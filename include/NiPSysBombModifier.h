@@ -20,9 +20,9 @@ public:
     virtual void ProcessClone(CloningProcess& process);
     virtual void Update(float time, NiPSysData* data);
 
-    void FUN_00c2e610(CloningProcess& process);
-    bool FUN_00c2eaf0(NiObject* object);
-    void FUN_00c2e670(float time, NiPSysData* data);
+    void ProcessClone_00c2e610(CloningProcess& process);
+    bool IsEqual_00c2eaf0(NiObject* object);
+    void Update_00c2e670(float time, NiPSysData* data);
     bool FUN_00c31830(NiObject* object);
     void FUN_00c319e0(StrArr* strings);
     void AppendToStrings(StrArr* strings);

@@ -28,10 +28,11 @@ extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 struct FUN_00b02310_shell
 {
-    bool FUN_00b02310(unsigned char* param);
+    bool BSWin32TaskletManager_CloseTaskGroupData(unsigned char* param);
 };
 // @fnv 0x00b02310
-bool FUN_00b02310_shell::FUN_00b02310(unsigned char* pObject)
+// src: COMMUNITY 0x00b02310
+bool FUN_00b02310_shell::BSWin32TaskletManager_CloseTaskGroupData(unsigned char* pObject)
 {
     unsigned char* p = pObject;
     bool b;
@@ -96,15 +97,16 @@ extern "C" __declspec(dllimport) void __stdcall ExitThread(unsigned long);
 struct Unk00b023f0
 {
     void CallVfn1OnAllEntries();
-    void FUN_00b02460();
+    void BSWin32TaskletManager_ProcessQueue();
     void CallVirtualOnAllEntries();
 };
 // Calls three methods on p in sequence, then terminates the calling thread with ExitThread(0).
 // @fnv 0x00b023f0
-void __stdcall FUN_00b023f0(Unk00b023f0* pTarget)
+// src: COMMUNITY 0x00b023f0
+void __stdcall BSWin32TaskletManager_ThreadProc(Unk00b023f0* pTarget)
 {
     pTarget->CallVfn1OnAllEntries();
-    pTarget->FUN_00b02460();
+    pTarget->BSWin32TaskletManager_ProcessQueue();
     pTarget->CallVirtualOnAllEntries();
     ExitThread(0);
 }
@@ -199,10 +201,11 @@ bool __thiscall FUN_00b02130_shell::QueueItem(void* apItem)
 
 struct FUN_00b020a0_shell
 {
-    char FUN_00b020a0(void* p);
+    char BSWin32TaskletManager_OpenTaskGroupData(void* p);
 };
 // @fnv 0x00b020a0
-char FUN_00b020a0_shell::FUN_00b020a0(void* pObject)
+// src: COMMUNITY 0x00b020a0
+char FUN_00b020a0_shell::BSWin32TaskletManager_OpenTaskGroupData(void* pObject)
 {
     unsigned char flag;
     void* obj = pObject;
@@ -234,11 +237,12 @@ extern "C" __declspec(dllimport) int __stdcall CloseHandle(void* hObject);
 
 struct FUN_00b01f50_shell
 {
-    void FUN_00b01f50();
+    void BSWin32TaskletManager_ShutdownAllTasks();
 };
 
 // @fnv 0x00b01f50
-void FUN_00b01f50_shell::FUN_00b01f50()
+// src: COMMUNITY 0x00b01f50
+void FUN_00b01f50_shell::BSWin32TaskletManager_ShutdownAllTasks()
 {
     unsigned int i;
 

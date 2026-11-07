@@ -125,7 +125,7 @@ bool TESConditionItem::ContainsTrait(TESObjectREFR* pSubjectRef, TESObjectREFR* 
             pData = ::Compare(GetComparisonCondition(), (float)pParam, fComparison);
             if (!pData)
             {
-                unsigned int uiFunction = FUN_005eb680() + 0x1000;
+                unsigned int uiFunction = GetConditionFunction() + 0x1000;
                 switch (uiFunction)
                 {
                 case 0x104c:
@@ -157,12 +157,12 @@ void TESConditionItem::InitItem(TESForm* owner)
         if (!m_objectRef)
         {
             if (owner)
-                Warning(DAT_010694b0, referenceID, owner->FUN_00440e30(), owner->GetName(), owner->GetFormID());
+                Warning(DAT_010694b0, referenceID, owner->TESForm_GetFormTypeString(), owner->GetName(), owner->GetFormID());
             else
                 Warning(DAT_01069458, referenceID);
         }
     }
-    if (!g_scriptCommands[FUN_005eb680()].eval)
+    if (!g_scriptCommands[GetConditionFunction()].eval)
     {
         char buffer[0x410];
         if (((const TESForm*)owner)->GetFormType() == 0x46)
@@ -180,10 +180,10 @@ void TESConditionItem::InitItem(TESForm* owner)
         }
         else
         {
-            sprintf(buffer, DAT_01069440, owner->FUN_00440e30(), owner->GetName(), owner->GetFormID());
+            sprintf(buffer, DAT_01069440, owner->TESForm_GetFormTypeString(), owner->GetName(), owner->GetFormID());
         }
         Warning(DAT_010693d8, buffer, ((TESDataHandler*)owner->GetFile(-1))->GetTESImageSpaceList(),
-                g_scriptCommands[FUN_005eb680()].name);
+                g_scriptCommands[GetConditionFunction()].name);
     }
     if (GetParamCount() && m_comparisonGlobal)
     {
@@ -208,7 +208,7 @@ void TESConditionItem::InitItem(TESForm* owner)
             }
             else
             {
-                FUN_00eca38d(buffer, 0x410, DAT_01069440, owner->FUN_00440e30(), owner->GetName(),
+                FUN_00eca38d(buffer, 0x410, DAT_01069440, owner->TESForm_GetFormTypeString(), owner->GetName(),
                              owner->GetFormID());
             }
             Warning(DAT_01069378, globalID, buffer);
@@ -296,7 +296,7 @@ struct ConditionSerializer
 void FUN_00401460(void*, const void*, unsigned int);
 int FUN_00682270(int);
 bool FUN_006822a0(int, int);
-bool FUN_00401500();
+bool TESForm_QEndianSwapOnSave();
 void AppendChunk(unsigned int, const void*, unsigned int);
 // @fnv 0x00681840
 void ConditionSerializer::SerializeCondition()
@@ -311,17 +311,17 @@ void ConditionSerializer::SerializeCondition()
         {
             TESForm* form = reinterpret_cast<TESForm*>(savedCondition.params[index]);
             if (form)
-                savedCondition.params[index] = form->FUN_0084e3a0();
+                savedCondition.params[index] = form->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         }
     }
     if (FUN_006814e0() && comparison)
-        savedCondition.comparison = comparison->FUN_0084e3a0();
+        savedCondition.comparison = comparison->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     if (reference)
-        savedCondition.reference = reference->FUN_0084e3a0();
-    if (FUN_00401500())
+        savedCondition.reference = reference->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    if (TESForm_QEndianSwapOnSave())
         savedCondition.SwapEndianAndProcess();
     AppendChunk(0x41445443, &savedCondition, 0x1c);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         savedCondition.SwapEndianAndProcess();
 }
 
@@ -334,7 +334,7 @@ struct FUN_00681500_class
 
 struct FUN_00681530_class
 {
-    void FUN_00681530(int count);
+    void TESConditionItem_SetComparisonCondition(int count);
 };
 
 }  // namespace fnv_00681220
@@ -374,20 +374,20 @@ void TESConditionItem::SetFunction(int functionCode)
         case 0x106F:
         case 0x1070:
         case 0x1136:
-            ((fnv_00681220::FUN_00681530_class*)this)->FUN_00681530(0);
+            ((fnv_00681220::FUN_00681530_class*)this)->TESConditionItem_SetComparisonCondition(0);
             ((fnv_00681220::FUN_00681500_class*)this)->SetValueIfNoParams(1.0f);
             break;
         case 0x1001:
-            ((fnv_00681220::FUN_00681530_class*)this)->FUN_00681530(4);
+            ((fnv_00681220::FUN_00681530_class*)this)->TESConditionItem_SetComparisonCondition(4);
             ((fnv_00681220::FUN_00681500_class*)this)->SetValueIfNoParams(100.0f);
             break;
         case 0x106B:
-            ((fnv_00681220::FUN_00681530_class*)this)->FUN_00681530(1);
+            ((fnv_00681220::FUN_00681530_class*)this)->TESConditionItem_SetComparisonCondition(1);
             ((fnv_00681220::FUN_00681500_class*)this)->SetValueIfNoParams(0.0f);
             break;
         case 0x10F7:
             m_data0C = 0x28;
-            ((fnv_00681220::FUN_00681530_class*)this)->FUN_00681530(0);
+            ((fnv_00681220::FUN_00681530_class*)this)->TESConditionItem_SetComparisonCondition(0);
             ((fnv_00681220::FUN_00681500_class*)this)->SetValueIfNoParams(1.0f);
             break;
         }

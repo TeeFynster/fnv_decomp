@@ -5,7 +5,8 @@
 int __cdecl FUN_00ec3bad(int);
 // Replaces the integer pointed to by p with the result of calling FUN_00ec3bad on its current value.
 // @fnv 0x00401080
-void FUN_00401080(int* piValue)
+// src: XBOX_PDB 0x00401080
+void BSEndian_00401080(int* piValue)
 {
     int* q = piValue;
     *q = FUN_00ec3bad(*q);
@@ -37,8 +38,8 @@ struct Arr12
     unsigned int m_uiItemCount;
     int f12;
     unsigned int FUN_0044ddc0();
-    bool FUN_0076b610();
-    Elem12* FUN_006a1440(unsigned int);
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
+    Elem12* Object_GetIndexedValue_006a1440(unsigned int);
 };
 struct Arr6
 {
@@ -53,9 +54,9 @@ struct ByteArg
 {
     unsigned char c;
 };
-bool FUN_00401500();
-void FUN_00401080(int* p, ByteArg b);
-void FUN_00407a90(short* p, ByteArg b);
+bool TESForm_QEndianSwapOnSave();
+void BSEndian_00401080(int* p, ByteArg b);
+void BSEndian_00407a90(short* p, ByteArg b);
 void* memcpy(void* dst, const void* src, unsigned int n);
 
 struct Owner69c4c0
@@ -81,50 +82,50 @@ void Owner69c4c0::WriteToBuffer(char* apBuffer)
     int j;
 
     v = m_kPointA;
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
     {
-        FUN_00401080(&v.x, ByteArg());
-        FUN_00401080(&v.y, ByteArg());
-        FUN_00401080(&v.z, ByteArg());
+        BSEndian_00401080(&v.x, ByteArg());
+        BSEndian_00401080(&v.y, ByteArg());
+        BSEndian_00401080(&v.z, ByteArg());
     }
     memcpy(apBuffer, &v, 12);
     apBuffer += 12;
     v = m_kPointB;
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
     {
-        FUN_00401080(&v.x, ByteArg());
-        FUN_00401080(&v.y, ByteArg());
-        FUN_00401080(&v.z, ByteArg());
+        BSEndian_00401080(&v.x, ByteArg());
+        BSEndian_00401080(&v.y, ByteArg());
+        BSEndian_00401080(&v.z, ByteArg());
     }
     memcpy(apBuffer, &v, 12);
     apBuffer += 12;
     w = (unsigned short)m_arr12.FUN_0044ddc0();
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
     {
-        FUN_00407a90((short*)&w, ByteArg());
+        BSEndian_00407a90((short*)&w, ByteArg());
     }
     memcpy(apBuffer, &w, 2);
     apBuffer += 2;
     w = (unsigned short)m_arr6.FUN_0044ddc0();
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
     {
-        FUN_00407a90((short*)&w, ByteArg());
+        BSEndian_00407a90((short*)&w, ByteArg());
     }
     memcpy(apBuffer, &w, 2);
     apBuffer += 2;
-    if (!m_arr12.FUN_0076b610())
+    if (!m_arr12.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
     {
         count2 = m_arr12.FUN_0044ddc0();
         bytes5 = count2 * 12;
         arr = new Elem12[count2];
-        memcpy(arr, m_arr12.FUN_006a1440(0), bytes5);
-        if (FUN_00401500())
+        memcpy(arr, m_arr12.Object_GetIndexedValue_006a1440(0), bytes5);
+        if (TESForm_QEndianSwapOnSave())
         {
             for (i3 = 0; i3 < count2; i3++)
             {
-                FUN_00401080(&arr[i3].x, ByteArg());
-                FUN_00401080(&arr[i3].y, ByteArg());
-                FUN_00401080(&arr[i3].z, ByteArg());
+                BSEndian_00401080(&arr[i3].x, ByteArg());
+                BSEndian_00401080(&arr[i3].y, ByteArg());
+                BSEndian_00401080(&arr[i3].z, ByteArg());
             }
         }
         memcpy(apBuffer, arr, bytes5);
@@ -135,13 +136,13 @@ void Owner69c4c0::WriteToBuffer(char* apBuffer)
         bytes5 = count2 * 6;
         arr2_2 = new Elem6[count2];
         memcpy(arr2_2, m_arr6.FUN_0069ccf0(0), bytes5);
-        if (FUN_00401500())
+        if (TESForm_QEndianSwapOnSave())
         {
             for (i4 = 0; i4 < count2; i4++)
             {
                 for (j = 0; j < 3; j++)
                 {
-                    FUN_00407a90(&arr2_2[i4].x + j, ByteArg());
+                    BSEndian_00407a90(&arr2_2[i4].x + j, ByteArg());
                 }
             }
         }

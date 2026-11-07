@@ -26,14 +26,15 @@ struct FUN_00d26460_cls
     int unk28;
     int unk2C;
     __m128 m_kTranslation;
-    hkpSampledHeightFieldShape* FUN_00d26450();
-    void FUN_00d26460(const hkTransform& kTransform, float fTolerance, hkAabb& kAabbOut);
+    hkpSampledHeightFieldShape* hkpTriSampledHeightFieldCollection_getHeightFieldShape();
+    void hkpTriSampledHeightFieldCollection_getAabb(const hkTransform& kTransform, float fTolerance, hkAabb& kAabbOut);
 };
 // @fnv 0x00d26460
-void FUN_00d26460_cls::FUN_00d26460(const hkTransform& kTransform, float fTolerance, hkAabb& kAabbOut)
+// src: XBOX_PDB 0x00d26460
+void FUN_00d26460_cls::hkpTriSampledHeightFieldCollection_getAabb(const hkTransform& kTransform, float fTolerance, hkAabb& kAabbOut)
 {
     hkAabb kAabb;
-    FUN_00d26450()->CalculateAabb(kTransform,
+    hkpTriSampledHeightFieldCollection_getHeightFieldShape()->CalculateAabb(kTransform,
                                m_fBoundRadius + fTolerance, kAabb);
     __m128 kMaxPoint = _mm_add_ps(m_kTranslation, kAabb.m_kMaximumCorner.m_vComponents);
     __m128 kMinBoundsCur = _mm_add_ps(m_kTranslation, kAabb.m_kMinimumCorner.m_vComponents);

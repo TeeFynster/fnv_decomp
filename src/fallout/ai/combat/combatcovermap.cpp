@@ -53,21 +53,22 @@ struct TESWorldSpace;
 extern TESWorldSpace* BGSSaveLoadGlobalDataWorldspacePtr;
 struct FUN_00983280_holder
 {
-    void __thiscall FUN_00983280(int, StageHolder*);
+    void __thiscall CombatCoverMap_ReserveCoverLocation(int, StageHolder*);
 };
 struct FUN_009a0510_shell
 {
     char _pad[0x1c4];
     int m_1c4;
-    void __thiscall FUN_009a0510(StageHolder*);
+    void __thiscall CombatState_ReserveCoverLocation(StageHolder*);
 };
 // If a1 is non-null and not done, calls FUN_00983280 with m_1c4 and a1 on the object returned by GetDaysPassed.
 // @fnv 0x009a0510
-void __thiscall FUN_009a0510_shell::FUN_009a0510(StageHolder* pStage)
+// src: XBOX_PDB 0x009a0510
+void __thiscall FUN_009a0510_shell::CombatState_ReserveCoverLocation(StageHolder* pStage)
 {
     if (pStage && !pStage->GetDone())
         ((FUN_00983280_holder*)((Calendar*)BGSSaveLoadGlobalDataWorldspacePtr)->GetDaysPassed())
-            ->FUN_00983280(m_1c4, pStage);
+            ->CombatCoverMap_ReserveCoverLocation(m_1c4, pStage);
 }
 
 class TESWorldSpace;
@@ -87,11 +88,12 @@ struct FUN_00983420_shell
 extern TESWorldSpace* BGSSaveLoadGlobalDataWorldspacePtr;
 struct FUN_009a0560_shell
 {
-    bool __thiscall FUN_009a0560(StageHolder*);
+    bool __thiscall CombatState_TryReserveCoverLocation(StageHolder*);
 };
 // Returns true if the stage holder is null or done, otherwise delegates to GetOrCreateCoverItem with the days passed and the holder.
 // @fnv 0x009a0560
-bool __thiscall FUN_009a0560_shell::FUN_009a0560(StageHolder* pStageHolder)
+// src: XBOX_PDB 0x009a0560
+bool __thiscall FUN_009a0560_shell::CombatState_TryReserveCoverLocation(StageHolder* pStageHolder)
 {
     if (pStageHolder && !pStageHolder->GetDone())
         return ((FUN_00983420_shell*)((Calendar*)BGSSaveLoadGlobalDataWorldspacePtr)->GetDaysPassed())
@@ -107,7 +109,7 @@ struct StageHolder
 };
 struct FUN_00983520_obj
 {
-    void __thiscall FUN_00983520(int, StageHolder*);
+    void __thiscall CombatCoverMap_UnreserveCoverLocation(int, StageHolder*);
 };
 struct Calendar
 {
@@ -118,15 +120,16 @@ struct FUN_009a05b0_shell
 {
     unsigned char pad[0x1c4];
     int fld1c4;
-    void __thiscall FUN_009a05b0(StageHolder*);
+    void __thiscall CombatState_UnreserveCoverLocation(StageHolder*);
 };
 // If a1 is non-null and done, passes fld1c4 and a1 to FUN_00983520 via the worldspace save-load global's days-passed object.
 // @fnv 0x009a05b0
-void __thiscall FUN_009a05b0_shell::FUN_009a05b0(StageHolder* pStage)
+// src: XBOX_PDB 0x009a05b0
+void __thiscall FUN_009a05b0_shell::CombatState_UnreserveCoverLocation(StageHolder* pStage)
 {
     if (pStage && pStage->GetDone())
     {
-        BGSSaveLoadGlobalDataWorldspacePtr->GetDaysPassed()->FUN_00983520(fld1c4, pStage);
+        BGSSaveLoadGlobalDataWorldspacePtr->GetDaysPassed()->CombatCoverMap_UnreserveCoverLocation(fld1c4, pStage);
     }
 }
 }  // namespace fnv_009a05b0
@@ -135,7 +138,7 @@ struct StageHolder;
 struct MapMember
 {
     void AcquireLock();
-    void FUN_00aa62e0();
+    void BSReadWriteLock_UnlockWrite();
 };
 struct HolderLookup
 {
@@ -158,10 +161,11 @@ struct CreatedShell
 struct HolderStatus
 {
     bool GetDone();
-    void FUN_0067fdb0(unsigned char value);
+    void PackageSchedule_SetStartDayOfWeek(unsigned char value);
 };
 // @fnv 0x00983280
-void FUN_00983280_holder::FUN_00983280(int value, StageHolder* pStageHolder)
+// src: XBOX_PDB 0x00983280
+void FUN_00983280_holder::CombatCoverMap_ReserveCoverLocation(int value, StageHolder* pStageHolder)
 {
     ((MapMember*)((char*)this + 0x14))->AcquireLock();
     void* pCreatedShell = 0;
@@ -172,8 +176,8 @@ void FUN_00983280_holder::FUN_00983280(int value, StageHolder* pStageHolder)
         ((HolderLookup*)this)->FUN_00844700(*(unsigned int*)((char*)pStageHolder + 0x68), pCreatedShell);
     }
     ((CreatedShell*)pCreatedShell)->AddItem(value, pStageHolder);
-    ((HolderStatus*)pStageHolder)->FUN_0067fdb0(1);
-    ((MapMember*)((char*)this + 0x14))->FUN_00aa62e0();
+    ((HolderStatus*)pStageHolder)->PackageSchedule_SetStartDayOfWeek(1);
+    ((MapMember*)((char*)this + 0x14))->BSReadWriteLock_UnlockWrite();
 }
 
 struct FUN_009836d0_class
@@ -182,10 +186,10 @@ struct FUN_009836d0_class
     int unk04;
     int unk08;
     int unk0C;
-    FUN_009836d0_class* __thiscall FUN_009836d0();
+    FUN_009836d0_class* __thiscall BSSimpleArray_CoverReservation_1024_BSSimpleArray_CoverReservation_1024();
     FUN_009836d0_class()
     {
-        FUN_009836d0();
+        BSSimpleArray_CoverReservation_1024_BSSimpleArray_CoverReservation_1024();
     }
     ~FUN_009836d0_class()
     {}
@@ -219,8 +223,8 @@ struct Arg2
     char pad[0x68];
     void* unk68;
 
-    bool FUN_00678ce0();
-    void FUN_0067fdb0(bool);
+    bool Main_GameReset();
+    void PackageSchedule_SetStartDayOfWeek(bool);
 };
 
 struct Lock
@@ -256,11 +260,11 @@ bool FUN_00983420_class::GetOrCreateCoverItem(void* arg1, Arg2* arg2)
     if (!FUN_00853130(arg2->unk68, &pItem))
     {
         pItem = new CoverItem();
-        pItem->SetByteAtOffset(arg2->FUN_00678ce0());
+        pItem->SetByteAtOffset(arg2->Main_GameReset());
         FUN_00844700(arg2->unk68, pItem);
     }
     bool kRet = pItem->RegisterEvent(arg1, arg2);
-    arg2->FUN_0067fdb0(kRet);
+    arg2->PackageSchedule_SetStartDayOfWeek(kRet);
     lock.Leave();
     return kRet;
 }
@@ -394,12 +398,13 @@ struct FUN_008a88f0_cls
     unsigned int unk60;
     unsigned int unk64;
     MemberVt* m68;
-    float FUN_008a88f0();
+    float Actor_GetCurrentAmmoClipPercent();
 };
 extern const double DAT_01012060;
 // Gets two values from m68's members and returns their ratio, or 1.0 when either member is null or the divisor equals DAT_01012060.
 // @fnv 0x008a88f0
-float FUN_008a88f0_cls::FUN_008a88f0()
+// src: XBOX_PDB 0x008a88f0
+float FUN_008a88f0_cls::Actor_GetCurrentAmmoClipPercent()
 {
     Pair3Pool* ywqVal = (Pair3Pool*)m68->GetA();
     if (ywqVal != 0)
@@ -545,18 +550,18 @@ FUN_00983130::~FUN_00983130()
 
 struct CoverItemCalls
 {
-    bool FUN_00982df0(unsigned int value);
+    bool ReservedCoverLocation_CanReserveCoverLocation(unsigned int value);
 };
 
 struct CoverTargetCalls
 {
-    bool FUN_009827c0(unsigned int a, unsigned int b, float c, CoverItem* item, unsigned char d, unsigned char e);
+    bool CoverReservationInfo_FindCoverReservation(unsigned int a, unsigned int b, float c, CoverItem* item, unsigned char d, unsigned char e);
 };
 
 struct CoverLockCalls
 {
-    void FUN_00aa5ff0();
-    void FUN_00aa62c0();
+    void BSReadWriteLock_LockForRead();
+    void BSReadWriteLock_UnlockRead();
 };
 
 struct FUN_009835d0_cls
@@ -580,37 +585,38 @@ bool FUN_009835d0_cls::TryUseCoverItem(unsigned int key, unsigned int p2, unsign
     bool ok = true;
     CoverItem* item;
 
-    lock.FUN_00aa5ff0();
+    lock.BSReadWriteLock_LockForRead();
     item = 0;
     if (FUN_00853130((void*)key, &item))
     {
-        if (!((CoverItemCalls*)item)->FUN_00982df0(p3))
+        if (!((CoverItemCalls*)item)->ReservedCoverLocation_CanReserveCoverLocation(p3))
         {
             ok = false;
         }
     }
     if (ok)
     {
-        ok = ((CoverTargetCalls*)target)->FUN_009827c0(p2, p3, fValue, item, d, e);
+        ok = ((CoverTargetCalls*)target)->CoverReservationInfo_FindCoverReservation(p2, p3, fValue, item, d, e);
     }
-    lock.FUN_00aa62c0();
+    lock.BSReadWriteLock_UnlockRead();
     return ok;
 }
 
 struct CoverReservationUnreserveCalls
 {
-    bool FUN_00982ff0(void* owner, Arg2* location);
+    bool ReservedCoverLocation_UnreserveCoverLocation(void* owner, Arg2* location);
 };
 
 struct CoverMapUnreserveReceiver : FUN_00983420_class
 {
     void RemoveKey(void* value);
-    void FUN_00983520(void* arg1, Arg2* arg2);
+    void CombatCoverMap_UnreserveCoverLocation(void* arg1, Arg2* arg2);
 };
 
 // Looks up the item at arg2->unk68, calls its callback, and on success calls DestroyIfFlagged and removes the keyed entry.
 // @fnv 0x00983520
-void CoverMapUnreserveReceiver::FUN_00983520(void* apOwner, Arg2* apLocation)
+// src: XBOX_PDB 0x00983520
+void CoverMapUnreserveReceiver::CombatCoverMap_UnreserveCoverLocation(void* apOwner, Arg2* apLocation)
 {
     if (apLocation->unk68 == 0)
     {
@@ -621,14 +627,14 @@ void CoverMapUnreserveReceiver::FUN_00983520(void* apOwner, Arg2* apLocation)
         CoverItem* item = 0;
         if (this->FUN_00853130(apLocation->unk68, &item))
         {
-            if (((CoverReservationUnreserveCalls*)item)->FUN_00982ff0(apOwner, apLocation))
+            if (((CoverReservationUnreserveCalls*)item)->ReservedCoverLocation_UnreserveCoverLocation(apOwner, apLocation))
             {
                 CoverItem* b = item;
                 CoverItem* a = b;
                 a != 0 ? ((FUN_00983250_shell*)a)->DestroyIfFlagged(1) : 0;
                 this->RemoveKey(apLocation->unk68);
             }
-            apLocation->FUN_0067fdb0(false);
+            apLocation->PackageSchedule_SetStartDayOfWeek(false);
         }
         this->lock.Leave();
     }

@@ -41,24 +41,24 @@ public:
 
     void* FUN_009b7a20(unsigned int flags);
     void FUN_009b7bc0();
-    void FUN_009b8030(float deltaTime);
-    void FUN_009b8a20();
-    bool FUN_009b8900(int arg1, int arg2, int arg3, Collider890* collider,
+    void UpdateProjectile_009b8030(float deltaTime);
+    void AdvanceStateAtOffset150_009b8a20();
+    bool AddImpact_009b8900(int arg1, int arg2, int arg3, Collider890* collider,
                       int arg5, int arg6);
-    void FUN_009b90b0();
-    void FUN_009baaa0(BGSLoadFormBuffer* buffer);
-    void FUN_009baad0(BGSLoadFormBuffer* buffer);
-    void FUN_009bab70(BGSLoadFormBuffer* buffer);
-    void FUN_009babe0();
+    void ProcessImpale();
+    void SaveGame_009baaa0(BGSLoadFormBuffer* buffer);
+    void LoadGame_009baad0(BGSLoadFormBuffer* buffer);
+    void RevertBGS_009bab70(BGSLoadFormBuffer* buffer);
+    void Initialize3D();
     // called on a missile by 0x009b90b0; owner class and real names not yet known
-    float FUN_00508070();
-    void FUN_005de0a0(int a, int b);
+    float Projectile_GetDistanceMoved();
+    void Projectile_SetFlag(int a, int b);
     void FUN_008126e0(int a);
-    void* FUN_00874480();
-    int FUN_008d8b80();
-    float FUN_009669c0(NiPoint3* out, float f);
-    NiPoint3* FUN_009b7010(NiPoint3* out);
-    void FUN_009bc8f0();
+    void* Projectile_GetShooter();
+    int MiddleHighProcess_GetCurrentFurniture();
+    float Projectile_GetSpeed(NiPoint3* out, float f);
+    NiPoint3* Projectile_GetMovementDirection(NiPoint3* out);
+    void Projectile_Kill();
     void FUN_009bf470(int a, int b);
 
     // own state (0x160 per its allocations; cleared by both constructors, 0x150 saved and loaded)

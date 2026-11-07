@@ -13,8 +13,8 @@ typedef unsigned short hkUint16;
 typedef unsigned int hkUint32;
 typedef float hkReal;
 
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750() throw();
-void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* array, int count, int size) throw();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* array, int count, int size) throw();
 extern "C" void __cdecl ResizeAudioStream(hkMemoryAllocator*, void*, int) throw();
 
 
@@ -25,7 +25,7 @@ template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMem
     {
         int doubled = 2 * capacity;
         int requested = n < doubled ? doubled : n;
-        FUN_00c908c0(alloc, this, requested, sizeof(T));
+        hkArrayUtil__reserve(alloc, this, requested, sizeof(T));
     }
 }
 template <typename T> __forceinline void hkArrayBase<T>::_setSize(hkMemoryAllocator& alloc, int n)
@@ -33,7 +33,7 @@ template <typename T> __forceinline void hkArrayBase<T>::_setSize(hkMemoryAlloca
     GrowArrayCapacity(alloc, n);
     m_iElementCount = n;
 }
-__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*) { return FUN_00c85750()->heap(); }
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*) { return hkMemoryRouter_getInstance()->heap(); }
 template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray() { clearAndDeallocate(); }
 template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
@@ -77,7 +77,7 @@ inline void hkxVertexDescription::clear()
 
 inline hkxVertexDescriptionElementDecl& hkxVertexDescription::AllocatePair()
 {
-    hkMemoryAllocator* alloc = &FUN_00c85750()->heap();
+    hkMemoryAllocator* alloc = &hkMemoryRouter_getInstance()->heap();
     hkArray<hkxVertexDescriptionElementDecl>& a = m_kElementDeclarations;
     if (a.m_iElementCount == (a.m_iCapacityState & 0x3fffffff))
         ResizeAudioStream(alloc, &a, sizeof(hkxVertexDescriptionElementDecl));
@@ -115,8 +115,8 @@ public:
     virtual ~hkxVertexBuffer();
     hkxVertexBufferVertexData m_data;
     hkxVertexDescription m_kCreateDesc;
-    void FUN_00e3e3a0(int count, const hkxVertexDescription& desc) throw();
-    void FUN_00e3e030(const hkxVertexBuffer* src, int srcIndex, int dstIndex);
+    void setNumVertices(int count, const hkxVertexDescription& desc) throw();
+    void copyVertex(const hkxVertexBuffer* src, int srcIndex, int dstIndex);
     void CopyFrom(const hkxVertexBuffer& src, bool resize) throw();
     void* getVertexDataPtr(const hkxVertexDescriptionElementDecl& decl);
     const void* getVertexDataPtr(const hkxVertexDescriptionElementDecl& decl) const;
@@ -156,38 +156,38 @@ hkxVertexBuffer::hkxVertexBuffer(FinishingFlag flag) throw()
     : hkReferencedObject(flag), m_data(flag), m_kCreateDesc(flag) {}
 
 template <typename T> inline T min2E3E6(T a, T b) { return a < b ? a : b; }
-void __cdecl FUN_00cb1260(void* dst, const void* src, int size) throw();
+void __cdecl hkString_memCpy(void* dst, const void* src, int size) throw();
 
 // @fnv 0x00e3e670
 void hkxVertexBuffer::CopyFrom(const hkxVertexBuffer& kOther, bool bResizeToMatch) throw()
 {
     bool bSameDesc = m_kCreateDesc == kOther.m_kCreateDesc;
     if (bResizeToMatch)
-        FUN_00e3e3a0(kOther.m_data.m_uiVertexCount, m_kCreateDesc);
+        setNumVertices(kOther.m_data.m_uiVertexCount, m_kCreateDesc);
 
     if (bSameDesc)
     {
         unsigned int numVerts = min2E3E6(kOther.m_data.m_uiVertexCount, m_data.m_uiVertexCount);
         if (m_data.m_uiUInt8DataStride > 0)
-            FUN_00cb1260(m_data.m_kUInt8Data.begin(), kOther.m_data.m_kUInt8Data.begin(),
+            hkString_memCpy(m_data.m_kUInt8Data.begin(), kOther.m_data.m_kUInt8Data.begin(),
                          m_data.m_uiUInt8DataStride * numVerts);
         if (m_data.m_uiUInt16DataStride > 0)
-            FUN_00cb1260(m_data.m_kUInt16Data.begin(), kOther.m_data.m_kUInt16Data.begin(),
+            hkString_memCpy(m_data.m_kUInt16Data.begin(), kOther.m_data.m_kUInt16Data.begin(),
                          m_data.m_uiUInt16DataStride * numVerts);
         if (m_data.m_uiUInt32DataStride > 0)
-            FUN_00cb1260(m_data.m_kUInt32Data.begin(), kOther.m_data.m_kUInt32Data.begin(),
+            hkString_memCpy(m_data.m_kUInt32Data.begin(), kOther.m_data.m_kUInt32Data.begin(),
                          m_data.m_uiUInt32DataStride * numVerts);
         if (m_data.m_uiFloatDataStride > 0)
-            FUN_00cb1260(m_data.m_kFloatData.begin(), kOther.m_data.m_kFloatData.begin(),
+            hkString_memCpy(m_data.m_kFloatData.begin(), kOther.m_data.m_kFloatData.begin(),
                          m_data.m_uiFloatDataStride * numVerts);
         if (m_data.m_uiVectorDataStride > 0)
-            FUN_00cb1260(m_data.m_kVectorData.begin(), kOther.m_data.m_kVectorData.begin(),
+            hkString_memCpy(m_data.m_kVectorData.begin(), kOther.m_data.m_kVectorData.begin(),
                          m_data.m_uiVectorDataStride * numVerts);
     }
     else
     {
         for (unsigned int i = 0; i < kOther.m_data.m_uiVertexCount; i++)
-            FUN_00e3e030(&kOther, i, i);
+            copyVertex(&kOther, i, i);
     }
 }
 
@@ -195,7 +195,7 @@ extern int DAT_0102e388;
 // @fnv 0x00e3e760
 void hkxVertexBuffer::Destroy()
 {
-    hkMemoryAllocator* target = &FUN_00c85750()->heap();
+    hkMemoryAllocator* target = &hkMemoryRouter_getInstance()->heap();
     hkArray<hkxVertexDescriptionElementDecl>& a = m_kCreateDesc.m_kElementDeclarations;
     int count = a.m_iCapacityState;
     a.m_iElementCount = 0;
@@ -215,7 +215,7 @@ hkxVertexBuffer* hkxVertexBuffer::DeleteThis(unsigned int flags) throw()
 {
     Destroy();
     if (flags & 1)
-        FUN_00c85750()->heap().blockFree(this, m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance()->heap().blockFree(this, m_usMemSizeAndFlags);
     return this;
 }
 
@@ -228,7 +228,8 @@ public:
 
 // Copies data between buffers, using stride-sized array copies for matching descriptions and per-element copies otherwise.
 // @fnv 0x00e3e030
-void hkxVertexBuffer::FUN_00e3e030(const hkxVertexBuffer* src, int srcIndex, int dstIndex)
+// src: XBOX_PDB 0x00e3e030
+void hkxVertexBuffer::copyVertex(const hkxVertexBuffer* src, int srcIndex, int dstIndex)
 {
     bool bSameDesc = (m_kCreateDesc == src->m_kCreateDesc);
     unsigned int aiUsageCounts[257];
@@ -322,7 +323,8 @@ void hkxVertexBuffer::FUN_00e3e030(const hkxVertexBuffer* src, int srcIndex, int
 
 // Rebuilds desc from input, computes offsets and strides, then sizes each data array for n vertices.
 // @fnv 0x00e3e3a0
-void hkxVertexBuffer::FUN_00e3e3a0(int aiCount, const hkxVertexDescription& input) throw()
+// src: XBOX_PDB 0x00e3e3a0
+void hkxVertexBuffer::setNumVertices(int aiCount, const hkxVertexDescription& input) throw()
 {
     if (aiCount == m_data.m_uiVertexCount && input.Equals(m_kCreateDesc))
         return;

@@ -46,7 +46,7 @@ struct Render_00de7580
 
 struct FUN_00e10a10_Obj
 {
-    void FUN_00e10a10(Render_00de7580* a1);
+    void hkpPrimitiveDrawer_setDisplayHandler(Render_00de7580* a1);
 };
 
 typedef void(__thiscall* VF5_00de7580)(void* self, void* p1, void* p2, void* p3, int p4, int p5);
@@ -74,14 +74,15 @@ struct FUN_00de7580_cls
     __m128 unkB0;
     FUN_00e10a10_Obj unkC0;
 
-    void FUN_00de47e0(Arg_00de7580* a1, hkTransform* a2, hkTransform* a3);
-    void FUN_00de44c0(int a1, int a2);
-    void FUN_00de4530(int a1, int a2);
-    void FUN_00de7580(ArgHolder_00de7580 a1, Render_00de7580* a2, int a3, int a4);
+    void hkpConstraintDrawer_updateCommonParameters(Arg_00de7580* a1, hkTransform* a2, hkTransform* a3);
+    void hkpConstraintDrawer_drawPivots(int a1, int a2);
+    void hkpConstraintDrawer_drawBodyFrames(int a1, int a2);
+    void UpdateFields_00de7580(ArgHolder_00de7580 a1, Render_00de7580* a2, int a3, int a4);
 };
 
 // @fnv 0x00de7580
-void FUN_00de7580_cls::FUN_00de7580(ArgHolder_00de7580 a1, Render_00de7580* a2, int a3, int a4)
+// src: GUESS 0x00de7580 (confidence: low)
+void FUN_00de7580_cls::UpdateFields_00de7580(ArgHolder_00de7580 a1, Render_00de7580* a2, int a3, int a4)
 {
     // Pointer storage preserves the original uninitialized temporaries without adding a /GS cookie.
     __declspec(align(16)) void* transform44Storage[sizeof(hkTransform) / sizeof(void*)];
@@ -91,12 +92,12 @@ void FUN_00de7580_cls::FUN_00de7580(ArgHolder_00de7580 a1, Render_00de7580* a2, 
     Vec4::Aligned result(Vec4::Uninitialized);
     B_00de7580* b = a1.value->unk0c;
 
-    unkC0.FUN_00e10a10(a2);
-    FUN_00de47e0(a1.value, &v44, &v80);
-    unk50.FUN_00c7f640(v44, reinterpret_cast<const hkVector4&>(b->unk30));
-    unk40.FUN_00c7f640(v80, reinterpret_cast<const hkVector4&>(b->unk20));
-    FUN_00de44c0(a3, a4);
-    FUN_00de4530(a3, a4);
+    unkC0.hkpPrimitiveDrawer_setDisplayHandler(a2);
+    hkpConstraintDrawer_updateCommonParameters(a1.value, &v44, &v80);
+    unk50.setTransformedPos_00c7f640(v44, reinterpret_cast<const hkVector4&>(b->unk30));
+    unk40.setTransformedPos_00c7f640(v80, reinterpret_cast<const hkVector4&>(b->unk20));
+    hkpConstraintDrawer_drawPivots(a3, a4);
+    hkpConstraintDrawer_drawBodyFrames(a3, a4);
 
     float t = b->unk44;
     __m128 d = _mm_sub_ps(unk50.m_vComponents, unk40.m_vComponents);

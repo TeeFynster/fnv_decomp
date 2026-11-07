@@ -25,7 +25,7 @@ struct __declspec(align(16)) FUN_00827200_class
 
 struct FUN_00cf2410_class
 {
-    int __thiscall FUN_00cf2410(int, void*);
+    int __thiscall hkMotionState_initMotionState(int, void*);
 };
 
 class FUN_00c9ea40_cls : public FUN_00c9ea90
@@ -90,6 +90,6 @@ FUN_00c9ea40_cls::FUN_00c9ea40_cls(int a, int b) : FUN_00c9ea90(a)
 {
     FUN_00827200_class tmp;
     tmp.FUN_00cb26e0(b);
-    ((FUN_00cf2410_class*)&m_swept)->FUN_00cf2410(b + 0x30, &tmp);
+    ((FUN_00cf2410_class*)&m_swept)->hkMotionState_initMotionState(b + 0x30, &tmp);
     m_motionPtr = &m_swept;
 }

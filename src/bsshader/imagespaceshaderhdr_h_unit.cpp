@@ -298,7 +298,7 @@ static ThkDerived g_thunk;
 // PrimaryBase = vptr (4) + 26 named ints (104) = 0x6c.
 struct PrimaryBase
 {
-    virtual void FUN_00b90320();
+    virtual void AdjustThisAndForward_00b90320();
     int unk04;
     int unk08;
     int unk0C;
@@ -329,14 +329,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b90320();
+    virtual void AdjustThisAndForward_00b90320();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b90320
-    virtual void FUN_00b90320();
+// src: GUESS 0x00b90320 (confidence: low)
+    virtual void AdjustThisAndForward_00b90320();
 };
 
 Derived::Derived()
@@ -375,7 +376,7 @@ namespace fnv_00b90820 {
 // the primary base (vptr 4 + 26 int fields 104 = 0x6c) before jumping.
 struct PrimaryBase
 {
-    virtual void FUN_00b90820();
+    virtual void AdjustThisAndForward_00b90820();
     int unk04;
     int unk08;
     int unk0C;
@@ -406,14 +407,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b90820();
+    virtual void AdjustThisAndForward_00b90820();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b90820
-    virtual void FUN_00b90820();
+// src: GUESS 0x00b90820 (confidence: low)
+    virtual void AdjustThisAndForward_00b90820();
 };
 
 Derived::Derived()
@@ -472,7 +474,7 @@ Derived::Derived()
 namespace fnv_00b90b40 {
 struct Base1
 {
-    virtual void FUN_00b90b40();
+    virtual void AdjustThisAndForward_00b90b40();
     int unk04;
     int unk08;
     int unk0C;
@@ -502,13 +504,14 @@ struct Base1
 };
 struct Base2
 {
-    virtual void FUN_00b90b40();
+    virtual void AdjustThisAndForward_00b90b40();
 };
 struct Derived : Base1, Base2
 {
     Derived();
 // @fnv 0x00b90b40
-    virtual void FUN_00b90b40();
+// src: GUESS 0x00b90b40 (confidence: low)
+    virtual void AdjustThisAndForward_00b90b40();
 };
 Derived::Derived()
 {}
@@ -639,7 +642,7 @@ namespace fnv_00b90e60 {
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_00b90e60();
+    virtual void AdjustThisAndForward_00b90e60();
     int unk04;
     int unk08;
     int unk0C;
@@ -670,14 +673,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b90e60();
+    virtual void AdjustThisAndForward_00b90e60();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b90e60
-    virtual void FUN_00b90e60();
+// src: GUESS 0x00b90e60 (confidence: low)
+    virtual void AdjustThisAndForward_00b90e60();
 };
 
 Derived::Derived()

@@ -13,17 +13,18 @@ extern double DAT_01012060;
 class FnvVehicleState
 {
   public:
-    void FUN_00561800(const hkVector4* value);
+    void hkpRigidBody_setAngularVelocity(const hkVector4* value);
 };
 
 class FnvVehicleDefaultVelocityDamper : public hkpVehicleDefaultVelocityDamper
 {
   public:
-    void FUN_00e43ae0(float timeStep, const void* data);
+    void hkpVehicleDefaultVelocityDamper_applyVelocityDamping(float timeStep, const void* data);
 };
 
 // @fnv 0x00e43ae0
-void __thiscall FnvVehicleDefaultVelocityDamper::FUN_00e43ae0(float timeStep, const void* data)
+// src: HAVOK_SRC 0x00e43ae0
+void __thiscall FnvVehicleDefaultVelocityDamper::hkpVehicleDefaultVelocityDamper_applyVelocityDamping(float timeStep, const void* data)
 {
     const char* dataBase = reinterpret_cast<const char*>(data);
     const float* state = *reinterpret_cast<const float* const*>(dataBase + 0x18);
@@ -58,5 +59,5 @@ void __thiscall FnvVehicleDefaultVelocityDamper::FUN_00e43ae0(float timeStep, co
     _mm_store_ps(&values.x, scaled);
 
     FnvVehicleState* st = (FnvVehicleState*)state;
-    st->FUN_00561800(&values);
+    st->hkpRigidBody_setAngularVelocity(&values);
 }

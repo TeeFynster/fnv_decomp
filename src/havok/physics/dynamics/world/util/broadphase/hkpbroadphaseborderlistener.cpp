@@ -30,7 +30,8 @@ struct S_00cf6f10_Obj
 };
 
 // @fnv 0x00cf6f10
-int __stdcall FUN_00cf6f10(Pair* pRec)
+// src: GUESS 0x00cf6f10 (confidence: low)
+int __stdcall Hkpbroadphaseborderlistener_UpdateState_00cf6f10(Pair* pRec)
 {
     S_00cf6f10_Node* a = (S_00cf6f10_Node*)pRec->a;
     if (a->type == 3 && ((S_00cf6f10_Node*)pRec->b)->type == 3)

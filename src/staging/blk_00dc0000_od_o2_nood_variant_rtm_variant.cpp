@@ -48,8 +48,8 @@ struct MemRouter
         return *unk10;
     }
 };
-void* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(MemAllocator* alloc, VecArray* arr, int newCap, int elemSize);
+void* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(MemAllocator* alloc, VecArray* arr, int newCap, int elemSize);
 static __forceinline float distanceSquared(LocalM128 a, LocalM128 b)
 {
     LocalM128 v = _mm_sub_ps(a, b);
@@ -59,7 +59,7 @@ static __forceinline float distanceSquared(LocalM128 a, LocalM128 b)
     _mm_store_ss(&r, _mm_add_ss(_mm_shuffle_ps(d, d, 0xaa), yx));
     return r;
 }
-void __cdecl FUN_00dd68d0(float tol, VecArray* arr, int* outCount);
+void __cdecl hkMemoryRouter_getInstance_ProcessEntries_00dd68d0(float tol, VecArray* arr, int* outCount);
 class __declspec(align(16)) S00dced70_Object
 {
   public:
@@ -77,7 +77,7 @@ class __declspec(align(16)) S00dced70_Object
     int unk28;
     int unk2C;
 };
-const void* __cdecl FUN_00dced70();
+const void* __cdecl Runtime_GetVtableFromTemporary_00dced70();
 struct __declspec(align(16)) FUN_00dd1f00
 {
     LocalM128 unk00;
@@ -104,7 +104,7 @@ struct Holder_00dd6c10
         return *allocator;
     }
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* allocator, void* container, int elementSize);
 template <class T> struct Arr_00dd6c10
 {
@@ -136,7 +136,7 @@ struct PairList_00dd6c10
     }
     __forceinline void add(const Pair& item)
     {
-        Holder_00dd6c10* h = static_cast<Holder_00dd6c10*>(FUN_00c85750());
+        Holder_00dd6c10* h = static_cast<Holder_00dd6c10*>(hkMemoryRouter_getInstance());
         if (size == (capacity & 0x3fffffff))
             ResizeAudioStream(h->allocator, this, sizeof(Pair));
         Pair* p = &data[size];
@@ -155,7 +155,7 @@ struct PairList_00dd6c10
     }
     __forceinline void clearAndFree()
     {
-        _clearAndDeallocate(static_cast<Holder_00dd6c10*>(FUN_00c85750())->heap());
+        _clearAndDeallocate(static_cast<Holder_00dd6c10*>(hkMemoryRouter_getInstance())->heap());
     }
 };
 typedef Arr_00dd6c10<LocalM128> VecArr_00dd6c10;
@@ -204,8 +204,9 @@ struct PlanePoint
         plane2 = other.plane2;
     }
 };
-int __cdecl FUN_00dd6380(VecArr_00dd6c10* vectors, int first, int second, int third, PlanePoint* point);
-__declspec(noinline) int __cdecl FUN_00dd6510(const LocalM128* normal, VecArr_00dd6c10* vectors, int first, int second,
+int __cdecl Object_ProcessAndReturnValue_00dd6380(VecArr_00dd6c10* vectors, int first, int second, int third, PlanePoint* point);
+// src: GUESS 0x00dd6510 (confidence: low)
+__declspec(noinline) int __cdecl hkVector4_ProcessEntries_00dd6510(const LocalM128* normal, VecArr_00dd6c10* vectors, int first, int second,
                                               PlanePoint* lower, PlanePoint* upper)
 {
     lower->plane0 = lower->plane1 = lower->plane2 = -1;
@@ -216,7 +217,7 @@ __declspec(noinline) int __cdecl FUN_00dd6510(const LocalM128* normal, VecArr_00
         if (i == first || i == second)
             continue;
         PlanePoint point;
-        if (FUN_00dd6380(vectors, first, second, i, &point) != 0)
+        if (Object_ProcessAndReturnValue_00dd6380(vectors, first, second, i, &point) != 0)
             continue;
         if (!initialized)
         {
@@ -253,7 +254,7 @@ __declspec(noinline) int __cdecl FUN_00dd6510(const LocalM128* normal, VecArr_00
     }
     return 0;
 }
-int __cdecl FUN_00dd6c10(VecArr_00dd6c10* vectors, int* first, int* second, PlanePoint* q, PlanePoint* p);
+int __cdecl hkVector4q_ProcessEntries_00dd6c10(VecArr_00dd6c10* vectors, int* first, int* second, PlanePoint* q, PlanePoint* p);
 
 extern "C" double __cdecl fabs(double);
 #pragma intrinsic(fabs)
@@ -273,7 +274,8 @@ struct TriangleProjectionData
 };
 
 // @fnv 0x00ddd2c0
-int __cdecl FUN_00ddd2c0(const LocalM128* origin, const LocalM128* firstAxis, const LocalM128* secondAxis,
+// src: GUESS 0x00ddd2c0 (confidence: low)
+int __cdecl Object_ProcessEntries_00ddd2c0(const LocalM128* origin, const LocalM128* firstAxis, const LocalM128* secondAxis,
                          const TriangleProjectionData* triangle, const LocalM128* direction)
 {
     float maximum = DAT_0104e148;

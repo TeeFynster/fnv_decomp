@@ -13,6 +13,6 @@ public:
 
     PathNode(const PathNode*);
     void FUN_005ae3d0(char* const& value);
-    PathQuery* FUN_009ddb30();
+    PathQuery* PathingSolution_GetLastVirtualNode();
     float GetHeuristic();
 };

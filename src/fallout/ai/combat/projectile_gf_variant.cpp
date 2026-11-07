@@ -23,8 +23,8 @@ struct EventInfo
     char indexBytes[32];  // 0x20..0x40
     int unk40, unk44, unk48, unk4c;
     int eventHandle;  // 0x50
-    EventInfo* FUN_00696c30(EventInfo* entry);
-    EventInfo* FUN_009c1a70(EventInfo* entry);
+    EventInfo* hkpWorldRayCastOutput_hkpWorldRayCastOutput_00696c30(EventInfo* entry);
+    EventInfo* CopyRayCastResultAndRootCollidable(EventInfo* entry);
 };
 struct EventCursor
 {
@@ -33,7 +33,7 @@ struct EventCursor
 };
 struct EventStream
 {
-    EventCursor* FUN_00460140();
+    EventCursor* TESDataHandler_GetWorldSpaceList();
 };
 struct Filter
 {
@@ -41,28 +41,28 @@ struct Filter
 };
 struct FormBase
 {
-    int FUN_0043b4d0();
+    int CFilter_GetLayer();
     bool FUN_009c19e0();
 };
 struct EventEntity
 {
     void** vtable;
-    FormBase* FUN_0043b4f0(unsigned int* out);
-    void* FUN_005d43c0();
+    FormBase* bhkWorldObject_GetCollisionFilter(unsigned int* out);
+    void* BSFile_GetDevice();
 };
 struct Scene
 {
-    EventStream* FUN_008cdd90();
-    void FUN_004585f0(NiPoint3* out);
-    void FUN_004587f0(NiPoint3* out);
-    void FUN_005dbe60(NiPoint3* out);
-    void FUN_009c1a20(NiPoint3* out);
+    EventStream* DialoguePackage_GetCurrentDialogItem();
+    void bhkPickData_NiGetFrom(NiPoint3* out);
+    void bhkPickData_NiGetTo(NiPoint3* out);
+    void bhkPickData_NiCalcHitPoint(NiPoint3* out);
+    void bhkPickData_NiGetLength(NiPoint3* out);
     Filter* ConstructCF845(Filter* out);
 };
 // Ray-pick query, not Animation: ctor 0x004a3c20 and collector getter 0x008cdd90 match BhkPickData in bgsdecalmanager.cpp.
 struct RayPickQuery
 {
-    EventStream* FUN_008cdd90();
+    EventStream* DialoguePackage_GetCurrentDialogItem();
     PhysicsVector rayOrigin, rayDirection;  // 0x00..0x20
     unsigned int filter;                    // 0x20
     unsigned int unk24, unk28, unk2c;
@@ -72,10 +72,10 @@ struct RayPickQuery
     int unka4, unka8;
     bool unkac;
     RayPickQuery();
-    void FUN_004a3f70(unsigned int filterValue);
-    void FUN_004a3da0(NiPoint3* origin);
-    void FUN_007f68a0(NiPoint3* direction);
-    void FUN_004a3fb0(void* collector);
+    void bhkPickData_SetFilter(unsigned int filterValue);
+    void bhkPickData_SetFrom(NiPoint3* origin);
+    void bhkPickData_SetLength(NiPoint3* direction);
+    void bhkPickData_SetAllCollector(void* collector);
 };
 struct HitEntry
 {
@@ -102,7 +102,7 @@ struct __declspec(align(16)) Collector
 };
 struct SoundSource
 {
-    const char* FUN_00511840();
+    const char* TESSound_GetFilename();
 };
 struct RenderManager
 {
@@ -110,17 +110,17 @@ struct RenderManager
 };
 struct VisualNode
 {
-    NiPoint3* FUN_0045bb80();
+    NiPoint3* NiAVObject_GetWorldTranslate();
 };
 struct Controller
 {
     void** vtable;
     RenderManager* FUN_004181e0();
-    Controller* FUN_00476c90();
-    bool FUN_00444d00(int);
-    void FUN_009795c0(float);
-    void FUN_009c4e60(NiPoint3 point, bool flag);
-    EventEntity* FUN_00874480();
+    Controller* Sky_GetMode();
+    bool Projectile_IsFlagSet(int);
+    void Projectile_SetRange(float);
+    void Projectile_SetMovementDelta(NiPoint3 point, bool flag);
+    EventEntity* Projectile_GetShooter();
 };
 struct AudioPlaybackHandle
 {
@@ -137,8 +137,8 @@ struct AudioPlaybackHandle
 };
 struct AudioSystem
 {
-    AudioPlaybackHandle FUN_00ad7480(const char* path, int flags, SoundSource* source);
-    void* FUN_0044edb0();
+    AudioPlaybackHandle BSAudio_GetSoundHandleByFilename(const char* path, int flags, SoundSource* source);
+    void* TESMain_GetThread();
 };
 struct WorldTarget
 {
@@ -151,8 +151,8 @@ struct Color
 };
 struct RenderElement
 {
-    void FUN_00a5a040();
-    void FUN_00440460(NiPoint3* at);
+    void UpdateProperties();
+    void NiAVObject_SetTranslate(NiPoint3* at);
 };
 struct AudioController
 {
@@ -162,7 +162,7 @@ struct FloatSetting
 {
     int type;
     float value;
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 struct FormTypeDescriptor;
 extern FormTypeDescriptor DAT_01268444;
@@ -173,21 +173,21 @@ extern FloatSetting DAT_011f210c;
 extern float DAT_010162c0, DAT_01017870, DAT_0101712c;
 extern double DAT_010231b0, DAT_01088210;
 extern NiPoint3 DAT_011a9484;
-extern int FUN_004b5820(int handle);
-extern EventEntity* FUN_0056f930(int handle);
-extern int FUN_004b5950(int handle);
-extern EventEntity* FUN_004b5a80(int form);
-extern void MarkBaseExtraListScriptEvent(Controller* player, void* sound, int flags);
-extern bool FUN_0043b300(FormTypeDescriptor* descriptor, EventEntity* entity);
-extern EventEntity* FUN_004b5260(int handle);
+extern int GetAVObjectForCollidable(int handle);
+extern EventEntity* TESObjectREFR_FindReferenceFor3D(int handle);
+extern int hkpGetPhantom(int handle);
+extern EventEntity* bhkEntity_Getbhk(int form);
+extern void Script_SetActionFlag(Controller* player, void* sound, int flags);
+extern bool NiObject_IsKindOf(FormTypeDescriptor* descriptor, EventEntity* entity);
+extern EventEntity* FindFirstCollisionObject(int handle);
 struct ParentEntity : EventEntity
 {
-    EventEntity* FUN_006fa820();
+    EventEntity* bhkNiCollisionObject_GetWorldObject();
 };
 extern bool CanProjectileHit(EventEntity* reference, int eventHandle, Controller* player, int eventOwner);
-extern bool FUN_009c5ba0(RayPickQuery* packet, int handle, int arg3, int arg4);
-extern void FUN_004a3970(NiPoint3* out, EventInfo* info);
-extern AudioSystem* FUN_00453a70();
+extern bool Projectile_PickSceneGraph(RayPickQuery* packet, int handle, int arg3, int arg4);
+extern void HK2NINS(NiPoint3* out, EventInfo* info);
+extern AudioSystem* BSAudio_QInstance();
 extern RenderElement* CreateOctahedron(float scale, Color* color, int arg3);
 typedef int(__thiscall* GetKindFn)(EventEntity*);
 typedef NiPoint3*(__thiscall* GetPositionFn)(EventEntity*);
@@ -195,80 +195,81 @@ typedef NiPoint3*(__thiscall* GetLocationFn)(WorldTarget*);
 typedef VisualNode*(__thiscall* GetVisualFn)(Controller*);
 typedef bool(__thiscall* DispatchFn)(Controller*, EventEntity*, NiPoint3*, NiPoint3*, int, int, int);
 // @fnv 0x009c0d80
-int __cdecl FUN_009c0d80(Scene* scene, Controller* player, int eventOwner, float* hitTime, bool acceptUnknown,
+// src: XBOX_PDB 0x009c0d80
+int __cdecl Projectile_ProcessTargetPick(Scene* scene, Controller* player, int eventOwner, float* hitTime, bool acceptUnknown,
                          float maximumTime)
 {
     if (eventOwner == 0 && player != 0)
         eventOwner = (int)player->FUN_004181e0();
     bool picked = false;
     int result = 0;
-    if (scene != 0 && scene->FUN_008cdd90() != 0)
+    if (scene != 0 && scene->DialoguePackage_GetCurrentDialogItem() != 0)
     {
         NiPoint3 initialPosition;
         NiPoint3 initialDirection;
-        scene->FUN_004585f0(&initialPosition);
-        scene->FUN_009c1a20(&initialDirection);
+        scene->bhkPickData_NiGetFrom(&initialPosition);
+        scene->bhkPickData_NiGetLength(&initialDirection);
         bool partialMatch = false;
         EventEntity* lastReference = 0;
-        for (int i = 0; !picked && i < scene->FUN_008cdd90()->FUN_00460140()->FUN_00726070(); ++i)
+        for (int i = 0; !picked && i < scene->DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->FUN_00726070(); ++i)
         {
             EventInfo info;
-            info.FUN_00696c30(scene->FUN_008cdd90()->FUN_00460140()->GetEntryAt(i));
+            info.hkpWorldRayCastOutput_hkpWorldRayCastOutput_00696c30(scene->DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(i));
             if (info.time > maximumTime)
                 continue;
-            int handle = FUN_004b5820(info.eventHandle);
-            EventEntity* reference = FUN_0056f930(handle);
+            int handle = GetAVObjectForCollidable(info.eventHandle);
+            EventEntity* reference = TESObjectREFR_FindReferenceFor3D(handle);
             if (handle != 0)
             {
                 bool candidate = true;
-                int form = FUN_004b5950(info.eventHandle);
-                EventEntity* entity2 = form != 0 ? FUN_004b5a80(form) : 0;
+                int form = hkpGetPhantom(info.eventHandle);
+                EventEntity* entity2 = form != 0 ? bhkEntity_Getbhk(form) : 0;
                 if (entity2 != 0)
                 {
                     candidate = false;
                     unsigned int filterA, filterB;
                     if (player != 0 && reference != 0 &&
-                        (entity2->FUN_0043b4f0(&filterA)->FUN_0043b4d0() == 0x17 ||
-                         entity2->FUN_0043b4f0(&filterB)->FUN_0043b4d0() == 0x18))
+                        (entity2->bhkWorldObject_GetCollisionFilter(&filterA)->CFilter_GetLayer() == 0x17 ||
+                         entity2->bhkWorldObject_GetCollisionFilter(&filterB)->CFilter_GetLayer() == 0x18))
                     {
-                        MarkBaseExtraListScriptEvent(player, reference->FUN_005d43c0(), 0x80);
-                        if (player->FUN_00476c90() != 0)
-                            MarkBaseExtraListScriptEvent(player->FUN_00476c90(), reference->FUN_005d43c0(), 0x100);
+                        Script_SetActionFlag(player, reference->BSFile_GetDevice(), 0x80);
+                        if (player->Sky_GetMode() != 0)
+                            Script_SetActionFlag(player->Sky_GetMode(), reference->BSFile_GetDevice(), 0x100);
                     }
                     unsigned int filterC;
-                    if (FUN_0043b300(&DAT_01268444, entity2) ||
-                        (acceptUnknown && entity2->FUN_0043b4f0(&filterC)->FUN_0043b4d0() == 0x1e))
+                    if (NiObject_IsKindOf(&DAT_01268444, entity2) ||
+                        (acceptUnknown && entity2->bhkWorldObject_GetCollisionFilter(&filterC)->CFilter_GetLayer() == 0x1e))
                     {
                         partialMatch = true;
                         lastReference = reference;
                         {
-                            ParentEntity* parentId = (ParentEntity*)FUN_004b5260(handle);
-                            EventEntity* parent2 = parentId != 0 ? parentId->FUN_006fa820() : 0;
+                            ParentEntity* parentId = (ParentEntity*)FindFirstCollisionObject(handle);
+                            EventEntity* parent2 = parentId != 0 ? parentId->bhkNiCollisionObject_GetWorldObject() : 0;
                             if (parent2 != 0)
                             {
                                 unsigned int filterD;
-                                if (parent2->FUN_0043b4f0(&filterD)->FUN_009c19e0() ||
+                                if (parent2->bhkWorldObject_GetCollisionFilter(&filterD)->FUN_009c19e0() ||
                                     ((GetKindFn)parent2->vtable[0x94 / 4])(parent2) == 0)
                                 {
                                     RayPickQuery pickQuery;
                                     NiPoint3 origin;
-                                    scene->FUN_004585f0(&origin);
+                                    scene->bhkPickData_NiGetFrom(&origin);
                                     NiPoint3 direction;
-                                    scene->FUN_009c1a20(&direction);
+                                    scene->bhkPickData_NiGetLength(&direction);
                                     initialDirection *= DAT_010162c0;
                                     direction *= DAT_010162c0;
                                     Filter sceneFilter;
-                                    pickQuery.FUN_004a3f70(scene->ConstructCF845(&sceneFilter)->value);
-                                    pickQuery.FUN_004a3da0(&origin);
-                                    pickQuery.FUN_007f68a0(&direction);
+                                    pickQuery.bhkPickData_SetFilter(scene->ConstructCF845(&sceneFilter)->value);
+                                    pickQuery.bhkPickData_SetFrom(&origin);
+                                    pickQuery.bhkPickData_SetLength(&direction);
                                     Collector collector;
-                                    pickQuery.FUN_004a3fb0(&collector);
-                                    bool hit = FUN_009c5ba0(&pickQuery, handle, 0, 1);
+                                    pickQuery.bhkPickData_SetAllCollector(&collector);
+                                    bool hit = Projectile_PickSceneGraph(&pickQuery, handle, 0, 1);
                                     if (hit)
                                     {
-                                        if (pickQuery.FUN_008cdd90()->FUN_00460140()->FUN_00726070() > 0)
+                                        if (pickQuery.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->FUN_00726070() > 0)
                                         {
-                                            info.FUN_009c1a70(pickQuery.FUN_008cdd90()->FUN_00460140()->GetEntryAt(0));
+                                            info.CopyRayCastResultAndRootCollidable(pickQuery.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(0));
                                             candidate = true;
                                         }
                                     }
@@ -287,11 +288,11 @@ int __cdecl FUN_009c0d80(Scene* scene, Controller* player, int eventOwner, float
                         NiPoint3 hitPoint = initialDirection * info.time;
                         NiPoint3 aimPoint = initialPosition + hitPoint;
                         NiPoint3 tempPoint;
-                        FUN_004a3970(&tempPoint, &info);
-                        if (player->FUN_00444d00(1))
+                        HK2NINS(&tempPoint, &info);
+                        if (player->Projectile_IsFlagSet(1))
                         {
-                            player->FUN_009795c0(hitPoint.Length());
-                            player->FUN_009c4e60(hitPoint, false);
+                            player->Projectile_SetRange(hitPoint.Length());
+                            player->Projectile_SetMovementDelta(hitPoint, false);
                         }
                         int lastIndex = -1;
                         for (int k = 0; k < 8 && reinterpret_cast<int*>(info.indexBytes)[k] != -1; ++k)
@@ -321,10 +322,10 @@ int __cdecl FUN_009c0d80(Scene* scene, Controller* player, int eventOwner, float
                 {
                     NiPoint3 away = initialDirection * maximumTime;
                     NiPoint3 dst = initialPosition + away;
-                    if (player->FUN_00444d00(1))
+                    if (player->Projectile_IsFlagSet(1))
                     {
-                        player->FUN_009795c0(away.Length());
-                        player->FUN_009c4e60(away, false);
+                        player->Projectile_SetRange(away.Length());
+                        player->Projectile_SetMovementDelta(away, false);
                     }
                     ((DispatchFn)player->vtable[0x32c / 4])(player, 0, &dst, &DAT_011a9484, 0, -1, 8);
                 }
@@ -334,14 +335,14 @@ int __cdecl FUN_009c0d80(Scene* scene, Controller* player, int eventOwner, float
                 if (lastReference != 0 && lastReference == DAT_011dea3c)
                 {
                     NiPoint3 impact;
-                    scene->FUN_005dbe60(&impact);
+                    scene->bhkPickData_NiCalcHitPoint(&impact);
                     if (player->FUN_004181e0() != 0)
                     {
                         if (player->FUN_004181e0()->FUN_004fd3e0() != 0)
                         {
                             int flags = 0x102;
                             AudioPlaybackHandle sound =
-                                FUN_00453a70()->FUN_00ad7480(player->FUN_004181e0()->FUN_004fd3e0()->FUN_00511840(),
+                                BSAudio_QInstance()->BSAudio_GetSoundHandleByFilename(player->FUN_004181e0()->FUN_004fd3e0()->TESSound_GetFilename(),
                                                              flags, player->FUN_004181e0()->FUN_004fd3e0());
                             sound.FUN_00ad8b60(impact.x, impact.y, impact.z);
                             sound.FUN_00ad8830(0);
@@ -350,26 +351,26 @@ int __cdecl FUN_009c0d80(Scene* scene, Controller* player, int eventOwner, float
                                 Color color;
                                 color.FUN_00414430(0.0f, 1.0f, 1.0f, DAT_01017870);
                                 RenderElement* visual = CreateOctahedron(DAT_0101712c, &color, 1);
-                                visual->FUN_00a5a040();
-                                visual->FUN_00440460(((GetVisualFn)player->vtable[0x1d0 / 4])(player)->FUN_0045bb80());
-                                DAT_011dea10->FUN_00458e20(visual, *DAT_011f210c.FUN_00403e20());
+                                visual->UpdateProperties();
+                                visual->NiAVObject_SetTranslate(((GetVisualFn)player->vtable[0x1d0 / 4])(player)->NiAVObject_GetWorldTranslate());
+                                DAT_011dea10->FUN_00458e20(visual, *DAT_011f210c.Setting_Float_00403e20());
                             }
                         }
                     }
                 }
             }
             else if (player->FUN_004181e0()->FUN_004fd3e0() != 0 &&
-                     ((picked && lastReference != DAT_011dea3c) || !picked) && player->FUN_00874480() != DAT_011dea3c &&
-                     FUN_00453a70()->FUN_0044edb0() != 0)
+                     ((picked && lastReference != DAT_011dea3c) || !picked) && player->Projectile_GetShooter() != DAT_011dea3c &&
+                     BSAudio_QInstance()->TESMain_GetThread() != 0)
             {
                 NiPoint3 at, saved, direction, extra, position;
-                WorldTarget* world = (WorldTarget*)FUN_00453a70()->FUN_0044edb0();
+                WorldTarget* world = (WorldTarget*)BSAudio_QInstance()->TESMain_GetThread();
                 position = *((GetLocationFn)world->vtable[3])(world);
                 if (lastReference != 0)
                     saved = *((GetPositionFn)lastReference->vtable[0x1f4 / 4])(lastReference);
                 else
-                    scene->FUN_004587f0(&saved);
-                scene->FUN_004585f0(&at);
+                    scene->bhkPickData_NiGetTo(&saved);
+                scene->bhkPickData_NiGetFrom(&at);
                 direction = saved - at;
                 extra = position - at;
                 float mag = extra.Dot(direction);
@@ -381,7 +382,7 @@ int __cdecl FUN_009c0d80(Scene* scene, Controller* player, int eventOwner, float
                 {
                     int flags = 0x102;
                     AudioPlaybackHandle sound =
-                        FUN_00453a70()->FUN_00ad7480(player->FUN_004181e0()->FUN_004fd3e0()->FUN_00511840(), flags,
+                        BSAudio_QInstance()->BSAudio_GetSoundHandleByFilename(player->FUN_004181e0()->FUN_004fd3e0()->TESSound_GetFilename(), flags,
                                                      player->FUN_004181e0()->FUN_004fd3e0());
                     sound.FUN_00ad8b60(projected.x, projected.y, projected.z);
                     sound.FUN_00ad8830(0);
@@ -390,9 +391,9 @@ int __cdecl FUN_009c0d80(Scene* scene, Controller* player, int eventOwner, float
                         Color color;
                         color.FUN_00414430(0.0f, 1.0f, 1.0f, DAT_01017870);
                         RenderElement* visual = CreateOctahedron(DAT_0101712c, &color, 1);
-                        visual->FUN_00a5a040();
-                        visual->FUN_00440460(&projected);
-                        DAT_011dea10->FUN_00458e20(visual, *DAT_011f210c.FUN_00403e20());
+                        visual->UpdateProperties();
+                        visual->NiAVObject_SetTranslate(&projected);
+                        DAT_011dea10->FUN_00458e20(visual, *DAT_011f210c.Setting_Float_00403e20());
                     }
                 }
             }

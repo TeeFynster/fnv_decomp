@@ -9,8 +9,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include "../../../../../../../include/Transform.h"
 
-extern "C" void __cdecl FUN_00d3f6a0(void* a, void* b, void* c, void* d);
-void __stdcall FUN_00d3fcc0(void* a, void* c, void* b, void* d);
+extern "C" void __cdecl hkpSphereSphereAgent_staticGetPenetrations(void* a, void* b, void* c, void* d);
+void __stdcall hkpSphereSphereAgent_getPenetrations(void* a, void* c, void* b, void* d);
 struct S_00d3f660_Owner
 {
     virtual void v0();
@@ -111,7 +111,7 @@ struct S_00d3f780_Obj
     int unk4;
     S_00d3f780_Owner* unk8;
     unsigned short unkC;
-    void FUN_00d3f780(S_00d3f780_In* a, S_00d3f780_In* b, S_00d3f780_C* c, S_00d3f780_D* d);
+    void hkpSphereSphereAgent_processCollision(S_00d3f780_In* a, S_00d3f780_In* b, S_00d3f780_C* c, S_00d3f780_D* d);
 };
 
 // ---------------------------------------------------------------------------
@@ -129,7 +129,8 @@ extern "C" double __cdecl sqrt(double);
 // ---------------------------------------------------------------------------
 
 // @fnv 0x00d3f780
-void S_00d3f780_Obj::FUN_00d3f780(S_00d3f780_In* a, S_00d3f780_In* b, S_00d3f780_C* c, S_00d3f780_D* d)
+// src: HAVOK_SRC 0x00d3f780
+void S_00d3f780_Obj::hkpSphereSphereAgent_processCollision(S_00d3f780_In* a, S_00d3f780_In* b, S_00d3f780_C* c, S_00d3f780_D* d)
 {
     float inv = 1.0f;
     union
@@ -301,7 +302,8 @@ struct Monitor
     Event* end;
 };
 // @fnv 0x00d3f980
-void __stdcall FUN_00d3f980(const Body* a, const Body* b, const Input* input, Collector* collector)
+// src: HAVOK_SRC 0x00d3f980
+void __stdcall hkpSphereSphereAgent_getClosestPoints(const Body* a, const Body* b, const Input* input, Collector* collector)
 {
     ScalarScratch scratch;
     {

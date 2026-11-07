@@ -4,7 +4,7 @@
 #include "../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../include/hkMemoryRouter.h"
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00d48370_cls
 {
@@ -25,7 +25,7 @@ FUN_00d48370_cls* FUN_00d48370_cls::FUN_00d48370(unsigned char acFlags)
     FinishObject();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }

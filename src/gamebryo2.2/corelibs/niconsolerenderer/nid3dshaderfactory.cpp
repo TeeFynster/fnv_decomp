@@ -170,15 +170,16 @@ NiShaderFactory* NiD3DShaderFactory::Create()
 
 struct FUN_00e91f40_shell : public NiD3DShaderFactory
 {
-    char* FUN_00e91f40(void**);
+    char* NiD3DShaderFactory_GetNextProgramDirectory(void**);
 };
 
-NiD3DShaderProgramFactory* __cdecl FUN_00e92eb0();
+NiD3DShaderProgramFactory* __cdecl NiD3DShaderProgramFactory_GetInstance();
 
 // @fnv 0x00e91f40
-char* FUN_00e91f40_shell::FUN_00e91f40(void** kIter)
+// src: XBOX_PDB 0x00e91f40
+char* FUN_00e91f40_shell::NiD3DShaderFactory_GetNextProgramDirectory(void** kIter)
 {
-    NiD3DShaderProgramFactory* pkSPFactory = FUN_00e92eb0();
+    NiD3DShaderProgramFactory* pkSPFactory = NiD3DShaderProgramFactory_GetInstance();
     if (!pkSPFactory)
         return 0;
     return (char*)pkSPFactory->GetNextName(*kIter);
@@ -187,24 +188,25 @@ char* FUN_00e91f40_shell::FUN_00e91f40(void** kIter)
 namespace fnv_00e91fa0 {
 struct FUN_00e91fa0_shell : public NiD3DShaderFactory
 {
-    void FUN_00e91fa0();
+    void NiD3DShaderFactory_RemoveAllProgramDirectories();
 };
 
-void* __cdecl FUN_00e92eb0();
-void __fastcall FUN_00e93cc0(void* pThis);
+void* __cdecl NiD3DShaderProgramFactory_GetInstance();
+void __fastcall NiD3DShaderProgramFactory_RemoveAllProgramDirectories(void* pThis);
 
 // @fnv 0x00e91fa0
-void FUN_00e91fa0_shell::FUN_00e91fa0()
+// src: XBOX_PDB 0x00e91fa0
+void FUN_00e91fa0_shell::NiD3DShaderFactory_RemoveAllProgramDirectories()
 {
-    void* pkFactory = FUN_00e92eb0();
+    void* pkFactory = NiD3DShaderProgramFactory_GetInstance();
     if (pkFactory)
-        FUN_00e93cc0(pkFactory);
+        NiD3DShaderProgramFactory_RemoveAllProgramDirectories(pkFactory);
 }
 }  // namespace fnv_00e91fa0
 
 struct NiConsoleRendererStub
 {
-    void FUN_00e75380();
+    void NiDX9Renderer_PurgeAllD3DShaders();
 };
 struct FUN_00e91ea0_cls
 {
@@ -212,14 +214,16 @@ struct FUN_00e91ea0_cls
     NiConsoleRendererStub* renderer;
 };
 // @fnv 0x00e91ea0
-void __fastcall FUN_00e91ea0(FUN_00e91ea0_cls* self, int)
+// src: GAMEBRYO_LIB 0x00e91ea0
+void __fastcall NiD3DShaderFactory_PurgeAllShaderRendererData(FUN_00e91ea0_cls* self, int)
 {
     if (self->renderer)
-        self->renderer->FUN_00e75380();
+        self->renderer->NiDX9Renderer_PurgeAllD3DShaders();
 }
 
 // @fnv 0x00e91eb0
-unsigned int __stdcall FUN_00e91eb0(unsigned int uiVersion)
+// src: XBOX_PDB 0x00e91eb0
+unsigned int __stdcall NiD3DShaderFactory_GetMinorVertexShaderVersion(unsigned int uiVersion)
 {
     return uiVersion & 0xFF;
 }
@@ -231,51 +235,56 @@ unsigned int __stdcall MakeVersionCode(unsigned int uiMajor, unsigned int uiMino
 }
 
 // @fnv 0x00e91ee0
-unsigned int __stdcall FUN_00e91ee0(unsigned int uiVersion)
+// src: XBOX_PDB 0x00e91ee0
+unsigned int __stdcall NiD3DShaderFactory_GetMajorVertexShaderVersion(unsigned int uiVersion)
 {
     return (uiVersion >> 8) & 0xFF;
 }
 
 // @fnv 0x00e91ef0
-unsigned int __stdcall FUN_00e91ef0(unsigned int a, unsigned int b)
+// src: XBOX_PDB 0x00e91ef0
+unsigned int __stdcall NiD3DShaderFactory_CreateVertexShaderVersion(unsigned int a, unsigned int b)
 {
     return ((0xFFFFFE00 | a) << 8) | b;
 }
 
 // @fnv 0x00e91f10
-void* __cdecl FUN_00e91f10()
+// src: XBOX_PDB 0x00e91f10
+void* __cdecl NiD3DShaderFactory_GetD3DShaderFactory()
 {
     return DAT_0126fa0c;
 }
 
 namespace fnv_00e91f20 {
-extern char* FUN_00e92fe0();
+extern char* NiD3D10ShaderProgramFactory_GetFirstProgramDirectory();
 struct FUN_00e91f20_shell : public NiD3DShaderFactory
 {
-    char* FUN_00e91f20(void**);
+    char* NiD3DShaderFactory_GetFirstProgramDirectory(void**);
 };
 
-extern NiD3DShaderProgramFactory* __cdecl FUN_00e92eb0(void);
+extern NiD3DShaderProgramFactory* __cdecl NiD3DShaderProgramFactory_GetInstance(void);
 
 // @fnv 0x00e91f20
-char* FUN_00e91f20_shell::FUN_00e91f20(void** kIter)
+// src: XBOX_PDB 0x00e91f20
+char* FUN_00e91f20_shell::NiD3DShaderFactory_GetFirstProgramDirectory(void** kIter)
 {
-    NiD3DShaderProgramFactory* pkSPFactory = FUN_00e92eb0();
+    NiD3DShaderProgramFactory* pkSPFactory = NiD3DShaderProgramFactory_GetInstance();
     if (!pkSPFactory)
         return 0;
     // The shared factory does not yet declare the first-name lookup.
     typedef char* (__thiscall* GetFirstName)(NiD3DShaderProgramFactory*, void**);
-    return reinterpret_cast<GetFirstName>(&FUN_00e92fe0)(pkSPFactory, kIter);
+    return reinterpret_cast<GetFirstName>(&NiD3D10ShaderProgramFactory_GetFirstProgramDirectory)(pkSPFactory, kIter);
 }
 }  // namespace fnv_00e91f20
 
 namespace fnv_00e91f60 {
-NiD3DShaderProgramFactory* __cdecl FUN_00e92eb0(void);
+NiD3DShaderProgramFactory* __cdecl NiD3DShaderProgramFactory_GetInstance(void);
 
 // @fnv 0x00e91f60
-void __stdcall FUN_00e91f60(const char* pacDirectory)
+// src: XBOX_PDB 0x00e91f60
+void __stdcall NiD3DShaderFactory_AddProgramDirectory(const char* pacDirectory)
 {
-    NiD3DShaderProgramFactory* pkFactory = FUN_00e92eb0();
+    NiD3DShaderProgramFactory* pkFactory = NiD3DShaderProgramFactory_GetInstance();
     if (pkFactory)
         pkFactory->AddDirectory(pacDirectory);
 }
@@ -283,19 +292,21 @@ void __stdcall FUN_00e91f60(const char* pacDirectory)
 
 namespace fnv_00e91f80 {
 
-NiD3DShaderProgramFactory* __cdecl FUN_00e92eb0();
+NiD3DShaderProgramFactory* __cdecl NiD3DShaderProgramFactory_GetInstance();
 
 // @fnv 0x00e91f80
-void __stdcall FUN_00e91f80(char* pacDirectory)
+// src: XBOX_PDB 0x00e91f80
+void __stdcall NiD3DShaderFactory_RemoveProgramDirectory(char* pacDirectory)
 {
-    NiD3DShaderProgramFactory* pkFactory = FUN_00e92eb0();
+    NiD3DShaderProgramFactory* pkFactory = NiD3DShaderProgramFactory_GetInstance();
     if (pkFactory)
         pkFactory->LoadProgramByName(pacDirectory);
 }
 }  // namespace fnv_00e91f80
 
 // @fnv 0x00e91fc0
-const char* __cdecl FUN_00e91fc0()
+// src: COMMUNITY 0x00e91fc0
+const char* __cdecl NiD3DGPUProgramCache_GetPlatform()
 {
     return "DX9";
 }
@@ -307,12 +318,13 @@ extern int _ref_00ec408c;
 struct NiD3DShaderFactory_shell
 {
     ShaderMapBase* m_pShaderMapStorage;
-    void __thiscall FUN_00e923f0(const char* pcName, unsigned int uiImplementation);
+    void __thiscall NiD3DShaderFactory_RemoveShader(const char* pcName, unsigned int uiImplementation);
 };
 
 // Builds a name from pcName and uiImplementation and removes the matching entry from the map at offset 0x28 if present.
 // @fnv 0x00e923f0
-void __thiscall NiD3DShaderFactory_shell::FUN_00e923f0(const char* pcName, unsigned int uiImplementation)
+// src: XBOX_PDB 0x00e923f0
+void __thiscall NiD3DShaderFactory_shell::NiD3DShaderFactory_RemoveShader(const char* pcName, unsigned int uiImplementation)
 {
     char acFullName[260];
     if (*(ShaderMapBase**)((char*)this + 0x28))
@@ -328,14 +340,16 @@ struct FUN_00e92460_cls
     ShaderMapBase* map;
 };
 // @fnv 0x00e92460
-void __fastcall FUN_00e92460(FUN_00e92460_cls* self, int)
+// src: GAMEBRYO_LIB 0x00e92460
+void __fastcall NiD3DShaderFactory_RemoveAllShaders(FUN_00e92460_cls* self, int)
 {
     if (self->map)
         self->map->RemoveAll();
 }
 
 // @fnv 0x00e92590
-unsigned int __stdcall FUN_00e92590(unsigned int auiLeft, unsigned int auiRight)
+// src: GUESS 0x00e92590 (confidence: high)
+unsigned int __stdcall NiD3DShaderFactory_AreValuesEqual(unsigned int auiLeft, unsigned int auiRight)
 {
     return auiLeft == auiRight;
 }
@@ -481,7 +495,7 @@ bool __stdcall IsDefaultShader(NiShader* pkShader)
 
 void __cdecl operator delete(void* p, unsigned int);
 
-void __cdecl FUN_00e92dc0();
+void __cdecl UpdateFields_00e92dc0();
 
 struct FUN_00e92e30_shell : public NiD3DShaderFactory
 {
@@ -492,7 +506,7 @@ struct FUN_00e92e30_shell : public NiD3DShaderFactory
 // @fnv 0x00e92e30
 void* __thiscall FUN_00e92e30_shell::DestroyShaderFactory(unsigned int flags)
 {
-    FUN_00e92dc0();
+    UpdateFields_00e92dc0();
     if (flags & 1)
         operator delete(this, 0x100);
     return this;
@@ -501,7 +515,7 @@ void* __thiscall FUN_00e92e30_shell::DestroyShaderFactory(unsigned int flags)
 struct GraphicsRenderer;
 struct FUN_00e91e60_shell : public NiD3DShaderFactory
 {
-    void FUN_00e91e60(GraphicsRenderer*);
+    void NiD3DShaderFactory_SetRenderer(GraphicsRenderer*);
 };
 
 struct ShaderConstantInterface
@@ -535,7 +549,8 @@ struct FakeFactory374
     virtual ShaderConstantInterface* GetPixelShaderConstantInterface();
 };
 // @fnv 0x00e91e60
-void FUN_00e91e60_shell::FUN_00e91e60(GraphicsRenderer* pkRenderer)
+// src: GAMEBRYO_SRC 0x00e91e60
+void FUN_00e91e60_shell::NiD3DShaderFactory_SetRenderer(GraphicsRenderer* pkRenderer)
 {
     ShaderConstantInterface* pkLibrary;
     if (*(GraphicsRenderer**)((char*)this + 0x24) != pkRenderer)
@@ -684,7 +699,7 @@ extern "C" void(__stdcall* fnv_EnterCriticalSection)(void* pkSection);
 extern "C" void(__stdcall* fnv_LeaveCriticalSection)(void* pkSection);
 
 // The shared shader does not yet declare its implementation getter.
-extern unsigned int FUN_00cc0760();
+extern unsigned int NiD3DShaderProgram_GetName();
 typedef unsigned int (__thiscall* GetShaderImplementation)(NiShader*);
 
 struct E92270CriticalSection
@@ -773,7 +788,7 @@ bool E92270Library::HasEntry(const char* pcName, unsigned int uiID)
     if (!FindProgram(pcName, uiID))
     {
         NiShader* pkProgram = FindProgram(pcName, 0xffffffff);
-        if (!pkProgram || reinterpret_cast<GetShaderImplementation>(&FUN_00cc0760)(pkProgram) != uiID)
+        if (!pkProgram || reinterpret_cast<GetShaderImplementation>(&NiD3DShaderProgram_GetName)(pkProgram) != uiID)
             return false;
     }
 
@@ -853,15 +868,16 @@ struct ShaderLibrary
 };
 struct ShaderRenderer
 {
-    void FUN_00e752b0(ShaderLibrary* library);
+    void NiXenonRenderer_RegisterD3DShader(ShaderLibrary* library);
 };
 struct ShaderFactoryShell : NiD3DShaderFactory
 {
-    void FUN_00e92470();
+    void NiD3DShaderFactory_RestoreAllShaderRendererData();
 };
 // Iterates the shader library map and, for each non-default shader, releases its resources and notifies the renderer.
 // @fnv 0x00e92470
-void ShaderFactoryShell::FUN_00e92470()
+// src: GAMEBRYO_SRC 0x00e92470
+void ShaderFactoryShell::NiD3DShaderFactory_RestoreAllShaderRendererData()
 {
     if (m_pOwnerShader && m_pShaderMapStorage)
     {
@@ -881,7 +897,7 @@ void ShaderFactoryShell::FUN_00e92470()
                 {
                     library.FUN_00e818d0(m_pOwnerShader);
                     library.ReleaseResources();
-                    static_cast<ShaderRenderer*>(m_pOwnerShader)->FUN_00e752b0(&library);
+                    static_cast<ShaderRenderer*>(m_pOwnerShader)->NiXenonRenderer_RegisterD3DShader(&library);
                 }
             }
         }
@@ -926,15 +942,16 @@ struct ReferenceObject_92c40
 };
 struct FUN_00e92c40_shell : NiD3DShaderFactory
 {
-    ShaderLibrary_92c40* FUN_00e92b50();
-    void FUN_00e92c40();
+    ShaderLibrary_92c40* NiD3DShaderFactory_GetFirstLibrary();
+    void NiD3DShaderFactory_RemoveAllLibraries();
 };
 // @fnv 0x00e92c40
-void FUN_00e92c40_shell::FUN_00e92c40()
+// src: XBOX_PDB 0x00e92c40
+void FUN_00e92c40_shell::NiD3DShaderFactory_RemoveAllLibraries()
 {
     if (!m_pShaderLibraryStorage)
         return;
-    ShaderLibrary_92c40* current = FUN_00e92b50();
+    ShaderLibrary_92c40* current = NiD3DShaderFactory_GetFirstLibrary();
     if (current)
     {
         do
@@ -958,20 +975,21 @@ extern "C" __declspec(dllimport) void __stdcall DeleteCriticalSection(void* crit
 
 struct ShaderFactoryShutdown : NiD3DShaderFactory
 {
-    void FUN_00e92c40();
+    void NiD3DShaderFactory_RemoveAllLibraries();
     void FUN_00aa05a0();
-    void FUN_00e92dc0();
+    void UpdateFields_00e92dc0();
 };
 
 // @fnv 0x00e92dc0
-void ShaderFactoryShutdown::FUN_00e92dc0()
+// src: GUESS 0x00e92dc0 (confidence: low)
+void ShaderFactoryShutdown::UpdateFields_00e92dc0()
 {
     ShaderMapBase* shaderMap = static_cast<ShaderMapBase*>(m_pShaderMapStorage);
     *(void**)this = &kVtbl_NiD3DShaderFactory;
     if (shaderMap)
         shaderMap->RemoveAll();
 
-    FUN_00e92c40();
+    NiD3DShaderFactory_RemoveAllLibraries();
 
     if (m_pShaderMapStorage)
         delete static_cast<ShaderMapBase*>(m_pShaderMapStorage);
@@ -1006,10 +1024,11 @@ struct RetainedShaderLibraryArgument
 
 struct ShaderFactory_e92a40 : NiD3DShaderFactory
 {
-    void FUN_00e92a40(FUN_00d47a30_class* p);
+    void NiD3DShaderFactory_InsertLibrary(FUN_00d47a30_class* p);
 };
 // @fnv 0x00e92a40
-void ShaderFactory_e92a40::FUN_00e92a40(FUN_00d47a30_class* p)
+// src: GAMEBRYO_LIB 0x00e92a40
+void ShaderFactory_e92a40::NiD3DShaderFactory_InsertLibrary(FUN_00d47a30_class* p)
 {
     if (p)
     {
@@ -1021,13 +1040,13 @@ void ShaderFactory_e92a40::FUN_00e92a40(FUN_00d47a30_class* p)
     }
 }
 
-extern "C" void __cdecl FUN_00aa10f0(void*);
+extern "C" void __cdecl _NiFree_00aa10f0(void*);
 
 template <>
 __forceinline NiTMapBase<NiTPointerAllocator<unsigned int>, const char*, NiPointer<NiShaderLibrary> >::~NiTMapBase() throw()
 {
     RemoveAll();
-    FUN_00aa10f0(m_ppkHashTable);
+    _NiFree_00aa10f0(m_ppkHashTable);
 }
 
 template <>
@@ -1050,7 +1069,7 @@ NiTStringTemplateMap<NiTPointerMap<const char*, NiPointer<NiShaderLibrary> >,
             {
                 EntryType* current = item;
                 item = item->m_pkNext;
-                FUN_00aa10f0(const_cast<char*>(current->m_key));
+                _NiFree_00aa10f0(const_cast<char*>(current->m_key));
             }
         }
     }
@@ -1135,12 +1154,13 @@ class OwnerE92A
     void* unk2C;
     ShaderLibraryMapBase* m_pTaskMap;
 
-    void FUN_00e92ae0(const char* pcName);
+    void NiD3DShaderFactory_RemoveLibrary(const char* pcName);
 };
 
 // Looks up pcName in m_pTaskMap; if found with refcount 2, removes it and decrements the reference, otherwise just decrements the reference.
 // @fnv 0x00e92ae0
-void OwnerE92A::FUN_00e92ae0(const char* pcName)
+// src: XBOX_PDB 0x00e92ae0
+void OwnerE92A::NiD3DShaderFactory_RemoveLibrary(const char* pcName)
 {
     NiRefObject* pkVal = 0;
     bool bFound = m_pTaskMap->GetAt(pcName, *reinterpret_cast<NiPointer<NiShaderLibrary>*>(&pkVal));
@@ -1191,11 +1211,12 @@ class ShaderFactoryView
     unsigned int unk28;
     void* m_pShaderLibraryIterator;
     ShaderLibraryMapBase* m_pShaderLibraryStorage;
-    ShaderRefObject* FUN_00e92b50();
+    ShaderRefObject* NiD3DShaderFactory_GetFirstLibrary();
 };
 // Resets the iterator to the first map position, advances it once, releases the returned object's reference, and returns that pointer.
 // @fnv 0x00e92b50
-ShaderRefObject* ShaderFactoryView::FUN_00e92b50()
+// src: GAMEBRYO_LIB 0x00e92b50
+ShaderRefObject* ShaderFactoryView::NiD3DShaderFactory_GetFirstLibrary()
 {
     ShaderLibraryMapBase* map = m_pShaderLibraryStorage;
     if (!map)
@@ -1243,7 +1264,7 @@ struct S_00e92be0_Factory
     int unk2c;
     ShaderLibraryMapBase* unk30;
 
-    S_00e92be0_Ref* FUN_00e92be0();
+    S_00e92be0_Ref* NiD3DShaderFactory_GetNextLibrary();
 };
 
 void S_00e92be0_Ref::f0()
@@ -1254,7 +1275,8 @@ void S_00e92be0_Ref::f1()
 
 // Calls unk30->AdvanceIterator to fetch the next S_00e92be0_Ref, decrements its reference count, and returns the object or null.
 // @fnv 0x00e92be0
-S_00e92be0_Ref* S_00e92be0_Factory::FUN_00e92be0()
+// src: GAMEBRYO_LIB 0x00e92be0
+S_00e92be0_Ref* S_00e92be0_Factory::NiD3DShaderFactory_GetNextLibrary()
 {
     ShaderLibraryMapBase* callee = unk30;
     if (callee != 0 && unk2c != 0)
@@ -1363,7 +1385,7 @@ void ShaderMaterialCacheSlot::UpdateShaderMaterialCache(void* parameter)
     }
 }
 
-extern "C" void __cdecl FUN_00aa0020(int, int, const char*, ...);
+extern "C" void __cdecl NiShaderFactory_ReportError(int, int, const char*, ...);
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 extern "C" char UNK_010f0b84[];
@@ -1442,11 +1464,12 @@ class ShaderFactory
     int unk7C;
     int m_kShaderMap;
 
-    ShaderLibrary* FUN_00e920a0(const char* pcName, unsigned int uiImplementation, bool bReportFailure);
+    ShaderLibrary* NiD3DShaderFactory_RetrieveShader(const char* pcName, unsigned int uiImplementation, bool bReportFailure);
 };
 // Acquires a ShaderLibrary by name, creating and registering it via producer interfaces if not already present, and optionally logs a failure.
 // @fnv 0x00e920a0
-ShaderLibrary* ShaderFactory::FUN_00e920a0(const char* pcName, unsigned int uiImplementation, bool bReportFailure)
+// src: XBOX_PDB 0x00e920a0
+ShaderLibrary* ShaderFactory::NiD3DShaderFactory_RetrieveShader(const char* pcName, unsigned int uiImplementation, bool bReportFailure)
 {
     if (!m_pOwnerShader)
     {
@@ -1456,7 +1479,7 @@ ShaderLibrary* ShaderFactory::FUN_00e920a0(const char* pcName, unsigned int uiIm
     }
     if (!pcName || !*pcName)
     {
-        FUN_00aa0020(1, 0, UNK_010f0b20);
+        NiShaderFactory_ReportError(1, 0, UNK_010f0b20);
         return 0;
     }
     ShaderLibrary* pkShader = AcquireShader(pcName, uiImplementation);
@@ -1474,7 +1497,7 @@ ShaderLibrary* ShaderFactory::FUN_00e920a0(const char* pcName, unsigned int uiIm
                 if (pkShader)
                 {
                     RegisterShader(pkShader, uiImplementation);
-                    m_pOwnerShader->FUN_00e752b0(pkShader);
+                    m_pOwnerShader->NiXenonRenderer_RegisterD3DShader(pkShader);
                     pkShader->FUN_00e818d0(m_pOwnerShader);
                     break;
                 }
@@ -1484,7 +1507,7 @@ ShaderLibrary* ShaderFactory::FUN_00e920a0(const char* pcName, unsigned int uiIm
         LeaveCriticalSection(pCriticalSection);
     }
     if (bReportFailure && !pkShader)
-        FUN_00aa0020(1, 0, UNK_010f0b54, pcName, uiImplementation);
+        NiShaderFactory_ReportError(1, 0, UNK_010f0b54, pcName, uiImplementation);
     return pkShader;
 }
 
@@ -1527,14 +1550,15 @@ struct FUN_00e92330_cls
     virtual FUN_00e92330_item* GetNext();
     unsigned int unk04[31];
     FUN_00e92330_critsec m_lock;
-    bool FUN_00e92330(unsigned int a1);
+    bool NiD3DShaderFactory_ReleaseShaderFromLibrary(unsigned int a1);
 };
 
 typedef FUN_00e92330_item*(__thiscall* FUN_00e92330_match)(FUN_00e92330_cls*, unsigned int, unsigned int);
 
 // Checks whether the collection contains the item identified by a1, using a virtual Match lookup and a Test predicate under a critical section.
 // @fnv 0x00e92330
-bool FUN_00e92330_cls::FUN_00e92330(unsigned int apItem)
+// src: XBOX_PDB 0x00e92330
+bool FUN_00e92330_cls::NiD3DShaderFactory_ReleaseShaderFromLibrary(unsigned int apItem)
 {
     if (apItem == 0)
     {
@@ -1543,7 +1567,7 @@ bool FUN_00e92330_cls::FUN_00e92330(unsigned int apItem)
     unsigned int key = reinterpret_cast<unsigned int>(((NiShader*)apItem)->GetFilename().m_kHandle);
     void** pVTable = *(void***)this;
     void** pMatchSlot = pVTable + 3;
-    unsigned int ref = reinterpret_cast<GetShaderImplementation>(&FUN_00cc0760)((NiShader*)apItem);
+    unsigned int ref = reinterpret_cast<GetShaderImplementation>(&NiD3DShaderProgram_GetName)((NiShader*)apItem);
     FUN_00e92330_item* r = ((FUN_00e92330_match)*pMatchSlot)(this, key, ref);
     if (!(r && (unsigned int)r == apItem))
     {

@@ -89,7 +89,7 @@ inline void displayLine(hkDebugDisplayHandler* handler, const hkVector4& start, 
 
 struct DebugDisplayHandlerHolder
 {
-    void FUN_00e10a10(hkDebugDisplayHandler* displayHandler);
+    void hkpPrimitiveDrawer_setDisplayHandler(hkDebugDisplayHandler* displayHandler);
 };
 
 template <class T> inline T hkMax2(T a, T b)
@@ -111,27 +111,28 @@ struct ConstraintVisualizer
     hkVector4 unkb0;
     DebugDisplayHandlerHolder m_kDisplayGeometry;
 
-    void FUN_00de47e0(hkpConstraintInstance* constraint, hkTransform& refLocalToWorld, hkTransform& attLocalToWorld);
-    void FUN_00de44c0(int id, int tag);
-    void FUN_00de4530(int id, int tag);
-    void FUN_00de6550(hkpConstraintInstance* constraint, hkDebugDisplayHandler* displayHandler, int id, int tag);
+    void hkpConstraintDrawer_updateCommonParameters(hkpConstraintInstance* constraint, hkTransform& refLocalToWorld, hkTransform& attLocalToWorld);
+    void hkpConstraintDrawer_drawPivots(int id, int tag);
+    void hkpConstraintDrawer_drawBodyFrames(int id, int tag);
+    void ProcessEntries_00de6550(hkpConstraintInstance* constraint, hkDebugDisplayHandler* displayHandler, int id, int tag);
 };
 
 // @fnv 0x00de6550
-void ConstraintVisualizer::FUN_00de6550(hkpConstraintInstance* constraint, hkDebugDisplayHandler* displayHandler, int id,
+// src: GUESS 0x00de6550 (confidence: low)
+void ConstraintVisualizer::ProcessEntries_00de6550(hkpConstraintInstance* constraint, hkDebugDisplayHandler* displayHandler, int id,
                                    int tag)
 {
     hkpPulleyConstraintData* pulley = static_cast<hkpPulleyConstraintData*>(constraint->m_data);
-    m_kDisplayGeometry.FUN_00e10a10(displayHandler);
+    m_kDisplayGeometry.hkpPrimitiveDrawer_setDisplayHandler(displayHandler);
     {
         hkTransform refLocalToWorld;
         hkTransform attLocalToWorld;
-        FUN_00de47e0(constraint, refLocalToWorld, attLocalToWorld);
-        m_vVectorAtOffset50.FUN_00c7f640(refLocalToWorld, pulley->m_kTranslationB);
-        m_vVectorAtOffset40.FUN_00c7f640(attLocalToWorld, pulley->m_kTranslationA);
+        hkpConstraintDrawer_updateCommonParameters(constraint, refLocalToWorld, attLocalToWorld);
+        m_vVectorAtOffset50.setTransformedPos_00c7f640(refLocalToWorld, pulley->m_kTranslationB);
+        m_vVectorAtOffset40.setTransformedPos_00c7f640(attLocalToWorld, pulley->m_kTranslationA);
     }
-    FUN_00de44c0(id, tag);
-    FUN_00de4530(id, tag);
+    hkpConstraintDrawer_drawPivots(id, tag);
+    hkpConstraintDrawer_drawBodyFrames(id, tag);
 
     displayLine(displayHandler, pulley->m_kFixedPivotA, VecAddress(&pulley->m_kFixedPivotB), 0xffc0c0c0, id, tag);
     displayLine(displayHandler, m_vVectorAtOffset40, VecAddress(&pulley->m_kFixedPivotA), 0xffffffff, id, tag);
@@ -139,7 +140,7 @@ void ConstraintVisualizer::FUN_00de6550(hkpConstraintInstance* constraint, hkDeb
     int numRopes = int(hkMax2(pulley->m_fRopeLength, 1.0f));
     hkVector4 offset(0.0f, 0.0f, 0.0f, 0.0f);
     offset.set(0.07f, 0.0f, 0.0f, 0.0f);
-    offset.FUN_00c7f700(constraint->m_kActorEntries[1]->m_pMotionState.m_kMotionState.m_kMotionTransform.getRotation(), offset);
+    offset.hkVector4_setRotatedDir(constraint->m_kActorEntries[1]->m_pMotionState.m_kMotionState.m_kMotionTransform.getRotation(), offset);
     hkVector4 start(0.0f, 0.0f, 0.0f, 0.0f);
     start.setMul4_b(hkReal((numRopes - 1) * DAT_01011598), offset);
     for (int i = 0; i < numRopes; i++)

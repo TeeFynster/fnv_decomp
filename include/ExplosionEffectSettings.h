@@ -24,6 +24,6 @@ public:
     SOUND_LEVEL m_eSoundLevel;
 
     // 0x004faa00: calls InitExplosionData (BGSExplosion::ResetFormData calls it on its Data member)
-    void FUN_004faa00();
+    void Object_ProcessAndReturnValue_004faa00();
     void InitExplosionData();
 };

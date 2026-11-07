@@ -9,7 +9,7 @@ void __cdecl operator delete(void*);
 void __cdecl operator delete[](void*);
 extern "C" void* __cdecl memcpy(void*, const void*, size_t);
 extern "C" const char kThreadSafeStructuresSourceFile[];
-unsigned int __cdecl FUN_0044e330();
+unsigned int __cdecl _TlsAlloc();
 class bhkRigidBody;
 class QueuedReference;
 class TESObjectREFR;

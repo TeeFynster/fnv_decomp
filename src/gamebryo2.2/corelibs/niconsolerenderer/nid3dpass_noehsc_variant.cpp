@@ -18,7 +18,8 @@ struct FUN_00e7ee80 : SNAEntry
     ~FUN_00e7ee80() throw();
 };
 // @fnv 0x00e7f0a0
-FUN_00e7ee80* FUN_00e7f0a0(unsigned int count)
+// src: GUESS 0x00e7f0a0 (confidence: medium)
+FUN_00e7ee80* Object_CreateElementArray(unsigned int count)
 {
     return new FUN_00e7ee80[count];
 }
@@ -60,7 +61,8 @@ class SpawnedObject
 };
 
 // @fnv 0x00e7e880
-SpawnedObject* FUN_00e7e880(unsigned int count)
+// src: GUESS 0x00e7e880 (confidence: low)
+SpawnedObject* Object_GetIndexedValue_00e7e880(unsigned int count)
 {
     return new SpawnedObject[count];
 }

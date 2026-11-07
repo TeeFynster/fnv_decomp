@@ -59,41 +59,41 @@ struct Vehicle {
  VehicleData* data;
  unsigned field20, field24, field28, field2c, field30, field34, field38;
  WheelCaster* caster;
- void FUN_00e39030(void*, WheelResult*);
+ void hkpVehicleInstance_stepVehicleUsingWheelCollideOutput(void*, WheelResult*);
 };
 struct Allocator {
  virtual void v00(); virtual void v04(); virtual void v08(); virtual void v0c();
  virtual void freeBlock(void*, int);
 };
 struct ThreadMemory { char* stack; unsigned field04, field08, field0c; Allocator* allocator; Allocator& heap() { return *allocator; } };
-ThreadMemory* FUN_00c85750();
-void FUN_00c908c0(Allocator*, hkArrayBase<WheelResult>*, int, int);
+ThreadMemory* hkMemoryRouter_getInstance();
+void hkArrayUtil__reserve(Allocator*, hkArrayBase<WheelResult>*, int, int);
 struct LocalWheelResults : hkArrayBase<WheelResult> {
  LocalWheelResults() : hkArrayBase<WheelResult>(FinishingFlag(0)) {}
  WheelResult* original;
  void initialize() {
   m_data = 0; m_iElementCount = 0; m_iCapacityState = 0x80000000;
-  ThreadMemory* memory = FUN_00c85750();
+  ThreadMemory* memory = hkMemoryRouter_getInstance();
   WheelResult* block = (WheelResult*)memory->stack;
   memory->stack = (char*)(block + 16);
   m_data = block; m_iCapacityState = 0x80000010; original = block;
  }
  void resize(int size) {
-  Allocator& allocator = FUN_00c85750()->heap();
+  Allocator& allocator = hkMemoryRouter_getInstance()->heap();
   _ReadWriteBarrier();
   int capacity = m_iCapacityState & 0x3fffffff;
   if (capacity < size) {
    int grown = capacity * 2;
    if (size >= grown) grown = size;
-   FUN_00c908c0(&allocator, this, grown, sizeof(WheelResult));
+   hkArrayUtil__reserve(&allocator, this, grown, sizeof(WheelResult));
   }
   m_iElementCount = size;
  }
  void release() {
   WheelResult* saved = original;
   if (saved == m_data) m_iElementCount = 0;
-  FUN_00c85750()->stack = (char*)saved;
-  Allocator& allocator = FUN_00c85750()->heap();
+  hkMemoryRouter_getInstance()->stack = (char*)saved;
+  Allocator& allocator = hkMemoryRouter_getInstance()->heap();
   m_iElementCount = 0;
   if ((m_iCapacityState & 0x80000000) == 0)
    allocator.freeBlock(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(WheelResult));
@@ -103,11 +103,12 @@ struct BatchOutputs { WheelCommand* commands; void* temporary; unsigned char* fl
 struct RayBatchManager {
  unsigned field00, field04; Vehicle** vehicles; int vehicleCount; unsigned field10; hkUint16 wheels, field16;
  void ComputeBufferLayout(WheelCommand*, void*, BatchOutputs*);
- void FUN_00e42da0(void* input, void* world, WheelCommand* commands);
+ void hkpVehicleRayCastBatchingManager_stepVehiclesUsingCastResults(void* input, void* world, WheelCommand* commands);
 };
 // Records timer entries TtDoVehicles and Et around a loop that casts or skips each wheel per vehicle via its caster and passes the results to FUN_00e39030.
 // @fnv 0x00e42da0
-void RayBatchManager::FUN_00e42da0(void* input, void* world, WheelCommand* commands)
+// src: HAVOK_LIB 0x00e42da0
+void RayBatchManager::hkpVehicleRayCastBatchingManager_stepVehiclesUsingCastResults(void* input, void* world, WheelCommand* commands)
 {
  TimerStream* timer = (TimerStream*)TlsGetValue(DAT_0126835c);
  hkMonitorStream::TimerCommand* record = timer->current;
@@ -139,7 +140,7 @@ void RayBatchManager::FUN_00e42da0(void* input, void* world, WheelCommand* comma
    caster->finish(vehicle, wheel, &results.m_data[wheel]);
    if (enabled) ++cursor;
   }
-  vehicles[i]->FUN_00e39030(input, results.m_data);
+  vehicles[i]->hkpVehicleInstance_stepVehicleUsingWheelCollideOutput(input, results.m_data);
  }
  timer = (TimerStream*)TlsGetValue(DAT_0126835c);
  record = timer->current;
@@ -399,11 +400,12 @@ struct VehicleRayCastBatchingManager
     VRVehicle** registeredVehicles() const { return m_ppVehicles; }
 
     void getBufferBreakdown(void* buffer, int numJobs, VRBatch& batchOut);
-    int FUN_00e42b50(const VRWorld* world, int filterSize, int numJobs, VRJobQueue* jobQueue, void* semaphore, void* buffer);
+    int hkpVehicleRayCastBatchingManager_buildAndAddCastJobs(const VRWorld* world, int filterSize, int numJobs, VRJobQueue* jobQueue, void* semaphore, void* buffer);
 };
 
 // @fnv 0x00e42b50
-int VehicleRayCastBatchingManager::FUN_00e42b50(const VRWorld* world, int filterSize, int numJobs, VRJobQueue* jobQueue, void* semaphore, void* buffer)
+// src: HAVOK_LIB 0x00e42b50
+int VehicleRayCastBatchingManager::hkpVehicleRayCastBatchingManager_buildAndAddCastJobs(const VRWorld* world, int filterSize, int numJobs, VRJobQueue* jobQueue, void* semaphore, void* buffer)
 {
     VROutput* outputStorage;
     VRMonitorStream::GetMonitorStream().timerCommand("TtBuildAndAddRaycastJobs");

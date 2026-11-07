@@ -142,7 +142,7 @@ Matrix* __stdcall D3DXMatrixMultiply(Matrix*, const Matrix*, const Matrix*);
 Matrix* __stdcall D3DXMatrixTranspose(Matrix*, const Matrix*);
 struct Shader
 {
-    void FUN_00baa850(int identity, const Transform* transform);
+    void TallGrassShader_SetupShadowData(int identity, const Transform* transform);
     unsigned int unk000;
     unsigned int unk004;
     unsigned int unk008;
@@ -255,7 +255,8 @@ struct Shader
     hkVector4 direction;
 };
 // @fnv 0x00baa850
-void Shader::FUN_00baa850(int identity, const Transform* transform)
+// src: COMMUNITY 0x00baa850
+void Shader::TallGrassShader_SetupShadowData(int identity, const Transform* transform)
 {
     AlignedMatrix world;
     Matrix result;

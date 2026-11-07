@@ -118,10 +118,11 @@ struct CollFilterS : hkReferencedObject, FilterS
 // The shared phantom header does not yet declare this linear-cast entry point.
 struct PhantomS : hkpAabbPhantom
 {
-    void FUN_00cf2880(const hkpCollidable* collA, const LinCastInputS& input, void* castCollector, void* startCollector);
+    void hkpAabbPhantom_linearCast(const hkpCollidable* collA, const LinCastInputS& input, void* castCollector, void* startCollector);
 };
 // @fnv 0x00cf2880
-void PhantomS::FUN_00cf2880(const hkpCollidable* collA, const LinCastInputS& input, void* castCollector,
+// src: EXE 0x00cf2880
+void PhantomS::hkpAabbPhantom_linearCast(const hkpCollidable* collA, const LinCastInputS& input, void* castCollector,
                             void* startCollector)
 {
     union
@@ -213,11 +214,12 @@ static inline void transformInversePos(hkVector4& out, const hkTransform& a, con
 class Phantom_00cf2510 : public hkpAabbPhantom
 {
   public:
-    void FUN_00cf2510(const WorldRayCastInput& input, hkpRayHitCollector& collector) const;
+    void hkpAabbPhantom_castRay(const WorldRayCastInput& input, hkpRayHitCollector& collector) const;
 };
 
 // @fnv 0x00cf2510
-void Phantom_00cf2510::FUN_00cf2510(const WorldRayCastInput& input, hkpRayHitCollector& collector) const
+// src: XBOX_PDB 0x00cf2510
+void Phantom_00cf2510::hkpAabbPhantom_castRay(const WorldRayCastInput& input, hkpRayHitCollector& collector) const
 {
     {
         hkMonitorStream& mStream = *(hkMonitorStream*)TlsGetValue(DAT_0126835c);

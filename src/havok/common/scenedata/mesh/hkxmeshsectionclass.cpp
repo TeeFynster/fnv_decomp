@@ -5,7 +5,7 @@
 #include "../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../include/hkMemoryRouter.h"
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 extern int DAT_0102e388;
 
@@ -33,7 +33,7 @@ struct FUN_00e01f70_cls
 // @fnv 0x00e01f70
 void FUN_00e01f70_cls::Destroy()
 {
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     FreeableItem** ppItems = m_ppData1c;
     int iCount = m_iCount20;
@@ -64,7 +64,7 @@ void FUN_00e01f70_cls::Destroy()
     }
     m_pObj18 = 0;
 
-    pHolder = FUN_00c85750();
+    pHolder = hkMemoryRouter_getInstance();
     pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     ppItems = m_ppData0c;
     iCount = m_iCount10;
@@ -97,7 +97,7 @@ void FUN_00e01f70_cls::Destroy()
 }
 
 namespace fnv_00e02090 {
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00e02090
 {
@@ -107,7 +107,7 @@ struct FUN_00e02090
     virtual ~FUN_00e02090();
     static void operator delete(void* apMemory)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         unsigned int uiSize = ((FUN_00e02090*)apMemory)->m_u04;
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         // Preserve the allocator's original virtual Free slot.

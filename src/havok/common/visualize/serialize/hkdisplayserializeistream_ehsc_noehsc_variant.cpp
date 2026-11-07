@@ -31,14 +31,14 @@ extern "C" LocalM128 _mm_set_ps1(float a);
 typedef float hkReal;
 typedef signed char hkInt8;
 
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 
 // Shared hkMemoryRouter.h is not available; this unit uses its heap pointer at +0x10.
 #include "../../../../../include/hkMemoryRouter.h"
 
 __forceinline hkMemoryRouter* getRouter()
 {
-    return reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    return reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
 }
 
 __forceinline void* hkGeometry::operator new(size_t nbytes) throw()
@@ -135,41 +135,42 @@ struct hkDisplayCylinder : hkDisplayGeometry
 __forceinline hkInt8 hkDisplaySerializeIStream::readInt8()
 {
     hkInt8 c;
-    FUN_00dd8fe0(&c, 1, 1);
+    hkIArchive_readArrayGeneric(&c, 1, 1);
     return c;
 }
 
 __forceinline int hkDisplaySerializeIStream::readInt32()
 {
     int i;
-    FUN_00dd8fe0(&i, 4, 1);
+    hkIArchive_readArrayGeneric(&i, 4, 1);
     return i;
 }
 
 __forceinline hkReal hkDisplaySerializeIStream::readFloat32()
 {
     hkReal f;
-    FUN_00dd8fe0(&f, 4, 1);
+    hkIArchive_readArrayGeneric(&f, 4, 1);
     return f;
 }
 
 __forceinline void hkDisplaySerializeIStream::ReadVector4(hkVector4& v)
 {
-    FUN_00ddac60(v);
+    readQuadVector4(v);
 }
 
 __forceinline void hkDisplaySerializeIStream::ReadTransform(hkTransform& t)
 {
-    FUN_00ddac80(t);
+    ReadTranslationAndRotation(t);
 }
 
 __forceinline void hkDisplaySerializeIStream::ReadGeometry(hkGeometry* g)
 {
-    FUN_00ddacd0(g);
+    readGeometry(g);
 }
 
 // @fnv 0x00ddada0
-void hkDisplaySerializeIStream::FUN_00ddada0(hkDisplayGeometry*& geometry)
+// src: GUESS 0x00ddada0 (confidence: low)
+void hkDisplaySerializeIStream::UpdateFields_00ddada0(hkDisplayGeometry*& geometry)
 {
     hkInt8 type = readInt8();
 

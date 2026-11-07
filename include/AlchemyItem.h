@@ -31,10 +31,10 @@ public:
     void ResetFormData();
     virtual void InitItem();
 
-    void* FUN_004030b0();
-    int FUN_004030b0(int, int, bool);
-    bool FUN_004029d0(unsigned int);
-    bool FUN_004029d0(int);
+    void* CombatController_GetTarget();
+    int CombatController_GetTarget(int, int, bool);
+    bool AlchemyItem_IsFlagSet(unsigned int);
+    bool AlchemyItem_IsFlagSet(int);
     bool FUN_00981420();
     void SetSound(TESSound* sound);
     unsigned int GetFieldC8();

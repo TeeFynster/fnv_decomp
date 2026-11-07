@@ -168,7 +168,7 @@ bool BSFaceGenKeyframeMultiple::DiffersFrom(BSFaceGenKeyframe* apOther)
     }
     for (unsigned int i = 0; i < GetCount(); ++i)
     {
-        if (pkeyframe->FUN_005dd4e0(i) != FUN_005dd4e0(i))
+        if (pkeyframe->BSFaceGenKeyframeMultiple_GetQuantity(i) != BSFaceGenKeyframeMultiple_GetQuantity(i))
         {
             return true;
         }
@@ -180,7 +180,8 @@ extern SettingT_GameSettingCollection_ originalRuntimeFloatSetting1262;
 
 // Returns the float value of originalRuntimeFloatSetting1262 if it is greater than 0.0, otherwise returns 0.0f.
 // @fnv 0x0064fb10
-float __cdecl FUN_0064fb10()
+// src: XBOX_PDB 0x0064fb10
+float __cdecl BSFaceGenAnimationData_GetExpressionTargetChangePerSec()
 {
     return originalRuntimeFloatSetting1262.Float()->f > 0.0 ? originalRuntimeFloatSetting1262.Float()->f : 0.0f;
 }
@@ -190,7 +191,8 @@ extern SettingT_GameSettingCollection_ g_011d577c;
 
 // Returns the float value from g_011d577c if it is greater than zero, otherwise returns 0.0f.
 // @fnv 0x0064fb50
-float __cdecl FUN_0064fb50()
+// src: XBOX_PDB 0x0064fb50
+float __cdecl BSFaceGenAnimationData_GetExpressionStrengthAddPerSec()
 {
     return g_011d577c.Float()->f > 0.0 ? g_011d577c.Float()->f : 0.0f;
 }
@@ -206,7 +208,7 @@ BSFaceGenKeyframeMultiple::BSFaceGenKeyframeMultiple(const BSFaceGenKeyframeMult
     m_uiFaceGenValueCount = 0;
     BSFaceGenKeyframeMultiple::ApplyFaceGenValues(const_cast<BSFaceGenKeyframeMultiple&>(aOther).GetCount(), true);
     for (unsigned int i = 0; i < m_uiFaceGenValueCount; i++)
-        FUN_0064a4d0(i, const_cast<BSFaceGenKeyframeMultiple&>(aOther).FUN_005dd4e0(i));
+        SetQuantity_0064a4d0(i, const_cast<BSFaceGenKeyframeMultiple&>(aOther).BSFaceGenKeyframeMultiple_GetQuantity(i));
 }
 
 // @fnv 0x0064f5b0
@@ -221,12 +223,13 @@ void BSFaceGenKeyframeMultiple::CopyFromKeyframe(BSFaceGenKeyframe* apFrom)
     vfn_10(pSourceMultiple->vfn_0c());
     ApplyFaceGenValues(pSourceMultiple->GetCount(), true);
     for (unsigned int i = 0; i < m_uiFaceGenValueCount; i++)
-        FUN_0064a4d0(i, pSourceMultiple->FUN_005dd4e0(i));
+        SetQuantity_0064a4d0(i, pSourceMultiple->BSFaceGenKeyframeMultiple_GetQuantity(i));
 }
 
 // Allocates a new keyframe by copying *this and returns the pointer.
 // @fnv 0x0064f530
-BSFaceGenKeyframeMultiple* BSFaceGenKeyframeMultiple::FUN_0064f530()
+// src: XBOX_PDB 0x0064f530
+BSFaceGenKeyframeMultiple* BSFaceGenKeyframeMultiple::CreateCopy_0064f530()
 {
     BSFaceGenKeyframeMultiple* preturn;
     preturn = new BSFaceGenKeyframeMultiple(*this);
@@ -237,7 +240,8 @@ extern double _gModifierZero;
 
 // Loops over the keyframes, calling the virtual at vtable slot 19; returns false if any keyframe is active and its value exceeds _gModifierZero, otherwise true.
 // @fnv 0x0064f7e0
-bool BSFaceGenKeyframeMultiple::FUN_0064f7e0()
+// src: XBOX_PDB 0x0064f7e0
+bool BSFaceGenKeyframeMultiple::IsEmpty_0064f7e0()
 {
     unsigned int i;
     for (i = 0; i < m_uiFaceGenValueCount; ++i)
@@ -338,7 +342,7 @@ bool BSFaceGenKeyframeMultiple::BlendWith(BSFaceGenKeyframe* apLeft, BSFaceGenKe
 }
 
 namespace fnv_0064eea0 {
-bool __cdecl FUN_0040eb10(float a, float b, float c);
+bool __cdecl FloatEQ(float a, float b, float c);
 }
 
 // @fnv 0x0064eea0
@@ -372,25 +376,25 @@ bool BSFaceGenKeyframeMultiple::BlendFrom(BSFaceGenKeyframe* pOther, float f, bo
 
     for (unsigned int i = 0; i < m_uiFaceGenValueCount; ++i)
     {
-        if (!b1 && fnv_0064eea0::FUN_0040eb10(pfOther->FUN_005dd4e0(i), 0.0f, 0.001f))
+        if (!b1 && fnv_0064eea0::FloatEQ(pfOther->BSFaceGenKeyframeMultiple_GetQuantity(i), 0.0f, 0.001f))
         {
             continue;
         }
-        if (pfOther->FUN_005dd4e0(i) < 3.4028234663852886e38)
+        if (pfOther->BSFaceGenKeyframeMultiple_GetQuantity(i) < 3.4028234663852886e38)
         {
-            if (f < 1.0f && FUN_005dd4e0(i) < 3.4028234663852886e38)
+            if (f < 1.0f && BSFaceGenKeyframeMultiple_GetQuantity(i) < 3.4028234663852886e38)
             {
-                bChanged = bChanged | this->FUN_0064a4d0(i, FUN_005dd4e0(i) * (1.0 - fClamped) +
-                                                              pfOther->FUN_005dd4e0(i) * fClamped);
+                bChanged = bChanged | this->SetQuantity_0064a4d0(i, BSFaceGenKeyframeMultiple_GetQuantity(i) * (1.0 - fClamped) +
+                                                              pfOther->BSFaceGenKeyframeMultiple_GetQuantity(i) * fClamped);
             }
             else
             {
-                bChanged = bChanged | this->FUN_0064a4d0(i, pfOther->FUN_005dd4e0(i));
+                bChanged = bChanged | this->SetQuantity_0064a4d0(i, pfOther->BSFaceGenKeyframeMultiple_GetQuantity(i));
             }
         }
         else if (b2)
         {
-            bChanged = bChanged | this->FUN_0064a4d0(i, 3.402823466e38f);
+            bChanged = bChanged | this->SetQuantity_0064a4d0(i, 3.402823466e38f);
         }
     }
     return bChanged;

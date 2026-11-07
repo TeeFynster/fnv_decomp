@@ -20,7 +20,8 @@ __forceinline void S_00d1b1d0_swap(T& x, T& y)
 }
 
 // @fnv 0x00d1b1d0
-void FUN_00d1b1d0(S_00d1b1d0_Item* pItems, int iLow, int iHigh, S_00d1b1d0_Less cmpLess)
+// src: GUESS 0x00d1b1d0 (confidence: low)
+void Hkpentityaabbutil_ProcessEntries_00d1b1d0(S_00d1b1d0_Item* pItems, int iLow, int iHigh, S_00d1b1d0_Less cmpLess)
 {
 setStart:
     const int iMid = (iLow + iHigh) >> 1;
@@ -38,7 +39,7 @@ setStart:
             lo++;
         }
     } while (lo <= hi);
-    if (iLow < hi) FUN_00d1b1d0(pItems, iLow, hi, cmpLess);
+    if (iLow < hi) Hkpentityaabbutil_ProcessEntries_00d1b1d0(pItems, iLow, hi, cmpLess);
     if (lo < iHigh) {
         iLow = lo;
         goto setStart;

@@ -118,7 +118,8 @@ extern double DAT_0109c9d0;
 extern double DAT_0109c9d8;
 
 // @fnv 0x00a6dc30
-float FUN_00a6dc30(float t, float fCos)
+// src: GAMEBRYO_LIB 0x00a6dc30
+float NiQuaternion_CounterWarp(float t, float fCos)
 {
     float fFactor = 1.0f - DAT_0109c9d8 * fCos;
     fFactor *= fFactor;
@@ -128,7 +129,8 @@ float FUN_00a6dc30(float t, float fCos)
 
 // Interpolates p to q and a to b by t, then slerps between those two results by 2*t*(1-t) into self.
 // @fnv 0x00a6e430
-void __fastcall FUN_00a6e430(NiQuaternion* self, int edx, float afTime, const NiQuaternion& aStart,
+// src: COMMUNITY 0x00a6e430
+void __fastcall NiQuaternion_Squad(NiQuaternion* self, int edx, float afTime, const NiQuaternion& aStart,
                              const NiQuaternion& aStart2, const NiQuaternion& aEnd2, const NiQuaternion& aEnd)
 {
     NiQuaternion q1;
@@ -141,7 +143,8 @@ void __fastcall FUN_00a6e430(NiQuaternion* self, int edx, float afTime, const Ni
 extern unsigned char DAT_011F3FE4;
 
 // @fnv 0x00a4ffe0
-unsigned char* __cdecl FUN_00a4ffe0()
+// src: COMMUNITY 0x00a4ffe0
+unsigned char* __cdecl NiBSplineTransformInterpolator_GetRTTI()
 {
     return &DAT_011F3FE4;
 }
@@ -276,15 +279,16 @@ void NiQuaternion::Snap()
 struct Quaternion
 {
     float w, x, y, z;
-    Quaternion* FUN_00a2bcf0(Quaternion* out, const Quaternion* right);
+    Quaternion* MultiplyQuaternion(Quaternion* out, const Quaternion* right);
 };
-Quaternion* __cdecl FUN_00a6dc90(Quaternion* out, const Quaternion* in);
-void __cdecl FUN_00a88970(Quaternion* out, const Quaternion* in);
+Quaternion* __cdecl NiQuaternion_Log(Quaternion* out, const Quaternion* in);
+void __cdecl NiQuaternion_Exp(Quaternion* out, const Quaternion* in);
 extern const double DAT_0109c9e0;
 
 // Combines two results from FUN_00a6dc90, scales their sum, passes it to FUN_00a88970, then multiplies by current.
 // @fnv 0x00a6dd50
-Quaternion* __cdecl FUN_00a6dd50(Quaternion* output, const Quaternion* previous, Quaternion* current,
+// src: COMMUNITY 0x00a6dd50
+Quaternion* __cdecl NiQuaternion_Intermediate(Quaternion* output, const Quaternion* previous, Quaternion* current,
                                  const Quaternion* next)
 {
     Quaternion inverse;
@@ -295,11 +299,11 @@ Quaternion* __cdecl FUN_00a6dd50(Quaternion* output, const Quaternion* previous,
 
     Quaternion qProductNext;
     Quaternion qLogNext;
-    volatile Quaternion* pLogNext = FUN_00a6dc90(&qLogNext, inverse.FUN_00a2bcf0(&qProductNext, next));
+    volatile Quaternion* pLogNext = NiQuaternion_Log(&qLogNext, inverse.MultiplyQuaternion(&qProductNext, next));
 
     Quaternion qProductPrev;
     Quaternion qLogPrev;
-    Quaternion* pLogPrev = FUN_00a6dc90(&qLogPrev, inverse.FUN_00a2bcf0(&qProductPrev, previous));
+    Quaternion* pLogPrev = NiQuaternion_Log(&qLogPrev, inverse.MultiplyQuaternion(&qProductPrev, previous));
 
     inverse.w = pLogNext->w + pLogPrev->w;
     inverse.x = pLogNext->x + pLogPrev->x;
@@ -313,8 +317,8 @@ Quaternion* __cdecl FUN_00a6dd50(Quaternion* output, const Quaternion* previous,
     qScaled.z = (float)(DAT_0109c9e0 * inverse.z);
 
     Quaternion qExponential;
-    FUN_00a88970(&qExponential, &qScaled);
-    current->FUN_00a2bcf0(output, &qExponential);
+    NiQuaternion_Exp(&qExponential, &qScaled);
+    current->MultiplyQuaternion(output, &qExponential);
     return output;
 }
 
@@ -348,7 +352,8 @@ inline float NiAbs(float fValue)
 
 // Sets vector x to zero and scales the other vector components and scalar part by a coefficient derived from arccosine of vector x.
 // @fnv 0x00a6dc90
-NiQuaternion __cdecl FUN_00a6dc90(const NiQuaternion& q)
+// src: GAMEBRYO_LIB 0x00a6dc90
+NiQuaternion __cdecl NiQuaternion_Log(const NiQuaternion& q)
 {
     // q = cos(A)+sin(A)*(x*i+y*j+z*k), log(q) = A*(x*i+y*j+z*k)
     float fAngleDifference = NiACos(q.m_fVectorX);

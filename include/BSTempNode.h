@@ -6,7 +6,7 @@ class BSTempNode : public NiNode
 {
 public:
     BSTempNode(float value);
-    void FUN_00c44ed0(float value);
+    void BSTempNodeManager_RemoveExpired(float value);
     void UpdateDownwardPass(NiUpdateData& data, unsigned int flags);
     void UpdateSelectedDownwardPass(NiUpdateData& data, unsigned int flags);
     void UpdateRigidDownwardPass(NiUpdateData& data, unsigned int flags);

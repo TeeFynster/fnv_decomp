@@ -90,7 +90,8 @@ int FUN_004a8070_shell::GetScriptText()
 extern unsigned char DAT_0118868c;
 
 // @fnv 0x004a82c0
-unsigned char __cdecl FUN_004a82c0()
+// src: XBOX_PDB 0x004a82c0
+unsigned char __cdecl BGSSceneInfo_GetAggregateInstances()
 {
     return DAT_0118868c;
 }
@@ -109,14 +110,15 @@ int __cdecl MinInt(int iA, int iB)
 
 struct FUN_004a8f50_shell
 {
-    void FUN_004a95d0(int a);
-    void* FUN_004a8f50();
+    void NiTMap_NiTexture_TEX_USER_DATA_NiTMap(int a);
+    void* BGSTextureUseMap_BGSTextureUseMap();
 };
 
 // @fnv 0x004a8f50
-void* __thiscall FUN_004a8f50_shell::FUN_004a8f50()
+// src: XBOX_PDB 0x004a8f50
+void* __thiscall FUN_004a8f50_shell::BGSTextureUseMap_BGSTextureUseMap()
 {
-    ((FUN_004a8f50_shell*)((char*)this + 4))->FUN_004a95d0(0x25);
+    ((FUN_004a8f50_shell*)((char*)this + 4))->NiTMap_NiTexture_TEX_USER_DATA_NiTMap(0x25);
     return this;
 }
 
@@ -133,7 +135,8 @@ struct GlobalObject2_0045cfe0
 GlobalObject2_0045cfe0 g_011c59e0;
 
 // @fnv 0x004a9100
-int FUN_004a9100()
+// src: XBOX_PDB 0x004a9100
+int BGSSceneInfo_GetActorMemoryBudgetCap()
 {
     return *g_011c59e0.Int();
 }
@@ -171,12 +174,13 @@ void* __cdecl memset(void*, int, unsigned int);
 
 struct FUN_004a7c40_shell
 {
-    void* FUN_004a7c40();
+    void* InitializeFields_004a7c40();
     void ClearToZero();
 };
 
 // @fnv 0x004a7c40
-void* FUN_004a7c40_shell::FUN_004a7c40()
+// src: GUESS 0x004a7c40 (confidence: low)
+void* FUN_004a7c40_shell::InitializeFields_004a7c40()
 {
     *(int*)this = (int)&DAT_0101ec68;
     ((FUN_004a7c40_shell*)((char*)this + 4))->ClearToZero();
@@ -202,13 +206,13 @@ void* FUN_004a7c80_shell::ClearToZero()
 struct BGSSceneInfo_shell
 {
     void* Destroy(unsigned int flags);
-    void FUN_004a7cd0();
+    void SetField0000();
 };
 // Calls FUN_004a7cd0, then deallocates this when flags has bit 0 set, and returns this.
 // @fnv 0x004a7ca0
 void* BGSSceneInfo_shell::Destroy(unsigned int flags)
 {
-    FUN_004a7cd0();
+    SetField0000();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -219,22 +223,24 @@ extern int DAT_0101ec68;
 struct FUN_004a7cd0_shell
 {
     int* m_0000;
-    void FUN_004a7cd0();
+    void SetField0000();
 };
 
 // @fnv 0x004a7cd0
-void FUN_004a7cd0_shell::FUN_004a7cd0()
+// src: GUESS 0x004a7cd0 (confidence: low)
+void FUN_004a7cd0_shell::SetField0000()
 {
     m_0000 = &DAT_0101ec68;
 }
 
 struct FUN_004a8030_shell
 {
-    unsigned int FUN_004a8030();
+    unsigned int NiGeometry_GetNormals();
 };
 // Returns the thread ID of the BSThread stored at offset 0xb8 of this object.
 // @fnv 0x004a8030
-unsigned int FUN_004a8030_shell::FUN_004a8030()
+// src: XBOX_PDB 0x004a8030
+unsigned int FUN_004a8030_shell::NiGeometry_GetNormals()
 {
     return ((BSThread*)((Flt*)((char*)this + 0xb8))->operator unsigned int())->GetThreadID();
 }
@@ -257,15 +263,16 @@ void* This_004a8050::GetNextProc()
 extern int DAT_0101ecec;
 struct FUN_004a95d0_shell
 {
-    void* FUN_004a95d0(int a);
-    void FUN_004a97e0(int a);
+    void* NiTMap_NiTexture_TEX_USER_DATA_NiTMap(int a);
+    void NiTMapBase_DFALL_NiTMapItem_NiTexture_TEX_USER_DATA_NiTexture_TEX_USER_DATA_NiTMapBase_DFALL_NiTMapItem_NiTexture_TEX_USER_DATA_NiTexture_TEX_USER_DATA(int a);
 };
 
 // Calls FUN_004a97e0(a), stores the address of DAT_0101ecec into this, and returns this.
 // @fnv 0x004a95d0
-void* FUN_004a95d0_shell::FUN_004a95d0(int a)
+// src: EXE 0x004a95d0
+void* FUN_004a95d0_shell::NiTMap_NiTexture_TEX_USER_DATA_NiTMap(int a)
 {
-    FUN_004a97e0(a);
+    NiTMapBase_DFALL_NiTMapItem_NiTexture_TEX_USER_DATA_NiTexture_TEX_USER_DATA_NiTMapBase_DFALL_NiTMapItem_NiTexture_TEX_USER_DATA_NiTexture_TEX_USER_DATA(a);
     *(int*)this = (int)&DAT_0101ecec;
     return this;
 }
@@ -275,15 +282,16 @@ extern int DAT_0101ed0c;
 struct FUN_004a9600_shell
 {
     int m_0000;
-    void* FUN_004a9600(void* arg);
-    void __thiscall FUN_004a98e0(void* arg);
+    void* InitializeFields_004a9600(void* arg);
+    void __thiscall NiTMapBase_DFALL_NiTMapItem_TESObjectCELL_bool_TESObjectCELL_bool_NiTMapBase_DFALL_NiTMapItem_TESObjectCELL_bool_TESObjectCELL_bool(void* arg);
 };
 
 // Calls FUN_004a98e0 on arg, stores the address of DAT_0101ed0c in m_0000, and returns this.
 // @fnv 0x004a9600
-void* FUN_004a9600_shell::FUN_004a9600(void* arg)
+// src: GUESS 0x004a9600 (confidence: low)
+void* FUN_004a9600_shell::InitializeFields_004a9600(void* arg)
 {
-    FUN_004a98e0(arg);
+    NiTMapBase_DFALL_NiTMapItem_TESObjectCELL_bool_TESObjectCELL_bool_NiTMapBase_DFALL_NiTMapItem_TESObjectCELL_bool_TESObjectCELL_bool(arg);
     m_0000 = (int)&DAT_0101ed0c;
     return this;
 }
@@ -359,7 +367,8 @@ int FUN_004a8090_shell::CallTargetV36()
 
 
 // @fnv 0x004a8fe0
-void __cdecl FUN_004a8fe0()
+// src: COMMUNITY 0x004a8fe0
+void __cdecl BGSSceneInfo_ReloadBudgetCaps()
 {
     int i;
     for (i = 0; i < 0x10; ++i)
@@ -382,7 +391,8 @@ extern GlobalObject_0045cfe0 g_011c5ae0;
 extern GlobalObject2_0045cfe0 g_011c5c04;
 extern int g_TES;
 // @fnv 0x004a9050
-int FUN_004a9050()
+// src: XBOX_PDB 0x004a9050
+int BGSSceneInfo_GetLoadedAreaNonActorMemoryBudgetCap()
 {
     int iValue = *g_011c5b20.Int();
     if (!((CP_008c48d0*)g_TES)->GetPrevPath())
@@ -395,7 +405,7 @@ int FUN_004a9050()
         if (pLODworld)
         {
             int iadjust = 0;
-            if (pLODworld->FUN_0084e3a0() == 0x3c)
+            if (pLODworld->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == 0x3c)
                 iadjust = *g_011c5ae0.Int();
             else
                 iadjust = *g_011c5c04.Int();
@@ -448,7 +458,7 @@ void FUN_004a8230_shell::ResetAndProcessNode(NiNode* node, bool includeAddonNode
 
     this->AccumulateSceneStatistics(node, (char*)this + 4, trackActors, 0);
 
-    if (FUN_004a82c0())
+    if (BGSSceneInfo_GetAggregateInstances())
         g_011c5c40.RemoveAll();
 }
 
@@ -485,8 +495,8 @@ struct SceneSource
 };
 struct SceneLoader
 {
-    void* LoadModel(const char*, int, int, int, int, int);
-    void FUN_0045a5e0(const char*);
+    void* ModelLoader_LoadFile(const char*, int, int, int, int, int);
+    void ModelLoader_ReleaseFile(const char*);
 };
 extern SceneSource* DAT_011c3f2c;
 extern SceneLoader* DAT_011c3b3c;
@@ -494,8 +504,8 @@ extern char DAT_01016fac;
 extern int DAT_011f4428;
 void __cdecl FUN_00406d30(char*, unsigned int, const char*);
 void __cdecl FUN_00406d50(char*, unsigned int, const char*);
-void* __cdecl FUN_00653270(const void*, void*);
-bool __cdecl FUN_00c511f0(void*);
+void* __cdecl NiObject_DynamicCast(const void*, void*);
+bool __cdecl BSParticleSystemManager_IsValidMasterParticleSystem(void*);
 struct LoadScenes
 {
     void AccumulateSceneStatistics(void*, void*, int, int);
@@ -520,13 +530,13 @@ void LoadScenes::LoadSceneModels()
                 char cPath[260];
                 FUN_00406d30(cPath, 260, &DAT_01016fac);
                 FUN_00406d50(cPath, 260, pSceneRecord->description.Name());
-                void* model = DAT_011c3b3c->LoadModel(cPath, 0, 1, 0, 0, 0);
+                void* model = DAT_011c3b3c->ModelLoader_LoadFile(cPath, 0, 1, 0, 0, 0);
                 if (model)
                 {
-                    if (!FUN_00c511f0(model))
-                        AccumulateSceneStatistics(FUN_00653270(&DAT_011f4428, model),
+                    if (!BSParticleSystemManager_IsValidMasterParticleSystem(model))
+                        AccumulateSceneStatistics(NiObject_DynamicCast(&DAT_011f4428, model),
                                                   &DAT_011c5ab4.GetAt(uiSceneIndex), 0, 0);
-                    DAT_011c3b3c->FUN_0045a5e0(cPath);
+                    DAT_011c3b3c->ModelLoader_ReleaseFile(cPath);
                 }
             }
         }
@@ -576,7 +586,7 @@ struct SceneItem
 };
 struct ItemList
 {
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
     void* DereferenceIfNotNull(void*);
     SceneItem** AddEight(void*);
 };
@@ -587,17 +597,17 @@ struct OuterRecord
 };
 struct OuterList
 {
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
     void* DereferenceIfNotNull(void*);
     OuterRecord** AddEight(void*);
 };
 struct SceneManager
 {
-    OuterList* FUN_005a8080();
+    OuterList* ComputeValue_005a8080();
 };
 struct SceneGlobal
 {
-    SceneManager* FUN_0070ec90();
+    SceneManager* DetailedActorPathHandler_GetCurrentNodeIndex();
 };
 extern SceneGlobal* DAT_011dea10;
 struct FUN_004a9600
@@ -605,8 +615,8 @@ struct FUN_004a9600
     int unk00, unk04, unk08, unk0c;
     FUN_004a9600(unsigned int);
     ~FUN_004a9600();
-    bool FUN_0057c850(SceneOwner*, bool*);
-    void FUN_0084d310(SceneOwner*, int);
+    bool NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_GetAt(SceneOwner*, bool*);
+    void NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_SetAt(SceneOwner*, int);
     void FUN_00438af0();
 };
 struct FUN_0042f4e0
@@ -614,8 +624,8 @@ struct FUN_0042f4e0
     int unk00, unk04, unk08, unk0c;
     FUN_0042f4e0(unsigned int);
     ~FUN_0042f4e0();
-    bool FUN_0057c850(SceneItem*, bool*);
-    void FUN_0084d310(SceneItem*, int);
+    bool NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_GetAt(SceneItem*, bool*);
+    void NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_SetAt(SceneItem*, int);
     void FUN_00438af0();
 };
 struct ScriptProgram
@@ -623,7 +633,7 @@ struct ScriptProgram
     unsigned short CallTargetV36();
     int FUN_0049ec60();
     int GetNextProc();
-    int FUN_004a8030();
+    int NiGeometry_GetNormals();
     int GetScriptText();
 };
 struct MeshPart
@@ -773,7 +783,7 @@ struct MeshNode
 };
 struct SceneOwner
 {
-    MeshNode* FUN_00545710();
+    MeshNode* TESObjectCELL_GetPlaceableWatersList();
 };
 struct SceneCounter
 {
@@ -787,10 +797,10 @@ struct SceneCounter
 // @fnv 0x004a7d20
 void SceneCounter::AccumulateSceneStats(SceneOwner* owner)
 {
-    OuterList* j = DAT_011dea10->FUN_0070ec90()->FUN_005a8080();
+    OuterList* j = DAT_011dea10->DetailedActorPathHandler_GetCurrentNodeIndex()->ComputeValue_005a8080();
     FUN_004a9600 e(0x25);
     FUN_0042f4e0 k(0x25);
-    void* ba = j->FUN_00559450();
+    void* ba = j->Modelloader_GetReferencedThis();
     void* l = 0;
     while (ba)
     {
@@ -801,24 +811,24 @@ void SceneCounter::AccumulateSceneStats(SceneOwner* owner)
             if (q)
             {
                 int eb = 0;
-                void* s = q->items.FUN_00559450();
+                void* s = q->items.Modelloader_GetReferencedThis();
                 void* cf = 0;
                 bool f = false;
                 while (s)
                 {
                     cf = q->items.DereferenceIfNotNull(s);
                     SceneItem* i = *q->items.AddEight(s);
-                    if (!e.FUN_0057c850(i->FUN_008d6f30(), &f))
+                    if (!e.NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_GetAt(i->FUN_008d6f30(), &f))
                         ++eb;
-                    if (!k.FUN_0057c850(i, &f) && i->FUN_008d6f30() == owner)
+                    if (!k.NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_GetAt(i, &f) && i->FUN_008d6f30() == owner)
                     {
                         ++this->count;
-                        k.FUN_0084d310(i, 1);
+                        k.NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_SetAt(i, 1);
                     }
-                    e.FUN_0084d310(i->FUN_008d6f30(), 1);
+                    e.NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_SetAt(i->FUN_008d6f30(), 1);
                     s = cf;
                 }
-                if (e.FUN_0057c850(owner, &f))
+                if (e.NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_bool_GetAt(owner, &f))
                 {
                     int a = 0;
                 }
@@ -827,7 +837,7 @@ void SceneCounter::AccumulateSceneStats(SceneOwner* owner)
         e.FUN_00438af0();
         ba = l;
     }
-    MeshNode* c = owner->FUN_00545710();
+    MeshNode* c = owner->TESObjectCELL_GetPlaceableWatersList();
     while (c && *c->FUN_006815c0())
     {
         MeshObject* h = *c->FUN_006815c0();
@@ -844,7 +854,7 @@ void SceneCounter::AccumulateSceneStats(SceneOwner* owner)
                     e2 += j2 * 12;
                 if (b->GetNextProc())
                     e2 += j2 * 16;
-                if (b->FUN_004a8030())
+                if (b->NiGeometry_GetNormals())
                     e2 += j2 * 12;
                 if (b->GetScriptText())
                     e2 += j2 * 8;
@@ -866,11 +876,11 @@ struct StatObject;
 struct StatForm
 {
     int FUN_00401170();
-    int FUN_0084e3a0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct StatLink
 {
-    StatForm* FUN_0041f050();
+    StatForm* ExtraDataList_GetDecalRefs();
 };
 struct StatNodeLink
 {
@@ -879,7 +889,7 @@ struct StatNodeLink
 };
 struct StatKey
 {
-    StatForm* FUN_00559450();
+    StatForm* Modelloader_GetReferencedThis();
 };
 struct StatKeyHolder
 {
@@ -887,21 +897,21 @@ struct StatKeyHolder
 };
 struct StatRef
 {
-    bool FUN_00444ed0();
-    StatForm* FUN_007af430();
-    StatLink* FUN_005d43c0();
+    bool TESObjectREFR_IsMarker();
+    StatForm* BGSSaveFormBuffer_GetForm();
+    StatLink* BSFile_GetDevice();
 };
 struct StatActor
 {
-    StatKeyHolder* FUN_006fa820();
+    StatKeyHolder* bhkNiCollisionObject_GetWorldObject();
 };
 struct StatExtra
 {
-    int FUN_009ee040();
+    int DialoguePackage_GetActorStartedConversation();
 };
 struct StatUnique
 {
-    bool FUN_005f65d0(const int&);
+    bool BSSimpleList_TESLevSpell_IsInList(const int&);
     void FUN_00905820(const int&);
 };
 struct StatTextureSet
@@ -911,13 +921,13 @@ struct StatTextureSet
 };
 struct StatTextureCount
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 struct StatGeom
 {
-    unsigned short FUN_00b70790();
+    unsigned short BSShaderLightingProperty_GetNumberofActiveLights();
     void* FUN_00b70590(void**);
-    void* FUN_00b70680(void**);
+    void* BSShaderLightingProperty_GetNextActiveLight(void**);
 };
 struct ScriptExecutionContext
 {
@@ -925,17 +935,17 @@ struct ScriptExecutionContext
     unsigned short CallTargetV36();
     void* FUN_0049ec60();
     void* GetNextProc();
-    void* FUN_004a8030();
+    void* NiGeometry_GetNormals();
     void* GetScriptText();
 };
 struct StatBlocks
 {
-    unsigned int FUN_00a727b0();
+    unsigned int NiAdditionalGeometryData_GetDataBlockCount();
     void GetItemData(unsigned int, unsigned int*);
 };
 struct StatSkin
 {
-    StatBlocks* FUN_004a8a90();
+    StatBlocks* NiTimeController_GetNext();
 };
 struct StatProperty;
 struct StatObject
@@ -989,14 +999,14 @@ struct StatObject
     virtual void Slot46();
     virtual void Visit(void(__cdecl*)(void*, void*), int**);
     SceneName* FUN_00413f40();
-    StatRef* FUN_009ad610();
+    StatRef* QUserData();
     unsigned int FUN_0043b480();
     StatObject* FUN_0043b4a0(unsigned int);
     void* FUN_00a59d30(int);
     int FUN_00441110();
     bool FUN_004a2020(int);
-    StatSkin* FUN_005495f0();
-    int FUN_00b5b4a0(void*);
+    StatSkin* NiGeometry_GetModelData();
+    int ShadowSceneNode_GetLight(void*);
     unsigned short GetActorBaseFatigue();
 };
 struct StatDetector
@@ -1009,11 +1019,11 @@ extern StatUnique DAT_011c5b30;
 
 extern StatTextureCount DAT_011c5a90;
 extern char DAT_01202de8, DAT_011c7d34, DAT_011f4a28, DAT_012024e0;
-bool __cdecl FUN_0043b300(const void*, const void*);
-void* __cdecl FUN_00653270(const void*, const void*);
-bool __cdecl FUN_00565580(StatObject*);
-StatActor* __cdecl FUN_004a8b00(StatObject*);
-int __cdecl FUN_004a9240(StatForm*);
+bool __cdecl NiObject_IsKindOf(const void*, const void*);
+void* __cdecl NiObject_DynamicCast(const void*, const void*);
+bool __cdecl TESObjectREFR_HasTimeControllers(StatObject*);
+StatActor* __cdecl bhkNiCollisionObject_GetbhkNiCollisionObject(StatObject*);
+int __cdecl BGSSceneInfo_GetHavokFaceCount(StatForm*);
 StatObject* __cdecl FUN_00450b80(int);
 void __cdecl AddToRefCountIfNotFlagged(void*, void*);
 int __cdecl strncmp(const char*, const char*, unsigned int);
@@ -1042,10 +1052,10 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
             if (node3->FUN_00413f40()->FUN_0043b1b0() &&
                 !strncmp(node3->FUN_00413f40()->FUN_0043b1b0(), "FurnitureMarker", 15))
                 return;
-            if (FUN_0043b300(&DAT_01202de8, node3))
+            if (NiObject_IsKindOf(&DAT_01202de8, node3))
             {
-                StatExtra* extra = (StatExtra*)FUN_00653270(&DAT_01202de8, node3);
-                int index = extra->FUN_009ee040();
+                StatExtra* extra = (StatExtra*)NiObject_DynamicCast(&DAT_01202de8, node3);
+                int index = extra->DialoguePackage_GetActorStartedConversation();
                 if (index >= 0 && index < (int)DAT_011c3f2c->FUN_0045a120() &&
                     index < (int)DAT_011c5ab4.GetSize())
                 {
@@ -1070,25 +1080,25 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
             StatObject* fade = 0;
             if (node3->AsFade())
                 fade = node3;
-            if (fade && (reference = fade->FUN_009ad610()) && !reference->FUN_00444ed0() && (!actorNode || !addon))
+            if (fade && (reference = fade->QUserData()) && !reference->TESObjectREFR_IsMarker() && (!actorNode || !addon))
             {
                 counts[0]++;
-                if (FUN_00565580(object))
+                if (TESObjectREFR_HasTimeControllers(object))
                 {
                     counts[2]++;
-                    if (!DAT_011c5b30.FUN_005f65d0(reference->FUN_007af430()->FUN_0084e3a0()))
+                    if (!DAT_011c5b30.BSSimpleList_TESLevSpell_IsInList(reference->BGSSaveFormBuffer_GetForm()->GetHavokWorldObjectCountInSceneGraph_0084e3a0()))
                     {
                         counts[3]++;
-                        DAT_011c5b30.FUN_00905820(reference->FUN_007af430()->FUN_0084e3a0());
+                        DAT_011c5b30.FUN_00905820(reference->BGSSaveFormBuffer_GetForm()->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                     }
                 }
-                StatNodeLink* link = (StatNodeLink*)reference->FUN_005d43c0()->FUN_0041f050();
+                StatNodeLink* link = (StatNodeLink*)reference->BSFile_GetDevice()->ExtraDataList_GetDecalRefs();
                 while (link && *link->FUN_006815c0())
                 {
                     counts[14]++;
                     link = link->FUN_00726070();
                 }
-                switch (reference->FUN_007af430()->FUN_00401170())
+                switch (reference->BGSSaveFormBuffer_GetForm()->FUN_00401170())
                 {
                 case 42:
                 case 43:
@@ -1098,14 +1108,14 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
                     isActor2 = true;
                     break;
                 }
-                StatActor* actor = FUN_004a8b00(object);
+                StatActor* actor = bhkNiCollisionObject_GetbhkNiCollisionObject(object);
                 if (actor)
                 {
-                    StatKeyHolder* holder = actor->FUN_006fa820();
+                    StatKeyHolder* holder = actor->bhkNiCollisionObject_GetWorldObject();
                     StatKey* key = holder ? holder->GetSourceFilesFromObject() : 0;
-                    StatForm* form1 = key ? key->FUN_00559450() : 0;
+                    StatForm* form1 = key ? key->Modelloader_GetReferencedThis() : 0;
                     if (form1)
-                        counts[15] += FUN_004a9240(form1);
+                        counts[15] += BGSSceneInfo_GetHavokFaceCount(form1);
                 }
             }
             if (isActor2 && !trackActors)
@@ -1136,7 +1146,7 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
                     {
                         int* textureCount = &counts[10];
                         textureProperty1->Visit(AddToRefCountIfNotFlagged, &textureCount);
-                        if ((parent && FUN_0043b300(&DAT_011c7d34, parent)) || textureProperty1->FUN_004a2020(26) ||
+                        if ((parent && NiObject_IsKindOf(&DAT_011c7d34, parent)) || textureProperty1->FUN_004a2020(26) ||
                             textureProperty1->FUN_004a2020(27))
                             counts[14]++;
                     }
@@ -1148,7 +1158,7 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
                                         : 0);
                     if (shader1)
                     {
-                        int textureSlots = shader1->FUN_00b70790();
+                        int textureSlots = shader1->BSShaderLightingProperty_GetNumberofActiveLights();
                         void* position1;
                         void* texture1 = shader1->FUN_00b70590(&position1);
                         while (texture1)
@@ -1157,9 +1167,9 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
                             ((StatTextureSet*)&g_011c5ad0)->FUN_00853130(texture1, &uses);
                             uses++;
                             ((StatTextureSet*)&g_011c5ad0)->FUN_00844700(texture1, uses);
-                            if (uses == *DAT_011c5a90.FUN_0043d4d0())
+                            if (uses == *DAT_011c5a90.Setting_Int())
                                 counts[13]++;
-                            texture1 = shader1->FUN_00b70680(&position1);
+                            texture1 = shader1->BSShaderLightingProperty_GetNextActiveLight(&position1);
                         }
                     }
                     ScriptExecutionContext* data = geometry->GetData();
@@ -1172,16 +1182,16 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
                             bytes += vertices * 12;
                         if (data->GetNextProc())
                             bytes += vertices * 16;
-                        if (data->FUN_004a8030())
+                        if (data->NiGeometry_GetNormals())
                             bytes += vertices * 12;
                         if (data->GetScriptText())
                             bytes += vertices * 8;
                         counts[9] += bytes;
                     }
-                    if (geometry->FUN_005495f0())
+                    if (geometry->NiGeometry_GetModelData())
                     {
-                        StatBlocks* blocks = geometry->FUN_005495f0()->FUN_004a8a90();
-                        for (unsigned int block = 0; blocks && block < blocks->FUN_00a727b0(); block++)
+                        StatBlocks* blocks = geometry->NiGeometry_GetModelData()->NiTimeController_GetNext();
+                        for (unsigned int block = 0; blocks && block < blocks->NiAdditionalGeometryData_GetDataBlockCount(); block++)
                         {
                             unsigned int blockBytes = 0;
                             blocks->GetItemData(block, &blockBytes);
@@ -1192,15 +1202,15 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
             }
             else
             {
-                StatObject* particle = (StatObject*)FUN_00653270(&DAT_011f4a28, object);
+                StatObject* particle = (StatObject*)NiObject_DynamicCast(&DAT_011f4a28, object);
                 if (particle)
                 {
                     StatObject* manager = FUN_00450b80(0);
-                    if (manager && manager->FUN_00b5b4a0(particle))
+                    if (manager && manager->ShadowSceneNode_GetLight(particle))
                         counts[12]++;
                 }
             }
-            StatObject* lines1 = (StatObject*)FUN_00653270(&DAT_012024e0, object);
+            StatObject* lines1 = (StatObject*)NiObject_DynamicCast(&DAT_012024e0, object);
             if (lines1)
             {
                 counts[5]++;
@@ -1215,7 +1225,7 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
 namespace fnv_004a8bb0 {
 struct Cell245
 {
-    NiNode* FUN_00545cb0();
+    NiNode* Get3D_00545cb0();
 };
 struct FUN_004a7c40
 {
@@ -1235,7 +1245,7 @@ struct FUN_004aa340
     FUN_004aa340();
     ~FUN_004aa340();
     void SetValueAndCall(NiNode*, Cell245*, int);
-    unsigned int FUN_004aa890();
+    unsigned int BGSTextureUseMap_GetTotalTextureSize();
 };
 struct GlobalObject2_0096a2d0
 {
@@ -1251,7 +1261,7 @@ struct GlobalObject2_0096a2d0
 struct TES245
 {
     Cell245* GetInteriorCell();
-    Cell245** FUN_00457050(unsigned int, unsigned int);
+    Cell245** GetGridCell_00457050(unsigned int, unsigned int);
 };
 extern TES245* DAT_011dea10;
 extern GlobalObject2_0045cfe0 DAT_011c63cc;
@@ -1269,11 +1279,12 @@ extern Clear245 DAT_011c5c40;
 void* __cdecl operator new(unsigned int);
 // Accumulates cost and count over the interior cell or nearby exterior cells, adding the list total when include is set, then calls FUN_00438af0.
 // @fnv 0x004a8bb0
-void __cdecl FUN_004a8bb0(float* cost, float* count, bool include, bool addons)
+// src: XBOX_PDB 0x004a8bb0
+void __cdecl BGSSceneInfo_CollectSceneDataForLoadedArea(float* cost, float* count, bool include, bool addons)
 {
     *cost = 0.0f;
     *count = 0.0f;
-    FUN_004a8fe0();
+    BGSSceneInfo_ReloadBudgetCaps();
     FUN_004aa340 list;
     GlobalObject2_0096a2d0 map;
     if (DAT_011dea10->GetInteriorCell())
@@ -1281,9 +1292,9 @@ void __cdecl FUN_004a8bb0(float* cost, float* count, bool include, bool addons)
         Cell245* cell = DAT_011dea10->GetInteriorCell();
         FUN_004a7c40* scene = new FUN_004a7c40;
         scene->SetDifficultyLevel(cell);
-        scene->ResetAndProcessNode(cell->FUN_00545cb0(), addons, false);
+        scene->ResetAndProcessNode(cell->Get3D_00545cb0(), addons, false);
         scene->AccumulateSceneStats(cell);
-        list.SetValueAndCall(cell->FUN_00545cb0(), cell, 0);
+        list.SetValueAndCall(cell->Get3D_00545cb0(), cell, 0);
         map.FUN_005ae3d0(scene);
     }
     else
@@ -1295,14 +1306,14 @@ void __cdecl FUN_004a8bb0(float* cost, float* count, bool include, bool addons)
         {
             for (unsigned int y = center; y <= first; y++)
             {
-                Cell245** entry = DAT_011dea10->FUN_00457050(x, y);
+                Cell245** entry = DAT_011dea10->GetGridCell_00457050(x, y);
                 if (*entry)
                 {
                     Cell245* scene2 = *entry;
                     FUN_004a7c40* cell2 = new FUN_004a7c40;
                     cell2->SetDifficultyLevel(scene2);
-                    cell2->ResetAndProcessNode(scene2->FUN_00545cb0(), addons, false);
-                    list.SetValueAndCall(scene2->FUN_00545cb0(), scene2, 0);
+                    cell2->ResetAndProcessNode(scene2->Get3D_00545cb0(), addons, false);
+                    list.SetValueAndCall(scene2->Get3D_00545cb0(), scene2, 0);
                     cell2->AccumulateSceneStats(scene2);
                     map.FUN_005ae3d0(cell2);
                 }
@@ -1322,7 +1333,7 @@ void __cdecl FUN_004a8bb0(float* cost, float* count, bool include, bool addons)
         delete current;
     }
     if (include)
-        *count += list.FUN_004aa890();
+        *count += list.BGSTextureUseMap_GetTotalTextureSize();
     DAT_011c5c40.FUN_00438af0();
 }
 }  // namespace fnv_004a8bb0
@@ -1362,14 +1373,15 @@ float A8F70Owner::GetScaledSlotValue(int iSlot)
     return 0.0f;
 }
 
-int FUN_004a9100();
-int FUN_004a9050();
+int BGSSceneInfo_GetActorMemoryBudgetCap();
+int BGSSceneInfo_GetLoadedAreaNonActorMemoryBudgetCap();
 int __cdecl FormatString(char* buffer, const char* format, ...);
 
 // @fnv 0x004a9120
-void __cdecl FUN_004a9120(float fUsed, char* buffer, bool abUseFirstTotal)
+// src: XBOX_PDB 0x004a9120
+void __cdecl BGSSceneInfo_BuildMNumberString(float fUsed, char* buffer, bool abUseFirstTotal)
 {
-    float fTotal = abUseFirstTotal ? (float)(unsigned int)FUN_004a9100() : (float)(unsigned int)FUN_004a9050();
+    float fTotal = abUseFirstTotal ? (float)(unsigned int)BGSSceneInfo_GetActorMemoryBudgetCap() : (float)(unsigned int)BGSSceneInfo_GetLoadedAreaNonActorMemoryBudgetCap();
     float fPercent2 = fUsed * 100.0 / fTotal;
     fTotal = fTotal / 1048576.0;
     if (fUsed > 1048576.0)

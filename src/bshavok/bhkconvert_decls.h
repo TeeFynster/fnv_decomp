@@ -8,6 +8,6 @@
 
 class BGSPerkEntry;
 
-float FUN_004587d0(float);
+float HK2NI(float);
 hkRotation& VisitAndFetchThree(hkRotation&, const NiMatrix3&);
-hkVector4& FUN_004a3e00(hkVector4&, const NiPoint3&);
+hkVector4& NI2HK(hkVector4&, const NiPoint3&);

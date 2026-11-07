@@ -36,18 +36,19 @@ bool BGSVoiceType::Load(TESFile* file)
     return true;
 }
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 // @fnv 0x005f0140
-void BGSVoiceType::FUN_005f0140()
+// src: XBOX_PDB 0x005f0140
+void BGSVoiceType::Save_005f0140()
 {
-    FUN_004855a0();
-    if (FUN_00401500())
+    BeginFormRecord();
+    if (TESForm_QEndianSwapOnSave())
         reinterpret_cast<TESForm*>(&Data)->TESForm::ClearData();
     AppendChunk(0x4d414e44, &Data, 1);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         reinterpret_cast<TESForm*>(&Data)->TESForm::ClearData();
-    FUN_00485680();
+    FinishFormRecord();
 }
 
 // @fnv 0x005f00d0
@@ -61,7 +62,8 @@ extern char DAT_01183028;
 extern char DAT_01186318;
 // If FUN_00ec43fb resolves a source from form, copies its Data member to this and calls FUN_004851b0(form).
 // @fnv 0x005f02a0
-void BGSVoiceType::FUN_005f02a0(TESForm* form)
+// src: XBOX_PDB 0x005f02a0
+void BGSVoiceType::Copy_005f02a0(TESForm* form)
 {
     BGSVoiceType* src = (BGSVoiceType*)FUN_00ec43fb(form, 0, &DAT_01183028, &DAT_01186318, 0);
     if (!src)
@@ -69,19 +71,20 @@ void BGSVoiceType::FUN_005f02a0(TESForm* form)
         return;
     }
     Data = src->Data;
-    FUN_004851b0(form);
+    TESForm_CopyAllComponents(form);
 }
 
 // Returns true if form is not a BGSVoiceType, its Data differs, or FUN_00485270(voice) is true; otherwise false.
 // @fnv 0x005f02f0
-bool BGSVoiceType::FUN_005f02f0(TESForm* form)
+// src: XBOX_PDB 0x005f02f0
+bool BGSVoiceType::Compare_005f02f0(TESForm* form)
 {
     BGSVoiceType* voice = dynamic_cast<BGSVoiceType*>(form);
     if (!voice)
         return true;
     if (Data != voice->Data)
         return true;
-    if (FUN_00485270(voice))
+    if (TESForm_CompareAllComponents(voice))
         return true;
     return false;
 }

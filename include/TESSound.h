@@ -33,15 +33,15 @@ public:
     char GetByteAtOffset44();
     unsigned short GetShortAt(int index);
     unsigned short GetShortAtOffset5A();
-    unsigned int FUN_0082d720();
+    unsigned int GetPriority_0082d720();
     unsigned int Deallocate();
     unsigned int GetFormID();
     unsigned int GetSoundID();
-    const char* FUN_00511840();
-    unsigned char FUN_0082d700();
-    bool FUN_0077eac0();
+    const char* TESSound_GetFilename();
+    unsigned char GetEndTime_0082d700();
+    bool Projectile_IsEditorCreated();
     Obj* FUN_00586170();
-    void FUN_004851b0(TESForm* form);
+    void TESForm_CopyAllComponents(TESForm* form);
     void CopyFromSound(TESForm* form);
 
     static void InitializeMagicSystem();

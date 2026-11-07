@@ -2,7 +2,7 @@
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
-unsigned int FUN_00ddcdd0(unsigned int auiValue, unsigned int auiIndex, unsigned int auiFieldValue);
+unsigned int hkpMeshWeldingUtility_modifyCombinedEdgesBitcode(unsigned int auiValue, unsigned int auiIndex, unsigned int auiFieldValue);
 int __cdecl ExtractBitField(unsigned short ausValue, char acShiftIndex);
 struct DDCC60BaseObject
 {
@@ -55,7 +55,7 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
@@ -66,7 +66,7 @@ struct CpuObject
 extern double DAT_010cd5a8;
 extern double DAT_0101ff40;
 int FindAngleIndex(float angle);
-int __cdecl FUN_00cb0fa0(const char* pcA, const char* pcB);
+int __cdecl hkString_strCmp(const char* pcA, const char* pcB);
 class __declspec(novtable) BDDCCB0ReferencedObject
 {
   public:
@@ -144,7 +144,7 @@ struct Flag
     Flag(bool v) : value(v)
     {}
 };
-Flag __cdecl FUN_00ddcda0(Item* apLeft, Item* apRight);
+Flag __cdecl Object_CompareField08_00ddcda0(Item* apLeft, Item* apRight);
 #include <math.h>
 struct DDCE80Point
 {
@@ -205,20 +205,21 @@ Derived::Derived()
 struct A1_00ddcd60
 {
     A1_00ddcd60();
-    virtual void FUN_00ddcd60();
+    virtual void AdjustThisAndForward_00ddcd60();
     char pad[0x04];
 };
 struct A2_00ddcd60
 {
     A2_00ddcd60();
-    virtual void FUN_00ddcd60();
+    virtual void AdjustThisAndForward_00ddcd60();
 };
 struct Own_00ddcd60 : A1_00ddcd60, A2_00ddcd60
 {
     Own_00ddcd60();
     virtual void key_fn();
 // @fnv 0x00ddcd60
-    void FUN_00ddcd60();
+// src: GUESS 0x00ddcd60 (confidence: low)
+    void AdjustThisAndForward_00ddcd60();
 };
 Own_00ddcd60::Own_00ddcd60()
 {}
@@ -281,7 +282,8 @@ struct Hit
     {}
 };
 // @fnv 0x00ddd0b0
-Hit __cdecl FUN_00ddd0b0(const ClipVectorLocal_00ddc& start, const ClipVectorLocal_00ddc& end, int planeCount, const ClipVectorLocal_00ddc* planes,
+// src: COMMUNITY 0x00ddd0b0
+Hit __cdecl hkClipEdgeAgainstPlanes(const ClipVectorLocal_00ddc& start, const ClipVectorLocal_00ddc& end, int planeCount, const ClipVectorLocal_00ddc* planes,
                          float* first, float* last)
 {
     ClipVectorLocal_00ddc a = start;

@@ -45,7 +45,7 @@ __forceinline void* __cdecl operator new(unsigned int, void* p)
 struct S
 {
     void __thiscall CreateScreenTextureBufferData(NiScreenTexture* pkScreenTexture);
-    void __thiscall FUN_00e98730(NiGeometryBufferData* pkBuffData);
+    void __thiscall NiGeometryGroup_AddObject(NiGeometryBufferData* pkBuffData);
 };
 // @fnv 0x00e94de0
 void __thiscall S::CreateScreenTextureBufferData(NiScreenTexture* pkScreenTexture)
@@ -57,7 +57,7 @@ void __thiscall S::CreateScreenTextureBufferData(NiScreenTexture* pkScreenTextur
         pkBuffData->m_eRequestType = 4;
         *(NiGeometryBufferData**)((char*)pkScreenTexture + 0x1c) = pkBuffData;
         pkBuffData->m_uiValue1 = (unsigned int)&DAT_01400000;
-        FUN_00e98730(pkBuffData);
+        NiGeometryGroup_AddObject(pkBuffData);
     }
 }
 
@@ -69,7 +69,8 @@ struct FakeVB
 };
 // Releases the vertex buffer chip for the given stream index, clears its slot and deletes the chip.
 // @fnv 0x00e94ee0
-void __stdcall FUN_00e94ee0(NiGeometryBufferData* pkBuffData, unsigned int uiStreamIndex)
+// src: XBOX_PDB 0x00e94ee0
+void __stdcall NiUnsharedGeometryGroup_ReleaseChip(NiGeometryBufferData* pkBuffData, unsigned int uiStreamIndex)
 {
     NiVBChip* pkChip;
     if (uiStreamIndex < pkBuffData->m_uiRegisterStreamCount)
@@ -92,7 +93,8 @@ void* _fnv_zlib_memset(void*, int, unsigned int);
 // Explicit group parameters and an unused EDX parameter preserve the original thiscall ABI.
 // Removes pkData's buffer data from the group, clears its buffer array, deletes it, and nulls the pointer.
 // @fnv 0x00e950f0
-void __fastcall FUN_00e950f0(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
+// src: XBOX_PDB 0x00e950f0
+void __fastcall NiDynamicGeometryGroup_RemoveObject(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
 {
     NiGeometryBufferData* pkBuffData = static_cast<NiGeometryBufferData*>(pkData->m_pkBuffData);
     if (pkBuffData)
@@ -112,7 +114,8 @@ struct NiSkinInstance;
 void* _fnv_zlib_memset(void*, int, unsigned int);
 // Removes the geometry buffer data stored at offset 0x28 of pkData, clears its chip array, deletes it and nulls the pointer.
 // @fnv 0x00e95140
-void __fastcall FUN_00e95140(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
+// src: XBOX_PDB 0x00e95140
+void __fastcall NiDynamicGeometryGroup_RemoveObject_00e95140(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
 {
     NiGeometryBufferData* pkBuffData = *(NiGeometryBufferData**)((char*)pkData + 0x28);
     if (pkBuffData)
@@ -127,7 +130,8 @@ void __fastcall FUN_00e95140(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryD
 
 void* _fnv_zlib_memset(void*, int, unsigned int);
 // @fnv 0x00e95190
-void __fastcall FUN_00e95190(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
+// src: XBOX_PDB 0x00e95190
+void __fastcall NiDynamicGeometryGroup_RemoveObject_00e95190(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
 {
     NiGeometryBufferData* pkBuffData = *(NiGeometryBufferData**)((char*)pkData + 0x1c);
     if (pkBuffData)
@@ -150,7 +154,7 @@ struct NiScreenTexture;
 struct NiSkinInstance;
 extern P03MM g_memoryManager;
 extern int DAT_01400000;
-void __stdcall FUN_00e94ee0(NiGeometryBufferData* pkBuffData, unsigned int uiStream);
+void __stdcall NiUnsharedGeometryGroup_ReleaseChip(NiGeometryBufferData* pkBuffData, unsigned int uiStream);
 void* _fnv_zlib_memset(void*, int, unsigned int);
 struct BufEntry
 {
@@ -371,7 +375,8 @@ class NiVBChip : public NiMemObject
 // The shared unshared-group header does not declare this method; retain it as an ABI-compatible helper.
 // Creates a D3D vertex buffer sized for the stream and returns a new NiVBChip wrapping it with the given size and owning stream.
 // @fnv 0x00e94e30
-NiVBChip* __fastcall FUN_00e94e30(NiUnsharedGeometryGroup* pkGroup, void*, NiGeometryBufferData* pkBuffData, unsigned int uiStream)
+// src: XBOX_PDB 0x00e94e30
+NiVBChip* __fastcall NiUnsharedGeometryGroup_CreateChip(NiUnsharedGeometryGroup* pkGroup, void*, NiGeometryBufferData* pkBuffData, unsigned int uiStream)
 {
     unsigned int uiVertexCount = pkBuffData->m_uiVertexDataSize;
     unsigned int uiVBSize = (uiStream < pkBuffData->m_uiRegisterStreamCount ? pkBuffData->m_puiVertexStrides[uiStream] : 0) * uiVertexCount;

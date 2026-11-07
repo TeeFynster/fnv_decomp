@@ -113,17 +113,19 @@ void NiBackToFrontAccumulator::QuickSort(int left, int right)
     }
 }
 
-unsigned char __stdcall FUN_00ba87d0(NiObject*);
+unsigned char __stdcall BSAnimNotes_IsEqual(NiObject*);
 // @fnv 0x00aa0ae0
-unsigned char __stdcall FUN_00aa0ae0(NiObject* pkObject)
+// src: XBOX_PDB 0x00aa0ae0
+unsigned char __stdcall NiBackToFrontAccumulator_IsEqual(NiObject* pkObject)
 {
-    unsigned char r = FUN_00ba87d0(pkObject);
+    unsigned char r = BSAnimNotes_IsEqual(pkObject);
     return r != 0;
 }
 
 extern const char g_011f5f74_arg1[];
 // @fnv 0x00aa0e50
-const char* __cdecl FUN_00aa0e50()
+// src: COMMUNITY 0x00aa0e50
+const char* __cdecl NiBackToFrontAccumulator_GetRTTI()
 {
     return g_011f5f74_arg1;
 }
@@ -272,15 +274,16 @@ NiBackToFrontAccumulator* __fastcall CloneBackToFrontAccumulator(NiBackToFrontAc
 {
     NiBackToFrontAccumulator* pkObject = InitializeBackToFrontAccumulator(
         static_cast<NiBackToFrontAccumulator*>(BSFaceGenMorphData::operator new(sizeof(NiBackToFrontAccumulator))));
-    self->FUN_00aa1000(pkObject, kCloning);
+    self->NiCollisionObject_CopyMembers(pkObject, kCloning);
     return pkObject;
 }
 
-void __cdecl FUN_00a88a40();
+void __cdecl BSTextureSet_LoadBinary();
 // @fnv 0x00aa0ac0
-void __cdecl FUN_00aa0ac0()
+// src: XBOX_PDB 0x00aa0ac0
+void __cdecl NiKeyBasedInterpolator_LoadBinary()
 {
-    FUN_00a88a40();
+    BSTextureSet_LoadBinary();
 }
 
 
@@ -392,7 +395,7 @@ struct NiBackToFrontItemsArg
     int m_iArrayLength;
 };
 
-void FUN_0043a080();
+void NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();
 
 static inline ItemListNode* NewListItem()
 {
@@ -400,7 +403,7 @@ static inline ItemListNode* NewListItem()
     NiBackToFrontItemPool::LinkedListEntry* pkReturn = NiBackToFrontItemPool::ms_pFreeList;
     if (pkReturn == 0)
     {
-        FUN_0043a080();
+        NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();
         pkReturn = NiBackToFrontItemPool::ms_pFreeList;
     }
     NiBackToFrontItemPool::ms_pFreeList = NiBackToFrontItemPool::ms_pFreeList->m_pkNext;

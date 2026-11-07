@@ -25,11 +25,11 @@ public:
     int GetVirtualNodeIndexAtPosition(NiPoint3&);
     virtual bool GetPathingDelta(NiPoint3* delta);
     int UpdatePathMovement(float);
-    float FUN_009eb070();
+    float GetDistanceRemaining_009eb070();
     void SaveToBuffer(BGSSaveFormBuffer*);
     void* DestroyIfFlagged(unsigned int);
-    int FUN_009ead60(float);
-    float FUN_009eb0b0();
+    int UpdateWhilePlayerWaits(float);
+    float GetPercentTraveled();
     NiPoint3 GetPoint(float);
     NiPoint3 GetNextPathPoint() const;
     void PrintPathDebugInfo(IDebugText*, DEBUGTEXT_LOCATION, DEBUGTEXT_JUSTIFY);

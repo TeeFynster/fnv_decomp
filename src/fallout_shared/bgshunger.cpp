@@ -101,13 +101,13 @@ bool BGSHungerStage::Load(TESFile* file)
             static_cast<TESForm*>(this)->readOBNDSubRecord(file);
             break;
         case 0x41544144:
-            reinterpret_cast<BGSDehydrationStage*>(this)->FUN_004861f0(
+            reinterpret_cast<BGSDehydrationStage*>(this)->TESForm_LoadData(
                 file, reinterpret_cast<BGSDehydrationStage*>(this)->FUN_00500940(8));
             break;
         }
 
         if (chunk == 0x41544144 && file->IsEndianConversionRequired())
-            reinterpret_cast<DehydrationStageData*>(&data)->FUN_00462230();
+            reinterpret_cast<DehydrationStageData*>(&data)->TwoValues_Endian();
         if (!file->NextChunk())
             break;
     }
@@ -236,7 +236,7 @@ bool _FUN_00401500();
 // @fnv 0x00591e10
 void BGSDehydrationStage::InitDehydrationStage()
 {
-    TESForm::FUN_004855a0();
+    TESForm::BeginFormRecord();
 
     SpellItem* pSavedSpell = reinterpret_cast<SpellItem*>(FUN_00441110());
 
@@ -245,19 +245,19 @@ void BGSDehydrationStage::InitDehydrationStage()
 
     if (_FUN_00401500())
     {
-        data.FUN_00462230();
+        data.TwoValues_Endian();
     }
 
-    TESForm::FUN_00485e20(&data, 8);
+    TESForm::TESForm___SaveData(&data, 8);
 
     if (_FUN_00401500())
     {
-        data.FUN_00462230();
+        data.TwoValues_Endian();
     }
 
     FUN_0050f9a0(pSavedSpell);
 
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 extern char DAT_0118307c;

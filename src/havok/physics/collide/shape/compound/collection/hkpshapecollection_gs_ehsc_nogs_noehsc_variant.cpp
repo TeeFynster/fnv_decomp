@@ -15,13 +15,13 @@ class hkpShapeCollection_L
 {
   public:
     virtual ~hkpShapeCollection_L();
-    virtual int FUN_00d213d0();
+    virtual int hkpShapeCollection_getContainer();
 };
 extern char const* const DAT_01268910;
-void __cdecl FUN_00c90360(char const* const* first, char const* const* second);
-void __cdecl FUN_00d213e0(char const* const* first, char const* const* ignored);
-void __stdcall FUN_00d213f0(int, int);
-void __stdcall FUN_00d21400(int a1);
+void __cdecl hkReferencedObject_calcContentStatistics(char const* const* first, char const* const* second);
+void __cdecl hkpShapeCollection_calcContentStatistics(char const* const* first, char const* const* ignored);
+void __stdcall nullsub_53(int, int);
+void __stdcall nullsub_52(int a1);
 struct Allocator
 {
     virtual void vfn0();
@@ -46,7 +46,7 @@ struct Holder
     unsigned int userData;
     unsigned int shapeType;
     void* shapeVtable;
-    MemorySystem* __thiscall FUN_00c85750();
+    MemorySystem* __thiscall hkMemoryRouter_getInstance();
     Holder* __thiscall Destroy(unsigned char flags);
 };
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
@@ -142,10 +142,11 @@ extern char DAT_010c41f8;
 class CollectionAabb : public hkpShapeCollection
 {
   public:
-    void FUN_00d215d0(const hkTransform& transform, float tolerance, Aabb& out) const;
+    void hkpShapeCollection_getAabb(const hkTransform& transform, float tolerance, Aabb& out) const;
 };
 // @fnv 0x00d215d0
-void CollectionAabb::FUN_00d215d0(const hkTransform& transform, float tolerance, Aabb& out) const
+// src: EXE 0x00d215d0
+void CollectionAabb::hkpShapeCollection_getAabb(const hkTransform& transform, float tolerance, Aabb& out) const
 {
     hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
     char* event = stream->m_end.m_storage;

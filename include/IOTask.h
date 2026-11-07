@@ -29,16 +29,16 @@ public:
     RefObj* GetCur();
     void SetState(long state);
     void AcquireReference();
-    void FUN_00c3d440();
-    bool FUN_00449110();
-    bool FUN_00449130();
-    bool FUN_0043caa0();
-    bool FUN_0043caf0();
-    IO_TASK_PRIORITY FUN_0043cc60();
-    unsigned short FUN_0043dc10();
-    void FUN_0044dd60();
-    void FUN_00c3cb70(int state, RefObj* obj);
-    void FUN_00c3c7e0(RefObj* obj);
+    void QueuedFileEntry_GenerateKey();
+    bool BSTask_int64_GetTaskFinished();
+    bool BSTask_int64_GetTaskCanceled();
+    bool QueuedFile_GetAllChildrenFinished();
+    bool QueuedModel_GetFinishedQueuing();
+    IO_TASK_PRIORITY IOTask_GetIOTaskPriority();
+    unsigned short IOTask_GetNextCounter();
+    void BSTask_int64_DecRefCount();
+    void QueuedFile_Cancel(int state, RefObj* obj);
+    void QueuedFile_AddAdditionalParent(RefObj* obj);
 
     static unsigned char GetPriorityFromKey(__int64& key);
 };

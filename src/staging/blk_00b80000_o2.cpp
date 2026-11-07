@@ -206,14 +206,15 @@ FUN_00b924d0_class* __thiscall FUN_00b924d0_class::FUN_00b924d0(bool abFree)
     return this;
 }
 
-extern "C" void __cdecl FUN_00b983d0(int, int, int, int);
+extern "C" void __cdecl BSRenderState_SetColorWriteEnableMrt(int, int, int, int);
 extern "C" int DAT_011ffa1c;
 
 // @fnv 0x00b985f0
-void __cdecl FUN_00b985f0(int aiAmount)
+// src: COMMUNITY 0x00b985f0
+void __cdecl BSRenderState_RestoreColorWrites(int aiAmount)
 {
     DAT_011ffa1c -= aiAmount;
-    FUN_00b983d0(0, 0, 0, 0);
+    BSRenderState_SetColorWriteEnableMrt(0, 0, 0, 0);
 }
 
 extern "C" void __cdecl _delete(void* p, size_t size);
@@ -299,10 +300,11 @@ extern int DAT_010b0a00;
 extern int DAT_010b09dc;
 struct FUN_00b8d950_class
 {
-    FUN_00b8d950_class* __thiscall FUN_00b8d950(bool flag);
+    FUN_00b8d950_class* __thiscall SetVtableAndProcessState_00b8d950(bool flag);
 };
 // @fnv 0x00b8d950
-FUN_00b8d950_class* __thiscall FUN_00b8d950_class::FUN_00b8d950(bool abFree)
+// src: GUESS 0x00b8d950 (confidence: low)
+FUN_00b8d950_class* __thiscall FUN_00b8d950_class::SetVtableAndProcessState_00b8d950(bool abFree)
 {
     *(int*)this = (int)&DAT_010b0a00;
     *(int*)((char*)this + 0x6c) = (int)&DAT_010b09dc;
@@ -921,11 +923,12 @@ extern int DAT_010b33f0;
 
 struct FUN_00b8ffb0_class
 {
-    FUN_00b8ffb0_class* __thiscall FUN_00b8ffb0(bool b);
+    FUN_00b8ffb0_class* __thiscall SetVtableAndProcessState_00b8ffb0(bool b);
 };
 
 // @fnv 0x00b8ffb0
-FUN_00b8ffb0_class* __thiscall FUN_00b8ffb0_class::FUN_00b8ffb0(bool abFree)
+// src: GUESS 0x00b8ffb0 (confidence: low)
+FUN_00b8ffb0_class* __thiscall FUN_00b8ffb0_class::SetVtableAndProcessState_00b8ffb0(bool abFree)
 {
     *(int*)this = (int)&DAT_010b33f0;
     *(int*)((char*)this + 0x6c) = (int)&DAT_010b33cc;
@@ -1930,7 +1933,8 @@ extern unsigned int DAT_011ffd2c;
 extern unsigned int DAT_011ffd30;
 // Adds d to three counters indexed by DAT_011ffd28/2c/30, first issuing renderer calls 0xbe/0xbf/0xc0 with a, b, c when each counter is zero.
 // @fnv 0x00b983d0
-void __cdecl FUN_00b983d0(int a, int b, int c, int d)
+// src: COMMUNITY 0x00b983d0
+void __cdecl BSRenderState_SetColorWriteEnableMrt(int a, int b, int c, int d)
 {
     unsigned int e = DAT_011ffd28;
     if (DAT_011ff9d8[e] == 0)
@@ -2412,12 +2416,13 @@ struct FUN_00b8cb00_class
 {
     unsigned char pad_000[0xb0];
     int m_00b0;
-    void __thiscall FUN_00b8cb00(int value);
+    void __thiscall ImageSpaceManager_SetActiveImageSpaceParams(int value);
 };
 
 // Stores value into m_00b0 and re-reads/writes the thread-local tlsValue.
 // @fnv 0x00b8cb00
-void FUN_00b8cb00_class::FUN_00b8cb00(int value)
+// src: COMMUNITY 0x00b8cb00
+void FUN_00b8cb00_class::ImageSpaceManager_SetActiveImageSpaceParams(int value)
 {
     static __declspec(thread) volatile int tlsValue = 59;
     int iTlsValue = tlsValue;
@@ -2671,7 +2676,8 @@ FUN_00b9b930_class* FUN_00b9b930_class::FUN_00b9b930(bool abDelete)
 extern int DAT_011ff0f4;
 
 // @fnv 0x00b811e0
-int __cdecl FUN_00b811e0()
+// src: XBOX_PDB 0x00b811e0
+int __cdecl BSShaderBloodSplatterProperty_GetRTTI()
 {
     return reinterpret_cast<int>(&DAT_011ff0f4);
 }
@@ -2705,11 +2711,12 @@ struct FUN_00b811f0_cls
     int unk60;
     int unk64;
     unsigned int m_i68;
-    void FUN_00b811f0(unsigned int value);
+    void BSShaderBloodSplatterProperty_SetClampNI(unsigned int value);
 };
 
 // @fnv 0x00b811f0
-void FUN_00b811f0_cls::FUN_00b811f0(unsigned int value)
+// src: XBOX_PDB 0x00b811f0
+void FUN_00b811f0_cls::BSShaderBloodSplatterProperty_SetClampNI(unsigned int value)
 {
     m_i68 = value;
 }
@@ -2816,14 +2823,15 @@ struct FUN_00b812b0_class
     FNVRefCounted* m_refs[2];
     int m_68;
     int unk6c;
-    void __thiscall FUN_00ba8b10(FUN_00b812b0_class* dst, int flag);
-    void __thiscall FUN_00b812b0(FUN_00b812b0_class* dst, int flag);
+    void __thiscall BSShaderProperty_CopyMembers(FUN_00b812b0_class* dst, int flag);
+    void __thiscall BSShaderBloodSplatterProperty_CopyMembers(FUN_00b812b0_class* dst, int flag);
 };
 
 // @fnv 0x00b812b0
-void FUN_00b812b0_class::FUN_00b812b0(FUN_00b812b0_class* dst, int flag)
+// src: XBOX_PDB 0x00b812b0
+void FUN_00b812b0_class::BSShaderBloodSplatterProperty_CopyMembers(FUN_00b812b0_class* dst, int flag)
 {
-    FUN_00ba8b10(dst, flag);
+    BSShaderProperty_CopyMembers(dst, flag);
     for (int i = 0; i < 2; i++)
     {
         FNVRefCounted* pOldRef = dst->m_refs[i];
@@ -3035,11 +3043,12 @@ struct S_00b8a6e0_Foo
     unsigned char unk55;
     unsigned char unk56;
 
-    void __thiscall FUN_00b8a6e0(int arg0, unsigned int arg1, unsigned int arg2);
+    void __thiscall ImageSpaceShaderParam_SetTextureOffsets(int arg0, unsigned int arg1, unsigned int arg2);
 };
 
 // @fnv 0x00b8a6e0
-void __thiscall S_00b8a6e0_Foo::FUN_00b8a6e0(int iSlot, unsigned int arg1, unsigned int arg2)
+// src: COMMUNITY 0x00b8a6e0
+void __thiscall S_00b8a6e0_Foo::ImageSpaceShaderParam_SetTextureOffsets(int iSlot, unsigned int arg1, unsigned int arg2)
 {
     float value0;
     float value1;
@@ -3754,10 +3763,11 @@ struct S_00b8d8c0_Cls
     virtual void v148()
     {}
     virtual void v14c();
-    void FUN_00b8d8c0();
+    void UpdateFields_00b8d8c0();
 };
 // @fnv 0x00b8d8c0
-void S_00b8d8c0_Cls::FUN_00b8d8c0()
+// src: GUESS 0x00b8d8c0 (confidence: low)
+void S_00b8d8c0_Cls::UpdateFields_00b8d8c0()
 {
     S_00b8d8c0_Desc s1;
     S_00b8d8c0_Desc s2;
@@ -4087,10 +4097,11 @@ struct S_00b8db50_Cls
     virtual void v148()
     {}
     virtual void v14c();
-    void FUN_00b8db50();
+    void UpdateState_00b8db50();
 };
 // @fnv 0x00b8db50
-void S_00b8db50_Cls::FUN_00b8db50()
+// src: GUESS 0x00b8db50 (confidence: low)
+void S_00b8db50_Cls::UpdateState_00b8db50()
 {
     S_00b8db50_Desc s1;
     S_00b8db50_Desc s2;
@@ -5344,12 +5355,13 @@ class FUN_00b8f590_cls
     virtual void v51();
     virtual void v52();
     virtual void v53();
-    void FUN_00b8f590();
+    void UpdateState_00b8f590();
 };
 
 // Fills a shader frame with the base.v.hlsl path, NOTEX and NULL names, zeroes its parameter blocks, then calls v4F and v53.
 // @fnv 0x00b8f590
-void FUN_00b8f590_cls::FUN_00b8f590()
+// src: GUESS 0x00b8f590 (confidence: low)
+void FUN_00b8f590_cls::UpdateState_00b8f590()
 {
     FUN_00b8f590_frame f;
     f.unk00 = "imagespace\\1x\\v\\base.v.hlsl";
@@ -5852,11 +5864,12 @@ struct FUN_00b8fc50_cls
     virtual void v144();
     virtual void v148();
     virtual void v14c();
-    void FUN_00b8fc50();
+    void UpdateState_00b8fc50();
 };
 // Fills two shader parameter blocks (base.v.hlsl/TEX2 and RadialBlur.p.hlsl/NUM_STEPS=10.0f), passes them to v13c with RBLURH/vs_1_1/ps_2_0, then calls v14c.
 // @fnv 0x00b8fc50
-void FUN_00b8fc50_cls::FUN_00b8fc50()
+// src: GUESS 0x00b8fc50 (confidence: low)
+void FUN_00b8fc50_cls::UpdateState_00b8fc50()
 {
     unsigned int f[0x26];
     f[0x13] = (unsigned int)"imagespace\\1x\\v\\base.v.hlsl";
@@ -8098,11 +8111,12 @@ class FUN_00b92e00_cls
     virtual void v51();
     virtual void v52();
     virtual void v53();
-    void FUN_00b92e00();
+    void UpdateFields_00b92e00();
 };
 
 // @fnv 0x00b92e00
-void FUN_00b92e00_cls::FUN_00b92e00()
+// src: GUESS 0x00b92e00 (confidence: low)
+void FUN_00b92e00_cls::UpdateFields_00b92e00()
 {
     FUN_00b92e00_frame f;
     f.unk4C = "water\\2_ab\\v\\displace.v.hlsl";
@@ -8485,11 +8499,12 @@ class FUN_00b931f0_cls
     virtual void v51();
     virtual void v52();
     virtual void v53();
-    void FUN_00b931f0();
+    void UpdateState_00b931f0();
 };
 
 // @fnv 0x00b931f0
-void FUN_00b931f0_cls::FUN_00b931f0()
+// src: GUESS 0x00b931f0 (confidence: low)
+void FUN_00b931f0_cls::UpdateState_00b931f0()
 {
     FUN_00b931f0_frame f;
     f.unk4C = "water\\2_ab\\v\\displace.v.hlsl";
@@ -8885,11 +8900,12 @@ struct Shader_b93420
     int unkc0;
     RefTarget_b93420* m_pkVertex;
     RefTarget_b93420* m_pkPixel;
-    bool FUN_00b93420();
+    bool ProcessEntries_00b93420();
 };
 
 // @fnv 0x00b93420
-bool Shader_b93420::FUN_00b93420()
+// src: GUESS 0x00b93420 (confidence: low)
+bool Shader_b93420::ProcessEntries_00b93420()
 {
     StageReturnRef stage;
     FUN_00e804d0(&m_pRenderPass);
@@ -9291,11 +9307,12 @@ class FUN_00b93b10_cls
     virtual void v82();
     virtual void v83();
 
-    void FUN_00b93b10();
+    void UpdateState_00b93b10();
 };
 
 // @fnv 0x00b93b10
-void FUN_00b93b10_cls::FUN_00b93b10()
+// src: GUESS 0x00b93b10 (confidence: low)
+void FUN_00b93b10_cls::UpdateState_00b93b10()
 {
     ShaderSourceA source;
     ShaderSourceB sourceB;
@@ -9575,11 +9592,12 @@ struct FUN_00b93db0_Object
     virtual void vf148();
     virtual void vf14C();
 
-    void __thiscall FUN_00b93db0();
+    void __thiscall UpdateState_00b93db0();
 };
 
 // @fnv 0x00b93db0
-void __thiscall FUN_00b93db0_Object::FUN_00b93db0()
+// src: GUESS 0x00b93db0 (confidence: low)
+void __thiscall FUN_00b93db0_Object::UpdateState_00b93db0()
 {
     FUN_00b93db0_First first;
     FUN_00b93db0_Second second;
@@ -10246,7 +10264,8 @@ extern int DAT_011ff9d8[];
 
 // Looks up the index for a, and if its counter is zero calls virtual method 26 on the object at DAT_011f9508+0x8b8, then adds c to the counter.
 // @fnv 0x00b97d90
-void __cdecl FUN_00b97d90(unsigned int uiIndex, unsigned int b, unsigned int uiDelta)
+// src: COMMUNITY 0x00b97d90
+void __cdecl BSRenderState_SetRenderState(unsigned int uiIndex, unsigned int b, unsigned int uiDelta)
 {
     int idx = DAT_011ffa30[uiIndex];
     if (DAT_011ff9d8[idx] == 0)
@@ -10294,7 +10313,8 @@ struct FUN_00b97e30_obj
 };
 
 // @fnv 0x00b97e30
-void FUN_00b97e30(unsigned char a1, unsigned int uiAmount)
+// src: COMMUNITY 0x00b97e30
+void BSRenderState_SetZWriteEnable(unsigned char a1, unsigned int uiAmount)
 {
     unsigned int idx = DAT_011ffa68;
     if (DAT_011ff9d8[idx] == 0)
@@ -10329,7 +10349,8 @@ extern int DAT_011ad888[];
 
 // For two channels, sends a notification when the channel counter is zero, then adds increment to each channel counter.
 // @fnv 0x00b97f20
-void __cdecl FUN_00b97f20(int index, int secondValue, int increment)
+// src: COMMUNITY 0x00b97f20
+void __cdecl BSRenderState_SetAlphaTestFuncRef(int index, int secondValue, int increment)
 {
     int firstChannel = DAT_011ffa94;
     if (DAT_011ff9d8[firstChannel] == 0)
@@ -10365,7 +10386,8 @@ typedef void(__thiscall* FinishEvent)(EventHandler*);
 typedef void(__stdcall* DispatchUI)(UIService*, unsigned int, unsigned int, unsigned int);
 
 // @fnv 0x00b988e0
-void __cdecl FUN_00b988e0()
+// src: COMMUNITY 0x00b988e0
+void __cdecl BSBatchRenderer_EndPass()
 {
     EventHandler* eventHandler = DAT_011ffe2c;
     if (eventHandler != 0)
@@ -10497,12 +10519,13 @@ class FUN_00b9b400_cls
     unsigned char m_table98[256];
     unsigned char m_table198[256];
 
-    void FUN_00b9b400(unsigned int key);
+    void ImageSpaceEffectNoise_InitializeUtilityBuffers(unsigned int key);
 };
 
 // Fills m_table198 and m_table98 with 256 bytes from DAT_011ad900 starting at an offset derived from key.
 // @fnv 0x00b9b400
-void FUN_00b9b400_cls::FUN_00b9b400(unsigned int key)
+// src: COMMUNITY 0x00b9b400
+void FUN_00b9b400_cls::ImageSpaceEffectNoise_InitializeUtilityBuffers(unsigned int key)
 {
     unsigned int shift = ((key * 0x5391313du) + 0x22fc2945u) >> 0x18;
     for (unsigned int i = 0; i < 0x100; i++)
@@ -11178,12 +11201,13 @@ class B9BB10Effect
     float m_fValue;
     float m_fTimer;
 
-    void FUN_00b9bb10(float fValue, bool bReset);
+    void ShadowSceneLight_SetFadeTarget(float fValue, bool bReset);
 };
 
 // Sets m_fValue when it differs from fValue, resetting m_fTimer to 1.0 or rescaling it by the clamped ratio against g_fB9BB10Duration.
 // @fnv 0x00b9bb10
-void B9BB10Effect::FUN_00b9bb10(float fValue, bool bReset)
+// src: COMMUNITY 0x00b9bb10
+void B9BB10Effect::ShadowSceneLight_SetFadeTarget(float fValue, bool bReset)
 {
     if (m_fValue != fValue)
     {
@@ -11521,7 +11545,7 @@ struct FUN_00bd8290
     int unk138;
     int unk13c;
     FUN_00bd8290(int);
-    void FUN_00bd7200(unsigned int);
+    void BSCubeMapCamera_SetupTransformation(unsigned int);
     void FUN_00bd74a0();
     ~FUN_00bd8290()
     {
@@ -11546,11 +11570,12 @@ struct TagGuard
 };
 struct Target
 {
-    bool FUN_00b9c020(int, FUN_00bd8290*);
-    bool FUN_00b9de90(int, int, int, int, Input*, unsigned short);
+    bool ShadowSceneLight_FrustumFrustumIntersection(int, FUN_00bd8290*);
+    bool ShadowSceneLight_CubeFaceFrustumFrustumIntersection(int, int, int, int, Input*, unsigned short);
 };
 // @fnv 0x00b9de90
-bool Target::FUN_00b9de90(int a, int b, int c, int aiUnused, Input* input, unsigned short flags)
+// src: COMMUNITY 0x00b9de90
+bool Target::ShadowSceneLight_CubeFaceFrustumFrustumIntersection(int a, int b, int c, int aiUnused, Input* input, unsigned short flags)
 {
     int value = input->unk0c;
     TagGuard tagGuard;
@@ -11558,10 +11583,10 @@ bool Target::FUN_00b9de90(int a, int b, int c, int aiUnused, Input* input, unsig
     node.unk058 = a;
     node.unk05c = b;
     node.unk060 = c;
-    node.FUN_00bd7200(flags);
+    node.BSCubeMapCamera_SetupTransformation(flags);
     NiUpdateData update;
     reinterpret_cast<NiAVObject*>(&node)->Update(static_cast<const NiUpdateData&>(update));
-    return FUN_00b9c020(value, &node);
+    return ShadowSceneLight_FrustumFrustumIntersection(value, &node);
 }
 }  // namespace fnv_00b9de90
 
@@ -11588,7 +11613,7 @@ void ImageSpaceManager::RenderEffect(int uiEffectIndex, GraphicsRenderer* pvArg1
     AutoMemContext kScope(0x27);
     ImageSpaceEffect* pkEffect = (*reinterpret_cast<ImageSpaceEffect***>(pEffectList + 4))[uiEffectIndex];
     ImageSpaceTexture kTexture;
-    kTexture.FUN_00ba37a0(pkSource);
+    kTexture.ImageSpaceTexture_SetTexture(pkSource);
     if (pkEffect)
     {
         pkEffect->SetupTextures(0, &kTexture, 0);
@@ -11626,8 +11651,8 @@ void FUN_00b8c830_class::RenderWithTextures(HolderForAccum* apShader, int aiArg1
     AutoMemContext kContext(0x27);
     ImageSpaceTexture kTexture0;
     ImageSpaceTexture kTexture1;
-    kTexture0.FUN_00ba37a0(apSource0);
-    kTexture1.FUN_00ba37a0(apSource1);
+    kTexture0.ImageSpaceTexture_SetTexture(apSource0);
+    kTexture1.ImageSpaceTexture_SetTexture(apSource1);
     if (apShader)
     {
         apShader->SetAccumulatorAt(0, (NiAccumulator*)&kTexture1, 0);
@@ -11982,11 +12007,12 @@ struct FUN_00b8ff10_class : public S_00b8ff10_Base
     virtual void v82();
     virtual void v83();
 
-    void __thiscall FUN_00b8ff10();
+    void __thiscall UpdateState_00b8ff10();
 };
 
 // @fnv 0x00b8ff10
-void FUN_00b8ff10_class::FUN_00b8ff10()
+// src: GUESS 0x00b8ff10 (confidence: low)
+void FUN_00b8ff10_class::UpdateState_00b8ff10()
 {
     S_00b8ff10_Local1 local1;
     S_00b8ff10_Local2 local2;
@@ -12641,7 +12667,8 @@ extern int g_aiB7DE0PushCounts[];
 
 // If the current level's push count is zero, sets render state 7 on the renderer, then adds iCount to that level's push count.
 // @fnv 0x00b97de0
-void __cdecl FUN_00b97de0(bool bEnable, int iCount)
+// src: COMMUNITY 0x00b97de0
+void __cdecl BSRenderState_SetZEnable(bool bEnable, int iCount)
 {
     unsigned int uiTreeBlockIndex = g_uiB7DE0Level;
     if (g_aiB7DE0PushCounts[uiTreeBlockIndex] == 0)
@@ -12682,7 +12709,8 @@ struct FUN_00b98480_Sub
 };
 // If the counter at DAT_011ff9d8[idx] is zero, calls f26(8, 2 or 3, 0, 0) on the object at DAT_011f9508+0x8b8, then adds param_2 to the counter.
 // @fnv 0x00b98480
-void __cdecl FUN_00b98480(char abFlag, int aiAmount)
+// src: COMMUNITY 0x00b98480
+void __cdecl BSRenderState_SetWireframeEnable(char abFlag, int aiAmount)
 {
     unsigned int idx = DAT_011ffa50;
     if (DAT_011ff9d8[idx] == 0)
@@ -12792,15 +12820,16 @@ struct EffectB9B540
     int unk30, unk34, unk38, unk3c, unk40, unk44, unk48;
     int unk4c, unk50, unk54, unk58, unk5c, unk60, unk64;
     ImageSpaceTexture temporaryTexture;
-    void FUN_00b9b540(void*, void*, void*, void*);
+    void ImageSpaceEffectNoise_Render(void*, void*, void*, void*);
 };
 // Initializes the effect if needed, sets shader constants, binds textures, renders both shader stages and releases the temporary texture.
 // @fnv 0x00b9b540
-void EffectB9B540::FUN_00b9b540(void* renderer, void* target, void* input, void* unused)
+// src: COMMUNITY 0x00b9b540
+void EffectB9B540::ImageSpaceEffectNoise_Render(void* renderer, void* target, void* input, void* unused)
 {
     if (needsInitialize)
         needsInitialize = Initialize(input);
-    temporaryTexture.FUN_00ba3840(50);
+    temporaryTexture.ImageSpaceTexture_BorrowRenderedTexture(50);
     ShaderStage* shader = static_cast<ShaderObject*>(shaders[0]);
     PassConstants* parameters = constants[0];
     parameters->FUN_00b8a790(0, DAT_011ffe4c, DAT_011ffe50, 0.0f, 0.0f);
@@ -12811,8 +12840,8 @@ void EffectB9B540::FUN_00b9b540(void* renderer, void* target, void* input, void*
     parameters->FUN_00b8a790(5, DAT_011ffe8c, DAT_011ffe90, DAT_011ffe94, 0.0f);
     shader->SetAccumulatorAt(0, &temporaryTexture, 0);
     shader->SetAccumulatorAt(1, textures[1], 1);
-    textures[0]->FUN_00ba3760(3);
-    textures[1]->FUN_00ba3760(3);
+    textures[0]->NiShader_SetImplementation(3);
+    textures[1]->NiShader_SetImplementation(3);
     shader->Render(renderer, target, parameters, true);
     shader = static_cast<ShaderObject*>(shaders[1]);
     parameters = constants[1];
@@ -12822,10 +12851,10 @@ void EffectB9B540::FUN_00b9b540(void* renderer, void* target, void* input, void*
     parameters->FUN_00b8a790(3, DAT_011ffe48, 0.0f, 0.0f, 0.0f);
     shader->SetAccumulatorAt(0, textures[0], 0);
     shader->SetAccumulatorAt(1, &temporaryTexture, 0);
-    textures[0]->FUN_00ba3760(3);
-    textures[1]->FUN_00ba3760(3);
+    textures[0]->NiShader_SetImplementation(3);
+    textures[1]->NiShader_SetImplementation(3);
     shader->Render(renderer, target, parameters, true);
-    temporaryTexture.FUN_00ba39a0();
+    temporaryTexture.ImageSpaceTexture_ReturnRenderedTexture();
 }
 }  // namespace fnv_00b9b540
 
@@ -12920,14 +12949,14 @@ struct Header6c
 };
 struct AllocSvc
 {
-    void* __thiscall FUN_00aa3e40(unsigned int n);
+    void* __thiscall Game_DoHeapAlloc(unsigned int n);
 };
 extern AllocSvc DAT_011f6238;
 struct NiMemObj
 {
     static void* operator new(unsigned int n)
     {
-        return DAT_011f6238.FUN_00aa3e40(n);
+        return DAT_011f6238.Game_DoHeapAlloc(n);
     }
 };
 struct ISEffect
@@ -13199,7 +13228,7 @@ struct CBB9180 : NiMemObj
         data_00_48, data_00_4c, data_00_50, data_00_54;
     CBB9180();
 };
-void* __cdecl FUN_00aa13e0(unsigned int n);
+void* __cdecl Object_DispatchCommandFour(unsigned int n);
 struct CB8EFA0
 {
     CB8EFA0* __thiscall FUN_00b8efa0();
@@ -13939,10 +13968,11 @@ struct B94520Cls
 {
     int m_00;
     Registry m_04;
-    void __thiscall FUN_00b94520();
+    void __thiscall ImageSpaceManager_InitEffects();
 };
 // @fnv 0x00b94520
-void __thiscall B94520Cls::FUN_00b94520()
+// src: COMMUNITY 0x00b94520
+void __thiscall B94520Cls::ImageSpaceManager_InitEffects()
 {
     {
         m_04.SetAt(13, new CC05680);
@@ -14307,7 +14337,8 @@ struct Main
 extern int DAT_011ffa8c;
 extern int DAT_011ad888[];
 // @fnv 0x00b97e80
-void __cdecl FUN_00b97e80(int idx, int amount)
+// src: COMMUNITY 0x00b97e80
+void __cdecl BSRenderState_SetZFunc(int idx, int amount)
 {
     int i = DAT_011ffa8c;
     if (!DAT_011ff9d8[i])
@@ -14317,7 +14348,8 @@ void __cdecl FUN_00b97e80(int idx, int amount)
 
 extern unsigned int DAT_011ffa6c;
 // @fnv 0x00b97ed0
-void __cdecl FUN_00b97ed0(unsigned char aByteValue, int aiDelta)
+// src: COMMUNITY 0x00b97ed0
+void __cdecl BSRenderState_SetAlphaTestEnable(unsigned char aByteValue, int aiDelta)
 {
     unsigned int index = DAT_011ffa6c;
     if (DAT_011ff9d8[index] == 0)
@@ -14530,11 +14562,11 @@ struct List2_af60
 struct Lock_af60
 {
     int m_pOwnerObject;
-    void FUN_0040fbf0(int a);
+    void BSSpinLock_Lock(int a);
 };
 struct Mgr_af60
 {
-    void FUN_00aa4060(Entry_af60* e);
+    void MemoryManager_Deallocate(Entry_af60* e);
 };
 
 }  // namespace fnv_00b9af60
@@ -14588,9 +14620,9 @@ extern int DAT_011ff9dc;
 extern int DAT_011ff9e4;
 extern double DAT_01016978;
 void __cdecl ClearPassList(int* p, int a);
-void __cdecl FUN_00b97e30(int a, int b);
+void __cdecl BSRenderState_SetZWriteEnable(int a, int b);
 void __cdecl SendFloatAdd(float f, int a);
-void __cdecl FUN_00b994f0(Item_af60* item, unsigned int a, int b, int c, int d);
+void __cdecl BSBatchRenderer_RenderPassImmediately(Item_af60* item, unsigned int a, int b, int c, int d);
 extern "C" int __cdecl _isnan(double);
 
 
@@ -14607,7 +14639,7 @@ inline void List2_af60::RemoveHead()
         m_pTail = 0;
     }
     n->m_data = 0;
-    DAT_011c5f80.FUN_0040fbf0(0);
+    DAT_011c5f80.BSSpinLock_Lock(0);
     n->m_pSecondNode = 0;
     n->m_next = DAT_011c5f58;
     DAT_011c5f84 -= 1;
@@ -14665,7 +14697,7 @@ void BSBatchRenderer::UpdateVisibility(int idx, Cam_af60* cam, bool abUseRadius,
             }
             e->m_02 = 0;
             e->FUN_00b9a410();
-            fnv_00b9af60::DAT_011f6238.FUN_00aa4060(e);
+            fnv_00b9af60::DAT_011f6238.MemoryManager_Deallocate(e);
             reinterpret_cast<List2_af60&>(AlphaGroupList[idx]).RemoveHead();
             e = reinterpret_cast<List2_af60&>(AlphaGroupList[idx]).m_uiItemCount ? reinterpret_cast<List2_af60&>(AlphaGroupList[idx]).m_pFirstNode->m_data : 0;
         }
@@ -14683,18 +14715,18 @@ void BSBatchRenderer::UpdateVisibility(int idx, Cam_af60* cam, bool abUseRadius,
                     {
                         f = 0.0f;
                     }
-                    FUN_00b97e30(0, 1);
+                    BSRenderState_SetZWriteEnable(0, 1);
                     SendFloatAdd(f, 1);
                 }
                 else
                 {
                     restore = false;
                 }
-                FUN_00b994f0(a, a->m_04, 1, 1, 1);
+                BSBatchRenderer_RenderPassImmediately(a, a->m_04, 1, 1, 1);
                 if (restore)
                 {
                     DAT_011ff9dc -= 1;
-                    FUN_00b97e30(1, 0);
+                    BSRenderState_SetZWriteEnable(1, 0);
                     DAT_011ff9e4 -= 1;
                     SendFloatAdd(0.0f, 0);
                 }
@@ -14954,11 +14986,12 @@ struct Owner
     RPtr m_194, m_198, m_19c;
     RPtr m_aPtr[0x26];
     bool FUN_00be0870();
-    bool FUN_00b861d0();
+    bool WaterShader_Initialize();
 };
 // Calls FUN_00be0870, clears all RPtr and TPtr members and global arrays, resets quad vectors to g_kQuad, and returns the result.
 // @fnv 0x00b861d0
-bool Owner::FUN_00b861d0()
+// src: COMMUNITY 0x00b861d0
+bool Owner::WaterShader_Initialize()
 {
     bool r = FUN_00be0870();
     m_194.Clear();
@@ -15041,12 +15074,13 @@ struct Self_b89970
     int unk68;
     FUN_00e80190_Class* unk6c;
     char FUN_00be0870();
-    char FUN_00b89970();
+    char SkyShader_Initialize();
 };
 
 // Calls FUN_00be0870, then if unk6c is set decrements its unk64 (calling FUN_00e80190 at zero) and clears unk6c; returns the FUN_00be0870 result.
 // @fnv 0x00b89970
-char Self_b89970::FUN_00b89970()
+// src: COMMUNITY 0x00b89970
+char Self_b89970::SkyShader_Initialize()
 {
     char result = FUN_00be0870();
     FUN_00e80190_Class* p = unk6c;
@@ -15119,10 +15153,11 @@ extern float DAT_011f9410;
 struct B9B400Cls
 {
     int m_000;
-    __declspec(noinline) void FUN_00b9b400(unsigned int v);
+    __declspec(noinline) void ImageSpaceEffectNoise_InitializeUtilityBuffers(unsigned int v);
 };
 
-void B9B400Cls::FUN_00b9b400(unsigned int v)
+// src: COMMUNITY 0x00b9b400
+void B9B400Cls::ImageSpaceEffectNoise_InitializeUtilityBuffers(unsigned int v)
 {
     m_000 = (int)v;
 }
@@ -15304,14 +15339,15 @@ struct FUN_00b9b7f0_cls
     int m_2b0;
     int m_2b4;
     unsigned char m_2b8;
-    void FUN_00b9b7f0();
+    void ImageSpaceEffectNoise_ShufflePermuationTable();
 };
 
 // Calls FUN_00b9b400 on this with DAT_011f9410 and sets m_2b8 to 1.
 // @fnv 0x00b9b7f0
-void FUN_00b9b7f0_cls::FUN_00b9b7f0()
+// src: COMMUNITY 0x00b9b7f0
+void FUN_00b9b7f0_cls::ImageSpaceEffectNoise_ShufflePermuationTable()
 {
-    ((B9B400Cls*)this)->FUN_00b9b400((unsigned int)DAT_011f9410);
+    ((B9B400Cls*)this)->ImageSpaceEffectNoise_InitializeUtilityBuffers((unsigned int)DAT_011f9410);
     m_2b8 = 1;
 }
 
@@ -15495,10 +15531,11 @@ struct FX
     int m_2b4;
     bool m_2b8;
     bool __thiscall EnsureInitialized(int unused);
-    void __thiscall FUN_00b9b400(unsigned int value);
+    void __thiscall ImageSpaceEffectNoise_InitializeUtilityBuffers(unsigned int value);
 };
 
-__declspec(noinline) void FX::FUN_00b9b400(unsigned int value)
+// src: COMMUNITY 0x00b9b400
+__declspec(noinline) void FX::ImageSpaceEffectNoise_InitializeUtilityBuffers(unsigned int value)
 {
     m_iWordAt00 = (int)value;
 }
@@ -15509,7 +15546,7 @@ bool FX::EnsureInitialized(int unused)
 {
     if (!m_2b8)
     {
-        FUN_00b9b400((unsigned int)DAT_011f9410);
+        ImageSpaceEffectNoise_InitializeUtilityBuffers((unsigned int)DAT_011f9410);
         m_2b8 = true;
     }
     return true;
@@ -15622,12 +15659,12 @@ struct W82197
 void __cdecl UpdateInputFlags(W82197, int);
 
 extern "C" void __stdcall FUN_00ec5fce(void* apBase, unsigned int aiSize, unsigned int aiCount, void* apDtor);
-void __cdecl FUN_00aa10f0(void* apMemory);
+void __cdecl _NiFree_00aa10f0(void* apMemory);
 extern "C" void FUN_0045cec0();
 
 struct AllocFree_b9960 : AllocSvc
 {
-    void FUN_00aa4060(void* apMemory);
+    void MemoryManager_Deallocate(void* apMemory);
 };
 static inline AllocFree_b9960& GetAllocFree()
 {
@@ -15640,7 +15677,7 @@ struct Elem_b11320
     ~Elem_b11320();
     static void operator delete[](void* p)
     {
-        GetAllocFree().FUN_00aa4060(p);
+        GetAllocFree().MemoryManager_Deallocate(p);
     }
 };
 struct Sub58_b9960
@@ -15658,7 +15695,7 @@ struct Sub68_b9960
 {
     virtual ~Sub68_b9960()
     {
-        FUN_00aa10f0(m_04);
+        _NiFree_00aa10f0(m_04);
     }
     void* m_04;
     int unk08;
@@ -15720,12 +15757,13 @@ FUN_00b8a8e0::~FUN_00b8a8e0()
 class WaterFFTDisplayEffect : public B8F080ImageSpaceEffect
 {
   public:
-    void FUN_00b941a0();
+    void CreateFFTDisplayShaders();
 };
 
 // Creates vertex and pixel shaders for the FFT display high-water effect and calls SetupShaders.
 // @fnv 0x00b941a0
-void WaterFFTDisplayEffect::FUN_00b941a0()
+// src: GUESS 0x00b941a0 (confidence: medium)
+void WaterFFTDisplayEffect::CreateFFTDisplayShaders()
 {
     B8F080ShaderFile kVertexDelta = {"imagespace\\1x\\v\\base.v.hlsl", {{NULL, NULL}}};
     B8F080ShaderFile kPixel = {"water\\2_ab\\p\\waterhmap.p.hlsl", {{"DISPLAY_HIGHW", NULL}, {NULL, NULL}}};
@@ -15739,16 +15777,17 @@ struct EffectManager975
     int unk00;
     int unk04;
     ImageSpaceEffect** effects;
-    void FUN_00b8c980(ImageSpaceEffect*, int, int, int, int, int);
-    void FUN_00b975f0(unsigned int index, int a, int b, int c, int d, int e);
+    void ImageSpaceManager_RenderEffect_0(ImageSpaceEffect*, int, int, int, int, int);
+    void ImageSpaceManager_RenderEffect_2(unsigned int index, int a, int b, int c, int d, int e);
 };
 
 // Calls FUN_00b8c980 with effects[index] and the five int arguments while a memory context of 0x27 is set.
 // @fnv 0x00b975f0
-void EffectManager975::FUN_00b975f0(unsigned int uiEffectIndex, int a, int b, int c, int d, int e)
+// src: COMMUNITY 0x00b975f0
+void EffectManager975::ImageSpaceManager_RenderEffect_2(unsigned int uiEffectIndex, int a, int b, int c, int d, int e)
 {
     AutoMemContext context(0x27);
-    FUN_00b8c980(effects[uiEffectIndex], a, b, c, d, e);
+    ImageSpaceManager_RenderEffect_0(effects[uiEffectIndex], a, b, c, d, e);
 }
 
 void NiFree(void* memory);
@@ -15756,10 +15795,10 @@ void NiFree(void* memory);
 extern "C" int DAT_010b9d24;
 
 extern "C" int DAT_01202410;
-extern "C" void __fastcall FUN_00b8a7e0(void*);
+extern "C" void __fastcall ClearConstantGroups(void*);
 struct Manager97690
 {
-    void FUN_00b6da10(unsigned int);
+    void BSTextureManager_ReturnRenderedTexture(unsigned int);
 };
 extern Manager97690* DAT_011f91a8;
 
@@ -15994,9 +16033,9 @@ FUN_00b97690::~FUN_00b97690()
     {
         ShutdownAllEffects();
         ClearTextures();
-        FUN_00b8a7e0(&DAT_01202410);
+        ClearConstantGroups(&DAT_01202410);
         active = false;
-        DAT_011f91a8->FUN_00b6da10(m_textureId);
+        DAT_011f91a8->BSTextureManager_ReturnRenderedTexture(m_textureId);
     }
 }
 
@@ -16410,21 +16449,22 @@ namespace fnv_00b8d840 {
 // vtable slot when the derived class inherits the same virtual from both bases.
 struct PrimaryBase
 {
-    virtual void FUN_00b8d840();
+    virtual void AdjustThisAndForward_00b8d840();
     int unk04;
     int unk08[25];
 };
 
 struct SecondaryBase
 {
-    virtual void FUN_00b8d840();
+    virtual void AdjustThisAndForward_00b8d840();
 };
 
 struct Derived : public PrimaryBase, public SecondaryBase
 {
     Derived();
 // @fnv 0x00b8d840
-    virtual void FUN_00b8d840();
+// src: GUESS 0x00b8d840 (confidence: low)
+    virtual void AdjustThisAndForward_00b8d840();
 };
 
 Derived::Derived()
@@ -16446,7 +16486,7 @@ namespace fnv_00b8d980 {
 // what makes the compiler emit the vtables and the adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_00b8d980();
+    virtual void AdjustThisAndForward_00b8d980();
     int unk04;
     int unk08;
     int unk0C;
@@ -16477,14 +16517,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b8d980();
+    virtual void AdjustThisAndForward_00b8d980();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8d980
-    virtual void FUN_00b8d980();
+// src: GUESS 0x00b8d980 (confidence: low)
+    virtual void AdjustThisAndForward_00b8d980();
 };
 
 Derived::Derived()
@@ -16525,7 +16566,7 @@ namespace fnv_00b8dc20 {
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_00b8dc20();
+    virtual void AdjustThisAndForward_00b8dc20();
     int unk04;
     int unk08;
     int unk0C;
@@ -16556,14 +16597,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b8dc20();
+    virtual void AdjustThisAndForward_00b8dc20();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8dc20
-    virtual void FUN_00b8dc20();
+// src: GUESS 0x00b8dc20 (confidence: low)
+    virtual void AdjustThisAndForward_00b8dc20();
 };
 
 Derived::Derived()
@@ -16615,7 +16657,7 @@ Own_00b8dd70* make_00b8dd70()
 // thunk's jump is a relocation to an external symbol.
 struct ThunkPrimaryBase
 {
-    virtual void FUN_00b8dec0();
+    virtual void AdjustThisAndForward_00b8dec0();
     int unk04;
     int unk08;
     int unk0C;
@@ -16646,14 +16688,15 @@ struct ThunkPrimaryBase
 
 struct ThunkSecondaryBase
 {
-    virtual void FUN_00b8dec0();
+    virtual void AdjustThisAndForward_00b8dec0();
 };
 
 struct ThunkDerived : ThunkPrimaryBase, ThunkSecondaryBase
 {
     ThunkDerived();
 // @fnv 0x00b8dec0
-    virtual void FUN_00b8dec0();
+// src: GUESS 0x00b8dec0 (confidence: low)
+    virtual void AdjustThisAndForward_00b8dec0();
 };
 
 ThunkDerived::ThunkDerived()
@@ -16719,7 +16762,7 @@ namespace fnv_00b8e160 {
 // base: vtable pointer plus 26 int members (4 + 26*4 = 0x6c).
 struct PrimaryBase
 {
-    virtual void FUN_00b8e160();
+    virtual void AdjustThisAndForward_00b8e160();
     int unk04;
     int unk08;
     int unk0C;
@@ -16750,14 +16793,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b8e160();
+    virtual void AdjustThisAndForward_00b8e160();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8e160
-    virtual void FUN_00b8e160();
+// src: GUESS 0x00b8e160 (confidence: low)
+    virtual void AdjustThisAndForward_00b8e160();
 };
 
 Derived::Derived()
@@ -16918,7 +16962,7 @@ namespace fnv_00b8f2e0 {
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_00b8f2e0();
+    virtual void AdjustThisAndForward_00b8f2e0();
     int unk04;
     int unk08;
     int unk0C;
@@ -16949,14 +16993,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b8f2e0();
+    virtual void AdjustThisAndForward_00b8f2e0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8f2e0
-    virtual void FUN_00b8f2e0();
+// src: GUESS 0x00b8f2e0 (confidence: low)
+    virtual void AdjustThisAndForward_00b8f2e0();
 };
 
 Derived::Derived()
@@ -16979,7 +17024,7 @@ namespace fnv_00b8f4a0 {
 // jump remains a relocation to an external symbol.
 struct PrimaryBase
 {
-    virtual int* FUN_00b8f4a0(bool);
+    virtual int* AdjustThisAndForward_00b8f4a0(bool);
     int unk04;
     int unk08;
     int unk0C;
@@ -17010,14 +17055,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual int* FUN_00b8f4a0(bool);
+    virtual int* AdjustThisAndForward_00b8f4a0(bool);
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8f4a0
-    virtual int* FUN_00b8f4a0(bool);
+// src: GUESS 0x00b8f4a0 (confidence: low)
+    virtual int* AdjustThisAndForward_00b8f4a0(bool);
 };
 
 Derived::Derived()
@@ -17080,7 +17126,7 @@ namespace fnv_00b8f700 {
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_00b8f700();
+    virtual void AdjustThisAndForward_00b8f700();
     int unk04;
     int unk08;
     int unk0C;
@@ -17111,14 +17157,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b8f700();
+    virtual void AdjustThisAndForward_00b8f700();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8f700
-    virtual void FUN_00b8f700();
+// src: GUESS 0x00b8f700 (confidence: low)
+    virtual void AdjustThisAndForward_00b8f700();
 };
 
 Derived::Derived()
@@ -17183,7 +17230,7 @@ namespace fnv_00b8f920 {
 // PrimaryBase = vptr (4) + 26 named ints (104) = 0x6c.
 struct PrimaryBase
 {
-    virtual void FUN_00b8f920();
+    virtual void AdjustThisAndForward_00b8f920();
     int unk04;
     int unk08;
     int unk0C;
@@ -17214,14 +17261,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b8f920();
+    virtual void AdjustThisAndForward_00b8f920();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8f920
-    virtual void FUN_00b8f920();
+// src: GUESS 0x00b8f920 (confidence: low)
+    virtual void AdjustThisAndForward_00b8f920();
 };
 
 Derived::Derived()
@@ -17590,20 +17638,21 @@ Derived::Derived()
 
 struct Prim6c
 {
-    virtual void FUN_00b91b40();
+    virtual void AdjustThisAndForward_00b91b40();
     int p04, p08, p0c, p10, p14, p18, p1c, p20, p24, p28, p2c, p30, p34, p38, p3c, p40, p44, p48, p4c, p50, p54, p58,
         p5c, p60, p64, p68;
 };
 
 struct Sec6c
 {
-    virtual void FUN_00b91b40();
+    virtual void AdjustThisAndForward_00b91b40();
 };
 
 struct Host6c : Prim6c, Sec6c
 {
 // @fnv 0x00b91b40
-    virtual void FUN_00b91b40();
+// src: GUESS 0x00b91b40 (confidence: low)
+    virtual void AdjustThisAndForward_00b91b40();
 };
 
 static Host6c g_thunk6c;
@@ -17613,7 +17662,7 @@ namespace fnv_00b91ce0 {
 // Derived overrides a virtual declared by both bases; primary base size 0x6c = vptr + 26 ints.
 struct PrimaryBase
 {
-    virtual void FUN_00b91ce0();
+    virtual void AdjustThisAndForward_00b91ce0();
     int unk04;
     int unk08;
     int unk0C;
@@ -17644,14 +17693,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b91ce0();
+    virtual void AdjustThisAndForward_00b91ce0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b91ce0
-    virtual void FUN_00b91ce0();
+// src: GUESS 0x00b91ce0 (confidence: low)
+    virtual void AdjustThisAndForward_00b91ce0();
 };
 
 Derived::Derived()
@@ -17713,7 +17763,7 @@ namespace fnv_00b91f80 {
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (0x6c).
 struct PrimaryBase
 {
-    virtual void FUN_00b91f80();
+    virtual void AdjustThisAndForward_00b91f80();
     int m_i04;
     int m_i08;
     int m_i0C;
@@ -17744,14 +17794,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b91f80();
+    virtual void AdjustThisAndForward_00b91f80();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b91f80
-    virtual void FUN_00b91f80();
+// src: GUESS 0x00b91f80 (confidence: low)
+    virtual void AdjustThisAndForward_00b91f80();
 };
 
 Derived::Derived()
@@ -17765,7 +17816,7 @@ namespace fnv_00b922c0 {
 // the primary base (vptr 4 + 26 int fields 104 = 0x6c) before jumping.
 struct PrimaryBase
 {
-    virtual void FUN_00b922c0();
+    virtual void AdjustThisAndForward_00b922c0();
     int unk04;
     int unk08;
     int unk0C;
@@ -17796,14 +17847,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b922c0();
+    virtual void AdjustThisAndForward_00b922c0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b922c0
-    virtual void FUN_00b922c0();
+// src: GUESS 0x00b922c0 (confidence: low)
+    virtual void AdjustThisAndForward_00b922c0();
 };
 
 Derived::Derived()
@@ -17814,7 +17866,7 @@ namespace fnv_00b92440 {
 // sub ecx,0x6c; jmp FUN_00b924d0  == MSVC adjustor thunk (multiple inheritance, primary base size 0x6c).
 struct PrimaryBase
 {
-    virtual void FUN_00b92440();
+    virtual void AdjustThisAndForward_00b92440();
     int unk04;
     int unk08;
     int unk0C;
@@ -17845,14 +17897,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b92440();
+    virtual void AdjustThisAndForward_00b92440();
 };
 
 struct SpawnedObject : PrimaryBase, SecondaryBase
 {
     SpawnedObject();
 // @fnv 0x00b92440
-    virtual void FUN_00b92440();
+// src: GUESS 0x00b92440 (confidence: low)
+    virtual void AdjustThisAndForward_00b92440();
 };
 
 SpawnedObject::SpawnedObject()
@@ -17865,7 +17918,7 @@ namespace fnv_00b925a0 {
 // the same virtual; Derived redeclares it and defines only its constructor.
 struct PrimaryBase
 {
-    virtual void FUN_00b925a0();
+    virtual void AdjustThisAndForward_00b925a0();
     int unk04;
     int unk08;
     int unk0C;
@@ -17896,14 +17949,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b925a0();
+    virtual void AdjustThisAndForward_00b925a0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b925a0
-    virtual void FUN_00b925a0();
+// src: GUESS 0x00b925a0 (confidence: low)
+    virtual void AdjustThisAndForward_00b925a0();
 };
 
 Derived::Derived()
@@ -17967,7 +18021,7 @@ namespace fnv_00b92920 {
 // sizeof(PrimaryBase) = vptr (4) + 26 int fields (104) = 0x6c.
 struct PrimaryBase
 {
-    virtual void FUN_00b92920();
+    virtual void AdjustThisAndForward_00b92920();
     int unk04;
     int unk08;
     int unk0C;
@@ -17998,14 +18052,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b92920();
+    virtual void AdjustThisAndForward_00b92920();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b92920
-    virtual void FUN_00b92920();
+// src: GUESS 0x00b92920 (confidence: low)
+    virtual void AdjustThisAndForward_00b92920();
 };
 
 Derived::Derived()
@@ -18067,7 +18122,7 @@ Derived::Derived()
 namespace fnv_00b92bc0 {
 struct Base1
 {
-    virtual void FUN_00b92bc0();
+    virtual void AdjustThisAndForward_00b92bc0();
     int unk04;
     int unk08;
     int unk0C;
@@ -18097,13 +18152,14 @@ struct Base1
 };
 struct Base2
 {
-    virtual void FUN_00b92bc0();
+    virtual void AdjustThisAndForward_00b92bc0();
 };
 struct Derived : Base1, Base2
 {
     Derived();
 // @fnv 0x00b92bc0
-    virtual void FUN_00b92bc0();
+// src: GUESS 0x00b92bc0 (confidence: low)
+    virtual void AdjustThisAndForward_00b92bc0();
 };
 Derived::Derived()
 {}
@@ -18229,7 +18285,7 @@ namespace fnv_00b93020 {
 // the vtables and the adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_00b93020();
+    virtual void AdjustThisAndForward_00b93020();
     int unk04;
     int unk08;
     int unk0C;
@@ -18260,14 +18316,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b93020();
+    virtual void AdjustThisAndForward_00b93020();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b93020
-    virtual void FUN_00b93020();
+// src: GUESS 0x00b93020 (confidence: low)
+    virtual void AdjustThisAndForward_00b93020();
 };
 
 Derived::Derived()
@@ -18323,7 +18380,7 @@ namespace fnv_00b932c0 {
 // sub ecx,0x6c; jmp target == MSVC adjustor thunk (secondary base vtable slot).
 struct ThunkPrimaryBase
 {
-    virtual void FUN_00b932c0();
+    virtual void AdjustThisAndForward_00b932c0();
     int unk04;
     int unk08;
     int unk0C;
@@ -18354,14 +18411,15 @@ struct ThunkPrimaryBase
 
 struct ThunkSecondaryBase
 {
-    virtual void FUN_00b932c0();
+    virtual void AdjustThisAndForward_00b932c0();
 };
 
 struct ThunkDerived : ThunkPrimaryBase, ThunkSecondaryBase
 {
     ThunkDerived();
 // @fnv 0x00b932c0
-    virtual void FUN_00b932c0();
+// src: GUESS 0x00b932c0 (confidence: low)
+    virtual void AdjustThisAndForward_00b932c0();
 };
 
 ThunkDerived::ThunkDerived()
@@ -18425,7 +18483,7 @@ namespace fnv_00b93740 {
 // vtable slot holds a thunk that steps `this` back over the primary base (0x6c bytes).
 struct PrimaryBase
 {
-    virtual void FUN_00b93740();
+    virtual void AdjustThisAndForward_00b93740();
     int unk04;
     int unk08;
     int unk0C;
@@ -18456,14 +18514,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b93740();
+    virtual void AdjustThisAndForward_00b93740();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b93740
-    virtual void FUN_00b93740();
+// src: GUESS 0x00b93740 (confidence: low)
+    virtual void AdjustThisAndForward_00b93740();
 };
 
 Derived::Derived()
@@ -18527,7 +18586,7 @@ Derived::Derived()
 // vtable emission -> [thunk] adjustor{0x6C} = sub ecx,0x6C; jmp override.
 struct Prim_b93be0
 {
-    virtual void FUN_00b93be0();
+    virtual void AdjustThisAndForward_00b93be0();
     int p04;
     int p08;
     int p0c;
@@ -18557,12 +18616,13 @@ struct Prim_b93be0
 };
 struct Sec_b93be0
 {
-    virtual void FUN_00b93be0();
+    virtual void AdjustThisAndForward_00b93be0();
 };
 struct ThunkHost_b93be0 : Prim_b93be0, Sec_b93be0
 {
 // @fnv 0x00b93be0
-    virtual void FUN_00b93be0();
+// src: GUESS 0x00b93be0 (confidence: low)
+    virtual void AdjustThisAndForward_00b93be0();
 };
 static ThunkHost_b93be0 g_b93be0_thunk;
 
@@ -18621,7 +18681,7 @@ namespace fnv_00b93e80 {
 // Primary base = vptr + 26 ints = 0x6c; derived redeclares the virtual and defines only its ctor.
 struct PrimaryBase
 {
-    virtual void FUN_00b93e80();
+    virtual void AdjustThisAndForward_00b93e80();
     int unk04;
     int unk08;
     int unk0C;
@@ -18652,14 +18712,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b93e80();
+    virtual void AdjustThisAndForward_00b93e80();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b93e80
-    virtual void FUN_00b93e80();
+// src: GUESS 0x00b93e80 (confidence: low)
+    virtual void AdjustThisAndForward_00b93e80();
 };
 
 Derived::Derived()
@@ -18721,7 +18782,7 @@ namespace fnv_00b94120 {
 // implementation that expects the primary base pointer.
 struct ThunkPrimaryBase
 {
-    virtual void FUN_00b94120(bool flag);
+    virtual void AdjustThisAndForward_00b94120(bool flag);
     int m_04;
     int m_08;
     int m_0c;
@@ -18752,14 +18813,15 @@ struct ThunkPrimaryBase
 
 struct ThunkSecondaryBase
 {
-    virtual void FUN_00b94120(bool flag);
+    virtual void AdjustThisAndForward_00b94120(bool flag);
 };
 
 struct ThunkDerived : ThunkPrimaryBase, ThunkSecondaryBase
 {
     ThunkDerived();
 // @fnv 0x00b94120
-    virtual void FUN_00b94120(bool flag);
+// src: GUESS 0x00b94120 (confidence: low)
+    virtual void AdjustThisAndForward_00b94120(bool flag);
 };
 
 ThunkDerived::ThunkDerived()
@@ -18771,7 +18833,7 @@ namespace fnv_00b943c0 {
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_00b943c0();
+    virtual void AdjustThisAndForward_00b943c0();
     int unk04;
     int unk08;
     int unk0C;
@@ -18802,14 +18864,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00b943c0();
+    virtual void AdjustThisAndForward_00b943c0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00b943c0
-    virtual void FUN_00b943c0();
+// src: GUESS 0x00b943c0 (confidence: low)
+    virtual void AdjustThisAndForward_00b943c0();
 };
 
 Derived::Derived()
@@ -18967,12 +19030,13 @@ struct S_00b81760
     int unk18c;
     int unk190;
 
-    void __thiscall FUN_00b81760(int arg);
+    void __thiscall WaterShader_InitPass(int arg);
 };
 
 // Stores the value of a member field selected by arg into the global DAT_0126f74c.
 // @fnv 0x00b81760
-void S_00b81760::FUN_00b81760(int arg)
+// src: COMMUNITY 0x00b81760
+void S_00b81760::WaterShader_InitPass(int arg)
 {
     switch (arg)
     {
@@ -19328,8 +19392,8 @@ inline const float& RMax(const float& a, const float& b)
 {
     return a > b ? a : b;
 }
-float FUN_00404010(float a, float b);
-float FUN_0040ebd0(float a, float b);
+float BSMAX_00404010(float a, float b);
+float BSMIN(float a, float b);
 
 struct LightStandIn
 {
@@ -19437,7 +19501,7 @@ float __fastcall ComputeShadowLightFade(ShadowSceneLight* self, void*, PointB9 p
         if (self->bPointLight)
         {
             float d = toLight.Length() / radius;
-            d = FUN_0040ebd0(1.0f, FUN_00404010(0.0f, d));
+            d = BSMIN(1.0f, BSMAX_00404010(0.0f, d));
             self->fLuminance = 1.0f - d * d;
         }
         PointB9 dir = target - pos;
@@ -19538,7 +19602,7 @@ class B9Point3
     {
         return (float)sqrt(x * x + y * y + z * z);
     }
-    __declspec(noinline) void FUN_004a0c10();
+    __declspec(noinline) void Unitize_004a0c10();
 };
 
 
@@ -19614,13 +19678,13 @@ struct B9Light
         ++revision;
     }
     B9Bounds* FUN_00a5bdd0(int);
-    void FUN_00a59c60(NiUpdateData&);
+    void NiAVObject_Update(NiUpdateData&);
 };
 
 struct B9List
 {
-    ShadowSceneLight* FUN_00b70600(void** position);
-    ShadowSceneLight* FUN_00b70700(void** position);
+    ShadowSceneLight* BSShaderLightingProperty_GetFirstActiveNonShadowLight(void** position);
+    ShadowSceneLight* BSShaderLightingProperty_GetNextActiveNonShadowLight(void** position);
 };
 struct B9Manager
 {
@@ -19804,7 +19868,7 @@ void B9D150::UpdateOutputLight(B9List* lights, B9Point3 position)
     unsigned int count = 0;
     unsigned short index = 0;
     void* cursor;
-    ShadowSceneLight* entry = lights ? lights->FUN_00b70600(&cursor) : B9Mgr()->GetListItemAt(0);
+    ShadowSceneLight* entry = lights ? lights->BSShaderLightingProperty_GetFirstActiveNonShadowLight(&cursor) : B9Mgr()->GetListItemAt(0);
 
     if (entry)
     {
@@ -19826,7 +19890,7 @@ void B9D150::UpdateOutputLight(B9List* lights, B9Point3 position)
                 }
             }
             ++index;
-            entry = lights ? lights->FUN_00b70700(&cursor) : B9Mgr()->GetListItemAt(index);
+            entry = lights ? lights->BSShaderLightingProperty_GetNextActiveNonShadowLight(&cursor) : B9Mgr()->GetListItemAt(index);
         } while (entry);
     }
     float distance = 0.0f;
@@ -19836,12 +19900,12 @@ void B9D150::UpdateOutputLight(B9List* lights, B9Point3 position)
     B9Light* primary = reinterpret_cast<B9Light*>(manager->primary->spLight.m_pObject);
     B9Point3 fallback = -primary->direction;
     fallback.z *= radius * DAT_010b7e98;
-    fallback.FUN_004a0c10();
+    fallback.Unitize_004a0c10();
     if (total == 0.0f)
     {
         direction = fallback;
         color = primary->diffuse;
-        direction.FUN_004a0c10();
+        direction.Unitize_004a0c10();
         float zmin = (float)(radius / DAT_010731a8);
         if (zmin > direction.z)
             direction.z = zmin;
@@ -19849,7 +19913,7 @@ void B9D150::UpdateOutputLight(B9List* lights, B9Point3 position)
     else
     {
         unsigned int scan = 0;
-        entry = lights ? lights->FUN_00b70600(&cursor) : manager->GetListItemAt(0);
+        entry = lights ? lights->BSShaderLightingProperty_GetFirstActiveNonShadowLight(&cursor) : manager->GetListItemAt(0);
         for (unsigned int i = 0; i < count; ++i)
         {
             if (entry && !entry->bCastShadow)
@@ -19864,32 +19928,33 @@ void B9D150::UpdateOutputLight(B9List* lights, B9Point3 position)
                         float& acc = distance;
                         acc += (reinterpret_cast<B9Light*>(entry->spLight.m_pObject)->attenuation.x * DAT_011ffea0[i] + other * 1000.0) * contribution;
                         B9Point3 delta = reinterpret_cast<B9Light*>(entry->spLight.m_pObject)->worldPosition - position;
-                        delta.FUN_004a0c10();
+                        delta.Unitize_004a0c10();
                         delta = delta * DAT_011ffea0[i] + fallback * (float)other;
                         direction += delta * contribution;
                         color += (light->diffuse * DAT_011ffea0[i] + primary->diffuse * (float)other) * contribution;
                     }
                 }
             }
-            entry = lights ? lights->FUN_00b70700(&cursor) : B9Mgr()->GetListItemAt(++scan);
+            entry = lights ? lights->BSShaderLightingProperty_GetNextActiveNonShadowLight(&cursor) : B9Mgr()->GetListItemAt(++scan);
         }
-        direction.FUN_004a0c10();
+        direction.Unitize_004a0c10();
         if (direction.z < DAT_0101de30)
             direction.z = DAT_01016264;
     }
-    direction.FUN_004a0c10();
+    direction.Unitize_004a0c10();
     float limitedDistance = ClipUpperRadius(radius);
     output->translation = position + (direction * limitedDistance) * (float)DAT_010b7e90;
     distance = (float)(limitedDistance * 8.0);
     NiUpdateData update;
-    output->FUN_00a59c60(update);
+    output->NiAVObject_Update(update);
     float intensity = (float)(color.r * (double)0.4f + color.g * (double)0.4f + color.b * (double)0.4f);
     float clamped = FinalClamp(intensity);
     output->SetDiffuse(NiColor(clamped, clamped, clamped));
     output->SetAttenuation(B9Point3(distance, 0.0f, 0.0f));
 }
 
-void B9Point3::FUN_004a0c10()
+// src: XBOX_PDB 0x004a0c10
+void B9Point3::Unitize_004a0c10()
 {
     float n = Length();
     if (n > DAT_01017cf8)
@@ -19909,7 +19974,8 @@ int __cdecl UpdateInputFlags(int id, int flags);
 
 // Maps code (575, 648 to 718) to a small id with a switch, defaulting to 0, and returns FUN_00b815e0(id, 0).
 // @fnv 0x00b81d60
-int __stdcall FUN_00b81d60(int code)
+// src: GUESS 0x00b81d60 (confidence: low)
+int __stdcall Object_MapCodeAndDispatch_00b81d60(int code)
 {
     int id = 0;
     switch (code)
@@ -20140,11 +20206,12 @@ int __stdcall FUN_00b81d60(int code)
 class B8EE90CinematicShader : public B92700WaterEffect
 {
   public:
-    void FUN_00b8ee90();
+    void UpdateState_00b8ee90();
 };
 
 // @fnv 0x00b8ee90
-void B8EE90CinematicShader::FUN_00b8ee90()
+// src: GUESS 0x00b8ee90 (confidence: low)
+void B8EE90CinematicShader::UpdateState_00b8ee90()
 {
     B92700ShaderFile kVertexShader;
     kVertexShader.m_pcFile = "imagespace\\1x\\v\\base.v.hlsl";

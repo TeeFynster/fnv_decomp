@@ -54,7 +54,8 @@ static __forceinline void perpendicular(hkVector4& dst, hkVector4& d) {
 static __forceinline float rootVal(float x){return sqrtf(x);}
 static __forceinline void difference(hkVector4& dst, const hkVector4& a, const hkVector4& b){ dst.m_vComponents=_mm_sub_ps(*(__m128*)&a,*(__m128*)&b); }
 // @fnv 0x00d3e530
-int __cdecl FUN_00d3e530(hkpCdBody* a0, hkpCdBody* a1, Arg2S* a2, hkContactPoint* out) {
+// src: XBOX_PDB 0x00d3e530
+int __cdecl hkpSphereCapsuleAgent_getClosestPoint(hkpCdBody* a0, hkpCdBody* a1, Arg2S* a2, hkContactPoint* out) {
     
     const hkVector4* qp = static_cast<const hkVector4*>(a0->m_pMotionState) + 3;
     const hkpCapsuleShape* bp = static_cast<const hkpCapsuleShape*>(a1->m_pCollisionShape);

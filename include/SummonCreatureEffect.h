@@ -31,15 +31,15 @@ public:
     bool SelectRecord(void* context, int flags, SelectedRecord* output);
     bool SelectRecord(Actor* ref, int iUnk, NiPoint3* pPos);
     int __thiscall GetZero(int a, int b, int c);
-    bool FUN_00828f00(int flags, SelectedRecord* record);
+    bool SummonCreatureEffect_CheckSummonLocation(int flags, SelectedRecord* record);
     void DispelOldestQualifyingEffect();
     void CleanupSummonedCreature();
     void LoadAssociatedItemEffect(Actor* actor);
-    void FUN_008287e0();
-    void FUN_00828ba0(int unused);
-    unsigned short __thiscall FUN_00829720(Actor* actor);
-    void FUN_008297a0(int value);
-    void FUN_00829900(void* arg);
+    void Start_008287e0();
+    void Update_00828ba0(int unused);
+    unsigned short __thiscall GetSaveSize_00829720(Actor* actor);
+    void SaveGame_008297a0(int value);
+    void InitLoadGame_00829900(void* arg);
 
     Actor* unk4C;
     unsigned char unk50;

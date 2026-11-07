@@ -206,11 +206,12 @@ FUN_00504480::FUN_00504480()
 
 struct FUN_005046e0_shell : public TESCasino
 {
-    void FUN_005046e0();
+    void TESCasino_InitItem();
 };
 
 // @fnv 0x005046e0
-void FUN_005046e0_shell::FUN_005046e0()
+// src: COMMUNITY 0x005046e0
+void FUN_005046e0_shell::TESCasino_InitItem()
 {
     TESForm::RemapFormIDForFile(*(unsigned int*)((char*)this + 0x214), GetFile(-1));
 }
@@ -249,11 +250,12 @@ void __thiscall FUN_00504620_shell::ClearFields()
 
 struct FUN_00504e00_shell
 {
-    void* __thiscall FUN_00504e00(int index);
+    void* __thiscall TESCasino_GetModel(int index);
 };
 
 // @fnv 0x00504e00
-void* __thiscall FUN_00504e00_shell::FUN_00504e00(int index)
+// src: XBOX_PDB 0x00504e00
+void* __thiscall FUN_00504e00_shell::TESCasino_GetModel(int index)
 {
     return (void**)((char*)this + 0x24 + index * 32);
 }
@@ -262,11 +264,12 @@ struct FUN_00504e20_shell
 {
     unsigned char _pad[0x164];
     unsigned char m_aiIndexedValues[0x200];
-    unsigned char* __thiscall FUN_00504e20(int idx);
+    unsigned char* __thiscall TESCasino_GetNthSlotReel(int idx);
 };
 
 // @fnv 0x00504e20
-unsigned char* __thiscall FUN_00504e20_shell::FUN_00504e20(int aiIndex)
+// src: COMMUNITY 0x00504e20
+unsigned char* __thiscall FUN_00504e20_shell::TESCasino_GetNthSlotReel(int aiIndex)
 {
     return &m_aiIndexedValues[aiIndex * 0xc];
 }
@@ -276,22 +279,24 @@ extern "C" TESForm* __cdecl GetFormByID(unsigned int);
 struct FUN_00504e40_shell
 {
     unsigned int m_0218;
-    TESForm* __thiscall FUN_00504e40();
+    TESForm* __thiscall TESCasino_GetQuest();
 };
 
 // @fnv 0x00504e40
-TESForm* __thiscall FUN_00504e40_shell::FUN_00504e40()
+// src: XBOX_PDB 0x00504e40
+TESForm* __thiscall FUN_00504e40_shell::TESCasino_GetQuest()
 {
     return GetFormByID(*(unsigned int*)((char*)this + 0x218));
 }
 
 struct FUN_00504e60_shell
 {
-    char* FUN_00504e60();
+    char* TESCasino_GetData();
 };
 
 // @fnv 0x00504e60
-char* FUN_00504e60_shell::FUN_00504e60()
+// src: XBOX_PDB 0x00504e60
+char* FUN_00504e60_shell::TESCasino_GetData()
 {
     return reinterpret_cast<char*>(this) + 0x1E8;
 }
@@ -351,23 +356,23 @@ struct FullNameEx
 };
 struct FUN_005e78f0_t
 {
-    void FUN_004851b0(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
 };
 struct FUN_00504e00_shell
 {
-    void* FUN_00504e00(int);
+    void* TESCasino_GetModel(int);
 };
 struct FUN_00504e20_shell
 {
-    unsigned char* FUN_00504e20(int);
+    unsigned char* TESCasino_GetNthSlotReel(int);
 };
 struct FUN_00504e40_shell
 {
-    TESForm* FUN_00504e40();
+    TESForm* TESCasino_GetQuest();
 };
 struct FUN_00504e60_shell
 {
-    char* FUN_00504e60();
+    char* TESCasino_GetData();
 };
 int __fastcall FNV_GetFormType(TESForm*);
 // 0x004f15a0 stores its argument byte at +4 (the form type here); the same folded code is BSSoundHandle::SetAssumeSuccess.
@@ -401,21 +406,21 @@ void Casino_504cc0::CopyFromCasino(TESForm* apCopy)
     TESCasino* pSourceCasino = dynamic_cast<TESCasino*>(apCopy);
     if (!pSourceCasino)
         return;
-    ((FUN_005e78f0_t*)this)->FUN_004851b0(pSourceCasino);
+    ((FUN_005e78f0_t*)this)->TESForm_CopyAllComponents(pSourceCasino);
     for (int i = 0; i < 10; i++)
     {
         m_kModelTextureSwaps[i].SetModelFilePath(
-            ((ModelSrc_504cc0*)((FUN_00504e00_shell*)pSourceCasino)->FUN_00504e00(i))->GetModelFilePath());
+            ((ModelSrc_504cc0*)((FUN_00504e00_shell*)pSourceCasino)->TESCasino_GetModel(i))->GetModelFilePath());
     }
     for (int i = 0; i < 11; i++)
     {
-        m_kIconTextures[i].SetFullName(((FNStub*)((FUN_00504e20_shell*)pSourceCasino)->FUN_00504e20(i))->GetFullName());
+        m_kIconTextures[i].SetFullName(((FNStub*)((FUN_00504e20_shell*)pSourceCasino)->TESCasino_GetNthSlotReel(i))->GetFullName());
     }
-    if (((FUN_00504e40_shell*)pSourceCasino)->FUN_00504e40())
-        data.uiChunkType = ((FUN_00504e40_shell*)pSourceCasino)->FUN_00504e40()->GetFormID();
+    if (((FUN_00504e40_shell*)pSourceCasino)->TESCasino_GetQuest())
+        data.uiChunkType = ((FUN_00504e40_shell*)pSourceCasino)->TESCasino_GetQuest()->GetFormID();
     else
         data.uiChunkType = 0;
-    data = *(EndianConvertibleData*)((FUN_00504e60_shell*)pSourceCasino)->FUN_00504e60();
+    data = *(EndianConvertibleData*)((FUN_00504e60_shell*)pSourceCasino)->TESCasino_GetData();
     ((fnv_00504cc0::FormTypeSetter_4f15a0*)this)->SetFormType(fnv_00504cc0::FNV_GetFormType(pSourceCasino));
 }
 }  // namespace fnv_00504cc0
@@ -450,7 +455,7 @@ struct FUN_004855a0
 
 struct DoorPart30
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 
 struct DoorPart3c
@@ -460,7 +465,7 @@ struct DoorPart3c
 
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
 
 struct FUN_0047a240_shell
@@ -490,26 +495,27 @@ struct FUN_00485680
 
 struct FUN_00504280_shell
 {
-    void FUN_00504280();
+    void TESCasinoChips_Save();
 };
 
-void FUN_004856f0(unsigned int, void*, unsigned int);
+void TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 
 // @fnv 0x00504280
-void FUN_00504280_shell::FUN_00504280()
+// src: XBOX_PDB 0x00504280
+void FUN_00504280_shell::TESCasinoChips_Save()
 {
     reinterpret_cast<struct FUN_004855a0*>(this)->M();
-    reinterpret_cast<DoorPart30*>(reinterpret_cast<char*>(this) + 0x30)->FUN_00487010();
+    reinterpret_cast<DoorPart30*>(reinterpret_cast<char*>(this) + 0x30)->Save_00487010();
     reinterpret_cast<DoorPart3c*>(reinterpret_cast<char*>(this) + 0x3c)
         ->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x5c)->FUN_0048e370(0x4e4f4349);
+    reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x5c)->TESTexture_Save(0x4e4f4349);
     reinterpret_cast<FUN_0047a240_shell*>(reinterpret_cast<char*>(this) + 0x68)->FUN_0047a240(0x4f43494d);
     reinterpret_cast<DoorPart68*>(reinterpret_cast<char*>(this) + 0x80)->FUN_00477f20();
     reinterpret_cast<FUN_0047b560_holder*>(reinterpret_cast<char*>(this) + 0x88)->LogFormIDs();
 
     if (reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x94)->Length())
     {
-        FUN_004856f0(0x4d414e4f,
+        TESForm_AddChunkArray(0x4d414e4f,
                      reinterpret_cast<void*>(
                          reinterpret_cast<const GO*>(reinterpret_cast<char*>(this) + 0x94)->operator unsigned int()),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x94)->Length() + 1);
@@ -541,12 +547,13 @@ struct FUN_00504640_shell
     Texture m_kIconTextures[11];
     char data[0x38];
 
-    void FUN_00504640();
+    void TESCasino_SetDefault();
 };
 
 // Zeroes the data block, then calls Init on all 10 Model entries and all 11 Texture entries.
 // @fnv 0x00504640
-void FUN_00504640_shell::FUN_00504640()
+// src: COMMUNITY 0x00504640
+void FUN_00504640_shell::TESCasino_SetDefault()
 {
     memset(this->data, 0, sizeof(this->data));
 
@@ -569,12 +576,12 @@ struct FUN_004855a0
 
 struct DoorPart30
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 
 struct FUN_00485e00_shell
 {
-    void FUN_00485e20(int, int);
+    void TESForm___SaveData(int, int);
 };
 
 struct DoorPart3c
@@ -586,7 +593,7 @@ struct DoorPart3c
 
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
 
 struct FUN_00485680
@@ -598,21 +605,22 @@ bool _FUN_00401500();
 
 struct FUN_00504710_shell : public TESCasino
 {
-    void FUN_00504710();
+    void TESCasino_Save();
 };
 
 // @fnv 0x00504710
-void FUN_00504710_shell::FUN_00504710()
+// src: XBOX_PDB 0x00504710
+void FUN_00504710_shell::TESCasino_Save()
 {
     reinterpret_cast<struct FUN_004855a0*>(this)->M();
-    reinterpret_cast<DoorPart30*>(reinterpret_cast<unsigned char*>(this) + 0x18)->FUN_00487010();
+    reinterpret_cast<DoorPart30*>(reinterpret_cast<unsigned char*>(this) + 0x18)->Save_00487010();
 
     if (_FUN_00401500())
     {
         reinterpret_cast<EndianConvertibleData*>(reinterpret_cast<unsigned char*>(this) + 0x1E8)->Endian();
     }
 
-    reinterpret_cast<FUN_00485e00_shell*>(this)->FUN_00485e20(
+    reinterpret_cast<FUN_00485e00_shell*>(this)->TESForm___SaveData(
         reinterpret_cast<int>(reinterpret_cast<EndianConvertibleData*>(reinterpret_cast<unsigned char*>(this) + 0x1E8)),
         0x38);
 
@@ -657,7 +665,7 @@ void FUN_00504710_shell::FUN_00504710()
         for (i = 0; i < 7; ++i)
         {
             reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<unsigned char*>(this) + 0x164 + i * 0x0C)
-                ->FUN_0048e370(0x4E4F4349);
+                ->TESTexture_Save(0x4E4F4349);
         }
     }
 
@@ -666,7 +674,7 @@ void FUN_00504710_shell::FUN_00504710()
         for (i = 7; i < 0x0B; ++i)
         {
             reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<unsigned char*>(this) + 0x164 + i * 0x0C)
-                ->FUN_0048e370(0x324F4349);
+                ->TESTexture_Save(0x324F4349);
         }
     }
 
@@ -756,10 +764,10 @@ struct Secondary_504570
 {
     virtual void v00();
     unsigned int b04;
-    void FUN_00591300();
+    void BSStringT_Thunk();
     ~Secondary_504570()
     {
-        FUN_00591300();
+        BSStringT_Thunk();
     }
 };
 struct Elem32_504570
@@ -795,52 +803,53 @@ FUN_00504570_cls::~FUN_00504570_cls()
 }
 
 #include <string.h>
-int FUN_00408b20(const char*, const char*);
+int BSstrcmp(const char*, const char*);
 struct TextureAccess : TESTexture
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct CasinoAccess : TESCasino
 {
-    TESTexture* FUN_00504e20(int);
-    TESModelTextureSwap* FUN_00504e00(int);
-    TESForm* FUN_00504e40();
-    void* FUN_00504e60();
-    bool FUN_00485270(TESForm*);
-    bool FUN_00504e80(TESForm* form);
+    TESTexture* TESCasino_GetNthSlotReel(int);
+    TESModelTextureSwap* TESCasino_GetModel(int);
+    TESForm* TESCasino_GetQuest();
+    void* TESCasino_GetData();
+    bool TESForm_CompareAllComponents(TESForm*);
+    bool TESCasino_Compare(TESForm* form);
 };
 // Returns true when the cast fails or any subsequent comparison check returns nonzero.
 // @fnv 0x00504e80
-bool CasinoAccess::FUN_00504e80(TESForm* form)
+// src: XBOX_PDB 0x00504e80
+bool CasinoAccess::TESCasino_Compare(TESForm* form)
 {
     TESCasino* other = dynamic_cast<TESCasino*>(form);
     if (!other)
         return true;
-    if (FUN_00485270(other))
+    if (TESForm_CompareAllComponents(other))
         return true;
     for (int i = 0; i < 11; i++)
     {
-        if (FUN_00408b20(reinterpret_cast<TextureAccess*>(&m_kIconTextures[i])->FUN_00408da0(),
-                         reinterpret_cast<TextureAccess*>(reinterpret_cast<CasinoAccess*>(other)->FUN_00504e20(i))
-                             ->FUN_00408da0()))
+        if (BSstrcmp(reinterpret_cast<TextureAccess*>(&m_kIconTextures[i])->TESModel_GetModel(),
+                         reinterpret_cast<TextureAccess*>(reinterpret_cast<CasinoAccess*>(other)->TESCasino_GetNthSlotReel(i))
+                             ->TESModel_GetModel()))
             return true;
     }
     for (int j = 0; j < 10; j++)
     {
-        if (FUN_00408b20(m_kModelTextureSwaps[j].GetModelFilePath(),
-                         reinterpret_cast<CasinoAccess*>(other)->FUN_00504e00(j)->GetModelFilePath()))
+        if (BSstrcmp(m_kModelTextureSwaps[j].GetModelFilePath(),
+                         reinterpret_cast<CasinoAccess*>(other)->TESCasino_GetModel(j)->GetModelFilePath()))
             return true;
     }
-    if (GetFormByID(data.uiChunkType) != reinterpret_cast<CasinoAccess*>(other)->FUN_00504e40())
+    if (GetFormByID(data.uiChunkType) != reinterpret_cast<CasinoAccess*>(other)->TESCasino_GetQuest())
         return true;
-    if (memcmp(&data, reinterpret_cast<CasinoAccess*>(other)->FUN_00504e60(), 0x38))
+    if (memcmp(&data, reinterpret_cast<CasinoAccess*>(other)->TESCasino_GetData(), 0x38))
         return true;
     return false;
 }
 
 struct CasinoChipFormCompareCall
 {
-    bool FUN_00485270(::TESForm*);
+    bool TESForm_CompareAllComponents(::TESForm*);
 };
 struct CasinoChipStringCompareCall
 {
@@ -849,16 +858,17 @@ struct CasinoChipStringCompareCall
 
 struct CasinoChipCompareView : public ::TESCasinoChips
 {
-    bool FUN_005043b0(::TESForm* form);
+    bool TESCasinoChips_Compare(::TESForm* form);
 };
 
 // @fnv 0x005043b0
-bool CasinoChipCompareView::FUN_005043b0(::TESForm* form)
+// src: XBOX_PDB 0x005043b0
+bool CasinoChipCompareView::TESCasinoChips_Compare(::TESForm* form)
 {
     ::TESCasinoChips* chip = dynamic_cast< ::TESCasinoChips*>(form);
     if (!chip)
         return true;
-    if (reinterpret_cast<CasinoChipFormCompareCall*>(this)->FUN_00485270(chip))
+    if (reinterpret_cast<CasinoChipFormCompareCall*>(this)->TESForm_CompareAllComponents(chip))
         return true;
     if (reinterpret_cast<CasinoChipStringCompareCall*>(&m_kPrimaryString)->CompareString(&chip->m_kPrimaryString, true))
         return true;

@@ -118,7 +118,7 @@ struct RenderState
     unsigned short unk2e;
     unsigned int kind;
     unsigned int mode;
-    void FUN_00e8b740(void*);
+    void NiDX9LightManager_UpdateLights(void*);
     void ApplyRenderModes(void*, Descriptor*, RenderModes*);
 };
 // @fnv 0x00e8bb70
@@ -193,7 +193,7 @@ void RenderState::ApplyRenderModes(void* resource, Descriptor* desc, RenderModes
         device->SetState(137, 1, 0, 0);
         if (cached == invalid || resource != cached || enabled != oldEnabled)
         {
-            FUN_00e8b740(resource);
+            NiDX9LightManager_UpdateLights(resource);
             cached = resource;
             oldEnabled = enabled;
         }

@@ -31,12 +31,12 @@ public:
     NiPoint3 GetPosition();
     bool IsWithinProcThreshold();
     bool FUN_008b3bb0();
-    float FUN_0057b0a0();
-    void* FUN_00575d70();
+    float TESObjectREFR_GetRelevantWaterHeight();
+    void* TESObjectREFR_GetWorldSpace();
     void* FUN_008d6f30();
     void PathToLocation(PathingRequest*, PathPoint*, void*, void*, float, int);
     void SetPathingRequestAvoidNodes(PathingRequest*);
-    void FUN_008b3ab0();
+    void StopMoving_008b3ab0();
     void UpdatePathing(PathActor_actormover* actor);
 };
 #include "../../../../include/PathingLocation.h"
@@ -150,7 +150,7 @@ bool ActorMover::HasActiveMovement()
         return true;
     if (m_bMovementActive)
         return true;
-    if (!m_pActorNode.operator->() || !m_pActorNode->FUN_009dc530() || bPathingFailed)
+    if (!m_pActorNode.operator->() || !m_pActorNode->PathingSolution_IsValid() || bPathingFailed)
         return false;
     return true;
 }
@@ -204,7 +204,8 @@ FUN_0040e0b0::FUN_0040e0b0(int a, float b) : FUN_0040e130(a, b)
 }
 
 // @fnv 0x009daf80
-void __fastcall FUN_009daf80(TESForm* pForm)
+// src: XBOX_PDB 0x009daf80
+void __fastcall ActorMover_ClearCurrentData(TESForm* pForm)
 {
     *(int*)((char*)pForm + 0x6c) = 6;
     ((NiPointer<PathingRequest>*)((char*)pForm + 0x1c))->operator=(0);
@@ -224,23 +225,25 @@ void __fastcall FUN_009daf80(TESForm* pForm)
 }
 
 // @fnv 0x009dba30
-bool ActorMover::FUN_009dba30(const PathingRequest* apRequest)
+// src: XBOX_PDB 0x009dba30
+bool ActorMover::SetGoal(const PathingRequest* apRequest)
 {
-    return FUN_009db090(apRequest);
+    return BackGroundBuildPath(apRequest);
 }
 
 struct ArrHelper
 {
-    bool FUN_0076b610() const;
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() const;
 };
 
 // @fnv 0x009dc530
-bool ActorMover::FUN_009dc530()
+// src: COMMUNITY 0x009dc530
+bool ActorMover::PathingSolution_IsValid()
 {
-    if (((ArrHelper*)((char*)this + 8))->FUN_0076b610())
+    if (((ArrHelper*)((char*)this + 8))->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
         return false;
     if (*(int*)((char*)this + 0x18) != -1 && *(int*)((char*)this + 0x1c) != -1 &&
-        ((ArrHelper*)((char*)this + 0x20))->FUN_0076b610())
+        ((ArrHelper*)((char*)this + 0x20))->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
         return false;
     if (GetPathingSolutionFlag40((PathingSolution*)this))
         return true;
@@ -265,7 +268,8 @@ void __fastcall ForwardValueToVtbl(ActorMover* pThis, FUN_009dc950_Arg aArg)
 extern PlayerCharacter* pPlayer;
 
 // @fnv 0x009dcae0
-bool __fastcall FUN_009dcae0(ActorMover* pMover)
+// src: XBOX_PDB 0x009dcae0
+bool __fastcall ActorMover_IsActorInLoadedArea(ActorMover* pMover)
 {
     if (!((BSOcclusionPlane*)pMover->pActor)->GetCullResult() ||
         !reinterpret_cast<TESObjectCELL*>(((BSOcclusionPlane*)pMover->pActor)->GetCullResult())->IsOutdoorCell() ||
@@ -277,7 +281,8 @@ bool __fastcall FUN_009dcae0(ActorMover* pMover)
 }
 
 // @fnv 0x009dcd40
-bool ActorMover::FUN_009dcd40()
+// src: XBOX_PDB 0x009dcd40
+bool ActorMover::IsPathingComplete()
 {
     if (m_bMovementActive)
     {
@@ -288,7 +293,7 @@ bool ActorMover::FUN_009dcd40()
         return true;
     }
     else if (((NiNode*)m_pActorNode &&
-              ((NiNode*)(NiNode*)m_pActorNode)->FUN_009dc530()) ||
+              ((NiNode*)(NiNode*)m_pActorNode)->PathingSolution_IsValid()) ||
              eState == 4)
     {
         return false;
@@ -300,13 +305,15 @@ bool ActorMover::FUN_009dcd40()
 }
 
 // @fnv 0x009dd130
-unsigned int ActorMover::FUN_009dd130()
+// src: XBOX_PDB 0x009dd130
+unsigned int ActorMover::GetPreferredMoveModeType_009dd130()
 {
     return unk34 & 0xff00;
 }
 
 // @fnv 0x009dd1c0
-void ActorMover::FUN_009dd1c0(bool abClearHandler)
+// src: XBOX_PDB 0x009dd1c0
+void ActorMover::FinishMoving(bool abClearHandler)
 {
     switch (eState)
     {
@@ -391,7 +398,8 @@ class PathManager
 } // namespace fnv_009dfa00
 
 // @fnv 0x009dfa00
-void ActorMover::FUN_009dfa00(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009dfa00
+void ActorMover::FinishLoadGame_009dfa00(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     using namespace fnv_009dfa00;
     if (m_bMovementActive && *(NiPointer<PathingRequest>*)((char*)this + 0x1c))
@@ -439,13 +447,14 @@ float __cdecl GetDirectionAngle(const NiPoint3&);
 } // namespace p07
 
 // @fnv 0x009dce20
-void* ActorMover::FUN_009dce20(NiPoint3 aPoint, bool abFlag)
+// src: XBOX_PDB 0x009dce20
+void* ActorMover::RequestRotateActor(NiPoint3 aPoint, bool abFlag)
 {
     using namespace p07;
     NiPoint3 kDelta = aPoint - *static_cast<const Actor*>(pActor)->GetPos();
     {
         float fDistance = GetDirectionAngle(kDelta);
-        return (this->*reinterpret_cast<void* (ActorMover::*)(float, bool)>(&ActorMover::FUN_009dce80))(fDistance, abFlag);
+        return (this->*reinterpret_cast<void* (ActorMover::*)(float, bool)>(&ActorMover::RequestRotateActor_009dce80))(fDistance, abFlag);
     }
 }
 
@@ -467,7 +476,7 @@ bool ActorMover::HasPathingSolution()
 // @fnv 0x009daef0
 ActorMover::~ActorMover()
 {
-    ::FUN_009daf80((TESForm*)this);
+    ::ActorMover_ClearCurrentData((TESForm*)this);
 }
 
 // @fnv 0x009db950
@@ -497,11 +506,12 @@ struct PathingRequestHelper
 void __cdecl SetupPathingRequest(void* actor, PathingRequestHelper* request, int a, int b, int c, float d, int e);
 // Builds a PathingRequestHelper via SetupPathingRequest from pActor and the given arguments, then returns the result of FUN_009dba30 on it.
 // @fnv 0x009dba50
-bool ActorMover::FUN_009dba50(int aiArg1, int aiArg2, int aiArg3, float afArg4, int aiArg5)
+// src: XBOX_PDB 0x009dba50
+bool ActorMover::SetGoal_009dba50(int aiArg1, int aiArg2, int aiArg3, float afArg4, int aiArg5)
 {
     PathingRequestHelper request;
     SetupPathingRequest(pActor, &request, aiArg1, aiArg2, aiArg3, afArg4, aiArg5);
-    return FUN_009dba30((PathingRequest*)&request);
+    return SetGoal((PathingRequest*)&request);
 }
 
 namespace fnv_009dbb60 {
@@ -517,13 +527,14 @@ void __cdecl SetupPathingRequest(void* actor, PathingRequestHelper* request, int
 } // namespace fnv_009dbb60
 
 // @fnv 0x009dbb60
-bool ActorMover::FUN_009dbb60(int aiArg1, int aiArg2, int aiArg3, float afValue, float afArg4, int aiArg5)
+// src: COMMUNITY 0x009dbb60
+bool ActorMover::SetGoalAndAngle(int aiArg1, int aiArg2, int aiArg3, float afValue, float afArg4, int aiArg5)
 {
     using namespace fnv_009dbb60;
     fnv_009dbb60::PathingRequestHelper request;
     SetupPathingRequest(pActor, &request, aiArg1, aiArg2, aiArg3, afArg4, aiArg5);
     request.SetTargetAngle(afValue);
-    return FUN_009dba30((PathingRequest*)&request);
+    return SetGoal((PathingRequest*)&request);
 }
 
 namespace fnv_00564db0 {
@@ -536,11 +547,12 @@ struct ActormoverOffset08View
 
 struct FUN_00564db0_cls
 {
-    void FUN_00564db0(bool abVal);
+    void TESObjectREFR_SetTargeted(bool abVal);
 };
 
 // @fnv 0x00564db0
-void __thiscall FUN_00564db0_cls::FUN_00564db0(bool abVal)
+// src: XBOX_PDB 0x00564db0
+void __thiscall FUN_00564db0_cls::TESObjectREFR_SetTargeted(bool abVal)
 {
     int iflags = ((ActormoverOffset08View*)this)->GetFlags();
     if (abVal)
@@ -564,16 +576,17 @@ struct FUN_00691c90_shell
     TypeValueCount* pBuffer;
     unsigned int iSize;
     unsigned int iAllocSize;
-    void FUN_00691c90(unsigned int auiIndex, unsigned int auiCount);
+    void BSSimpleArray_RemoveFast_0(unsigned int auiIndex, unsigned int auiCount);
     void FUN_0072ba80(TypeValueCount*, unsigned int);
-    void FUN_006dc6e0(TypeValueCount*, TypeValueCount*, unsigned int);
+    void BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(TypeValueCount*, TypeValueCount*, unsigned int);
 };
 // @fnv 0x00691c90
-void FUN_00691c90_shell::FUN_00691c90(unsigned int auiIndex, unsigned int auiCount)
+// src: COMMUNITY 0x00691c90
+void FUN_00691c90_shell::BSSimpleArray_RemoveFast_0(unsigned int auiIndex, unsigned int auiCount)
 {
     unsigned int uiMoveCount = FUN_0042f5a0(iSize - auiIndex - auiCount, auiCount);
     FUN_0072ba80(&pBuffer[auiIndex], auiCount);
-    FUN_006dc6e0(&pBuffer[auiIndex], pBuffer + iSize - uiMoveCount, uiMoveCount);
+    BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(&pBuffer[auiIndex], pBuffer + iSize - uiMoveCount, uiMoveCount);
     iSize -= auiCount;
 }
 
@@ -589,7 +602,8 @@ void FUN_006d3ae0::SetValue(float value)
 }
 
 // @fnv 0x009de060
-void ActorMover::FUN_009de060(int aiValue)
+// src: XBOX_PDB 0x009de060
+void ActorMover::ForceMoveMode(int aiValue)
 {
     m_bHasMovementData = true;
     m_uiMovementFlags = aiValue;
@@ -723,19 +737,21 @@ template <> NiPointer<NiNode>::~NiPointer()
 
 struct FUN_009dfd50Class
 {
-    void FUN_009dfd50();
+    void BSSimpleArray_VirtualPathingNode_1024_GetLast();
 };
 
 // @fnv 0x009ddb30
-void __thiscall ActorMover::FUN_009ddb30()
+// src: XBOX_PDB 0x009ddb30
+void __thiscall ActorMover::PathingSolution_GetLastVirtualNode()
 {
-    ((FUN_009dfd50Class*)((char*)this + 8))->FUN_009dfd50();
+    ((FUN_009dfd50Class*)((char*)this + 8))->BSSimpleArray_VirtualPathingNode_1024_GetLast();
 }
 
 // @fnv 0x009dbb10
-bool ActorMover::FUN_009dbb10(TESObjectREFR* apRef, float afValue, int aiValue)
+// src: XBOX_PDB 0x009dbb10
+bool ActorMover::SetGoal_009dbb10(TESObjectREFR* apRef, float afValue, int aiValue)
 {
-    return FUN_009dba50((int)((const TESObjectREFR*)apRef)->GetPos(), (int)((LowProcess*)apRef)->LowProcess::GetTarget(), (int)apRef->GetParentWorldSpace(),
+    return SetGoal_009dba50((int)((const TESObjectREFR*)apRef)->GetPos(), (int)((LowProcess*)apRef)->LowProcess::GetTarget(), (int)apRef->GetParentWorldSpace(),
                         afValue, aiValue);
 }
 
@@ -743,15 +759,17 @@ class TESSound;
 
 // Calls FUN_009dbb60 with the reference's position, target sound, world space, Z angle, and the two given values.
 // @fnv 0x009dbc30
-void ActorMover::FUN_009dbc30(TESObjectREFR* apReference, float afValue, int aiValue)
+// src: COMMUNITY 0x009dbc30
+void ActorMover::SetGoalAndAngle_(TESObjectREFR* apReference, float afValue, int aiValue)
 {
-    FUN_009dbb60(((const TESObjectREFR*)apReference)->GetPos(), ((LowProcess*)apReference)->LowProcess::GetTarget(), apReference->GetParentWorldSpace(),
+    SetGoalAndAngle(((const TESObjectREFR*)apReference)->GetPos(), ((LowProcess*)apReference)->LowProcess::GetTarget(), apReference->GetParentWorldSpace(),
                  apReference->GetAngleOnReference().z, afValue, aiValue);
 }
 
 // Returns the value from the inner object's f12() if p is non-null, otherwise returns 0.
 // @fnv 0x009dcab0
-int ActorMover::FUN_009dcab0()
+// src: XBOX_PDB 0x009dcab0
+int ActorMover::GetCurrentNodeIndex()
 {
     if (m_pPathHandler != 0)
         return m_pPathHandler->vfn_30();
@@ -761,9 +779,10 @@ int ActorMover::FUN_009dcab0()
 
 // Queries the handler when a valid movement path is present.
 // @fnv 0x009dcb30
-bool ActorMover::FUN_009dcb30()
+// src: XBOX_PDB 0x009dcb30
+bool ActorMover::IsWaitingForAvoidance()
 {
-    if (m_pPathHandler && (NiNode*)m_pActorNode && ((NiNode*)(NiNode*)m_pActorNode)->FUN_009dc530())
+    if (m_pPathHandler && (NiNode*)m_pActorNode && ((NiNode*)(NiNode*)m_pActorNode)->PathingSolution_IsValid())
         return m_pPathHandler->vfn_3c();
     return true;
 }
@@ -774,17 +793,19 @@ namespace fnv_009dcb90 {
 } // namespace fnv_009dcb90
 
 // @fnv 0x009dcb90
-bool ActorMover::FUN_009dcb90()
+// src: XBOX_PDB 0x009dcb90
+bool ActorMover::IsMovementBlocked()
 {
     using namespace fnv_009dcb90;
-    if (m_pPathHandler && (NiNode*)m_pActorNode && ((NiNode*)(NiNode*)m_pActorNode)->FUN_009dc530())
+    if (m_pPathHandler && (NiNode*)m_pActorNode && ((NiNode*)(NiNode*)m_pActorNode)->PathingSolution_IsValid())
         return m_pPathHandler->vfn_40();
     return 0;
 }
 
 // Returns the value from pHandler if it is set, otherwise returns 0.0f.
 // @fnv 0x009dcbf0
-float ActorMover::FUN_009dcbf0()
+// src: COMMUNITY 0x009dcbf0
+float ActorMover::GetCurrentPercent()
 {
     if (m_pPathHandler)
         return m_pPathHandler->vfn_1c();
@@ -794,7 +815,8 @@ float ActorMover::FUN_009dcbf0()
 
 // Returns the value from mPtr by calling its F6 method, or 0.0f when mPtr is null.
 // @fnv 0x009dcc20
-float ActorMover::FUN_009dcc20()
+// src: COMMUNITY 0x009dcc20
+float ActorMover::GetDistanceTraveled()
 {
     if (m_pPathHandler)
         return m_pPathHandler->vfn_18();
@@ -804,7 +826,8 @@ float ActorMover::FUN_009dcc20()
 
 // Returns the value from the handler pointer if set, otherwise returns 0.0f.
 // @fnv 0x009dcc50
-float ActorMover::FUN_009dcc50()
+// src: COMMUNITY 0x009dcc50
+float ActorMover::GetDistanceRemaining()
 {
     if (m_pPathHandler)
         return m_pPathHandler->vfn_28();
@@ -813,9 +836,10 @@ float ActorMover::FUN_009dcc50()
 }
 
 // @fnv 0x009dccf0
-bool ActorMover::FUN_009dccf0()
+// src: COMMUNITY 0x009dccf0
+bool ActorMover::ComputePathPassesThroughPlayersArea()
 {
-    if (!(NiNode*)m_pActorNode || !((NiNode*)(NiNode*)m_pActorNode)->FUN_009dc530())
+    if (!(NiNode*)m_pActorNode || !((NiNode*)(NiNode*)m_pActorNode)->PathingSolution_IsValid())
         return false;
     return m_pPathHandler->vfn_44();
 }
@@ -832,7 +856,8 @@ namespace fnv_009de110 {
 } // namespace fnv_009de110
 
 // @fnv 0x009de110
-bool ActorMover::FUN_009de110(int aiArg1, int aiArg2)
+// src: XBOX_PDB 0x009de110
+bool ActorMover::GetNodeLocation(int aiArg1, int aiArg2)
 {
     using namespace fnv_009de110;
     if ((NiNode*)m_pActorNode && m_pPathHandler)
@@ -848,9 +873,10 @@ void ActorMover::SetFormID(TESForm* pForm)
 }
 
 // @fnv 0x009de3e0
-bool ActorMover::FUN_009de3e0()
+// src: XBOX_PDB 0x009de3e0
+bool ActorMover::IsPathValid()
 {
-    if ((NiNode*)m_pActorNode && ((NiNode*)(NiNode*)m_pActorNode)->FUN_009dc530())
+    if ((NiNode*)m_pActorNode && ((NiNode*)(NiNode*)m_pActorNode)->PathingSolution_IsValid())
         return true;
     return false;
 }
@@ -892,9 +918,9 @@ struct FUN_006e2bb0_shell
     void SetInitialPathHeading(float f);
 };
 // Actor.h does not yet declare the no-argument call at 0x008be280.
-float __fastcall FUN_008be280(Actor*);
-bool __fastcall FUN_0087f350(Actor* a);
-bool __fastcall FUN_0087f390(Actor* a);
+float __fastcall Actor_GetWidth(Actor*);
+bool __fastcall Actor_DoesSwim(Actor* a);
+bool __fastcall DoesFly_0087f390(Actor* a);
 extern const double DAT_010290b8;
 struct FUN_006e29f0_sub
 {
@@ -920,10 +946,10 @@ struct FUN_006e29f0_shell
 void FUN_006e29f0_shell::InitFromActor(Actor* apActor)
 {
     *(PathingLocation*)((char*)this + 0xc) = PathingLocation((TESObjectREFR*)apActor);
-    ((FUN_006d3ae0*)this)->SetValue((float)(FUN_008be280(apActor) * DAT_010290b8));
+    ((FUN_006d3ae0*)this)->SetValue((float)(Actor_GetWidth(apActor) * DAT_010290b8));
     *(PathingActorData*)this = *(PathingActorData*)apActor;
-    ((FUN_006e2b70_shell*)this)->SetCanSwim(FUN_0087f350(apActor));
-    ((FUN_006e2b90*)this)->SetFlag(FUN_0087f390(apActor));
+    ((FUN_006e2b70_shell*)this)->SetCanSwim(Actor_DoesSwim(apActor));
+    ((FUN_006e2b90*)this)->SetFlag(DoesFly_0087f390(apActor));
     if (apActor->IsCreature())
     {
         ((FUN_006e2b50_shell*)this)
@@ -962,10 +988,10 @@ struct FUN_006e2b90
 
 struct Dummy
 {
-    bool FUN_005f0c40();
+    bool DoesFly();
 };
 
-bool __fastcall FUN_005f0b50(TESActorBase*);
+bool __fastcall DoesSwim(TESActorBase*);
 
 struct ActorBaseComponent30
 {
@@ -1004,8 +1030,8 @@ void __cdecl SetupPathingRequest(Actor* apActor, PathingRequest* apRequest, NiPo
         ((FUN_006e2b50_shell*)apRequest)
             ->SetCantOpenDoors(((ActorBaseComponent30*)((char*)apActor->GetActorBase() + 0x30))->v10());
     }
-    ((FUN_006e2b70_shell*)apRequest)->SetCanSwim(FUN_005f0b50(apActor->GetActorBase()));
-    ((FUN_006e2b90*)apRequest)->SetFlag(((Dummy*)apActor->GetActorBase())->FUN_005f0c40());
+    ((FUN_006e2b70_shell*)apRequest)->SetCanSwim(DoesSwim(apActor->GetActorBase()));
+    ((FUN_006e2b90*)apRequest)->SetFlag(((Dummy*)apActor->GetActorBase())->DoesFly());
 }
 }  // namespace fnv_009dbc90
 
@@ -1017,7 +1043,7 @@ extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 // Retain this local method view for those unsupported declarations.
 struct ActorStub_009dc7f0
 {
-    void FUN_0088d640();
+    void Actor_GetOutofFurnitureQuick();
     void TryMove(int);
 };
 
@@ -1032,12 +1058,12 @@ void ActorMover::UpdateTeleportPathState()
         return;
     else if (pActor->GetProcess()->GetSitSleepState())
     {
-        ((ActorStub_009dc7f0*)pActor)->FUN_0088d640();
+        ((ActorStub_009dc7f0*)pActor)->Actor_GetOutofFurnitureQuick();
         return;
     }
-    if (!m_pPathHandler || FUN_009dcd40())
+    if (!m_pPathHandler || IsPathingComplete())
     {
-        if (!g_BGSSaveLoadGame->FUN_0042ce10())
+        if (!g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
             ((ActorStub_009dc7f0*)pActor)->TryMove(0);
     }
     else if (m_bMovementStateFlag && m_pPathHandler->vfn_34())
@@ -1104,7 +1130,7 @@ typedef char _sizecheck_BGSLoadFormBuffer[sizeof(BGSLoadFormBuffer) == 48 ? 1 : 
 
 struct HighActorCullerCell
 {
-    BSPortalGraph* FUN_009d9f20();
+    BSPortalGraph* GetPortalGraph_009d9f20();
 };
 
 struct SPathReq
@@ -1123,7 +1149,8 @@ struct SPathReq
 } // namespace fnv_009df8c0
 
 // @fnv 0x009df8c0
-void ActorMover::FUN_009df8c0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009df8c0
+void ActorMover::InitLoadGame_009df8c0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     using namespace fnv_009df8c0;
     if (m_pPathHandler)
@@ -1136,7 +1163,7 @@ void ActorMover::FUN_009df8c0(BGSLoadFormBuffer* apLoadGameBuffer)
             CombatController* pcombatController = pActor->GetCombatController();
             if (pcombatController && pcombatController->GetCombatGroup())
             {
-                NiPointer<BSPortalGraph> kGraph(((HighActorCullerCell*)pcombatController->GetCombatGroup())->FUN_009d9f20());
+                NiPointer<BSPortalGraph> kGraph(((HighActorCullerCell*)pcombatController->GetCombatGroup())->GetPortalGraph_009d9f20());
                 plosRequest->AssignAtOffsetB0(reinterpret_cast<const NiPointer<void>&>(kGraph));
             }
         }
@@ -1150,7 +1177,7 @@ struct FUN_006d0b80
 {
     FUN_006d0b80(PathingRequest*, PathingSolution*);
     ~FUN_006d0b80();
-    int FUN_006c93d0();
+    int PathBuilder_UpdatePathMoveToLow();
     int f0;
     int f1;
     int f2;
@@ -1167,20 +1194,21 @@ struct FUN_006d0b80
 };
 // Constructs a FUN_006d0b80 from the request and solution, then returns the result of FUN_006c93d0 on it.
 // @fnv 0x006d53b0
-int FUN_006d53b0(PathingRequest* pRequest, PathingSolution* b)
+// src: COMMUNITY 0x006d53b0
+int Pathing_UpdateSolutionMoveToLow(PathingRequest* pRequest, PathingSolution* b)
 {
     FUN_006d0b80 obj(pRequest, b);
-    return obj.FUN_006c93d0();
+    return obj.PathBuilder_UpdatePathMoveToLow();
 }
 
 struct TESForm;
-void __fastcall FUN_009daf80(TESForm*);
+void __fastcall ActorMover_ClearCurrentData(TESForm*);
 struct Sol11
 {
-    bool FUN_009dc530();
+    bool PathingSolution_IsValid();
     int FUN_00441110();
-    unsigned int FUN_005a4320();
-    void* FUN_006e78b0(unsigned int);
+    unsigned int PathingSolution_GetVirtualNodeCount();
+    void* GetVirtualNode_006e78b0(unsigned int);
 };
 struct QueueVt11;
 struct Req11
@@ -1670,12 +1698,13 @@ struct Proc11 : public ProcVt11
 };
 
 // @fnv 0x009dc120
-void ActorMover::FUN_009dc120(float f)
+// src: XBOX_PDB 0x009dc120
+void ActorMover::Update_009dc120(float f)
 {
     if (m_bMovementComplete)
     {
         unk78 = 1;
-        FUN_009dd1c0(1);
+        FinishMoving(1);
         m_bMovementComplete = 0;
     }
     if (pActor->HasHealth(false))
@@ -1711,7 +1740,7 @@ void ActorMover::FUN_009dc120(float f)
         {
             if (!m_bMovementActive)
             {
-                if ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode) && ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->FUN_009dc530())
+                if ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode) && ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->PathingSolution_IsValid())
                 {
                     eState = 3;
                     FUN_009dc590(f);
@@ -1734,7 +1763,7 @@ void ActorMover::FUN_009dc120(float f)
                     case 1: {
                         m_bMovementActive = 0;
                         (*(NiPointer<Sol11>*)&m_pActorNode) = msg.m_sol;
-                        if ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode) && ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->FUN_009dc530() && ((Req11*)(*(NiPointer<Req11>*)&request))->GetByteAtOffset9B())
+                        if ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode) && ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->PathingSolution_IsValid() && ((Req11*)(*(NiPointer<Req11>*)&request))->GetByteAtOffset9B())
                         {
                             eState = 3;
                             UpdatePathingState(f);
@@ -1747,9 +1776,9 @@ void ActorMover::FUN_009dc120(float f)
                             int idx = ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->FUN_00441110();
                             if (idx != -1)
                             {
-                                if (((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->FUN_005a4320() > 0)
+                                if (((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->PathingSolution_GetVirtualNodeCount() > 0)
                                 {
-                                    void* node = ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->FUN_006e78b0(idx);
+                                    void* node = ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->GetVirtualNode_006e78b0(idx);
                                     if (node)
                                     {
                                         (*(Loc11*)&m_pathingLocation) = *(Loc11*)((Node11*)node)->FUN_00717e50();
@@ -1758,7 +1787,7 @@ void ActorMover::FUN_009dc120(float f)
                                 }
                             }
                         }
-                        ::FUN_009daf80((TESForm*)this);
+                        ::ActorMover_ClearCurrentData((TESForm*)this);
                         break;
                     }
                     default:
@@ -1771,7 +1800,7 @@ void ActorMover::FUN_009dc120(float f)
         }
     }
 SECB:
-    if (!((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode) && ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->FUN_009dc530() && !bPathingFailed))
+    if (!((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode) && ((Sol11*)(*(NiPointer<Sol11>*)&m_pActorNode))->PathingSolution_IsValid() && !bPathingFailed))
     {
         if (m_pPathHandler)
         {
@@ -1782,7 +1811,7 @@ SECB:
         }
     }
 END:
-    FUN_009ddc00();
+    SetCurrentFrameMoveModeAndDelta();
     FUN_00483710();
 }
 
@@ -1878,9 +1907,9 @@ struct PathQuery
 // @fnv 0x009de2b0
 bool ActorMover::GetPathCoordinate(NiPoint3* position)
 {
-    if (m_pActorNode.operator->() && m_pActorNode.operator->()->FUN_009dc530())
+    if (m_pActorNode.operator->() && m_pActorNode.operator->()->PathingSolution_IsValid())
     {
-        PathQuery* query = reinterpret_cast<PathNode*>(m_pActorNode.operator->())->FUN_009ddb30();
+        PathQuery* query = reinterpret_cast<PathNode*>(m_pActorNode.operator->())->PathingSolution_GetLastVirtualNode();
         if (query)
         {
             // Raw output storage avoids an outlined call to the shared empty constructor.
@@ -2028,7 +2057,7 @@ void ActorMover::UpdatePathingState(float a1)
         {
             flag = false;
             request.operator->()->FUN_006e2b20(pActor);
-            switch (FUN_006d53b0(request.operator->(), (PathingSolution*)(*(NiPointer<PathingSolution>*)&m_pActorNode).operator->()))
+            switch (Pathing_UpdateSolutionMoveToLow(request.operator->(), (PathingSolution*)(*(NiPointer<PathingSolution>*)&m_pActorNode).operator->()))
             {
                 break;
             case -1:
@@ -2080,7 +2109,7 @@ void ActorMover::UpdatePathingState(float a1)
     else
     {
         currentNode = 0;
-        lastNode = (*(NiPointer<PathingSolution>*)&m_pActorNode).operator->()->FUN_005a4320() - 1;
+        lastNode = (*(NiPointer<PathingSolution>*)&m_pActorNode).operator->()->PathingSolution_GetVirtualNodeCount() - 1;
         if (m_pPathHandler)
         {
             delete m_pPathHandler;
@@ -2110,7 +2139,7 @@ void ActorMover::HandlePathResult(int aiResult)
     case 5:
     case 6: {
         int iUpdateResult = UpdatePathHandler();
-        if (!((PathingSolution*)m_pActorNode.operator->())->FUN_006b05d0())
+        if (!((PathingSolution*)m_pActorNode.operator->())->IsIncomplete())
         {
             if (aiResult == 6 && eState != 7)
             {
@@ -2148,7 +2177,8 @@ struct MovementStatus
 bool __fastcall CanActorMove(Actor*);
 
 // @fnv 0x009dce80
-bool ActorMover::FUN_009dce80(float delta, bool force)
+// src: XBOX_PDB 0x009dce80
+bool ActorMover::RequestRotateActor_009dce80(float delta, bool force)
 {
     bool result = false;
     ResetMoverState(1);
@@ -2159,7 +2189,7 @@ bool ActorMover::FUN_009dce80(float delta, bool force)
         eState = 6;
         result = true;
     }
-    else if (!FUN_009dcae0(this))
+    else if (!ActorMover_IsActorInLoadedArea(this))
     {
         eState = 6;
         pActor->SetFurnitureHeading(delta);
@@ -2307,7 +2337,7 @@ void ActorMover::UpdatePathMovement()
         else
             reinterpret_cast<Actor*>(((PathActor_actormover*)pActor))->SetPos(
                 const_cast<NiPoint3*>(reinterpret_cast<const NiPoint3*>(&((NiPointer<PathSolution>*)&m_pActorNode)->operator->()->Last()->GetData()->GetPosition())));
-        FUN_009dd1c0(1);
+        FinishMoving(1);
         return;
     }
     (*(NiPointer<PathRequest>*)&request).operator->()->Update(((PathActor_actormover*)pActor));
@@ -2335,7 +2365,7 @@ void ActorMover::UpdatePathMovement()
     }
     if (currentNode == lastNode)
     {
-        FUN_009dd1c0(1);
+        FinishMoving(1);
         return;
     }
     fraction = 0.0f;
@@ -2352,7 +2382,7 @@ void ActorMover::UpdatePathMovement()
     if (result6 == 5 || result6 == 6)
     {
         HandlePathResult(result6);
-        FUN_009dd1c0(1);
+        FinishMoving(1);
     }
 }
 
@@ -2366,12 +2396,12 @@ struct World
 };
 struct Area
 {
-    int FUN_006b7850();
+    int FindNavMeshInfoForCellKey();
 };
 // Exe 0x009de490: unit-local Map view; declarations and layout are preserved.
 struct ActormoverMapView
 {
-    Area* FUN_0045af00(World*, unsigned int);
+    Area* TES_GetNavMeshInfoMap(World*, unsigned int);
     double GetCellHeightAtPosition(const NiPoint3&, Cell*);
 };
 extern ActormoverMapView* DAT_011dea10;
@@ -2379,13 +2409,13 @@ unsigned int PackShortPair(unsigned short, unsigned short);
 struct Reference
 {
     int FUN_00441110();
-    int FUN_009611e0();
+    int NiAVObject_GetParent();
     NiPoint3 FUN_005c3420();
     Cell* FUN_006dd4f0();
 };
 struct Request
 {
-    Reference* FUN_006a9540();
+    Reference* NiAVObject_GetRotate_006a9540();
     Reference* GetOffsetC();
 };
 struct Queue
@@ -2418,25 +2448,25 @@ void ActorMover::SetEnabled(bool abEnabled)
             int y = int(static_cast<const Actor*>(pActor)->GetPos()->y) >> 12;
             if (!xSlot14 && !y &&
                 !DAT_011dea10
-                     ->FUN_0045af00(reinterpret_cast<World*>(pActor->FUN_00575d70()), PackShortPair((unsigned short)xSlot14, (unsigned short)y))
-                     ->FUN_006b7850())
-                pActor->FUN_008ad1c0(((NiPointer<ActorMovement::Request>*)&request)->operator->()->FUN_006a9540()->FUN_005c3420(), 0.0f,
-                                    ((NiPointer<ActorMovement::Request>*)&request)->operator->()->FUN_006a9540()->FUN_009611e0(),
-                                    ((NiPointer<ActorMovement::Request>*)&request)->operator->()->FUN_006a9540()->FUN_00441110(), 0, 1);
+                     ->TES_GetNavMeshInfoMap(reinterpret_cast<World*>(pActor->TESObjectREFR_GetWorldSpace()), PackShortPair((unsigned short)xSlot14, (unsigned short)y))
+                     ->FindNavMeshInfoForCellKey())
+                pActor->Actor_MoveActorAndFollowers(((NiPointer<ActorMovement::Request>*)&request)->operator->()->NiAVObject_GetRotate_006a9540()->FUN_005c3420(), 0.0f,
+                                    ((NiPointer<ActorMovement::Request>*)&request)->operator->()->NiAVObject_GetRotate_006a9540()->NiAVObject_GetParent(),
+                                    ((NiPointer<ActorMovement::Request>*)&request)->operator->()->NiAVObject_GetRotate_006a9540()->FUN_00441110(), 0, 1);
         }
         float intervalSlot1 = pActor->FUN_008b0190(7) ? DAT_0109222c : DAT_01092230;
         if (((NiPointer<ActorMovement::Request>*)&request)->operator->())
         {
             Cell* fromSlot12 = ((NiPointer<ActorMovement::Request>*)&request)->operator->()->GetOffsetC()->FUN_006dd4f0();
-            Cell* to = ((NiPointer<ActorMovement::Request>*)&request)->operator->()->FUN_006a9540()->FUN_006dd4f0();
+            Cell* to = ((NiPointer<ActorMovement::Request>*)&request)->operator->()->NiAVObject_GetRotate_006a9540()->FUN_006dd4f0();
             if (fromSlot12 && to)
             {
                 bool fromAboveSlot13 = DAT_011dea10->GetCellHeightAtPosition(
                                            ((NiPointer<ActorMovement::Request>*)&request)->operator->()->GetOffsetC()->FUN_005c3420(), fromSlot12) >
                                        ((NiPointer<ActorMovement::Request>*)&request)->operator->()->GetOffsetC()->FUN_005c3420().z;
                 bool toAboveSlot1 =
-                    DAT_011dea10->GetCellHeightAtPosition(((NiPointer<ActorMovement::Request>*)&request)->operator->()->FUN_006a9540()->FUN_005c3420(), to) >
-                    ((NiPointer<ActorMovement::Request>*)&request)->operator->()->FUN_006a9540()->FUN_005c3420().z;
+                    DAT_011dea10->GetCellHeightAtPosition(((NiPointer<ActorMovement::Request>*)&request)->operator->()->NiAVObject_GetRotate_006a9540()->FUN_005c3420(), to) >
+                    ((NiPointer<ActorMovement::Request>*)&request)->operator->()->NiAVObject_GetRotate_006a9540()->FUN_005c3420().z;
                 if (fromAboveSlot13 != toAboveSlot1)
                     intervalSlot1 = DAT_01092234;
             }
@@ -2490,14 +2520,14 @@ struct PLoc
 struct Req
 {
     PLoc* GetOffsetC();
-    PLoc* FUN_006a9540();
+    PLoc* NiAVObject_GetRotate_006a9540();
     float FUN_009b0bd0();
 };
 
 struct ProjBase
 {
-    bool FUN_005f0b50();
-    bool FUN_005f0c40();
+    bool DoesSwim();
+    bool DoesFly();
 };
 struct RefrV
 {
@@ -2677,11 +2707,11 @@ struct RefrV
 // and 0x008be280. Retain this local actor view until those are shared.
 struct Actor13 : public RefrV
 {
-    bool FUN_008bc7f0(void* player);
-    void FUN_008985d0();
+    bool Actor_IsFollowing_008bc7f0(void* player);
+    void Actor_InitiateMovementBlockedPackage();
     int FUN_00931850();
     ProjBase* FUN_004181e0();
-    float FUN_008be280();
+    float Actor_GetWidth();
 };
 struct Player13 : public RefrV
 {
@@ -2693,8 +2723,8 @@ extern "C" Player13* g_thePlayer;
 extern "C" float _runtimeFloatSettingDefault38;
 extern "C" double _gModifierZero;
 
-TESWorldSpace* __fastcall FUN_00575d70(TESObjectREFR* refr);
-void __cdecl FUN_00573800(void* actor, void* cell, void* ws);
+TESWorldSpace* __fastcall TESObjectREFR_GetWorldSpace(TESObjectREFR* refr);
+void __cdecl TESObjectREFR_MoveRefToNewSpace(void* actor, void* cell, void* ws);
 struct Helper13
 {
     int m_00;
@@ -2757,7 +2787,7 @@ struct Helper13
 };
 struct S_FUN_006b05a0
 {
-    void* FUN_006b05a0();
+    void* PathingSolution_GetLastNode();
 };
 struct ContNode;
 ContNode* __fastcall FUN_00717e50(void* p);
@@ -2812,7 +2842,7 @@ void ActorMover::UpdateTargeting()
     iAB = false;
     if ((PathingRequest*)request == 0)
         return;
-    if (((Actor13*)pActor)->FUN_008bc7f0(g_thePlayer))
+    if (((Actor13*)pActor)->Actor_IsFollowing_008bc7f0(g_thePlayer))
     {
         if (m_pPathHandler != 0)
         {
@@ -2822,28 +2852,28 @@ void ActorMover::UpdateTargeting()
                 {
                     if (!GetPathingSolutionFlag40((PathingSolution*)((NiPointer<PathingSolution>*)&m_pActorNode)->operator->()))
                     {
-                        ((Actor13*)pActor)->FUN_008985d0();
+                        ((Actor13*)pActor)->Actor_InitiateMovementBlockedPackage();
                         return;
                     }
                 }
             }
         }
-        if (((Actor13*)pActor)->GetPos()->FUN_00439ef0(g_thePlayer->GetPos()).FUN_00589850() >
+        if (((Actor13*)pActor)->GetPos()->SubtractIntoVector(g_thePlayer->GetPos()).NiPoint3_XYLength() >
             ((Req*)(PathingRequest*)request)->FUN_009b0bd0() * 2)
             iAB = true;
     }
     if (((Actor13*)pActor)->FUN_00931850() == 0)
     {
         bA4 = ((Req*)(PathingRequest*)request)->GetOffsetC()->FUN_006dd4f0();
-        zX = ((Req*)(PathingRequest*)request)->FUN_006a9540()->FUN_006dd4f0();
+        zX = ((Req*)(PathingRequest*)request)->NiAVObject_GetRotate_006a9540()->FUN_006dd4f0();
         if (0 != bA4 && 0 != zX)
         {
             bool resultB;
             resultB = g_TES->GetCellHeightAtPosition(&((Req*)(PathingRequest*)request)->GetOffsetC()->FUN_005c3420(), bA4) >
                       ((Req*)(PathingRequest*)request)->GetOffsetC()->FUN_005c3420().z;
             bool y6;
-            y6 = g_TES->GetCellHeightAtPosition(&((Req*)(PathingRequest*)request)->FUN_006a9540()->FUN_005c3420(), zX) >
-                 ((Req*)(PathingRequest*)request)->FUN_006a9540()->FUN_005c3420().z;
+            y6 = g_TES->GetCellHeightAtPosition(&((Req*)(PathingRequest*)request)->NiAVObject_GetRotate_006a9540()->FUN_005c3420(), zX) >
+                 ((Req*)(PathingRequest*)request)->NiAVObject_GetRotate_006a9540()->FUN_005c3420().z;
             if (resultB != y6)
                 iAB = true;
         }
@@ -2855,16 +2885,16 @@ void ActorMover::UpdateTargeting()
     if (iAB)
     {
         Helper13 solution4;
-        solution4.AssignPathingLocation(((Req*)(PathingRequest*)request)->FUN_006a9540());
+        solution4.AssignPathingLocation(((Req*)(PathingRequest*)request)->NiAVObject_GetRotate_006a9540());
         solution4.FUN_006d1bc0(((Actor13*)pActor));
         solution4.FUN_006d3b00(10.0f);
-        solution4.FUN_006d3ae0((float)(((Actor13*)pActor)->FUN_008be280() * (double)0.6f));
+        solution4.FUN_006d3ae0((float)(((Actor13*)pActor)->Actor_GetWidth() * (double)0.6f));
         solution4.FUN_006e2b20(((Actor13*)pActor));
         solution4.SetByteAtOffset9B(1);
         solution4.SetFlagA3(true);
         solution4.SetCantOpenDoors(false);
-        solution4.SetCanSwim(((Actor13*)pActor)->FUN_004181e0()->FUN_005f0b50());
-        solution4.FUN_006e2b90(((Actor13*)pActor)->FUN_004181e0()->FUN_005f0c40());
+        solution4.SetCanSwim(((Actor13*)pActor)->FUN_004181e0()->DoesSwim());
+        solution4.FUN_006e2b90(((Actor13*)pActor)->FUN_004181e0()->DoesFly());
         solution4.SetByteAtA1(1);
         NiPoint3 idx;
         void* _limitA;
@@ -2877,7 +2907,7 @@ void ActorMover::UpdateTargeting()
                 {
                     float iB2;
                     iB2 = 128.0f;
-                    if (((Actor13*)pActor)->FUN_008be280() * (double)0.5f > 100.0)
+                    if (((Actor13*)pActor)->Actor_GetWidth() * (double)0.5f > 100.0)
                         iB2 = _runtimeFloatSettingDefault38;
                     float i4;
                     i4 = bB4.GetTotalPathLength();
@@ -2900,19 +2930,19 @@ void ActorMover::UpdateTargeting()
                 }
                 else
                 {
-                    memcpy(&idx, &((PLoc*)FUN_00717e50(((S_FUN_006b05a0*)&bB4)->FUN_006b05a0()))->FUN_005c3420(), sizeof(idx));
+                    memcpy(&idx, &((PLoc*)FUN_00717e50(((S_FUN_006b05a0*)&bB4)->PathingSolution_GetLastNode()))->FUN_005c3420(), sizeof(idx));
                 }
             }
             FUN_00483710();
-            if (((Actor13*)pActor)->FUN_008bc7f0(g_thePlayer) &&
-                FUN_00575d70((TESObjectREFR*)((Actor13*)pActor)) != FUN_00575d70((TESObjectREFR*)g_thePlayer))
+            if (((Actor13*)pActor)->Actor_IsFollowing_008bc7f0(g_thePlayer) &&
+                TESObjectREFR_GetWorldSpace((TESObjectREFR*)((Actor13*)pActor)) != TESObjectREFR_GetWorldSpace((TESObjectREFR*)g_thePlayer))
             {
-                FUN_00573800(((Actor13*)pActor), g_thePlayer->FUN_008d6f30(), FUN_00575d70((TESObjectREFR*)g_thePlayer));
+                TESObjectREFR_MoveRefToNewSpace(((Actor13*)pActor), g_thePlayer->FUN_008d6f30(), TESObjectREFR_GetWorldSpace((TESObjectREFR*)g_thePlayer));
                 ((Actor13*)pActor)->Call2a8((NiPoint3*)&idx);
             }
             else
             {
-                FUN_009df010(*(NiPoint3*)&idx);
+                MoveActorToLocation(*(NiPoint3*)&idx);
             }
         }
     }
@@ -2944,7 +2974,8 @@ struct SavedLocation
 
 // Writes movement, pathing, state and timing fields to the save buffer, then saves the location, reference, request, path and handler.
 // @fnv 0x009df100
-void ActorMover::FUN_009df100(BGSSaveFormBuffer* buffer)
+// src: XBOX_PDB 0x009df100
+void ActorMover::SaveGame_009df100(BGSSaveFormBuffer* buffer)
 {
     buffer->FUN_00865e50(&currentNode, 2, 0);
     buffer->FUN_00865e50(&lastNode, 2, 0);
@@ -3032,8 +3063,8 @@ struct Solution
     int a3c;
     int a40;
     void FUN_006e8d50(Buffer*);
-    unsigned int FUN_005a4320();
-    Node* FUN_006e78b0(unsigned int);
+    unsigned int PathingSolution_GetVirtualNodeCount();
+    Node* GetVirtualNode_006e78b0(unsigned int);
 };
 struct Request
 {
@@ -3132,7 +3163,8 @@ void Warning(const char*, ...);
 } // namespace loadpath
 
 // @fnv 0x009df3d0
-void ActorMover::FUN_009df3d0(BGSLoadFormBuffer* buffer)
+// src: XBOX_PDB 0x009df3d0
+void ActorMover::LoadGame_009df3d0(BGSLoadFormBuffer* buffer)
 {
     using namespace loadpath;
     ((loadpath::Buffer*)buffer)->Read(&currentNode, 2);
@@ -3179,10 +3211,10 @@ void ActorMover::FUN_009df3d0(BGSLoadFormBuffer* buffer)
     {
         ((NiPointer<loadpath::Solution>*)&m_pActorNode)->operator=(new Solution);
         ((loadpath::Solution*)*(NiPointer<loadpath::Solution>*)&m_pActorNode)->FUN_006e8d50((loadpath::Buffer*)buffer);
-        for (unsigned int index = 0; index < ((loadpath::Solution*)*(NiPointer<loadpath::Solution>*)&m_pActorNode)->FUN_005a4320(); ++index)
+        for (unsigned int index = 0; index < ((loadpath::Solution*)*(NiPointer<loadpath::Solution>*)&m_pActorNode)->PathingSolution_GetVirtualNodeCount(); ++index)
         {
-            if (((loadpath::Solution*)*(NiPointer<loadpath::Solution>*)&m_pActorNode)->FUN_006e78b0(index)->Valid() &&
-                !((ObjectResolver*)((loadpath::Solution*)*(NiPointer<loadpath::Solution>*)&m_pActorNode)->FUN_006e78b0(index)->Data())->Resolve())
+            if (((loadpath::Solution*)*(NiPointer<loadpath::Solution>*)&m_pActorNode)->GetVirtualNode_006e78b0(index)->Valid() &&
+                !((ObjectResolver*)((loadpath::Solution*)*(NiPointer<loadpath::Solution>*)&m_pActorNode)->GetVirtualNode_006e78b0(index)->Data())->Resolve())
             {
                 Warning("PATHFINDING: Actor %s (0x%08x) is using a stale path (the navmesh changed), forcing a failure",
                         pActor->GetName(), pActor->ID());
@@ -3203,7 +3235,7 @@ void ActorMover::FUN_009df3d0(BGSLoadFormBuffer* buffer)
         m_pPathHandler->Load(buffer);
     if (flags)
     {
-        FUN_009daf80();
+        ActorMover_ClearCurrentData();
         eState = 7;
         SetEnabled(1);
     }
@@ -3520,7 +3552,7 @@ extern TimeGlobal g_timeGlobal;
 class FUN_00491040_shell
 {
   public:
-    BSAnimGroupSequence* FUN_00491040(int section);
+    BSAnimGroupSequence* Animation_GetCurrentSequence(int section);
 };
 
 class AnimData : public FUN_00491040_shell
@@ -3532,7 +3564,8 @@ class AnimData : public FUN_00491040_shell
 
 // Computes the actor's movement delta from animation or pathing, adjusts movement mode flags, and stores the result in m_kPathingDelta.
 // @fnv 0x009ddc00
-void ActorMover::FUN_009ddc00()
+// src: XBOX_PDB 0x009ddc00
+void ActorMover::SetCurrentFrameMoveModeAndDelta()
 {
     bool bHaveValidDelta = false;
     unsigned int mode = 0;
@@ -3581,7 +3614,7 @@ void ActorMover::FUN_009ddc00()
                 mode &= ~0xF;
                 memcpy(&moveDelta, &NiPoint3_ZERO, sizeof(NiPoint3));
                 bHaveValidDelta = true;
-                switch (this->pActor->FUN_008a7570())
+                switch (this->pActor->GetAnimAction_008a7570())
                 {
                 case 0xc:
                 case 0xd:
@@ -3621,10 +3654,10 @@ void ActorMover::FUN_009ddc00()
     if ((mode & 0x400) != (this->m_uiMovementMode & 0x400))
     {
         AnimData* anim = this->pActor->GetAnimData();
-        if (!anim || (anim->FUN_00491040(0) && anim->FUN_00491040(0)->GetState() != 1) ||
-            (anim->FUN_00491040(1) && anim->FUN_00491040(1)->GetState() != 1) ||
-            (anim->FUN_00491040(4) && anim->FUN_00491040(4)->GetState() != 1) ||
-            this->pActor->FUN_008a7570() != -1)
+        if (!anim || (anim->Animation_GetCurrentSequence(0) && anim->Animation_GetCurrentSequence(0)->GetState() != 1) ||
+            (anim->Animation_GetCurrentSequence(1) && anim->Animation_GetCurrentSequence(1)->GetState() != 1) ||
+            (anim->Animation_GetCurrentSequence(4) && anim->Animation_GetCurrentSequence(4)->GetState() != 1) ||
+            this->pActor->GetAnimAction_008a7570() != -1)
         {
             mode &= ~0x400;
             mode |= (this->m_uiMovementMode & 0x400);
@@ -3640,7 +3673,7 @@ void ActorMover::FUN_009ddc00()
 class BackgroundPathLocation14
 {
   public:
-    bool FUN_006a9520();
+    bool PathingLocation_QUnused();
     unsigned int FUN_006dd4f0() const;
     void* FUN_00441110();
     NiPoint3 FUN_005c3420() const;
@@ -3673,11 +3706,11 @@ class BackgroundPathRequest14
     virtual void vfn_0c();
     virtual unsigned int vfn_10();
     BackgroundPathLocation14& GetOffsetC();
-    BackgroundPathLocation14* FUN_006a9540();
+    BackgroundPathLocation14* NiAVObject_GetRotate_006a9540();
     float FUN_009b0bd0() const;
     float GetSmoothingRandomness();
-    bool FUN_00505c00();
-    float FUN_00507e10();
+    bool TESCombatStyle_GetPowerAttackF();
+    float BGSProjectile_GetMuzzleFlashDuration();
     void FUN_006e2b20(void*);
     void FUN_009db930(unsigned int);
     void IncRefCount();
@@ -4088,25 +4121,26 @@ struct PathManager14
 
 struct PathManager;
 PathManager* __cdecl GetPathManager();
-bool __fastcall FUN_00450ff0(void*);
-void __cdecl FUN_009e71b0(void*, BackgroundPathRequest14*, void*);
-void __fastcall FUN_009daf80(TESForm*);
+bool __fastcall TESObjectCELL_GetAttached(void*);
+void __cdecl DetailedActorPathHandler_UpdateAvoidNodesForPath(void*, BackgroundPathRequest14*, void*);
+void __fastcall ActorMover_ClearCurrentData(TESForm*);
 
 extern PlayerCharacter* _g_thePlayer;
 
 // Builds a request from apRequest, notifies the handler when present, then submits it to the path manager or returns early.
 // @fnv 0x009db090
-bool ActorMover::FUN_009db090(const PathingRequest* apRequest)
+// src: XBOX_PDB 0x009db090
+bool ActorMover::BackGroundBuildPath(const PathingRequest* apRequest)
 {
     bool result5 = false;
     bool sleeping;
     ((BackgroundPathRequest14*)apRequest)->vfn_0c();
     eState = 1;
     ResetMoverState(0);
-    if (!((BackgroundPathRequest14*)apRequest)->FUN_006a9540()->FUN_006a9520())
+    if (!((BackgroundPathRequest14*)apRequest)->NiAVObject_GetRotate_006a9540()->PathingLocation_QUnused())
     {
         BackgroundPathLocation14* locA5 = &((BackgroundPathRequest14*)apRequest)->GetOffsetC();
-        BackgroundPathLocation14* locB2 = ((BackgroundPathRequest14*)apRequest)->FUN_006a9540();
+        BackgroundPathLocation14* locB2 = ((BackgroundPathRequest14*)apRequest)->NiAVObject_GetRotate_006a9540();
         unsigned int cell2 = locA5->FUN_006dd4f0();
         bool bNotInterior2 = !(cell2 != 0 && ((Cell14*)cell2)->FUN_00425fd0());
         bool same3 =
@@ -4122,11 +4156,11 @@ bool ActorMover::FUN_009db090(const PathingRequest* apRequest)
             {
                 if ((double)std::abs(diff8.z) <= (double)((BackgroundPathRequest14*)apRequest)->GetSmoothingRandomness())
                 {
-                    FUN_009dd1c0(1);
+                    FinishMoving(1);
                     bool flag = true;
-                    if (((BackgroundPathRequest14*)apRequest)->FUN_00505c00())
+                    if (((BackgroundPathRequest14*)apRequest)->TESCombatStyle_GetPowerAttackF())
                     {
-                        flag = FUN_009dce80(((BackgroundPathRequest14*)apRequest)->FUN_00507e10(), true);
+                        flag = RequestRotateActor_009dce80(((BackgroundPathRequest14*)apRequest)->BGSProjectile_GetMuzzleFlashDuration(), true);
                     }
                     return flag;
                 }
@@ -4165,7 +4199,7 @@ bool ActorMover::FUN_009db090(const PathingRequest* apRequest)
     }
     }
     ((BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request))->GetOffsetC().FUN_006ddbe0();
-    ((BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request))->FUN_006a9540()->FUN_006ddbe0();
+    ((BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request))->NiAVObject_GetRotate_006a9540()->FUN_006ddbe0();
     ((BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request))->FUN_006e2b20(((MobileObject_Helper*)pActor));
     DebugOnStopMoving();
     ((BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request))->FUN_009db930(retries + 3);
@@ -4175,15 +4209,15 @@ bool ActorMover::FUN_009db090(const PathingRequest* apRequest)
     }
     if (m_pPathHandler != 0 && m_pPathHandler->vfn_34())
     {
-        FUN_009e71b0(((MobileObject_Helper*)pActor), (BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request), m_pPathHandler);
+        DetailedActorPathHandler_UpdateAvoidNodesForPath(((MobileObject_Helper*)pActor), (BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request), m_pPathHandler);
     }
     else
     {
         if (((MobileObject_Helper*)pActor)->FUN_008d6f30() != 0)
         {
-            if (FUN_00450ff0(((MobileObject_Helper*)pActor)->FUN_008d6f30()))
+            if (TESObjectCELL_GetAttached(((MobileObject_Helper*)pActor)->FUN_008d6f30()))
             {
-                FUN_009e71b0(((MobileObject_Helper*)pActor), (BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request), 0);
+                DetailedActorPathHandler_UpdateAvoidNodesForPath(((MobileObject_Helper*)pActor), (BackgroundPathRequest14*)(*(NiPointer<BackgroundPathRequest14>*)&request), 0);
             }
         }
     }
@@ -4195,7 +4229,7 @@ bool ActorMover::FUN_009db090(const PathingRequest* apRequest)
         }
         if (!((PathManager14*)GetPathManager())->BuildPath((*(NiPointer<BackgroundPathRequest14>*)&request), m_queue, !sleeping))
         {
-            (::FUN_009daf80)((TESForm*)this);
+            (::ActorMover_ClearCurrentData)((TESForm*)this);
             eState = 7;
             SetEnabled(1);
         }
@@ -4245,7 +4279,8 @@ struct TESObjectREFR_Ext : TESObjectREFR
 };
 
 // @fnv 0x009df010
-bool ActorMover::FUN_009df010(const NiPoint3& aNewLoc)
+// src: XBOX_PDB 0x009df010
+bool ActorMover::MoveActorToLocation(const NiPoint3& aNewLoc)
 {
     if (IsConditionMet())
     {
@@ -4279,22 +4314,23 @@ bool ActorMover::FUN_009df010(const NiPoint3& aNewLoc)
 namespace PathEndCheck14 {
 struct Node
 {
-    bool FUN_006e2330();
-    bool FUN_006e22f0(::TESObjectREFR*);
+    bool PathingNode_IsTeleportDoorNode();
+    bool PathingNode_ActivateNode(::TESObjectREFR*);
 };
 struct Solution
 {
     unsigned int GetObjectFlags();
-    Node& FUN_006b05a0();
-    unsigned int FUN_005a4320();
+    Node& PathingSolution_GetLastNode();
+    unsigned int PathingSolution_GetVirtualNodeCount();
 };
-void __fastcall FUN_006c93a0(Solution*);
+void __fastcall PathingSolution_ClearCurrentDetailedPath(Solution*);
 
 // Handles a zero lastNode case, checks the current path node, and conditionally calls path routines before returning 0, 1, or 2.
 } // namespace PathEndCheck14
 
 // @fnv 0x009dc980
-int ActorMover::FUN_009dc980()
+// src: COMMUNITY 0x009dc980
+int ActorMover::EndOfCurrentPathCheck()
 {
     using namespace PathEndCheck14;
     Node* pnode;
@@ -4308,10 +4344,10 @@ int ActorMover::FUN_009dc980()
     currentNode = lastNode;
     if (((NiPointer<PathEndCheck14::Solution>*)&m_pActorNode)->operator->()->GetObjectFlags() > 0)
     {
-        pnode = &((NiPointer<PathEndCheck14::Solution>*)&m_pActorNode)->operator->()->FUN_006b05a0();
-        if (pnode->FUN_006e2330())
+        pnode = &((NiPointer<PathEndCheck14::Solution>*)&m_pActorNode)->operator->()->PathingSolution_GetLastNode();
+        if (pnode->PathingNode_IsTeleportDoorNode())
         {
-            if (!pnode->FUN_006e22f0(pActor) && !pActor->GetCurrentAIProcess()->GetCurrentFadeState())
+            if (!pnode->PathingNode_ActivateNode(pActor) && !pActor->GetCurrentAIProcess()->GetCurrentFadeState())
             {
                 eState = 7;
                 SetEnabled(true);
@@ -4320,12 +4356,12 @@ int ActorMover::FUN_009dc980()
             }
             else
             {
-                FUN_006c93a0(((NiPointer<PathEndCheck14::Solution>*)&m_pActorNode)->operator->());
+                PathingSolution_ClearCurrentDetailedPath(((NiPointer<PathEndCheck14::Solution>*)&m_pActorNode)->operator->());
                 return 1;
             }
         }
     }
-    if (currentNode >= ((NiPointer<PathEndCheck14::Solution>*)&m_pPathHandler->pCurrentPathingSolution)->operator->()->FUN_005a4320() - 1)
+    if (currentNode >= ((NiPointer<PathEndCheck14::Solution>*)&m_pPathHandler->pCurrentPathingSolution)->operator->()->PathingSolution_GetVirtualNodeCount() - 1)
         FUN_009dd150();
     return 0;
 }

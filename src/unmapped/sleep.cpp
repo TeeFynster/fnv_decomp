@@ -16,7 +16,8 @@ void FUN_008691b0::Lock()
 
 extern "C" __declspec(dllimport) void __stdcall Sleep(unsigned long ms);
 // @fnv 0x0040fca0
-void FUN_0040fca0(unsigned long ms)
+// src: XBOX_PDB 0x0040fca0
+void BSSleep(unsigned long ms)
 {
     Sleep(ms);
 }

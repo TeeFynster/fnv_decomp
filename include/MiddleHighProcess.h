@@ -181,9 +181,9 @@ public:
     virtual void ResetCurrentPackage(); // RTTI slot 145
     void SetAnimation(Animation*);
     void RefreshActorPackage(Actor*);
-    void FUN_0091db40(Actor*);
-    void FUN_00929260(unsigned char);
-    bool FUN_0044b130();
+    void ProcessCombat_0091db40(Actor*);
+    void BGSTerrainManager_SetNeedsImmediateUpdate(unsigned char);
+    bool BSCriticalSection_TryLock();
     void Revert(BGSLoadFormBuffer*);
     void LoadGame(BGSLoadFormBuffer*);
     void InitLoadGame(BGSLoadFormBuffer*);
@@ -267,7 +267,7 @@ public:
     virtual DetectionViewData* GetDetectionState(Actor* apTarget, DetectionListType aeType) const; // RTTI slot 321
     bool HasMatchingQueuedItem(TESBoundObject*, ExtraDataList*, bool);
     void UpdateShotsPerSecond(bool);
-    void FUN_0092c400(BooleanFloatQuery*);
-    void* FUN_00922b20(void*);
+    void SetLastHitData(BooleanFloatQuery*);
+    void* GetRightWeaponBone(void*);
 };
 #pragma pack(pop)

@@ -207,41 +207,41 @@ struct Ref
     virtual void vtbl190();
     virtual void vt2fc();
     bool FUN_00440da0();
-    ExtraList* FUN_005d43c0();
-    void FUN_00576760();
-    void FUN_00484af0(int a);
+    ExtraList* BSFile_GetDevice();
+    void TESObjectREFR_CleanUpTraps();
+    void TESForm_SetDisabled(int a);
     Proc* FUN_008d8520();
     void ApplyActorSpells();
     Ref* FUN_008d6f30();
-    bool FUN_005656d0();
-    bool FUN_00564d80();
-    void FUN_0093a660(Ref* a);
-    void FUN_00967350(Ref* a);
-    void FUN_00952c30(Ref* a);
+    bool TESObjectREFR_HasScript();
+    bool GetTargeted();
+    void PlayerCharacter_RemoveActorFromPlayercombatList(Ref* a);
+    void PlayerCharacter_RemovePerceivedActor(Ref* a);
+    void PlayerCharacter_CheckForQuestTargetUpdate(Ref* a);
     int FUN_00931850();
-    bool FUN_00574900();
-    void FUN_00881680(int a);
-    void FUN_0088d640();
+    bool MobileObject_IsTalkingActivator();
+    void Actor_EndInterruptPackage(int a);
+    void Actor_GetOutofFurnitureQuick();
     void FUN_00407800(Proc* a);
-    void FUN_0056c880(unsigned int a, bool b);
-    void* FUN_0056ac90();
+    void TESObjectREFR_SetLoadedDataFlag(unsigned int a, bool b);
+    void* TESObjectREFR_GetEnableStateChildList();
     bool FUN_0056aa70();
-    void FUN_0056c780(int a);
-    void FUN_00573f40();
-    void FUN_00572270();
-    void FUN_00579ac0(bool a);
-    Ref* FUN_007af430();
-    void FUN_00574400();
-    void FUN_008b01c0();
-    void FUN_00545560(Ref* a);
-    bool FUN_00549580();
+    void TESForm_SetDisableFade(int a);
+    void TESObjectREFR_Enable();
+    void TESObjectREFR_MarkAsDeleted();
+    void TESObjectREFR_AttachSound(bool a);
+    Ref* BGSSaveFormBuffer_GetForm();
+    void TESObjectREFR_Disable();
+    void DoDeathStuff();
+    void TESObjectCELL_AddScriptedRef(Ref* a);
+    bool TESForm_GetHasSpokenFlag();
 };
 struct ExtraList
 {
-    Ref* FUN_0041e310();
-    bool FUN_0041dbd0();
-    void* FUN_0041df90();
-    void FUN_0041de40(Ref* a);
+    Ref* ExtraDataList_GetAshPileRef();
+    bool ExtraDataList_ShouldPopInWhenEnabledByParent();
+    void* ExtraDataList_GetDroppedItemList();
+    void ExtraDataList_SetItemDropper(Ref* a);
 };
 struct Iter
 {
@@ -565,7 +565,7 @@ struct Proc
 };
 struct ObjX
 {
-    void FUN_00568020(int a);
+    void TESObjectREFR_SetMarkerUsed(int a);
     ObjX* FUN_00586170();
     void FUN_006fcfa0();
 };
@@ -576,20 +576,21 @@ struct Tes
 struct GlobalObj
 {
     void RemoveActor(Ref* a);
-    void FUN_0096d470(Ref* a, int b);
-    void FUN_0096f600(Ref* a, int b);
+    void ProcessLists_RemoveReference(Ref* a, int b);
+    void ProcessLists_NullOutTargetRef(Ref* a, int b);
 };
 extern Ref* DAT_011dea3c;
 extern Ref* DAT_011ca27c;
 extern Ref* DAT_011ca280;
 extern Tes* DAT_011dea10;
 extern GlobalObj DAT_011e0e80;
-void __cdecl FUN_008cddd0(Ref* a, int b);
-int __cdecl FUN_00570f60();
-void __cdecl FUN_00835980(Ref* a);
+void __cdecl ArrowProjectile_DeleteAttachedArrows(Ref* a, int b);
+int __cdecl ArrowProjectile_GetArrowCount();
+void __cdecl FalloutRadio_DisableNPCRadio(Ref* a);
 
 // @fnv 0x00574400
-void Ref::FUN_00574400()
+// src: COMMUNITY 0x00574400
+void Ref::TESObjectREFR_Disable()
 {
     Ref* p;
     Iter* val;
@@ -610,20 +611,20 @@ void Ref::FUN_00574400()
                     return;
                 {
                     vt1cc(0, 0);
-                    var1 = FUN_005d43c0()->FUN_0041e310();
+                    var1 = BSFile_GetDevice()->ExtraDataList_GetAshPileRef();
                     if (var1 != 0)
                     {
-                        if (FUN_007af430() != DAT_011ca27c)
+                        if (BGSSaveFormBuffer_GetForm() != DAT_011ca27c)
                         {
-                            if (FUN_007af430() != DAT_011ca280)
+                            if (BGSSaveFormBuffer_GetForm() != DAT_011ca280)
                             {
-                                var1->FUN_00574400();
+                                var1->TESObjectREFR_Disable();
                             }
                         }
                     }
-                    FUN_00576760();
+                    TESObjectREFR_CleanUpTraps();
                     vtc8(1);
-                    FUN_00484af0(1);
+                    TESForm_SetDisabled(1);
                     p = 0;
                     if (vtfc())
                         p = this;
@@ -636,30 +637,30 @@ void Ref::FUN_00574400()
                                 q = p;
                                 q->ApplyActorSpells();
                                 ((MagicSub*)((char*)q + 0x94))->FUN_00824970();
-                                if (FUN_00570f60() > 0)
+                                if (ArrowProjectile_GetArrowCount() > 0)
                                 {
-                                    FUN_008cddd0(this, 1);
+                                    ArrowProjectile_DeleteAttachedArrows(this, 1);
                                 }
-                                DAT_011dea3c->FUN_0093a660(q);
-                                DAT_011dea3c->FUN_00967350(q);
+                                DAT_011dea3c->PlayerCharacter_RemoveActorFromPlayercombatList(q);
+                                DAT_011dea3c->PlayerCharacter_RemovePerceivedActor(q);
                                 DAT_011e0e80.RemoveActor(q);
                                 if (FUN_008d6f30() != 0)
                                 {
-                                    if (FUN_005656d0())
+                                    if (TESObjectREFR_HasScript())
                                     {
-                                        FUN_008d6f30()->FUN_00545560(this);
+                                        FUN_008d6f30()->TESObjectCELL_AddScriptedRef(this);
                                     }
                                 }
                                 if (q->vt2e8())
                                 {
-                                    q->FUN_008b01c0();
+                                    q->DoDeathStuff();
                                 }
                             }
                             p->vt2fc();
-                            DAT_011e0e80.FUN_0096d470(p, p->FUN_00931850());
-                            if (vt100() || FUN_00564d80())
+                            DAT_011e0e80.ProcessLists_RemoveReference(p, p->FUN_00931850());
+                            if (vt100() || GetTargeted())
                             {
-                                DAT_011e0e80.FUN_0096f600(this, 0);
+                                DAT_011e0e80.ProcessLists_NullOutTargetRef(this, 0);
                             }
                             if (p->FUN_008d8520() != 0)
                             {
@@ -674,11 +675,11 @@ void Ref::FUN_00574400()
                                     if (r != 0)
                                     {
                                         r->vt288();
-                                        r->FUN_00881680(0);
+                                        r->Actor_EndInterruptPackage(0);
                                     }
                                     else
                                     {
-                                        if (p->FUN_00574900())
+                                        if (p->MobileObject_IsTalkingActivator())
                                         {
                                             p->vt288();
                                         }
@@ -697,11 +698,11 @@ void Ref::FUN_00574400()
                                     if (p->vt100())
                                     {
                                         i = p;
-                                        i->FUN_0088d640();
+                                        i->Actor_GetOutofFurnitureQuick();
                                     }
                                     else
                                     {
-                                        p->FUN_008d8520()->vt4c8()->FUN_00568020(p->FUN_008d8520()->vt4d0(0));
+                                        p->FUN_008d8520()->vt4c8()->TESObjectREFR_SetMarkerUsed(p->FUN_008d8520()->vt4d0(0));
                                     }
                                 }
                                 d1 = p->FUN_008d8520();
@@ -711,42 +712,42 @@ void Ref::FUN_00574400()
                             }
                         }
                     }
-                    if (FUN_007af430()->FUN_00549580())
+                    if (BGSSaveFormBuffer_GetForm()->TESForm_GetHasSpokenFlag())
                     {
                         DAT_011dea10->FUN_004fd3e0(this, 1)->FUN_00586170()->FUN_006fcfa0();
                     }
-                    FUN_0056c880(1, 0);
-                    DAT_011dea3c->FUN_00952c30(this);
-                    it1 = (Iter*)FUN_0056ac90();
+                    TESObjectREFR_SetLoadedDataFlag(1, 0);
+                    DAT_011dea3c->PlayerCharacter_CheckForQuestTargetUpdate(this);
+                    it1 = (Iter*)TESObjectREFR_GetEnableStateChildList();
                     while (it1 != 0 && !it1->FUN_008256d0())
                     {
                         procCopy = *it1->FUN_006815c0();
                         if (procCopy->FUN_0056aa70())
                         {
-                            if (procCopy->FUN_005d43c0()->FUN_0041dbd0())
+                            if (procCopy->BSFile_GetDevice()->ExtraDataList_ShouldPopInWhenEnabledByParent())
                             {
-                                procCopy->FUN_0056c780(1);
+                                procCopy->TESForm_SetDisableFade(1);
                             }
-                            procCopy->FUN_00573f40();
+                            procCopy->TESObjectREFR_Enable();
                         }
                         else
                         {
-                            procCopy->FUN_00574400();
+                            procCopy->TESObjectREFR_Disable();
                         }
                         it1 = it1->FUN_00726070();
                     }
-                    val = (Iter*)FUN_005d43c0()->FUN_0041df90();
+                    val = (Iter*)BSFile_GetDevice()->ExtraDataList_GetDroppedItemList();
                     while (val != 0 && !val->FUN_008256d0())
                     {
                         it2 = *val->FUN_006815c0();
-                        it2->FUN_005d43c0()->FUN_0041de40(0);
-                        it2->FUN_00572270();
+                        it2->BSFile_GetDevice()->ExtraDataList_SetItemDropper(0);
+                        it2->TESObjectREFR_MarkAsDeleted();
                         val->FUN_0063f7b0();
                     }
-                    FUN_00579ac0(0);
+                    TESObjectREFR_AttachSound(0);
                     if (vt100())
                     {
-                        FUN_00835980(this);
+                        FalloutRadio_DisableNPCRadio(this);
                     }
                 }
             }
@@ -783,7 +784,8 @@ extern int DAT_011db0d4;
 void Callee_007ebd50();
 
 // @fnv 0x007f6a20
-void __cdecl FUN_007f6a20(int a1)
+// src: XBOX_PDB 0x007f6a20
+void __cdecl VATSMenu_RemoveTarget(int a1)
 {
     if (DAT_011db150.Probe())
     {

@@ -37,14 +37,14 @@ struct SupportResult
     __m128 normal;
 };
 static const __m128 kNegMask = {-0.0f, -0.0f, -0.0f, -0.0f};
-static void FUN_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportResult* result, const __m128* dir,
+static void hkTransform_UpdateFields_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportResult* result, const __m128* dir,
                          const hkTransform* xf);
 void CallerOfIt(ConvexShapeStub* s, ConvexShapeStub* o, SupportResult* r, const __m128* d, const hkTransform* x);
-void FUN_00e31180(const float* base, int stride, int count, int mul, int offset, __m128** dst);
+void Object_ProcessEntries_00e31180(const float* base, int stride, int count, int mul, int offset, __m128** dst);
 class FrameE3B
 {
   public:
-    void FUN_00e3b630(const void* pSource);
+    void ProcessState_00e3b630(const void* pSource);
 
     int m_unk[8];
     hkRotation m_rotation;
@@ -57,7 +57,8 @@ __forceinline float ReadScalar(const float& x)
     return x;
 }
 // @fnv 0x00e33440
-void __cdecl FUN_00e33440(float u, int iDegree, const float* pfKnots, const hkVector4* pkControlPoints,
+// src: GUESS 0x00e33440 (confidence: low)
+void __cdecl hkVector4_ProcessEntries_00e33440(float u, int iDegree, const float* pfKnots, const hkVector4* pkControlPoints,
                           hkVector4& kOut)
 {
     float N[4];

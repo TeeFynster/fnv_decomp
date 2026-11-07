@@ -9,11 +9,12 @@
 struct FUN_00726d50_class
 {
     void SetFlags(int a, int b);
-    void FUN_00726d50(bool a);
+    void AnimatingText_SetFlash(bool a);
 };
 
 // @fnv 0x00726d50
-void FUN_00726d50_class::FUN_00726d50(bool a)
+// src: XBOX_PDB 0x00726d50
+void FUN_00726d50_class::AnimatingText_SetFlash(bool a)
 {
     SetFlags(2, a);
 }
@@ -40,7 +41,8 @@ void GlobalObject_00869f00::InitFromGlobal()
 extern "C" void __cdecl FUN_00ecbc5b(char* apString, int aiSize);
 
 // @fnv 0x00730490
-void FUN_00730490(char* apString, int aiSize)
+// src: XBOX_PDB 0x00730490
+void BSstrupr(char* apString, int aiSize)
 {
     FUN_00ecbc5b(apString, aiSize);
 }
@@ -70,7 +72,7 @@ void FUN_00726d50_class::SetFlags(int auiFlags, int abSet)
 
 struct AX
 {
-    void FUN_006b3eb0(unsigned int, unsigned int);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 };
 struct StandIn
 {
@@ -82,7 +84,7 @@ struct StandIn
 StandIn* StandIn::Initialize()
 {
     vtable = &DAT_01070660;
-    reinterpret_cast<AX*>(this)->FUN_006b3eb0(0, 0);
+    reinterpret_cast<AX*>(this)->BSSimpleArray_float_1024_InitialSetup(0, 0);
     return this;
 }
 
@@ -108,19 +110,19 @@ struct ListX
 };
 struct p07
 {
-    static void FUN_007211c0(void*);
+    static void InterfaceManager_UnregisterListBox(void*);
 };
 struct FUN_007308e0 : public ListX
 {
     virtual ~FUN_007308e0();
-    void FUN_00730950();
+    void ListBox_ItemChange_RemoveAll();
 };
 // Calls FUN_00730950, then passes this to p07::FUN_007211c0.
 // @fnv 0x007308e0
 FUN_007308e0::~FUN_007308e0()
 {
-    FUN_00730950();
-    p07::FUN_007211c0(this);
+    ListBox_ItemChange_RemoveAll();
+    p07::InterfaceManager_UnregisterListBox(this);
 }
 
 struct Calendar
@@ -144,7 +146,7 @@ int CompareCalendarDays(Calendar** apCalendarA, Calendar** apCalendarB)
 
 struct TileValue_00a0a270
 {
-    void FUN_00a0a270(float a, bool b);
+    void Tile_Value_SetFloat_00a0a270(float a, bool b);
 };
 struct FUN_00726db0_class
 {
@@ -152,14 +154,15 @@ struct FUN_00726db0_class
     int m_kPointB;
     int m_iThirdValue;
     TileValue_00a0a270* m_t;
-    void FUN_00726db0(bool a);
+    void AnimatingText_SetVisibility(bool a);
 };
 // If m_t is set, calls FUN_00a0a270 on it with 1.0f when a is true and 0.0f otherwise, passing true.
 // @fnv 0x00726db0
-void FUN_00726db0_class::FUN_00726db0(bool abEnabled)
+// src: COMMUNITY 0x00726db0
+void FUN_00726db0_class::AnimatingText_SetVisibility(bool abEnabled)
 {
     if (m_t)
-        m_t->FUN_00a0a270(abEnabled ? 1.0f : 0.0f, true);
+        m_t->Tile_Value_SetFloat_00a0a270(abEnabled ? 1.0f : 0.0f, true);
 }
 
 int GetTileValueID(char const*, int);
@@ -176,10 +179,11 @@ unsigned int VATSMenu::GetFilteredCount()
 struct FUN_0073ac90_shell
 {
     void* m_pHead;
-    void* FUN_0073ac90();
+    void* NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead();
 };
 // @fnv 0x0073ac90
-void* FUN_0073ac90_shell::FUN_0073ac90()
+// src: XBOX_PDB 0x0073ac90
+void* FUN_0073ac90_shell::NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead()
 {
     return (char*)(void*)*(void**)this + 8;
 }
@@ -235,8 +239,8 @@ void FUN_00725aa0_cls::ProcessSlots()
 
 extern double DAT_01012060;
 extern float __cdecl FUN_004e4430(float value);
-extern int __cdecl FUN_00647b70(int lower, int upper);
-extern int __cdecl FUN_00a01860(const char* name);
+extern int __cdecl BSMAX_00647b70(int lower, int upper);
+extern int __cdecl Tile_TextToTrait(const char* name);
 struct FUN_00725f40_shell
 {
     int unk00;
@@ -248,12 +252,13 @@ struct FUN_00725f40_shell
     int unk18;
     int unk1c;
     float unk20;
-    int FUN_00726920();
-    void FUN_00725f40();
+    int GetUnfilteredItemCount();
+    void UpdateScrollTraits();
 };
 // Reads a float from unk0c, computes a scroll delta from unk20 versus that value, and writes it plus an item count to unk0c and unk14.
 // @fnv 0x00725f40
-void FUN_00725f40_shell::FUN_00725f40()
+// src: GUESS 0x00725f40 (confidence: medium)
+void FUN_00725f40_shell::UpdateScrollTraits()
 {
     if (unk0c != 0)
     {
@@ -266,17 +271,17 @@ void FUN_00725f40_shell::FUN_00725f40()
             {
                 if (unk20 > iStack_c)
                 {
-                    iItemCount = FUN_00647b70(
-                        (int)FUN_004e4430((float)(unsigned int)FUN_00726920() * (unk20 - iStack_c) / unk20) + 1, 2);
+                    iItemCount = BSMAX_00647b70(
+                        (int)FUN_004e4430((float)(unsigned int)GetUnfilteredItemCount() * (unk20 - iStack_c) / unk20) + 1, 2);
                 }
                 if (iItemCount > 1)
                 {
-                    unk0c->Set(FUN_00a01860("_scroll_delta"), (unk20 - iStack_c) / (iItemCount - 1), true);
+                    unk0c->Set(Tile_TextToTrait("_scroll_delta"), (unk20 - iStack_c) / (iItemCount - 1), true);
                 }
             }
             if (unk14 != 0)
             {
-                unk14->Set(FUN_00a01860("_number_of_items"), iItemCount);
+                unk14->Set(Tile_TextToTrait("_number_of_items"), iItemCount);
             }
         }
     }
@@ -304,12 +309,13 @@ struct FUN_00726090_cls
     void Remove(void* p);
     void Flush();
     void Reset();
-    void FUN_00726090();
+    void ListBox_unsigned_int_Synchronize();
 };
 
 // Clears m_1c and m_20, notifies and removes each linked object whose byte at offset 8 is zero, then calls Flush and Reset.
 // @fnv 0x00726090
-void FUN_00726090_cls::FUN_00726090()
+// src: XBOX_PDB 0x00726090
+void FUN_00726090_cls::ListBox_unsigned_int_Synchronize()
 {
     m_1c = 0;
     m_20 = 0.0f;
@@ -327,7 +333,8 @@ void FUN_00726090_cls::FUN_00726090()
 }
 
 // @fnv 0x007273e0
-int __cdecl FUN_007273e0()
+// src: COMMUNITY 0x007273e0
+int __cdecl RecipeMenu_GetID()
 {
     return (int)1077u;
 }
@@ -359,13 +366,14 @@ struct FUN_0072c700_cls
     float m_20;
 
     void AccumulateTileHeight(Tile* o);
-    void FUN_0072cba0();
-    void FUN_0072c880();
-    void FUN_0072c700();
+    void UpdateScrollTraits_0072cba0();
+    void UpdateHighlightTraits();
+    void UpdateEntryMetrics_0072c700();
 };
 
 // @fnv 0x0072c700
-void FUN_0072c700_cls::FUN_0072c700()
+// src: GUESS 0x0072c700 (confidence: low)
+void FUN_0072c700_cls::UpdateEntryMetrics_0072c700()
 {
     m_1c = 0;
     m_20 = 0.0f;
@@ -378,14 +386,14 @@ void FUN_0072c700_cls::FUN_0072c700()
             AccumulateTileHeight((*cur->FUN_006815c0())->m_00);
         }
     }
-    FUN_0072cba0();
-    FUN_0072c880();
+    UpdateScrollTraits_0072cba0();
+    UpdateHighlightTraits();
 }
 
 extern double DAT_01012060;
 extern float __cdecl FUN_004e4430(float value);
-extern int __cdecl FUN_00647b70(int lower, int upper);
-extern int __cdecl FUN_00a01860(const char* name);
+extern int __cdecl BSMAX_00647b70(int lower, int upper);
+extern int __cdecl Tile_TextToTrait(const char* name);
 struct FUN_0072cba0_cls
 {
     int unk00;
@@ -400,12 +408,13 @@ struct FUN_0072cba0_cls
     float m_20;
 
     unsigned int GetVisibleCount();
-    void FUN_0072cba0();
+    void UpdateScrollTraits_0072cba0();
 };
 
 // Computes a scroll item count from the tile's float at 0xfb0 versus m_20 and stores _scroll_delta and _number_of_items on the tiles.
 // @fnv 0x0072cba0
-void FUN_0072cba0_cls::FUN_0072cba0()
+// src: GUESS 0x0072cba0 (confidence: medium)
+void FUN_0072cba0_cls::UpdateScrollTraits_0072cba0()
 {
     if (unk0c)
     {
@@ -415,16 +424,16 @@ void FUN_0072cba0_cls::FUN_0072cba0()
         {
             if (m_20 > fCurrentAmountNext)
             {
-                iCount = FUN_00647b70((int)FUN_004e4430((float)(GetVisibleCount() * (m_20 - fCurrentAmountNext) / m_20)) + 1, 2);
+                iCount = BSMAX_00647b70((int)FUN_004e4430((float)(GetVisibleCount() * (m_20 - fCurrentAmountNext) / m_20)) + 1, 2);
             }
             if (iCount > 1)
             {
-                unk0c->Set(FUN_00a01860("_scroll_delta"), (float)((m_20 - fCurrentAmountNext) / (iCount - 1)), true);
+                unk0c->Set(Tile_TextToTrait("_scroll_delta"), (float)((m_20 - fCurrentAmountNext) / (iCount - 1)), true);
             }
         }
         if (unk14)
         {
-            unk14->Set(FUN_00a01860("_number_of_items"), iCount);
+            unk14->Set(Tile_TextToTrait("_number_of_items"), iCount);
         }
     }
 }

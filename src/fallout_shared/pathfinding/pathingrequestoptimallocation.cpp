@@ -33,10 +33,10 @@ void PathingRequestOptimalLocation::CopyTo(PathingRequest* apDest)
 {
     PathingRequest* pdest = apDest;
     PathingRequest::CopyTo(pdest);
-    pdest->FUN_00507610(fPointHeight);
-    pdest->FUN_006e5ee0(m_fUnknownValue2);
-    pdest->FUN_006e4ef0(m_fUnknownValue3);
-    pdest->FUN_006e4320(m_fUnknownValue4);
+    pdest->PathingRequestClosePoint_SetMinDistance(fPointHeight);
+    pdest->SetMaxDistance_006e5ee0(m_fUnknownValue2);
+    pdest->PathingRequestCoveredMove_SetAttackerHeight(m_fUnknownValue3);
+    pdest->PathingRequestCoveredMove_SetAttackerSneakHeight(m_fUnknownValue4);
 }
 
 // @fnv 0x006e5db0
@@ -46,5 +46,5 @@ PathingRequestOptimalLocation::PathingRequestOptimalLocation(PathingRequestOptim
     fPointHeight = pSource->GetFloatAtOffsetB0();
     m_fUnknownValue2 = pSource->GetFieldB4Float();
     m_fUnknownValue3 = pSource->GetFieldB8Float();
-    m_fUnknownValue4 = pSource->FUN_0099e040();
+    m_fUnknownValue4 = pSource->BSSceneGraph_GetCameraFOV();
 }

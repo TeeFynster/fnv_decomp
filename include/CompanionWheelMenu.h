@@ -20,15 +20,15 @@ public:
     virtual bool HandleMenuInput(int aiInput, float afValue);  // 0x007556b0
 
     void SelectTile(int aiTile, bool abForce);  // 0x007557d0
-    void FUN_00755c50(float afAngle);           // selects the tile under the stick angle
+    void SetButtonAsHighlighted(float afAngle);           // selects the tile under the stick angle
     void SetTileText(const char* apText);       // 0x00755d90
     void ToggleFollowersTacticsDistance();      // 0x007560c0
     void ToggleRelatedTopic();                  // 0x007562b0
     void ToggleFollowerWait();                  // 0x007563a0
     void ToggleAggressive();                    // 0x007561b0
     void HealCompanion();                       // 0x00756490
-    void FUN_007568d0();
-    void FUN_00756930();                        // opens the companion's dialogue and closes the wheel
+    void CompanionWheelMenu_Do_OpenInventory();
+    void Do_Backup();                        // opens the companion's dialogue and closes the wheel
     void UpdateCompanionInteraction();          // 0x00756980
     void PlayTopicResponse(TESTopic* apTopic);  // 0x007573d0
     void RunTopicResultScripts(TESTopic* apTopic);  // 0x007575b0

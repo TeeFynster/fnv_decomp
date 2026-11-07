@@ -108,7 +108,7 @@ struct S_00dfb720_Router
         return *m_pStreamAllocator;
     }
 };
-S_00dfb720_Router* FUN_00c85750();
+S_00dfb720_Router* hkMemoryRouter_getInstance();
 template <class T> __forceinline void destruct(T* t, int n)
 {
     for (int i = 0; i < n; ++i)
@@ -116,7 +116,7 @@ template <class T> __forceinline void destruct(T* t, int n)
 }
 template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-        { S_00dfb720_Allocator& alloc = FUN_00c85750()->heap();
+        { S_00dfb720_Allocator& alloc = hkMemoryRouter_getInstance()->heap();
         destruct(m_data, m_iElementCount);
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
@@ -186,7 +186,7 @@ struct Manager
     int unk0c;
     Callback* callback;
 };
-Manager* FUN_00c85750();
+Manager* hkMemoryRouter_getInstance();
 struct Container
 {
     int unk00;
@@ -227,7 +227,7 @@ struct Record : Container
 // @fnv 0x00dfb7e0
 Record* Record::ClearAndNotify(unsigned int flags)
 {
-    Manager* manager = FUN_00c85750();
+    Manager* manager = hkMemoryRouter_getInstance();
     Callback* callback = manager->callback;
     int size = state6c;
     unk68 = 0;
@@ -238,7 +238,7 @@ Record* Record::ClearAndNotify(unsigned int flags)
     FUN_00dfb720();
     if (flags & 1)
     {
-        manager = FUN_00c85750();
+        manager = hkMemoryRouter_getInstance();
         manager->callback->Notify(this, *(unsigned short*)((char*)this + 4));
     }
     return this;
@@ -261,11 +261,12 @@ struct FloatOwner
     int unk10;
     int unk14;
     VirtualFloat* unk18;
-    float __thiscall FUN_00dfb6d0(float value, int mode);
+    float __thiscall hkaAnimation_getExtractedMotionReferenceFrame(float value, int mode);
 };
 // Forwards value and mode to the virtual Slot3 of the object at unk18 and returns its result.
 // @fnv 0x00dfb6d0
-float __thiscall FloatOwner::FUN_00dfb6d0(float value, int mode)
+// src: HAVOK_LIB 0x00dfb6d0
+float __thiscall FloatOwner::hkaAnimation_getExtractedMotionReferenceFrame(float value, int mode)
 {
     return unk18->Slot3(value, mode);
 }
@@ -306,7 +307,7 @@ struct Allocator
     virtual void unknown04() = 0;
     virtual void Release(void* object, unsigned int bytes) = 0;
 };
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 struct Owner
 {
     unsigned int unk00;
@@ -321,7 +322,7 @@ Owner* Owner::FUN_00dfb7b0(unsigned int flags)
     FUN_00dfb720();
     if (flags & 1u)
     {
-        BSAudio* audio = FUN_00c85750();
+        BSAudio* audio = hkMemoryRouter_getInstance();
         unsigned int bytes = size4;
         reinterpret_cast<Allocator*>(audio->pListener)->Release(this, bytes);
     }

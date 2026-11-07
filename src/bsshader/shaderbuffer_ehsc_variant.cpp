@@ -21,7 +21,7 @@ extern MemoryManager g_memoryManager;
 void InitializeShaderBufferTables();
 struct FUN_00aa4060_Manager
 {
-    void* FUN_00aa4060(void* object);
+    void* MemoryManager_Deallocate(void* object);
 };
 extern FUN_00aa4060_Manager DAT_011f6238;
 extern void* DAT_010ef53c;
@@ -37,7 +37,7 @@ struct FUN_00b7e2b0_Class
 
 struct S00b7fd90_Alloc
 {
-    void* FUN_00aa3e40(unsigned int uiSize);
+    void* Game_DoHeapAlloc(unsigned int uiSize);
 };
 
 struct Thing_b9704
@@ -111,11 +111,11 @@ struct Thing_b9704
     Thing_b9704(unsigned int a1, unsigned int a2, Thing_b9704* a3);
     static void* operator new(unsigned int size)
     {
-        return ((S00b7fd90_Alloc*)&DAT_011f6238)->FUN_00aa3e40(size);
+        return ((S00b7fd90_Alloc*)&DAT_011f6238)->Game_DoHeapAlloc(size);
     }
     static void operator delete(void* p)
     {
-        DAT_011f6238.FUN_00aa4060(p);
+        DAT_011f6238.MemoryManager_Deallocate(p);
     }
 };
 
@@ -129,11 +129,12 @@ struct S00b7fd90_cls
     unsigned short m_usGrowBy;
     void Expand_b9704(unsigned int newSize);
     void SetAt_b9704(unsigned int index, Thing_b9704*& item);
-    void FUN_00b7fd90(unsigned int a1, unsigned int a2, Thing_b9704* a3);
+    void ShaderBufferCreator_Add(unsigned int a1, unsigned int a2, Thing_b9704* a3);
 };
 
 // @fnv 0x00b7fd90
-void S00b7fd90_cls::FUN_00b7fd90(unsigned int a1, unsigned int a2, Thing_b9704* a3)
+// src: COMMUNITY 0x00b7fd90
+void S00b7fd90_cls::ShaderBufferCreator_Add(unsigned int a1, unsigned int a2, Thing_b9704* a3)
 {
     a3 = new Thing_b9704(a1, a2, a3);
     unsigned int index = m_usSize;

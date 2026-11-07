@@ -201,19 +201,20 @@ extern int DAT_0126f74c;
 class NiGeometry;
 extern NiGeometry** DAT_011f91e0;
 
-void __cdecl FUN_00c4c2d0(unsigned char*, int, Matrix4_b7dde0*);
+void __cdecl BSUtilities_GetInverseWorldMatrix(unsigned char*, int, Matrix4_b7dde0*);
 
 struct BloodDraw_b7dde0
 {
-    void FUN_00b7c750(GeometryView_b7dde0*, unsigned char*);
-    void FUN_00b7c7b0(Matrix4_b7dde0*);
+    void ShadowLightShader_SetupGeometryOpt_WorldViewProj(GeometryView_b7dde0*, unsigned char*);
+    void BSShader_SetLightDirection(Matrix4_b7dde0*);
     void* GetTextureByIndex(char*, int);
 
-    void FUN_00b7dde0(DrawArgument_b7dde0*);
+    void ShadowLightShader_Setup_ADT_Opt(DrawArgument_b7dde0*);
 };
 
 // @fnv 0x00b7dde0
-void BloodDraw_b7dde0::FUN_00b7dde0(DrawArgument_b7dde0* argument)
+// src: COMMUNITY 0x00b7dde0
+void BloodDraw_b7dde0::ShadowLightShader_Setup_ADT_Opt(DrawArgument_b7dde0* argument)
 {
     TextureSource_b7dde0* source = argument->source;
     BloodShaderView_b7dde0* global = reinterpret_cast<BloodShaderView_b7dde0*>(DAT_0126f74c);
@@ -245,7 +246,7 @@ void BloodDraw_b7dde0::FUN_00b7dde0(DrawArgument_b7dde0* argument)
     unsigned char* field = &geom->transform;
     Matrix4_b7dde0 local;
 
-    FUN_00c4c2d0(field, 0, &local);
-    FUN_00b7c750(geom, field);
-    FUN_00b7c7b0(&local);
+    BSUtilities_GetInverseWorldMatrix(field, 0, &local);
+    ShadowLightShader_SetupGeometryOpt_WorldViewProj(geom, field);
+    BSShader_SetLightDirection(&local);
 }

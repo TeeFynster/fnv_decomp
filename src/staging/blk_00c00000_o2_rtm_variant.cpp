@@ -80,7 +80,7 @@ struct Target_00c04090
 
     void AssignRefObjects(Arg_00c04090* arg);
 };
-extern "C" void __cdecl FUN_00b4f510();
+extern "C" void __cdecl BSShaderManager_ReturnVelocityBuffers();
 struct FUN_00c04960_class
 {
     void ResetArrayElement();
@@ -95,7 +95,7 @@ struct FUN_00c04d60_class
 {
     unsigned char pad[0x60];
     int m_0x60;
-    int __thiscall FUN_00c04d60();
+    int __thiscall ImageSpaceEffectCinematic_IsActive();
 };
 struct FUN_00c04d80_cls
 {
@@ -104,18 +104,18 @@ struct FUN_00c04d80_cls
 extern char DAT_011f9422;
 struct FUN_00c05350_class
 {
-    int FUN_00c05350();
+    int ImageSpaceEffectBloom_IsActive();
 };
 extern void* DAT_010bcb60;
-void __cdecl FUN_00bb45b0();
+void __cdecl Runtime_UpdateState_00bb45b0();
 extern "C" void __cdecl _delete(void*, unsigned int);
 struct FUN_00c058c0
 {
     void* vtbl;
     __thiscall FUN_00c058c0(bool flag);
 };
-extern "C" void __cdecl FUN_00b7a870(int, int);
-void __stdcall FUN_00c1a2f0(unsigned short ausValue);
+extern "C" void __cdecl ShadowLightShader_EnableConstantsForPass(int, int);
+void __stdcall SpeedTreeBranchShader_EnableConstantsForPass(unsigned short ausValue);
 void __fastcall FUN_00a89760(void*);
 extern "C" void __cdecl _delete(void*, unsigned int);
 extern int DAT_010bcdc8;
@@ -125,12 +125,12 @@ struct FUN_00a74480_holder
 };
 struct FUN_00c1a660_holder : FUN_00a74480_holder
 {
-    FUN_00c1a660_holder* FUN_00c1a660(unsigned int a);
+    FUN_00c1a660_holder* InitializeFields_00c1a660(unsigned int a);
 };
 extern int DAT_011f9530;
 struct FUN_00c0bb20_class
 {
-    void FUN_00c0bb20(int a, int b);
+    void Lighting30Shader_SetHairMaps(int a, int b);
 };
 extern NiShaderConstantMapEntry* DAT_011fec44;
 extern NiShaderConstantMapEntry* DAT_011fec6c;
@@ -138,7 +138,7 @@ void __cdecl UpdateFlagHolders(int);
 void SetShaderConstantMapEntryFlags(int a);
 struct FUN_00c036e0_class
 {
-    void __thiscall FUN_00c036e0(int a);
+    void __thiscall ImageSpaceEffectBloom_SetRadius(int a);
 };
 int PackBits(char a, char b, char c, char d, char e, char f, char g, char h);
 struct FUN_00c06ee0_class
@@ -146,13 +146,13 @@ struct FUN_00c06ee0_class
     char pad00[0x34];
     RefObject* m_sp34;
 
-    void __thiscall FUN_00c06ee0(RefObject* p);
+    void __thiscall NiPSEmitParticlesCtlr_SetBirthRateInterpolator(RefObject* p);
 };
 struct FUN_00c06f30_class
 {
     char pad[0x48];
     RefObject* m_sp48;
-    void __thiscall FUN_00c06f30(RefObject* p);
+    void __thiscall NiD3DPass_SetPixelShader_00c06f30(RefObject* p);
 };
 struct FUN_00c0d1b0_class
 {
@@ -249,11 +249,11 @@ struct FUN_00c0d1b0_class
     virtual void v168();
     virtual void v16c();
     virtual void v170();
-    void FUN_00c0d1b0();
+    void ParallaxShader_PresetPasses();
 };
 struct FUN_00c1a640_class
 {
-    unsigned short __thiscall FUN_00c1a640(unsigned short a);
+    unsigned short __thiscall TallGrassTriStrips_SetCount(unsigned short a);
 };
 extern float DAT_011ae6cc;
 extern float DAT_011ae6c8;
@@ -275,7 +275,7 @@ struct FUN_00c03260_class
 {
     char pad[0x58];
     ImageSpaceTexture m_tex;
-    void FUN_00c03260();
+    void AddRenderedTexture_Thunk();
 };
 extern float DAT_012023f4;
 extern float DAT_012023f8;
@@ -286,11 +286,11 @@ struct FUN_00c03350_class
     FUN_00c053c0_class* m_pParam;
     char pad20[0x58 - 0x20];
     char* m_p58;
-    bool __thiscall FUN_00c03350(int);
+    bool __thiscall ImageSpaceEffectSunbeams_UpdateParams(int);
 };
 struct FUN_00c03390_class
 {
-    void __thiscall FUN_00c03390(int);
+    void __thiscall ImageSpaceEffectSunbeams_BorrowTextures(int);
 };
 struct BeamStage
 {
@@ -305,7 +305,7 @@ struct StageReturn : BeamStage
 };
 struct UnkBA38F0
 {
-    void __thiscall FUN_00ba38f0(BeamStage*);
+    void __thiscall ImageSpaceTexture_SetupTexture(BeamStage*);
 };
 extern int DAT_0126f74c;
 struct FUN_00c04310_class
@@ -329,7 +329,7 @@ struct FUN_00c046e0_class
     unsigned char pad20[0x3c];
     float m_f5c;
 
-    bool __thiscall FUN_00c046e0(int);
+    bool __thiscall ImageSpaceEffectMenuBG_UpdateParams(int);
 };
 struct FUN_00c054a0_class
 {
@@ -346,12 +346,12 @@ struct FUN_00c1a480_class
 {
     int m_vtbl;
     int m_iWordAt04;
-    int __thiscall FUN_00a71cc0(int);
-    int __thiscall FUN_00c1a480(int a);
+    int __thiscall NiTriStrips_NiTriStrips(int);
+    int __thiscall SetVirtualTable_00c1a480(int a);
 };
 struct FUN_00a7fb20_class
 {
-    char* __thiscall FUN_00a7fb20(char const* name);
+    char* __thiscall GetViewerString_00a7fb20(char const* name);
 };
 struct Holder
 {
@@ -363,14 +363,14 @@ struct Holder
     void __thiscall AppendString(StrArr* strings);
     void __thiscall AppendBoundInfo(StrArr* strings);
 };
-char* __cdecl FUN_00a7d490(char const* name, unsigned short value);
+char* __cdecl NiGetViewerString_00a7d490(char const* name, unsigned short value);
 struct NiTransformDummy
 {
     int pad[4];
 };
 struct FUN_00c1a680_class
 {
-    void __thiscall FUN_00c1a680();
+    void __thiscall TallGrassTriShape_UpdateWorldBound();
 };
 struct FnvObj;
 struct FnvHolder
@@ -472,7 +472,7 @@ struct FUN_00c02d40_cls
 {
     int unk00[0x17];
     float m_f5c;
-    float FUN_00c02d40();
+    float ImageSpaceEffectMotionBlur_GetObjectBlurConst();
 };
 extern unsigned int DAT_011a9bd0;
 extern unsigned int DAT_011a9bd4;
@@ -505,7 +505,7 @@ class FUN_00c02d90_loc
     float m_08;
     unsigned int m_0c;
 };
-void __stdcall FUN_00c02d90(FUN_00c02d90_cls* a1, int a2, FUN_00c02d90_tgt* a3);
+void __stdcall ShadowLightShader_UpdateTogglesConstant(FUN_00c02d90_cls* a1, int a2, FUN_00c02d90_tgt* a3);
 struct FlagHolderB5649
 {
     char pad00[8];
@@ -564,7 +564,7 @@ struct FUN_00c03270 : Base03270
     ~FUN_00c03270();
 };
 extern unsigned char g_unk012023f0;
-unsigned char __cdecl FUN_00c03340();
+unsigned char __cdecl ImageSpaceEffectSunbeams_IsActive();
 struct FUN_00c033c0
 {
     FUN_00c033c0();
@@ -579,7 +579,7 @@ struct Handle
 };
 struct HandlePool
 {
-    void FUN_00aa4060(Handle* handle);
+    void MemoryManager_Deallocate(Handle* handle);
 };
 extern HandlePool DAT_011f6238;
 struct RefMapEntries
@@ -640,7 +640,7 @@ struct FUN_00c03580 : Parent
 };
 extern float DAT_01202400;
 extern float DAT_0120240c;
-int __cdecl FUN_00c036b0();
+int __cdecl ImageSpaceEffectGetHit_IsActive();
 class FUN_00c036f0_sub28;
 class FUN_00c036f0_sub5c;
 class FUN_00c036f0_sub28
@@ -651,7 +651,7 @@ class FUN_00c036f0_sub28
 class FUN_00c036f0_sub5c
 {
   public:
-    void FUN_00ba3840(int aiValue);
+    void ImageSpaceTexture_BorrowRenderedTexture(int aiValue);
 };
 class FUN_00c036f0_cls
 {
@@ -765,7 +765,7 @@ struct ShaderOwner
 
     ShaderObj* CreateVertexShader(char* path, int* desc, void* p, char* name);
     ShaderObj* CreatePixelShader(char* path, int* desc, void* p, char* name);
-    void FUN_00c03ae0(ShaderDesc* vsDesc, ShaderDesc* psDesc, const char* name, void* vsArg, void* psArg);
+    void ImageSpaceShader_LoadShaders(ShaderDesc* vsDesc, ShaderDesc* psDesc, const char* name, void* vsArg, void* psArg);
 };
 // FUN_00c03d70 : copies a member into a global and returns.
 //   mov eax,[ecx+0x5c] / mov [0x126f74c],eax / ret 4
@@ -796,7 +796,7 @@ struct Cls_00c03d70
     int unk54;
     int unk58;
     int unk5C;
-    void __thiscall FUN_00c03d70(int a);
+    void __thiscall ImageSpaceShader_InitPass(int a);
 };
 struct FUN_00c04030_renderer
 {
@@ -902,7 +902,7 @@ struct FUN_00c04030_class
     void __thiscall SetupRenderer();
 };
 extern FUN_00c04030_renderer* DAT_011f9508;
-FUN_00c04030_renderer* __cdecl FUN_00e76700(FUN_00c04030_renderer* renderer, int a, int b);
+FUN_00c04030_renderer* __cdecl NiDX9ShaderDeclaration_Create(FUN_00c04030_renderer* renderer, int a, int b);
 // FUN_00c043f0: thiscall, one stack arg, two guarded virtual calls on this->m_30 / this->m_34.
 struct B4630X;
 struct B4630Y;
@@ -1059,7 +1059,7 @@ class FUN_00c043f0_cls
     int unk2c;
     struct B4630Obj* m_30;
     struct B4630Obj* m_34;
-    void __thiscall FUN_00c043f0(int a1);
+    void __thiscall ImageSpaceShader_SetupGeometryConstants(int a1);
 };
 class C04620Object
 {
@@ -1296,7 +1296,7 @@ struct Property
     int value04;
     int value08;
     int value0c;
-    void FUN_00ba3840(int count);
+    void ImageSpaceTexture_BorrowRenderedTexture(int count);
 };
 struct PropertyCollection
 {
@@ -1401,7 +1401,7 @@ struct FUN_00c05880_cls
     unsigned int unkFC;
     unsigned int m_100;
     void FUN_00bb4520();
-    FUN_00c05880_cls* FUN_00c05880();
+    FUN_00c05880_cls* InitializeFields_00c05880();
 };
 struct ShaderEntry
 {
@@ -1482,7 +1482,7 @@ struct ShaderInterface
 };
 struct ShaderUpdater
 {
-    void FUN_00bb9640(ShaderEntry*, ShaderInterface*);
+    void Lighting30Shader_SetTextureMode(ShaderEntry*, ShaderInterface*);
     void UpdateShaderEntry(ShaderEntryTable*, ShaderInterface*, int);
 };
 // CopyOwnerValuesToItems candidate
@@ -1765,7 +1765,7 @@ struct FUN_00c0bbd0_Arg
 };
 extern int DAT_011f95e4;
 extern int DAT_011f95e8;
-void __stdcall FUN_00c0bbd0(FUN_00c0bbd0_Arg* arg);
+void __stdcall Lighting30Shader_SetProjShadowMaps(FUN_00c0bbd0_Arg* arg);
 struct FNV_Target
 {
     int unk00;
@@ -2251,7 +2251,7 @@ struct FUN_00c0e630_cls
     RefTex* m_f8;
     RefTex* m_fc;
 
-    void FUN_00c0e630();
+    void ParallaxShader_PresetADTPasses_2x();
 };
 static __forceinline void SetupStages(ShaderPassPtr& spRenderPass, TexStagePtr& spStage)
 {
@@ -2310,10 +2310,10 @@ struct RefHandle
     }
 };
 extern RefHandle DAT_011fda48[208];
-RefObject* __cdecl FUN_00c163a0(unsigned int index);
+RefObject* __cdecl Object_ProcessAndReturnValue_00c163a0(unsigned int index);
 struct CpuOpaque;
 extern CpuOpaque DAT_012024b8;
-CpuOpaque* __cdecl FUN_00c1a3a0();
+CpuOpaque* __cdecl TallGrassTriStrips_GetRTTI();
 class C1A3B0Heap
 {
   public:
@@ -2601,7 +2601,7 @@ class C1A550Object
     void RenderIfActive(NiRenderer* pkRenderer);
 };
 extern int DAT_012024c0;
-int* __cdecl FUN_00c1a650();
+int* __cdecl TallGrassTriShape_GetRTTI();
 struct FUN_00c1a6a0_out
 {
     int m_00;
@@ -2718,7 +2718,7 @@ struct FUN_00c1f4e0_cls
     int unk10;
     unsigned char m_b14;
 
-    void __thiscall FUN_00c1f4e0(unsigned char value);
+    void __thiscall NiPSysModifier_SetActive(unsigned char value);
 };
 struct DecompPass266
 {
@@ -2726,7 +2726,7 @@ struct DecompPass266
     void* unk04;
     void* m_resource;
     void ApplyPairToState(unsigned int value);
-    void FUN_00e7def0(unsigned int value);
+    void NiD3DTextureStage_SetFilterMode(unsigned int value);
 };
 struct ShaderPasses
 {
@@ -2859,7 +2859,7 @@ struct Renderer
 };
 struct TextureGenerator
 {
-    void* FUN_004bc320(unsigned int code);
+    void* BSRenderedTexture_GetTexture(unsigned int code);
 };
 struct ShaderResource
 {
@@ -3098,7 +3098,7 @@ struct ClusterObj
     RefPtr m_5c;
     unsigned int unk60;
     int m_64;
-    void __thiscall FUN_00e802b0(int idx, StageReturn* s);
+    void __thiscall NiD3DPass_SetStage(int idx, StageReturn* s);
     void __thiscall FUN_00e80190();
 };
 struct ClusterPtr
@@ -3332,7 +3332,7 @@ struct TargetShader
     int m_12c;
     RefTex* m_130;
     RefTex* m_134;
-    void FUN_00c113b0();
+    void ParallaxShader_PresetDiffusePtPasses_2x();
 };
 static __forceinline void SetupFourStages(ShaderPassPtr& pass, TexStagePtr& stage)
 {
@@ -3432,7 +3432,7 @@ struct C16400Shader
     RefTex* m_120;
     RefTex* m_124;
     RefTex* m_128;
-    void FUN_00c16400();
+    void SpeedTreeBranchShader_Func_87();
 };
 extern int DAT_011f950c;
 extern int DAT_011f9534;
@@ -3635,11 +3635,11 @@ struct FNVFace
 
     unsigned int unk060;
 
-    void __thiscall FUN_00e7ecd0();
+    void __thiscall NiD3DTextureStage_ReturnStageToPool();
     void DecRef()
     {
         if (--unk060 == 0)
-            FUN_00e7ecd0();
+            NiD3DTextureStage_ReturnStageToPool();
     }
 };
 struct FNVCubeSurface
@@ -3703,7 +3703,7 @@ struct FNVCubeSurface
     }
     void __thiscall FUN_00e80190();
 
-    void __thiscall FUN_00e802b0(void* currentFace, FNVFace* replacement);
+    void __thiscall NiD3DPass_SetStage(void* currentFace, FNVFace* replacement);
 };
 struct FNVRenderManager
 {
@@ -3983,13 +3983,13 @@ struct Source374
     float multiplier;
 };
 void __stdcall ApplySourceColor(Source374* source);
-extern "C" void __cdecl FUN_00b4f510();
-void __cdecl FUN_00c04950();
+extern "C" void __cdecl BSShaderManager_ReturnVelocityBuffers();
+void __cdecl ImageSpaceEffectMotionBlur_Shutdown();
 struct FUN_00c04da0 : _Base_00ba3d30
 {
     ~FUN_00c04da0();
 };
-float __cdecl FUN_00c05870();
+float __cdecl Runtime_EvaluateValue_00c05870();
 extern "C" unsigned int __cdecl _rotl(unsigned int, int);
 struct ConstantEntryStandin
 {
@@ -4125,7 +4125,7 @@ struct Owner
     void InitShaderConstantMaps();
 };
 void __cdecl FUN_00a74640();
-void __cdecl FUN_00c1a630();
+void __cdecl TallGrassTriShape_CreateClone();
 extern "C" void _ReadWriteBarrier();
 struct P440Light;
 struct P440Pass;
@@ -4240,7 +4240,7 @@ struct P440Pass
     unsigned char capacity;
     unsigned char unk0b;
     P440Light** lights;
-    void FUN_00ba8c30();
+    void BSShaderProperty_RenderPass_ClearSceneLights();
     void AllocateElemArray(unsigned char);
 };
 struct P440List
@@ -4665,28 +4665,28 @@ struct P440Shader
         unsigned int bit = (unsigned int)index % 32;
         return ((word == 0 ? flags : flags2) & (1u << bit)) > 0;
     }
-    void FUN_00441130(int, bool);
+    void BSShaderProperty_SetFlag(int, bool);
     void EnsureNewObj(int);
     void EnsureBa9740Obj(int);
     void EnsureAllocated(int);
     void CreateSpawnedObjectIfMissing(int);
     void FUN_00ba95e0(int);
-    void FUN_00ba8ab0(float);
+    void BSShaderProperty_SetAlpha(float);
     void SortShadowSceneLights(P440Position*);
     P440Light* FUN_00b70590(void**);
-    P440Light* FUN_00b70680(void**);
-    P440Light* FUN_00b70600(void**);
-    P440Light* FUN_00b70700(void**);
+    P440Light* BSShaderLightingProperty_GetNextActiveLight(void**);
+    P440Light* BSShaderLightingProperty_GetFirstActiveNonShadowLight(void**);
+    P440Light* BSShaderLightingProperty_GetNextActiveNonShadowLight(void**);
     P440List* GetPasses(P440Geometry*, unsigned int, int, unsigned int, P440Renderer*, int);
 };
 extern P440Renderer* DAT_011f4748;
 extern float DAT_011f9458, DAT_011f9460, DAT_011f9468, DAT_011f946c;
 extern float DAT_011f9470;
 extern unsigned char DAT_011f91a7;
-P440Renderer* __cdecl FUN_00b4f5c0();
+P440Renderer* __cdecl BSShaderManager_GetAccumulator();
 bool __cdecl IsParticleShaderRendererEnabled();
 int __cdecl GetGlobalFloatAsUInt();
-bool __cdecl FUN_005bf7b0();
+bool __cdecl BSShaderManager_GetShadows();
 float __cdecl LinearInterpolate(float, float, float, float, float);
 struct FUN_00c02c30_Obj
 {
@@ -4765,8 +4765,8 @@ struct S00c02c30_ColorA
 {
     float r, g, b, a;
 };
-void __stdcall FUN_00c02c30(unsigned int param_1, int param_2, FUN_00c02c30_Obj* param_3, int param_4);
-int __stdcall FUN_00c02f30(FNV_Node* a2, int a3);
+void __stdcall ShadowLightShader_UpdateTogglesConstantLand(unsigned int param_1, int param_2, FUN_00c02c30_Obj* param_3, int param_4);
+int __stdcall ShadowLightShader_GetCubeMap(FNV_Node* a2, int a3);
 struct S00c03c80_entry;
 struct S00c03c80_item
 {
@@ -4812,7 +4812,7 @@ struct S00c03c80_item
 };
 struct S00c03c80_entry
 {
-    S00c03c80_item* __thiscall FUN_00ba3780();
+    S00c03c80_item* __thiscall ImageSpaceTexture_GetTexture();
 };
 struct S00c03c80_meta
 {
@@ -4926,7 +4926,7 @@ struct S00c03c80_manager
 extern S00c03c80_manager* _DAT_011f4748;
 struct S00c03c80_processor
 {
-    void __thiscall FUN_00b8a6e0(unsigned int, int, void*);
+    void __thiscall ImageSpaceShaderParam_SetTextureOffsets(unsigned int, int, void*);
 };
 struct S00c03c80_cls
 {
@@ -5105,7 +5105,7 @@ struct S00c04f50_cls
     int unk84;
     S00c04f50_Mat m_88;
 
-    S00c04f50_Mat& FUN_00c04f50();
+    S00c04f50_Mat& ImageSpaceEffectCinematic_Func_08();
 };
 struct EffectBaseX
 {
@@ -5285,10 +5285,11 @@ struct Shader
     void* field8c;
     void* field90;
     void* field94;
-    void* FUN_00c0abd0(unsigned int);
+    void* Lighting30Shader_SelectPass(unsigned int);
 };
 // @fnv 0x00c0abd0
-void* Shader::FUN_00c0abd0(unsigned int pass)
+// src: COMMUNITY 0x00c0abd0
+void* Shader::Lighting30Shader_SelectPass(unsigned int pass)
 {
     void* result = 0;
     switch (pass)
@@ -5756,11 +5757,11 @@ finished:
 }
 struct TextureReceiver
 {
-    TextureReceiver* FUN_004bc320(int code);
+    TextureReceiver* BSRenderedTexture_GetTexture(int code);
 };
 struct C0CD80Pass
 {
-    unsigned int FUN_00e7def0(unsigned int code);
+    unsigned int NiD3DTextureStage_SetFilterMode(unsigned int code);
     unsigned int ApplyPairToState(unsigned int code);
 };
 struct C0CD80Rdr
@@ -5790,8 +5791,8 @@ extern unsigned int DAT_011f91b0;
 extern long DAT_01201c7c;
 struct C0CD80Shader
 {
-    void FUN_00bb9640(ShaderEntry* entry, ShaderInterface* iface);
-    void FUN_00c0cd80(unsigned int technique, Renderer* renderer);
+    void Lighting30Shader_SetTextureMode(ShaderEntry* entry, ShaderInterface* iface);
+    void Lighting30Shader_UpdateDiffuseNormalStages(unsigned int technique, Renderer* renderer);
 };
 struct SplatterItem
 {
@@ -5819,14 +5820,14 @@ struct BloodUpdater : ShaderUpdater
 {
     void SetupTextureStages(SplatterGeom* geom, ShaderEntryTable* table);
     void ApplyTextureStages(SplatterGeom* geom, ShaderEntryTable* table);
-    void FUN_00c0bbd0(ShaderEntryTable* table);
+    void Lighting30Shader_SetProjShadowMaps(ShaderEntryTable* table);
     void CopyOwnerValuesToItems(ShaderEntryTable* table, SplatterGeom* geom, int flag);
     void SetNodeResultValue(ShaderEntryTable* table, SplatterGeom* geom, int kind);
     void ApplyTextureStage(ShaderEntryTable* table, SplatterGeom* geom, int zero);
     void SetDstValueFromB(ShaderEntryTable* table, SplatterGeom* geom);
-    void FUN_00c0bb20(ShaderEntryTable* table, SplatterGeom* geom);
+    void Lighting30Shader_SetHairMaps(ShaderEntryTable* table, SplatterGeom* geom);
     void SetupPassTextureStage(ShaderEntryTable* table, SplatterGeom* geom);
-    void FUN_00c0cf10(unsigned int kind, SplatterGeom* geom);
+    void Lighting30Shader_UpdatePassTextureStages(unsigned int kind, SplatterGeom* geom);
 };
 extern ClusterObj* DAT_01202230;
 extern "C" void __cdecl FUN_00e804d0(void* pSlot);
@@ -5919,7 +5920,7 @@ struct C0D170Self
     virtual void s84();
     virtual void s85();
     virtual void at158();
-    bool FUN_00c0d170();
+    bool ProcessEntries_00c0d170();
 };
 struct ColorA_c1a310
 {
@@ -5943,9 +5944,9 @@ struct Obj_c1a310
     int unk34;
     float unk38;
 };
-void __stdcall FUN_00c1a310(int a, int b, Obj_c1a310* p);
+void __stdcall SpeedTreeBranchShader_UpdateTogglesConstant(int a, int b, Obj_c1a310* p);
 extern "C" void __cdecl CreateTriStripsObject();
-void __cdecl FUN_00c1a390();
+void __cdecl TallGrassTriStrips_CreateClone();
 namespace ShaderBias {
 struct RefObject
 {
@@ -6003,12 +6004,12 @@ struct ShaderStage
     unsigned int unk58;
     unsigned int unk5c;
     int references;
-    void FUN_00e7ecd0();
+    void NiD3DTextureStage_ReturnStageToPool();
     __forceinline void Release()
     {
         --references;
         if (references == 0)
-            FUN_00e7ecd0();
+            NiD3DTextureStage_ReturnStageToPool();
     }
 };
 struct ShaderStagePointer
@@ -6058,7 +6059,7 @@ struct ShaderPass
         return stageCount;
     }
     void FUN_00e80190();
-    void FUN_00e802b0(unsigned int, ShaderStage*);
+    void NiD3DPass_SetStage(unsigned int, ShaderStage*);
     __forceinline RenderStateBlock* const& GetState()
     {
         if (!state)
@@ -6122,7 +6123,8 @@ inline unsigned int FloatBits(float value)
     return *(unsigned int*)&value;
 }
 // @fnv 0x00c02340
-void FUN_00c02340()
+// src: COMMUNITY 0x00c02340
+void ShadowLightShader_PresetWaterFogPasses_2x()
 {
     ShaderPassPointer pass;
     ShaderStagePointer stage;
@@ -6143,7 +6145,7 @@ void FUN_00c02340()
     pass = DAT_011feb70;
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 1, 2, true);
-    pass->FUN_00e802b0(pass->unk14, stage.object);
+    pass->NiD3DPass_SetStage(pass->unk14, stage.object);
     pass->vertexShader = DAT_011fdfd4;
     pass->pixelShader = DAT_011fdc74;
     pass->GetState()->SetNodeValue(168, 3, 1);
@@ -6153,7 +6155,7 @@ void FUN_00c02340()
     pass = DAT_011feb74;
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 1, 2, true);
-    pass->FUN_00e802b0(pass->unk14, stage.object);
+    pass->NiD3DPass_SetStage(pass->unk14, stage.object);
     pass->vertexShader = DAT_011fdfd8;
     pass->pixelShader = DAT_011fdc74;
     pass->GetState()->SetNodeValue(168, 3, 1);
@@ -6177,7 +6179,7 @@ void FUN_00c02340()
     pass = DAT_011feba0;
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 1, 2, true);
-    pass->FUN_00e802b0(pass->unk14, stage.object);
+    pass->NiD3DPass_SetStage(pass->unk14, stage.object);
     pass->vertexShader = DAT_011fdfe4;
     pass->pixelShader = DAT_011fdc74;
     pass->GetState()->SetNodeValue(168, 3, 1);
@@ -6187,7 +6189,7 @@ void FUN_00c02340()
     pass = DAT_011feba4;
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 1, 2, true);
-    pass->FUN_00e802b0(pass->unk14, stage.object);
+    pass->NiD3DPass_SetStage(pass->unk14, stage.object);
     pass->vertexShader = DAT_011fdfe8;
     pass->pixelShader = DAT_011fdc74;
     pass->GetState()->SetNodeValue(168, 3, 1);
@@ -6690,11 +6692,12 @@ struct C17510Shader
     RefTex* m_f8;
     RefTex* m_fc;
     RefTex* m_100;
-    void FUN_00c17510();
+    void SpeedTreeBranchShader_Func_88();
 };
 
 // @fnv 0x00c17510
-void C17510Shader::FUN_00c17510()
+// src: COMMUNITY 0x00c17510
+void C17510Shader::SpeedTreeBranchShader_Func_88()
 {
     LocalPassPtr spRenderPass;
     TexStagePtr spStage;
@@ -7180,7 +7183,7 @@ void C17510Shader::FUN_00c17510()
         ShaderHandle handle = {m_e4};
         static_cast<PassMethods*>(spRenderPass.m_p)->SetPixelShader(handle);
     }
-    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(FUN_00c163a0(93)));
+    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(Object_ProcessAndReturnValue_00c163a0(93)));
     static_cast<PassMethods*>(spRenderPass.m_p)->SetBlend(2, 2, false);
     DAT_011fd15c = DAT_011fd148;
     DAT_011fc57c = DAT_011fc568;
@@ -7210,7 +7213,7 @@ void C17510Shader::FUN_00c17510()
         ShaderHandle handle = {m_e8};
         static_cast<PassMethods*>(spRenderPass.m_p)->SetPixelShader(handle);
     }
-    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(FUN_00c163a0(94)));
+    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(Object_ProcessAndReturnValue_00c163a0(94)));
     static_cast<PassMethods*>(spRenderPass.m_p)->SetBlend(2, 2, false);
     DAT_011fd18c = DAT_011fd178;
     DAT_011fc5ac = DAT_011fc598;
@@ -7246,7 +7249,7 @@ void C17510Shader::FUN_00c17510()
         ShaderHandle handle = {m_ec};
         static_cast<PassMethods*>(spRenderPass.m_p)->SetPixelShader(handle);
     }
-    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(FUN_00c163a0(95)));
+    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(Object_ProcessAndReturnValue_00c163a0(95)));
     static_cast<PassMethods*>(spRenderPass.m_p)->SetBlend(2, 2, false);
     DAT_011fd1fc = DAT_011fd1e8;
     DAT_011fc61c = DAT_011fc608;
@@ -7282,7 +7285,7 @@ void C17510Shader::FUN_00c17510()
         ShaderHandle handle = {m_f0};
         static_cast<PassMethods*>(spRenderPass.m_p)->SetPixelShader(handle);
     }
-    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(FUN_00c163a0(97)));
+    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(Object_ProcessAndReturnValue_00c163a0(97)));
     static_cast<PassMethods*>(spRenderPass.m_p)->SetBlend(2, 2, false);
     DAT_011fd214 = DAT_011fd200;
     DAT_011fc634 = DAT_011fc620;
@@ -7318,7 +7321,7 @@ void C17510Shader::FUN_00c17510()
         ShaderHandle handle = {m_f4};
         static_cast<PassMethods*>(spRenderPass.m_p)->SetPixelShader(handle);
     }
-    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(FUN_00c163a0(99)));
+    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(Object_ProcessAndReturnValue_00c163a0(99)));
     static_cast<PassMethods*>(spRenderPass.m_p)->SetBlend(2, 2, false);
     DAT_011fd22c = DAT_011fd218;
     DAT_011fc64c = DAT_011fc638;
@@ -7352,7 +7355,7 @@ void C17510Shader::FUN_00c17510()
         ShaderHandle handle = {m_f8};
         static_cast<PassMethods*>(spRenderPass.m_p)->SetPixelShader(handle);
     }
-    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(FUN_00c163a0(101)));
+    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(Object_ProcessAndReturnValue_00c163a0(101)));
     static_cast<PassMethods*>(spRenderPass.m_p)->SetBlend(2, 2, false);
     DAT_011fd244 = DAT_011fd230;
     DAT_011fc664 = DAT_011fc650;
@@ -7386,7 +7389,7 @@ void C17510Shader::FUN_00c17510()
         ShaderHandle handle = {m_fc};
         static_cast<PassMethods*>(spRenderPass.m_p)->SetPixelShader(handle);
     }
-    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(FUN_00c163a0(103)));
+    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(Object_ProcessAndReturnValue_00c163a0(103)));
     static_cast<PassMethods*>(spRenderPass.m_p)->SetBlend(2, 2, false);
     DAT_011fd25c = DAT_011fd248;
     DAT_011fc67c = DAT_011fc668;
@@ -7426,7 +7429,7 @@ void C17510Shader::FUN_00c17510()
         ShaderHandle handle = {m_100};
         static_cast<PassMethods*>(spRenderPass.m_p)->SetPixelShader(handle);
     }
-    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(FUN_00c163a0(200)));
+    static_cast<PassMethods*>(spRenderPass.m_p)->SetVertexShader(reinterpret_cast<RefTex*>(Object_ProcessAndReturnValue_00c163a0(200)));
     spRenderPass->GetRSG()->SetRenderState(0x1b, 1, true);
     static_cast<PassMethods*>(spRenderPass.m_p)->SetBlend(9, 1, false);
     spRenderPass->GetRSG()->SetRenderState(15, 0, true);

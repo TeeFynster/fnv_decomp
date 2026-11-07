@@ -17,7 +17,7 @@ public:
     float GetFloatAtOffsetB0();
     float GetFieldB4Float();
     float GetFieldB8Float();
-    float FUN_0099e040();
+    float BSSceneGraph_GetCameraFOV();
 
     union
     {

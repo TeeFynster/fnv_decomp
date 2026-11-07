@@ -22,7 +22,8 @@ struct Updater
 
 // Copies src into dest, calling self->update and other->update for each changed component and storing results in out1 and out2.
 // @fnv 0x00da4a50
-static __declspec(noinline) void FUN_00da4a50(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y,
+// src: HAVOK_LIB 0x00da4a50
+static __declspec(noinline) void extractChildShapes_00da4a50(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y,
                                               Out* out2, Out* out1)
 {
     Out** ppOut1 = &out1;
@@ -45,11 +46,12 @@ static __declspec(noinline) void FUN_00da4a50(Updater* self, int flag, Pair* des
 
 void S00da4a50_Wrap(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y, Out* out2, Out* out1)
 {
-    FUN_00da4a50(self, flag, dest, src, other, y, out2, out1);
+    extractChildShapes_00da4a50(self, flag, dest, src, other, y, out2, out1);
 }
 
 // @fnv 0x00da4960
-static __declspec(noinline) int FUN_00da4960(int savedValue, Out* out, Updater* obj, int value)
+// src: GUESS 0x00da4960 (confidence: low)
+static __declspec(noinline) int Object_ProcessAndReturnValue_00da4960(int savedValue, Out* out, Updater* obj, int value)
 {
     int result = obj->update(savedValue, value);
     out->res = result;
@@ -63,7 +65,7 @@ extern int volatile probeValue;
 extern int volatile probeSink;
 void callProbe()
 {
-    probeSink = FUN_00da4960(probeSaved, probeOut, probeObj, probeValue);
+    probeSink = Object_ProcessAndReturnValue_00da4960(probeSaved, probeOut, probeObj, probeValue);
 }
 
 struct Entry00da4970
@@ -347,7 +349,8 @@ extern "C" CParam00da4970 d4970_c(void);
 
 // For each Entry00da4970 between self+0x408 and m_kRayEnd, if m_04 minus a is in range, set m_04 to that value plus b and add b minus a to m_08.
 // @fnv 0x00da4970
-static __declspec(noinline) void FUN_00da4970(Owner00da4970* self, int a, int b, CParam00da4970 c)
+// src: HAVOK_LIB 0x00da4970
+static __declspec(noinline) void fixupPotentialContactPointers_00da4970(Owner00da4970* self, int a, int b, CParam00da4970 c)
 {
     int iLimit = *(volatile int*)&c.m_uiFilterValue;
     if (self == 0)
@@ -369,7 +372,7 @@ static __declspec(noinline) void FUN_00da4970(Owner00da4970* self, int a, int b,
 
 void d4970_caller(void)
 {
-    FUN_00da4970(d4970_self(), d4970_a(), d4970_b(), d4970_c());
+    fixupPotentialContactPointers_00da4970(d4970_self(), d4970_a(), d4970_b(), d4970_c());
 }
 
 extern "C" void _ReadWriteBarrier();
@@ -433,23 +436,24 @@ struct DaNode
 };
 struct DaReceiver
 {
-    void FUN_00cb22f0(void*, void*);
+    void hkTransform_setMulInverseMul(void*, void*);
 };
 struct DaResultArg
 {
     DaResult* p;
 };
-void* __cdecl FUN_00cf1510(void*, float, void*);
+void* __cdecl hkSweptTransformUtil_lerp2(void*, float, void*);
 // Calls FUN_00cf1510 to fill dest+0x20 and dest+0x60, sets up dest, its node and result from source, then calls FUN_00cb22f0 on result+0x20.
 // @fnv 0x00da49b0
-static __declspec(noinline) void FUN_00da49b0(DaDest* dest, DaSource* source, void* p)
+// src: HAVOK_LIB 0x00da49b0
+static __declspec(noinline) void hkAgent1nMachine_initInputAtTime(DaDest* dest, DaSource* source, void* p)
 {
     DaResult* result = (DaResult*)p;
     float value = source->unk0c->unk50;
     void* first = (char*)dest + 0x20;
-    FUN_00cf1510((char*)source->unk00->unk08 + 0x40, value, first);
+    hkSweptTransformUtil_lerp2((char*)source->unk00->unk08 + 0x40, value, first);
     p = (char*)dest + 0x60;
-    FUN_00cf1510((char*)source->unk04->unk08 + 0x40, source->unk0c->unk50, p);
+    hkSweptTransformUtil_lerp2((char*)source->unk04->unk08 + 0x40, source->unk0c->unk50, p);
     DaNode* node = (DaNode*)((char*)dest + 0x10);
     result->unk00 = dest;
     result->unk04 = node;
@@ -468,12 +472,12 @@ static __declspec(noinline) void FUN_00da49b0(DaDest* dest, DaSource* source, vo
         node->unk08 = p;
     }
     _ReadWriteBarrier();
-    ((DaReceiver*)((char*)result + 0x20))->FUN_00cb22f0(first, p);
+    ((DaReceiver*)((char*)result + 0x20))->hkTransform_setMulInverseMul(first, p);
 }
 DaDest* volatile daDest;
 DaSource* volatile daSource;
 DaResult* volatile daResult;
 void daCaller()
 {
-    FUN_00da49b0(daDest, daSource, daResult);
+    hkAgent1nMachine_initInputAtTime(daDest, daSource, daResult);
 }

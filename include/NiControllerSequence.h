@@ -109,13 +109,13 @@ class NiControllerSequence : public NiObject
     SL* GetTESPackageList();
     TESAnimGroup* GetAnimGroup();
     void ResetStrings();
-    float FUN_00508100();
-    float FUN_00508120();
-    float FUN_00639aa0();
-    NiTextKeyExtraData* FUN_00700300();
-    float FUN_00759450();
-    char* FUN_0084e3a0();
-    void FUN_0098adb0(float afTime);
+    float GetEndKeyTime_00508100();
+    float NiControllerSequence_GetLastTime();
+    float TESCombatStyle_GetTargetingFOV();
+    NiTextKeyExtraData* GetName_00700300();
+    float NiPSysSpawnModifier_GetLifeSpan();
+    char* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    void PathingLOSGridMap_SetSightRadius(float afTime);
     void* FUN_00a35820(unsigned int);
 
     bool IsNotInChain(void* sequence);
@@ -141,24 +141,24 @@ class NiControllerSequence : public NiObject
     void SaveToStream(NiStream& stream);
     void LinkSequenceSource(NiStream* stream);
 
-    void FUN_00a30540();
-    void FUN_00a30900(char priority);
-    float FUN_00a30970(float time, bool update);
-    bool FUN_00a30c80(void* sequence);
-    bool FUN_00a30ea0(NiStream& stream);
-    unsigned char FUN_00a30fb0(NiControllerSequence* sequence);
+    void NiControllerSequence_DetachInterpolators();
+    void AttachInterpolators(char priority);
+    float ComputeScaledTime_00a30970(float time, bool update);
+    bool CanSyncTo(void* sequence);
+    bool RegisterStreamables_00a30ea0(NiStream& stream);
+    unsigned char IsEqual_00a30fb0(NiControllerSequence* sequence);
     void* FUN_00a316a0();
-    bool FUN_00a31910(NiAVObject* target, NiAVObject* root, int argument);
-    void FUN_00a32290(float weight, float ease, float time);
-    bool FUN_00a32330();
-    void FUN_00a328b0(float time, bool setControllerTimes);
-    bool FUN_00a32c70(bool update);
-    void FUN_00a32fa0(NiControllerSequence* destination, int argument1, int argument2, bool remove);
-    void FUN_00a33570(NiControllerSequence* source, int argument);
-    void FUN_00a34ba0(float time, bool update);
-    bool FUN_00a350d0(NiControllerSequence* target, float time, float timeout, int priority,
+    bool ResolveTransformInterpolators(NiAVObject* target, NiAVObject* root, int argument);
+    void NiControllerSequence_SetInterpsWeightAndTime(float weight, float ease, float time);
+    bool NiControllerSequence_ReallocateArrays();
+    void SetPhase(float time, bool setControllerTimes);
+    bool StoreTargets(bool update);
+    void PopulatePoseSequence(NiControllerSequence* destination, int argument1, int argument2, bool remove);
+    void NiControllerSequence_CopyMembers(NiControllerSequence* source, int argument);
+    void Update_00a34ba0(float time, bool update);
+    bool StartBlend(NiControllerSequence* target, float time, float timeout, int priority,
                       float sequenceWeight, float targetWeight, NiControllerSequence* partner);
-    void FUN_00a35640();
+    void ProcessState_00a35640();
 
     NiFixedString m_kName;
     unsigned int m_uiNumControlledBlocks;

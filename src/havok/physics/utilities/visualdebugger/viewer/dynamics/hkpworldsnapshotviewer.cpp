@@ -13,11 +13,12 @@ extern void __cdecl FUN_00ddcc60();
 
 struct FUN_00d62fe0_cls
 {
-    void __thiscall FUN_00d62fe0();
+    void __thiscall UpdateFields_00d62fe0();
 };
 
 // @fnv 0x00d62fe0
-void __thiscall FUN_00d62fe0_cls::FUN_00d62fe0()
+// src: GUESS 0x00d62fe0 (confidence: low)
+void __thiscall FUN_00d62fe0_cls::UpdateFields_00d62fe0()
 {
     *(int*)this = (int)&DAT_010d1720;
     *(int*)((char*)this + 8) = (int)&DAT_010d1700;
@@ -45,22 +46,22 @@ typedef void(__cdecl* SnapshotFn)();
 
 struct ProfileRegistry
 {
-    int FUN_00dd9380(const char* apName, SnapshotFn apfnHandler);
+    int hkProcessFactory_registerProcess(const char* apName, SnapshotFn apfnHandler);
 };
 
 extern ProfileRegistry* DAT_01269cd0;
 extern int DAT_01268fc4;
 extern int DAT_01268fc0;
 
-void __cdecl FUN_00d62f20();
+void __cdecl hkpWorldSnapshotViewer_createNative();
 void __cdecl AllocateRecordWithData();
 
 // Registers the two world-snapshot commands with the profile registry, storing their returned handles in DAT_01268fc4 and DAT_01268fc0.
 // @fnv 0x00d63000
 void __cdecl RegisterSnapshotCommands()
 {
-    DAT_01268fc4 = DAT_01269cd0->FUN_00dd9380("* Grab World Snapshot Native", FUN_00d62f20);
-    DAT_01268fc0 = DAT_01269cd0->FUN_00dd9380("* Grab World Snapshot PC", AllocateRecordWithData);
+    DAT_01268fc4 = DAT_01269cd0->hkProcessFactory_registerProcess("* Grab World Snapshot Native", hkpWorldSnapshotViewer_createNative);
+    DAT_01268fc0 = DAT_01269cd0->hkProcessFactory_registerProcess("* Grab World Snapshot PC", AllocateRecordWithData);
 }
 
 struct FUN_00c7be20_cls;
@@ -80,8 +81,8 @@ struct FUN_00c7be20_arr
     unsigned int m_capFlags;
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
-void __cdecl FUN_00c908c0(void* allocator, FUN_00c7be20_arr* self, unsigned int newCap, int elemSize);
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
+void __cdecl hkArrayUtil__reserve(void* allocator, FUN_00c7be20_arr* self, unsigned int newCap, int elemSize);
 
 struct FUN_00c7be20_cls
 {
@@ -116,7 +117,7 @@ void FUN_00c7be20_cls::CopySourceArray(FUN_00c7be20_arr* out)
     if (pSource != 0)
     {
         int iCount = pSource->m_0c;
-        hkMemoryRouter* pAllocHolder = FUN_00c85750();
+        hkMemoryRouter* pAllocHolder = hkMemoryRouter_getInstance();
         void* allocator = pAllocHolder->m_heap;
         unsigned int uiCapacity = out->m_capFlags & 0x3fffffffu;
         if ((int)uiCapacity < iCount)
@@ -126,7 +127,7 @@ void FUN_00c7be20_cls::CopySourceArray(FUN_00c7be20_arr* out)
             {
                 newCap = iCount;
             }
-            FUN_00c908c0(allocator, out, (unsigned int)newCap, 4);
+            hkArrayUtil__reserve(allocator, out, (unsigned int)newCap, 4);
         }
         *(volatile int*)&out->m_uiItemCount = iCount;
         int iRemaining = m_48->m_0c;
@@ -185,7 +186,7 @@ struct FUN_00d63250_cls
     unsigned short m_uSize;
     unsigned short m_u06;
 
-    void FUN_00d62fe0();
+    void UpdateFields_00d62fe0();
 
     FUN_00d63250_cls* Destroy(unsigned char acFlags);
     static void operator delete(void* apMemory) throw();
@@ -195,10 +196,10 @@ struct FUN_00d63250_cls
 // @fnv 0x00d63250
 FUN_00d63250_cls* FUN_00d63250_cls::Destroy(unsigned char acFlags)
 {
-    FUN_00d62fe0();
+    UpdateFields_00d62fe0();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }
@@ -230,11 +231,12 @@ struct FUN_00d63280_cls
     SubObject m_sub28;
 
     void Setup(int b);
-    FUN_00d63280_cls* FUN_00d63280(int a, int b);
+    FUN_00d63280_cls* hkpWorldMemoryViewer_hkpWorldMemoryViewer(int a, int b);
 };
 
 // @fnv 0x00d63280
-FUN_00d63280_cls* FUN_00d63280_cls::FUN_00d63280(int a, int b)
+// src: HAVOK_LIB 0x00d63280
+FUN_00d63280_cls* FUN_00d63280_cls::hkpWorldMemoryViewer_hkpWorldMemoryViewer(int a, int b)
 {
     Setup(b);
     m_vtbl0 = (void*)&DAT_010d1794;
@@ -269,7 +271,7 @@ ThunkOwner::ThunkOwner()
 struct D63240Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00d63240();
+    virtual void AdjustThisAndForward_00d63240();
 
     int unk04;
     int unk08;
@@ -282,7 +284,7 @@ struct D63240Primary
 
 struct D63240Secondary
 {
-    virtual void FUN_00d63240();
+    virtual void AdjustThisAndForward_00d63240();
 };
 
 struct D63240Object : D63240Primary, D63240Secondary
@@ -290,7 +292,8 @@ struct D63240Object : D63240Primary, D63240Secondary
     D63240Object();
 
 // @fnv 0x00d63240
-    virtual void FUN_00d63240();
+// src: GUESS 0x00d63240 (confidence: low)
+    virtual void AdjustThisAndForward_00d63240();
 };
 
 D63240Object::D63240Object()

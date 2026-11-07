@@ -11,5 +11,5 @@ class LoadedAreaBound : public NiRefObject
     void FUN_006270f0();
     void* FUN_006270c0(unsigned int flags);
     void FUN_00628da0();
-    void FUN_006271b0(TESObjectCELL*, void*);
+    void LoadedAreaBound_Update(TESObjectCELL*, void*);
 };

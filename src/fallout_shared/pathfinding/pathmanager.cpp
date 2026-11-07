@@ -90,7 +90,7 @@ void PathingTaskData::Process()
     AutoMemContext context(static_cast<MEM_CONTEXT>(0x2d), true, DAT_0106d560, 355);
     PathManager::GetRandomGenerator()->FUN_00717e50()->FUN_00483710();
 
-    if (PathManager::GetRandomGenerator()->FUN_00559450()->FUN_006eb790())
+    if (PathManager::GetRandomGenerator()->Modelloader_GetReferencedThis()->PathManagerImpl_TaskTryLock())
     {
         if (!HasPendingMessages())
         {
@@ -114,25 +114,25 @@ void PathingTaskData::Process()
                     }
                     ((ActorPathingMessageQueue*)spQueue)
                         ->Push(QueuedMessage(PATHING_MESSAGE_TYPE_PMT_OK, m_pPathingSolution));
-                    PathManager::GetRandomGenerator()->FUN_00559450()->DispatchPathingMessage(Struct_004b0680(0, this));
+                    PathManager::GetRandomGenerator()->Modelloader_GetReferencedThis()->DispatchPathingMessage(Struct_004b0680(0, this));
                 }
                 else
                 {
                     ((ActorPathingMessageQueue*)spQueue)
                         ->Push(QueuedMessage(PATHING_MESSAGE_TYPE_PMT_ERROR, m_pPathingSolution));
-                    PathManager::GetRandomGenerator()->FUN_00559450()->DispatchPathingMessage(Struct_004b0680(1, this));
+                    PathManager::GetRandomGenerator()->Modelloader_GetReferencedThis()->DispatchPathingMessage(Struct_004b0680(1, this));
                 }
             }
         }
-        PathManager::GetRandomGenerator()->FUN_00559450()->FUN_006eb7b0();
+        PathManager::GetRandomGenerator()->Modelloader_GetReferencedThis()->PathManagerImpl_TaskUnlock();
     }
     else
     {
-        if (PathManager::GetRandomGenerator()->FUN_00559450()->GetByteAtOffsetC34())
+        if (PathManager::GetRandomGenerator()->Modelloader_GetReferencedThis()->GetByteAtOffsetC34())
         {
             ((ActorPathingMessageQueue*)spQueue)
                 ->Push(QueuedMessage(PATHING_MESSAGE_TYPE_PMT_ERROR, m_pPathingSolution));
-            PathManager::GetRandomGenerator()->FUN_00559450()->DispatchPathingMessage(Struct_004b0680(1, this));
+            PathManager::GetRandomGenerator()->Modelloader_GetReferencedThis()->DispatchPathingMessage(Struct_004b0680(1, this));
         }
         else
         {
@@ -145,20 +145,21 @@ void PathingTaskData::Process()
 
 struct G00559a40
 {
-    void FUN_0040f6e0();
+    void NiRefObject_IncRefCount();
 };
 struct S00559a40
 {
     G00559a40* p;
-    S00559a40* FUN_00559a40(S00559a40* o);
+    S00559a40* NiPointer_PathingSolution_NiPointer_PathingSolution(S00559a40* o);
 };
 // Copies the pointer from o into this object's p and, if non-null, calls FUN_0040f6e0 on it, then returns this.
 // @fnv 0x00559a40
-S00559a40* S00559a40::FUN_00559a40(S00559a40* apOther)
+// src: XBOX_PDB 0x00559a40
+S00559a40* S00559a40::NiPointer_PathingSolution_NiPointer_PathingSolution(S00559a40* apOther)
 {
     p = apOther->p;
     if (p)
-        p->FUN_0040f6e0();
+        p->NiRefObject_IncRefCount();
     return this;
 }
 
@@ -171,11 +172,12 @@ struct S006e9bd0
 {
     int a;
     G006e9bd0 g;
-    S006e9bd0* FUN_006e9bd0();
+    S006e9bd0* ActorPathingMessage_ActorPathingMessage_0();
 };
 // Sets a to -1, constructs g with 0, and returns this.
 // @fnv 0x006e9bd0
-S006e9bd0* S006e9bd0::FUN_006e9bd0()
+// src: COMMUNITY 0x006e9bd0
+S006e9bd0* S006e9bd0::ActorPathingMessage_ActorPathingMessage_0()
 {
     a = -1;
     g.FUN_ctor(0);
@@ -191,10 +193,11 @@ struct S006e9c00
 {
     int type;
     N006e9c00 sp;
-    S006e9c00* FUN_006e9c00(int t, N006e9c00* s);
+    S006e9c00* ActorPathingMessage_ActorPathingMessage(int t, N006e9c00* s);
 };
 // @fnv 0x006e9c00
-S006e9c00* S006e9c00::FUN_006e9c00(int aiType, N006e9c00* apSource)
+// src: COMMUNITY 0x006e9c00
+S006e9c00* S006e9c00::ActorPathingMessage_ActorPathingMessage(int aiType, N006e9c00* apSource)
 {
     type = aiType;
     sp.FUN_nip(*apSource);
@@ -341,18 +344,19 @@ FUN_006eaa30::FUN_006eaa30() : m2(&m1), a(0xc, 0x25, 0xc)
 
 struct FUN_006eabe0_shell : public PathManagerImpl
 {
-    bool FUN_006eabe0();
+    bool PathManagerImpl_Initialize();
 };
 
 BSWin32TaskletManager& __cdecl GetTaskletManager(void);
-bool __fastcall FUN_006c08e0(void*);
+bool __fastcall BSTaskletGroup_Open(void*);
 
 // @fnv 0x006eabe0
-bool FUN_006eabe0_shell::FUN_006eabe0()
+// src: COMMUNITY 0x006eabe0
+bool FUN_006eabe0_shell::PathManagerImpl_Initialize()
 {
     if (!GetTaskletManager().GetTaskletValue(this))
         return false;
-    if (!FUN_006c08e0(this))
+    if (!BSTaskletGroup_Open(this))
         return false;
     *(int*)((char*)this + 0xc24) = 0;
     *(int*)((char*)this + 0xc28) = 0;
@@ -362,28 +366,30 @@ bool FUN_006eabe0_shell::FUN_006eabe0()
 
 struct FUN_006eb790_shell : public PathManagerImpl
 {
-    bool FUN_006eb790();
+    bool PathManagerImpl_TaskTryLock();
 };
 
-bool __fastcall FUN_00aa6120(void* pThis);
+bool __fastcall BSReadWriteLock_TryLockForRead(void* pThis);
 
 // @fnv 0x006eb790
-bool FUN_006eb790_shell::FUN_006eb790()
+// src: COMMUNITY 0x006eb790
+bool FUN_006eb790_shell::PathManagerImpl_TaskTryLock()
 {
-    return FUN_00aa6120((char*)this + 0xc2c);
+    return BSReadWriteLock_TryLockForRead((char*)this + 0xc2c);
 }
 
 struct FUN_006eb7b0_shell : public PathManagerImpl
 {
-    void FUN_006eb7b0();
+    void PathManagerImpl_TaskUnlock();
 };
 
-void __fastcall FUN_00aa62c0(void* pThis);
+void __fastcall BSReadWriteLock_UnlockRead(void* pThis);
 
 // @fnv 0x006eb7b0
-void FUN_006eb7b0_shell::FUN_006eb7b0()
+// src: COMMUNITY 0x006eb7b0
+void FUN_006eb7b0_shell::PathManagerImpl_TaskUnlock()
 {
-    FUN_00aa62c0((char*)this + 0xc2c);
+    BSReadWriteLock_UnlockRead((char*)this + 0xc2c);
 }
 
 struct PathingTaskMessage
@@ -413,86 +419,92 @@ void FUN_006eb7f0_shell::DispatchPathingMessage(void* aMsg)
 
 struct FUN_006ebc70_shell : public PathManager
 {
-    void FUN_006ebc70();
+    void PathManager_Pause();
 };
 
-void __fastcall FUN_006eb310(void*);
+void __fastcall PathManagerImpl_Pause(void*);
 
 // @fnv 0x006ebc70
-void FUN_006ebc70_shell::FUN_006ebc70()
+// src: XBOX_PDB 0x006ebc70
+void FUN_006ebc70_shell::PathManager_Pause()
 {
-    FUN_006eb310(*reinterpret_cast<void**>(this));
+    PathManagerImpl_Pause(*reinterpret_cast<void**>(this));
 }
 
 struct FUN_006ebc90_shell : public PathManager
 {
-    bool FUN_006ebc90();
+    bool PathManager_QPaused();
 };
 
-bool __fastcall FUN_006eb390(void*);
+bool __fastcall PathManagerImpl_QPaused(void*);
 
 // @fnv 0x006ebc90
-bool FUN_006ebc90_shell::FUN_006ebc90()
+// src: XBOX_PDB 0x006ebc90
+bool FUN_006ebc90_shell::PathManager_QPaused()
 {
-    return FUN_006eb390(*reinterpret_cast<void**>(this));
+    return PathManagerImpl_QPaused(*reinterpret_cast<void**>(this));
 }
 
 struct FUN_006ebcd0_shell : public PathManager
 {
-    void FUN_006ebcd0();
+    void PathManager_Resume();
 };
 
-void __fastcall FUN_006eb3b0(void*);
+void __fastcall PathManagerImpl_Resume(void*);
 
 // @fnv 0x006ebcd0
-void FUN_006ebcd0_shell::FUN_006ebcd0()
+// src: XBOX_PDB 0x006ebcd0
+void FUN_006ebcd0_shell::PathManager_Resume()
 {
-    FUN_006eb3b0(*reinterpret_cast<void**>(this));
+    PathManagerImpl_Resume(*reinterpret_cast<void**>(this));
 }
 
 struct T006ebd10
 {
-    void FUN_006eb6b0(int);
+    void PathManagerImpl_CancelCurrentPathsAndPause_0(int);
 };
 struct S006ebd10
 {
     T006ebd10* p;
-    void FUN_006ebd10(int a);
+    void PathManager_CancelCurrentPathsAndPause_0(int a);
 };
 // @fnv 0x006ebd10
-void S006ebd10::FUN_006ebd10(int a)
+// src: COMMUNITY 0x006ebd10
+void S006ebd10::PathManager_CancelCurrentPathsAndPause_0(int a)
 {
-    p->FUN_006eb6b0(a);
+    p->PathManagerImpl_CancelCurrentPathsAndPause_0(a);
 }
 
 struct G006ebf30
 {
     char pad[0x14];
     char r;
-    void FUN_0040f6e0();
+    void NiRefObject_IncRefCount();
 };
 struct S006ebf30
 {
     G006ebf30* p;
-    S006ebf30* FUN_006ebf30(S006ebf30* o);
+    S006ebf30* CopyPointerAndAddReference(S006ebf30* o);
 };
 // Copies the pointer from o into this object and, if it is non-null, calls FUN_0040f6e0 on the sub-object at offset 0x14; returns this.
 // @fnv 0x006ebf30
-S006ebf30* S006ebf30::FUN_006ebf30(S006ebf30* apSource)
+// src: GUESS 0x006ebf30 (confidence: medium)
+S006ebf30* S006ebf30::CopyPointerAndAddReference(S006ebf30* apSource)
 {
     p = apSource->p;
     if (p)
-        ((G006ebf30*)((char*)p + 0x14))->FUN_0040f6e0();
+        ((G006ebf30*)((char*)p + 0x14))->NiRefObject_IncRefCount();
     return this;
 }
 
 
 // If the stored pointer is non-null, calls FUN_00401970 on the NiAVObject at offset 0x14 of it.
 // @fnv 0x006ebf90
-void __fastcall FUN_006ebf90(char** apObjectPtr)
+// src: GUESS 0x006ebf90 (confidence: medium)
+void __fastcall NiAVObject_ReleaseStoredSceneObjectReference(char** apObjectPtr)
 {
     if (*apObjectPtr)
-        ((NiAVObject*)(*apObjectPtr + 0x14))->FUN_00401970();
+        ((NiAVObject*)(*apObjectPtr + 0x14))->NiRefObject_DecRefCount();
 }
 
 void __cdecl Deallocate(void*);
@@ -534,22 +546,24 @@ void* FUN_006e9f60_shell::FUN_006e9f60(unsigned int flags)
 
 struct FUN_006ea330_shell
 {
-    void FUN_006ea330();
+    void BSTaskletData_TaskYield();
 };
 
 // @fnv 0x006ea330
-void FUN_006ea330_shell::FUN_006ea330()
+// src: XBOX_PDB 0x006ea330
+void FUN_006ea330_shell::BSTaskletData_TaskYield()
 {
     *(unsigned char*)(((unsigned char*)this) + 4) = 1;
 }
 
 struct FUN_006eb390_shell
 {
-    bool __thiscall FUN_006eb390();
+    bool __thiscall PathManagerImpl_QPaused();
 };
 
 // @fnv 0x006eb390
-bool __thiscall FUN_006eb390_shell::FUN_006eb390()
+// src: XBOX_PDB 0x006eb390
+bool __thiscall FUN_006eb390_shell::PathManagerImpl_QPaused()
 {
     return ((int*)this)[0xc24 / 4] == 2;
 }
@@ -609,11 +623,12 @@ void __thiscall FUN_006ebdc0_shell::SetVtable()
 struct FUN_006ebde0_shell
 {
     unsigned char c0c;
-    bool FUN_006ebde0();
+    bool LockFreeMap_char_const_Model_LockFreeMapIterator_GetFinished();
 };
 
 // @fnv 0x006ebde0
-bool FUN_006ebde0_shell::FUN_006ebde0()
+// src: XBOX_PDB 0x006ebde0
+bool FUN_006ebde0_shell::LockFreeMap_char_const_Model_LockFreeMapIterator_GetFinished()
 {
     return ((unsigned char*)this)[0xc] & 2;
 }
@@ -628,11 +643,12 @@ extern void* DAT_0106d650;
 struct FUN_006ebec0_shell
 {
     void* m_data;
-    void FUN_006ebec0();
+    void ResetVirtualTableAndClear_006ebec0();
 };
 
 // @fnv 0x006ebec0
-void FUN_006ebec0_shell::FUN_006ebec0()
+// src: GUESS 0x006ebec0 (confidence: medium)
+void FUN_006ebec0_shell::ResetVirtualTableAndClear_006ebec0()
 {
     m_data = &DAT_0106d650;
     reinterpret_cast<GlobalObject_00869f00*>(this)->Clear(true);
@@ -641,22 +657,23 @@ void FUN_006ebec0_shell::FUN_006ebec0()
 struct AX
 {
     void* vtable;
-    void FUN_006b3eb0(unsigned int, unsigned int);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 };
 
 extern int DAT_0106d664;
 
 struct FUN_006ebee0_shell : AX
 {
-    AX* FUN_006ebee0();
+    AX* BSSimpleArray_RayCastPath_1024_BSSimpleArray();
 };
 
 // Sets the vtable to DAT_0106d664, calls FUN_006b3eb0 with 0, 0, and returns this.
 // @fnv 0x006ebee0
-AX* FUN_006ebee0_shell::FUN_006ebee0()
+// src: EXE 0x006ebee0
+AX* FUN_006ebee0_shell::BSSimpleArray_RayCastPath_1024_BSSimpleArray()
 {
     vtable = &DAT_0106d664;
-    FUN_006b3eb0(0, 0);
+    BSSimpleArray_float_1024_InitialSetup(0, 0);
     return this;
 }
 
@@ -664,7 +681,7 @@ namespace fnv_006ebf10 {
 struct GlobalObject_00869f00
 {
     void Clear(bool);
-    void FUN_006ebf10();
+    void SetVtableAndProcessState_006ebf10();
 };
 
 extern int DAT_0106d664;
@@ -673,7 +690,8 @@ void GlobalObject_00869f00::Clear(bool)
 {}
 
 // @fnv 0x006ebf10
-void GlobalObject_00869f00::FUN_006ebf10()
+// src: GUESS 0x006ebf10 (confidence: low)
+void GlobalObject_00869f00::SetVtableAndProcessState_006ebf10()
 {
     *(int*)this = (int)&DAT_0106d664;
     Clear(true);
@@ -726,22 +744,23 @@ void* __thiscall FUN_006ebe60_shell::FUN_006ebe60(unsigned int flags)
 }
 }  // namespace fnv_006ebe60
 
-extern "C" void __cdecl FUN_006b3eb0(unsigned int, unsigned int);
+extern "C" void __cdecl BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 extern void* DAT_0106d650;
 
 struct FUN_006ebe90_shell
 {
     void* vtable;
-    void FUN_006b3eb0(unsigned int, unsigned int);
-    FUN_006ebe90_shell* FUN_006ebe90();
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
+    FUN_006ebe90_shell* BSSimpleArray_RayCastPathRequest_1024_BSSimpleArray();
 };
 
 // Sets the vtable to DAT_0106d650, calls FUN_006b3eb0 with 0 and false, and returns this.
 // @fnv 0x006ebe90
-FUN_006ebe90_shell* FUN_006ebe90_shell::FUN_006ebe90()
+// src: EXE 0x006ebe90
+FUN_006ebe90_shell* FUN_006ebe90_shell::BSSimpleArray_RayCastPathRequest_1024_BSSimpleArray()
 {
     vtable = &DAT_0106d650;
-    FUN_006b3eb0(0, false);
+    BSSimpleArray_float_1024_InitialSetup(0, false);
     return this;
 }
 
@@ -780,11 +799,12 @@ struct FUN_006ea9d0_shell
 {
     int f0;
     int f4;
-    FUN_006ea9d0_shell* FUN_006ea9d0();
+    FUN_006ea9d0_shell* PathingMessage_PathingMessage();
 };
 // Sets f0 to -1 and f4 to 0, then returns this.
 // @fnv 0x006ea9d0
-FUN_006ea9d0_shell* FUN_006ea9d0_shell::FUN_006ea9d0()
+// src: COMMUNITY 0x006ea9d0
+FUN_006ea9d0_shell* FUN_006ea9d0_shell::PathingMessage_PathingMessage()
 {
     f0 = -1;
     f4 = 0;
@@ -795,11 +815,12 @@ struct S_006eaa00
 {
     int m0;
     int m4;
-    S_006eaa00* FUN_006eaa00(S_006eaa00* p);
+    S_006eaa00* AssignFields_006eaa00(S_006eaa00* p);
 };
 // Copies m0 and m4 from p into this object and returns this.
 // @fnv 0x006eaa00
-S_006eaa00* S_006eaa00::FUN_006eaa00(S_006eaa00* apSource)
+// src: GUESS 0x006eaa00 (confidence: low)
+S_006eaa00* S_006eaa00::AssignFields_006eaa00(S_006eaa00* apSource)
 {
     m0 = apSource->m0;
     m4 = apSource->m4;
@@ -807,17 +828,18 @@ S_006eaa00* S_006eaa00::FUN_006eaa00(S_006eaa00* apSource)
 }
 
 namespace fnv_006eac40 {
-void __fastcall FUN_006c09d0(void*);
+void __fastcall BSTaskletGroup_Close(void*);
 BSWin32TaskletManager& __cdecl GetTaskletManager(void);
 struct FUN_006eac40_Holder
 {
-    void FUN_006eac40();
+    void PathManagerImpl_Release();
 };
 // Calls FUN_006c09d0 on this, then passes this to the tasklet manager's ReleaseItem.
 // @fnv 0x006eac40
-void FUN_006eac40_Holder::FUN_006eac40()
+// src: COMMUNITY 0x006eac40
+void FUN_006eac40_Holder::PathManagerImpl_Release()
 {
-    FUN_006c09d0(this);
+    BSTaskletGroup_Close(this);
     GetTaskletManager().ReleaseItem(this);
 }
 }  // namespace fnv_006eac40
@@ -849,10 +871,11 @@ bool HostA::DispatchToInner(int aiValue, bool abUseFirst)
 struct FUN_006eb670_Holder
 {
     PatrolActorPackageData* field0;
-    void FUN_006eb670(bool);
+    void BSTaskletGroup_WaitForCompletion(bool);
 };
 // @fnv 0x006eb670
-void FUN_006eb670_Holder::FUN_006eb670(bool a1)
+// src: COMMUNITY 0x006eb670
+void FUN_006eb670_Holder::BSTaskletGroup_WaitForCompletion(bool a1)
 {
     if (field0 != 0)
     {
@@ -870,11 +893,12 @@ struct Obj_6eb890
 struct Holder_6eb850
 {
     Obj_6eb890* ptr;
-    void FUN_006eb850();
+    void UpdateState_006eb850();
 };
 // If ptr is non-null, calls FUN_006eb890(1) on it.
 // @fnv 0x006eb850
-void Holder_6eb850::FUN_006eb850()
+// src: GUESS 0x006eb850 (confidence: low)
+void Holder_6eb850::UpdateState_006eb850()
 {
     Obj_6eb890* b;
     {
@@ -905,11 +929,12 @@ extern int DAT_0106d63c;
 
 struct FUN_006ebda0_shell
 {
-    void FUN_006ebda0();
+    void SetVirtualTable_006ebda0();
 };
 
 // @fnv 0x006ebda0
-void FUN_006ebda0_shell::FUN_006ebda0()
+// src: GUESS 0x006ebda0 (confidence: low)
+void FUN_006ebda0_shell::SetVirtualTable_006ebda0()
 {
     *reinterpret_cast<int*>(this) = (int)&DAT_0106d63c;
 }
@@ -931,14 +956,14 @@ void* S006ebe00::FUN_006ebe00(unsigned int flags)
 
 struct Class_006ebe30
 {
-    void FUN_006ebda0();
+    void SetVirtualTable_006ebda0();
     void* FUN_006ebe30(unsigned int);
 };
 void __cdecl _Deallocate(void*);
 // @fnv 0x006ebe30
 void* Class_006ebe30::FUN_006ebe30(unsigned int flags)
 {
-    FUN_006ebda0();
+    SetVirtualTable_006ebda0();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -947,20 +972,21 @@ void* Class_006ebe30::FUN_006ebe30(unsigned int flags)
 namespace fnv_006ebf60 {
 struct G00559a40
 {
-    void FUN_0040f6e0();
+    void NiRefObject_IncRefCount();
 };
 struct S006ebf60
 {
     int f;
-    S006ebf60* FUN_006ebf60(int);
+    S006ebf60* NiPointer_ActorPathingMessageQueue_NiPointer_ActorPathingMessageQueue(int);
 };
 // Stores a into f and, when a is non-zero, calls FUN_0040f6e0 on the object at a+0x14; returns this.
 // @fnv 0x006ebf60
-S006ebf60* S006ebf60::FUN_006ebf60(int aiValue)
+// src: XBOX_PDB 0x006ebf60
+S006ebf60* S006ebf60::NiPointer_ActorPathingMessageQueue_NiPointer_ActorPathingMessageQueue(int aiValue)
 {
     f = aiValue;
     if (f != 0)
-        ((G00559a40*)(f + 0x14))->FUN_0040f6e0();
+        ((G00559a40*)(f + 0x14))->NiRefObject_IncRefCount();
     return this;
 }
 }  // namespace fnv_006ebf60
@@ -986,8 +1012,8 @@ struct FUN_006c5e70
     ~FUN_006c5e70();
     int a, b;
 };
-FUN_006c5e70 __fastcall FUN_006c5e40();
-int __fastcall FUN_00559450(int*);
+FUN_006c5e70 __fastcall BSTasklet_BSTasklet();
+int __fastcall Modelloader_GetReferencedThis(int*);
 struct Queue_006eac70
 {
     virtual void v0();
@@ -1002,7 +1028,7 @@ struct PathManagerImpl_t
 {
     char pad[0x1480];
     Queue_006eac70 kQueue;
-    bool FUN_006c5ec0(FUN_006c5e70*, int);
+    bool BSTaskletGroup_AttachTask(FUN_006c5e70*, int);
     bool QueueTaskletRequest(GO aspRequest, Ptr2_006e9e20 aspMessageQueue);
 };
 
@@ -1011,12 +1037,12 @@ struct PathManagerImpl_t
 bool PathManagerImpl_t::QueueTaskletRequest(GO aspRequest, Ptr2_006e9e20 aspMessageQueue)
 {
     BSTaskletData* ptaskData = new FUN_006e9cc0(aspRequest, aspMessageQueue);
-    FUN_006c5e70 task = FUN_006c5e40();
+    FUN_006c5e70 task = BSTasklet_BSTasklet();
     ((TESRaceForm*)&task)->Initialize((unsigned int)ptaskData);
-    kQueue.Add(FUN_00559450((int*)&aspRequest), &ptaskData, 1);
-    if (!FUN_006c5ec0(&task, 0))
+    kQueue.Add(Modelloader_GetReferencedThis((int*)&aspRequest), &ptaskData, 1);
+    if (!BSTaskletGroup_AttachTask(&task, 0))
     {
-        kQueue.Remove(FUN_00559450((int*)&aspRequest));
+        kQueue.Remove(Modelloader_GetReferencedThis((int*)&aspRequest));
         delete ptaskData;
         return false;
     }
@@ -1070,8 +1096,8 @@ struct SearchLock
     int unk14;
     int unk18;
     int unk1c;
-    void FUN_0040fbf0(const char*);
-    void Leave();
+    void BSSpinLock_Lock(const char*);
+    void BSSpinLock_Unlock();
 };
 struct ManagerView
 {
@@ -1086,13 +1112,14 @@ struct ManagerView
     SearchLock lock;
     SearchArray first;
     SearchArray second;
-    int FUN_006ea350();
+    int PathingTaskData_ComputeRayCasts();
 };
 // @fnv 0x006ea350
-int ManagerView::FUN_006ea350()
+// src: COMMUNITY 0x006ea350
+int ManagerView::PathingTaskData_ComputeRayCasts()
 {
     int total = 0;
-    lock.FUN_0040fbf0(0);
+    lock.BSSpinLock_Lock(0);
     for (unsigned int i = 0; i < first.FUN_0044ddc0(); i++)
     {
         if (second.FUN_00877a30(i)->flags == 0)
@@ -1104,7 +1131,7 @@ int ManagerView::FUN_006ea350()
                 break;
         }
     }
-    lock.Leave();
+    lock.BSSpinLock_Unlock();
     return total;
 }
 
@@ -3864,7 +3891,7 @@ class B6EB310Lock
 class B6EB310Manager
 {
   public:
-    void FUN_006eb310();
+    void PathManagerImpl_Pause();
 
     int unk000;
     int unk004;
@@ -4652,7 +4679,8 @@ class B6EB310Manager
 };
 
 // @fnv 0x006eb310
-void B6EB310Manager::FUN_006eb310()
+// src: EXE 0x006eb310
+void B6EB310Manager::PathManagerImpl_Pause()
 {
     m_kLock.Lock(g_acB6EB310Name);
     switch (m_eAnimationState)
@@ -4681,7 +4709,7 @@ class B6EB3B0Lock
 class B6EB3B0Manager
 {
   public:
-    void FUN_006eb3b0();
+    void PathManagerImpl_Resume();
 
     int unk000;
     int unk004;
@@ -5469,7 +5497,8 @@ class B6EB3B0Manager
 };
 
 // @fnv 0x006eb3b0
-void B6EB3B0Manager::FUN_006eb3b0()
+// src: EXE 0x006eb3b0
+void B6EB3B0Manager::PathManagerImpl_Resume()
 {
     m_kLock.Lock(g_acB6EB3B0Name);
     switch (m_eAnimationState)
@@ -5487,21 +5516,22 @@ void B6EB3B0Manager::FUN_006eb3b0()
 
 struct Obj_006eb980_obj
 {
-    void FUN_006eac40();
+    void PathManagerImpl_Release();
     int FUN_006eb890(int);
 };
 
 struct Shell_006eb980
 {
     Obj_006eb980_obj* m0;
-    void FUN_006eb980();
+    void ReleaseAndClearObject();
 };
 
 // Calls FUN_006eac40 on m0, then FUN_006eb890(1) on m0 if non-null, and clears m0.
 // @fnv 0x006eb980
-void Shell_006eb980::FUN_006eb980()
+// src: GUESS 0x006eb980 (confidence: medium)
+void Shell_006eb980::ReleaseAndClearObject()
 {
-    m0->FUN_006eac40();
+    m0->PathManagerImpl_Release();
     Obj_006eb980_obj* QQ = m0;
     Obj_006eb980_obj* PP2 = QQ;
     PP2 != 0 ? PP2->FUN_006eb890(1) : 0;
@@ -5609,7 +5639,7 @@ struct Host17
     Spin17 spin;
     Arr40_17 arr40;
     Arr50_17 arr50;
-    void FUN_006ea330();
+    void BSTaskletData_TaskYield();
     void Notify(int arg);
     int FindOrAddPathingEntry(PathingLocation17& a1, PathingLocation17& a2, int a3);
 };
@@ -5638,7 +5668,7 @@ int Host17::FindOrAddPathingEntry(PathingLocation17& a1, PathingLocation17& a2, 
                         arr50.GetAt(i2)->sub8.Activate(iActivateArg);
                         break;
                     case 0:
-                        FUN_006ea330();
+                        BSTaskletData_TaskYield();
                         break;
                     default:
                         result = 2;
@@ -5677,7 +5707,7 @@ struct RequestLocation
 struct RequestShape
 {
     int unk00, unk04, unk08, unk0c;
-    void FUN_006cf940(int result);
+    void BSSimpleArray_CopyTo_0(int result);
     void ProcessItems(RequestShape* result);
 };
 struct FUN_006cb3a0
@@ -5709,7 +5739,7 @@ struct RequestManager
     SearchLock lock;
     RequestArray<FUN_006cb3a0> requests;
     RequestArray<FUN_006cb480> statuses;
-    void FUN_006ea330();
+    void BSTaskletData_TaskYield();
     void FUN_0060d4b0(int changed);
 };
 // Locks the manager, searches statuses for a matching type and location, updates or creates the request/status entries, unlocks, and returns the status.
@@ -5717,7 +5747,7 @@ struct RequestManager
 unsigned int FUN_006ea780_Obj::RequestLocationStatus(int pShape, int iLocation, int a3, int bTypeFlag)
 {
     unsigned int status = 0;
-    ((RequestManager*)this)->lock.FUN_0040fbf0(0);
+    ((RequestManager*)this)->lock.BSSpinLock_Lock(0);
     for (unsigned int i = 0; i < ((RequestManager*)this)->statuses.FUN_0044ddc0(); i++)
     {
         if (((RequestManager*)this)->statuses.FUN_00877a30(i)->type == !(unsigned char)bTypeFlag &&
@@ -5729,20 +5759,20 @@ unsigned int FUN_006ea780_Obj::RequestLocationStatus(int pShape, int iLocation, 
             case 2:
                 break;
             case 1:
-                ((RequestManager*)this)->statuses.FUN_00877a30(i)->shape.FUN_006cf940(a3);
+                ((RequestManager*)this)->statuses.FUN_00877a30(i)->shape.BSSimpleArray_CopyTo_0(a3);
                 break;
             case 0:
-                ((RequestManager*)this)->FUN_006ea330();
+                ((RequestManager*)this)->BSTaskletData_TaskYield();
                 break;
             default:
                 status = 2;
             }
-            ((RequestManager*)this)->lock.Leave();
+            ((RequestManager*)this)->lock.BSSpinLock_Unlock();
             return status;
         }
     }
     FUN_006cb3a0* entry = new FUN_006cb3a0;
-    entry->owner = ((RequestManager*)this)->owner.FUN_00559450();
+    entry->owner = ((RequestManager*)this)->owner.Modelloader_GetReferencedThis();
     entry->location.FUN_006dcce0(iLocation);
     ((RequestShape*)pShape)->ProcessItems(&entry->shape);
     entry->type = !(unsigned char)bTypeFlag;
@@ -5751,7 +5781,7 @@ unsigned int FUN_006ea780_Obj::RequestLocationStatus(int pShape, int iLocation, 
     request->status = 0;
     ((RequestManager*)this)->requests.FUN_007cb2e0(entry);
     ((RequestManager*)this)->statuses.FUN_007cb2e0(request);
-    ((RequestManager*)this)->lock.Leave();
+    ((RequestManager*)this)->lock.BSSpinLock_Unlock();
     ((RequestManager*)this)->FUN_0060d4b0(1);
     return status;
 }
@@ -7168,7 +7198,7 @@ void DrainManager::Drain()
     timer.Begin(taskName);
     EnterTasks(this);
     active = true;
-    ((FUN_006eb670_Holder*)this)->FUN_006eb670(false);
+    ((FUN_006eb670_Holder*)this)->BSTaskletGroup_WaitForCompletion(false);
     PathTaskCompletionRecord message;
     while (incoming.Pop(message))
     {
@@ -7196,7 +7226,7 @@ void DrainManager::Drain()
     lock.Release();
     state = 2;
     active = false;
-    FUN_006c08e0(this);
+    BSTaskletGroup_Open(this);
     timer.End();
 }
 

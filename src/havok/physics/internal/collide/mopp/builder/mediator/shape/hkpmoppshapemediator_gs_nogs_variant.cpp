@@ -18,7 +18,7 @@ struct FUN_00dd5260_T
     int d;
     int e;
 };
-void __stdcall FUN_00dd5260(FUN_00dd5260_T* pSrc, int a1, int a2, int a3, FUN_00dd5260_T* pDst);
+void __stdcall hkpMoppShapeMediator_splitPrimitive(FUN_00dd5260_T* pSrc, int a1, int a2, int a3, FUN_00dd5260_T* pDst);
 struct FUN_00dd5210_Record
 {
     int value;
@@ -64,22 +64,22 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
     unsigned short size;
-    void FUN_00dd51d0();
+    void InitializeFields_00dd51d0();
     CpuObject* FUN_00dd55a0(unsigned int flags);
 };
-void __stdcall FUN_00dd51e0(int, int);
+void __stdcall nullsub_83(int, int);
 struct FnvCpu_FUN_00dd5290_CpuObject
 {
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
     int value;
-    int FUN_00dd5290();
+    int GetValue();
 };
 extern "C"
 {
@@ -130,12 +130,13 @@ struct ExtentCalculator
     int m_unk04;
     const hkpShapeContainer* m_container;
 
-    void FUN_00dd5440(const hkVector4& direction, int unused, const hkpChildKey* keys, int numKeys, float* minOut,
+    void hkpMoppShapeMediator_findExtents(const hkVector4& direction, int unused, const hkpChildKey* keys, int numKeys, float* minOut,
                       float* maxOut) const;
 };
 
 // @fnv 0x00dd5440
-void ExtentCalculator::FUN_00dd5440(const hkVector4& direction, int unused, const hkpChildKey* keys, int numKeys,
+// src: XBOX_PDB 0x00dd5440
+void ExtentCalculator::hkpMoppShapeMediator_findExtents(const hkVector4& direction, int unused, const hkpChildKey* keys, int numKeys,
                                     float* minOut, float* maxOut) const
 {
     hkpShapeBuffer buffer;

@@ -12,7 +12,7 @@ public:
 
     virtual ~hkMoppBvTreeShapeBase() throw();
 
-    int FUN_00d54810(const hkAabb& aabbIn, unsigned int* hits, int maxNumKeys) const;
+    int queryAabbImpl(const hkAabb& aabbIn, unsigned int* hits, int maxNumKeys) const;
 
     const hkpMoppCode* m_pMoppCode;
     unsigned char* m_pMoppData;

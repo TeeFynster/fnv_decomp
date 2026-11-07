@@ -47,8 +47,8 @@ struct ResultData
     char unk0A;
     unsigned char unk0B;
     int unk0C;
-    void __thiscall FUN_00dafe70(void* a, void* b, void* c);
-    void __thiscall FUN_00dafcd0(void* a, void* b, void* c);
+    void __thiscall hkpGskCache_initTriangle(void* a, void* b, void* c);
+    void __thiscall hkpGskCache_init(void* a, void* b, void* c);
 };
 // Calls one of two handlers on result based on record->type, clears status[2] and some result flags, then returns result advanced by an aligned size.
 // @fnv 0x00d418d0
@@ -58,9 +58,9 @@ void* __cdecl DispatchInputRecord(InputData* input, unsigned char* status, Resul
     void* table = pObject->vtable;
     InputRecord* record = *input->unk04;
     if (record->type == 3)
-        result->FUN_00dafe70(table, record, &input->unk20);
+        result->hkpGskCache_initTriangle(table, record, &input->unk20);
     else
-        result->FUN_00dafcd0(table, record, &input->unk20);
+        result->hkpGskCache_init(table, record, &input->unk20);
     status[2] = 0;
     result->unk0B &= 0xEF;
     result->unk0C = 0;
@@ -75,8 +75,8 @@ extern "C" void __cdecl RemoveEntryById(int a, int b, int c, int d);
 extern "C" void __cdecl InsertSlotId(int a, int b, int c, int d);
 extern "C" void __cdecl FindEntryByKey(int a, int b, int c, int d);
 extern "C" void __cdecl ConvertPairFlags(int a, int b, int c, int d);
-extern "C" void __cdecl FUN_00d41930(int a, int b, int c, int d);
-extern "C" void __cdecl FUN_00d40d80(int a, int b, int c, int d);
+extern "C" void __cdecl hkPredGskAgent3_sepNormal(int a, int b, int c, int d);
+extern "C" void __cdecl hkPredGskCylinderAgent3_process(int a, int b, int c, int d);
 
 // The handler table that is handed to CScript::RegisterHandler.  It is kept
 // 16 byte aligned, which is what makes the compiler emit the aligned frame
@@ -117,8 +117,8 @@ void __cdecl RegisterScriptHandlers(void* pScript)
     HandlerTable tab;
 
     tab.p0 = ConvertPairFlags;
-    tab.p7 = FUN_00d40d80;
-    tab.p6 = FUN_00d41930;
+    tab.p7 = hkPredGskCylinderAgent3_process;
+    tab.p6 = hkPredGskAgent3_sepNormal;
     tab.p2 = FUN_00d41860;
     tab.p3 = RemoveEntryById;
     tab.p4 = InsertSlotId;
@@ -162,7 +162,7 @@ struct S_00d417b0_Obj
     S_00d417b0_Sub m_sub;
 };
 
-void __cdecl FUN_00dae340(S_00d417b0_Sub* sub, int index);
+void __cdecl _hkGskManifold_removePoint(S_00d417b0_Sub* sub, int index);
 
 // @fnv 0x00d417b0
 void __cdecl RemoveEntryById(int aiUnused, S_00d417b0_Obj* obj, short sId)
@@ -172,7 +172,7 @@ void __cdecl RemoveEntryById(int aiUnused, S_00d417b0_Obj* obj, short sId)
     {
         if (sub->m_entries[i].m_iOwnerObjectOffset == sId)
         {
-            FUN_00dae340(sub, i);
+            _hkGskManifold_removePoint(sub, i);
             return;
         }
     }
@@ -276,7 +276,8 @@ extern "C" void __cdecl ReleaseAllEntries(void* p, int obj, int data);
 
 // Calls ReleaseAllEntries on the record at b+0x0C, computes an aligned size from three bytes, clears byte 2 of a, and returns b plus that size.
 // @fnv 0x00d41860
-extern "C" int __cdecl FUN_00d41860_impl(int apOut, int apRecord, int aObj, int aData)
+// src: GUESS 0x00d41860 (confidence: low)
+extern "C" int __cdecl Object_ProcessAndReturnValue_00d41860(int apOut, int apRecord, int aObj, int aData)
 {
     unsigned char* rec = (unsigned char*)apRecord + 0x0C;
 
@@ -443,11 +444,12 @@ struct Output
     Contact contacts[256];
     OutputStack* stack;
 };
-void __cdecl FUN_00db60c0(Request*, float, float, float, ResultData*, AlignedVec*, Output*);
+void __cdecl hk4dGskCollideCalcToi(Request*, float, float, float, ResultData*, AlignedVec*, Output*);
 void __cdecl ProcessCollision(Request*, unsigned char*, ResultData*, ResultData*, Cache*, AlignedVec*, Output*);
-void __cdecl FUN_00dae3a0(Cache*, AlignedVec*, int, Output*, void*);
+void __cdecl hkGskManifold_verifyAndGetPoints(Cache*, AlignedVec*, int, Output*, void*);
 // @fnv 0x00d41a30
-void* __cdecl FUN_00d41a30(Request* input, unsigned char* status, ResultData* result, AlignedVec* separation,
+// src: COMMUNITY 0x00d41a30
+void* __cdecl hkPredGskAgent3_process(Request* input, unsigned char* status, ResultData* result, AlignedVec* separation,
                            Output* output)
 {
     volatile unsigned uiTimestamp;
@@ -488,7 +490,7 @@ void* __cdecl FUN_00d41a30(Request* input, unsigned char* status, ResultData* re
             float boundA = settings->factorC * radius;
             float boundB = settings->factorD * radius + w;
             float bound = boundA < boundB ? boundA : boundB;
-            FUN_00db60c0(input, radius, limit, bound, result, separation, output);
+            hk4dGskCollideCalcToi(input, radius, limit, bound, result, separation, output);
             goto fallback;
         }
     }
@@ -543,7 +545,7 @@ void* __cdecl FUN_00d41a30(Request* input, unsigned char* status, ResultData* re
                                                              _mm_add_ps(_mm_mul_ps(vz, z), w)));
                 } while (--j >= 0);
             }
-            FUN_00dae3a0(cache, vertices, 0, output, input->context);
+            hkGskManifold_verifyAndGetPoints(cache, vertices, 0, output, input->context);
             if (cache->contacts)
             {
                 OutputStack* stack = output->stack;

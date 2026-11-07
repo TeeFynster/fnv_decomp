@@ -13,5 +13,5 @@ public:
     SpellItem* pEffect;
 
     void SwapEndianness();
-    void FUN_00535aa0();  // 0x00535aa0: the CRDT endian swap TESObjectWEAP::LoadForm calls
+    void OBJ_WEAP_CRITICAL_Endian();  // 0x00535aa0: the CRDT endian swap TESObjectWEAP::LoadForm calls
 };

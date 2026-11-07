@@ -3,7 +3,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 extern void __cdecl operator delete(void*);
-void __fastcall FUN_0059cf00(void*);
+void __fastcall Object_UpdateFields_0059cf00(void*);
 struct HKPCloseStrayHitCollector
 {
     void* __thiscall Destroy(unsigned int flags);
@@ -12,7 +12,7 @@ struct HKPCloseStrayHitCollector
 // @fnv 0x0059cf20
 void* __thiscall HKPCloseStrayHitCollector::Destroy(unsigned int flags)
 {
-    FUN_0059cf00(this);
+    Object_UpdateFields_0059cf00(this);
     if (flags & 1)
         operator delete(this);
     return this;

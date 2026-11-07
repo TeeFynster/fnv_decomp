@@ -32,8 +32,8 @@ class NiSwitchNode : public NiNode
     // no user-declared destructor: the implicit one (deleting form 0x00a94400, inlined in ~NiLODNode 0x00a99470)
     // stores no NiSwitchNode vftable, only m_kChildRevID's NiTArray one, then calls ~NiNode
 
-    bool __thiscall FUN_00a5e600(NiObject* object);
-    bool __thiscall FUN_00a94000(NiObject* object);
+    bool __thiscall NiNode_IsEqual(NiObject* object);
+    bool __thiscall IsEqual_00a94000(NiObject* object);
     void __thiscall FUN_00a94360();
 
     // flags: bit 0 update only the active child, bit 1 update controllers

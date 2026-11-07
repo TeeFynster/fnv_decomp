@@ -19,12 +19,13 @@ class GrenadeImpactDataLayout
 };
 
 extern TESSaveLoadGame* DAT_011de45c;
-void FUN_00c69f50(NiAVObject*, bool, bool);
-void FUN_00525340(NiPoint3*);
-void FUN_0062b8d0(NiAVObject*, const NiPoint3&, bool);
+void bhkWorld_UpdatePosition(NiAVObject*, bool, bool);
+void NiPoint3_UnitizeVector(NiPoint3*);
+void TESHavokUtilities_AddVelocity(NiAVObject*, const NiPoint3&, bool);
 
 // @fnv 0x009b4740
-bool __fastcall FUN_009b4740(GrenadeProjectile* projectile)
+// src: GUESS 0x009b4740 (confidence: low)
+bool __fastcall Object_ProcessAndReturnValue_009b4740(GrenadeProjectile* projectile)
 {
     if (!projectile->kImpacts.IsEmpty())
     {
@@ -32,23 +33,23 @@ bool __fastcall FUN_009b4740(GrenadeProjectile* projectile)
         GrenadeImpactDataLayout* impact = reinterpret_cast<GrenadeImpactDataLayout*>(projectile->kImpacts.GetItem());
         if (!DAT_011de45c->FUN_0047c850())
         {
-            FUN_00c69f50(node1, true, false);
-            node1->FUN_00440460(impact->position + impact->normal * node1->GetHeadTail());
+            bhkWorld_UpdatePosition(node1, true, false);
+            node1->NiAVObject_SetTranslate(impact->position + impact->normal * node1->GetHeadTail());
             NiUpdateData update0(0.0f, false, false);
             node1->Update(update0);
             NiPoint3 velocity6 = NiPoint3::ZERO;
             NiPoint3 forward1;
-            node1->FUN_00461130().m_Rotate.GetCol(1, forward1);
+            node1->NiAVObject_GetWorldRotate().m_Rotate.GetCol(1, forward1);
             forward1 *= -1.0f;
-            FUN_00525340(&forward1);
-            FUN_00525340(&impact->normal);
+            NiPoint3_UnitizeVector(&forward1);
+            NiPoint3_UnitizeVector(&impact->normal);
             float dot0 = impact->normal.Dot(forward1);
             NiPoint3 deflection = 2.0f * (dot0 * impact->normal - forward1);
             velocity6 = forward1 + deflection;
             velocity6 *= projectile->GetProjectileBase()->GetFloatAtOffset68();
             if (projectile->GetProjectileBase()->GetFloatAtOffsetB0() > 0.0)
                 velocity6 *= projectile->GetProjectileBase()->GetFloatAtOffsetB0();
-            FUN_0062b8d0(node1, velocity6, true);
+            TESHavokUtilities_AddVelocity(node1, velocity6, true);
         }
     }
     return true;

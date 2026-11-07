@@ -6,7 +6,7 @@ MemoryManager g_memoryManager;
 
 struct FUN_00af3440_shell
 {
-    void __thiscall FUN_00af3420();
+    void __thiscall SetVirtualTable_00af3420();
     void* FUN_00af3440(unsigned int flags);
 };
 
@@ -14,7 +14,7 @@ struct FUN_00af3440_shell
 // @fnv 0x00af3440
 void* FUN_00af3440_shell::FUN_00af3440(unsigned int flags)
 {
-    FUN_00af3420();
+    SetVirtualTable_00af3420();
     if (flags & 1)
         g_memoryManager._DeallocateAlias(this);
     return this;

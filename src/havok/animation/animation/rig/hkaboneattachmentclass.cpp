@@ -4,7 +4,7 @@
 struct FUN_00cb0c00_class
 {
     int unk00;
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
 struct OwnedObject
 {
@@ -24,7 +24,7 @@ struct CallbackManager
     int unk0c;
     Callback* callback;
 };
-CallbackManager* FUN_00c85750();
+CallbackManager* hkMemoryRouter_getInstance();
 extern int DAT_0102e388;
 struct Owner
 {
@@ -56,15 +56,15 @@ struct Owner
 // @fnv 0x00dfe620
 Owner* Owner::FUN_00dfe620(unsigned int flags)
 {
-    child54.FUN_00cb0c00();
+    child54.Object_UpdateFields_00cb0c00();
     if (owned50)
         owned50->FUN_00c905b0();
     owned50 = 0;
-    child08.FUN_00cb0c00();
+    child08.Object_UpdateFields_00cb0c00();
     vtable = &DAT_0102e388;
     if (flags & 1)
     {
-        CallbackManager* manager = FUN_00c85750();
+        CallbackManager* manager = hkMemoryRouter_getInstance();
         manager->callback->Invoke(this, unk04);
     }
     return this;

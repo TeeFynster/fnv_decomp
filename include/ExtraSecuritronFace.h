@@ -15,7 +15,7 @@ public:
 
     BSStringT<char> GetStr1();
     BSStringT<char> GetStr2();
-    void FUN_00437f90(NiNode* pNode);
+    void ApplyFace(NiNode* pNode);
 
     static char* GetPersonality();
 

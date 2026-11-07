@@ -123,7 +123,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_011ff498;
 
 // @fnv 0x00b827b0
-GlobalObjectO2_00a7b610* __cdecl FUN_00b827b0()
+// src: COMMUNITY 0x00b827b0
+GlobalObjectO2_00a7b610* __cdecl WaterShader_GetRTTI()
 {
     return &g_011ff498;
 }
@@ -147,7 +148,7 @@ void* FUN_00b86db0_shell::FUN_00b86db0(int aiFlags)
 }
 
 extern unsigned int DAT_011f91e4;
-void __cdecl FUN_00b98480(int, int);
+void __cdecl BSRenderState_SetWireframeEnable(int, int);
 void __cdecl _FUN_00b98070(int, int);
 struct FUN_00b86b80_inner
 {
@@ -163,12 +164,13 @@ struct FUN_00b86b80_arg
 };
 // Reads the global mode and the inner object's flags and byte, calling FUN_00b98480 or _FUN_00b98070 depending on the mode and flag checks.
 // @fnv 0x00b86b80
-void __stdcall FUN_00b86b80(FUN_00b86b80_arg* apArg)
+// src: COMMUNITY 0x00b86b80
+void __stdcall WaterShader_SetStencil(FUN_00b86b80_arg* apArg)
 {
     FUN_00b86b80_inner* pInner = apArg->m_p;
     unsigned int mode = DAT_011f91e4;
     if (pInner && (pInner->m_flags & 0x10000) > 0)
-        FUN_00b98480(0, 0);
+        BSRenderState_SetWireframeEnable(0, 0);
     if (mode != 0x288 && mode != 0x289 && pInner->m_b60 != 0)
         _FUN_00b98070(0, 0);
 }
@@ -275,13 +277,13 @@ struct Stage112
     unsigned int unk58;
     unsigned int unk5c;
     int count;
-    void FUN_00e7def0(unsigned int);
-    void FUN_00e7ecd0();
+    void NiD3DTextureStage_SetFilterMode(unsigned int);
+    void NiD3DTextureStage_ReturnStageToPool();
     void Release()
     {
         --count;
         if (!count)
-            FUN_00e7ecd0();
+            NiD3DTextureStage_ReturnStageToPool();
     }
 };
 struct StagePtr112
@@ -345,24 +347,24 @@ bool Water112::InitWaterPasses()
             StagePtr112 declaration;
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 0, 3, 2, 1);
-            declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
+            declaration.p->NiD3DTextureStage_SetFilterMode(1);
+            (*slot)->NiD3DPass_SetStage((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 1, 3, 2, 1);
-            declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
+            declaration.p->NiD3DTextureStage_SetFilterMode(1);
+            (*slot)->NiD3DPass_SetStage((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 2, 1, 2, 1);
-            declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
+            declaration.p->NiD3DTextureStage_SetFilterMode(1);
+            (*slot)->NiD3DPass_SetStage((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 3, 1, 2, 1);
-            declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
+            declaration.p->NiD3DTextureStage_SetFilterMode(1);
+            (*slot)->NiD3DPass_SetStage((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 4, 3, 2, 1);
-            declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
+            declaration.p->NiD3DTextureStage_SetFilterMode(1);
+            (*slot)->NiD3DPass_SetStage((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignPassConstant(*slot, 0x0f, 1, 1);
             AssignPassConstant(*slot, 0x18, 0, 1);
             AssignPassConstant(*slot, 0x19, 5, 1);
@@ -631,7 +633,7 @@ bool Water112::InitWaterPasses()
 
 struct TextureReceiver
 {
-    void* FUN_004bc320(int);
+    void* BSRenderedTexture_GetTexture(int);
 };
 struct TextureBinding
 {
@@ -837,19 +839,19 @@ void MaterialShader::BindMaterialTextures(ShaderArgument* argument)
         if (properties->texture13C && properties->flag80)
         {
             TextureBinding* target = state->bindings->slots[0];
-            target->texture = properties->texture13C->FUN_004bc320(0);
+            target->texture = properties->texture13C->BSRenderedTexture_GetTexture(0);
         }
         else
             state->bindings->slots[0]->texture = DAT_011f9510;
         if (DAT_011f943c && properties->flag81)
         {
             TextureBinding* target = state->bindings->slots[1];
-            target->texture = DAT_011f943c->FUN_004bc320(0);
+            target->texture = DAT_011f943c->BSRenderedTexture_GetTexture(0);
         }
         if (properties->texture138)
         {
             TextureBinding* target = state->bindings->slots[2];
-            target->texture = properties->texture138->FUN_004bc320(0);
+            target->texture = properties->texture138->BSRenderedTexture_GetTexture(0);
         }
         else
             state->bindings->slots[2]->texture = DAT_011f9510;
@@ -858,7 +860,7 @@ void MaterialShader::BindMaterialTextures(ShaderArgument* argument)
         if (properties->texture144 && properties->flag63)
         {
             TextureBinding* target = state->bindings->slots[4];
-            target->texture = properties->texture144->FUN_004bc320(0);
+            target->texture = properties->texture144->BSRenderedTexture_GetTexture(0);
         }
         v66();
     }
@@ -948,11 +950,12 @@ class WaterShaderMemScope
 class WaterShaderLoader : public WaterShader
 {
   public:
-    void FUN_00b827c0();
+    void WaterShader_LoadShaders();
 };
 
 // @fnv 0x00b827c0
-void WaterShaderLoader::FUN_00b827c0()
+// src: COMMUNITY 0x00b827c0
+void WaterShaderLoader::WaterShader_LoadShaders()
 {
     WaterShaderMemScope kScope(0x1d);
 
@@ -1051,11 +1054,12 @@ void WaterShaderLoader::FUN_00b827c0()
 struct WaterShaderReleaser : WaterShader
 {
     void ReleaseBase();
-    void FUN_00b861c0();
+    void WaterShader_ReloadShaders();
 };
 
 // @fnv 0x00b861c0
-void WaterShaderReleaser::FUN_00b861c0()
+// src: COMMUNITY 0x00b861c0
+void WaterShaderReleaser::WaterShader_ReloadShaders()
 {
     ReleaseBase();
     InitWaterPasses();
@@ -1491,7 +1495,7 @@ struct WaterGeometry
 
 struct WaterTransformSink
 {
-    void FUN_00e6fbb0(void*, int);
+    void NiDX9Renderer_SetModelTransform(void*, int);
 };
 
 
@@ -1527,7 +1531,7 @@ struct WaterSetup
 
     NiD3DShaderConstantMap* pixel;
 
-    void FUN_00b864d0(WaterRenderArg*);
+    void WaterShader_SetupGeometryConstants(WaterRenderArg*);
 };
 
 struct WaterFog
@@ -1594,13 +1598,13 @@ extern const double DAT_01012070;
 
 extern float DAT_011ff108;
 
-WaterFog* FUN_00b55520(int);
+WaterFog* BSShaderManager_GetFogProperty(int);
 
 void UpdateRendererStateCount(int, int);
 
-void FUN_00b98180(int, int, unsigned int, int);
+void BSRenderState_SetStencilFunc(int, int, unsigned int, int);
 
-void FUN_00b980c0(int, int, int, int);
+void BSRenderState_SetStencilAction(int, int, int, int);
 
 void AddToSlot(unsigned int, int);
 
@@ -1659,9 +1663,9 @@ __forceinline void SetWaterAlpha(WaterMaterial* material, unsigned int mode)
 
         UpdateRendererStateCount(1, 0);
 
-        FUN_00b98180(2, 255, material->alpha, 0);
+        BSRenderState_SetStencilFunc(2, 255, material->alpha, 0);
 
-        FUN_00b980c0(0, 0, 3, 0);
+        BSRenderState_SetStencilAction(0, 0, 3, 0);
 
         AddToSlot(255, 0);
 
@@ -1670,16 +1674,17 @@ __forceinline void SetWaterAlpha(WaterMaterial* material, unsigned int mode)
 
     UpdateRendererStateCount(1, 0);
 
-    FUN_00b98180(2, 255, material->alpha, 0);
+    BSRenderState_SetStencilFunc(2, 255, material->alpha, 0);
 
-    FUN_00b980c0(0, 0, 0, 0);
+    BSRenderState_SetStencilAction(0, 0, 0, 0);
 
     AddToSlot(255, 0);
 }
 
 // Fills global water shader constants from the material, fog and lights, then configures the vertex and pixel shader constant maps.
 // @fnv 0x00b864d0
-void WaterSetup::FUN_00b864d0(WaterRenderArg* arg)
+// src: COMMUNITY 0x00b864d0
+void WaterSetup::WaterShader_SetupGeometryConstants(WaterRenderArg* arg)
 {
 
     WaterSetup* volatile savedSetup = this;
@@ -1699,7 +1704,7 @@ void WaterSetup::FUN_00b864d0(WaterRenderArg* arg)
 
     void* geometryData = geometry->geometryData;
 
-    transform->FUN_00e6fbb0(world, 0);
+    transform->NiDX9Renderer_SetModelTransform(world, 0);
 
     WaterVec4 light = DAT_011fa2a0;
 
@@ -1741,7 +1746,7 @@ void WaterSetup::FUN_00b864d0(WaterRenderArg* arg)
 
     (*reinterpret_cast<WaterVec4*>(DAT_011ff5f8)) = material->color4;
 
-    WaterFog* fog = FUN_00b55520(DAT_011f91c4);
+    WaterFog* fog = BSShaderManager_GetFogProperty(DAT_011f91c4);
 
     if (fog)
     {

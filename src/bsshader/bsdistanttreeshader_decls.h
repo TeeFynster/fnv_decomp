@@ -27,7 +27,7 @@ class BeamStage
 {
   public:
     static void CreateNewStage(NiPointer<BeamStage>&);
-    void FUN_00e7def0(unsigned int);
+    void NiD3DTextureStage_SetFilterMode(unsigned int);
     void ReturnToPool();
 };
 void ConfigureBeamStage(BeamStage*, unsigned int, unsigned int, unsigned int, bool);

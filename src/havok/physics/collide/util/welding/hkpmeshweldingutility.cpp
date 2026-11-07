@@ -63,7 +63,8 @@ struct ComparisonResult
         return value;
     }
 };
-__declspec(noinline) ComparisonResult FUN_00ddcda0(const Record& left, const Record& right)
+// src: GUESS 0x00ddcda0 (confidence: low)
+__declspec(noinline) ComparisonResult Object_CompareField08_00ddcda0(const Record& left, const Record& right)
 {
     return ComparisonResult(left.key > right.key);
 }
@@ -75,16 +76,17 @@ inline void SwapRecords(Record& first, Record& second)
 }
 // Sorts a range of records in place by key using a pivot and recursive quicksort, comparing with FUN_00ddcda0 and swapping with SwapRecords.
 // @fnv 0x00ddeb70
-void FUN_00ddeb70(Record* records, int left, int right, int comparator)
+// src: HAVOK_LIB 0x00ddeb70
+void hkAlgorithm_quickSortRecursive_struct_hkEntry_class_hkAlgorithm_less_struct_hkEntry(Record* records, int left, int right, int comparator)
 {
     int i = left;
     int j = right;
     __declspec(align(16)) Record pivotRecord = records[(left + right) >> 1];
     do
     {
-        while (FUN_00ddcda0(records[i], pivotRecord))
+        while (Object_CompareField08_00ddcda0(records[i], pivotRecord))
             ++i;
-        while (FUN_00ddcda0(pivotRecord, records[j]))
+        while (Object_CompareField08_00ddcda0(pivotRecord, records[j]))
             --j;
         if (j >= i)
         {
@@ -97,19 +99,20 @@ void FUN_00ddeb70(Record* records, int left, int right, int comparator)
         }
     } while (i <= j);
     if (left < j)
-        FUN_00ddeb70(records, left, j, comparator);
+        hkAlgorithm_quickSortRecursive_struct_hkEntry_class_hkAlgorithm_less_struct_hkEntry(records, left, j, comparator);
     if (i < right)
-        FUN_00ddeb70(records, i, right, comparator);
+        hkAlgorithm_quickSortRecursive_struct_hkEntry_class_hkAlgorithm_less_struct_hkEntry(records, i, right, comparator);
 }
 
 // Exe 0x00ddecb0: unit-local DynamicArray view; declarations and layout are preserved.
 struct HkpmeshweldingutilityDynamicArrayView
 {
     void SpliceElements(int a, int b, int c, int d, int e);
-    void FUN_00ddecb0(int a, int b, int c, int d);
+    void SpliceElements_Thunk(int a, int b, int c, int d);
 };
 // @fnv 0x00ddecb0
-void HkpmeshweldingutilityDynamicArrayView::FUN_00ddecb0(int a, int b, int c, int d)
+// src: GUESS 0x00ddecb0 (confidence: medium)
+void HkpmeshweldingutilityDynamicArrayView::SpliceElements_Thunk(int a, int b, int c, int d)
 {
     SpliceElements(a, b, 0, c, d);
 }
@@ -122,7 +125,7 @@ struct S_00ddecf0_Key
 };
 
 // This entry point is nonthrowing in the game; array cleanup depends on that contract.
-__declspec(nothrow) hkMemoryRouter* FUN_00c85750();
+__declspec(nothrow) hkMemoryRouter* hkMemoryRouter_getInstance();
 
 
 template <typename T> __forceinline void hkMemoryAllocator::_bufFree(void* p, int numElem)
@@ -134,7 +137,7 @@ struct S_00ddecf0_Array
 {
     S_00ddecf0_Key* m_data;
     int m_iElementCount;
-    void FUN_00ddecd0(hkMemoryAllocator& heap, int index, const S_00ddecf0_Key& key);
+    void ForwardCall_00ddecd0(hkMemoryAllocator& heap, int index, const S_00ddecf0_Key& key);
 };
 
 struct S_00ddecf0
@@ -160,20 +163,20 @@ void S_00ddecf0::InsertKey(float t, float a, float b)
     key.t = t;
     key.a = a;
     key.b = b;
-    m_keys.FUN_00ddecd0(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap()), n, key);
+    m_keys.ForwardCall_00ddecd0(reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance()->heap()), n, key);
 }
 
 extern double DAT_010cd5a8;
 extern double DAT_0101ff40;
 
-float FUN_00ddd7e0(int a1, int* pOut, float* pF);
+float Object_ComputeDihedralSinCos(int a1, int* pOut, float* pF);
 
 // @fnv 0x00dddc40
 int GetIndexForValue(int aiArg)
 {
     int n;
     float tmp;
-    tmp = FUN_00ddd7e0(aiArg, &n, &tmp);
+    tmp = Object_ComputeDihedralSinCos(aiArg, &n, &tmp);
     float r = tmp;
 
     for (n = 0; n < 31; n++)
@@ -345,7 +348,7 @@ __declspec(align(16)) struct QueryBuffer
     unsigned int unk1FC;
 };
 
-int FUN_00dde4c0(hkpShape* self, const hkpShape* a, void* b, int idx, int zero, int* out);
+int hkpMeshWeldingUtility_calcBitcodeForTriangleEdge(hkpShape* self, const hkpShape* a, void* b, int idx, int zero, int* out);
 
 // Reads a flag, clears it, runs up to three sub-queries via FUN_00dde4c0, sets result false if any returns 1, then restores the flag.
 // @fnv 0x00dde930
@@ -365,7 +368,7 @@ bool* CheckSubQueries(bool* result, void* key, hkpShape* self)
     int n = 0;
     for (int i = 0; i < 3; i++)
     {
-        if (FUN_00dde4c0(self, sub, key, i, 0, &n) == 1)
+        if (hkpMeshWeldingUtility_calcBitcodeForTriangleEdge(self, sub, key, i, 0, &n) == 1)
         {
             *result = false;
             break;
@@ -379,8 +382,8 @@ bool* CheckSubQueries(bool* result, void* key, hkpShape* self)
     return result;
 }
 
-void* FUN_00c908c0(void* alloc, void* arr, int numElems, int elemSize);
-void FUN_00d2cc70(void* dst, const void* src, int numBytes);
+void* hkArrayUtil__reserve(void* alloc, void* arr, int numElems, int elemSize);
+void hkMemUtil_memMove(void* dst, const void* src, int numBytes);
 
 inline void* operator new(unsigned int, void* p)
 {
@@ -403,7 +406,7 @@ static __forceinline void S_00ddeab0_GrowArrayCapacity(hkArrayBase<S_00ddeab0_El
         {
             int cap2 = cap + cap;
             int newcap = (numElems < cap2) ? cap2 : numElems;
-            FUN_00c908c0(alloc, (&self), newcap, 12);
+            hkArrayUtil__reserve(alloc, (&self), newcap, 12);
         }
     }
 
@@ -413,13 +416,14 @@ static __forceinline void S_00ddeab0_GrowArrayCapacity(hkArrayBase<S_00ddeab0_El
 
 struct S_00ddecd0
 {
-    void FUN_00ddecb0(int a, int b, int c, int flag);
-    void FUN_00ddecd0(int a, int b, int c);
+    void SpliceElements_Thunk(int a, int b, int c, int flag);
+    void ForwardCall_00ddecd0(int a, int b, int c);
 };
 // @fnv 0x00ddecd0
-void S_00ddecd0::FUN_00ddecd0(int aiArg1, int aiArg2, int aiArg3)
+// src: GUESS 0x00ddecd0 (confidence: low)
+void S_00ddecd0::ForwardCall_00ddecd0(int aiArg1, int aiArg2, int aiArg3)
 {
-    FUN_00ddecb0(aiArg1, aiArg2, aiArg3, 1);
+    SpliceElements_Thunk(aiArg1, aiArg2, aiArg3, 1);
 }
 
 struct LocalBuffer
@@ -429,7 +433,7 @@ struct LocalBuffer
 
 char* IsDegenerateTriangle(char* out, const hkVector4* v0, const hkVector4* v1, const hkVector4* v2,
                            float eps);
-int FUN_00dde4c0(hkpShape* p2, const hkpTriangleShape* trans, void* p1, int i, void* p3, int* outLocal);
+int hkpMeshWeldingUtility_calcBitcodeForTriangleEdge(hkpShape* p2, const hkpTriangleShape* trans, void* p1, int i, void* p3, int* outLocal);
 
 // @fnv 0x00dde880
 int __cdecl CheckTransformAndProcess(void* p1, hkpShape* pOuter, void* p3, short* outWord)
@@ -451,7 +455,7 @@ int __cdecl CheckTransformAndProcess(void* p1, hkpShape* pOuter, void* p3, short
     int local2 = 0;
     for (int i = 0; i < 3; ++i)
     {
-        int iRet = FUN_00dde4c0(pOuter, trans, p1, i, p3, &iResult);
+        int iRet = hkpMeshWeldingUtility_calcBitcodeForTriangleEdge(pOuter, trans, p1, i, p3, &iResult);
         if (iRet == 1)
         {
             local2 = iRet;
@@ -475,12 +479,13 @@ inline bool WeldingVectorsEqual3(const hkVector4& a, const hkVector4& b)
 
 struct hkUtilDDCE
 {
-    static hkBool FUN_00ddced0(const hkpTriangleShape& kA, const hkpTriangleShape& kB);
+    static hkBool ForwardCall_00ddced0(const hkpTriangleShape& kA, const hkpTriangleShape& kB);
 };
 
 // Returns true when the three vertices of kA and kB are all equal within epsilon.
 // @fnv 0x00ddced0
-hkBool hkUtilDDCE::FUN_00ddced0(const hkpTriangleShape& kA, const hkpTriangleShape& kB)
+// src: GUESS 0x00ddced0 (confidence: low)
+hkBool hkUtilDDCE::ForwardCall_00ddced0(const hkpTriangleShape& kA, const hkpTriangleShape& kB)
 {
     return WeldingVectorsEqual3(kA.m_kVertexA, kB.m_kVertexA) && WeldingVectorsEqual3(kA.m_kVertexB, kB.m_kVertexB) &&
            WeldingVectorsEqual3(kA.m_kVertexC, kB.m_kVertexC);
@@ -547,14 +552,14 @@ namespace fnv_00ddd940 {
 
 typedef float hkReal;
 
-void FUN_00ddd620(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkVector4& normalOut);
+void hkpMeshWeldingUtility_calcAntiClockwiseTriangleNormal(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkVector4& normalOut);
 
 // Builds five planes for a triangle: its normal, the negated normal, and three edge planes (edge crossed with normal, normalized), each offset by -radius.
 // @fnv 0x00ddd940
 void GenerateTrianglePlanes(hkVector4* planes, const hkpTriangleShape* triangle, hkReal radius)
 {
     hkVector4 normal;
-    FUN_00ddd620(triangle->m_kVertexA, triangle->m_kVertexB, triangle->m_kVertexC, normal);
+    hkpMeshWeldingUtility_calcAntiClockwiseTriangleNormal(triangle->m_kVertexA, triangle->m_kVertexB, triangle->m_kVertexC, normal);
 
     hkReal d = -radius;
 
@@ -669,7 +674,8 @@ FUN_00ddea00_cls* FUN_00ddea00_cls::CopyFromSource(const FUN_00ddea00_src* src)
 
 // Rotates a's three vectors by index into out, then appends each b[i] not equal to out[0] or out[1] (else stores i in result[j]) and returns the count.
 // @fnv 0x00ddd6f0
-int __cdecl FUN_00ddd6f0(const welding_simd::LocalM128* apVectors, const welding_simd::LocalM128* b, int aiStartIndex, welding_simd::LocalM128* out, int* result)
+// src: GUESS 0x00ddd6f0 (confidence: medium)
+int __cdecl Hkpmeshweldingutility_MergeTriangleVectors(const welding_simd::LocalM128* apVectors, const welding_simd::LocalM128* b, int aiStartIndex, welding_simd::LocalM128* out, int* result)
 {
     out[0] = apVectors[aiStartIndex % 3];
     out[1] = apVectors[(aiStartIndex + 1) % 3];
@@ -756,7 +762,8 @@ struct NormalVector
 };
 // Computes the normalized cross product of two triangle edge vectors (b-a) and (c-b) and stores the result in out.
 // @fnv 0x00ddd620
-void FUN_00ddd620(const NormalVector* apVertexA, const NormalVector* apVertexB, const NormalVector* apVertexC,
+// src: COMMUNITY 0x00ddd620
+void hkpMeshWeldingUtility_calcAntiClockwiseTriangleNormal(const NormalVector* apVertexA, const NormalVector* apVertexB, const NormalVector* apVertexC,
                   NormalVector* apNormal)
 {
     NormalVector edges[2];
@@ -774,11 +781,11 @@ void __cdecl ResizeAudioStream(void* heap, void* arr, int elemSize) throw();
 struct KeyLess
 {
 };
-void __cdecl FUN_00ddeb70(S_00ddecf0_Key* keys, int left, int right, KeyLess cmp) throw();
+void __cdecl hkAlgorithm_quickSortRecursive_struct_hkEntry_class_hkAlgorithm_less_struct_hkEntry(S_00ddecf0_Key* keys, int left, int right, KeyLess cmp) throw();
 template <typename T, typename L> inline void quickSort(T* pArr, int size, L cmpLess)
 {
     if (size > 1)
-        FUN_00ddeb70(pArr, 0, size - 1, cmpLess);
+        hkAlgorithm_quickSortRecursive_struct_hkEntry_class_hkAlgorithm_less_struct_hkEntry(pArr, 0, size - 1, cmpLess);
 }
 extern "C" double __cdecl fabs(double);
 __declspec(noinline) ComparisonResult __cdecl AreZDiffering(const S_00ddecf0_Key& a, const S_00ddecf0_Key& b) throw()
@@ -792,7 +799,7 @@ __declspec(noinline) ComparisonResult __cdecl AreZDiffering(const S_00ddecf0_Key
 // hkArray bodies (allocator = the memory router's heap).
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap());
+    return reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance()->heap());
 }
 template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
@@ -826,12 +833,13 @@ static inline float clamp(float x, float lo, float hi)
 
 struct Track : public S_00ddecf0
 {
-    float FUN_00dded60();
+    float hkHistogram_evaluate();
 };
 
 // If m_keys is empty returns unk0; else sorts it, groups near-equal-b keys, and returns the smallest b of a group with summed a-t >= DAT_010290b8, or 0.
 // @fnv 0x00dded60
-float Track::FUN_00dded60()
+// src: HAVOK_LIB 0x00dded60
+float Track::hkHistogram_evaluate()
 {
     if (m_keys.m_iElementCount == 0)
         return *(float*)&unk0;
@@ -887,7 +895,8 @@ float Track::FUN_00dded60()
 
 // Stores true when points a and b are each within tolerance of a triangle vertex, and returns out.
 // @fnv 0x00ddcf60
-volatile unsigned char* __cdecl FUN_00ddcf60(volatile unsigned char* out, const Vec4* apPointA, const Vec4* apPointB,
+// src: GUESS 0x00ddcf60 (confidence: medium)
+volatile unsigned char* __cdecl Object_TestTriangleVertexProximity(volatile unsigned char* out, const Vec4* apPointA, const Vec4* apPointB,
                                              const hkpTriangleShape* apShape)
 {
     welding_simd::LocalM128 pt = reinterpret_cast<const welding_simd::LocalM128&>(apShape->m_kVertexA);
@@ -962,7 +971,8 @@ void __cdecl FUN_00ddd620_triNormal(const hkVector4q& a, const hkVector4q& b, co
 
 // Computes the dihedral angle between two adjacent triangles via their normals and edge cross product, storing sin and cos outputs.
 // @fnv 0x00ddd7e0
-float FUN_00ddd7e0(const hkVector4q* apVertices, float* sinOut, float* cosOut)
+// src: GUESS 0x00ddd7e0 (confidence: medium)
+float Object_ComputeDihedralSinCos(const hkVector4q* apVertices, float* sinOut, float* cosOut)
 {
     hkVector4q nA;
     hkVector4q nB;
@@ -1005,11 +1015,12 @@ struct S00dde760_ScratchVector
 };
 
 extern "C" Matrix44 DAT_01268370;
-extern "C" void __cdecl FUN_00dddcd0(const Matrix44*, int, int, S00dde760_ScratchVector*, int);
+extern "C" void __cdecl hkpMeshWeldingUtility_computeWeldingInfoMultiShape(const Matrix44*, int, int, S00dde760_ScratchVector*, int);
 
 // Copies DAT_01268370 into a local Item, allocates a scratch vector from the pool, and passes it to FUN_00dddcd0.
 // @fnv 0x00dde760
-void __cdecl FUN_00dde760(int a, int aiPayload, int c, int d)
+// src: XBOX_PDB 0x00dde760
+void __cdecl hkpMeshWeldingUtility_computeWeldingInfo(int a, int aiPayload, int c, int d)
 {
     Item item;
     welding_simd::_mm_store_ps(&item.transform.row0.x, welding_simd::_mm_load_ps(&DAT_01268370.row0.x));
@@ -1021,13 +1032,13 @@ void __cdecl FUN_00dde760(int a, int aiPayload, int c, int d)
     vector.elements = 0;
     vector.size = 0;
     vector.encodedCapacity = 0x80000000;
-    hkMemoryRouter* poolState = FUN_00c85750();
+    hkMemoryRouter* poolState = hkMemoryRouter_getInstance();
     char* cursor = reinterpret_cast<char*&>(poolState->m_stack.m_next.m_storage);
     reinterpret_cast<char*&>(poolState->m_stack.m_next.m_storage) = cursor + 0x80;
     vector.elements = reinterpret_cast<Item*>(cursor);
     vector.encodedCapacity = 0x80000001;
     vector.originalCursor = cursor;
-    poolState = FUN_00c85750();
+    poolState = hkMemoryRouter_getInstance();
     if (vector.size == (vector.encodedCapacity & 0x3fffffff))
     {
         ResizeAudioStream(reinterpret_cast<hkMemoryAllocator*>(poolState->m_heap), &vector, 0x50);
@@ -1037,12 +1048,12 @@ void __cdecl FUN_00dde760(int a, int aiPayload, int c, int d)
         reinterpret_cast<FUN_00ddea00_cls*>(destination)
             ->CopyFromSource(reinterpret_cast<const FUN_00ddea00_src*>(&item));
     ++vector.size;
-    FUN_00dddcd0(&DAT_01268370, a, c, &vector, d);
+    hkpMeshWeldingUtility_computeWeldingInfoMultiShape(&DAT_01268370, a, c, &vector, d);
     char* finalCursor = vector.originalCursor;
     if (finalCursor == reinterpret_cast<char*>(vector.elements))
         vector.size = 0;
-    reinterpret_cast<char*&>(FUN_00c85750()->m_stack.m_next.m_storage) = finalCursor;
-    poolState = FUN_00c85750();
+    reinterpret_cast<char*&>(hkMemoryRouter_getInstance()->m_stack.m_next.m_storage) = finalCursor;
+    poolState = hkMemoryRouter_getInstance();
     hkMemoryAllocator* currentAllocator = reinterpret_cast<hkMemoryAllocator*>(poolState->m_heap);
     vector.size = 0;
     if ((vector.encodedCapacity & 0x80000000u) == 0)
@@ -1057,7 +1068,7 @@ void hkArrayBase<S_00ddeab0_Elem>::_spliceInto(hkMemoryAllocator& kSharedAlloc, 
     int newsize = m_iElementCount - numdel + aiNumInsert;
     unsigned int numtomove = m_iElementCount - index - numdel;
     S_00ddeab0_GrowArrayCapacity(*this, alloc, newsize);
-    FUN_00d2cc70(&m_data[index + aiNumInsert], &m_data[index + numdel], numtomove * 12);
+    hkMemUtil_memMove(&m_data[index + aiNumInsert], &m_data[index + numdel], numtomove * 12);
     S_00ddeab0_Elem* dst = m_data + index;
     for (int i = 0; i < aiNumInsert; ++i)
     {

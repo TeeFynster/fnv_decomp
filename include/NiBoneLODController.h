@@ -39,14 +39,14 @@ public:
 
     NiBoneLODController* FUN_00a550b0();
     void FUN_00a6cfe0(NiBoneLODController* clone, CloningProcess* process);
-    NiBoneLODController* FUN_00a552c0(CloningProcess& process);
+    NiBoneLODController* CreateClone_00a552c0(CloningProcess& process);
     void FUN_00a541f0(int lod);
-    void FUN_00a54340(NiStream& stream);
+    void PostLinkObject_00a54340(NiStream& stream);
     void* FUN_00a553f0(unsigned int flags);
-    bool FUN_00a53d00(NiStream& stream);
-    void FUN_00a53d70(NiStream& stream);
-    bool FUN_00a53ea0(NiObject* object);
-    void FUN_00a549d0(NiStream& stream);
+    bool RegisterStreamables_00a53d00(NiStream& stream);
+    void LinkObject_00a53d70(NiStream& stream);
+    bool IsEqual_00a53ea0(NiObject* object);
+    void SaveBinary_00a549d0(NiStream& stream);
     void FUN_00a6d0c0(CloningProcess* process);
     void FUN_00a6d5e0(NiStream* stream);
 

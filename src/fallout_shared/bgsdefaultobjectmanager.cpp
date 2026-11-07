@@ -122,13 +122,13 @@ BGSDefaultObjectManager::~BGSDefaultObjectManager()
 {
 }
 
-void __cdecl FUN_00485710(unsigned int, unsigned int*, unsigned int);
+void __cdecl TESForm_AddChunkArray_00485710(unsigned int, unsigned int*, unsigned int);
 // @fnv 0x0058d870
 void BGSDefaultObjectManager::Save()
 {
     unsigned int pidarray4[34];
     int i;
-    FUN_004855a0();
+    BeginFormRecord();
     for (i = 0; i < 34; ++i)
     {
         if (m_apDefaultObjects[i])
@@ -136,6 +136,6 @@ void BGSDefaultObjectManager::Save()
         else
             pidarray4[i] = 0;
     }
-    FUN_00485710(0x41544144, pidarray4, 34);
-    FUN_00485680();
+    TESForm_AddChunkArray_00485710(0x41544144, pidarray4, 34);
+    FinishFormRecord();
 }

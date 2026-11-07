@@ -28,7 +28,7 @@ public:
         AnimState();
         ~AnimState();
         void AssignString(int);
-        void FUN_006ffea0();
+        void AnimatingText_Update();
     };
 
     class ListState
@@ -40,7 +40,7 @@ public:
 
         ListState();
         ~ListState();
-        bool FUN_0076b610();
+        bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
         ScriptObj* RemoveHead();
         void FUN_004ed900();
     };
@@ -166,27 +166,27 @@ public:
     void SetTile(int aiID, Tile* apTile);
     bool HasAllSlots(int*);
     int GetScaledValue();
-    Tile* FUN_00767bb0(int iColumn, int iNewRow);
+    Tile* FindTile(int iColumn, int iNewRow);
     bool HandleKey(int iKey, int iUnused);
     void HandleClick(int m_uiSoundID, int iUnk);
-    int __thiscall FUN_00765870();
-    void FUN_00767ff0(int, void*);
-    void __thiscall FUN_0076a510();
-    void __thiscall FUN_0076a540();
+    int __thiscall GetClass_00765870();
+    void DoLeave_00767ff0(int, void*);
+    void __thiscall AccessTerminal();
+    void __thiscall TransitionToComputersMenu();
     unsigned int __thiscall CountMatchingChars(const char*, const char*);
     void __thiscall SelectWordSet(unsigned int);
     void __thiscall UpdateFade();
     void __thiscall FormatHexWord(unsigned short, char*);
     void __thiscall AddValueRows(unsigned int, const unsigned int*);
-    void FUN_0076a3f0();
-    void FUN_0076a670(int, const char*);
+    void DoShutdown();
+    void GetGarbageString(int, const char*);
     void __thiscall UpdateActiveNodeProperty();
     void BuildHackingGuessTemplate();
     void RemoveRandomWord();
     void BuildHackingPasswordFile();
-    void FUN_00769830();
+    void DoIntro();
     void UpdateHighlight();
-    void __thiscall FUN_00768020();
+    void __thiscall ClearEntry();
     void __thiscall PositionTileFromEntry(HackEntry*);
     void __thiscall PositionTileFromEntry(Entry28*);
 };

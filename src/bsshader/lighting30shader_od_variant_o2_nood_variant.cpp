@@ -78,9 +78,9 @@ extern float DAT_011f4750;
 extern float DAT_011f4754;
 extern S00bbe6b0_Mat DAT_012012b0;
 
-void FUN_00b799a0(S00bbe6b0_Mat* m, void* out);
-S00bbe6b0_Mat* __stdcall FUN_00ee6de0(S00bbe6b0_Mat* out, const S00bbe6b0_Mat* a, const S00bbe6b0_Mat* b);
-S00bbe6b0_Mat* __stdcall FUN_00ee6dd4(S00bbe6b0_Mat* out, const S00bbe6b0_Mat* in);
+void NiD3DUtility_GetD3DFromNi_(S00bbe6b0_Mat* m, void* out);
+S00bbe6b0_Mat* __stdcall D3DXMatrixMultiply_00ee6de0(S00bbe6b0_Mat* out, const S00bbe6b0_Mat* a, const S00bbe6b0_Mat* b);
+S00bbe6b0_Mat* __stdcall D3DXMatrixTranspose_00ee6dd4(S00bbe6b0_Mat* out, const S00bbe6b0_Mat* in);
 void* FUN_00ec44d0(void* dst, const void* src, unsigned int n);
 
 struct S00bbe6b0_Renderer
@@ -92,11 +92,12 @@ struct S00bbe6b0_Renderer
     int unk10;
     int unk14;
     char* m_18;
-    void FUN_00bbe6b0(S00bbe6b0_Src* src, unsigned int id, int flag, void* out);
+    void Lighting30Shader_SetupGeometryConstants_ObjToCubemap(S00bbe6b0_Src* src, unsigned int id, int flag, void* out);
 };
 
 // @fnv 0x00bbe6b0
-void S00bbe6b0_Renderer::FUN_00bbe6b0(S00bbe6b0_Src* src, unsigned int id, int flag, void* out)
+// src: COMMUNITY 0x00bbe6b0
+void S00bbe6b0_Renderer::Lighting30Shader_SetupGeometryConstants_ObjToCubemap(S00bbe6b0_Src* src, unsigned int id, int flag, void* out)
 {
     __declspec(align(16)) S00bbe6b0_Mat mat;
     __declspec(align(16)) S00bbe6b0_Mat world;
@@ -109,7 +110,7 @@ void S00bbe6b0_Renderer::FUN_00bbe6b0(S00bbe6b0_Src* src, unsigned int id, int f
             (id >= 0x2d8 && id <= 0x2ef))
         {
             mat = *(S00bbe6b0_Mat*)(m_18 + 0x940);
-            FUN_00ee6dd4(&mat, &mat);
+            D3DXMatrixTranspose_00ee6dd4(&mat, &mat);
             DAT_01201170._11 = mat._11;
             DAT_01201170._12 = mat._12;
             DAT_01201170._13 = mat._13;
@@ -134,13 +135,13 @@ void S00bbe6b0_Renderer::FUN_00bbe6b0(S00bbe6b0_Src* src, unsigned int id, int f
                 S00bbe6b0_Identity(&world);
                 S00bbe6b0_Identity(&mat);
                 if (!flag)
-                    FUN_00b799a0(&world, out);
+                    NiD3DUtility_GetD3DFromNi_(&world, out);
                 world._41 += DAT_011f474c;
                 world._42 += DAT_011f4750;
                 world._43 += DAT_011f4754;
-                FUN_00ee6de0(&res, &world, &(id - 0x1c4 <= 3 ? pair->first : pair->second)->world);
+                D3DXMatrixMultiply_00ee6de0(&res, &world, &(id - 0x1c4 <= 3 ? pair->first : pair->second)->world);
                 mat = res;
-                FUN_00ee6dd4(&mat, &mat);
+                D3DXMatrixTranspose_00ee6dd4(&mat, &mat);
                 FUN_00ec44d0(&DAT_01201170, &mat, 0x40);
             }
         }

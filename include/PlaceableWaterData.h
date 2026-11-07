@@ -12,6 +12,6 @@ public:
     void Reinitialize();
     void Reset();
     void FUN_004019f0();
-    void FUN_00535aa0();
-    void FUN_00462230();
+    void OBJ_WEAP_CRITICAL_Endian();
+    void TwoValues_Endian();
 };

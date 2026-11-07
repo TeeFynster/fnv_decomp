@@ -51,7 +51,7 @@ public:
     __declspec(noinline) virtual ~hkpPrismaticConstraintData() throw();
     static void operator delete(void* pItem) throw();
     hkpPrismaticConstraintData* DestroyObject(unsigned int uFlags) throw();
-    void* __thiscall FUN_00d4f880(int iFirst);
+    void* __thiscall getConstraintInfo_00d4f880(int iFirst);
     void setInWorldSpace(const hkTransform& kBodyATransform, const hkTransform& kBodyBTransform,
                          const hkVector4& kPivot, const hkVector4& kAxis);
     hkBool IsValid() const;
@@ -61,16 +61,18 @@ public:
 };
 
 
-extern "C" void* __cdecl FUN_00d21a60(void* self, int a, void* b);
+extern "C" void* __cdecl hkpConstraintData_getConstraintInfoUtil(void* self, int a, void* b);
 
 // @fnv 0x00d4f880
-void* __thiscall hkpPrismaticConstraintData::FUN_00d4f880(int a)
+// src: HAVOK_LIB 0x00d4f880
+void* __thiscall hkpPrismaticConstraintData::getConstraintInfo_00d4f880(int a)
 {
-    return FUN_00d21a60((char*)this + 0x10, 0xc0, (void*)a);
+    return hkpConstraintData_getConstraintInfoUtil((char*)this + 0x10, 0xc0, (void*)a);
 }
 
 // @fnv 0x00d4f8a0
-void __stdcall FUN_00d4f8a0(int aiUnused, hkpPrismaticConstraintData* apConstraintData)
+// src: HAVOK_LIB 0x00d4f8a0
+void __stdcall hkpPrismaticConstraintData_getRuntimeInfo(int aiUnused, hkpPrismaticConstraintData* apConstraintData)
 {
     *(int*)((char*)apConstraintData + 4) = 8;
     *(int*)((char*)apConstraintData + 0) = 0x48;
@@ -93,7 +95,8 @@ hkpPrismaticConstraintData::~hkpPrismaticConstraintData() throw()
 
 // FUN_00d4f8c0: cdecl constant-return leaf (mov eax,6; ret)
 // @fnv 0x00d4f8c0
-int FUN_00d4f8c0()
+// src: GUESS 0x00d4f8c0 (confidence: high)
+int Object_ReturnSix_00d4f8c0()
 {
     return 6;
 }

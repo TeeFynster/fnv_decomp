@@ -32,7 +32,7 @@ struct VirtualObj
 // @fnv 0x00825810
 void NightEyeEffect::Start()
 {
-    FUN_00804cb0(1.0f);
+    ActiveEffect_SetMagnitude(1.0f);
     ((void (__thiscall*)(ValueModifierEffect*))StartValueModifierEffect)(this);
     if (((VirtualObj*)ActiveEffect::FUN_0059bb30())->f1() == g_thePlayer)
         UpdateImageSpaceEffectFromPlayerState();
@@ -63,12 +63,13 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 void NightEyeEffect::Revert(Actor* apActor)
 {
     ((TESForm*)this)->Revert(reinterpret_cast<unsigned int>(apActor));
-    if (fnv_00825950::g_TESSaveLoadGame->FUN_0055f5b0() && (void*)apActor == (void*)g_thePlayer)
+    if (fnv_00825950::g_TESSaveLoadGame->TESSaveLoadGame_GetRevertBefore() && (void*)apActor == (void*)g_thePlayer)
         UpdateImageSpaceEffectFromPlayerState();
 }
 
 // @fnv 0x008258a0
-NightEyeEffect* FUN_008258a0(void* apArg0, void* apArg1, void* apArg2)
+// src: COMMUNITY 0x008258a0
+NightEyeEffect* NightEyeEffect_Create(void* apArg0, void* apArg1, void* apArg2)
 {
     return new NightEyeEffect(apArg0, apArg1, apArg2);
 }
@@ -101,7 +102,7 @@ struct FUN_00825990_ImageSpaceEffect
 
 struct FUN_00825990_ImageSpaceManager
 {
-    FUN_00825990_ImageSpaceEffect* __thiscall FUN_004ebbc0(int);
+    FUN_00825990_ImageSpaceEffect* __thiscall GetEffect_004ebbc0(int);
 };
 
 struct FUN_00825990_PlayerBase
@@ -157,8 +158,8 @@ struct FUN_00825990_PlayerData
     FUN_00825990_PlayerBase unkA4;
 };
 
-extern FUN_00825990_ImageSpaceManager* __cdecl FUN_004e3270();
-extern float* __fastcall FUN_00403e20(float*);
+extern FUN_00825990_ImageSpaceManager* __cdecl BSShaderManager_GetImageSpaceManager();
+extern float* __fastcall Setting_Float_00403e20(float*);
 extern FUN_00825990_PlayerData* DAT_011dea3c;
 extern float DAT_011d1668;
 extern float DAT_011f947c;
@@ -169,13 +170,13 @@ void UpdateImageSpaceEffectFromPlayerState()
     FUN_00825990_ImageSpaceEffect* effect;
 
     {
-        FUN_00825990_ImageSpaceManager* manager = FUN_004e3270();
-        effect = manager->FUN_004ebbc0(3);
+        FUN_00825990_ImageSpaceManager* manager = BSShaderManager_GetImageSpaceManager();
+        effect = manager->GetEffect_004ebbc0(3);
     }
 
     if (DAT_011dea3c->unkA4.vf08(0x32) > 0)
     {
-        DAT_011f947c = *FUN_00403e20(&DAT_011d1668);
+        DAT_011f947c = *Setting_Float_00403e20(&DAT_011d1668);
         effect->vf2C(1);
     }
     else

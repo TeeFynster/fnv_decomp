@@ -82,7 +82,7 @@ void PathingRequest::LoadGame(BGSLoadFormBuffer* buffer)
         for (unsigned int i = 0; i < count; ++i)
         {
             PathingAvoidNode* node =
-                reinterpret_cast<PathingAvoidPointerView*>(&m_pPathingAvoidNodeArray)->Get()->FUN_006a1400(i);
+                reinterpret_cast<PathingAvoidPointerView*>(&m_pPathingAvoidNodeArray)->Get()->BSSimpleArray_PathingAvoidNode_1024_GetAt(i);
             node->LoadPathingAvoidNode(buffer);
         }
     }
@@ -121,13 +121,13 @@ PathingRequest* PathingRequest::CreateRequestForType(PATHING_REQUEST_TYPE type)
 void PathingRequest::CopyTo(PathingRequest* request)
 {
     request->SetOrigin(GetOrigin());
-    request->SetDestination(FUN_006a9540());
+    request->SetDestination(NiAVObject_GetRotate_006a9540());
     request->SetActorRadius(GetActorRadius());
     request->FUN_006d3ae0(GetFloatAtOffset68());
-    request->FUN_006e29b0(FUN_006c9900());
+    request->SetActorLockData(GetActorLockData());
     request->SetCenterRadius(GetCenterRadius());
-    NiPoint3 center = FUN_006a7910();
-    request->FUN_006e2980(center, GetTargetRadius());
+    NiPoint3 center = GetTargetPoint();
+    request->PathingRequest_SetCenterRadius(center, GetTargetRadius());
     request->SetSmoothingRandomness(GetSmoothingRandomness());
     request->SetAvoidNodeArray(GetString());
     request->SetSmoothingRandomness(GetSmoothingRandomness());
@@ -234,12 +234,13 @@ void* FUN_006e25e0_impl::FUN_006e25e0(unsigned int flags)
 
 struct FUN_006e2980_shell : public PathingRequest
 {
-    void FUN_006e2980(NiPoint3*, float);
+    void PathingRequest_SetCenterRadius(NiPoint3*, float);
 };
 
 // Stores arCenter at offset 0x7c and afOriginRadius at offset 0x78 of this object.
 // @fnv 0x006e2980
-void FUN_006e2980_shell::FUN_006e2980(NiPoint3* apCenter, float afOriginRadius)
+// src: XBOX_PDB 0x006e2980
+void FUN_006e2980_shell::PathingRequest_SetCenterRadius(NiPoint3* apCenter, float afOriginRadius)
 {
     *(NiPoint3*)((char*)this + 0x7c) = *apCenter;
     *(float*)((char*)this + 0x78) = afOriginRadius;
@@ -363,11 +364,12 @@ extern "C" void* __cdecl Reallocate(void*, unsigned int);
 
 struct FUN_006e3c40_shell
 {
-    void* __thiscall FUN_006e3c40(void* apBuffer, unsigned int aiNewSizeInItem);
+    void* __thiscall Reallocate_Thunk_006e3c40(void* apBuffer, unsigned int aiNewSizeInItem);
 };
 
 // @fnv 0x006e3c40
-void* __thiscall FUN_006e3c40_shell::FUN_006e3c40(void* apBuffer, unsigned int aiNewSizeInItem)
+// src: GUESS 0x006e3c40 (confidence: medium)
+void* __thiscall FUN_006e3c40_shell::Reallocate_Thunk_006e3c40(void* apBuffer, unsigned int aiNewSizeInItem)
 {
     return Reallocate(apBuffer, aiNewSizeInItem * 0x24);
 }
@@ -404,17 +406,18 @@ struct PathingrequestOffset08View
 
 struct FUN_006dc890_Class
 {
-    void FUN_006dc890(BGSSaveFormBuffer*);
+    void PathingAvoidNode_SaveGame(BGSSaveFormBuffer*);
 };
 
 struct FUN_006e3230_shell
 {
-    void FUN_006e3230(BGSSaveFormBuffer*);
+    void PathingRequest_SaveGame(BGSSaveFormBuffer*);
 };
 
 // Serializes this object's fields and two embedded pathing locations into the save buffer, then saves each avoid node referenced at offset 0x94.
 // @fnv 0x006e3230
-void FUN_006e3230_shell::FUN_006e3230(BGSSaveFormBuffer* buffer)
+// src: XBOX_PDB 0x006e3230
+void FUN_006e3230_shell::PathingRequest_SaveGame(BGSSaveFormBuffer* buffer)
 {
     unsigned int i;
     unsigned int isaveGameCount;
@@ -454,14 +457,14 @@ void FUN_006e3230_shell::FUN_006e3230(BGSSaveFormBuffer* buffer)
                   ->GetFlags()
             : 0;
 
-    buffer->FUN_00865f60(i);
+    buffer->SaveVariableSizedValue(i);
 
     for (isaveGameCount = 0; isaveGameCount < i; ++isaveGameCount)
     {
         avoidNode = reinterpret_cast<PathingAvoidPointerView*>(reinterpret_cast<char*>(this) + 0x94)
                         ->Get()
-                        ->FUN_006a1400(isaveGameCount);
-        reinterpret_cast<FUN_006dc890_Class*>(avoidNode)->FUN_006dc890(buffer);
+                        ->BSSimpleArray_PathingAvoidNode_1024_GetAt(isaveGameCount);
+        reinterpret_cast<FUN_006dc890_Class*>(avoidNode)->PathingAvoidNode_SaveGame(buffer);
     }
 }
 

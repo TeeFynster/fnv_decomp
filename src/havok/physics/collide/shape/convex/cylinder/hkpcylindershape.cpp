@@ -5,7 +5,8 @@
 #include "../../../../../../../include/hkpCylinderShape.h"
 
 // @fnv 0x00d571b0
-int __cdecl FUN_00d571b0()
+// src: GUESS 0x00d571b0 (confidence: high)
+int __cdecl hkpCylinderShape_ReturnConstant_0x12()
 {
     return 0x12;
 }
@@ -21,11 +22,12 @@ hkReal hkpCylinderShape::getCylinderRadius() const {
 }
 
 extern char DAT_01268940[];
-void __cdecl FUN_00c90360(void* item, const char* type);
+void __cdecl hkReferencedObject_calcContentStatistics(void* item, const char* type);
 // @fnv 0x00d571c0
-void __cdecl FUN_00d571c0(void* item, const char*)
+// src: XBOX_PDB 0x00d571c0
+void __cdecl hkpCylinderShape_calcContentStatistics(void* item, const char*)
 {
-    FUN_00c90360(item, DAT_01268940);
+    hkReferencedObject_calcContentStatistics(item, DAT_01268940);
 }
 
 struct C00d573e0 {
@@ -52,7 +54,8 @@ extern char DAT_010305a8;
 extern char DAT_010d0f1c;
 extern float DAT_011b5be8;
 
-static __declspec(noinline) float FUN_00d571d0()
+// src: HAVOK_LIB 0x00d571d0
+static __declspec(noinline) float minValueRoundedUpTo1()
 {
     return 0.0f;
 }
@@ -63,11 +66,12 @@ struct S00d57b20_Obj {
     int unk08;
     int unk0C;
 
-    S00d57b20_Obj* __thiscall FUN_00d57b20(int condition);
+    S00d57b20_Obj* __thiscall hkpCylinderShape_hkpCylinderShape_00d57b20(int condition);
 };
 
 // @fnv 0x00d57b20
-S00d57b20_Obj* __thiscall S00d57b20_Obj::FUN_00d57b20(int condition)
+// src: HAVOK_LIB 0x00d57b20
+S00d57b20_Obj* __thiscall S00d57b20_Obj::hkpCylinderShape_hkpCylinderShape_00d57b20(int condition)
 {
     unk00 = &DAT_010305a8;
 
@@ -78,7 +82,7 @@ S00d57b20_Obj* __thiscall S00d57b20_Obj::FUN_00d57b20(int condition)
     unk00 = &DAT_010d0f1c;
 
     if (condition && DAT_011b5be8 < 0.0f)
-        DAT_011b5be8 = 1.0f - FUN_00d571d0();
+        DAT_011b5be8 = 1.0f - minValueRoundedUpTo1();
 
     unk0C = 2;
     return this;
@@ -199,12 +203,13 @@ struct S00d57830 {
     __m128 m_kVertexA;
     __m128 m_kVertexB;
 
-    void FUN_00d57830(__m128* out);
+    void hkpCylinderShape_getCentreImpl(__m128* out);
 };
 
 // Stores (m_kVertexA + m_kVertexB) scaled by DAT_01016248 into *out.
 // @fnv 0x00d57830
-void S00d57830::FUN_00d57830(__m128* out)
+// src: XBOX_PDB 0x00d57830
+void S00d57830::hkpCylinderShape_getCentreImpl(__m128* out)
 {
     __m128 a = this->m_kVertexA;
     __m128 b = this->m_kVertexB;
@@ -247,7 +252,8 @@ namespace fnv_00d571d0 {
 namespace c571 { const float DAT_01056528 = 1.1f; }
 using namespace c571;
 // @fnv 0x00d571d0
-float __cdecl FUN_00d571d0()
+// src: HAVOK_LIB 0x00d571d0
+float __cdecl minValueRoundedUpTo1()
 {
     for (float fValue = 0.0f; fValue < DAT_01056528; fValue += 0.009999999776482582)
     {

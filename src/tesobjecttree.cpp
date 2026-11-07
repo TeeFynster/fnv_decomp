@@ -176,36 +176,39 @@ FUN_0051d1c0::~FUN_0051d1c0()
 
 struct FUN_0051b830_shell
 {
-    unsigned int __thiscall FUN_0051b830();
+    unsigned int __thiscall TESTexture1024_GetMaxAllowedSize();
 };
 
 // @fnv 0x0051b830
-unsigned int __thiscall FUN_0051b830_shell::FUN_0051b830()
+// src: COMMUNITY 0x0051b830
+unsigned int __thiscall FUN_0051b830_shell::TESTexture1024_GetMaxAllowedSize()
 {
     return 1024;
 }
 
 struct FUN_0051b950_shell : TESModel
 {
-    void FUN_0051b950();
+    void DestroySubobject_0051b950();
 };
 
 // @fnv 0x0051b950
-void FUN_0051b950_shell::FUN_0051b950()
+// src: GUESS 0x0051b950 (confidence: low)
+void FUN_0051b950_shell::DestroySubobject_0051b950()
 {
     TESModel::~TESModel();
 }
 
 struct NiPoint2_shell : NiPoint2
 {
-    bool FUN_00452df0(const NiPoint2&) const;
-    bool FUN_0051c330(const NiPoint2& other) const;
+    bool HasEqualFloatPair(const NiPoint2&) const;
+    bool ForwardCall_0051c330(const NiPoint2& other) const;
 };
 
 // @fnv 0x0051c330
-bool NiPoint2_shell::FUN_0051c330(const NiPoint2& other) const
+// src: GUESS 0x0051c330 (confidence: low)
+bool NiPoint2_shell::ForwardCall_0051c330(const NiPoint2& other) const
 {
-    return !FUN_00452df0(other);
+    return !HasEqualFloatPair(other);
 }
 
 struct NiRTTI;
@@ -236,12 +239,13 @@ void __cdecl Deallocate(void*);
 
 struct FUN_0051d400_shell
 {
-    void __thiscall FUN_0051d400();
+    void __thiscall ReleaseStorage_0051d400();
 };
 
 // Frees the two pointers stored at offsets 0x14 and 0x18 of this object via Deallocate.
 // @fnv 0x0051d400
-void __thiscall FUN_0051d400_shell::FUN_0051d400()
+// src: GUESS 0x0051d400 (confidence: medium)
+void __thiscall FUN_0051d400_shell::ReleaseStorage_0051d400()
 {
     void* p2 = *(void**)((char*)this + 0x14);
     Deallocate(p2);
@@ -277,11 +281,12 @@ float FUN_006447b0_shell::GetField84Float()
 // float field getter at +0x38 (no RTTI evidence for its class)
 struct FUN_009a9350_shell
 {
-    float FUN_009a9350() const;
+    float TESCombatStyle_GetWeaponMinRangeMult() const;
 };
 
 // @fnv 0x009a9350
-float FUN_009a9350_shell::FUN_009a9350() const
+// src: XBOX_PDB 0x009a9350
+float FUN_009a9350_shell::TESCombatStyle_GetWeaponMinRangeMult() const
 {
     return *(const float*)((const char*)this + 0x38);
 }
@@ -302,18 +307,20 @@ unsigned int FUN_009acce0_shell::GetFieldC8()
 #include "../include/BSFadeNode.h"
 
 // @fnv 0x009ad610
-unsigned int BSFadeNode::FUN_009ad610()
+// src: XBOX_PDB 0x009ad610
+unsigned int BSFadeNode::QUserData()
 {
     return *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0xCC);
 }
 
 struct FUN_0051b8c0_shell : TESObjectTREE
 {
-    void FUN_0051b8c0(float value);
+    void SkyShaderProperty_SetBlendValue(float value);
 };
 
 // @fnv 0x0051b8c0
-void FUN_0051b8c0_shell::FUN_0051b8c0(float value)
+// src: COMMUNITY 0x0051b8c0
+void FUN_0051b8c0_shell::SkyShaderProperty_SetBlendValue(float value)
 {
     *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x84) = value;
 }
@@ -333,12 +340,13 @@ extern unsigned int __cdecl DialogueRandom(void);
 
 struct FUN_0051c360_shell
 {
-    unsigned int FUN_0051c360();
+    unsigned int TESObjectTREE_GetRandomSeed();
 };
 
 // Returns a random element from the seed array at offset 0x5c, or 0 when the array is empty.
 // @fnv 0x0051c360
-unsigned int FUN_0051c360_shell::FUN_0051c360()
+// src: COMMUNITY 0x0051c360
+unsigned int FUN_0051c360_shell::TESObjectTREE_GetRandomSeed()
 {
     unsigned int index = reinterpret_cast<NiTPrimitiveArray<unsigned int>*>(reinterpret_cast<char*>(this) + 0x5c)->GetSize();
     if (!index)
@@ -373,11 +381,12 @@ void* FUN_0051d220_shell::DestroyAndFree(unsigned int flags)
 
 struct FUN_00821600_shell
 {
-    void FUN_00821600(float value);
+    void TileShaderProperty_SetTileAlpha(float value);
 };
 
 // @fnv 0x00821600
-void FUN_00821600_shell::FUN_00821600(float value)
+// src: COMMUNITY 0x00821600
+void FUN_00821600_shell::TileShaderProperty_SetTileAlpha(float value)
 {
     *(float*)((char*)this + 0x78) = value;
 }
@@ -395,10 +404,11 @@ unsigned int __thiscall FUN_009b0900_shell::GetFieldE0()
 
 struct FUN_0051b8a0_shell
 {
-    void FUN_0051b8a0(float f);
+    void TESObjectTREE_SetShadowRadius(float f);
 };
 // @fnv 0x0051b8a0
-void FUN_0051b8a0_shell::FUN_0051b8a0(float afValue)
+// src: COMMUNITY 0x0051b8a0
+void FUN_0051b8a0_shell::TESObjectTREE_SetShadowRadius(float afValue)
 {
     *(int*)((char*)this + 0x80) = (int)afValue;
 }
@@ -423,11 +433,12 @@ void* S_0051b900::FUN_0051b900(unsigned int flags)
 
 struct FUN_0051b990_shell : public TESIcon
 {
-    void FUN_0051b990();
+    void DestroySubobject_0051b990();
 };
 
 // @fnv 0x0051b990
-void FUN_0051b990_shell::FUN_0051b990()
+// src: GUESS 0x0051b990 (confidence: low)
+void FUN_0051b990_shell::DestroySubobject_0051b990()
 {
     TESIcon::~TESIcon();
 }
@@ -437,7 +448,7 @@ void __cdecl _delete(void*, unsigned int);
 // @fnv 0x0051cfa0
 void* NiBillboardNode::Destroy(unsigned int flags)
 {
-    this->FUN_0051cfe0();
+    this->ForwardCall_0051cfe0();
     if (flags & 1)
         _delete(this, 0xB4);
     return this;
@@ -927,12 +938,12 @@ void SoundListView::AddSoundEntry(float* apFirst, float* apSecond)
 namespace fnv_0051c220 {
 struct FUN_005e79a0_t
 {
-    bool FUN_00485270(TESForm*);
+    bool TESForm_CompareAllComponents(TESForm*);
 };
 
 struct NiPoint2_shell
 {
-    bool FUN_0051c330(NiPoint2 const&) const;
+    bool ForwardCall_0051c330(NiPoint2 const&) const;
 };
 
 struct FUN_0051c220_vtable
@@ -1056,7 +1067,7 @@ bool FUN_0051c220_shell::IsNotEqual(TESForm* apCompare)
         return true;
 
     if (reinterpret_cast<NiPoint2_shell*>(reinterpret_cast<char*>(this) + 0x8c)
-            ->FUN_0051c330(*reinterpret_cast<NiPoint2 const*>(reinterpret_cast<const char*>(i) + 0x8c)))
+            ->ForwardCall_0051c330(*reinterpret_cast<NiPoint2 const*>(reinterpret_cast<const char*>(i) + 0x8c)))
         return true;
 
     unsigned int isize = reinterpret_cast<NiTPrimitiveArray<unsigned int>*>(reinterpret_cast<char*>(this) + 0x5c)->GetSize();
@@ -1071,7 +1082,7 @@ bool FUN_0051c220_shell::IsNotEqual(TESForm* apCompare)
             return true;
     }
 
-    if (reinterpret_cast<FUN_005e79a0_t*>(this)->FUN_00485270(i))
+    if (reinterpret_cast<FUN_005e79a0_t*>(this)->TESForm_CompareAllComponents(i))
         return true;
 
     return false;
@@ -1206,12 +1217,13 @@ struct FUN_0051d250_Class
     float unk8C;
     float unk90;
 
-    bool __thiscall FUN_0051d250();
+    bool __thiscall TESObjectTREE_IsLargeEnoughForDistantLOD();
 };
 
 // Returns false if unk8C or unk90 falls within their respective ranges above DAT_01012060, otherwise true.
 // @fnv 0x0051d250
-bool __thiscall FUN_0051d250_Class::FUN_0051d250()
+// src: XBOX_PDB 0x0051d250
+bool __thiscall FUN_0051d250_Class::TESObjectTREE_IsLargeEnoughForDistantLOD()
 {
     if ((this->unk8C > DAT_01012060 && this->unk8C <= DAT_010179e0) ||
         (this->unk90 > DAT_01012060 && this->unk90 <= DAT_0102c188))
@@ -1264,7 +1276,7 @@ struct FUN_004891d0_shell
 struct FUN_0048e370_obj
 {
     int unk00, unk04, unk08;
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
 struct S_00477f20
 {
@@ -1278,10 +1290,10 @@ struct TreeData
     float unk18, unk1c;
     void FUN_00414290();
 };
-bool __cdecl FUN_00401500();
-void __cdecl FUN_00485710(unsigned int, unsigned int*, unsigned int);
+bool __cdecl TESForm_QEndianSwapOnSave();
+void __cdecl TESForm_AddChunkArray_00485710(unsigned int, unsigned int*, unsigned int);
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
-void __cdecl FUN_00403d30(void*, int, unsigned int);
+void __cdecl ourMemset(void*, int, unsigned int);
 struct SaveTree
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
@@ -1291,16 +1303,17 @@ struct SaveTree
     NiTPrimitiveArray<unsigned int> seeds;
     TreeData data;
     float billboardX, billboardY;
-    void FUN_004855a0();
-    void FUN_00485680();
-    void FUN_0051bfb0();
+    void BeginFormRecord();
+    void FinishFormRecord();
+    void TESObjectTREE_Save();
 };
 // @fnv 0x0051bfb0
-void SaveTree::FUN_0051bfb0()
+// src: XBOX_PDB 0x0051bfb0
+void SaveTree::TESObjectTREE_Save()
 {
-    FUN_004855a0();
+    BeginFormRecord();
     model.WriteToBuffer(0x4c444f4d, 0x54444f4d);
-    icon.FUN_0048e370(0x4e4f4349);
+    icon.TESTexture_Save(0x4e4f4349);
     destruct.FUN_00477f20();
     if (seeds.GetSize() > 0)
     {
@@ -1308,7 +1321,7 @@ void SaveTree::FUN_0051bfb0()
         unsigned int values = seeds.GetSize();
         unsigned int index = values * sizeof(unsigned int);
         count = new unsigned int[values];
-        FUN_00403d30(count, 0, index);
+        ourMemset(count, 0, index);
         unsigned int uiSeedValue;
         for (unsigned int value = 0; value < values; value++)
         {
@@ -1316,17 +1329,17 @@ void SaveTree::FUN_0051bfb0()
             if (uiSeedValue > 0)
                 count[value] = uiSeedValue;
         }
-        FUN_00485710(0x4d414e53, count, values);
+        TESForm_AddChunkArray_00485710(0x4d414e53, count, values);
     }
     if (data.unk14 < 0)
         data.unk14 = 128;
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         data.FUN_00414290();
     AppendChunk(0x4d414e43, &data, 32);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         data.FUN_00414290();
-    FUN_00485710(0x4d414e42, (unsigned int*)&billboardX, 2);
-    FUN_00485680();
+    TESForm_AddChunkArray_00485710(0x4d414e42, (unsigned int*)&billboardX, 2);
+    FinishFormRecord();
 }
 
 class TreeNameView
@@ -1752,7 +1765,7 @@ class FUN_00ba8630 : public TreeSceneObject
     unsigned int unkFC;
     unsigned int unk100;
     FUN_00ba8630();
-    void FUN_00b66ad0(const char* name, TreeSceneObject* object);
+    void BSShaderPPLightingProperty_LoadTextureSet(const char* name, TreeSceneObject* object);
 };
 class FUN_0051d0d0 : public TreeSceneObject
 {
@@ -1809,7 +1822,7 @@ class FUN_0051cf00 : public TreeSceneObject
     unsigned int unkAC;
     unsigned int unkB0;
     FUN_0051cf00();
-    void FUN_0051d000(int mode);
+    void SetMode_0051d000(int mode);
 };
 extern const char treeSourceFile[];
 // NiPointer<NiSourceTexture>::operator==(NiSourceTexture*) (0x00822510); the shared NiPointer declares no operator==
@@ -1829,7 +1842,7 @@ class TreeBillboardBuilder : public FUN_0051d250_Class
 // @fnv 0x0051cba0
 TreeSceneObject* TreeBillboardBuilder::CreateBillboardSceneObject(bool variant)
 {
-    if (!FUN_0051d250())
+    if (!TESObjectTREE_IsLargeEnoughForDistantLOD())
         return 0;
     AutoMemContext eb(0x23, true, treeSourceFile, 470);
     NiPointer<BillboardTexture> a(0);
@@ -1844,14 +1857,14 @@ TreeSceneObject* TreeBillboardBuilder::CreateBillboardSceneObject(bool variant)
     BuildBillboardTexturePath(q);
     FUN_0051d0d0* cf = new FUN_0051d0d0;
     cf->SetTexture(0, q);
-    i->FUN_00b66ad0("STBB", cf);
+    i->BSShaderPPLightingProperty_LoadTextureSet("STBB", cf);
     i->UpdateShader(0);
     NiPointer<BillboardTexture> p(0);
     cf->GetTexture(0, &p);
     if (reinterpret_cast<BillboardTexturePointerCompare&>(p) == 0)
         return 0;
     FUN_0051cf00* s = new FUN_0051cf00;
-    s->FUN_0051d000(5);
+    s->SetMode_0051d000(5);
     s->AttachChildInAvailableSlot(h, true);
     return s;
 }
@@ -2046,22 +2059,23 @@ FUN_0051d2c0_shell* FUN_0051d2c0_shell::Init(void* apField0, void* apField4, voi
 class TreeCopy : public TESObjectTREE
 {
   public:
-    void FUN_004851b0(TESForm*);
-    void FUN_0051c140(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
+    void TESObjectTREE_Copy(TESForm*);
 };
 
 typedef TreeRecordData*(__thiscall* TreeDataGetter)(TESObjectTREE*);
 
 // Copies seed array, tree record data, and billboard dimensions from a source TESObjectTREE into this TreeCopy.
 // @fnv 0x0051c140
-void TreeCopy::FUN_0051c140(TESForm* source)
+// src: XBOX_PDB 0x0051c140
+void TreeCopy::TESObjectTREE_Copy(TESForm* source)
 {
     TESObjectTREE* tree;
     tree = dynamic_cast<TESObjectTREE*>(source);
     if (!tree)
         return;
 
-    FUN_004851b0(source);
+    TESForm_CopyAllComponents(source);
     {
         unsigned int count;
         count = tree->m_kSeedArray.GetSize();

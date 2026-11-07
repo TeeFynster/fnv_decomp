@@ -21,7 +21,7 @@ inline void hkVector4::sub4(const hkVector4& v)
 // src/havok/common/base/math/swepttransform/hkswepttransformutil_gs_nogs_variant.cpp - flag-variant unit created 2026-10-29 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/common/base/math/swepttransform/hkswepttransformutil.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
-void FUN_00cf1480(float a, float b, int* c);
+void hkSweptTransformUtil_setTimeInformation(float a, float b, int* c);
 struct S_00cf10f0_BinaryStream;
 typedef unsigned int(__cdecl* S_00cf10f0_ReadFn)(S_00cf10f0_BinaryStream* pkThis, void* pvBuffer, unsigned int uiBytes,
                                                  unsigned int* puiComponentSizes, unsigned int uiNumComponents);
@@ -411,9 +411,9 @@ struct S_00cf10f0_Router
         return *m10;
     }
 };
-S_00cf10f0_Router* FUN_00c85750() throw();
+S_00cf10f0_Router* hkMemoryRouter_getInstance() throw();
 struct S_00cf10f0_Arr4;
-void __cdecl FUN_00c908c0(S_00cf10f0_Heap* heap, S_00cf10f0_Arr4* arr, int n, int elemSize);
+void __cdecl hkArrayUtil__reserve(S_00cf10f0_Heap* heap, S_00cf10f0_Arr4* arr, int n, int elemSize);
 struct S_00cf10f0_Arr4
 {
     int* m_data;
@@ -421,10 +421,10 @@ struct S_00cf10f0_Arr4
     int m_cap;
     __forceinline void reserve(int n) throw()
     {
-        S_00cf10f0_Heap& h = FUN_00c85750()->heap();
+        S_00cf10f0_Heap& h = hkMemoryRouter_getInstance()->heap();
         int cap = m_cap & 0x3fffffff;
         if (cap < n)
-            FUN_00c908c0(&h, this, (n < cap * 2) ? cap * 2 : n, 4);
+            hkArrayUtil__reserve(&h, this, (n < cap * 2) ? cap * 2 : n, 4);
     }
     __forceinline void SetSizeAndGrow(int n) throw()
     {
@@ -442,8 +442,8 @@ struct S_00cf10f0_Arr4
     }
 };
 int __cdecl LoadIntArray(S_00cf10f0_Stream* kStream, S_00cf10f0_Arr4* arr);
-int __cdecl FUN_00cf1f80(int, int, int);
-int __cdecl FUN_00cf2160(unsigned int arg0, unsigned int arg1);
+int __cdecl hkSweptTransformUtil_warpTo(int, int, int);
+int __cdecl hkSweptTransformUtil_warpToRotation(unsigned int arg0, unsigned int arg1);
 #include <xmmintrin.h>
 struct Obj
 {
@@ -505,7 +505,7 @@ struct FUN_008cd6a0_Class
     V4 rot0;
     V4 rot1;
     V4 comLocal;
-    void __thiscall FUN_00cb2d90(void*);
+    void __thiscall hkRotation_set(void*);
 };
 __forceinline void interpolate(__m128& dst, __m128 a, __m128 b, float w)
 {
@@ -515,7 +515,7 @@ __forceinline void interpolate(__m128& dst, __m128 a, __m128 b, float w)
     dst = _mm_add_ps(_mm_mul_ps(other, a), _mm_mul_ps(wb, b));
 }
 void __cdecl UpdateRotationInterpolation(float time, FUN_008cd6a0_Class* self);
-void FUN_00cf1480(float a, float b, int* c);
+void hkSweptTransformUtil_setTimeInformation(float a, float b, int* c);
 struct __declspec(align(16)) MotionMat4
 {
     hkVector4 c0;
@@ -553,7 +553,8 @@ struct TransformData
     __m128 zero;
 };
 // @fnv 0x00cf20d0
-extern "C" void __cdecl FUN_00cf20d0(const __m128* source, TransformData* data)
+// src: COMMUNITY 0x00cf20d0
+extern "C" void __cdecl hkSweptTransformUtil_warpToPosition(const __m128* source, TransformData* data)
 {
     data->zero = _mm_setzero_ps();
     data->sourceCopy = *source;
@@ -583,9 +584,9 @@ struct Obj_t
     __m128 m80;
     __m128 m90;
 
-    void FUN_00cb2d90(const __m128& value);
+    void hkRotation_set(const __m128& value);
 };
-void __cdecl FUN_00cf1f80(const __m128& first, const __m128& second, Obj_t* obj);
+void __cdecl hkSweptTransformUtil_warpTo(const __m128& first, const __m128& second, Obj_t* obj);
 
 extern double DAT_01012070;
 
@@ -630,7 +631,8 @@ static inline __m128 InvNorm(__m128 s)
 }
 
 // @fnv 0x00cf1510
-void __cdecl FUN_00cf1510(const hkSweptTransform& sweptTrans, float t, hkTransformL& transformOut)
+// src: XBOX_PDB 0x00cf1510
+void __cdecl hkSweptTransformUtil_lerp2(const hkSweptTransform& sweptTrans, float t, hkTransformL& transformOut)
 {
     const float r = (t - sweptTrans.m_vCenterOfMass0.w) * sweptTrans.m_vCenterOfMass1.w;
     const __m128 r0 = _mm_load_ps(reinterpret_cast<const float*>(&sweptTrans.m_qRotation0));
@@ -661,7 +663,7 @@ void __cdecl FUN_00cf1510(const hkSweptTransform& sweptTrans, float t, hkTransfo
     }
     __m128 norm = InvNorm(SumSquares(q));
     quat.Set(_mm_mul_ps(_mm_shuffle_ps(norm, norm, 0), q));
-    transformOut.m_rotation.FUN_00cb2d90(reinterpret_cast<const hkQuaternion&>(quat));
+    transformOut.m_rotation.hkRotation_set(reinterpret_cast<const hkQuaternion&>(quat));
     __m128 u4 = _mm_load_ss(&r);
     u4 = _mm_shuffle_ps(u4, u4, 0);
     __m128 a = _mm_load_ps(&sweptTrans.m_vCenterOfMass0.x);
@@ -737,7 +739,8 @@ struct hkTransformL
 
 
 // @fnv 0x00cf1710
-void __cdecl FUN_00cf1710(const hkSweptTransform& sweptTrans, float t, float deltaTimeAddon,
+// src: GUESS 0x00cf1710 (confidence: low)
+void __cdecl hkSweptTransform_ComputeValues_00cf1710(const hkSweptTransform& sweptTrans, float t, float deltaTimeAddon,
                           hkTransformL& transformOut)
 {
     const __m128 r0 = _mm_load_ps(reinterpret_cast<const float*>(&sweptTrans.m_qRotation0));
@@ -779,7 +782,7 @@ void __cdecl FUN_00cf1710(const hkSweptTransform& sweptTrans, float t, float del
 
     const __m128 invNorm = SqrtInverse(LengthSquared4(rot));
     quat.Set(_mm_mul_ps(_mm_shuffle_ps(invNorm, invNorm, 0), rot));
-    transformOut.m_rotation.FUN_00cb2d90(reinterpret_cast<const hkQuaternion&>(quat));
+    transformOut.m_rotation.hkRotation_set(reinterpret_cast<const hkQuaternion&>(quat));
 
     transformOut.m_vTranslation.set(
         Interpolate4(_mm_load_ps(&sweptTrans.m_vCenterOfMass0.x), _mm_load_ps(&sweptTrans.m_vCenterOfMass1.x), r));
@@ -844,7 +847,7 @@ struct MotionState
     hkVector4 m_kDeltaAngle;
     void SetRotation(const hkQuaternion* p)
     {
-        reinterpret_cast<FUN_008cd6a0_Class*>(this)->FUN_00cb2d90((void*)p);
+        reinterpret_cast<FUN_008cd6a0_Class*>(this)->hkRotation_set((void*)p);
     }
 };
 
@@ -856,15 +859,16 @@ struct Bool8
 struct __declspec(align(16)) Quat
 {
     float x, y, z, w;
-    void FUN_00c74ac0(const hkQuaternion* a, const hkQuaternion* b);
+    void setMulInverse(const hkQuaternion* a, const hkQuaternion* b);
     float GetAngle();
-    Bool8* FUN_00ce1500(Bool8* o);
-    void FUN_00c74c90(hkVector4* out);
+    Bool8* ProcessAndReturnValue_00ce1500(Bool8* o);
+    void hkQuaternion_getAxis(hkVector4* out);
 };
 
 
 // @fnv 0x00cf2180
-void __cdecl FUN_00cf2180(const TimeInterval& info, const hkVector4& pos1, const hkQuaternion& rot1, MotionState& ms)
+// src: GUESS 0x00cf2180 (confidence: low)
+void __cdecl hkVector4_UpdateFields_00cf2180(const TimeInterval& info, const hkVector4& pos1, const hkQuaternion& rot1, MotionState& ms)
 {
     hkSweptTransform& st = ms.m_kSweptTransform;
     st.m_vCenterOfMass0 = st.m_vCenterOfMass1;
@@ -873,14 +877,14 @@ void __cdecl FUN_00cf2180(const TimeInterval& info, const hkVector4& pos1, const
     st.m_qRotation1 = rot1;
 
     Quat diff;
-    diff.FUN_00c74ac0(&rot1, &st.m_qRotation0);
+    diff.setMulInverse(&rot1, &st.m_qRotation0);
     float angle = diff.GetAngle();
     hkVector4 axis;
     Bool8 ok;
-    if (diff.FUN_00ce1500(&ok)->b != 0)
+    if (diff.ProcessAndReturnValue_00ce1500(&ok)->b != 0)
     {
         hkVector4 t;
-        diff.FUN_00c74c90(&t);
+        diff.hkQuaternion_getAxis(&t);
         axis = t;
     }
     else

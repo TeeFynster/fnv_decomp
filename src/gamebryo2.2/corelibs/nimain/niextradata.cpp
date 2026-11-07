@@ -118,7 +118,8 @@ bool __fastcall RegisterExtraDataStreamables(NiExtraData* self, void*, NiStream&
 }
 
 // @fnv 0x00a7b330
-void NiExtraData::FUN_00a7b330(void* destination, CloningProcess* kCloning)
+// src: XBOX_PDB 0x00a7b330
+void NiExtraData::CopyMembers_00a7b330(void* destination, CloningProcess* kCloning)
 {
     NiExtraData* pkDest = static_cast<NiExtraData*>(destination);
     NiObject::CreateVertexBufferSet(pkDest, *kCloning);
@@ -140,7 +141,8 @@ inline void* __cdecl operator new(unsigned int, void* p)
 }
 // Allocates a 12-byte NiExtraData, constructs it, sets its vtable and copies a stored int into offset 8, returning the object or null.
 // @fnv 0x00a7b380
-NiExtraData* FUN_00a7b380()
+// src: EXE 0x00a7b380
+NiExtraData* NiExtraData_CreateObject()
 {
     NiExtraData* p = (NiExtraData*)NiExtraData::operator new(sizeof(NiExtraData));
     if (p)
@@ -163,7 +165,8 @@ void NiExtraData::SaveBinary(NiStream& kStream)
 
 // Restores the NiExtraData vtable, releases the reference-counted object at offset 8 if not the empty sentinel, then calls the NiRefObject destructor.
 // @fnv 0x00a7b300
-void NiExtraData::FUN_00a7b300()
+// src: GUESS 0x00a7b300 (confidence: medium)
+void NiExtraData::DestroyFields_00a7b300()
 {
     *reinterpret_cast<void* volatile*>(this) = kVtbl_NiExtraData;
 
@@ -220,12 +223,12 @@ inline void AppendExtraDataString(StrArr* strings, char* value)
 }
 extern const char* const g_01270908_arg1;
 extern const char DAT_01097790[];
-extern "C" char* FUN_00a7d330(const char*);
-char* FUN_00a7d5e0(const char*, const char*);
+extern "C" char* NiViewerStrings_NiGetViewerString_Title(const char*);
+char* NiGetViewerString_00a7d5e0(const char*, const char*);
 // The shared header does not declare the StrArr viewer-string overload.
 // @fnv 0x00a7b580
 void __fastcall GetExtraDataViewerStrings(NiExtraData* self, void*, StrArr* strings)
 {
-    AppendExtraDataString(strings, FUN_00a7d330(g_01270908_arg1));
-    AppendExtraDataString(strings, FUN_00a7d5e0(DAT_01097790, static_cast<const char*>(self->m_kName)));
+    AppendExtraDataString(strings, NiViewerStrings_NiGetViewerString_Title(g_01270908_arg1));
+    AppendExtraDataString(strings, NiGetViewerString_00a7d5e0(DAT_01097790, static_cast<const char*>(self->m_kName)));
 }

@@ -101,17 +101,17 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 // @fnv 0x00682920
 void BSTempEffect::SaveGame()
 {
-    g_TESSaveLoadGame->FUN_008579b0(&m_fParticleParameter5, 4);
-    g_TESSaveLoadGame->FUN_008579b0(&m_fFirstFloatValue, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_fParticleParameter5, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_fFirstFloatValue, 4);
     SoundH* apSaveGameBuffer = 0;
     if (pCell)
     {
         apSaveGameBuffer = (SoundH*)((SoundH*)pCell)->Deallocate();
     }
-    g_TESSaveLoadGame->FUN_00857a10((int)&apSaveGameBuffer, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID((int)&apSaveGameBuffer, 4);
 }
 
-TESForm* FUN_004839c0(unsigned int);
+TESForm* TESForm_GetFormByNumericID(unsigned int);
 
 // @fnv 0x00682990
 bool BSTempEffect::LoadGame()
@@ -119,13 +119,13 @@ bool BSTempEffect::LoadGame()
     bool result = true;
     unsigned int formID;
 
-    g_TESSaveLoadGame->FUN_008579e0(&m_fParticleParameter5, 4);
-    g_TESSaveLoadGame->FUN_008579e0(&m_fFirstFloatValue, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&m_fParticleParameter5, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&m_fFirstFloatValue, 4);
     g_TESSaveLoadGame->FUN_00857aa0(&formID, 4);
 
-    pCell = dynamic_cast<TESObjectCELL*>(FUN_004839c0(formID));
+    pCell = dynamic_cast<TESObjectCELL*>(TESForm_GetFormByNumericID(formID));
 
-    if (!pCell || !pCell->FUN_00545cb0())
+    if (!pCell || !pCell->Get3D_00545cb0())
         result = false;
 
     return result;

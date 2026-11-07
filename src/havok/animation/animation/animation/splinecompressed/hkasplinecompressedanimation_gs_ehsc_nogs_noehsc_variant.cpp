@@ -59,7 +59,8 @@ __declspec(noinline) hkBool IsValidMode(RotationQuantizationType type)
            type == UNCOMPRESSED;
 }
 
-__declspec(noinline) hkReal FUN_00e32ea0(QuantizationType type)
+// src: GUESS 0x00e32ea0 (confidence: low)
+__declspec(noinline) hkReal Object_ComputeValue_00e32ea0(QuantizationType type)
 {
     switch (type)
     {
@@ -71,7 +72,7 @@ __declspec(noinline) hkReal FUN_00e32ea0(QuantizationType type)
     return 0.0f;
 }
 
-double FUN_00e32e50(RotationQuantizationType type);
+double hkaSplineCompressedAnimation_TrackCompressionParams_approximateQuantizationAccuracy(RotationQuantizationType type);
 
 struct TrackCompressionParams
 {
@@ -86,11 +87,12 @@ struct TrackCompressionParams
     hkUint8 m_eScaleQuantizationType;
     hkUint8 m_eFloatQuantizationType;
 
-    hkBool FUN_00e330b0() const;
+    hkBool hkaSplineCompressedAnimation_TrackCompressionParams_isOk() const;
 };
 
 // @fnv 0x00e330b0
-hkBool TrackCompressionParams::FUN_00e330b0() const
+// src: HAVOK_LIB 0x00e330b0
+hkBool TrackCompressionParams::hkaSplineCompressedAnimation_TrackCompressionParams_isOk() const
 {
     hkBool ok = StoreBoolFlag((QuantizationType)m_eTranslationQuantizationType) &&
                     IsValidMode((RotationQuantizationType)m_eRotationQuantizationType) &&
@@ -100,7 +102,7 @@ hkBool TrackCompressionParams::FUN_00e330b0() const
     hkBool tolerancesOk = m_fTranslationTolerance >= 0.0f && m_fRotationTolerance >= 0.0f &&
                               m_fScaleTolerance >= 0.0f && m_fFloatingTolerance >= 0.0f;
 
-    if (m_fTranslationTolerance < FUN_00e32ea0((QuantizationType)m_eTranslationQuantizationType))
+    if (m_fTranslationTolerance < Object_ComputeValue_00e32ea0((QuantizationType)m_eTranslationQuantizationType))
     {
         char assertBuf[512];
         hkOstream ostr(assertBuf, sizeof(assertBuf));
@@ -110,7 +112,7 @@ hkBool TrackCompressionParams::FUN_00e330b0() const
                               ".\\Animation\\SplineCompressed\\hkaSplineCompressedAnimation.cpp", 79);
     }
 
-    if (m_fScaleTolerance < FUN_00e32ea0((QuantizationType)m_eScaleQuantizationType))
+    if (m_fScaleTolerance < Object_ComputeValue_00e32ea0((QuantizationType)m_eScaleQuantizationType))
     {
         char assertBuf[512];
         hkOstream ostr(assertBuf, sizeof(assertBuf));
@@ -120,7 +122,7 @@ hkBool TrackCompressionParams::FUN_00e330b0() const
                               ".\\Animation\\SplineCompressed\\hkaSplineCompressedAnimation.cpp", 84);
     }
 
-    if (m_fFloatingTolerance < FUN_00e32ea0((QuantizationType)m_eFloatQuantizationType))
+    if (m_fFloatingTolerance < Object_ComputeValue_00e32ea0((QuantizationType)m_eFloatQuantizationType))
     {
         char assertBuf[512];
         hkOstream ostr(assertBuf, sizeof(assertBuf));
@@ -131,7 +133,7 @@ hkBool TrackCompressionParams::FUN_00e330b0() const
     }
 
     RotationQuantizationType rq = (RotationQuantizationType)m_eRotationQuantizationType;
-    if (m_fRotationTolerance < FUN_00e32e50(rq) * 0.16260161995887756)
+    if (m_fRotationTolerance < hkaSplineCompressedAnimation_TrackCompressionParams_approximateQuantizationAccuracy(rq) * 0.16260161995887756)
     {
         char assertBuf[512];
         hkOstream ostr(assertBuf, sizeof(assertBuf));

@@ -62,7 +62,7 @@ struct FUN_00d6ce70_Cursor
 {
     FUN_00d6ce70_Matrix* matrix;
 };
-void FUN_00d6ce70(FUN_00d6ce70_Vector* v, FUN_00d6ce70_Scale* s, FUN_00d6ce70_Dest* dest, FUN_00d6ce70_Cursor* cursor);
+void Hkpbuildjacobianfromatoms_UpdateState_00d6ce70(FUN_00d6ce70_Vector* v, FUN_00d6ce70_Scale* s, FUN_00d6ce70_Dest* dest, FUN_00d6ce70_Cursor* cursor);
 struct WriterContext
 {
     int unk00;
@@ -227,7 +227,8 @@ __forceinline float BuildAngular431(const S_00d6cb30_Info* info, const S_00d6cb3
     return diag;
 }
 // @fnv 0x00d6cb30
-void __cdecl FUN_00d6cb30(const S_00d6cb30_Info* info, const S_00d6cb30_QueryIn* in, S_00d6cb30_QueryOut* out)
+// src: GUESS 0x00d6cb30 (confidence: low)
+void __cdecl HkpbuildjacobianfromatomsGsNogs_UpdateState_00d6cb30(const S_00d6cb30_Info* info, const S_00d6cb30_QueryIn* in, S_00d6cb30_QueryOut* out)
 {
     float x = info->unk1C;
     S_00d6cb30_Jacobian* jac = out->m_pQueryResultSchema;

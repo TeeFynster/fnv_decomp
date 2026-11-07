@@ -68,7 +68,7 @@ extern "C"
 #include "../../include/hkpPhysicsContext.h"
 #include "../../include/hkMemoryRouter.h"
 #include "../../include/hkStackMemory.h"
-void __cdecl FUN_00d687c0(void);
+void __cdecl hkpInactiveContactPointViewer_create(void);
 struct Registry_00dd9380
 {
     void* Register(char const*, void(__cdecl*)(void));
@@ -100,7 +100,7 @@ struct FUN_00d68770_cls
     void BaseConstruct(int aParam, int aFlags);
     FUN_00d68770_cls* Construct(int aParam);
 };
-void* __stdcall FUN_00d687b0(char* a1);
+void* __stdcall hkpInactiveContactPointViewer_getIslands(char* a1);
 struct FnvCpu_FUN_00d687c0_CpuBlock;
 struct FnvCpu_FUN_00d687c0_CpuAllocator
 {
@@ -115,14 +115,14 @@ struct FnvCpu_FUN_00d687c0_CpuHolder
     unsigned int unk0c;
     FnvCpu_FUN_00d687c0_CpuAllocator* allocator;
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00d687c0_CpuBlock
 {
     unsigned int unk00;
     unsigned short size;
     FnvCpu_FUN_00d687c0_CpuBlock* Construct(unsigned int value);
 };
-void* __cdecl FUN_00d687c0(unsigned int value);
+void* __cdecl hkpInactiveContactPointViewer_create(unsigned int value);
 extern "C" int DAT_010d203c;
 extern "C" int DAT_010d201c;
 extern "C" int DAT_010d200c;
@@ -144,34 +144,34 @@ struct FUN_00d68840_cls
 
     void* Init(int a);
 };
-void* __stdcall FUN_00d68880(void* pObject);
+void* __stdcall hkpActiveContactPointViewer_getIslands(void* pObject);
 // FUN_00d688f0 : tiny global getter.
 // Reads the 4-byte global at DAT_0126900c and returns it in eax.
 extern int DAT_0126900c;
-int __cdecl FUN_00d688f0();
+int __cdecl Runtime_GetDAT0126900c();
 extern char DAT_0126905c;
-void* __cdecl FUN_00d6ade0();
+void* __cdecl Object_GetGlobalObjectAddress_00d6ade0();
 struct S_00d6adf0_Obj
 {
     virtual void vfn00(int arg);
 };
-void __cdecl FUN_00d6adf0(S_00d6adf0_Obj* obj);
+void __cdecl Runtime_ForwardCall_00d6adf0(S_00d6adf0_Obj* obj);
 extern int DAT_0126908c;
-int* __cdecl FUN_00d6ae00();
+int* __cdecl Object_GetGlobalObjectAddress_00d6ae00();
 struct FUN_00c90e00_Obj
 {
     void __thiscall FUN_00c90e00(int value);
 };
-void __cdecl FUN_00d6ae90(FUN_00c90e00_Obj* pObj, int iValue);
+void __cdecl Runtime_ProcessState_00d6ae90(FUN_00c90e00_Obj* pObj, int iValue);
 // 13-byte cdecl forwarder: loads the object pointer, fetches its vtable and
 // calls the first virtual slot with a literal 0 argument.
 struct VtblForwarder
 {
     virtual int v0(int);
 };
-int __cdecl FUN_00d6aeb0(VtblForwarder* p);
+int __cdecl Runtime_ForwardCall_00d6aeb0(VtblForwarder* p);
 extern int DAT_01269104;
-void* __cdecl FUN_00d6aee0();
+void* __cdecl Object_GetGlobalObjectAddress_00d6aee0();
 struct ResultFlag
 {
     bool value;
@@ -228,7 +228,7 @@ struct FUN_00d76f90_cls
     int unk00;
     int unk04;
     Inner* m_08;
-    void FUN_00d76f90();
+    void ForwardCall_00d76f90();
 };
 inline void* operator new(unsigned int, void* pvMem)
 {
@@ -284,25 +284,25 @@ struct D60590Object
     int unk04;
     D60590Callback* callback;
 
-    void FUN_00d60590();
+    void ReleaseReference_00d60590();
 };
 void __stdcall WriteSwapped(char**, int, int);
 void __stdcall FUN_00d60900(char* p);
 struct FUN_00d60600_class
 {
     void __thiscall WriteSwapped(int a, int b, int c);
-    void __thiscall FUN_00d60b20(int a, int b);
+    void __thiscall WriteSwapped_Thunk(int a, int b);
 };
 struct FUN_00d61470_Class
 {
-    void* FUN_00d61470();
+    void* ReturnSelf();
 };
-char* __cdecl FUN_00cb1130(char* pcHaystack, const char* pcNeedle);
+char* __cdecl hkString_strStr(char* pcHaystack, const char* pcNeedle);
 inline char toLowerD614(char c)
 {
     return (c >= 'A' && c <= 'Z') ? c - 'A' + 'a' : c;
 }
-int __cdecl FUN_00cb1130(int a1, int a2);
+int __cdecl hkString_strStr(int a1, int a2);
 struct FUN_00d61520_cls
 {
     int unk00;
@@ -335,7 +335,7 @@ struct FUN_00d61680_Obj
     int unk00;
     void __thiscall FUN_00d61680(unsigned int param);
 };
-int __cdecl FUN_00cb0fa0(int, int);
+int __cdecl hkString_strCmp(int, int);
 void __cdecl CompareStringsCaseInsensitive(void* pvOwner, int iValue);
 struct FUN_00d616a0_cls
 {
@@ -344,15 +344,15 @@ struct FUN_00d616a0_cls
     void FUN_00d616a0(int iValue);
 };
 int __stdcall FUN_00d61680(unsigned int value);
-int __stdcall FUN_00d616e0(unsigned int value);
-int __cdecl FUN_00cb10d0(int s);
+int __stdcall Object_ForwardCall_00d616e0(unsigned int value);
+int __cdecl hkString_strLen(int s);
 struct FUN_00d61700_cls
 {
     char* m_00;
     int m_04;
     int EndsWith(char* s);
 };
-int __cdecl FUN_00cb10d0(const char* str);
+int __cdecl hkString_strLen(const char* str);
 static inline int tolower_custom(char c)
 {
     if ((unsigned char)(c - 'A') <= 25)
@@ -381,11 +381,11 @@ struct hkMathD618
 };
 __forceinline hkMemoryAllocator& hkContainerTempAllocator::get(void*)
 {
-    return static_cast<hkMemoryRouter*>(FUN_00c85750())->temp();
+    return static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->temp();
 }
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return static_cast<hkMemoryRouter*>(FUN_00c85750())->heap();
+    return static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->heap();
 }
 template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
 {
@@ -411,8 +411,8 @@ template <typename T, typename Allocator> __forceinline hkArray<T, Allocator>::~
 {
     clearAndDeallocate();
 }
-void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-void __cdecl FUN_00cb1260(void* pvDst, const void* pvSrc, int iNumBytes) throw();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+void __cdecl hkString_memCpy(void* pvDst, const void* pvSrc, int iNumBytes) throw();
 template <class T, int N> class hkInplaceArrayD61B
 {
   public:
@@ -443,12 +443,12 @@ template <class T, int N> class hkInplaceArrayD61B
         {
             int iCap2 = 2 * iCap;
             int iNewCap = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewCap, sizeof(T));
+            hkArrayUtil__reserve(kAlloc, this, iNewCap, sizeof(T));
         }
     }
     __forceinline void SetSizeAndGrow(int n)
     {
-        reserve(static_cast<hkMemoryRouter*>(FUN_00c85750())->temp(), n);
+        reserve(static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->temp(), n);
         m_iElementCount = n;
     }
 };
@@ -459,8 +459,8 @@ class FUN_00d61b10
 
     FUN_00d61b10(const char* pcString, int iLength) throw();
 };
-int __cdecl FUN_00cb10d0(int);
-void* __cdecl FUN_00c85750();
+int __cdecl hkString_strLen(int);
+void* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00d62630_Obj
 {
     void FUN_00d62630(int a1, int a2, int a3, int a4);
@@ -471,18 +471,18 @@ struct FUN_00d61df0_cls
     int unk04;
     FUN_00d61df0_cls* FUN_00d61df0(int arg);
 };
-int __cdecl FUN_00cb10d0(const char* pcString) throw();
-void __cdecl FUN_00cb1260(void* pvDst, const void* pvSrc, int iNumBytes) throw();
-void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+int __cdecl hkString_strLen(const char* pcString) throw();
+void __cdecl hkString_memCpy(void* pvDst, const void* pvSrc, int iNumBytes) throw();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
 namespace hkRouterD620 {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
-void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-void __cdecl FUN_00d2caa0(void* pvDst, void* pvSrc, unsigned int uiNumBytes);
-int __cdecl FUN_00cb10d0(int value);
-void* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(int value1, int value2, int value3, int value4);
-void __cdecl FUN_00d2caa0(void* value1, unsigned int value2, unsigned int value3);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+void __cdecl hkMemUtil_memCpy_00d2caa0(void* pvDst, void* pvSrc, unsigned int uiNumBytes);
+int __cdecl hkString_strLen(int value);
+void* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(int value1, int value2, int value3, int value4);
+void __cdecl hkMemUtil_memCpy_00d2caa0(void* value1, unsigned int value2, unsigned int value3);
 struct D62080_Audio
 {
     int unk00;
@@ -498,7 +498,7 @@ struct D62080_Object
 
     void __thiscall FUN_00d62080(int param2, int param3);
 };
-extern int __cdecl FUN_00cb10d0(int value);
+extern int __cdecl hkString_strLen(int value);
 struct FUN_00d62100_Class
 {
     int __thiscall FUN_00d62630(int context, int first, int second, int third);
@@ -573,7 +573,7 @@ struct FUN_00d62ef0_cls
     int unk24;
     unsigned char unk28;
 
-    FUN_00d62ef0_cls* FUN_00d62ef0(int aParam, unsigned char aValue);
+    FUN_00d62ef0_cls* UpdateState_00d62ef0(int aParam, unsigned char aValue);
 };
 extern int DAT_010d1720;
 extern int DAT_010d1700;
@@ -596,7 +596,7 @@ struct HeapBlockMetadata
     unsigned int flags;
     unsigned short size;
     unsigned short reserved;
-    HeapBlockMetadata* FUN_00d62ef0(void* data, unsigned int enabled);
+    HeapBlockMetadata* UpdateState_00d62ef0(void* data, unsigned int enabled);
 };
 void* __cdecl AllocateRecordWithData(void* data);
 struct Allocator_d632c0
@@ -624,9 +624,9 @@ struct Base2_d632c0
 };
 struct Obj_d632c0 : Base1_d632c0, Base2_d632c0
 {
-    Obj_d632c0* FUN_00d63280(int a, int b);
+    Obj_d632c0* hkpWorldMemoryViewer_hkpWorldMemoryViewer(int a, int b);
 };
-Base2_d632c0* FUN_00d632c0(int aiValue);
+Base2_d632c0* hkpWorldMemoryViewer_create(int aiValue);
 struct hkContainerD633
 {
     int unk00;
@@ -675,7 +675,7 @@ struct hkObjD633
     hkListenerD633 m_kListener;
     hkContainerD633* m_container;
 
-    void FUN_00d63300();
+    void NotifyContainerItems();
 };
 class FUN_00ddf050_cls
 {
@@ -693,8 +693,8 @@ class FUN_00ddf050_cls
     int m_iElementCount;
 
     void ClearContainer() throw();
-    void FUN_00ddf030(int i) throw();
-    void FUN_00ddf040() throw();
+    void Clear_Thunk(int i) throw();
+    void Object_Clear_Thunk() throw();
 
     int GetLogicalSize() const
     {
@@ -746,8 +746,8 @@ class FUN_00d63370_class
     void UpdatePhysicsDebugDisplay(float fFrameTime) throw();
 };
 extern int DAT_01268fc8;
-int __cdecl FUN_00d63420();
-void* __cdecl FUN_00c85750();
+int __cdecl Object_GetDAT_01268fc8_00d63420();
+void* __cdecl hkMemoryRouter_getInstance();
 class FUN_00d63340
 {
   public:
@@ -757,7 +757,7 @@ class FUN_00d63340
 
     static void operator delete(void* p) throw()
     {
-        ((hkMemoryRouter*)FUN_00c85750())
+        ((hkMemoryRouter*)hkMemoryRouter_getInstance())
             ->heap()
             .blockFree(p, static_cast<FUN_00d63340*>(p)->m_usMemSizeAndFlags);
     }
@@ -830,14 +830,14 @@ struct FnvCpu_FUN_00d645f0_CpuHolder
     unsigned int unk0c;
     FnvCpu_FUN_00d645f0_CpuAllocator* allocator;
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00d645f0_CpuBlock
 {
     unsigned int unk00;
     unsigned short size;
     FnvCpu_FUN_00d645f0_CpuBlock* FUN_00d64260(unsigned int value);
 };
-void* __cdecl FUN_00d645f0(unsigned int value);
+void* __cdecl hkpSweptTransformDisplayViewer_create(unsigned int value);
 struct FUN_00d65250_cls
 {
     int unk00;
@@ -867,7 +867,7 @@ struct FUN_00d65250_cls
     unsigned char unk60;
     unsigned char unk61;
 
-    void __thiscall FUN_00d65250(unsigned char value);
+    void __thiscall SetUnk61(unsigned char value);
 };
 struct FnvCpu_FUN_00d65260_CpuObject
 {
@@ -898,7 +898,7 @@ struct FnvCpu_FUN_00d65260_CpuObject
     unsigned int unk60;
     unsigned char unk64;
     unsigned char value;
-    void FUN_00d65260(unsigned char arg0);
+    void SetValue_00d65260(unsigned char arg0);
 };
 struct FnvCpu_FUN_00d65270_CpuObject
 {
@@ -929,7 +929,7 @@ struct FnvCpu_FUN_00d65270_CpuObject
     unsigned char unk60;
     unsigned char unk61;
     unsigned char value;
-    void FUN_00d65270(unsigned char arg0);
+    void SetValue(unsigned char arg0);
 };
 struct FUN_00d65280_cls
 {
@@ -962,7 +962,7 @@ struct FUN_00d65280_cls
     char unk62;
     bool m_63;
 
-    void FUN_00d65280(bool bValue);
+    void SetField63_00d65280(bool bValue);
 };
 struct FnvCpu_FUN_00d65290_CpuObject
 {
@@ -992,11 +992,11 @@ struct FnvCpu_FUN_00d65290_CpuObject
     unsigned int unk5c;
     unsigned int unk60;
     unsigned char value;
-    void FUN_00d65290(unsigned char arg0);
+    void SetValue(unsigned char arg0);
 };
-void __cdecl FUN_00d6add0();
-extern "C" void __cdecl FUN_00d72e90();
-void __cdecl FUN_00d73380();
+void __cdecl nullsub_103();
+extern "C" void __cdecl hkMathUtil_decompose4x4ColTransform();
+void __cdecl Object_HkMathUtil_decompose4x4ColTransform_Thunk();
 class FUN_00d733e0
 {
   public:
@@ -1013,7 +1013,7 @@ struct FUN_00d73400_cls
     int unk08;
     int unk0C;
 
-    void FUN_00d73400();
+    void UpdateFields_00d73400();
 };
 extern hkError* DAT_01268360;
 struct hkpTransformCollapseUtilResultsD734
@@ -1027,14 +1027,14 @@ struct hkpTransformCollapseUtilResultsD734
 };
 struct FnvCpu_FUN_00d76d80_CpuTarget
 {
-    void FUN_00d81340();
+    void ProcessEntries_00d81340();
 };
 struct FnvCpu_FUN_00d76d80_CpuOwner
 {
     unsigned int unk00;
     unsigned int unk04;
     FnvCpu_FUN_00d76d80_CpuTarget* target;
-    void FUN_00d76d80();
+    void ForwardCall_00d76d80();
 };
 extern int DAT_010d14f8;
 struct hkAllocatorD608
@@ -1065,7 +1065,7 @@ struct FUN_00d608a0
     unsigned char mode;
     FUN_00d608a0(int first, int second, unsigned char mode);
 };
-int __cdecl FUN_00cb0fa0(int, int);
+int __cdecl hkString_strCmp(int, int);
 struct R
 {
     volatile char value;
@@ -1078,7 +1078,7 @@ struct S
     R IsLessThan(int other) const;
 };
 namespace hkRouterD619 {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 void __cdecl ResizeAudioStream(hkMemoryAllocator& kAlloc, void* pArray, int iElemSize);
 template <class T> __forceinline void constructWithCopyD619(T* p, int n, const T& t)
@@ -1109,10 +1109,10 @@ struct FUN_00d61a50_cls
     int* FUN_00d61a50(int value);
 };
 namespace fnvc_adapt {
-char* __cdecl FUN_00cb10d0(int value);
+char* __cdecl hkString_strLen(int value);
 }
-void __cdecl FUN_00c908c0(int allocator, FUN_00d61a50_cls* array, int capacity, int value);
-void __cdecl FUN_00cb1260(int* data, int value, char* source);
+void __cdecl hkArrayUtil__reserve(int allocator, FUN_00d61a50_cls* array, int capacity, int value);
+void __cdecl hkString_memCpy(int* data, int value, char* source);
 template <class T> __forceinline void hkArrayCopyD61B8(T* pDst, const T* pSrc, int n)
 {
     for (int i = 0; i < n; ++i)
@@ -1134,7 +1134,7 @@ template <class T, int N> class hkInplaceArrayD61B8
     __forceinline hkInplaceArrayD61B8(const hkInplaceArrayD61B8& kOther) throw()
         : m_data(m_kStorage), m_iElementCount(0), m_iCapacityState(N | 0x80000000)
     {
-        hkMemoryAllocator& kAlloc = static_cast<hkMemoryRouter*>(FUN_00c85750())->temp();
+        hkMemoryAllocator& kAlloc = static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->temp();
         if (getCapacity() < kOther.m_iElementCount)
         {
             if ((m_iCapacityState & 0x80000000) == 0)
@@ -1185,11 +1185,11 @@ struct FUN_00d61cc0_t
 };
 void __cdecl ArrayReserveImpl(void*, void*, int, int);
 namespace hkRouterD61F {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
-void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
 namespace hkRouterD62 {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 // 0x00d62f20 returns the +8 process interface of the world snapshot viewer (ctor 0x00d62ef0), not a collision agent.
 class WorldSnapshotProcessInterface
@@ -1204,8 +1204,8 @@ class FUN_00d62ef0 : public hkReferencedObject, public WorldSnapshotProcessInter
 
     int unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28;
 };
-WorldSnapshotProcessInterface* __cdecl FUN_00d62f20(void* contactMgr);
-static void FUN_00d6c1a0(int* piValue);
+WorldSnapshotProcessInterface* __cdecl hkpWorldSnapshotViewer_createNative(void* contactMgr);
+static void Object_UpdateFields_00d6c1a0(int* piValue);
 void E6C1A0Adjust(int* piValue);
 // FUN_00d73400's body must be in-TU so VC9 knows it clobbers only eax:
 // that is what lets the ctor keep `this` live in ECX across the call
@@ -1217,9 +1217,10 @@ struct Z0
     int m_iUnk04;
     int m_iUnk08;
     int m_iUnk0C;
-    void FUN_00d73400();
+    void UpdateFields_00d73400();
 };
-__declspec(noinline) void Z0::FUN_00d73400()
+// src: GUESS 0x00d73400 (confidence: low)
+__declspec(noinline) void Z0::UpdateFields_00d73400()
 {
     m_iUnk00 = 0;
     m_iUnk04 = 0;
@@ -1246,7 +1247,7 @@ struct Node
 void __cdecl AssignNodeFlags(Node** nodes, int count, unsigned seed);
 struct FUN_00d7e740_cls
 {
-    int FUN_00d7e740(int iArg0, int iArg1, bool iFlag, int iArg2);
+    int hkgpConvexHullImpl_generateIndexedFaces_unsigned_char_unsigned_short(int iArg0, int iArg1, bool iFlag, int iArg2);
 };
 struct FUN_00d76c20_cls
 {
@@ -1261,13 +1262,13 @@ struct CollisionHitFlag
 {
     int m_bHasHit;
 };
-void __cdecl FUN_00d79250(void* a, void* b, CollisionHitFlag* out, int flags, float f);
-bool __cdecl FUN_00d794e0(void* a, void* b, CollisionHitFlag* out, float f);
+void __cdecl hkgpConvexHull_booleanSplit(void* a, void* b, CollisionHitFlag* out, int flags, float f);
+bool __cdecl hkgpConvexHull_booleanIntersection(void* a, void* b, CollisionHitFlag* out, float f);
 static int ToLowerCase(char c);
 volatile char g_d61430_c;
 char g_d61430_sink;
 void d61430_caller();
-static int FUN_00d61450(char c);
+static int toupper_00d61450(char c);
 volatile char g_d61450_c;
 char g_d61450_sink;
 void d61450_caller();
@@ -1280,13 +1281,13 @@ struct D6C1B0Owner
 extern "C" D6C180Command** d6c1b0_cursor_src(void);
 volatile int g_d6c1b0_a1;
 D6C1B0Owner* volatile g_d6c1b0_owner;
-static void FUN_00d6c1b0(D6C180Command** ppkCursor, D6C1B0Owner* pOwner, int a1);
+static void callBridgeFromAtom(D6C180Command** ppkCursor, D6C1B0Owner* pOwner, int a1);
 void d6c1b0_caller(void);
 
 extern "C" LocalM128 g_d6c1d0_src[4];
 extern "C" LocalM128 g_d6c1d0_mat[4];
 extern "C" LocalM128 g_d6c1d0_out[4];
-static void FUN_00d6c1d0(LocalM128* __restrict out, const LocalM128* __restrict a, const LocalM128* __restrict b);
+static void Runtime_MultiplyAffineTransformColumns(LocalM128* __restrict out, const LocalM128* __restrict a, const LocalM128* __restrict b);
 void fnv_probe_d6c1d0();
 extern float DAT_011b6924;
 extern float DAT_011b6928;
@@ -1299,22 +1300,22 @@ struct IntegratorD720
     float unk0c;
     float state;
 };
-static float FUN_00d720a0(IntegratorD720* self, float input, float step);
+static float Object_ComputeValue_00d720a0(IntegratorD720* self, float input, float step);
 IntegratorD720* volatile integratorD720;
 volatile float inputD720, stepD720, resultD720;
 void invokeD720();
 struct FUN_00d74dc0_cls
 {
-    void* FUN_00d74dc0();
+    void* GetFieldAtOffset10Address_00d74dc0();
 };
 #include <stdarg.h>
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* getRouterD624()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
-void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-int __cdecl FUN_00cb0f50(char* pcBuf, int iBufSize, const char* pcFormat, va_list kArgs) throw();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+int __cdecl hkString_vsnprintf(char* pcBuf, int iBufSize, const char* pcFormat, va_list kArgs) throw();
 // 0x00d62420 formats text then calls string-buffer append 0x00d62080 (also bound to InlineStorageString).
 class FormattedStringBuffer
 {
@@ -1351,9 +1352,9 @@ struct Node_d6c580
     char pad[0x12];
     Node_d6c580* m_parent;
 };
-static Node_d6c580* FUN_00d6c580(Node_d6c580* n);
+static Node_d6c580* Object_ProcessEntries_00d6c580(Node_d6c580* n);
 Node_d6c580* zz_probe_d6c580(Node_d6c580* n);
-static void FUN_00d6c590(int* p);
+static void Runtime_UpdateState_00d6c590(int* p);
 void zz_probe_d6c590(int* p);
 class RotationColumns
 {
@@ -1435,7 +1436,7 @@ static __forceinline void RotateDirections(const RotationColumns& rotation, cons
         MultiplyDirection(destination[i], saved, source[i]);
     } while (--i >= 0);
 }
-static void FUN_00d6c3c0(const LocalOrientations& local, const ConstraintQuery& input, RigidTransform& outputA,
+static void Object_RotateBodyVectorBundles(const LocalOrientations& local, const ConstraintQuery& input, RigidTransform& outputA,
                          RigidTransform& outputB);
 void RotateLocalFrames(const LocalOrientations& local, const ConstraintQuery& input, RigidTransform& outputA,
                        RigidTransform& outputB);
@@ -1453,9 +1454,9 @@ struct D73390Data
     float value2[4];
     float value3[4];
 
-    void FUN_00de8f10();
+    void hkMatrix4_resetFourthRow();
 };
-void __cdecl FUN_00d73390(D73390Source* source, int count);
+void __cdecl hkMatrix4_resetFourthRow_ProcessState_00d73390(D73390Source* source, int count);
 inline char hkToUpperD618(char c)
 {
     return (c >= 'a' && c <= 'z') ? c - ('a' - 'A') : c;
@@ -1483,7 +1484,7 @@ struct TransformPair
 {
     LocalM128 m_row[4];
 };
-static void FUN_00d6c240(TransformPair* dest, const LocalM128* src, const TransformContext* ctx, LocalM128* out);
+static void Object_TransformVectorBundles(TransformPair* dest, const LocalM128* src, const TransformContext* ctx, LocalM128* out);
 TransformPair* volatile inputDest;
 const LocalM128* volatile inputSource;
 const TransformContext* volatile inputContext;
@@ -1509,7 +1510,7 @@ struct TransformOutputC320
     TransformOutputC320(RigidTransform* value) : p(value)
     {}
 };
-static void __cdecl FUN_00d6c320(const PivotsC320* pivots, const ConstraintQuery* bodies, TransformOutputC320 outA,
+static void __cdecl Object_TransformBodyPivots(const PivotsC320* pivots, const ConstraintQuery* bodies, TransformOutputC320 outA,
                                  TransformOutputC320 outB);
 const ConstraintQuery* volatile bodiesSourceC320;
 const PivotsC320* volatile pivotsSourceC320;
@@ -1729,7 +1730,8 @@ __forceinline void hkQuaternion::operator=(const hkQuaternion& q)
 }
 
 extern const hkQuadReal DAT_01017d20;
-inline void hkQuaternion::FUN_00d6bec0(const hkQuaternion& target, hkVector4& result) const
+// src: GUESS 0x00d6bec0 (confidence: low)
+inline void hkQuaternion::UpdateFields_00d6bec0(const hkQuaternion& target, hkVector4& result) const
 {
     result.setCross(getImag(), target.getImag());
     result.subMul4(target.getImag().getSimdAt(3), getImag());
@@ -1786,7 +1788,7 @@ __forceinline void hkQsTransform::SetProduct(const hkQsTransform& kLeft, const h
     hkVector4 kMovedTrans;
     kMovedTrans.SetRotatedDirection(kLeft.m_rotation, kRight.m_vTranslation);
     m_vTranslation.setAdd4(kLeft.m_vTranslation, kMovedTrans);
-    m_rotation.FUN_00c66320(kLeft.m_rotation, kRight.m_rotation);
+    m_rotation.setMul(kLeft.m_rotation, kRight.m_rotation);
     m_vScale.setMul4(kLeft.m_vScale, kRight.m_vScale);
 }
 
@@ -1840,7 +1842,7 @@ __forceinline void hkStackMemory::deallocateStack(void* p)
 }
 __forceinline hkMemoryRouter& hkRouterInstance()
 {
-    return *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    return *static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
 }
 
 template <typename T> class HkDynamicArray
@@ -1908,7 +1910,8 @@ struct Output
     hkReal m_fOutputValue;
 };
 
-static __declspec(noinline) void FUN_00d6b510(const hkQsTransform* poseLocalSpace, const IntegerTriple& body,
+// src: GUESS 0x00d6b510 (confidence: low)
+static __declspec(noinline) void hkQuaternion_ProcessEntries_00d6b510(const hkQsTransform* poseLocalSpace, const IntegerTriple& body,
                                               const ControlData* controlPalette, const hkQsTransform& worldFromRoot,
                                               BoneAndCenterOfMassPose* cache)
 {
@@ -1934,7 +1937,7 @@ static __declspec(noinline) void FUN_00d6b510(const hkQsTransform* poseLocalSpac
             worldFromParentBody.m_rotation = parentBody->getRotation();
             hkQsTransform blended;
             blended.SetProduct(worldFromParentBody, poseLocalSpace[i]);
-            rotation.FUN_00cb2850(rotation, blended.getRotation(), hierarchyGain);
+            rotation.D3D_ComputeClearColor(rotation, blended.getRotation(), hierarchyGain);
             position.setInterpolate4(position, blended.getTranslation(), hierarchyGain);
         }
         hkpRigidBody* rigidBody = body.m_ppRigidBodies[i];
@@ -1947,7 +1950,8 @@ static __declspec(noinline) void FUN_00d6b510(const hkQsTransform* poseLocalSpac
     }
 }
 
-static __declspec(noinline) void FUN_00d6b330(hkReal maxLength, hkVector4& v)
+// src: GUESS 0x00d6b330 (confidence: high)
+static __declspec(noinline) void Hkprigidbodycentreofmassviewer_ClampVectorLength(hkReal maxLength, hkVector4& v)
 {
     const hkReal lengthSquared = v.lengthSquared3();
     const hkReal maxSquared = maxLength * maxLength;
@@ -1958,7 +1962,8 @@ static __declspec(noinline) void FUN_00d6b330(hkReal maxLength, hkVector4& v)
     }
 }
 
-static __declspec(noinline) hkReal FUN_00d6b3c0(hkReal maxVelocity, hkReal maxDistance, hkVector4& v)
+// src: GUESS 0x00d6b3c0 (confidence: low)
+static __declspec(noinline) hkReal Object_ProcessAndReturnValue_00d6b3c0(hkReal maxVelocity, hkReal maxDistance, hkVector4& v)
 {
     const hkReal lengthSquared = v.lengthSquared3();
     const hkReal maxSquared = maxVelocity * maxVelocity;
@@ -1981,12 +1986,13 @@ static __declspec(noinline) hkReal FUN_00d6b3c0(hkReal maxVelocity, hkReal maxDi
 }
 
 // @fnv 0x00d6b8e0
-__declspec(noinline) void __cdecl FUN_00d6b8e0(hkReal m_fTimeStep, const TransformReferenceData& pose, const IntegerTriple& body,
+// src: COMMUNITY 0x00d6b8e0
+__declspec(noinline) void __cdecl hkaKeyFrameHierarchyUtility_applyKeyFrame(hkReal m_fTimeStep, const TransformReferenceData& pose, const IntegerTriple& body,
                                                const ControlData* controlPalette, Output* output)
 {
     HkDynamicArray<BoneAndCenterOfMassPose> matrixCache;
     matrixCache.init(body.m_iRigidBodyCount);
-    FUN_00d6b510(pose.m_pReferencedTransform, body, controlPalette, pose.m_kTransform, &matrixCache[0]);
+    hkQuaternion_ProcessEntries_00d6b510(pose.m_pReferencedTransform, body, controlPalette, pose.m_kTransform, &matrixCache[0]);
 
     const hkReal invDeltaTime = 1.0f / m_fTimeStep;
     const hkSimdReal invDeltaTimeS = invDeltaTime;
@@ -2042,7 +2048,7 @@ __declspec(noinline) void __cdecl FUN_00d6b8e0(hkReal m_fTimeStep, const Transfo
         {
             hkVector4 linearPosCorrection;
             linearPosCorrection.setMul4(hkSimdReal(positionGain), linearDiff);
-            FUN_00d6b330(controlData.m_fPositionMaxLinearVelocity, linearPosCorrection);
+            Hkprigidbodycentreofmassviewer_ClampVectorLength(controlData.m_fPositionMaxLinearVelocity, linearPosCorrection);
             linearNew.add4(linearPosCorrection);
         }
         if (snapGain != 0.0f)
@@ -2056,7 +2062,7 @@ __declspec(noinline) void __cdecl FUN_00d6b8e0(hkReal m_fTimeStep, const Transfo
             snapVelocity.sub4(linearNew);
             snapVelocity.mul4(hkSimdReal(snapGain));
             const hkReal maxDistance = controlData.m_fSnapMaxLinearDistance * invDeltaTime * snapGain;
-            const hkReal stress = FUN_00d6b3c0(controlData.m_fSnapMaxLinearVelocity, maxDistance, snapVelocity);
+            const hkReal stress = Object_ProcessAndReturnValue_00d6b3c0(controlData.m_fSnapMaxLinearVelocity, maxDistance, snapVelocity);
             if (output)
                 output[i].m_fOutputValue = stress;
             linearNew.add4(snapVelocity);
@@ -2068,9 +2074,9 @@ __declspec(noinline) void __cdecl FUN_00d6b8e0(hkReal m_fTimeStep, const Transfo
         hkVector4 angularDiff, angularRate, angularAccel;
         {
             const hkQuaternion& desiredRotation = cache.m_comPose.getRotation();
-            rigidBody->getRotation().FUN_00d6bec0(desiredRotation, angularDiff);
+            rigidBody->getRotation().UpdateFields_00d6bec0(desiredRotation, angularDiff);
             angularDiff.mul4(invDeltaTimeS);
-            workElem.m_kOrientation.FUN_00d6bec0(desiredRotation, angularRate);
+            workElem.m_kOrientation.UpdateFields_00d6bec0(desiredRotation, angularRate);
             workElem.m_kOrientation = desiredRotation;
             angularRate.mul4(invDeltaTimeS);
             angularAccel.setSub4(angularRate, workElem.m_kThirdVector);
@@ -2090,30 +2096,30 @@ __declspec(noinline) void __cdecl FUN_00d6b8e0(hkReal m_fTimeStep, const Transfo
         {
             hkVector4 angularPosCorrection;
             angularPosCorrection.setMul4(hkSimdReal(positionGain), angularDiff);
-            FUN_00d6b330(controlData.m_fPositionMaxAngularVelocity, angularPosCorrection);
+            Hkprigidbodycentreofmassviewer_ClampVectorLength(controlData.m_fPositionMaxAngularVelocity, angularPosCorrection);
             angularNew.add4(angularPosCorrection);
         }
         if (snapGain != 0.0f)
         {
             hkVector4 snapVelocity;
-            rigidBody->getRotation().FUN_00d6bec0(cache.m_bonePose.getRotation(), snapVelocity);
+            rigidBody->getRotation().UpdateFields_00d6bec0(cache.m_bonePose.getRotation(), snapVelocity);
             snapVelocity.mul4(invDeltaTimeS);
             snapVelocity.sub4(angularNew);
             snapVelocity.mul4(hkSimdReal(snapGain));
             const hkReal maxDistance = controlData.m_fSnapMaxAngularDistance * invDeltaTime * snapGain;
-            const hkReal stress = FUN_00d6b3c0(controlData.m_fSnapMaxAngularVelocity, maxDistance, snapVelocity);
+            const hkReal stress = Object_ProcessAndReturnValue_00d6b3c0(controlData.m_fSnapMaxAngularVelocity, maxDistance, snapVelocity);
             if (output)
                 output[i].m_fOutputValue += stress;
             angularNew.add4(snapVelocity);
         }
         if (!rigidBody->getAngularVelocity().equals4(angularNew, 0.001f))
-            rigidBody->FUN_00561800(angularNew);
+            rigidBody->hkpRigidBody_setAngularVelocity(angularNew);
     }
     matrixCache.destroy();
 }
 
 void(__cdecl* volatile retainKeyFrameEntry)(hkReal, const TransformReferenceData&, const IntegerTriple&, const ControlData*,
-                                            Output*) = &FUN_00d6b8e0;
+                                            Output*) = &hkaKeyFrameHierarchyUtility_applyKeyFrame;
 
 class ScalarR2
 {
@@ -2231,10 +2237,10 @@ class FUN_004b4ab0_Class
     }
     __forceinline void _setRotatedDir(const RotationR2& r, const FUN_004b4ab0_Class& v);
     __forceinline void _setMul3(const MatrixR2& r, const FUN_004b4ab0_Class& v);
-    void FUN_004b4ab0(int r, int v);
+    void hkVector4_setRotatedInverseDir(int r, int v);
     __forceinline void setRotatedInverseDir(const RotationR2& r, const FUN_004b4ab0_Class& v)
     {
-        FUN_004b4ab0((int)&r, (int)&v);
+        hkVector4_setRotatedInverseDir((int)&r, (int)&v);
     }
 };
 typedef FUN_004b4ab0_Class VectorR2;
@@ -2267,7 +2273,8 @@ __forceinline void VectorR2::_setMul3(const MatrixR2& r, const VectorR2& v)
     LocalM128 pz = _mm_mul_ps(r.getColumn(2).value, sz);
     value = _mm_add_ps(_mm_add_ps(px, py), pz);
 }
-inline void VectorR2::FUN_004b4ab0(int r, int v)
+// src: COMMUNITY 0x004b4ab0
+inline void VectorR2::hkVector4_setRotatedInverseDir(int r, int v)
 {
     const RotationR2& m = *reinterpret_cast<const RotationR2*>(r);
     LocalM128 low = _mm_unpacklo_ps(m.getColumn(0), m.getColumn(1));
@@ -2412,7 +2419,7 @@ static __forceinline void buildRow(const BodyR2* a, const BodyR2* b, const Vecto
     float p = diff.dot3(axis);
     row.linear(3) = p * scale;
 }
-static __declspec(noinline) void FUN_00d6c630(const VectorR2& pa, const VectorR2& pb, const QueryR2& ctx,
+static __declspec(noinline) void Runtime_ProcessEntries_00d6c630(const VectorR2& pa, const VectorR2& pb, const QueryR2& ctx,
                                               OutputR2& cursor, float mode, float dt);
 const QueryR2* volatile ballSocketContext;
 VectorR2* volatile ballSocketPivotA;
@@ -2421,11 +2428,12 @@ OutputR2* volatile ballSocketOutput;
 volatile float ballSocketImpulse, ballSocketStep;
 void BuildBallSocketRows()
 {
-    FUN_00d6c630(*ballSocketPivotA, *ballSocketPivotB, *ballSocketContext, *ballSocketOutput, ballSocketImpulse,
+    Runtime_ProcessEntries_00d6c630(*ballSocketPivotA, *ballSocketPivotB, *ballSocketContext, *ballSocketOutput, ballSocketImpulse,
                  ballSocketStep);
 }
 // @fnv 0x00d6c630
-static __declspec(noinline) void FUN_00d6c630(const VectorR2& pa, const VectorR2& pb, const QueryR2& ctx,
+// src: GUESS 0x00d6c630 (confidence: low)
+static __declspec(noinline) void Runtime_ProcessEntries_00d6c630(const VectorR2& pa, const VectorR2& pb, const QueryR2& ctx,
                                               OutputR2& cursor, float mode, float dt)
 {
     const BodyR2* a = ctx.m_pBodyA;
@@ -2481,17 +2489,17 @@ struct BoolD72
 struct Matrix3D72
 {
     LocalM128 x, y, z;
-    void FUN_00cd4f10(float tolerance);
+    void invert_00cd4f10(float tolerance);
     void FUN_00cd4b60();
     void FUN_00cd5140(const Matrix3D72& other);
     void FUN_00cd4d40(const LocalM128& factor, const Matrix3D72& other);
-    bool& FUN_00cd4e00(bool& result, const Matrix3D72& other, float tolerance);
+    bool& CompareMatrixColumnsWithinTolerance(bool& result, const Matrix3D72& other, float tolerance);
 };
 struct QuaternionD72
 {
     LocalM128 value;
     __declspec(noalias) void FUN_00cb26e0(const Matrix3D72& rotation);
-    __declspec(noalias) void FUN_005611c0();
+    __declspec(noalias) void normalize_005611c0();
 };
 __forceinline hkTransform::hkTransform() {}
 // 0x00cb20b0 imports column-major floats into hkTransform; the shared header lacks this method.
@@ -2536,8 +2544,8 @@ struct Matrix4D72
         };
     };
     __declspec(noalias) void CopyFromFloats(const float* source);
-    __declspec(noalias) void FUN_00de8f10();
-    __declspec(noalias) void FUN_00de8da0(const Matrix4D72& left, const Matrix4D72& right);
+    __declspec(noalias) void hkMatrix4_resetFourthRow();
+    __declspec(noalias) void hkMatrix4_setMul(const Matrix4D72& left, const Matrix4D72& right);
 };
 struct DecompositionD72
 {
@@ -2612,13 +2620,14 @@ struct OutputD72
     {}
 };
 // @fnv 0x00d72e90
-void __cdecl FUN_00d72e90(const float* source, OutputD72 output)
+// src: XBOX_PDB 0x00d72e90
+void __cdecl hkMathUtil_decompose4x4ColTransform(const float* source, OutputD72 output)
 {
     ColumnMajorTransformImporter transform;
     transform.ImportColumnMajor(source);
     Matrix4D72 original;
     original.CopyFromFloats(source);
-    original.FUN_00de8f10();
+    original.hkMatrix4_resetFourthRow();
     DecompositionD72* __restrict result = output.p;
     result->translation = transform.m_vTranslation;
     {
@@ -2632,14 +2641,14 @@ void __cdecl FUN_00d72e90(const float* source, OutputD72 output)
             copyMatrix(previous, current);
             Matrix3D72 inverse;
             copyMatrix(inverse, current);
-            inverse.FUN_00cd4f10(DAT_0104da4c);
+            inverse.invert_00cd4f10(DAT_0104da4c);
             inverse.FUN_00cd4b60();
             Matrix3D72 sum;
             copyMatrix(sum, previous);
             sum.FUN_00cd5140(inverse);
             LocalM128 half = _mm_load_ss(&DAT_01016248);
             current.FUN_00cd4d40(half, sum);
-        } while (++iteration < 30 && !current.FUN_00cd4e00(equal, previous, DAT_0104da4c));
+        } while (++iteration < 30 && !current.CompareMatrixColumnsWithinTolerance(equal, previous, DAT_0104da4c));
         copyMatrix(result->basis, current);
     }
     LocalM128 x = normalizedD72(result->basis.x);
@@ -2663,7 +2672,7 @@ void __cdecl FUN_00d72e90(const float* source, OutputD72 output)
         quaternion.FUN_00cb26e0(rotation);
         result->rotation.value = quaternion.value;
     }
-    result->rotation.FUN_005611c0();
+    result->rotation.normalize_005611c0();
     Matrix4D72 inverseMatrix;
     {
         hkTransform rotationTransform;
@@ -2673,9 +2682,9 @@ void __cdecl FUN_00d72e90(const float* source, OutputD72 output)
         inverseTransform.SetConjugate(rotationTransform);
         inverseMatrix.CopyFromFloats(reinterpret_cast<const float*>(&inverseTransform));
     }
-    inverseMatrix.FUN_00de8f10();
+    inverseMatrix.hkMatrix4_resetFourthRow();
     Matrix4D72* scaleSkew = &result->scaleSkew;
-    scaleSkew->FUN_00de8da0(inverseMatrix, original);
+    scaleSkew->hkMatrix4_setMul(inverseMatrix, original);
     Matrix4D72* skew = &result->skew;
     result->scale = _mm_setr_ps(result->scaleSkew.xx, result->scaleSkew.yy, result->scaleSkew.zz, DAT_01011d78);
     LocalM128 one = _mm_load_ss(&DAT_01012068);
@@ -2686,7 +2695,7 @@ void __cdecl FUN_00d72e90(const float* source, OutputD72 output)
     *flagAddress = (_mm_movemask_ps(_mm_cmple_ps(_mm_and_ps(delta, DAT_01017d10), tolerance)) & 7) != 7;
     Matrix4D72 inverseScale;
     diagD72(inverseScale, result->scaleX, result->scaleY, result->scaleZ);
-    skew->FUN_00de8da0(inverseScale, *scaleSkew);
+    skew->hkMatrix4_setMul(inverseScale, *scaleSkew);
     LocalM128 dz = _mm_and_ps(_mm_sub_ps(skew->z, DAT_0126a3e0.z), DAT_01017d10);
     LocalM128 dw = _mm_and_ps(_mm_sub_ps(skew->w, DAT_0126a3e0.w), DAT_01017d10);
     LocalM128 dx = _mm_and_ps(_mm_sub_ps(skew->x, DAT_0126a3e0.x), DAT_01017d10);

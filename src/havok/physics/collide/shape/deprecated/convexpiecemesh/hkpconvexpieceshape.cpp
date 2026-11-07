@@ -64,7 +64,7 @@ void FUN_00e60690_owner::DispatchToInner(int index,int value) { unk0c->inner.run
 extern int DAT_010c6fb0;
 extern int DAT_0102e388;
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00e60c30_cls {
     int m_vptr;
@@ -86,7 +86,7 @@ FUN_00e60c30_cls* FUN_00e60c30_cls::Destroy(unsigned char acFlags)
     m_p14 = (void*)&DAT_010c6fb0;
     m_vptr = (int)&DAT_0102e388;
     if (acFlags & 1) {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }
@@ -94,7 +94,8 @@ FUN_00e60c30_cls* FUN_00e60c30_cls::Destroy(unsigned char acFlags)
 }
 
 // @fnv 0x00e60670
-int FUN_00e60670()
+// src: GUESS 0x00e60670 (confidence: high)
+int Hkpconvexpieceshape_ReturnZero()
 {
     return 0;
 }
@@ -179,11 +180,12 @@ struct FUN_00e60730_cls {
     int unk1c;
     Holder* m_p20;
     void** m_p24;
-    void FUN_00e60730(const unsigned short* apIndices, int aiCount, Vec4* apOut);
+    void hkpConvexPieceShape_GetRTTI(const unsigned short* apIndices, int aiCount, Vec4* apOut);
 };
 
 // @fnv 0x00e60730
-void FUN_00e60730_cls::FUN_00e60730(const unsigned short* apIndices, int aiCount, Vec4* apOut)
+// src: COMMUNITY 0x00e60730
+void FUN_00e60730_cls::hkpConvexPieceShape_GetRTTI(const unsigned short* apIndices, int aiCount, Vec4* apOut)
 {
     Scratch scratch;
     for (int i = aiCount - 1; i >= 0; i--) {
@@ -220,12 +222,13 @@ public:
     __m128* m_kVertices;
     int m_iStridedVertexCount;
 
-    void FUN_00e60800(const hkTransform& kLocalToWorld, float fTolerance, Aabb_e608& kOut) const;
+    void GetExpandedWorldVertexBounds(const hkTransform& kLocalToWorld, float fTolerance, Aabb_e608& kOut) const;
 };
 
 // Computes the world-space AABB of the shape's vertices via kLocalToWorld, then expands it by m_fSphereRadius plus fTolerance into kOut.
 // @fnv 0x00e60800
-void Shape_e608::FUN_00e60800(const hkTransform& kLocalToWorld, float fTolerance, Aabb_e608& kOut) const
+// src: GUESS 0x00e60800 (confidence: medium)
+void Shape_e608::GetExpandedWorldVertexBounds(const hkTransform& kLocalToWorld, float fTolerance, Aabb_e608& kOut) const
 {
     kOut.m_kMinimumCorner = _mm_set1_ps(3.40282e+38f);
     kOut.m_kMaximumCorner = _mm_set1_ps(-3.40282e+38f);
@@ -341,12 +344,13 @@ struct S_00e609c0_ConvexPieceShape : S_00e609c0_Shape {
     unsigned int* m_keys;
     int m_numKeys;
 
-    S_00e609c0_Bool FUN_00e609c0(const S_00e609c0_RayInput& input, S_00e609c0_RayOutput& results) const;
+    S_00e609c0_Bool hkpConvexPieceShape_castRayImpl(const S_00e609c0_RayInput& input, S_00e609c0_RayOutput& results) const;
 };
 
 // Ray-casts each child shape whose filter allows it and, if any hit, sets results' key to the last hit index; returns whether any child was hit.
 // @fnv 0x00e609c0
-S_00e609c0_Bool S_00e609c0_ConvexPieceShape::FUN_00e609c0(const S_00e609c0_RayInput& input, S_00e609c0_RayOutput& results) const
+// src: HAVOK_LIB 0x00e609c0
+S_00e609c0_Bool S_00e609c0_ConvexPieceShape::hkpConvexPieceShape_castRayImpl(const S_00e609c0_RayInput& input, S_00e609c0_RayOutput& results) const
 {
     int hitIndex;
     S_00e609c0_Timer("TtrcConvxPiece", hitIndex);
@@ -510,7 +514,7 @@ void FUN_00e60b00_cls::ProcessCollisionShapes(const BodyA* bodyA, const BodyB* b
 // sub ecx,0x14; jmp Destroy == MSVC adjustor thunk (Derived overrides a virtual both bases declare).
 struct AdjPrimaryBase
 {
-    virtual void FUN_00e60c20();
+    virtual void AdjustThisAndForward_00e60c20();
     int unk04;
     int unk08;
     int unk0C;
@@ -519,14 +523,15 @@ struct AdjPrimaryBase
 
 struct AdjSecondaryBase
 {
-    virtual void FUN_00e60c20();
+    virtual void AdjustThisAndForward_00e60c20();
 };
 
 struct AdjDerived : AdjPrimaryBase, AdjSecondaryBase
 {
     AdjDerived();
 // @fnv 0x00e60c20
-    virtual void FUN_00e60c20();
+// src: GUESS 0x00e60c20 (confidence: low)
+    virtual void AdjustThisAndForward_00e60c20();
 };
 
 AdjDerived::AdjDerived()

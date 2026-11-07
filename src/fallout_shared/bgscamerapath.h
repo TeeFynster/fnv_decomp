@@ -25,7 +25,7 @@ class FUN_005a71d0
 {
   public:
     unsigned int parent, previous;
-    void FUN_00462230();
+    void TwoValues_Endian();
 };
 class ScriptVariableInfo;
 class TESTopicInfo;

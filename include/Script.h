@@ -78,7 +78,7 @@ public:
     static bool HandleScriptLocals(TESObjectREFR*, void*, void*, double&);
     Data* FUN_00671d10();
     char GetByteAt(unsigned int i);
-    char FUN_006e1670(unsigned int i, unsigned int a, unsigned int b);
+    char GetNavMeshAndTriangleForIndex(unsigned int i, unsigned int a, unsigned int b);
     void ExecuteScript(TESObjectREFR*, ScriptLocals*);
     static bool __cdecl GetActorSexConditionFunction(TESObjectREFR*, void*, void*, double&);
     static bool __cdecl GetPCIsSexConditionFunction(TESObjectREFR*, void*, void*, double&);
@@ -99,9 +99,9 @@ public:
     static void ClearReferenceScriptState(TESObjectREFR* ref);
     static void ClearScriptLocalsForReference(TESObjectREFR* ref);
     static void SetScriptLocalsFromExtraData(TESObjectREFR* ref, ExtraDataList* extra);
-    void FUN_005aa2e0();
-    void FUN_005ae2e0();
-    void FUN_006eae40();
+    void ClearVariableList();
+    void ClearLocalVariableRefObjects();
+    void PathManagerImpl_Update();
     ScriptHeaderView* FUN_00500940();
     void InitFromCompileData(CStringArgument*);
     static bool OnHitWithFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);

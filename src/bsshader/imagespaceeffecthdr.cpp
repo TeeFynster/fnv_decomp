@@ -11,14 +11,14 @@ void HDRImageSpaceEffect::Setup(ImageSpaceManager* manager, HdrEffectParamLocalF
     ImageSpaceShaderParam* shaderParam = new ImageSpaceShaderParam;
     shaderParam->AllocateShaderConstants(0, 0);
     shaderParam->m_bTextureFlags[1] = false;
-    shaderParam->FUN_00b8a7c0();
+    shaderParam->SetBlurClearMode();
     pEffectParamList.SetAt(7, (HdrEffectParamLocalForm*)shaderParam);
     SetEffectAt(7, manager->GetEffect(34), shaderParam, 0);
 
     shaderParam = new ImageSpaceShaderParam;
     shaderParam->AllocateShaderConstants(0, 24);
     shaderParam->m_bTextureFlags[1] = false;
-    shaderParam->FUN_00b8a7c0();
+    shaderParam->SetBlurClearMode();
     if (DAT_011f941f)
     {
         shaderParam->CopyParamData(3, DAT_011add48, 64);
@@ -33,7 +33,7 @@ void HDRImageSpaceEffect::Setup(ImageSpaceManager* manager, HdrEffectParamLocalF
 
     shaderParam = new ImageSpaceShaderParam;
     shaderParam->AllocateShaderConstants(0, 24);
-    shaderParam->FUN_00b8a7c0();
+    shaderParam->SetBlurClearMode();
     if (DAT_011f941f)
     {
         shaderParam->CopyParamData(3, DAT_011add48, 64);
@@ -49,7 +49,7 @@ void HDRImageSpaceEffect::Setup(ImageSpaceManager* manager, HdrEffectParamLocalF
     shaderParam = new ImageSpaceShaderParam;
     shaderParam->AllocateShaderConstants(0, 24);
     shaderParam->m_bTextureFlags[2] = false;
-    shaderParam->FUN_00b8a7c0();
+    shaderParam->SetBlurClearMode();
     if (DAT_011f941f)
     {
         shaderParam->CopyParamData(3, DAT_011add48, 64);
@@ -65,7 +65,7 @@ void HDRImageSpaceEffect::Setup(ImageSpaceManager* manager, HdrEffectParamLocalF
     shaderParam = new ImageSpaceShaderParam;
     shaderParam->AllocateShaderConstants(0, 24);
     shaderParam->m_bTextureFlags[1] = false;
-    shaderParam->FUN_00b8a7c0();
+    shaderParam->SetBlurClearMode();
     shaderParam->CopyParamData(3, DAT_011ade88, 144);
     SetEffectAt(6, manager->GetEffect(64), shaderParam, 0);
     pEffectParamList.SetAt(6, (HdrEffectParamLocalForm*)shaderParam);
@@ -73,7 +73,7 @@ void HDRImageSpaceEffect::Setup(ImageSpaceManager* manager, HdrEffectParamLocalF
     shaderParam = new ImageSpaceShaderParam;
     shaderParam->AllocateShaderConstants(0, 24);
     shaderParam->m_bTextureFlags[1] = false;
-    shaderParam->FUN_00b8a7c0();
+    shaderParam->SetBlurClearMode();
     SetEffectAt(10, manager->GetEffect(71), shaderParam, 0);
     pEffectParamList.SetAt(10, (HdrEffectParamLocalForm*)shaderParam);
 
@@ -81,13 +81,13 @@ void HDRImageSpaceEffect::Setup(ImageSpaceManager* manager, HdrEffectParamLocalF
     shaderParam->AllocateShaderConstants(0, 24);
     shaderParam->m_bTextureFlags[1] = false;
     shaderParam->m_bTextureFlags[2] = false;
-    shaderParam->FUN_00b8a7c0();
+    shaderParam->SetBlurClearMode();
     SetEffectAt(9, manager->GetEffect(70), shaderParam, 0);
     pEffectParamList.SetAt(9, (HdrEffectParamLocalForm*)shaderParam);
 
     shaderParam = new ImageSpaceShaderParam;
     shaderParam->AllocateShaderConstants(0, 24);
-    shaderParam->FUN_00b8a7c0();
+    shaderParam->SetBlurClearMode();
     SetEffectAt(8, manager->GetEffect(62), shaderParam, 0);
     pEffectParamList.SetAt(8, (HdrEffectParamLocalForm*)shaderParam);
 

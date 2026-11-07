@@ -143,12 +143,13 @@ struct SharedAccumulatorState
     unsigned int unk1f8;
     unsigned int unk1fc;
     unsigned int sharedLock;
-    bool FUN_00b63b10(NiObject* object);
+    bool BSShaderAccumulator_AddShared(NiObject* object);
 };
 
 // Locks sharedLock, checks if object is in sharedObjects, adds it if missing, and returns true when it was newly added.
 // @fnv 0x00b63b10
-bool SharedAccumulatorState::FUN_00b63b10(NiObject* object)
+// src: XBOX_PDB 0x00b63b10
+bool SharedAccumulatorState::BSShaderAccumulator_AddShared(NiObject* object)
 {
     bool value = false;
     EnterCriticalSection(reinterpret_cast<LPCRITICAL_SECTION>(&sharedLock));

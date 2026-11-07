@@ -29,8 +29,8 @@ public:
 
     bool Load(TESFile* file);
     void ResetFormData();
-    TESTexture* FUN_00503650();
-    char* FUN_0073b730();
+    TESTexture* GetBackTexture();
+    char* CaravanAIPackage_Print_WhatIsHeThinking();
 
     bool bIsActive;
     unsigned char layoutPadding99[3];

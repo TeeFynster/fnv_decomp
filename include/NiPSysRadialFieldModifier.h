@@ -17,6 +17,6 @@ public:
     virtual void GetViewerStrings(NiViewerStringsArray* apStrings);
     virtual void Update(float time, NiPSysData* data);
 
-    void FUN_00c28760(NiStream& stream);
-    void FUN_00c27770(NiStream& stream);
+    void LoadBinary_00c28760(NiStream& stream);
+    void SaveBinary_00c27770(NiStream& stream);
 };

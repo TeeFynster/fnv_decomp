@@ -17,7 +17,7 @@
 
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-char* __cdecl FUN_00a7d5e0(const char*, const char*);
+char* __cdecl NiGetViewerString_00a7d5e0(const char*, const char*);
 void __cdecl AddMotionTypeName(StrArr* arr, int type);
 struct LinkedRecord
 {
@@ -106,7 +106,7 @@ struct S_00c8d440_Target
     virtual void v4(unsigned int id, S_00c8d440_Arg arg);
 };
 extern S_00c8d440_Target* DAT_01268360;
-void __stdcall FUN_00c8d440(bool flag);
+void __stdcall bhkRigidBody_SetHavokAssertState(bool flag);
 struct NativeData
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14;
@@ -198,7 +198,7 @@ struct NativeLink
     NativeThing* object;
     unsigned int category;
 };
-NativeLink* FUN_00c85ef0(NativeLink*, NativeThing*, const NiRTTI*);
+NativeLink* bhkWorldObject_GetProperty(NativeLink*, NativeThing*, const NiRTTI*);
 extern unsigned char DAT_011afe59;
 struct BodyUpdate
 {
@@ -251,18 +251,18 @@ struct BodyUpdate
     {
         return (flags >> 6) & 1;
     }
-    bool FUN_00c85810(void*);
-    void FUN_00a29680();
+    bool bhkWorldObject_Add(void*);
+    void Object_DoNothing();
     void UpdateMatchingNodes(void*);
-    void* FUN_00c87a40();
+    void* bhkWorldObject_GethkWorld();
     bool InWorld()
     {
         NativeThing* body = native;
         if (!body)
             return false;
-        FUN_00a29680();
+        Object_DoNothing();
         bool inWorld = body->world != 0;
-        FUN_00a29680();
+        Object_DoNothing();
         return inWorld;
     }
     int MotionType() const
@@ -276,7 +276,8 @@ struct BodyUpdate
     }
     bool UpdateBody(void*);
 };
-bool __cdecl FUN_00c8cce0(int* type)
+// src: XBOX_PDB 0x00c8cce0
+bool __cdecl bhkRigidBody_IsMotionTypeDynamic(int* type)
 {
     bool result = false;
     if (*type > 0 && (*type <= 3 || *type == 6))
@@ -523,12 +524,12 @@ class C8EC60World
     {
         return &m_kIterator;
     }
-    void FUN_00c8ec60();
+    void bhkRigidBody_RemoveActionConstraints();
 };
 extern int DAT_0126810c;
 extern int DAT_012681fc;
 extern int DAT_012681bc;
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct OwnerBase
 {
     OwnerBase();
@@ -539,7 +540,7 @@ struct OwnerBase
 
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
 struct Pair8
@@ -581,11 +582,11 @@ struct SpawnedObject : public ChainB_cls
         DAT_012681bc += 1;
     }
 };
-SpawnedObject* __cdecl FUN_00c8ed70();
+SpawnedObject* __cdecl bhkRigidBody_CreateObject();
 struct HavokShape
 {
-    void FUN_00c8f080();
-    void FUN_00c8eb20(void* context);
+    void bhkRigidBody_Fix();
+    void bhkRigidBody_UnFix(void* context);
 };
 struct HavokLookup
 {
@@ -986,11 +987,11 @@ struct ScopedMemoryContext
 };
 struct GlobalObject_004ee810
 {
-    void FUN_004ee920();
+    void BSSimpleList_NiPointer_bhkAction_RemoveAll();
 };
 struct FUN_00c9d4c0_holder
 {
-    void FUN_00c9d4c0();
+    void bhkEntity_Kill();
 };
 struct Shell_c8da40 : public FUN_00c9d4c0_holder
 {
@@ -1001,7 +1002,7 @@ struct Shell_c8da40 : public FUN_00c9d4c0_holder
     int uNewnk;
     GlobalObject_004ee810 uTmpnk;
 
-    void FUN_00c8da40();
+    void bhkRigidBody_Kill();
 };
 struct C8DAC0RTTI
 {
@@ -1144,7 +1145,7 @@ class SceneC8E
     int unk10;
     ObjectListC8E m_kThirdFollowingStreamField;
 
-    void FUN_00c8ef80(NiObject* pkObject);
+    void bhkRigidBody_AddActCon(NiObject* pkObject);
 };
 struct RefCountedObj
 {
@@ -1170,7 +1171,7 @@ class FUN_00c88990_cls
     LinkNode* m_pNext;
     void PopAndRelease();
 };
-void __cdecl FUN_00c8ecf0(HavokObject* object);
+void __cdecl bhkRigidBody_RemoveAllActionConstraints(HavokObject* object);
 #include <xmmintrin.h>
 struct hkVector
 {
@@ -1194,10 +1195,11 @@ struct Ent
     int unk;
     int unkCur;
     Body* m_pPhysicsBody;
-    hkVector FUN_00c8d200();
+    hkVector GetCenterOfMassLocal_00c8d200();
 };
 // @fnv 0x00c8d200
-hkVector Ent::FUN_00c8d200()
+// src: XBOX_PDB 0x00c8d200
+hkVector Ent::GetCenterOfMassLocal_00c8d200()
 {
     const hkVector* p;
     if (this && m_pPhysicsBody)
@@ -1260,7 +1262,7 @@ class WorldObject_c8d3
     int unk04;
     Entity_c8d3* m_pkEntity;
 
-    void FUN_00a29680();
+    void Object_DoNothing();
     void GetAabb(Aabb_c8d3& kOut);
 };
 struct BuildSettings
@@ -1336,7 +1338,7 @@ struct BodyMemory
         return allocator->Allocate(size);
     }
 };
-BodyMemory* FUN_00c85750();
+BodyMemory* hkMemoryRouter_getInstance();
 struct FUN_00ca8c90
 {
     unsigned int unk00;
@@ -1476,11 +1478,11 @@ struct FUN_00ca8c90
     unsigned int unk218;
     unsigned int unk21C;
     FUN_00ca8c90(void* settings);
-    void FUN_00ca8420(int motion, int activate, int extra);
+    void hkpRigidBody_setMotionType(int motion, int activate, int extra);
     void FUN_00c905b0();
     static void* operator new(unsigned int size)
     {
-        FUN_00ca8c90* p = (FUN_00ca8c90*)FUN_00c85750()->AllocateBody(size);
+        FUN_00ca8c90* p = (FUN_00ca8c90*)hkMemoryRouter_getInstance()->AllocateBody(size);
         p->allocationSize = (unsigned short)size;
         return p;
     }
@@ -1551,17 +1553,17 @@ struct BodyBuild
     virtual void FinishBuild(BuildSettings* settings);
     unsigned int unk04;
     BodyNative* native;
-    void FUN_00a29680();
+    void Object_DoNothing();
     void GetAabb(hkAabb* bounds);
-    float FUN_00577b50();
+    float bhkRigidBody_GethkMaxLinearVelocity();
     BodyMotion* GetMotion()
     {
         BodyNative* p = native;
         if (!p)
             return 0;
-        FUN_00a29680();
+        Object_DoNothing();
         BodyMotion* result = p ? &p->motion : 0;
-        FUN_00a29680();
+        Object_DoNothing();
         return result;
     }
     void ConfigureBody(BuildSettings* settings);
@@ -1572,7 +1574,7 @@ struct Matrix
 };
 struct Receiver
 {
-    void FUN_00c7f640(Matrix*, const __m128*);
+    void setTransformedPos_00c7f640(Matrix*, const __m128*);
 };
 struct BodySlot
 {
@@ -1589,16 +1591,16 @@ struct CollisionOwner
     void* vtable;
     void* unk04;
     void* node;
-    void FUN_00a29680();
+    void Object_DoNothing();
     void DispatchCollision(Receiver*);
     __forceinline BodySlot* GetSlot()
     {
         char* base = (char*)node;
         if (base)
         {
-            FUN_00a29680();
+            Object_DoNothing();
             base += 16;
-            FUN_00a29680();
+            Object_DoNothing();
             if (base)
                 return (BodySlot*)base;
         }
@@ -1636,12 +1638,12 @@ class WorldObject_c8ea
 {
   public:
     virtual void v00();
-    void FUN_00c9d4f0(char* pkStream);
+    void bhkEntity_LoadBinary(char* pkStream);
     float FUN_0062ab20();
 };
 struct LoadStream_c8ea
 {
-    void FUN_00a64670();
+    void NiStream_ReadMultipleLinkIDs();
 };
 class Entity_c8ea : public WorldObject_c8ea
 {
@@ -1695,7 +1697,7 @@ class Entity_c8ea : public WorldObject_c8ea
     int unk04, unk08, unk0c;
     int m_iSlotCount;
 
-    void FUN_00c8ea30(char* pkStream);
+    void bhkRigidBody_LoadBinary(char* pkStream);
 };
 extern "C" void _ReadWriteBarrier(void);
 struct RTTI_eb20
@@ -1991,17 +1993,17 @@ struct RefObject_eb20
     unsigned int m_uiValue1;
     ConstraintList_eb20 m_kConstraints;
 
-    void* FUN_00c87a40();
+    void* bhkWorldObject_GethkWorld();
     int GetWorld()
     {
-        WorldData_eb20* pkData = (WorldData_eb20*)FUN_00c87a40();
+        WorldData_eb20* pkData = (WorldData_eb20*)bhkWorldObject_GethkWorld();
         return pkData ? pkData->m_iWorld : 0;
     }
     unsigned char IsInWorld() const
     {
         return (m_uiValue1 >> 2) & 1;
     }
-    void FUN_00c8eb20(bool bSetWorld);
+    void bhkRigidBody_UnFix(bool bSetWorld);
 };
 extern "C" __declspec(thread) int tls_iMemContext_eb20;
 struct MemContextGuard_eb20
@@ -2497,7 +2499,7 @@ struct IntegerTriple
     int unk34c;
     void* unk350;
 };
-Obj* __cdecl FUN_00cc81c0(Obj*, float);
+Obj* __cdecl bhkFixedConstraint_FixConstraint(Obj*, float);
 struct ParentData
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
@@ -2533,7 +2535,7 @@ struct Target
         ParentData* s = parent ? parent->GetSub() : 0;
         return s ? s->unk1c : 0;
     }
-    void FUN_00c8f080();
+    void bhkRigidBody_Fix();
 };
 
 #include <xmmintrin.h>
@@ -2641,15 +2643,15 @@ struct KFQuaternion
     {
         m_vec.m_vComponents = _mm_xor_ps(DAT_010c4c00, q.m_vec.m_vComponents);
     }
-    void FUN_00c66320(const KFQuaternion& q0, const KFQuaternion& q1);
-    void FUN_005611c0();                                           // normalize
+    void setMul(const KFQuaternion& q0, const KFQuaternion& q1);
+    void normalize_005611c0();                                           // normalize
     float GetAngle() const;                                    // getAngle
-    __declspec(noalias) void FUN_00c74c90(KFVector4& axis) const;  // getAxis
+    __declspec(noalias) void hkQuaternion_getAxis(KFVector4& axis) const;  // getAxis
     void SetInverseProduct(const KFQuaternion& q0, const KFQuaternion& q1)
     {
         KFQuaternion inv;
         inv.SetConjugate(q1);
-        FUN_00c66320(q0, inv);
+        setMul(q0, inv);
     }
 };
 
@@ -2707,7 +2709,7 @@ struct KFNativeBody : public NativeThing
     KFVector4 angularVelocity;
 
     void OnTrigger(const KFVector4& v);
-    void FUN_00561800(const KFVector4& v);
+    void hkpRigidBody_setAngularVelocity(const KFVector4& v);
 };
 
 struct KFRigidBody
@@ -2777,10 +2779,10 @@ struct KFRigidBody
     unsigned int unk04;
     KFNativeBody* native;
 
-    float FUN_00577b50();   // max linear velocity
+    float bhkRigidBody_GethkMaxLinearVelocity();   // max linear velocity
     float GetFloatValue();  // max angular velocity
-    KFWorldInfo* FUN_00c87a40();
-    void FUN_00a29680();  // lock / unlock
+    KFWorldInfo* bhkWorldObject_GethkWorld();
+    void Object_DoNothing();  // lock / unlock
 
     const KFVector4& GetLinearVelocityVector()
     {
@@ -2797,9 +2799,9 @@ struct KFRigidBody
         KFNativeBody* b = native;
         if (b)
         {
-            FUN_00a29680();
+            Object_DoNothing();
             b->OnTrigger(v);
-            FUN_00a29680();
+            Object_DoNothing();
         }
     }
     void SetAngularVelocity(const KFVector4& v)
@@ -2807,18 +2809,19 @@ struct KFRigidBody
         KFNativeBody* b = native;
         if (b)
         {
-            FUN_00a29680();
-            b->FUN_00561800(v);
-            FUN_00a29680();
+            Object_DoNothing();
+            b->hkpRigidBody_setAngularVelocity(v);
+            Object_DoNothing();
         }
     }
 
-    void FUN_00c8de20(const KFVector4& nextPosition, const KFQuaternion& nextOrientation, float invDeltaTime,
+    void bhkRigidBody_ApplyKeyframe(const KFVector4& nextPosition, const KFQuaternion& nextOrientation, float invDeltaTime,
                       float blend);
 };
 
 // @fnv 0x00c8de20
-void KFRigidBody::FUN_00c8de20(const KFVector4& nextPosition, const KFQuaternion& nextOrientation, float invDeltaTime,
+// src: XBOX_PDB 0x00c8de20
+void KFRigidBody::bhkRigidBody_ApplyKeyframe(const KFVector4& nextPosition, const KFQuaternion& nextOrientation, float invDeltaTime,
                                float blend)
 {
     KFVector4 center;
@@ -2831,7 +2834,7 @@ void KFRigidBody::FUN_00c8de20(const KFVector4& nextPosition, const KFQuaternion
     linearVelocity.setMul4(invDeltaTime, linearVelocity);
 
     float linLen = linearVelocity.length3();
-    float maxLin = FUN_00577b50();
+    float maxLin = bhkRigidBody_GethkMaxLinearVelocity();
     if (linLen > maxLin)
     {
         linearVelocity.mul4(maxLin / linLen);
@@ -2839,14 +2842,14 @@ void KFRigidBody::FUN_00c8de20(const KFVector4& nextPosition, const KFQuaternion
 
     KFQuaternion quatDif;
     quatDif.SetInverseProduct(nextOrientation, GetRotation());
-    quatDif.FUN_005611c0();
+    quatDif.normalize_005611c0();
 
     KFVector4 angularVelocity;
     angularVelocity.setZero4();
     float angle = quatDif.GetAngle();
     if (0.001f < angle)
     {
-        quatDif.FUN_00c74c90(angularVelocity);
+        quatDif.hkQuaternion_getAxis(angularVelocity);
         angularVelocity.setMul4(angle * invDeltaTime, angularVelocity);
     }
 
@@ -2857,7 +2860,7 @@ void KFRigidBody::FUN_00c8de20(const KFVector4& nextPosition, const KFQuaternion
         angularVelocity.mul4(maxAng / angLen);
     }
 
-    KFWorldInfo* world = FUN_00c87a40();
+    KFWorldInfo* world = bhkWorldObject_GethkWorld();
     if (world)
     {
         float g = world->gravity.getZ();
@@ -3235,7 +3238,7 @@ struct Linked160
     V4_160 linear;
     V4_160 angular;
     void OnTrigger(float* p);
-    void FUN_00561800(float* p);
+    void hkpRigidBody_setAngularVelocity(float* p);
 };
 struct This160
 {
@@ -3302,28 +3305,28 @@ struct This160
     virtual V4_160* V160f0(V4_160* in);
     unsigned int unk04;
     Linked160* m_08;
-    void FUN_00a29680();
-    float FUN_00577b50();
-    void FUN_005610f0(float* p);
-    void FUN_00561690(float* p);
-    void FUN_005617c0(float* p);
-    void FUN_00c8e160(float* p1, RotationArg160 input, unsigned int p3);
+    void Object_DoNothing();
+    float bhkRigidBody_GethkMaxLinearVelocity();
+    void bhkRigidBody_SetNiPosition(float* p);
+    void bhkRigidBody_SetLinearVelocity_00561690(float* p);
+    void bhkRigidBody_SetAngularVelocity_005617c0(float* p);
+    void bhkRigidBody_ApplyHardKeyframe(float* p1, RotationArg160 input, unsigned int p3);
 };
 struct SmartObj160
 {
     int unk00;
     int ref04;
-    void FUN_0040fbf0(int x);
+    void BSSpinLock_Lock(int x);
 };
 struct Vec50Obj
 {
     __m128 v;
-    void FUN_00c74ac0(float* q, V4_160* out);
-    void FUN_005611c0();
+    void setMulInverse(float* q, V4_160* out);
+    void normalize_005611c0();
     float GetAngle();
-    void FUN_00c74c90(V4_160* out);
+    void hkQuaternion_getAxis(V4_160* out);
 };
-void __cdecl FUN_004a3e00(V4_160* a, float* b);
+void __cdecl NI2HK(V4_160* a, float* b);
 extern float DAT_011afe64;
 extern const __m128 DAT_010c71e0;
 extern double DAT_0106b798;
@@ -3348,7 +3351,8 @@ struct Ws160
     V4_160 tmpC0;
 };
 // @fnv 0x00c8e160
-void This160::FUN_00c8e160(float* p1, RotationArg160 input, unsigned int p3)
+// src: XBOX_PDB 0x00c8e160
+void This160::bhkRigidBody_ApplyHardKeyframe(float* p1, RotationArg160 input, unsigned int p3)
 {
     V4_160 separate_q;
     V4_160 separate_p;
@@ -3403,9 +3407,9 @@ void This160::FUN_00c8e160(float* p1, RotationArg160 input, unsigned int p3)
                 _mm_store_ps((float*)&W.v60, eps);
                 if (lk)
                 {
-                    FUN_00a29680();
+                    Object_DoNothing();
                     lk->OnTrigger((float*)&DAT_01267e30);
-                    FUN_00a29680();
+                    Object_DoNothing();
                     eps = W.v60.v;
                 }
             }
@@ -3425,9 +3429,9 @@ void This160::FUN_00c8e160(float* p1, RotationArg160 input, unsigned int p3)
             {
                 if (lk)
                 {
-                    FUN_00a29680();
-                    lk->FUN_00561800((float*)&DAT_01267e30);
-                    FUN_00a29680();
+                    Object_DoNothing();
+                    lk->hkpRigidBody_setAngularVelocity((float*)&DAT_01267e30);
+                    Object_DoNothing();
                 }
             }
             return;
@@ -3482,10 +3486,10 @@ void This160::FUN_00c8e160(float* p1, RotationArg160 input, unsigned int p3)
     __m128 sq2 = _mm_shuffle_ps(sq, sq, 0xaa);
     __m128 sqs2 = _mm_add_ss(sq2, sqs);
     _mm_store_ss(&pair.vel, sqs2);
-    len = FUN_00577b50();
+    len = bhkRigidBody_GethkMaxLinearVelocity();
     if (pair.vel > len * len)
     {
-        FUN_004a3e00(&W.tmpC0, p1);
+        NI2HK(&W.tmpC0, p1);
         W.tmpB.v.m128_f32[0] = p2[1];
         W.tmpB.v.m128_f32[1] = p2[2];
         W.tmpB.v.m128_f32[2] = p2[3];
@@ -3503,21 +3507,21 @@ void This160::FUN_00c8e160(float* p1, RotationArg160 input, unsigned int p3)
     if (DAT_0106b798 < len)
     {
         if (a3)
-            a3->FUN_0040fbf0(0);
-        FUN_005610f0(p1);
+            a3->BSSpinLock_Lock(0);
+        bhkRigidBody_SetNiPosition(p1);
         if (a3)
         {
             if (--a3->ref04 == 0)
                 a3->unk00 = 0;
         }
-        FUN_00561690((float*)&DAT_01267e30);
+        bhkRigidBody_SetLinearVelocity_00561690((float*)&DAT_01267e30);
     }
     else
     {
-        FUN_00561690((float*)&W.v60);
+        bhkRigidBody_SetLinearVelocity_00561690((float*)&W.v60);
     }
-    separate_v50.FUN_00c74ac0((float*)&separate_q, &W.outB);
-    separate_v50.FUN_005611c0();
+    separate_v50.setMulInverse((float*)&separate_q, &W.outB);
+    separate_v50.normalize_005611c0();
     s1 = separate_v50.GetAngle();
     if (s1 < threshold160::DAT_01017d00)
     {
@@ -3525,13 +3529,13 @@ void This160::FUN_00c8e160(float* p1, RotationArg160 input, unsigned int p3)
     }
     else
     {
-        separate_v50.FUN_00c74c90(&W.v70);
+        separate_v50.hkQuaternion_getAxis(&W.v70);
         float sc = *(volatile float*)&s1 * inv;
         __m128 scalar = _mm_load_ss(&sc);
         __m128 factor = _mm_shuffle_ps(scalar, scalar, 0);
         __m128 axis = W.v70.v;
         W.v70.v = _mm_mul_ps(factor, axis);
     }
-    FUN_005617c0((float*)&W.v70);
+    bhkRigidBody_SetAngularVelocity_005617c0((float*)&W.v70);
 }
 }  // namespace fnv_00c8e160

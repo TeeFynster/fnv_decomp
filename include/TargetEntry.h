@@ -17,7 +17,7 @@ class bhkTTNode<TESObjectREFR> : public bhkTTNode_TESObjectREFR_
 class TargetEntry : public bhkTTNode<TESObjectREFR>
 {
 public:
-    virtual void FUN_0062c600(ZoneEntry* apTrap);
+    virtual void Run_0062c600(ZoneEntry* apTrap);
 
     __forceinline Refr* GetReference() const
     {

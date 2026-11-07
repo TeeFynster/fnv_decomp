@@ -29,7 +29,8 @@ void* NiFlipController::GetEntryAt(int uiIndex)
 extern "C" const void* g_011f3fd4;
 
 // @fnv 0x00a4f5d0
-const void* __cdecl FUN_00a4f5d0()
+// src: COMMUNITY 0x00a4f5d0
+const void* __cdecl NiFlipController_GetRTTI()
 {
     return &g_011f3fd4;
 }
@@ -64,7 +65,8 @@ extern NiRTTI g_011f49a4;
 
 // Walks pkTarget's NiRTTI base chain and returns true if it reaches g_011f49a4, false for a null target or RTTI.
 // @fnv 0x00a4f5e0
-bool __stdcall FUN_00a4f5e0(NiObjectNET* pkTarget)
+// src: GUESS 0x00a4f5e0 (confidence: medium)
+bool __stdcall Object_HasRTTIInBaseChain(NiObjectNET* pkTarget)
 {
     if (!pkTarget)
         return false;
@@ -91,14 +93,15 @@ inline void* NiFlipController::GetSrc(unsigned int i)
 
 // Calls the base copy, copies the int at offset 0x4c to dst, then copies each source entry via GetSrc and FUN_00a4f8a0.
 // @fnv 0x00a4f920
-void __thiscall NiFlipController::FUN_00a4f920(NiAlphaController* dst, CloningProcess& proc)
+// src: GAMEBRYO_LIB 0x00a4f920
+void __thiscall NiFlipController::CopyMembers_00a4f920(NiAlphaController* dst, CloningProcess& proc)
 {
     NiFloatInterpController::CopyMemberData(dst, &proc);
     ((NiFlipController*)dst)->m_eAffectedMap = m_eAffectedMap;
     for (unsigned int i = 0; i < m_kTextureSwapList.m_usSize; ++i)
     {
         void* e = this->GetSrc(i);
-        ((NiFlipController*)dst)->FUN_00a4f8a0(e, i);
+        ((NiFlipController*)dst)->AttachTexture(e, i);
     }
 }
 
@@ -114,7 +117,8 @@ struct FUN_00a40520
     __declspec(nothrow) FUN_00a40520(bool, float, unsigned char);
 };
 // @fnv 0x00a4f2c0
-FUN_00a40520* __stdcall FUN_00a4f2c0(unsigned short usIndex, bool bManagerControlled, bool bAccumulateAnimations,
+// src: XBOX_PDB 0x00a4f2c0
+FUN_00a40520* __stdcall NiFlipController_CreateBlendInterpolator(unsigned short usIndex, bool bManagerControlled, bool bAccumulateAnimations,
                                      float fWeightThreshold, unsigned char ucArraySize)
 {
     FUN_00a40520* pkInterp = new FUN_00a40520(bManagerControlled, fWeightThreshold, ucArraySize);
@@ -123,7 +127,8 @@ FUN_00a40520* __stdcall FUN_00a4f2c0(unsigned short usIndex, bool bManagerContro
 }
 
 // @fnv 0x00a4f350
-bool NiFlipController::FUN_00a4f350(NiStream& kStream)
+// src: XBOX_PDB 0x00a4f350
+bool NiFlipController::RegisterStreamables_00a4f350(NiStream& kStream)
 {
     if (!NiFloatInterpController::RegisterStreamables(kStream))
         return false;
@@ -148,7 +153,7 @@ void* NiFlipController::CreateFlipController(CloningProcess& kCloning)
         pkObject = (NiFlipController*)pkObject->FUN_00a4f820();
     else
         pkObject = 0;
-    FUN_00a4f920((NiAlphaController*)pkObject, kCloning);
+    CopyMembers_00a4f920((NiAlphaController*)pkObject, kCloning);
     return (NiObject*)pkObject;
 }
 
@@ -160,7 +165,8 @@ void NiFlipController::GetFloatValue(float* pfOut)
 
 // Compares the base controller and affected map.
 // @fnv 0x00a4f290
-unsigned char NiFlipController::FUN_00a4f290(NiFlipController* param)
+// src: GAMEBRYO_LIB 0x00a4f290
+unsigned char NiFlipController::IsEqual_00a4f290(NiFlipController* param)
 {
     if (!NiFloatInterpController::IsEqual(param))
     {
@@ -204,7 +210,7 @@ void __thiscall NiFlipController::SaveToStream(NiStream* stream)
     }
 }
 
-char** FUN_005e0ba0(unsigned int ItemUpdateArray) throw();
+char** NiTObjectArray_NiPointer_NiTexture_NiTObjectArray_NiPointer_NiTexture(unsigned int ItemUpdateArray) throw();
 
 template <class T, class A>
 inline NiTArray<T, A>::NiTArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
@@ -214,7 +220,7 @@ inline NiTArray<T, A>::NiTArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
     m_usSize = 0;
     m_usESize = 0;
     if (m_usMaxSize > 0)
-        m_pBase = (T*)FUN_005e0ba0(m_usMaxSize);
+        m_pBase = (T*)NiTObjectArray_NiPointer_NiTexture_NiTObjectArray_NiPointer_NiTexture(m_usMaxSize);
     else
         m_pBase = 0;
 }
@@ -232,7 +238,7 @@ NiFlipController::NiFlipController() : m_kTextureSwapList(1, 1)
     m_pkBuf = 0;
 }
 
-void* FUN_00aa1070(unsigned int uiSize);
+void* _NiMalloc_00aa1070(unsigned int uiSize);
 void* FUN_00ec61c0(void* pDest, int iValue, int iCount);
 
 struct FUN_00a6d220
@@ -260,7 +266,7 @@ struct MapBase_a4d
         m_uiHashSize = uiHashSize;
         m_uiCount = 0;
         unsigned int uiSize = sizeof(void*) * m_uiHashSize;
-        m_ppkHashTable = (void**)FUN_00aa1070(uiSize);
+        m_ppkHashTable = (void**)_NiMalloc_00aa1070(uiSize);
         FUN_00ec61c0(m_ppkHashTable, 0, m_uiHashSize * sizeof(void*));
     }
     virtual void v00();
@@ -389,13 +395,13 @@ void NiFlipController::UpdateFlipController(NiUpdateDataF& kUpdate)
 }
 
 void __cdecl NiFree(void* pkData) throw();
-void __cdecl FUN_004b0220(void* pkData) throw();
+void __cdecl j_Deallocate_NiTNewInterface_V_NiPointer_VNiAVObject_SAXPAV_NiPointer_VNiAVObject_Z(void* pkData) throw();
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plCount);
 
 template <class T, class A>
 inline NiTArray<T, A>::~NiTArray()
 {
-    FUN_004b0220(m_pBase);
+    j_Deallocate_NiTNewInterface_V_NiPointer_VNiAVObject_SAXPAV_NiPointer_VNiAVObject_Z(m_pBase);
 }
 
 extern const void* g_NiFlipControllerVTable;
@@ -477,7 +483,8 @@ void* operator new[](unsigned int size)
 
 // Grows the array if needed, increments the reference count of p, stores a copy of p in the array slot, then decrements the count and releases if zero.
 // @fnv 0x00a4f8a0
-void __thiscall NiFlipController::FUN_00a4f8a0(void* apRef, unsigned int aiIndex)
+// src: COMMUNITY 0x00a4f8a0
+void __thiscall NiFlipController::AttachTexture(void* apRef, unsigned int aiIndex)
 {
     if (m_kTextureSwapList.m_usSize <= aiIndex)
         m_kTextureSwapList.SetSize(aiIndex + 1);
@@ -499,7 +506,8 @@ void __thiscall NiFlipController::FUN_00a4f8a0(void* apRef, unsigned int aiIndex
 
 // Links the base controller, then loads the texture swap list when a target is present.
 // @fnv 0x00a4f990
-void NiFlipController::FUN_00a4f990(NiStream& kStream) throw()
+// src: GAMEBRYO_LIB 0x00a4f990
+void NiFlipController::LinkObject_00a4f990(NiStream& kStream) throw()
 {
     NiFloatInterpController::LinkObject(kStream);
     if (m_pkTarget)

@@ -35,7 +35,7 @@ public:
     void AddChild(QueuedFile* apChild);
     void IncRefCount();
     void DecRefCount();
-    bool FUN_0043caa0();
+    bool QueuedFile_GetAllChildrenFinished();
 
     MEM_CONTEXT aeMemoryContext;        // 0x18
     NiPointer<QueuedFile> m_pParent;     // 0x1C

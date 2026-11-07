@@ -23,13 +23,13 @@ __forceinline void hkpContactListener::contact1() {}
 __forceinline void hkpContactListener::contact2() {}
 __forceinline hkpContactListener::~hkpContactListener() {}
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 
 template <typename T, typename Allocator>
 __forceinline hkArray<T, Allocator>::~hkArray()
 {
-    hkMemoryAllocator& alloc = FUN_00c85750().heap();
+    hkMemoryAllocator& alloc = hkMemoryRouter_getInstance().heap();
     m_iElementCount = 0;
     if ((m_iCapacityState & 0x80000000) == 0)
         alloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
@@ -72,16 +72,16 @@ public:
     virtual void vf10();
     virtual void vf14(float);
     virtual void contact0();
-    __declspec(noinline) void FUN_00e44cc0();
+    __declspec(noinline) void removeFromWorld_00e44cc0();
     __declspec(noinline) void ReleaseWorld();
     __declspec(noinline) void InitOnce();
-    __declspec(noinline) void FUN_00e44d20(float);
-    void FUN_00e44d50(bool);
+    __declspec(noinline) void update_00e44d20(float);
+    void setHitListening(bool);
     __declspec(noinline) void ResetVtables();
     void ReleaseBody();
-    void FUN_00e450b0(int);
+    void UpdateState_00e450b0(int);
     hkpGunProjectile* FUN_00e450c0(unsigned int);
-    __declspec(noinline) void FUN_00e44c90(hkpWorld* scene) throw();
+    __declspec(noinline) void addToWorld_00e44c90(hkpWorld* scene) throw();
 };
 
 // No approved hkpProjectileGun.h is available yet.
@@ -103,12 +103,12 @@ class hkpProjectileGun : public hkpFirstPersonGun
     __declspec(noinline) void ApplyToAll(float);
     __declspec(noinline) void ClearProjectileFlags();
     hkpGunProjectile* FindFirstUnflaggedObject();
-    void FUN_00e44da0(float);
-    __declspec(noinline) void FUN_00e44eb0() throw();
-    __declspec(noinline) void FUN_00e44ef0();
-    void FUN_00e44f30(float, int, int, int, int, int);
+    void destroyAgedProjectiles(float);
+    __declspec(noinline) void clearProjectiles() throw();
+    __declspec(noinline) void removeDestroyedProjectiles();
+    void onUpdate(float, int, int, int, int, int);
     void GetCallResult(unsigned int);
-    void FUN_00e44f60(hkpGunProjectile*);
+    void addProjectile(hkpGunProjectile*);
     void* FUN_00e450f0(int);
 };
 
@@ -123,7 +123,8 @@ void hkpGunProjectile::InitOnce()
 }
 
 // @fnv 0x00e44d50
-void hkpGunProjectile::FUN_00e44d50(bool on)
+// src: HAVOK_LIB 0x00e44d50
+void hkpGunProjectile::setHitListening(bool on)
 {
     if (on != (m_flags.m_kStorage >> 2 & 1))
     {
@@ -160,7 +161,7 @@ void hkpGunProjectile::ReleaseWorld()
     if (m_kCollisionBody)
     {
         if (m_kCollisionBody->m_pOwningWorld)
-            FUN_00e44cc0();
+            removeFromWorld_00e44cc0();
         m_kCollisionBody->removeReference();
         m_kCollisionBody = 0;
     }
@@ -171,7 +172,7 @@ void hkpProjectileGun::ApplyToAll(float value)
 {
     int count = m_kRigidBodies.m_iElementCount;
     for (int i = 0; i < count; ++i)
-        m_kRigidBodies[i]->FUN_00e44d20(value);
+        m_kRigidBodies[i]->update_00e44d20(value);
 }
 
 // @fnv 0x00e44e40
@@ -207,11 +208,12 @@ void hkpGunProjectile::ResetVtables()
 
 // Calls ApplyToAll with a, then ClearProjectileFlags, then FUN_00e44ef0; b through f are unused.
 // @fnv 0x00e44f30
-void hkpProjectileGun::FUN_00e44f30(float a, int b, int c, int d, int e, int f)
+// src: HAVOK_LIB 0x00e44f30
+void hkpProjectileGun::onUpdate(float a, int b, int c, int d, int e, int f)
 {
     ApplyToAll(a);
     ClearProjectileFlags();
-    FUN_00e44ef0();
+    removeDestroyedProjectiles();
 }
 
 // Calls FUN_00e45040, then if flags bit 0 is set deallocates this via the memory router's manager, and returns this.
@@ -222,7 +224,7 @@ void* hkpProjectileGun::FUN_00e450f0(int flags)
 
     if (flags & 1)
     {
-        hkMemoryRouter& router = FUN_00c85750();
+        hkMemoryRouter& router = hkMemoryRouter_getInstance();
         router.m_heap->blockFree(this, m_usMemSizeAndFlags);
     }
 
@@ -233,7 +235,7 @@ void* hkpProjectileGun::FUN_00e450f0(int flags)
 // @fnv 0x00e44f50
 void hkpProjectileGun::GetCallResult(unsigned int auiUnused)
 {
-    FUN_00e44eb0();
+    clearProjectiles();
 }
 
 struct V
@@ -246,17 +248,19 @@ struct V
 };
 struct C
 {
-    void __fastcall FUN_00e45090(int);
+    void __fastcall hkpGunProjectile_contactPointCallback(int);
 };
 // @fnv 0x00e45090
-void __fastcall C::FUN_00e45090(int x)
+// src: HAVOK_LIB 0x00e45090
+void __fastcall C::hkpGunProjectile_contactPointCallback(int x)
 {
     V* base = reinterpret_cast<V*>(reinterpret_cast<char*>(this) - 8);
     base->f4(x);
 }
 
 // @fnv 0x00e450b0
-void __thiscall hkpGunProjectile::FUN_00e450b0(int)
+// src: GUESS 0x00e450b0 (confidence: low)
+void __thiscall hkpGunProjectile::UpdateState_00e450b0(int)
 {
     m_flags.m_kStorage |= 2;
 }
@@ -272,7 +276,8 @@ void hkpProjectileGun::TriggerIfElapsed(int a, int b)
 }
 
 // @fnv 0x00e44cc0
-void hkpGunProjectile::FUN_00e44cc0()
+// src: HAVOK_LIB 0x00e44cc0
+void hkpGunProjectile::removeFromWorld_00e44cc0()
 {
     if (m_kCollisionBody)
     {
@@ -354,7 +359,7 @@ hkpGunProjectile* hkpGunProjectile::FUN_00e450c0(unsigned int flags)
     ResetVtables();
     if (flags & 1)
     {
-        hkMemoryRouter& router = FUN_00c85750();
+        hkMemoryRouter& router = hkMemoryRouter_getInstance();
         router.m_heap->blockFree(this, m_usMemSizeAndFlags);
     }
     return this;
@@ -500,32 +505,33 @@ __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& 
 
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return FUN_00c85750().heap();
+    return hkMemoryRouter_getInstance().heap();
 }
 
 // @fnv 0x00e44f60
-void hkpProjectileGun::FUN_00e44f60(hkpGunProjectile* entity)
+// src: HAVOK_LIB 0x00e44f60
+void hkpProjectileGun::addProjectile(hkpGunProjectile* entity)
 {
     entity->addReference();
     m_kRigidBodies.pushBack(entity);
-    entity->FUN_00e44c90(static_cast<hkpWorld*>(m_pOwningWorld));
+    entity->addToWorld_00e44c90(static_cast<hkpWorld*>(m_pOwningWorld));
 }
 
 // @fnv 0x00e45040
 hkpProjectileGun::~hkpProjectileGun() throw()
 {
-    FUN_00e44eb0();
+    clearProjectiles();
 }
 
 class FUN_00e46e80
 {
   public:
     FUN_00e46e80() throw();
-    void FUN_00e45460(void* world) throw();
+    void hkQueue_hkpRigidBody_setCapacity(void* world) throw();
 
     static void* operator new(unsigned int n)
     {
-        return FUN_00c85750().heap().blockAlloc(n);
+        return hkMemoryRouter_getInstance().heap().blockAlloc(n);
     }
     static void operator delete(void* p);
 
@@ -561,7 +567,7 @@ FUN_00e46f20::FUN_00e46f20(FinishingFlag flag) throw() : FUN_00e466a0(flag)
     {
         unk08 = 1;
         m_helper = new FUN_00e46e80();
-        m_helper->FUN_00e45460(m_pOwningWorld);
+        m_helper->hkQueue_hkpRigidBody_setCapacity(m_pOwningWorld);
     }
 }
 
@@ -571,16 +577,18 @@ hkpProjectileGun::hkpProjectileGun(void* pkWorld) : hkpFirstPersonGun(pkWorld)
 
 // Registers the offset-8 contact listener when enabled, then adds the collision body to the world.
 // @fnv 0x00e44c90
-void hkpGunProjectile::FUN_00e44c90(hkpWorld* scene) throw()
+// src: HAVOK_LIB 0x00e44c90
+void hkpGunProjectile::addToWorld_00e44c90(hkpWorld* scene) throw()
 {
     if (m_flags.m_kStorage & 4)
         m_kCollisionBody->AddContactListener(static_cast<hkpContactListener*>(this));
-    scene->FUN_00c914d0(m_kCollisionBody, 1);
+    scene->hkpWorld_addEntity(m_kCollisionBody, 1);
 }
 
 // Iterates m_kRigidBodies and calls FUN_00e44c70 on each item whose offset-0x14 float field exceeds value.
 // @fnv 0x00e44da0
-void __thiscall hkpProjectileGun::FUN_00e44da0(float value)
+// src: HAVOK_LIB 0x00e44da0
+void __thiscall hkpProjectileGun::destroyAgedProjectiles(float value)
 {
     int count = m_kRigidBodies.m_iElementCount;
     int index = 0;
@@ -601,7 +609,8 @@ void __thiscall hkpProjectileGun::FUN_00e44da0(float value)
 
 // Adds elapsed time and invokes the update callback while the projectile is active.
 // @fnv 0x00e44d20
-void hkpGunProjectile::FUN_00e44d20(float value)
+// src: HAVOK_LIB 0x00e44d20
+void hkpGunProjectile::update_00e44d20(float value)
 {
     if ((m_flags.m_kStorage & 1) == 0)
     {
@@ -612,7 +621,8 @@ void hkpGunProjectile::FUN_00e44d20(float value)
 
 // Destroys and releases every projectile, then clears the array count.
 // @fnv 0x00e44eb0
-void hkpProjectileGun::FUN_00e44eb0() throw()
+// src: HAVOK_LIB 0x00e44eb0
+void hkpProjectileGun::clearProjectiles() throw()
 {
     int count = m_kRigidBodies.m_iElementCount;
     for (int i = 0; i < count; ++i)
@@ -642,7 +652,8 @@ __forceinline void eraseProjectile(hkArray<hkpGunProjectile*>& a, int i)
 
 // For each item in m_kRigidBodies whose flags bit 0 is set, calls FUN_00c905b0 on it and removes it from the array.
 // @fnv 0x00e44ef0
-void hkpProjectileGun::FUN_00e44ef0()
+// src: HAVOK_LIB 0x00e44ef0
+void hkpProjectileGun::removeDestroyedProjectiles()
 {
     int count = m_kRigidBodies.m_iElementCount;
     for (int i = 0; i < count; ++i)

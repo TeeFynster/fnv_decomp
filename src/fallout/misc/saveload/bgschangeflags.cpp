@@ -23,7 +23,7 @@ void BGSChangeFlagsState::CombineFlags(bool enabled)
 // @fnv 0x00841120
 LocalFormChangeMask LocalFormChangeMask::HasFormChanged(LocalFormChangeMask changes, LocalFormChangeMask forced, int type, bool enabled)
 {
-    ((FormChangeRecord*)&changes)->FUN_00562210(forced.FUN_00559450());
+    ((FormChangeRecord*)&changes)->FUN_00562210(forced.Modelloader_GetReferencedThis());
     ((FormChangeRecord*)&changes)->FUN_00562210(0xffff0000);
     if (enabled)
     {
@@ -488,7 +488,7 @@ bool BGSChangeFlags::TestFormChangeFlags(TESForm* apForm)
         {
             bKeep2 = true;
         }
-        if (pRef->FUN_0057b790())
+        if (pRef->TESObjectREFR_IsCellLoaded())
         {
             if (Test(0x10000000))
             {

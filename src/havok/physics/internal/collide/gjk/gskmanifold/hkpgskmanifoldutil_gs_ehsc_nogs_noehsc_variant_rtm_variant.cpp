@@ -64,8 +64,8 @@ struct S_00dad4d0_Set
     }
 };
 bool FindAndPromoteEntry(S_00dad4d0_Set* set, S_00dad4d0_Key* key);
-void __fastcall FUN_00dae220(int unused, S_00dad640_Set* set);
-void __cdecl FUN_00dae340(S_00dad640_Set* set, unsigned int index);
+void __fastcall hkGskManifold_garbageCollect(int unused, S_00dad640_Set* set);
+void __cdecl _hkGskManifold_removePoint(S_00dad640_Set* set, unsigned int index);
 #include <xmmintrin.h>
 extern float DAT_0104da48;
 struct __declspec(align(16)) S_00daee00_Vec
@@ -110,7 +110,7 @@ struct S_00daee00_Point
 struct S_00daee00
 {
     S_00daee00_Point points[5];
-    int FUN_00daee00();
+    int hkGskManifold_findRedundant5thPoint();
 };
 struct S_00dad720_Vec
 {
@@ -154,7 +154,7 @@ static __forceinline __m128 Dot3_3vs3(const __m128& a0, const __m128& b0, const 
     m2 = ctmp;
     return _mm_add_ps(_mm_add_ps(m0, m1), m2);
 }
-static int FUN_00dad720(S_00dad720_Rec* rec, S_00dad720_Vec* vecs, S_00dad720_Out* out);
+static int Object_ProcessAndReturnValue_00dad720(S_00dad720_Rec* rec, S_00dad720_Vec* vecs, S_00dad720_Out* out);
 volatile int g_rec;
 volatile int g_vecs;
 volatile int g_out;
@@ -177,7 +177,7 @@ struct S_00dae220_Set
     unsigned char unk3;
     S_00dae220_Entry entries[1];
 };
-void __fastcall FUN_00dae220(int unused, S_00dae220_Set* set);
+void __fastcall hkGskManifold_garbageCollect(int unused, S_00dae220_Set* set);
 extern "C" void _ReadWriteBarrier(void);
 struct ContactManifold
 {
@@ -199,7 +199,7 @@ struct ContactRecord
 struct ContactCache
 {
     ContactRecord points[4];
-    int FUN_00daee00();
+    int hkGskManifold_findRedundant5thPoint();
 };
 struct ContactContext
 {
@@ -230,10 +230,11 @@ static inline S_00dad4d0_Entry& ContactEntry(ContactManifold* set, unsigned inde
 {
     return *reinterpret_cast<S_00dad4d0_Entry*>(reinterpret_cast<char*>(set) + 4 + index * 8);
 }
-static void __fastcall FUN_00dae220(int, ContactManifold* set);
-int FUN_00daf1e0(ContactManifold* set, void* a, void* b, void* c, ContactContext* context, S_00dad4d0_Key* key,
+static void __fastcall hkGskManifold_garbageCollect(int, ContactManifold* set);
+int hkGskManifold_addPoint(ContactManifold* set, void* a, void* b, void* c, ContactContext* context, S_00dad4d0_Key* key,
                  ContactRecord* point, ContactCache* cache, ContactManager* manager, int defer);
-static __declspec(noinline) void __fastcall FUN_00dae220(int, ContactManifold* set)
+// src: COMMUNITY 0x00dae220
+static __declspec(noinline) void __fastcall hkGskManifold_garbageCollect(int, ContactManifold* set)
 {
     __declspec(align(16)) unsigned int usedWords[4];
     _mm_store_ps(reinterpret_cast<float*>(usedWords), _mm_setzero_ps());
@@ -808,7 +809,8 @@ __forceinline void downshift(Manifold& manifold, int oldCount, int newCount)
     for (int n = (manifold.verticesA + manifold.verticesB - 1) >> 1; n >= 0; --n)
         *dst++ = *src++;
 }
-static __declspec(noinline) void FUN_00dae220(Manifold* manifold)
+// src: COMMUNITY 0x00dae220
+static __declspec(noinline) void hkGskManifold_garbageCollect(Manifold* manifold)
 {
     unsigned char used[16] = {0};
     unsigned int pointCount = manifold->count;
@@ -851,7 +853,8 @@ static __declspec(noinline) void FUN_00dae220(Manifold* manifold)
 }
 
 // @fnv 0x00dae3a0
-void __cdecl FUN_00dae3a0(Manifold& manifold, const WorkData& data, int start, ProcessOutput& output, Manager* mgr)
+// src: COMMUNITY 0x00dae3a0
+void __cdecl hkGskManifold_verifyAndGetPoints(Manifold& manifold, const WorkData& data, int start, ProcessOutput& output, Manager* mgr)
 {
     unsigned int oldCount = manifold.count;
     unsigned int count = oldCount;
@@ -892,6 +895,6 @@ void __cdecl FUN_00dae3a0(Manifold& manifold, const WorkData& data, int start, P
     {
         manifold.count = static_cast<unsigned char>(count);
         downshift(manifold, oldCount, count);
-        FUN_00dae220(&manifold);
+        hkGskManifold_garbageCollect(&manifold);
     }
 }

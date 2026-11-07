@@ -103,15 +103,15 @@ public:
     void InitFromSource(TESBoundObject*);
     void LoadGame(void*);
 
-    bool FUN_007df210();
-    bool FUN_00833c20();
+    bool HasConditions();
+    bool ActiveEffect_IsActive();
     float FUN_007df1f0();
-    void FUN_00693d50(float);
-    void FUN_00804cb0(float);
+    void BaseProcess_SetLastTimeProcessed(float);
+    void ActiveEffect_SetMagnitude(float);
     MagicTarget* FUN_0059bb30();
     void* FUN_006733e0();
     MagicItem* FUN_0044ddc0();
-    EffectItem* FUN_0084e3a0();
+    EffectItem* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     EffectSetting* FUN_007df1d0();
     void FUN_00808680();
     void FUN_00804bc0(float);

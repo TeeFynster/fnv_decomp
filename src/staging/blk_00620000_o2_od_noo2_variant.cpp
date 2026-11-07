@@ -11,8 +11,8 @@
 struct Vec16
 {
     __m128 unk00;
-    void FUN_00628cc0(Vec16* a, Vec16* b);
-    int FUN_00458990(int flags);
+    void hkVector4Comparison_setAnd(Vec16* a, Vec16* b);
+    int hkVector4Comparison_allAreSet(int flags);
 };
 
 struct Sub16
@@ -21,7 +21,7 @@ struct Sub16
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0C;
-    void FUN_00458a60(Vec16* out, void* other);
+    void hkVector4_compareLessThanEqual4(Vec16* out, void* other);
 };
 
 struct FUN_00628d10_cls
@@ -31,20 +31,21 @@ struct FUN_00628d10_cls
     unsigned int unk08;
     unsigned int unk0C;
     Sub16 m_sub;
-    void FUN_00458a60(Vec16* out, void* other);
-    void FUN_00622570(bool flag);
-    FUN_00628d10_cls* FUN_00628d10(FUN_00628d10_cls* a, FUN_00628d10_cls* b);
+    void hkVector4_compareLessThanEqual4(Vec16* out, void* other);
+    void UpdateState_00622570(bool flag);
+    FUN_00628d10_cls* hkAabb_contains(FUN_00628d10_cls* a, FUN_00628d10_cls* b);
 };
 
 // @fnv 0x00628d10
-FUN_00628d10_cls* FUN_00628d10_cls::FUN_00628d10(FUN_00628d10_cls* a, FUN_00628d10_cls* b)
+// src: COMMUNITY 0x00628d10
+FUN_00628d10_cls* FUN_00628d10_cls::hkAabb_contains(FUN_00628d10_cls* a, FUN_00628d10_cls* b)
 {
     __declspec(align(16)) Vec16 r0;
     __declspec(align(16)) Vec16 r1;
     __declspec(align(16)) Vec16 r2;
-    this->FUN_00458a60(&r0, b);
-    ((Sub16*)((char*)b + 0x10))->FUN_00458a60(&r1, (char*)this + 0x10);
-    r2.FUN_00628cc0(&r0, &r1);
-    a->FUN_00622570(r2.FUN_00458990(7) != 0);
+    this->hkVector4_compareLessThanEqual4(&r0, b);
+    ((Sub16*)((char*)b + 0x10))->hkVector4_compareLessThanEqual4(&r1, (char*)this + 0x10);
+    r2.hkVector4Comparison_setAnd(&r0, &r1);
+    a->UpdateState_00622570(r2.hkVector4Comparison_allAreSet(7) != 0);
     return a;
 }

@@ -96,11 +96,11 @@ public:
     unsigned int ConfigureShaderConstantMap(
         NiD3DShaderProgram*, NiGeometry*, const NiSkinInstance*, const void*, NiGeometryBufferData*,
         const NiPropertyState*, const void*, const NiTransform&, const NiBound&, unsigned int, bool);
-    void FUN_00e81d00(unsigned int);
+    void NiD3DShaderConstantMap_SetD3DRenderer(unsigned int);
     void ResetShaderConstantMap();
     void ClearShaderConstantEntries(NiTObjectArray<NiPointer<NiShaderConstantMapEntry> >*);
     void Update();
-    unsigned int FUN_00e83db0(
+    unsigned int NiD3DShaderConstantMap_SetDefinedConstant(
         Program*, NiShaderConstantMapEntry*, NiAVObject*, Skin*, NiSkinPartition::Partition*,
         void*, Properties*, Effects*, const void*, const void*, unsigned int);
 

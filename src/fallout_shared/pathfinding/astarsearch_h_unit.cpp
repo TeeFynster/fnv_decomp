@@ -4,11 +4,12 @@
 
 struct FUN_00996840_shell
 {
-    unsigned int __thiscall FUN_00996840(unsigned int a);
+    unsigned int __thiscall AStarNodeMap_GetBucketIndex(unsigned int a);
 };
 
 // @fnv 0x00996840
-unsigned int __thiscall FUN_00996840_shell::FUN_00996840(unsigned int auiValue)
+// src: COMMUNITY 0x00996840
+unsigned int __thiscall FUN_00996840_shell::AStarNodeMap_GetBucketIndex(unsigned int auiValue)
 {
     return auiValue % 0x7f7;
 }

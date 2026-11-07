@@ -183,85 +183,85 @@ public:
 
     unsigned int FUN_00441110();
     int FUN_0041ca90();
-    DurationData* FUN_0041d8a0();
+    DurationData* TESPackage_GetPackageSchedule();
     bool FUN_00441b00();
-    bool FUN_005394a0();
-    TESIdleForm* FUN_00546930();
-    bool FUN_00670ed0();
-    bool FUN_00670f40();
-    bool FUN_00670f60();
-    void FUN_00671a20(bool enabled);
-    void FUN_00671a70(bool enabled);
-    void FUN_00671ad0(bool enabled);
-    void FUN_00671b30(bool enabled);
-    void FUN_00671b90(bool enabled);
-    void FUN_00671bf0(bool enabled);
-    void FUN_00671c50(bool enabled);
-    void FUN_00671d30(LocationDescriptor* location);
-    void FUN_00671d30(PackageTarget206* target);
-    void FUN_00671e10(PackageTarget206* target);
-    bool FUN_006727b0();
-    void FUN_00672aa0(char arg);
-    Schedule206* FUN_00672d10();
-    void FUN_00672fc0(PackageTargetRecord* target);
-    void FUN_00672fc0(PackageLocation206* location);
-    bool FUN_00673890();
-    bool FUN_00674d20();
-    unsigned int FUN_006758a0(MobileObject* actor);
-    TESObjectREFR* FUN_00676140(MobileObject* actor);
+    bool TESPackage_GetLockDoorsAtStart();
+    TESIdleForm* TESPackage_GetOnBeginIdle();
+    bool GetUnlockDoorsAtStart();
+    bool GetLockDoorsAtLocation();
+    bool GetUnlockDoorsAtLocation();
+    void SetDrawWeaponFlag(bool enabled);
+    void SandboxSetLocationIsLinkedRef(bool enabled);
+    void SandboxSetAllowEating(bool enabled);
+    void SandboxSetAllowSleeping(bool enabled);
+    void SandboxSetAllowConversation(bool enabled);
+    void SandboxSetAllowIdleMarkers(bool enabled);
+    void SandboxSetAllowFurniture(bool enabled);
+    void SetPackageLocation(LocationDescriptor* location);
+    void SetPackageLocation(PackageTarget206* target);
+    void TESPackage_SetPackageSecondLocation(PackageTarget206* target);
+    bool GetDialogueDoNotControlTarget();
+    void SetDialogueDoNotControlTarget(char arg);
+    Schedule206* GetOrCreateUseWeaponPackageData();
+    void SetPackageTarget(PackageTargetRecord* target);
+    void SetPackageTarget(PackageLocation206* location);
+    bool SandboxGetLocationIsLinkedRef();
+    bool AmbushGetLocationAtLinkedRef();
+    unsigned int GetSearchLocationRadius(MobileObject* actor);
+    TESObjectREFR* GetLocationReference_00676140(MobileObject* actor);
     unsigned int FUN_00676280(MobileObject* actor);
-    bool FUN_00677760(Actor* actor);
+    bool HasActorCompletedPackage(Actor* actor);
     bool FUN_00678610();
-    bool FUN_0067a480();
-    void FUN_0067a1b0(TESPackage* package);
-    void FUN_0067a1b0(void* context);
-    bool FUN_0067efd0();
-    bool FUN_0067a460();                              // 0x0067a460: package flags (+0x1c) & 0x800000
+    bool GetAlwaysRun();
+    void CopyAllFlags(TESPackage* package);
+    void CopyAllFlags(void* context);
+    bool GetMustComplete();
+    bool TESPackage_GetDrawWeaponFlag();                              // 0x0067a460: package flags (+0x1c) & 0x800000
     bool FUN_008e9620();                              // 0x008e9620 (HighProcess::ProcessActivate 0x008e9640)
-    const NiPoint3 FUN_00675360(MobileObject* actor); // 0x00675360
-    void* FUN_00674fd0(MobileObject* actor);          // 0x00674fd0
-    bool FUN_008eea80();                              // 0x008eea80
+    const NiPoint3 TESPackage_GetSecondLocationCoord(MobileObject* actor); // 0x00675360
+    void* TESPackage_GetSecondLocationWorld(MobileObject* actor);          // 0x00674fd0
+    bool TESPackage_AmbushGetHideWhileAmbushing();                              // 0x008eea80
     bool IsFlag28Clear();                             // 0x0067a7e0
     bool IsFlagBitSet();                              // 0x008840d0: package flags (+0x1c) & 1
-    int FUN_004036b0();                               // 0x004036b0: returns +0xb8
+    int TES_QPlaceableWaterCount();                               // 0x004036b0: returns +0xb8
     TESPatrolPackageData* GetPatrolData();            // 0x00675950
     bool IsTargetInRange(Actor* actor, float radius); // 0x00677570
     PackageTargetRecord* FUN_00671d10();             // 0x00671d10
     bool FUN_00674d40();                              // 0x00674d40
-    unsigned int FUN_00672930();                      // 0x00672930
-    NiPoint3 FUN_00675de0(Actor* actor);              // 0x00675de0
-    void FUN_00675de0(NiPoint3& out, Actor* actor);   // 0x00675de0: the same call written with its return slot
-    void* FUN_00675c20(Actor* actor);                 // 0x00675c20
+    unsigned int TESPackage_GetInitialTargetCount();                      // 0x00672930
+    NiPoint3 TESPackage_GetLocationCoord(Actor* actor);              // 0x00675de0
+    void TESPackage_GetLocationCoord(NiPoint3& out, Actor* actor);   // 0x00675de0: the same call written with its return slot
+    void* TESPackage_GetLocationCell(Actor* actor);                 // 0x00675c20
     int FUN_00675a50(Actor* actor, float value, int flags); // 0x00675a50
-    bool FUN_008a6290(); // 0x008a6290
-    TESObjectREFR* FUN_004030b0(); // 0x004030b0
+    bool TESPackage_GetWaiting(); // 0x008a6290
+    TESObjectREFR* CombatController_GetTarget(); // 0x004030b0
     float FUN_006787e0(Actor*, int, int); // 0x006787e0, explicit folded arguments
-    bool FUN_008e30e0(); // 0x008e30e0
-    bool FUN_008e3100(); // 0x008e3100
+    bool TESPackage_SearchGetAllowBuying(); // 0x008e30e0
+    bool TESPackage_SearchGetAllowKilling(); // 0x008e3100
     bool FUN_008e3120(); // 0x008e3120
     LocationDescriptor* FUN_00672dd0(); // 0x00672dd0
-    void* FUN_006751a0(MobileObject*); // 0x006751a0
+    void* TESPackage_GetSecondLocationCell(MobileObject*); // 0x006751a0
     void* FUN_00675a50(Actor*); // 0x00675a50: the original uses folded stack arguments
     float FUN_00678670(MobileObject*, bool); // 0x00678670
     bool FUN_00672710(); // 0x00672710
-    TESPackage* FUN_00672760(); // 0x00672760
-    bool FUN_00672800(); // 0x00672800
-    template <class Point> Point FUN_00675de0(Actor*); // 0x00675de0: aggregate result ABI
+    TESPackage* TESPackage_GetDialogueTopic(); // 0x00672760
+    bool TESPackage_GetDialogueNoHeadtrack(); // 0x00672800
+    template <class Point> Point TESPackage_GetLocationCoord(Actor*); // 0x00675de0: aggregate result ABI
     float FUN_00678670(Actor*); // 0x00678670: folded stack arguments
-    bool FUN_008840f0();
+    bool TESPackage_GetPCContinue();
     void FUN_00826b40(bool); // 0x00826b40
     void FUN_00826b90(bool); // 0x00826b90
     int FUN_006733e0(); // 0x006733e0
     void FUN_00673400(int); // 0x00673400
     bool FUN_008a67d0();
-    bool FUN_008b1ff0();
-    bool FUN_008dade0();
-    TESTopic* FUN_00903bb0();
-    Script* FUN_00903bd0();
-    TESTopic* FUN_00903cd0();
-    TESIdleForm* FUN_00903de0();
-    TESTopic* FUN_00903e00();
-    Script* FUN_00903e20();
+    bool TESPackage_GetMustReachLocation();
+    bool TESPackage_GetNoIdlesFlag();
+    TESTopic* TESPackage_GetOnBeginTopicInfo();
+    Script* TESPackage_GetOnBeginScript();
+    TESTopic* TESPackage_GetOnChangeTopicInfo();
+    TESIdleForm* TESPackage_GetOnEndIdle();
+    TESTopic* TESPackage_GetOnEndTopicInfo();
+    Script* TESPackage_GetOnEndScript();
     void F671d30(PkgLocation* location);
     void F672fc0(PkgTarget* target);
     void F984f60(int arg);

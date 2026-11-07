@@ -37,7 +37,7 @@ public:
     void ClearSweptEntry(int index);
     void RemoveWorldData(int);
     void NotifyItems();
-    void FUN_00d64950(int a);
+    void RemoveWorldDataIfFound(int a);
 
     union
     {

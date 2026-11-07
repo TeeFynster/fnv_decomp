@@ -25,13 +25,13 @@ void __thiscall FUN_00865aa0_shell::SetFlags(unsigned int a)
     c = (c & 0x3f) | (a << 6);
 }
 
-unsigned int __cdecl FUN_00845d40(unsigned int);
-unsigned int __cdecl FUN_00845d70(unsigned int);
+unsigned int __cdecl GetSizeTypeForSize(unsigned int);
+unsigned int __cdecl GetSizeTypeSize(unsigned int);
 // Calls FUN_0084e3a0, passes the result through FUN_00845d40 and FUN_00845d70, then returns that value plus 9.
 // @fnv 0x00865b10
 unsigned int __thiscall BGSSaveFormBuffer::GetSize()
 {
-    unsigned int value = FUN_00845d70(FUN_00845d40(FUN_0084e3a0()));
+    unsigned int value = GetSizeTypeSize(GetSizeTypeForSize(GetHavokWorldObjectCountInSceneGraph_0084e3a0()));
     return value + 9;
 }
 
@@ -66,7 +66,7 @@ struct PackedFormID
 };
 struct BGSFormInfo
 {
-    void __thiscall FUN_00853670(unsigned int a);
+    void __thiscall BGSSaveLoadFormInfo_SetFormType(unsigned int a);
 };
 // Stores the form ID, change flags, form type and version into this save-form buffer's fields.
 // @fnv 0x00865ad0
@@ -75,7 +75,7 @@ void BGSSaveFormBuffer::InitFormEntry(unsigned int aiFormID, unsigned int aiChan
 {
     reinterpret_cast<PackedFormID*>(Header.formID)->WriteFormIDBytes(aiFormID);
     Header.changeFlags = aiChangeFlags;
-    reinterpret_cast<BGSFormInfo*>(&Header.formInfo)->FUN_00853670(aeFormType);
+    reinterpret_cast<BGSFormInfo*>(&Header.formInfo)->BGSSaveLoadFormInfo_SetFormType(aeFormType);
     Header.version = acVersion;
 }
 
@@ -97,8 +97,8 @@ void __cdecl WriteValueByType(void*, unsigned int, unsigned int);
 // @fnv 0x00865a30
 void BGSSaveFormBuffer::Save(SaveLoadFile* buffer)
 {
-    unsigned int secondValue = FUN_0084e3a0();
-    unsigned int firstValue = FUN_00845d40(secondValue);
+    unsigned int secondValue = GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    unsigned int firstValue = GetSizeTypeForSize(secondValue);
     reinterpret_cast<FUN_00865aa0_shell*>(&Header.formInfo)->SetFlags(firstValue);
     buffer->WriteToFile(&Header, 9);
     WriteValueByType(buffer, secondValue, firstValue);

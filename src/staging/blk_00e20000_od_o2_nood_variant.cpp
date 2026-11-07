@@ -79,10 +79,11 @@ struct Hull {
     Vertex vertices[55];
     Face* freeFaces[100];
     Face faces[4];
-    void FUN_00e2d440();
+    void ProcessEntries_00e2d440();
 };
 // @fnv 0x00e2d440
-void Hull::FUN_00e2d440() {
+// src: GUESS 0x00e2d440 (confidence: low)
+void Hull::ProcessEntries_00e2d440() {
     faceCount = 4;
     InitEntry* init = DAT_010ed0f0;
     Face* end = faces + 4;
@@ -123,7 +124,8 @@ struct E29Out1 { E29Item item; void* ptr30; int one34; int zero38; char unk3c; c
 struct E29Out2 { E29Item items[4]; int count; char flagC4; void* ptrs[4]; int unkD8; int unkDC; int zeros[4]; int unkF0; };
 
 // @fnv 0x00e29a10
-void FUN_00e29a10(E29SrcList* src, const LocalM128* posA, const LocalM128* posB, char* base, E29Out1* out1, int* outCount1, E29Out2* out2, int* outCount2)
+// src: GUESS 0x00e29a10 (confidence: low)
+void Runtime_ProcessEntries_00e29a10(E29SrcList* src, const LocalM128* posA, const LocalM128* posB, char* base, E29Out1* out1, int* outCount1, E29Out2* out2, int* outCount2)
 {
     int n1 = 0;
     int n2 = 0;
@@ -172,7 +174,8 @@ typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4];
 extern "C" { LocalM128 _mm_load_ps(const LocalM128*); void _mm_store_ps(LocalM128*,LocalM128); LocalM128 _mm_shuffle_ps(LocalM128,LocalM128,int); void _ReadWriteBarrier(); }
 
 // @fnv 0x00e2ab00
-LocalM128* FUN_00e2ab00(LocalM128* src, LocalM128* out1, LocalM128* out2) {
+// src: GUESS 0x00e2ab00 (confidence: low)
+LocalM128* Object_ProcessAndReturnValue_00e2ab00(LocalM128* src, LocalM128* out1, LocalM128* out2) {
     out1[0] = src[0];
     out2[0] = src[1];
     out1[1] = src[3];
@@ -213,7 +216,7 @@ inline void* operator new(unsigned int, void* p) { return p; }
 struct __declspec(align(16)) Key_e3a1 {
     float m_ax, m_ay, m_az, m_aw;
     float m_bx, m_by, m_bz, m_bw;
-    Key_e3a1* FUN_00e39e50();
+    Key_e3a1* InitializeFields_00e39e50();
 };
 
 // This instantiation fetches the router before the capacity check and its heap only when growing.
@@ -232,17 +235,18 @@ struct Track_e3a1 {
     int m_numKeys;
     int m_pRayCursor;
     hkArray<Key_e3a1> m_keys;
-    void FUN_00e3a1e0(int numKeys);
+    void hkpTyremarksWheel_setNumPoints(int numKeys);
 };
 
 // @fnv 0x00e3a1e0
-void Track_e3a1::FUN_00e3a1e0(int numKeys)
+// src: HAVOK_LIB 0x00e3a1e0
+void Track_e3a1::hkpTyremarksWheel_setNumPoints(int numKeys)
 {
     m_pRayCursor = numKeys;
     m_numKeys = 0;
     for (int i = 0; i < m_pRayCursor; i++) {
         Key_e3a1 key;
-        key.FUN_00e39e50();
+        key.InitializeFields_00e39e50();
         m_keys.pushBack(key);
     }
 }
@@ -255,8 +259,8 @@ extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 extern int DAT_010dbacc, DAT_010dbad8, DAT_010dbae4, DAT_010dbaf8;
 extern int DAT_010ccfac, DAT_010ccfa0, DAT_010ccf8c, DAT_010c3bb8;
 extern void* DAT_011b3830[];
-void __cdecl FUN_00d1bb50(void*, void*, void*, void*, void*, void*, void*, void*, void*, int) throw();
-void __cdecl FUN_00d1d490(void*, void*, int, void*, void*, void*) throw();
+void __cdecl Runtime_UpdateState_00d1bb50(void*, void*, void*, void*, void*, void*, void*, void*, void*, int) throw();
+void __cdecl hkAabbTreeQueryUtils_ForwardCall_00d1d490(void*, void*, int, void*, void*, void*) throw();
 typedef LocalM128 FourFloatVector;
 __forceinline FourFloatVector packFractions(float x,float y,float z,float w) { FourFloatVector v; v.m128_f32[0]=x; v.m128_f32[1]=y; v.m128_f32[2]=z; v.m128_f32[3]=w; return v; }
 struct RaySource {
@@ -320,10 +324,11 @@ struct FractionValues { float x,y,z,w; };
 struct FractionArg { FourFloatVector* ptr; };
 struct Owner { unsigned unk00, unk04, unk08, unk0c; void* context; };
 // @fnv 0x00e2b510
-void __cdecl FUN_00e2b510(Owner* owner, RayBatch* input, int mode, FourFloatVector& fractions) {
+// src: GUESS 0x00e2b510 (confidence: low)
+void __cdecl Runtime_ProcessEntries_00e2b510(Owner* owner, RayBatch* input, int mode, FourFloatVector& fractions) {
     if (!owner) return;
     Bundle bundle;
-    FUN_00d1bb50(&bundle, &input->rays[0].from, &input->rays[0].to,
+    Runtime_UpdateState_00d1bb50(&bundle, &input->rays[0].from, &input->rays[0].to,
         &input->rays[1].from, &input->rays[1].to, &input->rays[2].from,
         &input->rays[2].to, &input->rays[3].from, &input->rays[3].to, 15);
     LocalRay rays[4];
@@ -347,7 +352,7 @@ void __cdecl FUN_00e2b510(Owner* owner, RayBatch* input, int mode, FourFloatVect
         pointers[i] = &collectors[i].ray;
     }
     bundle.dispatch = DAT_011b3830[input->type];
-    FUN_00d1d490(owner, owner->context, 0, &bundle, pointers, values);
+    hkAabbTreeQueryUtils_ForwardCall_00d1d490(owner, owner->context, 0, &bundle, pointers, values);
     for (int i = 0; i < 4; i++) input->hits[i] = rays[i].zero;
     fractions = _mm_setr_ps(values[0], values[1], values[2], values[3]);
     volatile Collector* p = collectors + 4;
@@ -382,7 +387,7 @@ public:
 class JobTarget
 {
 public:
-    void FUN_00d04380();
+    void hkSemaphore_acquire();
 };
 
 struct __declspec(align(16)) AutoJob
@@ -480,7 +485,7 @@ struct SplitResult
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
 };
 
-void __cdecl FUN_00e29b80(int a, int b, int n, void* p1, void* p2, void* p3, SplitResult* pOut);
+void __cdecl Object_ProcessEntries_00e29b80(int a, int b, int n, void* p1, void* p2, void* p3, SplitResult* pOut);
 
 __forceinline void ProfMark(const char* pName)
 {
@@ -555,7 +560,8 @@ template <class T> __forceinline void ArrClearFree(hkArrayBase<T>& arr)
 }
 
 // @fnv 0x00e2a390
-void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pSrc,
+// src: XBOX_PDB 0x00e2a390
+void __cdecl hkTreeBundleRayCastUtil_startWorldRayCastWithAutoBundleJobs(int a, int b, int n, float f1, float f2, JobSource* pSrc,
                           JobQueue* m_pPrimaryTaskProcessor, JobWaiter* pWaiter, int iParam, bool bAuto)
 {
     if (bAuto)
@@ -600,7 +606,7 @@ void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pS
         ProfMark("StWaitThreads");
         pWaiter->Wait();
         ProfMark("lt");
-        pSrc->m_p10->FUN_00d04380();
+        pSrc->m_p10->hkSemaphore_acquire();
         return;
     }
 
@@ -637,7 +643,7 @@ void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pS
         }
     }
     SplitResult out;
-    FUN_00e29b80(a, b, n, pData1, pData2, pData3, &out);
+    Object_ProcessEntries_00e29b80(a, b, n, pData1, pData2, pData3, &out);
     ArrInit(pData4, uiCap4, 8);
     ArrInit(pData5, uiCap5, 8);
 
@@ -677,7 +683,7 @@ void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pS
     ProfMark("TtAutoBundleJobs");
     pWaiter->Start(m_pPrimaryTaskProcessor, 0xb);
     pWaiter->Wait();
-    pSrc->m_p10->FUN_00d04380();
+    pSrc->m_p10->hkSemaphore_acquire();
     ProfMark("Et");
 
     ArrFree(pData5, uiCap5);
@@ -699,7 +705,8 @@ namespace SplineMax {
 struct MaxVec4 { LocalM128 value; };
 }
 // @fnv 0x00e314c0
-SplineMax::MaxVec4 __cdecl FUN_00e314c0(const hkArrayBase<SplineMax::MaxVec4>& input)
+// src: GUESS 0x00e314c0 (confidence: low)
+SplineMax::MaxVec4 __cdecl hkArrayBase_ProcessEntries_00e314c0(const hkArrayBase<SplineMax::MaxVec4>& input)
 {
     SplineMax::MaxVec4 result = input.m_data[0];
     const int count = input.m_iElementCount;
@@ -717,7 +724,8 @@ struct MinVec4 {
     void setMin4(const MinVec4& a, const MinVec4& b) { m_vComponents = (S31470_Intrinsics::_mm_min_ps)(a.m_vComponents, b.m_vComponents); }
 };
 // @fnv 0x00e31470
-MinVec4 __cdecl FUN_00e31470(const hkArrayBase<MinVec4>& arr)
+// src: GUESS 0x00e31470 (confidence: low)
+MinVec4 __cdecl hkArrayBase_ProcessEntries_00e31470(const hkArrayBase<MinVec4>& arr)
 {
     MinVec4 r = arr.m_data[0];
     for (int i = 1; i < arr.m_iElementCount; i++)

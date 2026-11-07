@@ -90,21 +90,21 @@ public:
     bool IsEmpty() const;
 
     unsigned int FUN_00441110();
-    unsigned int FUN_005a4320();
-    PathingGraphNode* FUN_006b05a0();
-    bool FUN_006b05d0();
+    unsigned int PathingSolution_GetVirtualNodeCount();
+    PathingGraphNode* PathingSolution_GetLastNode();
+    bool IsIncomplete();
     void* FUN_006c90d0(const PathingLocation&);
-    void FUN_006c9350();
-    void FUN_006c93a0();
-    LocationDescriptor* FUN_006e78b0(unsigned int);
-    BaseProcess* FUN_006e78b0(unsigned int, NiPoint3&);
-    const PathingGraphNode* FUN_006e7970(unsigned int);
-    float FUN_006e7990(int);
-    bool FUN_006e7e70(float, float, bool, float*, NiPoint3*);
-    bool FUN_006e7e70(float, float, int, int*, NiPoint3*);
-    bool FUN_006e7e70(float, float, int, float*, NiPoint3*);
-    int FUN_009611e0();
-    bool FUN_009dc530();
+    void RemoveLastNode();
+    void PathingSolution_ClearCurrentDetailedPath();
+    LocationDescriptor* GetVirtualNode_006e78b0(unsigned int);
+    BaseProcess* GetVirtualNode_006e78b0(unsigned int, NiPoint3&);
+    const PathingGraphNode* GetNode_006e7970(unsigned int);
+    float ComputeSplineLength(int);
+    bool FindPointOnPath(float, float, bool, float*, NiPoint3*);
+    bool FindPointOnPath(float, float, int, int*, NiPoint3*);
+    bool FindPointOnPath(float, float, int, float*, NiPoint3*);
+    int NiAVObject_GetParent();
+    bool PathingSolution_IsValid();
 
     union
     {

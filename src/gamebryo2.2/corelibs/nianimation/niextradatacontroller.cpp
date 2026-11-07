@@ -26,7 +26,8 @@ void NiPSysModifierCtlr::LoadBinary(NiStream& stream)
 }
 
 // @fnv 0x00a57400
-void NiExtraDataController::FUN_00a57400(NiStream& kStream)
+// src: XBOX_PDB 0x00a57400
+void NiExtraDataController::PostLinkObject_00a57400(NiStream& kStream)
 {
     NiObject::LinkObject(kStream);
     if (m_pkTarget)
@@ -64,7 +65,7 @@ extern char const* const g_011f3e6c_arg1;
 
 void __stdcall _FUN_00a390a0(StrArr* array);
 void* __cdecl _FUN_00a7d330(void* value);
-char* __cdecl FUN_00a7d5e0(char const* lhs, char const* rhs);
+char* __cdecl NiGetViewerString_00a7d5e0(char const* lhs, char const* rhs);
 
 // @fnv 0x00a57420
 void __fastcall GetExtraDataViewerStrings(NiExtraDataController* self, int, StrArr* strings)
@@ -81,7 +82,7 @@ void __fastcall GetExtraDataViewerStrings(NiExtraDataController* self, int, StrA
     array->SetAt(index, value);
 
     char const* pcExtraDataName = self->m_kDataName.m_kHandle;
-    value = FUN_00a7d5e0("Extra Data Name", pcExtraDataName);
+    value = NiGetViewerString_00a7d5e0("Extra Data Name", pcExtraDataName);
 
     index = array->m_usSize;
     if (index >= array->m_usMaxSize)
@@ -153,7 +154,7 @@ struct TypeRecord
     TypeRecord* next;
 };
 
-void* __fastcall FUN_00a62660(void* item);
+void* __fastcall GetFilename_00a62660(void* item);
 
 extern char g_011f4304;
 extern unsigned int g_0109b220;
@@ -181,7 +182,7 @@ bool __fastcall HasMatchingExtraData(NiExtraDataController* self, int, NiObjectN
         return false;
     for (unsigned int uiIndex = 0; uiIndex < pCandidate->m_usExtraDataSize; ++uiIndex)
     {
-        void* pResolved = FUN_00a62660(pCandidate->m_ppkExtra[(unsigned short)uiIndex]);
+        void* pResolved = GetFilename_00a62660(pCandidate->m_ppkExtra[(unsigned short)uiIndex]);
         if (*(void**)pResolved == self->m_kDataName.m_kHandle)
             return true;
     }

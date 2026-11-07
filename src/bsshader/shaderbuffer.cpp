@@ -73,7 +73,7 @@ void InitializeShaderBufferTables()
 
 struct FUN_00aa4060_Manager
 {
-    void* FUN_00aa4060(void* object);
+    void* MemoryManager_Deallocate(void* object);
 };
 
 extern FUN_00aa4060_Manager DAT_011f6238;
@@ -103,12 +103,12 @@ void* FUN_00b7e2b0_Class::Destroy(unsigned char flags)
         unsigned int count = *reinterpret_cast<unsigned int*>(allocation);
 
         FUN_00ec5fce(base, 4, count, FUN_0045cec0);
-        DAT_011f6238.FUN_00aa4060(allocation);
+        DAT_011f6238.MemoryManager_Deallocate(allocation);
     }
 
     if ((flags & 1) != 0)
     {
-        DAT_011f6238.FUN_00aa4060(this);
+        DAT_011f6238.MemoryManager_Deallocate(this);
     }
 
     return this;
@@ -195,12 +195,13 @@ class SpawnedObject
     unsigned int unkFC;
     unsigned int m_100;
     void* m_104;
-    SpawnedObject* FUN_00b7fa40(void* arg1, void* arg2, unsigned int arg3);
+    SpawnedObject* ShaderBufferData_ShaderBufferData(void* arg1, void* arg2, unsigned int arg3);
 };
 
 // Stores arg3 in m_100, looks up arg3 in DAT_011f6238 and registers arg2 when both are non-zero, clears the first 0x100 bytes, and sets arg1 as owner if non-null.
 // @fnv 0x00b7fa40
-SpawnedObject* SpawnedObject::FUN_00b7fa40(void* apOwner, void* apName, unsigned int auiKey)
+// src: COMMUNITY 0x00b7fa40
+SpawnedObject* SpawnedObject::ShaderBufferData_ShaderBufferData(void* apOwner, void* apName, unsigned int auiKey)
 {
     m_100 = auiKey;
     if (auiKey != 0)

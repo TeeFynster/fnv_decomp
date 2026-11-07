@@ -49,7 +49,7 @@ struct S_00df6a30 {
     int unk0;
     int unk4;
     S_00df6a30_Inner* unk8;
-    float FUN_00df6a30();
+    float EvaluateValue_00df6a30();
 };
 struct DF6B10Event {
     int unk00;
@@ -84,7 +84,7 @@ public:
     int m_04;
     FUN_00df6a40_inner* m_08;
 
-    bool* FUN_00df6a40(bool* out);
+    bool* hkCpuWorldGetClosestPointsCollector_hasHit(bool* out);
 };
 
 
@@ -245,7 +245,7 @@ struct SiblingCls_df6a60 {
     float Call(int a);
 };
 struct FUN_00df6b30_cls {
-    unsigned char* FUN_00df6b30(unsigned char* out, int a);
+    unsigned char* hkCpuWorldGetClosestPointsCollector_addMidPhaseHit(unsigned char* out, int a);
 };
 extern float DAT_0104da48;
 extern int DAT_0108f288;
@@ -297,7 +297,7 @@ inline QueryPoint* allocateResults(PairCommand* command, const QueryCollector& c
         return 0;
     }
 }
-void FUN_00df6e00(const QueryJob* job, const QueryInput* source, PairCommand* commands, int count);
+void hkCpuPairGetClosestPointsImplementation(const QueryJob* job, const QueryInput* source, PairCommand* commands, int count);
 // FUN_00df6db0 - base-class adjustment thunk (8 bytes):
 //
 //     sub ecx, 4
@@ -326,18 +326,19 @@ SecondaryBase::SecondaryBase() {}
 Derived::Derived() : PrimaryBase(), SecondaryBase() {}
 struct DF6DC0Primary {
     virtual void vfunc00();
-    virtual void FUN_00df6dc0();
+    virtual void AdjustThisAndForward_00df6dc0();
 
     int unk04;
 };
 struct DF6DC0Secondary {
-    virtual void FUN_00df6dc0();
+    virtual void AdjustThisAndForward_00df6dc0();
 };
 struct DF6DC0Object : DF6DC0Primary, DF6DC0Secondary {
     DF6DC0Object();
 
 // @fnv 0x00df6dc0
-    virtual void FUN_00df6dc0();
+// src: GUESS 0x00df6dc0 (confidence: low)
+    virtual void AdjustThisAndForward_00df6dc0();
 };
 DF6DC0Object::DF6DC0Object()
 {
@@ -935,7 +936,8 @@ static hkUint32 __cdecl CollectAabbHitsIntoBuffers(const KdTreeNode*root,const F
 hkArray<hkPrimitiveId>::Temp*hitArray,hkKdTreeCastCollector*collector,hkPrimitiveIdIterator*hitsOut,int maxHits);};
 
 // @fnv 0x00df6b50
-JobDispatcher::JobStatus __cdecl FUN_00df6b50(JobDispatcher&jobQueue,JobDispatcher::JobQueueSlot&nextJobOut)
+// src: XBOX_PDB 0x00df6b50
+JobDispatcher::JobStatus __cdecl hkCpuWorldGetClosestPointsJob(JobDispatcher&jobQueue,JobDispatcher::JobQueueSlot&nextJobOut)
 {
 {hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "CollQueryWorldGetClosestPoints";h->setTime();mStream.setEnd((char*)(h+1));}};
 const ContactPointQueryJob&worldGetClosestPointsJob=reinterpret_cast<ContactPointQueryJob&>(nextJobOut);

@@ -22,7 +22,7 @@ public:
     ~DoorAccessData();
     void SetDoorReference(TESObjectREFR* pRef);
     bool ReadState98();
-    bool FUN_005021c0(Actor* ref, bool b);
+    bool DoorLock_IsAnOwner(Actor* ref, bool b);
     bool CanActorUseDoor(const PathingActorData* pActorData, bool bFlag);
     bool CanActorOpenDoor(const PathingActorData* pActorData, bool bFlag);
     bool CanUnlockDoor(const PathingActorData* pActorData, TESObjectREFR* pRef, bool& bNeedsKey);

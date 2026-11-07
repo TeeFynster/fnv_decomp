@@ -7,7 +7,8 @@
 #include "../../include/MemoryManager.h"
 
 // @fnv 0x00b013e0
-bool BSSearchPath::FUN_00b013e0(char* apFile)
+// src: COMMUNITY 0x00b013e0
+bool BSSearchPath::Access_00b013e0(char* apFile)
 {
     return true;
 }
@@ -18,7 +19,7 @@ extern MemoryManager g_memoryManager;
 // @fnv 0x00b01480
 void* BSSearchPath::FUN_00b01480(unsigned int flags)
 {
-    this->FUN_00aa24f0();
+    this->SetVptr00();
     if (flags & 1)
         g_memoryManager._DeallocateAlias(this);
     return this;
@@ -37,22 +38,24 @@ void FUN_00b01c40_shell::SetByteAt45(unsigned char u8)
 
 struct FUN_00b01c70_shell
 {
-    int __thiscall FUN_00b01c70(int a, int b);
+    int __thiscall BSWin32FileCache_ParseCachedFileList(int a, int b);
 };
 
 // @fnv 0x00b01c70
-int __thiscall FUN_00b01c70_shell::FUN_00b01c70(int a, int b)
+// src: COMMUNITY 0x00b01c70
+int __thiscall FUN_00b01c70_shell::BSWin32FileCache_ParseCachedFileList(int a, int b)
 {
     return 0;
 }
 
 struct FUN_00b01c80_shell
 {
-    void FUN_00b01c80(int a1);
+    void BSWin32FileCache_BeginFileCaching(int a1);
 };
 
 // @fnv 0x00b01c80
-void FUN_00b01c80_shell::FUN_00b01c80(int a1)
+// src: COMMUNITY 0x00b01c80
+void FUN_00b01c80_shell::BSWin32FileCache_BeginFileCaching(int a1)
 {}
 
 // @fnv 0x00b01c90
@@ -63,86 +66,95 @@ int BSWin32FileCache::vf05(int arg)
 
 struct FUN_00b01ca0_shell
 {
-    void FUN_00b01ca0(int a, int b);
+    void BSWin32FileCache_GetCachedFileName(int a, int b);
 };
 
 // @fnv 0x00b01ca0
-void FUN_00b01ca0_shell::FUN_00b01ca0(int a, int b)
+// src: COMMUNITY 0x00b01ca0
+void FUN_00b01ca0_shell::BSWin32FileCache_GetCachedFileName(int a, int b)
 {}
 
 struct FUN_00b01cb0_shell
 {
-    bool FUN_00b01cb0(int arg1);
+    bool BSWin32FileCache_CacheFile(int arg1);
 };
 
 // @fnv 0x00b01cb0
-bool FUN_00b01cb0_shell::FUN_00b01cb0(int arg1)
+// src: COMMUNITY 0x00b01cb0
+bool FUN_00b01cb0_shell::BSWin32FileCache_CacheFile(int arg1)
 {
     return false;
 }
 
 struct FUN_00b01cc0_shell
 {
-    void __thiscall FUN_00b01cc0(int);
+    void __thiscall BSWin32FileCache_SetPriority(int);
 };
 
 // @fnv 0x00b01cc0
-void __thiscall FUN_00b01cc0_shell::FUN_00b01cc0(int)
+// src: COMMUNITY 0x00b01cc0
+void __thiscall FUN_00b01cc0_shell::BSWin32FileCache_SetPriority(int)
 {}
 
 struct FUN_00b01cd0_shell
 {
-    void FUN_00b01cd0();
+    void BSWin32FileCache_CalculatePriority();
 };
 
 // @fnv 0x00b01cd0
-void FUN_00b01cd0_shell::FUN_00b01cd0()
+// src: COMMUNITY 0x00b01cd0
+void FUN_00b01cd0_shell::BSWin32FileCache_CalculatePriority()
 {}
 
 struct FUN_00b01ce0_shell
 {
-    void __thiscall FUN_00b01ce0(int);
+    void __thiscall BSWin32FileCache_OutputCacheDriveListing(int);
 };
 
 // @fnv 0x00b01ce0
-void __thiscall FUN_00b01ce0_shell::FUN_00b01ce0(int)
+// src: COMMUNITY 0x00b01ce0
+void __thiscall FUN_00b01ce0_shell::BSWin32FileCache_OutputCacheDriveListing(int)
 {}
 
 struct FUN_00b01cf0_shell
 {
-    void FUN_00b01cf0(float a, float b, float c, float d);
+    void BSWin32FileCache_WaitForFileCachingToFinish(float a, float b, float c, float d);
 };
 
 // @fnv 0x00b01cf0
-void FUN_00b01cf0_shell::FUN_00b01cf0(float a, float b, float c, float d)
+// src: COMMUNITY 0x00b01cf0
+void FUN_00b01cf0_shell::BSWin32FileCache_WaitForFileCachingToFinish(float a, float b, float c, float d)
 {}
 
 struct FUN_00b01d10_shell
 {
-    bool __thiscall FUN_00b01d10(int a);
+    bool __thiscall BSWin32FileCache_RunConsistencyCheck(int a);
 };
 
 // @fnv 0x00b01d10
-bool __thiscall FUN_00b01d10_shell::FUN_00b01d10(int a)
+// src: COMMUNITY 0x00b01d10
+bool __thiscall FUN_00b01d10_shell::BSWin32FileCache_RunConsistencyCheck(int a)
 {
     return 0;
 }
 
 struct FUN_00b01c60_shell
 {
-    void FUN_00b01c60();
+    void BSWin32FileCache_Shutdown();
 };
 // @fnv 0x00b01c60
-void FUN_00b01c60_shell::FUN_00b01c60()
+// src: COMMUNITY 0x00b01c60
+void FUN_00b01c60_shell::BSWin32FileCache_Shutdown()
 {}
 
 struct FUN_00b01d00_shell
 {
-    void __thiscall FUN_00b01d00();
+    void __thiscall BSWin32FileCache_WaitDuringLoadingScreen();
 };
 
 // @fnv 0x00b01d00
-void __thiscall FUN_00b01d00_shell::FUN_00b01d00()
+// src: COMMUNITY 0x00b01d00
+void __thiscall FUN_00b01d00_shell::BSWin32FileCache_WaitDuringLoadingScreen()
 {}
 
 extern MemoryManager g_00b01d20_MemoryManager;

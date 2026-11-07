@@ -18,7 +18,7 @@ class LipSyncAnimation
 
     bool ApplyToAnimationData(BSFaceGenAnimationData* animation, float endDelay);
     void* DeleteThis(unsigned int flags);
-    void FUN_004d5080();
+    void ReleaseStorage_004d5080();
     float GetNegativeMagnitude(bool, bool, bool, bool, bool);
 };
 
@@ -28,10 +28,10 @@ FNV_STATIC_ASSERT(offsetof(LipSyncAnimation, m_ppModifierFrames) == 12);
 
 extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 void __cdecl operator delete(void*);
-float __cdecl FUN_0040ebd0(float, float);
+float __cdecl BSMIN(float, float);
 
 #include "../../include/NiBinaryStream.h"
 extern "C" void* __cdecl memset(void*, int, unsigned int);
-bool __cdecl FUN_004d5880(NiBinaryStream*, char*, unsigned int);
+bool __cdecl LipSynchAnim_Decompress(NiBinaryStream*, char*, unsigned int);
 
 #endif

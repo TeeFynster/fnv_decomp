@@ -18,7 +18,7 @@ inline hkClassMember::Type hkClassMember::getType() const
     return static_cast<Type>(m_type);
 }
 
-extern "C" int __cdecl FUN_00cb10d0(const char* s);
+extern "C" int __cdecl hkString_strLen(const char* s);
 
 class Hasher
 {
@@ -47,7 +47,7 @@ struct Audio
     }
 };
 
-extern "C" Audio* __cdecl FUN_00c85750();
+extern "C" Audio* __cdecl hkMemoryRouter_getInstance();
 
 class Handler
 {
@@ -66,8 +66,8 @@ extern "C" void __cdecl EmitStringWithHash(int* pValue, const char* pString, Han
 {
     if (pString)
     {
-        int len = FUN_00cb10d0(pString) + 1;
-        int hash = FUN_00c85750()->GetHasher().Hash(pString, len);
+        int len = hkString_strLen(pString) + 1;
+        int hash = hkMemoryRouter_getInstance()->GetHasher().Hash(pString, len);
         pHandler->Emit(1, *pValue, pString, len, hash);
     }
 }
@@ -121,7 +121,7 @@ struct S_00cf6080_Router
         return unk10;
     }
 };
-S_00cf6080_Router* FUN_00c85750();
+S_00cf6080_Router* hkMemoryRouter_getInstance();
 
 struct S_00cf6080_Listener
 {
@@ -134,9 +134,10 @@ struct S_00cf6080_Listener
 };
 
 // @fnv 0x00cf6080
-void FUN_00cf6080(int a, void* p, int aiOldCount, int newCount, int elemSize, S_00cf6080_Listener* listener)
+// src: HAVOK_LIB 0x00cf6080
+void hkStatisticsCollectorUtil__addArrayData(int a, void* p, int aiOldCount, int newCount, int elemSize, S_00cf6080_Listener* listener)
 {
-    void* result = FUN_00c85750()->heap()->vfn_2C(p, newCount * elemSize);
+    void* result = hkMemoryRouter_getInstance()->heap()->vfn_2C(p, newCount * elemSize);
     listener->vfn_14(3, a, p, aiOldCount * elemSize, result);
 }
 }  // namespace fnv_00cf6080
@@ -151,7 +152,7 @@ struct TypeInfo
     short m_sValue;
 };
 
-TypeInfo* __cdecl FUN_00d868a0(int aiType);
+TypeInfo* __cdecl hkClassMember_getClassMemberTypeProperties(int aiType);
 
 // Reads the type from apThing, looks up its TypeInfo, and returns m_sValue if positive, else the result of FUN_00d470d0 for kind 0x19, otherwise -1.
 // @fnv 0x00cf61c0
@@ -161,7 +162,7 @@ __declspec(noinline) int __cdecl GetThingValue(const hkClassMember* apThing)
     if (ucType == 0)
         return -1;
 
-    TypeInfo* pInfo = FUN_00d868a0(ucType);
+    TypeInfo* pInfo = hkClassMember_getClassMemberTypeProperties(ucType);
     short sValue = pInfo->m_sValue;
     if (sValue > 0)
         return sValue;
@@ -176,7 +177,8 @@ __declspec(nothrow) hkBool __cdecl GetFlagByState(const hkClassMember* s);
 
 // Calls FUN_00d46f70 for a count, then GetFlagByState on each shape from FUN_00d46f80, returning false on the first failure and true otherwise.
 // @fnv 0x00cf6330
-hkBool __cdecl FUN_00cf6330(const hkClass* apContainer)
+// src: HAVOK_LIB 0x00cf6330
+hkBool __cdecl hkStatisticsCollectorUtil__isClassSimple(const hkClass* apContainer)
 {
     int n = apContainer->GetNumDeclaredMembers();
     for (int i = 0; i < n; i++)
@@ -205,7 +207,8 @@ struct FNV_C60d0_Sink
 };
 
 // @fnv 0x00cf60d0
-extern "C" void __cdecl FUN_00cf60d0(void* pA0, void* pA1, const hkClass* pWalker, FNV_C60d0_Sink* pSink)
+// src: HAVOK_LIB 0x00cf60d0
+extern "C" void __cdecl hkStatisticsCollectorUtil__addObjectContents(void* pA0, void* pA1, const hkClass* pWalker, FNV_C60d0_Sink* pSink)
 {
     void* p = pA1;
     if (p)
@@ -221,12 +224,12 @@ extern "C" void __cdecl FUN_00cf60d0(void* pA0, void* pA1, const hkClass* pWalke
     }
 }
 
-void* __cdecl FUN_00cf60d0(void* context, const void* a, const void* b, const void* c);
+void* __cdecl hkStatisticsCollectorUtil__addObjectContents(void* context, const void* a, const void* b, const void* c);
 
 // @fnv 0x00cf6120
 void* __cdecl CallWithNullContext(const void* a, const void* b, const void* c)
 {
-    return FUN_00cf60d0(0, a, b, c);
+    return hkStatisticsCollectorUtil__addObjectContents(0, a, b, c);
 }
 
 struct SpawnedObject
@@ -251,7 +254,8 @@ void __cdecl CallObjectMethodAndDispatch(int aiFirst, int aiSecond)
 extern hkClass DAT_01268748;
 
 // @fnv 0x00cf6170
-unsigned char* FUN_00cf6170(unsigned char* result, const hkClass* object)
+// src: HAVOK_LIB 0x00cf6170
+unsigned char* hkStatisticsCollectorUtil_hasContents(unsigned char* result, const hkClass* object)
 {
     if (object != 0)
     {
@@ -274,15 +278,16 @@ unsigned char* FUN_00cf6170(unsigned char* result, const hkClass* object)
     return result;
 }
 
-unsigned char* FUN_00cf6330(const hkClass** where, const hkClass* node);
+unsigned char* hkStatisticsCollectorUtil__isClassSimple(const hkClass** where, const hkClass* node);
 
 // @fnv 0x00cf6380
-unsigned char* FUN_00cf6380(unsigned char* pResult, const hkClass* pStartNode)
+// src: HAVOK_LIB 0x00cf6380
+unsigned char* hkStatisticsCollectorUtil_isClassSimple(unsigned char* pResult, const hkClass* pStartNode)
 {
     const hkClass* cur = pStartNode;
     do
     {
-        unsigned char* flag = FUN_00cf6330(&pStartNode, cur);
+        unsigned char* flag = hkStatisticsCollectorUtil__isClassSimple(&pStartNode, cur);
         if (*flag == 0)
         {
             *pResult = 0;
@@ -294,7 +299,7 @@ unsigned char* FUN_00cf6380(unsigned char* pResult, const hkClass* pStartNode)
     return pResult;
 }
 
-hkBool __cdecl FUN_00cf6380(const hkClass& pClassInfo);
+hkBool __cdecl hkStatisticsCollectorUtil_isClassSimple(const hkClass& pClassInfo);
 
 struct CF63C0Writer
 {
@@ -311,7 +316,7 @@ void __cdecl WriteObjectArray(void* context, const hkClass& pClassInfo, const vo
 {
     if (count)
     {
-        if (!FUN_00cf6380(pClassInfo))
+        if (!hkStatisticsCollectorUtil_isClassSimple(pClassInfo))
         {
             const char* cur = static_cast<const char*>(data);
             int size = GetObjectSize(&pClassInfo);
@@ -339,7 +344,8 @@ void __cdecl WriteReflectedMembers(void* a, const hkClass* b, void* c);
 
 // If a1 is non-null, walks the linked list starting at a2, calling WriteReflectedMembers(a1, p, a3) for each node.
 // @fnv 0x00cf6920
-void __cdecl FUN_00cf6920(void* a1, const hkClass* apNode, void* apArg)
+// src: HAVOK_LIB 0x00cf6920
+void __cdecl hkStatisticsCollectorUtil_addClassContentsAll(void* a1, const hkClass* apNode, void* apArg)
 {
     if (a1 == 0)
         return;
@@ -457,10 +463,10 @@ struct Access64
     void* data;
     const hkClassMember* member;
     Access64(void*, const hkClassMember*);
-    char** FUN_00d87220(int);
-    const char* FUN_00d87230(int);
-    Pair64* FUN_00d87340(int);
-    Homogeneous64* FUN_00d87350(int);
+    char** hkClassMemberAccessor_asCstring(int);
+    const char* hkClassMemberAccessor_asStringPtr(int);
+    Pair64* hkClassMemberAccessor_asSimpleArray(int);
+    Homogeneous64* hkClassMemberAccessor_asHomogeneousArray(int);
 };
 struct Writer64
 {
@@ -478,11 +484,11 @@ struct Writer64
 };
 int __cdecl MemberSize64(const hkClassMember*);
 void __cdecl EmitStringWithHash(const hkClassMember*, const char*, Writer64*);
-void __cdecl FUN_00cf6080(const char*, void*, int, int, int, Writer64*);
-void __cdecl FUN_00cf6460(const hkClassMember*, void*, int, Writer64*);
+void __cdecl hkStatisticsCollectorUtil__addArrayData(const char*, void*, int, int, int, Writer64*);
+void __cdecl hkStatisticsCollectorUtil__addArrayContents(const hkClassMember*, void*, int, Writer64*);
 void __cdecl WriteObjectArray(const char*, const hkClass*, void*, int, Writer64*);
 void __cdecl WriteToDestination(const char*, void*, const hkClass*, Writer64*);
-void __cdecl FUN_00cf60d0(const char*, void*, const hkClass*, Writer64*);
+void __cdecl hkStatisticsCollectorUtil__addObjectContents(const char*, void*, const hkClass*, Writer64*);
 int __cdecl GetThingValue(const hkClassMember*);
 
 // @fnv 0x00cf6580
@@ -502,10 +508,10 @@ void __cdecl WriteReflectedMembers(void* base, const hkClass* apMeta, Writer64* 
             Access64 value(base, m);
             int n = GetCArraySize(m);
             if (n <= 1)
-                EmitStringWithHash(m, *value.FUN_00d87220(0), writer);
+                EmitStringWithHash(m, *value.hkClassMemberAccessor_asCstring(0), writer);
             else
                 for (int j = 0; j < n; ++j)
-                    EmitStringWithHash(m, *value.FUN_00d87220(j), writer);
+                    EmitStringWithHash(m, *value.hkClassMemberAccessor_asCstring(j), writer);
             break;
         }
         case 33: {
@@ -514,13 +520,13 @@ void __cdecl WriteReflectedMembers(void* base, const hkClass* apMeta, Writer64* 
             if (n <= 1)
             {
                 const char* name = m->m_name;
-                writer->EmitString(name, value.FUN_00d87230(0));
+                writer->EmitString(name, value.hkClassMemberAccessor_asStringPtr(0));
             }
             else
                 for (int j = 0; j < n; ++j)
                 {
                     const char* name = m->m_name;
-                    writer->EmitString(name, value.FUN_00d87230(j));
+                    writer->EmitString(name, value.hkClassMemberAccessor_asStringPtr(j));
                 }
             break;
         }
@@ -542,29 +548,29 @@ void __cdecl WriteReflectedMembers(void* base, const hkClass* apMeta, Writer64* 
             }
             else
                 name = m->m_name;
-            FUN_00cf6080(name, a->data, length, capacity, size, writer);
-            FUN_00cf6460(m, a->data, length, writer);
+            hkStatisticsCollectorUtil__addArrayData(name, a->data, length, capacity, size, writer);
+            hkStatisticsCollectorUtil__addArrayContents(m, a->data, length, writer);
             if (pointers)
                 writer->End();
             break;
         }
         case 26: {
             Access64 value(base, m);
-            Pair64 a = *value.FUN_00d87340(0);
+            Pair64 a = *value.hkClassMemberAccessor_asSimpleArray(0);
             void* data = a.data;
             int length = a.count;
             int size = GetThingValue(m);
             if (size < 0)
                 break;
             writer->Begin(m->m_name);
-            FUN_00cf6080(m->m_name, data, length, length, size, writer);
-            FUN_00cf6460(m, data, length, writer);
+            hkStatisticsCollectorUtil__addArrayData(m->m_name, data, length, length, size, writer);
+            hkStatisticsCollectorUtil__addArrayContents(m, data, length, writer);
             writer->End();
             break;
         }
         case 27: {
             Access64 value(base, m);
-            Homogeneous64 a = *value.FUN_00d87350(0);
+            Homogeneous64 a = *value.hkClassMemberAccessor_asHomogeneousArray(0);
             const hkClass* itemClass = a.pClassInfo;
             void* data = a.data;
             int length = a.count;
@@ -572,7 +578,7 @@ void __cdecl WriteReflectedMembers(void* base, const hkClass* apMeta, Writer64* 
             {
                 writer->Begin(m->m_name);
                 const char* name = m->m_name;
-                FUN_00cf6080(name, data, length, length, GetObjectSize(itemClass), writer);
+                hkStatisticsCollectorUtil__addArrayData(name, data, length, length, GetObjectSize(itemClass), writer);
                 WriteObjectArray(m->m_name, itemClass, data, length, writer);
                 writer->End();
             }
@@ -595,7 +601,7 @@ void __cdecl WriteReflectedMembers(void* base, const hkClass* apMeta, Writer64* 
         case 25: {
             const char* name = m->m_name;
             void* data = (char*)base + m->m_offset;
-            FUN_00cf60d0(name, data, m->GetClass(), writer);
+            hkStatisticsCollectorUtil__addObjectContents(name, data, m->GetClass(), writer);
             break;
         }
         }
@@ -613,18 +619,19 @@ struct StringArrayAccessor
     hkStringPtr& GetStringPtr(int index);
 };
 
-int __cdecl FUN_00cb0fa0(const char* a, const char* b);
+int __cdecl hkString_strCmp(const char* a, const char* b);
 
 // Finds the declared member named "name" in pClassInfo and returns its string value, or "unnamed" when the pointer is null.
 // @fnv 0x00cf6210
-static __declspec(noinline) const char* FUN_00cf6210(const void* object, const hkClass& pClassInfo)
+// src: HAVOK_LIB 0x00cf6210
+static __declspec(noinline) const char* _findObjectName(const void* object, const hkClass& pClassInfo)
 {
     const int n = pClassInfo.GetNumDeclaredMembers();
     for (int i = 0; i < n; i++)
     {
         const hkClassMember& member = pClassInfo.GetDeclaredMember(i);
         const char* name = member.m_name;
-        if (FUN_00cb0fa0(name, "name") != 0)
+        if (hkString_strCmp(name, "name") != 0)
             continue;
         StringArrayAccessor accessor(object, &member);
         switch (member.getType())
@@ -649,17 +656,18 @@ const hkClass* volatile g_klass;
 const char* volatile g_out;
 void caller_cf6210()
 {
-    g_out = FUN_00cf6210(g_obj, *g_klass);
+    g_out = _findObjectName(g_obj, *g_klass);
 }
 
 extern const char DAT_01094398[];
 extern const char DAT_010cc458[];
-int __cdecl FUN_00cb0fa0(const char*, const char*);
+int __cdecl hkString_strCmp(const char*, const char*);
 struct TaggedString64
 {
     unsigned int bits;
 };
-static __declspec(noinline) const char* FUN_00cf6210(const hkClass* pClassInfo, void* object)
+// src: HAVOK_LIB 0x00cf6210
+static __declspec(noinline) const char* _findObjectName(const hkClass* pClassInfo, void* object)
 {
     if (!pClassInfo)
         return 0;
@@ -667,18 +675,18 @@ static __declspec(noinline) const char* FUN_00cf6210(const hkClass* pClassInfo, 
     for (int i = 0; i < count; ++i)
     {
         const hkClassMember* m = &pClassInfo->GetDeclaredMember(i);
-        if (FUN_00cb0fa0(m->m_name, DAT_01094398) == 0)
+        if (hkString_strCmp(m->m_name, DAT_01094398) == 0)
         {
             Access64 access(object, m);
             switch (m->m_type)
             {
             case 0x21: {
-                TaggedString64* slot = (TaggedString64*)access.FUN_00d87230(0);
+                TaggedString64* slot = (TaggedString64*)access.hkClassMemberAccessor_asStringPtr(0);
                 const char* name = (const char*)(slot->bits & ~1u);
                 return name ? name : DAT_010cc458;
             }
             case 0x1d: {
-                const char* name = *access.FUN_00d87220(0);
+                const char* name = *access.hkClassMemberAccessor_asCstring(0);
                 return name ? name : DAT_010cc458;
             }
             }
@@ -689,7 +697,8 @@ static __declspec(noinline) const char* FUN_00cf6210(const hkClass* pClassInfo, 
 
 // Processes each element according to member subtype, calling the corresponding writer or helper for recognized subtypes.
 // @fnv 0x00cf6460
-void __cdecl FUN_00cf6460(const hkClassMember* member, void* elements, int count, Writer64* writer)
+// src: HAVOK_LIB 0x00cf6460
+void __cdecl hkStatisticsCollectorUtil__addArrayContents(const hkClassMember* member, void* elements, int count, Writer64* writer)
 {
     if (count <= 0)
         return;
@@ -701,7 +710,7 @@ void __cdecl FUN_00cf6460(const hkClassMember* member, void* elements, int count
             return;
         for (int i = 0; i < count; ++i)
         {
-            const char* name = FUN_00cf6210(meta, ((void**)elements)[i]);
+            const char* name = _findObjectName(meta, ((void**)elements)[i]);
             if (!name)
                 name = member->m_name;
             WriteToDestination(name, ((void**)elements)[i], meta, writer);

@@ -21,14 +21,14 @@ struct PhantomShape
     int field00, field04, field08, field0c, field10, field14;
     PhantomShape(BoundShape* bounds);
     ~PhantomShape();
-    void FUN_00c85810(void* form);
+    void bhkWorldObject_Add(void* form);
     struct ListEntries* FUN_00818110();
-    void FUN_00c9f420();
+    void bhkPhantom_Remove();
 };
 struct ListEntries
 {
     int FUN_00726070();
-    int* FUN_00629ab0(int at);
+    int* NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(int at);
 };
 struct TargetInterface
 {
@@ -70,8 +70,8 @@ struct TargetInterface
     int unused8c;
     int unused90;
     int origin94;
-    bool FUN_008ace90();
-    float FUN_00572380(NiPoint3* point);
+    bool GetGhost_008ace90();
+    float TESObjectREFR_GetDistanceFromPoint(NiPoint3* point);
     struct TargetInterface** FUN_006815c0();
     TargetInterface* FUN_00726070();
 };
@@ -82,18 +82,18 @@ struct RangeManager
 {
     struct TimeObject* FUN_00825c00();
     int FUN_00404420();
-    int FUN_0084e3a0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     int FUN_00404390();
     int FUN_004044d0();
 };
 struct TimeObject
 {
-    bool FUN_00403e60(unsigned int flags);
+    bool IsFlagSet_00403e60(unsigned int flags);
     float FUN_00639b20();
 };
 struct ListHandle
 {
-    void* FUN_004543c0();
+    void* TESObjectCELL_GetbhkWorld();
 };
 struct Master
 {
@@ -104,67 +104,68 @@ struct Master
     int field10;
     int field14;
     int field18;
-    void FUN_00817b90(NiPoint3 center, ListHandle* item, void* filter, RangeManager* source, TargetInterface* first,
+    void MagicCaster_DoExplosion(NiPoint3 center, ListHandle* item, void* filter, RangeManager* source, TargetInterface* first,
                       float scale, float strength);
     TargetInterface* FUN_00815410();
     bool CheckHealthDamageKill(int* origin, void* filter);
-    void FUN_00818150(TargetInterface* selected, NiPoint3 location, RangeManager* source, float attenuation);
+    void MagicCaster_ExplodeRigidBody(TargetInterface* selected, NiPoint3 location, RangeManager* source, float attenuation);
     void ApplyExplosion(TargetInterface* selected, NiPoint3 location, RangeManager* source, float attenuation);
 };
 extern TargetInterface* DAT_011dea3c;
 extern Setting originalRuntimeFloatSetting1112;
 extern const double DAT_01012060;
 extern const double DAT_01011588;
-extern void* __stdcall FUN_005dbe10(int which);
+extern void* __stdcall bhkCollisionFilter_GetNewSystemGroup(int which);
 struct FormRef;
 struct MediaSelector
 {
     int field00;
-    FormRef* FUN_00622290(int type, void* context);
+    FormRef* CFilter_CFilter(int type, void* context);
 };
 struct FormRef
 {
-    int FUN_00559450();
+    int Modelloader_GetReferencedThis();
 };
-extern int __cdecl FUN_004b59f0(int object);
+extern int __cdecl hkpGetRigidBody(int object);
 extern float __cdecl CalcEffectCost(float value, int area, int duration, int magnitude, bool special);
 extern int __cdecl FUN_00ec62c0();
-extern void __cdecl FUN_004a3e00(NiPoint3* destination, NiPoint3* source);
-extern int* __cdecl FUN_00403e20(unsigned int);
-extern void* __cdecl FUN_00416870(float, float, float);
+extern void __cdecl NI2HK(NiPoint3* destination, NiPoint3* source);
+extern int* __cdecl Setting_Float_00403e20(unsigned int);
+extern void* __cdecl SetComponents(float, float, float);
 
 // @fnv 0x00817b90
-void Master::FUN_00817b90(NiPoint3 center, ListHandle* item, void* filter, RangeManager* source, TargetInterface* first,
+// src: XBOX_PDB 0x00817b90
+void Master::MagicCaster_DoExplosion(NiPoint3 center, ListHandle* item, void* filter, RangeManager* source, TargetInterface* first,
                           float scale, float strength)
 {
-    if (source->FUN_00825c00()->FUN_00403e60(0x20000000))
+    if (source->FUN_00825c00()->IsFlagSet_00403e60(0x20000000))
     {
-        float range = (double)source->FUN_00404420() * *originalRuntimeFloatSetting1112.FUN_00403e20() * strength;
+        float range = (double)source->FUN_00404420() * *originalRuntimeFloatSetting1112.Setting_Float_00403e20() * strength;
         if (range > DAT_01012060)
         {
             float attenuation = CalcEffectCost(source->FUN_00825c00()->FUN_00639b20(), source->FUN_00404420(),
                                                (int)(source->FUN_004044d0() * scale),
-                                               (int)(source->FUN_00404390() * scale), source->FUN_0084e3a0() == 2);
+                                               (int)(source->FUN_00404390() * scale), source->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == 2);
             float size = (float)(range * DAT_01011588);
             BoundShape space;
-            FUN_004a3e00((NiPoint3*)&space.low, &center.FUN_00439e90(NiPoint3(-size, -size, -size)));
-            FUN_004a3e00((NiPoint3*)&space.high, &center.FUN_00439e90(NiPoint3(size, size, size)));
+            NI2HK((NiPoint3*)&space.low, &center.FUN_00439e90(NiPoint3(-size, -size, -size)));
+            NI2HK((NiPoint3*)&space.high, &center.FUN_00439e90(NiPoint3(size, size, size)));
             MediaSelector obj;
-            space.field00 = obj.FUN_00622290(0x29, FUN_005dbe10(0))->FUN_00559450();
+            space.field00 = obj.CFilter_CFilter(0x29, bhkCollisionFilter_GetNewSystemGroup(0))->Modelloader_GetReferencedThis();
             PhantomShape results(&space);
-            void* world = item->FUN_004543c0();
-            results.FUN_00c85810(world);
+            void* world = item->TESObjectCELL_GetbhkWorld();
+            results.bhkWorldObject_Add(world);
             ListEntries* entries = results.FUN_00818110();
             for (int i = 0; i < entries->FUN_00726070(); ++i)
             {
-                int target = FUN_004b59f0(*entries->FUN_00629ab0(i));
+                int target = hkpGetRigidBody(*entries->NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(i));
                 if (target)
                 {
-                    FUN_00818150((TargetInterface*)target, center, source, attenuation);
+                    MagicCaster_ExplodeRigidBody((TargetInterface*)target, center, source, attenuation);
                 }
             }
 
-            results.FUN_00c9f420();
+            results.bhkPhantom_Remove();
             TargetInterface* node = first;
             TargetInterface* skip = FUN_00815410();
             while (node && *node->FUN_006815c0())
@@ -174,9 +175,9 @@ void Master::FUN_00817b90(NiPoint3 center, ListHandle* item, void* filter, Range
                 if (candidate)
                     if (candidate && candidate != skip && ((TargetActive)candidate->vtable[116])(candidate))
                     {
-                        float distance = candidate->FUN_00572380(&center);
+                        float distance = candidate->TESObjectREFR_GetDistanceFromPoint(&center);
                         if (distance <= range && !((TargetDisabled)candidate->vtable[139])(candidate, 0) &&
-                            !candidate->FUN_008ace90())
+                            !candidate->GetGhost_008ace90())
                         {
                             if (CheckHealthDamageKill(candidate ? &candidate->origin94 : 0, filter))
                             {
@@ -188,9 +189,9 @@ void Master::FUN_00817b90(NiPoint3 center, ListHandle* item, void* filter, Range
             }
             if (DAT_011dea3c && DAT_011dea3c != skip && ((TargetActive)DAT_011dea3c->vtable[116])(DAT_011dea3c))
             {
-                float distance = DAT_011dea3c->FUN_00572380(&center);
+                float distance = DAT_011dea3c->TESObjectREFR_GetDistanceFromPoint(&center);
                 if (distance <= range && !((TargetDisabled)DAT_011dea3c->vtable[139])(DAT_011dea3c, 0) &&
-                    !DAT_011dea3c->FUN_008ace90())
+                    !DAT_011dea3c->GetGhost_008ace90())
                 {
                     if (CheckHealthDamageKill(DAT_011dea3c ? &DAT_011dea3c->origin94 : 0, filter))
                     {

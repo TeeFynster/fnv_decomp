@@ -44,10 +44,10 @@ class NiPoint3Interpolator : public NiKeyBasedInterpolator
     void CopyMemberData(NiPoint3Interpolator* pkDest, CloningProcess& kCloning);
     void CopyMemberData(NiPoint3Interpolator* pkDest, void* pvCloning);
     void CloneTo(NiPoint3Interpolator* pkDest, CloningProcess& kCloning);
-    NiPoint3Interpolator* FUN_00a49b30(void* pvCloning);
+    NiPoint3Interpolator* CreateClone_00a49b30(void* pvCloning);
     NiPoint3Interpolator* CreateRangeInterpolator(float startTime, float endTime);
     void CollapseConstantPosData();
-    void FUN_00a494b0(NiPoint3 value);
+    void SetPoseValue(NiPoint3 value);
 
     union
     {

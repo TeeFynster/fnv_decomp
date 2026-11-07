@@ -92,8 +92,8 @@ struct FUN_00db7b70_Class
     void AppendToArray(FUN_00db7b70_Array* p);
 };
 
-void* FUN_00c85750();
-void __cdecl FUN_00c908c0(void* mm, FUN_00db7b70_Array* arr, int count, int size);
+void* hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(void* mm, FUN_00db7b70_Array* arr, int count, int size);
 
 // Appends the null-terminated pointer list in unk0c to the array p, growing its capacity via the memory manager when needed.
 // @fnv 0x00db7b70
@@ -105,7 +105,7 @@ void FUN_00db7b70_Class::AppendToArray(FUN_00db7b70_Array* apArray)
     while (this->unk0c[count] != 0)
         count++;
 
-    FUN_00c85750_Obj* tls = (FUN_00c85750_Obj*)FUN_00c85750();
+    FUN_00c85750_Obj* tls = (FUN_00c85750_Obj*)hkMemoryRouter_getInstance();
     void* memmgr = tls->unk10;
     int oldCount = apArray->count;
     int iCapacity = apArray->capacity;
@@ -114,7 +114,7 @@ void FUN_00db7b70_Class::AppendToArray(FUN_00db7b70_Array* apArray)
     if (iCapacity < iNeeded)
     {
         int iNewCapacity = (iNeeded >= iCapacity * 2) ? iNeeded : iCapacity * 2;
-        FUN_00c908c0(memmgr, apArray, iNewCapacity, 4);
+        hkArrayUtil__reserve(memmgr, apArray, iNewCapacity, 4);
     }
     apArray->count += count;
 
@@ -128,10 +128,11 @@ struct FnvCpu_FUN_00db7a70_CpuObject
     unsigned int unk00;
     unsigned int unk04;
     int value;
-    int FUN_00db7a70();
+    int GetValue();
 };
 // @fnv 0x00db7a70
-int FnvCpu_FUN_00db7a70_CpuObject::FUN_00db7a70()
+// src: GUESS 0x00db7a70 (confidence: low)
+int FnvCpu_FUN_00db7a70_CpuObject::GetValue()
 {
     return value;
 }

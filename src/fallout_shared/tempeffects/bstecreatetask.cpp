@@ -35,7 +35,8 @@ void* __thiscall FUN_00682490_shell::DestroyIfFlagged(unsigned int flags)
 
 // Returns true if the status field at offset 8 is 4 or 3, otherwise false.
 // @fnv 0x006824e0
-bool NiTask::FUN_006824e0()
+// src: XBOX_PDB 0x006824e0
+bool NiTask::Clear_006824e0()
 {
     if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 8) == 4 ||
         *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 8) == 3)

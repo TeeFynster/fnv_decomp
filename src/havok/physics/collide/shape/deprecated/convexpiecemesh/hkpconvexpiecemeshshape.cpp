@@ -28,7 +28,7 @@ struct HkpStandIn
 {
     virtual void v0() = 0;
 
-    void FUN_00e490d0();
+    void ForwardCall_00e490d0();
     HkpStandIn* FUN_00e01010(int flags);
 
     unsigned short value;
@@ -40,7 +40,7 @@ HkpRouter* _D1A0E0GetMemoryRouter();
 // @fnv 0x00e01010
 HkpStandIn* HkpStandIn::FUN_00e01010(int flags)
 {
-    this->FUN_00e490d0();
+    this->ForwardCall_00e490d0();
 
     if (flags & 1)
     {
@@ -117,10 +117,11 @@ struct FUN_00e49290_Class
     FUN_00e49290_Data* data;
     FUN_00e49290_Owner* owner;
 
-    int FUN_00e49290(unsigned int index);
+    int hkpConvexPieceMeshShape_getCollisionFilterInfo(unsigned int index);
 };
 
-int FUN_00e49290_Class::FUN_00e49290(unsigned int index)
+// src: HAVOK_LIB 0x00e49290
+int FUN_00e49290_Class::hkpConvexPieceMeshShape_getCollisionFilterInfo(unsigned int index)
 {
     int result;
 
@@ -138,7 +139,8 @@ int FUN_00e49290_Class::FUN_00e49290(unsigned int index)
 }
 
 // @fnv 0x00e49030
-int FUN_00e49030()
+// src: GUESS 0x00e49030 (confidence: high)
+int hkpConvexPieceMeshShape_ReturnZero()
 {
     return 0;
 }
@@ -169,18 +171,19 @@ struct D : P, S
     Ptr m1c;
     __forceinline ~D()
     {}
-    void FUN_00e490d0();
+    void ForwardCall_00e490d0();
 };
 // Destroys the object by invoking its destructor.
 // @fnv 0x00e490d0
-void D::FUN_00e490d0()
+// src: GUESS 0x00e490d0 (confidence: low)
+void D::ForwardCall_00e490d0()
 {
     this->D::~D();
 }
 
 extern hkClass g_01269198;
 
-int __cdecl FUN_00d06f80(const void* pvChunk, int iNumBytes) throw();
+int __cdecl hkStatisticsCollector_getAllocatedSize(const void* pvChunk, int iNumBytes) throw();
 
 template <class T> inline void CollectArray(hkStatisticsCollector* pkCollector, const char* pcName,
                                           const hkArray<T>& kArray)
@@ -188,7 +191,7 @@ template <class T> inline void CollectArray(hkStatisticsCollector* pkCollector, 
     if ((kArray.m_iCapacityState & 0x80000000) == 0 || pkCollector->m_reportInplaceAllocations)
     {
         const T* pData = kArray.m_data;
-        int iAllocated = FUN_00d06f80(pData, kArray.getCapacity() * sizeof(T));
+        int iAllocated = hkStatisticsCollector_getAllocatedSize(pData, kArray.getCapacity() * sizeof(T));
         pkCollector->AddMemoryChunk(3, pcName, kArray.m_data, kArray.GetLogicalSize() * sizeof(T), iAllocated);
     }
 }
@@ -219,7 +222,8 @@ void hkpConvexPieceMeshShape::calcContentStatistics(hkStatisticsCollector* pkCol
 
 // Stores whether bit bitIndex % 31 of word bitIndex / 31, at bits[bits[0] + 1 + word], is set into *found, and returns found.
 // @fnv 0x00e49040
-unsigned char* __stdcall FUN_00e49040(unsigned char* pbResult, const int* bits, unsigned int bitIndex)
+// src: HAVOK_LIB 0x00e49040
+unsigned char* __stdcall hkpConvexPieceMeshShape_vertexIsSet(unsigned char* pbResult, const int* bits, unsigned int bitIndex)
 {
     unsigned int wordIndex = bitIndex / 31;
     unsigned int bitWithinWord = bitIndex % 31;
@@ -231,7 +235,7 @@ unsigned char* __stdcall FUN_00e49040(unsigned char* pbResult, const int* bits, 
 // sub ecx,0x10; jmp target  ==  MSVC adjustor thunk for a virtual declared by both bases.
 struct PrimaryBase
 {
-    virtual void FUN_00e01040();
+    virtual void AdjustThisAndForward_00e01040();
     int unk04;
     int unk08;
     int unk0C;
@@ -239,14 +243,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00e01040();
+    virtual void AdjustThisAndForward_00e01040();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00e01040
-    virtual void FUN_00e01040();
+// src: GUESS 0x00e01040 (confidence: low)
+    virtual void AdjustThisAndForward_00e01040();
 };
 
 Derived::Derived()

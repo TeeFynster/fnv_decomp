@@ -55,14 +55,14 @@ struct TESObjectDoorController
 };
 struct ControllerFactory
 {
-    void FUN_008d17d0(TESObjectDoorController*, void*);
+    void BSPlayerDistanceCheckController_CopyMembers(TESObjectDoorController*, void*);
     TESObjectDoorController* CreateController(void*);
 };
 // @fnv 0x008d1740
 TESObjectDoorController* ControllerFactory::CreateController(void* context)
 {
     TESObjectDoorController* result = new TESObjectDoorController;
-    FUN_008d17d0(result, context);
+    BSPlayerDistanceCheckController_CopyMembers(result, context);
     return result;
 }
 
@@ -72,7 +72,7 @@ extern char DAT_011f4280;
 struct DoorSpawnRequest
 {
     unsigned int unk00;
-    void* FUN_0045bb80();
+    void* NiAVObject_GetWorldTranslate();
 };
 struct ItemHandle
 {
@@ -83,7 +83,7 @@ struct ItemHandle
 };
 struct ItemRef
 {
-    void FUN_00439ef0();
+    void SubtractIntoVector();
 };
 
 struct Manager
@@ -216,23 +216,23 @@ struct Manager
     virtual ItemRef* v1f4(ItemHandle* out, void* h);
 };
 extern Manager* DAT_011dea3c;
-DoorSpawnRequest* __cdecl FUN_00653270(char* tag, void* owner);
+DoorSpawnRequest* __cdecl NiObject_DynamicCast(char* tag, void* owner);
 
 // @fnv 0x008d1670
 void BSPlayerDistanceCheckController::UpdateDoorSpawn(unsigned int unkArg)
 {
     DoorSpawnRequest* req;
     ItemHandle handle;
-    if (FUN_00508120() < DAT_01012060 || !GetField38() || DAT_011dea3c == 0)
+    if (NiControllerSequence_GetLastTime() < DAT_01012060 || !GetField38() || DAT_011dea3c == 0)
     {
     }
     else
     {
-        req = FUN_00653270((char*)&DAT_011f4280, m_pkTarget);
+        req = NiObject_DynamicCast((char*)&DAT_011f4280, m_pkTarget);
         if (req != 0)
         {
-            DAT_011dea3c->v1f4(&handle, req->FUN_0045bb80())->FUN_00439ef0();
-            if (handle.FUN_00457990() < FUN_00508120())
+            DAT_011dea3c->v1f4(&handle, req->NiAVObject_GetWorldTranslate())->SubtractIntoVector();
+            if (handle.FUN_00457990() < NiControllerSequence_GetLastTime())
             {
                 m_callback(req);
             }
@@ -243,14 +243,15 @@ void BSPlayerDistanceCheckController::UpdateDoorSpawn(unsigned int unkArg)
 namespace fnv_008d1720 {
 extern int DAT_011f4280;
 
-void __cdecl FUN_0043b300(int* apTarget, void* apValue);
+void __cdecl NiObject_IsKindOf(int* apTarget, void* apValue);
 
 }  // namespace fnv_008d1720
 
 // @fnv 0x008d1720
-void BSPlayerDistanceCheckController::FUN_008d1720()
+// src: XBOX_PDB 0x008d1720
+void BSPlayerDistanceCheckController::TargetIsRequiredType()
 {
-    fnv_008d1720::FUN_0043b300(&fnv_008d1720::DAT_011f4280, m_pkTarget);
+    fnv_008d1720::NiObject_IsKindOf(&fnv_008d1720::DAT_011f4280, m_pkTarget);
 }
 
 // @fnv 0x008d1650

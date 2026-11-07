@@ -17,7 +17,7 @@ public:
     // Explicit cleanup entry without an implicit destructor vtable write.
     void DestroyMembers();
     void FUN_006e55e0();
-    void FUN_006e56f0(PathingRequest* apDest);
+    void CopyTo_006e56f0(PathingRequest* apDest);
 
     PathingLocation m_Location;
     float m_fHideDistance;

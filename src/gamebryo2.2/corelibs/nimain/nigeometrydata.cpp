@@ -82,11 +82,11 @@ bool NiGeometryData::IsGeometryDataStreamable(bool bWrite)
     if (pkAdditional && pkAdditional->IsPacked())
     {
         if (bWrite)
-            pkAdditional->FUN_00a725d0(0);
+            pkAdditional->NiAdditionalGeometryData_UnlockDataBlock(0);
         else
         {
             unsigned int uiSize = 0;
-            pkAdditional->FUN_00a72590(0, &uiSize);
+            pkAdditional->NiAdditionalGeometryData_LockDataBlock(0, &uiSize);
         }
     }
     m_bVBLockWrite = bWrite;
@@ -104,11 +104,12 @@ void NiGeometryData::SetCompressFlags(unsigned char ucCompressFlags)
 
 struct FUN_00a673d0_shell : public NiGeometryData
 {
-    void FUN_00a673d0();
+    void NiGeometryData_UnlockPackedVertexData();
 };
 
 // @fnv 0x00a673d0
-void FUN_00a673d0_shell::FUN_00a673d0()
+// src: COMMUNITY 0x00a673d0
+void FUN_00a673d0_shell::NiGeometryData_UnlockPackedVertexData()
 {
     if (*reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0x3a))
     {
@@ -116,7 +117,7 @@ void FUN_00a673d0_shell::FUN_00a673d0()
             *reinterpret_cast<NiAdditionalGeometryData**>(reinterpret_cast<char*>(this) + 0x30);
         if (pkAGD && pkAGD->IsPacked() && !*reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0x3b))
         {
-            pkAGD->FUN_00a725d0(0);
+            pkAGD->NiAdditionalGeometryData_UnlockDataBlock(0);
         }
         *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0x3a) = false;
     }
@@ -124,14 +125,16 @@ void FUN_00a673d0_shell::FUN_00a673d0()
 
 extern NiObjectGroup* DAT_011f4880;
 // @fnv 0x00a669c0
-NiObjectGroup* __cdecl FUN_00a669c0()
+// src: COMMUNITY 0x00a669c0
+NiObjectGroup* __cdecl NiGeometryData_GetGroup()
 {
     return DAT_011f4880;
 }
 
 extern NiObjectGroup* DAT_011f4880;
 // @fnv 0x00a669d0
-void __stdcall FUN_00a669d0(NiObjectGroup* pkGroup)
+// src: XBOX_PDB 0x00a669d0
+void __stdcall NiGeometryData_SetGroup(NiObjectGroup* pkGroup)
 {
     DAT_011f4880 = pkGroup;
 }
@@ -179,10 +182,11 @@ struct FUN_00a67020_shell
 {
     char pad[0x10];
     NiBound m_kBound;
-    void FUN_00a67020(NiBound* kBound);
+    void NiGeometryData_SetBound(NiBound* kBound);
 };
 // @fnv 0x00a67020
-void FUN_00a67020_shell::FUN_00a67020(NiBound* kBound)
+// src: XBOX_PDB 0x00a67020
+void FUN_00a67020_shell::NiGeometryData_SetBound(NiBound* kBound)
 {
     if (kBound)
     {
@@ -194,7 +198,8 @@ void FUN_00a67020_shell::FUN_00a67020(NiBound* kBound)
 
 extern const char* const g_011f5b88_arg1;
 // @fnv 0x00a67bf0
-const char* const* __cdecl FUN_00a67bf0()
+// src: COMMUNITY 0x00a67bf0
+const char* const* __cdecl NiGeometryData_GetRTTI()
 {
     return &g_011f5b88_arg1;
 }
@@ -325,7 +330,7 @@ struct FUN_00a725d0_shell
     void*** m_ppChildren;
     char pad3[2];
     unsigned short m_usElementCount;
-    void FUN_00a725d0(unsigned int idx);
+    void NiAdditionalGeometryData_UnlockDataBlock(unsigned int idx);
 };
 struct VObj
 {
@@ -342,10 +347,11 @@ struct FUN_00a725d0_shell2
     VObj** m_aiIndexedValues;
     char pad3[2];
     unsigned short m_us;
-    void FUN_00a725d0(unsigned int idx);
+    void NiAdditionalGeometryData_UnlockDataBlock(unsigned int idx);
 };
 // @fnv 0x00a725d0
-void FUN_00a725d0_shell2::FUN_00a725d0(unsigned int uiIndex)
+// src: COMMUNITY 0x00a725d0
+void FUN_00a725d0_shell2::NiAdditionalGeometryData_UnlockDataBlock(unsigned int uiIndex)
 {
     if (uiIndex < m_us)
     {
@@ -367,13 +373,14 @@ struct NiGeometryData_shell
     NiPoint3* m_pkNormal;
     NiColorA* m_pkColor;
     NiPoint2* m_pkTexture;
-    void FUN_00a66bb0(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, NiColorA* pkColor,
+    void NiGeometryData_ReplaceData(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, NiColorA* pkColor,
                       NiPoint2* pkTexture, unsigned short usNumTextureSets, unsigned short eNBTMethod);
 };
 
 // Stores vertex count, vertex/normal/color/texture pointers, and packs texture-set count and NBT method into the flags field.
 // @fnv 0x00a66bb0
-void NiGeometryData_shell::FUN_00a66bb0(unsigned short ausVertexCount, NiPoint3* pkVertex, NiPoint3* pkNormal,
+// src: XBOX_PDB 0x00a66bb0
+void NiGeometryData_shell::NiGeometryData_ReplaceData(unsigned short ausVertexCount, NiPoint3* pkVertex, NiPoint3* pkNormal,
                                         NiColorA* pkColor, NiPoint2* pkTexture, unsigned short usNumTextureSets,
                                         unsigned short eNBTMethod)
 {
@@ -391,7 +398,7 @@ inline void NiObjectGroup::DecRefCount()
 {
     if (--m_uiRefCount == 0)
     {
-        FUN_00a8a670();
+        ForwardCall_00a8a670();
         _delete(this, 0x10);
     }
 }
@@ -470,11 +477,12 @@ struct NiBoundProxy
 };
 struct NiGeometryDataRecovered : NiGeometryData
 {
-    void FUN_00a66b30(unsigned short vertexCount, NiPoint3* vertices, NiPoint3* normals, NiColorA* colors,
+    void NiGeometryData_SetData(unsigned short vertexCount, NiPoint3* vertices, NiPoint3* normals, NiColorA* colors,
                       NiPoint2* textureCoords, unsigned short textureSetCount, unsigned short normalBinormalMethod);
 };
 // @fnv 0x00a66b30
-void NiGeometryDataRecovered::FUN_00a66b30(unsigned short vertexCount, NiPoint3* vertices, NiPoint3* normals,
+// src: COMMUNITY 0x00a66b30
+void NiGeometryDataRecovered::NiGeometryData_SetData(unsigned short vertexCount, NiPoint3* vertices, NiPoint3* normals,
                                            NiColorA* colors, NiPoint2* textureCoords, unsigned short textureSetCount,
                                            unsigned short normalBinormalMethod)
 {
@@ -581,13 +589,14 @@ int NiGeometryDataCmp::CompareVertices(unsigned short usVertexA, unsigned short 
 
 struct FUN_00a66f90_cls : public NiGeometryData
 {
-    unsigned int FUN_00a66f90();
+    unsigned int NiGeometryData_GetBlockAllocationSize();
     unsigned int FUN_00e7cd40_base();
 };
 
 // Computes the total geometry data size from vertex, normal, color and texture buffers and adds the base size.
 // @fnv 0x00a66f90
-unsigned int FUN_00a66f90_cls::FUN_00a66f90()
+// src: XBOX_PDB 0x00a66f90
+unsigned int FUN_00a66f90_cls::NiGeometryData_GetBlockAllocationSize()
 {
     unsigned int total;
 
@@ -618,7 +627,7 @@ unsigned int FUN_00a66f90_cls::FUN_00a66f90()
     return FUN_00e7cd40_base() + total;
 }
 
-void* FUN_00aa1070(unsigned int uiSize);
+void* _NiMalloc_00aa1070(unsigned int uiSize);
 
 class FUN_00a68820_cls
 {
@@ -627,7 +636,7 @@ class FUN_00a68820_cls
     unsigned int unk04;
     unsigned short m_08;
 
-    void FUN_00a67dd0(unsigned short* pusIndices, unsigned int uiBase, unsigned int uiZero, int iLast);
+    void NiGeometryData_IndexQSort(unsigned short* pusIndices, unsigned int uiBase, unsigned int uiZero, int iLast);
     void BuildIndexMappings(unsigned short** ppusA, unsigned short** ppusB, unsigned int uiValue);
 };
 
@@ -637,15 +646,15 @@ void FUN_00a68820_cls::BuildIndexMappings(unsigned short** ppusForward, unsigned
 {
     unsigned short m_usPassCountLocal = m_08;
     unsigned int uiBytes = (unsigned int)m_usPassCountLocal * 2;
-    *ppusForward = (unsigned short*)FUN_00aa1070(uiBytes);
-    *ppusInverse = (unsigned short*)FUN_00aa1070(uiBytes);
+    *ppusForward = (unsigned short*)_NiMalloc_00aa1070(uiBytes);
+    *ppusInverse = (unsigned short*)_NiMalloc_00aa1070(uiBytes);
 
     for (unsigned short i = 0; i < m_usPassCountLocal; i++)
     {
         (*ppusForward)[i] = i;
     }
 
-    FUN_00a67dd0(*ppusForward, uiValue, 0, (int)m_usPassCountLocal - 1);
+    NiGeometryData_IndexQSort(*ppusForward, uiValue, 0, (int)m_usPassCountLocal - 1);
 
     for (unsigned short j = 0; j < m_usPassCountLocal; j++)
     {
@@ -655,11 +664,11 @@ void FUN_00a68820_cls::BuildIndexMappings(unsigned short** ppusForward, unsigned
 
 
 extern char* DAT_011f4884;
-char* __cdecl FUN_00a7d330(char* pName);
-char* __cdecl FUN_00a7d490(const char* pName, unsigned short usValue);
-char* __cdecl FUN_00a7d5a0(const char* pName, void* pValue);
-char* __cdecl FUN_00a7d4d0(const char* pName, int iValue);
-char* __cdecl FUN_00a7d410(const char* pName, unsigned char ucValue);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char* pName);
+char* __cdecl NiGetViewerString_00a7d490(const char* pName, unsigned short usValue);
+char* __cdecl NiGetViewerString_00a7d5a0(const char* pName, void* pValue);
+char* __cdecl NiGetViewerString_00a7d4d0(const char* pName, int iValue);
+char* __cdecl NiGetViewerString_00a7d410(const char* pName, unsigned char ucValue);
 
 struct BoundVal
 {
@@ -667,7 +676,7 @@ struct BoundVal
     float m_fCenterY;
     float m_fCenterZ;
     float m_fBoundRadius;
-    char* FUN_00a7fb20(const char* pName);
+    char* GetViewerString_00a7fb20(const char* pName);
 };
 
 struct AddObj
@@ -741,31 +750,31 @@ void GeomData::RegisterFields(StrArr* arr)
 {
     AppendCameraPathEntries(arr);
     char* pValue;
-    pValue = FUN_00a7d330(DAT_011f4884);
+    pValue = NiViewerStrings_NiGetViewerString_Title(DAT_011f4884);
     AppendValue(arr, pValue);
-    pValue = FUN_00a7d490("m_usVertices", m_usVertices);
+    pValue = NiGetViewerString_00a7d490("m_usVertices", m_usVertices);
     AppendValue(arr, pValue);
-    pValue = FUN_00a7d5a0("m_pkVertex", m_pkVertex);
+    pValue = NiGetViewerString_00a7d5a0("m_pkVertex", m_pkVertex);
     AppendValue(arr, pValue);
-    pValue = FUN_00a7d5a0("m_pkNormal", m_pkNormal);
+    pValue = NiGetViewerString_00a7d5a0("m_pkNormal", m_pkNormal);
     AppendValue(arr, pValue);
     int iNBTMethod = m_usTrianglePoints & 0xf000;
-    pValue = FUN_00a7d4d0("NormalBinormalTangent", iNBTMethod);
+    pValue = NiGetViewerString_00a7d4d0("NormalBinormalTangent", iNBTMethod);
     AppendValue(arr, pValue);
-    pValue = m_kBound.FUN_00a7fb20("m_kBound");
+    pValue = m_kBound.GetViewerString_00a7fb20("m_kBound");
     AppendValue(arr, pValue);
-    pValue = FUN_00a7d5a0("m_pkColor", m_pkColor);
+    pValue = NiGetViewerString_00a7d5a0("m_pkColor", m_pkColor);
     AppendValue(arr, pValue);
     unsigned short usNumTextureSets = (unsigned short)(m_usTrianglePoints & 1);
-    pValue = FUN_00a7d490("Num Texture Sets", usNumTextureSets);
+    pValue = NiGetViewerString_00a7d490("Num Texture Sets", usNumTextureSets);
     AppendValue(arr, pValue);
-    pValue = FUN_00a7d5a0("m_pkTexture", m_pkTexture);
+    pValue = NiGetViewerString_00a7d5a0("m_pkTexture", m_pkTexture);
     AppendValue(arr, pValue);
-    pValue = FUN_00a7d490("m_usDirtyFlags", m_usDirtyFlags);
+    pValue = NiGetViewerString_00a7d490("m_usDirtyFlags", m_usDirtyFlags);
     AppendValue(arr, pValue);
-    pValue = FUN_00a7d410("m_ucKeepFlags", m_ucKeepFlags);
+    pValue = NiGetViewerString_00a7d410("m_ucKeepFlags", m_ucKeepFlags);
     AppendValue(arr, pValue);
-    pValue = FUN_00a7d410("m_ucCompressFlags", m_ucCompressFlags);
+    pValue = NiGetViewerString_00a7d410("m_ucCompressFlags", m_ucCompressFlags);
     AppendValue(arr, pValue);
     AddObj* pAddObj = m_spAdd;
     if (pAddObj)
@@ -774,7 +783,7 @@ void GeomData::RegisterFields(StrArr* arr)
     }
     else
     {
-        pValue = FUN_00a7d4d0("m_spAdditionalGeomData", 0);
+        pValue = NiGetViewerString_00a7d4d0("m_spAdditionalGeomData", 0);
         AppendValue(arr, pValue);
     }
 }
@@ -824,10 +833,11 @@ struct GeomView
     void* vptr;
     unsigned int refs;
     unsigned short usVertices;
-    unsigned short FUN_00a669e0() const;
+    unsigned short NiGeometryData_GetActiveVertexCount() const;
 };
 // @fnv 0x00a669e0
-unsigned short GeomView::FUN_00a669e0() const
+// src: XBOX_PDB 0x00a669e0
+unsigned short GeomView::NiGeometryData_GetActiveVertexCount() const
 {
     return usVertices;
 }
@@ -918,7 +928,7 @@ struct FUN_00a67720_obj
     virtual bool v35();
     unsigned int m_i04, m_i08, m_i0c, m_i10, m_i14, m_i18, m_i1c, m_i20, m_i24, m_i28;
     unsigned int m_uiKey2c;
-    void FUN_00a72720(unsigned int uiFlags, unsigned int* pA, unsigned int* pW, unsigned int* pC, unsigned int* pV,
+    void NiAdditionalGeometryData_GetDataStream(unsigned int uiFlags, unsigned int* pA, unsigned int* pW, unsigned int* pC, unsigned int* pV,
                       unsigned int* pU, unsigned int* pB);
 };
 
@@ -957,7 +967,7 @@ void FUN_00a67720_cls::GetKeyAndMode(unsigned int uiArg, FUN_00a67720_res* pOut)
         unsigned int bit1 = (key >> 1) & 1;
         unsigned int uiMode = ((key & 1) != 0) ? 4 : 2;
         u = 0;
-        obj->FUN_00a72720(uiMode + bit1, &a, &w, &c, &v, &u, &b);
+        obj->NiAdditionalGeometryData_GetDataStream(uiMode + bit1, &a, &w, &c, &v, &u, &b);
     }
     unsigned int x, y;
     if (a == 0)
@@ -1149,7 +1159,8 @@ struct Owner
 
 // Doubles a3 three times (multiplying by 8) and writes a2 with that size via the owner's callable BinaryWrite.
 // @fnv 0x00a67ae0
-void __cdecl FUN_00a67ae0(Owner* pOwner, unsigned int pData, unsigned int a3)
+// src: COMMUNITY 0x00a67ae0
+void __cdecl NiPoint2_SaveBinary(Owner* pOwner, unsigned int pData, unsigned int a3)
 {
     Callable* pkCallable = pOwner->m_callable;
     for (unsigned int ui = 0; ui < 3; ++ui)
@@ -1185,12 +1196,13 @@ class GeometryDataA66A
         m_usTrianglePoints = (unsigned short)((m_usTrianglePoints & 0xfff) | eMethod);
     }
 
-    void FUN_00a66a60(unsigned int eMethod);
+    void NiGeometryData_StoreNormalBinormalTangent(unsigned int eMethod);
 };
 
 // Sets the normal binormal tangent method, reallocating m_pkNormal to hold one or three NiPoint3 per vertex depending on eMethod.
 // @fnv 0x00a66a60
-void GeometryDataA66A::FUN_00a66a60(unsigned int eMethod)
+// src: COMMUNITY 0x00a66a60
+void GeometryDataA66A::NiGeometryData_StoreNormalBinormalTangent(unsigned int eMethod)
 {
     if (GetNormalBinormalTangentMethod() == eMethod)
         return;
@@ -1262,7 +1274,7 @@ struct NiRenderObj30
     unsigned int unk24;
     unsigned int unk28;
     unsigned int m_uiFlags2c;
-    void FUN_00a72720(unsigned int uiFlags, unsigned int* pA, unsigned int* pB, unsigned int* pC, unsigned int* pD,
+    void NiAdditionalGeometryData_GetDataStream(unsigned int uiFlags, unsigned int* pA, unsigned int* pB, unsigned int* pC, unsigned int* pD,
                       unsigned int* pE, unsigned int* pF);
 };
 
@@ -1303,7 +1315,7 @@ void RenderOwner::GetBounds(BoundOut* pOut)
         {
             unsigned int uiFlags = (pObj30->m_uiFlags2c & 1) * 2 | 1;
             unsigned int uiB = 0;
-            pObj30->FUN_00a72720(uiFlags, &uiC, &pObj, &uiD, &uiE, &uiB, &uiA);
+            pObj30->NiAdditionalGeometryData_GetDataStream(uiFlags, &uiC, &pObj, &uiD, &uiE, &uiB, &uiA);
         }
         unsigned int uiPtr;
         unsigned int ItemUpdateArray;
@@ -1328,12 +1340,13 @@ class FUN_00a67dd0_cls
   public:
     unsigned int MedianOfThree(unsigned short* pBase, unsigned int uiKey, int iLo, int iHi);
     int CompareVertices(unsigned int uiA, unsigned int uiB, unsigned int uiKey);
-    void FUN_00a67dd0(unsigned short* pArr, unsigned int uiKey, int iLo, int iHi);
+    void NiGeometryData_IndexQSort(unsigned short* pArr, unsigned int uiKey, int iLo, int iHi);
 };
 
 // Reorders the unsigned-short entries in pArr between iLo and iHi using pivot selection and CompareVertices.
 // @fnv 0x00a67dd0
-void FUN_00a67dd0_cls::FUN_00a67dd0(unsigned short* pArr, unsigned int uiKey, int iLo, int iHi)
+// src: XBOX_PDB 0x00a67dd0
+void FUN_00a67dd0_cls::NiGeometryData_IndexQSort(unsigned short* pArr, unsigned int uiKey, int iLo, int iHi)
 {
     if (iHi <= iLo)
         return;
@@ -1366,7 +1379,7 @@ void FUN_00a67dd0_cls::FUN_00a67dd0(unsigned short* pArr, unsigned int uiKey, in
         }
         else
         {
-            FUN_00a67dd0(pBase, uiKey, iLo, j);
+            NiGeometryData_IndexQSort(pBase, uiKey, iLo, j);
             iLo = j + 1;
         }
         if (iHi <= iLo)
@@ -1394,10 +1407,10 @@ namespace fnv_00a68520 {
 // The saving-side NiStream with the group-ID lookup this unit calls (0x00a634f0).
 struct SaveStream : NiStream
 {
-    unsigned int FUN_00a634f0(NiObjectGroup* pkGroup);
+    unsigned int NiStream_GetIDFromGroup(NiObjectGroup* pkGroup);
 };
 
-void FUN_00a67ae0(SaveStream& kStream, NiPoint2* pkTexture, unsigned int ItemUpdateArray);
+void NiPoint2_SaveBinary(SaveStream& kStream, NiPoint2* pkTexture, unsigned int ItemUpdateArray);
 
 // The bounding volume's saving entry point (declared on the real class).
 struct NiBoundSave : NiBound
@@ -1429,16 +1442,17 @@ extern NiObjectGroup* DAT_011f4880;
 
 struct NiGeometryDataSave : NiGeometryData
 {
-    void FUN_00a68520(SaveStream& kStream);
+    void NiGeometryData_SaveBinary(SaveStream& kStream);
 };
 
 // Serializes NiGeometryData vertex, normal, color, texture and bound data to kStream, writing arrays only when m_bVerticesDirty is set.
 // @fnv 0x00a68520
-void NiGeometryDataSave::FUN_00a68520(SaveStream& kStream)
+// src: XBOX_PDB 0x00a68520
+void NiGeometryDataSave::NiGeometryData_SaveBinary(SaveStream& kStream)
 {
     NiObject::SaveBinary(kStream);
 
-    unsigned int uiObjectGroup = kStream.FUN_00a634f0(DAT_011f4880);
+    unsigned int uiObjectGroup = kStream.NiStream_GetIDFromGroup(DAT_011f4880);
     SerializeValue(kStream, uiObjectGroup);
 
     SerializeValue(kStream, m_usVertices);
@@ -1474,7 +1488,7 @@ void NiGeometryDataSave::FUN_00a68520(SaveStream& kStream)
 
     unsigned int uiTextureCount = m_usVertices * (m_usDataFlags & NiGeometryData::TEXTURE_SET_MASK);
     if (uiTextureCount && m_pkTexture && m_bSaveVertexData)
-        FUN_00a67ae0(kStream, m_pkTexture, uiTextureCount);
+        NiPoint2_SaveBinary(kStream, m_pkTexture, uiTextureCount);
 
     SerializeValue(kStream, (unsigned short)(m_usDirtyFlags & 0x7000));
 
@@ -1510,12 +1524,13 @@ class SlotOwner
     int unk30;
     SlotOverride* m_pOverride;  // +0x34
 
-    bool FUN_00a66c00(int iSlot);
+    bool NiGeometryData_ContainsVertexData(int iSlot);
 };
 
 // Returns true if the slot is occupied, checking m_pOverride first, then the specific slot pointer or m_pLeveled with m_uiLevel thresholds.
 // @fnv 0x00a66c00
-bool SlotOwner::FUN_00a66c00(int iSlot)
+// src: XBOX_PDB 0x00a66c00
+bool SlotOwner::NiGeometryData_ContainsVertexData(int iSlot)
 {
     if (m_pOverride && m_pOverride->HasSlot(iSlot))
         return true;
@@ -1588,7 +1603,7 @@ struct FUN_00a67660_obj
     virtual void v33();
     virtual void v34();
     virtual bool v35();
-    void FUN_00a72720(unsigned int uiFlags, unsigned int* pA, unsigned int* pB, unsigned int* pC, unsigned int* pD,
+    void NiAdditionalGeometryData_GetDataStream(unsigned int uiFlags, unsigned int* pA, unsigned int* pB, unsigned int* pC, unsigned int* pD,
                       unsigned int* pE, unsigned int* pF);
     int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28;
     unsigned int m_uiValue1;
@@ -1610,12 +1625,13 @@ struct FUN_00a67660_cls
     int unk34;
     unsigned short unk38;
     unsigned char m_bEnableState;
-    void FUN_00a67660(StreamOut_a676* out);
+    void NiGeometryData_GetAdditionalColorData(StreamOut_a676* out);
 };
 
 // When enabled, it may return early; otherwise it writes data and stride from the entry object or defaults.
 // @fnv 0x00a67660
-void FUN_00a67660_cls::FUN_00a67660(StreamOut_a676* apStreamOut)
+// src: COMMUNITY 0x00a67660
+void FUN_00a67660_cls::NiGeometryData_GetAdditionalColorData(StreamOut_a676* apStreamOut)
 {
     if (!m_bEnableState)
         return;
@@ -1632,7 +1648,7 @@ void FUN_00a67660_cls::FUN_00a67660(StreamOut_a676* apStreamOut)
         unsigned int uiZ = 0;
         unsigned int uiU;
         unsigned int uiV;
-        obj->FUN_00a72720((fl & 1) ? 4 : 2, &uiData, &uiV, &uiW, &uiU, &uiZ, &uiStride);
+        obj->NiAdditionalGeometryData_GetDataStream((fl & 1) ? 4 : 2, &uiData, &uiV, &uiW, &uiU, &uiZ, &uiStride);
         if (fl & 0x20)
             bFlag = true;
     }
@@ -1665,7 +1681,8 @@ struct BoundEquality : NiBound
         return (static_cast<const Point3Equality&>(m_kCenter) == kBound.m_kCenter &&
                 m_fBoundRadius == kBound.m_fBoundRadius);
     }
-    __declspec(noinline) bool FUN_00a926b0(const NiBound& kBound) const
+// src: GUESS 0x00a926b0 (confidence: high)
+    __declspec(noinline) bool IsDifferent(const NiBound& kBound) const
     {
         return !(*this == kBound);
     }
@@ -1673,12 +1690,13 @@ struct BoundEquality : NiBound
 
 struct GeometryEquality : NiGeometryData
 {
-    bool FUN_00a67840(NiObject* pkObject);
+    bool NiGeometryData_IsEqual(NiObject* pkObject);
 };
 
 // Compares this NiGeometryData against pkObject, returning false if vertex, normal, bound, color, texture, or additional data differ.
 // @fnv 0x00a67840
-bool GeometryEquality::FUN_00a67840(NiObject* pkObject)
+// src: XBOX_PDB 0x00a67840
+bool GeometryEquality::NiGeometryData_IsEqual(NiObject* pkObject)
 {
     if (!NiObject::IsEqual(pkObject))
         return false;
@@ -1725,7 +1743,7 @@ bool GeometryEquality::FUN_00a67840(NiObject* pkObject)
         }
     }
 
-    if (static_cast<BoundEquality*>(&m_kBound)->FUN_00a926b0(pkData->m_kBound))
+    if (static_cast<BoundEquality*>(&m_kBound)->IsDifferent(pkData->m_kBound))
         return false;
 
     if ((m_pkColor && !pkData->m_pkColor) || (!m_pkTexture && pkData->m_pkTexture))
@@ -1752,7 +1770,7 @@ bool GeometryEquality::FUN_00a67840(NiObject* pkObject)
         unsigned int ItemUpdateArray = (m_usDataFlags & TEXTURE_SET_MASK) * m_usVertices;
         for (i = 0; i < ItemUpdateArray; i++)
         {
-            if (m_pkTexture[i].FUN_0051c330(pkData->m_pkTexture[i]))
+            if (m_pkTexture[i].ForwardCall_0051c330(pkData->m_pkTexture[i]))
                 return false;
         }
     }
@@ -1875,7 +1893,7 @@ typedef void*(__thiscall* CtorStubEA0)(void*);
 extern "C" void __stdcall _vector_constructor_iterator(void* apvArray, unsigned int uiElemSize, int iCount,
                                                        CtorStubEA0 pfnCtor);
 void FUN_00a67aa0(NiStream& kStream, void* pvDest, int iCount);
-void FUN_00a29680(const char* pcFmt, const char* pcName, int iKBytes);
+void Object_DoNothing(const char* pcFmt, const char* pcName, int iKBytes);
 
 class GeomEA0 : public ObjEA0
 {
@@ -2077,13 +2095,13 @@ void GeomEA0::ReadBinary(NiStream& kStream)
                 NiPoint2* pkTemp = new NiPoint2[uiExtraCount];
                 FUN_00a67aa0(kStream, pkTemp, uiExtraCount);
                 g_memoryManager.Deallocate(pkTemp);
-                FUN_00a29680(&UNK_0109c040, kStream.m_acFileName, (uiExtraCount * 8) >> 10);
+                Object_DoNothing(&UNK_0109c040, kStream.m_acFileName, (uiExtraCount * 8) >> 10);
             }
         }
     }
     if (kStream.m_uiNifFileVersion >= 0x0500000a)
         ReadEA0(kStream, &m_usDirtyFlags, 2, 2);
     if (kStream.m_uiNifFileVersion >= 0x0a030007)
-        kStream.FUN_00a645b0();
+        kStream.ReadLinkID();
 }
 }  // namespace fnv_00a67ea0

@@ -124,7 +124,7 @@ void TESSpellList::InitItem(TESForm* owner)
                                 reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(listCursor.previous)->GetNext());
                         }
                         if (spellTypes.leveled)
-                            FUN_0048d210(spellTypes.leveled);
+                            TESSpellList_AddSpell_0048d210(spellTypes.leveled);
                     }
                 }
             }
@@ -164,13 +164,14 @@ struct PadX
 };
 struct FloatValueProvider
 {
-    bool FUN_0048d170(SpellItem* apSpell);
+    bool TESSpellList_AddSpell(SpellItem* apSpell);
 };
 struct ZX2 : public PadX, public FloatValueProvider
 {
 };
 // @fnv 0x0048d170
-bool FloatValueProvider::FUN_0048d170(SpellItem* apSpell)
+// src: XBOX_PDB 0x0048d170
+bool FloatValueProvider::TESSpellList_AddSpell(SpellItem* apSpell)
 {
     if (!apSpell)
         return false;
@@ -185,28 +186,29 @@ bool FloatValueProvider::FUN_0048d170(SpellItem* apSpell)
 namespace fnv_0048d290 {
 struct FUN_0048d290_shell : public TESSpellList
 {
-    bool FUN_0048d290(TESForm*);
+    bool TESSpellList_AddSpell_0048d290(TESForm*);
 };
 
 struct ZX2
 {
-    bool FUN_0048d170(SpellItem*);
-    bool FUN_0048d210(TESLevSpell*);
+    bool TESSpellList_AddSpell(SpellItem*);
+    bool TESSpellList_AddSpell_0048d210(TESLevSpell*);
 };
 // @fnv 0x0048d290
-bool FUN_0048d290_shell::FUN_0048d290(TESForm* apSpellIn)
+// src: XBOX_PDB 0x0048d290
+bool FUN_0048d290_shell::TESSpellList_AddSpell_0048d290(TESForm* apSpellIn)
 {
     if (g_dataHandler->FUN_004516b0())
     {
-        ((ZX2*)this)->FUN_0048d170((SpellItem*)apSpellIn);
+        ((ZX2*)this)->TESSpellList_AddSpell((SpellItem*)apSpellIn);
         return true;
     }
     SpellItem* pSpell = dynamic_cast<SpellItem*>(apSpellIn);
     TESLevSpell* pLevSpell = dynamic_cast<TESLevSpell*>(apSpellIn);
     if (pSpell)
-        return ((ZX2*)this)->FUN_0048d170(pSpell);
+        return ((ZX2*)this)->TESSpellList_AddSpell(pSpell);
     else if (pLevSpell)
-        return ((ZX2*)this)->FUN_0048d210(pLevSpell);
+        return ((ZX2*)this)->TESSpellList_AddSpell_0048d210(pLevSpell);
     return false;
 }
 }  // namespace fnv_0048d290
@@ -238,12 +240,13 @@ bool Holder_0048d830::ContainsPackage(ActorPackageContext* package)
 struct FUN_0048d880_shell : public BSSimpleList<void*>
 {
     BSSimpleList<void*>* GetOffsetC();
-    bool FUN_0048d880(void* item);
+    bool ContainsListItem(void* item);
 };
 
 // Walks the list returned by GetOffsetC and returns true if any entry equals item, otherwise false.
 // @fnv 0x0048d880
-bool FUN_0048d880_shell::FUN_0048d880(void* item)
+// src: GUESS 0x0048d880 (confidence: medium)
+bool FUN_0048d880_shell::ContainsListItem(void* item)
 {
     BSSimpleList<void*>* node = GetOffsetC();
     while (node)
@@ -272,13 +275,13 @@ void Host0048d8d0::ForwardToHelper(int a)
 
 struct SpellListHandle
 {
-    bool FUN_005f65d0();
+    bool BSSimpleList_TESLevSpell_IsInList();
     void FUN_005ae3d0();
 };
 struct SpellListTask
 {
     SpellListHandle* GetOffsetC(TESLevSpell*& spell);
-    bool FUN_0048d210(TESLevSpell* spell);
+    bool TESSpellList_AddSpell_0048d210(TESLevSpell* spell);
 };
 struct PlayerBaseData
 {
@@ -322,13 +325,14 @@ struct PlayerProcessAccessor
     PlayerProcess* FUN_004181e0();
 };
 // @fnv 0x0048d210
-bool SpellListTask::FUN_0048d210(TESLevSpell* spell)
+// src: XBOX_PDB 0x0048d210
+bool SpellListTask::TESSpellList_AddSpell_0048d210(TESLevSpell* spell)
 {
     if (!spell)
         return false;
     if (this == static_cast<SpellListTask*>(reinterpret_cast<PlayerProcessAccessor*>(g_thePlayer)->FUN_004181e0()))
         return false;
-    if (GetOffsetC(spell)->FUN_005f65d0())
+    if (GetOffsetC(spell)->BSSimpleList_TESLevSpell_IsInList())
         return false;
     GetOffsetC(spell)->FUN_005ae3d0();
     return true;
@@ -401,7 +405,7 @@ struct SavedRecord
 };
 
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-TESForm* FUN_004839c0(unsigned int);
+TESForm* TESForm_GetFormByNumericID(unsigned int);
 struct LoadedList
 {
     void* item;
@@ -427,16 +431,16 @@ void LoadedSpells::LoadSpellList(unsigned int flags, unsigned int unused)
     {
         unsigned short h = 0;
         unsigned int a = 0;
-        if (g_TESSaveLoadGame->FUN_00862110())
+        if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned int s;
-            g_TESSaveLoadGame->FUN_008579e0(&s, 4);
+            g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&s, 4);
             if (s != 0x424c4f4b)
             {
-                SavedRecord* f = static_cast<SavedRecord*>(g_TESSaveLoadGame->FUN_004fd3c0());
+                SavedRecord* f = static_cast<SavedRecord*>(g_TESSaveLoadGame->BGSProjectile_GetExplosion());
                 if (f)
                 {
-                    TESForm* eb = FUN_004839c0(f->id);
+                    TESForm* eb = TESForm_GetFormByNumericID(f->id);
                     Warning(
                         "SAVELOAD: (LoadGame Buffer error) Block Header is incorrect in file %s on line %i.  Currently loading form is %08X %s with version %i and flags %08X",
                         "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESSpellList.cpp", 1371, f->id,
@@ -451,18 +455,18 @@ void LoadedSpells::LoadSpellList(unsigned int flags, unsigned int unused)
                 }
             }
             a = g_TESSaveLoadGame->Position();
-            g_TESSaveLoadGame->FUN_008579e0(&h, 2);
+            g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&h, 2);
         }
         spells.RemoveAll();
         leveledSpells.RemoveAll();
         unsigned short i;
-        g_TESSaveLoadGame->FUN_008579e0(&i, 2);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&i, 2);
         for (p = 0; p < i; p++)
         {
             unsigned int b;
             g_TESSaveLoadGame->FUN_00857aa0(&b, 4);
-            SpellItem* q = dynamic_cast<SpellItem*>(FUN_004839c0(b));
-            TESLevSpell* cf = dynamic_cast<TESLevSpell*>(FUN_004839c0(b));
+            SpellItem* q = dynamic_cast<SpellItem*>(TESForm_GetFormByNumericID(b));
+            TESLevSpell* cf = dynamic_cast<TESLevSpell*>(TESForm_GetFormByNumericID(b));
             if (q)
             {
                 spells.AddHead(q);
@@ -480,13 +484,13 @@ void LoadedSpells::LoadSpellList(unsigned int flags, unsigned int unused)
                 Warning("MASTERFILE: Could not find spell %08X", b);
             }
         }
-        if (g_TESSaveLoadGame->FUN_00862110())
+        if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned int l = g_TESSaveLoadGame->Position();
-            SavedRecord* k = static_cast<SavedRecord*>(g_TESSaveLoadGame->FUN_004fd3c0());
+            SavedRecord* k = static_cast<SavedRecord*>(g_TESSaveLoadGame->BGSProjectile_GetExplosion());
             if (k)
             {
-                TESForm* c = FUN_004839c0(k->id);
+                TESForm* c = TESForm_GetFormByNumericID(k->id);
                 if (l > a + h)
                 {
                     Warning(
@@ -527,11 +531,12 @@ bool __fastcall IsDeleted(const TESForm* form);
 struct TESSpellListShell : TESSpellList
 {
     TesspelllistListNodeView* _ref_00717e50();
-    void FUN_0048d330();
+    void TESSpellList_SaveSubRecord();
 };
-void __cdecl FUN_00485910(unsigned int type, unsigned int formId);
+void __cdecl TESForm_AddChunk_00485910(unsigned int type, unsigned int formId);
 // @fnv 0x0048d330
-void TESSpellListShell::FUN_0048d330()
+// src: COMMUNITY 0x0048d330
+void TESSpellListShell::TESSpellList_SaveSubRecord()
 {
     TesspelllistListNodeView* currentLeveledSpell = _ref_00717e50();
     unsigned int currentSpell;
@@ -541,7 +546,7 @@ void TESSpellListShell::FUN_0048d330()
         if (!IsDeleted(reinterpret_cast<TESForm*>(spell)))
         {
             currentSpell = reinterpret_cast<TESForm*>(spell)->GetFormID();
-            FUN_00485910(0x4f4c5053, currentSpell);
+            TESForm_AddChunk_00485910(0x4f4c5053, currentSpell);
         }
         currentLeveledSpell = currentLeveledSpell->_ref_00726070();
     }
@@ -553,7 +558,7 @@ void TESSpellListShell::FUN_0048d330()
             if (!IsDeleted(reinterpret_cast<TESForm*>(formId)))
             {
                 unsigned int leveledFormId = reinterpret_cast<TESForm*>(formId)->GetFormID();
-                FUN_00485910(0x4f4c5053, leveledFormId);
+                TESForm_AddChunk_00485910(0x4f4c5053, leveledFormId);
             }
             leveledSpell = leveledSpell->_ref_00726070();
         }
@@ -591,8 +596,8 @@ class FUN_0048d880_shell
     BSSimpleList<void*>* GetOffsetC();
 };
 
-TESForm* FUN_004839c0(unsigned int formID);
-extern "C" void FUN_0040fbe0(const char* fmt, ...);
+TESForm* TESForm_GetFormByNumericID(unsigned int formID);
+extern "C" void ProgramFlow(const char* fmt, ...);
 
 class TESSpellList_Target : public TESSpellList
 {
@@ -628,17 +633,17 @@ void TESSpellList_Target::SaveSpellList(unsigned int flags)
         if (*g_011de4e8.Bool())
             startPosData = reinterpret_cast<TimeGlobal*>(g_TESSaveLoadGame)->GetTimeStamp();
 
-        if (g_TESSaveLoadGame->FUN_00862110())
+        if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
         {
             blok = 0x424C4F4B;
-            g_TESSaveLoadGame->FUN_008579b0(&blok, 4);
+            g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&blok, 4);
             pBlockSize3 = (unsigned short*)reinterpret_cast<TimeGlobal*>(g_TESSaveLoadGame)->GetTimeStamp();
-            g_TESSaveLoadGame->FUN_008579b0(&unk0CVal, 2);
+            g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&unk0CVal, 2);
         }
 
         spellCount1 = 0;
         pNumSpells = (unsigned short*)reinterpret_cast<TimeGlobal*>(g_TESSaveLoadGame)->GetTimeStamp();
-        g_TESSaveLoadGame->FUN_008579b0(&spellCount1, 2);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&spellCount1, 2);
 
         curNodePtr = reinterpret_cast<ActorMagicSpellList*>(this)->GetSpells();
         while (curNodePtr)
@@ -647,7 +652,7 @@ void TESSpellList_Target::SaveSpellList(unsigned int flags)
             if (spell3)
             {
                 spellID1 = spell3->GetFormID();
-                g_TESSaveLoadGame->FUN_00857a10(static_cast<void*>(&spellID1), 4);
+                g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(static_cast<void*>(&spellID1), 4);
                 spellCount1++;
             }
             curNodePtr = curNodePtr->GetNext();
@@ -661,7 +666,7 @@ void TESSpellList_Target::SaveSpellList(unsigned int flags)
             if (levSpell2)
             {
                 leveledID = levSpell2->GetFormID();
-                g_TESSaveLoadGame->FUN_00857a10(static_cast<void*>(&leveledID), 4);
+                g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(static_cast<void*>(&leveledID), 4);
                 spellCount1++;
             }
             levNode2 = levNode2->GetNext();
@@ -675,20 +680,20 @@ void TESSpellList_Target::SaveSpellList(unsigned int flags)
             createdObj2 = reinterpret_cast<TES*>(g_TESSaveLoadGame)->GetHitSound();
             if (createdObj2)
             {
-                form = FUN_004839c0(*(unsigned int*)createdObj2);
-                FUN_0040fbe0("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
+                form = TESForm_GetFormByNumericID(*(unsigned int*)createdObj2);
+                ProgramFlow("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
                              currentPos1 - startPosData, *(unsigned int*)createdObj2, form->GetName(),
                              *(unsigned int*)((char*)createdObj2 + 5), 1359,
                              "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESSpellList.cpp");
             }
             else
             {
-                FUN_0040fbe0("SaveGame(): %-5i ending at line %i in file %s", currentPos1 - startPosData, 1359,
+                ProgramFlow("SaveGame(): %-5i ending at line %i in file %s", currentPos1 - startPosData, 1359,
                              "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESSpellList.cpp");
             }
         }
 
-        if (g_TESSaveLoadGame->FUN_00862110())
+        if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
         {
             posNow1 = reinterpret_cast<TimeGlobal*>(g_TESSaveLoadGame)->GetTimeStamp();
             startBlock = (unsigned int)pBlockSize3;
@@ -714,12 +719,13 @@ struct SpellNode
 struct SpellListAccess : TESSpellList
 {
     SpellNode* FUN_00717e50();
-    void FUN_0048d630(BaseFormComponent* source);
+    void TESSpellList_CopyComponent(BaseFormComponent* source);
 };
 
 // Copies all spells from the source TESSpellList into this list, clearing existing entries first.
 // @fnv 0x0048d630
-void SpellListAccess::FUN_0048d630(BaseFormComponent* source)
+// src: XBOX_PDB 0x0048d630
+void SpellListAccess::TESSpellList_CopyComponent(BaseFormComponent* source)
 {
     TESSpellList* a = dynamic_cast<TESSpellList*>(source);
     if (a == 0)
@@ -760,7 +766,7 @@ struct S0048d8f0_Record
 };
 struct S0048d8f0_SaveGame
 {
-    bool FUN_00862110();
+    bool TESSaveLoadGame_UseSaveGameBlocks();
     S0048d8f0_Record* FUN_004fd3e0();
 };
 extern S0048d8f0_SaveGame* DAT_011de45c;
@@ -862,18 +868,19 @@ struct S0048d8f0_SpellListSaveSizer
     void* vtable;
     S0048d8f0_SizedList spells;
     S0048d8f0_SizedList leveledSpells;
-    unsigned short FUN_0048d8f0(unsigned int saveFlags);
+    unsigned short TESSpellList_GetSaveSize(unsigned int saveFlags);
 };
 
 // When saveFlags bit 0x10 is set, adds two bytes and list-size contributions, plus six bytes when the save-state check succeeds.
 // @fnv 0x0048d8f0
-unsigned short S0048d8f0_SpellListSaveSizer::FUN_0048d8f0(unsigned int saveFlags)
+// src: XBOX_PDB 0x0048d8f0
+unsigned short S0048d8f0_SpellListSaveSizer::TESSpellList_GetSaveSize(unsigned int saveFlags)
 {
     unsigned short size = 0;
     if (saveFlags & 0x10)
     {
         unsigned short start = size;
-        if (DAT_011de45c->FUN_00862110())
+        if (DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
         {
             size += 4;
             size += 2;

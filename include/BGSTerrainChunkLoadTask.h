@@ -32,7 +32,7 @@ public:
     virtual void OnChildCompletion();
     virtual unsigned char GetFileIndex();
 
-    bool FUN_006fc400(char* apDescription, unsigned int aiBufferSize);
+    bool GetDescription_006fc400(char* apDescription, unsigned int aiBufferSize);
 
     bool unk30;
     unsigned char unk31[3];

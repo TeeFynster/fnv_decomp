@@ -8,7 +8,7 @@ public:
     void* m_pBeforeRefCount;
     unsigned int m_uiRefCount;
 
-    void FUN_00a8a670();
+    void ForwardCall_00a8a670();
     void* Allocate(unsigned int);
     void DecRefCount();
     void SetSize(unsigned int);

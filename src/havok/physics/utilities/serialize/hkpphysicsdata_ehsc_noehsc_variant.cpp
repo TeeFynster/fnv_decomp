@@ -43,7 +43,7 @@ struct FUN_00d4c050_obj
     int FindMatchingEntry(int a);
 };
 extern int DAT_0102f0ec;
-void* FUN_00c85750() throw();
+void* hkMemoryRouter_getInstance() throw();
 void __cdecl InitializeWorld(void*) throw();
 void __cdecl RunWithLocalContext(void*, void*, void*) throw();
 struct FUN_00d1df70
@@ -160,7 +160,7 @@ struct PhysicsDataExt : public hkpPhysicsData
 {
     hkpWorld* CreateWorld(char bRegisterWithMemoryManager) throw();
 };
-extern void* __cdecl FUN_00c85750(void);
+extern void* __cdecl hkMemoryRouter_getInstance(void);
 extern int DAT_010d07f4;
 extern void __cdecl ProcessCollisionRecords(void*, void*, void*);
 extern void __cdecl ResizeAudioStream(void*, void*, int);
@@ -230,7 +230,7 @@ struct HolderType
 };
 struct ClientType
 {
-    void FUN_00c91c50(void*);
+    void hkpWorld_getCinfo(void*);
     void AddPhysicsSystem(void*);
 };
 struct ArrayType
@@ -245,12 +245,12 @@ struct HostType
     int m_04;
     void* m_08;
     ArrayType m_0c;
-    void FUN_00d4c2d0(ClientType*, unsigned char);
+    void hkpPhysicsData_populateFromWorld(ClientType*, unsigned char);
 };
 extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 struct Value
 {
-    BoolResult FUN_00c9bff0();
+    BoolResult isActive_00c9bff0();
 };
 struct Owner
 {
@@ -258,7 +258,7 @@ struct Owner
     int unk04;
     int** m_08;
     int m_0c;
-    void FUN_00d06130(int index);
+    void hkpPhysicsSystem_removeRigidBody(int index);
 };
 struct Entity
 {
@@ -300,7 +300,7 @@ template <class T> __forceinline int findValue(T* self, Value* value)
     return -1;
 }
 typedef int Owner::*MemberPtr;
-static void FUN_00d4bf70(Owner* owner, Entity* volatile entityArg, MemberPtr valueArg);
+static void tryMoveEntity(Owner* owner, Entity* volatile entityArg, MemberPtr valueArg);
 Owner* volatile probeOwner;
 Value* volatile probeValue;
 Entity* volatile probeEntity;
@@ -376,7 +376,7 @@ struct SplitHeap
 {
     inline SplitAllocator& get(const void*)
     {
-        return ((SplitRouter*)FUN_00c85750())->allocator();
+        return ((SplitRouter*)hkMemoryRouter_getInstance())->allocator();
     }
 };
 template <class T> static __forceinline void copyItems(T* dest, int count, const T& item)
@@ -448,10 +448,10 @@ template <class T> struct SplitArray : SplitArrayBase<T>
 struct SplitName
 {
     char* text;
-    SplitName& FUN_00cb0c10(const char*);
+    SplitName& UpdateState_00cb0c10(const char*);
     __forceinline SplitName& operator=(const char* str)
     {
-        return FUN_00cb0c10(str);
+        return UpdateState_00cb0c10(str);
     }
 };
 struct SplitBody;
@@ -494,18 +494,18 @@ struct SplitSystem : SplitRef
     SplitBool active;
     static __forceinline void* operator new(unsigned int bytes)
     {
-        SplitRef* p = (SplitRef*)((SplitRouter*)FUN_00c85750())->allocator().alloc(bytes);
+        SplitRef* p = (SplitRef*)((SplitRouter*)hkMemoryRouter_getInstance())->allocator().alloc(bytes);
         p->m_usMemSizeAndFlags = (unsigned short)bytes;
         return p;
     }
 
     void AddShape(SplitBody*);
-    void FUN_00d064f0(void*);
-    void FUN_00d06540(SplitConstraint*);
-    void FUN_00d06590(SplitAction*);
-    void FUN_00d06130(int);
-    void FUN_00d061b0(int);
-    void FUN_00d061f0(int);
+    void hkpPhysicsSystem_addPhantom(void*);
+    void hkpPhysicsSystem_addConstraint(SplitConstraint*);
+    void hkpPhysicsSystem_addAction(SplitAction*);
+    void hkpPhysicsSystem_removeRigidBody(int);
+    void hkpPhysicsSystem_removeConstraint(int);
+    void hkpPhysicsSystem_removeAction(int);
     __forceinline const SplitArray<SplitBody*>& getRigidBodies() const
     {
         return bodies;
@@ -662,7 +662,7 @@ struct SplitEntity
     int unkd8;
     int unkdc;
     SplitMotion motion;
-    SplitBool FUN_00c9bff0() const;
+    SplitBool isActive_00c9bff0() const;
     inline SplitBool isFixed() const
     {
         return motion.type == SplitMotionFixed;
@@ -689,7 +689,8 @@ static __forceinline SplitSystem* makeSystem()
     return new FUN_00d065e0;
 }
 typedef int SplitSystem::*MoveMember;
-static __declspec(noinline) void FUN_00d4bf70(SplitSystem* from, SplitSystem* volatile toArg, MoveMember encoded)
+// src: HAVOK_LIB 0x00d4bf70
+static __declspec(noinline) void tryMoveEntity(SplitSystem* from, SplitSystem* volatile toArg, MoveMember encoded)
 {
     SplitSystem* to = toArg;
     SplitBody* body;
@@ -698,30 +699,31 @@ static __declspec(noinline) void FUN_00d4bf70(SplitSystem* from, SplitSystem* vo
     int toIndex = to->getRigidBodies().indexOf(body);
     if (toIndex == -1 && fromIndex != -1)
     {
-        to->setActive(to->isActive() || body->FUN_00c9bff0());
+        to->setActive(to->isActive() || body->isActive_00c9bff0());
         to->AddShape(body);
-        from->FUN_00d06130(fromIndex);
+        from->hkpPhysicsSystem_removeRigidBody(fromIndex);
     }
 }
 static __forceinline void moveConnected(SplitSystem* from, SplitSystem* to, SplitEntity* item)
 {
     MoveMember encoded;
     memcpy(&encoded, &item, 4);
-    FUN_00d4bf70(from, to, encoded);
+    tryMoveEntity(from, to, encoded);
 }
 
 // @fnv 0x00d4c3b0
-void FUN_00d4c3b0(const SplitSystem* source, SplitOutput& output)
+// src: HAVOK_LIB 0x00d4c3b0
+void hkpPhysicsData_splitPhysicsSystems(const SplitSystem* source, SplitOutput& output)
 {
     SplitSystem* remaining = makeSystem();
     for (int i = 0; i < source->getRigidBodies().GetLogicalSize(); ++i)
         remaining->AddShape(source->getRigidBodies()[i]);
     for (int i = 0; i < source->getActions().GetLogicalSize(); ++i)
-        remaining->FUN_00d06590(source->getActions()[i]);
+        remaining->hkpPhysicsSystem_addAction(source->getActions()[i]);
     for (int i = 0; i < source->getConstraints().GetLogicalSize(); ++i)
-        remaining->FUN_00d06540(source->getConstraints()[i]);
+        remaining->hkpPhysicsSystem_addConstraint(source->getConstraints()[i]);
     for (int i = 0; i < source->getPhantomArray().GetLogicalSize(); ++i)
-        remaining->FUN_00d064f0(source->getPhantomArray()[i]);
+        remaining->hkpPhysicsSystem_addPhantom(source->getPhantomArray()[i]);
 
     const SplitArray<SplitBody*>& bodies = remaining->getRigidBodies();
     SplitSystem* moving = makeSystem();
@@ -744,9 +746,9 @@ void FUN_00d4c3b0(const SplitSystem* source, SplitOutput& output)
         SplitSystem* component = makeSystem();
         component->SetParentObject("Constrained System");
         component->setUserData(remaining->getUserData());
-        component->setActive(bodies[0]->FUN_00c9bff0());
+        component->setActive(bodies[0]->isActive_00c9bff0());
         component->AddShape(bodies[0]);
-        remaining->FUN_00d06130(0);
+        remaining->hkpPhysicsSystem_removeRigidBody(0);
         bool changed = true;
         while (changed)
         {
@@ -760,11 +762,11 @@ void FUN_00d4c3b0(const SplitSystem* source, SplitOutput& output)
                     if (constraints[i]->getEntityA() == current || constraints[i]->getEntityB() == current)
                     {
                         changed = true;
-                        component->FUN_00d06540(constraints[i]);
+                        component->hkpPhysicsSystem_addConstraint(constraints[i]);
                         SplitEntity* other = constraints[i]->getOtherEntity(current);
                         if (other && !other->isFixed())
                             moveConnected(remaining, component, other);
-                        remaining->FUN_00d061b0(i);
+                        remaining->hkpPhysicsSystem_removeConstraint(i);
                     }
                     else
                         ++i;
@@ -780,8 +782,8 @@ void FUN_00d4c3b0(const SplitSystem* source, SplitOutput& output)
                         if (participants[k] == current)
                         {
                             changed = true;
-                            component->FUN_00d06590(actions[i]);
-                            remaining->FUN_00d061f0(i);
+                            component->hkpPhysicsSystem_addAction(actions[i]);
+                            remaining->hkpPhysicsSystem_removeAction(i);
                             moved = true;
                             for (int l = 0; l < participants.GetLogicalSize(); ++l)
                             {
@@ -799,7 +801,7 @@ void FUN_00d4c3b0(const SplitSystem* source, SplitOutput& output)
         if (component->getConstraints().GetLogicalSize() == 0 && component->getActions().GetLogicalSize() == 0)
         {
             SplitBody* body = component->getRigidBodies()[0];
-            bool active = !body->GetSimulationIsland() || body->FUN_00c9bff0();
+            bool active = !body->GetSimulationIsland() || body->isActive_00c9bff0();
             if (body->getMotionType() == 4)
             {
                 keyframed->setActive(keyframed->isActive() || active);
@@ -846,7 +848,7 @@ void FUN_00d4c3b0(const SplitSystem* source, SplitOutput& output)
         phantomGroup->setUserData(remaining->getUserData());
         output.m_kPhantoms = phantomGroup;
         for (int i = 0; i < phantoms.GetLogicalSize(); ++i)
-            phantomGroup->FUN_00d064f0(phantoms[i]);
+            phantomGroup->hkpPhysicsSystem_addPhantom(phantoms[i]);
     }
     else
         output.m_kPhantoms = 0;

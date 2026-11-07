@@ -106,7 +106,7 @@ struct PairOutD1E850
 };
 struct ShapeD1E850 : hkpBoxMotion
 {
-    void FUN_00d1e850(int pkOutRaw);
+    void hkpBoxMotion_getInertiaInvWorld(int pkOutRaw);
 };
 
 static const __m128& QuadD1E850(const hkVector4& value)
@@ -115,7 +115,8 @@ static const __m128& QuadD1E850(const hkVector4& value)
 }
 
 // @fnv 0x00d1e850
-void ShapeD1E850::FUN_00d1e850(int pkOutRaw)
+// src: HAVOK_SRC 0x00d1e850
+void ShapeD1E850::hkpBoxMotion_getInertiaInvWorld(int pkOutRaw)
 {
     RotationD1E850 kScaled;
     kScaled.m_kColumn0.Vector4f() =

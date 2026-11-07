@@ -66,7 +66,7 @@ struct S_cd3b20_cls
     int m_5c;
     int m_60[8];
 
-    void FUN_00cd3b20(S_cd3b20_cls* src);
+    void hkpClosestCdPointCollector_addCdPoint(S_cd3b20_cls* src);
 };
 
 static __forceinline S_cd3b20_node* Last(S_cd3b20_node* p)
@@ -78,7 +78,8 @@ static __forceinline S_cd3b20_node* Last(S_cd3b20_node* p)
 
 // If m_30 is null or src->m_1c is less than m_2c, copies src state, setting m_30 and m_58 to the last nodes of src's two lists and recording their key paths.
 // @fnv 0x00cd3b20
-void S_cd3b20_cls::FUN_00cd3b20(S_cd3b20_cls* src)
+// src: HAVOK_SRC 0x00cd3b20
+void S_cd3b20_cls::hkpClosestCdPointCollector_addCdPoint(S_cd3b20_cls* src)
 {
     if (m_30 != 0 && !(src->m_1c < m_2c))
         return;
@@ -126,7 +127,7 @@ void S_cd3b20_cls::FUN_00cd3b20(S_cd3b20_cls* src)
     m_04 = src->m_1c;
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00c6d9c0
 {
@@ -170,7 +171,7 @@ struct FUN_00c6d9c0
 
     static void operator delete(void* apMemory)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         // This allocator dispatches Free through its third vtable slot.
         typedef void (__thiscall *FreeFunction)(hkMemoryAllocator*, void*, unsigned int);

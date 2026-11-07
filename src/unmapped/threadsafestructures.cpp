@@ -15,10 +15,11 @@ int __cdecl FinishScriptRunLock(void*);
 struct FUN_0044b730_Class
 {
     int* p;
-    void FUN_0044b730();
+    void LockFreeMap_DecrementCount();
 };
 // @fnv 0x0044b730
-void FUN_0044b730_Class::FUN_0044b730()
+// src: COMMUNITY 0x0044b730
+void FUN_0044b730_Class::LockFreeMap_DecrementCount()
 {
     FinishScriptRunLock((char*)this + 0x18);
 }
@@ -27,11 +28,12 @@ extern int __cdecl InitScriptRunLock(void*);
 
 struct FUN_0044bbc0_Class
 {
-    void FUN_0044bbc0();
+    void ActorCause_IncRefCount();
 };
 
 // @fnv 0x0044bbc0
-void FUN_0044bbc0_Class::FUN_0044bbc0()
+// src: COMMUNITY 0x0044bbc0
+void FUN_0044bbc0_Class::ActorCause_IncRefCount()
 {
     InitScriptRunLock((char*)this + 0x18);
 }
@@ -50,12 +52,13 @@ bool __thiscall FUN_0044c1c0_Class::IsGreaterOrEqual(unsigned int auiValue, unsi
 struct FUN_0044f200_Class
 {
     int* p;
-    void FUN_0044f200();
+    void DrainFilteredQueue_0044f200();
     void FilterListByQueueData();
 };
 
 // @fnv 0x0044f200
-void FUN_0044f200_Class::FUN_0044f200()
+// src: GUESS 0x0044f200 (confidence: low)
+void FUN_0044f200_Class::DrainFilteredQueue_0044f200()
 {
     while (reinterpret_cast<int*>(this)[8])
         FilterListByQueueData();
@@ -72,16 +75,17 @@ struct FUN_0044bd60_Class
     void* s;
     void* t;
     RecursiveSpinLock lock;
-    void* __thiscall FUN_00449f80(int* a, void* b);
-    bool __thiscall FUN_0044bd60(void* a, void* b);
+    void* __thiscall LockFreeMap_GetInterface_0(int* a, void* b);
+    bool __thiscall LockFreeMap_T_Key_NiPointer_IOTask_GetAt_0044bd60(void* a, void* b);
 };
 bool __fastcall LookupBucket(void*);
 // Locks the object's lock, calls FUN_00449f80 with a and b, passes the result to LookupBucket, unlocks, and returns that bool.
 // @fnv 0x0044bd60
-bool __thiscall FUN_0044bd60_Class::FUN_0044bd60(void* a, void* b)
+// src: COMMUNITY 0x0044bd60
+bool __thiscall FUN_0044bd60_Class::LockFreeMap_T_Key_NiPointer_IOTask_GetAt_0044bd60(void* a, void* b)
 {
     lock.Lock(0);
-    bool r = LookupBucket(FUN_00449f80((int*)a, b));
+    bool r = LookupBucket(LockFreeMap_GetInterface_0((int*)a, b));
     lock.Unlock();
     return r;
 }
@@ -261,16 +265,16 @@ FUN_00906160::FUN_00906160(int a, unsigned int auiBucketCount, int aiParam)
 
 struct Item
 {
-    bool FUN_0044e550();
+    bool j_GetFirst_LockFreeMapInterface_LockFreeMap_PAVTESObjectREFR_V_NiPointer_VQueuedReference_QAE_NIAAPAVTESObjectREFR_AAV_NiPointer_VQueuedReference_Z();
     bool FindEntry();
-    bool FUN_00528bb0();
+    bool LockFreeMap_TESObjectREFR_NiPointer_QueuedReference_LockFreeMapInterface_RemoveAt();
 };
 struct Iteration
 {
     int unk00;
     unsigned int index;
     unsigned int value;
-    bool FUN_006ebde0();
+    bool LockFreeMap_char_const_Model_LockFreeMapIterator_GetFinished();
     bool IsFlagSet();
     void FUN_0044de40(bool);
     void FUN_0044de80(bool);
@@ -279,8 +283,8 @@ struct FUN_0044b8d0_Class
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     RecursiveSpinLock lock;
-    Item* FUN_00449f80(unsigned int, unsigned int*, unsigned int);
-    Item* FUN_00449f80(unsigned int);
+    Item* LockFreeMap_GetInterface_0(unsigned int, unsigned int*, unsigned int);
+    Item* LockFreeMap_GetInterface_0(unsigned int);
     unsigned int FUN_0044ddc0();
     bool ProcessIteration(Iteration*, unsigned int*, unsigned int, bool);
 };
@@ -291,7 +295,7 @@ bool FUN_0044b8d0_Class::ProcessIteration(Iteration* pIteration, unsigned int* p
 {
     lock.Lock(0);
     bool success = false;
-    if (pIteration->FUN_006ebde0())
+    if (pIteration->LockFreeMap_char_const_Model_LockFreeMapIterator_GetFinished())
     {
         success = false;
     }
@@ -301,12 +305,12 @@ bool FUN_0044b8d0_Class::ProcessIteration(Iteration* pIteration, unsigned int* p
         {
             if (!pIteration->IsFlagSet())
             {
-                success = FUN_00449f80(pIteration->index, &pIteration->value, extra)->FUN_0044e550();
+                success = LockFreeMap_GetInterface_0(pIteration->index, &pIteration->value, extra)->j_GetFirst_LockFreeMapInterface_LockFreeMap_PAVTESObjectREFR_V_NiPointer_VQueuedReference_QAE_NIAAPAVTESObjectREFR_AAV_NiPointer_VQueuedReference_Z();
                 pIteration->FUN_0044de40(true);
             }
             else
             {
-                success = FUN_00449f80(pIteration->index, &pIteration->value, extra)->FindEntry();
+                success = LockFreeMap_GetInterface_0(pIteration->index, &pIteration->value, extra)->FindEntry();
             }
             if (!success)
             {
@@ -330,7 +334,7 @@ bool FUN_0044b8d0_Class::ProcessIteration(Iteration* pIteration, unsigned int* p
     }
     if (success)
     {
-        success = FUN_00449f80(*puiResult)->FUN_00528bb0();
+        success = LockFreeMap_GetInterface_0(*puiResult)->LockFreeMap_TESObjectREFR_NiPointer_QueuedReference_LockFreeMapInterface_RemoveAt();
     }
     lock.Unlock();
     return success;
@@ -355,12 +359,13 @@ struct FUN_0044c000_cls
     FUN_0044c000_Target* m_00;
 
     void InsertOrReplace(int x);
-    void FUN_0044c000(unsigned int a, unsigned int b, unsigned char c);
+    void LockFreeMap_TESObjectREFR_NiPointer_QueuedReference_LockFreeMapInterface_SetAt(unsigned int a, unsigned int b, unsigned char c);
 };
 
 // Calls v09 on m_00 with a, a, b, c and passes the result to InsertOrReplace.
 // @fnv 0x0044c000
-void FUN_0044c000_cls::FUN_0044c000(unsigned int uiValue, unsigned int b, unsigned char c)
+// src: COMMUNITY 0x0044c000
+void FUN_0044c000_cls::LockFreeMap_TESObjectREFR_NiPointer_QueuedReference_LockFreeMapInterface_SetAt(unsigned int uiValue, unsigned int b, unsigned char c)
 {
     InsertOrReplace(m_00->v09(uiValue, uiValue, b, c));
 }
@@ -399,14 +404,14 @@ struct FUN_0044c3f0 : InterfacedClass
     void* first;
     void* unused;
     void* second;
-    void FUN_0044c480(int flag);
+    void ClearBucketsAndRecreateManager(int flag);
     ~FUN_0044c3f0();
 };
 // Calls FUN_0044c480(1), then frees the second and first pointers with operator delete.
 // @fnv 0x0044c3f0
 FUN_0044c3f0::~FUN_0044c3f0()
 {
-    FUN_0044c480(1);
+    ClearBucketsAndRecreateManager(1);
     void* savedSecond = second;
     ::operator delete(savedSecond);
     void* savedFirst = first;
@@ -452,12 +457,13 @@ struct TSHashTable
     RecursiveSpinLock m_lock;
 
     void FreeNode(TSNode* node);
-    void FUN_0044c480(bool bNoRecreate);
+    void ClearBucketsAndRecreateManager(bool bNoRecreate);
 };
 
 // Locks the table, deletes m_pManager, frees every bucket node, and unless bNoRecreate recreates m_pManager with the saved param, then unlocks.
 // @fnv 0x0044c480
-void TSHashTable::FUN_0044c480(bool bNoRecreate)
+// src: GUESS 0x0044c480 (confidence: medium)
+void TSHashTable::ClearBucketsAndRecreateManager(bool bNoRecreate)
 {
     AutoMemHelper memContext2(6, true, _kThreadSafeStructuresSourceFile, 0x42c);
     if (m_pManager == 0)
@@ -593,7 +599,7 @@ int C44C8E0Map::LookupBucket(int iKey, int iSize)
     return GetBucket(m_pkHasher->Hash(iKey, iKey, iSize));
 }
 
-void __cdecl FormHeap_Free(void* apMemory);
+void __cdecl FormHeapFreeAndLog_00401030(void* apMemory);
 
 struct FUN_0044cae0_cls : InterfacedClass
 {
@@ -611,9 +617,9 @@ FUN_0044cae0_cls::~FUN_0044cae0_cls()
 {
     Shutdown(1);
     void* pC_ = (void*)m_0c;
-    FormHeap_Free(pC_);
+    FormHeapFreeAndLog_00401030(pC_);
     void* p4 = (void*)m_04;
-    FormHeap_Free(p4);
+    FormHeapFreeAndLog_00401030(p4);
 }
 
 struct Dispatch
@@ -629,16 +635,17 @@ struct Dispatch
     virtual void Slot08();
     virtual void Slot09();
     virtual void Slot0A(unsigned int value);
-    void FUN_0044dde0(unsigned int* argument);
+    void LockFreeMap_DeleteNode(unsigned int* argument);
 };
-void __cdecl FormHeap_Free(void* object);
-// Calls Slot0A with the value pointed to by argument, then passes argument to FormHeap_Free.
+void __cdecl FormHeapFreeAndLog_00401030(void* object);
+// Calls Slot0A with the value pointed to by argument, then passes argument to FUN_00401030.
 // @fnv 0x0044dde0
-void Dispatch::FUN_0044dde0(unsigned int* puiValue)
+// src: COMMUNITY 0x0044dde0
+void Dispatch::LockFreeMap_DeleteNode(unsigned int* puiValue)
 {
     Slot0A(*puiValue);
     void* target = puiValue;
-    FormHeap_Free(target);
+    FormHeapFreeAndLog_00401030(target);
 }
 
 struct FUN_0044de20_cls
@@ -661,14 +668,14 @@ struct FUN_006661e0 : InterfacedClass
     unsigned int m_uiBuckets;
     CF_0081c630* m_pBuckets;
     int m_iParam;
-    void FUN_0044c480(int flag);
+    void ClearBucketsAndRecreateManager(int flag);
     ~FUN_006661e0();
 };
 // Calls FUN_0044c480(1), then deletes m_pBuckets and m_pSlots.
 // @fnv 0x006661e0
 FUN_006661e0::~FUN_006661e0()
 {
-    FUN_0044c480(1);
+    ClearBucketsAndRecreateManager(1);
     delete m_pBuckets;
     delete m_pSlots;
 }
@@ -680,14 +687,14 @@ struct FUN_006ec870 : InterfacedClass
     CF_0081c630* m_pBuckets;
     int m_iParam;
 
-    void __thiscall FUN_0044c480(int value);
+    void __thiscall ClearBucketsAndRecreateManager(int value);
     ~FUN_006ec870();
 };
 
 // @fnv 0x006ec870
 FUN_006ec870::~FUN_006ec870()
 {
-    FUN_0044c480(1);
+    ClearBucketsAndRecreateManager(1);
     delete m_pBuckets;
     delete m_pSlots;
 }
@@ -733,8 +740,8 @@ struct FUN_0044f220_Queue
 {
     void* vtable;
     void* m_pData;
-    int __thiscall FUN_0044f3e0();
-    void __thiscall FUN_0044dde0(void*);
+    int __thiscall LockFreeMap_GetMaxThreads();
+    void __thiscall LockFreeMap_DeleteNode(void*);
 };
 
 struct FUN_0044f220_Node
@@ -762,7 +769,7 @@ struct FUN_0044f220_Class : FUN_0044f200_Class
 void FUN_0044f200_Class::FilterListByQueueData()
 {
     AutoMemHelper guard5(6, true, _kThreadSafeStructuresSourceFile, 0x362);
-    int numSlots = ((FUN_0044f220_Queue*)p)->FUN_0044f3e0() * 3;
+    int numSlots = ((FUN_0044f220_Queue*)p)->LockFreeMap_GetMaxThreads() * 3;
     unsigned int* pArray = new unsigned int[numSlots];
     FUN_00401460(pArray, ((FUN_0044f220_Queue*)p)->m_pData, numSlots * 4);
     FUN_0044f220_Node* pTail = 0;
@@ -789,7 +796,7 @@ void FUN_0044f200_Class::FilterListByQueueData()
         else
         {
             pEntry2->FUN_006ecd40(0);
-            ((FUN_0044f220_Queue*)p)->FUN_0044dde0(pEntry2);
+            ((FUN_0044f220_Queue*)p)->LockFreeMap_DeleteNode(pEntry2);
         }
     }
     delete[] pArray;
@@ -832,14 +839,14 @@ struct HashMap44c1e0 : InterfacedClass
     unsigned int m_uiBuckets;
     CF_0081c630* m_pBuckets;
     int m_iParam;
-    void FUN_0044c480(int flag);
+    void ClearBucketsAndRecreateManager(int flag);
     ~HashMap44c1e0();
 };
 // Destructor that calls FUN_0044c480(1) and deletes m_pBuckets and m_pSlots.
 // @fnv 0x0044c1e0
 HashMap44c1e0::~HashMap44c1e0()
 {
-    FUN_0044c480(1);
+    ClearBucketsAndRecreateManager(1);
     delete m_pBuckets;
     delete m_pSlots;
 }

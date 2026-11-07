@@ -128,7 +128,8 @@ __forceinline void PointVelocity(const MotionData& motion, const hkVector4& poin
     out.add4(motion.linearVelocity);
 }
 // @fnv 0x00e42190
-void __stdcall FUN_00e42190(hkpVehicleInstance* a, unsigned char idx, hkpWorldRayCastOutput* src, hkpVehicleWheelCollide::WheelCollideResult* dst)
+// src: HAVOK_SRC 0x00e42190
+void __stdcall hkpVehicleRayCastWheelCollide_getCollisionOutputFromCastResult(hkpVehicleInstance* a, unsigned char idx, hkpWorldRayCastOutput* src, hkpVehicleWheelCollide::WheelCollideResult* dst)
 {
     hkpVehicleSuspensionSuspensionWheelParameters* table = a->m_pSuspension->m_kWheelParams.m_data;
     float slotA = table[idx].m_fRestLength;

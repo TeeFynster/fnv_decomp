@@ -4,13 +4,13 @@
 
 struct MorphName
 {
-    char const* FUN_0044a560();
+    char const* std_string_debug_c_str();
     char const* __thiscall GetMorphName();
 };
 // @fnv 0x0044a380
 char const* __thiscall MorphName::GetMorphName()
 {
-    return reinterpret_cast<MorphName*>(reinterpret_cast<char*>(this) + 0xc)->FUN_0044a560();
+    return reinterpret_cast<MorphName*>(reinterpret_cast<char*>(this) + 0xc)->std_string_debug_c_str();
 }
 
 struct FUN_00aca1e0

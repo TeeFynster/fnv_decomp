@@ -34,7 +34,7 @@ struct FUN_00e012f0_class
 
 extern "C" void __cdecl FUN_00e49f40();
 typedef void(__thiscall* InitialiseFunction)(FUN_00e012f0_class*);
-extern "C" NotifyRoot* __cdecl FUN_00c85750();
+extern "C" NotifyRoot* __cdecl hkMemoryRouter_getInstance();
 
 // Calls FUN_00e49f40 on this, then if flags has bit 0 set, notifies the target from FUN_00c85750 with this and m4, and returns this.
 // @fnv 0x00e012f0
@@ -43,7 +43,7 @@ FUN_00e012f0_class* FUN_00e012f0_class::InitialiseAndNotify(unsigned int flags)
     reinterpret_cast<InitialiseFunction>(FUN_00e49f40)(this);
     if (flags & 1)
     {
-        NotifyRoot* root = FUN_00c85750();
+        NotifyRoot* root = hkMemoryRouter_getInstance();
         root->target->Notify(this, m4);
     }
     return this;

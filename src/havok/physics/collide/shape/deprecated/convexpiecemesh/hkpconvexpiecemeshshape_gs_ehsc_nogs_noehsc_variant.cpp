@@ -24,7 +24,7 @@ struct HkpStandIn
 {
     virtual void v0() = 0;
 
-    void FUN_00e490d0();
+    void ForwardCall_00e490d0();
     HkpStandIn* FUN_00e01010(int flags);
 
     unsigned short value;
@@ -79,9 +79,10 @@ struct FUN_00e49290_Class
     FUN_00e49290_Data* data;
     FUN_00e49290_Owner* owner;
 
-    int FUN_00e49290(unsigned int index);
+    int hkpConvexPieceMeshShape_getCollisionFilterInfo(unsigned int index);
 };
-int FUN_00e49290_Class::FUN_00e49290(unsigned int index)
+// src: HAVOK_LIB 0x00e49290
+int FUN_00e49290_Class::hkpConvexPieceMeshShape_getCollisionFilterInfo(unsigned int index)
 {
     int result;
 
@@ -97,7 +98,7 @@ int FUN_00e49290_Class::FUN_00e49290(unsigned int index)
 
     return this->owner->target.FUN_00e49290_f4(result);
 }
-int FUN_00e49030();
+int hkpConvexPieceMeshShape_ReturnZero();
 struct Ref
 {
     void FUN_00c905b0() throw();
@@ -128,7 +129,7 @@ struct D : P, S
     Ptr m1c;
     __forceinline ~D()
     {}
-    void FUN_00e490d0();
+    void ForwardCall_00e490d0();
 };
 #include <xmmintrin.h>
 inline void* __cdecl operator new(unsigned int, void* pvWhere) throw()
@@ -225,13 +226,14 @@ class PieceAgentE49
     MeshShapeE49* m_pkMesh;
     float m_fBoundRadius;
 
-    FUN_00e607c0* FUN_00e49120(unsigned int uiIndex, void* pvMemory);
+    FUN_00e607c0* ProcessEntries_00e49120(unsigned int uiIndex, void* pvMemory);
 };
 
 class PieceSourceE49 : public PieceBaseE49, public PieceAgentE49
 {
   public:
-    __declspec(noinline) hkBool FUN_00e49040(const int* piFace, int m_iEdgeNumber) const
+// src: HAVOK_LIB 0x00e49040
+    __declspec(noinline) hkBool hkpConvexPieceMeshShape_vertexIsSet(const int* piFace, int m_iEdgeNumber) const
     {
         int iWord = m_iEdgeNumber / 31;
         int iBit = m_iEdgeNumber % 31;
@@ -240,7 +242,8 @@ class PieceSourceE49 : public PieceBaseE49, public PieceAgentE49
 };
 
 // @fnv 0x00e49120
-FUN_00e607c0* PieceAgentE49::FUN_00e49120(unsigned int uiIndex, void* pvMemory)
+// src: GUESS 0x00e49120 (confidence: low)
+FUN_00e607c0* PieceAgentE49::ProcessEntries_00e49120(unsigned int uiIndex, void* pvMemory)
 {
     FUN_00e607c0* pkPieces = new (pvMemory) FUN_00e607c0(m_fBoundRadius);
     pkPieces->m_pkMesh = m_pkMesh;
@@ -263,7 +266,7 @@ FUN_00e607c0* PieceAgentE49::FUN_00e49120(unsigned int uiIndex, void* pvMemory)
             int piFace = 0;
             do
             {
-                if (static_cast<PieceSourceE49*>(this)->FUN_00e49040(j, i * 3 + piFace))
+                if (static_cast<PieceSourceE49*>(this)->hkpConvexPieceMeshShape_vertexIsSet(j, i * 3 + piFace))
                 {
                     *pkOut = pkTriangle->m_kVertices[piFace];
                     pkOut++;
@@ -337,11 +340,12 @@ struct xShapeBase
 };
 struct xCollection : xShapeBase, xContainer
 {
-    void FUN_00e492d0(const xTransform& t, float tolerance, xAabb& out) const;
+    void hkpConvexPieceMeshShape_getAabb(const xTransform& t, float tolerance, xAabb& out) const;
 };
 
 // @fnv 0x00e492d0
-void xCollection::FUN_00e492d0(const xTransform& t, float tolerance, xAabb& out) const
+// src: XBOX_PDB 0x00e492d0
+void xCollection::hkpConvexPieceMeshShape_getAabb(const xTransform& t, float tolerance, xAabb& out) const
 {
     out.m_kMinimumCorner.set(3.40282e+38f, 3.40282e+38f, 3.40282e+38f, 0.0f);
     out.m_kMaximumCorner.set(-3.40282e+38f, -3.40282e+38f, -3.40282e+38f, 0.0f);

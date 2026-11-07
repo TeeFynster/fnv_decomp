@@ -25,10 +25,11 @@ struct CollisionGeometry
     FloatMatrix3 basis;
     float scaling;
     int param64, param68;
-    float __thiscall FUN_00eb5bf0(const NiPoint3*, const NiPoint3*, float);
+    float __thiscall NiSphereTriIntersector_Pseudodistance(const NiPoint3*, const NiPoint3*, float);
 };
 // @fnv 0x00eb5bf0
-float __thiscall CollisionGeometry::FUN_00eb5bf0(const NiPoint3* motion, const NiPoint3* translation, float amount)
+// src: GAMEBRYO_LIB 0x00eb5bf0
+float __thiscall CollisionGeometry::NiSphereTriIntersector_Pseudodistance(const NiPoint3* motion, const NiPoint3* translation, float amount)
 {
     NiPoint3 scaledMotion(motion->x * amount, motion->y * amount, motion->z * amount);
     const NiPoint3& storedPos = base->position;

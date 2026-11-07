@@ -256,11 +256,12 @@ struct FUN_004f4c40_shell
 {
     char _pad[8];
     void* field8;
-    bool FUN_004f4c40(void* apType);
+    bool TESRegionDataSound_SetMusicType(void* apType);
 };
 // Stores apType in field8 and returns true when apType is non-null and differs from the current field8; otherwise returns false.
 // @fnv 0x004f4c40
-bool FUN_004f4c40_shell::FUN_004f4c40(void* apType)
+// src: XBOX_PDB 0x004f4c40
+bool FUN_004f4c40_shell::TESRegionDataSound_SetMusicType(void* apType)
 {
     if (apType && apType != field8)
     {
@@ -402,9 +403,9 @@ FUN_004f4520_cls::~FUN_004f4520_cls()
 }
 
 void __fastcall WriteSaveData(void*);
-void __cdecl FUN_00485910(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 template <class T> struct RegionListAccess
 {
     unsigned int FUN_005ae380();
@@ -423,10 +424,10 @@ void RegionSoundWriter::WriteRegionSoundData()
     if (GetMusicType())
     {
         unsigned int musicID = ((C0084e3a0*)GetMusicType())->_ref_0084e3a0();
-        FUN_00485910(0x4f4d4452, musicID);
+        TESForm_AddChunk_00485910(0x4f4d4452, musicID);
     }
     if (sounds.uiIncidentalMediaSet)
-        FUN_00485910(0x49534452, sounds.uiIncidentalMediaSet);
+        TESForm_AddChunk_00485910(0x49534452, sounds.uiIncidentalMediaSet);
     unsigned int battleID = 0;
     unsigned int count = ((RegionListAccess<unsigned int>*)&sounds.battleMediaSetList)->FUN_005ae380();
     if (count)
@@ -434,7 +435,7 @@ void RegionSoundWriter::WriteRegionSoundData()
         RegionListAccess<unsigned int>* node = (RegionListAccess<unsigned int>*)&sounds.battleMediaSetList;
         for (unsigned int i = 0; node && node->FUN_006815c0() && i < count; i++)
         {
-            FUN_00485910(0x42534452, node->FUN_006815c0());
+            TESForm_AddChunk_00485910(0x42534452, node->FUN_006815c0());
             node = node->FUN_00726070();
         }
     }
@@ -450,13 +451,13 @@ void RegionSoundWriter::WriteRegionSoundData()
             node[i] = *sound;
             records = records->FUN_00726070();
         }
-        if (FUN_00401500())
+        if (TESForm_QEndianSwapOnSave())
         {
             for (unsigned int i = 0; i < count; i++)
                 ((ContainerItemExtraFileData*)&node[i])->Endian();
         }
         AppendChunk(0x44534452, node, count * sizeof(RegionSoundEntry));
-        if (FUN_00401500())
+        if (TESForm_QEndianSwapOnSave())
         {
             for (unsigned int i = 0; i < count; i++)
                 ((ContainerItemExtraFileData*)&node[i])->Endian();

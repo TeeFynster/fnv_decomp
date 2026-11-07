@@ -112,8 +112,8 @@ bool BloodSplatterBeamShader::ConfigureShaderPass()
     NiPointer<BeamStage> stage;
     BeamStage::CreateNewStage(stage);
     ConfigureBeamStage(stage.m_pObject, 0, 3, 2, true);
-    stage.m_pObject->FUN_00e7def0(0);
-    spPass[0].m_pObject->FUN_00e802b0(spPass[0].m_pObject->m_uiCurrentStage, stage.m_pObject);
+    stage.m_pObject->NiD3DTextureStage_SetFilterMode(0);
+    spPass[0].m_pObject->NiD3DPass_SetStage(spPass[0].m_pObject->m_uiCurrentStage, stage.m_pObject);
     spPass[0].m_pObject->SetVertexShader(m_spTreeVertexShader.m_pObject);
     spPass[0].m_pObject->SetPixelShader(m_spPixelShaderVariants[0].m_pObject);
     spPass[0].m_pObject->SetRenderState(7, 0, true);
@@ -162,11 +162,12 @@ void* FUN_00bd23c0_shell::DestroyIfFlagged(int arg)
 
 struct FUN_00bd2720_shell
 {
-    virtual void FUN_00bd2720();
+    virtual void DistantLODShader_ReloadShaders();
 };
 
 // @fnv 0x00bd2720
-void FUN_00bd2720_shell::FUN_00bd2720()
+// src: XBOX_PDB 0x00bd2720
+void FUN_00bd2720_shell::DistantLODShader_ReloadShaders()
 {
     void** v = *(void***)this;
     ((void(__thiscall*)(void*))v[0x13c / 4])(this);
@@ -174,13 +175,14 @@ void FUN_00bd2720_shell::FUN_00bd2720()
 
 struct FUN_00bd3f80_shell
 {
-    void FUN_00bd3f80();
+    void ProcessState_00bd3f80();
 };
 extern int _fnv_particle_shader_renderer_level;
 typedef void(__thiscall* FUN_00bd3f80_Fn)(FUN_00bd3f80_shell*);
 // Calls virtual slots 81 and 87 on this, and slot 88 when _fnv_particle_shader_renderer_level is at least 2.
 // @fnv 0x00bd3f80
-void FUN_00bd3f80_shell::FUN_00bd3f80()
+// src: GUESS 0x00bd3f80 (confidence: low)
+void FUN_00bd3f80_shell::ProcessState_00bd3f80()
 {
     ((FUN_00bd3f80_Fn*)*(void***)this)[81](this);
     ((FUN_00bd3f80_Fn*)*(void***)this)[87](this);
@@ -310,12 +312,13 @@ class FUN_00bd1c50_cls
     unsigned int m_6c[20];
     unsigned int m_bc;
 
-    int FUN_00bd1c50(int a1, int a2, int a3, int a4, int a5, int a6, int a7);
+    int DebugShader_UpdatePipeline(int a1, int a2, int a3, int a4, int a5, int a6, int a7);
 };
 
 // Updates the first texture stage and pixel shader, then selects this render pass.
 // @fnv 0x00bd1c50
-int FUN_00bd1c50_cls::FUN_00bd1c50(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+// src: COMMUNITY 0x00bd1c50
+int FUN_00bd1c50_cls::DebugShader_UpdatePipeline(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
     v59();
     m_5c->m_kStages.m_pBase[0].m_pObject->m_uiTextureStage = m_6c[m_bc];
@@ -517,7 +520,7 @@ inline bool SetScreenElementTexture(NiScreenElements* geometry, int a, int b, fl
 
 inline void FinishScreenElement(NiScreenElements* geometry)
 {
-    geometry->GetData()->FUN_00a87900();
+    geometry->GetData()->NiScreenElementsData_UpdateBound();
 }
 
 struct DebugShaderInit : BloodSplatterBeamShader
@@ -540,7 +543,7 @@ bool DebugShaderInit::InitDebugShader()
     SetScreenElementRectangle(m_pMenuBackgroundScreenGeometry.m_pObject, 0, -1.0f, 1.0f, 2.0f, -2.0f);
     SetScreenElementTexture(m_pMenuBackgroundScreenGeometry.m_pObject, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f);
     FinishScreenElement(m_pMenuBackgroundScreenGeometry.m_pObject);
-    m_pMenuBackgroundScreenGeometry.m_pObject->FUN_00a5a040();
+    m_pMenuBackgroundScreenGeometry.m_pObject->UpdateProperties();
     GetNiScreenElements()->Update(&update);
     if (!m_spPixelConstantMap.m_pObject)
     {
@@ -553,7 +556,8 @@ bool DebugShaderInit::InitDebugShader()
 
 void LoadDebugShaders();
 // @fnv 0x00bd1940
-void FUN_00bd1940()
+// src: COMMUNITY 0x00bd1940
+void DebugShader_ReloadShaders()
 {
     LoadDebugShaders();
 }
@@ -613,7 +617,7 @@ struct RenderRectangle
 struct RenderView
 {
     void FUN_00a88020(int flags, float x, float y, float width, float height);
-    void FUN_00a87900();
+    void NiScreenElementsData_UpdateBound();
 };
 
 struct RenderContext : RenderResource
@@ -673,7 +677,7 @@ struct RenderContext : RenderResource
     {
         this->owner = owner;
     }
-    void FUN_00a87790(void* device);
+    void NiScreenElements_Draw(void* device);
 };
 
 struct DisplayTarget
@@ -979,14 +983,14 @@ void RenderOwner::DrawSlots(void* destination)
             float fSizeX = fScaleX * DAT_0106b168;
             float fSizeY = fScaleY * DAT_010760f0;
             context.m_pObject->GetView()->FUN_00a88020(0, bx, by, fSizeX, fSizeY);
-            context.m_pObject->GetView()->FUN_00a87900();
+            context.m_pObject->GetView()->NiScreenElementsData_UpdateBound();
             context.m_pObject->SetOwner(this);
             DrawFrame(context.m_pObject);
             if ((DAT_011f4748->GetStatus() == 1 || DAT_011f4748->GetStatus() == 2) && DAT_011f4748->GetMode() == 1)
             {
                 DAT_011f4748->PrepareFrame(&viewportRect);
             }
-            context.m_pObject->FUN_00a87790(DAT_011f4748);
+            context.m_pObject->NiScreenElements_Draw(DAT_011f4748);
             slots[GetIndex()] = 0;
             context.m_pObject->SetOwner(0);
         }

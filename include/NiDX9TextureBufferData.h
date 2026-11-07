@@ -18,7 +18,7 @@ public:
     virtual const NiRTTI* GetRTTI() const;
     virtual void ReleaseReferences();
 
-    static NiDX9TextureBufferData* __cdecl FUN_00e7d250(
+    static NiDX9TextureBufferData* __cdecl Create_00e7d250(
         IDirect3DTexture9* pkD3DTexture, Ni2DBuffer*& pkBuffer,
         int eMSAAPref, int iUnk18);
     // 0x00e7d390: wraps face eFace (a D3DCUBEMAP_FACES) of a cube texture; the

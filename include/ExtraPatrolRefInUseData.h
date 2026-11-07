@@ -10,7 +10,7 @@ public:
     virtual ~ExtraPatrolRefInUseData();
 
     ExtraPatrolRefInUseData(TESForm* apForm);
-    bool FUN_00437ab0(void* apPotentialUser);
+    bool GetCanBeUsedBy(void* apPotentialUser);
 
     unsigned int User;
 };

@@ -27,13 +27,13 @@ public:
 
     void FUN_00afb520();
     void FUN_00afb5f0(int, int);
-    void FUN_00afb670(int byteCount, int seekFlags);
-    int FUN_00afbbf0(void* buffer, unsigned int count);
-    int FUN_00afbbf0(int buffer, int count);
-    unsigned int FUN_00afbde0(void* buffer, unsigned int size);
-    unsigned int FUN_00afbf50(void* buffer, unsigned int size);
+    void ArchiveFile_Seek(int byteCount, int seekFlags);
+    int ArchiveFile_ReadF(void* buffer, unsigned int count);
+    int ArchiveFile_ReadF(int buffer, int count);
+    unsigned int ArchiveFile_Read(void* buffer, unsigned int size);
+    unsigned int ArchiveFile_WriteF(void* buffer, unsigned int size);
     void FUN_00afbfa0(int);
-    int FUN_00b01800(void* buffer, unsigned int count);
+    int ArchiveFile_ReadFromBuffer(void* buffer, unsigned int count);
 
     Archive* m_pArchive;
     unsigned int m_uiFileIndex;

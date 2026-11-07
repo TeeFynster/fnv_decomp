@@ -15,14 +15,14 @@ public:
     virtual void Start();
     virtual void Finish();
 
-    unsigned short __thiscall FUN_0080df90(Actor* apActor);
+    unsigned short __thiscall GetSaveSize_0080df90(Actor* apActor);
     void* __thiscall ConstructFrenzyEffect(void* a, void* b, void* c);
-    FrenzyEffect* FUN_0080dbf0();
-    void __thiscall FUN_0080dfd0(Actor* apActor);
-    void FUN_0080e000(Actor* apActor);
-    bool FUN_0080dca0(MagicTarget* apTarget);
-    void FUN_0080dd30();
-    void FUN_0080ddd0();
+    FrenzyEffect* Copy_0080dbf0();
+    void __thiscall SaveGame_0080dfd0(Actor* apActor);
+    void LoadGame_0080e000(Actor* apActor);
+    bool CheckTarget_0080dca0(MagicTarget* apTarget);
+    void Start_0080dd30();
+    void Finish_0080ddd0();
 
     unsigned char exhausted;
 };

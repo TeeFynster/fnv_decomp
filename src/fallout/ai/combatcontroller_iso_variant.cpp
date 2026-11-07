@@ -6,7 +6,7 @@
 #include "../../../include/Creature.h"
 #include "../../../include/MiddleHighProcess.h"
 
-int __fastcall FUN_007031c0(int);
+int __fastcall GetCurrentWeapon(int);
 
 struct TESAmmoInitCalls
 {
@@ -15,21 +15,22 @@ struct TESAmmoInitCalls
 
 struct FUN_0097fc70_shell
 {
-    int FUN_0097fc70();
+    int CombatController_GetAttackSkill();
 };
 
 // @fnv 0x0097fc70
-int FUN_0097fc70_shell::FUN_0097fc70()
+// src: XBOX_PDB 0x0097fc70
+int FUN_0097fc70_shell::CombatController_GetAttackSkill()
 {
     int iresult = 0;
     Creature* pcreature;
 
     if (!((Actor*)((TESAmmoInitCalls*)this)->FUN_0097ae90())->IsCreature())
     {
-        if (FUN_007031c0((int)this))
+        if (GetCurrentWeapon((int)this))
         {
             iresult = ((ActorValueOwner*)(((TESAmmoInitCalls*)this)->FUN_0097ae90() + 0xa4))
-                          ->GetActorValueAsInteger(((MiddleHighProcess*)FUN_007031c0((int)this))->MiddleHighProcess::GetWeaponForm());
+                          ->GetActorValueAsInteger(((MiddleHighProcess*)GetCurrentWeapon((int)this))->MiddleHighProcess::GetWeaponForm());
         }
         else
         {
@@ -42,7 +43,7 @@ int FUN_0097fc70_shell::FUN_0097fc70()
         pcreature = dynamic_cast<Creature*>((Actor*)((TESAmmoInitCalls*)this)->FUN_0097ae90());
         if (pcreature)
         {
-            iresult = (int)pcreature->FUN_008d46f0();
+            iresult = (int)pcreature->Creature_GetWeaponSkill();
         }
     }
 

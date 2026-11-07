@@ -7,11 +7,12 @@
 
 struct FUN_00b02e00_class
 {
-    void FUN_00b02e00();
+    void UpdateFields_00b02e00();
 };
 
 // @fnv 0x00b02e00
-void FUN_00b02e00_class::FUN_00b02e00()
+// src: GUESS 0x00b02e00 (confidence: low)
+void FUN_00b02e00_class::UpdateFields_00b02e00()
 {
     *(int*)((char*)this + 4) = 0;
     *(int*)((char*)this + 8) = 0;
@@ -19,14 +20,15 @@ void FUN_00b02e00_class::FUN_00b02e00()
 
 struct FUN_00b2bcf0_shell
 {
-    void FUN_00b2bcf0(float*, float*);
-    void FUN_00b06260(float* a, float* b);
+    void CTreeEngine_GetSize(float*, float*);
+    void CSpeedTreeRT_GetTreeSize(float* a, float* b);
 };
 
 // @fnv 0x00b06260
-void FUN_00b2bcf0_shell::FUN_00b06260(float* pfA, float* pfB)
+// src: COMMUNITY 0x00b06260
+void FUN_00b2bcf0_shell::CSpeedTreeRT_GetTreeSize(float* pfA, float* pfB)
 {
-    ((FUN_00b2bcf0_shell*)*(int*)this)->FUN_00b2bcf0(pfA, pfB);
+    ((FUN_00b2bcf0_shell*)*(int*)this)->CTreeEngine_GetSize(pfA, pfB);
 }
 
 struct FUN_00b071c0_Class
@@ -211,19 +213,20 @@ void* FUN_00b078e0_Class::GetFieldAt0C()
 
 struct FUN_00b2bdc0_shell
 {
-    void FUN_00b2bdc0(float, float);
+    void UpdateFields_00b2bdc0(float, float);
 };
 
 struct FUN_00b08500_shell
 {
-    void FUN_00b08500(float a, float b);
+    void CSpeedTreeRT_SetNearFarDists(float a, float b);
 };
 
 // Forwards the two float arguments to the object pointed to by the first member of this object.
 // @fnv 0x00b08500
-void __thiscall FUN_00b08500_shell::FUN_00b08500(float afValue, float afOther)
+// src: COMMUNITY 0x00b08500
+void __thiscall FUN_00b08500_shell::CSpeedTreeRT_SetNearFarDists(float afValue, float afOther)
 {
-    ((FUN_00b2bdc0_shell*)*reinterpret_cast<int*>(this))->FUN_00b2bdc0(afValue, afOther);
+    ((FUN_00b2bdc0_shell*)*reinterpret_cast<int*>(this))->UpdateFields_00b2bdc0(afValue, afOther);
 }
 
 struct FUN_00b086f0_class
@@ -241,10 +244,11 @@ unsigned short __thiscall FUN_00b086f0_class::GetLowWordAtOffset0x78()
 struct CSpeedTreeRT
 {
     void* m_pFirstPointer;
-    unsigned short FUN_00b08710();
+    unsigned short GetNumLeafLodLevels();
 };
 // @fnv 0x00b08710
-unsigned short CSpeedTreeRT::FUN_00b08710()
+// src: XBOX_PDB 0x00b08710
+unsigned short CSpeedTreeRT::GetNumLeafLodLevels()
 {
     unsigned int v = *(unsigned int*)((char*)m_pFirstPointer + 0xd8);
     return (unsigned short)v;
@@ -274,10 +278,11 @@ struct CSpeedTreeRT
     int m_p0;
     int m_p4;
     SpeedTreeLodData* m_pLodData;
-    void __thiscall FUN_00b088b0();
+    void __thiscall FreeLeafLODDataArrays();
 };
 // @fnv 0x00b088b0
-void __thiscall CSpeedTreeRT::FUN_00b088b0()
+// src: COMMUNITY 0x00b088b0
+void __thiscall CSpeedTreeRT::FreeLeafLODDataArrays()
 {
     if (m_pLodData)
         m_pLodData->FreeLodBuffers();
@@ -338,12 +343,13 @@ struct FUN_00b051e0_class
     void* m_2c;
     void* m_30;
     void* m_34;
-    void* FUN_00b051e0();
+    void* CSpeedTreeRT_InstanceOf();
 };
 
 // Returns the pointer stored at the object referenced by m_34, or null if m_34 is null.
 // @fnv 0x00b051e0
-void* FUN_00b051e0_class::FUN_00b051e0()
+// src: COMMUNITY 0x00b051e0
+void* FUN_00b051e0_class::CSpeedTreeRT_InstanceOf()
 {
     void* result = 0;
     if (m_34)
@@ -353,7 +359,7 @@ void* FUN_00b051e0_class::FUN_00b051e0()
 
 struct FUN_0065f2b0_class
 {
-    void FUN_0065f2b0(int, int);
+    void std_vector_float_std_allocator_float_Destroy(int, int);
 };
 struct FUN_0064df10_helper
 {
@@ -367,15 +373,16 @@ struct FUN_00657f60_class
     void* d;
     void* e;
     void* f;
-    void FUN_00657f60();
+    void ReleaseStorage_00657f60();
 };
 // Frees the buffer at d via FUN_0065f2b0 and deallocate, then clears d, e and f.
 // @fnv 0x00657f60
-void FUN_00657f60_class::FUN_00657f60()
+// src: GUESS 0x00657f60 (confidence: medium)
+void FUN_00657f60_class::ReleaseStorage_00657f60()
 {
     if (d)
     {
-        ((FUN_0065f2b0_class*)this)->FUN_0065f2b0((int)d, (int)e);
+        ((FUN_0065f2b0_class*)this)->std_vector_float_std_allocator_float_Destroy((int)d, (int)e);
         ((FUN_0064df10_helper*)((char*)this + 8))->deallocate(d, (unsigned int)((char*)f - (char*)d));
     }
     d = 0;
@@ -441,11 +448,12 @@ struct FUN_00b08440_shell
     void* m_2c;
     void* m_30;
     void* m_34;
-    float FUN_00b08440();
+    float CSpeedTreeRT_GetLodLevel();
 };
 
 // @fnv 0x00b08440
-float FUN_00b08440_shell::FUN_00b08440()
+// src: XBOX_PDB 0x00b08440
+float FUN_00b08440_shell::CSpeedTreeRT_GetLodLevel()
 {
     float fLevel = -1.0f;
     if (m_34)
@@ -462,7 +470,8 @@ float FUN_00b08440_shell::FUN_00b08440()
 extern unsigned char DAT_011f8b78;
 
 // @fnv 0x00b084f0
-void FUN_00b084f0(unsigned char param_1)
+// src: COMMUNITY 0x00b084f0
+void CSpeedTreeRT_SetDropToBillboard(unsigned char param_1)
 {
     DAT_011f8b78 = param_1;
 }
@@ -472,11 +481,12 @@ void __cdecl AssignString(const char* s);
 
 struct CSpeedTreeRT_GetBoundingBox
 {
-    void __thiscall FUN_00b08c80(float* dst);
+    void __thiscall CSpeedTreeRT_GetBoundingBox_00b08c80(float* dst);
 };
 
 // @fnv 0x00b08c80
-void __thiscall CSpeedTreeRT_GetBoundingBox::FUN_00b08c80(float* afBounds)
+// src: XBOX_PDB 0x00b08c80
+void __thiscall CSpeedTreeRT_GetBoundingBox::CSpeedTreeRT_GetBoundingBox_00b08c80(float* afBounds)
 {
     if (afBounds)
     {
@@ -531,7 +541,8 @@ int __thiscall FUN_00b0a260_Class::GetEntryCount()
 extern unsigned char DAT_011f8b79;
 
 // @fnv 0x00b0d7b0
-void FUN_00b0d7b0(unsigned char param_1)
+// src: COMMUNITY 0x00b0d7b0
+void CSpeedTreeRT_SetFlipTextures(unsigned char param_1)
 {
     DAT_011f8b79 = param_1;
 }
@@ -720,7 +731,8 @@ extern int DAT_011f8eb0;
 extern int DAT_011f8eb4;
 // Copies the global camera position and direction into the two output vectors, or reports an error if either pointer is NULL.
 // @fnv 0x00b06b70
-void __cdecl FUN_00b06b70(float* pPosition, float* pDirection)
+// src: XBOX_PDB 0x00b06b70
+void __cdecl CSpeedTreeRT_GetCamera(float* pPosition, float* pDirection)
 {
     if (pPosition && pDirection)
     {
@@ -764,10 +776,11 @@ struct FUN_00b08480_shell
     void* m_2c;
     void* m_30;
     void* m_34;
-    void FUN_00b08480(float f);
+    void CSpeedTreeRT_SetLodLevel(float f);
 };
 // @fnv 0x00b08480
-void FUN_00b08480_shell::FUN_00b08480(float afLevel)
+// src: XBOX_PDB 0x00b08480
+void FUN_00b08480_shell::CSpeedTreeRT_SetLodLevel(float afLevel)
 {
     if (afLevel >= 0.0 && afLevel <= 1.0)
     {
@@ -814,11 +827,12 @@ struct FUN_00b2b940_class
 };
 struct FUN_00b053e0_shell
 {
-    void FUN_00b053e0();
+    void CSpeedTreeRT_DeleteTransientData();
 };
 
 // @fnv 0x00b053e0
-void FUN_00b053e0_shell::FUN_00b053e0()
+// src: XBOX_PDB 0x00b053e0
+void FUN_00b053e0_shell::CSpeedTreeRT_DeleteTransientData()
 {
     unsigned char bFlag = ((unsigned char*)*(void**)((char*)this))[0x21];
     if (bFlag)
@@ -830,12 +844,13 @@ void FUN_00b053e0_shell::FUN_00b053e0()
 struct FUN_00b073f0_class
 {
     void* m_p;  // +0x0
-    float FUN_00b073f0();
+    float GetNestedFloatOrZero();
 };
 
 // Returns the float at offset 0x18 of the object at m_p+0x5c, or 0.0 if m_p or that object is null.
 // @fnv 0x00b073f0
-float FUN_00b073f0_class::FUN_00b073f0()
+// src: GUESS 0x00b073f0 (confidence: medium)
+float FUN_00b073f0_class::GetNestedFloatOrZero()
 {
     if (m_p != 0)
     {
@@ -853,12 +868,13 @@ float FUN_00b073f0_class::FUN_00b073f0()
 struct FUN_00b07440_Class
 {
     void* m_p;
-    float __thiscall FUN_00b07440();
+    float __thiscall GetNestedFloatOrZero_00b07440();
 };
 
 // Returns the float at offset 0x1c of the object stored at m_p+0x5c, or 0.0f if m_p or that pointer is null.
 // @fnv 0x00b07440
-float __thiscall FUN_00b07440_Class::FUN_00b07440()
+// src: GUESS 0x00b07440 (confidence: low)
+float __thiscall FUN_00b07440_Class::GetNestedFloatOrZero_00b07440()
 {
     if (m_p)
     {
@@ -903,11 +919,12 @@ struct FUN_00b09780_class : FUN_0044d6f0_This
 {
     std::basic_string<char, std::char_traits<char>, std::allocator<char> > m_iThirdValue;
 
-    void __thiscall FUN_00b09780();
+    void __thiscall UpdateFields_00b09780();
 };
 
 // @fnv 0x00b09780
-void FUN_00b09780_class::FUN_00b09780()
+// src: GUESS 0x00b09780 (confidence: low)
+void FUN_00b09780_class::UpdateFields_00b09780()
 {
     char local[16];
 
@@ -923,12 +940,13 @@ struct FUN_00b097b0_class
     void* m_p;
     char pad[0x60];
     void FUN_00aca270(int a);
-    int* FUN_00b097b0(int a);
+    int* IdvFileError_IdvFileError(int a);
 };
 
 // Calls FUN_00aca270 with a, sets m_p to the address of DAT_010a51e0, and returns this as an int pointer.
 // @fnv 0x00b097b0
-int* FUN_00b097b0_class::FUN_00b097b0(int a)
+// src: EXE 0x00b097b0
+int* FUN_00b097b0_class::IdvFileError_IdvFileError(int a)
 {
     char pad[0x58];
     FUN_00aca270(a);
@@ -938,11 +956,12 @@ int* FUN_00b097b0_class::FUN_00b097b0(int a)
 
 struct FUN_00b09f70_Class
 {
-    void FUN_00b09f70();
+    void ProcessState_00b09f70();
     void _Tidy(bool, unsigned int);
 };
 // @fnv 0x00b09f70
-void FUN_00b09f70_Class::FUN_00b09f70()
+// src: GUESS 0x00b09f70 (confidence: low)
+void FUN_00b09f70_Class::ProcessState_00b09f70()
 {
     int a;
     int b;
@@ -969,7 +988,8 @@ char* DuplicateString(const char* pOrig)
 extern unsigned char DAT_011f8b79;
 
 // @fnv 0x00b0d7a0
-unsigned char __cdecl FUN_00b0d7a0()
+// src: COMMUNITY 0x00b0d7a0
+unsigned char __cdecl CSpeedTreeRT_GetTextureFlip()
 {
     return DAT_011f8b79;
 }
@@ -997,7 +1017,7 @@ struct LeafBlock
     int extra04, extra08, extra0c, extra10;
     __forceinline ~LeafBlock()
     {
-        contained.FUN_00b02e00();
+        contained.UpdateFields_00b02e00();
     }
 };
 struct FUN_00b02ac0
@@ -1018,20 +1038,21 @@ FUN_00b02ac0::~FUN_00b02ac0()
 extern double _DAT_0101a6b0;
 struct FUN_00b08610_shell
 {
-    unsigned short __thiscall FUN_00b08610(float fLodLevel);
+    unsigned short __thiscall CSpeedTreeRT_GetDiscreteLeafLodLevel(float fLodLevel);
 };
 // Maps a LOD fraction to a discrete level index using the LOD level count, clamping the top value down by one.
 // @fnv 0x00b08610
-unsigned short FUN_00b08610_shell::FUN_00b08610(float fLodLevel)
+// src: COMMUNITY 0x00b08610
+unsigned short FUN_00b08610_shell::CSpeedTreeRT_GetDiscreteLeafLodLevel(float fLodLevel)
 {
     unsigned short nLevel = 0;
     if (fLodLevel == _DAT_0101a6b0)
     {
-        fLodLevel = ((FUN_00b08440_shell*)this)->FUN_00b08440();
+        fLodLevel = ((FUN_00b08440_shell*)this)->CSpeedTreeRT_GetLodLevel();
     }
     if (DAT_011f8b78)
     {
-        int nNumLodLevels = ((CSpeedTreeRT*)this)->FUN_00b08710() + 1;
+        int nNumLodLevels = ((CSpeedTreeRT*)this)->GetNumLeafLodLevels() + 1;
         nLevel = (unsigned short)((1.0f - fLodLevel) * nNumLodLevels);
         if (nLevel == nNumLodLevels)
         {
@@ -1040,7 +1061,7 @@ unsigned short FUN_00b08610_shell::FUN_00b08610(float fLodLevel)
     }
     else
     {
-        int nNumLodLevels = ((CSpeedTreeRT*)this)->FUN_00b08710();
+        int nNumLodLevels = ((CSpeedTreeRT*)this)->GetNumLeafLodLevels();
         nLevel = (unsigned short)((1.0f - fLodLevel) * nNumLodLevels);
         if (nLevel == nNumLodLevels)
         {
@@ -1068,7 +1089,7 @@ void __cdecl AssignString(const char* pcString)
 
 extern unsigned char DAT_011f8b78;
 void __cdecl AssignString(const char* s);
-void __cdecl FUN_00b0c8d0(float a, unsigned short n, float b, float c, float d, float e, float* pf1, float* pf2,
+void __cdecl CSpeedTreeRT_GetTransitionValues(float a, unsigned short n, float b, float c, float d, float e, float* pf1, float* pf2,
                           short* ps1, short* ps2);
 
 struct FUN_00b0b920_geo
@@ -1091,9 +1112,9 @@ struct FUN_00b0b920_engine
     int FUN_00b7b0();
     int FUN_00b830();
     int FUN_00b8b0();
-    unsigned short FUN_00b0a9a0(unsigned short i);
-    int FUN_00b0aa20(unsigned short i);
-    int FUN_00b30730(unsigned short i);
+    unsigned short CIndexedGeometry_GetNumStrips(unsigned short i);
+    int CIndexedGeometry_GetStripLengthsPointer(unsigned short i);
+    int CIndexedGeometry_GetStripsPointer(unsigned short i);
 };
 
 struct FUN_00b0b920_arg
@@ -1114,9 +1135,9 @@ struct FUN_00b0b920_self
     unsigned char m_44;
     char m_45[0x1b];
     FUN_00b0b920_engine* m_60;
-    unsigned short FUN_00b08710();
-    short FUN_00b085a0(float f);
-    float FUN_00b08440();
+    unsigned short GetNumLeafLodLevels();
+    short CSpeedTreeRT_GetDiscreteFrondLodLevel(float f);
+    float CSpeedTreeRT_GetLodLevel();
     void FillFrondGeometry(FUN_00b0b920_arg* arg, short type);
 };
 
@@ -1144,19 +1165,19 @@ void FUN_00b0b920_self::FillFrondGeometry(FUN_00b0b920_arg* arg, short type)
         beg->m_2c = m_60->FUN_00b7b0();
         beg->m_30 = m_60->FUN_00b830();
         beg->m_34 = m_60->FUN_00b8b0();
-        short w = (type == -1) ? FUN_00b085a0(-1.0f) : type;
+        short w = (type == -1) ? CSpeedTreeRT_GetDiscreteFrondLodLevel(-1.0f) : type;
         beg->m_iWordAt00 = w;
-        beg->m_iWordAt04 = m_60->FUN_00b0a9a0((unsigned short)w);
-        beg->m_8 = m_60->FUN_00b0aa20((unsigned short)w);
-        beg->m_iThirdValue = m_60->FUN_00b30730((unsigned short)w);
+        beg->m_iWordAt04 = m_60->CIndexedGeometry_GetNumStrips((unsigned short)w);
+        beg->m_8 = m_60->CIndexedGeometry_GetStripLengthsPointer((unsigned short)w);
+        beg->m_iThirdValue = m_60->CIndexedGeometry_GetStripsPointer((unsigned short)w);
         if (DAT_011f8b78)
         {
-            n = FUN_00b08710() + 1;
+            n = GetNumLeafLodLevels() + 1;
             aj = -1.0f;
             idx = -1.0f;
             num = -1;
             cnt = -1;
-            FUN_00b0c8d0(FUN_00b08440(), n, m_1c, m_28, m_20, (float)m_44, &aj, &idx, &num, &cnt);
+            CSpeedTreeRT_GetTransitionValues(CSpeedTreeRT_GetLodLevel(), n, m_1c, m_28, m_20, (float)m_44, &aj, &idx, &num, &cnt);
             if (num == n - 2)
                 arg->m_74 = aj;
             else if (num == n - 1)
@@ -1176,9 +1197,9 @@ void FUN_00b0b920_self::FillFrondGeometry(FUN_00b0b920_arg* arg, short type)
 
 struct HelperC780
 {
-    void* FUN_00b0c780(float, float);
+    void* CSimpleBillboard_GetBillboardCoords(float, float);
 };
-void __cdecl FUN_00b0c8d0(float, unsigned short, float, float, float, float, float*, float*, short*, short*);
+void __cdecl CSpeedTreeRT_GetTransitionValues(float, unsigned short, float, float, float, float, float*, float*, short*, short*);
 extern "C" char DAT_011ad124;
 struct BlockC4
 {
@@ -1239,13 +1260,13 @@ void TreeC4::FillSpeedTreeOutput(OutC4* out)
 {
     if (DAT_011f8b78)
     {
-        unsigned short p = ((CSpeedTreeRT*)this)->FUN_00b08710() + 1;
+        unsigned short p = ((CSpeedTreeRT*)this)->GetNumLeafLodLevels() + 1;
         float s = -1.0f;
         float i = -1.0f;
         short h = -1;
         short a = -1;
         float f, eb, cf, q;
-        FUN_00b0c8d0(((FUN_00b08440_shell*)this)->FUN_00b08440(), p, x, z, y, (float)mode, &s, &i, &h, &a);
+        CSpeedTreeRT_GetTransitionValues(((FUN_00b08440_shell*)this)->CSpeedTreeRT_GetLodLevel(), p, x, z, y, (float)mode, &s, &i, &h, &a);
         out->weight = -1.0f;
         if (h == p - 1)
             out->weight = s;
@@ -1255,7 +1276,7 @@ void TreeC4::FillSpeedTreeOutput(OutC4* out)
         out->n = 0;
         if (out->active)
         {
-            out->value = helper->FUN_00b0c780(block->b, block->a);
+            out->value = helper->CSimpleBillboard_GetBillboardCoords(block->b, block->a);
             if (list)
                 out->data = list->data;
             else
@@ -1289,7 +1310,7 @@ void TreeC4::FillSpeedTreeOutput(OutC4* out)
 struct V3cdd0
 {
     float x, y, z;
-    float FUN_00b04d40(const V3cdd0* o);
+    float CVec3_Distance(const V3cdd0* o);
 };
 struct P8
 {
@@ -1305,7 +1326,7 @@ struct S0cf90
 };
 struct T3ea10
 {
-    void FUN_00b3ea10(void* c0, V3cdd0 fB, float b0, void* p);
+    void CProjectedShadow_ComputeTexCoords(void* c0, V3cdd0 fB, float b0, void* p);
 };
 struct B0cdd0
 {
@@ -1323,10 +1344,11 @@ struct FUN_00b0cdd0_cls
     T3ea10* m50;
     int m54, m58, m5c;
     void* m60;
-    void FUN_00b0cdd0();
+    void CSpeedTreeRT_ComputeSelfShadowTexCoords();
 };
 // @fnv 0x00b0cdd0
-void FUN_00b0cdd0_cls::FUN_00b0cdd0()
+// src: COMMUNITY 0x00b0cdd0
+void FUN_00b0cdd0_cls::CSpeedTreeRT_ComputeSelfShadowTexCoords()
 {
     float b0;
     V3cdd0 c0, dst, fB, fDist, s1, t1;
@@ -1344,17 +1366,17 @@ void FUN_00b0cdd0_cls::FUN_00b0cdd0()
         dst.x = t1.x;
         dst.y = t1.y;
         dst.z = t1.z;
-        b0 = c0.FUN_00b04d40(&dst) * 0.5;
+        b0 = c0.CVec3_Distance(&dst) * 0.5;
         ((S0cf90*)&c0)->AddVector(&fDist, &dst, &fB, 0.5f)->ScaleSwizzled();
         if (m4c)
         {
-            m50->FUN_00b3ea10(m4, fB, b0, &m4c->v);
-            m50->FUN_00b3ea10(m60, fB, b0, &m4c->v);
+            m50->CProjectedShadow_ComputeTexCoords(m4, fB, b0, &m4c->v);
+            m50->CProjectedShadow_ComputeTexCoords(m60, fB, b0, &m4c->v);
         }
         else
         {
-            m50->FUN_00b3ea10(m4, fB, b0, 0);
-            m50->FUN_00b3ea10(m60, fB, b0, 0);
+            m50->CProjectedShadow_ComputeTexCoords(m4, fB, b0, 0);
+            m50->CProjectedShadow_ComputeTexCoords(m60, fB, b0, 0);
         }
     }
     {
@@ -1385,11 +1407,12 @@ struct FUN_00b0d490_Class
     int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c;
     RecordVector records;
-    char* FUN_00b0d490(unsigned int index);
+    char* GetRecordStringDataChecked(unsigned int index);
 };
 // Returns the character data of the record at index, using the inline buffer when capacity is below 16, otherwise the allocated pointer.
 // @fnv 0x00b0d490
-char* FUN_00b0d490_Class::FUN_00b0d490(unsigned int index)
+// src: GUESS 0x00b0d490 (confidence: medium)
+char* FUN_00b0d490_Class::GetRecordStringDataChecked(unsigned int index)
 {
     RecordVector* data = &records;
     if (index >= static_cast<unsigned int>(data->last - data->first))
@@ -1543,12 +1566,13 @@ struct FUN_00b0eca0_t
 {
     int a;
     int b;
-    bool FUN_00b0eca0(FUN_00b0eca0_t* p);
+    bool ProcessEntries_00b0eca0(FUN_00b0eca0_t* p);
 };
 
 // Calls FUN_00ec7c56 if a is zero or differs from p->a, then returns whether b equals p->b.
 // @fnv 0x00b0eca0
-bool FUN_00b0eca0_t::FUN_00b0eca0(FUN_00b0eca0_t* apOther)
+// src: GUESS 0x00b0eca0 (confidence: low)
+bool FUN_00b0eca0_t::ProcessEntries_00b0eca0(FUN_00b0eca0_t* apOther)
 {
     if (!static_cast<bool>(static_cast<int>(a != 0)) || !static_cast<bool>(static_cast<int>(a == apOther->a)))
     {
@@ -1576,12 +1600,13 @@ struct FUN_00b10430_Class
     int unk00;
     int unk04;
 
-    FUN_00b10430_Class* __thiscall FUN_00b10430(unsigned int index, FUN_00b10430_Arg* range);
+    FUN_00b10430_Class* __thiscall SetCheckedRangeIndex(unsigned int index, FUN_00b10430_Arg* range);
 };
 
 // Resets unk00, validates index against range bounds via FUN_00ec7c56, then stores range->unk00 and index into the object.
 // @fnv 0x00b10430
-FUN_00b10430_Class* FUN_00b10430_Class::FUN_00b10430(unsigned int index, FUN_00b10430_Arg* range)
+// src: GUESS 0x00b10430 (confidence: medium)
+FUN_00b10430_Class* FUN_00b10430_Class::SetCheckedRangeIndex(unsigned int index, FUN_00b10430_Arg* range)
 {
     unk00 = 0;
 
@@ -1633,7 +1658,7 @@ extern MemoryManager DAT_011f6238;
 
 struct FUN_0044a730_shell
 {
-    void __thiscall FUN_0044a730(bool first, unsigned int second);
+    void __thiscall fopen_0044a730(bool first, unsigned int second);
 };
 
 struct FUN_00b04420_pad
@@ -1656,12 +1681,13 @@ class FUN_00b04420_class
     void* m14;
     FUN_0044a730_shell m18;
 
-    void FUN_00b04420();
+    void ReleaseStorage_00b04420();
 };
 
 // Releases m04, m0c, and m14 via DAT_011f6238.Deallocate, nulls them, and calls m18.FUN_0044a730(true, 0).
 // @fnv 0x00b04420
-void FUN_00b04420_class::FUN_00b04420()
+// src: GUESS 0x00b04420 (confidence: medium)
+void FUN_00b04420_class::ReleaseStorage_00b04420()
 {
     void* n;
     FUN_00b04420_pad v_;
@@ -1676,7 +1702,7 @@ void FUN_00b04420_class::FUN_00b04420()
     v0c = m14;
     DAT_011f6238.Deallocate(v0c);
     m14 = 0;
-    m18.FUN_0044a730(true, 0);
+    m18.fopen_0044a730(true, 0);
 }
 
 struct S00b065e0_Vec
@@ -1702,10 +1728,11 @@ struct S00b065e0_Cls
     void* m_2c;
     void* m_30;
     void* m_34;
-    void FUN_00b065e0(float a, float b, float c);
+    void CSpeedTreeRT_SetTreePosition(float a, float b, float c);
 };
 // @fnv 0x00b065e0
-void S00b065e0_Cls::FUN_00b065e0(float a, float b, float c)
+// src: XBOX_PDB 0x00b065e0
+void S00b065e0_Cls::CSpeedTreeRT_SetTreePosition(float a, float b, float c)
 {
     void* base;
     float* n;
@@ -1741,7 +1768,7 @@ short FUN_00b08530_class::GetIndexFromLevel(float level)
 {
     short index = 0;
     if (level == _DAT_0101a6b0)
-        level = ((FUN_00b08440_shell*)this)->FUN_00b08440();
+        level = ((FUN_00b08440_shell*)this)->CSpeedTreeRT_GetLodLevel();
 
     int count = ((FUN_00b086f0_class*)this)->GetLowWordAtOffset0x78();
     index = (short)((1.0 - level) * count);
@@ -1752,9 +1779,9 @@ short FUN_00b08530_class::GetIndexFromLevel(float level)
 
 struct FUN_00b085a0_local_shell
 {
-    float FUN_00b08440();
+    float CSpeedTreeRT_GetLodLevel();
     unsigned short GetId();
-    short FUN_00b085a0(float fLodLevel);
+    short CSpeedTreeRT_GetDiscreteFrondLodLevel(float fLodLevel);
 };
 
 extern double _DAT_0101a6b0;
@@ -1762,13 +1789,14 @@ unsigned short __cdecl FUN_00ec62c0();
 
 // Converts a float LOD level to a clamped integer LOD index using the object's LOD count and a fallback value.
 // @fnv 0x00b085a0
-short FUN_00b085a0_local_shell::FUN_00b085a0(float fLodLevel)
+// src: COMMUNITY 0x00b085a0
+short FUN_00b085a0_local_shell::CSpeedTreeRT_GetDiscreteFrondLodLevel(float fLodLevel)
 {
     short sLevel = 0;
 
     if (fLodLevel == _DAT_0101a6b0)
     {
-        fLodLevel = FUN_00b08440();
+        fLodLevel = CSpeedTreeRT_GetLodLevel();
     }
 
     int nNumLodLevels = GetId();
@@ -1784,16 +1812,17 @@ short FUN_00b085a0_local_shell::FUN_00b085a0(float fLodLevel)
 
 struct FUN_00ac2f70_shell
 {
-    void FUN_00ac2f70();
+    void ClearAllElements();
 };
 struct FUN_00b08750_class
 {
     void* m_iWordAt00;
     void* m_iWordAt04;
-    void FUN_00b08750();
+    void UpdateState_00b08750();
 };
 // @fnv 0x00b08750
-void FUN_00b08750_class::FUN_00b08750()
+// src: GUESS 0x00b08750 (confidence: low)
+void FUN_00b08750_class::UpdateState_00b08750()
 {
     unsigned int ctx00;
     unsigned int ctx04;
@@ -1829,7 +1858,7 @@ void FUN_00b08750_class::FUN_00b08750()
         if (m_iWordAt04)
         {
             p = (FUN_00ac2f70_shell*)m_iWordAt04;
-            ((FUN_00ac2f70_shell*)((char*)p + 0x70))->FUN_00ac2f70();
+            ((FUN_00ac2f70_shell*)((char*)p + 0x70))->ClearAllElements();
         }
     }
 }
@@ -1848,7 +1877,7 @@ struct FUN_00ec78e0
 
 struct FUN_00b096a0_Str
 {
-    void FUN_0044a730(bool, unsigned int);
+    void fopen_0044a730(bool, unsigned int);
     void AssignSubstring(const FUN_00b096a0_Str&, unsigned int, unsigned int);
 
     ~FUN_00b096a0_Str();
@@ -1895,7 +1924,7 @@ FUN_00b096a0::FUN_00b096a0(const FUN_00b096a0_Str& pName)
 
     {
         FUN_00b096a0_Str& s = m_str;
-        s.FUN_0044a730(false, 0);
+        s.fopen_0044a730(false, 0);
         s.AssignSubstring(pName, 0, DAT_010173f0);
     }
 }
@@ -1939,7 +1968,8 @@ void* __thiscall FUN_00b09730_Class::FUN_00b09730(unsigned int flags)
 
 // Returns an approximate distance to other, estimating the square root of the squared component differences with an integer bit trick.
 // @fnv 0x00b04d40
-float V3cdd0::FUN_00b04d40(const V3cdd0* other)
+// src: COMMUNITY 0x00b04d40
+float V3cdd0::CVec3_Distance(const V3cdd0* other)
 {
     float f =
         (other->z - (+z)) * (other->z - (+z)) +
@@ -1962,11 +1992,12 @@ struct M
 struct S
 {
     float x, y, z;
-    V* FUN_00b05000(V* out, M* m);
+    V* TransformPointByMatrix4(V* out, M* m);
 };
 // Applies the 4x4 matrix m to the vector (x, y, z) and stores the resulting x, y, z components in out.
 // @fnv 0x00b05000
-V* S::FUN_00b05000(V* out, M* apMatrix)
+// src: GUESS 0x00b05000 (confidence: medium)
+V* S::TransformPointByMatrix4(V* out, M* apMatrix)
 {
     float tx = (double)apMatrix->_30 + (apMatrix->_20 * z + (apMatrix->_10 * y + apMatrix->_00 * x));
     float ty = (double)apMatrix->_31 + (apMatrix->_21 * z + (apMatrix->_11 * y + apMatrix->_01 * x));

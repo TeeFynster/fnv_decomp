@@ -30,10 +30,10 @@ class NiProperty : public NiObjectNET
     virtual void Update(NiUpdateData& data);
 
     int Type();
-    void FUN_00438230(NiTexture* pTexture);
-    void FUN_004bc450(const NiColor* color);
-    void FUN_0068c9f0(float alpha);
-    void FUN_00441130(int, int);
+    void BSShaderNoLightingProperty_SetBaseMap(NiTexture* pTexture);
+    void NiMaterialProperty_SetEmittance(const NiColor* color);
+    void NiMaterialProperty_SetAlpha(float alpha);
+    void BSShaderProperty_SetFlag(int, int);
     int FUN_00441110();
     void* DestroyAndFree(unsigned int flags);
 };

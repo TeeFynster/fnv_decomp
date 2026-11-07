@@ -48,7 +48,8 @@ void FUN_004870f0_shell::CopyFullNameFrom(BaseFormComponent* apCopyFC)
 
 // Casts apObj to TESFullName and returns its full name, or an empty string if the cast fails.
 // @fnv 0x00482720
-const char* FUN_00482720(TESForm* apObj)
+// src: XBOX_PDB 0x00482720
+const char* TESFullName_GetFullName(TESForm* apObj)
 {
     TESFullName* pFullName = dynamic_cast<TESFullName*>(apObj);
     return pFullName ? ((FNStub*)pFullName)->GetFullName() : "";

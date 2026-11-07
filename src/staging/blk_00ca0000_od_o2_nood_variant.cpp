@@ -97,10 +97,11 @@ class ShapeCa36a0
     int unk8C;
     hkVector4 m_vScale;
     float m_fSphereRadius;
-    void FUN_00ca36a0(const hkTransform& t);
+    void hkPackedNiTriStripsShape_CalcWorldAabb(const hkTransform& t);
 };
 // @fnv 0x00ca36a0
-void ShapeCa36a0::FUN_00ca36a0(const hkTransform& t)
+// src: COMMUNITY 0x00ca36a0
+void ShapeCa36a0::hkPackedNiTriStripsShape_CalcWorldAabb(const hkTransform& t)
 {
     m_kMotionTransform = t;
     m_cachedScale = m_vScale.getX();
@@ -116,7 +117,7 @@ void ShapeCa36a0::FUN_00ca36a0(const hkTransform& t)
         v.m128_f32[3] = 0.0f;
         v = _mm_mul_ps(m_vScale.m_vComponents, v);
         __m128 tv;
-        reinterpret_cast<hkVector4&>(tv).FUN_00c7f640(t, reinterpret_cast<const hkVector4&>(v));
+        reinterpret_cast<hkVector4&>(tv).setTransformedPos_00c7f640(t, reinterpret_cast<const hkVector4&>(v));
         m_cachedMin.m_vComponents = _mm_min_ps(m_cachedMin.m_vComponents, tv);
         m_cachedMax.m_vComponents = _mm_max_ps(m_cachedMax.m_vComponents, tv);
     }
@@ -144,7 +145,7 @@ struct hkVertexArray
 
 struct hkShapeCache
 {
-    hkBool FUN_00cb2160(const hkTransform& t, float tolerance) const;
+    hkBool hkTransform_isApproximatelyEqual(const hkTransform& t, float tolerance) const;
     int unk00;
 };
 
@@ -184,13 +185,14 @@ class ShapeCa37e0
     hkVector4 m_vScale;
     float m_fSphereRadius;
 
-    void FUN_00ca37e0(const hkTransform& t, float tolerance, hkAabb& out);
+    void hkPackedNiTriStripsShape_getAabb(const hkTransform& t, float tolerance, hkAabb& out);
 };
 
 // @fnv 0x00ca37e0
-void ShapeCa37e0::FUN_00ca37e0(const hkTransform& t, float tolerance, hkAabb& out)
+// src: XBOX_PDB 0x00ca37e0
+void ShapeCa37e0::hkPackedNiTriStripsShape_getAabb(const hkTransform& t, float tolerance, hkAabb& out)
 {
-    if (m_cachedMin.getX() != 3.402820018375656e+38 && m_pAccessManager.FUN_00cb2160(t, 0.001f))
+    if (m_cachedMin.getX() != 3.402820018375656e+38 && m_pAccessManager.hkTransform_isApproximatelyEqual(t, 0.001f))
     {
         if (m_vScale.getX() == m_cachedScale)
         {
@@ -211,7 +213,7 @@ void ShapeCa37e0::FUN_00ca37e0(const hkTransform& t, float tolerance, hkAabb& ou
         v.m128_f32[3] = 0.0f;
         v = _mm_mul_ps(m_vScale.m_vComponents, v);
         __m128 tv;
-        reinterpret_cast<hkVector4&>(tv).FUN_00c7f640(t, reinterpret_cast<const hkVector4&>(v));
+        reinterpret_cast<hkVector4&>(tv).setTransformedPos_00c7f640(t, reinterpret_cast<const hkVector4&>(v));
         out.m_kMinimumCorner.m_vComponents = _mm_min_ps(out.m_kMinimumCorner.m_vComponents, tv);
         out.m_kMaximumCorner.m_vComponents = _mm_max_ps(out.m_kMaximumCorner.m_vComponents, tv);
     }
@@ -441,11 +443,12 @@ class Picker_ca3b
     __m128 m_kPoint;
     float m_fHitDistance;
 
-    void FUN_00ca3b20(PickResult_ca3b* pkResult);
+    void hkPackedNiTriStripsShape_CopyCinfo(PickResult_ca3b* pkResult);
 };
 
 // @fnv 0x00ca3b20
-void Picker_ca3b::FUN_00ca3b20(PickResult_ca3b* pkResult)
+// src: XBOX_PDB 0x00ca3b20
+void Picker_ca3b::hkPackedNiTriStripsShape_CopyCinfo(PickResult_ca3b* pkResult)
 {
     pkResult->m_fHitDistance = m_fHitDistance;
     pkResult->m_kPoint = m_kPoint;
@@ -561,7 +564,7 @@ struct TriMeshShape
     int unk7C;
     Vec4 scale;
     float radius;
-    TriShape* FUN_00ca3c40(unsigned int key, TriShape* buffer);
+    TriShape* hkPackedNiTriStripsShape_getChildShape(unsigned int key, TriShape* buffer);
 };
 
 static inline void SetVertex(Vec4& v, const TriVec3& p)
@@ -570,7 +573,8 @@ static inline void SetVertex(Vec4& v, const TriVec3& p)
 }
 
 // @fnv 0x00ca3c40
-TriShape* TriMeshShape::FUN_00ca3c40(unsigned int key, TriShape* buffer)
+// src: COMMUNITY 0x00ca3c40
+TriShape* TriMeshShape::hkPackedNiTriStripsShape_getChildShape(unsigned int key, TriShape* buffer)
 {
     unsigned int index = key & 0xFFFFFF;
     if (index >= data->numTriangles)
@@ -716,25 +720,26 @@ struct MassInfo_ca5360
 };
 struct Shape_ca5360
 {
-    void FUN_00ca3b20(MassInfo_ca5360* pkInfo);
+    void hkPackedNiTriStripsShape_CopyCinfo(MassInfo_ca5360* pkInfo);
 };
 struct Base_ca5360
 {
-    void FUN_00c84e20(MassInfo_ca5360* pkInfo);
+    void bhkShape_CopyCinfo(MassInfo_ca5360* pkInfo);
 };
 struct FUN_00ca5360_cls : Base_ca5360
 {
     int unk00;
     int unk04;
     Shape_ca5360* m_pShape;
-    void FUN_00ca5360(MassInfo_ca5360* pkInfo);
+    void bhkPackedNiTriStripsShape_CopyCinfo(MassInfo_ca5360* pkInfo);
 };
 // @fnv 0x00ca5360
-void FUN_00ca5360_cls::FUN_00ca5360(MassInfo_ca5360* pkInfo)
+// src: XBOX_PDB 0x00ca5360
+void FUN_00ca5360_cls::bhkPackedNiTriStripsShape_CopyCinfo(MassInfo_ca5360* pkInfo)
 {
-    Base_ca5360::FUN_00c84e20(pkInfo);
+    Base_ca5360::bhkShape_CopyCinfo(pkInfo);
     if (this != 0 && m_pShape != 0)
-        m_pShape->FUN_00ca3b20(pkInfo);
+        m_pShape->hkPackedNiTriStripsShape_CopyCinfo(pkInfo);
     else
     {
         pkInfo->m_fMass = 0.0f;
@@ -863,11 +868,12 @@ class VecOwnerAB
     int unk160, unk164, unk168, unk16c, unk170, unk174, unk178, unk17c;
     int unk180, unk184, unk188, unk18c, unk190, unk194, unk198, unk19c;
     __m128 m_v;
-    float FUN_00cac860();
+    float ProcessAndReturnValue_00cac860();
 };
 
 // @fnv 0x00cac860
-float VecOwnerAB::FUN_00cac860()
+// src: GUESS 0x00cac860 (confidence: low)
+float VecOwnerAB::ProcessAndReturnValue_00cac860()
 {
     return _mm_cvtss_f32(_mm_shuffle_ps(m_v, m_v, 0xff));
 }
@@ -879,11 +885,12 @@ struct CacObj
     int unk08;
     int unk0c;
     hkVector4 v4;
-    void FUN_00cac960(const hkVector4* pv);
+    void hkpCharacterProxy_setLinearVelocity(const hkVector4* pv);
 };
 
 // @fnv 0x00cac960
-void CacObj::FUN_00cac960(const hkVector4* pv)
+// src: XBOX_PDB 0x00cac960
+void CacObj::hkpCharacterProxy_setLinearVelocity(const hkVector4* pv)
 {
     v4.m_vComponents = pv->m_vComponents;
 }
@@ -1099,7 +1106,8 @@ struct F7_Shape
     }
     static void operator delete(void*);
 };
-static __declspec(noinline) void __cdecl FUN_00cbd9e0(float s, F7_Shape* d)
+// src: COMMUNITY 0x00cbd9e0
+static __declspec(noinline) void __cdecl hkHingeConstraintCinfo_ApplyScale(float s, F7_Shape* d)
 {
     __m128 k = _mm_set1_ps(s);
     hkVector4* p = &d->v20;
@@ -1119,10 +1127,11 @@ struct F7_Clone
     int unk00;
     F7_Shape* shape;
     void ReleaseObject(F7_Shape*, F7_Params*);
-    void FUN_00cbdb70(F7_Shape* dest, F7_Params* params);
+    void hkHingeConstraintCinfo_CloneData(F7_Shape* dest, F7_Params* params);
 };
 // @fnv 0x00cbdb70
-void F7_Clone::FUN_00cbdb70(F7_Shape* dest, F7_Params* params)
+// src: XBOX_PDB 0x00cbdb70
+void F7_Clone::hkHingeConstraintCinfo_CloneData(F7_Shape* dest, F7_Params* params)
 {
     F7_Scope scope;
     F7_Shape* src = shape;
@@ -1138,7 +1147,7 @@ void F7_Clone::FUN_00cbdb70(F7_Shape* dest, F7_Params* params)
     dest->v90.m_vComponents = src->v90.m_vComponents;
     float scale = params->scale;
     if (scale != 1.0f)
-        FUN_00cbd9e0(scale, dest);
+        hkHingeConstraintCinfo_ApplyScale(scale, dest);
     ReleaseObject(dest, params);
 }
 
@@ -1165,7 +1174,8 @@ static __forceinline void Load3(LocalM128& v, const float* p)
 }
 
 // @fnv 0x00cbeaf0
-void FUN_00cbeaf0(const float* vertexArray, int numVertices, int striding, hkAabb& aabbOut)
+// src: XBOX_PDB 0x00cbeaf0
+void hkAabbUtil_calcAabb(const float* vertexArray, int numVertices, int striding, hkAabb& aabbOut)
 {
     LocalM128 v;
     Load3(v, vertexArray);
@@ -1284,13 +1294,13 @@ struct MaterialArray
     MaterialEntry* data;
     unsigned capacity, size, occupied, growth;
     void Resize(unsigned);
-    void FUN_00ca49a0(unsigned, MaterialEntry&);
+    void NiTLargeArray_hkNiTriStripsData_NiTMallocInterface_hkNiTriStripsData_SetAt(unsigned, MaterialEntry&);
     void Append(MaterialEntry& value)
     {
         unsigned index = size;
         if (index >= capacity)
             Resize(index + growth);
-        FUN_00ca49a0(index, value);
+        NiTLargeArray_hkNiTriStripsData_NiTMallocInterface_hkNiTriStripsData_SetAt(index, value);
     }
 };
 struct RuntimeMesh
@@ -1310,7 +1320,7 @@ struct FUN_00cc0500
     {
         FUN_00cc00e0();
     }
-    FUN_00cc0500& FUN_00cc01c0(const char*);
+    FUN_00cc0500& ProcessAndReturnValue_00cc01c0(const char*);
 };
 struct WarningHandler
 {
@@ -1372,12 +1382,13 @@ struct MeshShape
     unsigned references, field08, field0c;
     int material;
     void ReadGroup(NiStream&);
-    void FUN_00c84d00(NiStream&);
-    void FUN_00ca7a70(NiStream&);
+    void bhkShape_LoadBinary(NiStream&);
+    void bhkNiTriStripsShape_LoadBinary(NiStream&);
 };
 
 // @fnv 0x00ca7a70
-void MeshShape::FUN_00ca7a70(NiStream& stream)
+// src: XBOX_PDB 0x00ca7a70
+void MeshShape::bhkNiTriStripsShape_LoadBinary(NiStream& stream)
 {
     unsigned char allocated;
     RuntimeMesh* mesh = GetRuntime(&allocated);
@@ -1390,11 +1401,11 @@ void MeshShape::FUN_00ca7a70(NiStream& stream)
             char message[512];
             FUN_00cc0500 text(message, 512, true);
             const char* path = stream.m_acFileName;
-            text.FUN_00cc01c0("File ")
-                .FUN_00cc01c0(path)
-                .FUN_00cc01c0(" contains an old bhkpMeshShape! ")
-                .FUN_00cc01c0(name)
-                .FUN_00cc01c0(" re-export\n");
+            text.ProcessAndReturnValue_00cc01c0("File ")
+                .ProcessAndReturnValue_00cc01c0(path)
+                .ProcessAndReturnValue_00cc01c0(" contains an old bhkpMeshShape! ")
+                .ProcessAndReturnValue_00cc01c0(name)
+                .ProcessAndReturnValue_00cc01c0(" re-export\n");
             DAT_01268360->Report(1, 0x234f2250, message,
                                  "D:\\_Fallout3\\Platforms\\Common\\Code\\BSHavok\\bhkNiTriStripsShape.cpp", 170);
         }
@@ -1440,7 +1451,7 @@ void MeshShape::FUN_00ca7a70(NiStream& stream)
     }
     else
     {
-        FUN_00c84d00(stream);
+        bhkShape_LoadBinary(stream);
         stream.ReadUnsignedInteger();
         unsigned count = 0;
         StreamReader(stream)->ReadScalar(&count, sizeof(count));

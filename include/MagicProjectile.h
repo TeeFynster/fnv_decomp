@@ -67,8 +67,8 @@ public:
     virtual void vf199();
 
     unsigned short GetSaveRecordSize(unsigned int);
-    void FUN_0081e8c0(unsigned int);
-    void FUN_0081e980(unsigned int, unsigned int);
+    void SaveGame_0081e8c0(unsigned int);
+    void LoadGame_0081e980(unsigned int, unsigned int);
     void ResolveMagicReferences(unsigned int, unsigned int);
     void ResolveMagicReferences(int arg1, int arg2);
     void InitEffect();
@@ -78,9 +78,9 @@ public:
     void Process(BGSLoadFormBuffer*);
     void Process(float);
     void Process(int);
-    void FUN_0081e730();
-    void FUN_00570f70(SceneNode*);
-    EffectSetting* FUN_004fd400();
+    void KillAreaEffectGeometry();
+    void TESObjectREFR_Set3DSimple(SceneNode*);
+    EffectSetting* GetAVEffect();
 };
 
 typedef char MagicProjectile_size_check[(sizeof(MagicProjectile) == 0x150) ? 1 : -1];

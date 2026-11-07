@@ -3,7 +3,7 @@
 #define BHKLIMITEDHINGECONSTRAINT_DECLS_H
 
 extern float DAT_01267e30;
-void FUN_00c9fb70();
+void bhkConvexShape_CopyCinfo();
 
 // bhkLimitedHingeVector_bhklimitedhingeconstraint_decls: local type (was include/bhkLimitedHingeVector_bhklimitedhingeconstraint_decls.h, which had no evidence of one real class); its methods are 0x004b4db0 bhkVector4::operator=
 class bhkLimitedHingeVector_bhklimitedhingeconstraint_decls
@@ -29,7 +29,7 @@ public:
         unsigned char vecData[16];
     };
 
-    void FUN_004b4db0(const float*);
+    void SetQuaternionComponentsFromVector(const float*);
 };
 
 class bhkLimitedHingeOutput

@@ -13,22 +13,24 @@
 
 struct FUN_006e4320_Class
 {
-    void FUN_006e4320(float value);
+    void PathingRequestCoveredMove_SetAttackerSneakHeight(float value);
 };
 
 // @fnv 0x006e4320
-void FUN_006e4320_Class::FUN_006e4320(float value)
+// src: XBOX_PDB 0x006e4320
+void FUN_006e4320_Class::PathingRequestCoveredMove_SetAttackerSneakHeight(float value)
 {
     *(float*)((char*)this + 0xbc) = value;
 }
 
 struct FUN_006e4340_Class
 {
-    void FUN_006e4340(float value);
+    void PathingRequestLOS_SetIgnoreLocationRadius(float value);
 };
 
 // @fnv 0x006e4340
-void FUN_006e4340_Class::FUN_006e4340(float value)
+// src: XBOX_PDB 0x006e4340
+void FUN_006e4340_Class::PathingRequestLOS_SetIgnoreLocationRadius(float value)
 {
     *(float*)((char*)this + 0xc4) = value;
 }
@@ -56,11 +58,12 @@ void __thiscall FUN_006e4380_Class::SetFlagCE(bool value)
 
 struct FUN_006e43a0_class
 {
-    void FUN_006e43a0(int b);
+    void _SetByteCF(int b);
 };
 
 // @fnv 0x006e43a0
-void FUN_006e43a0_class::FUN_006e43a0(int b)
+// src: COMMUNITY 0x006e43a0
+void FUN_006e43a0_class::_SetByteCF(int b)
 {
     *(char*)((char*)this + 0xcf) = (char)b;
 }
@@ -103,19 +106,22 @@ void PathingRequestCover::SetCover(const NiPoint3& point)
 }
 
 // @fnv 0x006e4630
-unsigned char* FUN_006e4630(int aiBase, unsigned short ausIndex, unsigned char aucOffset)
+// src: XBOX_PDB 0x006e4630
+unsigned char* PathingCoverLocation_ComputeKey(int aiBase, unsigned short ausIndex, unsigned char aucOffset)
 {
     return (unsigned char*)((aiBase << 0x10) + ausIndex * 4 + aucOffset);
 }
 
 // @fnv 0x006e4820
-bool PathingCoverLocation::FUN_006e4820()
+// src: XBOX_PDB 0x006e4820
+bool PathingCoverLocation::IsLedgeCover_006e4820()
 {
     return f04c == 2;
 }
 
 // @fnv 0x006e4500
-void PathingCoverLocation::FUN_006e4500(unsigned short ausValue, unsigned short b, unsigned short c, char e, char f,
+// src: COMMUNITY 0x006e4500
+void PathingCoverLocation::SetCoverData(unsigned short ausValue, unsigned short b, unsigned short c, char e, char f,
                                       char g)
 {
     f04c = (char)ausValue;
@@ -297,11 +303,12 @@ struct FUN_006e4650_class
 {
     bool FUN_006dd610(NavMeshPtr& nm);
     unsigned short GetShortValueAtOffset24(NiPointer<PathingSolution>& sol);
-    bool FUN_006e4650(int arg);
+    bool PathingCoverLocation_CheckDynamicCoverValid(int arg);
 };
 
 // @fnv 0x006e4650
-bool FUN_006e4650_class::FUN_006e4650(int aiValue)
+// src: XBOX_PDB 0x006e4650
+bool FUN_006e4650_class::PathingCoverLocation_CheckDynamicCoverValid(int aiValue)
 {
     NavMeshPtr nm;
     if (FUN_006dd610(nm))
@@ -315,18 +322,19 @@ bool FUN_006e4650_class::FUN_006e4650(int aiValue)
 
 struct S_006e4570_NavMesh : NavMesh
 {
-    int FUN_0084e3a0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 // Looks up a navmesh triangle via FUN_006dd640 and returns FUN_006e4630's result for that triangle and unk51, or null if lookup fails.
 // @fnv 0x006e4570
-unsigned char* PathingCoverLocation::FUN_006e4570()
+// src: XBOX_PDB 0x006e4570
+unsigned char* PathingCoverLocation::GetKey_006e4570()
 {
     NavMeshPtr navMesh;
     unsigned short triangleIndexA = 0;
     if (FUN_006dd640(&navMesh, &triangleIndexA))
     {
-        return FUN_006e4630(((S_006e4570_NavMesh*)navMesh.operator->())->FUN_0084e3a0(), triangleIndexA, f051);
+        return PathingCoverLocation_ComputeKey(((S_006e4570_NavMesh*)navMesh.operator->())->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), triangleIndexA, f051);
     }
     return 0;
 }
@@ -335,10 +343,11 @@ struct S_006e4740
 {
     bool FUN_006dd610(NavMeshPtr& nm);
     unsigned short GetShortValueAtOffset24(NiPointer<PathingSolution>& sol);
-    int FUN_006e4740();
+    int PathingCoverLocation_GetDynamicCoverObstacleTimeStamp();
 };
 // @fnv 0x006e4740
-int S_006e4740::FUN_006e4740()
+// src: XBOX_PDB 0x006e4740
+int S_006e4740::PathingCoverLocation_GetDynamicCoverObstacleTimeStamp()
 {
     NavMeshPtr nm;
     if (FUN_006dd610(nm))
@@ -354,14 +363,15 @@ int S_006e4740::FUN_006e4740()
 
 struct PointCalc : NiPoint3
 {
-    PointCalc FUN_00439ef0(const NiPoint3& other) const;
+    PointCalc SubtractIntoVector(const NiPoint3& other) const;
     double FUN_004a7290() const;
 };
 // @fnv 0x006e4840
-bool PathingCoverLocation::FUN_006e4840(const NiPoint3& point)
+// src: XBOX_PDB 0x006e4840
+bool PathingCoverLocation::IsLeftSideClosest(const NiPoint3& point)
 {
-    PointCalc vecA = ((const PointCalc&)a).FUN_00439ef0(point);
-    PointCalc vecB = ((const PointCalc&)b).FUN_00439ef0(point);
+    PointCalc vecA = ((const PointCalc&)a).SubtractIntoVector(point);
+    PointCalc vecB = ((const PointCalc&)b).SubtractIntoVector(point);
     if (vecA.FUN_004a7290() < vecB.FUN_004a7290())
         return true;
     return false;

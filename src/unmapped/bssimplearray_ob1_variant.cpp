@@ -16,7 +16,7 @@ extern int DAT_0106b8a0;
 struct FUN_006cf9d0
 {
     int* vfptr;
-    void FUN_009a3d00(unsigned int maxSize, unsigned int growBy);
+    void BSSimpleArray_WeaponData_1024_InitialSetup(unsigned int maxSize, unsigned int growBy);
     FUN_006cf9d0(unsigned int maxSize, unsigned int growBy);
 };
 extern int DAT_0106b91c;
@@ -33,13 +33,13 @@ struct FUN_006cf250_Class
 extern "C" void* __cdecl _Reallocate(void* p, unsigned int size);
 struct FUN_006cf280_Class
 {
-    void* __thiscall FUN_006cf280(void* p, unsigned int n);
+    void* __thiscall _Reallocate_Thunk_006cf280(void* p, unsigned int n);
 };
 bool AreBytesEqual(const unsigned char* a, const unsigned char* b);
 extern int DAT_0106b8c8;
 struct Dummy_0061bf20
 {
-    void FUN_006b3f40(int, int);
+    void BSSimpleArray_NavMeshPOVSearchNode_1024_InitialSetup(int, int);
 };
 struct FUN_006cf9a0 : Dummy_0061bf20
 {
@@ -54,7 +54,7 @@ struct GlobalObject_00869f00
 struct FUN_006cfaa0
 {
     int* vfptr;
-    void FUN_006cfaa0_();
+    void ResetVirtualTableAndClear_006cfaa0();
 };
 struct FUN_006e91e0_cls
 {
@@ -69,7 +69,7 @@ extern int DAT_0106d4e8;
 struct FUN_006e9230_class
 {
     int* vfptr;
-    void FUN_006e97a0(int a, int b);
+    void BSSimpleArray_PathingNode_1024_InitialSetup(int a, int b);
     FUN_006e9230_class();
 };
 extern int DAT_0106d4e8;
@@ -80,12 +80,12 @@ struct PSNodeStub
 };
 struct FUN_006e9260Class : PSNodeStub
 {
-    void FUN_006e9260();
+    void SetVirtualTableAndProcessState_006e9260();
 };
 void* __cdecl Reallocate(void* p, int size);
 struct FUN_006e93f0
 {
-    void* __thiscall FUN_006e93f0_(void* p, int n);
+    void* __thiscall Reallocate_Thunk(void* p, int n);
 };
 struct PacketNodeRecord
 {
@@ -128,14 +128,14 @@ struct ArrHelper
 };
 struct S5460
 {
-    unsigned int __thiscall FUN_00978bc0();
+    unsigned int __thiscall BSSimpleArray_NiPoint3_1024_AddUninitialized();
 };
 struct FUN_006cf4c0_Array
 {
     ParentSpaceNode* pDummy;
     ParentSpaceNode* pBuffer;
     unsigned int iSize;
-    unsigned int FUN_006cf4c0(const ParentSpaceNode& aValue);
+    unsigned int BSSimpleArray_ParentSpaceNode_1024_Add(const ParentSpaceNode& aValue);
 };
 extern int DAT_0106c990;
 struct FUN_0069b1d0
@@ -190,20 +190,20 @@ struct FUN_006cfd40_Class
 struct FUN_006e9410_shell
 {
     void FUN_006e90a0(int a, int b);
-    void* FUN_006e8f40(int a, void* b);
+    void* GetElementAddress30_006e8f40(int a, void* b);
 };
 struct FUN_006e9530_shell
 {
-    void FUN_006e9530();
+    void VirtualPathingNode_Copy();
 };
 struct FUN_006e9410_class
 {
-    void __thiscall FUN_006e9410(void* arg);
+    void __thiscall BSSimpleArray_VirtualPathingNode_1024_Copy(void* arg);
 };
 void* __cdecl FUN_00ec7230(char* dst, const char* src, unsigned int size);
 struct FUN_006dc6e0_Class
 {
-    void __thiscall FUN_006dc6e0(char* a, char* b, unsigned int count);
+    void __thiscall BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(char* a, char* b, unsigned int count);
 };
 struct FUN_006cf820
 {
@@ -228,7 +228,7 @@ struct FUN_006dc590
     TypeValueCount* pBuffer;
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
-    void __thiscall FUN_006dc590_(unsigned int aiNewSize, unsigned int aiCopyCount);
+    void __thiscall UpdateState_006dc590(unsigned int aiNewSize, unsigned int aiCopyCount);
 };
 struct FUN_0072ba80_shell
 {
@@ -236,7 +236,7 @@ struct FUN_0072ba80_shell
 };
 struct FUN_006f9eb0_class
 {
-    void FUN_006f9eb0(unsigned int newSize, int oldSize);
+    void BSSimpleArray_Resize_0(unsigned int newSize, int oldSize);
 };
 struct FUN_006f9790_class
 {
@@ -244,15 +244,15 @@ struct FUN_006f9790_class
     char* pBuffer;
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
-    void FUN_006f9790(unsigned int aiReserveSize);
+    void BSSimpleArray_SetAllocSize(unsigned int aiReserveSize);
 };
 struct FUN_006e1280_Class
 {
-    void FUN_006e1280(char* p, unsigned int n);
+    void VisitPlacementAddresses(char* p, unsigned int n);
 };
 struct FUN_006cf520_Class
 {
-    int __thiscall FUN_006cf520(const unsigned char* aValue);
+    int __thiscall BSScrapArray_bool_1024_Add(const unsigned char* aValue);
 };
 struct FUN_006d0450_Class
 {
@@ -270,11 +270,11 @@ struct NavMeshEdgeReference
 };
 struct FUN_006f3170_Class
 {
-    bool FUN_006f3170();
+    bool BSSimpleArray_HasSufficientCapacity();
 };
 struct FUN_00869600_Class
 {
-    unsigned int FUN_00869600();
+    unsigned int BSSimpleArray_GetOptimalCapacity();
 };
 struct FUN_0061bf70_Class
 {
@@ -290,7 +290,7 @@ struct FUN_0061bf70_Class
 extern int DAT_0106c954;
 struct FUN_006d0310_Class
 {
-    void FUN_006d0310(unsigned int, unsigned int);
+    void BSSimpleArray_NavMeshEdgeLocation_1024_InitialSetup(unsigned int, unsigned int);
 };
 struct FUN_006cf200
 {
@@ -314,7 +314,7 @@ struct FUN_006cf900_Class : EH
         int m_08;
     } m_Location;
 
-    FUN_006cf900_Class& FUN_006cf900(const FUN_006cf900_Class* aLocation);
+    FUN_006cf900_Class& CopyFields_006cf900(const FUN_006cf900_Class* aLocation);
 };
 struct PSClearStub
 {
@@ -322,11 +322,11 @@ struct PSClearStub
 };
 struct SaveGameSizeState
 {
-    void __thiscall FUN_006e95d0(unsigned int pBuffer, unsigned int ItemUpdateArray);
+    void __thiscall BSSimpleArray_VirtualPathingNode_1024_ConstructItems(unsigned int pBuffer, unsigned int ItemUpdateArray);
 };
 struct S5460Helper
 {
-    void __thiscall FUN_006cfe70(unsigned int aiNewSize, unsigned int uiOldSize);
+    void __thiscall BSSimpleArray_VirtualPathingNode_1024_ReallocateBuffer(unsigned int aiNewSize, unsigned int uiOldSize);
 };
 struct FUN_006e90a0_class
 {
@@ -360,11 +360,11 @@ struct FUN_006bf8f0_Class
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
 
-    void __thiscall FUN_006bf8f0(unsigned int aiIndex, bool abShrink);
+    void __thiscall BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned int aiIndex, bool abShrink);
 };
 struct FUN_006a2270_class
 {
-    void FUN_006a2270(char* pDest, char* pSource, unsigned int ItemUpdateArray);
+    void BSSimpleArray_PathingNode_1024_CopyItems(char* pDest, char* pSource, unsigned int ItemUpdateArray);
 };
 struct FUN_006cf000_Class
 {
@@ -379,7 +379,7 @@ struct FUN_006cf000_Class
 };
 struct S5460_FUN_006e3d30_Helper
 {
-    void* __thiscall FUN_006e3d30(unsigned int newSize, unsigned int oldSize);
+    void* __thiscall BSSimpleArray_PathingAvoidNode_1024_ReallocateBuffer(unsigned int newSize, unsigned int oldSize);
 };
 struct BSSimpleArray_PathingAvoidNode_1024
 {
@@ -395,11 +395,11 @@ struct BSSimpleArray_PathingAvoidNode_1024
 };
 struct FUN_009f6540_Helper
 {
-    void __thiscall FUN_009f6540(unsigned int, unsigned int);
+    void __thiscall BSSimpleArray_TeleportLink_1024_ReallocateBuffer(unsigned int, unsigned int);
 };
 struct Host9f6340
 {
-    void __thiscall FUN_009f6460(int, int);
+    void __thiscall BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(int, int);
 };
 struct FUN_009f6200_Class
 {
@@ -410,7 +410,7 @@ struct FUN_009f6200_Class
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
 
-    void FUN_009f6200(unsigned int aiNewSize, bool abFreeMemory);
+    void BSSimpleArray_SandBoxChoiceListItem_1024_SetSize(unsigned int aiNewSize, bool abFreeMemory);
 };
 struct FUN_0069cfe0_Elem
 {
@@ -421,7 +421,7 @@ struct FUN_0069cfe0_Elem
 struct FUN_0069cfe0_Dst
 {
     void FUN_0069cea0(unsigned int count, int flag);
-    FUN_0069cfe0_Elem* FUN_006a1440(unsigned int index);
+    FUN_0069cfe0_Elem* Object_GetIndexedValue_006a1440(unsigned int index);
 };
 struct FUN_0069cfe0_cls
 {
@@ -445,12 +445,12 @@ struct HeapProvider
 {
     void* FUN_00aa42e0();
 };
-HeapProvider* __cdecl FUN_00401020();
+HeapProvider* __cdecl MemoryManager_Instance();
 struct FUN_006cf2a0 : FUN_005e0510
 {
     void* m_pStreamAllocator;
     FUN_006cf2a0(int first, int second, void* heap);
-    void FUN_006b3eb0(int first, int second);
+    void BSSimpleArray_float_1024_InitialSetup(int first, int second);
 };
 struct FUN_006cf700_cls
 {
@@ -475,7 +475,7 @@ struct ParamHost
 };
 struct ItemFinish
 {
-    void FUN_006cf900();
+    void CopyFields_006cf900();
 };
 struct FUN_006cf8a0_cls
 {
@@ -491,7 +491,7 @@ struct FUN_006cf940_Item
 };
 struct FUN_006cf940_Owner
 {
-    void FUN_006cff60(unsigned int count, int flag);
+    void ResizeArrayStorage(unsigned int count, int flag);
     FUN_006cf940_Item* FUN_00691750(unsigned int index, char* pItem);
 };
 struct FUN_006cf940_cls
@@ -500,7 +500,7 @@ struct FUN_006cf940_cls
     char* m_04;
     unsigned int m_08;
 
-    void FUN_006cf940(FUN_006cf940_Owner* a1);
+    void BSSimpleArray_CopyTo_0(FUN_006cf940_Owner* a1);
 };
 struct FUN_006cfac0_base
 {
@@ -523,12 +523,12 @@ struct FUN_006d0540_shell
     int unk08;
     int unk0c;
 
-    void __thiscall FUN_006d0540(void* newItem, void* oldItem, unsigned int count);
+    void __thiscall CopyOverlappingElements30(void* newItem, void* oldItem, unsigned int count);
     void __thiscall FUN_006a8500();
 };
 struct FUN_006cfe70_Class : public FUN_006d0540_shell
 {
-    void __thiscall FUN_006cfe70(int value, int count);
+    void __thiscall BSSimpleArray_VirtualPathingNode_1024_ReallocateBuffer(int value, int count);
 };
 void* __cdecl operator new(unsigned int size, void* place);
 void __cdecl operator delete(void* p, void* place);
@@ -552,8 +552,8 @@ struct FUN_006e3c90_cls
 };
 struct FUN_006e9470_Helper
 {
-    void FUN_006e9280(unsigned int count, int flag);
-    void* FUN_006e8f80(int index, void* item);
+    void BSSimpleArray_PathingNode_1024_SetSize(unsigned int count, int flag);
+    void* GetPathingGraphNodeAddress(int index, void* item);
 };
 struct FUN_006e9470_Obj
 {
@@ -565,18 +565,18 @@ struct FUN_006e9470_cls
     char* m_04;
     unsigned int m_08;
 
-    void FUN_006e9470(FUN_006e9470_Helper* pHelper);
+    void BSSimpleArray_PathingNode_1024_Copy(FUN_006e9470_Helper* pHelper);
 };
 struct S_00a0d000_Class
 {
-    virtual unsigned int FUN_00a0d000();
+    virtual unsigned int ReserveSlotAndIncrementSize();
     virtual void* FUN_00a0d010(unsigned int size);
 
     void* pBuffer;
     unsigned int m_uiSize;
     unsigned int m_uiReservedSize;
 
-    void FUN_00a0d0c0(unsigned int newCapacity, unsigned int copyCount);
+    void UpdateFields_00a0d0c0(unsigned int newCapacity, unsigned int copyCount);
 };
 struct FUN_006cf230
 {
@@ -628,10 +628,10 @@ struct FUN_006e9280_shell
     FUN_006e9280_Item* m_pBuffer;
     unsigned int m_uiSize;
     unsigned int m_uiCapacity;
-    void FUN_006a21c0(unsigned int uiNewAlloc, unsigned int uiCopy);
+    void BSSimpleArray_PathingNode_1024_ReallocateBuffer(unsigned int uiNewAlloc, unsigned int uiCopy);
     void ConstructArray(FUN_006e9280_Item* pItems, unsigned int ItemUpdateArray);
     void FUN_006cff20(FUN_006e9280_Item* pItems, unsigned int ItemUpdateArray);
-    void FUN_006e9280(unsigned int uiNewSize, bool bShrink);
+    void BSSimpleArray_PathingNode_1024_SetSize(unsigned int uiNewSize, bool bShrink);
 };
 
 struct ArrayStub
@@ -670,11 +670,12 @@ struct ArrayStub
     }
     void copyOne(char* dest, char* src);
 
-    void FUN_00a0d0c0(void* newValue, void* key);
+    void UpdateFields_00a0d0c0(void* newValue, void* key);
 };
 
 // @fnv 0x00a0d0c0
-void ArrayStub::FUN_00a0d0c0(void* newValue, void* key)
+// src: GUESS 0x00a0d0c0 (confidence: low)
+void ArrayStub::UpdateFields_00a0d0c0(void* newValue, void* key)
 {
     if (unk04 != 0)
     {
@@ -754,10 +755,11 @@ struct ArrQ0cd50
         for (unsigned int i = 0; i < n; i++)
             new (&p[i], (PNQ0cd50*)0) void*;
     }
-    void FUN_00a0cd50(unsigned int index, void* const& item);
+    void AllocateStorage_00a0cd50(unsigned int index, void* const& item);
 };
 // @fnv 0x00a0cd50
-void ArrQ0cd50::FUN_00a0cd50(unsigned int index, void* const& item)
+// src: GUESS 0x00a0cd50 (confidence: low)
+void ArrQ0cd50::AllocateStorage_00a0cd50(unsigned int index, void* const& item)
 {
     DeadQ3();
     if (index == m_iElementCount)
@@ -844,11 +846,12 @@ struct ArrayConstructor
         }
     }
 
-    ArrayConstructor* FUN_00a1bef0();
+    ArrayConstructor* BSSimpleArray_ButtonIcon_1024_BSSimpleArray_ButtonIcon_1024();
 };
 
 // @fnv 0x00a1bef0
-ArrayConstructor* ArrayConstructor::FUN_00a1bef0()
+// src: COMMUNITY 0x00a1bef0
+ArrayConstructor* ArrayConstructor::BSSimpleArray_ButtonIcon_1024_BSSimpleArray_ButtonIcon_1024()
 {
     vfptr = &DAT_0109527c;
     Initialize(0, 0);

@@ -12,7 +12,7 @@ public:
     static ShortPoint3 ComponentProduct(const ShortPoint3&, const ShortPoint3&);
     float Length();
     short SqrLength();
-    ShortPoint3* FUN_0050e8b0(void*);
+    ShortPoint3* SetComponents(void*);
     short Dot(const ShortPoint3&);
     ShortPoint3 Cross(const ShortPoint3&);
     float GetFloatX();

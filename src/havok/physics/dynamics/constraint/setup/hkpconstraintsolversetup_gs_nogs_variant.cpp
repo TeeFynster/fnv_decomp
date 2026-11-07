@@ -12,11 +12,12 @@
 
 // The copied declarations for the parent unit's 0x00d88670 are unused in this variant.
 
-void __cdecl FUN_00d29bf0(void* a0, void* a1, hkpVelocityAccumulator* acc, hkpMotion** sub, int a4, int a5);
-void __cdecl FUN_00d1a330(void* world78, hkpEntity** ent, int count);
+void __cdecl hkRigidMotionUtilApplyAccumulators(void* a0, void* a1, hkpVelocityAccumulator* acc, hkpMotion** sub, int a4, int a5);
+void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(void* world78, hkpEntity** ent, int count);
 
 // @fnv 0x00d88580
-void __cdecl FUN_00d88580(void* a0, void* a1, int offset, hkpEntity** entities, int count)
+// src: COMMUNITY 0x00d88580
+void __cdecl hkpConstraintSolverSetup_oneStepIntegrate(void* a0, void* a1, int offset, hkpEntity** entities, int count)
 {
     for (int i = 0; i < count; ++i)
     {
@@ -38,8 +39,8 @@ void __cdecl FUN_00d88580(void* a0, void* a1, int offset, hkpEntity** entities, 
         acc.m_scratch1 = acc.m_vAngularVelocity;
         unsigned char saved = sub->m_ucDeactivationIntegrateCounter;
         sub->m_ucDeactivationIntegrateCounter = 0xff;
-        FUN_00d29bf0(a0, a1, &acc, &sub, 1, 0);
-        FUN_00d1a330(((hkpWorld*)entity->m_pOwningWorld)->m_pCollisionInput, &entity, 1);
+        hkRigidMotionUtilApplyAccumulators(a0, a1, &acc, &sub, 1, 0);
+        hkpEntityAabbUtil_entityBatchRecalcAabb(((hkpWorld*)entity->m_pOwningWorld)->m_pCollisionInput, &entity, 1);
         sub->m_ucDeactivationIntegrateCounter = saved;
     }
 }

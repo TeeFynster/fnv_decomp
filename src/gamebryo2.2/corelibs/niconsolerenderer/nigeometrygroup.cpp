@@ -51,7 +51,8 @@ NiGeometryBufferData::NiGeometryBufferData()
 __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 
 // @fnv 0x00e98730
-void __fastcall FUN_00e98730(int pObject, int, int pArg)
+// src: COMMUNITY 0x00e98730
+void __fastcall NiGeometryGroup_AddObject(int pObject, int, int pArg)
 {
     InterlockedIncrement((long volatile*)(pObject + 4));
     *(int*)(pArg + 8) = pObject;

@@ -269,7 +269,8 @@ void SkyShaderProperty::SetTexture(NiTexture* texture)
 #pragma optimize("", on)
 
 // @fnv 0x00b4f2f0
-void __cdecl FUN_00b4f2f0(int aiIndex, ShadowSceneNode* apNode)
+// src: XBOX_PDB 0x00b4f2f0
+void __cdecl BSShaderManager_SetShadowSceneNode(int aiIndex, ShadowSceneNode* apNode)
 {
     DAT_011f91c8[aiIndex] = apNode;
 }
@@ -299,7 +300,8 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile lo
 
 // Replaces the global NiTexture pointer with pkTexture, releasing the previous texture and incrementing the new one's reference count.
 // @fnv 0x00b54ac0
-void __cdecl FUN_00b54ac0(NiTexture* pkTexture)
+// src: COMMUNITY 0x00b54ac0
+void __cdecl BSShaderManager_SetAccumulator(NiTexture* pkTexture)
 {
     if (DAT_011f95ec != pkTexture)
     {
@@ -352,7 +354,8 @@ void __cdecl ProcessPropertyTree(PropHelper* pProp, int param2)
 }
 
 // @fnv 0x00b55520
-BSFogProperty* __cdecl FUN_00b55520(int aiShadowSceneNode)
+// src: XBOX_PDB 0x00b55520
+BSFogProperty* __cdecl BSShaderManager_GetFogProperty(int aiShadowSceneNode)
 {
     return *(BSFogProperty**)((char*)DAT_011f91c8[aiShadowSceneNode] + 0x134);
 }
@@ -361,7 +364,8 @@ void ProcessPropertyTree(NiAVObject*, unsigned int);
 
 // If obj is non-null, calls DAT_011f91ec to get a value (0 if unset) and passes obj and that value to ProcessPropertyTree.
 // @fnv 0x00b55b80
-void FUN_00b55b80(NiAVObject* apObject)
+// src: COMMUNITY 0x00b55b80
+void BSShaderManager_SetObjectType(NiAVObject* apObject)
 {
     if (apObject)
     {
@@ -403,17 +407,17 @@ NiObject* __cdecl CreateNewObj();
 NiObject* __cdecl CreateB6AE60Obj();
 NiObject* __cdecl CreateShaderLightingProperty();
 NiObject* __cdecl CreateBlobObj();
-NiObject* __cdecl FUN_00ba8a00();
-NiObject* __cdecl FUN_00ba9250();
+NiObject* __cdecl BSShaderTextureSet_CreateObject();
+NiObject* __cdecl BSShaderProperty_CreateObject();
 NiObject* __cdecl CreateSpawnedObject90();
 NiObject* __cdecl CreateObjectDerived();
 NiObject* __cdecl CreateInstance();
-NiObject* __cdecl FUN_00bb7ef0();
-NiObject* __cdecl FUN_00bc2cb0();
-NiObject* __cdecl FUN_00bc3190();
+NiObject* __cdecl TileShaderProperty_CreateObject();
+NiObject* __cdecl BSOrderedNode_CreateObject();
+NiObject* __cdecl BSMaterialEmittanceMultController_CreateObject();
 NiObject* __cdecl CreateDerived();
 NiObject* __cdecl CreateInterpDerivedBc36();
-NiObject* __cdecl FUN_00bc38c0();
+NiObject* __cdecl VolumetricFogShaderProperty_CreateObject();
 NiObject* __cdecl CreateSpawnedObj9441();
 NiObject* __cdecl CreateShaderAccumulator();
 extern const char g_011f9140_arg0[];
@@ -440,7 +444,7 @@ extern const char g_01204378_arg0[];
 // @fnv 0x00b4f1a0
 void RegisterNiStreamFactories()
 {
-    NiStream::RegisterObjectLoader(g_01200464_arg0, FUN_00ba9250);
+    NiStream::RegisterObjectLoader(g_01200464_arg0, BSShaderProperty_CreateObject);
     NiStream::RegisterObjectLoader(g_011fa560_arg0, CreateBlobObj);
     NiStream::RegisterObjectLoader(g_011fa010_arg0, CreateNewObj);
     NiStream::RegisterObjectLoader(g_012007b0_arg0, CreateObjectDerived);
@@ -448,17 +452,17 @@ void RegisterNiStreamFactories()
     NiStream::RegisterObjectLoader("NoFaderShaderProperty", CreateObjectDerived);
     NiStream::RegisterObjectLoader(g_011fa018_arg0, CreateB6AE60Obj);
     NiStream::RegisterObjectLoader(g_011fa05c_arg0, CreateShaderLightingProperty);
-    NiStream::RegisterObjectLoader(g_01201fb0_arg0, FUN_00bc38c0);
+    NiStream::RegisterObjectLoader(g_01201fb0_arg0, VolumetricFogShaderProperty_CreateObject);
     NiStream::RegisterObjectLoader(g_012005b8_arg0, CreateSpawnedObject90);
     NiStream::RegisterObjectLoader(g_011f9f00_arg0, FUN_00b60f50);
     NiStream::RegisterObjectLoader(g_01204378_arg0, CreateShaderAccumulator);
-    NiStream::RegisterObjectLoader(g_0120044c_arg0, FUN_00ba8a00);
+    NiStream::RegisterObjectLoader(g_0120044c_arg0, BSShaderTextureSet_CreateObject);
     NiStream::RegisterObjectLoader(g_01201fa8_arg0, CreateInterpDerivedBc36);
     NiStream::RegisterObjectLoader(g_01201f9c_arg0, CreateDerived);
-    NiStream::RegisterObjectLoader(g_012007d8_arg0, FUN_00bb7ef0);
-    NiStream::RegisterObjectLoader(g_01201f90_arg0, FUN_00bc3190);
+    NiStream::RegisterObjectLoader(g_012007d8_arg0, TileShaderProperty_CreateObject);
+    NiStream::RegisterObjectLoader(g_01201f90_arg0, BSMaterialEmittanceMultController_CreateObject);
     NiStream::RegisterObjectLoader(g_011f9140_arg0, BSFadeNode::CreateObject);
-    NiStream::RegisterObjectLoader(g_01201f84_arg0, FUN_00bc2cb0);
+    NiStream::RegisterObjectLoader(g_01201f84_arg0, BSOrderedNode_CreateObject);
     NiStream::RegisterObjectLoader(g_012007c8_arg0, CreateInstance);
 }
 
@@ -563,7 +567,8 @@ void B4F9A0ShaderManager::ClearAllCachedStates()
 int sprintf_s(char* apBuffer, unsigned int auiSize, const char* apFormat, ...);
 
 // @fnv 0x00b4f9d0
-const char* FUN_00b4f9d0(int aiShader)
+// src: XBOX_PDB 0x00b4f9d0
+const char* BSShaderManager_GetPassName(int aiShader)
 {
     switch (aiShader)
     {
@@ -2158,7 +2163,8 @@ struct ImageSpaceTail
 
 // Iterates shader entries, calls vfn_120 on each whose node list contains DAT_0126f554, then calls Tail on DAT_011f91ac.
 // @fnv 0x00b557d0
-void __cdecl FUN_00b557d0()
+// src: COMMUNITY 0x00b557d0
+void __cdecl BSShaderManager_ReloadShaders()
 {
     ShaderEntryBase** ppEntry = (ShaderEntryBase**)&DAT_011f9548;
     do
@@ -2203,7 +2209,8 @@ struct FUN_00b55b00_prop
 };
 
 // @fnv 0x00b55b00
-void __cdecl FUN_00b55b00(PropHelper* pPropHelper, float fValue)
+// src: XBOX_PDB 0x00b55b00
+void __cdecl BSShaderManager_RecursiveSetForcedDarkness(PropHelper* pPropHelper, float fValue)
 {
     FUN_00b55b00_prop* prop = (FUN_00b55b00_prop*)pPropHelper->GetProperty(3);
     if (prop != 0)
@@ -2228,7 +2235,7 @@ void __cdecl FUN_00b55b00(PropHelper* pPropHelper, float fValue)
                 void* child = pPropHelper->m_children[i];
                 if (child != 0)
                 {
-                    FUN_00b55b00((PropHelper*)child, fValue);
+                    BSShaderManager_RecursiveSetForcedDarkness((PropHelper*)child, fValue);
                 }
                 ++i;
             } while (i < pPropHelper->m_uiItemCount);
@@ -2527,7 +2534,7 @@ inline bool IsExactB(Shader* s, RTTIStub* r)
     return b;
 }
 
-Shader* __cdecl FUN_00b55560(void*);
+Shader* __cdecl BSShaderManager_GetShader(void*);
 
 // @fnv 0x00b579e0
 void __cdecl UpdateShaderProperty(AVObj* obj, bool abUnused, bool abFlag8, bool a3)
@@ -2551,7 +2558,7 @@ void __cdecl UpdateShaderProperty(AVObj* obj, bool abUnused, bool abFlag8, bool 
             obj->RemoveProperty(3);
             return;
         }
-        Shader* pShader = FUN_00b55560(pShaderProp->unk58);
+        Shader* pShader = BSShaderManager_GetShader(pShaderProp->unk58);
         obj->m_shaderC0 = pShader;
         pShader->vfn_50(obj);
         bool bIsShaderA = pShader->vfn_8() == &g_012021b8;
@@ -2630,7 +2637,8 @@ FUN_00b7ff40::FUN_00b7ff40(int aiPackageIndex)
 
 
 // @fnv 0x00b4f2e0
-NiFile* FUN_00b4f2e0(char const* fileName, NiFile::OpenMode openMode, unsigned int size)
+// src: COMMUNITY 0x00b4f2e0
+NiFile* BSShaderManager_DefaultFileCreateFunc(char const* fileName, NiFile::OpenMode openMode, unsigned int size)
 {
     return NiFile::GetFile(fileName, openMode, size);
 }
@@ -2876,7 +2884,8 @@ void __cdecl UpdateShaderProperty(NiAVObject* pkObject, BSShaderManager::eObject
 
 // Recursively applies a shader property to a NiAVObject, descending into child nodes when the object is not geometry.
 // @fnv 0x00b57bd0
-void __cdecl FUN_00b57bd0(NiAVObject* pkObject, BSShaderManager::eObjectType eType, bool bArg2, bool bArg3)
+// src: COMMUNITY 0x00b57bd0
+void __cdecl BSShaderManager_PrepareObjectRecurse(NiAVObject* pkObject, BSShaderManager::eObjectType eType, bool bArg2, bool bArg3)
 {
     if (pkObject->IsSceneNode() || pkObject->IsGeometry())
     {
@@ -2891,7 +2900,7 @@ void __cdecl FUN_00b57bd0(NiAVObject* pkObject, BSShaderManager::eObjectType eTy
             {
                 NiAVObject* pkChild = pkNode->m_kChildren.GetAt(i).m_pObject;
                 if (pkChild)
-                    FUN_00b57bd0(pkChild, eType, bArg2, bArg3);
+                    BSShaderManager_PrepareObjectRecurse(pkChild, eType, bArg2, bArg3);
             }
         }
     }
@@ -3003,12 +3012,12 @@ struct SubObj
 
 struct Mgr
 {
-    Rec* FUN_00aa3e40(unsigned int);
-    void FUN_00aa4060(Rec*);
+    Rec* Game_DoHeapAlloc(unsigned int);
+    void MemoryManager_Deallocate(Rec*);
 };
 
 extern int DAT_011f6238;
-extern "C" Reader* __cdecl FUN_00afdf00(int, int, int);
+extern "C" Reader* __cdecl FileFinder_GetFile_(int, int, int);
 
 struct FUN_00b7fe40_cls
 {
@@ -3029,14 +3038,14 @@ bool FUN_00b7fe40_cls::LoadFromReader(int param)
     buf.key = 0;
     if (param != 0)
     {
-        Reader* obj = FUN_00afdf00(param, 0, 0);
+        Reader* obj = FileFinder_GetFile_(param, 0, 0);
         if (obj != 0)
         {
             obj->vfn_20(0, 0);
             int r = obj->Read(&buf, 12);
             if (r == 12 && buf.tag == 100)
             {
-                m_04 = ((Mgr*)&DAT_011f6238)->FUN_00aa3e40(buf.key);
+                m_04 = ((Mgr*)&DAT_011f6238)->Game_DoHeapAlloc(buf.key);
                 if (obj->ReadBytes(m_04, buf.key) == (int)buf.key)
                 {
                     Rec* pRecord = m_04;
@@ -3049,7 +3058,7 @@ bool FUN_00b7fe40_cls::LoadFromReader(int param)
                 }
                 else
                 {
-                    ((Mgr*)&DAT_011f6238)->FUN_00aa4060(m_04);
+                    ((Mgr*)&DAT_011f6238)->MemoryManager_Deallocate(m_04);
                     m_04 = 0;
                 }
             }
@@ -3071,7 +3080,7 @@ class CleanupRef : public NiRefObject
 namespace fnv_00b54630 {
 struct CleanupHeap
 {
-    void FUN_00aa4060(void*);
+    void MemoryManager_Deallocate(void*);
 };
 extern CleanupHeap DAT_011f6238;
 }
@@ -3090,7 +3099,7 @@ inline void NP::operator=(CleanupRef* const& incoming)
 }
 inline void NP::operator delete[](void* data)
 {
-    fnv_00b54630::DAT_011f6238.FUN_00aa4060(data);
+    fnv_00b54630::DAT_011f6238.MemoryManager_Deallocate(data);
 }
 namespace fnv_00b54630 {
 namespace CleanupState {
@@ -3105,7 +3114,7 @@ struct CleanupB
     }
     static void operator delete(void* data)
     {
-        DAT_011f6238.FUN_00aa4060(data);
+        DAT_011f6238.MemoryManager_Deallocate(data);
     }
 };
 extern ImageSpaceManager* DAT_011f91ac;
@@ -3113,20 +3122,20 @@ extern CleanupB* DAT_011f91a8;
 extern NiFixedString* DAT_011f94bc;
 struct CleanupPool
 {
-    void FUN_00ba2d80();
+    void MTRenderingSystem_DestroyThreads();
 };
 extern CleanupPool DAT_01200088;
 extern bool DAT_011f91c6;
 extern void* DAT_011f917c;
 extern void* DAT_011f91e0;
 extern char DAT_010ad6e8;
-int FUN_00406d00(char*, unsigned int, const char*, ...);
+int BSsprintf(char*, unsigned int, const char*, ...);
 void FUN_00b62a20();
 void ClearCachedEntryMap();
-void FUN_00ba50d0();
-void FUN_00bc0940();
+void ParticleShader_Free();
+void BoltShader_Free();
 void ClearRefObject();
-void FUN_00a29680();
+void Object_DoNothing();
 extern NP DAT_011f950c;
 extern NP DAT_011f9510;
 extern NP DAT_011f9514;
@@ -3150,14 +3159,15 @@ extern NP DAT_011f95d8;
 extern NP DAT_011f9548[35];
 // When all is true, clears cached references and deletes cleanup objects; always clears selected globals and releases the pointer array.
 // @fnv 0x00b54630
-void FUN_00b54630(bool all)
+// src: COMMUNITY 0x00b54630
+void BSShaderManager_Free(bool all)
 {
     if (all)
     {
         FUN_00b62a20();
         ClearCachedEntryMap();
-        FUN_00ba50d0();
-        FUN_00bc0940();
+        ParticleShader_Free();
+        BoltShader_Free();
         ClearRefObject();
         DAT_011f950c = static_cast<CleanupRef*>(0);
         DAT_011f9510 = static_cast<CleanupRef*>(0);
@@ -3194,7 +3204,7 @@ void FUN_00b54630(bool all)
                 if (static_cast<CleanupRef*>(DAT_011f9548[i].p)->m_uiRefCount > 1)
                 {
                     char message[255];
-                    FUN_00406d00(message, 255, &DAT_010ad6e8, i, static_cast<CleanupRef*>(DAT_011f9548[i].p)->m_uiRefCount);
+                    BSsprintf(message, 255, &DAT_010ad6e8, i, static_cast<CleanupRef*>(DAT_011f9548[i].p)->m_uiRefCount);
                 }
                 DAT_011f9548[i] = static_cast<CleanupRef*>(0);
             }
@@ -3202,8 +3212,8 @@ void FUN_00b54630(bool all)
         delete DAT_011f94bc;
         DAT_011f94bc = 0;
         DAT_011f91c6 = false;
-        DAT_01200088.FUN_00ba2d80();
-        FUN_00a29680();
+        DAT_01200088.MTRenderingSystem_DestroyThreads();
+        Object_DoNothing();
         DAT_011f95f0 = static_cast<CleanupRef*>(0);
     }
     DAT_011f9508 = static_cast<CleanupRef*>(0);
@@ -3430,25 +3440,25 @@ __forceinline bool ResetShaderPointer(NiPointer<RefShader>& pointer)
     return false;
 }
 
-RefShader* __cdecl FUN_00b7a380();
+RefShader* __cdecl ShadowLightShader_CreateShader();
 RefShader* __cdecl CreateShaderFadeNode();
-RefShader* __cdecl FUN_00bd5920();
-RefShader* __cdecl FUN_00bd4750();
-RefShader* __cdecl FUN_00bd2e70();
+RefShader* __cdecl DistantLODShader_CreateShader();
+RefShader* __cdecl SpeedTreeBranchShader_CreateShader();
+RefShader* __cdecl SpeedTreeFrondShader_CreateShader();
 RefShader* __cdecl CreateSpeedTreeLeafShader();
 RefShader* __cdecl FUN_00bd23f0();
-RefShader* __cdecl FUN_00b8a390();
-RefShader* __cdecl FUN_00bd14b0();
+RefShader* __cdecl SkyShader_CreateShader();
+RefShader* __cdecl HairShader_CreateShader();
 RefShader* __cdecl CreateFaceGenMorphShader();
-RefShader* __cdecl FUN_00bcd680();
+RefShader* __cdecl ParallaxShader_CreateShader();
 RefShader* __cdecl CreateGeometryDecalShader();
 RefShader* __cdecl FUN_00b86de0();
 RefShader* __cdecl FUN_00ba58b0();
 RefShader* __cdecl FUN_00bc10e0();
 RefShader* __cdecl FUN_00bc4af0();
 RefShader* __cdecl FUN_00bbd0d0();
-RefShader* __cdecl FUN_00bb0660();
-RefShader* __cdecl FUN_00bcae90();
+RefShader* __cdecl PrecipitationShader_CreateShader();
+RefShader* __cdecl TileShader_CreateShader();
 RefShader* __cdecl FUN_00bc93c0();
 RefShader* __cdecl FUN_00bc59b0();
 RefShader* __cdecl FUN_00b80e70();
@@ -3456,7 +3466,8 @@ RefShader* __cdecl CreateTreeShader();
 
 // Returns the cached RefShader for the given index, lazily creating it via a switch on the index if it is not yet initialized.
 // @fnv 0x00b55560
-Shader* __cdecl FUN_00b55560(void* aiIndex)
+// src: XBOX_PDB 0x00b55560
+Shader* __cdecl BSShaderManager_GetShader(void* aiIndex)
 {
     if (!DAT_011f9508 || (unsigned int)aiIndex > 0x22)
         return 0;
@@ -3467,20 +3478,20 @@ Shader* __cdecl FUN_00b55560(void* aiIndex)
         switch ((unsigned int)aiIndex)
         {
         case 1:
-            shaders[(unsigned int)aiIndex] = FUN_00b7a380();
+            shaders[(unsigned int)aiIndex] = ShadowLightShader_CreateShader();
             break;
         case 2:
             shaders[(unsigned int)aiIndex] = CreateShaderFadeNode();
             break;
         case 3:
-            shaders[(unsigned int)aiIndex] = FUN_00bd5920();
+            shaders[(unsigned int)aiIndex] = DistantLODShader_CreateShader();
             break;
         case 4:
-            FUN_00b55560((void*)1);
-            shaders[(unsigned int)aiIndex] = FUN_00bd4750();
+            BSShaderManager_GetShader((void*)1);
+            shaders[(unsigned int)aiIndex] = SpeedTreeBranchShader_CreateShader();
             break;
         case 5:
-            shaders[(unsigned int)aiIndex] = FUN_00bd2e70();
+            shaders[(unsigned int)aiIndex] = SpeedTreeFrondShader_CreateShader();
             break;
         case 6:
             shaders[(unsigned int)aiIndex] = CreateSpeedTreeLeafShader();
@@ -3489,16 +3500,16 @@ Shader* __cdecl FUN_00b55560(void* aiIndex)
             shaders[(unsigned int)aiIndex] = FUN_00bd23f0();
             break;
         case 10:
-            shaders[(unsigned int)aiIndex] = FUN_00b8a390();
+            shaders[(unsigned int)aiIndex] = SkyShader_CreateShader();
             break;
         case 13:
-            shaders[(unsigned int)aiIndex] = FUN_00bd14b0();
+            shaders[(unsigned int)aiIndex] = HairShader_CreateShader();
             break;
         case 14:
             shaders[(unsigned int)aiIndex] = CreateFaceGenMorphShader();
             break;
         case 15:
-            shaders[(unsigned int)aiIndex] = FUN_00bcd680();
+            shaders[(unsigned int)aiIndex] = ParallaxShader_CreateShader();
             break;
         case 16:
             shaders[(unsigned int)aiIndex] = CreateGeometryDecalShader();
@@ -3522,10 +3533,10 @@ Shader* __cdecl FUN_00b55560(void* aiIndex)
                 return (Shader*)shaders[(unsigned int)aiIndex].m_pObject;
             break;
         case 30:
-            shaders[(unsigned int)aiIndex] = FUN_00bb0660();
+            shaders[(unsigned int)aiIndex] = PrecipitationShader_CreateShader();
             break;
         case 32:
-            shaders[(unsigned int)aiIndex] = FUN_00bcae90();
+            shaders[(unsigned int)aiIndex] = TileShader_CreateShader();
             break;
         case 33:
             shaders[(unsigned int)aiIndex] = FUN_00bc93c0();
@@ -3650,16 +3661,16 @@ extern NiColorA DAT_011fa090;
 extern const float DAT_01016248;
 void ProcessCommands();
 void InsertNodeAtHead();
-void FUN_00b606e0();
+void ThisCall_Ret1();
 void AccumulateRenderPasses();
-void FUN_00b64440();
+void Object_ProcessAndReturnValue_00b64440();
 void AddEntriesToAccumulator();
-void FUN_00b64490();
-void FUN_00b665a0();
+void BSShaderAccumulator_RegisterObject_ConstAlpha();
+void BSShaderAccumulator_FinishAccumulating_Standard();
 void RenderAccumulationPasses();
-void FUN_00b65e80();
-void FUN_00a29680();
-void FUN_00b64530();
+void BSShaderAccumulator_FinishAccumulating_Interface();
+void Object_DoNothing();
+void BSShaderAccumulator_FinishAccumulating_WaterDepth();
 struct GlobalShaderInit
 {
     void FUN_00ba3720();
@@ -3919,18 +3930,18 @@ void InitRenderSystem()
         ClearCallbackTables();
         reinterpret_cast<void (**)()>(DAT_011f9f80)[0] = ProcessCommands;
         reinterpret_cast<void (**)()>(DAT_011f9f80)[10] = InsertNodeAtHead;
-        reinterpret_cast<void (**)()>(DAT_011f9f80)[11] = FUN_00b606e0;
+        reinterpret_cast<void (**)()>(DAT_011f9f80)[11] = ThisCall_Ret1;
         reinterpret_cast<void (**)()>(DAT_011f9f80)[13] = AccumulateRenderPasses;
-        reinterpret_cast<void (**)()>(DAT_011f9f80)[9] = FUN_00b64440;
+        reinterpret_cast<void (**)()>(DAT_011f9f80)[9] = Object_ProcessAndReturnValue_00b64440;
         reinterpret_cast<void (**)()>(DAT_011f9f80)[14] = AddEntriesToAccumulator;
-        reinterpret_cast<void (**)()>(DAT_011f9f80)[8] = FUN_00b64490;
-        reinterpret_cast<void (**)()>(DAT_011f9f40)[0] = FUN_00b665a0;
+        reinterpret_cast<void (**)()>(DAT_011f9f80)[8] = BSShaderAccumulator_RegisterObject_ConstAlpha;
+        reinterpret_cast<void (**)()>(DAT_011f9f40)[0] = BSShaderAccumulator_FinishAccumulating_Standard;
         DAT_011f9f3c = ProcessCommands;
         reinterpret_cast<void (**)()>(DAT_011f9f40)[12] = RenderAccumulationPasses;
-        reinterpret_cast<void (**)()>(DAT_011f9f40)[10] = FUN_00b65e80;
-        reinterpret_cast<void (**)()>(DAT_011f9f40)[13] = FUN_00a29680;
-        reinterpret_cast<void (**)()>(DAT_011f9f40)[14] = FUN_00b64530;
-        DAT_011f9f38 = FUN_00b665a0;
+        reinterpret_cast<void (**)()>(DAT_011f9f40)[10] = BSShaderAccumulator_FinishAccumulating_Interface;
+        reinterpret_cast<void (**)()>(DAT_011f9f40)[13] = Object_DoNothing;
+        reinterpret_cast<void (**)()>(DAT_011f9f40)[14] = BSShaderAccumulator_FinishAccumulating_WaterDepth;
+        DAT_011f9f38 = BSShaderAccumulator_FinishAccumulating_Standard;
         DAT_011ffe2c = 0;
         DAT_011ffe30 = 0;
         DAT_01200088.FUN_00ba3720();
@@ -3947,10 +3958,10 @@ void InitRenderSystem()
 
 struct TangentAllocatorView
 {
-    void FUN_00aa4060(void*);
+    void MemoryManager_Deallocate(void*);
 };
 extern MemoryManager _g_memoryManager;
-extern "C" void* FUN_00aa13e0(unsigned int);
+extern "C" void* Object_DispatchCommandFour(unsigned int);
 // Local arithmetic helpers retain the original trivial vector-copy behavior.
 struct TangentPoint3
 {
@@ -3992,7 +4003,7 @@ struct TangentPoint3
         z += p.Z();
         return *this;
     }
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     static void* operator new[](unsigned int bytes)
     {
         return _g_memoryManager.Allocate(bytes);
@@ -4006,7 +4017,7 @@ struct NativeB66810 : NiRefObject
     TangentPoint3* second;
     static void* operator new(unsigned int n)
     {
-        return FUN_00aa13e0(n);
+        return Object_DispatchCommandFour(n);
     }
     TangentPoint3* GetFirst() const
     {
@@ -4054,7 +4065,8 @@ extern "C" void* memmove(void*, const void*, unsigned int);
 extern "C" void* FUN_00ec61c0(void*, int, unsigned int);
 // Copies tangent and binormal data from extra data when present; otherwise computes per-vertex vectors from UVs and normals and updates geometry data.
 // @fnv 0x00b54b60
-NativeB66810* __cdecl FUN_00b54b60(NiGeometry* apGeometry)
+// src: EXE 0x00b54b60
+NativeB66810* __cdecl BSShaderManager_CreateTangentSpaceSimple(NiGeometry* apGeometry)
 {
     if (apGeometry->GetName())
         _strnicmp(apGeometry->GetName(), DAT_0102bf34, 4);
@@ -4155,13 +4167,13 @@ NativeB66810* __cdecl FUN_00b54b60(NiGeometry* apGeometry)
         float dot = normals[i].Dot(pTangentAccum[i]);
         tangents[i] = pTangentAccum[i] - normals[i] * dot;
         binormals[i] = normals[i].Cross(tangents[i]);
-        tangents[i].FUN_004a0c10();
-        binormals[i].FUN_004a0c10();
+        tangents[i].Unitize_004a0c10();
+        binormals[i].Unitize_004a0c10();
     }
-    reinterpret_cast<TangentAllocatorView&>(_g_memoryManager).FUN_00aa4060(pTangentAccum);
+    reinterpret_cast<TangentAllocatorView&>(_g_memoryManager).MemoryManager_Deallocate(pTangentAccum);
     NiGeometryData* pDestGeomData = apGeometry->m_spModelData.m_pObject;
-    reinterpret_cast<TangentAllocatorView&>(_g_memoryManager).FUN_00aa4060(pDestGeomData->m_pkNormal);
-    pDestGeomData->FUN_00a66bb0(count, reinterpret_cast<TangentPoint3*>(pDestGeomData->m_pkVertex), replacement, pDestGeomData->m_pkColor,
+    reinterpret_cast<TangentAllocatorView&>(_g_memoryManager).MemoryManager_Deallocate(pDestGeomData->m_pkNormal);
+    pDestGeomData->NiGeometryData_ReplaceData(count, reinterpret_cast<TangentPoint3*>(pDestGeomData->m_pkVertex), replacement, pDestGeomData->m_pkColor,
                                 pDestGeomData->m_pkTexture, pDestGeomData->GetUVSetCount(), 0x1000);
     delete result;
     return 0;

@@ -25,6 +25,6 @@ struct FUN_00b60640 : QueuedFileEntry
 // @fnv 0x00b60640
 FUN_00b60640::FUN_00b60640(char const* filename) : QueuedFileEntry(2)
 {
-    FUN_00c3cee0(filename);
+    SetFileName_00c3cee0(filename);
     LookupFileEntryByArchive(0);
 }

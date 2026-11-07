@@ -26,7 +26,7 @@ class DebrisModelEntry
     FileEntryList model;
     DebrisModelEntry();
     ~DebrisModelEntry();
-    void FUN_004fa670(const char*);
+    void BGSDebrisData_SetFileName(const char*);
 };
 void Deallocate(void*);
 void* Allocate(unsigned int);
@@ -86,7 +86,7 @@ DebrisModelEntry* BGSDebris::AddDebrisModel(char chance, const char* path, char 
     {
         DebrisModelEntry* data = new DebrisModelEntry;
         data->chance = chance;
-        data->FUN_004fa670(path);
+        data->BGSDebrisData_SetFileName(path);
         data->flags = flags;
         InsertDebrisIfValid(data);
         return data;
@@ -170,7 +170,7 @@ MagicItemForm::MagicItemForm()
 BGSPreloadable::BGSPreloadable()
 {}
 
-int __cdecl FUN_00408b20(char const*, char const*);
+int __cdecl BSstrcmp(char const*, char const*);
 
 struct S_004fa4b0
 {
@@ -180,7 +180,8 @@ struct S_004fa4b0
 
 // Compares two entries by their char field, returning -1 or 1, and otherwise compares their string fields via FUN_00408b20.
 // @fnv 0x004fa4b0
-int __cdecl FUN_004fa4b0(const S_004fa4b0* apLeft, const S_004fa4b0* apRight)
+// src: COMMUNITY 0x004fa4b0
+int __cdecl DebrisSortFunction(const S_004fa4b0* apLeft, const S_004fa4b0* apRight)
 {
     if (apLeft->c > apRight->c)
     {
@@ -192,13 +193,14 @@ int __cdecl FUN_004fa4b0(const S_004fa4b0* apLeft, const S_004fa4b0* apRight)
     }
     else
     {
-        return FUN_00408b20(apLeft->s, apRight->s);
+        return BSstrcmp(apLeft->s, apRight->s);
     }
 }
 
 // Initializes the object: sets byte 0 to 10, byte 1 to 0, int at offset 4 to 0, constructs the object at offset 8, and returns pThis.
 // @fnv 0x004fa5e0
-void* __fastcall FUN_004fa5e0(char* pObject)
+// src: COMMUNITY 0x004fa5e0
+void* __fastcall BGSDebrisData_BGSDebrisData(char* pObject)
 {
     pObject[0] = 10;
     pObject[1] = 0;
@@ -221,7 +223,7 @@ struct AEList
 {
     void Insert(DebrisData*, int(__cdecl*)(DebrisData*, DebrisData*));
 };
-int __cdecl FUN_004fa4b0(DebrisData*, DebrisData*);
+int __cdecl DebrisSortFunction(DebrisData*, DebrisData*);
 unsigned int __cdecl BSStringLength(const char*);
 // Checks that a.d, its flag, and its string are non-empty, then inserts a.d into the AEList at self+0x1c and returns true; otherwise returns false.
 // @fnv 0x004fa610
@@ -229,13 +231,13 @@ bool __fastcall InsertDebrisIfValid(char* self, DArg aDebrisArg)
 {
     if (!aDebrisArg.d || !aDebrisArg.d->c || !aDebrisArg.d->p || !BSStringLength(aDebrisArg.d->p))
         return false;
-    ((AEList*)(self + 0x1c))->Insert(aDebrisArg.d, FUN_004fa4b0);
+    ((AEList*)(self + 0x1c))->Insert(aDebrisArg.d, DebrisSortFunction);
     return true;
 }
 
 struct FUN_004fa670_shell : public DebrisModelEntry
 {
-    void FUN_004fa670(char*);
+    void BGSDebrisData_SetFileName(char*);
 };
 
 void* __cdecl operator new(unsigned int);
@@ -248,7 +250,8 @@ class TaskQueueInterface
 };
 
 // @fnv 0x004fa670
-void FUN_004fa670_shell::FUN_004fa670(char* apFileName)
+// src: COMMUNITY 0x004fa670
+void FUN_004fa670_shell::BGSDebrisData_SetFileName(char* apFileName)
 {
     if (*(char**)((char*)this + 4))
     {
@@ -312,13 +315,13 @@ struct DItem
     void* model;
     unsigned char IsFlagSet();
 };
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 struct DebrisObj
 {
     char b[0x24];
     static void* operator new(unsigned int n)
     {
-        return FUN_00aa13e0(n);
+        return Object_DispatchCommandFour(n);
     }
     static void operator delete(void*, unsigned int);
     DebrisObj(void* a1, float f, void* m, int z, NiPoint3* pos, NiPoint3* v1, NiPoint3* v2, NiPoint3* v3, float s, int z1, int z2);
@@ -330,7 +333,7 @@ extern const double DAT_01020758;
 extern NiPoint3 DAT_011f426c;
 float __cdecl FUN_00476b70(float, float);
 
-void __cdecl FUN_006890b0(void* a1, float f, void* m, NiPoint3 v1, NiPoint3 v2, float s, int k, int z);
+void __cdecl BSTempEffectParticle_Spawn(void* a1, float f, void* m, NiPoint3 v1, NiPoint3 v2, float s, int k, int z);
 // @fnv 0x004fa6f0
 void BGSDebris::SpawnDebris(void* a1, NiPoint3* apPosition, unsigned int count, float scale)
 {
@@ -362,7 +365,7 @@ void BGSDebris::SpawnDebris(void* a1, NiPoint3* apPosition, unsigned int count, 
                 }
                 else
                 {
-                    FUN_006890b0(a1, DAT_01017b78, d9->model, v4, *apPosition, (float)(scale * DAT_01020758), 7, 0);
+                    BSTempEffectParticle_Spawn(a1, DAT_01017b78, d9->model, v4, *apPosition, (float)(scale * DAT_01020758), 7, 0);
                 }
                 i8++;
             }
@@ -385,12 +388,12 @@ struct DebrisEntry4fa
     DebrisModel4fa kModel;
 };
 
-void __cdecl FUN_004856f0(unsigned int uiType, void* pvData, unsigned int uiSize);
+void __cdecl TESForm_AddChunkArray(unsigned int uiType, void* pvData, unsigned int uiSize);
 
 // @fnv 0x004fa1a0
 void BGSDebris::WriteDebrisEntries()
 {
-    FUN_004855a0();
+    BeginFormRecord();
     DNode* pkNode = (DNode*)GetDataList();
     while (pkNode)
     {
@@ -406,16 +409,16 @@ void BGSDebris::WriteDebrisEntries()
             pcCur += BSStringLength(pkData->pcPath) + 1;
             *pcCur = pkData->cFlags;
             pcCur++;
-            FUN_004856f0('ATAD', pTmpcBuffer, uiSize);
+            TESForm_AddChunkArray('ATAD', pTmpcBuffer, uiSize);
             delete pTmpcBuffer;
             pkData->kModel.FUN_008d0600('TDOM', (int)pkData->pcPath);
         }
         pkNode = pkNode->FUN_00726070();
     }
-    FUN_00485680();
+    FinishFormRecord();
 }
 
-int __cdecl FUN_00408b20(char const*, char const*);
+int __cdecl BSstrcmp(char const*, char const*);
 
 struct DebrisListNode
 {
@@ -445,7 +448,7 @@ bool BGSDebris::Compare(TESForm* form)
         {
             if (srcData->chance != dstData->chance)
                 return true;
-            if (FUN_00408b20(srcData->path, dstData->path))
+            if (BSstrcmp(srcData->path, dstData->path))
                 return true;
             if (srcData->flags != dstData->flags)
                 return true;

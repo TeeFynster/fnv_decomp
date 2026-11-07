@@ -43,7 +43,7 @@ struct FUN_00404d30_Owner
 struct FUN_00845690_Owner
 {
     FUN_00845690_Owner* Destructor(unsigned int flags);
-    void FUN_008456c0();
+    void Object_ForwardCall_008456c0();
 };
 class TESObjectCELL;
 class TESObjectCELL;
@@ -61,7 +61,7 @@ struct FUN_004701d0_TESFormLargeArray
 {
     void* vtable;
     FUN_004701d0_TESFormLargeArray(unsigned int size, unsigned int flags);
-    void FUN_004705e0(unsigned int size, unsigned int flags);
+    void NiTLargeArray_TESForm_NiTMallocInterface_TESForm_NiTLargeArray(unsigned int size, unsigned int flags);
 };
 void operator delete(void* pointer);
 

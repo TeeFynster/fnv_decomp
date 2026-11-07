@@ -42,8 +42,8 @@ NiSourceTexture* NiSourceTexture::Create(const NiFixedString& name, NiTexture::T
             InterlockedDecrement(reinterpret_cast<volatile long*>(filename->m_kHandle - 8));
         filename->m_kHandle = newHandle;
     }
-    FUN_00a57500(filename);
-    FUN_00a76960(filename, &texture->m_kPlatformFilename);
+    NiStandardizeFilePath(filename);
+    NiImageConverter_ConvertFilenameToPlatformSpecific_(filename, &texture->m_kPlatformFilename);
 
     if (DAT_011a9594 && !reinterpret_cast<NiSourceTextureVCall*>(texture)->vfn_0ac())
     {

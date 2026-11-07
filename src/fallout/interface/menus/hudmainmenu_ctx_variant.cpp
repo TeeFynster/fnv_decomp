@@ -32,19 +32,19 @@ class HudCreationMethods : public HUDMainMenu
 {
   public:
     bool FUN_00770070();
-    NiNode* FUN_0077ee50();
+    NiNode* HUDMainMenu_Create3DCamera();
 };
 class CompassStub
 {
   public:
-    void FUN_007700b0(NiSourceTexture* texture);
+    void TileShaderProperty_SetAlphaTexture(NiSourceTexture* texture);
     void FUN_007700d0(bool enable);
 };
 
 class ATMStub
 {
   public:
-    void FUN_004538a0(int value);
+    void BSCriticalSection_Enter(int value);
     void FUN_004538c0();
 };
 class SettingString
@@ -55,12 +55,12 @@ class SettingString
 class SettingInt
 {
   public:
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 class SettingFloat
 {
   public:
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 struct HUDEmptyStub
 {
@@ -82,24 +82,24 @@ extern SettingString DAT_011d300c;
 extern SettingInt DAT_011d32d0;
 extern SettingFloat DAT_011d9774;
 extern float DAT_011d979c;
-InterfaceManager* __cdecl FUN_004b7210();
-unsigned int __cdecl FUN_00706f20();
-TileMenu* __cdecl FUN_00a09030(unsigned int id);
+InterfaceManager* __cdecl InterfaceManager_GetSingleton();
+unsigned int __cdecl HudMainMenu_GetMenuID();
+TileMenu* __cdecl Tile_GetMenuByClass(unsigned int id);
 float __cdecl FUN_00a01530();
-ATMStub* __cdecl FUN_00713d70();
+ATMStub* __cdecl Tile_GetTileUpdateAllCriticalSectionLock();
 float __cdecl FUN_00715d40();
-float __cdecl FUN_00715da0();
-float __cdecl FUN_007177c0();
-float __cdecl FUN_00717820();
-int __cdecl FUN_00a00940(const char* name, int defaultValue);
-Tile* __cdecl FUN_00a08b20(Tile* parent, const char* name);
-void __cdecl FUN_00774800(Tile* tile, int style);
-int __cdecl FUN_00a01860(const char* name);
-void __cdecl FUN_0040fbe0(const char* message);
-void __cdecl FUN_007037e0();
-void __cdecl FUN_00a04200(bool value);
-void __cdecl FUN_0077e430(float value);
-void __cdecl FUN_00771700(int value);
+float __cdecl InterfaceManager_GetScreenHeight();
+float __cdecl InterfaceManager_GetScreenSafeX();
+float __cdecl InterfaceManager_GetScreenSafeY();
+int __cdecl Tile_AddUserTrait(const char* name, int defaultValue);
+Tile* __cdecl Tile_GetTileByName(Tile* parent, const char* name);
+void __cdecl HUDMainMenu_SetBrightness(Tile* tile, int style);
+int __cdecl Tile_TextToTrait(const char* name);
+void __cdecl ProgramFlow(const char* message);
+void __cdecl Interface_EmergencyCloseAllMenusAndBreakStuff();
+void __cdecl Tile_UpdateAll(bool value);
+void __cdecl HUDMainMenu_ResetHUDOpacity(float value);
+void __cdecl HUDMainMenu_UpdateVisibilityState(int value);
 static const char kTemplateRightBracket[] = "template_right_bracket";
 static const char kTemplateMeter3[] = "template_meter";
 static const char kTemplateJustifyRightText6[] = "template_justify_right_text";
@@ -138,7 +138,8 @@ static const char kTemplateJustifyRightText[] = "template_justify_right_text";
 static const char kTemplateJustifyCenterText[] = "template_justify_center_text";
 static const char kHokeys[] = "Hokeys";
 // @fnv 0x0076bfe0
-Tile* FUN_0076bfe0()
+// src: COMMUNITY 0x0076bfe0
+Tile* HUDMainMenu_Create()
 {
     InterfaceManager* pInterfaceMgrY;
     Menu* pMenuXB;
@@ -146,17 +147,17 @@ Tile* FUN_0076bfe0()
     Tile* pMenuTileN;
     TileMenu* pOldMenuT;
 
-    if (!FUN_004b7210())
+    if (!InterfaceManager_GetSingleton())
         return 0;
-    pOldMenuT = FUN_00a09030(FUN_00706f20());
+    pOldMenuT = Tile_GetMenuByClass(HudMainMenu_GetMenuID());
     if (pOldMenuT)
         delete pOldMenuT;
-    pInterfaceMgrY = FUN_004b7210();
+    pInterfaceMgrY = InterfaceManager_GetSingleton();
     fTileAlphaM = FUN_00a01530();
-    FUN_00713d70()->FUN_004538a0(0);
-    pMenuTileN = pInterfaceMgrY->FUN_00586150()->FUN_00a01b00("Data\\Menus\\Main\\hud_main_menu.xml");
-    pMenuXB = (Menu*)pMenuTileN->FUN_00a03c90();
-    if (pMenuXB && pMenuXB->GetClass() == FUN_00706f20())
+    Tile_GetTileUpdateAllCriticalSectionLock()->BSCriticalSection_Enter(0);
+    pMenuTileN = pInterfaceMgrY->CombatController_GetCombatState()->Tile_ReadFile("Data\\Menus\\Main\\hud_main_menu.xml");
+    pMenuXB = (Menu*)pMenuTileN->Tile_GetMenu();
+    if (pMenuXB && pMenuXB->GetClass() == HudMainMenu_GetMenuID())
     {
         pMenuXB->SetTileMenu(static_cast<TileMenu*>(pMenuTileN), false);
         int iInfoRowY;
@@ -182,84 +183,84 @@ Tile* FUN_0076bfe0()
         int iInfoPadRightQ;
         HUDMainMenu_pme = (HUDMainMenu*)pMenuXB;
         iScreenWidthC = (int)FUN_00715d40();
-        iScreenHeightX = (int)FUN_00715da0();
-        iSafeZoneX3 = (int)FUN_007177c0();
-        iSafeZoneYY = (int)FUN_00717820();
-        iOriginalXTrait14 = FUN_00a00940("_OriginalX", -1);
-        iTotalWidthTraitA = FUN_00a00940("_TotalWidth", -1);
-        iImageWidthTraitT = FUN_00a00940("_ImageWidth", -1);
-        HUDMainMenu_pme->m_pTiles[59] = FUN_00a08b20(FUN_00a09030(1004), "ActionPoints");
-        HUDMainMenu_pme->m_pTiles[59]->FUN_00a012d0(
+        iScreenHeightX = (int)InterfaceManager_GetScreenHeight();
+        iSafeZoneX3 = (int)InterfaceManager_GetScreenSafeX();
+        iSafeZoneYY = (int)InterfaceManager_GetScreenSafeY();
+        iOriginalXTrait14 = Tile_AddUserTrait("_OriginalX", -1);
+        iTotalWidthTraitA = Tile_AddUserTrait("_TotalWidth", -1);
+        iImageWidthTraitT = Tile_AddUserTrait("_ImageWidth", -1);
+        HUDMainMenu_pme->m_pTiles[59] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "ActionPoints");
+        HUDMainMenu_pme->m_pTiles[59]->Tile_Set(
             4001, (float)(iScreenWidthC - iSafeZoneX3 * 2) - HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4017) + 30.0,
             1);
-        HUDMainMenu_pme->m_pTiles[59]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[59]->Tile_Set(
             4002, (float)(iScreenHeightX - iSafeZoneYY * 2) - HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4016), 1);
         HUDMainMenu_pme->m_pTiles[59]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[43] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[59], kTemplateRightBracket, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[43], 2);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[43], 2);
         HUDMainMenu_pme->m_pTiles[43]->FUN_00700320(4001, -37);
         HUDMainMenu_pme->m_pTiles[7] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[59], kTemplateMeter3, 0);
         HUDMainMenu_pme->m_pTiles[7]->FUN_00700320(iOriginalXTrait14, 326);
-        HUDMainMenu_pme->m_pTiles[7]->FUN_00a012d0(4002, 41.0f, 1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[7], 3);
+        HUDMainMenu_pme->m_pTiles[7]->Tile_Set(4002, 41.0f, 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[7], 3);
         HUDMainMenu_pme->m_pTiles[8] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[59], kTemplateJustifyRightText6, 0);
         HUDMainMenu_pme->m_pTiles[8]->FUN_00700320(4001, 315);
         HUDMainMenu_pme->m_pTiles[8]->FUN_00700320(4002, 8);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[8], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[8], 0);
         HUDMainMenu_pme->m_pTiles[12] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[59], kTemplateJustifyRightText5, 0);
         HUDMainMenu_pme->m_pTiles[12]->FUN_00700320(4001, 315);
         HUDMainMenu_pme->m_pTiles[12]->FUN_00700320(4002, 80);
         HUDMainMenu_pme->m_pTiles[12]->FUN_00700320(4025, 7);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[12], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[12], 0);
         HUDMainMenu_pme->m_pTiles[9] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[59], kTemplateJustifyRightText4, 0);
         HUDMainMenu_pme->m_pTiles[9]->FUN_00700320(4001, 80);
-        HUDMainMenu_pme->m_pTiles[9]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002), 1);
+        HUDMainMenu_pme->m_pTiles[9]->Tile_Set(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002), 1);
         HUDMainMenu_pme->m_pTiles[9]->FUN_00700320(4025, 7);
-        HUDMainMenu_pme->m_pTiles[9]->FUN_00a01350(4036, DAT_011d4da4.FUN_00403df0(), 1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[9], 0);
+        HUDMainMenu_pme->m_pTiles[9]->Tile_Set_00a01350(4036, DAT_011d4da4.FUN_00403df0(), 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[9], 0);
         HUDMainMenu_pme->m_pTiles[10] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[59], kTemplateMeter2, 0);
         HUDMainMenu_pme->m_pTiles[10]->FUN_00700320(iOriginalXTrait14, 90);
-        HUDMainMenu_pme->m_pTiles[10]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002) + 3.0, 1);
-        HUDMainMenu_pme->m_pTiles[10]->FUN_00a01350(4044, kInterfaceVATSVatsBarDds, 1);
+        HUDMainMenu_pme->m_pTiles[10]->Tile_Set(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002) + 3.0, 1);
+        HUDMainMenu_pme->m_pTiles[10]->Tile_Set_00a01350(4044, kInterfaceVATSVatsBarDds, 1);
         HUDMainMenu_pme->m_pTiles[10]->FUN_00700320(iTotalWidthTraitA, 60);
         HUDMainMenu_pme->m_pTiles[10]->FUN_00700320(iImageWidthTraitT, 1);
         HUDMainMenu_pme->m_pTiles[10]->FUN_00700320(4024, 200);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[10], 3);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[10], 3);
         HUDMainMenu_pme->m_pTiles[11] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[59], kTemplateMeterBackground, 0);
-        HUDMainMenu_pme->m_pTiles[11]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002) + 3.0, 1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[11], 4);
-        HUDMainMenu_pme->m_pTiles[86] = FUN_00a08b20(FUN_00a09030(1004), kCNDArrows);
-        HUDMainMenu_pme->m_pTiles[86]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[11]->Tile_Set(4002, HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002) + 3.0, 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[11], 4);
+        HUDMainMenu_pme->m_pTiles[86] = Tile_GetTileByName(Tile_GetMenuByClass(1004), kCNDArrows);
+        HUDMainMenu_pme->m_pTiles[86]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[9]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[10]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[11]->FUN_00a011b0(4017) * 0.75 + 8.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[86]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[86]->Tile_Set(
             4002, HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4002) + HUDMainMenu_pme->m_pTiles[10]->FUN_00a011b0(4002),
             1);
-        HUDMainMenu_pme->m_pTiles[86]->FUN_00a012d0(4016, HUDMainMenu_pme->m_pTiles[11]->FUN_00a011b0(4016), 1);
+        HUDMainMenu_pme->m_pTiles[86]->Tile_Set(4016, HUDMainMenu_pme->m_pTiles[11]->FUN_00a011b0(4016), 1);
         HUDMainMenu_pme->m_pTiles[86]->FUN_00700320(4003, 0);
-        HUDMainMenu_pme->m_pTiles[60] = FUN_00a08b20(FUN_00a09030(1004), kHitPoints);
+        HUDMainMenu_pme->m_pTiles[60] = Tile_GetTileByName(Tile_GetMenuByClass(1004), kHitPoints);
         HUDMainMenu_pme->m_pTiles[60]->FUN_00700320(4001, iSafeZoneX3 * 2 + 10);
-        HUDMainMenu_pme->m_pTiles[60]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[60]->Tile_Set(
             4002, (float)(iScreenHeightX - iSafeZoneYY * 2) - HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4016), 1);
         HUDMainMenu_pme->m_pTiles[60]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[42] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[60], kTemplateLeftBracket, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[42], 2);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[42], 2);
         HUDMainMenu_pme->m_pTiles[1] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[60], kTemplateMeter, 0);
         HUDMainMenu_pme->m_pTiles[1]->FUN_00700320(iOriginalXTrait14, 20);
-        HUDMainMenu_pme->m_pTiles[1]->FUN_00a012d0(4002, 41.0f, 1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[1], 3);
+        HUDMainMenu_pme->m_pTiles[1]->Tile_Set(4002, 41.0f, 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[1], 3);
         HUDMainMenu_pme->m_pTiles[2] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[60], kTemplateJustifyRightText3, 0);
         HUDMainMenu_pme->m_pTiles[2]->FUN_00700320(4001, 53);
         HUDMainMenu_pme->m_pTiles[2]->FUN_00700320(4002, 8);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[2], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[2], 0);
         HUDMainMenu_pme->m_pTiles[6] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[60], kTemplateCompassWindow, 0);
         HUDMainMenu_pme->m_pTiles[3] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[6], kTemplateCompassIconGroup, 0);
@@ -273,7 +274,7 @@ Tile* FUN_0076bfe0()
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[6], "template_compass_icon_group", 0);
         HUDMainMenu_pme->m_pTiles[5]->FUN_00700320(4002, 10);
         HUDMainMenu_pme->m_pTiles[5]->FUN_00700320(4013, 2);
-        for (int l_e8 = 0; l_e8 < *DAT_011d32d0.FUN_0043d4d0(); l_e8++)
+        for (int l_e8 = 0; l_e8 < *DAT_011d32d0.Setting_Int(); l_e8++)
         {
             Tile* l_ec =
                 ((Menu*)HUDMainMenu_pme)->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[5], "compass_npc_icon", 0);
@@ -290,45 +291,45 @@ Tile* FUN_0076bfe0()
             Tile* l_fc =
                 ((Menu*)HUDMainMenu_pme)->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[3], kTemplateCompassIconMarker, 0);
         }
-        HUDMainMenu_pme->m_pTiles[61] = FUN_00a08b20(FUN_00a09030(1004), kRadiationMeter);
-        HUDMainMenu_pme->m_pTiles[61]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[61] = Tile_GetTileByName(Tile_GetMenuByClass(1004), kRadiationMeter);
+        HUDMainMenu_pme->m_pTiles[61]->Tile_Set(
             4001, (float)(iScreenWidthC - iSafeZoneX3 * 2) - HUDMainMenu_pme->m_pTiles[61]->FUN_00a011b0(4017) - 20.0,
             1);
         HUDMainMenu_pme->m_pTiles[61]->FUN_00700320(4002, iSafeZoneYY * 2);
-        HUDMainMenu_pme->m_pTiles[17] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[61], "radiation_bracket");
-        HUDMainMenu_pme->m_pTiles[18] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[61], "radiation_pointer");
-        HUDMainMenu_pme->m_pTiles[20] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[61], "radiation_text");
-        HUDMainMenu_pme->m_pTiles[19] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[61], "radiation_text_value");
-        HUDMainMenu_pme->m_pTiles[19]->FUN_00a01350(4036, "+0", 1);
-        HUDMainMenu_pme->m_pTiles[20]->FUN_00a01350(4036, DAT_011d21d8.FUN_00403df0(), 1);
-        HUDMainMenu_pme->m_pTiles[62] = FUN_00a08b20(FUN_00a09030(1004), "EnemyHealth");
-        HUDMainMenu_pme->m_pTiles[62]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[17] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[61], "radiation_bracket");
+        HUDMainMenu_pme->m_pTiles[18] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[61], "radiation_pointer");
+        HUDMainMenu_pme->m_pTiles[20] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[61], "radiation_text");
+        HUDMainMenu_pme->m_pTiles[19] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[61], "radiation_text_value");
+        HUDMainMenu_pme->m_pTiles[19]->Tile_Set_00a01350(4036, "+0", 1);
+        HUDMainMenu_pme->m_pTiles[20]->Tile_Set_00a01350(4036, DAT_011d21d8.FUN_00403df0(), 1);
+        HUDMainMenu_pme->m_pTiles[62] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "EnemyHealth");
+        HUDMainMenu_pme->m_pTiles[62]->Tile_Set(
             4001, (float)(iScreenWidthC / 2) - HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[62]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002) + 40.0, 1);
+        HUDMainMenu_pme->m_pTiles[62]->Tile_Set(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002) + 40.0, 1);
         HUDMainMenu_pme->m_pTiles[62]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[62]->FUN_00700320(4084, 2);
         HUDMainMenu_pme->m_pTiles[21] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[62], "template_enemy_health_bracket", 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[21], 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[21], 1);
         HUDMainMenu_pme->m_pTiles[21]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[22] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[62], "template_meter", 0);
         HUDMainMenu_pme->m_pTiles[22]->FUN_00700320(iOriginalXTrait14, 171);
         HUDMainMenu_pme->m_pTiles[22]->FUN_00700320(iTotalWidthTraitA, 240);
         HUDMainMenu_pme->m_pTiles[22]->FUN_00700320(4002, 3);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[22], 3);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[22], 3);
         HUDMainMenu_pme->m_pTiles[22]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[23] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[62], "template_justify_center_text", 0);
         HUDMainMenu_pme->m_pTiles[23]->FUN_00700320(4001, 170);
         HUDMainMenu_pme->m_pTiles[23]->FUN_00700320(4002, 35);
         HUDMainMenu_pme->m_pTiles[23]->FUN_00700320(4026, 350);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[23], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[23], 0);
         iQuestYAA = iSafeZoneYY * 2 + 170;
-        HUDMainMenu_pme->m_pTiles[63] = FUN_00a08b20(FUN_00a09030(1004), "QuestReminder");
+        HUDMainMenu_pme->m_pTiles[63] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "QuestReminder");
         HUDMainMenu_pme->m_pTiles[63]->FUN_00700320(4001, iSafeZoneX3 * 2 + 15);
         HUDMainMenu_pme->m_pTiles[63]->FUN_00700320(4002, iQuestYAA);
-        HUDMainMenu_pme->m_pTiles[13] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[63], "QuestStages");
-        HUDMainMenu_pme->m_pTiles[14] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[63], "QuestAdded");
+        HUDMainMenu_pme->m_pTiles[13] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[63], "QuestStages");
+        HUDMainMenu_pme->m_pTiles[14] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[63], "QuestAdded");
         for (int l_100 = 0; l_100 < 64; l_100++)
         {
             ((Menu*)HUDMainMenu_pme)->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[14], "template_justify_left_text", 0);
@@ -341,49 +342,49 @@ Tile* FUN_0076bfe0()
         {
             ((Menu*)HUDMainMenu_pme)->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[13], "template_justify_left_text", 0);
         }
-        HUDMainMenu_pme->m_pTiles[64] = FUN_00a08b20(FUN_00a09030(1004), "Region_Location");
+        HUDMainMenu_pme->m_pTiles[64] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "Region_Location");
         HUDMainMenu_pme->m_pTiles[64]->FUN_00700320(4001, iSafeZoneX3 * 2 + 15);
-        HUDMainMenu_pme->m_pTiles[64]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002) - 75.0, 1);
+        HUDMainMenu_pme->m_pTiles[64]->Tile_Set(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002) - 75.0, 1);
         HUDMainMenu_pme->m_pTiles[15] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[64], "template_justify_left_text", 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[15], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[15], 0);
         HUDMainMenu_pme->m_pTiles[15]->FUN_00700320(4003, 1);
         NiPoint3 kTextSize1 =
             FontManager::Instance()->GetStringDimensions(kTestHeight2, (int)HUDMainMenu_pme->m_pTiles[15]->FUN_00a011b0(4025),
                                          HUDMainMenu_pme->m_pTiles[15]->FUN_00a011b0(4026), 0);
-        HUDMainMenu_pme->m_pTiles[15]->FUN_00a012d0(4002, kTextSize1.y, 1);
+        HUDMainMenu_pme->m_pTiles[15]->Tile_Set(4002, kTextSize1.y, 1);
         HUDMainMenu_pme->m_pTiles[16] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[64], kTemplateJustifyLeftText3, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[16], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[16], 0);
         HUDMainMenu_pme->m_pTiles[16]->FUN_00700320(4003, 1);
-        HUDMainMenu_pme->m_pTiles[16]->FUN_00a012d0(4002, kTextSize1.y, 1);
-        HUDMainMenu_pme->m_pTiles[65] = FUN_00a08b20(FUN_00a09030(1004), "ReticleCenter");
-        HUDMainMenu_pme->m_pTiles[65]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[16]->Tile_Set(4002, kTextSize1.y, 1);
+        HUDMainMenu_pme->m_pTiles[65] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "ReticleCenter");
+        HUDMainMenu_pme->m_pTiles[65]->Tile_Set(
             4001, (float)(iScreenWidthC / 2) - HUDMainMenu_pme->m_pTiles[65]->FUN_00a011b0(4017) / 2.0 - 3.0, 1);
-        HUDMainMenu_pme->m_pTiles[65]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[65]->Tile_Set(
             4002, (float)(iScreenHeightX / 2) - HUDMainMenu_pme->m_pTiles[65]->FUN_00a011b0(4016) / 2.0 - 3.0, 1);
         HUDMainMenu_pme->m_pTiles[65]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[65]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[51] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[65], kTemplateReticleCenter, 0);
         HUDMainMenu_pme->m_pTiles[51]->FUN_00700320(4084, 1);
         HUDMainMenu_pme->m_pTiles[51]->FUN_00700320(4003, 1);
-        HUDMainMenu_pme->m_pTiles[66] = FUN_00a08b20(FUN_00a09030(1004), kSneakMeter);
+        HUDMainMenu_pme->m_pTiles[66] = Tile_GetTileByName(Tile_GetMenuByClass(1004), kSneakMeter);
         HUDMainMenu_pme->m_pTiles[66]->FUN_00700320(4001, iScreenWidthC / 2);
         HUDMainMenu_pme->m_pTiles[66]->FUN_00700320(4002, iSafeZoneYY * 2);
         HUDMainMenu_pme->m_pTiles[66]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[66]->FUN_00700320(4003, 0);
-        HUDMainMenu_pme->m_pTiles[24] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[66], kSneakNif);
+        HUDMainMenu_pme->m_pTiles[24] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[66], kSneakNif);
         HUDMainMenu_pme->m_pTiles[24]->FUN_00700320(4009, 0);
-        HUDMainMenu_pme->m_pTiles[67] = FUN_00a08b20(FUN_00a09030(1004), kMessages);
+        HUDMainMenu_pme->m_pTiles[67] = Tile_GetTileByName(Tile_GetMenuByClass(1004), kMessages);
         iMessageOffsetX3 = -5;
         HUDMainMenu_pme->m_pTiles[67]->FUN_00700320(4001, iMessageOffsetX3 + iSafeZoneX3 * 2);
         HUDMainMenu_pme->m_pTiles[67]->FUN_00700320(4002, iSafeZoneYY * 2 + 25);
         HUDMainMenu_pme->m_pTiles[67]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[25] = pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[67], kTemplateMessageIcon, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[25], 6);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[25], 6);
         HUDMainMenu_pme->m_pTiles[26] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[67], kTemplateJustifyLeftText2, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[26], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[26], 0);
         HUDMainMenu_pme->m_pTiles[26]->FUN_00700320(4001, 130);
         HUDMainMenu_pme->m_pTiles[26]->FUN_00700320(4002, 5);
         HUDMainMenu_pme->m_pTiles[26]->FUN_00700320(4026, 320);
@@ -392,46 +393,46 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_pTiles[26]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[27] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[67], kTemplateMessageBracket, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[27], 1);
-        HUDMainMenu_pme->m_pTiles[68] = FUN_00a08b20(FUN_00a09030(1004), "Info");
-        HUDMainMenu_pme->m_pTiles[68]->FUN_00a012d0(
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[27], 1);
+        HUDMainMenu_pme->m_pTiles[68] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "Info");
+        HUDMainMenu_pme->m_pTiles[68]->Tile_Set(
             4001, (float)(iScreenWidthC / 2) - HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[68]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[68]->Tile_Set(
             4002, (float)(iScreenHeightX - iSafeZoneYY * 2) - HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4016) - 30.0,
             1);
         HUDMainMenu_pme->m_pTiles[68]->FUN_00700320(4008, 1);
-        HUDMainMenu_pme->m_pTiles[29] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[68], kJustifyCenterHotrect);
-        HUDMainMenu_pme->m_pTiles[30] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[29], kPCShortcutLabel);
-        HUDMainMenu_pme->m_pTiles[31] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[29], kXboxButton);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[29], 0);
-        HUDMainMenu_pme->m_pTiles[29]->FUN_00a012d0(FUN_00a01860("_x"),
+        HUDMainMenu_pme->m_pTiles[29] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[68], kJustifyCenterHotrect);
+        HUDMainMenu_pme->m_pTiles[30] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[29], kPCShortcutLabel);
+        HUDMainMenu_pme->m_pTiles[31] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[29], kXboxButton);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[29], 0);
+        HUDMainMenu_pme->m_pTiles[29]->Tile_Set(Tile_TextToTrait("_x"),
                                                     HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
         HUDMainMenu_pme->m_pTiles[32] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[68], "template_justify_center_text", 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[32], 0);
-        HUDMainMenu_pme->m_pTiles[32]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[32]->FUN_00a012d0(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[32], 0);
+        HUDMainMenu_pme->m_pTiles[32]->Tile_Set(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[32]->Tile_Set(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
         HUDMainMenu_pme->m_pTiles[32]->FUN_00700320(4002, 0);
         kTextSize1 = FontManager::Instance()->GetStringDimensions(kTestHeight, (int)HUDMainMenu_pme->m_pTiles[32]->FUN_00a011b0(4025),
                                                   HUDMainMenu_pme->m_pTiles[32]->FUN_00a011b0(4026), 0);
-        HUDMainMenu_pme->m_pTiles[32]->FUN_00a012d0(4108, kTextSize1.y, 1);
+        HUDMainMenu_pme->m_pTiles[32]->Tile_Set(4108, kTextSize1.y, 1);
         HUDMainMenu_pme->m_pTiles[33] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyCenterText3, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[33], 0);
-        HUDMainMenu_pme->m_pTiles[33]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[33]->FUN_00a012d0(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[33], 0);
+        HUDMainMenu_pme->m_pTiles[33]->Tile_Set(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[33]->Tile_Set(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
         HUDMainMenu_pme->m_pTiles[33]->FUN_00700320(4002, 65);
         HUDMainMenu_pme->m_pTiles[33]->FUN_00700320(4009, 0);
-        HUDMainMenu_pme->m_pTiles[33]->FUN_00a01350(4036, DAT_011d2454.FUN_00403df0(), 1);
+        HUDMainMenu_pme->m_pTiles[33]->Tile_Set_00a01350(4036, DAT_011d2454.FUN_00403df0(), 1);
         HUDMainMenu_pme->m_pTiles[33]->FUN_00700320(4003, 0);
         HUDMainMenu_pme->m_pTiles[34] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyCenterText2, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[34], 0);
-        HUDMainMenu_pme->m_pTiles[34]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[34]->FUN_00a012d0(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[34], 0);
+        HUDMainMenu_pme->m_pTiles[34]->Tile_Set(4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[34]->Tile_Set(4026, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017), 1);
         HUDMainMenu_pme->m_pTiles[34]->FUN_00700320(4002, 65);
         HUDMainMenu_pme->m_pTiles[34]->FUN_00700320(4009, 0);
-        HUDMainMenu_pme->m_pTiles[34]->FUN_00a01350(4036, DAT_011d1f68.FUN_00403df0(), 1);
+        HUDMainMenu_pme->m_pTiles[34]->Tile_Set_00a01350(4036, DAT_011d1f68.FUN_00403df0(), 1);
         HUDMainMenu_pme->m_pTiles[34]->FUN_00700320(4003, 0);
         iInfoRowY = 60;
         iInfoGapLeftAA = 25;
@@ -440,48 +441,48 @@ Tile* FUN_0076bfe0()
         iInfoPadMid34 = 5;
         HUDMainMenu_pme->m_pTiles[35] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyRightText2, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[35], 0);
-        HUDMainMenu_pme->m_pTiles[35]->FUN_00a012d0(
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[35], 0);
+        HUDMainMenu_pme->m_pTiles[35]->Tile_Set(
             4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0 - iInfoGapLeftAA, 1);
         HUDMainMenu_pme->m_pTiles[35]->FUN_00700320(4002, iInfoRowY);
-        HUDMainMenu_pme->m_pTiles[35]->FUN_00a012d0(4009, DAT_011d979c, 1);
+        HUDMainMenu_pme->m_pTiles[35]->Tile_Set(4009, DAT_011d979c, 1);
         HUDMainMenu_pme->m_pTiles[36] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyLeftText, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[36], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[36], 0);
         HUDMainMenu_pme->m_pTiles[36]->FUN_00700320(4001, iInfoPadLeft_);
         HUDMainMenu_pme->m_pTiles[36]->FUN_00700320(4002, iInfoRowY);
         HUDMainMenu_pme->m_pTiles[37] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[68], kTemplateJustifyRightText, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[37], 0);
-        HUDMainMenu_pme->m_pTiles[37]->FUN_00a012d0(
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[37], 0);
+        HUDMainMenu_pme->m_pTiles[37]->Tile_Set(
             4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) - iInfoPadRightQ, 1);
         HUDMainMenu_pme->m_pTiles[37]->FUN_00700320(4002, iInfoRowY);
-        HUDMainMenu_pme->m_pTiles[37]->FUN_00a012d0(4009, DAT_011d979c, 1);
+        HUDMainMenu_pme->m_pTiles[37]->Tile_Set(4009, DAT_011d979c, 1);
         HUDMainMenu_pme->m_pTiles[38] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[68], "template_justify_left_text", 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[38], 0);
-        HUDMainMenu_pme->m_pTiles[38]->FUN_00a012d0(
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[38], 0);
+        HUDMainMenu_pme->m_pTiles[38]->Tile_Set(
             4001, HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4017) / 2.0 + iInfoPadMid34, 1);
         HUDMainMenu_pme->m_pTiles[38]->FUN_00700320(4002, iInfoRowY);
         HUDMainMenu_pme->m_pTiles[39] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[68], "template_info_seperator", 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[39], 2);
-        HUDMainMenu_pme->m_pTiles[69] = FUN_00a08b20(FUN_00a09030(1004), "Subtitles");
-        HUDMainMenu_pme->m_pTiles[69]->FUN_00a012d0(
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[39], 2);
+        HUDMainMenu_pme->m_pTiles[69] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "Subtitles");
+        HUDMainMenu_pme->m_pTiles[69]->Tile_Set(
             4001, (float)(iScreenWidthC / 2) - HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[69]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[69]->Tile_Set(4002,
                                                     HUDMainMenu_pme->m_pTiles[68]->FUN_00a011b0(4002) -
                                                         HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4016) - 50.0,
                                                     1);
         HUDMainMenu_pme->m_pTiles[69]->FUN_00700320(4008, 1);
         HUDMainMenu_pme->m_pTiles[28] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[69], kTemplateJustifyCenterText, 0);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[28], 0);
-        HUDMainMenu_pme->m_pTiles[28]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017) / 2.0, 1);
-        HUDMainMenu_pme->m_pTiles[28]->FUN_00a012d0(4026, HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017), 1);
-        HUDMainMenu_pme->m_pTiles[70] = FUN_00a08b20(FUN_00a09030(1004), kHokeys);
-        HUDMainMenu_pme->m_pTiles[70]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4001) + 15.0, 1);
-        HUDMainMenu_pme->m_pTiles[70]->FUN_00a012d0(4002,
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[28], 0);
+        HUDMainMenu_pme->m_pTiles[28]->Tile_Set(4001, HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[28]->Tile_Set(4026, HUDMainMenu_pme->m_pTiles[69]->FUN_00a011b0(4017), 1);
+        HUDMainMenu_pme->m_pTiles[70] = Tile_GetTileByName(Tile_GetMenuByClass(1004), kHokeys);
+        HUDMainMenu_pme->m_pTiles[70]->Tile_Set(4001, HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4001) + 15.0, 1);
+        HUDMainMenu_pme->m_pTiles[70]->Tile_Set(4002,
                                                     (float)(iScreenHeightX - iSafeZoneYY * 2) -
                                                         HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4016) -
                                                         HUDMainMenu_pme->m_pTiles[70]->FUN_00a011b0(4016) - 20.0,
@@ -492,24 +493,24 @@ Tile* FUN_0076bfe0()
         HUDMainMenu_pme->m_kMenuData.Initialize(HUDMainMenu_pme->m_pTiles[40]);
         HUDMainMenu_pme->m_pTiles[41] =
             pMenuXB->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[70], "template_justify_center_text", 0);
-        HUDMainMenu_pme->m_pTiles[41]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[70]->FUN_00a011b0(4017) / 2.0, 1);
+        HUDMainMenu_pme->m_pTiles[41]->Tile_Set(4001, HUDMainMenu_pme->m_pTiles[70]->FUN_00a011b0(4017) / 2.0, 1);
         HUDMainMenu_pme->m_pTiles[41]->FUN_00700320(4002, -50);
         HUDMainMenu_pme->m_pTiles[41]->FUN_00700320(4003, 0);
-        HUDMainMenu_pme->m_pTiles[71] = FUN_00a08b20(FUN_00a09030(1004), "XPMeter");
+        HUDMainMenu_pme->m_pTiles[71] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "XPMeter");
         HUDMainMenu_pme->m_pTiles[71]->FUN_00700320(4001, iScreenWidthC - iSafeZoneX3 * 2 - 390);
         HUDMainMenu_pme->m_pTiles[71]->FUN_00700320(4002, iScreenHeightX - iSafeZoneYY * 2 - 280);
         HUDMainMenu_pme->m_pTiles[71]->FUN_00700320(4103, iScreenHeightX - iSafeZoneYY * 2 - 280);
-        HUDMainMenu_pme->m_pTiles[45] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[71], "XPAmount");
-        HUDMainMenu_pme->m_pTiles[46] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[71], "XPLabel");
-        HUDMainMenu_pme->m_pTiles[47] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[71], "XPPointer");
-        HUDMainMenu_pme->m_pTiles[44] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[71], "XPBracket");
-        HUDMainMenu_pme->m_pTiles[48] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[71], "XPLastLevel");
-        HUDMainMenu_pme->m_pTiles[49] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[71], "XPNextLevel");
-        HUDMainMenu_pme->m_pTiles[50] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[71], "XPLevelUp");
-        HUDMainMenu_pme->m_pTiles[72] = FUN_00a08b20(FUN_00a09030(1004), "BreathMeter");
+        HUDMainMenu_pme->m_pTiles[45] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[71], "XPAmount");
+        HUDMainMenu_pme->m_pTiles[46] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[71], "XPLabel");
+        HUDMainMenu_pme->m_pTiles[47] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[71], "XPPointer");
+        HUDMainMenu_pme->m_pTiles[44] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[71], "XPBracket");
+        HUDMainMenu_pme->m_pTiles[48] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[71], "XPLastLevel");
+        HUDMainMenu_pme->m_pTiles[49] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[71], "XPNextLevel");
+        HUDMainMenu_pme->m_pTiles[50] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[71], "XPLevelUp");
+        HUDMainMenu_pme->m_pTiles[72] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "BreathMeter");
         HUDMainMenu_pme->m_pTiles[72]->FUN_00700320(4001, iScreenWidthC / 2);
-        HUDMainMenu_pme->m_pTiles[72]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[66]->FUN_00a011b0(4002) + 80.0, 1);
-        HUDMainMenu_pme->m_pTiles[73] = FUN_00a08b20(FUN_00a09030(1004), "Explosive_positioning_rect");
+        HUDMainMenu_pme->m_pTiles[72]->Tile_Set(4002, HUDMainMenu_pme->m_pTiles[66]->FUN_00a011b0(4002) + 80.0, 1);
+        HUDMainMenu_pme->m_pTiles[73] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "Explosive_positioning_rect");
         HUDMainMenu_pme->m_pTiles[73]->FUN_00700320(4001, iScreenWidthC / 2);
         HUDMainMenu_pme->m_pTiles[73]->FUN_00700320(4002, iScreenHeightX / 2);
         for (int l_10c = 0; l_10c < 6; l_10c++)
@@ -517,214 +518,214 @@ Tile* FUN_0076bfe0()
             Tile* l_110 = ((Menu*)HUDMainMenu_pme)
                               ->CreateTileFromTemplate(HUDMainMenu_pme->m_pTiles[73], "template_explosive_indicator", 0);
         }
-        HUDMainMenu_pme->m_pTiles[74] = FUN_00a08b20(FUN_00a09030(1004), "crippled_limb_indicator");
+        HUDMainMenu_pme->m_pTiles[74] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "crippled_limb_indicator");
         iLimbOffsetXQ = 200;
         iLimbOffsetYB = 100;
         fLimbScaleAC = 75.0f;
         HUDMainMenu_pme->m_pTiles[74]->FUN_00700320(4001, iScreenWidthC - iSafeZoneX3 * 2 - iLimbOffsetXQ);
         HUDMainMenu_pme->m_pTiles[74]->FUN_00700320(4002, iLimbOffsetYB + iSafeZoneYY * 2);
-        HUDMainMenu_pme->m_pTiles[53] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Head");
-        HUDMainMenu_pme->m_pTiles[53]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[53]->FUN_00a012d0(4017, fLimbScaleAC * 85.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[53]->FUN_00a012d0(4016, fLimbScaleAC * 92.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[53] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[74], "Head");
+        HUDMainMenu_pme->m_pTiles[53]->Tile_Set(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[53]->Tile_Set(4017, fLimbScaleAC * 85.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[53]->Tile_Set(4016, fLimbScaleAC * 92.0 / 100.0, 1);
         HUDMainMenu_pme->m_pTiles[53]->FUN_00700320(4001, 0);
         HUDMainMenu_pme->m_pTiles[53]->FUN_00700320(4002, 40);
-        HUDMainMenu_pme->m_pTiles[52] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Face");
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4017, fLimbScaleAC * 48.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4016, fLimbScaleAC * 64.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[52] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[74], "Face");
+        HUDMainMenu_pme->m_pTiles[52]->Tile_Set(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[52]->Tile_Set(4017, fLimbScaleAC * 48.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[52]->Tile_Set(4016, fLimbScaleAC * 64.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[52]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4001) +
                                                         (HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4017) -
                                                          HUDMainMenu_pme->m_pTiles[52]->FUN_00a011b0(4017)) /
                                                             2.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[52]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[52]->Tile_Set(4002,
                                                     HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4002) +
                                                         (HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4016) -
                                                          HUDMainMenu_pme->m_pTiles[52]->FUN_00a011b0(4016)) /
                                                             2.0 +
                                                         fLimbScaleAC * 16.0 / 100.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[54] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Torso");
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(4017, fLimbScaleAC * 102.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(4016, fLimbScaleAC * 128.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[54] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[74], "Torso");
+        HUDMainMenu_pme->m_pTiles[54]->Tile_Set(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[54]->Tile_Set(4017, fLimbScaleAC * 102.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[54]->Tile_Set(4016, fLimbScaleAC * 128.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[54]->Tile_Set(
             4001, HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4001) + fLimbScaleAC * -14.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[54]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[54]->Tile_Set(
             4002, HUDMainMenu_pme->m_pTiles[53]->FUN_00a011b0(4002) + fLimbScaleAC * 86.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[55] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Left_Arm");
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(4017, fLimbScaleAC * 100.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(4016, fLimbScaleAC * 52.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[55] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[74], "Left_Arm");
+        HUDMainMenu_pme->m_pTiles[55]->Tile_Set(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[55]->Tile_Set(4017, fLimbScaleAC * 100.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[55]->Tile_Set(4016, fLimbScaleAC * 52.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[55]->Tile_Set(
             4001, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4001) + fLimbScaleAC * 90.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[55]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002), 1);
-        HUDMainMenu_pme->m_pTiles[56] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Right_Arm");
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(4017, fLimbScaleAC * 96.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(4016, fLimbScaleAC * 54.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[55]->Tile_Set(4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002), 1);
+        HUDMainMenu_pme->m_pTiles[56] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[74], "Right_Arm");
+        HUDMainMenu_pme->m_pTiles[56]->Tile_Set(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[56]->Tile_Set(4017, fLimbScaleAC * 96.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[56]->Tile_Set(4016, fLimbScaleAC * 54.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[56]->Tile_Set(
             4001, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4001) + fLimbScaleAC * -88.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[56]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[56]->Tile_Set(
             4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002) + fLimbScaleAC * -5.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[57] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Left_Leg");
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(4017, fLimbScaleAC * 72.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(4016, fLimbScaleAC * 112.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[57] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[74], "Left_Leg");
+        HUDMainMenu_pme->m_pTiles[57]->Tile_Set(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[57]->Tile_Set(4017, fLimbScaleAC * 72.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[57]->Tile_Set(4016, fLimbScaleAC * 112.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[57]->Tile_Set(
             4001, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4001) + fLimbScaleAC * 47.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[57]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[57]->Tile_Set(
             4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002) + fLimbScaleAC * 86.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[58] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[74], "Right_Leg");
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(4024, fLimbScaleAC, 1);
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(4017, fLimbScaleAC * 84.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(4016, fLimbScaleAC * 112.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[58] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[74], "Right_Leg");
+        HUDMainMenu_pme->m_pTiles[58]->Tile_Set(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[58]->Tile_Set(4017, fLimbScaleAC * 84.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[58]->Tile_Set(4016, fLimbScaleAC * 112.0 / 100.0, 1);
+        HUDMainMenu_pme->m_pTiles[58]->Tile_Set(
             4001, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4001) + fLimbScaleAC * -37.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[58]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[58]->Tile_Set(
             4002, HUDMainMenu_pme->m_pTiles[54]->FUN_00a011b0(4002) + fLimbScaleAC * 83.0 / 100.0, 1);
-        HUDMainMenu_pme->m_pTiles[75] = FUN_00a08b20(FUN_00a09030(1004), "DDTIcon");
-        HUDMainMenu_pme->m_pTiles[75]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[75] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "DDTIcon");
+        HUDMainMenu_pme->m_pTiles[75]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4017) + 5.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[75]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[75]->Tile_Set(4002,
                                                     HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4002) +
                                                         HUDMainMenu_pme->m_pTiles[6]->FUN_00a011b0(4002) - 16.0,
                                                     1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[75], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[75], 0);
         HUDMainMenu_pme->m_pTiles[75]->FUN_00700320(4003, 0);
-        HUDMainMenu_pme->m_pTiles[76] = FUN_00a08b20(FUN_00a09030(1004), "DDTIconEnemy");
-        HUDMainMenu_pme->m_pTiles[76]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[76] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "DDTIconEnemy");
+        HUDMainMenu_pme->m_pTiles[76]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[22]->FUN_00a011b0(4001) - 32.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[76]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[76]->Tile_Set(
             4002, HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4002) + HUDMainMenu_pme->m_pTiles[22]->FUN_00a011b0(4002),
             1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[76], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[76], 0);
         HUDMainMenu_pme->m_pTiles[76]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[76]->FUN_00700320(4084, 2);
-        HUDMainMenu_pme->m_pTiles[82] = FUN_00a08b20(FUN_00a09030(1004), "DDTIcon");
-        HUDMainMenu_pme->m_pTiles[82]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[82] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "DDTIcon");
+        HUDMainMenu_pme->m_pTiles[82]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4017) + 5.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[82]->FUN_00a012d0(4002,
+        HUDMainMenu_pme->m_pTiles[82]->Tile_Set(4002,
                                                     HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4002) +
                                                         HUDMainMenu_pme->m_pTiles[6]->FUN_00a011b0(4002) - 16.0,
                                                     1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[82], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[82], 0);
         HUDMainMenu_pme->m_pTiles[82]->FUN_00700320(4003, 1);
-        HUDMainMenu_pme->m_pTiles[83] = FUN_00a08b20(FUN_00a09030(1004), "DDTIconEnemyAP");
-        HUDMainMenu_pme->m_pTiles[83]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[83] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "DDTIconEnemyAP");
+        HUDMainMenu_pme->m_pTiles[83]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[22]->FUN_00a011b0(4001) - 32.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[83]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[83]->Tile_Set(
             4002, HUDMainMenu_pme->m_pTiles[62]->FUN_00a011b0(4002) + HUDMainMenu_pme->m_pTiles[22]->FUN_00a011b0(4002),
             1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[83], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[83], 0);
         HUDMainMenu_pme->m_pTiles[83]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[83]->FUN_00700320(4084, 2);
-        HUDMainMenu_pme->m_pTiles[77] = FUN_00a08b20(FUN_00a09030(1004), "AmmoTypeLabel");
-        HUDMainMenu_pme->m_pTiles[77]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[77] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "AmmoTypeLabel");
+        HUDMainMenu_pme->m_pTiles[77]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4001) +
                                                         HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4001) - 165.0,
                                                     1);
-        HUDMainMenu_pme->m_pTiles[77]->FUN_00a012d0(
+        HUDMainMenu_pme->m_pTiles[77]->Tile_Set(
             4002, HUDMainMenu_pme->m_pTiles[59]->FUN_00a011b0(4002) + HUDMainMenu_pme->m_pTiles[12]->FUN_00a011b0(4002),
             1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[77], 0);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[77], 0);
         HUDMainMenu_pme->m_pTiles[77]->FUN_00700320(4003, 1);
-        HUDMainMenu_pme->m_pTiles[78] = FUN_00a08b20(FUN_00a09030(1004), "HardcoreMode");
-        HUDMainMenu_pme->m_pTiles[78]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4001) + 150.0, 1);
-        HUDMainMenu_pme->m_pTiles[78]->FUN_00a012d0(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002), 1);
-        FUN_00774800(HUDMainMenu_pme->m_pTiles[78], 0);
+        HUDMainMenu_pme->m_pTiles[78] = Tile_GetTileByName(Tile_GetMenuByClass(1004), "HardcoreMode");
+        HUDMainMenu_pme->m_pTiles[78]->Tile_Set(4001, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4001) + 150.0, 1);
+        HUDMainMenu_pme->m_pTiles[78]->Tile_Set(4002, HUDMainMenu_pme->m_pTiles[60]->FUN_00a011b0(4002), 1);
+        HUDMainMenu_SetBrightness(HUDMainMenu_pme->m_pTiles[78], 0);
         HUDMainMenu_pme->m_pTiles[78]->FUN_00700320(4003, 1);
         HUDMainMenu_pme->m_pTiles[78]->FUN_00700320(4008, 1);
-        HUDMainMenu_pme->m_pTiles[79] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "Dehydration");
+        HUDMainMenu_pme->m_pTiles[79] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[78], "Dehydration");
         HUDMainMenu_pme->m_pTiles[79]->FUN_00700320(4001, 0);
         HUDMainMenu_pme->m_pTiles[79]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[79]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[79]->Tile_Set(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[79]->FUN_00700320(4009, 0);
-        HUDMainMenu_pme->m_pTiles[81] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "Hunger");
-        HUDMainMenu_pme->m_pTiles[81]->FUN_00a012d0(4001, HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0, 1);
+        HUDMainMenu_pme->m_pTiles[81] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[78], "Hunger");
+        HUDMainMenu_pme->m_pTiles[81]->Tile_Set(4001, HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0, 1);
         HUDMainMenu_pme->m_pTiles[81]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[81]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[81]->Tile_Set(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[81]->FUN_00700320(4009, 0);
-        HUDMainMenu_pme->m_pTiles[80] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "Sleep");
-        HUDMainMenu_pme->m_pTiles[80]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[80] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[78], "Sleep");
+        HUDMainMenu_pme->m_pTiles[80]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[81]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0,
                                                     1);
         HUDMainMenu_pme->m_pTiles[80]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[80]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[80]->Tile_Set(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[80]->FUN_00700320(4009, 0);
-        HUDMainMenu_pme->m_pTiles[84] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "Rads");
-        HUDMainMenu_pme->m_pTiles[84]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[84] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[78], "Rads");
+        HUDMainMenu_pme->m_pTiles[84]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[81]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[80]->FUN_00a011b0(4017) + 10.0,
                                                     1);
         HUDMainMenu_pme->m_pTiles[84]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[84]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[84]->Tile_Set(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[84]->FUN_00700320(4009, 0);
-        HUDMainMenu_pme->m_pTiles[85] = FUN_00a08b20(HUDMainMenu_pme->m_pTiles[78], "LMBs");
-        HUDMainMenu_pme->m_pTiles[85]->FUN_00a012d0(4001,
+        HUDMainMenu_pme->m_pTiles[85] = Tile_GetTileByName(HUDMainMenu_pme->m_pTiles[78], "LMBs");
+        HUDMainMenu_pme->m_pTiles[85]->Tile_Set(4001,
                                                     HUDMainMenu_pme->m_pTiles[81]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[79]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[80]->FUN_00a011b0(4017) + 10.0 +
                                                         HUDMainMenu_pme->m_pTiles[84]->FUN_00a011b0(4017) + 10.0,
                                                     1);
         HUDMainMenu_pme->m_pTiles[85]->FUN_00700320(4002, 0);
-        HUDMainMenu_pme->m_pTiles[85]->FUN_00a012d0(4024, fLimbScaleAC, 1);
+        HUDMainMenu_pme->m_pTiles[85]->Tile_Set(4024, fLimbScaleAC, 1);
         HUDMainMenu_pme->m_pTiles[85]->FUN_00700320(4009, 0);
         if (!static_cast<HudCreationMethods*>(HUDMainMenu_pme)->FUN_00770070())
         {
-            FUN_0040fbe0(
+            ProgramFlow(
                 "Hud Menu Creation Failed... This likely means that the archives were not built and the xml doesn't match the code.");
-            FUN_007037e0();
+            Interface_EmergencyCloseAllMenusAndBreakStuff();
         }
         if (pMenuTileN->FUN_00a011b0(4007) == 6006.0 || pMenuTileN->FUN_00a011b0(4007) == 102.0)
-            pMenuTileN->FUN_00a012d0(4013, fTileAlphaM, true);
-        HUDMainMenu_pme->m_pTiles[12]->FUN_00a01350(4036, DAT_011d4918.FUN_00403df0(), 1);
-        HUDMainMenu_pme->m_pTiles[8]->FUN_00a01350(4036, DAT_011d3e8c.FUN_00403df0(), 1);
-        HUDMainMenu_pme->m_pTiles[2]->FUN_00a01350(4036, DAT_011d300c.FUN_00403df0(), 1);
+            pMenuTileN->Tile_Set(4013, fTileAlphaM, true);
+        HUDMainMenu_pme->m_pTiles[12]->Tile_Set_00a01350(4036, DAT_011d4918.FUN_00403df0(), 1);
+        HUDMainMenu_pme->m_pTiles[8]->Tile_Set_00a01350(4036, DAT_011d3e8c.FUN_00403df0(), 1);
+        HUDMainMenu_pme->m_pTiles[2]->Tile_Set_00a01350(4036, DAT_011d300c.FUN_00403df0(), 1);
         HUDMainMenu_pme->m_iHudValueFirstAfterUpdateList = 856;
         HUDMainMenu_pme->m_iHudValueSecondAfterUpdateList =
             (int)(HUDMainMenu_pme->m_pTiles[6]->FUN_00a011b0(4017) / 2.0) - 35;
         HUDMainMenu_pme->m_iHudValueThirdAfterUpdateList = 70;
         pMenuTileN->FUN_00700320(4003, 1);
         ((Menu*)HUDMainMenu_pme)->FUN_00726070();
-        FUN_00a04200(false);
+        Tile_UpdateAll(false);
         NiPointer<NiSourceTexture> spCompassAlphaB(0);
         spCompassAlphaB = NiSourceTexture::Create(NiFixedString("Textures\\Interface\\HUD\\hud_compass_alphamap.dds"),
                                        DAT_011a9598, true, false);
-        ((CompassStub*)HUDMainMenu_pme->m_pTiles[6]->GetShaderProperty())->FUN_007700b0(spCompassAlphaB);
+        ((CompassStub*)HUDMainMenu_pme->m_pTiles[6]->GetShaderProperty())->TileShaderProperty_SetAlphaTexture(spCompassAlphaB);
         ((CompassStub*)HUDMainMenu_pme->m_pTiles[6]->GetShaderProperty())->FUN_007700d0(true);
         DAT_011d9770 = new NiNode(0);
         NiMatrix3 kRotZXB;
         NiMatrix3 kRotXYB;
         kRotZXB.MakeXRotation(1.5707964f);
         kRotXYB.MakeZRotation(1.5707964f);
-        DAT_011d9770->FUN_0043fa80(kRotZXB.operator*(kRotXYB));
-        DAT_011d9770->FUN_00440490(0.1f);
-        DAT_011d9770->FUN_004bc1f0(380.0f, 0.0f, 0.0f);
+        DAT_011d9770->SetRotate_0043fa80(kRotZXB.operator*(kRotXYB));
+        DAT_011d9770->NiAVObject_SetScale(0.1f);
+        DAT_011d9770->NiAVObject_SetTranslate_004bc1f0(380.0f, 0.0f, 0.0f);
         NiUpdateData kUpdateSceneY(0.0f, false, false);
-        DAT_011d9770->FUN_00a59c60(kUpdateSceneY);
-        DAT_011d975c = static_cast<HudCreationMethods*>(HUDMainMenu_pme)->FUN_0077ee50();
+        DAT_011d9770->NiAVObject_Update(kUpdateSceneY);
+        DAT_011d975c = static_cast<HudCreationMethods*>(HUDMainMenu_pme)->HUDMainMenu_Create3DCamera();
         DAT_011d96bc = new HUDEmptyStub;
         FUN_00450b80(1)->AttachChildInAvailableSlot(static_cast<NiAVObject*>(static_cast<NiNode*>(DAT_011d9770)), true);
-        fShadowRadiusXB = DAT_011d9770->FUN_0043d450()->FUN_0084d030() * 3.0;
+        fShadowRadiusXB = DAT_011d9770->NiAVObject_GetWorldBound()->FUN_0084d030() * 3.0;
         FUN_00450b80(1)->FUN_00b5ca70(static_cast<NiNode*>(DAT_011d9770), fShadowRadiusXB);
-        pBreathNodeYA = HUDMainMenu_pme->m_pTiles[72]->FUN_0056c7f0();
-        pController27 = static_cast<NiNode*>(pBreathNodeYA->FUN_0043b4a0(0))->FUN_00a5c570(&DAT_011f36ac);
+        pBreathNodeYA = HUDMainMenu_pme->m_pTiles[72]->GetModel_0056c7f0();
+        pController27 = static_cast<NiNode*>(pBreathNodeYA->FUN_0043b4a0(0))->NiObjectNET_GetController(&DAT_011f36ac);
         pBreathNodeYA->FUN_006404b0(-1.5707964f, 1.0f, 0.0f, 0.0f);
         NiUpdateData kUpdateBreath2(0.0f, true, false);
-        pBreathNodeYA->FUN_0043b4a0(0)->FUN_00a59c60(kUpdateBreath2);
+        pBreathNodeYA->FUN_0043b4a0(0)->NiAVObject_Update(kUpdateBreath2);
         if (pController27)
         {
             NiControllerManager* l_114 = (NiControllerManager*)pController27;
@@ -735,9 +736,9 @@ Tile* FUN_0076bfe0()
                 l_114->FUN_0047aab0(HUDMainMenu_pme->m_pHudAnimationSequence, 0, 1, 1.0f, 0.0f, 0);
         }
         pMenuXB->SetMenuVisibility(true);
-        FUN_0077e430(*DAT_011d9774.FUN_00403e20());
-        FUN_00771700(5);
-        FUN_00713d70()->FUN_004538c0();
+        HUDMainMenu_ResetHUDOpacity(*DAT_011d9774.Setting_Float_00403e20());
+        HUDMainMenu_UpdateVisibilityState(5);
+        Tile_GetTileUpdateAllCriticalSectionLock()->FUN_004538c0();
         return pMenuTileN;
     }
     else
@@ -745,7 +746,7 @@ Tile* FUN_0076bfe0()
         if (pMenuXB && pMenuXB->FUN_00726070())
             delete pMenuXB;
     }
-    FUN_00713d70()->FUN_004538c0();
+    Tile_GetTileUpdateAllCriticalSectionLock()->FUN_004538c0();
     return 0;
 }
 
@@ -794,15 +795,16 @@ extern TESObjectREFR* g_thePlayer;
 class SubtitleHUD : public HUDMainMenu
 {
   public:
-    bool FUN_00774fd0(const char*, BSSoundHandle, SubtitlePoint, TESObjectREFR*, bool);
+    bool HUDMainMenu_ShowSubtitle(const char*, BSSoundHandle, SubtitlePoint, TESObjectREFR*, bool);
 };
 // @fnv 0x00774fd0
-bool SubtitleHUD::FUN_00774fd0(const char* text, BSSoundHandle sound, SubtitlePoint position, TESObjectREFR* speaker,
+// src: XBOX_PDB 0x00774fd0
+bool SubtitleHUD::HUDMainMenu_ShowSubtitle(const char* text, BSSoundHandle sound, SubtitlePoint position, TESObjectREFR* speaker,
                                bool persistent)
 {
     bool added = false;
     Actor* actor = speaker && speaker->IsActor() ? dynamic_cast<Actor*>(speaker) : 0;
-    if (text && (*g_011d8928.Bool() || (actor && actor->FUN_008c1bc0())))
+    if (text && (*g_011d8928.Bool() || (actor && actor->BSSoundHandle_BSSoundHandle_008c1bc0())))
     {
         SubtitleRecord* record = new SubtitleRecord;
         FUN_00406d30(record->text, 260, text);

@@ -25,8 +25,8 @@ class NiSourceTexture : public NiTexture
     void IncRefCount();
     void DecRefCount();
     const NiFixedString& GetFilename();
-    bool FUN_004af860();  // 0x004af860: tests the byte at +0x43 against mask 0 (always false)
-    void FUN_004af880();  // 0x004af880: rewrites the byte at +0x43 with itself
+    bool NiSourceTexture_GetLookNormal();  // 0x004af860: tests the byte at +0x43 against mask 0 (always false)
+    void NiSourceTexture_SetLookNormal();  // 0x004af880: rewrites the byte at +0x43 with itself
 
     NiFixedString m_kFilename;
     NiFixedString m_kPlatformFilename;

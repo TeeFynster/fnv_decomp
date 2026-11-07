@@ -84,7 +84,7 @@ typedef char tileimage_texture_check[offsetof(TileImage, spTexture) == 0x3c ? 1 
 class TextureReceiver
 {
   public:
-    void FUN_004bc320();
+    void BSRenderedTexture_GetTexture();
 };
 class GlobalObject_00633c90
 {
@@ -115,7 +115,7 @@ Tile* TileImage::SetTraitValue(int trait, float value, const char* text)
 // @fnv 0x0078cdf0
 void TileImage::UpdateTileImage()
 {
-    ((ExtraDataList*)&g_011ded3c)->GetStartingAngle(0)->FUN_004bc320();
+    ((ExtraDataList*)&g_011ded3c)->GetStartingAngle(0)->BSRenderedTexture_GetTexture();
 }
 
 // @fnv 0x00a1f6e0
@@ -361,7 +361,7 @@ inline void NiNode::SetExtraBuffer(void* buffer)
 }
 
 namespace ImageNodeBuild {
-extern void* __cdecl FUN_00aa13e0(unsigned int);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int);
 }
 
 template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer<T>& kSrc)
@@ -383,16 +383,17 @@ struct PropertyList
     void* head;
     void* tail;
     unsigned int count;
-    void FUN_00439fd0(const NiPointer<NiNode>&);
+    void NiAVObject_AttachProperty_00439fd0(const NiPointer<NiNode>&);
 };
 }  // namespace ImageNodeBuild
-inline void NiNode::FUN_00439410(NiNode* property)
+// src: XBOX_PDB 0x00439410
+inline void NiNode::NiAVObject_AttachProperty(NiNode* property)
 {
     NiProperty* typedProperty = (NiProperty*)property;
     if (typedProperty->GetType() < 7)
     {
         NiPointer<NiNode> heldProperty(property);
-        ((ImageNodeBuild::PropertyList*)&m_kPropertyList)->FUN_00439fd0(heldProperty);
+        ((ImageNodeBuild::PropertyList*)&m_kPropertyList)->NiAVObject_AttachProperty_00439fd0(heldProperty);
     }
 }
 namespace ImageNodeBuild {
@@ -404,7 +405,7 @@ inline NiPoint3::NiPoint3(float vx, float vy, float vz) : x(vx), y(vy), z(vz)
 
 __forceinline void* __cdecl operator new[](size_t n)
 {
-    return ImageNodeBuild::g_GameAllocator.FUN_00aa3e40((unsigned)n);
+    return ImageNodeBuild::g_GameAllocator.Game_DoHeapAlloc((unsigned)n);
 }
 
 inline NiPoint2::NiPoint2(float vx, float vy) : x(vx), y(vy)
@@ -412,25 +413,25 @@ inline NiPoint2::NiPoint2(float vx, float vy) : x(vx), y(vy)
 
 __forceinline void* NiPoint2::operator new[](size_t n)
 {
-    return ImageNodeBuild::g_GameAllocator.FUN_00aa3e40((unsigned)n);
+    return ImageNodeBuild::g_GameAllocator.Game_DoHeapAlloc((unsigned)n);
 }
 
 namespace ImageNodeBuild {
-extern void* __cdecl FUN_00aa1070(unsigned int);
-extern void* __cdecl FUN_00aa13e0(unsigned int);
-extern void* __cdecl FUN_00b55560(unsigned int);
+extern void* __cdecl _NiMalloc_00aa1070(unsigned int);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int);
+extern void* __cdecl BSShaderManager_GetShader(unsigned int);
 extern void* __cdecl FUN_00706d30();
 extern void* __cdecl FUN_00706df0();
 extern void* __cdecl AttachFaceGenAnimationData(void*);
 extern void __stdcall FUN_00706e00(unsigned int);
-extern void __cdecl FUN_00707930(int);
+extern void __cdecl Interface_SetNeedToUpdate(int);
 extern unsigned int __cdecl FUN_00ec62c0();
 extern void __cdecl FUN_00a5b690_(const char*);
 struct FUN_00c5cf30
 {
     static __forceinline void* operator new(size_t)
     {
-        return FUN_00aa13e0(0xd4);
+        return Object_DispatchCommandFour(0xd4);
     }
     FUN_00c5cf30(int, NiPoint3*, NiPoint3*, int, NiPoint2*, int, int, int, unsigned short*, int, int, unsigned int);
 };
@@ -447,7 +448,7 @@ struct FUN_00a1f610 : NiExtraData
     NiNode* node;
     static __forceinline void* operator new(size_t)
     {
-        return FUN_00aa13e0(0x14);
+        return Object_DispatchCommandFour(0x14);
     }
     FUN_00a1f610(void* owner, NiNode* model) : tile(owner), node(model)
     {
@@ -483,7 +484,7 @@ NiNode* TileImage::CalculateNode()
     NiPoint2* extraBuffer_tjnslw;
     extraBuffer_tjnslw = new NiPoint2[4];
     unsigned short* indices_tyg;
-    indices_tyg = static_cast<unsigned short*>(FUN_00aa1070(6 * sizeof(unsigned short)));
+    indices_tyg = static_cast<unsigned short*>(_NiMalloc_00aa1070(6 * sizeof(unsigned short)));
     NiPoint3* previous_zphzqj;
     previous_zphzqj = 0;
 
@@ -522,11 +523,11 @@ NiNode* TileImage::CalculateNode()
 
     ((GO*)&m_spShaderProperty)->operator=(
         new TileShaderProperty(false));
-    ptr_k->FUN_00439410((NiNode*)(TileShaderProperty*)m_spShaderProperty);
+    ptr_k->NiAVObject_AttachProperty((NiNode*)(TileShaderProperty*)m_spShaderProperty);
 
     void* v_r;
     void* kIter_bw;
-    kIter_bw = FUN_00b55560(0x20);
+    kIter_bw = BSShaderManager_GetShader(0x20);
     v_r = kIter_bw;
     ptr_k->SetExtraBuffer(v_r);
 
@@ -538,14 +539,14 @@ NiNode* TileImage::CalculateNode()
 
     m_pRenderedNodeEntry->SetName(NiFixedString((const char*)StringProvider.pString));
     AttachFaceGenAnimationData(ptr_k);
-    m_pRenderedNodeEntry->FUN_00a5a040();
-    FUN_00707930(1);
+    m_pRenderedNodeEntry->UpdateProperties();
+    Interface_SetNeedToUpdate(1);
 
     m_pRenderedNodeEntry->SetExtraDataName(new FUN_00a1f610(this, (NiNode*)m_pRenderedNodeEntry));
 
-    FUN_00a037e0(0xfad, FUN_00a011b0(0xfad, 0));
+    Tile_FinalPostParse(0xfad, FUN_00a011b0(0xfad, 0));
     if (IsTraitNonZero(0xfae))
-        SetChangeFlag(0x100);
-    SetChangeFlag(0x3d);
+        Tile_SetChangeFlag(0x100);
+    Tile_SetChangeFlag(0x3d);
     return (NiNode*)m_pRenderedNodeEntry;
 }

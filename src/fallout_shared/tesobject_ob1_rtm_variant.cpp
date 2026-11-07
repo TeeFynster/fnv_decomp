@@ -422,7 +422,7 @@ inline bool operator!=(const BxString& _Left, const char* _Right)
 }
 struct GvFileHandle;
 extern "C" int __cdecl fseek(GvFileHandle* _File, long _Offset, int _Origin);
-void FUN_00ac6430(int code, BxString message);
+void futSetLastError(int code, BxString message);
 }
 
 struct SeekBinaryFile
@@ -431,12 +431,13 @@ struct SeekBinaryFile
     skac53::BxString kMagic;
     skac53::GvFileHandle* pFile;
     virtual void v00();
-    void FUN_00ac5430();
-    __declspec(noinline) bool FUN_00ac53a0(long offset);
+    void FutBinaryFileC_close();
+    __declspec(noinline) bool ProcessAndReturnValue_00ac53a0(long offset);
 };
 
 // @fnv 0x00ac53a0
-bool SeekBinaryFile::FUN_00ac53a0(long offset)
+// src: GUESS 0x00ac53a0 (confidence: low)
+bool SeekBinaryFile::ProcessAndReturnValue_00ac53a0(long offset)
 {
     if (pFile == 0)
     {
@@ -444,8 +445,8 @@ bool SeekBinaryFile::FUN_00ac53a0(long offset)
     }
     if (skac53::fseek(pFile, offset, 0) != 0)
     {
-        skac53::FUN_00ac6430(7, kPath);
-        FUN_00ac5430();
+        skac53::futSetLastError(7, kPath);
+        FutBinaryFileC_close();
         return false;
     }
     return true;

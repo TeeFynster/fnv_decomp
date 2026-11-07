@@ -2,5 +2,6 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00e5cee0
-void __cdecl FUN_00e5cee0()
+// src: XBOX_PDB 0x00e5cee0
+void __cdecl hkpShapeRayCastJob_setRunsOnSpuOrPpu()
 {}

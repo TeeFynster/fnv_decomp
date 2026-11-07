@@ -45,11 +45,11 @@ void ZoneLink::SetValue(int flags, bool set)
         unk00 &= ~flags;
 }
 
-void FUN_00553380(int param);
+void ourMemalignFree(int param);
 // @fnv 0x0087e9b0
 void CallWithParam(int param)
 {
-    FUN_00553380(param);
+    ourMemalignFree(param);
 }
 
 struct FUN_0061fc10_shell
@@ -65,12 +65,13 @@ struct FUN_0062d840_shell
 {
     void* m_iWordAt00;
     void* m_iWordAt04;
-    void* __thiscall FUN_0062d840(unsigned int a, unsigned int b);
+    void* __thiscall TrapEntry_TrapEntry(unsigned int a, unsigned int b);
 };
 
 // Calls FUN_0061fc10 with a and b, sets the first field to point at DAT_0104e3e8, and returns this.
 // @fnv 0x0062d840
-void* __thiscall FUN_0062d840_shell::FUN_0062d840(unsigned int a, unsigned int b)
+// src: EXE 0x0062d840
+void* __thiscall FUN_0062d840_shell::TrapEntry_TrapEntry(unsigned int a, unsigned int b)
 {
     ((FUN_0061fc10_shell*)this)->FUN_0061fc10(a, b);
     m_iWordAt00 = &DAT_0104e3e8;
@@ -79,7 +80,7 @@ void* __thiscall FUN_0062d840_shell::FUN_0062d840(unsigned int a, unsigned int b
 
 struct Member140
 {
-    void __thiscall FUN_00620720(unsigned int a, unsigned int b);
+    void __thiscall bhkTTNode_TESObjectREFR_bhkTTNode_TESObjectREFR(unsigned int a, unsigned int b);
 };
 extern int DAT_0104d9cc[];
 struct FUN_0061fc10
@@ -93,7 +94,7 @@ struct FUN_0061fc10
 // @fnv 0x0061fc10
 FUN_0061fc10::FUN_0061fc10(unsigned int uiFirst, unsigned int uiSecond)
 {
-    ((Member140*)((char*)this + 4))->FUN_00620720(uiFirst, uiSecond);
+    ((Member140*)((char*)this + 4))->bhkTTNode_TESObjectREFR_bhkTTNode_TESObjectREFR(uiFirst, uiSecond);
     m0 = DAT_0104d9cc;
     _14 = 0;
 }
@@ -103,14 +104,14 @@ struct FUN_0061fe70_shell
 {
     void* m_iWordAt00;
     void* m_iWordAt04;
-    void __thiscall FUN_0061fba0(unsigned int a, unsigned int b);
+    void __thiscall TargetEntry_TargetEntry(unsigned int a, unsigned int b);
     void* __thiscall Construct(unsigned int a, unsigned int b);
 };
 // Calls FUN_0061fba0 with a and b, stores the address of DAT_0104d9d8 at this, and returns this.
 // @fnv 0x0061fe70
 void* __thiscall FUN_0061fe70_shell::Construct(unsigned int a, unsigned int b)
 {
-    FUN_0061fba0(a, b);
+    TargetEntry_TargetEntry(a, b);
     *reinterpret_cast<void**>(this) = &DAT_0104d9d8;
     return this;
 }
@@ -121,12 +122,13 @@ struct FUN_00620720_shell
     void* m_iWordAt04;
     void* m_8;
     void* m_iThirdValue;
-    FUN_00620720_shell* __thiscall FUN_00620720(void* a, void* b);
+    FUN_00620720_shell* __thiscall bhkTTNode_TESObjectREFR_bhkTTNode_TESObjectREFR(void* a, void* b);
 };
 
 // Stores the two arguments into the object's fields and clears the other two pointers, then returns this.
 // @fnv 0x00620720
-FUN_00620720_shell* __thiscall FUN_00620720_shell::FUN_00620720(void* pFirst, void* pSecond)
+// src: XBOX_PDB 0x00620720
+FUN_00620720_shell* __thiscall FUN_00620720_shell::bhkTTNode_TESObjectREFR_bhkTTNode_TESObjectREFR(void* pFirst, void* pSecond)
 {
     m_iThirdValue = pFirst;
     m_8 = pSecond;
@@ -137,7 +139,7 @@ FUN_00620720_shell* __thiscall FUN_00620720_shell::FUN_00620720(void* pFirst, vo
 
 struct FUN_0061fef0_Node
 {
-    void* FUN_0061fef0();
+    void* TargetEntry_QNextEntry();
 };
 struct FUN_0061fea0_shell
 {
@@ -154,7 +156,7 @@ void FUN_0061fea0_shell::ClearList()
     {
         void* tmp;
         void* pNext;
-        pNext = ((FUN_0061fef0_Node*)pNode)->FUN_0061fef0();
+        pNext = ((FUN_0061fef0_Node*)pNode)->TargetEntry_QNextEntry();
         tmp = pNode;
         CallWithParam((int)tmp);
         pNode = pNext;
@@ -234,7 +236,7 @@ struct NodeBase0
 };
 struct NodeBase16
 {
-    NodeBase16* __thiscall FUN_006207a0(NodeBase16* previous);
+    NodeBase16* __thiscall bhkTTNode_RemoveFromList(NodeBase16* previous);
 };
 struct Node : NodeBase0, NodeBase16
 {
@@ -247,16 +249,17 @@ struct Holder
     int unk0c;
     int unk10;
     Node* node14;
-    void __thiscall FUN_0061ff30(Node* node);
+    void __thiscall ZoneEntry_RemoveTargetEntry(Node* node);
 };
 void CallWithParam(int value);
 
 // @fnv 0x0061ff30
-void Holder::FUN_0061ff30(Node* node)
+// src: COMMUNITY 0x0061ff30
+void Holder::ZoneEntry_RemoveTargetEntry(Node* node)
 {
     if (node == 0)
         return;
-    node14 = static_cast<Node*>(node->FUN_006207a0(node14));
+    node14 = static_cast<Node*>(node->bhkTTNode_RemoveFromList(node14));
     Node* toRelease = node;
     CallWithParam((int)toRelease);
 }
@@ -300,7 +303,7 @@ extern int DAT_0104d9c4;
 
 struct S_0061fba0_Member
 {
-    void __thiscall FUN_00620720(unsigned int a, unsigned int b);
+    void __thiscall bhkTTNode_TESObjectREFR_bhkTTNode_TESObjectREFR(unsigned int a, unsigned int b);
 };
 
 struct S_0061fba0_Sub
@@ -310,7 +313,7 @@ struct S_0061fba0_Sub
     int unk08;
     int unk0c;
     void __thiscall FUN_006815c0();
-    void __thiscall FUN_00538f40();
+    void __thiscall hkVector4_setZero4();
 };
 
 struct S_0061fba0_Obj
@@ -326,18 +329,19 @@ struct S_0061fba0_Obj
     S_0061fba0_Sub m_20;
     S_0061fba0_Sub m_30;
     int unk40;
-    S_0061fba0_Obj* __thiscall FUN_0061fba0(unsigned int a, unsigned int b);
+    S_0061fba0_Obj* __thiscall TargetEntry_TargetEntry(unsigned int a, unsigned int b);
 };
 
 // @fnv 0x0061fba0
-S_0061fba0_Obj* __thiscall S_0061fba0_Obj::FUN_0061fba0(unsigned int a, unsigned int b)
+// src: XBOX_PDB 0x0061fba0
+S_0061fba0_Obj* __thiscall S_0061fba0_Obj::TargetEntry_TargetEntry(unsigned int a, unsigned int b)
 {
-    m_10.FUN_00620720(a, b);
+    m_10.bhkTTNode_TESObjectREFR_bhkTTNode_TESObjectREFR(a, b);
     vtbl = (const void*)&DAT_0104d9c4;
     m_20.FUN_006815c0();
     m_30.FUN_006815c0();
-    m_20.FUN_00538f40();
-    m_30.FUN_00538f40();
+    m_20.hkVector4_setZero4();
+    m_30.hkVector4_setZero4();
     unk40 = 0x24;
     return this;
 }
@@ -362,7 +366,8 @@ struct LinkedOwnerLayout : OwnerPrefix, EmbeddedLink
 
 // Returns the embedded link call result cast to LinkedOwnerLayout*.
 // @fnv 0x0061fef0
-void* FUN_0061fef0_Node::FUN_0061fef0()
+// src: XBOX_PDB 0x0061fef0
+void* FUN_0061fef0_Node::TargetEntry_QNextEntry()
 {
     return static_cast<LinkedOwnerLayout*>(reinterpret_cast<LinkedOwnerLayout*>(this)->FUN_00726070());
 }
@@ -380,12 +385,13 @@ struct FUN_0057b700_class
     int unk0c;
     int unk10;
     ZoneNode* unk14;
-    ZoneNode* __thiscall FUN_0061fd70(unsigned int key, unsigned int arg2, unsigned int arg3);
+    ZoneNode* __thiscall ZoneEntry_AddTrapTarget(unsigned int key, unsigned int arg2, unsigned int arg3);
 };
 
 // Finds a ZoneNode by key in the list, or creates and attaches a new FUN_0061fe70 node with the given key, arg2, and arg3 values.
 // @fnv 0x0061fd70
-ZoneNode* FUN_0057b700_class::FUN_0061fd70(unsigned int key, unsigned int auiData, unsigned int auiValue)
+// src: COMMUNITY 0x0061fd70
+ZoneNode* FUN_0057b700_class::ZoneEntry_AddTrapTarget(unsigned int key, unsigned int auiData, unsigned int auiValue)
 {
     ZoneNode* result = (unk14 != 0) ? ((ZoneList*)this)->Find(key) : 0;
     if (result == 0)

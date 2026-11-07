@@ -66,40 +66,40 @@ void RegisterActorValue(Index, char*, Section, unsigned int, ActorValueDeriveCal
 }
 extern bool DAT_011d6154;
 
-void FUN_008ba140(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+void AV_Aggression_HandleChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
 void SetProcessFlagIfActive(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-void FUN_008b9ea0(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-float FUN_006439d0(ActorValueOwner*, ActorValue::Index);
-float FUN_00643a10(ActorValueOwner*, ActorValue::Index);
-float FUN_00643b10(ActorValueOwner*, ActorValue::Index);
-float FUN_00643a70(ActorValueOwner*, ActorValue::Index);
-void FUN_008b9db0(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-float FUN_00643670(ActorValueOwner*, ActorValue::Index);
+void Actor_EnduranceModifiedCallback(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+float AiFormulas_AVDeriveActionPoints(ActorValueOwner*, ActorValue::Index);
+float AiFormulas_AVDeriveCarryWeight(ActorValueOwner*, ActorValue::Index);
+float AiFormulas_AVDeriveCriticalChance(ActorValueOwner*, ActorValue::Index);
+float AiFormulas_AVDeriveHealingRate(ActorValueOwner*, ActorValue::Index);
+void AV_HealRate_HandleChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+float AiFormulas_AVDeriveHealth(ActorValueOwner*, ActorValue::Index);
 void UpdateActorValueFlag(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-float FUN_00643b50(ActorValueOwner*, ActorValue::Index);
-float FUN_008a0a90(ActorValueOwner*, ActorValue::Index);
-void FUN_008ba270(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-float FUN_00643e40(ActorValueOwner*, ActorValue::Index);
-void FUN_008ba2b0(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-float FUN_00643820(ActorValueOwner*, ActorValue::Index);
-float FUN_00643a50(ActorValueOwner*, ActorValue::Index);
-void FUN_008d53f0(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-float FUN_00643ed0(ActorValueOwner*, ActorValue::Index);
-float FUN_00643bd0(ActorValueOwner*, ActorValue::Index);
-void FUN_008b9ab0(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-void FUN_008b9b10(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-float FUN_008a0cd0(ActorValueOwner*, ActorValue::Index);
-void FUN_008b9cc0(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+float AiFormulas_AVDeriveFromPrimary(ActorValueOwner*, ActorValue::Index);
+float AV_DamageResist_CalculateDefault(ActorValueOwner*, ActorValue::Index);
+void Actor_ResetActorDTDR(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+float AiFormulas_AVDeriveResistance(ActorValueOwner*, ActorValue::Index);
+void AV_RadResist_HandleChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+float AiFormulas_AVDeriveFatigue(ActorValueOwner*, ActorValue::Index);
+float AiFormulas_AVDeriveBodyPartCondition(ActorValueOwner*, ActorValue::Index);
+void AV_XP_HandleChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+float AiFormulas_AVDeriveUnarmedDamage(ActorValueOwner*, ActorValue::Index);
+float callback4C(ActorValueOwner*, ActorValue::Index);
+void AV_Medicine_HandleChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+void AV_Survival_HandleChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
+float Actor_GetInventoryWeight(ActorValueOwner*, ActorValue::Index);
+void AV_Paralysis_HandleChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
 void UpdateStageChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
 void UpdateStageTransition(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
 void OnSleepDeprivationStageChanged(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
-float FUN_008a0ad0(ActorValueOwner*, ActorValue::Index);
+float ActorValueOwner_GetTotalArmorDT(ActorValueOwner*, ActorValue::Index);
 
 FNV_STATIC_ASSERT(offsetof(ActorValueInfo, m_pName) == 0x38);
 FNV_STATIC_ASSERT(offsetof(ActorValueInfo, m_pDerivedValueFunction) == 0x4c);
 
-float FUN_00404010(float, float);
-float FUN_0040ebd0(float, float);
+float BSMAX_00404010(float, float);
+float BSMIN(float, float);
 namespace ActorValue {
 bool GetFlag(Index, unsigned int);
 float ClampValue(Index, float);
@@ -118,7 +118,7 @@ bool HasActorValueChangedCallback(Index);
 template <class T> unsigned int BSStringLength(const T*);
 class TESObjectIMOD;
 
-float FUN_00406ce0(float);
+float floorf(float);
 
 namespace ActorValue {
 bool IsDerivedAttribute(Index);
@@ -127,7 +127,7 @@ bool IsSkill(Index);
 Section GetSection(Index);
 unsigned char ToArrayIndex(int, Index);
 }
-bool FUN_005d1260(ActorValue::Index);
+bool ActorValue_IsAttribute(ActorValue::Index);
 int MinInt(int, int);
 extern "C" int __cdecl sprintf_s(char*, unsigned int, const char*, ...);
 class GlobalObject_0066ef90
@@ -139,5 +139,5 @@ class GlobalObject_0066ef90
 extern GlobalObject_0066ef90 g_011d61c8;
 void* __cdecl operator new(size_t) throw();
 void __cdecl operator delete(void*);
-bool FUN_0066eba0(ActorValue::Index);
+bool ActorValue_IsResistance(ActorValue::Index);
 #endif

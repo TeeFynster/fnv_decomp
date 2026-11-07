@@ -42,7 +42,7 @@ float Creature::GetAnimationSpeedMultiplier(ANIM_GROUP_ENUM group)
 
 struct FUN_008d4a80_shell : public Creature
 {
-    int FUN_008d4a80(int);
+    int Creature_MapActorValue(int);
 };
 
 #include "../../../include/ActorValue.h"
@@ -52,7 +52,8 @@ bool __cdecl GetFlag(Index, unsigned int);
 
 // Returns 0x2d if the actor value at aiWhich has flag 0x400 set, otherwise returns aiWhich.
 // @fnv 0x008d4a80
-int FUN_008d4a80_shell::FUN_008d4a80(int aiWhich)
+// src: COMMUNITY 0x008d4a80
+int FUN_008d4a80_shell::Creature_MapActorValue(int aiWhich)
 {
     if (ActorValue::GetFlag((ActorValue::Index)aiWhich, 0x400))
         return 0x2d;
@@ -104,7 +105,8 @@ unsigned char __fastcall GetByteAtOffset1B4(void* thisPtr)
 extern NiFixedString* DAT_011c6250;
 
 // @fnv 0x008d4ca0
-NiFixedString* FUN_008d4ca0()
+// src: COMMUNITY 0x008d4ca0
+NiFixedString* FixedStrings_GetBip01_L_UpperArm()
 {
     return DAT_011c6250;
 }
@@ -113,7 +115,8 @@ NiFixedString* FUN_008d4ca0()
 extern NiFixedString* DAT_011c6258;
 
 // @fnv 0x008d4cb0
-NiFixedString* __cdecl FUN_008d4cb0()
+// src: COMMUNITY 0x008d4cb0
+NiFixedString* __cdecl FixedStrings_GetBip01_R_UpperArm()
 {
     return DAT_011c6258;
 }
@@ -130,67 +133,72 @@ void FUN_008d4490_shell::SetRagdoll(bool bRagDoll)
 
 struct S008d48a0
 {
-    int FUN_008d4a80(int, int);
-    void FUN_008806d0(int);
-    void FUN_008d48a0(int, int);
+    int Creature_MapActorValue(int, int);
+    void Actor_SetActorValueInt(int);
+    void Creature_SetActorValueI(int, int);
 };
 // Calls FUN_008d4a80 with a and b, then passes the result to FUN_008806d0.
 // @fnv 0x008d48a0
-void S008d48a0::FUN_008d48a0(int aiFirst, int aiSecond)
+// src: COMMUNITY 0x008d48a0
+void S008d48a0::Creature_SetActorValueI(int aiFirst, int aiSecond)
 {
-    this->FUN_008806d0(this->FUN_008d4a80(aiFirst, aiSecond));
+    this->Actor_SetActorValueInt(this->Creature_MapActorValue(aiFirst, aiSecond));
 }
 
 struct FUN_008d48d0_This
 {
-    int FUN_008d4a80(int, float);
-    void FUN_00880700(int);
-    void FUN_008d48d0(int, float);
+    int Creature_MapActorValue(int, float);
+    void Actor_SetActorValue(int);
+    void Creature_SetActorValueF(int, float);
 };
 // Calls FUN_008d4a80 with aiWhich and aiValue, then passes the result to FUN_00880700.
 // @fnv 0x008d48d0
-void FUN_008d48d0_This::FUN_008d48d0(int aiWhich, float aiValue)
+// src: COMMUNITY 0x008d48d0
+void FUN_008d48d0_This::Creature_SetActorValueF(int aiWhich, float aiValue)
 {
-    FUN_00880700(FUN_008d4a80(aiWhich, aiValue));
+    Actor_SetActorValue(Creature_MapActorValue(aiWhich, aiValue));
 }
 
 struct Unk008d49
 {
-    int FUN_008d4a80(int, int, int);
-    void FUN_00880950(int);
-    void FUN_008d4900(int, int, int);
+    int Creature_MapActorValue(int, int, int);
+    void Actor_TempModActorValueI(int);
+    void Creature_TempModActorValueI(int, int, int);
 };
 // Calls FUN_008d4a80 with a, b and c, then passes the result to FUN_00880950.
 // @fnv 0x008d4900
-void Unk008d49::FUN_008d4900(int aiArg1, int aiArg2, int aiArg3)
+// src: COMMUNITY 0x008d4900
+void Unk008d49::Creature_TempModActorValueI(int aiArg1, int aiArg2, int aiArg3)
 {
-    FUN_00880950(FUN_008d4a80(aiArg1, aiArg2, aiArg3));
+    Actor_TempModActorValueI(Creature_MapActorValue(aiArg1, aiArg2, aiArg3));
 }
 
 struct FUN_008d4960_CLASS
 {
-    int FUN_008d4a80(int, int, int);
-    void FUN_00880c70(int);
-    void FUN_008d4960(int, int, int);
+    int Creature_MapActorValue(int, int, int);
+    void Actor_ModActorValueInt(int);
+    void Creature_PermanentModActorValueI(int, int, int);
 };
 // Computes a value from the three arguments via FUN_008d4a80 and passes the result to FUN_00880c70.
 // @fnv 0x008d4960
-void FUN_008d4960_CLASS::FUN_008d4960(int aiArg1, int aiArg2, int aiArg3)
+// src: COMMUNITY 0x008d4960
+void FUN_008d4960_CLASS::Creature_PermanentModActorValueI(int aiArg1, int aiArg2, int aiArg3)
 {
-    FUN_00880c70(FUN_008d4a80(aiArg1, aiArg2, aiArg3));
+    Actor_ModActorValueInt(Creature_MapActorValue(aiArg1, aiArg2, aiArg3));
 }
 
 struct Unk008d4a50
 {
-    int FUN_008d4a80(int, float);
+    int Creature_MapActorValue(int, float);
     void SetActorValue(int);
-    void FUN_008d4a50(int, float);
+    void Creature_ModActorBaseValueF(int, float);
 };
 // Calls FUN_008d4a80 with aiWhich and aiValue, then passes the result to SetActorValue.
 // @fnv 0x008d4a50
-void Unk008d4a50::FUN_008d4a50(int aiWhich, float aiValue)
+// src: COMMUNITY 0x008d4a50
+void Unk008d4a50::Creature_ModActorBaseValueF(int aiWhich, float aiValue)
 {
-    SetActorValue(FUN_008d4a80(aiWhich, aiValue));
+    SetActorValue(Creature_MapActorValue(aiWhich, aiValue));
 }
 
 void _Deallocate(void*);
@@ -223,11 +231,12 @@ struct C008d46f0 : XActor
 {
     char _pad[0xA3];
     H008d46f0 _h;
-    float FUN_008d46f0();
+    float Creature_GetWeaponSkill();
 };
 // Casts the actor base to TESCreature and returns _h.f2(0x2D) as a float, or 0 if the cast fails.
 // @fnv 0x008d46f0
-float C008d46f0::FUN_008d46f0()
+// src: COMMUNITY 0x008d46f0
+float C008d46f0::Creature_GetWeaponSkill()
 {
     TESCreature* pcreature;
     pcreature = dynamic_cast<TESCreature*>(GetActorBase());
@@ -236,71 +245,75 @@ float C008d46f0::FUN_008d46f0()
 
 struct Holder
 {
-    int FUN_008d4a80(int, float, Actor*);
+    int Creature_MapActorValue(int, float, Actor*);
 };
 struct FUN_00880ad0_shell
 {
-    void FUN_00880ad0(int);
+    void Actor_ModActorValue(int);
 };
 struct FUN_008d4930_shell
 {
-    void FUN_008d4930(int, float, Actor*);
+    void Creature_TempModActorValueF(int, float, Actor*);
 };
 // Calls FUN_008d4a80 with a, b and c, then passes the returned int to FUN_00880ad0 on this object.
 // @fnv 0x008d4930
-void FUN_008d4930_shell::FUN_008d4930(int aiArg, float afArg, Actor* apActor)
+// src: COMMUNITY 0x008d4930
+void FUN_008d4930_shell::Creature_TempModActorValueF(int aiArg, float afArg, Actor* apActor)
 {
-    ((FUN_00880ad0_shell*)this)->FUN_00880ad0(((Holder*)this)->FUN_008d4a80(aiArg, afArg, apActor));
+    ((FUN_00880ad0_shell*)this)->Actor_ModActorValue(((Holder*)this)->Creature_MapActorValue(aiArg, afArg, apActor));
 }
 
 namespace fnv_008d4990 {
 struct Holder
 {
-    int FUN_008d4a80(int, float, int);
+    int Creature_MapActorValue(int, float, int);
 };
 struct FUN_00880e00_OBJ
 {
-    void FUN_00880e00(int);
+    void Actor_ForceActorValue(int);
 };
 struct FUN_008d4990_OBJ : Holder
 {
-    void FUN_008d4990(int, float, int);
+    void Creature_PermanentModActorValueF(int, float, int);
 };
 // Calls FUN_008d4a80 with the three arguments and passes its result to FUN_00880e00 on this object.
 // @fnv 0x008d4990
-void FUN_008d4990_OBJ::FUN_008d4990(int aiArg, float afArg, int aiArg2)
+// src: COMMUNITY 0x008d4990
+void FUN_008d4990_OBJ::Creature_PermanentModActorValueF(int aiArg, float afArg, int aiArg2)
 {
-    ((FUN_00880e00_OBJ*)this)->FUN_00880e00(FUN_008d4a80(aiArg, afArg, aiArg2));
+    ((FUN_00880e00_OBJ*)this)->Actor_ForceActorValue(Creature_MapActorValue(aiArg, afArg, aiArg2));
 }
 }  // namespace fnv_008d4990
 
 namespace fnv_008d49c0 {
 struct Holder
 {
-    int FUN_008d4a80(int, int, int);
-    int FUN_00880fb0(int);
-    void FUN_008d49c0(int, int, int);
+    int Creature_MapActorValue(int, int, int);
+    int Actor_DamageModActorValueI(int);
+    void Creature_DamageModActorValueI(int, int, int);
 };
 // Calls FUN_008d4a80 with a, b and c, then passes the result to FUN_00880fb0.
 // @fnv 0x008d49c0
-void Holder::FUN_008d49c0(int aiArg1, int aiArg2, int aiArg3)
+// src: COMMUNITY 0x008d49c0
+void Holder::Creature_DamageModActorValueI(int aiArg1, int aiArg2, int aiArg3)
 {
-    FUN_00880fb0(FUN_008d4a80(aiArg1, aiArg2, aiArg3));
+    Actor_DamageModActorValueI(Creature_MapActorValue(aiArg1, aiArg2, aiArg3));
 }
 }  // namespace fnv_008d49c0
 
 namespace fnv_008d49f0 {
 struct Holder
 {
-    int FUN_008d4a80(int, float, void*);
+    int Creature_MapActorValue(int, float, void*);
     void ApplyActorValueDelta(int);
-    void FUN_008d49f0(int, float, void*);
+    void Creature_DamageModActorValueF(int, float, void*);
 };
 // Calls FUN_008d4a80 with the given arguments and passes its result to ApplyActorValueDelta.
 // @fnv 0x008d49f0
-void Holder::FUN_008d49f0(int aiArg, float afValue, void* a3)
+// src: COMMUNITY 0x008d49f0
+void Holder::Creature_DamageModActorValueF(int aiArg, float afValue, void* a3)
 {
-    ApplyActorValueDelta(FUN_008d4a80(aiArg, afValue, a3));
+    ApplyActorValueDelta(Creature_MapActorValue(aiArg, afValue, a3));
 }
 }  // namespace fnv_008d49f0
 
@@ -308,22 +321,23 @@ extern int DAT_011dffe4;
 
 struct bhkCollisionObject;
 
-bhkCollisionObject* __cdecl FUN_004a8b00(NiNode*);
+bhkCollisionObject* __cdecl bhkNiCollisionObject_GetbhkNiCollisionObject(NiNode*);
 
 struct FUN_008d4ab0_shell
 {
-    bool FUN_008d4ab0(NiAVObject*);
+    bool Creature_FindRagDoll(NiAVObject*);
 };
 
 // @fnv 0x008d4ab0
-bool FUN_008d4ab0_shell::FUN_008d4ab0(NiAVObject* apObject)
+// src: COMMUNITY 0x008d4ab0
+bool FUN_008d4ab0_shell::Creature_FindRagDoll(NiAVObject* apObject)
 {
     bool bHasCollision = false;
     if (!apObject)
     {
         return false;
     }
-    bhkCollisionObject* collision = FUN_004a8b00(reinterpret_cast<NiNode*>(apObject));
+    bhkCollisionObject* collision = bhkNiCollisionObject_GetbhkNiCollisionObject(reinterpret_cast<NiNode*>(apObject));
     ++DAT_011dffe4;
     if (collision)
     {
@@ -334,7 +348,7 @@ bool FUN_008d4ab0_shell::FUN_008d4ab0(NiAVObject* apObject)
         NiAVObject* parent = apObject ? apObject->IsSceneNode() : 0;
         if (parent)
         {
-            bHasCollision = FUN_008d4ab0(reinterpret_cast<NiNode*>(parent)->FUN_0045bc00(0));
+            bHasCollision = Creature_FindRagDoll(reinterpret_cast<NiNode*>(parent)->NiNode_GetAtChecked(0));
         }
     }
     --DAT_011dffe4;
@@ -346,7 +360,7 @@ extern double _gModifierZero;
 
 struct ShellH
 {
-    void FUN_00422750(bool, float);
+    void ExtraDataList_SetRefractionPropertyExtra(bool, float);
 };
 
 struct XActor
@@ -724,7 +738,7 @@ struct VProc
     virtual float vfunc_5b4();
 };
 
-void __cdecl FUN_00b68770(void*, bool, float, int, float, int);
+void __cdecl BSShaderPPLightingProperty_SetRefractionRecurse(void*, bool, float, int, float, int);
 
 struct FUN_008c50f0_shell
 {
@@ -753,12 +767,12 @@ void FUN_008c50f0_shell::ApplyModifier(bool abEnabled, float afModifier)
     }
 
     typedef void*(__thiscall * VFunc_1d0)(void*);
-    FUN_00b68770(((VFunc_1d0)(*(void***)this)[0x1d0 / 4])(this), b, f, 0, 0.0f, 0);
+    BSShaderPPLightingProperty_SetRefractionRecurse(((VFunc_1d0)(*(void***)this)[0x1d0 / 4])(this), b, f, 0, 0.0f, 0);
 
     val = ((XActor*)this)->GetExtra();
     if (val)
     {
-        val->FUN_00422750(b, afModifier);
+        val->ExtraDataList_SetRefractionPropertyExtra(b, afModifier);
     }
 }
 }  // namespace fnv_008c50f0
@@ -767,7 +781,7 @@ extern double _gModifierZero;
 
 struct FUN_0087d880_class
 {
-    float FUN_0087d880();
+    float CachedValuesOwner_GetWidthX();
 };
 
 struct SubA4
@@ -786,18 +800,19 @@ struct FUN_008d4cc0_shell
     char pad[0x1b8];
     float m_fFirstResetValue;
 
-    float FUN_008d4cc0();
+    float Creature_GetArmorDamageResistance();
 };
 
 // Returns the cached modifier if non-negative; otherwise computes it from FUN_0087d880 and the SubA4 vfuncs at index 0x12, caching and returning the result.
 // @fnv 0x008d4cc0
-float FUN_008d4cc0_shell::FUN_008d4cc0()
+// src: COMMUNITY 0x008d4cc0
+float FUN_008d4cc0_shell::Creature_GetArmorDamageResistance()
 {
     if (m_fFirstResetValue >= _gModifierZero)
         return m_fFirstResetValue;
 
     int f = 0x12;
-    float temp = ((FUN_0087d880_class*)this)->FUN_0087d880();
+    float temp = ((FUN_0087d880_class*)this)->CachedValuesOwner_GetWidthX();
     bool b = false;
     typedef float(__thiscall * VFunc_48c)(void*, int, bool*);
     float val = ((VFunc_48c)(*(void***)this)[0x48c / 4])(this, f, &b);
@@ -817,7 +832,7 @@ extern double _gModifierZero;
 
 struct FUN_0087d880_class
 {
-    float FUN_0087d880();
+    float CachedValuesOwner_GetWidthX();
 };
 
 struct SubA4
@@ -836,17 +851,18 @@ struct FUN_008d4db0_shell
     char pad[0x1bc];
     float m_fSecondValue;
 
-    float FUN_008d4db0();
+    float Creature_GetArmorDamageThreshold();
 };
 
 // @fnv 0x008d4db0
-float FUN_008d4db0_shell::FUN_008d4db0()
+// src: COMMUNITY 0x008d4db0
+float FUN_008d4db0_shell::Creature_GetArmorDamageThreshold()
 {
     if (m_fSecondValue >= _gModifierZero)
         return m_fSecondValue;
 
     int f = 0x4c;
-    float temp = ((FUN_0087d880_class*)this)->FUN_0087d880();
+    float temp = ((FUN_0087d880_class*)this)->CachedValuesOwner_GetWidthX();
     bool b = false;
     typedef float(__thiscall * VFunc_48c)(void*, int, bool*);
     float val = ((VFunc_48c)(*(void***)this)[0x48c / 4])(this, f, &b);
@@ -863,12 +879,12 @@ float FUN_008d4db0_shell::FUN_008d4db0()
 
 struct ActorAnimData
 {
-    NiControllerManager* FUN_00496940();
+    NiControllerManager* GetControllerManager_00496940();
 };
-NiFixedString* FUN_008a30f0();
-NiFixedString* FUN_008d4ca0();
-NiFixedString* FUN_008d4cb0();
-void FUN_0062bc10(NiAVObject* obj);
+NiFixedString* FixedStrings_QBip01Head();
+NiFixedString* FixedStrings_GetBip01_L_UpperArm();
+NiFixedString* FixedStrings_GetBip01_R_UpperArm();
+void TESHavokUtilities_RemoveHavokFromSceneGraph(NiAVObject* obj);
 struct XActorQ
 {
     virtual void vx000();
@@ -993,11 +1009,12 @@ struct XActorQ
     virtual void vx119();
     virtual void vx120();
     virtual ActorAnimData* GetAnimData();
-    void FUN_008d4b60();
+    void Creature_CheckMissingLimbs();
 };
 // For each set creature flag, looks up an object through the controller manager and passes it to FUN_0062bc10.
 // @fnv 0x008d4b60
-void XActorQ::FUN_008d4b60()
+// src: COMMUNITY 0x008d4b60
+void XActorQ::Creature_CheckMissingLimbs()
 {
     TESCreature* pCreature = dynamic_cast<TESCreature*>(((XActor*)(void*)this)->GetActorBase());
     if (!pCreature)
@@ -1005,23 +1022,23 @@ void XActorQ::FUN_008d4b60()
     ActorAnimData* pAnimData = GetAnimData();
     if (pAnimData)
     {
-        if (!pAnimData->FUN_00496940())
+        if (!pAnimData->GetControllerManager_00496940())
             return;
-        NiAVObjectPalette* pManager = pAnimData->FUN_00496940()->GetStringAtOffset();
+        NiAVObjectPalette* pManager = pAnimData->GetControllerManager_00496940()->GetStringAtOffset();
         if (static_cast<const TESCreature*>(pCreature)->GetNoLeftArm())
         {
-            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FUN_008d4ca0()));
-            FUN_0062bc10(pObject);
+            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FixedStrings_GetBip01_L_UpperArm()));
+            TESHavokUtilities_RemoveHavokFromSceneGraph(pObject);
         }
         if (static_cast<const TESCreature*>(pCreature)->GetNoRightArm())
         {
-            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FUN_008d4cb0()));
-            FUN_0062bc10(pObject);
+            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FixedStrings_GetBip01_R_UpperArm()));
+            TESHavokUtilities_RemoveHavokFromSceneGraph(pObject);
         }
         if (static_cast<const TESCreature*>(pCreature)->GetNoHead())
         {
-            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FUN_008a30f0()));
-            FUN_0062bc10(pObject);
+            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FixedStrings_QBip01Head()));
+            TESHavokUtilities_RemoveHavokFromSceneGraph(pObject);
         }
     }
 }

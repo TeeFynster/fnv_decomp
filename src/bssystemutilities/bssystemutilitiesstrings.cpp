@@ -29,7 +29,7 @@ void BSSystemUtilitiesStrings::CallVTableMethod()
 // @fnv 0x00af37a0
 void* BSSystemUtilitiesStrings::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_00af35c0();
+    SetVirtualTable_00af35c0();
     if (flags & 1)
         g_memoryManager.Deallocate(this);
     return this;

@@ -16,7 +16,8 @@ int NiStricmp(const char* a, const char* b)
 extern "C" void FUN_00ec7ec0(void);
 
 // @fnv 0x00aa1370
-void FUN_00aa1370()
+// src: XBOX_PDB 0x00aa1370
+void NiStrnicmp()
 {
     FUN_00ec7ec0();
 }

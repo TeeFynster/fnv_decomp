@@ -17,7 +17,7 @@ public:
     virtual void GetViewerStrings(NiViewerStringsArray* strings);
     virtual void Update(float time, NiPSysData* data);
 
-    char FUN_00c26db0(NiPSysGravityFieldModifier* other);
+    char IsEqual_00c26db0(NiPSysGravityFieldModifier* other);
     void FUN_00c267f0(NiStream& stream);
     void* DestroyIfFlagged(unsigned int flags);
     NiPSysGravityFieldModifier* Ctor();

@@ -35,12 +35,12 @@ public:
     void SetTranslationalVelocity(const hkVector4& vel);
     void SetRotationalVelocity(const hkVector4& vel);
     void OnTrigger(const hkVector4&);
-    void FUN_00561800(const hkVector4&);
+    void hkpRigidBody_setAngularVelocity(const hkVector4&);
     void SetWorldPosition(const NiPoint3&);
     void SetBodyOrientation(const NiQuaternion&);
     void SetPositionAndRotation(const NiPoint3&, const NiQuaternion&);
     void SetCollisionShape(void* p);
-    void FUN_00ca88e0(float f);
+    void hkpRigidBody_setMassInv(float f);
 
     static void __cdecl createDynamicRigidMotion(
         hkpMotion::MotionType motionType,

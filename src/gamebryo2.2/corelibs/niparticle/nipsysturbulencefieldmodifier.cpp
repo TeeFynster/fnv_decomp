@@ -73,7 +73,8 @@ struct Point3ParameterData
 extern const void* const g_01202698;
 
 // @fnv 0x00c273c0
-const void* __cdecl FUN_00c273c0()
+// src: COMMUNITY 0x00c273c0
+const void* __cdecl NiPSysTurbulenceFieldModifier_GetRTTI()
 {
     return &g_01202698;
 }
@@ -98,12 +99,12 @@ struct NiPSysTurbulenceFieldModifier : NiPSysFieldModifier
     float m_fFrequency;
     float m_fFieldMagnitude;
     float m_fFieldDistance;
-    bool __thiscall FUN_00c27390(NiObject* pkObject);
+    bool __thiscall IsEqual_00c27390(NiObject* pkObject);
     static C27A30RTTI ms_kRTTI;
     void FieldViewerStrings(C27A30StringArray* pkStrings);
-    void FUN_00c27a30(C27A30StringArray* pkStrings);
+    void GetViewerStrings_00c27a30(C27A30StringArray* pkStrings);
     void __thiscall ReadFloatAndComputeInverse(void* object);
-    void FUN_00c274c0(float fTime, NiPSysData* pkData);
+    void UpateNoAttenuation(float fTime, NiPSysData* pkData);
     void __thiscall UpdateTurbulence(float fTime, NiPSysData* pkData);
     void __thiscall ApplyRandomOffset(float fTime, NiPSysData* pkData);
 
@@ -114,7 +115,8 @@ struct NiPSysTurbulenceFieldModifier : NiPSysFieldModifier
 };
 
 // @fnv 0x00c27390
-bool __thiscall NiPSysTurbulenceFieldModifier::FUN_00c27390(NiObject* pkObject)
+// src: XBOX_PDB 0x00c27390
+bool __thiscall NiPSysTurbulenceFieldModifier::IsEqual_00c27390(NiObject* pkObject)
 {
     NiPSysTurbulenceFieldModifier* pkDest;
     if (!NiPSysFieldModifier::IsEqual(pkObject))
@@ -170,17 +172,18 @@ struct C27A30RTTI
 
 typedef NiTArray<char*, NiTMallocInterface<char*> > C27A30StringArray;
 
-extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
-char* __cdecl FUN_00a7d550(const char* pcPrefix, float fValue);
+extern "C" char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcText);
+char* __cdecl NiGetViewerString_00a7d550(const char* pcPrefix, float fValue);
 
 // Appends the RTTI name and a formatted "Frequency" string for m_fFrequency to pkStrings after calling the base handler.
 // @fnv 0x00c27a30
-void NiPSysTurbulenceFieldModifier::FUN_00c27a30(C27A30StringArray* pkStrings)
+// src: XBOX_PDB 0x00c27a30
+void NiPSysTurbulenceFieldModifier::GetViewerStrings_00c27a30(C27A30StringArray* pkStrings)
 {
     FieldViewerStrings(pkStrings);
-    char* pcString = FUN_00a7d330(ms_kRTTI.GetName());
+    char* pcString = NiViewerStrings_NiGetViewerString_Title(ms_kRTTI.GetName());
     pkStrings->Add(pcString);
-    pcString = FUN_00a7d550("Frequency", m_fFrequency);
+    pcString = NiGetViewerString_00a7d550("Frequency", m_fFrequency);
     pkStrings->Add(pcString);
 }
 
@@ -224,7 +227,8 @@ inline float SymmetricRandom()
 
 // Applies a random offset scaled by m_fInfluence to particle values whose squared distance from the transformed field position is at most m_fFieldStrength.
 // @fnv 0x00c274c0
-void NiPSysTurbulenceFieldModifier::FUN_00c274c0(float fTime, NiPSysData* pkData)
+// src: XBOX_PDB 0x00c274c0
+void NiPSysTurbulenceFieldModifier::UpateNoAttenuation(float fTime, NiPSysData* pkData)
 {
     NiTransform kFieldXform;
     memcpy(&kFieldXform, &m_spFieldObject->m_kWorld, sizeof(kFieldXform));
@@ -285,7 +289,7 @@ void __thiscall NiPSysTurbulenceFieldModifier::UpdateTurbulence(float fTime, NiP
     if (m_fFieldAttenuation == 0.0f)
     {
         if (m_bEnableMaxDistance)
-            FUN_00c274c0(fTime, pkData);
+            UpateNoAttenuation(fTime, pkData);
         else
             ApplyRandomOffset(fTime, pkData);
     }

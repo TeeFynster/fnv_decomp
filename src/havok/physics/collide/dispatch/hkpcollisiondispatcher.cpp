@@ -27,11 +27,11 @@ inline Allocator& BSAudio::GetAlloc()
     return *reinterpret_cast<Allocator*>(SynchTimer.m_uiValueAt00);
 }
 
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 
 inline void FreeBuffer(void* p)
 {
-    FUN_00c85750()->GetAlloc().Free(p, 0xc00);
+    hkMemoryRouter_getInstance()->GetAlloc().Free(p, 0xc00);
 }
 
 struct Owner
@@ -243,12 +243,13 @@ class FUN_00cfbbe0_cls
 {
   public:
     void __thiscall RegisterAgentType(void* p, int flag, int a2, int a3, int a4, int a5, int h, int g);
-    void __thiscall FUN_00cfbbe0(FUN_00cfbbe0_rec* a1, int a2, int a3);
+    void __thiscall AppendRecordAndRegisterAgents(FUN_00cfbbe0_rec* a1, int a2, int a3);
 };
 
 // Copies a record into the array at offset 0x9a0 at the current index, calls RegisterAgentType on several sub-objects, and increments the index.
 // @fnv 0x00cfbbe0
-void FUN_00cfbbe0_cls::FUN_00cfbbe0(FUN_00cfbbe0_rec* pRecord, int a2, int a3)
+// src: GUESS 0x00cfbbe0 (confidence: medium)
+void FUN_00cfbbe0_cls::AppendRecordAndRegisterAgents(FUN_00cfbbe0_rec* pRecord, int a2, int a3)
 {
     char* base = (char*)this;
     Owner* o = (Owner*)this;
@@ -409,7 +410,7 @@ int FUN_00cfbd60_cls::AddEntry(SrcRec* pSrc, int a2, int a3)
     return idx;
 }
 
-int __cdecl FUN_00d06f80(const void* p, int numBytes);
+int __cdecl hkStatisticsCollector_getAllocatedSize(const void* p, int numBytes);
 
 struct CFBED0ShapeInheritance
 {
@@ -439,7 +440,7 @@ struct CFBED0StatisticsCollector
     {
         if ((array.m_iCapacityState & 0x80000000) == 0 || m_countDontDeallocate)
         {
-            int allocated = FUN_00d06f80(array.m_data, array.getCapacity() * sizeof(CFBED0ShapeInheritance));
+            int allocated = hkStatisticsCollector_getAllocatedSize(array.m_data, array.getCapacity() * sizeof(CFBED0ShapeInheritance));
             AddMemoryChunk(3, fieldName, array.m_data, array.m_iElementCount * sizeof(CFBED0ShapeInheritance), allocated);
         }
     }
@@ -2380,7 +2381,8 @@ static __forceinline CFBF60ShapeInheritance& CFBF60InheritanceArray_AllocatePair
 
 // Removes all entries matching primaryType/alternateType from the inheritance array, then updates inheritance and appends a new entry for the pair.
 // @fnv 0x00cfbf60
-void hkpCollisionDispatcher::FUN_00cfbf60(int primaryType, int alternateType)
+// src: HAVOK_LIB 0x00cfbf60
+void hkpCollisionDispatcher::registerAlternateShapeType(int primaryType, int alternateType)
 {
     for (int i = 0; i < reinterpret_cast<hkArrayBase<CFBF60ShapeInheritance>*>(&m_pShapeInheritance)->m_iElementCount; i++)
     {
@@ -2467,12 +2469,13 @@ struct FUN_00cfc030_cls
     unsigned short unk06;
     unsigned int unk08;
     void Reset_cfb080();
-    FUN_00cfc030_cls* FUN_00cfc030(unsigned int a1, unsigned int v);
+    FUN_00cfc030_cls* hkpCollisionDispatcher_hkpCollisionDispatcher(unsigned int a1, unsigned int v);
 };
 
 // Initializes the object by zeroing arrays, setting up a reference-counted pointer array from v, and initializing a bit rotation sequence.
 // @fnv 0x00cfc030
-FUN_00cfc030_cls* FUN_00cfc030_cls::FUN_00cfc030(unsigned int a1, unsigned int v)
+// src: HAVOK_LIB 0x00cfc030
+FUN_00cfc030_cls* FUN_00cfc030_cls::hkpCollisionDispatcher_hkpCollisionDispatcher(unsigned int a1, unsigned int v)
 {
     *(volatile unsigned short*)&unk06 = 1;
 
@@ -2548,13 +2551,13 @@ FUN_00cfc030_cls* FUN_00cfc030_cls::FUN_00cfc030(unsigned int a1, unsigned int v
 
 typedef void (*Callback)();
 
-void FUN_00cfb050();
-void FUN_00cfb060();
-void FUN_00cfb070();
-void FUN_00d10790();
-void FUN_00d10770();
-void FUN_00d10760();
-void FUN_00d10780();
+void Runtime_UpdateState_00cfb050();
+void nullsub_7();
+void Runtime_GetC();
+void Runtime_GetD107A0RTTIAddress();
+void nullsub_12();
+void nullsub_11();
+void nullsub_13();
 
 struct S00cfb080_IO
 {
@@ -2567,10 +2570,10 @@ struct S00cfb080_IO
 
     void Init()
     {
-        m_pfnRead = FUN_00d10790;
-        m_pfnWrite = FUN_00d10770;
-        m_pfnSeek = FUN_00d10760;
-        m_pfnClose = FUN_00d10780;
+        m_pfnRead = Runtime_GetD107A0RTTIAddress;
+        m_pfnWrite = nullsub_12;
+        m_pfnSeek = nullsub_11;
+        m_pfnClose = nullsub_13;
         m_bOpen = false;
         m_bEnableState = true;
     }
@@ -3491,14 +3494,15 @@ struct S00cfb080_State
     int unk1E2C;
     unsigned char* m_apucColor[4];  // 0x1E30
 
-    void FUN_00cfb080();
+    void hkpCollisionDispatcher_resetCreationFunctions();
 };
 
-void __cdecl FUN_00d923b0(S00cfb080_State* pkState);
+void __cdecl hkAgent3Bridge_registerAgent3(S00cfb080_State* pkState);
 
 // Initializes the state by zeroing map arrays, setting color buffers to 100, assigning allocation and notification callbacks, and calling FUN_00d923b0.
 // @fnv 0x00cfb080
-void S00cfb080_State::FUN_00cfb080()
+// src: HAVOK_LIB 0x00cfb080
+void S00cfb080_State::hkpCollisionDispatcher_resetCreationFunctions()
 {
     m_iDirtyA = 1;
     m_iDirtyB = 1;
@@ -3523,8 +3527,8 @@ void S00cfb080_State::FUN_00cfb080()
 
     m_kIO.Init();
 
-    m_pfnAlloc = FUN_00cfb050;
-    m_pfnFree = FUN_00cfb060;
+    m_pfnAlloc = Runtime_UpdateState_00cfb050;
+    m_pfnFree = nullsub_7;
     m_i16B8 = 0;
     m_i16BC = 0;
     m_i16C0 = 0;
@@ -3534,9 +3538,9 @@ void S00cfb080_State::FUN_00cfb080()
     m_i16D8 = 0;
     m_i16D0 = 0;
     m_i16D4 = 0;
-    m_pfnNotify = FUN_00cfb070;
+    m_pfnNotify = Runtime_GetC;
     m_i16F0 = 0;
-    FUN_00d923b0(this);
+    hkAgent3Bridge_registerAgent3(this);
     m_bPending = false;
 
     if (m_apucColor[2])
@@ -3803,12 +3807,13 @@ struct Big
     Block blk[7];
     int unk1E20, unk1E24, unk1E28, unk1E2C, unk1E30, unk1E34, unk1E38, unk1E3C;
     float f1e40, f1e44;
-    void FUN_00cfb570(Src* src);
+    void hkpCollisionDispatcher_initCollisionQualityInfo(Src* src);
 };
 
 // Fills the 7 Block entries in blk from src with conditional overrides based on src flags, and fills the 100-byte table with fixed values.
 // @fnv 0x00cfb570
-void Big::FUN_00cfb570(Src* src)
+// src: HAVOK_LIB 0x00cfb570
+void Big::hkpCollisionDispatcher_initCollisionQualityInfo(Src* src)
 {
     Block* b0 = &blk[0];
     f1e44 = src->f08;
@@ -4015,7 +4020,7 @@ struct S_00cfc550_Router
     int unk8;
     int unkc;
     S_00cfc550_Alloc* m_pStreamAllocator;
-    static S_00cfc550_Router& FUN_00c85750();
+    static S_00cfc550_Router& hkMemoryRouter_getInstance();
     S_00cfc550_Alloc& heap()
     {
         return *m_pStreamAllocator;
@@ -4031,7 +4036,7 @@ struct S_00cfc550_RefObj
     void operator delete(void* p)
     {
         S_00cfc550_RefObj* b = static_cast<S_00cfc550_RefObj*>(p);
-        S_00cfc550_Router::FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        S_00cfc550_Router::hkMemoryRouter_getInstance().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 
@@ -4070,12 +4075,13 @@ struct Cls_cfcba0
     int unk2c;
     unsigned short unk30;
     unsigned short unk32;
-    Cls_cfcba0* FUN_00cfcba0(unsigned short a0, Src_cfcba0* a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8,
+    Cls_cfcba0* hkpManifoldPointAddedEvent_hkpManifoldPointAddedEvent(unsigned short a0, Src_cfcba0* a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8,
                              float a9);
 };
 // Sets fields from parameters, stores a1 in unk24, sets unk32 from a1->unk12 when a1->unk08 is zero, and returns this.
 // @fnv 0x00cfcba0
-Cls_cfcba0* Cls_cfcba0::FUN_00cfcba0(unsigned short a0, Src_cfcba0* a1, int a2, int a3, int a4, int a5, int a6, int a7,
+// src: HAVOK_LIB 0x00cfcba0
+Cls_cfcba0* Cls_cfcba0::hkpManifoldPointAddedEvent_hkpManifoldPointAddedEvent(unsigned short a0, Src_cfcba0* a1, int a2, int a3, int a4, int a5, int a6, int a7,
                                      int a8, float a9)
 {
     unk00 = a4;

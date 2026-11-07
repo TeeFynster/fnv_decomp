@@ -19,10 +19,10 @@ public:
     const Vec57& extent();
     void setExtent(const Vec57& extent);
     void GetCorners(NiPoint3* corners);
-    void FUN_00c37a00(NiPoint3* corners);
-    void FUN_00c37a00(NiPoint3OB* corners);
-    bool FUN_00c37050(const NiFrustumPlanes& frustum);
-    void FUN_004a7130();
+    void BSMultiBoundOBB_GetVertices(NiPoint3* corners);
+    void BSMultiBoundOBB_GetVertices(NiPoint3OB* corners);
+    bool BSMultiBoundOBB_CompletelyWithinFrustum(const NiFrustumPlanes& frustum);
+    void DestroyBase_Thunk();
     void* FUN_004a7100(unsigned int flags);
 
     int unk24;

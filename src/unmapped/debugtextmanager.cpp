@@ -5,14 +5,15 @@
 #include "../../include/NiFixedString.h"
 #include "../../include/FontManager.h"
 
-extern "C" void __cdecl FUN_00802a90();
+extern "C" void __cdecl DebugTextManager_CreateSingleton();
 extern "C" int DAT_011db800;
 
 // @fnv 0x005ba8d0
-int __cdecl FUN_005ba8d0()
+// src: COMMUNITY 0x005ba8d0
+int __cdecl DebugTextManager_GetSingleton()
 {
     if (!DAT_011db800)
-        FUN_00802a90();
+        DebugTextManager_CreateSingleton();
     return DAT_011db800;
 }
 
@@ -33,11 +34,12 @@ struct FUN_00802a20_class
 {
     int m_uiPageCount;
     unsigned char m_aucPageBuffer[4352];
-    int __thiscall FUN_00802a20(const char* apPage);
+    int __thiscall DebugTextManager_FindPageIndex(const char* apPage);
 };
 // Searches the page table for a case-insensitive name match and returns its index, or -1 if not found.
 // @fnv 0x00802a20
-int FUN_00802a20_class::FUN_00802a20(const char* apPage)
+// src: COMMUNITY 0x00802a20
+int FUN_00802a20_class::DebugTextManager_FindPageIndex(const char* apPage)
 {
     int i;
     int iPageIndex;
@@ -72,7 +74,8 @@ struct PageTable
 // Stand-in for the class that owns FUN_00802220 (this pointer is unused by it).
 
 // @fnv 0x00802220
-void FontManager::FUN_00802220(PageTable* pPages, int index, unsigned char value)
+// src: COMMUNITY 0x00802220
+void FontManager::VATSEffect_SetBodyPartEnabled(PageTable* pPages, int index, unsigned char value)
 {
     pPages->SetEntryStateByKey((unsigned short)index, value);
     pPages->SetEntryStateByKey(index * 1000, value);
@@ -216,11 +219,12 @@ struct FUN_00802260_cls
     virtual void v78();
     virtual void v79();
     virtual FUN_0043f220_cls* v7a();
-    void __thiscall FUN_00802260(FUN_00802260_cls* a1, int a2, unsigned char a3);
+    void __thiscall FOVATSEffectManager_ShowBipedObjectOnActor(FUN_00802260_cls* a1, int a2, unsigned char a3);
 };
 
 // @fnv 0x00802260
-void __thiscall FUN_00802260_cls::FUN_00802260(FUN_00802260_cls* a1, int a2, unsigned char abFlag)
+// src: COMMUNITY 0x00802260
+void __thiscall FUN_00802260_cls::FOVATSEffectManager_ShowBipedObjectOnActor(FUN_00802260_cls* a1, int a2, unsigned char abFlag)
 {
     FUN_0043f220_cls* p = a1->v7a();
     if (p != 0)
@@ -235,7 +239,7 @@ void __thiscall FUN_00802260_cls::FUN_00802260(FUN_00802260_cls* a1, int a2, uns
 
 struct QueryStub
 {
-    unsigned char FUN_00c4edf0(unsigned int* out, int a);
+    unsigned char BSOcclusionQuery_GetResult(unsigned int* out, int a);
 };
 struct Obj : QueryStub
 {
@@ -321,11 +325,12 @@ struct Owner
     Obj* objsA[15];
     int unk168;
     Obj* objsB[15];
-    void FUN_008026b0();
+    void VATSEffect_FreeOcclusionQueries();
 };
 
 // @fnv 0x008026b0
-void Owner::FUN_008026b0()
+// src: COMMUNITY 0x008026b0
+void Owner::VATSEffect_FreeOcclusionQueries()
 {
     for (unsigned int i = 0; i < 15; i++)
     {
@@ -333,13 +338,13 @@ void Owner::FUN_008026b0()
         unsigned int val = 0;
         if (objsA[i])
         {
-            objsA[i]->FUN_00c4edf0(&val, 1);
+            objsA[i]->BSOcclusionQuery_GetResult(&val, 1);
             delete objsA[i];
             objsA[i] = 0;
         }
         if (objsB[i])
         {
-            objsB[i]->FUN_00c4edf0(&val, 1);
+            objsB[i]->BSOcclusionQuery_GetResult(&val, 1);
             delete objsB[i];
             objsB[i] = 0;
         }
@@ -410,13 +415,14 @@ struct FUN_008029c0_class
     int unk18;
     int unk1c;
 
-    bool __thiscall FUN_008029c0(const char* apPage, int value);
+    bool __thiscall DebugTextManager_SetScreenDebugPage(const char* apPage, int value);
 };
 
 // @fnv 0x008029c0
-bool FUN_008029c0_class::FUN_008029c0(const char* apPage, int value)
+// src: COMMUNITY 0x008029c0
+bool FUN_008029c0_class::DebugTextManager_SetScreenDebugPage(const char* apPage, int value)
 {
-    int result = reinterpret_cast<FUN_00802a20_class*>(this)->FUN_00802a20(apPage);
+    int result = reinterpret_cast<FUN_00802a20_class*>(this)->DebugTextManager_FindPageIndex(apPage);
 
     if (result != -1)
     {
@@ -447,7 +453,7 @@ struct NiObj
 
 struct GeomObj
 {
-    NiObj* __thiscall FUN_0043fad0();
+    NiObj* __thiscall NiGeometry_GetSkinInstance();
 };
 
 struct ListObj
@@ -600,7 +606,7 @@ struct BGSProj
 
 struct Sky2
 {
-    const char* __thiscall FUN_007fa950();
+    const char* __thiscall SkyObject_GetNiNode();
 };
 struct SkyObj
 {
@@ -734,8 +740,8 @@ struct MgrObj
     void __thiscall SetEntryStateByKey(int index, int value);
 };
 
-bool __cdecl FUN_004910d0(NiObj* o);
-NiObj* __cdecl FUN_00653270(void* rtti, NiObj* o);
+bool __cdecl Animation_FindSkinnedNode(NiObj* o);
+NiObj* __cdecl NiObject_DynamicCast(void* rtti, NiObj* o);
 
 struct This8022
 {
@@ -883,30 +889,31 @@ struct This8022
     int m_234;
     int m_238;
     int m_23c;
-    void __thiscall FUN_00802260(NodeObj* a1, int a2, unsigned char a3);
-    void __thiscall FUN_008022c0();
+    void __thiscall FOVATSEffectManager_ShowBipedObjectOnActor(NodeObj* a1, int a2, unsigned char a3);
+    void __thiscall FOVATSEffectManager_RestoreBodyParts();
 };
 
 // @fnv 0x008022c0
-void __thiscall This8022::FUN_008022c0()
+// src: COMMUNITY 0x008022c0
+void __thiscall This8022::FOVATSEffectManager_RestoreBodyParts()
 {
     if (!m_004->tv64())
         return;
     if (m_23c == 0xe || m_23c == 0xf)
         return;
     NodeObj* res = m_004;
-    FUN_00802260(res, 3, 1);
-    FUN_00802260(res, 4, 1);
-    FUN_00802260(res, 0xa, 1);
-    FUN_00802260(res, 0xb, 1);
-    FUN_00802260(res, 0xc, 1);
-    FUN_00802260(res, 0xd, 1);
-    FUN_00802260(res, 9, 1);
-    FUN_00802260(res, 0xe, 1);
-    FUN_00802260(res, 0xf, 1);
-    FUN_00802260(res, 0x10, 1);
-    FUN_00802260(res, 1, 1);
-    FUN_00802260(res, 0, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 3, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 4, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 0xa, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 0xb, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 0xc, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 0xd, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 9, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 0xe, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 0xf, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 0x10, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 1, 1);
+    FOVATSEffectManager_ShowBipedObjectOnActor(res, 0, 1);
     int list1;
     list1 = m_23c;
     ListObj* kIter = m_004->tv116();
@@ -917,7 +924,7 @@ void __thiscall This8022::FUN_008022c0()
             NiObj* p60 = kIter->FUN_0043b4a0(r2);
             if (p60 != 0)
             {
-                if (FUN_004910d0(p60))
+                if (Animation_FindSkinnedNode(p60))
                 {
                     ListObj* r1;
                     r1 = p60->tv03();
@@ -931,9 +938,9 @@ void __thiscall This8022::FUN_008022c0()
                             x30 = r1->FUN_0043b4a0(i) ? ((NiObj*)r1->FUN_0043b4a0(i))->tv06() : 0;
                             i++;
                         }
-                        NiObj* mgr = x30 ? x30->FUN_0043fad0() : 0;
+                        NiObj* mgr = x30 ? x30->NiGeometry_GetSkinInstance() : 0;
                         MgrObj* f23;
-                        f23 = (MgrObj*)FUN_00653270(&DAT_011f49d8, mgr);
+                        f23 = (MgrObj*)NiObject_DynamicCast(&DAT_011f49d8, mgr);
                         if (f23 != 0)
                         {
                             int ptr;
@@ -964,7 +971,7 @@ void __thiscall This8022::FUN_008022c0()
             Sky2* p = tmp64->GetValueByIndex(m_23c);
             if (p != 0)
             {
-                NiObj* val = res->tv116()->tv39(NiFixedString(p->FUN_007fa950()));
+                NiObj* val = res->tv116()->tv39(NiFixedString(p->SkyObject_GetNiNode()));
                 if (0 != val)
                 {
                     val->FUN_00450f90(false);
@@ -990,12 +997,13 @@ struct PageReporter
     int unk18;
     int unk1c;
     RegisteredPage pages[64];
-    void FUN_00802880(void(__cdecl*)(const char*));
+    void DebugTextManager_OutputDebugPageNames(void(__cdecl*)(const char*));
 };
 void FUN_00406d50(char*, unsigned int, const char*);
 // Builds a comma-separated string of up to five page names per batch and passes each batch to the report callback.
 // @fnv 0x00802880
-void PageReporter::FUN_00802880(void(__cdecl* report)(const char*))
+// src: COMMUNITY 0x00802880
+void PageReporter::DebugTextManager_OutputDebugPageNames(void(__cdecl* report)(const char*))
 {
     char buffer[512];
     buffer[0] = 0;
@@ -1019,7 +1027,7 @@ class Manager802
     Manager802();
     virtual ~Manager802();
 
-    static void FUN_00802a90();
+    static void DebugTextManager_CreateSingleton();
 
     int unk0004, unk0008, unk000C, unk0010, unk0014, unk0018, unk001C, unk0020;
     int unk0024, unk0028, unk002C, unk0030, unk0034, unk0038, unk003C, unk0040;
@@ -1164,7 +1172,8 @@ class Manager802
 
 // Creates the singleton Manager802 instance if ms_pkInstance is null.
 // @fnv 0x00802a90
-void Manager802::FUN_00802a90()
+// src: COMMUNITY 0x00802a90
+void Manager802::DebugTextManager_CreateSingleton()
 {
     if (!ms_pkInstance)
         ms_pkInstance = new Manager802;

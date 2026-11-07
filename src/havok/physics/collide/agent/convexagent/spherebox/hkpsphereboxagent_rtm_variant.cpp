@@ -40,7 +40,7 @@ typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4];
 #include "../../../../../../../include/hkpCollisionAgent.h"
 #include "../../../../../../../include/hkpSymmetricAgentFlipCollector.h"
 
-extern void __cdecl FUN_00d3c440(int a, int b, int c, int d);
+extern void __cdecl hkpSphereBoxAgent_staticGetPenetrations(int a, int b, int c, int d);
 void __stdcall ForwardToD3C440(int a, int b, int c, int d);
 struct Conversion {
     void (*convert)();
@@ -50,18 +50,18 @@ struct Conversion {
     bool enabled;
     bool supported;
 };
-struct Registry { void FUN_00cfbbe0(Conversion*, int, int); };
-void FUN_00d3c400();
-void FUN_00d3cfc0();
+struct Registry { void AppendRecordAndRegisterAgents(Conversion*, int, int); };
+void hkpSphereBoxAgent_createBoxSphereAgent();
+void Object_UpdateFields_00d3cfc0();
 void FlipAndDispatchCollector();
-void FUN_00d3ac80();
+void Object_UpdateFields_00d3ac80();
 void CreateD3C380Obj();
-void FUN_00d3c440();
-void FUN_00d3cc00();
-void FUN_00daf8e0();
-void __cdecl FUN_00d3cef0(Registry* registry);
+void hkpSphereBoxAgent_staticGetPenetrations();
+void hkpSphereBoxAgent_staticGetClosestPoints();
+void Object_ProcessEntries_00daf8e0();
+void __cdecl hkpSphereBoxAgent_registerAgent(Registry* registry);
 extern float DAT_0104da48;
-extern void __cdecl FUN_00d3cc00(void*, void*, int, void*);
+extern void __cdecl hkpSphereBoxAgent_staticGetClosestPoints(void*, void*, int, void*);
 void __cdecl FlipAndDispatchCollector(void* arg1, void* arg2, int arg3, int arg4);
 struct S_00d3c3c0_Holder {
     virtual void v00(); virtual void v04(); virtual void v08(); virtual void v0c(); virtual void v10();
@@ -72,7 +72,7 @@ struct S_00d3c3c0_Obj {
     int unk04;
     S_00d3c3c0_Holder* unk08;
     unsigned short unk0c;
-    void FUN_00d3c3c0(int arg);
+    void hkpSphereBoxAgent_cleanup(int arg);
 };
 
 struct ObjAllocator {
@@ -87,8 +87,8 @@ struct SmallRecord {
     unsigned short m_w0C;
 };
 extern char DAT_010cf018[];
-hkMemoryRouter* FUN_00c85750();
-void __cdecl FUN_00d3c400(int aiUnused1, int aiUnused2, int aiUnused3, int d);
+hkMemoryRouter* hkMemoryRouter_getInstance();
+void __cdecl hkpSphereBoxAgent_createBoxSphereAgent(int aiUnused1, int aiUnused2, int aiUnused3, int d);
 class D3CF80CollectorBase {
 public:
     D3CF80CollectorBase() : m_bHit(false) {}
@@ -108,20 +108,20 @@ public:
     void ForwardToD3C440(void* pkA, void* pkB, void* pkInput, D3CF80Collector* pkCollector);
     void CollectFilteredEvents(void* pkA, void* pkB, void* pkInput, int iFilter);
 };
-extern void __cdecl FUN_00d3c440(int a, int b, int c, int d);
+extern void __cdecl hkpSphereBoxAgent_staticGetPenetrations(int a, int b, int c, int d);
 extern char DAT_010ce81c[];
 struct FlipCollectorLocal {
     void* unk00;
     unsigned char unk04;
     int unk08;
 };
-void __cdecl FUN_00d3cfc0(int aiArg1, int aiArg2, int aiArg3, int a4);
+void __cdecl Object_UpdateFields_00d3cfc0(int aiArg1, int aiArg2, int aiArg3, int a4);
 struct CpuCallData { void* descriptor; float bound; unsigned int value; };
 extern float DAT_0104da48;
 extern unsigned char DAT_010ce7fc;
 struct CpuObject {
-    void FUN_00d3c910(void*, void*, unsigned int, CpuCallData*);
-    void FUN_00d3d000(void*, void*, unsigned int, unsigned int);
+    void hkpSphereBoxAgent_getClosestPoints(void*, void*, unsigned int, CpuCallData*);
+    void hkpSymmetricAgentLinearCast_hkpSphereBoxAgent_getClosestPoints(void*, void*, unsigned int, unsigned int);
 };
 extern "C" {
 LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
@@ -167,11 +167,11 @@ struct Simplex
 };
 struct AgentBase
 {
-    void FUN_00d3c5b0(int a, int b, int c, Simplex* s);
+    void hkpSphereBoxAgent_processCollision(int a, int b, int c, Simplex* s);
 };
 struct Agent : AgentBase
 {
-    void FUN_00d3d080(int a, int b, int c, Simplex* s);
+    void hkpSymmetricAgentLinearCast_hkpSphereBoxAgent_processCollision(int a, int b, int c, Simplex* s);
 };
 
 extern "C" {
@@ -682,7 +682,8 @@ __forceinline void S3c5_SphereBoxAgent::processContact(const hkpCdBody& bodyA, c
 }
 
 // @fnv 0x00d3c5b0
-void AgentBase::FUN_00d3c5b0(int a, int b, int c, Simplex* s)
+// src: HAVOK_SRC 0x00d3c5b0
+void AgentBase::hkpSphereBoxAgent_processCollision(int a, int b, int c, Simplex* s)
 {
     ((S3c5_SphereBoxAgent*)this)->processContact(*(const hkpCdBody*)a, *(const hkpCdBody*)b, *(const S3c5_CollisionInput*)c, *(S3c5_ProcessCollisionOutput*)s);
 }
@@ -777,7 +778,7 @@ struct S00d3c910_SphereBoxAgent
 {
     static bool ComputeClosestPoints(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
         const S00d3c910_CollisionInput& input, hkContactPoint& contact);
-    void FUN_00d3c910(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
+    void hkpSphereBoxAgent_getClosestPoints(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
         const S00d3c910_CollisionInput& input, S00d3c910_CdPointCollector& collector);
 };
 
@@ -857,7 +858,8 @@ __forceinline bool S00d3c910_SphereBoxAgent::ComputeClosestPoints(const hkpCdBod
 }
 
 // @fnv 0x00d3c910
-void S00d3c910_SphereBoxAgent::FUN_00d3c910(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
+// src: HAVOK_SRC 0x00d3c910
+void S00d3c910_SphereBoxAgent::hkpSphereBoxAgent_getClosestPoints(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
     const S00d3c910_CollisionInput& input, S00d3c910_CdPointCollector& collector)
 {
     S00d3c910_timerBegin(str_010cf050);
@@ -940,7 +942,8 @@ contactOut.setDistance(distance);
 contactOut.getPosition()(3)=1.0f;
 return true;}
 // @fnv 0x00d3cc00
-void __cdecl FUN_00d3cc00(const hkpCdBody&bodyA,const hkpCdBody&bodyB,const CollisionAgentContext&input,class hkpCdPointCollector&collector)
+// src: XBOX_PDB 0x00d3cc00
+void __cdecl hkpSphereBoxAgent_staticGetClosestPoints(const hkpCdBody&bodyA,const hkpCdBody&bodyB,const CollisionAgentContext&input,class hkpCdPointCollector&collector)
 {
 hkUint32 ticks;
 {hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "SphereBox";static_cast<TimerCommand_spherebox*>(h)->setTime(ticks);mStream.setEnd((char*)(h+1));}};

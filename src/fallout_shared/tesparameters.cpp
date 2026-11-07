@@ -96,7 +96,8 @@ void ScriptFunctionData::InitItem(TESForm* apForm, FunctionData* apData)
 
 // Returns true when the parameter at aiParam of apFuncData has type 4 or 6, after bounds-checking against the function's parameter count.
 // @fnv 0x00682320
-bool __cdecl FUN_00682320(const FunctionData* apFuncData, unsigned int aiParam)
+// src: COMMUNITY 0x00682320
+bool __cdecl TESParameters_GetParamIsReference(const FunctionData* apFuncData, unsigned int aiParam)
 {
     bool bretval = false;
     if (apFuncData && aiParam < ScriptFunctionData::GetParamCount(apFuncData))

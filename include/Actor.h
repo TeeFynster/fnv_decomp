@@ -365,203 +365,203 @@ public:
     SEX GetSex();
     unsigned short GetLevel();
 
-    void FUN_00881680(bool a);
-    void FUN_008c00e0(TESObjectREFR* victimRef, int amount, int crimeValue);
-    bool FUN_005785e0(Actor* target, bool a);
-    void FUN_008bff50();
-    void FUN_008b7c00(bool a, bool b);
-    void FUN_008bf500(Actor* actor);
-    bool FUN_00437bd0();
-    bool FUN_00437bf0();
-    bool FUN_00608d80();
-    bool FUN_00576d30();
-    bool FUN_008c4560();
-    bool FUN_008c51c0();
+    void Actor_EndInterruptPackage(bool a);
+    void PickpocketAlarm(TESObjectREFR* victimRef, int amount, int crimeValue);
+    bool TESObjectREFR_IsAnOwner(Actor* target, bool a);
+    void Actor_IncrementMinorCrimes();
+    void Actor_AddFactionMinorCrime(bool a, bool b);
+    void Actor_InitiatePickPocketWarning(Actor* actor);
+    bool Actor_IsUnConscious();
+    bool Actor_IsRestrained();
+    bool Actor_IsReanimated();
+    bool TESForm_IsStillLoading();
+    bool GetShouldCheckMagicNode();
+    bool IsRefractive();
     int FUN_00931850();
-    bool FUN_008bc860(TESObjectREFR*);   // 0x008bc860
+    bool Actor_CouldBeFollowing(TESObjectREFR*);   // 0x008bc860
     void* FUN_00568e50(); // 0x00568e50
-    void FUN_008b3cb0(Actor*); // 0x008b3cb0
-    void* FUN_005d43c0(int); // 0x005d43c0, explicit folded argument
-    template <class Point> void FUN_008bb520(Point, int); // 0x008bb520, preserve aggregate call ABI
+    void Actor_SetPathingDoorReference(Actor*); // 0x008b3cb0
+    void* BSFile_GetDevice(int); // 0x005d43c0, explicit folded argument
+    template <class Point> void Actor_RequestRotate(Point, int); // 0x008bb520, preserve aggregate call ABI
     BSSoundHandle FUN_00933150(unsigned int, bool, unsigned int, bool); // 0x00933150
-    template <class Topic> void FUN_0057ad20(Topic*); // 0x0057ad20
-    void FUN_0057ad60(int); // 0x0057ad60
-    bool FUN_008a40e0(TESObjectREFR*); // 0x008a40e0
+    template <class Topic> void TESObjectREFR_SetSayToTopic(Topic*); // 0x0057ad20
+    void TESObjectREFR_SetSayToResponseID(int); // 0x0057ad60
+    bool Actor_ShouldRotateToTrack(TESObjectREFR*); // 0x008a40e0
     int FUN_008dd860(); // 0x008dd860
-    TESObjectREFR* FUN_008a2ed0(); // 0x008a2ed0
+    TESObjectREFR* GetHeadingTarget(); // 0x008a2ed0
     void FUN_008dd880(); // 0x008dd880
-    void FUN_00953ce0(); // 0x00953ce0
-    bool FUN_008b3960(); // 0x008b3960
-    bool FUN_008843a0(); // 0x008843a0
-    void FUN_00573170(Actor*, int, int, int); // 0x00573170
-    template <class Point> bool FUN_008b3690(const Point&, TESObjectCELL*, void*, float, int); // 0x008b3690
-    bool FUN_005653d0(); // 0x005653d0
-    template <class Point> bool FUN_008b3690(const Point&, void*, void*, float, int, int); // 0x008b3690
+    void PlayerCharacter_ResetPlayerGreetFlag(); // 0x00953ce0
+    bool Actor_IsPathValid(); // 0x008b3960
+    bool Actor_CanMove(); // 0x008843a0
+    void TESObjectREFR_Activate(Actor*, int, int, int); // 0x00573170
+    template <class Point> bool Actor_SetPathfindingGoal(const Point&, TESObjectCELL*, void*, float, int); // 0x008b3690
+    bool TESObjectREFR_GetRefPersists_005653d0(); // 0x005653d0
+    template <class Point> bool Actor_SetPathfindingGoal(const Point&, void*, void*, float, int, int); // 0x008b3690
     int FUN_00905230(); // 0x00905230
-    void FUN_008b3690(NiPoint3*, void*); // 0x008b3690: folded stack arguments
+    void Actor_SetPathfindingGoal(NiPoint3*, void*); // 0x008b3690: folded stack arguments
     float FUN_00885560(float, int); // 0x00885560
     bool PlayAttackGroup(int aiAttackGroup);   // 0x008935f0
-    PathMover* FUN_008b70d0();
+    PathMover* Actor_GetAnimation();
     LookTarget* FUN_008d6f30();
     bool FUN_0094df60();
     NiPoint3* FUN_00430830();
-    void FUN_00575830(const NiPoint3& arPos);
-    bool FUN_00493bb0();
-    bool FUN_004eaf60();
-    float FUN_008be940();
+    void TESObjectREFR_SetLocationOnReference(const NiPoint3& arPos);
+    bool Actor_IsInCombat();
+    bool PlayerCharacter_Is3rdPerson();
+    float Actor_GetEyeLevel();
     NiPoint3* FUN_00436aa0();
-    int FUN_0084e3a0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     BaseProcess* FUN_008d8520();
-    NiNode* FUN_0043fcd0();
-    BaseForm* FUN_007af430();
+    NiNode* TESObjectREFR_Get3D();
+    BaseForm* BGSSaveFormBuffer_GetForm();
     HandleRef FUN_00931ed0();
     void FUN_008a1800(int aiValue);
-    bool FUN_0087eeb0();
-    void FUN_00886cb0(float afDelta, int aiUnused);
-    void FUN_00934430();
-    void FUN_00934450(int a1, int a2, int a3);
+    bool GetTurretBehavior();
+    void UpdateMovement_00886cb0(float afDelta, int aiUnused);
+    void TESObjectREFR_GetSayToTopicInfo();
+    void MobileObject_PutCreatedPackage(int a1, int a2, int a3);
     Package* FUN_009344a0();
-    void FUN_00575650(Position*);
-    int __thiscall FUN_00575650(void* output);
-    int __thiscall FUN_00575650(FourFloatVector* output);
-    int __thiscall FUN_00575650(void* output, Actor* reference, float radius);
-    void* FUN_00575ca0();
-    void* FUN_005d43c0();
-    float FUN_005723b0(Actor* a, int b, int c);
-    int FUN_00891be0(Target* pkTarget);
-    void FUN_0088d7d0(int iArg0, int iArg1, int iArg2, bool bArg3, bool bArg4, bool bArg5);
-    void UnequipItem(int iArg0, int iArg1, int iArg2, bool bArg3, bool bArg4, bool bArg5);
-    void FUN_0093a660(Actor*);
-    void FUN_00967220(Actor*, int);
-    void FUN_00884f80();
-    void FUN_008a08e0(bool);
-    void FUN_00574920(bool);
-    InventoryStackRecord* FUN_00891b90(int);
-    bool __thiscall FUN_008b0670(Actor*);
-    void FUN_0057b520(int);
+    void TESObjectREFR_GetWorldLocation(Position*);
+    int __thiscall TESObjectREFR_GetWorldLocation(void* output);
+    int __thiscall TESObjectREFR_GetWorldLocation(FourFloatVector* output);
+    int __thiscall TESObjectREFR_GetWorldLocation(void* output, Actor* reference, float radius);
+    void* TESObjectREFR_GetSpace();
+    void* BSFile_GetDevice();
+    float TESObjectREFR_GetDistanceFromReference(Actor* a, int b, int c);
+    int GetBootWeight(Target* pkTarget);
+    void Actor_UnEquipObject(int iArg0, int iArg1, int iArg2, bool bArg3, bool bArg4, bool bArg5);
+    void QueueUnEquipObject(int iArg0, int iArg1, int iArg2, bool bArg3, bool bArg4, bool bArg5);
+    void PlayerCharacter_RemoveActorFromPlayercombatList(Actor*);
+    void PlayerCharacter_ChangePerceivedActorHostileStatus(Actor*, int);
+    void SetWalkRunFlagDirty();
+    void Actor_ClearInCombat(bool);
+    void TESObjectREFR_ResetInventory(bool);
+    InventoryStackRecord* Actor_GetArmorBeingWorn(int);
+    bool __thiscall Actor_CanAttackActor(Actor*);
+    void TESObjectREFR_RemoveFromAllWater(int);
     void FUN_008c8bb0(int);
 
-    bool FUN_008b3b90();
-    bool FUN_008b3bf0();
-    int FUN_008a7570();
+    bool DidPathingFail();
+    bool IsWaitingOnPath();
+    int GetAnimAction_008a7570();
     float GetFatigueRatio();
-    float FUN_00884dc0();
-    bool FUN_005a2030();
-    unsigned short FUN_00897910(int, int, int, int);
-    float FUN_00897b50(int);
+    float GetWalkSpeed();
+    bool IsSwimming_005a2030();
+    unsigned short Actor_GetAnimGroup(int, int, int, int);
+    float Actor_GetAnimGroupDuration(int);
     void DispatchToTarget(int);
-    const char* FUN_0055d520();
+    const char* TESObjectREFR_GetFullName();
     static float GetActorScale();
-    void* FUN_00575d70(float);
+    void* TESObjectREFR_GetWorldSpace(float);
     void PathToLocation(void*, void*, void*, void*, bool);
     bool SetPathingRequestAvoidNodes(void*);
-    Vec4 FUN_00575650();
+    Vec4 TESObjectREFR_GetWorldLocation();
     // Explicit aggregate result types retain their own return and copy conventions.
     template <class Result>
-    Result FUN_00575650();
-    void FUN_008bcd20();
-    void FUN_008a6840(bool);
-    void FUN_00935ae0();                        // 0x00935ae0
-    void FUN_008b01c0();                        // 0x008b01c0
-    bool FUN_00885520(const NiPoint3*, TESObjectCELL*, float); // 0x00885520
+    Result TESObjectREFR_GetWorldLocation();
+    void FadeIn_008bcd20();
+    void Actor_SetWantWeaponDrawn(bool);
+    void MobileObject_UpdateTopicInfoSayOnce();                        // 0x00935ae0
+    void DoDeathStuff();                        // 0x008b01c0
+    bool Actor_IsPointDeepUnderWater(const NiPoint3*, TESObjectCELL*, float); // 0x00885520
     void TryMove(bool);                         // 0x00881860
-    bool FUN_008a69d0();                        // 0x008a69d0
-    void FUN_008bc3d0(int);                     // 0x008bc3d0
+    bool Actor_IsContinuingPackageforPC();                        // 0x008a69d0
+    void Actor_StartGreetingPlayer(int);                     // 0x008bc3d0
     bool IsNodeKindSupported();                 // 0x008ba530
     bool FUN_008d8220();                        // 0x008d8220
     bool FUN_005ce8f0();                        // 0x005ce8f0
-    bool FUN_008c13d0();                        // 0x008c13d0
-    void FUN_008b37c0(Actor*, float, int);      // 0x008b37c0
-    bool FUN_00884480();                        // 0x00884480
-    bool FUN_00893190(Actor*);                  // 0x00893190
+    bool Actor_IsTryingToEnterFurniture();                        // 0x008c13d0
+    void Actor_SetPathfindingGoalAndAngle(Actor*, float, int);      // 0x008b37c0
+    bool Actor_CanSpeak();                        // 0x00884480
+    bool Actor_ShouldTalkTo(Actor*);                  // 0x00893190
     bool FUN_005a03f0(int);                     // 0x005a03f0
-    void* FUN_00884350();                       // 0x00884350
-    void* FUN_0087f990();                       // 0x0087f990
+    void* Actor_GetClass();                       // 0x00884350
+    void* Actor_GetActorBaseEnergyLevel();                       // 0x0087f990
     unsigned int FUN_008846e0();                // 0x008846e0
-    bool FUN_00884b50();                        // 0x00884b50
+    bool Actor_IsAllowedToSwim();                        // 0x00884b50
     bool IsFlying();                            // 0x0087f350 (not FUN_: actor.cpp and actormover.cpp have a free __fastcall FUN_0087f350)
     bool IsFalling();                           // 0x0087f570 (named so it does not hide actor.cpp's free __fastcall FUN_0087f570)
-    bool FUN_0088b880(int, Actor*, int, int, int); // 0x0088b880
-    void FUN_008b3840(NiPoint3*);               // 0x008b3840
-    bool FUN_008eea60();                        // 0x008eea60
-    void* FUN_008a2d40();                       // 0x008a2d40
-    TESForm* FUN_00567790();                    // 0x00567790
-    void FUN_008c0460(Actor*, int, bool);       // 0x008c0460
+    bool Actor_LineOfSight(int, Actor*, int, int, int); // 0x0088b880
+    void Actor_GetCurrentPathfindingGoal(NiPoint3*);               // 0x008b3840
+    bool Actor_CanSneak();                        // 0x008eea60
+    void* GetObjectBeingEscorted();                       // 0x008a2d40
+    TESForm* TESObjectREFR_GetOwner();                    // 0x00567790
+    void Actor_AttackAlarm(Actor*, int, bool);       // 0x008c0460
     void SetDismemberedLimbsFlag(bool);         // 0x008a80c0
-    void FUN_008c09e0(Actor*);                  // 0x008c09e0
-    void FUN_008bca90(int);                     // 0x008bca90
-    bool FUN_00575450(void*);                   // 0x00575450
-    bool FUN_00892e90(TESForm*, int, TESObjectREFR*, unsigned int, int); // 0x00892e90 (ret 0x14)
-    void FUN_008a6ce0(int, int);                // 0x008a6ce0
+    void Actor_MurderAlarm(Actor*);                  // 0x008c09e0
+    void Actor_SetPlayerTeammate(int);                     // 0x008bca90
+    bool TESObjectREFR_HasObjectId(void*);                   // 0x00575450
+    bool Actor_PutItemInReference(TESForm*, int, TESObjectREFR*, unsigned int, int); // 0x00892e90 (ret 0x14)
+    void Actor_EvaluatePackage(int, int);                // 0x008a6ce0
     unsigned char FUN_005a3740();               // 0x005a3740
-    void FUN_00572500(NiPoint3&, float);        // 0x00572500
+    void TESObjectREFR_GetDeltaForAngle(NiPoint3&, float);        // 0x00572500
     unsigned int FUN_008858c0(unsigned int, float, float); // 0x008858c0
-    void FUN_008855f0(float&, float, float);    // 0x008855f0
-    void FUN_00884ff0(float);                   // 0x00884ff0
-    void FUN_00884fc0(float);                   // 0x00884fc0
-    void FUN_0087faa0();                        // 0x0087faa0
+    void Actor_AdjustSpeedForFollowing(float&, float, float);    // 0x008855f0
+    void Actor_SetRunSpeed(float);                   // 0x00884ff0
+    void Actor_SetWalkSpeed(float);                   // 0x00884fc0
+    void Actor_EndMovement();                        // 0x0087faa0
     void ClearPath();                           // 0x008b3ad0 (not FUN_: free __fastcall FUN_008b3ad0 exists in tesobjectrefr.cpp)
-    void FUN_008b38d0(PathingRequest*, const NiPoint3&, void*, float, int); // 0x008b38d0
+    void BuildRequest(PathingRequest*, const NiPoint3&, void*, float, int); // 0x008b38d0
     bool CallPathMgr(FurnitureMark*, TESObjectCELL*, TESWorldSpace*, float, float, int); // 0x008b3750
     int FUN_00575610(TESForm*);
-    void EquipItem(TESForm*, int, ExtraDataList*, bool, bool, bool);
-    void UnequipItem(TESForm*, ExtraDataList*, bool, bool, bool, bool);
+    void Actor_QueueEquipObject(TESForm*, int, ExtraDataList*, bool, bool, bool);
+    void QueueUnEquipObject(TESForm*, ExtraDataList*, bool, bool, bool, bool);
     float __thiscall GetCombatRating(float);
-    float __thiscall FUN_008be600();
-    bool FUN_008bc9d0(Weapon*, int);
-    bool FUN_008a8870();
-    void FUN_008a8840();
+    float __thiscall Actor_GetWeaponDamagePerSecond();
+    bool Actor_CanUseWeapon(Weapon*, int);
+    bool Actor_IsReloading();
+    void Actor_QueueReload();
     float FUN_008be1b0();
-    Weapon* FUN_008a1710();
+    Weapon* Actor_GetCurrentWeapon();
     float GetHealthFraction();
     ActorBase* FUN_004181e0();
     RetObj* _FNV_GetObjectReference();
-    bool FUN_00565690();
+    bool TESObjectREFR_BaseIsQuestItem();
     ActorBase* Base();
-    void FUN_009b90b0();
-    void FUN_00575830(V* v);
+    void ProcessImpale();
+    void TESObjectREFR_SetLocationOnReference(V* v);
     void UpdateNodeTransform(int a, int b);
     float FUN_00931d70();
     Obj* FUN_009306d0();
-    Obj* FUN_00874480();
+    Obj* Projectile_GetShooter();
     float GetFirstLightParameter();
-    float FUN_00508070();
-    int FUN_008d8b80();
+    float Projectile_GetDistanceMoved();
+    int MiddleHighProcess_GetCurrentFurniture();
     void SetWhich(int a);
-    void FUN_005de0a0(int a, int b);
-    float FUN_009669c0(V* out, float f);
-    V* FUN_009b7010(V* out);
-    void FUN_009bc8f0();
+    void Projectile_SetFlag(int a, int b);
+    float Projectile_GetSpeed(V* out, float f);
+    V* Projectile_GetMovementDirection(V* out);
+    void Projectile_Kill();
     void HandleMissileImpact();
     bool IsCombatTargetHostile(Actor*);
     void SpawnProjectile(Actor*, bool, void*, int);
-    bool FUN_0087f390();
-    bool FUN_008ace90();
+    bool DoesFly_0087f390();
+    bool GetGhost_008ace90();
     using MobileObject::GetCurrentAIProcess;
     Animation* GetAnimation() const;
-    void FUN_008b3230(float);
+    void Actor_UpdateActorMover(float);
     unsigned short GetAnimGroup(ANIM_GROUP_ENUM, InventoryStackRecord*, bool, Animation*);
     // 0x00572380 is TESObjectREFR::GetLightLevelAtPoint(const NiPoint3&).
     bool FUN_008b3bb0();
-    bool FUN_008b3bd0();
-    bool FUN_008b3690(const NiPoint3&, void*, int);
+    bool IsPathing();
+    bool Actor_SetPathfindingGoal(const NiPoint3&, void*, int);
     void PathToLocation(PathingRequest*, const NiPoint3&, void*, void*, float, int);
     bool SetPathingRequestAvoidNodes(PathingRequest&);
-    void FUN_008bb5c0(float, bool);
-    void FUN_008b3ab0();
-    Ref* FUN_00569b80();
-    void EquipItem(Form*, int, int, int, int, int);
-    bool FUN_008c0050();
+    void Actor_RequestRotate_008bb5c0(float, bool);
+    void StopMoving_008b3ab0();
+    Ref* TESObjectREFR_GetLinkedRef();
+    void Actor_QueueEquipObject(Form*, int, int, int, int, int);
+    bool Actor_IsProcessingTresPassAlarm();
     bool IsCurrentlyAlerted();
-    bool FUN_00579670();
-    bool FUN_0088c240(const NiPoint3&, int, int);
+    bool Actor_IsSleeping();
+    bool Actor_CalculateLOS(const NiPoint3&, int, int);
     bool IsWithinDistanceOfPoint(const NiPoint3&, float);
     int CalculateDetectionLevel(int, Actor*, bool*, bool, int, bool, bool*);
     bool HasFaction(TESForm*);
     bool CanBeDetected();
     void SetLightingNode(NiAVObject*);
     bool UpdateActorPackageState(int);
-    bool FUN_00437b90();
+    bool TESForm_GetDisabledOrDeleted();
     int GetReactionToActor(Actor*, bool*);
     bool ProcessActorAppearance();
     void UpdatePlayerStatus(int);
@@ -573,29 +573,29 @@ public:
     bool IsInKillMove();
     TESPackage* GetCurrentAIPackage();
     void* SetTaskFlag(bool);
-    void FUN_00881680(int);
-    bool FUN_008bb630(PathingRequest*);
-    bool FUN_00894d60();
-    void FUN_00894cc0(int);
-    void FUN_008b39f0(int);
-    void FUN_008db810(Actor*);
-    TESPackage* FUN_00881450();
-    void FUN_008b3d30();
-    TESObjectREFR* FUN_004fd380();
-    void FUN_0057bd60(TESObjectREFR*);
-    void FUN_0057bd60(Actor*);
+    void Actor_EndInterruptPackage(int);
+    bool Actor_SetPathfindingFlee(PathingRequest*);
+    bool GetBlocked();
+    void Actor_SetBlock(int);
+    void Actor_SetMoveMode(int);
+    void HighProcess_ProcessObserveCombat(Actor*);
+    TESPackage* GetPackage();
+    void ClearLookAtTarget();
+    TESObjectREFR* EffectSetting_GetLight();
+    void EffectSetting_SetLight(TESObjectREFR*);
+    void EffectSetting_SetLight(Actor*);
     void SetDialogueTopic(TESTopic*);
-    void FUN_0057ace0(void*);
-    void FUN_0057ad20(ScriptAnimation::Idle*);
-    void FUN_0057ace0(unsigned int);
-    void FUN_0057ad20(Idle*);
+    void TESObjectREFR_SetSayToTopicInfo(void*);
+    void TESObjectREFR_SetSayToTopic(ScriptAnimation::Idle*);
+    void TESObjectREFR_SetSayToTopicInfo(unsigned int);
+    void TESObjectREFR_SetSayToTopic(Idle*);
     Actor* FUN_005e3fa0();
     void InitPathingRequest(PathingRequest*, NiPoint3*, int);
     void InitializePathingRequestFromPosition(PathingRequest*, const NiPoint3&, TESObjectCELL*, TESWorldSpace*, float,
                                               PathingAvoidNodeArray*);
     void SetPathingRequestAvoidNodes(PathingRequest*);
     float GetCurrentMovementSpeed();
-    void FUN_008ad910(TESObjectREFR*, bool, bool);
+    void Actor_MoveActorAndFollowers_008ad910(TESObjectREFR*, bool, bool);
     bool DispatchWithObj(TESObjectREFR*, float, void*);
     void GetApplicablePackages(BSSimpleList<TESPackage*>*, float);
     bool HasCombatState();
@@ -603,51 +603,51 @@ public:
     bool RefreshCurrentPackage();
     bool IsAtPosition(const NiPoint3&, TESObjectCELL*, TESWorldSpace*, float, void*);
     void RefreshPackageState();
-    int FUN_00575d70();
-    void FUN_008ad1c0(const NiPoint3&, float, int, int, int, int);
+    int TESObjectREFR_GetWorldSpace();
+    void Actor_MoveActorAndFollowers(const NiPoint3&, float, int, int, int, int);
     bool FUN_008b0190(int);
     unsigned int ID();
-    float FUN_00884eb0();
-    const NiPoint3& FUN_008b3d50();
-    bool FUN_004938e0();
+    float GetRunSpeed();
+    const NiPoint3& GetCachedMoveDelta();
+    bool IsMoving_004938e0();
     float ProcessCoverLOSResult();
-    bool FUN_0096c950();
+    bool QUpdateLighting();
     bool FUN_004997b0();
-    bool FUN_0087f3d0();
+    bool GetEssential();
     void StealAlarm(TESObjectREFR*, int, int, int, TESForm*);
     bool IsFirstActorFlagSet();
     void SetIsSwimming(bool);
     bool ShouldShowSubtitles();
     static void SetActorDialogueState(unsigned int, bool);
-    float FUN_008c4330();
-    bool FUN_008c1bc0();
-    bool FUN_008b8e90(void*);
-    float FUN_008be870();
-    bool FUN_008a6650(int);
-    void FUN_008a6730(Actor*);
+    float Actor_GetRadiationResistanceMult();
+    bool BSSoundHandle_BSSoundHandle_008c1bc0();
+    bool Actor_IsInFaction(void*);
+    float Actor_GetPerceptionCondition();
+    bool Actor_IsFleeing(int);
+    void Actor_RemoveFleeTarget(Actor*);
     bool FUN_00477ba0();
-    bool FUN_005722c0(int iUnused);
+    bool TESObjectREFR_IsDead(int iUnused);
     Scene* FUN_009185e0();
-    void FUN_00819ca0();
-    float FUN_008c4850();
+    void MagicFogProjectile_InitHavok();
+    float GetAlphaMult();
     void SetProcessValue(float);
     void FUN_008c4640();
     void GetLightIntensity(float);
-    void __thiscall FUN_008acf10(bool);
+    void __thiscall Actor_SetGhost(bool);
     void __thiscall Kill(Actor*, float);
     void FUN_00865e50(bool* pValue, int a, int b);
     void FUN_005a9db0(Actor* apActor);
-    unsigned short FUN_0087f9f0();
+    unsigned short GetLevel_0087f9f0();
     float AdjustEffectElapsedTime(float, Actor*);
     void UpdateActorEquipmentState(TESObjectREFR*, float);
     void UpdateActorMovementState(bool);
     void ProcessActorDamage(float, BooleanFloatQuery*);
-    void FUN_0088fb00(float, BooleanFloatQuery*, Actor*);
+    void Actor_CreateBloodOnWeapon(float, BooleanFloatQuery*, Actor*);
     void HandleDismembermentTask(int, int, Actor*);
     void ProcessQueuedHit(bool, bool);
     void ProcessHitData(BooleanFloatQuery*, char);
     void DismemberLimb(unsigned int, unsigned int, bool, bool, bool, bool);
-    void FUN_008a5f20(bool);
+    void Actor_SetHavokWeapon(bool);
     void RefreshActorInteraction(bool, bool);
     void ProcessQueuedActorUpdate();
     static void UpdateActorConditionValue(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
@@ -655,10 +655,10 @@ public:
     static void HandleActorValueUpdate(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
     static void HandleRadiationValueChange(ActorValueOwner*, ActorValue::Index, float, float, ActorValueOwner*);
     bool IsAlert();
-    bool FUN_005721e0();
-    void FUN_005ce9d0(bool);
+    bool PlayerCharacter_GetTempPerson();
+    void SetForceSneak(bool);
     void ForwardToVtSlot(unsigned int);
-    void FUN_008b3cd0(NiPoint3);
+    void Actor_SetLookAtTarget(NiPoint3);
     void SetAimingWeapon(bool, bool, bool);
     void SetReloadState(bool);
     bool IsInIdleState();
@@ -666,93 +666,93 @@ public:
     bool HasFaction(TESFaction* apFaction);
     unsigned int GetActorStateFlags() const;
     BooleanFloatQuery* RefreshActorRuntimeData();
-    const char* FUN_008adcf0(TESForm*, int, int);
+    const char* Actor_GetPickUpSoundName(TESForm*, int, int);
     bool FUN_00573090(int);
-    void FUN_00572fc0(int, void*, void*, int, bool);
-    void FUN_008b52a0(int, int, bool, bool, bool, bool);
+    void TESObjectREFR_SetDismembered(int, void*, void*, int, bool);
+    void Actor_DismemberLimb(int, int, bool, bool, bool, bool);
     void ApplyEffectToBodyParts(Effect*, int, int, void*, void*, int, int, bool);
     void FUN_0046a010(bool);
-    void FUN_0095e6f0(int action);
-    bool FUN_0057a2f0();
-    bool FUN_0057a370();
-    void FUN_00579ac0(bool bValue);
-    void FUN_005728c0(int iArg);
-    void FUN_005729e0(int iArg);
+    void PlayerCharacter_CheckPoisonWeapon(int action);
+    bool TESObjectREFR_CanHaveSound();
+    bool TESObjectREFR_ShouldPlaySound();
+    void TESObjectREFR_AttachSound(bool bValue);
+    void TESObjectREFR_AddLight(int iArg);
+    void TESObjectREFR_RemoveLight(int iArg);
     bool FUN_00440da0();
     bool FUN_00440d80();
-    void FUN_0089d900(Actor*, float);
+    void Actor_Kill(Actor*, float);
     bool HasObjects(TESBoundObject*, int, int, unsigned int, int&);
-    void FUN_008ae640(int);
+    void Actor_SetForceUpdateQuest(int);
     void* Get3DSimple();
     const char* GetFullName();
-    bool FUN_008a16d0();
-    void FUN_008b0b00(int a);
-    void FUN_008b0bd0(void* p);
-    void FUN_00891190(int a);
+    bool IsWeaponDrawn();
+    void Actor_ReloadTargets(int a);
+    void Actor_InitLightingPropertyPtr(void* p);
+    void Actor_UpdateWeaponConditionEffects(int a);
     void* FUN_005715d0(int a, int b, int c);
     BipedAnim* GetBipedAnim(bool b);
-    void FUN_00571760(TESObjectWEAP* wpn);
-    void FUN_00567490(float fScale);
-    Box FUN_0056fa00();
-    void FUN_0056eab0();
-    int FUN_005730d0();
+    void TESObjectREFR_AttachWeapon(TESObjectWEAP* wpn);
+    void TESObjectREFR_SetScale(float fScale);
+    Box TESObjectREFR_GetOrientation();
+    void TESObjectREFR_InitHavokForCollisionObject();
+    int TESObjectREFR_GetCauseofDeath();
     BaseProcess* GetCurrentProcess() const;
     float GetHeight() const;
     unsigned int GetZero(void*);
-    bool FUN_008aad40(unsigned int);
-    void FUN_008a5e40(bool);
-    void FUN_00934250();
-    void FUN_00950030();
-    void UnequipItem(TESForm*, int, int, int, bool, int);
+    bool Actor_CheckShouldSaveHavokData(unsigned int);
+    void SetAlert_008a5e40(bool);
+    void MobileObject_StopCurrentDialogue();
+    void PlayerCharacter_UpdatePlayer3d();
+    void QueueUnEquipObject(TESForm*, int, int, int, bool, int);
     bool UnEquipObject(class TESBoundObject*, int, class ExtraDataList*, bool, bool, bool);
     void __thiscall RemoveEntry(Entry*);
     void SetEffectValue(int, float, int);
     bool FUN_008a3b30();
     void FUN_008c3c40(int a, int b);
-    Refr* FUN_00886080();
-    Refr* FUN_00881650();
-    void* FUN_00891d30();
-    bool FUN_008a7870();
-    bool FUN_0088d2f0(Refr* r, int a, int b, bool c);
-    void FUN_00562020();
-    bool __thiscall FUN_00891db0(TESBoundObject* object, int a, int b, int c, int& count);
-    float FUN_006b9130();
-    void FUN_008c4f10(BCaster_S* caster);
-    void FUN_00893340(int);
-    void FUN_00575830(NiPoint3*);
-    void FUN_00575700(NiPoint3);
-    void FUN_00484af0(int);
+    Refr* Actor_GetCurrentPackageLocation();
+    Refr* Actor_GetCurrentPackageTarget();
+    void* Actor_GetBestFoodItem();
+    bool IsEating();
+    bool Actor_PutActorInChairBedQuick(Refr* r, int a, int b, bool c);
+    void TESObjectREFR_Update3DPosition();
+    bool __thiscall Actor_HasObjects(TESBoundObject* object, int a, int b, int c, int& count);
+    float CombatTimer_GetTargetTime();
+    void Actor_CheckDeletedCaster(BCaster_S* caster);
+    void Actor_InitPackageLocations(int);
+    void TESObjectREFR_SetLocationOnReference(NiPoint3*);
+    void TESObjectREFR_SetAngleOnReference(NiPoint3);
+    void TESForm_SetDisabled(int);
     void FUN_00483710();
     void FUN_0046a010(int);
-    void FUN_008a08e0(int);
-    void FUN_008bbdb0();
-    void FUN_008bbe00();
-    void FUN_008c4400();
-    void FUN_0087d890(bool);
-    void FUN_00884c60();
-    bool FUN_004077c0();
+    void Actor_ClearInCombat(int);
+    void ResetCachedGunSkill();
+    void ResetCachedWeaponCondition();
+    void ResetRadiationResistanceMult();
+    void ConstructorInitialize(bool);
+    void ClearMoveModeAll();
+    bool TESForm_GetTemporary();
     using TESObjectREFR::GetParentCell;
     bool GetDeleted() const;
     using TESForm::GetDisabled;
-    bool FUN_008842c0();
+    bool Actor_IsFollowing();
     Actor* GetOffsetC();
-    Actor* FUN_006a9540();
+    Actor* NiAVObject_GetRotate_006a9540();
     Path* GetString();
-    Context* FUN_0068efb0();
+    Context* GetNavMeshInfo_0068efb0();
     NiPoint3 FUN_005c3420();
     int FUN_007058c0();
     bool GetByteAtE0();
-    NiPoint3* FUN_00923000();
+    NiPoint3* TESAmmo_GetAmmoEffectList();
     float GetFieldB8Float();
-    float FUN_0099e040();
-    History* FUN_006e4f90();
+    float BSSceneGraph_GetCameraFOV();
+    History* PathingRequestCoveredMove_GetUnreachableCoverLocations();
     History* GetOffsetF4();
     float GetFloatAtOffset68();
     float GetFloatAtOffsetB0();
     float GetFieldB4Float();
-    float FUN_006d6d90();
-    void FUN_006d30b0(const NiPoint3&);
-    void FUN_00c9c5b0(CListener* listener);
+    float PathingRequestCoveredMove_GetAttackerHealth();
+    void PathingRequestCoveredMove_SetCoverLocation(const NiPoint3&);
+    void hkpEntity_addEntityListener(CListener* listener);
 
     bool IsValidTarget64();
     void* GetSlot116();
@@ -765,13 +765,13 @@ public:
     float GetAdjustedAngle();
     using MobileObject::GetActorHeight;
     float GetActorHeight();
-    bool FUN_005a2030() const;
-    float FUN_008854d0(int p);
-    float FUN_00567400();
-    float FUN_00966980();
-    bool FUN_009a7f80() const;
-    TESObjectWEAP* FUN_004fd3c0();
-    TESObjectWEAP* FUN_00980070();
+    bool IsSwimming_005a2030() const;
+    float Actor_GetSneakHeight(int p);
+    float TESObjectREFR_GetScale_00567400();
+    float GetGravity_00966980();
+    bool GetHitScan() const;
+    TESObjectWEAP* BGSProjectile_GetExplosion();
+    TESObjectWEAP* GetCurrentCombatStyle();
     int GetFieldBC();
     float FUN_00931d70() const;
     bool vfn_0100();

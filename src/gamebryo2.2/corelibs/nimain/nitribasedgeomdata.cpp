@@ -62,7 +62,8 @@ void NiTriBasedGeomData::SaveBinary(NiStream& kStream)
 extern char const* const g_011f4a70_arg1;
 
 // @fnv 0x00a8a9f0
-char const* const* __cdecl FUN_00a8a9f0()
+// src: COMMUNITY 0x00a8a9f0
+char const* const* __cdecl NiTriBasedGeomData_GetRTTI()
 {
     return &g_011f4a70_arg1;
 }
@@ -76,7 +77,7 @@ typedef void (__thiscall* RegisterGeometryFieldsFn)(NiGeometryData*, NiTPrimitiv
 
 extern char const* const g_011f4a70_arg1;
 char* __cdecl _FUN_00a7d330(char const* pString);
-char* __cdecl FUN_00a7d490(char const* pString, unsigned short usValue);
+char* __cdecl NiGetViewerString_00a7d490(char const* pString, unsigned short usValue);
 
 // Calls RegisterFields, then appends a string from g_011f4a70_arg1 and a formatted m_usTriangles entry to pkStrings, growing it when full.
 // @fnv 0x00a8aab0
@@ -96,7 +97,7 @@ void __fastcall AppendTrianglesInfo(NiTriBasedGeomData* pThis, void*, NiTPrimiti
 
     pkStrings->SetAt(uiSize, pString);
 
-    pString = FUN_00a7d490("m_usTriangles", pThis->m_usTriangles);
+    pString = NiGetViewerString_00a7d490("m_usTriangles", pThis->m_usTriangles);
 
     uiSize = pkStrings->m_usSize;
     uiCapacity = pkStrings->m_usMaxSize;

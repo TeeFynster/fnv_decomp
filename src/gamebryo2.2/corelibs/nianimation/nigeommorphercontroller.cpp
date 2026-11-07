@@ -225,14 +225,16 @@ char* __fastcall GetMorphTargetName(NiGeomMorpherController* self, int, unsigned
 }
 
 // @fnv 0x00a3a8a0
-void* __fastcall FUN_00a3a8a0(NiGeomMorpherController* self, int unused, unsigned short idx)
+// src: GAMEBRYO_LIB 0x00a3a8a0
+void* __fastcall NiGeomMorpherController_GetInterpolator(NiGeomMorpherController* self, int unused, unsigned short idx)
 {
     return self->m_pInterpolatorItems[idx].m_spControllerInterpolator.m_pObject;
 }
 
 // Stores pkInterpolator into the morph controller's interpolator slot at usIndex, releasing the old interpolator and incrementing the new one's ref count.
 // @fnv 0x00a3a8b0
-void __fastcall FUN_00a3a8b0(NiGeomMorpherController* self, int, NiInterpolator* pkInterpolator, unsigned short usIndex)
+// src: GAMEBRYO_LIB 0x00a3a8b0
+void __fastcall NiGeomMorpherController_SetInterpolator(NiGeomMorpherController* self, int, NiInterpolator* pkInterpolator, unsigned short usIndex)
 {
     NiInterpolator** slot = reinterpret_cast<NiInterpolator**>(&self->m_pInterpolatorItems[usIndex]);
     NiInterpolator* pOldInterpolator = *slot;
@@ -318,7 +320,8 @@ struct GeomT
 };
 
 // @fnv 0x00a3aba0
-void __fastcall FUN_00a3aba0(NiGeomMorpherController* self, int)
+// src: XBOX_PDB 0x00a3aba0
+void __fastcall NiGeomMorpherController_OnPreDisplay(NiGeomMorpherController* self, int)
 {
     if (self->m_pkTarget && self->m_bUpdateEnabled)
     {
@@ -370,7 +373,8 @@ struct GlobalObjectO2_00a7b610
 };
 extern GlobalObjectO2_00a7b610 g_011f3728;
 // @fnv 0x00a3afd0
-GlobalObjectO2_00a7b610* __cdecl FUN_00a3afd0()
+// src: COMMUNITY 0x00a3afd0
+GlobalObjectO2_00a7b610* __cdecl NiGeomMorpherController_GetRTTI()
 {
     return &g_011f3728;
 }
@@ -422,7 +426,7 @@ struct MorphPoint3
 
 struct MorphGeomData
 {
-    void FUN_00a66bb0(unsigned short usVerts, MorphPoint3* pkDest, void* pvA, void* pvB, void* pvC,
+    void NiGeometryData_ReplaceData(unsigned short usVerts, MorphPoint3* pkDest, void* pvA, void* pvB, void* pvC,
                       unsigned int uiFlagA, unsigned int uiFlagB);
     unsigned short GetVertexCount() const
     {
@@ -472,7 +476,7 @@ MorphPoint3* __fastcall GetMorphVertices(NiGeomMorpherController* self, int)
     unsigned short usVerts = pkGeom->GetModelData()->GetVertexCount();
     MorphPoint3* pkNew = new MorphPoint3[usVerts];
     MorphGeomData* pkData = pkGeom->GetModelData();
-    pkData->FUN_00a66bb0(usVerts, pkNew, pkData->GetA(), pkData->GetB(), pkData->GetC(), pkData->GetFlags() & 1,
+    pkData->NiGeometryData_ReplaceData(usVerts, pkNew, pkData->GetA(), pkData->GetB(), pkData->GetC(), pkData->GetFlags() & 1,
                          pkData->GetFlags() & 0xf000);
     return pkNew;
 }
@@ -483,12 +487,13 @@ extern float DAT_011a8538[5];
 struct FUN_00a3e680_shell
 {
     float SampleLength(int iA, int iB, float fT);
-    float FUN_00a3e680(int iA, int iB, float fT);
+    float NiPathInterpolator_PathLength(int iA, int iB, float fT);
 };
 
 // Samples SampleLength at five scaled points from DAT_011a854c, weights each by DAT_011a8538, sums them and multiplies by fT.
 // @fnv 0x00a3e680
-float FUN_00a3e680_shell::FUN_00a3e680(int iA, int iB, float fT)
+// src: XBOX_PDB 0x00a3e680
+float FUN_00a3e680_shell::NiPathInterpolator_PathLength(int iA, int iB, float fT)
 {
     float fWeightedSum = 0.0f;
     for (int i = 0; i < 5; i++)
@@ -930,7 +935,7 @@ void __fastcall UpdateGeometryBound(NiGeomMorpherController* self, int)
             NiBound targetBound;
             data = self->m_spMorphTargetData.m_pObject;
             targetBound.ComputeBoundingSphere(data->m_uiNumVertsPerTarget, data->GetTarget(i)->m_pkVertexPositions);
-            morphBound.FUN_00a7f3f0(&targetBound);
+            morphBound.NiBound_Merge(&targetBound);
         }
     }
     else
@@ -1183,7 +1188,7 @@ void __fastcall ApplySetterArg(NiGeomMorpherController* self, int, SetterArg* a1
     }
     else
     {
-        bool ok = self->FUN_00a36250(a1->m_00);
+        bool ok = self->DontDoUpdate(a1->m_00);
         if (!ok || self->m_bNeedsUpdate != 0)
         {
             self->m_bUpdateEnabled = 1;
@@ -1221,11 +1226,12 @@ void __fastcall ApplySetterArg(NiGeomMorpherController* self, int, SetterArg* a1
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 // Allocates a morph controller with no morph data.
 // @fnv 0x00a3b550
-NiGeomMorpherController* __cdecl FUN_00a3b550()
+// src: EXE 0x00a3b550
+NiGeomMorpherController* __cdecl NiGeomMorpherController_CreateObject()
 {
     return new NiGeomMorpherController(0);
 }
@@ -1264,11 +1270,12 @@ struct C00a41590
 {
     char pad00[0x4];
     int m4;
-    int* FUN_00a41590();
+    int* NiMorphData_MorphTarget_GetName();
 };
 
 // @fnv 0x00a41590
-int* C00a41590::FUN_00a41590()
+// src: XBOX_PDB 0x00a41590
+int* C00a41590::NiMorphData_MorphTarget_GetName()
 {
     return &m4;
 }
@@ -1303,7 +1310,7 @@ template <class T> inline void SaveStreamValue(NiStream& stream, const T& value)
 
 struct S00c27120
 {
-    void FUN_00c27120(NiStream&);
+    void NiInterpController_SaveBinary(NiStream&);
 };
 
 inline unsigned int GetMorphTargetCountSV(const NiGeomMorpherController* self)
@@ -1317,7 +1324,7 @@ inline unsigned int GetMorphTargetCountSV(const NiGeomMorpherController* self)
 // @fnv 0x00a3b350
 void __fastcall SaveMorphData(NiGeomMorpherController* self, int, NiStream& stream)
 {
-    reinterpret_cast<S00c27120*>(self)->FUN_00c27120(stream);
+    reinterpret_cast<S00c27120*>(self)->NiInterpController_SaveBinary(stream);
     SaveStreamValue(stream, self->m_uiObjectFlags);
     stream.SaveLinkID(reinterpret_cast<const NiObject*>(self->m_spMorphTargetData.m_pObject));
     unsigned char bNeedsUpdate = self->m_bNeedsUpdate;

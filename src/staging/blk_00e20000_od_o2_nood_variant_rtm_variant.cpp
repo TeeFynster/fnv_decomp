@@ -79,27 +79,27 @@ struct Hull {
     Vertex vertices[55];
     Face* freeFaces[100];
     Face faces[4];
-    void FUN_00e2d440();
+    void ProcessEntries_00e2d440();
 };
 struct E29Src { int idx[4]; int n; };
 struct E29SrcList { E29Src* data; int count; };
 struct E29Item { LocalM128 a; LocalM128 b; char flag20; int val24; };
 struct E29Out1 { E29Item item; void* ptr30; int one34; int zero38; char unk3c; char flag3d; };
 struct E29Out2 { E29Item items[4]; int count; char flagC4; void* ptrs[4]; int unkD8; int unkDC; int zeros[4]; int unkF0; };
-void FUN_00e29a10(E29SrcList* src, const LocalM128* posA, const LocalM128* posB, char* base, E29Out1* out1, int* outCount1, E29Out2* out2, int* outCount2);
+void Runtime_ProcessEntries_00e29a10(E29SrcList* src, const LocalM128* posA, const LocalM128* posB, char* base, E29Out1* out1, int* outCount1, E29Out2* out2, int* outCount2);
 inline void* operator new(unsigned int, void* p) { return p; }
 void __cdecl ResizeAudioStream(void* mem, void* array, int sizeOfElement);
 struct __declspec(align(16)) Key_e3a1 {
     float m_ax, m_ay, m_az, m_aw;
     float m_bx, m_by, m_bz, m_bw;
-    Key_e3a1* FUN_00e39e50();
+    Key_e3a1* InitializeFields_00e39e50();
 };
 struct Track_e3a1 {
     int unk00, unk04;
     int m_numKeys;
     int m_pRayCursor;
     hkArray<Key_e3a1> m_keys;
-    void FUN_00e3a1e0(int numKeys);
+    void hkpTyremarksWheel_setNumPoints(int numKeys);
 };
 extern "C" LocalM128 _mm_load_ss(const float*);
 extern "C" LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
@@ -108,8 +108,8 @@ extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 extern int DAT_010dbacc, DAT_010dbad8, DAT_010dbae4, DAT_010dbaf8;
 extern int DAT_010ccfac, DAT_010ccfa0, DAT_010ccf8c, DAT_010c3bb8;
 extern void* DAT_011b3830[];
-void __cdecl FUN_00d1bb50(void*, void*, void*, void*, void*, void*, void*, void*, void*, int) throw();
-void __cdecl FUN_00d1d490(void*, void*, int, void*, void*, void*) throw();
+void __cdecl Runtime_UpdateState_00d1bb50(void*, void*, void*, void*, void*, void*, void*, void*, void*, int) throw();
+void __cdecl hkAabbTreeQueryUtils_ForwardCall_00d1d490(void*, void*, int, void*, void*, void*) throw();
 typedef LocalM128 FourFloatVector;
 __forceinline FourFloatVector packFractions(float x,float y,float z,float w) { FourFloatVector v; v.m128_f32[0]=x; v.m128_f32[1]=y; v.m128_f32[2]=z; v.m128_f32[3]=w; return v; }
 struct RaySource {
@@ -172,7 +172,7 @@ struct Bundle {
 struct FractionValues { float x,y,z,w; };
 struct FractionArg { FourFloatVector* ptr; };
 struct Owner { unsigned unk00, unk04, unk08, unk0c; void* context; };
-void __cdecl FUN_00e2b510(Owner* owner, RayBatch* input, int mode, FourFloatVector& fractions);
+void __cdecl Runtime_ProcessEntries_00e2b510(Owner* owner, RayBatch* input, int mode, FourFloatVector& fractions);
 extern "C" void _ReadWriteBarrier(void);
 extern DWORD DAT_0126835c;
 unsigned __int64 __cdecl __rdtsc(void);
@@ -188,7 +188,7 @@ public:
 class JobTarget
 {
 public:
-    void FUN_00d04380();
+    void hkSemaphore_acquire();
 };
 struct __declspec(align(16)) AutoJob
 {
@@ -278,7 +278,7 @@ struct SplitResult
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
 };
-void __cdecl FUN_00e29b80(int a, int b, int n, void* p1, void* p2, void* p3, SplitResult* pOut);
+void __cdecl Object_ProcessEntries_00e29b80(int a, int b, int n, void* p1, void* p2, void* p3, SplitResult* pOut);
 __forceinline void ProfMark(const char* pName)
 {
     hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -342,7 +342,7 @@ template <class T> __forceinline void ArrClearFree(hkArray<T>& arr)
     arr.m_data = 0;
     arr.m_iCapacityState = 0x80000000;
 }
-void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pSrc, JobQueue* m_pPrimaryTaskProcessor, JobWaiter* pWaiter, int iParam, bool bAuto);
+void __cdecl hkTreeBundleRayCastUtil_startWorldRayCastWithAutoBundleJobs(int a, int b, int n, float f1, float f2, JobSource* pSrc, JobQueue* m_pPrimaryTaskProcessor, JobWaiter* pWaiter, int iParam, bool bAuto);
 extern "C" LocalM128 _mm_max_ps(LocalM128, LocalM128);
 namespace SplineMax {
 // Kept POD: FUN_00e314c0 returns this vector by value through the hidden pointer.
@@ -454,7 +454,8 @@ __forceinline void hkArrayBase<T>::pushBackUnchecked(const T& t)
 
 
 // @fnv 0x00e29b80
-void __cdecl FUN_00e29b80(int a, int b, int numRays, void* p1, void* p2, void* p3, SplitResult* pOut)
+// src: GUESS 0x00e29b80 (confidence: low)
+void __cdecl Object_ProcessEntries_00e29b80(int a, int b, int numRays, void* p1, void* p2, void* p3, SplitResult* pOut)
 {
     for (int i = 0; i < numRays; i++)
     {
@@ -608,7 +609,8 @@ static __forceinline void S2db70_calculatePerpendicularVector(const S2db70_Vecto
     biVectorOut(ok2) = -vectorIn(ok1);
 }
 
-static __declspec(noinline) void FUN_00e2da40(const S2db70_Shape* shapeA, const S2db70_Shape* shapeB, const S2db70_Transform& aTb, const S2db70_Vector4& dir, S2db70_Sample& sample)
+// src: GUESS 0x00e2da40 (confidence: low)
+static __declspec(noinline) void hkTransform_UpdateFields_00e2da40(const S2db70_Shape* shapeA, const S2db70_Shape* shapeB, const S2db70_Transform& aTb, const S2db70_Vector4& dir, S2db70_Sample& sample)
 {
     S2db70_Vector4 negDir; negDir.setNeg4(dir);
     S2db70_Vector4 dirInB;
@@ -638,7 +640,8 @@ static __declspec(noinline) void FUN_00e2da40(const S2db70_Shape* shapeA, const 
 }
 
 // @fnv 0x00e2db70
-extern "C" void FUN_00e2db70(const S2db70_Shape* shapeA, const S2db70_Shape* shapeB, const S2db70_Transform& aTb,
+// src: GUESS 0x00e2db70 (confidence: medium)
+extern "C" void Geometry_RefineClosestPointsByDirectionSampling(const S2db70_Shape* shapeA, const S2db70_Shape* shapeB, const S2db70_Transform& aTb,
                   S2db70_Vector4& pointAinA, S2db70_Vector4& pointBinB, S2db70_Out& out)
 {
     S2db70_Sample sample;
@@ -649,9 +652,9 @@ extern "C" void FUN_00e2db70(const S2db70_Shape* shapeA, const S2db70_Shape* sha
     {
         S2db70_Vector4 dir = *axis;
         axis++;
-        FUN_00e2da40(shapeA, shapeB, aTb, dir, sample);
+        hkTransform_UpdateFields_00e2da40(shapeA, shapeB, aTb, dir, sample);
         dir.setNeg4(dir);
-        FUN_00e2da40(shapeA, shapeB, aTb, dir, sample);
+        hkTransform_UpdateFields_00e2da40(shapeA, shapeB, aTb, dir, sample);
     }
 
     for (hkReal eps = 1.0f; eps > 0.001f; )
@@ -674,10 +677,10 @@ extern "C" void FUN_00e2db70(const S2db70_Shape* shapeA, const S2db70_Shape* sha
         d2.mul4(invLen);
         d3.mul4(invLen);
 
-        FUN_00e2da40(shapeA, shapeB, aTb, d0, sample);
-        FUN_00e2da40(shapeA, shapeB, aTb, d1, sample);
-        FUN_00e2da40(shapeA, shapeB, aTb, d2, sample);
-        FUN_00e2da40(shapeA, shapeB, aTb, d3, sample);
+        hkTransform_UpdateFields_00e2da40(shapeA, shapeB, aTb, d0, sample);
+        hkTransform_UpdateFields_00e2da40(shapeA, shapeB, aTb, d1, sample);
+        hkTransform_UpdateFields_00e2da40(shapeA, shapeB, aTb, d2, sample);
+        hkTransform_UpdateFields_00e2da40(shapeA, shapeB, aTb, d3, sample);
         eps *= 0.5f;
     }
 
@@ -699,7 +702,8 @@ extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
 extern "C" LocalM128 _mm_load_ps(const float*);
 
 // @fnv 0x00e31410
-LocalM128* FUN_00e31410(LocalM128* out, AvgSrc* s)
+// src: GUESS 0x00e31410 (confidence: low)
+LocalM128* Runtime_ProcessEntries_00e31410(LocalM128* out, AvgSrc* s)
 {
     int m = s->count;
     LocalM128 sum = _mm_setzero_ps();
@@ -731,7 +735,8 @@ extern float DAT_01012068;
 extern float DAT_01011d78;
 static __forceinline LocalM128 inverseSpan(LocalM128 a, LocalM128 b) { return _mm_div_ss(_mm_load_ss(&DAT_01012068),_mm_add_ss(a,b)); }
 // @fnv 0x00e33670
-void FUN_00e33670(float t, int unused, const float* knots, const LocalM128* ctrl, LocalM128* out)
+// src: GUESS 0x00e33670 (confidence: low)
+void Runtime_ComputeValues_00e33670(float t, int unused, const float* knots, const LocalM128* ctrl, LocalM128* out)
 {
     float f;
     f = t - knots[1];

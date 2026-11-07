@@ -8,7 +8,7 @@
 #include "../../../../include/NiRenderer.h"
 #include "../../../../include/Pair.h"
 const void* g_011f5b1c;
-const void* __cdecl FUN_00a820d0();
+const void* __cdecl NiSkinPartition_GetRTTI();
 void __stdcall FUN_00a82600(int a, int b, float c);
 struct Holder
 {
@@ -28,7 +28,7 @@ struct S : NiRefObject
     int f4;
     int f8;
     void* fC;
-    void __thiscall FUN_00a824d0();
+    void __thiscall SetVtableAndProcessState_00a824d0();
 };
 struct NiTAbstractPoolAllocator_unsigned_int
 {
@@ -47,17 +47,17 @@ struct FUN_00a82710_shell
     void* m_p;
     unsigned int m_iElementCount;
     unsigned int m_uiItemCount;
-    void FUN_00a82710(unsigned int n);
+    void NiTSet_UInt16_Add(unsigned int n);
 };
 struct FUN_00a82890_shell
 {
     char __thiscall ContainsAllValues(void*);
-    char __thiscall FUN_00a82890(const unsigned short* a, const void* b);
+    char __thiscall ContainsAllIndexedTriples(const unsigned short* a, const void* b);
 };
 void __cdecl _delete(void*, unsigned int);
 struct FUN_00a82c70_holder
 {
-    void FUN_00a824d0();
+    void SetVtableAndProcessState_00a824d0();
     void* DestroyIfFlagged(unsigned int);
 };
 struct C082d30
@@ -65,7 +65,7 @@ struct C082d30
     unsigned short* f0;
     unsigned int f4;
     unsigned int f8;
-    void FUN_00a82710(unsigned int);
+    void NiTSet_UInt16_Add(unsigned int);
     void AppendMatchingIndices(int, int*, unsigned int);
 };
 struct Dummy13
@@ -81,11 +81,11 @@ struct MyCls
     int _40;
     int _44;
     void _Call_a5d3a0();
-    void FUN_00a853c0(int);
+    void NiSkinData_ComputeBoneBounds(int);
     MyCls* InitFromData(int, int, const Dummy13&, int);
 };
 extern int DAT_0109e574;
-int __cdecl FUN_00a853c0();
+int __cdecl NiSkinData_ComputeBoneBounds();
 void* __cdecl _NiMalloc(unsigned int);
 void __cdecl _NiFree(void*);
 struct FUN_00a826b0_shell
@@ -93,7 +93,7 @@ struct FUN_00a826b0_shell
     void* m_p;
     unsigned int m_uiItemCount;
     unsigned int m_uiBufferCapacity;
-    void FUN_00a826b0(unsigned int n);
+    void ReleaseStorage_00a826b0(unsigned int n);
 };
 struct FUN_00a81ff0_elem
 {
@@ -108,7 +108,7 @@ struct FUN_00a81ff0_elem
     int m_20;
     int m_24;
     int m_28;
-    bool FUN_00a81c90(const FUN_00a81ff0_elem* other);
+    bool NiSkinPartition_Partition_IsEqual(const FUN_00a81ff0_elem* other);
 };
 struct FUN_00a81ff0_cls
 {
@@ -320,7 +320,7 @@ __forceinline bool EqualBuffers(const void* right, const void* left, unsigned in
 }
 struct PartitionCompare : NiSkinPartition::Partition
 {
-    bool FUN_00a81c90(const PartitionCompare* other);
+    bool NiSkinPartition_Partition_IsEqual(const PartitionCompare* other);
 };
 struct CA82250IndexArray
 {
@@ -558,7 +558,7 @@ struct SkinBuilder
     int unk04;
     unsigned int count;
     __declspec(nothrow) void BuildBoneLODControllerSets(SkinGeom*, void*, SkinItems*, int*) throw();
-    __declspec(nothrow) void FUN_00a839d0(SkinItems*) throw();
+    __declspec(nothrow) void NiSkinPartition_MergeBoneSets(SkinItems*) throw();
     bool BuildTriangleSetMapping(SkinGeom*, void*, unsigned int, void*, SkinItems*, int**, int*) throw();
 };
 template <class T> class SkinTArray
@@ -633,7 +633,7 @@ class SkinPartitionOwner : public SkinObjectBase
     NiSkinPartition::Partition* m_pPartitions;
 
     virtual ~SkinPartitionOwner();
-    void FUN_00a846e0(SkinViewerStrings* pkStrings);
+    void NiSkinPartition_GetViewerStrings(SkinViewerStrings* pkStrings);
 };
 
 // Sorted skin-index sets; the limit is the first stack argument.
@@ -694,7 +694,8 @@ inline Pair::Pair() throw()
 {}
 
 // @fnv 0x00a839d0
-void __stdcall FUN_00a839d0(unsigned char threshold, MergeItems* items)
+// src: COMMUNITY 0x00a839d0
+void __stdcall NiSkinPartition_MergeBoneSets(unsigned char threshold, MergeItems* items)
 {
     // One equivalence id per bounded skin set; 50 entries inferred from the frame.
     int cls[50];

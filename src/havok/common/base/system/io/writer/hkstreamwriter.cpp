@@ -4,19 +4,22 @@
 #include "havok/hkStreamWriter.h"
 
 // @fnv 0x00cb15d0
-int __stdcall FUN_00cb15d0(int arg0, int arg1)
+// src: GUESS 0x00cb15d0 (confidence: high)
+int __stdcall hkStreamWriter_ReturnOne(int arg0, int arg1)
 {
     return 1;
 }
 
 // @fnv 0x00cb15f0
-void __stdcall FUN_00cb15f0(unsigned char* flag)
+// src: HAVOK_SRC 0x00cb15f0
+void __stdcall hkStreamWriter_seekTellSupported(unsigned char* flag)
 {
     *flag = 0;
 }
 
 // @fnv 0x00cb15e0
-int __cdecl FUN_00cb15e0()
+// src: HAVOK_SRC 0x00cb15e0
+int __cdecl hkStreamWriter_tell()
 {
     return -1;
 }

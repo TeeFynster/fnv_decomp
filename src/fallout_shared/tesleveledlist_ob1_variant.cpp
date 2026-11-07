@@ -81,7 +81,7 @@ class NiPointModifier : public NiBaseModifier
     {
         return m_fValue;
     }
-    void FUN_00c61120(NiViewerStringsArray* pkStrings);
+    void BSMultiBoundCapsule_GetViewerStrings(NiViewerStringsArray* pkStrings);
 
     static NiRTTI ms_kRTTI;
     NiPoint3 m_kPathOffset;
@@ -90,7 +90,8 @@ class NiPointModifier : public NiBaseModifier
 };
 
 // @fnv 0x00c61120
-void NiPointModifier::FUN_00c61120(NiViewerStringsArray* pkStrings)
+// src: XBOX_PDB 0x00c61120
+void NiPointModifier::BSMultiBoundCapsule_GetViewerStrings(NiViewerStringsArray* pkStrings)
 {
     NiBaseModifier::GetViewerStrings(pkStrings);
     pkStrings->Add(CreateDebugString(static_cast<const NiRTTI&>(ms_kRTTI).GetName()));

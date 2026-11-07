@@ -6,11 +6,12 @@
 
 struct FUN_006e4f90_shell
 {
-    void* FUN_006e4f90();
+    void* PathingRequestCoveredMove_GetUnreachableCoverLocations();
 };
 
 // @fnv 0x006e4f90
-void* FUN_006e4f90_shell::FUN_006e4f90()
+// src: XBOX_PDB 0x006e4f90
+void* FUN_006e4f90_shell::PathingRequestCoveredMove_GetUnreachableCoverLocations()
 {
     return reinterpret_cast<char*>(this) + 0xE4;
 }
@@ -33,22 +34,23 @@ struct FUN_006e4d00_shell
 
 struct FUN_006dae90_shell
 {
-    void* FUN_006dae90();
+    void* UpdateState_006dae90();
 };
 
 // @fnv 0x006e4d00
 void FUN_006e4d00_shell::CallMemberFunction()
 {
-    ((FUN_006dae90_shell*)((char*)this + 0x20))->FUN_006dae90();
+    ((FUN_006dae90_shell*)((char*)this + 0x20))->UpdateState_006dae90();
 }
 
 struct FUN_006e4ef0_shell
 {
-    void FUN_006e4ef0(float value);
+    void PathingRequestCoveredMove_SetAttackerHeight(float value);
 };
 
 // @fnv 0x006e4ef0
-void FUN_006e4ef0_shell::FUN_006e4ef0(float value)
+// src: XBOX_PDB 0x006e4ef0
+void FUN_006e4ef0_shell::PathingRequestCoveredMove_SetAttackerHeight(float value)
 {
     *(float*)((char*)this + 0xb8) = value;
 }
@@ -97,11 +99,12 @@ void* FUN_006e4cd0_shell::FUN_006e4cd0(unsigned int flags)
 
 struct FUN_006e4f50_shell
 {
-    void FUN_006e4f50();
+    void ClearVectorD4AndFlagE0();
 };
 // Sets the NiPoint3 at offset 0xd4 to NiPoint3::ZERO and clears the byte at offset 0xe0.
 // @fnv 0x006e4f50
-void FUN_006e4f50_shell::FUN_006e4f50()
+// src: GUESS 0x006e4f50 (confidence: medium)
+void FUN_006e4f50_shell::ClearVectorD4AndFlagE0()
 {
     *(NiPoint3*)((char*)this + 0xd4) = NiPoint3::ZERO;
     *(char*)((char*)this + 0xe0) = 0;
@@ -423,19 +426,19 @@ struct FUN_006e2750_cls
 };
 struct FUN_00507610_cls
 {
-    void FUN_00507610(float v);
+    void PathingRequestClosePoint_SetMinDistance(float v);
 };
 struct FUN_006e5ee0_cls
 {
-    void FUN_006e5ee0(float v);
+    void SetMaxDistance_006e5ee0(float v);
 };
 struct FUN_006e4320_cls
 {
-    void FUN_006e4320(float v);
+    void PathingRequestCoveredMove_SetAttackerSneakHeight(float v);
 };
 struct FUN_005076c0_cls
 {
-    void FUN_005076c0(float v);
+    void PathingRequestCoveredMove_SetAttackerHealth(float v);
 };
 struct FUN_00705b10_cls
 {
@@ -443,11 +446,11 @@ struct FUN_00705b10_cls
 };
 struct FUN_006d30b0_cls
 {
-    void FUN_006d30b0(void* p);
+    void PathingRequestCoveredMove_SetCoverLocation(void* p);
 };
 struct FUN_006e4f10_cls
 {
-    void FUN_006e4f10(void* p);
+    void PathingRequestCoveredMove_SetTargetLocation(void* p);
 };
 struct FUN_00613fb0_cls
 {
@@ -469,25 +472,25 @@ void FUN_006e4dd0_cls::CopyTo(void* arg)
     void* pTarget = arg;
     ((FUN_006e2750_cls*)this)->FUN_006e2750(pTarget);
 
-    ((FUN_00507610_cls*)pTarget)->FUN_00507610(m_b0);
-    ((FUN_006e5ee0_cls*)pTarget)->FUN_006e5ee0(m_b4);
-    ((FUN_006e4ef0_shell*)pTarget)->FUN_006e4ef0(m_b8);
-    ((FUN_006e4320_cls*)pTarget)->FUN_006e4320(m_bc);
-    ((FUN_005076c0_cls*)pTarget)->FUN_005076c0(m_c0);
+    ((FUN_00507610_cls*)pTarget)->PathingRequestClosePoint_SetMinDistance(m_b0);
+    ((FUN_006e5ee0_cls*)pTarget)->SetMaxDistance_006e5ee0(m_b4);
+    ((FUN_006e4ef0_shell*)pTarget)->PathingRequestCoveredMove_SetAttackerHeight(m_b8);
+    ((FUN_006e4320_cls*)pTarget)->PathingRequestCoveredMove_SetAttackerSneakHeight(m_bc);
+    ((FUN_005076c0_cls*)pTarget)->PathingRequestCoveredMove_SetAttackerHealth(m_c0);
     ((FUN_00705b10_cls*)pTarget)->FUN_00705b10(m_c4);
-    ((FUN_006d30b0_cls*)pTarget)->FUN_006d30b0(&unkC8);
+    ((FUN_006d30b0_cls*)pTarget)->PathingRequestCoveredMove_SetCoverLocation(&unkC8);
 
     if (m_e0)
     {
-        ((FUN_006e4f10_cls*)pTarget)->FUN_006e4f10(&unkD4);
+        ((FUN_006e4f10_cls*)pTarget)->PathingRequestCoveredMove_SetTargetLocation(&unkD4);
     }
     else
     {
-        ((FUN_006e4f50_shell*)pTarget)->FUN_006e4f50();
+        ((FUN_006e4f50_shell*)pTarget)->ClearVectorD4AndFlagE0();
     }
 
     ((FUN_00613fb0_cls*)pTarget)->FUN_00613fb0(m_e1);
-    ((FUN_006e5330_cls*)&unkE4)->FUN_006e5330(((FUN_006e4f90_shell*)pTarget)->FUN_006e4f90());
+    ((FUN_006e5330_cls*)&unkE4)->FUN_006e5330(((FUN_006e4f90_shell*)pTarget)->PathingRequestCoveredMove_GetUnreachableCoverLocations());
     ((FUN_0069cfe0_cls*)&unkF4)->CopyElementsTo(((FUN_006e4fb0_shell*)pTarget)->GetOffsetF4());
 }
 
@@ -497,12 +500,13 @@ struct FUN_006e4f10_class
     NiPoint3 m_afExtents;
     bool m_flag;
 
-    void __thiscall FUN_006e4f10(const NiPoint3& pt);
+    void __thiscall PathingRequestCoveredMove_SetTargetLocation(const NiPoint3& pt);
 };
 
 // Stores pt into the NiPoint3 member and sets m_flag to true.
 // @fnv 0x006e4f10
-void __thiscall FUN_006e4f10_class::FUN_006e4f10(const NiPoint3& aPoint)
+// src: XBOX_PDB 0x006e4f10
+void __thiscall FUN_006e4f10_class::PathingRequestCoveredMove_SetTargetLocation(const NiPoint3& aPoint)
 {
     m_afExtents = aPoint;
     m_flag = true;
@@ -510,18 +514,18 @@ void __thiscall FUN_006e4f10_class::FUN_006e4f10(const NiPoint3& aPoint)
 
 struct FNVInputStream
 {
-    void FUN_00864980(void* destination, unsigned int bytes);
+    void LoadData(void* destination, unsigned int bytes);
     unsigned int FUN_00864a60();
 };
 struct FNVElements4
 {
     void FUN_006f2290(unsigned int count, unsigned int flag);
-    void* FUN_006a7ad0(unsigned int index);
+    void* BSSimpleArray_NiAVObject_1024_GetAt(unsigned int index);
 };
 struct FNVElements12
 {
     void FUN_0069cea0(unsigned int count, unsigned int flag);
-    void* FUN_006a7af0(unsigned int index);
+    void* BSSimpleArray_NiPoint3_1024_GetAt(unsigned int index);
 };
 struct FUN_006e51a0_shell
 {
@@ -532,22 +536,22 @@ struct FUN_006e51a0_shell
 void FUN_006e51a0_shell::LoadFromStream(FNVInputStream* stream)
 {
     FUN_006e34f0(stream);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xb0, 4);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xb4, 4);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xb8, 4);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xbc, 4);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xc0, 4);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xc4, 4);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xc8, 12);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xd4, 12);
-    stream->FUN_00864980(reinterpret_cast<char*>(this) + 0xe0, 1);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xb0, 4);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xb4, 4);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xb8, 4);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xbc, 4);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xc0, 4);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xc4, 4);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xc8, 12);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xd4, 12);
+    stream->LoadData(reinterpret_cast<char*>(this) + 0xe0, 1);
 
     unsigned int count4 = stream->FUN_00864a60();
     reinterpret_cast<FNVElements4*>(reinterpret_cast<char*>(this) + 0xe4)->FUN_006f2290(count4, 1);
     for (unsigned int i = 0; i < count4; ++i)
     {
-        void* item = reinterpret_cast<FNVElements4*>(reinterpret_cast<char*>(this) + 0xe4)->FUN_006a7ad0(i);
-        stream->FUN_00864980(item, 4);
+        void* item = reinterpret_cast<FNVElements4*>(reinterpret_cast<char*>(this) + 0xe4)->BSSimpleArray_NiAVObject_1024_GetAt(i);
+        stream->LoadData(item, 4);
     }
     {
         unsigned int count12 = stream->FUN_00864a60();
@@ -555,8 +559,8 @@ void FUN_006e51a0_shell::LoadFromStream(FNVInputStream* stream)
         for (unsigned int uiIndex12 = 0; uiIndex12 < count12; ++uiIndex12)
         {
             void* item =
-                reinterpret_cast<FNVElements12*>(reinterpret_cast<char*>(this) + 0xf4)->FUN_006a7af0(uiIndex12);
-            stream->FUN_00864980(item, 12);
+                reinterpret_cast<FNVElements12*>(reinterpret_cast<char*>(this) + 0xf4)->BSSimpleArray_NiPoint3_1024_GetAt(uiIndex12);
+            stream->LoadData(item, 12);
         }
     }
 }
@@ -654,7 +658,7 @@ FUN_006e5510_cls::FUN_006e5510_cls()
 struct SaveBuffer6e4
 {
     void FUN_00865e50(void* pvData, unsigned int uiSize, int iFlags);
-    void FUN_00865f60(unsigned int ItemUpdateArray);
+    void SaveVariableSizedValue(unsigned int ItemUpdateArray);
 };
 struct Elements4Ex : FNVElements4
 {
@@ -668,7 +672,7 @@ struct Elements12Ex : FNVElements12
 };
 struct Base6e3230
 {
-    void FUN_006e3230(void* pkBuffer);
+    void PathingRequest_SaveGame(void* pkBuffer);
 };
 
 struct Saver6e4 : Base6e3230
@@ -693,7 +697,7 @@ struct Saver6e4 : Base6e3230
 // @fnv 0x006e4fd0
 void Saver6e4::SaveToBuffer(SaveBuffer6e4* pkBuffer)
 {
-    FUN_006e3230(pkBuffer);
+    PathingRequest_SaveGame(pkBuffer);
     pkBuffer->FUN_00865e50(&m_iB0, 4, 0);
     pkBuffer->FUN_00865e50(&m_iB4, 4, 0);
     pkBuffer->FUN_00865e50(&m_iB8, 4, 0);
@@ -705,19 +709,19 @@ void Saver6e4::SaveToBuffer(SaveBuffer6e4* pkBuffer)
     pkBuffer->FUN_00865e50(&m_bE0, 1, 0);
     {
         unsigned int ItemUpdateArray = &m_kList4 ? m_kList4.FUN_0044ddc0() : 0;
-        pkBuffer->FUN_00865f60(ItemUpdateArray);
+        pkBuffer->SaveVariableSizedValue(ItemUpdateArray);
         for (unsigned int i = 0; i < ItemUpdateArray; i++)
         {
-            void* pItem = m_kList4.FUN_006a7ad0(i);
+            void* pItem = m_kList4.BSSimpleArray_NiAVObject_1024_GetAt(i);
             pkBuffer->FUN_00865e50(pItem, 4, 0);
         }
     }
     {
         unsigned int ItemUpdateArray = &m_kList12 ? m_kList12.FUN_0044ddc0() : 0;
-        pkBuffer->FUN_00865f60(ItemUpdateArray);
+        pkBuffer->SaveVariableSizedValue(ItemUpdateArray);
         for (unsigned int i = 0; i < ItemUpdateArray; i++)
         {
-            void* pItem = m_kList12.FUN_006a7af0(i);
+            void* pItem = m_kList12.BSSimpleArray_NiPoint3_1024_GetAt(i);
             pkBuffer->FUN_00865e50(pItem, 0xc, 0);
         }
     }

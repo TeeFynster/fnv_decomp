@@ -52,7 +52,8 @@ struct GlobalObjectO2_00a7b610
 };
 extern GlobalObjectO2_00a7b610 g_011f403c;
 // @fnv 0x00a52af0
-GlobalObjectO2_00a7b610* FUN_00a52af0()
+// src: COMMUNITY 0x00a52af0
+GlobalObjectO2_00a7b610* NiBSplineBasisData_GetRTTI()
 {
     return &g_011f403c;
 }
@@ -61,7 +62,7 @@ class ActorCombatGroup;
 namespace fnv_00a52c90 {
 extern int g_011f403c;
 void __stdcall AppendCameraPathEntries(void*);
-ActorCombatGroup* __cdecl FUN_00a7d330(int);
+ActorCombatGroup* __cdecl NiViewerStrings_NiGetViewerString_Title(int);
 struct ArrX
 {
     void SetSize(unsigned);
@@ -73,10 +74,11 @@ struct ArrX
     unsigned short m_usGrowBy;
 };
 // @fnv 0x00a52c90
-void __stdcall FUN_00a52c90(ArrX* pArray)
+// src: XBOX_PDB 0x00a52c90
+void __stdcall NiBSplineBasisData_GetViewerStrings(ArrX* pArray)
 {
     AppendCameraPathEntries(pArray);
-    ActorCombatGroup* pObject = FUN_00a7d330(g_011f403c);
+    ActorCombatGroup* pObject = NiViewerStrings_NiGetViewerString_Title(g_011f403c);
     unsigned n = pArray->m_usSize;
     if (n >= pArray->m_usMaxSize)
         pArray->SetSize(n + pArray->m_usGrowBy);
@@ -106,12 +108,13 @@ struct FUN_00a51ab0_cls : FUN_00a51ab0_base
     float m_28;
     int m_2c;
 
-    FUN_00a51ab0_cls* FUN_00a51ab0(int a1, int a2, int a3);
+    FUN_00a51ab0_cls* NiBSplineColorInterpolator_NiBSplineColorInterpolator(int a1, int a2, int a3);
 };
 
 // Calls InitBase, sets the vtable pointer, zeroes four floats and stores a2 into m_2c, then returns this.
 // @fnv 0x00a51ab0
-FUN_00a51ab0_cls* FUN_00a51ab0_cls::FUN_00a51ab0(int a1, int a2, int a3)
+// src: GAMEBRYO_LIB 0x00a51ab0
+FUN_00a51ab0_cls* FUN_00a51ab0_cls::NiBSplineColorInterpolator_NiBSplineColorInterpolator(int a1, int a2, int a3)
 {
     InitBase(a1, a3);
     m_vptr00 = (int)&DAT_01099d3c;
@@ -123,7 +126,7 @@ FUN_00a51ab0_cls* FUN_00a51ab0_cls::FUN_00a51ab0(int a1, int a2, int a3)
     return this;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int uiSize);
+void* __cdecl Object_DispatchCommandFour(unsigned int uiSize);
 
 inline void* operator new(unsigned int, void* pMemory) throw()
 {
@@ -133,7 +136,7 @@ inline void* operator new(unsigned int, void* pMemory) throw()
 // Construct in separately allocated storage so constructor failure has no delete cleanup.
 inline NiBSplineBasisData* AllocateBSplineBasisData()
 {
-    void* pMemory = FUN_00aa13e0(sizeof(NiBSplineBasisData));
+    void* pMemory = Object_DispatchCommandFour(sizeof(NiBSplineBasisData));
     if (pMemory)
     {
         NiBSplineBasisData* pResult = ::new (pMemory) NiBSplineBasisData;
@@ -186,12 +189,13 @@ struct FUN_00a54190_cls
     unsigned short m_0a;
     unsigned short m_0c;
     unsigned short m_0e;
-    FUN_00a54190_cls* FUN_00a54190(int n, short a2);
+    FUN_00a54190_cls* UpdateState_00a54190(int n, short a2);
 };
 
 // Sets object fields and allocates 4 times m_08 bytes when m_08 is positive.
 // @fnv 0x00a54190
-FUN_00a54190_cls* FUN_00a54190_cls::FUN_00a54190(int n, short a2)
+// src: GUESS 0x00a54190 (confidence: low)
+FUN_00a54190_cls* FUN_00a54190_cls::UpdateState_00a54190(int n, short a2)
 {
     m_vt = (int)&DAT_0109a2a4;
     m_08 = n;

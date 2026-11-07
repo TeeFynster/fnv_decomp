@@ -42,7 +42,7 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
     } templateSelection;
     {
         TESCreature defaultCreature;
-        defaultCreature.TESCreature::SetCombatStyle(FUN_00505000());
+        defaultCreature.TESCreature::SetCombatStyle(TESCombatStyle_GetDefaultCombatStyle());
         templateSelection.creature = 0;
         if (!IsTemplateLeveled())
             templateSelection.creature =
@@ -92,7 +92,7 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
             TESModelList::BaseFormRecord((TESModelList*)templateSelection.creature);
             TESAnimation::BaseFormRecord((TESAnimation*)templateSelection.creature);
             SetBodyPartData(static_cast<const TESCreature*>(templateSelection.creature)->GetBodyPartData());
-            FUN_0050eaa0(templateSelection.creature);
+            TESBoundObject_CopyBoundData(templateSelection.creature);
             SetImpactDataSet(templateSelection.creature->GetImpactDataSet());
             SetBloodImpactMaterial(static_cast<const TESCreature*>(templateSelection.creature)->GetBloodImpactMaterial());
             BGSDestructibleObjectForm::BaseFormRecord((BGSDestructibleObjectForm*)templateSelection.creature);
@@ -150,7 +150,7 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
             reinterpret_cast<TESResponse*>(reinterpret_cast<char*>(&actorData) - offsetof(TESActorBaseData, actorData))
                 ->SetSpeakerIdle((TESIdleForm*)static_cast<const TESCreature*>(templateSelection.creature)->GetVoiceType());
             SetKarmaValue(static_cast<const TESCreature*>(templateSelection.creature)->GetHealthRegeneration());
-            FUN_005fbdb0(templateSelection.creature->FUN_0059f3a0());
+            SetTypeAtOffset12C(templateSelection.creature->FUN_0059f3a0());
             FUN_005f8bd0(templateSelection.creature->GetField158());
             SetCombatStyle(static_cast<const TESCreature*>(templateSelection.creature)->GetCombatStyle());
         }
@@ -158,18 +158,18 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
         {
             SetLevel(templateSelection.creature->GetLevel());
             SetMatchesPCLevel(templateSelection.creature->GetMatchesPCLevel());
-            SetCalcLevelMin(templateSelection.creature->FUN_0047d390());
-            SetCalcLevelMax(templateSelection.creature->FUN_0047d3b0());
+            SetCalcLevelMin(templateSelection.creature->GetCalcLevelMin_0047d390());
+            SetCalcLevelMax(templateSelection.creature->GetAnimGroupType_0047d3b0());
             TESAttributes::BaseFormRecord((TESAttributes*)templateSelection.creature);
             TESHealthForm::BaseFormRecord((TESHealthForm*)templateSelection.creature);
             TESAttackDamageForm::BaseFormRecord((TESAttackDamageForm*)templateSelection.creature);
             SetSpeedMult(templateSelection.creature->GetShortAtOffset12());
             SetFatigue(static_cast<const TESCreature*>(templateSelection.creature)->GetFatigue());
             SetByteAt12D(templateSelection.creature->GetCombatSkill());
-            SetCreatureType(templateSelection.creature->FUN_005f9ad0());
-            FUN_00507780(templateSelection.creature->FUN_00821640());
-            SetBoltGrowWidth(templateSelection.creature->FUN_00567470());
-            SetBoltSmallWidth(templateSelection.creature->FUN_00821660());
+            SetCreatureType(templateSelection.creature->ShadowSceneNode_GetDisableLightUpdate());
+            FUN_00507780(templateSelection.creature->TESObjectWEAP_GetShotsPerSecond());
+            SetBoltGrowWidth(templateSelection.creature->TESEffectShader_GetAddOnScaleStart());
+            SetBoltSmallWidth(templateSelection.creature->GetFootWeight());
         }
         if (GetTemplateUseFlag(TU_FACTIONS))
             CopyFactionList((TESActorBaseData*)templateSelection.creature);

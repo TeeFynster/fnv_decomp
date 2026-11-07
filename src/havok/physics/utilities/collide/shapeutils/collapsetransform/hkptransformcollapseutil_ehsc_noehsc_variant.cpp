@@ -58,9 +58,9 @@ struct ShapeData
     int m_kPointB;
     int m_iThirdValue;
     int m_iFourthElementInteger;
-    void FUN_00d738f0(int);
-    void FUN_00d74a20();
-    ShapeData* FUN_00d74b20(ShapeRefArray* refs);
+    void _SharedShapeData_recursivelyParseShapeReferences(int);
+    void _SharedShapeData_removeSingleReferencedShapeData();
+    ShapeData* _SharedShapeData__SharedShapeData(ShapeRefArray* refs);
 };
 struct FUN_00d74980_Class
 {
@@ -79,15 +79,15 @@ struct FUN_00d74420_Context
     int m_kPointA;  // +0x00
     int m_kPointB;  // +0x04
     int m_iThirdValue;  // +0x08, initialized to 0x80000000
-    void FUN_00d738f0(int value);
-    void FUN_00d74a20();
-    void FUN_00d74aa0();
+    void _SharedShapeData_recursivelyParseShapeReferences(int value);
+    void _SharedShapeData_removeSingleReferencedShapeData();
+    void ProcessEntries_00d74aa0();
 };
-int FUN_00d739f0(int a1, int a2, FUN_00d74420_Context* ctx, int a3);
+int hkpShape_ProcessEntries_00d739f0(int a1, int a2, FUN_00d74420_Context* ctx, int a3);
 int RunContextOperation(int a1, int a2, int a3, int* out);
 // Other units bind GetMonitorStream to 0x00c85750; the allocator is at +0x10.
 void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
-void FUN_00c908c0(void*, void*, int, int);
+void hkArrayUtil__reserve(void*, void*, int, int);
 // Allocator-dependent array bodies are supplied by each unit, as declared in hkArray.h.
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
@@ -120,7 +120,7 @@ template <class T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemory
     {
         int cap2 = 2 * capacity;
         int newSize = (n < cap2) ? cap2 : n;
-        FUN_00c908c0(&alloc, this, newSize, sizeof(T));
+        hkArrayUtil__reserve(&alloc, this, newSize, sizeof(T));
     }
 }
 template <class T> __forceinline void hkArrayBase<T>::_setSize(hkMemoryAllocator& alloc, int n)
@@ -162,7 +162,8 @@ struct EntryD738
     int m_iObjectReferenceCount;
 };
 
-static __declspec(noinline) void FUN_00d737d0(hkpShape* shape, hkArray<hkpShape*>* out)
+// src: GUESS 0x00d737d0 (confidence: high)
+static __declspec(noinline) void hkpShape_AppendChildShapesByType(hkpShape* shape, hkArray<hkpShape*>* out)
 {
     switch (shape->getType())
     {
@@ -212,13 +213,14 @@ static __forceinline void addShapeD738(ShapeData* self, int value)
     ((hkReferencedObject*)value)->addReference();
 
     hkArray<hkpShape*> children;
-    FUN_00d737d0((hkpShape*)value, &children);
+    hkpShape_AppendChildShapesByType((hkpShape*)value, &children);
     for (int i = 0; i < children.m_iElementCount; i++)
-        self->FUN_00d738f0((int)children.m_data[i]);
+        self->_SharedShapeData_recursivelyParseShapeReferences((int)children.m_data[i]);
 }
 
 // @fnv 0x00d738f0
-void ShapeData::FUN_00d738f0(int value)
+// src: HAVOK_LIB 0x00d738f0
+void ShapeData::_SharedShapeData_recursivelyParseShapeReferences(int value)
 {
     int index = indexOfD738(this, value);
     if (index >= 0)
@@ -331,16 +333,16 @@ __forceinline void* shapeNew(int nbytes)
 // The shared headers omit these pointer-returning initializers, vector
 // overloads and cylinder getter. Typed thiscall adapters retain the original
 // entry points without duplicating a game class.
-extern "C" void FUN_00c7f640();
-extern "C" void FUN_00c7f700();
+extern "C" void setTransformedPos_00c7f640();
+extern "C" void hkVector4_setRotatedDir();
 extern "C" void FUN_00cf5990();
 extern "C" void FUN_00d22590();
 extern "C" void FUN_00d571a0();
-extern "C" void FUN_00d57aa0();
-extern "C" void FUN_00d5d7a0();
+extern "C" void hkpCylinderShape_hkpCylinderShape();
+extern "C" void hkpConvexTransformShape_hkpConvexTransformShape();
 __forceinline void transformPoint(hkVector4& result, const hkTransform* transform, const hkVector4* point)
 {
-    reinterpret_cast<void(__thiscall*)(hkVector4*, const hkTransform*, const hkVector4*)>(FUN_00c7f640)(&result, transform, point);
+    reinterpret_cast<void(__thiscall*)(hkVector4*, const hkTransform*, const hkVector4*)>(setTransformedPos_00c7f640)(&result, transform, point);
 }
 __forceinline const hkpShape* hkpTransformShape::GetShapeForKey() const { return m_pContainedShape.getChild(); }
 __forceinline const hkTransform& hkpTransformShape::getTransform() const { return m_kMotionTransform; }
@@ -385,7 +387,8 @@ __forceinline void TransformPointArray(const hkTransform& t, const hkVector4* ve
     } while (--i >= 0);
 }
 // @fnv 0x00d739f0
-const hkpShape* FUN_00d739f0(const hkpShape* transformShape, const Options& options, D749Table& sharedShapeData,
+// src: GUESS 0x00d739f0 (confidence: low)
+const hkpShape* hkpShape_ProcessEntries_00d739f0(const hkpShape* transformShape, const Options& options, D749Table& sharedShapeData,
                              Results& resultsOut)
 {
     const int transformShapeType = transformShape->getType();
@@ -454,7 +457,7 @@ const hkpShape* FUN_00d739f0(const hkpShape* transformShape, const Options& opti
                 hkpTransformShape* wrapperMem = static_cast<hkpTransformShape*>(shapeNew(0x70));
                 const hkpShape* childTransformShape = reinterpret_cast<hkpTransformShape*(__thiscall*)(hkpTransformShape*, const hkpShape*, const hkTransform*)>(FUN_00cf5990)(wrapperMem, grandChildShape, &parentFromChild);
                 const hkpShape* collapsedGrandChild =
-                    FUN_00d739f0(childTransformShape, options, sharedShapeData, resultsOut);
+                    hkpShape_ProcessEntries_00d739f0(childTransformShape, options, sharedShapeData, resultsOut);
                 newChildren.pushBack(collapsedGrandChild);
                 childTransformShape->removeReference();
             }
@@ -498,7 +501,7 @@ const hkpShape* FUN_00d739f0(const hkpShape* transformShape, const Options& opti
             hkVector4 parentB;
             transformPoint(parentB, &parentFromChild, childB);
             hkpCylinderShape* newCylinderMem = static_cast<hkpCylinderShape*>(shapeNew(0x60));
-            hkpCylinderShape* newCylinder = reinterpret_cast<hkpCylinderShape*(__thiscall*)(hkpCylinderShape*, const hkVector4&, const hkVector4&, float, float)>(FUN_00d57aa0)(newCylinderMem, parentA, parentB, cylRadius, radius);
+            hkpCylinderShape* newCylinder = reinterpret_cast<hkpCylinderShape*(__thiscall*)(hkpCylinderShape*, const hkVector4&, const hkVector4&, float, float)>(hkpCylinderShape_hkpCylinderShape)(newCylinderMem, parentA, parentB, cylRadius, radius);
             sharedShapeData.SetEntryValue(reinterpret_cast<int>(transformShape), reinterpret_cast<int>(newCylinder));
             resultsOut.m_iFirstResult++;
             return newCylinder;
@@ -521,7 +524,7 @@ const hkpShape* FUN_00d739f0(const hkpShape* transformShape, const Options& opti
                 hkVector4 plane;
                 _mm_store_ps(reinterpret_cast<float*>(&plane.m_vComponents), planes[p].m_vComponents);
                 const float newDist = plane(3) - pivotShift.dot3(plane);
-                reinterpret_cast<void(__thiscall*)(hkVector4*, const hkRotation&, const hkVector4&)>(FUN_00c7f700)(&plane, parentFromChild.getRotation(), plane);
+                reinterpret_cast<void(__thiscall*)(hkVector4*, const hkRotation&, const hkVector4&)>(hkVector4_setRotatedDir)(&plane, parentFromChild.getRotation(), plane);
                 plane(3) = newDist;
                 newplanes[p] = plane;
             }
@@ -616,7 +619,7 @@ const hkpShape* FUN_00d739f0(const hkpShape* transformShape, const Options& opti
         if (transformShapeType == 15)
         {
             hkpConvexTransformShape* newShapeMem = static_cast<hkpConvexTransformShape*>(shapeNew(0x60));
-            hkpConvexTransformShape* pRemappedShape = reinterpret_cast<hkpConvexTransformShape*(__thiscall*)(hkpConvexTransformShape*, const hkpConvexShape*, const hkTransform*, int)>(FUN_00d5d7a0)(newShapeMem, childConvexShape, &parentFromChild, 1);
+            hkpConvexTransformShape* pRemappedShape = reinterpret_cast<hkpConvexTransformShape*(__thiscall*)(hkpConvexTransformShape*, const hkpConvexShape*, const hkTransform*, int)>(hkpConvexTransformShape_hkpConvexTransformShape)(newShapeMem, childConvexShape, &parentFromChild, 1);
             sharedShapeData.SetEntryValue(reinterpret_cast<int>(transformShape), reinterpret_cast<int>(pRemappedShape));
             resultsOut.m_iThirdResult++;
             return pRemappedShape;

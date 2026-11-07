@@ -44,7 +44,7 @@ struct _ref_0084e3a0_t
 unsigned int __cdecl _FUN_00485910(unsigned int, unsigned int);
 struct FUN_00511d10_shell
 {
-    void __thiscall FUN_00511d10();
+    void __thiscall TESObjectANIO_Save();
 };
 
 // sub ecx,0x18; jmp target  ==  MSVC adjustor thunk: Derived overrides a virtual that both of its bases

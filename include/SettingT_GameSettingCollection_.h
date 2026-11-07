@@ -21,6 +21,6 @@ public:
     const char* String();
 
     bool* FUN_00408d60();
-    int* FUN_0043d4d0();
+    int* Setting_Int();
     const char* FUN_00403df0();
 };

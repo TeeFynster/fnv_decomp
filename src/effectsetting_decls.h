@@ -19,4 +19,4 @@ extern "C" void* __cdecl memset(void*, int, unsigned int);
 int __cdecl Warning(const char*, ...);
 #endif
 
-double FUN_00408820(float value);
+double NiAbs_00408820(float value);

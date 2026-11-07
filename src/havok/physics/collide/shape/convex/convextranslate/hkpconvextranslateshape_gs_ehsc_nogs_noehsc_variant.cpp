@@ -38,7 +38,7 @@ struct Own_dd5e60
     int unk10;
     int unk14;
     Sub_dd5e60* m_sub;  // at +0x18
-    void __thiscall FUN_00dd5e60();
+    void __thiscall hkpConvexTranslateShape_getNumCollisionSpheresImpl();
 };
 struct Sub_dd5e70
 {
@@ -58,7 +58,7 @@ struct Own_dd5e70
     int unk14;
     void* m_sub;
 
-    void __thiscall FUN_00c90360(Sub_dd5e70* object, const int* attribute);
+    void __thiscall hkReferencedObject_calcContentStatistics(Sub_dd5e70* object, const int* attribute);
     void __thiscall AttachChildAndAttribute(Sub_dd5e70* object, int unused);
 };
 struct FUN_00dd5ea0_class
@@ -69,7 +69,7 @@ struct FUN_00dd5ea0_class
     int unk0C;
     int unk10;
     int unk14;
-    void* FUN_00dd5ea0();
+    void* hkpConvexTranslateShape_getContainer();
 };
 
 #include <xmmintrin.h>
@@ -91,10 +91,11 @@ struct FUN_00dd5eb0_cls
     FUN_00dd5eb0_Sub* m_18;
     int unk1C;
     __m128 unk20;
-    float FUN_00dd5eb0(__m128* a);
+    float hkpConvexTranslateShape_getMaximumProjection(__m128* a);
 };
 // @fnv 0x00dd5eb0
-float FUN_00dd5eb0_cls::FUN_00dd5eb0(__m128* a)
+// src: HAVOK_SRC 0x00dd5eb0
+float FUN_00dd5eb0_cls::hkpConvexTranslateShape_getMaximumProjection(__m128* a)
 {
     float d = m_18->v0C(a);
     __m128 m = _mm_mul_ps(*a, unk20);
@@ -135,10 +136,11 @@ struct Own_dd5f10
     Sub_dd5f10* m_sub;
     int unk1C;
     __m128 m_trans;
-    void __thiscall FUN_00dd5f10(float* a, float* b);
+    void __thiscall hkpConvexTranslateShape_getSupportingVertexImpl(float* a, float* b);
 };
 // @fnv 0x00dd5f10
-void __thiscall Own_dd5f10::FUN_00dd5f10(float* a, float* b)
+// src: HAVOK_SRC 0x00dd5f10
+void __thiscall Own_dd5f10::hkpConvexTranslateShape_getSupportingVertexImpl(float* a, float* b)
 {
     Sub_dd5f10* s = m_sub;
     s->v38(a, b);
@@ -193,7 +195,7 @@ struct __declspec(align(16)) MyTransform
 struct LocalCdBody
 {
     MyTransform m_kMotionTransform;
-    void FUN_00cb2240(const void*, const MyTransform*);
+    void hkTransform_setMul(const void*, const MyTransform*);
 };
 
 struct Context2
@@ -229,11 +231,12 @@ struct Dummy
     ChildShape* m_pContainedShape;
     MyVec m_vTranslation;
 
-    void FUN_00dd61b0(const MyVec* points, const Context2* context, int value);
+    void hkpConvexTranslateShape_castRayWithCollectorImpl(const MyVec* points, const Context2* context, int value);
 };
 
 // @fnv 0x00dd61b0
-void Dummy::FUN_00dd61b0(const MyVec* points, const Context2* context, int value)
+// src: HAVOK_SRC 0x00dd61b0
+void Dummy::hkpConvexTranslateShape_castRayWithCollectorImpl(const MyVec* points, const Context2* context, int value)
 {
     __m128 p1 = m_vTranslation.quad;
     __m128 s = _mm_sub_ps(points[0].quad, p1);
@@ -258,7 +261,7 @@ void Dummy::FUN_00dd61b0(const MyVec* points, const Context2* context, int value
     c.col2.z = 1.0f;
 
     LocalCdBody r;
-    r.FUN_00cb2240(motion, &c);
+    r.hkTransform_setMul(motion, &c);
 
     Context2 trans;
     trans.m_localBody = &r;

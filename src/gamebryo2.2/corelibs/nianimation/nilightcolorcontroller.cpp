@@ -43,19 +43,20 @@ template <class T> __forceinline void NiBinaryStream::Read(T& value)
 
 // Functions missing from the shared classes use explicit-this adapters. The
 // unused EDX argument leaves original thiscall stack arguments in place.
-void __cdecl FUN_00a57c00();
+void __cdecl NiBoolInterpController_SaveBinary();
 void __cdecl FUN_00a6d290();
 void __cdecl FUN_00a38e00();
 void __cdecl FUN_00a57c70();
-void __cdecl FUN_00a645b0();
-void __cdecl FUN_004bc280();
+void __cdecl ReadLinkID();
+void __cdecl NiLight_SetAmbientColor();
 extern int DAT_0109ad74;
 __declspec(noinline) NiPoint3InterpController* __fastcall InitializePoint3Controller(NiPoint3InterpController* self);
 
 extern "C" bool __stdcall FUN_00a57780(void*);
 
 // @fnv 0x00a461c0
-char __stdcall FUN_00a461c0(void* kStream)
+// src: XBOX_PDB 0x00a461c0
+char __stdcall NiLightColorController_RegisterStreamables(void* kStream)
 {
     char result = 0;
     result = FUN_00a57780(kStream) ? 1 : 0;
@@ -76,7 +77,8 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f3fa8;
 
 // @fnv 0x00a4d200
-GlobalObjectO2_00a7b610* __cdecl FUN_00a4d200()
+// src: COMMUNITY 0x00a4d200
+GlobalObjectO2_00a7b610* __cdecl NiLightColorController_GetRTTI()
 {
     return &g_011f3fa8;
 }
@@ -84,7 +86,8 @@ GlobalObjectO2_00a7b610* __cdecl FUN_00a4d200()
 extern int DAT_01098dd4;
 
 // @fnv 0x00a4d500
-void* __cdecl FUN_00a4d500()
+// src: EXE 0x00a4d500
+void* __cdecl NiLightColorController_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x3c);
     if (p)
@@ -119,7 +122,8 @@ void __fastcall GetLightColor(NiLightColorController* self, void*, NiPoint3& kVa
 bool __stdcall FUN_00a57c10(void*);
 // Checks pkObject via FUN_00a57c10, then compares bit 0 of the inverted byte at offset 0x38 with the byte at this+0x38 and returns the result.
 // @fnv 0x00a4d1d0
-bool __fastcall FUN_00a4d1d0(NiLightColorController* self, void*, NiObject* pkObject)
+// src: GAMEBRYO_LIB 0x00a4d1d0
+bool __fastcall NiLightColorController_IsEqual(NiLightColorController* self, void*, NiObject* pkObject)
 {
     NiLightColorController* pkControl = (NiLightColorController*)pkObject;
     if (!FUN_00a57c10(pkControl))
@@ -134,7 +138,8 @@ bool __fastcall FUN_00a4d1d0(NiLightColorController* self, void*, NiObject* pkOb
 extern NiRTTI g_011f4a68_arg1;
 // Walks the RTTI chain of pkTarget and returns true if it reaches g_011f4a68_arg1, false if pkTarget is null or the chain ends.
 // @fnv 0x00a4d210
-bool __stdcall FUN_00a4d210(NiObjectNET* pkTarget)
+// src: GUESS 0x00a4d210 (confidence: high)
+bool __stdcall NiObjectNET_HasTargetRTTIInChain(NiObjectNET* pkTarget)
 {
     if (!pkTarget)
         return false;
@@ -169,7 +174,8 @@ struct CloningProcess
     void* m_pCloneMap;
 };
 // @fnv 0x00a4d4b0
-void* __fastcall FUN_00a4d4b0(NiLightColorController* self, void*, CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a4d4b0
+void* __fastcall NiLightColorController_CreateClone(NiLightColorController* self, void*, CloningProcess& kCloning)
 {
     NiLightColorController* pkObject = (NiLightColorController*)BSFadeNode::operator new(0x3c);
     if (pkObject)
@@ -187,13 +193,14 @@ void* __fastcall FUN_00a4d4b0(NiLightColorController* self, void*, CloningProces
     return pkObject;
 }
 
-void __stdcall FUN_00a57d10(StrArr*);
-char* __cdecl FUN_00a7d330(GlobalObjectO2_00a7b610*);
+void __stdcall NiPoint3InterpController_GetViewerStrings(StrArr*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(GlobalObjectO2_00a7b610*);
 // @fnv 0x00a4d5a0
-void __stdcall FUN_00a4d5a0(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a4d5a0
+void __stdcall NiLightColorController_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00a57d10(pkStrings);
-    char* p = FUN_00a7d330(*(GlobalObjectO2_00a7b610**)&g_011f3fa8);
+    NiPoint3InterpController_GetViewerStrings(pkStrings);
+    char* p = NiViewerStrings_NiGetViewerString_Title(*(GlobalObjectO2_00a7b610**)&g_011f3fa8);
     unsigned int uiIndex = ((unsigned short*)pkStrings)[5];
     if (uiIndex >= ((unsigned short*)pkStrings)[4])
         pkStrings->SetSize(((unsigned short*)pkStrings)[7] + uiIndex);
@@ -203,7 +210,7 @@ void __stdcall FUN_00a4d5a0(StrArr* pkStrings)
 // @fnv 0x00a4b840
 void __fastcall WriteToStream(NiLightColorController* self, void*, NiStream& stream)
 {
-    ((void(__thiscall*)(NiLightColorController*, NiStream&))FUN_00a57c00)(self, stream);
+    ((void(__thiscall*)(NiLightColorController*, NiStream&))NiBoolInterpController_SaveBinary)(self, stream);
     NiBinaryStream* __restrict out = stream.GetBinaryStream();
     unsigned int size = 2;
     out->BinaryWrite(&LightColorFlags(self), 2, &size, 1);
@@ -211,7 +218,7 @@ void __fastcall WriteToStream(NiLightColorController* self, void*, NiStream& str
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 struct RefObject
 {
@@ -284,7 +291,7 @@ void __fastcall LoadActiveObject(NiLightColorController* self, void*, NiStream* 
     RefObject* source = ((RefObject*(__thiscall*)(NiStream*))FUN_00a63430)(stream);
     if (source)
         InterlockedIncrement(&source->referenceCount);
-    void* memory = FUN_00aa13e0(sizeof(RefObject));
+    void* memory = Object_DispatchCommandFour(sizeof(RefObject));
     RefObject* fresh = memory ? static_cast<RefObject*>(memory)->FUN_00a495f0(source) : 0;
     RefObject*& activeObject = *(RefObject**)&self->m_spControllerInterpolator.m_pObject;
     RefObject* old = activeObject;
@@ -311,7 +318,7 @@ void NiTimeController::EvaluateAndApplyOutput(float& parameter)
 {
     if ((unsigned char)(m_uiObjectFlags >> 5) & 1)
         m_fControllerTime = DAT_01096324;
-    else if (FUN_00a36250(parameter))
+    else if (DontDoUpdate(parameter))
     {
         if (((NiSingleInterpController*)this)->m_spControllerInterpolator.m_pObject == 0)
             return;
@@ -352,12 +359,12 @@ void NiTimeController::EvaluateAndApplyOutput(float& parameter)
     NiLight* pOutput = (NiLight*)m_pkTarget->DynamicCast(&g_011f4a28);
     if ((LightColorFlags((NiLightColorController*)this) & 1) != 0)
     {
-        ((void(__thiscall*)(NiLight*, const NiPoint3&))FUN_004bc280)(pOutput, kClampedValues);
+        ((void(__thiscall*)(NiLight*, const NiPoint3&))NiLight_SetAmbientColor)(pOutput, kClampedValues);
         pOutput->SetEffectColor(DAT_011f4998);
     }
     else
     {
-        ((void(__thiscall*)(NiLight*, const NiPoint3&))FUN_004bc280)(pOutput, (const NiPoint3&)DAT_011f4998);
+        ((void(__thiscall*)(NiLight*, const NiPoint3&))NiLight_SetAmbientColor)(pOutput, (const NiPoint3&)DAT_011f4998);
         pOutput->SetEffectColor((const NiColor&)kClampedValues);
     }
 }
@@ -383,5 +390,5 @@ void __fastcall ReadFromStream(NiLightColorController* self, void*, NiStream& st
         stream.Istr().Read(LightColorFlags(self));
     }
     if (stream.version() < 0x0a010068)
-        ((void(__thiscall*)(NiStream*))FUN_00a645b0)(&stream);
+        ((void(__thiscall*)(NiStream*))ReadLinkID)(&stream);
 }

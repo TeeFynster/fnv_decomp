@@ -28,7 +28,7 @@
 class SandboxActorEnergySource : public Actor
 {
 public:
-    void* FUN_0087f990();
+    void* Actor_GetActorBaseEnergyLevel();
 };
 
 class SandboxActorUsedReference : public Actor

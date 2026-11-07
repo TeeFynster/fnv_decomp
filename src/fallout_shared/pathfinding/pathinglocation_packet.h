@@ -12,7 +12,7 @@ class PathingLocationArray
 
 
 extern TES* g_TES;
-const BSSimpleArray<const NavMeshInfo*, 1024>* FUN_006d6f40(TESObjectCELL*);
+const BSSimpleArray<const NavMeshInfo*, 1024>* Pathing_GetPotentialNavMeshInfoForLocation(TESObjectCELL*);
 const BSSimpleArray<const NavMeshInfo*, 1024>* ForwardToPathing(TESWorldSpace*, unsigned int);
 
 

@@ -111,35 +111,38 @@ void* __thiscall FUN_00e3f340_Class::GetEntryByArg(int arg)
 
 struct FUN_00e3f900_class
 {
-    int __thiscall FUN_00cb0a70(int a);
-    int __thiscall FUN_00e3f900(int a);
+    int __thiscall ReturnSelf(int a);
+    int __thiscall ProcessAndReturnValue_00e3f900(int a);
 };
 
 // @fnv 0x00e3f900
-int __thiscall FUN_00e3f900_class::FUN_00e3f900(int a)
+// src: GUESS 0x00e3f900 (confidence: low)
+int __thiscall FUN_00e3f900_class::ProcessAndReturnValue_00e3f900(int a)
 {
-    FUN_00cb0a70(a);
+    ReturnSelf(a);
     return (int)this;
 }
 
 // @fnv 0x00e30f40
-int __cdecl FUN_00e30f40(int a, int b)
+// src: HAVOK_LIB 0x00e30f40
+int __cdecl hkaSplineCompressedAnimation_packMaskAndQuantizationType(int a, int b)
 {
     return ((unsigned char)b << 1) | (unsigned char)a;
 }
 
 struct S_00df8990_Obj;
 extern void(__cdecl* DAT_0126ec04)(void*, void*, S_00df8990_Obj*);
-void __cdecl FUN_00e2b9b0(void*, void*, S_00df8990_Obj*);
+void __cdecl Runtime_ProcessEntries_00e2b9b0(void*, void*, S_00df8990_Obj*);
 // @fnv 0x00e2ba90
-void __cdecl FUN_00e2ba90()
+// src: GUESS 0x00e2ba90 (confidence: low)
+void __cdecl Runtime_SetDAT0126ec04()
 {
-    DAT_0126ec04 = FUN_00e2b9b0;
+    DAT_0126ec04 = Runtime_ProcessEntries_00e2b9b0;
 }
 
 extern int DAT_010eb3b8[];
 extern int DAT_010eb3d0[];
-int __cdecl FUN_00e30ff0(int a, int b);
+int __cdecl hkaSplineCompressedAnimation_handleEndianQuaternion(int a, int b);
 
 // @fnv 0x00e31010
 void __cdecl AlignAndAdvance(char flags, int aiCount, int aiIndex, int* p)
@@ -157,14 +160,14 @@ void __cdecl AlignAndAdvance(char flags, int aiCount, int aiIndex, int* p)
         int count = aiCount + 1;
         do
         {
-            FUN_00e30ff0(aiIndex, *p);
+            hkaSplineCompressedAnimation_handleEndianQuaternion(aiIndex, *p);
             *p += DAT_010eb3d0[aiIndex];
             count--;
         } while (count);
     }
     else
     {
-        FUN_00e30ff0(aiIndex, *p);
+        hkaSplineCompressedAnimation_handleEndianQuaternion(aiIndex, *p);
         *p += DAT_010eb3d0[aiIndex];
     }
 }
@@ -188,7 +191,7 @@ FUN_00e34800::FUN_00e34800(int aiValue)
 
 struct CB2FC0Object
 {
-    void __thiscall FUN_00cb2d90(void*);
+    void __thiscall hkRotation_set(void*);
 };
 struct FUN_00e3b4d0_Class
 {
@@ -198,19 +201,20 @@ struct FUN_00e3b4d0_Class
 // @fnv 0x00e3b4d0
 void __thiscall FUN_00e3b4d0_Class::ApplyToBothObjects(void* a, void* b)
 {
-    ((CB2FC0Object*)(this + 0x20))->FUN_00cb2d90(a);
-    ((CB2FC0Object*)(this + 0x50))->FUN_00cb2d90(b);
+    ((CB2FC0Object*)(this + 0x20))->hkRotation_set(a);
+    ((CB2FC0Object*)(this + 0x50))->hkRotation_set(b);
 }
 
 int __cdecl CompareStringsCaseInsensitive(int, int);
 
 struct FUN_00e3ec30_Class
 {
-    int __thiscall FUN_00e3ec30(int arg);
+    int __thiscall ProcessEntries_00e3ec30(int arg);
 };
 
 // @fnv 0x00e3ec30
-int FUN_00e3ec30_Class::FUN_00e3ec30(int arg)
+// src: GUESS 0x00e3ec30 (confidence: low)
+int FUN_00e3ec30_Class::ProcessEntries_00e3ec30(int arg)
 {
     if (!arg)
         return 0;
@@ -235,23 +239,25 @@ struct D481D0RefVariant
 };
 struct FUN_00e3f8d0_class
 {
-    void FUN_00e3f8d0(void* a, const void* b);
+    void Set_Thunk(void* a, const void* b);
 };
 // @fnv 0x00e3f8d0
-void FUN_00e3f8d0_class::FUN_00e3f8d0(void* a, const void* b)
+// src: GUESS 0x00e3f8d0 (confidence: medium)
+void FUN_00e3f8d0_class::Set_Thunk(void* a, const void* b)
 {
     ((D481D0RefVariant*)((char*)this + 4))->set(a, b);
 }
 
 struct FUN_00e29620_class
 {
-    void __thiscall FUN_00e29620(int param);
+    void __thiscall ProcessEntries_00e29620(int param);
 };
 
 // @fnv 0x00e298f0
-void __cdecl FUN_00e298f0(FUN_00e29620_class* object, int param)
+// src: GUESS 0x00e298f0 (confidence: low)
+void __cdecl Runtime_ForwardCall_00e298f0(FUN_00e29620_class* object, int param)
 {
-    object->FUN_00e29620(param);
+    object->ProcessEntries_00e29620(param);
 }
 
 struct SplitChunk
@@ -370,7 +376,8 @@ struct E2baaDst
 
 // Initializes an output record from a source record: sets a float, copies several source fields, and derives unk54 from src->unk20 and flag.
 // @fnv 0x00e2baa0
-E2baaDst* __cdecl FUN_00e2baa0(E2baaDst* out, E2baaSrc* src, int flag)
+// src: HAVOK_LIB 0x00e2baa0
+E2baaDst* __cdecl setCollector(E2baaDst* out, E2baaSrc* src, int flag)
 {
     out->unk14 = 1.0f;
     out->unk18 = 0;
@@ -1539,29 +1546,31 @@ void __cdecl FillInterpolatedValues(int count, float** array, float first, float
     }
 }
 
-unsigned int __cdecl FUN_00e31570(unsigned char a1, unsigned int* a2);
-int __cdecl FUN_00e315a0(unsigned char a1, unsigned int a2, unsigned int a3, unsigned int* a4);
+unsigned int __cdecl hkaSplineCompressedAnimation_handleEndianKnots(unsigned char a1, unsigned int* a2);
+int __cdecl hkaSplineCompressedAnimation_handleEndianScalarControlPoints(unsigned char a1, unsigned int a2, unsigned int a3, unsigned int* a4);
 
 // @fnv 0x00e31740
-void __cdecl FUN_00e31740(unsigned char flag, unsigned int uiValue, unsigned int* puiOut)
+// src: GUESS 0x00e31740 (confidence: low)
+void __cdecl Object_UpdateFields_00e31740(unsigned char flag, unsigned int uiValue, unsigned int* puiOut)
 {
     if (flag != 0)
     {
-        unsigned int r = FUN_00e31570(flag, puiOut);
-        FUN_00e315a0(flag, r, uiValue, puiOut);
+        unsigned int r = hkaSplineCompressedAnimation_handleEndianKnots(flag, puiOut);
+        hkaSplineCompressedAnimation_handleEndianScalarControlPoints(flag, r, uiValue, puiOut);
         *puiOut = (*puiOut + 3) & 0xfffffffcu;
     }
 }
 
-int __cdecl FUN_00e31570(int a, int* c);
+int __cdecl hkaSplineCompressedAnimation_handleEndianKnots(int a, int* c);
 void __cdecl AlignAndAdvance(int a, int result, int b, int* c);
 
 // @fnv 0x00e31780
-void __cdecl FUN_00e31780(int a, int b, int* c)
+// src: GUESS 0x00e31780 (confidence: low)
+void __cdecl Object_UpdateFields_00e31780(int a, int b, int* c)
 {
     if ((a & 0xff) != 0)
     {
-        int result = FUN_00e31570(a, c);
+        int result = hkaSplineCompressedAnimation_handleEndianKnots(a, c);
         AlignAndAdvance(a, result, b, c);
         *c = (*c + 3) & 0xfffffffc;
     }
@@ -1772,7 +1781,7 @@ FUN_00e3a270::FUN_00e3a270()
     m_iElementCount = 0;
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct S_00e3ae70_Item
 {
@@ -1821,7 +1830,7 @@ void S_00e3ae70_cls::SetItemValues(unsigned int a1, unsigned int a2, float afVal
             } while (i < arr.iSize);
         }
     }
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uiCapacityFlags = arr.SimpleArrayStorage;
     arr.iSize = 0;
@@ -1842,7 +1851,7 @@ struct LinkOwner
     void* unk00;
     void* unk04;
     void* unk08;
-    void __thiscall FUN_00d21ce0(void*);
+    void __thiscall hkpBridgeConstraintAtom_init(void*);
 };
 struct FUN_00e3b060_Class
 {
@@ -1859,15 +1868,15 @@ FUN_00e3b060_Class* FUN_00e3b060_Class::ReleaseLinks(ReleaseFlags aReleaseFlags)
     vtable = &DAT_010eb98c;
     LinkOwner* owner = &links;
     if (aReleaseFlags.releaseHandle)
-        owner->FUN_00d21ce0(owner->unk08);
+        owner->hkpBridgeConstraintAtom_init(owner->unk08);
     if (aReleaseFlags.releaseOwner)
-        owner->FUN_00d21ce0(this);
+        owner->hkpBridgeConstraintAtom_init(this);
     return this;
 }
 
 namespace fnv_00e3b0a0 {
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 extern int DAT_010eb98c;
 extern int DAT_0102e388;
 
@@ -1883,15 +1892,16 @@ struct FUN_00e3b0a0_cls
     int m_iArrayLength;
     unsigned int m_uCapBits;
 
-    void FUN_00e3b0a0();
+    void ReleaseOwnedArrayAndResetFields();
 };
 
 // Sets the vtable, frees the data array through the audio allocator if capacity is not flagged, then resets the data pointer and capacity and sets a new vtable.
 // @fnv 0x00e3b0a0
-void FUN_00e3b0a0_cls::FUN_00e3b0a0()
+// src: GUESS 0x00e3b0a0 (confidence: medium)
+void FUN_00e3b0a0_cls::ReleaseOwnedArrayAndResetFields()
 {
     m_vptr00 = (int)&DAT_010eb98c;
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uCapBits = m_uCapBits;
     m_iArrayLength = 0;
@@ -1995,12 +2005,13 @@ class FUN_00e3dfb0_cls
     int unk34;
     int m_38;
 
-    int FUN_00e3dfb0(FUN_00e3dfb0_arg* rec);
+    int hkxVertexBuffer_getVertexDataPtr(FUN_00e3dfb0_arg* rec);
 };
 
 // Selects one of the object's fields based on rec->m_type and returns rec->value plus that field, or 0 for unknown types.
 // @fnv 0x00e3dfb0
-int FUN_00e3dfb0_cls::FUN_00e3dfb0(FUN_00e3dfb0_arg* apRecord)
+// src: XBOX_PDB 0x00e3dfb0
+int FUN_00e3dfb0_cls::hkxVertexBuffer_getVertexDataPtr(FUN_00e3dfb0_arg* apRecord)
 {
     int field;
     switch (apRecord->m_type)
@@ -2098,7 +2109,7 @@ struct S_00e3ed00_Foo
     S_00e3ed00_Foo** children;
     int childCount;
 
-    S_00e3ed00_Result* __thiscall FUN_00c85750();
+    S_00e3ed00_Result* __thiscall hkMemoryRouter_getInstance();
     int __thiscall AppendToTraversalList(S_00e3ed00_Foo* param1, S_00e3ed00_List* param2);
 };
 
@@ -2108,7 +2119,7 @@ void __cdecl ResizeAudioStream(int param1, S_00e3ed00_List* param2, int param3);
 // @fnv 0x00e3ed00
 int __thiscall S_00e3ed00_Foo::AppendToTraversalList(S_00e3ed00_Foo* pTarget, S_00e3ed00_List* pList)
 {
-    S_00e3ed00_Result* resultInfo = this->FUN_00c85750();
+    S_00e3ed00_Result* resultInfo = this->hkMemoryRouter_getInstance();
 
     if (pList->count == (pList->capacity & 0x3fffffff))
     {
@@ -2219,7 +2230,7 @@ template <class T> __forceinline void destructAll(T* t, int n)
 // hkArray<T>::~hkArray() = clearAndDeallocate() on the heap allocator (hkArray.inl: clear() destructs the elements).
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return reinterpret_cast<hkMemoryRouter*>(FUN_00c85750())->heap();
+    return reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->heap();
 }
 template <typename T> __forceinline void hkArrayBase<T>::clear()
 {
@@ -2283,11 +2294,12 @@ struct E3F0F0Owner
     int* m_piFirst;
     int* m_piLast;
 
-    void FUN_00e3f0f0();
+    void ProcessState_00e3f0f0();
 };
 
 // @fnv 0x00e3f0f0
-void E3F0F0Owner::FUN_00e3f0f0()
+// src: GUESS 0x00e3f0f0 (confidence: low)
+void E3F0F0Owner::ProcessState_00e3f0f0()
 {
     E3F0F0Less kPred;
     HeapSort(m_piFirst, m_piLast, kPred);
@@ -2297,7 +2309,7 @@ class BSAudio;
 namespace fnv_00e3f110 {
 
 extern int DAT_010e33dc;
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 
 struct AudioRefObject
 {
@@ -2360,7 +2372,7 @@ void FUN_00e3f110_cls::Destroy() throw()
         pRef->Release();
     }
     m_p7c = 0;
-    hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     int count = m_iCount74;
     AudioRefObject** pBuf = m_pBuf70;
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
@@ -2379,7 +2391,7 @@ void FUN_00e3f110_cls::Destroy() throw()
     }
     m_pBuf70 = 0;
     m_uCap78 = 0x80000000u;
-    hkMemoryRouter* pHolder2 = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pHolder2 = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
     int* pEntry = (int*)m_pBuf18;
     if (m_iCount1c > 0)
@@ -2470,7 +2482,8 @@ namespace fnv_00e30ff0 {
 extern int(__cdecl* DAT_011be4a0[])(int);
 
 // @fnv 0x00e30ff0
-void __cdecl FUN_00e30ff0(int index, int arg)
+// src: HAVOK_LIB 0x00e30ff0
+void __cdecl hkaSplineCompressedAnimation_handleEndianQuaternion(int index, int arg)
 {
     DAT_011be4a0[index](arg);
 }
@@ -2520,7 +2533,8 @@ BE3E7E0Entry* BE3E7E0Table::FindEntryByName(const char* pcName)
 void __cdecl SetEntity();
 
 // @fnv 0x00e36f40
-void __cdecl FUN_00e36f40()
+// src: GUESS 0x00e36f40 (confidence: medium)
+void __cdecl Object_SetEntity_Thunk()
 {
     SetEntity();
 }
@@ -2535,31 +2549,34 @@ struct FUN_00e39e80_class
     int unk14;
     int unk18;
     float unk1C;
-    float FUN_00e39e80();
+    float GetUnk1C_00e39e80();
 };
 // @fnv 0x00e39e80
-float FUN_00e39e80_class::FUN_00e39e80()
+// src: GUESS 0x00e39e80 (confidence: low)
+float FUN_00e39e80_class::GetUnk1C_00e39e80()
 {
     return unk1C;
 }
 
 struct FUN_00e3df50_Class
 {
-    FUN_00e3df50_Class* __thiscall FUN_00e3df50(int param);
+    FUN_00e3df50_Class* __thiscall ReturnSelf(int param);
 };
 
 // @fnv 0x00e3df50
-FUN_00e3df50_Class* FUN_00e3df50_Class::FUN_00e3df50(int param)
+// src: GUESS 0x00e3df50 (confidence: high)
+FUN_00e3df50_Class* FUN_00e3df50_Class::ReturnSelf(int param)
 {
     return this;
 }
 
-int __cdecl FUN_00e3dfb0(int param_1, int* param_2);
+int __cdecl hkxVertexBuffer_getVertexDataPtr(int param_1, int* param_2);
 
 // @fnv 0x00e3e020
-int __cdecl FUN_00e3e020(int param_1, int* param_2)
+// src: GUESS 0x00e3e020 (confidence: medium)
+int __cdecl Object_HkxVertexBuffer_getVertexDataPtr_Thunk(int param_1, int* param_2)
 {
-    return FUN_00e3dfb0(param_1, param_2);
+    return hkxVertexBuffer_getVertexDataPtr(param_1, param_2);
 }
 
 struct FNVTreeNode
@@ -2610,10 +2627,11 @@ class Base
     int unk04;
     int unk08;
     int unk0C;
-    int FUN_00e3f270();
+    int GetUnk0C();
 };
 // @fnv 0x00e3f270
-int Base::FUN_00e3f270()
+// src: GUESS 0x00e3f270 (confidence: low)
+int Base::GetUnk0C()
 {
     return unk0C;
 }
@@ -2732,7 +2750,8 @@ void FUN_00e3f370_cls::ReleaseItems()
 __int64 __cdecl __time64(__int64* t);
 
 // @fnv 0x00e29900
-static __int64 FUN_00e29900(__int64* t)
+// src: GUESS 0x00e29900 (confidence: medium)
+static __int64 Object___time64_Thunk(__int64* t)
 {
     return __time64(t);
 }
@@ -2740,7 +2759,7 @@ static __int64 FUN_00e29900(__int64* t)
 __int64* volatile g_ptr;
 __int64 probe_caller(void)
 {
-    return FUN_00e29900(g_ptr);
+    return Object___time64_Thunk(g_ptr);
 }
 
 typedef __int64 (*probe_fn)(void);
@@ -2754,7 +2773,8 @@ int main(void)
 }
 
 // @fnv 0x00e2abd0
-void __cdecl FUN_00e2abd0()
+// src: COMMUNITY 0x00e2abd0
+void __cdecl nullsub_333()
 {
     return;
     __debugbreak();
@@ -2835,7 +2855,8 @@ struct S00e311f0_T
 };
 // Compares each component of a against b, c and d within eps, setting bit 16<<i if it differs from b or c, else bit 1<<i if it differs from d.
 // @fnv 0x00e311f0
-unsigned char __cdecl FUN_00e311f0(S00e311f0_PA apVecA, S00e311f0_PB apVecB, const V4* apVecC, S00e311f0_T eps,
+// src: HAVOK_LIB 0x00e311f0
+unsigned char __cdecl hkaSplineCompressedAnimation_isStatic(S00e311f0_PA apVecA, S00e311f0_PB apVecB, const V4* apVecC, S00e311f0_T eps,
                                    const V4* apVecD)
 {
     unsigned char result = 0;
@@ -2855,7 +2876,8 @@ namespace se34af0 {
 
 // Swaps the byte order of a float value by reversing its four bytes and returns the result.
 // @fnv 0x00e34af0
-float FUN_00e34af0(float fValue)
+// src: XBOX_PDB 0x00e34af0
+float delta_hkConvertEndianF32(float fValue)
 {
     union
     {
@@ -2879,7 +2901,8 @@ extern "C" unsigned short stub_val_e34b20(void);
 
 // Swaps the two bytes of the input unsigned short and returns the result.
 // @fnv 0x00e34b20
-static __declspec(noinline) unsigned short FUN_00e34b20(unsigned short v)
+// src: XBOX_PDB 0x00e34b20
+static __declspec(noinline) unsigned short delta_hkConvertEndianU16(unsigned short v)
 {
     union SwapWordE34B20
     {
@@ -2898,7 +2921,7 @@ static __declspec(noinline) unsigned short FUN_00e34b20(unsigned short v)
 
 unsigned short call_e34b20()
 {
-    return FUN_00e34b20(stub_val_e34b20());
+    return delta_hkConvertEndianU16(stub_val_e34b20());
 }
 
 #include <xmmintrin.h>
@@ -2978,11 +3001,12 @@ struct FUN_00e39e50_cls
 {
     __m128 m_v0;
     __m128 m_v1;
-    FUN_00e39e50_cls* __thiscall FUN_00e39e50();
+    FUN_00e39e50_cls* __thiscall InitializeFields_00e39e50();
 };
 
 // @fnv 0x00e39e50
-FUN_00e39e50_cls* FUN_00e39e50_cls::FUN_00e39e50()
+// src: GUESS 0x00e39e50 (confidence: low)
+FUN_00e39e50_cls* FUN_00e39e50_cls::InitializeFields_00e39e50()
 {
     m_v0 = _mm_setzero_ps();
     m_v1 = _mm_setzero_ps();
@@ -2997,7 +3021,7 @@ struct S3b010Links
     int unk04;
     int unk08;
 
-    void FUN_00d21ce0(void* arg);
+    void hkpBridgeConstraintAtom_init(void* arg);
 };
 
 struct S3b010Obj
@@ -3014,12 +3038,13 @@ struct S3b010Obj
     float unk28;
     float unk2c;
 
-    void* FUN_00e3b010();
+    void* hkpStiffSpringChainData_hkpStiffSpringChainData();
 };
 
 // Initializes S3b010Obj fields to default values and calls m_0c.FUN_00d21ce0(this) before returning this.
 // @fnv 0x00e3b010
-void* S3b010Obj::FUN_00e3b010()
+// src: HAVOK_LIB 0x00e3b010
+void* S3b010Obj::hkpStiffSpringChainData_hkpStiffSpringChainData()
 {
     unk06 = 1;
     unk08 = 0;
@@ -3031,7 +3056,7 @@ void* S3b010Obj::FUN_00e3b010()
     unk24 = 0.6f;
     unk28 = 1.0f;
     unk2c = DAT_010d0c80;
-    m_0c.FUN_00d21ce0(this);
+    m_0c.hkpBridgeConstraintAtom_init(this);
     return this;
 }
 
@@ -3147,7 +3172,8 @@ inline void SetPair(Cell* pkCell, int iByte, int iPair, unsigned char ucValue)
 
 // Sets the iPair bit-pair in byte iByte of the current cell's flags to zero via SetPair.
 // @fnv 0x00e3b790
-void FUN_00e3b790(Grid* pkGrid, int iByte, int iPair)
+// src: GUESS 0x00e3b790 (confidence: high)
+void Runtime_ClearCellBitPair(Grid* pkGrid, int iByte, int iPair)
 {
     Cell* pkCell = &pkGrid->m_pkArray->m_pkCells[pkGrid->m_pkInfo->m_iIndex];
     SetPair(pkCell, iByte, iPair, 0);
@@ -3168,15 +3194,16 @@ struct Mesh
     int unk018;
     unsigned short* m_pusIndices;
 
-    void FUN_00e3cd50(int iV0, int iV1, int iV2, float fValue, int iArg0, int iArg1, int iArg2);
-    void FUN_00e3d200(int iTri, float fValue, int iArg0, int iArg1, int iArg2);
+    void ProcessState_00e3cd50(int iV0, int iV1, int iV2, float fValue, int iArg0, int iArg1, int iArg2);
+    void ForwardCall_00e3d200(int iTri, float fValue, int iArg0, int iArg1, int iArg2);
 };
 
 // Calls FUN_00e3cd50 with m_pusIndices[iTri], [iTri+1], [iTri+2] each multiplied by 3, then fValue and the three remaining arguments.
 // @fnv 0x00e3d200
-void Mesh::FUN_00e3d200(int iTri, float fValue, int iArg0, int iArg1, int iArg2)
+// src: GUESS 0x00e3d200 (confidence: low)
+void Mesh::ForwardCall_00e3d200(int iTri, float fValue, int iArg0, int iArg1, int iArg2)
 {
-    FUN_00e3cd50(m_pusIndices[iTri] * 3, m_pusIndices[iTri + 1] * 3, m_pusIndices[iTri + 2] * 3, fValue, iArg0, iArg1,
+    ProcessState_00e3cd50(m_pusIndices[iTri] * 3, m_pusIndices[iTri + 1] * 3, m_pusIndices[iTri + 2] * 3, fValue, iArg0, iArg1,
                  iArg2);
 }
 
@@ -3199,7 +3226,7 @@ template <class T> struct hkRefPtr_e3e8
         if (m_pRetainedObject)
             m_pRetainedObject->FUN_00c905b0();
     }
-    T* FUN_00d477a0() throw();
+    T* hkRefVariant_getClass() throw();
     T* val() const
     {
         return m_pRetainedObject;
@@ -3210,7 +3237,8 @@ hkRefPtr_e3e8<Resource_e3e8> __stdcall FindWorldByKey(const char* name) throw();
 
 // Finds an object by name with FindWorldByKey and returns it if expected is null or their FUN_00d46d40 strings match case-insensitively, otherwise returns null.
 // @fnv 0x00e3e8e0
-Resource_e3e8* __stdcall FUN_00e3e8e0(const char* name, Resource_e3e8* expected)
+// src: GUESS 0x00e3e8e0 (confidence: medium)
+Resource_e3e8* __stdcall Object_FindNamedWorldWithExpectedType(const char* name, Resource_e3e8* expected)
 {
     if (!name)
         return 0;
@@ -3218,7 +3246,7 @@ Resource_e3e8* __stdcall FUN_00e3e8e0(const char* name, Resource_e3e8* expected)
     if (found.m_pRetainedObject)
     {
         if (!expected ||
-            ns_e3e8::CompareStringsCaseInsensitive(expected->FUN_00d46d40(), found.FUN_00d477a0()->FUN_00d46d40()) == 0)
+            ns_e3e8::CompareStringsCaseInsensitive(expected->FUN_00d46d40(), found.hkRefVariant_getClass()->FUN_00d46d40()) == 0)
             return found.m_pRetainedObject;
     }
     return 0;
@@ -3236,12 +3264,13 @@ struct S_00e3f280_Class
     int unk04;
     S_00e3f280_Entry* unk08;
 
-    int __thiscall FUN_00e3f280(int index);
+    int __thiscall GetMaskedValue0xfffffffe(int index);
     int __thiscall GetEntryValue(int index);
 };
 
 // @fnv 0x00e3f280
-int S_00e3f280_Class::FUN_00e3f280(int index)
+// src: GUESS 0x00e3f280 (confidence: medium)
+int S_00e3f280_Class::GetMaskedValue0xfffffffe(int index)
 {
     return unk08[index].unk00 & 0xfffffffe;
 }
@@ -3352,10 +3381,11 @@ struct __declspec(align(16)) CastCollector
     int unk7c;
 };
 extern int DAT_010dbaf8, DAT_010dbae4, DAT_010dbad8, DAT_010dbacc, DAT_010dbb04;
-void __cdecl FUN_00d98ca0(void*, void*, S_00df8990_Obj*, void*, void*);
+void __cdecl hkKdTreeUtils_castRayIterative(void*, void*, S_00df8990_Obj*, void*, void*);
 // Initializes a CastCollector from source and value, optionally fills a CastOutput, then calls FUN_00d98ca0 with the caster and source.
 // @fnv 0x00e2abf0
-void __cdecl FUN_00e2abf0(void* caster, S_00df8990_Obj* source, int value, CastOutput* output)
+// src: HAVOK_LIB 0x00e2abf0
+void __cdecl hkTreeRayCastJobUtil_castRayKdTree(void* caster, S_00df8990_Obj* source, int value, CastOutput* output)
 {
     if (caster)
     {
@@ -3396,20 +3426,22 @@ void __cdecl FUN_00e2abf0(void* caster, S_00df8990_Obj* source, int value, CastO
             }
             else
                 collector.output60 = 0;
-            DAT_0126ec04 = FUN_00e2b9b0;
+            DAT_0126ec04 = Runtime_ProcessEntries_00e2b9b0;
         }
         else
             collector.output60 = 0;
-        FUN_00d98ca0(&result, caster, source, &source->unk10, &collector.vtable04);
+        hkKdTreeUtils_castRayIterative(&result, caster, source, &source->unk10, &collector.vtable04);
     }
 }
 
 // @fnv 0x00e2cfc0
-void __cdecl FUN_00e2cfc0()
+// src: COMMUNITY 0x00e2cfc0
+void __cdecl nullsub_334()
 {}
 
 // @fnv 0x00e2cfd0
-void FUN_00e2cfd0()
+// src: GUESS 0x00e2cfd0 (confidence: high)
+void Runtime_DoNothing_00e2cfd0()
 {}
 
 #include <xmmintrin.h>
@@ -3533,37 +3565,39 @@ void TrianglePlane::ComputePlane()
 }
 }  // namespace fnv_00e2cfe0
 
-float __cdecl FUN_00e52f40();
-float __cdecl FUN_00e52f50();
-float __cdecl FUN_00e52f60();
-float __cdecl FUN_00e52f70();
-float __cdecl FUN_00e52f80();
-float __cdecl FUN_00e52f90();
+float __cdecl Object_GetGlobalValue_00e52f40();
+float __cdecl Runtime_GetField010ec960();
+float __cdecl Object_GetGlobalValue_00e52f60();
+float __cdecl Runtime_GetField010ec964();
+float __cdecl Object_GetDAT_010ec968_00e52f80();
+float __cdecl Runtime_GetDAT0104da4c();
 
 // Returns a float value from one of six type-specific getters selected by the type argument, or 0.0f for unknown types.
 // @fnv 0x00e32e50
-float __cdecl FUN_00e32e50(int type)
+// src: HAVOK_LIB 0x00e32e50
+float __cdecl hkaSplineCompressedAnimation_TrackCompressionParams_approximateQuantizationAccuracy(int type)
 {
     switch (type)
     {
     case 4:
-        return FUN_00e52f40();
+        return Object_GetGlobalValue_00e52f40();
     case 3:
-        return FUN_00e52f50();
+        return Runtime_GetField010ec960();
     case 0:
-        return FUN_00e52f60();
+        return Object_GetGlobalValue_00e52f60();
     case 1:
-        return FUN_00e52f70();
+        return Runtime_GetField010ec964();
     case 2:
-        return FUN_00e52f80();
+        return Object_GetDAT_010ec968_00e52f80();
     case 5:
-        return FUN_00e52f90();
+        return Runtime_GetDAT0104da4c();
     }
     return 0.0f;
 }
 
 // @fnv 0x00e32ea0
-float __cdecl FUN_00e32ea0(int type)
+// src: GUESS 0x00e32ea0 (confidence: low)
+float __cdecl Object_ComputeValue_00e32ea0(int type)
 {
     switch (type)
     {
@@ -3635,7 +3669,8 @@ struct Manager
 
 // Copies source into a free slot of manager, or when full over the node with the largest value if source's is smaller, then records the chain's values in it.
 // @fnv 0x00e2b9b0
-void __cdecl FUN_00e2b9b0(Chain* chain, Node* source, Manager* manager)
+// src: GUESS 0x00e2b9b0 (confidence: low)
+void __cdecl Runtime_ProcessEntries_00e2b9b0(Chain* chain, Node* source, Manager* manager)
 {
     Node* destination;
 
@@ -3746,8 +3781,8 @@ struct SplitInput
     int unk14, unk18;
     PlaneList nodes;
 };
-hkMemoryRouter* FUN_00e4e3f0() throw();
-void FUN_00e2c100(SplitInput*, PackedPlane*, PackedPlane*, int, int, int, int, int, float*, int*, int, int, int, int,
+hkMemoryRouter* hkStackMemory_getInstance() throw();
+void Object_ProcessEntries_00e2c100(SplitInput*, PackedPlane*, PackedPlane*, int, int, int, int, int, float*, int*, int, int, int, int,
                   int*, int*, int*, int*, PackedPlane*, PackedPlane*) throw();
 struct WorkStack
 {
@@ -3797,11 +3832,12 @@ struct WorkArray : FUN_00e2cc30_LocalArray<WorkItem>
 };
 // Splits indices 0..count-1 using a work stack of plane nodes, calling FUN_00e2c100 on each popped item and pushing non-empty left and right results.
 // @fnv 0x00e2cc30
-void FUN_00e2cc30(SplitInput* input, int a2, int a3, int a4, int a5, int a6, int count)
+// src: HAVOK_LIB 0x00e2cc30
+void hkAabbTreeRayCastUtil_struct_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_castRayFiltering(SplitInput* input, int a2, int a3, int a4, int a5, int a6, int count)
 {
     if (!input)
         return;
-    hkMemoryRouter* router = FUN_00c85750();
+    hkMemoryRouter* router = hkMemoryRouter_getInstance();
     WeightArray weightArray;
     float* weights = (float*)router->m_stack.m_next.m_storage;
     weightArray.m_data = weights;
@@ -3811,12 +3847,12 @@ void FUN_00e2cc30(SplitInput* input, int a2, int a3, int a4, int a5, int a6, int
     weightArray.m_iCapacityState = count | 0x80000000;
     for (int i = 0; i < count; ++i)
         weights[i] = 1.0f;
-    FUN_00e4e3f0();
+    hkStackMemory_getInstance();
     int populations[2] = {0, 0};
     int& usedA = populations[0];
     int& usedB = populations[1];
-    FUN_00e4e3f0();
-    router = FUN_00c85750();
+    hkStackMemory_getInstance();
+    router = hkMemoryRouter_getInstance();
     WorkArray stack;
     WorkItem* data = (WorkItem*)router->m_stack.m_next.m_storage;
     stack.m_data = data;
@@ -3844,7 +3880,7 @@ void FUN_00e2cc30(SplitInput* input, int a2, int a3, int a4, int a5, int a6, int
         PackedPlane children[2];
         int leftCount, rightCount;
         populations[item.side] -= item.count;
-        FUN_00e2c100(input, &desc, item.node, a2, a5, a6, a3, a4, weights, indices[item.side] + populations[item.side],
+        Object_ProcessEntries_00e2c100(input, &desc, item.node, a2, a5, a6, a3, a4, weights, indices[item.side] + populations[item.side],
                      item.count, 10 - stack.m_iElementCount, 250 - usedA, 250 - usedB, indices[0] + usedA, &leftCount,
                      indices[1] + usedB, &rightCount, &children[0], &children[1]);
         usedA += leftCount;
@@ -3871,9 +3907,9 @@ void FUN_00e2cc30(SplitInput* input, int a2, int a3, int a4, int a5, int a6, int
         if (iMaxDepth <= stack.m_iElementCount)
             iMaxDepth = stack.m_iElementCount;
     } while (stack.m_iElementCount);
-    FUN_00c85750()->m_stack.m_next.m_storage = (void*)((int)stack.localMemory);
+    hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = (void*)((int)stack.localMemory);
     stack.ClearAndRelease();
-    FUN_00c85750()->m_stack.m_next.m_storage = (void*)((int)weightArray.localMemory);
+    hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = (void*)((int)weightArray.localMemory);
     weightArray.ClearAndRelease();
 }
 
@@ -3940,7 +3976,7 @@ struct InitItem : Item
 };
 struct IndexLookup
 {
-    int* FUN_00d1bb40(ShortIndex) throw();
+    int* GetElementAddress_00d1bb40(ShortIndex) throw();
 };
 struct Owner
 {
@@ -3975,10 +4011,10 @@ struct Scratch
 };
 __forceinline Scratch* scratchRouter() throw()
 {
-    return (Scratch*)FUN_00c85750();
+    return (Scratch*)hkMemoryRouter_getInstance();
 }
-void FUN_00e4e3f0() throw();
-extern "C" __declspec(noalias) void FUN_00e2bbd0(Owner*, IndexedAabbNode*, int*, int, int, int, int, int, float*, int*, int, int,
+void hkStackMemory_getInstance() throw();
+extern "C" __declspec(noalias) void hkCpuWorldRayCastCollector_PartitionRaysByChildBounds(Owner*, IndexedAabbNode*, int*, int, int, int, int, int, float*, int*, int, int,
                                                  int, int, int*, int*, int*, int*, IndexedAabbNode*, IndexedAabbNode*) throw();
 struct __declspec(align(16)) Weights
 {
@@ -3993,7 +4029,7 @@ struct __declspec(align(16)) Weights
         capacity = n | 0x80000000;
         for (int i = 0; i < n; ++i)
             data[i] = 1.0f;
-        FUN_00e4e3f0();
+        hkStackMemory_getInstance();
     }
     __forceinline void release() throw()
     {
@@ -4029,14 +4065,15 @@ struct Outputs
 };
 // Pops an item stack, calls FUN_00e2bbd0 on each item, and pushes non-empty first and second results until the stack is empty.
 // @fnv 0x00e2c8a0
-void FUN_00e2c8a0(Owner* owner, int p2, int p3, int p4, int p5, int p6, int aiCount)
+// src: XBOX_PDB 0x00e2c8a0
+void hkAabbTreeRayCastUtil_hkAabbTreeData_hkAabbTreeAabb_unsigned_short_castRayFiltering(Owner* owner, int p2, int p3, int p4, int p5, int p6, int aiCount)
 {
     if (!owner)
         return;
     Weights weights(aiCount);
     int counts[2] = {0, 0};
     int indices[2][250];
-    FUN_00e4e3f0();
+    hkStackMemory_getInstance();
     Scratch* scratch = scratchRouter();
     Item* stack = (Item*)scratch->top;
     scratch->top += 640;
@@ -4065,7 +4102,7 @@ void FUN_00e2c8a0(Owner* owner, int p2, int p3, int p4, int p5, int p6, int aiCo
         int* inputIndices = &indices[current.kind][counts[current.kind]];
         ++depth;
         int count0, count1;
-        FUN_00e2bbd0(owner, &input, current.data, p2, p5, p6, p3, p4, weights.data, inputIndices, current.count, depth,
+        hkCpuWorldRayCastCollector_PartitionRaysByChildBounds(owner, &input, current.data, p2, p5, p6, p3, p4, weights.data, inputIndices, current.count, depth,
                      250 - counts[0], 250 - counts[1], &indices[0][counts[0]], &count0, &indices[1][counts[1]], &count1,
                      &outs.out0, &outs.out1);
         counts[0] += count0;
@@ -4080,7 +4117,7 @@ void FUN_00e2c8a0(Owner* owner, int p2, int p3, int p4, int p5, int p6, int aiCo
             --depth;
             Item* next = growAt(stack, oldBytes, oldSize, stackSize);
             next->bounds.assign(outs.out0);
-            next->data = owner->lookup.FUN_00d1bb40(input.index22);
+            next->data = owner->lookup.GetElementAddress_00d1bb40(input.index22);
             next->kind = 0;
             next->count = count0;
         }
@@ -4093,7 +4130,7 @@ void FUN_00e2c8a0(Owner* owner, int p2, int p3, int p4, int p5, int p6, int aiCo
             --depth;
             Item* next = growAt(stack, oldBytes, oldSize, stackSize);
             next->bounds.assign(outs.out1);
-            next->data = input.index26.value != 0x7fff ? owner->lookup.FUN_00d1bb40(input.index26) : 0;
+            next->data = input.index26.value != 0x7fff ? owner->lookup.GetElementAddress_00d1bb40(input.index26) : 0;
             next->kind = 1;
             next->count = generated1;
         }
@@ -4101,7 +4138,7 @@ void FUN_00e2c8a0(Owner* owner, int p2, int p3, int p4, int p5, int p6, int aiCo
             highWater = stackSize;
     } while (stackSize);
     scratchRouter()->top = (char*)stack;
-    FUN_00c85750();
+    hkMemoryRouter_getInstance();
     weights.release();
 }
 }  // namespace fnv_00e2c8a0
@@ -4318,11 +4355,12 @@ struct FanBuilder
             vertices[k].referee = 0;
         return chain == current ? 0 : 2;
     }
-    int FUN_00e2d1b0(int count, FanEdge* chain, FanVertex* apex);
+    int AllocateTriangleFan(int count, FanEdge* chain, FanVertex* apex);
 };
 // Allocates the requested number of triangles and initializes them into a fan around the apex vertex.
 // @fnv 0x00e2d1b0
-int FanBuilder::FUN_00e2d1b0(int count, FanEdge* chain, FanVertex* apex)
+// src: GUESS 0x00e2d1b0 (confidence: medium)
+int FanBuilder::AllocateTriangleFan(int count, FanEdge* chain, FanVertex* apex)
 {
     FanTriangle* fresh[100];
     allocate(count, fresh);
@@ -4372,12 +4410,13 @@ struct HullFace
 struct HullWalker
 {
     void ClearEntries();
-    HullFace* FUN_00e2d550(HullFace* start);
+    HullFace* WalkAdjacentHullFaces(HullFace* start);
 };
 
 // Walks from start across twin edges to neighbouring faces, stopping when no edge qualifies or the next face already has m_uiContentCount equal to 3.
 // @fnv 0x00e2d550
-HullFace* HullWalker::FUN_00e2d550(HullFace* start)
+// src: GUESS 0x00e2d550 (confidence: medium)
+HullFace* HullWalker::WalkAdjacentHullFaces(HullFace* start)
 {
     ClearEntries();
     HullFace* face = start;
@@ -4437,7 +4476,8 @@ namespace fnv_00e31570 {
 extern void __cdecl SwapBytesAndAdvance(int, unsigned char**);
 // If flags & 0xf0, calls FUN_00e31510(2, pp), advances *pp by the byte at *pp plus the short at *pp-2 plus 3 and returns that short; otherwise returns -1.
 // @fnv 0x00e31570
-unsigned int __cdecl FUN_00e31570(unsigned char flags, unsigned int* pp)
+// src: HAVOK_LIB 0x00e31570
+unsigned int __cdecl hkaSplineCompressedAnimation_handleEndianKnots(unsigned char flags, unsigned int* pp)
 {
     if (flags & 0xf0)
     {
@@ -4454,7 +4494,7 @@ unsigned int __cdecl FUN_00e31570(unsigned char flags, unsigned int* pp)
 
 extern int DAT_010e00dc;
 
-void __cdecl FUN_00c908c0(hkMemoryAllocator* allocator, void* array, int capacity, int elementSize);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* allocator, void* array, int capacity, int elementSize);
 
 template <class T>
 static __forceinline void TyremarkArray_initialize(hkArrayBase<T>& self);
@@ -4473,12 +4513,12 @@ static __forceinline void TyremarkArray_initialize(hkArrayBase<T>& self)
 template <class T>
 static __forceinline void TyremarkArray_SetSizeAndGrow(hkArrayBase<T>& self, int count)
 {
-        hkMemoryAllocator& allocator = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750())->heap();
+        hkMemoryAllocator& allocator = reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->heap();
         int capacity = self.m_iCapacityState & 0x3fffffff;
         if (capacity < count)
         {
             int doubled = capacity * 2;
-            FUN_00c908c0(&allocator, (&self), count < doubled ? doubled : count, sizeof(T));
+            hkArrayUtil__reserve(&allocator, (&self), count < doubled ? doubled : count, sizeof(T));
         }
         self.m_iElementCount = count;
     }
@@ -4486,13 +4526,13 @@ static __forceinline void TyremarkArray_SetSizeAndGrow(hkArrayBase<T>& self, int
 struct TyremarkWheelView : FUN_00e3a270
 {
     TyremarkWheelView* FUN_00e3a270();
-    void FUN_00e3a1e0(int pointCount);
+    void hkpTyremarksWheel_setNumPoints(int pointCount);
 };
 
 inline TyremarkWheelView* allocateTyremarkWheel()
 {
     void* memory =
-        reinterpret_cast<hkMemoryRouter*>(FUN_00c85750())->heap().blockAlloc(sizeof(TyremarkWheelView));
+        reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->heap().blockAlloc(sizeof(TyremarkWheelView));
     TyremarkWheelView* wheel = static_cast<TyremarkWheelView*>(memory);
     wheel->m_usMemSizeAndFlags = sizeof(TyremarkWheelView);
     return wheel->FUN_00e3a270();
@@ -4513,12 +4553,13 @@ struct TyremarkInfoView
     float m_fMaxTyremarkPointDistance;
     hkArrayBase<TyremarkWheelView*> m_wheels;
 
-    TyremarkInfoView* FUN_00e3a2a0(const TyremarkVehicleView* vehicle, int pointCount);
+    TyremarkInfoView* hkpTyremarksInfo_hkpTyremarksInfo(const TyremarkVehicleView* vehicle, int pointCount);
 };
 
 // Initializes the TyremarkInfoView from a TyremarkVehicleView, allocating and storing wheel views for each wheel in the vehicle.
 // @fnv 0x00e3a2a0
-TyremarkInfoView* TyremarkInfoView::FUN_00e3a2a0(const TyremarkVehicleView* vehicle, int pointCount)
+// src: HAVOK_LIB 0x00e3a2a0
+TyremarkInfoView* TyremarkInfoView::hkpTyremarksInfo_hkpTyremarksInfo(const TyremarkVehicleView* vehicle, int pointCount)
 {
     m_ppVirtualMethodTable = &DAT_010e00dc;
     m_sReferenceCount = 1;
@@ -4529,7 +4570,7 @@ TyremarkInfoView* TyremarkInfoView::FUN_00e3a2a0(const TyremarkVehicleView* vehi
     for (int index = 0; index < m_wheels.m_iElementCount; ++index)
     {
         TyremarkWheelView* wheel = allocateTyremarkWheel();
-        wheel->FUN_00e3a1e0(pointCount);
+        wheel->hkpTyremarksWheel_setNumPoints(pointCount);
         m_wheels.m_data[index] = wheel;
     }
     return this;
@@ -4580,12 +4621,13 @@ struct S_Class2b0
     S_Pair2b0* unk08;
     int unk0c;
 
-    void FUN_00e3f2b0(S_Out2b0* param);
+    void hkxEnvironment_convertToString(S_Out2b0* param);
 };
 
 // Writes unk0c pairs from unk08 to param, formatting each with DAT_01021184 or DAT_01011584 based on Q_cls::FUN_00e3f210 and joining with str_010ebaa0.
 // @fnv 0x00e3f2b0
-void S_Class2b0::FUN_00e3f2b0(S_Out2b0* apOut)
+// src: COMMUNITY 0x00e3f2b0
+void S_Class2b0::hkxEnvironment_convertToString(S_Out2b0* apOut)
 {
     apOut->FUN_00d61cc0();
     for (int i = 0; i < unk0c; i++)

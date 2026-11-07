@@ -14,11 +14,12 @@
 
 struct FUN_004aa3d0_shell
 {
-    void FUN_004aa3d0(int a, char b);
+    void BGSTextureUseMap_CollectTexUseDataRecursive(int a, char b);
     void SetValueAndCall(int a, int b, char c);
 };
 
-void FUN_004aa3d0_shell::FUN_004aa3d0(int a, char b)
+// src: XBOX_PDB 0x004aa3d0
+void FUN_004aa3d0_shell::BGSTextureUseMap_CollectTexUseDataRecursive(int a, char b)
 {}
 
 // Stores b into the object's first field and forwards a and c to FUN_004aa3d0.
@@ -26,7 +27,7 @@ void FUN_004aa3d0_shell::FUN_004aa3d0(int a, char b)
 void FUN_004aa3d0_shell::SetValueAndCall(int aiArg, int aiValue, char c)
 {
     *(int*)this = aiValue;
-    FUN_004aa3d0(aiArg, c);
+    BGSTextureUseMap_CollectTexUseDataRecursive(aiArg, c);
 }
 
 struct FUN_004aa830;
@@ -41,11 +42,12 @@ struct NiTMapContainer
 {
     unsigned int m1;
     NiTMap<unsigned int, FUN_004aa830*> m_kEntryMap;
-    unsigned long FUN_004aa890();
+    unsigned long BGSTextureUseMap_GetTotalTextureSize();
 };
 
 // @fnv 0x004aa890
-unsigned long NiTMapContainer::FUN_004aa890()
+// src: XBOX_PDB 0x004aa890
+unsigned long NiTMapContainer::BGSTextureUseMap_GetTotalTextureSize()
 {
     unsigned long ulretsize = 0;
     void* iter = this->m_kEntryMap.GetFirstPos();
@@ -213,7 +215,7 @@ void FUN_004aa720_shell::AddEntry(int aiKey, int aiValue, int aiItem)
 
 struct LLD_Cell
 {
-    NiNode* FUN_00545cb0();
+    NiNode* Get3D_00545cb0();
 };
 
 struct GridCell
@@ -231,12 +233,13 @@ extern GlobalObject_0045cfe0 g_011c63cc;
 
 struct FUN_004aabb0_shell : public FUN_004aa3d0_shell
 {
-    void FUN_004aabb0(char a1);
+    void BGSTextureUseMap_CollectTextureUseDataForLoadedArea(char a1);
 };
 
 // If a previous path exists, processes its cell; otherwise iterates the 5x5 grid around half the global int and processes each occupied cell.
 // @fnv 0x004aabb0
-void FUN_004aabb0_shell::FUN_004aabb0(char a1)
+// src: XBOX_PDB 0x004aabb0
+void FUN_004aabb0_shell::BGSTextureUseMap_CollectTextureUseDataForLoadedArea(char a1)
 {
     LLD_Cell* inner5;
     unsigned int center3;
@@ -250,7 +253,7 @@ void FUN_004aabb0_shell::FUN_004aabb0(char a1)
     if (g_TES->GetPrevPath())
     {
         inner5 = reinterpret_cast<LLD_Cell*>(g_TES->GetPrevPath());
-        this->SetValueAndCall(reinterpret_cast<int>(inner5->FUN_00545cb0()), reinterpret_cast<int>(inner5), a1);
+        this->SetValueAndCall(reinterpret_cast<int>(inner5->Get3D_00545cb0()), reinterpret_cast<int>(inner5), a1);
     }
     else
     {
@@ -262,11 +265,11 @@ void FUN_004aabb0_shell::FUN_004aabb0(char a1)
         {
             for (fTargetUpperBound = grid; fTargetUpperBound <= center3; ++fTargetUpperBound)
             {
-                outer = g_TES->FUN_00457050(previousPath, fTargetUpperBound);
+                outer = g_TES->GetGridCell_00457050(previousPath, fTargetUpperBound);
                 if (outer->m0)
                 {
                     cell = outer->m0;
-                    this->SetValueAndCall(reinterpret_cast<int>(cell->FUN_00545cb0()), reinterpret_cast<int>(cell), a1);
+                    this->SetValueAndCall(reinterpret_cast<int>(cell->Get3D_00545cb0()), reinterpret_cast<int>(cell), a1);
                 }
             }
         }
@@ -402,7 +405,7 @@ struct ElemObj
 };
 struct TESForm_Proxy40e30
 {
-    const char* FUN_00440e30();
+    const char* TESForm_GetFormTypeString();
 };
 struct RefObj
 {
@@ -418,15 +421,16 @@ template <class T> struct TextureUserList
     TextureUserList* GetNext();
     unsigned int ItemsInList();
 };
-int __cdecl FUN_00406f60(StrMem*, const char*, ...);
+int __cdecl BSStringT_char_SPrintF(StrMem*, const char*, ...);
 struct TexUseMap
 {
     unsigned int m1;
     NiTMap<unsigned int, FUN_004aa830*> m_kEntryMap;
-    bool FUN_004aa900(const char* name);
+    bool BGSTextureUseMap_WriteToFile(const char* name);
 };
 // @fnv 0x004aa900
-bool TexUseMap::FUN_004aa900(const char* apFileName)
+// src: XBOX_PDB 0x004aa900
+bool TexUseMap::BGSTextureUseMap_WriteToFile(const char* apFileName)
 {
     bool result5 = false;
     BSFile file9(apFileName, true, 0x400, true);
@@ -443,21 +447,21 @@ bool TexUseMap::FUN_004aa900(const char* apFileName)
             if (casted9 && value9)
             {
                 StrMem str5;
-                FUN_00406f60(&str5, "%s\t%d bytes\t%i users\r\n", casted9->vt_9c()->FUN_0043b1b0(),
+                BSStringT_char_SPrintF(&str5, "%s\t%d bytes\t%i users\r\n", casted9->vt_9c()->FUN_0043b1b0(),
                              ((UnsignedIntegerRecord*)value9)->m_ulSecondValue,
                              ((TextureUserList<TESRegionData*>*)((char*)value9 + 8))->ItemsInList());
-                file9.FUN_00affbb0(&str5, 1);
+                file9.BSFile_Write_00affbb0(&str5, 1);
                 TextureUserList<TESRegionData*>* listA = (TextureUserList<TESRegionData*>*)((char*)value9 + 8);
                 while (listA && !listA->FUN_008256d0())
                 {
                     TESRegionData* elem9 = listA->GetItem();
                     listA = listA->GetNext();
-                    FUN_00406f60(&str5, str_0101f524, ((TESForm_Proxy40e30*)elem9)->FUN_00440e30(),
+                    BSStringT_char_SPrintF(&str5, str_0101f524, ((TESForm_Proxy40e30*)elem9)->TESForm_GetFormTypeString(),
                                  ((ElemObj*)elem9)->vt_130(), ((RefObj*)elem9)->_ref_0084e3a0());
-                    file9.FUN_00affbb0(&str5, 1);
+                    file9.BSFile_Write_00affbb0(&str5, 1);
                 }
-                FUN_00406f60(&str5, "\r\n");
-                file9.FUN_00affbb0(&str5, 1);
+                BSStringT_char_SPrintF(&str5, "\r\n");
+                file9.BSFile_Write_00affbb0(&str5, 1);
             }
         }
         file9.FUN_00affd10();
@@ -561,12 +565,13 @@ struct WalkCtx
 struct TextureWalker
 {
     int m0;
-    void FUN_004aa3d0(NiAVObject* obj, bool b);
+    void BGSTextureUseMap_CollectTexUseDataRecursive(NiAVObject* obj, bool b);
 };
 
 // Recursively walks a NiAVObject tree, tracking the current WalkRef from fade nodes and invoking a texture callback on geometry properties.
 // @fnv 0x004aa3d0
-void TextureWalker::FUN_004aa3d0(NiAVObject* obj, bool b)
+// src: XBOX_PDB 0x004aa3d0
+void TextureWalker::BGSTextureUseMap_CollectTexUseDataRecursive(NiAVObject* obj, bool b)
 {
     if (obj && !obj->IsCulledFlag())
     {
@@ -580,7 +585,7 @@ void TextureWalker::FUN_004aa3d0(NiAVObject* obj, bool b)
                 fade = (BSFadeNode*)node;
             if (fade)
             {
-                WalkRef* ref = reinterpret_cast<WalkRef*>(fade->FUN_009ad610());
+                WalkRef* ref = reinterpret_cast<WalkRef*>(fade->QUserData());
                 if (g_walkRefMap)
                     g_walkRefMap->GetAt(ref, &bSkip);
                 if (ref && !bSkip)
@@ -606,7 +611,7 @@ void TextureWalker::FUN_004aa3d0(NiAVObject* obj, bool b)
                 for (unsigned int i = 0; i < count; i++)
                 {
                     NiAVObject* child = node->FUN_0043b4a0(i);
-                    FUN_004aa3d0(child, b);
+                    BGSTextureUseMap_CollectTexUseDataRecursive(child, b);
                 }
             }
             if (bSet)

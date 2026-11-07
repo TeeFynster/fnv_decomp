@@ -83,11 +83,11 @@ class NiTexture : public NiObjectNET
 
     NiFixedString* FUN_00413f40();
     TextureAccessor* FUN_0059bb30();
-    int FUN_0043c430();
+    int NiTexture_GetTextureQualityLevel();
     int FUN_00726070();
     NiTexture* FUN_0055b980();
-    NiTexture* FUN_0064ceb0(float lo, float hi, float scale, void* srcv);
-    const ExtraName& FUN_00a62660();
+    NiTexture* BSFaceGenImage_GetCompressedImage(float lo, float hi, float scale, void* srcv);
+    const ExtraName& GetFilename_00a62660();
 
     TextureFormatPreferences m_kFormatPrefs;
     RendererData* m_pkRendererData;

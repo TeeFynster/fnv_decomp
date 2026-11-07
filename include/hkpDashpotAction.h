@@ -10,9 +10,9 @@ typedef float hkReal;
 class hkpDashpotAction : public hkpBinaryAction
 {
 public:
-    __declspec(noinline) hkpDashpotAction* FUN_00d4d980(int entityA, int entityB, int userData);
-    hkpAction* FUN_00d4d9d0(const hkArray<hkpEntity*>& newEntities, const hkArray<hkpEntity*>& removedEntities);
-    void FUN_00d4da60(hkPadSpu<const hkStepInfo*> stepInfo);
+    __declspec(noinline) hkpDashpotAction* InitializeSpringMotorFields(int entityA, int entityB, int userData);
+    hkpAction* clone_00d4d9d0(const hkArray<hkpEntity*>& newEntities, const hkArray<hkpEntity*>& removedEntities);
+    void applyAction_00d4da60(hkPadSpu<const hkStepInfo*> stepInfo);
 
     hkVector4 m_kPoint[2];
     hkReal m_fSpringStrength;

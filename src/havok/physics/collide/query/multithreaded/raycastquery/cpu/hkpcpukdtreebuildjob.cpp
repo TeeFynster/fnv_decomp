@@ -168,13 +168,13 @@ __forceinline void FillChild(OutElem& out, const InElem& in, ArgStruct* arg, int
 }
 struct Ctx
 {
-    int FUN_00d04400(void* p);
+    int hkJobQueue_lockQueue(void* p);
     int InsertItemAndNotify(int h, void* p, int z);
-    void FUN_00d04420(int h);
+    void hkJobQueue_unlockQueue(int h);
     int ProcessCallback(ArgStruct* a, ArgStruct* b, int z);
 };
 extern "C" void __cdecl MixChannels(Head* a1, char* a2, int a3, int a4, int a5, int a6, DWORD* a7);
-extern "C" void __cdecl FUN_00df37b0(Head* a1, char* a2, int a3, int a4, void* a5, int* a6, unsigned short* a7);
+extern "C" void __cdecl ProcessEntries_00df37b0(Head* a1, char* a2, int a3, int a4, void* a5, int* a6, unsigned short* a7);
 struct ContextHandle
 {
     Ctx* object;
@@ -254,7 +254,7 @@ int __cdecl BuildKdTreeDistributed(ContextHandle ctx, ArgStruct* input, ...)
         _mm_store_ps(&in[2].initialVector.x, initial);
         in[3].m_28 = -1;
         _mm_store_ps(&in[3].initialVector.x, initial);
-        FUN_00df37b0(&head, arg->m_28, arg->m_3c, arg->m_38, &in[0].m_20ptr, arg->m_34, &head.s0);
+        ProcessEntries_00df37b0(&head, arg->m_28, arg->m_3c, arg->m_38, &in[0].m_20ptr, arg->m_34, &head.s0);
         OutElem out[4];
         result = 0;
         int iQuarter = arg->m_40 / 4;
@@ -368,12 +368,12 @@ int __cdecl BuildKdTreeDistributed(ContextHandle ctx, ArgStruct* input, ...)
             DWORD unk168;
             DWORD unk16c;
         } buf;
-        int h = ctx->FUN_00d04400(&buf);
+        int h = ctx->hkJobQueue_lockQueue(&buf);
         ctx->InsertItemAndNotify(h, &out[0], result);
         ctx->InsertItemAndNotify(h, &out[1], result);
         ctx->InsertItemAndNotify(h, &out[2], result);
         ctx->InsertItemAndNotify(h, &out[3], result);
-        ctx->FUN_00d04420(h);
+        ctx->hkJobQueue_unlockQueue(h);
         (void)buf;
     }
     zero = ctx->ProcessCallback(arg, arg, result);
@@ -560,7 +560,7 @@ struct S00d947e0_Cmd : S00d947e0_DynJob
 
 struct S00d947e0_Queue
 {
-    void FUN_00d04b50(const S00d947e0_Job& job, int a);
+    void hkJobQueue_addJob(const S00d947e0_Job& job, int a);
     void ProcessCallback(S00d947e0_Data* a, S00d947e0_Data* b, int c);
 };
 
@@ -576,12 +576,13 @@ static __forceinline void S00d947e0_memClear16(int* p, int n)
     }
 }
 
-void __cdecl FUN_00d8d030(void* a, int b, int c, int d);
-void __cdecl FUN_00df0680(void* a, int b, int c, int d);
+void __cdecl hkSolveConstraints(void* a, int b, int c, int d);
+void __cdecl hkExportImpulsesAndRhs(void* a, int b, int c, int d);
 
 // Writes profiler records, clears a buffer, calls FUN_00d8d030, queues an S00d947e0_Cmd via a2->FUN_00d04b50, calls FUN_00df0680, then calls a2->ProcessCallback.
 // @fnv 0x00d947e0
-void __cdecl FUN_00d947e0(S00d947e0_Obj** a1, S00d947e0_Queue* apQueue, S00d947e0_Data* apData)
+// src: HAVOK_LIB 0x00d947e0
+void __cdecl hkCpuSolveConstraintsJob(S00d947e0_Obj** a1, S00d947e0_Queue* apQueue, S00d947e0_Data* apData)
 {
     volatile unsigned int tb;
 
@@ -603,10 +604,10 @@ void __cdecl FUN_00d947e0(S00d947e0_Obj** a1, S00d947e0_Queue* apQueue, S00d947e
     int p30 = apData->unk30 + base;
     unsigned int bytes = (apData->unk38 * 4 + 15) & 0xfffffff0u;
     S00d947e0_memClear16((int*)p30, bytes / 16);
-    FUN_00d8d030(&(*a1)->unk000 + 0x1e0, p2c, p28, p30);
+    hkSolveConstraints(&(*a1)->unk000 + 0x1e0, p2c, p28, p30);
 
     S00d947e0_Info* info = apData->unk18;
-    apQueue->FUN_00d04b50(S00d947e0_Cmd(*apData, info), 0);
+    apQueue->hkJobQueue_addJob(S00d947e0_Cmd(*apData, info), 0);
 
     tls = (S00d947e0_Tls*)TlsGetValue(DAT_0126835c);
     cur = tls->unk04;
@@ -619,7 +620,7 @@ void __cdecl FUN_00d947e0(S00d947e0_Obj** a1, S00d947e0_Queue* apQueue, S00d947e
         tls->unk04 = cur + 0xc;
     }
 
-    FUN_00df0680(&(*a1)->unk000 + 0x1e0, info->unk40, info->unk3c, info->unk30);
+    hkExportImpulsesAndRhs(&(*a1)->unk000 + 0x1e0, info->unk40, info->unk3c, info->unk30);
 
     tls = (S00d947e0_Tls*)TlsGetValue(DAT_0126835c);
     cur = tls->unk04;

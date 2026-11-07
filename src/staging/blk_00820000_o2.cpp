@@ -28,19 +28,20 @@ Derived::Derived()
 // Primary base is only the vptr (4 bytes); the secondary base sits at +4 inside Derived.
 struct PrimaryBase_00832000
 {
-    virtual void __cdecl FUN_00832000();
+    virtual void __cdecl AdjustThisAndForward_00832000();
 };
 
 struct SecondaryBase_00832000
 {
-    virtual void __cdecl FUN_00832000();
+    virtual void __cdecl AdjustThisAndForward_00832000();
 };
 
 struct Derived_00832000 : PrimaryBase_00832000, SecondaryBase_00832000
 {
     Derived_00832000();
 // @fnv 0x00832000
-    virtual void __cdecl FUN_00832000();
+// src: GUESS 0x00832000 (confidence: low)
+    virtual void __cdecl AdjustThisAndForward_00832000();
 };
 
 Derived_00832000::Derived_00832000()

@@ -35,11 +35,11 @@
 #include "../../include/TESTopicInfo.h"
 struct FUN_00821620_Class
 {
-    void __thiscall FUN_00821620(float value);
+    void __thiscall BoltShaderProperty_SetBoltsRadius(float value);
 };
 struct FUN_00821680_Class
 {
-    float FUN_00821680() const;
+    float TESObjectWEAP_GetFiringRumbleRightMotorStrength() const;
 };
 struct FUN_008216a0_class
 {
@@ -53,7 +53,7 @@ struct FUN_00827200_class
 {
     void __thiscall _ref_006815c0();
     void __thiscall FUN_00cb26e0(int);
-    FUN_00827200_class* __thiscall FUN_00827200(int a);
+    FUN_00827200_class* __thiscall hkQuaternion_hkQuaternion(int a);
 };
 extern int DAT_0107ca44;
 void __cdecl InitArray(int);
@@ -66,18 +66,18 @@ struct FUN_0082ee80_class
 extern "C" void* DAT_0107cb6c;
 struct FUN_0082f140_class
 {
-    void FUN_0082f140();
+    void SetVirtualTable_0082f140();
 };
-void __fastcall FUN_0082f1b0(void*);
+void __fastcall NiCriticalSection_Lock(void*);
 struct FUN_0082f190_class
 {
-    void FUN_0082f190();
+    void CBSAStream_Lock();
 };
-void __fastcall FUN_0082f1b0(void*);
+void __fastcall NiCriticalSection_Lock(void*);
 struct FUN_0082f520Class
 {
     void* p;
-    void* __thiscall FUN_0082f520(void* v);
+    void* __thiscall ProcessAndReturnValue_0082f520(void* v);
 };
 struct FUN_00831e00_class
 {
@@ -86,7 +86,7 @@ struct FUN_00831e00_class
 extern "C" void __stdcall ReceiveConnection(int, int, int);
 struct FUN_00831f40_Class
 {
-    void FUN_00831f40(int a, int b);
+    void ReceiveConnection_Thunk(int a, int b);
 };
 struct FUN_008321c0_Class
 {
@@ -95,7 +95,7 @@ struct FUN_008321c0_Class
     int m_iThirdValue;
     int m_iFourthElementInteger;
     void FUN_00836030();
-    void FUN_008321c0();
+    void ForwardCall_008321c0();
 };
 struct FUN_00836240
 {
@@ -107,16 +107,16 @@ struct FUN_00836630
 };
 extern int DAT_011a1888[];
 extern int DAT_011dd87c[];
-int __cdecl FUN_008374b0(int index);
+int __cdecl ImpactMixer_GetMaterialSoundName(int index);
 extern "C" void __cdecl FalloutAudio_FUN_00839ab0();
 extern unsigned char DAT_011dd85c;
-void FUN_00837500();
+void ResetFootstepSounds();
 extern "C" void* DAT_0107d9c4;
 struct FUN_0083b5e0_class
 {
     void* m_ptr;
     void InitBuffer(int);
-    void* FUN_0083b5e0(int a);
+    void* NiTPointerMap_int_unsigned_int_NiTPointerMap(int a);
 };
 struct S7010
 {
@@ -124,13 +124,13 @@ struct S7010
 };
 struct FUN_0083dea0_class
 {
-    unsigned int FUN_0083dea0();
+    unsigned int TESTopic_HasDummyPrompt();
 };
 extern "C" void* __cdecl _NiFreeAlias(void*);
 extern void* DAT_0107ca64;
 struct FUN_0082efb0
 {
-    void FUN_0082efb0_init();
+    void SetVtableAndProcessState_0082efb0();
 };
 struct FUN_00438690
 {
@@ -156,7 +156,7 @@ struct FUN_0082eee0_class
 void __cdecl Deallocate(void*);
 struct FUN_00831f80_class
 {
-    void __thiscall FUN_00831fb0();
+    void __thiscall SetVtableAndProcessState_00831fb0();
     void* __thiscall FUN_00831f80(unsigned int flags);
 };
 extern int DAT_0107cd54;
@@ -170,22 +170,22 @@ struct FUN_00831fb0_class
     int b;
     int c;
     int d;
-    void __thiscall FUN_00831fb0();
+    void __thiscall SetVtableAndProcessState_00831fb0();
 };
 struct FUN_00836600_class
 {
-    void __thiscall FUN_00836600(BGSLoadFormBuffer* buffer);
-    void __thiscall FUN_00836110(BGSLoadFormBuffer* buffer);
+    void __thiscall RadioEntry_Save(BGSLoadFormBuffer* buffer);
+    void __thiscall RadioEntry_Data_Save(BGSLoadFormBuffer* buffer);
 };
 struct FUN_00837280_Class
 {
-    char FUN_00837280();
+    char RadioConvTask_GetFileIndex();
 };
 void __cdecl Deallocate(void*);
 struct FUN_0083b740_Class
 {
     void* __thiscall FUN_0083b740(unsigned int flags);
-    void __thiscall FUN_0083b710();
+    void __thiscall SetVtableAndProcessState_0083b710();
 };
 struct FUN_0083b770
 {
@@ -231,7 +231,7 @@ struct FUN_00824290_class
 {
     void __thiscall AddWeatherEntry(int a, int b, int c);
 };
-bool FUN_0082d740(TESSound* self, int* outA, int* outB);
+bool GetSoundLoopPoints(TESSound* self, int* outA, int* outB);
 struct SndItem
 {
     TESObject* obj;
@@ -277,7 +277,7 @@ struct FUN_0083d1e0
     unsigned int unk24;
     unsigned int unk28;
     FUN_0083d1e0();
-    void FUN_0083d740(BGSLoadFormBuffer* buffer);
+    void DialogueResponse_LoadGameBGS(BGSLoadFormBuffer* buffer);
 };
 struct DialogueResponseList
 {
@@ -403,13 +403,13 @@ struct FUN_00831de0_Class
     int ForwardToMember();
 };
 typedef void(__stdcall* FUN_00831eb0_callback)(void*, int, int);
-void __stdcall FUN_00831eb0(void* object, int a, int b);
+void __stdcall BSSimpleList_UpdateState_00831eb0(void* object, int a, int b);
 struct FUN_00831ee0_class
 {
     virtual void FUN_00831ee0_virtual0();
     virtual void __stdcall FUN_00831ee0_virtual1();
 };
-void __stdcall FUN_00831ee0(void* p);
+void __stdcall Object_UpdateFields_00831ee0(void* p);
 struct GlobalObject_0083b5e0
 {
     ~GlobalObject_0083b5e0();
@@ -419,7 +419,7 @@ struct GlobalObject_0083b5e0
 TESForm* __cdecl _ref_004839c0(unsigned int formID);
 struct FUN_0083d740_Class
 {
-    void __thiscall FUN_0083d740(BGSLoadGameBuffer* buffer);
+    void __thiscall DialogueResponse_LoadGameBGS(BGSLoadGameBuffer* buffer);
 };
 struct Str6a70
 {
@@ -429,7 +429,7 @@ TESForm* __cdecl _ref_004839c0(unsigned int formID);
 extern void* _DAT_01183028;
 struct FUN_0083fbe0_Class
 {
-    void __thiscall FUN_0083fbe0(BGSLoadGameBuffer* buffer);
+    void __thiscall ExtraInfoGeneralTopic_Data_LoadGame(BGSLoadGameBuffer* buffer);
 };
 // FUN_00822440 - 0x00822440, 99 bytes.
 //
@@ -509,7 +509,7 @@ struct SecondaryBase_b5774
 };
 struct GlobalMgr_b5774
 {
-    bool FUN_004226e0();
+    bool TESDataHandler_GetClearingData();
 };
 extern GlobalMgr_b5774* DAT_011c3f2c;
 struct Holder_b5774
@@ -574,7 +574,7 @@ extern "C" void* __cdecl FUN_00afdf20(const char*, int, int, int);
 struct FNVHandle
 {
     virtual ~FNVHandle();
-    bool FUN_008905f0();
+    bool TESAnimGroup_GetDecal();
 };
 struct FUN_0082f240
 {
@@ -613,7 +613,7 @@ struct ProbeTarget
     virtual void v0C();
     virtual void v10();
     virtual void v14(int a, int b);
-    bool FUN_008905f0();
+    bool TESAnimGroup_GetDecal();
 };
 class FUN_0082f310_cls
 {
@@ -695,7 +695,7 @@ class FUN_0082f310_cls
     __int64 m_130;
 
   public:
-    int FUN_0082f310(__int64 value);
+    int CBSAStream_Seek(__int64 value);
 };
 struct StreamLock
 {
@@ -786,14 +786,14 @@ struct ArchiveStream
     int unk124;
     __int64 size;
     __int64 pos;
-    int FUN_0082f3c0(void* buffer, unsigned int count, int unused, unsigned int* bytesRead);
+    int CBSAStream_Read(void* buffer, unsigned int count, int unused, unsigned int* bytesRead);
 };
 // FUN_0082f6c0 @ 0x0082f6c0 (size 150)
 // Base-object destructor of a thread-like class: clears the "running" flag bit,
 // signals the object at +0x34, waits for the worker thread to leave, closes its
 // handle, then runs the base class destructor.
 extern "C" __declspec(dllimport) int __stdcall CloseHandle(void* hObject);
-void __cdecl FUN_0040fca0(int milliseconds);
+void __cdecl BSSleep(int milliseconds);
 struct FUN_00aa63c0
 {
     virtual ~FUN_00aa63c0();
@@ -820,13 +820,13 @@ struct FUN_0082f6c0 : FUN_00aa63c0
     virtual ~FUN_0082f6c0();
 };
 extern unsigned int DAT_011dd1f4;
-void __cdecl FormHeap_Free(unsigned int p);
+void __cdecl FormHeapFreeAndLog_00401030(unsigned int p);
 struct FUN_0082f9c0_obj
 {
     virtual int unk00(int a);
 };
-void __cdecl FUN_0082f9c0();
-int __stdcall FUN_00831f70(int unused);
+void __cdecl FalloutAudioMedia_Shutdown();
+int __stdcall Runtime_ReturnZero(int unused);
 // PlayWeaponSound v2 (worker11): pack types reused; extra callees via shell classes
 struct Entry
 {
@@ -839,12 +839,12 @@ struct Entry
 };
 struct BSAudioShell
 {
-    NiPoint3 __thiscall FUN_00ad78e0();
-    BSSoundHandle __thiscall FUN_00ad7480(const char* name);
+    NiPoint3 __thiscall BSAudio_GetListenerPosition();
+    BSSoundHandle __thiscall BSAudio_GetSoundHandleByFilename(const char* name);
 };
 struct Weap
 {
-    TESSound* __thiscall FUN_005215a0(bool v);
+    TESSound* __thiscall TESObjectWEAP_GetAttackSound(bool v);
     void* __thiscall GetPointerByFlag(bool v);
     TESSound* __thiscall GetValueByFlag(bool v);
 };
@@ -1070,16 +1070,16 @@ struct Player
 };
 struct ListObj
 {
-    NiPoint3* __thiscall FUN_0045bb80();
+    NiPoint3* __thiscall NiAVObject_GetWorldTranslate();
 };
 struct SettingObj
 {
-    float* __thiscall FUN_00403e20();
+    float* __thiscall Setting_Float_00403e20();
 };
-bool __cdecl FUN_00839da0();
-bool __fastcall FUN_00524d10(void* p);
-void* __cdecl FUN_00453a70();
-unsigned int __cdecl FUN_00457fe0();
+bool __cdecl ImpactMixer_GetGunshotsInitialized();
+bool __fastcall PlayerCharacter_IsActually3rdPerson(void* p);
+void* __cdecl BSAudio_QInstance();
+unsigned int __cdecl Cmd_GetSessionTime_Execute();
 bool __cdecl FUN_0082eca0(void* snd, NiPoint3 pos, float v);
 extern Player* DAT_011dea3c;
 extern NiPoint3 DAT_011f426c;
@@ -1122,20 +1122,20 @@ struct EffectTime
 };
 struct EffectHandle
 {
-    EffectTime* FUN_00559450();
+    EffectTime* Modelloader_GetReferencedThis();
 };
 struct SpellTimes
 {
     float FUN_009a7c40();
-    float FUN_00759450();
+    float NiPSysSpawnModifier_GetLifeSpan();
 };
 struct EffectCollection
 {
     unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
     unsigned int FUN_0044ddc0();
-    EffectHandle* FUN_006a7ad0(unsigned int);
+    EffectHandle* BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
 };
-float FUN_00404010(float, float);
+float BSMAX_00404010(float, float);
 struct FUN_008216c0_shell
 {
     unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
@@ -1658,29 +1658,30 @@ struct SoundTimer
     unsigned char m_flag11;
     int unk14;
     SoundListNode m_kNode;
-    void FUN_00836110(BGSSaveFormBuffer* buffer);
+    void RadioEntry_Data_Save(BGSSaveFormBuffer* buffer);
 };
 
 // These declarations name the existing BSStringT ABI accessors omitted from
 // the supplied class declaration; they add no storage or replacement bodies.
 struct StringAccess530
 {
-    unsigned int FUN_004048e0();
+    unsigned int BSStringT_char_Length();
     char* ApplyMaskedOffset(unsigned int);
 };
 struct BraceString530 : BSStringT<char>
 {
-    BSStringT<char> FUN_0083d8b0();
+    BSStringT<char> BSStringT_char_RemoveCurlyContent();
 };
 // @fnv 0x0083d8b0
-BSStringT<char> BraceString530::FUN_0083d8b0()
+// src: COMMUNITY 0x0083d8b0
+BSStringT<char> BraceString530::BSStringT_char_RemoveCurlyContent()
 {
     unsigned int output6 = 0;  // next output character
     int depth_ = 0;            // nesting depth
     unsigned int index4;       // input character index
     BSStringT<char> result;
     result.Set(String(), 0);
-    for (index4 = 0; index4 < ((StringAccess530*)this)->FUN_004048e0(); ++index4)
+    for (index4 = 0; index4 < ((StringAccess530*)this)->BSStringT_char_Length(); ++index4)
     {
         if (String()[index4] == '{')
         {
@@ -1699,7 +1700,7 @@ BSStringT<char> BraceString530::FUN_0083d8b0()
             }
         }
     }
-    if (output6 < ((StringAccess530*)&result)->FUN_004048e0())
+    if (output6 < ((StringAccess530*)&result)->BSStringT_char_Length())
     {
         *((StringAccess530*)&result)->ApplyMaskedOffset(output6) = 0;
     }

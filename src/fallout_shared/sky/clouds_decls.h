@@ -34,7 +34,7 @@ class CloudsColorController : public NiTimeController
 extern SettingT_GameSettingCollection_ DAT_011cca6c;
 struct NiRTTI;
 extern NiRTTI DAT_012005b8;
-SkyShaderProperty* FUN_00653270(const NiRTTI*, NiProperty*);
+SkyShaderProperty* NiObject_DynamicCast(const NiRTTI*, NiProperty*);
 void AddToFloatArray(unsigned short, float);
 class Model
 {

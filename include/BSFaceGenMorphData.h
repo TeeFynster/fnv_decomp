@@ -36,6 +36,6 @@ public:
     virtual void vf17();
 
     unsigned int DynamicCast();
-    float FUN_00508120();
+    float NiControllerSequence_GetLastTime();
 
 };

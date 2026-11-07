@@ -71,7 +71,7 @@ extern int DAT_011a0f14;
 
 void* __cdecl FUN_00ec43fb(void* apObject, long alDelta, void* apSourceType, void* apTargetType, int aiIsReference);
 
-bool __cdecl FUN_006494d0(unsigned short auValue, float afAmount);
+bool __cdecl MagicFormulas_CheckTargetLevelMagnitude(unsigned short auValue, float afAmount);
 
 struct CastTarget
 {
@@ -293,7 +293,7 @@ struct CastTarget
     virtual void v35c();
     virtual bool IsBlocked();
 
-    unsigned short FUN_0087f9f0();
+    unsigned short GetLevel_0087f9f0();
 };
 
 struct FUN_0080bb70_cls
@@ -313,5 +313,5 @@ bool FUN_0080bb70_cls::CanCastOn(void* apObject)
     if (pTarget->IsBlocked())
         return false;
 
-    return FUN_006494d0(pTarget->FUN_0087f9f0(), GetFloatAtOffset1C());
+    return MagicFormulas_CheckTargetLevelMagnitude(pTarget->GetLevel_0087f9f0(), GetFloatAtOffset1C());
 }

@@ -82,17 +82,19 @@ struct FUN_00440460_S
 {
     char pad[0x58];
     V3 t;
-    void FUN_00440460(const V3* k);
+    void NiAVObject_SetTranslate(const V3* k);
 };
 // Copies the V3 pointed to by k into the t member.
 // @fnv 0x00440460
-void FUN_00440460_S::FUN_00440460(const V3* k)
+// src: XBOX_PDB 0x00440460
+void FUN_00440460_S::NiAVObject_SetTranslate(const V3* k)
 {
     t = *k;
 }
 
 // @fnv 0x004bae00
-bool __fastcall FUN_004bae00(const char* pThis)
+// src: XBOX_PDB 0x004bae00
+bool __fastcall bhkWorld_QDebugDisplay(const char* pThis)
 {
     return *(const bool*)(pThis + 0x16);
 }
@@ -104,16 +106,17 @@ class RenderedTextureString : public BSStringT<char>
 };
 
 extern char DAT_01189184;
-void __cdecl FUN_00451570(int);
-BSTextureManager* __stdcall FUN_004a0ea0();
+void __cdecl BSShaderManager_SetProjectedShadowMaskTexture(int);
+BSTextureManager* __stdcall BSShaderManager_GetTextureManager();
 
 // @fnv 0x004baec0
-void GridCellArray::FUN_004baec0()
+// src: XBOX_PDB 0x004baec0
+void GridCellArray::ClearCanopyShadowMaskTexture()
 {
     if (reinterpret_cast<RenderedTextureString*>(&spRT)->operator const char*())
     {
-        FUN_00451570(0);
-        FUN_004a0ea0()->AddRenderedTexture(reinterpret_cast<BSRenderedTexture*>(const_cast<char*>(
+        BSShaderManager_SetProjectedShadowMaskTexture(0);
+        BSShaderManager_GetTextureManager()->AddRenderedTexture(reinterpret_cast<BSRenderedTexture*>(const_cast<char*>(
             reinterpret_cast<RenderedTextureString*>(&spRT)->operator const char*())));
         reinterpret_cast<NiPointer<NiNode>*>(&spRT)->operator=(0);
         DAT_01189184 = 1;
@@ -124,11 +127,12 @@ struct FUN_004bc1f0_S
 {
     char pad[0x58];
     NiPoint3 t;
-    void FUN_004bc1f0(float x, float y, float z);
+    void NiAVObject_SetTranslate_004bc1f0(float x, float y, float z);
 };
 // Stores the given x, y and z into the t point of this object.
 // @fnv 0x004bc1f0
-void FUN_004bc1f0_S::FUN_004bc1f0(float x, float y, float z)
+// src: XBOX_PDB 0x004bc1f0
+void FUN_004bc1f0_S::NiAVObject_SetTranslate_004bc1f0(float x, float y, float z)
 {
     t = NiPoint3(x, y, z);
 }
@@ -142,11 +146,12 @@ struct FUN_004bc280_S
 {
     char pad[0xc8];
     C3 c;
-    void FUN_004bc280(const C3* k);
+    void NiLight_SetAmbientColor(const C3* k);
 };
 // Copies the C3 value pointed to by k into c, then calls IncRevisionID.
 // @fnv 0x004bc280
-void FUN_004bc280_S::FUN_004bc280(const C3* apColor)
+// src: COMMUNITY 0x004bc280
+void FUN_004bc280_S::NiLight_SetAmbientColor(const C3* apColor)
 {
     c = *apColor;
     reinterpret_cast<NiDynamicEffect*>(this)->IncRevisionID();
@@ -165,7 +170,8 @@ void NiDynamicEffect::SetEffectColor(const NiColor& color)
 extern Setting g_011c75a4;
 
 // @fnv 0x004bc400
-unsigned char FUN_004bc400()
+// src: COMMUNITY 0x004bc400
+unsigned char TESRenderer_GetDoCanopyShadowPass()
 {
     return *g_011c75a4.FUN_00408d60();
 }
@@ -179,15 +185,16 @@ struct FUN_004bc450_S
 {
     char pad[0x28];
     C3 c;
-    void FUN_004bc480(int);
-    void FUN_004bc450(const C3* k);
+    void NiMaterialProperty_SetChanged(int);
+    void NiMaterialProperty_SetEmittance(const C3* k);
 };
 // Copies the C3 value pointed to by k into the c member and calls FUN_004bc480 with 1.
 // @fnv 0x004bc450
-void FUN_004bc450_S::FUN_004bc450(const C3* apColor)
+// src: XBOX_PDB 0x004bc450
+void FUN_004bc450_S::NiMaterialProperty_SetEmittance(const C3* apColor)
 {
     c = *apColor;
-    FUN_004bc480(1);
+    NiMaterialProperty_SetChanged(1);
 }
 }  // namespace fnv_004bc450
 
@@ -217,7 +224,8 @@ bool GridCellArray::IsOutdoorCell(unsigned int aiX, unsigned int aiY)
 extern int DAT_011f91d8;
 
 // @fnv 0x004bc3d0
-void FUN_004bc3d0(int aiEnabledPasses)
+// src: COMMUNITY 0x004bc3d0
+void BSShaderManager_SetEnabledPasses(int aiEnabledPasses)
 {
     DAT_011f91d8 = aiEnabledPasses;
 }
@@ -225,7 +233,8 @@ void FUN_004bc3d0(int aiEnabledPasses)
 extern int DAT_011f91d8;
 
 // @fnv 0x004bc3e0
-int __cdecl FUN_004bc3e0()
+// src: COMMUNITY 0x004bc3e0
+int __cdecl BSShaderManager_GetEnabledPasses()
 {
     return DAT_011f91d8;
 }
@@ -238,7 +247,8 @@ struct Flt
 extern Flt g_011c73b4;
 
 // @fnv 0x004bc3f0
-unsigned int FUN_004bc3f0()
+// src: XBOX_PDB 0x004bc3f0
+unsigned int Renderer_GetNIRenderer()
 {
     return g_011c73b4.operator unsigned int();
 }
@@ -247,7 +257,8 @@ extern float DAT_011fd874;
 extern float DAT_011fd878;
 
 // @fnv 0x004bc420
-void __cdecl FUN_004bc420(float afValue1, float afValue2)
+// src: COMMUNITY 0x004bc420
+void __cdecl ShadowLightShader_SetProjectedShadowMaskLL(float afValue1, float afValue2)
 {
     DAT_011fd874 = afValue1;
     DAT_011fd878 = afValue2;
@@ -256,7 +267,8 @@ void __cdecl FUN_004bc420(float afValue1, float afValue2)
 extern float DAT_011fd880;
 
 // @fnv 0x004bc440
-void FUN_004bc440(float value)
+// src: COMMUNITY 0x004bc440
+void ShadowLightShader_SetProjectedShadowMaskWidth(float value)
 {
     DAT_011fd880 = value;
 }
@@ -289,24 +301,25 @@ void GridCellArray::SetCellAt(unsigned int aiX, unsigned int aiY, TESObjectCELL*
 
 struct DH
 {
-    bool FUN_004226e0();
+    bool TESDataHandler_GetClearingData();
 };
 extern DH* g_dataHandler;
 struct FUN_004b9e90_shell
 {
     void CallVirtualMethod2();
 };
-void FUN_00541c00();
+void TESObjectCELL_KillStatics();
 // Calls CallVirtualMethod2 on this, then calls FUN_00541c00 if g_dataHandler->FUN_004226e0() returns true.
 // @fnv 0x004ba600
-void GridCellArray::FUN_004ba600()
+// src: XBOX_PDB 0x004ba600
+void GridCellArray::KillAll()
 {
     ((FUN_004b9e90_shell*)this)->CallVirtualMethod2();
-    if (g_dataHandler->FUN_004226e0())
-        FUN_00541c00();
+    if (g_dataHandler->TESDataHandler_GetClearingData())
+        TESObjectCELL_KillStatics();
 }
 
-extern "C" void FUN_005546a0(float*);
+extern "C" void TESObjectCELL_MoveExteriorWorld(float*);
 
 // @fnv 0x004ba630
 bool GridCellArray::SetGridCellPosition(int aiX, int aiY)
@@ -317,7 +330,7 @@ bool GridCellArray::SetGridCellPosition(int aiX, int aiY)
         fX = static_cast<float>(aiX << 12);
         fY = static_cast<float>(aiY << 12);
         *reinterpret_cast<float*>(&unk1c) = 0.0f;
-        FUN_005546a0(&fX);
+        TESObjectCELL_MoveExteriorWorld(&fX);
         bretval = true;
         *reinterpret_cast<char*>(&unk20) = 0;
     }
@@ -348,7 +361,8 @@ struct FUN_00552970_Call
 };
 // Gets the grid cell at (aiX, aiY) and, if it has a cell, forwards apRoot to that cell's UpdateCellScene.
 // @fnv 0x004ba960
-void GridCellArray::FUN_004ba960(NiNode* apRoot, unsigned int aiX, unsigned int aiY)
+// src: COMMUNITY 0x004ba960
+void GridCellArray::AttachToWorld(NiNode* apRoot, unsigned int aiX, unsigned int aiY)
 {
     GridCell* pgridcell;
     pgridcell = Get(aiX, aiY);
@@ -368,10 +382,11 @@ struct CLS_004bc240
 {
     char _pad[0x1c];
     Arr arr;
-    void* FUN_004bc240();
+    void* NiTexturingProperty_GetBaseTexture();
 };
 // @fnv 0x004bc240
-void* CLS_004bc240::FUN_004bc240()
+// src: COMMUNITY 0x004bc240
+void* CLS_004bc240::NiTexturingProperty_GetBaseTexture()
 {
     KFModel* p = *(KFModel**)arr.GetAt(0);
     if (p)
@@ -384,40 +399,43 @@ struct FUN_004bc480_shell
 {
     unsigned char pad_00_44[0x44];
     unsigned int m_44;
-    void FUN_004bc480(int arg);
+    void NiMaterialProperty_SetChanged(int arg);
 };
 
 // @fnv 0x004bc480
-void FUN_004bc480_shell::FUN_004bc480(int arg)
+// src: XBOX_PDB 0x004bc480
+void FUN_004bc480_shell::NiMaterialProperty_SetChanged(int arg)
 {
     ++m_44;
 }
 
 struct bhkWorld;
-bool __fastcall FUN_004bae00(char const*);
+bool __fastcall bhkWorld_QDebugDisplay(char const*);
 // @fnv 0x004bad40
-void GridCellArray::FUN_004bad40()
+// src: COMMUNITY 0x004bad40
+void GridCellArray::ToggleCollisionGeometry_004bad40()
 {
     bhkWorld* pWorld = TESObjectCELL::GetExteriorbhkWorld();
     if (pWorld)
     {
-        bool b = !FUN_004bae00((const char*)pWorld);
+        bool b = !bhkWorld_QDebugDisplay((const char*)pWorld);
         for (unsigned int i = 0; i < GetGridDimension(); ++i)
             for (unsigned int j = 0; j < GetGridDimension(); ++j)
             {
                 GridCell* cell = Get(i, j);
                 if (cell->pCell && cell->pCell->IsOutdoorCell())
-                    ((ExtraDataList*)cell->pCell)->FUN_00554960(b);
+                    ((ExtraDataList*)cell->pCell)->TESObjectCELL_SetCollisionGeometryDisplay(b);
             }
     }
 }
 
 struct FUN_005549d0_shell
 {
-    void FUN_005549d0(bool);
+    void TESObjectCELL_TogglePrimitives(bool);
 };
 // @fnv 0x004bae20
-void GridCellArray::FUN_004bae20(bool detach)
+// src: COMMUNITY 0x004bae20
+void GridCellArray::TogglePrimitives_004bae20(bool detach)
 {
     bhkWorld* world = TESObjectCELL::GetExteriorbhkWorld();
     if (world)
@@ -428,7 +446,7 @@ void GridCellArray::FUN_004bae20(bool detach)
             {
                 GridCell* cell = Get(x, y);
                 if (cell->pCell && cell->pCell->IsOutdoorCell())
-                    ((FUN_005549d0_shell*)cell->pCell)->FUN_005549d0(detach);
+                    ((FUN_005549d0_shell*)cell->pCell)->TESObjectCELL_TogglePrimitives(detach);
             }
         }
     }
@@ -436,11 +454,12 @@ void GridCellArray::FUN_004bae20(bool detach)
 
 struct FUN_00553820_shell
 {
-    void FUN_00553820();
+    void TESObjectCELL_RunAnimations();
 };
 // Iterates every grid cell and calls FUN_00553820 on each cell's pCell when it is non-null.
 // @fnv 0x004baba0
-void GridCellArray::FUN_004baba0()
+// src: COMMUNITY 0x004baba0
+void GridCellArray::RunAnimations_004baba0()
 {
     unsigned int i;
     for (i = 0; i < GetGridDimension(); i++)
@@ -450,7 +469,7 @@ void GridCellArray::FUN_004baba0()
         {
             GridCell* cell = Get(i, j);
             if (cell->pCell)
-                reinterpret_cast<FUN_00553820_shell*>(cell->pCell)->FUN_00553820();
+                reinterpret_cast<FUN_00553820_shell*>(cell->pCell)->TESObjectCELL_RunAnimations();
         }
     }
 }
@@ -461,7 +480,8 @@ struct CellOwner
 };
 // Iterates every grid cell and calls PlayCellSoundEffects on each cell's pCell when both the cell and its pCell are non-null.
 // @fnv 0x004bac20
-void GridCellArray::FUN_004bac20()
+// src: COMMUNITY 0x004bac20
+void GridCellArray::UpdateRefSounds_004bac20()
 {
     for (unsigned int x = 0; x < GetGridDimension(); ++x)
     {
@@ -476,12 +496,13 @@ void GridCellArray::FUN_004bac20()
 
 struct LAND_x
 {
-    void FUN_0053fa40(bool);
+    void TESObjectLAND_DrawLandBorder(bool);
 };
 
 // Iterates every grid cell and, for cells whose cell has a LAND, calls FUN_0053fa40 with abShow.
 // @fnv 0x004baca0
-void GridCellArray::FUN_004baca0(bool abShow)
+// src: COMMUNITY 0x004baca0
+void GridCellArray::ShowLandBorders(bool abShow)
 {
     for (unsigned int x = 0; x < GetGridDimension(); ++x)
     {
@@ -492,7 +513,7 @@ void GridCellArray::FUN_004baca0(bool abShow)
             {
                 TESObjectLAND* pland = pgridcell->pCell->GetLandscape();
                 if (pland)
-                    reinterpret_cast<LAND_x*>(pland)->FUN_0053fa40(abShow);
+                    reinterpret_cast<LAND_x*>(pland)->TESObjectLAND_DrawLandBorder(abShow);
             }
         }
     }
@@ -502,15 +523,16 @@ typedef AutoMemHelper AutoMemContext;
 
 struct FUN_005535f0_shell
 {
-    void FUN_005535f0();
+    void SetupMopp();
 };
 
 extern char const str_010206c0[];
 
-void __fastcall FUN_005374f0(TESObjectLAND* land);
+void __fastcall TESObjectLAND_Attach3D(TESObjectLAND* land);
 
 // @fnv 0x004ba7d0
-void GridCellArray::FUN_004ba7d0()
+// src: COMMUNITY 0x004ba7d0
+void GridCellArray::AttachAllLand3D()
 {
     if (*reinterpret_cast<bool*>(&unk20))
         return;
@@ -526,9 +548,9 @@ void GridCellArray::FUN_004ba7d0()
             GridCell* pgc = Get(ix, iy);
             if (pgc && pgc->pCell)
             {
-                FUN_005374f0(pgc->pCell->GetLandscape());
+                TESObjectLAND_Attach3D(pgc->pCell->GetLandscape());
 
-                reinterpret_cast<FUN_005535f0_shell*>(pgc->pCell)->FUN_005535f0();
+                reinterpret_cast<FUN_005535f0_shell*>(pgc->pCell)->SetupMopp();
             }
         }
     }
@@ -542,7 +564,7 @@ extern bool DAT_011c642c;
 
 struct Zt5Cell
 {
-    void FUN_00551890(float value, bool flag);
+    void TESObjectCELL_UpdateManagedNodes(float value, bool flag);
 };
 
 // @fnv 0x004ba9a0
@@ -581,7 +603,7 @@ void GridCellArray::UpdateCellGrid(float value)
 
             if (idim->pCell != 0)
             {
-                reinterpret_cast<Zt5Cell*>(idim->pCell)->FUN_00551890(value, !bupdate);
+                reinterpret_cast<Zt5Cell*>(idim->pCell)->TESObjectCELL_UpdateManagedNodes(value, !bupdate);
             }
         }
     }
@@ -594,12 +616,13 @@ struct FUN_004bc320_shell
     unsigned char _pad_0[0x30];
     GO m_textures[1];
 
-    unsigned int FUN_004bc320(int aiIndex);
+    unsigned int BSRenderedTexture_GetTexture(int aiIndex);
 };
 
 // Returns the unsigned int value of the texture at aiIndex, or 0 when this is null.
 // @fnv 0x004bc320
-unsigned int FUN_004bc320_shell::FUN_004bc320(int aiIndex)
+// src: COMMUNITY 0x004bc320
+unsigned int FUN_004bc320_shell::BSRenderedTexture_GetTexture(int aiIndex)
 {
     return (this ? m_textures[aiIndex] : GO(0)).operator unsigned int();
 }
@@ -610,8 +633,8 @@ void _Deallocate(void*);
 // @fnv 0x004ba400
 GridCellArray::~GridCellArray()
 {
-    FUN_004ba600();
-    FUN_004baec0();
+    KillAll();
+    ClearCanopyShadowMaskTexture();
     void* p = m_pGridCells;
     _Deallocate(p);
 }
@@ -637,14 +660,15 @@ void GridCellArray::SetCellAtXY(unsigned int aiX, unsigned int aiY, GridCell* ap
 
 struct FUN_00552840_cell
 {
-    void FUN_00552840();
+    void TESObjectCELL_UpdateManagedNodeTransforms();
 };
 
 extern bool DAT_011c642d;
 
 // Flips DAT_011c642d, then for each grid cell on the border whose checkerboard parity matches, calls FUN_00552840 on the cell's pCell if non-null.
 // @fnv 0x004baab0
-void GridCellArray::FUN_004baab0()
+// src: COMMUNITY 0x004baab0
+void GridCellArray::UpdateManagedNodeTransforms()
 {
     unsigned int dim = this->GetGridDimension();
     unsigned int last = dim - 1;
@@ -670,7 +694,7 @@ void GridCellArray::FUN_004baab0()
                 GridCell* cell = this->Get(i, j);
                 if (cell->pCell != 0)
                 {
-                    reinterpret_cast<FUN_00552840_cell*>(cell->pCell)->FUN_00552840();
+                    reinterpret_cast<FUN_00552840_cell*>(cell->pCell)->TESObjectCELL_UpdateManagedNodeTransforms();
                 }
             }
         }
@@ -680,7 +704,7 @@ void GridCellArray::FUN_004baab0()
 struct InventoryItem
 {
     bool FUN_00418750();
-    short FUN_00418770();
+    short ExtraDataList_GetCount();
 };
 struct LinkedEntry
 {
@@ -690,11 +714,12 @@ struct LinkedEntry
 struct FUN_004bcc30_List
 {
     LinkedEntry* first;
-    int FUN_004bcc30();
+    int ItemChange_NumberLeveledExtra();
 };
 // Walks the linked entries and sums the short value of each item whose check returns true, stopping at the first null entry or null item pointer.
 // @fnv 0x004bcc30
-int FUN_004bcc30_List::FUN_004bcc30()
+// src: XBOX_PDB 0x004bcc30
+int FUN_004bcc30_List::ItemChange_NumberLeveledExtra()
 {
     LinkedEntry* pEntry = first;
     int total = 0;
@@ -703,7 +728,7 @@ int FUN_004bcc30_List::FUN_004bcc30()
         InventoryItem* item = *pEntry->FUN_006815c0();
         if (item && item->FUN_00418750())
         {
-            total += item->FUN_00418770();
+            total += item->ExtraDataList_GetCount();
         }
         pEntry = pEntry->FUN_00726070();
     }
@@ -721,13 +746,13 @@ struct HealthForm4bcdb0
 HealthForm4bcdb0* GetHealthForm(TESBoundObject* pkForm);
 struct HealthExtra4bcdb0
 {
-    float FUN_004186f0();
+    float ExtraDataList_GetHealth();
 };
 struct HealthList4bcdb0
 {
     HealthExtra4bcdb0*& FUN_006815c0();
 };
-float FUN_0040ebd0(float a, float b);
+float BSMIN(float a, float b);
 extern const float g_011c7294_arg1;
 extern const float DAT_01012054;
 extern double DAT_01017a40;
@@ -737,10 +762,11 @@ struct FUN_004bcdb0_shell
     int m_iArrayLength;
     TESBoundObject* m_pkForm;
     bool HasEffect(int iFlag);
-    float FUN_004bcdb0(bool bPercent);
+    float ItemChange_GetItemHealth(bool bPercent);
 };
 // @fnv 0x004bcdb0
-float FUN_004bcdb0_shell::FUN_004bcdb0(bool bPercent)
+// src: XBOX_PDB 0x004bcdb0
+float FUN_004bcdb0_shell::ItemChange_GetItemHealth(bool bPercent)
 {
     HealthForm4bcdb0* pkHealth = GetHealthForm(m_pkForm);
     if (pkHealth)
@@ -753,12 +779,12 @@ float FUN_004bcdb0_shell::FUN_004bcdb0(bool bPercent)
         if (pkList2 && pkList2->FUN_006815c0())
         {
             HealthExtra4bcdb0* pkExtra = pkList2->FUN_006815c0();
-            if (pkExtra && pkExtra->FUN_004186f0() != -1.0)
+            if (pkExtra && pkExtra->ExtraDataList_GetHealth() != -1.0)
             {
                 if (!bPercent)
-                    return pkExtra->FUN_004186f0();
+                    return pkExtra->ExtraDataList_GetHealth();
                 else
-                    return FUN_0040ebd0(g_011c7294_arg1, pkExtra->FUN_004186f0() / m_uiHealthValue) * DAT_01017a40;
+                    return BSMIN(g_011c7294_arg1, pkExtra->ExtraDataList_GetHealth() / m_uiHealthValue) * DAT_01017a40;
             }
             else
             {
@@ -982,7 +1008,8 @@ extern char DAT_011a9b7c;
 
 // Builds a grid of textured cell meshes, sets up an orthographic camera and light, and renders the scene into a render target texture.
 // @fnv 0x004baf10
-void GridCellArray::FUN_004baf10()
+// src: COMMUNITY 0x004baf10
+void GridCellArray::RecreateCanopyShadowMaskTexture()
 {
     Obj* pStencil4;
     Obj* pMat8;
@@ -1084,7 +1111,7 @@ void GridCellArray::FUN_004baf10()
                 if (iResult == 1 && pTexVal)
                 {
                     PPTmp = new BSShaderNoLightingProperty();
-                    PPTmp->FUN_00438230(reinterpret_cast<NiTexture*>(pTexVal));
+                    PPTmp->BSShaderNoLightingProperty_SetBaseMap(reinterpret_cast<NiTexture*>(pTexVal));
                     reinterpret_cast<Obj*>(PPTmp)->SetFlag(0);
                     bAllEmpty7 = bAllLoaded7 = false;
                 }

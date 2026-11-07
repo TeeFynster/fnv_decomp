@@ -288,9 +288,9 @@ struct Manager
     virtual void begin(const SimpleContactPoint&, Input&, Velocity&, Input&, Velocity&);
     virtual void end(const SimpleContactPoint&, float, Input&, Velocity&, Input&, Velocity&);
 };
-extern "C" void __cdecl FUN_00df5950(const Input&, const Input&, const Matrix&, Constraint&);
-extern "C" float __cdecl FUN_00df5f80(const Constraint&, Params&, Velocity&, Velocity&);
-extern "C" void __cdecl FUN_00df5e80(const Constraint&, Velocity&, Velocity&, hkVector4&);
+extern "C" void __cdecl hkpCollision_BuildResponseMatrices(const Input&, const Input&, const Matrix&, Constraint&);
+extern "C" float __cdecl Object_ProcessAndReturnValue_00df5f80(const Constraint&, Params&, Velocity&, Velocity&);
+extern "C" void __cdecl hkVector4_UpdateFields_00df5e80(const Constraint&, Velocity&, Velocity&, hkVector4&);
 
 static __forceinline void centerAt(const MotionState& ms, float time, hkVector4& center)
 {
@@ -337,7 +337,8 @@ static __forceinline void makeBasis(const hkVector4& normal, Matrix& basis)
 }
 
 // @fnv 0x00d9f250
-extern "C" void __cdecl FUN_00d9f250(const SimpleContactPoint& point, float time, Params& params, Motion* a, Motion* b, Manager* mgr,
+// src: GUESS 0x00d9f250 (confidence: medium)
+extern "C" void __cdecl hkpCollision_ProcessBodyResponse(const SimpleContactPoint& point, float time, Params& params, Motion* a, Motion* b, Manager* mgr,
                                      Result& result)
 {
     Input ia;
@@ -370,13 +371,13 @@ extern "C" void __cdecl FUN_00d9f250(const SimpleContactPoint& point, float time
     Matrix basis;
     makeBasis(point.dir(), basis);
     mgr->begin(point, ia, va, ib, vb);
-    FUN_00df5950(ia, ib, basis, info);
-    result.impulse = FUN_00df5f80(info, params, va, vb);
+    hkpCollision_BuildResponseMatrices(ia, ib, basis, info);
+    result.impulse = Object_ProcessAndReturnValue_00df5f80(info, params, va, vb);
     mgr->end(point, result.impulse, ia, va, ib, vb);
     {
         hkVector4 pa, pb;
-        FUN_00df5e80(info, oa, vb, pa);
-        FUN_00df5e80(info, va, ob, pb);
+        hkVector4_UpdateFields_00df5e80(info, oa, vb, pa);
+        hkVector4_UpdateFields_00df5e80(info, va, ob, pb);
         result.velocityA = pa(0);
         result.velocityB = pb(0);
     }
@@ -641,7 +642,8 @@ static __forceinline void inverseSymmetric(const hkMatrix3& m, float eps, hkMatr
     inv.getColumn(2).scaled(factor, r2);
 }
 // @fnv 0x00df5950
-extern "C" void __cdecl FUN_00df5950(const BodyInput* bodyA, const BodyInput* bodyB, const hkMatrix3& axes,
+// src: GUESS 0x00df5950 (confidence: medium)
+extern "C" void __cdecl hkpCollision_BuildResponseMatrices(const BodyInput* bodyA, const BodyInput* bodyB, const hkMatrix3& axes,
                                      SolverResult* out)
 {
     hkReal sumInvMass = bodyA->m_vel(3) + bodyB->m_vel(3);

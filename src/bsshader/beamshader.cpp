@@ -122,8 +122,8 @@ void BeamPassShader::SetupPass()
     {
         BeamStage::CreateNewStage((NiPointer<BeamStage>&)stage);
         ConfigureBeamStage(stage.object, 0, 1, 2, true);
-        stage.object->state->FUN_00e890c0(7, 0, 0, false);
-        p.object->FUN_00e802b0(p.object->m_uiCurrentStage, stage.object);
+        stage.object->state->NiD3DTextureStageGroup_SetSamplerState(7, 0, 0, false);
+        p.object->NiD3DPass_SetStage(p.object->m_uiCurrentStage, stage.object);
     }
     reinterpret_cast<NiPointer<NiRefObject>&>(p.object->m_spVertexShader) = vertex;
     reinterpret_cast<NiPointer<NiRefObject>&>(p.object->m_spPixelShader) = pixel;

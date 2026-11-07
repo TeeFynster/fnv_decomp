@@ -19,7 +19,7 @@ class NiUnsharedGeometryGroup
   public:
     static NiGeometryGroup* Create();
 };
-NiGeometryGroup* FUN_00e94c00();
+NiGeometryGroup* NiStaticGeometryGroup_Create();
 NiGeometryGroup* GetNiGeometryGroup();
 class NiStreamLinkIDSet
 {

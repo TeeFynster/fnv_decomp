@@ -6,7 +6,7 @@
 #include "../../../../../../include/hkMemoryRouter.h"
 
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct BufferPair
 {
@@ -22,12 +22,12 @@ void __cdecl FreeBufferPair(BufferPair* apPair, int aiCount)
         return;
 
     void* pSecond = apPair->m_pSecond;
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     pAllocator->blockFree(pSecond, aiCount * 16);
 
     void* pFirst = apPair->m_pFirst;
-    hkMemoryRouter* pHolder2 = FUN_00c85750();
+    hkMemoryRouter* pHolder2 = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
     pAllocator2->blockFree(pFirst, aiCount * 16);
 }
@@ -197,7 +197,8 @@ struct S9d950_Box
 
 // Relocates pair entries in apA->m_pairs when aiB >= 8, then stores the max of apC's four fields into apA->unk0c.
 // @fnv 0x00d9d950
-void __cdecl FUN_00d9d950(S9d950_Owner* apA, int aiB, const S9d950_Box* apC, const int* apD)
+// src: HAVOK_LIB 0x00d9d950
+void __cdecl hkKdTreeBuildingUtils_completeDistributedBuild(S9d950_Owner* apA, int aiB, const S9d950_Box* apC, const int* apD)
 {
 
     if (aiB >= 8)

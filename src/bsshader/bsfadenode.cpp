@@ -37,9 +37,9 @@ public:
     float GetSquaredXYLength();
     float GetSquaredXYLength() const;
 
-    void FUN_004a0c10();
-    LocalPt3* FUN_00439ef0(LocalPt3* out, LocalPt3* other);
-    LocalPt3 FUN_00439ef0(const LocalPt3& rhs);
+    void Unitize_004a0c10();
+    LocalPt3* SubtractIntoVector(LocalPt3* out, LocalPt3* other);
+    LocalPt3 SubtractIntoVector(const LocalPt3& rhs);
     bool FUN_00439090(LocalPt3* other);
     float FUN_00457990() const;
 
@@ -165,7 +165,7 @@ BSRenderedTexture* BSShaderManager::GetSceneDepthRenderedTexture()
 typedef char _sizecheck_BSTreeNode[sizeof(BSTreeNode) == 304 ? 1 : -1];
 struct FUN_00b4def0_shell : public BSFadeNode
 {
-    bool FUN_00b4def0(NiStream*);
+    bool BSFadeNode_RegisterStreamables(NiStream*);
 };
 
 struct FUN_00a5e5b0_helper
@@ -174,7 +174,8 @@ struct FUN_00a5e5b0_helper
 };
 
 // @fnv 0x00b4def0
-bool FUN_00b4def0_shell::FUN_00b4def0(NiStream* arStream)
+// src: XBOX_PDB 0x00b4def0
+bool FUN_00b4def0_shell::BSFadeNode_RegisterStreamables(NiStream* arStream)
 {
     if (!((FUN_00a5e5b0_helper*)this)->RegisterChildStreamables(arStream))
         return false;
@@ -205,7 +206,8 @@ void __cdecl SetFlagOnVirtualResult(Dummy* apDummy)
 
 // Recursively frees the linked list hanging off self[1], deallocating each node, then clears self[0].
 // @fnv 0x00b4df30
-void __fastcall FUN_00b4df30(void* p)
+// src: GUESS 0x00b4df30 (confidence: medium)
+void __fastcall BSFadeNode_FreeLinkedNodesRecursively(void* p)
 {
     void** self = (void**)p;
     if (self[1])
@@ -219,7 +221,7 @@ void __fastcall FUN_00b4df30(void* p)
             void* pCurrent = self[1];
             if (pCurrent)
             {
-                FUN_00b4df30(pCurrent);
+                BSFadeNode_FreeLinkedNodesRecursively(pCurrent);
                 g_memoryManager._DeallocateAlias(pCurrent);
             }
             self[1] = next;
@@ -232,7 +234,8 @@ double(__cdecl* DAT_011f9134)(void*);
 
 // Returns the result of calling the DAT_011f9134 function pointer on param_1, or 1.0f if the pointer is null.
 // @fnv 0x00b4df80
-float __fastcall FUN_00b4df80(void* param_1)
+// src: COMMUNITY 0x00b4df80
+float __fastcall BSFadeNode_GetMaxAlpha(void* param_1)
 {
     float f;
     if (DAT_011f9134)
@@ -244,17 +247,19 @@ float __fastcall FUN_00b4df80(void* param_1)
 
 struct FUN_00b4dec0_shell : public BSFadeNode
 {
-    void FUN_00b4dec0(int);
+    void BSFadeNode_SetLODMultType(int);
 };
 
 // @fnv 0x00b4dec0
-void FUN_00b4dec0_shell::FUN_00b4dec0(int aeMultType)
+// src: XBOX_PDB 0x00b4dec0
+void FUN_00b4dec0_shell::BSFadeNode_SetLODMultType(int aeMultType)
 {
     *(int*)((char*)this + 0xc4) = aeMultType;
 }
 
 // @fnv 0x00b4e3f0
-void* __fastcall FUN_00b4e3f0(void* apSource, int dummy, void* kCloning)
+// src: XBOX_PDB 0x00b4e3f0
+void* __fastcall BSFadeNode_CreateClone(void* apSource, int dummy, void* kCloning)
 {
     BSFadeNode* pFadeNode = new BSFadeNode();
     ((NiNode*)apSource)->CopyMemberData((NiNode*)pFadeNode, *(CloningProcess*)kCloning);
@@ -330,11 +335,12 @@ class FUN_00b4ea20_cls
     unsigned char unkA8[0x18];
     float m_fC0;
     void Tail(float* p, int v);
-    void FUN_00b4ea20(float* p, int v);
+    void BSFadeNode_UpdateSelectedDownwardPass(float* p, int v);
 };
 
 // @fnv 0x00b4ea20
-void FUN_00b4ea20_cls::FUN_00b4ea20(float* apValue, int aiValue)
+// src: XBOX_PDB 0x00b4ea20
+void FUN_00b4ea20_cls::BSFadeNode_UpdateSelectedDownwardPass(float* apValue, int aiValue)
 {
     if (DAT_011ad7b4 == 0)
     {
@@ -407,15 +413,15 @@ struct Extra
 };
 extern const char* DAT_011f9140;
 extern void* DAT_01202ddc;
-char* __cdecl FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d550(const char*, float);
-char* __cdecl FUN_00a7d4d0(const char*, int);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
+char* __cdecl NiGetViewerString_00a7d4d0(const char*, int);
 struct ViewerBool
 {
     bool value;
 };
 char* __cdecl FlagString(const char*, ViewerBool);
-int __cdecl FUN_00406d00(char*, unsigned int, const char*, ...);
+int __cdecl BSsprintf(char*, unsigned int, const char*, ...);
 struct FadeViewer
 {
     unsigned int field00;
@@ -463,42 +469,43 @@ struct FadeViewer
     unsigned int fielda8;
     float nearDist, farDist, lastFade, currentFade, boundRadius, timeSinceUpdate;
     int multType, frameCounter;
-    void FUN_00a5ea70(Strings*);
+    void NiNode_GetViewerStrings(Strings*);
     Extra* FUN_00a5bdd0(void*);
-    void FUN_00b4ed70(Strings* strings);
+    void BSFadeNode_GetViewerStrings(Strings* strings);
 };
 // Appends formatted fade-viewer fields and bit flags from field30 to the strings list, then forwards to an Extra viewer if found.
 // @fnv 0x00b4ed70
-void FadeViewer::FUN_00b4ed70(Strings* strings)
+// src: XBOX_PDB 0x00b4ed70
+void FadeViewer::BSFadeNode_GetViewerStrings(Strings* strings)
 {
-    FUN_00a5ea70(strings);
+    NiNode_GetViewerStrings(strings);
     {
-        char* text = FUN_00a7d330(DAT_011f9140);
+        char* text = NiViewerStrings_NiGetViewerString_Title(DAT_011f9140);
         strings->Add(text);
         float fNearDist = nearDist;
         float fFarDist = farDist;
         text = (char*)g_memoryManager.Allocate(64);
         if (fNearDist == 3.4028234663852886e38)
-            FUN_00406d00(text, 64, "fNearDistSqr = DISABLED");
+            BSsprintf(text, 64, "fNearDistSqr = DISABLED");
         else
-            FUN_00406d00(text, 64, "fNearDistSqr = %.2f", fNearDist);
+            BSsprintf(text, 64, "fNearDistSqr = %.2f", fNearDist);
         strings->Add(text);
         text = (char*)g_memoryManager.Allocate(64);
         if (fFarDist == 3.4028234663852886e38)
-            FUN_00406d00(text, 64, "fFarDistSqr = DISABLED");
+            BSsprintf(text, 64, "fFarDistSqr = DISABLED");
         else
-            FUN_00406d00(text, 64, "fFarDistSqr = %.2f", fFarDist);
+            BSsprintf(text, 64, "fFarDistSqr = %.2f", fFarDist);
         strings->Add(text);
         text = (char*)g_memoryManager.Allocate(64);
-        FUN_00406d00(text, 64, "eMultType = %d", multType);
+        BSsprintf(text, 64, "eMultType = %d", multType);
         strings->Add(text);
-        text = FUN_00a7d550("fLastFade", lastFade);
+        text = NiGetViewerString_00a7d550("fLastFade", lastFade);
         strings->Add(text);
-        text = FUN_00a7d550("fCurrentFade", currentFade);
+        text = NiGetViewerString_00a7d550("fCurrentFade", currentFade);
         strings->Add(text);
-        text = FUN_00a7d550("fTimeSinceUpdate", timeSinceUpdate);
+        text = NiGetViewerString_00a7d550("fTimeSinceUpdate", timeSinceUpdate);
         strings->Add(text);
-        text = FUN_00a7d4d0("iFrameCounter", frameCounter);
+        text = NiGetViewerString_00a7d4d0("iFrameCounter", frameCounter);
         strings->Add(text);
     }
     {
@@ -539,28 +546,31 @@ void FadeViewer::FUN_00b4ed70(Strings* strings)
 void FUN_00a5dd70();
 
 // @fnv 0x00b4ded0
-void FUN_00b4ded0()
+// src: XBOX_PDB 0x00b4ded0
+void BSFadeNode_UpdateDownwardPass()
 {
     FUN_00a5dd70();
 }
 
-void FUN_00a5dd40();
+void NiNode_LoadBinary();
 // @fnv 0x00b4dee0
-void FUN_00b4dee0()
+// src: XBOX_PDB 0x00b4dee0
+void BSFadeNode_LoadBinary()
 {
-    FUN_00a5dd40();
+    NiNode_LoadBinary();
 }
 
 struct Cls00b4df20
 {
-    bool FUN_00a5e600(Cls00b4df20* other);
-    bool FUN_00b4df20(Cls00b4df20* other);
+    bool NiNode_IsEqual(Cls00b4df20* other);
+    bool BSFadeNode_IsEqual(Cls00b4df20* other);
 };
 
 // @fnv 0x00b4df20
-bool Cls00b4df20::FUN_00b4df20(Cls00b4df20* other)
+// src: XBOX_PDB 0x00b4df20
+bool Cls00b4df20::BSFadeNode_IsEqual(Cls00b4df20* other)
 {
-    return FUN_00a5e600(other);
+    return NiNode_IsEqual(other);
 }
 
 struct Fade
@@ -859,9 +869,9 @@ extern FadeQueueHolder* DAT_011f4748;
 extern int DAT_011fa000;
 extern char DAT_011f4288[];
 
-float FUN_0040ebd0(float a, float b);
-float FUN_00404010(float a, float b);
-bool FUN_0043b300(void* list, FadeQueue* q);
+float BSMIN(float a, float b);
+float BSMAX_00404010(float a, float b);
+bool NiObject_IsKindOf(void* list, FadeQueue* q);
 
 struct FadeNodeObj;
 void FUN_00b6bb30(FadeNodeObj* node, float fade);
@@ -930,18 +940,19 @@ struct FadeNodeObj
     {
         return (m_uiValue1 >> 28) & 1;
     }
-    void FUN_00a5dbe0(FadeCuller& culler);
-    float FUN_00b4df80();
-    void FUN_00b4e490(FadeCuller& culler);
+    void NiNode_OnVisible(FadeCuller& culler);
+    float BSFadeNode_GetMaxAlpha();
+    void BSFadeNode_OnVisible(FadeCuller& culler);
 };
 
 // Updates the fade state of a FadeNodeObj based on camera distance and fade thresholds, queueing a batch render when the fade target is in progress.
 // @fnv 0x00b4e490
-void FadeNodeObj::FUN_00b4e490(FadeCuller& culler)
+// src: XBOX_PDB 0x00b4e490
+void FadeNodeObj::BSFadeNode_OnVisible(FadeCuller& culler)
 {
     if (!DAT_011ad7b4 || IsCulledFlag())
     {
-        FUN_00a5dbe0(culler);
+        NiNode_OnVisible(culler);
         return;
     }
     float fFadeAmount;
@@ -949,14 +960,14 @@ void FadeNodeObj::FUN_00b4e490(FadeCuller& culler)
     {
         if (!IsFadedIn())
         {
-            fFadeAmount = FUN_0040ebd0(1.0f, FUN_0040ebd0(DAT_011f63a0 / DAT_011ad7e4, DAT_011ad7f8) + fCurrentFade);
+            fFadeAmount = BSMIN(1.0f, BSMIN(DAT_011f63a0 / DAT_011ad7e4, DAT_011ad7f8) + fCurrentFade);
             fCurrentFade = fFadeAmount;
             FUN_00b6bb30(this, fFadeAmount);
             fLastFade = fCurrentFade;
             if (fCurrentFade >= 1.0f)
                 m_uiValue1 |= 0x4000;
         }
-        FUN_00a5dbe0(culler);
+        NiNode_OnVisible(culler);
         return;
     }
 
@@ -1010,12 +1021,12 @@ void FadeNodeObj::FUN_00b4e490(FadeCuller& culler)
     }
     iFrameCounter = DAT_011f9138;
 
-    float fTarget = FUN_00b4df80();
+    float fTarget = BSFadeNode_GetMaxAlpha();
     bool bFadeQueuedCur = false;
     if (IsFadedIn() && fTarget > 0.0f && fTarget < 1.0f)
     {
         FadeQueue* m_pPrimaryTaskProcessor = DAT_011f4748->m_pQueue;
-        if (FUN_0043b300(&DAT_011fa000, m_pPrimaryTaskProcessor))
+        if (NiObject_IsKindOf(&DAT_011fa000, m_pPrimaryTaskProcessor))
         {
             m_pPrimaryTaskProcessor->RenderBound(m_pcName ? m_pcName : DAT_011f4288, 1);
             bFadeQueuedCur = true;
@@ -1026,7 +1037,7 @@ void FadeNodeObj::FUN_00b4e490(FadeCuller& culler)
     else if ((!IsFadedIn() && fFadeAmount > DAT_011ad7ec) ||
              (fCurrentFade > 0.0f && fCurrentFade < 1.0f && fFadeAmount > DAT_011ad7ec))
     {
-        fFadeAmount = FUN_0040ebd0(1.0f, FUN_0040ebd0(DAT_011f63a0 / DAT_011ad7e4, DAT_011ad7f8) + fCurrentFade);
+        fFadeAmount = BSMIN(1.0f, BSMIN(DAT_011f63a0 / DAT_011ad7e4, DAT_011ad7f8) + fCurrentFade);
         fCurrentFade = fFadeAmount;
         FUN_00b6bb30(this, fFadeAmount);
         fLastFade = fCurrentFade;
@@ -1036,7 +1047,7 @@ void FadeNodeObj::FUN_00b4e490(FadeCuller& culler)
     else if ((IsFadedIn() && fFadeAmount < DAT_011ad7f0) ||
              (fCurrentFade < 1.0f && fCurrentFade > 0.0f && fFadeAmount < DAT_011ad7f0))
     {
-        fCurrentFade = FUN_00404010(0.0f, fCurrentFade - FUN_0040ebd0(DAT_011f63a0 / DAT_011ad7e8, DAT_011ad7f8));
+        fCurrentFade = BSMAX_00404010(0.0f, fCurrentFade - BSMIN(DAT_011f63a0 / DAT_011ad7e8, DAT_011ad7f8));
         FUN_00b6bb30(this, fCurrentFade);
         fLastFade = fCurrentFade;
         if (fCurrentFade <= 0.0f)
@@ -1044,15 +1055,16 @@ void FadeNodeObj::FUN_00b4e490(FadeCuller& culler)
     }
 
     if (fCurrentFade > 0.0f && fTarget != 0.0f)
-        FUN_00a5dbe0(culler);
+        NiNode_OnVisible(culler);
     if (bFadeQueuedCur)
         DAT_011f4748->m_pQueue->DispatchBatchRenderer();
 }
 }  // namespace fnv_00b4e490
 
 // @fnv 0x00b4df10
-extern "C" void __cdecl FUN_00a5e880();
-void __cdecl FUN_00b4df10()
+extern "C" void __cdecl NiNode_SaveBinary();
+// src: XBOX_PDB 0x00b4df10
+void __cdecl BSFadeNode_SaveBinary()
 {
-    FUN_00a5e880();
+    NiNode_SaveBinary();
 }

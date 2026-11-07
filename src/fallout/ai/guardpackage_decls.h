@@ -2,7 +2,7 @@
 #ifndef GUARDPACKAGE_DECLS_H
 #define GUARDPACKAGE_DECLS_H
 
-double FUN_00408860(float);
+double fabsf_00408860(float);
 namespace std {
 double abs(float);
 }

@@ -10,8 +10,8 @@
 #include "../../../../../../include/hkArray.h"
 
 extern char DAT_010ceaa8[];
-BSAudio* FUN_00c85750();
-void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
+BSAudio* hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 struct SizeSource {
     virtual void v00(); virtual void v01(); virtual void v02(); virtual void v03();
     virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07();
@@ -30,17 +30,17 @@ struct FUN_00d32060_Class {
 
     FUN_00d32060_Class* Init(const SourceRef& src, int b, int c, int flag);
 };
-extern void __cdecl FUN_00d319e0(void*, void*, void*, void*);
-void __stdcall FUN_00d32170(void* a, void* b, void* c, void* d);
+extern void __cdecl hkpHeightFieldAgent_staticGetClosestPoints(void*, void*, void*, void*);
+void __stdcall hkpHeightFieldAgent_getClosestPoints(void* a, void* b, void* c, void* d);
 typedef void (*S_00d321e0_Func)();
-void FUN_00d32190();
-void FUN_00d32370();
-void FUN_00d323b0();
-void FUN_00d323f0();
+void hkpHeightFieldAgent_createHeightFieldAAgent();
+void hkpHeightFieldAgent_staticGetPenetrations_UpdateState_00d32370();
+void hkpHeightFieldAgent_staticGetClosestPoints_ProcessState_00d323b0();
+void Hkpheightfieldagent_UpdateState_00d323f0();
 void AllocateTargetObj();
-void FUN_00d317d0();
-void FUN_00d319e0();
-void FUN_00d31d30();
+void hkpHeightFieldAgent_staticGetPenetrations();
+void hkpHeightFieldAgent_staticGetClosestPoints();
+void hkpHeightFieldAgent_ProcessSphereQueries();
 struct S_00d321e0_AgentFuncs {
     S_00d321e0_Func m_pCreateFunc;
     S_00d321e0_Func m_pQueryPenetrationsFunc;
@@ -50,9 +50,9 @@ struct S_00d321e0_AgentFuncs {
     bool m_bIsPredictive;
 };
 struct S_00d321e0_Dispatcher {
-    void FUN_00cfbbe0(S_00d321e0_AgentFuncs& f, int typeA, int typeB);
+    void AppendRecordAndRegisterAgents(S_00d321e0_AgentFuncs& f, int typeA, int typeB);
 };
-void FUN_00d321e0(S_00d321e0_Dispatcher* dispatcher);
+void hkpHeightFieldAgent_registerAgent(S_00d321e0_Dispatcher* dispatcher);
 extern float g_D323B0MaxDistance;
 struct D323B0CollectorBase {
     virtual void unk00();
@@ -71,8 +71,8 @@ struct D323B0Collector : D323B0CollectorBase {
     virtual void unk00();
     virtual void unk04();
 };
-void __cdecl FUN_00d319e0(int a, int b, int c, D323B0CollectorBase* collector);
-void __cdecl FUN_00d323b0(int a, int b, int c, int d);
+void __cdecl hkpHeightFieldAgent_staticGetClosestPoints(int a, int b, int c, D323B0CollectorBase* collector);
+void __cdecl hkpHeightFieldAgent_staticGetClosestPoints_ProcessState_00d323b0(int a, int b, int c, int d);
 struct Handler {
     virtual void v0();
     virtual void v1();
@@ -89,26 +89,28 @@ struct Owner {
     int count;
     void NotifyAndClear(int value);
 };
-extern "C" void __cdecl FUN_00d31d30(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);
+extern "C" void __cdecl hkpHeightFieldAgent_ProcessSphereQueries(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);
 // @fnv 0x00d32030
-extern "C" void __stdcall FUN_00d32030(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4)
+// src: HAVOK_SRC 0x00d32030
+extern "C" void __stdcall hkpHeightFieldAgent_linearCast(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4)
 {
-    FUN_00d31d30(arg0, arg1, arg2, arg3, arg4);
+    hkpHeightFieldAgent_ProcessSphereQueries(arg0, arg1, arg2, arg3, arg4);
 }
-extern "C" void __cdecl FUN_00d317d0(void* arg0, void* arg1, void* arg2, void* arg3);
+extern "C" void __cdecl hkpHeightFieldAgent_staticGetPenetrations(void* arg0, void* arg1, void* arg2, void* arg3);
 // @fnv 0x00d32150
-extern "C" void __stdcall FUN_00d32150(void* arg0, void* arg1, void* arg2, void* arg3)
+// src: HAVOK_SRC 0x00d32150
+extern "C" void __stdcall hkpHeightFieldAgent_getPenetrations(void* arg0, void* arg1, void* arg2, void* arg3)
 {
-    FUN_00d317d0(arg0, arg1, arg2, arg3);
+    hkpHeightFieldAgent_staticGetPenetrations(arg0, arg1, arg2, arg3);
 }
 extern char DAT_010ce81c;
-void __cdecl FUN_00d317d0(int a1, int a2, int a3, void* a4);
+void __cdecl hkpHeightFieldAgent_staticGetPenetrations(int a1, int a2, int a3, void* a4);
 struct FUN_00d32370_cls {
     void* vt;
     unsigned char flag;
     int d;
 };
-void __cdecl FUN_00d32370(int a1, int a2, int a3, int a4);
+void __cdecl hkpHeightFieldAgent_staticGetPenetrations_UpdateState_00d32370(int a1, int a2, int a3, int a4);
 #include <xmmintrin.h>
 
 extern "C" unsigned __int64 __rdtsc();
@@ -126,7 +128,7 @@ union CastVector {
 };
 struct CastTransform {
     CastVector r0,r1,r2,translation;
-    void __thiscall FUN_00cb22f0(const CastTransform*,const CastTransform*);
+    void __thiscall hkTransform_setMulInverseMul(const CastTransform*,const CastTransform*);
 };
 static __forceinline void transformVector(CastVector& out,const CastTransform& t,const CastVector& in) {
     CastVector x,y,z,tx,ty,tz,xy,zt;
@@ -210,7 +212,8 @@ static __forceinline void event(TimerStream* stream,const char* name) {
     }
 }
 // @fnv 0x00d31d30
-extern "C" void __cdecl FUN_00d31d30(void* arg0,void* arg1,void* arg2,void* arg3,void* arg4) {
+// src: GUESS 0x00d31d30 (confidence: medium)
+extern "C" void __cdecl hkpHeightFieldAgent_ProcessSphereQueries(void* arg0,void* arg1,void* arg2,void* arg3,void* arg4) {
     TimerStream* stream=(TimerStream*)TlsGetValue(DAT_0126835c);
     TimerEvent* e=stream->current;
     if(e<stream->end) {
@@ -227,14 +230,14 @@ extern "C" void __cdecl FUN_00d31d30(void* arg0,void* arg1,void* arg2,void* arg3
     CastBody* bodyA=(CastBody*)arg0;
     CastBody* bodyB=(CastBody*)arg1;
     CastInput* input=(CastInput*)arg2;
-    if(arg4) FUN_00d319e0(arg0,arg1,arg2,arg4);
+    if(arg4) hkpHeightFieldAgent_staticGetClosestPoints(arg0,arg1,arg2,arg4);
     event((TimerStream*)TlsGetValue(DAT_0126835c),"StGetSpheres");
     CastShape* shape=bodyA->shape;
     CastHeightField* __restrict heightField=(CastHeightField*)bodyB->shape;
     CastTransform relativeTransform;
-    relativeTransform.FUN_00cb22f0(bodyB->transform,bodyA->transform);
+    relativeTransform.hkTransform_setMulInverseMul(bodyB->transform,bodyA->transform);
     int count=shape->count();
-    BSAudio* scratch=FUN_00c85750();
+    BSAudio* scratch=hkMemoryRouter_getInstance();
     // This Havok scratch pointer uses the first word as its stack cursor.
     int savedStack=*reinterpret_cast<int*>(scratch);
     *reinterpret_cast<int*>(scratch)=savedStack+((count*16+127)&~127);
@@ -286,7 +289,7 @@ extern "C" void __cdecl FUN_00d31d30(void* arg0,void* arg1,void* arg2,void* arg3
         heightField->CastSphere(sphereInput,*bodyB,collector);
         ++spheres;
     } while(--remaining); }
-    *reinterpret_cast<int*>(FUN_00c85750())=savedStack;
+    *reinterpret_cast<int*>(hkMemoryRouter_getInstance())=savedStack;
     event((TimerStream*)TlsGetValue(DAT_0126835c),"lt");
     }
 }
@@ -317,7 +320,7 @@ static __forceinline void timer(const char* tag) {
 }
 struct Matrix {
     __m128 c0,c1,c2,c3;
-    void FUN_00cb22f0(const Matrix& b, const Matrix& a);
+    void hkTransform_setMulInverseMul(const Matrix& b, const Matrix& a);
 };
 struct SphereQuery {
     __m128* spheres; int count; float tolerance;
@@ -340,7 +343,7 @@ struct ManagerD {
     virtual void v10(); virtual void remove(unsigned short id, int constraint);
 };
 static __forceinline __m128* reserve(int n) {
-    __m128** top = reinterpret_cast<__m128**>(FUN_00c85750());
+    __m128** top = reinterpret_cast<__m128**>(hkMemoryRouter_getInstance());
     __m128* p = *top;
     int bytes = (n * 16 + 127) & -128;
     *top = (__m128*)((char*)p + bytes);
@@ -356,15 +359,16 @@ static __forceinline __m128 direction(const Matrix& m, __m128 v) {
 }
 struct AgentD {
     void* vtable; int unk04; ManagerD* manager; unsigned short* ids; int count; int capacity;
-    void FUN_00d324e0(const BodyD& a, const BodyD& b, const InputD& input, OutputD& output);
+    void hkpHeightFieldAgent_processCollision(const BodyD& a, const BodyD& b, const InputD& input, OutputD& output);
 };
 // @fnv 0x00d324e0
-void AgentD::FUN_00d324e0(const BodyD& a, const BodyD& b, const InputD& input, OutputD& output) {
+// src: HAVOK_SRC 0x00d324e0
+void AgentD::hkpHeightFieldAgent_processCollision(const BodyD& a, const BodyD& b, const InputD& input, OutputD& output) {
     timer(DAT_010ceae0);
     ShapeD* shapeA = a.shape;
     ShapeD* shapeB = b.shape;
     Matrix relative;
-    relative.FUN_00cb22f0(*b.transform,*a.transform);
+    relative.hkTransform_setMulInverseMul(*b.transform,*a.transform);
     int n = count;
     __m128* transformed = reserve(n);
     unsigned short* id = ids;
@@ -410,8 +414,8 @@ void AgentD::FUN_00d324e0(const BodyD& a, const BodyD& b, const InputD& input, O
             c->id = *id;
         }
     }
-    *reinterpret_cast<__m128**>(FUN_00c85750()) = planes;
-    *reinterpret_cast<__m128**>(FUN_00c85750()) = transformed;
+    *reinterpret_cast<__m128**>(hkMemoryRouter_getInstance()) = planes;
+    *reinterpret_cast<__m128**>(hkMemoryRouter_getInstance()) = transformed;
     timer(DAT_010c41f8);
 }
 }  // namespace fnv_00d324e0

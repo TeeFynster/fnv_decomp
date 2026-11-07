@@ -144,32 +144,32 @@ public:
     unsigned int EndianConvert(unsigned int);
     unsigned short EndianConvert(unsigned short);
     bool FUN_0047c850();  // folded getter (TESActorBase::GetHasPLSpecTex)
-    void* FUN_004fd3c0();  // folded with BGSProjectile::GetExplosion
+    void* BGSProjectile_GetExplosion();  // folded with BGSProjectile::GetExplosion
     void* FUN_004fd3e0();  // folded with TES::GetWorldSpace
-    bool FUN_0055f5b0();  // 0x55f5b0 = TESSaveLoadGame::GetRevertBefore
-    const char* FUN_005a9460();  // 0x5a9460 = TESSaveLoadGame::GetMostRecentSaveGame
-    bool FUN_00632ce0();  // folded getter (bhkPickData::GetPickFailed)
+    bool TESSaveLoadGame_GetRevertBefore();  // 0x55f5b0 = TESSaveLoadGame::GetRevertBefore
+    const char* TESSaveLoadGame_GetMostRecentSaveGame();  // 0x5a9460 = TESSaveLoadGame::GetMostRecentSaveGame
+    bool bhkPickData_GetPickFailed();  // folded getter (bhkPickData::GetPickFailed)
     unsigned int FUN_00825c00();  // folded with BSTimer::GetTime
-    void FUN_008579b0(int*, int);  // 0x8579b0 = TESSaveLoadGame::SaveGameDataOLD
-    void FUN_008579b0(void*, int);  // 0x8579b0 = TESSaveLoadGame::SaveGameDataOLD
-    void FUN_008579b0(void*, unsigned int);  // 0x8579b0 = TESSaveLoadGame::SaveGameDataOLD
-    void FUN_008579e0(void*, unsigned int);  // 0x8579e0 = TESSaveLoadGame::LoadGameDataOLD
-    void FUN_00857a10(int, int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
-    void FUN_00857a10(int*, int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
-    void FUN_00857a10(unsigned int*, unsigned int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
-    void FUN_00857a10(void*, int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
-    void FUN_00857a10(void*, unsigned int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
+    void TESSaveLoadGame_SaveGameDataOLD(int*, int);  // 0x8579b0 = TESSaveLoadGame::SaveGameDataOLD
+    void TESSaveLoadGame_SaveGameDataOLD(void*, int);  // 0x8579b0 = TESSaveLoadGame::SaveGameDataOLD
+    void TESSaveLoadGame_SaveGameDataOLD(void*, unsigned int);  // 0x8579b0 = TESSaveLoadGame::SaveGameDataOLD
+    void TESSaveLoadGame_LoadGameDataOLD(void*, unsigned int);  // 0x8579e0 = TESSaveLoadGame::LoadGameDataOLD
+    void TESSaveLoadGame_SaveNumericID(int, int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
+    void TESSaveLoadGame_SaveNumericID(int*, int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
+    void TESSaveLoadGame_SaveNumericID(unsigned int*, unsigned int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
+    void TESSaveLoadGame_SaveNumericID(void*, int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
+    void TESSaveLoadGame_SaveNumericID(void*, unsigned int);  // 0x857a10 = TESSaveLoadGame::SaveNumericID
     void FUN_00857aa0(unsigned int*, int);  // 0x857aa0 = TESSaveLoadGame::LoadNumericID
     void FUN_00857aa0(unsigned int*, unsigned int);  // 0x857aa0 = TESSaveLoadGame::LoadNumericID
     void FUN_00857aa0(void*, unsigned int);  // 0x857aa0 = TESSaveLoadGame::LoadNumericID
     void FUN_00857bd0(unsigned int);  // 0x857bd0 = TESSaveLoadGame::AdvanceBuffer
-    void FUN_00858480(BSFile*);  // 0x858480 = TESSaveLoadGame::SaveGlobals
-    void* FUN_00858600(unsigned int);  // 0x858600 = TESSaveLoadGame::CreateBuffer
+    void SaveGlobals(BSFile*);  // 0x858480 = TESSaveLoadGame::SaveGlobals
+    void* TESSaveLoadGame_CreateBuffer(unsigned int);  // 0x858600 = TESSaveLoadGame::CreateBuffer
     void FUN_00858700(void*);  // 0x858700 = TESSaveLoadGame::DestroyBuffer
-    void FUN_0085f010(void*, unsigned int);  // 0x85f010 = TESSaveLoadGame::QueueAnimationLoad
+    void TESSaveLoadGame_QueueAnimationLoad(void*, unsigned int);  // 0x85f010 = TESSaveLoadGame::QueueAnimationLoad
     void FUN_0085f420(void*, unsigned int);  // 0x85f420 = TESSaveLoadGame::QueueCharControllerLoad
-    void FUN_00861ea0();  // 0x861ea0 = TESSaveLoadGame::StartLoadingSequence
-    bool FUN_00862110();  // 0x862110 = TESSaveLoadGame::UseSaveGameBlocks
+    void TESSaveLoadGame_StartLoadingSequence();  // 0x861ea0 = TESSaveLoadGame::StartLoadingSequence
+    bool TESSaveLoadGame_UseSaveGameBlocks();  // 0x862110 = TESSaveLoadGame::UseSaveGameBlocks
     unsigned char FUN_008df040();  // 0x8df040 = TESSaveLoadGame::GetCurrentVersion
     void FinalizeForm(TESForm*);
     void FinalizeQueuedForms();

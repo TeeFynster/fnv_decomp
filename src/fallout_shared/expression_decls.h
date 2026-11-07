@@ -5,7 +5,7 @@
 class ExpressionCharStackInit
 {
   public:
-    void FUN_00594b60();
+    void Stack_enum_EXPRESSION_OPERATORS_64_Stack_enum_EXPRESSION_OPERATORS_64();
 };
 class ExpressionOperandStackInit
 {

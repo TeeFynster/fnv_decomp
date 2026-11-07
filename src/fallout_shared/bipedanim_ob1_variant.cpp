@@ -51,14 +51,15 @@ struct ObjQ
         v14(), v15(), v16(), v17(), v18(), v19(), v20(), v21(), v22(), v23(), v24(), v25(), v26(), v27(), v28(), v29(),
         v30(), v31(), v32(), v33(), v34(), v35(), v36(), v37(), v38();
     virtual ResultQ* GetObjectByName(const FixStrQ& name);
-    ExtQ* __thiscall FUN_00a5c570(void* rtti);
+    ExtQ* __thiscall NiObjectNET_GetController(void* rtti);
 };
 // @fnv 0x00c4b310
-ResultQ* __cdecl FUN_00c4b310(ObjQ* pObj, const char* pcName, bool bRecurse)
+// src: XBOX_PDB 0x00c4b310
+ResultQ* __cdecl BSUtilities_GetObjectByName_00c4b310(ObjQ* pObj, const char* pcName, bool bRecurse)
 {
     if (!pObj || !pcName)
         return 0;
-    ExtQ* pExt3 = pObj->FUN_00a5c570(&DAT_011f36ac);
+    ExtQ* pExt3 = pObj->NiObjectNET_GetController(&DAT_011f36ac);
     FixStrQ kName9(pcName);
     if (pExt3)
     {

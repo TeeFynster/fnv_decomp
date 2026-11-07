@@ -35,11 +35,12 @@ struct FUN_00c98820_Class
     FUN_00c98820_ArrayObject** m_08;
     int m_0c;
 
-    void __thiscall FUN_00c98820(void* first, void* second, void* third, void* fourth, void* fifth);
+    void __thiscall ProcessEntries_00c98820(void* first, void* second, void* third, void* fourth, void* fifth);
 };
 
 // @fnv 0x00c98820
-void __thiscall FUN_00c98820_Class::FUN_00c98820(void* first, void* second, void* third, void* fourth, void* fifth)
+// src: GUESS 0x00c98820 (confidence: low)
+void __thiscall FUN_00c98820_Class::ProcessEntries_00c98820(void* first, void* second, void* third, void* fourth, void* fifth)
 {
     __m128 sum = _mm_add_ps(*(__m128*)second, *(__m128*)first);
 

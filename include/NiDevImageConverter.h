@@ -31,36 +31,36 @@ public:
 
     NiTexture* GenerateMipmaps(NiPixelData* pd, int a);
     void FUN_00a7b110();
-    void FUN_00a7aff0();
+    void ProcessEntries_00a7aff0();
 
     virtual bool CanConvertPixelFormat(const NiPixelFormat&, const NiPixelFormat&);
     virtual NiPixelData* ConvertImageData(const NiPixelData&, const NiPixelFormat&, NiPixelData*, bool);
-    virtual bool FUN_00a77ae0(const char* pcFilename);
+    virtual bool CanReadImageFile(const char* pcFilename);
     virtual void vfn_1c();
     virtual bool IsSupportedDestinationFormat(const NiPixelFormat&);
     virtual bool IsSupportedSourceFormat(const NiPixelFormat&);
     virtual NiPixelData* ConvertBetweenPixelData(const NiPixelData*, NiPixelData*) throw();
-    virtual NiPixelData* FUN_00a7ae60(const char** ppcFileNames, unsigned uiNumLevels, NiPixelData* pkCurrentObject);
+    virtual NiPixelData* GenerateMipmapPyramidFromFiles(const char** ppcFileNames, unsigned uiNumLevels, NiPixelData* pkCurrentObject);
     virtual bool ConvertMipLevel(NiPixelData&, const NiPixelData&, int) throw();
     virtual NiPixelData* ConvertToBumpMap(const NiPixelData&, const NiPixelFormat&) throw();
     virtual void PushImageReaderNode(NiImageReader* pkReader);
     virtual void* SelectPlatformFormat(int ePlatform, void* kFmtPrefs, void* kSrcFmt, void* kDesiredFmt);
-    virtual NiPixelData* FUN_00a78570(int a1, int a2, const NiPixelData& kSrc, int a4);
-    virtual void* FUN_00a7b0a0();
-    virtual const NiPixelFormat* FUN_00a786e0(const NiTexture::TextureFormatPreferences& prefs,
+    virtual NiPixelData* ConvertForPlatform(int a1, int a2, const NiPixelData& kSrc, int a4);
+    virtual void* GetImageReaderList();
+    virtual const NiPixelFormat* FindClosestPixelFormatDX9(const NiTexture::TextureFormatPreferences& prefs,
         const NiPixelFormat& src, const NiPixelFormat& dest);
     virtual const NiPixelFormat* SelectFormat(const NiTexture::TextureFormatPreferences& kPrefs,
         const NiPixelFormat& kSrcFmt, const NiPixelFormat& kDestFmt);
-    virtual const NiPixelFormat* FUN_00a78a50(const NiTexture::TextureFormatPreferences& kPrefs,
+    virtual const NiPixelFormat* FindClosestPixelFormatPS3(const NiTexture::TextureFormatPreferences& kPrefs,
         const NiPixelFormat& kSrcFmt, const NiPixelFormat& kDestFmt);
 
     bool ReadFileWithReader(const char*, int&, int&, int&, int&, int&);
-    NiPixelData* FUN_00a77d10(const char* pcFilename, NiPixelData* pkOptDest, NiFile* pkIstr);
+    NiPixelData* ReadImageFile_00a77d10(const char* pcFilename, NiPixelData* pkOptDest, NiFile* pkIstr);
     bool QueryImageProperties(const char*, NiPixelFormat&, bool&, unsigned&, unsigned&, unsigned&) throw();
     NiPixelData* LoadPixelDataFromFile(const char*, NiPixelData*, int) throw();
     NiPixelData* GenerateMipmaps(const NiPixelData* pkSrc, NiPixelData* pkDst) throw();
     NiPixelData* GenerateMipmaps(NiPixelData* source, NiPixelData* destination);
-    NiPixelData* FUN_00a7a280(const NiPixelData& kSrc, const NiPixelFormat& kDstFmt,
+    NiPixelData* ConvertPixelData(const NiPixelData& kSrc, const NiPixelFormat& kDstFmt,
         NiPixelData* pkDst, bool bWithMipmaps) throw();
     const NiPixelFormat* GetDestinationPixelFormat(int a1, int a2, const NiPixelFormat& kSrc, int a4);
     void* DestroyIfFlagged(unsigned int auiFlags);

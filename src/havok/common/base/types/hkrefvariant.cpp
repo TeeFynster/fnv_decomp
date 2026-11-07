@@ -26,11 +26,12 @@ extern hkVtableClassRegistry* DAT_01269b10;
 struct ReferencedObjectHolder
 {
     hkReferencedObject* m_pObject;
-    void* __thiscall FUN_00d477a0();
+    void* __thiscall hkRefVariant_getClass();
 };
 
 // @fnv 0x00d477a0
-void* ReferencedObjectHolder::FUN_00d477a0()
+// src: HAVOK_LIB 0x00d477a0
+void* ReferencedObjectHolder::hkRefVariant_getClass()
 {
     hkReferencedObject* object = m_pObject;
     if (object)
@@ -59,7 +60,8 @@ extern "C" int stub_c(void);
 // convention for the out-of-line body above.
 // If enable is set, builds a SetBlk with f06=1 and f00 pointing to DAT_010cf9c8, then calls DAT_010cf9d4; otherwise returns 1.
 // @fnv 0x00d48560
-static __declspec(noinline) int FUN_00d48560(int enable, int extra, int value)
+// src: GUESS 0x00d48560 (confidence: low)
+static __declspec(noinline) int Object_ProcessAndReturnValue_00d48560(int enable, int extra, int value)
 {
     SetBlk v;
     if (enable)
@@ -73,11 +75,12 @@ static __declspec(noinline) int FUN_00d48560(int enable, int extra, int value)
 
 int stub_caller(void)
 {
-    return FUN_00d48560(stub_a(), stub_b(), stub_c());
+    return Object_ProcessAndReturnValue_00d48560(stub_a(), stub_b(), stub_c());
 }
 
 // @fnv 0x00d48620
-int __cdecl FUN_00d48620(int iThirdArg, int iFirstArg, int iUnused)
+// src: GUESS 0x00d48620 (confidence: low)
+int __cdecl Object_ForwardCall_00d48620(int iThirdArg, int iFirstArg, int iUnused)
 {
-    return FUN_00d48560(iFirstArg, 0, iThirdArg);
+    return Object_ProcessAndReturnValue_00d48560(iFirstArg, 0, iThirdArg);
 }

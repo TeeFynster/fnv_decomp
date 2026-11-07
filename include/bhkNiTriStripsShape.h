@@ -8,7 +8,7 @@ class NiNode;
 class bhkNiTriStripsShape : public bhkShapeCollection
 {
 public:
-    virtual void FUN_00ca6b60(NiNode* parent, int arg);
+    virtual void BuildDisplayGeometry_00ca6b60(NiNode* parent, int arg);
     virtual void vf56();
     virtual void vf57();
 

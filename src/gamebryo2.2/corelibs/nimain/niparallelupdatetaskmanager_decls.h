@@ -24,6 +24,6 @@ extern bool DAT_011dea28;
 extern bool DAT_011dea29;
 extern bool DAT_011dea2b;
 extern Interface* DAT_011d8804;
-bool FUN_0070edf0();
+bool StartMenu_MainMenuIsActive();
 
 #endif

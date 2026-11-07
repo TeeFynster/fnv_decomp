@@ -36,8 +36,8 @@ struct FaceGenSam
 
 struct FaceGenCtlVec
 {
-    unsigned int FUN_00657a30() const;
-    OpaqueDataBlock* FUN_00657a50(unsigned int uiIndex);
+    unsigned int std_vector_FanLinCtlS_std_allocator_FanLinCtlS_size() const;
+    OpaqueDataBlock* GetElementPointerChecked(unsigned int uiIndex);
     char data[0x18];
 };
 

@@ -8,26 +8,27 @@
 extern "C" __declspec(dllimport) unsigned int __stdcall XInputGetState(unsigned int dwUserIndex, void* pState);
 
 // @fnv 0x009f996e
-unsigned int __stdcall FUN_009f996e(unsigned int dwUserIndex, void* pState)
+// src: COMMUNITY 0x009f996e
+unsigned int __stdcall XInputGetState_009f996e(unsigned int dwUserIndex, void* pState)
 {
     return XInputGetState(dwUserIndex, pState);
 }
 
-void FUN_00714a40(int);
-void FUN_00714a60(int);
-void FUN_00714a80(int);
-void FUN_00714aa0(int);
-void FUN_00714ac0(int);
-void FUN_00714ae0(int);
-void FUN_00714b00(int);
-void FUN_00714b20(int);
-void FUN_00714b50(int);
-void FUN_00714b80(int);
-void FUN_00714bf0(int);
-void FUN_00b985f0(int);
-void FUN_004eb510(int);
-void FUN_004ecb40(unsigned int);
-void FUN_004eced0(unsigned int);
+void BSRenderState_RestoreZEnable(int);
+void BSRenderState_RestoreZWriteEnable(int);
+void BSRenderState_RestoreZFunc(int);
+void BSRenderState_RestoreAlphaTestEnable(int);
+void BSRenderState_RestoreAlphaTestFuncRef(int);
+void BSRenderState_RestoreAlphaBlendEnable(int);
+void BSRenderState_RestoreAlphaBlendFunc(int);
+void BSRenderState_RestoreStencilAction(int);
+void BSRenderState_RestoreStencilFunc(int);
+void BSRenderState_RestoreStencilWriteMask(int);
+void BSRenderState_RestoreDepthBias(int);
+void BSRenderState_RestoreColorWrites(int);
+void BSRenderState_RestoreUserClipPlaneEnables(int);
+void BSRenderState_RestoreStencilEnable(unsigned int);
+void BSRenderState_RestoreColorWriteEnable(unsigned int);
 
 struct RenderStateEntry
 {
@@ -142,72 +143,73 @@ class RenderStateManager
 extern NiRenderer* DAT_011f9508;
 
 // @fnv 0x00b98610
-void FUN_00b98610(int state, int value)
+// src: COMMUNITY 0x00b98610
+void BSRenderState_RestoreState(int state, int value)
 {
     switch (state)
     {
     case 7:
-        FUN_00714a40(value);
+        BSRenderState_RestoreZEnable(value);
         break;
     case 14:
-        FUN_00714a60(value);
+        BSRenderState_RestoreZWriteEnable(value);
         break;
     case 23:
-        FUN_00714a80(value);
+        BSRenderState_RestoreZFunc(value);
         break;
     case 15:
-        FUN_00714aa0(value);
+        BSRenderState_RestoreAlphaTestEnable(value);
         break;
     case 25:
-        FUN_00714ac0(value);
+        BSRenderState_RestoreAlphaTestFuncRef(value);
         break;
     case 24:
-        FUN_00714ac0(value);
+        BSRenderState_RestoreAlphaTestFuncRef(value);
         break;
     case 27:
-        FUN_00714ae0(value);
+        BSRenderState_RestoreAlphaBlendEnable(value);
         break;
     case 19:
-        FUN_00714b00(value);
+        BSRenderState_RestoreAlphaBlendFunc(value);
         break;
     case 20:
-        FUN_00714b00(value);
+        BSRenderState_RestoreAlphaBlendFunc(value);
         break;
     case 168:
-        FUN_004eced0(value);
+        BSRenderState_RestoreColorWriteEnable(value);
         break;
     case 190:
-        FUN_00b985f0(value);
+        BSRenderState_RestoreColorWrites(value);
         break;
     case 52:
-        FUN_004ecb40(value);
+        BSRenderState_RestoreStencilEnable(value);
         break;
     case 59:
-        FUN_00714b80(value);
+        BSRenderState_RestoreStencilWriteMask(value);
         break;
     case 152:
-        FUN_004eb510(value);
+        BSRenderState_RestoreUserClipPlaneEnables(value);
         break;
     case 53:
-        FUN_00714b20(value);
+        BSRenderState_RestoreStencilAction(value);
         break;
     case 54:
-        FUN_00714b20(value);
+        BSRenderState_RestoreStencilAction(value);
         break;
     case 55:
-        FUN_00714b20(value);
+        BSRenderState_RestoreStencilAction(value);
         break;
     case 56:
-        FUN_00714b50(value);
+        BSRenderState_RestoreStencilFunc(value);
         break;
     case 57:
-        FUN_00714b50(value);
+        BSRenderState_RestoreStencilFunc(value);
         break;
     case 58:
-        FUN_00714b50(value);
+        BSRenderState_RestoreStencilFunc(value);
         break;
     case 195:
-        FUN_00714bf0(value);
+        BSRenderState_RestoreDepthBias(value);
         break;
     default:
         RenderStateManager* manager = reinterpret_cast<RenderStateManager*>(static_cast<NiDX9Renderer*>(DAT_011f9508)->pRenderState);

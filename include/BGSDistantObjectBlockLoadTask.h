@@ -29,8 +29,8 @@ public:
     virtual void OnChildCompletion();
     virtual unsigned char GetFileIndex();
 
-    void FUN_006f6250(void* destination);
-    void FUN_00c3cb70(void* pState, void* pOwner);
+    void BGSDistantObjectBlockLoadTask_GetWaterGeometry(void* destination);
+    void QueuedFile_Cancel(void* pState, void* pOwner);
     void RunOnce(void* apTaskState, void* apTaskOwner);
     void FUN_006f6fe0();
     void* FUN_006f6fb0(unsigned int flags);

@@ -15,7 +15,7 @@ public:
     virtual bool GetDescription(char* description, unsigned int bufferSize) override;
     virtual void DispatchToManager() override;
 
-    void FUN_0043e2a0();
-    void FUN_0043e4b0();
-    void FUN_0043e480(bool abValue);
+    void QueuedKF_Run();
+    void QueuedKF_Finish();
+    void QueuedKF_SetAlreadyInKFMap(bool abValue);
 };

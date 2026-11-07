@@ -90,7 +90,8 @@ unsigned int MersenneTwister::GetRandomUInt(unsigned int bound)
 extern ProcessLists g_011c77b4;
 
 // @fnv 0x00446e10
-unsigned char FUN_00446e10()
+// src: COMMUNITY 0x00446e10
+unsigned char TESRenderer_GetFullScreen()
 {
     return *g_011c77b4.GetLifeStateControlFlag();
 }

@@ -9,8 +9,8 @@
 #include "../../../../../../include/hkaSplineCompressedAnimation.h"
 
 extern char DAT_010c3aa0[];
-extern void __cdecl FUN_00cb1750(const char* message);
-extern int __cdecl FUN_00e29910();
+extern void __cdecl _hkErrorMessage(const char* message);
+extern int __cdecl Hksystemtime_Time64_Thunk();
 extern "C" void _ReadWriteBarrier(void);
 
 static int hexDigit(char c)
@@ -40,11 +40,12 @@ static char* findDot(char* p)
 
 static void invalidKey()
 {
-    FUN_00cb1750("Product:hka Key Code is invalid.\nPlease contact Havok.com\nNo simulation possible.");
+    _hkErrorMessage("Product:hka Key Code is invalid.\nPlease contact Havok.com\nNo simulation possible.");
 }
 
 // @fnv 0x00e63c60
-int __cdecl FUN_00e63c60(bool* valid)
+// src: XBOX_PDB 0x00e63c60
+int __cdecl hkaProcessFlyingColors(bool* valid)
 {
     *valid = false;
     int status = 0;
@@ -87,11 +88,11 @@ int __cdecl FUN_00e63c60(bool* valid)
     if (expires)
     {
         first = (first ^ 0xd4efe34a) & 0x7fffffff;
-        int now = FUN_00e29910() >> 8;
+        int now = Hksystemtime_Time64_Thunk() >> 8;
         int remaining = first - now;
         if (first < now || remaining > 0x96c99)
         {
-            FUN_00cb1750(
+            _hkErrorMessage(
                 "Product:hka Key Code has expired .\nPlease contact Havok.com for an extension.\nNo simulation possible.");
             return 2;
         }

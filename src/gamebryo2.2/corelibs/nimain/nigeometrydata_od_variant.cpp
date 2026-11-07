@@ -8,7 +8,8 @@
 
 extern unsigned int* DAT_011f4aa8;
 // @fnv 0x00525340
-void FUN_00525340(float* v)
+// src: XBOX_PDB 0x00525340
+void NiPoint3_UnitizeVector(float* v)
 {
     float len2;
     unsigned int* bits = (unsigned int*)&len2;

@@ -102,12 +102,12 @@ MBG* FUN_00e45150_class::Initialize(int a)
     return self;
 }
 
-void* __cdecl FUN_00c85750();
-void __cdecl FUN_00cb1260(void* dst, const void* src, int numBytes);
+void* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkString_memCpy(void* dst, const void* src, int numBytes);
 
 inline hkMemoryRouterQ_hkpmountedballgun& getRouter()
 {
-    return *(hkMemoryRouterQ_hkpmountedballgun*)FUN_00c85750();
+    return *(hkMemoryRouterQ_hkpmountedballgun*)hkMemoryRouter_getInstance();
 }
 
 template <typename T> inline T* hkAllocateChunkQ(int n)
@@ -139,12 +139,13 @@ template <typename T> struct hkQueueQ
         if (m_pRayCursor)
             hkDeallocateChunkQ<T>(m_data, m_pRayCursor);
     }
-    void FUN_00e45460(int n);
+    void hkQueue_hkpRigidBody_setCapacity(int n);
 };
 
 // Grows the queue buffer to at least n elements, copying existing nodes and updating the head and tail indices.
 // @fnv 0x00e45460
-template <typename T> void hkQueueQ<T>::FUN_00e45460(int aiMinCapacity)
+// src: XBOX_PDB 0x00e45460
+template <typename T> void hkQueueQ<T>::hkQueue_hkpRigidBody_setCapacity(int aiMinCapacity)
 {
     if (getCapacity() < aiMinCapacity)
     {
@@ -160,12 +161,12 @@ template <typename T> void hkQueueQ<T>::FUN_00e45460(int aiMinCapacity)
                 {
                     int numHead = m_pRayCursor - m_pFirstNode;
                     int numTail = m_pTail;
-                    FUN_00cb1260(p, m_data + m_pFirstNode, numHead * sizeof(T));
-                    FUN_00cb1260(p + numHead, m_data, numTail * sizeof(T));
+                    hkString_memCpy(p, m_data + m_pFirstNode, numHead * sizeof(T));
+                    hkString_memCpy(p + numHead, m_data, numTail * sizeof(T));
                 }
                 else
                 {
-                    FUN_00cb1260(p, m_data + m_pFirstNode, m_iNodeCount * sizeof(T));
+                    hkString_memCpy(p, m_data + m_pFirstNode, m_iNodeCount * sizeof(T));
                 }
             }
             m_pFirstNode = 0;

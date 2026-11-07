@@ -2,12 +2,13 @@
 
 struct GlobalObject_0044fae0
 {
-    void FUN_004538e0(int);
-    void FUN_004538a0(int);
+    void BSCriticalSection_Lock(int);
+    void BSCriticalSection_Enter(int);
 };
 
 // @fnv 0x004538a0
-void GlobalObject_0044fae0::FUN_004538a0(int arg)
+// src: XBOX_PDB 0x004538a0
+void GlobalObject_0044fae0::BSCriticalSection_Enter(int arg)
 {
-    FUN_004538e0(arg);
+    BSCriticalSection_Lock(arg);
 }

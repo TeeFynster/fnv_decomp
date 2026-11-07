@@ -12,16 +12,16 @@
 
 typedef unsigned short hkUint16;
 struct hkQsTransform;
-int __cdecl FUN_00e51da0(int aiValue, const char* apBytes);
-unsigned int __fastcall FUN_00e2f9f0(hkaWaveletCompressedAnimation* self, int, unsigned int a);
+int __cdecl hkCalcQuantizedSize(int aiValue, const char* apBytes);
+unsigned int __fastcall hkaWaveletCompressedAnimation_getFullCacheKey(hkaWaveletCompressedAnimation* self, int, unsigned int a);
 struct FUN_00e2f8c0_Class
 {
     unsigned char m_auiShapeKeys[0x2c];
     unsigned int m_divisor;
 
-    int FUN_00e2f8c0(unsigned int value, int unused);
+    int hkaWaveletCompressedAnimation_getNumDataChunks(unsigned int value, int unused);
 };
-void __stdcall FUN_00e2f950(int aiUnused1, int aiUnused2, unsigned int count, void* dest);
+void __stdcall hkaWaveletCompressedAnimation_sampleIndividualFloatTracks(int aiUnused1, int aiUnused2, unsigned int count, void* dest);
 struct FUN_00e2f7c0_Class : hkaWaveletCompressedAnimation
 {
     virtual void v1();
@@ -32,7 +32,7 @@ struct FUN_00e2f7c0_Class : hkaWaveletCompressedAnimation
     virtual void v6();
     virtual void v7();
     virtual unsigned int v8();
-    void FUN_00e2f7c0(float t, unsigned int* outIndex, float* outFrac);
+    void hkaAnimation_getFrameAndDelta(float t, unsigned int* outIndex, float* outFrac);
 };
 struct FUN_00e2f8b0_Obj
 {
@@ -48,7 +48,7 @@ struct FUN_00e2f8b0_Obj
     int unk24;
     int unk28;
 
-    int FUN_00e2f8b0();
+    int GetUnk28();
 };
 class FUN_00e2f860
 {
@@ -79,7 +79,7 @@ class ObjE2F8
     int m_iFirst;
     int m_iSecond;
 
-    void FUN_00e2f8e0(float fTime, int iB, int iD, int iE);
+    void hkaWaveletCompressedAnimation_sampleTracks(float fTime, int iB, int iD, int iE);
 };
 struct e2f910_Cls
 {
@@ -121,7 +121,7 @@ extern "C" e2f910_Cls* e2f910_obj(void);
 volatile int g_e2f910_a2 = 0;
 volatile int g_e2f910_a4 = 0;
 e2f910_Stream* volatile g_e2f910_stream = 0;
-static void FUN_00e2f910(e2f910_Cls* anim, int arg1, e2f910_Stream* stream, int count);
+static void releaseToCache(e2f910_Cls* anim, int arg1, e2f910_Stream* stream, int count);
 void e2f910_probe_caller(void);
 class hkBufferE2FA
 {
@@ -146,7 +146,7 @@ class hkBufferE2FA
     void Write(hkStreamWriter* writer);
 };
 extern unsigned char DAT_0126ef84;
-void __cdecl FUN_00e63c60(void*);
+void __cdecl hkaProcessFlyingColors(void*);
 extern const float DAT_010ec880[];
 struct QParam_00e51660
 {
@@ -214,8 +214,8 @@ static __forceinline void Decode_e51660(const unsigned char* __restrict& in, con
 }
 void __cdecl DecodeQuantizedBlock(const unsigned char* __restrict in, const QParam_00e51660* qParam, float* out,
                                   int totalCount);
-float __cdecl FUN_00e2f970(float f);
-static unsigned short FUN_00e2f9d0(unsigned short v);
+float __cdecl hkaWaveletCompressedAnimation_SwapFloatByteOrder(float f);
+static unsigned short hkaWaveletCompressedAnimation_SwapUnsignedShortByteOrder(unsigned short v);
 unsigned short volatile g_in;
 unsigned short g_out;
 void caller();
@@ -254,7 +254,7 @@ struct DestWrap
     DestWrap(float* q) : p(q)
     {}
 };
-void __stdcall FUN_00e2fbc0(int, int, unsigned int count, DestWrap dest);
+void __stdcall hkaWaveletCompressedAnimation_sampleIndividualTransformTracks(int, int, unsigned int count, DestWrap dest);
 extern "C" void __cdecl _ReadWriteBarrier(void);
 struct SwapCountsE2
 {
@@ -263,7 +263,7 @@ struct SwapCountsE2
     SwapCountsE2() : a(0), b(0), c(0), d(0), e(0), f(0), g(0), h(0), i(0), j(0), k(0), l(0), m(0), n(0.0f)
     {}
 };
-void __cdecl FUN_00e4ebb0(unsigned short*, unsigned short*, int, int, SwapCountsE2*);
+void __cdecl hkaTrackAnalysis_calcStats(unsigned short*, unsigned short*, int, int, SwapCountsE2*);
 inline unsigned short SwapShortE2(unsigned short v)
 {
     union
@@ -305,7 +305,7 @@ inline unsigned int SwapIntE2(unsigned int u)
     b.fourth = (unsigned char)u;
     return *(unsigned int*)&b;
 }
-void __fastcall FUN_00e2fc10(hkaWaveletCompressedAnimation* self);
+void __fastcall hkaWaveletCompressedAnimation_handleEndian(hkaWaveletCompressedAnimation* self);
 #include <string.h>
 extern "C" unsigned __int64 __rdtsc(void);
 extern "C" void _ReadWriteBarrier(void);
@@ -328,7 +328,8 @@ struct S00e306d0_Args
     unsigned int f18;
 };
 static volatile unsigned int s00e306d0_sink;
-static __declspec(noinline) void FUN_00e300b0(unsigned int x, S00e306d0_Args args)
+// src: HAVOK_LIB 0x00e300b0
+static __declspec(noinline) void _decompress(unsigned int x, S00e306d0_Args args)
 {
     unsigned int* p = (unsigned int*)x;
     p[0] = args.f00;
@@ -367,7 +368,7 @@ struct S00e306d0_Obj
     int unk60;
     unsigned int m_ui64;
 };
-static void FUN_00e306d0(S00e306d0_Obj* self, unsigned int a, unsigned int b, unsigned int c);
+static void decompressBlockToCache(S00e306d0_Obj* self, unsigned int a, unsigned int b, unsigned int c);
 void S00e306d0_Wrap(S00e306d0_Obj* self, unsigned int a, unsigned int b, unsigned int c);
 #include <windows.h>
 struct hkDmaRefE2FA
@@ -426,8 +427,8 @@ class hkQueueE2FA
     int unk60;
     void* m_data;
 
-    void FUN_00e2fa60(unsigned int slot, hkDmaRefE2FA* out) const;
-    void FUN_00e2fac0(unsigned int offset, int unused, hkDmaRefE2FA* desc, int mode) const;
+    void hkaWaveletCompressedAnimation_getBlockDataAndSize(unsigned int slot, hkDmaRefE2FA* out) const;
+    void hkaWaveletCompressedAnimation_getDataChunks(unsigned int offset, int unused, hkDmaRefE2FA* desc, int mode) const;
 };
 struct InfoE2FB
 {
@@ -440,10 +441,11 @@ struct InfoE2FB
 class HostE2FB : public hkaWaveletCompressedAnimation
 {
   public:
-    void FUN_00e2fa60(unsigned int uiIndex, InfoE2FB* pkInfo);
-    int FUN_00e2fb30();
+    void hkaWaveletCompressedAnimation_getBlockDataAndSize(unsigned int uiIndex, InfoE2FB* pkInfo);
+    int hkaWaveletCompressedAnimation_getMaxSizeOfCombinedDataChunks();
 };
-__declspec(noinline) void HostE2FB::FUN_00e2fa60(unsigned int uiIndex, InfoE2FB* pkInfo)
+// src: HAVOK_LIB 0x00e2fa60
+__declspec(noinline) void HostE2FB::hkaWaveletCompressedAnimation_getBlockDataAndSize(unsigned int uiIndex, InfoE2FB* pkInfo)
 {
     const unsigned int* blockOffsets =
         reinterpret_cast<const unsigned int*>(m_kCompressedData.m_data + m_uiIndexDataOffset);
@@ -476,7 +478,7 @@ struct ChunkRetry
 };
 struct AnimRetry : hkaWaveletCompressedAnimation
 {
-    void FUN_00e2fa60(int block, ChunkRetry& chunk) const;
+    void hkaWaveletCompressedAnimation_getBlockDataAndSize(int block, ChunkRetry& chunk) const;
 };
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern "C" unsigned __int64 __rdtsc();
@@ -522,7 +524,7 @@ inline void monitorSplit(const char* name)
         stream->m_end.m_storage = reinterpret_cast<char*>(record + 1);
     }
 }
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct Chunk
 {
     const hkUint8* data;
@@ -552,10 +554,10 @@ struct PackedFormat
 {
     unsigned int bits, value, rawCount;
 };
-int __cdecl FUN_00e51da0(int, const Quantization*);
+int __cdecl hkCalcQuantizedSize(int, const Quantization*);
 unsigned int __cdecl DecodeBlock(const float*, const PackedFormat*, float*, unsigned int);
 void __cdecl DecodeQuantizedBlock(const float*, const Quantization*, float*, int);
-void __cdecl FUN_00e51140(float*, int);
+void __cdecl hkInverseWaveletTransform(float*, int);
 struct TrackStatistics
 {
 
@@ -623,17 +625,18 @@ struct RecomposeParameters
     const float* dynamicFloats;
 };
 void __cdecl FUN_00e4e610(const hkUint16*, const hkUint16*, unsigned int, unsigned int, TrackStatistics*);
-void __cdecl FUN_00e4f640(const RecomposeParameters*, hkQsTransform*, float*);
-static void FUN_00e300b0(WaveletParameters parameters, float* output)
+void __cdecl hkaTrackAnalysis_recompose(const RecomposeParameters*, hkQsTransform*, float*);
+// src: HAVOK_LIB 0x00e300b0
+static void _decompress(WaveletParameters parameters, float* output)
 {
 
     Quantization quantization;
     quantization.preserved = parameters.preserved;
     quantization.bitWidth = parameters.maxBitWidth;
 
-    unsigned int bytes = FUN_00e51da0(parameters.blockSize, &quantization);
+    unsigned int bytes = hkCalcQuantizedSize(parameters.blockSize, &quantization);
 
-    hkMemoryRouter* router = FUN_00c85750();
+    hkMemoryRouter* router = hkMemoryRouter_getInstance();
     float* temporary = reinterpret_cast<float*>(router->m_stack.m_next.m_storage);
     router->m_stack.m_next.m_storage = (char*)router->m_stack.m_next.m_storage + ((bytes + 127) & ~127u);
 
@@ -646,7 +649,7 @@ static void FUN_00e300b0(WaveletParameters parameters, float* output)
         quantization.scale = parameters.scales[i];
         quantization.bitWidth = parameters.bitWidths ? parameters.bitWidths[i] : parameters.maxBitWidth;
 
-        bytes = FUN_00e51da0(parameters.blockSize, &quantization);
+        bytes = hkCalcQuantizedSize(parameters.blockSize, &quantization);
 
         PackedFormat format;
         format.bits = quantization.bitWidth;
@@ -660,13 +663,13 @@ static void FUN_00e300b0(WaveletParameters parameters, float* output)
         data += DecodeBlock(reinterpret_cast<const float*>(data), &format, temporary, bytes);
 
         DecodeQuantizedBlock(temporary, &quantization, output, parameters.blockSize);
-        FUN_00e51140(output, parameters.blockSize);
+        hkInverseWaveletTransform(output, parameters.blockSize);
         output += parameters.blockSize;
     }
 
-    FUN_00c85750()->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(temporary));
+    hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(temporary));
 }
-void __cdecl FUN_00e30200(unsigned int frame, float weight, unsigned int numTransforms, hkQsTransform* transforms,
+void __cdecl hkaWaveletCompressedAnimation_samplePartialWithDataChunks(unsigned int frame, float weight, unsigned int numTransforms, hkQsTransform* transforms,
                           unsigned int numFloats, float* floats, const Chunk* chunks, int chunkCount);
 
 namespace wav {
@@ -691,7 +694,8 @@ struct DecompressParams
 void __cdecl FUN_00e592a0(float* dst, int numFloats);
 
 // @fnv 0x00e349c0
-static __declspec(noinline) void FUN_00e349c0(float* dst, wav::DecompressParams params)
+// src: HAVOK_LIB 0x00e349c0
+static __declspec(noinline) void _decompress_00e349c0(float* dst, wav::DecompressParams params)
 {
     const char* data = params.m_data;
     unsigned int offset = 0;
@@ -705,11 +709,11 @@ static __declspec(noinline) void FUN_00e349c0(float* dst, wav::DecompressParams 
         DecodeQuantizedBlock(reinterpret_cast<const unsigned char*>(data + offset), &info, dst, params.m_numFloats);
         FUN_00e592a0(dst, params.m_numFloats);
         dst += params.m_iElementIndex;
-        offset += FUN_00e51da0(params.m_numFloats, (const char*)&info);
+        offset += hkCalcQuantizedSize(params.m_numFloats, (const char*)&info);
     }
 }
 
 void DecompressCaller(float* dst, wav::DecompressParams params)
 {
-    FUN_00e349c0(dst, params);
+    _decompress_00e349c0(dst, params);
 }

@@ -47,8 +47,8 @@ struct S_00df8d60
     int unkC;
     int unk10;
     float unk14;
-    S_00df8d60_Bool FUN_00df8aa0(const void* data);
-    float FUN_00df8d60(const S_00df8d60_Data* data, int unused);
+    S_00df8d60_Bool CastBody_Thunk(const void* data);
+    float hkCpuWorldRayCastCollector_addBroadPhaseHandle(const S_00df8d60_Data* data, int unused);
 };
 struct ParamBlock
 {
@@ -64,7 +64,7 @@ struct ParamBlock
 };
 struct Container
 {
-    void FUN_00df8aa0(int* apOut, int aiValue);
+    void CastBody_Thunk(int* apOut, int aiValue);
 };
 struct FUN_00df8db0_cls
 {
@@ -76,7 +76,7 @@ struct FUN_00df8db0_cls
     float GetResult(ParamBlock* apParam);
 };
 extern int DAT_0101e594;
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct FUN_00df8960_cls
 {
     int m_vptr;
@@ -85,11 +85,11 @@ struct FUN_00df8960_cls
 };
 struct AdjustedBase
 {
-    void FUN_00df8aa0(void* apFirst, int aiSecond);
+    void CastBody_Thunk(void* apFirst, int aiSecond);
 };
 struct AdjustOwner
 {
-    void* FUN_00df8d90(void* apFirst, int aiSecond);
+    void* hkCpuWorldRayCastCollector_addMidPhaseHit(void* apFirst, int aiSecond);
 };
 struct FUN_00df8dd0_Param
 {
@@ -100,7 +100,7 @@ struct FUN_00df8dd0_Param
 };
 struct FUN_00df8dd0_helper
 {
-    void FUN_00df8aa0(FUN_00df8dd0_Param** pp, unsigned int value);
+    void CastBody_Thunk(FUN_00df8dd0_Param** pp, unsigned int value);
 };
 struct FUN_00df8dd0_cls
 {
@@ -108,7 +108,7 @@ struct FUN_00df8dd0_cls
     int unk04;
     float m_f08;
 
-    float FUN_00df8dd0(FUN_00df8dd0_Param* p);
+    float hkCpuWorldRayCastCollector_addLeaf(FUN_00df8dd0_Param* p);
 };
 struct DF8930Primary
 {
@@ -173,7 +173,7 @@ Derived::Derived()
 extern char DAT_010dbb04[];
 extern void(__cdecl* DAT_0126ec04)(void* a, void* b, struct S_00df8990_Obj* obj);
 struct S_00df8990_Obj;
-void __cdecl FUN_00e2b9b0(void* a, void* b, S_00df8990_Obj* obj);
+void __cdecl Runtime_ProcessEntries_00e2b9b0(void* a, void* b, S_00df8990_Obj* obj);
 struct Source
 {
     __m128 m_v00;
@@ -289,7 +289,7 @@ struct HkpcpuworldraycastjobInterfaceView
     virtual void v58();
     virtual void v5c(void* a, Output* b, unsigned int c);
 };
-void __cdecl FUN_00df89b0(HkpcpuworldraycastjobInterfaceView* iface, Source* src, Output* out, Spawned* spawned);
+void __cdecl castRayBroadPhase(HkpcpuworldraycastjobInterfaceView* iface, Source* src, Output* out, Spawned* spawned);
 
 #include <xmmintrin.h>
 namespace fnv_00df8df0 {
@@ -318,16 +318,16 @@ struct Allocator
 };
 static __forceinline hkMemoryRouter* pool()
 {
-    return FUN_00c85750();
+    return hkMemoryRouter_getInstance();
 }
-void __cdecl FUN_00c908c0(Allocator*, void*, int, int) throw();
-void __cdecl FUN_00e2c8a0(void*, void*, void*, int, void*, void*, int) throw();
-void __cdecl FUN_00e2cc30(void*, void*, void*, int, void*, void*, int) throw();
-void __cdecl FUN_00e2abf0(void*, void*, int, void*, int, int, int, int) throw();
-void __cdecl FUN_00e2b070(void*, void*, int, void*, int, int, int, int, int) throw();
-void __cdecl FUN_00e2b510(void*, void*, int, void*, int, int, int, int, int) throw();
-void __cdecl FUN_00e2acf0(void*, void*, int, void*, int, int, int, int, int) throw();
-void __cdecl FUN_00df89b0(void*, void*, void*, void*) throw();
+void __cdecl hkArrayUtil__reserve(Allocator*, void*, int, int) throw();
+void __cdecl hkAabbTreeRayCastUtil_hkAabbTreeData_hkAabbTreeAabb_unsigned_short_castRayFiltering(void*, void*, void*, int, void*, void*, int) throw();
+void __cdecl hkAabbTreeRayCastUtil_struct_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_castRayFiltering(void*, void*, void*, int, void*, void*, int) throw();
+void __cdecl hkTreeRayCastJobUtil_castRayKdTree(void*, void*, int, void*, int, int, int, int) throw();
+void __cdecl hkVector4_ProcessEntries_00e2b070(void*, void*, int, void*, int, int, int, int, int) throw();
+void __cdecl Runtime_ProcessEntries_00e2b510(void*, void*, int, void*, int, int, int, int, int) throw();
+void __cdecl hkKdTreeUtils_castRayBundleIterative_ProcessEntries_00e2acf0(void*, void*, int, void*, int, int, int, int, int) throw();
+void __cdecl castRayBroadPhase(void*, void*, void*, void*) throw();
 struct Finalizer
 {
     void __thiscall ProcessCallback(void*, void*, int) throw();
@@ -421,7 +421,7 @@ struct VertexBuffer
             int next = old * 2;
             if (n >= next)
                 next = n;
-            FUN_00c908c0(a, &data, next, 32);
+            hkArrayUtil__reserve(a, &data, next, 32);
         }
     }
     __forceinline void Clear() throw()
@@ -538,7 +538,8 @@ struct TraceContext
     TraceEntry* end;
 };
 // @fnv 0x00df8df0
-void __cdecl FUN_00df8df0(void* result, MeshRequest* request)
+// src: XBOX_PDB 0x00df8df0
+void __cdecl hkCpuWorldRayCastJob(void* result, MeshRequest* request)
 {
     {
         TraceContext* t = (TraceContext*)TlsGetValue(DAT_0126835c);
@@ -629,8 +630,8 @@ void __cdecl FUN_00df8df0(void* result, MeshRequest* request)
             at->option = queryType;
             ++at;
         } while (queryRemaining-- != 1);
-        FUN_00e2c8a0(request->passA, vertices.data, querySource, queryType, fields, iteration.destination, count);
-        FUN_00e2cc30(request->passB, vertices.data, querySource, queryType, fields, iteration.destination, count);
+        hkAabbTreeRayCastUtil_hkAabbTreeData_hkAabbTreeAabb_unsigned_short_castRayFiltering(request->passA, vertices.data, querySource, queryType, fields, iteration.destination, count);
+        hkAabbTreeRayCastUtil_struct_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_castRayFiltering(request->passB, vertices.data, querySource, queryType, fields, iteration.destination, count);
         pool()->m_stack.m_next.m_storage = (void*)((int)iteration.destination);
         Field* end = fields + 4;
         int remaining = 3;
@@ -649,7 +650,7 @@ void __cdecl FUN_00df8df0(void* result, MeshRequest* request)
             iteration.count = remainingVertices;
             do
             {
-                FUN_00e2abf0(queryFinal, source, queryType, &finalState, 0, 0, 0, 0);
+                hkTreeRayCastJobUtil_castRayKdTree(queryFinal, source, queryType, &finalState, 0, 0, 0, 0);
                 ++source;
             } while (--iteration.count != 0);
         }
@@ -661,9 +662,9 @@ void __cdecl FUN_00df8df0(void* result, MeshRequest* request)
             do
             {
                 *(__m128*)&scratch.range = *(__m128*)&shared.unit;
-                FUN_00e2b070(request->passA, face, queryType, &scratch.range, 0, 0, 0, 0, 0);
-                FUN_00e2b510(request->passB, face, queryType, &scratch.range, 0, 0, 0, 0, 0);
-                FUN_00e2acf0(queryFinal, face, queryType, &scratch.range, 0, 0, 0, 0, 0);
+                hkVector4_ProcessEntries_00e2b070(request->passA, face, queryType, &scratch.range, 0, 0, 0, 0, 0);
+                Runtime_ProcessEntries_00e2b510(request->passB, face, queryType, &scratch.range, 0, 0, 0, 0, 0);
+                hkKdTreeUtils_castRayBundleIterative_ProcessEntries_00e2acf0(queryFinal, face, queryType, &scratch.range, 0, 0, 0, 0, 0);
                 ++face;
             } while (--iteration.count != 0);
         }
@@ -680,7 +681,7 @@ void __cdecl FUN_00df8df0(void* result, MeshRequest* request)
             {
                 field.weight = 1.0f;
                 field.dirty = 0;
-                FUN_00df89b0(request->shapeBuilder, vertex, &field, &shared.state);
+                castRayBroadPhase(request->shapeBuilder, vertex, &field, &shared.state);
                 ++vertex;
                 ++iteration.count;
             } while (iteration.count < request->vertexCount);
@@ -716,7 +717,7 @@ void __cdecl FUN_00df8df0(void* result, MeshRequest* request)
                         c.output = 0;
                         field.weight = 1.0f;
                         field.dirty = 0;
-                        FUN_00df89b0(request->shapeBuilder, &c, &field, &shared.state);
+                        castRayBroadPhase(request->shapeBuilder, &c, &field, &shared.state);
                         queryFaces->outputs[iteration.count] = c.output;
                         ++iteration.count;
                     } while (iteration.count < queryFaces->count);

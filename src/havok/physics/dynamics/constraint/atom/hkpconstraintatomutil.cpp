@@ -23,7 +23,7 @@ struct D92740MemoryRouter
     }
 };
 
-extern "C" D92740MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D92740MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 struct D92740Block
 {
@@ -38,7 +38,7 @@ struct D92740Block
 };
 
 D92740Block* __cdecl AllocateBlock(int capacity, int typeA, int typeB, int extra);
-void __cdecl FUN_00d925b0(D92740Block* dst, D92740Block* src);
+void __cdecl hkpSimpleContactConstraintAtom_ProcessEntries_00d925b0(D92740Block* dst, D92740Block* src);
 int __cdecl RoundUpToBucketSize(int sizeClass);
 
 // @fnv 0x00d92740
@@ -48,9 +48,9 @@ D92740Block* __cdecl ShrinkBlockIfSparse(D92740Block* block, int numToAdd, bool*
     {
         int newCapacity = block->m_pRayCursor >> 1;
         D92740Block* newBlock = AllocateBlock(newCapacity, block->m_iAgentTypeA, block->m_iAgentTypeB, block->m_extra);
-        FUN_00d925b0(newBlock, block);
+        hkpSimpleContactConstraintAtom_ProcessEntries_00d925b0(newBlock, block);
         int size = RoundUpToBucketSize(block->m_sizeClass);
-        FUN_00c85750().heap().ReleaseBlock(block, size);
+        hkMemoryRouter_getInstance().heap().ReleaseBlock(block, size);
         *pbResized = true;
         return newBlock;
     }
@@ -102,7 +102,7 @@ struct MyAlloc
     virtual void* Construct(unsigned int raw);
 };
 
-extern "C" D92740MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D92740MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 extern "C" __declspec(noinline) unsigned int __cdecl RoundUpToBucketSize(unsigned int size)
 {
@@ -144,7 +144,7 @@ D92740Block* __cdecl AllocateBlock(int capacity, int typeA, int typeB, int extra
     unsigned int stride = uiTypeSum * 4 + 0x14;
     unsigned int size = (unsigned int)capacity * (stride + 0x20);
     size = (size + 0x3f) & 0xfffffff0u;
-    D92740MemoryRouter& memoryRouter = FUN_00c85750();
+    D92740MemoryRouter& memoryRouter = hkMemoryRouter_getInstance();
     MyAlloc* alloc = (MyAlloc*)memoryRouter.m_pStreamAllocator;
     unsigned int raw = RoundUpToBucketSize(size);
     Obj* pBlock = (Obj*)alloc->Construct(raw);

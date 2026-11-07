@@ -6,14 +6,14 @@
 
 struct FUN_00404cd0_Class
 {
-    void __thiscall FUN_00404c80();
+    void __thiscall UpdateFields_00404c80();
     void* __thiscall FUN_00404cd0(unsigned int flags);
 };
 
 // @fnv 0x00404cd0
 void* __thiscall FUN_00404cd0_Class::FUN_00404cd0(unsigned int flags)
 {
-    FUN_00404c80();
+    UpdateFields_00404c80();
     if (flags & 1)
         operator delete(this);
     return this;

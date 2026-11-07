@@ -95,7 +95,7 @@ ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>::Thr
     uiThreadCount = 0;
     uiMaxThreads = maxThreads;
     m_pThreadInterfaceEntries = new ThreadInterfaceEntry[uiMaxThreads];
-    uiTLSIndex = FUN_0044e330();
+    uiTLSIndex = _TlsAlloc();
 }
 
 template<>

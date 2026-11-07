@@ -12,7 +12,7 @@ inline hkMemoryAllocator& BSAudio::heap()
     return *reinterpret_cast<hkMemoryAllocator*>(pListener);
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct RefElem_t
 {
@@ -46,7 +46,7 @@ FUN_00dff010_cls::~FUN_00dff010_cls() throw()
         m_ppData[i]->FUN_00c905b0();
     }
 
-    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAudioAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     unsigned int uiCapacity = m_uCapacity;
     *(volatile int*)&m_iArrayLength = 0;
@@ -61,7 +61,7 @@ FUN_00dff010_cls::~FUN_00dff010_cls() throw()
 }
 
 namespace fnv_00dff080 {
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 
 struct FUN_00e05d10_Base
 {
@@ -72,7 +72,7 @@ struct FUN_00e05d10_Base
     void operator delete(void* p, unsigned int)
     {
         FUN_00e05d10_Base* b = static_cast<FUN_00e05d10_Base*>(p);
-        FUN_00c85750()->heap().blockFree(p, b->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance()->heap().blockFree(p, b->m_usMemSizeAndFlags);
     }
 };
 

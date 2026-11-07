@@ -54,29 +54,30 @@ void ActiveEffect::ApplyLockEffect()
         return;
     }
 
-    pLock = pTarget->GetMagicTargetReference()->FUN_005690a0();
+    pLock = pTarget->GetMagicTargetReference()->TESObjectREFR_AddLock();
     pLock->m_cOwner = (char)GetFloatAtOffset1C();
     pLock->m_iArrayLength = 0;
     pLock->m_cActionFlags = 2;
-    pTarget->GetMagicTargetReference()->FUN_005789b0();
+    pTarget->GetMagicTargetReference()->TESObjectREFR_AddLockChange();
     pTarget->GetMagicTargetReference()->Lock();
 }
 
 struct S_80f580_cls
 {
-    bool FUN_0080f580(MagicTarget* a);
+    bool LockEffect_CheckTarget(MagicTarget* a);
 };
 
 // Checks whether the parent reference's base object is a TESObjectDOOR or TESObjectCONT.
 // @fnv 0x0080f580
-bool S_80f580_cls::FUN_0080f580(MagicTarget* apTarget)
+// src: COMMUNITY 0x0080f580
+bool S_80f580_cls::LockEffect_CheckTarget(MagicTarget* apTarget)
 {
     NonActorMagicTarget* t = dynamic_cast<NonActorMagicTarget*>(apTarget);
     if (!t || !t->GetMagicTargetReference())
         return false;
     TESObjectDOOR* door =
-        dynamic_cast<TESObjectDOOR*>(t->GetMagicTargetReference()->FUN_007af430());
+        dynamic_cast<TESObjectDOOR*>(t->GetMagicTargetReference()->BGSSaveFormBuffer_GetForm());
     TESObjectCONT* cont_2 =
-        dynamic_cast<TESObjectCONT*>(t->GetMagicTargetReference()->FUN_007af430());
+        dynamic_cast<TESObjectCONT*>(t->GetMagicTargetReference()->BGSSaveFormBuffer_GetForm());
     return door || cont_2;
 }

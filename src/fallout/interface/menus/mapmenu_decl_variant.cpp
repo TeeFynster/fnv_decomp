@@ -10,18 +10,19 @@ template <> void ListBox<TESQuest*>::ClearSelection(bool notify)
     SetSelectedTile(0, notify);
 }
 
-bool FUN_007a1750();
+bool MapMenu_ShouldRenderLocalMap();
 // @fnv 0x0079af30
-void MapMenu::FUN_0079af30()
+// src: XBOX_PDB 0x0079af30
+void MapMenu::UpdateCurrentPage()
 {
     int selected = -1;
     Tile* index = 0;
     m_kQuestListBox.SetEnabled(false);
     m_kObjectiveListBox.SetEnabled(false);
-    m_kNoteListBox.FUN_007a30e0(false);
-    m_kNoteListBox.FUN_007a5a30(false);
-    m_kChallengeListBox.FUN_007a59a0(false);
-    m_kChallengeListBox.FUN_007a5a30(false);
+    m_kNoteListBox.ListBox_BGSNote_SetEnabled(false);
+    m_kNoteListBox.ListBox_BGSNote_SetVisible(false);
+    m_kChallengeListBox.ListBox_TESChallenge_SetEnabled(false);
+    m_kChallengeListBox.ListBox_BGSNote_SetVisible(false);
     DAT_011da368->m_pTiles[11]->Set(0xfaf, 1);
     DAT_011da368->m_pTiles[12]->Set(0xfa3, 1);
     DAT_011da368->m_pTiles[18]->Set(0xfa3, 0);
@@ -30,7 +31,7 @@ void MapMenu::FUN_0079af30()
     {
     case 32:
         DAT_011da368->m_pMapTile = DAT_011da368->m_pTiles[2];
-        if (!FUN_007a1750())
+        if (!MapMenu_ShouldRenderLocalMap())
             DAT_011da368->UpdateLocalMap();
         break;
     case 33:
@@ -56,7 +57,7 @@ void MapMenu::FUN_0079af30()
             DAT_011da368->m_kNoteListBox.UpdateScrollSelection(true);
         }
         DAT_011da368->RefreshChallengeList();
-        FUN_0079b460(false);
+        ToggleNotesChallengeMode(false);
         break;
     case 36:
         DAT_011da368->m_pTiles[12]->Set(0xfa3, 0);
@@ -66,7 +67,7 @@ void MapMenu::FUN_0079af30()
         DAT_011da368->RefreshRadioList();
         index = m_kMapMarkerListBox.GetTileAt(static_cast<unsigned int>(selected), false);
         if (index)
-            FUN_004b7210()->FUN_00715860(index, 0xfc3, 1);
+            InterfaceManager_GetSingleton()->InterfaceManager_SetCurrentFocusTarget(index, 0xfc3, 1);
         m_kMapMarkerListBox.ScrollToHighlight();
         break;
     }

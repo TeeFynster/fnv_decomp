@@ -20,7 +20,7 @@ struct S_00ddfcd0_Router
     }
 };
 
-S_00ddfcd0_Router* FUN_00c85750();
+S_00ddfcd0_Router* hkMemoryRouter_getInstance();
 
 struct S_00ddfcd0_RefObj
 {
@@ -34,7 +34,7 @@ struct S_00ddfcd0_RefObj
     {}
     void* operator new(unsigned int nbytes)
     {
-        S_00ddfcd0_RefObj* b = static_cast<S_00ddfcd0_RefObj*>(FUN_00c85750()->heap().AllocateMemoryBlock(nbytes));
+        S_00ddfcd0_RefObj* b = static_cast<S_00ddfcd0_RefObj*>(hkMemoryRouter_getInstance()->heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -61,7 +61,8 @@ struct S_00ddfcd0_Obj : S_00ddfcd0_RefObj
 
 // Allocates and constructs a new S_00ddfcd0_Obj through the router's heap and returns it as a S_00ddfcd0_RefObj pointer.
 // @fnv 0x00ddfcd0
-S_00ddfcd0_RefObj* FUN_00ddfcd0()
+// src: XBOX_PDB 0x00ddfcd0
+S_00ddfcd0_RefObj* hkpUserShapeDisplayBuildercreate()
 {
     return new S_00ddfcd0_Obj;
 }
@@ -113,18 +114,19 @@ struct FUN_00ddfc30_cls
     int unk0C;
     HkDisplayConvexObj* m_pConvex;
 
-    HkDisplayConvexObj* FUN_00ddfc30(HkArrayRaw* a1);
+    HkDisplayConvexObj* hkpShapeDisplayBuilder_getCurrentRawGeometry(HkArrayRaw* a1);
 };
 
 // If m_pConvex is null, allocates a pair block and a 0x60-byte object, stores it in m_pConvex and appends it to a1's array; returns m_pConvex.
 // @fnv 0x00ddfc30
-HkDisplayConvexObj* FUN_00ddfc30_cls::FUN_00ddfc30(HkArrayRaw* apArray)
+// src: HAVOK_LIB 0x00ddfc30
+HkDisplayConvexObj* FUN_00ddfc30_cls::hkpShapeDisplayBuilder_getCurrentRawGeometry(HkArrayRaw* apArray)
 {
     int zero = 0;
     if (m_pConvex == (HkDisplayConvexObj*)zero)
     {
         HkArrayPairBlock* pBlock = (HkArrayPairBlock*)zero;
-        HkAllocHolder* pHolder = (HkAllocHolder*)FUN_00c85750();
+        HkAllocHolder* pHolder = (HkAllocHolder*)hkMemoryRouter_getInstance();
         void* mem = pHolder->m_pAllocator->Alloc(0x18);
         if (mem != (void*)zero)
         {
@@ -139,12 +141,12 @@ HkDisplayConvexObj* FUN_00ddfc30_cls::FUN_00ddfc30(HkArrayRaw* apArray)
             pBlock = p;
         }
 
-        pHolder = (HkAllocHolder*)FUN_00c85750();
+        pHolder = (HkAllocHolder*)hkMemoryRouter_getInstance();
         mem = pHolder->m_pAllocator->Alloc(0x60);
         ((HkDisplayConvexObj*)mem)->m_u04 = 0x60;
         m_pConvex = ((HkDisplayConvexObj*)mem)->FUN_00de1d20(pBlock);
 
-        pHolder = (HkAllocHolder*)FUN_00c85750();
+        pHolder = (HkAllocHolder*)hkMemoryRouter_getInstance();
         if (apArray->m_iArrayLength == (int)(apArray->m_uCapFlags & 0x3fffffffu))
         {
             FUN_00c90940(pHolder->m_pAllocator, apArray, 4);

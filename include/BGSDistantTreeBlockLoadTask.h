@@ -21,9 +21,9 @@ public:
 
     void* Destroy(unsigned int flags);
     void FUN_006f94a0();
-    void FUN_00c3cb70(int a1, void* a2);
-    void FUN_006f9540(int a1, void* a2);
-    void FUN_006f94c0();
+    void QueuedFile_Cancel(int a1, void* a2);
+    void Cancel_006f9540(int a1, void* a2);
+    void QueueMe();
     bool __thiscall FormatDescription(char* apDescription, unsigned int aiBufferSize);
 
     unsigned char unk30[8];

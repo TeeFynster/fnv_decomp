@@ -92,7 +92,8 @@ void NiPSysVolumeEmitter::GetPositionAndDirection(NiPoint3& kPosition, NiPoint3&
 extern char const* const g_01202508_arg1;
 
 // @fnv 0x00c31bc0
-char const* const* __cdecl FUN_00c31bc0()
+// src: COMMUNITY 0x00c31bc0
+char const* const* __cdecl NiPSysVolumeEmitter_GetRTTI()
 {
     return &g_01202508_arg1;
 }
@@ -154,15 +155,15 @@ struct NameHolder_b9457
 };
 
 extern void* DAT_012027d8;
-void* __cdecl FUN_00a7d330(void* p);
-void* __cdecl FUN_00a7d5e0(const char* fmt, void* arg);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* p);
+void* __cdecl NiGetViewerString_00a7d5e0(const char* fmt, void* arg);
 
 // @fnv 0x00c31db0
 void NiPSysVolumeEmitter::GetViewerStrings(NiViewerStringsArray* strings)
 {
     NameArray_b9457* arr = (NameArray_b9457*)strings;
     NiPSysEmitter::GetViewerStrings(strings);
-    void* name = FUN_00a7d330(DAT_012027d8);
+    void* name = NiViewerStrings_NiGetViewerString_Title(DAT_012027d8);
     unsigned int uiIndex = arr->m_usNum;
     if (uiIndex >= arr->m_usMax)
     {
@@ -172,7 +173,7 @@ void NiPSysVolumeEmitter::GetViewerStrings(NiViewerStringsArray* strings)
     if (m_pkEmitterObject != 0)
     {
         void* holderVal = ((NameHolder_b9457*)m_pkEmitterObject)->m_pIntegerData;
-        name = FUN_00a7d5e0("Emitter Object", holderVal);
+        name = NiGetViewerString_00a7d5e0("Emitter Object", holderVal);
         uiIndex = arr->m_usNum;
         if (uiIndex >= arr->m_usMax)
         {

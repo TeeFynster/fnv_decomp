@@ -48,21 +48,21 @@ public:
 
     PathBuilder(PathingRequest*, PathingSolution*);
     bool BuildPath();
-    bool FUN_006cd1f0(PathingLocation*, PathingLocation*);
-    int FUN_006cb4c0(PathingLocation&, PathingLocation&, void*);
+    bool PathBuilder_TryBuildStraightPath(PathingLocation*, PathingLocation*);
+    int BuildStraightPathUsingRayCasts(PathingLocation&, PathingLocation&, void*);
     bool FindPath(PathingLocation*, PathingLocation*,
                   BSSimpleArray<NavMeshTriangleEdgeReference, 1024>&,
                   BSSimpleArray<NavMeshTriangleReference, 1024>&,
                   BSSimpleArray<NavMeshTriangleEdgeReference, 1024>&,
                   unsigned int, unsigned int);
-    bool FUN_006cd8a0(PathingLocation&, PathingLocation&,
+    bool PathBuilder_RunPathSmoother(PathingLocation&, PathingLocation&,
                      BSSimpleArray<NavMeshTriangleEdgeReference, 1024>&,
                      BSSimpleArray<NavMeshTriangleReference, 1024>&,
                      BSSimpleArray<NavMeshTriangleEdgeReference, 1024>&);
     bool BuildPathSpans(OutNodes&);
     bool BuildPathSpans(BSScrapArray<NavMeshEdgeData, 1024>&); // exe 0x006ca500
     bool BuildPathSegment(unsigned int, unsigned int);
-    bool FUN_006c9b20();
+    bool PathBuilder_BuildTeleportDoorPath();
     bool BuildActorPathSegments(Actor*);
     bool BuildPathSpans(BSSimpleArray<NavMeshEdgeData, 1024>&);
     bool TryConnectPathNodes(unsigned int, unsigned int);
@@ -74,10 +74,10 @@ public:
     int AppendPathNodeLocations(int, BSSimpleArray<PathingLocation, 1024>*, TESObjectREFR*);
     bool BuildPathNodeLocation(PacketNodeRecord*, PacketNodeRecord*, PathingLocation&);
     int AppendNearbyPathLocations(PathingLocation*, BSSimpleArray<PathingLocation, 1024>*, int, TESObjectREFR*);
-    void* FUN_006e8f40(void*);
-    void* FUN_006e8f60(void* a1);
+    void* GetElementAddress30_006e8f40(void*);
+    void* BSSimpleArray_VirtualPathingNode_1024_GetAt(void* a1);
     bool FindPath(const NiPoint3&, const NiPoint3&, void*, PathDoorView*);
-    void* FUN_009dfd50();
-    int FUN_00d9a2a0(int a1, Param2* a2, Param3* a3, int a4, Embedded5* a5,
+    void* BSSimpleArray_VirtualPathingNode_1024_GetLast();
+    int ProcessAndReturnValue_00d9a2a0(int a1, Param2* a2, Param3* a3, int a4, Embedded5* a5,
                      int a6, int a7, volatile int a8);
 };

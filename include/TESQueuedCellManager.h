@@ -5,11 +5,11 @@ class TESObjectCELL;
 class TESQueuedCellManager
 {
 public:
-    void FUN_00528540();
+    void ExteriorCellLoader_CancelAllCellLoads();
     void SubmitQueuedItems();
-    void FUN_005283c0(TESObjectCELL*);
+    void ExteriorCellLoader_QueueCellLoad(TESObjectCELL*);
     int CallVirtual17();
     void ProcessQueries();
-    int FUN_005281f0();
-    void FUN_005282d0();
+    int ExteriorCellLoader_TryCancelTasks();
+    void ExteriorCellLoader_WaitForTasks();
 };

@@ -48,10 +48,11 @@ struct FUN_00d0a270_class
     void* p8;
     void* pc;
     FUN_00d97710_class* pv;
-    void FUN_00d0a270(int ai);
+    void ClearEntryByKey_Thunk(int ai);
 };
 // @fnv 0x00d0a270
-void FUN_00d0a270_class::FUN_00d0a270(int ai)
+// src: GUESS 0x00d0a270 (confidence: medium)
+void FUN_00d0a270_class::ClearEntryByKey_Thunk(int ai)
 {
     pv->ClearEntryByKey(ai + 0x10);
 }
@@ -60,7 +61,8 @@ struct D107A0RTTI;
 extern D107A0RTTI g_D107A0RTTI;
 
 // @fnv 0x00d10790
-D107A0RTTI* __cdecl FUN_00d10790()
+// src: GUESS 0x00d10790 (confidence: low)
+D107A0RTTI* __cdecl Runtime_GetD107A0RTTIAddress()
 {
     return &g_D107A0RTTI;
 }
@@ -90,7 +92,8 @@ struct FUN_00c9ce00_cls
 };
 
 // @fnv 0x00d1f180
-void __cdecl FUN_00d1f180(FUN_00c9ce00_cls* obj, int v)
+// src: GUESS 0x00d1f180 (confidence: low)
+void __cdecl Object_ProcessState_00d1f180(FUN_00c9ce00_cls* obj, int v)
 {
     if (obj)
         obj->FUN_00c9ce00(v);
@@ -117,7 +120,7 @@ public:
     virtual void Free(void* p, unsigned int size);
 };
 
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 extern "C" void __cdecl FUN_00ec44d0(void* dst, const void* src, unsigned int size);
 
 struct FUN_00d06c30_cls
@@ -128,9 +131,10 @@ struct FUN_00d06c30_cls
 };
 
 // @fnv 0x00d06c30
-extern "C" void __cdecl FUN_00d06c30(FUN_00d06c30_cls* self, unsigned int newCap, unsigned int elemSize)
+// src: HAVOK_LIB 0x00d06c30
+extern "C" void __cdecl hkSmallArrayUtil__reserve(FUN_00d06c30_cls* self, unsigned int newCap, unsigned int elemSize)
 {
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     Allocator* alloc = reinterpret_cast<Allocator*>(holder->m_heap);
     char* newBuf = (char*)alloc->Alloc(newCap * elemSize);
     FUN_00ec44d0(newBuf, self->m_pData, self->m_usElementCount * elemSize);
@@ -138,7 +142,7 @@ extern "C" void __cdecl FUN_00d06c30(FUN_00d06c30_cls* self, unsigned int newCap
     {
         unsigned int size = (self->m_usCap & 0x3fff) * elemSize;
         char* oldBuf = self->m_pData;
-        holder = FUN_00c85750();
+        holder = hkMemoryRouter_getInstance();
         alloc = reinterpret_cast<Allocator*>(holder->m_heap);
         alloc->Free(oldBuf, size);
     }
@@ -221,7 +225,8 @@ void FUN_00d07910_cls::NotifyElements()
 
 // File-static helper with a compiler-chosen register convention.
 // @fnv 0x00d10ab0
-static __declspec(noinline) unsigned int FUN_00d10ab0(unsigned int uiValue)
+// src: GUESS 0x00d10ab0 (confidence: low)
+static __declspec(noinline) unsigned int Runtime_EvaluateValue_00d10ab0(unsigned int uiValue)
 {
     if (uiValue != 0xffff)
         uiValue++;
@@ -230,13 +235,14 @@ static __declspec(noinline) unsigned int FUN_00d10ab0(unsigned int uiValue)
 
 unsigned int D10AB0NextOdd(const unsigned int* puiValue)
 {
-    return FUN_00d10ab0(*puiValue);
+    return Runtime_EvaluateValue_00d10ab0(*puiValue);
 }
 
 extern int DAT_01268838;
 
 // @fnv 0x00d1f110
-int* __cdecl FUN_00d1f110()
+// src: GUESS 0x00d1f110 (confidence: low)
+int* __cdecl Runtime_GetDAT01268838Address()
 {
     return &DAT_01268838;
 }
@@ -244,7 +250,8 @@ int* __cdecl FUN_00d1f110()
 extern int g_unk01268868;
 
 // @fnv 0x00d1f130
-void* __cdecl FUN_00d1f130()
+// src: GUESS 0x00d1f130 (confidence: low)
+void* __cdecl Runtime_GetUnk01268868Address()
 {
     return &g_unk01268868;
 }
@@ -252,7 +259,8 @@ void* __cdecl FUN_00d1f130()
 // FUN_00d1f140 : a one-line function - getter
 extern int g_target_00d1f140;
 // @fnv 0x00d1f140
-void* FUN_00d1f140()
+// src: GUESS 0x00d1f140 (confidence: low)
+void* Object_GetGlobalObjectAddress_00d1f140()
 {
     return &g_target_00d1f140;
 }
@@ -264,14 +272,16 @@ class D1F150Object
 };
 
 // @fnv 0x00d1f150
-void FUN_00d1f150(D1F150Object* pkObject)
+// src: GUESS 0x00d1f150 (confidence: low)
+void Runtime_DestroySubobject_00d1f150(D1F150Object* pkObject)
 {
     pkObject->~D1F150Object();
 }
 
 extern int DAT_012688c8;
 // @fnv 0x00d1f160
-int* __cdecl FUN_00d1f160()
+// src: GUESS 0x00d1f160 (confidence: low)
+int* __cdecl Object_GetGlobalObjectAddress_00d1f160()
 {
     return &DAT_012688c8;
 }
@@ -282,7 +292,8 @@ struct FUN_00d1f1c0_target
 };
 
 // @fnv 0x00d1f1c0
-void __cdecl FUN_00d1f1c0(FUN_00d1f1c0_target* pTarget)
+// src: GUESS 0x00d1f1c0 (confidence: low)
+void __cdecl Object_InvokeVirtualMethod_00d1f1c0(FUN_00d1f1c0_target* pTarget)
 {
     pTarget->Run();
 }
@@ -431,20 +442,20 @@ struct D01E50Node
     int unk18;
     int payload;
 };
-int __cdecl FUN_00d95cf0(int, void*, D01E50Node*);
-int __cdecl FUN_00d94df0(int, void*, D01E50Node*);
+int __cdecl integrateJob(int, void*, D01E50Node*);
+int __cdecl hkCpuBuildAccumulatorsJob(int, void*, D01E50Node*);
 int __cdecl ExecuteConstraintCallbacks(int, void*, D01E50Node*);
-int __cdecl FUN_00d94a80(int, void*, D01E50Node*);
-int __cdecl FUN_00d947e0(int, void*, D01E50Node*);
-int __cdecl FUN_00d944d0(int, void*, D01E50Node*);
-int __cdecl FUN_00d94570(int, void*, D01E50Node*);
+int __cdecl hkCpuBuildJacobiansJob(int, void*, D01E50Node*);
+int __cdecl hkCpuSolveConstraintsJob(int, void*, D01E50Node*);
+int __cdecl hkCpuSolveApplyGravityJob(int, void*, D01E50Node*);
+int __cdecl hkCpuSolveConstraintBatchJob(int, void*, D01E50Node*);
 int __cdecl LogIntegrateVelocity(int, void*, D01E50Node*);
-int __cdecl FUN_00d94730(int, void*, D01E50Node*);
-int __cdecl FUN_00d943d0(int, void*, D01E50Node*);
-int __cdecl FUN_00d93ba0(int, void*, D01E50Node*);
-int __cdecl FUN_00d93380(int, void*, D01E50Node*);
+int __cdecl hkCpuSolveExportResultsJob(int, void*, D01E50Node*);
+int __cdecl hkCpuIntegrateMotionJob(int, void*, D01E50Node*);
+int __cdecl hkpSingleThreadedJobsOnIsland_cpuBroadPhaseJob(int, void*, D01E50Node*);
+int __cdecl hkCpuAgentSectorJob(int, void*, D01E50Node*);
 int __cdecl AccumulateShapes(int, void*, D01E50Node*);
-int __cdecl FUN_00d94340(int, void*, D01E50Node*);
+int __cdecl hkCpuSplitSimulationIslandJob(int, void*, D01E50Node*);
 
 // Dispatches on node->kind to one of several handlers, passing node->payload, ctx and node; returns 1 for unknown kinds.
 // @fnv 0x00d01e50
@@ -453,32 +464,32 @@ int __cdecl DispatchNodeByKind(void* pContext, D01E50Node* node)
     switch (node->kind)
     {
     case 0:
-        return FUN_00d95cf0(node->payload, pContext, node);
+        return integrateJob(node->payload, pContext, node);
     case 1:
-        return FUN_00d94df0(node->payload, pContext, node);
+        return hkCpuBuildAccumulatorsJob(node->payload, pContext, node);
     case 3:
         return ExecuteConstraintCallbacks(node->payload, pContext, node);
     case 4:
-        return FUN_00d94a80(node->payload, pContext, node);
+        return hkCpuBuildJacobiansJob(node->payload, pContext, node);
     case 6:
-        return FUN_00d947e0(node->payload, pContext, node);
+        return hkCpuSolveConstraintsJob(node->payload, pContext, node);
     case 7:
-        return FUN_00d944d0(node->payload, pContext, node);
+        return hkCpuSolveApplyGravityJob(node->payload, pContext, node);
     case 8:
-        return FUN_00d94570(node->payload, pContext, node);
+        return hkCpuSolveConstraintBatchJob(node->payload, pContext, node);
     case 9:
         return LogIntegrateVelocity(node->payload, pContext, node);
     case 10:
-        return FUN_00d94730(node->payload, pContext, node);
+        return hkCpuSolveExportResultsJob(node->payload, pContext, node);
     case 11:
-        return FUN_00d943d0(node->payload, pContext, node);
+        return hkCpuIntegrateMotionJob(node->payload, pContext, node);
     case 5:
-        return FUN_00d94340(node->payload, pContext, node);
+        return hkCpuSplitSimulationIslandJob(node->payload, pContext, node);
     case 12:
-        return FUN_00d93ba0(node->payload, pContext, node);
+        return hkpSingleThreadedJobsOnIsland_cpuBroadPhaseJob(node->payload, pContext, node);
     case 15:
     case 13:
-        return FUN_00d93380(node->payload, pContext, node);
+        return hkCpuAgentSectorJob(node->payload, pContext, node);
     case 14:
         return AccumulateShapes(node->payload, pContext, node);
     default:
@@ -486,15 +497,17 @@ int __cdecl DispatchNodeByKind(void* pContext, D01E50Node* node)
     }
 }
 
-int __fastcall FUN_00d04380(void*);
+int __fastcall hkSemaphore_acquire(void*);
 // @fnv 0x00d043b0
-int __cdecl FUN_00d043b0(void* ap)
+// src: GUESS 0x00d043b0 (confidence: low)
+int __cdecl hkSemaphore_acquire_ForwardCall_00d043b0(void* ap)
 {
-    return FUN_00d04380(ap);
+    return hkSemaphore_acquire(ap);
 }
 
 // @fnv 0x00d043d0
-int __cdecl FUN_00d043d0()
+// src: COMMUNITY 0x00d043d0
+int __cdecl hkDefaultPopJobFunc()
 {
     return 0;
 }
@@ -519,10 +532,11 @@ struct FnvCpu_FUN_00d04430_CpuObject
     unsigned int unk10;
     unsigned int unk14;
     FnvCpu_FUN_00d04430_CpuScalar* value;
-    int FUN_00d04430();
+    int EvaluateValue_00d04430();
 };
 // @fnv 0x00d04430
-int FnvCpu_FUN_00d04430_CpuObject::FUN_00d04430()
+// src: GUESS 0x00d04430 (confidence: low)
+int FnvCpu_FUN_00d04430_CpuObject::EvaluateValue_00d04430()
 {
     return value->value;
 }
@@ -546,22 +560,24 @@ struct FnvCpu_FUN_00d04440_CpuObject
     unsigned int unk10;
     unsigned int unk14;
     FnvCpu_FUN_00d04440_CpuScalar* value;
-    int FUN_00d04440();
+    int hkJobQueue_getMasterThreadFinishingFlags();
 };
 // @fnv 0x00d04440
-int FnvCpu_FUN_00d04440_CpuObject::FUN_00d04440()
+// src: COMMUNITY 0x00d04440
+int FnvCpu_FUN_00d04440_CpuObject::hkJobQueue_getMasterThreadFinishingFlags()
 {
     return value->value;
 }
 
 // 0x00d05de0  bare ret
 // @fnv 0x00d05de0
-void FUN_00d05de0()
+// src: COMMUNITY 0x00d05de0
+void nullsub_9()
 {}
 
 struct FUN_00d06f70_s
 {
-    void FUN_00d06f70();
+    void InitializeFields_00d06f70();
 };
 
 struct FUN_00d07070_s : FUN_00d06f70_s
@@ -575,11 +591,11 @@ struct FUN_00d07070_s : FUN_00d06f70_s
 // @fnv 0x00d07070
 int __thiscall FUN_00d07070_s::FUN_00d07070(unsigned char flag)
 {
-    this->FUN_00d06f70();
+    this->InitializeFields_00d06f70();
 
     if (flag & 1)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         unsigned short value = unk04;
         holder->m_heap->blockFree(reinterpret_cast<void*>(this), value);
     }
@@ -589,15 +605,17 @@ int __thiscall FUN_00d07070_s::FUN_00d07070(unsigned char flag)
 
 // 0x00d070b0  bare ret
 // @fnv 0x00d070b0
-void FUN_00d070b0()
+// src: COMMUNITY 0x00d070b0
+void nullsub_30()
 {}
 
 struct FnvCpu_FUN_00d081d0_CpuObject
 {
-    char* FUN_00d081d0();
+    char* hkpLinkedCollidable_getCollisionEntriesDeterministicUnchecked();
 };
 // @fnv 0x00d081d0
-char* FnvCpu_FUN_00d081d0_CpuObject::FUN_00d081d0()
+// src: XBOX_PDB 0x00d081d0
+char* FnvCpu_FUN_00d081d0_CpuObject::hkpLinkedCollidable_getCollisionEntriesDeterministicUnchecked()
 {
     return reinterpret_cast<char*>(this) + 80;
 }
@@ -631,37 +649,43 @@ class FUN_00d081e0_cls
     int unk48;
     int unk4C;
     FUN_00d081e0_ret unk50;
-    FUN_00d081e0_ret* FUN_00d081e0();
+    FUN_00d081e0_ret* hkpLinkedCollidable_getCollisionEntriesDeterministicUnchecked_00d081e0();
 };
 
 // @fnv 0x00d081e0
-FUN_00d081e0_ret* FUN_00d081e0_cls::FUN_00d081e0()
+// src: XBOX_PDB 0x00d081e0
+FUN_00d081e0_ret* FUN_00d081e0_cls::hkpLinkedCollidable_getCollisionEntriesDeterministicUnchecked_00d081e0()
 {
     return &unk50;
 }
 
 // @fnv 0x00d08370
-void __stdcall FUN_00d08370(int)
+// src: COMMUNITY 0x00d08370
+void __stdcall nullsub_63(int)
 {}
 
 // @fnv 0x00d0a2a0
-void __stdcall FUN_00d0a2a0(int)
+// src: COMMUNITY 0x00d0a2a0
+void __stdcall nullsub_64(int)
 {}
 
 // @fnv 0x00d10760
-void __cdecl FUN_00d10760()
+// src: COMMUNITY 0x00d10760
+void __cdecl nullsub_11()
 {}
 
 // @fnv 0x00d10770
-void FUN_00d10770()
+// src: COMMUNITY 0x00d10770
+void nullsub_12()
 {}
 
 // @fnv 0x00d10780
-void __cdecl FUN_00d10780()
+// src: COMMUNITY 0x00d10780
+void __cdecl nullsub_13()
 {}
 
 extern int DAT_010cd664;
-void __cdecl FormHeap_Free(void*);
+void __cdecl FormHeapFreeAndLog_00401030(void*);
 struct FUN_00d1bab0_t
 {
     int m_vft;
@@ -672,27 +696,32 @@ FUN_00d1bab0_t::FUN_00d1bab0_t(bool fInit)
 {
     m_vft = (int)&DAT_010cd664;
     if (fInit & 1)
-        FormHeap_Free(this);
+        FormHeapFreeAndLog_00401030(this);
 }
 
 // @fnv 0x00d1f100
-void __cdecl FUN_00d1f100()
+// src: COMMUNITY 0x00d1f100
+void __cdecl nullsub_94()
 {}
 
 // @fnv 0x00d1f120
-void __cdecl FUN_00d1f120()
+// src: COMMUNITY 0x00d1f120
+void __cdecl nullsub_96()
 {}
 
 // @fnv 0x00d1f170
-void FUN_00d1f170()
+// src: COMMUNITY 0x00d1f170
+void nullsub_95()
 {}
 
 // @fnv 0x00d1fa10
-void __cdecl FUN_00d1fa10()
+// src: COMMUNITY 0x00d1fa10
+void __cdecl nullsub_14()
 {}
 
 // @fnv 0x00d043f0
-void __stdcall FUN_00d043f0(int)
+// src: GUESS 0x00d043f0 (confidence: high)
+void __stdcall Runtime_DoNothing_00d043f0(int)
 {}
 
 inline void* operator new(unsigned int, void* address)
@@ -717,7 +746,7 @@ struct Holder
     ArrayAllocator* allocator;
 };
 Holder* __cdecl _FUN_00c85750();
-void __cdecl FUN_00c908c0(ArrayAllocator* allocator, void* array, int capacity, int elementSize);
+void __cdecl hkArrayUtil__reserve(ArrayAllocator* allocator, void* array, int capacity, int elementSize);
 
 struct IntArray
 {
@@ -803,7 +832,7 @@ struct ArrayOfArrays
             int grown = reserved * 2;
             if (newSize >= grown)
                 grown = newSize;
-            FUN_00c908c0(allocator, this, grown, sizeof(IntArray));
+            hkArrayUtil__reserve(allocator, this, grown, sizeof(IntArray));
         }
         IntArray* end = data + newSize;
         for (int i = 0; i < oldSize - newSize; ++i)
@@ -827,12 +856,13 @@ struct ArrayRecord
     char flag;
     int value;
     ArrayOfArrays arrays;
-    ArrayRecord& FUN_00d05b50(const ArrayRecord& source);
+    ArrayRecord& UpdateState_00d05b50(const ArrayRecord& source);
 };
 
 // Copies type, flag, value and arrays from source into this ArrayRecord and returns a reference to this.
 // @fnv 0x00d05b50
-ArrayRecord& ArrayRecord::FUN_00d05b50(const ArrayRecord& source)
+// src: GUESS 0x00d05b50 (confidence: low)
+ArrayRecord& ArrayRecord::UpdateState_00d05b50(const ArrayRecord& source)
 {
     type = source.type;
     flag = source.flag;
@@ -842,31 +872,33 @@ ArrayRecord& ArrayRecord::FUN_00d05b50(const ArrayRecord& source)
 }
 
 // @fnv 0x00d05dd0
-void FUN_00d05dd0()
+// src: GUESS 0x00d05dd0 (confidence: high)
+void Runtime_DoNothing_00d05dd0()
 {}
 
-extern "C" int __cdecl FUN_00d61d00(void* dst, const char* format, ...);
+extern "C" int __cdecl hkStringBuf_printf(void* dst, const char* format, ...);
 
 // Writes a human-readable size string (Bytes, Kb, or Mb) into dst using FUN_00d61d00 based on the value of size.
 // @fnv 0x00d06eb0
-void __cdecl FUN_00d06eb0(int size, void* dst)
+// src: HAVOK_LIB 0x00d06eb0
+void __cdecl hkStatisticsCollector_memorySizeToText(int size, void* dst)
 {
     if (size < 0x400)
     {
-        FUN_00d61d00(dst, "%i Bytes", size);
+        hkStringBuf_printf(dst, "%i Bytes", size);
     }
     else if (size < 0x2800)
     {
-        FUN_00d61d00(dst, "%.1f Kb", (double)size * (1.0 / 1024.0));
+        hkStringBuf_printf(dst, "%.1f Kb", (double)size * (1.0 / 1024.0));
     }
     else if (size < 0x100000)
     {
-        FUN_00d61d00(dst, "%i Kb", size / 1024);
+        hkStringBuf_printf(dst, "%i Kb", size / 1024);
     }
     else
     {
         float mb = (float)((double)size * (1.0 / 1048576.0));
-        FUN_00d61d00(dst, "%.2f Mb", mb);
+        hkStringBuf_printf(dst, "%.2f Mb", mb);
     }
 }
 
@@ -913,7 +945,8 @@ struct FUN_00d0bc20_Outer
 
 // Sets bit 0 of object->unk27, calls the virtual Method on object->unk14, and stores the negation of bit 3 of unk27 into result.
 // @fnv 0x00d0bc20
-unsigned char* __stdcall FUN_00d0bc20(unsigned char* result, FUN_00d0bc20_Outer* object, unsigned int value)
+// src: HAVOK_LIB 0x00d0bc20
+unsigned char* __stdcall hkpContinuousSimulation_fireEarliestToiCallbacksAndCheckEnabled(unsigned char* result, FUN_00d0bc20_Outer* object, unsigned int value)
 {
     object->unk27 |= 1;
     object->unk14->Method(object, value);
@@ -936,12 +969,13 @@ struct FUN_00d107d0_t
         void* p8b;
     };
     int c;
-    FUN_00d107d0_t* FUN_00d107d0(int v);
+    FUN_00d107d0_t* InitializeFields_00d107d0(int v);
 };
 
 // Sets b to 1, points p8a/p0/p8b at DAT_010c63bc/DAT_010cd598/DAT_010cd588, stores v in c, and returns this.
 // @fnv 0x00d107d0
-FUN_00d107d0_t* FUN_00d107d0_t::FUN_00d107d0(int v)
+// src: GUESS 0x00d107d0 (confidence: low)
+FUN_00d107d0_t* FUN_00d107d0_t::InitializeFields_00d107d0(int v)
 {
     b = 1;
     p8a = &DAT_010c63bc;
@@ -992,7 +1026,8 @@ extern "C" void __cdecl QueryKdTree(int a, int b, int c, const LocalM128* d, con
 
 // Subtracts the vector at p+0x30 from the one at p+0x40 and calls QueryKdTree with p->m00 twice, p->m1C, the difference and the p+0x30 values.
 // @fnv 0x00d1b7f0
-void __cdecl FUN_00d1b7f0(S00d1b7f0_Input* p, int argB, int argC)
+// src: GUESS 0x00d1b7f0 (confidence: low)
+void __cdecl Runtime_ComputeValues_00d1b7f0(S00d1b7f0_Input* p, int argB, int argC)
 {
     S00d1b7f0_Frame frame;
 
@@ -1010,7 +1045,8 @@ void __cdecl FUN_00d1b7f0(S00d1b7f0_Input* p, int argB, int argC)
 }
 
 // @fnv 0x00d043e0
-int FUN_00d043e0()
+// src: COMMUNITY 0x00d043e0
+int hkDefaultFinishJobFunc()
 {
     return 1;
 }
@@ -1096,7 +1132,8 @@ struct DispatchContext
 extern "C" void _ReadWriteBarrier(void);
 // Computes a byte offset from the node subtype and invokes the handler pointer stored at that offset in the context's handler table.
 // @fnv 0x00d04570
-int __cdecl FUN_00d04570(DispatchContext* apContext, int b, DispatchNode* apNode)
+// src: GUESS 0x00d04570 (confidence: low)
+int __cdecl Runtime_UpdateState_00d04570(DispatchContext* apContext, int b, DispatchNode* apNode)
 {
     unsigned off = apNode->subtype << 4;
 
@@ -1105,11 +1142,13 @@ int __cdecl FUN_00d04570(DispatchContext* apContext, int b, DispatchNode* apNode
 }
 
 // @fnv 0x00d05dc0
-void FUN_00d05dc0()
+// src: GUESS 0x00d05dc0 (confidence: high)
+void Object_DoNothing_00d05dc0()
 {}
 
 // @fnv 0x00d083d0
-void __cdecl FUN_00d083d0()
+// src: GUESS 0x00d083d0 (confidence: high)
+void __cdecl Runtime_DoNothing_00d083d0()
 {}
 
 struct D10E90Obj
@@ -1118,7 +1157,8 @@ struct D10E90Obj
 };
 
 // @fnv 0x00d10e90
-static __declspec(noinline) unsigned short FUN_00d10e90(D10E90Obj* obj)
+// src: GUESS 0x00d10e90 (confidence: low)
+static __declspec(noinline) unsigned short Runtime_EvaluateValue_00d10e90(D10E90Obj* obj)
 {
     return obj->unk00;
 }
@@ -1128,7 +1168,7 @@ extern unsigned short d10e90_sink;
 
 void d10e90_caller(void)
 {
-    d10e90_sink = FUN_00d10e90(d10e90_stub());
+    d10e90_sink = Runtime_EvaluateValue_00d10e90(d10e90_stub());
 }
 
 class MyClass
@@ -1156,7 +1196,8 @@ int* MyClass::GetField20()
 extern LocalM128 DAT_011b3810;
 
 // @fnv 0x00d1b280
-LocalM128 __cdecl FUN_00d1b280()
+// src: GUESS 0x00d1b280 (confidence: low)
+LocalM128 __cdecl Object_GetDAT_011b3810_00d1b280()
 {
     return DAT_011b3810;
 }
@@ -1195,11 +1236,12 @@ struct QueryObj
     LocalM128 max;
 };
 
-void __cdecl FUN_00d1b4d0(const void* a, int b, const Vec4* c, const Vec4* d, int e, int f, int g, int h, int i, int j);
+void __cdecl hkKdTreeAabbQueryUtils_queryAabbInternal(const void* a, int b, const Vec4* c, const Vec4* d, int e, int f, int g, int h, int i, int j);
 
 // Records two HkTimer profiling markers around a call to FUN_00d1b4d0 with the QueryObj vertex data and bounds.
 // @fnv 0x00d1b850
-void __cdecl FUN_00d1b850(QueryObj* obj, int arg1, int arg2)
+// src: XBOX_PDB 0x00d1b850
+void __cdecl hkKdTreeAabbQueryUtils_queryAabbIterative(QueryObj* obj, int arg1, int arg2)
 {
     HkTimer* prof = (HkTimer*)TlsGetValue(DAT_0126835c);
     char* cur = prof->head;
@@ -1218,7 +1260,7 @@ void __cdecl FUN_00d1b850(QueryObj* obj, int arg1, int arg2)
     LocalM128 dv = _mm_sub_ps(obj->max, obj->min);
     const Vec4* delta = (const Vec4*)&dv;
     int count = obj->unk0c > 0 ? obj->unk0c : 128;
-    FUN_00d1b4d0(verts, vcount, delta, &mn, arg1, count, arg2, 0, 0, 0);
+    hkKdTreeAabbQueryUtils_queryAabbInternal(verts, vcount, delta, &mn, arg1, count, arg2, 0, 0, 0);
 
     prof = (HkTimer*)TlsGetValue(DAT_0126835c);
     cur = prof->head;
@@ -1232,11 +1274,12 @@ void __cdecl FUN_00d1b850(QueryObj* obj, int arg1, int arg2)
     }
 }
 
-extern "C" void __cdecl FUN_00d1b4d0(int, int, const LocalM128*, const int*, int, int, int, int, int, int);
+extern "C" void __cdecl hkKdTreeAabbQueryUtils_queryAabbInternal(int, int, const LocalM128*, const int*, int, int, int, int, int, int);
 
 // Builds a frame from the vectors at p->m30 and p->m40 (start and difference) and calls FUN_00d1b4d0 with count m0C, or 128 if that is not positive.
 // @fnv 0x00d1b930
-void __cdecl FUN_00d1b930(S00d1b7f0_Input* p, int argB, int argC, int argD)
+// src: XBOX_PDB 0x00d1b930
+void __cdecl hkKdTreeAabbQueryUtils_queryAabbIterative_00d1b930(S00d1b7f0_Input* p, int argB, int argC, int argD)
 {
     S00d1b7f0_Frame frame;
     LocalM128 end = _mm_load_ps(reinterpret_cast<const float*>(&p->m40));
@@ -1252,7 +1295,7 @@ void __cdecl FUN_00d1b930(S00d1b7f0_Input* p, int argB, int argC, int argD)
     int count = p->m0C;
     if (count <= 0)
         count = 128;
-    FUN_00d1b4d0(first, second, &frame.diff, &frame.v0, argB, count, 0, 0, argC, argD);
+    hkKdTreeAabbQueryUtils_queryAabbInternal(first, second, &frame.diff, &frame.v0, argB, count, 0, 0, argC, argD);
 }
 
 struct FUN_00d1ba90
@@ -1285,11 +1328,12 @@ struct D01B40_Obj
 struct D01B40_cls
 {
     D01B40_Obj* pObj;
-    bool* FUN_00d01b40(bool* pbResult);
+    bool* ProcessAndReturnValue_00d01b40(bool* pbResult);
 };
 // Writes false to pbResult if pObj is null, if unk0C is 0xF, or if unk0C is 7, 9 or 0x17 and GetValue() exceeds 100; otherwise true.
 // @fnv 0x00d01b40
-bool* D01B40_cls::FUN_00d01b40(bool* pbResult)
+// src: GUESS 0x00d01b40 (confidence: low)
+bool* D01B40_cls::ProcessAndReturnValue_00d01b40(bool* pbResult)
 {
     if (!pObj)
     {
@@ -1339,7 +1383,7 @@ void __cdecl ResizeAudioStream(void* allocator, void* arr, int elemSize);
 
 struct MemSource
 {
-    static void* FUN_00c85750();
+    static void* hkMemoryRouter_getInstance();
 };
 
 struct KdNode
@@ -1511,7 +1555,7 @@ void __cdecl QueryKdTree(void* tree, KdNode* node, const Aabb16* prims, const fl
             _mm_and_ps(_mm_cmple_ps(lower, _mm_load_ps(query->max)), _mm_cmple_ps(_mm_load_ps(query->min), upper));
         if ((_mm_movemask_ps(cmp) & 7) == 7)
         {
-            hkMemoryRouter* holder = (hkMemoryRouter*)MemSource::FUN_00c85750();
+            hkMemoryRouter* holder = (hkMemoryRouter*)MemSource::hkMemoryRouter_getInstance();
             if (hits->size == (hits->capacity & 0x3fffffff))
                 ResizeAudioStream((void*)holder->m_temp, hits, 4);
             int* dst = hits->data + hits->size;
@@ -1608,7 +1652,8 @@ struct HkRayBundle
 };
 // Transposes four from vectors and four to vectors into bundles, then returns an HkRayBundle built from them with the given mask.
 // @fnv 0x00d1bb50
-HkRayBundle __cdecl FUN_00d1bb50(const HkVec4& from0, const HkVec4& to0, const HkVec4& from1, const HkVec4& to1,
+// src: GUESS 0x00d1bb50 (confidence: low)
+HkRayBundle __cdecl Runtime_UpdateState_00d1bb50(const HkVec4& from0, const HkVec4& to0, const HkVec4& from1, const HkVec4& to1,
                                  const HkVec4& from2, const HkVec4& to2, const HkVec4& from3, const HkVec4& to3,
                                  int mask)
 {
@@ -1657,7 +1702,8 @@ typedef void*(__stdcall* S00d1b9b0_TlsGet)(unsigned long dwTlsIndex);
 
 // Records a TtqueryAabb timer, calls FUN_00d1b4d0 with the query AABB and count, then records an Et timer.
 // @fnv 0x00d1b9b0
-void __cdecl FUN_00d1b9b0(QueryObj* pQuery, int p1, int p2)
+// src: XBOX_PDB 0x00d1b9b0
+void __cdecl hkKdTreeAabbQueryUtils_queryAabbIterative_00d1b9b0(QueryObj* pQuery, int p1, int p2)
 {
     volatile unsigned int tick;
     S00d1b9b0_TlsGet pfnTls = TlsGetValue;
@@ -1680,7 +1726,7 @@ void __cdecl FUN_00d1b9b0(QueryObj* pQuery, int p1, int p2)
     int count = pQuery->unk0c;
     if (count <= 0)
         count = 0x80;
-    FUN_00d1b4d0(a, b, &vExtent, &vMin, p1, count, 0, p2, 0, 0);
+    hkKdTreeAabbQueryUtils_queryAabbInternal(a, b, &vExtent, &vMin, p1, count, 0, p2, 0, 0);
 
     pBuf = (HkTimer*)pfnTls(DAT_0126835c);
     if (pBuf->head < pBuf->end)
@@ -1704,7 +1750,8 @@ extern "C" float _mm_cvtss_f32(LocalM128 a);
 
 // Returns the squared distance from the point at b to the box with min at a and max at a+4 floats, or 0.0f when the point is inside.
 // @fnv 0x00d1bad0
-float __cdecl FUN_00d1bad0(float* a, float* b)
+// src: GUESS 0x00d1bad0 (confidence: low)
+float __cdecl Runtime_ComputeValues_00d1bad0(float* a, float* b)
 {
     LocalM128 va2 = *reinterpret_cast<LocalM128*>(a + 4);
     LocalM128 vb = *reinterpret_cast<LocalM128*>(b);
@@ -1868,7 +1915,8 @@ static __forceinline void copyResult(unsigned* target, int count, const unsigned
         target[i] = value;
 }
 // @fnv 0x00d1b4d0
-int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const RealVec& scale, const RealVec& offset,
+// src: XBOX_PDB 0x00d1b4d0
+int __cdecl hkKdTreeAabbQueryUtils_queryAabbInternal(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const RealVec& scale, const RealVec& offset,
                          S00d1b4d0_Bounds* query, int capacity, S00d1b4d0_List* list, S00d1b4d0_Callback* callback,
                          unsigned** output, int limit)
 {
@@ -1876,7 +1924,7 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
     S00d1b4d0_Id id;
     __declspec(align(16)) S00d1b4d0_NodeCopy n;
     n.set(cur);
-    hkMemoryRouter* alloc = FUN_00c85750();
+    hkMemoryRouter* alloc = hkMemoryRouter_getInstance();
     S00d1b4d0_Node** base = (S00d1b4d0_Node**)alloc->m_stack.m_next.m_storage;
     S00d1b4d0_Node** top = base;
     int bytes = (capacity * 4 + 127) & ~127;
@@ -1965,7 +2013,7 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
                         }
                         else if (list)
                         {
-                            hkMemoryRouter* grow = FUN_00c85750();
+                            hkMemoryRouter* grow = hkMemoryRouter_getInstance();
                             if (list->size == (int)(list->capacity & 0x3fffffff))
                                 ResizeAudioStream((void*)grow->m_temp, list, 4);
                             copyResult(list->data + list->size, 1, *(unsigned*)&id);
@@ -1989,6 +2037,6 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
         n.set(cur);
     }
 done:
-    FUN_00c85750()->m_stack.m_next.m_storage = (void*)((int)base);
+    hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = (void*)((int)base);
     return found;
 }

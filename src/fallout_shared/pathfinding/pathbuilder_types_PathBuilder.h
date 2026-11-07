@@ -6,9 +6,9 @@ struct OutNodes;
 class PathingInfoEntry;
 class ScrapHeapBuffer;
 
-MemoryManager* FUN_00401020();
+MemoryManager* MemoryManager_Instance();
 #include "../../../include/PathBuilder.h"
-void* FUN_006e6da0(unsigned int, void*);
+void* Memory_ReturnPlacementAddress(unsigned int, void*);
 FNV_STATIC_ASSERT(sizeof(PathBuilder::FindTriangleForLocationWaterFilter) == 4);
 FNV_STATIC_ASSERT(sizeof(PathBuilder) == 52);
 FNV_STATIC_ASSERT(offsetof(PathBuilder, pRequest) == 0);

@@ -11,11 +11,12 @@ struct EscortLocationComparison
 // The shared class does not yet declare this comparison method.
 struct EscortComparison : TESEscortPackageData
 {
-    bool __thiscall FUN_0067be40(TESPackageData* compare);
+    bool __thiscall TESEscortPackageData_Compare(TESPackageData* compare);
 };
 
 // @fnv 0x0067be40
-bool EscortComparison::FUN_0067be40(TESPackageData* compare)
+// src: XBOX_PDB 0x0067be40
+bool EscortComparison::TESEscortPackageData_Compare(TESPackageData* compare)
 {
     TESEscortPackageData* other = dynamic_cast<TESEscortPackageData*>(compare);
     if (!other)

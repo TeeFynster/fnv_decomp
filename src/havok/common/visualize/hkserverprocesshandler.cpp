@@ -37,7 +37,8 @@ FUN_00d60bb0::FUN_00d60bb0(unsigned char p)
 extern "C" void* DAT_011b5d38;
 
 // @fnv 0x00d60bf0
-void __stdcall FUN_00d60bf0(void** ppOut, void** b)
+// src: HAVOK_LIB 0x00d60bf0
+void __stdcall hkServerProcessHandler_getConsumableCommands(void** ppOut, void** b)
 {
     *ppOut = &DAT_011b5d38;
     *(int*)b = 2;
@@ -61,13 +62,14 @@ struct FUN_00d607b0_s
 };
 struct FUN_00d60ca0_s
 {
-    int FUN_00d60ca0(int a, int b);
+    int hkServerProcessHandler_registerProcess(int a, int b);
 };
-int __cdecl FUN_00cb10d0(int);
+int __cdecl hkString_strLen(int);
 // @fnv 0x00d60ca0
-int FUN_00d60ca0_s::FUN_00d60ca0(int a, int b)
+// src: HAVOK_LIB 0x00d60ca0
+int FUN_00d60ca0_s::hkServerProcessHandler_registerProcess(int a, int b)
 {
-    int iClamped = FUN_00cb10d0(a);
+    int iClamped = hkString_strLen(a);
     if (iClamped > 0xffff)
         iClamped = 0xffff;
     ((FUN_00d60940_s*)*(void**)((char*)this + 0x10))->WriteInt32(iClamped + 7);
@@ -84,18 +86,19 @@ struct FUN_00d60940_Class
 };
 struct FUN_00d605d0_Class
 {
-    void FUN_00d605d0(unsigned int);
+    void hkOArchive_write8u(unsigned int);
 };
 struct FUN_00d60d10_Class
 {
     int* m_p;
-    int FUN_00d60d10(unsigned int a);
+    int hkServerProcessHandler_selectProcess(unsigned int a);
 };
 // @fnv 0x00d60d10
-int FUN_00d60d10_Class::FUN_00d60d10(unsigned int a)
+// src: HAVOK_LIB 0x00d60d10
+int FUN_00d60d10_Class::hkServerProcessHandler_selectProcess(unsigned int a)
 {
     ((FUN_00d60940_Class*)(*(int**)((char*)this + 0x10)))->WriteInt(5);
-    ((FUN_00d605d0_Class*)(*(int**)((char*)this + 0x10)))->FUN_00d605d0(0xc1);
+    ((FUN_00d605d0_Class*)(*(int**)((char*)this + 0x10)))->hkOArchive_write8u(0xc1);
     ((FUN_00d60940_Class*)(*(int**)((char*)this + 0x10)))->WriteInt(a);
     return 0;
 }
@@ -107,7 +110,7 @@ struct FUN_00ddac60_Obj
 
 struct FUN_00ddacd0_shell : FUN_00ddac60_Obj
 {
-    void __thiscall FUN_00dd8fe0(void*, int, int);
+    void __thiscall hkIArchive_readArrayGeneric(void*, int, int);
 };
 
 struct FUN_00d60c10_VirtualBase
@@ -138,7 +141,7 @@ void FUN_00d60c10_s::HandleCommand(unsigned char ucCommand)
     case 0xc3: {
         int iValue;
 
-        m_pArchive->FUN_00dd8fe0(&iValue, 4, 1);
+        m_pArchive->hkIArchive_readArrayGeneric(&iValue, 4, 1);
         if (*m_pArchive->GetStreamResult(&ucCommand))
             ((FUN_00d60c10_VirtualBase*)((char*)this - 4))->FUN_00d60c10_v6(iValue);
         break;
@@ -148,7 +151,7 @@ void FUN_00d60c10_s::HandleCommand(unsigned char ucCommand)
         unsigned char ucStatus;
         int iValue;
 
-        m_pArchive->FUN_00dd8fe0(&iValue, 4, 1);
+        m_pArchive->hkIArchive_readArrayGeneric(&iValue, 4, 1);
         if (*m_pArchive->GetStreamResult(&ucStatus))
             ((FUN_00d60c10_VirtualBase*)((char*)this - 4))->FUN_00d60c10_v5(iValue);
         break;
@@ -178,10 +181,11 @@ struct FUN_00d60d40_Class
     FUN_00d60d40_Element** m_p;
     int m_uiItemCount;
 
-    int FUN_00d60d40(int value);
+    int hkServerProcessHandler_findProcessByTag(int value);
 };
 
-int FUN_00d60d40_Class::FUN_00d60d40(int value)
+// src: HAVOK_LIB 0x00d60d40
+int FUN_00d60d40_Class::hkServerProcessHandler_findProcessByTag(int value)
 {
     int count = m_uiItemCount;
     int index = 0;
@@ -200,7 +204,8 @@ struct FUN_00dd9270_Class
     void FindEntry();
 };
 // @fnv 0x00d61240
-void __cdecl FUN_00d61240()
+// src: GUESS 0x00d61240 (confidence: medium)
+void __cdecl Object_FindEntry_Thunk()
 {
     ((FUN_00dd9270_Class*)DAT_01269cd0)->FindEntry();
 }
@@ -211,11 +216,12 @@ struct FUN_00d61260_Class
     unsigned short m_iElementCount;
 
     void FUN_00d610e0();
-    void* FUN_00d61260(int flags);
+    void* hkServerProcessHandler_Destroy(int flags);
 };
 
 // @fnv 0x00d61260
-void* FUN_00d61260_Class::FUN_00d61260(int flags)
+// src: COMMUNITY 0x00d61260
+void* FUN_00d61260_Class::hkServerProcessHandler_Destroy(int flags)
 {
     FUN_00d610e0();
 
@@ -231,7 +237,8 @@ void* FUN_00d61260_Class::FUN_00d61260(int flags)
 extern int DAT_01268fb8;
 
 // @fnv 0x00d61210
-int __cdecl FUN_00d61210()
+// src: GUESS 0x00d61210 (confidence: low)
+int __cdecl Hkserverprocesshandler_GetDAT01268fb8()
 {
     return DAT_01268fb8;
 }
@@ -393,10 +400,10 @@ class hkMapBaseD610
 
     ~hkMapBaseD610() throw()
     {
-        FUN_00a29680();
+        Object_DoNothing();
     }
     void ProcessArgument(hkMemoryAllocator& kAlloc) throw();
-    void FUN_00a29680() throw();
+    void Object_DoNothing() throw();
 };
 
 class hkPointerMapD610
@@ -471,12 +478,13 @@ class hkObjD611
     int unk08;
     hkInnerD611* m_inner;
 
-    int FUN_00d611e0() const throw();
+    int hkProcess_isOk() const throw();
 };
 
 // Returns 1 if m_inner is non-null and its ForwardValueToObject() returns true, otherwise 0.
 // @fnv 0x00d611e0
-int hkObjD611::FUN_00d611e0() const throw()
+// src: HAVOK_LIB 0x00d611e0
+int hkObjD611::hkProcess_isOk() const throw()
 {
     if (m_inner && m_inner->ForwardValueToObject())
         return 1;
@@ -485,12 +493,13 @@ int hkObjD611::FUN_00d611e0() const throw()
 
 struct FUN_00dd9240_Class
 {
-    void FUN_00dd9240();
+    void hkProcessFactory_getProcessName();
 };
 // @fnv 0x00d61250
-void __cdecl FUN_00d61250()
+// src: GUESS 0x00d61250 (confidence: low)
+void __cdecl hkProcessFactory_getProcessName_ForwardCall_00d61250()
 {
-    ((FUN_00dd9240_Class*)DAT_01269cd0)->FUN_00dd9240();
+    ((FUN_00dd9240_Class*)DAT_01269cd0)->hkProcessFactory_getProcessName();
 }
 
 namespace fnv_00dd9cc0 {
@@ -560,7 +569,7 @@ template <typename T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAlloc
 class ListenerD60E
 {
   public:
-    virtual int FUN_00d60e80(int aiSoundId);
+    virtual int hkServerProcessHandler_createProcess(int aiSoundId);
 };
 
 class EntryD60E
@@ -612,15 +621,16 @@ class OwnerD60E : public OwnerBaseD60E, public ListenerD60E
     hkArray<EntryD60E*> m_kEntries;
     int m_unk44;
 
-    int FUN_00d60d40(int aiSoundId);
-    virtual int FUN_00d60e80(int aiSoundId);
+    int hkServerProcessHandler_findProcessByTag(int aiSoundId);
+    virtual int hkServerProcessHandler_createProcess(int aiSoundId);
 };
 
 // Creates an EntryD60E for aiSoundId via DAT_01269cd0, configures it with owner state, adds it to m_kEntries, and processes it through m_kEntryList.
 // @fnv 0x00d60e80
-int OwnerD60E::FUN_00d60e80(int aiSoundId)
+// src: HAVOK_LIB 0x00d60e80
+int OwnerD60E::hkServerProcessHandler_createProcess(int aiSoundId)
 {
-    if (FUN_00d60d40(aiSoundId) >= 0)
+    if (hkServerProcessHandler_findProcessByTag(aiSoundId) >= 0)
         return 0;
     EntryD60E* pkEntry = ((EntryFactoryD60E*)DAT_01269cd0)->InvokeRecord(aiSoundId, &m_unk44);
     if (pkEntry)
@@ -658,12 +668,12 @@ struct Item_d60e
 
 struct Owner_d60e
 {
-    int FUN_00d60d40(void* key);
+    int hkServerProcessHandler_findProcessByTag(void* key);
 };
 
 struct Listeners_d60e
 {
-    void FUN_00dd95b0(Item_d60e* item);
+    void hkCommandRouter_unregisterProcess(Item_d60e* item);
 };
 
 struct Part_d60e
@@ -672,19 +682,20 @@ struct Part_d60e
     Listeners_d60e m_kListeners;
     int unk20, unk24, unk28, unk2C;
     hkArray<Item_d60e*> m_items;
-    int FUN_00d60e20(void* key);
+    int hkServerProcessHandler_deleteProcess(void* key);
 };
 
 // Looks up an item by key in the owner, removes it from m_items, notifies m_kListeners, and deletes the item.
 // @fnv 0x00d60e20
-int Part_d60e::FUN_00d60e20(void* key)
+// src: HAVOK_LIB 0x00d60e20
+int Part_d60e::hkServerProcessHandler_deleteProcess(void* key)
 {
-    int index = ((Owner_d60e*)((char*)this - 8))->FUN_00d60d40(key);
+    int index = ((Owner_d60e*)((char*)this - 8))->hkServerProcessHandler_findProcessByTag(key);
     if (index >= 0)
     {
         Item_d60e* item = m_items[index];
         m_items.removeAt(index);
-        m_kListeners.FUN_00dd95b0(item);
+        m_kListeners.hkCommandRouter_unregisterProcess(item);
         delete item;
     }
     return 0;
@@ -696,21 +707,22 @@ int Part_d60e::FUN_00d60e20(void* key)
 // the shared virtual implementation.
 struct ThunkPrimaryBase
 {
-    virtual void FUN_00d61220();
+    virtual void AdjustThisAndForward_00d61220();
     int unk04;
     int unk08;
 };
 
 struct ThunkSecondaryBase
 {
-    virtual void FUN_00d61220();
+    virtual void AdjustThisAndForward_00d61220();
 };
 
 struct ThunkDerived : ThunkPrimaryBase, ThunkSecondaryBase
 {
     ThunkDerived();
 // @fnv 0x00d61220
-    virtual void FUN_00d61220();
+// src: GUESS 0x00d61220 (confidence: low)
+    virtual void AdjustThisAndForward_00d61220();
 };
 
 ThunkDerived::ThunkDerived()

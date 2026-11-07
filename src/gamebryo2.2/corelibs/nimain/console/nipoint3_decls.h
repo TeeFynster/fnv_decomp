@@ -2,7 +2,7 @@
 #ifndef FNV_NIPOINT3_CONSOLE_DECLS_H
 #define FNV_NIPOINT3_CONSOLE_DECLS_H
 
-float FUN_004579e0(float fValue);
+float NiSqrt_004579e0(float fValue);
 extern const double DAT_01017cf8;
 
 #endif

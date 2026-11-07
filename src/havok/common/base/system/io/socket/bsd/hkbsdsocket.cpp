@@ -46,12 +46,13 @@ void* __thiscall hkBsdSocket::InitWithParam(int param)
     *(void**)this = &DAT_010d5030;
     m_pSocket = param;
     if (param == -1)
-        FUN_00da2de0();
+        createSocket();
     return this;
 }
 
 // @fnv 0x00da2db0
-bool* hkBsdSocket::FUN_00da2db0(bool* pOut)
+// src: HAVOK_LIB 0x00da2db0
+bool* hkBsdSocket::isOk_00da2db0(bool* pOut)
 {
     *pOut = (m_pSocket != -1);
     return pOut;
@@ -61,7 +62,8 @@ extern "C" int __stdcall FUN_00ee6d5c(int, int, int, int);
 extern "C" int __cdecl FUN_00ee6d50(void);
 
 // @fnv 0x00da2e60
-int hkBsdSocket::FUN_00da2e60(int a, int b)
+// src: HAVOK_SRC 0x00da2e60
+int hkBsdSocket::write_00da2e60(int a, int b)
 {
     int r;
     if (m_pSocket != -1)
@@ -80,7 +82,8 @@ int hkBsdSocket::FUN_00da2e60(int a, int b)
 int __stdcall FUN_00ee6d4a(int, int, int);
 
 // @fnv 0x00da2de0
-__declspec(noinline) int hkBsdSocket::FUN_00da2de0()
+// src: HAVOK_LIB 0x00da2de0
+__declspec(noinline) int hkBsdSocket::createSocket()
 {
     this->CloseSocket();
 
@@ -92,7 +95,8 @@ __declspec(noinline) int hkBsdSocket::FUN_00da2de0()
 
 extern "C" int __stdcall FUN_00ee6d7a(int, int, int, int);
 // @fnv 0x00da2f90
-bool hkBsdSocket::FUN_00da2f90(int aiArg1, int aiArg2, int c)
+// src: HAVOK_LIB 0x00da2f90
+bool hkBsdSocket::asyncSelect(int aiArg1, int aiArg2, int c)
 {
     return FUN_00ee6d7a(m_pSocket, aiArg1, aiArg2, ((c & 3) | ((c & 0xc) << 2))) != 0;
 }
@@ -102,7 +106,8 @@ extern "C" __declspec(dllimport) int __stdcall setsockopt(unsigned int s, int le
                                                           int optlen);
 
 // @fnv 0x00ee6d9e
-int __stdcall FUN_00ee6d9e(unsigned int s, int level, int optname, const char* optval, int optlen)
+// src: COMMUNITY 0x00ee6d9e
+int __stdcall setsockopt_0(unsigned int s, int level, int optname, const char* optval, int optlen)
 {
     return setsockopt(s, level, optname, optval, optlen);
 }
@@ -141,7 +146,7 @@ template <> __forceinline hkArray<char, hkContainerTempAllocator>::~hkArray()
 
 inline hkStringBuf::~hkStringBuf() throw()
 {
-    FUN_00cbbd40();
+    UpdateFields_00cbbd40();
 }
 
 inline hkStringBuf& hkStringBuf::operator=(const char* pcString)
@@ -151,7 +156,8 @@ inline hkStringBuf& hkStringBuf::operator=(const char* pcString)
 }
 
 // @fnv 0x00cbbd40
-__declspec(noinline) void hkStringBuf::FUN_00cbbd40() throw()
+// src: GUESS 0x00cbbd40 (confidence: low)
+__declspec(noinline) void hkStringBuf::UpdateFields_00cbbd40() throw()
 {
     hkMemoryRouter* pHolder = (&hkMemoryRouter::getInstance());
     hkMemoryAllocator* r = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_temp);
@@ -182,7 +188,7 @@ bool hkBsdSocket::SetNonBlocking(bool blocking)
 extern char DAT_01269acc;
 extern const char str_010d5004[];
 extern const char str_010d4fdc[];
-int __stdcall FUN_00ee6d86(unsigned short, void*);
+int __stdcall WSAStartup_0(unsigned short, void*);
 
 extern hkError* DAT_01268360;
 
@@ -197,12 +203,12 @@ void InitWinsock()
             int wsa[0x64];
             int buf[0x80];
         } L;
-        if (FUN_00ee6d86(0x202, L.wsa) == -1)
+        if (WSAStartup_0(0x202, L.wsa) == -1)
         {
             unsigned int streamStorage[sizeof(hkOstream) / sizeof(unsigned int)];
             hkOstream& ostr = *reinterpret_cast<hkOstream*>(streamStorage);
             ostr.FUN_00cb1600(L.buf, 0x200);
-            ostr.FUN_00cc01c0(str_010d5004);
+            ostr.ProcessAndReturnValue_00cc01c0(str_010d5004);
             if (DAT_01268360->message(3, 0x321825f8, (const char*)L.buf, str_010d4fdc, 0x48))
                 __debugbreak();
             ostr.FUN_00cc00e0();
@@ -211,15 +217,16 @@ void InitWinsock()
     }
 }
 
-extern "C" void __cdecl FUN_00cb1280(void*, int, unsigned int);
-extern "C" void __cdecl FUN_00cb1260(void*, const void*, unsigned int);
+extern "C" void __cdecl hkString_memSet(void*, int, unsigned int);
+extern "C" void __cdecl hkString_memCpy(void*, const void*, unsigned int);
 extern "C" int __stdcall FUN_00ee6d74(int);
 extern "C" int __stdcall FUN_00ee6d6e(const char*);
 extern "C" int __stdcall FUN_00ee6d68(const char*);
 extern "C" int __stdcall FUN_00ee6d62(int, void*, int);
 extern "C" int __cdecl FUN_00ee6d50(void);
 
-static __declspec(noinline) bool* FUN_00da2eb0(int c, bool* out)
+// src: HAVOK_LIB 0x00da2eb0
+static __declspec(noinline) bool* hkIsDigit(int c, bool* out)
 {
     *out = false;
     if (c >= '0' && c <= '9')
@@ -238,16 +245,17 @@ struct HostEntry
 
 // Resolves the host to an IPv4 address, ensures a socket exists, and calls the connection routine with the address and port.
 // @fnv 0x00da2ec0
-int hkBsdSocket::FUN_00da2ec0(const char* host, int port)
+// src: HAVOK_LIB 0x00da2ec0
+int hkBsdSocket::connect(const char* host, int port)
 {
     // Word storage preserves the original stack protection with the shared sin_zero character array.
     unsigned int targetStorage[sizeof(sockaddr_in) / sizeof(unsigned int)];
     sockaddr_in& target = *reinterpret_cast<sockaddr_in*>(targetStorage);
-    FUN_00cb1280(&target, 0, sizeof(target));
+    hkString_memSet(&target, 0, sizeof(target));
     target.sin_family = 2;
     target.sin_port = (unsigned short)FUN_00ee6d74(port);
 
-    if (*FUN_00da2eb0(host[0], (bool*)&port))
+    if (*hkIsDigit(host[0], (bool*)&port))
     {
         target.sin_addr.S_un.S_addr = FUN_00ee6d6e(host);
     }
@@ -256,10 +264,10 @@ int hkBsdSocket::FUN_00da2ec0(const char* host, int port)
         HostEntry* pHostEntry = (HostEntry*)FUN_00ee6d68(host);
         if (!pHostEntry)
             return 1;
-        FUN_00cb1260(&target.sin_addr.S_un.S_addr, pHostEntry->addresses[0], pHostEntry->address_length);
+        hkString_memCpy(&target.sin_addr.S_un.S_addr, pHostEntry->addresses[0], pHostEntry->address_length);
     }
 
-    if (m_pSocket == -1 && FUN_00da2de0())
+    if (m_pSocket == -1 && createSocket())
         return 1;
     int iResult = FUN_00ee6d62(m_pSocket, &target, sizeof(target));
     if (iResult != -1)
@@ -273,10 +281,10 @@ success:
 }
 
 unsigned short __stdcall FUN_00ee6d74(unsigned short usHostShort);
-int __stdcall FUN_00ee6d98(unsigned int s, const void* pvName, int iNameLen);
-int __stdcall FUN_00ee6d92(unsigned int s, int iBacklog);
-int __stdcall FUN_00ee6d8c(char* pcName, int iNameLen);
-extern "C" int __stdcall FUN_00ee6d9e(unsigned int s, int level, int option, const void* value, int size);
+int __stdcall bind_0(unsigned int s, const void* pvName, int iNameLen);
+int __stdcall listen_0(unsigned int s, int iBacklog);
+int __stdcall gethostname_0(char* pcName, int iNameLen);
+extern "C" int __stdcall setsockopt_0(unsigned int s, int level, int option, const void* value, int size);
 
 extern const char str_010d505c[];
 extern const char str_010d5070[];
@@ -287,9 +295,10 @@ typedef hkOstream& (__thiscall *AppendSocketHostMethod)(hkOstream*, const hkStri
 
 // Binds the socket to the given port, sets it to listen with backlog 2, and logs the host name and port.
 // @fnv 0x00da30d0
-int hkBsdSocket::FUN_00da30d0(int iPort) throw()
+// src: HAVOK_LIB 0x00da30d0
+int hkBsdSocket::listen_00da30d0(int iPort) throw()
 {
-    if (FUN_00da2de0() != 0)
+    if (createSocket() != 0)
         return 1;
 
     // Word storage preserves the original stack protection with the shared sin_zero character array.
@@ -300,14 +309,14 @@ int hkBsdSocket::FUN_00da30d0(int iPort) throw()
     kName.sin_port = FUN_00ee6d74((unsigned short)iPort);
 
     int iOn = 1;
-    FUN_00ee6d9e(m_pSocket, 0xffff, 4, (const void*)&iOn, sizeof(int));
+    setsockopt_0(m_pSocket, 0xffff, 4, (const void*)&iOn, sizeof(int));
 
-    if (FUN_00ee6d98(m_pSocket, &kName, sizeof(kName)) == -1)
+    if (bind_0(m_pSocket, &kName, sizeof(kName)) == -1)
     {
         CloseSocket();
         return 1;
     }
-    if (FUN_00ee6d92(m_pSocket, 2) == -1)
+    if (listen_0(m_pSocket, 2) == -1)
     {
         CloseSocket();
         return 1;
@@ -315,13 +324,13 @@ int hkBsdSocket::FUN_00da30d0(int iPort) throw()
 
     hkStringBuf kHost;
     unsigned int auiHostName[64];
-    FUN_00ee6d8c((char*)auiHostName, sizeof(auiHostName));
+    gethostname_0((char*)auiHostName, sizeof(auiHostName));
     kHost = (const char*)auiHostName;
     {
         unsigned int auiReportBuf[128];
         hkOstream kReportStream(auiReportBuf, sizeof(auiReportBuf));
         reinterpret_cast<AppendSocketHostMethod>(AppendSocketHost)(
-            &kReportStream.FUN_00cc01c0(str_010d505c), kHost).FUN_00cc01c0(str_010d5070).WriteInt(iPort);
+            &kReportStream.ProcessAndReturnValue_00cc01c0(str_010d505c), kHost).ProcessAndReturnValue_00cc01c0(str_010d5070).WriteInt(iPort);
         DAT_01268360->message(0, -1, (const char*)auiReportBuf, str_010d4fdc, 364);
     }
     return 0;

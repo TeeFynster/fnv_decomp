@@ -29,11 +29,12 @@ struct AcquireSortNode
 
 struct AcquireSortProcess : MiddleHighProcess
 {
-    void FUN_0091b640();
+    void HighProcess_SortObjectsListByValue();
 };
 
 // @fnv 0x0091b640
-void AcquireSortProcess::FUN_0091b640()
+// src: COMMUNITY 0x0091b640
+void AcquireSortProcess::HighProcess_SortObjectsListByValue()
 {
     AcquireSortNode* outer2 = (AcquireSortNode*)&ReferenceListNode;
     AcquireSortNode* inner5 = 0;
@@ -73,7 +74,7 @@ using ::MiddleHighProcess;
 
 struct FurnitureLocation
 {
-    int FUN_00678ca0();
+    int PackageLocation_GetLocType();
     ::TESObjectCELL* FUN_0067f3e0();
 };
 struct FurniturePackage
@@ -82,7 +83,7 @@ struct FurniturePackage
     int FUN_0041ca90();
     unsigned int FUN_00676280(::Actor*);
     bool FUN_006728a0(::Actor*, float*);
-    ::NiPoint3 FUN_00675de0(::Actor*);
+    ::NiPoint3 TESPackage_GetLocationCoord(::Actor*);
 };
 struct FurnitureCell
 {
@@ -90,7 +91,7 @@ struct FurnitureCell
 };
 struct FurnitureRef : ::TESObjectREFR
 {
-    ::TESForm* FUN_00567790();
+    ::TESForm* TESObjectREFR_GetOwner();
 };
 struct FurnitureList
 {
@@ -103,7 +104,7 @@ struct FurnitureList
 };
 struct FurnitureSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 struct FurnitureSearchManager
 {
@@ -119,13 +120,14 @@ extern FurnitureSearchManager* DAT_011c3f2c;
 extern FurnitureList DAT_011e0424;
 extern FurnitureSetting DAT_011cd24c;
 extern FurnitureTime DAT_011f6394;
-void __cdecl FUN_00922960(::TESObjectREFR*, ::Actor*);
+void __cdecl EvaluateReferenceforSitSleep(::TESObjectREFR*, ::Actor*);
 struct SearchFurnitureProcess : ::MiddleHighProcess
 {
-    void FUN_00922670(::Actor*, bool, ::TESObjectREFR*);
+    void MiddleHighProcess_FindBedChairs(::Actor*, bool, ::TESObjectREFR*);
 };
 // @fnv 0x00922670
-void SearchFurnitureProcess::FUN_00922670(::Actor* actor, bool flag, ::TESObjectREFR* target)
+// src: COMMUNITY 0x00922670
+void SearchFurnitureProcess::MiddleHighProcess_FindBedChairs(::Actor* actor, bool flag, ::TESObjectREFR* target)
 {
     DAT_011e040c = flag;
     ::TESObjectCELL* a = actor->GetParentCell();
@@ -137,28 +139,28 @@ void SearchFurnitureProcess::FUN_00922670(::Actor* actor, bool flag, ::TESObject
     float i = 0.0f;
     if (f->FUN_0041ca90() == 3)
     {
-        if (s && s->FUN_00678ca0() == 1 && reinterpret_cast<FurnitureCell*>(s->FUN_0067f3e0())->FUN_00425fd0())
+        if (s && s->PackageLocation_GetLocType() == 1 && reinterpret_cast<FurnitureCell*>(s->FUN_0067f3e0())->FUN_00425fd0())
             i = 3.402823466e38f;
         else
             i = static_cast<float>(f->FUN_00676280(actor));
     }
     else if (!f->FUN_006728a0(actor, &i))
     {
-        if (s && s->FUN_00678ca0() == 1 && reinterpret_cast<FurnitureCell*>(s->FUN_0067f3e0())->FUN_00425fd0())
+        if (s && s->PackageLocation_GetLocType() == 1 && reinterpret_cast<FurnitureCell*>(s->FUN_0067f3e0())->FUN_00425fd0())
             i = 3.402823466e38f;
         else
-            i = *DAT_011cd24c.FUN_00403e20();
+            i = *DAT_011cd24c.Setting_Float_00403e20();
     }
     if (target)
     {
         ::NiPoint3* targetPosition = static_cast<const ::TESObjectREFR*>(target)->GetPos();
         reinterpret_cast<FurnitureSearchManager*>(DAT_011c3f2c)
-            ->FUN_0046f280(target->GetParentCell(), *targetPosition, i, *targetPosition, i, FUN_00922960, actor);
+            ->FUN_0046f280(target->GetParentCell(), *targetPosition, i, *targetPosition, i, EvaluateReferenceforSitSleep, actor);
     }
     else
     {
         reinterpret_cast<FurnitureSearchManager*>(DAT_011c3f2c)
-            ->FUN_0046f280(a, p, i, f->FUN_00675de0(actor), i, FUN_00922960, actor);
+            ->FUN_0046f280(a, p, i, f->TESPackage_GetLocationCoord(actor), i, EvaluateReferenceforSitSleep, actor);
     }
     reinterpret_cast<FurnitureList*>(&m_kSecondaryReferenceList)->FUN_00470470();
     FurnitureList* cf = &DAT_011e0424;
@@ -182,8 +184,8 @@ void SearchFurnitureProcess::FUN_00922670(::Actor* actor, bool flag, ::TESObject
             {
                 ::TESObjectREFR* barterA = eb->FUN_006815c0();
                 ::TESObjectREFR* found = h->FUN_006815c0();
-                if (!static_cast<FurnitureRef*>(barterA)->FUN_00567790() &&
-                    static_cast<FurnitureRef*>(found)->FUN_00567790())
+                if (!static_cast<FurnitureRef*>(barterA)->TESObjectREFR_GetOwner() &&
+                    static_cast<FurnitureRef*>(found)->TESObjectREFR_GetOwner())
                 {
                     eb->FUN_00726c60(found);
                     h->FUN_00726c60(barterA);
@@ -228,11 +230,12 @@ struct Holder91b580
     int unk54;
     int unk58;
     BSSimpleList<TESClass*> m_kNode;
-    void FUN_0091b580();
+    void HighProcess_SortObjectsListByType();
 };
 
 // @fnv 0x0091b580
-void Holder91b580::FUN_0091b580()
+// src: COMMUNITY 0x0091b580
+void Holder91b580::HighProcess_SortObjectsListByType()
 {
     BSSimpleList<TESClass*>* pOuter = &m_kNode;
     BSSimpleList<TESClass*>* pInner3 = 0;

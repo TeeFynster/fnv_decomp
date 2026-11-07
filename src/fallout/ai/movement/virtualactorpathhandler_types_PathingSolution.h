@@ -389,9 +389,9 @@ FNV_STATIC_ASSERT(offsetof(PathingGraphNode, m_pDoorRef) == 56);
 class PathingSolution : public NiRefObject
 {
   public:
-    LocationDescriptor* FUN_006e78b0(unsigned int);
-    BaseProcess* FUN_006e78b0(unsigned int, NiPoint3&);
-    unsigned int FUN_005a4320();
+    LocationDescriptor* GetVirtualNode_006e78b0(unsigned int);
+    BaseProcess* GetVirtualNode_006e78b0(unsigned int, NiPoint3&);
+    unsigned int PathingSolution_GetVirtualNodeCount();
     float CalculatePathLength();
     // base NiRefObject at +0x0, size 8
     PathingInfo Info;                                               // +0x8, 108 bytes

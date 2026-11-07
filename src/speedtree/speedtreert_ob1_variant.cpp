@@ -82,46 +82,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 #include "../../include/CVec3.h"
@@ -174,12 +174,12 @@ inline CVec3::CVec3(float fx, float fy, float afDepth)
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00b02e00_class
 {
-    void FUN_00b02e00();
+    void UpdateFields_00b02e00();
 };
 struct FUN_00b2bcf0_shell
 {
-    void FUN_00b2bcf0(float*, float*);
-    void FUN_00b06260(float* a, float* b);
+    void CTreeEngine_GetSize(float*, float*);
+    void CSpeedTreeRT_GetTreeSize(float* a, float* b);
 };
 struct FUN_00b071c0_Class
 {
@@ -292,11 +292,11 @@ struct FUN_00b078e0_Class
 };
 struct FUN_00b2bdc0_shell
 {
-    void FUN_00b2bdc0(float, float);
+    void UpdateFields_00b2bdc0(float, float);
 };
 struct FUN_00b08500_shell
 {
-    void FUN_00b08500(float a, float b);
+    void CSpeedTreeRT_SetNearFarDists(float a, float b);
 };
 struct FUN_00b086f0_class
 {
@@ -305,7 +305,7 @@ struct FUN_00b086f0_class
 struct CSpeedTreeRT
 {
     void* m_pFirstPointer;
-    unsigned short FUN_00b08710();
+    unsigned short GetNumLeafLodLevels();
 };
 struct FUN_00b0d5d0_Class
 {
@@ -354,11 +354,11 @@ struct FUN_00b051e0_class
     void* m_2c;
     void* m_30;
     void* m_34;
-    void* FUN_00b051e0();
+    void* CSpeedTreeRT_InstanceOf();
 };
 struct FUN_0065f2b0_class
 {
-    void FUN_0065f2b0(int, int);
+    void std_vector_float_std_allocator_float_Destroy(int, int);
 };
 struct FUN_0064df10_helper
 {
@@ -372,7 +372,7 @@ struct FUN_00657f60_class
     void* d;
     void* e;
     void* f;
-    void FUN_00657f60();
+    void ReleaseStorage_00657f60();
 };
 struct FUN_00b02e20
 {
@@ -412,15 +412,15 @@ struct FUN_00b08440_shell
     void* m_2c;
     void* m_30;
     void* m_34;
-    float FUN_00b08440();
+    float CSpeedTreeRT_GetLodLevel();
 };
 extern unsigned char DAT_011f8b78;
-void FUN_00b084f0(unsigned char param_1);
+void CSpeedTreeRT_SetDropToBillboard(unsigned char param_1);
 void __cdecl _memmove(void* dst, const void* src, unsigned int size);
 void __cdecl AssignString(const char* s);
 struct CSpeedTreeRT_GetBoundingBox
 {
-    void __thiscall FUN_00b08c80(float* dst);
+    void __thiscall CSpeedTreeRT_GetBoundingBox_00b08c80(float* dst);
 };
 struct FUN_00b0a260_Class
 {
@@ -450,7 +450,7 @@ struct FUN_00b0a260_Class
     int __thiscall GetEntryCount();
 };
 extern unsigned char DAT_011f8b79;
-void FUN_00b0d7b0(unsigned char param_1);
+void CSpeedTreeRT_SetFlipTextures(unsigned char param_1);
 struct FUN_00b02b70_shell
 {
     int m_iWordAt00;
@@ -543,7 +543,7 @@ extern int DAT_011f8ea4;
 extern int DAT_011f8eac;
 extern int DAT_011f8eb0;
 extern int DAT_011f8eb4;
-void __cdecl FUN_00b06b70(float* pPosition, float* pDirection);
+void __cdecl CSpeedTreeRT_GetCamera(float* pPosition, float* pDirection);
 struct FUN_00b08480_shell
 {
     void* m_iWordAt00;
@@ -560,7 +560,7 @@ struct FUN_00b08480_shell
     void* m_2c;
     void* m_30;
     void* m_34;
-    void FUN_00b08480(float f);
+    void CSpeedTreeRT_SetLodLevel(float f);
 };
 struct FUN_00b02dc0_class
 {
@@ -578,17 +578,17 @@ struct FUN_00b2b940_class
 };
 struct FUN_00b053e0_shell
 {
-    void FUN_00b053e0();
+    void CSpeedTreeRT_DeleteTransientData();
 };
 struct FUN_00b073f0_class
 {
     void* m_p;  // +0x0
-    float FUN_00b073f0();
+    float GetNestedFloatOrZero();
 };
 struct FUN_00b07440_Class
 {
     void* m_p;
-    float __thiscall FUN_00b07440();
+    float __thiscall GetNestedFloatOrZero_00b07440();
 };
 namespace std {
 template <class _CharT> struct char_traits
@@ -618,7 +618,7 @@ struct FUN_00b09780_class : FUN_0044d6f0_This
 {
     std::basic_string<char, std::char_traits<char>, std::allocator<char> > m_iThirdValue;
 
-    void __thiscall FUN_00b09780();
+    void __thiscall UpdateFields_00b09780();
 };
 extern int DAT_010a51e0;
 struct FUN_00b097b0_class
@@ -626,18 +626,18 @@ struct FUN_00b097b0_class
     void* m_p;
     char pad[0x60];
     void FUN_00aca270(int a);
-    int* FUN_00b097b0(int a);
+    int* IdvFileError_IdvFileError(int a);
 };
 struct FUN_00b09f70_Class
 {
-    void FUN_00b09f70();
+    void ProcessState_00b09f70();
     void _Tidy(bool, unsigned int);
 };
 extern MemoryManager _g_memoryManager;
 unsigned int _strlen(const char* s);
 char* DuplicateString(const char* pOrig);
 extern unsigned char DAT_011f8b79;
-unsigned char __cdecl FUN_00b0d7a0();
+unsigned char __cdecl CSpeedTreeRT_GetTextureFlip();
 struct BoundingBlock
 {
     FUN_00b02c10_class contained;
@@ -661,7 +661,7 @@ struct LeafBlock
     int extra04, extra08, extra0c, extra10;
     __forceinline ~LeafBlock()
     {
-        contained.FUN_00b02e00();
+        contained.UpdateFields_00b02e00();
     }
 };
 struct FUN_00b02ac0
@@ -678,7 +678,7 @@ struct FUN_00b02ac0
 extern double _DAT_0101a6b0;
 struct FUN_00b08610_shell
 {
-    unsigned short __thiscall FUN_00b08610(float fLodLevel);
+    unsigned short __thiscall CSpeedTreeRT_GetDiscreteLeafLodLevel(float fLodLevel);
 };
 struct std_string
 {
@@ -689,7 +689,7 @@ unsigned int _strlen(const char*);
 void __cdecl AssignString(const char* s);
 extern unsigned char DAT_011f8b78;
 void __cdecl AssignString(const char* s);
-void __cdecl FUN_00b0c8d0(float a, unsigned short n, float b, float c, float d, float e, float* pf1, float* pf2,
+void __cdecl CSpeedTreeRT_GetTransitionValues(float a, unsigned short n, float b, float c, float d, float e, float* pf1, float* pf2,
                           short* ps1, short* ps2);
 struct FUN_00b0b920_geo
 {
@@ -710,9 +710,9 @@ struct FUN_00b0b920_engine
     int FUN_00b7b0();
     int FUN_00b830();
     int FUN_00b8b0();
-    unsigned short FUN_00b0a9a0(unsigned short i);
-    int FUN_00b0aa20(unsigned short i);
-    int FUN_00b30730(unsigned short i);
+    unsigned short CIndexedGeometry_GetNumStrips(unsigned short i);
+    int CIndexedGeometry_GetStripLengthsPointer(unsigned short i);
+    int CIndexedGeometry_GetStripsPointer(unsigned short i);
 };
 struct FUN_00b0b920_arg
 {
@@ -731,16 +731,16 @@ struct FUN_00b0b920_self
     unsigned char m_44;
     char m_45[0x1b];
     FUN_00b0b920_engine* m_60;
-    unsigned short FUN_00b08710();
-    short FUN_00b085a0(float f);
-    float FUN_00b08440();
+    unsigned short GetNumLeafLodLevels();
+    short CSpeedTreeRT_GetDiscreteFrondLodLevel(float f);
+    float CSpeedTreeRT_GetLodLevel();
     void FillFrondGeometry(FUN_00b0b920_arg* arg, short type);
 };
 struct HelperC780
 {
-    void* FUN_00b0c780(float, float);
+    void* CSimpleBillboard_GetBillboardCoords(float, float);
 };
-void __cdecl FUN_00b0c8d0(float, unsigned short, float, float, float, float, float*, float*, short*, short*);
+void __cdecl CSpeedTreeRT_GetTransitionValues(float, unsigned short, float, float, float, float, float*, float*, short*, short*);
 extern "C" char DAT_011ad124;
 struct BlockC4
 {
@@ -805,7 +805,7 @@ struct S0cf90
 };
 struct T3ea10
 {
-    void FUN_00b3ea10(void* c0, LocalVec3 fB, float b0, void* p);
+    void CProjectedShadow_ComputeTexCoords(void* c0, LocalVec3 fB, float b0, void* p);
 };
 struct B0cdd0
 {
@@ -823,7 +823,7 @@ struct FUN_00b0cdd0_cls
     T3ea10* m50;
     int m54, m58, m5c;
     void* m60;
-    void FUN_00b0cdd0();
+    void CSpeedTreeRT_ComputeSelfShadowTexCoords();
 };
 struct StringRecord
 {
@@ -848,7 +848,7 @@ struct FUN_00b0d490_Class
     int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c;
     RecordVector records;
-    char* FUN_00b0d490(unsigned int index);
+    char* GetRecordStringDataChecked(unsigned int index);
 };
 struct Vec2
 {
@@ -908,7 +908,7 @@ struct FUN_00b0eca0_t
 {
     int a;
     int b;
-    bool FUN_00b0eca0(FUN_00b0eca0_t* p);
+    bool ProcessEntries_00b0eca0(FUN_00b0eca0_t* p);
 };
 void __cdecl FUN_00ec7c56(void);
 struct FUN_00b10430_Arg
@@ -924,7 +924,7 @@ struct FUN_00b10430_Class
     int unk00;
     int unk04;
 
-    FUN_00b10430_Class* __thiscall FUN_00b10430(unsigned int index, FUN_00b10430_Arg* range);
+    FUN_00b10430_Class* __thiscall SetCheckedRangeIndex(unsigned int index, FUN_00b10430_Arg* range);
 };
 
 struct Mat
@@ -956,16 +956,16 @@ struct It : FUN_00b10430
 {
     inline It(Elem* q, Cont* cc) : FUN_00b10430(q, cc)
     {}
-    bool FUN_00b0eca0(const It& r);
-    It& FUN_00b0eb30();
-    Elem& FUN_00b0ebb0();
+    bool ProcessEntries_00b0eca0(const It& r);
+    It& ProcessEntries_00b0eb30();
+    Elem& ProcessEntries_00b0ebb0();
     inline bool operator!=(const It& r)
     {
-        return !FUN_00b0eca0(r);
+        return !ProcessEntries_00b0eca0(r);
     }
     inline Elem* operator->()
     {
-        return &FUN_00b0ebb0();
+        return &ProcessEntries_00b0ebb0();
     }
 };
 inline void Dead3()
@@ -989,35 +989,36 @@ struct Cont
     {
         return It(pLast, this);
     }
-    void FUN_00b04db0(const Mat& m);
+    void SCollisionObjects_TransformAll(const Mat& m);
 };
 // @fnv 0x00b04db0
-void Cont::FUN_00b04db0(const Mat& m)
+// src: COMMUNITY 0x00b04db0
+void Cont::SCollisionObjects_TransformAll(const Mat& m)
 {
-    for (It it = Begin(); it != End(); it.FUN_00b0eb30())
+    for (It it = Begin(); it != End(); it.ProcessEntries_00b0eb30())
     {
         LocalVec3 pos(it->x, it->y, it->z);
-        memcpy(&pos, &pos.FUN_00b05000(m), sizeof(pos));
-        it.FUN_00b0ebb0().x = pos[0];
-        it.FUN_00b0ebb0().y = pos[1];
-        it.FUN_00b0ebb0().z = pos[2];
+        memcpy(&pos, &pos.TransformPointByMatrix4(m), sizeof(pos));
+        it.ProcessEntries_00b0ebb0().x = pos[0];
+        it.ProcessEntries_00b0ebb0().y = pos[1];
+        it.ProcessEntries_00b0ebb0().z = pos[2];
         Dead3();
         if (it->type == 0)
         {
-            it.FUN_00b0ebb0().f10 *= m.f0;
+            it.ProcessEntries_00b0ebb0().f10 *= m.f0;
         }
         else if (it->type == 1)
         {
             Dead3();
-            it.FUN_00b0ebb0().f10 *= m.f0;
-            it.FUN_00b0ebb0().f14 *= m.f0;
+            it.ProcessEntries_00b0ebb0().f10 *= m.f0;
+            it.ProcessEntries_00b0ebb0().f14 *= m.f0;
         }
         else if (it->type == 2)
         {
             Dead3();
-            it.FUN_00b0ebb0().f10 *= m.f0;
-            it.FUN_00b0ebb0().f14 *= m.f14;
-            it.FUN_00b0ebb0().f18 *= m.f28;
+            it.ProcessEntries_00b0ebb0().f10 *= m.f0;
+            it.ProcessEntries_00b0ebb0().f14 *= m.f14;
+            it.ProcessEntries_00b0ebb0().f18 *= m.f28;
         }
     }
 }
@@ -1042,12 +1043,12 @@ struct FUN_0044a4c0
     ~FUN_0044a4c0()
     {
         Dead8();
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
 };
-FUN_0044a4c0 __cdecl FUN_00ad4210(const FUN_0044a4c0& l, const char* r);
-FUN_0044a4c0 __cdecl FUN_00ad42e0(const FUN_0044a4c0& l, const FUN_0044a4c0& r);
+FUN_0044a4c0 __cdecl TESObject_ConcatenateStrings(const FUN_0044a4c0& l, const char* r);
+FUN_0044a4c0 __cdecl Object_ProcessAndReturnValue_00ad42e0(const FUN_0044a4c0& l, const FUN_0044a4c0& r);
 struct FUN_00b096a0
 {
     int iBase;
@@ -1061,7 +1062,7 @@ struct FUN_00b09480 : FUN_00b096a0
 };
 // @fnv 0x00b09480
 FUN_00b09480::FUN_00b09480(const FUN_0044a4c0& msg, bool bErrno)
-    : FUN_00b096a0(FUN_00ad4210(FUN_00ad42e0(FUN_00ad4210(msg, " ["),
+    : FUN_00b096a0(TESObject_ConcatenateStrings(Object_ProcessAndReturnValue_00ad42e0(TESObject_ConcatenateStrings(msg, " ["),
                                              bErrno ? FUN_0044a4c0(FUN_00ecdb42(*FUN_00ec85e3())) : FUN_0044a4c0("")),
                                 "]"))
 {}
@@ -1101,11 +1102,12 @@ struct MyClass
     int unk60, unk64, unk68, unk6c;
     MyVector m_vec;
 
-    int* FUN_00b0b4b0();
+    int* CIndexedGeometry_GetVertexColors();
 };
 
 // @fnv 0x00b0b4b0
-int* MyClass::FUN_00b0b4b0()
+// src: COMMUNITY 0x00b0b4b0
+int* MyClass::CIndexedGeometry_GetVertexColors()
 {
     return m_vec.empty() ? 0 : m_vec[0];
 }
@@ -1240,11 +1242,12 @@ struct FUN_00b0b830_Class
 
     std::vector<float> m_vec;
 
-    float* FUN_00b0b830();
+    float* CIndexedGeometry_GetVertexWindWeights();
 };
 
 // @fnv 0x00b0b830
-float* FUN_00b0b830_Class::FUN_00b0b830()
+// src: COMMUNITY 0x00b0b830
+float* FUN_00b0b830_Class::CIndexedGeometry_GetVertexWindWeights()
 {
     return m_vec.empty() ? 0 : &m_vec[0];
 }
@@ -1275,7 +1278,7 @@ extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(CritSecQ*);
 extern CritSecQ DAT_011f8bc4;
 struct InstListQ
 {
-    void FUN_00b0ddc0(void* const& v);
+    void std_vector_push_back(void* const& v);
 };
 extern InstListQ DAT_011f8bdc;
 extern int DAT_011f8b7c;
@@ -1298,7 +1301,7 @@ struct StrQ : std::basic_string<char, std::char_traits<char>, std::allocator<cha
         _Tidy(true, 0);
     }
 };
-StrQ __cdecl FUN_00b18860(const char* fmt, ...);
+StrQ __cdecl IdvFormatString(const char* fmt, ...);
 inline void SetCurQ(void* p)
 {
     int pad[24];
@@ -1410,7 +1413,7 @@ FUN_00b02ef0::FUN_00b02ef0()
         m5c = new O84;
         m60 = new O190(m10, 1);
         EnterCriticalSection(&DAT_011f8bc4);
-        DAT_011f8bdc.FUN_00b0ddc0(this);
+        DAT_011f8bdc.std_vector_push_back(this);
         DAT_011f8b7c++;
         LeaveCriticalSection(&DAT_011f8bc4);
         SetCurQ(m0c);
@@ -1426,12 +1429,12 @@ FUN_00b02ef0::FUN_00b02ef0()
     }
     catch (ExcQ& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::CSpeedTreeRT( )", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::CSpeedTreeRT( )", e.what()).c_str());
         Dead5Q();
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::CSpeedTreeRT( )").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::CSpeedTreeRT( )").c_str());
         Dead5Q();
     }
 }
@@ -1462,15 +1465,15 @@ struct StrF
     ~StrF()
     {
         int aiD[4];
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
     const char* c_str() const
     {
         return 16 <= uiRes ? kBx.pPtr : kBx.acBuf;
     }
 };
-StrF __cdecl FUN_00b18860(const char* pFmt, ...);
+StrF __cdecl IdvFormatString(const char* pFmt, ...);
 void __cdecl AssignString(const char* s);
 void* __cdecl FUN_00ec44d0(void*, const void*, unsigned);
 namespace std {
@@ -1509,11 +1512,11 @@ struct V3Q
 struct V3B
 {
     float x, y, z;
-    float FUN_00b04d40(const V3Q& v) const;
+    float CVec3_Distance(const V3Q& v) const;
     float Dist(const V3Q& v) const
     {
         Dead2();
-        return FUN_00b04d40(v);
+        return CVec3_Distance(v);
     }
 };
 inline void CopyV(V3Q& d, const BVecQ& s)
@@ -1574,13 +1577,13 @@ struct TreeCQ
         return iD8;
     }
     void InitSeed(int);
-    void FUN_00b2af80(float);
+    void CTreeEngine_Compute(float);
 };
 struct GeoQ
 {
-    void FUN_00b2ed70(int);
-    void FUN_00b2fc50(const MatQ&);
-    void FUN_00b2fa30(BoxQ&);
+    void CIndexedGeometry_CombineStrips(int);
+    void CIndexedGeometry_Transform(const MatQ&);
+    void CIndexedGeometry_ComputeExtents(BoxQ&);
     unsigned short pad[16];
     unsigned short w20;
     unsigned short GetW20()
@@ -1590,10 +1593,10 @@ struct GeoQ
 };
 struct BrQ
 {
-    void FUN_00b28480(unsigned short, int, O94Q*);
+    void CLeafGeometry_Init(unsigned short, int, O94Q*);
     void SetLeafTableEntry(int, int*);
-    void FUN_00b28280(const MatQ&);
-    void FUN_00b27910(BoxQ&);
+    void ProcessEntries_00b28280(const MatQ&);
+    void CLeafGeometry_ComputeExtents(BoxQ&);
 };
 struct Cfg0cQ
 {
@@ -1622,12 +1625,12 @@ struct M4cQ
 };
 struct M58Q
 {
-    void FUN_00b04db0(const MatQ&);
+    void SCollisionObjects_TransformAll(const MatQ&);
 };
 struct M5cQ
 {
-    void FUN_00b18fd0(GeoQ*, Cfg0cQ*);
-    void FUN_00b1c6d0(GeoQ*, int, int*, unsigned char);
+    void CFrondEngine_Compute(GeoQ*, Cfg0cQ*);
+    void CFrondEngine_SetTextureCoords(GeoQ*, int, int*, unsigned char);
 };
 extern unsigned char DAT_011f8b79;
 extern M5cQ* DAT_011f8c00;
@@ -1653,10 +1656,10 @@ struct SpdCompQ
     M5cQ* m_p5c;
     GeoQ* m_p60;
     unsigned short m_w64;
-    void FUN_00b08cc0();
-    void FUN_00b0cdd0();
+    void ComputeLeafStaticLighting();
+    void CSpeedTreeRT_ComputeSelfShadowTexCoords();
     void InitBoundingBoxCorners();
-    bool FUN_00b044a0(const float* pTransform, int nSeed, bool bStrips);
+    bool CSpeedTreeRT_Compute(const float* pTransform, int nSeed, bool bStrips);
 };
 inline void SetCur(M5cQ* p)
 {
@@ -1668,10 +1671,11 @@ inline void InitLeaves(TreeCQ* t)
 }
 inline void InitBr(BrQ* b, O94Q* o, int ec, unsigned short d8)
 {
-    b->FUN_00b28480(d8, ec, o);
+    b->CLeafGeometry_Init(d8, ec, o);
 }
 // @fnv 0x00b044a0
-bool SpdCompQ::FUN_00b044a0(const float* pTransform, int nSeed, bool bStrips)
+// src: EXE 0x00b044a0
+bool SpdCompQ::CSpeedTreeRT_Compute(const float* pTransform, int nSeed, bool bStrips)
 {
     try
     {
@@ -1679,41 +1683,41 @@ bool SpdCompQ::FUN_00b044a0(const float* pTransform, int nSeed, bool bStrips)
         {
             SetCur(m_p5c);
             m_p0->InitSeed(nSeed);
-            m_p0->FUN_00b2af80(m_f24);
-            m_p5c->FUN_00b18fd0(m_p60, m_pC);
+            m_p0->CTreeEngine_Compute(m_f24);
+            m_p5c->CFrondEngine_Compute(m_p60, m_pC);
             m_w64 = m_p60->GetW20();
             InitLeaves(m_p0);
             if (m_pC->Get38() == 1)
-                FUN_00b08cc0();
+                ComputeLeafStaticLighting();
             int* p10c_iipp = &m_p0->o10c;
             m_p10->SetFromSource(p10c_iipp);
-            m_p8->FUN_00b28480(m_p0->GetD8(), m_p0->GetEC(), m_p0->GetO94());
+            m_p8->CLeafGeometry_Init(m_p0->GetD8(), m_p0->GetEC(), m_p0->GetO94());
             if (m_p4c)
             {
                 for (int i = 0; i < m_p4c->n0; ++i)
                     m_p8->SetLeafTableEntry(i, &m_p4c->p4[i * 8]);
                 for (int j = 0; j < m_p4c->n10; ++j)
-                    m_p5c->FUN_00b1c6d0(m_p60, j, &m_p4c->p14[j * 8], DAT_011f8b79);
+                    m_p5c->CFrondEngine_SetTextureCoords(m_p60, j, &m_p4c->p14[j * 8], DAT_011f8b79);
             }
             if (bStrips)
             {
-                m_p4->FUN_00b2ed70(0);
-                m_p60->FUN_00b2ed70(0);
+                m_p4->CIndexedGeometry_CombineStrips(0);
+                m_p60->CIndexedGeometry_CombineStrips(0);
             }
             if (pTransform)
             {
                 MatQ mat;
                 FUN_00ec44d0(&mat, pTransform, 0x40);
-                m_p4->FUN_00b2fc50(mat);
-                m_p8->FUN_00b28280(mat);
-                m_p60->FUN_00b2fc50(mat);
+                m_p4->CIndexedGeometry_Transform(mat);
+                m_p8->ProcessEntries_00b28280(mat);
+                m_p60->CIndexedGeometry_Transform(mat);
                 if (m_p58)
-                    m_p58->FUN_00b04db0(mat);
+                    m_p58->SCollisionObjects_TransformAll(mat);
             }
             BoxQ box_pktk;
-            m_p4->FUN_00b2fa30(box_pktk);
-            m_p8->FUN_00b27910(box_pktk);
-            m_p60->FUN_00b2fa30(box_pktk);
+            m_p4->CIndexedGeometry_ComputeExtents(box_pktk);
+            m_p8->CLeafGeometry_ComputeExtents(box_pktk);
+            m_p60->CIndexedGeometry_ComputeExtents(box_pktk);
             Dead21();
             CopyV(m_p40->min, box_pktk.min);
             CopyV(m_p40->max, box_pktk.max);
@@ -1734,7 +1738,7 @@ bool SpdCompQ::FUN_00b044a0(const float* pTransform, int nSeed, bool bStrips)
                               : (center_nrc.Dist(V3Q(m_p40->max.x, m_p40->max.y)));
             m_p40->f18 = fMax_jdjgrg * 2.0f;
             if (m_p50)
-                FUN_00b0cdd0();
+                CSpeedTreeRT_ComputeSelfShadowTexCoords();
             InitBoundingBoxCorners();
             m_b45 = true;
         }
@@ -1745,11 +1749,11 @@ bool SpdCompQ::FUN_00b044a0(const float* pTransform, int nSeed, bool bStrips)
     }
     catch (std::exception& exc)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::Compute", exc.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::Compute", exc.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::Compute").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::Compute").c_str());
         Dead1();
     }
     return m_b45;
@@ -1978,7 +1982,7 @@ struct StringB05210 : public StringValB05210
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB05210 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB05210 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 extern MemoryManager g_kMemoryB05210;
 struct SpeedTreeRTB05210
@@ -1992,7 +1996,7 @@ struct SpeedTreeRTB05210
         g_kMemoryB05210.Deallocate(pvMem);
     }
     SpeedTreeRTB05210(const SpeedTreeRTB05210* pOriginal);
-    SpeedTreeRTB05210* FUN_00b05210();
+    SpeedTreeRTB05210* CSpeedTreeRT_MakeInstance();
     int unk00;
     int unk04;
     int unk08;
@@ -2036,7 +2040,8 @@ struct SpeedTreeRTB05210
 };
 
 // @fnv 0x00b05210
-SpeedTreeRTB05210* SpeedTreeRTB05210::FUN_00b05210()
+// src: EXE 0x00b05210
+SpeedTreeRTB05210* SpeedTreeRTB05210::CSpeedTreeRT_MakeInstance()
 {
     SpeedTreeRTB05210* pInstance = 0;
     try
@@ -2045,11 +2050,11 @@ SpeedTreeRTB05210* SpeedTreeRTB05210::FUN_00b05210()
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::MakeInstance", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::MakeInstance", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::MakeInstance").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::MakeInstance").c_str());
     }
     return pInstance;
 }
@@ -2057,7 +2062,8 @@ SpeedTreeRTB05210* SpeedTreeRTB05210::FUN_00b05210()
 
 namespace fnv_00b05420 {
 int __cdecl FUN_00ec7c66(void*, unsigned, const void*, unsigned);
-inline char* __cdecl FUN_0044e440(char* d, unsigned z, const char* s, unsigned n)
+// src: COMMUNITY 0x0044e440
+inline char* __cdecl std_char_traits_char_Copy_s(char* d, unsigned z, const char* s, unsigned n)
 {
     FUN_00ec7c66(d, z, s, n);
     return d;
@@ -2065,19 +2071,22 @@ inline char* __cdecl FUN_0044e440(char* d, unsigned z, const char* s, unsigned n
 struct StringCopyTag
 {
 };
-inline StringCopyTag __cdecl FUN_0065e750()
+// src: COMMUNITY 0x0065e750
+inline StringCopyTag __cdecl std_Move_cat_unsigned_char()
 {
     StringCopyTag tag;
     return tag;
 }
-char* __cdecl FUN_0044e440(char*, unsigned, const char*, unsigned);
-inline char* __cdecl FUN_0044e420(char* d, unsigned z, const char* s, unsigned n, StringCopyTag)
+char* __cdecl std_char_traits_char_Copy_s(char*, unsigned, const char*, unsigned);
+// src: COMMUNITY 0x0044e420
+inline char* __cdecl std_Traits_helper_copy_s_std_char_traits_char_0044e420(char* d, unsigned z, const char* s, unsigned n, StringCopyTag)
 {
-    return FUN_0044e440(d, z, s, n);
+    return std_char_traits_char_Copy_s(d, z, s, n);
 }
-inline char* __cdecl FUN_0044ccd0(char* d, unsigned z, const char* s, unsigned n)
+// src: COMMUNITY 0x0044ccd0
+inline char* __cdecl std_Traits_helper_copy_s_std_char_traits_char(char* d, unsigned z, const char* s, unsigned n)
 {
-    return FUN_0044e420(d, z, s, n, FUN_0065e750());
+    return std_Traits_helper_copy_s_std_char_traits_char_0044e420(d, z, s, n, std_Move_cat_unsigned_char());
 }
 
 struct StrF
@@ -2092,9 +2101,10 @@ struct StrF
     unsigned uiRes;
     ~StrF()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n)
+// src: XBOX_PDB 0x0044a730
+    void fopen_0044a730(bool b, unsigned n)
     {
         if (!b)
         {
@@ -2103,7 +2113,7 @@ struct StrF
         {
             char* p = kBx.pPtr;
             if (0 < n)
-                FUN_0044ccd0(kBx.acBuf, 16, p, n);
+                std_Traits_helper_copy_s_std_char_traits_char(kBx.acBuf, 16, p, n);
             FUN_0064df10(p, uiRes + 1);
         }
         uiRes = 15;
@@ -2117,9 +2127,10 @@ struct StrF
     {
         char zero = 0;
         uiSize = n;
-        FUN_0044a8c0(Myptr() + n, &zero);
+        std_char_traits_char_assign(Myptr() + n, &zero);
     }
-    static void FUN_0044a8c0(char* d, const char* s)
+// src: COMMUNITY 0x0044a8c0
+    static void std_char_traits_char_assign(char* d, const char* s)
     {
         *d = *s;
     }
@@ -2132,7 +2143,7 @@ struct StrF
         return 16 <= uiRes ? kBx.pPtr : kBx.acBuf;
     }
 };
-StrF __cdecl FUN_00b18860(const char* pFmt, ...);
+StrF __cdecl IdvFormatString(const char* pFmt, ...);
 void __cdecl AssignString(const char* s);
 extern "C" int* __cdecl FUN_00ec85e3();
 extern "C" char* __cdecl FUN_00ecdb42(int);
@@ -2182,25 +2193,26 @@ struct TreeFileQ
 TreeFileQ* __cdecl FUN_00afdf20(const char*, int, int, int);
 struct TreeHeapQ
 {
-    char* FUN_00aa3e40(unsigned);
-    void FUN_00aa4060(void*);
+    char* Game_DoHeapAlloc(unsigned);
+    void MemoryManager_Deallocate(void*);
 };
 extern TreeHeapQ DAT_011f6238;
 inline void* operator new[](unsigned n)
 {
-    return DAT_011f6238.FUN_00aa3e40(n);
+    return DAT_011f6238.Game_DoHeapAlloc(n);
 }
 inline void operator delete[](void* p)
 {
-    DAT_011f6238.FUN_00aa4060(p);
+    DAT_011f6238.MemoryManager_Deallocate(p);
 }
 struct SpdLoadQ
 {
-    bool FUN_00b059e0(const char*, int);
-    bool FUN_00b05420(const char*);
+    bool CSpeedTreeRT_LoadTree_00b059e0(const char*, int);
+    bool CSpeedTreeRT_LoadTree(const char*);
 };
 // @fnv 0x00b05420
-bool SpdLoadQ::FUN_00b05420(const char* path)
+// src: EXE 0x00b05420
+bool SpdLoadQ::CSpeedTreeRT_LoadTree(const char* path)
 {
     bool bOk_dt = false;
     char* contents_lmol = 0;
@@ -2221,13 +2233,13 @@ bool SpdLoadQ::FUN_00b05420(const char* path)
                     int count = file_cswij->Read(contents_lmol, length);
                     if (count == length)
                     {
-                        bOk_dt = FUN_00b059e0(contents_lmol, length);
+                        bOk_dt = CSpeedTreeRT_LoadTree_00b059e0(contents_lmol, length);
                         delete[] contents_lmol;
                         contents_lmol = 0;
                     }
                     else
                     {
-                        throw std::exception(FUN_00b18860("only read %d of %d from %s [%s]", count, length, path,
+                        throw std::exception(IdvFormatString("only read %d of %d from %s [%s]", count, length, path,
                                                           FUN_00ecdb42(*FUN_00ec85e3()))
                                                  .c_str());
                     }
@@ -2237,13 +2249,13 @@ bool SpdLoadQ::FUN_00b05420(const char* path)
                 else
                 {
                     throw std::exception(
-                        FUN_00b18860("file seek failed on '%s' [%s]", path, FUN_00ecdb42(*FUN_00ec85e3())).c_str());
+                        IdvFormatString("file seek failed on '%s' [%s]", path, FUN_00ecdb42(*FUN_00ec85e3())).c_str());
                 }
             }
             else
             {
                 throw std::exception(
-                    FUN_00b18860("failed to load file '%s' [%s]", path, FUN_00ecdb42(*FUN_00ec85e3())).c_str());
+                    IdvFormatString("failed to load file '%s' [%s]", path, FUN_00ecdb42(*FUN_00ec85e3())).c_str());
             }
         }
     }
@@ -2255,7 +2267,7 @@ bool SpdLoadQ::FUN_00b05420(const char* path)
             file_cswij = 0;
         }
         contents_lmol = 0;
-        AssignString(FUN_00b18860("CSpeedTreeRT::Load Tree - %s", e_jzu.what()).c_str());
+        AssignString(IdvFormatString("CSpeedTreeRT::Load Tree - %s", e_jzu.what()).c_str());
     }
     catch (...)
     {
@@ -2265,14 +2277,15 @@ bool SpdLoadQ::FUN_00b05420(const char* path)
             file_cswij = 0;
         }
         contents_lmol = 0;
-        AssignString(FUN_00b18860("CSpeedTreeRT::LoadTree - threw an unknown system exception").c_str());
+        AssignString(IdvFormatString("CSpeedTreeRT::LoadTree - threw an unknown system exception").c_str());
     }
     return bOk_dt;
 }
 }  // namespace fnv_00b05420
 
 namespace fnv_00b059e0 {
-inline void __cdecl FUN_0044a8c0(char& destination, const char& source)
+// src: COMMUNITY 0x0044a8c0
+inline void __cdecl std_char_traits_char_assign(char& destination, const char& source)
 {
     destination = source;
 }
@@ -2283,7 +2296,7 @@ struct Alloc59;
 
 struct Global59
 {
-    void FUN_00aa4060(int allocation);
+    void MemoryManager_Deallocate(int allocation);
 };
 extern Global59 DAT_011f6238;
 struct Proxy59
@@ -2302,7 +2315,7 @@ struct Alloc59
     int state;
     __forceinline void deallocate(Proxy59* allocation, unsigned int count)
     {
-        DAT_011f6238.FUN_00aa4060((int)allocation);
+        DAT_011f6238.MemoryManager_Deallocate((int)allocation);
     }
 };
 struct ScalarTag59
@@ -2337,7 +2350,7 @@ struct Inner59 : VectorValue59
     char* d;
     char* e;
     char* f;
-    void FUN_00b0e200(int, unsigned char);
+    void ProcessState_00b0e200(int, unsigned char);
     void destroyRange(char* first, char* last)
     {
         CallInterfaceWithResult(first, last, c);
@@ -2346,7 +2359,8 @@ struct Inner59 : VectorValue59
     {
         operator delete(allocation);
     }
-    void FUN_00657f60()
+// src: GUESS 0x00657f60 (confidence: medium)
+    void ReleaseStorage_00657f60()
     {
         if (d != 0)
         {
@@ -2369,7 +2383,7 @@ struct Inner59 : VectorValue59
     }
     __forceinline ~Inner59()
     {
-        FUN_00657f60();
+        ReleaseStorage_00657f60();
     }
 };
 extern unsigned char DAT_011f8c04;
@@ -2386,7 +2400,7 @@ struct FUN_00b06090
     Inner59 m_in;
     FUN_00b06090(int p1, int p2) : m_pos(0)
     {
-        m_in.FUN_00b0e200(p2, 0);
+        m_in.ProcessState_00b0e200(p2, 0);
         for (int index = 0; index < p2; ++index)
         {
             if ((unsigned int)index >= (unsigned int)(m_in.e - m_in.d))
@@ -2395,8 +2409,9 @@ struct FUN_00b06090
         }
     }
     int GetNextElement();
-    float FUN_00b3ed20();
-    bool FUN_00b06180()
+    float CTreeFileAccess_ParseFloat();
+// src: GUESS 0x00b06180 (confidence: low)
+    bool ProcessAndTransformResult_00b06180()
     {
         return m_in.at(m_pos++) != 0;
     }
@@ -2480,10 +2495,10 @@ struct Sub0
     {
         return f108;
     }
-    bool FUN_00b2b550(FUN_00b06090* r);
-    void FUN_00b2d090(FUN_00b06090* r);
-    void FUN_00b2d2e0(FUN_00b06090* r);
-    void FUN_00b2daf0(FUN_00b06090* r);
+    bool Parse_00b2b550(FUN_00b06090* r);
+    void ParseTextureControls(FUN_00b06090* r);
+    void ParseFlareInfo(FUN_00b06090* r);
+    void CTreeEngine_ParseFlareSeed(FUN_00b06090* r);
 };
 struct SubC
 {
@@ -2530,12 +2545,12 @@ struct SubC
     int unk70;
     int unk74;
     int f78;
-    void FUN_00b2a940(FUN_00b06090* r);
+    void CLightingEngine_Parse(FUN_00b06090* r);
 };
 struct Sub5c
 {
-    void FUN_00b18340(FUN_00b06090* r);
-    int FUN_00b18300();
+    void CFrondEngine_Parse(FUN_00b06090* r);
+    int CFrondEngine_GetLevel();
 };
 struct Sub10
 {
@@ -2592,21 +2607,21 @@ struct Tree59
     int unk54;
     int unk58;
     Sub5c* m_p5c;
-    bool FUN_00b059e0(int p1, int p2);
+    bool CSpeedTreeRT_LoadTree_00b059e0(int p1, int p2);
     __forceinline SubC* engine()
     {
         return m_p0c;
     }
-    void FUN_00b092a0(FUN_00b06090* r);
-    void FUN_00b097e0(FUN_00b06090* r);
-    void FUN_00b09960(FUN_00b06090* r);
-    void FUN_00b0a490(FUN_00b06090* r);
-    void FUN_00b0cd40(FUN_00b06090* r);
-    void FUN_00b0d500(FUN_00b06090* r);
-    void FUN_00b0d810(FUN_00b06090* r);
-    void FUN_00b06660(int x);
-    void FUN_00b06810(int x);
-    void FUN_00b069c0(int x);
+    void CSpeedTreeRT_ParseLodInfo(FUN_00b06090* r);
+    void CSpeedTreeRT_ParseWindInfo(FUN_00b06090* r);
+    void CSpeedTreeRT_ParseTextureCoordInfo(FUN_00b06090* r);
+    void CSpeedTreeRT_ParseCollisionObjects(FUN_00b06090* r);
+    void CSpeedTreeRT_ParseShadowProjectionInfo(FUN_00b06090* r);
+    void CSpeedTreeRT_ParseUserData(FUN_00b06090* r);
+    void CSpeedTreeRT_ParseSupplementalTexCoordInfo(FUN_00b06090* r);
+    void CSpeedTreeRT_SetBranchLightingMethod(int x);
+    void CSpeedTreeRT_SetLeafLightingMethod(int x);
+    void CSpeedTreeRT_SetFrondLightingMethod(int x);
 };
 struct Exc59
 {
@@ -2622,19 +2637,22 @@ inline TraitsTag59 traitsCategory()
     return category;
 }
 int __cdecl FUN_00ec7c66(void*, unsigned int, const void*, unsigned int);
-inline char* __cdecl FUN_0044e440(char* destination, unsigned int capacity, const char* source, unsigned int count)
+// src: COMMUNITY 0x0044e440
+inline char* __cdecl std_char_traits_char_Copy_s(char* destination, unsigned int capacity, const char* source, unsigned int count)
 {
     FUN_00ec7c66(destination, capacity, source, count);
     return destination;
 }
-inline char* __cdecl FUN_0044e420(char* destination, unsigned int capacity, const char* source, unsigned int count,
+// src: COMMUNITY 0x0044e420
+inline char* __cdecl std_Traits_helper_copy_s_std_char_traits_char_0044e420(char* destination, unsigned int capacity, const char* source, unsigned int count,
                                   TraitsTag59)
 {
-    return FUN_0044e440(destination, capacity, source, count);
+    return std_char_traits_char_Copy_s(destination, capacity, source, count);
 }
-inline char* FUN_0044ccd0(char* destination, unsigned int capacity, const char* source, unsigned int count)
+// src: COMMUNITY 0x0044ccd0
+inline char* std_Traits_helper_copy_s_std_char_traits_char(char* destination, unsigned int capacity, const char* source, unsigned int count)
 {
-    return FUN_0044e420(destination, capacity, source, count, traitsCategory());
+    return std_Traits_helper_copy_s_std_char_traits_char_0044e420(destination, capacity, source, count, traitsCategory());
 }
 struct CharAllocator59
 {
@@ -2654,15 +2672,17 @@ struct Str59
     {
         operator delete(allocation);
     }
-    char* FUN_0044a970()
+// src: COMMUNITY 0x0044a970
+    char* std_string__Myptr()
     {
         return res >= 16 ? *(char**)buf : buf;
     }
     void ResizeString(unsigned int newSize)
     {
-        FUN_0044a8c0(FUN_0044a970()[size = newSize], char());
+        std_char_traits_char_assign(std_string__Myptr()[size = newSize], char());
     }
-    void FUN_0044a730(bool built, unsigned int newSize)
+// src: XBOX_PDB 0x0044a730
+    void fopen_0044a730(bool built, unsigned int newSize)
     {
         if (!built)
         {
@@ -2671,7 +2691,7 @@ struct Str59
         {
             char* allocation = *(char**)buf;
             if (newSize > 0)
-                FUN_0044ccd0(buf, 16, allocation, newSize);
+                std_Traits_helper_copy_s_std_char_traits_char(buf, 16, allocation, newSize);
             allocator.deallocate(allocation, res + 1);
         }
         res = 15;
@@ -2679,7 +2699,7 @@ struct Str59
     }
     __forceinline ~Str59()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
     __forceinline const char* c_str() const
     {
@@ -2690,7 +2710,7 @@ struct Str59
         return c_str();
     }
 };
-Str59 __cdecl FUN_00b18860(const char* fmt, ...);
+Str59 __cdecl IdvFormatString(const char* fmt, ...);
 void __cdecl AssignString(const char* s);
 struct StrCalls
 {
@@ -2701,17 +2721,18 @@ struct StrCalls
     int unk10;
     int unk14;
     int unk18;
-    void FUN_0044a730(bool b, unsigned int n);
+    void fopen_0044a730(bool b, unsigned int n);
 };
 
 // @fnv 0x00b059e0
-bool Tree59::FUN_00b059e0(int p1, int p2)
+// src: EXE 0x00b059e0
+bool Tree59::CSpeedTreeRT_LoadTree_00b059e0(int p1, int p2)
 {
     bool result5 = false;
     try
     {
         FUN_00b06090 reader8(p1, p2);
-        if (m_p00->FUN_00b2b550(&reader8))
+        if (m_p00->Parse_00b2b550(&reader8))
         {
             if (!reader8.atEnd())
             {
@@ -2722,55 +2743,55 @@ bool Tree59::FUN_00b059e0(int p1, int p2)
                     switch (cur)
                     {
                     case 8000:
-                        m_p0c->FUN_00b2a940(&reader8);
+                        m_p0c->CLightingEngine_Parse(&reader8);
                         break;
                     case 9000:
-                        FUN_00b092a0(&reader8);
+                        CSpeedTreeRT_ParseLodInfo(&reader8);
                         break;
                     case 11000:
-                        FUN_00b097e0(&reader8);
+                        CSpeedTreeRT_ParseWindInfo(&reader8);
                         break;
                     case 10000:
-                        FUN_00b09960(&reader8);
+                        CSpeedTreeRT_ParseTextureCoordInfo(&reader8);
                         break;
                     case 12000:
-                        FUN_00b0a490(&reader8);
+                        CSpeedTreeRT_ParseCollisionObjects(&reader8);
                         break;
                     case 13000:
-                        m_p5c->FUN_00b18340(&reader8);
+                        m_p5c->CFrondEngine_Parse(&reader8);
                         break;
                     case 15000:
-                        m_p00->FUN_00b2d090(&reader8);
+                        m_p00->ParseTextureControls(&reader8);
                         break;
                     case 16000:
-                        m_p00->FUN_00b2d2e0(&reader8);
+                        m_p00->ParseFlareInfo(&reader8);
                         break;
                     case 16013:
-                        m_p00->FUN_00b2daf0(&reader8);
+                        m_p00->CTreeEngine_ParseFlareSeed(&reader8);
                         break;
                     case 16014: {
-                        m_28 = reader8.FUN_00b3ed20();
+                        m_28 = reader8.CTreeFileAccess_ParseFloat();
                         break;
                     }
                     case 18000:
-                        FUN_00b0cd40(&reader8);
+                        CSpeedTreeRT_ParseShadowProjectionInfo(&reader8);
                         break;
                     case 19000:
-                        FUN_00b0d500(&reader8);
+                        CSpeedTreeRT_ParseUserData(&reader8);
                         break;
                     case 20000:
-                        FUN_00b0d810(&reader8);
+                        CSpeedTreeRT_ParseSupplementalTexCoordInfo(&reader8);
                         break;
                     case 21000: {
-                        m_p10->setFirst(reader8.FUN_00b3ed20());
+                        m_p10->setFirst(reader8.CTreeFileAccess_ParseFloat());
                         break;
                     }
                     case 21001: {
-                        m_p10->setSecond(reader8.FUN_00b3ed20());
+                        m_p10->setSecond(reader8.CTreeFileAccess_ParseFloat());
                         break;
                     }
                     case 22000: {
-                        setFlag(reader8.FUN_00b06180());
+                        setFlag(reader8.ProcessAndTransformResult_00b06180());
                         break;
                     }
                     default:
@@ -2789,11 +2810,11 @@ bool Tree59::FUN_00b059e0(int p1, int p2)
                     }
                 } while (!done4);
             }
-            FUN_00b06660(engine()->first());
-            FUN_00b06810(m_p0c->second());
-            FUN_00b069c0(m_p0c->third());
+            CSpeedTreeRT_SetBranchLightingMethod(engine()->first());
+            CSpeedTreeRT_SetLeafLightingMethod(m_p0c->second());
+            CSpeedTreeRT_SetFrondLightingMethod(m_p0c->third());
             m_48 = m_p00->count();
-            m_3c = m_p5c->FUN_00b18300();
+            m_3c = m_p5c->CFrondEngine_GetLevel();
             if (m_18 == 2)
             {
                 m_18 = 1;
@@ -2805,11 +2826,11 @@ bool Tree59::FUN_00b059e0(int p1, int p2)
     }
     catch (Exc59& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::LoadTree", e.Msg()));
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::LoadTree", e.Msg()));
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::LoadTree"));
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::LoadTree"));
     }
     return result5;
 }
@@ -3006,7 +3027,7 @@ struct StringB06280 : public StringValB06280
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB06280 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB06280 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct EngineB06280
 {
@@ -3040,23 +3061,24 @@ struct EngineB06280
     {
         return m_iTreeSize;
     }
-    void FUN_00b2bd20(float fSize, float fVariance);
+    void SetSize_00b2bd20(float fSize, float fVariance);
 };
 struct SpeedTreeRTB06280
 {
     EngineB06280* m_pFirstPointer;
-    void FUN_00b06280(float fSize, float fVariance);
+    void CSpeedTreeRT_SetTreeSize(float fSize, float fVariance);
 };
 
 // @fnv 0x00b06280
-void SpeedTreeRTB06280::FUN_00b06280(float fSize, float fVariance)
+// src: COMMUNITY 0x00b06280
+void SpeedTreeRTB06280::CSpeedTreeRT_SetTreeSize(float fSize, float fVariance)
 {
     try
     {
         if (m_pFirstPointer->TransientDataOk())
         {
             if (fSize > 0.0)
-                m_pFirstPointer->FUN_00b2bd20(fSize, fVariance);
+                m_pFirstPointer->SetSize_00b2bd20(fSize, fVariance);
             else
                 AssignString("SetTreeSize() is only valid for size values greater than 0.0");
         }
@@ -3067,11 +3089,11 @@ void SpeedTreeRTB06280::FUN_00b06280(float fSize, float fVariance)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetTreeSize", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetTreeSize", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetTreeSize").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetTreeSize").c_str());
     }
 }
 }  // namespace fnv_00b06280
@@ -3179,7 +3201,7 @@ struct StringB06440 : public StringValB06440
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB06440 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB06440 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct EngineB06440
 {
@@ -3217,11 +3239,12 @@ struct EngineB06440
 struct SpeedTreeRTB06440
 {
     EngineB06440* m_pFirstPointer;
-    int FUN_00b06440();
+    int CSpeedTreeRT_GetSeed();
 };
 
 // @fnv 0x00b06440
-int SpeedTreeRTB06440::FUN_00b06440()
+// src: COMMUNITY 0x00b06440
+int SpeedTreeRTB06440::CSpeedTreeRT_GetSeed()
 {
     int iResult = 0;
     try
@@ -3233,11 +3256,11 @@ int SpeedTreeRTB06440::FUN_00b06440()
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetTreeSize", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetTreeSize", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetTreeSize").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetTreeSize").c_str());
     }
     return iResult;
 }
@@ -3346,7 +3369,7 @@ struct StringB06660 : public StringValB06660
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB06660 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB06660 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct EngineB06660
 {
@@ -3388,11 +3411,12 @@ struct SpeedTreeRTB06660
     int unk40;
     char unk44;
     bool m_bComputed;
-    void FUN_00b06660(int eMethod);
+    void CSpeedTreeRT_SetBranchLightingMethod(int eMethod);
 };
 
 // @fnv 0x00b06660
-void SpeedTreeRTB06660::FUN_00b06660(int eMethod)
+// src: EXE 0x00b06660
+void SpeedTreeRTB06660::CSpeedTreeRT_SetBranchLightingMethod(int eMethod)
 {
     try
     {
@@ -3408,12 +3432,12 @@ void SpeedTreeRTB06660::FUN_00b06660(int eMethod)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetBranchLightingMethod", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetBranchLightingMethod", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetBranchLightingMethod").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetBranchLightingMethod").c_str());
     }
 }
 }  // namespace fnv_00b06660
@@ -3521,7 +3545,7 @@ struct StringB06810 : public StringValB06810
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB06810 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB06810 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct LeafLightingB06810
 {
@@ -3575,11 +3599,12 @@ struct SpeedTreeRTB06810
     int unk40;
     char unk44;
     bool m_bComputed;
-    void FUN_00b06810(int eMethod);
+    void CSpeedTreeRT_SetLeafLightingMethod(int eMethod);
 };
 
 // @fnv 0x00b06810
-void SpeedTreeRTB06810::FUN_00b06810(int eMethod)
+// src: EXE 0x00b06810
+void SpeedTreeRTB06810::CSpeedTreeRT_SetLeafLightingMethod(int eMethod)
 {
     try
     {
@@ -3595,12 +3620,12 @@ void SpeedTreeRTB06810::FUN_00b06810(int eMethod)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetLeafLightingMethod", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetLeafLightingMethod", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetLeafLightingMethod").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetLeafLightingMethod").c_str());
     }
 }
 }  // namespace fnv_00b06810
@@ -3708,7 +3733,7 @@ struct StringB069C0 : public StringValB069C0
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB069C0 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB069C0 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct FrondFlagsB069C0
 {
@@ -3788,11 +3813,12 @@ struct SpeedTreeRTB069C0
     int unk58;
     int unk5C;
     FrondFlagsB069C0* m_pFrondFlags;
-    void FUN_00b069c0(int eMethod);
+    void CSpeedTreeRT_SetFrondLightingMethod(int eMethod);
 };
 
 // @fnv 0x00b069c0
-void SpeedTreeRTB069C0::FUN_00b069c0(int eMethod)
+// src: EXE 0x00b069c0
+void SpeedTreeRTB069C0::CSpeedTreeRT_SetFrondLightingMethod(int eMethod)
 {
     try
     {
@@ -3808,12 +3834,12 @@ void SpeedTreeRTB069C0::FUN_00b069c0(int eMethod)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetFrondLightingMethod", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetFrondLightingMethod", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetFrondLightingMethod").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetFrondLightingMethod").c_str());
     }
 }
 }  // namespace fnv_00b069c0
@@ -3838,15 +3864,15 @@ struct StrF
     ~StrF()
     {
         int aiD[5];
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
     const char* c_str() const
     {
         return 16 <= uiRes ? kBx.pPtr : kBx.acBuf;
     }
 };
-StrF __cdecl FUN_00b18860(const char* pFmt, ...);
+StrF __cdecl IdvFormatString(const char* pFmt, ...);
 void __cdecl AssignString(const char* pMsg);
 struct CIdvException
 {
@@ -3900,7 +3926,7 @@ extern float DAT_011ad11c;
 extern float DAT_011ad120;
 extern const float DAT_010a4d88;
 extern const float DAT_01023cd8;
-void __cdecl FUN_00b08ec0(int i);
+void __cdecl CSpeedTreeRT_NotifyAllTreesOfEvent(int i);
 void __cdecl FUN_00b27080(const CamV* p);
 float __cdecl FUN_00ec9610(double d);
 inline float RadToDeg(float fRad)
@@ -3913,10 +3939,11 @@ inline float VAsin(float f)
 }
 struct SpdTreeQ
 {
-    static void __cdecl FUN_00b06c10(const float* pPos, const float* pDir);
+    static void __cdecl CSpeedTreeRT_SetCamera(const float* pPos, const float* pDir);
 };
 // @fnv 0x00b06c10
-void __cdecl SpdTreeQ::FUN_00b06c10(const float* pPos, const float* pDir)
+// src: EXE 0x00b06c10
+void __cdecl SpdTreeQ::CSpeedTreeRT_SetCamera(const float* pPos, const float* pDir)
 {
     try
     {
@@ -3932,9 +3959,9 @@ void __cdecl SpdTreeQ::FUN_00b06c10(const float* pPos, const float* pDir)
             {
                 *(CamV*)&DAT_011f8e9c = kPos;
                 *(CamV*)&DAT_011f8eac = kWorldPosition;
-                FUN_00b08ec0(1);
+                CSpeedTreeRT_NotifyAllTreesOfEvent(1);
                 FUN_00b27080(&kWorldPosition);
-                FUN_00b08ec0(1);
+                CSpeedTreeRT_NotifyAllTreesOfEvent(1);
                 CamR x;
                 x = kWorldPosition;
                 float s;
@@ -3953,11 +3980,11 @@ void __cdecl SpdTreeQ::FUN_00b06c10(const float* pPos, const float* pDir)
     }
     catch (CIdvException& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetCamera", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetCamera", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetCamera").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetCamera").c_str());
     }
 }
 }  // namespace fnv_00b06c10
@@ -4086,25 +4113,26 @@ class ExceptionB07
 };
 
 extern float g_fSpeedTreeTimeB07;
-void __cdecl FUN_00b08ec0(int iValue);
-stdb07::string __cdecl FUN_00b18860(const char* pcFormat, ...);
+void __cdecl CSpeedTreeRT_NotifyAllTreesOfEvent(int iValue);
+stdb07::string __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcError);
 
 // @fnv 0x00b07060
-void __cdecl FUN_00b07060(float fTime)
+// src: XBOX_PDB 0x00b07060
+void __cdecl CSpeedTreeRT_SetTime(float fTime)
 {
     try
     {
         g_fSpeedTreeTimeB07 = fTime;
-        FUN_00b08ec0(0);
+        CSpeedTreeRT_NotifyAllTreesOfEvent(0);
     }
     catch (ExceptionB07& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetTime", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetTime", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetTime").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetTime").c_str());
     }
 }
 }  // namespace fnv_00b07060
@@ -4212,7 +4240,7 @@ struct StringB071F0 : public StringValB071F0
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB071F0 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB071F0 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct EngineB071F0
 {
@@ -4296,11 +4324,12 @@ struct SpeedTreeRTB071F0
     int unk40;
     char unk44;
     bool m_bComputed;
-    void FUN_00b071f0(int iGroups);
+    void CSpeedTreeRT_SetLeafRockingState(int iGroups);
 };
 
 // @fnv 0x00b071f0
-void SpeedTreeRTB071F0::FUN_00b071f0(int iGroups)
+// src: EXE 0x00b071f0
+void SpeedTreeRTB071F0::CSpeedTreeRT_SetLeafRockingState(int iGroups)
 {
     try
     {
@@ -4317,12 +4346,12 @@ void SpeedTreeRTB071F0::FUN_00b071f0(int iGroups)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetLeafRockingState", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetLeafRockingState", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetLeafRockingState").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetLeafRockingState").c_str());
     }
 }
 }  // namespace fnv_00b071f0
@@ -4430,7 +4459,7 @@ struct StringB07510 : public StringValB07510
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB07510 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB07510 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct Part007510
 {
@@ -4475,11 +4504,12 @@ struct SpeedTreeRTB07510
     int unk40;
     char unk44;
     bool m_bComputed;
-    void FUN_00b07510(int eMode);
+    void CSpeedTreeRT_SetLeafWindMethod(int eMode);
 };
 
 // @fnv 0x00b07510
-void SpeedTreeRTB07510::FUN_00b07510(int eMode)
+// src: EXE 0x00b07510
+void SpeedTreeRTB07510::CSpeedTreeRT_SetLeafWindMethod(int eMode)
 {
     try
     {
@@ -4495,11 +4525,11 @@ void SpeedTreeRTB07510::FUN_00b07510(int eMode)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetLeafWindMethod", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetLeafWindMethod", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetLeafWindMethod").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetLeafWindMethod").c_str());
     }
 }
 }  // namespace fnv_00b07510
@@ -4607,7 +4637,7 @@ struct StringB076E0 : public StringValB076E0
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB076E0 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB076E0 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct WindB076E0
 {
@@ -4649,7 +4679,7 @@ struct LeafB076E0
     {
         m_eMode14 = e;
     }
-    void FUN_00b30800(int i);
+    void CIndexedGeometry_ComputeWindEffect(int i);
 };
 
 struct SpeedTreeRTB076E0
@@ -4673,11 +4703,12 @@ struct SpeedTreeRTB076E0
     int unk40;
     char unk44;
     bool m_bComputed;
-    void FUN_00b076e0(int eMode);
+    void CSpeedTreeRT_SetBranchWindMethod(int eMode);
 };
 
 // @fnv 0x00b076e0
-void SpeedTreeRTB076E0::FUN_00b076e0(int eMode)
+// src: EXE 0x00b076e0
+void SpeedTreeRTB076E0::CSpeedTreeRT_SetBranchWindMethod(int eMode)
 {
     try
     {
@@ -4686,7 +4717,7 @@ void SpeedTreeRTB076E0::FUN_00b076e0(int eMode)
             if (eMode == 2 && m_pWind->GetMode() == 1)
             {
                 m_pLeafData->SetFlag12(false);
-                m_pLeafData->FUN_00b30800(0);
+                m_pLeafData->CIndexedGeometry_ComputeWindEffect(0);
             }
             m_pWind->SetMode(eMode);
             m_pLeafData->SetFlag08(eMode != 2);
@@ -4699,12 +4730,12 @@ void SpeedTreeRTB076E0::FUN_00b076e0(int eMode)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetBranchWindMethod", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetBranchWindMethod", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetBranchWindMethod").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetBranchWindMethod").c_str());
     }
 }
 }  // namespace fnv_00b076e0
@@ -4812,7 +4843,7 @@ struct StringB07900 : public StringValB07900
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB07900 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB07900 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct WindB07900
 {
@@ -4855,7 +4886,7 @@ struct LeafB07900
     {
         m_eMode14 = e;
     }
-    void FUN_00b30800(int i);
+    void CIndexedGeometry_ComputeWindEffect(int i);
 };
 
 struct SpeedTreeRTB07900
@@ -4886,11 +4917,12 @@ struct SpeedTreeRTB07900
     int unk58;
     int unk5C;
     LeafB07900* m_pLeafData;
-    void FUN_00b07900(int eMode);
+    void CSpeedTreeRT_SetFrondWindMethod(int eMode);
 };
 
 // @fnv 0x00b07900
-void SpeedTreeRTB07900::FUN_00b07900(int eMode)
+// src: EXE 0x00b07900
+void SpeedTreeRTB07900::CSpeedTreeRT_SetFrondWindMethod(int eMode)
 {
     try
     {
@@ -4899,7 +4931,7 @@ void SpeedTreeRTB07900::FUN_00b07900(int eMode)
             if (eMode == 2 && m_pWind->GetMode() == 1)
             {
                 m_pLeafData->SetFlag12(false);
-                m_pLeafData->FUN_00b30800(0);
+                m_pLeafData->CIndexedGeometry_ComputeWindEffect(0);
             }
             m_pWind->SetMode(eMode);
             m_pLeafData->SetFlag08(eMode != 2);
@@ -4912,12 +4944,12 @@ void SpeedTreeRTB07900::FUN_00b07900(int eMode)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetFrondWindMethod", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetFrondWindMethod", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetFrondWindMethod").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetFrondWindMethod").c_str());
     }
 }
 }  // namespace fnv_00b07900
@@ -4942,15 +4974,15 @@ struct StrF
     ~StrF()
     {
         int aiD[5];
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
     const char* c_str() const
     {
         return 16 <= uiRes ? kBx.pPtr : kBx.acBuf;
     }
 };
-StrF __cdecl FUN_00b18860(const char* pFmt, ...);
+StrF __cdecl IdvFormatString(const char* pFmt, ...);
 void __cdecl AssignString(const char* pMsg);
 struct CIdvException
 {
@@ -4980,7 +5012,7 @@ struct GeomQ
 };
 struct WindTgt
 {
-    void FUN_00b27820();
+    void CLeafGeometry_Invalidate();
 };
 struct SpdTreeQ
 {
@@ -4998,10 +5030,11 @@ struct SpdTreeQ
     {
         return pWind->b14;
     }
-    float FUN_00b07b00(float fWaterLevelItem, float fLeaf, float fBranch);
+    float CSpeedTreeRT_SetWindStrength(float fWaterLevelItem, float fLeaf, float fBranch);
 };
 // @fnv 0x00b07b00
-float SpdTreeQ::FUN_00b07b00(float fWaterLevelItem, float fLeaf, float fBranch)
+// src: EXE 0x00b07b00
+float SpdTreeQ::CSpeedTreeRT_SetWindStrength(float fWaterLevelItem, float fLeaf, float fBranch)
 {
     float fResult = 0.0f;
     try
@@ -5018,7 +5051,7 @@ float SpdTreeQ::FUN_00b07b00(float fWaterLevelItem, float fLeaf, float fBranch)
             if (GetFieldAt0C() == 1 && pFrond)
                 pFrond->SetB12(false);
             if (GetNestedPointer() == 1 || WindB14())
-                pWind8->FUN_00b27820();
+                pWind8->CLeafGeometry_Invalidate();
         }
         else
         {
@@ -5027,11 +5060,11 @@ float SpdTreeQ::FUN_00b07b00(float fWaterLevelItem, float fLeaf, float fBranch)
     }
     catch (CIdvException& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetWindStrength", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetWindStrength", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetWindStrength").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetWindStrength").c_str());
     }
     return fResult;
 }
@@ -5198,11 +5231,12 @@ class WindMatricesB07
     WindMatrixB07* m_pkMatrices;
 };
 extern WindMatricesB07 g_kWindMatricesB07;
-stdb07::string __cdecl FUN_00b18860(const char* pcFormat, ...);
+stdb07::string __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcError);
 
 // @fnv 0x00b07db0
-void __cdecl FUN_00b07db0(unsigned short usMode)
+// src: EXE 0x00b07db0
+void __cdecl CSpeedTreeRT_SetNumWindMatrices(unsigned short usMode)
 {
     try
     {
@@ -5210,12 +5244,12 @@ void __cdecl FUN_00b07db0(unsigned short usMode)
     }
     catch (ExceptionB07& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetNumWindMatrices", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetNumWindMatrices", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetNumWindMatrices").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetNumWindMatrices").c_str());
     }
 }
 }  // namespace fnv_00b07db0
@@ -5323,7 +5357,7 @@ struct StringB08050 : public StringValB08050
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB08050 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB08050 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct WindGroupsB08050
 {
@@ -5356,11 +5390,12 @@ struct SpeedTreeRTB08050
     int unk40;
     char unk44;
     bool m_bComputed;
-    void FUN_00b08050(unsigned int uiStart, unsigned int ItemUpdateArray);
+    void CSpeedTreeRT_SetLocalMatrices(unsigned int uiStart, unsigned int ItemUpdateArray);
 };
 
 // @fnv 0x00b08050
-void SpeedTreeRTB08050::FUN_00b08050(unsigned int uiStart, unsigned int ItemUpdateArray)
+// src: EXE 0x00b08050
+void SpeedTreeRTB08050::CSpeedTreeRT_SetLocalMatrices(unsigned int uiStart, unsigned int ItemUpdateArray)
 {
     try
     {
@@ -5378,11 +5413,11 @@ void SpeedTreeRTB08050::FUN_00b08050(unsigned int uiStart, unsigned int ItemUpda
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::SetLocalMatrices", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::SetLocalMatrices", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::SetLocalMatrices").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::SetLocalMatrices").c_str());
     }
 }
 }  // namespace fnv_00b08050
@@ -5407,15 +5442,15 @@ struct StrF
     ~StrF()
     {
         int aiD[5];
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
     const char* c_str() const
     {
         return 16 <= uiRes ? kBx.pPtr : kBx.acBuf;
     }
 };
-StrF __cdecl FUN_00b18860(const char* pFmt, ...);
+StrF __cdecl IdvFormatString(const char* pFmt, ...);
 void __cdecl AssignString(const char* pMsg);
 struct CIdvException
 {
@@ -5449,10 +5484,11 @@ struct SpdTreeQ
     TreeEngine* pEngine;
     int ai[12];
     LodInfo* pLod;
-    void FUN_00b08200();
+    void CSpeedTreeRT_ComputeLodLevel();
 };
 // @fnv 0x00b08200
-void SpdTreeQ::FUN_00b08200()
+// src: EXE 0x00b08200
+void SpdTreeQ::CSpeedTreeRT_ComputeLodLevel()
 {
     try
     {
@@ -5472,11 +5508,11 @@ void SpdTreeQ::FUN_00b08200()
     }
     catch (CIdvException& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::ComputeLodLevel", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::ComputeLodLevel", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::ComputeLodLevel").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::ComputeLodLevel").c_str());
     }
 }
 }  // namespace fnv_00b08200
@@ -5935,12 +5971,13 @@ struct OwnerB087
 class ListOwnerRefB087
 {
   public:
-    void FUN_00b08780();
+    void ProcessState_00b08780();
     void* m_pVTable;
     OwnerB087* m_pkOwnerManager;
 };
 // @fnv 0x00b08780
-void ListOwnerRefB087::FUN_00b08780()
+// src: GUESS 0x00b08780 (confidence: low)
+void ListOwnerRefB087::ProcessState_00b08780()
 {
     if (m_pkOwnerManager)
         m_pkOwnerManager->ClearLists();
@@ -6099,14 +6136,14 @@ class LodB08
     int m_iArrayLength;
 };
 
-stdb07::string __cdecl FUN_00b18860(const char* pcFormat, ...);
+stdb07::string __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcError);
 
 // Local CSpeedTreeRT definition retained: include/CSpeedTreeRT.h is not available.
 class CSpeedTreeRT
 {
   public:
-    void FUN_00b088d0();
+    void DeleteBranchGeometry();
     TreeInfoB08* m_pkTreeInfo;
     BranchGeometryB08* m_pkBranchGeometry;
     char m_acPad[0x30 - 8];
@@ -6117,7 +6154,8 @@ class CSpeedTreeRT
 };
 
 // @fnv 0x00b088d0
-void CSpeedTreeRT::FUN_00b088d0()
+// src: EXE 0x00b088d0
+void CSpeedTreeRT::DeleteBranchGeometry()
 {
     try
     {
@@ -6131,12 +6169,12 @@ void CSpeedTreeRT::FUN_00b088d0()
     }
     catch (ExceptionB07& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::DeleteBranchGeometry", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::DeleteBranchGeometry", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::DeleteBranchGeometry").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::DeleteBranchGeometry").c_str());
     }
 }
 }  // namespace fnv_00b088d0
@@ -6244,7 +6282,7 @@ struct StringB08AF0 : public StringValB08AF0
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB08AF0 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB08AF0 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 struct LeafGeometryB08AF0
 {
@@ -6255,11 +6293,12 @@ struct SpeedTreeRTB08AF0
     int unk00;
     int unk04;
     LeafGeometryB08AF0* m_pLodData;
-    const float* FUN_00b08af0(int iIndex);
+    const float* CSpeedTreeRT_GetLeafBillboardTable(int iIndex);
 };
 
 // @fnv 0x00b08af0
-const float* SpeedTreeRTB08AF0::FUN_00b08af0(int iIndex)
+// src: EXE 0x00b08af0
+const float* SpeedTreeRTB08AF0::CSpeedTreeRT_GetLeafBillboardTable(int iIndex)
 {
     const float* pSearchEntries = 0;
     try
@@ -6268,12 +6307,12 @@ const float* SpeedTreeRTB08AF0::FUN_00b08af0(int iIndex)
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::GetLeafBillboardTable", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::GetLeafBillboardTable", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::GetLeafBillboardTable").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::GetLeafBillboardTable").c_str());
     }
     return pSearchEntries;
 }
@@ -6473,11 +6512,12 @@ struct S00b092a0_cls
     float m1c;
     float m20;
     float m24;
-    void FUN_00b092a0(S00b092a0_Reader* r);
+    void CSpeedTreeRT_ParseLodInfo(S00b092a0_Reader* r);
 };
 
 // @fnv 0x00b092a0
-void S00b092a0_cls::FUN_00b092a0(S00b092a0_Reader* r)
+// src: XBOX_PDB 0x00b092a0
+void S00b092a0_cls::CSpeedTreeRT_ParseLodInfo(S00b092a0_Reader* r)
 {
     r->Begin();
     int tok = r->ReadInt();
@@ -6900,11 +6940,12 @@ struct SpdWindInfo
 struct SpdWindReader
 {
     SpdWindInfo* m_pWind;
-    void FUN_00b097e0(SpdParser* pParser);
+    void CSpeedTreeRT_ParseWindInfo(SpdParser* pParser);
 };
 
 // @fnv 0x00b097e0
-void SpdWindReader::FUN_00b097e0(SpdParser* pParser)
+// src: XBOX_PDB 0x00b097e0
+void SpdWindReader::CSpeedTreeRT_ParseWindInfo(SpdParser* pParser)
 {
     int nToken = pParser->ParseToken();
     do
@@ -7500,11 +7541,12 @@ struct IdvFilename : public String
 {
     IdvFilename(String strName) : String(strName)
     {}
-    IdvFilename FUN_00b09f90() const;
+    IdvFilename ProcessEntries_00b09f90() const;
 };
 
 // @fnv 0x00b09f90
-IdvFilename IdvFilename::FUN_00b09f90() const
+// src: GUESS 0x00b09f90 (confidence: low)
+IdvFilename IdvFilename::ProcessEntries_00b09f90() const
 {
     char szBuffer[1024];
     strcpy(szBuffer, c_str());
@@ -7620,7 +7662,7 @@ struct StringB0A2A0 : public StringValB0A2A0
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB0A2A0 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB0A2A0 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 void __cdecl FUN_00ec7c56();
 void* __cdecl memcpy(void* pvDst, const void* pvSrc, unsigned int ItemUpdateArray);
@@ -7681,16 +7723,17 @@ struct SpeedTreeRTB0A2A0
     int unk50;
     int unk54;
     CollisionVectorB0A2A0* m_pCollisionVectors;
-    void FUN_00b0a2a0(unsigned int uiIndex, int& eType, float* pPosition, float* pDimensions);
+    void CSpeedTreeRT_GetCollisionObject(unsigned int uiIndex, int& eType, float* pPosition, float* pDimensions);
 };
 
 // @fnv 0x00b0a2a0
-void SpeedTreeRTB0A2A0::FUN_00b0a2a0(unsigned int uiIndex, int& eType, float* pPosition, float* pDimensions)
+// src: XBOX_PDB 0x00b0a2a0
+void SpeedTreeRTB0A2A0::CSpeedTreeRT_GetCollisionObject(unsigned int uiIndex, int& eType, float* pPosition, float* pDimensions)
 {
     if (m_pCollisionVectors)
     {
         if (uiIndex >= m_pCollisionVectors->size())
-            AssignString(FUN_00b18860("collision object index (%d) exceeds maximum index (%d)", uiIndex,
+            AssignString(IdvFormatString("collision object index (%d) exceeds maximum index (%d)", uiIndex,
                                       m_pCollisionVectors->size())
                              .c_str());
         else
@@ -7808,7 +7851,7 @@ struct StringB0A7A0 : public StringValB0A7A0
     unsigned int m_uiSize;
     unsigned int m_uiRes;
 };
-StringB0A7A0 __cdecl FUN_00b18860(const char* pcFormat, ...);
+StringB0A7A0 __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
 extern MemoryManager g_kMemoryB0A7A0;
 struct FrondGeometryB0A7A0
@@ -7853,11 +7896,12 @@ struct SpeedTreeRTB0A7A0
     int unk58;
     int unk5C;
     FrondGeometryB0A7A0* m_pFrondGeometryData;
-    void FUN_00b0a7a0();
+    void CSpeedTreeRT_DeleteFrondGeometry();
 };
 
 // @fnv 0x00b0a7a0
-void SpeedTreeRTB0A7A0::FUN_00b0a7a0()
+// src: EXE 0x00b0a7a0
+void SpeedTreeRTB0A7A0::CSpeedTreeRT_DeleteFrondGeometry()
 {
     try
     {
@@ -7870,12 +7914,12 @@ void SpeedTreeRTB0A7A0::FUN_00b0a7a0()
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::DeleteFrondGeometry", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::DeleteFrondGeometry", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::DeleteFrondGeometry").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::DeleteFrondGeometry").c_str());
     }
 }
 }  // namespace fnv_00b0a7a0
@@ -8178,7 +8222,7 @@ template <class _Ty> class vectorS : public _Vector_valS<_Ty>
 class FUN_00b0a9a0_Tree
 {
   public:
-    short FUN_00b0a9a0(short m_sIndex);
+    short CIndexedGeometry_GetNumStrips(short m_sIndex);
     int unk00;
     int unk04;
     int unk08;
@@ -8205,7 +8249,8 @@ class FUN_00b0a9a0_Tree
 };
 
 // @fnv 0x00b0a9a0
-short FUN_00b0a9a0_Tree::FUN_00b0a9a0(short m_sIndex)
+// src: XBOX_PDB 0x00b0a9a0
+short FUN_00b0a9a0_Tree::CIndexedGeometry_GetNumStrips(short m_sIndex)
 {
     return (m_sIndex > -1) ? (short)m_kLists[m_sIndex].size() : (short)0;
 }
@@ -8259,11 +8304,12 @@ struct SpeedTreeRTB0AA20
     int unk38;
     int unk3C;
     CheckedLodArray<CheckedLodArray<short> > m_vLodStrips;
-    const short* FUN_00b0aa20(short nLod) const;
+    const short* CIndexedGeometry_GetStripLengthsPointer(short nLod) const;
 };
 
 // @fnv 0x00b0aa20
-const short* SpeedTreeRTB0AA20::FUN_00b0aa20(short nLod) const
+// src: XBOX_PDB 0x00b0aa20
+const short* SpeedTreeRTB0AA20::CIndexedGeometry_GetStripLengthsPointer(short nLod) const
 {
     return nLod >= 0 && nLod < m_usValueAt28 && !m_vLodStrips[nLod].empty() ? &m_vLodStrips[nLod][0] : 0;
 }
@@ -8387,10 +8433,11 @@ struct SelfAd00
     int m3c;
     int m40;
     unsigned char m44;
-    void __thiscall FUN_00b0ad00(OutAd00* out, float param);
+    void __thiscall CSpeedTreeRT_GetBSGeometryLODData(OutAd00* out, float param);
 };
 // @fnv 0x00b0ad00
-void __thiscall SelfAd00::FUN_00b0ad00(OutAd00* out, float param)
+// src: XBOX_PDB 0x00b0ad00
+void __thiscall SelfAd00::CSpeedTreeRT_GetBSGeometryLODData(OutAd00* out, float param)
 {
     float asinRad;
     float t2;
@@ -8409,13 +8456,13 @@ void __thiscall SelfAd00::FUN_00b0ad00(OutAd00* out, float param)
     Vec3f vaTmp;
     Vec3f vbC;
     float deg4;
-    savedQ = ((CSpeedTreeRT*)this)->FUN_00b08710();
+    savedQ = ((CSpeedTreeRT*)this)->GetNumLeafLodLevels();
     nW = savedQ + (DAT_011f8b78 != 0);
     fPf1 = -1.0f;
     pf9 = -1.0f;
     _s1 = -1;
     sZ = -1;
-    FUN_00b0c8d0(param, nW, m1c, m28, m20, (float)m44, &fPf1, &pf9, &_s1, &sZ);
+    CSpeedTreeRT_GetTransitionValues(param, nW, m1c, m28, m20, (float)m44, &fPf1, &pf9, &_s1, &sZ);
     if (DAT_011f8b78)
     {
         out->mfc = -1.0f;
@@ -8503,8 +8550,8 @@ void __thiscall SelfAd00::FUN_00b0ad00(OutAd00* out, float param)
         }
         else
         {
-            tfbk = ((FUN_00b08610_shell*)this)->FUN_00b08610(-1.0f);
-            if (tfbk < ((CSpeedTreeRT*)this)->FUN_00b08710())
+            tfbk = ((FUN_00b08610_shell*)this)->CSpeedTreeRT_GetDiscreteLeafLodLevel(-1.0f);
+            if (tfbk < ((CSpeedTreeRT*)this)->GetNumLeafLodLevels())
             {
                 m08->SetLeafLodGeometry(&out->m78, tfbk, deg4, negDeg8, m24);
                 out->m78 = 1;
@@ -8559,18 +8606,18 @@ struct E0b
 {
     char pad[0x88];
     G0b geo;
-    int FUN_00b0b4b0();
-    int FUN_00b0b530();
-    int FUN_00b0b5b0();
-    int FUN_00b0b630();
-    int FUN_00b0b6b0();
-    int FUN_00b0b730();
-    int FUN_00b0b7b0();
-    int FUN_00b0b830();
-    int FUN_00b0b8b0();
-    unsigned short FUN_00b0a9a0(unsigned short i);
-    int FUN_00b0aa20(unsigned short i);
-    int FUN_00b30730(unsigned short i);
+    int CIndexedGeometry_GetVertexColors();
+    int CIndexedGeometry_GetVertexCoords();
+    int CIndexedGeometry_GetVertexNormals();
+    int CIndexedGeometry_GetVertexBinormals();
+    int CIndexedGeometry_GetVertexTangents();
+    int CIndexedGeometry_GetVertexTexCoords0();
+    int CIndexedGeometry_GetVertexTexCoords1();
+    int CIndexedGeometry_GetVertexWindWeights();
+    int CIndexedGeometry_GetVertexWindMatrixIndices();
+    unsigned short CIndexedGeometry_GetNumStrips(unsigned short i);
+    int CIndexedGeometry_GetStripLengthsPointer(unsigned short i);
+    int CIndexedGeometry_GetStripsPointer(unsigned short i);
 };
 struct I0b
 {
@@ -8594,40 +8641,41 @@ struct S0b
     char p2c[0x18];
     unsigned char ucMin;
     short GetIndexFromLevel(float f);
-    unsigned short FUN_00b08710();
-    float FUN_00b08440();
-    void FUN_00b0b1d0(I0b* pArg, short sLod);
+    unsigned short GetNumLeafLodLevels();
+    float CSpeedTreeRT_GetLodLevel();
+    void CSpeedTreeRT_GetBranchGeometry(I0b* pArg, short sLod);
 };
 // @fnv 0x00b0b1d0
-void S0b::FUN_00b0b1d0(I0b* pArg, short sLod)
+// src: XBOX_PDB 0x00b0b1d0
+void S0b::CSpeedTreeRT_GetBranchGeometry(I0b* pArg, short sLod)
 {
     if (pEngine)
     {
         I0b* pInfo = pArg;
         pInfo->m_usPassCountLocal = pEngine->geo.Count();
         DeadB();
-        pInfo->i14 = pEngine->FUN_00b0b4b0();
-        pInfo->i24 = pEngine->FUN_00b0b530();
-        pInfo->i18 = pEngine->FUN_00b0b5b0();
-        pInfo->i1c = pEngine->FUN_00b0b630();
-        pInfo->i20 = pEngine->FUN_00b0b6b0();
-        pInfo->i28 = pEngine->FUN_00b0b730();
-        pInfo->i2c = pEngine->FUN_00b0b7b0();
-        pInfo->i30 = pEngine->FUN_00b0b830();
-        pInfo->i34 = pEngine->FUN_00b0b8b0();
+        pInfo->i14 = pEngine->CIndexedGeometry_GetVertexColors();
+        pInfo->i24 = pEngine->CIndexedGeometry_GetVertexCoords();
+        pInfo->i18 = pEngine->CIndexedGeometry_GetVertexNormals();
+        pInfo->i1c = pEngine->CIndexedGeometry_GetVertexBinormals();
+        pInfo->i20 = pEngine->CIndexedGeometry_GetVertexTangents();
+        pInfo->i28 = pEngine->CIndexedGeometry_GetVertexTexCoords0();
+        pInfo->i2c = pEngine->CIndexedGeometry_GetVertexTexCoords1();
+        pInfo->i30 = pEngine->CIndexedGeometry_GetVertexWindWeights();
+        pInfo->i34 = pEngine->CIndexedGeometry_GetVertexWindMatrixIndices();
         short sLevel7 = sLod == -1 ? GetIndexFromLevel(-1.0f) : sLod;
         pInfo->iLod = sLevel7;
-        pInfo->usA = pEngine->FUN_00b0a9a0(sLevel7);
-        pInfo->i8 = pEngine->FUN_00b0aa20(sLevel7);
-        pInfo->ic = pEngine->FUN_00b30730(sLevel7);
+        pInfo->usA = pEngine->CIndexedGeometry_GetNumStrips(sLevel7);
+        pInfo->i8 = pEngine->CIndexedGeometry_GetStripLengthsPointer(sLevel7);
+        pInfo->ic = pEngine->CIndexedGeometry_GetStripsPointer(sLevel7);
         if (DAT_011f8b78)
         {
-            unsigned short usN5 = FUN_00b08710() + 1;
+            unsigned short usN5 = GetNumLeafLodLevels() + 1;
             float fW1 = -1.0f;
             float fW3 = -1.0f;
             short s5 = -1;
             short s2 = -1;
-            FUN_00b0c8d0(FUN_00b08440(), usN5, f1c, f28, f20, ucMin, &fW1, &fW3, &s5, &s2);
+            CSpeedTreeRT_GetTransitionValues(CSpeedTreeRT_GetLodLevel(), usN5, f1c, f28, f20, ucMin, &fW1, &fW3, &s5, &s2);
             if (s5 == usN5 - 2)
                 pArg->fAlpha = fW1;
             else if (s5 == usN5 - 1)
@@ -8686,7 +8734,7 @@ template <class T> class CheckedGeometryArray : public GeometryArrayStorage
 class FUN_00b0b530_Tree
 {
   public:
-    float* FUN_00b0b530();
+    float* CIndexedGeometry_GetVertexCoords();
     int unk00;
     int unk04;
     int unk08;
@@ -8725,7 +8773,8 @@ class FUN_00b0b530_Tree
 };
 
 // @fnv 0x00b0b530
-float* FUN_00b0b530_Tree::FUN_00b0b530()
+// src: COMMUNITY 0x00b0b530
+float* FUN_00b0b530_Tree::CIndexedGeometry_GetVertexCoords()
 {
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
@@ -8733,7 +8782,7 @@ float* FUN_00b0b530_Tree::FUN_00b0b530()
 class FUN_00b0b5b0_Tree
 {
   public:
-    float* FUN_00b0b5b0();
+    float* CIndexedGeometry_GetVertexNormals();
     int unk00;
     int unk04;
     int unk08;
@@ -8784,7 +8833,8 @@ class FUN_00b0b5b0_Tree
 };
 
 // @fnv 0x00b0b5b0
-float* FUN_00b0b5b0_Tree::FUN_00b0b5b0()
+// src: COMMUNITY 0x00b0b5b0
+float* FUN_00b0b5b0_Tree::CIndexedGeometry_GetVertexNormals()
 {
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
@@ -8792,7 +8842,7 @@ float* FUN_00b0b5b0_Tree::FUN_00b0b5b0()
 class FUN_00b0b630_Tree
 {
   public:
-    float* FUN_00b0b630();
+    float* CIndexedGeometry_GetVertexBinormals();
     int unk00;
     int unk04;
     int unk08;
@@ -8849,7 +8899,8 @@ class FUN_00b0b630_Tree
 };
 
 // @fnv 0x00b0b630
-float* FUN_00b0b630_Tree::FUN_00b0b630()
+// src: COMMUNITY 0x00b0b630
+float* FUN_00b0b630_Tree::CIndexedGeometry_GetVertexBinormals()
 {
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
@@ -8857,7 +8908,7 @@ float* FUN_00b0b630_Tree::FUN_00b0b630()
 class FUN_00b0b6b0_Tree
 {
   public:
-    float* FUN_00b0b6b0();
+    float* CIndexedGeometry_GetVertexTangents();
     int unk00;
     int unk04;
     int unk08;
@@ -8920,7 +8971,8 @@ class FUN_00b0b6b0_Tree
 };
 
 // @fnv 0x00b0b6b0
-float* FUN_00b0b6b0_Tree::FUN_00b0b6b0()
+// src: COMMUNITY 0x00b0b6b0
+float* FUN_00b0b6b0_Tree::CIndexedGeometry_GetVertexTangents()
 {
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
@@ -8928,7 +8980,7 @@ float* FUN_00b0b6b0_Tree::FUN_00b0b6b0()
 class FUN_00b0b730_Tree
 {
   public:
-    float* FUN_00b0b730();
+    float* CIndexedGeometry_GetVertexTexCoords0();
     int unk00;
     int unk04;
     int unk08;
@@ -8997,7 +9049,8 @@ class FUN_00b0b730_Tree
 };
 
 // @fnv 0x00b0b730
-float* FUN_00b0b730_Tree::FUN_00b0b730()
+// src: COMMUNITY 0x00b0b730
+float* FUN_00b0b730_Tree::CIndexedGeometry_GetVertexTexCoords0()
 {
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
@@ -9005,7 +9058,7 @@ float* FUN_00b0b730_Tree::FUN_00b0b730()
 class FUN_00b0b7b0_Tree
 {
   public:
-    float* FUN_00b0b7b0();
+    float* CIndexedGeometry_GetVertexTexCoords1();
     int unk00;
     int unk04;
     int unk08;
@@ -9092,7 +9145,8 @@ class FUN_00b0b7b0_Tree
 };
 
 // @fnv 0x00b0b7b0
-float* FUN_00b0b7b0_Tree::FUN_00b0b7b0()
+// src: COMMUNITY 0x00b0b7b0
+float* FUN_00b0b7b0_Tree::CIndexedGeometry_GetVertexTexCoords1()
 {
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
@@ -9100,7 +9154,7 @@ float* FUN_00b0b7b0_Tree::FUN_00b0b7b0()
 class FUN_00b0b8b0_Tree
 {
   public:
-    unsigned char* FUN_00b0b8b0();
+    unsigned char* CIndexedGeometry_GetVertexWindMatrixIndices();
     int unk00;
     int unk04;
     int unk08;
@@ -9199,7 +9253,8 @@ class FUN_00b0b8b0_Tree
 };
 
 // @fnv 0x00b0b8b0
-unsigned char* FUN_00b0b8b0_Tree::FUN_00b0b8b0()
+// src: COMMUNITY 0x00b0b8b0
+unsigned char* FUN_00b0b8b0_Tree::CIndexedGeometry_GetVertexWindMatrixIndices()
 {
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
@@ -9237,10 +9292,10 @@ struct TreeOutput
 };
 struct TreeEngine
 {
-    void FUN_00b288f0(TreeGeometry*, unsigned short, float, float, float);
+    void CLeafGeometry_Update_(TreeGeometry*, unsigned short, float, float, float);
     void SetLeafLodGeometry(TreeGeometry*, unsigned short, float, float, float);
 };
-void __cdecl FUN_00b0c8d0(float, unsigned short, float, float, float, float, float*, float*, short*, short*);
+void __cdecl CSpeedTreeRT_GetTransitionValues(float, unsigned short, float, float, float, float, float*, float*, short*, short*);
 struct TreeRuntime : CSpeedTreeRT
 {
     int unk04;
@@ -9250,12 +9305,13 @@ struct TreeRuntime : CSpeedTreeRT
     float lodNear, lodFar, scale, lodTransition;
     int unk2c, unk30, unk34, unk38, unk3c, unk40;
     unsigned char alpha;
-    unsigned short FUN_00b08610(float);
-    void FUN_00b0bc00(TreeOutput*, short);
+    unsigned short CSpeedTreeRT_GetDiscreteLeafLodLevel(float);
+    void CSpeedTreeRT_GetLeafGeometry(TreeOutput*, short);
 };
 
 // @fnv 0x00b0bc00
-void TreeRuntime::FUN_00b0bc00(TreeOutput* output, short forcedLod)
+// src: COMMUNITY 0x00b0bc00
+void TreeRuntime::CSpeedTreeRT_GetLeafGeometry(TreeOutput* output, short forcedLod)
 {
     float resultVal;
     float pointX;
@@ -9276,7 +9332,7 @@ void TreeRuntime::FUN_00b0bc00(TreeOutput* output, short forcedLod)
     float pos2[3];
     float angleVal;
 
-    count4 = FUN_00b08710();
+    count4 = GetNumLeafLodLevels();
     count2 = count4 + (DAT_011f8b78 != 0);
     position[2] = 0.0f;
     position[1] = 0.0f;
@@ -9300,9 +9356,9 @@ void TreeRuntime::FUN_00b0bc00(TreeOutput* output, short forcedLod)
     resultVal = (double)(float)FUN_00ec9610(pointX);
     angle5 = -(float)(resultVal * 57.295780181884766);
     index_ = 0;
-    while (index_ < FUN_00b08710())
+    while (index_ < GetNumLeafLodLevels())
     {
-        geometry->FUN_00b288f0(&output->first, index_, angleVal, angle5, scale);
+        geometry->CLeafGeometry_Update_(&output->first, index_, angleVal, angle5, scale);
         ++index_;
     }
     if (forcedLod > -1)
@@ -9318,7 +9374,7 @@ void TreeRuntime::FUN_00b0bc00(TreeOutput* output, short forcedLod)
         angle3 = -1.0f;
         index6 = -1;
         indexX = -1;
-        FUN_00b0c8d0(reinterpret_cast<FUN_00b08440_shell*>(this)->FUN_00b08440(), count2, lodNear, lodTransition,
+        CSpeedTreeRT_GetTransitionValues(reinterpret_cast<FUN_00b08440_shell*>(this)->CSpeedTreeRT_GetLodLevel(), count2, lodNear, lodTransition,
                      lodFar, (float)alpha, &aAngle, &angle3, &index6, &indexX);
         output->first.active = index6 != -1 && index6 < count4;
         if (output->first.active)
@@ -9342,8 +9398,8 @@ void TreeRuntime::FUN_00b0bc00(TreeOutput* output, short forcedLod)
     }
     else
     {
-        indexVal = FUN_00b08610(-1.0f);
-        if (indexVal < FUN_00b08710())
+        indexVal = CSpeedTreeRT_GetDiscreteLeafLodLevel(-1.0f);
+        if (indexVal < GetNumLeafLodLevels())
         {
             geometry->SetLeafLodGeometry(&output->first, indexVal, angleVal, angle5, scale);
             output->first.active = true;
@@ -9354,7 +9410,7 @@ void TreeRuntime::FUN_00b0bc00(TreeOutput* output, short forcedLod)
 }
 
 extern float DAT_01023cd8;
-float __cdecl FUN_00b0c470(const float* v);
+float __cdecl ComputeAzimuth(const float* v);
 inline void Dead6()
 {
     int d0;
@@ -9407,10 +9463,11 @@ struct T0c
     char p50[4];
     unsigned short m_usPassCountLocal;
     void FillSpeedTreeOutput(O0c* out);
-    void FUN_00b0c050(O0c* pOut, unsigned int uiFlags);
+    void CSpeedTreeRT_Get360BillboardGeometry(O0c* pOut, unsigned int uiFlags);
 };
 // @fnv 0x00b0c050
-void T0c::FUN_00b0c050(O0c* pOut, unsigned int uiFlags)
+// src: COMMUNITY 0x00b0c050
+void T0c::CSpeedTreeRT_Get360BillboardGeometry(O0c* pOut, unsigned int uiFlags)
 {
     FillSpeedTreeOutput(pOut);
     if (pOut->bActive && m_usPassCountLocal)
@@ -9422,7 +9479,7 @@ void T0c::FUN_00b0c050(O0c* pOut, unsigned int uiFlags)
         memcpy(&vB9, &DAT_011f8eac, sizeof(vB9));
         memcpy(&vB9, &(-vB9), sizeof(vB9));
         Dead6();
-        float fAngleTmp = FUN_00b0c470(&vB9.x);
+        float fAngleTmp = ComputeAzimuth(&vB9.x);
         if (fAngleTmp < 0.0)
             fAngleTmp += 360.0;
         float fW3 = -1.0f;
@@ -9432,7 +9489,7 @@ void T0c::FUN_00b0c050(O0c* pOut, unsigned int uiFlags)
         unsigned short usN = m_usPassCountLocal;
         float fHalf3 = 0.5 / usN;
         float fTVal = Lerp0c(fAngleTmp / 360.0, fHalf3, 1.0f - fHalf3);
-        FUN_00b0c8d0(fTVal, usN, (float)(0.5 / usN), f28, f20, ucMin, &fW3, &fWTmp, &sA, &s3);
+        CSpeedTreeRT_GetTransitionValues(fTVal, usN, (float)(0.5 / usN), f28, f20, ucMin, &fW3, &fWTmp, &sA, &s3);
         sA = m_usPassCountLocal - 1 - sA;
         s3 = m_usPassCountLocal - 1 - s3;
         while (sA >= usN)
@@ -9479,7 +9536,8 @@ extern const double DAT_010a4d90;
 
 
 // @fnv 0x00b0c470
-float __cdecl FUN_00b0c470(const float* p)
+// src: COMMUNITY 0x00b0c470
+float __cdecl ComputeAzimuth(const float* p)
 {
     float local_z[3];
     local_z[2] = 0.0f;
@@ -9511,11 +9569,12 @@ struct FrameC780
     {
         return m_bBuilt;
     }
-    FrameC780* FUN_00b0c780(float fScale, float m_fProjectionDepth);
+    FrameC780* CSimpleBillboard_GetBillboardCoords(float fScale, float m_fProjectionDepth);
 };
 
 // @fnv 0x00b0c780
-FrameC780* FrameC780::FUN_00b0c780(float fScale, float m_fProjectionDepth)
+// src: COMMUNITY 0x00b0c780
+FrameC780* FrameC780::CSimpleBillboard_GetBillboardCoords(float fScale, float m_fProjectionDepth)
 {
     if (!IsBuilt())
     {
@@ -9546,7 +9605,8 @@ inline float Lerp0c(float t, float a, float b)
 extern "C" double __cdecl FUN_00ec6cde(double);
 extern "C" double __cdecl FUN_00ec9ac0(double, double);
 // @fnv 0x00b0c8d0
-void __cdecl FUN_00b0c8d0(float a, unsigned short n, float fLimit, float fMin, float fExp, float fBase, float* pOut1,
+// src: XBOX_PDB 0x00b0c8d0
+void __cdecl CSpeedTreeRT_GetTransitionValues(float a, unsigned short n, float fLimit, float fMin, float fExp, float fBase, float* pOut1,
                           float* pOut2, short* pIdx1, short* pIdx2)
 {
     unsigned short _us;
@@ -9616,15 +9676,15 @@ struct StrF
     ~StrF()
     {
         int aiD[5];
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
     const char* c_str() const
     {
         return 16 <= uiRes ? kBx.pPtr : kBx.acBuf;
     }
 };
-StrF __cdecl FUN_00b18860(const char* pFmt, ...);
+StrF __cdecl IdvFormatString(const char* pFmt, ...);
 void __cdecl AssignString(const char* pMsg);
 struct CIdvException
 {
@@ -9633,12 +9693,12 @@ struct CIdvException
 };
 struct Pool
 {
-    void* FUN_00aa3e40(unsigned n);
+    void* Game_DoHeapAlloc(unsigned n);
 };
 extern Pool DAT_011f6238;
 inline void* __cdecl operator new[](unsigned n)
 {
-    return DAT_011f6238.FUN_00aa3e40(n);
+    return DAT_011f6238.Game_DoHeapAlloc(n);
 }
 struct SpdTreeQ
 {
@@ -9646,17 +9706,18 @@ struct SpdTreeQ
     float f24;
     int i28;
     float* pafLodSizes;
-    unsigned short FUN_00b08710();
-    const float* FUN_00b0cb10();
+    unsigned short GetNumLeafLodLevels();
+    const float* CSpeedTreeRT_GetLeafLodSizeAdjustments();
 };
 // @fnv 0x00b0cb10
-const float* SpdTreeQ::FUN_00b0cb10()
+// src: EXE 0x00b0cb10
+const float* SpdTreeQ::CSpeedTreeRT_GetLeafLodSizeAdjustments()
 {
     try
     {
         if (!pafLodSizes)
         {
-            int nLods = FUN_00b08710();
+            int nLods = GetNumLeafLodLevels();
             pafLodSizes = new float[nLods];
             for (int i = 0; i < nLods; i++)
                 pafLodSizes[i] = nLods > 0 ? 1.0 + f24 * i : 1.0;
@@ -9664,12 +9725,12 @@ const float* SpdTreeQ::FUN_00b0cb10()
     }
     catch (CIdvException& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::GetLeafLodSizeAdjustments", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::GetLeafLodSizeAdjustments", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::GetLeafLodSizeAdjustments").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::GetLeafLodSizeAdjustments").c_str());
     }
     return pafLodSizes;
 }
@@ -9677,8 +9738,8 @@ const float* SpdTreeQ::FUN_00b0cb10()
 
 struct Pool_b0cd
 {
-    void* FUN_00aa3e40(unsigned int uiSize);
-    void FUN_00aa4060(void* pvBlock);
+    void* Game_DoHeapAlloc(unsigned int uiSize);
+    void MemoryManager_Deallocate(void* pvBlock);
 };
 extern Pool_b0cd g_kPoolB0CD;
 
@@ -9686,14 +9747,14 @@ class Track_b0cd
 {
   public:
     Track_b0cd();
-    void FUN_00b3e750(int iValue);
+    void ProcessEntries_00b3e750(int iValue);
     static void* operator new(unsigned int uiSize)
     {
-        return g_kPoolB0CD.FUN_00aa3e40(uiSize);
+        return g_kPoolB0CD.Game_DoHeapAlloc(uiSize);
     }
     static void operator delete(void* pvBlock)
     {
-        g_kPoolB0CD.FUN_00aa4060(pvBlock);
+        g_kPoolB0CD.MemoryManager_Deallocate(pvBlock);
     }
 
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
@@ -9708,14 +9769,15 @@ class TrackOwner_b0cd
     int unk40, unk44, unk48, unk4c;
     Track_b0cd* m_pkTrack;
 
-    void FUN_00b0cd40(int iValue);
+    void CSpeedTreeRT_ParseShadowProjectionInfo(int iValue);
 };
 
 // @fnv 0x00b0cd40
-void TrackOwner_b0cd::FUN_00b0cd40(int iValue)
+// src: COMMUNITY 0x00b0cd40
+void TrackOwner_b0cd::CSpeedTreeRT_ParseShadowProjectionInfo(int iValue)
 {
     m_pkTrack = new Track_b0cd;
-    m_pkTrack->FUN_00b3e750(iValue);
+    m_pkTrack->ProcessEntries_00b3e750(iValue);
 }
 
 inline void Dead8_acad60()
@@ -9740,11 +9802,11 @@ inline CatQ_acad60 PtrCat_acad60(int*&, int*&)
     CatQ_acad60 c;
     return c;
 }
-void __cdecl FUN_00b36b10(int* _First, unsigned int _Count, const int& _Val);
+void __cdecl Runtime_ProcessState_00b36b10(int* _First, unsigned int _Count, const int& _Val);
 inline void UFill2_acad60(int* _First, unsigned int _Count, const int& _Val, AlQ_acad60& _Al, CatQ_acad60, TagQ_acad60)
 {
     Dead8_acad60();
-    FUN_00b36b10(_First, _Count, _Val);
+    Runtime_ProcessState_00b36b10(_First, _Count, _Val);
 }
 inline void UFillN_acad60(int* _First, unsigned int _Count, const int& _Val, AlQ_acad60& _Al)
 {
@@ -9792,8 +9854,8 @@ struct VecQ_acad60
         UFillN_acad60(_Ptr, _Count, _Val, _Alval);
         return _Ptr + _Count;
     }
-    ItQ_acad60 FUN_00b0e600(CItQ_acad60 _Where, const int& _Val);
-    void FUN_00b0ddc0(const int& _Val);
+    ItQ_acad60 ProcessAndReturnValue_00b0e600(CItQ_acad60 _Where, const int& _Val);
+    void std_vector_push_back(const int& _Val);
 };
 inline CItQ_acad60::CItQ_acad60(int* _Ptr, const VecQ_acad60* _Pvector) : _Myaux(0)
 {
@@ -9806,13 +9868,14 @@ inline CItQ_acad60::CItQ_acad60(int* _Ptr, const VecQ_acad60* _Pvector) : _Myaux
     _Myptr = _Ptr;
 }
 // @fnv 0x00b0ddc0
-void VecQ_acad60::FUN_00b0ddc0(const int& _Val)
+// src: COMMUNITY 0x00b0ddc0
+void VecQ_acad60::std_vector_push_back(const int& _Val)
 {
     if (size() < capacity())
         _Mylast = _Ufill(_Mylast, 1, _Val);
     else
     {
-        FUN_00b0e600(end(), _Val);
+        ProcessAndReturnValue_00b0e600(end(), _Val);
         Dead11_acad60();
     }
 }
@@ -10173,11 +10236,12 @@ template <class _Ty> class vectorS : public _Vector_valS<_Ty>
 class FUN_00b0df00_Vector : public vectorS<int>
 {
   public:
-    iterator FUN_00b0df00(const_iterator _Where);
+    iterator std_vector_erase(const_iterator _Where);
 };
 
 // @fnv 0x00b0df00
-FUN_00b0df00_Vector::iterator FUN_00b0df00_Vector::FUN_00b0df00(const_iterator _Where)
+// src: COMMUNITY 0x00b0df00
+FUN_00b0df00_Vector::iterator FUN_00b0df00_Vector::std_vector_erase(const_iterator _Where)
 {
     unchecked_copyS(_Where._Myptr + 1, _Mylast, _Where._Myptr);
     _Destroy(_Mylast - 1, _Mylast);
@@ -10205,11 +10269,11 @@ inline CatQ_acda90 PtrCat_acda90(ElQ_acda90*&, ElQ_acda90*&)
     CatQ_acda90 c;
     return c;
 }
-void __cdecl FUN_00b10990(ElQ_acda90* _First, unsigned int _Count, const ElQ_acda90& _Val, AlQ_acda90& _Al, CatQ_acda90,
+void __cdecl Speedtreert_ProcessEntries_00b10990(ElQ_acda90* _First, unsigned int _Count, const ElQ_acda90& _Val, AlQ_acda90& _Al, CatQ_acda90,
                           TagQ_acda90);
 inline void UFillN_acda90(ElQ_acda90* _First, unsigned int _Count, const ElQ_acda90& _Val, AlQ_acda90& _Al)
 {
-    FUN_00b10990(_First, _Count, _Val, _Al, PtrCat_acda90(_First, _First), TagQ_acda90());
+    Speedtreert_ProcessEntries_00b10990(_First, _Count, _Val, _Al, PtrCat_acda90(_First, _First), TagQ_acda90());
 }
 struct VecQ_acda90;
 struct CItQ_acda90
@@ -10253,8 +10317,8 @@ struct VecQ_acda90
         UFillN_acda90(_Ptr, _Count, _Val, _Alval);
         return _Ptr + _Count;
     }
-    ItQ_acda90 FUN_00b0e880(CItQ_acda90 _Where, const ElQ_acda90& _Val);
-    void FUN_00b0e090(const ElQ_acda90& _Val);
+    ItQ_acda90 ProcessAndReturnValue_00b0e880(CItQ_acda90 _Where, const ElQ_acda90& _Val);
+    void UpdateState_00b0e090(const ElQ_acda90& _Val);
 };
 inline CItQ_acda90::CItQ_acda90(ElQ_acda90* _Ptr, const VecQ_acda90* _Pvector) : _Myaux(0)
 {
@@ -10281,13 +10345,14 @@ inline void Dead12_acda90()
     int d10;
 }
 // @fnv 0x00b0e090
-void VecQ_acda90::FUN_00b0e090(const ElQ_acda90& _Val)
+// src: GUESS 0x00b0e090 (confidence: low)
+void VecQ_acda90::UpdateState_00b0e090(const ElQ_acda90& _Val)
 {
     if (size() < capacity())
         _Mylast = _Ufill(_Mylast, 1, _Val);
     else
     {
-        FUN_00b0e880(end(), _Val);
+        ProcessAndReturnValue_00b0e880(end(), _Val);
         Dead12_acda90();
     }
 }
@@ -10594,11 +10659,12 @@ struct ElemEBB0
 class FUN_00b0ebb0_Iterator : public _Vector_const_iteratorS<ElemEBB0>
 {
   public:
-    ElemEBB0& FUN_00b0ebb0() const;
+    ElemEBB0& ProcessEntries_00b0ebb0() const;
 };
 
 // @fnv 0x00b0ebb0
-ElemEBB0& FUN_00b0ebb0_Iterator::FUN_00b0ebb0() const
+// src: GUESS 0x00b0ebb0 (confidence: low)
+ElemEBB0& FUN_00b0ebb0_Iterator::ProcessEntries_00b0ebb0() const
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoS();
@@ -10634,7 +10700,8 @@ inline void Construct(ElQ* p, const ElQ& v)
     ::new (vp) ElQ(v);
 }
 // @fnv 0x00b10990
-void FUN_00b10990(ElQ* first, unsigned int n, const ElQ& val)
+// src: GUESS 0x00b10990 (confidence: low)
+void Speedtreert_ProcessEntries_00b10990(ElQ* first, unsigned int n, const ElQ& val)
 {
     ElQ* next = first;
     try
@@ -10928,13 +10995,14 @@ template <class _Ty> class vectorS : public _Vector_valS<_Ty>
 class FUN_00b06180_Reader
 {
   public:
-    bool FUN_00b06180();
+    bool ProcessAndTransformResult_00b06180();
     unsigned int m_uiPosition;
     vectorS<unsigned char> m_kFlags;
 };
 
 // @fnv 0x00b06180
-bool FUN_00b06180_Reader::FUN_00b06180()
+// src: GUESS 0x00b06180 (confidence: low)
+bool FUN_00b06180_Reader::ProcessAndTransformResult_00b06180()
 {
     return m_kFlags[m_uiPosition++] != 0;
 }
@@ -11846,12 +11914,12 @@ extern unsigned char DAT_011f8b79;
 typedef unsigned int size_t;
 struct HeapQ
 {
-    void* FUN_00aa3e40(size_t n);
+    void* Game_DoHeapAlloc(size_t n);
 };
 extern HeapQ DAT_011f6238;
 inline void* operator new[](size_t n)
 {
-    return DAT_011f6238.FUN_00aa3e40(n);
+    return DAT_011f6238.Game_DoHeapAlloc(n);
 }
 struct FUN_0044a4c0
 {
@@ -11863,9 +11931,9 @@ struct FUN_0044a4c0
     FUN_0044a4c0(const FUN_0044a4c0& r);
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
     FUN_0044a4c0& AssignSubstring(const FUN_0044a4c0& r, unsigned o, unsigned n);
     FUN_0044a4c0& operator=(const FUN_0044a4c0& r)
     {
@@ -11890,7 +11958,7 @@ struct FUN_00b09480 : FUN_00b096a0
 struct PathQ : FUN_0044a4c0
 {
     PathQ(FUN_0044a4c0 s);
-    FUN_0044a4c0 FUN_00b09f90();
+    FUN_0044a4c0 ProcessEntries_00b09f90();
 };
 struct ByteVec
 {
@@ -11909,9 +11977,9 @@ struct Parser
     unsigned uiPos;
     ByteVec kData;
     int GetNextElement();
-    float FUN_00b3ed20();
-    FUN_0044a4c0 FUN_00b3ee40();
-    bool FUN_00b06180();
+    float CTreeFileAccess_ParseFloat();
+    FUN_0044a4c0 CTreeFileAccess_ParseString();
+    bool ProcessAndTransformResult_00b06180();
     bool AtEnd()
     {
         int aK[9];
@@ -11931,7 +11999,7 @@ struct TexCoordQ
     TexCoordQ();
     static void* operator new(size_t n)
     {
-        return DAT_011f6238.FUN_00aa3e40(n);
+        return DAT_011f6238.Game_DoHeapAlloc(n);
     }
 };
 inline void DeadTop()
@@ -11967,10 +12035,11 @@ struct Tree
     int aj[7];
     bool b6c;
     bool b6d;
-    void FUN_00b09960(Parser* p);
+    void CSpeedTreeRT_ParseTextureCoordInfo(Parser* p);
 };
 // @fnv 0x00b09960
-void Tree::FUN_00b09960(Parser* p)
+// src: COMMUNITY 0x00b09960
+void Tree::CSpeedTreeRT_ParseTextureCoordInfo(Parser* p)
 {
     pTileTexture = new TexCoordQ;
     int iToken = p->GetNextElement();
@@ -11986,7 +12055,7 @@ void Tree::FUN_00b09960(Parser* p)
                 pTileTexture->pA = new float[pTileTexture->iA * 8];
                 for (int i = 0; i < pTileTexture->iA; i++)
                     for (int j = 0; j < 8; j++)
-                        pTileTexture->pA[i * 8 + j] = p->FUN_00b3ed20();
+                        pTileTexture->pA[i * 8 + j] = p->CTreeFileAccess_ParseFloat();
             }
             break;
         case 0x2713:
@@ -11997,7 +12066,7 @@ void Tree::FUN_00b09960(Parser* p)
                 for (int i = 0; i < pTileTexture->iB; i++)
                     for (int j = 0; j < 8; j++)
                     {
-                        pTileTexture->pB[i * 8 + j] = p->FUN_00b3ed20();
+                        pTileTexture->pB[i * 8 + j] = p->CTreeFileAccess_ParseFloat();
                         if (j % 2 && DAT_011f8b79)
                             pTileTexture->pB[i * 8 + j] = -pTileTexture->pB[i * 8 + j];
                     }
@@ -12010,21 +12079,21 @@ void Tree::FUN_00b09960(Parser* p)
                 pTileTexture->pC = new float[pTileTexture->iC * 8];
                 for (int i = 0; i < pTileTexture->iC; i++)
                     for (int j = 0; j < 8; j++)
-                        pTileTexture->pC[i * 8 + j] = p->FUN_00b3ed20();
+                        pTileTexture->pC[i * 8 + j] = p->CTreeFileAccess_ParseFloat();
             }
             break;
         case 0x2715: {
             Gap1();
 
-            PathQ kPath(p->FUN_00b3ee40());
-            pTileTexture->strName = kPath.FUN_00b09f90();
+            PathQ kPath(p->CTreeFileAccess_ParseString());
+            pTileTexture->strName = kPath.ProcessEntries_00b09f90();
             break;
         }
         case 0x2716:
-            b6d = p->FUN_00b06180();
+            b6d = p->ProcessAndTransformResult_00b06180();
             break;
         case 0x2717:
-            b6c = p->FUN_00b06180();
+            b6c = p->ProcessAndTransformResult_00b06180();
             break;
         default:
             throw FUN_00b09480("malformed texture coord info", false);
@@ -12049,9 +12118,9 @@ struct FUN_0044a4c0
     FUN_0044a4c0(const FUN_0044a4c0& r);
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
 };
 struct FUN_00b096a0
 {
@@ -12066,7 +12135,7 @@ struct FUN_00b09480 : FUN_00b096a0
 };
 struct Pool
 {
-    void* FUN_00aa3e40(unsigned n);
+    void* Game_DoHeapAlloc(unsigned n);
     void Free(void* p);
 };
 extern Pool DAT_011f6238;
@@ -12094,13 +12163,13 @@ struct FUN_00b0dfb0
     {
         int aiA[41];
         aiA[0] = 0;
-        return DAT_011f6238.FUN_00aa3e40(n);
+        return DAT_011f6238.Game_DoHeapAlloc(n);
     }
     static void operator delete(void* p)
     {
         DAT_011f6238.Free(p);
     }
-    void FUN_00b0e090(const Shape& s);
+    void UpdateState_00b0e090(const Shape& s);
 };
 inline void Dead40()
 {
@@ -12124,7 +12193,7 @@ struct Parser
     unsigned uiPos;
     ByteVec kData;
     int GetNextElement();
-    float FUN_00b3ed20();
+    float CTreeFileAccess_ParseFloat();
 };
 inline void* DeadNew(void* q)
 {
@@ -12134,10 +12203,11 @@ struct Tree
 {
     int ai[22];
     FUN_00b0dfb0* pColl;
-    void FUN_00b0a490(Parser* p);
+    void CSpeedTreeRT_ParseCollisionObjects(Parser* p);
 };
 // @fnv 0x00b0a490
-void Tree::FUN_00b0a490(Parser* p)
+// src: XBOX_PDB 0x00b0a490
+void Tree::CSpeedTreeRT_ParseCollisionObjects(Parser* p)
 {
     pColl = new FUN_00b0dfb0;
     int iToken3 = p->GetNextElement();
@@ -12166,30 +12236,30 @@ void Tree::FUN_00b0a490(Parser* p)
         default:
             throw FUN_00b09480("malformed collision object info", false);
         }
-        kPos2.x = p->FUN_00b3ed20();
-        kPos2.y = p->FUN_00b3ed20();
-        kPos2.z = p->FUN_00b3ed20();
+        kPos2.x = p->CTreeFileAccess_ParseFloat();
+        kPos2.y = p->CTreeFileAccess_ParseFloat();
+        kPos2.z = p->CTreeFileAccess_ParseFloat();
         s.a.x = kPos2.x;
         s.a.y = kPos2.y;
         s.a.z = kPos2.z;
         switch (s.iType)
         {
         case 0:
-            s.b.x = p->FUN_00b3ed20();
+            s.b.x = p->CTreeFileAccess_ParseFloat();
             break;
         case 1:
-            s.b.x = p->FUN_00b3ed20();
-            s.b.y = p->FUN_00b3ed20();
+            s.b.x = p->CTreeFileAccess_ParseFloat();
+            s.b.y = p->CTreeFileAccess_ParseFloat();
             break;
         case 2:
-            s.b.x = p->FUN_00b3ed20();
-            s.b.y = p->FUN_00b3ed20();
-            s.b.z = p->FUN_00b3ed20();
+            s.b.x = p->CTreeFileAccess_ParseFloat();
+            s.b.y = p->CTreeFileAccess_ParseFloat();
+            s.b.z = p->CTreeFileAccess_ParseFloat();
             break;
         default:
             throw FUN_00b09480("unknown collision object type", false);
         }
-        pColl->FUN_00b0e090(s);
+        pColl->UpdateState_00b0e090(s);
         if ((bool)(int)(p->uiPos >= p->kData.size()))
             throw FUN_00b09480("premature end of file reached parsing collision object info", false);
         else
@@ -12211,9 +12281,9 @@ struct FUN_0044a4c0
     FUN_0044a4c0(const FUN_0044a4c0& r);
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
     FUN_0044a4c0& AssignSubstring(const FUN_0044a4c0& r, unsigned o, unsigned n);
     FUN_0044a4c0& operator=(const FUN_0044a4c0& r)
     {
@@ -12238,7 +12308,7 @@ struct FUN_00b09480 : FUN_00b096a0
 struct FUN_0044a500 : FUN_0044a4c0
 {
     FUN_0044a500(const FUN_0044a4c0& r);
-    FUN_0044a4c0 FUN_00b09f90();
+    FUN_0044a4c0 ProcessEntries_00b09f90();
 };
 struct KP : FUN_0044a500
 {
@@ -12263,9 +12333,9 @@ struct Parser
     unsigned uiPos;
     ByteVec kData;
     int GetNextElement();
-    float FUN_00b3ed20();
-    FUN_0044a4c0 FUN_00b3ee40();
-    bool FUN_00b06180();
+    float CTreeFileAccess_ParseFloat();
+    FUN_0044a4c0 CTreeFileAccess_ParseString();
+    bool ProcessAndTransformResult_00b06180();
 };
 struct TexQ
 {
@@ -12289,10 +12359,11 @@ struct Tree
     int aj[7];
     bool b6c;
     bool b6d;
-    void FUN_00b0d810(Parser* p);
+    void CSpeedTreeRT_ParseSupplementalTexCoordInfo(Parser* p);
 };
 // @fnv 0x00b0d810
-void Tree::FUN_00b0d810(Parser* p)
+// src: COMMUNITY 0x00b0d810
+void Tree::CSpeedTreeRT_ParseSupplementalTexCoordInfo(Parser* p)
 {
     if (pTileTexture)
     {
@@ -12302,19 +12373,19 @@ void Tree::FUN_00b0d810(Parser* p)
             switch (iToken)
             {
             case 0x4e22: {
-                KP kPath(p->FUN_00b3ee40());
-                pTileTexture->strName = kPath.FUN_00b09f90();
+                KP kPath(p->CTreeFileAccess_ParseString());
+                pTileTexture->strName = kPath.ProcessEntries_00b09f90();
                 break;
             }
             case 0x4e23:
-                b6d = p->FUN_00b06180();
+                b6d = p->ProcessAndTransformResult_00b06180();
                 break;
             case 0x4e24:
-                b6c = p->FUN_00b06180();
+                b6c = p->ProcessAndTransformResult_00b06180();
                 break;
             case 0x4e25:
                 for (int i = 0; i < 8; i++)
-                    pTileTexture->af[i] = p->FUN_00b3ed20();
+                    pTileTexture->af[i] = p->CTreeFileAccess_ParseFloat();
                 break;
             default:
                 throw FUN_00b09480("malformed texture coord info", false);
@@ -13343,10 +13414,10 @@ struct VirtualResource
 };
 struct LodResource : TreeResource
 {
-    void FUN_00b04420();
+    void ReleaseStorage_00b04420();
     __forceinline ~LodResource()
     {
-        FUN_00b04420();
+        ReleaseStorage_00b04420();
     }
 };
 struct BillboardResource : TreeResource
@@ -13379,10 +13450,10 @@ struct RegCIt
 {
     void* owner;
     void** current;
-    bool FUN_00b0eca0(const RegCIt&) const;
+    bool ProcessEntries_00b0eca0(const RegCIt&) const;
     __forceinline bool operator!=(const RegCIt& r) const
     {
-        return !(FUN_00b0eca0(r));
+        return !(ProcessEntries_00b0eca0(r));
     }
     __forceinline void setCur(void** p)
     {
@@ -13427,7 +13498,7 @@ struct Registry : RegMid
     void** last;
     void** limit;
     void Clear();
-    RegistryIterator FUN_00b0df00(RegCIt);
+    RegistryIterator std_vector_erase(RegCIt);
     __forceinline RegistryIterator begin()
     {
         void** p = first;
@@ -13458,13 +13529,13 @@ struct OtherMid : OtherRegistryProxy
 };
 struct OtherRegistry : OtherMid
 {
-    void FUN_00b0ea80();
+    void ReleaseEntries_00b0ea80();
     __forceinline ~OtherRegistry()
     {
-        FUN_00b0ea80();
+        ReleaseEntries_00b0ea80();
     }
 };
-void FUN_00b37a00();
+void CIdvBezierSpline_ClearCache();
 static __forceinline void Pad5()
 {
     int dq[5];
@@ -13534,11 +13605,12 @@ struct SpeedTreeRelease
     BranchResource* extraBranches;
     void* m64;
     void* m68;
-    void FUN_00b053e0();
-    void FUN_00b03b30();
+    void CSpeedTreeRT_DeleteTransientData();
+    void ReleaseStorage_00b03b30();
 };
 // @fnv 0x00b03b30
-void SpeedTreeRelease::FUN_00b03b30()
+// src: GUESS 0x00b03b30 (confidence: low)
+void SpeedTreeRelease::ReleaseStorage_00b03b30()
 {
     if (instance == 0)
     {
@@ -13546,7 +13618,7 @@ void SpeedTreeRelease::FUN_00b03b30()
         RegistryIterator found = findResource(reinterpret_cast<Registry&>(DAT_011f8bdc).begin(),
                                               reinterpret_cast<Registry&>(DAT_011f8bdc).end(), this);
         if (found != reinterpret_cast<Registry&>(DAT_011f8bdc).end())
-            reinterpret_cast<Registry&>(DAT_011f8bdc).FUN_00b0df00(found);
+            reinterpret_cast<Registry&>(DAT_011f8bdc).std_vector_erase(found);
         Pad5();
         LeaveCriticalSection(&DAT_011f8bc4);
     }
@@ -13554,14 +13626,14 @@ void SpeedTreeRelease::FUN_00b03b30()
     if (instance != 0)
     {
         RegistryIterator found = findResource(instances->begin(), instances->end(), this);
-        instances->FUN_00b0df00(found);
+        instances->std_vector_erase(found);
         Pad5();
         delete (TreeResource*)instance;
         instance = 0;
     }
     if (*references == 0)
     {
-        FUN_00b053e0();
+        CSpeedTreeRT_DeleteTransientData();
         delete branches;
         delete (TreeResource*)m0c;
         delete (TreeResource*)m10;
@@ -13596,7 +13668,7 @@ void SpeedTreeRelease::FUN_00b03b30()
     strings = 0;
     m68 = 0;
     if (--DAT_011f8b7c == 0)
-        FUN_00b37a00();
+        CIdvBezierSpline_ClearCache();
     Pad8();
 }
 
@@ -13754,7 +13826,8 @@ struct TreeFloatVector : TreeFloatAllocator
         }
         return first;
     }
-    void FUN_0044a0a0()
+// src: COMMUNITY 0x0044a0a0
+    void std_vector_float_std_allocator_float_clear()
     {
         Erase(Begin(), End());
     }
@@ -13829,7 +13902,8 @@ struct TreeString
     {
         TreeCharTraits::Assign(Data()[length = count], char());
     }
-    void FUN_0044a730(bool built = false, unsigned int count = 0)
+// src: XBOX_PDB 0x0044a730
+    void fopen_0044a730(bool built = false, unsigned int count = 0)
     {
         if (!built)
             ;
@@ -13845,7 +13919,7 @@ struct TreeString
     }
     ~TreeString()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
 };
 
@@ -13859,7 +13933,7 @@ struct TreeGeomQ
     TreeFloatVector vec;
     void Release()
     {
-        vec.FUN_0044a0a0();
+        vec.std_vector_float_std_allocator_float_clear();
     }
 };
 
@@ -13883,11 +13957,12 @@ struct TreeRuntimeQ
     EmbeddedTex* unk50;
     int unk54, unk58, unk5c;
     TreeGeomQ* unk60;
-    void __thiscall FUN_00b087d0();
+    void __thiscall ReleaseStorage_00b087d0();
 };
 
 // @fnv 0x00b087d0
-void __thiscall TreeRuntimeQ::FUN_00b087d0()
+// src: GUESS 0x00b087d0 (confidence: low)
+void __thiscall TreeRuntimeQ::ReleaseStorage_00b087d0()
 {
     if (this->unk50 != 0)
     {
@@ -13997,7 +14072,7 @@ struct TreeEngine
 };
 struct LightingEngine
 {
-    void FUN_00b2a210(const CVec3& center, int a, unsigned short n);
+    void CLightingEngine_ComputeLeafStaticLighting(const CVec3& center, int a, unsigned short n);
 };
 struct CSpeedTreeRT
 {
@@ -14005,31 +14080,32 @@ struct CSpeedTreeRT
     void* m_04;
     void* m_08;
     LightingEngine* m_pLighting;
-    void FUN_00b08c80(float* box);
-    unsigned short FUN_00b08710();
-    void FUN_00b08cc0();
+    void CSpeedTreeRT_GetBoundingBox_00b08c80(float* box);
+    unsigned short GetNumLeafLodLevels();
+    void ComputeLeafStaticLighting();
 };
 
 // @fnv 0x00b08cc0
-void CSpeedTreeRT::FUN_00b08cc0()
+// src: EXE 0x00b08cc0
+void CSpeedTreeRT::ComputeLeafStaticLighting()
 {
     int a;
     try
     {
         float box2[6];
-        FUN_00b08c80(box2);
+        CSpeedTreeRT_GetBoundingBox_00b08c80(box2);
         CVec3 center5((box2[0] + box2[3]) * 0.5, (box2[1] + box2[4]) * 0.5, (box2[2] + box2[5]) * 0.5);
         a = m_pFirstPointer->m_ec;
-        m_pLighting->FUN_00b2a210(center5, a, FUN_00b08710());
+        m_pLighting->CLightingEngine_ComputeLeafStaticLighting(center5, a, GetNumLeafLodLevels());
     }
     catch (std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::ComputeLeafStaticLighting", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::ComputeLeafStaticLighting", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::ComputeLeafStaticLighting").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::ComputeLeafStaticLighting").c_str());
     }
 }
 }
@@ -14081,25 +14157,26 @@ struct SpeedTreeImpl
     int unk60, unk64, unk68;
     unsigned char unk6c;
 
-    void FUN_00b0b1d0(void* m_pShaderGeometry, unsigned short nBranchLodLevel);
+    void CSpeedTreeRT_GetBranchGeometry(void* m_pShaderGeometry, unsigned short nBranchLodLevel);
     void FillFrondGeometry(void* m_pShaderGeometry, unsigned short nFrondLodLevel);
-    void FUN_00b0bc00(void* m_pShaderGeometry, unsigned short nLeafLodLevel);
-    void FUN_00b0c050(void* m_pShaderGeometry, unsigned long ulGeometryFlags);
+    void CSpeedTreeRT_GetLeafGeometry(void* m_pShaderGeometry, unsigned short nLeafLodLevel);
+    void CSpeedTreeRT_Get360BillboardGeometry(void* m_pShaderGeometry, unsigned long ulGeometryFlags);
     void FillSpeedTreeOutput(void* m_pShaderGeometry);
 
-    void FUN_00b0ab20(void* m_pShaderGeometry, unsigned long ulGeometryFlags, unsigned short nBranchLodLevel,
+    void CSpeedTreeRT_GetGeometry(void* m_pShaderGeometry, unsigned long ulGeometryFlags, unsigned short nBranchLodLevel,
                       unsigned short nFrondLodLevel, unsigned short nLeafLodLevel);
 };
 
 // @fnv 0x00b0ab20
-void SpeedTreeImpl::FUN_00b0ab20(void* m_pShaderGeometry, unsigned long ulGeometryFlags, unsigned short nBranchLodLevel,
+// src: EXE 0x00b0ab20
+void SpeedTreeImpl::CSpeedTreeRT_GetGeometry(void* m_pShaderGeometry, unsigned long ulGeometryFlags, unsigned short nBranchLodLevel,
                                  unsigned short nFrondLodLevel, unsigned short nLeafLodLevel)
 {
     try
     {
         if (ulGeometryFlags & 1)
         {
-            this->FUN_00b0b1d0(m_pShaderGeometry, nBranchLodLevel);
+            this->CSpeedTreeRT_GetBranchGeometry(m_pShaderGeometry, nBranchLodLevel);
         }
         if (ulGeometryFlags & 2)
         {
@@ -14107,13 +14184,13 @@ void SpeedTreeImpl::FUN_00b0ab20(void* m_pShaderGeometry, unsigned long ulGeomet
         }
         if (ulGeometryFlags & 4)
         {
-            this->FUN_00b0bc00(m_pShaderGeometry, nLeafLodLevel);
+            this->CSpeedTreeRT_GetLeafGeometry(m_pShaderGeometry, nLeafLodLevel);
         }
         if (ulGeometryFlags & 8)
         {
             if (this->unk6c && !(ulGeometryFlags & 0x10))
             {
-                this->FUN_00b0c050(m_pShaderGeometry, ulGeometryFlags);
+                this->CSpeedTreeRT_Get360BillboardGeometry(m_pShaderGeometry, ulGeometryFlags);
             }
             else
             {
@@ -14123,11 +14200,11 @@ void SpeedTreeImpl::FUN_00b0ab20(void* m_pShaderGeometry, unsigned long ulGeomet
     }
     catch (const std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::GetGeometry", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::GetGeometry", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::GetGeometry").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::GetGeometry").c_str());
     }
 }
 }  // namespace fnv_00b0ab20
@@ -14135,16 +14212,17 @@ void SpeedTreeImpl::FUN_00b0ab20(void* m_pShaderGeometry, unsigned long ulGeomet
 struct TreeFileReader
 {
     int GetNextElement();
-    StrQ FUN_00b3ee40();
+    StrQ CTreeFileAccess_ParseString();
 };
 
 struct UserDataOwner : FUN_00b0d5d0_Class
 {
-    void FUN_00b0d500(TreeFileReader* pFile);
+    void CSpeedTreeRT_ParseUserData(TreeFileReader* pFile);
 };
 
 // @fnv 0x00b0d500
-void UserDataOwner::FUN_00b0d500(TreeFileReader* pFile)
+// src: COMMUNITY 0x00b0d500
+void UserDataOwner::CSpeedTreeRT_ParseUserData(TreeFileReader* pFile)
 {
     int token = pFile->GetNextElement();
     do
@@ -14152,7 +14230,7 @@ void UserDataOwner::FUN_00b0d500(TreeFileReader* pFile)
         switch (token)
         {
         case 0x4a3a:
-            m_unk_68 = (int)DuplicateString(pFile->FUN_00b3ee40().c_str());
+            m_unk_68 = (int)DuplicateString(pFile->CTreeFileAccess_ParseString().c_str());
             Dead5Q();
             break;
         }
@@ -14170,7 +14248,7 @@ class exception
 };
 }
 
-void FUN_0044ccd0(char*, unsigned, const char*, unsigned);
+void std_Traits_helper_copy_s_std_char_traits_char(char*, unsigned, const char*, unsigned);
 
 struct ErrorStringView
 {
@@ -14183,7 +14261,7 @@ struct ErrorStringView
     unsigned int _Mysize;
     unsigned int _Myres;
 
-    bool FUN_0044a8d0(unsigned count, bool trim = false);
+    bool std_basic_string_char_std_char_traits_char_std_allocator_char_Grow(unsigned count, bool trim = false);
     void ResizeString(unsigned count);
     ErrorStringView& AssignSubstring(const ErrorStringView& other, unsigned offset, unsigned count);
     char* myptr()
@@ -14219,22 +14297,22 @@ struct LeafModeView
 
 struct FUN_00b10430_class
 {
-    void __thiscall FUN_00b10430(unsigned int node, void* tree);
+    void __thiscall SetCheckedRangeIndex(unsigned int node, void* tree);
 };
 
 struct FUN_00b0ec20_class
 {
-    void __thiscall FUN_00b0ec20();
+    void __thiscall ProcessEntries_00b0ec20();
 };
 
 struct FUN_00b0eca0_class
 {
-    bool __thiscall FUN_00b0eca0(void* other);
+    bool __thiscall ProcessEntries_00b0eca0(void* other);
 };
 
 struct FUN_00b0ebb0_class
 {
-    FUN_00b076c0_Class** __thiscall FUN_00b0ebb0();
+    FUN_00b076c0_Class** __thiscall ProcessEntries_00b0ebb0();
 };
 
 struct TreeUpdateRecord
@@ -14256,7 +14334,8 @@ struct FUN_00b27820_class
     unsigned short count;
     unsigned short unk2a;
     TreeUpdateRecord* records;
-    void FUN_00b27820()
+// src: COMMUNITY 0x00b27820
+    void CLeafGeometry_Invalidate()
     {
         if (records)
         {
@@ -14344,22 +14423,22 @@ struct Iterator
 
     __forceinline Iterator(unsigned int node, void* tree)
     {
-        ((FUN_00b10430_class*)this)->FUN_00b10430(node, tree);
+        ((FUN_00b10430_class*)this)->SetCheckedRangeIndex(node, tree);
     }
 
     __forceinline void operator++()
     {
-        ((FUN_00b0ec20_class*)this)->FUN_00b0ec20();
+        ((FUN_00b0ec20_class*)this)->ProcessEntries_00b0ec20();
     }
 
     __forceinline bool operator!=(const Iterator& other) const
     {
-        return !((FUN_00b0eca0_class*)this)->FUN_00b0eca0((void*)&other);
+        return !((FUN_00b0eca0_class*)this)->ProcessEntries_00b0eca0((void*)&other);
     }
 
     __forceinline FUN_00b076c0_Class** operator*() const
     {
-        return ((FUN_00b0ebb0_class*)this)->FUN_00b0ebb0();
+        return ((FUN_00b0ebb0_class*)this)->ProcessEntries_00b0ebb0();
     }
 };
 
@@ -14371,7 +14450,7 @@ inline void AssignString(const char* s)
     {
         target.AssignSubstring(target, s - target.myptr(), count);
     }
-    else if (target.FUN_0044a8d0(count))
+    else if (target.std_basic_string_char_std_char_traits_char_std_allocator_char_Grow(count))
     {
         char* destination = target.myptr();
         for (unsigned index = 0; index < count; ++index)
@@ -14381,7 +14460,8 @@ inline void AssignString(const char* s)
 }
 
 // @fnv 0x00b08ec0
-void FUN_00b08ec0(int param_1)
+// src: EXE 0x00b08ec0
+void CSpeedTreeRT_NotifyAllTreesOfEvent(int param_1)
 {
     try
     {
@@ -14400,12 +14480,12 @@ void FUN_00b08ec0(int param_1)
                 }
                 if (((LeafModeView*)(**it))->GetNestedPointer() == (void*)1 || field_byte14(**it))
                 {
-                    ((FUN_00b27820_class*)(**it)->m08)->FUN_00b27820();
+                    ((FUN_00b27820_class*)(**it)->m08)->CLeafGeometry_Invalidate();
                 }
             }
             else if (param_1 == 1)
             {
-                ((FUN_00b27820_class*)(**it)->m08)->FUN_00b27820();
+                ((FUN_00b27820_class*)(**it)->m08)->CLeafGeometry_Invalidate();
                 field_m14(**it)->byte30 = 0;
             }
         }
@@ -14413,12 +14493,12 @@ void FUN_00b08ec0(int param_1)
     }
     catch (const std::exception& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::NotifyAllTreesOfEvent", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::NotifyAllTreesOfEvent", e.what()).c_str());
     }
     catch (...)
     {
         AssignString(
-            FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::NotifyAllTreesOfEvent").c_str());
+            IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::NotifyAllTreesOfEvent").c_str());
     }
 }
 }  // namespace fnv_00b08ec0
@@ -14447,9 +14527,10 @@ struct String
     }
     ~String()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool built, unsigned n)
+// src: XBOX_PDB 0x0044a730
+    void fopen_0044a730(bool built, unsigned n)
     {
         if (!built)
             ;
@@ -14464,7 +14545,7 @@ struct String
         end(n);
     }
 };
-String __cdecl FUN_00b18860(const char* format, ...);
+String __cdecl IdvFormatString(const char* format, ...);
 }
 
 void* __cdecl FUN_00ec44d0(void*, const void*, unsigned int);
@@ -14500,19 +14581,20 @@ struct WrapQ
 };
 struct ListQ : VecQ_acad60
 {
-    void FUN_00b0ddc0(void* const& value)
+// src: COMMUNITY 0x00b0ddc0
+    void std_vector_push_back(void* const& value)
     {
         unsigned count = size();
         if (count < capacity())
         {
             int* destination = _Mylast;
-            FUN_00b36b10(destination, 1, reinterpret_cast<const int&>(value));
+            Runtime_ProcessState_00b36b10(destination, 1, reinterpret_cast<const int&>(value));
             _Mylast = destination + 1;
         }
         else
         {
             ItQ_acad60 where = end();
-            FUN_00b0e600(where, reinterpret_cast<const int&>(value));
+            ProcessAndReturnValue_00b0e600(where, reinterpret_cast<const int&>(value));
         }
     }
 };
@@ -14544,7 +14626,7 @@ struct FUN_00b036d0
     int m68;
     bool b6c, b6d;
     int a70[12];
-    float FUN_00b08440();
+    float CSpeedTreeRT_GetLodLevel();
     FUN_00b036d0(FUN_00b036d0* pNewInstance);
 };
 // @fnv 0x00b036d0
@@ -14557,24 +14639,24 @@ FUN_00b036d0::FUN_00b036d0(FUN_00b036d0* pNewInstance)
 {
     try
     {
-        m38->FUN_00b0ddc0(this);
+        m38->std_vector_push_back(this);
         FUN_00ec44d0(a70, pNewInstance->a70, 0x30);
         *m30 = *m30 + 1;
         m34 = new (DAT_011f6238) WrapQ;
         m34->pTree = pNewInstance;
         memcpy(&m34->kPos, &pNewInstance->m00->v, sizeof(m34->kPos));
-        m34->fScale = pNewInstance->FUN_00b08440();
+        m34->fScale = pNewInstance->CSpeedTreeRT_GetLodLevel();
         DAT_011f8b7c++;
     }
     catch (IdvException& e)
     {
         AssignString(
-            CloneFormatting::FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::CSpeedTreeRT(CSpeedTreeRT*)", e.what())
+            CloneFormatting::IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::CSpeedTreeRT(CSpeedTreeRT*)", e.what())
                 .c_str());
     }
     catch (...)
     {
-        AssignString(CloneFormatting::FUN_00b18860("%s - threw an unknown system exception",
+        AssignString(CloneFormatting::IdvFormatString("%s - threw an unknown system exception",
                                                    "CSpeedTreeRT::CSpeedTreeRT(CSpeedTreeRT*)")
                          .c_str());
     }
@@ -14742,7 +14824,7 @@ inline void* operator new[](unsigned int uiSize)
     return g_kMemoryManagerD04.Allocate(uiSize);
 }
 
-stdb07::string __cdecl FUN_00b18860(const char* pcFormat, ...);
+stdb07::string __cdecl IdvFormatString(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcError);
 
 struct SLeafTextureD04
@@ -14808,7 +14890,7 @@ struct STexturesD04
 class CSpeedTreeRT
 {
   public:
-    void FUN_00b0d040(STexturesD04& sTextures);
+    void GetTextures_00b0d040(STexturesD04& sTextures);
     TreeD04* m_pLeafTreeRuntime;
     char m_acPad[0x4c - 4];
     SelfShadowD04* m_pSelfShadow;
@@ -14818,7 +14900,8 @@ class CSpeedTreeRT
 };
 
 // @fnv 0x00b0d040
-void CSpeedTreeRT::FUN_00b0d040(STexturesD04& sTextures)
+// src: EXE 0x00b0d040
+void CSpeedTreeRT::GetTextures_00b0d040(STexturesD04& sTextures)
 {
     try
     {
@@ -14853,11 +14936,11 @@ void CSpeedTreeRT::FUN_00b0d040(STexturesD04& sTextures)
     }
     catch (ExceptionB07& e)
     {
-        AssignString(FUN_00b18860("%s - failed [%s]", "CSpeedTreeRT::GetTextures", e.what()).c_str());
+        AssignString(IdvFormatString("%s - failed [%s]", "CSpeedTreeRT::GetTextures", e.what()).c_str());
     }
     catch (...)
     {
-        AssignString(FUN_00b18860("%s - threw an unknown system exception", "CSpeedTreeRT::GetTextures").c_str());
+        AssignString(IdvFormatString("%s - threw an unknown system exception", "CSpeedTreeRT::GetTextures").c_str());
     }
 }
 }  // namespace fnv_00b0d040

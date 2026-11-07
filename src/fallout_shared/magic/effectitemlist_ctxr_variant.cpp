@@ -13,7 +13,7 @@ ActorPathHandler::PATH_HANDLER_RESULT CallNoPathUpdate(ActorPathHandler* pHandle
 extern "C" char DAT_011837c4, DAT_01183028, DAT_010120d8, DAT_010125c0, DAT_01012578, DAT_01012520, DAT_011c33d4;
 struct File
 {
-    int FUN_004726b0();
+    int TESFile_GetTESChunk();
     void ReadChunkInt(unsigned*);
     void FUN_004726f0();
 };
@@ -28,29 +28,30 @@ struct Item
 void* __cdecl operator new(unsigned);
 void __cdecl operator delete(void*);
 void __cdecl ResolveFormID(unsigned*, File*);
-TESForm* __cdecl FUN_004839c0(unsigned);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned);
 void* __cdecl FUN_00ec43fb(void*, int, void*, void*, int);
-void __cdecl FUN_005b5e40(const char*, ...);
+void __cdecl Warning_005b5e40(const char*, ...);
 struct List
 {
     int pad[3];
     int count;
     void FUN_00405d20(Item*);
-    void FUN_00405760(File*, const char*);
+    void EffectItemList_Load(File*, const char*);
 };
 // @fnv 0x00405760
-void List::FUN_00405760(File* file, const char* name)
+// src: XBOX_PDB 0x00405760
+void List::EffectItemList_Load(File* file, const char* name)
 {
     unsigned id;
     EffectSetting* effect;
     Item* actorValue;
     int item;
-    switch (file->FUN_004726b0())
+    switch (file->TESFile_GetTESChunk())
     {
     case 0x44494645:
         file->ReadChunkInt(&id);
         ResolveFormID(&id, file);
-        effect = dynamic_cast<EffectSetting*>(FUN_004839c0(id));
+        effect = dynamic_cast<EffectSetting*>(TESForm_GetFormByNumericID(id));
         if (effect)
         {
             actorValue = new Item(effect);
@@ -61,14 +62,14 @@ void List::FUN_00405760(File* file, const char* name)
                 FUN_00405d20(actorValue);
             else
             {
-                FUN_005b5e40(&DAT_010125c0, static_cast<const char*>(effect->GetEffectName()), name == 0 ? &DAT_010120d8 : name);
+                Warning_005b5e40(&DAT_010125c0, static_cast<const char*>(effect->GetEffectName()), name == 0 ? &DAT_010120d8 : name);
                 delete actorValue;
                 actorValue = 0;
             }
             *(Item**)&DAT_011c33d4 = actorValue;
         }
         else
-            FUN_005b5e40(&DAT_01012578, id, name == 0 ? &DAT_010120d8 : name);
+            Warning_005b5e40(&DAT_01012578, id, name == 0 ? &DAT_010120d8 : name);
         break;
     case 0x41445443:
         if (*(Item**)&DAT_011c33d4)
@@ -78,7 +79,7 @@ void List::FUN_00405760(File* file, const char* name)
                 count++;
         }
         else
-            FUN_005b5e40(&DAT_01012520, name == 0 ? &DAT_010120d8 : name);
+            Warning_005b5e40(&DAT_01012520, name == 0 ? &DAT_010120d8 : name);
         break;
     }
 }

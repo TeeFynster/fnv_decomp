@@ -748,7 +748,8 @@ void TESTopicInfo::SetPrompt(char* apPrompt)
 
 // Reads the flags byte at offset 0x26 and returns 1 if bit 0x10 is set, 3 if bit 0x20 is set, otherwise 2.
 // @fnv 0x0061e720
-int __fastcall FUN_0061e720(const char* pThis)
+// src: XBOX_PDB 0x0061e720
+int __fastcall TESTopicInfo_GetDummyNodeState(const char* pThis)
 {
     return (pThis[0x26] & 0x10) ? 1 : ((pThis[0x26] & 0x20) ? 3 : 2);
 }
@@ -926,7 +927,7 @@ struct GlobalObject2_0040c150
     int* Int();
 };
 extern GlobalObject2_0040c150 g_011d0dc8;
-int __fastcall FUN_0061e720(const char*);
+int __fastcall TESTopicInfo_GetDummyNodeState(const char*);
 
 
 
@@ -942,7 +943,7 @@ bool TESTopicInfo::IsInfoValidForDialogue(bool& rbDeferred, TESQuest* apQuest, T
     if (IsSayOnce() && IsNew())
         return false;
     {
-        int iType = FUN_0061e720((const char*)this);
+        int iType = TESTopicInfo_GetDummyNodeState((const char*)this);
         pActor = 0;
         if (apListener && ((TESForm*)apListener)->IsActor())
             pActor = (Actor*)apListener;
@@ -1358,7 +1359,7 @@ void TESTopicInfo::Copy(TESForm* form)
 }
 
 extern "C" void* __cdecl _alloca(unsigned int);
-void FUN_00403d30(void*, int, unsigned int);
+void ourMemset(void*, int, unsigned int);
 struct FileOps : TESFile
 {
     bool GetChunkData();
@@ -1424,7 +1425,7 @@ Script* TESTopicInfo::GetResultScript(unsigned int auiIndex)
         case 0x41444353: {
             unsigned int size = a->GetChunkSize();
             char* data = (char*)_alloca(size);
-            FUN_00403d30(data, 0, size);
+            ourMemset(data, 0, size);
             a->GetChunkData(data, 0);
             g_resultScripts[s].SetScriptData(size, data);
             break;
@@ -1480,7 +1481,7 @@ int TESTopicInfo::GetDifficultyLevel()
 }
 
 extern unsigned int kGroupFormType;
-TESForm* FUN_004839c0(unsigned int id);
+TESForm* TESForm_GetFormByNumericID(unsigned int id);
 struct TopicGroupRecord
 {
     unsigned int unk00;
@@ -1513,7 +1514,7 @@ bool TopicGroupCheck::IsFormInGroup(TopicGroupRecord* pGroupObj)
             result = false;
             break;
         case 7: {
-            TESTopic* t = dynamic_cast<TESTopic*>(FUN_004839c0(pGroupObj->unk08));
+            TESTopic* t = dynamic_cast<TESTopic*>(TESForm_GetFormByNumericID(pGroupObj->unk08));
             if (t)
                 result = Sort(t);
             break;

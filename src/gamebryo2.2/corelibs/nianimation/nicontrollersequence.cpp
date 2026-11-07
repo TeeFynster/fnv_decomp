@@ -49,7 +49,8 @@ inline NiFixedString::operator const char*() const
 extern const char* const g_011c7d74_arg1;
 
 // @fnv 0x00a31730
-const char* const* __cdecl FUN_00a31730()
+// src: COMMUNITY 0x00a31730
+const char* const* __cdecl NiControllerSequence_GetRTTI()
 {
     return &g_011c7d74_arg1;
 }
@@ -60,7 +61,7 @@ extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 // @fnv 0x00a35820
 void* NiControllerSequence::FUN_00a35820(unsigned int flags)
 {
-    FUN_00a35640();
+    ProcessState_00a35640();
     if (flags & 1)
         __Dummy_00b6fef0(this, 0x74);
     return this;
@@ -193,7 +194,7 @@ void NiControllerSequence::SaveToStream(NiStream& kStream)
 
 struct FUN_00a2e420_shell
 {
-    unsigned char FUN_00a2e420(float);
+    unsigned char NiControllerManager_StopTransSourceSequence(float);
 };
 
 extern float DAT_01015f5c;
@@ -216,17 +217,18 @@ unsigned char NiControllerSequence::SetEaseOut(float fEaseOutTime, bool bTransit
         *(float*)((char*)this + 0x48) = *(float*)((char*)this + 0x38) / *(float*)((char*)this + 0x28) -
                                         *(float*)((char*)this + 0x34) + *(float*)((char*)this + 0x48);
     if (*(unsigned int*)((char*)this + 0x44) == 5 && *(void**)((char*)this + 0x40))
-        ((FUN_00a2e420_shell*)*(void**)((char*)this + 0x40))->FUN_00a2e420(0.0f);
+        ((FUN_00a2e420_shell*)*(void**)((char*)this + 0x40))->NiControllerManager_StopTransSourceSequence(0.0f);
     *(float*)((char*)this + 0x54) = DAT_01015f5c;
     *(unsigned int*)((char*)this + 0x44) = 0;
     *(void**)((char*)this + 0x58) = 0;
-    ((NiControllerSequence*)this)->FUN_00a30540();
+    ((NiControllerSequence*)this)->NiControllerSequence_DetachInterpolators();
     return 1;
 }
 
 
 // @fnv 0x00a30900
-void NiControllerSequence::FUN_00a30900(char cDefaultPriority)
+// src: COMMUNITY 0x00a30900
+void NiControllerSequence::AttachInterpolators(char cDefaultPriority)
 {
     unsigned int ui;
     NiControllerSequence__InterpArrayItem* kItem;
@@ -256,7 +258,8 @@ struct A51BF0Base
 
 
 // @fnv 0x00a326c0
-void* __cdecl FUN_00a326c0()
+// src: EXE 0x00a326c0
+void* __cdecl NiControllerSequence_CreateObject()
 {
     void* p = A51BF0Base::operator new(0x74);
     if (p)
@@ -270,12 +273,12 @@ extern int(__stdcall* DAT_00fdf1c4)(void*);
 
 struct FUN_00a31500_shell
 {
-    void __thiscall FUN_00a31500(int);
+    void __thiscall NiControllerSequence_InterpArrayItem_Free(int);
 };
 
 struct FUN_00a315b0_shell
 {
-    void __thiscall FUN_00a315b0(int);
+    void __thiscall NiControllerSequence_IDTag_Free(int);
 };
 
 struct FUN_00a31740_shell
@@ -285,7 +288,8 @@ struct FUN_00a31740_shell
 
 
 // @fnv 0x00a35640
-void NiControllerSequence::FUN_00a35640()
+// src: GUESS 0x00a35640 (confidence: low)
+void NiControllerSequence::ProcessState_00a35640()
 {
     *reinterpret_cast<void**>(this) = &DAT_01096584;
 
@@ -297,13 +301,13 @@ void NiControllerSequence::FUN_00a35640()
     if (*reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x14) != 0)
     {
         reinterpret_cast<FUN_00a31500_shell*>(*reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x14))
-            ->FUN_00a31500(3);
+            ->NiControllerSequence_InterpArrayItem_Free(3);
     }
 
     if (*reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x18) != 0)
     {
         reinterpret_cast<FUN_00a315b0_shell*>(*reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x18))
-            ->FUN_00a315b0(3);
+            ->NiControllerSequence_IDTag_Free(3);
     }
 
     if (*reinterpret_cast<unsigned short*>(reinterpret_cast<unsigned char*>(this) + 0x70) > 0 &&
@@ -441,7 +445,8 @@ extern "C" double __cdecl fmod(double, double);
 
 // Advances the sequence's accumulated time by frequency times the delta, wraps it into [begin,end] when cycleType is 0, and optionally stores the new state.
 // @fnv 0x00a30970
-float NiControllerSequence::FUN_00a30970(float time, bool update)
+// src: XBOX_PDB 0x00a30970
+float NiControllerSequence::ComputeScaledTime_00a30970(float time, bool update)
 {
     float accumulated = m_fWeightAdjustedLastTime;
     float delta;
@@ -490,7 +495,8 @@ float NiControllerSequence::FUN_00a30970(float time, bool update)
 
 bool __stdcall MatchesTextKeys(void* arg);
 // @fnv 0x00a30c80
-bool NiControllerSequence::FUN_00a30c80(void* arg)
+// src: COMMUNITY 0x00a30c80
+bool NiControllerSequence::CanSyncTo(void* arg)
 {
     if (arg)
     {
@@ -585,7 +591,8 @@ struct TagView
 };
 
 // @fnv 0x00a30ea0
-bool NiControllerSequence::FUN_00a30ea0(NiStream& stream)
+// src: XBOX_PDB 0x00a30ea0
+bool NiControllerSequence::RegisterStreamables_00a30ea0(NiStream& stream)
 {
     if (!NiObject::RegisterStreamables(stream))
         return false;
@@ -647,7 +654,7 @@ extern int(__stdcall* DAT_00fdf1c4)(void*);
 
 struct S_00aa4060_Class
 {
-    void FUN_00aa4060(void* apMemory);
+    void MemoryManager_Deallocate(void* apMemory);
 };
 extern S_00aa4060_Class DAT_011f6238;
 
@@ -663,7 +670,7 @@ struct FUN_00a315b0_Elem
 class FUN_00a315b0_Base
 {
   public:
-    void FUN_00a30750();
+    void NiControllerSequence_IDTag_Destroy();
 };
 
 class FUN_00a315b0_cls
@@ -675,11 +682,12 @@ class FUN_00a315b0_cls
     char* m_0c;
     char* m_10;
 
-    FUN_00a315b0_cls* FUN_00a315b0(unsigned char acFlags);
+    FUN_00a315b0_cls* NiControllerSequence_IDTag_Free(unsigned char acFlags);
 };
 
 // @fnv 0x00a315b0
-FUN_00a315b0_cls* FUN_00a315b0_cls::FUN_00a315b0(unsigned char acFlags)
+// src: COMMUNITY 0x00a315b0
+FUN_00a315b0_cls* FUN_00a315b0_cls::NiControllerSequence_IDTag_Free(unsigned char acFlags)
 {
     if (acFlags & 2)
     {
@@ -717,15 +725,15 @@ FUN_00a315b0_cls* FUN_00a315b0_cls::FUN_00a315b0(unsigned char acFlags)
         }
         if (acFlags & 1)
         {
-            DAT_011f6238.FUN_00aa4060(base);
+            DAT_011f6238.MemoryManager_Deallocate(base);
         }
         return (FUN_00a315b0_cls*)base;
     }
 
-    ((FUN_00a315b0_Base*)this)->FUN_00a30750();
+    ((FUN_00a315b0_Base*)this)->NiControllerSequence_IDTag_Destroy();
     if (acFlags & 1)
     {
-        DAT_011f6238.FUN_00aa4060(this);
+        DAT_011f6238.MemoryManager_Deallocate(this);
     }
     return this;
 }
@@ -794,7 +802,7 @@ struct FUN_00a317e0_interp
     void* unk04;
     void* unk08;
     void* unk0C;
-    void __thiscall FUN_00a31260();
+    void __thiscall ReleaseReferencedObjectsAndResetFlags();
 };
 
 struct FUN_00a317e0_tag
@@ -816,7 +824,7 @@ __declspec(noalias) void __thiscall NiControllerSequence::AssignInterpolatorRef(
     if (pNewRef)
         DAT_00fdf1c0((int*)&pNewRef->m_uiRefCount);
 
-    reinterpret_cast<FUN_00a317e0_interp*>(m_pInterpArray + index)->FUN_00a31260();
+    reinterpret_cast<FUN_00a317e0_interp*>(m_pInterpArray + index)->ReleaseReferencedObjectsAndResetFlags();
 
     reinterpret_cast<FUN_00a317e0_tag*>(m_pkIDTags + index)->ResetStrings();
 
@@ -851,7 +859,8 @@ extern char* DAT_0109b220;
 
 // Computes the sequence offset and optionally sets each controller time.
 // @fnv 0x00a328b0
-void NiControllerSequence::FUN_00a328b0(float time, bool setControllerTimes)
+// src: XBOX_PDB 0x00a328b0
+void NiControllerSequence::SetPhase(float time, bool setControllerTimes)
 {
     float currentTime = time + m_fFirstKeyTime;
     if (setControllerTimes)
@@ -897,7 +906,7 @@ struct SlotInfo
     unsigned int m_unk08;
     unsigned int m_unk0c;
     unsigned int m_unk10;
-    void FUN_00a31400(unsigned int value);
+    void NiControllerSequence_IDTag_Operator_Set(unsigned int value);
 };
 
 
@@ -915,7 +924,7 @@ int NiControllerSequence::AssignSlot(NiRefObject* apRef, unsigned int auiValue, 
     }
     if (idx == count)
     {
-        if (!FUN_00a32330())
+        if (!NiControllerSequence_ReallocateArrays())
         {
             return -1;
         }
@@ -937,7 +946,7 @@ int NiControllerSequence::AssignSlot(NiRefObject* apRef, unsigned int auiValue, 
             InterlockedIncrement((long*)&apRef->m_uiRefCount);
         }
     }
-    ((SlotInfo*)m_pkIDTags)[idx].FUN_00a31400(auiValue);
+    ((SlotInfo*)m_pkIDTags)[idx].NiControllerSequence_IDTag_Operator_Set(auiValue);
     ((SlotEntry*)m_pInterpArray)[idx].m_flag0d = aucFlag;
     return idx;
 }
@@ -1036,13 +1045,13 @@ struct TagItem
     const char* fifth;
 };
 
-void* __cdecl FUN_00a7d330(void*);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
 void* __cdecl FormatStringWithType(const char*, void*);
-void* __cdecl FUN_00a7d510(const char*, unsigned int);
-void* __cdecl FUN_00a7d550(const char*, float);
-void* __cdecl FUN_00a6d190(const char*, void*);
+void* __cdecl NiGetViewerString_00a7d510(const char*, unsigned int);
+void* __cdecl NiGetViewerString_00a7d550(const char*, float);
+void* __cdecl NiTimeController_GetViewerString(const char*, void*);
 int __cdecl FUN_00a305b0(char*, unsigned int, const char*, ...);
-void* __cdecl FUN_00a7d5e0(const char*, const char*);
+void* __cdecl NiGetViewerString_00a7d5e0(const char*, const char*);
 
 struct Position
 {
@@ -1057,20 +1066,20 @@ void NiControllerSequence::AddViewerStrings(NiViewerStringsArray* strings)
 {
     OutputArray* output = (OutputArray*)strings;
     NiObject::AddViewerStrings(strings);
-    output->Append(FUN_00a7d330(DAT_011f36dc));
+    output->Append(NiViewerStrings_NiGetViewerString_Title(DAT_011f36dc));
     output->Append(FormatStringWithType(&DAT_01044a7c, (void*)m_eAnimationState));
-    output->Append(FUN_00a7d510(&DAT_01096678, m_uiNumControlledBlocks));
-    output->Append(FUN_00a7d550(&DAT_0105ac84, m_fWeight));
-    output->Append(FUN_00a6d190(&DAT_0109666c, (void*)m_eAnimationCycleType));
-    output->Append(FUN_00a7d550(&DAT_01096664, m_fFrequency));
-    output->Append(FUN_00a7d550(&DAT_01044c94, m_fFirstKeyTime));
-    output->Append(FUN_00a7d550(&DAT_01044c90, m_fLastKeyTime));
-    output->Append(FUN_00a7d550(&DAT_0109665c, m_fLastTime));
-    output->Append(FUN_00a7d550(&DAT_01096654, m_fSequenceOffset));
-    output->Append(FUN_00a7d550(&DAT_010477f4, m_fStartTime));
-    output->Append(FUN_00a7d550(&DAT_01044c90, m_fEndTime));
-    output->Append(FUN_00a7d550(&DAT_01096648, m_fWeightAdjustedLastTime));
-    output->Append(FUN_00a7d550(&DAT_0109663c, m_fScaledLastTime));
+    output->Append(NiGetViewerString_00a7d510(&DAT_01096678, m_uiNumControlledBlocks));
+    output->Append(NiGetViewerString_00a7d550(&DAT_0105ac84, m_fWeight));
+    output->Append(NiTimeController_GetViewerString(&DAT_0109666c, (void*)m_eAnimationCycleType));
+    output->Append(NiGetViewerString_00a7d550(&DAT_01096664, m_fFrequency));
+    output->Append(NiGetViewerString_00a7d550(&DAT_01044c94, m_fFirstKeyTime));
+    output->Append(NiGetViewerString_00a7d550(&DAT_01044c90, m_fLastKeyTime));
+    output->Append(NiGetViewerString_00a7d550(&DAT_0109665c, m_fLastTime));
+    output->Append(NiGetViewerString_00a7d550(&DAT_01096654, m_fSequenceOffset));
+    output->Append(NiGetViewerString_00a7d550(&DAT_010477f4, m_fStartTime));
+    output->Append(NiGetViewerString_00a7d550(&DAT_01044c90, m_fEndTime));
+    output->Append(NiGetViewerString_00a7d550(&DAT_01096648, m_fWeightAdjustedLastTime));
+    output->Append(NiGetViewerString_00a7d550(&DAT_0109663c, m_fScaledLastTime));
     Position pos;
     pos.i = 0;
     if (pos.i < m_uiNumControlledBlocks)
@@ -1085,7 +1094,7 @@ void NiControllerSequence::AddViewerStrings(NiViewerStringsArray* strings)
             ControlItem* ctrl = (ControlItem*)((char*)m_pInterpArray + controlOffset);
             FUN_00a305b0(key, sizeof(key), &DAT_01096630, pos.i);
             FUN_00a305b0(val, sizeof(val), &DAT_01096624, tag->first, tag->third, ctrl->priority);
-            void* entry = FUN_00a7d5e0(key, val);
+            void* entry = NiGetViewerString_00a7d5e0(key, val);
             unsigned int index = output->length;
             if (index >= output->capacity)
                 output->FUN_0096ad30(index + output->growth);
@@ -1247,7 +1256,8 @@ struct HolderB3718
 extern HolderB3718* DAT_011f6080;
 
 // @fnv 0x00aa10f0
-void __cdecl FUN_00aa10f0(void* pv)
+// src: GAMEBRYO_LIB 0x00aa10f0
+void __cdecl _NiFree_00aa10f0(void* pv)
 {
     if (pv != 0)
     {
@@ -1258,13 +1268,14 @@ void __cdecl FUN_00aa10f0(void* pv)
 struct FUN_00a30750_shell
 {
     char* m_kPointA[5];
-    void FUN_00a30750();
+    void NiControllerSequence_IDTag_Destroy();
 };
 
 extern int EmptyFS;
 
 // @fnv 0x00a30750
-void FUN_00a30750_shell::FUN_00a30750()
+// src: COMMUNITY 0x00a30750
+void FUN_00a30750_shell::NiControllerSequence_IDTag_Destroy()
 {
     char* p;
     p = m_kPointA[4];
@@ -1316,7 +1327,8 @@ struct SeqTK
 
 // Compares this sequence with another field by field, including interpolators, tags, text keys and owner, returning true only if all match.
 // @fnv 0x00a30fb0
-unsigned char NiControllerSequence::FUN_00a30fb0(NiControllerSequence* other)
+// src: XBOX_PDB 0x00a30fb0
+unsigned char NiControllerSequence::IsEqual_00a30fb0(NiControllerSequence* other)
 {
     if (!((TCEq*)this)->IsSameAs((NiObject*)other))
         return false;
@@ -1358,13 +1370,13 @@ extern const char str_01020f94[];
 extern const char str_0109655c[];
 struct S_00a31140_Allocator
 {
-    void* __thiscall FUN_00aa3e40(unsigned int);
+    void* __thiscall Game_DoHeapAlloc(unsigned int);
 };
 extern "C" void __cdecl FUN_00ec623a(void*, const char*, const char*, const char*);
 // @fnv 0x00a31140
 void* __cdecl FormatStringWithType(const char* pcText, void* arg2)
 {
-    void* esi = ((S_00a31140_Allocator&)DAT_011f6238).FUN_00aa3e40((unsigned int)strlen(pcText) + 0x20);
+    void* esi = ((S_00a31140_Allocator&)DAT_011f6238).Game_DoHeapAlloc((unsigned int)strlen(pcText) + 0x20);
     const char* eax = 0;
     switch ((unsigned int)arg2)
     {
@@ -1411,12 +1423,13 @@ class A1400StringGroup
     NiFixedString m_kName3;
     NiFixedString m_kName4;
 
-    A1400StringGroup& FUN_00a31400(const A1400StringGroup& kOther);
+    A1400StringGroup& NiControllerSequence_IDTag_Operator_Set(const A1400StringGroup& kOther);
 };
 
 // Assigns each of the five fixed-string members from kOther and returns *this.
 // @fnv 0x00a31400
-A1400StringGroup& A1400StringGroup::FUN_00a31400(const A1400StringGroup& kOther)
+// src: COMMUNITY 0x00a31400
+A1400StringGroup& A1400StringGroup::NiControllerSequence_IDTag_Operator_Set(const A1400StringGroup& kOther)
 {
     m_kName0 = kOther.m_kName0;
     m_kName1 = kOther.m_kName1;
@@ -1523,7 +1536,8 @@ struct UpdateOwner
 };
 
 // @fnv 0x00a34ba0
-void NiControllerSequence::FUN_00a34ba0(float time, bool update)
+// src: XBOX_PDB 0x00a34ba0
+void NiControllerSequence::Update_00a34ba0(float time, bool update)
 {
     if (m_eAnimationState == 0)
     {
@@ -1617,13 +1631,13 @@ void NiControllerSequence::FUN_00a34ba0(float time, bool update)
         else if (m_pkTimeSyncSequence)
         {
             if (m_pkTimeSyncSequence->m_fLastTime != time + m_pkTimeSyncSequence->m_fSequenceOffset)
-                m_pkTimeSyncSequence->FUN_00a34ba0(time, false);
+                m_pkTimeSyncSequence->Update_00a34ba0(time, false);
             localTime = GetMorphedTime(m_pkTimeSyncSequence, time + m_pkTimeSyncSequence->m_fSequenceOffset);
             localTime /= m_fFrequency;
         }
         else
             localTime = time + m_fSequenceOffset;
-        FUN_00a32290(m_fWeight * transition, ease, FUN_00a30970(localTime, true));
+        NiControllerSequence_SetInterpsWeightAndTime(m_fWeight * transition, ease, ComputeScaledTime_00a30970(localTime, true));
         if (((UpdateNote**)m_pkAnimNotes))
         {
             if (fOldScaledTime > m_fScaledLastTime)
@@ -1772,15 +1786,15 @@ void A33950Object::LoadFromStream(void* streamObject)
         SequenceReadStream(*stream)->ReadScalar(&flag0d, 1);
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 
 // @fnv 0x00a344f0
 NiObject* NiControllerSequence::MakeClone(CloningProcess& cloning)
 {
-    void* p = FUN_00aa13e0(0x74);
+    void* p = Object_DispatchCommandFour(0x74);
     void* result = p ? ((NiControllerSequence*)p)->FUN_00a316a0() : 0;
-    FUN_00a33570((NiControllerSequence*)result, (int)&cloning);
+    NiControllerSequence_CopyMembers((NiControllerSequence*)result, (int)&cloning);
     return (NiObject*)result;
 }
 
@@ -1788,7 +1802,8 @@ extern const float DAT_010141cc;
 
 
 // @fnv 0x00a350d0
-bool NiControllerSequence::FUN_00a350d0(NiControllerSequence* pkTarget, float fTime, float m_fTimeout, int iPriority, float fSeqWeight,
+// src: XBOX_PDB 0x00a350d0
+bool NiControllerSequence::StartBlend(NiControllerSequence* pkTarget, float fTime, float m_fTimeout, int iPriority, float fSeqWeight,
                                     float fTargetWeight, NiControllerSequence* pkPartner)
 {
     Deactivate(0.0f, true);
@@ -1872,12 +1887,13 @@ struct A31500Item
     }
 
     void ReleaseRefs();
-    A31500Item* FUN_00a31500(unsigned char m_ucEntryType);
+    A31500Item* NiControllerSequence_InterpArrayItem_Free(unsigned char m_ucEntryType);
 };
 
 // Releases references for this item or preceding items, conditionally calls another function, and returns this or the count address.
 // @fnv 0x00a31500
-A31500Item* A31500Item::FUN_00a31500(unsigned char m_ucEntryType)
+// src: COMMUNITY 0x00a31500
+A31500Item* A31500Item::NiControllerSequence_InterpArrayItem_Free(unsigned char m_ucEntryType)
 {
     if (m_ucEntryType & 2)
     {
@@ -1891,12 +1907,12 @@ A31500Item* A31500Item::FUN_00a31500(unsigned char m_ucEntryType)
             Release(pkItem->m_spControllerInterpolator);
         }
         if (m_ucEntryType & 1)
-            DAT_011f6238.FUN_00aa4060(piItemCount);
+            DAT_011f6238.MemoryManager_Deallocate(piItemCount);
         return reinterpret_cast<A31500Item*>(piItemCount);
     }
     ReleaseRefs();
     if (m_ucEntryType & 1)
-        DAT_011f6238.FUN_00aa4060(this);
+        DAT_011f6238.MemoryManager_Deallocate(this);
     return this;
 }
 
@@ -2014,8 +2030,8 @@ struct Node31910
     int unk2c;
     unsigned int flags30;
 
-    Node31910* FUN_00a5c570(const void*);
-    void FUN_00a5c480(Node31910*);
+    Node31910* NiObjectNET_GetController(const void*);
+    void NiObjectNET_RemoveController(Node31910*);
     unsigned int FUN_00dbbc10();
 };
 struct NiSingleInterpControllerBase : Node31910
@@ -2029,7 +2045,7 @@ struct MorphController31910 : NiSingleInterpControllerBase
     unsigned short count;
     unsigned short unk3e;
     unsigned short FindIndexByValue(Node31910*);
-    unsigned short FUN_00a35fe0(Node31910*, unsigned short, MorphItem31910*);
+    unsigned short BSMultiTargetTreadTransfController_AddInterpolatorTarget(Node31910*, unsigned short, MorphItem31910*);
     void SetSlotEntry(unsigned short, Node31910*, unsigned short, MorphItem31910*);
     Blend31910* FUN_00a358a0(unsigned short);
     MorphController31910* FUN_00a36070(unsigned short, unsigned short);
@@ -2085,19 +2101,19 @@ char* __cdecl FUN_00a5b690(const char*);
 void __cdecl FUN_00fdad60();
 void __cdecl FUN_00fdad80();
 extern "C" int __cdecl atexit(void(__cdecl*)());
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 // The shared NiInterpController has no explicit constructor declaration.
 // Initialize that base through the original constructor before the shared fields.
-void* __fastcall FUN_00a2f8c0(void*);
+void* __fastcall NiInterpController_NiInterpController(void*);
 static inline NiMultiTargetTransformController* ConstructMultiTargetController(
     NiMultiTargetTransformController* controller, unsigned short count)
 {
-    FUN_00a2f8c0(controller);
+    NiInterpController_NiInterpController(controller);
     *reinterpret_cast<void**>(controller) = &DAT_01096444;
     controller->m_usNumInterps = 0;
     controller->m_pkBlendInterpolators = 0;
     controller->m_ppTargetObjects = 0;
-    controller->FUN_00a2feb0(count);
+    controller->AllocateStorage(count);
     return controller;
 }
 void* __cdecl operator new(unsigned int, void* p)
@@ -2189,15 +2205,16 @@ static __forceinline unsigned short AddTarget31910(NiMultiTargetTransformControl
     return DAT_01096320;
 }
 // @fnv 0x00a31910
-bool NiControllerSequence::FUN_00a31910(NiAVObject* targetObject, NiAVObject* rootObject, int unused)
+// src: COMMUNITY 0x00a31910
+bool NiControllerSequence::ResolveTransformInterpolators(NiAVObject* targetObject, NiAVObject* rootObject, int unused)
 {
     Node31910* target = (Node31910*)targetObject;
     Node31910* root = (Node31910*)rootObject;
     bool spMorphController;
     spMorphController = false;
-    NiMultiTargetTransformController* ctrl = (NiMultiTargetTransformController*)target->FUN_00a5c570(&DAT_011f36bc);
+    NiMultiTargetTransformController* ctrl = (NiMultiTargetTransformController*)target->NiObjectNET_GetController(&DAT_011f36bc);
     Retain31910((Node31910*)ctrl);
-    MorphController31910* pMorphCtrl = (MorphController31910*)target->FUN_00a5c570(&DAT_011f36e4);
+    MorphController31910* pMorphCtrl = (MorphController31910*)target->NiObjectNET_GetController(&DAT_011f36e4);
     Retain31910(pMorphCtrl);
     unsigned short uiMorphEntries = 0, usMorphTargetCount = 0;
     for (unsigned int i = 0; i < m_uiNumControlledBlocks; i++)
@@ -2236,7 +2253,7 @@ bool NiControllerSequence::FUN_00a31910(NiAVObject* targetObject, NiAVObject* ro
         if (usExistingTargets && !ctrl)
         {
             MorphController31910* tag;
-            tag = (MorphController31910*)FUN_00aa13e0(0x40);
+            tag = (MorphController31910*)Object_DispatchCommandFour(0x40);
             if (tag)
             {
                 ctrl = ConstructMultiTargetController((NiMultiTargetTransformController*)tag, usExistingTargets);
@@ -2247,14 +2264,14 @@ bool NiControllerSequence::FUN_00a31910(NiAVObject* targetObject, NiAVObject* ro
             spMorphController = true;
             if (target == ((Owner31910*)m_pkOwnerManager)->root)
             {
-                target->FUN_00a5c480((Node31910*)ctrl);
+                target->NiObjectNET_RemoveController((Node31910*)ctrl);
                 Assign31910((Node31910*&)ctrl->m_spNextController.m_pObject, ((Owner31910*)m_pkOwnerManager)->controller);
                 Assign31910(((Owner31910*)m_pkOwnerManager)->controller, (Node31910*)ctrl);
             }
         }
         if (uiMorphEntries && !pMorphCtrl)
         {
-            MorphController31910* tag = (MorphController31910*)FUN_00aa13e0(0x44);
+            MorphController31910* tag = (MorphController31910*)Object_DispatchCommandFour(0x44);
             if (tag)
             {
                 tag = tag->FUN_00a36070(uiMorphEntries, usMorphTargetCount);
@@ -2269,7 +2286,7 @@ bool NiControllerSequence::FUN_00a31910(NiAVObject* targetObject, NiAVObject* ro
             spMorphController = true;
             if (target == ((Owner31910*)m_pkOwnerManager)->root)
             {
-                target->FUN_00a5c480(pMorphCtrl);
+                target->NiObjectNET_RemoveController(pMorphCtrl);
                 Assign31910((Node31910*&)pMorphCtrl->flags30, ((Owner31910*)m_pkOwnerManager)->controller);
                 Assign31910(((Owner31910*)m_pkOwnerManager)->controller, pMorphCtrl);
             }
@@ -2291,7 +2308,7 @@ bool NiControllerSequence::FUN_00a31910(NiAVObject* targetObject, NiAVObject* ro
             Node31910* spTransformController = root->FindObject(&v);
             if (!spTransformController || ((*(Node31910**)&m_pkAccumulationRoot) == spTransformController && ((Owner31910*)m_pkOwnerManager)->skipAccum))
                 continue;
-            Node31910* z = spTransformController->FUN_00a5c570(&g_011f36ec);
+            Node31910* z = spTransformController->NiObjectNET_GetController(&g_011f36ec);
             unsigned short s = FindTarget31910(ctrl, spTransformController);
             if (s == DAT_01096320)
             {
@@ -2305,7 +2322,7 @@ bool NiControllerSequence::FUN_00a31910(NiAVObject* targetObject, NiAVObject* ro
                 spTransformController->flags30 |= 0x80;
             }
             if (spTransformController->name != DAT_011f36cc)
-                spTransformController->FUN_00a5c480(z);
+                spTransformController->NiObjectNET_RemoveController(z);
             Assign31910(entry.controller, (Node31910*)ctrl);
             entry.blend = (Blend31910*)&ctrl->m_pkBlendInterpolators[s];
             entry.blend->flags |= 1;
@@ -2320,7 +2337,7 @@ bool NiControllerSequence::FUN_00a31910(NiAVObject* targetObject, NiAVObject* ro
                 Node31910* spTransformController = root->FindObject(&item->name);
                 unsigned short usMorphSlot = pMorphCtrl->FindIndexByValue(spTransformController);
                 if (usMorphSlot == DAT_01096320)
-                    s = pMorphCtrl->FUN_00a35fe0(spTransformController, idx, item);
+                    s = pMorphCtrl->BSMultiTargetTreadTransfController_AddInterpolatorTarget(spTransformController, idx, item);
                 else
                     pMorphCtrl->SetSlotEntry(usMorphSlot, spTransformController, idx, item);
             }
@@ -2352,7 +2369,7 @@ struct TimedTextEntry
 
 extern const char* ms_kMorphTextKey;
 extern int ms_iMorphTextKeyLength;
-int __cdecl FUN_00aa1370(const char*, const char*, unsigned int);
+int __cdecl NiStrnicmp(const char*, const char*, unsigned int);
 int __cdecl FUN_00aa1360(const char*, const char*);
 
 // Interpolates between matching key times in this sequence using surrounding morph-key times from the partner sequence.
@@ -2360,7 +2377,7 @@ int __cdecl FUN_00aa1360(const char*, const char*);
 float NiControllerSequence::GetMorphedTime(NiControllerSequence* pkPartnerSequence, float fFrameTime)
 {
     TimedTextEntry* pkNextKey = 0;
-    float fPartnerTime = pkPartnerSequence->FUN_00a30970(fFrameTime, false);
+    float fPartnerTime = pkPartnerSequence->ComputeScaledTime_00a30970(fFrameTime, false);
 
     unsigned int uiNumPartnerKeys;
     TimedTextEntry* pkPartnerKeys = ((NiTextKeyExtraData*)pkPartnerSequence->m_spTextKeyData.m_pObject)->GetKeys(uiNumPartnerKeys);
@@ -2372,7 +2389,7 @@ float NiControllerSequence::GetMorphedTime(NiControllerSequence* pkPartnerSequen
     for (ui = 0; ui < uiNumPartnerKeys; ui++)
     {
         const char* pcText = pkPartnerKeys[ui].GetText();
-        if (pcText && FUN_00aa1370(pcText, ms_kMorphTextKey, ms_iMorphTextKeyLength) == 0)
+        if (pcText && NiStrnicmp(pcText, ms_kMorphTextKey, ms_iMorphTextKeyLength) == 0)
         {
             pkLastKey = &pkPartnerKeys[ui];
             if (!pkFirstKey)
@@ -2610,8 +2627,8 @@ void NiControllerSequence::ProcessClone(CloningProcess& cloning)
 
 struct Ctl43c
 {
-    void FUN_00a31500(int iFlags);
-    void FUN_00a315b0(int iFlags);
+    void NiControllerSequence_InterpArrayItem_Free(int iFlags);
+    void NiControllerSequence_IDTag_Free(int iFlags);
 };
 
 
@@ -2629,10 +2646,10 @@ void NiControllerSequence::ClearInterpolatorRefs(NiControllerSequence* pkSrc, in
             pObj->DecRefCount();
     }
     if (pkSrc->m_pInterpArray)
-        ((Ctl43c*)pkSrc->m_pInterpArray)->FUN_00a31500(3);
+        ((Ctl43c*)pkSrc->m_pInterpArray)->NiControllerSequence_InterpArrayItem_Free(3);
     if (pkSrc->m_pkIDTags)
-        ((Ctl43c*)pkSrc->m_pkIDTags)->FUN_00a315b0(3);
-    FUN_00a33570(pkSrc, iArg);
+        ((Ctl43c*)pkSrc->m_pkIDTags)->NiControllerSequence_IDTag_Free(3);
+    NiControllerSequence_CopyMembers(pkSrc, iArg);
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
@@ -2706,7 +2723,8 @@ extern "C" void __cdecl ConvertOldSequence(NiObject*, S00a35700_NodeRef*) throw(
 
 // Retrieves a NiNode by index from a NiStream, using version-specific lookup, and assigns it to the output pointer with a reference count adjustment.
 // @fnv 0x00a35700
-void __cdecl FUN_00a35700(void* streamObject, unsigned int index, NiPtrNode& out)
+// src: XBOX_PDB 0x00a35700
+void __cdecl NiControllerSequence_CreateSequenceFromFile(void* streamObject, unsigned int index, NiPtrNode& out)
 {
     NiStream* stream = static_cast<NiStream*>(streamObject);
     if (index >= SequenceStreamObjectCount(*stream))
@@ -2739,7 +2757,7 @@ struct ActiveArray
     void** items;
     unsigned int capacity;
     unsigned int size;
-    void FUN_00a311e0(unsigned int);
+    void NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(unsigned int);
     unsigned int Find(void* const& key) const
     {
         for (unsigned int i = 0; i < size; ++i)
@@ -2757,7 +2775,7 @@ unsigned int ActiveArray::FindOrAdd(void* const& key)
     if (i != (unsigned int)-1)
         return i;
     if (size == capacity)
-        FUN_00a311e0(capacity > 0 ? capacity * 2 : 1);
+        NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(capacity > 0 ? capacity * 2 : 1);
     unsigned int index = size;
     items[index] = key;
     ++size;
@@ -2818,7 +2836,7 @@ void NiControllerSequence__IDTag::ResetStrings()
 }
 
 
-int __cdecl FUN_00aa1370(const char*, const char*, const char*);
+int __cdecl NiStrnicmp(const char*, const char*, const char*);
 extern const char* g_kTextKeyA;
 extern const char* g_kTextKeyB;
 
@@ -2848,7 +2866,7 @@ bool NiControllerSequence::MatchesTextKeys(NiControllerSequence* pkOther)
     for (i = 0; i < uiNumOther; i++)
     {
         const char* pcText = pOther[i].m_kText;
-        if (!FUN_00aa1370(pcText, g_kTextKeyA, g_kTextKeyB))
+        if (!NiStrnicmp(pcText, g_kTextKeyA, g_kTextKeyB))
         {
             bFound = true;
             bool bMatch = false;
@@ -2870,7 +2888,7 @@ bool NiControllerSequence::MatchesTextKeys(NiControllerSequence* pkOther)
     for (i = 0; i < uiNumKeys; i++)
     {
         const char* pcText = pKeys[i].m_kText;
-        if (!FUN_00aa1370(pcText, g_kTextKeyA, g_kTextKeyB))
+        if (!NiStrnicmp(pcText, g_kTextKeyA, g_kTextKeyB))
         {
             bFound = true;
             bool bMatch = false;
@@ -3055,7 +3073,7 @@ struct BindObj
     virtual void V53();
     virtual void V54();
     virtual Blend* MakeBlend(unsigned short, bool, bool, float, int);
-    void FUN_00a5c480(BindCtrl*);
+    void NiObjectNET_RemoveController(BindCtrl*);
     int refs;
     unsigned short flags;
     unsigned short unk0a;
@@ -3138,7 +3156,8 @@ struct BindTag
 
 // Resolves interpolators, objects, and controllers for each BindItem, creating blends and updating the owner's target.
 // @fnv 0x00a32c70
-bool NiControllerSequence::FUN_00a32c70(bool abUpdate)
+// src: XBOX_PDB 0x00a32c70
+bool NiControllerSequence::StoreTargets(bool abUpdate)
 {
     BindObj* root = ((BindOwner*)m_pkOwnerManager)->root;
     if (m_kAccumulationRootName.m_kHandle != (const char*)DAT_0109b220)
@@ -3194,7 +3213,7 @@ bool NiControllerSequence::FUN_00a32c70(bool abUpdate)
             abUpdate = true;
             if (object == ((BindOwner*)m_pkOwnerManager)->target)
             {
-                object->FUN_00a5c480(controller);
+                object->NiObjectNET_RemoveController(controller);
                 controller->FUN_00a67260(((BindOwner*)m_pkOwnerManager)->program);
                 ((BindCtrl*)((BindOwner*)m_pkOwnerManager))->FUN_00a67260(controller);
             }
@@ -3368,7 +3387,7 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volati
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 
 namespace a3 {
@@ -3500,7 +3519,7 @@ void __cdecl ConvertOldSequence(OldSequence* pkOld, SeqPtr<NiControllerSequence>
 
 {
 
-    void* pvRaw = FUN_00aa13e0(0x74);
+    void* pvRaw = Object_DispatchCommandFour(0x74);
 
     unsigned int ItemUpdateArray = pvRaw != 0 ? pkOld->m_usElementCount : 0;
 
@@ -3665,7 +3684,8 @@ extern unsigned short DAT_01096320;
 
 // Copies cycleType, frequency, beginTime, endTime and interpolator slots from this sequence into destination, optionally clearing destination slots first.
 // @fnv 0x00a32fa0
-void NiControllerSequence::FUN_00a32fa0(NiControllerSequence* destination, int, int, bool remove)
+// src: COMMUNITY 0x00a32fa0
+void NiControllerSequence::PopulatePoseSequence(NiControllerSequence* destination, int, int, bool remove)
 {
     if (remove)
     {
@@ -3700,7 +3720,7 @@ void NiControllerSequence::FUN_00a32fa0(NiControllerSequence* destination, int, 
                         FUN_00a312d0((NiFixedString&)DAT_011f49e0, (NiFixedString&)DAT_011f49e0, (NiFixedString&)DAT_011f49e0,
                                      (NiFixedString&)DAT_011f49e0, (NiFixedString&)DAT_011f49e0),
                     0xff);
-                ((FUN_00a30750_shell*)&tag)->FUN_00a30750();
+                ((FUN_00a30750_shell*)&tag)->NiControllerSequence_IDTag_Destroy();
                 S00a32fa0_Item& newItem = ((S00a32fa0_Item*)destination->m_pInterpArray)[newIndex];
                 newItem.blend = item.blend;
                 newItem.controller = item.controller;
@@ -3722,12 +3742,13 @@ class S00a31880_FUN_00a31880_cls
     unsigned char m_0c;
     unsigned char m_0d;
 
-    S00a31880_FUN_00a31880_cls* FUN_00a31880(S00a31880_FUN_00a31880_cls* src);
+    S00a31880_FUN_00a31880_cls* CopyRetainedFields(S00a31880_FUN_00a31880_cls* src);
 };
 
 // Copies reference-counted pointers and plain fields from src, managing ref counts for the two NiRefObject pointers.
 // @fnv 0x00a31880
-S00a31880_FUN_00a31880_cls* S00a31880_FUN_00a31880_cls::FUN_00a31880(S00a31880_FUN_00a31880_cls* src)
+// src: GUESS 0x00a31880 (confidence: medium)
+S00a31880_FUN_00a31880_cls* S00a31880_FUN_00a31880_cls::CopyRetainedFields(S00a31880_FUN_00a31880_cls* src)
 {
     NiRefObject* pOldRef0 = m_00;
     if (pOldRef0 != src->m_00)

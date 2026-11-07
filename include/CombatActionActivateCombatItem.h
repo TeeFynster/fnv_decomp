@@ -6,5 +6,5 @@ class CombatActionActivateCombatItem : public CombatAction
 {
 public:
     CombatActionActivateCombatItem(COMBAT_ACTION type);
-    void FUN_0097cf10(CombatController* apCombatController, int aiActionValue);
+    void Execute_0097cf10(CombatController* apCombatController, int aiActionValue);
 };

@@ -11,16 +11,17 @@ extern "C" void __cdecl ProcessElements(int, int, int);
 
 struct FUN_00dc0ed0_class
 {
-    void FUN_00dc0ed0(int a, int b);
+    void ProcessElements_Thunk(int a, int b);
 };
 
 // @fnv 0x00dc0ed0
-void FUN_00dc0ed0_class::FUN_00dc0ed0(int aiFirst, int aiSecond)
+// src: GUESS 0x00dc0ed0 (confidence: medium)
+void FUN_00dc0ed0_class::ProcessElements_Thunk(int aiFirst, int aiSecond)
 {
     ProcessElements(*(int*)((char*)this + 8), aiSecond, aiFirst);
 }
 
-void __cdecl FUN_00dc0de0(void*, void*);
+void __cdecl hkNativePackfileUtils_unload(void*, void*);
 
 struct FUN_00dc0ef0_class
 {
@@ -31,16 +32,17 @@ struct FUN_00dc0ef0_class
     int m_10;
     int m_14;
     int m_18;
-    void FUN_00dc0ef0();
+    void UpdateState_00dc0ef0();
 };
 
 // If m_14 is set, calls FUN_00dc0de0 on m_08 and m_0c, then clears m_14 and m_18.
 // @fnv 0x00dc0ef0
-void FUN_00dc0ef0_class::FUN_00dc0ef0()
+// src: GUESS 0x00dc0ef0 (confidence: low)
+void FUN_00dc0ef0_class::UpdateState_00dc0ef0()
 {
     if (m_14)
     {
-        FUN_00dc0de0(m_08, m_0c);
+        hkNativePackfileUtils_unload(m_08, m_0c);
         m_14 = 0;
         m_18 = 0;
     }
@@ -88,7 +90,7 @@ extern "C" void __cdecl ProcessElements(int header, int first, int second)
     }
 }
 
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 
 inline hkMemoryAllocator& GetHeap(hkMemoryRouter* holder)
 {
@@ -97,7 +99,7 @@ inline hkMemoryAllocator& GetHeap(hkMemoryRouter* holder)
 
 inline hkMemoryRouter& GetMonitorStream() throw()
 {
-    return *FUN_00c85750();
+    return *hkMemoryRouter_getInstance();
 }
 
 struct S_00dc0de0_Value
@@ -148,7 +150,7 @@ struct S_00dc0de0_Map
         return m_kPrimitiveElement[it].val;
     }
     void ClearAndRelease(hkMemoryAllocator& alloc);
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 
 struct S_00dc0de0_Elem
@@ -190,7 +192,8 @@ struct S_00dc0de0
 };
 
 // @fnv 0x00dc0de0
-void FUN_00dc0de0(S_00dc0de0* s)
+// src: XBOX_PDB 0x00dc0de0
+void hkNativePackfileUtils_unload(S_00dc0de0* s)
 {
     s->m_00 = 0;
     S_00dc0de0_Map& map = s->m_map;
@@ -200,15 +203,16 @@ void FUN_00dc0de0(S_00dc0de0* s)
         if (pValue->m_callback)
             pValue->m_callback(map.GetIteratorKey(it));
     }
-    s->m_ppData._clearAndDeallocate(GetHeap(FUN_00c85750()));
-    map.ClearAndRelease(GetHeap(FUN_00c85750()));
-    map.FUN_00a29680();
+    s->m_ppData._clearAndDeallocate(GetHeap(hkMemoryRouter_getInstance()));
+    map.ClearAndRelease(GetHeap(hkMemoryRouter_getInstance()));
+    map.Object_DoNothing();
 }
 
 extern char DAT_010d6ab4[];
 
 // @fnv 0x00dc0eb0
-void* __cdecl FUN_00dc0eb0()
+// src: GUESS 0x00dc0eb0 (confidence: low)
+void* __cdecl Hknativepackfileutils_GetDAT010d6ab4()
 {
     return DAT_010d6ab4;
 }
@@ -221,16 +225,17 @@ struct FUN_00dc0ec0_cls
     int unk0c;
     int unk10;
     int unk14;
-    int FUN_00dc0ec0(int first, int second);
+    int GetUnk14_00dc0ec0(int first, int second);
 };
 // @fnv 0x00dc0ec0
-int FUN_00dc0ec0_cls::FUN_00dc0ec0(int first, int second)
+// src: GUESS 0x00dc0ec0 (confidence: low)
+int FUN_00dc0ec0_cls::GetUnk14_00dc0ec0(int first, int second)
 {
     return unk14;
 }
 
-extern "C" int __cdecl FUN_00dc07d0(void*, void*) throw();
-extern "C" void __cdecl FUN_00c908c0(void*, void*, int, int) throw();
+extern "C" int __cdecl hkPackfile_ComputeNativeStorageSize(void*, void*) throw();
+extern "C" void __cdecl hkArrayUtil__reserve(void*, void*, int, int) throw();
 extern "C" void* __cdecl UnpackPackfile(void*, void*, void*, int, void*) throw();
 extern "C" void* DAT_010d6a94;
 
@@ -286,7 +291,7 @@ struct S_00dc0cd0_ArrayLocalForm
             int newCap = 2 * cap;
             if (n >= newCap)
                 newCap = n;
-            FUN_00c908c0(&alloc, this, newCap, 1);
+            hkArrayUtil__reserve(&alloc, this, newCap, 1);
         }
     }
 
@@ -330,7 +335,7 @@ struct S_00dc0cd0_Resource
 void* __cdecl CreateResourceFromArray(void* arg0, void* arg1, void* arg2) throw()
 {
     S_00dc0cd0_ArrayLocalForm tempArray;
-    int needed = FUN_00dc07d0(arg0, arg1);
+    int needed = hkPackfile_ComputeNativeStorageSize(arg0, arg1);
     tempArray.SetSizeAndGrow(needed);
     void* pKey = UnpackPackfile(arg0, arg1, tempArray.m_data, needed, arg2);
     S_00dc0cd0_Map* map = (S_00dc0cd0_Map*)((char*)tempArray.m_data + 8);
@@ -357,7 +362,7 @@ namespace fnv_00dc0f20 {
 extern int DAT_010d6a94;
 extern int DAT_0102e388;
 
-void __cdecl FUN_00dc0de0(void*, void*);
+void __cdecl hkNativePackfileUtils_unload(void*, void*);
 
 
 struct FUN_00dc0f20_cls
@@ -370,20 +375,21 @@ struct FUN_00dc0f20_cls
     int m_14;
     int m_18;
 
-    void FUN_00dc0f20();
+    void UpdateFields_00dc0f20();
 };
 
 // @fnv 0x00dc0f20
-void FUN_00dc0f20_cls::FUN_00dc0f20()
+// src: GUESS 0x00dc0f20 (confidence: low)
+void FUN_00dc0f20_cls::UpdateFields_00dc0f20()
 {
     m_vptr = (int)&DAT_010d6a94;
     if (m_14 != 0)
     {
-        FUN_00dc0de0(m_08, m_0c);
+        hkNativePackfileUtils_unload(m_08, m_0c);
         m_14 = 0;
         m_18 = 0;
     }
-    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     m_0c = 0;
     unsigned int uCapBits = m_10;
@@ -407,9 +413,9 @@ struct StructureLayoutRules
 
 extern StructureLayoutRules DAT_011b7b88;
 
-void __cdecl FUN_00cb1280(void* p, int a, int b);
-void* __cdecl FUN_00dc0fb0();
-int __cdecl FUN_00cb0fa0(const void* a, const void* b);
+void __cdecl hkString_memSet(void* p, int a, int b);
+void* __cdecl hkVersionUtil_getCurrentVersion();
+int __cdecl hkString_strCmp(const void* a, const void* b);
 
 struct hkPackfileHeader
 {
@@ -438,7 +444,7 @@ struct hkPackfileHeader
 
     hkPackfileHeader()
     {
-        FUN_00cb1280(this, -1, sizeof(*this));
+        hkString_memSet(this, -1, sizeof(*this));
         m_magic0 = 0x57e0e057;
         m_magic1 = 0x10c0c010;
         m_contentsVersion_0 = 0;
@@ -504,7 +510,7 @@ int __cdecl ValidatePackfileHeader(const hkPackfileHeader* header, const char** 
             *outError = "Packfile file format is too old";
         return 1;
     }
-    if (FUN_00cb0fa0(&header->m_contentsVersion_0, FUN_00dc0fb0()) != 0)
+    if (hkString_strCmp(&header->m_contentsVersion_0, hkVersionUtil_getCurrentVersion()) != 0)
     {
         if (outError)
             *outError = "Packfile contents are not up to date";
@@ -673,7 +679,7 @@ extern "C" void* __cdecl UnpackPackfile(void* packfileData, void* dataSize, void
                 const void* typeInfo = registry->RegisterLoadedObject(obj, className);
                 if (typeInfo)
                 {
-                    hkMemoryAllocator& heap = GetHeap(FUN_00c85750());
+                    hkMemoryAllocator& heap = GetHeap(hkMemoryRouter_getInstance());
                     out->m_pTracker.add(&heap, obj, typeInfo);
                 }
             }
@@ -704,7 +710,8 @@ struct Table_dc07b0
 };
 
 // @fnv 0x00dc07b0
-static __declspec(noinline) int FUN_00dc07b0(Table_dc07b0* apTable, int aiIndex, int a, int b)
+// src: GUESS 0x00dc07b0 (confidence: low)
+static __declspec(noinline) int Hknativepackfileutils_EvaluateValue_00dc07b0(Table_dc07b0* apTable, int aiIndex, int a, int b)
 {
     if (apTable->entries[aiIndex].unk18 != 0)
     {
@@ -721,10 +728,10 @@ volatile int g_out_dc07b0;
 
 void CallTarget_dc07b0()
 {
-    g_out_dc07b0 = FUN_00dc07b0(g_t_dc07b0, g_idx_dc07b0, g_a_dc07b0, g_b_dc07b0);
+    g_out_dc07b0 = Hknativepackfileutils_EvaluateValue_00dc07b0(g_t_dc07b0, g_idx_dc07b0, g_a_dc07b0, g_b_dc07b0);
 }
 
-extern "C" int __cdecl FUN_00cb17f0(int);
+extern "C" int __cdecl Hkmap_ProcessEntries_00cb17f0(int);
 
 struct hkPackfileSectionHeader
 {
@@ -757,7 +764,8 @@ struct hkPackfileSectionHeader
 };
 
 // @fnv 0x00dc07d0
-extern "C" int __cdecl FUN_00dc07d0(void* packfileData, void* packfileSize) throw()
+// src: GUESS 0x00dc07d0 (confidence: medium)
+extern "C" int __cdecl hkPackfile_ComputeNativeStorageSize(void* packfileData, void* packfileSize) throw()
 {
     const hkPackfileHeader* header = (const hkPackfileHeader*)packfileData;
     int dataSize = 0;
@@ -769,12 +777,12 @@ extern "C" int __cdecl FUN_00dc07d0(void* packfileData, void* packfileSize) thro
         numVirtualFixups += sections[i].getVirtualFixupsSize() / (3 * (int)sizeof(int));
         dataSize += sections[i].getDataSize() + sections[i].getExportsSize() + sections[i].getImportsSize();
     }
-    int mapSize = FUN_00cb17f0(numVirtualFixups);
+    int mapSize = Hkmap_ProcessEntries_00cb17f0(numVirtualFixups);
     return 0x20 + header->m_iNumSections * (int)sizeof(hkPackfileSectionHeader) + dataSize + mapSize;
 }
 
 namespace fnv_00dc0f80 {
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 struct FUN_00dc0f80
 {
     unsigned short allocationSize;
@@ -782,7 +790,7 @@ struct FUN_00dc0f80
     virtual ~FUN_00dc0f80();
     void operator delete(void* ptr)
     {
-        hkMemoryRouter* manager = FUN_00c85750();
+        hkMemoryRouter* manager = hkMemoryRouter_getInstance();
         reinterpret_cast<hkMemoryAllocator*>(manager->m_heap)->blockFree(ptr, static_cast<FUN_00dc0f80*>(ptr)->allocationSize);
     }
 };

@@ -16,11 +16,11 @@ public:
     virtual void Start();
     virtual void Finish();
 
-    void FUN_0080b1b0(Actor* apActor);
-    void FUN_0080b310(BGSLoadFormBuffer* apActor);
-    void FUN_0080b0c0(Actor* actor);
-    void FUN_0080b200(BGSLoadFormBuffer* target);
-    void FUN_0080aef0();
+    void Revert_0080b1b0(Actor* apActor);
+    void Revert_0080b310(BGSLoadFormBuffer* apActor);
+    void FinishInitLoadGame_0080b0c0(Actor* actor);
+    void FinishLoadGame(BGSLoadFormBuffer* target);
+    void Finish_0080aef0();
     void UpdateChameleonEffect();
     ChameleonEffect* Clone();
     void CopyTo(ChameleonEffect* pkCopy);

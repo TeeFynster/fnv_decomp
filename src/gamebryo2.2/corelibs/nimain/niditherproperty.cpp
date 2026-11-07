@@ -10,13 +10,15 @@
 extern void* g_011f5f48;
 
 // @fnv 0x00a9a5e0
-void* __cdecl FUN_00a9a5e0()
+// src: COMMUNITY 0x00a9a5e0
+void* __cdecl NiDitherProperty_GetRTTI()
 {
     return &g_011f5f48;
 }
 
 // @fnv 0x00dc9bc0
-int __cdecl FUN_00dc9bc0()
+// src: GUESS 0x00dc9bc0 (confidence: low)
+int __cdecl Object_ComputeValue_00dc9bc0()
 {
     return 8;
 }
@@ -24,7 +26,8 @@ int __cdecl FUN_00dc9bc0()
 extern void* DAT_010a0f6c;
 
 // @fnv 0x00a9a640
-void* __cdecl FUN_00a9a640()
+// src: EXE 0x00a9a640
+void* __cdecl NiDitherProperty_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x1c);
     if (p)
@@ -40,7 +43,8 @@ void* __cdecl FUN_00a9a640()
 
 // Allocates and constructs a copy of this NiCullingProperty, runs FUN_00a5d7a0 on it, copies m_usFlags, and returns the copy.
 // @fnv 0x00a9a5f0
-NiCullingProperty* NiCullingProperty::FUN_00a9a5f0(CloningProcess& process)
+// src: XBOX_PDB 0x00a9a5f0
+NiCullingProperty* NiCullingProperty::NiDitherProperty_CreateClone(CloningProcess& process)
 {
     NiCullingProperty* copy = (NiCullingProperty*)BSFadeNode::operator new(0x1c);
     if (copy)
@@ -53,13 +57,13 @@ NiCullingProperty* NiCullingProperty::FUN_00a9a5f0(CloningProcess& process)
     {
         copy = 0;
     }
-    FUN_00a5d7a0(copy, process);
+    NiProperty_CopyMembers(copy, process);
     copy->m_usFlags = m_usFlags;
     return copy;
 }
 
-char* __cdecl FUN_00a7d330(char const*);
-char* __cdecl FUN_00a7d370(char const*, bool);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char const*);
+char* __cdecl NiGetViewerString(char const*, bool);
 // The base property viewer helper is not declared with StrArr in NiProperty.h.
 struct NiDitherProperty : NiProperty
 {
@@ -78,13 +82,13 @@ void NiDitherProperty::AppendDitherSettings(StrArr* array)
 {
     AppendString(array);
     Temporary value;
-    value.text = FUN_00a7d330((char const*)g_011f5f48);
+    value.text = NiViewerStrings_NiGetViewerString_Title((char const*)g_011f5f48);
     unsigned int index = array->m_usSize;
     if (index >= array->m_usMaxSize)
         array->SetSize(index + array->m_usGrowBy);
     array->SetAt(index, value.text);
     value.flag = (m_bDither & 1) != 0;
-    value.text = FUN_00a7d370("m_bDither", value.flag);
+    value.text = NiGetViewerString("m_bDither", value.flag);
     index = array->m_usSize;
     if (index >= array->m_usMaxSize)
         array->SetSize(index + array->m_usGrowBy);

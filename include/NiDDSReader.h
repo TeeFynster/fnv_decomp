@@ -20,6 +20,6 @@ public:
                                             unsigned int uiBlueMask, unsigned int uiAlphaMask,
                                             unsigned int uiBitsPerPixel);
     NiPixelFormat NormalizePixelFormat(NiPixelFormat kFormat);
-    bool FUN_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsigned int& uiHeight,
+    bool ReadHeader_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsigned int& uiHeight,
                       NiPixelFormat& kFormat, bool& bMipmap, unsigned int& uiFaces);
 };

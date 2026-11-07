@@ -26,7 +26,7 @@ struct PathWorkList
     int unk00[4];
     PathWorkList();
     ~PathWorkList();
-    bool FUN_006ebde0();
+    bool LockFreeMap_char_const_Model_LockFreeMapIterator_GetFinished();
 };
 
 struct PathIndex
@@ -36,26 +36,27 @@ struct PathIndex
 
 struct FUN_006eb6b0_cls : public PathManagerImpl
 {
-    void FUN_006eb6b0(int id);
+    void PathManagerImpl_CancelCurrentPathsAndPause_0(int id);
 };
 
 // @fnv 0x006eb6b0
-void FUN_006eb6b0_cls::FUN_006eb6b0(int id)
+// src: COMMUNITY 0x006eb6b0
+void FUN_006eb6b0_cls::PathManagerImpl_CancelCurrentPathsAndPause_0(int id)
 {
     reinterpret_cast<BSSpinLock_r006eb6b0*>(reinterpret_cast<char*>(this) + 0xc38)
         ->Lock("PathManagerImpl::CancelCurrentPathsAndPause");
     PathingRequest* ref;
     int outA2;
     PathWorkList list3;
-    while (!list3.FUN_006ebde0())
+    while (!list3.LockFreeMap_char_const_Model_LockFreeMapIterator_GetFinished())
     {
         if (reinterpret_cast<PathIndex*>(reinterpret_cast<char*>(this) + 0x1480)
                 ->TryGetNextEntry(&list3, &ref, &outA2, true))
         {
-            if (reinterpret_cast<PathSlot*>(ref->FUN_006c9900())->unk04 == id)
+            if (reinterpret_cast<PathSlot*>(ref->GetActorLockData())->unk04 == id)
             {
-                reinterpret_cast<PathSlot*>(ref->FUN_006c9900())->unk04 = 0;
-                reinterpret_cast<PathSlot*>(ref->FUN_006c9900())->unk00 = 0;
+                reinterpret_cast<PathSlot*>(ref->GetActorLockData())->unk04 = 0;
+                reinterpret_cast<PathSlot*>(ref->GetActorLockData())->unk00 = 0;
             }
         }
     }

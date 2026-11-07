@@ -83,7 +83,7 @@ bool NiScreenElementsData::SetRectangleBounds(int iPolygonIndex, unsigned short 
             NiScreenElementsData__Polygon& kPolygon = m_akPolygon[usIndex];
             if (kPolygon.m_usVertexCount == 4 && usTextureSetIndex < (unsigned short)(m_usDataFlags & 1))
             {
-                NiPoint2* pkTexture = FUN_00a66960(usTextureSetIndex) + kPolygon.m_usVertexOffset;
+                NiPoint2* pkTexture = NiGeometryData_GetTextureSet(usTextureSetIndex) + kPolygon.m_usVertexOffset;
                 pkTexture[0].x = fLeft;
                 pkTexture[0].y = fTop;
                 pkTexture[1].x = fLeft;
@@ -104,7 +104,8 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f5b50;
 
 // @fnv 0x00a87a90
-GlobalObjectO2_00a7b610* __cdecl FUN_00a87a90()
+// src: COMMUNITY 0x00a87a90
+GlobalObjectO2_00a7b610* __cdecl NiScreenElementsData_GetRTTI()
 {
     return &g_011f5b50;
 }
@@ -136,8 +137,8 @@ struct TriShapeViewerStrings : NiTriShapeData
 };
 
 char* __cdecl _FUN_00a7d330(void*);
-char* __cdecl FUN_00a7d490(char const*, unsigned short);
-char* __cdecl FUN_00a7d5a0(char const*, void*);
+char* __cdecl NiGetViewerString_00a7d490(char const*, unsigned short);
+char* __cdecl NiGetViewerString_00a7d5a0(char const*, void*);
 
 // Appends the object's member names and values to the string array, growing it as needed via SetSize and SetAt.
 // @fnv 0x00a886f0
@@ -155,55 +156,55 @@ void NiScreenElementsData::GetViewerStrings(NiViewerStringsArray* pkStrings)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d5a0("m_akPolygon", this->m_akPolygon);
+    value = NiGetViewerString_00a7d5a0("m_akPolygon", this->m_akPolygon);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d5a0("m_ausPIndexer", this->m_ausPIndexer);
+    value = NiGetViewerString_00a7d5a0("m_ausPIndexer", this->m_ausPIndexer);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d490("m_usMaxPQuantity", this->m_usMaxPQuantity);
+    value = NiGetViewerString_00a7d490("m_usMaxPQuantity", this->m_usMaxPQuantity);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d490("m_usPGrowBy", this->m_usPGrowBy);
+    value = NiGetViewerString_00a7d490("m_usPGrowBy", this->m_usPGrowBy);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d490("m_usPQuantity", this->m_usPQuantity);
+    value = NiGetViewerString_00a7d490("m_usPQuantity", this->m_usPQuantity);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d490("m_usMaxVQuantity", this->m_usMaxVQuantity);
+    value = NiGetViewerString_00a7d490("m_usMaxVQuantity", this->m_usMaxVQuantity);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d490("m_usVGrowBy", this->m_usVGrowBy);
+    value = NiGetViewerString_00a7d490("m_usVGrowBy", this->m_usVGrowBy);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d490("m_usMaxIQuantity", this->m_usMaxIQuantity);
+    value = NiGetViewerString_00a7d490("m_usMaxIQuantity", this->m_usMaxIQuantity);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    value = FUN_00a7d490("m_usIGrowBy", this->m_usIGrowBy);
+    value = NiGetViewerString_00a7d490("m_usIGrowBy", this->m_usIGrowBy);
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
         strings->SetSize(index + strings->m_usGrowBy);
@@ -218,29 +219,29 @@ inline NiColorA::NiColorA(float fR, float fG, float fB, float fA)
     a = fA;
 }
 
-extern void* __cdecl FUN_00aa1070(unsigned int);
-extern void __cdecl FUN_00aa10f0(void*);
+extern void* __cdecl _NiMalloc_00aa1070(unsigned int);
+extern void __cdecl _NiFree_00aa10f0(void*);
 extern void* __cdecl FUN_00ec44d0(void*, const void*, unsigned int);
 extern void* __cdecl FUN_00ec61c0(void*, int, unsigned int);
 
 struct NiMemorySystem
 {
-    void* FUN_00aa3e40(unsigned int);
-    void FUN_00aa4060(void*);
+    void* Game_DoHeapAlloc(unsigned int);
+    void MemoryManager_Deallocate(void*);
 };
 extern NiMemorySystem g_011f6238;
 
 inline void* __cdecl operator new[](unsigned int n)
 {
-    return g_011f6238.FUN_00aa3e40(n);
+    return g_011f6238.Game_DoHeapAlloc(n);
 }
 inline void* NiPoint2::operator new[](size_t n)
 {
-    return g_011f6238.FUN_00aa3e40(n);
+    return g_011f6238.Game_DoHeapAlloc(n);
 }
 inline void __cdecl operator delete[](void* p)
 {
-    g_011f6238.FUN_00aa4060(p);
+    g_011f6238.MemoryManager_Deallocate(p);
 }
 
 extern const NiPoint3 DAT_011a9484;
@@ -275,16 +276,16 @@ unsigned int ScreenPolygonInsertion::InsertPolygon(unsigned short usVertexCount,
     {
         unsigned short usNewMaxPolygons = m_usMaxPQuantity + m_usPGrowBy;
         NiScreenElementsData__Polygon* pkNewPolygons =
-            (NiScreenElementsData__Polygon*)FUN_00aa1070(usNewMaxPolygons * sizeof(NiScreenElementsData__Polygon));
+            (NiScreenElementsData__Polygon*)_NiMalloc_00aa1070(usNewMaxPolygons * sizeof(NiScreenElementsData__Polygon));
         FUN_00ec44d0(pkNewPolygons, m_akPolygon, m_usMaxPQuantity * sizeof(NiScreenElementsData__Polygon));
-        FUN_00aa10f0(m_akPolygon);
+        _NiFree_00aa10f0(m_akPolygon);
         m_akPolygon = pkNewPolygons;
 
-        unsigned short* pusNewIndexer = (unsigned short*)FUN_00aa1070(usNewMaxPolygons * sizeof(unsigned short));
+        unsigned short* pusNewIndexer = (unsigned short*)_NiMalloc_00aa1070(usNewMaxPolygons * sizeof(unsigned short));
         FUN_00ec44d0(pusNewIndexer, m_ausPIndexer, m_usMaxPQuantity * sizeof(unsigned short));
         FUN_00ec61c0(pusNewIndexer + m_usMaxPQuantity, 0xff,
                      (usNewMaxPolygons - m_usMaxPQuantity) * sizeof(unsigned short));
-        FUN_00aa10f0(m_ausPIndexer);
+        _NiFree_00aa10f0(m_ausPIndexer);
         m_ausPIndexer = pusNewIndexer;
         m_usMaxPQuantity = usNewMaxPolygons;
     }
@@ -371,9 +372,9 @@ unsigned int ScreenPolygonInsertion::InsertPolygon(unsigned short usVertexCount,
         unsigned short usIndexGrowCount = (unsigned short)(fIndexGrowCount + 0.5);
         unsigned short usNewMaxIndices = (usIndexGrowCount + 1) * m_usIGrowBy + m_usMaxIQuantity;
 
-        unsigned short* pusNewTriList = (unsigned short*)FUN_00aa1070(usNewMaxIndices * sizeof(unsigned short));
+        unsigned short* pusNewTriList = (unsigned short*)_NiMalloc_00aa1070(usNewMaxIndices * sizeof(unsigned short));
         FUN_00ec44d0(pusNewTriList, m_pusTriList, m_usMaxIQuantity * sizeof(unsigned short));
-        FUN_00aa10f0(m_pusTriList);
+        _NiFree_00aa10f0(m_pusTriList);
         m_pusTriList = pusNewTriList;
         m_usMaxIQuantity = usNewMaxIndices;
     }
@@ -427,8 +428,8 @@ NiScreenElementsData* __fastcall InitializeScreenElementsData(
     data->m_usPGrowBy = (unsigned short)(iPGrowBy > 0 ? iPGrowBy : 1);
     data->m_usPQuantity = 0;
     data->m_akPolygon =
-        (NiScreenElementsData__Polygon*)FUN_00aa1070(data->m_usMaxPQuantity * sizeof(NiScreenElementsData__Polygon));
-    data->m_ausPIndexer = (unsigned short*)FUN_00aa1070(data->m_usMaxPQuantity * sizeof(unsigned short));
+        (NiScreenElementsData__Polygon*)_NiMalloc_00aa1070(data->m_usMaxPQuantity * sizeof(NiScreenElementsData__Polygon));
+    data->m_ausPIndexer = (unsigned short*)_NiMalloc_00aa1070(data->m_usMaxPQuantity * sizeof(unsigned short));
     FUN_00ec61c0(data->m_ausPIndexer, 0xff, data->m_usMaxPQuantity * sizeof(unsigned short));
 
     data->m_usMaxVQuantity = (unsigned short)(iMaxVQuantity > 0 ? iMaxVQuantity : 1);
@@ -463,7 +464,7 @@ NiScreenElementsData* __fastcall InitializeScreenElementsData(
     data->m_usIGrowBy = (unsigned short)(iTGrowBy > 0 ? 3 * iTGrowBy : 3);
     data->m_usTriangles = 0;
     data->m_uiTriListLength = 0;
-    data->m_pusTriList = (unsigned short*)FUN_00aa1070(data->m_usMaxIQuantity * sizeof(unsigned short));
+    data->m_pusTriList = (unsigned short*)_NiMalloc_00aa1070(data->m_usMaxIQuantity * sizeof(unsigned short));
     data->m_bGeometryInitialized = false;
     return data;
 }
@@ -485,15 +486,15 @@ template <class T> inline void NiStreamLoadBinary(NiStream& kStream, T* pkValue,
 {
     NiBinaryStreamLoad(kStream.GetBinaryStream(), pkValue, ItemUpdateArray);
 }
-void* __cdecl FUN_00aa1070(unsigned int bytes);
+void* __cdecl _NiMalloc_00aa1070(unsigned int bytes);
 // @fnv 0x00a88410
 void NiScreenElementsData::LoadBinary(NiStream& kStream)
 {
     NiTriShapeData::LoadBinary(kStream);
     NiStreamLoadBinary(kStream, m_usMaxPQuantity);
     m_akPolygon = static_cast<NiScreenElementsData__Polygon*>(
-        FUN_00aa1070(m_usMaxPQuantity * sizeof(NiScreenElementsData__Polygon)));
-    m_ausPIndexer = static_cast<unsigned short*>(FUN_00aa1070(m_usMaxPQuantity * sizeof(unsigned short)));
+        _NiMalloc_00aa1070(m_usMaxPQuantity * sizeof(NiScreenElementsData__Polygon)));
+    m_ausPIndexer = static_cast<unsigned short*>(_NiMalloc_00aa1070(m_usMaxPQuantity * sizeof(unsigned short)));
 
     unsigned int uiPolygonCount = m_usMaxPQuantity;
     NiStreamLoadBinary(kStream, m_akPolygon, uiPolygonCount);
@@ -546,7 +547,7 @@ void NiScreenElementsData::SaveBinary(NiStream& kStream)
 bool NiScreenElementsData::IsEqual(NiObject* object) const
 {
     const NiScreenElementsData* pkOther = static_cast<const NiScreenElementsData*>(object);
-    if (!const_cast<NiScreenElementsData*>(this)->NiTriShapeData::FUN_00a7b7e0(pkOther))
+    if (!const_cast<NiScreenElementsData*>(this)->NiTriShapeData::IsEqual_00a7b7e0(pkOther))
         return false;
 
     if (m_usMaxPQuantity != pkOther->m_usMaxPQuantity || m_usPGrowBy != pkOther->m_usPGrowBy ||

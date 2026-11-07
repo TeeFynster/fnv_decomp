@@ -29,7 +29,8 @@ __declspec(noinline) void __fastcall AddUnserializedReference(hkReferencedObject
 
 extern int DAT_012681d4;
 // @fnv 0x00c90410
-void __cdecl FUN_00c90410(int v)
+// src: HAVOK_LIB 0x00c90410
+void __cdecl hkReferencedObject_setLockMode(int v)
 {
     *(int*)(*(int**)(void*)&DAT_012681d4 + 2) = v;
 }
@@ -37,7 +38,8 @@ void __cdecl FUN_00c90410(int v)
 extern int DAT_0102e388;
 
 // @fnv 0x00c903d0
-int* __cdecl FUN_00c903d0()
+// src: GUESS 0x00c903d0 (confidence: low)
+int* __cdecl hkReferencedObject_GetDAT0102e388Address()
 {
     return &DAT_0102e388;
 }
@@ -52,10 +54,11 @@ struct RefObj
 };
 struct FUN_00cd29c0_class
 {
-    void FUN_00cd29c0(RefObj*);
+    void hkpWorldObject_setAiObjectData(RefObj*);
 };
 // @fnv 0x00cd29c0
-void FUN_00cd29c0_class::FUN_00cd29c0(RefObj* object)
+// src: HAVOK_LIB 0x00cd29c0
+void FUN_00cd29c0_class::hkpWorldObject_setAiObjectData(RefObj* object)
 {
     object->RetainReference();
     DDCC60World* pOldWorld = *reinterpret_cast<DDCC60World**>(reinterpret_cast<unsigned char*>(this) + 0x84);
@@ -129,10 +132,11 @@ struct FUN_00dee6f0_class
     int m_iFourthElementInteger;
     int m_usTrailingValue;
     RefObj* m_pObject;
-    void FUN_00dee6f0(RefObj* pObject);
+    void hkpPointToPathConstraintData_setPath(RefObj* pObject);
 };
 // @fnv 0x00dee6f0
-void FUN_00dee6f0_class::FUN_00dee6f0(RefObj* pNewObject)
+// src: COMMUNITY 0x00dee6f0
+void FUN_00dee6f0_class::hkpPointToPathConstraintData_setPath(RefObj* pNewObject)
 {
     if (pNewObject)
         pNewObject->FUN_00c90510();
@@ -169,7 +173,7 @@ struct FUN_00e3e840_result
 
 struct FUN_00e5c4d0_class
 {
-    void FUN_00e5c4d0(FUN_00e3e840_data* data, int key);
+    void FindOrCreateEntryReference(FUN_00e3e840_data* data, int key);
 };
 
 struct FUN_00e3e840_class
@@ -197,7 +201,7 @@ FUN_00e3e840_result* FUN_00e3e840_class::FindWorldByKey(FUN_00e3e840_result* res
 
             do
             {
-                reinterpret_cast<FUN_00e5c4d0_class*>(m_pItems + offset)->FUN_00e5c4d0(&data, key);
+                reinterpret_cast<FUN_00e5c4d0_class*>(m_pItems + offset)->FindOrCreateEntryReference(&data, key);
 
                 if (data.m_pWorld)
                 {
@@ -225,7 +229,8 @@ FUN_00e3e840_result* FUN_00e3e840_class::FindWorldByKey(FUN_00e3e840_result* res
 extern int DAT_012681d4;
 
 // @fnv 0x00c90480
-int __cdecl FUN_00c90480()
+// src: COMMUNITY 0x00c90480
+int __cdecl hkReferencedObject_getLockMode()
 {
     return *(int*)(DAT_012681d4 + 8);
 }
@@ -417,7 +422,7 @@ struct Owner_9bf0
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14;
     Object_9bf0* m_object;
-    void FUN_00c89bf0(Object_9bf0* next);
+    void UpdateState_00c89bf0(Object_9bf0* next);
 };
 struct RestoreMode_9bf0
 {
@@ -432,7 +437,8 @@ struct RestoreMode_9bf0
     }
 };
 // @fnv 0x00c89bf0
-void Owner_9bf0::FUN_00c89bf0(Object_9bf0* apObject)
+// src: GUESS 0x00c89bf0 (confidence: low)
+void Owner_9bf0::UpdateState_00c89bf0(Object_9bf0* apObject)
 {
     RestoreMode_9bf0 scoped;
     if (apObject)
@@ -444,13 +450,13 @@ void Owner_9bf0::FUN_00c89bf0(Object_9bf0* apObject)
 
 namespace hkRouterC904 {
 // Shared router layout: the heap allocator used by 0x00c85750 is at +0x10.
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 
 inline void* hkReferencedObject::operator new(std::size_t nbytes)
 {
-    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkRouterC904::FUN_00c85750().heap().blockAlloc(nbytes));
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkRouterC904::hkMemoryRouter_getInstance().heap().blockAlloc(nbytes));
     b->m_usMemSizeAndFlags = (unsigned short)nbytes;
     return b;
 }
@@ -550,10 +556,11 @@ struct FUN_00ca9b40_class
     short m_uCount;
     int m_extraneousState;
     ObjectRef* m_pObject;
-    void FUN_00ca9b40(ObjectRef* pObject);
+    void UpdateFields_00ca9b40(ObjectRef* pObject);
 };
 // @fnv 0x00ca9b40
-void FUN_00ca9b40_class::FUN_00ca9b40(ObjectRef* pObject)
+// src: GUESS 0x00ca9b40 (confidence: low)
+void FUN_00ca9b40_class::UpdateFields_00ca9b40(ObjectRef* pObject)
 {
     ThreadFlagGuard guard;
     if (pObject)
@@ -581,14 +588,14 @@ struct Resource
 struct DeviceOwner;
 struct DeviceSubobject
 {
-    void FUN_00d21ce0(DeviceOwner*);
+    void hkpBridgeConstraintAtom_init(DeviceOwner*);
 };
 struct DeviceOwner
 {
     int unk00, unk04, unk08, unk0c;
     DeviceSubobject m_subobject;
     int unk14, unk18, m_payload;
-    void FUN_00ca9b40(Resource*);
+    void UpdateFields_00ca9b40(Resource*);
 };
 struct InputObject
 {
@@ -597,22 +604,22 @@ struct InputObject
         return *reinterpret_cast<DeviceCallback* const*>(reinterpret_cast<const char*>(this) + 0x24c);
     }
 };
-Resource* __cdecl FUN_00cf4af0(InputObject*);
+Resource* __cdecl bhkConstraintManager_LoadBinary(InputObject*);
 struct FUN_00ca9ce0_class
 {
     int unk00;
     DeviceOwner* m_pOwnerObject;
-    void FUN_00c8a230(InputObject*);
+    void hkConstraintCinfo_LoadBinary(InputObject*);
     void ProcessInput(InputObject*);
 };
 // @fnv 0x00ca9ce0
 void FUN_00ca9ce0_class::ProcessInput(InputObject* input)
 {
-    FUN_00c8a230(input);
+    hkConstraintCinfo_LoadBinary(input);
     DeviceOwner* owner = m_pOwnerObject;
-    Resource* resource = FUN_00cf4af0(input);
-    owner->FUN_00ca9b40(resource);
-    owner->m_subobject.FUN_00d21ce0(owner);
+    Resource* resource = bhkConstraintManager_LoadBinary(input);
+    owner->UpdateFields_00ca9b40(resource);
+    owner->m_subobject.hkpBridgeConstraintAtom_init(owner);
     resource->FUN_00c905b0();
     DeviceCallback* callback = input->GetCallback();
     callback->Process(&owner->m_payload);
@@ -900,12 +907,13 @@ struct Obj_00c89b60
     int unk0C;
     int unk10;
     Ref_00c89b60* m_pReference;
-    void __thiscall FUN_00c89b60(Ref_00c89b60* r);
+    void __thiscall SetRetainedReference(Ref_00c89b60* r);
 };
 
 // Sets m_pReference to r, calling FUN_00c90510 on the new reference and FUN_00c905b0 on the old one if present.
 // @fnv 0x00c89b60
-void __thiscall Obj_00c89b60::FUN_00c89b60(Ref_00c89b60* apReference)
+// src: GUESS 0x00c89b60 (confidence: medium)
+void __thiscall Obj_00c89b60::SetRetainedReference(Ref_00c89b60* apReference)
 {
     Scope_00c89b60 s;
     if (apReference)
@@ -928,7 +936,8 @@ static inline void replaceInstanceC904(hkReferencedObjectLock* p)
 
 // Sets the singleton lock mode, creating the lock first if DAT_012681d4 is null.
 // @fnv 0x00c90420
-void __cdecl FUN_00c90420(int value)
+// src: HAVOK_LIB 0x00c90420
+void __cdecl hkReferencedObject_lockInit(int value)
 {
     if (!hkSingletonC904::DAT_012681d4)
     {
@@ -1030,7 +1039,7 @@ struct FUN_00cc49b0_class;
 struct FUN_00d21ce0_class
 {
     int unk0c, unk10, unk14;
-    void FUN_00d21ce0(FUN_00cc49b0_class* parent);
+    void hkpBridgeConstraintAtom_init(FUN_00cc49b0_class* parent);
 };
 struct FUN_00cc49b0_class
 {
@@ -1039,7 +1048,7 @@ struct FUN_00cc49b0_class
     FUN_00c90510_class* owner;
     unsigned short state;
     unsigned short substate;
-    void FUN_00cc49b0(FUN_00c90510_class* value);
+    void ahkpBreakableConstraintData_SetChild(FUN_00c90510_class* value);
 };
 struct ScopedThreadState
 {
@@ -1056,7 +1065,8 @@ struct ScopedThreadState
 };
 // Retains value if present, releases owner if present, assigns value, copies two values from vf24, and calls subobject.FUN_00d21ce0(this).
 // @fnv 0x00cc49b0
-void FUN_00cc49b0_class::FUN_00cc49b0(FUN_00c90510_class* apOwner)
+// src: XBOX_PDB 0x00cc49b0
+void FUN_00cc49b0_class::ahkpBreakableConstraintData_SetChild(FUN_00c90510_class* apOwner)
 {
     ScopedThreadState thread;
     if (apOwner)
@@ -1068,7 +1078,7 @@ void FUN_00cc49b0_class::FUN_00cc49b0(FUN_00c90510_class* apOwner)
     owner->vf24(ByteFlag(true), &result);
     state = (unsigned short)result.first;
     substate = (unsigned short)result.second;
-    subobject.FUN_00d21ce0(this);
+    subobject.hkpBridgeConstraintAtom_init(this);
 }
 }  // namespace fnv_00cc49b0
 
@@ -1093,17 +1103,17 @@ class WorldObjectStreamState
     int m_iLayer;
     unsigned char m_ucFlags;
 
-    void FUN_00cc49b0(hkReferencedObject* pkShape) throw();
+    void ahkpBreakableConstraintData_SetChild(hkReferencedObject* pkShape) throw();
 };
 
 class FUN_00d53200_class
 {
   public:
     virtual ~FUN_00d53200_class();
-    void FUN_00c8a230(NiStream& kStream);
+    void hkConstraintCinfo_LoadBinary(NiStream& kStream);
 };
 
-hkReferencedObject* __cdecl FUN_00cf4af0(NiStream& kStream) throw();
+hkReferencedObject* __cdecl bhkConstraintManager_LoadBinary(NiStream& kStream) throw();
 
 // This loader's state pointer is at +0x4; bhkWorldObject's inherited Havok pointer is at +0x8.
 class WorldObjectStreamLoader : public FUN_00d53200_class
@@ -1111,17 +1121,18 @@ class WorldObjectStreamLoader : public FUN_00d53200_class
   public:
     WorldObjectStreamState* m_pPointer;
 
-    void FUN_00cc4e10(NiStream& kStream);
+    void hkBreakableConstraintCinfo_LoadBinary(NiStream& kStream);
 };
 
 // Reads a shape, attaches it to the hkpWorldObject, and deserializes its layer and flags from the stream.
 // @fnv 0x00cc4e10
-void WorldObjectStreamLoader::FUN_00cc4e10(NiStream& kStream)
+// src: XBOX_PDB 0x00cc4e10
+void WorldObjectStreamLoader::hkBreakableConstraintCinfo_LoadBinary(NiStream& kStream)
 {
-    FUN_00c8a230(kStream);
+    hkConstraintCinfo_LoadBinary(kStream);
     WorldObjectStreamState* pkObject = m_pPointer;
-    hkReferencedObject* pkShape = FUN_00cf4af0(kStream);
-    pkObject->FUN_00cc49b0(pkShape);
+    hkReferencedObject* pkShape = bhkConstraintManager_LoadBinary(kStream);
+    pkObject->ahkpBreakableConstraintData_SetChild(pkShape);
     pkShape->removeReference();
     kStream.GetBinaryStream()->Read(pkObject->m_iLayer);
     kStream.GetBinaryStream()->Read(pkObject->m_ucFlags);
@@ -1226,18 +1237,19 @@ struct Container_e3eb
     int unk1C, unk20, unk24;
     Container_e3eb** m_children;
     int m_numChildren;
-    hkRefPtr_e3eb<Resource_e3eb> FUN_00e3eb10(Resource_e3eb* target) throw();
+    hkRefPtr_e3eb<Resource_e3eb> FindResourceRecursively(Resource_e3eb* target) throw();
 };
 
 // Recursively searches this container and its children for the given Resource_e3eb, returning a reference-counted pointer to it or an empty reference.
 // @fnv 0x00e3eb10
-hkRefPtr_e3eb<Resource_e3eb> Container_e3eb::FUN_00e3eb10(Resource_e3eb* apResource) throw()
+// src: GUESS 0x00e3eb10 (confidence: high)
+hkRefPtr_e3eb<Resource_e3eb> Container_e3eb::FindResourceRecursively(Resource_e3eb* apResource) throw()
 {
     if (m_resource == apResource)
         return hkRefPtr_e3eb<Resource_e3eb>(m_resource);
     for (int i = 0; i < m_numChildren; i++)
     {
-        hkRefPtr_e3eb<Resource_e3eb> found = m_children[i]->FUN_00e3eb10(apResource);
+        hkRefPtr_e3eb<Resource_e3eb> found = m_children[i]->FindResourceRecursively(apResource);
         if (found.m_pRetainedObject)
             return found;
     }
@@ -1280,12 +1292,13 @@ struct E5C4Foo
     int unk0;
     E5C4Entry* d;
     int FindEntryIndex(E5C4Obj* k);
-    E5C4Ref FUN_00e5c4d0(E5C4Key k);
+    E5C4Ref FindOrCreateEntryReference(E5C4Key k);
 };
 
 // Looks up an entry by key in d; if missing, assigns a new object via k.AssignObject, then returns a copy of the stored E5C4Ref.
 // @fnv 0x00e5c4d0
-E5C4Ref E5C4Foo::FUN_00e5c4d0(E5C4Key akKey)
+// src: GUESS 0x00e5c4d0 (confidence: medium)
+E5C4Ref E5C4Foo::FindOrCreateEntryReference(E5C4Key akKey)
 {
     int bCreated = 0;
     volatile int tmp[2];
@@ -1359,7 +1372,8 @@ void S00e3eba0_class::ReplaceObject(hkReferencedObject* oldObject, hkReferencedO
 
 // Calls FUN_00c903b0 for each strided item, acquiring the critical section when multi-threaded mode is enabled and TLS lacks the marker.
 // @fnv 0x00c90740
-void __cdecl FUN_00c90740(void* items, int count, int stride)
+// src: HAVOK_LIB 0x00c90740
+void __cdecl hkReferencedObject_removeReferences(void* items, int count, int stride)
 {
     hkReferencedObjectLock* guard = (hkReferencedObjectLock*)DAT_012681d4;
     if (guard->m_multiThreaded != 0 && TlsGetValue(DAT_012681d8) != (void*)0x23df4554)
@@ -1405,7 +1419,8 @@ void __cdecl FUN_00c90740(void* items, int count, int stride)
 
 // Calls FUN_00c903a0 on each object, acquiring the critical section when multi-threaded mode is enabled and TLS lacks the marker.
 // @fnv 0x00c90670
-void __cdecl FUN_00c90670(const void* objects, int numObjects, int stride)
+// src: HAVOK_LIB 0x00c90670
+void __cdecl hkReferencedObject_addReferences(const void* objects, int numObjects, int stride)
 {
     hkReferencedObjectLock* lock = (hkReferencedObjectLock*)DAT_012681d4;
     if (lock->m_multiThreaded && (unsigned int)TlsGetValue(DAT_012681d8) != 0x23df4554)
@@ -1444,7 +1459,8 @@ void __cdecl FUN_00c90670(const void* objects, int numObjects, int stride)
 
 // Decrements the lock count and, when it is nonpositive, clears the TLS slot and leaves the critical section.
 // @fnv 0x00c904e0
-void __cdecl FUN_00c904e0()
+// src: HAVOK_LIB 0x00c904e0
+void __cdecl hkReferencedObject_unlockAll()
 {
     hkReferencedObjectLock* lock = reinterpret_cast<hkReferencedObjectLock*>(DAT_012681d4);
     lock->m_lLockCount = lock->m_lLockCount - 1;

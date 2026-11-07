@@ -18,7 +18,7 @@ struct S_00ddecf0_Router
         return *m_pStreamAllocator;
     }
 };
-S_00ddecf0_Router* FUN_00c85750();
+S_00ddecf0_Router* hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* heap, void* arr, int elemSize) throw();
 
 extern const char DAT_010d8038[];
@@ -26,9 +26,9 @@ extern const char DAT_010d8038[];
 struct S00ddf070_StringPtr
 {
     const char* m_pcText;
-    S00ddf070_StringPtr* FUN_00cb0b80(const char* s) throw();
+    S00ddf070_StringPtr* InitializeTextHandle(const char* s) throw();
     S00ddf070_StringPtr* FUN_00cb0bd0(const S00ddf070_StringPtr& other) throw();
-    void FUN_00cb0c00() throw();
+    void Object_UpdateFields_00cb0c00() throw();
     const char* cString() const
     {
         return (const char*)((unsigned int)m_pcText & ~1u);
@@ -48,7 +48,7 @@ struct S00ddf070_Node
     const char* m_name;
     int unk50;
     int unk54;
-    S00ddf070_Node* FUN_00e0d000(S00ddf070_Node* parent, const char* name, int type) throw();
+    S00ddf070_Node* DoNothing_00e0d000(S00ddf070_Node* parent, const char* name, int type) throw();
 };
 struct S00ddf070_Heap
 {
@@ -56,11 +56,12 @@ struct S00ddf070_Heap
     virtual void* AllocateMemoryBlock(int numBytes) throw();
 };
 
-int __cdecl FUN_00cb0fa0(const char* a, const char* b) throw();
+int __cdecl hkString_strCmp(const char* a, const char* b) throw();
 
 // Finds or creates a child node by name, appends the name to the string pool if new, and accumulates value, count, and two counters on the node.
 // @fnv 0x00ddf070
-static __declspec(noinline) S00ddf070_Node* FUN_00ddf070(S00ddf070_Node* parent, const char* name, int value, int count,
+// src: HAVOK_LIB 0x00ddf070
+static __declspec(noinline) S00ddf070_Node* _newNode(S00ddf070_Node* parent, const char* name, int value, int count,
                                                          hkArrayBase<S00ddf070_StringPtr>* strings)
 {
     if (count == 0)
@@ -71,7 +72,7 @@ static __declspec(noinline) S00ddf070_Node* FUN_00ddf070(S00ddf070_Node* parent,
     S00ddf070_Node* child = 0;
     for (int i = 0; parent && i < parent->m_children.GetLogicalSize(); i++)
     {
-        if (FUN_00cb0fa0(parent->m_children[i]->m_name, name) == 0)
+        if (hkString_strCmp(parent->m_children[i]->m_name, name) == 0)
         {
             child = parent->m_children[i];
             break;
@@ -83,20 +84,20 @@ static __declspec(noinline) S00ddf070_Node* FUN_00ddf070(S00ddf070_Node* parent,
         {
             {
                 S00ddf070_StringPtr strName;
-                strName.FUN_00cb0b80(name);
-                S00ddf070_Heap& heap = *(S00ddf070_Heap*)&FUN_00c85750()->heap();
+                strName.InitializeTextHandle(name);
+                S00ddf070_Heap& heap = *(S00ddf070_Heap*)&hkMemoryRouter_getInstance()->heap();
                 if (strings->m_iElementCount == (strings->m_iCapacityState & 0x3fffffff))
                     ResizeAudioStream(&heap, strings, 4);
                 S00ddf070_StringPtr* dest = strings->m_data + strings->m_iElementCount;
                 if (dest)
                     dest->FUN_00cb0bd0(strName);
                 strings->m_iElementCount++;
-                strName.FUN_00cb0c00();
+                strName.Object_UpdateFields_00cb0c00();
             }
             name = strings->back().cString();
         }
-        void* mem = ((S00ddf070_Heap*)&FUN_00c85750()->heap())->AllocateMemoryBlock(0x58);
-        child = mem ? ((S00ddf070_Node*)mem)->FUN_00e0d000(parent, name, 1) : 0;
+        void* mem = ((S00ddf070_Heap*)&hkMemoryRouter_getInstance()->heap())->AllocateMemoryBlock(0x58);
+        child = mem ? ((S00ddf070_Node*)mem)->DoNothing_00e0d000(parent, name, 1) : 0;
     }
     child->m_uiFilterValue[0] += (float)value;
     child->m_uiFilterValue[1] += (float)count;
@@ -112,5 +113,5 @@ volatile int g00ddf070_v;
 S00ddf070_Node* volatile g00ddf070_out;
 void S00ddf070_Caller()
 {
-    g00ddf070_out = FUN_00ddf070(g00ddf070_parent, g00ddf070_name, g00ddf070_v, g00ddf070_v, g00ddf070_strings);
+    g00ddf070_out = _newNode(g00ddf070_parent, g00ddf070_name, g00ddf070_v, g00ddf070_v, g00ddf070_strings);
 }

@@ -105,7 +105,8 @@ struct Motion363
 };
 
 // @fnv 0x00e41220
-void FUN_00e41220(Projection363_Owner* a, Motion363* __restrict b, Projection363_Input* c, hkVector4* out)
+// src: XBOX_PDB 0x00e41220
+void hkaDefaultAnimatedReferenceFrame_project(Projection363_Owner* a, Motion363* __restrict b, Projection363_Input* c, hkVector4* out)
 {
     __m128 A = a->vec20;
     const __m128& v = b->vector;
@@ -130,7 +131,7 @@ void FUN_00e41220(Projection363_Owner* a, Motion363* __restrict b, Projection363
         float f1;
         hkVector4 f2;
         hkQuaternion* h = &b->angular;
-        h->FUN_00cb2ca0(&a->vec20, &f2, &f1);
+        h->hkQuaternion_decomposeRestAxis(&a->vec20, &f2, &f1);
         float target = c->unk0C;
         const double PI = 3.14159265358979323846f;
         const double TWO_PI = 6.28318530717958647692f;
@@ -288,7 +289,8 @@ inline void hkQuaternion::SetConjugate(const hkQuaternion& q)
 {
     reinterpret_cast<hkVector4*>(this)->setNeg3(q.getImag());
 }
-inline void hkQuaternion::FUN_00c66320(const hkQuaternion& a, const hkQuaternion& b)
+// src: COMMUNITY 0x00c66320
+inline void hkQuaternion::setMul(const hkQuaternion& a, const hkQuaternion& b)
 {
     hkVector4 imaginary;
     imaginary.setCross(a.getImag(), b.getImag());
@@ -365,7 +367,7 @@ __forceinline void hkQsTransform::SetProduct(const hkQsTransform& a, const hkQsT
     hkVector4 shift;
     shift.SetRotatedDirection(a.m_rotation, b.m_vTranslation);
     m_vTranslation.setAdd4(a.m_vTranslation, shift);
-    m_rotation.FUN_00c66320(a.m_rotation, b.m_rotation);
+    m_rotation.setMul(a.m_rotation, b.m_rotation);
     m_vScale.setMul4(a.m_vScale, b.m_vScale);
 }
 __forceinline void hkQsTransform::SetMulInverse(const hkQsTransform& a, const hkQsTransform& b)
@@ -383,10 +385,11 @@ struct AnimatedFrame
     int unk04, unk08, unk0c;
     int unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
     float m_fAnimationDuration;
-    void FUN_00e413d0(float time, float nextTime, int loops, hkQsTransform& output) const;
+    void hkaDefaultAnimatedReferenceFrame_getDeltaReferenceFrame(float time, float nextTime, int loops, hkQsTransform& output) const;
 };
 // @fnv 0x00e413d0
-void AnimatedFrame::FUN_00e413d0(float time, float nextTime, int loops, hkQsTransform& output) const
+// src: HAVOK_SRC 0x00e413d0
+void AnimatedFrame::hkaDefaultAnimatedReferenceFrame_getDeltaReferenceFrame(float time, float nextTime, int loops, hkQsTransform& output) const
 {
     hkQsTransform start;
     EvaluateTransform(time, start);

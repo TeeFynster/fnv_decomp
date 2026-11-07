@@ -28,6 +28,6 @@ public:
     int unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
     CritSecStub lock;
 
-    void __thiscall FUN_00e8cd60();
-    void __thiscall FUN_00e8ceb0();
+    void __thiscall DestroyDefaultBuffers();
+    void __thiscall ReleaseStorage_00e8ceb0();
 };

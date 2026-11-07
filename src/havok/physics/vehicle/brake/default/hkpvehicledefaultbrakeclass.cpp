@@ -25,7 +25,7 @@ struct S_00dfc080_Router
     }
 };
 
-S_00dfc080_Router* FUN_00c85750();
+S_00dfc080_Router* hkMemoryRouter_getInstance();
 
 struct S_00dfc080_RefObj
 {
@@ -36,7 +36,7 @@ struct S_00dfc080_RefObj
     static void operator delete(void* p, size_t)
     {
         S_00dfc080_RefObj* b = static_cast<S_00dfc080_RefObj*>(p);
-        FUN_00c85750()->heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance()->heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 
@@ -60,7 +60,7 @@ static __forceinline void S_00dfc080_Array__clearAndDeallocate(hkArrayBase<T>& s
 template <class T>
 static __forceinline void S_00dfc080_Array_destroy(hkArrayBase<T>& self) throw()
 {
-        S_00dfc080_Array__clearAndDeallocate(self, FUN_00c85750()->heap());
+        S_00dfc080_Array__clearAndDeallocate(self, hkMemoryRouter_getInstance()->heap());
     }
 
 struct S_00dfc080_ArrayPolicy

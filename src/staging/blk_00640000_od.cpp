@@ -47,11 +47,12 @@ void FUN_006427a0_Class::SetValue(float value)
 
 struct FUN_00642890_Class
 {
-    void FUN_00642890();
+    void Sun_StopSunOcclusion();
 };
 
 // @fnv 0x00642890
-void FUN_00642890_Class::FUN_00642890()
+// src: XBOX_PDB 0x00642890
+void FUN_00642890_Class::Sun_StopSunOcclusion()
 {
     ((char*)this)[0x24] = 0;
 }
@@ -88,7 +89,7 @@ float __cdecl AddRuntimeFloatSetting(float afValue)
 
 struct Helper_00644400
 {
-    void FUN_00644400(int, int);
+    void BSSimpleArray_NavMeshTriangle_1024_InitialSetup(int, int);
 };
 
 extern int DAT_0104f3e8;
@@ -96,15 +97,16 @@ extern int DAT_0104f3e8;
 struct FUN_006442b0_class
 {
     void* vftable;
-    void* FUN_006442b0(int a);
+    void* BSSimpleArray_FollowerDist_1024_BSSimpleArray_FollowerDist_1024(int a);
 };
 
 // Sets the vftable to DAT_0104f3e8, calls FUN_00644400 with the argument twice, and returns this.
 // @fnv 0x006442b0
-void* FUN_006442b0_class::FUN_006442b0(int aiValue)
+// src: COMMUNITY 0x006442b0
+void* FUN_006442b0_class::BSSimpleArray_FollowerDist_1024_BSSimpleArray_FollowerDist_1024(int aiValue)
 {
     vftable = &DAT_0104f3e8;
-    ((Helper_00644400*)this)->FUN_00644400(aiValue, aiValue);
+    ((Helper_00644400*)this)->BSSimpleArray_NavMeshTriangle_1024_InitialSetup(aiValue, aiValue);
     return this;
 }
 
@@ -137,7 +139,8 @@ namespace fnv_00644520 {
 extern Setting originalRuntimeFloatSetting509;
 
 // @fnv 0x00644520
-float FUN_00644520()
+// src: XBOX_PDB 0x00644520
+float CombatFormulas_GetPowerAttackDamageMultiplier()
 {
     float f = ((Setting*)&originalRuntimeFloatSetting509)->Float()[0];
     return f;
@@ -146,11 +149,12 @@ float FUN_00644520()
 
 struct FUN_00644790_class
 {
-    float FUN_00644790();
+    float BGSProjectile_GetExplosionTimer();
 };
 
 // @fnv 0x00644790
-float FUN_00644790_class::FUN_00644790()
+// src: XBOX_PDB 0x00644790
+float FUN_00644790_class::BGSProjectile_GetExplosionTimer()
 {
     return *(float*)((char*)this + 0x80);
 }
@@ -223,46 +227,50 @@ unsigned char FUN_00647ac0_Class::GetByteAt0x62()
 
 struct FUN_0064db00_class
 {
-    int FUN_0064dc30();
-    bool FUN_0064db00();
+    int GetFieldAtOffset10();
+    bool ForwardCall_0064db00();
 };
 
 // @fnv 0x0064db00
-bool FUN_0064db00_class::FUN_0064db00()
+// src: GUESS 0x0064db00 (confidence: low)
+bool FUN_0064db00_class::ForwardCall_0064db00()
 {
-    return !FUN_0064dc30();
+    return !GetFieldAtOffset10();
 }
 
 struct FUN_0064db50_class
 {
     void __thiscall ApplyToCopy(int a, int b);
-    void __thiscall FUN_0064db50(int a, int b);
+    void __thiscall ApplyToCopy_Thunk(int a, int b);
 };
 
 // @fnv 0x0064db50
-void __thiscall FUN_0064db50_class::FUN_0064db50(int aiArg1, int aiArg2)
+// src: GUESS 0x0064db50 (confidence: medium)
+void __thiscall FUN_0064db50_class::ApplyToCopy_Thunk(int aiArg1, int aiArg2)
 {
     ApplyToCopy(aiArg1, aiArg2);
 }
 
 struct FUN_0064dbd0_Class
 {
-    void FUN_0064dda0();
-    void FUN_0064dbd0();
+    void ProcessEntries_0064dda0();
+    void ForwardCall_0064dbd0();
 };
 // @fnv 0x0064dbd0
-void FUN_0064dbd0_Class::FUN_0064dbd0()
+// src: GUESS 0x0064dbd0 (confidence: low)
+void FUN_0064dbd0_Class::ForwardCall_0064dbd0()
 {
-    FUN_0064dda0();
+    ProcessEntries_0064dda0();
 }
 
 struct FUN_0064dc30_class
 {
-    int __thiscall FUN_0064dc30();
+    int __thiscall GetFieldAtOffset10();
 };
 
 // @fnv 0x0064dc30
-int __thiscall FUN_0064dc30_class::FUN_0064dc30()
+// src: GUESS 0x0064dc30 (confidence: low)
+int __thiscall FUN_0064dc30_class::GetFieldAtOffset10()
 {
     return (*(int*)((char*)this + 0x10) - *(int*)((char*)this + 0x0C)) >> 4;
 }
@@ -270,11 +278,12 @@ int __thiscall FUN_0064dc30_class::FUN_0064dc30()
 struct FUN_0064de50_class
 {
     void InitAndReturn();
-    void* FUN_0064de50();
+    void* FaceGenData_Iterator_ClearsData();
 };
 
 // @fnv 0x0064de50
-void* FUN_0064de50_class::FUN_0064de50()
+// src: COMMUNITY 0x0064de50
+void* FUN_0064de50_class::FaceGenData_Iterator_ClearsData()
 {
     InitAndReturn();
     return this;
@@ -294,17 +303,18 @@ CF_0081c630* __fastcall InitAndReturn(CF_0081c630* pObject)
     return pObject;
 }
 
-extern "C" void __cdecl FUN_0064e2d0();
+extern "C" void __cdecl UpdateState_0064e2d0();
 
 struct FUN_0064de90_class
 {
-    void __thiscall FUN_0064de90();
+    void __thiscall max_size_0064de90();
 };
 
 // @fnv 0x0064de90
-void __thiscall FUN_0064de90_class::FUN_0064de90()
+// src: COMMUNITY 0x0064de90
+void __thiscall FUN_0064de90_class::max_size_0064de90()
 {
-    ((void(__thiscall*)(void*))FUN_0064e2d0)(this + 8);
+    ((void(__thiscall*)(void*))UpdateState_0064e2d0)(this + 8);
 }
 
 struct FUN_0064deb0_Class
@@ -319,7 +329,7 @@ void FUN_0064deb0_Class::ForwardToFUN0064df50(int a, int b, int c, int d)
     Insert(a, b, c, d);
 }
 
-extern "C" void __cdecl FUN_0064e3f0(int, int, int);
+extern "C" void __cdecl Range_ProcessWithMoveCategory_0064e3f0(int, int, int);
 
 struct FUN_0064dee0_Class
 {
@@ -330,48 +340,51 @@ struct FUN_0064dee0_Class
 // @fnv 0x0064dee0
 void __thiscall FUN_0064dee0_Class::ForwardToHelper(int aiArg1, int aiArg2)
 {
-    FUN_0064e3f0(aiArg1, aiArg2, (int)this + 8);
+    Range_ProcessWithMoveCategory_0064e3f0(aiArg1, aiArg2, (int)this + 8);
 }
 
-extern "C" void __cdecl FUN_0064e430(int, int);
+extern "C" void __cdecl Array_AllocateElements16Checked(int, int);
 
 struct FUN_0064df30_class
 {
-    void __thiscall FUN_0064df30(int a);
+    void __thiscall ForwardCall_0064df30(int a);
 };
 
 // @fnv 0x0064df30
-void __thiscall FUN_0064df30_class::FUN_0064df30(int a)
+// src: GUESS 0x0064df30 (confidence: low)
+void __thiscall FUN_0064df30_class::ForwardCall_0064df30(int a)
 {
-    FUN_0064e430(a, 0);
+    Array_AllocateElements16Checked(a, 0);
 }
 
-extern "C" void __cdecl FUN_0064e630(void* a, void* b, void* c, void* d);
+extern "C" void __cdecl Range_ForwardWithCategoryAndFlags_0064e630(void* a, void* b, void* c, void* d);
 
 struct FUN_0064e480_Class
 {
-    void __thiscall FUN_0064e480(void* a, void* b, void* c);
+    void __thiscall ForwardCall_0064e480(void* a, void* b, void* c);
 };
 
 // Calls FUN_0064e630 with the three arguments and a pointer to this object's offset 8.
 // @fnv 0x0064e480
-void __thiscall FUN_0064e480_Class::FUN_0064e480(void* a, void* b, void* c)
+// src: GUESS 0x0064e480 (confidence: low)
+void __thiscall FUN_0064e480_Class::ForwardCall_0064e480(void* a, void* b, void* c)
 {
-    FUN_0064e630(a, b, c, (char*)this + 8);
+    Range_ForwardWithCategoryAndFlags_0064e630(a, b, c, (char*)this + 8);
 }
 
 struct FUN_0065e9a0_holder
 {
-    void FUN_0065e9a0(int* p);
+    void PrintDebugMessage_Thunk(int* p);
 };
 
 // Iterates over the range from a to b in steps of 4 and calls FUN_0065e9a0 on each element through c.
 // @fnv 0x0064e600
-void FUN_0064e600(int* pBegin, int* pEnd, FUN_0065e9a0_holder* c)
+// src: GUESS 0x0064e600 (confidence: low)
+void Object_ProcessEntries_0064e600(int* pBegin, int* pEnd, FUN_0065e9a0_holder* c)
 {
     for (; pBegin != pEnd; pBegin += 4)
     {
-        c->FUN_0065e9a0(pBegin);
+        c->PrintDebugMessage_Thunk(pBegin);
     }
 }
 
@@ -379,48 +392,50 @@ extern "C" void __cdecl CopyConstructBlock(void*, void*);
 
 struct FUN_0064e7d0_class
 {
-    void __thiscall FUN_0064e7d0(void* a, void* b);
+    void __thiscall CopyConstructBlock_Thunk(void* a, void* b);
 };
 
 // @fnv 0x0064e7d0
-void __thiscall FUN_0064e7d0_class::FUN_0064e7d0(void* apFirst, void* apSecond)
+// src: GUESS 0x0064e7d0 (confidence: medium)
+void __thiscall FUN_0064e7d0_class::CopyConstructBlock_Thunk(void* apFirst, void* apSecond)
 {
     CopyConstructBlock(apFirst, apSecond);
 }
 
-extern "C" void __cdecl FUN_0064e920(int, int, int, int);
+extern "C" void __cdecl Object_DispatchIteratorRange_0064e920(int, int, int, int);
 
 // @fnv 0x0064e840
 void __cdecl ForwardToHandler(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
 {
-    FUN_0064e920(aiArg1, aiArg2, aiArg3, aiArg4);
+    Object_DispatchIteratorRange_0064e920(aiArg1, aiArg2, aiArg3, aiArg4);
 }
 
 struct DecalStub
 {
-    void FUN_004bc480(int);
+    void NiMaterialProperty_SetChanged(int);
     float m_f;
-    void FUN_00654700(float f);
+    void NiMaterialProperty_SetShine(float f);
 };
 
 // Stores f at offset 0x38 of this and calls FUN_004bc480(1).
 // @fnv 0x00654700
-void DecalStub::FUN_00654700(float afValue)
+// src: COMMUNITY 0x00654700
+void DecalStub::NiMaterialProperty_SetShine(float afValue)
 {
     *(float*)((char*)this + 0x38) = afValue;
-    FUN_004bc480(1);
+    NiMaterialProperty_SetChanged(1);
 }
 
 struct FUN_00657880_class
 {
-    bool FUN_00658160(int);
+    bool ProcessAndReturnValue_00658160(int);
     bool operator==(int other);
 };
 
 // @fnv 0x00657880
 bool FUN_00657880_class::operator==(int other)
 {
-    return !FUN_00658160(other);
+    return !ProcessAndReturnValue_00658160(other);
 }
 
 struct FUN_00657be0_class
@@ -450,31 +465,33 @@ void __thiscall FUN_00657fd0::Method_00657fd0()
     ((FUN_00658100*)((char*)this + 8))->Method_00658100();
 }
 
-extern "C" void __cdecl FUN_00658bd0(int a1, int a2, int a3);
+extern "C" void __cdecl Range_ProcessWithMoveCategory_00658bd0(int a1, int a2, int a3);
 
 struct FUN_00657ff0_Class
 {
-    void FUN_00657ff0(int a1, int a2);
+    void ForwardCall_00657ff0(int a1, int a2);
 };
 
 // Calls FUN_00658bd0 with the two arguments and a pointer to this object's offset 8.
 // @fnv 0x00657ff0
-void FUN_00657ff0_Class::FUN_00657ff0(int a1, int a2)
+// src: GUESS 0x00657ff0 (confidence: low)
+void FUN_00657ff0_Class::ForwardCall_00657ff0(int a1, int a2)
 {
-    FUN_00658bd0(a1, a2, (int)this + 8);
+    Range_ProcessWithMoveCategory_00658bd0(a1, a2, (int)this + 8);
 }
 
-extern "C" void __cdecl FUN_00658c10(int a, int b);
+extern "C" void __cdecl Array_AllocateElements60Checked(int a, int b);
 
 struct FUN_00658020_Class
 {
-    void __thiscall FUN_00658020(int a);
+    void __thiscall ForwardCall_00658020(int a);
 };
 
 // @fnv 0x00658020
-void __thiscall FUN_00658020_Class::FUN_00658020(int a)
+// src: GUESS 0x00658020 (confidence: low)
+void __thiscall FUN_00658020_Class::ForwardCall_00658020(int a)
 {
-    FUN_00658c10(a, 0);
+    Array_AllocateElements60Checked(a, 0);
 }
 
 struct FUN_00658130
@@ -500,31 +517,33 @@ void __thiscall FUN_00658040::Call_00658040()
     ((FUN_00658130*)((char*)this + 8))->Call_00658130();
 }
 
-extern "C" void __cdecl FUN_00658c60(int, int, int);
+extern "C" void __cdecl Object_DispatchIteratorRange_00658c60(int, int, int);
 
 struct FUN_00658060_Class
 {
-    void __thiscall FUN_00658060(int a, int b);
+    void __thiscall ForwardCall_00658060(int a, int b);
 };
 
 // Calls FUN_00658c60 with the two arguments and a pointer to this object's offset 8.
 // @fnv 0x00658060
-void __thiscall FUN_00658060_Class::FUN_00658060(int a, int b)
+// src: GUESS 0x00658060 (confidence: low)
+void __thiscall FUN_00658060_Class::ForwardCall_00658060(int a, int b)
 {
-    FUN_00658c60(a, b, (int)this + 8);
+    Object_DispatchIteratorRange_00658c60(a, b, (int)this + 8);
 }
 
-void __cdecl FUN_00658ca0(int a, int b);
+void __cdecl Object_AllocateStorage_00658ca0(int a, int b);
 
 struct FUN_00658090_Class
 {
-    void __thiscall FUN_00658090(int a);
+    void __thiscall ForwardCall_00658090(int a);
 };
 
 // @fnv 0x00658090
-void __thiscall FUN_00658090_Class::FUN_00658090(int a)
+// src: GUESS 0x00658090 (confidence: low)
+void __thiscall FUN_00658090_Class::ForwardCall_00658090(int a)
 {
-    FUN_00658ca0(a, 0);
+    Object_AllocateStorage_00658ca0(a, 0);
 }
 
 struct FUN_00658930_class
@@ -573,34 +592,36 @@ void BSFaceGenModelMap::FreeStringMapObject(NiTMapItem<const char*, void*>* pStr
 struct FUN_00658d30_class
 {
     void __thiscall FUN_00658d50();
-    void __thiscall FUN_00658d30();
+    void __thiscall ForwardCall_00658d30();
 };
 
 // @fnv 0x00658d30
-void __thiscall FUN_00658d30_class::FUN_00658d30()
+// src: GUESS 0x00658d30 (confidence: low)
+void __thiscall FUN_00658d30_class::ForwardCall_00658d30()
 {
     FUN_00658d50();
 }
 
 struct FUN_00659170
 {
-    void FUN_00659190();
+    void DoNothing();
     FUN_00659170();
 };
 
 // @fnv 0x00659170
 FUN_00659170::FUN_00659170()
 {
-    FUN_00659190();
+    DoNothing();
 }
 
 struct FUN_00659210_Class
 {
-    int __thiscall FUN_00659210(char a, int b);
+    int __thiscall NiTStringTemplateMap_NiTMap_char_const_TESForm_TESForm_HashChar(char a, int b);
 };
 
 // @fnv 0x00659210
-int __thiscall FUN_00659210_Class::FUN_00659210(char a, int b)
+// src: COMMUNITY 0x00659210
+int __thiscall FUN_00659210_Class::NiTStringTemplateMap_NiTMap_char_const_TESForm_TESForm_HashChar(char a, int b)
 {
     return (b << 5) + b + a;
 }
@@ -612,7 +633,8 @@ struct FUN_006592f0
 
 // Iterates from a to b in 0x3c-byte steps, invoking the callable c on each element.
 // @fnv 0x00659260
-void FUN_00659260(void* pBegin, void* pEnd, FUN_006592f0* pCallback)
+// src: GUESS 0x00659260 (confidence: medium)
+void Object_InvokeCallbackForRange(void* pBegin, void* pEnd, FUN_006592f0* pCallback)
 {
     for (; pBegin != pEnd; pBegin = (char*)pBegin + 0x3c)
         pCallback->operator()(pBegin);
@@ -620,7 +642,7 @@ void FUN_00659260(void* pBegin, void* pEnd, FUN_006592f0* pCallback)
 
 struct FUN_00659310_
 {
-    void __thiscall FUN_00659310(void*);
+    void __thiscall ForwardCall_00659310(void*);
 };
 
 // Iterates from obj to end in 0x88-byte steps, calling FUN_00659310 on each element.
@@ -628,7 +650,7 @@ struct FUN_00659310_
 void __cdecl ForEachItem(void* apBegin, void* end, FUN_00659310_* apVisitor)
 {
     for (; apBegin != end; apBegin = (char*)apBegin + 0x88)
-        apVisitor->FUN_00659310(apBegin);
+        apVisitor->ForwardCall_00659310(apBegin);
 }
 
 extern int DAT_010658b0;
@@ -660,22 +682,24 @@ struct FUN_00659540_class
     void* m_iWordAt00;
     void* m_iWordAt04;
     void* m_8;
-    void FUN_00659540();
+    void ForwardCall_00659540();
 };
 
 // @fnv 0x00659540
-void FUN_00659540_class::FUN_00659540()
+// src: GUESS 0x00659540 (confidence: low)
+void FUN_00659540_class::ForwardCall_00659540()
 {
     ((void(__stdcall*)(void*))DAT_00fdf07c)(m_8);
 }
 
 struct FUN_0065cc30_class
 {
-    int __thiscall FUN_0065cc30();
+    int __thiscall EvaluateValue_0065cc30();
 };
 
 // @fnv 0x0065cc30
-int __thiscall FUN_0065cc30_class::FUN_0065cc30()
+// src: GUESS 0x0065cc30 (confidence: low)
+int __thiscall FUN_0065cc30_class::EvaluateValue_0065cc30()
 {
     return (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x10) -
             *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xc)) /
@@ -684,110 +708,118 @@ int __thiscall FUN_0065cc30_class::FUN_0065cc30()
 
 struct FUN_0065cc50_Class
 {
-    int FUN_0065cc50();
+    int GetFieldAtOffset10();
 };
 
 // @fnv 0x0065cc50
-int FUN_0065cc50_Class::FUN_0065cc50()
+// src: GUESS 0x0065cc50 (confidence: low)
+int FUN_0065cc50_Class::GetFieldAtOffset10()
 {
     return *(int*)((char*)this + 0x10) - *(int*)((char*)this + 0xc);
 }
 
 struct FUN_0065cea0_class
 {
-    int __thiscall FUN_0065cea0();
+    int __thiscall GetPointerSpanCount_0065cea0();
 };
 
 // @fnv 0x0065cea0
-int __thiscall FUN_0065cea0_class::FUN_0065cea0()
+// src: GUESS 0x0065cea0 (confidence: low)
+int __thiscall FUN_0065cea0_class::GetPointerSpanCount_0065cea0()
 {
     return (*(int*)((char*)this + 0x10) - *(int*)((char*)this + 0xc)) / 0x58;
 }
 
 struct FUN_0065cf90_class
 {
-    void FUN_0065db40();
-    void* FUN_0065cf90();
+    void FaceGenData_Iterator_Clears();
+    void* EvaluateValue_0065cf90();
 };
 
 // @fnv 0x0065cf90
-void* FUN_0065cf90_class::FUN_0065cf90()
+// src: GUESS 0x0065cf90 (confidence: low)
+void* FUN_0065cf90_class::EvaluateValue_0065cf90()
 {
-    FUN_0065db40();
+    FaceGenData_Iterator_Clears();
     return this;
 }
 
 struct FUN_0065cfb0_Class
 {
     void __thiscall FUN_0065d6e0();
-    void __thiscall FUN_0065cfb0();
+    void __thiscall ForwardCall_0065cfb0();
 };
 
 // @fnv 0x0065cfb0
-void __thiscall FUN_0065cfb0_Class::FUN_0065cfb0()
+// src: GUESS 0x0065cfb0 (confidence: low)
+void __thiscall FUN_0065cfb0_Class::ForwardCall_0065cfb0()
 {
     FUN_0065d6e0();
 }
 
 struct FUN_0065db40_class
 {
-    void FUN_0064de50();
-    void* FUN_0065db40();
+    void FaceGenData_Iterator_ClearsData();
+    void* FaceGenData_Iterator_Clears();
 };
 
 // Calls FUN_0064de50, sets the field at offset 4 to 0, and returns this.
 // @fnv 0x0065db40
-void* FUN_0065db40_class::FUN_0065db40()
+// src: COMMUNITY 0x0065db40
+void* FUN_0065db40_class::FaceGenData_Iterator_Clears()
 {
-    FUN_0064de50();
+    FaceGenData_Iterator_ClearsData();
     *(int*)((char*)this + 4) = 0;
     return this;
 }
 
-void __cdecl FUN_0065e2d0(int, int, int);
+void __cdecl Runtime_UpdateState_0065e2d0(int, int, int);
 
 struct FUN_0065db60_class
 {
-    void __thiscall FUN_0065db60(int a, int b);
+    void __thiscall ForwardCall_0065db60(int a, int b);
 };
 
 // Calls FUN_0065e2d0 with the two arguments and a pointer to this object's offset 8.
 // @fnv 0x0065db60
-void __thiscall FUN_0065db60_class::FUN_0065db60(int aiArg1, int aiArg2)
+// src: GUESS 0x0065db60 (confidence: low)
+void __thiscall FUN_0065db60_class::ForwardCall_0065db60(int aiArg1, int aiArg2)
 {
-    FUN_0065e2d0(aiArg1, aiArg2, (int)this + 8);
+    Runtime_UpdateState_0065e2d0(aiArg1, aiArg2, (int)this + 8);
 }
 
 struct FUN_0065e020_class
 {
-    void __thiscall FUN_0065e020();
+    void __thiscall ComputeValue_0065e020();
 };
 
 struct FUN_0065db90_class
 {
-    void __thiscall FUN_0065db90();
+    void __thiscall ForwardCall_0065db90();
 };
 
 // @fnv 0x0065db90
-void __thiscall FUN_0065db90_class::FUN_0065db90()
+// src: GUESS 0x0065db90 (confidence: low)
+void __thiscall FUN_0065db90_class::ForwardCall_0065db90()
 {
-    ((FUN_0065e020_class*)((char*)this + 8))->FUN_0065e020();
+    ((FUN_0065e020_class*)((char*)this + 8))->ComputeValue_0065e020();
 }
 
-extern "C" void __cdecl FUN_0065e310(int, int);
+extern "C" void __cdecl Array_AllocateElements12Checked(int, int);
 
 struct FUN_0065dbb0_class
 {
-    void __thiscall FUN_0065dbb0(int arg);
+    void __thiscall ForwardCall_0065dbb0(int arg);
 };
 
 // @fnv 0x0065dbb0
-void __thiscall FUN_0065dbb0_class::FUN_0065dbb0(int arg)
+// src: GUESS 0x0065dbb0 (confidence: low)
+void __thiscall FUN_0065dbb0_class::ForwardCall_0065dbb0(int arg)
 {
-    FUN_0065e310(arg, 0);
+    Array_AllocateElements12Checked(arg, 0);
 }
 
-extern "C" void __cdecl FUN_0065e360(int, int, int);
+extern "C" void __cdecl Object_DispatchIteratorRange_0065e360(int, int, int);
 
 struct FUN_0065dbf0_class
 {
@@ -797,216 +829,232 @@ struct FUN_0065dbf0_class
 // @fnv 0x0065dbf0
 void FUN_0065dbf0_class::CallWithThisOffset(int aiFirst, int aiSecond)
 {
-    FUN_0065e360(aiFirst, aiSecond, (int)this + 8);
+    Object_DispatchIteratorRange_0065e360(aiFirst, aiSecond, (int)this + 8);
 }
 
-extern "C" void __cdecl FUN_0065e3a0(int, int);
+extern "C" void __cdecl Object_UpdateFields_0065e3a0(int, int);
 
 struct FUN_0065dc20_class
 {
-    void __thiscall FUN_0065dc20(int a);
+    void __thiscall ForwardCall_0065dc20(int a);
 };
 
 // @fnv 0x0065dc20
-void __thiscall FUN_0065dc20_class::FUN_0065dc20(int a)
+// src: GUESS 0x0065dc20 (confidence: low)
+void __thiscall FUN_0065dc20_class::ForwardCall_0065dc20(int a)
 {
-    FUN_0065e3a0(a, 0);
+    Object_UpdateFields_0065e3a0(a, 0);
 }
 
-extern "C" void __cdecl FUN_0065e3f0(int a, int b, int c);
+extern "C" void __cdecl Runtime_UpdateState_0065e3f0(int a, int b, int c);
 
 struct FUN_0065dc60Class
 {
-    void FUN_0065dc60(int a, int b);
+    void ForwardCall_0065dc60(int a, int b);
 };
 
 // Calls FUN_0065e3f0 with the two arguments and a pointer to this object's offset 8.
 // @fnv 0x0065dc60
-void FUN_0065dc60Class::FUN_0065dc60(int aiArg1, int aiArg2)
+// src: GUESS 0x0065dc60 (confidence: low)
+void FUN_0065dc60Class::ForwardCall_0065dc60(int aiArg1, int aiArg2)
 {
-    FUN_0065e3f0(aiArg1, aiArg2, (int)this + 8);
+    Runtime_UpdateState_0065e3f0(aiArg1, aiArg2, (int)this + 8);
 }
 
-extern "C" void __cdecl FUN_0065e430(int, int);
+extern "C" void __cdecl Runtime_UpdateState_0065e430(int, int);
 
 struct FUN_0065dd50_Class
 {
-    void __thiscall FUN_0065dd50(int a);
+    void __thiscall ForwardCall_0065dd50(int a);
 };
 
 // @fnv 0x0065dd50
-void __thiscall FUN_0065dd50_Class::FUN_0065dd50(int a)
+// src: GUESS 0x0065dd50 (confidence: low)
+void __thiscall FUN_0065dd50_Class::ForwardCall_0065dd50(int a)
 {
-    FUN_0065e430(a, 0);
+    Runtime_UpdateState_0065e430(a, 0);
 }
 
 struct FUN_0065dd70_Class
 {
-    void __thiscall FUN_0065dd70();
+    void __thiscall Helper_0065dd70();
 };
 
-extern "C" void __cdecl FUN_0065e0b0(void*);
+extern "C" void __cdecl UpdateState_0065e0b0(void*);
 
 // @fnv 0x0065dd70
-void __thiscall FUN_0065dd70_Class::FUN_0065dd70()
+// src: GUESS 0x0065dd70 (confidence: low)
+void __thiscall FUN_0065dd70_Class::Helper_0065dd70()
 {
-    ((void(__thiscall*)(void*))FUN_0065e0b0)((char*)this + 8);
+    ((void(__thiscall*)(void*))UpdateState_0065e0b0)((char*)this + 8);
 }
 
-extern "C" void __cdecl FUN_0065e4c0(int, int);
+extern "C" void __cdecl Object_AllocateElementStorage(int, int);
 
 struct FUN_0065ddc0_class
 {
-    void __thiscall FUN_0065ddc0(int a);
+    void __thiscall ForwardCall_0065ddc0(int a);
 };
 
 // @fnv 0x0065ddc0
-void __thiscall FUN_0065ddc0_class::FUN_0065ddc0(int a)
+// src: GUESS 0x0065ddc0 (confidence: low)
+void __thiscall FUN_0065ddc0_class::ForwardCall_0065ddc0(int a)
 {
-    FUN_0065e4c0(a, 0);
+    Object_AllocateElementStorage(a, 0);
 }
 
 struct FUN_0065dde0_Class
 {
-    void FUN_0065e0e0();
-    void FUN_0065dde0();
+    void ComputeValue_0065e0e0();
+    void ForwardCall_0065dde0();
 };
 
 // @fnv 0x0065dde0
-void FUN_0065dde0_Class::FUN_0065dde0()
+// src: GUESS 0x0065dde0 (confidence: low)
+void FUN_0065dde0_Class::ForwardCall_0065dde0()
 {
-    ((FUN_0065dde0_Class*)((char*)this + 8))->FUN_0065e0e0();
+    ((FUN_0065dde0_Class*)((char*)this + 8))->ComputeValue_0065e0e0();
 }
 
-extern "C" void __cdecl FUN_0065e510(int, int, int);
+extern "C" void __cdecl Range_ProcessWithMoveCategory_0065e510(int, int, int);
 
 struct FUN_0065de00_Class
 {
-    void FUN_0065de00(int a, int b);
+    void ForwardCall_0065de00(int a, int b);
 };
 
 // Calls FUN_0065e510 with the two arguments and a pointer to this object's offset 8.
 // @fnv 0x0065de00
-void FUN_0065de00_Class::FUN_0065de00(int aiArg1, int aiArg2)
+// src: GUESS 0x0065de00 (confidence: low)
+void FUN_0065de00_Class::ForwardCall_0065de00(int aiArg1, int aiArg2)
 {
-    FUN_0065e510(aiArg1, aiArg2, (int)this + 8);
+    Range_ProcessWithMoveCategory_0065e510(aiArg1, aiArg2, (int)this + 8);
 }
 
-extern "C" void __cdecl FUN_0065e5a0(int, int, int);
+extern "C" void __cdecl Object_DispatchIteratorRange_0065e5a0(int, int, int);
 
 struct FUN_0065de80_Class
 {
-    void FUN_0065de80(int a, int b);
+    void ForwardCall_0065de80(int a, int b);
 };
 
 // Calls FUN_0065e5a0 with the two arguments and a pointer to this object's offset 8.
 // @fnv 0x0065de80
-void FUN_0065de80_Class::FUN_0065de80(int aiArg1, int aiArg2)
+// src: GUESS 0x0065de80 (confidence: low)
+void FUN_0065de80_Class::ForwardCall_0065de80(int aiArg1, int aiArg2)
 {
-    FUN_0065e5a0(aiArg1, aiArg2, (int)this + 8);
+    Object_DispatchIteratorRange_0065e5a0(aiArg1, aiArg2, (int)this + 8);
 }
 
-extern "C" void __cdecl FUN_0065e5e0(int, int);
+extern "C" void __cdecl Object_ProcessAndReturnValue_0065e5e0(int, int);
 
 struct FUN_0065deb0_Class
 {
-    void __thiscall FUN_0065deb0(int arg);
+    void __thiscall ForwardCall_0065deb0(int arg);
 };
 
 // @fnv 0x0065deb0
-void __thiscall FUN_0065deb0_Class::FUN_0065deb0(int arg)
+// src: GUESS 0x0065deb0 (confidence: low)
+void __thiscall FUN_0065deb0_Class::ForwardCall_0065deb0(int arg)
 {
-    FUN_0065e5e0(arg, 0);
+    Object_ProcessAndReturnValue_0065e5e0(arg, 0);
 }
 
-extern "C" void __cdecl FUN_0065e630(void*, void*, void*);
+extern "C" void __cdecl Runtime_ForwardCall_0065e630(void*, void*, void*);
 
 struct FUN_0065df10_class
 {
-    void __thiscall FUN_0065df10(void* b, void* c);
+    void __thiscall ForwardCall_0065df10(void* b, void* c);
 };
 
 // @fnv 0x0065df10
-void __thiscall FUN_0065df10_class::FUN_0065df10(void* apFirst, void* apSecond)
+// src: GUESS 0x0065df10 (confidence: low)
+void __thiscall FUN_0065df10_class::ForwardCall_0065df10(void* apFirst, void* apSecond)
 {
-    FUN_0065e630(apFirst, apSecond, (char*)this + 8);
+    Runtime_ForwardCall_0065e630(apFirst, apSecond, (char*)this + 8);
 }
 
-void __cdecl FUN_0065e670(int a, int b);
+void __cdecl Runtime_UpdateState_0065e670(int a, int b);
 
 struct FUN_0065df40_class
 {
-    void __thiscall FUN_0065df40(int a);
+    void __thiscall ForwardCall_0065df40(int a);
 };
 
 // @fnv 0x0065df40
-void __thiscall FUN_0065df40_class::FUN_0065df40(int a)
+// src: GUESS 0x0065df40 (confidence: low)
+void __thiscall FUN_0065df40_class::ForwardCall_0065df40(int a)
 {
-    FUN_0065e670(a, 0);
+    Runtime_UpdateState_0065e670(a, 0);
 }
 
 struct FUN_0065df60_class
 {
-    void FUN_0065e170();
-    void FUN_0065df60();
+    void UpdateState_0065e170();
+    void ForwardCall_0065df60();
 };
 
 // @fnv 0x0065df60
-void FUN_0065df60_class::FUN_0065df60()
+// src: GUESS 0x0065df60 (confidence: low)
+void FUN_0065df60_class::ForwardCall_0065df60()
 {
-    ((FUN_0065df60_class*)((char*)this + 8))->FUN_0065e170();
+    ((FUN_0065df60_class*)((char*)this + 8))->UpdateState_0065e170();
 }
 
 extern "C" void __cdecl CallWithByteResult(int, int, int);
 
 struct FUN_0065df80_class
 {
-    void __thiscall FUN_0065df80(int a, int b);
+    void __thiscall CallWithByteResult_Thunk(int a, int b);
 };
 
 // Calls CallWithByteResult with the two arguments and a pointer to this object's offset 8.
 // @fnv 0x0065df80
-void __thiscall FUN_0065df80_class::FUN_0065df80(int aiArg1, int aiArg2)
+// src: GUESS 0x0065df80 (confidence: medium)
+void __thiscall FUN_0065df80_class::CallWithByteResult_Thunk(int aiArg1, int aiArg2)
 {
     CallWithByteResult(aiArg1, aiArg2, (int)this + 8);
 }
 
 struct FUN_0065dfb0_Class
 {
-    void __thiscall FUN_0065dfb0(int a);
+    void __thiscall ForwardCall_0065dfb0(int a);
 };
 
-extern "C" void __cdecl FUN_0065e700(int a, int b);
+extern "C" void __cdecl Object_AllocateElementStorage_0065e700(int a, int b);
 
 // @fnv 0x0065dfb0
-void __thiscall FUN_0065dfb0_Class::FUN_0065dfb0(int a)
+// src: GUESS 0x0065dfb0 (confidence: low)
+void __thiscall FUN_0065dfb0_Class::ForwardCall_0065dfb0(int a)
 {
-    FUN_0065e700(a, 0);
+    Object_AllocateElementStorage_0065e700(a, 0);
 }
 
 struct FUN_0065dfd0_class
 {
-    bool __thiscall FUN_0065e1a0(int);
-    bool __thiscall FUN_0065dfd0(int);
+    bool __thiscall FaceGenData_Iterator_AreIdentical(int);
+    bool __thiscall IsNotIdentical(int);
 };
 // Returns the logical negation of FUN_0065e1a0(b).
 // @fnv 0x0065dfd0
-bool __thiscall FUN_0065dfd0_class::FUN_0065dfd0(int b)
+// src: GUESS 0x0065dfd0 (confidence: high)
+bool __thiscall FUN_0065dfd0_class::IsNotIdentical(int b)
 {
-    return !FUN_0065e1a0(b);
+    return !FaceGenData_Iterator_AreIdentical(b);
 }
 
 struct FUN_0065e000_class
 {
-    int __thiscall FUN_0065da80(int a, int b);
-    int __thiscall FUN_0065e000(int a, int b);
+    int __thiscall FaceGenData_Iterator_Set_(int a, int b);
+    int __thiscall FaceGenData_Iterator_Set(int a, int b);
 };
 
 // Calls FUN_0065da80 with the two arguments, then returns this.
 // @fnv 0x0065e000
-int __thiscall FUN_0065e000_class::FUN_0065e000(int a, int b)
+// src: COMMUNITY 0x0065e000
+int __thiscall FUN_0065e000_class::FaceGenData_Iterator_Set(int a, int b)
 {
-    FUN_0065da80(a, b);
+    FaceGenData_Iterator_Set_(a, b);
     return (int)this;
 }
 
@@ -1017,7 +1065,8 @@ struct FUN_0065e9a0
 
 // Iterates from a to b in 0xc-byte steps and calls Destroy on each element through c.
 // @fnv 0x0065e820
-void FUN_0065e820(void* pBegin, void* pEnd, FUN_0065e9a0* pDestroyer)
+// src: GUESS 0x0065e820 (confidence: medium)
+void Object_DestroyElementRange(void* pBegin, void* pEnd, FUN_0065e9a0* pDestroyer)
 {
     for (; pBegin != pEnd; pBegin = (char*)pBegin + 0xc)
         pDestroyer->Destroy(pBegin);
@@ -1025,105 +1074,113 @@ void FUN_0065e820(void* pBegin, void* pEnd, FUN_0065e9a0* pDestroyer)
 
 struct FUN_0065e9a0_t
 {
-    void __thiscall FUN_0065e9a0(void*);
+    void __thiscall PrintDebugMessage_Thunk(void*);
 };
 // Iterates from a to b in 8-byte steps, calling FUN_0065e9a0 on c for each element.
 // @fnv 0x0065e850
-void __cdecl FUN_0065e850(void* pBegin, void* pEnd, void* pCallback)
+// src: GUESS 0x0065e850 (confidence: low)
+void __cdecl Runtime_ProcessEntries_0065e850(void* pBegin, void* pEnd, void* pCallback)
 {
     for (; pBegin != pEnd; pBegin = (char*)pBegin + 8)
-        ((FUN_0065e9a0_t*)pCallback)->FUN_0065e9a0(pBegin);
+        ((FUN_0065e9a0_t*)pCallback)->PrintDebugMessage_Thunk(pBegin);
 }
 
 struct FUN_0065ea00_class
 {
-    void __thiscall FUN_0065ea00(void*);
+    void __thiscall ForwardCall_0065ea00(void*);
 };
 
 // Iterates over the range from first to last in 0x34-byte steps, calling FUN_0065ea00 on each element via obj.
 // @fnv 0x0065e8e0
-void __cdecl FUN_0065e8e0(void* first, void* last, FUN_0065ea00_class* obj)
+// src: GUESS 0x0065e8e0 (confidence: low)
+void __cdecl Object_ProcessEntries_0065e8e0(void* first, void* last, FUN_0065ea00_class* obj)
 {
     for (; first != last; first = (char*)first + 0x34)
-        obj->FUN_0065ea00(first);
+        obj->ForwardCall_0065ea00(first);
 }
 
 struct FUN_0065ea60_class
 {
-    void __thiscall FUN_0065ea60(void*);
+    void __thiscall ForwardCall_0065ea60(void*);
 };
 
 // Iterates from p to e in 0x58-byte steps, calling FUN_0065ea60 on obj for each element.
 // @fnv 0x0065e970
-void FUN_0065e970(void* apBegin, void* apEnd, void* apTarget)
+// src: GUESS 0x0065e970 (confidence: low)
+void Runtime_ProcessEntries_0065e970(void* apBegin, void* apEnd, void* apTarget)
 {
     for (; apBegin != apEnd; apBegin = (char*)apBegin + 0x58)
-        ((FUN_0065ea60_class*)apTarget)->FUN_0065ea60(apBegin);
+        ((FUN_0065ea60_class*)apTarget)->ForwardCall_0065ea60(apBegin);
 }
 
-extern "C" void __cdecl FUN_0065eb00(int);
+extern "C" void __cdecl Object_ForwardCall_0065eb00(int);
 
 struct FUN_0065e9c0_class
 {
-    void __thiscall FUN_0065e9c0(int arg);
+    void __thiscall ForwardCall_0065e9c0(int arg);
 };
 
 // @fnv 0x0065e9c0
-void __thiscall FUN_0065e9c0_class::FUN_0065e9c0(int aiValue)
+// src: GUESS 0x0065e9c0 (confidence: low)
+void __thiscall FUN_0065e9c0_class::ForwardCall_0065e9c0(int aiValue)
 {
-    FUN_0065eb00(aiValue);
+    Object_ForwardCall_0065eb00(aiValue);
 }
 
-extern "C" void __cdecl FUN_0065eb10(void*);
+extern "C" void __cdecl Object_ForwardCall_0065eb10(void*);
 
 struct FUN_0065e9e0_Class
 {
-    void __thiscall FUN_0065e9e0(void* a);
+    void __thiscall ForwardCall_0065e9e0(void* a);
 };
 
 // @fnv 0x0065e9e0
-void __thiscall FUN_0065e9e0_Class::FUN_0065e9e0(void* a)
+// src: GUESS 0x0065e9e0 (confidence: low)
+void __thiscall FUN_0065e9e0_Class::ForwardCall_0065e9e0(void* a)
 {
-    FUN_0065eb10(a);
+    Object_ForwardCall_0065eb10(a);
 }
 
-extern "C" void __cdecl FUN_0065eb30(int);
+extern "C" void __cdecl Runtime_ForwardCall_0065eb30(int);
 
 struct FUN_0065ea20_Class
 {
-    void __thiscall FUN_0065ea20(int a);
+    void __thiscall ForwardCall_0065ea20(int a);
 };
 
 // @fnv 0x0065ea20
-void __thiscall FUN_0065ea20_Class::FUN_0065ea20(int aiValue)
+// src: GUESS 0x0065ea20 (confidence: low)
+void __thiscall FUN_0065ea20_Class::ForwardCall_0065ea20(int aiValue)
 {
-    FUN_0065eb30(aiValue);
+    Runtime_ForwardCall_0065eb30(aiValue);
 }
 
-void FUN_0065eb40(int a);
+void Object_ForwardCall_0065eb40(int a);
 
 struct FUN_0065ea40_class
 {
-    void FUN_0065ea40(int a);
+    void ForwardCall_0065ea40(int a);
 };
 
 // @fnv 0x0065ea40
-void FUN_0065ea40_class::FUN_0065ea40(int aiValue)
+// src: GUESS 0x0065ea40 (confidence: low)
+void FUN_0065ea40_class::ForwardCall_0065ea40(int aiValue)
 {
-    FUN_0065eb40(aiValue);
+    Object_ForwardCall_0065eb40(aiValue);
 }
 
-void __cdecl FUN_0065eb50(void* a);
+void __cdecl Runtime_ForwardCall_0065eb50(void* a);
 
 struct FUN_0065ea60_cls
 {
-    void __thiscall FUN_0065ea60(void* a);
+    void __thiscall ForwardCall_0065ea60(void* a);
 };
 
 // @fnv 0x0065ea60
-void __thiscall FUN_0065ea60_cls::FUN_0065ea60(void* a)
+// src: GUESS 0x0065ea60 (confidence: low)
+void __thiscall FUN_0065ea60_cls::ForwardCall_0065ea60(void* a)
 {
-    FUN_0065eb50(a);
+    Runtime_ForwardCall_0065eb50(a);
 }
 
 struct FUN_0065ee70_class
@@ -1133,11 +1190,12 @@ struct FUN_0065ee70_class
 
 struct FUN_0065ee30_class
 {
-    void __thiscall FUN_0065ee30();
+    void __thiscall ForwardCall_0065ee30();
 };
 
 // @fnv 0x0065ee30
-void __thiscall FUN_0065ee30_class::FUN_0065ee30()
+// src: GUESS 0x0065ee30 (confidence: low)
+void __thiscall FUN_0065ee30_class::ForwardCall_0065ee30()
 {
     ((FUN_0065ee70_class*)((char*)this + 4))->FUN_0065ee70();
 }
@@ -1146,96 +1204,103 @@ extern "C" void __cdecl CallInterfaceWithResult(int, int, int);
 
 struct FUN_0065f2b0_class
 {
-    void __thiscall FUN_0065f2b0(int a, int b);
+    void __thiscall std_vector_float_std_allocator_float_Destroy(int a, int b);
 };
 
 // Calls CallInterfaceWithResult with the two arguments and a pointer to this object's offset 8.
 // @fnv 0x0065f2b0
-void __thiscall FUN_0065f2b0_class::FUN_0065f2b0(int aiArg1, int aiArg2)
+// src: COMMUNITY 0x0065f2b0
+void __thiscall FUN_0065f2b0_class::std_vector_float_std_allocator_float_Destroy(int aiArg1, int aiArg2)
 {
     CallInterfaceWithResult(aiArg1, aiArg2, (int)this + 8);
 }
 
-extern "C" void __cdecl FUN_0065f9a0(int, int, int);
+extern "C" void __cdecl Object_DispatchIteratorRange_0065f9a0(int, int, int);
 
 struct FUN_0065f400_class
 {
-    void __thiscall FUN_0065f400(int a, int b);
+    void __thiscall ForwardCall_0065f400(int a, int b);
 };
 
 // @fnv 0x0065f400
-void __thiscall FUN_0065f400_class::FUN_0065f400(int aiArg1, int aiArg2)
+// src: GUESS 0x0065f400 (confidence: low)
+void __thiscall FUN_0065f400_class::ForwardCall_0065f400(int aiArg1, int aiArg2)
 {
-    FUN_0065f9a0(aiArg1, aiArg2, (int)this + 8);
+    Object_DispatchIteratorRange_0065f9a0(aiArg1, aiArg2, (int)this + 8);
 }
 
 struct FUN_0065f7c0_Class
 {
-    void FUN_0065f7c0();
+    void ComputeValue_0065f7c0();
 };
 
 struct FUN_0065f580_Class
 {
-    void FUN_0065f580();
+    void ForwardCall_0065f580();
 };
 
 // @fnv 0x0065f580
-void FUN_0065f580_Class::FUN_0065f580()
+// src: GUESS 0x0065f580 (confidence: low)
+void FUN_0065f580_Class::ForwardCall_0065f580()
 {
-    ((FUN_0065f7c0_Class*)((char*)this + 8))->FUN_0065f7c0();
+    ((FUN_0065f7c0_Class*)((char*)this + 8))->ComputeValue_0065f7c0();
 }
 
-extern "C" void __cdecl FUN_0065f9e0(int a, int b);
+extern "C" void __cdecl Object_AllocateElementStorage_0065f9e0(int a, int b);
 
 struct FUN_0065f6c0_class
 {
-    void __thiscall FUN_0065f6c0(int a);
+    void __thiscall ForwardCall_0065f6c0(int a);
 };
 
 // @fnv 0x0065f6c0
-void __thiscall FUN_0065f6c0_class::FUN_0065f6c0(int aiValue)
+// src: GUESS 0x0065f6c0 (confidence: low)
+void __thiscall FUN_0065f6c0_class::ForwardCall_0065f6c0(int aiValue)
 {
-    FUN_0065f9e0(aiValue, 0);
+    Object_AllocateElementStorage_0065f9e0(aiValue, 0);
 }
 
 extern "C" void* __cdecl AllocateChecked(void*, void*);
 
 struct FUN_0065f7a0_Class
 {
-    void* __thiscall FUN_0065f7a0(void* arg);
+    void* __thiscall std_allocator_char_allocate(void* arg);
 };
 
 // @fnv 0x0065f7a0
-void* __thiscall FUN_0065f7a0_Class::FUN_0065f7a0(void* arg)
+// src: COMMUNITY 0x0065f7a0
+void* __thiscall FUN_0065f7a0_Class::std_allocator_char_allocate(void* arg)
 {
     return AllocateChecked(arg, 0);
 }
 
-extern "C" void __cdecl FUN_0065fde0(int, int, int, int);
+extern "C" void __cdecl Object_DispatchIteratorRange_0065fde0(int, int, int, int);
 
 struct FUN_0065f890_class
 {
-    void __thiscall FUN_0065f890(int a1, int a2, int a3);
+    void __thiscall ForwardCall_0065f890(int a1, int a2, int a3);
 };
 
 // @fnv 0x0065f890
-void __thiscall FUN_0065f890_class::FUN_0065f890(int aiArg1, int aiArg2, int aiArg3)
+// src: GUESS 0x0065f890 (confidence: low)
+void __thiscall FUN_0065f890_class::ForwardCall_0065f890(int aiArg1, int aiArg2, int aiArg3)
 {
-    FUN_0065fde0(aiArg1, aiArg2, aiArg3, (int)(this + 8));
+    Object_DispatchIteratorRange_0065fde0(aiArg1, aiArg2, aiArg3, (int)(this + 8));
 }
 
-extern "C" void __cdecl FUN_0065fea0(int, int, int, int);
+extern "C" void __cdecl Object_ProcessAndReturnValue_0065fea0(int, int, int, int);
 
 struct FUN_0065f930_Class
 {
-    void __thiscall FUN_0065f930(int a, int b, int c);
+    void __thiscall ForwardCall_0065f930(int a, int b, int c);
 };
 
 // Calls FUN_0065fea0 with the three arguments and a pointer to this object's offset 8.
 // @fnv 0x0065f930
-void __thiscall FUN_0065f930_Class::FUN_0065f930(int aiArg1, int aiArg2, int aiArg3)
+// src: GUESS 0x0065f930 (confidence: low)
+void __thiscall FUN_0065f930_Class::ForwardCall_0065f930(int aiArg1, int aiArg2, int aiArg3)
 {
-    FUN_0065fea0(aiArg1, aiArg2, aiArg3, (int)this + 8);
+    Object_ProcessAndReturnValue_0065fea0(aiArg1, aiArg2, aiArg3, (int)this + 8);
 }
 
 extern "C" void _NiFreeAlias(void*);
@@ -1243,11 +1308,12 @@ extern void* DAT_010658d0;
 
 struct FUN_00658e70_cls : public NiTPointerMap<int, int>
 {
-    void FUN_00658e70();
+    void SetVtableAndProcessState_00658e70();
 };
 
 // @fnv 0x00658e70
-void FUN_00658e70_cls::FUN_00658e70()
+// src: GUESS 0x00658e70 (confidence: low)
+void FUN_00658e70_cls::SetVtableAndProcessState_00658e70()
 {
     *reinterpret_cast<void**>(this) = &DAT_010658d0;
     RemoveAll();
@@ -1266,12 +1332,13 @@ struct FUN_00b64d60_Class
 
 struct FUN_00642860_Class
 {
-    void FUN_00642860();
+    void Sun_StartSunOcclusion();
 };
 
 // Sets the byte at offset 0x24 to 1, then reads a pointer at 0x28 and, if non-null, calls its UpdateQueries method.
 // @fnv 0x00642860
-void FUN_00642860_Class::FUN_00642860()
+// src: COMMUNITY 0x00642860
+void FUN_00642860_Class::Sun_StartSunOcclusion()
 {
     *reinterpret_cast<unsigned char*>(this + 0x24) = 1;
     unsigned int p = reinterpret_cast<Flt*>(this + 0x28)->operator unsigned int();
@@ -1284,7 +1351,8 @@ extern Setting originalRuntimeFloatSetting333;
 
 // Returns a float setting scaled by collection->GetFloat(0x2d) plus an offset when index is 0x38, otherwise 0.0f.
 // @fnv 0x00643ed0
-float FUN_00643ed0(GameSettingCollection* collection, int index)
+// src: COMMUNITY 0x00643ed0
+float AiFormulas_AVDeriveUnarmedDamage(GameSettingCollection* collection, int index)
 {
     float result = 0.0f;
     if (index == 0x38)
@@ -1296,12 +1364,13 @@ float FUN_00643ed0(GameSettingCollection* collection, int index)
 namespace fnv_00643f20 {
 extern Setting originalRuntimeFloatSetting287;
 extern Setting originalRuntimeFloatSetting288;
-float FUN_00404010(float a, float b);
+float BSMAX_00404010(float a, float b);
 // Returns FUN_00404010 called with value times the float setting and value minus another float setting.
 // @fnv 0x00643f20
-float FUN_00643f20(float value)
+// src: COMMUNITY 0x00643f20
+float AiFormulas_GetFollowRadiusStop(float value)
 {
-    return FUN_00404010(value * *originalRuntimeFloatSetting288.Float(),
+    return BSMAX_00404010(value * *originalRuntimeFloatSetting288.Float(),
                         value - *originalRuntimeFloatSetting287.Float());
 }
 }  // namespace fnv_00643f20
@@ -1327,10 +1396,11 @@ int CompareObjects(int aiLeft, int aiRight)
 void* __cdecl operator new(unsigned int size, void* placement);
 struct FUN_00644490_Class
 {
-    void __thiscall FUN_00644490(char* items, unsigned int count);
+    void __thiscall BSSimpleArray_NavMeshTriangle_1024_ConstructItems(char* items, unsigned int count);
 };
 // @fnv 0x00644490
-void __thiscall FUN_00644490_Class::FUN_00644490(char* acBuffer, unsigned int count)
+// src: COMMUNITY 0x00644490
+void __thiscall FUN_00644490_Class::BSSimpleArray_NavMeshTriangle_1024_ConstructItems(char* acBuffer, unsigned int count)
 {
     for (unsigned int i = 0; i < count; ++i)
     {
@@ -1344,12 +1414,13 @@ struct FUN_006444e0_Class
     int m_iWordAt04;
     int m_8;
     int m_C;
-    void* __thiscall FUN_006444e0(int a, int b, int c, int d);
+    void* __thiscall PerActivitySettings_PerActivitySettings(int a, int b, int c, int d);
 };
 
 // Stores the four arguments into the object's fields and returns this.
 // @fnv 0x006444e0
-void* __thiscall FUN_006444e0_Class::FUN_006444e0(int aiFirst, int aiSecond, int aiThird, int aiFourth)
+// src: COMMUNITY 0x006444e0
+void* __thiscall FUN_006444e0_Class::PerActivitySettings_PerActivitySettings(int aiFirst, int aiSecond, int aiThird, int aiFourth)
 {
     m_iWordAt00 = aiFirst;
     m_iWordAt04 = aiSecond;
@@ -1382,7 +1453,8 @@ extern Setting g_011cfd8c;
 
 // Converts value to float and returns the sum of g_011ce840's float setting plus g_011cfd8c's float setting multiplied by that value.
 // @fnv 0x006463a0
-float FUN_006463a0(int value)
+// src: XBOX_PDB 0x006463a0
+float CombatFormulas_CalcBlock(int value)
 {
     float f = (float)value;
     float result =
@@ -1405,7 +1477,8 @@ extern Setting g_011d17d0;
 extern Setting originalRuntimeFloatSetting1216;
 // Computes carry weight from actor value 37 divided by g_d100, scaled by a setting and offset by another setting.
 // @fnv 0x00649530
-float __cdecl FUN_00649530(ActorValueOwner* apOwner)
+// src: COMMUNITY 0x00649530
+float __cdecl CalculateMagicMedicine(ActorValueOwner* apOwner)
 {
     float a;
     {
@@ -1434,11 +1507,12 @@ float __cdecl GetActorValueScaledSetting(ActorValueOwner* apActorValueOwner)
 
 struct S_0064dac0
 {
-    int __thiscall FUN_0064dac0(int, int);
+    int __thiscall NiPixelData_GetPixels(int, int);
 };
 // Returns the value at this+0x50 plus b times the element at index this+0x60 of the array at this+0x5C, plus the element at index a of that array.
 // @fnv 0x0064dac0
-int __thiscall S_0064dac0::FUN_0064dac0(int a, int b)
+// src: XBOX_PDB 0x0064dac0
+int __thiscall S_0064dac0::NiPixelData_GetPixels(int a, int b)
 {
     return *(int*)((char*)this + 0x50) + b * *(int*)(*(int*)((char*)this + 0x5C) + *(int*)((char*)this + 0x60) * 4) +
            *(int*)(*(int*)((char*)this + 0x5C) + a * 4);
@@ -1453,7 +1527,7 @@ struct FUN_0064db20_Class
 // @fnv 0x0064db20
 void* __thiscall FUN_0064db20_Class::GetEntryAt(unsigned int auiIndex)
 {
-    if (auiIndex >= ((FUN_0064db00_class*)this)->FUN_0064dc30())
+    if (auiIndex >= ((FUN_0064db00_class*)this)->GetFieldAtOffset10())
         FUN_00ec7c56();
     do
     {
@@ -1482,10 +1556,11 @@ int* __thiscall Tgt::CopyPairAfterCallback(int* pOutPair, int aiUnused)
 
 struct FUN_0064e2d0_Holder
 {
-    unsigned int __thiscall FUN_0064e2d0() const;
+    unsigned int __thiscall UpdateState_0064e2d0() const;
 };
 // @fnv 0x0064e2d0
-unsigned int __thiscall FUN_0064e2d0_Holder::FUN_0064e2d0() const
+// src: GUESS 0x0064e2d0 (confidence: low)
+unsigned int __thiscall FUN_0064e2d0_Holder::UpdateState_0064e2d0() const
 {
     unsigned int _Count = 0xfffffff;
     return _Count > 0 ? _Count : 1;
@@ -1493,46 +1568,50 @@ unsigned int __thiscall FUN_0064e2d0_Holder::FUN_0064e2d0() const
 
 struct FUN_0064e300_Class
 {
-    int __thiscall FUN_0064e300();
+    int __thiscall GetPointerSpanCount_0064e300();
 };
 // Returns 0 when the pointer at offset 0xc is null, otherwise the difference between the values at offsets 0x14 and 0xc shifted right by 4.
 // @fnv 0x0064e300
-int __thiscall FUN_0064e300_Class::FUN_0064e300()
+// src: GUESS 0x0064e300 (confidence: low)
+int __thiscall FUN_0064e300_Class::GetPointerSpanCount_0064e300()
 {
     return !*(int*)((char*)this + 0xc) ? 0 : (*(int*)((char*)this + 0x14) - *(int*)((char*)this + 0xc)) >> 4;
 }
 
-extern "C" void __cdecl FUN_0064e550(int a, int b, int c, void* d);
+extern "C" void __cdecl Runtime_CopyToUninitializedStorage(int a, int b, int c, void* d);
 
 struct FUN_0064e340_class
 {
-    void* __thiscall FUN_0064e340(int a, int b, int c);
+    void* __thiscall ProcessAndReturnValue_0064e340(int a, int b, int c);
 };
 
 // Calls FUN_0064e550 with a, b, c and this+8, then returns a + (b << 4).
 // @fnv 0x0064e340
-void* __thiscall FUN_0064e340_class::FUN_0064e340(int pBase, int b, int c)
+// src: GUESS 0x0064e340 (confidence: low)
+void* __thiscall FUN_0064e340_class::ProcessAndReturnValue_0064e340(int pBase, int b, int c)
 {
-    FUN_0064e550(pBase, b, c, (char*)this + 8);
+    Runtime_CopyToUninitializedStorage(pBase, b, c, (char*)this + 8);
     return (char*)pBase + (b << 4);
 }
 
-char __cdecl FUN_0065e750(int*, int*);
-void __cdecl FUN_0064e600(int, int, int, char);
-extern "C" void __cdecl FUN_0064e3f0(int, int, int);
+char __cdecl std_Move_cat_unsigned_char(int*, int*);
+void __cdecl Object_ProcessEntries_0064e600(int, int, int, char);
+extern "C" void __cdecl Range_ProcessWithMoveCategory_0064e3f0(int, int, int);
 // @fnv 0x0064e3f0
-extern "C" void __cdecl FUN_0064e3f0(int a, int b, int c)
+// src: GUESS 0x0064e3f0 (confidence: low)
+extern "C" void __cdecl Range_ProcessWithMoveCategory_0064e3f0(int a, int b, int c)
 {
-    char v = FUN_0065e750(&a, &b);
-    FUN_0064e600(a, b, c, v);
+    char v = std_Move_cat_unsigned_char(&a, &b);
+    Object_ProcessEntries_0064e600(a, b, c, v);
 }
 
 int __cdecl CallWithFlag(int* p);
-void __cdecl FUN_0064e680(int a, int b, int c);
+void __cdecl Object_ProcessEntries_0064e680(int a, int b, int c);
 // @fnv 0x0064e4b0
-void __cdecl FUN_0064e4b0(int a, int b, int c)
+// src: GUESS 0x0064e4b0 (confidence: low)
+void __cdecl Runtime_ProcessRangeWithCallFlags_0064e4b0(int a, int b, int c)
 {
-    FUN_0064e680(CallWithFlag(&a), CallWithFlag(&b), c);
+    Object_ProcessEntries_0064e680(CallWithFlag(&a), CallWithFlag(&b), c);
 }
 
 struct FUN_0064e680_S
@@ -1544,7 +1623,8 @@ struct FUN_0064e680_S
 };
 // Copies the four-int struct pointed to by c into each struct from a up to b.
 // @fnv 0x0064e680
-void FUN_0064e680(FUN_0064e680_S* apBegin, FUN_0064e680_S* apEnd, FUN_0064e680_S* apSource)
+// src: GUESS 0x0064e680 (confidence: low)
+void Object_ProcessEntries_0064e680(FUN_0064e680_S* apBegin, FUN_0064e680_S* apEnd, FUN_0064e680_S* apSource)
 {
     for (; apBegin != apEnd; apBegin++)
         *apBegin = *apSource;
@@ -1608,23 +1688,25 @@ unsigned int __thiscall FUN_006505d0_class::GetFloatValue()
 
 struct Holder00aad6b0
 {
-    void __thiscall FUN_00aad6b0();
+    void __thiscall ProcessEntries_00aad6b0();
 };
 // @fnv 0x00652fc0
-void __cdecl FUN_00652fc0(float a1, int a2, int a3)
+// src: GUESS 0x00652fc0 (confidence: low)
+void __cdecl Object_ProcessState_00652fc0(float a1, int a2, int a3)
 {
     if (a3 != 0 && a2 != 0)
     {
-        ((Holder00aad6b0*)((char*)BSFaceGenManager::GetFaceGenManager(a1, a2, a3) + 0x118))->FUN_00aad6b0();
+        ((Holder00aad6b0*)((char*)BSFaceGenManager::GetFaceGenManager(a1, a2, a3) + 0x118))->ProcessEntries_00aad6b0();
     }
 }
 
 struct Class_00658100
 {
-    unsigned int __thiscall FUN_00658100();
+    unsigned int __thiscall ComputeValue_00658100();
 };
 // @fnv 0x00658100
-unsigned int __thiscall Class_00658100::FUN_00658100()
+// src: GUESS 0x00658100 (confidence: low)
+unsigned int __thiscall Class_00658100::ComputeValue_00658100()
 {
     unsigned int v = 0x4444444;
     return v > 0 ? v : 1;
@@ -1632,33 +1714,36 @@ unsigned int __thiscall Class_00658100::FUN_00658100()
 
 struct Dummy658130
 {
-    unsigned __thiscall FUN_00658130();
+    unsigned __thiscall UpdateState_00658130();
 };
 // @fnv 0x00658130
-unsigned __thiscall Dummy658130::FUN_00658130()
+// src: GUESS 0x00658130 (confidence: low)
+unsigned __thiscall Dummy658130::UpdateState_00658130()
 {
     unsigned x = 0x1E1E1E1;
     return x > 0 ? x : 1;
 }
 
-unsigned char __cdecl FUN_0065e750(void*, void*);
-void __cdecl FUN_00659260(int, int, int, unsigned char);
+unsigned char __cdecl std_Move_cat_unsigned_char(void*, void*);
+void __cdecl Object_InvokeCallbackForRange(int, int, int, unsigned char);
 // Computes a byte from a1 and a2 via FUN_0065e750, then passes a1, a2, a3 and that byte to FUN_00659260.
 // @fnv 0x00658bd0
-void FUN_00658bd0(int a1, int a2, int a3)
+// src: GUESS 0x00658bd0 (confidence: low)
+void Range_ProcessWithMoveCategory_00658bd0(int a1, int a2, int a3)
 {
-    unsigned char tmp = FUN_0065e750(&a1, &a2);
-    FUN_00659260(a1, a2, a3, tmp);
+    unsigned char tmp = std_Move_cat_unsigned_char(&a1, &a2);
+    Object_InvokeCallbackForRange(a1, a2, a3, tmp);
 }
 
 namespace fnv_00658c60 {
-unsigned char __cdecl FUN_0065e750(int*, int*);
+unsigned char __cdecl std_Move_cat_unsigned_char(int*, int*);
 void __cdecl ForEachItem(int, int, int, unsigned char);
 // Calls FUN_0065e750 on a and b to get a byte, then passes a, b, c and that byte to ForEachItem.
 // @fnv 0x00658c60
-void FUN_00658c60(int a, int b, int c)
+// src: GUESS 0x00658c60 (confidence: low)
+void Object_DispatchIteratorRange_00658c60(int a, int b, int c)
 {
-    unsigned char d = FUN_0065e750(&a, &b);
+    unsigned char d = std_Move_cat_unsigned_char(&a, &b);
     ForEachItem(a, b, c, d);
 }
 }  // namespace fnv_00658c60
@@ -1690,7 +1775,7 @@ struct FUN_00658ea0_cls
 // @fnv 0x00658ea0
 void* __thiscall FUN_00658ea0_cls::FUN_00658ea0(unsigned int flags)
 {
-    ((FUN_00658e70_cls*)this)->FUN_00658e70();
+    ((FUN_00658e70_cls*)this)->SetVtableAndProcessState_00658e70();
     if (flags & 1)
         _Deallocate((void*)this);
     return (void*)this;
@@ -1742,7 +1827,7 @@ void* __thiscall S_006590c0::CopyPairTo(void* apDest, int q)
 
 struct FUN_006a68b0_Class
 {
-    void FUN_006a68b0();
+    void ForwardCall_006a68b0();
 };
 void __cdecl operator delete(void*);
 struct FUN_00659140_Class
@@ -1753,7 +1838,7 @@ struct FUN_00659140_Class
 // @fnv 0x00659140
 void* __thiscall FUN_00659140_Class::FUN_00659140(unsigned int flags)
 {
-    ((FUN_006a68b0_Class*)this)->FUN_006a68b0();
+    ((FUN_006a68b0_Class*)this)->ForwardCall_006a68b0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -1782,7 +1867,7 @@ struct S_006592c0
 // @fnv 0x006592c0
 void* S_006592c0::FUN_006592c0(unsigned int flags)
 {
-    ((FUN_00658d30_class*)this)->FUN_00658d30();
+    ((FUN_00658d30_class*)this)->ForwardCall_00658d30();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -1814,7 +1899,8 @@ struct FUN_00659380_cls
 };
 
 // @fnv 0x00659360
-void __cdecl FUN_00659360(int a)
+// src: GUESS 0x00659360 (confidence: low)
+void __cdecl Object_ForwardCall_00659360(int a)
 {
     ((FUN_00659380_cls*)a)->FUN_00659380(0);
 }
@@ -1824,7 +1910,8 @@ struct FUN_006593b0_class
     void __thiscall FUN_006593b0(int a);
 };
 // @fnv 0x00659370
-void __cdecl FUN_00659370(int a)
+// src: GUESS 0x00659370 (confidence: low)
+void __cdecl Runtime_ForwardCall_00659370(int a)
 {
     ((FUN_006593b0_class*)a)->FUN_006593b0(0);
 }
@@ -1935,13 +2022,14 @@ struct FUN_0065cc70_Holder
     int m_iWordAt04;
     int m_8;
     int m_C;
-    int __thiscall FUN_0065cc70(unsigned int param);
+    int __thiscall GetElementChecked_0065cc70(unsigned int param);
 };
 // Bounds-checks param against the holder's count, then returns the int stored at offset 0xc plus param.
 // @fnv 0x0065cc70
-int __thiscall FUN_0065cc70_Holder::FUN_0065cc70(unsigned int uiIndex)
+// src: GUESS 0x0065cc70 (confidence: medium)
+int __thiscall FUN_0065cc70_Holder::GetElementChecked_0065cc70(unsigned int uiIndex)
 {
-    if (uiIndex >= ((FUN_0065cc50_Class*)this)->FUN_0065cc50())
+    if (uiIndex >= ((FUN_0065cc50_Class*)this)->GetFieldAtOffset10())
         FUN_00ec7c56();
     do
     {
@@ -1951,17 +2039,18 @@ int __thiscall FUN_0065cc70_Holder::FUN_0065cc70(unsigned int uiIndex)
 
 struct TextureBasis
 {
-    unsigned int FUN_0065cea0();
+    unsigned int GetPointerSpanCount_0065cea0();
 };
 unsigned int __cdecl FUN_00ec7c56();
 struct Holder : TextureBasis
 {
-    int FUN_0065cec0(unsigned int);
+    int ProcessEntries_0065cec0(unsigned int);
 };
 // @fnv 0x0065cec0
-int Holder::FUN_0065cec0(unsigned int auiIndex)
+// src: GUESS 0x0065cec0 (confidence: low)
+int Holder::ProcessEntries_0065cec0(unsigned int auiIndex)
 {
-    if (auiIndex >= TextureBasis::FUN_0065cea0())
+    if (auiIndex >= TextureBasis::GetPointerSpanCount_0065cea0())
         FUN_00ec7c56();
     do
     {
@@ -1972,7 +2061,7 @@ int Holder::FUN_0065cec0(unsigned int auiIndex)
 struct Holder65cf50
 {
     Pair data;
-    void __thiscall FUN_0065dae0();
+    void __thiscall FaceGenData_Iterator_IncBy6();
     void* __thiscall CopyDataAfterCallback(void* p, int q);
 };
 // Saves data, calls FUN_0065dae0, then writes the saved pair to p and returns p.
@@ -1980,7 +2069,7 @@ struct Holder65cf50
 void* __thiscall Holder65cf50::CopyDataAfterCallback(void* pDest, int iUnused)
 {
     Pair tmp = data;
-    FUN_0065dae0();
+    FaceGenData_Iterator_IncBy6();
     *(Pair*)pDest = tmp;
     return pDest;
 }
@@ -2032,7 +2121,7 @@ void __thiscall FUN_0065d330Class::ClearAndFreeArray()
 {
     if (m_iThirdValue)
     {
-        ((FUN_0065dc60Class*)this)->FUN_0065dc60(m_iThirdValue, m_10);
+        ((FUN_0065dc60Class*)this)->ForwardCall_0065dc60(m_iThirdValue, m_10);
         ((FUN_0064df10_helper*)((char*)this + 8))->deallocate((void*)m_iThirdValue, (unsigned int)((m_14 - m_iThirdValue) >> 5));
     }
     m_iThirdValue = 0;
@@ -2041,43 +2130,46 @@ void __thiscall FUN_0065d330Class::ClearAndFreeArray()
 }
 }  // namespace fnv_0065d330
 
-void __cdecl FUN_0065e480(int a1, int a2, void* a3);
+void __cdecl Object_DispatchIteratorRange_0065e480(int a1, int a2, void* a3);
 struct FUN_0065dd90_Class
 {
     int m_iWordAt00;
     int m_iWordAt04;
     int m_8;
-    void __thiscall FUN_0065dd90(int a1, int a2);
+    void __thiscall ForwardCall_0065dd90(int a1, int a2);
 };
 // Forwards the two arguments and the address of m_8 to FUN_0065e480.
 // @fnv 0x0065dd90
-void __thiscall FUN_0065dd90_Class::FUN_0065dd90(int aiArg1, int aiArg2)
+// src: GUESS 0x0065dd90 (confidence: low)
+void __thiscall FUN_0065dd90_Class::ForwardCall_0065dd90(int aiArg1, int aiArg2)
 {
-    FUN_0065e480(aiArg1, aiArg2, &m_8);
+    Object_DispatchIteratorRange_0065e480(aiArg1, aiArg2, &m_8);
 }
 
 struct _Out_0044a170
 {
-    void __thiscall FUN_0065e000(int, void*);
+    void __thiscall FaceGenData_Iterator_Set(int, void*);
 };
 struct FUN_0065ded0_Class
 {
-    _Out_0044a170* __thiscall FUN_0065ded0(_Out_0044a170* a1, int a2, int a3);
+    _Out_0044a170* __thiscall std_vector_float_std_allocator_float_Make_iter(_Out_0044a170* a1, int a2, int a3);
 };
 // Calls FUN_0065e000 on a1 with a3 and this, then returns a1.
 // @fnv 0x0065ded0
-_Out_0044a170* __thiscall FUN_0065ded0_Class::FUN_0065ded0(_Out_0044a170* a1, int aiUnused, int aiArg)
+// src: COMMUNITY 0x0065ded0
+_Out_0044a170* __thiscall FUN_0065ded0_Class::std_vector_float_std_allocator_float_Make_iter(_Out_0044a170* a1, int aiUnused, int aiArg)
 {
-    a1->FUN_0065e000(aiArg, this);
+    a1->FaceGenData_Iterator_Set(aiArg, this);
     return a1;
 }
 
 struct FUN_0065e020_Cls
 {
-    int __thiscall FUN_0065e020();
+    int __thiscall ComputeValue_0065e020();
 };
 // @fnv 0x0065e020
-int __thiscall FUN_0065e020_Cls::FUN_0065e020()
+// src: GUESS 0x0065e020 (confidence: low)
+int __thiscall FUN_0065e020_Cls::ComputeValue_0065e020()
 {
     unsigned int val = 0x15555555;
     return val > 0 ? val : 1;
@@ -2085,10 +2177,11 @@ int __thiscall FUN_0065e020_Cls::FUN_0065e020()
 
 struct FUN_0065e050_Holder
 {
-    int __thiscall FUN_0065e050();
+    int __thiscall UpdateState_0065e050();
 };
 // @fnv 0x0065e050
-int __thiscall FUN_0065e050_Holder::FUN_0065e050()
+// src: GUESS 0x0065e050 (confidence: low)
+int __thiscall FUN_0065e050_Holder::UpdateState_0065e050()
 {
     unsigned int x = 0x1fffffff;
     return x > 0 ? x : 1;
@@ -2096,10 +2189,11 @@ int __thiscall FUN_0065e050_Holder::FUN_0065e050()
 
 struct FUN_0065e080_S
 {
-    int __thiscall FUN_0065e080();
+    int __thiscall ComputeValue_0065e080();
 };
 // @fnv 0x0065e080
-int __thiscall FUN_0065e080_S::FUN_0065e080()
+// src: GUESS 0x0065e080 (confidence: low)
+int __thiscall FUN_0065e080_S::ComputeValue_0065e080()
 {
     unsigned int x = 0x7FFFFFF;
     return x > 0 ? x : 1;
@@ -2107,10 +2201,11 @@ int __thiscall FUN_0065e080_S::FUN_0065e080()
 
 struct FUN_0065e0b0_Class
 {
-    unsigned int FUN_0065e0b0();
+    unsigned int UpdateState_0065e0b0();
 };
 // @fnv 0x0065e0b0
-unsigned int FUN_0065e0b0_Class::FUN_0065e0b0()
+// src: GUESS 0x0065e0b0 (confidence: low)
+unsigned int FUN_0065e0b0_Class::UpdateState_0065e0b0()
 {
     unsigned int value = 0x5D1745D;
     return value > 0 ? value : 1;
@@ -2129,10 +2224,11 @@ int FUN_0065e110_Holder::GetPositiveValue()
 
 struct S_0065e140
 {
-    unsigned int FUN_0065e140();
+    unsigned int ComputeValue_0065e140();
 };
 // @fnv 0x0065e140
-unsigned int S_0065e140::FUN_0065e140()
+// src: GUESS 0x0065e140 (confidence: low)
+unsigned int S_0065e140::ComputeValue_0065e140()
 {
     unsigned int v = 0x9249249;
     return v > 0 ? v : 1;
@@ -2140,80 +2236,87 @@ unsigned int S_0065e140::FUN_0065e140()
 
 struct FUN_0065e170_Cls
 {
-    unsigned __thiscall FUN_0065e170();
+    unsigned __thiscall UpdateState_0065e170();
 };
 // @fnv 0x0065e170
-unsigned __thiscall FUN_0065e170_Cls::FUN_0065e170()
+// src: GUESS 0x0065e170 (confidence: low)
+unsigned __thiscall FUN_0065e170_Cls::UpdateState_0065e170()
 {
     unsigned int value = 0x2e8ba2e;
     return value > 0 ? value : 1;
 }
 
 namespace fnv_0065e2d0 {
-unsigned char __cdecl FUN_0065e750(int*, int*);
-void __cdecl FUN_0065e820(int, int, int, unsigned char);
+unsigned char __cdecl std_Move_cat_unsigned_char(int*, int*);
+void __cdecl Object_DestroyElementRange(int, int, int, unsigned char);
 // @fnv 0x0065e2d0
-void __cdecl FUN_0065e2d0(int aiFirst, int aiSecond, int aiThird)
+// src: GUESS 0x0065e2d0 (confidence: low)
+void __cdecl Runtime_UpdateState_0065e2d0(int aiFirst, int aiSecond, int aiThird)
 {
-    unsigned char v = FUN_0065e750(&aiFirst, &aiSecond);
-    FUN_0065e820(aiFirst, aiSecond, aiThird, v);
+    unsigned char v = std_Move_cat_unsigned_char(&aiFirst, &aiSecond);
+    Object_DestroyElementRange(aiFirst, aiSecond, aiThird, v);
 }
 }  // namespace fnv_0065e2d0
 
 namespace fnv_0065e360 {
-bool __cdecl FUN_0065e750(void*, void*);
-void __cdecl FUN_0065e850(int, int, int, bool);
+bool __cdecl std_Move_cat_unsigned_char(void*, void*);
+void __cdecl Runtime_ProcessEntries_0065e850(int, int, int, bool);
 // Calls FUN_0065e750 on a and b to get a bool, then passes a, b, c and that bool to FUN_0065e850.
 // @fnv 0x0065e360
-void __cdecl FUN_0065e360(int aiFirst, int aiSecond, int aiThird)
+// src: GUESS 0x0065e360 (confidence: low)
+void __cdecl Object_DispatchIteratorRange_0065e360(int aiFirst, int aiSecond, int aiThird)
 {
-    bool d = FUN_0065e750(&aiFirst, &aiSecond);
-    FUN_0065e850(aiFirst, aiSecond, aiThird, d);
+    bool d = std_Move_cat_unsigned_char(&aiFirst, &aiSecond);
+    Runtime_ProcessEntries_0065e850(aiFirst, aiSecond, aiThird, d);
 }
 }  // namespace fnv_0065e360
 
 namespace fnv_0065e3f0 {
-bool __cdecl FUN_0065e750(int*, int*);
-void __cdecl FUN_0065e880(int, int, int, bool);
+bool __cdecl std_Move_cat_unsigned_char(int*, int*);
+void __cdecl Object_ProcessEntries_0065e880(int, int, int, bool);
 // Calls FUN_0065e750 on a and b, then passes a, b, c and the returned bool to FUN_0065e880.
 // @fnv 0x0065e3f0
-void __cdecl FUN_0065e3f0(int aiValueA, int aiValueB, int aiValueC)
+// src: GUESS 0x0065e3f0 (confidence: low)
+void __cdecl Runtime_UpdateState_0065e3f0(int aiValueA, int aiValueB, int aiValueC)
 {
-    bool tmp = FUN_0065e750(&aiValueA, &aiValueB);
-    FUN_0065e880(aiValueA, aiValueB, aiValueC, tmp);
+    bool tmp = std_Move_cat_unsigned_char(&aiValueA, &aiValueB);
+    Object_ProcessEntries_0065e880(aiValueA, aiValueB, aiValueC, tmp);
 }
 }  // namespace fnv_0065e3f0
 
 namespace fnv_0065e480 {
-unsigned char __cdecl FUN_0065e750(int* a, int* b);
-void __cdecl FUN_0065e8b0(int a, int b, int c, int d);
+unsigned char __cdecl std_Move_cat_unsigned_char(int* a, int* b);
+void __cdecl Runtime_ProcessEntries_0065e8b0(int a, int b, int c, int d);
 // @fnv 0x0065e480
-void __cdecl FUN_0065e480(int aiFirst, int aiSecond, int aiThird)
+// src: GUESS 0x0065e480 (confidence: low)
+void __cdecl Object_DispatchIteratorRange_0065e480(int aiFirst, int aiSecond, int aiThird)
 {
     unsigned char v;
-    v = FUN_0065e750(&aiFirst, &aiSecond);
-    FUN_0065e8b0(aiFirst, aiSecond, aiThird, v);
+    v = std_Move_cat_unsigned_char(&aiFirst, &aiSecond);
+    Runtime_ProcessEntries_0065e8b0(aiFirst, aiSecond, aiThird, v);
 }
 }  // namespace fnv_0065e480
 
-unsigned char __cdecl FUN_0065e750(void*, void*);
-void __cdecl FUN_0065e8e0(int, int, int, unsigned char);
+unsigned char __cdecl std_Move_cat_unsigned_char(void*, void*);
+void __cdecl Object_ProcessEntries_0065e8e0(int, int, int, unsigned char);
 // Calls FUN_0065e750 on a and b to get a byte, then passes a, b, c and that byte to FUN_0065e8e0.
 // @fnv 0x0065e510
-void FUN_0065e510(int aiFirst, int aiSecond, int aiThird)
+// src: GUESS 0x0065e510 (confidence: low)
+void Range_ProcessWithMoveCategory_0065e510(int aiFirst, int aiSecond, int aiThird)
 {
-    unsigned char v = FUN_0065e750(&aiFirst, &aiSecond);
-    FUN_0065e8e0(aiFirst, aiSecond, aiThird, v);
+    unsigned char v = std_Move_cat_unsigned_char(&aiFirst, &aiSecond);
+    Object_ProcessEntries_0065e8e0(aiFirst, aiSecond, aiThird, v);
 }
 
-unsigned char __cdecl FUN_0065e750(void*, void*);
-void __cdecl FUN_0065e910(int, int, int, int);
+unsigned char __cdecl std_Move_cat_unsigned_char(void*, void*);
+void __cdecl Runtime_ProcessEntries_0065e910(int, int, int, int);
 // Calls FUN_0065e750 on a and b to get a byte, then passes a, b, c and that byte to FUN_0065e910.
 // @fnv 0x0065e5a0
-void __cdecl FUN_0065e5a0(int aiFirst, int aiSecond, int aiThird)
+// src: GUESS 0x0065e5a0 (confidence: low)
+void __cdecl Object_DispatchIteratorRange_0065e5a0(int aiFirst, int aiSecond, int aiThird)
 {
-    unsigned char v = FUN_0065e750(&aiFirst, &aiSecond);
-    FUN_0065e910(aiFirst, aiSecond, aiThird, v);
+    unsigned char v = std_Move_cat_unsigned_char(&aiFirst, &aiSecond);
+    Runtime_ProcessEntries_0065e910(aiFirst, aiSecond, aiThird, v);
 }
 
 namespace fnv_0065e630 {
@@ -2221,73 +2324,79 @@ struct DummyTag
 {
     char dummy;
 };
-DummyTag __cdecl FUN_0065e750(void* a, void* b);
-void __cdecl FUN_0065e940(void* a, void* b, void* c, int d);
+DummyTag __cdecl std_Move_cat_unsigned_char(void* a, void* b);
+void __cdecl Object_ProcessEntries_0065e940(void* a, void* b, void* c, int d);
 // Calls FUN_0065e750 on the addresses of a and b, then passes its dummy byte as the fourth argument to FUN_0065e940 along with a, b and c.
 // @fnv 0x0065e630
-void __cdecl FUN_0065e630(void* pFirst, void* pSecond, void* pThird)
+// src: GUESS 0x0065e630 (confidence: low)
+void __cdecl Runtime_ForwardCall_0065e630(void* pFirst, void* pSecond, void* pThird)
 {
-    FUN_0065e940(pFirst, pSecond, pThird, (unsigned char)FUN_0065e750(&pFirst, &pSecond).dummy);
+    Object_ProcessEntries_0065e940(pFirst, pSecond, pThird, (unsigned char)std_Move_cat_unsigned_char(&pFirst, &pSecond).dummy);
 }
 }  // namespace fnv_0065e630
 
 namespace fnv_0065e6c0 {
-int __cdecl FUN_0065e750(void*, void*);
-void __cdecl FUN_0065e970(int, int, int, int);
+int __cdecl std_Move_cat_unsigned_char(void*, void*);
+void __cdecl Runtime_ProcessEntries_0065e970(int, int, int, int);
 // @fnv 0x0065e6c0
 void __cdecl CallWithByteResult(int aiValue1, int aiValue2, int aiValue3)
 {
     unsigned char c;
-    c = FUN_0065e750(&aiValue1, &aiValue2);
-    FUN_0065e970(aiValue1, aiValue2, aiValue3, c);
+    c = std_Move_cat_unsigned_char(&aiValue1, &aiValue2);
+    Runtime_ProcessEntries_0065e970(aiValue1, aiValue2, aiValue3, c);
 }
 }  // namespace fnv_0065e6c0
 
 // Iterates over 0x20-byte entries from a1 up to a2, calling a3->FUN_0065e9c0 on each entry.
 // @fnv 0x0065e880
-void __cdecl FUN_0065e880(int a1, int a2, FUN_0065e9c0_class* a3)
+// src: GUESS 0x0065e880 (confidence: low)
+void __cdecl Object_ProcessEntries_0065e880(int a1, int a2, FUN_0065e9c0_class* a3)
 {
     for (; a1 != a2; a1 += 0x20)
-        a3->FUN_0065e9c0(a1);
+        a3->ForwardCall_0065e9c0(a1);
 }
 
 // Iterates over the range from a to b in 0x2c-byte steps, calling c->FUN_0065e9e0 on each element.
 // @fnv 0x0065e8b0
-void __cdecl FUN_0065e8b0(char* pBegin, char* pEnd, FUN_0065e9e0_Class* c)
+// src: GUESS 0x0065e8b0 (confidence: low)
+void __cdecl Runtime_ProcessEntries_0065e8b0(char* pBegin, char* pEnd, FUN_0065e9e0_Class* c)
 {
     for (; pBegin != pEnd; pBegin += 0x2c)
-        c->FUN_0065e9e0(pBegin);
+        c->ForwardCall_0065e9e0(pBegin);
 }
 
 // Iterates over the range from _First to _Last in steps of 0x38, calling _Dest->FUN_0065ea20 on each element.
 // @fnv 0x0065e910
-void FUN_0065e910(int _First, int _Last, FUN_0065ea20_Class* _Dest)
+// src: GUESS 0x0065e910 (confidence: low)
+void Runtime_ProcessEntries_0065e910(int _First, int _Last, FUN_0065ea20_Class* _Dest)
 {
     for (; _First != _Last; _First += 0x38)
     {
-        _Dest->FUN_0065ea20(_First);
+        _Dest->ForwardCall_0065ea20(_First);
     }
 }
 
 // @fnv 0x0065e940
-void FUN_0065e940(int a, int b, FUN_0065ea40_class* c)
+// src: GUESS 0x0065e940 (confidence: low)
+void Object_ProcessEntries_0065e940(int a, int b, FUN_0065ea40_class* c)
 {
     for (; a != b; a += 0x1c)
     {
-        c->FUN_0065ea40(a);
+        c->ForwardCall_0065ea40(a);
     }
 }
 
 struct S_0065eb60
 {
-    void __thiscall FUN_0065eb60(void* p);
+    void __thiscall CopyFields_0065eb60(void* p);
 };
 // @fnv 0x0065ea80
-char* __cdecl FUN_0065ea80(char* apSourceBegin, char* apSourceEnd, char* apDest)
+// src: GUESS 0x0065ea80 (confidence: low)
+char* __cdecl Object_ProcessEntries_0065ea80(char* apSourceBegin, char* apSourceEnd, char* apDest)
 {
     for (; apSourceBegin != apSourceEnd; apDest += 0x1c, apSourceBegin += 0x1c)
     {
-        ((S_0065eb60*)apDest)->FUN_0065eb60(apSourceBegin);
+        ((S_0065eb60*)apDest)->CopyFields_0065eb60(apSourceBegin);
     }
     return apDest;
 }
@@ -2297,7 +2406,8 @@ struct S_0065eb90
     void __thiscall FUN_0065eb90(int);
 };
 // @fnv 0x0065eac0
-int FUN_0065eac0(int pBegin, int pEnd, int pDest)
+// src: GUESS 0x0065eac0 (confidence: low)
+int Object_ProcessEntries_0065eac0(int pBegin, int pEnd, int pDest)
 {
     for (; pBegin != pEnd; pDest += 0x58, pBegin += 0x58)
         ((S_0065eb90*)pDest)->FUN_0065eb90(pBegin);
@@ -2310,7 +2420,8 @@ struct FUN_0065ec10_class
 };
 
 // @fnv 0x0065eb00
-void __cdecl FUN_0065eb00(int a)
+// src: GUESS 0x0065eb00 (confidence: low)
+void __cdecl Object_ForwardCall_0065eb00(int a)
 {
     ((FUN_0065ec10_class*)(void*)a)->FUN_0065ec10(0);
 }
@@ -2320,7 +2431,8 @@ struct FUN_0065ec40_class
     void FUN_0065ec40(int a);
 };
 // @fnv 0x0065eb10
-void FUN_0065eb10(FUN_0065ec40_class* self, int a)
+// src: GUESS 0x0065eb10 (confidence: low)
+void Object_ForwardCall_0065eb10(FUN_0065ec40_class* self, int a)
 {
     self->FUN_0065ec40(0);
 }
@@ -2331,7 +2443,8 @@ struct FUN_0065ec70_class
 };
 
 // @fnv 0x0065eb20
-void __cdecl FUN_0065eb20(FUN_0065ec70_class* self)
+// src: GUESS 0x0065eb20 (confidence: low)
+void __cdecl Object_ForwardCall_0065eb20(FUN_0065ec70_class* self)
 {
     self->FUN_0065ec70(0);
 }
@@ -2341,7 +2454,8 @@ struct FUN_0065ecd0_Class
     void FUN_0065ecd0(int a);
 };
 // @fnv 0x0065eb40
-void FUN_0065eb40(int a)
+// src: GUESS 0x0065eb40 (confidence: low)
+void Object_ForwardCall_0065eb40(int a)
 {
     ((FUN_0065ecd0_Class*)a)->FUN_0065ecd0(0);
 }
@@ -2351,41 +2465,43 @@ struct FUN_0065ed00_Class
     void __thiscall FUN_0065ed00(int a);
 };
 // @fnv 0x0065eb50
-void __cdecl FUN_0065eb50(int a)
+// src: GUESS 0x0065eb50 (confidence: low)
+void __cdecl Runtime_ForwardCall_0065eb50(int a)
 {
     ((FUN_0065ed00_Class*)a)->FUN_0065ed00(0);
 }
 
 struct Sub_0065eed0
 {
-    void __thiscall FUN_0065eed0(const Sub_0065eed0*);
+    void __thiscall AssignVectorContents(const Sub_0065eed0*);
 };
 struct Owner_0065eb60
 {
     float m_iWordAt00;
     Sub_0065eed0 m_iWordAt04;
-    Owner_0065eb60& __thiscall FUN_0065eb60(const Owner_0065eb60&);
+    Owner_0065eb60& __thiscall CopyFields_0065eb60(const Owner_0065eb60&);
 };
 // Copies the float member and the nested object from src into this object, then returns *this.
 // @fnv 0x0065eb60
-Owner_0065eb60& __thiscall Owner_0065eb60::FUN_0065eb60(const Owner_0065eb60& src)
+// src: GUESS 0x0065eb60 (confidence: medium)
+Owner_0065eb60& __thiscall Owner_0065eb60::CopyFields_0065eb60(const Owner_0065eb60& src)
 {
     m_iWordAt00 = src.m_iWordAt00;
-    m_iWordAt04.FUN_0065eed0(&src.m_iWordAt04);
+    m_iWordAt04.AssignVectorContents(&src.m_iWordAt04);
     return *this;
 }
 
 namespace fnv_0065ec10 {
 struct FUN_0065ec10_class
 {
-    void* FUN_0065ed30();
+    void* NarrowString_Thunk();
     void* FUN_0065ec10(unsigned int flags);
 };
 // Calls FUN_0065ed30, then deletes this when flags has bit 0 set, and returns this.
 // @fnv 0x0065ec10
 void* FUN_0065ec10_class::FUN_0065ec10(unsigned int flags)
 {
-    FUN_0065ed30();
+    NarrowString_Thunk();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -2416,7 +2532,7 @@ struct FUN_0065ecd0_class
 // @fnv 0x0065ecd0
 void* __thiscall FUN_0065ecd0_class::FUN_0065ecd0(unsigned int flags)
 {
-    reinterpret_cast<FUN_0065ee30_class*>(this)->FUN_0065ee30();
+    reinterpret_cast<FUN_0065ee30_class*>(this)->ForwardCall_0065ee30();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -2425,14 +2541,14 @@ void* __thiscall FUN_0065ecd0_class::FUN_0065ecd0(unsigned int flags)
 void __cdecl operator delete(void* p);
 struct FUN_0065ed00_class
 {
-    void __thiscall FUN_0065ee50();
+    void __thiscall ForwardCall_0065ee50();
     void* __thiscall FUN_0065ed00(unsigned int flags);
 };
 // Calls FUN_0065ee50, then frees this with operator delete when flags has bit 0 set, and returns this.
 // @fnv 0x0065ed00
 void* FUN_0065ed00_class::FUN_0065ed00(unsigned int flags)
 {
-    FUN_0065ee50();
+    ForwardCall_0065ee50();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -2488,11 +2604,12 @@ struct FUN_0065ee50_S
 {
     char m_auiShapeKeys[16];
     char m_aiIndexedValues[72];
-    void FUN_0065ee50();
+    void ForwardCall_0065ee50();
 };
 // Calls FUN_0065ee50_Helper on the sub-object at this+16 with 24, 3 and FUN_0065f060.
 // @fnv 0x0065ee50
-void FUN_0065ee50_S::FUN_0065ee50()
+// src: GUESS 0x0065ee50 (confidence: low)
+void FUN_0065ee50_S::ForwardCall_0065ee50()
 {
     FUN_0065ee50_Helper((void*)((char*)this + 16), 24, 3, FUN_0065f060);
 }
@@ -2505,10 +2622,11 @@ struct S_0065f2e0
     int m_iThirdValue;
     int _10;
     int m_14;
-    int FUN_0065f2e0();
+    int GetPointerSpanCount_0065f2e0();
 };
 // @fnv 0x0065f2e0
-int S_0065f2e0::FUN_0065f2e0()
+// src: GUESS 0x0065f2e0 (confidence: low)
+int S_0065f2e0::GetPointerSpanCount_0065f2e0()
 {
     return m_iThirdValue == 0 ? 0 : (m_14 - m_iThirdValue) / 6;
 }
@@ -2521,11 +2639,12 @@ struct FUN_0065f4b0_Class
     int m_C;
     int m_10;
     int m_14;
-    int FUN_0065f4b0();
+    int GetPointerRangeLengthOrZero();
 };
 // Returns 0 when m_C is zero, otherwise returns m_14 minus m_C.
 // @fnv 0x0065f4b0
-int FUN_0065f4b0_Class::FUN_0065f4b0()
+// src: GUESS 0x0065f4b0 (confidence: medium)
+int FUN_0065f4b0_Class::GetPointerRangeLengthOrZero()
 {
     return m_C == 0 ? 0 : m_14 - m_C;
 }
@@ -2533,7 +2652,7 @@ int FUN_0065f4b0_Class::FUN_0065f4b0()
 namespace fnv_0065f550 {
 struct _Out_0044a170
 {
-    void FUN_0065e000(int, void*);
+    void FaceGenData_Iterator_Set(int, void*);
 };
 struct FUN_0065f550_Class
 {
@@ -2545,17 +2664,18 @@ struct FUN_0065f550_Class
 // @fnv 0x0065f550
 _Out_0044a170* __thiscall FUN_0065f550_Class::CallWithSelf(_Out_0044a170* pOut)
 {
-    pOut->FUN_0065e000(m_10, this);
+    pOut->FaceGenData_Iterator_Set(m_10, this);
     return pOut;
 }
 }  // namespace fnv_0065f550
 
 struct S_0065f7c0
 {
-    unsigned int FUN_0065f7c0();
+    unsigned int ComputeValue_0065f7c0();
 };
 // @fnv 0x0065f7c0
-unsigned int S_0065f7c0::FUN_0065f7c0()
+// src: GUESS 0x0065f7c0 (confidence: low)
+unsigned int S_0065f7c0::ComputeValue_0065f7c0()
 {
     unsigned int v = 0x2AAAAAAA;
     return v > 0 ? v : 1;
@@ -2563,10 +2683,11 @@ unsigned int S_0065f7c0::FUN_0065f7c0()
 
 struct FUN_0065f7f0_Class
 {
-    unsigned int __thiscall FUN_0065f7f0() const;
+    unsigned int __thiscall std_allocator_char_max_size() const;
 };
 // @fnv 0x0065f7f0
-unsigned int __thiscall FUN_0065f7f0_Class::FUN_0065f7f0() const
+// src: COMMUNITY 0x0065f7f0
+unsigned int __thiscall FUN_0065f7f0_Class::std_allocator_char_max_size() const
 {
     unsigned int _Count = (unsigned int)-1 / sizeof(char);
     return (0 < _Count ? _Count : 1);
@@ -2578,22 +2699,23 @@ struct BlkInterfaceView
 {
     static void __cdecl PrintDebugMessage(int a, int b, int c, int d);
 };
-unsigned char __cdecl FUN_0065e750(int* a, int* b);
+unsigned char __cdecl std_Move_cat_unsigned_char(int* a, int* b);
 // @fnv 0x0065f960
 void CallInterfaceWithResult(int aiValue1, int aiValue2, int aiValue3, int aiValue4)
 {
-    unsigned char r = FUN_0065e750(&aiValue1, &aiValue2);
+    unsigned char r = std_Move_cat_unsigned_char(&aiValue1, &aiValue2);
     BlkInterfaceView::PrintDebugMessage(aiValue1, aiValue2, aiValue3, (int)r);
 }
 }  // namespace fnv_0065f960
 
-unsigned char __cdecl FUN_0065e750(void* a, void* b);
-void __cdecl FUN_0065ff00(void* a, void* b, void* c, unsigned char d);
+unsigned char __cdecl std_Move_cat_unsigned_char(void* a, void* b);
+void __cdecl Object_ProcessEntries_0065ff00(void* a, void* b, void* c, unsigned char d);
 // @fnv 0x0065f9a0
-void __cdecl FUN_0065f9a0(void* pFirst, void* pSecond, void* pThird)
+// src: GUESS 0x0065f9a0 (confidence: low)
+void __cdecl Object_DispatchIteratorRange_0065f9a0(void* pFirst, void* pSecond, void* pThird)
 {
-    unsigned char r = FUN_0065e750(&pFirst, &pSecond);
-    FUN_0065ff00(pFirst, pSecond, pThird, r);
+    unsigned char r = std_Move_cat_unsigned_char(&pFirst, &pSecond);
+    Object_ProcessEntries_0065ff00(pFirst, pSecond, pThird, r);
 }
 
 struct FUN_0065fb10_Class
@@ -2604,10 +2726,11 @@ struct FUN_0065fa80_Holder
 {
     float m_iWordAt00;
     FUN_0065fb10_Class m_iWordAt04;
-    FUN_0065fa80_Holder& __thiscall FUN_0065fa80(const FUN_0065fa80_Holder& other);
+    FUN_0065fa80_Holder& __thiscall AssignFields_0065fa80(const FUN_0065fa80_Holder& other);
 };
 // @fnv 0x0065fa80
-FUN_0065fa80_Holder& __thiscall FUN_0065fa80_Holder::FUN_0065fa80(const FUN_0065fa80_Holder& other)
+// src: GUESS 0x0065fa80 (confidence: low)
+FUN_0065fa80_Holder& __thiscall FUN_0065fa80_Holder::AssignFields_0065fa80(const FUN_0065fa80_Holder& other)
 {
     m_iWordAt00 = other.m_iWordAt00;
     m_iWordAt04.FUN_0065fb10(other.m_iWordAt04);
@@ -2616,7 +2739,8 @@ FUN_0065fa80_Holder& __thiscall FUN_0065fa80_Holder::FUN_0065fa80(const FUN_0065
 
 int __cdecl FUN_00ec7ce3(void* a1, unsigned int a2, void* a3, unsigned int a4);
 // @fnv 0x0065fe60
-char* FUN_0065fe60(char* pBegin, char* pEnd, char* pDest)
+// src: GUESS 0x0065fe60 (confidence: low)
+char* Object_ProcessAndReturnValue_0065fe60(char* pBegin, char* pEnd, char* pDest)
 {
     char* end;
     {
@@ -2629,35 +2753,38 @@ char* FUN_0065fe60(char* pBegin, char* pEnd, char* pDest)
 }
 
 // @fnv 0x0065ff00
-void __cdecl FUN_0065ff00(char* _First, char* _Last, FUN_0065e9a0_holder* _Dest)
+// src: GUESS 0x0065ff00 (confidence: low)
+void __cdecl Object_ProcessEntries_0065ff00(char* _First, char* _Last, FUN_0065e9a0_holder* _Dest)
 {
     for (; _First != _Last; _First += 6)
-        _Dest->FUN_0065e9a0((int*)_First);
+        _Dest->PrintDebugMessage_Thunk((int*)_First);
 }
 
-extern "C" void __cdecl FUN_00660130(int a, int b, int c, int d, int e, int f);
+extern "C" void __cdecl Runtime_CopyCheckedRange(int a, int b, int c, int d, int e, int f);
 
 struct FUN_0065ff30_Class
 {
-    void __thiscall FUN_0065ff30(int a, int b, int c, int d, int e);
+    void __thiscall ForwardCall_0065ff30(int a, int b, int c, int d, int e);
 };
 
 // @fnv 0x0065ff30
-void __thiscall FUN_0065ff30_Class::FUN_0065ff30(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5)
+// src: GUESS 0x0065ff30 (confidence: low)
+void __thiscall FUN_0065ff30_Class::ForwardCall_0065ff30(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5)
 {
-    FUN_00660130(aiArg1, aiArg2, aiArg3, aiArg4, aiArg5, (int)(this + 8));
+    Runtime_CopyCheckedRange(aiArg1, aiArg2, aiArg3, aiArg4, aiArg5, (int)(this + 8));
 }
 
 struct FUN_0065ff60_class
 {
-    void __thiscall FUN_0065ff60(int a, int b, int c, int d, int e);
+    void __thiscall ForwardCall_0065ff60(int a, int b, int c, int d, int e);
 };
-extern "C" void __cdecl FUN_00660190(int a, int b, int c, int d, int e, int f);
+extern "C" void __cdecl Runtime_EvaluateValue_00660190(int a, int b, int c, int d, int e, int f);
 // Passes the five arguments plus a pointer to this object's offset 8 to FUN_00660190.
 // @fnv 0x0065ff60
-void __thiscall FUN_0065ff60_class::FUN_0065ff60(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5)
+// src: GUESS 0x0065ff60 (confidence: low)
+void __thiscall FUN_0065ff60_class::ForwardCall_0065ff60(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5)
 {
-    FUN_00660190(aiArg1, aiArg2, aiArg3, aiArg4, aiArg5, (int)(this + 8));
+    Runtime_EvaluateValue_00660190(aiArg1, aiArg2, aiArg3, aiArg4, aiArg5, (int)(this + 8));
 }
 
 struct NiRTTI;
@@ -2688,10 +2815,11 @@ struct FUN_00642940_class
     int n;
     int o;
     int p;
-    void FUN_00642940();
+    void Sun_RemoveTextures();
 };
 // @fnv 0x00642940
-void FUN_00642940_class::FUN_00642940()
+// src: COMMUNITY 0x00642940
+void FUN_00642940_class::Sun_RemoveTextures()
 {
     void* pProperty;
     SkyShaderProperty* obj;
@@ -2700,29 +2828,30 @@ void FUN_00642940_class::FUN_00642940()
     if (obj)
     {
         obj->SetTexture(0);
-        obj->FUN_00634900(&DAT_011f49e0);
+        obj->SetTextureFile(&DAT_011f49e0);
     }
     pProperty = ((PropHelper*)((Flt*)((char*)this + 0x14))->operator unsigned int())->GetProperty(3);
     obj = (SkyShaderProperty*)DynamicCastByRTTI((const NiRTTI*)&DAT_012005b8, (NiProperty*)pProperty);
     if (obj)
     {
         obj->SetTexture(0);
-        obj->FUN_00634900(&DAT_011f49e0);
+        obj->SetTextureFile(&DAT_011f49e0);
     }
 }
 
 struct Arr16
 {
-    void FUN_00644490(int a, int b);
+    void BSSimpleArray_NavMeshTriangle_1024_ConstructItems(int a, int b);
 };
 struct FUN_00644400_Class
 {
     virtual void v0();
     virtual int v1(int a);
-    void FUN_00644400(unsigned int a, unsigned int b);
+    void BSSimpleArray_NavMeshTriangle_1024_InitialSetup(unsigned int a, unsigned int b);
 };
 // @fnv 0x00644400
-void FUN_00644400_Class::FUN_00644400(unsigned int a, unsigned int b)
+// src: COMMUNITY 0x00644400
+void FUN_00644400_Class::BSSimpleArray_NavMeshTriangle_1024_InitialSetup(unsigned int a, unsigned int b)
 {
     *(int*)((char*)this + 4) = 0;
     *(int*)((char*)this + 8) = 0;
@@ -2738,7 +2867,7 @@ void FUN_00644400_Class::FUN_00644400(unsigned int a, unsigned int b)
     }
     if (b > 0)
     {
-        ((Arr16*)this)->FUN_00644490(*(int*)((char*)this + 4), b);
+        ((Arr16*)this)->BSSimpleArray_NavMeshTriangle_1024_ConstructItems(*(int*)((char*)this + 4), b);
         *(int*)((char*)this + 8) = b;
     }
 }
@@ -2751,14 +2880,15 @@ struct FUN_00657e60_Class
     int m_iThirdValue;
     int m_10;
     int m_14;
-    void __thiscall FUN_00657e60();
+    void __thiscall ReleaseStorage_00657e60();
 };
 // @fnv 0x00657e60
-void __thiscall FUN_00657e60_Class::FUN_00657e60()
+// src: GUESS 0x00657e60 (confidence: medium)
+void __thiscall FUN_00657e60_Class::ReleaseStorage_00657e60()
 {
     if (m_iThirdValue)
     {
-        ((FUN_00658060_Class*)this)->FUN_00658060(m_iThirdValue, m_10);
+        ((FUN_00658060_Class*)this)->ForwardCall_00658060(m_iThirdValue, m_10);
         ((FUN_0064df10_helper*)((char*)this + 8))->deallocate((void*)m_iThirdValue, (unsigned int)((m_14 - m_iThirdValue) / 0x88));
     }
     m_iThirdValue = 0;
@@ -2768,18 +2898,19 @@ void __thiscall FUN_00657e60_Class::FUN_00657e60()
 
 struct H_0060b3b0
 {
-    float* FUN_006578b0(unsigned int a) const;
+    float* GetElementPointerChecked(unsigned int a) const;
 };
 int __cdecl _memcmp(const void* a, const void* b, unsigned int n);
 // @fnv 0x00658160
-bool FUN_00657880_class::FUN_00658160(int other)
+// src: GUESS 0x00658160 (confidence: low)
+bool FUN_00657880_class::ProcessAndReturnValue_00658160(int other)
 {
     if (*(unsigned int*)((char*)other + 0x18) != *(unsigned int*)((char*)this + 0x18) ||
         *(unsigned int*)((char*)other + 0x1c) != *(unsigned int*)((char*)this + 0x1c))
         return false;
     if (*(unsigned int*)((char*)this + 0x18) == 0 || *(unsigned int*)((char*)this + 0x1c) == 0)
         return true;
-    return _memcmp(((H_0060b3b0*)this)->FUN_006578b0(0), ((H_0060b3b0*)other)->FUN_006578b0(0),
+    return _memcmp(((H_0060b3b0*)this)->GetElementPointerChecked(0), ((H_0060b3b0*)other)->GetElementPointerChecked(0),
                    (*(unsigned int*)((char*)this + 0x18) << 2) * *(unsigned int*)((char*)this + 0x1c)) == 0;
 }
 
@@ -2791,14 +2922,15 @@ struct FUN_0065d460_Class
     void* m_iThirdValue;
     void* m_10;
     void* m_14;
-    void __thiscall FUN_0065d460();
+    void __thiscall ReleaseStorage_0065d460();
 };
 // @fnv 0x0065d460
-void __thiscall FUN_0065d460_Class::FUN_0065d460()
+// src: GUESS 0x0065d460 (confidence: medium)
+void __thiscall FUN_0065d460_Class::ReleaseStorage_0065d460()
 {
     if (m_iThirdValue)
     {
-        ((FUN_0065dd90_Class*)this)->FUN_0065dd90((int)m_iThirdValue, (int)m_10);
+        ((FUN_0065dd90_Class*)this)->ForwardCall_0065dd90((int)m_iThirdValue, (int)m_10);
         ((FUN_0064df10_helper*)((char*)this + 8))->deallocate(m_iThirdValue, (unsigned int)(((int)m_14 - (int)m_iThirdValue) / 44));
     }
     m_iThirdValue = 0;
@@ -2814,14 +2946,15 @@ struct FUN_0065d660_Class
     int m_iThirdValue;
     int m_10;
     int m_14;
-    void __thiscall FUN_0065d660();
+    void __thiscall ReleaseStorage_0065d660();
 };
 // @fnv 0x0065d660
-void __thiscall FUN_0065d660_Class::FUN_0065d660()
+// src: GUESS 0x0065d660 (confidence: medium)
+void __thiscall FUN_0065d660_Class::ReleaseStorage_0065d660()
 {
     if (m_iThirdValue)
     {
-        ((FUN_0065de80_Class*)this)->FUN_0065de80(m_iThirdValue, m_10);
+        ((FUN_0065de80_Class*)this)->ForwardCall_0065de80(m_iThirdValue, m_10);
         ((FUN_0064df10_helper*)((char*)this + 8))->deallocate((void*)m_iThirdValue, (unsigned int)((m_14 - m_iThirdValue) / 0x38));
     }
     m_iThirdValue = 0;
@@ -2837,14 +2970,15 @@ struct FUN_0065d860_class
     void* m_iThirdValue;
     void* m_10;
     void* m_14;
-    void __thiscall FUN_0065d860();
+    void __thiscall ReleaseStorage_0065d860();
 };
 // @fnv 0x0065d860
-void __thiscall FUN_0065d860_class::FUN_0065d860()
+// src: GUESS 0x0065d860 (confidence: medium)
+void __thiscall FUN_0065d860_class::ReleaseStorage_0065d860()
 {
     if (m_iThirdValue)
     {
-        ((FUN_0065df10_class*)this)->FUN_0065df10(m_iThirdValue, m_10);
+        ((FUN_0065df10_class*)this)->ForwardCall_0065df10(m_iThirdValue, m_10);
         ((FUN_0064df10_helper*)((char*)this + 8))->deallocate(m_iThirdValue, (int)((int)m_14 - (int)m_iThirdValue) / 0x1c);
     }
     m_iThirdValue = 0;
@@ -2853,12 +2987,12 @@ void __thiscall FUN_0065d860_class::FUN_0065d860()
 }
 
 struct EGMDeltaList;
-int __fastcall FUN_00657bc0(EGMDeltaList*);
+int __fastcall Object_GetPointerSpanCount_00657bc0(EGMDeltaList*);
 struct Elem_65eed0
 {
     short a, b, c;
 };
-Elem_65eed0* __cdecl FUN_0065f820(Elem_65eed0*, Elem_65eed0*, Elem_65eed0*);
+Elem_65eed0* __cdecl Object_DispatchIteratorRange_0065f820(Elem_65eed0*, Elem_65eed0*, Elem_65eed0*);
 
 struct Vec_65eed0
 {
@@ -2868,43 +3002,44 @@ struct Vec_65eed0
     Elem_65eed0* _Myfirst;
     Elem_65eed0* _Mylast;
     Elem_65eed0* _Myend;
-    void FUN_0065f320();
-    bool FUN_0065f380(unsigned int);
-    Elem_65eed0* FUN_0065f890(Elem_65eed0*, Elem_65eed0*, Elem_65eed0*);
-    Vec_65eed0* FUN_0065eed0(Vec_65eed0* _Right);
+    void UpdateFields_0065f320();
+    bool ProcessAndReturnValue_0065f380(unsigned int);
+    Elem_65eed0* ForwardCall_0065f890(Elem_65eed0*, Elem_65eed0*, Elem_65eed0*);
+    Vec_65eed0* AssignVectorContents(Vec_65eed0* _Right);
 };
 
 // Assigns the contents of _Right into this vector, reusing, growing or reallocating storage depending on the two sizes.
 // @fnv 0x0065eed0
-Vec_65eed0* Vec_65eed0::FUN_0065eed0(Vec_65eed0* _Right)
+// src: GUESS 0x0065eed0 (confidence: medium)
+Vec_65eed0* Vec_65eed0::AssignVectorContents(Vec_65eed0* _Right)
 {
     if (this != _Right)
     {
-        if (FUN_00657bc0((EGMDeltaList*)_Right) == 0)
+        if (Object_GetPointerSpanCount_00657bc0((EGMDeltaList*)_Right) == 0)
         {
-            FUN_0065f320();
+            UpdateFields_0065f320();
         }
-        else if ((unsigned int)FUN_00657bc0((EGMDeltaList*)_Right) <= (unsigned int)FUN_00657bc0((EGMDeltaList*)this))
+        else if ((unsigned int)Object_GetPointerSpanCount_00657bc0((EGMDeltaList*)_Right) <= (unsigned int)Object_GetPointerSpanCount_00657bc0((EGMDeltaList*)this))
         {
-            Elem_65eed0* _Ptr = FUN_0065f820(_Right->_Myfirst, _Right->_Mylast, _Myfirst);
-            ((FUN_0065f400_class*)this)->FUN_0065f400((int)_Ptr, (int)_Mylast);
-            _Mylast = _Myfirst + FUN_00657bc0((EGMDeltaList*)_Right);
+            Elem_65eed0* _Ptr = Object_DispatchIteratorRange_0065f820(_Right->_Myfirst, _Right->_Mylast, _Myfirst);
+            ((FUN_0065f400_class*)this)->ForwardCall_0065f400((int)_Ptr, (int)_Mylast);
+            _Mylast = _Myfirst + Object_GetPointerSpanCount_00657bc0((EGMDeltaList*)_Right);
         }
-        else if ((unsigned int)FUN_00657bc0((EGMDeltaList*)_Right) <= (unsigned int)((S_0065f2e0*)this)->FUN_0065f2e0())
+        else if ((unsigned int)Object_GetPointerSpanCount_00657bc0((EGMDeltaList*)_Right) <= (unsigned int)((S_0065f2e0*)this)->GetPointerSpanCount_0065f2e0())
         {
-            Elem_65eed0* _Ptr = _Right->_Myfirst + FUN_00657bc0((EGMDeltaList*)this);
-            FUN_0065f820(_Right->_Myfirst, _Ptr, _Myfirst);
-            _Mylast = FUN_0065f890(_Ptr, _Right->_Mylast, _Mylast);
+            Elem_65eed0* _Ptr = _Right->_Myfirst + Object_GetPointerSpanCount_00657bc0((EGMDeltaList*)this);
+            Object_DispatchIteratorRange_0065f820(_Right->_Myfirst, _Ptr, _Myfirst);
+            _Mylast = ForwardCall_0065f890(_Ptr, _Right->_Mylast, _Mylast);
         }
         else
         {
             if (_Myfirst != 0)
             {
-                ((FUN_0065f400_class*)this)->FUN_0065f400((int)_Myfirst, (int)_Mylast);
+                ((FUN_0065f400_class*)this)->ForwardCall_0065f400((int)_Myfirst, (int)_Mylast);
                 _Alval.deallocate(_Myfirst, _Myend - _Myfirst);
             }
-            if (FUN_0065f380(FUN_00657bc0((EGMDeltaList*)_Right)))
-                _Mylast = FUN_0065f890(_Right->_Myfirst, _Right->_Mylast, _Myfirst);
+            if (ProcessAndReturnValue_0065f380(Object_GetPointerSpanCount_00657bc0((EGMDeltaList*)_Right)))
+                _Mylast = ForwardCall_0065f890(_Right->_Myfirst, _Right->_Mylast, _Myfirst);
         }
     }
     return this;
@@ -2918,14 +3053,15 @@ struct FUN_0065f430_class
     void* m_iThirdValue;
     int m_10;
     int m_14;
-    void FUN_0065f430();
+    void UpdateState_0065f430();
 };
 // @fnv 0x0065f430
-void FUN_0065f430_class::FUN_0065f430()
+// src: GUESS 0x0065f430 (confidence: low)
+void FUN_0065f430_class::UpdateState_0065f430()
 {
     if (m_iThirdValue)
     {
-        ((FUN_0065f400_class*)this)->FUN_0065f400((int)m_iThirdValue, m_10);
+        ((FUN_0065f400_class*)this)->ForwardCall_0065f400((int)m_iThirdValue, m_10);
         ((FUN_0064df10_helper*)((char*)this + 8))->deallocate(m_iThirdValue, (unsigned int)((m_14 - (int)m_iThirdValue) / 6));
     }
     m_iThirdValue = 0;
@@ -2935,12 +3071,13 @@ void FUN_0065f430_class::FUN_0065f430()
 
 struct FUN_0064cc90_Class
 {
-    void __thiscall FUN_0064cc90(unsigned char bFlag);
+    void __thiscall BSFaceGenAnimationData_SetAnimHeadCulled(unsigned char bFlag);
 };
 
 // If bFlag differs from the byte at this+0x18f, calls vtable slot 47 when bFlag is set, then stores bFlag at this+0x18f.
 // @fnv 0x0064cc90
-void FUN_0064cc90_Class::FUN_0064cc90(unsigned char bFlag)
+// src: XBOX_PDB 0x0064cc90
+void FUN_0064cc90_Class::BSFaceGenAnimationData_SetAnimHeadCulled(unsigned char bFlag)
 {
     if (bFlag == *(unsigned char*)((char*)this + 0x18f))
         return;
@@ -2989,7 +3126,7 @@ void FUN_0065d050::Clear_0065d050()
 {
     if (m_iThirdValue)
     {
-        ((FUN_0065db60_class*)this)->FUN_0065db60(m_iThirdValue, m_10);
+        ((FUN_0065db60_class*)this)->ForwardCall_0065db60(m_iThirdValue, m_10);
         ((FUN_0064df10_helper*)((char*)this + 8))->deallocate((void*)m_iThirdValue, (m_14 - m_iThirdValue) / 0xc);
     }
     m_iThirdValue = 0;
@@ -3014,7 +3151,7 @@ void FUN_0065f240::Clear()
 {
     if (m_buf)
     {
-        ((FUN_0065f2b0_class*)this)->FUN_0065f2b0(m_buf, m_iElementCount);
+        ((FUN_0065f2b0_class*)this)->std_vector_float_std_allocator_float_Destroy(m_buf, m_iElementCount);
         ((FUN_0064df10_helper*)((char*)this + 8))
             ->deallocate((void*)m_buf, (unsigned int)(((int)m_cap - (int)m_buf) >> 2));
     }
@@ -3062,21 +3199,23 @@ void __cdecl FormatMenuText(int menuType, char const* text, char* buffer, unsign
 
 struct FUN_0064da80_Class
 {
-    int __thiscall FUN_0064da80(int a, int b);
+    int __thiscall NiPixelData_GetWidth(int a, int b);
 };
 
 // @fnv 0x0064da80
-int __thiscall FUN_0064da80_Class::FUN_0064da80(int aiIndex, int aiUnused)
+// src: COMMUNITY 0x0064da80
+int __thiscall FUN_0064da80_Class::NiPixelData_GetWidth(int aiIndex, int aiUnused)
 {
     return reinterpret_cast<int*>(*reinterpret_cast<int**>(reinterpret_cast<unsigned char*>(this) + 0x54))[aiIndex];
 }
 
 struct FUN_0064daa0_Class
 {
-    int __thiscall FUN_0064daa0(int a, int b);
+    int __thiscall NiPixelData_GetHeight(int a, int b);
 };
 // @fnv 0x0064daa0
-int __thiscall FUN_0064daa0_Class::FUN_0064daa0(int aiIndex, int b)
+// src: COMMUNITY 0x0064daa0
+int __thiscall FUN_0064daa0_Class::NiPixelData_GetHeight(int aiIndex, int b)
 {
     return (*(int**)((char*)this + 0x58))[aiIndex];
 }
@@ -3089,7 +3228,8 @@ struct Calendar : public BGSTerrainManager
 };
 
 // @fnv 0x00653000
-void FUN_00653000(float value, Calendar* calendars, bool flag)
+// src: COMMUNITY 0x00653000
+void BSFaceGenManager_ScaleFaceCoord(float value, Calendar* calendars, bool flag)
 {
     if (calendars == 0 || value < 0.0f || value > 1.0f)
         return;
@@ -3159,7 +3299,7 @@ struct FUN_00658bb0 : FUN_00658d30_class
 FUN_00658bb0::~FUN_00658bb0()
 {
     *(void**)this = &DAT_01065870;
-    FUN_00658d30_class::FUN_00658d30();
+    FUN_00658d30_class::ForwardCall_00658d30();
 }
 
 struct FUN_0065d240_class
@@ -3193,7 +3333,7 @@ void FUN_0065d560_Class::ClearAndFreeBuffer()
 {
     if (*(int*)((char*)this + 0xc) != 0)
     {
-        ((FUN_0065de00_Class*)this)->FUN_0065de00(*(int*)((char*)this + 0xc), *(int*)((char*)this + 0x10));
+        ((FUN_0065de00_Class*)this)->ForwardCall_0065de00(*(int*)((char*)this + 0xc), *(int*)((char*)this + 0x10));
         ((FUN_0064df10_helper*)((char*)this + 8))
             ->deallocate(*(void**)((char*)this + 0xc),
                          (*(int*)((char*)this + 0x14) - *(int*)((char*)this + 0xc)) / 0x34);
@@ -3205,14 +3345,15 @@ void FUN_0065d560_Class::ClearAndFreeBuffer()
 
 struct FUN_0065da00_class
 {
-    void FUN_0065da00();
+    void ReleaseStorage_0065da00();
 };
 // @fnv 0x0065da00
-void FUN_0065da00_class::FUN_0065da00()
+// src: GUESS 0x0065da00 (confidence: medium)
+void FUN_0065da00_class::ReleaseStorage_0065da00()
 {
     if (*(int*)((char*)this + 0xc) != 0)
     {
-        ((FUN_0065df80_class*)this)->FUN_0065df80(*(int*)((char*)this + 0xc), *(int*)((char*)this + 0x10));
+        ((FUN_0065df80_class*)this)->CallWithByteResult_Thunk(*(int*)((char*)this + 0xc), *(int*)((char*)this + 0x10));
         ((FUN_0064df10_helper*)((char*)this + 8))
             ->deallocate(*(void**)((char*)this + 0xc),
                          (*(int*)((char*)this + 0x14) - *(int*)((char*)this + 0xc)) / 0x58);
@@ -3226,12 +3367,13 @@ struct FUN_0065dbd0_Class
 {
     int a0;
     int a4;
-    int FUN_0065dbd0();
+    int ForwardCall_0065dbd0();
 };
 // @fnv 0x0065dbd0
-int FUN_0065dbd0_Class::FUN_0065dbd0()
+// src: GUESS 0x0065dbd0 (confidence: low)
+int FUN_0065dbd0_Class::ForwardCall_0065dbd0()
 {
-    return ((FUN_0065e050_Holder*)((char*)this + 8))->FUN_0065e050();
+    return ((FUN_0065e050_Holder*)((char*)this + 8))->UpdateState_0065e050();
 }
 
 struct FUN_0065dc40_Class
@@ -3241,18 +3383,19 @@ struct FUN_0065dc40_Class
 // @fnv 0x0065dc40
 int FUN_0065dc40_Class::CallNestedMethod()
 {
-    return ((FUN_0065e080_S*)((char*)this + 8))->FUN_0065e080();
+    return ((FUN_0065e080_S*)((char*)this + 8))->ComputeValue_0065e080();
 }
 
 struct FUN_0065de60_Class
 {
     int m_iWordAt00;
     int m_iWordAt04;
-    int FUN_0065de60();
+    int GetPositiveValue_Thunk();
 };
 
 // @fnv 0x0065de60
-int FUN_0065de60_Class::FUN_0065de60()
+// src: GUESS 0x0065de60 (confidence: medium)
+int FUN_0065de60_Class::GetPositiveValue_Thunk()
 {
     return ((FUN_0065e110_Holder*)((char*)this + 8))->GetPositiveValue();
 }
@@ -3261,16 +3404,18 @@ struct FUN_0065def0_class
 {
     int m_iWordAt00;
     int m_iWordAt04;
-    unsigned int FUN_0065def0();
+    unsigned int ForwardCall_0065def0();
 };
 // @fnv 0x0065def0
-unsigned int FUN_0065def0_class::FUN_0065def0()
+// src: GUESS 0x0065def0 (confidence: low)
+unsigned int FUN_0065def0_class::ForwardCall_0065def0()
 {
-    return ((S_0065e140*)((char*)this + 8))->FUN_0065e140();
+    return ((S_0065e140*)((char*)this + 8))->ComputeValue_0065e140();
 }
 
 // @fnv 0x0065eb30
-void* __cdecl FUN_0065eb30(unsigned int a)
+// src: GUESS 0x0065eb30 (confidence: low)
+void* __cdecl Runtime_ForwardCall_0065eb30(unsigned int a)
 {
     return ((FUN_0065eca0_class*)a)->FUN_0065eca0(0);
 }
@@ -3282,11 +3427,12 @@ struct CIdvFilenameDestructorHelper
 
 struct FUN_0065ed30_class
 {
-    void __thiscall FUN_0065ed30();
+    void __thiscall NarrowString_Thunk();
 };
 
 // @fnv 0x0065ed30
-void __thiscall FUN_0065ed30_class::FUN_0065ed30()
+// src: GUESS 0x0065ed30 (confidence: medium)
+void __thiscall FUN_0065ed30_class::NarrowString_Thunk()
 {
     reinterpret_cast<CIdvFilenameDestructorHelper*>(reinterpret_cast<unsigned char*>(this) + 4)->NarrowString();
 }
@@ -3298,18 +3444,19 @@ struct CIdvFilenameDtorHelper
 
 struct FUN_0065ed50_Class
 {
-    void FUN_0065ed50();
+    void Dtor_Thunk();
 };
 
 // @fnv 0x0065ed50
-void FUN_0065ed50_Class::FUN_0065ed50()
+// src: GUESS 0x0065ed50 (confidence: medium)
+void FUN_0065ed50_Class::Dtor_Thunk()
 {
     ((CIdvFilenameDtorHelper*)((char*)this + 0x10))->Dtor();
 }
 
 struct FUN_0044a9d0_Class
 {
-    unsigned int FUN_0065f7f0();
+    unsigned int std_allocator_char_max_size();
 };
 struct FUN_0065f6e0_Class
 {
@@ -3321,7 +3468,7 @@ struct FUN_0065f6e0_Class
 // @fnv 0x0065f6e0
 unsigned int FUN_0065f6e0_Class::GetNestedValue()
 {
-    return m8.FUN_0065f7f0();
+    return m8.std_allocator_char_max_size();
 }
 
 extern const char DAT_0104f2ac;
@@ -3343,11 +3490,12 @@ struct FUN_006427c0_Class
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
     FUN_00559450 unk28;
-    float FUN_006427c0();
+    float Sun_GetSunOcclusionPercent();
 };
 // Returns the value from the object obtained via unk28, or 0.0f if that object is null.
 // @fnv 0x006427c0
-float FUN_006427c0_Class::FUN_006427c0()
+// src: COMMUNITY 0x006427c0
+float FUN_006427c0_Class::Sun_GetSunOcclusionPercent()
 {
     FUN_00404eb0 scope(0x21, 1, &DAT_0104f2ac, 0x235);
     FUN_00508050* value = unk28.FUN_00559450_value();
@@ -3394,7 +3542,7 @@ struct Link_006428b0
 };
 struct Container_006428b0
 {
-    Link_006428b0* FUN_00559450(int index);
+    Link_006428b0* Modelloader_GetReferencedThis(int index);
 };
 struct Object_006428b0
 {
@@ -3407,9 +3555,9 @@ struct Object_006428b0
 float Object_006428b0::GetLinkedValueFloat()
 {
     Value_006428b0* value =
-        (unk14.FUN_00559450(3)->FUN_00a59d30() == 0 ? false
-                                                    : unk14.FUN_00559450(3)->FUN_00a59d30()->FUN_00441110() == 13)
-            ? unk14.FUN_00559450(3)->FUN_00a59d30()
+        (unk14.Modelloader_GetReferencedThis(3)->FUN_00a59d30() == 0 ? false
+                                                    : unk14.Modelloader_GetReferencedThis(3)->FUN_00a59d30()->FUN_00441110() == 13)
+            ? unk14.Modelloader_GetReferencedThis(3)->FUN_00a59d30()
             : 0;
     if (value)
         return value->unk6c;
@@ -3421,7 +3569,8 @@ extern double DAT_01012060;
 float __cdecl FUN_00476b70(float a, float b);
 
 // @fnv 0x006429e0
-float __cdecl FUN_006429e0(float afValue, float afLimit)
+// src: XBOX_PDB 0x006429e0
+float __cdecl AiFormulas_RandomHour(float afValue, float afLimit)
 {
     float lo2 = (afValue > afLimit) ? afLimit + DAT_010356d8 : afLimit;
     float r = FUN_00476b70(afValue, lo2);
@@ -3444,7 +3593,8 @@ extern Setting g_011cd438;
 
 // Sums base, a level-scaled term, and several setting-weighted terms (some skipped when flag is set) plus extra, returning the total.
 // @fnv 0x00642a60
-int FUN_00642a60(int base, int level, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int extra,
+// src: COMMUNITY 0x00642a60
+int AiFormulas_GetActorDispositiontoTarget(int base, int level, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int extra,
                  bool abSkipTerms)
 {
     int total = 0;
@@ -3480,7 +3630,8 @@ struct FUN_0066ef50_Class
 
 // Returns a scaled value from the actor's FUN_0066ef50(7) plus a setting, multiplied by another setting, depending on the action (0x13 or 0x14); otherwise 0.
 // @fnv 0x00643e40
-float __cdecl FUN_00643e40(FUN_0066ef50_Class* actor, int action)
+// src: COMMUNITY 0x00643e40
+float __cdecl AiFormulas_AVDeriveResistance(FUN_0066ef50_Class* actor, int action)
 {
     float result = 0.0f;
     switch (action)
@@ -3534,7 +3685,8 @@ extern FloatSetting_646400 gs_011ce808;
 unsigned int DialogueRandom();
 
 // @fnv 0x00646400
-bool FUN_00646400(AVOwnerStub_646400* owner, int value)
+// src: COMMUNITY 0x00646400
+bool ActorValueOwner_ShouldDamageKnockdownTarget(AVOwnerStub_646400* owner, int value)
 {
     bool result2 = false;
     float current4 = owner->GetCurAV(16);
@@ -3592,7 +3744,8 @@ struct FUN_00647a30_Flag
 };
 
 // @fnv 0x00647a30
-float __cdecl FUN_00647a30(FUN_00647a30_Obj* pObj, FUN_00647a30_Flag* pFlag, float fValue)
+// src: XBOX_PDB 0x00647a30
+float __cdecl CombatFormulas_CalcTargetedLimbDamage(FUN_00647a30_Obj* pObj, FUN_00647a30_Flag* pFlag, float fValue)
 {
     float result2 = 0.0f;
     if (pObj != 0 && pFlag != 0)
@@ -3624,7 +3777,7 @@ extern SettingValue g_011ced28;
 extern SettingValue g_011ceb38;
 
 float __cdecl FUN_00476b70(float a, float b);
-int __cdecl FUN_00647b70(int a, int b);
+int __cdecl BSMAX_00647b70(int a, int b);
 
 // @fnv 0x00647ae0
 int __cdecl ComputeScaledSettingSum(float scale)
@@ -3632,7 +3785,7 @@ int __cdecl ComputeScaledSettingSum(float scale)
     float v5 = *g_011cee24.GetValue();
     float v2 = *g_011cf314.GetValue() + scale * *g_011ced28.GetValue();
     float v4 = FUN_00476b70(-(*g_011ceb38.GetValue()), *g_011ceb38.GetValue());
-    int r = FUN_00647b70(0, (int)(v5 + v2 + v4));
+    int r = BSMAX_00647b70(0, (int)(v5 + v2 + v4));
     return r;
 }
 
@@ -3650,7 +3803,7 @@ float __cdecl ScaleByInverseRatio(float fValue, float fScaledValue, float afSubt
 
 struct S_00648ea0_Setting
 {
-    float* __thiscall FUN_00403e20();
+    float* __thiscall Setting_Float_00403e20();
 };
 
 extern S_00648ea0_Setting DAT_011d0c90;
@@ -3673,15 +3826,15 @@ int __cdecl ComputeWeightedValue(float value1, float value2, int weight)
     float product3;
     int result;
 
-    normalized9 = 1.0 + *DAT_011d0c90.FUN_00403e20() * (value1 - *DAT_011d07c0.FUN_00403e20()) / DAT_01017a40;
-    normalized8 = 1.0 + *DAT_011d1110.FUN_00403e20() * (value2 - *DAT_011d0a24.FUN_00403e20()) / DAT_01017a40;
+    normalized9 = 1.0 + *DAT_011d0c90.Setting_Float_00403e20() * (value1 - *DAT_011d07c0.Setting_Float_00403e20()) / DAT_01017a40;
+    normalized8 = 1.0 + *DAT_011d1110.Setting_Float_00403e20() * (value2 - *DAT_011d0a24.Setting_Float_00403e20()) / DAT_01017a40;
 
     weightInt2 = 100 - weight;
     weightFactor = weightInt2 / DAT_01017a40;
 
     product3 = normalized9 * normalized8 * weightFactor;
 
-    if (product3 > *DAT_011d00f0.FUN_00403e20())
+    if (product3 > *DAT_011d00f0.Setting_Float_00403e20())
     {
         result = 100;
     }
@@ -3696,7 +3849,8 @@ int __cdecl ComputeWeightedValue(float value1, float value2, int weight)
 extern int DAT_011d5744;
 
 // @fnv 0x006499d0
-int __cdecl FUN_006499d0()
+// src: COMMUNITY 0x006499d0
+int __cdecl Get_Ni_FAD()
 {
     return DAT_011d5744;
 }
@@ -3745,7 +3899,7 @@ struct FUN_0064bda0_Class
     virtual void vf90();
     virtual float vf94(int index);
 
-    int __thiscall FUN_0064bda0();
+    int __thiscall BSFaceGenAnimationData_GetCurrentExpression();
 };
 
 // @fnv 0x0064bda0
@@ -3828,7 +3982,8 @@ inline float FUN_0064bda0_Class::vf94(int)
     return 0.0f;
 }
 
-int __thiscall FUN_0064bda0_Class::FUN_0064bda0()
+// src: XBOX_PDB 0x0064bda0
+int __thiscall FUN_0064bda0_Class::BSFaceGenAnimationData_GetCurrentExpression()
 {
     int result = -1;
 
@@ -3856,46 +4011,47 @@ int __thiscall FUN_0064bda0_Class::FUN_0064bda0()
 
 struct FUN_0040fbf0_lock
 {
-    void FUN_0040fbf0(int);
-    void Leave();
+    void BSSpinLock_Lock(int);
+    void BSSpinLock_Unlock();
 };
 struct FUN_0064be40_shell
 {
-    bool FUN_0064be40(float elapsed, int unused);
-    int FUN_0064bda0();
+    bool BSFaceGenAnimationData_UpdateEyeTracking(float elapsed, int unused);
+    int BSFaceGenAnimationData_GetCurrentExpression();
     void FUN_0064bf90(int deltaY, float* deltaX, float* limit, float elapsed);
     void SetEyeHeadingAndPitch(float x, float y);
 };
 struct FUN_00403e20_setting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern FUN_00403e20_setting DAT_011d5924;
-void __cdecl FUN_005330e0(float* value, float minimum, float maximum);
+void __cdecl BSClamp_float(float* value, float minimum, float maximum);
 
 // @fnv 0x0064be40
-bool FUN_0064be40_shell::FUN_0064be40(float elapsed, int unused)
+// src: XBOX_PDB 0x0064be40
+bool FUN_0064be40_shell::BSFaceGenAnimationData_UpdateEyeTracking(float elapsed, int unused)
 {
-    ((FUN_0040fbf0_lock*)((char*)this + 0x1a0))->FUN_0040fbf0(0);
+    ((FUN_0040fbf0_lock*)((char*)this + 0x1a0))->BSSpinLock_Lock(0);
     bool updateNeeded = !*(bool*)((char*)this + 0x18e);
     if (updateNeeded)
     {
         updateNeeded = true;
-        int deltaY = FUN_0064bda0();
+        int deltaY = BSFaceGenAnimationData_GetCurrentExpression();
         float deltaX = *(float*)((char*)this + 0x150);
         float limit = *(float*)((char*)this + 0x154);
         if (deltaY < 15)
             FUN_0064bf90(deltaY, &deltaX, &limit, elapsed);
         float desiredX = deltaX - *(float*)((char*)this + 0x140);
         float stage = limit - *(float*)((char*)this + 0x144);
-        float desiredY = *DAT_011d5924.FUN_00403e20() * elapsed;
-        FUN_005330e0(&desiredX, -desiredY, desiredY);
-        FUN_005330e0(&stage, -desiredY, desiredY);
+        float desiredY = *DAT_011d5924.Setting_Float_00403e20() * elapsed;
+        BSClamp_float(&desiredX, -desiredY, desiredY);
+        BSClamp_float(&stage, -desiredY, desiredY);
         *(float*)((char*)this + 0x140) += desiredX;
         *(float*)((char*)this + 0x144) += stage;
         SetEyeHeadingAndPitch(*(float*)((char*)this + 0x140), *(float*)((char*)this + 0x144));
     }
-    ((FUN_0040fbf0_lock*)((char*)this + 0x1a0))->Leave();
+    ((FUN_0040fbf0_lock*)((char*)this + 0x1a0))->BSSpinLock_Unlock();
     return updateNeeded;
 }
 
@@ -3995,7 +4151,8 @@ FUN_0064ccf0::FUN_0064ccf0(S_0064ccf0_Obj* pObj) : unk08(0)
 extern unsigned char DAT_011f94b0;
 
 // @fnv 0x0064d870
-unsigned char __cdecl FUN_0064d870()
+// src: COMMUNITY 0x0064d870
+unsigned char __cdecl BSShaderManager_GetTintMipMaps()
 {
     return DAT_011f94b0;
 }
@@ -4022,12 +4179,13 @@ class SlotIdRange
     Iter64D begin();
     Iter64D end();
     Iter64D erase(ConstIter64D kFirst, ConstIter64D kLast);
-    void FUN_0064db70();
+    void ClearAllElements();
 };
 
 // Erases all elements of the vector by calling erase with begin() and end().
 // @fnv 0x0064db70
-void SlotIdRange::FUN_0064db70()
+// src: GUESS 0x0064db70 (confidence: high)
+void SlotIdRange::ClearAllElements()
 {
     erase(begin(), end());
 }
@@ -4036,10 +4194,10 @@ struct PairDword
 {
     int a;
     int b;
-    bool FUN_0065dfd0(PairDword* other);
+    bool IsNotIdentical(PairDword* other);
 };
 
-extern "C" int __cdecl FUN_0064e380(int, int, int);
+extern "C" int __cdecl Object_DispatchIteratorRange_0064e380(int, int, int);
 
 class FUN_0064dc50_cls
 {
@@ -4049,21 +4207,22 @@ class FUN_0064dc50_cls
     int m_8;
     int m_iThirdValue;
     int m_10;
-    PairDword* FUN_0065ded0(PairDword* out, int a, int b);
+    PairDword* std_vector_float_std_allocator_float_Make_iter(PairDword* out, int a, int b);
     void ForwardToHelper(int a, int b);
-    PairDword FUN_0064dc50(int p1, int p2, int p3, int p4);
+    PairDword UpdateState_0064dc50(int p1, int p2, int p3, int p4);
 };
 
 // @fnv 0x0064dc50
-PairDword FUN_0064dc50_cls::FUN_0064dc50(int p1, int p2, int p3, int p4)
+// src: GUESS 0x0064dc50 (confidence: low)
+PairDword FUN_0064dc50_cls::UpdateState_0064dc50(int p1, int p2, int p3, int p4)
 {
     PairDword B;
     PairDword A;
-    FUN_0065ded0(&B, p1, p2);
-    FUN_0065ded0(&A, p3, p4);
-    if (B.FUN_0065dfd0(&A))
+    std_vector_float_std_allocator_float_Make_iter(&B, p1, p2);
+    std_vector_float_std_allocator_float_Make_iter(&A, p3, p4);
+    if (B.IsNotIdentical(&A))
     {
-        int r = FUN_0064e380(A.b, m_10, B.b);
+        int r = Object_DispatchIteratorRange_0064e380(A.b, m_10, B.b);
         ForwardToHelper(r, m_10);
         m_10 = r;
     }
@@ -4134,10 +4293,11 @@ struct FUN_0064dda0_cls
     unsigned int m_iWordAt04;
     unsigned char __thiscall CheckValid();
     FUN_0064dda0_target* __thiscall GetTarget();
-    unsigned int __thiscall FUN_0064dda0();
+    unsigned int __thiscall ProcessEntries_0064dda0();
 };
 // @fnv 0x0064dda0
-unsigned int __thiscall FUN_0064dda0_cls::FUN_0064dda0()
+// src: GUESS 0x0064dda0 (confidence: low)
+unsigned int __thiscall FUN_0064dda0_cls::ProcessEntries_0064dda0()
 {
     if (!CheckValid())
         FUN_00ec7c56();
@@ -4172,21 +4332,21 @@ struct S_0064ddf0_Iter
 {
     int unk00;
     S_0064ddf0_Elem* ptr;
-    bool FUN_005ca4f0();
-    S_0064ddf0_Container* FUN_0060b980();
+    bool ActorCause_IsValid();
+    S_0064ddf0_Container* FaceGenData_Iterator_FaceGenData_GetUnk00();
     S_0064ddf0_Iter* Increment();
 };
 // @fnv 0x0064ddf0
 S_0064ddf0_Iter* S_0064ddf0_Iter::Increment()
 {
-    if (!FUN_005ca4f0())
+    if (!ActorCause_IsValid())
     {
         FUN_00ec7c56();
     }
     do
     {
     } while (0);
-    if (!((unsigned int)ptr < FUN_0060b980()->end))
+    if (!((unsigned int)ptr < FaceGenData_Iterator_FaceGenData_GetUnk00()->end))
     {
         FUN_00ec7c56();
     }
@@ -4210,7 +4370,8 @@ struct bad_alloc : public exception
 };
 }
 // @fnv 0x0064e430
-extern "C" void __cdecl FUN_0064e430(int count, int unused)
+// src: GUESS 0x0064e430 (confidence: high)
+extern "C" void __cdecl Array_AllocateElements16Checked(int count, int unused)
 {
     if ((unsigned int)count <= 0u)
         count = 0;
@@ -4237,13 +4398,14 @@ void C64E550UninitCopy(C64E550Element* first, C64E550Element* last, C64E550Eleme
 
 // Copies the elements in [first, last) to dest by calling C64E550UninitCopy with the pointer category of first and a checked tag.
 // @fnv 0x0064e550
-void FUN_0064e550(C64E550Element* first, C64E550Element* last, C64E550Element* dest, C64E550Allocator* alloc)
+// src: GUESS 0x0064e550 (confidence: medium)
+void Runtime_CopyToUninitializedStorage(C64E550Element* first, C64E550Element* last, C64E550Element* dest, C64E550Allocator* alloc)
 {
     C64E550UninitCopy(first, last, dest, alloc, C64E550PtrCat(&first, &first), C64E550CheckedTag());
 }
 
 void __cdecl ForwardToHandler(int a, int b, void* c, void* d, unsigned char r, unsigned char flag);
-unsigned char __cdecl FUN_0065e750(void* p);
+unsigned char __cdecl std_Move_cat_unsigned_char(void* p);
 int __cdecl CallWithFlag(int* p);
 
 struct FUN_0064e630_flag
@@ -4252,14 +4414,15 @@ struct FUN_0064e630_flag
 };
 
 // @fnv 0x0064e630
-extern "C" void __cdecl FUN_0064e630(void* apFirst, void* apSecond, void* c, void* d)
+// src: GUESS 0x0064e630 (confidence: low)
+extern "C" void __cdecl Range_ForwardWithCategoryAndFlags_0064e630(void* apFirst, void* apSecond, void* c, void* d)
 {
     FUN_0064e630_flag zeroFlag = {};
-    unsigned char zz = FUN_0065e750(&c);
+    unsigned char zz = std_Move_cat_unsigned_char(&c);
     ForwardToHandler(CallWithFlag((int*)&apFirst), CallWithFlag((int*)&apSecond), c, d, zz, zeroFlag.m_flag);
 }
 
-extern "C" void __cdecl FUN_0064e860(void* a1, void* a2, void* a3, unsigned char a4, unsigned char a5,
+extern "C" void __cdecl Object_ProcessAndReturnValue_0064e860(void* a1, void* a2, void* a3, unsigned char a4, unsigned char a5,
                                      unsigned char a6);
 struct SpawnedFlagBox
 {
@@ -4267,12 +4430,13 @@ struct SpawnedFlagBox
 };
 
 // @fnv 0x0064e6c0
-extern "C" void __cdecl FUN_0064e6c0(void* a1, void* a2, void* a3, unsigned char a4)
+// src: GUESS 0x0064e6c0 (confidence: low)
+extern "C" void __cdecl Object_DispatchIteratorRange_0064e6c0(void* a1, void* a2, void* a3, unsigned char a4)
 {
     SpawnedFlagBox flagA3 = {};
     unsigned char flagB;
-    flagB = FUN_0065e750(&a1, &a3);
-    FUN_0064e860(a1, a2, a3, a4, flagB, flagA3.v);
+    flagB = std_Move_cat_unsigned_char(&a1, &a3);
+    Object_ProcessAndReturnValue_0064e860(a1, a2, a3, a4, flagB, flagA3.v);
 }
 
 struct S_0064e860_Block
@@ -4297,7 +4461,8 @@ struct S_0064e860_TagC
 void* __cdecl CopyBlocksBackward(S_0064e860_Block* a, S_0064e860_Block* b, int c, S_0064e860_TagA t1,
                                  S_0064e860_TagB t2, S_0064e860_TagC t3);
 // @fnv 0x0064e860
-S_0064e860_Block* __cdecl FUN_0064e860(S_0064e860_Block* first, S_0064e860_Block* last, S_0064e860_Block* dest)
+// src: GUESS 0x0064e860 (confidence: low)
+S_0064e860_Block* __cdecl Object_ProcessAndReturnValue_0064e860(S_0064e860_Block* first, S_0064e860_Block* last, S_0064e860_Block* dest)
 {
     S_0064e860_Block* result = dest - (last - first);
     CopyBlocksBackward(first, last, CallWithFlag((int*)&dest), S_0064e860_TagA(), S_0064e860_TagB(), S_0064e860_TagC());
@@ -4319,7 +4484,7 @@ void __cdecl CopyConstructBlock(void* apDest, S_0064e8c0_Blk* src)
     new (mem) S_0064e8c0_Blk(*src);
 }
 
-extern "C" void __cdecl FUN_0064e9c0(int a, int b, int c, int d, int e, int f);
+extern "C" void __cdecl Object_ProcessEntries_0064e9c0(int a, int b, int c, int d, int e, int f);
 
 struct FlagBox5317
 {
@@ -4327,11 +4492,12 @@ struct FlagBox5317
 };
 
 // @fnv 0x0064e920
-extern "C" void __cdecl FUN_0064e920(int a, int b, int c, int iFourth)
+// src: GUESS 0x0064e920 (confidence: low)
+extern "C" void __cdecl Object_DispatchIteratorRange_0064e920(int a, int b, int c, int iFourth)
 {
     FlagBox5317 flag1 = {};
-    unsigned char flag2 = FUN_0065e750((void*)&a, (void*)&c);
-    FUN_0064e9c0(CallWithFlag((int*)&a), CallWithFlag((int*)&b), c, iFourth, flag2, flag1.v);
+    unsigned char flag2 = std_Move_cat_unsigned_char((void*)&a, (void*)&c);
+    Object_ProcessEntries_0064e9c0(CallWithFlag((int*)&a), CallWithFlag((int*)&b), c, iFourth, flag2, flag1.v);
 }
 
 struct FUN_0064fcd0_Other
@@ -4340,8 +4506,8 @@ struct FUN_0064fcd0_Other
     virtual int v01();
     virtual int v02();
     virtual float v03();
-    unsigned int __thiscall FUN_0044edb0(int flag);
-    float __thiscall FUN_005dd4e0(unsigned int index);
+    unsigned int __thiscall TESMain_GetThread(int flag);
+    float __thiscall BSFaceGenKeyframeMultiple_GetQuantity(unsigned int index);
 };
 
 struct FUN_0064fcd0_Self
@@ -4371,7 +4537,7 @@ struct FUN_0064fcd0_Self
     int unk08;
     int unk0c;
     unsigned int m_uiItemCount;
-    void __thiscall FUN_0064a4d0(unsigned int index, float value);
+    void __thiscall SetQuantity_0064a4d0(unsigned int index, float value);
     FUN_0064fcd0_Self* __thiscall CopyFrom(FUN_0064fcd0_Other* other);
 };
 
@@ -4384,10 +4550,10 @@ FUN_0064fcd0_Self* FUN_0064fcd0_Self::CopyFrom(FUN_0064fcd0_Other* other)
         return this;
     }
     this->v04(other->v03());
-    this->v20(other->FUN_0044edb0(1));
+    this->v20(other->TESMain_GetThread(1));
     for (unsigned int i = 0; i < this->m_uiItemCount; i++)
     {
-        this->FUN_0064a4d0(i, other->FUN_005dd4e0(i));
+        this->SetQuantity_0064a4d0(i, other->BSFaceGenKeyframeMultiple_GetQuantity(i));
     }
     return this;
 }
@@ -4439,7 +4605,7 @@ struct S_006503b0_Slot
     S_006503b0_Slot(int);
     ~S_006503b0_Slot();
     void FUN_0066b0d0(int);
-    S_006503b0_Elem* FUN_00559450();
+    S_006503b0_Elem* Modelloader_GetReferencedThis();
 };
 struct S_006503b0_Elem
 {
@@ -4451,35 +4617,36 @@ struct S_006503b0_Elem
 struct S_006503b0_List
 {
     int FUN_004b9ba0();
-    void FUN_00559120(int* pos, int* out, S_006503b0_Slot* slot);
+    void NiTMap_Ptr_GetNext(int* pos, int* out, S_006503b0_Slot* slot);
     void RemoveKey(int item);
 };
-void __cdecl FUN_00652140();
-void __cdecl FUN_00652190();
+void __cdecl BSFaceGenManager_LockFaceGenAccess();
+void __cdecl BSFaceGenManager_UnlockFaceGenAccess();
 struct S_006503b0_Owner
 {
     int unk00;
     S_006503b0_List list04;
-    void FUN_006503b0();
+    void BSFaceGenModelMap_RemoveAllUnusedModels();
 };
 // Iterates list04, removing each item whose nested slot reports 1, then calls FUN_00652140 and FUN_00652190 around the loop.
 // @fnv 0x006503b0
-void S_006503b0_Owner::FUN_006503b0()
+// src: COMMUNITY 0x006503b0
+void S_006503b0_Owner::BSFaceGenModelMap_RemoveAllUnusedModels()
 {
-    FUN_00652140();
+    BSFaceGenManager_LockFaceGenAccess();
     int pos2 = list04.FUN_004b9ba0();
     int item3;
     S_006503b0_Slot slot(0);
     while (pos2 != 0)
     {
-        list04.FUN_00559120(&pos2, &item3, &slot);
-        if (slot.FUN_00559450()->slot08.FUN_00559450()->FUN_00726070() == 1)
+        list04.NiTMap_Ptr_GetNext(&pos2, &item3, &slot);
+        if (slot.Modelloader_GetReferencedThis()->slot08.Modelloader_GetReferencedThis()->FUN_00726070() == 1)
         {
             list04.RemoveKey(item3);
         }
         slot.FUN_0066b0d0(0);
     }
-    FUN_00652190();
+    BSFaceGenManager_UnlockFaceGenAccess();
 }
 
 struct ModelHelper
@@ -4488,7 +4655,7 @@ struct ModelHelper
 };
 struct InnerPointer
 {
-    ModelHelper* FUN_00559450();
+    ModelHelper* Modelloader_GetReferencedThis();
 };
 struct ModelRecord
 {
@@ -4501,48 +4668,49 @@ struct NPX
     ModelRecord* ptr;
     NPX(int);
     ~NPX();
-    ModelRecord* FUN_00559450();
+    ModelRecord* Modelloader_GetReferencedThis();
 };
 struct FileNames
 {
     const char* GetFloatValue();
-    const char* FUN_00650600();
+    const char* BSFaceGenModel_GetString();
 };
-unsigned FUN_0044a670(const char*);
-void FUN_00652140();
-void FUN_00652190();
+unsigned BSstrlen(const char*);
+void BSFaceGenManager_LockFaceGenAccess();
+void BSFaceGenManager_UnlockFaceGenAccess();
 unsigned gm_GetTickCount();
 struct CacheMap
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
-    bool FUN_006c62d0(const char*, NPX&);
+    bool NiTMapBase_DFALL_NiTMapItem_bhkRigidBody_NiPointer_ObstacleData_bhkRigidBody_NiPointer_ObstacleData_GetAt(const char*, NPX&);
 };
 struct Target
 {
     int unk00;
     CacheMap map;
     bool dirty;
-    void FUN_00650ba0(ModelRecord*);
-    bool FUN_00650480(FileNames*);
+    void BSFaceGenModelMap_VerifyData(ModelRecord*);
+    bool BSFaceGenModelMap_LoadEGMData(FileNames*);
 };
 // @fnv 0x00650480
-bool Target::FUN_00650480(FileNames* pFileNames)
+// src: COMMUNITY 0x00650480
+bool Target::BSFaceGenModelMap_LoadEGMData(FileNames* pFileNames)
 {
     NPX a(0);
-    if (!pFileNames || !pFileNames->GetFloatValue() || !FUN_0044a670(pFileNames->GetFloatValue()))
+    if (!pFileNames || !pFileNames->GetFloatValue() || !BSstrlen(pFileNames->GetFloatValue()))
         return false;
     bool p = false;
-    FUN_00652140();
-    if (map.FUN_006c62d0(pFileNames->GetFloatValue(), a) ||
-        (pFileNames->FUN_00650600() && map.FUN_006c62d0(pFileNames->FUN_00650600(), a)))
+    BSFaceGenManager_LockFaceGenAccess();
+    if (map.NiTMapBase_DFALL_NiTMapItem_bhkRigidBody_NiPointer_ObstacleData_bhkRigidBody_NiPointer_ObstacleData_GetAt(pFileNames->GetFloatValue(), a) ||
+        (pFileNames->BSFaceGenModel_GetString() && map.NiTMapBase_DFALL_NiTMapItem_bhkRigidBody_NiPointer_ObstacleData_bhkRigidBody_NiPointer_ObstacleData_GetAt(pFileNames->BSFaceGenModel_GetString(), a)))
     {
-        a.FUN_00559450()->time = gm_GetTickCount();
-        FUN_00650ba0(a.FUN_00559450());
-        a.FUN_00559450()->model.FUN_00559450()->EnsureMorphData();
+        a.Modelloader_GetReferencedThis()->time = gm_GetTickCount();
+        BSFaceGenModelMap_VerifyData(a.Modelloader_GetReferencedThis());
+        a.Modelloader_GetReferencedThis()->model.Modelloader_GetReferencedThis()->EnsureMorphData();
         dirty = true;
         p = true;
     }
-    FUN_00652190();
+    BSFaceGenManager_UnlockFaceGenAccess();
     return p;
 }
 
@@ -4570,11 +4738,12 @@ struct FUN_00657c50_cls
     void* __thiscall Get1(void* out);
     Holder_657c50* __thiscall Get3(void* out, void* a, void* x);
     void __thiscall Apply(int a, int b, int c, int d);
-    void* __thiscall FUN_00657c50(void* a, EntryPosition b, int c, int d);
+    void* __thiscall UpdateState_00657c50(void* a, EntryPosition b, int c, int d);
 };
 
 // @fnv 0x00657c50
-void* FUN_00657c50_cls::FUN_00657c50(void* a, EntryPosition pair, int c, int d)
+// src: GUESS 0x00657c50 (confidence: low)
+void* FUN_00657c50_cls::UpdateState_00657c50(void* a, EntryPosition pair, int c, int d)
 {
     Blk_657c50 t14;
     int t12;
@@ -4641,12 +4810,12 @@ struct FUN_00657d50_cls
     int m_0c;
     int m_10;
     int m_14;
-    void __thiscall FUN_00657d50();
+    void __thiscall UpdateState_00657d50();
 };
 
 struct FUN_00657d50_callee_a
 {
-    void __thiscall FUN_00657ff0(int a1, int a2);
+    void __thiscall ForwardCall_00657ff0(int a1, int a2);
 };
 
 struct FUN_00657d50_callee_b
@@ -4655,11 +4824,12 @@ struct FUN_00657d50_callee_b
 };
 
 // @fnv 0x00657d50
-void FUN_00657d50_cls::FUN_00657d50()
+// src: GUESS 0x00657d50 (confidence: low)
+void FUN_00657d50_cls::UpdateState_00657d50()
 {
     if (m_0c != 0)
     {
-        reinterpret_cast<FUN_00657d50_callee_a*>(this)->FUN_00657ff0(m_0c, m_10);
+        reinterpret_cast<FUN_00657d50_callee_a*>(this)->ForwardCall_00657ff0(m_0c, m_10);
         reinterpret_cast<FUN_00657d50_callee_b*>(&m_08)->FUN_0064df10(m_0c, (m_14 - m_0c) / 60);
     }
     m_0c = 0;
@@ -4684,11 +4854,12 @@ struct FUN_00657dd0_cls
     char* m_10;
     char* m_14;
     unsigned int GetCount();
-    bool FUN_00657dd0(unsigned int index);
+    bool UpdateState_00657dd0(unsigned int index);
 };
 
 // @fnv 0x00657dd0
-bool FUN_00657dd0_cls::FUN_00657dd0(unsigned int index)
+// src: GUESS 0x00657dd0 (confidence: low)
+bool FUN_00657dd0_cls::UpdateState_00657dd0(unsigned int index)
 {
     m_0c = 0;
     m_10 = 0;
@@ -4730,11 +4901,12 @@ struct FUN_00657ee0_cls
 
     unsigned int __thiscall Count();
     static void __cdecl Grow();
-    bool __thiscall FUN_00657ee0(unsigned int a);
+    bool __thiscall AllocateElementStorage(unsigned int a);
 };
 
 // @fnv 0x00657ee0
-bool FUN_00657ee0_cls::FUN_00657ee0(unsigned int a)
+// src: GUESS 0x00657ee0 (confidence: medium)
+bool FUN_00657ee0_cls::AllocateElementStorage(unsigned int a)
 {
     m_0c = 0;
     m_10 = 0;
@@ -4809,7 +4981,7 @@ struct FNV_HashMap
     FNV_MapNode** buckets;
     int count;
     bool keepExisting;
-    FNV_MapNode* FUN_006c63e0();
+    FNV_MapNode* InvokeVirtualMethod_006c63e0();
     void InsertOrUpdate(int id, FNV_MapKey key);
 };
 // Looks up the bucket for id, updates the matching node's key (and id unless keepExisting), or allocates and inserts a new node and increments count.
@@ -4831,7 +5003,7 @@ void FNV_HashMap::InsertOrUpdate(int id, FNV_MapKey key)
         }
         node = node->next;
     }
-    node = FUN_006c63e0();
+    node = InvokeVirtualMethod_006c63e0();
     Init(node, id, key);
     node->next = buckets[bucketIndex];
     buckets[bucketIndex] = node;
@@ -4843,7 +5015,7 @@ struct Hldr0044
     int m_iWordAt00;
     int m_iWordAt04;
     int m_8;
-    void FUN_0044d6c0(int a);
+    void std_bad_alloc_bad_alloc(int a);
 };
 
 extern "C" void __stdcall FUN_00ec7894(Hldr0044* p, void* dat);
@@ -4851,7 +5023,8 @@ extern "C" void __cdecl FormHeap_Allocate(int scaled);
 extern "C" int DAT_01140ef8;
 
 // @fnv 0x00658c10
-extern "C" void __cdecl FUN_00658c10(int aiValue, int aiUnused)
+// src: GUESS 0x00658c10 (confidence: medium)
+extern "C" void __cdecl Array_AllocateElements60Checked(int aiValue, int aiUnused)
 {
     Hldr0044 h;
 
@@ -4863,7 +5036,7 @@ extern "C" void __cdecl FUN_00658c10(int aiValue, int aiUnused)
     {
         if (0xFFFFFFFFu / (unsigned)aiValue < 60)
         {
-            h.FUN_0044d6c0(0);
+            h.std_bad_alloc_bad_alloc(0);
             FUN_00ec7894(&h, &DAT_01140ef8);
         }
     }
@@ -4914,7 +5087,7 @@ struct FUN_0065cd70_Elem
     int unk10;
     int unk14;
 
-    void FUN_0065cd70();
+    void ClearAllElements();
     ~FUN_0065cd70_Elem();
 };
 
@@ -4929,8 +5102,8 @@ struct FUN_00659600
 // @fnv 0x00659600
 FUN_00659600::~FUN_00659600()
 {
-    m_aiIndexedValues[0].FUN_0065cd70();
-    m_aiIndexedValues[1].FUN_0065cd70();
+    m_aiIndexedValues[0].ClearAllElements();
+    m_aiIndexedValues[1].ClearAllElements();
 }
 
 struct PacketEntry
@@ -4956,7 +5129,7 @@ struct PacketScope
     PacketScope(unsigned int selector);
     ~PacketScope();
 };
-void __cdecl FUN_00ab2640(PacketScope* scope, void* owner, PacketEntry* begin, PacketEntry* next);
+void __cdecl Object_ProcessEntries_00ab2640(PacketScope* scope, void* owner, PacketEntry* begin, PacketEntry* next);
 struct FUN_00659670
 {
     unsigned int mode;
@@ -4968,7 +5141,7 @@ struct FUN_00659670
 FUN_00659670::FUN_00659670(unsigned int selector)
 {
     PacketScope scope(selector);
-    FUN_00ab2640(&scope, this, &entries[0], &entries[1]);
+    Object_ProcessEntries_00ab2640(&scope, this, &entries[0], &entries[1]);
 }
 
 struct FUN_00659710_elem
@@ -4999,12 +5172,12 @@ FUN_00659710_cls::~FUN_00659710_cls()
     m_04[1].Init();
 }
 
-const NiFixedString& FUN_00607340();
+const NiFixedString& BSFaceGenModelExtraData_GetTag();
 
 // Attaches the model to named face-generation extra data.
 // @fnv 0x0065be60
 BSFaceGenModelExtraData::BSFaceGenModelExtraData(int model)
-    : NiExtraData(FUN_00607340()), m_spModel(0)
+    : NiExtraData(BSFaceGenModelExtraData_GetTag()), m_spModel(0)
 {
     m_spModel = (BSFaceGenModel*)model;
 }
@@ -5102,13 +5275,13 @@ struct Mem_65ca30
 struct FUN_0065ca30
 {
     Mem_65ca30 m_mem;
-    void FUN_0065d460();
+    void ReleaseStorage_0065d460();
     ~FUN_0065ca30();
 };
 // @fnv 0x0065ca30
 FUN_0065ca30::~FUN_0065ca30()
 {
-    FUN_0065d460();
+    ReleaseStorage_0065d460();
 }
 
 struct FUN_006815c0
@@ -5125,13 +5298,13 @@ struct FUN_0065d3a0
 struct FUN_0065ca90 : FUN_0065d3a0
 {
     FUN_0065ca90();
-    void __thiscall FUN_0065d4e0(int value);
+    void __thiscall AllocateElementStorage_0065d4e0(int value);
 };
 // Constructs the base with a default value and initializes the object by calling FUN_0065d4e0 with 0.
 // @fnv 0x0065ca90
 FUN_0065ca90::FUN_0065ca90() : FUN_0065d3a0(FUN_006815c0())
 {
-    FUN_0065d4e0(0);
+    AllocateElementStorage_0065d4e0(0);
 }
 
 namespace fnv_0065cb00 {
@@ -5197,7 +5370,7 @@ struct FUN_0065cbd0 : FUN_0065cfb0
 // @fnv 0x0065cbd0
 FUN_0065cbd0::~FUN_0065cbd0()
 {
-    ((FUN_0065d660_Class*)this)->FUN_0065d660();
+    ((FUN_0065d660_Class*)this)->ReleaseStorage_0065d660();
 }
 }  // namespace fnv_0065cbd0
 
@@ -5208,14 +5381,14 @@ struct FUN_0065cfb0_Base
 
 struct FUN_0065cd10 : FUN_0065cfb0_Base
 {
-    void FUN_0065d860();
+    void ReleaseStorage_0065d860();
     ~FUN_0065cd10();
 };
 
 // @fnv 0x0065cd10
 FUN_0065cd10::~FUN_0065cd10()
 {
-    FUN_0065d860();
+    ReleaseStorage_0065d860();
 }
 
 struct B65CD70ConstIterator
@@ -5236,12 +5409,13 @@ class B65CD70Vector
     B65CD70Iterator end();
     B65CD70Iterator erase(B65CD70ConstIterator kFirst, B65CD70ConstIterator kLast);
 
-    void FUN_0065cd70();
+    void ClearAllElements();
 };
 
 // Erases all elements of the vector by calling erase(begin(), end()).
 // @fnv 0x0065cd70
-void B65CD70Vector::FUN_0065cd70()
+// src: GUESS 0x0065cd70 (confidence: high)
+void B65CD70Vector::ClearAllElements()
 {
     erase(begin(), end());
 }
@@ -5257,7 +5431,7 @@ struct FUN_0065d3a0
 {
     FUN_0065d3a0(FUN_006815c0 value);
     ~FUN_0065d3a0();
-    void __thiscall FUN_0065d980(int value);
+    void __thiscall ProcessAndReturnValue_0065d980(int value);
 };
 struct FUN_0065cdd0 : FUN_0065d3a0
 {
@@ -5267,7 +5441,7 @@ struct FUN_0065cdd0 : FUN_0065d3a0
 // @fnv 0x0065cdd0
 FUN_0065cdd0::FUN_0065cdd0() : FUN_0065d3a0(FUN_006815c0())
 {
-    FUN_0065d980(0);
+    ProcessAndReturnValue_0065d980(0);
 }
 }  // namespace fnv_0065cdd0
 
@@ -5305,14 +5479,15 @@ class FUN_0065cef0_cls
 {
   public:
     FNVPair8* CallWithSelf(FNVPair8* out);
-    FNVPair8* FUN_0044a170(FNVPair8* out);
+    FNVPair8* SetIteratorDataAndOwner(FNVPair8* out);
     void BuildAndComparePair(FNVPair8* out, FNVPair8 y, FNVPair8 x);
-    void FUN_0065cef0();
+    void std_vector_FffModeTexS_std_allocator_FffModeTexS_clear();
 };
 
 // Reads two FNVPair8 values via CallWithSelf and FUN_0044a170, then passes them to BuildAndComparePair to produce an output pair.
 // @fnv 0x0065cef0
-void FUN_0065cef0_cls::FUN_0065cef0()
+// src: XBOX_PDB 0x0065cef0
+void FUN_0065cef0_cls::std_vector_FffModeTexS_std_allocator_FffModeTexS_clear()
 {
     FNVPair8 tmpA3;
     FNVPair8 x;
@@ -5321,7 +5496,7 @@ void FUN_0065cef0_cls::FUN_0065cef0()
     FNVPair8 out;
 
     x = *CallWithSelf(&tmpA3);
-    y3 = *FUN_0044a170(&tmpB);
+    y3 = *SetIteratorDataAndOwner(&tmpB);
     BuildAndComparePair(&out, y3, x);
 }
 
@@ -5420,7 +5595,7 @@ bool FUN_0065d0d0_cls::ReserveBuffers(unsigned int count)
 
 struct S_0065d1c0_Element
 {
-    int __thiscall FUN_0065dc20(unsigned int a);
+    int __thiscall ForwardCall_0065dc20(unsigned int a);
 };
 
 struct S_0065d1c0_Class
@@ -5432,7 +5607,7 @@ struct S_0065d1c0_Class
     int m_10;
     int m_14;
 
-    unsigned int __thiscall FUN_0065dbd0();
+    unsigned int __thiscall ForwardCall_0065dbd0();
     bool __thiscall AllocateElements(unsigned int a);
 };
 
@@ -5450,13 +5625,13 @@ bool __thiscall S_0065d1c0_Class::AllocateElements(unsigned int a)
     {
         return false;
     }
-    else if (FUN_0065dbd0() < a)
+    else if (ForwardCall_0065dbd0() < a)
     {
         ThrowVectorTooLong();
     }
     else
     {
-        m_iThirdValue = m_8.FUN_0065dc20(a);
+        m_iThirdValue = m_8.ForwardCall_0065dc20(a);
         m_10 = m_iThirdValue;
         m_14 = m_iThirdValue + a * 8;
     }
@@ -5481,12 +5656,13 @@ struct FUN_0065d2b0_cls
     int m_10;
     int m_14;
     unsigned int GetCount();
-    bool FUN_0065d2b0(int n);
+    bool UpdateState_0065d2b0(int n);
 };
 
 // Resets the three fields, then either calls ThrowVectorTooLong when the count is below n or allocates n and sets the range from the result.
 // @fnv 0x0065d2b0
-bool FUN_0065d2b0_cls::FUN_0065d2b0(int aiCount)
+// src: GUESS 0x0065d2b0 (confidence: low)
+bool FUN_0065d2b0_cls::UpdateState_0065d2b0(int aiCount)
 {
     m_iThirdValue = 0;
     m_10 = 0;
@@ -5514,7 +5690,7 @@ bool FUN_0065d2b0_cls::FUN_0065d2b0(int aiCount)
 struct S_0065d3e0_Pool
 {
     int unk00;
-    char* FUN_0065ddc0(unsigned n);
+    char* ForwardCall_0065ddc0(unsigned n);
 };
 void __cdecl ThrowVectorTooLong();
 struct S_0065d3e0_Class
@@ -5525,7 +5701,7 @@ struct S_0065d3e0_Class
     char* unk0c;
     char* unk10;
     char* unk14;
-    unsigned FUN_0065dd70();
+    unsigned Helper_0065dd70();
     bool AllocateBuffer(unsigned n);
 };
 
@@ -5541,13 +5717,13 @@ bool S_0065d3e0_Class::AllocateBuffer(unsigned n)
     }
     else
     {
-        if (FUN_0065dd70() < n)
+        if (Helper_0065dd70() < n)
         {
             ThrowVectorTooLong();
         }
         else
         {
-            unk0c = unk08.FUN_0065ddc0(n);
+            unk0c = unk08.ForwardCall_0065ddc0(n);
             unk10 = unk0c;
             unk14 = unk0c + n * 0x2c;
         }
@@ -5573,13 +5749,14 @@ class FUN_0065d4e0_cls
     unsigned int m_14;
 
     unsigned int GetCount();
-    bool FUN_0065d4e0(unsigned int n);
+    bool AllocateElementStorage_0065d4e0(unsigned int n);
 };
 
 void FUN_0065d4e0_GrowFail();
 
 // @fnv 0x0065d4e0
-bool FUN_0065d4e0_cls::FUN_0065d4e0(unsigned int n)
+// src: GUESS 0x0065d4e0 (confidence: medium)
+bool FUN_0065d4e0_cls::AllocateElementStorage_0065d4e0(unsigned int n)
 {
     m_0c = 0;
     m_10 = 0;
@@ -5659,7 +5836,7 @@ struct FNVPair8
     bool Compare(FNVPair8* other);
 };
 
-extern "C" unsigned int __cdecl FUN_0065e1f0(unsigned int a, unsigned int b, unsigned int c);
+extern "C" unsigned int __cdecl Runtime_UpdateState_0065e1f0(unsigned int a, unsigned int b, unsigned int c);
 
 class FUN_0065d740_cls
 {
@@ -5669,23 +5846,24 @@ class FUN_0065d740_cls
     unsigned int unk08;
     unsigned int unk0C;
     unsigned int m_10;
-    void FUN_0065ded0(FNVPair8* out, unsigned int a, unsigned int b);
-    void FUN_0065df10(unsigned int a, unsigned int b);
-    FNVPair8* FUN_0065d740(FNVPair8* out, unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+    void std_vector_float_std_allocator_float_Make_iter(FNVPair8* out, unsigned int a, unsigned int b);
+    void ForwardCall_0065df10(unsigned int a, unsigned int b);
+    FNVPair8* ProcessAndReturnValue_0065d740(FNVPair8* out, unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 };
 
 // @fnv 0x0065d740
-FNVPair8* FUN_0065d740_cls::FUN_0065d740(FNVPair8* out, unsigned int a, unsigned int b, unsigned int c, unsigned int d)
+// src: GUESS 0x0065d740 (confidence: low)
+FNVPair8* FUN_0065d740_cls::ProcessAndReturnValue_0065d740(FNVPair8* out, unsigned int a, unsigned int b, unsigned int c, unsigned int d)
 {
     FNVPair8 local1;
     FNVPair8 local7;
 
-    FUN_0065ded0(&local1, a, b);
-    FUN_0065ded0(&local7, c, d);
+    std_vector_float_std_allocator_float_Make_iter(&local1, a, b);
+    std_vector_float_std_allocator_float_Make_iter(&local7, c, d);
     if (local1.Compare(&local7))
     {
-        unsigned int t = FUN_0065e1f0(local7.hi, m_10, local1.hi);
-        FUN_0065df10(t, m_10);
+        unsigned int t = Runtime_UpdateState_0065e1f0(local7.hi, m_10, local1.hi);
+        ForwardCall_0065df10(t, m_10);
         m_10 = t;
     }
     *out = local1;
@@ -5776,12 +5954,13 @@ struct D980Vector
     D980Elem* _Myend;
 
     unsigned int max_size();
-    bool FUN_0065d980(unsigned int _Capacity);
+    bool ProcessAndReturnValue_0065d980(unsigned int _Capacity);
 };
 
 // Resets the vector's pointers, then allocates _Capacity elements via _Alval, setting _Myfirst, _Mylast and _Myend; returns false for zero capacity.
 // @fnv 0x0065d980
-bool D980Vector::FUN_0065d980(unsigned int _Capacity)
+// src: GUESS 0x0065d980 (confidence: low)
+bool D980Vector::ProcessAndReturnValue_0065d980(unsigned int _Capacity)
 {
     _Myfirst = 0;
     _Mylast = 0;
@@ -5811,10 +5990,11 @@ struct FUN_0065dae0_cls
     unsigned int m_iWordAt04;
     unsigned char __thiscall CheckValid();
     FUN_0065dae0_target* __thiscall GetTarget();
-    FUN_0065dae0_cls* __thiscall FUN_0065dae0();
+    FUN_0065dae0_cls* __thiscall FaceGenData_Iterator_IncBy6();
 };
 // @fnv 0x0065dae0
-FUN_0065dae0_cls* __thiscall FUN_0065dae0_cls::FUN_0065dae0()
+// src: COMMUNITY 0x0065dae0
+FUN_0065dae0_cls* __thiscall FUN_0065dae0_cls::FaceGenData_Iterator_IncBy6()
 {
     if (!CheckValid())
         FUN_00ec7c56();
@@ -5832,11 +6012,12 @@ FUN_0065dae0_cls* __thiscall FUN_0065dae0_cls::FUN_0065dae0()
 
 struct FUN_0065e0e0_cls
 {
-    unsigned int FUN_0065e0e0();
+    unsigned int ComputeValue_0065e0e0();
 };
 
 // @fnv 0x0065e0e0
-unsigned int FUN_0065e0e0_cls::FUN_0065e0e0()
+// src: GUESS 0x0065e0e0 (confidence: low)
+unsigned int FUN_0065e0e0_cls::ComputeValue_0065e0e0()
 {
     unsigned int count = 0x4ec4ec4;
     return count > 0 ? count : 1;
@@ -5846,14 +6027,15 @@ struct S_0065e1a0
 {
     int unk00;
     int unk04;
-    bool FUN_005ca4f0();
-    bool FUN_004b0460(S_0065e1a0* other);
-    bool FUN_0065e1a0(S_0065e1a0* other);
+    bool ActorCause_IsValid();
+    bool LightRefData_IsEqual(S_0065e1a0* other);
+    bool FaceGenData_Iterator_AreIdentical(S_0065e1a0* other);
 };
 // @fnv 0x0065e1a0
-bool S_0065e1a0::FUN_0065e1a0(S_0065e1a0* other)
+// src: COMMUNITY 0x0065e1a0
+bool S_0065e1a0::FaceGenData_Iterator_AreIdentical(S_0065e1a0* other)
 {
-    if (!FUN_005ca4f0() || !FUN_004b0460(other))
+    if (!ActorCause_IsValid() || !LightRefData_IsEqual(other))
         FUN_00ec7c56();
     do
     {
@@ -5867,7 +6049,7 @@ struct FUN_0065e310_cls
     int unk00;
     int unk04;
     int unk08;
-    void __thiscall FUN_0044d6c0(int arg);
+    void __thiscall std_bad_alloc_bad_alloc(int arg);
 };
 
 extern "C" void __stdcall FUN_00ec7894(void* obj, void* dtor);
@@ -5875,7 +6057,8 @@ extern "C" void* __cdecl FormHeap_Allocate(unsigned int size);
 extern int DAT_01140ef8;
 
 // @fnv 0x0065e310
-extern "C" void __cdecl FUN_0065e310(int count, int)
+// src: GUESS 0x0065e310 (confidence: medium)
+extern "C" void __cdecl Array_AllocateElements12Checked(int count, int)
 {
     FUN_0065e310_cls tmp;
     if ((unsigned int)count <= 0)
@@ -5886,7 +6069,7 @@ extern "C" void __cdecl FUN_0065e310(int count, int)
     {
         if (0xffffffffu / (unsigned int)count < 12)
         {
-            tmp.FUN_0044d6c0(0);
+            tmp.std_bad_alloc_bad_alloc(0);
             FUN_00ec7894(&tmp, &DAT_01140ef8);
         }
     }
@@ -5907,7 +6090,8 @@ class bad_alloc
 }
 
 // @fnv 0x0065e430
-void* __cdecl FUN_0065e430(unsigned int count)
+// src: GUESS 0x0065e430 (confidence: low)
+void* __cdecl Runtime_UpdateState_0065e430(unsigned int count)
 {
     if (count <= 0u)
         count = 0;
@@ -5929,7 +6113,8 @@ struct LengthErrorB9431
 
 // Validates that count * 0x2c does not overflow, throwing LengthErrorB9431 on overflow, then allocates count * 0x2c bytes via operator new.
 // @fnv 0x0065e4c0
-void* __cdecl FUN_0065e4c0(unsigned int count)
+// src: GUESS 0x0065e4c0 (confidence: medium)
+void* __cdecl Object_AllocateElementStorage(unsigned int count)
 {
     if (count <= 0)
     {
@@ -5958,7 +6143,8 @@ void* __cdecl operator new(unsigned int size);
 
 // Clamps n to 0, throws S_0065e550_Err(0) if n * 0x34 would overflow, and returns operator new(n * 0x34).
 // @fnv 0x0065e550
-void* __cdecl FUN_0065e550(unsigned int auiCount)
+// src: GUESS 0x0065e550 (confidence: high)
+void* __cdecl Runtime_AllocateElementArray52Checked(unsigned int auiCount)
 {
     if (auiCount <= 0)
     {
@@ -5985,7 +6171,8 @@ extern "C" void* __cdecl FormHeap_Allocate(unsigned int size);
 extern "C" int DAT_01140ef8;
 
 // @fnv 0x0065e5e0
-void* __cdecl FUN_0065e5e0(unsigned int n)
+// src: GUESS 0x0065e5e0 (confidence: low)
+void* __cdecl Object_ProcessAndReturnValue_0065e5e0(unsigned int n)
 {
     FUN_0065e5e0_Hldr h;
 
@@ -6021,7 +6208,8 @@ int __cdecl FormHeap_Allocate(unsigned int size);
 void __stdcall FUN_00ec7894(FUN_0065e670_cls* obj, char* msg);
 
 // @fnv 0x0065e670
-void __cdecl FUN_0065e670(unsigned int count, int unused)
+// src: GUESS 0x0065e670 (confidence: low)
+void __cdecl Runtime_UpdateState_0065e670(unsigned int count, int unused)
 {
     if (count <= 0)
     {
@@ -6049,7 +6237,8 @@ struct LengthErrB9739
 };
 
 // @fnv 0x0065e700
-void* __cdecl FUN_0065e700(unsigned int count)
+// src: GUESS 0x0065e700 (confidence: medium)
+void* __cdecl Object_AllocateElementStorage_0065e700(unsigned int count)
 {
     if (count <= 0)
     {
@@ -6066,7 +6255,8 @@ void* __cdecl FUN_0065e700(unsigned int count)
 }
 
 // @fnv 0x0065e750
-unsigned char __cdecl FUN_0065e750(void* a, void* b)
+// src: COMMUNITY 0x0065e750
+unsigned char __cdecl std_Move_cat_unsigned_char(void* a, void* b)
 {
     char c;
     return c;
@@ -6076,16 +6266,17 @@ struct EmptyTag
 {
 };
 int __cdecl CallWithFlag(int*);
-int __cdecl FUN_0065eac0(int, int, int, EmptyTag, EmptyTag, EmptyTag);
+int __cdecl Object_ProcessEntries_0065eac0(int, int, int, EmptyTag, EmptyTag, EmptyTag);
 // @fnv 0x0065e7c0
-int __cdecl FUN_0065e7c0(int first, int last, int destination)
+// src: GUESS 0x0065e7c0 (confidence: low)
+int __cdecl Object_ProcessAndReturnValue_0065e7c0(int first, int last, int destination)
 {
     int result = ((last - first) / 88) * 88 + destination;
     {
         EmptyTag firstZero = {};
         EmptyTag secondZero = {};
         EmptyTag option;
-        FUN_0065eac0(first, last, CallWithFlag(&destination), option, secondZero, firstZero);
+        Object_ProcessEntries_0065eac0(first, last, CallWithFlag(&destination), option, secondZero, firstZero);
     }
     return result;
 }
@@ -6133,12 +6324,13 @@ struct Vec_65f0c0
     void _Destroy(char* first, char* last);
     char* _Ucopy(char* first, char* last, char* dest);
     bool _Buy(unsigned int n);
-    Vec_65f0c0& FUN_0065f0c0(const Vec_65f0c0& _Right);
+    Vec_65f0c0& CopyFields_0065f0c0(const Vec_65f0c0& _Right);
 };
 
 // Copy-assigns _Right into this vector, reusing existing storage when possible and reallocating when _Right is larger than capacity.
 // @fnv 0x0065f0c0
-Vec_65f0c0& Vec_65f0c0::FUN_0065f0c0(const Vec_65f0c0& _Right)
+// src: GUESS 0x0065f0c0 (confidence: medium)
+Vec_65f0c0& Vec_65f0c0::CopyFields_0065f0c0(const Vec_65f0c0& _Right)
 {
     if (this != &_Right)
     {
@@ -6181,13 +6373,14 @@ struct Pair8_b6530
 struct Vec_65eed0_callees_b6530
 {
     Pair8_b6530* CallWithSelf(Pair8_b6530* out);
-    Pair8_b6530* FUN_0044a170(Pair8_b6530* out);
-    void FUN_0065f5a0(Pair8_b6530* out, Pair8_b6530 a, Pair8_b6530 b);
+    Pair8_b6530* SetIteratorDataAndOwner(Pair8_b6530* out);
+    void ProcessAndReturnValue_0065f5a0(Pair8_b6530* out, Pair8_b6530 a, Pair8_b6530 b);
 };
 
 // Reads two pairs via CallWithSelf and FUN_0044a170, then passes them to FUN_0065f5a0 to produce a result.
 // @fnv 0x0065f320
-void Vec_65eed0::FUN_0065f320()
+// src: GUESS 0x0065f320 (confidence: low)
+void Vec_65eed0::UpdateFields_0065f320()
 {
     Pair8_b6530 first;
     Pair8_b6530 firstTmp4;
@@ -6196,8 +6389,8 @@ void Vec_65eed0::FUN_0065f320()
     Pair8_b6530 result;
 
     first = *((Vec_65eed0_callees_b6530*)this)->CallWithSelf(&firstTmp4);
-    second3 = *((Vec_65eed0_callees_b6530*)this)->FUN_0044a170(&secondTmp);
-    ((Vec_65eed0_callees_b6530*)this)->FUN_0065f5a0(&result, second3, first);
+    second3 = *((Vec_65eed0_callees_b6530*)this)->SetIteratorDataAndOwner(&secondTmp);
+    ((Vec_65eed0_callees_b6530*)this)->ProcessAndReturnValue_0065f5a0(&result, second3, first);
 }
 
 namespace fnv_0065f4f0 {
@@ -6211,14 +6404,15 @@ class FUN_0065f4f0_cls
 {
   public:
     FNVPair8* CallWithSelf(FNVPair8* out);
-    FNVPair8* FUN_0044a170(FNVPair8* out);
-    void FUN_0065f700(FNVPair8* out, FNVPair8 y, FNVPair8 x);
-    void FUN_0065f4f0();
+    FNVPair8* SetIteratorDataAndOwner(FNVPair8* out);
+    void UnlinkEqualIteratorRange(FNVPair8* out, FNVPair8 y, FNVPair8 x);
+    void UpdateState_0065f4f0();
 };
 
 // Reads two FNVPair8 values via CallWithSelf and FUN_0044a170, then passes them to FUN_0065f700 to produce an output pair.
 // @fnv 0x0065f4f0
-void FUN_0065f4f0_cls::FUN_0065f4f0()
+// src: GUESS 0x0065f4f0 (confidence: low)
+void FUN_0065f4f0_cls::UpdateState_0065f4f0()
 {
     FNVPair8 tmpA3;
     FNVPair8 x;
@@ -6227,8 +6421,8 @@ void FUN_0065f4f0_cls::FUN_0065f4f0()
     FNVPair8 out;
 
     x = *CallWithSelf(&tmpA3);
-    y3 = *FUN_0044a170(&tmpB);
-    FUN_0065f700(&out, y3, x);
+    y3 = *SetIteratorDataAndOwner(&tmpB);
+    UnlinkEqualIteratorRange(&out, y3, x);
 }
 }  // namespace fnv_0065f4f0
 
@@ -6237,7 +6431,7 @@ struct FNVPair8
 {
     unsigned int lo;
     unsigned int hi;
-    bool FUN_0065dfd0(FNVPair8* other);
+    bool IsNotIdentical(FNVPair8* other);
 };
 
 class FUN_0065f5a0_cls
@@ -6248,23 +6442,24 @@ class FUN_0065f5a0_cls
     int unk08;
     int unk0c;
     int m_10;
-    FNVPair8* FUN_0065ded0(FNVPair8* out, int a, int b);
-    void FUN_0065f400(int a, int b);
-    FNVPair8* FUN_0065f5a0(FNVPair8* out, int a, int b, int c, int d);
+    FNVPair8* std_vector_float_std_allocator_float_Make_iter(FNVPair8* out, int a, int b);
+    void ForwardCall_0065f400(int a, int b);
+    FNVPair8* ProcessAndReturnValue_0065f5a0(FNVPair8* out, int a, int b, int c, int d);
 };
 
 // @fnv 0x0065f5a0
-FNVPair8* FUN_0065f5a0_cls::FUN_0065f5a0(FNVPair8* out, int a, int b, int c, int d)
+// src: GUESS 0x0065f5a0 (confidence: low)
+FNVPair8* FUN_0065f5a0_cls::ProcessAndReturnValue_0065f5a0(FNVPair8* out, int a, int b, int c, int d)
 {
     FNVPair8 A5;
     FNVPair8 B;
 
-    FUN_0065ded0(&A5, a, b);
-    FUN_0065ded0(&B, c, d);
-    if (A5.FUN_0065dfd0(&B))
+    std_vector_float_std_allocator_float_Make_iter(&A5, a, b);
+    std_vector_float_std_allocator_float_Make_iter(&B, c, d);
+    if (A5.IsNotIdentical(&B))
     {
-        int t = (int)FUN_0065f820((Elem_65eed0*)B.hi, (Elem_65eed0*)m_10, (Elem_65eed0*)A5.hi);
-        FUN_0065f400(t, m_10);
+        int t = (int)Object_DispatchIteratorRange_0065f820((Elem_65eed0*)B.hi, (Elem_65eed0*)m_10, (Elem_65eed0*)A5.hi);
+        ForwardCall_0065f400(t, m_10);
         m_10 = t;
     }
     *out = A5;
@@ -6334,12 +6529,13 @@ class C65F700List
     int unk0C;
     C65F700Node* m_pkHead;
 
-    C65F700Iterator FUN_0065f700(void* pvFirstCont, C65F700Node* pitFirst, void* pvLastCont, C65F700Node* pitLast);
+    C65F700Iterator UnlinkEqualIteratorRange(void* pvFirstCont, C65F700Node* pitFirst, void* pvLastCont, C65F700Node* pitLast);
 };
 
 // Builds iterators for the first and last nodes; if they are equal, unlinks that node, frees the range and updates m_pkHead, then returns the first iterator.
 // @fnv 0x0065f700
-C65F700Iterator C65F700List::FUN_0065f700(void* pvFirstCont, C65F700Node* pitFirst, void* pvLastCont,
+// src: GUESS 0x0065f700 (confidence: medium)
+C65F700Iterator C65F700List::UnlinkEqualIteratorRange(void* pvFirstCont, C65F700Node* pitFirst, void* pvLastCont,
                                           C65F700Node* pitLast)
 {
     C65F700Iterator itFirst = MakeIterator(pvFirstCont, pitFirst);
@@ -6367,17 +6563,18 @@ struct S_0065f8c0_IterTag
     S_0065f8c0_IterTag()
     {}
 };
-S_0065f8c0_PtrTag __cdecl FUN_0065e750(char** first, char** dest);
-S_0065f8c0_IterTag __cdecl FUN_0065fd70(char** first, char** dest);
+S_0065f8c0_PtrTag __cdecl std_Move_cat_unsigned_char(char** first, char** dest);
+S_0065f8c0_IterTag __cdecl return_value(char** first, char** dest);
 char* __cdecl CallWithFlag(char** p);
-char* __cdecl FUN_0065fe60(char* first, char* last, char* dest, S_0065f8c0_IterTag a, S_0065f8c0_PtrTag b,
+char* __cdecl Object_ProcessAndReturnValue_0065fe60(char* first, char* last, char* dest, S_0065f8c0_IterTag a, S_0065f8c0_PtrTag b,
                            S_0065f8c0_ChkTag c);
 
 // @fnv 0x0065f8c0
-char* __cdecl FUN_0065f8c0(char* first, char* last, char* dest)
+// src: GUESS 0x0065f8c0 (confidence: low)
+char* __cdecl Object_DispatchIteratorRange_0065f8c0(char* first, char* last, char* dest)
 {
-    return FUN_0065fe60(CallWithFlag(&first), CallWithFlag(&last), dest, FUN_0065fd70(&first, &dest),
-                        FUN_0065e750(&first, &dest), S_0065f8c0_ChkTag());
+    return Object_ProcessAndReturnValue_0065fe60(CallWithFlag(&first), CallWithFlag(&last), dest, return_value(&first, &dest),
+                        std_Move_cat_unsigned_char(&first, &dest), S_0065f8c0_ChkTag());
 }
 
 namespace fnv_0065f9e0 {
@@ -6395,7 +6592,8 @@ class bad_alloc
 };
 }
 // @fnv 0x0065f9e0
-extern "C" void __cdecl FUN_0065f9e0(int count, int unused)
+// src: GUESS 0x0065f9e0 (confidence: medium)
+extern "C" void __cdecl Object_AllocateElementStorage_0065f9e0(int count, int unused)
 {
     if ((unsigned int)count <= 0u)
     {
@@ -6447,12 +6645,13 @@ struct FUN_0065fab0_cls
     int m_iWordAt04;
     int m_8;
     int m_iThirdValue;
-    FUN_0065fab0_cls* FUN_0065fab0(FUN_0065fab0_cls* src);
+    FUN_0065fab0_cls* CopyFieldsAndConstructElementArray(FUN_0065fab0_cls* src);
 };
 
 // Copies the four leading fields from src and copies three 0x18-byte elements at offset 0x10 using the given copy constructor and destructor.
 // @fnv 0x0065fab0
-FUN_0065fab0_cls* FUN_0065fab0_cls::FUN_0065fab0(FUN_0065fab0_cls* apSource)
+// src: GUESS 0x0065fab0 (confidence: medium)
+FUN_0065fab0_cls* FUN_0065fab0_cls::CopyFieldsAndConstructElementArray(FUN_0065fab0_cls* apSource)
 {
     m_iWordAt00 = apSource->m_iWordAt00;
     m_iWordAt04 = apSource->m_iWordAt04;
@@ -6463,7 +6662,8 @@ FUN_0065fab0_cls* FUN_0065fab0_cls::FUN_0065fab0(FUN_0065fab0_cls* apSource)
 }
 
 // @fnv 0x0065fd70
-int __cdecl FUN_0065fd70(int a)
+// src: COMMUNITY 0x0065fd70
+int __cdecl return_value(int a)
 {
     int b;
     return a;
@@ -6491,13 +6691,13 @@ int __cdecl ComputeIndexAndCall(int a, int b, int c)
 
 // Candidate: CallWithFlag
 //   int CallWithFlag(int* p) { bool flag; return FUN_0043b1d0(p, flag); }
-int __cdecl FUN_0043b1d0(int* p, bool flag);
+int __cdecl NiGlobalStringTable_GetString(int* p, bool flag);
 
 // @fnv 0x0065fe40
 int __cdecl CallWithFlag(int* p)
 {
     bool flag;
-    return FUN_0043b1d0(p, flag);
+    return NiGlobalStringTable_GetString(p, flag);
 }
 
 struct _DummyTag
@@ -6511,12 +6711,13 @@ struct S_0065ff90_Dest
     int* m_ptr;
     unsigned int m_iElementCount;
 };
-_DummyTag __cdecl FUN_0065e750(S_0065ff90_Dest* dest);
-void __cdecl FUN_00660210(int first, int last, S_0065ff90_Dest dest, _DummyTag cat, S_0065ff90_Tag tag);
+_DummyTag __cdecl std_Move_cat_unsigned_char(S_0065ff90_Dest* dest);
+void __cdecl Runtime_ForwardCall_00660210(int first, int last, S_0065ff90_Dest dest, _DummyTag cat, S_0065ff90_Tag tag);
 // @fnv 0x0065ff90
-void __cdecl FUN_0065ff90(int first, int last, S_0065ff90_Dest dest)
+// src: GUESS 0x0065ff90 (confidence: low)
+void __cdecl Runtime_ProcessRangeWithCallFlags_0065ff90(int first, int last, S_0065ff90_Dest dest)
 {
-    FUN_00660210(CallWithFlag(&first), CallWithFlag(&last), dest, FUN_0065e750(&dest), S_0065ff90_Tag());
+    Runtime_ForwardCall_00660210(CallWithFlag(&first), CallWithFlag(&last), dest, std_Move_cat_unsigned_char(&dest), S_0065ff90_Tag());
 }
 
 namespace fnv_0065ffe0 {
@@ -6525,15 +6726,16 @@ struct SpawnedFlagBox
     unsigned char v;
 };
 
-int __cdecl FUN_00660230(int a, int b, int c, int d, unsigned char e, unsigned char f);
-unsigned char __cdecl FUN_0065e750(void* p);
+int __cdecl Runtime_ForwardCall_00660230(int a, int b, int c, int d, unsigned char e, unsigned char f);
+unsigned char __cdecl std_Move_cat_unsigned_char(void* p);
 
 // @fnv 0x0065ffe0
-int __cdecl FUN_0065ffe0(int a, int b, int c, int d)
+// src: GUESS 0x0065ffe0 (confidence: low)
+int __cdecl Object_DispatchIteratorRange_0065ffe0(int a, int b, int c, int d)
 {
     SpawnedFlagBox flagA3 = {};
-    unsigned char flagB = FUN_0065e750(&c);
-    return FUN_00660230(CallWithFlag(&a), CallWithFlag(&b), c, d, flagB, flagA3.v);
+    unsigned char flagB = std_Move_cat_unsigned_char(&c);
+    return Runtime_ForwardCall_00660230(CallWithFlag(&a), CallWithFlag(&b), c, d, flagB, flagA3.v);
 }
 }  // namespace fnv_0065ffe0
 
@@ -6569,10 +6771,10 @@ struct CloneComponent
 struct LinkedList
 {
     int head, tail, count;
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
     FUN_0064ec10_obj*& AddEight(void*);
     void* DereferenceIfNotNull(void*);
-    void FUN_004ed8c0(void* const&);
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(void* const&);
 };
 struct CloneVector
 {
@@ -6636,10 +6838,11 @@ struct FUN_00649680 : NiMemObject
     int value1b8;
     int value1bc;
     FUN_00649680();
-    FUN_00649680* FUN_0064c5a0();
+    FUN_00649680* BSFaceGenAnimationData_CreateCopyBS();
 };
 // @fnv 0x0064c5a0
-FUN_00649680* FUN_00649680::FUN_0064c5a0()
+// src: COMMUNITY 0x0064c5a0
+FUN_00649680* FUN_00649680::BSFaceGenAnimationData_CreateCopyBS()
 {
     FUN_00649680* copy = new FUN_00649680;
     copy->member10.CopyFrom(&member10);
@@ -6666,7 +6869,7 @@ FUN_00649680* FUN_00649680::FUN_0064c5a0()
         copy->extra = 0;
     void* position;
     FUN_0064ec10_obj* cloned;
-    position = list88.FUN_00559450();
+    position = list88.Modelloader_GetReferencedThis();
     while (position)
     {
         FUN_0064ec10_obj* eligible0 = list88.AddEight(position);
@@ -6675,10 +6878,10 @@ FUN_00649680* FUN_00649680::FUN_0064c5a0()
             cloned = new FUN_0064ec10_obj(*item0);
         else
             cloned = 0;
-        copy->list88.FUN_004ed8c0(cloned);
+        copy->list88.NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(cloned);
         position = list88.DereferenceIfNotNull(position);
     }
-    position = listbc.FUN_00559450();
+    position = listbc.Modelloader_GetReferencedThis();
     while (position)
     {
         FUN_0064ec10_obj* item1 = listbc.AddEight(position);
@@ -6687,10 +6890,10 @@ FUN_00649680* FUN_00649680::FUN_0064c5a0()
             cloned = new FUN_0064ec10_obj(*eligible1);
         else
             cloned = 0;
-        copy->listbc.FUN_004ed8c0(cloned);
+        copy->listbc.NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(cloned);
         position = listbc.DereferenceIfNotNull(position);
     }
-    position = listf0.FUN_00559450();
+    position = listf0.Modelloader_GetReferencedThis();
     while (position)
     {
         FUN_0064ec10_obj* eligible2 = listf0.AddEight(position);
@@ -6699,7 +6902,7 @@ FUN_00649680* FUN_00649680::FUN_0064c5a0()
             cloned = new FUN_0064ec10_obj(*item2);
         else
             cloned = 0;
-        copy->listf0.FUN_004ed8c0(cloned);
+        copy->listf0.NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(cloned);
         position = listf0.DereferenceIfNotNull(position);
     }
     return copy;
@@ -6853,7 +7056,7 @@ struct FUN_00657a80 : FUN_0065d3a0
 // @fnv 0x00657a80
 FUN_00657a80::FUN_00657a80() : FUN_0065d3a0(FUN_006815c0())
 {
-    ((FUN_00657dd0_cls*)this)->FUN_00657dd0(0);
+    ((FUN_00657dd0_cls*)this)->UpdateState_00657dd0(0);
 }
 
 // Destructor: clear the contents, then the base container is destroyed.
@@ -6932,7 +7135,8 @@ struct C658CA0Element
 
 // Clamps the element count to zero, throws C658CA0BadAlloc on overflow, and allocates count * sizeof(C658CA0Element) bytes.
 // @fnv 0x00658ca0
-C658CA0Element* __cdecl FUN_00658ca0(unsigned int ItemUpdateArray, C658CA0Element*)
+// src: GUESS 0x00658ca0 (confidence: medium)
+C658CA0Element* __cdecl Object_AllocateStorage_00658ca0(unsigned int ItemUpdateArray, C658CA0Element*)
 {
     if (ItemUpdateArray <= 0)
         ItemUpdateArray = 0;
@@ -7000,11 +7204,12 @@ FUN_00658e10::~FUN_00658e10()
 
 struct FUN_00659080_Class
 {
-    void __thiscall FUN_00659080(FUN_00659140_Class* obj);
+    void __thiscall UpdateFields_00659080(FUN_00659140_Class* obj);
 };
 // If obj is non-null, calls its FUN_00659140 method with argument 1.
 // @fnv 0x00659080
-void FUN_00659080_Class::FUN_00659080(FUN_00659140_Class* pObject)
+// src: GUESS 0x00659080 (confidence: low)
+void FUN_00659080_Class::UpdateFields_00659080(FUN_00659140_Class* pObject)
 {
     FUN_00659140_Class* a = pObject;
     FUN_00659140_Class* p = a;
@@ -7054,8 +7259,8 @@ FUN_0065cca0_cls::FUN_0065cca0_cls() : B65CCA0Base(B65CCA0List())
     Reset(0);
 }
 
-unsigned char* __cdecl FUN_0065fd70(unsigned char* out, int* a1, int* a2);
-void __cdecl FUN_0065e760(int a, int b, int c, unsigned char d, unsigned char e, unsigned char f);
+unsigned char* __cdecl return_value(unsigned char* out, int* a1, int* a2);
+void __cdecl Object_ProcessAndReturnValue_0065e760(int a, int b, int c, unsigned char d, unsigned char e, unsigned char f);
 
 struct FlagA
 {
@@ -7063,12 +7268,13 @@ struct FlagA
 };
 
 // @fnv 0x0065e1f0
-void __cdecl FUN_0065e1f0(int aiValueA, int aiValueB, int aiValueC)
+// src: GUESS 0x0065e1f0 (confidence: low)
+void __cdecl Runtime_UpdateState_0065e1f0(int aiValueA, int aiValueB, int aiValueC)
 {
     FlagA FLAGA = {};
-    unsigned char flagB = FUN_0065e750(&aiValueA, &aiValueC);
+    unsigned char flagB = std_Move_cat_unsigned_char(&aiValueA, &aiValueC);
     unsigned char out;
-    FUN_0065e760(CallWithFlag(&aiValueA), CallWithFlag(&aiValueB), aiValueC, *FUN_0065fd70(&out, &aiValueA, &aiValueC),
+    Object_ProcessAndReturnValue_0065e760(CallWithFlag(&aiValueA), CallWithFlag(&aiValueB), aiValueC, *return_value(&out, &aiValueA, &aiValueC),
                  flagB, FLAGA.v);
 }
 
@@ -7105,11 +7311,12 @@ struct FUN_0044d6c0_class
     int unk00;
     int unk04;
     int unk08;
-    void* __thiscall FUN_0044d6c0(void** a);
+    void* __thiscall std_bad_alloc_bad_alloc(void** a);
 };
 
 // @fnv 0x0065e3a0
-void __cdecl FUN_0065e3a0(int aiCount, int)
+// src: GUESS 0x0065e3a0 (confidence: low)
+void __cdecl Object_UpdateFields_0065e3a0(int aiCount, int)
 {
     if ((unsigned int)aiCount <= 0u)
     {
@@ -7118,7 +7325,7 @@ void __cdecl FUN_0065e3a0(int aiCount, int)
     else if (0xFFFFFFFFu / (unsigned int)aiCount < 8u)
     {
         FUN_0044d6c0_class holder;
-        holder.FUN_0044d6c0(0);
+        holder.std_bad_alloc_bad_alloc(0);
         FUN_00ec7894((Hldr0044*)&holder, (void*)&DAT_01140ef8);
     }
     FormHeap_Allocate(aiCount << 3);
@@ -7146,17 +7353,18 @@ struct B65E760CheckedTag
 };
 
 B65E760Item* __cdecl B65E760Unchecked(B65E760Item** ppkIter);
-B65E760Item* __cdecl FUN_0065ea80(B65E760Item* pkCurrentObject, B65E760Item* pkLast, B65E760Item* pkDest,
+B65E760Item* __cdecl Object_ProcessEntries_0065ea80(B65E760Item* pkCurrentObject, B65E760Item* pkLast, B65E760Item* pkDest,
                                   B65E760IterCategory kCategory, B65E760ScalarTag kScalar, B65E760CheckedTag kChecked);
 
 // @fnv 0x0065e760
-B65E760Item* __cdecl FUN_0065e760(B65E760Item* pkCurrentObject, B65E760Item* pkLast, B65E760Item* pkDest)
+// src: GUESS 0x0065e760 (confidence: low)
+B65E760Item* __cdecl Object_ProcessAndReturnValue_0065e760(B65E760Item* pkCurrentObject, B65E760Item* pkLast, B65E760Item* pkDest)
 {
     B65E760Item* pkResult = pkDest + (pkLast - pkCurrentObject);
     B65E760CheckedTag kChecked = {};
     B65E760ScalarTag kScalar = {};
     B65E760IterCategory kCategory4;
-    FUN_0065ea80(pkCurrentObject, pkLast, B65E760Unchecked(&pkDest), kCategory4, kScalar, kChecked);
+    Object_ProcessEntries_0065ea80(pkCurrentObject, pkLast, B65E760Unchecked(&pkDest), kCategory4, kScalar, kChecked);
     return pkResult;
 }
 
@@ -7168,7 +7376,7 @@ struct FUN_0065ee70 : FUN_0065cfb0
 // @fnv 0x0065ee70
 FUN_0065ee70::~FUN_0065ee70()
 {
-    ((FUN_0065f430_class*)this)->FUN_0065f430();
+    ((FUN_0065f430_class*)this)->UpdateState_0065f430();
 }
 
 // Copy-style range helper: unwrap both iterators and forward them with the iterator-category and range tags.
@@ -7186,7 +7394,8 @@ char* EA0CopyImpl(char* pcFirst, char* pcLast, char* pcDest, int iCount, EA0Cate
 
 // Copies iCount elements from the range [pcFirst, pcLast) to pcDest via EA0CopyImpl, unwrapping the iterators first.
 // @fnv 0x0065fea0
-char* FUN_0065fea0(char* pcFirst, char* pcLast, char* pcDest, int iCount)
+// src: GUESS 0x0065fea0 (confidence: low)
+char* Object_ProcessAndReturnValue_0065fea0(char* pcFirst, char* pcLast, char* pcDest, int iCount)
 {
     return EA0CopyImpl(EA0Unwrap(&pcFirst), EA0Unwrap(&pcLast), pcDest, iCount, EA0Category(&pcFirst, &pcDest),
                        EA0RangeTag());
@@ -7200,7 +7409,7 @@ struct FUN_00657b50 : FUN_0065d3a0
 // @fnv 0x00657b50
 FUN_00657b50::FUN_00657b50() : FUN_0065d3a0(FUN_006815c0())
 {
-    ((FUN_00657ee0_cls*)this)->FUN_00657ee0(0);
+    ((FUN_00657ee0_cls*)this)->AllocateElementStorage(0);
 }
 
 namespace c820 {
@@ -7223,17 +7432,18 @@ struct PtrCat
 {
 };
 typedef Elem_65eed0* It;
-PtrCat __cdecl FUN_0065e750(It& a, It& b);
-RaTag __cdecl FUN_0065fd70(const It& a, const It& b);
+PtrCat __cdecl std_Move_cat_unsigned_char(It& a, It& b);
+RaTag __cdecl return_value(const It& a, const It& b);
 It __cdecl ComputeIndexAndCall(int first, int last, It dest, RaTag cat, PtrCat pc, RCTag rc);
 }
 // Copies the elements in [first, last) to dest, choosing the copy strategy from the iterator category tags.
 // @fnv 0x0065f820
-Elem_65eed0* __cdecl FUN_0065f820(Elem_65eed0* first, Elem_65eed0* last, Elem_65eed0* dest)
+// src: GUESS 0x0065f820 (confidence: low)
+Elem_65eed0* __cdecl Object_DispatchIteratorRange_0065f820(Elem_65eed0* first, Elem_65eed0* last, Elem_65eed0* dest)
 {
     using namespace c820;
     return c820::ComputeIndexAndCall(CallWithFlag((int*)&first), CallWithFlag((int*)&last), dest,
-                                     c820::FUN_0065fd70(first, dest), c820::FUN_0065e750(first, dest), RCTag());
+                                     c820::return_value(first, dest), c820::std_Move_cat_unsigned_char(first, dest), RCTag());
 }
 
 namespace de {
@@ -7243,15 +7453,16 @@ struct RCTag
 struct PtrCat
 {
 };
-PtrCat __cdecl FUN_0065e750(int& a, int& b);
+PtrCat __cdecl std_Move_cat_unsigned_char(int& a, int& b);
 int __cdecl CopyRange(int first, int last, int dest, int al, PtrCat pc, RCTag rc);
 }
 // Calls CopyRange with CallWithFlag applied to first and last, dest, al, and FUN_0065e750(first, dest).
 // @fnv 0x0065fde0
-extern "C" void __cdecl FUN_0065fde0(int first, int last, int dest, int al)
+// src: GUESS 0x0065fde0 (confidence: low)
+extern "C" void __cdecl Object_DispatchIteratorRange_0065fde0(int first, int last, int dest, int al)
 {
     using namespace de;
-    de::CopyRange(CallWithFlag(&first), CallWithFlag(&last), dest, al, de::FUN_0065e750(first, dest), RCTag());
+    de::CopyRange(CallWithFlag(&first), CallWithFlag(&last), dest, al, de::std_Move_cat_unsigned_char(first, dest), RCTag());
 }
 
 struct TagA
@@ -7259,17 +7470,18 @@ struct TagA
     char v;
 };
 
-TagA* __cdecl FUN_0065fd70(TagA* flag, int* a, int* b);
-int __cdecl FUN_0064e5a0(int a, int b, int c, TagA d, unsigned char e, TagA f);
+TagA* __cdecl return_value(TagA* flag, int* a, int* b);
+int __cdecl Object_ProcessAndReturnValue_0064e5a0(int a, int b, int c, TagA d, unsigned char e, TagA f);
 
 // @fnv 0x0064e380
-extern "C" int __cdecl FUN_0064e380(int arg1, int arg2, int arg3)
+// src: GUESS 0x0064e380 (confidence: low)
+extern "C" int __cdecl Object_DispatchIteratorRange_0064e380(int arg1, int arg2, int arg3)
 {
     TagA flag1 = {};
-    char flag2 = FUN_0065e750(&arg1, &arg3);
+    char flag2 = std_Move_cat_unsigned_char(&arg1, &arg3);
     TagA flag3;
 
-    return FUN_0064e5a0(CallWithFlag(&arg1), CallWithFlag(&arg2), arg3, *FUN_0065fd70(&flag3, &arg1, &arg3), flag2,
+    return Object_ProcessAndReturnValue_0064e5a0(CallWithFlag(&arg1), CallWithFlag(&arg2), arg3, *return_value(&flag3, &arg1, &arg3), flag2,
                         flag1);
 }
 
@@ -7282,7 +7494,8 @@ struct Tag
 void __cdecl SpawnCallee6(int a1, int a2, int a3, Tag a4, Tag a5, Tag a6);
 
 // @fnv 0x0064e5a0
-int __cdecl FUN_0064e5a0(int a1, int a2, int a3)
+// src: GUESS 0x0064e5a0 (confidence: low)
+int __cdecl Object_ProcessAndReturnValue_0064e5a0(int a1, int a2, int a3)
 {
     int value = (((a2 - a1) >> 4) << 4) + a3;
     Tag x1 = {};
@@ -7301,14 +7514,14 @@ void __cdecl ConstructArrayWithRollback(char* apElements, unsigned int count, vo
     {
         for (; count > 0; count--, apElements += 0x10)
         {
-            obj->FUN_0064e7d0(apElements, value);
+            obj->CopyConstructBlock_Thunk(apElements, value);
         }
     }
     catch (...)
     {
         for (; p != apElements; p += 0x10)
         {
-            reinterpret_cast<FUN_0065e9a0_holder*>(obj)->FUN_0065e9a0((int*)p);
+            reinterpret_cast<FUN_0065e9a0_holder*>(obj)->PrintDebugMessage_Thunk((int*)p);
         }
         throw;
     }
@@ -7320,8 +7533,8 @@ struct Elem64e9
 };
 struct Alloc64e9
 {
-    void FUN_0064e7d0(Elem64e9* pDest, const Elem64e9& kSrc);
-    void FUN_0065e9a0(Elem64e9* pElem);
+    void CopyConstructBlock_Thunk(Elem64e9* pDest, const Elem64e9& kSrc);
+    void PrintDebugMessage_Thunk(Elem64e9* pElem);
 };
 struct NonscalarTag64e9
 {
@@ -7332,19 +7545,20 @@ struct CheckedTag64e9
 
 // Copy-constructs each element of [_First, _Last) into _Dest via _Al, destroying already-built elements and rethrowing on exception.
 // @fnv 0x0064e9c0
-Elem64e9* __cdecl FUN_0064e9c0(Elem64e9* _First, Elem64e9* _Last, Elem64e9* _Dest, Alloc64e9& _Al, NonscalarTag64e9,
+// src: GUESS 0x0064e9c0 (confidence: low)
+Elem64e9* __cdecl Object_ProcessEntries_0064e9c0(Elem64e9* _First, Elem64e9* _Last, Elem64e9* _Dest, Alloc64e9& _Al, NonscalarTag64e9,
                                CheckedTag64e9)
 {
     Elem64e9* _Next = _Dest;
     try
     {
         for (; _First != _Last; ++_Dest, ++_First)
-            _Al.FUN_0064e7d0(_Dest, *_First);
+            _Al.CopyConstructBlock_Thunk(_Dest, *_First);
     }
     catch (...)
     {
         for (; _Next != _Dest; ++_Next)
-            _Al.FUN_0065e9a0(_Next);
+            _Al.PrintDebugMessage_Thunk(_Next);
         throw;
     }
     return _Dest;
@@ -7395,12 +7609,12 @@ bool BSFaceGenModel::CloneTriBasedGeom(NiPointer<NiTriBasedGeom>& out)
     out->ReplaceModelData(spModelData);
 
     NiSkinInstance* pObjectInstance = out->GetSkinInstance();
-    if (pObjectInstance && pObjectInstance->FUN_0043b230())
+    if (pObjectInstance && pObjectInstance->NiObjectNET_GetControllers())
     {
         NiPointer<NiObject> spPartitionCopy(0);
-        pObjectInstance->FUN_0043b230()->ResolveObjectPointer(spPartitionCopy);
+        pObjectInstance->NiObjectNET_GetControllers()->ResolveObjectPointer(spPartitionCopy);
         spSkinPartition = (NiSkinPartition*)(NiObject*)spPartitionCopy;
-        pObjectInstance->FUN_004addc0(spSkinPartition);
+        pObjectInstance->BSMultiBound_SetShape(spSkinPartition);
     }
 
     FUN_006624c0* pExtra3 = new FUN_006624c0(out, m_pGeometryModel->unk14, m_pGeometryModel->unk18);
@@ -7435,12 +7649,13 @@ struct VecItemVector
 
     unsigned int max_size() const;
     static void _Xlen();
-    bool FUN_0065d7e0(unsigned int _Capacity);
+    bool ProcessAndReturnValue_0065d7e0(unsigned int _Capacity);
 };
 
 // Resets the vector pointers and allocates storage for _Capacity items, returning false when _Capacity is zero.
 // @fnv 0x0065d7e0
-bool VecItemVector::FUN_0065d7e0(unsigned int _Capacity)
+// src: GUESS 0x0065d7e0 (confidence: low)
+bool VecItemVector::ProcessAndReturnValue_0065d7e0(unsigned int _Capacity)
 {
     _Myfirst = 0, _Mylast = 0, _Myend = 0;
     if (_Capacity == 0)
@@ -7481,12 +7696,12 @@ struct S_0065fb10_Base
     S_0065fb10_Elem* _Myend;
     S_0065fb10_Base(S_0065fb10_Alloc al);
     ~S_0065fb10_Base();
-    unsigned int FUN_00657bc0() const;
-    bool FUN_0065f380(unsigned int n);
-    S_0065fb10_Iter FUN_0065fd10() const;
-    S_0065fb10_Iter FUN_0065fd40() const;
-    S_0065fb10_Elem* FUN_0065ff30(S_0065fb10_Iter first, S_0065fb10_Iter last, S_0065fb10_Elem* dest);
-    void FUN_0065f430();
+    unsigned int Object_GetPointerSpanCount_00657bc0() const;
+    bool ProcessAndReturnValue_0065f380(unsigned int n);
+    S_0065fb10_Iter EvaluateValue_0065fd10() const;
+    S_0065fb10_Iter ProcessAndReturnValue_0065fd40() const;
+    S_0065fb10_Elem* ForwardCall_0065ff30(S_0065fb10_Iter first, S_0065fb10_Iter last, S_0065fb10_Elem* dest);
+    void UpdateState_0065f430();
 };
 struct FUN_0065fb10 : S_0065fb10_Base
 {
@@ -7495,15 +7710,15 @@ struct FUN_0065fb10 : S_0065fb10_Base
 // @fnv 0x0065fb10
 FUN_0065fb10::FUN_0065fb10(const FUN_0065fb10& other) : S_0065fb10_Base(other._Alval)
 {
-    if (FUN_0065f380(other.FUN_00657bc0()))
+    if (ProcessAndReturnValue_0065f380(other.Object_GetPointerSpanCount_00657bc0()))
     {
         try
         {
-            _Mylast = FUN_0065ff30(other.FUN_0065fd10(), other.FUN_0065fd40(), _Myfirst);
+            _Mylast = ForwardCall_0065ff30(other.EvaluateValue_0065fd10(), other.ProcessAndReturnValue_0065fd40(), _Myfirst);
         }
         catch (...)
         {
-            FUN_0065f430();
+            UpdateState_0065f430();
             throw;
         }
     }
@@ -7529,7 +7744,7 @@ struct SlotIdBuffer
     void* m_pHeadNode;
     void* m_last;
     void* m_kRayEnd;
-    void FUN_0064db70();
+    void ClearAllElements();
     ~SlotIdBuffer();
 };
 
@@ -7544,7 +7759,7 @@ struct FUN_0064ce20 : Base64ce20
 // @fnv 0x0064ce20
 FUN_0064ce20::~FUN_0064ce20()
 {
-    m_iSlotIds.FUN_0064db70();
+    m_iSlotIds.ClearAllElements();
     m_object = 0;
 }
 
@@ -7567,17 +7782,18 @@ struct PtrCatE4E0
     {}
 };
 
-CatTagE4E0 __cdecl FUN_0065e750(const ItE4E0& it);
-PtrCatE4E0 __cdecl FUN_0065fd70(const ItE4E0& a, const ItE4E0& b);
+CatTagE4E0 __cdecl std_Move_cat_unsigned_char(const ItE4E0& it);
+PtrCatE4E0 __cdecl return_value(const ItE4E0& a, const ItE4E0& b);
 int* __cdecl CallWithFlag(ItE4E0& it);
-void __cdecl FUN_0064e6c0(int* pFirst, int* pLast, ItE4E0 kDest, PtrCatE4E0 kPtrCat, CatTagE4E0 kCat,
+void __cdecl Object_DispatchIteratorRange_0064e6c0(int* pFirst, int* pLast, ItE4E0 kDest, PtrCatE4E0 kPtrCat, CatTagE4E0 kCat,
                           RangeTagE4E0 kRange);
 
 // Calls FUN_0064e6c0 with the raw pointers from kFirst and kLast, kDest, and tags computed from kFirst, kDest and a range tag.
 // @fnv 0x0064e4e0
-void __cdecl FUN_0064e4e0(ItE4E0 kFirst, ItE4E0 kLast, ItE4E0 kDest)
+// src: GUESS 0x0064e4e0 (confidence: low)
+void __cdecl Object_DispatchIteratorRange_0064e4e0(ItE4E0 kFirst, ItE4E0 kLast, ItE4E0 kDest)
 {
-    FUN_0064e6c0(CallWithFlag(kFirst), CallWithFlag(kLast), kDest, FUN_0065fd70(kFirst, kDest), FUN_0065e750(kDest),
+    Object_DispatchIteratorRange_0064e6c0(CallWithFlag(kFirst), CallWithFlag(kLast), kDest, return_value(kFirst, kDest), std_Move_cat_unsigned_char(kDest),
                  RangeTagE4E0());
 }
 
@@ -7618,27 +7834,27 @@ struct FUN_0065fc10 : FUN_0065d3a0
     int* m_pHeadNode;
     int* m_last;
     int* m_kRayEnd;
-    int FUN_0065cc50();
-    bool FUN_00657ee0(unsigned int n);
-    ItQ FUN_0065fd40();
-    ItQ FUN_0065fd10();
-    int* FUN_0065ff60(ItQ f, ItQ l, int* d);
-    void FUN_00657f60();
+    int GetFieldAtOffset10();
+    bool AllocateElementStorage(unsigned int n);
+    ItQ ProcessAndReturnValue_0065fd40();
+    ItQ EvaluateValue_0065fd10();
+    int* ForwardCall_0065ff60(ItQ f, ItQ l, int* d);
+    void ReleaseStorage_00657f60();
     FUN_0065fc10(FUN_0065fc10& r);
 };
 // Constructs the base from r.m_al; if FUN_00657ee0(r.FUN_0065cc50()) is true, sets m_last via FUN_0065ff60, calling FUN_00657f60 on exception.
 // @fnv 0x0065fc10
 FUN_0065fc10::FUN_0065fc10(FUN_0065fc10& arSource) : FUN_0065d3a0(*(FUN_006815c0*)&arSource.m_al)
 {
-    if (FUN_00657ee0(arSource.FUN_0065cc50()))
+    if (AllocateElementStorage(arSource.GetFieldAtOffset10()))
     {
         try
         {
-            m_last = FUN_0065ff60(arSource.FUN_0065fd10(), arSource.FUN_0065fd40(), m_pHeadNode);
+            m_last = ForwardCall_0065ff60(arSource.EvaluateValue_0065fd10(), arSource.ProcessAndReturnValue_0065fd40(), m_pHeadNode);
         }
         catch (...)
         {
-            FUN_00657f60();
+            ReleaseStorage_00657f60();
             FUN_00ec7894(0, 0);
         }
     }
@@ -7651,12 +7867,13 @@ class FloatSource
 };
 struct FloatGetterGlobal
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern FloatGetterGlobal DAT_011cfb5c, DAT_011cf264;
 // Returns the value from src scaled by the sum of two global float values, or 0.0f if src is null.
 // @fnv 0x006479e0
-float FUN_006479e0(FloatSource* src)
+// src: COMMUNITY 0x006479e0
+float CombatFormulas_CalcExplosionDamage(FloatSource* src)
 {
     float result;
     if (src != 0)
@@ -7664,7 +7881,7 @@ float FUN_006479e0(FloatSource* src)
     else
         result = 0.0f;
     float factor = result;
-    factor = (*DAT_011cf264.FUN_00403e20() + (+*DAT_011cfb5c.FUN_00403e20())) * factor;
+    factor = (*DAT_011cf264.Setting_Float_00403e20() + (+*DAT_011cfb5c.Setting_Float_00403e20())) * factor;
     return factor;
 }
 
@@ -7680,7 +7897,7 @@ struct FUN_0065d3a0
 {
     FUN_0065d3a0(FUN_006815c0 al) throw();
     ~FUN_0065d3a0();
-    void FUN_0065d2b0(int value);
+    void UpdateState_0065d2b0(int value);
 };
 
 struct FUN_0065c8f0 : FUN_0065d3a0
@@ -7692,7 +7909,7 @@ struct FUN_0065c8f0 : FUN_0065d3a0
 // @fnv 0x0065c8f0
 FUN_0065c8f0::FUN_0065c8f0() : FUN_0065d3a0(FUN_006815c0())
 {
-    FUN_0065d2b0(0);
+    UpdateState_0065d2b0(0);
 }
 
 }
@@ -7736,7 +7953,7 @@ struct Elem6_f380
 };
 struct Alloc_f380
 {
-    Elem6_f380* FUN_0065f6c0(unsigned int n);
+    Elem6_f380* ForwardCall_0065f6c0(unsigned int n);
 };
 void __cdecl ThrowVectorTooLong();
 struct VecF380
@@ -7747,23 +7964,24 @@ struct VecF380
     Elem6_f380* _Myfirst;
     Elem6_f380* _Mylast;
     Elem6_f380* _Myend;
-    unsigned int FUN_0065f580() const;
-    bool FUN_0065f380(unsigned int _Capacity);
+    unsigned int ForwardCall_0065f580() const;
+    bool ProcessAndReturnValue_0065f380(unsigned int _Capacity);
 };
 // Resets first/last/end pointers; returns false if _Capacity is 0, throws if it exceeds FUN_0065f580(), else allocates that many elements and returns true.
 // @fnv 0x0065f380
-bool VecF380::FUN_0065f380(unsigned int _Capacity)
+// src: GUESS 0x0065f380 (confidence: low)
+bool VecF380::ProcessAndReturnValue_0065f380(unsigned int _Capacity)
 {
     _Myfirst = 0;
     _Mylast = 0;
     _Myend = 0;
     if (_Capacity == 0)
         return false;
-    else if (FUN_0065f580() < _Capacity)
+    else if (ForwardCall_0065f580() < _Capacity)
         ThrowVectorTooLong();
     else
     {
-        _Myfirst = _Alval.FUN_0065f6c0(_Capacity);
+        _Myfirst = _Alval.ForwardCall_0065f6c0(_Capacity);
         _Mylast = _Myfirst;
         _Myend = _Myfirst + _Capacity;
     }
@@ -7785,11 +8003,12 @@ extern Setting originalRuntimeFloatSetting102;
 extern Setting originalRuntimeFloatSetting150;
 extern Setting g_011cd080;
 extern Setting g_011cdb84;
-float FUN_00404010(float, float);
+float BSMAX_00404010(float, float);
 
 // Sums a base setting with distance-falloff terms for quantity, value, level and resistance and returns it as int; a total between 0 and 1 becomes 1.
 // @fnv 0x00642bc0
-int __cdecl FUN_00642bc0(int skill, int count, float distance, int resistance, int level, bool flagA, bool flagB,
+// src: COMMUNITY 0x00642bc0
+int __cdecl AiFormulas_GetDetectedEvent(int skill, int count, float distance, int resistance, int level, bool flagA, bool flagB,
                          bool flagC, int quantity, int value, bool special)
 {
     int d;      // Third boolean modifier.
@@ -7822,7 +8041,7 @@ int __cdecl FUN_00642bc0(int skill, int count, float distance, int resistance, i
     float a = special ? *originalRuntimeFloatSetting101.Float() * *originalRuntimeFloatSetting87.Float()
                       : *originalRuntimeFloatSetting87.Float();
     // Range attenuation.
-    float g = FUN_00404010((a - distance) / a, 0.0f);
+    float g = BSMAX_00404010((a - distance) / a, 0.0f);
     g = pow((double)g, (double)*originalRuntimeFloatSetting102.Float());
     // Attenuation adjusted for count.
     float j = g;
@@ -7831,13 +8050,13 @@ int __cdecl FUN_00642bc0(int skill, int count, float distance, int resistance, i
     // Scaled quantity.
     int o = (int)*g_011cd080.Float() * quantity;
     // Quantity contribution.
-    float q = FUN_00404010(j * *originalRuntimeFloatSetting93.Float() * o, 0.0f);
+    float q = BSMAX_00404010(j * *originalRuntimeFloatSetting93.Float() * o, 0.0f);
     // Level contribution multiplier.
     float p = (*g_011cdb84.Float() + level) * *originalRuntimeFloatSetting92.Float();
     // Resistance multiplier, using integer division.
     float h = (100 - resistance) / 100;
     // Value contribution.
-    float b = FUN_00404010(k * g * p * h, 0.0f);
+    float b = BSMAX_00404010(k * g * p * h, 0.0f);
     // Attenuated skill contribution.
     float f = m * g;
     c = c + q + b;
@@ -7857,32 +8076,34 @@ FUN_006443d0::~FUN_006443d0()
 {}
 
 namespace fnv_006592f0 {
-extern "C" void __cdecl FUN_00659360(int);
+extern "C" void __cdecl Object_ForwardCall_00659360(int);
 
 struct FUN_006592f0_Class
 {
-    void __thiscall FUN_006592f0(int a);
+    void __thiscall ForwardCall_006592f0(int a);
 };
 
 // @fnv 0x006592f0
-void __thiscall FUN_006592f0_Class::FUN_006592f0(int a)
+// src: GUESS 0x006592f0 (confidence: low)
+void __thiscall FUN_006592f0_Class::ForwardCall_006592f0(int a)
 {
-    FUN_00659360(a);
+    Object_ForwardCall_00659360(a);
 }
 }  // namespace fnv_006592f0
 
 namespace fnv_00659310 {
-extern "C" int __cdecl FUN_00659370(int);
+extern "C" int __cdecl Runtime_ForwardCall_00659370(int);
 
 struct FUN_00659310_Class
 {
-    int __thiscall FUN_00659310(int a);
+    int __thiscall ForwardCall_00659310(int a);
 };
 
 // @fnv 0x00659310
-int __thiscall FUN_00659310_Class::FUN_00659310(int a)
+// src: GUESS 0x00659310 (confidence: low)
+int __thiscall FUN_00659310_Class::ForwardCall_00659310(int a)
 {
-    return FUN_00659370(a);
+    return Runtime_ForwardCall_00659370(a);
 }
 }  // namespace fnv_00659310
 
@@ -7890,39 +8111,41 @@ struct BGSLoadGameBuffer;
 void __cdecl PrintDebugMessage(BGSLoadGameBuffer*);
 struct FUN_0065e9a0_Class
 {
-    void __thiscall FUN_0065e9a0(BGSLoadGameBuffer* p);
+    void __thiscall PrintDebugMessage_Thunk(BGSLoadGameBuffer* p);
 };
 // @fnv 0x0065e9a0
-void __thiscall FUN_0065e9a0_Class::FUN_0065e9a0(BGSLoadGameBuffer* apBuffer)
+// src: GUESS 0x0065e9a0 (confidence: medium)
+void __thiscall FUN_0065e9a0_Class::PrintDebugMessage_Thunk(BGSLoadGameBuffer* apBuffer)
 {
     PrintDebugMessage(apBuffer);
 }
 
-void __cdecl FUN_0065eb20(void*);
+void __cdecl Object_ForwardCall_0065eb20(void*);
 
 struct FUN_0065ea00_Class
 {
-    void __thiscall FUN_0065ea00(void* a);
+    void __thiscall ForwardCall_0065ea00(void* a);
 };
 
 // @fnv 0x0065ea00
-void __thiscall FUN_0065ea00_Class::FUN_0065ea00(void* apObj)
+// src: GUESS 0x0065ea00 (confidence: low)
+void __thiscall FUN_0065ea00_Class::ForwardCall_0065ea00(void* apObj)
 {
-    FUN_0065eb20(apObj);
+    Object_ForwardCall_0065eb20(apObj);
 }
 
 namespace fnv_0065ec40 {
 extern "C" void __cdecl Deallocate(void*);
 struct FUN_0065ec40_Class
 {
-    void FUN_0065ed50();
+    void Dtor_Thunk();
     void* FUN_0065ec40(unsigned int flags);
 };
 // Calls FUN_0065ed50, then if the low bit of flags is set calls Deallocate on this and returns this.
 // @fnv 0x0065ec40
 void* FUN_0065ec40_Class::FUN_0065ec40(unsigned int flags)
 {
-    FUN_0065ed50();
+    Dtor_Thunk();
     if (flags & 1)
         Deallocate(this);
     return this;

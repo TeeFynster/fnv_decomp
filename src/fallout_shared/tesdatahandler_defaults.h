@@ -17,7 +17,7 @@ class TESGlobalMap
 };
 namespace MagicSystem { void InitializeMagicSystem(); }
 void CreateDefaultTopics();
-void FUN_00479570();
+void BGSEquipType_GenerateDefaultMenuIcons();
 void RegisterEffectSetting(EffectSetting*);
 template <class T> unsigned int BSStringLength(const T*);
 extern BGSExplosion* DAT_011ca284;

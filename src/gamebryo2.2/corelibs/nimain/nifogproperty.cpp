@@ -13,7 +13,8 @@ extern NiFogProperty* DAT_011f5f3c;
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 // Releases the global fog property and clears the pointer.
 // @fnv 0x00a9a120
-void FUN_00a9a120()
+// src: COMMUNITY 0x00a9a120
+void NiFogProperty__SDMShutdown()
 {
     if (DAT_011f5f3c)
     {
@@ -97,10 +98,10 @@ struct FogPropertyRoutines
 
 struct PropertyCloneRoutines
 {
-    void FUN_00a5d7a0(void* prop, int arg);
+    void NiProperty_CopyMembers(void* prop, int arg);
 };
 
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 void __stdcall CreateVertexBufferSet(void*, int);
 
 void* __cdecl operator new(unsigned int, void* p)
@@ -114,7 +115,7 @@ void* FogPropertyRoutines::Clone(int arg)
     NiFogProperty* self = reinterpret_cast<NiFogProperty*>(this);
     if (self->m_spControllers != 0)
     {
-        void* raw = FUN_00aa13e0(0x2c);
+        void* raw = Object_DispatchCommandFour(0x2c);
         NiFogProperty* esi;
         if (raw)
         {
@@ -124,7 +125,7 @@ void* FogPropertyRoutines::Clone(int arg)
         {
             esi = 0;
         }
-        ((PropertyCloneRoutines*)this)->FUN_00a5d7a0(esi, arg);
+        ((PropertyCloneRoutines*)this)->NiProperty_CopyMembers(esi, arg);
         unsigned short cx = self->m_uiObjectFlags;
         esi->m_uiObjectFlags = cx;
         esi->m_fFogDepth = self->m_fFogDepth;
@@ -138,7 +139,7 @@ void* FogPropertyRoutines::Clone(int arg)
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int bytes);
+void* __cdecl Object_DispatchCommandFour(unsigned int bytes);
 
 // This factory inlines construction in the original, while Clone calls the constructor.
 extern void* NiFogPropertyVTable[];
@@ -156,7 +157,7 @@ __forceinline void ConstructFogPropertyInPlace(NiFogProperty* property)
 // @fnv 0x00a99fd0
 NiFogProperty* __cdecl CreateNiFogProperty()
 {
-    void* memory = FUN_00aa13e0(sizeof(NiFogProperty));
+    void* memory = Object_DispatchCommandFour(sizeof(NiFogProperty));
     if (memory != 0)
     {
         NiFogProperty* property = static_cast<NiFogProperty*>(memory);
@@ -168,7 +169,7 @@ NiFogProperty* __cdecl CreateNiFogProperty()
 
 struct EqBase
 {
-    bool __thiscall FUN_00a62140(NiObject* object);
+    bool __thiscall NiSequenceStreamHelper_IsEqual(NiObject* object);
 };
 
 // @fnv 0x00a9a030
@@ -177,7 +178,7 @@ bool __thiscall FogPropertyRoutines::IsEqual(NiFogProperty* other)
     NiFogProperty* self = reinterpret_cast<NiFogProperty*>(this);
     EqBase* base = reinterpret_cast<EqBase*>(this);
 
-    if (base->FUN_00a62140(reinterpret_cast<NiObject*>(other)))
+    if (base->NiSequenceStreamHelper_IsEqual(reinterpret_cast<NiObject*>(other)))
     {
         volatile unsigned char* ownFlags = reinterpret_cast<volatile unsigned char*>(&self->m_uiObjectFlags);
         unsigned char* otherFlags = reinterpret_cast<unsigned char*>(&other->m_uiObjectFlags);
@@ -331,7 +332,7 @@ template <class T> inline void WriteBinaryValue(NiStream& kStream, T& value)
 class PropertySaveRoutines
 {
   public:
-    void FUN_00a5d7b0(NiStream& kStream);
+    void NiSequenceStreamHelper_SaveBinary(NiStream& kStream);
 };
 
 // Saves the base property, flags, depth and RGB tint to the output stream.
@@ -339,7 +340,7 @@ class PropertySaveRoutines
 void FogPropertyRoutines::SaveBinary(NiStream& kStream)
 {
     NiFogProperty* self = reinterpret_cast<NiFogProperty*>(this);
-    reinterpret_cast<PropertySaveRoutines*>(this)->FUN_00a5d7b0(kStream);
+    reinterpret_cast<PropertySaveRoutines*>(this)->NiSequenceStreamHelper_SaveBinary(kStream);
     WriteBinaryValue(kStream, self->m_uiObjectFlags);
     WriteBinaryValue(kStream, self->m_fFogDepth);
     self->m_kFogTint.SaveBinary(kStream);
@@ -376,8 +377,9 @@ template <class T> struct PtrRef
 };
 // Allocates a NiFogProperty and assigns it to DAT_011f5f3c through a reference-counting smart pointer.
 // @fnv 0x00a9a090
-void FUN_00a9a090()
+// src: COMMUNITY 0x00a9a090
+void NiFogProperty__SDMInit()
 {
     PtrRef<NiFogProperty> r(DAT_011f5f3c);
-    r = new (FUN_00aa13e0(sizeof(NiFogProperty))) NiFogProperty;
+    r = new (Object_DispatchCommandFour(sizeof(NiFogProperty))) NiFogProperty;
 }

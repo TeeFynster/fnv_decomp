@@ -45,7 +45,7 @@ inline bool IsExactTextKeyKind(const NiRTTI* pkRTTI, const NiExtraData* pkObject
 // @fnv 0x00a46c20
 void __fastcall CopyTextKeys(NiTextKeyExtraData* self, void*, NiTextKeyExtraData* pkDest, CloningProcess* kCloning)
 {
-    self->NiExtraData::FUN_00a7b330(pkDest, kCloning);
+    self->NiExtraData::CopyMembers_00a7b330(pkDest, kCloning);
     pkDest->m_uiNumKeys = self->m_uiNumKeys;
     if (self->m_uiNumKeys > 0 && IsExactTextKeyKind((const NiRTTI*)&g_011f3f28, self))
     {

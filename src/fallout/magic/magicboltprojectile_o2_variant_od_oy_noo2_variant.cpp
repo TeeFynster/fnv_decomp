@@ -16,10 +16,10 @@ struct FUN_00811930_shell : RefH
     bool IsNotDeleted() const;
 };
 extern int DAT_011ae61c;
-void FUN_00811e00(int value);
+void BoltShader_SetSubSegmentCount(int value);
 struct FUN_008133d0_shell
 {
-    void FUN_008133d0(int value);
+    void MagicBoltProjectile_SetState(int value);
 };
 
 struct xP3
@@ -50,7 +50,7 @@ struct xSound
 };
 struct xFltSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern xFltSetting xg_11d16f8;
 extern xFltSetting xg_11d1c28;
@@ -59,7 +59,7 @@ extern xFltSetting xg_11d1ae4;
 extern xFltSetting xg_11d1758;
 struct xIntSetting
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 extern xIntSetting xg_11d16ec;
 void xFUN_00811e00(int);
@@ -68,23 +68,23 @@ struct xPtr
     xPtr(int);
     ~xPtr();
     void FUN_0066b0d0(void*);
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
     void* m_p;
 };
 int xFUN_0081e440(void*);
 struct xNodeA
 {
-    bool FUN_00456610();
+    bool GetAppCulled_00456610();
 };
 struct xPC
 {
-    xNodeA* FUN_00950bb0(bool);
+    xNodeA* PlayerCharacter_Get3D_00950bb0(bool);
 };
 extern xPC* xg_pc_11dea3c;
 struct xAudio
 {
-    static xAudio* FUN_00453a70();
-    struct xSound FUN_00ad73b0(void*, unsigned int);
+    static xAudio* BSAudio_QInstance();
+    struct xSound GetSoundHandleByFormID_00ad73b0(void*, unsigned int);
 };
 struct xRefList
 {
@@ -102,15 +102,15 @@ struct xRadius
 };
 struct xSndForm
 {
-    void* FUN_0084e3a0();
+    void* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct xEffect
 {
-    xSndForm* FUN_004fd3c0();
+    xSndForm* BGSProjectile_GetExplosion();
 };
 struct xCtl
 {
-    void FUN_0080fb00(xVec4*);
+    void bhkCharacterProxy_SetLinearVelocity(xVec4*);
 };
 struct xCell
 {
@@ -118,7 +118,7 @@ struct xCell
 };
 struct xOwner
 {
-    void FUN_0081c4a0(void*);
+    void MagicLight_Transfer(void*);
 };
 struct xA
 {
@@ -168,62 +168,62 @@ struct xProj : xBase
     xSound m_c8;
     float m_d4;
     xProj(xActorV* apA, int b, int c, int d, xP3 kP1, xP3 kP2);
-    xEffect* FUN_004fd400();
-    void FUN_008133d0(int);
+    xEffect* GetAVEffect();
+    void MagicBoltProjectile_SetState(int);
     xP3* FUN_00436aa0();
-    void FUN_00575830(const xP3&);
+    void TESObjectREFR_SetLocationOnReference(const xP3&);
     void InitEffect();
-    void FUN_00570f70(void*);
-    void FUN_00813f30();
+    void TESObjectREFR_Set3DSimple(void*);
+    void MagicBoltProjectile_InitHavok();
     xCtl* FUN_009306d0();
     xCell* FUN_008d6f30();
-    void FUN_0081eba0();
+    void MagicProjectile_CheckShotBehindWall();
     xActorV* FUN_009185e0();
 };
 // @fnv 0x00811980
 xProj::xProj(xActorV* apA, int b, int c, int d, xP3 kP1, xP3 kP2)
     : xBase((int)apA, b, c, d, kP1, kP2), m_a8(0), m_b4(0), m_b8(0), m_bc(0), m_c0(0)
 {
-    xFUN_00811e00(*xg_11d16ec.FUN_0043d4d0());
-    FUN_008133d0(0);
-    m_88 = ((xRadius*)FUN_004fd400())->FUN_009b0bd0() * *xg_11d16f8.FUN_00403e20();
+    xFUN_00811e00(*xg_11d16ec.Setting_Int());
+    MagicBoltProjectile_SetState(0);
+    m_88 = ((xRadius*)GetAVEffect())->FUN_009b0bd0() * *xg_11d16f8.Setting_Float_00403e20();
     m_b0 = 0;
     m_c4 = 0;
     m_d4 = 0.0f;
-    if (apA->FUN_2c() == xg_player_11dea3c && xg_pc_11dea3c->FUN_00950bb0(true) &&
-        !xg_pc_11dea3c->FUN_00950bb0(true)->FUN_00456610())
+    if (apA->FUN_2c() == xg_player_11dea3c && xg_pc_11dea3c->PlayerCharacter_Get3D_00950bb0(true) &&
+        !xg_pc_11dea3c->PlayerCharacter_Get3D_00950bb0(true)->GetAppCulled_00456610())
     {
         xP3 POS = *FUN_00436aa0();
-        POS.z = POS.z + *xg_11d1ae4.FUN_00403e20();
-        FUN_00575830(POS);
+        POS.z = POS.z + *xg_11d1ae4.Setting_Float_00403e20();
+        TESObjectREFR_SetLocationOnReference(POS);
     }
-    xPtr OLD(xFUN_0081e440(FUN_004fd400()));
+    xPtr OLD(xFUN_0081e440(GetAVEffect()));
     OLD.FUN_0066b0d0(0);
     InitEffect();
-    FUN_00570f70(m_b4.FUN_00559450());
-    FUN_00813f30();
+    TESObjectREFR_Set3DSimple(m_b4.Modelloader_GetReferencedThis());
+    MagicBoltProjectile_InitHavok();
     xVec4 V(-xg_107a8b0, 0.0f, 0.0f, 0.0f);
-    FUN_009306d0()->FUN_0080fb00(&V);
+    FUN_009306d0()->bhkCharacterProxy_SetLinearVelocity(&V);
     FUN_008d6f30()->FUN_00548230(this, false);
-    FUN_008133d0(0);
-    if (FUN_004fd400()->FUN_004fd3c0())
+    MagicBoltProjectile_SetState(0);
+    if (GetAVEffect()->BGSProjectile_GetExplosion())
     {
-        void* NAME = FUN_004fd400()->FUN_004fd3c0()->FUN_0084e3a0();
+        void* NAME = GetAVEffect()->BGSProjectile_GetExplosion()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         if (m_c8.FUN_00ad8ce0())
             m_c8.FUN_00ad8d10();
-        if (m_c0.FUN_00559450())
+        if (m_c0.Modelloader_GetReferencedThis())
         {
-            m_c8 = xAudio::FUN_00453a70()->FUN_00ad73b0(NAME, 0x102);
+            m_c8 = xAudio::BSAudio_QInstance()->GetSoundHandleByFormID_00ad73b0(NAME, 0x102);
             xP3 POS2 = *FUN_00436aa0();
             m_c8.FUN_00ad8b60(POS2.x, POS2.y, POS2.z);
-            m_c8.FUN_00ad8f20(m_c0.FUN_00559450());
+            m_c8.FUN_00ad8f20(m_c0.Modelloader_GetReferencedThis());
             m_c8.FUN_00ad8830(true);
         }
     }
-    FUN_0081eba0();
+    MagicProjectile_CheckShotBehindWall();
     void* SHOOTER = FUN_009185e0() ? FUN_009185e0()->FUN_2c() : 0;
     if (SHOOTER != xg_player_11dea3c)
-        xFUN_0080fae0(*xg_11d1758.FUN_00403e20());
+        xFUN_0080fae0(*xg_11d1758.Setting_Float_00403e20());
     else
     {
         xRefList* LIST = xg_11e0e80.GetOffset70Ptr();

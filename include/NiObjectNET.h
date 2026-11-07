@@ -41,15 +41,15 @@ class NiObjectNET : public NiObject
     unsigned int GetNumChildren();
     void CopyMemberData(NiObjectNET* object, CloningProcess& process);
 
-    void FUN_00439360(unsigned short, unsigned int, unsigned int);
-    void FUN_00439340(unsigned short);
-    void FUN_00439390(unsigned short);
-    void FUN_0049edb0(unsigned short);
-    void FUN_0049ee10(unsigned short);
-    void FUN_0049ee30(unsigned short);
-    void FUN_00533fb0(unsigned short);
-    void FUN_00a5c050();
-    bool FUN_00a5bf50(unsigned short);
+    void SetField_00439360(unsigned short, unsigned int, unsigned int);
+    void NiAlphaProperty_SetSrcBlendMode(unsigned short);
+    void NiAlphaProperty_SetDestBlendMode(unsigned short);
+    void NiStencilProperty_SetStencilFunction(unsigned short);
+    void NiStencilProperty_SetStencilPassZFailAction(unsigned short);
+    void NiStencilProperty_SetDrawMode(unsigned short);
+    void NiStencilProperty_SetStencilFailAction(unsigned short);
+    void RemoveAllControllers();
+    bool RemoveExtraDataAt(unsigned short);
 
     NiFixedString m_kName;
     NiTimeController* m_spControllers;

@@ -71,7 +71,7 @@ extern MemoryManager g_memoryManager;
 // @fnv 0x00ba3b50
 void ImageSpaceEffect::SetArrayEntry(int uiIndex, int a2, int a3, int a4, int a5)
 {
-    int* p = (int*)g_memoryManager.FUN_00aa3e40(16);
+    int* p = (int*)g_memoryManager.Game_DoHeapAlloc(16);
     p[0] = a2;
     p[1] = a4;
     p[2] = a3;
@@ -94,7 +94,7 @@ void ImageSpaceEffect::SetTextureArraySize(int count)
 void ImageSpaceEffect::SetThreeInputs(unsigned int auiIndex, int aiValue0, int aiValue1, int aiValue2, int aiValue3, int aiValue4,
                           int aiValue5)
 {
-    int* p = (int*)g_memoryManager.FUN_00aa3e40(24);
+    int* p = (int*)g_memoryManager.Game_DoHeapAlloc(24);
     p[0] = aiValue0;
     p[1] = aiValue3;
     p[2] = aiValue1;
@@ -125,7 +125,7 @@ struct TextureInputQuad
 {
     static void* operator new(unsigned int uiSize)
     {
-        return g_memoryManager.FUN_00aa3e40(uiSize);
+        return g_memoryManager.Game_DoHeapAlloc(uiSize);
     }
 
     TextureInputRange m_akRanges[4];

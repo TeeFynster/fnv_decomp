@@ -19,10 +19,10 @@ struct S_00dfdb90_Allocator
     virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
     virtual void ReturnMemory(void* p, int numBytes);
 };
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-        { S_00dfdb90_Allocator& alloc = heap<S_00dfdb90_Allocator>(FUN_00c85750());
+        { S_00dfdb90_Allocator& alloc = heap<S_00dfdb90_Allocator>(hkMemoryRouter_getInstance());
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
@@ -66,7 +66,7 @@ struct Owner
     int unk1C;
     Owner* DestroyOwner(unsigned int flags);
 };
-extern hkMemoryRouter* FUN_00c85750();
+extern hkMemoryRouter* hkMemoryRouter_getInstance();
 // Calls FUN_00dfdb90 on this, and if flags has bit 0 set, frees this through the holder's heap using unk04; returns this.
 // @fnv 0x00dfdc10
 Owner* Owner::DestroyOwner(unsigned int flags)
@@ -74,7 +74,7 @@ Owner* Owner::DestroyOwner(unsigned int flags)
     ((Helper*)this)->FUN_00dfdb90();
     if (flags & 1)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         reinterpret_cast<hkMemoryAllocator*>(holder->m_heap)->blockFree(this, unk04);
     }
     return this;
@@ -90,7 +90,7 @@ struct S_00dfdc40_Allocator
     virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
     virtual void ReturnMemory(void* p, int numBytes);
 };
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 template <class T> __forceinline void destruct(T* t, int n)
 {
     for (int i = 0; i < n; ++i)
@@ -113,7 +113,7 @@ template<> __forceinline hkArray<fnv_00dfdc40::S_00dfdc40_Elem>::~hkArray()
 {
     using namespace fnv_00dfdc40;
 
-        { S_00dfdc40_Allocator& alloc = heap<S_00dfdc40_Allocator>(fnv_00dfdc40::FUN_00c85750());
+        { S_00dfdc40_Allocator& alloc = heap<S_00dfdc40_Allocator>(fnv_00dfdc40::hkMemoryRouter_getInstance());
         destruct(m_data, m_iElementCount);
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
@@ -164,7 +164,7 @@ struct Owner
     Ref* unk20;
     Owner* Destroy(unsigned int flags);
 };
-extern hkMemoryRouter* FUN_00c85750();
+extern hkMemoryRouter* hkMemoryRouter_getInstance();
 // Releases the reference at unk20, calls FUN_00dfdb90, and if flags bit 0 is set frees this through the holder's heap using unk04.
 // @fnv 0x00dfdcb0
 Owner* Owner::Destroy(unsigned int flags)
@@ -175,7 +175,7 @@ Owner* Owner::Destroy(unsigned int flags)
     ((Helper*)this)->FUN_00dfdb90();
     if (flags & 1)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         reinterpret_cast<hkMemoryAllocator*>(holder->m_heap)->blockFree(this, unk04);
     }
     return this;
@@ -184,7 +184,7 @@ Owner* Owner::Destroy(unsigned int flags)
 
 namespace fnv_00dfdcf0 {
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00dfdcf0_cls
 {
@@ -205,7 +205,7 @@ FUN_00dfdcf0_cls* FUN_00dfdcf0_cls::FUN_00dfdcf0(unsigned char acFlags)
     FUN_00dfdc40();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }

@@ -46,7 +46,7 @@ struct FUN_00e42fe0_impl
     FUN_00e42fe0_vehicle** vehicles;
     int count;
 
-    int __thiscall FUN_00e42fe0();
+    int __thiscall GetTotalVehicleCount();
 };
 extern "C" void _ReadWriteBarrier(void);
 extern "C" unsigned __int64 __rdtsc(void);
@@ -61,7 +61,7 @@ struct CharacterBufferState
 	AllocV *m_pSharedOwner;
 	AllocV &heap() { return *m_pSharedOwner; }
 };
-CharacterBufferState *__cdecl FUN_00c85750();
+CharacterBufferState *__cdecl hkMemoryRouter_getInstance();
 struct AllocV
 {
 	virtual void u0();
@@ -83,14 +83,14 @@ struct HkArr
 		m_iElementCount = n;
 	}
 };
-extern "C" int __cdecl FUN_00c908c0(AllocV &owner, void *arr, int newCap, int stride);
+extern "C" int __cdecl hkArrayUtil__reserve(AllocV &owner, void *arr, int newCap, int stride);
 inline void HkArr::reserve(AllocV &a, int n)
 {
 	if (getCapacity() < n)
 	{
 		int cap2 = 2 * getCapacity();
 		int newSize = (n < cap2) ? cap2 : n;
-		FUN_00c908c0(a, this, newSize, 0x60);
+		hkArrayUtil__reserve(a, this, newSize, 0x60);
 	}
 }
 struct Counted433
@@ -138,7 +138,7 @@ struct Vehicle433
 	int unk34;
 	int unk38;
 	Counted433 *m_counted;
-    void FUN_00e39030(void*,void*);
+    void hkpVehicleInstance_stepVehicleUsingWheelCollideOutput(void*,void*);
 };
 static __forceinline void S00e43320_timerB(const char *name, volatile DWORD &tick)
 {
@@ -185,7 +185,7 @@ struct S00e43320_Mgr
 	Vehicle433 **m_ppVehicles;
 	int m_uiItemCount;
 	void FUN_00e43060(void *a, void *b, Out433 *out);
-	void FUN_00e43320(void* param1, void* param2, void* param3);
+	void hkpVehicleLinearCastBatchingManager_stepVehiclesUsingCastResults(void* param1, void* param2, void* param3);
 };
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
@@ -409,7 +409,7 @@ __declspec(align(16)) struct E430B0Job : public E430B0QueryJob
 
 struct FUN_00d05db0_class
 {
-	void FUN_00d05db0();
+	void nullsub_8();
 };
 
 struct FUN_00d04b90_class
@@ -424,7 +424,7 @@ struct E430B0Mgr
 	E430B0Vehicle** vehicles;
 	int count;
 
-	int __thiscall FUN_00e430b0(E430B0World* world, int filterSize, int numJobs, FUN_00d04b90_class* jobQueue, void* semaphore, void* buffer);
+	int __thiscall hkpVehicleLinearCastBatchingManager_buildAndAddCastJobs(E430B0World* world, int filterSize, int numJobs, FUN_00d04b90_class* jobQueue, void* semaphore, void* buffer);
 };
 
 static inline void E430B0Timer(hkMonitorStream* mon, const char* name)
@@ -444,7 +444,8 @@ static inline void E430B0Timer(hkMonitorStream* mon, const char* name)
 }
 
 // @fnv 0x00e430b0
-int __thiscall E430B0Mgr::FUN_00e430b0(E430B0World* world, int filterSize, int numJobs, FUN_00d04b90_class* jobQueue, void* semaphore, void* buffer)
+// src: HAVOK_SRC 0x00e430b0
+int __thiscall E430B0Mgr::hkpVehicleLinearCastBatchingManager_buildAndAddCastJobs(E430B0World* world, int filterSize, int numJobs, FUN_00d04b90_class* jobQueue, void* semaphore, void* buffer)
 {
 
 	E430B0Timer((hkMonitorStream*)TlsGetValue(DAT_0126835c), "TtBuildAndAddLinearCastJobs");
@@ -486,7 +487,7 @@ int __thiscall E430B0Mgr::FUN_00e430b0(E430B0World* world, int filterSize, int n
 	{
 		int n = perJob + (j < rem);
 		E430B0Job job(world->collisionInput, header, cmdPtr, n, semaphore, 128);
-		((FUN_00d05db0_class*)&job)->FUN_00d05db0();
+		((FUN_00d05db0_class*)&job)->nullsub_8();
 		jobQueue->AddObjectCopy(&job, 1);
 		cmdPtr += n;
 		header++;

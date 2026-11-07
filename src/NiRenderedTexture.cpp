@@ -66,7 +66,7 @@ NiRenderedTexture* NiRenderedTexture::Create(const NiFixedString& name, unsigned
 // The error log didn't complain about InterlockedDecrement, only LONG.
 
 void __fastcall DestroyFogProperty(void*);
-void __fastcall FUN_00a5f800(void*);
+void __fastcall NiTexture_RemoveTextureFromList(void*);
 void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 extern int DAT_0109b944;
 
@@ -97,7 +97,7 @@ void* __fastcall DestroyRenderedTexture(NiRenderedTexture* self, int, unsigned c
         ((void(__thiscall*)(void*, int))vtbl24[0])(p24, 1);
     }
 
-    FUN_00a5f800(self);
+    NiTexture_RemoveTextureFromList(self);
     DestroyFogProperty(self);
 
     if (flags & 1)

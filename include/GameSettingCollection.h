@@ -19,8 +19,8 @@ public:
 
     static GameSettingCollection* __cdecl Instance();
     bool GetSetting(const char* key, SettingT_GameSettingCollection_** setting);
-    TESFile* FUN_004f8960();
-    Setting* FUN_004f8a30(const char* key);
+    TESFile* GameSettingCollection_File();
+    Setting* SettingCollectionMap_Setting_GetPtr(const char* key);
     void SetField108(TESFile* file);
     SETTING_VALUE* __thiscall Bool();
     SETTING_VALUE* __thiscall Int();

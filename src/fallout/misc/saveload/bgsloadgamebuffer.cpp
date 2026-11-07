@@ -15,11 +15,12 @@ struct FUN_00835f80_shell
     char _1d;
     char _1e;
     char _1f;
-    void FUN_00835f80(BGSLoadFormBuffer* apBuffer);
+    void DynamicRadio_Load(BGSLoadFormBuffer* apBuffer);
 };
 
 // @fnv 0x00835f80
-void __thiscall FUN_00835f80_shell::FUN_00835f80(BGSLoadFormBuffer* apBuffer)
+// src: COMMUNITY 0x00835f80
+void __thiscall FUN_00835f80_shell::DynamicRadio_Load(BGSLoadFormBuffer* apBuffer)
 {
     apBuffer->ReadFormIdentifier(this);
     apBuffer->ReadTypedData(&this->_1c, 1u);
@@ -46,7 +47,8 @@ void BGSLoadGameBuffer::SetBuffer(char* apBuffer, unsigned int aiSize, unsigned 
 }
 
 // @fnv 0x00864980
-void BGSLoadGameBuffer::FUN_00864980(void* apData, unsigned int aiSize)
+// src: XBOX_PDB 0x00864980
+void BGSLoadGameBuffer::LoadData(void* apData, unsigned int aiSize)
 {
     ReadTypedData(static_cast<NiQuaternion*>(apData), aiSize);
 }
@@ -75,11 +77,12 @@ struct SandboxProcedureData
 typedef char _sizecheck_SandBoxChoiceListItem[sizeof(SandboxProcedureData) == 16 ? 1 : -1];
 struct FUN_009f38b0_shell : public SandboxProcedureData
 {
-    void FUN_009f38b0(BGSLoadFormBuffer*);
+    void SandBoxChoiceListItem_LoadGame(BGSLoadFormBuffer*);
 };
 
 // @fnv 0x009f38b0
-void FUN_009f38b0_shell::FUN_009f38b0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009f38b0
+void FUN_009f38b0_shell::SandBoxChoiceListItem_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     apLoadGameBuffer->ReadTypedData(static_cast<void*>(&eProcedure), 4u);
     apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_iActivityState), 4u);
@@ -94,7 +97,8 @@ struct SaveGameLoader
 };
 
 // @fnv 0x0084c2a0
-void FUN_0084c2a0(unsigned int start, unsigned int end, unsigned char flag)
+// src: XBOX_PDB 0x0084c2a0
+void BGSSaveLoadGlobalData_RevertGlobalDataRange(unsigned int start, unsigned int end, unsigned char flag)
 {
     BGSLoadGameBuffer lgb;
     for (unsigned int uiIndex = start; uiIndex < end; uiIndex++)
@@ -131,11 +135,12 @@ struct FUN_008579e0_shell
 {
     char _0[0x14];
     void* _14;
-    void FUN_008579e0(void* dst, unsigned int size);
+    void TESSaveLoadGame_LoadGameDataOLD(void* dst, unsigned int size);
 };
 // Copies size bytes from the object's _14 pointer into dst, then calls Init(size) on this.
 // @fnv 0x008579e0
-void FUN_008579e0_shell::FUN_008579e0(void* dst, unsigned int size)
+// src: XBOX_PDB 0x008579e0
+void FUN_008579e0_shell::TESSaveLoadGame_LoadGameDataOLD(void* dst, unsigned int size)
 {
     __memcpy(dst, _14, size);
     ((FUN_00857bd0*)this)->Init(size);
@@ -202,7 +207,7 @@ struct Dummy84eaf0
 {
     void ClearNumericIDIndex();
 };
-unsigned int __fastcall FUN_00853500(void*);
+unsigned int __fastcall BGSNumericIDIndex_GetNumericID(void*);
 }
 
 // @fnv 0x008648a0
@@ -213,7 +218,7 @@ unsigned int BGSLoadGameBuffer::ReadFormIdentifier()
     PackedFormID formIDIndex;
     ((Dummy84eaf0*)&formIDIndex)->ClearNumericIDIndex();
     ReadTypedData(reinterpret_cast<NiQuaternion*>(&formIDIndex), 3);
-    iformID = FUN_00853500(&formIDIndex);
+    iformID = BGSNumericIDIndex_GetNumericID(&formIDIndex);
     return iformID;
 }
 
@@ -233,8 +238,8 @@ struct Dummy84eaf0
 {
     void ClearNumericIDIndex();
 };
-unsigned int __fastcall FUN_00853500(void*);
-bool __fastcall FUN_00864940(void*);
+unsigned int __fastcall BGSNumericIDIndex_GetNumericID(void*);
+bool __fastcall BGSNumericIDIndex_IsZero(void*);
 }
 
 // @fnv 0x008648e0
@@ -244,18 +249,19 @@ bool BGSLoadGameBuffer::ReadFormIdentifier(unsigned int* aiFormID)
     PackedFormID formIDIndex;
     ((Dummy84eaf0*)&formIDIndex)->ClearNumericIDIndex();
     ReadTypedData(reinterpret_cast<NiQuaternion*>(&formIDIndex), 3);
-    *aiFormID = FUN_00853500(&formIDIndex);
-    return !FUN_00864940(&formIDIndex) && *aiFormID == 0;
+    *aiFormID = BGSNumericIDIndex_GetNumericID(&formIDIndex);
+    return !BGSNumericIDIndex_IsZero(&formIDIndex) && *aiFormID == 0;
 }
 
 struct FUN_00864940_shell
 {
-    unsigned char FUN_00864940();
+    unsigned char BGSNumericIDIndex_IsZero();
 };
 
 // Returns 1 if the first three bytes at this are all zero, otherwise 0.
 // @fnv 0x00864940
-unsigned char FUN_00864940_shell::FUN_00864940()
+// src: XBOX_PDB 0x00864940
+unsigned char FUN_00864940_shell::BGSNumericIDIndex_IsZero()
 {
     return (!(unsigned char)*reinterpret_cast<char*>(this) && !(unsigned char)reinterpret_cast<char*>(this)[1] &&
             !(unsigned char)reinterpret_cast<char*>(this)[2])
@@ -335,15 +341,16 @@ struct PackedFormID
 typedef char _sizecheck_BGSNumericIDIndex[sizeof(PackedFormID) == 3 ? 1 : -1];
 struct FUN_00853500_shell : public PackedFormID
 {
-    unsigned int FUN_00853500();
+    unsigned int BGSNumericIDIndex_GetNumericID();
 };
 
 struct FUN_00846d20_shell
 {
-    unsigned int FUN_00846d20(unsigned int);
+    unsigned int BGSSaveLoadFormIDMap_GetFormID(unsigned int);
 };
 // @fnv 0x00853500
-unsigned int FUN_00853500_shell::FUN_00853500()
+// src: XBOX_PDB 0x00853500
+unsigned int FUN_00853500_shell::BGSNumericIDIndex_GetNumericID()
 {
     unsigned int uiValue = (unsigned int)((unsigned char)m_ucIDByte0 << 0x10) +
                            (unsigned int)((unsigned char)m_ucIDByte1 << 8) + (unsigned int)(unsigned char)m_ucIDByte2;
@@ -353,7 +360,7 @@ unsigned int FUN_00853500_shell::FUN_00853500()
         uiValue |= 0xff000000;
         return uiValue;
     }
-    return ((FUN_00846d20_shell*)g_BGSSaveLoadGame->GetFormIDMap())->FUN_00846d20(uiValue);
+    return ((FUN_00846d20_shell*)g_BGSSaveLoadGame->GetFormIDMap())->BGSSaveLoadFormIDMap_GetFormID(uiValue);
 }
 
 void* __cdecl operator new(unsigned int);
@@ -365,22 +372,23 @@ struct FUN_0066deb0
     char _pad[0x1c];
 
     FUN_0066deb0();
-    void FUN_0066e440(BGSLoadGameBuffer*);
+    void ActorCause_LoadGameBGS(BGSLoadGameBuffer*);
 };
 
 // @fnv 0x0066e750
-void FUN_0066e750(BGSLoadGameBuffer* apLoadGameBuffer)
+// src: COMMUNITY 0x0066e750
+void ActorCause_LoadActorCausesList(BGSLoadGameBuffer* apLoadGameBuffer)
 {
     unsigned int iloop;
     unsigned int isaveGameCount;
 
-    apLoadGameBuffer->FUN_00864980(&DAT_011d60cc, 4);
+    apLoadGameBuffer->LoadData(&DAT_011d60cc, 4);
     iloop = apLoadGameBuffer->ReadElementCount();
 
     for (isaveGameCount = 0; isaveGameCount < iloop; ++isaveGameCount)
     {
         FUN_0066deb0* pactorCause = new FUN_0066deb0();
-        pactorCause->FUN_0066e440(apLoadGameBuffer);
+        pactorCause->ActorCause_LoadGameBGS(apLoadGameBuffer);
     }
 }
 
@@ -390,7 +398,7 @@ void BGSLoadGameBuffer::ReadTypedData(NiMatrix3* matrix, unsigned int unused)
     NiQuaternion quatData;
     {
         BGSLoadGameBuffer* pBuffer = this;
-        pBuffer->FUN_00864980(&quatData, 0x10);
+        pBuffer->LoadData(&quatData, 0x10);
         quatData.ToRotationMatrix(*matrix);
     }
 }

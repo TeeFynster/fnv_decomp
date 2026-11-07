@@ -28,7 +28,7 @@ struct FUN_00e43d00_class
     virtual void v7() = 0;
     virtual float v8(FUN_00e43d00_arg1*, FUN_00e43d00_arg2*) = 0;
 
-    float FUN_00e43d00(FUN_00e43d00_arg1*, FUN_00e43d00_arg2*);
+    float hkpVehicleDefaultTransmission_calcMainTransmittedTorque(FUN_00e43d00_arg1*, FUN_00e43d00_arg2*);
 };
 struct FUN_00e43c30_arg1
 {
@@ -102,7 +102,7 @@ struct FUN_00e43ea0_Class
     int unk18;
     int unk1C;
     int unk20;
-    void FUN_00e43ea0(float a, int b, FUN_00e43ea0_State* st);
+    void hkpVehicleDefaultTransmission_updateCurrentGear(float a, int b, FUN_00e43ea0_State* st);
 };
 
 extern "C" const double gModifierZero;
@@ -200,7 +200,8 @@ struct Vehicle
     VehicleWheelInfo* wheels;
 };
 // @fnv 0x00e43d40
-float hkpVehicleDefaultTransmission::FUN_00e43d40(const Vehicle* vehicle, const void* input)
+// src: HAVOK_LIB 0x00e43d40
+float hkpVehicleDefaultTransmission::calcTransmissionRPM(const Vehicle* vehicle, const void* input)
 {
     float rpm = 0.0f;
     for (int i = 0; i < vehicle->data->numWheels; ++i)

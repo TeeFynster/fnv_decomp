@@ -79,32 +79,32 @@ struct CellH {
     int GetCellGridX();
 };
 struct FUN_00533fd0_Class {
-    int FUN_00533fd0();
+    int TESObjectLAND_GetCellX();
 };
 struct FUN_00534050_Class {
-    int FUN_00533fd0();
-    float FUN_00534050();
+    int TESObjectLAND_GetCellX();
+    float TESObjectLAND_GetWorldCellX();
 };
 struct FUN_00534080_Class {
     int FUN_00534010();
-    double FUN_00534080();
+    double TESObjectLAND_GetWorldCellY();
 };
 struct FUN_005340b0_Class {
     int m_auiShapeKeys[8];
     TESObjectREFR* m_pDoor;
-    TESWorldSpace* FUN_005340b0();
+    TESWorldSpace* TESObjectLAND_GetWorldSpace();
 };
 struct FUN_00534140_Class {
-    bool FUN_00534140();
+    bool TESObjectLAND_GetLandRemapped();
 };
 struct FUN_00534160_Class {
-    void FUN_00534160(bool set);
+    void TESObjectLAND_SetLandRemapped(bool set);
 };
 struct FUN_005341a0_Class {
-    void FUN_005341a0(bool set);
+    void TESObjectLAND_SetGoodMopp(bool set);
 };
 struct FUN_005341e0_Class {
-    bool FUN_005341e0();
+    bool TESObjectLAND_HasGoodNormals();
 };
 struct FUN_00534200_Class {
     int m_00;
@@ -115,18 +115,18 @@ struct FUN_00534200_Class {
     int m_14;
     int m_18;
     int m_1c;
-    void FUN_00534200(bool value);
+    void TESObjectLAND_SetGoodNormals(bool value);
 };
 
-struct FUN_00534570_shell { char* m_pkDeltas; unsigned int stride; void FUN_00534570(unsigned int index, NiPoint3& vertex); };
+struct FUN_00534570_shell { char* m_pkDeltas; unsigned int stride; void NiGeometryDataIteratorNiPoint3_Get(unsigned int index, NiPoint3& vertex); };
 template<int> struct EndianSizeTag {};
 void BSEndian(int*, EndianSizeTag<2>);
 void BSEndian(unsigned short*, EndianSizeTag<2>);
 struct FUN_00535a60_Class {
-    void FUN_00535a60();
+    void ProcessState_00535a60();
 };
 extern int DAT_011c9f04;
-int FUN_00535ae0();
+int TESLandTexture_GetDefaultTexture();
 extern "C" void __cdecl _Deallocate(void*);
 struct FUN_00537100_Class {
     void __thiscall FUN_00537130();
@@ -135,18 +135,18 @@ struct FUN_00537100_Class {
 extern const char* const g_011f4aac_arg1;
 struct FUN_00537ca0_class
 {
-    const char* const* FUN_00537ca0();
+    const char* const* NiAdditionalGeometryData_GetRTTI();
 };
-struct FUN_00a73080_holder { void FUN_00a73080(); };
+struct FUN_00a73080_holder { void ReleaseEntries_00a73080(); };
 void __cdecl operator delete(void* p, unsigned int size);
 
 struct FUN_00540800_Class {
-    void FUN_00540800();
-    void FUN_00537ce0();
+    void UpdateFields_00540800();
+    void ForwardCall_00537ce0();
 };
 extern "C" void* g_011f4aac;
 struct FUN_00537d00_Class {
-    void* __thiscall FUN_00537d00();
+    void* __thiscall BSPackedAdditionalGeometryData_GetRTTI();
 };
 struct FUN_00537d10_Class {
     void FUN_00537d40();
@@ -158,7 +158,7 @@ struct QuantityData { void SetQuantity(unsigned int); };
 #include "../../include/TESConditionItem.h"
 struct TESQuest;
 
-struct FUN_00537e30_cls { char _pad[24]; int _m18; int _m1c; FUN_00537e30_cls* FUN_00537e30(); };
+struct FUN_00537e30_cls { char _pad[24]; int _m18; int _m1c; FUN_00537e30_cls* NiVBChip_NiVBChip(); };
 struct FUN_00537e90 {
     unsigned int quantity;
     void SetQuantity(unsigned int value);
@@ -169,10 +169,10 @@ struct FUN_00538e30_class {
 extern int DAT_0102e378;
 struct FUN_00538e10_class {
     int* m_vtbl;
-    void __fastcall FUN_00538e10();
+    void __fastcall UpdateState_00538e10();
 };
 struct B1 { virtual ~B1(); void* FUN_00538e80(unsigned int); };
-void __cdecl FUN_00538eb0(void*);
+void __cdecl Tesland_UpdateState_00538eb0(void*);
 extern "C" void __cdecl FUN_00538f20();
 extern int DAT_0102e378;
 struct FUN_00538ef0_class {
@@ -180,14 +180,14 @@ struct FUN_00538ef0_class {
     int m_kPointA;
     int m_kPointB;
     void FUN_00538f20();
-    void* FUN_00538ef0();
+    void* UpdateState_00538ef0();
 };
 extern int DAT_0102e388;
 struct FUN_00538f20 {
     int* p;
     FUN_00538f20();
 };
-void __cdecl FUN_00538eb0(void*);
+void __cdecl Tesland_UpdateState_00538eb0(void*);
 struct FUN_00538f80 {
     void __thiscall FUN_00538fb0();
     void* __thiscall DeleteThis(unsigned int flags);
@@ -195,7 +195,7 @@ struct FUN_00538f80 {
 struct FUN_00539460_Class {
     char m_00[0x1c];
     int m_1c;
-    bool FUN_00539460();
+    bool TESObjectLAND_IsLandAltered();
 };
 struct FUN_005394c0_Class {
     int m_00;
@@ -206,13 +206,13 @@ struct FUN_005394c0_Class {
     int m_14;
     int m_18;
     int m_1c;
-    void FUN_005394c0(bool value);
+    void TESObjectLAND_MarkLoaded(bool value);
 };
 struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f4ab8;
 struct FUN_00539fc0_Class
 {
-    GlobalObjectO2_00a7b610* FUN_00539fc0();
+    GlobalObjectO2_00a7b610* NiBinaryExtraData_GetRTTI();
 };
 void __cdecl operator delete(void* p, unsigned int size);
 struct FUN_0053a000 {
@@ -222,7 +222,7 @@ struct FUN_00539fd0 : public FUN_0053a000 {
     void* __thiscall ScalarDeletingDestructor(unsigned int flags);
 };
 struct FUN_0053a070_Class {
-    void __thiscall FUN_0053a070(int a, int b);
+    void __thiscall NiBinaryExtraData_SetValue(int a, int b);
 };
 struct FUN_0053a510 {
     NiPoint3 m0;
@@ -248,18 +248,18 @@ struct FUN_0053a760_Class {
     int m_28;
     int m_2c;
     int m_30[6];
-    void FUN_0053a760(unsigned char a, unsigned short b, int c);
+    void TESObjectLAND_SetTexture(unsigned char a, unsigned short b, int c);
 };
 struct FUN_0053ae30_class {
-    int __thiscall FUN_0053a700(unsigned char, unsigned short);
-    float __thiscall FUN_0053a830(unsigned char, unsigned short, unsigned short);
-    float __thiscall FUN_0053ae30(unsigned char type, unsigned short id);
+    int __thiscall TESObjectLAND_GetTexture(unsigned char, unsigned short);
+    float __thiscall TESObjectLAND_GetTexturePercent(unsigned char, unsigned short, unsigned short);
+    float __thiscall TESObjectLAND_GetTextureUsePercent(unsigned char type, unsigned short id);
 };
 struct GlobalObject_0044f440 {
     float* Float();
 };
 extern GlobalObject_0044f440 g_011c8dcc;
-float FUN_0053ca40();
+float TESGrass_GetWaveOffsetRange();
 struct FUN_0053ca60 {
     void FUN_00b600e0();
     FUN_0053ca60* Init();
@@ -273,12 +273,12 @@ struct Buf50
 };
 struct Owner
 {
-    bool FUN_0053b550(Buf50*, int, int);
+    bool TESObjectLAND_GetCoordData(Buf50*, int, int);
     bool ComputeTerrainNormalAndTangent(Buf50*, int, int);
-    bool FUN_0053d2e0(int, int, int);
+    bool TESObjectLAND_GetLandNormal(int, int, int);
 };
 struct FUN_0053df00_Class {
-    int __thiscall FUN_0053df00();
+    int __thiscall TESObjectLAND_GetNormalArray();
 };
 struct Tmp53e210 {
     int m00;
@@ -304,9 +304,9 @@ struct Tmp53e210 {
     void FUN_0053a510();
 };
 struct Host53e210 {
-    bool FUN_0053b550(Tmp53e210* p, int a, int b);
-    bool FUN_0053e260(int a, int b);
-    bool FUN_0053e210(int a);
+    bool TESObjectLAND_GetCoordData(Tmp53e210* p, int a, int b);
+    bool TESObjectLAND_IsNormalSet(int a, int b);
+    bool TESObjectLAND_IsNormalSet_0(int a);
 };
 struct FUN_0053e260_Class {
     void* m_p; // +0x00
@@ -320,23 +320,23 @@ struct FUN_0053e260_Class {
     void* m_uiX; // +0x20
     void* m_uiY; // +0x24
     void* m_uiZ; // +0x28
-    unsigned char FUN_0053e260(int index, int offset);
+    unsigned char TESObjectLAND_IsNormalSet(int index, int offset);
 };
 struct NiAVObject;
 
 struct FUN_0053f120_Param { unsigned char _pad[0x18]; unsigned int idx; };
-struct FUN_0053f120_Holder { unsigned char _pad[0x28]; NiNode*** fld28; NiAVObject* FUN_0053f120(FUN_0053f120_Param*); };
+struct FUN_0053f120_Holder { unsigned char _pad[0x28]; NiNode*** fld28; NiAVObject* GetGeometry_0053f120(FUN_0053f120_Param*); };
 #include "../../include/LandscapeColorData.h"
 
 struct QueuedFile;
 
 struct FUN_00541540_Class {
-    void FUN_00541540(int a, QueuedFile* b);
+    void TESLandTexture_QueueTexture(int a, QueuedFile* b);
 };
 struct FUN_00541590_Class {
-    char FUN_00541590();
+    char TESLandTexture_GetSpecularExponent();
 };
-struct S_00592cf0 { void* FUN_00592cf0(); };
+struct S_00592cf0 { void* BGSTextureSet_GetAsShaderTextureSet(); };
 struct Param5380d0 {
 	virtual void v00(); virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
 	virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09();
@@ -349,7 +349,7 @@ struct Param5380d0 {
 	virtual bool v40();
 };
 struct This5380d0 {
-	bool FUN_005380d0(Param5380d0* p);
+	bool bhkWorld_RemoveBody(Param5380d0* p);
 };
 
 BSAudio* _FUN_00c85750();
@@ -364,7 +364,7 @@ struct Prm
     char pad[4];
     unsigned short val;
 };
-void FUN_00538eb0(Prm* p);
+void Tesland_UpdateState_00538eb0(Prm* p);
 struct FUN_0053a5a0_Inner
 {
     char pad[32];
@@ -374,7 +374,7 @@ struct FUN_0053a5a0_Outer
 {
     char pad[40];
     FUN_0053a5a0_Inner* ptr;
-    void* FUN_0053a5a0(unsigned char index);
+    void* TESObjectLAND_GetDefaultTexture(unsigned char index);
 };
 struct FUN_0053a700_Mid {
     unsigned char pad[0x30];
@@ -383,11 +383,11 @@ struct FUN_0053a700_Mid {
 struct FUN_0053a700_Holder {
     unsigned char pad[0x28];
     FUN_0053a700_Mid* p;
-    int FUN_0053a700(unsigned char, unsigned short);
+    int TESObjectLAND_GetTexture(unsigned char, unsigned short);
 };
 extern float DAT_01015f5c;
 struct FUN_0053a630_Class : public FUN_0053ae30_class {
-    int FUN_0053a630(unsigned char type, unsigned short id);
+    int TESObjectLAND_GetMainTexture_0053a630(unsigned char type, unsigned short id);
 };
 struct A51BF0Base {
     static void* operator new(unsigned int); static void operator delete(void*, unsigned int);
@@ -396,7 +396,7 @@ struct FUN_00537d60 : A51BF0Base {
     char _pad[0x18];
     int _m18;
     int _m1c;
-    FUN_00537e30_cls* FUN_00537e30();
+    FUN_00537e30_cls* NiVBChip_NiVBChip();
     void SetQuantity(unsigned int);
     void Initialize(unsigned int);
     void SetFlags(unsigned int);
@@ -405,21 +405,21 @@ struct FUN_00537d60 : A51BF0Base {
     void SetOwner(TESQuest*);
     FUN_00537d60();
 };
-void* FUN_00537d60_Create(unsigned int a, unsigned int b, unsigned int c, int d, int e);
+void* Object_ProcessAndReturnValue_00537d60(unsigned int a, unsigned int b, unsigned int c, int d, int e);
 struct FUN_005330d8_class
 {
     void _FNV_GetObjectReference();
 };
 struct FUN_005331f0_class
 {
-    void FUN_005331f0();
+    void TESObjectLAND_GetSaveParentCell();
 };
 extern int DAT_0102dcd4;
 extern int DAT_0102dccc;
 extern unsigned char DAT_011c9efc;
 extern int DAT_011c9f00;
-void __cdecl FUN_00533420();
-void __cdecl FUN_00403d30(void* p, int value, unsigned int size);
+void __cdecl TESObjectLAND_InitializeStatics();
+void __cdecl ourMemset(void* p, int value, unsigned int size);
 struct FUN_00483370 {
     void* m_vt;
     int m_04;
@@ -463,7 +463,7 @@ struct LandForm : TESLandFlagsView {
     int unk24;
     LandData_tesland_od_variant_ctx_variant* unk28;
 
-    bool FUN_00535b90(bool bFlag);
+    bool TESObjectLAND_LoadVertices(bool bFlag);
     bool IsLoaded();
     TESFile* GetFile(int index);
     void SetLoadState(bool value);
@@ -520,18 +520,18 @@ public:
     virtual ~FUN_00537d40();
 };
 int TruncateFloatToInt(float value);
-bool FUN_00401500();
+bool TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int fourcc, void* buf, unsigned int size);
-void __cdecl FUN_004856f0(unsigned int fourcc, void* buf, unsigned int size);
+void __cdecl TESForm_AddChunkArray(unsigned int fourcc, void* buf, unsigned int size);
 int __cdecl FUN_00ec7d40(int v);
 void __cdecl FNV_Warning(const char* fmt, ...);
 void __cdecl CompressSaveLoadRecord();
-int FUN_00535ae0();
-void __fastcall FUN_00503210(void* p);
-struct FUN_0084e3a0_Class { int FUN_0084e3a0(); };
-struct FUN_00535aa0_Class { void FUN_00535aa0(); };
-struct FUN_004855a0_shell { void FUN_004855a0(); };
-struct FUN_00485680_shell { void FUN_00485680(); };
+int TESLandTexture_GetDefaultTexture();
+void __fastcall QuestPerkEntryData_Endian(void* p);
+struct FUN_0084e3a0_Class { int GetHavokWorldObjectCountInSceneGraph_0084e3a0(); };
+struct FUN_00535aa0_Class { void OBJ_WEAP_CRITICAL_Endian(); };
+struct FUN_004855a0_shell { void BeginFormRecord(); };
+struct FUN_00485680_shell { void FinishFormRecord(); };
 extern double DAT_0102dfe0;
 extern double DAT_0101e568;
 extern double DAT_01012060;
@@ -565,8 +565,8 @@ struct Entry538110 {
     unsigned short m_02;
     float m_04;
 };
-struct FUN_0053db20_Class { void FUN_0053db20(); };
-struct FUN_0053a940_Class { void FUN_0053a940(); };
+struct FUN_0053db20_Class { void TESObjectLAND_ForceGoodNormals(); };
+struct FUN_0053a940_Class { void TESObjectLAND_AdjustTextureArrays(); };
 struct This538110 {
     int m_00;
     int m_04;
@@ -579,7 +579,7 @@ struct This538110 {
     int m_20;
     int m_24;
     TerrainRenderArrays* m_28;
-    void FUN_00538110();
+    void TESObjectLAND_Save();
 };
 struct Base8ef0 { virtual void v0(); int a; int b; int c; Base8ef0(); ~Base8ef0(); };
 struct MA { int x[4]; MA(); void Go(); };
@@ -667,24 +667,24 @@ struct S_00539280_Obj {
     virtual void vfn42();
     virtual void vfn43();
     virtual bool vfn44(S_00539280_Arg* a, bool b, bool c);
-    bool FUN_00485be0(int id);
+    bool TESForm_FormIDMatchesWithoutIndex(int id);
 };
 struct S_00539280_Owner {
-    S_00539280_Obj* FUN_007af430();
-    bool FUN_00539280(S_00539280_Arg* a, bool b, bool c);
+    S_00539280_Obj* BGSSaveFormBuffer_GetForm();
+    bool TESObjectLAND_BelongsInGroup(S_00539280_Arg* a, bool b, bool c);
 };
 
-struct Texture960 {Texture960* FUN_009611e0();void* FUN_00592cf0();unsigned char FUN_00541590();};
-struct Property960 {virtual void v000();virtual void v004();virtual void v008();virtual void v00c();virtual void v010();virtual void v014();virtual void v018();virtual void v01c();virtual void v020();virtual void v024();virtual void v028();virtual void v02c();virtual void v030();virtual void v034();virtual void v038();virtual void v03c();virtual void v040();virtual void v044();virtual void v048();virtual void v04c();virtual void v050();virtual void v054();virtual void v058();virtual void v05c();virtual void v060();virtual void v064();virtual void v068();virtual void v06c();virtual void v070();virtual void v074();virtual void v078();virtual void v07c();virtual void v080();virtual void v084();virtual void v088();virtual void v08c();virtual void v090();virtual void v094();virtual void v098();virtual void v09c();virtual void v0a0();virtual void v0a4();virtual void v0a8();virtual void v0ac();virtual void v0b0();virtual void v0b4();virtual void v0b8();virtual void v0bc();virtual void v0c0();virtual void v0c4();virtual void v0c8();virtual void v0cc();virtual void v0d0();virtual void* vd4(void*);unsigned unk004;unsigned unk008;unsigned unk00c;unsigned unk010;unsigned unk014;unsigned unk018;unsigned unk01c;unsigned unk020;unsigned unk024;unsigned unk028;unsigned unk02c;unsigned unk030;unsigned unk034;unsigned unk038;unsigned unk03c;unsigned unk040;unsigned unk044;unsigned unk048;unsigned unk04c;unsigned unk050;unsigned unk054;unsigned unk058;unsigned unk05c;unsigned unk060;unsigned unk064;unsigned unk068;unsigned unk06c;unsigned unk070;unsigned unk074;unsigned unk078;unsigned unk07c;unsigned unk080;unsigned unk084;unsigned unk088;unsigned unk08c;unsigned unk090;unsigned unk094;unsigned unk098;unsigned unk09c;unsigned unk0a0;unsigned unk0a4;unsigned unk0a8;unsigned unk0ac;unsigned unk0b0;unsigned unk0b4;unsigned unk0b8;unsigned unk0bc;unsigned unk0c0;unsigned unk0c4;unsigned unk0c8;unsigned unk0cc;unsigned unk0d0;unsigned unk0d4;unsigned unk0d8;unsigned unk0dc;unsigned unk0e0;unsigned unk0e4;unsigned unk0e8;unsigned unk0ec;unsigned unk0f0;unsigned unk0f4;unsigned unk0f8;unsigned unk0fc;unsigned unk100;Property960();static void* operator new(unsigned); static void operator delete(void*, unsigned int);void FUN_005a8060(int);void FUN_00b68660(int,void*);void FUN_00b66640(unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,int,int,int);void FUN_00539f20(void*);};
+struct Texture960 {Texture960* NiAVObject_GetParent();void* BGSTextureSet_GetAsShaderTextureSet();unsigned char TESLandTexture_GetSpecularExponent();};
+struct Property960 {virtual void v000();virtual void v004();virtual void v008();virtual void v00c();virtual void v010();virtual void v014();virtual void v018();virtual void v01c();virtual void v020();virtual void v024();virtual void v028();virtual void v02c();virtual void v030();virtual void v034();virtual void v038();virtual void v03c();virtual void v040();virtual void v044();virtual void v048();virtual void v04c();virtual void v050();virtual void v054();virtual void v058();virtual void v05c();virtual void v060();virtual void v064();virtual void v068();virtual void v06c();virtual void v070();virtual void v074();virtual void v078();virtual void v07c();virtual void v080();virtual void v084();virtual void v088();virtual void v08c();virtual void v090();virtual void v094();virtual void v098();virtual void v09c();virtual void v0a0();virtual void v0a4();virtual void v0a8();virtual void v0ac();virtual void v0b0();virtual void v0b4();virtual void v0b8();virtual void v0bc();virtual void v0c0();virtual void v0c4();virtual void v0c8();virtual void v0cc();virtual void v0d0();virtual void* vd4(void*);unsigned unk004;unsigned unk008;unsigned unk00c;unsigned unk010;unsigned unk014;unsigned unk018;unsigned unk01c;unsigned unk020;unsigned unk024;unsigned unk028;unsigned unk02c;unsigned unk030;unsigned unk034;unsigned unk038;unsigned unk03c;unsigned unk040;unsigned unk044;unsigned unk048;unsigned unk04c;unsigned unk050;unsigned unk054;unsigned unk058;unsigned unk05c;unsigned unk060;unsigned unk064;unsigned unk068;unsigned unk06c;unsigned unk070;unsigned unk074;unsigned unk078;unsigned unk07c;unsigned unk080;unsigned unk084;unsigned unk088;unsigned unk08c;unsigned unk090;unsigned unk094;unsigned unk098;unsigned unk09c;unsigned unk0a0;unsigned unk0a4;unsigned unk0a8;unsigned unk0ac;unsigned unk0b0;unsigned unk0b4;unsigned unk0b8;unsigned unk0bc;unsigned unk0c0;unsigned unk0c4;unsigned unk0c8;unsigned unk0cc;unsigned unk0d0;unsigned unk0d4;unsigned unk0d8;unsigned unk0dc;unsigned unk0e0;unsigned unk0e4;unsigned unk0e8;unsigned unk0ec;unsigned unk0f0;unsigned unk0f4;unsigned unk0f8;unsigned unk0fc;unsigned unk100;Property960();static void* operator new(unsigned); static void operator delete(void*, unsigned int);void FUN_005a8060(int);void BSShaderPPLightingProperty_SetLandscapeTextureSet(int,void*);void BSShaderPPLightingProperty_SetLandscapeSpecularExponents(unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,int,int,int);void BSShaderPPLightingProperty_StoreExtraDataPointers(void*);};
 struct Binary960 {unsigned unk00,unk04,unk08,unk0c,unk10;Binary960(unsigned,unsigned char*);static void* operator new(unsigned); static void operator delete(void*, unsigned int);};
-const char* __cdecl FUN_00539f40();
-struct Geometry960 {void FUN_00539ef0(void*);void FUN_00439410(Property960*);};
-struct Node960 {void FUN_00a5bc40(const char*,Binary960*);Geometry960* FUN_0045bc00(unsigned);};
-void* __cdecl FUN_00b54b60(Geometry960*);
+const char* __cdecl BSShaderManager_GetTexPercTag();
+struct Geometry960 {void NiGeometry_SetAdditionalGeometryData(void*);void NiAVObject_AttachProperty(Property960*);};
+struct Node960 {void FUN_00a5bc40(const char*,Binary960*);Geometry960* NiNode_GetAtChecked(unsigned);};
+void* __cdecl BSShaderManager_CreateTangentSpaceSimple(Geometry960*);
 void __cdecl FUN_00b57e30(Node960*,int,int);
 // Terrain nodes/colors and quadrant texture/layer arrays at +0x20/+0x30, unlike Data's skill/category record.
 struct TerrainMaterialArrays {Node960** nodes;unsigned unk04,unk08;NiColorA** colors;unsigned unk10,unk14,unk18,unk1c;Texture960* base[4];Texture960** layers[4];unsigned char** binary[4];};
-struct Host960 {unsigned unk00,unk04,unk08,unk0c,unk10,unk14,unk18,flags,unk20,unk24;TerrainMaterialArrays* data;void FUN_005394c0(bool);bool FUN_00539960();};
+struct Host960 {unsigned unk00,unk04,unk08,unk0c,unk10,unk14,unk18,flags,unk20,unk24;TerrainMaterialArrays* data;void TESObjectLAND_MarkLoaded(bool);bool TESObjectLAND_InitLandscape();};
 void __cdecl NiFree(void* pvMem);
 class B53A000ExtraData {
 public:
@@ -729,9 +729,9 @@ struct LocalObj53a5e0 {
     void FUN_0053a510();
 };
 struct FUN_0053a5e0_cls {
-    bool FUN_0053b550(LocalObj53a5e0* p, int a, int b);
-    int FUN_0053a630(unsigned char type, unsigned short id);
-    int FUN_0053a5e0(int arg);
+    bool TESObjectLAND_GetCoordData(LocalObj53a5e0* p, int a, int b);
+    int TESObjectLAND_GetMainTexture_0053a630(unsigned char type, unsigned short id);
+    int TESObjectLAND_GetMainTexture(int arg);
 };
 struct FUN_0053a7a0_Tbl {
     char pad[0x40];
@@ -740,7 +740,7 @@ struct FUN_0053a7a0_Tbl {
 struct FUN_0053a7a0_cls {
     char pad[0x28];
     FUN_0053a7a0_Tbl* m_28;
-    float FUN_0053a7a0(unsigned char a, unsigned short b);
+    float TESObjectLAND_GetDefaultTexturePercent(unsigned char a, unsigned short b);
 };
 struct FUN_0053a830_Row {
     float* cells[0x121];
@@ -776,7 +776,7 @@ struct FUN_0053a830_cls {
     int m20;
     int m24;
     FUN_0053a830_Mid* m_28;
-    float FUN_0053a830(unsigned char type, unsigned short id, unsigned short idx);
+    float TESObjectLAND_GetTexturePercent(unsigned char type, unsigned short id, unsigned short idx);
 };
 extern "C" double gModifierZero;
 struct C53A8A0Data {
@@ -812,7 +812,7 @@ public:
     int unk24;
     C53A8A0Data* m_pUserData;
 
-    void FUN_0053a8a0(unsigned char ucTable, unsigned short usRow, unsigned short usColumn, float fValue);
+    void TESObjectLAND_SetTexturePercent(unsigned char ucTable, unsigned short usRow, unsigned short usColumn, float fValue);
 };
 struct WeightTables53ace0 {
     int unk00;
@@ -839,7 +839,7 @@ struct Owner53ace0 : public FUN_0053ae30_class {
     int unk20;
     int unk24;
     WeightTables53ace0* tables;
-    void FUN_0053ace0(unsigned char type, unsigned short id);
+    void TESObjectLAND_SetNewDefaultTexture(unsigned char type, unsigned short id);
 };
 extern float DAT_01017a3c;
 struct FNv53b450_Point {
@@ -849,9 +849,9 @@ struct FNv53b450_Point {
     void FUN_006815c0();
 };
 struct FNv53b450_Source {
-    int FUN_00533fd0();
+    int TESObjectLAND_GetCellX();
     int FUN_00534010();
-    FNv53b450_Point* FUN_0053b450(FNv53b450_Point* output, unsigned char flags, unsigned short cellIndex, const int* x, const int* y);
+    FNv53b450_Point* TESObjectLAND_GetVertexLocation(FNv53b450_Point* output, unsigned char flags, unsigned short cellIndex, const int* x, const int* y);
 };
 class B3CA80Map {
 public:
@@ -888,7 +888,7 @@ struct B3CA80Data {
 };
 class B3CA80Owner {
 public:
-    unsigned int FUN_0053ca80(int iQuad, int iIndex);
+    unsigned int TESObjectLAND_GetGrassParameters(int iQuad, int iIndex);
 
     int unk00;
     int unk04;
@@ -905,18 +905,18 @@ public:
 struct TESWorldSpace;
 struct TESObjectCELL;
 struct Obj53 {
-    bool FUN_0045cb90();
-    void FUN_00535b90(int a);
+    bool TESObjectLAND_HasVertices();
+    void TESObjectLAND_LoadVertices(int a);
 };
 struct Cell53 {
-    Obj53* FUN_00546fb0();
+    Obj53* TESObjectCELL_GetLand();
 };
 struct FUN_00461c20_Holder {
     Cell53* GetOrCreateCell(int a, int b, TESWorldSpace* ws, bool f);
 };
 extern FUN_00461c20_Holder* DAT_011c3f2c;
 struct This53 {
-    void FUN_0053d330(Obj53** out, bool flag, unsigned char* outFlags);
+    void TESObjectLAND_FillLands8(Obj53** out, bool flag, unsigned char* outFlags);
 };
 extern double DAT_01016968;
 class B3DA60Point3 {
@@ -939,21 +939,21 @@ class B3DA60Object {
 public:
     double GetPosY();
     float GetPosX();
-    bool FUN_0053da60(B3DA60Rect* pkRect, void* pvMatrix);
+    bool TESObjectLAND_VertexInRect(B3DA60Rect* pkRect, void* pvMatrix);
 };
 extern float DAT_01015f5c;
 extern float DAT_01016970;
 
 struct FUN_0053f390_cls {
-    void FUN_00534240(int n, int i, NiPoint3* out);
-    NiPoint2* FUN_0053f390(NiPoint2* out, int n);
+    void TESObjectLAND_GetVertex(int n, int i, NiPoint3* out);
+    NiPoint2* TESObjectLAND_GetMinMaxBlockHeight(NiPoint2* out, int n);
 };
 struct UVBounds { float x,y,z,w; };
 extern NiPoint3 DAT_011f426c;
 extern NiPoint2 DAT_011f4980;
 extern UVBounds DAT_011a9bd0;
 struct TextureSample { short FUN_004a8ae0(); short FUN_0047d3f0(); unsigned int FUN_00726070(); };
-struct TexturePointer { TextureSample* FUN_00559450(); };
+struct TexturePointer { TextureSample* Modelloader_GetReferencedThis(); };
 struct TextureManager { void* FUN_006fce30(const NiPoint3&); void* FUN_006fce70(const NiPoint3&); TexturePointer* FUN_006fceb0(const NiPoint3&); };
 struct WorldManager { TextureManager* FUN_00586170(); };
 struct TESView { WorldManager* FUN_004fd3e0(); };
@@ -1063,7 +1063,7 @@ struct ShaderProperty {
  UVBounds bounds;
  int FUN_00441110(); void* GetElement(int); void* GetFltValue(int);
 };
-struct QuadNode { QuadNode* FUN_0045bc00(int); ShaderProperty* FUN_00a59d30(int); };
+struct QuadNode { QuadNode* NiNode_GetAtChecked(int); ShaderProperty* FUN_00a59d30(int); };
 struct TESFileRecordLoader {
  QuadNode** nodes;
  int unk04;
@@ -1117,7 +1117,7 @@ struct Surface {
  int unk20;
  int unk24;
  TESFileRecordLoader* data;
- void FUN_005400e0();
+ void TESObjectLAND_InitDistantTextureBlending();
 };
 struct FUN_00538ef0 {
     virtual void VirtualMethod();
@@ -1260,7 +1260,7 @@ struct LandObject : TESObjectLAND {
     int unk20; int unk24;
     LandLoadedData_tesland_od_variant_ctx_variant* m_pRenderData;
     bool IsLoaded();
-    void FUN_00534240(int quadrant, int index, LandPoint3* vertex);
+    void TESObjectLAND_GetVertex(int quadrant, int index, LandPoint3* vertex);
 };
 struct VertPt {
     float x; float y; float z;
@@ -1305,15 +1305,15 @@ struct VertOwner {
     int unk14; int unk18; int unk1c; int unk20; int unk24;
     VertTables* tables;
     bool IsLoaded();
-    void FUN_00534390(unsigned int index, unsigned int vert, VertPt& out);
+    void TESObjectLAND_GetNormal(unsigned int index, unsigned int vert, VertPt& out);
 };
 extern NiColorA DAT_011a9be0;
 struct Buffer_5345c0 {
     void* data;
     unsigned int stride;
     unsigned int unk08;
-    void FUN_00534550();
-    void FUN_00534780(unsigned int, NiColorA&);
+    void NiTConvertingStrideIterator_NiTConvertingStrideIterator();
+    void NiGeometryDataIteratorNiColorA_Get(unsigned int, NiColorA&);
 };
 struct Format_5345c0 {
     virtual void v0();
@@ -1354,9 +1354,9 @@ struct Format_5345c0 {
     virtual bool HasColor();
 };
 struct Geometry_5345c0 {
-    unsigned int FUN_004a8030();
+    unsigned int NiGeometry_GetNormals();
     NiColorA* GetNextProc();
-    NiGeometryData* FUN_005495f0();
+    NiGeometryData* NiGeometry_GetModelData();
 };
 struct Node_5345c0 { Geometry_5345c0* FUN_0043b4a0(unsigned int); };
 struct Store_5345c0 {
@@ -1377,8 +1377,8 @@ struct FUN_005345c0_shell {
     int unk20;
     int unk24;
     Store_5345c0* store;
-    bool FUN_0045cb90();
-    void FUN_005345c0(unsigned int group, unsigned int index, NiColorA& out);
+    bool TESObjectLAND_HasVertices();
+    void TESObjectLAND_GetColorA(unsigned int group, unsigned int index, NiColorA& out);
 };
 
 struct FUN_00534780_Class {
@@ -1386,7 +1386,7 @@ struct FUN_00534780_Class {
     int m_04;
     unsigned char m_08;
     void __thiscall FUN_004534f0(int index);
-    void FUN_00534780(int index, NiColorA* out);
+    void NiGeometryDataIteratorNiColorA_Get(int index, NiColorA* out);
 };
 extern int FNV_RTTI_TESForm;
 extern int FNV_RTTI_TESObjectLAND;
@@ -1415,12 +1415,12 @@ struct LandCopy : TESLandFlagsView {
     void* cell;
     int unk24;
     LandCopyData_tesland_od_variant_ctx_variant* data;
-    void FUN_00535b90(int);
-    void* FUN_007af430();
-    void FUN_00539500(LandCopy*);
-    void FUN_00536d80();
-    void FUN_005394c0(bool);
-    void FUN_005348c0(TESForm* form);
+    void TESObjectLAND_LoadVertices(int);
+    void* BGSSaveFormBuffer_GetForm();
+    void TESObjectLAND_CreateLandscape(LandCopy*);
+    void TESObjectLAND_UnLoadVertices();
+    void TESObjectLAND_MarkLoaded(bool);
+    void TESObjectLAND_Copy(TESForm* form);
 };
 struct CleanupMap {
     int unk00, unk04, unk08, unk0c;
@@ -1457,10 +1457,10 @@ struct CleanupOwner {
     CleanupData* data;
     void SetLoaded(bool);
     void Finish();
-    bool FUN_00536d80();
+    bool TESObjectLAND_UnLoadVertices();
 };
 void* __cdecl operator new(unsigned int);
-void __cdecl FUN_00403d30(void*, int, unsigned int);
+void __cdecl ourMemset(void*, int, unsigned int);
 
 extern NiPoint3 DAT_011f426c;
 extern float DAT_01016970, DAT_01015f5c, DAT_010236e0;
@@ -1469,7 +1469,7 @@ struct Shape;
 struct GeomData {void FUN_00a67090(int); void FUN_00a67050(int); void FUN_004410f0(bool); void SetByteAtOffset38(int);};
 
 struct Property {int FUN_008d8520(); void* GetStringAtOffset();};
-struct Model {struct Scene* FUN_0043b230();};
+struct Model {struct Scene* NiObjectNET_GetControllers();};
 struct Scene {
 virtual void v00();
 virtual void v04();
@@ -1534,12 +1534,12 @@ virtual void vec();
 virtual void vf0();
 virtual void vf4();
 virtual void Attach(int,Shape*);
-bool FUN_00456610(); void FUN_00450f90(bool); void AttachProperty(void*);
-Model* FUN_006629f0(); void FUN_00439680(const NiPoint3&);
-void Update(UpdateData&); void FUN_00a5a040();
+bool GetAppCulled_00456610(); void FUN_00450f90(bool); void AttachProperty(void*);
+Model* FUN_006629f0(); void BSMultiBound_SetHalfExtents(const NiPoint3&);
+void Update(UpdateData&); void UpdateProperties();
 };
-struct Shape {unsigned short FUN_00456650(); void* FUN_0049ec60(); Bound* GetSourceFilesFromForm(); GeomData* FUN_005495f0(); Property* FUN_004030b0();};
-struct PropPointer {void* FUN_00559450();};
+struct Shape {unsigned short NiGeometry_GetVertexCount(); void* FUN_0049ec60(); Bound* GetSourceFilesFromForm(); GeomData* NiGeometry_GetModelData(); Property* CombatController_GetTarget();};
+struct PropPointer {void* Modelloader_GetReferencedThis();};
 extern PropPointer g_011ca000;
 struct Renderer {virtual void v00();
 virtual void v04();
@@ -1601,13 +1601,13 @@ virtual void ve0();
 virtual void ve4();
 virtual void ve8();
 virtual void Render(Shape*,int,int,void*);
-void FUN_00e74120();};
-Renderer* FUN_0043c4b0();
-struct Cell {Scene* FUN_00545cb0();};
-struct Mopp {void Clear(); void FUN_00621f60(Shape**,int,float);};
+void NiDX9Renderer_PerformPrecache();};
+Renderer* NiXenonRenderer_GetRenderer();
+struct Cell {Scene* Get3D_00545cb0();};
+struct Mopp {void Clear(); void CellMopp_Create(Shape**,int,float);};
 Mopp* __fastcall GetCellMopp(Cell*);
 struct Scratch {int a,b,c,d; Scratch();};
-struct Other {bool FUN_00537b50(); bool FUN_00544590(int);};
+struct Other {bool TESObjectCELL_HasObjects(); bool GetHideLand(int);};
 
 struct Land {int unk00;
 int unk04;
@@ -1617,10 +1617,10 @@ int unk10;
 int unk14;
 int unk18;
 int unk1c; Cell* cell; int unk24; Data* data;
-Scene* FUN_00535af0(int); Shape* FUN_005371b0(unsigned char);
-NiPoint2* FUN_0053f390(NiPoint2*,int); float FUN_00534050(); double FUN_00534080();
-void FUN_0053bc10(); void FUN_0053aeb0(); void FUN_00539960();
-Other* FUN_007af430(); bool FUN_00534140(); void FUN_005374f0();};
+Scene* TESObjectLAND_GetQuadLandNode(int); Shape* TESObjectLAND_MakeLandTriStrips(unsigned char);
+NiPoint2* TESObjectLAND_GetMinMaxBlockHeight(NiPoint2*,int); float TESObjectLAND_GetWorldCellX(); double TESObjectLAND_GetWorldCellY();
+void TESObjectLAND_CalculateGrassParams(); void TESObjectLAND_MergeSameFileTextures(); void TESObjectLAND_InitLandscape();
+Other* BGSSaveFormBuffer_GetForm(); bool TESObjectLAND_GetLandRemapped(); void TESObjectLAND_Attach3D();};
 struct SceneObject {
     virtual void Unknown00();
     virtual void Unknown01();
@@ -1683,23 +1683,23 @@ struct SceneObject {
     virtual void InsertChild(SceneObject* child);
     virtual void Unknown59();
     virtual void SetState(int state);
-    SceneObject* FUN_009611e0();
+    SceneObject* NiAVObject_GetParent();
 };
 struct ScenePointer {
     SceneObject* value;
-    SceneObject* FUN_00559450();
+    SceneObject* Modelloader_GetReferencedThis();
     bool FUN_0052aa80(int value) const;
     void FUN_0066b0d0(SceneObject* value);
 };
 struct QueuePointer {
     void* value;
-    void FUN_006f74f0(void* value);
+    void AssignTaskReference(void* value);
 };
 struct SceneController {
-    bool FUN_005380d0(SceneObject* object);
+    bool bhkWorld_RemoveBody(SceneObject* object);
 };
 struct SceneSource {
-    SceneController* FUN_004543c0();
+    SceneController* TESObjectCELL_GetbhkWorld();
 };
 struct BoneTransformData {
     SceneObject** objects;
@@ -1753,11 +1753,11 @@ struct SceneCleanup {
     SceneSource* source;
     QueuePointer queued;
     BoneTransformData* data;
-    void FUN_00537eb0();
+    void TESObjectLAND_Detach3D();
 };
 
 ShadowSceneNode* __cdecl FUN_00450b80(int index);
-void* __cdecl FUN_0056d280(unsigned int size);
+void* __cdecl Object_AllocateStorage_0056d280(unsigned int size);
 void* __cdecl FUN_00401460(void* destination, const void* source, unsigned int size);
 struct Buffer538c00
 
@@ -1767,9 +1767,9 @@ struct Buffer538c00
 
     unsigned int m04;
 
-    void __thiscall FUN_00540750(unsigned int size);
+    void __thiscall UpdateState_00540750(unsigned int size);
 
-    void* __thiscall FUN_00559450();
+    void* __thiscall Modelloader_GetReferencedThis();
 
 };
 struct Output538c00
@@ -1799,21 +1799,21 @@ struct Output538c00
     unsigned int m2c;
 
     Output538c00();
-    static void* operator new(unsigned int bytes) { return FUN_0056d280(bytes); } static void operator delete(void*);
+    static void* operator new(unsigned int bytes) { return Object_AllocateStorage_0056d280(bytes); } static void operator delete(void*);
 
 };
 struct FUN_00538c00_Class
 
 {
 
-    char __thiscall FUN_00538c00(const void* source, unsigned int size, Output538c00** result);
+    char __thiscall TESObjectLAND_ReadMoppCodeFromBuffer(const void* source, unsigned int size, Output538c00** result);
 
 };
 struct Mesh53;
 struct Buffer53 { void ComputeBoundingSphere(); };
-struct Texture53Data { void* FUN_00592cf0(); };
-struct Texture53 { Texture53Data* FUN_009611e0(); unsigned char FUN_00541590(); };
-struct GeoData53 { void* FUN_0059bb30(); void FUN_00a67090(int); void FUN_00a66a60(int); };
+struct Texture53Data { void* BGSTextureSet_GetAsShaderTextureSet(); };
+struct Texture53 { Texture53Data* NiAVObject_GetParent(); unsigned char TESLandTexture_GetSpecularExponent(); };
+struct GeoData53 { void* FUN_0059bb30(); void FUN_00a67090(int); void NiGeometryData_StoreNormalBinormalTangent(int); };
 
 struct Mesh53 {
  virtual void slot0();
@@ -1823,14 +1823,14 @@ struct Mesh53 {
  virtual void slot4();
  virtual void slot5();
  virtual Mesh53* AsMesh();
- unsigned short FUN_00456650();
+ unsigned short NiGeometry_GetVertexCount();
  void* FUN_0049ec60();
  Buffer53* GetSourceFilesFromForm(unsigned short,void*);
- GeoData53* FUN_005495f0();
+ GeoData53* NiGeometry_GetModelData();
  NiTimeController* FUN_00a59d30(int);
 };
 struct Update53 { float time; bool update; bool flags; int unk08; void FUN_0043d410(float,bool,bool); };
-struct Node53 { Mesh53* FUN_0045bc00(int); void FUN_00a59c60(Update53&); void FUN_00a5a040(); };
+struct Node53 { Mesh53* NiNode_GetAtChecked(int); void NiAVObject_Update(Update53&); void UpdateProperties(); };
 struct Config53 {
  int enabled; int unk04; void** sources; int unk0c; int unk10; int unk14; int unk18; int unk1c;
  Texture53* primary[4]; Texture53** textures[4];
@@ -1841,15 +1841,15 @@ void* __cdecl memcpy(void*,const void*,unsigned int);
 struct Worker53 {
  int unk00; int unk04; int unk08; int unk0c; int unk10; int unk14; int unk18; int unk1c; int unk20; int unk24;
  Config53* config;
- Node53* FUN_00535af0(int);
- void FUN_0053fa40(char); void FUN_00539500(int); void FUN_005374f0();
- void FUN_0053a090(bool update, int unused);
+ Node53* TESObjectLAND_GetQuadLandNode(int);
+ void TESObjectLAND_DrawLandBorder(char); void TESObjectLAND_CreateLandscape(int); void TESObjectLAND_Attach3D();
+ void TESObjectLAND_UpdateMesh(bool update, int unused);
 };
 void* __cdecl FormHeap_Allocate(unsigned int size);
-void __cdecl FormHeap_Free(void* memory);
+void __cdecl FormHeapFreeAndLog_00401030(void* memory);
 struct LayerOwner53a940 : Owner53ace0 {
-    void FUN_0053abb0(unsigned char quadrant, unsigned short layer);
-    void FUN_0053a940();
+    void TESObjectLAND_RemoveTextureFromArrays(unsigned char quadrant, unsigned short layer);
+    void TESObjectLAND_AdjustTextureArrays();
 };
 struct ShiftTableData {
     int unk00[12];
@@ -1861,7 +1861,7 @@ public:
     int unk00[10];
     ShiftTableData* m_pUserData;      // +0x28
 
-    void FUN_0053abb0(unsigned char ucSlot, unsigned short usIndex);
+    void TESObjectLAND_RemoveTextureFromArrays(unsigned char ucSlot, unsigned short usIndex);
 };
 struct xPoint3 {
     float x, y, z;
@@ -1901,7 +1901,7 @@ struct xLand {
     double GetBaseX();
     float GetBaseY();
     void GetVertex(int iCell, int iVertex, xPoint3& kOut);
-    bool FUN_0053b550(xCoordData& kData, const xPoint3& kPos, bool bRecurse);
+    bool TESObjectLAND_GetCoordData(xCoordData& kData, const xPoint3& kPos, bool bRecurse);
 };
 struct Grass;
 struct GrassNode { Grass** GetItem(); GrassNode* Next(); };
@@ -2049,8 +2049,8 @@ extern IntSetting g_011c9f74,g_011c9fb8;
 extern unsigned long DAT_011c9f6c;
 struct TerrainOwner {
  int u00,u04,u08,u0c,u10,u14,u18,u1c,u20,u24; TerrainData* data;
- float FUN_0053a7a0(unsigned char,unsigned short);
- bool FUN_0053bc10();
+ float TESObjectLAND_GetDefaultTexturePercent(unsigned char,unsigned short);
+ bool TESObjectLAND_CalculateGrassParams();
 };
 struct Pt53d8f0 {
     float x;
@@ -2091,7 +2091,7 @@ struct Land53d8f0 {
     bool TestPoint(void* other, Pt53d8f0* pt);
     void FixPoint(int quad, int index, Pt53d8f0* pt, Edges53d8f0* edges);
     void SetFlag(bool value);
-    void FUN_0053d8f0(Edges53d8f0* edges, void* other);
+    void TESObjectLAND_SetLandNormals(Edges53d8f0* edges, void* other);
 };
 struct NormalPoint {
  float x,y,z;
@@ -2101,7 +2101,7 @@ struct NormalPoint {
 };
 extern NormalPoint NiPoint3_ZERO;
 extern unsigned short* DAT_011c9ee8;
-void __cdecl FUN_00525340(NormalPoint*);
+void __cdecl NiPoint3_UnitizeVector(NormalPoint*);
 void __cdecl NormalizePoints(NormalPoint*, int, int);
 struct NormalData {
  int unk00;
@@ -2114,8 +2114,8 @@ struct NormalLand : TESLandFlagsView {
  int unk20;
  int unk24;
  NormalData* data;
- bool FUN_0053da60(void*, const NormalPoint*);
- void FUN_0053df30(void* region);
+ bool TESObjectLAND_VertexInRect(void*, const NormalPoint*);
+ void TESObjectLAND_InvalidateNormals(void* region);
 };
 struct LandVertex {
     float x;
@@ -2151,7 +2151,7 @@ public:
 };
 struct LandStandIn {
     void GetVertex(int cell, int index, LandVertex* out);
-    bool FUN_0053f1e0(LandCoord_tesland_od_variant_ctx_variant& coord, float& height);
+    bool TESObjectLAND_GetLandHeight(LandCoord_tesland_od_variant_ctx_variant& coord, float& height);
 };
 extern const double DAT_010231b0;
 extern const double DAT_010241b0;
@@ -2167,12 +2167,12 @@ struct FUN_0053f440_shell
     char pad20[8];
     LandData53f* pkData;
 
-    float FUN_0053a550();
-    NiPoint2 FUN_0053f390(int iQuad);
-    NiPoint2 FUN_0053f440();
+    float TESObjectLAND_GetDefaultWorldHeight();
+    NiPoint2 TESObjectLAND_GetMinMaxBlockHeight(int iQuad);
+    NiPoint2 TESObjectLAND_GetMinMaxLandHeight();
 };
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
-int __cdecl FUN_00406d90(float fValue);
+int __cdecl FloatToInt(float fValue);
 namespace TESLandInit {
 
 struct LandMemObject {
@@ -2184,7 +2184,7 @@ struct LandTexturePtr {
     void* pObject;
     LandTexturePtr(void* apObject);
     ~LandTexturePtr();
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
 };
 
 struct LandShaderSlot {
@@ -2222,13 +2222,13 @@ struct LandProperty : LandMemObject {
 };
 
 struct LandPropertyList {
-    void FUN_00533fb0(int aiMode);
-    void FUN_00533f40(LandTextureData* apData);
+    void NiStencilProperty_SetStencilFailAction(int aiMode);
+    void SetBaseMap(LandTextureData* apData);
 };
 
 struct LandPropertyHolder {
     void FUN_0066b0d0(LandProperty* apProperty);
-    LandPropertyList* FUN_00559450();
+    LandPropertyList* Modelloader_GetReferencedThis();
 };
 
 struct LandShaderList {
@@ -2244,7 +2244,7 @@ struct LandStringSetting {
 };
 
 struct LandFloatSetting {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 
 
@@ -2277,31 +2277,32 @@ extern float DAT_011c9eb4[4];
 extern LandPoint3* DAT_011c9ed4[4];
 extern unsigned char DAT_011c9efc;
 
-int __cdecl FUN_00406d00(char* apBuffer, unsigned int auiSize, const char* apFormat, ...);
-int __cdecl FUN_005b5e40(const char* apFormat, ...);
+int __cdecl BSsprintf(char* apBuffer, unsigned int auiSize, const char* apFormat, ...);
+int __cdecl Warning_005b5e40(const char* apFormat, ...);
 
 static const char s_szSourceFile[] = "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESLand.cpp";
 static const char s_szLandscapeFormat[] = "Landscape\\%s";
 static const char s_szTilingWarning[] = "DEFAULT: INI setting fLandTextureTilingMult cannot be 0.";
 
 // @fnv 0x00533420
-void __cdecl FUN_00533420() {
+// src: XBOX_PDB 0x00533420
+void __cdecl TESObjectLAND_InitializeStatics() {
     AutoMemContext kMemContext(0x1b, true, s_szSourceFile, 0xc6);
     DAT_011c9f08 = new LandTexturing();
     char acPath[260];
-    FUN_00406d00(acPath, 260, s_szLandscapeFormat, DAT_011ca004.FUN_00403df0());
+    BSsprintf(acPath, 260, s_szLandscapeFormat, DAT_011ca004.FUN_00403df0());
     DAT_011c9f08->SetFullNameByType(0, acPath);
-    FUN_00406d00(acPath, 260, s_szLandscapeFormat, DAT_011c9f8c.FUN_00403df0());
+    BSsprintf(acPath, 260, s_szLandscapeFormat, DAT_011c9f8c.FUN_00403df0());
     DAT_011c9f08->SetFullNameByType(1, acPath);
     DAT_011c3f2c->FUN_00726070()->RemoveNode(DAT_011c9f08);
     DAT_011c9f04 = new LandShaderData();
     DAT_011c9f04->FUN_00984f60(DAT_011c9f08);
     LandTexturePtr kTexture(0);
     DAT_011c9f08->kShader.FUN_vt90(0, &kTexture);
-    LandTextureData* pTextureDataValue = new LandTextureData(kTexture.FUN_00559450(), 0, 3, 5, 0);
+    LandTextureData* pTextureDataValue = new LandTextureData(kTexture.Modelloader_GetReferencedThis(), 0, 3, 5, 0);
     DAT_011ca000.FUN_0066b0d0(new LandProperty());
-    DAT_011ca000.FUN_00559450()->FUN_00533fb0(2);
-    DAT_011ca000.FUN_00559450()->FUN_00533f40(pTextureDataValue);
+    DAT_011ca000.Modelloader_GetReferencedThis()->NiStencilProperty_SetStencilFailAction(2);
+    DAT_011ca000.Modelloader_GetReferencedThis()->SetBaseMap(pTextureDataValue);
 
     DAT_011c9ee8 = new unsigned short[0x600];
     int iIndex = 0;
@@ -2353,9 +2354,9 @@ void __cdecl FUN_00533420() {
         }
     }
 
-    float fTiling = *DAT_011c9f2c.FUN_00403e20();
+    float fTiling = *DAT_011c9f2c.Setting_Float_00403e20();
     if (fTiling == 0.0) {
-        FUN_005b5e40(s_szTilingWarning);
+        Warning_005b5e40(s_szTilingWarning);
         fTiling = 16.0f;
     }
     fTiling = 4.0 / fTiling;
@@ -2395,9 +2396,9 @@ void __cdecl FUN_00533420() {
 
 struct CoordProcessor { int x, y, z; NiPoint3 FUN_00439e90(const NiPoint3& arOrigin); };
 struct Grid53 { int count; CoordProcessor** processors; NiPoint3** positions; int unknown0c; unsigned char** evaluated; };
-struct FNV53WorkerProxy { bool FUN_0053d2e0(NiPoint3* apCoord, NiPoint3* apAxis, NiPoint3* apAux); bool FUN_0053e210(NiPoint3* apCoord); };
+struct FNV53WorkerProxy { bool TESObjectLAND_GetLandNormal(NiPoint3* apCoord, NiPoint3* apAxis, NiPoint3* apAux); bool TESObjectLAND_IsNormalSet_0(NiPoint3* apCoord); };
 struct WorkerTable53 { FNV53WorkerProxy* southwest; FNV53WorkerProxy* northwest; FNV53WorkerProxy* southeast; FNV53WorkerProxy* northCount; FNV53WorkerProxy* east; FNV53WorkerProxy* west; FNV53WorkerProxy* upper; FNV53WorkerProxy* northeast; };
-struct Region53 { int m00,m04,m08,m0c,m10,m14,m18,m1c,m20,m24; Grid53* grid; float FUN_00534080(); float FUN_00534050(); void FUN_0053e290(int,int,NiPoint3*,WorkerTable53*); };
+struct Region53 { int m00,m04,m08,m0c,m10,m14,m18,m1c,m20,m24; Grid53* grid; float TESObjectLAND_GetWorldCellY(); float TESObjectLAND_GetWorldCellX(); void TESObjectLAND_CalculateEdgeNormal(int,int,NiPoint3*,WorkerTable53*); };
 
 struct Geometry5371 {
     unsigned int unk00;
@@ -2451,7 +2452,7 @@ struct Geometry5371 {
     unsigned int unkc0;
     static void* operator new(unsigned int); static void operator delete(void*, unsigned int);
     Geometry5371(unsigned short, NiPoint3*, NiPoint3*, void*, NiPoint2*, unsigned short, unsigned short, unsigned short, unsigned short, unsigned short*, unsigned short*);
-    void FUN_00440460(const NiPoint3&);
+    void NiAVObject_SetTranslate(const NiPoint3&);
     void SetName(const NiFixedString&);
 };
 struct MeshData5371 {
@@ -2464,13 +2465,13 @@ struct Land5371 {
     int unk00; int unk04; int unk08; int unk0c; int unk10;
     int unk14; int unk18; int unk1c; int unk20; int unk24;
     MeshData5371* data;
-    void FUN_00535b30(NiPoint3*, unsigned char);
-    Geometry5371* FUN_005371b0(unsigned char index);
+    void TESObjectLAND_GetWorldOffsetForBlock(NiPoint3*, unsigned char);
+    Geometry5371* TESObjectLAND_MakeLandTriStrips(unsigned char index);
 };
 extern NiPoint2* DAT_011c9ef4;
 extern unsigned short DAT_0118ae90[];
-void* FUN_00aa1070(unsigned int);
-int FUN_00406d00(char*, int, const char*, ...);
+void* _NiMalloc_00aa1070(unsigned int);
+int BSsprintf(char*, int, const char*, ...);
 
 void* __cdecl FUN_00401460(void* pvDest, const void* pvSrc, unsigned int uiSize);
 struct LandDataLD {
@@ -2487,7 +2488,7 @@ public:
     void SetNormalsDirty(int iValue);
     void SetupNeighbors(LandLD** ppkNeighbors, int iValue);
     void UpdateNormals();
-    bool FUN_0053db20();
+    bool TESObjectLAND_ForceGoodNormals();
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -2535,8 +2536,8 @@ struct GeometryOwner {
     Resource* resource;
     int unknown24;
     FUN_005405a0* geometry;
-    float FUN_0053a550();
-    bool FUN_00539500(GeometryOwner* source);
+    float TESObjectLAND_GetDefaultWorldHeight();
+    bool TESObjectLAND_CreateLandscape(GeometryOwner* source);
 };
 
 extern void* DAT_011c9ed4[4];
@@ -2546,7 +2547,8 @@ extern void* DAT_011c9ef8;
 extern float DAT_0102dcc4;
 
 // @fnv 0x00539500
-bool GeometryOwner::FUN_00539500(GeometryOwner* source)
+// src: COMMUNITY 0x00539500
+bool GeometryOwner::TESObjectLAND_CreateLandscape(GeometryOwner* source)
 {
     if (geometry != 0 && geometry->positions != 0)
         return false;
@@ -2560,14 +2562,14 @@ bool GeometryOwner::FUN_00539500(GeometryOwner* source)
     geometry->normals = new NiPoint3*[4];
     geometry->tags = new unsigned char*[4];
 
-    float height = FUN_0053a550();
+    float height = TESObjectLAND_GetDefaultWorldHeight();
     for (int i = 0; i < 4; ++i) {
         geometry->positions[i] = new NiPoint3[0x121];
         geometry->transforms[i] = new NiColorA[0x121];
         geometry->normals[i] = new NiPoint3[0x121];
         geometry->tags[i] = new unsigned char[0x121];
         geometry->vertexRows[i] = new float*[0x121];
-        geometry->resources[i] = (void*)FUN_00535ae0();
+        geometry->resources[i] = (void*)TESLandTexture_GetDefaultTexture();
         geometry->metadata[i] = new unsigned char[0x18];
 
         if (!source || !source->geometry) {

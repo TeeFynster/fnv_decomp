@@ -8,12 +8,13 @@ struct NiTriShapeDynamicData
 {
     unsigned short m_usActiveVertices;
     unsigned short m_usActiveTriangles;
-    void FUN_00a81730(unsigned short& usStrips, const unsigned short*& pusStripLengths,
+    void GetStripData_00a81730(unsigned short& usStrips, const unsigned short*& pusStripLengths,
                       const unsigned short*& pusTriList, unsigned int& uiStripLengthSum);
 };
 
 // @fnv 0x00a81730
-void __thiscall NiTriShapeDynamicData::FUN_00a81730(unsigned short& usStrips, const unsigned short*& pusStripLengths,
+// src: XBOX_PDB 0x00a81730
+void __thiscall NiTriShapeDynamicData::GetStripData_00a81730(unsigned short& usStrips, const unsigned short*& pusStripLengths,
                                                     const unsigned short*& pusTriList, unsigned int& uiStripLengthSum)
 {
     usStrips = *(unsigned short*)((char*)this + 0x5a);
@@ -25,7 +26,8 @@ void __thiscall NiTriShapeDynamicData::FUN_00a81730(unsigned short& usStrips, co
 extern void* g_011f5af4;
 
 // @fnv 0x00a81800
-void* __cdecl FUN_00a81800()
+// src: COMMUNITY 0x00a81800
+void* __cdecl NiTriShapeDynamicData_GetRTTI()
 {
     return &g_011f5af4;
 }
@@ -33,11 +35,12 @@ void* __cdecl FUN_00a81800()
 namespace fnv_00a81820 {
 struct NiTriShapeDynamicData
 {
-    void __thiscall FUN_00a81820(unsigned short usActiveTriangles);
+    void __thiscall SetActiveTriangleCount(unsigned short usActiveTriangles);
 };
 
 // @fnv 0x00a81820
-void __thiscall NiTriShapeDynamicData::FUN_00a81820(unsigned short usActiveTriangles)
+// src: XBOX_PDB 0x00a81820
+void __thiscall NiTriShapeDynamicData::SetActiveTriangleCount(unsigned short usActiveTriangles)
 {
     *(unsigned short*)((char*)this + 0x5a) = usActiveTriangles;
 }
@@ -47,13 +50,14 @@ struct NiTriShapeDynamicDataShell : NiTriShapeData
 {
     unsigned short m_usActiveVertices;
     unsigned short m_usActiveTriangles;
-    bool FUN_00a817c0(const NiTriShapeDynamicDataShell*);
+    bool NiTriShapeDynamicData_IsEqual(const NiTriShapeDynamicDataShell*);
 };
 // Compares this shape data with another via FUN_00a7b7e0 and checks that the active vertex and triangle counts match.
 // @fnv 0x00a817c0
-bool NiTriShapeDynamicDataShell::FUN_00a817c0(const NiTriShapeDynamicDataShell* other)
+// src: XBOX_PDB 0x00a817c0
+bool NiTriShapeDynamicDataShell::NiTriShapeDynamicData_IsEqual(const NiTriShapeDynamicDataShell* other)
 {
-    if (FUN_00a7b7e0(other) && *(unsigned short*)((char*)this + 0x58) == *(unsigned short*)((char*)other + 0x58) &&
+    if (IsEqual_00a7b7e0(other) && *(unsigned short*)((char*)this + 0x58) == *(unsigned short*)((char*)other + 0x58) &&
         *(unsigned short*)((char*)this + 0x5a) == *(unsigned short*)((char*)other + 0x5a))
         return true;
     return false;
@@ -61,11 +65,12 @@ bool NiTriShapeDynamicDataShell::FUN_00a817c0(const NiTriShapeDynamicDataShell* 
 
 struct NiTriShapeDynamicData_shell : NiTriShapeDynamicData
 {
-    void FUN_00a81810(unsigned short usActiveVertices);
+    void NiTriShapeDynamicData_SetActiveVertexCount(unsigned short usActiveVertices);
 };
 
 // @fnv 0x00a81810
-void NiTriShapeDynamicData_shell::FUN_00a81810(unsigned short usActiveVertices)
+// src: XBOX_PDB 0x00a81810
+void NiTriShapeDynamicData_shell::NiTriShapeDynamicData_SetActiveVertexCount(unsigned short usActiveVertices)
 {
     ((unsigned short*)this)[0x2c] = usActiveVertices;
 }
@@ -105,11 +110,12 @@ static __forceinline void S_BinRead(S_00a818b0_Bin* bin, void* v, unsigned int b
 struct FUN_00a818b0_cls
 {
     void FUN_00a7bbe0(void* pOther);
-    void FUN_00a818b0(void* pOther);
+    void NiTriShapeDynamicData_SaveBinary(void* pOther);
 };
 // Calls FUN_00a7bbe0, then reads two 2-byte values from the stream at pOther+0x250 into this+0x58 and this+0x5a.
 // @fnv 0x00a818b0
-void FUN_00a818b0_cls::FUN_00a818b0(void* pOther)
+// src: XBOX_PDB 0x00a818b0
+void FUN_00a818b0_cls::NiTriShapeDynamicData_SaveBinary(void* pOther)
 {
     char* pObj = (char*)pOther;
     FUN_00a7bbe0(pOther);
@@ -118,8 +124,8 @@ void FUN_00a818b0_cls::FUN_00a818b0(void* pOther)
 }
 
 extern void* g_011f5af4;
-void* __cdecl FUN_00a7d330(void* p);
-void* __cdecl FUN_00a7d490(const char* name, unsigned int value);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* p);
+void* __cdecl NiGetViewerString_00a7d490(const char* name, unsigned int value);
 
 struct NiArr
 {
@@ -182,9 +188,9 @@ struct FUN_00a81910_cls
 void FUN_00a81910_cls::AddActiveCounts(NiArr* a)
 {
     AppendTriListInfo(a);
-    a->Add(FUN_00a7d330(g_011f5af4));
-    a->Add(FUN_00a7d490("m_usActiveVertices", m_58));
-    a->Add(FUN_00a7d490("m_usActiveTriangles", m_5a));
+    a->Add(NiViewerStrings_NiGetViewerString_Title(g_011f5af4));
+    a->Add(NiGetViewerString_00a7d490("m_usActiveVertices", m_58));
+    a->Add(NiGetViewerString_00a7d490("m_usActiveTriangles", m_5a));
 }
 
 struct FUN_00a81710_cls
@@ -212,10 +218,11 @@ struct FUN_00a81710_cls
     unsigned int unk50;
     unsigned int unk54;
     unsigned short m_58;
-    unsigned short FUN_00a81710();
+    unsigned short NiTriShapeDynamicData_GetActiveVertexCount();
 };
 // @fnv 0x00a81710
-unsigned short FUN_00a81710_cls::FUN_00a81710()
+// src: XBOX_PDB 0x00a81710
+unsigned short FUN_00a81710_cls::NiTriShapeDynamicData_GetActiveVertexCount()
 {
     return m_58;
 }
@@ -246,11 +253,12 @@ struct A81720Owner
     int unk54;
     unsigned short unk58;
     unsigned short unk5a;
-    unsigned short FUN_00a81720();
+    unsigned short NiTriShapeDynamicData_GetActiveTriangleCount();
 };
 
 // @fnv 0x00a81720
-unsigned short A81720Owner::FUN_00a81720()
+// src: XBOX_PDB 0x00a81720
+unsigned short A81720Owner::NiTriShapeDynamicData_GetActiveTriangleCount()
 {
     return unk5a;
 }
@@ -443,7 +451,7 @@ struct Dynamic
     unsigned short m_usActiveVertices;
     unsigned short m_usActiveTriangles;
     bool FUN_00a7b940(Stream*);
-    void FUN_00a81850(Stream*);
+    void NiTriShapeDynamicData_LoadBinary(Stream*);
 };
 static __forceinline void ReadBytes(Reader* bin, void* v, unsigned int bytes)
 {
@@ -451,7 +459,8 @@ static __forceinline void ReadBytes(Reader* bin, void* v, unsigned int bytes)
     bin->m_uiBytesRead += bin->Read(v, bytes, &size, 1);
 }
 // @fnv 0x00a81850
-void Dynamic::FUN_00a81850(Stream* pStream)
+// src: XBOX_PDB 0x00a81850
+void Dynamic::NiTriShapeDynamicData_LoadBinary(Stream* pStream)
 {
     Stream* s = pStream;
     FUN_00a7b940(s);

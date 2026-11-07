@@ -17,7 +17,8 @@ struct ScalarValue
     __m128 Broadcast() const;
 };
 // @fnv 0x0066c930
-void Vec4::FUN_0066c930()
+// src: XBOX_PDB 0x0066c930
+void Vec4::hkVector4_fastNormalize3()
 {
     __m128 d = Dot(*this).Get();
     ScalarValue s(_mm_rsqrt_ss(d));

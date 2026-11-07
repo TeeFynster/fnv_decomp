@@ -37,7 +37,7 @@ class PipboyColorMethods : public FOPipboyManager
 {
   public:
     void SetQuad(const NiColorA&);
-    void FUN_007f7fb0(const NiColorA&);
+    void FORenderedMenu_SetTintColor(const NiColorA&);
 };
 class PipboyAudioMethods : public BSAudio
 {
@@ -49,16 +49,16 @@ class PipboyAudioMethods : public BSAudio
 class PipboyLightMethods : public NiPointLight
 {
   public:
-    void FUN_004bc280(const NiPoint3&);
+    void NiLight_SetAmbientColor(const NiPoint3&);
 };
 // 0x006b0570 copies three floats at +0x2c here on the rendered Pipboy menu, not a path node.
 class PipboyColorStoreView_006b0570
 {
   public:
-    void FUN_006b0570(const NiPoint3&);
+    void FORenderedMenu_SetScreenLightColor(const NiPoint3&);
 };
-unsigned int FUN_004af350();
-unsigned int FUN_00438220();
+unsigned int NiMaterialProperty_GetType();
+unsigned int NiShadeProperty_GetType();
 NiAVObject* NiDynamicCast(const NiRTTI*, NiAVObject*);
 extern NiRTTI DAT_011f4428;
 extern SettingT_GameSettingCollection_ DAT_011db33c, DAT_011db34c;
@@ -79,7 +79,7 @@ class PipboyInterface
     unsigned char interfaceState[0x174];
     FOPipboyManager* pPipboyManager;
     FOPipboyManager* GetPipboyManager();
-    static PipboyInterface* FUN_004b7210();
+    static PipboyInterface* InterfaceManager_GetSingleton();
     NiNode* GetRoot();
 };
 class SystemColorManager
@@ -111,19 +111,19 @@ void FOPipboyManager::UpdatePipBoyButton()
         if (!node)
             node = (NiNode*)NiDynamicCast(
                 &DAT_011f4428, ((const NiNode*)g_thePlayer->GetNode(true))->GetObjectByName(NiFixedString("PipBoyButton01:0")));
-        m_cPipBoyButtonAvailability[0] = node->FUN_0045bc00(0u);
+        m_cPipBoyButtonAvailability[0] = node->NiNode_GetAtChecked(0u);
         node = (NiNode*)NiDynamicCast(&DAT_011f4428,
                                       ((const NiNode*)g_thePlayer->GetNode(true))->GetObjectByName(NiFixedString("PipBoyButton02")));
         if (!node)
             node = (NiNode*)NiDynamicCast(
                 &DAT_011f4428, ((const NiNode*)g_thePlayer->GetNode(true))->GetObjectByName(NiFixedString("PipBoyButton02:0")));
-        m_cPipBoyButtonAvailability[1] = node->FUN_0045bc00(0u);
+        m_cPipBoyButtonAvailability[1] = node->NiNode_GetAtChecked(0u);
         node = (NiNode*)NiDynamicCast(&DAT_011f4428,
                                       ((const NiNode*)g_thePlayer->GetNode(true))->GetObjectByName(NiFixedString("PipBoyButton03")));
         if (!node)
             node = (NiNode*)NiDynamicCast(
                 &DAT_011f4428, ((const NiNode*)g_thePlayer->GetNode(true))->GetObjectByName(NiFixedString("PipBoyButton03:0")));
-        m_cPipBoyButtonAvailability[2] = node->FUN_0045bc00(0u);
+        m_cPipBoyButtonAvailability[2] = node->NiNode_GetAtChecked(0u);
     }
     button = ((const NiNode*)g_thePlayer->GetNode(true))->GetObjectByName(NiFixedString("StatsGlow"));
     if (!button)
@@ -206,10 +206,10 @@ void FOPipboyManager::OnMenuOpen()
                 screenNode = (NiNode*)NiDynamicCast(
                     &DAT_011f4428, ((const NiNode*)g_thePlayer->GetNode(true))->GetObjectByName(NiFixedString("pipboyscreen:0")));
             FORenderedMenu::OnMenuOpen();
-            FUN_00705fc0(PipboyInterface::FUN_004b7210()->GetRoot());
+            SetTarget_00705fc0(PipboyInterface::InterfaceManager_GetSingleton()->GetRoot());
             if (screenNode)
             {
-                screenObjects.firstPerson = screenNode->FUN_0045bc00(0u);
+                screenObjects.firstPerson = screenNode->NiNode_GetAtChecked(0u);
                 m_pPipBoyObject0 = screenNode->GetParent();
             }
             else
@@ -219,10 +219,10 @@ void FOPipboyManager::OnMenuOpen()
                 if (screenObjects.firstPerson)
                     m_pPipBoyObject0 = screenObjects.firstPerson->GetParent();
             }
-            FUN_004dc540(g_thePlayer->GetNode(true));
+            NiTexturingProperty_Map_SetTexture(g_thePlayer->GetNode(true));
             if (screenNode)
             {
-                screenObjects.thirdPerson = NiDynamicCast(&DAT_011f4acc, screenNode->FUN_0045bc00(0u));
+                screenObjects.thirdPerson = NiDynamicCast(&DAT_011f4acc, screenNode->NiNode_GetAtChecked(0u));
                 m_pPipBoyObject1 = screenNode->GetParent();
                 m_pPipBoyObject2 = screenObjects.thirdPerson;
             }
@@ -234,8 +234,8 @@ void FOPipboyManager::OnMenuOpen()
             }
             if (screenObjects.firstPerson && screenObjects.thirdPerson)
             {
-                FUN_007fc2d0(screenObjects.firstPerson);
-                FUN_007fc2d0(screenObjects.thirdPerson);
+                FORenderedMenu_SetupScreen(screenObjects.firstPerson);
+                FORenderedMenu_SetupScreen(screenObjects.thirdPerson);
                 SetScreen(screenObjects.firstPerson);
             }
             UpdatePipBoyButton();
@@ -258,12 +258,12 @@ void FOPipboyManager::OnMenuOpen()
         if (SystemColorManager::GetSingleton()->GetColor(4, kColor))
         {
             ((PipboyColorMethods*)this)->SetQuad(kColor);
-            ((PipboyColorMethods*)this)->FUN_007f7fb0(kColor);
+            ((PipboyColorMethods*)this)->FORenderedMenu_SetTintColor(kColor);
         }
         SetBlurIntensity(DAT_011db2dc.Float()->f);
-        FUN_00444020(DAT_011db328.Float()->f);
+        TESQuest_SetScriptProcessingDelay(DAT_011db328.Float()->f);
         SetScanlines(true, DAT_011db274.Float()->f);
-        FUN_00810530(true);
+        bhkCharacterControllerCinfo_SetAvoidBox(true);
         SetPipBoyObjectVisibility(false, false, true);
         SetPipBoyObjectVisibility(true, false, true);
     }
@@ -291,18 +291,18 @@ void FOPipboyManager::SetPipBoyObjectVisibility(bool thirdPerson, bool show, boo
                 {
                     b3rdPersonLightOn = show;
                     NiNode* pNode = pEffect->IsSceneNode();
-                    if (pNode && pNode->FUN_00453470())
+                    if (pNode && pNode->NiNode_GetChildCount())
                     {
                         NiGeometry* m_pShaderGeometry = pNode->GetAt(0)->IsGeometry();
                         if (m_pShaderGeometry)
                         {
-                            NiProperty* pProperty = m_pShaderGeometry->GetProperty(FUN_004af350());
+                            NiProperty* pProperty = m_pShaderGeometry->GetProperty(NiMaterialProperty_GetType());
                             if (pProperty)
-                                pProperty->FUN_0068c9f0((float)show);
+                                pProperty->NiMaterialProperty_SetAlpha((float)show);
                             else
                             {
                                 BSShaderProperty* pShaderProperty =
-                                    (BSShaderProperty*)m_pShaderGeometry->GetProperty(FUN_00438220());
+                                    (BSShaderProperty*)m_pShaderGeometry->GetProperty(NiShadeProperty_GetType());
                                 pShaderProperty->SetAlpha((float)show);
                             }
                             m_pShaderGeometry->UpdateSceneObject();
@@ -341,16 +341,16 @@ void FOPipboyManager::InitializeMenuLight()
     if (light)
     {
         light->SetEffectColor(NiPoint3(0.0f, 0.0f, 0.0f));
-        ((PipboyLightMethods*)light)->FUN_004bc280(NiPoint3(0.0f, 0.0f, 0.0f));
+        ((PipboyLightMethods*)light)->NiLight_SetAmbientColor(NiPoint3(0.0f, 0.0f, 0.0f));
         light->FUN_0050c630(0.0f);
         light->FUN_0050c660(0.0f);
         light->FUN_0050c690(0.0f);
-        light->FUN_0050dd20(1.0f);
+        light->NiLight_SetDimmer(1.0f);
         light->FUN_0050dd50(NiPoint3(DAT_011db514.Float()->f, 0.0f, 0.0f));
         NiColorA color(0.0f, 0.0f, 0.0f, 0.0f);
         SystemColorManager::GetSingleton()->GetColor(4, color);
         ((NiPoint3*)&rgb)->NiPoint3::NiPoint3(color.r, color.g, color.b);
-        ((PipboyColorStoreView_006b0570*)this)->FUN_006b0570((const NiPoint3&)rgb);
+        ((PipboyColorStoreView_006b0570*)this)->FORenderedMenu_SetScreenLightColor((const NiPoint3&)rgb);
         SetIntensity(1.0f);
         SetScreenLightFlickerIntensity(1.0f);
     }
@@ -379,11 +379,12 @@ void FOPipboyManager::SetBlurIntensity(float value)
 
 struct RenderedMenuNodeMethods : public FORenderedMenu
 {
-    void FUN_004dc540(NiAVObject*);
+    void NiTexturingProperty_Map_SetTexture(NiAVObject*);
 };
 
 // @fnv 0x004dc540
-void RenderedMenuNodeMethods::FUN_004dc540(NiAVObject* apScreenParent)
+// src: XBOX_PDB 0x004dc540
+void RenderedMenuNodeMethods::NiTexturingProperty_Map_SetTexture(NiAVObject* apScreenParent)
 {
     m_pMenuRoot = (NiNode*)apScreenParent;
 }
@@ -392,12 +393,13 @@ struct NiStream;
 typedef char _sizecheck_NiColor[sizeof(NiColor) == 12 ? 1 : -1];
 struct RenderedMenuColorMethods : public FORenderedMenu
 {
-    void FUN_006b0570(NiColor*);
+    void FORenderedMenu_SetScreenLightColor(NiColor*);
 };
 
 // Copies the NiColor pointed to by the argument into the field at offset 0x2c of this object.
 // @fnv 0x006b0570
-void RenderedMenuColorMethods::FUN_006b0570(NiColor* apColor)
+// src: COMMUNITY 0x006b0570
+void RenderedMenuColorMethods::FORenderedMenu_SetScreenLightColor(NiColor* apColor)
 {
     m_kScreenLightColor = *apColor;
 }
@@ -445,12 +447,13 @@ void* DelStandIn::FUN_007f7cb0(unsigned int flags)
 // The shared header does not yet declare the pipboy reset override.
 struct PipboyResetMethods : public FOPipboyManager
 {
-    void FUN_007f7e00();
+    void FOPipboyManager_ClearModels();
 };
 
 // Clears the pipboy node pointers, per-index arrays and screen elements, then calls FUN_007fadf0.
 // @fnv 0x007f7e00
-void PipboyResetMethods::FUN_007f7e00()
+// src: COMMUNITY 0x007f7e00
+void PipboyResetMethods::FOPipboyManager_ClearModels()
 {
     m_pPipBoyObject0 = 0;
     m_pPipBoyObject1 = 0;
@@ -465,7 +468,7 @@ void PipboyResetMethods::FUN_007f7e00()
         m_fGaugeValues2[i] = 0;
     }
     m_pPipBoyObject2 = 0;
-    FORenderedMenu::FUN_007fadf0();
+    FORenderedMenu::ResetNifs();
 }
 
 namespace fnv_007f8610 {
@@ -473,11 +476,12 @@ namespace fnv_007f8610 {
 struct PipboyKnobMethods : public FOPipboyManager
 {
     enum Knobs {};
-    void FUN_007f8610(Knobs, float, float, bool);
+    void FOPipboyManager_MoveKnob(Knobs, float, float, bool);
 };
 
 // @fnv 0x007f8610
-void PipboyKnobMethods::FUN_007f8610(Knobs aiKnob, float afAmount, float afRate, bool abPlaySound)
+// src: XBOX_PDB 0x007f8610
+void PipboyKnobMethods::FOPipboyManager_MoveKnob(Knobs aiKnob, float afAmount, float afRate, bool abPlaySound)
 {
     if (abPlaySound && aiKnob == 0)
     {
@@ -513,22 +517,23 @@ extern SettingT_GameSettingCollection_ g_011db4ec;
 // The shared header does not yet declare the burst update.
 struct PipboyBurstMethods : public FOPipboyManager
 {
-    void FUN_007f8a80();
+    void FOPipboyManager_TriggerRandomEffect();
 };
 
 // @fnv 0x007f8a80
-void PipboyBurstMethods::FUN_007f8a80()
+// src: XBOX_PDB 0x007f8a80
+void PipboyBurstMethods::FOPipboyManager_TriggerRandomEffect()
 {
     float fchance;
 
     fchance = RandomFloat0To1();
     if (fchance < g_011db4b4.Float()->f)
-        ((FORenderedMenuPC*)PipboyInterface::FUN_004b7210()->GetPipboyManager())
+        ((FORenderedMenuPC*)PipboyInterface::InterfaceManager_GetSingleton()->GetPipboyManager())
             ->FUN_007fb250(g_011db4ec.Float()->f, g_011db3fc.Float()->f);
     if (fchance >= g_011db4b4.Float()->f && fchance < g_011db4b4.Float()->f + g_011db4e0.Float()->f)
-        ((FORenderedMenuPC*)PipboyInterface::FUN_004b7210()->GetPipboyManager())
+        ((FORenderedMenuPC*)PipboyInterface::InterfaceManager_GetSingleton()->GetPipboyManager())
             ->FUN_007fb2b0(g_011db414.Float()->f, g_011db3bc.Float()->f, g_011db3b0.Float()->f);
-    ((FORenderedMenuPC*)PipboyInterface::FUN_004b7210()->GetPipboyManager())
+    ((FORenderedMenuPC*)PipboyInterface::InterfaceManager_GetSingleton()->GetPipboyManager())
         ->StartBurst(g_011db480.Float()->f, g_011db43c.Float()->f, 0.5f);
 }
 }  // namespace fnv_007f8a80
@@ -543,11 +548,11 @@ class Animation
     void UpdateMovement(Actor*);
     bool IsGroupQueued(unsigned short);
     BSAnimGroupSequence* PlayGroup(unsigned short, ACTION_FLAGS, int, ANIM_GROUP_SECTION);
-    void FUN_008eeaa0(int);
+    void Animation_SkipUpdate(int);
 };
 struct FUN_00424940_shell
 {
-    char FUN_00424940();
+    char InterfaceManager_GetMenuMode();
 };
 struct Twin_0084d030
 {
@@ -559,26 +564,27 @@ bool __cdecl IsConsoleActive();
 // The shared header does not yet declare the animation update.
 struct PipboyAnimationMethods : public FOPipboyManager
 {
-    void FUN_007fa220();
+    void FOPipboyManager_UpdateIdleAnims();
 };
 
 // @fnv 0x007fa220
-void PipboyAnimationMethods::FUN_007fa220()
+// src: XBOX_PDB 0x007fa220
+void PipboyAnimationMethods::FOPipboyManager_UpdateIdleAnims()
 {
     BSAnimGroupSequence* pIdleSequence;
     Animation* panim;
 
     if (IsConsoleActive())
         return;
-    if (*(int*)((char*)PipboyInterface::FUN_004b7210() + 0x4bc) != 3)
+    if (*(int*)((char*)PipboyInterface::InterfaceManager_GetSingleton() + 0x4bc) != 3)
         return;
-    if (((FUN_00424940_shell*)PipboyInterface::FUN_004b7210())->FUN_00424940() == 4)
+    if (((FUN_00424940_shell*)PipboyInterface::InterfaceManager_GetSingleton())->InterfaceManager_GetMenuMode() == 4)
         return;
     panim = (Animation*)((const ::PlayerCharacter*)g_thePlayer)->GetAnimation(true);
     pIdleSequence = (BSAnimGroupSequence*)panim->GetControllerSequence(0);
     if (pIdleSequence && pIdleSequence->GetAnimGroup()->GetType() != 1 && panim->IsGroupQueued(1))
         panim->PlayGroup(1, (ACTION_FLAGS)1, -1, (ANIM_GROUP_SECTION)-1);
-    panim->FUN_008eeaa0(0x17);
+    panim->Animation_SkipUpdate(0x17);
     panim->Update((Actor*)g_thePlayer, g_timeGlobal.GetStoredFloatValue(), -1.0f);
     panim->UpdateMovement((Actor*)g_thePlayer);
 }
@@ -590,9 +596,9 @@ struct ReferenceLightData
     NiPointer<NiPointLight> m_pMenuLight;
 };
 
-float __cdecl FUN_00404010(float, float);
-float __cdecl FUN_0040ebd0(float, float);
-ReferenceLightData* __fastcall FUN_00572750(PlayerCharacter* apPlayer);
+float __cdecl BSMAX_00404010(float, float);
+float __cdecl BSMIN(float, float);
+ReferenceLightData* __fastcall ProcessAndReturnValue_0057bd40(PlayerCharacter* apPlayer);
 extern double _gModifierZero;
 extern SettingT_GameSettingCollection_ g_011db308;
 
@@ -607,13 +613,13 @@ void FOPipboyManager::UpdatePipboyLightFade(float afTime)
     float fdelta;
 
     fdelta = afTime - m_fFirstPersonLightIntensity;
-    ffade = FUN_0040ebd0(fdelta / g_011db308.Float()->f, 1.0f);
-    ffade = FUN_00404010(0.0f, ffade);
+    ffade = BSMIN(fdelta / g_011db308.Float()->f, 1.0f);
+    ffade = BSMAX_00404010(0.0f, ffade);
     if (m_fThirdPersonLightIntensity == 0.0)
         ffade = 1.0f - ffade;
-    plightref = FUN_00572750(g_thePlayer);
+    plightref = ProcessAndReturnValue_0057bd40(g_thePlayer);
     if (plightref && plightref->m_pMenuLight)
-        ((NiPointLight*)plightref->m_pMenuLight)->FUN_0050dd20(ffade);
+        ((NiPointLight*)plightref->m_pMenuLight)->NiLight_SetDimmer(ffade);
 }
 
 namespace fnv_007ff960 {
@@ -636,7 +642,7 @@ class NiAVObjectPC : public NiAVObject
 struct TerminalLightMethods : public FOPipboyManager
 {
     NiPointLight* GetLight();
-    void FUN_006b0570(const NiColor&);
+    void FORenderedMenu_SetScreenLightColor(const NiColor&);
     void CreateTerminalLight();
 };
 
@@ -653,15 +659,15 @@ void TerminalLightMethods::CreateTerminalLight()
     plight = GetLight();
     if (plight)
     {
-        ((PipboyLightMethods*)plight)->FUN_004bc280(NiPoint3(0, 0, 0));
+        ((PipboyLightMethods*)plight)->NiLight_SetAmbientColor(NiPoint3(0, 0, 0));
         plight->FUN_0050c630(0);
         plight->FUN_0050c660(0);
         plight->FUN_0050c690(0);
-        plight->FUN_0050dd20(1.0f);
+        plight->NiLight_SetDimmer(1.0f);
         plight->FUN_0050dd50(NiPoint3(g_011db644.Float()->f, 0, 0));
         {
             NiColor screenLightColor(g_011db608.Float()->f, g_011db668.Float()->f, g_011db5f8.Float()->f);
-            FUN_006b0570(screenLightColor);
+            FORenderedMenu_SetScreenLightColor(screenLightColor);
         }
         SetIntensity(g_011db650.Float()->f);
         SetScreenLightFlickerIntensity(1.0f);
@@ -675,24 +681,25 @@ extern GameTimerRecord g_timeGlobal;
 // The shared header does not yet declare the pipboy update override.
 struct PipboyUpdateMethods : public FOPipboyManager
 {
-    void FUN_007f8320(float);
-    void FUN_007fa220();
-    bool FUN_007f7ee0();
+    void FOPipboyManager_UpdateKnobs(float);
+    void FOPipboyManager_UpdateIdleAnims();
+    bool FOPipboyManager_OnIdle();
 };
 // @fnv 0x007f7ee0
-bool PipboyUpdateMethods::FUN_007f7ee0()
+// src: COMMUNITY 0x007f7ee0
+bool PipboyUpdateMethods::FOPipboyManager_OnIdle()
 {
     float fappTime;
     if (!FORenderedMenu::UpdateScreenEffect())
         return false;
     fappTime = (float)(unsigned int)((AnimIdle*)&g_timeGlobal)->GetSection();
-    this->FUN_007f8320(fappTime);
-    this->FUN_007fa220();
+    this->FOPipboyManager_UpdateKnobs(fappTime);
+    this->FOPipboyManager_UpdateIdleAnims();
     return true;
 }
 
-void __cdecl FUN_007ffe40();
-void* __cdecl FUN_004b7210();
+void __cdecl FORenderedTerminal_PlayShutdownSound();
+void* __cdecl InterfaceManager_GetSingleton();
 struct Im7181
 {
     void SetRenderedMenu(int);
@@ -709,27 +716,28 @@ struct VTab
 };
 struct FUN_007ffd50_shell
 {
-    void Close();
+    void FORenderedMenu_Close();
 };
 // Calls FUN_007ffe40, invokes VFn(1) on the parent if present, then sets procedure type 0 and calls SetRenderedMenu(0) on the FUN_004b7210 result.
 // @fnv 0x007ffd50
-void FUN_007ffd50_shell::Close()
+// src: COMMUNITY 0x007ffd50
+void FUN_007ffd50_shell::FORenderedMenu_Close()
 {
     VTab* parent;
-    FUN_007ffe40();
+    FORenderedTerminal_PlayShutdownSound();
     {
         NiNode* obj = ((NiAVObject*)this)->GetParent();
         parent = (VTab*)obj;
     }
     parent ? parent->VFn(1) : 0;
     ((ol4_00985000::CGBase*)this)->SetProcedureType(0);
-    ((Im7181*)FUN_004b7210())->SetRenderedMenu(0);
+    ((Im7181*)InterfaceManager_GetSingleton())->SetRenderedMenu(0);
 }
 
 // FUN_007fa990: thiscall; calls on two module globals, three far virtual calls
 struct G02d98
 {
-    void FUN_00c3dfa0(int);
+    void LoadQueuedPriority(int);
 };
 class G11dea3c
 {
@@ -1031,22 +1039,23 @@ extern unsigned int DAT_011dea3c;
 class PipboyOpenMethods : public FOPipboyManager
 {
   public:
-    void FUN_007fa990();
-    void FUN_005db4c0(int a);
+    void FOPipboyManager_ResetPipBoyManager();
+    void BSShaderAccumulator_SetRenderDecals(int a);
 };
 
 // Calls FUN_00c3dfa0(5) on DAT_01202d98, obtains an object from DAT_011dea3c, invokes v092, v282(1) and v281 on it, then FUN_007fadf0, OnMenuOpen and FUN_005db4c0(0).
 // @fnv 0x007fa990
-void PipboyOpenMethods::FUN_007fa990()
+// src: XBOX_PDB 0x007fa990
+void PipboyOpenMethods::FOPipboyManager_ResetPipBoyManager()
 {
-    reinterpret_cast<G02d98*>(DAT_01202d98)->FUN_00c3dfa0(5);
+    reinterpret_cast<G02d98*>(DAT_01202d98)->LoadQueuedPriority(5);
     Obj* obj = reinterpret_cast<G11dea3c*>(DAT_011dea3c)->FUN_008d8520();
     obj->v092(reinterpret_cast<G11dea3c*>(DAT_011dea3c));
     obj->v282(1);
     obj->v281(reinterpret_cast<G11dea3c*>(DAT_011dea3c));
-    FUN_007fadf0();
+    ResetNifs();
     OnMenuOpen();
-    FUN_005db4c0(0);
+    BSShaderAccumulator_SetRenderDecals(0);
 }
 
 // @fnv 0x007f7a70
@@ -1075,14 +1084,14 @@ FOPipboyManager::FOPipboyManager()
 }
 
 bool FUN_00705ea0();
-void FUN_00703610();
+void Interface_HideMenus();
 
 // Destructor that, if FUN_00705ea0() returns true, calls FUN_00703610().
 // @fnv 0x007f7ce0
 FOPipboyManager::~FOPipboyManager()
 {
     if (FUN_00705ea0())
-        FUN_00703610();
+        Interface_HideMenus();
 }
 
 namespace fnv_007f8320 {
@@ -1098,11 +1107,12 @@ class NiAVObjectHelper : public NiAVObject
 class PipboyKnobUpdateMethods : public FOPipboyManager
 {
   public:
-    void FUN_007f8320(float fTime);
+    void FOPipboyManager_UpdateKnobs(float fTime);
 };
 
 // @fnv 0x007f8320
-void PipboyKnobUpdateMethods::FUN_007f8320(float fTime)
+// src: COMMUNITY 0x007f8320
+void PipboyKnobUpdateMethods::FOPipboyManager_UpdateKnobs(float fTime)
 {
     bool bUpdated[3];
     float fMoveElapsedTime = fTime - DAT_011db370;
@@ -1158,12 +1168,12 @@ void PipboyKnobUpdateMethods::FUN_007f8320(float fTime)
 }  // namespace fnv_007f8320
 
 extern SettingT_GameSettingCollection_ DAT_011db2bc;
-float __cdecl FUN_0040ebd0(float, float);
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMIN(float, float);
+float __cdecl BSMAX_00404010(float, float);
 class FadeGeometry : public NiGeometry
 {
   public:
-    void FUN_00a5a040();
+    void UpdateProperties();
 };
 
 // @fnv 0x007fa540
@@ -1175,8 +1185,8 @@ void FOPipboyManager::UpdateFade(float now)
         SetPipBoyObjectVisibility(false, true, false);
         NiNode* aTarget = m_pPipBoyObject0;  // Root containing the light effect.
         float time = now - m_fFirstPersonLightIntensity;
-        float result = FUN_0040ebd0(time / DAT_011db2bc.Float()->f, 1.0f);
-        result = FUN_00404010(0.0f, result);
+        float result = BSMIN(time / DAT_011db2bc.Float()->f, 1.0f);
+        result = BSMAX_00404010(0.0f, result);
         if (m_fThirdPersonLightIntensity == 0.0)
             result = 1.0f - result;
         NiAVObject* effect = ((const NiNode*)aTarget)->GetObjectByName(NiFixedString("PipboyLightEffect"));
@@ -1185,20 +1195,20 @@ void FOPipboyManager::UpdateFade(float now)
         NiNode* current = 0;
         if (effect)
             current = effect->IsSceneNode();
-        if (current && current->FUN_00453470())
+        if (current && current->NiNode_GetChildCount())
         {
             FadeGeometry* geometry = static_cast<FadeGeometry*>(current->GetAt(0)->IsGeometry());
             if (geometry)
             {
-                NiProperty* property = geometry->GetProperty(FUN_004af350());
+                NiProperty* property = geometry->GetProperty(NiMaterialProperty_GetType());
                 if (property)
-                    property->FUN_0068c9f0(result);
+                    property->NiMaterialProperty_SetAlpha(result);
                 else
                 {
-                    BSShaderProperty* shader = static_cast<BSShaderProperty*>(geometry->GetProperty(FUN_00438220()));
+                    BSShaderProperty* shader = static_cast<BSShaderProperty*>(geometry->GetProperty(NiShadeProperty_GetType()));
                     shader->SetAlpha(result);
                 }
-                geometry->FUN_00a5a040();
+                geometry->UpdateProperties();
             }
         }
         if (result == m_fThirdPersonLightIntensity)

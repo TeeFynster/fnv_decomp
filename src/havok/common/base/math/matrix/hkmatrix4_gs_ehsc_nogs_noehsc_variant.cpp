@@ -125,7 +125,8 @@ __forceinline void hkMatrix4::setMulAffine(const hkMatrix4& a, const hkMatrix4& 
     m_kColumn3 = col3;
 }
 
-__declspec(noinline) void hkMatrix4::FUN_00de88a0(const hkSimdReal& s, const hkMatrix4& m)
+// src: GUESS 0x00de88a0 (confidence: low)
+__declspec(noinline) void hkMatrix4::ProcessAndReturnValue_00de88a0(const hkSimdReal& s, const hkMatrix4& m)
 {
     m_kColumn0.setMul4(s, m.m_kColumn0);
     m_kColumn1.setMul4(s, m.m_kColumn1);
@@ -133,7 +134,8 @@ __declspec(noinline) void hkMatrix4::FUN_00de88a0(const hkSimdReal& s, const hkM
     m_kColumn3.setMul4(s, m.m_kColumn3);
 }
 
-int hkMatrix4::FUN_00de8910(float epsilon)
+// src: GUESS 0x00de8910 (confidence: low)
+int hkMatrix4::UpdateState_00de8910(float epsilon)
 {
     hkMatrix4& m = *this;
 
@@ -176,14 +178,15 @@ int hkMatrix4::FUN_00de8910(float epsilon)
     inv(3, 3) = m(2, 0) * a3 - m(2, 1) * a1 + m(2, 2) * a0;
 
     hkSimdReal invDet(1.0f / det);
-    FUN_00de88a0(invDet, inv);
+    ProcessAndReturnValue_00de88a0(invDet, inv);
     return 0;
 }
 
 // @fnv 0x00de9140
-void hkMatrix4::FUN_00de9140(const hkMatrix4& a, const hkMatrix4& b)
+// src: GUESS 0x00de9140 (confidence: low)
+void hkMatrix4::UpdateFields_00de9140(const hkMatrix4& a, const hkMatrix4& b)
 {
     hkMatrix4 bInv = b;
-    bInv.FUN_00de8910(1.192092896e-07f);
+    bInv.UpdateState_00de8910(1.192092896e-07f);
     setMulAffine(a, bInv);
 }

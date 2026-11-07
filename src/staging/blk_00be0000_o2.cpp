@@ -49,7 +49,8 @@ template <class T> inline NiPointer<T>::operator T*() const { return m_pObject; 
 template <class T> inline T* NiPointer<T>::operator->() const { return m_pObject; }
 
 // @fnv 0x00be08e0
-bool __fastcall FUN_00be08e0(char* self, int)
+// src: COMMUNITY 0x00be08e0
+bool __fastcall BSShader_CreateStagesAndPasses(char* self, int)
 {
     NiD3DPass::CreateD3DPass(*(NiPointer<NiD3DPass>*)(self + 0x5c));
     return true;
@@ -217,12 +218,12 @@ struct ShaderStage
     unsigned int unk58;
     unsigned int unk5c;
     int references;
-    void FUN_00e7ecd0();
+    void NiD3DTextureStage_ReturnStageToPool();
     __forceinline void Release()
     {
         --references;
         if (references == 0)
-            FUN_00e7ecd0();
+            NiD3DTextureStage_ReturnStageToPool();
     }
 };
 struct ShaderStagePointer
@@ -537,7 +538,8 @@ extern RenderObject* DAT_011fde04;
 extern unsigned int DAT_011fcc98, DAT_011fcc9c, DAT_011fcca0;
 extern unsigned int DAT_011fc0b8, DAT_011fc0bc, DAT_011fc0c0;
 // @fnv 0x00beb830
-void __cdecl FUN_00beb830()
+// src: COMMUNITY 0x00beb830
+void __cdecl ShadowLightShader_PresetConstAlphaPasses_1x()
 {
     NiPointer<NiD3DPass> pass;
     NiPointer<StageReturn> stage;
@@ -633,11 +635,12 @@ void __cdecl FUN_00beb830()
 
 struct C0
 {
-    int __thiscall FUN_00be0b10();
+    int __thiscall NiD3DPixelShader_GetShaderHandle();
 };
 
 // @fnv 0x00be0b10
-int __thiscall C0::FUN_00be0b10()
+// src: COMMUNITY 0x00be0b10
+int __thiscall C0::NiD3DPixelShader_GetShaderHandle()
 {
     return *(int*)((char*)this + 0x2c);
 }

@@ -18,8 +18,8 @@ public:
 
     void ApplyEffect();
     void UpdateParalysisEffect(float afElapsed);
-    void FUN_008263c0();
-    void FUN_008264b0();
-    void FUN_00826550(Actor* apActor);
-    void FUN_00826570(TESObjectREFR* actor);
+    void Start_008263c0();
+    void Finish_008264b0();
+    void FinishInitLoadGame_00826550(Actor* apActor);
+    void Revert_00826570(TESObjectREFR* actor);
 };

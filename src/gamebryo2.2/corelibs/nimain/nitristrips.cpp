@@ -85,14 +85,16 @@ void __fastcall GetTriangleVertices(NiTriStrips* self, void*, unsigned short m_u
 extern char const* const g_012024b8_arg1;
 
 // @fnv 0x00a71d20
-char const* const* __cdecl FUN_00a71d20()
+// src: COMMUNITY 0x00a71d20
+char const* const* __cdecl NiTriStrips_GetRTTI()
 {
     return &g_012024b8_arg1;
 }
 
 // Allocates 0xc4 bytes, constructs a NiGeometry in place, sets its vtable to NiParticleMeshes::vftable, and returns the pointer or 0 on failure.
 // @fnv 0x00a9b150
-void* __cdecl FUN_00a9b150()
+// src: EXE 0x00a9b150
+void* __cdecl NiParticles_CreateObject()
 {
     void* pObject = BSFadeNode::operator new(0xc4);
     if (pObject)
@@ -140,13 +142,13 @@ void __fastcall RenderTriStripsAlt(NiTriStrips* self, void*, NiRenderer* apkRend
         ((void(__thiscall**)(NiRenderer*, void*)) * (void***)pkRenderer)[108](pkRenderer, self);
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern "C" void* DAT_0109cd44;
 void __fastcall CopyTriStrips(NiTriStrips* self, void*, NiTriStrips* strips, int value);
 // @fnv 0x00a71db0
 NiTriStrips* __fastcall CreateTriStripsObject(NiTriStrips* self, void*, int value)
 {
-    NiTriStrips* strips = static_cast<NiTriStrips*>(FUN_00aa13e0(sizeof(NiTriStrips)));
+    NiTriStrips* strips = static_cast<NiTriStrips*>(Object_DispatchCommandFour(sizeof(NiTriStrips)));
     if (strips)
     {
         reinterpret_cast<NiTriBasedGeom*(__thiscall*)(NiTriBasedGeom*)>(InitTriBasedGeom)(strips);
@@ -163,14 +165,16 @@ NiTriStrips* __fastcall CreateTriStripsObject(NiTriStrips* self, void*, int valu
 void __cdecl FUN_00a80400();
 
 // @fnv 0x00a9b140
-void __cdecl FUN_00a9b140()
+// src: XBOX_PDB 0x00a9b140
+void __cdecl NiParticleMeshes_CopyMembers()
 {
     FUN_00a80400();
 }
 
-void __cdecl FUN_00a9b180();
+void __cdecl NiLines_LoadBinary();
 // @fnv 0x00a98ea0
-void __cdecl FUN_00a98ea0()
+// src: XBOX_PDB 0x00a98ea0
+void __cdecl NiParticleMeshes_LoadBinary()
 {
-    FUN_00a9b180();
+    NiLines_LoadBinary();
 }

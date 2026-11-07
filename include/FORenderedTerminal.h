@@ -21,12 +21,12 @@ public:
     virtual ~FORenderedTerminal();
 
     NiAVObject* GetTerminalScreenObject();
-    NiAVObject* FUN_007ffad0();
+    NiAVObject* GetParentNodeToRender();
     void FUN_007060d0();
     void* DestroyIfFlagged(unsigned int);
-    void FUN_007ffaf0();
+    void FORenderedTerminal_FadeOut();
     void FUN_00984f60(TilePX* item);
-    void FUN_00705fc0(NiNode* node);
+    void SetTarget_00705fc0(NiNode* node);
     void Refresh();
 
     NiPoint3 pt;

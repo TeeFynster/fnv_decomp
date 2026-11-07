@@ -33,7 +33,7 @@ struct FUN_008cd6a0_Class
         d[10] = 1.0f;
         m_vTranslation.setZero4();
     }
-    void FUN_00cb2d90(void* p);
+    void hkRotation_set(void* p);
 };
 struct __declspec(align(16)) ShapeBase : hkReferencedObject
 {
@@ -56,11 +56,11 @@ struct __declspec(align(16)) FUN_00e0af50 : ShapeBase
 
     FUN_00e0af50(const hkVec4f& v, int a, int b);
 };
-void __stdcall FUN_00e0af40(int a, int b);
+void __stdcall nullsub_91(int a, int b);
 
 extern "C" void _ReadBarrier();
-void* FUN_00c85750(void);
-void __cdecl FUN_00c908c0(void* allocator, void* self, unsigned int newCap, int elemSize);
+void* hkMemoryRouter_getInstance(void);
+void __cdecl hkArrayUtil__reserve(void* allocator, void* self, unsigned int newCap, int elemSize);
 
 struct AllocatorHolder
 {
@@ -141,7 +141,7 @@ static __forceinline void SecondMidpoint(OutputPair* dst, __m128 m, const float*
 
 template <class Array> static __forceinline void SubdivExpand(Array* array, int amount)
 {
-    AllocatorHolder* holder = (AllocatorHolder*)FUN_00c85750();
+    AllocatorHolder* holder = (AllocatorHolder*)hkMemoryRouter_getInstance();
     void* alloc = holder->m_pAllocator;
     int need = array->m_uiItemCount + amount;
     int cap = array->m_capFlags & 0x3fffffffu;
@@ -150,13 +150,14 @@ template <class Array> static __forceinline void SubdivExpand(Array* array, int 
         int newCap = cap + cap;
         if (need < newCap)
             need = newCap;
-        FUN_00c908c0(alloc, array, need, 16);
+        hkArrayUtil__reserve(alloc, array, need, 16);
     }
     array->m_uiItemCount += amount;
 }
 
 // @fnv 0x00e0afe0
-void __cdecl FUN_00e0afe0(SubdivMesh* self, int idx, float w, float t)
+// src: XBOX_PDB 0x00e0afe0
+void __cdecl _subdivideRecursive(SubdivMesh* self, int idx, float w, float t)
 {
     if (t == 0.0f)
     {
@@ -199,9 +200,9 @@ void __cdecl FUN_00e0afe0(SubdivMesh* self, int idx, float w, float t)
         original->c = oldV + 2;
 
         double t1 = t - 1.0;
-        FUN_00e0afe0(self, oldT, w, t1);
-        FUN_00e0afe0(self, oldT + 1, w, t1);
-        FUN_00e0afe0(self, oldT + 2, w, t1);
+        _subdivideRecursive(self, oldT, w, t1);
+        _subdivideRecursive(self, oldT + 1, w, t1);
+        _subdivideRecursive(self, oldT + 2, w, t1);
         t = t1;
         if (t == 0.0f)
         {

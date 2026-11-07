@@ -34,7 +34,8 @@ bool NiAVObject::AddExtraData(const NiFixedString& kName, NiExtraData* pkTex)
 }
 
 // @fnv 0x00b553d0
-void __cdecl FUN_00b553d0(NiGeometry* pObject, NiPoint3* pValue)
+// src: COMMUNITY 0x00b553d0
+void __cdecl BSShaderManager_SetEmittanceRecurse(NiGeometry* pObject, NiPoint3* pValue)
 {
     if (pObject == 0)
         return;
@@ -67,18 +68,18 @@ void __cdecl FUN_00b553d0(NiGeometry* pObject, NiPoint3* pValue)
     {
         NiAVObject* pChild = pNode->m_kChildren.m_pBase[i].m_pObject;
         if (pChild != 0)
-            FUN_00b553d0((NiGeometry*)pChild, pValue);
+            BSShaderManager_SetEmittanceRecurse((NiGeometry*)pChild, pValue);
     }
 }
 
-NiAVObject* FUN_00c4b310(NiAVObject* root, const char* name, int flag);
-NiAVObject* FUN_00c4b470(NiAVObject* root, NiFixedString* name, int flag);
+NiAVObject* BSUtilities_GetObjectByName_00c4b310(NiAVObject* root, const char* name, int flag);
+NiAVObject* BSUtilities_GetObjectByName_00c4b470(NiAVObject* root, NiFixedString* name, int flag);
 struct AttachInfo
 {
     void* m_data;
 };
 
-void FUN_00c88a40(void* a1, AttachInfo a2, NiAVObject* obj, NiAVObject* parent, bool a4);
+void WeaponObject_Constrain(void* a1, AttachInfo a2, NiAVObject* obj, NiAVObject* parent, bool a4);
 
 inline NiNode* NiAVObject::GetParent() const
 {
@@ -103,17 +104,18 @@ static __forceinline NiAVObject* FindAttachParent(NiAVObject* obj, NiAVObject* r
 }
 
 // @fnv 0x00c89050
-void __stdcall FUN_00c89050(void* a1, AttachInfo a2, NiAVObject* root, bool a4)
+// src: XBOX_PDB 0x00c89050
+void __stdcall WeaponObject_UpdateConstraints(void* a1, AttachInfo a2, NiAVObject* root, bool a4)
 {
-    NiAVObject* obj = FUN_00c4b310(root, "Weapon", 0);
+    NiAVObject* obj = BSUtilities_GetObjectByName_00c4b310(root, "Weapon", 0);
     NiAVObject* parent = FindAttachParent(obj, root);
     if (obj && parent)
-        FUN_00c88a40(a1, a2, obj, parent, a4);
+        WeaponObject_Constrain(a1, a2, obj, parent, a4);
 
     static NiFixedString kBackpack("Backpack");
-    obj = FUN_00c4b470(root, &kBackpack, 0);
+    obj = BSUtilities_GetObjectByName_00c4b470(root, &kBackpack, 0);
     parent = FindAttachParent(obj, root);
     if (obj && parent)
-        FUN_00c88a40(a1, a2, obj, parent, a4);
+        WeaponObject_Constrain(a1, a2, obj, parent, a4);
 }
 

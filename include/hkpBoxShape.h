@@ -31,9 +31,9 @@ public:
     void SetHalfExtents(const hkVector4& halfExtents);
     void GetHalfExtents(hkVector4& result) const;
     void GetAabb(const hkTransform& transform, hkReal tolerance, hkAabb& out) const;
-    void FUN_00c9dc40(const float* src, float* dst);
-    void* FUN_00c9dd30(__m128* sphereBuffer) const;
-    hkBool FUN_00c9de40(const BRRayCastInput& input, BRRayCastOutput& results) const;
+    void getSupportingVertexImpl(const float* src, float* dst);
+    void* getCollisionSpheresImpl(__m128* sphereBuffer) const;
+    hkBool castRayImpl(const BRRayCastInput& input, BRRayCastOutput& results) const;
     hkpBoxShape* SetExtentsAndRadius(const hkVector4& halfExtents, float radius);
 
     char pad14[0xC];

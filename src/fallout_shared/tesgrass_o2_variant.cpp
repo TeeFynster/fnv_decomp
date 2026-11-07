@@ -10,13 +10,13 @@ struct FUN_005081b0_shell
 };
 struct FUN_00509aa0_shell : TESGrass
 {
-    unsigned char FUN_00509aa0();
+    unsigned char TESGrass_GetMaxSlopeDegrees();
 };
 struct TESGrass_shell
 {
     char m_auiShapeKeys[0x4c];
     unsigned short m_4c;
-    void FUN_00509b20(unsigned short state);
+    void TESGrass_SetDistanceFromWaterLevel(unsigned short state);
 };
 struct FUN_00509bb0_shell
 {
@@ -42,11 +42,11 @@ struct FUN_00509c90_shell
 struct FUN_00509d30_shell
 {
     char field_48;
-    bool FUN_00509d30(unsigned char a);
+    bool TESGrass_SetDensity(unsigned char a);
 };
 struct FUN_00509d60_class
 {
-    bool FUN_00509d60(unsigned char value);
+    bool TESGrass_SetMinSlopeDegrees(unsigned char value);
 };
 struct FUN_00509da0_shell
 {

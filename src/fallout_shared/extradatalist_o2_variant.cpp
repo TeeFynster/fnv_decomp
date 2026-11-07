@@ -109,11 +109,11 @@ template <class T> class MyList
     struct Allocator
     {
         unsigned int count;
-        NiTListItem<T>* FUN_0043a010();
+        NiTListItem<T>* NiGeometry_AddProperty();
     } allocator;
     __declspec(noinline) void FUN_00a5a310(const T& value)
     {
-        NiTListItem<T>* node = allocator.FUN_0043a010();
+        NiTListItem<T>* node = allocator.NiGeometry_AddProperty();
         node->m_element = value;
         node->m_pkNext = 0;
         node->m_pkPrev = tail;
@@ -139,7 +139,7 @@ template <class T> class MyList
 class B5Owner
 {
   public:
-    void FUN_00b5eed0(unsigned int key);
+    void ShadowSceneNode_RemoveLight(unsigned int key);
     __declspec(noinline) void AddBound(const NiPointer<B5Item>& ptr);
     int unk000;
     int unk004;
@@ -268,7 +268,8 @@ class B5Owner
 };
 
 // @fnv 0x00b5eed0
-void B5Owner::FUN_00b5eed0(unsigned int key)
+// src: XBOX_PDB 0x00b5eed0
+void B5Owner::ShadowSceneNode_RemoveLight(unsigned int key)
 {
     if (key == 0)
         return;
@@ -291,14 +292,14 @@ struct B5Lock
 {
     unsigned int owner;
     unsigned int count;
-    void FUN_0040fbf0(const char* name);
+    void BSSpinLock_Lock(const char* name);
 };
 extern B5Lock DAT_011f9ea0;
 void B5Owner::AddBound(const NiPointer<B5Item>& ptr)
 {
     if (ptr.m_pObject && m_1fc)
     {
-        DAT_011f9ea0.FUN_0040fbf0(0);
+        DAT_011f9ea0.BSSpinLock_Lock(0);
         pending.FUN_00a5a310(ptr);
         if (--DAT_011f9ea0.count == 0)
             DAT_011f9ea0.owner = 0;

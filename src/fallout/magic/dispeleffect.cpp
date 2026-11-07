@@ -53,7 +53,7 @@ struct ItemObj
 
 struct DatObj
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern DatObj DAT_011d1b20;
 
@@ -66,7 +66,7 @@ MagicCaster* __fastcall GetEffectCaster(ActiveEffect*);
 void DispelEffect::Start()
 {
     BSSimpleList<ActiveEffect*>* cur = FUN_0059bb30()->GetActiveEffectList();
-    bool b9 = FUN_0084e3a0()->FUN_0084e3a0() == 0;
+    bool b9 = GetHavokWorldObjectCountInSceneGraph_0084e3a0()->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == 0;
     Actor* x = GetEffectCaster(this) ? GetEffectCaster(this)->GetCasterActor() : 0;
     while (cur != 0 && !cur->IsEmpty())
     {
@@ -77,7 +77,7 @@ void DispelEffect::Start()
             ItemObj* u2 = reinterpret_cast<ItemObj*>(t5->FUN_0044ddc0());
             if (u2->i6() == 0)
             {
-                if (u2->m_0c.s2(b9 ? x : 0) <= GetFloatAtOffset1C() * *DAT_011d1b20.FUN_00403e20())
+                if (u2->m_0c.s2(b9 ? x : 0) <= GetFloatAtOffset1C() * *DAT_011d1b20.Setting_Float_00403e20())
                     t5->Dispel(false);
             }
         }

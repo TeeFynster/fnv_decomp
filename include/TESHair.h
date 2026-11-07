@@ -18,8 +18,8 @@ public:
     bool IsValidForNPC(TESNPC* npc);
     bool IsHairValidForNPC(TESNPC* npc);
     void ResetFormData();
-    bool FUN_005fdf40();
-    bool FUN_005fdf60();
+    bool TESHair_GetPlayable();
+    bool TESHair_CanBeMale();
     bool IsFlag2Clear();
     bool IsFlag4Clear();
 

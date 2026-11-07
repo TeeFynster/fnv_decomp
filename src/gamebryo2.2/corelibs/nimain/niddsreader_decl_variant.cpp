@@ -51,7 +51,8 @@ class FUN_00a779b0_info
 };
 
 // @fnv 0x00a8c6e0
-void __cdecl FUN_00a8c6e0(ReadCtx* ctx, ImgObj* self, NiPixelFormat fmtA, NiPixelFormat fmtB, unsigned int idx,
+// src: GAMEBRYO_LIB 0x00a8c6e0
+void __cdecl NiDDSReader_Read24Bit(ReadCtx* ctx, ImgObj* self, NiPixelFormat fmtA, NiPixelFormat fmtB, unsigned int idx,
                           unsigned int scale)
 {
     unsigned char* base = (unsigned char*)(self->m5c[self->m60] * scale + self->m50 + self->m5c[idx]);

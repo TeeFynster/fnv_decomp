@@ -64,18 +64,18 @@ struct InvEntry
     TESForm* FUN_0044ddc0();
     ExtraDataList* FUN_00726070();
 };
-bool __fastcall FUN_004c0bf0(TESForm*);
-bool __fastcall FUN_006450c0(TESForm*);
+bool __fastcall TESObjectWEAP_IsThrownWeapon(TESForm*);
+bool __fastcall TESObjectWEAP_IsMeleeWeapon(TESForm*);
 // @fnv 0x009da7c0
 void CombatProcedureSwitchWeapon::UpdateWeaponDraw()
 {
-    if (m_pCombatController->FUN_00981990())
+    if (m_pCombatController->IsFleeing_00981990())
     {
         SetCombatProcedureState(this);
         return;
     }
     Actor* actor = GetCombatProcedureActor(this);
-    if (actor->FUN_008a7570() != -1)
+    if (actor->GetAnimAction_008a7570() != -1)
         return;
     InvEntry* entry = reinterpret_cast<InvEntry*>(reinterpret_cast<BaseProcess*>(actor->FUN_008d8520())->GetActiveWeapon());
     TESForm* weap = entry ? entry->FUN_0044ddc0() : 0;
@@ -83,27 +83,27 @@ void CombatProcedureSwitchWeapon::UpdateWeaponDraw()
     {
         if (reinterpret_cast<BaseProcess*>(actor->FUN_008d8520())->IsAdditionalActorFlagSet())
         {
-            actor->FUN_008a6840(false);
+            actor->Actor_SetWantWeaponDrawn(false);
             return;
         }
         if (pWeapon)
         {
             int count = 1;
-            if (FUN_004c0bf0(pWeapon))
+            if (TESObjectWEAP_IsThrownWeapon(pWeapon))
                 count = actor->FUN_00575610(pWeapon);
-            actor->EquipItem(pWeapon, count, 0, true, false, true);
+            actor->Actor_QueueEquipObject(pWeapon, count, 0, true, false, true);
         }
         else
         {
-            actor->UnequipItem(weap, entry->FUN_00726070(), false, false, false, true);
+            actor->QueueUnEquipObject(weap, entry->FUN_00726070(), false, false, false, true);
         }
         m_ucWeaponState = true;
     }
     else if (weap == pWeapon)
     {
         if (!reinterpret_cast<BaseProcess*>(actor->FUN_008d8520())->IsAdditionalActorFlagSet())
-            actor->FUN_008a6840(true);
-        if (!weap || FUN_006450c0(weap))
+            actor->Actor_SetWantWeaponDrawn(true);
+        if (!weap || TESObjectWEAP_IsMeleeWeapon(weap))
             m_pCombatController->UpdateActorValues();
         SetCombatProcedureState(this);
     }

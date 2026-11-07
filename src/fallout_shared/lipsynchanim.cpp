@@ -8,7 +8,7 @@ bool LipSyncAnimation::ApplyToAnimationData(BSFaceGenAnimationData* animation, f
     if (!animation)
         return false;
 
-    animation->SetTransitionDuration(FUN_0040ebd0(0.2f, GetNegativeMagnitude(false, true, true, true, false)));
+    animation->SetTransitionDuration(BSMIN(0.2f, GetNegativeMagnitude(false, true, true, true, false)));
 
     float phonemes[16];
     float modifiers[17];
@@ -33,7 +33,7 @@ bool LipSyncAnimation::ApplyToAnimationData(BSFaceGenAnimationData* animation, f
 // @fnv 0x004d5850
 void* LipSyncAnimation::DeleteThis(unsigned int flags)
 {
-    FUN_004d5080();
+    ReleaseStorage_004d5080();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -41,7 +41,8 @@ void* LipSyncAnimation::DeleteThis(unsigned int flags)
 
 // Reads characters from stream into output until size bytes are consumed, expanding zero markers into runs of zero bytes.
 // @fnv 0x004d5880
-bool __cdecl FUN_004d5880(NiBinaryStream* stream, char* output, unsigned int size)
+// src: COMMUNITY 0x004d5880
+bool __cdecl LipSynchAnim_Decompress(NiBinaryStream* stream, char* output, unsigned int size)
 {
     bool success = true;
     unsigned int remaining = size;
@@ -98,7 +99,7 @@ struct Header
 };
 
 LipSyncAnimation* __cdecl ReadBufFromMemory(char* buffer, unsigned int size);
-bool __cdecl FUN_004d5880(NiBinaryStream*, char*, unsigned int, unsigned int);
+bool __cdecl LipSynchAnim_Decompress(NiBinaryStream*, char*, unsigned int, unsigned int);
 
 // Reads a 12-byte header from the stream, decompresses or reads the payload into a buffer, parses it into an animation, and deletes the stream and buffer.
 // @fnv 0x004d5350
@@ -151,7 +152,7 @@ LipSyncAnimation* __cdecl ReadAnimationFromStream(Stream* stream)
     buffer_ = new char[headerTmp.uncompressedSize + 16];
     if (headerTmp.flags & 1)
     {
-        FUN_004d5880((NiBinaryStream*)stream, buffer_, streamSize, headerTmp.uncompressedSize);
+        LipSynchAnim_Decompress((NiBinaryStream*)stream, buffer_, streamSize, headerTmp.uncompressedSize);
     }
     else
     {

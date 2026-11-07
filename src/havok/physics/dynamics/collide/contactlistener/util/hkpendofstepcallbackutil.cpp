@@ -50,14 +50,14 @@ struct Derived : FirstBase, SecondBase
 
 struct Target
 {
-    void FUN_00c93920(SecondBase* apObject);
+    void hkpWorld_addWorldPostSimulationListener(SecondBase* apObject);
 };
 
 // Calls FUN_00c93920 on apTarget, passing apObject as the argument.
 // @fnv 0x00d9e250
 void __fastcall PassObjectToTarget(Derived* apObject, void* apUnused, Target* apTarget)
 {
-    apTarget->FUN_00c93920(apObject);
+    apTarget->hkpWorld_addWorldPostSimulationListener(apObject);
 }
 
 struct S_00d9e280_World
@@ -66,12 +66,13 @@ struct S_00d9e280_World
 };
 struct S_00d9e280_D : hkReferencedObject, hkpWorldPostSimulationListener
 {
-    virtual void FUN_00d9e280(S_00d9e280_World* w);
+    virtual void ClearValue_Thunk_00d9e280(S_00d9e280_World* w);
 };
 
 // Passes this object to the world's ClearValue method.
 // @fnv 0x00d9e280
-void S_00d9e280_D::FUN_00d9e280(S_00d9e280_World* apWorld)
+// src: GUESS 0x00d9e280 (confidence: medium)
+void S_00d9e280_D::ClearValue_Thunk_00d9e280(S_00d9e280_World* apWorld)
 {
     apWorld->ClearValue(this);
 }
@@ -178,7 +179,7 @@ FUN_00d9e860::FUN_00d9e860()
     unk34 = (int)0x80000000;
 }
 
-extern "C" void* __cdecl FUN_00c85750(void);
+extern "C" void* __cdecl hkMemoryRouter_getInstance(void);
 extern "C" void __cdecl ResizeAudioStream(void* heap, void* arr, int elemSize);
 
 struct S_00d9e3f0_Item
@@ -193,7 +194,7 @@ struct S_00d9e3f0_Arr
     unsigned m_cap;
     S_00d9e3f0_Item& AllocatePair()
     {
-        hkMemoryRouter& r = *static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryRouter& r = *static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
         if (m_iElementCount == (int)(m_cap & 0x3fffffff))
             ResizeAudioStream(r.m_heap, this, sizeof(S_00d9e3f0_Item));
         return m_data[m_iElementCount++];
@@ -368,7 +369,7 @@ setRecursionStart:
 }
 
 namespace fnv_00d9ee20 {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00d9ee20_cls
 {
@@ -378,18 +379,19 @@ struct FUN_00d9ee20_cls
 
     void FUN_00d0b0d0();
 
-    FUN_00d9ee20_cls* FUN_00d9ee20(unsigned char acFlags);
+    FUN_00d9ee20_cls* hkpEndOfStepCallbackUtil_Destroy(unsigned char acFlags);
     static void operator delete(void* apMemory) throw();
 };
 
 // Calls FUN_00d0b0d0, then if acFlags bit 0 is set frees this through the allocator from FUN_00c85750 with m_uSize, and returns this.
 // @fnv 0x00d9ee20
-FUN_00d9ee20_cls* FUN_00d9ee20_cls::FUN_00d9ee20(unsigned char acFlags)
+// src: COMMUNITY 0x00d9ee20
+FUN_00d9ee20_cls* FUN_00d9ee20_cls::hkpEndOfStepCallbackUtil_Destroy(unsigned char acFlags)
 {
     FUN_00d0b0d0();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }
@@ -404,7 +406,7 @@ extern DWORD DAT_0126835c;
 
 static inline hkMemoryRouter& GetMonitorStream()
 {
-    return *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    return *static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
 }
 
 static __forceinline hkMemoryAllocator& GetStreamHeap(hkMemoryRouter& holder)
@@ -412,7 +414,7 @@ static __forceinline hkMemoryAllocator& GetStreamHeap(hkMemoryRouter& holder)
     return *reinterpret_cast<hkMemoryAllocator*>(holder.m_heap);
 }
 
-void __cdecl FUN_00c908c0(hkMemoryAllocator*, void* arr, int n, int elemSize);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator*, void* arr, int n, int elemSize);
 
 struct S_00d9ea80_TimerEntry
 {
@@ -444,7 +446,7 @@ struct S_00d9ea80_Info
 };
 struct S_00d9ea80_Sub
 {
-    S_00d9ea80_Info* FUN_00cf3dd0();
+    S_00d9ea80_Info* hkpConstraintInstance_getSimulationIsland();
 };
 struct S_00d9ea80_Obj
 {
@@ -466,7 +468,7 @@ struct S_00d9ea80_Obj
     virtual void v3c();
     virtual S_00d9ea80_Sub* FUN_vfn40();
 };
-void __cdecl FUN_00d9e2e0(S_00d9ea80_Obj* obj, int a, int b);
+void __cdecl hkpEndOfStepCallbackUtil_fireContactPointEventsForCollision(S_00d9ea80_Obj* obj, int a, int b);
 
 struct S_00d9ea80_Src
 {
@@ -498,7 +500,7 @@ struct S_00d9ea80_EntryArray
         if (cap < n)
         {
             int c2 = cap * 2;
-            FUN_00c908c0(&a, this, (n < c2) ? c2 : n, sizeof(S_00d9ea80_Entry));
+            hkArrayUtil__reserve(&a, this, (n < c2) ? c2 : n, sizeof(S_00d9ea80_Entry));
         }
     }
 };
@@ -506,9 +508,9 @@ struct S_00d9ea80_Less
 {
     char c;
 };
-void __cdecl FUN_00d9e4a0(void* c, S_00d9ea80_SrcArray* b);
-void __cdecl FUN_00d9e680(void* c, S_00d9ea80_EntryArray* a);
-void __cdecl FUN_00d9e8b0(S_00d9ea80_SrcArray* b, S_00d9ea80_EntryArray* a);
+void __cdecl stripArray_struct_hkpEndOfStepCallbackUtil_NewCollision(void* c, S_00d9ea80_SrcArray* b);
+void __cdecl stripArray_struct_hkpEndOfStepCallbackUtil_Collision(void* c, S_00d9ea80_EntryArray* a);
+void __cdecl mergeArrays(S_00d9ea80_SrcArray* b, S_00d9ea80_EntryArray* a);
 void __cdecl QuickSortEntries(S_00d9ea80_Src* data, int lo, int hi, S_00d9ea80_Less l);
 
 struct S_00d9ea80
@@ -520,12 +522,13 @@ struct S_00d9ea80
     S_00d9ea80_EntryArray m_entries;
     S_00d9ea80_SrcArray m_src;
     int m_iThirdValue[3];
-    void FUN_00d9ea80(int arg);
+    void hkpEndOfStepCallbackUtil_postSimulationCallback(int arg);
 };
 
 // Records a timer, merges m_src into m_entries (sorting if m_sort), invokes FUN_00d9e2e0 on flagged entries, and clears unk4.
 // @fnv 0x00d9ea80
-void S_00d9ea80::FUN_00d9ea80(int arg)
+// src: HAVOK_LIB 0x00d9ea80
+void S_00d9ea80::hkpEndOfStepCallbackUtil_postSimulationCallback(int arg)
 {
     int off;
     S_00d9ea80_Timers* tm = (S_00d9ea80_Timers*)TlsGetValue(DAT_0126835c);
@@ -538,16 +541,16 @@ void S_00d9ea80::FUN_00d9ea80(int arg)
         h->m_uiStartTicks = *(volatile unsigned*)&off;
         tm->m_cur = h + 1;
     }
-    FUN_00d9e4a0(m_iThirdValue, &m_src);
+    stripArray_struct_hkpEndOfStepCallbackUtil_NewCollision(m_iThirdValue, &m_src);
     S_00d9ea80_EntryArray* arr = &m_entries;
-    FUN_00d9e680(m_iThirdValue, arr);
+    stripArray_struct_hkpEndOfStepCallbackUtil_Collision(m_iThirdValue, arr);
     if (m_sort)
     {
         S_00d9ea80_Less less;
         less.c = 0;
         if (m_src.m_iElementCount > 1)
             QuickSortEntries(m_src.m_data, 0, m_src.m_iElementCount - 1, less);
-        FUN_00d9e8b0(&m_src, arr);
+        mergeArrays(&m_src, arr);
     }
     else
     {
@@ -574,9 +577,9 @@ void S_00d9ea80::FUN_00d9ea80(int arg)
         {
             S_00d9ea80_Entry* e = (S_00d9ea80_Entry*)((char*)arr->m_data + off);
             S_00d9ea80_Obj* pObj = e->obj;
-            S_00d9ea80_Info* pInfo = pObj->FUN_vfn40()->FUN_00cf3dd0();
+            S_00d9ea80_Info* pInfo = pObj->FUN_vfn40()->hkpConstraintInstance_getSimulationIsland();
             if (pInfo->flags26 & 0xc)
-                FUN_00d9e2e0(pObj, e->a, e->b);
+                hkpEndOfStepCallbackUtil_fireContactPointEventsForCollision(pObj, e->a, e->b);
         }
     }
     unk4 = 0;
@@ -735,7 +738,8 @@ struct ListenerArg
 };
 // Iterates block entries in reverse, calling the listener's Notify0 for each entry whose properties flag bit 1 is set or when the resource flags bit 8 is set.
 // @fnv 0x00d9e2e0
-void FUN_00d9e2e0(S_Owner* self, ListenerArg listener, int aiSource)
+// src: HAVOK_LIB 0x00d9e2e0
+void hkpEndOfStepCallbackUtil_fireContactPointEventsForCollision(S_Owner* self, ListenerArg listener, int aiSource)
 {
     int a = self->v10()->unk14;
     int c = self->v10()->unk18;
@@ -798,7 +802,7 @@ static __forceinline void ElemArrayD9E_init(hkArrayBase<StripCollisionD9E>& self
 
 static __forceinline hkMemoryAllocator* ElemArrayD9E_heap()
 {
-        return reinterpret_cast<hkMemoryAllocator*>(static_cast<hkMemoryRouter*>(FUN_00c85750())->m_heap);
+        return reinterpret_cast<hkMemoryAllocator*>(static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->m_heap);
     }
 
 static __forceinline int ElemArrayD9E_indexOf(hkArrayBase<StripCollisionD9E>& self, const StripCollisionD9E& t)
@@ -827,7 +831,7 @@ static __forceinline void ElemArrayD9E_SetSizeAndGrow(hkArrayBase<StripCollision
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, (&self), newSize, sizeof(StripCollisionD9E));
+            hkArrayUtil__reserve(&alloc, (&self), newSize, sizeof(StripCollisionD9E));
         }
         self.m_iElementCount = n;
     }
@@ -849,7 +853,7 @@ static __forceinline void ElemArrayD9E_init(hkArrayBase<StripCollisionD9E>& self
         self.m_data = 0;
         self.m_iElementCount = 0;
         self.m_iCapacityState = (int)0x80000000;
-        hkMemoryRouter* router = static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryRouter* router = static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
         hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(router->m_heap);
         p = cap ? bufAllocD9E(alloc, cap) : 0;
         flags = cap ? cap : (int)0x80000000;
@@ -893,7 +897,8 @@ static __forceinline void stripCollisionArrays(hkArray<StripCollisionD9E, ElemAr
 
 // Removes entries from the first array that are found in the second, then replaces the second array with the remaining entries.
 // @fnv 0x00d9e680
-void __cdecl FUN_00d9e680(void* apFirstArray, S_00d9ea80_EntryArray* apSecondArray)
+// src: HAVOK_LIB 0x00d9e680
+void __cdecl stripArray_struct_hkpEndOfStepCallbackUtil_Collision(void* apFirstArray, S_00d9ea80_EntryArray* apSecondArray)
 {
     stripCollisionArrays(*static_cast<hkArray<StripCollisionD9E, ElemArrayD9EPolicy>*>(apFirstArray), *reinterpret_cast<hkArray<StripCollisionD9E, ElemArrayD9EPolicy>*>(apSecondArray));
 }
@@ -944,7 +949,8 @@ static inline hkValue8b0* AllocArray8b0(hkMemoryAllocator* pkHeap, int& iCount)
 
 // Merges two arrays ordered by key into a new buffer, hands it to argOut via FUN_00d9ec10, zeroes pkNew's count and frees the temporary buffer.
 // @fnv 0x00d9e8b0
-void __cdecl FUN_00d9e8b0(hkArray16_8b0* pkNew, hkArray12_8b0* volatile argOut)
+// src: HAVOK_LIB 0x00d9e8b0
+void __cdecl mergeArrays(hkArray16_8b0* pkNew, hkArray12_8b0* volatile argOut)
 {
     hkArray12_8b0* pkOut = argOut;
     hkEntry8b0* pkA = pkNew->m_pData;
@@ -953,7 +959,7 @@ void __cdecl FUN_00d9e8b0(hkArray16_8b0* pkNew, hkArray12_8b0* volatile argOut)
         return;
 
     int iTotalCount = pkOut->m_uiLogicalSize + pkNew->m_uiLogicalSize;
-    hkMemoryRouter& kRouter0 = *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter& kRouter0 = *static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     hkValue8b0* pkData = AllocArray8b0(reinterpret_cast<hkMemoryAllocator*>(kRouter0.m_heap), iTotalCount);
     int iCapacity = iTotalCount ? iTotalCount : 0x80000000;
     hkArray12_8b0 kMerged;
@@ -978,7 +984,7 @@ void __cdecl FUN_00d9e8b0(hkArray16_8b0* pkNew, hkArray12_8b0* volatile argOut)
 
     ((hkMergeTarget8b0*)argOut)->SwapThreeInts((int*)&kMerged);
     pkNew->m_uiLogicalSize = 0;
-    hkMemoryRouter& kRouter = *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter& kRouter = *static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     hkMemoryAllocator* pkHeap = reinterpret_cast<hkMemoryAllocator*>(kRouter.m_heap);
     if ((kMerged.m_iCapacityAndFlags & 0x80000000) == 0)
         pkHeap->bufFree(kMerged.m_pData, (kMerged.m_iCapacityAndFlags & 0x3fffffff) * (int)sizeof(hkValue8b0));
@@ -1055,12 +1061,12 @@ static __forceinline S_00d9e3f0_Item* makeAllocation(hkMemoryAllocator* heap, in
     return result;
 }
 struct BatchBuffer;
-extern "C" void __cdecl FUN_00c908c0(hkMemoryAllocator*, BatchBuffer*, int, int);
+extern "C" void __cdecl hkArrayUtil__reserve(hkMemoryAllocator*, BatchBuffer*, int, int);
 struct BatchBuffer : BatchArrayView<S_00d9e3f0_Item>
 {
     __forceinline BatchBuffer(int size) : BatchArrayView<S_00d9e3f0_Item>()
     {
-        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
         hkMemoryAllocator* heap = reinterpret_cast<hkMemoryAllocator*>(context->m_heap);
         S_00d9e3f0_Item* allocation = size ? makeAllocation(heap, size) : 0;
         int cap = size ? size : 0x80000000;
@@ -1070,16 +1076,16 @@ struct BatchBuffer : BatchArrayView<S_00d9e3f0_Item>
     }
     __forceinline void resize(int size)
     {
-        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
         hkMemoryAllocator* heap = reinterpret_cast<hkMemoryAllocator*>(context->m_heap);
         int cap = capacity & 0x3fffffff;
         if (cap < size)
-            FUN_00c908c0(heap, this, size < 2 * cap ? 2 * cap : size, 16);
+            hkArrayUtil__reserve(heap, this, size < 2 * cap ? 2 * cap : size, 16);
         count = size;
     }
     __forceinline void clear()
     {
-        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
         hkMemoryAllocator* heap = reinterpret_cast<hkMemoryAllocator*>(context->m_heap);
         count = 0;
         if ((capacity & 0x80000000) == 0)
@@ -1104,7 +1110,8 @@ struct IncomingArg
 };
 // For each incoming item, removes it from destination if present, otherwise appends it to a temporary buffer, then swaps the buffer into incoming.
 // @fnv 0x00d9e4a0
-void __cdecl FUN_00d9e4a0(PendingBatch& destination, IncomingBatch& incoming)
+// src: HAVOK_LIB 0x00d9e4a0
+void __cdecl stripArray_struct_hkpEndOfStepCallbackUtil_NewCollision(PendingBatch& destination, IncomingBatch& incoming)
 {
     int initialCount = destination.size();
     int sourceCount = incoming.size();

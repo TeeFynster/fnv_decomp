@@ -11,7 +11,8 @@
 extern NiRTTI g_012026f0;
 
 // @fnv 0x00c2a1a0
-const NiRTTI* __cdecl FUN_00c2a1a0()
+// src: COMMUNITY 0x00c2a1a0
+const NiRTTI* __cdecl NiPSysInitialRotAngleCtlr_GetRTTI()
 {
     return &g_012026f0;
 }
@@ -49,13 +50,14 @@ bool NiPSysInitialRotAngleCtlr::IsModifierOfType(NiObjectNET* pkTarget)
     return pkModifier->IsKindOfType(&_g_01202528);
 }
 
-char* __cdecl FUN_00a7d330(const char*);
-void __stdcall FUN_00c32f60(StrArr*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 // @fnv 0x00c2a260
-void __stdcall FUN_00c2a260(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c2a260
+void __stdcall NiPSysInitialRotAngleCtlr_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00c32f60(pkStrings);
-    char* pStr = FUN_00a7d330(g_012026f0.m_pcName);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pkStrings);
+    char* pStr = NiViewerStrings_NiGetViewerString_Title(g_012026f0.m_pcName);
     unsigned int iCount = *(unsigned short*)((char*)pkStrings + 10);
     unsigned int iSize = *(unsigned short*)((char*)pkStrings + 8);
     if (iCount >= iSize)
@@ -64,7 +66,7 @@ void __stdcall FUN_00c2a260(StrArr* pkStrings)
 }
 
 extern char DAT_010befbc;
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 struct SpawnedObject
 {
@@ -81,7 +83,7 @@ struct SpawnedCtlr
 // @fnv 0x00c2a1c0
 SpawnedObject* SpawnedCtlr::CreateSpawnedObject(void* pArg)
 {
-    SpawnedObject* pkObj = (SpawnedObject*)FUN_00aa13e0(0x40);
+    SpawnedObject* pkObj = (SpawnedObject*)Object_DispatchCommandFour(0x40);
     if (pkObj != 0)
     {
         pkObj->FUN_00c32d80();

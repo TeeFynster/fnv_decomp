@@ -11,7 +11,7 @@ struct DAT_010c53b4_t
 };
 extern DAT_010c53b4_t DAT_010c53b4;
 
-int __cdecl FUN_00c80c00(void*, void*, void*, int);
+int __cdecl bhkUtilFunctions_FindCollisionObjectBFSRec(void*, void*, void*, int);
 
 struct LocalObj
 {
@@ -41,10 +41,11 @@ struct LocalObj
 };
 
 // @fnv 0x00c812d0
-int __cdecl FUN_00c812d0(void* a1, void* a2)
+// src: COMMUNITY 0x00c812d0
+int __cdecl bhkUtilFunctions_FindCollisionObjectBFS(void* a1, void* a2)
 {
     LocalObj local;
-    return FUN_00c80c00(a1, &local, a2, 0);
+    return bhkUtilFunctions_FindCollisionObjectBFSRec(a1, &local, a2, 0);
 }
 
 class NiAVObject;
@@ -76,12 +77,13 @@ static inline unsigned int C6A350IsEnabled(NiAVObject* pkObject)
 }
 
 typedef void (*CollisionObjectCountCallback)(NiCollisionObject*, CollisionObjectCountContext*);
-void FUN_00c68900(NiAVObject* pkObject, CollisionObjectCountContext* pkContext,
+void bhkWorld_DoObjectRec(NiAVObject* pkObject, CollisionObjectCountContext* pkContext,
                   CollisionObjectCountCallback pfnCallback);
 extern CollisionObjectCountCallback DAT_011afe9c;
 
 // @fnv 0x00c6a350
-bool FUN_00c6a350(NiAVObject* pkObject, int iValue, bool bRecurse, bool bForce, bool bOption)
+// src: XBOX_PDB 0x00c6a350
+bool bhkWorld_SetMotion(NiAVObject* pkObject, int iValue, bool bRecurse, bool bForce, bool bOption)
 {
     bool bResult = false;
     if (pkObject && (bForce || C6A350IsEnabled(pkObject)))
@@ -94,7 +96,7 @@ bool FUN_00c6a350(NiAVObject* pkObject, int iValue, bool bRecurse, bool bForce, 
         kContext.iValue = iValue;
         kContext.iOption = bOption;
         if (DAT_011afe9c)
-            FUN_00c68900(pkObject, &kContext, DAT_011afe9c);
+            bhkWorld_DoObjectRec(pkObject, &kContext, DAT_011afe9c);
     }
     return bResult;
 }

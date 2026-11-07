@@ -30,7 +30,7 @@ public:
     bool IsInList(BGSListForm*& form);
     void CopyConditionsFromListForm(TESForm* form);
     bool IsNotEqual(TESForm* form);
-    void FUN_0058fcc0();
+    void Save_0058fcc0();
     int GetConditionIndex(TESForm* form);
     void SaveFormList(BGSSaveFormBuffer* buffer);
 };

@@ -11,7 +11,7 @@ extern char DAT_010ef37c;
 extern NiFixedString EmptyFS;
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 void SetShadowWorldView();
-void FUN_00e80a50();
+void NiD3DShader_PackWorldPerspectiveEffect();
 void UpdateWorldViewMatrix();
 void SetWorldViewFromShadow();
 void SetWorldViewMatrix();

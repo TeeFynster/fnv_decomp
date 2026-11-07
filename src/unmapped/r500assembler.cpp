@@ -38,7 +38,7 @@ extern "C" __declspec(dllimport) int __stdcall FindClose(void*);
 struct DebrisData;
 extern StartMenu g_011c3f74;
 const char* __cdecl PrepareScriptMessage(const char*, bool);
-char* __cdecl FUN_004dc110();
+char* __cdecl BSUtilities_GetPersonalPath();
 int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 struct AEList
 {
@@ -187,7 +187,7 @@ void SaveLoadList::LoadSaveFiles()
                     if (list)
                         DeleteAllItems();
                     list = new SL;
-                    lstrcpy(path, FUN_004dc110());
+                    lstrcpy(path, BSUtilities_GetPersonalPath());
                     lstrcatA(path, PrepareScriptMessage(static_cast<const StartMenu&>(g_011c3f74).GetMenuTitle(), false));
                     lstrcatA(path, "*.ess");
                     handle = FindFirstFileA(path, (_WIN32_FIND_DATAA*)&findData);
@@ -197,7 +197,7 @@ void SaveLoadList::LoadSaveFiles()
                         {
                             if (findData.nFileSizeHigh || findData.nFileSizeLow)
                             {
-                                _sprintf_s(fullPath, 260, "%s%s%s", FUN_004dc110(),
+                                _sprintf_s(fullPath, 260, "%s%s%s", BSUtilities_GetPersonalPath(),
                                            PrepareScriptMessage(static_cast<const StartMenu&>(g_011c3f74).GetMenuTitle(), false), findData.cFileName);
                                 file = new FUN_0085fb40(fullPath, 0, 0x20000);
                                 ((AEList*)list)->Insert((DebrisData*)file, CompareFileWriteTimes);
@@ -303,11 +303,12 @@ struct SpawnedObject
     unsigned int unk154;
     unsigned char m_158;
     void Init(int a, int b, int c, int d);
-    SpawnedObject* FUN_0085fb40(int a1, int a2, int a3);
+    SpawnedObject* InitializeFields_0085fb40(int a1, int a2, int a3);
 };
 
 // @fnv 0x0085fb40
-SpawnedObject* SpawnedObject::FUN_0085fb40(int a1, int a2, int a3)
+// src: GUESS 0x0085fb40 (confidence: low)
+SpawnedObject* SpawnedObject::InitializeFields_0085fb40(int a1, int a2, int a3)
 {
     this->Init(a1, a2, a3, 0);
     *(void* volatile*)this = &DAT_01081a5c;

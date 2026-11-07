@@ -14,10 +14,11 @@ struct FUN_007408d0_Class
 {
     char m_auiShapeKeys[0x24];
     int m_val;
-    bool FUN_007408d0(int a);
+    bool NiControllerSequence_SetCycleType(int a);
 };
 // @fnv 0x007408d0
-bool FUN_007408d0_Class::FUN_007408d0(int a)
+// src: XBOX_PDB 0x007408d0
+bool FUN_007408d0_Class::NiControllerSequence_SetCycleType(int a)
 {
     if (a == 2 || a == 0)
     {

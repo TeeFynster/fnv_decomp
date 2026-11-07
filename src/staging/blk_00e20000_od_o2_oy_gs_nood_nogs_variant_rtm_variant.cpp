@@ -31,7 +31,8 @@ static __forceinline LocalM128 inverseSpan(LocalM128 a, LocalM128 b)
     return _mm_div_ss(_mm_load_ss(&DAT_01012068), _mm_add_ss(a, b));
 }
 // @fnv 0x00e33760
-void FUN_00e33760(float t, int unused, const float* knots, const LocalM128* ctrl, LocalM128* out)
+// src: GUESS 0x00e33760 (confidence: low)
+void Object_UpdateFields_00e33760(float t, int unused, const float* knots, const LocalM128* ctrl, LocalM128* out)
 {
     float f;
     LocalM128 left[4], right[4];

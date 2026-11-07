@@ -21,17 +21,17 @@ public:
 
     void SetTrespassEnabled(bool enabled);
     int FUN_009185e0();
-    float FUN_00644790();
-    void FUN_008db4c0(float);
-    void FUN_009f94d0(int);   // 0x009f94d0
+    float BGSProjectile_GetExplosionTimer();
+    void TrespassPackage_ModWarningTimer(float);
+    void TrespassPackage_ModWarningCount(int);   // 0x009f94d0
     void* __thiscall FUN_009f9220(unsigned int flags);
     void __thiscall FUN_009f9450();
-    unsigned short FUN_009f9500();
+    unsigned short GetSaveSize_009f9500();
     void __thiscall SaveFormRefs();
     void __thiscall LoadTrespassPackage();
     void __thiscall SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffer);
-    void __thiscall FUN_009f9840(BGSLoadFormBuffer*);
-    void __thiscall FUN_009f98e0(unsigned int);
+    void __thiscall LoadGame_009f9840(BGSLoadFormBuffer*);
+    void __thiscall InitLoadGame_009f98e0(unsigned int);
 
     float fUnk80;                // 0x80
     unsigned int uiUnk84;        // 0x84 (ctor 0)

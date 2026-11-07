@@ -48,9 +48,9 @@ public:
     char GetByte63();
     unsigned int FUN_005e3fc0();
     void FUN_00994ef0(BGSImpactDataSet* impactDataSet);
-    void FUN_005e3d20();
-    NiPoint3* FUN_0045bb80();
-    void FUN_004f00e0(const NiPoint3& position);
+    void InitializeData_005e3d20();
+    NiPoint3* NiAVObject_GetWorldTranslate();
+    void NiAVObject_SetWorldTranslate(const NiPoint3& position);
 
     BSStringT<char> NodeName;
     BSStringT<char> TargetName;

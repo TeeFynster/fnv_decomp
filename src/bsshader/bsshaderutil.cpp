@@ -44,7 +44,7 @@ extern NiCamera* DAT_011f917c;
 extern void* DAT_011fa050;
 extern void* DAT_011fa054;
 extern MemoryManager g_memoryManager;
-void FUN_00b54b10(BSShaderAccumulator* accumulator);
+void BSShaderManager_SetCurrentAccumulator(BSShaderAccumulator* accumulator);
 
 inline void* NiFixedString::operator new(size_t size)
 {
@@ -80,7 +80,7 @@ void BSShaderRenderUtility_bsshaderutil::SetRenderCamera(NiCamera* camera, BSSha
     {
         NiRenderer::ms_pRenderer->SetCurrentCamera(camera);
         DAT_011f917c = camera;
-        FUN_00b54b10(accumulator);
+        BSShaderManager_SetCurrentAccumulator(accumulator);
         accumulator->StartAccumulating(camera);
         // The shared accumulator does not yet declare the callbacks at 0xa8 and 0xac.
         ((AccumulatorCallback)(*(void***)accumulator)[0xa8 / 4])(accumulator);
@@ -164,7 +164,8 @@ extern NiPointer<NiRefObject> g_spCurrentAccumulator;
 
 // Stores the given BSShaderAccumulator into the global g_spCurrentAccumulator smart pointer.
 // @fnv 0x00b54b10
-void FUN_00b54b10(BSShaderAccumulator* accumulator)
+// src: COMMUNITY 0x00b54b10
+void BSShaderManager_SetCurrentAccumulator(BSShaderAccumulator* accumulator)
 {
     g_spCurrentAccumulator = reinterpret_cast<NiRefObject*>(accumulator);
 }
@@ -172,10 +173,10 @@ void FUN_00b54b10(BSShaderAccumulator* accumulator)
 // The shared renderer lacks this setter; retain only its member-call ABI.
 struct RendererAccumulatorCall
 {
-    void FUN_004dc540(NiRefObject* accumulator);
+    void NiTexturingProperty_Map_SetTexture(NiRefObject* accumulator);
 };
 extern NiRenderer* DAT_011f4748;
-void __cdecl FUN_00b54ac0(NiRefObject* pkNode);
+void __cdecl BSShaderManager_SetAccumulator(NiRefObject* pkNode);
 
 // Slot18 has not yet acquired its camera/object signature in the shared header.
 inline void SetSortingCamera(BSCullingProcess* process, void* camera, void* object, int flags)
@@ -202,15 +203,16 @@ inline void* NextObject(void*& position)
 
 // Sets the sorting camera from the first list item, then registers later items when the manager and camera are non-null.
 // @fnv 0x00b6bfc0
-void __cdecl FUN_00b6bfc0(void* pkCamera, NiTPointerList<void*>& kList, BSCullingProcess* pkAccumulator)
+// src: COMMUNITY 0x00b6bfc0
+void __cdecl BSShaderUtil_AccumulateSceneList(void* pkCamera, NiTPointerList<void*>& kList, BSCullingProcess* pkAccumulator)
 {
     if (!DAT_011f4748 || !pkCamera)
         return;
 
     NiPointer<NiRefObject> spRetainedObject = *reinterpret_cast<NiPointer<NiRefObject>*>(&DAT_011f4748->m_spAccum);
-    reinterpret_cast<RendererAccumulatorCall*>(DAT_011f4748)->FUN_004dc540(
+    reinterpret_cast<RendererAccumulatorCall*>(DAT_011f4748)->NiTexturingProperty_Map_SetTexture(
         reinterpret_cast<NiPointer<NiRefObject>&>(pkAccumulator->m_acRendererDataA));
-    FUN_00b54ac0(reinterpret_cast<NiPointer<NiRefObject>&>(pkAccumulator->m_acRendererDataA));
+    BSShaderManager_SetAccumulator(reinterpret_cast<NiPointer<NiRefObject>&>(pkAccumulator->m_acRendererDataA));
 
     void* kPos = kList.GetHeadPos();
     if (kPos)
@@ -241,13 +243,14 @@ extern unsigned char DAT_011f4448;
 extern bool DAT_011a9595;
 extern NiTexture::TextureFormatPreferences DAT_011a9598;
 int FUN_00e7bd20(const NiPixelFormat*);
-HRESULT __stdcall FUN_00ee6de6(IDirect3DSurface9*, const PALETTEENTRY*, const RECT*, IDirect3DSurface9*,
+HRESULT __stdcall D3DXLoadSurfaceFromSurface_00ee6de6(IDirect3DSurface9*, const PALETTEENTRY*, const RECT*, IDirect3DSurface9*,
                                const PALETTEENTRY*, const RECT*, DWORD, D3DCOLOR);
-NiTexture* FUN_00a5ff10(NiPixelData*, void*, NiTexture::TextureFormatPreferences*);
+NiTexture* NiSourceTexture_Create(NiPixelData*, void*, NiTexture::TextureFormatPreferences*);
 
 // Converts a NiTexture to a supported D3D format by copying each mip level and swapping RGB bytes when needed, then builds a new NiTexture from the result.
 // @fnv 0x00b6bbd0
-NiTexture* FUN_00b6bbd0(NiTexture* texture, const NiPixelFormat* pixelFormat)
+// src: COMMUNITY 0x00b6bbd0
+NiTexture* BSShaderUtil_ConvertTexture(NiTexture* texture, const NiPixelFormat* pixelFormat)
 {
     NiDX9Renderer* renderer = DAT_011f4748;
     NiPixelFormat format = *pixelFormat;
@@ -292,7 +295,7 @@ NiTexture* FUN_00b6bbd0(NiTexture* texture, const NiPixelFormat* pixelFormat)
     {
         source->GetSurfaceLevel(level, &sourceSurface);
         destination->GetSurfaceLevel(level, &destinationSurface);
-        FUN_00ee6de6(destinationSurface, 0, 0, sourceSurface, 0, 0, 0xffffffff, 0);
+        D3DXLoadSurfaceFromSurface_00ee6de6(destinationSurface, 0, 0, sourceSurface, 0, 0, 0xffffffff, 0);
         destinationSurface->LockRect(&lockedRect, 0, 0);
         if (d3dFormat == 21)
         {
@@ -323,7 +326,7 @@ NiTexture* FUN_00b6bbd0(NiTexture* texture, const NiPixelFormat* pixelFormat)
     unsigned char oldFlag = DAT_011f4448;
     DAT_011f4448 = 0;
     void* pvGlobalData = *(void**)DAT_011fa050;
-    NiTexture* pResultTexture = FUN_00a5ff10(pixels, pvGlobalData, &DAT_011a9598);
+    NiTexture* pResultTexture = NiSourceTexture_Create(pixels, pvGlobalData, &DAT_011a9598);
     DAT_011a9595 = levels > 1;
     DAT_011f4448 = oldFlag;
     return pResultTexture;

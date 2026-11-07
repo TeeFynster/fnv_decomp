@@ -20,14 +20,14 @@ struct FUN_0062e750_shell
 };
 void __cdecl _Deallocate(void* p);
 extern int DAT_011c7a3c;
-void FUN_0062f310(int value);
+void TESWaterSystem_SetCurrentWaterType(int value);
 extern unsigned char DAT_011c7a5a;
-void FUN_0062f8e0(unsigned char value);
+void TESWaterSystem_SetCameraInPlaceableWater(unsigned char value);
 extern float _DAT_011c7a5c;
-void FUN_0062f8f0(float value);
+void TESWaterSystem_SetCameraRelevantWaterHeight(float value);
 unsigned int __cdecl GetOcclusionPlaneThreadID(BSOcclusionPlane* pPlane);
 extern "C" float __cdecl ExpFloat(float);
-float FUN_00630aa0(float value);
+float exp_00630aa0(float value);
 extern "C" double __cdecl _exp(double);
 float ExpFloat(float value);
 extern float _gModifierZero;
@@ -37,19 +37,19 @@ struct FUN_005631e0_shell
     int __thiscall MaskWithField(int a);
     bool __thiscall IsNonZero(int a);
 };
-float __cdecl FUN_004a3e90(float);
+float __cdecl NI2HK_004a3e90(float);
 struct FUN_0062e710_shell
 {
     void __thiscall SetValueAt(float f, int a, int b);
 };
 struct FUN_006310c0_shell
 {
-    void __thiscall FUN_006310c0();
+    void __thiscall hkpRigidBody_getCenterOfMassInWorld();
 };
 struct FUN_00c9a460_shell
 {
     void __thiscall AddObject(int a);
-    void __thiscall FUN_00c9a600(int a);
+    void __thiscall bhkEntityListener_entityAddedCallback(int a);
 };
 
 #include <xmmintrin.h>
@@ -67,9 +67,9 @@ class NiPoint3E
     float x, y, z;
 };
 
-void __cdecl FUN_004a3e00(hkVector4* pkOut, const NiPoint3E* pkIn);
-float __cdecl FUN_004a3e90(float fValue);
-float __cdecl FUN_004587d0(float fValue);
+void __cdecl NI2HK(hkVector4* pkOut, const NiPoint3E* pkIn);
+float __cdecl NI2HK_004a3e90(float fValue);
+float __cdecl HK2NI(float fValue);
 
 class SettingE
 {
@@ -116,9 +116,9 @@ class InterfaceE
 };
 extern InterfaceE* g_pkInterfaceE;
 
-bool __cdecl FUN_008c7aa0();
+bool __cdecl AILinearTaskThreadManager_ShouldQueue3DTask();
 AudioE* __cdecl FUN_004537b0();
-ImpactObjE* __cdecl FUN_0062b4e0(void* pvObj);
+ImpactObjE* __cdecl TESHavokUtilities_FindCollidableRef(void* pvObj);
 
 class BodyE;
 class RefE
@@ -213,7 +213,7 @@ class SpawnCellE : public CellBaseE, public CellLinkE
     SpawnListE* GetFirstList();
 };
 
-BodyE* __cdecl FUN_004b59f0(void* pvForm);
+BodyE* __cdecl hkpGetRigidBody(void* pvForm);
 
 class ProcessE
 {
@@ -360,8 +360,8 @@ class CameraE
   public:
     const NiPoint3E* GetPosition();
 };
-CameraE* __cdecl FUN_00524c90();
-void __cdecl FUN_0062f310(void* pvWater);
+CameraE* __cdecl Main_WorldRootCamera();
+void __cdecl TESWaterSystem_SetCurrentWaterType(void* pvWater);
 
 class SpawnManagerE
 {
@@ -376,26 +376,27 @@ class SpawnManagerE
     float m_fTimer;
 
     bool IsEnabled();
-    bool FUN_0062ff10(BodyE* pkBody, const hkVector4& kTarget, float fRadius, SpawnCellE* pkCell, float* pfHeight);
+    bool TESWaterListener_ShouldProcessRigidBody(BodyE* pkBody, const hkVector4& kTarget, float fRadius, SpawnCellE* pkCell, float* pfHeight);
     int Update(BodyE* pkBody, float m_fGlyphExtent, float fTimeDelta, int iFlag);
     void Finish(int a, int b, int c);
-    void FUN_0062ee60(float fTimeDelta);
+    void TESWaterListener_Update(float fTimeDelta);
 };
 
 // Preserve the original /GS prologue with the shared union storage.
 #pragma strict_gs_check(push, on)
 // @fnv 0x0062ee60
-void SpawnManagerE::FUN_0062ee60(float fTimeDelta)
+// src: COMMUNITY 0x0062ee60
+void SpawnManagerE::TESWaterListener_Update(float fTimeDelta)
 {
     if (IsEnabled())
     {
         m_fTimer -= fTimeDelta;
         float fRadius = g_kSpawnRadiusE.GetValue();
         fRadius = fRadius * fRadius;
-        fRadius = FUN_004a3e90(fRadius);
-        float m_fGlyphExtent = FUN_004a3e90(g_kSpawnHeightE.GetValue());
+        fRadius = NI2HK_004a3e90(fRadius);
+        float m_fGlyphExtent = NI2HK_004a3e90(g_kSpawnHeightE.GetValue());
         hkVector4 kPlayerPos;
-        FUN_004a3e00(&kPlayerPos, g_pkPlayerE->GetPosition());
+        NI2HK(&kPlayerPos, g_pkPlayerE->GetPosition());
         hkVector4 kUnused;
         ListNodeE* pkNode = &m_kActive;
         float fFoundHeight = 0.0f;
@@ -406,19 +407,19 @@ void SpawnManagerE::FUN_0062ee60(float fTimeDelta)
             RefE* pkRef2 = pkRef;
             BodyE* pkBody = pkRef2->GetBody();
             int iResult = 0;
-            if (FUN_0062ff10(pkBody, kPlayerPos, fRadius, 0, &fFoundHeight))
+            if (TESWaterListener_ShouldProcessRigidBody(pkBody, kPlayerPos, fRadius, 0, &fFoundHeight))
                 iResult = Update(pkBody, fFoundHeight, fTimeDelta, 0);
             if (iResult)
             {
-                ImpactObjE* pkObj = FUN_0062b4e0(pkRef->GetObject());
+                ImpactObjE* pkObj = TESHavokUtilities_FindCollidableRef(pkRef->GetObject());
                 if (pkObj)
                 {
-                    fFoundHeight = FUN_004587d0(fFoundHeight);
+                    fFoundHeight = HK2NI(fFoundHeight);
                     if (iResult == 1)
                     {
                         if (!pkObj->IsPlaying())
                         {
-                            if (FUN_008c7aa0() && FUN_004537b0())
+                            if (AILinearTaskThreadManager_ShouldQueue3DTask() && FUN_004537b0())
                                 FUN_004537b0()->PlayIn(0, pkObj, fFoundHeight);
                             else
                                 g_pkInterfaceE->GetAudio()->ProcessActorWithFlag(0, pkObj, fFoundHeight);
@@ -430,7 +431,7 @@ void SpawnManagerE::FUN_0062ee60(float fTimeDelta)
                         pkObj->SetPlaying(false);
                         if (!pkObj->IsPlaying())
                         {
-                            if (FUN_008c7aa0() && FUN_004537b0())
+                            if (AILinearTaskThreadManager_ShouldQueue3DTask() && FUN_004537b0())
                                 FUN_004537b0()->PlayOut(0, pkObj, fFoundHeight);
                             else
                                 g_pkInterfaceE->GetAudio()->SetPlaybackTime(0, pkObj, fFoundHeight);
@@ -451,10 +452,10 @@ void SpawnManagerE::FUN_0062ee60(float fTimeDelta)
                 for (unsigned int i = 0; i < pkList->m_kForms.GetCount(); i++)
                 {
                     void* pvForm = *pkList->m_kForms.GetAt(i);
-                    BodyE* pkBody = FUN_004b59f0(pvForm);
+                    BodyE* pkBody = hkpGetRigidBody(pvForm);
                     int iResult = 0;
                     if (!g_kSpawnLockE.IsBlocked(pkBody, &bSkip) &&
-                        FUN_0062ff10(pkBody, kPlayerPos, fRadius, pkCell, &fFoundHeight))
+                        TESWaterListener_ShouldProcessRigidBody(pkBody, kPlayerPos, fRadius, pkCell, &fFoundHeight))
                         iResult = Update(pkBody, fFoundHeight, fTimeDelta, 1);
                     if (iResult == 1)
                     {
@@ -468,10 +469,10 @@ void SpawnManagerE::FUN_0062ee60(float fTimeDelta)
         }
         Finish(0, 1, 0);
     }
-    if (FUN_00524c90() && g_pkPlayerE->GetProcess())
+    if (Main_WorldRootCamera() && g_pkPlayerE->GetProcess())
     {
-        if (FUN_00524c90()->GetPosition()->z < g_pkPlayerE->GetProcess()->UpdateTESState())
-            FUN_0062f310(g_pkPlayerE->GetProcess()->GetWaterForm());
+        if (Main_WorldRootCamera()->GetPosition()->z < g_pkPlayerE->GetProcess()->UpdateTESState())
+            TESWaterSystem_SetCurrentWaterType(g_pkPlayerE->GetProcess()->GetWaterForm());
     }
 }
 
@@ -524,10 +525,10 @@ class GameSettingW
 };
 extern GameSettingW g_kFloorOffsetW;
 
-void* __cdecl FUN_004b5a80(const void* pvRef);
+void* __cdecl bhkEntity_Getbhk(const void* pvRef);
 NiPoint3W* __cdecl FUN_00458620(NiPoint3W* pkOut, const hkVector4* pkIn);
-float __cdecl FUN_004a3e90(float fHavok);
-int __cdecl FUN_00406d90(float fValue);
+float __cdecl NI2HK_004a3e90(float fHavok);
+int __cdecl FloatToInt(float fValue);
 
 class HeightGridW
 {
@@ -547,19 +548,20 @@ class HeightGridW
     int m_iOriginY;
 
     float GetHeight(int iX, int iY);
-    bool FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4& kTarget, float fRadius, HeightSourceW* pkSource,
+    bool TESWaterListener_ShouldProcessRigidBody(TESObjectREFRW* pkRef, const hkVector4& kTarget, float fRadius, HeightSourceW* pkSource,
                       float* pfHeight);
 };
 
 // Preserve the original /GS prologue with the shared union storage.
 #pragma strict_gs_check(push, on)
 // @fnv 0x0062ff10
-bool HeightGridW::FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4& kTarget, float fRadius, HeightSourceW* pkSource,
+// src: COMMUNITY 0x0062ff10
+bool HeightGridW::TESWaterListener_ShouldProcessRigidBody(TESObjectREFRW* pkRef, const hkVector4& kTarget, float fRadius, HeightSourceW* pkSource,
                                float* pfHeight)
 {
     if (pkRef)
     {
-        FUN_005631e0_shell* pkCharacter = (FUN_005631e0_shell*)FUN_004b5a80(pkRef);
+        FUN_005631e0_shell* pkCharacter = (FUN_005631e0_shell*)bhkEntity_Getbhk(pkRef);
         if (!pkCharacter)
             return false;
 
@@ -578,14 +580,14 @@ bool HeightGridW::FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4& kTarget, 
 
         if (pkSource)
         {
-            *pfHeight = FUN_004a3e90(pkSource->m_fOriginZ);
+            *pfHeight = NI2HK_004a3e90(pkSource->m_fOriginZ);
         }
         else if (m_uiCells > 1)
         {
             NiPoint3W kPoint;
             FUN_00458620(&kPoint, &kPos);
-            int iX = FUN_00406d90(kPoint.x) >> 12;
-            int iY = FUN_00406d90(kPoint.y) >> 12;
+            int iX = FloatToInt(kPoint.x) >> 12;
+            int iY = FloatToInt(kPoint.y) >> 12;
             iX -= m_iOriginX;
             iY -= m_iOriginY;
             *pfHeight = GetHeight(iX, iY);
@@ -595,7 +597,7 @@ bool HeightGridW::FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4& kTarget, 
             *pfHeight = GetHeight(0, 0);
         }
 
-        float fProjectionAlongAim = FUN_004a3e90(g_kFloorOffsetW.GetValue());
+        float fProjectionAlongAim = NI2HK_004a3e90(g_kFloorOffsetW.GetValue());
         if (*pfHeight + fProjectionAlongAim < kPos.getComponent(2).getReal())
             return pkCharacter->IsNonZero(0x88);
         return true;
@@ -608,13 +610,13 @@ bool HeightGridW::FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4& kTarget, 
 class S00630ae0_Source
 {
   public:
-    hkVector4 FUN_00561240() const;
+    hkVector4 hkSimdReal_broadcast() const;
 };
 
 // @fnv 0x00630ae0
 void hkVector4::setMul4(const hkSimdReal& a, const hkVector4& b)
 {
-    m_vComponents = _mm_mul_ps(reinterpret_cast<const S00630ae0_Source&>(a).FUN_00561240().m_vComponents, b.m_vComponents);
+    m_vComponents = _mm_mul_ps(reinterpret_cast<const S00630ae0_Source&>(a).hkSimdReal_broadcast().m_vComponents, b.m_vComponents);
 }
 
 // Emit the game entry point even though the shared declaration is inline.
@@ -646,7 +648,7 @@ void hkVector4::SetRotatedDirection(const hkVector4& source, const hkVector4& pa
     kE.broadcast(0);
     kD.addMul4(kE, reinterpret_cast<const hkVector4&>(source.getQuad()));
     hkVector4 kF;
-    kF.FUN_00630df0(reinterpret_cast<const hkVector4&>(source.getQuad()), param);
+    kF.ComputeValues_00630df0(reinterpret_cast<const hkVector4&>(source.getQuad()), param);
     kD.addMul4(kB, kF);
     setAdd4(kD, kD);
 }
@@ -666,7 +668,8 @@ void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, const hkVecto
 }
 
 // @fnv 0x00630df0
-void hkVector4::FUN_00630df0(const hkVector4& a, const hkVector4& b)
+// src: GUESS 0x00630df0 (confidence: low)
+void hkVector4::ComputeValues_00630df0(const hkVector4& a, const hkVector4& b)
 {
     const __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
                                      _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)));

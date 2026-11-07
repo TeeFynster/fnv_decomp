@@ -105,11 +105,11 @@ typedef std::size_t hk_size_t;
 
 // src/havok/physics/utilities/visualdebugger/viewer/vehicle/hkpvehicleviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/vehicle/hkpvehicleviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* array, int numElements, int sizeElem);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* alloc, void* array, int numElements, int sizeElem);
 void __cdecl D625A0MemMove(void* dst, const void* src, unsigned int nbytes);
 
 extern char d_010d17d0;
-char *FUN_00d634d0();
+char *Hkpvehicleviewer_GetD010d17d0Address();
 struct ItemSink;
 typedef void (__thiscall* ProcessFn)(ItemSink* apThis, void* apItem);
 struct ItemSinkVtbl {
@@ -203,27 +203,27 @@ struct ItemList {
     void FUN_00c905b0();
 };
 struct Registry {
-    void FUN_00c937a0(NotifyTarget* apTarget);
-    void FUN_00c93920(SecondTarget* apTarget);
-    ItemList* FUN_00c929e0();
+    void hkpWorld_addActionListener(NotifyTarget* apTarget);
+    void hkpWorld_addWorldPostSimulationListener(SecondTarget* apTarget);
+    ItemList* hkpWorld_getWorldAsOneSystem();
 };
 struct Factory {
-    void* FUN_00dd9380(const char*, void*);
+    void* hkProcessFactory_registerProcess(const char*, void*);
 };
 extern void* DAT_01268fcc;
 extern Factory* DAT_01269cd0;
 extern const char DAT_010d17c4;
 extern void AllocAndInitObject();
-void __cdecl FUN_00d63da0();
+void __cdecl Object_UpdateFields_00d63da0();
 extern int g_D63DC0Value;
-int __cdecl FUN_00d63dc0();
+int __cdecl Object_GetG_D63DC0Value_00d63dc0();
 // PassMembersToTarget - forwarding stub for a "container of" style object.
 //
 // `this` points at a sub-object that lives 0x20 bytes into a bigger object;
 // the code recovers the owner pointer (this - 0x20) and passes it on to the
 // two Target methods, which are called with the owner as their `this`.
 struct Target {
-    void FUN_00c91700(void* apArg);
+    void hkpWorld_removeActionListener(void* apArg);
     void ClearValue(void* apArg);
 };
 struct FUN_00d63480_cls {
@@ -261,7 +261,7 @@ extern int DAT_010d1834;
 extern int DAT_010d1824;
 extern int DAT_010d1814;
 extern int DAT_010d1804;
-void* __cdecl FUN_00c85750() throw();
+void* __cdecl hkMemoryRouter_getInstance() throw();
 struct S_D { virtual ~S_D() throw() {} };
 struct S_E { virtual ~S_E() throw() {} };
 struct S_Arr
@@ -271,7 +271,7 @@ struct S_Arr
     int m_cap;
     __forceinline void clear() throw()
     {
-        hkMemoryAllocator& heap = ((hkMemoryRouter*)FUN_00c85750())->heap();
+        hkMemoryAllocator& heap = ((hkMemoryRouter*)hkMemoryRouter_getInstance())->heap();
         m_iElementCount = 0;
         if ((m_cap & 0x80000000) == 0) heap.bufFree(m_data, (m_cap & 0x3fffffff) * (int)sizeof(void*));
         m_data = 0;
@@ -319,18 +319,19 @@ static TO g_thunk;
 // `this` back by the size of the primary base (8 = vptr + one int field).
 struct PrimaryBase
 {
-    virtual void FUN_00d63de0();
+    virtual void AdjustThisAndForward_00d63de0();
     int unk04;
 };
 struct SecondaryBase
 {
-    virtual void FUN_00d63de0();
+    virtual void AdjustThisAndForward_00d63de0();
 };
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00d63de0
-    virtual void FUN_00d63de0();
+// src: GUESS 0x00d63de0 (confidence: low)
+    virtual void AdjustThisAndForward_00d63de0();
 };
 Derived::Derived()
 {
@@ -352,18 +353,19 @@ Parent::Parent() {}
 // FUN_00d63e00 : MSVC this-adjusting thunk  (sub ecx, 0x2c ; jmp <impl>)
 struct A1_00d63e00 {
     A1_00d63e00();
-    virtual void FUN_00d63e00();
+    virtual void AdjustThisAndForward_00d63e00();
     char pad[0x28];
 };
 struct A2_00d63e00 {
     A2_00d63e00();
-    virtual void FUN_00d63e00();
+    virtual void AdjustThisAndForward_00d63e00();
 };
 struct Own_00d63e00 : A1_00d63e00, A2_00d63e00 {
     Own_00d63e00();
     virtual void key_fn();
 // @fnv 0x00d63e00
-    void FUN_00d63e00();
+// src: GUESS 0x00d63e00 (confidence: low)
+    void AdjustThisAndForward_00d63e00();
 };
 Own_00d63e00::Own_00d63e00() { }
 void Own_00d63e00::key_fn() { }
@@ -430,7 +432,7 @@ m_next=p;
 
 __forceinline hkMemoryRouter& __cdecl hkMemoryRouter::getInstance()
 {
-return *static_cast<hkMemoryRouter*>(::FUN_00c85750());
+return *static_cast<hkMemoryRouter*>(::hkMemoryRouter_getInstance());
 }
 
 template<typename TYPE>
@@ -601,7 +603,7 @@ return *reinterpret_cast<const hkVector4*>(this);
 }
 inline hkQuaternion::hkQuaternion(const hkVector4&axis,hkReal angle)
 {
-FUN_00cb2450(axis,angle);
+hkQuaternion_setAxisAngle(axis,angle);
 }
 
 inline const hkVector4&hkContactPoint::getPosition()const
@@ -628,8 +630,8 @@ class hkDisplayGeometry;
 class VehicleViewerPostSimulationListener : public hkpWorldPostSimulationListener
 {
 public:
-virtual void FUN_00d63680(hkpWorld* world)=0;
-virtual void postSimulationCallback(hkpWorld* world) { FUN_00d63680(world); }
+virtual void step_00d63680(hkpWorld* world)=0;
+virtual void postSimulationCallback(hkpWorld* world) { step_00d63680(world); }
 };
 class hkpVehicleViewer:
 public hkpWorldViewerBase,
@@ -648,7 +650,7 @@ hkpVehicleViewer(const hkArray<hkProcessContext*>&contexts);
 virtual ~hkpVehicleViewer() throw();
 virtual void WorldAddedCallback(hkpWorld*world);
 virtual void WorldRemovedCallback(hkpWorld*world);
-virtual void FUN_00d63680(hkpWorld*world);
+virtual void step_00d63680(hkpWorld*world);
 virtual void ActionAddedCallback(hkpAction*action);
 virtual void ActionRemovedCallback(hkpAction*action);
 protected:
@@ -690,7 +692,8 @@ __forceinline T&PointerArrayView<T>::operator[](int i)
 return m_data[i];
 }
 // @fnv 0x00d63680
-void hkpVehicleViewer::FUN_00d63680(hkpWorld*world)
+// src: EXE 0x00d63680
+void hkpVehicleViewer::step_00d63680(hkpWorld*world)
 {
 {hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "hkpVehicleViewer::step";h->setTime();mStream.setEnd((char*)(h+1));}};ScopedTimer timeblock14;
 const int numVehicles=m_ppVehicles.m_iElementCount;

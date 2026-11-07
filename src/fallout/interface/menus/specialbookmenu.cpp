@@ -25,7 +25,8 @@ extern "C" bool __cdecl _FUN_004b71d0();
 
 // Returns pageIndex + 4 when pageIndex is between 1 and 8, adding 4 more for slot 8 if _FUN_004b71d0() is true; otherwise returns -1.
 // @fnv 0x007ca030
-int SPECIALBookMenu::FUN_007ca030()
+// src: XBOX_PDB 0x007ca030
+int SPECIALBookMenu::GetCurrentStatesActorValue()
 {
     if (this->pageIndex > 0 && this->pageIndex < 9)
     {
@@ -39,12 +40,12 @@ int SPECIALBookMenu::FUN_007ca030()
     return -1;
 }
 
-extern "C" int __cdecl FUN_007c6110();
+extern "C" int __cdecl SPECIALBookMenu_GetClassStatic();
 // NiNode.h does not declare this cleanup helper; fastcall passes the node in ECX.
 void __fastcall RemoveSpecialBookSceneChildren(NiNode* node);
 struct ModelLoader
 {
-    void FUN_0045a5e0(const char*);
+    void ModelLoader_ReleaseFile(const char*);
 };
 struct GlobalObject_00633c90
 {
@@ -60,15 +61,16 @@ extern GlobalObject_00633c90 g_011daa9c;
 Menu* __cdecl FindMenuById(int);
 
 // @fnv 0x007c6120
-void __cdecl FUN_007c6120()
+// src: XBOX_PDB 0x007c6120
+void __cdecl SPECIALBookMenu_Close()
 {
     int i;
-    Menu* menu5 = FindMenuById(FUN_007c6110());
+    Menu* menu5 = FindMenuById(SPECIALBookMenu_GetClassStatic());
     if (!menu5)
         return;
-    g_modelLoader->FUN_0045a5e0("Meshes\\Terminals\\Babybook02.NIF");
+    g_modelLoader->ModelLoader_ReleaseFile("Meshes\\Terminals\\Babybook02.NIF");
     RemoveSpecialBookSceneChildren(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1));
-    NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1)->FUN_00b5d180();
+    NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1)->RemoveAllLights();
     *(int*)((char*)DAT_011daa38 + 0x5c) = 0;
     ((GO*)&g_011daa9c)->operator=(0);
     i = 0;
@@ -87,7 +89,8 @@ void __cdecl FUN_007c6120()
 
 // Returns selectedStat + 4 when pageIndex is 8 and _FUN_004b71d0() is true, pageIndex + 4 when pageIndex is between 1 and 7, otherwise -1.
 // @fnv 0x00794d30
-int SPECIALBookMenu::FUN_00794d30()
+// src: XBOX_PDB 0x00794d30
+int SPECIALBookMenu::LoveTesterMenu_GetCurrentStatesActorValue()
 {
     if (pageIndex == 8)
     {
@@ -147,11 +150,11 @@ bool SPECIALBookMenu::HandleInput(int aiKey)
 
 struct MenuInput
 {
-    int FUN_00a24180(int, int);
+    int Controls_GetKeyboardButton(int, int);
 };
 struct MenuOS
 {
-    MenuInput* FUN_00877720();
+    MenuInput* Main_GetControls();
 };
 struct MenuLocale
 {
@@ -168,23 +171,24 @@ extern bool DAT_011a0854;
 extern const char* DAT_011a0858[];
 extern const char* DAT_011a0878[];
 extern int DAT_011f36bc;
-bool __cdecl FUN_00702450(int);
-int __cdecl FUN_00408b20(const char*, const char*);
-NiTimeController* __cdecl FUN_00653270(const int*, NiTimeController*);
+bool __cdecl Interface_IsTopMenuID(int);
+int __cdecl BSstrcmp(const char*, const char*);
+NiTimeController* __cdecl NiObject_DynamicCast(const int*, NiTimeController*);
 // Checks a key press to trigger Handle(4,0), otherwise advances the scene's controller sequence by elapsed time and updates the scene.
 // @fnv 0x007c6200
-void SPECIALBookMenu::FUN_007c6200()
+// src: XBOX_PDB 0x007c6200
+void SPECIALBookMenu::DoIdle_007c6200()
 {
-    if (!FUN_00702450(0x424))
+    if (!Interface_IsTopMenuID(0x424))
         return;
-    MenuInput* pInput = g_osGlobals->FUN_00877720();
+    MenuInput* pInput = g_osGlobals->Main_GetControls();
     {
         NiTimeController* pController;
         {
             int scanCode = 30;
-            if (FUN_00408b20(g_011c3cb4.FUN_00403df0(), "FRENCH") == 0)
+            if (BSstrcmp(g_011c3cb4.FUN_00403df0(), "FRENCH") == 0)
                 scanCode = 16;
-            if (pInput->FUN_00a24180(scanCode, 1))
+            if (pInput->Controls_GetKeyboardButton(scanCode, 1))
             {
                 HandleSelection(4, 0);
                 return;
@@ -195,13 +199,13 @@ void SPECIALBookMenu::FUN_007c6200()
                 NiTimeController* manager = pController;
                 NiControllerSequence* sequence = 0;
                 if (!DAT_011a0854 || pageIndex > 0)
-                    sequence = manager->FUN_0047a520(
+                    sequence = manager->NiControllerManager_GetSequenceByName(
                         NiFixedString(DAT_011a0854 ? DAT_011a0878[pageIndex] : DAT_011a0858[pageIndex]));
                 elapsed += g_timeGlobal.FUN_0084d030();
                 if (sequence)
                 {
                     sequence->Update(elapsed, true);
-                    if (sequence->FUN_00508120() < sequence->FUN_00508100() && pageIndex > 0)
+                    if (sequence->NiControllerSequence_GetLastTime() < sequence->GetEndKeyTime_00508100() && pageIndex > 0)
                         finished = false;
                     else
                         finished = true;
@@ -212,7 +216,7 @@ void SPECIALBookMenu::FUN_007c6200()
                 }
                 for (; pController; pController = pController->GetNext())
                 {
-                    NiTimeController* castController = FUN_00653270(&DAT_011f36bc, pController);
+                    NiTimeController* castController = NiObject_DynamicCast(&DAT_011f36bc, pController);
                     if (castController)
                     {
                         NiUpdateData updateData(elapsed, false, false);
@@ -227,7 +231,7 @@ void SPECIALBookMenu::FUN_007c6200()
     }
 }
 
-bool __cdecl FUN_00702450(unsigned int);
+bool __cdecl Interface_IsTopMenuID(unsigned int);
 struct Values6440
 {
     virtual void v0();
@@ -288,9 +292,9 @@ extern Player6440* g_thePlayer;
 // @fnv 0x007c6440
 bool SPECIALBookMenu::HandleSpecialBookKey(unsigned int key, int unused)
 {
-    if (FUN_00702450(0x424))
+    if (Interface_IsTopMenuID(0x424))
     {
-        int index = FUN_007ca030();
+        int index = GetCurrentStatesActorValue();
         switch (key)
         {
         case 4:
@@ -300,7 +304,7 @@ bool SPECIALBookMenu::HandleSpecialBookKey(unsigned int key, int unused)
             return true;
         case 3:
         case 9:
-            if (index != -1 && FUN_00794d80() < limit && g_thePlayer->values.GetValue(index) < 10)
+            if (index != -1 && SPECIALBookMenu_GetTotalPointsUsed() < limit && g_thePlayer->values.GetValue(index) < 10)
                 HandleSelection(2, 0);
             return true;
         }
@@ -406,13 +410,13 @@ struct G_011dea10_cls
 
 extern G_011dea10_cls* g_011dea10;
 
-void __cdecl FUN_00406d00(char* dst, int size, const char* a, const char* b, const char* c, ...);
+void __cdecl BSsprintf(char* dst, int size, const char* a, const char* b, const char* c, ...);
 
 void __cdecl FUN_00406d30(char* dst, int n, const char* src);
 
 void __cdecl FUN_004b7240(char* src, char* dst, int n);
 
-bool __cdecl FUN_00709d40();
+bool __cdecl Interface_Has360Controller();
 
 extern const char str_01074c4c[];
 
@@ -454,7 +458,8 @@ extern const char str_01076c94[];
 
 
 // @fnv 0x007cadd0
-void SPECIALBookMenu::FUN_007cadd0()
+// src: COMMUNITY 0x007cadd0
+void SPECIALBookMenu::LoadBBTextures()
 
 {
 
@@ -471,7 +476,7 @@ void SPECIALBookMenu::FUN_007cadd0()
     for (auStack_110 = 0; auStack_110 < 0xb; auStack_110++)
     {
 
-        FUN_00406d00(auStack_220, 0x104, str_01074c4c, str_01076cc0, str_01074c6c, auStack_110);
+        BSsprintf(auStack_220, 0x104, str_01074c4c, str_01076cc0, str_01074c6c, auStack_110);
 
         FUN_004b7240(auStack_220, auStack_218, 0x104);
 
@@ -481,14 +486,14 @@ void SPECIALBookMenu::FUN_007cadd0()
     for (iStack_228 = 1; iStack_228 < 5; iStack_228++)
     {
 
-        FUN_00406d00(auStack_220, 0x104, str_01074c4c, str_01076ca4, str_01074c40, iStack_228);
+        BSsprintf(auStack_220, 0x104, str_01074c4c, str_01076ca4, str_01074c40, iStack_228);
 
         FUN_004b7240(auStack_220, auStack_218, 0x104);
 
         g_011dea10->FUN_004568c0(auStack_218, &m1a8[iStack_228], 0, 0);
     }
 
-    if (FUN_00709d40())
+    if (Interface_Has360Controller())
 
         FUN_00406d30(iStack_224, 5, str_0101fd1c);
 
@@ -496,53 +501,53 @@ void SPECIALBookMenu::FUN_007cadd0()
 
         FUN_00406d30(iStack_224, 5, str_0101fd24);
 
-    FUN_00406d00(auStack_218, 0x104, str_01076c94, str_01076cc0, iStack_224, str_01074c38);
+    BSsprintf(auStack_218, 0x104, str_01076c94, str_01076cc0, iStack_224, str_01074c38);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1c0, 0, 0);
 
-    FUN_00406d00(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074c24);
+    BSsprintf(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074c24);
 
     FUN_004b7240(auStack_220, auStack_218, 0x104);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1bc, 0, 0);
 
-    FUN_00406d00(auStack_218, 0x104, str_01076c94, str_01076cc0, iStack_224, str_01074c1c);
+    BSsprintf(auStack_218, 0x104, str_01076c94, str_01076cc0, iStack_224, str_01074c1c);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1c4, 0, 0);
 
-    FUN_00406d00(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074c14);
+    BSsprintf(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074c14);
 
     FUN_004b7240(auStack_220, auStack_218, 0x104);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1c8, 0, 0);
 
-    FUN_00406d00(auStack_218, 0x104, str_01076c94, str_01076cc0, iStack_224, str_01074c00);
+    BSsprintf(auStack_218, 0x104, str_01076c94, str_01076cc0, iStack_224, str_01074c00);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1cc, 0, 0);
 
-    FUN_00406d00(auStack_218, 0x104, str_01076c94, str_01076cc0, iStack_224, str_01074bf8);
+    BSsprintf(auStack_218, 0x104, str_01076c94, str_01076cc0, iStack_224, str_01074bf8);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1d0, 0, 0);
 
-    FUN_00406d00(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074be8);
+    BSsprintf(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074be8);
 
     FUN_004b7240(auStack_220, auStack_218, 0x104);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1d4, 0, 0);
 
-    FUN_00406d00(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074bd8);
+    BSsprintf(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074bd8);
 
     FUN_004b7240(auStack_220, auStack_218, 0x104);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1d8, 0, 0);
 
-    FUN_00406d00(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074bc8);
+    BSsprintf(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074bc8);
 
     FUN_004b7240(auStack_220, auStack_218, 0x104);
 
     g_011dea10->FUN_004568c0(auStack_218, &m1dc, 0, 0);
 
-    FUN_00406d00(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074bb8);
+    BSsprintf(auStack_220, 0x104, str_01074c08, str_01076cc0, str_01074bb8);
 
     FUN_004b7240(auStack_220, auStack_218, 0x104);
 
@@ -563,7 +568,8 @@ extern const char* DAT_011a0878[8];
 
 
 // @fnv 0x007c9dc0
-bool SPECIALBookMenu::FUN_007c9dc0(bool forward)
+// src: XBOX_PDB 0x007c9dc0
+bool SPECIALBookMenu::TurnPage(bool forward)
 {
     bool turned = false;
     if (forward)
@@ -574,7 +580,7 @@ bool SPECIALBookMenu::FUN_007c9dc0(bool forward)
             pageIndex++;
             turned = true;
             BSSoundHandle sound;
-            sound = reinterpret_cast<const BSSoundHandle&>(BSAudio::GetSingleton()->FUN_00ad7550("OBJBookSpecialPageTurn", 0x121));
+            sound = reinterpret_cast<const BSSoundHandle&>(BSAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName("OBJBookSpecialPageTurn", 0x121));
             sound.Play(false);
         }
         else
@@ -590,7 +596,7 @@ bool SPECIALBookMenu::FUN_007c9dc0(bool forward)
             pageIndex--;
             turned = true;
             BSSoundHandle sound;
-            sound = reinterpret_cast<const BSSoundHandle&>(BSAudio::GetSingleton()->FUN_00ad7550("OBJBookSpecialPageTurn", 0x121));
+            sound = reinterpret_cast<const BSSoundHandle&>(BSAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName("OBJBookSpecialPageTurn", 0x121));
             sound.Play(false);
         }
         else
@@ -622,21 +628,21 @@ bool SPECIALBookMenu::FUN_007c9dc0(bool forward)
     return true;
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern "C" void* __cdecl FormHeap_Allocate(unsigned int size);
 
 void __cdecl CallVfunc60WithGlobalOffset(void* p);
-void __cdecl FUN_007cabb0(void* p);
-void __cdecl FUN_007ca8a0(void* p);
-void __cdecl FUN_007cabf0(void* p);
+void __cdecl Runtime_TurnPageForwardAndInvokeCallbacks(void* p);
+void __cdecl Object_ProcessState_007ca8a0(void* p);
+void __cdecl Runtime_TurnPageBackwardAndInvokeCallbacks(void* p);
 void __cdecl DispatchSourceCallback(void* p);
-void __cdecl FUN_007cac30(void* p);
+void __cdecl BSAudio_CloseBookMenuOrPlayInactiveSound(void* p);
 void __cdecl UpdateEntryRankText(void* p);
 void __cdecl DispatchStateCallback(void* p);
 void __cdecl UpdateLodVisibility(void* p);
-void __cdecl FUN_007ca700(void* p);
-void __cdecl FUN_007ca960(void* p);
-void __cdecl FUN_007ca7a0(void* p);
+void __cdecl Object_UpdateFields_007ca700(void* p);
+void __cdecl Object_ProcessAndReturnValue_007ca960(void* p);
+void __cdecl Object_UpdateFields_007ca7a0(void* p);
 void __cdecl PlaySpecialBookSoundAndSetStat(void* p);
 
 typedef void(__cdecl* ItemCb)(void* p);
@@ -661,11 +667,11 @@ struct BkLight
     static void* operator new(unsigned int size);
     static void operator delete(void*, unsigned int);
     BkLight();
-    void FUN_00440460(const BkColor& c);
+    void NiAVObject_SetTranslate(const BkColor& c);
     void SetEffectColor(const BkColor& c);
     void FUN_0050dd50(const BkColor& c);
-    void FUN_0050dd20(float f);
-    void FUN_00a59c60(const BkPoint3& p);
+    void NiLight_SetDimmer(float f);
+    void NiAVObject_Update(const BkPoint3& p);
 };
 struct BkScene
 {
@@ -730,7 +736,7 @@ struct BkScene
 };
 struct BkLoader
 {
-    NiNode* LoadModel(const char* path, int a, int b, int c, int d, int e);
+    NiNode* ModelLoader_LoadFile(const char* path, int a, int b, int c, int d, int e);
 };
 
 struct BkItemBase
@@ -770,8 +776,8 @@ struct BkDisplay : BkItemBase
 extern BkLoader* DAT_011c3b3c;
 extern BkTimer DAT_011f6394;
 void __cdecl FUN_004b7660(NiNode* node);
-void __cdecl FUN_00a6d2d0(NiNode* node);
-void* __cdecl FUN_00653270(void* rtti, NiTimeController* obj);
+void __cdecl NiTimeController_StartAnimations(NiNode* node);
+void* __cdecl NiObject_DynamicCast(void* rtti, NiTimeController* obj);
 BkScene* __cdecl FUN_00450b80(int a);
 
 
@@ -793,10 +799,10 @@ void SPECIALBookMenu::InitMenu()
     BkDisplay* kMsg;
 
     DAT_011daa38->m_pReferencedNode =
-        DAT_011c3b3c->LoadModel("Meshes\\Terminals\\Babybook02.NIF", 0, 1, 0, 0, 0);
+        DAT_011c3b3c->ModelLoader_LoadFile("Meshes\\Terminals\\Babybook02.NIF", 0, 1, 0, 0, 0);
     FUN_004b7660(DAT_011daa38->m_pReferencedNode);
-    DAT_011daa38->m_pReferencedNode->FUN_00440490(0.05f);
-    DAT_011daa38->m_pReferencedNode->FUN_004bc1f0(0.0f, 0.0f, -60.0f);
+    DAT_011daa38->m_pReferencedNode->NiAVObject_SetScale(0.05f);
+    DAT_011daa38->m_pReferencedNode->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, -60.0f);
     DAT_011daa38->m_pReferencedNode->SetLocalRotation(1.5707964f, 1.0f, 0.0f, 0.0f);
     akStart.Init(0.0f, 0, 0);
     DAT_011daa38->m_pReferencedNode->Update((NiUpdateData&)akStart);
@@ -805,7 +811,7 @@ void SPECIALBookMenu::InitMenu()
     if (aPCtrl)
     {
         NiControllerManager* mgr5 = (NiControllerManager*)aPCtrl;
-        NiControllerSequence* pForwardSequence = mgr5->FUN_0047a520(NiFixedString("Forward"));
+        NiControllerSequence* pForwardSequence = mgr5->NiControllerManager_GetSequenceByName(NiFixedString("Forward"));
         if (pForwardSequence)
         {
             mgr5->FUN_0048fef0(0.0f);
@@ -814,10 +820,10 @@ void SPECIALBookMenu::InitMenu()
             SetNegatedGlobal(pForwardSequence);
         }
     }
-    FUN_00a6d2d0(m_pReferencedNode);
+    NiTimeController_StartAnimations(m_pReferencedNode);
     for (; aPCtrl; aPCtrl = aPCtrl->GetNext())
     {
-        void* pMatch = FUN_00653270(&DAT_011f36bc, aPCtrl);
+        void* pMatch = NiObject_DynamicCast(&DAT_011f36bc, aPCtrl);
         if (pMatch)
         {
             BkPoint3 pT4;
@@ -828,34 +834,34 @@ void SPECIALBookMenu::InitMenu()
     }
     pos.Init(0.0f, 0, 0);
     m_pReferencedNode->Update((NiUpdateData&)pos);
-    aScale = DAT_011daa38->m_pReferencedNode->FUN_0043d450()->FUN_0084d030() * 20.0;
+    aScale = DAT_011daa38->m_pReferencedNode->NiAVObject_GetWorldBound()->FUN_0084d030() * 20.0;
     found = FUN_00450b80(1)->FUN_00b5ca70(DAT_011daa38->m_pReferencedNode->IsSceneNode(), aScale);
     if (found == 0)
     {
         BkLight* apTargetLight = new BkLight();
-        apTargetLight->FUN_00440460(BkColor(0.0f, 0.0f, 0.0f));
+        apTargetLight->NiAVObject_SetTranslate(BkColor(0.0f, 0.0f, 0.0f));
         apTargetLight->SetEffectColor(BkColor(0.85f, 0.85f, 0.85f));
         apTargetLight->FUN_0050dd50(BkColor(aScale, 0.0f, 0.0f));
-        apTargetLight->FUN_0050dd20(1.0f);
+        apTargetLight->NiLight_SetDimmer(1.0f);
         BkPoint3 kLightPos;
         kLightPos.Init(0.0f, 0, 0);
-        apTargetLight->FUN_00a59c60(kLightPos);
+        apTargetLight->NiAVObject_Update(kLightPos);
         FUN_00450b80(1)->AttachChildInAvailableSlot(apTargetLight, 1);
         FUN_00450b80(1)->FUN_00b5c940(apTargetLight, 0);
     }
     FUN_00450b80(1)->AttachChildInAvailableSlot(DAT_011daa38->m_pReferencedNode, 1);
 
-    next = new BkButton(FUN_007cabb0, CallVfunc60WithGlobalOffset, "LookInside_Btn:0");
+    next = new BkButton(Runtime_TurnPageForwardAndInvokeCallbacks, CallVfunc60WithGlobalOffset, "LookInside_Btn:0");
     m_groups[0].buttons.FUN_007cb2e0(next);
 
     valueX = new BkDisplay(UpdateEntryRankText, "P1_PointVal:0", 0, 5);
     kMsg = new BkDisplay(DispatchStateCallback, "P1_Message:0", 0, -1);
     pDigits = new BkDisplay(UpdateLodVisibility, "P1_PointsRemainDigit1:0", "P1_PointsRemainDigit2:0", -1);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "P1_Decrease_Btn:0", 5, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "P1_Decrease_Btn:0", 5, 2, valueX, pDigits);
     pIncrease =
-        new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "P1_Increase_Btn:0", 5, 2, valueX, pDigits);
-    next = new BkButton(FUN_007cabb0, CallVfunc60WithGlobalOffset, "P1_RT_Btn:0");
-    pLeft = new BkButton(FUN_007cabf0, FUN_007ca8a0, "P1_LT_Btn:0");
+        new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "P1_Increase_Btn:0", 5, 2, valueX, pDigits);
+    next = new BkButton(Runtime_TurnPageForwardAndInvokeCallbacks, CallVfunc60WithGlobalOffset, "P1_RT_Btn:0");
+    pLeft = new BkButton(Runtime_TurnPageBackwardAndInvokeCallbacks, Object_ProcessState_007ca8a0, "P1_LT_Btn:0");
     m_groups[1].displays.FUN_007cb2e0(valueX);
     m_groups[1].displays.FUN_007cb2e0(kMsg);
     m_groups[1].displays.FUN_007cb2e0(pDigits);
@@ -867,11 +873,11 @@ void SPECIALBookMenu::InitMenu()
     valueX = new BkDisplay(UpdateEntryRankText, "P2_PointVal:0", 0, 6);
     kMsg = new BkDisplay(DispatchStateCallback, "P2_Message:0", 0, -1);
     pDigits = new BkDisplay(UpdateLodVisibility, "P2_PointsRemainDigit1:0", "P2_PointsRemainDigit2:0", -1);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "P2_Decrease_Btn:0", 6, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "P2_Decrease_Btn:0", 6, 2, valueX, pDigits);
     pIncrease =
-        new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "P2_Increase_Btn:0", 6, 2, valueX, pDigits);
-    next = new BkButton(FUN_007cabb0, CallVfunc60WithGlobalOffset, "P2_RT_Btn:0");
-    pLeft = new BkButton(FUN_007cabf0, FUN_007ca8a0, "P2_LT_Btn:0");
+        new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "P2_Increase_Btn:0", 6, 2, valueX, pDigits);
+    next = new BkButton(Runtime_TurnPageForwardAndInvokeCallbacks, CallVfunc60WithGlobalOffset, "P2_RT_Btn:0");
+    pLeft = new BkButton(Runtime_TurnPageBackwardAndInvokeCallbacks, Object_ProcessState_007ca8a0, "P2_LT_Btn:0");
     m_groups[2].displays.FUN_007cb2e0(valueX);
     m_groups[2].displays.FUN_007cb2e0(kMsg);
     m_groups[2].displays.FUN_007cb2e0(pDigits);
@@ -883,11 +889,11 @@ void SPECIALBookMenu::InitMenu()
     valueX = new BkDisplay(UpdateEntryRankText, "P3_PointVal:0", 0, 7);
     kMsg = new BkDisplay(DispatchStateCallback, "P3_Message:0", 0, -1);
     pDigits = new BkDisplay(UpdateLodVisibility, "P3_PointsRemainDigit1:0", "P3_PointsRemainDigit2:0", -1);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "P3_Decrease_Btn:0", 7, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "P3_Decrease_Btn:0", 7, 2, valueX, pDigits);
     pIncrease =
-        new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "P3_Increase_Btn:0", 7, 2, valueX, pDigits);
-    next = new BkButton(FUN_007cabb0, CallVfunc60WithGlobalOffset, "P3_RT_Btn:0");
-    pLeft = new BkButton(FUN_007cabf0, FUN_007ca8a0, "P3_LT_Btn:0");
+        new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "P3_Increase_Btn:0", 7, 2, valueX, pDigits);
+    next = new BkButton(Runtime_TurnPageForwardAndInvokeCallbacks, CallVfunc60WithGlobalOffset, "P3_RT_Btn:0");
+    pLeft = new BkButton(Runtime_TurnPageBackwardAndInvokeCallbacks, Object_ProcessState_007ca8a0, "P3_LT_Btn:0");
     m_groups[3].displays.FUN_007cb2e0(valueX);
     m_groups[3].displays.FUN_007cb2e0(kMsg);
     m_groups[3].displays.FUN_007cb2e0(pDigits);
@@ -899,11 +905,11 @@ void SPECIALBookMenu::InitMenu()
     valueX = new BkDisplay(UpdateEntryRankText, "P4_PointVal:0", 0, 8);
     kMsg = new BkDisplay(DispatchStateCallback, "P4_Message:0", 0, -1);
     pDigits = new BkDisplay(UpdateLodVisibility, "P4_PointsRemainDigit1:0", "P4_PointsRemainDigit2:0", -1);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "P4_Decrease_Btn:0", 8, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "P4_Decrease_Btn:0", 8, 2, valueX, pDigits);
     pIncrease =
-        new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "P4_Increase_Btn:0", 8, 2, valueX, pDigits);
-    next = new BkButton(FUN_007cabb0, CallVfunc60WithGlobalOffset, "P4_RT_Btn:0");
-    pLeft = new BkButton(FUN_007cabf0, FUN_007ca8a0, "P4_LT_Btn:0");
+        new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "P4_Increase_Btn:0", 8, 2, valueX, pDigits);
+    next = new BkButton(Runtime_TurnPageForwardAndInvokeCallbacks, CallVfunc60WithGlobalOffset, "P4_RT_Btn:0");
+    pLeft = new BkButton(Runtime_TurnPageBackwardAndInvokeCallbacks, Object_ProcessState_007ca8a0, "P4_LT_Btn:0");
     m_groups[4].displays.FUN_007cb2e0(valueX);
     m_groups[4].displays.FUN_007cb2e0(kMsg);
     m_groups[4].displays.FUN_007cb2e0(pDigits);
@@ -915,11 +921,11 @@ void SPECIALBookMenu::InitMenu()
     valueX = new BkDisplay(UpdateEntryRankText, "P5_PointVal:0", 0, 9);
     kMsg = new BkDisplay(DispatchStateCallback, "P5_Message:0", 0, -1);
     pDigits = new BkDisplay(UpdateLodVisibility, "P5_PointsRemainDigit1:0", "P5_PointsRemainDigit2:0", -1);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "P5_Decrease_Btn:0", 9, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "P5_Decrease_Btn:0", 9, 2, valueX, pDigits);
     pIncrease =
-        new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "P5_Increase_Btn:0", 9, 2, valueX, pDigits);
-    next = new BkButton(FUN_007cabb0, CallVfunc60WithGlobalOffset, "P5_RT_Btn:0");
-    pLeft = new BkButton(FUN_007cabf0, FUN_007ca8a0, "P5_LT_Btn:0");
+        new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "P5_Increase_Btn:0", 9, 2, valueX, pDigits);
+    next = new BkButton(Runtime_TurnPageForwardAndInvokeCallbacks, CallVfunc60WithGlobalOffset, "P5_RT_Btn:0");
+    pLeft = new BkButton(Runtime_TurnPageBackwardAndInvokeCallbacks, Object_ProcessState_007ca8a0, "P5_LT_Btn:0");
     m_groups[5].displays.FUN_007cb2e0(valueX);
     m_groups[5].displays.FUN_007cb2e0(kMsg);
     m_groups[5].displays.FUN_007cb2e0(pDigits);
@@ -931,11 +937,11 @@ void SPECIALBookMenu::InitMenu()
     valueX = new BkDisplay(UpdateEntryRankText, "P6_PointVal:0", 0, 10);
     kMsg = new BkDisplay(DispatchStateCallback, "P6_Message:0", 0, -1);
     pDigits = new BkDisplay(UpdateLodVisibility, "P6_PointsRemainDigit1:0", "P6_PointsRemainDigit2:0", -1);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "P6_Decrease_Btn:0", 10, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "P6_Decrease_Btn:0", 10, 2, valueX, pDigits);
     pIncrease =
-        new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "P6_Increase_Btn:0", 10, 2, valueX, pDigits);
-    next = new BkButton(FUN_007cabb0, CallVfunc60WithGlobalOffset, "P6_RT_Btn:0");
-    pLeft = new BkButton(FUN_007cabf0, FUN_007ca8a0, "P6_LT_Btn:0");
+        new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "P6_Increase_Btn:0", 10, 2, valueX, pDigits);
+    next = new BkButton(Runtime_TurnPageForwardAndInvokeCallbacks, CallVfunc60WithGlobalOffset, "P6_RT_Btn:0");
+    pLeft = new BkButton(Runtime_TurnPageBackwardAndInvokeCallbacks, Object_ProcessState_007ca8a0, "P6_LT_Btn:0");
     m_groups[6].displays.FUN_007cb2e0(valueX);
     m_groups[6].displays.FUN_007cb2e0(kMsg);
     m_groups[6].displays.FUN_007cb2e0(pDigits);
@@ -947,11 +953,11 @@ void SPECIALBookMenu::InitMenu()
     valueX = new BkDisplay(UpdateEntryRankText, "P7_PointVal:0", 0, 11);
     kMsg = new BkDisplay(DispatchStateCallback, "P7_Message:0", 0, -1);
     pDigits = new BkDisplay(UpdateLodVisibility, "P7_PointsRemainDigit1:0", "P7_PointsRemainDigit2:0", -1);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "P7_Decrease_Btn:0", 11, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "P7_Decrease_Btn:0", 11, 2, valueX, pDigits);
     pIncrease =
-        new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "P7_Increase_Btn:0", 11, 2, valueX, pDigits);
-    next = new BkButton(FUN_007cabb0, CallVfunc60WithGlobalOffset, "P7_RT_Btn:0");
-    pLeft = new BkButton(FUN_007cabf0, FUN_007ca8a0, "P7_LT_Btn:0");
+        new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "P7_Increase_Btn:0", 11, 2, valueX, pDigits);
+    next = new BkButton(Runtime_TurnPageForwardAndInvokeCallbacks, CallVfunc60WithGlobalOffset, "P7_RT_Btn:0");
+    pLeft = new BkButton(Runtime_TurnPageBackwardAndInvokeCallbacks, Object_ProcessState_007ca8a0, "P7_LT_Btn:0");
     m_groups[7].displays.FUN_007cb2e0(valueX);
     m_groups[7].displays.FUN_007cb2e0(kMsg);
     m_groups[7].displays.FUN_007cb2e0(pDigits);
@@ -962,57 +968,57 @@ void SPECIALBookMenu::InitMenu()
 
     valueX = new BkDisplay(UpdateEntryRankText, "Index_StrengthPointVal:0", 0, 5);
     m_groups[8].displays.FUN_007cb2e0(valueX);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "Index_StrengthDecrease_Btn:0", 5, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "Index_StrengthDecrease_Btn:0", 5, 2, valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(declA);
-    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "Index_StrengthIncrease_Btn:0", 5, 2,
+    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "Index_StrengthIncrease_Btn:0", 5, 2,
                                  valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(pIncrease);
 
     valueX = new BkDisplay(UpdateEntryRankText, "Index_PerceptionPointVal:0", 0, 6);
     m_groups[8].displays.FUN_007cb2e0(valueX);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "Index_PerceptionDecrease_Btn:0", 6, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "Index_PerceptionDecrease_Btn:0", 6, 2, valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(declA);
-    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "Index_PerceptionIncrease_Btn:0", 6, 2,
+    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "Index_PerceptionIncrease_Btn:0", 6, 2,
                                  valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(pIncrease);
 
     valueX = new BkDisplay(UpdateEntryRankText, "Index_EndurancePointVal:0", 0, 7);
     m_groups[8].displays.FUN_007cb2e0(valueX);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "Index_EnduranceDecrease_Btn:0", 7, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "Index_EnduranceDecrease_Btn:0", 7, 2, valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(declA);
-    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "Index_EnduranceIncrease_Btn:0", 7, 2,
+    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "Index_EnduranceIncrease_Btn:0", 7, 2,
                                  valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(pIncrease);
 
     valueX = new BkDisplay(UpdateEntryRankText, "Index_CharismaPointVal:0", 0, 8);
     m_groups[8].displays.FUN_007cb2e0(valueX);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "Index_CharismaDecrease_Btn:0", 8, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "Index_CharismaDecrease_Btn:0", 8, 2, valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(declA);
-    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "Index_CharismaIncrease_Btn:0", 8, 2,
+    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "Index_CharismaIncrease_Btn:0", 8, 2,
                                  valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(pIncrease);
 
     valueX = new BkDisplay(UpdateEntryRankText, "Index_IntelligencePointVal:0", 0, 9);
     m_groups[8].displays.FUN_007cb2e0(valueX);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "Index_IntelligenceDecrease_Btn:0", 9, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "Index_IntelligenceDecrease_Btn:0", 9, 2, valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(declA);
-    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "Index_IntelligenceIncrease_Btn:0", 9, 2,
+    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "Index_IntelligenceIncrease_Btn:0", 9, 2,
                                  valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(pIncrease);
 
     valueX = new BkDisplay(UpdateEntryRankText, "Index_AgilityPointVal:0", 0, 10);
     m_groups[8].displays.FUN_007cb2e0(valueX);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "Index_AgilityDecrease_Btn:0", 10, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "Index_AgilityDecrease_Btn:0", 10, 2, valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(declA);
-    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "Index_AgilityIncrease_Btn:0", 10, 2,
+    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "Index_AgilityIncrease_Btn:0", 10, 2,
                                  valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(pIncrease);
 
     valueX = new BkDisplay(UpdateEntryRankText, "Index_LuckPointVal:0", 0, 11);
     m_groups[8].displays.FUN_007cb2e0(valueX);
-    declA = new BkStepButton(FUN_007ca960, FUN_007ca700, "Index_LuckDecrease_Btn:0", 11, 2, valueX, pDigits);
+    declA = new BkStepButton(Object_ProcessAndReturnValue_007ca960, Object_UpdateFields_007ca700, "Index_LuckDecrease_Btn:0", 11, 2, valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(declA);
-    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, FUN_007ca7a0, "Index_LuckIncrease_Btn:0", 11, 2,
+    pIncrease = new BkStepButton(PlaySpecialBookSoundAndSetStat, Object_UpdateFields_007ca7a0, "Index_LuckIncrease_Btn:0", 11, 2,
                                  valueX, pDigits);
     m_groups[8].buttons.FUN_007cb2e0(pIncrease);
 
@@ -1020,27 +1026,27 @@ void SPECIALBookMenu::InitMenu()
     m_groups[8].displays.FUN_007cb2e0(kMsg);
     pDigits = new BkDisplay(UpdateLodVisibility, (char*)"Index_PointsRemainDigit1:0", "Index_PointsRemainDigit2:0", -1);
     m_groups[8].displays.FUN_007cb2e0(pDigits);
-    next = new BkButton(FUN_007cac30, DispatchSourceCallback, "AllDone_Btn:0");
+    next = new BkButton(BSAudio_CloseBookMenuOrPlayInactiveSound, DispatchSourceCallback, "AllDone_Btn:0");
     m_groups[8].buttons.FUN_007cb2e0(next);
-    pLeft = new BkButton(FUN_007cabf0, FUN_007ca8a0, "Index_LT_Btn:0");
+    pLeft = new BkButton(Runtime_TurnPageBackwardAndInvokeCallbacks, Object_ProcessState_007ca8a0, "Index_LT_Btn:0");
     m_groups[8].buttons.FUN_007cb2e0(pLeft);
 
-    FUN_007cadd0();
+    LoadBBTextures();
     for (int iGroup = 0; iGroup < 9; iGroup++)
     {
         for (unsigned int iItem = 0; iItem < m_groups[iGroup].displays.FUN_0044ddc0(); iItem++)
         {
-            m_groups[iGroup].displays.FUN_006a7ad0(iItem)->m_cb(m_groups[iGroup].displays.FUN_006a7ad0(iItem));
+            m_groups[iGroup].displays.BSSimpleArray_NiAVObject_1024_GetAt(iItem)->m_cb(m_groups[iGroup].displays.BSSimpleArray_NiAVObject_1024_GetAt(iItem));
         }
         for (unsigned int iButton = 0; iButton < m_groups[iGroup].buttons.FUN_0044ddc0(); iButton++)
         {
-            m_groups[iGroup].buttons.FUN_006a7ad0(iButton)->m_cb4(m_groups[iGroup].buttons.FUN_006a7ad0(iButton));
+            m_groups[iGroup].buttons.BSSimpleArray_NiAVObject_1024_GetAt(iButton)->m_cb4(m_groups[iGroup].buttons.BSSimpleArray_NiAVObject_1024_GetAt(iButton));
         }
     }
 }
 
 int __cdecl MinInt(int, int);
-int __cdecl FUN_00647b70(int, int);
+int __cdecl BSMAX_00647b70(int, int);
 
 struct StatValues
 {
@@ -1097,11 +1103,11 @@ struct BookPlayer
     int unk9c;
     int unka0;
     StatValues values;
-    void FUN_0093a7c0(int stat, int value);
+    void PlayerCharacter_SetActorBaseValue(int stat, int value);
 };
 struct RawBookPtr
 {
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
 };
 struct BookButton
 {
@@ -1113,13 +1119,13 @@ struct BookButton
 };
 struct BookInterface
 {
-    float FUN_009a9350();
-    float FUN_00792760();
+    float TESCombatStyle_GetWeaponMinRangeMult();
+    float QueuedModel_GetOverriddenVisualDistance();
 };
-BookInterface* __cdecl FUN_004b7210();
+BookInterface* __cdecl InterfaceManager_GetSingleton();
 struct RenderBuffer
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct BookRenderer
 {
@@ -1178,7 +1184,7 @@ struct BookRenderer
     virtual void v52();
     virtual RenderBuffer* GetBuffer();
 };
-BookRenderer* __cdecl FUN_0043c4b0();
+BookRenderer* __cdecl NiXenonRenderer_GetRenderer();
 extern bool DAT_011f9426;
 extern float DAT_011ad84c;
 extern float DAT_011ad848;
@@ -1190,7 +1196,7 @@ struct FUN_006815c0
 class PickRecord
 {
 public:
-    void* FUN_00968670();
+    void* ProcessArray_GetItem();
 };
 struct BookScene
 {
@@ -1205,19 +1211,19 @@ void SPECIALBookMenu::HandleKey(unsigned int key, int unused)
     switch (key)
     {
     case 4:
-        if (FUN_00794d80() == limit)
-            FUN_007c6120();
+        if (SPECIALBookMenu_GetTotalPointsUsed() == limit)
+            SPECIALBookMenu_Close();
         else
-            reinterpret_cast<BSSoundHandle&>(BSAudio::GetSingleton()->FUN_00ad7550("UIActivateNothing", 0x121)).Play(false);
+            reinterpret_cast<BSSoundHandle&>(BSAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName("UIActivateNothing", 0x121)).Play(false);
         break;
     case 0:
     case 1:
         if (finished)
         {
             if (key == 0)
-                turned = FUN_007c9dc0(true);
+                turned = TurnPage(true);
             else
-                turned = FUN_007c9dc0(false);
+                turned = TurnPage(false);
             InvokeCallbacksForSlot();
         }
         break;
@@ -1225,19 +1231,19 @@ void SPECIALBookMenu::HandleKey(unsigned int key, int unused)
     case 3: {
         int oldValue9 = 0;
         int newValue = 0;
-        if (FUN_007ca030() != -1)
+        if (GetCurrentStatesActorValue() != -1)
         {
-            oldValue9 = ((BookPlayer*)g_thePlayer)->values.GetBaseValue(FUN_007ca030());
+            oldValue9 = ((BookPlayer*)g_thePlayer)->values.GetBaseValue(GetCurrentStatesActorValue());
             if (key == 2)
             {
-                if (FUN_00794d80() < limit)
-                    ((BookPlayer*)g_thePlayer)->FUN_0093a7c0(FUN_007ca030(), MinInt(oldValue9 + 1, 10));
+                if (SPECIALBookMenu_GetTotalPointsUsed() < limit)
+                    ((BookPlayer*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(GetCurrentStatesActorValue(), MinInt(oldValue9 + 1, 10));
             }
             else
             {
-                ((BookPlayer*)g_thePlayer)->FUN_0093a7c0(FUN_007ca030(), FUN_00647b70(oldValue9 - 1, 1));
+                ((BookPlayer*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(GetCurrentStatesActorValue(), BSMAX_00647b70(oldValue9 - 1, 1));
             }
-            newValue = ((BookPlayer*)g_thePlayer)->values.GetValue(FUN_007ca030());
+            newValue = ((BookPlayer*)g_thePlayer)->values.GetValue(GetCurrentStatesActorValue());
         }
         else if (_FUN_004b71d0() && pageIndex == 8)
         {
@@ -1245,19 +1251,19 @@ void SPECIALBookMenu::HandleKey(unsigned int key, int unused)
             oldValue9 = ((BookPlayer*)g_thePlayer)->values.GetBaseValue(stat);
             if (key == 2)
             {
-                if (FUN_00794d80() < limit)
-                    ((BookPlayer*)g_thePlayer)->FUN_0093a7c0(stat, MinInt(oldValue9 + 1, 10));
+                if (SPECIALBookMenu_GetTotalPointsUsed() < limit)
+                    ((BookPlayer*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(stat, MinInt(oldValue9 + 1, 10));
             }
             else
             {
-                ((BookPlayer*)g_thePlayer)->FUN_0093a7c0(stat, FUN_00647b70(oldValue9 - 1, 1));
+                ((BookPlayer*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(stat, BSMAX_00647b70(oldValue9 - 1, 1));
             }
             newValue = ((BookPlayer*)g_thePlayer)->values.GetValue(stat);
         }
         if (oldValue9 != newValue)
         {
             BSSoundHandle sound;
-            sound = reinterpret_cast<const BSSoundHandle&>(BSAudio::GetSingleton()->FUN_00ad7550("OBJBookSpecialNumber", 0x121));
+            sound = reinterpret_cast<const BSSoundHandle&>(BSAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName("OBJBookSpecialNumber", 0x121));
             sound.Play(false);
         }
         InvokeCallbacksForSlot();
@@ -1266,30 +1272,30 @@ void SPECIALBookMenu::HandleKey(unsigned int key, int unused)
     case 5:
         if (pageIndex < 9)
         {
-            BookInterface* interfaceManager3 = FUN_004b7210();
-            int mouseX = (int)interfaceManager3->FUN_009a9350();
-            int mouseY = (int)interfaceManager3->FUN_00792760();
+            BookInterface* interfaceManager3 = InterfaceManager_GetSingleton();
+            int mouseX = (int)interfaceManager3->TESCombatStyle_GetWeaponMinRangeMult();
+            int mouseY = (int)interfaceManager3->QueuedModel_GetOverriddenVisualDistance();
             if (DAT_011f9426)
                 mouseY = (int)(mouseY * (DAT_011ad848 - DAT_011ad84c) +
-                               FUN_0043c4b0()->GetBuffer()->FUN_0084e3a0() * DAT_011ad84c);
+                               NiXenonRenderer_GetRenderer()->GetBuffer()->GetHavokWorldObjectCountInSceneGraph_0084e3a0() * DAT_011ad84c);
             for (unsigned int i = 0; i < groups[pageIndex].buttons.FUN_0044ddc0(); i++)
             {
                 FUN_006815c0 origin20;
                 FUN_006815c0 direction1;
                 NiPick pick(0, 8);
                 pick.SetByteAtOffset17(1);
-                pick.FUN_00705fc0(groups[pageIndex].buttons.FUN_006a7ad0(i)->object.FUN_00559450());
+                pick.SetTarget_00705fc0(groups[pageIndex].buttons.BSSimpleArray_NiAVObject_1024_GetAt(i)->object.Modelloader_GetReferencedThis());
                 pick.FUN_006ecd40(0);
                 pick.SetByteAtOffset30(1);
-                ((BookScene*)((RawBookPtr*)&g_011daa9c)->FUN_00559450())
+                ((BookScene*)((RawBookPtr*)&g_011daa9c)->Modelloader_GetReferencedThis())
                     ->MapScreenToRay(mouseX, mouseY, &origin20, &direction1, 0);
                 if (pick.FUN_00e98e20((const NiPoint3&)origin20, (const NiPoint3&)direction1, 0))
                 {
                     unsigned int resultIndex = 0;
-                    void* hit = pick.FUN_00500940(resultIndex)->FUN_00968670();
+                    void* hit = pick.FUN_00500940(resultIndex)->ProcessArray_GetItem();
                     if (hit)
                     {
-                        groups[pageIndex].buttons.FUN_006a7ad0(i)->activate(groups[pageIndex].buttons.FUN_006a7ad0(i));
+                        groups[pageIndex].buttons.BSSimpleArray_NiAVObject_1024_GetAt(i)->activate(groups[pageIndex].buttons.BSSimpleArray_NiAVObject_1024_GetAt(i));
                         break;
                     }
                 }
@@ -1300,7 +1306,7 @@ void SPECIALBookMenu::HandleKey(unsigned int key, int unused)
         if (pageIndex == 8 && selectedStat > 1)
         {
             selectedStat--;
-            reinterpret_cast<BSSoundHandle&>(BSAudio::GetSingleton()->FUN_00ad7550("OBJBookSpecialFocus", 0x121)).Play(false);
+            reinterpret_cast<BSSoundHandle&>(BSAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName("OBJBookSpecialFocus", 0x121)).Play(false);
         }
         InvokeCallbacksForSlot();
         break;
@@ -1308,7 +1314,7 @@ void SPECIALBookMenu::HandleKey(unsigned int key, int unused)
         if (pageIndex == 8 && selectedStat < 7)
         {
             selectedStat++;
-            reinterpret_cast<BSSoundHandle&>(BSAudio::GetSingleton()->FUN_00ad7550("OBJBookSpecialFocus", 0x121)).Play(false);
+            reinterpret_cast<BSSoundHandle&>(BSAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName("OBJBookSpecialFocus", 0x121)).Play(false);
         }
         InvokeCallbacksForSlot();
         break;

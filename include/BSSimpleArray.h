@@ -53,19 +53,19 @@ public:
     unsigned int Find(const T& value, unsigned int start,
                       bool (__cdecl* compare)(const T&, const T&));
 
-    void FUN_006b3eb0(unsigned int, bool);
-    void FUN_00822860(unsigned int, bool);
-    bool FUN_0076b610() const;
-    const T& FUN_006b3160(unsigned int index) const;
-    const T& FUN_006dad90(unsigned int index) const;
-    void FUN_006c61b0(const T& value);
-    bool FUN_009962f0(T& value);
-    unsigned int __thiscall FUN_00a11ee0();
-    unsigned int __thiscall FUN_00a11d20(void*& value);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, bool);
+    void BSSimpleArray_NiPointer_ObstacleUndoData_1024_InitialSetup(unsigned int, bool);
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() const;
+    const T& GetIndexedValue_006b3160(unsigned int index) const;
+    const T& BSSimpleArray_CombatMember_1024_GetAt(unsigned int index) const;
+    void BSSimpleArray_NiPointer_NiAVObject_1024_Add(const T& value);
+    bool BSSimpleArray_BGSBodyPart_1024_IsInArray(T& value);
+    unsigned int __thiscall BSSimpleArray_AddUninitialized_0();
+    unsigned int __thiscall BSSimpleArray_Add(void*& value);
 
     // Per-instantiation helpers whose real names are unknown (each unit binds them to its instantiation's address).
     BSSimpleArray(unsigned int, bool);
-    T& FUN_006a1440(unsigned int index);
+    T& Object_GetIndexedValue_006a1440(unsigned int index);
     unsigned int AppendElement(const T& value);
     unsigned int Append(const T& value);
     T& GetElement(unsigned int index);
@@ -74,7 +74,7 @@ public:
     void AppendValue(const T&);
     T& GetBufferElementAddress(unsigned int index);
     void GrowCapacity(unsigned int capacity);
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     const T& GetLastEdge();
     const T& GetFirstElement() const;
     const T& GetLastElement() const;

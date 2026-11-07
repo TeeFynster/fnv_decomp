@@ -77,11 +77,11 @@ template <> bool BSStringT<char>::Set(const BSStringT<char>& source)
 class LitWaterReference : public TESObjectREFR
 {
 public:
-    ExtraDataList* FUN_005d43c0(TESForm* owner, bool flag);
+    ExtraDataList* BSFile_GetDevice(TESForm* owner, bool flag);
 };
 
 void __cdecl ResolveFormID(unsigned int* apFormID, TESFile* apFile);
-TESForm* __cdecl FUN_004839c0(unsigned int auiFormID);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int auiFormID);
 void __cdecl FNV_Warning(const char* apFormat, ...);
 
 // Shared ExtraLitWaterRefs.h lacks FUN_00434050 (0x00434050, also bound by extradatalist.cpp); retain the real layout locally until it is declared.
@@ -89,7 +89,8 @@ class BSExtraDataEx;
 
 
 // @fnv 0x00434050
-void ExtraLitWaterRefs::FUN_00434050(TESForm* apOwner)
+// src: XBOX_PDB 0x00434050
+void ExtraLitWaterRefs::InitItem_00434050(TESForm* apOwner)
 {
     BSSimpleList<TESObjectREFR*>* pNodeB8 = &kRefs;
     BSSimpleList<TESObjectREFR*> kResolved4;
@@ -98,7 +99,7 @@ void ExtraLitWaterRefs::FUN_00434050(TESForm* apOwner)
         TESObjectREFR* pItem3 = pNodeB8->GetItem();
         unsigned int auiFormId = (unsigned int)pItem3;
         ResolveFormID(&auiFormId, apOwner->GetFile(-1));
-        TESObjectREFR* pRef = dynamic_cast<TESObjectREFR*>(FUN_004839c0(auiFormId));
+        TESObjectREFR* pRef = dynamic_cast<TESObjectREFR*>(TESForm_GetFormByNumericID(auiFormId));
         if (!pRef || !pRef->GetReferencePersistence())
         {
             if (!pRef)
@@ -110,7 +111,7 @@ void ExtraLitWaterRefs::FUN_00434050(TESForm* apOwner)
         }
         else
         {
-            static_cast<LitWaterReference*>(pRef)->FUN_005d43c0(apOwner, true)->FUN_0041f840();
+            static_cast<LitWaterReference*>(pRef)->BSFile_GetDevice(apOwner, true)->FUN_0041f840();
             kResolved4.AddHead(pRef);
         }
         pNodeB8 = pNodeB8->GetNext();

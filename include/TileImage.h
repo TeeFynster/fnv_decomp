@@ -29,7 +29,7 @@ class TileImage : public Tile
     NiNode* GetNiNode();
     using Tile::FUN_00a011b0;
     float FUN_00a011b0(unsigned int trait, int value);
-    void FUN_00a037e0(unsigned int trait, float value);
+    void Tile_FinalPostParse(unsigned int trait, float value);
 
     static void ReadFloatAttribute(const char* name, float& value, float defaultValue, char* buffer);
     static void ReadTextureAttribute(const char* name, float& value, NiPointer<NiTexture>& texture,

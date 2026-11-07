@@ -27,7 +27,7 @@ bool TeleportDoorSearch::CollectConnections(const AStarNode<ParentSpaceNode, Tel
 {
     reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(&doors)->Clear(false);
     if (node->exterior)
-        node->world->FUN_00588270(doors);
+        node->world->BuildTeleportDoorList(doors);
     else
         node->cell->AppendCellReferences(doors);
     if (disposition == 1 || disposition == 3 || lockData)
@@ -54,7 +54,7 @@ bool TeleportDoorSearch::CollectConnections(const AStarNode<ParentSpaceNode, Tel
             void* b01 =
                 reinterpret_cast<ExtraLock*>(a00->GetExtraRadioData())->FUN_0043a320()
                     ? reinterpret_cast<void*>(reinterpret_cast<ExtraLock*>(a00->GetExtraRadioData())->FUN_0043a320())
-                    : reinterpret_cast<void*>(a00->GetExtraRadioData()->FUN_0043a2b0());
+                    : reinterpret_cast<void*>(a00->GetExtraRadioData()->DoorTeleportData_GetTeleportCell());
             switch (restriction)
             {
             case 2:
@@ -97,7 +97,7 @@ bool TeleportDoorSearch::CollectConnections(const AStarNode<ParentSpaceNode, Tel
             if (maxCost != 0.0 && node->cost + b00 > maxCost)
                 continue;
             a01 = node->cost + b00 + a06;
-            a07 = a00->GetExtraRadioData()->FUN_0043a2b0();
+            a07 = a00->GetExtraRadioData()->DoorTeleportData_GetTeleportCell();
             switch (InsertOrUpdateNode(b01, a01, a08))
             {
             case 0:
@@ -112,7 +112,7 @@ bool TeleportDoorSearch::CollectConnections(const AStarNode<ParentSpaceNode, Tel
                 {
                     a08->exterior = false;
                     a08->world = 0;
-                    a08->cell = a00->GetExtraRadioData()->FUN_0043a2b0();
+                    a08->cell = a00->GetExtraRadioData()->DoorTeleportData_GetTeleportCell();
                 }
                 a08->fitness = 1.0f;
             case 1:
@@ -133,7 +133,7 @@ TeleportDoorSearch::~TeleportDoorSearch()
 
 struct FUN_00996840_shell
 {
-    unsigned int FUN_00996840(unsigned int);
+    unsigned int AStarNodeMap_GetBucketIndex(unsigned int);
 };
 struct AStarNodeTD
 {
@@ -144,7 +144,7 @@ struct AStarNodeTD
 };
 struct FUN_006f4340_shell
 {
-    AStarNodeTD* FUN_006f4340();
+    AStarNodeTD* ProcessAndReturnValue_006f4340();
 };
 struct FUN_006f4430_shell
 {
@@ -154,7 +154,7 @@ struct FUN_006f4430_shell
 // @fnv 0x006f3e30
 int TeleportDoorSearch::InsertOrUpdateNode(void* aiKey, float afCost, AStarNode<ParentSpaceNode, TeleportLink>*& aRetNode)
 {
-    AStarNodeTD** pBucketHead = (AStarNodeTD**)((char*)this + 0x14) + reinterpret_cast<FUN_00996840_shell*>(reinterpret_cast<char*>(this) + 0x14)->FUN_00996840(reinterpret_cast<unsigned int>(aiKey));
+    AStarNodeTD** pBucketHead = (AStarNodeTD**)((char*)this + 0x14) + reinterpret_cast<FUN_00996840_shell*>(reinterpret_cast<char*>(this) + 0x14)->AStarNodeMap_GetBucketIndex(reinterpret_cast<unsigned int>(aiKey));
     if (*pBucketHead)
     {
         if ((*pBucketHead)->uiKey == reinterpret_cast<unsigned int>(aiKey))
@@ -198,7 +198,7 @@ int TeleportDoorSearch::InsertOrUpdateNode(void* aiKey, float afCost, AStarNode<
             }
         }
     }
-    reinterpret_cast<AStarNodeTD*&>(aRetNode) = reinterpret_cast<FUN_006f4340_shell*>(reinterpret_cast<char*>(this) + 4)->FUN_006f4340();
+    reinterpret_cast<AStarNodeTD*&>(aRetNode) = reinterpret_cast<FUN_006f4340_shell*>(reinterpret_cast<char*>(this) + 4)->ProcessAndReturnValue_006f4340();
     (reinterpret_cast<AStarNodeTD*&>(aRetNode))->uiKey = reinterpret_cast<unsigned int>(aiKey);
     (reinterpret_cast<AStarNodeTD*&>(aRetNode))->m_fPathingCostCur = afCost;
     (reinterpret_cast<AStarNodeTD*&>(aRetNode))->pNext = *pBucketHead;
@@ -225,7 +225,7 @@ struct SearchResult
 // Local extension for methods not yet declared by the shared search class.
 struct DoorSearchInit : TeleportDoorSearch
 {
-    void FUN_006f3d00(void*, SearchState*, float);
+    void AStarSearch_ParentSpaceNode_TeleportLink_AddStartNode(void*, SearchState*, float);
     bool FindPath(SearchResult*, ResultSub*, bool);
     bool InitDoorSearch(PathingLocation*, PathingLocation*, SearchResult*, int, float, void*, int);
 };
@@ -274,7 +274,7 @@ bool DoorSearchInit::InitDoorSearch(PathingLocation* start, PathingLocation* goa
     lockData = static_cast<const PathingActorData*>(locks);
     result->start = start->FUN_005c3420();
     result->finish = goal->FUN_005c3420();
-    FUN_006f3d00(a, reinterpret_cast<SearchState*>(reinterpret_cast<char*>(this) + 0x2058), 1.0f);
+    AStarSearch_ParentSpaceNode_TeleportLink_AddStartNode(a, reinterpret_cast<SearchState*>(reinterpret_cast<char*>(this) + 0x2058), 1.0f);
     if (!FindPath(result, &result->sub, true))
         return false;
     return true;

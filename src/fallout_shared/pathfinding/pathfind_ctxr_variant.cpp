@@ -25,12 +25,12 @@ struct Elem20
 };
 struct TriX
 {
-    unsigned short FUN_005582d0(int i);
+    unsigned short GetVert_005582d0(int i);
 };
 struct MeshX
 {
     TriX* FUN_005582f0(unsigned short t);
-    const NiPoint3& FUN_0068f0a0(unsigned short v);
+    const NiPoint3& GetVertex_0068f0a0(unsigned short v);
 };
 struct ArrD
 {
@@ -42,7 +42,7 @@ struct ArrD
     ArrD(int a, int b, void* c);
     ~ArrD();
     unsigned int FUN_0044ddc0();
-    Elem20* FUN_006b3160(int idx);
+    Elem20* GetIndexedValue_006b3160(int idx);
 };
 struct ArrE
 {
@@ -589,10 +589,11 @@ struct Ctx12
     float z;
     float w;
 };
-NiPoint3 __cdecl FUN_006bbad0(NiPoint3* a, NiPoint3* b, NiPoint3* c);
+NiPoint3 __cdecl NavMeshMath_RandomPointOnTriangle(NiPoint3* a, NiPoint3* b, NiPoint3* c);
 
 // @fnv 0x006d34d0
-bool __cdecl FUN_006d34d0(void* req, NiPoint3* out)
+// src: XBOX_PDB 0x006d34d0
+bool __cdecl Pathing_FindClosePointViaNavMesh(void* req, NiPoint3* out)
 {
     if (!((PathingRequest*)req)->GetOffsetC().HasValidTriangle())
         return false;
@@ -601,19 +602,19 @@ bool __cdecl FUN_006d34d0(void* req, NiPoint3* out)
     if (!((PathingRequest*)req)->GetOffsetC().FindNavMeshTriangle(navPtr, tri3))
         return false;
     Info info2;
-    info2.mesh = navPtr.FUN_00458b50();
+    info2.mesh = navPtr.AnimatingText_GetFullText();
     info2.tri = tri3;
     BigSearch big3;
     ArrD arrD3(0x20, 0, 0);
     ArrE arrE3(0x20, 0, 0);
     if (!big3.Search(req, &info2, &arrD3, &arrE3))
         return false;
-    Elem20 elem = *arrD3.FUN_006b3160(arrD3.FUN_0044ddc0() - 1);
+    Elem20 elem = *arrD3.GetIndexedValue_006b3160(arrD3.FUN_0044ddc0() - 1);
     NiPoint3 pts[3];
     TriX* triPtr7 = ((MeshX*)elem.mesh)->FUN_005582f0(elem.tri);
-    *(NiPoint3*)&pts[0] = ((MeshX*)elem.mesh)->FUN_0068f0a0(triPtr7->FUN_005582d0(0));
-    *(NiPoint3*)&pts[1] = ((MeshX*)elem.mesh)->FUN_0068f0a0(triPtr7->FUN_005582d0(1));
-    *(NiPoint3*)&pts[2] = ((MeshX*)elem.mesh)->FUN_0068f0a0(triPtr7->FUN_005582d0(2));
-    *out = (const NiPoint3&)FUN_006bbad0((NiPoint3*)&pts[0], (NiPoint3*)&pts[1], (NiPoint3*)&pts[2]);
+    *(NiPoint3*)&pts[0] = ((MeshX*)elem.mesh)->GetVertex_0068f0a0(triPtr7->GetVert_005582d0(0));
+    *(NiPoint3*)&pts[1] = ((MeshX*)elem.mesh)->GetVertex_0068f0a0(triPtr7->GetVert_005582d0(1));
+    *(NiPoint3*)&pts[2] = ((MeshX*)elem.mesh)->GetVertex_0068f0a0(triPtr7->GetVert_005582d0(2));
+    *out = (const NiPoint3&)NavMeshMath_RandomPointOnTriangle((NiPoint3*)&pts[0], (NiPoint3*)&pts[1], (NiPoint3*)&pts[2]);
     return true;
 }

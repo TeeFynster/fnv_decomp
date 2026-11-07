@@ -37,11 +37,12 @@ class FUN_0082b370 : public ActiveEffect
 
     FUN_0082b370(MagicCaster*, MagicItem*, EffectItem*);
 
-    ActiveEffect* FUN_0082b3b0();
+    ActiveEffect* TurnUndeadEffect_Copy();
 };
 
 // @fnv 0x0082b3b0
-ActiveEffect* FUN_0082b370::FUN_0082b3b0()
+// src: XBOX_PDB 0x0082b3b0
+ActiveEffect* FUN_0082b370::TurnUndeadEffect_Copy()
 {
     FUN_0082b370* presult = new FUN_0082b370(m_pEffectInstance, pSpell, pEffect);
     presult->m_bEffectFlag = m_bEffectFlag;
@@ -56,29 +57,30 @@ class Reference
 };
 extern char _data_011a0ef8;
 extern char _data_011a106c;
-bool __cdecl FUN_006494d0(unsigned short value, float strength);
+bool __cdecl MagicFormulas_CheckTargetLevelMagnitude(unsigned short value, float strength);
 int __cdecl FUN_00ec43fb(Reference* reference, int flag, void* first, void* second, int extra);
 class EffectEvaluator
 {
   public:
     float GetFloatAtOffset1C();
-    bool FUN_0082b460(Reference* reference);
+    bool TurnUndeadEffect_CheckTarget(Reference* reference);
 };
 // @fnv 0x0082b460
-bool EffectEvaluator::FUN_0082b460(Reference* reference)
+// src: XBOX_PDB 0x0082b460
+bool EffectEvaluator::TurnUndeadEffect_CheckTarget(Reference* reference)
 {
     Actor* actor = reference ? reference->FUN_00822b40() : 0;
     if (actor != 0)
     {
         if (!actor->HasHealth(0) && !actor->GetIsDying())
         {
-            if (FUN_006494d0(actor->FUN_0087f9f0(), GetFloatAtOffset1C()))
+            if (MagicFormulas_CheckTargetLevelMagnitude(actor->GetLevel_0087f9f0(), GetFloatAtOffset1C()))
             {
                 int result = FUN_00ec43fb(reference, 0, &_data_011a0ef8, &_data_011a106c, 0);
                 if (result != 0)
                 {
                 }
-                else if (actor->FUN_00608d80())
+                else if (actor->Actor_IsReanimated())
                     return true;
             }
         }
@@ -98,7 +100,7 @@ struct C
 {
     int FUN_0059bb30();
     int FUN_0045cd60();
-    void FUN_0082b530();
+    void TurnUndeadEffect_Start();
 };
 
 struct D
@@ -111,7 +113,8 @@ struct V
     virtual int v0();
 };
 // @fnv 0x0082b530
-void C::FUN_0082b530()
+// src: XBOX_PDB 0x0082b530
+void C::TurnUndeadEffect_Start()
 {
     int b;
     int a;
@@ -389,7 +392,7 @@ void B82B5E0Request::ApplyPackageToActor()
         return;
     Actor* pkActor = GetActorHandle() ? GetActorHandle()->Get() : 0;
     B82B5E0Package* pkPackage3 = GetPackageHandle() ? GetPackageHandle()->Get() : 0;
-    if (pkActor && pkActor->FUN_00493bb0())
+    if (pkActor && pkActor->Actor_IsInCombat())
     {
         pkActor->Unk_10D(reinterpret_cast<Actor*>(pkPackage3));
         if (pkPackage3 && pkActor->GetProcess())

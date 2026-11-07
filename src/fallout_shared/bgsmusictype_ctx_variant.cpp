@@ -14,7 +14,7 @@ unsigned int __cdecl GetRandomNumberInRange(int minimum, int maximum);
 
 int __cdecl FUN_00462d40(const char* path, char* drive, unsigned int driveLen, char* dir, unsigned int dirLen,
                          char* fname, unsigned int fnameLen, char* ext, unsigned int extLen);
-int __cdecl FUN_00404dc0(const char* a, const char* b);
+int __cdecl BSstricmp(const char* a, const char* b);
 
 class BSDirectoryIterator
 {
@@ -36,11 +36,12 @@ class BSDirectoryIterator
 class MusicFileBuilder : public BGSMusicType
 {
   public:
-    void FUN_005917b0();
+    void BGSMusicType_BuildFileList();
 };
 
 // @fnv 0x005917b0
-void MusicFileBuilder::FUN_005917b0()
+// src: COMMUNITY 0x005917b0
+void MusicFileBuilder::BGSMusicType_BuildFileList()
 {
     AutoMemHelper memContext(11, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\BGSMusicType.cpp", 352);
     const char* soundFile5 = GetSoundFile();
@@ -57,7 +58,7 @@ void MusicFileBuilder::FUN_005917b0()
         {
             char fileExt[260];
             FUN_00462d40(iter.GetFileName(), 0, 0, 0, 0, 0, 0, fileExt, 0x104);
-            if (FUN_00404dc0(fileExt, ext_2) == 0)
+            if (BSstricmp(fileExt, ext_2) == 0)
             {
                 sprintf_s(fullPathA, 0x104, "%s%s", path5, iter.GetFileName());
                 MusicTrack* entry = new MusicTrack(fullPathA);

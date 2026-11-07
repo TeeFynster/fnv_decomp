@@ -63,12 +63,12 @@ public:
     PacketCallLocal_00d323f0(float x, float y, float z, float w);
     PacketCallLocal_00d323f0(const __m128& vector);
 
-    PacketCallLocal_00d323f0* FUN_005532a0(float x, float y, float z, float w);
-    void FUN_004a3f10(PacketCallLocal_00d323f0* vector);
-    void __thiscall FUN_004b4db0(const PacketCallLocal_00d323f0* vector);
-    PacketCallLocal_00d323f0& FUN_00e531a0(int parameter);
-    PacketCallLocal_00d323f0 FUN_00e53260(int parameter);
-    void FUN_005611c0();
+    PacketCallLocal_00d323f0* hkVector4_hkVector4(float x, float y, float z, float w);
+    void SetValue(PacketCallLocal_00d323f0* vector);
+    void __thiscall SetQuaternionComponentsFromVector(const PacketCallLocal_00d323f0* vector);
+    PacketCallLocal_00d323f0& ComputeValue_00e531a0(int parameter);
+    PacketCallLocal_00d323f0 ProcessAndReturnValue_00e53260(int parameter);
+    void normalize_005611c0();
 
     void operator=(const PacketCallLocal_00d323f0& vector);
     float& operator()(int index);
@@ -143,9 +143,9 @@ __forceinline hkTransform::hkTransform(const hkTransform& other) {
 
 extern char DAT_010ceaa8[];
 
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 
-void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 
 struct SizeSource {
     virtual void v00(); virtual void v01(); virtual void v02(); virtual void v03();
@@ -160,7 +160,7 @@ struct SourceRef {
 
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    hkMemoryRouter* a = FUN_00c85750();
+    hkMemoryRouter* a = hkMemoryRouter_getInstance();
     return *(hkMemoryAllocator*)a->m_heap;
 }
 
@@ -170,7 +170,7 @@ __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& alloc, i
     int c = m_iCapacityState & 0x3fffffff;
     if (c < n) {
         c = c * 2;
-        FUN_00c908c0(alloc, this, n < c ? c : n, sizeof(T));
+        hkArrayUtil__reserve(alloc, this, n < c ? c : n, sizeof(T));
     }
 }
 
@@ -212,7 +212,7 @@ FUN_00d32060_Class* FUN_00d32060_Class::Init(const SourceRef& aSource, int aiUnu
 }
 
 namespace fnv_00d32110 {
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 
 struct TargetObj {
     int unk00;
@@ -223,29 +223,30 @@ struct TargetObj {
 // Allocates a 0x18-byte TargetObj from the shared allocator, sets its size to 0x18, and returns the result of FUN_00d32060(a1, a2, a3, a4).
 // @fnv 0x00d32110
 TargetObj* AllocateTargetObj(void* apArg1, void* apArg2, void* apArg3, void* apArg4) {
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     TargetObj* obj = (TargetObj*)((hkMemoryAllocator*)holder->m_heap)->blockAlloc(0x18);
     obj->size = 0x18;
     return obj->FUN_00d32060(apArg1, apArg2, apArg3, apArg4);
 }
 }  // namespace fnv_00d32110
 
-extern void __cdecl FUN_00d319e0(void*, void*, void*, void*);
+extern void __cdecl hkpHeightFieldAgent_staticGetClosestPoints(void*, void*, void*, void*);
 // @fnv 0x00d32170
-void __stdcall FUN_00d32170(void* apArg1, void* apArg2, void* apArg3, void* apArg4) {
-    FUN_00d319e0(apArg1, apArg2, apArg3, apArg4);
+// src: HAVOK_SRC 0x00d32170
+void __stdcall hkpHeightFieldAgent_getClosestPoints(void* apArg1, void* apArg2, void* apArg3, void* apArg4) {
+    hkpHeightFieldAgent_staticGetClosestPoints(apArg1, apArg2, apArg3, apArg4);
 }
 
 typedef void (*S_00d321e0_Func)();
 
-void FUN_00d32190();
-void FUN_00d32370();
-void FUN_00d323b0();
-void FUN_00d323f0();
+void hkpHeightFieldAgent_createHeightFieldAAgent();
+void hkpHeightFieldAgent_staticGetPenetrations_UpdateState_00d32370();
+void hkpHeightFieldAgent_staticGetClosestPoints_ProcessState_00d323b0();
+void Hkpheightfieldagent_UpdateState_00d323f0();
 void AllocateTargetObj();
-void FUN_00d317d0();
-void FUN_00d319e0();
-void FUN_00d31d30();
+void hkpHeightFieldAgent_staticGetPenetrations();
+void hkpHeightFieldAgent_staticGetClosestPoints();
+void hkpHeightFieldAgent_ProcessSphereQueries();
 
 struct S_00d321e0_AgentFuncs {
     S_00d321e0_Func m_pCreateFunc;
@@ -257,31 +258,32 @@ struct S_00d321e0_AgentFuncs {
 };
 
 struct S_00d321e0_Dispatcher {
-    void FUN_00cfbbe0(S_00d321e0_AgentFuncs& f, int typeA, int typeB);
+    void AppendRecordAndRegisterAgents(S_00d321e0_AgentFuncs& f, int typeA, int typeB);
 };
 
 // @fnv 0x00d321e0
-void FUN_00d321e0(S_00d321e0_Dispatcher* dispatcher)
+// src: XBOX_PDB 0x00d321e0
+void hkpHeightFieldAgent_registerAgent(S_00d321e0_Dispatcher* dispatcher)
 {
     {
         S_00d321e0_AgentFuncs af;
-        af.m_pCreateFunc = FUN_00d32190;
-        af.m_pQueryPenetrationsFunc = FUN_00d32370;
-        af.m_pGetPenetrationsFunc = FUN_00d323b0;
-        af.m_pLinearCastFunc = FUN_00d323f0;
+        af.m_pCreateFunc = hkpHeightFieldAgent_createHeightFieldAAgent;
+        af.m_pQueryPenetrationsFunc = hkpHeightFieldAgent_staticGetPenetrations_UpdateState_00d32370;
+        af.m_pGetPenetrationsFunc = hkpHeightFieldAgent_staticGetClosestPoints_ProcessState_00d323b0;
+        af.m_pLinearCastFunc = Hkpheightfieldagent_UpdateState_00d323f0;
         af.m_bIsFlipped = true;
         af.m_bIsPredictive = true;
-        dispatcher->FUN_00cfbbe0(af, 0x19, 0x1a);
+        dispatcher->AppendRecordAndRegisterAgents(af, 0x19, 0x1a);
     }
     {
         S_00d321e0_AgentFuncs af;
         af.m_pCreateFunc = AllocateTargetObj;
-        af.m_pQueryPenetrationsFunc = FUN_00d317d0;
-        af.m_pGetPenetrationsFunc = FUN_00d319e0;
-        af.m_pLinearCastFunc = FUN_00d31d30;
+        af.m_pQueryPenetrationsFunc = hkpHeightFieldAgent_staticGetPenetrations;
+        af.m_pGetPenetrationsFunc = hkpHeightFieldAgent_staticGetClosestPoints;
+        af.m_pLinearCastFunc = hkpHeightFieldAgent_ProcessSphereQueries;
         af.m_bIsFlipped = false;
         af.m_bIsPredictive = true;
-        dispatcher->FUN_00cfbbe0(af, 0x1a, 0x19);
+        dispatcher->AppendRecordAndRegisterAgents(af, 0x1a, 0x19);
     }
 }
 
@@ -306,14 +308,15 @@ struct D323B0Collector : D323B0CollectorBase {
     virtual void unk04();
 };
 
-void __cdecl FUN_00d319e0(int a, int b, int c, D323B0CollectorBase* collector);
+void __cdecl hkpHeightFieldAgent_staticGetClosestPoints(int a, int b, int c, D323B0CollectorBase* collector);
 
 // Constructs a D323B0Collector from d and passes it with b, a, c to FUN_00d319e0.
 // @fnv 0x00d323b0
-void __cdecl FUN_00d323b0(int aiArg1, int aiArg2, int aiArg3, int aiData)
+// src: GUESS 0x00d323b0 (confidence: low)
+void __cdecl hkpHeightFieldAgent_staticGetClosestPoints_ProcessState_00d323b0(int aiArg1, int aiArg2, int aiArg3, int aiData)
 {
     D323B0Collector collector(aiData);
-    FUN_00d319e0(aiArg2, aiArg1, aiArg3, &collector);
+    hkpHeightFieldAgent_staticGetClosestPoints(aiArg2, aiArg1, aiArg3, &collector);
 }
 
 struct Handler {
@@ -345,24 +348,26 @@ void Owner::NotifyAndClear(int value) {
     clear(1);
 }
 
-extern "C" void __cdecl FUN_00d31d30(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);
+extern "C" void __cdecl hkpHeightFieldAgent_ProcessSphereQueries(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);
 // Forwards all five arguments unchanged to FUN_00d31d30.
 // @fnv 0x00d32030
-extern "C" void __stdcall FUN_00d32030(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4)
+// src: HAVOK_SRC 0x00d32030
+extern "C" void __stdcall hkpHeightFieldAgent_linearCast(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4)
 {
-    FUN_00d31d30(arg0, arg1, arg2, arg3, arg4);
+    hkpHeightFieldAgent_ProcessSphereQueries(arg0, arg1, arg2, arg3, arg4);
 }
 
-extern "C" void __cdecl FUN_00d317d0(void* arg0, void* arg1, void* arg2, void* arg3);
+extern "C" void __cdecl hkpHeightFieldAgent_staticGetPenetrations(void* arg0, void* arg1, void* arg2, void* arg3);
 // @fnv 0x00d32150
-extern "C" void __stdcall FUN_00d32150(void* arg0, void* arg1, void* arg2, void* arg3)
+// src: HAVOK_SRC 0x00d32150
+extern "C" void __stdcall hkpHeightFieldAgent_getPenetrations(void* arg0, void* arg1, void* arg2, void* arg3)
 {
-    FUN_00d317d0(arg0, arg1, arg2, arg3);
+    hkpHeightFieldAgent_staticGetPenetrations(arg0, arg1, arg2, arg3);
 }
 
 extern char DAT_010ce81c;
 
-void __cdecl FUN_00d317d0(int a1, int a2, int a3, void* a4);
+void __cdecl hkpHeightFieldAgent_staticGetPenetrations(int a1, int a2, int a3, void* a4);
 
 struct FUN_00d32370_cls {
     void* vt;
@@ -372,12 +377,13 @@ struct FUN_00d32370_cls {
 
 // Builds a FUN_00d32370_cls with vt set to DAT_010ce81c and d set to a4, then calls FUN_00d317d0 with a2, a1, a3 and the struct.
 // @fnv 0x00d32370
-void __cdecl FUN_00d32370(int aiArg1, int aiArg2, int aiArg3, int a4) {
+// src: GUESS 0x00d32370 (confidence: low)
+void __cdecl hkpHeightFieldAgent_staticGetPenetrations_UpdateState_00d32370(int aiArg1, int aiArg2, int aiArg3, int a4) {
     FUN_00d32370_cls local;
     local.flag = 0;
     local.d = a4;
     local.vt = &DAT_010ce81c;
-    FUN_00d317d0(aiArg2, aiArg1, aiArg3, &local);
+    hkpHeightFieldAgent_staticGetPenetrations(aiArg2, aiArg1, aiArg3, &local);
 }
 
 namespace fnv_00d323f0 {
@@ -402,11 +408,12 @@ struct Argument {
 extern "C" const float DAT_0104da48;
 extern "C" const __m128 DAT_010c44d0;
 extern "C" const char UNK_010ce80c;
-extern "C" void __cdecl FUN_00d31d30(int, int, const CopyPacket*, const Argument*, const Argument*);
+extern "C" void __cdecl hkpHeightFieldAgent_ProcessSphereQueries(int, int, const CopyPacket*, const Argument*, const Argument*);
 
 // Copies a CopyPacket with its orientation sign-flipped and calls FUN_00d31d30 with one or two Argument descriptors built from the source.
 // @fnv 0x00d323f0
-void __cdecl FUN_00d323f0(int a, int b, const CopyPacket* source, int id1, int id2) {
+// src: GUESS 0x00d323f0 (confidence: low)
+void __cdecl Hkpheightfieldagent_UpdateState_00d323f0(int a, int b, const CopyPacket* source, int id1, int id2) {
     __m128 orient = _mm_load_ps(&source->orientation.x);
     __m128 inverted = _mm_xor_ps(orient, DAT_010c44d0);
     Argument first;
@@ -423,9 +430,9 @@ void __cdecl FUN_00d323f0(int a, int b, const CopyPacket* source, int id1, int i
         second.scale = DAT_0104da48;
         second.orientation = source->orientation;
         second.identifier = id2;
-        FUN_00d31d30(b, a, &copy, &first, &second);
+        hkpHeightFieldAgent_ProcessSphereQueries(b, a, &copy, &first, &second);
     } else {
-        FUN_00d31d30(b, a, &copy, &first, 0);
+        hkpHeightFieldAgent_ProcessSphereQueries(b, a, &copy, &first, 0);
     }
 }
 }  // namespace fnv_00d323f0
@@ -576,7 +583,8 @@ struct CollisionScratch { hkTransform transform; ContactPointPair contact; };
 
 
 // @fnv 0x00d317d0
-void __cdecl FUN_00d317d0(int a1, int a2, int a3, void* a4)
+// src: XBOX_PDB 0x00d317d0
+void __cdecl hkpHeightFieldAgent_staticGetPenetrations(int a1, int a2, int a3, void* a4)
 {
     const hkpCdBody* bodyA = (const hkpCdBody*)a1;
     const hkpCdBody* bodyB = (const hkpCdBody*)a2;
@@ -590,11 +598,11 @@ void __cdecl FUN_00d317d0(int a1, int a2, int a3, void* a4)
     // Float storage avoids VC9 treating the SDK __m128 byte lanes as a GS buffer.
     __declspec(align(16)) float transformStorage[sizeof(hkTransform) / sizeof(float)];
     hkTransform& aTb = *::new (transformStorage) hkTransform;
-    aTb.FUN_00cb22f0(bodyB->m_pMotionState, bodyA->m_pMotionState);
+    aTb.hkTransform_setMulInverseMul(bodyB->m_pMotionState, bodyA->m_pMotionState);
 
     int count = ((CollisionSphereShape*)shapeA)->getNumCollisionSpheres();
 
-    hkMemoryRouter* q = FUN_00c85750();
+    hkMemoryRouter* q = hkMemoryRouter_getInstance();
     char* cur1 = (char*)q->m_stack.m_next.m_storage;
     hkSphere* sphereBuffer = (hkSphere*)cur1;
     q->m_stack.m_next.m_storage = (void*)((int)(cur1 + ((count * 16 + 127) & ~127)));
@@ -604,7 +612,7 @@ void __cdecl FUN_00d317d0(int a1, int a2, int a3, void* a4)
 
     static_cast<StringCursor_hkpheightfieldagent&>(hkMonitorStream::getInstance()).timerSplit("StCollide");
 
-    hkMemoryRouter* bs2 = FUN_00c85750();
+    hkMemoryRouter* bs2 = hkMemoryRouter_getInstance();
     char* cur2 = (char*)bs2->m_stack.m_next.m_storage;
     hkSphere* hitResults = (hkSphere*)cur2;
     {
@@ -627,14 +635,14 @@ void __cdecl FUN_00d317d0(int a1, int a2, int a3, void* a4)
         }
     }
 
-    FUN_00c85750()->m_stack.m_next.m_storage = (void*)((int)hitResults);
-    FUN_00c85750()->m_stack.m_next.m_storage = (void*)((int)sphereBuffer);
+    hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = (void*)((int)hitResults);
+    hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = (void*)((int)sphereBuffer);
 
     static_cast<StringCursor_hkpheightfieldagent&>(hkMonitorStream::getInstance()).timerEnd("lt");
 }
 
 namespace fnv_00d32190 {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 extern char DAT_010ceaf4[];
 
@@ -648,9 +656,10 @@ struct FUN_00d32190_cls {
 
 // Allocates a 0x18 byte object via m_pAllocator, sets m_w04 to 0x18, calls FUN_00d32060, and sets m_vptr to DAT_010ceaf4.
 // @fnv 0x00d32190
-FUN_00d32190_cls* __cdecl FUN_00d32190(int a1, int a2, int a3, int a4)
+// src: HAVOK_LIB 0x00d32190
+FUN_00d32190_cls* __cdecl hkpHeightFieldAgent_createHeightFieldAAgent(int a1, int a2, int a3, int a4)
 {
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     FUN_00d32190_cls* obj = (FUN_00d32190_cls*)((hkMemoryAllocator*)holder->m_heap)->blockAlloc(0x18);
     obj->m_w04 = 0x18;
     obj->FUN_00d32060(a2, a1, a3, a4);

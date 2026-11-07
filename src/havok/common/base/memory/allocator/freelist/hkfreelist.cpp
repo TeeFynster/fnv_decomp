@@ -44,24 +44,24 @@ class hkFreeList
     hkFreeListAllocatorServer* m_blockServer;
 
     __declspec(noinline) int FreeBlocks(Block* node);
-    __declspec(noinline) void FUN_00dd7200();
-    void FUN_00dd7360();
+    __declspec(noinline) void freeAllMemory();
+    void freeAllFreeBlocks();
     void CollectFreeNodes(Block** blocks, int unused);
-    __declspec(noinline) void FUN_00dd74b0(int, int, int, int);
-    void FUN_00dd7510(int, int, int, int);
+    __declspec(noinline) void _init(int, int, int, int);
+    void init_00dd7510(int, int, int, int);
     bool* ValidateFreeList(bool* result);
-    unsigned int FUN_00dd7240();
+    unsigned int _calcNumFreeElements();
     __declspec(noinline) int SumNodeCounts(Block* node);
-    int FUN_00dd72d0();
-    void FUN_00dd7380(unsigned int key);
-    void FUN_00dd7430(FreeListStatistics* info);
+    int _calcTotalNumElements();
+    void freeSmallFreeBlocks(unsigned int key);
+    void calculateStatistics(FreeListStatistics* info);
     void ResetFreeList();
     __declspec(noinline) void WalkFreeBlocks(Block*, FreeBlockWalkCallback, int, void*);
     int Compact();
-    void FUN_00dd78f0(hkMemoryWalkCallback callback, int pool, void* param);
+    void walkMemory_00dd78f0(hkMemoryWalkCallback callback, int pool, void* param);
     void* AllocateElement();
-    int FUN_00dd7b40(Block*);
-    hkBool FUN_00dd7c40(int, int&) throw();
+    int _calcBlockFree(Block*);
+    hkBool incrementalFindGarbage(int, int&) throw();
 };
 
 // @fnv 0x00dd7280
@@ -77,14 +77,16 @@ __declspec(noinline) int __cdecl SumFreeListSizes(hkFreeList::Block* node)
 }
 
 // @fnv 0x00dd7360
-void hkFreeList::FUN_00dd7360()
+// src: HAVOK_LIB 0x00dd7360
+void hkFreeList::freeAllFreeBlocks()
 {
     FreeBlocks(m_freeBlocks);
     m_freeBlocks = 0;
 }
 
 // @fnv 0x00dd73d0
-__declspec(noinline) void* FUN_00dd73d0(void* p, unsigned int n)
+// src: HAVOK_LIB 0x00dd73d0
+__declspec(noinline) void* hkFreeList_bestBlockSize(void* p, unsigned int n)
 {
     if (n <= 0x10)
         return (char*)p + 0x10;
@@ -93,10 +95,11 @@ __declspec(noinline) void* FUN_00dd73d0(void* p, unsigned int n)
 
 // Calls FUN_00dd7200, then forwards the four int arguments to FUN_00dd74b0.
 // @fnv 0x00dd7510
-void hkFreeList::FUN_00dd7510(int a, int b, int c, int d)
+// src: HAVOK_LIB 0x00dd7510
+void hkFreeList::init_00dd7510(int a, int b, int c, int d)
 {
-    FUN_00dd7200();
-    FUN_00dd74b0(a, b, c, d);
+    freeAllMemory();
+    _init(a, b, c, d);
 }
 
 // @fnv 0x00dd71c0
@@ -124,7 +127,8 @@ int hkFreeList::FreeBlocks(Block* node)
 }
 
 // @fnv 0x00dd7200
-void hkFreeList::FUN_00dd7200()
+// src: HAVOK_LIB 0x00dd7200
+void hkFreeList::freeAllMemory()
 {
     hkFreeList* p = this;
 
@@ -142,7 +146,8 @@ void hkFreeList::FUN_00dd7200()
 }
 
 // @fnv 0x00dd7240
-unsigned int hkFreeList::FUN_00dd7240()
+// src: HAVOK_LIB 0x00dd7240
+unsigned int hkFreeList::_calcNumFreeElements()
 {
     unsigned int count = 0;
     Element* node = m_free;
@@ -308,7 +313,7 @@ void* hkFreeList::AllocateElement()
         unsigned int auiCount = 256 / m_elementSize;
         if (auiCount < 1)
             auiCount = 1;
-        m_blockSize = reinterpret_cast<unsigned int>(FUN_00dd73d0(reinterpret_cast<void*>(m_elementSize * auiCount), m_alignment));
+        m_blockSize = reinterpret_cast<unsigned int>(hkFreeList_bestBlockSize(reinterpret_cast<void*>(m_elementSize * auiCount), m_alignment));
     }
     else if (m_blockSize < m_maxBlockSize)
     {
@@ -317,7 +322,7 @@ void* hkFreeList::AllocateElement()
             auiCount = 8;
         else
             auiCount += auiCount >> 1;
-        m_blockSize = reinterpret_cast<unsigned int>(FUN_00dd73d0(reinterpret_cast<void*>(m_elementSize * auiCount), m_alignment));
+        m_blockSize = reinterpret_cast<unsigned int>(hkFreeList_bestBlockSize(reinterpret_cast<void*>(m_elementSize * auiCount), m_alignment));
     }
 
     // The block server allocates at slot 1 and reports allocated size at slot 4;
@@ -350,11 +355,11 @@ struct StackAllocationCursor
 {
     char* m_pcCur;
 };
-extern "C" StackAllocationCursor* __cdecl FUN_00c85750();
+extern "C" StackAllocationCursor* __cdecl hkMemoryRouter_getInstance();
 
 template <class T> inline T* AllocateFreeListScratch(int iCount)
 {
-    StackAllocationCursor* pkStack = FUN_00c85750();
+    StackAllocationCursor* pkStack = hkMemoryRouter_getInstance();
     T* pResult = (T*)pkStack->m_pcCur;
     pkStack->m_pcCur = (char*)pResult + ((iCount * sizeof(T) + 127) & ~127);
     return pResult;
@@ -362,16 +367,17 @@ template <class T> inline T* AllocateFreeListScratch(int iCount)
 
 template <class T> inline void ReleaseFreeListScratch(T* p)
 {
-    FUN_00c85750()->m_pcCur = (char*)p;
+    hkMemoryRouter_getInstance()->m_pcCur = (char*)p;
 }
 
 bool __cdecl CompareLessThan(const hkFreeList::Element* pkA, const hkFreeList::Element* pkB);
-void __cdecl FUN_00dd7d00(hkFreeList::Element** ppArray, int iLow, int iHigh,
+void __cdecl hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(hkFreeList::Element** ppArray, int iLow, int iHigh,
                           bool(__cdecl* pfnLess)(const hkFreeList::Element*, const hkFreeList::Element*));
 
 // Removes elements in the block range, then sorts and relinks them; returns 1 for a fully free block.
 // @fnv 0x00dd7b40
-int hkFreeList::FUN_00dd7b40(hkFreeList::Block* pkBlock)
+// src: HAVOK_LIB 0x00dd7b40
+int hkFreeList::_calcBlockFree(hkFreeList::Block* pkBlock)
 {
     Element** ppElems = AllocateFreeListScratch<Element*>(static_cast<int>(pkBlock->m_numElements));
 
@@ -409,7 +415,7 @@ int hkFreeList::FUN_00dd7b40(hkFreeList::Block* pkBlock)
     if (iNumFound > 0)
     {
         if (iNumFound > 1)
-            FUN_00dd7d00(ppElems, 0, iNumFound - 1, CompareLessThan);
+            hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(ppElems, 0, iNumFound - 1, CompareLessThan);
         Element* pkLast = ppElems[0];
         for (int i = 1; i < iNumFound; i++)
         {
@@ -425,7 +431,8 @@ int hkFreeList::FUN_00dd7b40(hkFreeList::Block* pkBlock)
 }
 
 // @fnv 0x00dd7c40
-hkBool hkFreeList::FUN_00dd7c40(int iMaxBlocks, int& iNumBlocksOut) throw()
+// src: HAVOK_LIB 0x00dd7c40
+hkBool hkFreeList::incrementalFindGarbage(int iMaxBlocks, int& iNumBlocksOut) throw()
 {
     int i = 0;
     for (; i < iMaxBlocks; i++)
@@ -439,7 +446,7 @@ hkBool hkFreeList::FUN_00dd7c40(int iMaxBlocks, int& iNumBlocksOut) throw()
                 m_incrementalBlock = 0;
                 return true;
             }
-            if (FUN_00dd7b40(pkBlock))
+            if (_calcBlockFree(pkBlock))
             {
                 m_incrementalBlock->m_next = pkBlock->m_next;
                 pkBlock->m_next = m_freeBlocks;
@@ -459,7 +466,7 @@ hkBool hkFreeList::FUN_00dd7c40(int iMaxBlocks, int& iNumBlocksOut) throw()
                 m_incrementalBlock = 0;
                 return true;
             }
-            if (FUN_00dd7b40(pkBlock))
+            if (_calcBlockFree(pkBlock))
             {
                 m_blocks = pkBlock->m_next;
                 pkBlock->m_next = m_freeBlocks;
@@ -580,7 +587,8 @@ empty:
 }
 
 // @fnv 0x00dd7380
-void hkFreeList::FUN_00dd7380(unsigned int key)
+// src: HAVOK_LIB 0x00dd7380
+void hkFreeList::freeSmallFreeBlocks(unsigned int key)
 {
     Block** prev = &m_freeBlocks;
     Block* block = m_freeBlocks;
@@ -616,7 +624,8 @@ struct FreeListStatistics
 
 // Fills the statistics record from the block lists, element size and element counts.
 // @fnv 0x00dd7430
-void hkFreeList::FUN_00dd7430(FreeListStatistics* pkInfo)
+// src: HAVOK_LIB 0x00dd7430
+void hkFreeList::calculateStatistics(FreeListStatistics* pkInfo)
 {
     pkInfo->m_iTotal = SumNodeCounts(m_freeBlocks) + SumNodeCounts(m_blocks);
     int iFirst = m_numFreeElements;
@@ -802,19 +811,20 @@ struct BlockWalkServerInterface
 };
 
 bool __cdecl CompareLessThan(void* a, void* b);
-void __cdecl FUN_00dd7d00(void** arr, int lo, int hi, bool(__cdecl* cmpLess)(void*, void*));
+void __cdecl hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(void** arr, int lo, int hi, bool(__cdecl* cmpLess)(void*, void*));
 
 inline void quickSortPointers(void** arr, int numElem)
 {
     if (numElem > 1)
     {
-        FUN_00dd7d00(arr, 0, numElem - 1, CompareLessThan);
+        hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(arr, 0, numElem - 1, CompareLessThan);
     }
 }
 
 // Walks free blocks, then reports slots in active blocks through the callback with their allocation status.
 // @fnv 0x00dd78f0
-void hkFreeList::FUN_00dd78f0(hkMemoryWalkCallback callback, int pool, void* param)
+// src: HAVOK_LIB 0x00dd78f0
+void hkFreeList::walkMemory_00dd78f0(hkMemoryWalkCallback callback, int pool, void* param)
 {
     WalkFreeBlocks(m_freeBlocks, reinterpret_cast<FreeBlockWalkCallback>(callback), pool, param);
 
@@ -913,7 +923,8 @@ void hkFreeList::FUN_00dd78f0(hkMemoryWalkCallback callback, int pool, void* par
 
 // Initializes the list, rounds the element size to its alignment, and records the block-server settings.
 // @fnv 0x00dd74b0
-void hkFreeList::FUN_00dd74b0(int a2, int aiAlignment, int a4, int a5)
+// src: HAVOK_LIB 0x00dd74b0
+void hkFreeList::_init(int a2, int aiAlignment, int a4, int a5)
 {
     m_free = 0;
     m_blocks = 0;
@@ -934,11 +945,12 @@ void hkFreeList::FUN_00dd74b0(int a2, int aiAlignment, int a4, int a5)
         size = ((unsigned int)a2 + (unsigned int)aiAlignment - 1u) & ~((unsigned int)aiAlignment - 1u);
 
     m_elementSize = (int)size;
-    m_maxBlockSize = (int)FUN_00dd73d0((void*)0xFF0u, (unsigned int)aiAlignment);
+    m_maxBlockSize = (int)hkFreeList_bestBlockSize((void*)0xFF0u, (unsigned int)aiAlignment);
 }
 
 // @fnv 0x00dd72d0
-int hkFreeList::FUN_00dd72d0()
+// src: HAVOK_LIB 0x00dd72d0
+int hkFreeList::_calcTotalNumElements()
 {
     int first = SumFreeListSizes(this->m_freeBlocks);
     return first + SumFreeListSizes(this->m_blocks);

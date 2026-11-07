@@ -302,10 +302,11 @@ int __cdecl strcpy_s(char*, unsigned int, const char*);
 struct FUN_00c3d090_shell2 {
     char pad[0x28];
     char* p;
-    void FUN_00c3d090(int flag, char* dst);
+    void QueuedFileEntry_GetLookupFileName(int flag, char* dst);
 };
 // @fnv 0x00c3d090
-void FUN_00c3d090_shell2::FUN_00c3d090(int flag, char* dst)
+// src: XBOX_PDB 0x00c3d090
+void FUN_00c3d090_shell2::QueuedFileEntry_GetLookupFileName(int flag, char* dst)
 {
     if (flag == 0) {
         BuildAssetPath((int)p, dst, 0x104);
@@ -339,7 +340,8 @@ struct FontReferenceAccess : Font {
     unsigned short Dec() { --iRefCount; return iRefCount; }
 };
 // @fnv 0x00a152d0
-void Font::FUN_00a152d0()
+// src: COMMUNITY 0x00a152d0
+void Font::Unload_00a152d0()
 {
     if (((FontReferenceAccess*)this)->Get()) {
         if (!((FontReferenceAccess*)this)->Dec())
@@ -351,12 +353,12 @@ namespace fnv_00a16850 {
 extern MemoryManager g_memoryManager;
 // Shared FontManager has no destructor declaration.
 struct FUN_00a16850_shell {
-    void FUN_00a16d20();
+    void ProcessEntries_00a16d20();
 // Calls FUN_00a16d20, deallocates this via g_memoryManager when flags has bit 1 set, and returns this.
 // @fnv 0x00a16850
     FUN_00a16850_shell* Destroy(unsigned int flags)
     {
-        FUN_00a16d20();
+        ProcessEntries_00a16d20();
         if (flags & 1)
             g_memoryManager.Deallocate(this);
         return this;
@@ -391,9 +393,10 @@ struct FontDeletion : Font {
 };
 struct FUN_00a16d20_shell {
     FontDeletion* pFont[8];
-    void FUN_00a16d20();
+    void ProcessEntries_00a16d20();
 };
-void FUN_00a16d20_shell::FUN_00a16d20()
+// src: GUESS 0x00a16d20 (confidence: low)
+void FUN_00a16d20_shell::ProcessEntries_00a16d20()
 {
     for (int i = 0; i < 8; ++i) {
         FontDeletion* f = pFont[i];
@@ -468,11 +471,12 @@ struct FUN_00a1c270_shell {
     FUN_00a1c270_node* head;
     FUN_00a1c270_node* tail;
     int count;
-    void FUN_00a1c270(FUN_00a1c270_node* node);
+    void NiTListBase_AddNodeHead_1(FUN_00a1c270_node* node);
 };
 // Inserts node at the head of the doubly linked list, fixing up prev/next links, tail when empty, and incrementing count.
 // @fnv 0x00a1c270
-void FUN_00a1c270_shell::FUN_00a1c270(FUN_00a1c270_node* node)
+// src: COMMUNITY 0x00a1c270
+void FUN_00a1c270_shell::NiTListBase_AddNodeHead_1(FUN_00a1c270_node* node)
 {
     node->prev = 0;
     node->next = head;
@@ -495,11 +499,12 @@ struct FUN_00a1c2d0_shell {
     FUN_00a1c2d0_node* head;
     FUN_00a1c2d0_node* tail;
     int count;
-    void FUN_00a1c2d0();
+    void ClearLinkedNodes();
 };
 // Walks the linked list from head, zeroes each node's data, deallocates every node, then resets count, head and tail.
 // @fnv 0x00a1c2d0
-void FUN_00a1c2d0_shell::FUN_00a1c2d0()
+// src: GUESS 0x00a1c2d0 (confidence: medium)
+void FUN_00a1c2d0_shell::ClearLinkedNodes()
 {
     FUN_00a1c2d0_node* cur = head;
     while (cur) {
@@ -889,11 +894,12 @@ struct SBox {
     int m_counts[8];
     void* m_40;
     __forceinline void* GetM8() { return m_8; }
-    SBox* FUN_00a19c00(SItem* pItem, int aiIndex);
+    SBox* ProcessEntries_00a19c00(SItem* pItem, int aiIndex);
 };
 
 // @fnv 0x00a19c00
-SBox* SBox::FUN_00a19c00(SItem* pItem, int aiIndex)
+// src: GUESS 0x00a19c00 (confidence: low)
+SBox* SBox::ProcessEntries_00a19c00(SItem* pItem, int aiIndex)
 {
     int iOffset;
     {
@@ -1046,11 +1052,12 @@ struct FUN_00a14170_shell {
     int unk24;
     int unk28;
     float fValue2C;
-    void FUN_00a14170(FUN_00a14170_out* apOut, const char* apName);
+    void GetGlyphMetricsByName(FUN_00a14170_out* apOut, const char* apName);
 };
 
 // @fnv 0x00a14170
-void FUN_00a14170_shell::FUN_00a14170(FUN_00a14170_out* apOut, const char* apName) {
+// src: GUESS 0x00a14170 (confidence: medium)
+void FUN_00a14170_shell::GetGlyphMetricsByName(FUN_00a14170_out* apOut, const char* apName) {
     apOut->fX = 60.0f;
     apOut->fZ = fValue2C;
     if (apName[0] == 'a' || apName[0] == 'b' || apName[0] == 'x' || apName[0] == 'y') {
@@ -1198,13 +1205,14 @@ struct FUN_00a1b770_cls
     unsigned int m_u18;
     FUN_00a1b770_sub m_s1c;
 
-    void FUN_00a1b7f0(int size);
-    void FUN_00a1b770();
+    void FontManager_CharData_SetChar(int size);
+    void InitializeCharacterData();
 };
 
 // Initialises the object: zeroes m_u00, sets m_v08 from three globals with w=1, sets m_u18 to 1, inits m_s1c and calls FUN_00a1b7f0(0x20).
 // @fnv 0x00a1b770
-void FUN_00a1b770_cls::FUN_00a1b770()
+// src: GUESS 0x00a1b770 (confidence: medium)
+void FUN_00a1b770_cls::InitializeCharacterData()
 {
     FUN_00a1b770_vec4 vec;
     FUN_00a1b770_scratch scratch;
@@ -1218,7 +1226,7 @@ void FUN_00a1b770_cls::FUN_00a1b770()
     m_u18 = 1;
     FUN_00a1b770_sub* sub = &m_s1c;
     sub->Init(0, 0);
-    FUN_00a1b7f0(0x20);
+    FontManager_CharData_SetChar(0x20);
 }
 
 unsigned int __cdecl strlen(const char*);
@@ -1480,19 +1488,20 @@ struct AtlasShader : NiMemObjectAllocation_font {
  unsigned unka4;
  unsigned unka8;
  unsigned unkac;
- AtlasShader(bool);void FUN_00bb7a10(void*);
+ AtlasShader(bool);void SetTileTexture(void*);
 };
 struct AtlasPropertyPointer { AtlasShader* pointer;AtlasPropertyPointer(AtlasShader*);~AtlasPropertyPointer();AtlasPropertyPointer& FUN_006e5cc0(const AtlasPropertyPointer&); };
 struct AtlasPropertyNode { AtlasPropertyNode* next;AtlasPropertyNode* previous;AtlasPropertyPointer value; };
-struct AtlasPoolLock {void FUN_0040fbf0(bool);void Leave();};
+struct AtlasPoolLock {void BSSpinLock_Lock(bool);void BSSpinLock_Unlock();};
 extern AtlasPoolLock DAT_011c5f80;
 extern AtlasPropertyNode* DAT_011c5f58;
-void FUN_0043a080();
-struct AtlasNodeAllocator { unsigned count;AtlasPropertyNode* Allocate() { DAT_011c5f80.FUN_0040fbf0(false);if(!DAT_011c5f58)FUN_0043a080();AtlasPropertyNode* node=DAT_011c5f58;DAT_011c5f58=DAT_011c5f58->next;node->value.pointer=0;node->next=0;node->previous=0;DAT_011c5f80.Leave();return node;} };
+void NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();
+struct AtlasNodeAllocator { unsigned count;AtlasPropertyNode* Allocate() { DAT_011c5f80.BSSpinLock_Lock(false);if(!DAT_011c5f58)NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();AtlasPropertyNode* node=DAT_011c5f58;DAT_011c5f58=DAT_011c5f58->next;node->value.pointer=0;node->next=0;node->previous=0;DAT_011c5f80.BSSpinLock_Unlock();return node;} };
 struct AtlasPropertyList { AtlasPropertyNode* head;AtlasPropertyNode* tail;AtlasNodeAllocator allocator;
  AtlasPropertyNode* NewNode(){return allocator.Allocate();}
- void FUN_0049fa20(AtlasPropertyNode*);
- void FUN_00439fd0(const AtlasPropertyPointer& property) {AtlasPropertyNode* node=NewNode();node->value.FUN_006e5cc0(property);FUN_0049fa20(node);}
+ void NiTListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddNodeHead(AtlasPropertyNode*);
+// src: XBOX_PDB 0x00439fd0
+ void NiAVObject_AttachProperty_00439fd0(const AtlasPropertyPointer& property) {AtlasPropertyNode* node=NewNode();node->value.FUN_006e5cc0(property);NiTListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddNodeHead(node);}
 };
 struct AtlasGeometry : NiMemObjectAllocation_font {
  unsigned unk00;
@@ -1549,13 +1558,14 @@ struct AtlasGeometry : NiMemObjectAllocation_font {
  AtlasGeometry(unsigned short,AtlasVertex*,unsigned,void*,NiPoint2*,unsigned,unsigned,unsigned short,unsigned short*,void*,void*,void*,void*);
  AtlasData* GetData() { AtlasData* result=data;return result; }
  void AssignFixedString(const NiFixedString&);
- void FUN_00439410(AtlasShader* shader) { if(shader->GetPropertyType()<7) { AtlasPropertyPointer property(shader);properties.FUN_00439fd0(property); } }
- void FUN_00a5a040();
+// src: XBOX_PDB 0x00439410
+ void NiAVObject_AttachProperty(AtlasShader* shader) { if(shader->GetPropertyType()<7) { AtlasPropertyPointer property(shader);properties.NiAVObject_AttachProperty_00439fd0(property); } }
+ void UpdateProperties();
 };
-void* FUN_00aa1070(unsigned);
+void* _NiMalloc_00aa1070(unsigned);
 void FUN_00b57e30(AtlasGeometry*,unsigned,unsigned);
 void FUN_00ec8d5f(char*,unsigned,const char*,unsigned);
-int FUN_00406d00(char*,unsigned,const char*,...);
+int BSsprintf(char*,unsigned,const char*,...);
 extern char sheetGeometryName[];
 extern unsigned DAT_011a9598;
 void* FUN_00a5fd70(const NiFixedString&,unsigned&,bool,bool);
@@ -1567,11 +1577,12 @@ struct FontAtlasAccess : Font {
  const char* GetTextureResourceName() { return *(const char**)IconAtlasTextureName; }
 };
 // @fnv 0x00a14da0
-PageMeshes::Shape* Font::FUN_00a14da0() {
+// src: COMMUNITY 0x00a14da0
+PageMeshes::Shape* Font::MakeButton() {
  unsigned vertices7=((FontAtlasAccess*)this)->GetCount()*4;
  AtlasVertex* positions=new AtlasVertex[vertices7];
  NiPoint2* uvs5=new NiPoint2[vertices7];
- unsigned short* indicesVal=(unsigned short*)FUN_00aa1070(((FontAtlasAccess*)this)->GetCount()*6*sizeof(unsigned short));
+ unsigned short* indicesVal=(unsigned short*)_NiMalloc_00aa1070(((FontAtlasAccess*)this)->GetCount()*6*sizeof(unsigned short));
  AtlasGeometry* geometry_=new AtlasGeometry((unsigned short)vertices7,positions,0,0,uvs5,1,0,(unsigned short)(((FontAtlasAccess*)this)->GetCount()*2), indicesVal,0,0,0,0);
  AtlasData* dataB=geometry_->GetData();
  dataB->keep=false;
@@ -1579,15 +1590,15 @@ PageMeshes::Shape* Font::FUN_00a14da0() {
  geometry_->AssignFixedString(NiFixedString((const char*)sheetGeometryName));
  geometry_->GetData()->FUN_00a67050(0x4000);
  AtlasShader* shader3=new AtlasShader(false);
- geometry_->FUN_00439410(shader3);
+ geometry_->NiAVObject_AttachProperty(shader3);
  shader3->color=DAT_011a9be0;
  FUN_00b57e30(geometry_,0,0);
  char sourceName7[260];
  CopyAtlasPath(sourceName7,((FontAtlasAccess*)this)->GetTextureResourceName(),259);
  char texturePath[260];
- FUN_00406d00(texturePath,260,"Data\\Textures\\%s",sourceName7);
- shader3->FUN_00bb7a10(FUN_00a5fd70(NiFixedString((const char*)texturePath),DAT_011a9598,true,false));
- geometry_->FUN_00a5a040();
+ BSsprintf(texturePath,260,"Data\\Textures\\%s",sourceName7);
+ shader3->SetTileTexture(FUN_00a5fd70(NiFixedString((const char*)texturePath),DAT_011a9598,true,false));
+ geometry_->UpdateProperties();
  AttachFaceGenAnimationData(geometry_);
  return (PageMeshes::Shape*)geometry_;}
 
@@ -2035,7 +2046,8 @@ struct LayoutItem {
         offset=0;
         position=0;
     }
-    void FUN_00a1b7f0(unsigned char value) {
+// src: COMMUNITY 0x00a1b7f0
+    void FontManager_CharData_SetChar(unsigned char value) {
         character=value;
         if(!string.Get() || !string[0]) {
             FontManager* manager=FontManager::pInstance;
@@ -2117,7 +2129,8 @@ struct LayoutLine {
         LayoutNodeLock.Unlock();
         return node;
     }
-    void FUN_00a0c9f0(LayoutItem* const& value) {
+// src: COMMUNITY 0x00a0c9f0
+    void _NiTListBase_AddHead(LayoutItem* const& value) {
         LayoutNode* node=AllocateNode(); node->item=value; node->prev=0; node->next=head;
         if(head) head->prev=node; else tail=node;
         head=node; ++count;
@@ -2163,7 +2176,7 @@ LayoutLine* LayoutLine::WrapLine(LayoutItem* apItem, bool start) {
                 WrapLine(result2,false);
             }
         } else {
-            apItem->FUN_00a1b7f0(0);
+            apItem->FontManager_CharData_SetChar(0);
             first6=new LayoutLine(owner,apItem,0,maxWidth);
             first6->height=LayoutFontHeights[apItem->font];
         }
@@ -2211,7 +2224,7 @@ LayoutLine* LayoutLine::WrapLine(LayoutItem* apItem, bool start) {
             height=LayoutMax(height,apItem->height);
             depth=LayoutMax(depth,apItem->depth);
         }
-        if(start) FUN_00a0c9f0(apItem); else AddItem(apItem);
+        if(start) _NiTListBase_AddHead(apItem); else AddItem(apItem);
         owner->width=LayoutMax(owner->width,width);
     }
     return first6;
@@ -2233,7 +2246,7 @@ struct IconSetting {
     const char* Get() { return this ? value : 0; }
 };
 extern IconSetting g_011f3368;
-void __cdecl FUN_00a06dd0(const char*, const char*, BSStringT<char>*, IconRect*);
+void __cdecl Tile_GetTextureAtlasInfo(const char*, const char*, BSStringT<char>*, IconRect*);
 void* operator new(unsigned int, void* address) { return address; }
 struct IconArray {
     void** vtable;
@@ -2250,14 +2263,14 @@ struct IconArray {
     }
 };
 struct FUN_00a1aee0_shell : Font {
-    void FUN_00a14170(IconData*, const char*);
+    void GetGlyphMetricsByName(IconData*, const char*);
     void LoadIconFromPath(const char* path);
 };
 // Parses the icon suffix from the path after the last underscore, builds an IconData via FUN_00a06dd0 and FUN_00a14170, then appends it to the icon array.
 // @fnv 0x00a1aee0
 void FUN_00a1aee0_shell::LoadIconFromPath(const char* path) {
     IconData icon6;
-    FUN_00a06dd0(g_011f3368.Get(), path, (BSStringT<char>*)IconAtlasTextureName, &icon6.uv);
+    Tile_GetTextureAtlasInfo(g_011f3368.Get(), path, (BSStringT<char>*)IconAtlasTextureName, &icon6.uv);
     int offset = strlen(path) - 1;
     int count7 = 0;
     while (path[offset] != '_') --offset;
@@ -2266,7 +2279,7 @@ void FUN_00a1aee0_shell::LoadIconFromPath(const char* path) {
         suffix[count7] = path[offset + count7 + 1];
     }
     suffix[count7] = 0;
-    FUN_00a14170(&icon6, suffix);
+    GetGlyphMetricsByName(&icon6, suffix);
     reinterpret_cast<IconArray*>(&ButtonIcons)->Append(icon6);
 }
 }  // namespace fnv_00a1aee0
@@ -2383,7 +2396,7 @@ struct S_00a12300_Elem {
 
 struct S_00a12300_Glob {
     int unk00;
-    void FUN_00aa4060(S_00a12300_Arr* p);
+    void MemoryManager_Deallocate(S_00a12300_Arr* p);
 };
 
 extern S_00a12300_Glob DAT_011f6238;
@@ -2419,7 +2432,7 @@ void S_00a12300_Obj::ClearArray() {
     }
 
     index = (int)m_aiIndexedValues;
-    DAT_011f6238.FUN_00aa4060((S_00a12300_Arr*)index);
+    DAT_011f6238.MemoryManager_Deallocate((S_00a12300_Arr*)index);
     m_aiIndexedValues = 0;
 }
 
@@ -2445,7 +2458,7 @@ struct SStr {
 struct Hole { int a[42]; };
 inline void Pad168() { Hole hole; (void)&hole; }
 
-struct MM { void* FUN_00aa3e40(unsigned int); void FUN_00aa4060(void*); };
+struct MM { void* Game_DoHeapAlloc(unsigned int); void MemoryManager_Deallocate(void*); };
 
 struct TexNode { void LoadIconFromPath(char*); };
 
@@ -2453,13 +2466,13 @@ struct FontC {
     TexNode* m_apNode[8];
     int GetCharType(char);
     TexNode* GetNode(unsigned i) { return m_apNode[i]; }
-    SStr FUN_00a16ea0(const char* text, int* pos, unsigned mask, unsigned mask2,
+    SStr Font_CollectTo(const char* text, int* pos, unsigned mask, unsigned mask2,
                       int* value, char* pch, bool flag);
 };
 
-void __cdecl FUN_005b5e40(int, const char*, int);
+void __cdecl Warning_005b5e40(int, const char*, int);
 void __cdecl FUN_00ec8d5f(char*, int, const char*, int);
-void __cdecl FUN_007070c0(char*, char*, int, int);
+void __cdecl Interface_FindTextReplacementString(char*, char*, int, int);
 void __cdecl FUN_00ec61c0(void*, int, unsigned int);
 void __cdecl FUN_00ec7c66(char*, int, const char*, int);
 
@@ -2467,7 +2480,8 @@ inline void CopyName(char* d, int sz, const char* s, int n) { FUN_00ec8d5f(d, sz
 
 // Scans text from *pos until a stop character or mask match, expanding '&...;' settings into _buf, and returns the accumulated SStr.
 // @fnv 0x00a16ea0
-SStr FontC::FUN_00a16ea0(const char* text, int* apiPos, unsigned mask, unsigned mask2,
+// src: EXE 0x00a16ea0
+SStr FontC::Font_CollectTo(const char* text, int* apiPos, unsigned mask, unsigned mask2,
                          int* apiValue, char* apCh, bool abExpandSettings)
 {
     SStr str3;
@@ -2499,16 +2513,16 @@ SStr FontC::FUN_00a16ea0(const char* text, int* apiPos, unsigned mask, unsigned 
                        text[*apiPos + n5 - 1] != ';')
                     n5++;
                 if (text[*apiPos + n5 - 1] != ';') {
-                    FUN_005b5e40(0x12, "Font::CollectTo() -- Found GameSetting w/o ending ; in HTML text.", 0);
+                    Warning_005b5e40(0x12, "Font::CollectTo() -- Found GameSetting w/o ending ; in HTML text.", 0);
                 } else {
                     int iLen;
-                    void* lenB = ((MM*)&DAT_011f6238)->FUN_00aa3e40(n5 + 1);
+                    void* lenB = ((MM*)&DAT_011f6238)->Game_DoHeapAlloc(n5 + 1);
                     char* p2 = (char*)lenB;
                     CopyName(p2, n5 + 1, &text[*apiPos], n5);
                     p2[n5] = 0;
                     char kNamebuf[0x104];
                     kNamebuf[0] = 0;
-                    FUN_007070c0(p2, kNamebuf, 0x104, 0);
+                    Interface_FindTextReplacementString(p2, kNamebuf, 0x104, 0);
                     if (kNamebuf[0] == '\\') {
                         kNamebuf[strlen(kNamebuf) - 1] = 0;
                         GetNode(0)->LoadIconFromPath(&kNamebuf[1]);
@@ -2524,7 +2538,7 @@ SStr FontC::FUN_00a16ea0(const char* text, int* apiPos, unsigned mask, unsigned 
                     }
                     *apiPos = n5 + *apiPos - 1;
                     void* aTmp = p2;
-                    ((MM*)&DAT_011f6238)->FUN_00aa4060(aTmp);
+                    ((MM*)&DAT_011f6238)->MemoryManager_Deallocate(aTmp);
                 }
             } else {
                 _buf[count2] = text[*apiPos];
@@ -2584,7 +2598,7 @@ struct Info_ {
 };
 
 namespace fnv_00a18a30 {
-struct Pool { void* FUN_00aa3e40(unsigned int); };
+struct Pool { void* Game_DoHeapAlloc(unsigned int); };
 
 inline void SetName(Info_* info, SStr* src) {
     SStr* p = &info->str;
@@ -2633,8 +2647,8 @@ struct TextRun {
     SStr str;
     int a24, a28, a2c, a30, a34;
     TextRun(int, unsigned char, ColA, int);
-    void FUN_00a1b770();
-    void FUN_00a1b7f0(unsigned char);
+    void InitializeCharacterData();
+    void FontManager_CharData_SetChar(unsigned char);
     TextRun* Clone(int, int);
     ~TextRun() { str.Set(0, 0); }
 };
@@ -2645,9 +2659,9 @@ struct RunNodeBase { void* b0; void* b4; void* b8; RunNodeBase(); };
 struct RunNode : RunNodeBase {
     int c, d, e;
     RunNode(int a, int b, int cc) : RunNodeBase() { this->c = a; this->d = b; this->e = cc; }
-    static void* operator new(unsigned int n) { return ((fnv_00a18a30::Pool*)&fnv_00a18a30::DAT_011f6238)->FUN_00aa3e40(n); }
+    static void* operator new(unsigned int n) { return ((fnv_00a18a30::Pool*)&fnv_00a18a30::DAT_011f6238)->Game_DoHeapAlloc(n); }
     fnv_00a18a30::ListObj* GetList();
-    void FUN_00a19a10(fnv_00a18a30::TextRun*);
+    void FontManager_TextDoc_AddChar(fnv_00a18a30::TextRun*);
     void* GetB8() { return b8; }
 };
 
@@ -2664,7 +2678,7 @@ RunNode* FontData::CreateTextRunNode(SStr* text, Info_* info) {
     pNode = new RunNode(info->GetStart(), info->GetEnd(), info->GetLeading());
     Pad38();
     TextRun textRun(0, ' ', ColA(), 1);
-    textRun.FUN_00a1b770();
+    textRun.InitializeCharacterData();
     textRun.m_iType = info->GetFont();
     textRun.color = info->GetColor();
     textRun.iExtra = info->GetHeight();
@@ -2676,8 +2690,8 @@ RunNode* FontData::CreateTextRunNode(SStr* text, Info_* info) {
         fnv_00a18a30::NormalizeSmartQuotes(c);
         if (c == info->cBreak) w++;
         else if (c == 9 || c >= 0x20) {
-            textRun.FUN_00a1b7f0(c);
-            pNode->FUN_00a19a10(textRun.Clone(w, 0));
+            textRun.FontManager_CharData_SetChar(c);
+            pNode->FontManager_TextDoc_AddChar(textRun.Clone(w, 0));
             w = 0;
         }
     }
@@ -2863,10 +2877,10 @@ struct FinalizerView {
 struct FontRenderer : Font {
     bool HasNoIcons() { return ((FinalizerView*)ButtonIcons)->count==0; }
     unsigned int GetIconCount() { return ((FinalizerView*)ButtonIcons)->count; }
-    void FUN_00a12880(int*,int*,int*,int,int,int,char,int,ShapeView**,ShapeView**);
-    void FUN_00a12fb0(int,FUN_00759330*);
+    void Font_CreateText(int*,int*,int*,int,int,int,char,int,ShapeView**,ShapeView**);
+    void CheckForVariablesInText(int,FUN_00759330*);
     ShapeView* CreateTextShape(int,int,int);
-    ShapeView* FUN_00a14da0();
+    ShapeView* MakeButton();
     void UpdateIconGeometry(int,ShapeView*,FontPoint3&);
     void BuildGlyphQuad(GlyphData*,int,ShapeView*,FontPoint3&,int);
 };
@@ -2888,7 +2902,8 @@ inline InlineManager* Manager() { return (InlineManager*)FontManager::pInstance;
 __forceinline double TabMod(const float& value) { return (float)FUN_00ec9130((double)value,(double)DAT_0102f0f8); }
 __forceinline void TabAdvance(float& value) { float tabPosition=value; float tabMultiple=(float)TabMod(tabPosition); value=DAT_010731a8-tabMultiple+value; }
 // @fnv 0x00a12880
-void FontRenderer::FUN_00a12880(int* source,int* width,int* height,int count,int limit,int mode,char separator,int flags,ShapeView** primary,ShapeView** secondary) {
+// src: COMMUNITY 0x00a12880
+void FontRenderer::Font_CreateText(int* source,int* width,int* height,int count,int limit,int mode,char separator,int flags,ShapeView** primary,ShapeView** secondary) {
     if(*height==0) *height=0x7fffffff;
     if(!limit) limit=0x7fffffff;
     unsigned char letter9;
@@ -2897,7 +2912,7 @@ void FontRenderer::FUN_00a12880(int* source,int* width,int* height,int count,int
     int secondaryActive_2;
     float lineB=Manager()->LinePadding(iFontNum);
     FUN_00759330 layoutX(*width,*height,count,limit,separator);
-    FUN_00a12fb0(SourceValue(source),&layoutX);
+    CheckForVariablesInText(SourceValue(source),&layoutX);
     *width=layoutX.GetWidth();
     *height=layoutX.GetHeight();
     int linePosition_2=0;
@@ -2913,7 +2928,7 @@ void FontRenderer::FUN_00a12880(int* source,int* width,int* height,int count,int
     kIter.x=0.0f; kIter.y=position6.y; kIter.z=position6.z;
     (*primary)->SetPosition(kIter);
     if(!HasNoIcons()) {
-        *secondary=FUN_00a14da0();
+        *secondary=MakeButton();
         (*secondary)->SetPosition(kIter);
         MarkGeometry(*secondary);
     }
@@ -3078,7 +3093,7 @@ extern "C" unsigned int __cdecl strlen(const char*);
 extern "C" char* __cdecl strcpy(char*,const char*);
 extern "C" int __cdecl toupper(int);
 extern "C" int __cdecl _stricmp(const char*,const char*);
-int __cdecl FUN_00408b20(const char*,const char*);
+int __cdecl BSstrcmp(const char*,const char*);
 long __cdecl FUN_00eca6d3(const char*);
 extern "C" int __cdecl sscanf(const char*,const char*,...);
 extern "C" void* __cdecl fnv_zlib_memset(void*,int,unsigned int);
@@ -3137,7 +3152,7 @@ struct LayoutString {
     unsigned int Size() const { return Length()+1; }
     int StrCmp(const char* other, bool ignoreCase) const {
         int result;
-        if(other && Get()) result=ignoreCase ? _stricmp(Get(),other) : FUN_00408b20(Get(),other);
+        if(other && Get()) result=ignoreCase ? _stricmp(Get(),other) : BSstrcmp(Get(),other);
         else if(!other && !Get()) result=0;
         else result=(other==0)*2-1;
         return result;
@@ -3183,7 +3198,8 @@ struct LayoutItem {
         offset=0;
         position=0;
     }
-    void FUN_00a1b7f0(unsigned char value) {
+// src: COMMUNITY 0x00a1b7f0
+    void FontManager_CharData_SetChar(unsigned char value) {
         character=value;
         if(Empty()) {
             FontCharacterInfo* letter=&((FontCharacterInfo*)(LayoutFonts::Instance()->GetFont(font)->pFontData)->pFontLetters)[character];
@@ -3194,7 +3210,7 @@ struct LayoutItem {
         }
         position=0;
     }
-    void SetFont(int index) { font=index; FUN_00a1b7f0(character); }
+    void SetFont(int index) { font=index; FontManager_CharData_SetChar(character); }
     LayoutItem* Clone() {
         LayoutItem* item=new LayoutItem(font,character,color,unk18);
         item->string=string;
@@ -3205,12 +3221,13 @@ struct LayoutItem {
         item->offset=0;
         return item;
     }
-    void FUN_00a1b770() {
+// src: GUESS 0x00a1b770 (confidence: medium)
+    void InitializeCharacterData() {
         font=0;
         color=LayoutColor(DAT_01095268,DAT_01095264,DAT_01095260,1.0f);
         unk18=1;
         string.Clear();
-        FUN_00a1b7f0(0x20);
+        FontManager_CharData_SetChar(0x20);
     }
     bool Empty() const { return !string.Get() || !string[0]; }
     ~LayoutItem() {}
@@ -3235,7 +3252,7 @@ struct LayoutBlock : FUN_00a1b940 {
     LayoutBlock(int newWidth,int newHeight,int newUnk14) { width=newWidth; height=newHeight; unk14=newUnk14; }
     static void* operator new(unsigned int size) { return g_memoryManager.Allocate(size); }
     static void operator delete(void* p) { ((LayoutMemory*)&g_memoryManager)->Deallocate(p); }
-    void FUN_00a19a10(LayoutItem*,int,bool);
+    void FontManager_TextDoc_AddChar(LayoutItem*,int,bool);
     LayoutPage* GetValueAtCount();
 };
 struct LayoutResult {
@@ -3259,7 +3276,7 @@ __forceinline char* AllocateText(unsigned int count) {
 struct FUN_00a17390_shell : FontManager {
     Font* GetFont(unsigned int number) { return pFont[number]; }
     const char* GetFontFile(unsigned int number) { return GetFont(number)->pFontFile; }
-    LayoutString FUN_00a16ea0(const char* input, int* index, unsigned int stopMask, unsigned int allowedMask, unsigned int* outFlags, char* currentChar, bool parseEntities);
+    LayoutString Font_CollectTo(const char* input, int* index, unsigned int stopMask, unsigned int allowedMask, unsigned int* outFlags, char* currentChar, bool parseEntities);
     LayoutBlock* ParseLayout(LayoutString& source, LayoutResult* result);
 };
 inline ButtonIcon& GetIcon(Font* font, unsigned int index) { return ((FontButtonIconArray*)font->ButtonIcons)->pBuffer[index]; }
@@ -3283,57 +3300,57 @@ LayoutBlock* FUN_00a17390_shell::ParseLayout(LayoutString& source, LayoutResult*
     bool lineRule=false;
     LayoutBlock* block=0;
     unsigned int iconNum=0;
-    FUN_00a16ea0(input,&parsePos,0,4,&mask,&character,false);
+    Font_CollectTo(input,&parsePos,0,4,&mask,&character,false);
     if(mask==1) {
         block=new LayoutBlock(result->GetWidth(),result->GetHeight(),result->GetUnk24());
         layout=true;
         parsePos=0;
         while(true) {
-            word=FUN_00a16ea0(input,&parsePos,1,0,&mask,&character,true);
+            word=Font_CollectTo(input,&parsePos,1,0,&mask,&character,true);
             if(word.Get()) {
                 if(img) {
                     img=false;
                     format.character=0;
-                    block->FUN_00a19a10(format.Clone(),lines,lineRule);
+                    block->FontManager_TextDoc_AddChar(format.Clone(),lines,lineRule);
                     lines=0;
                     lineRule=false;
                     format.string="";
                 }
                 output+=word;
                 for(unsigned int i=0;i<word.Length();++i) {
-                    format.FUN_00a1b7f0(word[i]);
+                    format.FontManager_CharData_SetChar(word[i]);
                     if(format.character==1) {
                         format.width=(int)(GetIcon(GetFont(0),iconNum).m_fGlyphWidthInPixels+((FontButtonIconArray*)GetFont(0)->ButtonIcons)->pBuffer[iconNum].m_fHorizontalSpacing);
                         ++iconNum;
                     }
-                    block->FUN_00a19a10(format.Clone(),lines,lineRule);
+                    block->FontManager_TextDoc_AddChar(format.Clone(),lines,lineRule);
                     lines=0;
                     lineRule=false;
                 }
             }
             if(mask&0x20) break;
-            tagText=FUN_00a16ea0(input,&parsePos,6,0,&mask,&character,true);
+            tagText=Font_CollectTo(input,&parsePos,6,0,&mask,&character,true);
             for(unsigned int i=0;i<tagText.Length();++i) tagText[i]=toupper(tagText[i]);
             if(mask&0x20) break;
             if(mask&4) {
                 while(true) {
-                    FUN_00a16ea0(input,&parsePos,0,4,&mask,&character,false);
+                    Font_CollectTo(input,&parsePos,0,4,&mask,&character,false);
                     if(mask&0x20 || mask&2) break;
-                    paramName=FUN_00a16ea0(input,&parsePos,0x16,0,&mask,&character,true);
+                    paramName=Font_CollectTo(input,&parsePos,0x16,0,&mask,&character,true);
                     for(unsigned int i=0;i<paramName.Length();++i) paramName[i]=toupper(paramName[i]);
                     if(mask&0x20 || mask&2) break;
                     if(mask&4) attributeValue="true";
                     else {
-                        FUN_00a16ea0(input,&parsePos,0,4,&mask,&character,false);
+                        Font_CollectTo(input,&parsePos,0,4,&mask,&character,false);
                         if(mask&0x20 || mask&2) break;
                         if(mask==8) {
                             ++parsePos;
-                            attributeValue=FUN_00a16ea0(input,&parsePos,0xa,0,&mask,&character,true);
+                            attributeValue=Font_CollectTo(input,&parsePos,0xa,0,&mask,&character,true);
                             character=input[parsePos];
                             ++parsePos;
                             mask=GetCharType(character);
                         } else {
-                            attributeValue=FUN_00a16ea0(input,&parsePos,6,0,&mask,&character,true);
+                            attributeValue=Font_CollectTo(input,&parsePos,6,0,&mask,&character,true);
                             for(unsigned int i=0;i<attributeValue.Length();++i) attributeValue[i]=toupper(attributeValue[i]);
                         }
                     }
@@ -3345,7 +3362,7 @@ LayoutBlock* FUN_00a17390_shell::ParseLayout(LayoutString& source, LayoutResult*
                     } else if(img) {
                         img=false;
                         format.character=0;
-                        block->FUN_00a19a10(format.Clone(),lines,lineRule);
+                        block->FontManager_TextDoc_AddChar(format.Clone(),lines,lineRule);
                         lines=0;
                         lineRule=false;
                         format.string="";
@@ -3392,7 +3409,7 @@ LayoutBlock* FUN_00a17390_shell::ParseLayout(LayoutString& source, LayoutResult*
             else if(tagText=="HR") {
                 if(result->height==0x7fffffff) lines+=2;
                 else { lineRule=true; lines=0; }
-            } else if(tagText=="/FONT") format.FUN_00a1b770();
+            } else if(tagText=="/FONT") format.InitializeCharacterData();
         }
         source=output;
     }
@@ -3418,7 +3435,7 @@ LayoutBlock* FUN_00a17390_shell::ParseLayout(LayoutString& source, LayoutResult*
 }  // namespace fnv_00a17390
 
 namespace fnv_00a18f00 {
-struct PoolQ { void FUN_00aa4060(void* p); };
+struct PoolQ { void MemoryManager_Deallocate(void* p); };
 extern PoolQ DAT_011f6238;
 struct StrQ {
   char* p; unsigned short l, m;
@@ -3430,7 +3447,7 @@ struct StrQ {
 struct FUN_00a1b990 {
   ~FUN_00a1b990();
   void BuildPage(int a, int b);
-  void operator delete(void* p) { int aiD[21]; DAT_011f6238.FUN_00aa4060(p); }
+  void operator delete(void* p) { int aiD[21]; DAT_011f6238.MemoryManager_Deallocate(p); }
 };
 struct OwnQ {
   FUN_00a1b990* CreateTextRunNode(StrQ* s, int a);
@@ -3449,13 +3466,13 @@ bool OwnQ::CreateTextRun(StrQ asText, int a, int b) {
 }  // namespace fnv_00a18f00
 
 namespace fnv_00a19a10 {
-struct PoolQ { void* FUN_00aa3e40(unsigned int n); };
+struct PoolQ { void* Game_DoHeapAlloc(unsigned int n); };
 extern PoolQ DAT_011f6238;
 struct OwnQ;
 struct EntQ {
   int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40;
-  EntQ* FUN_00a19c00(int a, int b);
-  void* operator new(unsigned int n) { int aiD[9]; return DAT_011f6238.FUN_00aa3e40(n); }
+  EntQ* ProcessEntries_00a19c00(int a, int b);
+  void* operator new(unsigned int n) { int aiD[9]; return DAT_011f6238.Game_DoHeapAlloc(n); }
   void operator delete(void* p);
 };
 struct FUN_00a1bc70 : EntQ { FUN_00a1bc70(OwnQ* pOwner, int a, int c, int d); };
@@ -3465,14 +3482,15 @@ struct OwnQ {
   unsigned int GetCount() { return ItemUpdateArray; }
   EntQ*& First() { return pHead->pEnt; }
   void AddItem(EntQ** ppEnt);
-  void FUN_00a19a10(int a, int b, bool bForce);
+  void FontManager_TextDoc_AddChar(int a, int b, bool bForce);
 };
 // Calls FUN_00a19c00 on First() when the count is nonzero and bForce is false; otherwise allocates FUN_00a1bc70, then passes a non-null result to AddItem.
 // @fnv 0x00a19a10
-void OwnQ::FUN_00a19a10(int aiParam1, int aiParam2, bool bForce) {
+// src: COMMUNITY 0x00a19a10
+void OwnQ::FontManager_TextDoc_AddChar(int aiParam1, int aiParam2, bool bForce) {
   EntQ* pEnt = 0;
   if (GetCount() && !bForce)
-    pEnt = First()->FUN_00a19c00(aiParam1, aiParam2);
+    pEnt = First()->ProcessEntries_00a19c00(aiParam1, aiParam2);
   else
     pEnt = new FUN_00a1bc70(this, aiParam1, unk0c, unk10);
   if (pEnt) AddItem(&pEnt);
@@ -3603,21 +3621,21 @@ extern "C" int __cdecl FUN_00ec65a6(char*,unsigned int,const char*);
 extern "C" int __cdecl sprintf(char*,const char*,...);
 extern "C" void* __cdecl FUN_00ec61c0(void*,int,unsigned int);
 extern "C" void* __cdecl FUN_00ec7230(void*,const void*,unsigned int);
-bool __cdecl FUN_007070c0(const char*,char*,unsigned int,bool);
+bool __cdecl Interface_FindTextReplacementString(const char*,char*,unsigned int,bool);
 bool __cdecl ResolveSettingString(const char*,char*);
-void __cdecl FUN_00406d00(char*,unsigned int,const char*,...);
+void __cdecl BSsprintf(char*,unsigned int,const char*,...);
 void __cdecl NormalizeSmartQuotes(unsigned char*);
 extern char DAT_01019f08[],DAT_010950a8[];
 struct Memory {
- void* FUN_00aa3e40(unsigned int);
+ void* Game_DoHeapAlloc(unsigned int);
  void* FUN_00aa4150(void*,unsigned int);
- void FUN_00aa4060(void*);
+ void MemoryManager_Deallocate(void*);
 };
 extern Memory DAT_011f6238;
 __forceinline char* AllocateText(unsigned int count) {
  unsigned int size=1;
  size*=count;
- char* text=(char*)DAT_011f6238.FUN_00aa3e40(size);
+ char* text=(char*)DAT_011f6238.Game_DoHeapAlloc(size);
  FUN_00ec61c0(text,0,size);
  return text;
 }
@@ -3640,7 +3658,7 @@ struct FontListNodeView {
  int value;
  FontListNodeView* next;
  FontListNodeView(const int& item) : value(item), next(0) {}
- static void* operator new(unsigned int size) { return DAT_011f6238.FUN_00aa3e40(size); }
+ static void* operator new(unsigned int size) { return DAT_011f6238.Game_DoHeapAlloc(size); }
  void FUN_00af25b0(int* item) {
   if (!*item) return;
   FontListNodeView* tail = this;
@@ -3684,7 +3702,8 @@ struct Layout {
 inline unsigned int Font::GetIconCount() { return ((FontButtonIconArray*)ButtonIcons)->iSize; }
 
 // @fnv 0x00a12fb0
-void Font::FUN_00a12fb0(const char* input,TextLayout::Layout* layout) {
+// src: COMMUNITY 0x00a12fb0
+void Font::CheckForVariablesInText(const char* input,TextLayout::Layout* layout) {
  using namespace TextLayout;
  if(!input) return;
  if(layout->width<=0) layout->width=0x7fffffff;
@@ -3722,7 +3741,7 @@ void Font::FUN_00a12fb0(const char* input,TextLayout::Layout* layout) {
    entitySlot1[countSlot0?countSlot0-prefixSlot10:countSlot0]=0;
    unsigned int consumed=TextLayout::strlen(entitySlot1)+1;
    if(workSlot77[scan+countSlot0]==';') consumed+=prefixSlot10;
-   if(TextLayout::FUN_007070c0(entitySlot1,replacementSlot0,1024,positiveSlot0) || TextLayout::ResolveSettingString(entitySlot1,replacementSlot0)) {
+   if(TextLayout::Interface_FindTextReplacementString(entitySlot1,replacementSlot0,1024,positiveSlot0) || TextLayout::ResolveSettingString(entitySlot1,replacementSlot0)) {
     unsigned int replacementLengthSlot18=TextLayout::strlen(replacementSlot0);
     int deltaSlot0=replacementLengthSlot18-consumed;
     if(replacementSlot0[replacementLengthSlot18-1]=='\\') {
@@ -3735,7 +3754,7 @@ void Font::FUN_00a12fb0(const char* input,TextLayout::Layout* layout) {
      if(iFontNum==7) {
       char originalPath[260];
       TextLayout::FUN_00ec65a6(originalPath,260,pathSlot13);
-      TextLayout::FUN_00406d00(pathSlot13,260,TextLayout::DAT_010950a8,originalPath);
+      TextLayout::BSsprintf(pathSlot13,260,TextLayout::DAT_010950a8,originalPath);
      }
      LoadIconFromPath(pathSlot13);
      replacementSlot0[slashSlot0]=1;replacementSlot0[slashSlot0+1]=0;
@@ -3869,8 +3888,8 @@ void Font::FUN_00a12fb0(const char* input,TextLayout::Layout* layout) {
  layout->firstLine=0;
  layout->maxLines=lineCountSlot0;
  layout->characters=outputLengthSlot0;
- TextLayout::DAT_011f6238.FUN_00aa4060(workSlot77);
- TextLayout::DAT_011f6238.FUN_00aa4060(outputSlot60);
+ TextLayout::DAT_011f6238.MemoryManager_Deallocate(workSlot77);
+ TextLayout::DAT_011f6238.MemoryManager_Deallocate(outputSlot60);
 }
 
 void* __cdecl operator new(unsigned int);
@@ -3883,16 +3902,20 @@ struct Update {float time;bool controllers,multithreaded,unk6,unk7,unk8;Update()
 
 struct GeometryData {int unk0,unk4;unsigned short count,unkA;int unkC;Bound bound;NiPoint3* vertices;NiPoint3* GetVertices(){NiPoint3* result=vertices;return result;}unsigned short GetCount(){return count;}Bound& GetBound(){return bound;}};
 
-struct Shape {virtual void Destroy();unsigned int unk4;unsigned int unk8;unsigned int unkc;unsigned int unk10;unsigned int unk14;unsigned int unk18;unsigned int unk1c;unsigned int unk20;unsigned int unk24;unsigned int unk28;unsigned int unk2c;unsigned int unk30;unsigned int unk34;unsigned int unk38;unsigned int unk3c;unsigned int unk40;unsigned int unk44;unsigned int unk48;unsigned int unk4c;unsigned int unk50;unsigned int unk54;NiPoint3 position;unsigned int unk64;unsigned int unk68;unsigned int unk6c;unsigned int unk70;unsigned int unk74;unsigned int unk78;unsigned int unk7c;unsigned int unk80;unsigned int unk84;unsigned int unk88;unsigned int unk8c;unsigned int unk90;unsigned int unk94;unsigned int unk98;unsigned int unk9c;unsigned int unka0;unsigned int unka4;unsigned int unka8;unsigned int unkac;unsigned int unkb0;unsigned int unkb4;GeometryData* data;void SetPosition(const NiPoint3& v){position=v;}void SetPositionThroughShape(const NiPoint3& v){Shape* current=this;current->position=v;}GeometryData* GetData(){return data;}void FUN_00a5a040();void FUN_00a59c60(const Update&);};
+struct Shape {virtual void Destroy();unsigned int unk4;unsigned int unk8;unsigned int unkc;unsigned int unk10;unsigned int unk14;unsigned int unk18;unsigned int unk1c;unsigned int unk20;unsigned int unk24;unsigned int unk28;unsigned int unk2c;unsigned int unk30;unsigned int unk34;unsigned int unk38;unsigned int unk3c;unsigned int unk40;unsigned int unk44;unsigned int unk48;unsigned int unk4c;unsigned int unk50;unsigned int unk54;NiPoint3 position;unsigned int unk64;unsigned int unk68;unsigned int unk6c;unsigned int unk70;unsigned int unk74;unsigned int unk78;unsigned int unk7c;unsigned int unk80;unsigned int unk84;unsigned int unk88;unsigned int unk8c;unsigned int unk90;unsigned int unk94;unsigned int unk98;unsigned int unk9c;unsigned int unka0;unsigned int unka4;unsigned int unka8;unsigned int unkac;unsigned int unkb0;unsigned int unkb4;GeometryData* data;void SetPosition(const NiPoint3& v){position=v;}void SetPositionThroughShape(const NiPoint3& v){Shape* current=this;current->position=v;}GeometryData* GetData(){return data;}void UpdateProperties();void NiAVObject_Update(const Update&);};
 
 struct Node {virtual void v0();virtual void v4();virtual void v8();virtual void vc();virtual void v10();virtual void v14();virtual void v18();virtual void v1c();virtual void v20();virtual void v24();virtual void v28();virtual void v2c();virtual void v30();virtual void v34();virtual void v38();virtual void v3c();virtual void v40();virtual void v44();virtual void v48();virtual void v4c();virtual void v50();virtual void v54();virtual void v58();virtual void v5c();virtual void v60();virtual void v64();virtual void v68();virtual void v6c();virtual void v70();virtual void v74();virtual void v78();virtual void v7c();virtual void v80();virtual void v84();virtual void v88();virtual void v8c();virtual void v90();virtual void v94();virtual void v98();virtual void v9c();virtual void va0();virtual void va4();virtual void va8();virtual void vac();virtual void vb0();virtual void vb4();virtual void vb8();virtual void vbc();virtual void vc0();virtual void vc4();virtual void vc8();virtual void vcc();virtual void vd0();virtual void vd4();virtual void vd8();virtual void Attach(Shape*,bool);};
 
-struct Heap {void* FUN_00aa3e40(unsigned int);void FUN_00aa4060(void*);};extern Heap DAT_011f6238;
+struct Heap {void* Game_DoHeapAlloc(unsigned int);void MemoryManager_Deallocate(void*);};extern Heap DAT_011f6238;
 
 template<class T> struct Link {Link* next;Link* previous;T value;};
 
-template<class T> struct ListBase {Link<T>* head;Link<T>* tail;unsigned int count;~ListBase(){}Link<T>* Head(){return head;}T& Next(Link<T>*& p){T& value=p->value;p=p->next;return value;}unsigned int Count(){return count;}void FUN_00a1c270(Link<T>*);void FUN_00a1c2d0(){Link<T>* pNode=head;while(pNode){Link<T>* pDelete=pNode;pNode=pNode->next;pDelete->value=0;Link<T>* pFree=pDelete;DAT_011f6238.FUN_00aa4060(pFree);}count=0;head=0;tail=0;}T PopFront(){Link<T>* pNode=head;head=head->next;if(head)head->previous=0;else tail=0;T element=pNode->value;pNode->value=0;Link<T>* pFree=pNode;DAT_011f6238.FUN_00aa4060(pFree);--count;return element;}void FUN_00a11db0(Link<T>* item){item->next=0;item->previous=tail;if(tail)tail->next=item;else head=item;tail=item;++count;}void FUN_00a11c00(const T& value){Link<T>* item=NewNode();item->value=value;FUN_00a11db0(item);}Link<T>* NewNode(){Link<T>* node=(Link<T>*)DAT_011f6238.FUN_00aa3e40(sizeof(Link<T>));return node;}void Add(T value){Link<T>* p=NewNode();p->value=value;FUN_00a1c270(p);}};
-template<class T> struct PointerListBase : ListBase<T> {~PointerListBase(){this->FUN_00a1c2d0();}};
+template<class T> struct ListBase {Link<T>* head;Link<T>* tail;unsigned int count;~ListBase(){}Link<T>* Head(){return head;}T& Next(Link<T>*& p){T& value=p->value;p=p->next;return value;}unsigned int Count(){return count;}void NiTListBase_AddNodeHead_1(Link<T>*);
+// src: GUESS 0x00a1c2d0 (confidence: medium)
+void ClearLinkedNodes(){Link<T>* pNode=head;while(pNode){Link<T>* pDelete=pNode;pNode=pNode->next;pDelete->value=0;Link<T>* pFree=pDelete;DAT_011f6238.MemoryManager_Deallocate(pFree);}count=0;head=0;tail=0;}T PopFront(){Link<T>* pNode=head;head=head->next;if(head)head->previous=0;else tail=0;T element=pNode->value;pNode->value=0;Link<T>* pFree=pNode;DAT_011f6238.MemoryManager_Deallocate(pFree);--count;return element;}void FUN_00a11db0(Link<T>* item){item->next=0;item->previous=tail;if(tail)tail->next=item;else head=item;tail=item;++count;}
+// src: COMMUNITY 0x00a11c00
+void NiTList_AddTail(const T& value){Link<T>* item=NewNode();item->value=value;FUN_00a11db0(item);}Link<T>* NewNode(){Link<T>* node=(Link<T>*)DAT_011f6238.Game_DoHeapAlloc(sizeof(Link<T>));return node;}void Add(T value){Link<T>* p=NewNode();p->value=value;NiTListBase_AddNodeHead_1(p);}};
+template<class T> struct PointerListBase : ListBase<T> {~PointerListBase(){this->ClearLinkedNodes();}};
 template<class T> struct List : PointerListBase<T> {List(){this->count=0;this->head=0;this->tail=0;} ~List(){}};
 
 unsigned int TextLength(const char*);unsigned int TextCapacity(unsigned int,unsigned int);void* TextCopy(void*,const void*,unsigned int);
@@ -3913,7 +3936,7 @@ struct Letter {float leading,top,width,height;unsigned int unk10,unk14,unk18,unk
 struct Icons {virtual void v0();virtual void v4();virtual void Free(void*);int unk4,count,unkC;bool Empty(){return count==0;}void FUN_00a1bfa0(bool abFree){if(unk4){for(unsigned int i=0;i<(unsigned int)count;++i){}if(abFree){Free((void*)unk4);unk4=0;unk4=0;unkC=0;}count=0;}}};
 
 
-struct Manager {Font* fonts[8];Font* GetFont(unsigned int i){return fonts[i];}Shape* FUN_00a1a800(Text,NiPoint3,int,int);};extern Manager* DAT_011f33f8;inline Manager* GetDebrisManager(){return DAT_011f33f8;}
+struct Manager {Font* fonts[8];Font* GetFont(unsigned int i){return fonts[i];}Shape* FontManager_MakeImage(Text,NiPoint3,int,int);};extern Manager* DAT_011f33f8;inline Manager* GetDebrisManager(){return DAT_011f33f8;}
 
 struct Layout {unsigned int unk0;unsigned int unk4;unsigned int unk8;unsigned int unkc;unsigned int unk10;unsigned int unk14;unsigned int unk18;unsigned int unk1c;unsigned int unk20;unsigned int unk24;int height;unsigned int unk2c;unsigned int unk30;bool useWidth;unsigned char unk35,unk36,unk37;int Height(){return height;}bool UseWidth(){return useWidth;}};
 
@@ -3927,7 +3950,7 @@ Page* pageSlot35=0;int remainingSlot28=index;int iconIndexSlot11=0;Shape* shapes
 
 for(unsigned int fontIndex=0;fontIndex<8;fontIndex++){indices[fontIndex]=0;shapesSlot32[fontIndex]=0;int count=pageSlot35->CountEmptyNameEntries(fontIndex);if(count>0){shapesSlot32[fontIndex]=GetDebrisManager()->GetFont(fontIndex)->CreateTextShape(count,&Color(117.0f/255.0f,59.0f/255.0f,33.0f/255.0f,1.0f),true);shapesSlot32[fontIndex]->SetPosition(DAT_011f426c);}}
 
-List<Shape*> imagesSlot52;Shape* iconsSlot17=0;if(!((Icons*)GetDebrisManager()->GetFont(0)->ButtonIcons)->Empty()){iconsSlot17=GetDebrisManager()->GetFont(0)->FUN_00a14da0();iconsSlot17->SetPositionThroughShape(DAT_011f426c);imagesSlot52.Add(iconsSlot17);}
+List<Shape*> imagesSlot52;Shape* iconsSlot17=0;if(!((Icons*)GetDebrisManager()->GetFont(0)->ButtonIcons)->Empty()){iconsSlot17=GetDebrisManager()->GetFont(0)->MakeButton();iconsSlot17->SetPositionThroughShape(DAT_011f426c);imagesSlot52.Add(iconsSlot17);}
 
 if(pageSlot35){int lineIndexSlot43=0;NiPoint3 position=DAT_011f426c;Link<Line*>* lineCursorSlot0=pageSlot35->lines.Head();while(lineCursorSlot0&&lineIndexSlot43<layout->Height()){Line* lineSlot0=pageSlot35->lines.Next(lineCursorSlot0);position.x=0.0f;int lineWidthSlot23=0;if(layout->UseWidth())lineWidthSlot23=width;if(lineSlot0->align==4)position.x=float(lineWidthSlot23-lineSlot0->width);if(lineSlot0->align==2)position.x=float((lineWidthSlot23-lineSlot0->width)/2);position.y=0.0f;position.z-=lineSlot0->height+lineSlot0->padding;
 
@@ -3935,13 +3958,13 @@ Link<Run*>* runCursorSlot19=lineSlot0->runs.Head();while(runCursorSlot19){Run* r
 
 NiPoint3 glyphPosition=position;glyphPosition.x+=runSlot0->offset;if(runSlot0->letter==1){GetDebrisManager()->GetFont(0)->UpdateIconGeometry(iconIndexSlot11++,iconsSlot17,glyphPosition);}else fontSlot0->BuildGlyphQuad(&((Letter*)fontSlot0->pFontData->pFontLetters)[runSlot0->letter],indices[runSlot0->font]++,shapesSlot32[runSlot0->font],glyphPosition,&runSlot0->color);
 
-}else{NiPoint3 imagePosition=position;imagePosition.x+=runSlot0->offset;Shape* image=GetDebrisManager()->FUN_00a1a800(runSlot0->text,imagePosition,runSlot0->width,runSlot0->height+runSlot0->padding);if(image)imagesSlot52.FUN_00a11c00(image);}}
+}else{NiPoint3 imagePosition=position;imagePosition.x+=runSlot0->offset;Shape* image=GetDebrisManager()->FontManager_MakeImage(runSlot0->text,imagePosition,runSlot0->width,runSlot0->height+runSlot0->padding);if(image)imagesSlot52.NiTList_AddTail(image);}}
 
 }
 
-bool attachedSlot0=false;for(unsigned int finishIndex=0;finishIndex<8;finishIndex++){if(shapesSlot32[finishIndex]){NiPoint3* vertices=shapesSlot32[finishIndex]->GetData()->GetVertices();shapesSlot32[finishIndex]->GetData()->GetBound().ComputeBoundingSphere(shapesSlot32[finishIndex]->GetData()->GetCount(),(::NiPoint3*)vertices);shapesSlot32[finishIndex]->SetPosition(DAT_011f426c);shapesSlot32[finishIndex]->FUN_00a5a040();Update update;shapesSlot32[finishIndex]->FUN_00a59c60(update);node->Attach(shapesSlot32[finishIndex],true);attachedSlot0=true;}}
+bool attachedSlot0=false;for(unsigned int finishIndex=0;finishIndex<8;finishIndex++){if(shapesSlot32[finishIndex]){NiPoint3* vertices=shapesSlot32[finishIndex]->GetData()->GetVertices();shapesSlot32[finishIndex]->GetData()->GetBound().ComputeBoundingSphere(shapesSlot32[finishIndex]->GetData()->GetCount(),(::NiPoint3*)vertices);shapesSlot32[finishIndex]->SetPosition(DAT_011f426c);shapesSlot32[finishIndex]->UpdateProperties();Update update;shapesSlot32[finishIndex]->NiAVObject_Update(update);node->Attach(shapesSlot32[finishIndex],true);attachedSlot0=true;}}
 
-while(imagesSlot52.Count()){Shape* finishedImageSlot0=imagesSlot52.PopFront();NiPoint3* imageVerticesSlot0=finishedImageSlot0->GetData()->GetVertices();finishedImageSlot0->GetData()->GetBound().ComputeBoundingSphere(finishedImageSlot0->GetData()->GetCount(),(::NiPoint3*)imageVerticesSlot0);finishedImageSlot0->position=DAT_011f426c;finishedImageSlot0->FUN_00a5a040();Update imageUpdateSlot0;finishedImageSlot0->FUN_00a59c60(imageUpdateSlot0);node->Attach(finishedImageSlot0,true);}}
+while(imagesSlot52.Count()){Shape* finishedImageSlot0=imagesSlot52.PopFront();NiPoint3* imageVerticesSlot0=finishedImageSlot0->GetData()->GetVertices();finishedImageSlot0->GetData()->GetBound().ComputeBoundingSphere(finishedImageSlot0->GetData()->GetCount(),(::NiPoint3*)imageVerticesSlot0);finishedImageSlot0->position=DAT_011f426c;finishedImageSlot0->UpdateProperties();Update imageUpdateSlot0;finishedImageSlot0->NiAVObject_Update(imageUpdateSlot0);node->Attach(finishedImageSlot0,true);}}
 
 ((Icons*)GetDebrisManager()->GetFont(0)->ButtonIcons)->FUN_00a1bfa0(true);
 
@@ -3963,7 +3986,8 @@ template <> inline void BSSimpleArray<ButtonIcon, 1024>::UpdateEntryValue(Button
             }
         }
     }
-template <> inline bool BSSimpleArray<ButtonIcon, 1024>::FUN_0076b610() const
+// src: XBOX_PDB 0x0076b610
+template <> inline bool BSSimpleArray<ButtonIcon, 1024>::NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() const
 {
         if (iSize == SimpleArrayStorage) {
             return true;
@@ -3992,7 +4016,7 @@ template <> inline void BSSimpleArray<ButtonIcon, 1024>::ReallocateStorage(unsig
 // Grows the buffer when full, increments iSize, and returns the index of the newly added slot.
 // @fnv 0x00a1c130
 template <> unsigned int BSSimpleArray<ButtonIcon, 1024>::ReserveIndex() {
-    if (FUN_0076b610()) {
+    if (NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty()) {
         if (SimpleArrayStorage == 0) {
             unsigned int inewSize = 4;
             pBuffer = _Allocate(inewSize);
@@ -4425,15 +4449,16 @@ __forceinline void TabAdvance(float& x) { float remainder = x; float input = (fl
 
 // Font methods at 0x00a12460, 0x00a12370 and 0x00a14a20; Font.h lacks these declarations.
 struct StringShapeBuilder : public Font {
-    NiTriShape* FUN_00a12460(float fX, float fY, float fZ, SStr* text, int* piX,
+    NiTriShape* Font_MakeString(float fX, float fY, float fZ, SStr* text, int* piX,
                              int iFlags, void* pUnk, bool bShift, bool bSkip);
-    void FUN_00a12370(char* str, float* pSize, float* pOut, int iFlags, int iStart);
+    void Font_GetLineOffsets(char* str, float* pSize, float* pOut, int iFlags, int iStart);
     NiTriShape* CreateTextShape(int count, void* p, bool b);
 };
 
 // Builds a NiTriShape for a text string by mapping each character to glyph geometry, handling newlines and tabs, and updating the output x-offset.
 // @fnv 0x00a12460
-NiTriShape* StringShapeBuilder::FUN_00a12460(float fX, float fY, float fZ, SStr* text, int* piX,
+// src: COMMUNITY 0x00a12460
+NiTriShape* StringShapeBuilder::Font_MakeString(float fX, float fY, float fZ, SStr* text, int* piX,
                                 int iFlags, void* pUnk, bool bShift, bool bSkip)
 {
     if (text->GetLen() == 0 || this->pFontData == 0)
@@ -4441,7 +4466,7 @@ NiTriShape* StringShapeBuilder::FUN_00a12460(float fX, float fY, float fZ, SStr*
 
     float kPos2 = (float)*piX;
     float fOut1;
-    this->FUN_00a12370(text->GetString(), &kPos2, &fOut1, iFlags, 0);
+    this->Font_GetLineOffsets(text->GetString(), &kPos2, &fOut1, iFlags, 0);
 
     FontPoint3 kVertexPositionLocal;
     kVertexPositionLocal.x = fX + kPos2;
@@ -4485,7 +4510,7 @@ NiTriShape* StringShapeBuilder::FUN_00a12460(float fX, float fY, float fZ, SStr*
             {
                 float fNewSize = (float)*piX;
                 float fOut2;
-                this->FUN_00a12370(text->GetString(), &fNewSize, &fOut2, iFlags, i6 + 1);
+                this->Font_GetLineOffsets(text->GetString(), &fNewSize, &fOut2, iFlags, i6 + 1);
                 kVertexPositionLocal.x = fNewSize;
                 kVertexPositionLocal.z = kVertexPositionLocal.z - (this->pFontData)->fBaseLine;
             }
@@ -4538,12 +4563,13 @@ inline int max_val(int a, int b) {
 }
 
 struct TextWrapper : Font {
-    int FUN_00a160c0(BSStringT<char>* text, int* maxWidth, int* totalHeight, int lineLimit, char separator);
+    int Font_LineBreakText(BSStringT<char>* text, int* maxWidth, int* totalHeight, int lineLimit, char separator);
 };
 
 // Wraps text to fit maxWidth by inserting separators, returns line count and updates totalHeight.
 // @fnv 0x00a160c0
-int TextWrapper::FUN_00a160c0(BSStringT<char>* text, int* piMaxWidth, int* piTotalHeight, int lineLimit, char separator)
+// src: COMMUNITY 0x00a160c0
+int TextWrapper::Font_LineBreakText(BSStringT<char>* text, int* piMaxWidth, int* piTotalHeight, int lineLimit, char separator)
 {
     int p; // maxLines (bucket 15) -> -0x4
     unsigned int h; // index (bucket 14) -> -0x8
@@ -4657,14 +4683,14 @@ extern Setting_01017720_011f96a0 g_011f345c;
 extern Setting_01017720_011f96a0 g_011f3468;
 extern __declspec(thread) int g_tlsMemContext;
 extern char DAT_0109518c;
-void __cdecl FUN_0040fbe0(const char*);
+void __cdecl ProgramFlow(const char*);
 namespace FontManagerInitialization {
-struct Memory { void* FUN_00aa3e40(unsigned int); };
+struct Memory { void* Game_DoHeapAlloc(unsigned int); };
 extern Memory DAT_011f6238;
 // Font lacks class-specific allocation and exception cleanup declarations.
 struct FontAllocation : Font {
     FontAllocation(int index, const char* name, int enabled);
-    static __forceinline void* operator new(unsigned int n) { return DAT_011f6238.FUN_00aa3e40(n); }
+    static __forceinline void* operator new(unsigned int n) { return DAT_011f6238.Game_DoHeapAlloc(n); }
     static __forceinline void operator delete(void*) {}
 };
 }
@@ -4691,7 +4717,7 @@ FUN_00a168b0::FUN_00a168b0() {
         break;
       }
     }
-    if (!loaded) FUN_0040fbe0(&DAT_0109518c);
+    if (!loaded) ProgramFlow(&DAT_0109518c);
 
 }
 
@@ -4701,8 +4727,8 @@ unsigned int __cdecl BSStringLength(const char*);
 unsigned int __cdecl BSStringCapacityMaximum(unsigned int, unsigned int);
 void* __cdecl __memcpy(void*, const void*, unsigned int);
 struct TQMemoryAllocator {
-    void* FUN_00aa3e40(unsigned int);
-    void FUN_00aa4060(void*);
+    void* Game_DoHeapAlloc(unsigned int);
+    void MemoryManager_Deallocate(void*);
 };
 extern TQMemoryAllocator DAT_011f6238;
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
@@ -4716,7 +4742,7 @@ struct TQPoint3 {
 
     TQPoint3() {}
     TQPoint3(float fX, float fY, float fZ) { x = fX; y = fY; z = fZ; }
-    static void* operator new[](unsigned int uiSize) { return DAT_011f6238.FUN_00aa3e40(uiSize); }
+    static void* operator new[](unsigned int uiSize) { return DAT_011f6238.Game_DoHeapAlloc(uiSize); }
 };
 
 struct TQStr {
@@ -4851,8 +4877,8 @@ struct TQPropertyState {
     TQPtr<TQProperty> properties[7];
     TQPropertyState();
     ~TQPropertyState();
-    static void* operator new(unsigned int size) { return DAT_011f6238.FUN_00aa3e40(size); }
-    static void operator delete(void* memory) { DAT_011f6238.FUN_00aa4060(memory); }
+    static void* operator new(unsigned int size) { return DAT_011f6238.Game_DoHeapAlloc(size); }
+    static void operator delete(void* memory) { DAT_011f6238.MemoryManager_Deallocate(memory); }
 };
 struct TQPropertyLock {
     unsigned int owner;
@@ -5067,12 +5093,13 @@ inline void TQShape::AttachProperty(TQProperty* apProperty) {
 }
 
 struct TQOwner {
-    TQShape* FUN_00a1a800(TQStr kPath, float fX, float fY, float fZ, int iWidth, int iHeight);
+    TQShape* FontManager_MakeImage(TQStr kPath, float fX, float fY, float fZ, int iWidth, int iHeight);
 };
 
 // Builds a textured quad TQShape from a path and dimensions, attaches a texture property, and assigns a new z-buffer.
 // @fnv 0x00a1a800
-TQShape* TQOwner::FUN_00a1a800(TQStr kPath, float fX, float fY, float fZ, int iWidth, int iHeight)
+// src: COMMUNITY 0x00a1a800
+TQShape* TQOwner::FontManager_MakeImage(TQStr kPath, float fX, float fY, float fZ, int iWidth, int iHeight)
 {
     TQPoint3* pkVerts = new TQPoint3[4];
     NiPoint2* pkUVs5 = new NiPoint2[4];
@@ -5131,12 +5158,13 @@ extern double _gModifierZero;
 inline FontManager* FontAlignmentInstance() { return FontManager::pInstance; }
 
 struct FUN_00a12370_shell : Font {
-    void FUN_00a12370(const char* apTextString, float& afX, float& afY, int aiFlags, unsigned int aiStart);
+    void Font_GetLineOffsets(const char* apTextString, float& afX, float& afY, int aiFlags, unsigned int aiStart);
 };
 
 // For flag values 2 and 4, calls FUN_00a1b020 and sets afX to negative half or full returned x; otherwise sets afX to zero.
 // @fnv 0x00a12370
-void FUN_00a12370_shell::FUN_00a12370(const char* apTextString, float& afX, float& afY, int aiFlags, unsigned int aiStart)
+// src: COMMUNITY 0x00a12370
+void FUN_00a12370_shell::Font_GetLineOffsets(const char* apTextString, float& afX, float& afY, int aiFlags, unsigned int aiStart)
 {
     FontPoint3 stringDims;
     float fwrapWidth = (afX > _gModifierZero) ? afX : 3.4028234663852886e+38f;
@@ -5191,13 +5219,14 @@ struct S00a1b7f0_GlyphMetric {
 
  int width,height,drop,unk30,unk34;
 
- void FUN_00a1b7f0(unsigned char);
+ void FontManager_CharData_SetChar(unsigned char);
 
 };
 
 // Stores the character, conditionally computes width, height, and drop when the icon is empty, and resets fields.
 // @fnv 0x00a1b7f0
-void S00a1b7f0_GlyphMetric::FUN_00a1b7f0(unsigned char auiCharacter) {
+// src: COMMUNITY 0x00a1b7f0
+void S00a1b7f0_GlyphMetric::FontManager_CharData_SetChar(unsigned char auiCharacter) {
 
  character = auiCharacter;
 

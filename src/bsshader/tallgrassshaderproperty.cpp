@@ -77,7 +77,7 @@ void TallGrassShaderProperty::ClearCaches()
 
 struct Helper
 {
-    void FUN_00b70260(NiStream&);
+    void BSShaderLightingProperty_LoadBinary(NiStream&);
 };
 void _NiFreeAlias(void*);
 struct Holder
@@ -90,7 +90,7 @@ struct Holder
 // @fnv 0x00b60fc0
 void Holder::ReadStringFromStream(NiStream& stream)
 {
-    ((Helper*)this)->FUN_00b70260(stream);
+    ((Helper*)this)->BSShaderLightingProperty_LoadBinary(stream);
     char* pBuffer = 0;
     stream.ReadStreamString(pBuffer);
     mStr.Set(pBuffer, 0);
@@ -136,7 +136,7 @@ struct FUN_00b58570_Class
 {
     TallGrassGroup_Node* m_pkHead;
     TallGrassGroup_Node* m_pkTail;
-    void* FUN_00b58570(void* element);
+    void* NiTPointerListBase_AddTail(void* element);
     struct FUN_00bd8f90* GetNext(void*& piter) const
     {
         struct FUN_00bd8f90* const& element = ((TallGrassGroup_Node*)piter)->m_element;
@@ -212,7 +212,7 @@ template <> __declspec(noalias) bool NiTMapBase<NiTPointerAllocator<unsigned int
     TallGrassShaderProperty::TallGrassCacheData*>::GetAt(unsigned long,
     TallGrassShaderProperty::TallGrassCacheData*&) const;
 
-GeometryCacheEntry* __cdecl FUN_00b61980(IntegerDataBlock* p);
+GeometryCacheEntry* __cdecl TallGrassShaderProperty_GetCachedGeometry(IntegerDataBlock* p);
 void* __cdecl _memmove(void*, const void*, unsigned int);
 
 // Looks up a cached grass group for the cell, creating and attaching a new one to the node when none has remaining capacity, and returns its remaining count.
@@ -227,7 +227,7 @@ unsigned short __cdecl GetOrCreateGrassGroup(IntegerDataBlock* apGrassParam, int
     GeometryCacheEntry* pcachedGeom;
     FUN_00bd8f90* pgrassgroup;
     *apGrassGroup = 0;
-    pcachedGeom = FUN_00b61980(apGrassParam);
+    pcachedGeom = TallGrassShaderProperty_GetCachedGeometry(apGrassParam);
     if (!pcachedGeom)
         return 0;
     pGrassCache = 0;
@@ -257,7 +257,7 @@ unsigned short __cdecl GetOrCreateGrassGroup(IntegerDataBlock* apGrassParam, int
         *apGrassGroup = new FUN_00bd8ae0(pcachedGeom, aiCellX, aiCellY, 0);
         ++DAT_011f9ef4;
         (*apGrassGroup)->CopySettings(apGrassParam);
-        pCurrentElementNext->FUN_00b58570(apGrassGroup);
+        pCurrentElementNext->NiTPointerListBase_AddTail(apGrassGroup);
         apGrassNode->AttachChildInAvailableSlot(static_cast<NiAVObject*>((*apGrassGroup)->m_pSecondObject), true);
     }
     return (*apGrassGroup)->GetRemaining();
@@ -316,7 +316,8 @@ struct TallGrassShaderPropertyInstance
 };
 // Allocates and constructs a new tall grass shader property instance.
 // @fnv 0x00b60f50
-TallGrassShaderPropertyInstance* FUN_00b60f50_Create()
+// src: GUESS 0x00b60f50 (confidence: high)
+TallGrassShaderPropertyInstance* Tallgrassshaderproperty_CreateTallGrassShaderPropertyInstance()
 {
     return new TallGrassShaderPropertyInstance;
 }
@@ -330,7 +331,7 @@ struct MapEntry
 struct MapPool
 {
     unsigned int count;
-    MapEntry* FUN_0043a010();
+    MapEntry* NiGeometry_AddProperty();
 };
 struct PointerMap
 {
@@ -342,10 +343,11 @@ struct PointerMap
     MapEntry** buckets;
     MapPool allocator;
     bool preserveKey;
-    void FUN_00b61010(const char* key, NiPointer<NiRefObject> value);
+    void CachedGeometryMap_SetAt(const char* key, NiPointer<NiRefObject> value);
 };
 // @fnv 0x00b61010
-void PointerMap::FUN_00b61010(const char* key, NiPointer<NiRefObject> value)
+// src: COMMUNITY 0x00b61010
+void PointerMap::CachedGeometryMap_SetAt(const char* key, NiPointer<NiRefObject> value)
 {
     unsigned int hash = Hash(key);
     MapEntry* entry = buckets[hash];
@@ -360,7 +362,7 @@ void PointerMap::FUN_00b61010(const char* key, NiPointer<NiRefObject> value)
         }
         entry = entry->next;
     }
-    entry = allocator.FUN_0043a010();
+    entry = allocator.NiGeometry_AddProperty();
     SetValue(entry, key, value);
     entry->next = buckets[hash];
     buckets[hash] = entry;
@@ -464,7 +466,7 @@ void __cdecl PopulateGrassInstances(void* apKey, int aiCellX, int aiCellY, NiNod
 }
 
 namespace fnv_00b61170 {
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 void __cdecl FUN_00ec61c0(void* p, int fill, unsigned int size);
 int __cdecl FUN_00ec658f(void(__cdecl* fn)());
 
@@ -478,7 +480,7 @@ struct ArrayHolderBase
     {
         m_04 = 0x25;
         m_0C = 0;
-        m_08 = FUN_00aa1070(m_04 * 4);
+        m_08 = _NiMalloc_00aa1070(m_04 * 4);
         FUN_00ec61c0(m_08, 0, m_04 * 4);
     }
 };

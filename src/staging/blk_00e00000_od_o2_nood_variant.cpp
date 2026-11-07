@@ -29,7 +29,8 @@ struct __declspec(align(16)) FinishedObject
     FinishedObject(FinishingFlag);
 };
 // @fnv 0x00e005f0
-void* __cdecl FUN_00e005f0()
+// src: GUESS 0x00e005f0 (confidence: low)
+void* __cdecl Runtime_EvaluateValue_00e005f0()
 {
     FinishingFlag finish(0);
     FinishedObject object(finish);
@@ -69,7 +70,8 @@ struct __declspec(align(16)) S_00e00cd0_Obj
 };
 
 // @fnv 0x00e00cd0
-const char* __cdecl FUN_00e00cd0()
+// src: HAVOK_LIB 0x00e00cd0
+const char* __cdecl getVtablehkpFastMeshShape()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -108,7 +110,8 @@ struct __declspec(align(16)) hkObjectE01710
 };
 
 // @fnv 0x00e01710
-void* FUN_00e01710()
+// src: GUESS 0x00e01710 (confidence: low)
+void* hkObjectE01710_AllocateStorage_00e01710()
 {
     union
     {
@@ -145,7 +148,8 @@ struct __declspec(align(16)) FinishObject
 };
 
 // @fnv 0x00e01eb0
-void* __cdecl FUN_00e01eb0()
+// src: GUESS 0x00e01eb0 (confidence: low)
+void* __cdecl Runtime_UpdateState_00e01eb0()
 {
     FinishingFlag f;
     f.m_bFinishing = 0;
@@ -183,7 +187,8 @@ struct __declspec(align(16)) FilterStorage402
     unsigned filterType;
 };
 // @fnv 0x00e00a60
-unsigned FUN_00e00a60()
+// src: GUESS 0x00e00a60 (confidence: low)
+unsigned Object_ProcessAndReturnValue_00e00a60()
 {
     FilterStorage402 storage;
     new (&storage) FUN_00e00a80(FinishingFlag(0));
@@ -222,7 +227,8 @@ class __declspec(align(16)) S00e000e0_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00e000e0
-const void* __cdecl FUN_00e000e0()
+// src: GUESS 0x00e000e0 (confidence: medium)
+const void* __cdecl Object_GetConstructedVirtualTable_00e000e0()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -232,7 +238,7 @@ const void* __cdecl FUN_00e000e0()
 
 struct FUN_00e00290_sub
 {
-    void FUN_00cb0a70(FinishingFlag kHandle);
+    void ReturnSelf(FinishingFlag kHandle);
     int m_00;
 };
 extern int DAT_010cc040;
@@ -266,7 +272,8 @@ struct __declspec(align(16)) FUN_00e00290_obj
     int unk4C;
 };
 // @fnv 0x00e00290
-int* __cdecl FUN_00e00290()
+// src: HAVOK_LIB 0x00e00290
+int* __cdecl getVtablehkpConstraintChainInstance()
 {
     FinishingFlag kHandle(0);
     FUN_00e00290_obj kObj;
@@ -274,7 +281,7 @@ int* __cdecl FUN_00e00290()
     kObj.m_kArray.m_pData = 0;
     kObj.m_kArray.m_usSize = 0;
     kObj.m_kArray.m_usCapacityAndFlags = 0x8000;
-    kObj.m_kSub.FUN_00cb0a70(kHandle);
+    kObj.m_kSub.ReturnSelf(kHandle);
     return &DAT_010d79e8;
 }
 
@@ -377,7 +384,8 @@ class __declspec(align(16)) S00e003b0_Object
 };
 
 // @fnv 0x00e003b0
-const void* __cdecl FUN_00e003b0()
+// src: GUESS 0x00e003b0 (confidence: medium)
+const void* __cdecl Runtime_GetVtableFromTemporary_00e003b0()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -448,7 +456,8 @@ class __declspec(align(16)) S00e004d0_Object
 };
 
 // @fnv 0x00e004d0
-const void* __cdecl FUN_00e004d0()
+// src: GUESS 0x00e004d0 (confidence: medium)
+const void* __cdecl Runtime_GetVtableFromTemporary_00e004d0()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -476,7 +485,8 @@ class __declspec(align(16)) S00e006b0_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00e006b0
-const void* __cdecl FUN_00e006b0()
+// src: GUESS 0x00e006b0 (confidence: medium)
+const void* __cdecl Runtime_GetVtableFromTemporary_00e006b0()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -555,7 +565,8 @@ class __declspec(align(16)) S00e00b80_Object
 };
 
 // @fnv 0x00e00b80
-const void* __cdecl FUN_00e00b80()
+// src: HAVOK_LIB 0x00e00b80
+const void* __cdecl getVtablehkpGroupFilter()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -583,7 +594,8 @@ class __declspec(align(16)) S00e00f90_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00e00f90
-const void* __cdecl FUN_00e00f90()
+// src: GUESS 0x00e00f90 (confidence: medium)
+const void* __cdecl Runtime_GetVtableFromTemporary_00e00f90()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -614,7 +626,8 @@ class __declspec(align(16)) S00e01230_Object
 };
 
 // @fnv 0x00e01230
-const void* __cdecl FUN_00e01230()
+// src: GUESS 0x00e01230 (confidence: low)
+const void* __cdecl Runtime_UpdateState_00e01230()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -638,7 +651,8 @@ struct __declspec(align(16)) LoadedObject
     {}
 };
 // @fnv 0x00e01830
-const void* FUN_00e01830()
+// src: GUESS 0x00e01830 (confidence: low)
+const void* Runtime_UpdateState_00e01830()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -662,7 +676,8 @@ class __declspec(align(16)) S00e01e50_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00e01e50
-const void* __cdecl FUN_00e01e50()
+// src: GUESS 0x00e01e50 (confidence: medium)
+const void* __cdecl Runtime_GetVtableFromTemporary_00e01e50()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -686,7 +701,8 @@ class __declspec(align(16)) S00e020f0_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00e020f0
-const void* __cdecl FUN_00e020f0()
+// src: GUESS 0x00e020f0 (confidence: medium)
+const void* __cdecl Runtime_GetVtableFromTemporary_00e020f0()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -696,7 +712,7 @@ const void* __cdecl FUN_00e020f0()
 
 struct FUN_00e02180_sub
 {
-    void FUN_00cb0a70(FinishingFlag kHandle);
+    void ReturnSelf(FinishingFlag kHandle);
     int m_00;
 };
 extern int DAT_010e9ccc;
@@ -716,15 +732,16 @@ struct __declspec(align(16)) FUN_00e02180_obj
     int unk2C;
 };
 // @fnv 0x00e02180
-int* __cdecl FUN_00e02180()
+// src: GUESS 0x00e02180 (confidence: low)
+int* __cdecl Object_ProcessAndReturnValue_00e02180()
 {
     FinishingFlag kHandle(0);
     FUN_00e02180_obj kObj;
     kObj.m_pVtbl = &DAT_010e9ccc;
-    kObj.m_kSub08.FUN_00cb0a70(kHandle);
-    kObj.m_kSub10.FUN_00cb0a70(kHandle);
-    kObj.m_kSub14.FUN_00cb0a70(kHandle);
-    kObj.m_kSub18.FUN_00cb0a70(kHandle);
+    kObj.m_kSub08.ReturnSelf(kHandle);
+    kObj.m_kSub10.ReturnSelf(kHandle);
+    kObj.m_kSub14.ReturnSelf(kHandle);
+    kObj.m_kSub18.ReturnSelf(kHandle);
     return kObj.m_pVtbl;
 }
 
@@ -744,7 +761,8 @@ class __declspec(align(16)) S00e02730_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00e02730
-const void* __cdecl FUN_00e02730()
+// src: GUESS 0x00e02730 (confidence: medium)
+const void* __cdecl Runtime_GetVtableFromTemporary_00e02730()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -771,11 +789,12 @@ struct S_00e11530_Owner
     int unk10;
     S_00e11530_Node* unk14;
 
-    __m128* FUN_00e11530(__m128* out);
+    __m128* ProcessEntries_00e11530(__m128* out);
 };
 
 // @fnv 0x00e11530
-__m128* S_00e11530_Owner::FUN_00e11530(__m128* out)
+// src: GUESS 0x00e11530 (confidence: low)
+__m128* S_00e11530_Owner::ProcessEntries_00e11530(__m128* out)
 {
     S_00e11530_Node* node = unk14;
     __m128 value = unk14->bounds;
@@ -812,19 +831,20 @@ struct __declspec(align(16)) RotationQ
 
 struct ShapeQ
 {
-    void FUN_00e11a90(const Transform* t);
-    void FUN_00e11b40(const RotationQ* r);
+    void ProcessEntries_00e11a90(const Transform* t);
+    void UpdateFields_00e11b40(const RotationQ* r);
 };
 
 // @fnv 0x00e11b40
-void ShapeQ::FUN_00e11b40(const RotationQ* r)
+// src: GUESS 0x00e11b40 (confidence: low)
+void ShapeQ::UpdateFields_00e11b40(const RotationQ* r)
 {
     __declspec(align(16)) Transform t;
     *reinterpret_cast<VecQ*>(&t.m_f30) = DAT_012683a0;
     t.r[0] = *(const __m128*)&r->m_col[0];
     t.r[1] = *(const __m128*)&r->m_col[4];
     t.r[2] = *(const __m128*)&r->m_col[8];
-    FUN_00e11a90(&t);
+    ProcessEntries_00e11a90(&t);
 }
 
 extern unsigned __int64 g_unk01268370[6];
@@ -834,11 +854,12 @@ struct __declspec(align(16)) Rot
 };
 struct Owner
 {
-    void FUN_00e11a90(const Transform* xf);
-    void FUN_00e11ca0(const __m128* src);
+    void ProcessEntries_00e11a90(const Transform* xf);
+    void UpdateFields_00e11ca0(const __m128* src);
 };
 // @fnv 0x00e11ca0
-void Owner::FUN_00e11ca0(const __m128* src)
+// src: GUESS 0x00e11ca0 (confidence: low)
+void Owner::UpdateFields_00e11ca0(const __m128* src)
 {
     Rot rot;
     rot.d[0] = g_unk01268370[0];
@@ -852,7 +873,7 @@ void Owner::FUN_00e11ca0(const __m128* src)
     xf.r[1] = *(__m128*)&rot.d[2];
     xf.r[2] = *(__m128*)&rot.d[4];
     xf.r[3] = *src;
-    FUN_00e11a90(&xf);
+    ProcessEntries_00e11a90(&xf);
 }
 
 struct S00e00d70_Arg
@@ -888,14 +909,15 @@ struct __declspec(align(16)) S00e00d70_Object
     int unk54;
     int unk58;
     int unk5c;
-    void FUN_00d57b20(S00e00d70_Arg arg);
+    void hkpCylinderShape_hkpCylinderShape_00d57b20(S00e00d70_Arg arg);
 };
 
 // @fnv 0x00e00d70
-int __cdecl FUN_00e00d70()
+// src: GUESS 0x00e00d70 (confidence: low)
+int __cdecl hkpCylinderShape_hkpCylinderShape_00d57b20_EvaluateValue_00e00d70()
 {
     S00e00d70_Object object;
-    object.FUN_00d57b20(S00e00d70_Arg(0));
+    object.hkpCylinderShape_hkpCylinderShape_00d57b20(S00e00d70_Arg(0));
     return (int)object.first;
 }
 
@@ -1086,10 +1108,10 @@ struct EdgeMemory
     int unk0c;
     EdgeAllocator* allocator;
 };
-EdgeMemory* FUN_00c85750();
-void FUN_00c908c0(void*, void*, int, int);
+EdgeMemory* hkMemoryRouter_getInstance();
+void hkArrayUtil__reserve(void*, void*, int, int);
 void FUN_00c90940(void*, void*, int);
-float FUN_00e13870(EdgeNode*, int);
+float Hkgpmesh_ComputeValues_00e13870(EdgeNode*, int);
 float ClampedAcos(float);
 template <class T> inline void EdgeAllocator::reserve(EdgeArray<T>& array, int needed, int elementSize)
 {
@@ -1099,12 +1121,12 @@ template <class T> inline void EdgeAllocator::reserve(EdgeArray<T>& array, int n
         int next = available * 2;
         if (needed >= next)
             next = needed;
-        FUN_00c908c0(this, &array, next, elementSize);
+        hkArrayUtil__reserve(this, &array, next, elementSize);
     }
 }
 template <class T> inline void EdgeArray<T>::grow(int elementSize)
 {
-    EdgeMemory* memory = FUN_00c85750();
+    EdgeMemory* memory = hkMemoryRouter_getInstance();
     if (size == (capacity & 0x3fffffff))
         FUN_00c90940(memory->allocator, this, elementSize);
 }
@@ -1130,12 +1152,12 @@ struct EdgePool
     void* head;
     int size;
     int unk14;
-    PoolPage* FUN_00e23530();
+    PoolPage* AllocateChainedSlotBlock();
     template <class T> T* allocate(const T& value)
     {
         PoolPage* page;
         if (!pageCount || !(page = pages[0])->freeHead)
-            page = FUN_00e23530();
+            page = AllocateChainedSlotBlock();
         T* item = (T*)page->freeHead;
         page->freeHead = item->next;
         ++page->used;
@@ -1179,22 +1201,23 @@ struct EdgeProcessor
     int unk04;
     EdgePool vertices;
     EdgePool edges;
-    void FUN_00e11910(EdgeNode*);
-    void FUN_00e195c0(float threshold, float distance, const EdgeMesh* mesh);
+    void UpdateTriangleNormal(EdgeNode*);
+    void ProcessEntries_00e195c0(float threshold, float distance, const EdgeMesh* mesh);
 };
 // @fnv 0x00e195c0
-void EdgeProcessor::FUN_00e195c0(float threshold, float distance, const EdgeMesh* mesh)
+// src: GUESS 0x00e195c0 (confidence: low)
+void EdgeProcessor::ProcessEntries_00e195c0(float threshold, float distance, const EdgeMesh* mesh)
 {
     EdgeArray<EdgeRef> refs;
     EdgeArray<float> scores;
     {
         int required = mesh->count * 3;
-        EdgeMemory* memory = FUN_00c85750();
+        EdgeMemory* memory = hkMemoryRouter_getInstance();
         memory->allocator->reserve(refs, required, 8);
     }
     {
         int required = mesh->count * 3;
-        EdgeMemory* memory = FUN_00c85750();
+        EdgeMemory* memory = hkMemoryRouter_getInstance();
         memory->allocator->reserve(scores, required, 4);
     }
     for (EdgeNode* node = mesh->head; node; node = node->next)
@@ -1206,7 +1229,7 @@ void EdgeProcessor::FUN_00e195c0(float threshold, float distance, const EdgeMesh
             Vertex* second = current.second();
             Vertex* first = current.first();
             if (!(vertexLess(second, first) && (node->edges[edge] & ~3u)))
-                if ((node->edges[edge] & ~3u) && FUN_00e13870(node, edge) > 0.0f)
+                if ((node->edges[edge] & ~3u) && Hkgpmesh_ComputeValues_00e13870(node, edge) > 0.0f)
                 {
                     refs.grow(8);
                     EdgeRef* ref = (EdgeRef*)refs.data + refs.size;
@@ -1262,18 +1285,18 @@ void EdgeProcessor::FUN_00e195c0(float threshold, float distance, const EdgeMesh
             edge->vertices[0] = va;
             edge->vertices[1] = vb;
             edge->vertices[2] = va;
-            FUN_00e11910(edge);
+            UpdateTriangleNormal(edge);
             registerEdge(edge, 0);
             registerEdge(edge, 1);
             registerEdge(edge, 2);
         }
     }
     {
-        EdgeMemory* memory = FUN_00c85750();
+        EdgeMemory* memory = hkMemoryRouter_getInstance();
         memory->allocator->clear(scores, 4);
     }
     {
-        EdgeMemory* memory = FUN_00c85750();
+        EdgeMemory* memory = hkMemoryRouter_getInstance();
         memory->allocator->clear(refs, 8);
     }
 }
@@ -1307,7 +1330,8 @@ class __declspec(align(16)) ChainAction_E001F0 : public ChainActionBase_E001F0
 };
 
 // @fnv 0x00e001f0
-const void* __cdecl FUN_00e001f0()
+// src: HAVOK_LIB 0x00e001f0
+const void* __cdecl getVtablehkpConstraintChainInstanceAction()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -1341,7 +1365,8 @@ class __declspec(align(16)) S00e01490_Object
 };
 
 // @fnv 0x00e01490
-const void* __cdecl FUN_00e01490()
+// src: GUESS 0x00e01490 (confidence: low)
+const void* __cdecl Runtime_UpdateState_00e01490()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -1373,7 +1398,8 @@ struct __declspec(align(16)) SceneFinishObject
 };
 
 // @fnv 0x00e01c60
-void* __cdecl FUN_00e01c60()
+// src: GUESS 0x00e01c60 (confidence: medium)
+void* __cdecl Object_GetConstructedVirtualTable_00e01c60()
 {
     FinishingFlag f;
     f.m_bFinishing = 0;
@@ -1407,7 +1433,8 @@ class __declspec(align(16)) S00e01d10_Object
 };
 
 // @fnv 0x00e01d10
-const void* __cdecl FUN_00e01d10()
+// src: GUESS 0x00e01d10 (confidence: low)
+const void* __cdecl Runtime_UpdateState_00e01d10()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -1437,7 +1464,8 @@ class __declspec(align(16)) S00e022a0_Object
 };
 
 // @fnv 0x00e022a0
-const void* __cdecl FUN_00e022a0()
+// src: GUESS 0x00e022a0 (confidence: low)
+const void* __cdecl Object_ProcessAndReturnValue_00e022a0()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;

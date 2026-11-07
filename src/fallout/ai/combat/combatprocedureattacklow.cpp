@@ -10,7 +10,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x009cbfd0
-void CombatProcedureAttackLow::FUN_009cbfd0(BGSSaveFormBuffer* apSaveGameBuffer)
+// src: XBOX_PDB 0x009cbfd0
+void CombatProcedureAttackLow::SaveGame_009cbfd0(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     CombatProcedure::SaveGame(apSaveGameBuffer);
     apSaveGameBuffer->SaveData(reinterpret_cast<char*>(this) + 0x10, 4, 0);
@@ -21,36 +22,38 @@ void CombatProcedureAttackLow::FUN_009cbfd0(BGSSaveFormBuffer* apSaveGameBuffer)
 
 struct FUN_009ca6c0_shell
 {
-    void FUN_009ca6c0();
+    void SetVirtualTable_009ca6c0();
 };
 
-void FUN_009ca6c0_shell::FUN_009ca6c0()
+// src: GUESS 0x009ca6c0 (confidence: low)
+void FUN_009ca6c0_shell::SetVirtualTable_009ca6c0()
 {}
 
 extern int DAT_01090aec;
 
 struct FUN_009cbb50_shell
 {
-    void FUN_009cbb50();
+    void SetVtableAndProcessState_009cbb50();
 };
 
 // @fnv 0x009cbb50
-void FUN_009cbb50_shell::FUN_009cbb50()
+// src: GUESS 0x009cbb50 (confidence: low)
+void FUN_009cbb50_shell::SetVtableAndProcessState_009cbb50()
 {
     *(int*)this = (int)&DAT_01090aec;
-    reinterpret_cast<FUN_009ca6c0_shell*>(this)->FUN_009ca6c0();
+    reinterpret_cast<FUN_009ca6c0_shell*>(this)->SetVirtualTable_009ca6c0();
 }
 
 struct FUN_009cbb20_shell
 {
-    void FUN_009cbb50();
+    void SetVtableAndProcessState_009cbb50();
     void* DestroyIfFlagged(unsigned int flags);
 };
 // Calls FUN_009cbb50, then deletes this when flags has bit 0 set, and returns this.
 // @fnv 0x009cbb20
 void* FUN_009cbb20_shell::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_009cbb50();
+    SetVtableAndProcessState_009cbb50();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -108,11 +111,12 @@ struct FUN_009cc040_shell
     int m_18;
     TESObjectWEAP* pWeapon;
 
-    void FUN_009cc040(BGSLoadFormBuffer* apLoadGameBuffer);
+    void CombatProcedureAttackLow_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer);
 };
 
 // @fnv 0x009cc040
-void FUN_009cc040_shell::FUN_009cc040(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009cc040
+void FUN_009cc040_shell::CombatProcedureAttackLow_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     reinterpret_cast<CombatProcedure_Helper*>(this)->LoadGame(apLoadGameBuffer);
 
@@ -144,7 +148,7 @@ struct FUN_008c1c30 : FUN_008c1c60
 struct FUN_004459e0
 {
     ~FUN_004459e0();
-    float FUN_004bcdb0(int aiFlag);
+    float ItemChange_GetItemHealth(int aiFlag);
 };
 
 struct FUN_00645d00_base
@@ -255,11 +259,11 @@ struct FUN_009cbb70_actorbase
 
 struct FUN_009cbb70_actor : FUN_009cbb70_actorbase, FUN_00645d00_base
 {
-    int FUN_00575ca0();
-    FUN_004459e0* FUN_00576260(TESObjectWEAP* apWeapon, int aiFlag);
-    bool FUN_008a6650(int aiFlag);
-    void FUN_0089a760(AnimIdle* apPackage, int aiFlag);
-    bool FUN_008a8dd0(TESObjectWEAP* apWeapon);
+    int TESObjectREFR_GetSpace();
+    FUN_004459e0* TESObjectREFR_GetInventoryItem_00576260(TESObjectWEAP* apWeapon, int aiFlag);
+    bool Actor_IsFleeing(int aiFlag);
+    void Actor_HitMe(AnimIdle* apPackage, int aiFlag);
+    bool Actor_ShouldUseAmmo(TESObjectWEAP* apWeapon);
     int FUN_00575610(void* apAmmo);
 };
 
@@ -273,14 +277,14 @@ struct FUN_0099a2d0_state
 
 struct FUN_00586150_ctrl
 {
-    FUN_0099a2d0_state* FUN_00586150();
+    FUN_0099a2d0_state* CombatController_GetCombatState();
 };
 
-float& __fastcall FUN_00403e20(float* apSetting);
+float& __fastcall Setting_Float_00403e20(float* apSetting);
 float RandomFloat(float afMin, float afMax);
-void __cdecl FUN_009b5720(AnimIdle* apPackage, FUN_009cbb70_actor* apActor, FUN_009cbb70_actor* apTarget, float afTime);
-float __cdecl FUN_00645d00(FUN_00645d00_base* apActor, TESObjectWEAP* apWeapon, int aiFlag);
-int FUN_00647b70(int a, int b);
+void __cdecl HitData_InitializeHitData(AnimIdle* apPackage, FUN_009cbb70_actor* apActor, FUN_009cbb70_actor* apTarget, float afTime);
+float __cdecl ActorValueOwner_GetWeaponAnimMult(FUN_00645d00_base* apActor, TESObjectWEAP* apWeapon, int aiFlag);
+int BSMAX_00647b70(int a, int b);
 int MinInt(int a, int b);
 extern float DAT_011ce230;
 extern float DAT_011cfbb4;
@@ -295,44 +299,45 @@ struct FUN_009cbb70_shell
     float fTime;
     float fTimeCur;
     TESObjectWEAP* pWeapon;
-    FUN_009cbb70_actor* FUN_00996de0();
-    FUN_009cbb70_actor* FUN_00996e00();
-    void FUN_009caac0(const char* apReason);
-    void FUN_009cbb70();
+    FUN_009cbb70_actor* CombatProcedure_GetAttacker();
+    FUN_009cbb70_actor* GetTarget_00996e00();
+    void CombatProcedure_SetFailed(const char* apReason);
+    void CombatProcedureAttackLow_Update();
 };
 
 // @fnv 0x009cbb70
-void FUN_009cbb70_shell::FUN_009cbb70()
+// src: XBOX_PDB 0x009cbb70
+void FUN_009cbb70_shell::CombatProcedureAttackLow_Update()
 {
-    FUN_009cbb70_actor* kActor = FUN_00996de0();
-    FUN_009cbb70_actor* pTarget = FUN_00996e00();
-    FUN_0099a2d0_state* pState2 = pController->FUN_00586150();
-    if (!pTarget || pTarget->FUN_00575ca0() != kActor->FUN_00575ca0())
+    FUN_009cbb70_actor* kActor = CombatProcedure_GetAttacker();
+    FUN_009cbb70_actor* pTarget = GetTarget_00996e00();
+    FUN_0099a2d0_state* pState2 = pController->CombatController_GetCombatState();
+    if (!pTarget || pTarget->TESObjectREFR_GetSpace() != kActor->TESObjectREFR_GetSpace())
     {
-        FUN_009caac0(DAT_01090b30);
+        CombatProcedure_SetFailed(DAT_01090b30);
         return;
     }
 
     if (iState == 0)
     {
         pWeapon = pState2->GetBestWeapon();
-        int aIType = pWeapon ? pWeapon->FUN_00522c80() : 6;
+        int aIType = pWeapon ? pWeapon->TESObjectWEAP_GetCombatWeaponType() : 6;
         fTime = pState2->FUN_0097ac90(aIType);
         if (pWeapon)
         {
-            FUN_004459e0* pItem = kActor->FUN_00576260(pWeapon, 0);
+            FUN_004459e0* pItem = kActor->TESObjectREFR_GetInventoryItem_00576260(pWeapon, 0);
             if (!pItem)
             {
                 pState2->SetAttacker(true);
                 return;
             }
-            fTimeCur = pItem->FUN_004bcdb0(1);
+            fTimeCur = pItem->ItemChange_GetItemHealth(1);
             delete pItem;
         }
         iState = 1;
     }
 
-    int iType = pWeapon ? pWeapon->FUN_00522c80() : 6;
+    int iType = pWeapon ? pWeapon->TESObjectWEAP_GetCombatWeaponType() : 6;
     if (pWeapon && pWeapon != pState2->FUN_0097c150(iType))
     {
         pState2->SetAttacker(true);
@@ -340,20 +345,20 @@ void FUN_009cbb70_shell::FUN_009cbb70()
         return;
     }
 
-    float fChance3 = pTarget->FUN_008a6650(0) ? FUN_00403e20(&DAT_011ce230) : FUN_00403e20(&DAT_011cfbb4);
+    float fChance3 = pTarget->Actor_IsFleeing(0) ? Setting_Float_00403e20(&DAT_011ce230) : Setting_Float_00403e20(&DAT_011cfbb4);
     if (RandomFloat(0.0f, 1.0f) < fChance3)
     {
         FUN_008c1c30 spPackage(new FUN_009b4d90);
-        FUN_009b5720(spPackage, kActor, pTarget, fTime);
-        pTarget->FUN_0089a760(spPackage, 0);
+        HitData_InitializeHitData(spPackage, kActor, pTarget, fTime);
+        pTarget->Actor_HitMe(spPackage, 0);
     }
 
-    if (pWeapon && pWeapon->GetCurrentAmmo(reinterpret_cast<Actor*>(kActor)) && kActor->FUN_008a8dd0(pWeapon))
+    if (pWeapon && pWeapon->GetCurrentAmmo(reinterpret_cast<Actor*>(kActor)) && kActor->Actor_ShouldUseAmmo(pWeapon))
     {
         void* pAmmoA = pWeapon->GetCurrentAmmo(reinterpret_cast<Actor*>(kActor));
         int iCountCur = kActor->FUN_00575610(pAmmoA);
-        int iClip = FUN_00645d00(kActor, pWeapon, 0);
-        iClip = FUN_00647b70(iClip, 1);
+        int iClip = ActorValueOwner_GetWeaponAnimMult(kActor, pWeapon, 0);
+        iClip = BSMAX_00647b70(iClip, 1);
         iClip = MinInt(iClip, iCountCur);
         kActor->v095(pAmmoA, 0, iClip, 0, 0, 0, 0, 0, 1, 0);
         if (iClip == iCountCur)

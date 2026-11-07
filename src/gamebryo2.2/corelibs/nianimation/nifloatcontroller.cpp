@@ -17,7 +17,8 @@ public:
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00a57970
-void NiFloatController::FUN_00a57970(NiStream& stream)
+// src: XBOX_PDB 0x00a57970
+void NiFloatController::LoadBinary_00a57970(NiStream& stream)
 {
     NiTimeController::LoadBinary(stream);
     stream.ResetStreamState();
@@ -25,7 +26,8 @@ void NiFloatController::FUN_00a57970(NiStream& stream)
 
 // Calls ProcessClone on this and, if the pointer at offset 0x38 is set, on that object too.
 // @fnv 0x00a57a40
-void NiFloatController::FUN_00a57a40(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a57a40
+void NiFloatController::ProcessClone_00a57a40(CloningProcess& kCloning)
 {
     NiTimeController::ProcessClone(kCloning);
     NiFloatData* pData = m_spFloatData;
@@ -43,7 +45,8 @@ struct FakeObj543
 };
 // Links the object obtained from the stream into the field at offset 0x38, releasing the previous object and incrementing the new one's reference count.
 // @fnv 0x00a57a70
-void NiFloatController::FUN_00a57a70(NiStream& kStream)
+// src: XBOX_PDB 0x00a57a70
+void NiFloatController::LinkObject_00a57a70(NiStream& kStream)
 {
     NiTimeController::LinkObject(kStream);
     FakeObj543* pkObj = (FakeObj543*)kStream.GetLoadedObject();
@@ -99,7 +102,8 @@ TimedAnimationKey* NiFloatController::GetFloatKeys(unsigned int& uiNumKeys, NiAn
 }
 
 // @fnv 0x00a57ad0
-bool NiFloatController::FUN_00a57ad0(NiStream& stream)
+// src: XBOX_PDB 0x00a57ad0
+bool NiFloatController::RegisterStreamables_00a57ad0(NiStream& stream)
 {
     if (!NiTimeController::RegisterStreamables(stream))
         return false;
@@ -108,7 +112,8 @@ bool NiFloatController::FUN_00a57ad0(NiStream& stream)
 }
 
 // @fnv 0x00a57b00
-void __thiscall NiFloatController::FUN_00a57b00(NiStream& stream)
+// src: XBOX_PDB 0x00a57b00
+void __thiscall NiFloatController::SaveBinary_00a57b00(NiStream& stream)
 {
     ((BaseHack_nifloatcontroller*)this)->FUN_00a6d730(stream);
     stream.SaveLinkID(reinterpret_cast<const NiObject*>(m_spFloatData));
@@ -202,9 +207,10 @@ NiFloatController::~NiFloatController()
 
 // Compare the controller base and the referenced float data.
 // @fnv 0x00a57b20
-bool NiFloatController::FUN_00a57b20(NiFloatController* other)
+// src: XBOX_PDB 0x00a57b20
+bool NiFloatController::IsEqual_00a57b20(NiFloatController* other)
 {
-    if (!FUN_00a6cc80(other))
+    if (!NiTimeController_IsEqual(other))
     {
         return false;
     }

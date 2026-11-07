@@ -7,15 +7,17 @@
 #include "../../../include/ValueModifierEffect.h"
 
 // @fnv 0x008264b0
-void ParalysisEffect::FUN_008264b0()
+// src: XBOX_PDB 0x008264b0
+void ParalysisEffect::Finish_008264b0()
 {
     ValueModifierEffect::ApplyEffect();
 }
 
 // @fnv 0x00826550
-void ParalysisEffect::FUN_00826550(Actor* apActor)
+// src: XBOX_PDB 0x00826550
+void ParalysisEffect::FinishInitLoadGame_00826550(Actor* apActor)
 {
-    ValueModifierEffect::FUN_0082cd10(apActor);
+    ValueModifierEffect::ValueModifierEffect_FinishInitLoadGame(apActor);
 }
 
 // @fnv 0x008262e0
@@ -371,7 +373,7 @@ struct ParalysisEffectSubject
     virtual void vfunc22C();
     virtual void vfunc230();
     virtual bool IsSubjectActive();
-    void FUN_00934250();
+    void MobileObject_StopCurrentDialogue();
 };
 
 struct ParalysisSourceHolder
@@ -381,7 +383,8 @@ struct ParalysisSourceHolder
 
 // Gets the paralysis subject via FUN_0059bb30/FUN_00822b40, calls FUN_00934250 on it, reads IsSubjectActive, then calls FUN_0082c000.
 // @fnv 0x008263c0
-void ParalysisEffect::FUN_008263c0()
+// src: XBOX_PDB 0x008263c0
+void ParalysisEffect::Start_008263c0()
 {
     bool active;
     {
@@ -391,7 +394,7 @@ void ParalysisEffect::FUN_008263c0()
         }
         else
         {
-            subject->FUN_00934250();
+            subject->MobileObject_StopCurrentDialogue();
             active = subject->IsSubjectActive();
             ValueModifierEffect::Start();
         }
@@ -402,7 +405,8 @@ void __cdecl ApplyHavokOperation(NiAVObject*, int, int);
 
 // Calls FUN_004534f0 with actor, then calls FUN_00c8f210 with 0 and 1 if actor->Get3DSimple() is non-null.
 // @fnv 0x00826570
-void ParalysisEffect::FUN_00826570(TESObjectREFR* actor)
+// src: XBOX_PDB 0x00826570
+void ParalysisEffect::Revert_00826570(TESObjectREFR* actor)
 {
     NiAVObject* object;
     ActiveEffect::Revert((Actor*)actor);

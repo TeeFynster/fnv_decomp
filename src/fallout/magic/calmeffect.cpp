@@ -6,7 +6,8 @@
 
 // Calls ClearCasterIfMatch on the caster; if it returns true, dispels the effect and returns that result.
 // @fnv 0x0080ba50
-bool __thiscall CalmEffect::FUN_0080ba50(MagicCaster* caster)
+// src: XBOX_PDB 0x0080ba50
+bool __thiscall CalmEffect::AbsorbEffect_CheckDeletedCaster(MagicCaster* caster)
 {
     bool result = ClearCasterIfMatch(caster);
     if (result)
@@ -16,7 +17,8 @@ bool __thiscall CalmEffect::FUN_0080ba50(MagicCaster* caster)
 
 // Allocates a CalmEffect from the caster, spell and effect, copies its state, and returns it.
 // @fnv 0x0080a930
-CalmEffect* CalmEffect::FUN_0080a930()
+// src: XBOX_PDB 0x0080a930
+CalmEffect* CalmEffect::Copy_0080a930()
 {
     CalmEffect* presult = new CalmEffect(m_pEffectInstance, pSpell, pEffect);
     CopyData(presult);
@@ -307,7 +309,8 @@ struct FUN_00822b40_Class
 
 
 // @fnv 0x0080abf0
-void CalmEffect::FUN_0080abf0()
+// src: XBOX_PDB 0x0080abf0
+void CalmEffect::Finish_0080abf0()
 {
     ApplyEffect();
     FUN_0080abf0_Target* target = ActiveEffect::FUN_0059bb30() ? ((FUN_00822b40_Class*)ActiveEffect::FUN_0059bb30())->FUN_00822b40() : 0;
@@ -515,21 +518,22 @@ struct FUN_0080a9e0_Caster
 
 struct FUN_0080a9e0_Helper
 {
-    bool FUN_00493bb0();
-    unsigned short FUN_0087f9f0();
+    bool Actor_IsInCombat();
+    unsigned short GetLevel_0087f9f0();
 };
 
-bool __cdecl FUN_006494d0(unsigned short a, float b);
+bool __cdecl MagicFormulas_CheckTargetLevelMagnitude(unsigned short a, float b);
 
 
 // @fnv 0x0080a9e0
-bool CalmEffect::FUN_0080a9e0(MagicCaster* caster)
+// src: XBOX_PDB 0x0080a9e0
+bool CalmEffect::CheckTarget_0080a9e0(MagicCaster* caster)
 {
     FUN_0080a9e0_Effect* pEffect;
     pEffect = (caster != 0) ? ((FUN_0080a9e0_Caster*)caster)->FUN_00822b40() : 0;
-    if (pEffect != 0 && !pEffect->vf08B(false) && !pEffect->vf0BA() && ((FUN_0080a9e0_Helper*)pEffect)->FUN_00493bb0())
+    if (pEffect != 0 && !pEffect->vf08B(false) && !pEffect->vf0BA() && ((FUN_0080a9e0_Helper*)pEffect)->Actor_IsInCombat())
     {
-        if (FUN_006494d0(((FUN_0080a9e0_Helper*)pEffect)->FUN_0087f9f0(),
+        if (MagicFormulas_CheckTargetLevelMagnitude(((FUN_0080a9e0_Helper*)pEffect)->GetLevel_0087f9f0(),
                          GetFloatAtOffset1C()))
         {
             return true;
@@ -822,7 +826,8 @@ struct FUN_0080aa90_Holder
 
 // Starts the value modifier, then stops the target actor moving when its process is available.
 // @fnv 0x0080aa90
-void CalmEffect::FUN_0080aa90()
+// src: XBOX_PDB 0x0080aa90
+void CalmEffect::Start_0080aa90()
 {
     FUN_0080aa90_Obj* pObject;
 
@@ -1113,7 +1118,8 @@ struct FUN_0080ab10_obj
 
 
 // @fnv 0x0080ab10
-void CalmEffect::FUN_0080ab10(float afValue)
+// src: XBOX_PDB 0x0080ab10
+void CalmEffect::Update_0080ab10(float afValue)
 {
     unsigned char flag;
     FUN_0080ab10_obj* obj;

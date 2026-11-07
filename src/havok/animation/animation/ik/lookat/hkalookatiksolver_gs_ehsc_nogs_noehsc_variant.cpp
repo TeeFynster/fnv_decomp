@@ -10,7 +10,8 @@
 extern float DAT_01011d78;
 
 // @fnv 0x00ce0110
-void __cdecl FUN_00ce0110(float* v)
+// src: GUESS 0x00ce0110 (confidence: low)
+void __cdecl HkalookatiksolverGsEhscNogsNoehsc_UpdateState_00ce0110(float* v)
 {
     volatile float x = v[0];
     float y = v[1];

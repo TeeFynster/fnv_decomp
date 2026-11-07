@@ -37,7 +37,8 @@ struct WheelAngleScalar
     }
 };
 // @fnv 0x00d4e480
-void __fastcall FUN_00d4e480(hkpWheelConstraintData* self, void*, float angle)
+// src: GUESS 0x00d4e480 (confidence: low)
+void __fastcall hkpWheelConstraintData_UpdateFields_00d4e480(hkpWheelConstraintData* self, void*, float angle)
 {
     // The shared atoms header exposes padding: rotation B columns 0 and 2 are at +0xf0 and +0x110.
     __m128& steeringDirection = *reinterpret_cast<__m128*>(self->m_kBridgeAtoms.pad0 + 0xf0);

@@ -61,7 +61,7 @@ ThunkDerived::ThunkDerived()
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_005fbfe0();
+    virtual void AdjustThisAndForward_005fbfe0();
     int unk04;
     int unk08;
     int unk0C;
@@ -96,14 +96,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_005fbfe0();
+    virtual void AdjustThisAndForward_005fbfe0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x005fbfe0
-    virtual void FUN_005fbfe0();
+// src: GUESS 0x005fbfe0 (confidence: low)
+    virtual void AdjustThisAndForward_005fbfe0();
 };
 
 Derived::Derived()
@@ -121,7 +122,7 @@ namespace fnv_005fc020 {
 // emit the vtables and the adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_005fc020();
+    virtual void AdjustThisAndForward_005fc020();
     int unk04;
     int unk08;
     int unk0C;
@@ -156,14 +157,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_005fc020();
+    virtual void AdjustThisAndForward_005fc020();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x005fc020
-    virtual void FUN_005fc020();
+// src: GUESS 0x005fc020 (confidence: low)
+    virtual void AdjustThisAndForward_005fc020();
 };
 
 Derived::Derived()

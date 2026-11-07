@@ -12,7 +12,7 @@ public:
 
     ExtraOwnership();
     ExtraOwnership(TESForm* owner);
-    bool FUN_00431a70(BSExtraData* apCompare);
+    bool Compare_00431a70(BSExtraData* apCompare);
 
     void* pOwner;
 };

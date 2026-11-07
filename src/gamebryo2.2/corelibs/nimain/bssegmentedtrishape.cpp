@@ -7,7 +7,8 @@
 extern "C" void* g_011f5b40;
 
 // @fnv 0x00a86fe0
-void* __cdecl FUN_00a86fe0()
+// src: COMMUNITY 0x00a86fe0
+void* __cdecl BSSegmentedTriShape_GetRTTI()
 {
     return &g_011f5b40;
 }
@@ -16,7 +17,8 @@ void __cdecl FinalizeEntries();
 void __cdecl FUN_00a745c0();
 
 // @fnv 0x00a87120
-void __cdecl FUN_00a87120()
+// src: XBOX_PDB 0x00a87120
+void __cdecl BSSegmentedTriShape_RenderImmediate()
 {
     FinalizeEntries();
     FUN_00a745c0();
@@ -137,7 +139,8 @@ void __cdecl FinalizeEntries();
 void __cdecl FUN_00a74600();
 // Calls FinalizeEntries then FUN_00a74600 in sequence.
 // @fnv 0x00a87130
-void __cdecl FUN_00a87130()
+// src: XBOX_PDB 0x00a87130
+void __cdecl BSSegmentedTriShape_OnlyRenderImmediate()
 {
     FinalizeEntries();
     FUN_00a74600();
@@ -257,7 +260,7 @@ struct EntryPod70
 
     static void* operator new[](unsigned int aSize)
     {
-        return DAT_011f6238.FUN_00aa3e40(aSize);
+        return DAT_011f6238.Game_DoHeapAlloc(aSize);
     }
     static void operator delete[](void* apBlock)
     {
@@ -267,14 +270,14 @@ struct EntryPod70
 
 struct FUN_00a871a0_cls : Target
 {
-    void FUN_00a744c0(Target* apDst, unsigned int aFlag);
+    void NiTriShape_CopyMembers(Target* apDst, unsigned int aFlag);
     void CopyEntries(Target* apDst, unsigned int aFlag);
 };
 // Calls FUN_00a744c0, frees apDst->entries, then copies unkC8 and active and deep-copies the entries array into apDst, or clears it when entries is null.
 // @fnv 0x00a871a0
 void FUN_00a871a0_cls::CopyEntries(Target* apDst, unsigned int aFlag)
 {
-    FUN_00a744c0(apDst, aFlag);
+    NiTriShape_CopyMembers(apDst, aFlag);
     if (apDst->entries != 0)
     {
         DAT_011f6238.Deallocate(apDst->entries);
@@ -296,7 +299,7 @@ void FUN_00a871a0_cls::CopyEntries(Target* apDst, unsigned int aFlag)
 
 extern "C" void* DAT_0109e834;
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct FUN_00a744a0_shell
 {
@@ -317,7 +320,7 @@ struct FUN_00a87340_cls
 Target* FUN_00a87340_cls::CreateTarget(unsigned int volatile flags)
 {
     Target* self = reinterpret_cast<Target*>(this);
-    Target* obj = reinterpret_cast<Target*>(FUN_00aa13e0(0xd0));
+    Target* obj = reinterpret_cast<Target*>(Object_DispatchCommandFour(0xd0));
     if (obj != 0)
     {
         reinterpret_cast<FUN_00a744a0_shell*>(obj)->FUN_00a744a0();
@@ -496,7 +499,7 @@ struct S_a873b0_E : Entry
 {
     static void* operator new[](unsigned int n)
     {
-        return DAT_011f6238.FUN_00aa3e40(n);
+        return DAT_011f6238.Game_DoHeapAlloc(n);
     }
 };
 static __forceinline void S_a873b0_BinRead(S_a873b0_Bin* bin, void* v, unsigned int bytes)
@@ -555,7 +558,7 @@ struct S_a873b0_Base
     int unkb8;
     int unkbc;
     int unkc0;
-    void FUN_00a98ea0(S_a873b0_Stream* s);
+    void NiParticleMeshes_LoadBinary(S_a873b0_Stream* s);
 };
 struct S_a873b0_T : S_a873b0_Base
 {
@@ -569,7 +572,7 @@ struct S_a873b0_T : S_a873b0_Base
 // @fnv 0x00a873b0
 void S_a873b0_T::ReadFromStream(S_a873b0_Stream* pStream)
 {
-    FUN_00a98ea0(pStream);
+    NiParticleMeshes_LoadBinary(pStream);
     if (entries)
         DAT_011f6238.Deallocate(entries);
     S_a873b0_BinRead(pStream->istr, &count, 4);
@@ -605,7 +608,7 @@ struct StreamFor87520
     unsigned int unk08;
     StreamIoFn io;
 };
-void __stdcall FUN_00a71d10(void* owner);
+void __stdcall NiParticleMeshes_SaveBinary(void* owner);
 struct FUN_00a87520_shell : Target
 {
     void ReadEntries(void* owner);
@@ -614,7 +617,7 @@ struct FUN_00a87520_shell : Target
 // @fnv 0x00a87520
 void FUN_00a87520_shell::ReadEntries(void* owner)
 {
-    FUN_00a71d10(owner);
+    NiParticleMeshes_SaveBinary(owner);
     StreamFor87520* stream = *(StreamFor87520**)((char*)owner + 0x250);
     {
         unsigned int countBytes = 4;
@@ -800,8 +803,8 @@ extern "C" const char DAT_0109e938[];
 extern "C" const char DAT_0109e94c[];
 extern "C" const char DAT_0109e95c[];
 extern "C" void* g_011f5b40;
-void* __cdecl FUN_00a7d330(void* value);
-void* __cdecl FUN_00a7d510(const char* fmt, unsigned int value);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* value);
+void* __cdecl NiGetViewerString_00a7d510(const char* fmt, unsigned int value);
 
 struct S00a87620_Obj
 {
@@ -865,8 +868,8 @@ struct S00a87620_Obj
 void S00a87620_Obj::AddToItemList(ItemList* apItemList)
 {
     this->FUN_00a74690(apItemList);
-    apItemList->Add(FUN_00a7d330(g_011f5b40));
-    apItemList->Add(FUN_00a7d510(DAT_0109e95c, this->count));
+    apItemList->Add(NiViewerStrings_NiGetViewerString_Title(g_011f5b40));
+    apItemList->Add(NiGetViewerString_00a7d510(DAT_0109e95c, this->count));
 
     if (this->entries != 0)
     {
@@ -877,12 +880,12 @@ void S00a87620_Obj::AddToItemList(ItemList* apItemList)
             {
                 if (this->entries[i].enabled)
                 {
-                    void* item = FUN_00a7d510(DAT_0109e94c, i);
+                    void* item = NiGetViewerString_00a7d510(DAT_0109e94c, i);
                     apItemList->Add(item);
                 }
                 else
                 {
-                    void* item = FUN_00a7d510(DAT_0109e938, i);
+                    void* item = NiGetViewerString_00a7d510(DAT_0109e938, i);
                     apItemList->Add(item);
                 }
             }
@@ -891,6 +894,6 @@ void S00a87620_Obj::AddToItemList(ItemList* apItemList)
                 nullCount++;
             }
         }
-        apItemList->Add(FUN_00a7d510(DAT_0109e928, nullCount));
+        apItemList->Add(NiGetViewerString_00a7d510(DAT_0109e928, nullCount));
     }
 }

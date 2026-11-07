@@ -21,28 +21,28 @@ public:
     virtual void vf51();
     virtual void vf52();
 
-    void FUN_005620e0(void*);
-    void FUN_0080fb00(void*);
-    float FUN_005d10f0();
-    void FUN_0087cee0();
+    void SetPosition_005620e0(void*);
+    void bhkCharacterProxy_SetLinearVelocity(void*);
+    float bhkCharacterController_GetFallStartHeight();
+    void bhkCharacterController_QHitDamage();
     void ResetState();
     float& GetVectorElement(int index);
-    CollisionFilter FUN_0070c440();
-    void FUN_00561630(const NiPoint3& param_1);
-    void FUN_005617c0(void* controller);
+    CollisionFilter bhkCharacterController_GetCollisionFilter();
+    void bhkRigidBody_SetAngularVelocity(const NiPoint3& param_1);
+    void bhkRigidBody_SetAngularVelocity_005617c0(void* controller);
     void SetInactive();
-    void FUN_00c70c90(int);
-    void FUN_008a50d0(float);
+    void bhkCharacterController_SetWorld(int);
+    void hkSphere_setRadius(float);
     void SubtractVectors(Vec4* result);
-    bool FUN_00c6fa20();
-    int __fastcall FUN_005c0880(char*);
+    bool CheckInsideOfObject();
+    int __fastcall bhkCharacterController_GetState(char*);
     float GetValue();
-    void FUN_0066ca00(void*);
+    void bhkCharacterProxy_GetLinearVelocity(void*);
 
     struct ControllerState
     {
-        void FUN_00629670(int, bool);
-        bool FUN_008b7320();
+        void bhkCharacterListener_SetFlag(int, bool);
+        bool bhkCharacterListener_StuckToSomeone();
     };
 
     union

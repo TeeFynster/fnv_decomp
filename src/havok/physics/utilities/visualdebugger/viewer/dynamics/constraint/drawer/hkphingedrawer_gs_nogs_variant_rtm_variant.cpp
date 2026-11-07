@@ -129,12 +129,13 @@ struct Drawer
     void drawFramesD(int id, int tag);
     void drawPivotsD(int id, int tag);
 
-    void FUN_00de7f20(const hkpConstraintInstanceD* constraint, hkDebugDisplayHandlerD* displayHandler, int id,
+    void UpdateFields_00de7f20(const hkpConstraintInstanceD* constraint, hkDebugDisplayHandlerD* displayHandler, int id,
                       int tag);
 };
 
 // @fnv 0x00de7f20
-void Drawer::FUN_00de7f20(const hkpConstraintInstanceD* constraint, hkDebugDisplayHandlerD* displayHandler, int id,
+// src: GUESS 0x00de7f20 (confidence: low)
+void Drawer::UpdateFields_00de7f20(const hkpConstraintInstanceD* constraint, hkDebugDisplayHandlerD* displayHandler, int id,
                           int tag)
 {
     hkpHingeConstraintDataD* data = constraint->m_data;

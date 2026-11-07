@@ -2,7 +2,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include "../../include/TESUseItemPackageData.h"
 
-extern "C" void __cdecl FUN_004856d0(int);
+extern "C" void __cdecl TESForm_AddChunk(int);
 struct LocationDescriptor
 {
     ~LocationDescriptor();
@@ -12,7 +12,7 @@ struct LocationDescriptor
 // @fnv 0x0067c9d0
 void TESUseItemPackageData::vf03()
 {
-    FUN_004856d0(0x44495550);
+    TESForm_AddChunk(0x44495550);
     if (this->m_pPackageTarget != 0)
         this->m_pPackageTarget->Save(0x32444c50);
 }

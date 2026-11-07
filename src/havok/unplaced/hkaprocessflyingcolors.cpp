@@ -62,7 +62,8 @@ static __forceinline float expandWord(float low, float high, u16 b)
 }
 
 int FindKeyInterval(int, int, u8, const u8*);
-__declspec(noinline) int FUN_00e32f10(const u8*& cur, int* total, int* order, int tick, float scaleTime, float* times)
+// src: HAVOK_LIB 0x00e32f10
+__declspec(noinline) int hkaSplineCompressedAnimation_readKnots(const u8*& cur, int* total, int* order, int tick, float scaleTime, float* times)
 {
     int count = *reinterpret_cast<const u16*>(cur);
     cur += 2;
@@ -76,7 +77,7 @@ __declspec(noinline) int FUN_00e32f10(const u8*& cur, int* total, int* order, in
     *order = degree;
     return span;
 }
-int FUN_00e32f10(const u8*& cur, int* p28, int* p24, int a1, float f1, float* buf);
+int hkaSplineCompressedAnimation_readKnots(const u8*& cur, int* p28, int* p24, int a1, float f1, float* buf);
 void BlendVector4(u8 flags, float* v, Point4* outp, int aux);
 
 static __forceinline void fillPoint(u8 bits, const Point4& fixedValues, const Point4& defaultValues, Point4& result)
@@ -95,7 +96,8 @@ static __forceinline void fillPoint(u8 bits, const Point4& fixedValues, const Po
 }
 
 // @fnv 0x00e33a30
-void __cdecl FUN_00e33a30(const u8*& cur, int aiTick, float afScaleTime, float f2, u32 flags, int idx, Point4* outp,
+// src: HAVOK_LIB 0x00e33a30
+void __cdecl hkaSplineCompressedAnimation_readNURBSCurve(const u8*& cur, int aiTick, float afScaleTime, float f2, u32 flags, int idx, Point4* outp,
                           int aux)
 {
     int stride;
@@ -114,7 +116,7 @@ void __cdecl FUN_00e33a30(const u8*& cur, int aiTick, float afScaleTime, float f
     u8 fb = (u8)flags;
     if ((u8)(fb & 0xf0) != 0)
     {
-        iSpan = FUN_00e32f10(cur, &iCount, &iDegree, aiTick, afScaleTime, buf);
+        iSpan = hkaSplineCompressedAnimation_readKnots(cur, &iCount, &iDegree, aiTick, afScaleTime, buf);
     }
     else
     {

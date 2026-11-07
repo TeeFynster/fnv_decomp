@@ -3,16 +3,16 @@
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/havok/common/base/memory/system/hkmemorysystem.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-int __stdcall FUN_00cbc440(int a, int b);
+int __stdcall hkMemorySystem_debugTagAddress(int a, int b);
 extern int DAT_01268418;
-int FUN_00cbbfc0();
+int hkMemorySystem_getInstance();
 extern int g_CBBFD0Value;
-int __cdecl FUN_00cbbfd0();
+int __cdecl hkMemorySystem_GetCBBFD0Value();
 extern int DAT_010c8efc;
 struct FUN_00cbbfe0_This
 {
     int unk00;
-    void __thiscall FUN_00cbbfe0();
+    void __thiscall SetVirtualTable_00cbbfe0();
 };
 // FUN_00cbc450 - 10 bytes
 //   call 0xcbbfe0
@@ -37,10 +37,11 @@ static const VTable g_vtbl = {
 struct MyCls
 {
     const VTable* m_vtbl;
-    __declspec(noinline) void FUN_00cbbfe0();
-    MyCls* FUN_00cbc450(int arg);
+    __declspec(noinline) void SetVirtualTable_00cbbfe0();
+    MyCls* EvaluateValue_00cbc450(int arg);
 };
-void MyCls::FUN_00cbbfe0()
+// src: GUESS 0x00cbbfe0 (confidence: low)
+void MyCls::SetVirtualTable_00cbbfe0()
 {
     m_vtbl = &g_vtbl;
 }
@@ -50,18 +51,19 @@ struct Quantity
     unsigned int m_quantity;
     void SetQuantity(unsigned int q);
 };
-unsigned int __cdecl FUN_005e0b50(void* p, int v);
+unsigned int __cdecl hkAddByteOffset_005e0b50(void* p, int v);
 struct QuantitySet
 {
     Quantity m_kPointA;
     Quantity m_kPointB;
     Quantity m_iThirdValue;
-    void FUN_008c70c0(unsigned int q, int v);
+    void hkStackMemory_initMemory(unsigned int q, int v);
 };
 // @fnv 0x008c70c0
-void QuantitySet::FUN_008c70c0(unsigned int q, int v)
+// src: XBOX_PDB 0x008c70c0
+void QuantitySet::hkStackMemory_initMemory(unsigned int q, int v)
 {
     m_kPointB.SetQuantity(q);
     m_kPointA.SetQuantity(q);
-    m_iThirdValue.SetQuantity(FUN_005e0b50((void*)q, v));
+    m_iThirdValue.SetQuantity(hkAddByteOffset_005e0b50((void*)q, v));
 }

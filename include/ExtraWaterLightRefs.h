@@ -12,7 +12,7 @@ public:
     virtual bool Compare(BSExtraData* apCompare);
 
     ExtraWaterLightRefs();
-    bool FUN_004349c0(BSExtraData* apCompare);
+    bool Compare_004349c0(BSExtraData* apCompare);
     void Copy(BSExtraDataEx* apSource);
 
     LitWaterRefList kRefs;

@@ -17,7 +17,7 @@ class RagdollCollisionFlags : public bhkCollisionObject
 
 typedef void (__thiscall* RagdollCollisionUpdate)(bhkCollisionObject*, int, int, int);
 
-bhkCollisionObject* FUN_004a8b00(NiNode*);
+bhkCollisionObject* bhkNiCollisionObject_GetbhkNiCollisionObject(NiNode*);
 struct TransformEntry
 {
     signed char id;
@@ -35,7 +35,7 @@ class RagDollData
     void ReadFromActor(TESObjectREFR* apRef);
     void ReadFromRef(TESObjectREFR* apRef);
     bool ApplyToAnimationData(NiNode* apNode, unsigned int& auiIndex, unsigned int auiDepth);
-    bool FUN_004d9800(TESObjectREFR* apRef);
+    bool UpdateDataFromReference(TESObjectREFR* apRef);
 };
 
 // Returns the negation of operator== for this matrix compared with another matrix.
@@ -52,19 +52,19 @@ bool RagDollData::FindBoneIndex(NiNode* node, unsigned int& ruiIndex)
     bool result = true;
     if (node && ruiIndex < count)
     {
-        bhkCollisionObject* collision = FUN_004a8b00(node);
+        bhkCollisionObject* collision = bhkNiCollisionObject_GetbhkNiCollisionObject(node);
         if (collision)
         {
             {
-                int id = collision->FUN_006fa820()->FUN_0043b4f0().FUN_004d9da0();
+                int id = collision->bhkNiCollisionObject_GetWorldObject()->bhkWorldObject_GetCollisionFilter().CFilter_GetPart();
                 if (bones[ruiIndex].id != id)
                     return false;
             }
-            node->FUN_00440460(bones[ruiIndex].translate);
+            node->NiAVObject_SetTranslate(bones[ruiIndex].translate);
             NiMatrix3 rotation;
             rotation.FromEulerAnglesXYZ(bones[ruiIndex].rotate.x, bones[ruiIndex].rotate.y, bones[ruiIndex].rotate.z);
-            node->FUN_0043fa80(&rotation);
-            collision->FUN_004d9fa0(true);
+            node->SetRotate_0043fa80(&rotation);
+            collision->bhkNiCollisionObject_SetReset(true);
             reinterpret_cast<RagdollCollisionUpdate>((*reinterpret_cast<void***>(collision))[0xb0 / 4])(collision, 1, 0, 0);
             ++ruiIndex;
         }
@@ -112,17 +112,19 @@ struct CFilter
 typedef char _sizecheck_CFilter[sizeof(CFilter) == 4 ? 1 : -1];
 struct FUN_004d9da0_shell : public CFilter
 {
-    unsigned int FUN_004d9da0();
+    unsigned int CFilter_GetPart();
 };
 
 // @fnv 0x004d9da0
-unsigned int FUN_004d9da0_shell::FUN_004d9da0()
+// src: XBOX_PDB 0x004d9da0
+unsigned int FUN_004d9da0_shell::CFilter_GetPart()
 {
     return (iFilter >> 8) & 0x1f;
 }
 
 // @fnv 0x004d9fa0
-void bhkCollisionObject::FUN_004d9fa0(bool abTF)
+// src: COMMUNITY 0x004d9fa0
+void bhkCollisionObject::bhkNiCollisionObject_SetReset(bool abTF)
 {
     static_cast<RagdollCollisionFlags*>(this)->SetFlags(abTF, 0x40);
 }
@@ -162,12 +164,13 @@ void RagdollCollisionFlags::SetFlags(bool abSet, unsigned short uFlags)
 
 // Recursively counts node and its descendants for which FUN_004a8b00 returns true, returning the total count.
 // @fnv 0x004da180
-unsigned char FUN_004da180(NiNode* node)
+// src: GUESS 0x004da180 (confidence: medium)
+unsigned char NiAVObject_CountCollisionNodes(NiNode* node)
 {
     unsigned char count = 0;
     if (node)
     {
-        if (FUN_004a8b00(node))
+        if (bhkNiCollisionObject_GetbhkNiCollisionObject(node))
             ++count;
         unsigned int total = node->FUN_0043b480();
         for (unsigned int i = 0; i < total; ++i)
@@ -175,7 +178,7 @@ unsigned char FUN_004da180(NiNode* node)
             NiAVObject* object = node->FUN_0043b4a0(i);
             NiNode* child = object ? object->IsSceneNode() : 0;
             if (child)
-                count += FUN_004da180(child);
+                count += NiAVObject_CountCollisionNodes(child);
         }
     }
     return count;
@@ -255,11 +258,12 @@ struct FUN_004d9780_shell
 {
     unsigned char m_ucValue;
     TransformEntry* m_pTransformEntry;
-    bool FUN_004d9780(FUN_004d9780_shell* apCompare);
+    bool RagDollData_Compare(FUN_004d9780_shell* apCompare);
 };
 
 // @fnv 0x004d9780
-bool FUN_004d9780_shell::FUN_004d9780(FUN_004d9780_shell* apCompare)
+// src: XBOX_PDB 0x004d9780
+bool FUN_004d9780_shell::RagDollData_Compare(FUN_004d9780_shell* apCompare)
 {
     if (!apCompare)
         return true;
@@ -297,12 +301,13 @@ struct FUN_004d9670_shell
     DoorTeleportLoadData* items;
     Payload0C data;
 
-    void FUN_004d9670(const FUN_004d9670_shell* source);
+    void RagDollData_Copy(const FUN_004d9670_shell* source);
 };
 
 // Copies count, data and the items array from source into this object, reallocating the items buffer.
 // @fnv 0x004d9670
-void FUN_004d9670_shell::FUN_004d9670(const FUN_004d9670_shell* source)
+// src: COMMUNITY 0x004d9670
+void FUN_004d9670_shell::RagDollData_Copy(const FUN_004d9670_shell* source)
 {
     if (source)
     {
@@ -338,20 +343,21 @@ struct FUN_004d93c0_cls
     unsigned char m_uiItemCount;
     FUN_004d93c0_bone* m_kBones;
     FUN_004d93c0_name m_name;
-    void FUN_004d93c0();
+    void RagDollData_Save();
 };
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int tag, void* p, unsigned int size);
-void __cdecl FUN_00485710(unsigned int tag, void* p, unsigned int n);
+void __cdecl TESForm_AddChunkArray_00485710(unsigned int tag, void* p, unsigned int n);
 extern char DAT_011f426c[];
 
 // @fnv 0x004d93c0
-void FUN_004d93c0_cls::FUN_004d93c0()
+// src: COMMUNITY 0x004d93c0
+void FUN_004d93c0_cls::RagDollData_Save()
 {
     if (m_uiItemCount != 0)
     {
-        if (FUN_00401500())
+        if (TESForm_QEndianSwapOnSave())
         {
             for (unsigned int i = 0; i < m_uiItemCount; i++)
             {
@@ -359,7 +365,7 @@ void FUN_004d93c0_cls::FUN_004d93c0()
             }
         }
         AppendChunk(0x44475258, m_kBones, m_uiItemCount * 28);
-        if (FUN_00401500())
+        if (TESForm_QEndianSwapOnSave())
         {
             for (unsigned int uiSwapIndex = 0; uiSwapIndex < m_uiItemCount; uiSwapIndex++)
             {
@@ -369,12 +375,13 @@ void FUN_004d93c0_cls::FUN_004d93c0()
     }
     if (m_name.Matches(DAT_011f426c))
     {
-        FUN_00485710(0x42475258, &m_name, 3);
+        TESForm_AddChunkArray_00485710(0x42475258, &m_name, 3);
     }
 }
 
 // @fnv 0x004d9800
-bool RagDollData::FUN_004d9800(TESObjectREFR* apRef)
+// src: XBOX_PDB 0x004d9800
+bool RagDollData::UpdateDataFromReference(TESObjectREFR* apRef)
 {
     unsigned int uiIndex = 0;
     bool bResultTmp = true;
@@ -405,19 +412,20 @@ struct NiMatrix3Cmp
     bool NotEqual(const NiMatrix3& m) const;
 };
 
-void __cdecl FUN_00c6bd00(NiAVObject* apObject, bool abFlag);
-void __cdecl FUN_00c6a350(NiNode* apNode, int aiVal, bool ab1, bool ab2, bool ab3);
+void __cdecl bhkNiCollisionObject_ResetSim(NiAVObject* apObject, bool abFlag);
+void __cdecl bhkWorld_SetMotion(NiNode* apNode, int aiVal, bool ab1, bool ab2, bool ab3);
 
 struct RagDollRefUpdater
 {
     bool bEnabled;
     void SyncRef(TESObjectREFR* apRef);
     bool ApplyToAnimationData(NiNode* apNode, unsigned int& auiCount);
-    bool FUN_004d9910(TESObjectREFR* apRef);
+    bool RagDollData_UpdateReferenceFromData(TESObjectREFR* apRef);
 };
 
 // @fnv 0x004d9910
-bool RagDollRefUpdater::FUN_004d9910(TESObjectREFR* apRef)
+// src: XBOX_PDB 0x004d9910
+bool RagDollRefUpdater::RagDollData_UpdateReferenceFromData(TESObjectREFR* apRef)
 {
     unsigned int ItemUpdateArray = 0;
     bool bResult = true;
@@ -430,18 +438,18 @@ bool RagDollRefUpdater::FUN_004d9910(TESObjectREFR* apRef)
         bResult = ApplyToAnimationData(pNode4, ItemUpdateArray);
         if (p3D2)
         {
-            if (((NiPoint3Cmp&)p3D2->FUN_0043c490()).NotEqual(*static_cast<const TESObjectREFR*>(apRef)->GetPos()) ||
-                ((NiMatrix3Cmp&)p3D2->FUN_006a9540()).NotEqual(apRef->GetRotation()))
+            if (((NiPoint3Cmp&)p3D2->GetTranslate_0043c490()).NotEqual(*static_cast<const TESObjectREFR*>(apRef)->GetPos()) ||
+                ((NiMatrix3Cmp&)p3D2->NiAVObject_GetRotate_006a9540()).NotEqual(apRef->GetRotation()))
             {
-                p3D2->FUN_00440460(*static_cast<const TESObjectREFR*>(apRef)->GetPos());
-                p3D2->FUN_0043fa80(apRef->GetRotation());
-                FUN_00c6bd00(p3D2, true);
+                p3D2->NiAVObject_SetTranslate(*static_cast<const TESObjectREFR*>(apRef)->GetPos());
+                p3D2->SetRotate_0043fa80(apRef->GetRotation());
+                bhkNiCollisionObject_ResetSim(p3D2, true);
                 NiUpdateData kData6(0.0f, false, false);
                 p3D2->Update(kData6);
             }
         }
         if (!bResult)
-            FUN_00c6a350(pNode4, 1, 1, 0, 1);
+            bhkWorld_SetMotion(pNode4, 1, 1, 0, 1);
     }
     return ItemUpdateArray == bEnabled && bResult;
 }
@@ -460,19 +468,19 @@ bool RagDollWalker::CollectBoneTransforms(NiNode* apNode, unsigned int& arIndex,
     bool bResult2 = true;
     if (apNode && arIndex < count)
     {
-        bhkCollisionObject* pCollision = FUN_004a8b00(apNode);
+        bhkCollisionObject* pCollision = bhkNiCollisionObject_GetbhkNiCollisionObject(apNode);
         if (pCollision)
         {
             if (abSet)
             {
-                bones[arIndex].id = pCollision->FUN_006fa820()->FUN_0043b4f0().FUN_004d9da0();
+                bones[arIndex].id = pCollision->bhkNiCollisionObject_GetWorldObject()->bhkWorldObject_GetCollisionFilter().CFilter_GetPart();
             }
-            else if (bones[arIndex].id != pCollision->FUN_006fa820()->FUN_0043b4f0().FUN_004d9da0())
+            else if (bones[arIndex].id != pCollision->bhkNiCollisionObject_GetWorldObject()->bhkWorldObject_GetCollisionFilter().CFilter_GetPart())
             {
                 return false;
             }
-            bones[arIndex].translate = apNode->FUN_0043c490();
-            apNode->FUN_006a9540().ToEulerAnglesXYZ(
+            bones[arIndex].translate = apNode->GetTranslate_0043c490();
+            apNode->NiAVObject_GetRotate_006a9540().ToEulerAnglesXYZ(
                 bones[arIndex].rotate.x, bones[arIndex].rotate.y, bones[arIndex].rotate.z);
             arIndex++;
         }
@@ -504,19 +512,20 @@ struct LocalRagdollTransform
     int field08;
     int field0c;
     int field10;
-    void FUN_004da340(TESObjectREFR* source);
+    void RagDollData_UpdateRagDollDataFromBip01Node(TESObjectREFR* source);
 };
 // @fnv 0x004da340
-void LocalRagdollTransform::FUN_004da340(TESObjectREFR* source)
+// src: XBOX_PDB 0x004da340
+void LocalRagdollTransform::RagDollData_UpdateRagDollDataFromBip01Node(TESObjectREFR* source)
 {
     NiAVObject* pObject = source && source->IsActor() ? source->GetNiNode() : 0;
     NiNode* node = pObject ? pObject->IsSceneNode() : 0;
     if (node != 0)
     {
-        NiAVObject* link = node->FUN_0045bc00(0);
+        NiAVObject* link = node->NiNode_GetAtChecked(0);
         if (link != 0)
         {
-            link->FUN_006a9540().ToEulerAnglesXYZ(
+            link->NiAVObject_GetRotate_006a9540().ToEulerAnglesXYZ(
                 reinterpret_cast<float&>(field08), reinterpret_cast<float&>(field0c), reinterpret_cast<float&>(field10));
         }
     }
@@ -547,12 +556,12 @@ void FUN_004da230_shell::UpdateNodeFromPosition(TESObjectREFR* object)
 
         if (pNode != 0)
         {
-            NiNode* node = static_cast<NiNode*>(pNode->FUN_0045bc00(0));
+            NiNode* node = static_cast<NiNode*>(pNode->NiNode_GetAtChecked(0));
             if (node != 0)
             {
                 NiMatrix3 rotation;
                 rotation.FromEulerAnglesXYZ(position.x, position.y, position.z);
-                node->FUN_0043fa80(&rotation);
+                node->SetRotate_0043fa80(&rotation);
                 NiUpdateData update(0.0f, false, false);
                 node->UpdateWorldData(update);
             }
@@ -560,7 +569,7 @@ void FUN_004da230_shell::UpdateNodeFromPosition(TESObjectREFR* object)
     }
 }
 
-unsigned char FUN_004da180(NiNode* node);
+unsigned char NiAVObject_CountCollisionNodes(NiNode* node);
 void FNV_Warning(const char* fmt, ...);
 
 struct RagDollBoneInit : public TransformEntry
@@ -584,7 +593,7 @@ void RagDollDataInit::InitFromRef(TESObjectREFR* apRef)
     {
         NiAVObject* pObj = apRef->GetNiNode();
         NiNode* pNode = pObj ? pObj->IsSceneNode() : 0;
-        count = FUN_004da180(pNode);
+        count = NiAVObject_CountCollisionNodes(pNode);
         if (count)
         {
             bones = new RagDollBoneInit[count];

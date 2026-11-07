@@ -135,7 +135,7 @@ struct TriangleSolver
     hkVector4 m_unk90;
     hkVector4 m_kSmartReference;
 
-    int FUN_00e4da90(const hkVector4& p, TriangleVerts& tri, hkVector4& normalOut);
+    int ComputeTriangleBarycentricTerms(const hkVector4& p, TriangleVerts& tri, hkVector4& normalOut);
 };
 extern "C"
 {
@@ -279,7 +279,7 @@ struct Both
     Clip first;
     Clip second;
 };
-extern "C" int FUN_00d22e40(Shape*, const V*, const V*, const V*, Clip*);
+extern "C" int hkLineSegmentUtil_closestLineSegLineSeg(Shape*, const V*, const V*, const V*, Clip*);
 static __forceinline void ThreeDots(const V& first, const V& firstWeight, const V& second, const V& secondWeight,
                                     const V& third, const V& thirdWeight, V& out)
 {
@@ -328,9 +328,9 @@ struct State
     int m10, m14, m18, m1c;
     V m20, m30, m40, m50, m60, m70, m80, m90, ma0, mb0, mc0, md0, me0, mf0, m100, m110;
     V direction;
-    int FUN_00e4da90(Shape*, Shape*, V*);
-    int FUN_00e4dc70(V*, Shape*, V*);
-    int FUN_00e4bbe0(Shape*, Shape*, int*, int*, unsigned char, int);
+    int ComputeTriangleBarycentricTerms(Shape*, Shape*, V*);
+    int GetTriangleEdgeSignMask(V*, Shape*, V*);
+    int ProcessAndReturnValue_00e4bbe0(Shape*, Shape*, int*, int*, unsigned char, int);
 };
 
 extern "C"
@@ -812,7 +812,7 @@ class SegUtil
         Vec4 m_kClosestPointOnSecond;
         Pad<Real> m_fValue;
     };
-    static int __cdecl FUN_00d22e40(const Vec4& A, const Vec4& dA, const Vec4& B, const Vec4& dB, Result& result);
+    static int __cdecl hkLineSegmentUtil_closestLineSegLineSeg(const Vec4& A, const Vec4& dA, const Vec4& B, const Vec4& dB, Result& result);
 };
 
 extern const SChar DAT_010ececc[];
@@ -849,7 +849,7 @@ enum GskStatus
     GSK_PD_UNSOLVABLE = 5
 };
 
-int __cdecl FUN_00e4b810(const Vec4& point, const Vec4* vertices, Real sign);
+int __cdecl Runtime_ProcessEntries_00e4b810(const Vec4& point, const Vec4* vertices, Real sign);
 
 extern const VComp::Mask DAT_010ec600[];
 extern const VComp::Mask DAT_010ec5f0[];
@@ -888,7 +888,7 @@ class Gsk
         SReal m_fBlendWeight;
     };
 
-    GskStatus FUN_00e4c730(const Input& input, GskCache* __restrict cache, GskOut& output);
+    GskStatus hkGsk_getClosestPoint(const Input& input, GskCache* __restrict cache, GskOut& output);
 
     enum
     {
@@ -929,13 +929,13 @@ class Gsk
     };
 
   protected:
-    int FUN_00e4da90(const Vec4& support, Vec4* __restrict vertices, Vec4& normalOut);
+    int ComputeTriangleBarycentricTerms(const Vec4& support, Vec4* __restrict vertices, Vec4& normalOut);
     int checkTri0(const Vec4& support, Vec4* __restrict vertices, Vec4& normalOut);
     int isPointInTriangle(const Vec4& point, const Vec4* __restrict vertices);
-    NextCase FUN_00e4bbe0(Vec4* __restrict vertexA, Vec4* __restrict vertexB, Pad<int>& dimA, Pad<int>& dimB,
+    NextCase ProcessAndReturnValue_00e4bbe0(Vec4* __restrict vertexA, Vec4* __restrict vertexB, Pad<int>& dimA, Pad<int>& dimB,
                           bool comingFromEdgeEdge, SupportTypes supportType);
     __forceinline ReduceDimensionResult reduceDimension(Pad<int>& dimA, Pad<int>& dimB, Vec4& support);
-    void FUN_00e4c230(const GskShape* shapeA, const GskShape* shapeB, const Xform& aTb, Pad<int>& dimA, Pad<int>& dimB,
+    void ProcessEntries_00e4c230(const GskShape* shapeA, const GskShape* shapeB, const Xform& aTb, Pad<int>& dimA, Pad<int>& dimB,
                       GskOut& output);
 
   public:
@@ -999,7 +999,8 @@ static __forceinline int process_point_edge(Vec4* __restrict vertexA, Vec4* __re
     return dimB;
 }
 
-Gsk::NextCase Gsk::FUN_00e4bbe0(Vec4* __restrict vertexA, Vec4* __restrict vertexB, Pad<int>& dimA, Pad<int>& dimB,
+// src: GUESS 0x00e4bbe0 (confidence: low)
+Gsk::NextCase Gsk::ProcessAndReturnValue_00e4bbe0(Vec4* __restrict vertexA, Vec4* __restrict vertexB, Pad<int>& dimA, Pad<int>& dimB,
                                 bool comingFromEdgeEdge, SupportTypes supportType)
 {
     if (comingFromEdgeEdge)
@@ -1037,8 +1038,8 @@ Gsk::NextCase Gsk::FUN_00e4bbe0(Vec4* __restrict vertexA, Vec4* __restrict verte
             edgeA.setSub4(vertexA[1], vertexA[0]);
             SegUtil::Result result0;
             SegUtil::Result result1;
-            SegUtil::FUN_00d22e40(vertexA[0], edgeA, vertexB[2], edge0, result0);
-            SegUtil::FUN_00d22e40(vertexA[0], edgeA, vertexB[2], edge1, result1);
+            SegUtil::hkLineSegmentUtil_closestLineSegLineSeg(vertexA[0], edgeA, vertexB[2], edge0, result0);
+            SegUtil::hkLineSegmentUtil_closestLineSegLineSeg(vertexA[0], edgeA, vertexB[2], edge1, result1);
 
             int index = (result0.m_fValue > result1.m_fValue) ? 1 : 0;
 
@@ -1055,7 +1056,7 @@ Gsk::NextCase Gsk::FUN_00e4bbe0(Vec4* __restrict vertexA, Vec4* __restrict verte
             swap16(vertexA[4], vertexA[5]);
         }
 
-        int maskT = FUN_00e4da90(vertexA[0], vertexB, m_pSupport);
+        int maskT = ComputeTriangleBarycentricTerms(vertexA[0], vertexB, m_pSupport);
 
         if (maskT == VComp::MASK_XYZ)
         {
@@ -1190,7 +1191,7 @@ Gsk::ReduceDimensionResult Gsk::reduceDimension(Pad<int>& dimA, Pad<int>& dimB, 
 
         case GSK_POINT_TRIANGLE:
         case_point_triangle: {
-            int mask = FUN_00e4da90(m_akPackedVerticesA[0], m_akCachedVectors, m_pSupport);
+            int mask = ComputeTriangleBarycentricTerms(m_akPackedVerticesA[0], m_akCachedVectors, m_pSupport);
             if (mask == VComp::MASK_XYZ)
             {
                 break;
@@ -1247,7 +1248,7 @@ Gsk::ReduceDimensionResult Gsk::reduceDimension(Pad<int>& dimA, Pad<int>& dimB, 
 
         case GSK_TRIANGLE_POINT:
         case_triangle_point: {
-            int mask = FUN_00e4da90(m_akCachedVectors[0], m_akPackedVerticesA, m_pSupport);
+            int mask = ComputeTriangleBarycentricTerms(m_akCachedVectors[0], m_akPackedVerticesA, m_pSupport);
             if (mask == VComp::MASK_XYZ)
             {
                 break;
@@ -1294,7 +1295,7 @@ Gsk::ReduceDimensionResult Gsk::reduceDimension(Pad<int>& dimA, Pad<int>& dimB, 
 
         case GSK_EDGE_TRIANGLE: {
             NextCase nextcase =
-                FUN_00e4bbe0(m_akPackedVerticesA, m_akCachedVectors, dimA, dimB, m_iCacheState == 2, BUILD_POS_SUPPORT);
+                ProcessAndReturnValue_00e4bbe0(m_akPackedVerticesA, m_akCachedVectors, dimA, dimB, m_iCacheState == 2, BUILD_POS_SUPPORT);
             switch (nextcase)
             {
             case NEXT_IS_EDGE_EDGE:
@@ -1307,7 +1308,7 @@ Gsk::ReduceDimensionResult Gsk::reduceDimension(Pad<int>& dimA, Pad<int>& dimB, 
 
         case GSK_TRIANGLE_EDGE: {
             NextCase nextcase =
-                FUN_00e4bbe0(m_akCachedVectors, m_akPackedVerticesA, dimB, dimA, m_iCacheState == 2, BUILD_NEG_SUPPORT);
+                ProcessAndReturnValue_00e4bbe0(m_akCachedVectors, m_akPackedVerticesA, dimB, dimA, m_iCacheState == 2, BUILD_NEG_SUPPORT);
             switch (nextcase)
             {
             case NEXT_IS_EDGE_EDGE:
@@ -1378,7 +1379,7 @@ Gsk::ReduceDimensionResult Gsk::reduceDimension(Pad<int>& dimA, Pad<int>& dimB, 
                 goto case_edge_point;
             }
 
-            int result = SegUtil::FUN_00d22e40(a0, edgeA, b0, edgeB, m_kVectorPairResult);
+            int result = SegUtil::hkLineSegmentUtil_closestLineSegLineSeg(a0, edgeA, b0, edgeB, m_kVectorPairResult);
             if (result == 0)
             {
                 {
@@ -1415,7 +1416,7 @@ Gsk::ReduceDimensionResult Gsk::reduceDimension(Pad<int>& dimA, Pad<int>& dimB, 
             continue;
 
         case GSK_POINT_TETRA: {
-            int maxIndex = FUN_00e4b810(m_akPackedVerticesA[0], m_akCachedVectors, 1.0f);
+            int maxIndex = Runtime_ProcessEntries_00e4b810(m_akPackedVerticesA[0], m_akCachedVectors, 1.0f);
             if (maxIndex >= 0)
             {
                 dimB = dimB - 1;
@@ -1427,7 +1428,7 @@ Gsk::ReduceDimensionResult Gsk::reduceDimension(Pad<int>& dimA, Pad<int>& dimB, 
             goto penetration;
 
         case GSK_TETRA_POINT: {
-            int maxIndex = FUN_00e4b810(m_akCachedVectors[0], m_akPackedVerticesA, -1.0f);
+            int maxIndex = Runtime_ProcessEntries_00e4b810(m_akCachedVectors[0], m_akPackedVerticesA, -1.0f);
             if (maxIndex >= 0)
             {
                 dimA = dimA - 1;
@@ -1449,7 +1450,8 @@ Gsk::ReduceDimensionResult Gsk::reduceDimension(Pad<int>& dimA, Pad<int>& dimB, 
     return REDUCE_DIMENSION_OK;
 }
 
-void Gsk::FUN_00e4c230(const GskShape* shapeA, const GskShape* shapeB, const Xform& aTb, Pad<int>& dimA, Pad<int>& dimB,
+// src: GUESS 0x00e4c230 (confidence: low)
+void Gsk::ProcessEntries_00e4c230(const GskShape* shapeA, const GskShape* shapeB, const Xform& aTb, Pad<int>& dimA, Pad<int>& dimB,
                        GskOut& output)
 {
     int simplexSize = 4;
@@ -1579,7 +1581,8 @@ void Gsk::FUN_00e4c230(const GskShape* shapeA, const GskShape* shapeB, const Xfo
 }
 
 // @fnv 0x00e4c730
-GskStatus Gsk::FUN_00e4c730(const Input& input, GskCache* __restrict cache, GskOut& output)
+// src: XBOX_PDB 0x00e4c730
+GskStatus Gsk::hkGsk_getClosestPoint(const Input& input, GskCache* __restrict cache, GskOut& output)
 {
     const GskShape* shapeA = input.m_pShapeA;
     const GskShape* shapeB = input.m_pShapeB;
@@ -1605,10 +1608,10 @@ GskStatus Gsk::FUN_00e4c730(const Input& input, GskCache* __restrict cache, GskO
         dir.set(1.0f, 0.0f, 0.0f, 0.0f);
         Vec4 dirNeg;
         dirNeg.setNeg4(dir);
-        dirNeg.FUN_004b4ab0(input.m_kTransform.getRotation(), dirNeg);
+        dirNeg.hkVector4_setRotatedInverseDir(input.m_kTransform.getRotation(), dirNeg);
         shapeA->GetSupportPoint(dir, &m_akPackedVerticesA[0]);
         shapeB->GetSupportPoint(dirNeg, &m_akPackedVerticesB[0]);
-        m_akCachedVectors[0].FUN_00c7f700(input.m_kTransform.getRotation(), m_akPackedVerticesB[0]);
+        m_akCachedVectors[0].hkVector4_setRotatedDir(input.m_kTransform.getRotation(), m_akPackedVerticesB[0]);
     }
 
     SReal terminationEps = 1e-5f;
@@ -1634,7 +1637,7 @@ GskStatus Gsk::FUN_00e4c730(const Input& input, GskCache* __restrict cache, GskO
 
                 if (!m_uiCacheFlags.val())
                 {
-                    FUN_00e4c230(shapeA, shapeB, input.m_kTransform, dimA, dimB, output);
+                    ProcessEntries_00e4c230(shapeA, shapeB, input.m_kTransform, dimA, dimB, output);
                     result = GSK_OK;
                 }
                 else

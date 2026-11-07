@@ -38,7 +38,8 @@ inline hkpShapeType hkpShape::getType() const
 // This virtual deleting thunk is absent from the shared method declarations.
 // Keep its calling convention and dispatch without duplicating the agent class.
 // @fnv 0x00dabe90
-void __fastcall FUN_00dabe90(hkpGskBaseAgent* agent, void*, bool)
+// src: HAVOK_LIB 0x00dabe90
+void __fastcall hkpGskBaseAgent_cleanup(hkpGskBaseAgent* agent, void*, bool)
 {
     if (agent)
     {
@@ -108,7 +109,7 @@ struct ContactPointPair
     const hkpCdBody* m_pBodyB;
 };
 
-int FUN_00dabca0(const GskInput* input, void* status, LocalM128* out1, LocalM128* out2);
+int hkpGsk_getClosestPoint(const GskInput* input, void* status, LocalM128* out1, LocalM128* out2);
 
 // @fnv 0x00dac9e0
 void hkpGskBaseAgent::getClosestPoints(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const CollisionAgentContext& input,
@@ -127,7 +128,7 @@ void hkpGskBaseAgent::getClosestPoints(const hkpCdBody& bodyA, const hkpCdBody& 
     }
 
     hkTransform aTb;
-    aTb.FUN_00cb22f0(bodyA.m_pMotionState, bodyB.m_pMotionState);
+    aTb.hkTransform_setMulInverseMul(bodyA.m_pMotionState, bodyB.m_pMotionState);
 
     GskInput queryInput;
     queryInput.m_pShapeA = bodyA.m_pCollisionShape;
@@ -137,7 +138,7 @@ void hkpGskBaseAgent::getClosestPoints(const hkpCdBody& bodyA, const hkpCdBody& 
     queryInput.m_fScalar = input.m_fScalar;
 
     GskOutput out;
-    if (FUN_00dabca0(&queryInput, m_pAccess, &out.m_vHitNormal, &out.m_pos) == 0)
+    if (hkpGsk_getClosestPoint(&queryInput, m_pAccess, &out.m_vHitNormal, &out.m_pos) == 0)
     {
         // The temporary is filled below; avoid the approved hkVector4's
         // out-of-line default constructor for this raw solver result.
@@ -184,7 +185,7 @@ __forceinline void hkVector4::_setMul3(const hkMatrix3& r, const hkVector4& b)
 
 struct FUN_00daad40_solver
 {
-    void FUN_00daad40(const hkpConvexShape* pkShapeA, const hkpConvexShape* pkShapeB,
+    void hkpGsk_getClosestFeature(const hkpConvexShape* pkShapeA, const hkpConvexShape* pkShapeB,
                       const hkTransform& kAtB, hkVector4& kPointOut);
 };
 
@@ -197,10 +198,10 @@ void __cdecl hkpGskBaseAgent::ComputeClosestPoint(const hkpCdBody& kBodyA, const
     const hkpConvexShape* pkShapeB = (const hkpConvexShape*)kBodyB.m_pCollisionShape;
 
     hkTransform kAtB;
-    kAtB.FUN_00cb22f0(*(const hkTransform*)kBodyA.m_pMotionState, *(const hkTransform*)kBodyB.m_pMotionState);
+    kAtB.hkTransform_setMulInverseMul(*(const hkTransform*)kBodyA.m_pMotionState, *(const hkTransform*)kBodyB.m_pMotionState);
 
     hkVector4 kNormal;
-    ((FUN_00daad40_solver*)&gsk)->FUN_00daad40(pkShapeA, pkShapeB, kAtB, kNormal);
+    ((FUN_00daad40_solver*)&gsk)->hkpGsk_getClosestFeature(pkShapeA, pkShapeB, kAtB, kNormal);
 
     separatingNormalOut._setMul3(*(const hkMatrix3*)kBodyA.m_pMotionState, kNormal);
     separatingNormalOut.w = kNormal.w - pkShapeA->m_fSphereRadius - pkShapeB->m_fSphereRadius;
@@ -342,9 +343,9 @@ struct GskStatus
     LocalM128 m_vertsA[12];
     LocalM128 m_vertsB[10];
 
-    void FUN_00daad40(const void* shapeA, const void* shapeB, const hkTransform* bTa, void* out10);
-    void FUN_00da9790(void* cache);
-    void FUN_00da9880(void* out10, hkContactPoint* pointOut);
+    void hkpGsk_getClosestFeature(const void* shapeA, const void* shapeB, const hkTransform* bTa, void* out10);
+    void hkpGsk_exitAndExportCacheImpl(void* cache);
+    void hkpGsk_convertFeatureToClosestDistance(void* out10, hkContactPoint* pointOut);
 };
 
 extern "C"
@@ -380,7 +381,7 @@ hkBool hkpGskBaseAgent::_getClosestPoint(const hkpCdBody& bodyA, const hkpCdBody
     const hkpConvexShape* shapeA = (const hkpConvexShape*)bodyA.m_pCollisionShape;
 
     hkTransform tRelativeTransform;
-    tRelativeTransform.FUN_00cb22f0(bodyA.m_pMotionState, bodyB.m_pMotionState);
+    tRelativeTransform.hkTransform_setMulInverseMul(bodyA.m_pMotionState, bodyB.m_pMotionState);
 
     const hkpConvexShape* __restrict convertShapeA = shapeA;
     int dimB, r1;
@@ -399,14 +400,14 @@ hkBool hkpGskBaseAgent::_getClosestPoint(const hkpCdBody& bodyA, const hkpCdBody
                               (Vector4WithInt24W*)gskStatus.m_vertsB);
 
     LocalM128 c1;
-    gskStatus.FUN_00daad40(shapeA, pShapeB, &tRelativeTransform, &c1);
+    gskStatus.hkpGsk_getClosestFeature(shapeA, pShapeB, &tRelativeTransform, &c1);
 
     if (gskStatus.unk14 != 0)
     {
-        gskStatus.FUN_00da9790(i);
+        gskStatus.hkpGsk_exitAndExportCacheImpl(i);
     }
 
-    gskStatus.FUN_00da9880(&c1, &pointOut);
+    gskStatus.hkpGsk_convertFeatureToClosestDistance(&c1, &pointOut);
 
     const hkTransform* b = (const hkTransform*)bodyA.m_pMotionState;
     ContactData* pContactData = (ContactData*)&pointOut;
@@ -489,8 +490,8 @@ struct S_00dac2b0_Cache
 {
     unsigned short id0, id1, id2, id3;
     unsigned char dimA, dimB, dims;
-    void FUN_00dafe70(const hkpConvexShape* a, const hkpConvexShape* b, const hkTransform* t);
-    void FUN_00dafcd0(const hkpConvexShape* a, const hkpConvexShape* b, const hkTransform* t);
+    void hkpGskCache_initTriangle(const hkpConvexShape* a, const hkpConvexShape* b, const hkTransform* t);
+    void hkpGskCache_init(const hkpConvexShape* a, const hkpConvexShape* b, const hkTransform* t);
 };
 
 struct __declspec(align(16)) S_00dac2b0_Gsk
@@ -505,7 +506,7 @@ struct __declspec(align(16)) S_00dac2b0_Gsk
     int unk1C;
     hkVector4 m_vertsA[12];
     hkVector4 m_vertsB[10];
-    int FUN_00daad40(const hkpConvexShape* a, const hkpConvexShape* b, const hkTransform* t,
+    int hkpGsk_getClosestFeature(const hkpConvexShape* a, const hkpConvexShape* b, const hkTransform* t,
                      hkVector4* out);
 };
 
@@ -520,16 +521,16 @@ void __cdecl hkpGskBaseAgent::m_pVirtualFunction1(const hkpCdBody& bodyA, const 
     const hkpConvexShape* shapeB = (const hkpConvexShape*)bodyB.m_pCollisionShape;
 
     hkTransform aTb;
-    aTb.FUN_00cb22f0(bodyA.m_pMotionState, bodyB.m_pMotionState);
+    aTb.hkTransform_setMulInverseMul(bodyA.m_pMotionState, bodyB.m_pMotionState);
 
     S_00dac2b0_Cache cache;
     if (shapeB->getType() == HK_SHAPE_TRIANGLE)
     {
-        cache.FUN_00dafe70(shapeA, shapeB, &aTb);
+        cache.hkpGskCache_initTriangle(shapeA, shapeB, &aTb);
     }
     else
     {
-        cache.FUN_00dafcd0(shapeA, shapeB, &aTb);
+        cache.hkpGskCache_init(shapeA, shapeB, &aTb);
     }
 
     S_00dac2b0_Gsk gsk;
@@ -543,7 +544,7 @@ void __cdecl hkpGskBaseAgent::m_pVirtualFunction1(const hkpCdBody& bodyA, const 
     shapeB->GetVerticesFromIds(&cache.id0 + gsk.m_ucDimensionA, gsk.m_ucDimensionB, (Vector4WithInt24W*)gsk.m_vertsB);
 
     hkVector4 out;
-    int iResult = gsk.FUN_00daad40(shapeA, shapeB, &aTb, &out);
+    int iResult = gsk.hkpGsk_getClosestFeature(shapeA, shapeB, &aTb, &out);
 
     GskTimer("Et");
 
@@ -679,8 +680,8 @@ struct S_00dac0b0_Gsk
     hkVector4 b08;
     hkVector4 b09;
     hkTransform aTb;
-    int FUN_00daad40(const hkpConvexShape* a, const hkpConvexShape* b, const hkTransform& aTb, hkVector4* out);
-    void FUN_00da9790(S_00dac0b0_PackedCache* dst);
+    int hkpGsk_getClosestFeature(const hkpConvexShape* a, const hkpConvexShape* b, const hkTransform& aTb, hkVector4* out);
+    void hkpGsk_exitAndExportCacheImpl(S_00dac0b0_PackedCache* dst);
 };
 
 // @fnv 0x00dac0b0
@@ -694,7 +695,7 @@ void hkpGskBaseAgent::getPenetrations(const hkpCdBody& bodyA, const hkpCdBody& b
     const hkpConvexShape* shapeA = (const hkpConvexShape*)bodyA.m_pCollisionShape;
     const hkpConvexShape* shapeB = (const hkpConvexShape*)bodyB.m_pCollisionShape;
     S_00dac0b0_Gsk gsk;
-    gsk.aTb.FUN_00cb22f0(bodyA.m_pMotionState, bodyB.m_pMotionState);
+    gsk.aTb.hkTransform_setMulInverseMul(bodyA.m_pMotionState, bodyB.m_pMotionState);
 
     S_00dac0b0_PackedCache* c = (S_00dac0b0_PackedCache*)m_pAccess;
     gsk.m_ucDimensionA = c->m_ucDimensionA;
@@ -707,9 +708,9 @@ void hkpGskBaseAgent::getPenetrations(const hkpCdBody& bodyA, const hkpCdBody& b
     shapeB->GetVerticesFromIds(&c->id0 + gsk.m_ucDimensionA, gsk.m_ucDimensionB, (Vector4WithInt24W*)&gsk.b00);
 
     hkVector4 normal;
-    scratch.result = gsk.FUN_00daad40(shapeA, shapeB, gsk.aTb, &normal);
+    scratch.result = gsk.hkpGsk_getClosestFeature(shapeA, shapeB, gsk.aTb, &normal);
     if (gsk.m_changed)
-        gsk.FUN_00da9790(c);
+        gsk.hkpGsk_exitAndExportCacheImpl(c);
 
     if (scratch.result == 0)
     {

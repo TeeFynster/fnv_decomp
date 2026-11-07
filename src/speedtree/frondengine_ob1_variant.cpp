@@ -20,7 +20,7 @@ class BaseTag_frondengine
 #include "../../include/IdvFileError.h"
 struct FUN_00b39460_class
 {
-    void __thiscall FUN_00b39460();
+    void __thiscall FreeStoredPointer_00b39460();
 };
 struct FUN_0064df10_helper
 {
@@ -44,12 +44,12 @@ struct FUN_00b1db00_class
     int i8;
     int ic;
     int i10;
-    unsigned int __thiscall FUN_00b1db00(unsigned int a);
+    unsigned int __thiscall GetElementAddress38_00b1db00(unsigned int a);
 };
 unsigned int __cdecl FUN_00ec7c56(void);
 struct FUN_00b30fd0_class
 {
-    unsigned int FUN_00b30fd0(unsigned int n);
+    unsigned int GetDoubledIndexElementChecked(unsigned int n);
 };
 struct FUN_00b319a0_class
 {
@@ -58,7 +58,7 @@ struct FUN_00b319a0_class
     int m_8;
     int m_iThirdValue;
     int m_10;
-    int __thiscall FUN_00b319a0(int n);
+    int __thiscall ProcessAndReturnValue_00b319a0(int n);
 };
 unsigned int __cdecl FUN_00ec7c56();
 void __cdecl operator delete(void*);
@@ -71,7 +71,7 @@ struct FUN_00b1ec70_class
     int* q;
     int* r;
     void __thiscall FUN_00b1ebc0(int* a, int* b);
-    void __thiscall FUN_00b1ec70();
+    void __thiscall ReleaseStorage_00b1ec70();
 };
 struct FUN_00b1ff50
 {
@@ -90,7 +90,7 @@ struct FUN_00b1ff50
 };
 struct FUN_00b12af0_shell
 {
-    void FUN_00b12af0();
+    void CRotTransform_CRotTransform();
 };
 struct FUN_00b18b20
 {
@@ -111,7 +111,7 @@ struct FUN_00b1fe80_helper
     int* m10;
     int* m14;
     void __thiscall FUN_00b22650(int* a, int* b);
-    void __thiscall FUN_00b1fe80();
+    void __thiscall UpdateFields_00b1fe80();
 };
 void __cdecl operator delete(void*);
 struct FUN_00b20c30_class
@@ -126,7 +126,7 @@ struct FUN_00b1f650_class
     void* pc;
     void* pe;
     void* pp;
-    void __thiscall FUN_00b1f650();
+    void __thiscall ReleaseStorage_00b1f650();
 };
 struct FUN_00b249d0_local
 {
@@ -186,21 +186,21 @@ struct CopyableStateBlock
     int i30;
     int i34;
 
-    void __thiscall FUN_00b24ae0(const CopyableStateBlock* that);
+    void __thiscall AssignVectorElements_00b24ae0(const CopyableStateBlock* that);
     CopyableStateBlock* __thiscall CopyFrom(const CopyableStateBlock& that);
 };
-void __cdecl FUN_00b269d0(char* a, char* b, char* c, bool d);
-void __cdecl FUN_00b26160(char* a, char* b, char* c, bool d);
-extern int* __cdecl FUN_0044d600(int*, int*, int*);
+void __cdecl Frondengine_SortThreeByField2C(char* a, char* b, char* c, bool d);
+void __cdecl Object_UpdateFields_00b26160(char* a, char* b, char* c, bool d);
+extern int* __cdecl std_Move_float_float(int*, int*, int*);
 extern int* __cdecl UninitCopyChecked(int*, int*, int*, void*);
-extern void __cdecl FormHeap_Free(void*);
+extern void __cdecl FormHeapFreeAndLog_00401030(void*);
 struct C00b1d5d0
 {
     int a, b, alloc;
     int *first, *last, *limit;
-    void FUN_0044a0a0();
-    bool FUN_0044a240(unsigned);
-    C00b1d5d0& FUN_00b1d5d0(const C00b1d5d0& rhs);
+    void std_vector_float_std_allocator_float_clear();
+    bool InitializeElementStorage(unsigned);
+    C00b1d5d0& AssignVectorContents(const C00b1d5d0& rhs);
 };
 struct Frame00b1d5d0
 {
@@ -253,7 +253,7 @@ struct SpawnEntry : StringLike
     float f24;
     float f28;
     int __thiscall Init(SpawnEntry*, int, int);
-    SpawnEntry* __thiscall FUN_00b22f80(SpawnEntry* that);
+    SpawnEntry* __thiscall AssignFields_00b22f80(SpawnEntry* that);
 };
 struct FUN_00ec78f1_t
 {
@@ -265,7 +265,7 @@ void __stdcall FUN_00ec7894(FUN_00ec78f1_t* info, const char* fmt);
 void* __cdecl operator new(unsigned int);
 extern int DAT_010176f8;
 extern int DAT_01140ef8;
-void* __cdecl FUN_00b23980(unsigned int n);
+void* __cdecl Object_AllocateElementStorage_00b23980(unsigned int n);
 void __cdecl CopyObjects(CopyableStateBlock* dst, unsigned int n, const CopyableStateBlock* src);
 
 struct FUN_00b37880
@@ -293,11 +293,12 @@ struct Host
     int unk3C;
     FUN_00b37880* unk40;
 
-    void FUN_00b18f60(FUN_00b37880* arg);
+    void UpdateFields_00b18f60(FUN_00b37880* arg);
 };
 
 // @fnv 0x00b18f60
-void Host::FUN_00b18f60(FUN_00b37880* arg)
+// src: GUESS 0x00b18f60 (confidence: low)
+void Host::UpdateFields_00b18f60(FUN_00b37880* arg)
 {
     if (this->unk40 != arg)
     {
@@ -348,7 +349,8 @@ struct FrondMatrix
         r.m22 = m20 * b.m02 + m21 * b.m12 + m22 * b.m22;
         return FrondMatrix(r);
     }
-    inline void FUN_00b1ae00(float angle)
+// src: GUESS 0x00b1ae00 (confidence: low)
+    inline void UpdateFields_00b1ae00(float angle)
     {
         FrondMatrix rotation;
         rotation.m11 = (float)FUN_00ec9f30((float)(angle / DAT_010a4d90));
@@ -387,11 +389,12 @@ struct FrondPoint
         z = c;
     }
     FrondPoint FUN_00b12890(const FrondMatrix&) const;
-    FrondPoint FUN_00b13040(const FrondPoint&) const;
+    FrondPoint Diff_00b13040(const FrondPoint&) const;
     FrondPoint AddVector(const FrondPoint&) const;
     FrondPoint ScaleSwizzled(float) const;
     FrondPoint FUN_00b12810(const FrondPoint&) const;
-    inline void FUN_00b12790()
+// src: COMMUNITY 0x00b12790
+    inline void Normalize_00b12790()
     {
         float lengthSquared = x * x + y * y + z * z;
         float reciprocal = 1.0f / (float)FUN_00ec6054(lengthSquared);
@@ -412,8 +415,8 @@ struct FrondPoint
         estimate.i = (estimate.i >> 1) + 0x1fc00000;
         return estimate.f;
     }
-    float FUN_00b04d40(const FrondPoint&) const;
-    FrondPoint* FUN_00b1ada0(float, float, float);
+    float CVec3_Distance(const FrondPoint&) const;
+    FrondPoint* SetThreeComponents(float, float, float);
     void Set(float, float, float);
 };
 struct FrondGuidePoint : FrondPoint
@@ -426,10 +429,10 @@ struct FrondPointStorage
 {
     int a, b, c;
     FrondPoint *first, *last, *limit;
-    void FUN_00b39460();
+    void FreeStoredPointer_00b39460();
     __forceinline ~FrondPointStorage()
     {
-        FUN_00b39460();
+        FreeStoredPointer_00b39460();
     }
 };
 struct FrondPointList : FrondPointStorage
@@ -457,11 +460,11 @@ struct FrondPointList : FrondPointStorage
             FUN_00ec7c56();
         return first[i];
     }
-    void FUN_00b1e4c0(const FrondPoint&);
-    void FUN_00b1fca0();
+    void AppendElementWithGrowth(const FrondPoint&);
+    void ReleaseStorage_00b1fca0();
     __forceinline ~FrondPointList()
     {
-        FUN_00b1fca0();
+        ReleaseStorage_00b1fca0();
     }
 };
 struct FrondFloatStorage
@@ -479,7 +482,7 @@ struct FrondFloatList : FrondFloatStorage
     FrondFloatList();
     void FUN_0065f240();
     void PushBack(const float&);
-    float* FUN_006578b0(unsigned int);
+    float* GetElementPointerChecked(unsigned int);
     __forceinline ~FrondFloatList()
     {
         FUN_0065f240();
@@ -507,15 +510,15 @@ struct FrondOutput
     {
         count = (unsigned short)n;
     }
-    void FUN_00b300c0(const FrondPoint&);
-    void FUN_00b301f0(const float*, unsigned short);
-    void FUN_00b30020(const float*);
-    void FUN_00b30190(const float*);
-    void FUN_00b305f0(const FrondPoint&);
-    void FUN_00b30660(const FrondPoint&);
-    void FUN_00b30560(float, unsigned char);
-    FrondPoint* FUN_00b30f80(unsigned int);
-    float* FUN_00b30fd0(unsigned int);
+    void UpdateFields_00b300c0(const FrondPoint&);
+    void CIndexedGeometry_AddVertexTexCoord0(const float*, unsigned short);
+    void UpdateFields_00b30020(const float*);
+    void AppendThreeFloatComponents(const float*);
+    void UpdateState_00b305f0(const FrondPoint&);
+    void UpdateFields_00b30660(const FrondPoint&);
+    void AppendInvertedValueAndDispatchIndex(float, unsigned char);
+    FrondPoint* CIndexedGeometry_GetVertexCoord(unsigned int);
+    float* GetDoubledIndexElementChecked(unsigned int);
 };
 struct FrondInput
 {
@@ -535,7 +538,7 @@ struct FrondInput
             FUN_00ec7c56();
         return first[i];
     }
-    FrondGuidePoint* FUN_00b1db00(unsigned int);
+    FrondGuidePoint* GetElementAddress38_00b1db00(unsigned int);
 };
 struct FrondBuilder
 {
@@ -543,11 +546,12 @@ struct FrondBuilder
     void* required;
     int u08, u0c, u10, u14, u18, u1c, u20, u24, u28, u2c, u30, u34, u38;
     unsigned int slices;
-    void FUN_00b19ad0(FrondInput* input);
+    void ProcessEntries_00b19ad0(FrondInput* input);
 };
 
 // @fnv 0x00b19ad0
-void FrondBuilder::FUN_00b19ad0(FrondInput* input)
+// src: GUESS 0x00b19ad0 (confidence: low)
+void FrondBuilder::ProcessEntries_00b19ad0(FrondInput* input)
 {
     if (output && required)
     {
@@ -567,20 +571,20 @@ void FrondBuilder::FUN_00b19ad0(FrondInput* input)
                     rotationSlot17 = (*input)[i].rotation;
                 else
                     rotationSlot17 = (*input)[i - 1].rotation;
-                rotationSlot17.FUN_00b1ae00(slice * step + input->angle);
+                rotationSlot17.UpdateFields_00b1ae00(slice * step + input->angle);
                 FrondPoint direction = FrondPoint(0.0f, 1.0f, 0.0f).FUN_00b12890(rotationSlot17);
-                directionX.FUN_00b1e4c0(direction);
+                directionX.AppendElementWithGrowth(direction);
                 FrondPoint tangentVal;
                 if (i == 0)
-                    tangentVal = (*input)[i + 1].FUN_00b13040((*input)[0]);
+                    tangentVal = (*input)[i + 1].Diff_00b13040((*input)[0]);
                 else
-                    tangentVal = (*input)[i].FUN_00b13040((*input)[0]);
-                tangentVal.FUN_00b12790();
+                    tangentVal = (*input)[i].Diff_00b13040((*input)[0]);
+                tangentVal.Normalize_00b12790();
                 FrondPoint left2, right8;
                 if (i == input->size() - 1 && input->size() > 0)
                 {
                     left2 = (*input)[i].AddVector(directionX[i - 1].ScaleSwizzled(input->width));
-                    right8 = (*input)[i].FUN_00b13040(directionX[i - 1].ScaleSwizzled(input->width));
+                    right8 = (*input)[i].Diff_00b13040(directionX[i - 1].ScaleSwizzled(input->width));
                 }
                 else if (i > 0 && i < input->size() - 1)
                 {
@@ -588,49 +592,49 @@ void FrondBuilder::FUN_00b19ad0(FrondInput* input)
                     prior = (*input)[i].AddVector(directionX[i - 1].ScaleSwizzled(input->width));
                     left2 = (*input)[i].AddVector(direction.ScaleSwizzled(input->width));
                     left2 = left2.AddVector(prior).ScaleSwizzled(DAT_01016248);
-                    prior = (*input)[i].FUN_00b13040(directionX[i - 1].ScaleSwizzled(input->width));
-                    right8 = (*input)[i].FUN_00b13040(direction.ScaleSwizzled(input->width));
+                    prior = (*input)[i].Diff_00b13040(directionX[i - 1].ScaleSwizzled(input->width));
+                    right8 = (*input)[i].Diff_00b13040(direction.ScaleSwizzled(input->width));
                     right8 = right8.AddVector(prior).ScaleSwizzled(DAT_01016248);
                 }
                 else
                 {
                     left2 = (*input)[i].AddVector(direction.ScaleSwizzled(input->width));
-                    right8 = (*input)[i].FUN_00b13040(direction.ScaleSwizzled(input->width));
+                    right8 = (*input)[i].Diff_00b13040(direction.ScaleSwizzled(input->width));
                 }
                 float v3 = i / (input->size() - 1.0);
-                output->FUN_00b300c0(left2);
+                output->UpdateFields_00b300c0(left2);
                 float uv1[2];
                 uv1[0] = 1.0f;
                 uv1[1] = v3;
-                output->FUN_00b301f0(uv1, (unsigned short)input->layer);
+                output->CIndexedGeometry_AddVertexTexCoord0(uv1, (unsigned short)input->layer);
                 colorAlloc2[0] = colorAlloc2[1] = colorAlloc2[2] = colorAlloc2[3] = 1.0f;
-                output->FUN_00b30020(colorAlloc2);
-                output->FUN_00b30190(&tangentVal.x);
-                output->FUN_00b305f0(direction);
+                output->UpdateFields_00b30020(colorAlloc2);
+                output->AppendThreeFloatComponents(&tangentVal.x);
+                output->UpdateState_00b305f0(direction);
                 normalChild3 = direction.FUN_00b12810(tangentVal);
                 if (static_cast<const FrondPoint&>(normalChild3).FastSqrt() < DAT_010a54ec)
                     normalChild3 = tangentVal;
                 else
-                    normalChild3.FUN_00b12790();
-                output->FUN_00b30660(normalChild3);
+                    normalChild3.Normalize_00b12790();
+                output->UpdateFields_00b30660(normalChild3);
                 if (output->isEnabled())
-                    output->FUN_00b30560((*input)[i].scale, (*input)[i].material);
+                    output->AppendInvertedValueAndDispatchIndex((*input)[i].scale, (*input)[i].material);
                 output->advance();
-                output->FUN_00b300c0(right8);
+                output->UpdateFields_00b300c0(right8);
                 uv1[0] = 0.0f;
-                output->FUN_00b301f0(uv1, (unsigned short)input->layer);
+                output->CIndexedGeometry_AddVertexTexCoord0(uv1, (unsigned short)input->layer);
                 colorAlloc2[0] = colorAlloc2[1] = colorAlloc2[2] = colorAlloc2[3] = 1.0f;
-                output->FUN_00b30020(colorAlloc2);
-                output->FUN_00b30190(&tangentVal.x);
-                output->FUN_00b305f0(direction);
+                output->UpdateFields_00b30020(colorAlloc2);
+                output->AppendThreeFloatComponents(&tangentVal.x);
+                output->UpdateState_00b305f0(direction);
                 normalChild3 = direction.FUN_00b12810(tangentVal);
                 if (normalChild3.FastSqrt() < DAT_010a54ec)
                     normalChild3 = tangentVal;
                 else
-                    normalChild3.FUN_00b12790();
-                output->FUN_00b30660(normalChild3);
+                    normalChild3.Normalize_00b12790();
+                output->UpdateFields_00b30660(normalChild3);
                 if (output->isEnabled())
-                    output->FUN_00b30560(input->FUN_00b1db00(i)->scale, (*input)[i].material);
+                    output->AppendInvertedValueAndDispatchIndex(input->GetElementAddress38_00b1db00(i)->scale, (*input)[i].material);
                 output->advance();
             }
             float totalLeft6 = 0.0f, totalRight9 = 0.0f;
@@ -638,34 +642,34 @@ void FrondBuilder::FUN_00b19ad0(FrondInput* input)
             unsigned int count30 = input->size();
             for (unsigned int i = 0; i < count30 - 1; ++i)
             {
-                FrondPoint* firstLocalVal = output->FUN_00b30f80(input->start + i * 2);
-                FrondPoint* secondValue3 = output->FUN_00b30f80(input->start + i * 2 + 2);
+                FrondPoint* firstLocalVal = output->CIndexedGeometry_GetVertexCoord(input->start + i * 2);
+                FrondPoint* secondValue3 = output->CIndexedGeometry_GetVertexCoord(input->start + i * 2 + 2);
                 FrondPoint aA1(firstLocalVal->x, firstLocalVal->y, firstLocalVal->z);
                 FrondPoint b111(0);
-                b111.FUN_00b1ada0(secondValue3->x, secondValue3->y, secondValue3->z);
-                totalLeft6 += aA1.FUN_00b04d40(b111);
+                b111.SetThreeComponents(secondValue3->x, secondValue3->y, secondValue3->z);
+                totalLeft6 += aA1.CVec3_Distance(b111);
                 LeftX.PushBack(totalLeft6);
-                firstLocalVal = output->FUN_00b30f80(input->start + i * 2 + 1);
-                secondValue3 = output->FUN_00b30f80(input->start + i * 2 + 3);
+                firstLocalVal = output->CIndexedGeometry_GetVertexCoord(input->start + i * 2 + 1);
+                secondValue3 = output->CIndexedGeometry_GetVertexCoord(input->start + i * 2 + 3);
                 aA1.Set(firstLocalVal->x, firstLocalVal->y, firstLocalVal->z);
                 b111.Set(secondValue3->x, secondValue3->y, secondValue3->z);
-                totalRight9 += aA1.FUN_00b04d40(b111);
+                totalRight9 += aA1.CVec3_Distance(b111);
                 rightVal.PushBack(totalRight9);
             }
             output->setCount(begin4 + 2);
             for (unsigned int i = 1; i < count30 - 1; ++i)
             {
-                float* original4 = output->FUN_00b30fd0(input->start + i * 2);
+                float* original4 = output->GetDoubledIndexElementChecked(input->start + i * 2);
                 float uv3[2];
                 uv3[0] = *original4;
-                uv3[1] = *LeftX.FUN_006578b0(i - 1) / totalLeft6 * DAT_010a54e8;
-                output->FUN_00b301f0(uv3, (unsigned short)input->layer);
+                uv3[1] = *LeftX.GetElementPointerChecked(i - 1) / totalLeft6 * DAT_010a54e8;
+                output->CIndexedGeometry_AddVertexTexCoord0(uv3, (unsigned short)input->layer);
                 output->advance();
-                original4 = output->FUN_00b30fd0(input->start + i * 2 + 1);
+                original4 = output->GetDoubledIndexElementChecked(input->start + i * 2 + 1);
                 float uvs5[2];
                 uvs5[0] = *original4;
-                uvs5[1] = *rightVal.FUN_006578b0(i - 1) / totalRight9 * DAT_010a54e8;
-                output->FUN_00b301f0(uvs5, (unsigned short)input->layer);
+                uvs5[1] = *rightVal.GetElementPointerChecked(i - 1) / totalRight9 * DAT_010a54e8;
+                output->CIndexedGeometry_AddVertexTexCoord0(uvs5, (unsigned short)input->layer);
                 output->advance();
             }
             output->advance();
@@ -737,11 +741,12 @@ struct Iter : public _Iterator_base_aux
 {
     Element* _Myptr;
 
-    Iter* __thiscall FUN_00b235e0(int _Off);
+    Iter* __thiscall ProcessAndReturnValue_00b235e0(int _Off);
 };
 
 // @fnv 0x00b235e0
-Iter* __thiscall Iter::FUN_00b235e0(int _Off)
+// src: GUESS 0x00b235e0 (confidence: low)
+Iter* __thiscall Iter::ProcessAndReturnValue_00b235e0(int _Off)
 {
     if (!_Has_container())
         FUN_00ec7c56();
@@ -755,7 +760,8 @@ Iter* __thiscall Iter::FUN_00b235e0(int _Off)
 void* __cdecl operator new(unsigned int);
 
 // @fnv 0x00b23b50
-void* __cdecl FUN_00b23b50(unsigned int n)
+// src: GUESS 0x00b23b50 (confidence: low)
+void* __cdecl Frondengine_UpdateState_00b23b50(unsigned int n)
 {
     if (n <= 0)
     {
@@ -779,7 +785,8 @@ struct GlobalObject_00b3f100
 };
 
 // @fnv 0x00b25a90
-GlobalObject_00b3f100* __cdecl FUN_00b25a90(GlobalObject_00b3f100* pkCurrentObject, GlobalObject_00b3f100* pkLast,
+// src: GUESS 0x00b25a90 (confidence: low)
+GlobalObject_00b3f100* __cdecl Frondengine_AllocateStorage_00b25a90(GlobalObject_00b3f100* pkCurrentObject, GlobalObject_00b3f100* pkLast,
                                             GlobalObject_00b3f100* pkDest)
 {
     GlobalObject_00b3f100* pkNext = pkDest;
@@ -800,7 +807,7 @@ GlobalObject_00b3f100* __cdecl FUN_00b25a90(GlobalObject_00b3f100* pkCurrentObje
     return pkDest;
 }
 
-void __cdecl FormHeap_Free(void* p);
+void __cdecl FormHeapFreeAndLog_00401030(void* p);
 template <class T> inline void Swp(T& a, T& b)
 {
     if (&a != &b)
@@ -822,7 +829,7 @@ struct VecBase
     }
     inline void Dealloc(void* q)
     {
-        FormHeap_Free(q);
+        FormHeapFreeAndLog_00401030(q);
     }
     ~VecBase()
     {
@@ -941,11 +948,12 @@ struct FUN_00b22ff0 : VecBase
     FUN_00b22ff0(const FUN_00b22ff0& r);
     ~FUN_00b22ff0()
     {}
-    FUN_00b22ff0& FUN_00b1d5d0(const FUN_00b22ff0& r);
-    void FUN_00b26570(FUN_00b22ff0& r);
+    FUN_00b22ff0& AssignVectorContents(const FUN_00b22ff0& r);
+    void ProcessState_00b26570(FUN_00b22ff0& r);
 };
 // @fnv 0x00b26570
-void FUN_00b22ff0::FUN_00b26570(FUN_00b22ff0& r)
+// src: GUESS 0x00b26570 (confidence: low)
+void FUN_00b22ff0::ProcessState_00b26570(FUN_00b22ff0& r)
 {
     if (this == &r)
         ;
@@ -960,8 +968,8 @@ void FUN_00b22ff0::FUN_00b26570(FUN_00b22ff0& r)
     {
         SwapAll(r);
         FUN_00b22ff0 tmp(*this);
-        FUN_00b1d5d0(r);
-        r.FUN_00b1d5d0(tmp);
+        AssignVectorContents(r);
+        r.AssignVectorContents(tmp);
         DeadX();
     }
 }
@@ -1247,11 +1255,12 @@ struct Elem6830
 class FUN_00b16830_Iterator : public _Vector_const_iteratorS<Elem6830>
 {
   public:
-    bool FUN_00b16830(const _Vector_const_iteratorS<Elem6830>& _Right) const;
+    bool AreValuesEqual_00b16830(const _Vector_const_iteratorS<Elem6830>& _Right) const;
 };
 
 // @fnv 0x00b16830
-bool FUN_00b16830_Iterator::FUN_00b16830(const _Vector_const_iteratorS<Elem6830>& _Right) const
+// src: GUESS 0x00b16830 (confidence: medium)
+bool FUN_00b16830_Iterator::AreValuesEqual_00b16830(const _Vector_const_iteratorS<Elem6830>& _Right) const
 {
     return (!(*this == _Right));
 }
@@ -1303,12 +1312,13 @@ struct VectorX16890 : public ContainerBaseAuxX16890
 class FUN_00b16890_It : public IteratorBaseAuxX16890
 {
   public:
-    FUN_00b16890_It& FUN_00b16890(int _Off);
+    FUN_00b16890_It& UpdateState_00b16890(int _Off);
     ElemX16890* _Myptr;
 };
 
 // @fnv 0x00b16890
-FUN_00b16890_It& FUN_00b16890_It::FUN_00b16890(int _Off)
+// src: GUESS 0x00b16890 (confidence: low)
+FUN_00b16890_It& FUN_00b16890_It::UpdateState_00b16890(int _Off)
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoX16890();
@@ -2279,25 +2289,25 @@ struct FUN_0044a4c0
     int iRes;
     FUN_0044a4c0()
     {
-        FUN_0044a730(false, 0);
+        fopen_0044a730(false, 0);
     }
     FUN_0044a4c0(const char* s);
     FUN_0044a4c0(const FUN_0044a4c0& r)
     {
-        FUN_0044a730(false, 0);
+        fopen_0044a730(false, 0);
         AssignSubstring(r, 0, *(unsigned*)&DAT_010173f0);
     }
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
     FUN_0044a4c0& AssignSubstring(const FUN_0044a4c0& r, unsigned o, unsigned n);
     FUN_0044a4c0& operator=(const FUN_0044a4c0& r)
     {
         return AssignSubstring(r, 0, *(unsigned*)&DAT_010173f0);
     }
-    FUN_0044a4c0 FUN_00b09f90();
+    FUN_0044a4c0 ProcessEntries_00b09f90();
 };
 struct FUN_00b096a0
 {
@@ -2313,7 +2323,7 @@ struct FUN_00b09480 : FUN_00b096a0
 struct RQ : FUN_0044a4c0
 {
 };
-FUN_0044a4c0 FUN_00b18860(const char* fmt, ...);
+FUN_0044a4c0 IdvFormatString(const char* fmt, ...);
 struct RQ;
 struct ByteVec
 {
@@ -2328,10 +2338,10 @@ struct Parser
     unsigned uiPos;
     ByteVec kData;
     int GetNextElement();
-    float FUN_00b3ed20();
-    int FUN_00b13970();
-    bool FUN_00b06180();
-    FUN_0044a4c0 FUN_00b3ee40();
+    float CTreeFileAccess_ParseFloat();
+    int CTreeFileAccess_ParseBranchParameter();
+    bool ProcessAndTransformResult_00b06180();
+    FUN_0044a4c0 CTreeFileAccess_ParseString();
 };
 struct PQ : FUN_0044a4c0
 {
@@ -2357,8 +2367,8 @@ struct TexQ
 struct TexVec
 {
     int ai[4];
-    void FUN_00b1e2f0();
-    void FUN_00b1e1e0(const TexQ& t);
+    void ClearAllElements();
+    void UpdateFields_00b1e1e0(const TexQ& t);
 };
 inline void DeadTop()
 {
@@ -2379,11 +2389,12 @@ struct Frond
     int i68;
     float f6c, f70, f74, f78;
     int i7c, i80;
-    void FUN_00b18f60(int);
-    void FUN_00b18340(Parser* p);
+    void UpdateFields_00b18f60(int);
+    void CFrondEngine_Parse(Parser* p);
 };
 // @fnv 0x00b18340
-void Frond::FUN_00b18340(Parser* p)
+// src: COMMUNITY 0x00b18340
+void Frond::CFrondEngine_Parse(Parser* p)
 {
     DeadTop();
     int iToken = p->GetNextElement();
@@ -2401,28 +2412,28 @@ void Frond::FUN_00b18340(Parser* p)
             i3c = p->GetNextElement();
             break;
         case 0x32cd:
-            FUN_00b18f60(p->FUN_00b13970());
+            UpdateFields_00b18f60(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x32ce:
             i44 = p->GetNextElement();
             break;
         case 0x32cf:
-            b4c = p->FUN_00b06180();
+            b4c = p->ProcessAndTransformResult_00b06180();
             break;
         case 0x32d1:
             i68 = p->GetNextElement();
             break;
         case 0x32d2:
-            f6c = p->FUN_00b3ed20();
+            f6c = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x32d3:
-            f70 = p->FUN_00b3ed20();
+            f70 = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x32d4:
-            f74 = p->FUN_00b3ed20();
+            f74 = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x32d5:
-            f78 = p->FUN_00b3ed20();
+            f78 = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x36b7:
             i7c = p->GetNextElement();
@@ -2431,7 +2442,7 @@ void Frond::FUN_00b18340(Parser* p)
             i80 = p->GetNextElement();
             break;
         case 0x32d0: {
-            kTex.FUN_00b1e2f0();
+            kTex.ClearAllElements();
             int iCount = p->GetNextElement();
             for (int i = 0; i < iCount; i++)
             {
@@ -2443,35 +2454,35 @@ void Frond::FUN_00b18340(Parser* p)
                     switch (iToken)
                     {
                     case 0x36b2: {
-                        PQ kName(p->FUN_00b3ee40());
+                        PQ kName(p->CTreeFileAccess_ParseString());
                         (FUN_0044a4c0&)kInfo.strName = kName;
                     }
-                        (FUN_0044a4c0&)kInfo.strName = kInfo.strName.FUN_00b09f90();
+                        (FUN_0044a4c0&)kInfo.strName = kInfo.strName.ProcessEntries_00b09f90();
                         break;
                     case 0x36b3:
-                        kInfo.fA = p->FUN_00b3ed20();
+                        kInfo.fA = p->CTreeFileAccess_ParseFloat();
                         break;
                     case 0x36b4:
-                        kInfo.fB = p->FUN_00b3ed20();
+                        kInfo.fB = p->CTreeFileAccess_ParseFloat();
                         break;
                     case 0x36b5:
-                        kInfo.fC = p->FUN_00b3ed20();
+                        kInfo.fC = p->CTreeFileAccess_ParseFloat();
                         break;
                     case 0x36b6:
-                        kInfo.fD = p->FUN_00b3ed20();
+                        kInfo.fD = p->CTreeFileAccess_ParseFloat();
                         break;
                     default:
-                        throw FUN_00b09480(FUN_00b18860("malformed frond texture information (token %d)", iToken),
+                        throw FUN_00b09480(IdvFormatString("malformed frond texture information (token %d)", iToken),
                                            false);
                     }
                     iToken = p->GetNextElement();
                 } while (iToken != 0x36b1);
-                kTex.FUN_00b1e1e0(kInfo);
+                kTex.UpdateFields_00b1e1e0(kInfo);
             }
             break;
         }
         default:
-            throw FUN_00b09480(FUN_00b18860("malformed frond info (token %d)", iToken), false);
+            throw FUN_00b09480(IdvFormatString("malformed frond info (token %d)", iToken), false);
         }
         iToken = p->GetNextElement();
     } while (iToken != 0x32c9);
@@ -2522,7 +2533,7 @@ struct TargetS
     {
         m_usBatches++;
     }
-    void FUN_00b2fdc0(unsigned short usId, unsigned short* pusIdx, unsigned short usNum);
+    void CIndexedGeometry_AddStrip(unsigned short usId, unsigned short* pusIdx, unsigned short usNum);
 };
 struct MeshS
 {
@@ -2542,10 +2553,11 @@ struct MeshS
     void* unk34;
     void* unk38;
     unsigned int m_uiCount;
-    void FUN_00b1aed0(unsigned short usId, int iBase, VecS* pkVec);
+    void AllocateStorage_00b1aed0(unsigned short usId, int iBase, VecS* pkVec);
 };
 // @fnv 0x00b1aed0
-void MeshS::FUN_00b1aed0(unsigned short usId, int iBase, VecS* pkVec)
+// src: GUESS 0x00b1aed0 (confidence: low)
+void MeshS::AllocateStorage_00b1aed0(unsigned short usId, int iBase, VecS* pkVec)
 {
     if (m_pkTarget)
     {
@@ -2560,7 +2572,7 @@ void MeshS::FUN_00b1aed0(unsigned short usId, int iBase, VecS* pkVec)
                 pusIdx[k5] = (unsigned short)(i * 2 * (pkVec->m_pRecordEnd - pkVec->m_pBegin) + iBase + j);
                 k5++;
             }
-            m_pkTarget->FUN_00b2fdc0(usId, pusIdx, usNum);
+            m_pkTarget->CIndexedGeometry_AddStrip(usId, pusIdx, usNum);
             m_pkTarget->AddBatch();
         }
     }
@@ -2574,7 +2586,7 @@ struct FUN_00b2fdc0_obj
     {
         w26++;
     }
-    void FUN_00b2fdc0(unsigned short a, unsigned short* p, unsigned short n);
+    void CIndexedGeometry_AddStrip(unsigned short a, unsigned short* p, unsigned short n);
 };
 struct LodVert
 {
@@ -2604,10 +2616,11 @@ struct FUN_00b1b960_class
     char pad2[0x7c - 0x6c];
     unsigned int m_uiMinRows;
     unsigned int m_uiMinCols;
-    void FUN_00b1b960(unsigned int uiLod, int iOffset, LodGrid* pGrid);
+    void ProcessEntries_00b1b960(unsigned int uiLod, int iOffset, LodGrid* pGrid);
 };
 // @fnv 0x00b1b960
-void FUN_00b1b960_class::FUN_00b1b960(unsigned int uiLod, int iOffset, LodGrid* pGrid)
+// src: GUESS 0x00b1b960 (confidence: low)
+void FUN_00b1b960_class::ProcessEntries_00b1b960(unsigned int uiLod, int iOffset, LodGrid* pGrid)
 {
     if (m_pEntryObject)
     {
@@ -2674,7 +2687,7 @@ void FUN_00b1b960_class::FUN_00b1b960(unsigned int uiLod, int iOffset, LodGrid* 
                 }
             }
         }
-        m_pEntryObject->FUN_00b2fdc0((unsigned short)uiLod, pIndices_gg, (unsigned short)uiNumIndicesws);
+        m_pEntryObject->CIndexedGeometry_AddStrip((unsigned short)uiLod, pIndices_gg, (unsigned short)uiNumIndicesws);
         m_pEntryObject->Inc();
     }
 }
@@ -2705,21 +2718,21 @@ struct AlQ
 {
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     __forceinline void destroy(ElQ* p)
     {
         p->~ElQ();
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b23e80(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
-ElQ* __cdecl FUN_00b236a0(ElQ* f, ElQ* l, ElQ* d);
-ElQ* __cdecl FUN_00b25a90(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b23e80(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b236a0(ElQ* f, ElQ* l, ElQ* d);
+ElQ* __cdecl Frondengine_AllocateStorage_00b25a90(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -2781,11 +2794,11 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Unchecked_copy(ElQ* f, ElQ* l, ElQ* d)
 {
-    return FUN_00b23e80(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
+    return Object_ProcessAndReturnValue_00b23e80(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
 }
 inline ElQ* Unchecked_uninitialized_copy(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
-    return FUN_00b25a90(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
+    return Frondengine_AllocateStorage_00b25a90(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
 }
 __forceinline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -2820,19 +2833,20 @@ struct VecQ
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b1e750();
-    bool FUN_00b1f590(unsigned n);
-    VecQ& FUN_00b1d130(const VecQ& _Right);
+    void ClearAllElements();
+    bool UpdateState_00b1f590(unsigned n);
+    VecQ& UpdateState_00b1d130(const VecQ& _Right);
 };
 // @fnv 0x00b1d130
-VecQ& VecQ::FUN_00b1d130(const VecQ& _Right)
+// src: GUESS 0x00b1d130 (confidence: low)
+VecQ& VecQ::UpdateState_00b1d130(const VecQ& _Right)
 {
     if (this != &_Right)
     {
         if (_Right.size() == 0)
         {
             Dead12();
-            FUN_00b1e750();
+            ClearAllElements();
         }
         else if (_Right.size() <= size())
         {
@@ -2843,7 +2857,7 @@ VecQ& VecQ::FUN_00b1d130(const VecQ& _Right)
         else if (_Right.size() <= capacity())
         {
             ElQ* _Ptr = _Right.m_pHeadNode + size();
-            FUN_00b236a0(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
+            Object_ProcessAndReturnValue_00b236a0(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
             Dead2();
             DC1();
             m_last = _Ucopy(_Ptr, _Right.m_last, m_last);
@@ -2855,7 +2869,7 @@ VecQ& VecQ::FUN_00b1d130(const VecQ& _Right)
                 _DestroyI(m_pHeadNode, m_last);
                 m_al.deallocate(m_pHeadNode, m_kRayEnd - m_pHeadNode);
             }
-            if (FUN_00b1f590(_Right.size()))
+            if (UpdateState_00b1f590(_Right.size()))
             {
                 Dead26();
                 m_last = _Ucopy(_Right.m_pHeadNode, _Right.m_last, m_pHeadNode);
@@ -4034,11 +4048,12 @@ struct S00b1df10_Guard
 
 struct FUN_00b1df10_obj : FUN_00b1f650_class
 {
-    void __thiscall FUN_00b1df10();
+    void __thiscall UpdateState_00b1df10();
 };
 
 // @fnv 0x00b1df10
-void __thiscall FUN_00b1df10_obj::FUN_00b1df10()
+// src: GUESS 0x00b1df10 (confidence: low)
+void __thiscall FUN_00b1df10_obj::UpdateState_00b1df10()
 {
     int u1;
     int u2;
@@ -4057,11 +4072,11 @@ void __thiscall FUN_00b1df10_obj::FUN_00b1df10()
     int u15;
     {
         S00b1df10_Guard g;
-        FUN_00b1f650_class::FUN_00b1f650();
+        FUN_00b1f650_class::ReleaseStorage_00b1f650();
     }
     {
         void* p = *(void**)this;
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
 }
 
@@ -5056,7 +5071,7 @@ struct S00b1e170_cls
 {
     void* m_pHeadNode;
     void FUN_00b1f9e0();
-    void FUN_00b1e170();
+    void UpdateState_00b1e170();
 };
 struct S00b1e170_guard
 {
@@ -5080,7 +5095,8 @@ struct S00b1e170_guard
     {}
 };
 // @fnv 0x00b1e170
-void S00b1e170_cls::FUN_00b1e170()
+// src: GUESS 0x00b1e170 (confidence: low)
+void S00b1e170_cls::UpdateState_00b1e170()
 {
     {
         S00b1e170_guard g;
@@ -5088,7 +5104,7 @@ void S00b1e170_cls::FUN_00b1e170()
     }
     {
         void* p = m_pHeadNode;
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
 }
 
@@ -5298,7 +5314,8 @@ inline VcElem* VcCopyOpt(VcElem* _First, VcElem* _Last, VcElem* _Dest, VcRandomT
     VcCopyOpt(_First, _Last, VcCheckedBase(_Dest), VcForwardTag(), VcNonscalarTag(), VcRangeCheckedTag());
     return _Result;
 }
-template <class _InIt, class _OutIt> inline _OutIt FUN_00b23830(_InIt _First, _InIt _Last, _OutIt _Dest)
+// src: GUESS 0x00b23830 (confidence: low)
+template <class _InIt, class _OutIt> inline _OutIt Frondengine_EvaluateValue_00b23830(_InIt _First, _InIt _Last, _OutIt _Dest)
 {
     return VcCopyOpt(VcCheckedBase(_First), VcCheckedBase(_Last), _Dest, VcIterRandom(_First, _Dest),
                      VcPtrCatC(_First, _Dest), VcRangeCheckedTag());
@@ -5355,13 +5372,13 @@ struct VcVector : VcContainer
         VcIterator _Last = _Make_iter(_Last_arg);
         if (_First != _Last)
         {
-            VcElem* _Ptr = FUN_00b23830(_Last._Myptr, _Mylast, _First._Myptr);
+            VcElem* _Ptr = Frondengine_EvaluateValue_00b23830(_Last._Myptr, _Mylast, _First._Myptr);
             _Destroy(_Ptr, _Mylast);
             _Mylast = _Ptr;
         }
         return _First;
     }
-    void FUN_00b1e2f0();
+    void ClearAllElements();
 };
 inline VcConstIterator::VcConstIterator(VcElem* _Ptr, const VcContainer* _Pvector)
 {
@@ -5384,7 +5401,8 @@ inline VcConstIterator& VcConstIterator::operator+=(int _Off)
 using namespace vecb1e2;
 
 // @fnv 0x00b1e2f0
-void VcVector::FUN_00b1e2f0()
+// src: GUESS 0x00b1e2f0 (confidence: high)
+void VcVector::ClearAllElements()
 {
     erase(begin(), end());
 }
@@ -6390,11 +6408,12 @@ struct EmptyGuard
 
 struct S00b1e5d0_Obj : FUN_00b1fe80_helper
 {
-    void __thiscall FUN_00b1e5d0();
+    void __thiscall UpdateState_00b1e5d0();
 };
 
 // @fnv 0x00b1e5d0
-void __thiscall S00b1e5d0_Obj::FUN_00b1e5d0()
+// src: GUESS 0x00b1e5d0 (confidence: low)
+void __thiscall S00b1e5d0_Obj::UpdateState_00b1e5d0()
 {
     int u1;
     int u2;
@@ -6411,11 +6430,11 @@ void __thiscall S00b1e5d0_Obj::FUN_00b1e5d0()
     int u13;
     {
         EmptyGuard t;
-        this->FUN_00b1fe80();
+        this->UpdateFields_00b1fe80();
     }
     {
         int v = this->m0;
-        FormHeap_Free((void*)v);
+        FormHeapFreeAndLog_00401030((void*)v);
     }
 }
 
@@ -6548,7 +6567,8 @@ inline VcElem* VcCopyOpt(VcElem* _First, VcElem* _Last, VcElem* _Dest, VcRandomT
     VcCopyOpt(_First, _Last, VcCheckedBase(_Dest), VcForwardTag(), VcNonscalarTag(), VcRangeCheckedTag());
     return _Result;
 }
-template <class _InIt, class _OutIt> inline _OutIt FUN_00b236a0(_InIt _First, _InIt _Last, _OutIt _Dest)
+// src: GUESS 0x00b236a0 (confidence: low)
+template <class _InIt, class _OutIt> inline _OutIt Object_ProcessAndReturnValue_00b236a0(_InIt _First, _InIt _Last, _OutIt _Dest)
 {
     return VcCopyOpt(VcCheckedBase(_First), VcCheckedBase(_Last), _Dest, VcIterRandom(_First, _Dest),
                      VcPtrCatC(_First, _Dest), VcRangeCheckedTag());
@@ -6605,13 +6625,13 @@ struct VcVector : VcContainer
         VcIterator _Last = _Make_iter(_Last_arg);
         if (_First != _Last)
         {
-            VcElem* _Ptr = FUN_00b236a0(_Last._Myptr, _Mylast, _First._Myptr);
+            VcElem* _Ptr = Object_ProcessAndReturnValue_00b236a0(_Last._Myptr, _Mylast, _First._Myptr);
             _Destroy(_Ptr, _Mylast);
             _Mylast = _Ptr;
         }
         return _First;
     }
-    void FUN_00b1e750();
+    void ClearAllElements();
 };
 inline VcConstIterator::VcConstIterator(VcElem* _Ptr, const VcContainer* _Pvector)
 {
@@ -6634,7 +6654,8 @@ inline VcConstIterator& VcConstIterator::operator+=(int _Off)
 using namespace vecb1e;
 
 // @fnv 0x00b1e750
-void VcVector::FUN_00b1e750()
+// src: GUESS 0x00b1e750 (confidence: high)
+void VcVector::ClearAllElements()
 {
     erase(begin(), end());
 }
@@ -6672,9 +6693,9 @@ struct T1Alloc
     {}
     void deallocate(T1Elem* ptr, unsigned int count)
     {
-        FormHeap_Free(ptr);
+        FormHeapFreeAndLog_00401030(ptr);
     }
-    static void FormHeap_Free(void* ptr);
+    static void FormHeapFreeAndLog_00401030(void* ptr);
 };
 inline void T1DestroyRange(T1Elem* first, T1Elem* last, T1Alloc& al, T1NonscalarTag)
 {
@@ -6699,13 +6720,14 @@ struct T1Vector
     {
         T1DestroyRange(first, last, kAlval);
     }
-    void FUN_00b1e970();
+    void UpdateState_00b1e970();
 };
 }
 using namespace tidyb1e;
 
 // @fnv 0x00b1e970
-void T1Vector::FUN_00b1e970()
+// src: GUESS 0x00b1e970 (confidence: low)
+void T1Vector::UpdateState_00b1e970()
 {
     if (pFirst != 0)
     {
@@ -6717,8 +6739,8 @@ void T1Vector::FUN_00b1e970()
     pEnd = 0;
 }
 
-void __cdecl FUN_00b0fb80();
-int __cdecl FUN_00b23980(unsigned int n, int hint);
+void __cdecl BxLengthError_Thunk();
+int __cdecl Object_AllocateElementStorage_00b23980(unsigned int n, int hint);
 
 inline unsigned int maxsz(unsigned int m)
 {
@@ -6733,11 +6755,12 @@ struct FUN_00b1eb00_class
     int m_iThirdValue;
     int m_10;
     int m_14;
-    bool __thiscall FUN_00b1eb00(unsigned int n);
+    bool __thiscall ProcessAndReturnValue_00b1eb00(unsigned int n);
 };
 
 // @fnv 0x00b1eb00
-bool FUN_00b1eb00_class::FUN_00b1eb00(unsigned int n)
+// src: GUESS 0x00b1eb00 (confidence: low)
+bool FUN_00b1eb00_class::ProcessAndReturnValue_00b1eb00(unsigned int n)
 {
     int CNVal;
     int CN_;
@@ -6784,10 +6807,10 @@ bool FUN_00b1eb00_class::FUN_00b1eb00(unsigned int n)
     {
         CNA = 0x4924924u;
         if (maxsz(CNA) < n)
-            FUN_00b0fb80();
+            BxLengthError_Thunk();
         else
         {
-            m_iThirdValue = FUN_00b23980(n, 0);
+            m_iThirdValue = Object_AllocateElementStorage_00b23980(n, 0);
             m_10 = m_iThirdValue;
             m_14 = n * 0x38 + m_iThirdValue;
         }
@@ -6939,11 +6962,12 @@ struct VdElemV : public VdVector<VdInner>
 }
 struct FUN_00b1ebc0 : public VdVectorImpl<VdElemV>
 {
-    void FUN_00b1ebc0_Destroy(VdElemV* _First, VdElemV* _Last);
+    void VdDestroyRange_Thunk(VdElemV* _First, VdElemV* _Last);
 };
 
 // @fnv 0x00b1ebc0
-void FUN_00b1ebc0::FUN_00b1ebc0_Destroy(VdElemV* _First, VdElemV* _Last)
+// src: GUESS 0x00b1ebc0 (confidence: medium)
+void FUN_00b1ebc0::VdDestroyRange_Thunk(VdElemV* _First, VdElemV* _Last)
 {
     VdDestroyRange<VdAlloc<VdElemV> >(_First, _Last, _Alval);
 }
@@ -7027,28 +7051,28 @@ struct AlQ
     }
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     void destroy(ElQ* p)
     {
         p->~ElQ();
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b23980(unsigned n, ElQ* p);
-ElQ* __cdecl FUN_00b26450(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
-ElQ* __cdecl FUN_00b24030(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
+ElQ* __cdecl Object_AllocateElementStorage_00b23980(unsigned n, ElQ* p);
+ElQ* __cdecl Range_ForwardWithTagBytes_00b26450(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
+ElQ* __cdecl Frondengine_EvaluateValue_00b24030(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
 inline ElQ* Uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al, MoveCatQ mc, TagQ tg)
 {
-    return FUN_00b26450(f, l, d, al);
+    return Range_ForwardWithTagBytes_00b26450(f, l, d, al);
 }
-ElQ* __cdecl FUN_00b238e0(ElQ* f, ElQ* l, ElQ* d);
-void __cdecl FUN_00b24180(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
-void __cdecl FUN_00b0fb80();
+ElQ* __cdecl Object_UpdateFields_00b238e0(ElQ* f, ElQ* l, ElQ* d);
+void __cdecl Object_ConstructFilledRange(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
+void __cdecl BxLengthError_Thunk();
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -7118,7 +7142,7 @@ inline ElQ* Unchecked_uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 }
 inline void Unchecked_uninitialized_fill_n(ElQ* f, unsigned n, const ElQ& v, AlQ& al)
 {
-    FUN_00b24180(f, n, v, al, Ptr_cat(f, f), TagQ());
+    Object_ConstructFilledRange(f, n, v, al, Ptr_cat(f, f), TagQ());
 }
 inline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -7170,7 +7194,7 @@ struct VecQ
     }
     ElQ* _Umove2(ElQ* f, ElQ* l, ElQ* p)
     {
-        return FUN_00b24030(f, l, p, m_al);
+        return Frondengine_EvaluateValue_00b24030(f, l, p, m_al);
     }
     ElQ* _Ufill(ElQ* p, unsigned n, const ElQ& v)
     {
@@ -7182,23 +7206,24 @@ struct VecQ
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b1ecf0(CItQ _Where, unsigned _Count, const ElQ& _Val);
+    void UpdateState_00b1ecf0(CItQ _Where, unsigned _Count, const ElQ& _Val);
 };
 // @fnv 0x00b1ecf0
-void VecQ::FUN_00b1ecf0(CItQ _Where, unsigned _Count, const ElQ& _Val)
+// src: GUESS 0x00b1ecf0 (confidence: low)
+void VecQ::UpdateState_00b1ecf0(CItQ _Where, unsigned _Count, const ElQ& _Val)
 {
     unsigned _Capacity = capacity();
     if (_Count == 0)
         ;
     else if (max_size() - size() < _Count)
-        FUN_00b0fb80();
+        BxLengthError_Thunk();
     else if (_Capacity < size() + _Count)
     {
         Dead17();
         _Capacity = max_size() - _Capacity / 2 < _Capacity ? 0 : _Capacity + _Capacity / 2;
         if (_Capacity < size() + _Count)
             _Capacity = size() + _Count;
-        ElQ* _Newvec = FUN_00b23980(_Capacity, 0);
+        ElQ* _Newvec = Object_AllocateElementStorage_00b23980(_Capacity, 0);
         ElQ* _Ptr = _Newvec;
         try
         {
@@ -7246,7 +7271,7 @@ void VecQ::FUN_00b1ecf0(CItQ _Where, unsigned _Count, const ElQ& _Val)
         ElQ* _Oldend = m_last;
         Dead21();
         m_last = _Umove2(_Oldend - _Count, _Oldend, m_last);
-        FUN_00b238e0(_Where.m_ptr, _Oldend - _Count, _Oldend);
+        Object_UpdateFields_00b238e0(_Where.m_ptr, _Oldend - _Count, _Oldend);
         Dead8c();
         Unchecked_fill(_Where.m_ptr, _Where.m_ptr + _Count, *(const ElQ*)&_Tmp);
         Dead8b();
@@ -7618,13 +7643,14 @@ struct BxVector
     {
         throw BxLengthError("vector<T> too long");
     }
-    bool FUN_00b1f590(unsigned int _Capacity);
+    bool UpdateState_00b1f590(unsigned int _Capacity);
 };
 }
 using namespace buyElement24;
 
 // @fnv 0x00b1f590
-bool BxVector::FUN_00b1f590(unsigned int _Capacity)
+// src: GUESS 0x00b1f590 (confidence: low)
+bool BxVector::UpdateState_00b1f590(unsigned int _Capacity)
 {
     _Myfirst = 0, _Mylast = 0, _Myend = 0;
     if (_Capacity == 0)
@@ -7696,7 +7722,8 @@ struct EraseElement
     {
         EraseTraits::assign(data()[length = size], char());
     }
-    void FUN_0044a730(bool built, unsigned int size)
+// src: XBOX_PDB 0x0044a730
+    void fopen_0044a730(bool built, unsigned int size)
     {
         if (!built)
             ;
@@ -7712,12 +7739,12 @@ struct EraseElement
     }
     ~EraseElement()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
 };
 unsigned int __cdecl FUN_00ec7c56();
 void __cdecl operator delete(void*);
-EraseElement* __cdecl FUN_00b23830(EraseElement*, EraseElement*, EraseElement*);
+EraseElement* __cdecl Frondengine_EvaluateValue_00b23830(EraseElement*, EraseElement*, EraseElement*);
 struct EraseVector;
 struct EraseIteratorBase
 {
@@ -7730,7 +7757,7 @@ struct EraseConstIterator : EraseIteratorBase
 {
     EraseElement* ptr;
     EraseConstIterator(EraseElement*, const EraseVector*);
-    bool FUN_00b16830(const EraseConstIterator&) const;
+    bool AreValuesEqual_00b16830(const EraseConstIterator&) const;
 };
 struct EraseIterator : EraseConstIterator
 {
@@ -7802,7 +7829,8 @@ inline EraseElement* CopyOpt(EraseElement* first, EraseElement* last, EraseEleme
     CopyOpt(first, last, CheckedBase(dest), EraseForwardTag(), EraseTag(), EraseRangeTag());
     return result;
 }
-inline EraseElement* FUN_00b23830(EraseElement* first, EraseElement* last, EraseElement* dest)
+// src: GUESS 0x00b23830 (confidence: low)
+inline EraseElement* Frondengine_EvaluateValue_00b23830(EraseElement* first, EraseElement* last, EraseElement* dest)
 {
     return CopyOpt(CheckedBase(first), CheckedBase(last), dest, IteratorCategory(first, dest),
                    PointerCategory(first, dest), EraseRangeTag());
@@ -7832,7 +7860,7 @@ struct EraseVector
     {
         DestroyRange(first, last, al);
     }
-    EraseIterator FUN_00b1f800(EraseConstIterator first_arg, EraseConstIterator last_arg);
+    EraseIterator ProcessAndReturnValue_00b1f800(EraseConstIterator first_arg, EraseConstIterator last_arg);
 };
 inline void EraseIteratorBase::SetContainer(const EraseVector* v)
 {
@@ -7850,13 +7878,14 @@ inline EraseConstIterator::EraseConstIterator(EraseElement* p, const EraseVector
     ptr = p;
 }
 // @fnv 0x00b1f800
-EraseIterator EraseVector::FUN_00b1f800(EraseConstIterator first_arg, EraseConstIterator last_arg)
+// src: GUESS 0x00b1f800 (confidence: low)
+EraseIterator EraseVector::ProcessAndReturnValue_00b1f800(EraseConstIterator first_arg, EraseConstIterator last_arg)
 {
     EraseIterator first = MakeIter(first_arg);
     EraseIterator last = MakeIter(last_arg);
-    if (first.FUN_00b16830(last))
+    if (first.AreValuesEqual_00b16830(last))
     {
-        EraseElement* ptr = FUN_00b23830(last.ptr, m10, first.ptr);
+        EraseElement* ptr = Frondengine_EvaluateValue_00b23830(last.ptr, m10, first.ptr);
         Destroy(ptr, m10);
         m10 = ptr;
     }
@@ -8782,10 +8811,11 @@ struct GvObj
 using namespace tidyb1f9;
 struct FUN_00b1f9e0 : GvVector<GvNamed>
 {
-    void FUN_00b1f9e0_Tidy();
+    void ReleaseStorage_00b1f9e0();
 };
 // @fnv 0x00b1f9e0
-void FUN_00b1f9e0::FUN_00b1f9e0_Tidy()
+// src: GUESS 0x00b1f9e0 (confidence: medium)
+void FUN_00b1f9e0::ReleaseStorage_00b1f9e0()
 {
     if (_Myfirst != 0)
     {
@@ -9158,13 +9188,14 @@ struct BxVector
     {
         throw BxLengthError("vector<T> too long");
     }
-    bool FUN_00b1fbe0(unsigned int _Capacity);
+    bool ProcessAndReturnValue_00b1fbe0(unsigned int _Capacity);
 };
 }
 using namespace buyb1f;
 
 // @fnv 0x00b1fbe0
-bool BxVector::FUN_00b1fbe0(unsigned int _Capacity)
+// src: GUESS 0x00b1fbe0 (confidence: low)
+bool BxVector::ProcessAndReturnValue_00b1fbe0(unsigned int _Capacity)
 {
     _Myfirst = 0, _Mylast = 0, _Myend = 0;
     if (_Capacity == 0)
@@ -9207,9 +9238,9 @@ struct T1Alloc
     {}
     void deallocate(T1Elem* ptr, unsigned int count)
     {
-        FormHeap_Free(ptr);
+        FormHeapFreeAndLog_00401030(ptr);
     }
-    static void FormHeap_Free(void* ptr);
+    static void FormHeapFreeAndLog_00401030(void* ptr);
 };
 inline void T1DestroyRange(T1Elem* first, T1Elem* last, T1Alloc& al, T1NonscalarTag)
 {
@@ -9234,13 +9265,14 @@ struct T1Vector
     {
         T1DestroyRange(first, last, kAlval);
     }
-    void FUN_00b1fca0();
+    void ReleaseStorage_00b1fca0();
 };
 }
 using namespace tidyb1f;
 
 // @fnv 0x00b1fca0
-void T1Vector::FUN_00b1fca0()
+// src: GUESS 0x00b1fca0 (confidence: medium)
+void T1Vector::ReleaseStorage_00b1fca0()
 {
     if (pFirst != 0)
     {
@@ -9276,18 +9308,18 @@ struct AlQ
     }
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     void destroy(ElQ* p)
     {}
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
-ElQ* __cdecl FUN_00b23980(unsigned n, ElQ* p);
-ElQ* __cdecl FUN_00b264a0(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
-ElQ* __cdecl FUN_00b24690(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
-ElQ* __cdecl FUN_00b23930(ElQ* f, ElQ* l, ElQ* d);
+ElQ* __cdecl Object_AllocateElementStorage_00b23980(unsigned n, ElQ* p);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b264a0(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
+ElQ* __cdecl Frondengine_EvaluateValue_00b24690(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
+ElQ* __cdecl Frondengine_EvaluateValue_00b23930(ElQ* f, ElQ* l, ElQ* d);
 void __cdecl CopyObjects(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
-void __cdecl FUN_00b0fb80();
+void __cdecl BxLengthError_Thunk();
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -9325,7 +9357,7 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al, MoveCatQ mc, TagQ tg)
 {
-    return FUN_00b264a0(f, l, d, al);
+    return Object_ProcessAndReturnValue_00b264a0(f, l, d, al);
 }
 inline ElQ* Unchecked_uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
@@ -9389,22 +9421,23 @@ struct VecQ
     }
     ElQ* _Umove2(ElQ* f, ElQ* l, ElQ* p)
     {
-        return FUN_00b24690(f, l, p, m_al);
+        return Frondengine_EvaluateValue_00b24690(f, l, p, m_al);
     }
     void _Destroy(ElQ* f, ElQ* l)
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b20360(CItQ _Where, unsigned _Count, const ElQ& _Val);
+    void InsertFilledElements_00b20360(CItQ _Where, unsigned _Count, const ElQ& _Val);
 };
 // @fnv 0x00b20360
-void VecQ::FUN_00b20360(CItQ _Where, unsigned _Count, const ElQ& _Val)
+// src: GUESS 0x00b20360 (confidence: medium)
+void VecQ::InsertFilledElements_00b20360(CItQ _Where, unsigned _Count, const ElQ& _Val)
 {
     unsigned _Capacity = capacity();
     if (_Count == 0)
         ;
     else if (max_size() - size() < _Count)
-        FUN_00b0fb80();
+        BxLengthError_Thunk();
     else if (_Capacity < size() + _Count)
     {
         Dead17();
@@ -9412,7 +9445,7 @@ void VecQ::FUN_00b20360(CItQ _Where, unsigned _Count, const ElQ& _Val)
         Dead3();
         if (_Capacity < size() + _Count)
             _Capacity = size() + _Count;
-        ElQ* _Newvec = FUN_00b23980(_Capacity, 0);
+        ElQ* _Newvec = Object_AllocateElementStorage_00b23980(_Capacity, 0);
         ElQ* _Ptr = _Newvec;
         try
         {
@@ -9458,7 +9491,7 @@ void VecQ::FUN_00b20360(CItQ _Where, unsigned _Count, const ElQ& _Val)
         ElQ* _Oldend = m_last;
         Dead13();
         m_last = _Umove2(_Oldend - _Count, _Oldend, m_last);
-        FUN_00b23930(_Where.m_ptr, _Oldend - _Count, _Oldend);
+        Frondengine_EvaluateValue_00b23930(_Where.m_ptr, _Oldend - _Count, _Oldend);
         Dead16();
         Unchecked_fill(_Where.m_ptr, _Where.m_ptr + _Count, _Tmp);
     }
@@ -10572,11 +10605,12 @@ struct VdElemW : public VdVector<VdElemV>
 }
 struct FUN_00b20c30 : public VdVectorImpl<VdElemW>
 {
-    void FUN_00b20c30_Destroy(VdElemW* _First, VdElemW* _Last);
+    void Helper_00b20c30(VdElemW* _First, VdElemW* _Last);
 };
 
 // @fnv 0x00b20c30
-void FUN_00b20c30::FUN_00b20c30_Destroy(VdElemW* _First, VdElemW* _Last)
+// src: GUESS 0x00b20c30 (confidence: low)
+void FUN_00b20c30::Helper_00b20c30(VdElemW* _First, VdElemW* _Last)
 {
     VdDestroyRange<VdAlloc<VdElemW> >(_First, _Last, _Alval);
 }
@@ -10644,23 +10678,23 @@ struct AlQ
     }
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     void destroy(ElQ* p)
     {
         p->~ElQ();
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b23aa0(unsigned n, ElQ* p);
-ElQ* __cdecl FUN_00b25ca0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, MoveCatQ c, TagQ t);
-ElQ* __cdecl FUN_00b239e0(ElQ* f, ElQ* l, ElQ* d);
-void __cdecl FUN_00b24290(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
-void __cdecl FUN_00b0fb80();
+ElQ* __cdecl Object_AllocateElementStorage_00b23aa0(unsigned n, ElQ* p);
+ElQ* __cdecl Object_ProcessEntries_00b25ca0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, MoveCatQ c, TagQ t);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b239e0(ElQ* f, ElQ* l, ElQ* d);
+void __cdecl Frondengine_ProcessEntries_00b24290(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
+void __cdecl BxLengthError_Thunk();
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -10718,11 +10752,11 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Unchecked_uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
-    return FUN_00b25ca0(Checked_base2(f), Checked_base(l), d, al, Move_cat(d), TagQ());
+    return Object_ProcessEntries_00b25ca0(Checked_base2(f), Checked_base(l), d, al, Move_cat(d), TagQ());
 }
 inline void Unchecked_uninitialized_fill_n(ElQ* f, unsigned n, const ElQ& v, AlQ& al)
 {
-    FUN_00b24290(f, n, v, al, Ptr_cat(f, f), TagQ());
+    Frondengine_ProcessEntries_00b24290(f, n, v, al, Ptr_cat(f, f), TagQ());
 }
 inline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -10782,23 +10816,24 @@ struct VecQ
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b20ce0(CItQ _Where, unsigned _Count, const ElQ& _Val);
+    void InsertFilledElements_00b20ce0(CItQ _Where, unsigned _Count, const ElQ& _Val);
 };
 // @fnv 0x00b20ce0
-void VecQ::FUN_00b20ce0(CItQ _Where, unsigned _Count, const ElQ& _Val)
+// src: GUESS 0x00b20ce0 (confidence: medium)
+void VecQ::InsertFilledElements_00b20ce0(CItQ _Where, unsigned _Count, const ElQ& _Val)
 {
     unsigned _Capacity = capacity();
     if (_Count == 0)
         ;
     else if (max_size() - size() < _Count)
-        FUN_00b0fb80();
+        BxLengthError_Thunk();
     else if (_Capacity < size() + _Count)
     {
         Dead17();
         _Capacity = max_size() - _Capacity / 2 < _Capacity ? 0 : _Capacity + _Capacity / 2;
         if (_Capacity < size() + _Count)
             _Capacity = size() + _Count;
-        ElQ* _Newvec = FUN_00b23aa0(_Capacity, 0);
+        ElQ* _Newvec = Object_AllocateElementStorage_00b23aa0(_Capacity, 0);
         ElQ* _Ptr = _Newvec;
         try
         {
@@ -10845,7 +10880,7 @@ void VecQ::FUN_00b20ce0(CItQ _Where, unsigned _Count, const ElQ& _Val)
         ElQ* _Oldend = m_last;
         Dead9();
         m_last = _Umove(_Oldend - _Count, _Oldend, m_last);
-        FUN_00b239e0(_Where.m_ptr, _Oldend - _Count, _Oldend);
+        Object_ProcessAndReturnValue_00b239e0(_Where.m_ptr, _Oldend - _Count, _Oldend);
         Dead11();
         Unchecked_fill(_Where.m_ptr, _Where.m_ptr + _Count, *(const ElQ*)&_Tmp);
         Dead8b();
@@ -10860,14 +10895,14 @@ struct ElQ
     char ac[44];
     ElQ(const ElQ&);
     ElQ& operator=(const ElQ&);
-    void FUN_0044a730(bool, int);
+    void fopen_0044a730(bool, int);
     ~ElQ()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
     void DelQ(unsigned f)
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
         if (f & 1)
             FreeQ(this);
     }
@@ -10890,24 +10925,24 @@ struct AlQ
     }
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     void destroy(ElQ* p)
     {
         p->DelQ(0);
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b23b50(unsigned n, ElQ* p);
-ElQ* __cdecl FUN_00b23f10(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
-ElQ* __cdecl FUN_00b247b0(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
-ElQ* __cdecl FUN_00b23b00(ElQ* f, ElQ* l, ElQ* d);
-void __cdecl FUN_00b243a0(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
-void __cdecl FUN_00b0fb80();
+ElQ* __cdecl Frondengine_UpdateState_00b23b50(unsigned n, ElQ* p);
+ElQ* __cdecl Frondengine_EvaluateValue_00b23f10(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
+ElQ* __cdecl Frondengine_EvaluateValue_00b247b0(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b23b00(ElQ* f, ElQ* l, ElQ* d);
+void __cdecl Object_ProcessEntries_00b243a0(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
+void __cdecl BxLengthError_Thunk();
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -10949,7 +10984,7 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al, MoveCatQ mc, TagQ tg)
 {
-    return FUN_00b23f10(f, l, d, al);
+    return Frondengine_EvaluateValue_00b23f10(f, l, d, al);
 }
 inline ElQ* Unchecked_uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
@@ -10957,7 +10992,7 @@ inline ElQ* Unchecked_uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 }
 inline void Unchecked_uninitialized_fill_n(ElQ* f, unsigned n, const ElQ& v, AlQ& al)
 {
-    FUN_00b243a0(f, n, v, al, Ptr_cat(f, f), TagQ());
+    Object_ProcessEntries_00b243a0(f, n, v, al, Ptr_cat(f, f), TagQ());
 }
 inline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -11013,29 +11048,30 @@ struct VecQ
     }
     ElQ* _Umove2(ElQ* f, ElQ* l, ElQ* p)
     {
-        return FUN_00b247b0(f, l, p, m_al);
+        return Frondengine_EvaluateValue_00b247b0(f, l, p, m_al);
     }
     void _Destroy(ElQ* f, ElQ* l)
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b21560(CItQ _Where, unsigned _Count, const ElQ& _Val);
+    void InsertFilledElements_00b21560(CItQ _Where, unsigned _Count, const ElQ& _Val);
 };
 // @fnv 0x00b21560
-void VecQ::FUN_00b21560(CItQ _Where, unsigned _Count, const ElQ& _Val)
+// src: GUESS 0x00b21560 (confidence: medium)
+void VecQ::InsertFilledElements_00b21560(CItQ _Where, unsigned _Count, const ElQ& _Val)
 {
     unsigned _Capacity = capacity();
     if (_Count == 0)
         ;
     else if (max_size() - size() < _Count)
-        FUN_00b0fb80();
+        BxLengthError_Thunk();
     else if (_Capacity < size() + _Count)
     {
         Dead17();
         _Capacity = max_size() - _Capacity / 2 < _Capacity ? 0 : _Capacity + _Capacity / 2;
         if (_Capacity < size() + _Count)
             _Capacity = size() + _Count;
-        ElQ* _Newvec = FUN_00b23b50(_Capacity, 0);
+        ElQ* _Newvec = Frondengine_UpdateState_00b23b50(_Capacity, 0);
         ElQ* _Ptr = _Newvec;
         try
         {
@@ -11081,7 +11117,7 @@ void VecQ::FUN_00b21560(CItQ _Where, unsigned _Count, const ElQ& _Val)
         ElQ* _Oldend = m_last;
         Dead17();
         m_last = _Umove2(_Oldend - _Count, _Oldend, m_last);
-        FUN_00b23b00(_Where.m_ptr, _Oldend - _Count, _Oldend);
+        Object_ProcessAndReturnValue_00b23b00(_Where.m_ptr, _Oldend - _Count, _Oldend);
         Dead8();
         Unchecked_fill(_Where.m_ptr, _Where.m_ptr + _Count, _Tmp);
         Dead5();
@@ -11112,18 +11148,18 @@ struct AlQ
     }
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     void destroy(ElQ* p)
     {}
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
-ElQ* __cdecl FUN_00b23980(unsigned n, ElQ* p);
-ElQ* __cdecl FUN_00b264a0(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
-ElQ* __cdecl FUN_00b24690(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
-ElQ* __cdecl FUN_00b23930(ElQ* f, ElQ* l, ElQ* d);
+ElQ* __cdecl Object_AllocateElementStorage_00b23980(unsigned n, ElQ* p);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b264a0(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
+ElQ* __cdecl Frondengine_EvaluateValue_00b24690(ElQ* f, ElQ* l, ElQ* d, AlQ& al);
+ElQ* __cdecl Frondengine_EvaluateValue_00b23930(ElQ* f, ElQ* l, ElQ* d);
 void __cdecl CopyObjects(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
-void __cdecl FUN_00b0fb80();
+void __cdecl BxLengthError_Thunk();
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -11161,7 +11197,7 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al, MoveCatQ mc, TagQ tg)
 {
-    return FUN_00b264a0(f, l, d, al);
+    return Object_ProcessAndReturnValue_00b264a0(f, l, d, al);
 }
 inline ElQ* Unchecked_uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
@@ -11225,22 +11261,23 @@ struct VecQ
     }
     ElQ* _Umove2(ElQ* f, ElQ* l, ElQ* p)
     {
-        return FUN_00b24690(f, l, p, m_al);
+        return Frondengine_EvaluateValue_00b24690(f, l, p, m_al);
     }
     void _Destroy(ElQ* f, ElQ* l)
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b21e00(CItQ _Where, unsigned _Count, const ElQ& _Val);
+    void InsertFilledElements_00b21e00(CItQ _Where, unsigned _Count, const ElQ& _Val);
 };
 // @fnv 0x00b21e00
-void VecQ::FUN_00b21e00(CItQ _Where, unsigned _Count, const ElQ& _Val)
+// src: GUESS 0x00b21e00 (confidence: medium)
+void VecQ::InsertFilledElements_00b21e00(CItQ _Where, unsigned _Count, const ElQ& _Val)
 {
     unsigned _Capacity = capacity();
     if (_Count == 0)
         ;
     else if (max_size() - size() < _Count)
-        FUN_00b0fb80();
+        BxLengthError_Thunk();
     else if (_Capacity < size() + _Count)
     {
         Dead17();
@@ -11248,7 +11285,7 @@ void VecQ::FUN_00b21e00(CItQ _Where, unsigned _Count, const ElQ& _Val)
         Dead3();
         if (_Capacity < size() + _Count)
             _Capacity = size() + _Count;
-        ElQ* _Newvec = FUN_00b23980(_Capacity, 0);
+        ElQ* _Newvec = Object_AllocateElementStorage_00b23980(_Capacity, 0);
         ElQ* _Ptr = _Newvec;
         try
         {
@@ -11294,7 +11331,7 @@ void VecQ::FUN_00b21e00(CItQ _Where, unsigned _Count, const ElQ& _Val)
         ElQ* _Oldend = m_last;
         Dead13();
         m_last = _Umove2(_Oldend - _Count, _Oldend, m_last);
-        FUN_00b23930(_Where.m_ptr, _Oldend - _Count, _Oldend);
+        Frondengine_EvaluateValue_00b23930(_Where.m_ptr, _Oldend - _Count, _Oldend);
         Dead16();
         Unchecked_fill(_Where.m_ptr, _Where.m_ptr + _Count, _Tmp);
     }
@@ -11420,11 +11457,12 @@ struct VdElemV : public VdVector<unsigned short>
 }
 struct FUN_00b22650 : public VdVectorImpl<VdElemV>
 {
-    void FUN_00b22650_Destroy(VdElemV* _First, VdElemV* _Last);
+    void Helper_00b22650(VdElemV* _First, VdElemV* _Last);
 };
 
 // @fnv 0x00b22650
-void FUN_00b22650::FUN_00b22650_Destroy(VdElemV* _First, VdElemV* _Last)
+// src: GUESS 0x00b22650 (confidence: low)
+void FUN_00b22650::Helper_00b22650(VdElemV* _First, VdElemV* _Last)
 {
     VdDestroyRange<VdAlloc<VdElemV> >(_First, _Last, _Alval);
 }
@@ -11499,23 +11537,23 @@ struct AlQ
     }
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     void destroy(ElQ* p)
     {
         p->~ElQ();
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b23aa0(unsigned n, ElQ* p);
-ElQ* __cdecl FUN_00b25e20(ElQ* f, ElQ* l, ElQ* d, AlQ& al, MoveCatQ c, TagQ t);
-ElQ* __cdecl FUN_00b23c10(ElQ* f, ElQ* l, ElQ* d);
-void __cdecl FUN_00b24580(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
-void __cdecl FUN_00b0fb80();
+ElQ* __cdecl Object_AllocateElementStorage_00b23aa0(unsigned n, ElQ* p);
+ElQ* __cdecl Object_ProcessEntries_00b25e20(ElQ* f, ElQ* l, ElQ* d, AlQ& al, MoveCatQ c, TagQ t);
+ElQ* __cdecl Frondengine_EvaluateValue_00b23c10(ElQ* f, ElQ* l, ElQ* d);
+void __cdecl Object_ProcessEntries_00b24580(ElQ* f, unsigned n, const ElQ& v, AlQ& al, PtrCatQ c, TagQ t);
+void __cdecl BxLengthError_Thunk();
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -11577,11 +11615,11 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Unchecked_uninitialized_move(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
-    return FUN_00b25e20(Checked_base2(f), Checked_base(l), d, al, Move_cat(d), TagQ());
+    return Object_ProcessEntries_00b25e20(Checked_base2(f), Checked_base(l), d, al, Move_cat(d), TagQ());
 }
 inline void Unchecked_uninitialized_fill_n(ElQ* f, unsigned n, const ElQ& v, AlQ& al)
 {
-    FUN_00b24580(f, n, v, al, Ptr_cat(f, f), TagQ());
+    Object_ProcessEntries_00b24580(f, n, v, al, Ptr_cat(f, f), TagQ());
 }
 __forceinline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -11641,23 +11679,24 @@ struct VecQ
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b22700(CItQ _Where, unsigned _Count, const ElQ& _Val);
+    void InsertFilledElements_00b22700(CItQ _Where, unsigned _Count, const ElQ& _Val);
 };
 // @fnv 0x00b22700
-void VecQ::FUN_00b22700(CItQ _Where, unsigned _Count, const ElQ& _Val)
+// src: GUESS 0x00b22700 (confidence: medium)
+void VecQ::InsertFilledElements_00b22700(CItQ _Where, unsigned _Count, const ElQ& _Val)
 {
     unsigned _Capacity = capacity();
     if (_Count == 0)
         ;
     else if (max_size() - size() < _Count)
-        FUN_00b0fb80();
+        BxLengthError_Thunk();
     else if (_Capacity < size() + _Count)
     {
         Dead17();
         _Capacity = max_size() - _Capacity / 2 < _Capacity ? 0 : _Capacity + _Capacity / 2;
         if (_Capacity < size() + _Count)
             _Capacity = size() + _Count;
-        ElQ* _Newvec = FUN_00b23aa0(_Capacity, 0);
+        ElQ* _Newvec = Object_AllocateElementStorage_00b23aa0(_Capacity, 0);
         ElQ* _Ptr = _Newvec;
         try
         {
@@ -11704,7 +11743,7 @@ void VecQ::FUN_00b22700(CItQ _Where, unsigned _Count, const ElQ& _Val)
         ElQ* _Oldend = m_last;
         Dead7();
         m_last = _Umove(_Oldend - _Count, _Oldend, m_last);
-        FUN_00b23c10(_Where.m_ptr, _Oldend - _Count, _Oldend);
+        Frondengine_EvaluateValue_00b23c10(_Where.m_ptr, _Oldend - _Count, _Oldend);
         Dead11();
         Unchecked_fill(_Where.m_ptr, _Where.m_ptr + _Count, *(const ElQ*)&_Tmp);
         Dead7();
@@ -11767,12 +11806,13 @@ struct VectorX23460 : public ContainerBaseAuxX23460
 class FUN_00b23460_It : public IteratorBaseAuxX23460
 {
   public:
-    FUN_00b23460_It& FUN_00b23460(int _Off);
+    FUN_00b23460_It& ProcessAndReturnValue_00b23460(int _Off);
     ElemX23460* _Myptr;
 };
 
 // @fnv 0x00b23460
-FUN_00b23460_It& FUN_00b23460_It::FUN_00b23460(int _Off)
+// src: GUESS 0x00b23460 (confidence: low)
+FUN_00b23460_It& FUN_00b23460_It::ProcessAndReturnValue_00b23460(int _Off)
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoX23460();
@@ -11835,12 +11875,13 @@ struct VectorX23520 : public ContainerBaseAuxX23520
 class FUN_00b23520_It : public IteratorBaseAuxX23520
 {
   public:
-    FUN_00b23520_It& FUN_00b23520(int _Off);
+    FUN_00b23520_It& ProcessAndReturnValue_00b23520(int _Off);
     ElemX23520* _Myptr;
 };
 
 // @fnv 0x00b23520
-FUN_00b23520_It& FUN_00b23520_It::FUN_00b23520(int _Off)
+// src: GUESS 0x00b23520 (confidence: low)
+FUN_00b23520_It& FUN_00b23520_It::ProcessAndReturnValue_00b23520(int _Off)
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoX23520();
@@ -12724,7 +12765,8 @@ struct GvElemLess
 }
 using namespace cpyb237;
 // @fnv 0x00b23760
-GvElem* FUN_00b23760(GvElem* _First, GvElem* _Last, GvElem* _Dest)
+// src: GUESS 0x00b23760 (confidence: low)
+GvElem* Object_ProcessAndReturnValue_00b23760(GvElem* _First, GvElem* _Last, GvElem* _Dest)
 {
     return GvCopyOpt(GvCheckedBase(_First), GvCheckedBase(_Last), _Dest, GvIterRandom(_First, _Dest),
                      GvPtrCat(_First, _Dest), GvRangeCheckedTag());
@@ -12809,17 +12851,18 @@ inline __int64 z64(void)
     return 0;
 }
 
-void __cdecl FUN_00b240b0(int a, int b, int c, char d, char e, char f);
+void __cdecl Frondengine_EvaluateValue_00b240b0(int a, int b, int c, char d, char e, char f);
 
 // @fnv 0x00b238e0
-void __cdecl FUN_00b238e0(int a, int b, int c)
+// src: GUESS 0x00b238e0 (confidence: low)
+void __cdecl Object_UpdateFields_00b238e0(int a, int b, int c)
 {
     sbuf108 s;
     s.c107 = (unsigned int)z64();
     s.c106 = s.c104;
     s.f0fc = b;
     s.f0f4 = a;
-    FUN_00b240b0(s.f0f4, s.f0fc, c, s.c105, s.c106, s.c107);
+    Frondengine_EvaluateValue_00b240b0(s.f0f4, s.f0fc, c, s.c105, s.c106, s.c107);
 }
 
 namespace fnv_00b23930 {
@@ -13310,7 +13353,8 @@ struct EUMB
     int unk14;
 };
 // @fnv 0x00b23930
-EUMB* __cdecl FUN_00b23930(EUMB* _First, EUMB* _Last, EUMB* _Dest)
+// src: GUESS 0x00b23930 (confidence: low)
+EUMB* __cdecl Frondengine_EvaluateValue_00b23930(EUMB* _First, EUMB* _Last, EUMB* _Dest)
 {
     return (_Move_backward_optS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Iter_randomS(_First, _Dest),
                                 _Move_catS(_Dest), _Range_checked_iterator_tagS()));
@@ -14282,7 +14326,8 @@ inline O GvCopyBackwardOpt(I _First, I _Last, O _Dest, GvRandomTag, GvNonscalarT
 }
 using namespace cbkb239;
 // @fnv 0x00b239e0
-GvVector<GvElem>* FUN_00b239e0(GvVector<GvElem>* _First, GvVector<GvElem>* _Last, GvVector<GvElem>* _Dest)
+// src: GUESS 0x00b239e0 (confidence: low)
+GvVector<GvElem>* Object_ProcessAndReturnValue_00b239e0(GvVector<GvElem>* _First, GvVector<GvElem>* _Last, GvVector<GvElem>* _Dest)
 {
     return GvMoveBackwardOpt(GvCheckedBase(_First), GvCheckedBase(_Last), _Dest, GvIterRandom(_First, _Dest),
                              GvMoveCat(_Dest), GvRangeCheckedTag());
@@ -14353,7 +14398,8 @@ inline void S00b23cd0_Adjust_heap(FrondIt _First, int _Hole, int _Bottom, FUN_00
     }
     S00b23cd0_Push_heap(_First, _Hole, _Top, _Val, _Pred);
 }
-inline void __cdecl FUN_00b26260(FrondIt _First, FrondIt _Last, FrondPred _Pred, int*, FUN_00b1ff50*)
+// src: GUESS 0x00b26260 (confidence: low)
+inline void __cdecl Object_ProcessEntries_00b26260(FrondIt _First, FrondIt _Last, FrondPred _Pred, int*, FUN_00b1ff50*)
 {
     int _Bottom = _Last - _First;
     for (int _Hole = _Bottom / 2; 0 < _Hole;)
@@ -14363,7 +14409,8 @@ inline void __cdecl FUN_00b26260(FrondIt _First, FrondIt _Last, FrondPred _Pred,
     }
 }
 FrondIt S00b23cd0_unchecked_copy_backward(FrondIt, FrondIt, FrondIt);
-inline void __cdecl FUN_00b262d0(FrondIt _First, FrondIt _Last, FrondPred _Pred, FUN_00b1ff50*)
+// src: GUESS 0x00b262d0 (confidence: low)
+inline void __cdecl Frondengine_ProcessEntries_00b262d0(FrondIt _First, FrondIt _Last, FrondPred _Pred, FUN_00b1ff50*)
 {
     if (_First != _Last)
         for (FrondIt _Next = _First; ++_Next != _Last;)
@@ -14397,7 +14444,8 @@ inline void S00b23cd0_iter_swap(FrondIt _Left, FrondIt _Right)
 {
     S00b23cd0_swap(*_Left, *_Right);
 }
-inline S00b23cd0_Pair __cdecl FUN_00b25680(FrondIt _First, FrondIt _Last, FrondPred _Pred)
+// src: GUESS 0x00b25680 (confidence: medium)
+inline S00b23cd0_Pair __cdecl Object_PartitionByPivotField(FrondIt _First, FrondIt _Last, FrondPred _Pred)
 {  // partition [_First, _Last), using _Pred
     FrondIt _Mid = _First + (_Last - _First) / 2;
     S00b23cd0_Median(_First, _Mid, _Last - 1, _Pred);
@@ -14484,7 +14532,8 @@ inline void S00b23cd0_Pop_heap_0(FrondIt _First, FrondIt _Last, FrondPred _Pred,
 {
     S00b23cd0_Pop_heap(_First, _Last - 1, _Last - 1, FUN_00b1ff50(*(_Last - 1)), _Pred, S00b23cd0_Dist_type(_First));
 }
-inline void __cdecl FUN_00b26ca0(FrondIt _First, FrondIt _Last, FrondPred _Pred)
+// src: GUESS 0x00b26ca0 (confidence: low)
+inline void __cdecl Object_UpdateFields_00b26ca0(FrondIt _First, FrondIt _Last, FrondPred _Pred)
 {
     if (1 < _Last - _First)
         S00b23cd0_Pop_heap_0(S00b23cd0_Checked_base(_First), S00b23cd0_Checked_base(_Last), _Pred,
@@ -14493,14 +14542,14 @@ inline void __cdecl FUN_00b26ca0(FrondIt _First, FrondIt _Last, FrondPred _Pred)
 inline void S00b23cd0_make_heap(FrondIt _First, FrondIt _Last, FrondPred _Pred)
 {
     if (1 < _Last - _First)
-        FUN_00b26260(S00b23cd0_Checked_base(_First), S00b23cd0_Checked_base(_Last), _Pred, S00b23cd0_Dist_type(_First),
+        Object_ProcessEntries_00b26260(S00b23cd0_Checked_base(_First), S00b23cd0_Checked_base(_Last), _Pred, S00b23cd0_Dist_type(_First),
                      S00b23cd0_Val_type(_First));
 }
 
 inline void S00b23cd0_Sort_heap(FrondIt _First, FrondIt _Last, FrondPred _Pred)
 {
     for (; 1 < _Last - _First; --_Last)
-        FUN_00b26ca0(_First, _Last, _Pred);
+        Object_UpdateFields_00b26ca0(_First, _Last, _Pred);
 }
 
 inline void S00b23cd0_sort_heap(FrondIt _First, FrondIt _Last, FrondPred _Pred)
@@ -14510,25 +14559,26 @@ inline void S00b23cd0_sort_heap(FrondIt _First, FrondIt _Last, FrondPred _Pred)
 
 inline void S00b23cd0_Insertion_sort(FrondIt _First, FrondIt _Last, FrondPred _Pred)
 {
-    FUN_00b262d0(_First, _Last, _Pred, S00b23cd0_Val_type(_First));
+    Frondengine_ProcessEntries_00b262d0(_First, _Last, _Pred, S00b23cd0_Val_type(_First));
 }
 
 // @fnv 0x00b23cd0
-void __cdecl FUN_00b23cd0(FrondIt _First, FrondIt _Last, int _Ideal, FrondPred _Pred)
+// src: GUESS 0x00b23cd0 (confidence: high)
+void __cdecl Range_SortWithHeapFallback(FrondIt _First, FrondIt _Last, int _Ideal, FrondPred _Pred)
 {
     int _Count;
     for (; 32 < (_Count = _Last - _First) && 0 < _Ideal;)
     {
-        S00b23cd0_Pair _Mid = FUN_00b25680(_First, _Last, _Pred);
+        S00b23cd0_Pair _Mid = Object_PartitionByPivotField(_First, _Last, _Pred);
         _Ideal /= 2, _Ideal += _Ideal / 2;
         if (_Mid.first - _First < _Last - _Mid.second)
         {
-            FUN_00b23cd0(_First, _Mid.first, _Ideal, _Pred);
+            Range_SortWithHeapFallback(_First, _Mid.first, _Ideal, _Pred);
             _First = _Mid.second;
         }
         else
         {
-            FUN_00b23cd0(_Mid.second, _Last, _Ideal, _Pred);
+            Range_SortWithHeapFallback(_Mid.second, _Last, _Ideal, _Pred);
             _Last = _Mid.first;
         }
     }
@@ -14564,7 +14614,8 @@ inline void S00b23e80_Copy(S00b23e80_G* first, S00b23e80_G* last, S00b23e80_G* d
         *d = *s;
 }
 // @fnv 0x00b23e80
-S00b23e80_G* FUN_00b23e80(S00b23e80_G* first, S00b23e80_G* last, S00b23e80_G* dest)
+// src: GUESS 0x00b23e80 (confidence: low)
+S00b23e80_G* Object_ProcessAndReturnValue_00b23e80(S00b23e80_G* first, S00b23e80_G* last, S00b23e80_G* dest)
 {
     S00b23e80_G* result = dest + (last - first);
     S00b23e80_Copy(first, last, dest, S00b23e80_T1(), S00b23e80_T2());
@@ -14919,7 +14970,8 @@ _FwdIt _Uninit_copyS(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al, _Nons
                      _Range_checked_iterator_tagS);
 
 // @fnv 0x00b23f10
-Elem3f10* __cdecl FUN_00b23f10(Elem3f10* _First, Elem3f10* _Last, Elem3f10* _Dest, allocatorS<Elem3f10>& _Al)
+// src: GUESS 0x00b23f10 (confidence: low)
+Elem3f10* __cdecl Frondengine_EvaluateValue_00b23f10(Elem3f10* _First, Elem3f10* _Last, Elem3f10* _Dest, allocatorS<Elem3f10>& _Al)
 {
     return (_Uninit_copyS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Al, _Ptr_catS(_First, _Dest),
                           _Range_checked_iterator_tagS()));
@@ -15306,7 +15358,8 @@ struct ElemMOVE
     int unk04;
 };
 // @fnv 0x00b24030
-ElemMOVE* __cdecl FUN_00b24030(ElemMOVE* _First, ElemMOVE* _Last, ElemMOVE* _Dest, allocatorS<ElemMOVE>& _Al)
+// src: GUESS 0x00b24030 (confidence: low)
+ElemMOVE* __cdecl Frondengine_EvaluateValue_00b24030(ElemMOVE* _First, ElemMOVE* _Last, ElemMOVE* _Dest, allocatorS<ElemMOVE>& _Al)
 {
     return (_Uninit_moveS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Al, _Move_catS(_Dest),
                           _Range_checked_iterator_tagS()));
@@ -15693,7 +15746,8 @@ struct ElemMOVE
     int unk04;
 };
 // @fnv 0x00b24690
-ElemMOVE* __cdecl FUN_00b24690(ElemMOVE* _First, ElemMOVE* _Last, ElemMOVE* _Dest, allocatorS<ElemMOVE>& _Al)
+// src: GUESS 0x00b24690 (confidence: low)
+ElemMOVE* __cdecl Frondengine_EvaluateValue_00b24690(ElemMOVE* _First, ElemMOVE* _Last, ElemMOVE* _Dest, allocatorS<ElemMOVE>& _Al)
 {
     return (_Uninit_moveS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Al, _Move_catS(_Dest),
                           _Range_checked_iterator_tagS()));
@@ -16080,7 +16134,8 @@ struct ElemMOVE
     int unk04;
 };
 // @fnv 0x00b247b0
-ElemMOVE* __cdecl FUN_00b247b0(ElemMOVE* _First, ElemMOVE* _Last, ElemMOVE* _Dest, allocatorS<ElemMOVE>& _Al)
+// src: GUESS 0x00b247b0 (confidence: low)
+ElemMOVE* __cdecl Frondengine_EvaluateValue_00b247b0(ElemMOVE* _First, ElemMOVE* _Last, ElemMOVE* _Dest, allocatorS<ElemMOVE>& _Al)
 {
     return (_Uninit_moveS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Al, _Move_catS(_Dest),
                           _Range_checked_iterator_tagS()));
@@ -16597,7 +16652,8 @@ inline _BidIt2 _Move_backward_optS(_BidIt1 _First, _BidIt1 _Last, _BidIt2 _Dest,
                                _Range_checked_iterator_tagS());
 }
 // @fnv 0x00b24960
-int* __cdecl FUN_00b24960(_Vector_const_iteratorS<int> _First, _Vector_const_iteratorS<int> _Last, int* _Dest)
+// src: GUESS 0x00b24960 (confidence: low)
+int* __cdecl Object_ProcessAndReturnValue_00b24960(_Vector_const_iteratorS<int> _First, _Vector_const_iteratorS<int> _Last, int* _Dest)
 {
     return (_Uninit_copyS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Ptr_catS(_First, _Dest),
                           _Range_checked_iterator_tagS()));
@@ -16630,21 +16686,21 @@ struct AlQ
 {
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     __forceinline void destroy(ElQ* p)
     {
         p->~ElQ();
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b264f0(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
-ElQ* __cdecl FUN_00b260c0(ElQ* f, ElQ* l, ElQ* d);
-ElQ* __cdecl FUN_00b26db0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
+ElQ* __cdecl Frondengine_CopyStateBlockRange(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b260c0(ElQ* f, ElQ* l, ElQ* d);
+ElQ* __cdecl Frondengine_ProcessEntries_00b26db0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -16706,11 +16762,11 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Unchecked_copy(ElQ* f, ElQ* l, ElQ* d)
 {
-    return FUN_00b264f0(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
+    return Frondengine_CopyStateBlockRange(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
 }
 inline ElQ* Unchecked_uninitialized_copy(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
-    return FUN_00b26db0(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
+    return Frondengine_ProcessEntries_00b26db0(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
 }
 __forceinline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -16745,19 +16801,20 @@ struct VecQ
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b25490();
-    bool FUN_00b1eb00(unsigned n);
-    VecQ& FUN_00b24ae0(const VecQ& _Right);
+    void ClearAllElements();
+    bool ProcessAndReturnValue_00b1eb00(unsigned n);
+    VecQ& AssignVectorElements_00b24ae0(const VecQ& _Right);
 };
 // @fnv 0x00b24ae0
-VecQ& VecQ::FUN_00b24ae0(const VecQ& _Right)
+// src: GUESS 0x00b24ae0 (confidence: medium)
+VecQ& VecQ::AssignVectorElements_00b24ae0(const VecQ& _Right)
 {
     if (this != &_Right)
     {
         if (_Right.size() == 0)
         {
             Dead12();
-            FUN_00b25490();
+            ClearAllElements();
         }
         else if (_Right.size() <= size())
         {
@@ -16768,7 +16825,7 @@ VecQ& VecQ::FUN_00b24ae0(const VecQ& _Right)
         else if (_Right.size() <= capacity())
         {
             ElQ* _Ptr = _Right.m_pHeadNode + size();
-            FUN_00b260c0(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
+            Object_ProcessAndReturnValue_00b260c0(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
             Dead2();
             DC1();
             m_last = _Ucopy(_Ptr, _Right.m_last, m_last);
@@ -16780,7 +16837,7 @@ VecQ& VecQ::FUN_00b24ae0(const VecQ& _Right)
                 _DestroyI(m_pHeadNode, m_last);
                 m_al.deallocate(m_pHeadNode, m_kRayEnd - m_pHeadNode);
             }
-            if (FUN_00b1eb00(_Right.size()))
+            if (ProcessAndReturnValue_00b1eb00(_Right.size()))
             {
                 Dead26();
                 m_last = _Ucopy(_Right.m_pHeadNode, _Right.m_last, m_pHeadNode);
@@ -16835,21 +16892,21 @@ struct AlQ
 {
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     __forceinline void destroy(ElQ* p)
     {
         p->~ElQ();
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b253f0(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
-ElQ* __cdecl FUN_00b23760(ElQ* f, ElQ* l, ElQ* d);
-ElQ* __cdecl FUN_00b25fa0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
+ElQ* __cdecl Frondengine_UpdateState_00b253f0(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b23760(ElQ* f, ElQ* l, ElQ* d);
+ElQ* __cdecl Object_ProcessEntries_00b25fa0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -16915,11 +16972,11 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Unchecked_copy(ElQ* f, ElQ* l, ElQ* d)
 {
-    return FUN_00b253f0(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
+    return Frondengine_UpdateState_00b253f0(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
 }
 inline ElQ* Unchecked_uninitialized_copy(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
-    return FUN_00b25fa0(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
+    return Object_ProcessEntries_00b25fa0(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
 }
 __forceinline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -16955,20 +17012,21 @@ struct VecQ
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b1de20();
+    void ProcessState_00b1de20();
     void FUN_00b1ebc0(ElQ* f, ElQ* l);
-    bool FUN_00b1eb00(unsigned n);
-    VecQ& FUN_00b24f40(const VecQ& _Right);
+    bool ProcessAndReturnValue_00b1eb00(unsigned n);
+    VecQ& AssignVectorElements_00b24f40(const VecQ& _Right);
 };
 // @fnv 0x00b24f40
-VecQ& VecQ::FUN_00b24f40(const VecQ& _Right)
+// src: GUESS 0x00b24f40 (confidence: medium)
+VecQ& VecQ::AssignVectorElements_00b24f40(const VecQ& _Right)
 {
     if (this != &_Right)
     {
         if (_Right.size() == 0)
         {
             Dead12();
-            FUN_00b1de20();
+            ProcessState_00b1de20();
         }
         else if (_Right.size() <= size())
         {
@@ -16980,7 +17038,7 @@ VecQ& VecQ::FUN_00b24f40(const VecQ& _Right)
         else if (_Right.size() <= capacity())
         {
             ElQ* _Ptr = _Right.m_pHeadNode + size();
-            FUN_00b23760(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
+            Object_ProcessAndReturnValue_00b23760(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
             Dead2();
             DC1();
             m_last = _Ucopy(_Ptr, _Right.m_last, m_last);
@@ -16992,7 +17050,7 @@ VecQ& VecQ::FUN_00b24f40(const VecQ& _Right)
                 _DestroyI(m_pHeadNode, m_last);
                 m_al.deallocate(m_pHeadNode, m_kRayEnd - m_pHeadNode);
             }
-            if (FUN_00b1eb00(_Right.size()))
+            if (ProcessAndReturnValue_00b1eb00(_Right.size()))
             {
                 Dead26();
                 m_last = _Ucopy(_Right.m_pHeadNode, _Right.m_last, m_pHeadNode);
@@ -17056,7 +17114,8 @@ inline CopyableStateBlock* S00b253f0_Copy(CopyableStateBlock* first, CopyableSta
     return dest;
 }
 // @fnv 0x00b253f0
-CopyableStateBlock* __cdecl FUN_00b253f0(CopyableStateBlock* first, CopyableStateBlock* last, CopyableStateBlock* dest)
+// src: GUESS 0x00b253f0 (confidence: low)
+CopyableStateBlock* __cdecl Frondengine_UpdateState_00b253f0(CopyableStateBlock* first, CopyableStateBlock* last, CopyableStateBlock* dest)
 {
     CopyableStateBlock* result = dest + (last - first);
     S00b253f0_Copy(first, last, dest, S00b253f0_T1(), S00b253f0_T2());
@@ -17339,11 +17398,12 @@ struct Elem5490
 class FUN_00b25490_Vector : public vectorS<Elem5490>
 {
   public:
-    void FUN_00b25490();
+    void ClearAllElements();
 };
 
 // @fnv 0x00b25490
-void FUN_00b25490_Vector::FUN_00b25490()
+// src: GUESS 0x00b25490 (confidence: high)
+void FUN_00b25490_Vector::ClearAllElements()
 {
     erase(begin(), end());
 }
@@ -17707,11 +17767,12 @@ struct Elem5580
 class FUN_00b25580_Vector : public vectorS<Elem5580>
 {
   public:
-    iterator FUN_00b25580(const_iterator _First_arg, const_iterator _Last_arg);
+    iterator ProcessAndReturnValue_00b25580(const_iterator _First_arg, const_iterator _Last_arg);
 };
 
 // @fnv 0x00b25580
-FUN_00b25580_Vector::iterator FUN_00b25580_Vector::FUN_00b25580(const_iterator _First_arg, const_iterator _Last_arg)
+// src: GUESS 0x00b25580 (confidence: low)
+FUN_00b25580_Vector::iterator FUN_00b25580_Vector::ProcessAndReturnValue_00b25580(const_iterator _First_arg, const_iterator _Last_arg)
 {
     iterator _First = _Make_iter(_First_arg);
     iterator _Last = _Make_iter(_Last_arg);
@@ -18227,7 +18288,8 @@ struct E60C0
     int unk34;
 };
 // @fnv 0x00b260c0
-E60C0* __cdecl FUN_00b260c0(E60C0* _First, E60C0* _Last, E60C0* _Dest)
+// src: GUESS 0x00b260c0 (confidence: low)
+E60C0* __cdecl Object_ProcessAndReturnValue_00b260c0(E60C0* _First, E60C0* _Last, E60C0* _Dest)
 {
     return (_Copy_optS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Iter_randomS(_First, _Dest),
                        _Ptr_catS(_First, _Dest), _Range_checked_iterator_tagS()));
@@ -18582,7 +18644,8 @@ _FwdIt _Uninit_copyS(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al, _Nons
                      _Range_checked_iterator_tagS);
 
 // @fnv 0x00b264a0
-Elem64a0* __cdecl FUN_00b264a0(Elem64a0* _First, Elem64a0* _Last, Elem64a0* _Dest, allocatorS<Elem64a0>& _Al)
+// src: GUESS 0x00b264a0 (confidence: low)
+Elem64a0* __cdecl Object_ProcessAndReturnValue_00b264a0(Elem64a0* _First, Elem64a0* _Last, Elem64a0* _Dest, allocatorS<Elem64a0>& _Al)
 {
     return (_Uninit_copyS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Al, _Ptr_catS(_First, _Dest),
                           _Range_checked_iterator_tagS()));
@@ -19464,7 +19527,8 @@ struct GvElemLess
 }
 using namespace swapb26a;
 // @fnv 0x00b26ab0
-void FUN_00b26ab0(GvElem& _Left, GvElem& _Right)
+// src: GUESS 0x00b26ab0 (confidence: low)
+void Frondengine_UpdateState_00b26ab0(GvElem& _Left, GvElem& _Right)
 {
     if (&_Left != &_Right)
     {
@@ -19559,13 +19623,14 @@ struct SFrondGuidePoints : SFrondGuidePointsBase
 
     ~SFrondGuidePoints()
     {
-        FUN_00b1e970();
+        UpdateState_00b1e970();
     }
     void Destroy(SFrondGuidePoint* f, SFrondGuidePoint* l)
     {
         DestroyRange(f, l, alloc);
     }
-    void FUN_00b1e970()
+// src: GUESS 0x00b1e970 (confidence: low)
+    void UpdateState_00b1e970()
     {
         SFrondGuidePoints* self = this;
         if (self->first != 0)
@@ -19603,10 +19668,11 @@ struct SFrondGuideGreater
     }
 };
 
-void __cdecl FUN_00b26e80(SFrondGuideEntry* first, int hole, int top, SFrondGuideEntry val, SFrondGuideGreater pred);
+void __cdecl Object_ProcessEntries_00b26e80(SFrondGuideEntry* first, int hole, int top, SFrondGuideEntry val, SFrondGuideGreater pred);
 
 // @fnv 0x00b26b50
-void __cdecl FUN_00b26b50(SFrondGuideEntry* first, int hole, int bottom, SFrondGuideEntry val, SFrondGuideGreater pred)
+// src: GUESS 0x00b26b50 (confidence: low)
+void __cdecl Frondengine_ProcessEntries_00b26b50(SFrondGuideEntry* first, int hole, int bottom, SFrondGuideEntry val, SFrondGuideGreater pred)
 {
     int top2 = hole;
     int idx = 2 * hole + 2;
@@ -19621,7 +19687,7 @@ void __cdecl FUN_00b26b50(SFrondGuideEntry* first, int hole, int bottom, SFrondG
         first[hole] = first[bottom - 1];
         hole = bottom - 1;
     }
-    FUN_00b26e80(first, hole, top2, val, pred);
+    Object_ProcessEntries_00b26e80(first, hole, top2, val, pred);
 }
 
 namespace fnv_00b26ce0 {
@@ -20511,7 +20577,8 @@ inline O GvCopyBackwardOpt(I _First, I _Last, O _Dest, GvRandomTag, GvNonscalarT
 }
 using namespace cbkb26c;
 // @fnv 0x00b26ce0
-GvElem* FUN_00b26ce0(GvElem* _First, GvElem* _Last, GvElem* _Dest)
+// src: GUESS 0x00b26ce0 (confidence: low)
+GvElem* Object_ProcessAndReturnValue_00b26ce0(GvElem* _First, GvElem* _Last, GvElem* _Dest)
 {
     return GvCopyBackwardOpt(GvCheckedBase(_First), GvCheckedBase(_Last), _Dest, GvIterRandom(_First, _Dest),
                              GvPtrCat(_First, _Dest), GvRangeCheckedTag());
@@ -20533,7 +20600,8 @@ inline void Construct(ElQ* p, const ElQ& v)
     ::new (vp) ElQ(v);
 }
 // @fnv 0x00b26db0
-ElQ* FUN_00b26db0(ElQ* first, ElQ* last, ElQ* dest)
+// src: GUESS 0x00b26db0 (confidence: low)
+ElQ* Frondengine_ProcessEntries_00b26db0(ElQ* first, ElQ* last, ElQ* dest)
 {
     ElQ* next = dest;
     try
@@ -21426,7 +21494,8 @@ struct GvElemLess
 }
 using namespace pushb26e;
 // @fnv 0x00b26e80
-void FUN_00b26e80(GvElem* _First, int _Hole, int _Top, GvElem _Val, GvElemLess _Pred)
+// src: GUESS 0x00b26e80 (confidence: low)
+void Object_ProcessEntries_00b26e80(GvElem* _First, int _Hole, int _Top, GvElem _Val, GvElemLess _Pred)
 {
     for (int _Idx = (_Hole - 1) / 2; _Top < _Hole && _Pred(*(_First + _Idx), _Val); _Idx = (_Hole - 1) / 2)
     {
@@ -22293,7 +22362,8 @@ inline void GvPopHeap(GvElem* _First, GvElem* _Last, GvElem* _Dest, GvElem _Val,
 }
 using namespace popb26f;
 // @fnv 0x00b26f90
-void FUN_00b26f90(GvElem* _First, GvElem* _Last, GvElemLess _Pred)
+// src: GUESS 0x00b26f90 (confidence: low)
+void Frondengine_ProcessState_00b26f90(GvElem* _First, GvElem* _Last, GvElemLess _Pred)
 {
     GvPopHeap(_First, _Last - 1, _Last - 1, GvElem(*(_Last - 1)), _Pred, GvDistType(_First));
 }
@@ -22342,21 +22412,21 @@ struct AlQ
 {
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     __forceinline void destroy(ElQ* p)
     {
         p->~ElQ();
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b35f60(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
-ElQ* __cdecl FUN_00b35a90(ElQ* f, ElQ* l, ElQ* d);
-ElQ* __cdecl FUN_00b368d0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b35f60(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
+ElQ* __cdecl Runtime_EvaluateValue_00b35a90(ElQ* f, ElQ* l, ElQ* d);
+ElQ* __cdecl Runtime_ProcessEntries_00b368d0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -22418,11 +22488,11 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Unchecked_copy(ElQ* f, ElQ* l, ElQ* d)
 {
-    return FUN_00b35f60(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
+    return Object_ProcessAndReturnValue_00b35f60(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
 }
 inline ElQ* Unchecked_uninitialized_copy(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
-    return FUN_00b368d0(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
+    return Runtime_ProcessEntries_00b368d0(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
 }
 __forceinline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -22458,32 +22528,33 @@ struct VecQ
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b319e0();
-    void FUN_00b32bb0(ElQ* f, ElQ* l);
-    bool FUN_00b1f590(unsigned n);
-    VecQ& FUN_00b314f0(const VecQ& _Right);
+    void m_vStripLengths_clear();
+    void ForwardCall_00b32bb0(ElQ* f, ElQ* l);
+    bool UpdateState_00b1f590(unsigned n);
+    VecQ& UpdateState_00b314f0(const VecQ& _Right);
 };
 // @fnv 0x00b314f0
-VecQ& VecQ::FUN_00b314f0(const VecQ& _Right)
+// src: GUESS 0x00b314f0 (confidence: low)
+VecQ& VecQ::UpdateState_00b314f0(const VecQ& _Right)
 {
     if (this != &_Right)
     {
         if (_Right.size() == 0)
         {
             Dead12();
-            FUN_00b319e0();
+            m_vStripLengths_clear();
         }
         else if (_Right.size() <= size())
         {
             ElQ* _Ptr = Unchecked_copy(_Right.m_pHeadNode, _Right.m_last, m_pHeadNode);
-            FUN_00b32bb0(_Ptr, m_last);
+            ForwardCall_00b32bb0(_Ptr, m_last);
             m_last = m_pHeadNode + _Right.size();
             Dead6c();
         }
         else if (_Right.size() <= capacity())
         {
             ElQ* _Ptr = _Right.m_pHeadNode + size();
-            FUN_00b35a90(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
+            Runtime_EvaluateValue_00b35a90(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
             Dead2();
             DC1();
             m_last = _Ucopy(_Ptr, _Right.m_last, m_last);
@@ -22495,7 +22566,7 @@ VecQ& VecQ::FUN_00b314f0(const VecQ& _Right)
                 _DestroyI(m_pHeadNode, m_last);
                 m_al.deallocate(m_pHeadNode, m_kRayEnd - m_pHeadNode);
             }
-            if (FUN_00b1f590(_Right.size()))
+            if (UpdateState_00b1f590(_Right.size()))
             {
                 Dead26();
                 m_last = _Ucopy(_Right.m_pHeadNode, _Right.m_last, m_pHeadNode);
@@ -22549,21 +22620,21 @@ struct AlQ
 {
     void deallocate(ElQ* p, unsigned)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     __forceinline void destroy(ElQ* p)
     {
         p->~ElQ();
     }
-    static void FormHeap_Free(void*);
+    static void FormHeapFreeAndLog_00401030(void*);
 };
 inline void FreeQ(void* p)
 {
-    AlQ::FormHeap_Free(p);
+    AlQ::FormHeapFreeAndLog_00401030(p);
 }
-ElQ* __cdecl FUN_00b36000(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
-ElQ* __cdecl FUN_00b35b60(ElQ* f, ElQ* l, ElQ* d);
-ElQ* __cdecl FUN_00b369f0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b36000(ElQ* f, ElQ* l, ElQ* d, RandQ, PtrCatQ, TagQ);
+ElQ* __cdecl Object_ProcessAndReturnValue_00b35b60(ElQ* f, ElQ* l, ElQ* d);
+ElQ* __cdecl Runtime_ProcessEntries_00b369f0(ElQ* f, ElQ* l, ElQ* d, AlQ& al, PtrCatQ, TagQ);
 inline ElQ* Checked_base(ElQ* const& it)
 {
     return it;
@@ -22625,11 +22696,11 @@ inline PtrCatQ Ptr_cat(ElQ*&, ElQ*&)
 }
 inline ElQ* Unchecked_copy(ElQ* f, ElQ* l, ElQ* d)
 {
-    return FUN_00b36000(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
+    return Object_ProcessAndReturnValue_00b36000(Checked_base2(f), Checked_base2(l), d, RandQ(), Ptr_cat(f, d), TagQ());
 }
 inline ElQ* Unchecked_uninitialized_copy(ElQ* f, ElQ* l, ElQ* d, AlQ& al)
 {
-    return FUN_00b369f0(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
+    return Runtime_ProcessEntries_00b369f0(Checked_base2(f), Checked_base4(l), d, al, Ptr_cat(f, d), TagQ());
 }
 __forceinline void Destroy_range2(ElQ* f, ElQ* l, AlQ& al, PtrCatQ)
 {
@@ -22665,32 +22736,33 @@ struct VecQ
     {
         Destroy_range(f, l, m_al);
     }
-    void FUN_00b32120();
-    void FUN_00b33110(ElQ* f, ElQ* l);
-    bool FUN_00b1f590(unsigned n);
-    VecQ& FUN_00b31c70(const VecQ& _Right);
+    void m_vStrips_clear();
+    void ForwardCall_00b33110(ElQ* f, ElQ* l);
+    bool UpdateState_00b1f590(unsigned n);
+    VecQ& UpdateState_00b31c70(const VecQ& _Right);
 };
 // @fnv 0x00b31c70
-VecQ& VecQ::FUN_00b31c70(const VecQ& _Right)
+// src: GUESS 0x00b31c70 (confidence: low)
+VecQ& VecQ::UpdateState_00b31c70(const VecQ& _Right)
 {
     if (this != &_Right)
     {
         if (_Right.size() == 0)
         {
             Dead12();
-            FUN_00b32120();
+            m_vStrips_clear();
         }
         else if (_Right.size() <= size())
         {
             ElQ* _Ptr = Unchecked_copy(_Right.m_pHeadNode, _Right.m_last, m_pHeadNode);
-            FUN_00b33110(_Ptr, m_last);
+            ForwardCall_00b33110(_Ptr, m_last);
             m_last = m_pHeadNode + _Right.size();
             Dead6c();
         }
         else if (_Right.size() <= capacity())
         {
             ElQ* _Ptr = _Right.m_pHeadNode + size();
-            FUN_00b35b60(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
+            Object_ProcessAndReturnValue_00b35b60(_Right.m_pHeadNode, _Ptr, m_pHeadNode);
             Dead2();
             DC1();
             m_last = _Ucopy(_Ptr, _Right.m_last, m_last);
@@ -22702,7 +22774,7 @@ VecQ& VecQ::FUN_00b31c70(const VecQ& _Right)
                 _DestroyI(m_pHeadNode, m_last);
                 m_al.deallocate(m_pHeadNode, m_kRayEnd - m_pHeadNode);
             }
-            if (FUN_00b1f590(_Right.size()))
+            if (UpdateState_00b1f590(_Right.size()))
             {
                 Dead26();
                 m_last = _Ucopy(_Right.m_pHeadNode, _Right.m_last, m_pHeadNode);
@@ -23345,12 +23417,13 @@ struct GvOwner
     int unk00;
     int unk04;
     GvVector<GvElem> kElems;
-    void FUN_00b188d0();
+    void ProcessState_00b188d0();
 };
 }
 using namespace addb18;
 // @fnv 0x00b188d0
-void GvOwner::FUN_00b188d0()
+// src: GUESS 0x00b188d0 (confidence: low)
+void GvOwner::ProcessState_00b188d0()
 {
     GvElem kElem;
     kElems.push_back(kElem);
@@ -23850,7 +23923,8 @@ struct E36A0
     int unk14;
 };
 // @fnv 0x00b236a0
-E36A0* __cdecl FUN_00b236a0(E36A0* _First, E36A0* _Last, E36A0* _Dest)
+// src: GUESS 0x00b236a0 (confidence: low)
+E36A0* __cdecl Object_ProcessAndReturnValue_00b236a0(E36A0* _First, E36A0* _Last, E36A0* _Dest)
 {
     return (_Copy_optS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Iter_randomS(_First, _Dest),
                        _Ptr_catS(_First, _Dest), _Range_checked_iterator_tagS()));
@@ -23899,7 +23973,7 @@ class FUN_00b231f0 : public S00b24290_Base
         int u12;
         int u13;
         int u14;
-        ((FUN_00b1ec70_class*)this)->FUN_00b1ec70();
+        ((FUN_00b1ec70_class*)this)->ReleaseStorage_00b1ec70();
     }
 };
 inline void S00b24290_Construct(FUN_00b231f0* p, const S00b24290_Arg& v)
@@ -23908,7 +23982,8 @@ inline void S00b24290_Construct(FUN_00b231f0* p, const S00b24290_Arg& v)
     ::new (vp) FUN_00b231f0(v);
 }
 // @fnv 0x00b24290
-void __cdecl FUN_00b24290(FUN_00b231f0* first, unsigned int count, const S00b24290_Arg& param)
+// src: GUESS 0x00b24290 (confidence: low)
+void __cdecl Frondengine_ProcessEntries_00b24290(FUN_00b231f0* first, unsigned int count, const S00b24290_Arg& param)
 {
     FUN_00b231f0* constructed = first;
     try
@@ -23974,17 +24049,18 @@ struct S00b26260_E
     ~S00b26260_E();
 };
 
-void __cdecl FUN_00b26b50(S00b26260_E* first, int hole, int bottom, S00b26260_E val, bool pred);
+void __cdecl Frondengine_ProcessEntries_00b26b50(S00b26260_E* first, int hole, int bottom, S00b26260_E val, bool pred);
 
 // @fnv 0x00b26260
-void __cdecl FUN_00b26260(S00b26260_E* first, S00b26260_E* last, bool pred)
+// src: GUESS 0x00b26260 (confidence: low)
+void __cdecl Object_ProcessEntries_00b26260(S00b26260_E* first, S00b26260_E* last, bool pred)
 {
     int bottom = last - first;
     int hole = bottom / 2;
     while (0 < hole)
     {
         --hole;
-        FUN_00b26b50(first, hole, bottom, first[hole], pred);
+        Frondengine_ProcessEntries_00b26b50(first, hole, bottom, first[hole], pred);
     }
 }
 
@@ -24011,10 +24087,10 @@ struct IntStdVector : Aux
     int* first;
     int* last;
     int* end;
-    void FUN_00b1e970();
+    void UpdateState_00b1e970();
     ~IntStdVector()
     {
-        FUN_00b1e970();
+        UpdateState_00b1e970();
     }
 };
 
@@ -24069,10 +24145,11 @@ inline FUN_00b1ff50* FUN_00b1ff50::CopyFrom(const FUN_00b1ff50& that)
 
 typedef spt::FUN_00b1ff50 Guide;
 
-void __cdecl FUN_00b26ce0(Guide* a, Guide* b, Guide* c);
+void __cdecl Object_ProcessAndReturnValue_00b26ce0(Guide* a, Guide* b, Guide* c);
 
 // @fnv 0x00b262d0
-void __cdecl FUN_00b262d0(Guide* _First, Guide* _Last)
+// src: GUESS 0x00b262d0 (confidence: low)
+void __cdecl Frondengine_ProcessEntries_00b262d0(Guide* _First, Guide* _Last)
 {
     if (_First != _Last)
         for (Guide* _Next = _First; ++_Next != _Last;)
@@ -24081,7 +24158,7 @@ void __cdecl FUN_00b262d0(Guide* _First, Guide* _Last)
             Guide _Val = *_Next;
             if (_Val < *_First)
             {
-                FUN_00b26ce0(_First, _Next, ++_Next1);
+                Object_ProcessAndReturnValue_00b26ce0(_First, _Next, ++_Next1);
                 _First->CopyFrom(_Val);
             }
             else
@@ -24102,7 +24179,8 @@ struct SG
     ~SG();
 };
 void __cdecl REAL(char* first, int zero, int count, SG pivot, bool flag);
-inline void FUN_00b26f90(char* first, char* last, bool flag, int ideal)
+// src: GUESS 0x00b26f90 (confidence: low)
+inline void Frondengine_ProcessState_00b26f90(char* first, char* last, bool flag, int ideal)
 {
     SG tmp(*(const SG*)last);
     SG buf;
@@ -24110,13 +24188,14 @@ inline void FUN_00b26f90(char* first, char* last, bool flag, int ideal)
     REAL(first, 0, (int)((last - first) / 56), tmp, flag);
 }
 // @fnv 0x00b26ca0
-void __cdecl FUN_00b26ca0(char* first, char* last, bool flag)
+// src: GUESS 0x00b26ca0 (confidence: low)
+void __cdecl Object_UpdateFields_00b26ca0(char* first, char* last, bool flag)
 {
     char* dead;
     if ((last - first) / 0x38 > 1)
     {
         char* t = last;
-        FUN_00b26f90(first, t, flag, 0);
+        Frondengine_ProcessState_00b26f90(first, t, flag, 0);
     }
 }
 
@@ -24125,7 +24204,7 @@ double __cdecl FUN_00eca060(double);
 struct RotMat
 {
     float m_fComponents[3][3];
-    void FUN_00b12af0();
+    void CRotTransform_CRotTransform();
     RotMat Multiply(const RotMat& b) const;
 };
 inline void Unused()
@@ -24134,13 +24213,14 @@ inline void Unused()
 }
 struct FUN_00b1ae00_class : RotMat
 {
-    void __thiscall FUN_00b1ae00(float angle);
+    void __thiscall UpdateFields_00b1ae00(float angle);
 };
 // @fnv 0x00b1ae00
-void FUN_00b1ae00_class::FUN_00b1ae00(float fAngleDifference)
+// src: GUESS 0x00b1ae00 (confidence: low)
+void FUN_00b1ae00_class::UpdateFields_00b1ae00(float fAngleDifference)
 {
     RotMat cRotMatrix;
-    cRotMatrix.FUN_00b12af0();
+    cRotMatrix.CRotTransform_CRotTransform();
     float fCosine = (float)(double)(float)FUN_00ec9f30((float)(fAngleDifference / DAT_010a4d90));
     float fSine = (float)(double)(float)FUN_00eca060((float)(fAngleDifference / DAT_010a4d90));
     cRotMatrix.m_fComponents[0][0] = 1.0f;
@@ -24204,7 +24284,8 @@ __forceinline _OutIt _Copy_backward_opt(_InIt _First, _InIt _Last, _OutIt _Dest,
 }
 }
 // @fnv 0x00b240b0
-CopyableStateBlock* __cdecl FUN_00b240b0(CopyableStateBlock* _First, CopyableStateBlock* _Last,
+// src: GUESS 0x00b240b0 (confidence: low)
+CopyableStateBlock* __cdecl Frondengine_EvaluateValue_00b240b0(CopyableStateBlock* _First, CopyableStateBlock* _Last,
                                          CopyableStateBlock* _Dest)
 {
     return fg::_Copy_backward_opt(_First, _Last, _Dest, fg::_Ptr_cat(_First, _Dest), fg::_Range_checked_iterator_tag());
@@ -24261,11 +24342,11 @@ struct PointVecQ
             _invalid_parameter_noinfo();
         return *(m_pHeadNode + pos);
     }
-    void FUN_00b1e4c0(const CVec3& p);
+    void AppendElementWithGrowth(const CVec3& p);
 };
 struct CurveQ
 {
-    float FUN_00b37ad0(float t);
+    float CIdvBezierSpline_Evaluate(float t);
 };
 struct ScaleQ
 {
@@ -24298,13 +24379,14 @@ struct FUN_00b1be50_Owner
     int unk3c;
     CurveQ* m_profile;
     unsigned m_uiItemCount;
-    void FUN_00b1be50(ScaleQ* scale, PointVecQ& points, PointVecQ& normals);
+    void ProcessEntries_00b1be50(ScaleQ* scale, PointVecQ& points, PointVecQ& normals);
 };
 
 // @fnv 0x00b1be50
-void FUN_00b1be50_Owner::FUN_00b1be50(ScaleQ* scale, PointVecQ& points, PointVecQ& normals)
+// src: GUESS 0x00b1be50 (confidence: low)
+void FUN_00b1be50_Owner::ProcessEntries_00b1be50(ScaleQ* scale, PointVecQ& points, PointVecQ& normals)
 {
-    float base = m_profile->FUN_00b37ad0(0.0f) * scale->m_height;
+    float base = m_profile->CIdvBezierSpline_Evaluate(0.0f) * scale->m_height;
     for (unsigned i = 0; i < m_uiItemCount; i++)
     {
         float t = 1.0 - i / (m_uiItemCount - 1.0);
@@ -24312,14 +24394,14 @@ void FUN_00b1be50_Owner::FUN_00b1be50(ScaleQ* scale, PointVecQ& points, PointVec
         InitializeProfileCoordinate(p);
         p[0] = 0.0f;
         p[1] = -t * scale->m_height;
-        p[2] = m_profile->FUN_00b37ad0(t) * scale->m_height - base;
-        points.FUN_00b1e4c0(p);
+        p[2] = m_profile->CIdvBezierSpline_Evaluate(t) * scale->m_height - base;
+        points.AppendElementWithGrowth(p);
     }
     for (int j = m_uiItemCount - 2; j >= 0; j--)
     {
         CVec3 p = points[j];
         p[1] *= -1.0;
-        points.FUN_00b1e4c0(p);
+        points.AppendElementWithGrowth(p);
     }
     for (unsigned k = 0; k < points.size(); k++)
     {
@@ -24347,8 +24429,8 @@ void FUN_00b1be50_Owner::FUN_00b1be50(ScaleQ* scale, PointVecQ& points, PointVec
         }
         CVec3 n(0.0f, cosQ(angle), sinQ(angle));
         padQ();
-        n.FUN_00b12790();
-        normals.FUN_00b1e4c0(n);
+        n.Normalize_00b12790();
+        normals.AppendElementWithGrowth(n);
     }
 }
 }  // namespace fnv_00b1be50
@@ -25295,7 +25377,8 @@ struct SA4830
     int unk28;
 };
 // @fnv 0x00b23b00
-SA4830* __cdecl FUN_00b23b00(SA4830* _First, SA4830* _Last, SA4830* _Dest)
+// src: GUESS 0x00b23b00 (confidence: low)
+SA4830* __cdecl Object_ProcessAndReturnValue_00b23b00(SA4830* _First, SA4830* _Last, SA4830* _Dest)
 {
     return (_Move_backward_optS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Iter_randomS(_First, _Dest),
                                 _Move_catS(_Dest), _Range_checked_iterator_tagS()));
@@ -25303,14 +25386,14 @@ SA4830* __cdecl FUN_00b23b00(SA4830* _First, SA4830* _Last, SA4830* _Dest)
 }  // namespace fnv_00b23b00
 
 namespace fnv_00b24180 {
-void FormHeap_Free(void* p);
+void FormHeapFreeAndLog_00401030(void* p);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
 inline void FreeQ(void* p)
 {
-    FormHeap_Free(p);
+    FormHeapFreeAndLog_00401030(p);
 }
 struct VBQ
 {
@@ -25345,7 +25428,8 @@ inline void Construct(ElemQ* p, const ElemQ& v)
     DeadX();
 }
 // @fnv 0x00b24180
-void FUN_00b24180(ElemQ* first, unsigned int n, const ElemQ& val)
+// src: GUESS 0x00b24180 (confidence: medium)
+void Object_ConstructFilledRange(ElemQ* first, unsigned int n, const ElemQ& val)
 {
     ElemQ* next = first;
     try
@@ -25363,7 +25447,7 @@ void FUN_00b24180(ElemQ* first, unsigned int n, const ElemQ& val)
 }  // namespace fnv_00b24180
 
 namespace fnv_00b243a0 {
-void FormHeap_Free(void* p);
+void FormHeapFreeAndLog_00401030(void* p);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
@@ -25371,7 +25455,7 @@ inline void* operator new(unsigned int, void* p)
 struct StrY
 {
     char b[0x1c];
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
 };
 struct FUN_00b22f80
 {
@@ -25381,9 +25465,9 @@ struct FUN_00b22f80
 };
 inline void Del(FUN_00b22f80* p, unsigned int f)
 {
-    p->s.FUN_0044a730(true, 0);
+    p->s.fopen_0044a730(true, 0);
     if (f & 1)
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
 }
 inline void DeadX()
 {
@@ -25396,7 +25480,8 @@ inline void Construct(FUN_00b22f80* p, const FUN_00b22f80& v)
     DeadX();
 }
 // @fnv 0x00b243a0
-void FUN_00b243a0(FUN_00b22f80* first, unsigned int n, const FUN_00b22f80& val)
+// src: GUESS 0x00b243a0 (confidence: low)
+void Object_ProcessEntries_00b243a0(FUN_00b22f80* first, unsigned int n, const FUN_00b22f80& val)
 {
     FUN_00b22f80* next = first;
     try
@@ -25414,14 +25499,14 @@ void FUN_00b243a0(FUN_00b22f80* first, unsigned int n, const FUN_00b22f80& val)
 }  // namespace fnv_00b243a0
 
 namespace fnv_00b24580 {
-void FormHeap_Free(void* p);
+void FormHeapFreeAndLog_00401030(void* p);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
 inline void FreeQ(void* p)
 {
-    FormHeap_Free(p);
+    FormHeapFreeAndLog_00401030(p);
 }
 struct VBQ
 {
@@ -25456,7 +25541,8 @@ inline void Construct(ElemQ* p, const ElemQ& v)
     DeadX();
 }
 // @fnv 0x00b24580
-void FUN_00b24580(ElemQ* first, unsigned int n, const ElemQ& val)
+// src: GUESS 0x00b24580 (confidence: low)
+void Object_ProcessEntries_00b24580(ElemQ* first, unsigned int n, const ElemQ& val)
 {
     ElemQ* next = first;
     try
@@ -26339,7 +26425,8 @@ struct SA4830
     int unk28;
 };
 // @fnv 0x00b24830
-SA4830* __cdecl FUN_00b24830(SA4830* _First, SA4830* _Last, SA4830* _Dest, random_access_iterator_tagS _First_dest_cat,
+// src: GUESS 0x00b24830 (confidence: low)
+SA4830* __cdecl Frondengine_EvaluateValue_00b24830(SA4830* _First, SA4830* _Last, SA4830* _Dest, random_access_iterator_tagS _First_dest_cat,
                              _Undefined_move_tagS, _Range_checked_iterator_tagS)
 {
     return _Copy_backward_optS(_First, _Last, _Dest, _First_dest_cat, _Ptr_catS(_First, _Dest),
@@ -27211,7 +27298,8 @@ struct E48C0
     int unk08;
 };
 // @fnv 0x00b248c0
-E48C0* __cdecl FUN_00b248c0(E48C0* _First, E48C0* _Last, E48C0* _Dest, random_access_iterator_tagS _First_dest_cat,
+// src: GUESS 0x00b248c0 (confidence: low)
+E48C0* __cdecl Object_ProcessAndReturnValue_00b248c0(E48C0* _First, E48C0* _Last, E48C0* _Dest, random_access_iterator_tagS _First_dest_cat,
                             _Undefined_move_tagS, _Range_checked_iterator_tagS)
 {
     return _Copy_backward_optS(_First, _Last, _Dest, _First_dest_cat, _Ptr_catS(_First, _Dest),
@@ -27220,7 +27308,7 @@ E48C0* __cdecl FUN_00b248c0(E48C0* _First, E48C0* _Last, E48C0* _Dest, random_ac
 }  // namespace fnv_00b248c0
 
 namespace fnv_00b25ba0 {
-void FormHeap_Free(void* p);
+void FormHeapFreeAndLog_00401030(void* p);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
@@ -27228,7 +27316,7 @@ inline void* operator new(unsigned int, void* p)
 struct StrY
 {
     char b[0x1c];
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
 };
 struct FUN_00b22f80
 {
@@ -27238,9 +27326,9 @@ struct FUN_00b22f80
 };
 inline void Del(FUN_00b22f80* p, unsigned int f)
 {
-    p->s.FUN_0044a730(true, 0);
+    p->s.fopen_0044a730(true, 0);
     if (f & 1)
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
 }
 inline void DeadX()
 {
@@ -27253,7 +27341,8 @@ inline void Construct(FUN_00b22f80* p, const FUN_00b22f80& v)
     DeadX();
 }
 // @fnv 0x00b25ba0
-FUN_00b22f80* FUN_00b25ba0(FUN_00b22f80* first, FUN_00b22f80* last, FUN_00b22f80* dest)
+// src: GUESS 0x00b25ba0 (confidence: low)
+FUN_00b22f80* Object_ProcessEntries_00b25ba0(FUN_00b22f80* first, FUN_00b22f80* last, FUN_00b22f80* dest)
 {
     FUN_00b22f80* next = dest;
     try
@@ -27272,14 +27361,14 @@ FUN_00b22f80* FUN_00b25ba0(FUN_00b22f80* first, FUN_00b22f80* last, FUN_00b22f80
 }  // namespace fnv_00b25ba0
 
 namespace fnv_00b25ca0 {
-void FormHeap_Free(void* p);
+void FormHeapFreeAndLog_00401030(void* p);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
 inline void FreeQ(void* p)
 {
-    FormHeap_Free(p);
+    FormHeapFreeAndLog_00401030(p);
 }
 struct VBQ
 {
@@ -27298,7 +27387,7 @@ struct ElemQ : VBQ
     MQ m;
     ElemQ();
     ElemQ(const ElemQ& o);
-    void FUN_00b267a0(ElemQ& o);
+    void ProcessState_00b267a0(ElemQ& o);
 };
 __forceinline void Del(ElemQ* p, unsigned int f)
 {
@@ -27323,7 +27412,8 @@ inline void Construct(ElemQ* p, const ElemQ& v)
     DeadX();
 }
 // @fnv 0x00b25ca0
-ElemQ* FUN_00b25ca0(ElemQ* first, ElemQ* last, ElemQ* dest)
+// src: GUESS 0x00b25ca0 (confidence: low)
+ElemQ* Object_ProcessEntries_00b25ca0(ElemQ* first, ElemQ* last, ElemQ* dest)
 {
     ElemQ* next = dest;
     ElemQ _Val;
@@ -27333,7 +27423,7 @@ ElemQ* FUN_00b25ca0(ElemQ* first, ElemQ* last, ElemQ* dest)
         for (; first != last; ++dest, ++first)
         {
             Construct(dest, _Val);
-            dest->FUN_00b267a0(*first);
+            dest->ProcessState_00b267a0(*first);
         }
     }
     catch (...)
@@ -27348,14 +27438,14 @@ ElemQ* FUN_00b25ca0(ElemQ* first, ElemQ* last, ElemQ* dest)
 }  // namespace fnv_00b25ca0
 
 namespace fnv_00b25e20 {
-void FormHeap_Free(void* p);
+void FormHeapFreeAndLog_00401030(void* p);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
 inline void FreeQ(void* p)
 {
-    FormHeap_Free(p);
+    FormHeapFreeAndLog_00401030(p);
 }
 struct VBQ
 {
@@ -27374,7 +27464,7 @@ struct ElemQ : VBQ
     MQ m;
     ElemQ();
     ElemQ(const ElemQ& o);
-    void FUN_00b26570(ElemQ& o);
+    void ProcessState_00b26570(ElemQ& o);
 };
 __forceinline void Del(ElemQ* p, unsigned int f)
 {
@@ -27399,7 +27489,8 @@ inline void Construct(ElemQ* p, const ElemQ& v)
     DeadX();
 }
 // @fnv 0x00b25e20
-ElemQ* FUN_00b25e20(ElemQ* first, ElemQ* last, ElemQ* dest)
+// src: GUESS 0x00b25e20 (confidence: low)
+ElemQ* Object_ProcessEntries_00b25e20(ElemQ* first, ElemQ* last, ElemQ* dest)
 {
     ElemQ* next = dest;
     ElemQ _Val;
@@ -27409,7 +27500,7 @@ ElemQ* FUN_00b25e20(ElemQ* first, ElemQ* last, ElemQ* dest)
         for (; first != last; ++dest, ++first)
         {
             Construct(dest, _Val);
-            dest->FUN_00b26570(*first);
+            dest->ProcessState_00b26570(*first);
         }
     }
     catch (...)
@@ -27424,14 +27515,14 @@ ElemQ* FUN_00b25e20(ElemQ* first, ElemQ* last, ElemQ* dest)
 }  // namespace fnv_00b25e20
 
 namespace fnv_00b25fa0 {
-void FormHeap_Free(void* p);
+void FormHeapFreeAndLog_00401030(void* p);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
 inline void FreeQ(void* p)
 {
-    FormHeap_Free(p);
+    FormHeapFreeAndLog_00401030(p);
 }
 struct VBQ
 {
@@ -27466,7 +27557,8 @@ inline void Construct(ElemQ* p, const ElemQ& v)
     DeadX();
 }
 // @fnv 0x00b25fa0
-ElemQ* FUN_00b25fa0(ElemQ* first, ElemQ* last, ElemQ* dest)
+// src: GUESS 0x00b25fa0 (confidence: low)
+ElemQ* Object_ProcessEntries_00b25fa0(ElemQ* first, ElemQ* last, ElemQ* dest)
 {
     ElemQ* next = dest;
     try
@@ -27485,7 +27577,7 @@ ElemQ* FUN_00b25fa0(ElemQ* first, ElemQ* last, ElemQ* dest)
 }  // namespace fnv_00b25fa0
 
 namespace fnv_00b267a0 {
-void __cdecl FormHeap_Free(void* p);
+void __cdecl FormHeapFreeAndLog_00401030(void* p);
 template <class T> inline void Swp(T& a, T& b)
 {
     if (&a != &b)
@@ -27507,7 +27599,7 @@ struct VecBase
     }
     inline void Dealloc(void* q)
     {
-        FormHeap_Free(q);
+        FormHeapFreeAndLog_00401030(q);
     }
     ~VecBase()
     {
@@ -27636,11 +27728,12 @@ struct FUN_00b231f0 : VecBase
     FUN_00b231f0(const FUN_00b231f0& r);
     ~FUN_00b231f0()
     {}
-    FUN_00b231f0& FUN_00b24f40(const FUN_00b231f0& r);
-    void FUN_00b267a0(FUN_00b231f0& r);
+    FUN_00b231f0& AssignVectorElements_00b24f40(const FUN_00b231f0& r);
+    void ProcessState_00b267a0(FUN_00b231f0& r);
 };
 // @fnv 0x00b267a0
-void FUN_00b231f0::FUN_00b267a0(FUN_00b231f0& r)
+// src: GUESS 0x00b267a0 (confidence: low)
+void FUN_00b231f0::ProcessState_00b267a0(FUN_00b231f0& r)
 {
     if (this == &r)
         ;
@@ -27655,8 +27748,8 @@ void FUN_00b231f0::FUN_00b267a0(FUN_00b231f0& r)
     {
         SwapAll(r);
         FUN_00b231f0 tmp(*this);
-        FUN_00b24f40(r);
-        r.FUN_00b24f40(tmp);
+        AssignVectorElements_00b24f40(r);
+        r.AssignVectorElements_00b24f40(tmp);
         DeadX();
     }
 }
@@ -27694,7 +27787,8 @@ struct SBranchList : addb18::GvVector<BranchPoint>
     int unk2C;
     int unk30;
     int unk34;
-    void FUN_00b1d980(const BranchPoint& e)
+// src: GUESS 0x00b1d980 (confidence: low)
+    void UpdateFields_00b1d980(const BranchPoint& e)
     {
         if (size() < capacity())
         {
@@ -27732,10 +27826,11 @@ struct SBranchOwner
     int unk00;
     int unk04;
     SBranchVec m_vec;
-    void FUN_00b18a60(BranchPoint e);
+    void UpdateFields_00b18a60(BranchPoint e);
 };
 // @fnv 0x00b18a60
-void SBranchOwner::FUN_00b18a60(BranchPoint e)
+// src: GUESS 0x00b18a60 (confidence: low)
+void SBranchOwner::UpdateFields_00b18a60(BranchPoint e)
 {
     BranchPoint local;
     local.FUN_00b18b20();
@@ -27745,7 +27840,7 @@ void SBranchOwner::FUN_00b18a60(BranchPoint e)
     local.sub = e.sub;
     local.f30 = e.f30;
     local.i34 = e.i34;
-    m_vec[m_vec.size() - 1].FUN_00b1d980(local);
+    m_vec[m_vec.size() - 1].UpdateFields_00b1d980(local);
 }
 
 typedef addb18::GvElem AppendGuide;
@@ -27753,13 +27848,13 @@ typedef addb18::GvAlloc<AppendGuide> AppendAllocator;
 typedef addb18::GvConstIterator<AppendGuide> AppendConstIterator;
 typedef addb18::GvIterator<AppendGuide> AppendIterator;
 
-void __cdecl FUN_00b24180(AppendGuide* first, unsigned int count, const AppendGuide& value, AppendAllocator& allocator,
+void __cdecl Object_ConstructFilledRange(AppendGuide* first, unsigned int count, const AppendGuide& value, AppendAllocator& allocator,
                           addb18::GvNonscalarTag, addb18::GvRangeCheckedTag);
 
 inline void FillAppendGuides(AppendGuide* first, unsigned int count, const AppendGuide& value,
                              AppendAllocator& allocator)
 {
-    FUN_00b24180(first, count, value, allocator, addb18::GvPtrCat(first, first), addb18::GvRangeCheckedTag());
+    Object_ConstructFilledRange(first, count, value, allocator, addb18::GvPtrCat(first, first), addb18::GvRangeCheckedTag());
 }
 
 struct AppendGuideVector : addb18::GvVector<AppendGuide>
@@ -27770,18 +27865,20 @@ struct AppendGuideVector : addb18::GvVector<AppendGuide>
         return first + count;
     }
 
-    AppendIterator FUN_00b1dc50(AppendConstIterator where, const AppendGuide& value)
+// src: GUESS 0x00b1dc50 (confidence: low)
+    AppendIterator UpdateState_00b1dc50(AppendConstIterator where, const AppendGuide& value)
     {
         unsigned int offset = size() == 0 ? 0 : where - begin();
         _Insert_n(where, 1, value);
         return begin() + offset;
     }
 
-    void FUN_00b1db40(const AppendGuide& value);
+    void UpdateFields_00b1db40(const AppendGuide& value);
 };
 
 // @fnv 0x00b1db40
-void AppendGuideVector::FUN_00b1db40(const AppendGuide& value)
+// src: GUESS 0x00b1db40 (confidence: low)
+void AppendGuideVector::UpdateFields_00b1db40(const AppendGuide& value)
 {
     if (size() < capacity())
     {
@@ -27789,19 +27886,19 @@ void AppendGuideVector::FUN_00b1db40(const AppendGuide& value)
     }
     else
     {
-        FUN_00b1dc50(end(), value);
+        UpdateState_00b1dc50(end(), value);
     }
 }
 
 typedef dtorb181::GvVector<dtorb181::GvElemV> FrondGroupValue;
 typedef dtorb181::GvConstIterator<FrondGroupValue> FrondGroupConstIterator;
 typedef dtorb181::GvIterator<FrondGroupValue> FrondGroupIterator;
-void __cdecl FUN_00b24290(FrondGroupValue*, unsigned int, const FrondGroupValue&, dtorb181::GvAlloc<FrondGroupValue>&,
+void __cdecl Frondengine_ProcessEntries_00b24290(FrondGroupValue*, unsigned int, const FrondGroupValue&, dtorb181::GvAlloc<FrondGroupValue>&,
                           dtorb181::GvNonscalarTag, dtorb181::GvRangeCheckedTag);
 inline void FrondGroupFill(FrondGroupValue* first, unsigned int count, const FrondGroupValue& value,
                            dtorb181::GvAlloc<FrondGroupValue>& allocator)
 {
-    FUN_00b24290(first, count, value, allocator, dtorb181::GvPtrCat(first, first), dtorb181::GvRangeCheckedTag());
+    Frondengine_ProcessEntries_00b24290(first, count, value, allocator, dtorb181::GvPtrCat(first, first), dtorb181::GvRangeCheckedTag());
 }
 struct FrondGroupList : dtorb181::GvVector<FrondGroupValue>
 {
@@ -27810,30 +27907,32 @@ struct FrondGroupList : dtorb181::GvVector<FrondGroupValue>
         FrondGroupFill(ptr, count, value, _Alval);
         return ptr + count;
     }
-    FrondGroupIterator FUN_00b1f460(FrondGroupConstIterator where, const FrondGroupValue& value)
+// src: GUESS 0x00b1f460 (confidence: low)
+    FrondGroupIterator ProcessAndReturnValue_00b1f460(FrondGroupConstIterator where, const FrondGroupValue& value)
     {
         unsigned int offset = size() == 0 ? 0 : where - begin();
         _Insert_n(where, 1, value);
         return begin() + offset;
     }
-    void FUN_00b1df80(const FrondGroupValue& value);
+    void UpdateFields_00b1df80(const FrondGroupValue& value);
 };
 // @fnv 0x00b1df80
-void FrondGroupList::FUN_00b1df80(const FrondGroupValue& value)
+// src: GUESS 0x00b1df80 (confidence: low)
+void FrondGroupList::UpdateFields_00b1df80(const FrondGroupValue& value)
 {
     if (size() < capacity())
         _Mylast = Fill(_Mylast, 1, value);
     else
-        FUN_00b1f460(end(), value);
+        ProcessAndReturnValue_00b1f460(end(), value);
 }
 
-void __cdecl FUN_00b244a0(FrondPoint*, unsigned int, const FrondPoint&, dtorb181::GvAlloc<FrondPoint>&,
+void __cdecl Object_FillElementRange(FrondPoint*, unsigned int, const FrondPoint&, dtorb181::GvAlloc<FrondPoint>&,
                           dtorb181::GvNonscalarTag, dtorb181::GvRangeCheckedTag);
 
 inline void FillPointRange(FrondPoint* destination, unsigned int count, const FrondPoint& value,
                            dtorb181::GvAlloc<FrondPoint>& allocator)
 {
-    FUN_00b244a0(destination, count, value, allocator, dtorb181::GvPtrCat(destination, destination),
+    Object_FillElementRange(destination, count, value, allocator, dtorb181::GvPtrCat(destination, destination),
                  dtorb181::GvRangeCheckedTag());
 }
 
@@ -27844,22 +27943,24 @@ struct FrondPointAppend : dtorb181::GvVector<FrondPoint>
         FillPointRange(destination, count, value, this->_Alval);
         return destination + count;
     }
-    dtorb181::GvIterator<FrondPoint> FUN_00b1fab0(dtorb181::GvConstIterator<FrondPoint> where, const FrondPoint& value)
+// src: GUESS 0x00b1fab0 (confidence: low)
+    dtorb181::GvIterator<FrondPoint> UpdateState_00b1fab0(dtorb181::GvConstIterator<FrondPoint> where, const FrondPoint& value)
     {
         unsigned int offset = size() == 0 ? 0 : where - begin();
         _Insert_n(where, 1, value);
         return begin() + offset;
     }
-    void FUN_00b1e4c0(const FrondPoint& value);
+    void AppendElementWithGrowth(const FrondPoint& value);
 };
 
 // @fnv 0x00b1e4c0
-void FrondPointAppend::FUN_00b1e4c0(const FrondPoint& value)
+// src: GUESS 0x00b1e4c0 (confidence: medium)
+void FrondPointAppend::AppendElementWithGrowth(const FrondPoint& value)
 {
     if (size() < capacity())
         _Mylast = fillTail(_Mylast, 1, value);
     else
-        FUN_00b1fab0(end(), value);
+        UpdateState_00b1fab0(end(), value);
 }
 
 struct ElQ_acf7d0
@@ -27881,11 +27982,11 @@ inline CatQ_acf7d0 PtrCat_acf7d0(ElQ_acf7d0*&, ElQ_acf7d0*&)
     CatQ_acf7d0 c;
     return c;
 }
-void __cdecl FUN_00ac20d0(ElQ_acf7d0* _First, unsigned int _Count, const ElQ_acf7d0& _Val, AlQ_acf7d0& _Al, CatQ_acf7d0,
+void __cdecl Runtime_ProcessEntries_00ac20d0(ElQ_acf7d0* _First, unsigned int _Count, const ElQ_acf7d0& _Val, AlQ_acf7d0& _Al, CatQ_acf7d0,
                           TagQ_acf7d0);
 inline void UFillN_acf7d0(ElQ_acf7d0* _First, unsigned int _Count, const ElQ_acf7d0& _Val, AlQ_acf7d0& _Al)
 {
-    FUN_00ac20d0(_First, _Count, _Val, _Al, PtrCat_acf7d0(_First, _First), TagQ_acf7d0());
+    Runtime_ProcessEntries_00ac20d0(_First, _Count, _Val, _Al, PtrCat_acf7d0(_First, _First), TagQ_acf7d0());
 }
 struct VecQ_acf7d0;
 inline void Dead2_q()
@@ -27907,7 +28008,7 @@ struct CItQ_acf7d0
     {
         return _Myaux == r._Myaux;
     }
-    CItQ_acf7d0& FUN_00b23460(int _Off);
+    CItQ_acf7d0& ProcessAndReturnValue_00b23460(int _Off);
     int operator-(const CItQ_acf7d0& _Right) const
     {
         if (!(_Has() && _Same(_Right)))
@@ -27923,7 +28024,7 @@ struct ItQ_acf7d0 : CItQ_acf7d0
     {}
     ItQ_acf7d0& operator+=(int _Off)
     {
-        FUN_00b23460(_Off);
+        ProcessAndReturnValue_00b23460(_Off);
         return *this;
     }
     ItQ_acf7d0 operator+(int _Off) const
@@ -27954,7 +28055,7 @@ struct VecQ_acf7d0
     {
         return ItQ_acf7d0(_Myfirst, this);
     }
-    void FUN_00b20360(CItQ_acf7d0 _Where, unsigned int _Count, const ElQ_acf7d0& _Val);
+    void InsertFilledElements_00b20360(CItQ_acf7d0 _Where, unsigned int _Count, const ElQ_acf7d0& _Val);
     ItQ_acf7d0 end()
     {
         return ItQ_acf7d0(_Mylast, this);
@@ -27964,7 +28065,7 @@ struct VecQ_acf7d0
         UFillN_acf7d0(_Ptr, _Count, _Val, _Alval);
         return _Ptr + _Count;
     }
-    ItQ_acf7d0 FUN_00b1e840(CItQ_acf7d0 _Where, const ElQ_acf7d0& _Val);
+    ItQ_acf7d0 ProcessAndReturnValue_00b1e840(CItQ_acf7d0 _Where, const ElQ_acf7d0& _Val);
 };
 inline CItQ_acf7d0::CItQ_acf7d0(ElQ_acf7d0* _Ptr, const VecQ_acf7d0* _Pvector) : _Myaux(0)
 {
@@ -27974,10 +28075,11 @@ inline CItQ_acf7d0::CItQ_acf7d0(ElQ_acf7d0* _Ptr, const VecQ_acf7d0* _Pvector) :
     _Myptr = _Ptr;
 }
 // @fnv 0x00b1e840
-ItQ_acf7d0 VecQ_acf7d0::FUN_00b1e840(CItQ_acf7d0 _Where, const ElQ_acf7d0& _Val)
+// src: GUESS 0x00b1e840 (confidence: low)
+ItQ_acf7d0 VecQ_acf7d0::ProcessAndReturnValue_00b1e840(CItQ_acf7d0 _Where, const ElQ_acf7d0& _Val)
 {
     unsigned int _Off = size() == 0 ? 0 : _Where - begin();
-    FUN_00b20360(_Where, 1, _Val);
+    InsertFilledElements_00b20360(_Where, 1, _Val);
     return begin() + _Off;
 }
 
@@ -27997,7 +28099,7 @@ struct CItQ_ab9bc0 : IteratorBaseAuxX23520
     {
         return _Myaux == r._Myaux;
     }
-    CItQ_ab9bc0& FUN_00b23520(int _Off);
+    CItQ_ab9bc0& ProcessAndReturnValue_00b23520(int _Off);
     int operator-(const CItQ_ab9bc0& _Right) const
     {
         if (!(_Has() && _Same(_Right)))
@@ -28013,7 +28115,7 @@ struct ItQ_ab9bc0 : CItQ_ab9bc0
     {}
     ItQ_ab9bc0& operator+=(int _Off)
     {
-        FUN_00b23520(_Off);
+        ProcessAndReturnValue_00b23520(_Off);
         return *this;
     }
     ItQ_ab9bc0 operator+(int _Off) const
@@ -28036,12 +28138,12 @@ struct VecQ_ab9bc0 : VectorX23520
     {
         return ItQ_ab9bc0(_Myfirst, this);
     }
-    void FUN_00b21560(CItQ_ab9bc0 _Where, unsigned int _Count, const ElQ_ab9bc0& _Val);
+    void InsertFilledElements_00b21560(CItQ_ab9bc0 _Where, unsigned int _Count, const ElQ_ab9bc0& _Val);
     ItQ_ab9bc0 end()
     {
         return ItQ_ab9bc0(_Mylast, this);
     }
-    ItQ_ab9bc0 FUN_00b1f6d0(CItQ_ab9bc0 _Where, const ElQ_ab9bc0& _Val);
+    ItQ_ab9bc0 UpdateState_00b1f6d0(CItQ_ab9bc0 _Where, const ElQ_ab9bc0& _Val);
 };
 inline CItQ_ab9bc0::CItQ_ab9bc0(ElQ_ab9bc0* _Ptr, const VecQ_ab9bc0* _Pvector)
 {
@@ -28051,7 +28153,8 @@ inline CItQ_ab9bc0::CItQ_ab9bc0(ElQ_ab9bc0* _Ptr, const VecQ_ab9bc0* _Pvector)
     _Myaux = _Pvector->_Myownedaux;
     _Myptr = _Ptr;
 }
-inline CItQ_ab9bc0& CItQ_ab9bc0::FUN_00b23520(int _Off)
+// src: GUESS 0x00b23520 (confidence: low)
+inline CItQ_ab9bc0& CItQ_ab9bc0::ProcessAndReturnValue_00b23520(int _Off)
 {
     if (!_Has())
         ::FUN_00ec7c56();
@@ -28062,10 +28165,11 @@ inline CItQ_ab9bc0& CItQ_ab9bc0::FUN_00b23520(int _Off)
     return *this;
 }
 // @fnv 0x00b1f6d0
-ItQ_ab9bc0 VecQ_ab9bc0::FUN_00b1f6d0(CItQ_ab9bc0 _Where, const ElQ_ab9bc0& _Val)
+// src: GUESS 0x00b1f6d0 (confidence: low)
+ItQ_ab9bc0 VecQ_ab9bc0::UpdateState_00b1f6d0(CItQ_ab9bc0 _Where, const ElQ_ab9bc0& _Val)
 {
     unsigned int _Off = size() == 0 ? 0 : _Where - begin();
-    FUN_00b21560(_Where, 1, _Val);
+    InsertFilledElements_00b21560(_Where, 1, _Val);
     return begin() + _Off;
 }
 
@@ -28084,7 +28188,7 @@ struct PointInsertConstIterator : dtorb181::GvIterBase
     {
         return _Myaux == r._Myaux;
     }
-    inline PointInsertConstIterator& FUN_00b235e0(int _Off);
+    inline PointInsertConstIterator& ProcessAndReturnValue_00b235e0(int _Off);
     const PointInsertVector* _Container() const;
     int operator-(const PointInsertConstIterator& _Right) const
     {
@@ -28119,8 +28223,8 @@ struct PointInsertVector : dtorb181::GvVectorVal<FrondPoint>
     {
         return PointInsertIterator(_Myfirst, this);
     }
-    void FUN_00b21e00(PointInsertConstIterator _Where, unsigned int _Count, const FrondPoint& _Val);
-    PointInsertIterator FUN_00b1fab0(PointInsertConstIterator _Where, const FrondPoint& _Val);
+    void InsertFilledElements_00b21e00(PointInsertConstIterator _Where, unsigned int _Count, const FrondPoint& _Val);
+    PointInsertIterator UpdateState_00b1fab0(PointInsertConstIterator _Where, const FrondPoint& _Val);
 };
 inline PointInsertConstIterator::PointInsertConstIterator(FrondPoint* _Ptr, const PointInsertVector* _Pvector)
 {
@@ -28134,7 +28238,8 @@ inline const PointInsertVector* PointInsertConstIterator::_Container() const
 {
     return (const PointInsertVector*)_Getmycont();
 }
-inline PointInsertConstIterator& PointInsertConstIterator::FUN_00b235e0(int _Off)
+// src: GUESS 0x00b235e0 (confidence: low)
+inline PointInsertConstIterator& PointInsertConstIterator::ProcessAndReturnValue_00b235e0(int _Off)
 {
     if (!_Has())
         ::FUN_00ec7c56();
@@ -28146,14 +28251,15 @@ inline PointInsertConstIterator& PointInsertConstIterator::FUN_00b235e0(int _Off
 
 inline PointInsertIterator& PointInsertIterator::operator+=(int _Off)
 {
-    (*(PointInsertConstIterator*)this).FUN_00b235e0(_Off);
+    (*(PointInsertConstIterator*)this).ProcessAndReturnValue_00b235e0(_Off);
     return *this;
 }
 // @fnv 0x00b1fab0
-PointInsertIterator PointInsertVector::FUN_00b1fab0(PointInsertConstIterator _Where, const FrondPoint& _Val)
+// src: GUESS 0x00b1fab0 (confidence: low)
+PointInsertIterator PointInsertVector::UpdateState_00b1fab0(PointInsertConstIterator _Where, const FrondPoint& _Val)
 {
     unsigned int _Off = size() == 0 ? 0 : _Where - begin();
-    FUN_00b21e00(_Where, 1, _Val);
+    InsertFilledElements_00b21e00(_Where, 1, _Val);
     return begin() + _Off;
 }
 
@@ -28323,7 +28429,8 @@ template <class In, class Out> inline Out copy_opt(In _First, In _Last, Out _Des
     copy_opt(_First, _Last, checked_base(_Dest), ForwardTag(), NonscalarTag(), CheckedTag());
     return _Result;
 }
-template <class In, class Out> inline Out __cdecl FUN_00b236a0(In _First, In _Last, Out _Dest)
+// src: GUESS 0x00b236a0 (confidence: low)
+template <class In, class Out> inline Out __cdecl Object_ProcessAndReturnValue_00b236a0(In _First, In _Last, Out _Dest)
 {
     return copy_opt(checked_base(_First), checked_base(_Last), _Dest, iter_random(_First, _Dest),
                     ptr_cat(_First, _Dest), CheckedTag());
@@ -28336,14 +28443,14 @@ Iterator GlobalObjectVector::FUN_00b1ffd0(ConstIterator _First_arg, ConstIterato
     Iterator _Last = _Make_iter(_Last_arg);
     if (_First != _Last)
     {
-        GlobalObject_00b3f100* _Ptr = FUN_00b236a0(_Last._Myptr, _Mylast, _First._Myptr);
+        GlobalObject_00b3f100* _Ptr = Object_ProcessAndReturnValue_00b236a0(_Last._Myptr, _Mylast, _First._Myptr);
         _Destroy(_Ptr, _Mylast);
         _Mylast = _Ptr;
     }
     return _First;
 }
 
-void __cdecl FormHeap_Free(void* p);
+void __cdecl FormHeapFreeAndLog_00401030(void* p);
 
 struct AuxCont_b189f0
 {
@@ -28358,7 +28465,7 @@ struct AllocQ_b189f0
     }
     void deallocate(AuxCont_b189f0* p, unsigned int)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
 };
 
@@ -28378,29 +28485,30 @@ struct FUN_00b189f0 : AuxAlloc_b189f0
 {  // the list itself
     void* _Myhead;
     unsigned int _Mysize;
-    void FUN_00b1e970();  // _Tidy
+    void UpdateState_00b1e970();  // _Tidy
     ~FUN_00b189f0();
 };
 
 // @fnv 0x00b189f0
 FUN_00b189f0::~FUN_00b189f0()
 {
-    FUN_00b1e970();
+    UpdateState_00b1e970();
 }
 
-extern "C" void* __cdecl FUN_0044d670(unsigned int, int);
+extern "C" void* __cdecl std_allocator_SIdvLeafTexture_allocator_SIdvLeafTexture(unsigned int, int);
 
 extern double FUN_00ec9f30(double);
 extern double FUN_00eca060(double);
 struct FloatMatrix3
 {
     float xx, xy, xz, yx, yy, yz, zx, zy, zz;
-    void FUN_00b12af0();
+    void CRotTransform_CRotTransform();
     FloatMatrix3 Multiply(const FloatMatrix3&) const;
-    void FUN_00b1ae00(float angle)
+// src: GUESS 0x00b1ae00 (confidence: low)
+    void UpdateFields_00b1ae00(float angle)
     {
         FloatMatrix3 rotation;
-        rotation.FUN_00b12af0();
+        rotation.CRotTransform_CRotTransform();
         float cosine = (float)FUN_00ec9f30(angle / DAT_010a4d90);
         float sine = (float)FUN_00eca060(angle / DAT_010a4d90);
         rotation.xx = 1.0f;
@@ -28445,13 +28553,13 @@ struct FUN_00b1fca0
 };
 struct FUN_00b1e3e0 : FUN_00b39460, FUN_00b1fca0
 {
-    void FUN_00b1fbe0(unsigned int);
+    void ProcessAndReturnValue_00b1fbe0(unsigned int);
     FUN_00b1e3e0()
     {
-        void** allocated = (void**)FUN_0044d670(1, 0);
+        void** allocated = (void**)std_allocator_SIdvLeafTexture_allocator_SIdvLeafTexture(1, 0);
         void** proxy = allocated;
         allocator = (int)(proxy ? (*proxy = this, proxy) : 0);
-        FUN_00b1fbe0(0);
+        ProcessAndReturnValue_00b1fbe0(0);
     }
 };
 struct FUN_00449fd0 : FrondFloatStorage
@@ -28462,7 +28570,7 @@ struct FUN_00449fd0 : FrondFloatStorage
         ((FrondFloatList*)this)->FUN_0065f240();
     }
     void PushBack(const float&);
-    float* FUN_006578b0(unsigned int);
+    float* GetElementPointerChecked(unsigned int);
 };
 struct FUN_00b1fe80
 {
@@ -28475,8 +28583,8 @@ struct FUN_00b1fe80
 struct FUN_00b31270 : FUN_00b39460, FUN_00b1fe80
 {
     FUN_00b31270();
-    void FUN_00b1e640(const FUN_00449fd0&);
-    FUN_00449fd0& FUN_00b319a0(unsigned int);
+    void AppendElementWithGrowth_00b1e640(const FUN_00449fd0&);
+    FUN_00449fd0& ProcessAndReturnValue_00b319a0(unsigned int);
 };
 struct Color4
 {
@@ -28492,7 +28600,7 @@ struct PackedColors
     unsigned int* first;
     unsigned int* last;
     unsigned int* limit;
-    void FUN_00b32210(const unsigned int&);
+    void UpdateState_00b32210(const unsigned int&);
 };
 struct Geometry
 {
@@ -28508,7 +28616,8 @@ struct Geometry
     PackedColors colors;
     FUN_00449fd0 positions;
     FUN_00449fd0 windPositions;
-    void FUN_00b300c0(const CVec3& point)
+// src: GUESS 0x00b300c0 (confidence: low)
+    void UpdateFields_00b300c0(const CVec3& point)
     {
         float px = point.x;
         float py = point.y;
@@ -28523,23 +28632,25 @@ struct Geometry
             windPositions.PushBack(pz);
         }
     }
-    void FUN_00b301f0(const TexCoord&, unsigned short);
-    unsigned int FUN_00b30060(const Color4& color)
+    void CIndexedGeometry_AddVertexTexCoord0(const TexCoord&, unsigned short);
+// src: GUESS 0x00b30060 (confidence: low)
+    unsigned int GetIndexedValue_00b30060(const Color4& color)
     {
         return (unsigned int)(color.r * 255.0) + ((unsigned int)(color.g * 255.0) << 8) +
                ((unsigned int)(color.b * 255.0) << 16) - 0x1000000;
     }
-    void FUN_00b30020(const Color4& color)
+// src: GUESS 0x00b30020 (confidence: low)
+    void UpdateFields_00b30020(const Color4& color)
     {
-        unsigned int packed = FUN_00b30060(color);
-        colors.FUN_00b32210(packed);
+        unsigned int packed = GetIndexedValue_00b30060(color);
+        colors.UpdateState_00b32210(packed);
     }
-    void FUN_00b30190(const CVec3&);
-    void FUN_00b305f0(const CVec3&);
-    void FUN_00b30660(const CVec3&);
-    void FUN_00b30560(float, unsigned char);
-    float* FUN_00b30f80(unsigned int);
-    float* FUN_00b30fd0(unsigned int);
+    void AppendThreeFloatComponents(const CVec3&);
+    void UpdateState_00b305f0(const CVec3&);
+    void UpdateFields_00b30660(const CVec3&);
+    void AppendInvertedValueAndDispatchIndex(float, unsigned char);
+    float* CIndexedGeometry_GetVertexCoord(unsigned int);
+    float* GetDoubledIndexElementChecked(unsigned int);
     unsigned short GetVertex() const
     {
         return vertex;
@@ -28561,23 +28672,24 @@ struct Geometry
 struct DistancePoint : CVec3
 {
     DistancePoint(float x, float y, float z);
-    float FUN_00b04d40(const DistancePoint&) const;
+    float CVec3_Distance(const DistancePoint&) const;
 };
 struct B1FrondBuilder
 {
     Geometry* geometry;
     void* configuration;
-    void FUN_00b1be50(FrondInput*, FUN_00b1e3e0&, FUN_00b1e3e0&);
-    void FUN_00b1b000(FrondInput* frond);
+    void ProcessEntries_00b1be50(FrondInput*, FUN_00b1e3e0&, FUN_00b1e3e0&);
+    void ProcessEntries_00b1b000(FrondInput* frond);
 };
 // @fnv 0x00b1b000
-void B1FrondBuilder::FUN_00b1b000(FrondInput* frond)
+// src: GUESS 0x00b1b000 (confidence: low)
+void B1FrondBuilder::ProcessEntries_00b1b000(FrondInput* frond)
 {
     if (geometry && configuration)
     {
         FUN_00b1e3e0 positions3;
         FUN_00b1e3e0 normals;
-        FUN_00b1be50(frond, positions3, normals);
+        ProcessEntries_00b1be50(frond, positions3, normals);
         frond->stride = positions3.size();
         frond->start = geometry->GetVertex();
         for (unsigned int guide = 0; guide < frond->size(); ++guide)
@@ -28588,33 +28700,33 @@ void B1FrondBuilder::FUN_00b1b000(FrondInput* frond)
                 float across_2 = vertex / (frond->stride - 1.0);
                 FloatMatrix3 current2X = (*(FloatMatrix3*)&(*frond)[guide].rotation);
                 FloatMatrix3 previousA = guide ? (*(FloatMatrix3*)&(*frond)[guide - 1].rotation) : current2X;
-                current2X.FUN_00b1ae00(frond->angle);
-                previousA.FUN_00b1ae00(frond->angle);
+                current2X.UpdateFields_00b1ae00(frond->angle);
+                previousA.UpdateFields_00b1ae00(frond->angle);
                 CVec3 point7 = positions3[vertex].FUN_00b12890(current2X);
                 CVec3 priority_2 = positions3[vertex].FUN_00b12890(previousA);
                 CVec3 midPoint =
                     (*(CVec3*)&(*frond)[guide]).AddVector(point7.AddVector(priority_2).ScaleSwizzled(0.5f));
                 CVec3 tangentsB = point7.AddVector(priority_2);
-                tangentsB.FUN_00b12790();
-                geometry->FUN_00b300c0(midPoint);
+                tangentsB.Normalize_00b12790();
+                geometry->UpdateFields_00b300c0(midPoint);
                 TexCoord uvB;
                 uvB.u = across_2;
                 uvB.v = along;
-                geometry->FUN_00b301f0(uvB, (unsigned short)frond->layer);
+                geometry->CIndexedGeometry_AddVertexTexCoord0(uvB, (unsigned short)frond->layer);
                 CVec3 normal_0 = normals[vertex].FUN_00b12890(current2X);
                 CVec3 priorNormal = normals[vertex].FUN_00b12890(previousA);
                 CVec3 localA = normal_0.AddVector(priorNormal).ScaleSwizzled(0.5f);
-                localA.FUN_00b12790();
+                localA.Normalize_00b12790();
                 Color4 colorSlot5;
                 colorSlot5.r = colorSlot5.g = colorSlot5.b = colorSlot5.a = 1.0f;
-                geometry->FUN_00b30020(colorSlot5);
-                geometry->FUN_00b30190(localA);
-                geometry->FUN_00b305f0(tangentsB);
+                geometry->UpdateFields_00b30020(colorSlot5);
+                geometry->AppendThreeFloatComponents(localA);
+                geometry->UpdateState_00b305f0(tangentsB);
                 CVec3 binormalVal = localA.FUN_00b12810(tangentsB);
-                binormalVal.FUN_00b12790();
-                geometry->FUN_00b30660(binormalVal);
+                binormalVal.Normalize_00b12790();
+                geometry->UpdateFields_00b30660(binormalVal);
                 if (geometry->HasWind())
-                    geometry->FUN_00b30560(frond->FUN_00b1db00(guide)->scale, frond->FUN_00b1db00(guide)->material);
+                    geometry->AppendInvertedValueAndDispatchIndex(frond->GetElementAddress38_00b1db00(guide)->scale, frond->GetElementAddress38_00b1db00(guide)->material);
                 geometry->AdvanceVertex();
             }
         }
@@ -28629,14 +28741,14 @@ void B1FrondBuilder::FUN_00b1b000(FrondInput* frond)
             {
                 unsigned int indexA6 = frond->start + row * frond->stride + column;
                 unsigned int priorIndex8 = frond->start + (row - 1) * frond->stride + column;
-                float* coordinates = geometry->FUN_00b30f80(indexA6);
-                float* local7 = geometry->FUN_00b30f80(priorIndex8);
+                float* coordinates = geometry->CIndexedGeometry_GetVertexCoord(indexA6);
+                float* local7 = geometry->CIndexedGeometry_GetVertexCoord(priorIndex8);
                 DistancePoint point21(coordinates[0], coordinates[1], coordinates[2]);
                 DistancePoint priorVal(local7[0], local7[1], local7[2]);
-                total += point21.FUN_00b04d40(priorVal);
+                total += point21.CVec3_Distance(priorVal);
                 cumulative.PushBack(total);
             }
-            cumulativeLengths.FUN_00b1e640(cumulative);
+            cumulativeLengths.AppendElementWithGrowth_00b1e640(cumulative);
             local2.PushBack(total);
         }
         for (unsigned int column = 0; column < frond->stride; ++column)
@@ -28645,13 +28757,13 @@ void B1FrondBuilder::FUN_00b1b000(FrondInput* frond)
             {
                 unsigned short index4 = frond->start + row * frond->stride + column;
                 geometry->SelectVertex(index4);
-                float* original4 = geometry->FUN_00b30fd0(index4);
+                float* original4 = geometry->GetDoubledIndexElementChecked(index4);
                 TexCoord uv3;
                 uv3.u = original4[0];
                 static const float textureScale = 0.999f;
-                uv3.v = *cumulativeLengths.FUN_00b319a0(column).FUN_006578b0(row) / *local2.FUN_006578b0(column) *
+                uv3.v = *cumulativeLengths.ProcessAndReturnValue_00b319a0(column).GetElementPointerChecked(row) / *local2.GetElementPointerChecked(column) *
                         textureScale;
-                geometry->FUN_00b301f0(uv3, (unsigned short)frond->layer);
+                geometry->CIndexedGeometry_AddVertexTexCoord0(uv3, (unsigned short)frond->layer);
                 geometry->AdvanceVertex();
             }
         }
@@ -28665,12 +28777,12 @@ struct TreeElemQ
 struct VecTE_00b1d130
 {
     int x0, x1, x2, x3, x4, x5;
-    VecTE_00b1d130& FUN_00b1d130(const VecTE_00b1d130& that);
+    VecTE_00b1d130& UpdateState_00b1d130(const VecTE_00b1d130& that);
 };
 struct VecPI_00b1d5d0
 {
     int x0, x1, x2, x3, x4, x5;
-    VecPI_00b1d5d0& FUN_00b1d5d0(const VecPI_00b1d5d0& that);
+    VecPI_00b1d5d0& AssignVectorContents(const VecPI_00b1d5d0& that);
 };
 static __forceinline void DeadN()
 {
@@ -28686,21 +28798,22 @@ struct FUN_00b1c7a0_cls
     VecPI_00b1d5d0 m3c;
     VecTE_00b1d130 m54;
     VecTE_00b1d130 m6c;
-    FUN_00b1c7a0_cls& FUN_00b1c7a0(const FUN_00b1c7a0_cls& that);
+    FUN_00b1c7a0_cls& ProcessAndReturnValue_00b1c7a0(const FUN_00b1c7a0_cls& that);
 };
 
 // @fnv 0x00b1c7a0
-FUN_00b1c7a0_cls& FUN_00b1c7a0_cls::FUN_00b1c7a0(const FUN_00b1c7a0_cls& that)
+// src: GUESS 0x00b1c7a0 (confidence: low)
+FUN_00b1c7a0_cls& FUN_00b1c7a0_cls::ProcessAndReturnValue_00b1c7a0(const FUN_00b1c7a0_cls& that)
 {
     DeadN();
     f00 = that.f00;
     f04 = that.f04;
     f08 = that.f08;
-    m0c.FUN_00b1d130(that.m0c);
-    m24.FUN_00b1d130(that.m24);
-    m3c.FUN_00b1d5d0(that.m3c);
-    m54.FUN_00b1d130(that.m54);
-    m6c.FUN_00b1d130(that.m6c);
+    m0c.UpdateState_00b1d130(that.m0c);
+    m24.UpdateState_00b1d130(that.m24);
+    m3c.AssignVectorContents(that.m3c);
+    m54.UpdateState_00b1d130(that.m54);
+    m6c.UpdateState_00b1d130(that.m6c);
     return *this;
 }
 
@@ -28877,10 +28990,10 @@ __forceinline Entry* checkedBase(Iter& it)
     BaseTag_frondengine tag;
     return checkedBase(it, tag);
 }
-void __cdecl FUN_00b23cd0(Entry*, Entry*, int, Compare);
+void __cdecl Range_SortWithHeapFallback(Entry*, Entry*, int, Compare);
 __forceinline void sortRange(Iter first, Iter last, Compare comp)
 {
-    FUN_00b23cd0(checkedBase(first), checkedBase(last), last - first, comp);
+    Range_SortWithHeapFallback(checkedBase(first), checkedBase(last), last - first, comp);
 }
 __forceinline float interpolate(float start, float end, float ratio)
 {
@@ -28894,11 +29007,12 @@ struct Processor
     int i38, i3c, i40, i44, i48, i4c, i50, i54, i58, i5c, i60, i64;
     unsigned count;
     float low, high, randomness, cutoff;
-    void FUN_00b1c850();
+    void CFrondEngine_BuildGuideLods();
 };
 
 // @fnv 0x00b1c850
-void Processor::FUN_00b1c850()
+// src: COMMUNITY 0x00b1c850
+void Processor::CFrondEngine_BuildGuideLods()
 {
     float sum;
     sum = 0.0f;
@@ -28984,21 +29098,23 @@ struct AppendGuideVector : dtorb181::GvVector<AppendGuide>
         AppendFill(ptr, count, value, this->_Alval);
         return ptr + count;
     }
-    AppendIterator FUN_00b1e840(AppendConstIterator where, const AppendGuide& value)
+// src: GUESS 0x00b1e840 (confidence: low)
+    AppendIterator ProcessAndReturnValue_00b1e840(AppendConstIterator where, const AppendGuide& value)
     {
         unsigned int offset = size() == 0 ? 0 : where - begin();
         _Insert_n(where, 1, value);
         return begin() + offset;
     }
-    void FUN_00b1d980(const AppendGuide& value);
+    void UpdateFields_00b1d980(const AppendGuide& value);
 };
 // @fnv 0x00b1d980
-void AppendGuideVector::FUN_00b1d980(const AppendGuide& value)
+// src: GUESS 0x00b1d980 (confidence: low)
+void AppendGuideVector::UpdateFields_00b1d980(const AppendGuide& value)
 {
     if (size() < capacity())
         _Mylast = _Ufill(_Mylast, 1, value);
     else
-        FUN_00b1e840(end(), value);
+        ProcessAndReturnValue_00b1e840(end(), value);
 }
 }  // namespace fnv_00b1d980
 
@@ -29008,7 +29124,8 @@ struct FrondInsertIterator : dtorb181::GvConstIterator<ElemX23460>
         : dtorb181::GvConstIterator<ElemX23460>(ptr, container)
     {}
 
-    FrondInsertIterator& FUN_00b23460(int offset)
+// src: GUESS 0x00b23460 (confidence: low)
+    FrondInsertIterator& ProcessAndReturnValue_00b23460(int offset)
     {
         if (!this->_Has_container())
             ::FUN_00ec7c56();
@@ -29021,7 +29138,7 @@ struct FrondInsertIterator : dtorb181::GvConstIterator<ElemX23460>
 
     FrondInsertIterator& operator+=(int offset)
     {
-        FUN_00b23460(offset);
+        ProcessAndReturnValue_00b23460(offset);
         return *this;
     }
 
@@ -29038,16 +29155,17 @@ struct FrondInsertVector : dtorb181::GvVector<ElemX23460>
     {
         return FrondInsertIterator(_Myfirst, this);
     }
-    void FUN_00b1ecf0(dtorb181::GvConstIterator<ElemX23460> where, unsigned int count, const ElemX23460& value);
-    FrondInsertIterator FUN_00b1dc50(dtorb181::GvConstIterator<ElemX23460> where, const ElemX23460& value);
+    void UpdateState_00b1ecf0(dtorb181::GvConstIterator<ElemX23460> where, unsigned int count, const ElemX23460& value);
+    FrondInsertIterator UpdateState_00b1dc50(dtorb181::GvConstIterator<ElemX23460> where, const ElemX23460& value);
 };
 
 // @fnv 0x00b1dc50
-FrondInsertIterator FrondInsertVector::FUN_00b1dc50(dtorb181::GvConstIterator<ElemX23460> where,
+// src: GUESS 0x00b1dc50 (confidence: low)
+FrondInsertIterator FrondInsertVector::UpdateState_00b1dc50(dtorb181::GvConstIterator<ElemX23460> where,
                                                     const ElemX23460& value)
 {
     unsigned int offset = size() == 0 ? 0 : where - begin();
-    FUN_00b1ecf0(where, 1, value);
+    UpdateState_00b1ecf0(where, 1, value);
     return begin() + offset;
 }
 
@@ -29102,8 +29220,8 @@ struct VecB1de20 : CtB1de20
     {
         return ItB1de20(_Mylast, this);
     }
-    ItB1de20 FUN_00b1ea20(ItCB1de20 _First, ItCB1de20 _Last);
-    void FUN_00b1de20();
+    ItB1de20 ProcessAndReturnValue_00b1ea20(ItCB1de20 _First, ItCB1de20 _Last);
+    void ProcessState_00b1de20();
 };
 inline ItCB1de20::ItCB1de20(Item_b1de20** _Ptr, const CtB1de20* _Pvector)
 {
@@ -29119,9 +29237,10 @@ inline void ScratchFrame_b1de20()
 }
 
 // @fnv 0x00b1de20
-void VecB1de20::FUN_00b1de20()
+// src: GUESS 0x00b1de20 (confidence: low)
+void VecB1de20::ProcessState_00b1de20()
 {
-    FUN_00b1ea20(begin(), end());
+    ProcessAndReturnValue_00b1ea20(begin(), end());
     ScratchFrame_b1de20();
 }
 
@@ -29145,11 +29264,11 @@ inline CatQ_ab9bc0 PtrCat_ab9bc0(ElQ_ab9bc0*&, ElQ_ab9bc0*&)
     CatQ_ab9bc0 c;
     return c;
 }
-void __cdecl FUN_00b243a0(ElQ_ab9bc0* _First, unsigned int _Count, const ElQ_ab9bc0& _Val, AlQ_ab9bc0& _Al, CatQ_ab9bc0,
+void __cdecl Object_ProcessEntries_00b243a0(ElQ_ab9bc0* _First, unsigned int _Count, const ElQ_ab9bc0& _Val, AlQ_ab9bc0& _Al, CatQ_ab9bc0,
                           TagQ_ab9bc0);
 inline void UFillN_ab9bc0(ElQ_ab9bc0* _First, unsigned int _Count, const ElQ_ab9bc0& _Val, AlQ_ab9bc0& _Al)
 {
-    FUN_00b243a0(_First, _Count, _Val, _Al, PtrCat_ab9bc0(_First, _First), TagQ_ab9bc0());
+    Object_ProcessEntries_00b243a0(_First, _Count, _Val, _Al, PtrCat_ab9bc0(_First, _First), TagQ_ab9bc0());
 }
 struct VecQ_ab9bc0;
 struct CItQ_ab9bc0
@@ -29193,8 +29312,8 @@ struct VecQ_ab9bc0
         UFillN_ab9bc0(_Ptr, _Count, _Val, _Alval);
         return _Ptr + _Count;
     }
-    ItQ_ab9bc0 FUN_00b1f6d0(CItQ_ab9bc0 _Where, const ElQ_ab9bc0& _Val);
-    void FUN_00b1e1e0(const ElQ_ab9bc0& _Val);
+    ItQ_ab9bc0 UpdateState_00b1f6d0(CItQ_ab9bc0 _Where, const ElQ_ab9bc0& _Val);
+    void UpdateFields_00b1e1e0(const ElQ_ab9bc0& _Val);
 };
 inline CItQ_ab9bc0::CItQ_ab9bc0(ElQ_ab9bc0* _Ptr, const VecQ_ab9bc0* _Pvector) : _Myaux(0)
 {
@@ -29218,13 +29337,14 @@ inline void Dead12_ab9bc0()
     int d10;
 }
 // @fnv 0x00b1e1e0
-void VecQ_ab9bc0::FUN_00b1e1e0(const ElQ_ab9bc0& _Val)
+// src: GUESS 0x00b1e1e0 (confidence: low)
+void VecQ_ab9bc0::UpdateFields_00b1e1e0(const ElQ_ab9bc0& _Val)
 {
     if (size() < capacity())
         _Mylast = _Ufill(_Mylast, 1, _Val);
     else
     {
-        FUN_00b1f6d0(end(), _Val);
+        UpdateState_00b1f6d0(end(), _Val);
         Dead12_ab9bc0();
     }
 }
@@ -29234,12 +29354,12 @@ struct AppendElement
 {
     int value00, value04, value08, value0c, value10, value14;
 };
-void __cdecl FUN_00b24580(AppendElement*, unsigned int, const AppendElement&, dtorb181::GvAlloc<AppendElement>&,
+void __cdecl Object_ProcessEntries_00b24580(AppendElement*, unsigned int, const AppendElement&, dtorb181::GvAlloc<AppendElement>&,
                           dtorb181::GvNonscalarTag, dtorb181::GvRangeCheckedTag);
 inline void AppendFill(AppendElement* first, unsigned int count, const AppendElement& value,
                        dtorb181::GvAlloc<AppendElement>& allocator)
 {
-    FUN_00b24580(first, count, value, allocator, dtorb181::GvPtrCat(first, first), dtorb181::GvRangeCheckedTag());
+    Object_ProcessEntries_00b24580(first, count, value, allocator, dtorb181::GvPtrCat(first, first), dtorb181::GvRangeCheckedTag());
 }
 struct AppendVector : dtorb181::GvVector<AppendElement>
 {
@@ -29248,30 +29368,32 @@ struct AppendVector : dtorb181::GvVector<AppendElement>
         AppendFill(first, count, value, _Alval);
         return first + count;
     }
-    dtorb181::GvIterator<AppendElement> FUN_00b1fd50(dtorb181::GvConstIterator<AppendElement> where,
+// src: GUESS 0x00b1fd50 (confidence: low)
+    dtorb181::GvIterator<AppendElement> UpdateState_00b1fd50(dtorb181::GvConstIterator<AppendElement> where,
                                                      const AppendElement& value)
     {
         unsigned int offset = size() == 0 ? 0 : where - begin();
         _Insert_n(where, 1, value);
         return begin() + offset;
     }
-    void FUN_00b1e640(const AppendElement& value);
+    void AppendElementWithGrowth_00b1e640(const AppendElement& value);
 };
 // @fnv 0x00b1e640
-void AppendVector::FUN_00b1e640(const AppendElement& value)
+// src: GUESS 0x00b1e640 (confidence: medium)
+void AppendVector::AppendElementWithGrowth_00b1e640(const AppendElement& value)
 {
     if (size() < capacity())
         _Mylast = _Ufill(_Mylast, 1, value);
     else
-        FUN_00b1fd50(end(), value);
+        UpdateState_00b1fd50(end(), value);
 }
 
-SFrondGuideEntry* __cdecl FUN_00b23760(SFrondGuideEntry* _First, SFrondGuideEntry* _Last, SFrondGuideEntry* _Dest);
+SFrondGuideEntry* __cdecl Object_ProcessAndReturnValue_00b23760(SFrondGuideEntry* _First, SFrondGuideEntry* _Last, SFrondGuideEntry* _Dest);
 
 class IterQ_b16830 : public _Vector_iteratorS<SFrondGuideEntry>
 {
   public:
-    bool FUN_00b16830(const _Vector_const_iteratorS<SFrondGuideEntry>& _Right) const;
+    bool AreValuesEqual_00b16830(const _Vector_const_iteratorS<SFrondGuideEntry>& _Right) const;
 };
 
 static __forceinline void DeadQ()
@@ -29282,20 +29404,21 @@ static __forceinline void DeadQ()
 // A checked STL-style frond-guide container (begin/end/capacity), unlike the SIMD math Vector.
 struct FrondGuideEraseContainer : vectorS<SFrondGuideEntry>
 {
-    iterator FUN_00b1ea20(const_iterator _First_arg, const_iterator _Last_arg);
+    iterator ProcessAndReturnValue_00b1ea20(const_iterator _First_arg, const_iterator _Last_arg);
     void __thiscall FUN_00b1ebc0(SFrondGuideEntry* a, SFrondGuideEntry* b);
 };
 
 // @fnv 0x00b1ea20
-FrondGuideEraseContainer::iterator FrondGuideEraseContainer::FUN_00b1ea20(const_iterator _First_arg, const_iterator _Last_arg)
+// src: GUESS 0x00b1ea20 (confidence: low)
+FrondGuideEraseContainer::iterator FrondGuideEraseContainer::ProcessAndReturnValue_00b1ea20(const_iterator _First_arg, const_iterator _Last_arg)
 {
     iterator _First = _Make_iter(_First_arg);
     DeadQ();
     iterator _Last = _Make_iter(_Last_arg);
 
-    if (((IterQ_b16830*)&_First)->FUN_00b16830(_Last))
+    if (((IterQ_b16830*)&_First)->AreValuesEqual_00b16830(_Last))
     {
-        pointer _Ptr = FUN_00b23760(_Last._Myptr, _Mylast, _First._Myptr);
+        pointer _Ptr = Object_ProcessAndReturnValue_00b23760(_Last._Myptr, _Mylast, _First._Myptr);
         FUN_00b1ebc0(_Ptr, _Mylast);
         _Mylast = _Ptr;
     }
@@ -29310,7 +29433,8 @@ struct FrondInsertConstIterator : dtorb181::GvIterBase
     FrondInsertConstIterator()
     {}
     FrondInsertConstIterator(ElemX16890* _Ptr, const FrondInsertVector* _Pvector);
-    FrondInsertConstIterator& FUN_00b16890(int _Off)
+// src: GUESS 0x00b16890 (confidence: low)
+    FrondInsertConstIterator& UpdateState_00b16890(int _Off)
     {
         if (!this->_Has_container())
             ::FUN_00ec7c56();
@@ -29335,7 +29459,7 @@ struct FrondInsertIterator : FrondInsertConstIterator
     {}
     FrondInsertIterator& operator+=(int _Off)
     {
-        FUN_00b16890(_Off);
+        UpdateState_00b16890(_Off);
         return *this;
     }
     FrondInsertIterator operator+(int _Off) const
@@ -29350,8 +29474,8 @@ struct FrondInsertVector : dtorb181::GvVector<ElemX16890>
     {
         return FrondInsertIterator(_Myfirst, this);
     }
-    void FUN_00b20ce0(FrondInsertConstIterator _Where, unsigned int _Count, const ElemX16890& _Val);
-    FrondInsertIterator FUN_00b1f460(FrondInsertConstIterator _Where, const ElemX16890& _Val);
+    void InsertFilledElements_00b20ce0(FrondInsertConstIterator _Where, unsigned int _Count, const ElemX16890& _Val);
+    FrondInsertIterator ProcessAndReturnValue_00b1f460(FrondInsertConstIterator _Where, const ElemX16890& _Val);
 };
 inline FrondInsertConstIterator::FrondInsertConstIterator(ElemX16890* _Ptr, const FrondInsertVector* _Pvector)
 {
@@ -29361,10 +29485,11 @@ inline FrondInsertConstIterator::FrondInsertConstIterator(ElemX16890* _Ptr, cons
     _Myptr = _Ptr;
 }
 // @fnv 0x00b1f460
-FrondInsertIterator FrondInsertVector::FUN_00b1f460(FrondInsertConstIterator _Where, const ElemX16890& _Val)
+// src: GUESS 0x00b1f460 (confidence: low)
+FrondInsertIterator FrondInsertVector::ProcessAndReturnValue_00b1f460(FrondInsertConstIterator _Where, const ElemX16890& _Val)
 {
     unsigned int _Off = size() == 0 ? 0 : _Where - begin();
-    FUN_00b20ce0(_Where, 1, _Val);
+    InsertFilledElements_00b20ce0(_Where, 1, _Val);
     return begin() + _Off;
 }
 }  // namespace fnv_00b1f460
@@ -29386,7 +29511,8 @@ struct InsertConstIterator24 : dtorb181::GvIterBase
             ::FUN_00ec7c56();
         return _Myptr - other._Myptr;
     }
-    InsertConstIterator24& FUN_00b16890(int offset)
+// src: GUESS 0x00b16890 (confidence: low)
+    InsertConstIterator24& UpdateState_00b16890(int offset)
     {
         if (!_Has_container())
             ::FUN_00ec7c56();
@@ -29404,7 +29530,7 @@ struct InsertIterator24 : InsertConstIterator24
     {}
     InsertIterator24& operator+=(int offset)
     {
-        (*(InsertConstIterator24*)this).FUN_00b16890(offset);
+        (*(InsertConstIterator24*)this).UpdateState_00b16890(offset);
         return *this;
     }
     InsertIterator24 operator+(int offset) const
@@ -29419,14 +29545,15 @@ struct InsertVector24 : dtorb181::GvVector<ElemX16890>
     {
         return InsertIterator24(_Myfirst, this);
     }
-    void FUN_00b22700(InsertConstIterator24 where, unsigned int count, const ElemX16890& value);
-    InsertIterator24 FUN_00b1fd50(InsertConstIterator24 where, const ElemX16890& value);
+    void InsertFilledElements_00b22700(InsertConstIterator24 where, unsigned int count, const ElemX16890& value);
+    InsertIterator24 UpdateState_00b1fd50(InsertConstIterator24 where, const ElemX16890& value);
 };
 // @fnv 0x00b1fd50
-InsertIterator24 InsertVector24::FUN_00b1fd50(InsertConstIterator24 where, const ElemX16890& value)
+// src: GUESS 0x00b1fd50 (confidence: low)
+InsertIterator24 InsertVector24::UpdateState_00b1fd50(InsertConstIterator24 where, const ElemX16890& value)
 {
     unsigned int offset = size() == 0 ? 0 : where - begin();
-    FUN_00b22700(where, 1, value);
+    InsertFilledElements_00b22700(where, 1, value);
     return begin() + offset;
 }
 
@@ -29489,7 +29616,7 @@ struct CItQ_b200
     ElQ_b200* m_ptr;
     CItQ_b200(ElQ_b200* p, const FUN_00b200f0* c);
 };
-ElQ_b200* __cdecl FUN_00b26db0(ElQ_b200* f, ElQ_b200* l, ElQ_b200* d, AlQ_b200& al, CatQ_b200 c, TagQ_b200 b);
+ElQ_b200* __cdecl Frondengine_ProcessEntries_00b26db0(ElQ_b200* f, ElQ_b200* l, ElQ_b200* d, AlQ_b200& al, CatQ_b200 c, TagQ_b200 b);
 inline void DeadA_b200()
 {
     int a0;
@@ -29551,8 +29678,8 @@ struct MidQ_b200 : FUN_00b20ba0
 struct FUN_00b200f0 : MidQ_b200
 {
     FUN_00b200f0(const FUN_00b200f0& r);
-    bool FUN_00b1eb00(unsigned int n);
-    void FUN_00b1e970();
+    bool ProcessAndReturnValue_00b1eb00(unsigned int n);
+    void UpdateState_00b1e970();
     unsigned int size() const
     {
         return m_last - m_pHeadNode;
@@ -29571,7 +29698,7 @@ struct FUN_00b200f0 : MidQ_b200
     }
     ElQ_b200* UninitCopy_b200(CItQ_b200 f, CItQ_b200 l, ElQ_b200* d, AlQ_b200& al)
     {
-        return FUN_00b26db0(CBase_b200F_b200(f), CBase_b200(l), d, al, PtrCat_b200(f, d), TagQ_b200());
+        return Frondengine_ProcessEntries_00b26db0(CBase_b200F_b200(f), CBase_b200(l), d, al, PtrCat_b200(f, d), TagQ_b200());
     }
 };
 inline CItQ_b200::CItQ_b200(ElQ_b200* p, const FUN_00b200f0* c)
@@ -29585,7 +29712,7 @@ inline CItQ_b200::CItQ_b200(ElQ_b200* p, const FUN_00b200f0* c)
 // @fnv 0x00b200f0
 FUN_00b200f0::FUN_00b200f0(const FUN_00b200f0& r) : MidQ_b200(AlQ_b200())
 {
-    if (FUN_00b1eb00(r.size()))
+    if (ProcessAndReturnValue_00b1eb00(r.size()))
     {
         DeadA_b200();
         try
@@ -29595,7 +29722,7 @@ FUN_00b200f0::FUN_00b200f0(const FUN_00b200f0& r) : MidQ_b200(AlQ_b200())
         }
         catch (...)
         {
-            FUN_00b1e970();
+            UpdateState_00b1e970();
             FUN_00ec7894(0, 0);
         }
     }
@@ -29632,7 +29759,7 @@ struct AlR
     AlR(const AlR&)
     {}
 };
-ElR* __cdecl FUN_00b25fa0(ElR* f, ElR* l, ElR* d, AlR& al, PtrCatR, TagR);
+ElR* __cdecl Object_ProcessEntries_00b25fa0(ElR* f, ElR* l, ElR* d, AlR& al, PtrCatR, TagR);
 struct AuxQ;
 struct FUN_00b20ba0
 {
@@ -29679,7 +29806,7 @@ inline PtrCatR Ptr_cat(const CItQ&, ElR*&)
 }
 inline ElR* Unchecked_uninitialized_copy(CItQ f, CItQ l, ElR* d, AlR& al)
 {
-    return FUN_00b25fa0((ElR*)Checked_base2(f), (ElR*)Checked_base(l), d, al, Ptr_cat(f, d), TagR());
+    return Object_ProcessEntries_00b25fa0((ElR*)Checked_base2(f), (ElR*)Checked_base(l), d, al, Ptr_cat(f, d), TagR());
 }
 struct MidQ : FUN_00b20ba0
 {
@@ -29704,8 +29831,8 @@ struct MidQ : FUN_00b20ba0
     {
         return Unchecked_uninitialized_copy(f, l, p, m_al);
     }
-    bool FUN_00b1eb00(unsigned n);
-    void FUN_00b1ec70();
+    bool ProcessAndReturnValue_00b1eb00(unsigned n);
+    void ReleaseStorage_00b1ec70();
 };
 struct VecCopyR : MidQ
 {
@@ -29714,7 +29841,7 @@ struct VecCopyR : MidQ
 // @fnv 0x00b231f0
 VecCopyR::VecCopyR(const VecCopyR& r) : MidQ(AlR())
 {
-    if (FUN_00b1eb00(r.size()))
+    if (ProcessAndReturnValue_00b1eb00(r.size()))
     {
         try
         {
@@ -29724,7 +29851,7 @@ VecCopyR::VecCopyR(const VecCopyR& r) : MidQ(AlR())
         }
         catch (...)
         {
-            FUN_00b1ec70();
+            ReleaseStorage_00b1ec70();
             throw;
         }
     }
@@ -29732,7 +29859,7 @@ VecCopyR::VecCopyR(const VecCopyR& r) : MidQ(AlR())
 
 struct VcElemQ
 {
-    void FUN_00b24a80(const VcElem* src);
+    void CopyFields_00b24a80(const VcElem* src);
 };
 __forceinline void P1Q()
 {
@@ -29748,7 +29875,7 @@ __forceinline VcElem* CopyFwdQ(VcElem* _First, VcElem* _Last, VcElem* _Dest, VcF
     P2Q();
     for (; _First != _Last; ++_Dest, ++_First)
     {
-        ((VcElemQ*)_Dest)->FUN_00b24a80(_First);
+        ((VcElemQ*)_Dest)->CopyFields_00b24a80(_First);
     }
     return _Dest;
 }
@@ -29766,7 +29893,8 @@ __forceinline VcElem* CbFirstQ(VcElem* const& _It)
     return _Base;
 }
 // @fnv 0x00b23830
-VcElem* FUN_00b23830(VcElem* _First, VcElem* _Last, VcElem* _Dest)
+// src: GUESS 0x00b23830 (confidence: low)
+VcElem* Frondengine_EvaluateValue_00b23830(VcElem* _First, VcElem* _Last, VcElem* _Dest)
 {
     return CopyRandQ(VcCheckedBase(_First), CbFirstQ(_Last), _Dest, VcIterRandom(_First, _Dest),
                      VcPtrCatC(_First, _Dest), VcRangeCheckedTag());
@@ -29775,7 +29903,7 @@ VcElem* FUN_00b23830(VcElem* _First, VcElem* _Last, VcElem* _Dest)
 struct E93Q
 {
     int m[6];
-    void FUN_00b26570(E93Q& o);
+    void ProcessState_00b26570(E93Q& o);
 };
 struct NsTag93
 {
@@ -29810,7 +29938,7 @@ __forceinline void Dead64Q()
 }
 __forceinline void Swap93(E93Q& a, E93Q& b)
 {
-    a.FUN_00b26570(b);
+    a.ProcessState_00b26570(b);
     Dead64Q();
 }
 __forceinline E93Q* MbFwd93(E93Q* F, E93Q* L, E93Q* D, FwdTag93)
@@ -29840,7 +29968,8 @@ __forceinline E93Q* CbLast93(E93Q* const& it)
     return b;
 }
 // @fnv 0x00b23c10
-E93Q* FUN_00b23c10(E93Q* F, E93Q* L, E93Q* D)
+// src: GUESS 0x00b23c10 (confidence: low)
+E93Q* Frondengine_EvaluateValue_00b23c10(E93Q* F, E93Q* L, E93Q* D)
 {
     return MbRand93(CheckedBase93(F), CbLast93(L), D, IterRandom93(F, D), PtrCat93(F, D), RcTag93());
 }
@@ -29871,7 +30000,8 @@ template <typename T> struct MyVector
 
 struct FinalizerGuidePoint : FrondGuidePoint
 {
-    inline float FUN_00b04d40(const FrondPoint& other) const
+// src: COMMUNITY 0x00b04d40
+    inline float CVec3_Distance(const FrondPoint& other) const
     {
         union FloatBits
         {
@@ -29944,17 +30074,18 @@ struct FrondGuideFinalizer
     int unk4c;
     MyVector<Field50Item> m_field50;
 
-    void FUN_00b18b70(float a1);
+    void CFrondEngine_EndGuide(float a1);
 };
 
 // @fnv 0x00b18b70
-void FrondGuideFinalizer::FUN_00b18b70(float a1)
+// src: COMMUNITY 0x00b18b70
+void FrondGuideFinalizer::CFrondEngine_EndGuide(float a1)
 {
     MyFrondGuide* guide = &m_guides[m_guides.size() - 1];
     unsigned int i;
     for (i = 0; i < guide->m_kPoints.size() - 1; ++i)
     {
-        guide->f18 += guide->m_kPoints[i].FUN_00b04d40(guide->m_kPoints[i + 1]);
+        guide->f18 += guide->m_kPoints[i].CVec3_Distance(guide->m_kPoints[i + 1]);
     }
     FUN_00b3f100 rng;
     if (m_field50.size() == 0)
@@ -30061,7 +30192,8 @@ struct FUN_0065dc90 : dtorb181::GvContainer
         _Alaux.deallocate(_Myownedaux, 1);
     }
 };
-inline int* __cdecl FUN_00b24960(dtorb181::GvConstIterator<int> _First, dtorb181::GvConstIterator<int> _Last,
+// src: GUESS 0x00b24960 (confidence: low)
+inline int* __cdecl Object_ProcessAndReturnValue_00b24960(dtorb181::GvConstIterator<int> _First, dtorb181::GvConstIterator<int> _Last,
                                  int* _Dest, ValueAllocator<int>& _Al)
 {
     return dtorb181::GvUninitCopy(dtorb181::GvCheckedBase(_First), dtorb181::GvCheckedBase(_Last), _Dest, _Al,
@@ -30087,7 +30219,8 @@ struct VectorOperations : FUN_0065dc90
     {
         throw dtorb181::BxLengthError("vector<T> too long");
     }
-    bool FUN_0044a240(unsigned int _Capacity)
+// src: GUESS 0x0044a240 (confidence: medium)
+    bool InitializeElementStorage(unsigned int _Capacity)
     {
         _Myfirst = 0, _Mylast = 0, _Myend = 0;
         if (_Capacity == 0)
@@ -30116,7 +30249,7 @@ struct VectorOperations : FUN_0065dc90
     }
     template <class I> int* _Ucopy(I _First, I _Last, int* _Ptr)
     {
-        return FUN_00b24960(_First, _Last, _Ptr, _Alval);
+        return Object_ProcessAndReturnValue_00b24960(_First, _Last, _Ptr, _Alval);
     }
     void _Destroy(int* _First, int* _Last)
     {
@@ -30139,7 +30272,7 @@ struct FUN_00b22ff0 : VectorOperations
 // @fnv 0x00b22ff0
 FUN_00b22ff0::FUN_00b22ff0(const FUN_00b22ff0& _Right) : VectorOperations(_Right._Alval)
 {
-    if (FUN_0044a240(_Right.size()))
+    if (InitializeElementStorage(_Right.size()))
         try
         {
             _Mylast = _Ucopy(_Right.begin(), _Right.end(), _Myfirst);
@@ -30163,7 +30296,7 @@ inline IdvFileError::IdvFileError(const std::string& message, bool systemError)
     : std::runtime_error(message + " [" +
                          (systemError ? std::string(GetErrorText(*GetErrorNumber())) : std::string("")) + "]")
 {}
-FUN_0044a4c0 __cdecl FUN_00b18860(const char*, ...);
+FUN_0044a4c0 __cdecl IdvFormatString(const char*, ...);
 struct FrondGuide;
 template <class T> struct FrondVector
 {
@@ -30200,8 +30333,8 @@ struct FrondGuide
 };
 struct FrondGeometry
 {
-    void FUN_00b2fb30(unsigned short);
-    void FUN_00b306d0(unsigned short);
+    void CIndexedGeometry_SetNumLodLevels(unsigned short);
+    void CIndexedGeometry_ResetStripCounter(unsigned short);
 };
 struct FrondEngine
 {
@@ -30215,22 +30348,23 @@ struct FrondEngine
     int extrusionCount;
     int state48, state4c, state50, state54, state58, state5c, state60, state64;
     unsigned short geometryType;
-    void FUN_00b1c850();
-    void FUN_00b19ad0(FrondGuide&);
-    void FUN_00b1aed0(unsigned short, int, FrondGuide&);
-    void FUN_00b1b000(FrondGuide&);
-    void FUN_00b1b960(unsigned short, int, FrondGuide&);
-    void FUN_00b18fd0(FrondGeometry*, void*);
+    void CFrondEngine_BuildGuideLods();
+    void ProcessEntries_00b19ad0(FrondGuide&);
+    void AllocateStorage_00b1aed0(unsigned short, int, FrondGuide&);
+    void ProcessEntries_00b1b000(FrondGuide&);
+    void ProcessEntries_00b1b960(unsigned short, int, FrondGuide&);
+    void CFrondEngine_Compute(FrondGeometry*, void*);
 };
 static const char vertexLimitMessage[] = "frond vertices exceed %d";
 static const char invalidModeMessage[] = "default reached in CFrondEngine::Compute()";
 // @fnv 0x00b18fd0
-void FrondEngine::FUN_00b18fd0(FrondGeometry* output, void* context)
+// src: EXE 0x00b18fd0
+void FrondEngine::CFrondEngine_Compute(FrondGeometry* output, void* context)
 {
     geometry = output;
     auxiliary = context;
     int vertexCount = 0;
-    FUN_00b1c850();
+    CFrondEngine_BuildGuideLods();
     for (unsigned i = 0; i < guides[0].size(); ++i)
     {
         switch (mode)
@@ -30248,21 +30382,21 @@ void FrondEngine::FUN_00b18fd0(FrondGeometry* output, void* context)
         }
     }
     if (vertexCount > 65535)
-        throw std::runtime_error(*(const std::string*)&FUN_00b18860(vertexLimitMessage, 65535));
-    geometry->FUN_00b2fb30(geometryType);
+        throw std::runtime_error(*(const std::string*)&IdvFormatString(vertexLimitMessage, 65535));
+    geometry->CIndexedGeometry_SetNumLodLevels(geometryType);
     switch (mode)
     {
     case 0: {
         for (unsigned i = 0; i < guides[0].size(); ++i)
         {
-            FUN_00b19ad0(guides[0][i]);
+            ProcessEntries_00b19ad0(guides[0][i]);
         }
         for (unsigned short level = 0; level < guides.size(); ++level)
         {
-            geometry->FUN_00b306d0(level);
+            geometry->CIndexedGeometry_ResetStripCounter(level);
             for (unsigned j = 0; j < guides[level].size(); ++j)
             {
-                FUN_00b1aed0(level, guides[0][j].i30, guides[level][j]);
+                AllocateStorage_00b1aed0(level, guides[0][j].i30, guides[level][j]);
             }
         }
         break;
@@ -30270,15 +30404,15 @@ void FrondEngine::FUN_00b18fd0(FrondGeometry* output, void* context)
     case 1: {
         for (unsigned i = 0; i < guides[0].size(); ++i)
         {
-            FUN_00b1b000(guides[0][i]);
+            ProcessEntries_00b1b000(guides[0][i]);
         }
         for (unsigned short level = 0; level < guides.size(); ++level)
         {
-            geometry->FUN_00b306d0(level);
+            geometry->CIndexedGeometry_ResetStripCounter(level);
             for (unsigned j = 0; j < guides[level].size(); ++j)
             {
                 guides[level][j].i34 = guides[0][j].i34;
-                FUN_00b1b960(level, guides[0][j].i30, guides[level][j]);
+                ProcessEntries_00b1b960(level, guides[0][j].i30, guides[level][j]);
             }
         }
         break;

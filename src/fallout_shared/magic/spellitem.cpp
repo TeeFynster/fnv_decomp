@@ -99,19 +99,20 @@ class E600SoundSource
 {
   public:
     virtual void Unk_00();
-    virtual E600Sound* FUN_0040e600();
+    virtual E600Sound* SpellItem_GetLevel();
     virtual float GetValue(int iIndex);
 };
 
 class E600TopicInfo : public E600Info, public E600SoundSource
 {
   public:
-    virtual E600Sound* FUN_0040e600();
+    virtual E600Sound* SpellItem_GetLevel();
 };
 
 // Returns the speaker sound if flag 1 is set, otherwise picks a sound from the value at index 0.
 // @fnv 0x0040e600
-E600Sound* E600TopicInfo::FUN_0040e600()
+// src: COMMUNITY 0x0040e600
+E600Sound* E600TopicInfo::SpellItem_GetLevel()
 {
     if (HasFlag(1))
         return GetSpeaker();
@@ -134,7 +135,7 @@ struct MagicBase
     virtual void s4();
     virtual void s5();
     virtual int s6();
-    virtual bool FUN_0040e3c0(MagicItem* p);
+    virtual bool SpellItem_CompareMagicItemData(MagicItem* p);
     int unk04;
     int unk08;
     int unk0C;
@@ -149,7 +150,8 @@ struct MagicBase
 // Returns true if the other spell is absent or differs in type, cost, level or flags.
 // RTTI returns the containing spell; this points to its secondary interface at offset 0x18.
 // @fnv 0x0040e3c0
-bool MagicItem::FUN_0040e3c0(MagicItem* apItem)
+// src: COMMUNITY 0x0040e3c0
+bool MagicItem::SpellItem_CompareMagicItemData(MagicItem* apItem)
 {
     MagicItem* a = reinterpret_cast<MagicItem*>(dynamic_cast<SpellItem*>(apItem));
     if (a == 0)
@@ -166,11 +168,11 @@ bool MagicItem::FUN_0040e3c0(MagicItem* apItem)
     return false;
 }
 
-bool FUN_00401500();
+bool TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(int iValue, void* pData, int iSize);
 struct SubE360
 {
-    void FUN_005a6b10();
+    void TESRegionSound_Endian();
 };
 struct PadE360
 {
@@ -188,7 +190,7 @@ struct IfaceE360
     virtual void v07();
     virtual void v08();
     virtual int GetValue();
-    virtual void FUN_0040e360();
+    virtual void EnchantmentItem_Endian();
 };
 struct ObjE360 : PadE360, IfaceE360
 {
@@ -199,16 +201,17 @@ struct ObjE360 : PadE360, IfaceE360
     int unk18;
     int unk1c;
     SubE360 m_sub;
-    virtual void FUN_0040e360();
+    virtual void EnchantmentItem_Endian();
 };
 // @fnv 0x0040e360
-void ObjE360::FUN_0040e360()
+// src: COMMUNITY 0x0040e360
+void ObjE360::EnchantmentItem_Endian()
 {
-    if (FUN_00401500())
-        m_sub.FUN_005a6b10();
+    if (TESForm_QEndianSwapOnSave())
+        m_sub.TESRegionSound_Endian();
     AppendChunk(GetValue(), &m_sub, 0x10);
-    if (FUN_00401500())
-        m_sub.FUN_005a6b10();
+    if (TESForm_QEndianSwapOnSave())
+        m_sub.TESRegionSound_Endian();
 }
 
 struct MagicEffectKind
@@ -224,12 +227,13 @@ struct MagicEffectKind
 float __cdecl ScaleBySettingBlend(float cost, int value, int adjustment);
 struct FUN_0040e520_shell
 {
-    int FUN_004065e0();
+    int EffectItemList_GetAssociatedSkill();
     float GetTotalCost(Actor* caster);
-    float FUN_0040e520(Actor* caster);
+    float SpellItem_GetCost(Actor* caster);
 };
 // @fnv 0x0040e520
-float FUN_0040e520_shell::FUN_0040e520(Actor* caster)
+// src: COMMUNITY 0x0040e520
+float FUN_0040e520_shell::SpellItem_GetCost(Actor* caster)
 {
     float cost = 0.0f;
     Actor* effectiveCaster = (((MagicEffectKind*)((char*)this - 12))->GetType() == 2 ||
@@ -242,7 +246,7 @@ float FUN_0040e520_shell::FUN_0040e520(Actor* caster)
         if (effectiveCaster)
         {
             cost =
-                ScaleBySettingBlend(cost, ((ActorValues*)((char*)effectiveCaster + 0xa4))->FUN_0066ef20(FUN_004065e0()),
+                ScaleBySettingBlend(cost, ((ActorValues*)((char*)effectiveCaster + 0xa4))->FUN_0066ef20(EffectItemList_GetAssociatedSkill()),
                                     ((ActorValues*)((char*)effectiveCaster + 0xa4))->FUN_0066ef20(11));
         }
     }
@@ -274,16 +278,17 @@ struct CopyPart40E
     int unk20;
     int unk24;
     unsigned char flags;
-    virtual void FUN_0040e470(MagicItem* input);
+    virtual void SpellItem_CopyMagicItemData(MagicItem* input);
 };
 struct CopyOwner40E : TESForm, CopyPart40E
 {
     void FUN_008d7dc0(int value);
-    virtual void FUN_0040e470(MagicItem* input);
+    virtual void SpellItem_CopyMagicItemData(MagicItem* input);
 };
 // Passes source values to setters, assigns the value returned by GetSpeaker, and copies the source flags.
 // @fnv 0x0040e470
-void CopyOwner40E::FUN_0040e470(MagicItem* apSource)
+// src: COMMUNITY 0x0040e470
+void CopyOwner40E::SpellItem_CopyMagicItemData(MagicItem* apSource)
 {
     SpellItem* source = static_cast<SpellItem*>(_FNV_DynamicCast(apSource, 0, &DAT_01183140, &DAT_01183060, 0));
     if (source == 0)

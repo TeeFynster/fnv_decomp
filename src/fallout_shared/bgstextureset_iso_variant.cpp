@@ -119,8 +119,8 @@ struct ArchiveManager
     static BSFileEntry* FindFileEntry(ARCHIVE_TYPE_INDEX, FileNameHash&, FileNameHash&, const char*);
 };
 
-void FUN_00593210();
-BGSTextureSet* __cdecl FUN_00593220();
+void BGSTextureSet_ClearNullTextureSet();
+BGSTextureSet* __cdecl BGSTextureSet_GetNullTextureSet();
 void __cdecl _Deallocate(void*);
 struct S591140
 {
@@ -145,13 +145,13 @@ struct FUN_00485680
 };
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
-void __cdecl FUN_00485950(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_00485950(unsigned int, unsigned int);
 extern unsigned int DAT_0118c574[6];
 struct FUN_005e79a0_t : public TESForm
 {
-    bool FUN_00485270(TESForm*);
+    bool TESForm_CompareAllComponents(TESForm*);
 };
 struct FUN_005932e0_shell
 {
@@ -195,11 +195,12 @@ struct Owner
     ValueList m_kList3;
     ValueList m_kList4;
 
-    void FUN_00593030(unsigned int uiType, int iValue);
+    void BGSTextureSet_SetTexturePath(unsigned int uiType, int iValue);
 };
 
 // @fnv 0x00593030
-void Owner::FUN_00593030(unsigned int uiType, int iValue)
+// src: COMMUNITY 0x00593030
+void Owner::BGSTextureSet_SetTexturePath(unsigned int uiType, int iValue)
 {
     switch (uiType)
     {

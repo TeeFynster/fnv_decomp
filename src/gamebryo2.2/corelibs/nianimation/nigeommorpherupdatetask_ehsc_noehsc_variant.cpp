@@ -20,7 +20,7 @@ extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 struct FreeStore
 {
-    void FUN_00a56e60(int);
+    void ProcessEntries_00a56e60(int);
 };
 NiGeomMorpherUpdateTask* __cdecl PopMorpherUpdateTask();
 extern unsigned char DAT_011f5b08;
@@ -74,7 +74,7 @@ extern int(__stdcall* DAT_00fdf1c4)(void*);
 extern int DAT_01069674;
 extern int(__stdcall* DAT_00fdf1c0)(void*);
 extern "C" void __cdecl FUN_00aa1460(void* apMemory, unsigned int aiSize);
-extern "C" void __cdecl FUN_00aa1490(void* apMemory, unsigned int aiSize);
+extern "C" void __cdecl NiMemObject_ReleaseStorage_00aa1490(void* apMemory, unsigned int aiSize);
 class A56DF0Heap
 {
   public:
@@ -118,9 +118,9 @@ extern MemoryManager g_memoryManager;
 class FUN_00a5e3a0_Helper
 {
   public:
-    void* FUN_00aa3e40(unsigned int uiSize);
+    void* Game_DoHeapAlloc(unsigned int uiSize);
 };
-NiGeomMorpherUpdateTask* __cdecl FUN_00a56ce0(unsigned int ItemUpdateArray) throw();
+NiGeomMorpherUpdateTask* __cdecl NiGeomMorpherUpdateTask_ConstructObject(unsigned int ItemUpdateArray) throw();
 struct TaskBlock
 {
     NiGeomMorpherUpdateTask* m_pkTasks;
@@ -130,7 +130,7 @@ struct TaskBlock
     TaskBlock(unsigned int ItemUpdateArray) : m_uiCount(ItemUpdateArray), m_pkNext(0)
     {
         if (ItemUpdateArray > 0)
-            m_pkTasks = FUN_00a56ce0(ItemUpdateArray);
+            m_pkTasks = NiGeomMorpherUpdateTask_ConstructObject(ItemUpdateArray);
         else
             m_pkTasks = 0;
     }
@@ -141,14 +141,14 @@ struct TaskBlock
 
     static void* operator new(unsigned int uiSize)
     {
-        return ((FUN_00a5e3a0_Helper*)&g_memoryManager)->FUN_00aa3e40(uiSize);
+        return ((FUN_00a5e3a0_Helper*)&g_memoryManager)->Game_DoHeapAlloc(uiSize);
     }
     static void operator delete(void*, int, int);
 };
 
 struct S_00a56ce0_HeapX
 {
-    void* FUN_00aa3e40(unsigned int n);
+    void* Game_DoHeapAlloc(unsigned int n);
 };
 extern S_00a56ce0_HeapX DAT_011f6238;
 extern "C" void* __cdecl FUN_00aa1420(unsigned int n);
@@ -157,12 +157,13 @@ extern "C" void* __cdecl FUN_00aa1420(unsigned int n);
 inline void* operator new[](size_t size, unsigned int count)
 {
     if (count == 0)
-        return DAT_011f6238.FUN_00aa3e40(4);
+        return DAT_011f6238.Game_DoHeapAlloc(4);
     return FUN_00aa1420(size);
 }
 
 // @fnv 0x00a56ce0
-NiGeomMorpherUpdateTask* __cdecl FUN_00a56ce0(unsigned int ItemUpdateArray) throw()
+// src: GUESS 0x00a56ce0 (confidence: medium)
+NiGeomMorpherUpdateTask* __cdecl NiGeomMorpherUpdateTask_ConstructObject(unsigned int ItemUpdateArray) throw()
 {
     return ::new (ItemUpdateArray) NiGeomMorpherUpdateTask[ItemUpdateArray];
 }

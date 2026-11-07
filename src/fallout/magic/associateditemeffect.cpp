@@ -44,8 +44,8 @@ void AssociatedItemEffect::SaveGame(Actor* apActor)
     ActiveEffect::SaveGame(apActor);
     unsigned int iformID = 0;
     if (m_pAssociatedForm)
-        iformID = m_pAssociatedForm->FUN_0084e3a0();
-    g_TESSaveLoadGame->FUN_00857a10(&iformID, 4u);
+        iformID = m_pAssociatedForm->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(&iformID, 4u);
 }
 
 // Allocates a new effect from this object's caster, spell and effect item, copies its data, and returns it.

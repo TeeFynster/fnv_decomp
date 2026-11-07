@@ -63,10 +63,11 @@ struct PatrolLoadShell
     bool bFlag2C;
     int unk30;
     int unk34;
-    void FUN_009f34e0(BGSLoadFormBuffer* apBuffer);
+    void PatrolActorPackageData_LoadGame(BGSLoadFormBuffer* apBuffer);
 };
 // @fnv 0x009f34e0
-void PatrolLoadShell::FUN_009f34e0(BGSLoadFormBuffer* apBuffer)
+// src: XBOX_PDB 0x009f34e0
+void PatrolLoadShell::PatrolActorPackageData_LoadGame(BGSLoadFormBuffer* apBuffer)
 {
     apBuffer->ReadDataBlock(&iState, 4);
     iState = (iState >= 0 && iState <= 2) ? iState : 0;
@@ -89,7 +90,7 @@ struct ExtraHolder;
 
 struct ExtraHolder
 {
-    void FUN_0042f300(struct PatrolActor* actor);
+    void ExtraDataList_SetPatrolRefInUse(struct PatrolActor* actor);
 };
 struct PatrolActor
 {
@@ -252,11 +253,12 @@ struct PatrolData9f3610
 
     bool SetPatrolRefIndex(unsigned int);
     void SelectClosestPatrolPoint(void*);
-    void FUN_009f3610(BGSLoadFormBuffer* apBuf);
+    void PatrolActorPackageData_InitLoadGame(BGSLoadFormBuffer* apBuf);
 };
 
 // @fnv 0x009f3610
-void PatrolData9f3610::FUN_009f3610(BGSLoadFormBuffer* apBuf)
+// src: XBOX_PDB 0x009f3610
+void PatrolData9f3610::PatrolActorPackageData_InitLoadGame(BGSLoadFormBuffer* apBuf)
 {
     bool bAnyRemoved = false;
     unsigned int ItemUpdateArray = kRefs.GetSize();
@@ -269,7 +271,7 @@ void PatrolData9f3610::FUN_009f3610(BGSLoadFormBuffer* apBuf)
                  : 0;
         if (rRef)
         {
-            rRef->FUN_00564db0(true);
+            rRef->TESObjectREFR_SetTargeted(true);
         }
         else
         {
@@ -298,10 +300,10 @@ void PatrolData9f3610::FUN_009f3610(BGSLoadFormBuffer* apBuf)
         if (!kRefs.IsEmpty() && bRepeat)
         {
             TESObjectREFR* pRef = kRefs.GetAt(uiIndex);
-            ExtraHolder* pExtraList = pRef ? reinterpret_cast<ExtraHolder*>(pRef->FUN_005d43c0()) : 0;
+            ExtraHolder* pExtraList = pRef ? reinterpret_cast<ExtraHolder*>(pRef->BSFile_GetDevice()) : 0;
             if (pExtraList)
             {
-                pExtraList->FUN_0042f300(pActor);
+                pExtraList->ExtraDataList_SetPatrolRefInUse(pActor);
             }
         }
     }

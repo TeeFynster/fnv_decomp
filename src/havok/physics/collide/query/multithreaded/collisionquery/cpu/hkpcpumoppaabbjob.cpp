@@ -75,7 +75,7 @@ struct S_00df7010_Router
     }
 };
 
-S_00df7010_Router* FUN_00c85750() throw();
+S_00df7010_Router* hkMemoryRouter_getInstance() throw();
 void ResizeAudioStream(S_00df7010_Allocator& alloc, void* array, int sizeElem) throw();
 
 static __forceinline void S_00df7010_HitArray_destroy(hkArrayBase<unsigned int>& self) throw();
@@ -88,7 +88,7 @@ static __forceinline void S_00df7010_HitArray_AddBack(hkArrayBase<unsigned int>&
 
 static __forceinline void S_00df7010_HitArray_destroy(hkArrayBase<unsigned int>& self) throw()
 {
-        S_00df7010_HitArray__clearAndDeallocate(self, FUN_00c85750()->heap());
+        S_00df7010_HitArray__clearAndDeallocate(self, hkMemoryRouter_getInstance()->heap());
     }
 
 static __forceinline void S_00df7010_HitArray__clearAndDeallocate(hkArrayBase<unsigned int>& self, S_00df7010_Allocator& alloc)
@@ -110,7 +110,7 @@ static __forceinline void S_00df7010_HitArray__pushBack(hkArrayBase<unsigned int
 
 static __forceinline void S_00df7010_HitArray_AddBack(hkArrayBase<unsigned int>& self, const unsigned int& e)
 {
-        S_00df7010_HitArray__pushBack(self, FUN_00c85750()->heap(), e);
+        S_00df7010_HitArray__pushBack(self, hkMemoryRouter_getInstance()->heap(), e);
     }
 
 struct S_00df7010_HitArrayPolicy
@@ -198,7 +198,7 @@ struct S_00df7010_VirtualMachine
     int unk34;
     int unk38;
     int unk3C;
-    void FUN_00dd1da0(const S_00df7010_MoppCode* code, const S_00df7010_Aabb& aabb, hkArray<unsigned int, S_00df7010_HitArrayPolicy>* hits) throw();
+    void hkpMoppObbVirtualMachine_queryAabb(const S_00df7010_MoppCode* code, const S_00df7010_Aabb& aabb, hkArray<unsigned int, S_00df7010_HitArrayPolicy>* hits) throw();
 };
 
 struct S_00df7010_Output
@@ -224,7 +224,7 @@ void __cdecl ExecuteMoppAabbQuery(S_00df7010_Output* out, const S_00df7010_Input
         S_00df7010_Query& query = input->m_queries[i];
         hkArray<unsigned int, S_00df7010_HitArrayPolicy> hits(query.m_pResultBuffer, 0, 0x1000);
         S_00df7010_VirtualMachine vm;
-        vm.FUN_00dd1da0(code, query.m_kBounds, &hits);
+        vm.hkpMoppObbVirtualMachine_queryAabb(code, query.m_kBounds, &hits);
         S_00df7010_HitArray_AddBack(hits, 0xffffffff);
     }
 

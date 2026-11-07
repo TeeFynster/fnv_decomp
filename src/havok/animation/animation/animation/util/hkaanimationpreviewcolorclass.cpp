@@ -16,22 +16,22 @@ struct Holder
     unsigned int unk0c;
     Allocator* allocator;
 };
-Holder* FUN_00c85750();
+Holder* hkMemoryRouter_getInstance();
 struct hkaAnimationPreviewColorContainer
 {
     unsigned int unk00;
     unsigned short allocationSize;
     hkaAnimationPreviewColorContainer* Destroy(unsigned int flags);
-    void FUN_00e41e20();
+    void ReleaseOwnedArray();
 };
 // Calls FUN_00e41e20, and if flags has bit 0 set, frees this through the allocator from FUN_00c85750 using allocationSize; returns this.
 // @fnv 0x00dfe6b0
 hkaAnimationPreviewColorContainer* hkaAnimationPreviewColorContainer::Destroy(unsigned int flags)
 {
-    FUN_00e41e20();
+    ReleaseOwnedArray();
     if (flags & 1)
     {
-        Holder* holder = FUN_00c85750();
+        Holder* holder = hkMemoryRouter_getInstance();
         Allocator* allocator = holder->allocator;
         unsigned short size = allocationSize;
         allocator->Free(this, size);

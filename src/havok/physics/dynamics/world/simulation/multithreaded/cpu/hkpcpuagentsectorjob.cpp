@@ -18,11 +18,12 @@ void __thiscall FUN_00d93330::UpdateConstraint(int v)
 }
 
 struct FUN_00d93340_StandIn {
-    void FUN_00d93340(int);
+    void hkpDeferredConstraintOwner_removeConstraintFromCriticalLockedIsland(int);
 };
 
 // @fnv 0x00d93340
-void __thiscall FUN_00d93340_StandIn::FUN_00d93340(int a)
+// src: HAVOK_LIB 0x00d93340
+void __thiscall FUN_00d93340_StandIn::hkpDeferredConstraintOwner_removeConstraintFromCriticalLockedIsland(int a)
 {
     *(int*)((char*)this + 0x18) = *(int*)((char*)this + 0x18) - 1;
     *(int*)((char*)this + 0x1c) = a;
@@ -107,7 +108,7 @@ struct PhysicsCommand { union { int type; char code; }; int object, value, extra
 struct CommandBuffer {
     int offset, size, capacity, field0c;
     PhysicsCommand commands[16];
-    void FUN_00d93310();
+    void hkpFixedSizePhysicsCommandQueue_256_hkpFixedSizePhysicsCommandQueue_256();
     PhysicsCommand *end() { return (PhysicsCommand *)((char *)this + offset + size); }
 };
 extern int DAT_010d3df8, DAT_0102e388;
@@ -189,7 +190,7 @@ struct Job {
 };
 struct World {
     void EnterLock(Island *);
-    void FUN_00c91210(Island *);
+    void hkpWorld_unlockIslandForConstraintUpdate(Island *);
 };
 struct Quality { int field00, field04, field08, field0c; int createPredictive; int field14, field18, field1c, field20, field24, field28, field2c, field30, field34, field38, field3c; };
 struct Dispatcher {
@@ -238,11 +239,11 @@ __forceinline void profile(const char *name, unsigned long tlsIndex) {
         m->end = p + 1;
     }
 }
-void FUN_00cfedd0(Entry *, Context *, Output *, CollisionManager *);
-void FUN_00df25f0(World *, void *, int);
+void hkAgentNnMachine_ProcessAgent(Entry *, Context *, Output *, CollisionManager *);
+void hkPhysicsCommandMachineProcess(World *, void *, int);
 struct Allocator { virtual void v0(); virtual void v1(); virtual void release(void *, int); };
 struct Memory { int field00, field04, field08, field0c; Allocator *allocator; };
-Memory *FUN_00c85750();
+Memory *hkMemoryRouter_getInstance();
 __forceinline Quality *qualityAt(Context &c, int index) { return ((Dispatcher *)c.dispatcher)->qualities + index; }
 __forceinline void storeResults(Statistics *s, Owner &owner) {
     s->maximum = owner.maximum; s->added = owner.added; s->removed = owner.removed; s->changed = owner.changed;
@@ -255,7 +256,8 @@ __forceinline void storeResults(Statistics *s, Owner &owner) {
     }
 }
 // @fnv 0x00d93380
-int FUN_00d93380(Globals *globals, Queue *queue, Job *job) {
+// src: COMMUNITY 0x00d93380
+int hkCpuAgentSectorJob(Globals *globals, Queue *queue, Job *job) {
     union WorkSlot { Island *savedIsland; int i; }; WorkSlot work;
     // The job initializes this context in place without constructing its time vector.
     __declspec(align(16)) void *contextStorage[sizeof(Context) / sizeof(void *)];
@@ -267,7 +269,7 @@ int FUN_00d93380(Globals *globals, Queue *queue, Job *job) {
     Owner owner;
     owner.references = 1;
     owner.dispatch = &DAT_010d3df8;
-    owner.commands.FUN_00d93310();
+    owner.commands.hkpFixedSizePhysicsCommandQueue_256_hkpFixedSizePhysicsCommandQueue_256();
     Output output;
     output.toi.time = 3.402820018375656e38f;
     output.toi.rotation = output.toi.velocity = 0.0f;
@@ -295,7 +297,7 @@ int FUN_00d93380(Globals *globals, Queue *queue, Job *job) {
             context.field14 = ((Quality *)context.quality)->createPredictive;
             output.toi.time = 3.402820018375656e38f;
             output.end = output.contacts; output.count = 0;
-            FUN_00cfedd0(current, &context, &output, current->manager);
+            hkAgentNnMachine_ProcessAgent(current, &context, &output, current->manager);
             if (output.end != output.contacts) current->manager->process(bodyA, bodyB, &context, &output);
             if (output.toi.time != 3.402820018375656e38) physics->AddToiEvent(&output, current, &physics->toiQueue);
             owner.flush();
@@ -323,8 +325,8 @@ int FUN_00d93380(Globals *globals, Queue *queue, Job *job) {
                 globals->world->EnterLock(island);
                 island->maximum = island->maximum > owner.maximum ? island->maximum : owner.maximum;
                 island->added += owner.added; island->removed += owner.removed; island->changed += owner.changed;
-                if (owner.commands.size) FUN_00df25f0(globals->world, (char *)&owner.commands + owner.commands.offset, owner.commands.size);
-                globals->world->FUN_00c91210(island);
+                if (owner.commands.size) hkPhysicsCommandMachineProcess(globals->world, (char *)&owner.commands + owner.commands.offset, owner.commands.size);
+                globals->world->hkpWorld_unlockIslandForConstraintUpdate(island);
             }
         } else storeResults(job->batch->results[job->index], owner);
         }
@@ -343,7 +345,7 @@ int FUN_00d93380(Globals *globals, Queue *queue, Job *job) {
             }
             output.toi.time = 3.402820018375656e38f;
             output.end = output.contacts; output.count = 0;
-            FUN_00cfedd0(entry, &context, &output, entry->manager);
+            hkAgentNnMachine_ProcessAgent(entry, &context, &output, entry->manager);
             if (output.end != output.contacts) entry->manager->process(entry->bodyA, entry->bodyB, &context, &output);
             if (output.toi.time != 3.402820018375656e38) globals->physics->AddToiEvent(&output, entry, &globals->physics->toiQueue);
             owner.flush();
@@ -354,6 +356,6 @@ int FUN_00d93380(Globals *globals, Queue *queue, Job *job) {
     }
     int result = queue->ProcessCallback(job, job, 0);
     owner.dispatch = &DAT_0102e388;
-    if (context.allocation) { Memory *m = FUN_00c85750(); Allocator *a = m->allocator; a->release(context.allocation, 512); }
+    if (context.allocation) { Memory *m = hkMemoryRouter_getInstance(); Allocator *a = m->allocator; a->release(context.allocation, 512); }
     return result;
 }

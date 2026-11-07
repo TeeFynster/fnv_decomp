@@ -66,7 +66,7 @@ extern const char str_010cd380[];
 extern const char str_010cd378[];
 extern const char str_010cd36c[];
 extern const char str_01076f38[];
-extern void __cdecl FUN_00cb6f30(void*);
+extern void __cdecl hkpWorldOperationUtil_splitSimulationIslands(void*);
 struct TraceBuffer
 {
     int unk00;
@@ -93,12 +93,13 @@ struct FUN_00d0b280_cls
     int unk04;
     int unk08;
     float unk0c;
-    void FUN_00d0b280(float* first, float* second);
-    void FUN_00d0b3e0(float* first, float* second);
+    void hkpDefaultWorldMaintenanceMgr_performMaintenance(float* first, float* second);
+    void hkpDefaultWorldMaintenanceMgr_resetWorldTime(float* first, float* second);
 };
 // Writes trace entries, calls FUN_00cb6f30(first), and if *second >= unk0c calls FUN_00d0b3e0(first, second) between further trace entries.
 // @fnv 0x00d0b280
-void FUN_00d0b280_cls::FUN_00d0b280(float* first, float* second)
+// src: HAVOK_LIB 0x00d0b280
+void FUN_00d0b280_cls::hkpDefaultWorldMaintenanceMgr_performMaintenance(float* first, float* second)
 {
     TraceBuffer* buffer = (TraceBuffer*)TlsGetValue(DAT_0126835c);
     unsigned char* current = buffer->current;
@@ -113,7 +114,7 @@ void FUN_00d0b280_cls::FUN_00d0b280(float* first, float* second)
         current += 16;
         buffer->current = current;
     }
-    FUN_00cb6f30(first);
+    hkpWorldOperationUtil_splitSimulationIslands(first);
     if (*second >= unk0c)
     {
         buffer = (TraceBuffer*)TlsGetValue(DAT_0126835c);
@@ -128,7 +129,7 @@ void FUN_00d0b280_cls::FUN_00d0b280(float* first, float* second)
             current += 12;
             buffer->current = current;
         }
-        FUN_00d0b3e0(first, second);
+        hkpDefaultWorldMaintenanceMgr_resetWorldTime(first, second);
     }
     buffer = (TraceBuffer*)TlsGetValue(DAT_0126835c);
     current = buffer->current;
@@ -155,7 +156,7 @@ struct FUN_00d0b350_cls
     int unk04;
     int unk08;
     float unk0c;
-    void FUN_00d0b3e0(float* first, float* second);
+    void hkpDefaultWorldMaintenanceMgr_resetWorldTime(float* first, float* second);
     void TraceConditionalCall(float* first, float* second);
 };
 // Writes a trace entry, calls FUN_00d0b3e0(first, second) if *second >= unk0c, then writes a closing trace entry.
@@ -176,7 +177,7 @@ void FUN_00d0b350_cls::TraceConditionalCall(float* first, float* second)
         buffer->current = current;
     }
     if (*second >= unk0c)
-        FUN_00d0b3e0(first, second);
+        hkpDefaultWorldMaintenanceMgr_resetWorldTime(first, second);
     buffer = (TraceBuffer*)TlsGetValue(DAT_0126835c);
     current = buffer->current;
     if (current < buffer->end)
@@ -229,11 +230,12 @@ struct TimeRebaser
     int unk00;
     int unk04;
     float m_newTime;
-    void FUN_00d0b3e0(hkpWorld* world, hkStepInfo& stepInfo);
+    void hkpDefaultWorldMaintenanceMgr_resetWorldTime(hkpWorld* world, hkStepInfo& stepInfo);
 };
 
 // @fnv 0x00d0b3e0
-void TimeRebaser::FUN_00d0b3e0(hkpWorld* world, hkStepInfo& stepInfo)
+// src: HAVOK_LIB 0x00d0b3e0
+void TimeRebaser::hkpDefaultWorldMaintenanceMgr_resetWorldTime(hkpWorld* world, hkStepInfo& stepInfo)
 {
     float deltaTime = stepInfo.m_fEndTime - stepInfo.m_uiStartTime;
     hkStepInfo& si = WorldStepInfo(world);

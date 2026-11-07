@@ -4,18 +4,19 @@
 
 
 extern int DAT_0109cb9c;
-void __fastcall FUN_00a5a390(void* p);
+void __fastcall ReleaseStorage_00a5a390(void* p);
 
 struct FUN_00a6fae0_Class
 {
-    void __thiscall FUN_00a6fae0();
+    void __thiscall UpdateFields_00a6fae0();
 };
 
 // @fnv 0x00a6fae0
-void __thiscall FUN_00a6fae0_Class::FUN_00a6fae0()
+// src: GUESS 0x00a6fae0 (confidence: low)
+void __thiscall FUN_00a6fae0_Class::UpdateFields_00a6fae0()
 {
     *(int*)this = (int)&DAT_0109cb9c;
-    FUN_00a5a390(this);
+    ReleaseStorage_00a5a390(this);
 }
 
 // Lazily create the shader property for this geometry, picking the shader type by whether the geometry is skinned.
@@ -203,11 +204,12 @@ class B9F30Owner
     int unk148;
     B9F30Property* m_pkProperty;
 
-    B9F30Property* FUN_00b69f30(B9F30Geometry* pkGeometry);
+    B9F30Property* WaterShaderProperty_GetWaterPass(B9F30Geometry* pkGeometry);
 };
 
 // @fnv 0x00b69f30
-B9F30Property* B9F30Owner::FUN_00b69f30(B9F30Geometry* pkGeometry)
+// src: XBOX_PDB 0x00b69f30
+B9F30Property* B9F30Owner::WaterShaderProperty_GetWaterPass(B9F30Geometry* pkGeometry)
 {
     if (!m_pkProperty)
     {

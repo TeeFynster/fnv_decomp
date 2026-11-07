@@ -6,7 +6,7 @@
 #include "../../../include/MEDIATYPE.h"
 
 unsigned long GetCurrentThreadId();
-void FUN_00830490();
+void FalloutAudioMedia_MediaAccessLeave();
 
 extern char DAT_011dd310;
 extern char DAT_011dd311;
@@ -58,6 +58,6 @@ class FAMThread
 
 void EnsureArenaAllocated(void*);
 void RunAudioChannel(void*);
-void FUN_00c80240(void*);
+void DoThreadShutdown(void*);
 
 #endif

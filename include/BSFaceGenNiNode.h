@@ -27,10 +27,10 @@ class BSFaceGenNiNode : public NiNode
     void SetFixedNormals(bool abFixedNormals);
     void UpdateFaceGenAnimation(NiUpdateData* apUpdateData);
     void UpdateFaceGenAnimation(NiUpdateData& arUpdateData);
-    void FUN_00663050(bool abUpdate);
+    void BSFaceGenNiNode_UpdateAllChildrenMorphData(bool abUpdate);
 
-    void FUN_0045c570(unsigned int uiFlags);
-    void FUN_00c52020(float f, int a, void* b, int c);
+    void BSMultiBoundRoom_SetCullResult(unsigned int uiFlags);
+    void SceneGraph_SetCameraFOV(float f, int a, void* b, int c);
     void StopMoving(bool stop);
     void SetApplyRotToParent(int apply);
 

@@ -12,7 +12,7 @@
 
 struct FUN_00d65970_stub
 {
-    void FUN_00d65970(int);
+    void hkpShapeDisplayViewer_addWorld(int);
 };
 struct FUN_00d65f70_class
 {
@@ -24,16 +24,17 @@ struct FUN_00d65f70_class
     int m_14;
     int m_18;
     int m_1c;
-    void FUN_00d65f70();
+    void ProcessEntries_00d65f70();
 };
 // If m_1c is set, iterates its count at offset 0x70 and calls FUN_00d65970 on each entry from the array at 0x6c.
 // @fnv 0x00d65f70
-void FUN_00d65f70_class::FUN_00d65f70()
+// src: GUESS 0x00d65f70 (confidence: low)
+void FUN_00d65f70_class::ProcessEntries_00d65f70()
 {
     if (m_1c)
     {
         for (int i = 0; i < *(int*)(m_1c + 0x70); ++i)
-            ((FUN_00d65970_stub*)((char*)this - 8))->FUN_00d65970(*(*(int**)(m_1c + 0x6c) + i));
+            ((FUN_00d65970_stub*)((char*)this - 8))->hkpShapeDisplayViewer_addWorld(*(*(int**)(m_1c + 0x6c) + i));
     }
 }
 
@@ -131,11 +132,12 @@ struct FUN_00d653e0_cls
     int unk4c;
     int unk50;
     FUN_00cb1a60_t sub54;
-    void FUN_00d653e0();
+    void ResetEntries_Thunk();
 };
 
 // @fnv 0x00d653e0
-void FUN_00d653e0_cls::FUN_00d653e0()
+// src: GUESS 0x00d653e0 (confidence: medium)
+void FUN_00d653e0_cls::ResetEntries_Thunk()
 {
     sub54.ResetEntries();
 }
@@ -177,19 +179,20 @@ struct Allocator
     virtual void reserved();
     virtual void* allocate(unsigned int);
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00d657d0_class
 {
-    FUN_00d657d0_class* FUN_00d657d0(int);
+    FUN_00d657d0_class* hkpShapeDisplayViewer_hkpShapeDisplayViewer(int);
 };
 // Allocates a 0x74-byte object from the audio allocator, initializes it with context, and returns a pointer 8 bytes into it, or null on failure.
 // @fnv 0x00d65910
-void* __cdecl FUN_00d65910(void* context)
+// src: HAVOK_LIB 0x00d65910
+void* __cdecl hkpShapeDisplayViewer_create(void* context)
 {
-    hkMemoryRouter* audio = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* audio = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     FUN_00d657d0_class* result = (FUN_00d657d0_class*)audio->m_heap->blockAlloc(0x74);
     *(unsigned short*)((char*)result + 4) = 0x74;
-    result = result->FUN_00d657d0((int)context);
+    result = result->hkpShapeDisplayViewer_hkpShapeDisplayViewer((int)context);
     if (result)
         return (char*)result + 8;
     return 0;
@@ -198,35 +201,37 @@ void* __cdecl FUN_00d65910(void* context)
 struct GlobalObjectO2_00d472a0
 {
 };
-extern hkProcessFactory* FUN_00dd9380;
+extern hkProcessFactory* hkProcessFactory_registerProcess;
 extern GlobalObjectO2_00d472a0 g_01268f2c;
-extern void* __cdecl FUN_00d65910(void*);
+extern void* __cdecl hkpShapeDisplayViewer_create(void*);
 
 // @fnv 0x00d65950
 void RegisterShapesProcess()
 {
-    void* process = FUN_00dd9380->RegisterProcess("Shapes", (void*)&FUN_00d65910);
+    void* process = hkProcessFactory_registerProcess->RegisterProcess("Shapes", (void*)&hkpShapeDisplayViewer_create);
     *(void**)((char*)&g_01268f2c + 0xB4) = process;
 }
 
 struct Target
 {
-    void FUN_00d65970();
+    void hkpShapeDisplayViewer_addWorld();
 };
 struct Adjustor
 {
-    void FUN_00d65fb0();
+    void ForwardCall_00d65fb0();
 };
 // @fnv 0x00d65fb0
-void Adjustor::FUN_00d65fb0()
+// src: GUESS 0x00d65fb0 (confidence: low)
+void Adjustor::ForwardCall_00d65fb0()
 {
-    ((Target*)((char*)this - 0x20))->FUN_00d65970();
+    ((Target*)((char*)this - 0x20))->hkpShapeDisplayViewer_addWorld();
 }
 
 extern int g_D661D0Value;
 
 // @fnv 0x00d661d0
-int __cdecl FUN_00d661d0()
+// src: GUESS 0x00d661d0 (confidence: low)
+int __cdecl Hkpshapedisplayviewer_GetD661D0Value()
 {
     return g_D661D0Value;
 }
@@ -244,11 +249,12 @@ struct FUN_00d652a0_cls
     int m_10;
     int m_14;
     int m_18;
-    void FUN_00d652a0(int arg);
+    void hkpShapeDisplayViewer_synchronizeTransforms(int arg);
 };
 
 // @fnv 0x00d652a0
-void FUN_00d652a0_cls::FUN_00d652a0(int arg)
+// src: HAVOK_LIB 0x00d652a0
+void FUN_00d652a0_cls::hkpShapeDisplayViewer_synchronizeTransforms(int arg)
 {
     v10(m_18, arg);
 }
@@ -271,7 +277,7 @@ struct SpawnedBuf
     int unk08;
 
     void ProcessArgument(hkMemoryAllocator* apAlloc);
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 
 struct FUN_00d66080_cls
@@ -295,7 +301,7 @@ struct FUN_00d66080_cls
     SpawnedBuf m_buf48;
     SpawnedBuf m_buf54;
 
-    void FUN_00d65fc0(int aiIndex);
+    void hkpShapeDisplayViewer_removeWorld(int aiIndex);
     void FUN_00ddcc60();
     void Destroy();
 };
@@ -311,29 +317,29 @@ void FUN_00d66080_cls::Destroy()
 
     for (int i = m_iArrayLength - 1; i >= 0; --i)
     {
-        FUN_00d65fc0(i);
+        hkpShapeDisplayViewer_removeWorld(i);
     }
 
     {
         SpawnedBuf* pBuf = &m_buf54;
-        hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         pBuf->ProcessArgument(reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap));
-        pBuf->FUN_00a29680();
+        pBuf->Object_DoNothing();
     }
     {
         SpawnedBuf* pBuf = &m_buf48;
-        hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         pBuf->ProcessArgument(reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap));
-        pBuf->FUN_00a29680();
+        pBuf->Object_DoNothing();
     }
     {
         SpawnedBuf* pBuf = &m_buf3c;
-        hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         pBuf->ProcessArgument(reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap));
-        pBuf->FUN_00a29680();
+        pBuf->Object_DoNothing();
     }
 
-    hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uiFlags = m_uiObjectFlags;
     m_iArrayLength = 0;
@@ -357,7 +363,7 @@ void FUN_00d66080_cls::Destroy()
 struct OwnerObject
 {
     int FindItemIndex(int);
-    void FUN_00d65fc0(int);
+    void hkpShapeDisplayViewer_removeWorld(int);
 };
 
 struct FUN_00d66160_cls
@@ -370,18 +376,19 @@ struct FUN_00d66160_cls
     int m_14;
     int m_18;
     int m_1c;
-    void FUN_00d66160(int arg);
+    void UpdateFields_00d66160(int arg);
 };
 
 // Calls FindItemIndex on the owner object at this-0x20 and, if the result is non-negative, passes it to FUN_00d65fc0.
 // @fnv 0x00d66160
-void FUN_00d66160_cls::FUN_00d66160(int arg)
+// src: GUESS 0x00d66160 (confidence: low)
+void FUN_00d66160_cls::UpdateFields_00d66160(int arg)
 {
     OwnerObject* pOwner = (OwnerObject*)((char*)this - 0x20);
     int result = pOwner->FindItemIndex(arg);
     if (result >= 0)
     {
-        pOwner->FUN_00d65fc0(result);
+        pOwner->hkpShapeDisplayViewer_removeWorld(result);
     }
 }
 
@@ -484,8 +491,8 @@ struct SpawnOwner
     char** m_34;
     int m_38;
 
-    void FUN_00c93820(void* p);
-    void FUN_00c93920(void* p);
+    void hkpWorld_addEntityListener(void* p);
+    void hkpWorld_addWorldPostSimulationListener(void* p);
 };
 
 struct SpawnSublist
@@ -511,7 +518,7 @@ struct PendingNode
     }
     void* operator new(unsigned int size) throw()
     {
-        hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* holder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         Allocator* alloc = reinterpret_cast<Allocator*>(holder->m_heap);
         return alloc->allocate(size);
     }
@@ -539,11 +546,12 @@ struct FUN_00d64650_cls
     int m_2c;
     SpawnList m_30;
 
-    void FUN_00d64650(SpawnOwner* a1);
+    void hkpSweptTransformDisplayViewer_addWorld(SpawnOwner* a1);
 };
 
 // @fnv 0x00d64650
-void FUN_00d64650_cls::FUN_00d64650(SpawnOwner* apOwner)
+// src: HAVOK_LIB 0x00d64650
+void FUN_00d64650_cls::hkpSweptTransformDisplayViewer_addWorld(SpawnOwner* apOwner)
 {
     void* pSubA;
     if (this != 0)
@@ -554,7 +562,7 @@ void FUN_00d64650_cls::FUN_00d64650(SpawnOwner* apOwner)
     {
         pSubA = 0;
     }
-    apOwner->FUN_00c93820(pSubA);
+    apOwner->hkpWorld_addEntityListener(pSubA);
     void* pSubB;
     if (this != 0)
     {
@@ -564,13 +572,13 @@ void FUN_00d64650_cls::FUN_00d64650(SpawnOwner* apOwner)
     {
         pSubB = 0;
     }
-    apOwner->FUN_00c93920(pSubB);
+    apOwner->hkpWorld_addWorldPostSimulationListener(pSubB);
 
     PendingNode* node = new PendingNode();
     node->m_pSharedOwner = apOwner;
 
     SpawnList* list = &m_30;
-    hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* holder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     if (list->m_uiItemCount == (int)(list->m_capBits & 0x3fffffffu))
     {
         ResizeAudioStream(holder->m_heap, list, 4);
@@ -622,16 +630,17 @@ struct D65610Prim
 };
 struct D65610Sec
 {
-    virtual void FUN_00d65610(D66180Entity* e);
+    virtual void hkpShapeDisplayViewer_inactiveEntityMovedCallback(D66180Entity* e);
 };
 struct D65610Self : D65610Prim, D65610Sec
 {
-    void FUN_00d65610(D66180Entity* e);
+    void hkpShapeDisplayViewer_inactiveEntityMovedCallback(D66180Entity* e);
 };
 
 // Calls v10 on the stored object with the entity's offset 0xf0 pointer, the result of GetProperty1134(e), and DAT_01268fe0.
 // @fnv 0x00d65610
-void D65610Self::FUN_00d65610(D66180Entity* pEntity)
+// src: HAVOK_LIB 0x00d65610
+void D65610Self::hkpShapeDisplayViewer_inactiveEntityMovedCallback(D66180Entity* pEntity)
 {
     D65610Obj* obj = m_pEntryObject;
     char* p = (char*)pEntity;
@@ -650,7 +659,8 @@ static inline bool HasProperty(const S_00c6d840* props, int key)
 
 // Returns the value of the first present entry among 0x1234 (if checkOverride), 0x1235 and 0x1135; sets *usedDefault and returns 0 if that value is 0.
 // @fnv 0x00d652c0
-static int FUN_00d652c0(S_00c6d840* props, bool checkOverride, bool* usedDefault)
+// src: HAVOK_LIB 0x00d652c0
+static int _getProxyShape(S_00c6d840* props, bool checkOverride, bool* usedDefault)
 {
     int base = props->FindEntry(0x1135, 0).m_kPointA;
     int level = props->FindEntry(0x1235, 0).m_kPointA;
@@ -689,7 +699,7 @@ static int FUN_00d652c0(S_00c6d840* props, bool checkOverride, bool* usedDefault
 
 int PropertyQueryCaller(S_00c6d840* props, bool checkOverride, bool* usedDefault)
 {
-    return FUN_00d652c0(props, checkOverride, usedDefault);
+    return _getProxyShape(props, checkOverride, usedDefault);
 }
 
 struct ShapeList
@@ -727,8 +737,8 @@ extern float DAT_01012054;
 extern int DAT_01268fe8;
 extern int DAT_01268fe4;
 
-void* __cdecl FUN_00c85750();
-int __cdecl FUN_00cb0fa0(const char* name, void* obj);
+void* __cdecl hkMemoryRouter_getInstance();
+int __cdecl hkString_strCmp(const char* name, void* obj);
 
 struct FUN_00d657d0_cls
 {
@@ -762,12 +772,13 @@ struct FUN_00d657d0_cls
     int m_70;
 
     void FUN_00ddccb0(ShapeList* a1);
-    FUN_00d657d0_cls* FUN_00d657d0(ShapeList* a1);
+    FUN_00d657d0_cls* hkpShapeDisplayViewer_hkpShapeDisplayViewer(ShapeList* a1);
 };
 
 // Initializes vtables, ShapeSub members, and flags, then searches a1 for a ShapeDisplayViewerOptions item to set m_60.
 // @fnv 0x00d657d0
-FUN_00d657d0_cls* FUN_00d657d0_cls::FUN_00d657d0(ShapeList* apShapes)
+// src: HAVOK_LIB 0x00d657d0
+FUN_00d657d0_cls* FUN_00d657d0_cls::hkpShapeDisplayViewer_hkpShapeDisplayViewer(ShapeList* apShapes)
 {
     int i;
     FUN_00ddccb0(apShapes);
@@ -786,7 +797,7 @@ FUN_00d657d0_cls* FUN_00d657d0_cls::FUN_00d657d0(ShapeList* apShapes)
     pShapeSub1->m_04 = 0;
     pShapeSub1->m_08 = -1;
     {
-        void* h1 = FUN_00c85750();
+        void* h1 = hkMemoryRouter_getInstance();
         int val1 = ((int*)h1)[4];
         pShapeSub1->EnsureCapacity(val1, 0);
     }
@@ -795,7 +806,7 @@ FUN_00d657d0_cls* FUN_00d657d0_cls::FUN_00d657d0(ShapeList* apShapes)
     pShapeSub2->m_04 = 0;
     pShapeSub2->m_08 = -1;
     {
-        void* h2 = FUN_00c85750();
+        void* h2 = hkMemoryRouter_getInstance();
         int val2 = ((int*)h2)[4];
         pShapeSub2->EnsureCapacity(val2, 0);
     }
@@ -804,7 +815,7 @@ FUN_00d657d0_cls* FUN_00d657d0_cls::FUN_00d657d0(ShapeList* apShapes)
     pShapeSub3->m_04 = 0;
     pShapeSub3->m_08 = -1;
     {
-        void* h3 = FUN_00c85750();
+        void* h3 = hkMemoryRouter_getInstance();
         int val3 = ((int*)h3)[4];
         pShapeSub3->EnsureCapacity(val3, 0);
     }
@@ -825,7 +836,7 @@ FUN_00d657d0_cls* FUN_00d657d0_cls::FUN_00d657d0(ShapeList* apShapes)
     {
         ShapeItem* item = apShapes->data[i];
         void* desc = item->GetDesc();
-        if (FUN_00cb0fa0("ShapeDisplayViewerOptions", desc) == 0)
+        if (hkString_strCmp("ShapeDisplayViewerOptions", desc) == 0)
             goto found;
     }
     return this;
@@ -868,7 +879,7 @@ struct Watch2_d65f
 
 struct Agent_d65f
 {
-    void FUN_00c917a0(Listener_d65f* listener);
+    void hkpWorld_removeEntityListener(Listener_d65f* listener);
     void ClearValue(Watch2_d65f* watch);
 };
 
@@ -901,17 +912,18 @@ struct Watch_d65f
 struct Phantom_d65f : Base_d65f, Listener_d65f, Watch2_d65f
 {
     hkArray<Node_d65f*> m_kNodeCollection;
-    void FUN_00d65750(int index);
-    void FUN_00d65fc0(int index);
+    void hkpShapeDisplayViewer_removeAllGeometries(int index);
+    void hkpShapeDisplayViewer_removeWorld(int index);
 };
 
 // Calls FUN_00c917a0 and ClearValue on the node's collision agent with this, calls FUN_00d65750, then deletes the node and removes it from m_kNodeCollection.
 // @fnv 0x00d65fc0
-void Phantom_d65f::FUN_00d65fc0(int index)
+// src: XBOX_PDB 0x00d65fc0
+void Phantom_d65f::hkpShapeDisplayViewer_removeWorld(int index)
 {
-    m_kNodeCollection[index]->m_pCollisionAgent->FUN_00c917a0(this);
+    m_kNodeCollection[index]->m_pCollisionAgent->hkpWorld_removeEntityListener(this);
     m_kNodeCollection[index]->m_pCollisionAgent->ClearValue(this);
-    FUN_00d65750(index);
+    hkpShapeDisplayViewer_removeAllGeometries(index);
     delete m_kNodeCollection[index];
     m_kNodeCollection.removeAt(index);
 }
@@ -964,7 +976,7 @@ struct TtShapeDisplayInner
     bool m_flag34;
 
     TtShapeDisplayOuter* GetOuter();
-    void FUN_00d65520(int arg);
+    void hkpShapeDisplayViewer_postSimulationCallback(int arg);
 };
 
 struct TtShapeDisplayOuter : TtShapeDisplayBase, TtShapeDisplayInner
@@ -992,7 +1004,8 @@ static void __forceinline TtPushEvent(const char* name)
 
 // Pushes a TthkpShapeDisplayViewer event, returns early if m_flag34 is false, otherwise calls GetOuter()->v10 with m_18 and arg, then pushes an Et event.
 // @fnv 0x00d65520
-void TtShapeDisplayInner::FUN_00d65520(int arg)
+// src: HAVOK_LIB 0x00d65520
+void TtShapeDisplayInner::hkpShapeDisplayViewer_postSimulationCallback(int arg)
 {
     TtPushEvent("TthkpShapeDisplayViewer");
     if (!m_flag34)
@@ -1007,7 +1020,7 @@ void TtShapeDisplayInner::FUN_00d65520(int arg)
 struct D661E0Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00d661e0();
+    virtual void AdjustThisAndForward_00d661e0();
 
     int unk04;
     int unk08;
@@ -1020,7 +1033,7 @@ struct D661E0Primary
 
 struct D661E0Secondary
 {
-    virtual void FUN_00d661e0();
+    virtual void AdjustThisAndForward_00d661e0();
 };
 
 struct D661E0Object : D661E0Primary, D661E0Secondary
@@ -1028,7 +1041,8 @@ struct D661E0Object : D661E0Primary, D661E0Secondary
     D661E0Object();
 
 // @fnv 0x00d661e0
-    virtual void FUN_00d661e0();
+// src: GUESS 0x00d661e0 (confidence: low)
+    virtual void AdjustThisAndForward_00d661e0();
 };
 
 D661E0Object::D661E0Object()
@@ -1067,7 +1081,7 @@ Derived::Derived()
 struct A1_00d66200
 {
     A1_00d66200();
-    virtual void FUN_00d66200();
+    virtual void AdjustThisAndForward_00d66200();
     char pad[0x24];
 };
 
@@ -1075,14 +1089,15 @@ struct A2_00d66200
 {
     A2_00d66200();
 // @fnv 0x00d66200
-    virtual void FUN_00d66200();
+// src: GUESS 0x00d66200 (confidence: low)
+    virtual void AdjustThisAndForward_00d66200();
 };
 
 struct Own_00d66200 : A1_00d66200, A2_00d66200
 {
     Own_00d66200();
     virtual void key_fn();  // key function - defined, so the vftable is emitted
-    void FUN_00d66200();    // the shared override - declared only
+    void AdjustThisAndForward_00d66200();    // the shared override - declared only
 };
 
 Own_00d66200::Own_00d66200()
@@ -1347,7 +1362,7 @@ struct Node
     int unk24;
     Group** m_28;
     int m_2c;
-    float FUN_00c91020();
+    float hkpWorld_getCurrentTime();
 };
 
 class S00d653f0_Obj
@@ -1380,14 +1395,15 @@ class S00d653f0_Obj
     int unk60;
     int unk64;
     float m_68;
-    void FUN_00d653f0(Visitor* a1, Node* a2);
+    void hkpShapeDisplayViewer_synchronizeTransforms_00d653f0(Visitor* a1, Node* a2);
 };
 
 // Calls a1->v04 with each item's SweepTransform result and property pointer, using m_68 (or a2->FUN_00c91020() if m_68 is not positive), between v18 and v19.
 // @fnv 0x00d653f0
-void S00d653f0_Obj::FUN_00d653f0(Visitor* apVisitor, Node* apNode)
+// src: HAVOK_LIB 0x00d653f0
+void S00d653f0_Obj::hkpShapeDisplayViewer_synchronizeTransforms_00d653f0(Visitor* apVisitor, Node* apNode)
 {
-    float f = (m_68 > 0.0f) ? m_68 : apNode->FUN_00c91020();
+    float f = (m_68 > 0.0f) ? m_68 : apNode->hkpWorld_getCurrentTime();
     apVisitor->v18();
     int i = 0;
     if (apNode->m_2c > 0)
@@ -1450,8 +1466,8 @@ struct Singleton
 };
 
 extern void* g_01268fe0;
-Singleton* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(void* a, ArrayStruct* arr, int sz, int elem);
+Singleton* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(void* a, ArrayStruct* arr, int sz, int elem);
 
 struct Shell
 {
@@ -1468,12 +1484,13 @@ struct Shell
     int m_28;
     int m_2c;
     Entry** m_pTable;
-    void FUN_00d65750(int index);
+    void hkpShapeDisplayViewer_removeAllGeometries(int index);
 };
 
 // Invokes m_pListener->FUN_v5 for each item in m_pTable[index]->m_aiIndexedValues, then resets the array count to 0.
 // @fnv 0x00d65750
-void Shell::FUN_00d65750(int index)
+// src: HAVOK_LIB 0x00d65750
+void Shell::hkpShapeDisplayViewer_removeAllGeometries(int index)
 {
     Entry* entry = m_pTable[index];
     for (int i = 0; i < entry->m_aiIndexedValues.m_iArrayLength; i++)
@@ -1482,12 +1499,12 @@ void Shell::FUN_00d65750(int index)
         m_pListener->FUN_v5(entry->m_aiIndexedValues.m_pData[i], g_01268fe0, *(int*)nItem);
     }
     ArrayStruct* arr = &entry->m_aiIndexedValues;
-    Singleton* holder = FUN_00c85750();
+    Singleton* holder = hkMemoryRouter_getInstance();
     void* pContext = holder->m_10;
     int iCapacity = arr->m_iCapacity & 0x3fffffff;
     if (iCapacity < 0)
     {
-        FUN_00c908c0(pContext, arr, (iCapacity * 2) > 0 ? iCapacity * 2 : 0, 4);
+        hkArrayUtil__reserve(pContext, arr, (iCapacity * 2) > 0 ? iCapacity * 2 : 0, 4);
     }
     arr->m_iArrayLength = 0;
 }
@@ -1508,14 +1525,14 @@ struct AudioVoiceHost
 // The channel that owns a playback buffer.
 struct AudioChannel
 {
-    void FUN_00cb1fb0(int iResult);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(int iResult);
 };
 // The playback buffer itself.
 struct AudioBuffer
 {
     int LookupHashEntry(int iResult, int iUnused);
-    void FUN_00cb1870(hkMemoryAllocator* pAlloc, int iResult, int iCount);
-    void FUN_00cb1fb0(int iResult);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocator* pAlloc, int iResult, int iCount);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(int iResult);
 };
 // One list of played items.
 struct AudioItemList
@@ -1582,7 +1599,7 @@ struct AudioNodeSub
     unsigned char unk38;
     unsigned char m_bPlayed;
 
-    void FUN_00d65640(AudioParam* pParam);
+    void hkpShapeDisplayViewer_entityRemovedCallback(AudioParam* pParam);
 };
 struct DisplayPrimary
 {
@@ -1618,13 +1635,14 @@ void* __cdecl GetProperty1134(D66180Entity* e);
 // hands it the sound in EAX and keeps the two other arguments on the stack.
 // Resolves a display result for pParam, notifies the voice host, adjusts the audio buffer, and removes the matching item from the item list.
 // @fnv 0x00d65640
-void AudioNodeSub::FUN_00d65640(AudioParam* pParam)
+// src: HAVOK_LIB 0x00d65640
+void AudioNodeSub::hkpShapeDisplayViewer_entityRemovedCallback(AudioParam* pParam)
 {
     AudioNodeSub* self = this;
     int iResult;
     bool checkOverride = GetDisplayOuter(self)->m_override10 == 0 && GetDisplayOuter(self)->m_override14 == 0;
     bool usedDefault;
-    iResult = FUN_00d652c0((S_00c6d840*)pParam, checkOverride, &usedDefault);
+    iResult = _getProxyShape((S_00c6d840*)pParam, checkOverride, &usedDefault);
 
     FUN_00d655e0_Q* pList = (FUN_00d655e0_Q*)((char*)self - 0x28);
     int iIndex = pList->FindItemIndex(pParam->m_i08);
@@ -1649,13 +1667,13 @@ void AudioNodeSub::FUN_00d65640(AudioParam* pParam)
         iCount = iCount - 1;
         if (iCount == 0)
         {
-            self->m_channel.FUN_00cb1fb0(iResult);
-            self->m_buffer.FUN_00cb1fb0(iResult);
+            self->m_channel.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(iResult);
+            self->m_buffer.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(iResult);
         }
         else
         {
-            hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
-            self->m_buffer.FUN_00cb1870(reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap), iResult, iCount);
+            hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
+            self->m_buffer.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap), iResult, iCount);
         }
     }
 
@@ -1719,8 +1737,8 @@ struct S_00d65970_Arg
     int unk30;
     S_00d65970_Elem** unk34;
     int unk38;
-    void FUN_00c93820(S_00d65970_B28* l);
-    void FUN_00c93920(S_00d65970_B2c* l);
+    void hkpWorld_addEntityListener(S_00d65970_B28* l);
+    void hkpWorld_addWorldPostSimulationListener(S_00d65970_B2c* l);
 };
 
 struct S_00d65970_Node
@@ -1763,15 +1781,16 @@ struct S_00d65970_B2c
 struct S_00d65970_Obj : S_00d65970_Base0, S_00d65970_B28, S_00d65970_B2c
 {
     hkArray<S_00d65970_Node*> nodes;
-    void FUN_00d65970(S_00d65970_Arg* arg);
+    void hkpShapeDisplayViewer_addWorld(S_00d65970_Arg* arg);
 };
 
 // Creates a node from arg, appends it to the nodes array, and calls vfn1 on all items in arg's element arrays.
 // @fnv 0x00d65970
-void S_00d65970_Obj::FUN_00d65970(S_00d65970_Arg* arg)
+// src: XBOX_PDB 0x00d65970
+void S_00d65970_Obj::hkpShapeDisplayViewer_addWorld(S_00d65970_Arg* arg)
 {
-    arg->FUN_00c93820(this);
-    arg->FUN_00c93920(this);
+    arg->hkpWorld_addEntityListener(this);
+    arg->hkpWorld_addWorldPostSimulationListener(this);
     hkMemoryAllocator& heap = reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter::getInstance().heap());
     void* mem = heap.blockAlloc(0x10);
     S_00d65970_Node* node = new (mem) S_00d65970_Node;

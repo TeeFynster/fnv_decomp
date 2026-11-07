@@ -19,7 +19,7 @@ template <> FaceGenMatrix<float>& FaceGenMatrix<float>::operator=(const FaceGenM
     m_uiRowCount = rhs.m_uiRowCount;
     m_uiColumnCount = rhs.m_uiColumnCount;
     reinterpret_cast<FR2MatrixVTCData*>(this)->SetElementCount(m_uiRowCount * m_uiColumnCount);
-    memcpy(FUN_006578b0(0), rhs.FUN_006578b0(0), m_uiRowCount * m_uiColumnCount * sizeof(float));
+    memcpy(GetElementPointerChecked(0), rhs.GetElementPointerChecked(0), m_uiRowCount * m_uiColumnCount * sizeof(float));
     return *this;
 }
 
@@ -33,7 +33,7 @@ template <> float FaceGenMatrix<float>::GetTrace()
         unsigned int col = 0;
         for (; col < m_uiColumnCount; ++col)
         {
-            result += SquareFloat(*FUN_0060b370(row, col).FUN_00629ab0());
+            result += SquareFloat(*ForwardCall_0060b370(row, col).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt());
         }
     }
     return result;
@@ -60,14 +60,14 @@ template <> FaceGenMatrix<float> FaceGenMatrix<float>::operator*(const FaceGenMa
         unsigned int j = 0;
         for (; j < rhs.m_uiColumnCount; ++j)
         {
-            *const_cast<float*>(result.FUN_0060b370(i, j).FUN_00629ab0()) = 0.0f;
+            *const_cast<float*>(result.ForwardCall_0060b370(i, j).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt()) = 0.0f;
 
             k = 0;
             for (; k < m_uiColumnCount; ++k)
             {
-                *const_cast<float*>(result.FUN_0060b370(i, j).FUN_00629ab0())
-                    += *FUN_0060b370(i, k).FUN_00629ab0()
-                     * *const_cast<FaceGenMatrix<float>&>(rhs).FUN_0060b370(k, j).FUN_00629ab0();
+                *const_cast<float*>(result.ForwardCall_0060b370(i, j).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt())
+                    += *ForwardCall_0060b370(i, k).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt()
+                     * *const_cast<FaceGenMatrix<float>&>(rhs).ForwardCall_0060b370(k, j).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt();
             }
         }
     }

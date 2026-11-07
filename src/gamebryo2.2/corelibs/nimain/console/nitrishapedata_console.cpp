@@ -5,7 +5,7 @@
 #include "../../../../../include/NiTriShapeData.h"
 
 // Preserve the original noalias contract, absent from the shared static method declaration.
-__declspec(noalias) void __cdecl FUN_00525340(NiPoint3& kPt);
+__declspec(noalias) void __cdecl NiPoint3_UnitizeVector(NiPoint3& kPt);
 
 inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
@@ -48,7 +48,7 @@ void NiTriShapeData::RecalculateNormals()
         NiPoint3 kEdge1 = m_pkVertex[usIndex1] - m_pkVertex[usIndex0];
         NiPoint3 kEdge2 = m_pkVertex[usIndex2] - m_pkVertex[usIndex1];
         NiPoint3 kFaceNormal = kEdge1.Cross(kEdge2);
-        FUN_00525340(kFaceNormal);
+        NiPoint3_UnitizeVector(kFaceNormal);
         m_pkNormal[usIndex0] += kFaceNormal;
         m_pkNormal[usIndex1] += kFaceNormal;
         m_pkNormal[usIndex2] += kFaceNormal;

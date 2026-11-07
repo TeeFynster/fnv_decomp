@@ -40,13 +40,13 @@ public:
     unsigned char const* __thiscall GetFullName();
     TESObjectWEAP* GetFlags();
     TESBoundObject* FUN_0044ddc0();
-    bool FUN_004bddd0(bool abUnk);
-    BSSimpleList<ExtraDataList*>* FUN_00559450();
+    bool ItemChange_GetWorn(bool abUnk);
+    BSSimpleList<ExtraDataList*>* Modelloader_GetReferencedThis();
     int FUN_00726070();
     void ClearExtraDataList();
     int CountAndPruneEntries();
-    int FUN_004bc8f0(bool abWornIgnore);
-    int FUN_004bc980();
+    int ItemChange_GetExtraTotalCount(bool abWornIgnore);
+    int ItemChange_GetExtraTotalDefaultCount();
     void InitLoadGame(BGSLoadFormBuffer* buffer);
     bool HasPerkEntry();
     bool HasApplicablePerkEntry();

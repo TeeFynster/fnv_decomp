@@ -137,24 +137,26 @@ void CompressedArchiveFile::Seek(int offset, int mode)
 }
 
 // @fnv 0x0043c030
-unsigned int __fastcall FUN_0043c030(const char* pThis)
+// src: COMMUNITY 0x0043c030
+unsigned int __fastcall Archive_GetRuntimeID(const char* pThis)
 {
     return *(const unsigned int*)(pThis + 0x1c8);
 }
 
 class bhkCharacterController;
 
-int __fastcall FUN_005c0880(bhkCharacterController*);
+int __fastcall bhkCharacterController_GetState(bhkCharacterController*);
 float __fastcall GetSettingFloat(bhkCharacterController*);
-float __cdecl FUN_004587d0(float);
-bool __fastcall FUN_008a5170(void*);
-int __cdecl FUN_004b5470(const NiPoint3&, float);
+float __cdecl HK2NI(float);
+bool __fastcall bhkCharacterListener_QQuadruped(void*);
+int __cdecl LengthCheck_004b5470(const NiPoint3&, float);
 
 extern double gModifierZero;
 extern double DAT_0101db88;
 
 // @fnv 0x008b2f90
-bool MobileObject::FUN_008b2f90(const NiPoint3& targetPos, float radius, bool addCharRadius, bool check3D)
+// src: COMMUNITY 0x008b2f90
+bool MobileObject::Actor_IsAtPoint(const NiPoint3& targetPos, float radius, bool addCharRadius, bool check3D)
 {
     bhkCharacterController* charCtrl;
     {
@@ -163,7 +165,7 @@ bool MobileObject::FUN_008b2f90(const NiPoint3& targetPos, float radius, bool ad
         charCtrl = GetPhysicsCharacterController();
         {
             NiPoint3 diff = selfPos - targetPos;
-            if (!check3D && charCtrl && FUN_005c0880(charCtrl))
+            if (!check3D && charCtrl && bhkCharacterController_GetState(charCtrl))
             {
                 diff.z = 0.0f;
             }
@@ -190,8 +192,8 @@ bool MobileObject::FUN_008b2f90(const NiPoint3& targetPos, float radius, bool ad
                 float charRadius;
                 if (charCtrl)
                 {
-                    charRadius = FUN_004587d0(GetSettingFloat(charCtrl));
-                    if (FUN_008a5170((char*)charCtrl + 0x410))
+                    charRadius = HK2NI(GetSettingFloat(charCtrl));
+                    if (bhkCharacterListener_QQuadruped((char*)charCtrl + 0x410))
                     {
                         charRadius *= 2.0f;
                     }
@@ -206,7 +208,7 @@ bool MobileObject::FUN_008b2f90(const NiPoint3& targetPos, float radius, bool ad
                 }
                 radius = radius + charRadius;
             }
-            return FUN_004b5470(diff, radius) <= 0;
+            return LengthCheck_004b5470(diff, radius) <= 0;
         }
     }
 }
@@ -222,7 +224,7 @@ class TESObjectREFRHelper
     void SetTargetingState(bool);
 };
 
-bool __cdecl FUN_009a3830(NavMesh* const&, NavMesh* const&);
+bool __cdecl Actor_AreReferencedValuesEqual(NavMesh* const&, NavMesh* const&);
 
 // @fnv 0x009f2da0
 bool __fastcall BuildLinkedRefChain(char* _this)
@@ -243,7 +245,7 @@ bool __fastcall BuildLinkedRefChain(char* _this)
         if (pRef == 0)
             break;
 
-        unsigned int idx = ((BSSimpleArray<NavMesh*, 1024>*)(_this + 0x1c))->Find(*(NavMesh**)&pRef, 0, FUN_009a3830);
+        unsigned int idx = ((BSSimpleArray<NavMesh*, 1024>*)(_this + 0x1c))->Find(*(NavMesh**)&pRef, 0, Actor_AreReferencedValuesEqual);
         if (idx != (unsigned int)-1)
         {
             if (!bLoop)
@@ -259,7 +261,7 @@ bool __fastcall BuildLinkedRefChain(char* _this)
         }
     }
 
-    return !((BSSimpleArray<NavMeshEdgeSegment, 1024>*)(_this + 0x1c))->FUN_0076b610();
+    return !((BSSimpleArray<NavMeshEdgeSegment, 1024>*)(_this + 0x1c))->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
 }
 
 extern int DAT_011acdfc;
@@ -267,7 +269,8 @@ extern int DAT_011ace00;
 extern int DAT_011ace04;
 
 // @fnv 0x00af4470
-void __cdecl FUN_00af4470(int aiDirString, int aiFileString, int aiFileOffset)
+// src: COMMUNITY 0x00af4470
+void __cdecl SetRetainStringAndOffsetTables(int aiDirString, int aiFileString, int aiFileOffset)
 {
     DAT_011acdfc = aiDirString;
     DAT_011ace00 = aiFileString;
@@ -315,7 +318,8 @@ void __cdecl ProcessArcList()
 int __cdecl FindArchiveForFile(int a1, int a2);
 
 // @fnv 0x00af6320
-bool __cdecl FUN_00af6320(int a1, int a2)
+// src: COMMUNITY 0x00af6320
+bool __cdecl ArchiveManager_FindFile(int a1, int a2)
 {
     return FindArchiveForFile(a1, a2);
 }
@@ -325,7 +329,8 @@ int __cdecl LookupExtensionType(const char*);
 
 // Computes the string length, then passes a pointer to its last three characters to LookupExtensionType and returns that result.
 // @fnv 0x00af7d80
-int __cdecl FUN_00af7d80(const char* pcString)
+// src: COMMUNITY 0x00af7d80
+int __cdecl ArchiveManager_GetArchiveTypeFromFileName(const char* pcString)
 {
     unsigned int len = _strlen(pcString);
     return LookupExtensionType(pcString + len - 3);
@@ -335,14 +340,15 @@ int __cdecl FUN_00af7d80(const char* pcString)
 struct ArchiveHashLookup : public Archive
 {
     bool FindHashEntry(int, int*, int);
-    bool FUN_00afa120(int, int, int, int, int);
+    bool Archive_FindFileInDirectory(int, int, int, int, int);
 };
 // Returns true if FindHashEntry(a, c, e) succeeds and FUN_00afa120 then succeeds on *c with b, d, e and 0.
 // @fnv 0x00af9bf0
-bool Archive::FUN_00af9bf0(int a, int b, int* c, int d, int e)
+// src: COMMUNITY 0x00af9bf0
+bool Archive::FindFile_00af9bf0(int a, int b, int* c, int d, int e)
 {
     if (reinterpret_cast<ArchiveHashLookup*>(this)->FindHashEntry(a, c, e) &&
-        reinterpret_cast<ArchiveHashLookup*>(this)->FUN_00afa120(*c, b, d, e, 0))
+        reinterpret_cast<ArchiveHashLookup*>(this)->Archive_FindFileInDirectory(*c, b, d, e, 0))
         return true;
     return false;
 }
@@ -350,12 +356,13 @@ bool Archive::FUN_00af9bf0(int a, int b, int* c, int d, int e)
 // 0x00afa6e0: Archive.h lacks FindHashEntry and FUN_00afa120; local methods use the shared layout.
 
 // @fnv 0x00afa6e0
-int Archive::FUN_00afa6e0(int a, int b, int c)
+// src: COMMUNITY 0x00afa6e0
+int Archive::GetFileEntryForFile(int a, int b, int c)
 {
     int index1;
     int index2;
     if (reinterpret_cast<ArchiveHashLookup*>(this)->FindHashEntry(a, &index1, c) &&
-        reinterpret_cast<ArchiveHashLookup*>(this)->FUN_00afa120(index1, b, (int)&index2, c, 1))
+        reinterpret_cast<ArchiveHashLookup*>(this)->Archive_FindFileInDirectory(index1, b, (int)&index2, c, 1))
     {
         return (int)pEntries[index1].m_pFiles + index2 * 16;
     }
@@ -369,7 +376,8 @@ struct FUN_00afb170_Args
 };
 
 // @fnv 0x00afb170
-bool __fastcall FUN_00afb170(void* pThis, FUN_00afb170_Args args)
+// src: COMMUNITY 0x00afb170
+bool __fastcall Archive_CheckRetain(void* pThis, FUN_00afb170_Args args)
 {
     if (args.param_2 == 1)
         return args.param_1;
@@ -378,12 +386,13 @@ bool __fastcall FUN_00afb170(void* pThis, FUN_00afb170_Args args)
 
 struct FUN_00afb670_shell : public ArchiveFile
 {
-    void FUN_00afb670(int, int);
+    void ArchiveFile_Seek(int, int);
 };
 
 // Adjusts the archive file position at offset 0x150 according to the seek mode, then advances m_uiPos by the delta and flushes if the buffer is exhausted.
 // @fnv 0x00afb670
-void FUN_00afb670_shell::FUN_00afb670(int aiByteCount, int aiSeekFlags)
+// src: XBOX_PDB 0x00afb670
+void FUN_00afb670_shell::ArchiveFile_Seek(int aiByteCount, int aiSeekFlags)
 {
     unsigned int ioldFilePos = *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x150);
 
@@ -427,12 +436,13 @@ struct S_afbb
     char pad[0x150];
     unsigned int pos;
     unsigned int size;
-    int FUN_00b01800(void*, unsigned int);
-    int FUN_00afbbf0(void*, unsigned int);
+    int ArchiveFile_ReadFromBuffer(void*, unsigned int);
+    int ArchiveFile_ReadF(void*, unsigned int);
 };
 // Clamps count to the remaining bytes (size - pos), reads via FUN_00b01800, advances pos by the bytes read and returns that count.
 // @fnv 0x00afbbf0
-int S_afbb::FUN_00afbbf0(void* pBuffer, unsigned int count)
+// src: XBOX_PDB 0x00afbbf0
+int S_afbb::ArchiveFile_ReadF(void* pBuffer, unsigned int count)
 {
     int r;
     unsigned int sz = size;
@@ -441,20 +451,21 @@ int S_afbb::FUN_00afbbf0(void* pBuffer, unsigned int count)
         unsigned int sz2 = size;
         count = sz2 - pos;
     }
-    r = FUN_00b01800(pBuffer, count);
+    r = ArchiveFile_ReadFromBuffer(pBuffer, count);
     pos += r;
     return r;
 }
 
 struct Dummy_00afbbf0
 {
-    int FUN_00afbbf0(int, int);
+    int ArchiveFile_ReadF(int, int);
 };
 
 // @fnv 0x00afbf80
-int __cdecl FUN_00afbf80(Dummy_00afbbf0* pTarget, int b, int c)
+// src: COMMUNITY 0x00afbf80
+int __cdecl ArchiveFile_ReadNoSwap(Dummy_00afbbf0* pTarget, int b, int c)
 {
-    return pTarget->FUN_00afbbf0(b, c);
+    return pTarget->ArchiveFile_ReadF(b, c);
 }
 
 struct ZlibStreamPeer;
@@ -510,24 +521,26 @@ void FUN_00afbfe0_shell::DestroyCompressedArchiveFile()
 struct FUN_00afc060_shell2 : public CompressedArchiveFile
 {
     bool AttachFileStream(bool, bool);
-    bool FUN_00afc060(bool a1, bool a2);
+    bool CompressedArchiveFile_Open(bool a1, bool a2);
 };
 
 // @fnv 0x00afc060
-bool FUN_00afc060_shell2::FUN_00afc060(bool a1, bool a2)
+// src: XBOX_PDB 0x00afc060
+bool FUN_00afc060_shell2::CompressedArchiveFile_Open(bool a1, bool a2)
 {
     return AttachFileStream(a1, a2);
 }
 
 struct S
 {
-    void __thiscall FUN_00afc0e0(int, int);
+    void __thiscall CompressedArchiveFile_ReadF(int, int);
 };
 
 // @fnv 0x00afc660
-void __cdecl FUN_00afc660(void* pObject, int b, int c)
+// src: COMMUNITY 0x00afc660
+void __cdecl CompressedArchiveFile_ReadNoSwap(void* pObject, int b, int c)
 {
-    (*(S*)pObject).FUN_00afc0e0(b, c);
+    (*(S*)pObject).CompressedArchiveFile_ReadF(b, c);
 }
 
 namespace fnv_00afc6c0 {
@@ -614,7 +627,8 @@ template <> inline NiPointer<Archive>& NiPointer<Archive>::operator=(const NiPoi
 
 // Counts the high bits of bytes 0, 1 and 3 of pThis, weighted 2, 1 and 4 respectively, and returns their sum.
 // @fnv 0x00afcfe0
-int __fastcall FUN_00afcfe0(unsigned char* pucData)
+// src: COMMUNITY 0x00afcfe0
+int __fastcall BSHash_ExtensionIndex(unsigned char* pucData)
 {
     return ((pucData[3] & 0x80) >> 5) + ((pucData[0] & 0x80) >> 6) + ((pucData[1] & 0x80) >> 7);
 }
@@ -645,7 +659,8 @@ inline void AssignArchivePointer(NiPointer<Archive>& pointer, Archive* object)
 extern void(__stdcall* DAT_00fdf1c0)(int);
 
 // @fnv 0x00afd230
-void __fastcall FUN_00afd230(int* piValue)
+// src: COMMUNITY 0x00afd230
+void __fastcall ArchivePtr_ArchivePtr(int* piValue)
 {
     *piValue = 0;
     if (*piValue)
@@ -730,11 +745,12 @@ void __cdecl ComputeNameHash(const char*, const char*, void*);
 
 struct FUN_00afd390_class
 {
-    void* FUN_00afd390(const char* path, int mode);
+    void* UpdateState_00afd390(const char* path, int mode);
 };
 
 // @fnv 0x00afd390
-void* FUN_00afd390_class::FUN_00afd390(const char* path, int mode)
+// src: GUESS 0x00afd390 (confidence: low)
+void* FUN_00afd390_class::UpdateState_00afd390(const char* path, int mode)
 {
     const char* pExt = 0;
     if (mode != 2)
@@ -790,7 +806,8 @@ struct MemoryManagerAllocHelper
 };
 // Stores abInvalidate in DAT_011acdf9 and, when apInvalidationFile is non-null, allocates a copy of it into DAT_011f8158.
 // @fnv 0x00af4490
-void __cdecl FUN_00af4490(bool abInvalidate, const char* apInvalidationFile)
+// src: COMMUNITY 0x00af4490
+void __cdecl ArchiveManager_SetInvalidation(bool abInvalidate, const char* apInvalidationFile)
 {
     DAT_011acdf9 = abInvalidate;
     if (apInvalidationFile)
@@ -840,7 +857,7 @@ extern int DAT_010a464c;
 extern unsigned int DAT_011f8164;
 struct S_afbb
 {
-    int FUN_00afbbf0(void*, unsigned int);
+    int ArchiveFile_ReadF(void*, unsigned int);
 };
 struct P03Z
 {
@@ -876,7 +893,7 @@ FUN_00afc430::FUN_00afc430(int a, int b, int c, int d, int e) : FUN_00afb300(a, 
 {
     *(int**)this = &DAT_010a464c;
     ((CompressedArchiveFile*)this)->CompressedArchiveFile::SetEndianSwap(false);
-    ((S_afbb*)this)->FUN_00afbbf0((char*)this + 0x168, 4);
+    ((S_afbb*)this)->ArchiveFile_ReadF((char*)this + 0x168, 4);
     char* pStream;
     int pTmp;
     void* err = g_memoryManager.Allocate(0x1be0);
@@ -944,11 +961,12 @@ void FUN_00afcde0_shell::InitArray(unsigned int aiReserveSize, unsigned int aiIn
 struct FUN_00afce90_S
 {
     unsigned __int64 value;
-    int FUN_00afce90(const unsigned __int64& other);
+    int BSHash_Compare(const unsigned __int64& other);
 };
 // Compares value with other and returns -1 if less, 1 if greater, or 0 if equal.
 // @fnv 0x00afce90
-int FUN_00afce90_S::FUN_00afce90(const unsigned __int64& aullValue)
+// src: COMMUNITY 0x00afce90
+int FUN_00afce90_S::BSHash_Compare(const unsigned __int64& aullValue)
 {
     if (value < aullValue)
         return -1;
@@ -983,7 +1001,8 @@ extern char* DAT_011f815c;
 extern unsigned int DAT_011f8164;
 // Stores the archive flag, copies the archive list and master file path into globals, and sets the file buffer size.
 // @fnv 0x00af43a0
-void __cdecl FUN_00af43a0(bool abUseArchives, char* apMasterFilePath, char* apArchiveList,
+// src: COMMUNITY 0x00af43a0
+void __cdecl ArchiveManager_Init(bool abUseArchives, char* apMasterFilePath, char* apArchiveList,
                           unsigned int aiFileBufferSize)
 {
     int ilistSize;
@@ -1066,7 +1085,8 @@ struct ArchiveManager
 };
 
 // @fnv 0x00af6340
-ArchiveFile* __cdecl FUN_00af6340(int aeArchiveTypeIndex, BSFileEntry* apFileEntry, unsigned int aiBufferSize,
+// src: XBOX_PDB 0x00af6340
+ArchiveFile* __cdecl ArchiveManager_GetFileByFileEntry(int aeArchiveTypeIndex, BSFileEntry* apFileEntry, unsigned int aiBufferSize,
                                   unsigned int apFileName)
 {
     ArchiveFile* pfile = 0;
@@ -1083,7 +1103,8 @@ ArchiveFile* __cdecl FUN_00af6340(int aeArchiveTypeIndex, BSFileEntry* apFileEnt
 extern bool DAT_011f8154;
 
 // @fnv 0x00af4460
-void FUN_00af4460(bool abCheckRuntimeCollisions)
+// src: COMMUNITY 0x00af4460
+void ArchiveManager_SetCheckRuntimeCollisions(bool abCheckRuntimeCollisions)
 {
     DAT_011f8154 = abCheckRuntimeCollisions;
 }
@@ -1095,7 +1116,8 @@ extern "C" void __cdecl _DeallocateAlias(void* ptr);
 extern MemoryManager g_memoryManager;
 
 // @fnv 0x00af44f0
-void FUN_00af44f0()
+// src: GUESS 0x00af44f0 (confidence: low)
+void Archive_UpdateState_00af44f0()
 {
     char* ptr0;
     char* ptr1;
@@ -1115,7 +1137,8 @@ void FUN_00af44f0()
 extern unsigned int DAT_011f8164;
 
 // @fnv 0x00af4540
-void FUN_00af4540()
+// src: COMMUNITY 0x00af4540
+void ArchiveManager_SetStartupFinished()
 {
     DAT_011f8164 = 0x20000;
 }
@@ -1126,7 +1149,8 @@ extern "C" int DAT_011f8160;
 
 // Returns false if DAT_011f8160 or arg is zero; otherwise calls RemoveArchiveFile with arg and returns true.
 // @fnv 0x00af56d0
-bool __cdecl FUN_00af56d0(int aiValue)
+// src: GUESS 0x00af56d0 (confidence: medium)
+bool __cdecl Archive_RemoveArchiveFileIfAvailable(int aiValue)
 {
     if (DAT_011f8160 == 0 || aiValue == 0)
         return false;
@@ -1145,11 +1169,12 @@ struct Entry16
 // 0x00af9b60: Archive.h lacks this entry-position method; use the shared folder array.
 struct ArchiveEntryPosition : public Archive
 {
-    unsigned int FUN_00af9b60(unsigned int index, unsigned int value);
+    unsigned int Archive_GetFileIndexForFileEntryFromDirectory(unsigned int index, unsigned int value);
 };
 // Computes the difference between value and the entry's d field at index, shifted right by 4.
 // @fnv 0x00af9b60
-unsigned int ArchiveEntryPosition::FUN_00af9b60(unsigned int index, unsigned int value)
+// src: COMMUNITY 0x00af9b60
+unsigned int ArchiveEntryPosition::Archive_GetFileIndexForFileEntryFromDirectory(unsigned int index, unsigned int value)
 {
     unsigned int tmp;
     unsigned int start;
@@ -1166,17 +1191,18 @@ unsigned int ArchiveEntryPosition::FUN_00af9b60(unsigned int index, unsigned int
 struct ArchiveNameLookup : public Archive
 {
     int FindEntryIndex(unsigned int key);
-    unsigned int FUN_00af9b60(unsigned int index, unsigned int value);
-    int FUN_00af9ba0(unsigned int key);
+    unsigned int Archive_GetFileIndexForFileEntryFromDirectory(unsigned int index, unsigned int value);
+    int Archive_GetFileNameForFileEntry(unsigned int key);
 };
 // @fnv 0x00af9ba0
-int ArchiveNameLookup::FUN_00af9ba0(unsigned int key)
+// src: COMMUNITY 0x00af9ba0
+int ArchiveNameLookup::Archive_GetFileNameForFileEntry(unsigned int key)
 {
     int index = FindEntryIndex(key);
     if (index == -1)
         return 0;
-    unsigned int result = FUN_00af9b60(index, key);
-    return FUN_00af96d0(index, result);
+    unsigned int result = Archive_GetFileIndexForFileEntryFromDirectory(index, key);
+    return Archive_GetFileString(index, result);
 }
 
 namespace fnv_00afac20 {
@@ -1201,15 +1227,16 @@ struct FUN_00afac20_group
 // 0x00afac20: Archive.h lacks this size-reset method; use the shared hash lookup declaration.
 struct ArchiveEntrySizeReset : public Archive
 {
-    bool FUN_00afac20(int a, int b, int c);
+    bool Archive_InvalidateFile(int a, int b, int c);
 };
 // Looks up an entry via FUN_00af9bf0 and, if found, sets its size to 0 and returns true; otherwise returns false.
 // @fnv 0x00afac20
-bool ArchiveEntrySizeReset::FUN_00afac20(int a, int b, int c)
+// src: COMMUNITY 0x00afac20
+bool ArchiveEntrySizeReset::Archive_InvalidateFile(int a, int b, int c)
 {
     int iGroupIndex;
     int idx;
-    if (FUN_00af9bf0(a, b, &iGroupIndex, (int)&idx, 0))
+    if (FindFile_00af9bf0(a, b, &iGroupIndex, (int)&idx, 0))
     {
         FUN_00afac20_entry* e =
             (FUN_00afac20_entry*)((char*)((FUN_00afac20_group*)*(char**)((char*)this + 0x184) + iGroupIndex)->entries +
@@ -1243,14 +1270,15 @@ struct FUN_00afac90_group
 // 0x00afac90: Archive.h lacks this size-reset method and FUN_00afa120.
 struct ArchiveFolderSizeReset : public Archive
 {
-    bool FUN_00afa120(int, int, int*, int, int);
-    bool FUN_00afac90(int a, int b, int c);
+    bool Archive_FindFileInDirectory(int, int, int*, int, int);
+    bool Archive_InvalidateFile_(int a, int b, int c);
 };
 // @fnv 0x00afac90
-bool ArchiveFolderSizeReset::FUN_00afac90(int aiGroupIndex, int b, int aiUnused)
+// src: COMMUNITY 0x00afac90
+bool ArchiveFolderSizeReset::Archive_InvalidateFile_(int aiGroupIndex, int b, int aiUnused)
 {
     int idx;
-    if (FUN_00afa120(aiGroupIndex, b, &idx, 0, 0))
+    if (Archive_FindFileInDirectory(aiGroupIndex, b, &idx, 0, 0))
     {
         FUN_00afac90_entry* e =
             (FUN_00afac90_entry*)((char*)((FUN_00afac90_group*)*(char**)((char*)this + 0x184) + aiGroupIndex)->entries +
@@ -1264,40 +1292,44 @@ bool ArchiveFolderSizeReset::FUN_00afac90(int aiGroupIndex, int b, int aiUnused)
 
 struct FUN_00afbf50_shell
 {
-    unsigned int FUN_00afbf50(void* a, unsigned int b);
+    unsigned int ArchiveFile_WriteF(void* a, unsigned int b);
 };
 // @fnv 0x00afbf50
-unsigned int FUN_00afbf50_shell::FUN_00afbf50(void* a, unsigned int b)
+// src: COMMUNITY 0x00afbf50
+unsigned int FUN_00afbf50_shell::ArchiveFile_WriteF(void* a, unsigned int b)
 {
     return 0;
 }
 
 struct FUN_00afc3e0_shell
 {
-    unsigned int FUN_00afc3e0(void* a, unsigned int b);
+    unsigned int CompressedArchiveFile_ReadStringAlt(void* a, unsigned int b);
 };
 // @fnv 0x00afc3e0
-unsigned int FUN_00afc3e0_shell::FUN_00afc3e0(void* a, unsigned int b)
+// src: COMMUNITY 0x00afc3e0
+unsigned int FUN_00afc3e0_shell::CompressedArchiveFile_ReadStringAlt(void* a, unsigned int b)
 {
     return 0;
 }
 
 struct FUN_00afc3f0_shell
 {
-    unsigned int FUN_00afc3f0(void* a, unsigned int b);
+    unsigned int CompressedArchiveFile_ReadString(void* a, unsigned int b);
 };
 // @fnv 0x00afc3f0
-unsigned int FUN_00afc3f0_shell::FUN_00afc3f0(void* a, unsigned int b)
+// src: COMMUNITY 0x00afc3f0
+unsigned int FUN_00afc3f0_shell::CompressedArchiveFile_ReadString(void* a, unsigned int b)
 {
     return 0;
 }
 
 struct FUN_00afc400_shell
 {
-    int FUN_00afc400(int a, int b);
+    int CompressedArchiveFile_DoWrite(int a, int b);
 };
 // @fnv 0x00afc400
-int FUN_00afc400_shell::FUN_00afc400(int a, int b)
+// src: COMMUNITY 0x00afc400
+int FUN_00afc400_shell::CompressedArchiveFile_DoWrite(int a, int b)
 {
     return 0;
 }
@@ -1330,11 +1362,12 @@ namespace fnv_00afcd10 {
 extern MemoryManager g_memoryManager;
 struct FUN_00afcd10_shell
 {
-    void* FUN_00afcd10(unsigned int count);
+    void* BSSimpleArray_DebugText_sPrintData_1024_Allocate(unsigned int count);
 };
 // Allocates count << 2 bytes via g_memoryManager.Allocate and returns the resulting pointer.
 // @fnv 0x00afcd10
-void* FUN_00afcd10_shell::FUN_00afcd10(unsigned int count)
+// src: COMMUNITY 0x00afcd10
+void* FUN_00afcd10_shell::BSSimpleArray_DebugText_sPrintData_1024_Allocate(unsigned int count)
 {
     void* result = g_memoryManager.Allocate(count << 2);
     return result;
@@ -1345,10 +1378,11 @@ namespace fnv_00afcd40 {
 extern MemoryManager g_memoryManager;
 struct FUN_00afcd40_shell
 {
-    void FUN_00afcd40(void* ptr);
+    void BSSimpleArray_DebugText_sPrintData_1024_Deallocate(void* ptr);
 };
 // @fnv 0x00afcd40
-void FUN_00afcd40_shell::FUN_00afcd40(void* pMemory)
+// src: COMMUNITY 0x00afcd40
+void FUN_00afcd40_shell::BSSimpleArray_DebugText_sPrintData_1024_Deallocate(void* pMemory)
 {
     g_memoryManager._DeallocateAlias(pMemory);
 }
@@ -1358,10 +1392,11 @@ namespace fnv_00afcd60 {
 extern MemoryManager g_memoryManager;
 struct FUN_00afcd60_shell
 {
-    void* FUN_00afcd60(void* p, unsigned int count);
+    void* BSSimpleArray_DebugText_sPrintData_1024_Reallocate(void* p, unsigned int count);
 };
 // @fnv 0x00afcd60
-void* FUN_00afcd60_shell::FUN_00afcd60(void* p, unsigned int count)
+// src: COMMUNITY 0x00afcd60
+void* FUN_00afcd60_shell::BSSimpleArray_DebugText_sPrintData_1024_Reallocate(void* p, unsigned int count)
 {
     return g_memoryManager.Reallocate(p, count << 2);
 }
@@ -1397,7 +1432,8 @@ extern ArchiveListNode* DAT_011f8160;
 void __cdecl RemoveArchiveFile(BSFile* apArchive);
 
 // @fnv 0x00af5700
-bool __cdecl FUN_00af5700(char* apFileName)
+// src: COMMUNITY 0x00af5700
+bool __cdecl ArchiveManager_CloseArchive(char* apFileName)
 {
     char acPath[260];
     if (!DAT_011f8160)
@@ -1425,7 +1461,7 @@ bool __cdecl FUN_00af5700(char* apFileName)
 }  // namespace fnv_00af5700
 
 namespace fnv_00af5fa0 {
-int __cdecl FUN_00af7d80(const char* apFileName);
+int __cdecl ArchiveManager_GetArchiveTypeFromFileName(const char* apFileName);
 const char* __cdecl SkipDataPrefix(const char* apFileName);
 
 struct FileNameHash
@@ -1450,14 +1486,14 @@ void* LoadFileFromArchives(const char* apFileName, unsigned int auiBufferSize, u
     FileNameHash kDirectoryNameHash;
     apFileName = SkipDataPrefix(apFileName);
     if (aeArchiveTypeFlags == 0xffff)
-        aeArchiveTypeFlags = FUN_00af7d80(apFileName);
+        aeArchiveTypeFlags = ArchiveManager_GetArchiveTypeFromFileName(apFileName);
     FileNameHash::CreateDirectoryAndFileHashes(apFileName, kDirectoryNameHash, kFileNameHash);
     BSSimpleList<NiPointer<Archive> >* pCurrentElementNext = DAT_011f8160;
     while (pCurrentElementNext)
     {
         NiPointer<Archive> sparchive(pCurrentElementNext->m_item);
         if (sparchive && sparchive->HasArchiveTypeFlags(aeArchiveTypeFlags) &&
-            sparchive->FUN_00af9bf0((int)&kDirectoryNameHash, (int)&kFileNameHash, (int*)&uiFolderIndex,
+            sparchive->FindFile_00af9bf0((int)&kDirectoryNameHash, (int)&kFileNameHash, (int*)&uiFolderIndex,
                                     (int)&uiFileIndex, (int)apFileName))
         {
             return sparchive->OpenFile(uiFolderIndex, uiFileIndex, auiBufferSize, apFileName);
@@ -1469,7 +1505,7 @@ void* LoadFileFromArchives(const char* apFileName, unsigned int auiBufferSize, u
 }  // namespace fnv_00af5fa0
 
 namespace fnv_00af6160 {
-int __cdecl FUN_00af7d80(const char* apFileName);
+int __cdecl ArchiveManager_GetArchiveTypeFromFileName(const char* apFileName);
 const char* __cdecl SkipDataPrefix(const char* apFileName);
 
 struct FileNameHash
@@ -1497,7 +1533,7 @@ Archive* FindArchiveForFile(const char* apFileName, unsigned int aeArchiveTypeFl
     FileNameHash kDirectoryNameHash;
     apFileName = SkipDataPrefix(apFileName);
     if (aeArchiveTypeFlags == 0xffff)
-        aeArchiveTypeFlags = FUN_00af7d80(apFileName);
+        aeArchiveTypeFlags = ArchiveManager_GetArchiveTypeFromFileName(apFileName);
     FileNameHash::CreateDirectoryAndFileHashes(apFileName, kDirectoryNameHash, kFileNameHash);
     EnterCriticalSection(&DAT_011f8170);
     BSSimpleList<NiPointer<Archive> >* pCurrentElementNext = DAT_011f8160;
@@ -1505,7 +1541,7 @@ Archive* FindArchiveForFile(const char* apFileName, unsigned int aeArchiveTypeFl
     {
         NiPointer<Archive> sparchive(pCurrentElementNext->m_item);
         if (sparchive && sparchive->HasArchiveTypeFlags(aeArchiveTypeFlags) &&
-            sparchive->FUN_00af9bf0((int)&kDirectoryNameHash, (int)&kFileNameHash, (int*)&uiFolderIndex,
+            sparchive->FindFile_00af9bf0((int)&kDirectoryNameHash, (int)&kFileNameHash, (int*)&uiFolderIndex,
                                     (int)&uiFileIndex, (int)apFileName))
         {
             LeaveCriticalSection(&DAT_011f8170);
@@ -1522,12 +1558,12 @@ namespace fnv_00af7e80 {
 struct FUN_00afd390_class
 {
     void* v;
-    void* __thiscall FUN_00afd390(const char*, int);
+    void* __thiscall UpdateState_00afd390(const char*, int);
 };
 
 struct FUN_00afcf00_class
 {
-    int __thiscall FUN_00afcf00(void*);
+    int __thiscall BSHash_WildCardCompare(void*);
 };
 
 struct Local28
@@ -1542,11 +1578,12 @@ struct Local28
 };
 
 // @fnv 0x00af7e80
-bool __cdecl FUN_00af7e80(const char* path, FUN_00afcf00_class* obj)
+// src: COMMUNITY 0x00af7e80
+bool __cdecl ArchiveManager_WildCardMatch(const char* path, FUN_00afcf00_class* obj)
 {
     Local28 l;
-    l.obj.FUN_00afd390(path, 0);
-    if (obj->FUN_00afcf00(&l.obj) == 0)
+    l.obj.UpdateState_00afd390(path, 0);
+    if (obj->BSHash_WildCardCompare(&l.obj) == 0)
         return true;
     return false;
 }
@@ -1559,12 +1596,13 @@ struct FUN_00afcde0_shell
 {
     void* vptr;
     void InitArray(unsigned int, unsigned int);
-    void* FUN_00afcce0();
+    void* InitializeFields_00afcce0();
 };
 
 // Sets the vtable pointer to DAT_010a469c, calls InitArray with 0 and 0, and returns this.
 // @fnv 0x00afcce0
-void* FUN_00afcde0_shell::FUN_00afcce0()
+// src: GUESS 0x00afcce0 (confidence: low)
+void* FUN_00afcde0_shell::InitializeFields_00afcce0()
 {
     int a;
     int b;
@@ -1736,12 +1774,13 @@ struct _BSAHelper
 struct FUN_00afcdc0_StandIn
 {
     void* vptr;
-    void FUN_00afcdc0();
+    void ResetVirtualTableAndClear_00afcdc0();
 };
 
 // Sets the object's vtable pointer to DAT_010a469c and calls Clear(true) on it.
 // @fnv 0x00afcdc0
-void FUN_00afcdc0_StandIn::FUN_00afcdc0()
+// src: GUESS 0x00afcdc0 (confidence: medium)
+void FUN_00afcdc0_StandIn::ResetVirtualTableAndClear_00afcdc0()
 {
     int _t;
     *(void**)this = &DAT_010a469c;
@@ -1942,7 +1981,7 @@ struct FUN_00afc7f0
     NiPointer<Archive> m_spArchive;
 
     ~FUN_00afc7f0();
-    void FUN_00afcaf0();
+    void ReleaseStorage_00afcaf0();
 };
 
 // Destructor that calls FUN_00afcaf0 and releases the held Archive through the NiPointer member.
@@ -1950,7 +1989,7 @@ struct FUN_00afc7f0
 FUN_00afc7f0::~FUN_00afc7f0()
 {
     int l1, l2, l3, l4, l5, l6, l7, l8;
-    FUN_00afcaf0();
+    ReleaseStorage_00afcaf0();
 }
 }  // namespace fnv_00afc7f0
 
@@ -1975,7 +2014,8 @@ struct NP_afc
     NP_afc(NP_afc* other) : m_spArchive(other->m_spArchive), m_pkNext(0)
     {}
 
-    NP_afc* FUN_00afc770(NP_afc* other)
+// src: COMMUNITY 0x00afc770
+    NP_afc* BSSimpleList_SetItem(NP_afc* other)
     {
         if (m_spArchive.m_pObject != other->m_spArchive.m_pObject)
         {
@@ -2006,11 +2046,11 @@ void NP_afc::PushArchive(NP_afc* other)
         NP_afc* pNode = new NP_afc(this);
         pNode->m_pkNext = m_pkNext;
         m_pkNext = pNode;
-        FUN_00afc770(other);
+        BSSimpleList_SetItem(other);
     }
     else
     {
-        FUN_00afc770(other);
+        BSSimpleList_SetItem(other);
     }
 }
 }  // namespace fnv_00afc880
@@ -2036,7 +2076,8 @@ struct NP_afc
     NP_afc(NP_afc* other) : m_spArchive(other->m_spArchive), m_pkNext(0)
     {}
 
-    NP_afc* FUN_00afc770(NP_afc* other)
+// src: COMMUNITY 0x00afc770
+    NP_afc* BSSimpleList_SetItem(NP_afc* other)
     {
         if (m_spArchive.m_pObject != other->m_spArchive.m_pObject)
         {
@@ -2075,7 +2116,7 @@ void NP_afc::AppendArchive(NP_afc* other)
     }
     else
     {
-        cur->FUN_00afc770(other);
+        cur->BSSimpleList_SetItem(other);
     }
 }
 }  // namespace fnv_00afcc10
@@ -2103,7 +2144,7 @@ BSFileEntry* FindFileEntryInArchives(int aeArchiveTypeIndex, FileNameHash& arDir
         if (sparchive && sparchive->HasArchiveType(aeArchiveTypeIndex))
         {
             pReturn =
-                (BSFileEntry*)sparchive->FUN_00afa6e0((int)&arDirectoryHash, (int)&arFileNameHash, (int)apFileName);
+                (BSFileEntry*)sparchive->GetFileEntryForFile((int)&arDirectoryHash, (int)&arFileNameHash, (int)apFileName);
             if (pReturn)
                 return pReturn;
         }
@@ -2223,7 +2264,7 @@ struct ArchiveFileNameLookup : public Archive
     }
     inline bool CheckCache(bool abFlag, int aiVal)
     {
-        return FUN_00afb170(abFlag, aiVal);
+        return Archive_CheckRetain(abFlag, aiVal);
     }
     static inline int GetCacheVal()
     {
@@ -2237,11 +2278,12 @@ struct ArchiveFileNameLookup : public Archive
     {
         strcpy_s(apDest, 0x100, apSrc);
     }
-    char* FUN_00af96d0(unsigned int auiFolder, unsigned int auiFile);
+    char* Archive_GetFileString(unsigned int auiFolder, unsigned int auiFile);
 };
 
 // @fnv 0x00af96d0
-char* ArchiveFileNameLookup::FUN_00af96d0(unsigned int auiFolder, unsigned int auiFile)
+// src: COMMUNITY 0x00af96d0
+char* ArchiveFileNameLookup::Archive_GetFileString(unsigned int auiFolder, unsigned int auiFile)
 {
     if (HasNameTable())
     {
@@ -2363,11 +2405,12 @@ struct ArchiveFileReadMethods : BSFile
         if (m_pArchive)
             EnterCriticalSection(&m_pArchive->m_kLock.m_kCriticalSection);
     }
-    unsigned int FUN_00afbde0(void* buf, unsigned int size);
+    unsigned int ArchiveFile_Read(void* buf, unsigned int size);
 };
 
 // @fnv 0x00afbde0
-unsigned int ArchiveFileReadMethods::FUN_00afbde0(void* apBuffer, unsigned int size)
+// src: XBOX_PDB 0x00afbde0
+unsigned int ArchiveFileReadMethods::ArchiveFile_Read(void* apBuffer, unsigned int size)
 {
     unsigned int uiRead = 0;
     LockArc(m_pArchive->FileName());
@@ -2526,7 +2569,7 @@ int __cdecl FindEntryInArchives(unsigned int auiTypes, int aiArg1, int aiArg2, i
         NiPointer<Archive> m_pArchive(pNode->spItem);
         if (m_pArchive && m_pArchive->HasArchiveTypeFlags(auiTypes))
         {
-            int iResult = m_pArchive->FUN_00afa6e0(aiArg1, aiArg2, aiArg3);
+            int iResult = m_pArchive->GetFileEntryForFile(aiArg1, aiArg2, aiArg3);
             if (iResult)
                 return iResult;
         }
@@ -2540,7 +2583,7 @@ extern CRITICAL_SECTION DAT_011f8170;
 // 0x00af6910 calls 0x00afdc00 on the +0x160 header; BSArchiveHeader.h lacks that lookup method.
 struct ArchiveDirectoryIndex : BSArchiveHeader
 {
-    bool FUN_00afdc00(const FileNameHash* key);
+    bool BSArchive_IsFileEntryInArchive(const FileNameHash* key);
 };
 struct LookupArchive : Archive
 {
@@ -2551,7 +2594,7 @@ struct LookupArchive : Archive
     }
     bool Contains(const FileNameHash* key)
     {
-        return reinterpret_cast<ArchiveDirectoryIndex*>(reinterpret_cast<char*>(this) + sizeof(BSFile) + sizeof(NiRefObject))->FUN_00afdc00(key);
+        return reinterpret_cast<ArchiveDirectoryIndex*>(reinterpret_cast<char*>(this) + sizeof(BSFile) + sizeof(NiRefObject))->BSArchive_IsFileEntryInArchive(key);
     }
 };
 __forceinline void AddArchiveReference(RefObj* reference)
@@ -2612,9 +2655,10 @@ __forceinline unsigned int CountEntries(LNode* input)
     }
     return node;
 }
-void** __cdecl FUN_00af7060(Archive*, unsigned int, void**, FileNameHash*, FileNameHash*, LNode*, const char*);
+void** __cdecl ArchiveManager_AddArchiveToFileList(Archive*, unsigned int, void**, FileNameHash*, FileNameHash*, LNode*, const char*);
 // @fnv 0x00af6ba0
-void __cdecl FUN_00af6ba0(LNode* entries, const char* path, const char* directory, unsigned int types)
+// src: COMMUNITY 0x00af6ba0
+void __cdecl ArchiveManager_AddToFileList(LNode* entries, const char* path, const char* directory, unsigned int types)
 {
     if (!DAT_011f8160)
         return;
@@ -2625,7 +2669,7 @@ void __cdecl FUN_00af6ba0(LNode* entries, const char* path, const char* director
     if (last)
         last[1] = 0;
     if (types == 0xffff)
-        types = FUN_00af7d80(path);
+        types = ArchiveManager_GetArchiveTypeFromFileName(path);
     void** value = 0;
     FileNameHash bound, n;
     HashPathComponents(path, &bound, &n);
@@ -2634,7 +2678,7 @@ void __cdecl FUN_00af6ba0(LNode* entries, const char* path, const char* director
     {
         NiPointer<Archive> owner(*(const NiPointer<Archive>*)&archive->item);
         if (owner && (unsigned short)(owner->GetFlags() & types))
-            value = FUN_00af7060(owner, count_2, value, &bound, &n, entries, buffer);
+            value = ArchiveManager_AddArchiveToFileList(owner, count_2, value, &bound, &n, entries, buffer);
         archive = archive->next;
     }
     if (value)
@@ -2983,12 +3027,12 @@ struct Group97
 };
 struct Hash97
 {
-    int FUN_00afce90(const Entry97&);
+    int BSHash_Compare(const Entry97&);
 };
 struct MM97
 {
-    void* FUN_00aa3e40(unsigned int);
-    void FUN_00aa4060(void*);
+    void* Game_DoHeapAlloc(unsigned int);
+    void MemoryManager_Deallocate(void*);
 };
 extern MM97 DAT_011f6238;
 extern char DAT_010a454c[];
@@ -3007,18 +3051,19 @@ inline unsigned int Length97(const char* s)
 }
 extern "C" char* __cdecl strtok_s(char*, const char*, char**);
 extern "C" int __cdecl _stricmp(const char*, const char*);
-void __cdecl FUN_005b5e40(const char*, ...);
+void __cdecl Warning_005b5e40(const char*, ...);
 // 0x00afa120: Archive.h lacks FUN_00afa120, FUN_00afb190 and IsFileEntryValid.
 struct ArchiveFileHashLookup : public Archive
 {
     bool IsFileEntryValid(Entry97*, bool);
-    bool FUN_00afb190(Entry97*, const char*);
-    const char* FUN_00af96d0(unsigned int, unsigned int);
-    bool FUN_00afa120(unsigned int, Hash97*, unsigned int*, const char*, bool);
+    bool Archive_CheckInvalidateFile(Entry97*, const char*);
+    const char* Archive_GetFileString(unsigned int, unsigned int);
+    bool Archive_FindFileInDirectory(unsigned int, Hash97*, unsigned int*, const char*, bool);
 };
 // Looks up an entry in a group by hash, checking the m_uiCacheOffset index first then binary-searching, and writes the found index to output.
 // @fnv 0x00afa120
-bool ArchiveFileHashLookup::FUN_00afa120(unsigned int group, Hash97* hash, unsigned int* puiOutput, const char* path, bool ignore)
+// src: COMMUNITY 0x00afa120
+bool ArchiveFileHashLookup::Archive_FindFileInDirectory(unsigned int group, Hash97* hash, unsigned int* puiOutput, const char* path, bool ignore)
 {
     if ((m_ucStatus & 1) ? true : false)
         return false;
@@ -3028,9 +3073,9 @@ bool ArchiveFileHashLookup::FUN_00afa120(unsigned int group, Hash97* hash, unsig
     if (last9 < files31->Size())
     {
         Entry97* entry = &files31->entries[last9];
-        if (IsFileEntryValid(entry, ignore) && hash->FUN_00afce90(*entry) == 0)
+        if (IsFileEntryValid(entry, ignore) && hash->BSHash_Compare(*entry) == 0)
         {
-            if (!FUN_00afb190(entry, path))
+            if (!Archive_CheckInvalidateFile(entry, path))
             {
                 *puiOutput = last9;
                 found5 = true;
@@ -3052,7 +3097,7 @@ bool ArchiveFileHashLookup::FUN_00afa120(unsigned int group, Hash97* hash, unsig
             step13 = (high27 - low10) >> 1;
             middle91 = low10 + step13;
             candidate26 = &files31->entries[middle91];
-            comparison20 = hash->FUN_00afce90(*candidate26);
+            comparison20 = hash->BSHash_Compare(*candidate26);
             if (comparison20 > 0)
                 low10 = middle91;
             else if (comparison20 < 0)
@@ -3060,7 +3105,7 @@ bool ArchiveFileHashLookup::FUN_00afa120(unsigned int group, Hash97* hash, unsig
             else
                 break;
         }
-        if (comparison20 == 0 && IsFileEntryValid(candidate26, ignore) && !FUN_00afb190(candidate26, path))
+        if (comparison20 == 0 && IsFileEntryValid(candidate26, ignore) && !Archive_CheckInvalidateFile(candidate26, path))
         {
             *puiOutput = middle91;
             m_uiCacheOffset = middle91;
@@ -3069,7 +3114,7 @@ bool ArchiveFileHashLookup::FUN_00afa120(unsigned int group, Hash97* hash, unsig
             {
                 char filename4[260];
                 _splitpath_s(path, 0, 0, 0, 0, filename4, 260, 0, 0);
-                const char* original27 = FUN_00af96d0(group, middle91);
+                const char* original27 = Archive_GetFileString(group, middle91);
                 char* left22 = new char[Length97(original27) + 1];
                 char* right19 = new char[Length97(filename4) + 1];
                 Copy97(left22, Length97(original27) + 1, original27);
@@ -3081,7 +3126,7 @@ bool ArchiveFileHashLookup::FUN_00afa120(unsigned int group, Hash97* hash, unsig
                 Lower97(right19, Length97(right19) + 1);
                 if (_stricmp(left22, right19))
                 {
-                    FUN_005b5e40("DEFAULT: HashMap Collision between %s and %s", original27, filename4);
+                    Warning_005b5e40("DEFAULT: HashMap Collision between %s and %s", original27, filename4);
                     found5 = false;
                 }
                 delete[] left22;
@@ -3212,8 +3257,8 @@ struct ArchiveMatchedEntries : public Archive
         return (this->m_uiArchiveFlags & bit) != 0;
     }
     const char* GetString(int);
-    void FUN_00b01510(BSHashA*);
-    int FUN_00b01590(char*, const char*, BSHashA*);
+    void Archive_PlatformGetLastWriteTime(BSHashA*);
+    int Archive_InvalidateOlderFilesByPath(char*, const char*, BSHashA*);
     int ClearMatchedEntries();
 };
 // @fnv 0x00afad00
@@ -3239,7 +3284,7 @@ int ArchiveMatchedEntries::ClearMatchedEntries()
                     for (j = 0; j < List1Ptr()->GetCount(); j++)
                     {
                         FUN_00afce90_S* item = List1Ptr()->GetItemAt(j);
-                        if (item->FUN_00afce90(*(unsigned __int64*)entry) == 0)
+                        if (item->BSHash_Compare(*(unsigned __int64*)entry) == 0)
                         {
                             found = true;
                             break;
@@ -3294,8 +3339,8 @@ int ArchiveMatchedEntries::ClearMatchedEntries()
         else
         {
             BSHashA hash;
-            this->FUN_00b01510(&hash);
-            count = this->FUN_00b01590(DAT_011f8050, DAT_010a4346, &hash);
+            this->Archive_PlatformGetLastWriteTime(&hash);
+            count = this->Archive_InvalidateOlderFilesByPath(DAT_011f8050, DAT_010a4346, &hash);
         }
         return count;
     }
@@ -3306,7 +3351,7 @@ extern "C" int __cdecl _strnicmp(const char*, const char*, unsigned int);
 
 struct FUN_00afb520_mm
 {
-    void FUN_00aa4060(void* p);
+    void MemoryManager_Deallocate(void* p);
 };
 extern FUN_00afb520_mm DAT_011f6238;
 
@@ -3323,7 +3368,7 @@ ArchiveFile::~ArchiveFile()
     if (m_pBuffer != 0)
     {
         void* buf = m_pBuffer;
-        DAT_011f6238.FUN_00aa4060(buf);
+        DAT_011f6238.MemoryManager_Deallocate(buf);
     }
     m_pBuffer = 0;
     m_bGood = 0;
@@ -3352,8 +3397,8 @@ __forceinline void RenderCopyData(void* dest, const void* source, unsigned int s
 // 0x00afb7a0: the three low-level NiFile calls below lack shared declarations; use the shared Archive storage.
 struct ArchiveRead : Archive
 {
-    char* FUN_00aa1ac0();
-    void FUN_00aa16d0(int, int);
+    char* NiFile_GetBuffer();
+    void NiFile_Seek(int, int);
     unsigned int FUN_00aa1570(void*, unsigned int);
     int GetCurrentPos()
     {
@@ -3403,7 +3448,7 @@ unsigned int ArchiveFile::ReadAtOffset(char* output, unsigned int size, unsigned
         int available = reinterpret_cast<ArchiveRead*>(GetArchive())->GetReadSize() - bufferOffset;
         if (available > (int)size)
             available = size;
-        RenderCopyData(output, reinterpret_cast<ArchiveRead*>(GetArchive())->FUN_00aa1ac0() + bufferOffset, available);
+        RenderCopyData(output, reinterpret_cast<ArchiveRead*>(GetArchive())->NiFile_GetBuffer() + bufferOffset, available);
         output += available;
         if (size == available)
         {
@@ -3418,7 +3463,7 @@ unsigned int ArchiveFile::ReadAtOffset(char* output, unsigned int size, unsigned
     reinterpret_cast<ArchiveRead*>(GetArchive())->SetReadSize(0);
     if (end = position - difference)
     {
-        reinterpret_cast<ArchiveRead*>(GetArchive())->FUN_00aa16d0(end, DAT_010a2484);
+        reinterpret_cast<ArchiveRead*>(GetArchive())->NiFile_Seek(end, DAT_010a2484);
         reinterpret_cast<ArchiveRead*>(GetArchive())->SetTruePos(position);
     }
     if (m_uiBufferSize + size + offset > m_uiValueId)
@@ -3429,11 +3474,11 @@ unsigned int ArchiveFile::ReadAtOffset(char* output, unsigned int size, unsigned
     {
         if (size < reinterpret_cast<ArchiveRead*>(GetArchive())->GetBufferSize())
         {
-            result = reinterpret_cast<ArchiveRead*>(GetArchive())->FUN_00aa1570(reinterpret_cast<ArchiveRead*>(GetArchive())->FUN_00aa1ac0(), size);
+            result = reinterpret_cast<ArchiveRead*>(GetArchive())->FUN_00aa1570(reinterpret_cast<ArchiveRead*>(GetArchive())->NiFile_GetBuffer(), size);
             reinterpret_cast<ArchiveRead*>(GetArchive())->SetPos(result);
             reinterpret_cast<ArchiveRead*>(GetArchive())->SetReadSize(result);
             copied = result < size ? result : size;
-            RenderCopyData(output, reinterpret_cast<ArchiveRead*>(GetArchive())->FUN_00aa1ac0(), copied);
+            RenderCopyData(output, reinterpret_cast<ArchiveRead*>(GetArchive())->NiFile_GetBuffer(), copied);
         }
         else
         {
@@ -3534,7 +3579,8 @@ struct OwnerList
 {
     Archive* object;
     ListItem* head;
-    OwnerList* FUN_00afc770(const NiPointer<Archive>& rhs)
+// src: COMMUNITY 0x00afc770
+    OwnerList* BSSimpleList_SetItem(const NiPointer<Archive>& rhs)
     {
         RefObj* r0 = 0;
         RefObj* r1 = 0;
@@ -3555,12 +3601,13 @@ struct OwnerList
         }
         return this;
     }
-    void FUN_00afcaf0();
+    void ReleaseStorage_00afcaf0();
 };
 
 // Deletes every node in the head list, resetting each node's next pointer, then releases the object reference via FUN_00afc770 with a null reference.
 // @fnv 0x00afcaf0
-void OwnerList::FUN_00afcaf0()
+// src: GUESS 0x00afcaf0 (confidence: low)
+void OwnerList::ReleaseStorage_00afcaf0()
 {
     while (head)
     {
@@ -3569,7 +3616,7 @@ void OwnerList::FUN_00afcaf0()
         delete head;
         head = next;
     }
-    FUN_00afc770(NiPointer<Archive>());
+    BSSimpleList_SetItem(NiPointer<Archive>());
 }
 
 namespace fnv_00af5480 {
@@ -3651,7 +3698,7 @@ struct LNode
     LNode* next;
 
     void DeleteNode(LNode* n);
-    LNode* FUN_00afc770(LNode* a2);
+    LNode* BSSimpleList_SetItem(LNode* a2);
 
     void Remove(NiPointer<Archive>& target)
     {
@@ -3678,7 +3725,7 @@ struct LNode
             {
                 prev = next;
                 next = prev->next;
-                FUN_00afc770(prev);
+                BSSimpleList_SetItem(prev);
                 prev->next = (LNode*)0;
                 DeleteNode(prev);
             }
@@ -3774,8 +3821,8 @@ struct ArchiveMemory
     void Deallocate(void*);
 };
 extern ArchiveMemory DAT_011f6238;
-void __cdecl FUN_00af5ab0(const char*);
-void* __cdecl FUN_00af4be0(const char*, int, int);
+void __cdecl ArchiveManager_LoadInvalidationFile(const char*);
+void* __cdecl LoadBSAFileHook(const char*, int, int);
 inline char* AllocationResult(char* const& result)
 {
     return result;
@@ -3798,7 +3845,8 @@ inline unsigned long TextLength(const char* text)
 }
 // Builds a comma-separated list of .bsa files from Plugins.txt, loads each archive and registers it by type, returning false if any archive fails to load.
 // @fnv 0x00af4550
-bool __cdecl FUN_00af4550()
+// src: COMMUNITY 0x00af4550
+bool __cdecl ArchiveManager_OpenMasterArchives()
 {
     _iobuf* flags;
     char extra[260];
@@ -3817,7 +3865,7 @@ bool __cdecl FUN_00af4550()
                         char* zz2;
                         if (!DAT_011acdf8)
                             return pForm;
-                        FUN_00af5ab0(DAT_011f8158);
+                        ArchiveManager_LoadInvalidationFile(DAT_011f8158);
                         for (unsigned int i = 0; i < 25; i++)
                         {
                             unsigned int minimum = i;
@@ -3873,7 +3921,7 @@ bool __cdecl FUN_00af4550()
                         {
                             while (*time == ' ' || *time == '\t' || *time == '\n')
                                 time++;
-                            NiPointer<Archive> archive = (Archive*)FUN_00af4be0(time, 0, 0);
+                            NiPointer<Archive> archive = (Archive*)LoadBSAFileHook(time, 0, 0);
                             if (archive)
                             {
                                 for (unsigned int kind = 0; kind < 9; kind++)
@@ -3907,7 +3955,8 @@ bool __cdecl FUN_00af4550()
 }  // namespace fnv_00af4550
 
 // @fnv 0x00af59e0
-void __cdecl FUN_00af59e0()
+// src: COMMUNITY 0x00af59e0
+void __cdecl nullsub_330()
 {}
 
 namespace fnv_00afd4e0 {
@@ -4178,7 +4227,8 @@ __forceinline void SetOpenNode(OpenNode* const& p)
 }
 // Opens a BSA archive by path, determines its load rank, and inserts it into the global archive list at the correct priority position.
 // @fnv 0x00af4be0
-Archive* __cdecl FUN_00af4be0(const char* path, unsigned short types, bool option)
+// src: COMMUNITY 0x00af4be0
+Archive* __cdecl LoadBSAFileHook(const char* path, unsigned short types, bool option)
 {
     if (!DAT_011acdf8)
         return 0;
@@ -4289,7 +4339,8 @@ static __forceinline Archive* GetArc(bool c, unsigned int i)
 }
 // Looks up the file path for an archive entry by index and compressed flag, copying it into pcOutput and returning whether a path was found.
 // @fnv 0x00af67d0
-bool __cdecl FUN_00af67d0(unsigned int uiIndex, ArchiveFileEntry* pkEntry, char* pcOutput)
+// src: COMMUNITY 0x00af67d0
+bool __cdecl ArchiveManager_GetFileNameForFileEntry(unsigned int uiIndex, ArchiveFileEntry* pkEntry, char* pcOutput)
 {
     bool bHasPath = false;
     bool bIsCompressed = (pkEntry->uiSize & 0x80000000);
@@ -4297,7 +4348,7 @@ bool __cdecl FUN_00af67d0(unsigned int uiIndex, ArchiveFileEntry* pkEntry, char*
     if (spCurrent)
     {
         spCurrent->Lock();
-        const char* pcSource = spCurrent->FUN_00af9ba0(pkEntry);
+        const char* pcSource = spCurrent->Archive_GetFileNameForFileEntry(pkEntry);
         if (pcSource)
         {
             strcpy_s(pcOutput, 260, pcSource);
@@ -4400,18 +4451,19 @@ struct DirectoryRecord
 };
 struct Filter
 {
-    int FUN_00afcf00(FileRecord*);
+    int BSHash_WildCardCompare(FileRecord*);
 };
 // 0x00af7060: Archive.h lacks FindHashEntry/IsFileEntryValid and this filename lookup signature.
 struct ArchivePathSearch : public Archive
 {
     bool FindHashEntry(int, int*, int);
     bool IsFileEntryValid(FileRecord*, bool);
-    const char* FUN_00af96d0(int, unsigned int);
+    const char* Archive_GetFileString(int, unsigned int);
 };
 void QuickSortSortKeys(HashKey**, unsigned int, unsigned int);
 // @fnv 0x00af7060
-HashKey** __cdecl FUN_00af7060(ArchivePathSearch* archive, unsigned int count, HashKey** keys, int directory,
+// src: COMMUNITY 0x00af7060
+HashKey** __cdecl ArchiveManager_AddArchiveToFileList(ArchivePathSearch* archive, unsigned int count, HashKey** keys, int directory,
                                Filter* filter, ArchivePathList* paths, const char* prefix)
 {
     EnterCriticalSection(&archive->m_kLock.m_kCriticalSection);
@@ -4437,7 +4489,7 @@ HashKey** __cdecl FUN_00af7060(ArchivePathSearch* archive, unsigned int count, H
             FileRecord* file = &dir->files[fileIndex];
             if (archive->IsFileEntryValid(file, false))
             {
-                int result = filter->FUN_00afcf00(file);
+                int result = filter->BSHash_WildCardCompare(file);
                 if (result == 0)
                 {
                     bool found = false;
@@ -4466,7 +4518,7 @@ HashKey** __cdecl FUN_00af7060(ArchivePathSearch* archive, unsigned int count, H
                     }
                     if (!found)
                     {
-                        const char* name = archive->FUN_00af96d0(directoryIndex, fileIndex);
+                        const char* name = archive->Archive_GetFileString(directoryIndex, fileIndex);
                         unsigned int length = CombinedLength(prefix, name);
                         char* full = new char[length];
                         CopyPath(full, length, prefix);
@@ -4533,16 +4585,17 @@ inline int CacheMode2()
 // Archive::FUN_00afd020 is an inline function: the constructor below does not expand it (/Ob1) but keeps the
 // frame slots of its inlinees at each of its four calls; its out-of-line copy is 0x00afd020.
 // @fnv 0x00afd020
-inline bool Archive::FUN_00afd020()
+// src: COMMUNITY 0x00afd020
+inline bool Archive::GetLoadStrings()
 {
     ArgPair p[5];
     return (DAT_011acdf9 || DAT_011f8154 || (unsigned char)+((m_uiArchiveFlags & 0x80) != 0) ||
-            (p[4].i = DAT_011acdfc, p[4].b = (m_uiArchiveFlags & 8) != 0, FUN_00afb170(p[4].b, p[4].i)) ||
-            (p[3].i = DAT_011ace00, p[3].b = (m_uiArchiveFlags & 0x10) != 0, FUN_00afb170(p[3].b, p[3].i)) ||
-            (p[2].i = DAT_011ace04, p[2].b = (m_uiArchiveFlags & 0x20) != 0, FUN_00afb170(p[2].b, p[2].i))) &&
+            (p[4].i = DAT_011acdfc, p[4].b = (m_uiArchiveFlags & 8) != 0, Archive_CheckRetain(p[4].b, p[4].i)) ||
+            (p[3].i = DAT_011ace00, p[3].b = (m_uiArchiveFlags & 0x10) != 0, Archive_CheckRetain(p[3].b, p[3].i)) ||
+            (p[2].i = DAT_011ace04, p[2].b = (m_uiArchiveFlags & 0x20) != 0, Archive_CheckRetain(p[2].b, p[2].i))) &&
            (!(unsigned short)(m_usFlags & 0x10) ||
-            (p[1].i = DAT_011ace00, p[1].b = (m_uiArchiveFlags & 0x10) != 0, FUN_00afb170(p[1].b, p[1].i)) ||
-            (p[0].i = DAT_011ace04, p[0].b = (m_uiArchiveFlags & 0x20) != 0, FUN_00afb170(p[0].b, p[0].i)));
+            (p[1].i = DAT_011ace00, p[1].b = (m_uiArchiveFlags & 0x10) != 0, Archive_CheckRetain(p[1].b, p[1].i)) ||
+            (p[0].i = DAT_011ace04, p[0].b = (m_uiArchiveFlags & 0x20) != 0, Archive_CheckRetain(p[0].b, p[0].i)));
 }
 
 using fnv_00af7eb0::ArcLoadChars;
@@ -4585,7 +4638,7 @@ Archive::Archive(const char* apPath, int aiMode, bool abHeaderOnly, bool abPrepa
         delete[] pEntries;
         pEntries = new ArchiveEntry[GetDirectoryCount()];
         ArcReadEntries(*this, pEntries, GetDirectoryCount());
-        if (HasArchiveFlag(1) && FUN_00afd020())
+        if (HasArchiveFlag(1) && GetLoadStrings())
         {
             SetStatus<0x10>(true);
             delete[] m_pDirectoryNames;
@@ -4593,7 +4646,7 @@ Archive::Archive(const char* apPath, int aiMode, bool abHeaderOnly, bool abPrepa
             m_pDirectoryNames = new char[GetDirectoryNamesLength()];
             m_puiDirectoryNameOffsets = new unsigned int[GetDirectoryCount()];
         }
-        if (HasArchiveFlag(2) && FUN_00afd020())
+        if (HasArchiveFlag(2) && GetLoadStrings())
         {
             SetStatus<0x20>(true);
             delete[] m_pFileNames;
@@ -4613,7 +4666,7 @@ Archive::Archive(const char* apPath, int aiMode, bool abHeaderOnly, bool abPrepa
             {
                 unsigned char length;
                 ArcLoadChars(*this, &length, 1);
-                if (FUN_00afd020())
+                if (GetLoadStrings())
                 {
                     ArcLoadChars(*this, m_pDirectoryNames + dirOffset, length);
                     m_puiDirectoryNameOffsets[i] = dirOffset;
@@ -4633,7 +4686,7 @@ Archive::Archive(const char* apPath, int aiMode, bool abHeaderOnly, bool abPrepa
         if (HasArchiveFlag(2))
         {
             m_uiFileNamesOffset = GetTruePosition();
-            if (FUN_00afd020())
+            if (GetLoadStrings())
             {
                 ArcLoadChars(*this, m_pFileNames, GetFileNamesLength());
                 for (unsigned int i = 0; i < GetDirectoryCount(); ++i)
@@ -4678,17 +4731,17 @@ extern int DAT_010a2480;
 extern int DAT_010a2484;
 struct ArcMemMgr
 {
-    void FUN_00aa4060(void* p);
-    void* FUN_00aa3e40(unsigned int uiSize);
+    void MemoryManager_Deallocate(void* p);
+    void* Game_DoHeapAlloc(unsigned int uiSize);
 };
 extern ArcMemMgr DAT_011f6238;
 inline void ArcFree(void* p)
 {
-    DAT_011f6238.FUN_00aa4060(p);
+    DAT_011f6238.MemoryManager_Deallocate(p);
 }
 inline void* ArcAlloc(unsigned int uiSize)
 {
-    return DAT_011f6238.FUN_00aa3e40(uiSize);
+    return DAT_011f6238.Game_DoHeapAlloc(uiSize);
 }
 struct ArcEntry
 {
@@ -4752,7 +4805,7 @@ char* ArchiveDirectoryStringLookup::GetString(unsigned int uiIndex)
         if (m_pDirectoryNames)
         {
             pcOld2 = m_pDirectoryNames;
-            DAT_011f6238.FUN_00aa4060(pcOld2);
+            DAT_011f6238.MemoryManager_Deallocate(pcOld2);
             m_pDirectoryNames = 0;
         }
         pcNew2 = (char*)ArcAlloc(ucLen);
@@ -4767,8 +4820,8 @@ char* ArchiveDirectoryStringLookup::GetString(unsigned int uiIndex)
 namespace fnv_00afa8e0 {
 struct PoolY
 {
-    void* FUN_00aa3e40(unsigned int uiSize);
-    void FUN_00aa4060(void* p);
+    void* Game_DoHeapAlloc(unsigned int uiSize);
+    void MemoryManager_Deallocate(void* p);
 };
 extern PoolY DAT_011f6238;
 extern bool DAT_011f8154;
@@ -4780,7 +4833,7 @@ extern "C" int __cdecl FUN_00ecbc5b(char* s, unsigned int sz);
 extern "C" char* __cdecl FUN_00ec68e4(const char* a, const char* b);
 inline void* AllocNY(unsigned int n)
 {
-    return DAT_011f6238.FUN_00aa3e40(n + 1);
+    return DAT_011f6238.Game_DoHeapAlloc(n + 1);
 }
 inline void CopyStrY(char* d, unsigned int n, const char* s)
 {
@@ -4802,7 +4855,7 @@ struct ArchivePathComponent : public Archive
         return (m_uiArchiveFlags & 2) != 0;
     }
     const char* GetString(int a);
-    const char* FUN_00af96d0(int a, int b);
+    const char* Archive_GetFileString(int a, int b);
     const char* GetPathComponent(int a1, int a2, const char* pPath);
 };
 // Splits pPath into directory and file, resolves a1/a2 via FUN_00af9bf0, and returns the matching directory or file name after case-insensitive comparison.
@@ -4815,7 +4868,7 @@ const char* ArchivePathComponent::GetPathComponent(int a1, int a2, const char* p
         char szFile7[0x104];
         FUN_00ec7f1e(pPath, 0, 0, szDirX, 0x104, szFile7, 0x104, 0, 0);
         int iA4, iB3;
-        if (FUN_00af9bf0(a1, a2, &iA4, (int)&iB3, 0))
+        if (FindFile_00af9bf0(a1, a2, &iA4, (int)&iB3, 0))
         {
             char* pDirCopyX_lvyahv;
             char* pFileCopyTmp_lun;
@@ -4828,7 +4881,7 @@ const char* ArchivePathComponent::GetPathComponent(int a1, int a2, const char* p
             void* q_u;
             void* q_ewlv;
             pDirName_mcmb = GetString(iA4);
-            pFileName_zpqwby = FUN_00af96d0(iA4, iB3);
+            pFileName_zpqwby = Archive_GetFileString(iA4, iB3);
             t_elydin = (char*)AllocNY(FUN_00ec6130(pDirName_mcmb));
             pDirCopyX_lvyahv = t_elydin;
             t_szknnb = (char*)AllocNY(FUN_00ec6130(pFileName_zpqwby));
@@ -4842,17 +4895,17 @@ const char* ArchivePathComponent::GetPathComponent(int a1, int a2, const char* p
             if (FUN_00ec68e4(pDirCopyX_lvyahv, szDirX))
             {
                 q_pddrt = pDirCopyX_lvyahv;
-                DAT_011f6238.FUN_00aa4060(q_pddrt);
+                DAT_011f6238.MemoryManager_Deallocate(q_pddrt);
                 q_cyqb = pFileCopyTmp_lun;
-                DAT_011f6238.FUN_00aa4060(q_cyqb);
+                DAT_011f6238.MemoryManager_Deallocate(q_cyqb);
                 return pDirName_mcmb;
             }
             if (FUN_00ec68e4(pFileCopyTmp_lun, szFile7))
             {
                 q_u = pDirCopyX_lvyahv;
-                DAT_011f6238.FUN_00aa4060(q_u);
+                DAT_011f6238.MemoryManager_Deallocate(q_u);
                 q_ewlv = pFileCopyTmp_lun;
-                DAT_011f6238.FUN_00aa4060(q_ewlv);
+                DAT_011f6238.MemoryManager_Deallocate(q_ewlv);
                 return pFileName_zpqwby;
             }
         }
@@ -4935,14 +4988,14 @@ inline ArchiveEntry* Archive::GetEntry(int index)
 
 namespace fnv_00af7400 {
 const char* __cdecl SkipDataPrefix(const char*);
-int __cdecl FUN_00af7d80(const char*);
+int __cdecl ArchiveManager_GetArchiveTypeFromFileName(const char*);
 
 class FUN_00afd390_class
 {
   public:
     int unk00;
     int unk04;
-    void* FUN_00afd390(const char*, int);
+    void* UpdateState_00afd390(const char*, int);
 };
 
 // 0x00af7400 calls FindHashEntry (0x00af9c50), absent from Archive.h.
@@ -4971,7 +5024,7 @@ __forceinline const char* ResolveNameInline(ArchiveEntry& entry, NiPointer<Archi
     int id = entry.m_uiCount;
     static FUN_00aa5140 s_obj;
     const char* name = s_obj.FUN_00aa5230(id);
-    return (const char*)((Archive*)(Archive*)archive)->FUN_00af96d0(index, (unsigned int)name);
+    return (const char*)((Archive*)(Archive*)archive)->Archive_GetFileString(index, (unsigned int)name);
 }
 
 // Resolves a data path to an archive entry name, copying the result into dest and returning success.
@@ -4983,10 +5036,10 @@ bool __cdecl ResolveArchivePath(const char* path, char* dest, unsigned int flags
     unsigned int len5 = strlen(path);
     if (flags == 0xffff && (signed char)path[len5 - 1] != '\\')
     {
-        flags = FUN_00af7d80(path);
+        flags = ArchiveManager_GetArchiveTypeFromFileName(path);
     }
     FUN_00afd390_class key;
-    key.FUN_00afd390(path, 1);
+    key.UpdateState_00afd390(path, 1);
 
     ArchiveEntry* spFoundArchive2 = 0;
     NiPointer<Archive> pEntry = 0;
@@ -5119,7 +5172,7 @@ struct ArchiveStreamFile : public ArchiveStreamBase, public StreamSecondary
 ArchiveStreamFile::ArchiveStreamFile()
 {}
 
-unsigned char __fastcall FUN_00afcfe0(void*);
+unsigned char __fastcall BSHash_ExtensionIndex(void*);
 
 struct FUN_00afcf00_t
 {
@@ -5128,16 +5181,17 @@ struct FUN_00afcf00_t
     unsigned char field_3;
     unsigned int field_4;
 
-    int FUN_00afcf00(FUN_00afcf00_t* other);
+    int BSHash_WildCardCompare(FUN_00afcf00_t* other);
 };
 
 // Compares two FUN_00afcf00_t objects by field_4, field_2, and FUN_00afcfe0 result, returning -1, 0, or 1.
 // @fnv 0x00afcf00
-int FUN_00afcf00_t::FUN_00afcf00(FUN_00afcf00_t* other)
+// src: COMMUNITY 0x00afcf00
+int FUN_00afcf00_t::BSHash_WildCardCompare(FUN_00afcf00_t* other)
 {
     if ((unsigned char)(field_3 & 0x7f) == 0x2a)
     {
-        if (FUN_00afcfe0(this) == FUN_00afcfe0(other))
+        if (BSHash_ExtensionIndex(this) == BSHash_ExtensionIndex(other))
         {
             return 0;
         }
@@ -5175,7 +5229,7 @@ int FUN_00afcf00_t::FUN_00afcf00(FUN_00afcf00_t* other)
         }
     }
 
-    if (FUN_00afcfe0(this) != FUN_00afcfe0(other))
+    if (BSHash_ExtensionIndex(this) != BSHash_ExtensionIndex(other))
     {
         return 1;
     }
@@ -5198,7 +5252,7 @@ extern "C" int __cdecl strcpy_s(char*, unsigned int, const char*);
 extern "C" char* __cdecl strrchr(const char*, int);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-int __cdecl FUN_00af7d80(const char*);
+int __cdecl ArchiveManager_GetArchiveTypeFromFileName(const char*);
 struct LNode;
 extern LNode* DAT_011f8160;
 
@@ -5279,7 +5333,7 @@ struct ArchivePathLookup : public Archive
         return reinterpret_cast<RecursiveMutex*>(&m_kLock.m_kCriticalSection);
     }
 
-    const char* FUN_00af96d0(unsigned, unsigned);
+    const char* Archive_GetFileString(unsigned, unsigned);
 };
 
 struct PathArchiveNode
@@ -5292,7 +5346,8 @@ const char* SkipDataPrefix(const char*);
 
 // Finds the archive entry matching path and mask, picks the lowest-offset file, and writes its resolved name into output.
 // @fnv 0x00af7800
-bool FUN_00af7800(const char* path, char* output, unsigned mask)
+// src: COMMUNITY 0x00af7800
+bool ArchiveManager_GetFileNameForSmallestFileInDirectory(const char* path, char* output, unsigned mask)
 {
 
     unsigned directoryIndex = 0;
@@ -5302,7 +5357,7 @@ bool FUN_00af7800(const char* path, char* output, unsigned mask)
     unsigned length2 = strlen(path);
 
     if (mask == 65535 && path[length2 - 1] != '\\')
-        mask = FUN_00af7d80(path);
+        mask = ArchiveManager_GetArchiveTypeFromFileName(path);
 
     ArchiveDirectoryKey key(path, 1);
 
@@ -5362,7 +5417,7 @@ bool FUN_00af7800(const char* path, char* output, unsigned mask)
             }
         }
 
-        const char* replacementVal = archiveTmp->FUN_00af96d0(directoryIndex, aBestA);
+        const char* replacementVal = archiveTmp->Archive_GetFileString(directoryIndex, aBestA);
 
         strcpy_s(output, 260, path);
 
@@ -5399,7 +5454,7 @@ inline void* operator new(unsigned int, void* memory)
     return memory;
 }
 extern const char DAT_010a445c[];
-BSFile* __cdecl FUN_00afdf00(const char*, int, unsigned int);
+BSFile* __cdecl FileFinder_GetFile_(const char*, int, unsigned int);
 struct FUN_00afd390
 {
     unsigned int low;
@@ -5449,8 +5504,9 @@ struct FUN_00afcce0
             count = size;
         }
     }
-    void FUN_00a0d0c0(unsigned int, unsigned int);
-    unsigned int FUN_00a11ee0()
+    void UpdateFields_00a0d0c0(unsigned int, unsigned int);
+// src: COMMUNITY 0x00a11ee0
+    unsigned int BSSimpleArray_AddUninitialized_0()
     {
         if (count == capacity)
         {
@@ -5463,16 +5519,17 @@ struct FUN_00afcce0
             else
             {
                 unsigned int newCapacity = capacity > 1024 ? capacity + 1024 : capacity * 2;
-                FUN_00a0d0c0(newCapacity, count);
+                UpdateFields_00a0d0c0(newCapacity, count);
                 capacity = newCapacity;
             }
         }
         ++count;
         return count - 1;
     }
-    unsigned int FUN_00a11d20(FUN_00afd390* const& value)
+// src: COMMUNITY 0x00a11d20
+    unsigned int BSSimpleArray_Add(FUN_00afd390* const& value)
     {
-        unsigned int index = FUN_00a11ee0();
+        unsigned int index = BSSimpleArray_AddUninitialized_0();
         for (unsigned int i = 0; i < 1; ++i)
             new (&entries[index + i]) FUN_00afd390*;
         entries[index] = value;
@@ -5495,12 +5552,13 @@ inline unsigned int BSFile::BinaryRead(void* buffer, unsigned int bytes, unsigne
 }
 // Opens an archive list file, reads each line, and adds entries to DAT_011f816c or DAT_011f8168 based on a substring check.
 // @fnv 0x00af5ab0
-void __cdecl FUN_00af5ab0(const char* path)
+// src: COMMUNITY 0x00af5ab0
+void __cdecl ArchiveManager_LoadInvalidationFile(const char* path)
 {
     BSFile* file;
     if (path)
     {
-        file = (BSFile*)FUN_00afdf00(path, 0, 0x4000);
+        file = (BSFile*)FileFinder_GetFile_(path, 0, 0x4000);
         if (!file || !file->Open(false, false))
         {
             delete file;
@@ -5519,13 +5577,13 @@ void __cdecl FUN_00af5ab0(const char* path)
                 entryPath = lineBuffer;
                 if (lineBuffer[0] == '\\')
                     entryPath++;
-                reinterpret_cast<FUN_00afcce0*>(DAT_011f816c)->FUN_00a11d20(new FUN_00afd390(entryPath, 1));
+                reinterpret_cast<FUN_00afcce0*>(DAT_011f816c)->BSSimpleArray_Add(new FUN_00afd390(entryPath, 1));
             }
             else
             {
                 if (!DAT_011f8168)
                     DAT_011f8168 = reinterpret_cast<ArchiveArray*>(new FUN_00afcce0);
-                reinterpret_cast<FUN_00afcce0*>(DAT_011f8168)->FUN_00a11d20(new FUN_00afd390(lineBuffer, 0));
+                reinterpret_cast<FUN_00afcce0*>(DAT_011f8168)->BSSimpleArray_Add(new FUN_00afd390(lineBuffer, 0));
             }
         }
         delete file;
@@ -5547,11 +5605,12 @@ struct DecompReadFile : public CompressedArchiveFile
 {
     void FUN_00aa15a0();
     unsigned int ReadAtOffset(void* buffer, unsigned int size, int mode);
-    unsigned int FUN_00afc0e0(char* buffer, unsigned int size);
+    unsigned int CompressedArchiveFile_ReadF(char* buffer, unsigned int size);
 };
 // Reads up to size bytes of decompressed data into buffer, refilling the compressed input buffer as needed, and returns the number of bytes read.
 // @fnv 0x00afc0e0
-unsigned int DecompReadFile::FUN_00afc0e0(char* buffer, unsigned int size)
+// src: XBOX_PDB 0x00afc0e0
+unsigned int DecompReadFile::CompressedArchiveFile_ReadF(char* buffer, unsigned int size)
 {
     unsigned int bytesToRead = size;
     unsigned int nRead = 0;
@@ -5663,12 +5722,13 @@ inline Archive* SelectMaster(int index)
 }
 // Selects an archive using kind and calls its FUN_00afa6e0 method with directory, file, and name.
 // @fnv 0x00af6430
-int __cdecl FUN_00af6430(int aiMasterIndex, int directory, int file, int name)
+// src: COMMUNITY 0x00af6430
+int __cdecl ArchiveManager_GetFileEntryForFile_0(int aiMasterIndex, int directory, int file, int name)
 {
     int result = 0;
     NiPointer<Archive> archive(SelectMaster(aiMasterIndex));
     if (archive)
-        result = archive->FUN_00afa6e0(directory, file, name);
+        result = archive->GetFileEntryForFile(directory, file, name);
     return result;
 }
 }

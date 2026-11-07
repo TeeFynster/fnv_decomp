@@ -38,9 +38,9 @@ public:
 
     void NiMemStreamDestructor();
     void SetSwapMode(bool bDoSwap);
-    void __thiscall FUN_00aa2d70(int iNumBytes);
-    unsigned int __thiscall FUN_00aa2dd0(const void* data, unsigned int numBytes);
+    void __thiscall Seek_00aa2d70(int iNumBytes);
+    unsigned int __thiscall MemWrite(const void* data, unsigned int numBytes);
     void FUN_00aa2fb0(char* buffer, int size);
-    void FUN_00aa2ff0();
-    char* FUN_00aa2d60();
+    void NiMemStream_NiMemStream();
+    char* NiMemStream_Str();
 };

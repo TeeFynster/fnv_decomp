@@ -78,11 +78,11 @@ public:
     void SetProduct(const hkTransform& a, const hkTransform& b);
     void SetMulInverse(const hkTransform& a, const hkTransform& b);
     hkBool IsEqualWithinTolerance(const hkTransform& other, float epsilon) const;
-    void FUN_00cb2240(const hkTransform& a, const hkTransform& b);
-    void FUN_00cb22f0(const hkTransform& a, const hkTransform& b);
-    void FUN_00cb22f0(const void* a, const void* b);
-    void FUN_00cb23e0(const hkTransform& transform);
-    void FUN_0056d300(const hkVector4& vector);
+    void hkTransform_setMul(const hkTransform& a, const hkTransform& b);
+    void hkTransform_setMulInverseMul(const hkTransform& a, const hkTransform& b);
+    void hkTransform_setMulInverseMul(const void* a, const void* b);
+    void ProcessTransformedMatrixCopy_00cb23e0(const hkTransform& transform);
+    void bhkRigidBodyCinfo_SetPosition(const hkVector4& vector);
 
     static void* __cdecl operator new(size_t nbytes);
     static const hkTransform& __cdecl GetIdentityTransform();

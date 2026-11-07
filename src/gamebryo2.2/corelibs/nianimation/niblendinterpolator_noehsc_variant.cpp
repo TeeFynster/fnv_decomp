@@ -31,14 +31,15 @@ struct CloneInterpItem
 
 struct BlendCopy : NiBlendInterpolator
 {
-    void FUN_00aa1000(NiBlendInterpolator* destination, CloningProcess* process);
-    void FUN_00a37510(NiBlendInterpolator* destination, CloningProcess* process);
+    void NiCollisionObject_CopyMembers(NiBlendInterpolator* destination, CloningProcess* process);
+    void NiBlendInterpolator_CopyMembers(NiBlendInterpolator* destination, CloningProcess* process);
 };
 
 // @fnv 0x00a37510
-void BlendCopy::FUN_00a37510(NiBlendInterpolator* destination, CloningProcess* process)
+// src: XBOX_PDB 0x00a37510
+void BlendCopy::NiBlendInterpolator_CopyMembers(NiBlendInterpolator* destination, CloningProcess* process)
 {
-    FUN_00aa1000(destination, process);
+    NiCollisionObject_CopyMembers(destination, process);
     destination->m_uiObjectFlags = m_uiObjectFlags;
     destination->m_ucArraySize = m_ucArraySize;
     destination->m_pInterpArray = (NiBlendInterpolator__InterpArrayItem*)new CloneInterpItem[m_ucArraySize];
@@ -99,11 +100,12 @@ class FUN_00a370a0 : public NiBlendInterpolator__InterpArrayItem
 class NiBlendInterpolatorW : public NiBlendInterpolator
 {
   public:
-    bool FUN_00a37690();
+    bool NiBlendInterpolator_ReallocateArrays();
 };
 
 // @fnv 0x00a37690
-bool NiBlendInterpolatorW::FUN_00a37690()
+// src: XBOX_PDB 0x00a37690
+bool NiBlendInterpolatorW::NiBlendInterpolator_ReallocateArrays()
 {
     if (DAT_011a83ff == 0)
         return false;
@@ -140,7 +142,7 @@ struct FUN_00a370a0
     {}
     static void* operator new[](unsigned int n) throw()
     {
-        return DAT_011f6238.FUN_00aa3e40(n);
+        return DAT_011f6238.Game_DoHeapAlloc(n);
     }
     void LoadFromStream(Stream100&);
 };
@@ -469,15 +471,16 @@ struct Blend100
     Item100* array;
     void* singleInterpolator;
     float weightThreshold, singleTime, highSum, nextSum, highEase;
-    void FUN_00a88a40(Stream100&);
-    void FUN_00a37980(Stream100&);
+    void BSTextureSet_LoadBinary(Stream100&);
+    void NiBlendInterpolator_LoadBinary(Stream100&);
 };
 
 // @fnv 0x00a37980
-void Blend100::FUN_00a37980(Stream100& stream)
+// src: XBOX_PDB 0x00a37980
+void Blend100::NiBlendInterpolator_LoadBinary(Stream100& stream)
 {
 
-    FUN_00a88a40(stream);
+    BSTextureSet_LoadBinary(stream);
 
     if (stream.version >= 0x0a010070)
     {

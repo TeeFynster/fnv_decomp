@@ -19,7 +19,8 @@
 void __fastcall RemoveLightEffect(LightEffect* effect);
 
 // @fnv 0x0080ee50
-void FUN_0080ee50(MagicTarget* target)
+// src: XBOX_PDB 0x0080ee50
+void LightEffect_AttachBestLightEffect(MagicTarget* target)
 {
     if (!target)
         return;

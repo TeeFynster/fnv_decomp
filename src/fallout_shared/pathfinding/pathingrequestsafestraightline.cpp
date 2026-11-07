@@ -22,7 +22,8 @@ void* PathingRequestSafeStraightLine::FUN_006e5fd0(unsigned int flags)
 }
 
 // @fnv 0x006e60c0
-void __thiscall PathingRequestSafeStraightLine::FUN_006e60c0(int a1)
+// src: XBOX_PDB 0x006e60c0
+void __thiscall PathingRequestSafeStraightLine::SetTarget_006e60c0(int a1)
 {
     pTarget = pTarget;
 }
@@ -30,24 +31,26 @@ void __thiscall PathingRequestSafeStraightLine::FUN_006e60c0(int a1)
 // @fnv 0x006e60e0
 void __thiscall PathingRequestSafeStraightLine::SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    FUN_006e5f00(apSaveGameBuffer);
+    PathingRequestOptimalLocation_SaveGame(apSaveGameBuffer);
     apSaveGameBuffer->SerializeFormData((void*)pTarget, 0);
 }
 
 // Calls the base load routine on buffer, then loads the field at offset 0xb8 from the buffer.
 // @fnv 0x006e6110
-void PathingRequestSafeStraightLine::FUN_006e6110(BGSLoadFormBuffer* buffer)
+// src: XBOX_PDB 0x006e6110
+void PathingRequestSafeStraightLine::LoadGame_006e6110(BGSLoadFormBuffer* buffer)
 {
-    PathingRequestClosePoint::FUN_006e5f50(buffer);
+    PathingRequestClosePoint::PathingRequestOptimalLocation_LoadGame(buffer);
     buffer->ReadFormIdentifier((void*)&pTarget);
 }
 
 // @fnv 0x006e6080
-void __thiscall PathingRequestSafeStraightLine::FUN_006e6080(PathingRequest* apDest)
+// src: XBOX_PDB 0x006e6080
+void __thiscall PathingRequestSafeStraightLine::CopyTo_006e6080(PathingRequest* apDest)
 {
     PathingRequestSafeStraightLine* pdest = (PathingRequestSafeStraightLine*)apDest;
     PathingRequest::CopyTo(pdest);
-    pdest->FUN_006e60c0(pTarget);
+    pdest->SetTarget_006e60c0(pTarget);
 }
 
 // The shared PathingRequestClosePoint lacks the copy constructor at 0x006e3fb0,
@@ -55,7 +58,7 @@ void __thiscall PathingRequestSafeStraightLine::FUN_006e6080(PathingRequest* apD
 // Retain the constructor helpers until those declarations are available.
 struct S_004036b0
 {
-    int FUN_004036b0();
+    int TES_QPlaceableWaterCount();
 };
 struct FUN_006e3fb0_base
 {
@@ -73,7 +76,7 @@ struct FUN_006e6010 : FUN_006e3fb0_base
 // @fnv 0x006e6010
 FUN_006e6010::FUN_006e6010(int ai) : FUN_006e3fb0_base(ai)
 {
-    pTarget = ((S_004036b0*)(void*)ai)->FUN_004036b0();
+    pTarget = ((S_004036b0*)(void*)ai)->TES_QPlaceableWaterCount();
 }
 
 // @fnv 0x006e6140

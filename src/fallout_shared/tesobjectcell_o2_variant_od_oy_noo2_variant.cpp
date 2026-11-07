@@ -8,8 +8,8 @@
 #include "tesobjectcell_packet.h"
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
-unsigned int FUN_0054f4c0();
-NiAVObject* FUN_0054f4f0();
+unsigned int TESTerrainLODManager_GetGrassNode();
+NiAVObject* TESMain_GetWeatherRoot();
 struct FUN_00b5a9a0_Node
 {
     void* m_pListObject;
@@ -21,7 +21,7 @@ struct FUN_00b5a9a0_List
     FUN_00b5a9a0_Node* m_pHead;
     FUN_00b5a9a0_Node* m_pTail;
     unsigned int m_uiCount;
-    void __thiscall FUN_00b5a9a0(FUN_00b5a9a0_Node* node);
+    void __thiscall NiTListBase_AddNodeTail(FUN_00b5a9a0_Node* node);
 };
 void* __cdecl _memmove(void* dst, const void* src, unsigned int count);
 void* __cdecl _fnv_zlib_memset(void* ptr, int value, unsigned int count);
@@ -30,7 +30,7 @@ struct FUN_00bb39e0_shell
     int m_00;
     int m_04;
     void* m_08;
-    void FUN_00bb39e0(const void* src, unsigned int count);
+    void UpdateFields_00bb39e0(const void* src, unsigned int count);
 };
 
 #include <xmmintrin.h>
@@ -49,11 +49,12 @@ FUN_004a3c90::FUN_004a3c90(const FUN_004a3c90& src)
 struct FUN_005532a0_cls
 {
     __m128 m_v;
-    FUN_005532a0_cls* FUN_005532a0(float a1, float a2, float a3, float a4);
+    FUN_005532a0_cls* hkVector4_hkVector4(float a1, float a2, float a3, float a4);
 };
 
 // @fnv 0x005532a0
-FUN_005532a0_cls* FUN_005532a0_cls::FUN_005532a0(float a1, float a2, float a3, float a4)
+// src: XBOX_PDB 0x005532a0
+FUN_005532a0_cls* FUN_005532a0_cls::hkVector4_hkVector4(float a1, float a2, float a3, float a4)
 {
     m_v = _mm_setr_ps(a1, a2, a3, a4);
     return this;

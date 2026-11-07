@@ -28,7 +28,7 @@ typedef unsigned int NiUInt32;
 // Nivid3D shader program with its compiled D3D program state.
 // Nivid3D pixel shader program.
 struct NiD3DPixelShader;
-void __cdecl FUN_00e92f30(NiD3DPixelShader*);
+void __cdecl NiD3DShaderProgramFactory_RecreatePixelShader(NiD3DPixelShader*);
 struct FUN_00e898d0_shell : NiD3DPixelShader
 {
     void FUN_00e898d0();
@@ -55,12 +55,13 @@ typedef void(__stdcall* S_00e89a40_Callback)(void* object, void* source, void* d
 
 struct S_00e89a40_Shell : NiD3DPixelShader
 {
-    bool FUN_00e89a40(NiShaderConstantMapEntry* data, void* destination, unsigned int count, unsigned int stride,
+    bool NiD3DPixelShader_SetShaderConstantArray(NiShaderConstantMapEntry* data, void* destination, unsigned int count, unsigned int stride,
                       const unsigned short* indices);
 };
 
 // @fnv 0x00e89a40
-bool __thiscall S_00e89a40_Shell::FUN_00e89a40(NiShaderConstantMapEntry* data, void* destination, unsigned int count,
+// src: XBOX_PDB 0x00e89a40
+bool __thiscall S_00e89a40_Shell::NiD3DPixelShader_SetShaderConstantArray(NiShaderConstantMapEntry* data, void* destination, unsigned int count,
                                                unsigned int stride, const unsigned short* indices)
 {
     unsigned int type = DAT_011f5fc4[data->m_uiValue1 & 0xff];
@@ -134,11 +135,12 @@ struct ShaderConstantRenderState
 
 struct FUN_00e899a0_shell : NiD3DPixelShader
 {
-    bool FUN_00e899a0(NiShaderConstantMapEntry* pkEntry, const void* pvDataSource, unsigned int uiRegisterCount);
+    bool NiD3DPixelShader_SetShaderConstant(NiShaderConstantMapEntry* pkEntry, const void* pvDataSource, unsigned int uiRegisterCount);
 };
 
 // @fnv 0x00e899a0
-bool FUN_00e899a0_shell::FUN_00e899a0(NiShaderConstantMapEntry* pkEntry, const void* pvDataSource,
+// src: XBOX_PDB 0x00e899a0
+bool FUN_00e899a0_shell::NiD3DPixelShader_SetShaderConstant(NiShaderConstantMapEntry* pkEntry, const void* pvDataSource,
                                       unsigned int uiRegisterCount)
 {
     if (!pvDataSource)

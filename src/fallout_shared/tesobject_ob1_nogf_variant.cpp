@@ -115,11 +115,12 @@ template <class T> class InsertVector : public std::_Vector_val<T, std::allocato
         stdext::unchecked_uninitialized_fill_n(dest, count, value, this->_Alval);
         return dest + count;
     }
-    inline void FUN_00abfa90(const_iterator, size_type, const T&);
+    inline void UpdateState_00abfa90(const_iterator, size_type, const T&);
 };
 
 // @fnv 0x00abfa90
-template <> void InsertVector<El>::FUN_00abfa90(V::const_iterator _Where, V::size_type _Count, const El& _Val)
+// src: GUESS 0x00abfa90 (confidence: low)
+template <> void InsertVector<El>::UpdateState_00abfa90(V::const_iterator _Where, V::size_type _Count, const El& _Val)
 {
     size_type _Capacity = capacity();
     if (_Count == 0)
@@ -177,5 +178,5 @@ template <> void InsertVector<El>::FUN_00abfa90(V::const_iterator _Where, V::siz
 
 void emit_insert(InsertVector<El>* p, V::const_iterator w, V::size_type n, const El& x)
 {
-    p->FUN_00abfa90(w, n, x);
+    p->UpdateState_00abfa90(w, n, x);
 }

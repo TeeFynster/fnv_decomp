@@ -33,7 +33,8 @@ int __thiscall SummonCreatureEffect::GetZero(int a, int b, int c)
 }
 
 // @fnv 0x00829720
-unsigned short __thiscall SummonCreatureEffect::FUN_00829720(Actor* actor)
+// src: XBOX_PDB 0x00829720
+unsigned short __thiscall SummonCreatureEffect::GetSaveSize_00829720(Actor* actor)
 {
     unsigned short isize = 0;
     isize += AssociatedItemEffect::GetSaveSize(actor);
@@ -95,7 +96,7 @@ struct SelectedRecord
     int z;
 };
 extern void* selectionContext;
-int __cdecl FUN_00828b20(const void*, const void*);
+int __cdecl SummonPosSort(const void*, const void*);
 void __cdecl FUN_00ec6f20(int, int, int, int);
 // Collects records via GetZero, sorts them with FUN_00ec6f20, finds the first matching FUN_00828f00, copies it to output and frees the array.
 // @fnv 0x00828cb0
@@ -107,9 +108,9 @@ bool SummonCreatureEffect::SelectRecord(void* context, int flags, SelectedRecord
         return false;
     int index = 0;
     selectionContext = context;
-    FUN_00ec6f20((int)entries, count, sizeof(SelectedRecord), (int)&FUN_00828b20);
+    FUN_00ec6f20((int)entries, count, sizeof(SelectedRecord), (int)&SummonPosSort);
     index = 0;
-    while (index < count && !FUN_00828f00(flags, &entries[index]))
+    while (index < count && !SummonCreatureEffect_CheckSummonLocation(flags, &entries[index]))
     {
         ++index;
     }
@@ -139,7 +140,7 @@ struct SummoncreatureeffectListNodeView
 extern Actor* g_thePlayer;
 struct GlobalObject2_0040c150
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 extern GlobalObject2_0040c150 g_011d171c;
 extern float DAT_01015f5c;
@@ -169,13 +170,13 @@ void SummonCreatureEffect::DispelOldestQualifyingEffect()
         }
         node = node->_ref_00726070();
     }
-    if (bestEffect && bestAge > *g_011d171c.FUN_0043d4d0())
+    if (bestEffect && bestAge > *g_011d171c.Setting_Int())
         bestEffect->Dispel(false);
 }
 
-float FUN_005b9e80(float f);
-float FUN_005c53d0(float f);
-void* FUN_006890b0(void* pCell, float fScale, const char* m_kModelObjectsItem, NiPoint3 point, NiPoint3 vel, float fScale2,
+float NiCos(float f);
+float NiSin_005c53d0(float f);
+void* BSTempEffectParticle_Spawn(void* pCell, float fScale, const char* m_kModelObjectsItem, NiPoint3 point, NiPoint3 vel, float fScale2,
                    int iFlags, int iUnk);
 float GetAnimValueByPrefix(void* pA, const char* m_pIdleForm, const char* pEvent);
 
@@ -210,7 +211,7 @@ struct S_008287e0_Item
 
 struct S_008287e0_Temp
 {
-    void FUN_00689920(const char* m_pIdleForm);
+    void PlaySequence(const char* m_pIdleForm);
     void* FUN_00490e40();
 };
 
@@ -220,7 +221,8 @@ struct S_008287e0_Magic
 };
 
 // @fnv 0x008287e0
-void SummonCreatureEffect::FUN_008287e0()
+// src: XBOX_PDB 0x008287e0
+void SummonCreatureEffect::Start_008287e0()
 {
     Actor* ref = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : 0;
     if (!ref)
@@ -233,10 +235,10 @@ void SummonCreatureEffect::FUN_008287e0()
         unk58 = point;
 
     const char* m_pIdleForm = "SpecialIdle_SummonEffect";
-    NiPoint3 vel = 64.0f * NiPoint3(-FUN_005c53d0(-unk64.z), FUN_005b9e80(-unk64.z), 0.0f);
+    NiPoint3 vel = 64.0f * NiPoint3(-NiSin_005c53d0(-unk64.z), NiCos(-unk64.z), 0.0f);
     void* m_kModelObjectsItem =
-        FUN_006890b0(ref->FUN_008d6f30(), 1.0f, ((S_008287e0_Item*)FUN_0084e3a0())->FUN_00825c00()->vfn05(), vel, unk58, 1.0f, 7, 0);
-    ((S_008287e0_Temp*)m_kModelObjectsItem)->FUN_00689920(m_pIdleForm);
+        BSTempEffectParticle_Spawn(ref->FUN_008d6f30(), 1.0f, ((S_008287e0_Item*)GetHavokWorldObjectCountInSceneGraph_0084e3a0())->FUN_00825c00()->vfn05(), vel, unk58, 1.0f, 7, 0);
+    ((S_008287e0_Temp*)m_kModelObjectsItem)->PlaySequence(m_pIdleForm);
     void* pAVObject = ((S_008287e0_Temp*)m_kModelObjectsItem)->FUN_00490e40();
     unk54 = GetAnimValueByPrefix(pAVObject, m_pIdleForm, "Hit");
 
@@ -288,7 +290,8 @@ SummonCreatureEffect* SummonCreatureEffect::CloneObject()
 
 // Allocates and constructs a summon effect from its caster, spell and effect item.
 // @fnv 0x00828760
-SummonCreatureEffect* __cdecl FUN_00828760(MagicCaster* caster, MagicItem* spell, EffectItem* effect)
+// src: XBOX_PDB 0x00828760
+SummonCreatureEffect* __cdecl SummonCreatureEffect_Instantiate(MagicCaster* caster, MagicItem* spell, EffectItem* effect)
 {
     return new SummonCreatureEffect(caster, spell, effect);
 }
@@ -297,11 +300,11 @@ struct FxnNode
 {
     Actor* FUN_00822b40();
     int FUN_0045cd60();
-    void FUN_008feab0(Actor* obj);
+    void HighProcess_FadeAndDelete(Actor* obj);
     void FUN_0040b800(int a);
 };
 
-void __cdecl FUN_0080b9e0(Actor* obj, Actor* node, int flag);
+void __cdecl CommandEffect_CleanupCommandedActor(Actor* obj, Actor* node, int flag);
 
 // @fnv 0x008289e0
 void SummonCreatureEffect::CleanupSummonedCreature()
@@ -313,14 +316,14 @@ void SummonCreatureEffect::CleanupSummonedCreature()
         {
             if (!this->unk4C->HasHealth(false))
             {
-                this->unk4C->FUN_0089d900(0, 0.0f);
+                this->unk4C->Actor_Kill(0, 0.0f);
             }
-            ((FxnNode*)this->unk4C->FUN_008d8520())->FUN_008feab0(this->unk4C);
-            FUN_0080b9e0(this->unk4C, a, 1);
+            ((FxnNode*)this->unk4C->FUN_008d8520())->HighProcess_FadeAndDelete(this->unk4C);
+            CommandEffect_CleanupCommandedActor(this->unk4C, a, 1);
         }
         else
         {
-            FUN_0080b9e0(this->unk4C, a, 1);
+            CommandEffect_CleanupCommandedActor(this->unk4C, a, 1);
             this->unk4C->MarkForDeletion(true);
         }
         this->unk4C = 0;
@@ -337,7 +340,8 @@ float __cdecl ComputeDirectionalFalloff(int owner, int key);
 
 // Looks up two float values by id from g_011dcc58 and returns 0 if equal, 1 if the first is smaller, -1 otherwise.
 // @fnv 0x00828b20
-int __cdecl FUN_00828b20(int aiIdA, int aiIdB)
+// src: XBOX_PDB 0x00828b20
+int __cdecl SummonPosSort(int aiIdA, int aiIdB)
 {
     int idA = aiIdA;
     int idB = aiIdB;
@@ -357,11 +361,12 @@ int __cdecl FUN_00828b20(int aiIdA, int aiIdB)
     }
 }
 
-void __cdecl FUN_0080b8f0(Actor* t, Actor* actor);
+void __cdecl CommandEffect_UpdateCommandedActor(Actor* t, Actor* actor);
 extern Actor* DAT_011dea3c;
 
 // @fnv 0x00828ba0
-void SummonCreatureEffect::FUN_00828ba0(int unused)
+// src: XBOX_PDB 0x00828ba0
+void SummonCreatureEffect::Update_00828ba0(int unused)
 {
     Actor* actor = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : 0;
     if (!actor || (unk70 && (!unk4C || unk4C->HasHealth(false))))
@@ -377,7 +382,7 @@ void SummonCreatureEffect::FUN_00828ba0(int unused)
         unk70 = 1;
     }
     if (unk4C && !unk4C->HasHealth(false))
-        FUN_0080b8f0(unk4C, actor);
+        CommandEffect_UpdateCommandedActor(unk4C, actor);
 }
 
 extern float DAT_0101b2d0;
@@ -396,11 +401,11 @@ extern S_00828dc0_Mat DAT_011a9448;
 
 struct S_00828dc0_Obj
 {
-    void FUN_00439ef0(NiPoint3* out, int x);
+    void SubtractIntoVector(NiPoint3* out, int x);
 };
 
-void FUN_004b3ae0(NiPoint3* out, const NiPoint3* v, const S_00828dc0_Mat* m);
-float FUN_00408820(float f);
+void NiPoint3_TransformByMatrix3(NiPoint3* out, const NiPoint3* v, const S_00828dc0_Mat* m);
+float NiAbs_00408820(float f);
 
 // @fnv 0x00828dc0
 float ComputeDirectionalFalloff(Actor* actor, S_00828dc0_Obj* obj)
@@ -408,7 +413,7 @@ float ComputeDirectionalFalloff(Actor* actor, S_00828dc0_Obj* obj)
     float low = DAT_0101b2d0;
     float high = DAT_01013d84;
     float delta[sizeof(NiPoint3) / sizeof(float)];
-    obj->FUN_00439ef0(reinterpret_cast<NiPoint3*>(delta), (int)static_cast<const Actor*>(actor)->GetPos());
+    obj->SubtractIntoVector(reinterpret_cast<NiPoint3*>(delta), (int)static_cast<const Actor*>(actor)->GetPos());
     float dist = reinterpret_cast<NiPoint3*>(delta)->FUN_00457990();
     float scale = 1.0f;
     if (dist < low)
@@ -423,9 +428,9 @@ float ComputeDirectionalFalloff(Actor* actor, S_00828dc0_Obj* obj)
     S_00828dc0_Mat mInv;
     matrix.FUN_004b45b0(&mInv);
     float localDir[sizeof(NiPoint3) / sizeof(float)];
-    FUN_004b3ae0(reinterpret_cast<NiPoint3*>(localDir), reinterpret_cast<NiPoint3*>(delta), &matrix);
-    reinterpret_cast<NiPoint3*>(localDir)->FUN_004a0c10();
-    float x = 1.0f - FUN_00408820(reinterpret_cast<NiPoint3*>(localDir)->x);
+    NiPoint3_TransformByMatrix3(reinterpret_cast<NiPoint3*>(localDir), reinterpret_cast<NiPoint3*>(delta), &matrix);
+    reinterpret_cast<NiPoint3*>(localDir)->Unitize_004a0c10();
+    float x = 1.0f - NiAbs_00408820(reinterpret_cast<NiPoint3*>(localDir)->x);
     x = x * x;
     float fy = (1.0f + reinterpret_cast<NiPoint3*>(localDir)->y) * DAT_01011588;
     return scale * x * fy;
@@ -434,19 +439,20 @@ float ComputeDirectionalFalloff(Actor* actor, S_00828dc0_Obj* obj)
 extern TESSaveLoadGame* g_registrationManager;
 
 // @fnv 0x008297a0
-void SummonCreatureEffect::FUN_008297a0(int value)
+// src: XBOX_PDB 0x008297a0
+void SummonCreatureEffect::SaveGame_008297a0(int value)
 {
     FUN_00806de0((Actor*)value);
     int id = 0;
     if (unk4C != 0)
-        id = unk4C->FUN_0084e3a0();
-    g_registrationManager->FUN_00857a10(&id, 4);
-    g_registrationManager->FUN_008579b0(&unk50, 1);
+        id = unk4C->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    g_registrationManager->TESSaveLoadGame_SaveNumericID(&id, 4);
+    g_registrationManager->TESSaveLoadGame_SaveGameDataOLD(&unk50, 1);
     if (unk4C == 0)
     {
-        g_registrationManager->FUN_008579b0(&unk54, 4);
-        g_registrationManager->FUN_008579b0(&unk58, 12);
-        g_registrationManager->FUN_008579b0(&unk64, 12);
+        g_registrationManager->TESSaveLoadGame_SaveGameDataOLD(&unk54, 4);
+        g_registrationManager->TESSaveLoadGame_SaveGameDataOLD(&unk58, 12);
+        g_registrationManager->TESSaveLoadGame_SaveGameDataOLD(&unk64, 12);
     }
 }
 
@@ -456,7 +462,7 @@ struct S_008294e0_Str
     unsigned short m_len;
     unsigned short m_kMaximumCorner;
     ~S_008294e0_Str();
-    const char* FUN_00559450();
+    const char* Modelloader_GetReferencedThis();
 };
 
 struct S_008294e0_Named
@@ -897,7 +903,7 @@ struct S_008294e0_Handler
 };
 extern S_008294e0_Handler* DAT_011c3f2c;
 
-void __cdecl FUN_005b5e40(const char* fmt, ...);
+void __cdecl Warning_005b5e40(const char* fmt, ...);
 void __cdecl StartHostilityAndCombat(Actor* ref, Actor* actor);
 
 // @fnv 0x008294e0
@@ -913,19 +919,19 @@ void SummonCreatureEffect::SpawnSummonedActor(int unused)
     TESBoundObject* pCreatureForm = dynamic_cast<TESBoundObject*>((TESForm*)FUN_006733e0());
     if (!pCreatureForm)
     {
-        FUN_005b5e40("GAME EFFECTS: %s effect has no associated creature.",
-                     ((S_008294e0_Named*)FUN_007df1d0())->AssignFromSub().FUN_00559450());
+        Warning_005b5e40("GAME EFFECTS: %s effect has no associated creature.",
+                     ((S_008294e0_Named*)FUN_007df1d0())->AssignFromSub().Modelloader_GetReferencedThis());
     }
     else
     {
         ref = DAT_011c3f2c->PlaceObjectReference(pCreatureForm, &unk58, &unk64,
-                                                 (actor->*reinterpret_cast<CellLookupWithContext>(static_cast<CellLookup>(&Actor::FUN_008d6f30)))(actor->FUN_00575d70()), 0, 0, 0);
+                                                 (actor->*reinterpret_cast<CellLookupWithContext>(static_cast<CellLookup>(&Actor::FUN_008d6f30)))(actor->TESObjectREFR_GetWorldSpace()), 0, 0, 0);
         if (ref)
         {
             if (ref->IsActor())
             {
                 unk4C = ref;
-                unk4C->FUN_00575830(&unk58);
+                unk4C->TESObjectREFR_SetLocationOnReference(&unk58);
                 unk4C->vfn_01fc(false);
                 unk4C->Unk_98();
                 StartHostilityAndCombat(unk4C, actor);
@@ -933,28 +939,29 @@ void SummonCreatureEffect::SpawnSummonedActor(int unused)
             }
             else
             {
-                FUN_005b5e40("GAME EFFECTS: %s summoned a non-actor.", actor->FUN_0055d520());
+                Warning_005b5e40("GAME EFFECTS: %s summoned a non-actor.", actor->TESObjectREFR_GetFullName());
                 ref->SetDeleted(true);
             }
         }
         else if (!pCreatureForm)
         {
-            FUN_005b5e40("DEFAULT: %s effect unable to create reference.",
-                         ((S_008294e0_Named*)FUN_007df1d0())->AssignFromSub().FUN_00559450());
+            Warning_005b5e40("DEFAULT: %s effect unable to create reference.",
+                         ((S_008294e0_Named*)FUN_007df1d0())->AssignFromSub().Modelloader_GetReferencedThis());
         }
     }
 }
 
-TESForm* __cdecl FUN_004839c0(unsigned int);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int);
 // Calls the base handler, resolves unk4C to an Actor via FUN_004839c0, and dispels the effect if the lookup fails.
 // @fnv 0x00829900
-void SummonCreatureEffect::FUN_00829900(void* arg)
+// src: XBOX_PDB 0x00829900
+void SummonCreatureEffect::InitLoadGame_00829900(void* arg)
 {
     AssociatedItemEffect::FUN_00806e70((Actor*)arg);
     int iFormId = (int)unk4C;
     if (iFormId)
     {
-        unk4C = dynamic_cast<Actor*>(FUN_004839c0((unsigned int)iFormId));
+        unk4C = dynamic_cast<Actor*>(TESForm_GetFormByNumericID((unsigned int)iFormId));
         if (!unk4C)
             ((ActiveEffect*)this)->Dispel(true);
     }

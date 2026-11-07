@@ -23,7 +23,8 @@ struct FUN_00dd5260_T
 
 // Copies the five-int struct pointed to by pSrc into the struct pointed to by pDst.
 // @fnv 0x00dd5260
-void __stdcall FUN_00dd5260(FUN_00dd5260_T* pSrc, int a1, int a2, int a3, FUN_00dd5260_T* pDst)
+// src: XBOX_PDB 0x00dd5260
+void __stdcall hkpMoppShapeMediator_splitPrimitive(FUN_00dd5260_T* pSrc, int a1, int a2, int a3, FUN_00dd5260_T* pDst)
 {
     *pDst = *pSrc;
 }
@@ -107,28 +108,29 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
     unsigned short size;
-    void FUN_00dd51d0();
+    void InitializeFields_00dd51d0();
     CpuObject* FUN_00dd55a0(unsigned int flags);
 };
 // @fnv 0x00dd55a0
 CpuObject* CpuObject::FUN_00dd55a0(unsigned int flags)
 {
-    FUN_00dd51d0();
+    InitializeFields_00dd51d0();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
+        CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;
 }
 
 // @fnv 0x00dd51e0
-void __stdcall FUN_00dd51e0(int, int)
+// src: COMMUNITY 0x00dd51e0
+void __stdcall nullsub_83(int, int)
 {}
 
 struct FnvCpu_FUN_00dd5290_CpuObject
@@ -137,10 +139,11 @@ struct FnvCpu_FUN_00dd5290_CpuObject
     unsigned int unk04;
     unsigned int unk08;
     int value;
-    int FUN_00dd5290();
+    int GetValue();
 };
 // @fnv 0x00dd5290
-int FnvCpu_FUN_00dd5290_CpuObject::FUN_00dd5290()
+// src: GUESS 0x00dd5290 (confidence: low)
+int FnvCpu_FUN_00dd5290_CpuObject::GetValue()
 {
     return value;
 }

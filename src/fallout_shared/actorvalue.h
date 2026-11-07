@@ -4,6 +4,6 @@
 ActorValueShortVector* ActorValueShortVector::Subtract(ActorValueShortVector* result,
                                                        const ActorValueShortVector& other)
 {
-    result->FUN_0050e960(x - other.x, y - other.y, z - other.z);
+    result->NiNPShortPoint3_NiNPShortPoint3(x - other.x, y - other.y, z - other.z);
     return result;
 }

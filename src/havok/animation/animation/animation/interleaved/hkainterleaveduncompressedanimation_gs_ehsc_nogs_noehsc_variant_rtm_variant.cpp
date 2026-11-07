@@ -95,24 +95,25 @@ __forceinline void hkQsTransform::setInterpolate4(const hkQsTransform& a, const 
     v.setMul4(hkSimdReal(signedT), reinterpret_cast<const hkVector4&>(b.m_rotation));
     v.addMul4(hkSimdReal(oneMinusT), reinterpret_cast<const hkVector4&>(a.m_rotation));
     reinterpret_cast<hkVector4&>(out) = v;
-    out.FUN_005611c0();
+    out.normalize_005611c0();
 
     m_rotation = out;
 }
 
 struct S00e3f9b0_Anim : public hkaInterleavedUncompressedAnimation
 {
-    void FUN_00e2f7c0(float time, int& frame, float& delta) const;
-    void FUN_00e3f9b0(float time, const short* tracks, unsigned int numTracks, hkQsTransform* transformsOut) const;
+    void hkaAnimation_getFrameAndDelta(float time, int& frame, float& delta) const;
+    void hkaInterleavedUncompressedAnimation_sampleIndividualTransformTracks(float time, const short* tracks, unsigned int numTracks, hkQsTransform* transformsOut) const;
 };
 
 // @fnv 0x00e3f9b0
-void S00e3f9b0_Anim::FUN_00e3f9b0(float time, const short* tracks, unsigned int numTracks,
+// src: HAVOK_SRC 0x00e3f9b0
+void S00e3f9b0_Anim::hkaInterleavedUncompressedAnimation_sampleIndividualTransformTracks(float time, const short* tracks, unsigned int numTracks,
                                   hkQsTransform* transformsOut) const
 {
     int frame;
     float delta;
-    FUN_00e2f7c0(time, frame, delta);
+    hkaAnimation_getFrameAndDelta(time, frame, delta);
 
     for (unsigned int i = 0; i < numTracks; ++i)
     {

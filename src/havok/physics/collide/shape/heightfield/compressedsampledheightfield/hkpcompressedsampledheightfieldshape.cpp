@@ -11,7 +11,8 @@ typedef union __declspec(intrin_type) __declspec(align(16)) {
 #include "havok/hkpCompressedSampledHeightFieldShape.h"
 
 // @fnv 0x00e49510
-int __stdcall FUN_00e49510(int a, int b)
+// src: HAVOK_LIB 0x00e49510
+int __stdcall hkpCompressedSampledHeightFieldShape_calcSizeForSpu_00e49510(int a, int b)
 {
     int r = (b >= 0x80) ? 1 : 0;
     r = r - 1;
@@ -256,8 +257,8 @@ void HfShape_e49530::Collide(const HfInput_e49530& input, HfVec_e49530* outputAr
     HfCollide_e49530(*this, input, outputArray);
 }
 
-extern "C" void* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00c908c0(void* alloc, void* array, int capacity, int elemSize);
+extern "C" void* __cdecl hkMemoryRouter_getInstance();
+extern "C" void __cdecl hkArrayUtil__reserve(void* alloc, void* array, int capacity, int elemSize);
 extern int DAT_010e901c;
 
 struct hkBoolR_e499
@@ -304,7 +305,7 @@ static __forceinline void Arr16_e499_GrowArrayCapacity(hkArrayBase<hkUint16>& se
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&a, (&self), newSize, sizeof(hkUint16));
+            hkArrayUtil__reserve(&a, (&self), newSize, sizeof(hkUint16));
         }
     }
 
@@ -316,13 +317,13 @@ static __forceinline void Arr16_e499__setSize(hkArrayBase<hkUint16>& self, Alloc
 
 static __forceinline void Arr16_e499_reserve(hkArrayBase<hkUint16>& self, int n)
 {
-        Holder_e499* h = (Holder_e499*)FUN_00c85750();
+        Holder_e499* h = (Holder_e499*)hkMemoryRouter_getInstance();
         Alloc_e499* alloc = h->m_alloc;
         int c = self.m_iCapacityState & 0x3fffffff;
         if (c < n)
         {
             c = c * 2;
-            FUN_00c908c0(alloc, (&self), n < c ? c : n, 2);
+            hkArrayUtil__reserve(alloc, (&self), n < c ? c : n, 2);
         }
     }
 
@@ -335,12 +336,13 @@ static __forceinline void Arr16_e499_SetSizeAndGrow(hkArrayBase<hkUint16>& self,
 class Compressed_e499 : public hkpCompressedSampledHeightFieldShape
 {
   public:
-    Compressed_e499* FUN_00e499d0(const HfSrc_e499* hf);
+    Compressed_e499* InitializeFields_00e499d0(const HfSrc_e499* hf);
 };
 
 // Initializes a compressed heightfield from a source heightfield by copying parameters, computing height range, and storing scaled 16-bit heights.
 // @fnv 0x00e499d0
-Compressed_e499* Compressed_e499::FUN_00e499d0(const HfSrc_e499* apSourceHeightField)
+// src: GUESS 0x00e499d0 (confidence: low)
+Compressed_e499* Compressed_e499::InitializeFields_00e499d0(const HfSrc_e499* apSourceHeightField)
 {
     m_sReferenceCount = 1;
     m_ulUserData = 0;

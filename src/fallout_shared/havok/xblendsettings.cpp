@@ -16,11 +16,12 @@ struct FUN_005e01b0_shell
     virtual void vfn_18();
     virtual int vfn_1c();
     virtual bool vfn_20();
-    bool FUN_005e01b0(const char* apFileName);
+    bool INISettingCollection_SaveAll(const char* apFileName);
 };
 // Calls FUN_005e0830 with the file name and 1; if it succeeds, calls vfn_20 and vfn_1c and returns the result.
 // @fnv 0x005e01b0
-bool FUN_005e01b0_shell::FUN_005e01b0(const char* apFileName)
+// src: COMMUNITY 0x005e01b0
+bool FUN_005e01b0_shell::INISettingCollection_SaveAll(const char* apFileName)
 {
     bool bres = reinterpret_cast<FUN_005e0830_shell*>(this)->FUN_005e0830(apFileName, 1);
     if (bres)

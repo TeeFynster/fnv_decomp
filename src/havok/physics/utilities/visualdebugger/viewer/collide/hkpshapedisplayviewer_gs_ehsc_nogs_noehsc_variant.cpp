@@ -13,7 +13,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00d65970_stub
 {
-    void FUN_00d65970(int);
+    void hkpShapeDisplayViewer_addWorld(int);
 };
 struct FUN_00d65f70_class
 {
@@ -25,7 +25,7 @@ struct FUN_00d65f70_class
     int m_14;
     int m_18;
     int m_1c;
-    void FUN_00d65f70();
+    void ProcessEntries_00d65f70();
 };
 struct S_00c6d840_Pair
 {
@@ -104,7 +104,7 @@ struct FUN_00d653e0_cls
     int unk4c;
     int unk50;
     FUN_00cb1a60_t sub54;
-    void FUN_00d653e0();
+    void ResetEntries_Thunk();
 };
 struct FUN_00d655e0_Item
 {
@@ -128,29 +128,29 @@ struct FUN_00d655e0_class
     int count34;
     int FindItemIndex(int key);
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00d657d0_class
 {
-    FUN_00d657d0_class* FUN_00d657d0(int);
+    FUN_00d657d0_class* hkpShapeDisplayViewer_hkpShapeDisplayViewer(int);
 };
-void* __cdecl FUN_00d65910(void* context);
+void* __cdecl hkpShapeDisplayViewer_create(void* context);
 struct GlobalObjectO2_00d472a0
 {
 };
-extern hkProcessFactory* FUN_00dd9380;
+extern hkProcessFactory* hkProcessFactory_registerProcess;
 extern GlobalObjectO2_00d472a0 g_01268f2c;
-extern void* __cdecl FUN_00d65910(void*);
+extern void* __cdecl hkpShapeDisplayViewer_create(void*);
 void RegisterShapesProcess();
 struct Target
 {
-    void FUN_00d65970();
+    void hkpShapeDisplayViewer_addWorld();
 };
 struct Adjustor
 {
-    void FUN_00d65fb0();
+    void ForwardCall_00d65fb0();
 };
 extern int g_D661D0Value;
-int __cdecl FUN_00d661d0();
+int __cdecl Hkpshapedisplayviewer_GetD661D0Value();
 struct FUN_00d652a0_cls
 {
     virtual void v00() = 0;
@@ -164,7 +164,7 @@ struct FUN_00d652a0_cls
     int m_10;
     int m_14;
     int m_18;
-    void FUN_00d652a0(int arg);
+    void hkpShapeDisplayViewer_synchronizeTransforms(int arg);
 };
 extern int vftbl_010d1b04;
 extern int vftbl_010d1ae4;
@@ -181,7 +181,7 @@ struct SpawnedBuf
     int unk08;
 
     void ProcessArgument(hkMemoryAllocator* apAlloc);
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 struct FUN_00d66080_cls
 {
@@ -204,14 +204,14 @@ struct FUN_00d66080_cls
     SpawnedBuf m_buf48;
     SpawnedBuf m_buf54;
 
-    void FUN_00d65fc0(int aiIndex);
+    void hkpShapeDisplayViewer_removeWorld(int aiIndex);
     void FUN_00ddcc60();
     void Destroy();
 };
 struct OwnerObject
 {
     int FindItemIndex(int);
-    void FUN_00d65fc0(int);
+    void hkpShapeDisplayViewer_removeWorld(int);
 };
 struct FUN_00d66160_cls
 {
@@ -223,7 +223,7 @@ struct FUN_00d66160_cls
     int m_14;
     int m_18;
     int m_1c;
-    void FUN_00d66160(int arg);
+    void UpdateFields_00d66160(int arg);
 };
 struct D66180PropertyValue
 {
@@ -307,8 +307,8 @@ struct SpawnOwner
     char** m_34;
     int m_38;
 
-    void FUN_00c93820(void* p);
-    void FUN_00c93920(void* p);
+    void hkpWorld_addEntityListener(void* p);
+    void hkpWorld_addWorldPostSimulationListener(void* p);
 };
 struct SpawnSublist
 {
@@ -331,7 +331,7 @@ struct PendingNode
     }
     void* operator new(unsigned int size) throw()
     {
-        hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* holder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>((&holder->heap()));
         return alloc->blockAlloc(size);
     }
@@ -357,7 +357,7 @@ struct FUN_00d64650_cls
     int m_2c;
     SpawnList m_30;
 
-    void FUN_00d64650(SpawnOwner* a1);
+    void hkpSweptTransformDisplayViewer_addWorld(SpawnOwner* a1);
 };
 extern int DAT_01268fe0;
 struct D65610Obj
@@ -376,11 +376,11 @@ struct D65610Prim
 };
 struct D65610Sec
 {
-    virtual void FUN_00d65610(D66180Entity* e);
+    virtual void hkpShapeDisplayViewer_inactiveEntityMovedCallback(D66180Entity* e);
 };
 struct D65610Self : D65610Prim, D65610Sec
 {
-    void FUN_00d65610(D66180Entity* e);
+    void hkpShapeDisplayViewer_inactiveEntityMovedCallback(D66180Entity* e);
 };
 static inline bool HasProperty(const S_00c6d840* props, int key)
 {
@@ -391,7 +391,7 @@ static inline bool HasProperty(const S_00c6d840* props, int key)
     }
     return false;
 }
-static int FUN_00d652c0(S_00c6d840* props, bool checkOverride, bool* usedDefault);
+static int _getProxyShape(S_00c6d840* props, bool checkOverride, bool* usedDefault);
 int PropertyQueryCaller(S_00c6d840* props, bool checkOverride, bool* usedDefault);
 struct ShapeList
 {
@@ -424,8 +424,8 @@ extern char DAT_010d1aa8[];
 extern float DAT_01012054;
 extern int DAT_01268fe8;
 extern int DAT_01268fe4;
-void* __cdecl FUN_00c85750();
-int __cdecl FUN_00cb0fa0(const char* name, void* obj);
+void* __cdecl hkMemoryRouter_getInstance();
+int __cdecl hkString_strCmp(const char* name, void* obj);
 struct FUN_00d657d0_cls
 {
     void* m_vptr00;
@@ -458,11 +458,11 @@ struct FUN_00d657d0_cls
     int m_70;
 
     void FUN_00ddccb0(ShapeList* a1);
-    FUN_00d657d0_cls* FUN_00d657d0(ShapeList* a1);
+    FUN_00d657d0_cls* hkpShapeDisplayViewer_hkpShapeDisplayViewer(ShapeList* a1);
 };
 inline hkMemoryAllocator& getMemory_d65f()
 {
-    return *reinterpret_cast<hkMemoryAllocator*>(&static_cast<hkMemoryRouter*>(FUN_00c85750())->heap());
+    return *reinterpret_cast<hkMemoryAllocator*>(&static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->heap());
 }
 struct Listener_d65f;
 struct Watch2_d65f
@@ -471,7 +471,7 @@ struct Watch2_d65f
 };
 struct Agent_d65f
 {
-    void FUN_00c917a0(Listener_d65f* listener);
+    void hkpWorld_removeEntityListener(Listener_d65f* listener);
     void ClearValue(Watch2_d65f* watch);
 };
 struct Node_d65f
@@ -499,8 +499,8 @@ struct Watch_d65f
 struct Phantom_d65f : Base_d65f, Listener_d65f, Watch2_d65f
 {
     hkArray<Node_d65f*> m_kNodeCollection;
-    void FUN_00d65750(int index);
-    void FUN_00d65fc0(int index);
+    void hkpShapeDisplayViewer_removeAllGeometries(int index);
+    void hkpShapeDisplayViewer_removeWorld(int index);
 };
 extern "C" void _ReadWriteBarrier(void);
 extern "C" unsigned __int64 __rdtsc(void);
@@ -545,7 +545,7 @@ struct TtShapeDisplayInner
     bool m_flag34;
 
     TtShapeDisplayOuter* GetOuter();
-    void FUN_00d65520(int arg);
+    void hkpShapeDisplayViewer_postSimulationCallback(int arg);
 };
 struct TtShapeDisplayOuter : TtShapeDisplayBase, TtShapeDisplayInner
 {
@@ -570,7 +570,7 @@ static void __forceinline TtPushEvent(const char* name)
 struct D661E0Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00d661e0();
+    virtual void AdjustThisAndForward_00d661e0();
 
     int unk04;
     int unk08;
@@ -582,14 +582,15 @@ struct D661E0Primary
 };
 struct D661E0Secondary
 {
-    virtual void FUN_00d661e0();
+    virtual void AdjustThisAndForward_00d661e0();
 };
 struct D661E0Object : D661E0Primary, D661E0Secondary
 {
     D661E0Object();
 
 // @fnv 0x00d661e0
-    virtual void FUN_00d661e0();
+// src: GUESS 0x00d661e0 (confidence: low)
+    virtual void AdjustThisAndForward_00d661e0();
 };
 D661E0Object::D661E0Object()
 {}
@@ -622,20 +623,21 @@ Derived::Derived()
 struct A1_00d66200
 {
     A1_00d66200();
-    virtual void FUN_00d66200();
+    virtual void AdjustThisAndForward_00d66200();
     char pad[0x24];
 };
 struct A2_00d66200
 {
     A2_00d66200();
 // @fnv 0x00d66200
-    virtual void FUN_00d66200();
+// src: GUESS 0x00d66200 (confidence: low)
+    virtual void AdjustThisAndForward_00d66200();
 };
 struct Own_00d66200 : A1_00d66200, A2_00d66200
 {
     Own_00d66200();
     virtual void key_fn();  // key function - defined, so the vftable is emitted
-    void FUN_00d66200();    // the shared override - declared only
+    void AdjustThisAndForward_00d66200();    // the shared override - declared only
 };
 Own_00d66200::Own_00d66200()
 {}
@@ -830,7 +832,7 @@ struct Node
     int unk24;
     Group** m_28;
     int m_2c;
-    float FUN_00c91020();
+    float hkpWorld_getCurrentTime();
 };
 class S00d653f0_Obj
 {
@@ -862,7 +864,7 @@ class S00d653f0_Obj
     int unk60;
     int unk64;
     float m_68;
-    void FUN_00d653f0(Visitor* a1, Node* a2);
+    void hkpShapeDisplayViewer_synchronizeTransforms_00d653f0(Visitor* a1, Node* a2);
 };
 
 #include <xmmintrin.h>
@@ -870,12 +872,12 @@ class S00d653f0_Obj
 #include "../../../../../../../include/BSAudio.h"
 __forceinline hkMemoryRouter& s65Router()
 {
-    return *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    return *static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
 }
 
 __forceinline hkMemoryAllocator& s65Heap()
 {
-    return *reinterpret_cast<hkMemoryAllocator*>(&static_cast<hkMemoryRouter*>(FUN_00c85750())->heap());
+    return *reinterpret_cast<hkMemoryAllocator*>(&static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->heap());
 }
 
 struct S65_Pair
@@ -936,7 +938,7 @@ struct S65_Param : S_00c6d840
     {
         return FindEntry(key, 0).integer();
     }
-    S65_Pair FUN_00cd2a50(int key);
+    S65_Pair hkpWorldObject_removeProperty(int key);
     bool has(int key) const
     {
         for (int i = 0; i < m_uiItemCount; ++i)
@@ -952,10 +954,10 @@ struct S65_Map
     int s04;
     int s08;
     unsigned int LookupHashEntry(void* key, int def);
-    void FUN_00cb1870(hkMemoryAllocator* a, void* key, int val);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocator* a, void* key, int val);
     __forceinline void insert(void* key, int val)
     {
-        FUN_00cb1870(&s65Heap(), key, val);
+        hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(&s65Heap(), key, val);
     }
 };
 struct S65_Ref
@@ -966,7 +968,7 @@ struct S65_Val
 {
     int phi;
     int theta;
-    void FUN_00ddfb70();
+    void hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment();
 };
 struct S65_Str
 {
@@ -974,7 +976,7 @@ struct S65_Str
     int s04;
     int s08;
     void FUN_00cb1600(char* buf, int size);
-    void FUN_00cc01c0(const char* s);
+    void ProcessAndReturnValue_00cc01c0(const char* s);
     void FUN_00cc00e0();
 };
 struct S65_Elem
@@ -1015,8 +1017,8 @@ struct S65_Work
     int w08;
     int w0c;
     int w10;
-    void FUN_00ddfb80(S65_Val* p);
-    void FUN_00de0f90(void* v, S65_Vec* vec);
+    void hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(S65_Val* p);
+    void UpdateState_00de0f90(void* v, S65_Vec* vec);
 };
 union S65_V4
 {
@@ -1070,7 +1072,8 @@ extern S65_Err* DAT_01268360;
 extern const char str_010d196c[];
 extern const char str_010d1b18[];
 
-static __declspec(noinline) void* FUN_00d652c0(S65_Param* p, bool flag, unsigned char* out)
+// src: HAVOK_LIB 0x00d652c0
+static __declspec(noinline) void* _getProxyShape(S65_Param* p, bool flag, unsigned char* out)
 {
     void* base = p->pointerProperty(0x1135);
     void* alt = p->pointerProperty(0x1235);
@@ -1113,7 +1116,7 @@ struct S65_Prim
 };
 struct S65_Sec
 {
-    virtual void FUN_00d65ad0(S65_Param* param);
+    virtual void hkpShapeDisplayViewer_entityAddedCallback(S65_Param* param);
 };
 struct S65_Self : S65_Prim, S65_Sec
 {
@@ -1135,7 +1138,7 @@ struct S65_Self : S65_Prim, S65_Sec
     int t40;
     int f44;
     int f48;
-    void FUN_00d65ad0(S65_Param* param);
+    void hkpShapeDisplayViewer_entityAddedCallback(S65_Param* param);
 };
 
 inline void* operator new(unsigned int, void* p)
@@ -1144,11 +1147,12 @@ inline void* operator new(unsigned int, void* p)
 }
 
 // @fnv 0x00d65ad0
-void S65_Self::FUN_00d65ad0(S65_Param* param)
+// src: XBOX_PDB 0x00d65ad0
+void S65_Self::hkpShapeDisplayViewer_entityAddedCallback(S65_Param* param)
 {
     unsigned char done;
     bool flag = (f10 == 0 && f14 == 0) ? true : false;
-    void* ret = FUN_00d652c0(param, flag, &done);
+    void* ret = _getProxyShape(param, flag, &done);
     if (done)
         return;
     int idx = FindItemIndex(param->unk08);
@@ -1166,7 +1170,7 @@ void S65_Self::FUN_00d65ad0(S65_Param* param)
         unsigned int r = sub2c.LookupHashEntry(key, 0);
         isNew = r > 0;
         if (!r)
-            sub2c.FUN_00cb1870(reinterpret_cast<hkMemoryAllocator*>(s65Router().m_heap), key, 1);
+            sub2c.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(reinterpret_cast<hkMemoryAllocator*>(s65Router().m_heap), key, 1);
     }
     int existing = 0;
     if (b39)
@@ -1183,10 +1187,10 @@ void S65_Self::FUN_00d65ad0(S65_Param* param)
         if (!a && !alt)
         {
             S65_Val val;
-            val.FUN_00ddfb70();
+            val.hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment();
             S65_Work work;
-            work.FUN_00ddfb80(&val);
-            work.FUN_00de0f90(key, &vec);
+            work.hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(&val);
+            work.UpdateState_00de0f90(key, &vec);
             for (int i = vec.count - 1; i >= 0; i--)
             {
                 S65_Elem* e = vec.data[i];
@@ -1195,7 +1199,7 @@ void S65_Self::FUN_00d65ad0(S65_Param* param)
                     __declspec(align(16)) char buf[0x200];
                     S65_Str str;
                     str.FUN_00cb1600(buf, 0x200);
-                    str.FUN_00cc01c0(str_010d196c);
+                    str.ProcessAndReturnValue_00cc01c0(str_010d196c);
                     DAT_01268360->d0c(0, -1, buf, str_010d1b18, 0x13c);
                     str.FUN_00cc00e0();
                     vec.count--;
@@ -1207,14 +1211,14 @@ void S65_Self::FUN_00d65ad0(S65_Param* param)
             if (v && (void*)v == ret)
             {
                 ((S65_Ref*)v)->FUN_00c905b0();
-                param->FUN_00cd2a50(0x1135);
+                param->hkpWorldObject_removeProperty(0x1135);
             }
         }
         else
         {
             keep = a == 0;
             if (alt)
-                param->FUN_00cd2a50(0x1131);
+                param->hkpWorldObject_removeProperty(0x1131);
             S65_NewObj* mem = (S65_NewObj*)s65Heap().blockAlloc(0x60);
             mem->s04 = (short)0x60;
             S65_NewObj* obj = mem->FUN_00de1d20(a ? a : alt);
@@ -1231,7 +1235,7 @@ void S65_Self::FUN_00d65ad0(S65_Param* param)
     }
     void* nv = GetProperty1134((D66180Entity*)param);
     S65_IntArr* arr = &item->arr;
-    hkMemoryRouter* heap = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* heap = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     if (arr->count == (arr->cap & 0x3fffffff))
         ResizeAudioStream(heap->m_heap, arr, 4);
     int* slot = arr->data + arr->count;

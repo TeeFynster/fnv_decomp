@@ -12,17 +12,18 @@ void ScriptVariableInfo::Load(TESFile* file)
     {
         file->GetChunkData(this, 24);
         if (file->IsEndianConversionRequired())
-            reinterpret_cast<ScriptVariableEndian*>(this)->FUN_005e2870();
+            reinterpret_cast<ScriptVariableEndian*>(this)->ProcessState_005e2870();
     }
 }
 
 struct SL_standin
 {
-    SL_standin* FUN_005ac150(SL_standin* apCopy);
+    SL_standin* SCRIPT_LOCAL_SCRIPT_LOCAL(SL_standin* apCopy);
 };
 // Copies the byte at offset 0x10, the uint at offset 0, and the double at offset 8 from apCopy into this, then returns this.
 // @fnv 0x005ac150
-SL_standin* SL_standin::FUN_005ac150(SL_standin* apCopy)
+// src: XBOX_PDB 0x005ac150
+SL_standin* SL_standin::SCRIPT_LOCAL_SCRIPT_LOCAL(SL_standin* apCopy)
 {
     *((char*)this + 0x10) = *((char*)apCopy + 0x10);
     *(unsigned int*)this = *(unsigned int*)apCopy;
@@ -32,7 +33,8 @@ SL_standin* SL_standin::FUN_005ac150(SL_standin* apCopy)
 
 // Zeroes the object's first field, sets the double at offset 0x8 to 0.0, clears the bool at 0x10, and returns the object.
 // @fnv 0x005e28e0
-ScriptLocalVariable* __fastcall FUN_005e28e0(ScriptLocalVariable* apObject)
+// src: GUESS 0x005e28e0 (confidence: low)
+ScriptLocalVariable* __fastcall Object_ComputeValue_005e28e0(ScriptLocalVariable* apObject)
 {
     *(unsigned int*)((char*)apObject + 0x0) = 0;
     *(double*)((char*)apObject + 0x8) = 0.0;
@@ -52,11 +54,12 @@ struct FUN_005e29a0_shell
     unsigned char m_kPointB;
     char m_pAuxiliaryObject[3];
     Dummy00501c30 m_dum;
-    bool FUN_005e29a0(FUN_005e29a0_shell* other);
+    bool ProcessAndReturnValue_005e29a0(FUN_005e29a0_shell* other);
 };
 
 // @fnv 0x005e29a0
-bool FUN_005e29a0_shell::FUN_005e29a0(FUN_005e29a0_shell* other)
+// src: GUESS 0x005e29a0 (confidence: low)
+bool FUN_005e29a0_shell::ProcessAndReturnValue_005e29a0(FUN_005e29a0_shell* other)
 {
     if (!other)
         return true;
@@ -82,11 +85,12 @@ void __cdecl BSEndian(unsigned char*, EndianSizeTag<10>);
 
 struct FUN_00414220_shell
 {
-    void FUN_00414220();
+    void SCRIPT_HEADER_Endian();
 };
 
 // @fnv 0x00414220
-void FUN_00414220_shell::FUN_00414220()
+// src: XBOX_PDB 0x00414220
+void FUN_00414220_shell::SCRIPT_HEADER_Endian()
 {
     BSEndian((unsigned char*)this, EndianSizeTag<0>());
     BSEndian((unsigned char*)this + 4, EndianSizeTag<1>());

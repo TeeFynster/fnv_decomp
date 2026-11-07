@@ -12,23 +12,24 @@ int TruncateFloatToInt(float value);
 
 struct LandDuplicateCalls
 {
-    ::TESForm* FUN_004867a0(bool createEditorID, void* copyMap);
+    ::TESForm* TESForm_CreateDuplicateForm(bool createEditorID, void* copyMap);
 };
 struct LandDuplicateEntry : LandDuplicateCalls
 {
-    ::TESForm* FUN_00534880(bool createEditorID, void* copyMap);
+    ::TESForm* TESObjectLAND_CreateDuplicateForm(bool createEditorID, void* copyMap);
 };
 // @fnv 0x00534880
-::TESForm* LandDuplicateEntry::FUN_00534880(bool createEditorID, void* copyMap)
+// src: XBOX_PDB 0x00534880
+::TESForm* LandDuplicateEntry::TESObjectLAND_CreateDuplicateForm(bool createEditorID, void* copyMap)
 {
     ::TESObjectLAND* duplicate;
-    duplicate = dynamic_cast< ::TESObjectLAND*>(FUN_004867a0(false, copyMap));
+    duplicate = dynamic_cast< ::TESObjectLAND*>(TESForm_CreateDuplicateForm(false, copyMap));
     return duplicate;
 }
 
 extern void* DAT_01187020;
 
-TESForm* FUN_004839c0(unsigned int auiFormId);
+TESForm* TESForm_GetFormByNumericID(unsigned int auiFormId);
 
 struct LandSaveGroup5391
 {
@@ -40,12 +41,13 @@ struct LandSaveGroup5391
 
 struct FUN_005391d0_class
 {
-    TESObjectCELL* __thiscall FUN_007af430();
-    bool __thiscall FUN_005391d0(LandSaveGroup5391* apGroupFORM);
+    TESObjectCELL* __thiscall BGSSaveFormBuffer_GetForm();
+    bool __thiscall TESObjectLAND_SavesBefore_005391d0(LandSaveGroup5391* apGroupFORM);
 };
 
 // @fnv 0x005391d0
-bool FUN_005391d0_class::FUN_005391d0(LandSaveGroup5391* apGroupFORM)
+// src: XBOX_PDB 0x005391d0
+bool FUN_005391d0_class::TESObjectLAND_SavesBefore_005391d0(LandSaveGroup5391* apGroupFORM)
 {
     bool bretval = false;
     if (apGroupFORM && apGroupFORM->typeTag == DAT_01187020)
@@ -54,13 +56,13 @@ bool FUN_005391d0_class::FUN_005391d0(LandSaveGroup5391* apGroupFORM)
         {
         case 8:
         case 9: {
-            void* found = dynamic_cast< ::TESObjectCELL*>(FUN_004839c0(apGroupFORM->formID));
-            if (found && FUN_007af430() == found)
+            void* found = dynamic_cast< ::TESObjectCELL*>(TESForm_GetFormByNumericID(apGroupFORM->formID));
+            if (found && BGSSaveFormBuffer_GetForm() == found)
                 bretval = false;
             break;
         }
         default: {
-            TESObjectCELL* pCell = FUN_007af430();
+            TESObjectCELL* pCell = BGSSaveFormBuffer_GetForm();
             bretval = pCell->Unk_0E(apGroupFORM);
             break;
         }

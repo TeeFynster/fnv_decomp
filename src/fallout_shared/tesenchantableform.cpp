@@ -56,8 +56,8 @@ void TESEnchantableForm::SetFormEnchantmentAmount(unsigned short amount)
     m_usEnchantmentAmount = amount;
 }
 
-void __cdecl FUN_00485910(unsigned int a, unsigned int b);
-void __cdecl FUN_00485950(unsigned int a, unsigned int b);
+void __cdecl TESForm_AddChunk_00485910(unsigned int a, unsigned int b);
+void __cdecl TESForm_AddChunk_00485950(unsigned int a, unsigned int b);
 
 // @fnv 0x0047bd70
 void TESEnchantableForm::Save()
@@ -66,11 +66,11 @@ void TESEnchantableForm::Save()
     if (m_pEnchantment != 0)
     {
         tempint = m_pEnchantment->GetFormID();
-        FUN_00485910(0x4d544945, tempint);
+        TESForm_AddChunk_00485910(0x4d544945, tempint);
     }
     if (m_usEnchantmentAmount != 0)
     {
-        FUN_00485950(0x544d4145, m_usEnchantmentAmount);
+        TESForm_AddChunk_00485950(0x544d4145, m_usEnchantmentAmount);
     }
 }
 

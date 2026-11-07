@@ -28,8 +28,8 @@ public:
     StrMem& operator+=(const char*);
 
     StrMem& FUN_00404820(const char*);
-    unsigned int FUN_004048e0();
-    char* FUN_00559450();
-    const char* FUN_00559450() const;
-    void __thiscall FUN_006ffe10();
+    unsigned int BSStringT_char_Length();
+    char* Modelloader_GetReferencedThis();
+    const char* Modelloader_GetReferencedThis() const;
+    void __thiscall AnimatingText_Initialize();
 };

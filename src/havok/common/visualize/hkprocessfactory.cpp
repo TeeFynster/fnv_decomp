@@ -17,7 +17,7 @@ struct FUN_00dd9580_Service
     int unk0c;
     FUN_00dd9580_Interface* unk10;
 };
-FUN_00dd9580_Service* __cdecl FUN_00c85750();
+FUN_00dd9580_Service* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00dd9580_Class
 {
     void* vtable;
@@ -32,7 +32,7 @@ FUN_00dd9580_Class* FUN_00dd9580_Class::FUN_00dd9580(char flags)
     FUN_00dd94c0();
     if (flags & 1)
     {
-        FUN_00dd9580_Service* service = FUN_00c85750();
+        FUN_00dd9580_Service* service = hkMemoryRouter_getInstance();
         service->unk10->notify(this, unk04);
     }
     return this;
@@ -74,7 +74,7 @@ FUN_00dd9460_cls* FUN_00dd9460_cls::Initialize()
     unk0c = 0;
     unk10 = 0;
     unk14 = 0x80000000u;
-    FUN_00dd9580_Service* svc = FUN_00c85750();
+    FUN_00dd9580_Service* svc = hkMemoryRouter_getInstance();
     FUN_00dd9460_Factory* f = reinterpret_cast<FUN_00dd9460_Factory*>(svc->unk10);
     void* pBuffer = f->CreateBuffer(0x18);
     if (pBuffer != 0)
@@ -109,7 +109,7 @@ struct MyInterface
 // @fnv 0x00dd9550
 MyFactory* CreateFactory()
 {
-    FUN_00dd9580_Service* service = FUN_00c85750();
+    FUN_00dd9580_Service* service = hkMemoryRouter_getInstance();
     MyInterface* iface = (MyInterface*)service->unk10;
     MyFactory* factory = iface->v04(0x1c);
     factory->unk04 = 0x1c;
@@ -127,7 +127,7 @@ struct S_00dd94c0_Heap
 };
 inline S_00dd94c0_Heap& S_00dd94c0_GetHeap()
 {
-    return *(S_00dd94c0_Heap*)FUN_00c85750()->unk10;
+    return *(S_00dd94c0_Heap*)hkMemoryRouter_getInstance()->unk10;
 }
 
 struct S_00dd94c0_Entry
@@ -135,7 +135,7 @@ struct S_00dd94c0_Entry
     int unk00;
     int unk04;
     int unk08;
-    void FUN_00cb0c00() throw();
+    void Object_UpdateFields_00cb0c00() throw();
 };
 
 typedef hkArrayBase<S_00dd94c0_Entry> S_00dd94c0_Array;
@@ -147,7 +147,7 @@ S_00dd94c0_Heap& h = reinterpret_cast<S_00dd94c0_Heap&>(sharedAlloc);
         int n = m_iElementCount;
         S_00dd94c0_Entry* p = m_data;
         for (int i = 0; i < n; i++, p++)
-            p->FUN_00cb0c00();
+            p->Object_UpdateFields_00cb0c00();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             h.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(S_00dd94c0_Entry));
@@ -180,13 +180,13 @@ FUN_00dd94c0::~FUN_00dd94c0() throw()
     if (lock)
     {
         DeleteCriticalSection(lock);
-        FUN_00dd9580_Service* sv = FUN_00c85750();
+        FUN_00dd9580_Service* sv = hkMemoryRouter_getInstance();
         sv->unk10->notify(lock, 0x18);
     }
     m_entries._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(S_00dd94c0_GetHeap()));
 }
 
-int FUN_00cb0fa0(const char* a, const char* b);
+int hkString_strCmp(const char* a, const char* b);
 
 struct S_00dd9380_Allocator;
 
@@ -207,7 +207,7 @@ struct S_00dd9380_StringPtr
 {
     unsigned int m_pcText;
     void FUN_00cb0a60();
-    void FUN_00cb0c10(const char* s);
+    void UpdateState_00cb0c10(const char* s);
     const char* cString() const
     {
         return (const char*)(m_pcText & ~1u);
@@ -219,7 +219,7 @@ inline int S_00dd9380_strCmp(const char* a, const char* b)
     if (a)
     {
         if (b)
-            return FUN_00cb0fa0(a, b);
+            return hkString_strCmp(a, b);
         return 1;
     }
     return b ? -1 : 0;
@@ -232,7 +232,7 @@ struct S_00dd9380_Entry
     int m_iOwnerObjectOffset;
 };
 
-void FUN_00c908c0(S_00dd9380_Allocator& alloc, void* array, int numElem, int sizeElem);
+void hkArrayUtil__reserve(S_00dd9380_Allocator& alloc, void* array, int numElem, int sizeElem);
 
 struct S_00dd9380_ArrayLocalForm
 { // local form of hkArray: 0x00dd9380 needs the original inline/out-of-line helper split; shared replacement changes bytes.
@@ -249,7 +249,7 @@ struct S_00dd9380_ArrayLocalForm
         {
             int cap2 = 2 * getCapacity();
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, sizeof(S_00dd9380_Entry));
+            hkArrayUtil__reserve(alloc, this, newSize, sizeof(S_00dd9380_Entry));
         }
     }
     S_00dd9380_Entry& _expandOne(S_00dd9380_Allocator& alloc)
@@ -264,7 +264,7 @@ struct S_00dd9380_ArrayLocalForm
     }
     S_00dd9380_Entry& AllocatePair()
     {
-        return _expandOne(((S_00dd9380_Router*)FUN_00c85750())->heap());
+        return _expandOne(((S_00dd9380_Router*)hkMemoryRouter_getInstance())->heap());
     }
 };
 
@@ -275,12 +275,13 @@ struct S_00dd9380
     int m_nextId;
     S_00dd9380_ArrayLocalForm m_entries;
     CRITICAL_SECTION* m_lock;
-    int FUN_00dd9380(const char* name, int value);
+    int hkProcessFactory_registerProcess(const char* name, int value);
 };
 
 // Finds an entry by name or creates one with the supplied value and next owner offset, then returns its owner offset.
 // @fnv 0x00dd9380
-int S_00dd9380::FUN_00dd9380(const char* name, int value)
+// src: HAVOK_LIB 0x00dd9380
+int S_00dd9380::hkProcessFactory_registerProcess(const char* name, int value)
 {
     EnterCriticalSection(m_lock);
     S_00dd9380_Entry* e = 0;
@@ -295,7 +296,7 @@ int S_00dd9380::FUN_00dd9380(const char* name, int value)
     if (e == 0)
     {
         e = &m_entries.AllocatePair();
-        e->m_name.FUN_00cb0c10(name);
+        e->m_name.UpdateState_00cb0c10(name);
         e->m_uiFilterValue = value;
         e->m_iOwnerObjectOffset = m_nextId++;
     }

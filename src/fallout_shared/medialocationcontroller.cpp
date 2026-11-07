@@ -413,33 +413,36 @@ float FUN_00595c80_shell::GetSquaredXYLength()
 
 struct FUN_00595cf0_shell : public MediaLocationController
 {
-    int FUN_00595cf0();
+    int MediaLocationController_GetDeadRep();
 };
 
 // @fnv 0x00595cf0
-int FUN_00595cf0_shell::FUN_00595cf0()
+// src: COMMUNITY 0x00595cf0
+int FUN_00595cf0_shell::MediaLocationController_GetDeadRep()
 {
     return *(unsigned int*)((char*)this + 0x6c) & 0xf;
 }
 
 struct FUN_00595d10_shell : public PlayerCharacter
 {
-    void* FUN_00595d10();
+    void* PlayerCharacter_GetCompassTargets();
 };
 
 // @fnv 0x00595d10
-void* FUN_00595d10_shell::FUN_00595d10()
+// src: COMMUNITY 0x00595d10
+void* FUN_00595d10_shell::PlayerCharacter_GetCompassTargets()
 {
     return *(void**)((char*)this + 0xd48);
 }
 
 struct FUN_00595e80_shell : public MediaLocationController
 {
-    bool FUN_00595e80();
+    bool MediaLocationController_GetDefaultTime();
 };
 
 // @fnv 0x00595e80
-bool FUN_00595e80_shell::FUN_00595e80()
+// src: COMMUNITY 0x00595e80
+bool FUN_00595e80_shell::MediaLocationController_GetDefaultTime()
 {
     if ((*(int*)((char*)this + 0x6c) >> 6) & 1)
         return true;
@@ -449,11 +452,12 @@ bool FUN_00595e80_shell::FUN_00595e80()
 extern float DAT_011ca9e8;
 
 // @fnv 0x00595ea0
-float __fastcall FUN_00595ea0(char* apThis)
+// src: COMMUNITY 0x00595ea0
+float __fastcall Sky_GetSunriseBegin(char* apThis)
 {
     if ((*(unsigned int*)(apThis + 0x118) & 0x100) && *(TESClimate**)(apThis + 0xc))
     {
-        DAT_011ca9e8 = (double)(*(TESClimate**)(apThis + 0xc))->FUN_00595f10(0) / 6.0;
+        DAT_011ca9e8 = (double)(*(TESClimate**)(apThis + 0xc))->GetTransTime(0) / 6.0;
         *(unsigned int*)(apThis + 0x118) &= ~0x100u;
     }
     return DAT_011ca9e8;
@@ -461,7 +465,8 @@ float __fastcall FUN_00595ea0(char* apThis)
 
 // Returns the indexed time setting when the index is in [0,4), otherwise returns 0.
 // @fnv 0x00595f10
-unsigned char TESClimate::FUN_00595f10(int aiIndex)
+// src: COMMUNITY 0x00595f10
+unsigned char TESClimate::GetTransTime(int aiIndex)
 {
     return (aiIndex < 4 && aiIndex >= 0) ? m_ucTimeSettings[aiIndex] : 0;
 }
@@ -497,11 +502,12 @@ struct blob16
 extern float DAT_011ca9ec;
 
 // @fnv 0x00595f50
-float __fastcall FUN_00595f50(Sky* pThis)
+// src: COMMUNITY 0x00595f50
+float __fastcall Sky_GetSunriseEnd(Sky* pThis)
 {
     if ((*(unsigned int*)((char*)pThis + 0x118) & 0x200) && *(TESClimate**)((char*)pThis + 0xc))
     {
-        DAT_011ca9ec = (*(TESClimate**)((char*)pThis + 0xc))->FUN_00595f10(1) / 6.0;
+        DAT_011ca9ec = (*(TESClimate**)((char*)pThis + 0xc))->GetTransTime(1) / 6.0;
         *(unsigned int*)((char*)pThis + 0x118) &= ~0x200;
     }
     return DAT_011ca9ec;
@@ -513,11 +519,12 @@ extern float DAT_011ca9f0;
 
 // If the 0x400 flag is set and a TESClimate is present, stores its value for index 2 divided by 6.0 in DAT_011ca9f0 and clears the flag; returns DAT_011ca9f0.
 // @fnv 0x00595fc0
-float __fastcall FUN_00595fc0(char* pThis)
+// src: COMMUNITY 0x00595fc0
+float __fastcall Sky_GetSunsetBegin(char* pThis)
 {
     if ((*(unsigned int*)(pThis + 0x118) & 0x400) && *(TESClimate**)(pThis + 0xc))
     {
-        DAT_011ca9f0 = (float)((*(TESClimate**)(pThis + 0xc))->FUN_00595f10(2) / 6.0);
+        DAT_011ca9f0 = (float)((*(TESClimate**)(pThis + 0xc))->GetTransTime(2) / 6.0);
         *(unsigned int*)(pThis + 0x118) &= ~0x400;
     }
     return DAT_011ca9f0;
@@ -532,14 +539,15 @@ struct FUN_00596030_cls
     TESClimate* inner;
     char pad1[0x118 - 0x10];
     unsigned int flags;
-    float FUN_00596030();
+    float Sky_GetSunsetEnd();
 };
 // @fnv 0x00596030
-float FUN_00596030_cls::FUN_00596030()
+// src: COMMUNITY 0x00596030
+float FUN_00596030_cls::Sky_GetSunsetEnd()
 {
     if ((flags & 0x800) && inner)
     {
-        DAT_011ca9f4 = (float)(inner->FUN_00595f10(3) / DAT_01034208);
+        DAT_011ca9f4 = (float)(inner->GetTransTime(3) / DAT_01034208);
         flags &= ~0x800u;
     }
     return DAT_011ca9f4;
@@ -698,21 +706,21 @@ FUN_005960a0::~FUN_005960a0()
 
 struct MLCFormSaver
 {
-    void FUN_004855a0();
-    void FUN_00485680();
+    void BeginFormRecord();
+    void FinishFormRecord();
 };
 
 struct MLCFullNameSaver : public TESFullName
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 
 struct MLCFormID
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
-void __cdecl FUN_00485910(unsigned int auiChunkID, unsigned int auiValue);
+void __cdecl TESForm_AddChunk_00485910(unsigned int auiChunkID, unsigned int auiValue);
 void __cdecl SaveChunkFloat(unsigned int auiChunkID, float afValue);
 
 struct MLCSaver : public TESForm, public MLCFullNameSaver
@@ -756,14 +764,14 @@ struct MLCSaver : public TESForm, public MLCFullNameSaver
 // @fnv 0x00596790
 void MLCSaver::SaveToStream()
 {
-    ((MLCFormSaver*)this)->FUN_004855a0();
-    MLCFullNameSaver::FUN_00487010();
-    FUN_00485910(CHUNK_ID_NAM1_ID, (unsigned int)iFlags);
+    ((MLCFormSaver*)this)->BeginFormRecord();
+    MLCFullNameSaver::Save_00487010();
+    TESForm_AddChunk_00485910(CHUNK_ID_NAM1_ID, (unsigned int)iFlags);
     SaveChunkFloat(CHUNK_ID_NAM2_ID, m_fLowerWeightThreshold);
     SaveChunkFloat(CHUNK_ID_NAM3_ID, m_fUpperWeightThreshold);
     SaveChunkFloat(CHUNK_ID_NAM4_ID, m_fUpdateInterval);
-    FUN_00485910(CHUNK_ID_NAM5_ID, m_uiShortDelay);
-    FUN_00485910(CHUNK_ID_NAM6_ID, m_uiLongDelay);
+    TESForm_AddChunk_00485910(CHUNK_ID_NAM5_ID, m_uiShortDelay);
+    TESForm_AddChunk_00485910(CHUNK_ID_NAM6_ID, m_uiLongDelay);
     SaveChunkFloat(CHUNK_ID_NAM7_ID, m_fMediaSelectionValue);
 
     BSSimpleList<MediaSet*>* pIter = &m_kMediaSetList1;
@@ -772,8 +780,8 @@ void MLCSaver::SaveToStream()
         MediaSet* pMediaSet;
         while (pIter && (pMediaSet = pIter->GetItem()) != 0)
         {
-            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->FUN_0084e3a0();
-            FUN_00485910(CHUNK_ID_HNAM_ID, auiFormId);
+            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            TESForm_AddChunk_00485910(CHUNK_ID_HNAM_ID, auiFormId);
             pIter = pIter->GetNext();
         }
     }
@@ -783,8 +791,8 @@ void MLCSaver::SaveToStream()
         MediaSet* pMediaSet;
         while (pIter && (pMediaSet = pIter->GetItem()) != 0)
         {
-            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->FUN_0084e3a0();
-            FUN_00485910(CHUNK_ID_ZNAM_ID, auiFormId);
+            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            TESForm_AddChunk_00485910(CHUNK_ID_ZNAM_ID, auiFormId);
             pIter = pIter->GetNext();
         }
     }
@@ -794,8 +802,8 @@ void MLCSaver::SaveToStream()
         MediaSet* pMediaSet;
         while (pIter && (pMediaSet = pIter->GetItem()) != 0)
         {
-            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->FUN_0084e3a0();
-            FUN_00485910(CHUNK_ID_XNAM_ID, auiFormId);
+            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            TESForm_AddChunk_00485910(CHUNK_ID_XNAM_ID, auiFormId);
             pIter = pIter->GetNext();
         }
     }
@@ -805,8 +813,8 @@ void MLCSaver::SaveToStream()
         MediaSet* pMediaSet;
         while (pIter && (pMediaSet = pIter->GetItem()) != 0)
         {
-            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->FUN_0084e3a0();
-            FUN_00485910(CHUNK_ID_YNAM_ID, auiFormId);
+            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            TESForm_AddChunk_00485910(CHUNK_ID_YNAM_ID, auiFormId);
             pIter = pIter->GetNext();
         }
     }
@@ -816,8 +824,8 @@ void MLCSaver::SaveToStream()
         MediaSet* pMediaSet;
         while (pIter && (pMediaSet = pIter->GetItem()) != 0)
         {
-            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->FUN_0084e3a0();
-            FUN_00485910(CHUNK_ID_LNAM_ID, auiFormId);
+            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            TESForm_AddChunk_00485910(CHUNK_ID_LNAM_ID, auiFormId);
             pIter = pIter->GetNext();
         }
     }
@@ -827,18 +835,18 @@ void MLCSaver::SaveToStream()
         MediaSet* pMediaSet;
         while (pIter && (pMediaSet = pIter->GetItem()) != 0)
         {
-            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->FUN_0084e3a0();
-            FUN_00485910(CHUNK_ID_GNAM_ID, auiFormId);
+            unsigned int auiFormId = ((MLCFormID*)pMediaSet)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            TESForm_AddChunk_00485910(CHUNK_ID_GNAM_ID, auiFormId);
             pIter = pIter->GetNext();
         }
     }
     if (pFaction)
     {
-        unsigned int auiFormId = ((MLCFormID*)pFaction)->FUN_0084e3a0();
-        FUN_00485910(0x4d414e52, auiFormId);
+        unsigned int auiFormId = ((MLCFormID*)pFaction)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e52, auiFormId);
     }
-    FUN_00485910(CHUNK_ID_FNAM_ID, (unsigned int)m_eRequiredFightReaction);
-    ((MLCFormSaver*)this)->FUN_00485680();
+    TESForm_AddChunk_00485910(CHUNK_ID_FNAM_ID, (unsigned int)m_eRequiredFightReaction);
+    ((MLCFormSaver*)this)->FinishFormRecord();
 }
 
 struct ListOps
@@ -847,15 +855,16 @@ struct ListOps
 };
 struct FormOps
 {
-    bool FUN_00485270(TESForm* apOther);
+    bool TESForm_CompareAllComponents(TESForm* apOther);
 };
 struct FUN_00596d70_shell : public MediaLocationController
 {
-    bool FUN_00596d70(TESForm* apForm);
+    bool MediaLocationController_Compare(TESForm* apForm);
 };
 // Compares this MediaLocationController with apForm: returns true if apForm is not one, or if any flag, faction, field or media list differs; false if all match.
 // @fnv 0x00596d70
-bool FUN_00596d70_shell::FUN_00596d70(TESForm* apForm)
+// src: XBOX_PDB 0x00596d70
+bool FUN_00596d70_shell::MediaLocationController_Compare(TESForm* apForm)
 {
     MediaLocationController* pOther = dynamic_cast<MediaLocationController*>(apForm);
     if (!pOther)
@@ -880,7 +889,7 @@ bool FUN_00596d70_shell::FUN_00596d70(TESForm* apForm)
         return true;
     if (m_uiLongDelay != pOther->m_uiLongDelay)
         return true;
-    if (reinterpret_cast<FormOps*>(this)->FUN_00485270(pOther))
+    if (reinterpret_cast<FormOps*>(this)->TESForm_CompareAllComponents(pOther))
         return true;
     if (pOther->m_kMediaSetList1.GetItem() && m_kMediaSetList1.GetItem() &&
         reinterpret_cast<ListOps*>(&pOther->m_kMediaSetList1)->FUN_005ae380() ==
@@ -1055,9 +1064,9 @@ bool FUN_00596d70_shell::FUN_00596d70(TESForm* apForm)
 
 struct ObjT
 {
-    float FUN_00595f50();
-    float FUN_00595fc0();
-    float FUN_00596030();
+    float Sky_GetSunriseEnd();
+    float Sky_GetSunsetBegin();
+    float Sky_GetSunsetEnd();
 };
 struct GlobT
 {
@@ -1065,7 +1074,7 @@ struct GlobT
 };
 extern GlobT* DAT_011dea10;
 extern double DAT_01034200;
-float __fastcall FUN_00595ea0(char* apThis);
+float __fastcall Sky_GetSunriseBegin(char* apThis);
 float __fastcall GetFieldEC(const char* pThis);
 
 struct ThisT
@@ -1104,7 +1113,7 @@ struct ThisT
     unsigned int unk7c;
     unsigned int m_uiShortDelay;
     unsigned int m_uiLongDelay;
-    bool FUN_00595e80();
+    bool MediaLocationController_GetDefaultTime();
     bool IsWithinRange();
 };
 
@@ -1113,10 +1122,10 @@ bool ThisT::IsWithinRange()
 {
     ObjT* p;
     p = DAT_011dea10->FUN_008d8520();
-    if (FUN_00595e80())
+    if (MediaLocationController_GetDefaultTime())
     {
-        return (p != 0) ? (((FUN_00595ea0((char*)p) + p->FUN_00595f50()) / 2.0 <= GetFieldEC((const char*)p)) &&
-                           (GetFieldEC((const char*)p) <= (p->FUN_00595fc0() + p->FUN_00596030()) / 2.0))
+        return (p != 0) ? (((Sky_GetSunriseBegin((char*)p) + p->Sky_GetSunriseEnd()) / 2.0 <= GetFieldEC((const char*)p)) &&
+                           (GetFieldEC((const char*)p) <= (p->Sky_GetSunsetBegin() + p->Sky_GetSunsetEnd()) / 2.0))
                         : true;
     }
     else
@@ -1169,7 +1178,7 @@ struct ThisCls
     BSSimpleList<MediaSet*> m_kMediaSetList4;
     BSSimpleList<MediaSet*> m_kMediaSetList5;
     BSSimpleList<MediaSet*> m_kMediaSetList6;
-    void FUN_004851b0(MediaLocationController* apSrc);
+    void TESForm_CopyAllComponents(MediaLocationController* apSrc);
     void CopyFromMediaLocationController(TESForm* apForm);
 };
 
@@ -1181,7 +1190,7 @@ void ThisCls::CopyFromMediaLocationController(TESForm* apForm)
     MediaLocationController* pSrc = dynamic_cast<MediaLocationController*>(apForm);
     if (pSrc == 0)
         return;
-    FUN_004851b0(pSrc);
+    TESForm_CopyAllComponents(pSrc);
     iFlags = pSrc->iFlags;
     m_fLowerWeightThreshold = pSrc->m_fLowerWeightThreshold;
     m_fUpperWeightThreshold = pSrc->m_fUpperWeightThreshold;

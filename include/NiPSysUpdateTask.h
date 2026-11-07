@@ -16,7 +16,7 @@ public:
     void AssignRefAndValue(NiParticleSystem* pkObject, float fNew);
     void ReleaseSysAndDispatch();
     void Destroy();
-    bool FUN_00c25be0();
+    bool Clear_00c25be0();
     void Release();
     void Destruct();
     void* DestroyElements(unsigned int uiFlags);

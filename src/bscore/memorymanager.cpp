@@ -101,11 +101,11 @@ void ExtraDataList::SetExtraHealth(float health)
     }
 }
 
-MemoryManager* FUN_00401020();
+MemoryManager* MemoryManager_Instance();
 // @fnv 0x0042f5d0
 void* Reallocate(void* pointer, unsigned int size)
 {
-    return FUN_00401020()->Reallocate(pointer, size);
+    return MemoryManager_Instance()->Reallocate(pointer, size);
 }
 
 // Looks up the scrap heap for the current thread ID, creating and storing a new one if none exists, and returns it.
@@ -198,13 +198,15 @@ __declspec(dllimport) void __stdcall LeaveCriticalSection(_RTL_CRITICAL_SECTION*
 }
 extern _RTL_CRITICAL_SECTION DAT_011f6234;
 // @fnv 0x00aa4460
-void FUN_00aa4460()
+// src: COMMUNITY 0x00aa4460
+void MemoryManager_EnableDelayedFree()
 {
     memorymanager_imports::EnterCriticalSection(&DAT_011f6234);
 }
 
 // @fnv 0x00aa4470
-void FUN_00aa4470()
+// src: COMMUNITY 0x00aa4470
+void MemoryManager_DisableDelayedFree()
 {
     memorymanager_imports::LeaveCriticalSection(&DAT_011f6234);
 }
@@ -212,7 +214,8 @@ void FUN_00aa4470()
 extern char DAT_011f6230;
 
 // @fnv 0x00aa4480
-void FUN_00aa4480(unsigned char value)
+// src: COMMUNITY 0x00aa4480
+void MemoryManager_SetCheckMemOnFree(unsigned char value)
 {
     DAT_011f6230 = value;
 }
@@ -221,7 +224,8 @@ namespace fnv_00aa4490 {
 extern unsigned int DAT_011f6234;
 
 // @fnv 0x00aa4490
-bool FUN_00aa4490()
+// src: COMMUNITY 0x00aa4490
+bool MemoryManager_GetDelayedFreeEnabled()
 {
     if (DAT_011f6234 > 0)
         return true;
@@ -232,7 +236,8 @@ bool FUN_00aa4490()
 extern char DAT_011f6230;
 
 // @fnv 0x00aa44b0
-char __cdecl FUN_00aa44b0()
+// src: COMMUNITY 0x00aa44b0
+char __cdecl MemoryManager_GetCheckMemOnFree()
 {
     return DAT_011f6230;
 }
@@ -270,7 +275,7 @@ void MemoryManager::Initialize()
     ClearMemoryPoolTables();
     InitializeHeaps();
     bInitialized = true;
-    FUN_00866770();
+    SpecifyPools();
     FUN_00483710();
     g_tls.m_2b4 = 0;
 }
@@ -385,7 +390,8 @@ struct FUN_00aa5950_s
     }
 };
 extern FUN_00aa5950_s* DAT_011f63b4;
-inline void FUN_00aa5950()
+// src: COMMUNITY 0x00aa5950
+inline void ScrapHeapManager_Shutdown()
 {
     delete DAT_011f63b4;
     DAT_011f63b4 = 0;
@@ -412,7 +418,7 @@ MemoryManager::~MemoryManager()
         delete heap;
     }
     reinterpret_cast<MapView*>(&kThreadScrapHeapMap)->ClearAll();
-    FUN_00aa5950();
+    ScrapHeapManager_Shutdown();
     FUN_00483710();
     DestroyMemoryPools();
     fnv_zlib_memset(pHeapsByContextA, 0, 0x108);
@@ -438,7 +444,7 @@ MemoryManager::~MemoryManager()
 }
 
 namespace fnv_00aa43a0 {
-void __cdecl FUN_00aa7370();
+void __cdecl MemoryPool_CheckPools();
 
 class ItemAA43
 {
@@ -455,9 +461,10 @@ class ItemAA43
 
 // Calls FUN_00aa7370, then iterates over all entries and calls Update on each ItemAA43.
 // @fnv 0x00aa43a0
-void MemoryManager::FUN_00aa43a0(int unused)
+// src: COMMUNITY 0x00aa43a0
+void MemoryManager::CheckMemoryIntegrity_00aa43a0(int unused)
 {
-    fnv_00aa43a0::FUN_00aa7370();
+    fnv_00aa43a0::MemoryPool_CheckPools();
     fnv_00aa43a0::ItemAA43* pkItem;
     int ItemUpdateArray = GetCount();
     for (int i = 0; i < ItemUpdateArray; i++)

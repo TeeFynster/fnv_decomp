@@ -18,7 +18,7 @@ public:
 
     bool SetSoundName(const char*);
     void ClearSounds();
-    void FUN_005f0820();
+    void FreeAllCreatureSoundLists();
     void* DeleteThis(unsigned int);
     void AddSoundForType(SoundListEntry*, CREATURE_SOUND_TYPE);
     BSSimpleList<SoundListEntry*>* GetSoundListForType(CREATURE_SOUND_TYPE);

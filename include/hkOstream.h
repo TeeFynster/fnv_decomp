@@ -32,5 +32,5 @@ public:
 
     hkOstream* FUN_00cb1600(void* buf, int size);
     void FUN_00cc00e0();
-    __declspec(nothrow) hkOstream& FUN_00cc01c0(const char* str) throw();
+    __declspec(nothrow) hkOstream& ProcessAndReturnValue_00cc01c0(const char* str) throw();
 };

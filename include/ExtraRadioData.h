@@ -9,7 +9,7 @@ class ExtraRadioData : public BSExtraData
 public:
     struct RadioData
     {
-        void FUN_00437240(RadioData* other);
+        void RADIO_DATA_Copy(RadioData* other);
 
         char unk00[0x10];
     };
@@ -18,7 +18,7 @@ public:
     virtual ~ExtraRadioData();
 
     bool CompareRadioData(BSExtraData* extra);
-    TESObjectCELL* FUN_0043a2b0();
+    TESObjectCELL* DoorTeleportData_GetTeleportCell();
 
     union
     {

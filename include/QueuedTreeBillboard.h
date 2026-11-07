@@ -13,8 +13,8 @@ public:
 
     void ApplyQueuedTexture();
     void QueueForPostProcess();
-    bool FUN_0043d820(char* apDescription, unsigned int aiBufferSize);
-    bool FUN_00c3d0e0(char* apDescription, unsigned int aiBufferSize, const char* apStr);
+    bool GetDescription_0043d820(char* apDescription, unsigned int aiBufferSize);
+    bool QueuedFileEntry_GetDescription(char* apDescription, unsigned int aiBufferSize, const char* apStr);
     void __thiscall FUN_0043d5b0();
     void* __thiscall FUN_0043d580(unsigned int flags);
 };

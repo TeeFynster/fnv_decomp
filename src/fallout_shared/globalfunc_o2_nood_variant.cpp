@@ -53,8 +53,8 @@ struct MemoryContextScope
         g_tlsCur = previous;
     }
 };
-char* __cdecl FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d550(const char*, float);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
 extern const float DAT_01016248;
 extern const float DAT_01017870;
 extern const float DAT_0101b2d0;
@@ -75,9 +75,9 @@ struct __declspec(align(16)) SpringInfo
 };
 struct MouseSpringDiagnostic
 {
-    void FUN_00c86b80(StrArr*);
-    void FUN_00c86d20(SpringInfo*);
-    void FUN_00c873d0(StrArr*);
+    void bhkUnaryAction_GetViewerStrings(StrArr*);
+    void bhkMouseSpringAction_CopyCinfo(SpringInfo*);
+    void bhkMouseSpringAction_GetViewerStrings(StrArr*);
 };
 static void AppendString(StrArr* strings, char*& value)
 {
@@ -87,12 +87,13 @@ static void AppendString(StrArr* strings, char*& value)
     strings->SetAt(index, value);
 }
 // @fnv 0x00c873d0
-void MouseSpringDiagnostic::FUN_00c873d0(StrArr* strings)
+// src: XBOX_PDB 0x00c873d0
+void MouseSpringDiagnostic::bhkMouseSpringAction_GetViewerStrings(StrArr* strings)
 {
     MemoryContextScope scope(16);
     char* str;
-    FUN_00c86b80(strings);
-    str = FUN_00a7d330(DAT_0126812c);
+    bhkUnaryAction_GetViewerStrings(strings);
+    str = NiViewerStrings_NiGetViewerString_Title(DAT_0126812c);
     AppendString(strings, str);
     SpringInfo info;
     info.unk00 = 0;
@@ -108,14 +109,14 @@ void MouseSpringDiagnostic::FUN_00c873d0(StrArr* strings)
     info.elasticity = DAT_01017870;
     info.maxForce = DAT_0101b2d0;
     info.objectDamping = str_0101ffc0;
-    FUN_00c86d20(&info);
-    str = FUN_00a7d550("Damping", info.damping);
+    bhkMouseSpringAction_CopyCinfo(&info);
+    str = NiGetViewerString_00a7d550("Damping", info.damping);
     AppendString(strings, str);
-    str = FUN_00a7d550("Elasticity", info.elasticity);
+    str = NiGetViewerString_00a7d550("Elasticity", info.elasticity);
     AppendString(strings, str);
-    str = FUN_00a7d550("Object Damping", info.objectDamping);
+    str = NiGetViewerString_00a7d550("Object Damping", info.objectDamping);
     AppendString(strings, str);
-    str = FUN_00a7d550("Max Force", info.maxForce);
+    str = NiGetViewerString_00a7d550("Max Force", info.maxForce);
     AppendString(strings, str);
 }
 
@@ -180,7 +181,7 @@ struct MouseSpringAction
 
     MouseSpringAction(const hkVector4& kPositionInRbLocal, const hkVector4& kMousePositionInWorld, float fSpringDamping,
                       float fSpringElasticity, float fObjectDamping, void* pkBody, int iUserData);
-    void FUN_00cbb1b0(float fMaxRelativeForce);
+    void hkpMouseSpringAction_setMaxRelativeForce(float fMaxRelativeForce);
     void FUN_00c905b0();
 
     int unk08;
@@ -257,18 +258,19 @@ struct MouseSpringOwner
     virtual void vf45();
     virtual void vf46();
     virtual void finish(struct MouseSpringInfo* pkInfo);
-    void FUN_00c87260(MouseSpringInfo* pkInfo);
+    void bhkMouseSpringAction_Init(MouseSpringInfo* pkInfo);
 };
 
 // @fnv 0x00c87260
-void MouseSpringOwner::FUN_00c87260(MouseSpringInfo* pkInfo)
+// src: XBOX_PDB 0x00c87260
+void MouseSpringOwner::bhkMouseSpringAction_Init(MouseSpringInfo* pkInfo)
 {
     MemContextGuard kGuard(0x10);
     MouseSpringAction* pkAction = new MouseSpringAction(
         AsHkVector4(_mm_setr_ps(pkInfo->m_f10, pkInfo->m_f14, pkInfo->m_f18, pkInfo->m_f1C)),
         AsHkVector4(_mm_setr_ps(pkInfo->m_f20, pkInfo->m_f24, pkInfo->m_f28, pkInfo->m_f2C)), pkInfo->m_fSpringDamping,
         pkInfo->m_fSpringElasticity, pkInfo->m_fObjectDamping, pkInfo->m_pkBody, 0);
-    pkAction->FUN_00cbb1b0(pkInfo->m_fMaxRelativeForce);
+    pkAction->hkpMouseSpringAction_setMaxRelativeForce(pkInfo->m_fMaxRelativeForce);
     RegisterAction(pkAction);
     pkAction->FUN_00c905b0();
     finish(pkInfo);

@@ -3,8 +3,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 extern int DAT_012027a0;
-void __stdcall FUN_00c32f60(void* p);
-void* __cdecl FUN_00a7d330(int v);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(void* p);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(int v);
 
 struct ObjHdr
 {
@@ -23,8 +23,8 @@ struct ObjHdr
 void __stdcall AppendElement(ObjHdr* apObj)
 {
     ObjHdr* pObj = apObj;
-    FUN_00c32f60(pObj);
-    void* pValue = FUN_00a7d330(DAT_012027a0);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pObj);
+    void* pValue = NiViewerStrings_NiGetViewerString_Title(DAT_012027a0);
     unsigned int count = pObj->unkA;
     if (count >= pObj->unk8)
     {

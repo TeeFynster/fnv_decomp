@@ -39,7 +39,7 @@ class NiGeometry : public NiAVObject
     bool FUN_00a59f00(NiStream& stream);
     bool FUN_00a5a260(NiGeometry* object);
     void FUN_00a5ad00(void* strings);
-    NiGeometryData* FUN_005495f0();
+    NiGeometryData* NiGeometry_GetModelData();
     NiObjectNET* FUN_0050d100();
     GeomInfo* FUN_00a59d30(int index);
 

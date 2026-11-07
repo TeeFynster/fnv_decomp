@@ -34,8 +34,8 @@ class Model
 {
   public:
     void SetManualRefCount(int);
-    void FUN_0092c870();
-    const char* FUN_00559450();
+    void Model_IncManualRefCount();
+    const char* Modelloader_GetReferencedThis();
 };
 class KFModel;
 class ModelLoader
@@ -43,11 +43,11 @@ class ModelLoader
   public:
     void QueueMagicEffectModel(MagicItem*, EffectSetting*, int);
     NiNode* LoadFile(const char*, int, bool, bool, bool, bool);
-    bool FUN_004472a0(const char*, NiPointer<Model>&);
+    bool ModelLoader_FindModel(const char*, NiPointer<Model>&);
     KFModel* LoadKF(const char*);
     BSSimpleList<const char*>* GetModelFileList(const char*, bool, bool, int);
 };
-void FUN_0040ab50();
+void MagicItem_IncrementGlobalCounter();
 extern ModelLoader* g_modelLoader;
 class TaskQueueInterface
 {
@@ -56,7 +56,7 @@ class TaskQueueInterface
 };
 // Game path concatenation helper at 0x00406d50.
 int AppendModelPath(char*, unsigned int, const char*);
-char* FUN_0040ab30(char*, int);
+char* strrchr_0040ab30(char*, int);
 extern "C" const char* strrchr(const char*, int);
 extern "C" int _strnicmp(const char*, const char*, unsigned int);
 extern "C" void FormHeapFreeAndLog(const void*);
@@ -220,7 +220,7 @@ void MagicItem::Preload(bool immediate)
     {
         if (bLoad && pSelfEffectSetting->TESModel::GetModelLength() > 0)
             g_modelLoader->LoadFile(pSelfEffectSetting->GetModelFilePath(), 0, true, false, false, false);
-        pSelfEffectSetting->FUN_004088c0();
+        pSelfEffectSetting->IncEffectLoadedCount();
     }
     EffectItemList* pIter = this;
     if (!pIter->IsEmpty())
@@ -239,7 +239,7 @@ void MagicItem::Preload(bool immediate)
                 if (bLoad)
                 {
                     TESForm* form = current.effect->FUN_005f5f80();
-                    if (form && current.effect->FUN_00403e60(0x10000))
+                    if (form && current.effect->IsFlagSet_00403e60(0x10000))
                     {
                         TESObjectWEAP* weapon = dynamic_cast<TESObjectWEAP*>(form);
                         // Address the TESModel base from shared layout without nullable base-cast temporaries.
@@ -250,7 +250,7 @@ void MagicItem::Preload(bool immediate)
                                     offsetof(TESModel, m_kModelFilePath))->GetModelFilePath(),
                                 0, true, false, false, false);
                     }
-                    else if (form && current.effect->FUN_00403e60(0x20000))
+                    else if (form && current.effect->IsFlagSet_00403e60(0x20000))
                     {
                         TESObjectARMO* armor = dynamic_cast<TESObjectARMO*>(form);
                         if (armor)
@@ -259,7 +259,7 @@ void MagicItem::Preload(bool immediate)
                             g_modelLoader->LoadFile(armor->GetBipedModel(1), 0, true, false, false, false);
                         }
                     }
-                    else if (form && current.effect->FUN_00403e60(0x40000))
+                    else if (form && current.effect->IsFlagSet_00403e60(0x40000))
                     {
                         TESNPC* pNPC = dynamic_cast<TESNPC*>(form);
                         if (pNPC)
@@ -296,7 +296,7 @@ void MagicItem::Preload(bool immediate)
                             modelPaths.files = creature->TESModelList::FUN_00717e50();
                             char path[260];
                             TaskQueueInterface::CopyStringToBuffer(path, 260, modelPaths.filename);
-                            modelPaths.slash = FUN_0040ab30(path, '\\');
+                            modelPaths.slash = strrchr_0040ab30(path, '\\');
                             modelPaths.node = modelPaths.files;
                             while (modelPaths.slash && modelPaths.node)
                             {
@@ -331,7 +331,7 @@ void MagicItem::Preload(bool immediate)
                                 modelPaths.slash[1] = 0;
                                 AppendModelPath(path, 260, "SpecialAnims");
                                 AppendModelPath(path, 260, "\\");
-                                modelPaths.slash = FUN_0040ab30(path, '\\');
+                                modelPaths.slash = strrchr_0040ab30(path, '\\');
                                 BSSimpleList<const char*>* anim = static_cast<BSSimpleList<const char*>*>(creature->TESAnimation::GetKFFileList());
                                 while (anim)
                                 {
@@ -349,8 +349,8 @@ void MagicItem::Preload(bool immediate)
                     }
                 }
                 if (!current.effect->HasEffectID() && !current.effect->UsesAssociatedActorValue() &&
-                    current.effect->FUN_00403e60(0x40000))
-                    FUN_0040ab50();
+                    current.effect->IsFlagSet_00403e60(0x40000))
+                    MagicItem_IncrementGlobalCounter();
                 current.effect->UpdateCounter();
             }
             pIter = (EffectItemList*)pIter->GetNext();
@@ -359,16 +359,17 @@ void MagicItem::Preload(bool immediate)
 }
 
 // @fnv 0x0040ab30
-char* FUN_0040ab30(char* pcString, int cChar)
+// src: XBOX_PDB 0x0040ab30
+char* strrchr_0040ab30(char* pcString, int cChar)
 {
     return (char*)strrchr((const char*)pcString, cChar);
 }
 
 struct FUN_0040c110_obj
 {
-    void FUN_0040c130();
+    void Model_DecRefCount();
 };
-void __fastcall FUN_0040c130(void*);
+void __fastcall Model_DecRefCount(void*);
 
 struct FUN_0040c110_ptr
 {
@@ -378,20 +379,22 @@ struct FUN_0040c110_ptr
     }* m_pObject;
 };
 
-void __fastcall FUN_0040c130(FUN_0040c110_ptr::Target*);
+void __fastcall Model_DecRefCount(FUN_0040c110_ptr::Target*);
 
 // @fnv 0x0040c110
-void __fastcall FUN_0040c110(FUN_0040c110_ptr* _this)
+// src: GUESS 0x0040c110 (confidence: high)
+void __fastcall MagicItem_ReleaseModelReference(FUN_0040c110_ptr* _this)
 {
     if (_this->m_pObject)
-        FUN_0040c130(_this->m_pObject);
+        Model_DecRefCount(_this->m_pObject);
 }
 
 extern int DAT_01202800;
 
 // Returns pThis[1] when pThis is non-null, otherwise resets DAT_01202800 to 0 and returns it.
 // @fnv 0x0043d4d0
-int& __fastcall FUN_0043d4d0(int* pThis)
+// src: XBOX_PDB 0x0043d4d0
+int& __fastcall Setting_Int(int* pThis)
 {
     return pThis ? pThis[1] : (DAT_01202800 = 0, DAT_01202800);
 }
@@ -400,13 +403,13 @@ struct FUN_004047f0_arg
 {
     const BSStringT<char>* s;
 };
-const char* __fastcall FUN_00559450(const BSStringT<char>*);
+const char* __fastcall Modelloader_GetReferencedThis(const BSStringT<char>*);
 void __fastcall FUN_00403970(BSStringT<char>*);
 // @fnv 0x004047f0
 BSStringT<char>* __fastcall AssignFromString(BSStringT<char>* this_ptr, FUN_004047f0_arg aStringArg)
 {
     FUN_00403970(this_ptr);
-    this_ptr->Set(FUN_00559450(aStringArg.s), 0);
+    this_ptr->Set(Modelloader_GetReferencedThis(aStringArg.s), 0);
     return this_ptr;
 }
 
@@ -416,7 +419,8 @@ struct FUN_0040c0e0_arg
 };
 void __fastcall FUN_00403970(BSStringT<char>*);
 // @fnv 0x0040c0e0
-BSStringT<char>* __fastcall FUN_0040c0e0(BSStringT<char>* this_ptr, FUN_0040c0e0_arg aCString)
+// src: GUESS 0x0040c0e0 (confidence: medium)
+BSStringT<char>* __fastcall BSStringT_InitializeCString(BSStringT<char>* this_ptr, FUN_0040c0e0_arg aCString)
 {
     FUN_00403970(this_ptr);
     this_ptr->Set(aCString.s, 0);
@@ -426,7 +430,8 @@ BSStringT<char>* __fastcall FUN_0040c0e0(BSStringT<char>* this_ptr, FUN_0040c0e0
 extern int DAT_011c3438;
 
 // @fnv 0x0040ab50
-void FUN_0040ab50()
+// src: GUESS 0x0040ab50 (confidence: medium)
+void MagicItem_IncrementGlobalCounter()
 {
     DAT_011c3438 += 1;
 }
@@ -456,7 +461,7 @@ void __fastcall PreloadModels(MagicItem* magicItem)
         if (pavEffectSetting->TESModel::GetModelLength() > 0)
         {
             NiPointer<Model> spmodel(0);
-            g_modelLoader->FUN_004472a0(pavEffectSetting->GetModelFilePath(), spmodel);
+            g_modelLoader->ModelLoader_FindModel(pavEffectSetting->GetModelFilePath(), spmodel);
             if (spmodel)
                 ((Model*)spmodel)->SetManualRefCount(icount);
         }
@@ -475,13 +480,13 @@ void __fastcall PreloadModels(MagicItem* magicItem)
                 icount = pes->FUN_004087e0();
             if (icount)
             {
-                if (pform && pes->FUN_00403e60(0x10000))
+                if (pform && pes->IsFlagSet_00403e60(0x10000))
                 {
                     TESObjectWEAP* pweapon = dynamic_cast<TESObjectWEAP*>(pform);
                     if (pweapon && pweapon->TESModel::GetModelLength() > 0)
                     {
                         NiPointer<Model> spmodel(0);
-                        g_modelLoader->FUN_004472a0(
+                        g_modelLoader->ModelLoader_FindModel(
                             reinterpret_cast<TESModel*>(reinterpret_cast<char*>(pweapon) +
                                 offsetof(TESObjectWEAP, m_kModelFilePath) -
                                 offsetof(TESModel, m_kModelFilePath))->GetModelFilePath(), spmodel);
@@ -489,23 +494,23 @@ void __fastcall PreloadModels(MagicItem* magicItem)
                             ((Model*)spmodel)->SetManualRefCount(icount);
                     }
                 }
-                else if (pform && pes->FUN_00403e60(0x20000))
+                else if (pform && pes->IsFlagSet_00403e60(0x20000))
                 {
                     TESObjectARMO* parmor = dynamic_cast<TESObjectARMO*>(pform);
                     if (parmor)
                     {
                         NiPointer<Model> spmodel(0);
-                        g_modelLoader->FUN_004472a0(parmor->GetBipedModel(0),
+                        g_modelLoader->ModelLoader_FindModel(parmor->GetBipedModel(0),
                                                     spmodel);
                         if (spmodel)
                             ((Model*)spmodel)->SetManualRefCount(icount);
-                        g_modelLoader->FUN_004472a0(parmor->GetBipedModel(1),
+                        g_modelLoader->ModelLoader_FindModel(parmor->GetBipedModel(1),
                                                     spmodel);
                         if (spmodel)
                             ((Model*)spmodel)->SetManualRefCount(icount);
                     }
                 }
-                else if (pform && pes->FUN_00403e60(0x40000))
+                else if (pform && pes->IsFlagSet_00403e60(0x40000))
                 {
                     TESNPC* pnpc = dynamic_cast<TESNPC*>(pform);
                     if (pnpc)
@@ -516,7 +521,7 @@ void __fastcall PreloadModels(MagicItem* magicItem)
                         {
                             const char* pfilename = pCurrentElementNext->GetItem();
                             NiPointer<Model> spmodel(0);
-                            g_modelLoader->FUN_004472a0(pfilename, spmodel);
+                            g_modelLoader->ModelLoader_FindModel(pfilename, spmodel);
                             if (spmodel)
                                 ((Model*)spmodel)->SetManualRefCount(icount);
                             pCurrentElementNext = pCurrentElementNext->GetNext();
@@ -532,18 +537,18 @@ void __fastcall PreloadModels(MagicItem* magicItem)
                         BSSimpleList<const char*>* pfilelist;
                         char* plastSlash;
                         const char* pfilename;
-                        g_modelLoader->FUN_004472a0(pcreature->GetModelFilePath(),
+                        g_modelLoader->ModelLoader_FindModel(pcreature->GetModelFilePath(),
                                                     spmodel);
                         if (spmodel)
                         {
                             char path[260];
                             BSSimpleList<const char*>* pcreatureFileList;
                             for (int i = 0; i < icount; i++)
-                                ((Model*)spmodel)->FUN_0092c870();
-                            pfilename = ((Model*)spmodel)->FUN_00559450();
+                                ((Model*)spmodel)->Model_IncManualRefCount();
+                            pfilename = ((Model*)spmodel)->Modelloader_GetReferencedThis();
                             pfilelist = pcreature->TESModelList::FUN_00717e50();
                             TaskQueueInterface::CopyStringToBuffer(path, 260, pfilename);
-                            plastSlash = FUN_0040ab30(path, '\\');
+                            plastSlash = strrchr_0040ab30(path, '\\');
                             pcreatureFileList = pfilelist;
                             while (plastSlash && pcreatureFileList)
                             {
@@ -553,7 +558,7 @@ void __fastcall PreloadModels(MagicItem* magicItem)
                                 {
                                     AppendModelPath(path, 260, pitem);
                                     NiPointer<Model> spmodel(0);
-                                    g_modelLoader->FUN_004472a0(path, spmodel);
+                                    g_modelLoader->ModelLoader_FindModel(path, spmodel);
                                     if (spmodel)
                                         ((Model*)spmodel)->SetManualRefCount(icount);
                                 }
@@ -586,7 +591,7 @@ void __fastcall PreloadModels(MagicItem* magicItem)
                                 plastSlash[1] = 0;
                                 AppendModelPath(path, 260, "SpecialAnims");
                                 AppendModelPath(path, 260, "\\");
-                                plastSlash = FUN_0040ab30(path, '\\');
+                                plastSlash = strrchr_0040ab30(path, '\\');
                                 BSSimpleList<const char*>* pspecialList =
                                     static_cast<BSSimpleList<const char*>*>(pcreature->TESAnimation::GetKFFileList());
                                 while (pspecialList)
@@ -660,8 +665,8 @@ int __fastcall ClampEffectCounterTowardZero(EffectSetting*);
 
 struct UnloadLoader : ModelLoader
 {
-    void FUN_00445300(const char*, bool, bool);
-    void FUN_00445370(const char*, bool);
+    void ModelLoader_ReleaseModel(const char*, bool, bool);
+    void ModelLoader_ReleaseKF(const char*, bool);
 };
 extern UnloadLoader* DAT_011c3b3c;
 int FUN_00406d30(char*, unsigned int, const char*);
@@ -678,7 +683,7 @@ void MagicItem::Unload(bool immediate)
     if (primary && primary->TESModel::GetModelLength())
     {
         if (!queued)
-            DAT_011c3b3c->FUN_00445300(primary->GetModelFilePath(), immediate, true);
+            DAT_011c3b3c->ModelLoader_ReleaseModel(primary->GetModelFilePath(), immediate, true);
         StepEffectLoadedCountTowardZero(primary);
     }
     EffectItemList* effects = this;
@@ -693,25 +698,25 @@ void MagicItem::Unload(bool immediate)
                 if (!queued)
                 {
                     TESForm* associated = effect->FUN_005f5f80();
-                    if (associated && effect->FUN_00403e60(0x10000))
+                    if (associated && effect->IsFlagSet_00403e60(0x10000))
                     {
                         TESObjectWEAP* weapon = dynamic_cast<TESObjectWEAP*>(associated);
                         if (weapon && weapon->TESModel::GetModelLength() > 0)
-                            DAT_011c3b3c->FUN_00445300(
+                            DAT_011c3b3c->ModelLoader_ReleaseModel(
                                 reinterpret_cast<TESModel*>(reinterpret_cast<char*>(weapon) +
                                     offsetof(TESObjectWEAP, m_kModelFilePath) -
                                     offsetof(TESModel, m_kModelFilePath))->GetModelFilePath(), immediate, true);
                     }
-                    else if (associated && effect->FUN_00403e60(0x20000))
+                    else if (associated && effect->IsFlagSet_00403e60(0x20000))
                     {
                         TESObjectARMO* armor = dynamic_cast<TESObjectARMO*>(associated);
                         if (armor)
                         {
-                            DAT_011c3b3c->FUN_00445300(armor->GetBipedModel(0), immediate, true);
-                            DAT_011c3b3c->FUN_00445300(armor->GetBipedModel(1), immediate, true);
+                            DAT_011c3b3c->ModelLoader_ReleaseModel(armor->GetBipedModel(0), immediate, true);
+                            DAT_011c3b3c->ModelLoader_ReleaseModel(armor->GetBipedModel(1), immediate, true);
                         }
                     }
-                    else if (associated && effect->FUN_00403e60(0x40000))
+                    else if (associated && effect->IsFlagSet_00403e60(0x40000))
                     {
                         TESNPC* npc3 = dynamic_cast<TESNPC*>(associated);
                         if (npc3)
@@ -721,7 +726,7 @@ void MagicItem::Unload(bool immediate)
                             while (model15 && !model15->IsEmpty())
                             {
                                 const char* path = model15->GetItem();
-                                DAT_011c3b3c->FUN_00445300(path, immediate, true);
+                                DAT_011c3b3c->ModelLoader_ReleaseModel(path, immediate, true);
                                 model15 = model15->GetNext();
                             }
                             models71->RemoveAll();
@@ -730,14 +735,14 @@ void MagicItem::Unload(bool immediate)
                         TESCreature* creature11 = dynamic_cast<TESCreature*>(associated);
                         if (creature11)
                         {
-                            DAT_011c3b3c->FUN_00445300(creature11->GetModelFilePath(), immediate, true);
+                            DAT_011c3b3c->ModelLoader_ReleaseModel(creature11->GetModelFilePath(), immediate, true);
                             const char* modelPath6 = creature11->GetModelFilePath();
                             BSSimpleList<const char*>* modelList6 = creature11->TESModelList::FUN_00717e50();
                             BSSimpleList<const char*>* modelNode29;
                             const char* fileName12;
                             char buffer4[260];
                             FUN_00406d30(buffer4, 260, modelPath6);
-                            char* separator10 = FUN_0040ab30(buffer4, '\\');
+                            char* separator10 = strrchr_0040ab30(buffer4, '\\');
                             modelNode29 = modelList6;
                             while (separator10 && modelNode29)
                             {
@@ -746,7 +751,7 @@ void MagicItem::Unload(bool immediate)
                                 if (path)
                                 {
                                     AppendModelPath(buffer4, 260, path);
-                                    DAT_011c3b3c->FUN_00445300(buffer4, immediate, true);
+                                    DAT_011c3b3c->ModelLoader_ReleaseModel(buffer4, immediate, true);
                                 }
                                 modelNode29 = modelNode29->GetNext();
                             }
@@ -760,7 +765,7 @@ void MagicItem::Unload(bool immediate)
                                 {
                                     const char* path = file->GetItem();
                                     if (path)
-                                        DAT_011c3b3c->FUN_00445370(path, immediate);
+                                        DAT_011c3b3c->ModelLoader_ReleaseKF(path, immediate);
                                     delete[] path;
                                     file = file->GetNext();
                                 }
@@ -772,7 +777,7 @@ void MagicItem::Unload(bool immediate)
                                 separator10[1] = 0;
                                 AppendModelPath(buffer4, 260, "SpecialAnims");
                                 AppendModelPath(buffer4, 260, "\\");
-                                separator10 = FUN_0040ab30(buffer4, '\\');
+                                separator10 = strrchr_0040ab30(buffer4, '\\');
                                 BSSimpleList<const char*>* animation = static_cast<BSSimpleList<const char*>*>(creature11->TESAnimation::GetKFFileList());
                                 while (animation)
                                 {
@@ -781,7 +786,7 @@ void MagicItem::Unload(bool immediate)
                                     if (path)
                                     {
                                         AppendModelPath(buffer4, 260, path);
-                                        DAT_011c3b3c->FUN_00445370(buffer4, immediate);
+                                        DAT_011c3b3c->ModelLoader_ReleaseKF(buffer4, immediate);
                                     }
                                     animation = animation->GetNext();
                                 }
@@ -790,7 +795,7 @@ void MagicItem::Unload(bool immediate)
                     }
                 }
                 ClampEffectCounterTowardZero(effect);
-                if (!effect->HasEffectID() && !effect->UsesAssociatedActorValue() && effect->FUN_00403e60(0x40000))
+                if (!effect->HasEffectID() && !effect->UsesAssociatedActorValue() && effect->IsFlagSet_00403e60(0x40000))
                     DecrementGlobalCounter();
             }
             effects = (EffectItemList*)effects->GetNext();

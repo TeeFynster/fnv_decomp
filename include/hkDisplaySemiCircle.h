@@ -11,7 +11,7 @@ public:
     hkDisplaySemiCircle(const hkVector4& center, const hkVector4& normal, const hkVector4& startPerp,
                         hkReal thetaMin, hkReal thetaMax, hkReal radius, int numSegments);
 
-    void FUN_00de4950(hkReal radius, hkReal thetaMin, hkReal thetaMax, int numSegments,
+    void UpdateState_00de4950(hkReal radius, hkReal thetaMin, hkReal thetaMax, int numSegments,
                       const hkVector4& center, const hkVector4& normal, const hkVector4& startPerp);
 
     hkVector4 m_vHitNormal;

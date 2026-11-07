@@ -13,7 +13,7 @@ public:
     NiPoint3* GetVertices();
     unsigned int GetPointerByFlag(unsigned int);
     void* FUN_006626f0(unsigned int flags);
-    void FUN_00662720();
+    void UpdateFields_00662720();
 
     static const NiRTTI ms_kRTTI;
 

@@ -39,9 +39,10 @@ bool Ni2DBuffer::CreateRendererData(const NiPixelFormat& format, MultiSamplePref
 
 bool __stdcall IsSameAs(NiObject* pkObject);
 
-bool __stdcall FUN_00a88a50(NiObject* pkObject);
+bool __stdcall Ni2DBuffer_IsEqual(NiObject* pkObject);
 // @fnv 0x00a88a50
-bool __stdcall FUN_00a88a50(NiObject* pkObject)
+// src: XBOX_PDB 0x00a88a50
+bool __stdcall Ni2DBuffer_IsEqual(NiObject* pkObject)
 {
     if (IsSameAs(pkObject))
         return true;

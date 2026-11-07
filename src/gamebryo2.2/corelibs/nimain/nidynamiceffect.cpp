@@ -100,8 +100,8 @@ NiDynamicEffect::NiDynamicEffect()
     iIndex = InterlockedIncrement(&DAT_011a9b58);
 }
 
-void __fastcall FUN_00a5a390(void*);
-void __fastcall FUN_00a68e30(void*);
+void __fastcall ReleaseStorage_00a5a390(void*);
+void __fastcall NiDynamicEffect_DetachAllUnaffectedNodes(void*);
 void __cdecl _delete(void*, unsigned int);
 
 extern const void* vftable_NiDynamicEffect;
@@ -112,10 +112,10 @@ extern const void* vftable_NiDynamicEffect;
 void* __fastcall DestroyNiDynamicEffect(NiDynamicEffect* effect, void*, unsigned int flags)
 {
     *reinterpret_cast<void**>(effect) = &vftable_NiDynamicEffect;
-    FUN_00a68e30(effect);
+    NiDynamicEffect_DetachAllUnaffectedNodes(effect);
     reinterpret_cast<BSShaderLightingProperty*>(&effect->unaffectedNodes)->ClearLights();
     reinterpret_cast<BSShaderLightingProperty*>(&effect->shadowGenerator)->ClearLights();
-    FUN_00a5a390(effect);
+    ReleaseStorage_00a5a390(effect);
     if (flags & 1)
         _delete(effect, 0xc4);
     return effect;
@@ -168,8 +168,8 @@ struct NiAVObjectEffectMethods
     bool IsEqual(NiObject*) const;
 };
 int NiSprintf(char*, unsigned int, const char*, ...);
-char* FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d5a0(const char*, void*);
+char* NiViewerStrings_NiGetViewerString_Title(const char*);
+char* __cdecl NiGetViewerString_00a7d5a0(const char*, void*);
 extern const char* const g_011f4a28_arg1;
 static inline NiNode* GetNext(NiTListItem<NiNode*>*& node)
 {
@@ -181,7 +181,7 @@ static inline NiNode* GetNext(NiTListItem<NiNode*>*& node)
 void NiDynamicEffect::AppendEffectProperties(StrArr* pkStrings)
 {
     reinterpret_cast<NiAVObjectEffectMethods*>(this)->AppendEffectProperties(pkStrings);
-    (pkStrings->*static_cast<unsigned int (StrArr::*)(char* const&)>(&StrArr::Add))(FUN_00a7d330(g_011f4a28_arg1));
+    (pkStrings->*static_cast<unsigned int (StrArr::*)(char* const&)>(&StrArr::Add))(NiViewerStrings_NiGetViewerString_Title(g_011f4a28_arg1));
     if (EffectNodes(shadowGenerator).m_kItemCount.m_uiCount)
     {
         NiTListItem<NiNode*>* kPos = EffectNodes(shadowGenerator).m_pkHead;
@@ -191,7 +191,7 @@ void NiDynamicEffect::AppendEffectProperties(StrArr* pkStrings)
             NiNode* pkNode = GetNext(kPos);
             char acPrefix[64];
             NiSprintf(acPrefix, 64, "affected node[%d]", i);
-            pkStrings->AddInline(FUN_00a7d5a0(acPrefix, pkNode));
+            pkStrings->AddInline(NiGetViewerString_00a7d5a0(acPrefix, pkNode));
             i++;
         }
         kPos = EffectNodes(unaffectedNodes).m_pkHead;
@@ -200,7 +200,7 @@ void NiDynamicEffect::AppendEffectProperties(StrArr* pkStrings)
             NiNode* pkNode = GetNext(kPos);
             char acPrefix[64];
             NiSprintf(acPrefix, 64, "unaffected node[%d]", i);
-            pkStrings->AddInline(FUN_00a7d5a0(acPrefix, pkNode));
+            pkStrings->AddInline(NiGetViewerString_00a7d5a0(acPrefix, pkNode));
             i++;
         }
     }

@@ -16,7 +16,7 @@ inline hkMemoryAllocator& BSAudio::heap()
 }
 
 namespace fnvc_adapt {
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 }
 
 struct FUN_00dce8d0_class
@@ -30,36 +30,37 @@ unsigned long FUN_00dce8d0_class::GetValueOrDefault(unsigned long key)
     return ((FUN_00dce8d0_class*)((char*)this + 4))->LookupHashEntry(key, 0);
 }
 
-void __cdecl FUN_00d3fe90(void);
-void __cdecl FUN_00d39390(void);
-void __cdecl FUN_00d41a30(void);
-void __cdecl FUN_00d40d80(void);
-void __cdecl FUN_00d32cd0(void);
+void __cdecl hkBoxBoxAgent3_process(void);
+void __cdecl hkCapsuleTriangleAgent3_process(void);
+void __cdecl hkPredGskAgent3_process(void);
+void __cdecl hkPredGskCylinderAgent3_process(void);
+void __cdecl hkConvexListAgent3_process(void);
 void __cdecl BuildEventIndex(void);
-void __fastcall FUN_00d2d890(void*, int, void*, int);
-void __cdecl FUN_00d35770(void);
-void __cdecl FUN_00d365d0(void);
+void __fastcall hkBvTreeAgent3_process(void*, int, void*, int);
+void __cdecl process_00d35770(void);
+void __cdecl hkpCollectionAgent3_process(void);
 
 // @fnv 0x00dcd4d0
-int __cdecl FUN_00dcd4d0(void* p)
+// src: COMMUNITY 0x00dcd4d0
+int __cdecl hkpSaveContactPointsUtil_getSerializedAgentType(void* p)
 {
-    if (p == (void*)&FUN_00d3fe90)
+    if (p == (void*)&hkBoxBoxAgent3_process)
         return 1;
-    if (p == (void*)&FUN_00d39390)
+    if (p == (void*)&hkCapsuleTriangleAgent3_process)
         return 2;
-    if (p == (void*)&FUN_00d41a30)
+    if (p == (void*)&hkPredGskAgent3_process)
         return 3;
-    if (p == (void*)&FUN_00d40d80)
+    if (p == (void*)&hkPredGskCylinderAgent3_process)
         return 4;
-    if (p == (void*)&FUN_00d32cd0)
+    if (p == (void*)&hkConvexListAgent3_process)
         return 5;
     if (p == (void*)&BuildEventIndex)
         return 6;
-    if (p == (void*)&FUN_00d2d890)
+    if (p == (void*)&hkBvTreeAgent3_process)
         return 7;
-    if (p == (void*)&FUN_00d35770)
+    if (p == (void*)&process_00d35770)
         return 8;
-    return (p != (void*)&FUN_00d365d0) ? 0 : 9;
+    return (p != (void*)&hkpCollectionAgent3_process) ? 0 : 9;
 }
 
 struct D10710Object
@@ -1724,7 +1725,7 @@ struct S_00dcdd80_RefObj
     static void* operator new(unsigned int nbytes)
     {
         S_00dcdd80_RefObj* b =
-            static_cast<S_00dcdd80_RefObj*>(fnvc_adapt::FUN_00c85750()->heap().blockAlloc(nbytes));
+            static_cast<S_00dcdd80_RefObj*>(fnvc_adapt::hkMemoryRouter_getInstance()->heap().blockAlloc(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -1882,7 +1883,7 @@ struct S_00dcdd80_Listener
 {
     void AddObject(FUN_00dce930* obj);
 };
-int __cdecl FUN_00dcd720(void* a, S_00dcdd80_Item* item, int c, FUN_00dce930* obj);
+int __cdecl hkpSaveContactPointsUtil_serializeCollisionEntry(void* a, S_00dcdd80_Item* item, int c, FUN_00dce930* obj);
 
 static inline S_00dcdd80_WorldObj* S_00dcdd80_getRigidBody(S_00dcdd80_Collidable* c)
 {
@@ -1893,42 +1894,44 @@ static inline S_00dcdd80_WorldObj* S_00dcdd80_getRigidBody(S_00dcdd80_Collidable
 
 // For each item, allocates a FUN_00dce930, tests it against world->unk78 via FUN_00dcd720, notifies the listener on failure, then calls FUN_00c905b0.
 // @fnv 0x00dcdd80
-void FUN_00dcdd80(void* a, S_00dcdd80_Item** items, int count, S_00dcdd80_Listener* listener)
+// src: HAVOK_LIB 0x00dcdd80
+void hkpSaveContactPointsUtil_saveContactPoints_00dcdd80(void* a, S_00dcdd80_Item** items, int count, S_00dcdd80_Listener* listener)
 {
     S_00dcdd80_World2* world = S_00dcdd80_getRigidBody(items[0]->unk10)->m_pOwningWorld;
     for (int i = 0; i < count; i++)
     {
         FUN_00dce930* obj = new FUN_00dce930();
         int iWorldValue = world->unk78;
-        if (!FUN_00dcd720(a, items[i], iWorldValue, obj))
+        if (!hkpSaveContactPointsUtil_serializeCollisionEntry(a, items[i], iWorldValue, obj))
             listener->AddObject(obj);
         obj->FUN_00c905b0();
     }
 }
 
 namespace fnv_00dcde10 {
-void* __cdecl FUN_00cb1260(void*, const void*, unsigned int);
-void* __cdecl FUN_00d32ac0(void*, void*);
+void* __cdecl hkString_memCpy(void*, const void*, unsigned int);
+void* __cdecl Object_ComputeValue_00d32ac0(void*, void*);
 int __cdecl CopyAudioNodeTree(void*, void*, void*);
-int FUN_00dcd4d0(void* p)
+// src: COMMUNITY 0x00dcd4d0
+int hkpSaveContactPointsUtil_getSerializedAgentType(void* p)
 {
-    if (p == reinterpret_cast<void*>(&FUN_00d3fe90))
+    if (p == reinterpret_cast<void*>(&hkBoxBoxAgent3_process))
         return 1;
-    if (p == reinterpret_cast<void*>(&FUN_00d39390))
+    if (p == reinterpret_cast<void*>(&hkCapsuleTriangleAgent3_process))
         return 2;
-    if (p == reinterpret_cast<void*>(&FUN_00d41a30))
+    if (p == reinterpret_cast<void*>(&hkPredGskAgent3_process))
         return 3;
-    if (p == reinterpret_cast<void*>(&FUN_00d40d80))
+    if (p == reinterpret_cast<void*>(&hkPredGskCylinderAgent3_process))
         return 4;
-    if (p == reinterpret_cast<void*>(&FUN_00d32cd0))
+    if (p == reinterpret_cast<void*>(&hkConvexListAgent3_process))
         return 5;
     if (p == reinterpret_cast<void*>(&BuildEventIndex))
         return 6;
-    if (p == reinterpret_cast<void*>(&FUN_00d2d890))
+    if (p == reinterpret_cast<void*>(&hkBvTreeAgent3_process))
         return 7;
-    if (p == reinterpret_cast<void*>(&FUN_00d35770))
+    if (p == reinterpret_cast<void*>(&process_00d35770))
         return 8;
-    if (p == reinterpret_cast<void*>(&FUN_00d365d0))
+    if (p == reinterpret_cast<void*>(&hkpCollectionAgent3_process))
         return 9;
     return 0;
 }
@@ -1963,7 +1966,7 @@ int DispatchInstruction(char* source, int kind, void* context, char** ppRegistry
     default:
         return 1;
     }
-    if (FUN_00dcd4d0(*reinterpret_cast<void**>(*ppRegistry + 0x16dc + instruction[1] * 80)) != kind)
+    if (hkpSaveContactPointsUtil_getSerializedAgentType(*reinterpret_cast<void**>(*ppRegistry + 0x16dc + instruction[1] * 80)) != kind)
         return 1;
     switch (kind)
     {
@@ -1971,23 +1974,23 @@ int DispatchInstruction(char* source, int kind, void* context, char** ppRegistry
     case 2:
     case 3:
     case 4:
-        FUN_00cb1260(instruction + 24, source + 140, 104);
+        hkString_memCpy(instruction + 24, source + 140, 104);
         instruction[2] = source[118];
         instruction[3] = source[119];
         return 0;
     case 5:
-        FUN_00cb1260(instruction + 24, source + 140, 104);
+        hkString_memCpy(instruction + 24, source + 140, 104);
         instruction[2] = source[118];
         instruction[3] = source[119];
         if (payload[11] & 32)
             return 0;
         return CopyAudioNodeTree(context, ppRegistry,
-                                 reset(static_cast<EntryState*>(FUN_00d32ac0(instruction, payload))));
+                                 reset(static_cast<EntryState*>(Object_ComputeValue_00d32ac0(instruction, payload))));
     case 6:
     case 7:
     case 8:
     case 9:
-        FUN_00cb1260(instruction + 24, source + 140, 104);
+        hkString_memCpy(instruction + 24, source + 140, 104);
         return CopyAudioNodeTree(context, ppRegistry, reset(reinterpret_cast<EntryState*>(payload)));
     default:
         return 1;
@@ -2000,18 +2003,18 @@ struct LocalContext
     void* vtable;
 };
 extern int DAT_010d77c0;
-extern "C" void __cdecl FUN_00dcea10(int, int, int, LocalContext*);
+extern "C" void __cdecl hkpSaveContactPointsUtil_loadContactPointsInternal(int, int, int, LocalContext*);
 // Sets up a LocalContext with DAT_010d77c0 as its vtable and forwards first, second and third to FUN_00dcea10.
 // @fnv 0x00dce7b0
 void __cdecl RunWithLocalContext(int first, int second, int third)
 {
     LocalContext local;
     local.vtable = &DAT_010d77c0;
-    FUN_00dcea10(first, second, third, &local);
+    hkpSaveContactPointsUtil_loadContactPointsInternal(first, second, third, &local);
 }
 
-void __cdecl FUN_00dcea10(int, int, int, void*);
-int __cdecl FUN_00c85750();
+void __cdecl hkpSaveContactPointsUtil_loadContactPointsInternal(int, int, int, void*);
+int __cdecl hkMemoryRouter_getInstance();
 struct FUN_00dce7e0_local
 {
     int unk00;
@@ -2020,24 +2023,25 @@ struct FUN_00dce7e0_local
     int unk0c;
     void __thiscall FUN_00dce840(void*, void*);
     void __thiscall ProcessArgument(int);
-    void __thiscall FUN_00a29680();
+    void __thiscall Object_DoNothing();
 };
 // Reads a value from *p, initializes a local via FUN_00dce840, calls FUN_00dcea10, then invokes two methods on the local using a value from FUN_00c85750.
 // @fnv 0x00dce7e0
-void __cdecl FUN_00dce7e0(int aiArg1, int aiArg2, int* p, int d)
+// src: HAVOK_LIB 0x00dce7e0
+void __cdecl hkpSaveContactPointsUtil_loadContactPoints(int aiArg1, int aiArg2, int* p, int d)
 {
     FUN_00dce7e0_local local;
     int value = *(int*)(*p + 8);
     local.FUN_00dce840(p, (void*)d);
-    FUN_00dcea10(aiArg1, aiArg2, value, &local);
-    int object = FUN_00c85750();
+    hkpSaveContactPointsUtil_loadContactPointsInternal(aiArg1, aiArg2, value, &local);
+    int object = hkMemoryRouter_getInstance();
     ((FUN_00dce7e0_local*)((char*)&local + 4))->ProcessArgument(*(int*)(object + 0x10));
-    ((FUN_00dce7e0_local*)((char*)&local + 4))->FUN_00a29680();
+    ((FUN_00dce7e0_local*)((char*)&local + 4))->Object_DoNothing();
 }
 
 namespace fnv_00dce840 {
 
-extern "C" BSAudio& __cdecl FUN_00c85750();
+extern "C" BSAudio& __cdecl hkMemoryRouter_getInstance();
 
 struct DCE840PointerMap
 {
@@ -2047,7 +2051,7 @@ struct DCE840PointerMap
 
     DCE840PointerMap() : m_kPrimitiveElement(0), m_iCapacityFlags(0), m_iPairCount(-1)
     {
-        reserve(FUN_00c85750().heap(), 0);
+        reserve(hkMemoryRouter_getInstance().heap(), 0);
     }
 
     void reserve(hkMemoryAllocator& alloc, int numElements);
@@ -2069,16 +2073,16 @@ struct FUN_00dce840
 FUN_00dce840::FUN_00dce840(void* const* keys, int numKeys)
 {
     m_map.clear();
-    m_map.reserve(FUN_00c85750().heap(), numKeys);
+    m_map.reserve(hkMemoryRouter_getInstance().heap(), numKeys);
     for (int i = 0; i < numKeys; i++)
     {
         void* key = keys[i];
-        m_map.insert(FUN_00c85750().heap(), key, 1);
+        m_map.insert(hkMemoryRouter_getInstance().heap(), key, 1);
     }
 }
 }  // namespace fnv_00dce840
 
-void __cdecl FUN_00c908c0(void* apAllocator, void* apArray, unsigned int auiNewCap, int aiElemSize);
+void __cdecl hkArrayUtil__reserve(void* apAllocator, void* apArray, unsigned int auiNewCap, int aiElemSize);
 
 struct SrcNode
 {
@@ -2238,7 +2242,7 @@ int __cdecl CopyAudioNodeTree(SrcNode* apSrc, int aiCount, DstBlock* apDst);
 int __cdecl CopyAudioNodeTree(SrcNode* apSrc, int aiCount, DstBlock* apDst)
 {
     int count = apSrc->m_iArrayLength;
-    hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)fnvc_adapt::FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)fnvc_adapt::hkMemoryRouter_getInstance();
     hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     int cap = (int)(apDst->m_uCapBits & 0x3fffffffu);
     if (cap < count)
@@ -2248,12 +2252,12 @@ int __cdecl CopyAudioNodeTree(SrcNode* apSrc, int aiCount, DstBlock* apDst)
         {
             newCap = count;
         }
-        FUN_00c908c0(alloc, apDst, (unsigned int)newCap, 4);
+        hkArrayUtil__reserve(alloc, apDst, (unsigned int)newCap, 4);
     }
     apDst->m_iArrayLength = count;
     for (int i = 0; i < apSrc->m_iArrayLength; ++i)
     {
-        hkMemoryRouter* h = (hkMemoryRouter*)fnvc_adapt::FUN_00c85750();
+        hkMemoryRouter* h = (hkMemoryRouter*)fnvc_adapt::hkMemoryRouter_getInstance();
         hkMemoryAllocator* a = reinterpret_cast<hkMemoryAllocator*>(h->m_heap);
         unsigned int* p = (unsigned int*)reinterpret_cast<hkMemoryAllocator*>(a)->blockAlloc(0x200);
         if (p != 0)
@@ -2331,7 +2335,7 @@ struct S_00dcda40_Arr
     void Search(hkMemoryAllocator& h, int idx, void* src, int n);
     __forceinline S_00dcda40_Arr(const S_00dcda40_Arr& other) : data(0), size(0), cap(0x80000000)
     {
-        hkMemoryAllocator& heap = fnvc_adapt::FUN_00c85750()->heap();
+        hkMemoryAllocator& heap = fnvc_adapt::hkMemoryRouter_getInstance()->heap();
         if ((cap & 0x3fffffff) < other.size)
         {
             if ((cap & 0x80000000) == 0)
@@ -2352,7 +2356,7 @@ struct S_00dcda40_Arr
         int count = other.size;
         void* src = other.data;
         int at = size;
-        hkMemoryAllocator& heap = fnvc_adapt::FUN_00c85750()->heap();
+        hkMemoryAllocator& heap = fnvc_adapt::hkMemoryRouter_getInstance()->heap();
         Search(heap, at, src, count);
     }
 };
@@ -2408,14 +2412,14 @@ void __cdecl ProcessCollisionRecords(void* arg1, S_00dcda40_World* world, S_00dc
                 FUN_00dce930* r = new FUN_00dce930;
                 void* callbackArg = arg1;
                 int state = world->unk78;
-                if (!FUN_00dcd720(callbackArg, (S_00dcdd80_Item*)p, state, r))
+                if (!hkpSaveContactPointsUtil_serializeCollisionEntry(callbackArg, (S_00dcdd80_Item*)p, state, r))
                     sink->AddObject(r);
                 r->FUN_00c905b0();
                 p += ((CollisionRecordHeader*)p)->size;
             }
         }
     }
-    hkMemoryAllocator& finalHeap = fnvc_adapt::FUN_00c85750()->heap();
+    hkMemoryAllocator& finalHeap = fnvc_adapt::hkMemoryRouter_getInstance()->heap();
     mergedBlocks.size = 0;
     if ((mergedBlocks.cap & 0x80000000) == 0)
         finalHeap.bufFree(mergedBlocks.data, (mergedBlocks.cap & 0x3fffffff) * 4);
@@ -2423,7 +2427,7 @@ void __cdecl ProcessCollisionRecords(void* arg1, S_00dcda40_World* world, S_00dc
 
 namespace fnv_00dce8f0 {
 namespace fnvc_adapt {
-void* FUN_00c85750();
+void* hkMemoryRouter_getInstance();
 }
 
 class FUN_00cb1a90_out
@@ -2435,10 +2439,10 @@ class FUN_00cb1a90_out
 class SubOfSel : public FUN_00cb1a90_out
 {
   public:
-    void FUN_00a29680();
-    SubOfSel(void* p) throw() : FUN_00cb1a90_out(*(void**)((char*)fnvc_adapt::FUN_00c85750() + 0x10))
+    void Object_DoNothing();
+    SubOfSel(void* p) throw() : FUN_00cb1a90_out(*(void**)((char*)fnvc_adapt::hkMemoryRouter_getInstance() + 0x10))
     {
-        FUN_00a29680();
+        Object_DoNothing();
     }
 };
 
@@ -2558,7 +2562,7 @@ template <class T> struct S00dcd720_Arr
         {
             int cap2 = cap * 2;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&a, (S00dcd720_Arr<char>*)this, newSize, sz);
+            hkArrayUtil__reserve(&a, (S00dcd720_Arr<char>*)this, newSize, sz);
         }
     }
     __forceinline void SetSizeAndGrow(int n)
@@ -2651,7 +2655,7 @@ BSAudio* __cdecl _FUN_00c85750();
 
 extern "C"
 {
-    void __cdecl FUN_00c908c0(void* allocator, void* array, int numElements, int elementSize);
+    void __cdecl hkArrayUtil__reserve(void* allocator, void* array, int numElements, int elementSize);
 }
 void __cdecl ResizeAudioStream(void* allocator, void* array, int elementSize);
 
@@ -2664,7 +2668,7 @@ template <typename T> static __forceinline void reserve(hkArray<T>& a, hkMemoryA
     {
         int cap2 = 2 * cap;
         int newCap = (numElements < cap2) ? cap2 : numElements;
-        FUN_00c908c0(&alloc, &a, newCap, sizeof(T));
+        hkArrayUtil__reserve(&alloc, &a, newCap, sizeof(T));
     }
 }
 template <typename T> static __forceinline void AddBack(hkArray<T>& a, const T& val)
@@ -2857,12 +2861,13 @@ struct Struct0x20
     }
 };
 
-int __cdecl FUN_00dcd550(const void* cur, hkBool flag, void* context, int* pItemSize, int* pField18, void** pSubPtr,
+int __cdecl hkpSaveContactPointsUtil_serializeEntry(const void* cur, hkBool flag, void* context, int* pItemSize, int* pField18, void** pSubPtr,
                          Struct0x20* child);
 
 // Iterates over chunks, calls FUN_00dcd550 to parse sub-structures, and populates out->arr1 with Block512 copies and out->arr2 with child nodes.
 // @fnv 0x00dcdf70
-int __cdecl FUN_00dcdf70(const hkArray<Block512*>& chunks, void* context, Struct0x20* out)
+// src: HAVOK_LIB 0x00dcdf70
+int __cdecl hkpSaveContactPointsUtil_serialize1nTrack(const hkArray<Block512*>& chunks, void* context, Struct0x20* out)
 {
     const char* cur;
     int iNumChunks = chunks.m_iElementCount;
@@ -2878,7 +2883,7 @@ int __cdecl FUN_00dcdf70(const hkArray<Block512*>& chunks, void* context, Struct
             int itemSize = 0;
             int dummy;
             Struct0x20* __restrict child = new Struct0x20();
-            if (FUN_00dcd550(cur, hkBool(false), context, &itemSize, &dummy, &subPtr, child) == 0)
+            if (hkpSaveContactPointsUtil_serializeEntry(cur, hkBool(false), context, &itemSize, &dummy, &subPtr, child) == 0)
             {
                 if (child->arr1.m_iElementCount != 0)
                 {
@@ -3095,11 +3100,12 @@ struct Ctx
 
 void* __cdecl FindEntryValue(unsigned int a, unsigned int b);
 void __cdecl SwapMeshRecords(unsigned int a, SpawnedItem* b);
-int __cdecl FUN_00dce180(Resolver* a1, SpawnedItem* item, unsigned int edi, unsigned int ebx, unsigned int ctx78,
+int __cdecl hkpSaveContactPointsUtil_deserializeCollisionEntry(Resolver* a1, SpawnedItem* item, unsigned int edi, unsigned int ebx, unsigned int ctx78,
                          void* p);
 
 // @fnv 0x00dcea10
-void __cdecl FUN_00dcea10(Resolver* apResolver, ListOwner* apListOwner, Ctx* apCtx, Visitor* apVisitor)
+// src: HAVOK_LIB 0x00dcea10
+void __cdecl hkpSaveContactPointsUtil_loadContactPointsInternal(Resolver* apResolver, ListOwner* apListOwner, Ctx* apCtx, Visitor* apVisitor)
 {
     apCtx->m_94++;
     for (int i = apListOwner->m_48 - 1; i >= 0; --i)
@@ -3126,7 +3132,7 @@ void __cdecl FUN_00dcea10(Resolver* apResolver, ListOwner* apListOwner, Ctx* apC
             continue;
         if (item->m_12C != 0x103)
             SwapMeshRecords(apCtx->m_78, item);
-        int ok = FUN_00dce180(apResolver, item, edi, ebx, apCtx->m_78, p);
+        int ok = hkpSaveContactPointsUtil_deserializeCollisionEntry(apResolver, item, edi, ebx, apCtx->m_78, p);
         if (apResolver->m_00 == 0 || ok == 0)
             continue;
         SpawnedItem** d = apListOwner->m_44;
@@ -3151,7 +3157,7 @@ void __cdecl FUN_00dcea10(Resolver* apResolver, ListOwner* apListOwner, Ctx* apC
 
 namespace fnv_00dce9e0 {
 
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 
 struct FUN_00e05d10_Base
 {
@@ -3162,7 +3168,7 @@ struct FUN_00e05d10_Base
     void operator delete(void* p, unsigned int)
     {
         FUN_00e05d10_Base* b = static_cast<FUN_00e05d10_Base*>(p);
-        FUN_00c85750()->heap().blockFree(p, b->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance()->heap().blockFree(p, b->m_usMemSizeAndFlags);
     }
 };
 
@@ -3182,31 +3188,33 @@ struct AgentKey
 {
     void* value;
 };
-__declspec(noinline) int __cdecl FUN_00dcd4d0(AgentKey key)
+// src: COMMUNITY 0x00dcd4d0
+__declspec(noinline) int __cdecl hkpSaveContactPointsUtil_getSerializedAgentType(AgentKey key)
 {
-    if (key.value == (void*)FUN_00d3fe90)
+    if (key.value == (void*)hkBoxBoxAgent3_process)
         return 1;
-    if (key.value == (void*)FUN_00d39390)
+    if (key.value == (void*)hkCapsuleTriangleAgent3_process)
         return 2;
-    if (key.value == (void*)FUN_00d41a30)
+    if (key.value == (void*)hkPredGskAgent3_process)
         return 3;
-    if (key.value == (void*)FUN_00d40d80)
+    if (key.value == (void*)hkPredGskCylinderAgent3_process)
         return 4;
-    if (key.value == (void*)FUN_00d32cd0)
+    if (key.value == (void*)hkConvexListAgent3_process)
         return 5;
     if (key.value == (void*)BuildEventIndex)
         return 6;
-    if (key.value == (void*)FUN_00d2d890)
+    if (key.value == (void*)hkBvTreeAgent3_process)
         return 7;
-    if (key.value == (void*)FUN_00d35770)
+    if (key.value == (void*)process_00d35770)
         return 8;
-    return key.value == (void*)FUN_00d365d0 ? 9 : 0;
+    return key.value == (void*)hkpCollectionAgent3_process ? 9 : 0;
 }
-extern "C" void* __cdecl FUN_00d32ad0(void*, void*);
-extern "C" int __cdecl FUN_00dcdf70(void*, DCD6A0Context**, int);
+extern "C" void* __cdecl Runtime_EvaluateValue_00d32ad0(void*, void*);
+extern "C" int __cdecl hkpSaveContactPointsUtil_serialize1nTrack(void*, DCD6A0Context**, int);
 // Resolves the collision data pointer and type for a CollisionRecordHeader entry, writing results to output, size, and type out-parameters.
 // @fnv 0x00dcd550
-int __cdecl FUN_00dcd550(CollisionRecordHeader* apRecord, char abOffset, DCD6A0Context** context, int* size, int* type,
+// src: HAVOK_LIB 0x00dcd550
+int __cdecl hkpSaveContactPointsUtil_serializeEntry(CollisionRecordHeader* apRecord, char abOffset, DCD6A0Context** context, int* size, int* type,
                          void** output, int arg)
 {
     *output = 0;
@@ -3229,7 +3237,7 @@ int __cdecl FUN_00dcd550(CollisionRecordHeader* apRecord, char abOffset, DCD6A0C
         data = (unsigned char*)apRecord + (abOffset ? 32 : 16);
     process: {
         AgentKey key = {(void*)(*context)->m_entries[apRecord->unk01].m_key};
-        int t = FUN_00dcd4d0(key);
+        int t = hkpSaveContactPointsUtil_getSerializedAgentType(key);
         *type = t;
         switch (t)
         {
@@ -3245,8 +3253,8 @@ int __cdecl FUN_00dcd550(CollisionRecordHeader* apRecord, char abOffset, DCD6A0C
             *size = apRecord->size;
             if (data[11] & 32)
                 return 0;
-            *output = FUN_00d32ad0(apRecord, data);
-            return FUN_00dcdf70(*output, context, arg);
+            *output = Runtime_EvaluateValue_00d32ad0(apRecord, data);
+            return hkpSaveContactPointsUtil_serialize1nTrack(*output, context, arg);
         case 6:
         case 7:
         case 8:
@@ -3254,7 +3262,7 @@ int __cdecl FUN_00dcd550(CollisionRecordHeader* apRecord, char abOffset, DCD6A0C
             *size = apRecord->size;
             *type = t;
             *output = data;
-            return FUN_00dcdf70(data, context, arg);
+            return hkpSaveContactPointsUtil_serialize1nTrack(data, context, arg);
         default:
             return 1;
         }
@@ -3270,8 +3278,8 @@ int __cdecl FUN_00dcd550(CollisionRecordHeader* apRecord, char abOffset, DCD6A0C
 
 BSAudio* __cdecl _FUN_00c85750();
 
-int FUN_00dcd550(S00dcd720_Src*, S00dcd720_Bool, int, int*, int*, void**, void*);
-extern "C" void FUN_00cb1260(void*, const void*, int);
+int hkpSaveContactPointsUtil_serializeEntry(S00dcd720_Src*, S00dcd720_Bool, int, int*, int*, void**, void*);
+extern "C" void hkString_memCpy(void*, const void*, int);
 
 static inline S00dcd720_Part* S00dcd720_get(S00dcd720_Part* p)
 {
@@ -3280,7 +3288,8 @@ static inline S00dcd720_Part* S00dcd720_get(S00dcd720_Part* p)
 
 // Calls FUN_00dcd550 on src, then copies shape header and arrays into out and sets the part fields via cb->m_fn or by storing them and calling FUN_00c90510.
 // @fnv 0x00dcd720
-int __cdecl FUN_00dcd720(S00dcd720_Cb* cb, S00dcd720_Src* src, int c, S00dcd720_Out* out)
+// src: HAVOK_LIB 0x00dcd720
+int __cdecl hkpSaveContactPointsUtil_serializeCollisionEntry(S00dcd720_Cb* cb, S00dcd720_Src* src, int c, S00dcd720_Out* out)
 {
     if (src->m_pCollisionShape->v34() != 0 || src->m_pCollisionShape->m_hdr->m_numA <= 0)
         return 1;
@@ -3291,22 +3300,22 @@ int __cdecl FUN_00dcd720(S00dcd720_Cb* cb, S00dcd720_Src* src, int c, S00dcd720_
         void* decoded;
         S00dcd720_Bool flag;
         flag.m_cBooleanValue = 1;
-        r = FUN_00dcd550(src, flag, c, &size, &b, &decoded, &out->m_context114);
+        r = hkpSaveContactPointsUtil_serializeEntry(src, flag, c, &size, &b, &decoded, &out->m_context114);
     }
     if (r == 0)
     {
         out->m_cBooleanValue = (char)b;
         if (size)
-            FUN_00cb1260(&out->m_74, src, size);
+            hkString_memCpy(&out->m_74, src, size);
         S00dcd720_Shape* shape = src->m_pCollisionShape;
         out->m_arr68.SetSizeAndGrow(shape->m_iVertexCount);
         for (int i = 0; i < out->m_arr68.m_iElementCount; i++)
             out->m_arr68.m_data[i] = shape->m_bytes[i];
         S00dcd720_Hdr* hdr = shape->m_hdr;
         out->m_arr50.SetSizeAndGrow(hdr->m_iElementIndex * hdr->m_numA);
-        FUN_00cb1260(out->m_arr50.m_data, (char*)hdr + hdr->m_numB * 32 + 0x30, hdr->m_iElementIndex * hdr->m_numA);
+        hkString_memCpy(out->m_arr50.m_data, (char*)hdr + hdr->m_numB * 32 + 0x30, hdr->m_iElementIndex * hdr->m_numA);
         out->m_arr5c.SetSizeAndGrow(hdr->m_numA);
-        FUN_00cb1260(out->m_arr5c.m_data, (char*)hdr + 0x30, hdr->m_numA * 32);
+        hkString_memCpy(out->m_arr5c.m_data, (char*)hdr + 0x30, hdr->m_numA * 32);
         out->m_hdr = *shape->m_hdr;
         S00dcd720_Part* pPartA = S00dcd720_get(src->m_partA);
         S00dcd720_Part* pPartB = S00dcd720_get(src->m_partB);
@@ -3820,7 +3829,7 @@ struct ContactDce
 };
 
 namespace DceAccess {
-extern "C" BSAudio* FUN_00c85750();
+extern "C" BSAudio* hkMemoryRouter_getInstance();
 }
 
 struct ContactListDce
@@ -6986,16 +6995,16 @@ struct LocalStateDce
 extern "C" int PickIslandByValue(void* p5, int a, int b);
 extern "C" int DispatchItemToAgent(int a, void* p4, WorkObj* wb, int cc, void* p5);
 extern "C" int DispatchInstruction(NodeDce* p1, int sb, void* inner, void* p4, void* p5);
-extern "C" void FUN_00c908c0(void* old, void* bufptr, int nsize, int one);
-extern "C" void FUN_00cb3ca0(void* obj, void* work, int one);
+extern "C" void hkArrayUtil__reserve(void* old, void* bufptr, int nsize, int one);
+extern "C" void hkpWorldOperationUtil_addConstraintImmediately(void* obj, void* work, int one);
 extern "C" int RoundUpToBucketSize(int w);
 extern "C" NodeG* AllocateBlock(int a, int b, int c, int d);
 extern "C" void __fastcall AccumulateStats(void* cc, void* elem, void* a, int* b);
-extern "C" void FUN_00cfdbe0(void* p5, void* p4);
-extern "C" void FUN_00d01850(void* a, void* item);
-extern "C" void FUN_00d00110(NodeDce* p, void* item);
-extern "C" void FUN_00d00ca0(void* a, void* item);
-extern "C" void FUN_00cfff00(NodeDce* p, void* item);
+extern "C" void hkAgentNnMachine_InvalidateTimInAgent(void* p5, void* p4);
+extern "C" void hkpWorldCallbackUtil_fireContactPointAdded(void* a, void* item);
+extern "C" void hkpEntityCallbackUtil_fireContactPointAddedInternal(NodeDce* p, void* item);
+extern "C" void hkpWorldCallbackUtil_fireContactPointCallback(void* a, void* item);
+extern "C" void hkpEntityCallbackUtil_fireContactPointCallbackInternal(NodeDce* p, void* item);
 extern "C" float DAT_0104da48;
 typedef int(__thiscall* FnThiscallInt)(void* self, int a);
 typedef int(__thiscall* FnThiscallInt2)(void* self, int a, int b);
@@ -7007,12 +7016,12 @@ __forceinline void BytesDce::reserve(hkMemoryAllocator& alloc, int count)
     if (cap < count)
     {
         int newcap = (count < cap + cap) ? cap + cap : count;
-        FUN_00c908c0(&alloc, this, newcap, 1);
+        hkArrayUtil__reserve(&alloc, this, newcap, 1);
     }
 }
 __forceinline void BytesDce::resize(int count)
 {
-    hkMemoryAllocator& allocator = DceAccess::FUN_00c85750()->heap();
+    hkMemoryAllocator& allocator = DceAccess::hkMemoryRouter_getInstance()->heap();
     reserve(allocator, count);
     size = count;
 }
@@ -7065,7 +7074,8 @@ inline void CountDce::AccumulateStats(S00dce180_Instance* constraint, CountInfoD
 
 // Swaps constraint ends if needed, copies state from p1 into p5's work object, calls per-contact handlers for each contact id, returns 0 on success else 1.
 // @fnv 0x00dce180
-int __cdecl FUN_00dce180(Arg0* apFlags, NodeDce* apNode, NodeDce* apNodeA, NodeDce* apNodeB, void* apContext, P5* p5)
+// src: HAVOK_LIB 0x00dce180
+int __cdecl hkpSaveContactPointsUtil_deserializeCollisionEntry(Arg0* apFlags, NodeDce* apNode, NodeDce* apNodeA, NodeDce* apNodeB, void* apContext, P5* p5)
 {
     void* idx = 0;
     LocalStateDce i;
@@ -7114,7 +7124,7 @@ int __cdecl FUN_00dce180(Arg0* apFlags, NodeDce* apNode, NodeDce* apNodeA, NodeD
                 ResourceDce* pResource = p->m_08;
                 pResource->m_94 -= 1;
                 pResource->m_9c = 1;
-                FUN_00cb3ca0(pResource, &c->m_pHavokConstraint, 1);
+                hkpWorldOperationUtil_addConstraintImmediately(pResource, &c->m_pHavokConstraint, 1);
                 pResource->m_94 += 1;
                 pResource->m_9c = 0;
             }
@@ -7128,7 +7138,7 @@ int __cdecl FUN_00dce180(Arg0* apFlags, NodeDce* apNode, NodeDce* apNodeA, NodeD
             NodeG* pNodeG;
             pNodeG = c->m_3c;
             int base = RoundUpToBucketSize(pNodeG->m_02);
-            BSAudio* pSvc = DceAccess::FUN_00c85750();
+            BSAudio* pSvc = DceAccess::hkMemoryRouter_getInstance();
             pSvc->heap().blockFree(pNodeG, base);
             int ecxv = apNode->m_024;
             unsigned int n = apNode->m_02c;
@@ -7148,8 +7158,8 @@ int __cdecl FUN_00dce180(Arg0* apFlags, NodeDce* apNode, NodeDce* apNodeA, NodeD
             }
             NodeG* kIter = c->m_3c;
             int res = kIter->m_0a * ecxv;
-            FUN_00cb1260(kIter->entries(), apNode->m_050, res);
-            FUN_00cb1260(c->m_3c + 1, apNode->m_05c, ecxv << 5);
+            hkString_memCpy(kIter->entries(), apNode->m_050, res);
+            hkString_memCpy(c->m_3c + 1, apNode->m_05c, ecxv << 5);
             if (0 != apFlags->m_01)
             {
                 NodeG* pObj = c->m_3c;
@@ -7178,11 +7188,11 @@ int __cdecl FUN_00dce180(Arg0* apFlags, NodeDce* apNode, NodeDce* apNodeA, NodeD
                         idx = &apNodeB->u010;
                     }
                     InputDce z(i.transform, idx, c, j, apContext, &output, val.current);
-                    FUN_00d01850(apNodeA->m_008, &z);
+                    hkpWorldCallbackUtil_fireContactPointAdded(apNodeA->m_008, &z);
                     if ((bool)apNodeA->m_204)
-                        FUN_00d00110(apNodeA, &z);
+                        hkpEntityCallbackUtil_fireContactPointAddedInternal(apNodeA, &z);
                     if (apNodeB->m_204 != 0)
-                        FUN_00d00110(apNodeB, &z);
+                        hkpEntityCallbackUtil_fireContactPointAddedInternal(apNodeB, &z);
                 }
             }
             if ((bool)apFlags->m_09)
@@ -7212,17 +7222,17 @@ int __cdecl FUN_00dce180(Arg0* apFlags, NodeDce* apNode, NodeDce* apNodeA, NodeD
                     z.m_24 = 0;
                     z.m_2c = 0;
                     z.m_30 = 0;
-                    FUN_00d00ca0(apNodeA->m_008, &z);
+                    hkpWorldCallbackUtil_fireContactPointCallback(apNodeA->m_008, &z);
                     z.m_00 = 0;
                     if ((bool)apNodeA->m_204)
-                        FUN_00cfff00(apNodeA, &z);
+                        hkpEntityCallbackUtil_fireContactPointCallbackInternal(apNodeA, &z);
                     z.m_00 = (void*)1;
                     if (!!apNodeB->m_204)
-                        FUN_00cfff00(apNodeB, &z);
+                        hkpEntityCallbackUtil_fireContactPointCallbackInternal(apNodeB, &z);
                 }
             }
-            FUN_00cfdbe0(p5, apContext);
-            BSAudio* rf = DceAccess::FUN_00c85750();
+            hkAgentNnMachine_InvalidateTimInAgent(p5, apContext);
+            BSAudio* rf = DceAccess::hkMemoryRouter_getInstance();
             long r;
             hkMemoryAllocator* pAlloc = &rf->heap();
             r = val.ids.m_iCapacityState;
@@ -7334,7 +7344,8 @@ DCEEntryInit::DCEEntryInit()
 
 // Placement-constructs a DCEEntryInit object on the provided storage buffer and returns a pointer to it.
 // @fnv 0x00dce930
-extern "C" DCEEntryInit* __fastcall FUN_00dce930(void* storage, void*)
+// src: GUESS 0x00dce930 (confidence: medium)
+extern "C" DCEEntryInit* __fastcall SolverEntry_ConstructInPlace(void* storage, void*)
 {
     __assume(storage != 0);
     return new (storage) DCEEntryInit;

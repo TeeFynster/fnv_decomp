@@ -8,7 +8,7 @@ class LocalFormChangeMask
 {
   public:
     unsigned int flags;
-    unsigned int FUN_00559450();
+    unsigned int Modelloader_GetReferencedThis();
     static LocalFormChangeMask HasFormChanged(LocalFormChangeMask changes, LocalFormChangeMask forced, int type, bool enabled);
 };
 class FormChangeRecord

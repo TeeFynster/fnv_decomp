@@ -81,12 +81,13 @@ class Cls_dafcd0
     unsigned char m_ucLowNibble : 4;
     unsigned char m_ucHighNibble : 4;
     unsigned char m_0b;
-    void FUN_00dafcd0(Node* a, Node* b, const Vec4Blk* m);
+    void hkpGskCache_init(Node* a, Node* b, const Vec4Blk* m);
 };
 
 // Queries both nodes via v3c, v38 and the matrix m, then stores two shorts and flag bytes, two clamped v2c nibbles, and zeroes m_04, m_06 and m_0b.
 // @fnv 0x00dafcd0
-void Cls_dafcd0::FUN_00dafcd0(Node* apNodeA, Node* apNodeB, const Vec4Blk* apMatrix)
+// src: XBOX_PDB 0x00dafcd0
+void Cls_dafcd0::hkpGskCache_init(Node* apNodeA, Node* apNodeB, const Vec4Blk* apMatrix)
 {
     Vec4Blk Q;
     Vec4Blk P;
@@ -235,8 +236,8 @@ class FUN_00dafe70_cls
     unsigned char m_bA;
     unsigned char m_bB;
 
-    void FUN_00dafcd0(Iface* a1, Src* a2, const unsigned int* a3);
-    void FUN_00dafe70(Iface* a1, Src* a2, const unsigned int* a3);
+    void hkpGskCache_init(Iface* a1, Src* a2, const unsigned int* a3);
+    void hkpGskCache_initTriangle(Iface* a1, Src* a2, const unsigned int* a3);
 };
 
 extern "C"
@@ -262,11 +263,12 @@ __declspec(align(16)) struct Frame3
 };
 
 // @fnv 0x00dafe70
-void FUN_00dafe70_cls::FUN_00dafe70(Iface* apIface, Src* apSrc, const unsigned int* apMatrix)
+// src: XBOX_PDB 0x00dafe70
+void FUN_00dafe70_cls::hkpGskCache_initTriangle(Iface* apIface, Src* apSrc, const unsigned int* apMatrix)
 {
     if (apSrc->m_flag17 != 0)
     {
-        FUN_00dafcd0(apIface, apSrc, apMatrix);
+        hkpGskCache_init(apIface, apSrc, apMatrix);
         return;
     }
     m_w2 = 0;

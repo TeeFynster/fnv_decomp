@@ -7,22 +7,24 @@
 
 extern int currentState;
 // @fnv 0x00d68260
-int __cdecl FUN_00d68260() {
+// src: GUESS 0x00d68260 (confidence: high)
+int __cdecl Object_GetCurrentState() {
     return currentState;
 }
 
-struct Built { int field00; short field04; int field08; int __thiscall FUN_00d682d0(int); };
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
+struct Built { int field00; short field04; int field08; int __thiscall hkpToiContactPointViewer_hkpToiContactPointViewer(int); };
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 // Allocates a 0x2c-byte Built via the global allocator, sets its field04 to 0x2c, calls FUN_00d682d0(arg), and returns result+8 or 0.
 // @fnv 0x00d686b0
-int __cdecl FUN_00d686b0(int arg)
+// src: XBOX_PDB 0x00d686b0
+int __cdecl hkpToiContactPointViewer_create(int arg)
 {
-    hkMemoryRouter* global = FUN_00c85750();
+    hkMemoryRouter* global = hkMemoryRouter_getInstance();
     hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(global->m_heap);
     typedef void* (__thiscall* AllocateFunction)(hkMemoryAllocator*, int);
     Built* pBuilt = (Built*)(*reinterpret_cast<AllocateFunction**>(allocator))[1](allocator, 0x2c);
     pBuilt->field04 = 0x2c;
-    int result = pBuilt->FUN_00d682d0(arg);
+    int result = pBuilt->hkpToiContactPointViewer_hkpToiContactPointViewer(arg);
     if (result) return result + 8;
     return 0;
 }
@@ -61,7 +63,7 @@ void FUN_00d66bf0_cls::DispatchToChild(int arg)
 }
 
 struct Target {
-    void FUN_00c91a20(void* apArg);
+    void hkpWorld_removeContactListener(void* apArg);
 };
 
 struct FUN_00d682a0_cls {
@@ -81,7 +83,7 @@ struct FUN_00d682a0_cls {
 // @fnv 0x00d682a0
 void FUN_00d682a0_cls::InvokeTargetWithSelfOffset(Target* apTarget)
 {
-    apTarget->FUN_00c91a20(((char*)this - 0x20) != 0 ? (char*)this + 8 : 0);
+    apTarget->hkpWorld_removeContactListener(((char*)this - 0x20) != 0 ? (char*)this + 8 : 0);
 }
 
 extern char DAT_0104dd7c[];
@@ -105,12 +107,13 @@ struct FUN_00d682d0_cls {
     int unk24;
     void* m_vtbl28;
 
-    void* FUN_00d682d0(int a1);
+    void* hkpToiContactPointViewer_hkpToiContactPointViewer(int a1);
 };
 
 // Calls FUN_00ddccb0 with a1, then stores five DAT_ pointers into this at offsets 0x28, 0x00, 0x08, 0x20 and 0x28, and returns this.
 // @fnv 0x00d682d0
-void* FUN_00d682d0_cls::FUN_00d682d0(int aiArg)
+// src: HAVOK_LIB 0x00d682d0
+void* FUN_00d682d0_cls::hkpToiContactPointViewer_hkpToiContactPointViewer(int aiArg)
 {
     FUN_00ddccb0(aiArg);
     *(void* volatile*)((char*)this + 0x28) = (void*)&DAT_0104dd7c;
@@ -144,12 +147,13 @@ public:
     int unk10; int unk14;
     Sub m_sub;          // +0x18
     ItemList* m_kNode;   // +0x1c
-    void FUN_00d68310();
+    void ProcessEntries_00d68310();
 };
 
 // Iterates the item list and calls m_sub.v1 on each item until the list ends or the count is reached.
 // @fnv 0x00d68310
-void FUN_00d68310_cls::FUN_00d68310() {
+// src: GUESS 0x00d68310 (confidence: low)
+void FUN_00d68310_cls::ProcessEntries_00d68310() {
     int i = 0;
     while (m_kNode != 0) {
         if (i >= m_kNode->count) break;
@@ -235,11 +239,12 @@ public:
     ListBlob_t* m_pEntries;
     Part2_t m_pTail;
 
-    void FUN_00d68350();
+    void ProcessEntries_00d68350();
 };
 
 // @fnv 0x00d68350
-void FUN_00d68350_cls::FUN_00d68350()
+// src: GUESS 0x00d68350 (confidence: low)
+void FUN_00d68350_cls::ProcessEntries_00d68350()
 {
     int i = 0;
     this->Part0_t::~Part0_t();
@@ -271,7 +276,7 @@ extern const char str_010d1ea0[];
 // @fnv 0x00d686f0
 void DispatchStateHandler()
 {
-    g_stateResult = g_stateTarget->Dispatch(str_010d1ea0, FUN_00d686b0);
+    g_stateResult = g_stateTarget->Dispatch(str_010d1ea0, hkpToiContactPointViewer_create);
 }
 
 struct FUN_00d68270_Base0 {
@@ -287,7 +292,7 @@ struct FUN_00d68270_Base0 {
 struct FUN_00d68270_Base1 {
     int unk00;
     int unk04;
-    void FUN_00d68270(struct FUN_00d68270_Arg* arg);
+    void ForwardCall_00d68270(struct FUN_00d68270_Arg* arg);
 };
 struct FUN_00d68270_Base2 {
     int unk00;
@@ -295,13 +300,14 @@ struct FUN_00d68270_Base2 {
 struct FUN_00d68270_Derived : public FUN_00d68270_Base0, public FUN_00d68270_Base1, public FUN_00d68270_Base2 {
 };
 struct FUN_00d68270_Arg {
-    void FUN_00c93a20(FUN_00d68270_Base2* obj);
+    void hkpWorld_addContactListener(FUN_00d68270_Base2* obj);
 };
 // Calls arg->FUN_00c93a20 with the address 8 bytes past this, treated as the Base2 part of the enclosing Derived object.
 // @fnv 0x00d68270
-void FUN_00d68270_Base1::FUN_00d68270(FUN_00d68270_Arg* arg)
+// src: GUESS 0x00d68270 (confidence: low)
+void FUN_00d68270_Base1::ForwardCall_00d68270(FUN_00d68270_Arg* arg)
 {
-    arg->FUN_00c93a20(reinterpret_cast<FUN_00d68270_Derived*>(reinterpret_cast<char*>(this) - sizeof(FUN_00d68270_Base0)));
+    arg->hkpWorld_addContactListener(reinterpret_cast<FUN_00d68270_Derived*>(reinterpret_cast<char*>(this) - sizeof(FUN_00d68270_Base0)));
 }
 
 // sub ecx,0x20; jmp target  ==  MSVC adjustor thunk: Derived overrides a virtual that both of its bases
@@ -337,18 +343,19 @@ Derived::Derived()
 // FUN_00d68720 : MSVC this-adjusting thunk  (sub ecx, 0x08 ; jmp <impl>)
 struct A1_00d68720 {
     A1_00d68720();
-    virtual void FUN_00d68720();
+    virtual void AdjustThisAndForward_00d68720();
     char pad[0x04];
 };
 struct A2_00d68720 {
     A2_00d68720();
-    virtual void FUN_00d68720();
+    virtual void AdjustThisAndForward_00d68720();
 };
 struct Own_00d68720 : A1_00d68720, A2_00d68720 {
     Own_00d68720();
     virtual void key_fn();
 // @fnv 0x00d68720
-    void FUN_00d68720();
+// src: GUESS 0x00d68720 (confidence: low)
+    void AdjustThisAndForward_00d68720();
 };
 Own_00d68720::Own_00d68720() { }
 void Own_00d68720::key_fn() { }
@@ -389,7 +396,7 @@ Derived::Derived()
 }  // namespace fnv_00d68730
 
 namespace fnv_00d68740 {
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00d68740 {
     unsigned short m_u04;
@@ -398,7 +405,7 @@ struct FUN_00d68740 {
     virtual ~FUN_00d68740();
     static void operator delete(void* apMemory)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         unsigned int uiSize = ((FUN_00d68740*)apMemory)->m_u04;
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         // This allocator frees through vtable slot 2; the shared Free declaration is nonvirtual.
@@ -509,7 +516,8 @@ __forceinline LocalM128 splat(float s) {
 }
 
 // @fnv 0x00d683b0
-static __declspec(noinline) void FUN_00d683b0(Handler* self, hkVector4* from, hkVector4* dir, int color, int id, int tag) {
+// src: XBOX_PDB 0x00d683b0
+static __declspec(noinline) void hkToiContactPointViewer_displayArrow(Handler* self, hkVector4* from, hkVector4* dir, int color, int id, int tag) {
     float lenSq;
 
     _mm_store_ss(&lenSq, lengthSquared3(dir->v));
@@ -576,7 +584,7 @@ static __declspec(noinline) void FUN_00d683b0(Handler* self, hkVector4* from, hk
 }
 
 void RenderLine(Handler* handler, hkVector4* direction, hkVector4* origin, int color, int id, int tag) {
-    FUN_00d683b0(handler, origin, direction, color, id, tag);
+    hkToiContactPointViewer_displayArrow(handler, origin, direction, color, id, tag);
 }
 
 extern int DAT_01269004;
@@ -628,19 +636,20 @@ struct S00d68670_WorldViewerBase {
 };
 
 struct S00d68670_ContactListener {
-    virtual void FUN_00d68670(const S00d68670_ContactPointEvent& event);
+    virtual void hkpToiContactPointViewer_contactPointCallback(const S00d68670_ContactPointEvent& event);
 };
 
 struct S00d68670_ToiContactPointViewer : S00d68670_WorldViewerBase, S00d68670_ContactListener {
-    virtual void FUN_00d68670(const S00d68670_ContactPointEvent& event);
+    virtual void hkpToiContactPointViewer_contactPointCallback(const S00d68670_ContactPointEvent& event);
 };
 
 // @fnv 0x00d68670
-void S00d68670_ToiContactPointViewer::FUN_00d68670(const S00d68670_ContactPointEvent& event)
+// src: XBOX_PDB 0x00d68670
+void S00d68670_ToiContactPointViewer::hkpToiContactPointViewer_contactPointCallback(const S00d68670_ContactPointEvent& event)
 {
     if (event.isToi())
     {
         const S00d68670_Collidable* collidable = event.m_apEntities[0]->getCollidable();
-        FUN_00d683b0(m_pDisplayHandler, (hkVector4*)&event.m_vContactPoint->getPosition(), (hkVector4*)&event.m_vContactPoint->getNormal(), 0xffff0000, (int)collidable, DAT_01269004);
+        hkToiContactPointViewer_displayArrow(m_pDisplayHandler, (hkVector4*)&event.m_vContactPoint->getPosition(), (hkVector4*)&event.m_vContactPoint->getNormal(), 0xffff0000, (int)collidable, DAT_01269004);
     }
 }

@@ -19,6 +19,6 @@ extern ModelLoader* g_modelLoader;
 extern const NiRTTI DAT_012024e0;
 extern const char DAT_0104ed9c[];
 
-SkyShaderProperty* FUN_00653270(const NiRTTI* rtti, NiProperty* property);
+SkyShaderProperty* NiObject_DynamicCast(const NiRTTI* rtti, NiProperty* property);
 
 #endif

@@ -20,7 +20,7 @@ class FileFinder
     static NiFile* GetFile(const char*, NiFile::OpenMode, unsigned int, unsigned int);
     static FILE_LOCATION __cdecl Exist(const char*, char*, unsigned int, unsigned int);
     FILE_LOCATION GetFileLocation(char*, char*, unsigned int, unsigned int);
-    unsigned int FUN_00afe220(char*, unsigned int, unsigned int);
+    unsigned int FileFinder_LookForFile(char*, unsigned int, unsigned int);
 };
 extern "C" FileFinder* g_fileFinder;
 extern "C" int __cdecl strcpy_s(char*, unsigned int, const char*);

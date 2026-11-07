@@ -26,7 +26,8 @@ void __cdecl _NiFreeAlias(void*);
 
 // Replaces the triangle list and updates the triangle and index counts.
 // @fnv 0x00a7b6c0
-void __fastcall FUN_00a7b6c0(NiTriShapeData* self, int, unsigned short ausValue, unsigned short* apusBuffer)
+// src: COMMUNITY 0x00a7b6c0
+void __fastcall NiTriShapeData_Replace(NiTriShapeData* self, int, unsigned short ausValue, unsigned short* apusBuffer)
 {
     if (apusBuffer != self->m_pusTriList && self->m_pusTriList)
         _NiFreeAlias(self->m_pusTriList);
@@ -36,7 +37,8 @@ void __fastcall FUN_00a7b6c0(NiTriShapeData* self, int, unsigned short ausValue,
 }
 
 // @fnv 0x00a7b700
-void __fastcall FUN_00a7b700(NiTriShapeData* self, int, unsigned short ausValue, unsigned short* apusBuffer)
+// src: COMMUNITY 0x00a7b700
+void __fastcall NiTriShapeData_SetData(NiTriShapeData* self, int, unsigned short ausValue, unsigned short* apusBuffer)
 {
     self->m_usTriangles = ausValue;
     self->m_uiTriListLength = ausValue * 3;
@@ -45,7 +47,8 @@ void __fastcall FUN_00a7b700(NiTriShapeData* self, int, unsigned short ausValue,
 
 // Reads three consecutive unsigned shorts from self->m_pusTriList at offset i*3 and writes them to the three output pointers.
 // @fnv 0x00a7b720
-void __fastcall FUN_00a7b720(NiTriShapeData* self, int, unsigned short i, unsigned short* i0, unsigned short* i1,
+// src: XBOX_PDB 0x00a7b720
+void __fastcall NiTriShapeData_GetTriangleIndices(NiTriShapeData* self, int, unsigned short i, unsigned short* i0, unsigned short* i1,
                              unsigned short* i2)
 {
     unsigned int j = i * 3;
@@ -55,7 +58,8 @@ void __fastcall FUN_00a7b720(NiTriShapeData* self, int, unsigned short i, unsign
 }
 
 // @fnv 0x00a7b760
-void __fastcall FUN_00a7b760(NiTriShapeData* self, int, unsigned short* p1, unsigned int* p2, unsigned short** p3,
+// src: XBOX_PDB 0x00a7b760
+void __fastcall NiTriShapeData_GetStripData(NiTriShapeData* self, int, unsigned short* p1, unsigned int* p2, unsigned short** p3,
                              unsigned int* p4)
 {
     *p1 = self->m_usTriangles;
@@ -67,7 +71,8 @@ void __fastcall FUN_00a7b760(NiTriShapeData* self, int, unsigned short* p1, unsi
 extern const char* const g_011f5af4_arg1;
 
 // @fnv 0x00a7b860
-const char* const* __fastcall FUN_00a7b860(void* self, int)
+// src: COMMUNITY 0x00a7b860
+const char* const* __fastcall NiTriShapeData_GetRTTI(void* self, int)
 {
     return &g_011f5af4_arg1;
 }
@@ -79,7 +84,8 @@ struct FUN_00a7b870_T
 };
 
 // @fnv 0x00a7b870
-FUN_00a7b870_T* __fastcall FUN_00a7b870(FUN_00a7b870_T* self, int)
+// src: GUESS 0x00a7b870 (confidence: medium)
+FUN_00a7b870_T* __fastcall NiTriShapeData_ClearFields(FUN_00a7b870_T* self, int)
 {
     self->a = 0;
     self->b = 0;
@@ -154,9 +160,9 @@ void __fastcall DestroyTriShapeData(NiTriShapeData* self)
 }  // namespace fnv_00a7b8c0
 
 extern const char* const g_011f5af4_arg1;
-char* __cdecl FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d510(const char*, unsigned int);
-char* __cdecl FUN_00a7d5a0(const char*, void*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+char* __cdecl NiGetViewerString_00a7d510(const char*, unsigned int);
+char* __cdecl NiGetViewerString_00a7d5a0(const char*, void*);
 
 inline void StrArr::AppendInline(char* e)
 {
@@ -173,9 +179,9 @@ void __cdecl AppendTrianglesInfo();
 void __fastcall AppendTriListInfo(NiTriShapeData* self, int, StrArr* pStrArr)
 {
     reinterpret_cast<void (__thiscall*)(NiTriBasedGeomData*, StrArr*)>(AppendTrianglesInfo)(self, pStrArr);
-    pStrArr->AppendInline(FUN_00a7d330(g_011f5af4_arg1));
-    pStrArr->AppendInline(FUN_00a7d510("m_uiTriListLength", self->m_uiTriListLength));
-    pStrArr->AppendInline(FUN_00a7d5a0("m_pusTriList", self->m_pusTriList));
+    pStrArr->AppendInline(NiViewerStrings_NiGetViewerString_Title(g_011f5af4_arg1));
+    pStrArr->AppendInline(NiGetViewerString_00a7d510("m_uiTriListLength", self->m_uiTriListLength));
+    pStrArr->AppendInline(NiGetViewerString_00a7d5a0("m_pusTriList", self->m_pusTriList));
 }
 
 inline void NiBinaryStream::BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes,
@@ -400,7 +406,8 @@ NiTriShapeData* __fastcall InitializeTriShapeData(NiTriShapeData* self)
 bool __cdecl MatchesTriangleCount();
 
 // @fnv 0x00a7b7e0
-bool NiTriShapeData::FUN_00a7b7e0(const NiTriShapeData* pkOther)
+// src: XBOX_PDB 0x00a7b7e0
+bool NiTriShapeData::IsEqual_00a7b7e0(const NiTriShapeData* pkOther)
 {
     if (!reinterpret_cast<bool (__thiscall*)(NiTriBasedGeomData*, const NiTriShapeData*)>(MatchesTriangleCount)(this, pkOther))
         return false;
@@ -437,7 +444,7 @@ bool NiTriShapeData::FUN_00a7b7e0(const NiTriShapeData* pkOther)
 namespace fnv_00ba3d30 {
 extern "C" char DAT_010b7fe4;
 
-void __cdecl FUN_00aa10f0(void*);
+void __cdecl _NiFree_00aa10f0(void*);
 
 extern "C" MemoryManager DAT_011f6238;
 
@@ -456,7 +463,7 @@ class HolderA
 HolderA::~HolderA()
 {
     void* memory = m_pData;
-    FUN_00aa10f0(memory);
+    _NiFree_00aa10f0(memory);
 }
 
 class HolderB
@@ -474,7 +481,7 @@ class HolderB
 HolderB::~HolderB()
 {
     void* memory = m_pData;
-    FUN_00aa10f0(memory);
+    _NiFree_00aa10f0(memory);
 }
 
 class HolderC
@@ -492,7 +499,7 @@ class HolderC
 HolderC::~HolderC()
 {
     void* memory = m_pData;
-    FUN_00aa10f0(memory);
+    _NiFree_00aa10f0(memory);
 }
 
 class HolderArray
@@ -512,7 +519,7 @@ class HolderArray
 HolderArray::~HolderArray()
 {
     void* memory = m_pData;
-    FUN_00aa10f0(memory);
+    _NiFree_00aa10f0(memory);
 }
 
 extern int DAT_010b9d24;
@@ -525,7 +532,7 @@ struct PlainHolder
     {
         void* memory = m_pData;
         vtable = &DAT_010b9d24;
-        FUN_00aa10f0(memory);
+        _NiFree_00aa10f0(memory);
     }
 };
 

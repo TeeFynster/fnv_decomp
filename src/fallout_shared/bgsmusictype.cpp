@@ -104,16 +104,17 @@ void* MusicTypeDeletion::FUN_005912a0(unsigned int flags)
 // @fnv 0x00591320
 BGSMusicType::~BGSMusicType()
 {
-    FUN_005913b0();
+    BGSMusicType_ClearData();
 }
 
 struct MusicTypeFileList_005913b0 : BGSMusicType
 {
-    void FUN_005913b0();
+    void BGSMusicType_ClearData();
 };
 // Removes and frees every entry in m_kMusicFiles until the list is empty.
 // @fnv 0x005913b0
-void MusicTypeFileList_005913b0::FUN_005913b0()
+// src: COMMUNITY 0x005913b0
+void MusicTypeFileList_005913b0::BGSMusicType_ClearData()
 {
     void* pEntry = 0;
     while (!m_kMusicFiles.IsEmpty())
@@ -137,63 +138,66 @@ struct MusicSaveComponents
     MusicSoundWriter soundFile;
 };
 
-void FUN_00485910(int chunk, float value);
+void TESForm_AddChunk_00485910(int chunk, float value);
 
 struct MusicTypeWriter : BGSMusicType
 {
-    void FUN_004855a0();
-    void FUN_00485680();
-    void FUN_005916b0();
+    void BeginFormRecord();
+    void FinishFormRecord();
+    void BGSMusicType_Save();
 };
 
 // Writes the music type save components by calling FUN_004855a0, the sound file writer, and FUN_00485910 with the MANA chunk and fVolumeScale.
 // @fnv 0x005916b0
-void MusicTypeWriter::FUN_005916b0()
+// src: XBOX_PDB 0x005916b0
+void MusicTypeWriter::BGSMusicType_Save()
 {
-    FUN_004855a0();
+    BeginFormRecord();
     reinterpret_cast<MusicSaveComponents*>(this)->soundFile.FUN_0048cea0();
-    FUN_00485910(0x4d414e41, fVolumeScale);
-    FUN_00485680();
+    TESForm_AddChunk_00485910(0x4d414e41, fVolumeScale);
+    FinishFormRecord();
 }
 
 class MusicTypeCopyEntry : public BGSMusicType
 {
   public:
-    void FUN_004851b0(TESForm* source);
-    void FUN_005916f0(TESForm* source);
+    void TESForm_CopyAllComponents(TESForm* source);
+    void BGSMusicType_Copy(TESForm* source);
 };
 
 // Copies fVolumeScale from a BGSMusicType source and delegates the remaining copy to FUN_004851b0.
 // @fnv 0x005916f0
-void MusicTypeCopyEntry::FUN_005916f0(TESForm* source)
+// src: XBOX_PDB 0x005916f0
+void MusicTypeCopyEntry::BGSMusicType_Copy(TESForm* source)
 {
     BGSMusicType* music = dynamic_cast<BGSMusicType*>(source);
     if (!music)
         return;
     fVolumeScale = music->fVolumeScale;
-    FUN_004851b0(music);
+    TESForm_CopyAllComponents(music);
 }
 
 struct MusicFormComponentCompareView
 {
-    bool FUN_00485270(::TESForm* form);
+    bool TESForm_CompareAllComponents(::TESForm* form);
 };
 
 struct MusicTypeCompareEntry : ::BGSMusicType
 {
-    bool FUN_00591740(::TESForm* form);
+    bool BGSMusicType_Compare(::TESForm* form);
 };
 
 // Returns true if the given form is not a BGSMusicType, or if its fVolumeScale or form component differs from this entry.
 // @fnv 0x00591740
-bool MusicTypeCompareEntry::FUN_00591740(::TESForm* form)
+// src: XBOX_PDB 0x00591740
+bool MusicTypeCompareEntry::BGSMusicType_Compare(::TESForm* form)
 {
     ::BGSMusicType* other = dynamic_cast< ::BGSMusicType*>(form);
     if (!other)
         return true;
     if (fVolumeScale != other->fVolumeScale)
         return true;
-    if (reinterpret_cast<MusicFormComponentCompareView*>(this)->FUN_00485270(other))
+    if (reinterpret_cast<MusicFormComponentCompareView*>(this)->TESForm_CompareAllComponents(other))
         return true;
     return false;
 }

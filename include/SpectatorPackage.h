@@ -6,5 +6,5 @@ class SpectatorPackage : public TESPackage
 {
 public:
     int IsComplete(const SpectatorPackage& other);
-    void __thiscall FUN_009f8420(Actor& aActor);
+    void __thiscall ProcessEntries_009f8420(Actor& aActor);
 };

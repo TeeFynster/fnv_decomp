@@ -28,8 +28,8 @@ public:
         float Distance(const Location&);
         MoveVec Position();
         void Set(const MoveVec&, int);
-        void FUN_00527b70(void* buffer);
-        void FUN_00527ba0(void* buffer);
+        void BGSWorldLocation_SaveGame(void* buffer);
+        void BGSLoadGameBuffer_LoadBGSWorldLocation(void* buffer);
     };
 
     CombatProcedureMove(MoveInput* input, float speed, unsigned int flags);
@@ -48,16 +48,16 @@ public:
 
     void FUN_009d6ba0();
     void* DestroyIfFlagged(unsigned int flags);
-    void FUN_009d6ca0();
+    void Update_009d6ca0();
     void UpdateCombatMovement();
     void ClearTargetRef(TESObjectREFR* apRef);
     void PrintDebugInfo(DebugDisplay* display, int x, int y);
-    void FUN_009d84b0();
-    void FUN_009d84e0();
-    void FUN_009d8880(BGSSaveFormBuffer* buffer);
-    void FUN_009d89a0(BGSLoadFormBuffer* buffer);
-    void FUN_009d8ad0(unsigned int value);
-    float FUN_009d8440();
+    void StartedPlanning();
+    void FinishedPlanning();
+    void SaveGame_009d8880(BGSSaveFormBuffer* buffer);
+    void LoadGame_009d89a0(BGSLoadFormBuffer* buffer);
+    void InitLoadGame_009d8ad0(unsigned int value);
+    float GetHidingTime();
     void UpdateOutput(OutputValue* output);
     bool UpdateMovementRequest(Output052* output);
 

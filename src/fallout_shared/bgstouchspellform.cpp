@@ -70,7 +70,8 @@ void BGSTouchSpellForm::InitItem(TESForm* owner)
 extern int DAT_0101aef0;
 
 // @fnv 0x0047bd10
-BGSTouchSpellForm* __fastcall FUN_0047bd10(BGSTouchSpellForm* pThis)
+// src: EXE 0x0047bd10
+BGSTouchSpellForm* __fastcall BGSTouchSpellForm_BGSTouchSpellForm(BGSTouchSpellForm* pThis)
 {
     pThis->BaseFormComponent::BaseFormComponent();
     *(int**)pThis = &DAT_0101aef0;

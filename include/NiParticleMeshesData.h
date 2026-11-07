@@ -19,11 +19,11 @@ class NiParticleMeshesData : public NiParticlesData
     virtual void vf35();
     virtual void vf41(unsigned short);
 
-    void FUN_00a98a10(NiStream&);
-    void FUN_00a98a30(unsigned short);
-    bool FUN_00a98a80(NiStream&);
-    void FUN_00a98ab0(NiStream&);
-    void FUN_00a98d60(NiStream&);
+    void LoadBinary_00a98a10(NiStream&);
+    void SetActiveVertexCount(unsigned short);
+    bool RegisterStreamables_00a98a80(NiStream&);
+    void SaveBinary_00a98ab0(NiStream&);
+    void LinkObject_00a98d60(NiStream&);
     bool IsMeshNodeEqual(void*);
     void RemoveParticleMesh(unsigned short);
     void UpdateParticleMeshes();

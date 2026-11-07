@@ -66,11 +66,12 @@ class ShaderOwner
     int unk0b0;
     int unk0b4;
     NiPointer<NiGPUProgramOwner> m_spProgramOwner;
-    void FUN_00539ef0(NiGPUProgram* program);
+    void NiGeometry_SetAdditionalGeometryData(NiGPUProgram* program);
 };
 
 // @fnv 0x00539ef0
-void ShaderOwner::FUN_00539ef0(NiGPUProgram* program)
+// src: COMMUNITY 0x00539ef0
+void ShaderOwner::NiGeometry_SetAdditionalGeometryData(NiGPUProgram* program)
 {
     ((NiGPUProgramOwner*)m_spProgramOwner)->SetProgram(program);
 }

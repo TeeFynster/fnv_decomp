@@ -8,10 +8,11 @@ struct OriginDirectionPair
 {
     NiPoint3 m_kStartPoint;
     NiPoint3 m_kLightVector;
-    NiPoint3 FUN_00eb6090(float fS);
+    NiPoint3 NiSegment_GetPoint(float fS);
 };
 // @fnv 0x00eb6090
-NiPoint3 OriginDirectionPair::FUN_00eb6090(float fS)
+// src: GAMEBRYO_LIB 0x00eb6090
+NiPoint3 OriginDirectionPair::NiSegment_GetPoint(float fS)
 {
     NiPoint3 p;
     NiPoint3 s;

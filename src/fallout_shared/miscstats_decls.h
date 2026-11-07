@@ -12,7 +12,7 @@ struct MiscStatEntry
     int value;
 };
 extern "C" MiscStatEntry* DAT_011c6d50[43];
-int FUN_004d5e00();
+int StatsMenu_GetClassStatic();
 int Warning(const char*, ...);
 class TESForm;
 #include "../../include/CHALLENGE_TYPE.h"

@@ -25,7 +25,7 @@ public:
     static NiObject* CreateObject();
     void FUN_00a40360(BSRotAccumTransfInterpolator*, int);
     BSRotAccumTransfInterpolator* CreateInterpolator(int);
-    void FUN_00a43330(int);
+    void j_j_j_nullsub_3(int);
     void UpdateRotValue(int);
     void BaseCleanup();
     BSRotAccumTransfInterpolator* FUN_00a43df0(unsigned char);

@@ -18,17 +18,17 @@ class BGSEncounterZone : public TESForm
     bool Load(TESFile* file);
     virtual void InitItem();
     void Save();
-    void FUN_00526070(unsigned int time);
-    void FUN_005260a0(unsigned int time);
-    bool FUN_00526120(TESObjectCELL* cell);
-    void FUN_00526160(unsigned short level);
-    void FUN_00526270();
-    bool FUN_00526320();
+    void SetDetachTime_00526070(unsigned int time);
+    void SetAttachTime(unsigned int time);
+    bool ShouldCellRecalc(TESObjectCELL* cell);
+    void SetZoneLevel(unsigned short level);
+    void DetermineLevel();
+    bool QNeverReset();
     void SaveGame(BGSSaveFormBuffer* buffer);
-    void FUN_005264a0(BGSLoadFormBuffer* buffer);
+    void LoadGame_005264a0(BGSLoadFormBuffer* buffer);
     void RevertAndClearIfChanged(BGSLoadFormBuffer* buffer);
-    bool FUN_00526000(TESForm* other);
-    void FUN_00525fa0(TESForm* source);
+    bool Compare_00526000(TESForm* other);
+    void Copy_00525fa0(TESForm* source);
     static void CreateDefaultEncounterZone();
     static BGSEncounterZone* ms_pDefaultEncounterZone;
     // base TESForm at +0x0, size 24

@@ -19,7 +19,7 @@ class BSRenderedTexture
     NiRenderTargetGroup* GetGroup();
     static void __cdecl EndAllAndResetRendererState();
     static void EndAll();
-    void* FUN_004bc320();
-    void __thiscall FUN_00876830(int, int);
+    void* BSRenderedTexture_GetTexture();
+    void __thiscall TESMain_DrawWorld_StopRenderTarget(int, int);
     void IncRefCount();
 };

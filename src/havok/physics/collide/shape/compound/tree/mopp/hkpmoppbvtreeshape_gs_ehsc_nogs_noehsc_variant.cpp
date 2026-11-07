@@ -14,13 +14,13 @@
 #include "../../../../../../../../include/hkpSingleShapeContainer.h"
 #include "../../../../../../../../include/hkpMoppBvTreeShape.h"
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 
 // ~hkArray: clearAndDeallocate through the router heap (the trailing m_data / capacity stores are dead here).
 template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
 {
-    hkMemoryAllocator& alloc = reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap());
+    hkMemoryAllocator& alloc = reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance().heap());
     this->m_iElementCount = 0;
     if ((this->m_iCapacityState & 0x80000000) == 0)
     {
@@ -56,13 +56,14 @@ struct MoppAabbQueryMachine
     int unk38;
     int unk3C;
 
-    void FUN_00dd1da0(const hkpMoppCode* code, const hkAabb* aabb, hkArray<unsigned int>* hits) throw();
+    void hkpMoppObbVirtualMachine_queryAabb(const hkpMoppCode* code, const hkAabb* aabb, hkArray<unsigned int>* hits) throw();
 };
 
 extern double DAT_01091c00;
 
 // @fnv 0x00d54810
-int hkMoppBvTreeShapeBase::FUN_00d54810(const hkAabb& aabbIn, unsigned int* hits, int maxNumKeys) const
+// src: XBOX_PDB 0x00d54810
+int hkMoppBvTreeShapeBase::queryAabbImpl(const hkAabb& aabbIn, unsigned int* hits, int maxNumKeys) const
 {
     const hkVector4_X& offset = m_kMoppCodeInfo;
 
@@ -77,7 +78,7 @@ int hkMoppBvTreeShapeBase::FUN_00d54810(const hkAabb& aabbIn, unsigned int* hits
         _mm_min_ps(_mm_add_ps(_mm_set_ps1(extent), offset.m_vComponents), aabbIn.m_kMaximumCorner.m_vComponents);
     hkArray<unsigned int> hitsArray(hits, 0, maxNumKeys);
     MoppAabbQueryMachine machine;
-    machine.FUN_00dd1da0(code, &aabb, &hitsArray);
+    machine.hkpMoppObbVirtualMachine_queryAabb(code, &aabb, &hitsArray);
     int numHits = machine.m_kHits->m_iElementCount;
     return numHits;
 }

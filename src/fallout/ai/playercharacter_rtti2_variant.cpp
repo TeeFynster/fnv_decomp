@@ -986,7 +986,7 @@ struct IRContainer
     float fWeight;
 
     bool IsHardcore();
-    IRFormStack* FUN_00968be0(IRForm* apItem, IRExtraList* apExtra, int aiCount, bool abReturnEntry);
+    IRFormStack* PlayerCharacter_RemoveRockItAmmo(IRForm* apItem, IRExtraList* apExtra, int aiCount, bool abReturnEntry);
 };
 
 namespace RockItAmmoCountDetail {
@@ -1003,11 +1003,12 @@ struct EntryArrayView
 
 struct PlayerView : IRContainer
 {
-    int FUN_00969040();
+    int PlayerCharacter_GetNumRockItAmmo();
 };
 
 // @fnv 0x00969040
-int PlayerView::FUN_00969040()
+// src: XBOX_PDB 0x00969040
+int PlayerView::PlayerCharacter_GetNumRockItAmmo()
 {
     int iitemCt = 0;
     int iammoCt = 0;
@@ -1024,15 +1025,15 @@ extern Save451* g_TESSaveLoadGame;
 struct Data451;
 extern Data451* g_dataHandler;
 void FNV_Warning(const char* fmt, ...);
-TESForm* FUN_004839c0(unsigned int id);
+TESForm* TESForm_GetFormByNumericID(unsigned int id);
 struct GlobalObject2_0096a2d0;
 extern GlobalObject2_0096a2d0 g_011e0ae8;
 
 struct SaveStream
 {
     unsigned char* FUN_00825c00();
-    bool FUN_00862110();
-    void FUN_008579b0(void*, int);
+    bool TESSaveLoadGame_UseSaveGameBlocks();
+    void TESSaveLoadGame_SaveGameDataOLD(void*, int);
     unsigned char FUN_008df040();
 };
 
@@ -1058,34 +1059,34 @@ struct FormRecord
     unsigned int unk00;
     unsigned int unk04;
     unsigned short unk08;
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     unsigned int FUN_0040a1e0();
     unsigned int RefreshItem();
-    FormRecord* FUN_00575d70();
+    FormRecord* TESObjectREFR_GetWorldSpace();
     FormRecord* FUN_008d6f30();
     FormRecord* FUN_0059bb30();
     FormRecord* FUN_005e3fa0();
-    bool FUN_005dc980();
-    PlayercharacterListNodeView* FUN_005d43c0();
+    bool BGSBodyPart_GetToHitChance();
+    PlayercharacterListNodeView* BSFile_GetDevice();
     FormRecord* FindItemByDoneFlag(bool);
-    bool FUN_009373f0();
-    FormRecord* FUN_0044edb0();
+    bool TESTextureList_GetTextureCount();
+    FormRecord* TESMain_GetThread();
     unsigned int FUN_00726070();
     FormRecord* FUN_00502430();
-    void FUN_005f6f70();
+    void TESClass_SaveGameTES();
     void SerializeFaceGenData(void*);
 };
 
 struct SaveMap
 {
     unsigned int count;
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     void* GetFirstPos();
     void GetNextEntry(void*&, unsigned int&, unsigned char&);
 };
 struct SaveSubobject
 {
-    void FUN_008d5510(unsigned int);
+    void SaveValueAndFollowingBytes(unsigned int);
 };
 struct SaveReference
 {
@@ -1101,9 +1102,9 @@ struct StreamView
     SaveReference* GetHitSound();
 };
 void __cdecl SaveLog(const char*, ...);
-void __cdecl FUN_0049aa80(void*, unsigned int);
+void __cdecl Animation_SaveAnimation(void*, unsigned int);
 void __cdecl CopyEntrySecondFields(void*);
-void __cdecl FUN_00805b40(FormRecord*, void*);
+void __cdecl ActiveEffect_SaveActiveEffectList(FormRecord*, void*);
 extern unsigned int g_011e0b5c;
 extern FormRecord* g_011e0784;
 extern FormRecord* g_011e078c;
@@ -1828,18 +1829,18 @@ struct PlayerSave
     unsigned int unk870;
     unsigned int unk874;
     SaveSubobject unk878;
-    void FUN_00484ce0(void*, int);
+    void TESForm_SaveGameDataOLD(void*, int);
     void ForwardToSaveLoadGame(void*, int);
-    void FUN_008d32f0(unsigned int);
-    bool FUN_008bbc10();
-    PlayercharacterListNodeView* FUN_005a6260();
+    void Character_SaveGame(unsigned int);
+    bool Actor_GetIronSights();
+    PlayercharacterListNodeView* PlayerCharacter_GetCasinoDataList();
     PlayercharacterListNodeView* GetField614();
     PlayercharacterListNodeView* GetField618();
     PlayercharacterListNodeView* GetSelfOffset6A8();
-    FormRecord* FUN_007af430();
-    const char* FUN_0055d520();
+    FormRecord* BGSSaveFormBuffer_GetForm();
+    const char* TESObjectREFR_GetFullName();
     FormRecord* FUN_004181e0();
-    void FUN_00955620(unsigned int flags);
+    void PlayerCharacter_SaveGame(unsigned int flags);
 };
 
 // Original read-only string addresses, independent of MSVC literal numbering.
@@ -1858,7 +1859,8 @@ extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 #pragma intrinsic(memcpy)
 
 // @fnv 0x00955620
-void PlayerSave::FUN_00955620(unsigned int flags)
+// src: XBOX_PDB 0x00955620
+void PlayerSave::PlayerCharacter_SaveGame(unsigned int flags)
 {
     {
         unsigned short blockSize3 = 0;
@@ -1866,25 +1868,25 @@ void PlayerSave::FUN_00955620(unsigned int flags)
         unsigned char* initialPosition3 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
         if (*g_011de4e8.Bool())
             initialPosition3 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-        if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00862110())
+        if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned int marker = 0x424c4f4b;
-            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008579b0(&marker, 4);
+            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_SaveGameDataOLD(&marker, 4);
             blockStart9 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008579b0(&blockSize3, 2);
+            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_SaveGameDataOLD(&blockSize3, 2);
         }
-        FUN_00484ce0(&unk244, 0x134);
-        FUN_00484ce0(&unk378, 0x134);
+        TESForm_SaveGameDataOLD(&unk244, 0x134);
+        TESForm_SaveGameDataOLD(&unk378, 0x134);
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x31)
-            FUN_00484ce0(&unk4b0, 0x134);
-        FUN_00484ce0(&unk4ac, 4);
+            TESForm_SaveGameDataOLD(&unk4b0, 0x134);
+        TESForm_SaveGameDataOLD(&unk4ac, 4);
         if (*g_011de4e8.Bool())
         {
             unsigned char* endPosition4 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
             SaveReference* reference = ((StreamView*)g_TESSaveLoadGame)->GetHitSound();
             if (reference)
             {
-                TESForm* form = FUN_004839c0(reference->formID);
+                TESForm* form = TESForm_GetFormByNumericID(reference->formID);
                 SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::kSaveFormLog),
                         endPosition4 - initialPosition3, reference->formID, form->GetName(),
                         *(unsigned int*)&reference->detail0, 0x3378,
@@ -1894,7 +1896,7 @@ void PlayerSave::FUN_00955620(unsigned int flags)
                 SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::kSaveLog), endPosition4 - initialPosition3, 0x3378,
                         reinterpret_cast<const char*>(PlayerSaveStrings::kPlayerSourcePath));
         }
-        if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00862110())
+        if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned char* endPositionA = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
             unsigned char* sizePosition = blockStart9;
@@ -1904,111 +1906,111 @@ void PlayerSave::FUN_00955620(unsigned int flags)
             *(unsigned short*)blockStart9 = (unsigned short)(endPositionA - sizePosition);
         }
     }
-    FUN_008d32f0(flags);
+    Character_SaveGame(flags);
     {
         unsigned short blockSize3 = 0;
         unsigned char* blockStart9 = 0;
         unsigned char* initialPosition3 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
         if (*g_011de4e8.Bool())
             initialPosition3 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-        if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00862110())
+        if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned int marker2 = 0x424c4f4b;
-            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008579b0(&marker2, 4);
+            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_SaveGameDataOLD(&marker2, 4);
             blockStart9 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008579b0(&blockSize3, 2);
+            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_SaveGameDataOLD(&blockSize3, 2);
         }
         {
             if (flags & 0x10000000)
-                FUN_0049aa80(this, unk690);
+                Animation_SaveAnimation(this, unk690);
             // Serialize the original raw vector copy without calling the shared NiPoint3 copy constructor.
             // 0x011f426c is NiPoint3_ZERO; its old binding uses a struct tag, while the shared type uses class.
             unsigned int position[3];
             memcpy(position, &(unk6f4 ? unk6f4->GetPosition() : *reinterpret_cast<const NiPoint3*>(0x011f426c)), 12);
-            FUN_00484ce0(&unk64a, 1);
-            FUN_00484ce0(&unk64d, 1);
-            FUN_00484ce0(&unk651, 1);
-            FUN_00484ce0(&unk652, 1);
-            FUN_00484ce0(&unk654, 4);
-            FUN_00484ce0(&unk660, 4);
-            FUN_00484ce0(&unk664, 4);
-            FUN_00484ce0(&unk668, 4);
-            FUN_00484ce0(&unk66c, 1);
-            FUN_00484ce0(&unk6cc, 1);
-            FUN_00484ce0(&unk6d0, 4);
-            FUN_00484ce0(&unk6d4, 4);
-            FUN_00484ce0(&unk6d8, 1);
-            FUN_00484ce0(&unk6dc, 4);
-            FUN_00484ce0(&unk6e8, 1);
-            FUN_00484ce0(&unk6e4, 4);
-            FUN_00484ce0(&position, 12);
-            FUN_00484ce0(&unk698, 4);
-            FUN_00484ce0(&unk67c, 4);
-            FUN_00484ce0(&unk734, 4);
-            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008579b0(&unk738, 4);
-            FUN_00484ce0(&unk658, 1);
-            FUN_00484ce0(&unk65c, 4);
-            FUN_00484ce0(&unk75c, 1);
-            FUN_00484ce0(&unk75e, 1);
-            FUN_00484ce0(&unk730, 4);
-            FUN_00484ce0(&unk790, 4);
-            FUN_00484ce0(&unk680, 1);
+            TESForm_SaveGameDataOLD(&unk64a, 1);
+            TESForm_SaveGameDataOLD(&unk64d, 1);
+            TESForm_SaveGameDataOLD(&unk651, 1);
+            TESForm_SaveGameDataOLD(&unk652, 1);
+            TESForm_SaveGameDataOLD(&unk654, 4);
+            TESForm_SaveGameDataOLD(&unk660, 4);
+            TESForm_SaveGameDataOLD(&unk664, 4);
+            TESForm_SaveGameDataOLD(&unk668, 4);
+            TESForm_SaveGameDataOLD(&unk66c, 1);
+            TESForm_SaveGameDataOLD(&unk6cc, 1);
+            TESForm_SaveGameDataOLD(&unk6d0, 4);
+            TESForm_SaveGameDataOLD(&unk6d4, 4);
+            TESForm_SaveGameDataOLD(&unk6d8, 1);
+            TESForm_SaveGameDataOLD(&unk6dc, 4);
+            TESForm_SaveGameDataOLD(&unk6e8, 1);
+            TESForm_SaveGameDataOLD(&unk6e4, 4);
+            TESForm_SaveGameDataOLD(&position, 12);
+            TESForm_SaveGameDataOLD(&unk698, 4);
+            TESForm_SaveGameDataOLD(&unk67c, 4);
+            TESForm_SaveGameDataOLD(&unk734, 4);
+            reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_SaveGameDataOLD(&unk738, 4);
+            TESForm_SaveGameDataOLD(&unk658, 1);
+            TESForm_SaveGameDataOLD(&unk65c, 4);
+            TESForm_SaveGameDataOLD(&unk75c, 1);
+            TESForm_SaveGameDataOLD(&unk75e, 1);
+            TESForm_SaveGameDataOLD(&unk730, 4);
+            TESForm_SaveGameDataOLD(&unk790, 4);
+            TESForm_SaveGameDataOLD(&unk680, 1);
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x28 &&
                 reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() < 0x2d)
             {
-                FUN_00484ce0(&unk7a0, 12);
-                FUN_00484ce0(&unk7a0, 12);
+                TESForm_SaveGameDataOLD(&unk7a0, 12);
+                TESForm_SaveGameDataOLD(&unk7a0, 12);
             }
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x39)
             {
                 unsigned int statistics[43];
                 CopyEntrySecondFields(statistics);
-                FUN_00484ce0(statistics, 0xac);
-                FUN_00484ce0(&unk744, 0x14);
+                TESForm_SaveGameDataOLD(statistics, 0xac);
+                TESForm_SaveGameDataOLD(&unk744, 0x14);
             }
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x3f)
-                FUN_00484ce0(&unk7c4, 1);
+                TESForm_SaveGameDataOLD(&unk7c4, 1);
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x40)
             {
-                reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008579b0(&unk63c, 4);
-                FUN_00484ce0(&unk640, 4);
-                FUN_00484ce0(&unk644, 4);
+                reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_SaveGameDataOLD(&unk63c, 4);
+                TESForm_SaveGameDataOLD(&unk640, 4);
+                TESForm_SaveGameDataOLD(&unk644, 4);
             }
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x49)
             {
-                FUN_00484ce0(&unk200, 4);
-                FUN_00484ce0(&unk240, 1);
+                TESForm_SaveGameDataOLD(&unk200, 4);
+                TESForm_SaveGameDataOLD(&unk240, 1);
             }
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x70)
             {
             }
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x71)
             {
-                FUN_00484ce0(&unk64e, 1);
-                FUN_00484ce0(&unk66d, 1);
-                FUN_00484ce0(&unk794, 4);
+                TESForm_SaveGameDataOLD(&unk64e, 1);
+                TESForm_SaveGameDataOLD(&unk66d, 1);
+                TESForm_SaveGameDataOLD(&unk794, 4);
                 ForwardToSaveLoadGame(&unk7f4, 4);
             }
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x78)
             {
-                bool flagValue = FUN_008bbc10();
-                FUN_00484ce0(&flagValue, 1);
+                bool flagValue = Actor_GetIronSights();
+                TESForm_SaveGameDataOLD(&flagValue, 1);
             }
             if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x7a)
-                FUN_00484ce0(&g_011e0b5c, 4);
+                TESForm_SaveGameDataOLD(&g_011e0b5c, 4);
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x7a)
         {
             unsigned int entryID4 = 0;
-            PlayercharacterListNodeView* entries6 = FUN_005a6260();
+            PlayercharacterListNodeView* entries6 = PlayerCharacter_GetCasinoDataList();
             int entryCount = entries6->GetSize();
-            FUN_00484ce0(&entryCount, 4);
+            TESForm_SaveGameDataOLD(&entryCount, 4);
             while (entries6 && *entries6->FUN_006815c0())
             {
                 entryID4 = (*entries6->FUN_006815c0())->unk00;
-                FUN_00484ce0(&entryID4, 4);
-                FUN_00484ce0(&(*entries6->FUN_006815c0())->unk04, 4);
-                FUN_00484ce0(&(*entries6->FUN_006815c0())->unk08, 2);
+                TESForm_SaveGameDataOLD(&entryID4, 4);
+                TESForm_SaveGameDataOLD(&(*entries6->FUN_006815c0())->unk04, 4);
+                TESForm_SaveGameDataOLD(&(*entries6->FUN_006815c0())->unk08, 2);
                 entries6 = entries6->FUN_00726070();
             }
         }
@@ -2017,43 +2019,43 @@ void PlayerSave::FUN_00955620(unsigned int flags)
             unsigned int entryID4 = 0;
             PlayercharacterListNodeView* entries2 = GetField614();
             int entryCount2 = entries2->GetSize();
-            FUN_00484ce0(&entryCount2, 4);
+            TESForm_SaveGameDataOLD(&entryCount2, 4);
             while (entries2 && *entries2->FUN_006815c0())
             {
-                entryID4 = (*entries2->FUN_006815c0())->FUN_0084e3a0();
-                FUN_00484ce0(&entryID4, 4);
+                entryID4 = (*entries2->FUN_006815c0())->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+                TESForm_SaveGameDataOLD(&entryID4, 4);
                 entries2 = entries2->FUN_00726070();
             }
             entries2 = GetField618();
             entryCount2 = entries2->GetSize();
-            FUN_00484ce0(&entryCount2, 4);
+            TESForm_SaveGameDataOLD(&entryCount2, 4);
             while (entries2 && *entries2->FUN_006815c0())
             {
-                entryID4 = (*entries2->FUN_006815c0())->FUN_0084e3a0();
-                FUN_00484ce0(&entryID4, 4);
+                entryID4 = (*entries2->FUN_006815c0())->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+                TESForm_SaveGameDataOLD(&entryID4, 4);
                 entries2 = entries2->FUN_00726070();
             }
-            FUN_00484ce0(&unk61c, 4);
-            FUN_00484ce0(&unk620, 4);
-            FUN_00484ce0(&unk624, 4);
-            FUN_00484ce0(&unk628, 4);
-            FUN_00484ce0(&unk62c, 4);
+            TESForm_SaveGameDataOLD(&unk61c, 4);
+            TESForm_SaveGameDataOLD(&unk620, 4);
+            TESForm_SaveGameDataOLD(&unk624, 4);
+            TESForm_SaveGameDataOLD(&unk628, 4);
+            TESForm_SaveGameDataOLD(&unk62c, 4);
         }
         {
             unsigned int id5 = 0;
             if (unk208)
-                id5 = unk208->FUN_0084e3a0();
+                id5 = unk208->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id5, 4);
             unsigned int globalID3 = 0;
             if (g_011e0784)
-                globalID3 = g_011e0784->FUN_0084e3a0();
+                globalID3 = g_011e0784->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&globalID3, 4);
             unsigned int spellID = 0;
             if (unk6ec)
             {
                 SpellItem* spell = dynamic_cast<SpellItem*>(unk6ec);
                 if (spell)
-                    spellID = reinterpret_cast<FormRecord*>(spell)->FUN_0084e3a0();
+                    spellID = reinterpret_cast<FormRecord*>(spell)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             }
             ForwardToSaveLoadGame(&spellID, 4);
             unsigned int id4 = 0;
@@ -2066,19 +2068,19 @@ void PlayerSave::FUN_00955620(unsigned int flags)
             ForwardToSaveLoadGame(&id8, 4);
             unsigned int id760_2 = 0;
             if (unk760)
-                id760_2 = unk760->FUN_0084e3a0();
+                id760_2 = unk760->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id760_2, 4);
             unsigned int id6f4 = 0;
             if (unk6f0)
-                id6f4 = unk6f0->FUN_0084e3a0();
+                id6f4 = unk6f0->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id6f4, 4);
             unsigned int id73c4 = 0;
             if (unk73c)
-                id73c4 = unk73c->FUN_0084e3a0();
+                id73c4 = unk73c->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id73c4, 4);
             unsigned int id_ = 0;
             if (unk758)
-                id_ = ((FormRecord*)unk758)->FUN_0084e3a0();
+                id_ = ((FormRecord*)unk758)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id_, 4);
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x28 &&
@@ -2086,28 +2088,28 @@ void PlayerSave::FUN_00955620(unsigned int flags)
         {
             unsigned int id7ac = 0;
             if (unk7ac)
-                id7ac = unk7ac->FUN_0084e3a0();
+                id7ac = unk7ac->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id7ac, 4);
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x40)
         {
             unsigned int id638 = 0;
             if (unk638)
-                id638 = unk638->FUN_0084e3a0();
+                id638 = unk638->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id638, 4);
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x42)
         {
             unsigned int globalID2 = 0;
             if (g_011e078c)
-                globalID2 = g_011e078c->FUN_0084e3a0();
+                globalID2 = g_011e078c->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&globalID2, 4);
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x57)
         {
             unsigned int id604 = 0;
             if (unk604)
-                id604 = unk604->FUN_0084e3a0();
+                id604 = unk604->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id604, 4);
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x60)
@@ -2115,11 +2117,11 @@ void PlayerSave::FUN_00955620(unsigned int flags)
             unsigned int worldID = 0;
             if (unk6f4)
             {
-                FormRecord* world = ((FormRecord*)unk6f4)->FUN_00575d70();
+                FormRecord* world = ((FormRecord*)unk6f4)->TESObjectREFR_GetWorldSpace();
                 if (!world)
                     world = ((FormRecord*)unk6f4)->FUN_008d6f30();
                 if (world)
-                    worldID = world->FUN_0084e3a0();
+                    worldID = world->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             }
             ForwardToSaveLoadGame(&worldID, 4);
         }
@@ -2127,14 +2129,14 @@ void PlayerSave::FUN_00955620(unsigned int flags)
         {
             unsigned short count63 = 0;
             unsigned char* countPos63 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-            FUN_00484ce0(&count63, 2);
+            TESForm_SaveGameDataOLD(&count63, 2);
             PlayercharacterListNodeView* list9 = 0;
             while (list9 && !list9->FUN_008256d0())
             {
                 FormRecord* item63 = *list9->FUN_006815c0();
                 unsigned int id63 = 0;
                 if (item63)
-                    id63 = item63->FUN_0084e3a0();
+                    id63 = item63->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
                 ForwardToSaveLoadGame(&id63, 4);
                 ++count63;
                 list9 = list9->FUN_00726070();
@@ -2145,13 +2147,13 @@ void PlayerSave::FUN_00955620(unsigned int flags)
         {
             unsigned int parentID = 0;
             if (unk760 && unk760->FUN_0059bb30())
-                parentID = unk760->FUN_0059bb30()->FUN_0084e3a0();
+                parentID = unk760->FUN_0059bb30()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&parentID, 4);
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x6f)
         {
-            unsigned short mapCount = (unsigned short)unk854.FUN_0084e3a0();
-            FUN_00484ce0(&mapCount, 2);
+            unsigned short mapCount = (unsigned short)unk854.GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            TESForm_SaveGameDataOLD(&mapCount, 2);
             unsigned short savedCount = 0;
             void* mapPosition = unk854.GetFirstPos();
             while (mapPosition)
@@ -2160,7 +2162,7 @@ void PlayerSave::FUN_00955620(unsigned int flags)
                 unsigned char mapValue2 = 0;
                 unk854.GetNextEntry(mapPosition, mapKey, mapValue2);
                 ForwardToSaveLoadGame(&mapKey, 4);
-                FUN_00484ce0(&mapValue2, 1);
+                TESForm_SaveGameDataOLD(&mapValue2, 1);
                 ++savedCount;
             }
         }
@@ -2168,37 +2170,37 @@ void PlayerSave::FUN_00955620(unsigned int flags)
         {
             unsigned short count73 = 0;
             unsigned char* countPos8 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-            FUN_00484ce0(&count73, 2);
+            TESForm_SaveGameDataOLD(&count73, 2);
             PlayercharacterListNodeView* list73 = reinterpret_cast<PlayercharacterListNodeView*>(&g_011e0ae8);
             while (list73 && !list73->FUN_008256d0())
             {
                 FormRecord* item73 = *list73->FUN_006815c0();
                 unsigned int id_ = 0;
                 if (item73)
-                    id_ = item73->FUN_0084e3a0();
+                    id_ = item73->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
                 ForwardToSaveLoadGame(&id_, 4);
                 ++count73;
                 list73 = list73->FUN_00726070();
             }
             *(unsigned short*)countPos8 = count73;
         }
-        FUN_00805b40(unk210, this);
-        unk878.FUN_008d5510(flags);
+        ActiveEffect_SaveActiveEffectList(unk210, this);
+        unk878.SaveValueAndFollowingBytes(flags);
         {
             unsigned int activeQuestID = 0;
             if (unk6b8)
-                activeQuestID = unk6b8->FUN_0084e3a0();
+                activeQuestID = unk6b8->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&activeQuestID, 4);
         }
         {
             unsigned short topicCount5 = 0;
             unsigned char* topicCountPos = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-            FUN_00484ce0(&topicCount5, 2);
+            TESForm_SaveGameDataOLD(&topicCount5, 2);
             PlayercharacterListNodeView* topics9 = GetSelfOffset6A8();
             while (topics9 && !topics9->FUN_008256d0())
             {
                 FormRecord* topic = *topics9->FUN_006815c0();
-                unsigned int topicID = topic->FUN_0084e3a0();
+                unsigned int topicID = topic->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
                 ForwardToSaveLoadGame(&topicID, 4);
                 ++topicCount5;
                 topics9 = topics9->FUN_00726070();
@@ -2208,29 +2210,29 @@ void PlayerSave::FUN_00955620(unsigned int flags)
         {
             unsigned short questCount3 = 0;
             unsigned char* questCountPos = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-            FUN_00484ce0(&questCount3, 2);
+            TESForm_SaveGameDataOLD(&questCount3, 2);
             PlayercharacterListNodeView* quests2 = &unk6b0;
             while (quests2 && !quests2->FUN_008256d0())
             {
                 FormRecord* quest = *quests2->FUN_006815c0();
                 FormRecord* questForm = quest->FUN_005e3fa0();
-                unsigned int questID3 = questForm->FUN_0084e3a0();
+                unsigned int questID3 = questForm->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
                 bool completed = false;
-                bool questFlag = quest->FUN_005dc980();
-                PlayercharacterListNodeView* questEntries3 = questForm->FUN_005d43c0();
+                bool questFlag = quest->BGSBodyPart_GetToHitChance();
+                PlayercharacterListNodeView* questEntries3 = questForm->BSFile_GetDevice();
                 while (questEntries3 && !questEntries3->FUN_008256d0())
                 {
                     FormRecord* questEntry = *questEntries3->FUN_006815c0();
                     if (quest == questEntry->FindItemByDoneFlag(questFlag))
                     {
-                        completed = questEntry->FUN_009373f0();
+                        completed = questEntry->TESTextureList_GetTextureCount();
                         break;
                     }
                     questEntries3 = questEntries3->FUN_00726070();
                 }
                 ForwardToSaveLoadGame(&questID3, 4);
-                FUN_00484ce0(&completed, 1);
-                FUN_00484ce0(&questFlag, 1);
+                TESForm_SaveGameDataOLD(&completed, 1);
+                TESForm_SaveGameDataOLD(&questFlag, 1);
                 ++questCount3;
                 quests2 = quests2->FUN_00726070();
             }
@@ -2239,28 +2241,28 @@ void PlayerSave::FUN_00955620(unsigned int flags)
         {
             unsigned short objectiveCount = 0;
             unsigned char* objectiveCountPos2 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
-            FUN_00484ce0(&objectiveCount, 2);
+            TESForm_SaveGameDataOLD(&objectiveCount, 2);
             PlayercharacterListNodeView* objectives = &unk6bc;
             while (objectives && !objectives->FUN_008256d0())
             {
                 FormRecord* objectiveA = *objectives->FUN_006815c0();
-                FormRecord* objectiveQuest = objectiveA->FUN_0044edb0();
-                unsigned int objectiveQuestID = objectiveQuest->FUN_0084e3a0();
+                FormRecord* objectiveQuest = objectiveA->TESMain_GetThread();
+                unsigned int objectiveQuestID = objectiveQuest->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
                 unsigned int objectiveID2 = objectiveA->FUN_00726070();
                 ForwardToSaveLoadGame(&objectiveQuestID, 4);
-                FUN_00484ce0(&objectiveID2, 4);
+                TESForm_SaveGameDataOLD(&objectiveID2, 4);
                 ++objectiveCount;
                 objectives = objectives->FUN_00726070();
             }
             *(unsigned short*)objectiveCountPos2 = objectiveCount;
         }
         {
-            FormRecord* acoustic = FUN_007af430();
+            FormRecord* acoustic = BGSSaveFormBuffer_GetForm();
             acoustic->SerializeFaceGenData(this);
-            const char* playerName3 = FUN_0055d520();
+            const char* playerName3 = TESObjectREFR_GetFullName();
             unsigned char nameSize = (unsigned char)(strlen(playerName3) + 1);
-            FUN_00484ce0(&nameSize, 1);
-            FUN_00484ce0((void*)playerName3, nameSize);
+            TESForm_SaveGameDataOLD(&nameSize, 1);
+            TESForm_SaveGameDataOLD((void*)playerName3, nameSize);
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x2c)
         {
@@ -2269,16 +2271,16 @@ void PlayerSave::FUN_00955620(unsigned int flags)
             FormRecord* defaultClass = reinterpret_cast<DataLookup*>(g_dataHandler)->GetTESClassByID(*g_011d0a9c.Int());
             unsigned int classID2 = 0;
             if (actorClass5)
-                classID2 = actorClass5->FUN_0084e3a0();
+                classID2 = actorClass5->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&classID2, 4);
             if (actorClass5 && actorClass5 == defaultClass)
-                actorClass5->FUN_005f6f70();
+                actorClass5->TESClass_SaveGameTES();
         }
         if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_008df040() >= 0x45)
         {
             unsigned int id740 = 0;
             if (unk740)
-                id740 = unk740->FUN_0084e3a0();
+                id740 = unk740->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             ForwardToSaveLoadGame(&id740, 4);
         }
         if (*g_011de4e8.Bool())
@@ -2287,7 +2289,7 @@ void PlayerSave::FUN_00955620(unsigned int flags)
             SaveReference* reference4 = ((StreamView*)g_TESSaveLoadGame)->GetHitSound();
             if (reference4)
             {
-                TESForm* form2 = FUN_004839c0(reference4->formID);
+                TESForm* form2 = TESForm_GetFormByNumericID(reference4->formID);
                 SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::kSaveFormLog),
                         endPosition2 - initialPosition3, reference4->formID, form2->GetName(),
                         *(unsigned int*)&reference4->detail0, 0x3592,
@@ -2297,7 +2299,7 @@ void PlayerSave::FUN_00955620(unsigned int flags)
                 SaveLog(reinterpret_cast<const char*>(PlayerSaveStrings::kSaveLog), endPosition2 - initialPosition3, 0x3592,
                         reinterpret_cast<const char*>(PlayerSaveStrings::kPlayerSourcePath));
         }
-        if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00862110())
+        if (reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned char* endPosition5 = reinterpret_cast<SaveStream*>(g_TESSaveLoadGame)->FUN_00825c00();
             unsigned char* sizePosition2 = blockStart9;

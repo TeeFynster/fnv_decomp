@@ -52,18 +52,19 @@ int __cdecl FUN_00430b40(int value);
 // TESObjectREFR's shared header does not yet declare the lock-level accessor at 0x005691b0.
 struct S_00826190_Ref
 {
-    int FUN_005691b0();
+    int TESObjectREFR_GetLockLevel();
 };
 
 struct S_00826190_Effect
 {
     MagicTarget* FUN_0059bb30();
     float GetFloatAtOffset1C();
-    void FUN_00826190();
+    void OpenEffect_Start();
 };
 
 // @fnv 0x00826190
-void S_00826190_Effect::FUN_00826190()
+// src: XBOX_PDB 0x00826190
+void S_00826190_Effect::OpenEffect_Start()
 {
     NonActorMagicTarget* target = dynamic_cast<NonActorMagicTarget*>(FUN_0059bb30());
     if (!target || !target->GetMagicTargetReference())
@@ -72,7 +73,7 @@ void S_00826190_Effect::FUN_00826190()
     }
     void* pLock = target->GetMagicTargetReference()->GetLock();
     int a = FUN_00430b40((int)GetFloatAtOffset1C());
-    int lockLevel = FUN_00430b40(reinterpret_cast<S_00826190_Ref*>(target->GetMagicTargetReference())->FUN_005691b0());
+    int lockLevel = FUN_00430b40(reinterpret_cast<S_00826190_Ref*>(target->GetMagicTargetReference())->TESObjectREFR_GetLockLevel());
     if (pLock && a >= lockLevel)
     {
         target->GetMagicTargetReference()->Unlock();

@@ -26,8 +26,8 @@ class FalloutAudioMedia
     static void PlayMedia(MEDIATYPE, const char*, unsigned int, bool, bool, float, unsigned int);
     static void EndMediaUpdate();
 };
-unsigned int FUN_00830970(MEDIATYPE);
-unsigned int FUN_00830a20(MEDIATYPE);
+unsigned int FalloutAudioMedia_MediaGetSubDuration(MEDIATYPE);
+unsigned int FalloutAudioMedia_MediaGetPosition(MEDIATYPE);
 extern unsigned int DAT_011dd37c;
 
 extern unsigned int DAT_011ca9fc;

@@ -10,7 +10,8 @@
 #include "../../../../../../include/hkpSingleShapeContainer.h"
 
 // @fnv 0x00c9e1e0
-int __stdcall FUN_00c9e1e0(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+// src: COMMUNITY 0x00c9e1e0
+int __stdcall hkpConvexShape_weldContactPointImpl(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
     return 2;
 }
@@ -135,12 +136,13 @@ class Shape
 
 struct FN : public Shape
 {
-    void FUN_00c9e2a0(int p1, int p2, Cb* p3);
+    void hkpBoxShape_castRayWithCollectorImpl(int p1, int p2, Cb* p3);
 };
 
 // Calls v8 to fill out.v, multiplies it by the Mat3 in P2, stores the result back, then invokes the VTable callback fn on Cb.
 // @fnv 0x00c9e2a0
-void FN::FUN_00c9e2a0(int p1, int p2, Cb* apCb)
+// src: HAVOK_SRC 0x00c9e2a0
+void FN::hkpBoxShape_castRayWithCollectorImpl(int p1, int p2, Cb* apCb)
 {
     bool ok;
     Out out;

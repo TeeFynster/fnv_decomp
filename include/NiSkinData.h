@@ -43,10 +43,10 @@ class NiSkinData : public NiObject
     unsigned int GetBoneCount();
     bool MapSkinData(SkinMapContext& context);
     bool Equals(NiSkinData* other);
-    void FUN_00a84ce0(void* streamObject);
-    void FUN_00a84f50(void* streamObject);
-    void FUN_00a85250(void* streamObject);
-    void FUN_00a853c0(NiPoint3* vertices);
+    void NiSkinData_LinkObject(void* streamObject);
+    void NiSkinData_LoadBinary(void* streamObject);
+    void NiSkinData_SaveBinary(void* streamObject);
+    void NiSkinData_ComputeBoneBounds(NiPoint3* vertices);
     void BaseCleanupA();
     void BaseCleanupB();
 };

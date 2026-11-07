@@ -101,7 +101,7 @@ struct Struct_00ebfd20
 
 struct Standin_011f6238
 {
-    void FUN_00aa4060(void* param_1);
+    void MemoryManager_Deallocate(void* param_1);
 };
 
 extern Standin_011f6238 DAT_011f6238;
@@ -120,7 +120,7 @@ void __cdecl ReleaseInterfaceArray(Struct_00ebfd20* pStruct)
             }
         }
         pStruct->unk40 = 0;
-        DAT_011f6238.FUN_00aa4060(pStruct);
+        DAT_011f6238.MemoryManager_Deallocate(pStruct);
     }
 }
 
@@ -225,7 +225,7 @@ FnvD3DTexture* __cdecl CreateZeroedTexture(FnvD3DDevice* device, int format, int
 
 struct GridAllocator : Standin_011f6238
 {
-    void* FUN_00aa3e40(unsigned int bytes);
+    void* Game_DoHeapAlloc(unsigned int bytes);
 };
 void* __cdecl FUN_00ec61c0(void* destination, int value, unsigned int bytes);
 Interface_00ebfd20* __cdecl CreateZeroedTexture(void* device, unsigned int format, unsigned int edgeWidth,
@@ -247,7 +247,7 @@ Struct_00ebfd20* __cdecl CreateTiledTexture(void* device, unsigned int width, un
     unsigned int row = height > edgePitch ? height : edgePitch;  // Maximum required height.
     // Total number of full and partial tiles.
     unsigned int i = ((width + tileSize - 1) / tileSize) * ((height + tileSize - 1) / tileSize);
-    pitch = (Struct_00ebfd20*)((GridAllocator*)&DAT_011f6238)->FUN_00aa3e40(0x48 + i * 4);
+    pitch = (Struct_00ebfd20*)((GridAllocator*)&DAT_011f6238)->Game_DoHeapAlloc(0x48 + i * 4);
     if (!pitch)
         return 0;
     FUN_00ec61c0(pitch, 0, 0x48);
@@ -313,7 +313,7 @@ Struct_00ebfd20* __cdecl CreateTiledTexture(void* device, unsigned int width, un
                     pitch->unk40[grid] = 0;
                 }
             }
-            DAT_011f6238.FUN_00aa4060(pitch);
+            DAT_011f6238.MemoryManager_Deallocate(pitch);
             return 0;
         }
     }
@@ -489,15 +489,16 @@ struct TileGrid
     unsigned int tileSize;
     IDirect3DBaseTexture9** textures;
 };
-void __cdecl FUN_00ec0460(IDirect3DDevice9* device);
+void __cdecl Setup_Renderstate(IDirect3DDevice9* device);
 void __cdecl DrawTexturedQuad(IDirect3DDevice9* device, float x, float y, float scaleX, float scaleY, unsigned int width,
                           unsigned int height);
 
 // Renders a grid of textured tiles and optional edge strips to the D3D device using the textures in the TileGrid.
 // @fnv 0x00ebff30
-void __cdecl FUN_00ebff30(TileGrid* grid, float startX, float startY, float scaleX, float scaleY)
+// src: COMMUNITY 0x00ebff30
+void __cdecl Blit_RAD_3D_image_pow2(TileGrid* grid, float startX, float startY, float scaleX, float scaleY)
 {
-    FUN_00ec0460(grid->device);
+    Setup_Renderstate(grid->device);
     grid->device->SetRenderState(D3DRS_ZENABLE, 0);
     grid->device->SetRenderState(D3DRS_ZWRITEENABLE, 0);
     grid->device->SetRenderState(D3DRS_COLORWRITEENABLE, 15);

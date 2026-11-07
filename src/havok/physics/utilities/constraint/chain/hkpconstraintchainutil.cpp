@@ -12,10 +12,11 @@ struct CallTarget_00e5c370
 };
 struct SearchObject
 {
-    int FUN_00e5c420(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
+    int ProcessAndReturnValue_00e5c420(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
 };
 // @fnv 0x00e5c420
-int SearchObject::FUN_00e5c420(unsigned int auiParam0, unsigned int auiParam1, unsigned int auiParam2,
+// src: GUESS 0x00e5c420 (confidence: low)
+int SearchObject::ProcessAndReturnValue_00e5c420(unsigned int auiParam0, unsigned int auiParam1, unsigned int auiParam2,
                                unsigned int auiParam3)
 {
     unsigned int callResult0 =
@@ -27,22 +28,23 @@ int SearchObject::FUN_00e5c420(unsigned int auiParam0, unsigned int auiParam1, u
 namespace fnv_00e5c440 {
 struct CallTarget_00e5c420
 {
-    int FUN_00e5c420(int, int, int, int);
+    int ProcessAndReturnValue_00e5c420(int, int, int, int);
 };
 struct SearchObject
 {
-    int FUN_00e5c440(unsigned int arg0, unsigned int arg1, unsigned int arg2);
+    int ProcessAndReturnValue_00e5c440(unsigned int arg0, unsigned int arg1, unsigned int arg2);
 };
 // @fnv 0x00e5c440
-int SearchObject::FUN_00e5c440(unsigned int arg0, unsigned int arg1, unsigned int arg2)
+// src: GUESS 0x00e5c440 (confidence: low)
+int SearchObject::ProcessAndReturnValue_00e5c440(unsigned int arg0, unsigned int arg1, unsigned int arg2)
 {
     unsigned int callResult0 =
-        (unsigned int)((CallTarget_00e5c420*)this)->FUN_00e5c420((int)arg0, (int)arg1, (int)arg2, (int)1u);
+        (unsigned int)((CallTarget_00e5c420*)this)->ProcessAndReturnValue_00e5c420((int)arg0, (int)arg1, (int)arg2, (int)1u);
     return (int)callResult0;
 }
 }  // namespace fnv_00e5c440
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct DispatchTarget
 {
@@ -72,14 +74,15 @@ struct FUN_00e5c460_cls
     int unk34;
     DispatchTarget m_38;
 
-    void FUN_00e5c460(OutObject* a1);
+    void hkpConstraintChainInstance_insertEntityAtFront(OutObject* a1);
 };
 
 // Gets an hkMemoryRouter, passes its allocator to m_38.CallWithFlag, then calls FUN_00c90510 on a1.
 // @fnv 0x00e5c460
-void FUN_00e5c460_cls::FUN_00e5c460(OutObject* pOutObject)
+// src: HAVOK_LIB 0x00e5c460
+void FUN_00e5c460_cls::hkpConstraintChainInstance_insertEntityAtFront(OutObject* pOutObject)
 {
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     void* pValue = pHolder->m_heap;
     m_38.CallWithFlag(pValue, 0, &pOutObject);
     pOutObject->FUN_00c90510();
@@ -96,7 +99,7 @@ __declspec(align(16)) struct XfOut_cls
 
 struct FUN_00c7f690_cls
 {
-    void FUN_00c7f690(const __m128* m, const __m128* v);
+    void hkVector4_setTransformedInversePos(const __m128* m, const __m128* v);
 };
 
 struct XfSub_cls
@@ -135,14 +138,15 @@ static char* XfSelectRec(char* rec)
 }
 
 // @fnv 0x00e5b3a0
-void FUN_00e5b3a0(XfScene_cls* a1, XfScene_cls* a2, const __m128* a3)
+// src: HAVOK_LIB 0x00e5b3a0
+void hkpConstraintChainUtil_addConstraintToBallSocketChain(XfScene_cls* a1, XfScene_cls* a2, const __m128* a3)
 {
     XfSub_cls* sub = a1->m_0c;
     char* p1 = XfSelectRec(a1->m_38[a1->m_3c - 1] + 0x10);
     char* p2 = XfSelectRec((char*)a2 + 0x10);
     XfOut_cls outs[2];
-    ((FUN_00c7f690_cls*)&outs[0])->FUN_00c7f690((const __m128*)(p1 + 0xf0), a3);
-    ((FUN_00c7f690_cls*)&outs[1])->FUN_00c7f690((const __m128*)(p2 + 0xf0), a3);
+    ((FUN_00c7f690_cls*)&outs[0])->hkVector4_setTransformedInversePos((const __m128*)(p1 + 0xf0), a3);
+    ((FUN_00c7f690_cls*)&outs[1])->hkVector4_setTransformedInversePos((const __m128*)(p2 + 0xf0), a3);
     sub->Push(&outs[0], &outs[1]);
     a1->AddReferencedObject(a2);
 }
@@ -154,7 +158,7 @@ struct __declspec(align(16)) FUN_00c7f690_cls
     int unk04;
     int unk08;
     int unk0c;
-    void FUN_00c7f690(const __m128* m, const __m128* v);
+    void hkVector4_setTransformedInversePos(const __m128* m, const __m128* v);
 };
 
 struct __declspec(align(16)) RelativeOrientationData
@@ -170,13 +174,13 @@ struct __declspec(align(16)) RelativeOrientationData
     int argument4;
     int argument5;
     int argument6;
-    void FUN_00c74ac0(char* a, char* b);
+    void setMulInverse(char* a, char* b);
 };
 
 struct Callee
 {
     int unk00;
-    void FUN_00e3b850(void* p1, void* p2, void* p3, int a4, int a5, int a6);
+    void addConstraintInfoInBodySpace(void* p1, void* p2, void* p3, int a4, int a5, int a6);
 };
 
 struct Owner
@@ -221,15 +225,15 @@ void ApplyRelativeOrientation(Owner* a1, char* a2, const __m128* a3, int a4, int
         FUN_00c7f690_cls first;
         FUN_00c7f690_cls second;
     } points;
-    points.first.FUN_00c7f690((const __m128*)(e1 + 0xf0), a3);
-    points.second.FUN_00c7f690((const __m128*)(e2 + 0xf0), a3);
+    points.first.hkVector4_setTransformedInversePos((const __m128*)(e1 + 0xf0), a3);
+    points.second.hkVector4_setTransformedInversePos((const __m128*)(e2 + 0xf0), a3);
     // Helper writes the quaternion at offset 0; original also stores arguments at 0x20/24/28.
     RelativeOrientationData relativeOrientation;
-    relativeOrientation.FUN_00c74ac0(e2 + 0x160, e1 + 0x160);
+    relativeOrientation.setMulInverse(e2 + 0x160, e1 + 0x160);
     relativeOrientation.argument4 = a4;
     relativeOrientation.argument5 = a5;
     relativeOrientation.argument6 = a6;
-    pCallee->FUN_00e3b850(&points.first, &points.second, (void*)&relativeOrientation, a4, a5, a6);
+    pCallee->addConstraintInfoInBodySpace(&points.first, &points.second, (void*)&relativeOrientation, a4, a5, a6);
     a1->AddReferencedObject(a2);
 }
 }  // namespace fnv_00e5b440
@@ -270,7 +274,7 @@ struct KeyOwnerA
 
 struct Sub18
 {
-    void FUN_00e5c440(hkMemoryAllocator* a, int b, Pair32* c);
+    void ProcessAndReturnValue_00e5c440(hkMemoryAllocator* a, int b, Pair32* c);
 };
 
 struct OwnerC
@@ -304,18 +308,19 @@ struct ListB
     unsigned int* m_38;
     unsigned int m_3c;
     void AddReferencedObject(unsigned int key);
-    void FUN_00e5c460(unsigned int key);
+    void hkpConstraintChainInstance_insertEntityAtFront(unsigned int key);
 };
 
-int FUN_00e5ad40(KeyOwnerA* a, Tmp16* p, Tmp16* q);
+int hkpConstraintUtils_getConstraintPivots(KeyOwnerA* a, Tmp16* p, Tmp16* q);
 
 // Returns 1 if FUN_00e5ad40 is nonzero or no key matches; else matches a1's m_14/m_18 to a2's list ends, calls a3 helpers, updates a2 and returns 0.
 // @fnv 0x00e5b8f0
-int FUN_00e5b8f0(KeyOwnerA* a1, ListB* a2, OwnerC* a3, ...)
+// src: XBOX_PDB 0x00e5b8f0
+int hkpConstraintChainUtil_addConstraintToChain(KeyOwnerA* a1, ListB* a2, OwnerC* a3, ...)
 {
     Pair32 keyPair;
 
-    if (FUN_00e5ad40(a1, &keyPair.lo, &keyPair.hi) != 0)
+    if (hkpConstraintUtils_getConstraintPivots(a1, &keyPair.lo, &keyPair.hi) != 0)
     {
         return 1;
     }
@@ -341,9 +346,9 @@ int FUN_00e5b8f0(KeyOwnerA* a1, ListB* a2, OwnerC* a3, ...)
         Pair32 p;
         CopyTmp16(&p.lo, &keyPair.hi);
         CopyTmp16(&p.hi, &keyPair.lo);
-        hkMemoryRouter* h = FUN_00c85750();
-        a3->m_18.FUN_00e5c440(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), 0, &p);
-        a2->FUN_00e5c460(a1->m_18);
+        hkMemoryRouter* h = hkMemoryRouter_getInstance();
+        a3->m_18.ProcessAndReturnValue_00e5c440(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), 0, &p);
+        a2->hkpConstraintChainInstance_insertEntityAtFront(a1->m_18);
         return 0;
     }
     if (a2->m_38[0] == a1->m_18)
@@ -351,9 +356,9 @@ int FUN_00e5b8f0(KeyOwnerA* a1, ListB* a2, OwnerC* a3, ...)
         Pair32 p;
         CopyTmp16(&p.lo, &keyPair.lo);
         CopyTmp16(&p.hi, &keyPair.hi);
-        hkMemoryRouter* h = FUN_00c85750();
-        a3->m_18.FUN_00e5c440(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), 0, &p);
-        a2->FUN_00e5c460(a1->m_14);
+        hkMemoryRouter* h = hkMemoryRouter_getInstance();
+        a3->m_18.ProcessAndReturnValue_00e5c440(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), 0, &p);
+        a2->hkpConstraintChainInstance_insertEntityAtFront(a1->m_14);
         return 0;
     }
     return 1;
@@ -381,8 +386,8 @@ struct S_00e5c370_Elem
         reinterpret_cast<__m128&>(b) = reinterpret_cast<const __m128&>(o.b);
     }
 };
-void __cdecl FUN_00c908c0(S_00e5c370_Alloc& alloc, void* arr, int numElem, int sizeElem);
-void __cdecl FUN_00d2cc70(void* dst, const void* src, int nbytes);
+void __cdecl hkArrayUtil__reserve(S_00e5c370_Alloc& alloc, void* arr, int numElem, int sizeElem);
+void __cdecl hkMemUtil_memMove(void* dst, const void* src, int nbytes);
 
 template <class T>
 static __forceinline void S_00e5c370_ArrayBase_GrowArrayCapacity(hkArrayBase<T>& self, S_00e5c370_Alloc& a, int n);
@@ -395,7 +400,7 @@ static __forceinline void S_00e5c370_ArrayBase_GrowArrayCapacity(hkArrayBase<T>&
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(a, (&self), newSize, sizeof(T));
+            hkArrayUtil__reserve(a, (&self), newSize, sizeof(T));
         }
     }
 
@@ -408,7 +413,7 @@ void hkArrayBase<S_00e5c370_Elem>::_spliceInto(hkMemoryAllocator& alloc, int ind
         int numtomove = m_iElementCount - index - numdel;
         if (newsize > getCapacity())
             S_00e5c370_ArrayBase_GrowArrayCapacity(*this, reinterpret_cast<S_00e5c370_Alloc&>(alloc), newsize);
-        FUN_00d2cc70(m_data + index + numtoinsert, m_data + index + numdel, numtomove * sizeof(S_00e5c370_Elem));
+        hkMemUtil_memMove(m_data + index + numtoinsert, m_data + index + numdel, numtomove * sizeof(S_00e5c370_Elem));
         S_00e5c370_Elem* dst = m_data + index;
         for (int i = 0; i < numtoinsert; i++)
             new (dst + i) S_00e5c370_Elem(apElements[i]);

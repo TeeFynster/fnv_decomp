@@ -45,13 +45,13 @@ public:
                              DNewPartition* apNewPartition, unsigned short* apPartMap);
     void CreateDecalGeometry(const char* s, int a, int b, Pt3Obj* c, Pt3Obj* d,
                              unsigned short* e, Obj4c* f, void* g, unsigned short* h);
-    bool FUN_00683a70(int triangle, int base, bool strip,
+    bool ShouldAddTriangle(int triangle, int base, bool strip,
                       const unsigned short* indices, const NiPoint3* vertices,
                       const unsigned short* remap);
-    bool FUN_00683a70(int triangle, int base, bool strip,
+    bool ShouldAddTriangle(int triangle, int base, bool strip,
                       const unsigned short* indices, const DPoint* vertices,
                       const unsigned short* remap);
-    unsigned char FUN_00683a70(int a, int b, bool c, unsigned short* d,
+    unsigned char ShouldAddTriangle(int a, int b, bool c, unsigned short* d,
                                Pt3Obj* e, int f);
 
     void Smooth();
@@ -60,13 +60,13 @@ public:
     void FinalizePath();
     unsigned short GetRuntimeFlags();
 
-    const NiRTTI* FUN_006838a0() const;
+    const NiRTTI* GetRTTI_006838a0() const;
     void* FUN_006838d0(unsigned int flags);
     bool FUN_006828a0(float f);
     void FUN_00688770();
-    bool FUN_006888a0(float f);
-    void FUN_00688b00();
-    bool FUN_00688c90();
+    bool Update_006888a0(float f);
+    void SaveGameTES_00688b00();
+    bool LoadGameTES_00688c90();
 
     unsigned int unk18;
     NiPointer<NiAVObject> m_spGeometry;

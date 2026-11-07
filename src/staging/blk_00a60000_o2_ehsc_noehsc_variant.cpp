@@ -44,7 +44,7 @@ struct FUN_00a61590_class
 extern NiTStringTemplateMap<NiTPointerMap<char const*, NiShader*>, NiShader*>* DAT_011f4784;
 class NiUnionBV;
 extern NiUnionBV* DAT_011f4788;
-void FUN_00a632b0();
+void NiStream__SDMShutdown();
 extern "C" void NiFreeAlias(void*);
 extern void* DAT_011f4aa8;
 void FreeGlobalAlias();
@@ -52,9 +52,9 @@ extern int DAT_0109df2c;
 extern int DAT_011f4ab4;
 struct FUN_00a7f820_Class
 {
-    void __thiscall FUN_00a7f820();
+    void __thiscall UpdateFields_00a7f820();
 };
-void __fastcall FUN_00a69690(float* p);
+void __fastcall NiColor_Clamp(float* p);
 extern MemoryManager g_memoryManager;
 struct FUN_00a615c0_Class
 {
@@ -67,24 +67,24 @@ void __stdcall FUN_00a638c0(void* p);
 struct NiTriBasedGeomData;
 NiTriBasedGeomData* __fastcall InitializeTriBasedGeomData(NiTriBasedGeomData*);
 extern int DAT_0109dac4;
-void* __cdecl FUN_00a7b790();
+void* __cdecl NiTriShapeData_CreateObject();
 void __fastcall FUN_00a71f60(void*);
 extern int DAT_0109dd0c;
 extern "C" int __cdecl tolower(int);
-unsigned int FUN_00a61530(const char* str);
+unsigned int BSTexturePalette_GetContainerNumber(const char* str);
 struct FUN_00a755f0_Class : NiCullingProperty
 {
     void __thiscall CopyCullingData(void* dst, CloningProcess& proc);
 };
 struct FUN_00a72590_Class
 {
-    int FUN_00a72590(unsigned int index, int* out);
+    int NiAdditionalGeometryData_LockDataBlock(unsigned int index, int* out);
 };
 struct A51BF0Base
 {
     static void* __cdecl operator new(unsigned int);
 };
-void* FUN_00a7d6e0();
+void* NiPointLight_CreateObject();
 extern void _NiFree(void*);
 extern int DAT_0109bc84;
 extern int DAT_0109bca4;
@@ -94,7 +94,7 @@ struct FUN_00a699d0_Class
     NiPoint3 normal;
     float distance;
 
-    FUN_00a699d0_Class* __thiscall FUN_00a699d0(NiPoint3 const* point0, NiPoint3 const* point1, NiPoint3 const* point2);
+    FUN_00a699d0_Class* __thiscall SetPlaneFromThreePoints(NiPoint3 const* point0, NiPoint3 const* point1, NiPoint3 const* point2);
 };
 struct FUN_00a6ea00_Class : NiTFixedStringMap_NiAVObject___
 {
@@ -108,7 +108,7 @@ extern int DAT_0109cd44;
 void* CreateNiTriStrips();
 struct FUN_00a72ca0_Class
 {
-    void FUN_00a72ca0(unsigned int size);
+    void SetSize_Thunk(unsigned int size);
 };
 struct FUN_00a7f810
 {
@@ -175,7 +175,7 @@ struct A616E0Pool
     A616E0Bucket m_buckets[7];
 };
 extern A616E0Pool* DAT_011f4464;
-bool __cdecl FUN_00a616e0(A616E0Iter* it);
+bool __cdecl BSTexturePalette_GetFirstPos(A616E0Iter* it);
 class A61750Texture
 {
   public:
@@ -220,7 +220,7 @@ class A61750Texture
     virtual unsigned int GetWidth();
 };
 unsigned int GetTextureSizeLevel(A61750Texture* pkTexture);
-extern bool __cdecl FUN_00a614d0(int, int);
+extern bool __cdecl BSTexturePalette_ArePathsEqual(int, int);
 struct FUN_00a61920_Node
 {
     NiShader* m_pObject;
@@ -373,7 +373,7 @@ struct FUN_00a66960_cls
     int m_24;
     int m_28;
     int m_2C;
-    int FUN_00a66960(int a1);
+    int NiGeometryData_GetTextureSet(int a1);
 };
 static int CompareFloatArrays(const float* pfA, const float* pfB, unsigned int ItemUpdateArray);
 struct A66970Keys
@@ -438,7 +438,7 @@ struct Obj_a674
     unsigned int unk24;
     unsigned int unk28;
     unsigned char m_2c;
-    void __thiscall FUN_00a72720(int flag, int* a, int* f, int* c, int* e, int* d, int* b);
+    void __thiscall NiAdditionalGeometryData_GetDataStream(int flag, int* a, int* f, int* c, int* e, int* d, int* b);
 };
 struct FUN_00a674b0_cls
 {
@@ -466,7 +466,7 @@ struct FUN_00a693e0_cls
 {
     int m_vptr00;
 
-    void FUN_00a693e0();
+    void UpdateFields_00a693e0();
 };
 extern unsigned int DAT_011f4980;
 extern unsigned int DAT_011f4984;
@@ -482,7 +482,7 @@ struct FUN_00a69b00
 };
 struct FUN_00a69b40_Class
 {
-    void __thiscall FUN_00a69b40(int param_2);
+    void __thiscall NiTexturingProperty_SetMultiTexture(int param_2);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
 extern NiRefObject* DAT_011f49ac;
@@ -513,7 +513,7 @@ class A6DB70ColorA
     A6DB70ColorA(float fR, float fG, float fB, float fA) : r(fR), g(fG), b(fB), a(fA)
     {}
 
-    A6DB70ColorA FUN_00a6db70(const A6DB70ColorA& kColor) const;
+    A6DB70ColorA NiQuaternion_Sum(const A6DB70ColorA& kColor) const;
 
     float r;
     float g;
@@ -548,7 +548,7 @@ struct FUN_00a75dc0_cls
                        unsigned int a6, unsigned int a7, unsigned int a8, unsigned int a9, unsigned int a10,
                        unsigned int a11);
 };
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern int DAT_0109cd44;
 struct FUN_00a72550_Class
 {
@@ -628,7 +628,7 @@ class FUN_00a726a0_cls
     unsigned short unk24;
     unsigned short m_usMaxCount;
 
-    bool FUN_00a726a0(unsigned int uiIndex, unsigned int ItemUpdateArray, unsigned int uiStart, void* pvData,
+    bool NiAdditionalGeometryData_SetDataStream(unsigned int uiIndex, unsigned int ItemUpdateArray, unsigned int uiStart, void* pvData,
                       unsigned short usFormat, unsigned int uiStride, unsigned int uiElapsedMilliseconds);
 };
 struct ObjectWriter
@@ -649,12 +649,12 @@ struct ColorState
     unsigned int threshold;
     unsigned int blendMode;
 
-    void FUN_00a72cb0(NiStream* stream);
+    void NiAdditionalGeometryData_NiAGDDataStream_LoadBinary(NiStream* stream);
 };
 class BA72DB0Data
 {
   public:
-    void FUN_00a72db0(NiStream& kStream);
+    void NiAdditionalGeometryData_NiAGDDataStream_SaveBinary(NiStream& kStream);
 
     bool m_bFlag;
     int m_iValue0;
@@ -672,7 +672,7 @@ struct SceneFactoryObject
 };
 SceneFactoryObject* CreateSceneFactoryObject();
 extern int DAT_011aa04c;
-void __cdecl FUN_00a74d80(int param_1);
+void __cdecl NiProcessorSpecificCode_SetVectorTransformFunction(int param_1);
 // FUN_00a74d90 - installs a callback pointer into the global slot at 0x011aa050.
 //
 // Original bytes:
@@ -685,14 +685,14 @@ void __cdecl FUN_00a74d80(int param_1);
 // own address.  The name is spelled with a void* type so that it does not
 // collide with the canonical "?DAT_011aa050@@3HA" entry in the symbol DB.
 extern void* DAT_011aa050;
-void __cdecl FUN_00a74d90(void* callback);
+void __cdecl NiProcessorSpecificCode_SetPointTransformFunction(void* callback);
 struct CallTarget_00a74e10
 {
     int SetFromFrustum(int, int);
 };
 struct SearchObject
 {
-    int FUN_00a755d0(unsigned int arg0);
+    int NiFrustumPlanes_Set_(unsigned int arg0);
 };
 extern int DAT_00ff0000;
 struct FUN_00a77110_info
@@ -700,7 +700,7 @@ struct FUN_00a77110_info
     unsigned int m_eVertexFormat;
     unsigned int m_flags;
 };
-void __cdecl FUN_00a77110(unsigned int width, unsigned int rows, unsigned int unk0c, unsigned char* dst,
+void __cdecl NiDevImageConverter_ConvertRGBA32To24(unsigned int width, unsigned int rows, unsigned int unk0c, unsigned char* dst,
                           unsigned int unk14, FUN_00a77110_info* info, const unsigned char* src);
 struct BitPackLayout
 {
@@ -767,9 +767,9 @@ struct S_00a77800_Layout
     unsigned char unk16;
     unsigned char shr2;
 };
-void __cdecl FUN_00a77800(unsigned int count, unsigned int rows, unsigned int unkArg3, unsigned int* dst,
+void __cdecl NiDevImageConverter_ConvertBUMP16To32(unsigned int count, unsigned int rows, unsigned int unkArg3, unsigned int* dst,
                           unsigned int unkArg5, const S_00a77800_Layout* layout, const unsigned char* src);
-bool FUN_00a77920(int a);
+bool NiIsPowerOf2(int a);
 struct NiBinaryStream;
 typedef unsigned int (*NiBinaryStreamWriteFn)(NiBinaryStream* pThis, const void* pvBuffer, unsigned int uiBytes,
                                               unsigned int* puiComponentSizes, unsigned int uiNumComponents);
@@ -799,10 +799,10 @@ struct FUN_00a7d1a0_Class
     int m_i10;
     Entry m_entries[4];
 
-    void FUN_00a7d1a0(NiStream& stream);
+    void NiPixelFormat_SaveBinary(NiStream& stream);
 };
 void* __cdecl BuildSqrtLut();
-void FUN_00a7e930();
+void NiPoint3__SDMInit();
 struct S_00a7fea0_P3
 {
     float x, y, z;
@@ -930,12 +930,12 @@ struct MyPool
 };
 struct FUN_0040fbf0_Class
 {
-    void FUN_0040fbf0(int);
+    void BSSpinLock_Lock(int);
 };
 extern FUN_00a615c0_Class* DAT_011f4468;
 extern FUN_0040fbf0_Class DAT_011f4480;
 extern int DAT_011f4484;
-void __cdecl FUN_00a62030();
+void __cdecl BSTexturePalette_RemoveAll();
 class BA643B0BinaryStream
 {
   public:
@@ -1112,7 +1112,7 @@ template <class T> inline void BA643B0LoadBinary(BA643B0Stream& kStream, T& valu
 {
     BA643B0BinaryStreamLoad(*kStream.m_pUnderlyingStream, &value);
 }
-void __cdecl FUN_00a643b0(BA643B0Stream& kStream, char* pcValue);
+void __cdecl NiStreamLoadBinary_char_00a643b0(BA643B0Stream& kStream, char* pcValue);
 struct Q67530Data
 {
     int a;
@@ -1133,7 +1133,7 @@ class NiExtraDataMapA6F : public NiObject
     {}
     virtual ~NiExtraDataMapA6F() throw();
 
-    static NiObject* FUN_00a6f000();
+    static NiObject* NiDefaultAVObjectPalette_CreateObject();
 
     // Vtables 0x01096114/0x0109618c identify the fixed-string map base/derived pair.
     NiTFixedStringMap<NiAVObject*> m_kFormatEntries;
@@ -1154,7 +1154,7 @@ struct NiPixelChannelsA773
     unsigned char m_ucBlueBits;
     unsigned char m_ucAlphaBits;
 };
-void __cdecl FUN_00a773d0(unsigned int uiWidth, unsigned int uiHeight, unsigned int uiDestStride,
+void __cdecl NiDevImageConverter_Convert16NoAlphaToRGBA32(unsigned int uiWidth, unsigned int uiHeight, unsigned int uiDestStride,
                           unsigned char* pucDest, unsigned int uiDestSize, unsigned int uiSrcStride,
                           const unsigned short* pusSrc, const NiPixelChannelsA773* pkChannels);
 struct NiPixelChannelsA77
@@ -1190,16 +1190,16 @@ struct NiPixelChannelsA776
     unsigned char m_ucBlueBits;
     unsigned char m_ucAlphaBits;
 };
-void __cdecl FUN_00a776b0(unsigned int uiWidth, unsigned int uiHeight, unsigned int uiDestStride, unsigned int* puiDest,
+void __cdecl NiDevImageConverter_ConvertBUMPLUMA32To32(unsigned int uiWidth, unsigned int uiHeight, unsigned int uiDestStride, unsigned int* puiDest,
                           unsigned int uiDestSize, const NiPixelChannelsA776* pkDestChannels,
                           const unsigned char* pucSrc, const NiPixelChannelsA776* pkSrcChannels);
 extern "C" int __cdecl tolower(int);
-bool __cdecl FUN_00a614d0(const char* a, const char* b);
+bool __cdecl BSTexturePalette_ArePathsEqual(const char* a, const char* b);
 struct A5FC10Stub
 {
-    A5FC10Stub* __thiscall FUN_00a5fc10();
+    A5FC10Stub* __thiscall NiSourceTexture_NiSourceTexture();
 };
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 A5FC10Stub* __cdecl CreateA5FC10Stub();
 struct This;
 struct T
@@ -1252,7 +1252,7 @@ struct This
 };
 struct FUN_00a5fca0_cls
 {
-    void FUN_00a5fca0();
+    void UpdateFields_00a5fca0();
 };
 struct FUN_00a60160_cls : FUN_00a5fca0_cls
 {
@@ -1273,13 +1273,13 @@ struct ControllerA606
     bool m_bUnk40;
     bool m_bUnk41;
     bool m_bUseFirst;
-    void FUN_00a5d7b0(NiStream& kStream);
-    void FUN_00a60600(NiStream& kStream);
+    void NiSequenceStreamHelper_SaveBinary(NiStream& kStream);
+    void NiSourceTexture_SaveBinary(NiStream& kStream);
 };
 class FUN_00a5e3a0_Helper
 {
   public:
-    void* FUN_00aa3e40(unsigned int uiSize);
+    void* Game_DoHeapAlloc(unsigned int uiSize);
 };
 struct EntryA616
 {
@@ -1296,7 +1296,7 @@ struct NodeA616
 
     static void* operator new(unsigned int uiSize)
     {
-        return ((FUN_00a5e3a0_Helper*)&_g_memoryManager)->FUN_00aa3e40(uiSize);
+        return ((FUN_00a5e3a0_Helper*)&_g_memoryManager)->Game_DoHeapAlloc(uiSize);
     }
     static void operator delete(void* p);
 };
@@ -1306,7 +1306,7 @@ class HashA616
     NodeA616* m_buckets[1001];
     unsigned int m_uiItemCount;
 
-    void FUN_00a61610(unsigned int key, EntryA616* entry);
+    void BSEntryMap_SetAt(unsigned int key, EntryA616* entry);
 };
 class A61E60Obj
 {
@@ -1371,7 +1371,7 @@ struct A61E60Node
     A61E60Node* m_pNext;
 };
 unsigned int __cdecl FUN_00af4170(const char* s, int n);
-unsigned int FUN_00a61530(const char* str);
+unsigned int BSTexturePalette_GetContainerNumber(const char* str);
 struct NodeList
 {
     A61E60Node* m_pHead;
@@ -1388,13 +1388,13 @@ struct NodeList
     }
 };
 void* __cdecl FindNodeByObject(A61E60Obj* obj);
-bool __fastcall FUN_00a5c180(void*, int, NiStream*);
-bool __fastcall FUN_00a62130(void* a, int b, NiStream* s);
+bool __fastcall NiObjectNET_RegisterStreamables(void*, int, NiStream*);
+bool __fastcall NiSequenceStreamHelper_RegisterStreamables(void* a, int b, NiStream* s);
 class EqBase
 {
   public:
-    bool __thiscall FUN_00a5c820(void* other);
-    bool __thiscall FUN_00a62140(void* other);
+    bool __thiscall NiObjectNET_IsEqual(void* other);
+    bool __thiscall NiSequenceStreamHelper_IsEqual(void* other);
 };
 class ColorAStandIn
 {
@@ -1413,11 +1413,11 @@ class ColorAStandIn
 };
 struct FUN_00a727b0_Class
 {
-    unsigned int FUN_00a727b0();
+    unsigned int NiAdditionalGeometryData_GetDataBlockCount();
 };
 extern void __cdecl FUN_00a8a9b0();
-void __cdecl FUN_00a75f00();
-unsigned short __fastcall FUN_00a75f20(char* p, int);
+void __cdecl NiPSysData_RegisterStreamables();
+unsigned short __fastcall NiTriBasedGeomData_GetActiveTriangleCount(char* p, int);
 class FileA609
 {
   public:
@@ -1543,15 +1543,15 @@ enum SourceAlphaFormat
     AlphaSmooth = 3
 };
 extern bool DAT_011f4780;
-void __cdecl FUN_00a76960(void*, void*);
-bool __cdecl FUN_00aa1a30(const char*, int);
+void __cdecl NiImageConverter_ConvertFilenameToPlatformSpecific_(void*, void*);
+bool __cdecl NiFile_Access(const char*, int);
 class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f444c;
-char* __cdecl FUN_00a7d330(char* pcText);
-char* __cdecl FUN_00a7d5e0(const char* pcPrefix, const char* pcText);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char* pcText);
+char* __cdecl NiGetViewerString_00a7d5e0(const char* pcPrefix, const char* pcText);
 struct FUN_00a62a40_this
 {
-    void FUN_00a62a40(NiTPrimitiveArray<char*>* pkStrings);
+    void NiTexture_GetViewerStrings(NiTPrimitiveArray<char*>* pkStrings);
 };
 struct FUN_00a60770_shell : FUN_00a62a40_this
 {
@@ -1594,8 +1594,8 @@ class GlobalObject_0096a2d0
     void Lock(const char* pcName) throw();
 };
 extern "C" bool __cdecl fnv_NiStreamGetTexture(const char* pcName, NiPointer<NiRefObject>* apTextureOutput) throw();
-bool __cdecl FUN_00a61f30(const void* pvTexture) throw();
-bool __cdecl FUN_00a61fb0(const char* pcName);
+bool __cdecl BSTexturePalette_RemoveTexture(const void* pvTexture) throw();
+bool __cdecl BSTexturePalette_RemoveTexture_0(const char* pcName);
 // Conversion descriptor: 24 bytes of masks, shifts and losses; NiPixelFormat is 68 bytes.
 struct PixelChannelPacking
 {
@@ -1607,7 +1607,7 @@ void __cdecl ConvertPixelFormat(unsigned int uiWidth, unsigned int uiHeight, uns
                                 unsigned char* pucDest, unsigned int uiSrcStride, unsigned int uiSrcSize,
                                 const unsigned char* pucSrc, const PixelChannelPacking* pkSrcFmt);
 void __cdecl FUN_00a8a9a0();
-void __cdecl FUN_00a7b7d0();
+void __cdecl NiPSysData_LinkObject();
 void __cdecl AddScaledPoints(NiPoint3* dest, float scale, const NiPoint3* src, unsigned int count);
 extern int DAT_0109b944;
 extern int DAT_0109df8c;
@@ -1627,11 +1627,11 @@ struct FUN_00a7fb80_Class
     int m_2C;
     int m_30;
     void* __thiscall FUN_00a5c200();
-    void* __thiscall FUN_00a7fb80();
+    void* __thiscall NiRenderedTexture_NiRenderedTexture();
 };
 struct Z2Setup
 {
-    void* __thiscall FUN_00a5f7b0();
+    void* __thiscall NiTexture_AddTextureToList();
 };
 
 class FUN_007613f0
@@ -1643,12 +1643,13 @@ class FUN_007613f0
     {}
     static void* operator new[](unsigned int uiSize)
     {
-        return ((FUN_00a5e3a0_Helper*)&DAT_011f6238)->FUN_00aa3e40(uiSize);
+        return ((FUN_00a5e3a0_Helper*)&DAT_011f6238)->Game_DoHeapAlloc(uiSize);
     }
 };
 
 // @fnv 0x00a63ae0
-void* FUN_00a63ae0(unsigned int ItemUpdateArray)
+// src: XBOX_PDB 0x00a63ae0
+void* NiTNewInterface_NiFixedString_Allocate(unsigned int ItemUpdateArray)
 {
     return new FUN_007613f0[ItemUpdateArray];
 }

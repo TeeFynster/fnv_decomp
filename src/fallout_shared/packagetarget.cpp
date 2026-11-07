@@ -86,27 +86,27 @@ void LocationDescriptor::Copy(LocationDescriptor* source, bool copy)
             switch (m_ucLocationType)
             {
             case 0:
-                SetRadius(source->FUN_0067f1c0());
-                FUN_0067f3c0(source->GetLocationReference());
+                SetRadius(source->PackageLocation_GetRadius());
+                PackageLocation_SetLocReference(source->GetLocationReference());
                 break;
             case 1:
-                FUN_0067f410(source->GetLocationCellReference());
+                PackageLocation_SetLocCell(source->GetLocationCellReference());
                 break;
             case 4:
-                SetRadius(source->FUN_0067f1c0());
+                SetRadius(source->PackageLocation_GetRadius());
                 SetValue((TESForm*)source->FUN_0067f430());
                 break;
             case 5:
-                SetRadius(source->FUN_0067f1c0());
-                FUN_0067f4b0(source->GetObjectType());
+                SetRadius(source->PackageLocation_GetRadius());
+                PackageLocation_SetLocObjectType(source->GetObjectType());
                 break;
             case 2:
             case 3:
             case 7:
-                SetRadius(source->FUN_0067f1c0());
+                SetRadius(source->PackageLocation_GetRadius());
                 break;
             case 6:
-                SetRadius(source->FUN_0067f1c0());
+                SetRadius(source->PackageLocation_GetRadius());
                 break;
             }
         }
@@ -231,7 +231,7 @@ bool PackageTargetRecord::Compare(PackageTargetRecord* apCompare)
 
 struct ChunkPayload16
 {
-    void FUN_0067ff10();
+    void OBJ_WEAP_VATS_SPECIAL_Endian();
 };
 struct FormValueEntry
 {
@@ -241,11 +241,12 @@ struct FormValueEntry
     float m_fTargetValue;
 };
 extern "C" void* __cdecl memset(void* dest, int value, unsigned int count);
-extern "C" bool __cdecl FUN_00401500();
+extern "C" bool __cdecl TESForm_QEndianSwapOnSave();
 extern "C" void __cdecl AppendChunk(int id, FormValueEntry* data, unsigned int size);
 
 // @fnv 0x006802f0
-void PackageTargetRecord::FUN_006802f0(int chunk)
+// src: XBOX_PDB 0x006802f0
+void PackageTargetRecord::PackageTarget_Save(int chunk)
 {
     FormValueEntry record;
     memset(&record, 0, 16);
@@ -263,11 +264,11 @@ void PackageTargetRecord::FUN_006802f0(int chunk)
             record.iFormID = this->pObject->GetFormID();
         break;
     }
-    if (FUN_00401500())
-        ((ChunkPayload16*)&record)->FUN_0067ff10();
+    if (TESForm_QEndianSwapOnSave())
+        ((ChunkPayload16*)&record)->OBJ_WEAP_VATS_SPECIAL_Endian();
     AppendChunk(chunk, &record, 16);
-    if (FUN_00401500())
-        ((ChunkPayload16*)&record)->FUN_0067ff10();
+    if (TESForm_QEndianSwapOnSave())
+        ((ChunkPayload16*)&record)->OBJ_WEAP_VATS_SPECIAL_Endian();
 }
 
 // @fnv 0x00680520
@@ -316,9 +317,9 @@ void PackageTargetRecord::SaveGame(BGSSaveFormBuffer* pkBuffer)
 // @fnv 0x006807b0
 void PackageTargetRecord::LoadGame(BGSLoadFormBuffer* pStream)
 {
-    pStream->FUN_00864980(this, 1);
-    pStream->FUN_00864980(&iValue, 4);
-    pStream->FUN_00864980(&m_fTargetValue, 4);
+    pStream->LoadData(this, 1);
+    pStream->LoadData(&iValue, 4);
+    pStream->LoadData(&m_fTargetValue, 4);
     switch (m_uiTargetType)
     {
         break;
@@ -327,7 +328,7 @@ void PackageTargetRecord::LoadGame(BGSLoadFormBuffer* pStream)
         pStream->FUN_008648e0(&pTargetForm);
         break;
     case 2:
-        pStream->FUN_00864980(&pTargetForm, 4);
+        pStream->LoadData(&pTargetForm, 4);
         break;
     }
 }
@@ -351,9 +352,9 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 // @fnv 0x00680590
 void __fastcall SavePackageTargetRecordOLD(PackageTargetRecord* target)
 {
-    g_TESSaveLoadGame->FUN_008579b0(&target->m_uiTargetType, 1);
-    g_TESSaveLoadGame->FUN_008579b0(&target->iValue, 4);
-    g_TESSaveLoadGame->FUN_008579b0(&target->m_fTargetValue, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&target->m_uiTargetType, 1);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&target->iValue, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&target->m_fTargetValue, 4);
 
     switch (target->m_uiTargetType)
     {
@@ -365,16 +366,16 @@ void __fastcall SavePackageTargetRecordOLD(PackageTargetRecord* target)
         {
             uiResult = target->pTargetForm->GetFormID();
         }
-        g_TESSaveLoadGame->FUN_00857a10((int)&uiResult, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID((int)&uiResult, 4);
     }
     break;
     case 2:
-        g_TESSaveLoadGame->FUN_008579b0(&target->eObjType, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&target->eObjType, 4);
         break;
     }
 }
 
-TESForm* FUN_004839c0(unsigned int formID);
+TESForm* TESForm_GetFormByNumericID(unsigned int formID);
 
 // For reference or object target types, replaces pTargetForm with the TESForm resolved from its formID via FUN_004839c0.
 // @fnv 0x006806e0
@@ -385,22 +386,22 @@ void __fastcall ResolvePackageTargetForm(PackageTargetRecord* target)
     case PACK_TARG_TYPE_PTT_REFERENCE:
     case PACK_TARG_TYPE_PTT_OBJECT:
         unsigned int formID = reinterpret_cast<unsigned int>(target->pTargetForm);
-        target->pTargetForm = FUN_004839c0(formID);
+        target->pTargetForm = TESForm_GetFormByNumericID(formID);
     }
 }
 
 struct SaveLoadStub
 {
-    void FUN_008579e0(void* data, int size);
+    void TESSaveLoadGame_LoadGameDataOLD(void* data, int size);
     void FUN_00857aa0(void* data, int size);
 };
 extern SaveLoadStub* g_saveLoad_011de45c;
 // @fnv 0x00680640
 void __fastcall LoadPackageTargetRecordOLD(PackageTargetRecord* target)
 {
-    g_saveLoad_011de45c->FUN_008579e0(target, 1);
-    g_saveLoad_011de45c->FUN_008579e0(&target->iValue, 4);
-    g_saveLoad_011de45c->FUN_008579e0(&target->m_fTargetValue, 4);
+    g_saveLoad_011de45c->TESSaveLoadGame_LoadGameDataOLD(target, 1);
+    g_saveLoad_011de45c->TESSaveLoadGame_LoadGameDataOLD(&target->iValue, 4);
+    g_saveLoad_011de45c->TESSaveLoadGame_LoadGameDataOLD(&target->m_fTargetValue, 4);
     switch (target->m_uiTargetType)
     {
         break;
@@ -412,7 +413,7 @@ void __fastcall LoadPackageTargetRecordOLD(PackageTargetRecord* target)
     }
     break;
     case 2:
-        g_saveLoad_011de45c->FUN_008579e0(&target->eObjType, 4);
+        g_saveLoad_011de45c->TESSaveLoadGame_LoadGameDataOLD(&target->eObjType, 4);
         break;
     }
 }

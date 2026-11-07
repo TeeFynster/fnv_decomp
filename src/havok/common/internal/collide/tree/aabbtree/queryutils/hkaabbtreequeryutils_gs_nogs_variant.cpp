@@ -8,7 +8,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00d1bb40_Class
 {
-    int* FUN_00d1bb40(unsigned short index);
+    int* GetElementAddress_00d1bb40(unsigned short index);
 };
 inline void* __cdecl operator new(unsigned int, void* where) throw()
 {
@@ -30,7 +30,7 @@ struct S_00d1bcb0_Router
         return *m_pStreamAllocator;
     }
 };
-S_00d1bcb0_Router* FUN_00c85750();
+S_00d1bcb0_Router* hkMemoryRouter_getInstance();
 void ResizeAudioStream(S_00d1bcb0_Allocator& alloc, void* array, int sizeElem);
 struct S_00d1bcb0_Entry
 {
@@ -42,37 +42,40 @@ struct S_00d1bcb0
 {
     int unk00;
     S_00d1bcb0_Array* m_ppData;
-    bool FUN_00d1bcb0(int a, int b);
+    bool AppendPointPairAndReturnFalse(int a, int b);
 };
-extern int __cdecl FUN_00d1c560(void*, int, int, int, int, int);
+extern int __cdecl Object_CollectAABBTreeHits(void*, int, int, int, int, int);
 int __cdecl CallWithDefaults(void* arg0, int arg1, int arg2);
-int __cdecl FUN_00d1c560(void* a, void* b, int c, int d, void* e, void* f);
-int __cdecl FUN_00d1d4d0(void* a, void* b, void* e, void* f);
-extern int __cdecl FUN_00d1c560(void*, int, int, int, int, int);
-int __cdecl FUN_00d1d500(void* arg0, int arg1, int arg2);
-extern "C" void* __cdecl FUN_00d1ce50(void* p, int a, int b, int c, int d, int e);
+int __cdecl Object_CollectAABBTreeHits(void* a, void* b, int c, int d, void* e, void* f);
+int __cdecl hkAabbTreeQueryUtils_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_queryAabb(void* a, void* b, void* e, void* f);
+extern int __cdecl Object_CollectAABBTreeHits(void*, int, int, int, int, int);
+int __cdecl hkAabbTreeQueryUtils_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_queryAabb_00d1d500(void* arg0, int arg1, int arg2);
+extern "C" void* __cdecl hkAabb_QueryAllIfTreePresent(void* p, int a, int b, int c, int d, int e);
 // @fnv 0x00d1d540
-extern "C" void* __cdecl FUN_00d1d540(void* p, int a, int d, int e)
+// src: XBOX_PDB 0x00d1d540
+extern "C" void* __cdecl hkAabbTreeQueryUtils_hkAabbTreeData_hkAabbTreeAabb_unsigned_short_queryAabb(void* p, int a, int d, int e)
 {
     if (!p)
         return 0;
-    return FUN_00d1ce50(p, a, 0, 0, d, e);
+    return hkAabb_QueryAllIfTreePresent(p, a, 0, 0, d, e);
 }
 
-extern "C" void* __cdecl FUN_00d1d240(void* p, int a, int b, int c, int d, int e);
+extern "C" void* __cdecl Object_CollectOverlappingTreeLeaves(void* p, int a, int b, int c, int d, int e);
 // @fnv 0x00d1d570
-extern "C" void* __cdecl FUN_00d1d570(void* p, int a, int b)
+// src: GUESS 0x00d1d570 (confidence: low)
+extern "C" void* __cdecl AabbTree_ProcessIfPresent_00d1d570(void* p, int a, int b)
 {
     if (!p)
         return p;
-    return FUN_00d1d240(p, a, b, 0, 0, 0);
+    return Object_CollectOverlappingTreeLeaves(p, a, b, 0, 0, 0);
 }
 
-extern "C" void __cdecl FUN_00d1ca00();
+extern "C" void __cdecl Object_ProcessEntries_00d1ca00();
 // @fnv 0x00d1d530
-extern "C" void __cdecl FUN_00d1d530()
+// src: GUESS 0x00d1d530 (confidence: low)
+extern "C" void __cdecl AabbTree_ForwardCall_00d1d530()
 {
-    FUN_00d1ca00();
+    Object_ProcessEntries_00d1ca00();
 }
 
 #include <xmmintrin.h>
@@ -123,7 +126,8 @@ extern const __m128 kActiveMasks[];
 extern const int kBitMasks[];
 
 // @fnv 0x00d1ca00
-void FUN_00d1ca00(RayTree* tree, Node* node, Node* endNode, const RayQuerySet* rayBundle, RayCollector** collectors,
+// src: GUESS 0x00d1ca00 (confidence: low)
+void Object_ProcessEntries_00d1ca00(RayTree* tree, Node* node, Node* endNode, const RayQuerySet* rayBundle, RayCollector** collectors,
                   const float* maxDistances)
 {
     __m128 maxT = _mm_setr_ps(maxDistances[0], maxDistances[1], maxDistances[2], maxDistances[3]);
@@ -134,7 +138,7 @@ void FUN_00d1ca00(RayTree* tree, Node* node, Node* endNode, const RayQuerySet* r
 
         Node* nextNode;
         if (node->m_siblingIndex != 0x7fff)
-            nextNode = (Node*)tree->nodes.FUN_00d1bb40(node->m_siblingIndex);
+            nextNode = (Node*)tree->nodes.GetElementAddress_00d1bb40(node->m_siblingIndex);
         else
             nextNode = 0;
 
@@ -177,7 +181,7 @@ void FUN_00d1ca00(RayTree* tree, Node* node, Node* endNode, const RayQuerySet* r
         {
             if ((node->m_flags & 0x8000) == 0)
             {
-                node = (Node*)tree->nodes.FUN_00d1bb40(node->m_childIndex);
+                node = (Node*)tree->nodes.GetElementAddress_00d1bb40(node->m_childIndex);
                 continue;
             }
 

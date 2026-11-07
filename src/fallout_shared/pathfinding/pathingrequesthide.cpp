@@ -20,7 +20,7 @@ void* PathingRequestHide::Destroy(unsigned int flags)
 class HideActorView
 {
 public:
-    PathingLocation* FUN_00984230();
+    PathingLocation* hkpAabbPhantom_getAabb();
     float FUN_00885bd0();
 };
 
@@ -33,7 +33,7 @@ struct HidePathView
 PathingRequestHide::PathingRequestHide(Actor* pkActor)
     : PathingRequest(reinterpret_cast<PathingRequestOwner*>(pkActor))
 {
-    m_Location = *reinterpret_cast<HideActorView*>(pkActor)->FUN_00984230();
+    m_Location = *reinterpret_cast<HideActorView*>(pkActor)->hkpAabbPhantom_getAabb();
     m_fHideDistance = reinterpret_cast<HideActorView*>(pkActor)->FUN_00885bd0();
     reinterpret_cast<HidePathView*>(&Destination)->FUN_006d2c00();
 }
@@ -51,7 +51,7 @@ PathingRequestHide::~PathingRequestHide()
 // @fnv 0x006e5740
 void PathingRequestHide::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    PathingRequest::FUN_006e3230(apSaveGameBuffer);
+    PathingRequest::PathingRequest_SaveGame(apSaveGameBuffer);
     m_Location.SaveGame(reinterpret_cast<BGSSaveGameBuffer*>(apSaveGameBuffer));
     apSaveGameBuffer->SaveData(&m_fHideDistance, 4, 0);
 }
@@ -67,7 +67,8 @@ void PathingRequestHide::LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 
 // Copies the base request, hide location, and hide distance.
 // @fnv 0x006e56f0
-void PathingRequestHide::FUN_006e56f0(PathingRequest* apDest)
+// src: XBOX_PDB 0x006e56f0
+void PathingRequestHide::CopyTo_006e56f0(PathingRequest* apDest)
 {
     PathingRequestHide* pdest = static_cast<PathingRequestHide*>(apDest);
     PathingRequest::CopyTo(pdest);

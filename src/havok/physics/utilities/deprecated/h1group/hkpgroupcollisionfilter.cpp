@@ -41,7 +41,7 @@ public:
     virtual hkBoolRet IsCollisionEnabled(const ShapeRayCastQuery& kInput, const hkpShapeCollection& kShape,
                                      const hkpShapeContainer& kContainer, unsigned int uKey) const;
     virtual hkBool IsCollisionEnabled(const WorldRayCastInput& kInput, const hkpCollidable& kBody) const;
-    hkBool FUN_00e455f0(int iMask, int iValue) const;
+    hkBool isCollisionEnabled(int iMask, int iValue) const;
 
     unsigned int m_uiPreTypePadding[2];
     unsigned int m_type;
@@ -53,7 +53,8 @@ public:
 
 // Returns m_bEnableCollisionTable if mask or value is zero, otherwise ORs selected m_uiCollisionTable entries per mask bits and returns whether value overlaps the result.
 // @fnv 0x00e455f0
-hkBool hkpGroupCollisionFilter::FUN_00e455f0(int mask, int value) const
+// src: HAVOK_LIB 0x00e455f0
+hkBool hkpGroupCollisionFilter::isCollisionEnabled(int mask, int value) const
 {
     if (mask == 0 || value == 0)
     {
@@ -111,7 +112,7 @@ hkBool hkpGroupCollisionFilter::FUN_00e455f0(int mask, int value) const
 // @fnv 0x00e45890
 hkBool hkpGroupCollisionFilter::IsCollisionEnabled(const hkpCollidable& a, const hkpCollidable& b) const
 {
-    return FUN_00e455f0(a.m_kBroadPhaseHandle.m_uiCollisionFilterData, b.m_kBroadPhaseHandle.m_uiCollisionFilterData);
+    return isCollisionEnabled(a.m_kBroadPhaseHandle.m_uiCollisionFilterData, b.m_kBroadPhaseHandle.m_uiCollisionFilterData);
 }
 
 // @fnv 0x00e458c0
@@ -123,7 +124,7 @@ hkBool hkpGroupCollisionFilter::IsCollisionEnabled(const CollisionAgentContext& 
     const hkpCdBody* root = &a;
     while (root->m_parent)
         root = root->m_parent;
-    return FUN_00e455f0(reinterpret_cast<const hkpCollidable*>(root)->m_kBroadPhaseHandle.m_uiCollisionFilterData, info);
+    return isCollisionEnabled(reinterpret_cast<const hkpCollidable*>(root)->m_kBroadPhaseHandle.m_uiCollisionFilterData, info);
 }
 
 // @fnv 0x00e45910
@@ -134,7 +135,7 @@ hkBool hkpGroupCollisionFilter::IsCollisionEnabled(const CollisionAgentContext& 
 {
     unsigned int infoA = containerA.GetFilterInfoForKey(keyA);
     unsigned int infoB = containerB.GetFilterInfoForKey(keyB);
-    return FUN_00e455f0(infoA, infoB);
+    return isCollisionEnabled(infoA, infoB);
 }
 
 // @fnv 0x00e45950
@@ -142,14 +143,14 @@ hkBoolRet hkpGroupCollisionFilter::IsCollisionEnabled(const ShapeRayCastQuery& i
                                                 const hkpShapeContainer& container, unsigned int key) const
 {
     unsigned int info = container.GetFilterInfoForKey(key);
-    hkBoolRet result = { FUN_00e455f0(reinterpret_cast<const hkpShapeRayCastInput&>(input).m_uiFilterInfo, info) };
+    hkBoolRet result = { isCollisionEnabled(reinterpret_cast<const hkpShapeRayCastInput&>(input).m_uiFilterInfo, info) };
     return result;
 }
 
 // @fnv 0x00e45990
 hkBool hkpGroupCollisionFilter::IsCollisionEnabled(const WorldRayCastInput& input, const hkpCollidable& body) const
 {
-    return FUN_00e455f0(*reinterpret_cast<const unsigned int*>(reinterpret_cast<const char*>(&input) + 0x24),
+    return isCollisionEnabled(*reinterpret_cast<const unsigned int*>(reinterpret_cast<const char*>(&input) + 0x24),
                       body.m_kBroadPhaseHandle.m_uiCollisionFilterData);
 }
 
@@ -157,7 +158,7 @@ hkBool hkpGroupCollisionFilter::IsCollisionEnabled(const WorldRayCastInput& inpu
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (0x10).
 struct PrimaryBase
 {
-    virtual void FUN_00cbfc00();
+    virtual void AdjustThisAndForward_00cbfc00();
     int unk04;
     int unk08;
     int unk0C;
@@ -165,14 +166,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00cbfc00();
+    virtual void AdjustThisAndForward_00cbfc00();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00cbfc00
-    virtual void FUN_00cbfc00();
+// src: GUESS 0x00cbfc00 (confidence: low)
+    virtual void AdjustThisAndForward_00cbfc00();
 };
 
 Derived::Derived()

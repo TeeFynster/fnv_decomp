@@ -5,7 +5,8 @@
 extern int DAT_0126e330;
 
 // @fnv 0x00e014c0
-int* __cdecl FUN_00e014c0()
+// src: GUESS 0x00e014c0 (confidence: low)
+int* __cdecl Object_GetGlobalObjectAddress_00e014c0()
 {
     return &DAT_0126e330;
 }
@@ -24,11 +25,12 @@ struct State
     int unk24;
     int unk28;
     int unk2C;
-    int FUN_00e01500();
+    int hkMemoryMeshShape_getName();
 };
 // Returns the value of unk2C with the lowest bit cleared.
 // @fnv 0x00e01500
-int State::FUN_00e01500()
+// src: XBOX_PDB 0x00e01500
+int State::hkMemoryMeshShape_getName()
 {
     return unk2C & ~1;
 }
@@ -54,7 +56,7 @@ struct E014D0MemoryRouter
     }
 };
 
-extern "C" E014D0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" E014D0MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00e014d0
 {
@@ -67,7 +69,7 @@ struct FUN_00e014d0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00e014d0* b = static_cast<FUN_00e014d0*>(p);
-        FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 

@@ -49,7 +49,7 @@ class EdgeExtraInfo
     int portal;
     int reserved;
     bool IsEdgeFlagSet();
-    unsigned short FUN_0068f2c0();
+    unsigned short GetEdgeExtraInfo_0068f2c0();
 };
 
 
@@ -80,7 +80,7 @@ InventoryStackRecord* MiddleHighProcess::GetActiveWeapon() const
 // @fnv 0x0042fb00
 NavMeshStaticAvoidNode* NavMesh::GetStaticAvoidNodeData()
 {
-    FUN_0042fd70(0);
+    NiPointer_NavMesh_NiPointer_NavMesh_0042fd70(0);
     return (NavMeshStaticAvoidNode*)this;
 }
 
@@ -97,7 +97,7 @@ bool NavMesh::GetStaticAvoidNodesForTriangle(unsigned short triangle,
             arOutput.Add(node);
         }
     }
-    return !arOutput.FUN_0076b610();
+    return !arOutput.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
 }
 
 // Initializes a PathingLocation from a location, NavMeshInfo and triangle index, storing the navmesh's cell or location key and marking all meshes reachable.
@@ -131,11 +131,12 @@ ExtraNavMeshPortal::ExtraNavMeshPortal(TwoIntRecord v) : BSExtraData(0x5a), hand
 
 // If the stored object pointer is non-null, calls FUN_00401970 on the NiAVObject at offset 0x1c within it.
 // @fnv 0x0042fda0
-void __fastcall FUN_0042fda0(int* pObjectPtr)
+// src: GUESS 0x0042fda0 (confidence: medium)
+void __fastcall Object_ReleaseReferencedObject(int* pObjectPtr)
 {
     if (*pObjectPtr != 0)
     {
-        ((NiAVObject*)(*pObjectPtr + 0x1c))->FUN_00401970();
+        ((NiAVObject*)(*pObjectPtr + 0x1c))->NiRefObject_DecRefCount();
     }
 }
 
@@ -158,7 +159,8 @@ void* NavMesh::DestroyNavMesh(unsigned int flags)
 
 
 // @fnv 0x0068efb0
-const NavMeshInfo* NavMesh::FUN_0068efb0()
+// src: XBOX_PDB 0x0068efb0
+const NavMeshInfo* NavMesh::GetNavMeshInfo_0068efb0()
 {
     return m_pNavigationMesh;
 }
@@ -175,57 +177,63 @@ struct EdgeV
 };
 struct FloatValueProvider : public NavMesh
 {
-    EdgeV FUN_0068f040(unsigned short tri, int idx);
+    EdgeV NavMesh_GetEdgeVertices_0(unsigned short tri, int idx);
 };
 // Fetches the edge indices for a triangle via FUN_0068efd0 and returns pointers to the two edge vertices from FUN_0068f0a0.
 // @fnv 0x0068f040
-EdgeV FloatValueProvider::FUN_0068f040(unsigned short ausTriIndex, int aiEdgeIndex)
+// src: COMMUNITY 0x0068f040
+EdgeV FloatValueProvider::NavMesh_GetEdgeVertices_0(unsigned short ausTriIndex, int aiEdgeIndex)
 {
     EdgeT edge;
     EdgeV ev;
-    FUN_0068efd0(&edge, ausTriIndex, aiEdgeIndex);
-    ev.a = &FUN_0068f0a0(edge.a);
-    ev.b = &FUN_0068f0a0(edge.b);
+    GetEdge_0068efd0(&edge, ausTriIndex, aiEdgeIndex);
+    ev.a = &GetVertex_0068f0a0(edge.a);
+    ev.b = &GetVertex_0068f0a0(edge.b);
     return ev;
 }
 
 
 // @fnv 0x0068f0a0
-const NiPoint3& NavMesh::FUN_0068f0a0(unsigned short asVertexIndex)
+// src: XBOX_PDB 0x0068f0a0
+const NiPoint3& NavMesh::GetVertex_0068f0a0(unsigned short asVertexIndex)
 {
     return *reinterpret_cast<const NiPoint3*>(&Vertices.GetAt((unsigned int)asVertexIndex));
 }
 
 
 // @fnv 0x0068f230
-EdgeExtraInfo* NavMesh::FUN_0068f230(unsigned short ausTriangleIndex, int aiEdgeIndex)
+// src: XBOX_PDB 0x0068f230
+EdgeExtraInfo* NavMesh::GetEdgeExtraInfo(unsigned short ausTriangleIndex, int aiEdgeIndex)
 {
     if (Triangles.GetAt((int)ausTriangleIndex).IsEdgeFlagSet(aiEdgeIndex) &&
-        Triangles.GetAt((int)ausTriangleIndex).FUN_0068f2c0(aiEdgeIndex) != 0xFFFF)
-        return &m_kEdgeExtraInfo.GetAt((unsigned int)Triangles.GetAt((int)ausTriangleIndex).FUN_0068f2c0(aiEdgeIndex));
+        Triangles.GetAt((int)ausTriangleIndex).GetEdgeExtraInfo_0068f2c0(aiEdgeIndex) != 0xFFFF)
+        return &m_kEdgeExtraInfo.GetAt((unsigned int)Triangles.GetAt((int)ausTriangleIndex).GetEdgeExtraInfo_0068f2c0(aiEdgeIndex));
     else
         return 0;
 }
 
 // @fnv 0x0068f320
-bool __fastcall FUN_0068f320(const NavMeshInfo* apNavMeshInfo)
+// src: XBOX_PDB 0x0068f320
+bool __fastcall NavMeshInfo_GetDisabled(const NavMeshInfo* apNavMeshInfo)
 {
     return (apNavMeshInfo->uiFlags & 0x10) != 0;
 }
 
-TESForm* __fastcall FUN_00690830(const NavMeshInfo*);
+TESForm* __fastcall NavMeshInfo_GetParentSpace(const NavMeshInfo*);
 
 // Casts the result of FUN_00690830(_this) to TESWorldSpace* and returns it.
 // @fnv 0x00690800
-TESWorldSpace* __fastcall FUN_00690800(const NavMeshInfo* apNavMeshInfo)
+// src: XBOX_PDB 0x00690800
+TESWorldSpace* __fastcall NavMeshInfo_GetWorldSpace(const NavMeshInfo* apNavMeshInfo)
 {
-    return dynamic_cast<TESWorldSpace*>(FUN_00690830(apNavMeshInfo));
+    return dynamic_cast<TESWorldSpace*>(NavMeshInfo_GetParentSpace(apNavMeshInfo));
 }
 
 TESForm* __cdecl _ref_004839c0(unsigned int);
 
 // @fnv 0x00690830
-TESForm* __fastcall FUN_00690830(const NavMeshInfo* pThis)
+// src: XBOX_PDB 0x00690830
+TESForm* __fastcall NavMeshInfo_GetParentSpace(const NavMeshInfo* pThis)
 {
     if (pThis->m_pParentSpace)
         return pThis->m_pParentSpace;
@@ -269,7 +277,8 @@ void __fastcall FUN_005890c0(int* self, FUN_006916f0_arg a);
 
 // Calls FUN_005890c0 on self, then stores the address of DAT_01031fac into *self and returns self.
 // @fnv 0x006916f0
-int* __fastcall FUN_006916f0(int* self, FUN_006916f0_arg a)
+// src: EXE 0x006916f0
+int* __fastcall NiTMap_unsigned_short_NiPointer_ObstacleData_NiTMap(int* self, FUN_006916f0_arg a)
 {
     FUN_005890c0(self, a);
     *self = (int)&DAT_01031fac;
@@ -288,7 +297,8 @@ void __fastcall FUN_005890c0(int* self, FUN_00691720_arg a);
 
 // Calls FUN_005890c0 on self, then stores the address of DAT_01031fac into *self and returns self.
 // @fnv 0x00691720
-int* __fastcall FUN_00691720(int* self, FUN_00691720_arg a)
+// src: EXE 0x00691720
+int* __fastcall NiTMap_unsigned_short_NavMeshPOVData_NiTMap(int* self, FUN_00691720_arg a)
 {
     FUN_005890c0(self, a);
     *self = (int)&DAT_01031fac;
@@ -343,7 +353,7 @@ template <> BSSimpleArray<NavMeshClosedDoorInfo, 1024>::BSSimpleArray()
 // @fnv 0x00691f60
 template <> BSSimpleArray<NiPointer<ObstacleUndoData>, 1024>::BSSimpleArray()
 {
-    FUN_00822860(0, false);
+    BSSimpleArray_NiPointer_ObstacleUndoData_1024_InitialSetup(0, false);
 }
 
 // @fnv 0x00691fb0
@@ -363,40 +373,42 @@ NavMeshClosedDoorInfo::NavMeshClosedDoorInfo()
 
 struct G00559a40
 {
-    void FUN_0040f6e0();
+    void NiRefObject_IncRefCount();
 };
 struct Holder42
 {
     char* p;
-    Holder42* FUN_0042fd70(char*);
+    Holder42* NiPointer_NavMesh_NiPointer_NavMesh_0042fd70(char*);
 };
 // Stores v in p and, when v is non-null, calls FUN_0040f6e0 on the object at v+0x1c; returns this.
 // @fnv 0x0042fd70
-Holder42* Holder42::FUN_0042fd70(char* v)
+// src: XBOX_PDB 0x0042fd70
+Holder42* Holder42::NiPointer_NavMesh_NiPointer_NavMesh_0042fd70(char* v)
 {
     p = v;
     if (p)
     {
-        ((G00559a40*)(p + 0x1c))->FUN_0040f6e0();
+        ((G00559a40*)(p + 0x1c))->NiRefObject_IncRefCount();
     }
     return this;
 }
 
 // Looks up the two vertex indices of the given triangle edge and writes their positions into p0 and p1, returning true.
 // @fnv 0x0068f0c0
-bool NavMesh::FUN_0068f0c0(unsigned short ausTriIndex, int aiEdgeIndex, NiPoint3* pStartVertex,
+// src: COMMUNITY 0x0068f0c0
+bool NavMesh::GetEdgeVertices_0068f0c0(unsigned short ausTriIndex, int aiEdgeIndex, NiPoint3* pStartVertex,
                                       NiPoint3* pEndVertex)
 {
     int iNext;
     unsigned short v1;
     unsigned short v0;
-    v1 = GetTriangle(ausTriIndex)->FUN_005582d0(aiEdgeIndex);
+    v1 = GetTriangle(ausTriIndex)->GetVert_005582d0(aiEdgeIndex);
     iNext = (aiEdgeIndex + 1) % 3;
-    v0 = GetTriangle(ausTriIndex)->FUN_005582d0(iNext);
+    v0 = GetTriangle(ausTriIndex)->GetVert_005582d0(iNext);
     reinterpret_cast<ObjectBytes<sizeof(NiPoint3)>&>(*pStartVertex) =
-        reinterpret_cast<const ObjectBytes<sizeof(NiPoint3)>&>(FUN_0068f0a0(v1));
+        reinterpret_cast<const ObjectBytes<sizeof(NiPoint3)>&>(GetVertex_0068f0a0(v1));
     reinterpret_cast<ObjectBytes<sizeof(NiPoint3)>&>(*pEndVertex) =
-        reinterpret_cast<const ObjectBytes<sizeof(NiPoint3)>&>(FUN_0068f0a0(v0));
+        reinterpret_cast<const ObjectBytes<sizeof(NiPoint3)>&>(GetVertex_0068f0a0(v0));
     return true;
 }
 
@@ -405,11 +417,12 @@ struct FUN_00690e10_shell
 {
     char _pad0c[0x0c];
     unsigned int flags;
-    bool __thiscall FUN_00690e10();
+    bool __thiscall NavMeshTriangle_HasEdgeExtraInfo();
 };
 
 // @fnv 0x00690e10
-bool __thiscall FUN_00690e10_shell::FUN_00690e10()
+// src: COMMUNITY 0x00690e10
+bool __thiscall FUN_00690e10_shell::NavMeshTriangle_HasEdgeExtraInfo()
 {
     return (flags & 7) != 0;
 }
@@ -417,27 +430,29 @@ bool __thiscall FUN_00690e10_shell::FUN_00690e10()
 struct FUN_00691000_shell
 {
     char _pad38[0x38];
-    void FUN_00691b60(int);
-    void FUN_00691000(int arg);
+    void BSSimpleArray_NavMeshTriangle_1024_Add(int);
+    void NavMesh_AddTriangle(int arg);
 };
 
 // @fnv 0x00691000
-void FUN_00691000_shell::FUN_00691000(int arg)
+// src: COMMUNITY 0x00691000
+void FUN_00691000_shell::NavMesh_AddTriangle(int arg)
 {
-    ((FUN_00691000_shell*)((char*)this + 0x38))->FUN_00691b60(arg);
+    ((FUN_00691000_shell*)((char*)this + 0x38))->BSSimpleArray_NavMeshTriangle_1024_Add(arg);
 }
 
 struct FUN_00691020_shell
 {
     char _pad48[0x48];
-    void FUN_00691c10(int);
-    void FUN_00691020(int a);
+    void BSSimpleArray_EdgeExtraInfo_1024_Add(int);
+    void NavMesh_AddEdgeInfo(int a);
 };
 
 // @fnv 0x00691020
-void FUN_00691020_shell::FUN_00691020(int a)
+// src: COMMUNITY 0x00691020
+void FUN_00691020_shell::NavMesh_AddEdgeInfo(int a)
 {
-    ((FUN_00691020_shell*)((char*)this + 0x48))->FUN_00691c10(a);
+    ((FUN_00691020_shell*)((char*)this + 0x48))->BSSimpleArray_EdgeExtraInfo_1024_Add(a);
 }
 
 // Exe 0x00691620: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
@@ -448,18 +463,20 @@ struct NavmeshOffset08View
 
 
 // @fnv 0x00691620
-unsigned int NavMesh::FUN_00691620()
+// src: COMMUNITY 0x00691620
+unsigned int NavMesh::GetAvoidNodeCount()
 {
     return m_kStaticAvoidNodes.GetSize();
 }
 
 struct FUN_00691640_shell : NavMesh
 {
-    NavMeshStaticAvoidNode* FUN_00691640(int index);
+    NavMeshStaticAvoidNode* NavMesh_GetAvoidNode(int index);
 };
 
 // @fnv 0x00691640
-NavMeshStaticAvoidNode* FUN_00691640_shell::FUN_00691640(int index)
+// src: COMMUNITY 0x00691640
+NavMeshStaticAvoidNode* FUN_00691640_shell::NavMesh_GetAvoidNode(int index)
 {
     return &m_kStaticAvoidNodes.GetAt(index);
 }
@@ -505,22 +522,23 @@ template <> BSSimpleArray<NiPointer<ObstacleUndoData>, 1024>::~BSSimpleArray()
 namespace fnv_0042fd40 {
 struct G00559a40
 {
-    void FUN_0040f6e0();
+    void NiRefObject_IncRefCount();
 };
 
 struct FUN_0042fd40_shell
 {
-    void* FUN_0042fd40(void* arg);
+    void* NiPointer_NavMesh_NiPointer_NavMesh(void* arg);
 };
 
 // Copies the value from arg into this and, if non-zero, calls FUN_0040f6e0 on the object at offset 0x1c of that value; returns this.
 // @fnv 0x0042fd40
-void* FUN_0042fd40_shell::FUN_0042fd40(void* apSource)
+// src: COMMUNITY 0x0042fd40
+void* FUN_0042fd40_shell::NiPointer_NavMesh_NiPointer_NavMesh(void* apSource)
 {
     *reinterpret_cast<unsigned int*>(this) = *reinterpret_cast<unsigned int*>(apSource);
     if (*reinterpret_cast<unsigned int*>(this) != 0)
     {
-        reinterpret_cast<G00559a40*>(*reinterpret_cast<unsigned int*>(this) + 0x1c)->FUN_0040f6e0();
+        reinterpret_cast<G00559a40*>(*reinterpret_cast<unsigned int*>(this) + 0x1c)->NiRefObject_IncRefCount();
     }
     return this;
 }
@@ -532,9 +550,9 @@ void NavMesh::GetTriangleVertexPositions(unsigned short ausTriangleIndex, unsign
                                     unsigned int* pVertex2)
 {
     NavMeshTriangle* tri = GetTriangle(ausTriangleIndex);
-    *pVertex0 = reinterpret_cast<unsigned int>(&this->FUN_0068f0a0(tri->FUN_005582d0(0)));
-    *pVertex1 = reinterpret_cast<unsigned int>(&this->FUN_0068f0a0(tri->FUN_005582d0(1)));
-    *pVertex2 = reinterpret_cast<unsigned int>(&this->FUN_0068f0a0(tri->FUN_005582d0(2)));
+    *pVertex0 = reinterpret_cast<unsigned int>(&this->GetVertex_0068f0a0(tri->GetVert_005582d0(0)));
+    *pVertex1 = reinterpret_cast<unsigned int>(&this->GetVertex_0068f0a0(tri->GetVert_005582d0(1)));
+    *pVertex2 = reinterpret_cast<unsigned int>(&this->GetVertex_0068f0a0(tri->GetVert_005582d0(2)));
 }
 
 
@@ -554,12 +572,13 @@ struct FUN_00691160_shell
 {
     unsigned short a[6];
     int b;
-    void FUN_00691160();
+    void NavMeshTriangle_Clear();
 };
 
 // Sets all six elements of the array a to 0xffff and clears b to 0.
 // @fnv 0x00691160
-void FUN_00691160_shell::FUN_00691160()
+// src: COMMUNITY 0x00691160
+void FUN_00691160_shell::NavMeshTriangle_Clear()
 {
     a[0] = 0xffff;
     a[1] = 0xffff;
@@ -584,12 +603,13 @@ template <> BSSimpleArray<NavMeshClosedDoorInfo, 1024>::~BSSimpleArray()
 
 struct FUN_00691e70_shell
 {
-    void FUN_00691e70(unsigned char* param1, unsigned short param2, unsigned int param3);
+    void UpdateState_00691e70(unsigned char* param1, unsigned short param2, unsigned int param3);
 };
 
 // Stores a 16-bit value at offset 4 and a 32-bit value at offset 6 of the given buffer.
 // @fnv 0x00691e70
-void __thiscall FUN_00691e70_shell::FUN_00691e70(unsigned char* pBuffer, unsigned short usValue, unsigned int uiValue)
+// src: GUESS 0x00691e70 (confidence: low)
+void __thiscall FUN_00691e70_shell::UpdateState_00691e70(unsigned char* pBuffer, unsigned short usValue, unsigned int uiValue)
 {
     *reinterpret_cast<unsigned short*>(pBuffer + 4) = usValue;
     *reinterpret_cast<unsigned int*>(pBuffer + 6) = uiValue;
@@ -651,7 +671,8 @@ template <> void BSSimpleArray<NavMeshPtr, 1024>::_InitialSetup(unsigned int req
 }
 
 // @fnv 0x0068f2c0
-unsigned short NavMeshTriangle::FUN_0068f2c0(int index)
+// src: XBOX_PDB 0x0068f2c0
+unsigned short NavMeshTriangle::GetEdgeExtraInfo_0068f2c0(int index)
 {
     return ((unsigned short*)((char*)this + 6))[index];
 }
@@ -666,10 +687,11 @@ bool NavMesh::MatchNavMesh(const NavMeshEdgeData& pIn, NavMeshEdgeData& pOut)
 void __cdecl AddPoint(unsigned int);
 struct FUN_00690fe0_shell
 {
-    void __thiscall FUN_00690fe0(unsigned int state);
+    void __thiscall NavMesh_AddVertex(unsigned int state);
 };
 // @fnv 0x00690fe0
-void __thiscall FUN_00690fe0_shell::FUN_00690fe0(unsigned int state)
+// src: COMMUNITY 0x00690fe0
+void __thiscall FUN_00690fe0_shell::NavMesh_AddVertex(unsigned int state)
 {
     ((void(__thiscall*)(void*, unsigned int))AddPoint)(this + 0x28, state);
 }
@@ -697,24 +719,26 @@ struct S006911c0
 {
     char _pad[0xA8];
     Flt _f;
-    unsigned int FUN_006911c0();
+    unsigned int NavMesh_GetGridCellCount();
 };
 // Returns the product of the float member converted to unsigned int with itself.
 // @fnv 0x006911c0
-unsigned int S006911c0::FUN_006911c0()
+// src: COMMUNITY 0x006911c0
+unsigned int S006911c0::NavMesh_GetGridCellCount()
 {
     return (unsigned int)_f * (unsigned int)_f;
 }
 
 struct FUN_006911f0_shell
 {
-    void FUN_00691210(int);
-    void FUN_006911f0(int a);
+    void NavMeshGrid_GetTrianglesForGridCell(int);
+    void NavMesh_GetTrianglesForGridCell(int a);
 };
 // @fnv 0x006911f0
-void FUN_006911f0_shell::FUN_006911f0(int a)
+// src: COMMUNITY 0x006911f0
+void FUN_006911f0_shell::NavMesh_GetTrianglesForGridCell(int a)
 {
-    ((FUN_006911f0_shell*)((char*)this + 0xa8))->FUN_00691210(a);
+    ((FUN_006911f0_shell*)((char*)this + 0xa8))->NavMeshGrid_GetTrianglesForGridCell(a);
 }
 
 // Converts a point to grid coordinates via GetCellCoords and returns the linear cell index x * m_uiGridIndex + y.
@@ -732,20 +756,21 @@ int NavMeshGrid::GetCellIndex(NiPoint3 const& aPoint)
 struct Dummy914e0
 {
     int fld0;
-    void FUN_0069da10(unsigned short, int);
-    void FUN_006914e0(unsigned short, int, int);
+    void NavMeshGrid_IsTriangleInGridCell_0(unsigned short, int);
+    void NavMeshGrid_IsTriangleInGridCell(unsigned short, int, int);
 };
 // Calls FUN_0069da10 with a and b plus c multiplied by fld0.
 // @fnv 0x006914e0
-void Dummy914e0::FUN_006914e0(unsigned short a, int b, int c)
+// src: COMMUNITY 0x006914e0
+void Dummy914e0::NavMeshGrid_IsTriangleInGridCell(unsigned short a, int b, int c)
 {
-    FUN_0069da10(a, c * fld0 + b);
+    NavMeshGrid_IsTriangleInGridCell_0(a, c * fld0 + b);
 }
 
 struct EH;
 struct S5460
 {
-    unsigned int FUN_00978bc0();
+    unsigned int BSSimpleArray_NiPoint3_1024_AddUninitialized();
 };
 struct FUN_0069b310_S
 {
@@ -757,7 +782,7 @@ struct FUN_0069b310_S
 // @fnv 0x00691ab0
 unsigned int FUN_0069b310_S::AddPoint(const NiPoint3& aPoint)
 {
-    unsigned int index = ((S5460*)this)->FUN_00978bc0();
+    unsigned int index = ((S5460*)this)->BSSimpleArray_NiPoint3_1024_AddUninitialized();
     ConstructBounds((EH*)&pElementBuffer[index], 1);
     reinterpret_cast<ObjectBytes<sizeof(NiPoint3)>&>(pElementBuffer[index]) =
         reinterpret_cast<const ObjectBytes<sizeof(NiPoint3)>&>(aPoint);
@@ -775,15 +800,16 @@ struct Arr16
 {
     int _pad0;
     Elem16* buffer;
-    unsigned int FUN_006f31f0();
-    void FUN_00644490(void*, int);
-    unsigned int FUN_00691b60(Elem16*);
+    unsigned int BSSimpleArray_TeleportLink_1024_AddUninitialized();
+    void BSSimpleArray_NavMeshTriangle_1024_ConstructItems(void*, int);
+    unsigned int BSSimpleArray_NavMeshTriangle_1024_Add(Elem16*);
 };
 // @fnv 0x00691b60
-unsigned int Arr16::FUN_00691b60(Elem16* apElement)
+// src: COMMUNITY 0x00691b60
+unsigned int Arr16::BSSimpleArray_NavMeshTriangle_1024_Add(Elem16* apElement)
 {
-    unsigned int idx = FUN_006f31f0();
-    FUN_00644490(&buffer[idx], 1);
+    unsigned int idx = BSSimpleArray_TeleportLink_1024_AddUninitialized();
+    BSSimpleArray_NavMeshTriangle_1024_ConstructItems(&buffer[idx], 1);
     buffer[idx] = *apElement;
     return idx;
 }
@@ -819,11 +845,12 @@ struct UnkHost
 {
     char _pad[12];
     Unk6b f2;
-    void FUN_00691f30(UnkParam*);
+    void ProcessState_00691f30(UnkParam*);
 };
 // Calls FUN_0065de30(0) on a1->f, then passes a1 to f2.FreeMemory.
 // @fnv 0x00691f30
-void UnkHost::FUN_00691f30(UnkParam* pParam)
+// src: GUESS 0x00691f30 (confidence: low)
+void UnkHost::ProcessState_00691f30(UnkParam* pParam)
 {
     pParam->f.FUN_0065de30(0);
     f2.FreeMemory(pParam);
@@ -841,7 +868,7 @@ struct Node680
 };
 struct S3e60
 {
-    Node680* FUN_006a1400(unsigned int);
+    Node680* BSSimpleArray_PathingAvoidNode_1024_GetAt(unsigned int);
 };
 struct Sdc990
 {
@@ -857,7 +884,7 @@ float Sdc990::SumNodeValues(int a1)
     Node680* pNode;
     for (; idx < cnt; idx++)
     {
-        pNode = ((S3e60*)this)->FUN_006a1400(idx);
+        pNode = ((S3e60*)this)->BSSimpleArray_PathingAvoidNode_1024_GetAt(idx);
         fSum += pNode->EvaluateFalloff(a1);
     }
     return fSum;
@@ -894,14 +921,15 @@ struct NavMeshInfoProxy
 {
     char _pad[0x54];
     void* field54;
-    bool FUN_0068f320() const;
-    bool FUN_0068f2e0(void**);
+    bool NavMeshInfo_GetDisabled() const;
+    bool NavMeshInfo_GetNavMesh_0(void**);
 };
 // If FUN_0068f320() is true, sets *p to null and returns false; otherwise stores field54 in *p and returns whether field54 is non-null.
 // @fnv 0x0068f2e0
-bool NavMeshInfoProxy::FUN_0068f2e0(void** apOut)
+// src: COMMUNITY 0x0068f2e0
+bool NavMeshInfoProxy::NavMeshInfo_GetNavMesh_0(void** apOut)
 {
-    if (FUN_0068f320())
+    if (NavMeshInfo_GetDisabled())
     {
         *apOut = 0;
         return false;
@@ -912,10 +940,11 @@ bool NavMeshInfoProxy::FUN_0068f2e0(void** apOut)
 
 struct FUN_00844160_shell
 {
-    FUN_00844160_shell* FUN_00844160(int);
+    FUN_00844160_shell* BSSimpleArray_GroupMemberData_1024_GetAt(int);
 };
 
-FUN_00844160_shell* FUN_00844160_shell::FUN_00844160(int index)
+// src: XBOX_PDB 0x00844160
+FUN_00844160_shell* FUN_00844160_shell::BSSimpleArray_GroupMemberData_1024_GetAt(int index)
 {
     return this;
 }
@@ -924,7 +953,7 @@ FUN_00844160_shell* FUN_00844160_shell::FUN_00844160(int index)
 // @fnv 0x0068f6b0
 NavMeshEdgeExtra* NavMesh::GetEdge(unsigned short index)
 {
-    return reinterpret_cast<NavMeshEdgeExtra*>(((FUN_00844160_shell*)&m_kDoorPortals)->FUN_00844160(index));
+    return reinterpret_cast<NavMeshEdgeExtra*>(((FUN_00844160_shell*)&m_kDoorPortals)->BSSimpleArray_GroupMemberData_1024_GetAt(index));
 }
 
 // Clears bit idx in fieldC and sets the corresponding entry of field6 to 0xffff.
@@ -976,11 +1005,12 @@ struct S691210
     unsigned int m0;
     char _pad[32];
     int mBase;
-    int FUN_00691210(unsigned int);
+    int NavMeshGrid_GetTrianglesForGridCell(unsigned int);
 };
 // Returns 0 if idx is outside m0*m0, otherwise returns idx*16 plus mBase.
 // @fnv 0x00691210
-int S691210::FUN_00691210(unsigned int uiIndex)
+// src: COMMUNITY 0x00691210
+int S691210::NavMeshGrid_GetTrianglesForGridCell(unsigned int uiIndex)
 {
     if (uiIndex >= m0 * m0)
     {
@@ -1014,11 +1044,12 @@ struct FUN_006915d0_helper
     char _pad[36];
     unsigned short field24;
     PathingAvoidNode* FUN_006915d0(NiPoint3 const&, float, float);
-    FUN_006915d0_helper* FUN_00691590(NiPoint3 const&, unsigned short, float, float);
+    FUN_006915d0_helper* NavMeshStaticAvoidNode_NavMeshStaticAvoidNode_0(NiPoint3 const&, unsigned short, float, float);
 };
 // Calls FUN_006915d0 with the position and two floats, stores the unsigned short in field24, and returns this.
 // @fnv 0x00691590
-FUN_006915d0_helper* FUN_006915d0_helper::FUN_00691590(NiPoint3 const& akPosition, unsigned short ausValue, float c,
+// src: COMMUNITY 0x00691590
+FUN_006915d0_helper* FUN_006915d0_helper::NavMeshStaticAvoidNode_NavMeshStaticAvoidNode_0(NiPoint3 const& akPosition, unsigned short ausValue, float c,
                                                        float d)
 {
     FUN_006915d0(akPosition, c, d);
@@ -1038,7 +1069,7 @@ NavMesh::~NavMesh()
     m_kEdgeExtraInfo.Clear(true);
     m_kDoorPortals.Clear(true);
     m_kIndexList.Clear(true);
-    m_kGrid.FUN_0069d2d0();
+    m_kGrid.Clear_0069d2d0();
     if (m_pNavigationMesh)
         ((TESRecipe*)m_pNavigationMesh)->SetCategory(0u);
     if (pTriangleToObstacleMap)
@@ -1070,7 +1101,7 @@ template <> void BSSimpleArray<NavMeshPtr, 1024>::UpdateEntryValue(NavMeshPtr* p
 namespace fnv_00690d50 {
 struct FUN_0069d2d0_s
 {
-    void FUN_0069d2d0();
+    void Clear_0069d2d0();
 };
 struct FUN_006b6a00_s
 {
@@ -1078,26 +1109,27 @@ struct FUN_006b6a00_s
 };
 struct FUN_0084e3a0_s
 {
-    void* FUN_0084e3a0();
+    void* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 extern TES g_TES;
 struct FUN_00690d50_shell
 {
-    void FUN_00690d50(bool abCheckout);
+    void NavMesh_ClearNavMesh(bool abCheckout);
 };
 // @fnv 0x00690d50
-void FUN_00690d50_shell::FUN_00690d50(bool abCheckout)
+// src: COMMUNITY 0x00690d50
+void FUN_00690d50_shell::NavMesh_ClearNavMesh(bool abCheckout)
 {
     ((BSSimpleArray<NavMeshVertex, 1024>*)((char*)this + 0x28))->Clear(true);
     ((BSSimpleArray<NavMeshTriangle, 1024>*)((char*)this + 0x38))->Clear(true);
     ((BSSimpleArray<EdgeExtraInfo, 1024>*)((char*)this + 0x48))->Clear(true);
-    ((FUN_0069d2d0_s*)((char*)this + 0xa8))->FUN_0069d2d0();
+    ((FUN_0069d2d0_s*)((char*)this + 0xa8))->Clear_0069d2d0();
     ((BSSimpleArray<unsigned short, 1024>*)((char*)this + 0x78))->Clear(true);
     ((BSSimpleArray<NiPointer<ObstacleUndoData>, 1024>*)((char*)this + 0xd0))->RemoveAll(true);
     ((BSSimpleArray<NavMeshTriangleDoorPortal, 1024>*)((char*)this + 0x58))->Clear(true);
     if (*(void**)((char*)this + 0x104))
     {
-        ((FUN_006b6a00_s*)((TES*)*(int*)&g_TES)->GetActiveCell(((FUN_0084e3a0_s*)this)->FUN_0084e3a0()))
+        ((FUN_006b6a00_s*)((TES*)*(int*)&g_TES)->GetActiveCell(((FUN_0084e3a0_s*)this)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()))
             ->ActivateNavigationEntry();
     }
 }
@@ -1125,11 +1157,12 @@ struct FUN_0069b030_S
     virtual ~FUN_0069b030_S();
     virtual int Write(unsigned int);
     void ConstructPairCells(int, unsigned int);
-    void FUN_00692520(unsigned int requested, unsigned int savedSize);
+    void UpdateFields_00692520(unsigned int requested, unsigned int savedSize);
 };
 
 // @fnv 0x00692520
-void FUN_0069b030_S::FUN_00692520(unsigned int requested, unsigned int savedSize)
+// src: GUESS 0x00692520 (confidence: low)
+void FUN_0069b030_S::UpdateFields_00692520(unsigned int requested, unsigned int savedSize)
 {
     ((int*)this)[1] = 0;
     ((int*)this)[2] = 0;
@@ -1153,7 +1186,7 @@ void FUN_0069b030_S::FUN_00692520(unsigned int requested, unsigned int savedSize
 namespace fnv_00690e90 {
 struct FUN_00690e10_shell
 {
-    bool FUN_00690e10();
+    bool NavMeshTriangle_HasEdgeExtraInfo();
 };
 struct Unk00690e30
 {
@@ -1172,17 +1205,17 @@ void NavMesh::UpdateTriangleExtraInfo(unsigned short aiExtraInfo)
     itriSize4 = Triangles.GetSize();
     for (i = 0; i < itriSize4; ++i)
     {
-        if (reinterpret_cast<fnv_00690e90::FUN_00690e10_shell*>(&Triangles.GetAt((int)i))->FUN_00690e10())
+        if (reinterpret_cast<fnv_00690e90::FUN_00690e10_shell*>(&Triangles.GetAt((int)i))->NavMeshTriangle_HasEdgeExtraInfo())
         {
             for (t = 0; t < 3; ++t)
             {
                 if (Triangles.GetAt((int)i).IsEdgeFlagSet(t))
                 {
-                    if (Triangles.GetAt((int)i).FUN_0068f2c0(t) == aiExtraInfo)
+                    if (Triangles.GetAt((int)i).GetEdgeExtraInfo_0068f2c0(t) == aiExtraInfo)
                     {
                         Triangles.GetAt((int)i).ClearFlag(t);
                     }
-                    else if (Triangles.GetAt((int)i).FUN_0068f2c0(t) == m_kEdgeExtraInfo.GetSize())
+                    else if (Triangles.GetAt((int)i).GetEdgeExtraInfo_0068f2c0(t) == m_kEdgeExtraInfo.GetSize())
                     {
                         reinterpret_cast<fnv_00690e90::Unk00690e30*>(&Triangles.GetAt((int)i))
                             ->SetSlotValue(t, aiExtraInfo);
@@ -1238,10 +1271,10 @@ struct InfoView
 
 struct MeshView
 {
-    char* FUN_00559450();
-    unsigned int FUN_0084e3a0();
-    unsigned int FUN_00558200();
-    unsigned int FUN_00690800();
+    char* Modelloader_GetReferencedThis();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    unsigned int NavMesh_GetTriangleCount();
+    unsigned int NavMeshInfo_GetWorldSpace();
     bool FUN_00690860(NavMeshPtr*);
 };
 
@@ -1278,7 +1311,7 @@ extern const char DAT_0106a2c8[];
 extern const char DAT_0106a260[];
 extern const char DAT_0106a1f0[];
 
-void __cdecl FUN_005b5e40(const char* fmt, ...);
+void __cdecl Warning_005b5e40(const char* fmt, ...);
 int __cdecl FUN_00ec7595(double);
 double __cdecl FUN_00408840(float);
 
@@ -1294,19 +1327,19 @@ bool NavMesh::Validate(int a0)
     {
         if (FUN_00ec7595(reinterpret_cast<NiPoint3&>(Vertices.GetAt(i)).x) == 0 || FUN_00408840(reinterpret_cast<NiPoint3&>(Vertices.GetAt(i)).x) > DAT_0106ab98)
         {
-            FUN_005b5e40(DAT_0106ab40, FUN_0084e3a0(), p.FUN_00559450());
+            Warning_005b5e40(DAT_0106ab40, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis());
             hadError = true;
             break;
         }
         if (FUN_00ec7595(reinterpret_cast<NiPoint3&>(Vertices.GetAt(i)).y) == 0 || FUN_00408840(reinterpret_cast<NiPoint3&>(Vertices.GetAt(i)).y) > DAT_0106ab98)
         {
-            FUN_005b5e40(DAT_0106aae8, FUN_0084e3a0(), p.FUN_00559450());
+            Warning_005b5e40(DAT_0106aae8, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis());
             hadError = true;
             break;
         }
         if (FUN_00ec7595(reinterpret_cast<NiPoint3&>(Vertices.GetAt(i)).z) == 0 || FUN_00408840(reinterpret_cast<NiPoint3&>(Vertices.GetAt(i)).z) > DAT_0106ab98)
         {
-            FUN_005b5e40(DAT_0106aa90, FUN_0084e3a0(), p.FUN_00559450());
+            Warning_005b5e40(DAT_0106aa90, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis());
             hadError = true;
             break;
         }
@@ -1314,7 +1347,7 @@ bool NavMesh::Validate(int a0)
 
     if (Triangles.GetSize() >= 0x7d0)
     {
-        FUN_005b5e40(DAT_0106aa28, FUN_0084e3a0(), p.FUN_00559450(), Triangles.GetSize());
+        Warning_005b5e40(DAT_0106aa28, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), Triangles.GetSize());
     }
 
     for (unsigned int j = 0; j < Triangles.GetSize(); j++)
@@ -1322,9 +1355,9 @@ bool NavMesh::Validate(int a0)
         NavMeshTriangle* triA = &Triangles.GetAt(j);
         for (long k = 0; k < 3; k++)
         {
-            if (!triA->IsEdgeFlagSet(k) && triA->FUN_0068f200(k) != 0 && triA->FUN_0068f2c0(k) >= Triangles.GetSize())
+            if (!triA->IsEdgeFlagSet(k) && triA->IsEdgeConnected(k) != 0 && triA->GetEdgeExtraInfo_0068f2c0(k) >= Triangles.GetSize())
             {
-                FUN_005b5e40(DAT_0106a9c0, FUN_0084e3a0(), p.FUN_00559450(), j, k);
+                Warning_005b5e40(DAT_0106a9c0, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), j, k);
                 triA->SetArrayValue(k, 0xffff);
                 hadError = true;
             }
@@ -1332,7 +1365,7 @@ bool NavMesh::Validate(int a0)
         NiPoint3 normal = FUN_006971e0((unsigned short)j);
         if (normal.z < 0.0f)
         {
-            FUN_005b5e40(DAT_0106a960, FUN_0084e3a0(), p.FUN_00559450(), j);
+            Warning_005b5e40(DAT_0106a960, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), j);
             SwapTriangleEdges((unsigned short)j);
             hadError = true;
         }
@@ -1345,23 +1378,23 @@ bool NavMesh::Validate(int a0)
         {
             if (sh->IsEdgeFlagSet(tri7))
             {
-                if (sh->FUN_0068f2c0(tri7) >= m_kEdgeExtraInfo.GetSize())
+                if (sh->GetEdgeExtraInfo_0068f2c0(tri7) >= m_kEdgeExtraInfo.GetSize())
                 {
-                    FUN_005b5e40(DAT_0106a8f0, FUN_0084e3a0(), p.FUN_00559450(), b, tri7);
+                    Warning_005b5e40(DAT_0106a8f0, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), b, tri7);
                     sh->ClearFlag(tri7);
                     hadError = true;
                     continue;
                 }
-                EdgeInfoView* pRetrievedObject = reinterpret_cast<EdgeInfoView*>(FUN_0068f230((unsigned short)b, tri7));
+                EdgeInfoView* pRetrievedObject = reinterpret_cast<EdgeInfoView*>(GetEdgeExtraInfo((unsigned short)b, tri7));
                 if (pRetrievedObject->m_04 == 0)
                 {
-                    UpdateTriangleExtraInfo(sh->FUN_0068f2c0(tri7));
+                    UpdateTriangleExtraInfo(sh->GetEdgeExtraInfo_0068f2c0(tri7));
                     hadError = true;
                     continue;
                 }
                 else if (pRetrievedObject->m_08 == 0xffff)
                 {
-                    UpdateTriangleExtraInfo(sh->FUN_0068f2c0(tri7));
+                    UpdateTriangleExtraInfo(sh->GetEdgeExtraInfo_0068f2c0(tri7));
                     hadError = true;
                     continue;
                 }
@@ -1370,20 +1403,20 @@ bool NavMesh::Validate(int a0)
                     NavMeshPtr pTri;
                     if (pRetrievedObject->m_04->FUN_00690860(&pTri))
                     {
-                        if (pRetrievedObject->m_08 >= ((MeshView*)pTri.FUN_00559450())->FUN_00558200())
+                        if (pRetrievedObject->m_08 >= ((MeshView*)pTri.Modelloader_GetReferencedThis())->NavMesh_GetTriangleCount())
                         {
-                            FUN_005b5e40(DAT_0106a860, FUN_0084e3a0(), p.FUN_00559450(), b, tri7,
-                                         ((MeshView*)pTri.FUN_00559450())->FUN_0084e3a0(), pRetrievedObject->m_08);
-                            UpdateTriangleExtraInfo(sh->FUN_0068f2c0(tri7));
+                            Warning_005b5e40(DAT_0106a860, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), b, tri7,
+                                         ((MeshView*)pTri.Modelloader_GetReferencedThis())->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), pRetrievedObject->m_08);
+                            UpdateTriangleExtraInfo(sh->GetEdgeExtraInfo_0068f2c0(tri7));
                             hadError = true;
                             continue;
                         }
                     }
-                    if (reinterpret_cast<InfoView*>(GetParentCell())->FUN_0054ddd0() != pRetrievedObject->m_04->FUN_00690800())
+                    if (reinterpret_cast<InfoView*>(GetParentCell())->FUN_0054ddd0() != pRetrievedObject->m_04->NavMeshInfo_GetWorldSpace())
                     {
-                        FUN_005b5e40(DAT_0106a7d8, FUN_0084e3a0(), p.FUN_00559450(), b, tri7,
-                                     pRetrievedObject->m_04->FUN_00559450());
-                        UpdateTriangleExtraInfo(sh->FUN_0068f2c0(tri7));
+                        Warning_005b5e40(DAT_0106a7d8, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), b, tri7,
+                                     pRetrievedObject->m_04->Modelloader_GetReferencedThis());
+                        UpdateTriangleExtraInfo(sh->GetEdgeExtraInfo_0068f2c0(tri7));
                         hadError = true;
                         continue;
                     }
@@ -1395,19 +1428,19 @@ bool NavMesh::Validate(int a0)
     for (unsigned int t4 = 0; t4 < Triangles.GetSize(); t4++)
     {
         NavMeshTriangle* tri4 = FUN_005582f0((unsigned short)t4);
-        if (tri4->FUN_005582d0(0) == tri4->FUN_005582d0(1))
+        if (tri4->GetVert_005582d0(0) == tri4->GetVert_005582d0(1))
         {
-            FUN_005b5e40(DAT_0106a770, FUN_0084e3a0(), p.FUN_00559450(), t4, tri4->FUN_005582d0(0));
+            Warning_005b5e40(DAT_0106a770, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), t4, tri4->GetVert_005582d0(0));
             hadError = true;
         }
-        if (tri4->FUN_005582d0(0) == tri4->FUN_005582d0(2))
+        if (tri4->GetVert_005582d0(0) == tri4->GetVert_005582d0(2))
         {
-            FUN_005b5e40(DAT_0106a708, FUN_0084e3a0(), p.FUN_00559450(), t4, tri4->FUN_005582d0(0));
+            Warning_005b5e40(DAT_0106a708, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), t4, tri4->GetVert_005582d0(0));
             hadError = true;
         }
-        if (tri4->FUN_005582d0(1) == tri4->FUN_005582d0(2))
+        if (tri4->GetVert_005582d0(1) == tri4->GetVert_005582d0(2))
         {
-            FUN_005b5e40(DAT_0106a6a0, FUN_0084e3a0(), p.FUN_00559450(), t4, tri4->FUN_005582d0(1));
+            Warning_005b5e40(DAT_0106a6a0, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), t4, tri4->GetVert_005582d0(1));
             hadError = true;
         }
     }
@@ -1415,22 +1448,22 @@ bool NavMesh::Validate(int a0)
     for (unsigned int e7 = 0; e7 < Triangles.GetSize(); e7++)
     {
         NavMeshTriangle* tri5 = FUN_005582f0((unsigned short)e7);
-        if (tri5->FUN_0068f2c0(0) == tri5->FUN_0068f2c0(1) && tri5->FUN_0068f2c0(0) != 0xffff &&
+        if (tri5->GetEdgeExtraInfo_0068f2c0(0) == tri5->GetEdgeExtraInfo_0068f2c0(1) && tri5->GetEdgeExtraInfo_0068f2c0(0) != 0xffff &&
             tri5->IsEdgeFlagSet(0) == tri5->IsEdgeFlagSet(1))
         {
-            FUN_005b5e40(DAT_0106a640, FUN_0084e3a0(), p.FUN_00559450(), e7, tri5->FUN_0068f2c0(0));
+            Warning_005b5e40(DAT_0106a640, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), e7, tri5->GetEdgeExtraInfo_0068f2c0(0));
             hadError = true;
         }
-        if (tri5->FUN_0068f2c0(0) == tri5->FUN_0068f2c0(2) && tri5->FUN_0068f2c0(0) != 0xffff &&
+        if (tri5->GetEdgeExtraInfo_0068f2c0(0) == tri5->GetEdgeExtraInfo_0068f2c0(2) && tri5->GetEdgeExtraInfo_0068f2c0(0) != 0xffff &&
             tri5->IsEdgeFlagSet(0) == tri5->IsEdgeFlagSet(2))
         {
-            FUN_005b5e40(DAT_0106a5e0, FUN_0084e3a0(), p.FUN_00559450(), e7, tri5->FUN_0068f2c0(0));
+            Warning_005b5e40(DAT_0106a5e0, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), e7, tri5->GetEdgeExtraInfo_0068f2c0(0));
             hadError = true;
         }
-        if (tri5->FUN_0068f2c0(1) == tri5->FUN_0068f2c0(2) && tri5->FUN_0068f2c0(1) != 0xffff &&
+        if (tri5->GetEdgeExtraInfo_0068f2c0(1) == tri5->GetEdgeExtraInfo_0068f2c0(2) && tri5->GetEdgeExtraInfo_0068f2c0(1) != 0xffff &&
             tri5->IsEdgeFlagSet(1) == tri5->IsEdgeFlagSet(2))
         {
-            FUN_005b5e40(DAT_0106a580, FUN_0084e3a0(), p.FUN_00559450(), e7, tri5->FUN_0068f2c0(1));
+            Warning_005b5e40(DAT_0106a580, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), e7, tri5->GetEdgeExtraInfo_0068f2c0(1));
             hadError = true;
         }
     }
@@ -1444,8 +1477,8 @@ bool NavMesh::Validate(int a0)
             unsigned int e = edge + 1;
             if (e == 3)
                 e = 0;
-            unsigned short vA = tri6->FUN_005582d0(edge);
-            unsigned short pForm = tri6->FUN_005582d0(e);
+            unsigned short vA = tri6->GetVert_005582d0(edge);
+            unsigned short pForm = tri6->GetVert_005582d0(e);
             for (int tri3 = 0; tri3 < Triangles.GetSize(); tri3++)
             {
                 if (tri3 == t6)
@@ -1453,7 +1486,7 @@ bool NavMesh::Validate(int a0)
                 NavMeshTriangle* tri = FUN_005582f0((unsigned short)tri3);
                 for (int t5 = 0; t5 < 3; t5++)
                 {
-                    if (tri->FUN_005582d0(t5) != pForm)
+                    if (tri->GetVert_005582d0(t5) != pForm)
                         continue;
                     unsigned short tIn = (unsigned short)(t5 + 1);
                     if (tIn == 3)
@@ -1462,31 +1495,31 @@ bool NavMesh::Validate(int a0)
                     {
                         if (e8 == t5)
                             continue;
-                        if (tri->FUN_005582d0(e8) != vA)
+                        if (tri->GetVert_005582d0(e8) != vA)
                             continue;
                         if (e8 != tIn)
                         {
-                            FUN_005b5e40(DAT_0106a520, FUN_0084e3a0(), p.FUN_00559450(), t6, tri3);
+                            Warning_005b5e40(DAT_0106a520, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), t6, tri3);
                             hadError = true;
                         }
                         if (!tri6->IsEdgeFlagSet(e6))
                         {
-                            if (tri6->FUN_0068f2c0(e6) != 0xffff)
+                            if (tri6->GetEdgeExtraInfo_0068f2c0(e6) != 0xffff)
                             {
                                 if (tri->IsEdgeFlagSet(t5))
                                 {
-                                    FUN_005b5e40(DAT_0106a480, FUN_0084e3a0(), p.FUN_00559450(), t6, e6, tri3, tri3,
+                                    Warning_005b5e40(DAT_0106a480, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), t6, e6, tri3, tri3,
                                                  t5);
                                     hadError = true;
                                 }
-                                if (tri6->FUN_0068f2c0(e6) != tri3)
+                                if (tri6->GetEdgeExtraInfo_0068f2c0(e6) != tri3)
                                 {
-                                    FUN_005b5e40(DAT_0106a418, FUN_0084e3a0(), p.FUN_00559450(), t6, e6, tri3);
+                                    Warning_005b5e40(DAT_0106a418, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), t6, e6, tri3);
                                     hadError = true;
                                 }
-                                if (tri->FUN_0068f2c0(t5) != t6)
+                                if (tri->GetEdgeExtraInfo_0068f2c0(t5) != t6)
                                 {
-                                    FUN_005b5e40(DAT_0106a418, FUN_0084e3a0(), p.FUN_00559450(), tri3, t5, t6);
+                                    Warning_005b5e40(DAT_0106a418, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), tri3, t5, t6);
                                     hadError = true;
                                 }
                             }
@@ -1495,7 +1528,7 @@ bool NavMesh::Validate(int a0)
                         {
                             if (!tri->IsEdgeFlagSet(t5))
                             {
-                                FUN_005b5e40(DAT_0106a3b0, FUN_0084e3a0(), p.FUN_00559450(), tri3, t5);
+                                Warning_005b5e40(DAT_0106a3b0, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), tri3, t5);
                                 hadError = true;
                             }
                         }
@@ -1510,14 +1543,14 @@ bool NavMesh::Validate(int a0)
         NavMeshTriangle* tri8 = FUN_005582f0((unsigned short)e10);
         for (int e9 = 0; 3 > e9; e9++)
         {
-            if (!tri8->IsEdgeFlagSet(e9) && tri8->FUN_0068f2c0(e9) != 0xffff)
+            if (!tri8->IsEdgeFlagSet(e9) && tri8->GetEdgeExtraInfo_0068f2c0(e9) != 0xffff)
             {
-                NavMeshTriangle* h = FUN_005582f0(tri8->FUN_0068f2c0(e9));
+                NavMeshTriangle* h = FUN_005582f0(tri8->GetEdgeExtraInfo_0068f2c0(e9));
                 bool s = false;
                 int a;
                 for (a = 0; 3 > a; a++)
                 {
-                    if (!h->IsEdgeFlagSet(a) && h->FUN_0068f2c0(a) != 0xffff && h->FUN_0068f2c0(a) == e10)
+                    if (!h->IsEdgeFlagSet(a) && h->GetEdgeExtraInfo_0068f2c0(a) != 0xffff && h->GetEdgeExtraInfo_0068f2c0(a) == e10)
                     {
                         s = true;
                         break;
@@ -1525,8 +1558,8 @@ bool NavMesh::Validate(int a0)
                 }
                 if (!s)
                 {
-                    FUN_005b5e40(DAT_0106a330, FUN_0084e3a0(), p.FUN_00559450(), e10, tri8->FUN_0068f2c0(e9),
-                                 tri8->FUN_0068f2c0(e9));
+                    Warning_005b5e40(DAT_0106a330, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), e10, tri8->GetEdgeExtraInfo_0068f2c0(e9),
+                                 tri8->GetEdgeExtraInfo_0068f2c0(e9));
                     hadError = true;
                 }
                 if (a < 3)
@@ -1539,9 +1572,9 @@ bool NavMesh::Validate(int a0)
                     int q = a + 1;
                     if (q == 3)
                         q = 0;
-                    if (tri8->FUN_005582d0(bIdx) != h->FUN_005582d0(q) || tri8->FUN_005582d0(c) != h->FUN_005582d0(c2))
+                    if (tri8->GetVert_005582d0(bIdx) != h->GetVert_005582d0(q) || tri8->GetVert_005582d0(c) != h->GetVert_005582d0(c2))
                     {
-                        FUN_005b5e40(DAT_0106a2c8, FUN_0084e3a0(), p.FUN_00559450(), e10, tri8->FUN_0068f2c0(e9));
+                        Warning_005b5e40(DAT_0106a2c8, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), e10, tri8->GetEdgeExtraInfo_0068f2c0(e9));
                         hadError = true;
                     }
                 }
@@ -1555,12 +1588,12 @@ bool NavMesh::Validate(int a0)
         NavMeshTriangle* coverTri = FUN_005582f0(triC);
         if (coverTri == 0)
         {
-            FUN_005b5e40(DAT_0106a260, FUN_0084e3a0(), p.FUN_00559450(), ci, triC);
+            Warning_005b5e40(DAT_0106a260, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), ci, triC);
             hadError = true;
         }
         else if (!coverTri->HasFlags())
         {
-            FUN_005b5e40(DAT_0106a1f0, FUN_0084e3a0(), p.FUN_00559450(), ci, triC);
+            Warning_005b5e40(DAT_0106a1f0, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), p.Modelloader_GetReferencedThis(), ci, triC);
             hadError = true;
         }
     }
@@ -1580,7 +1613,7 @@ struct ProbeResult
 {
     void* value;
     ~ProbeResult();
-    void* FUN_00458b50();
+    void* AnimatingText_GetFullText();
 };
 
 struct ProbeArray
@@ -1591,7 +1624,7 @@ struct ProbeArray
 
 struct ProbeHolder
 {
-    ProbeArray* FUN_0070ec90();
+    ProbeArray* DetailedActorPathHandler_GetCurrentNodeIndex();
 };
 
 struct ProbeCell
@@ -1607,7 +1640,7 @@ struct ProbeGrid
     ProbeCell* FUN_0054ddd0(int x, int y);
 };
 
-bool __cdecl FUN_005d4a40(void* self, void* value, int mode, float x, float y);
+bool __cdecl Cmd_Default_Execute(void* self, void* value, int mode, float x, float y);
 
 
 // @fnv 0x006908f0
@@ -1624,11 +1657,11 @@ bool NavMesh::CheckNeighborCells()
 
     float xWorld = (float)(cellX2 << 12);
     ProbeHolder* kWest = reinterpret_cast<ProbeGrid*>(GetParentCell())->FUN_0054ddd0(cellX2 - 1, cellY8)->FUN_005875a0();
-    if (kWest != 0 && kWest->FUN_0070ec90() != 0)
+    if (kWest != 0 && kWest->DetailedActorPathHandler_GetCurrentNodeIndex() != 0)
     {
-        for (unsigned int westIdx = 0; westIdx < kWest->FUN_0070ec90()->GetReferenceFlags(); ++westIdx)
+        for (unsigned int westIdx = 0; westIdx < kWest->DetailedActorPathHandler_GetCurrentNodeIndex()->GetReferenceFlags(); ++westIdx)
         {
-            if (!FUN_005d4a40(this, kWest->FUN_0070ec90()->FUN_00464f60(westIdx).FUN_00458b50(), 1, xWorld, 0.0f))
+            if (!Cmd_Default_Execute(this, kWest->DetailedActorPathHandler_GetCurrentNodeIndex()->FUN_00464f60(westIdx).AnimatingText_GetFullText(), 1, xWorld, 0.0f))
             {
                 result = false;
             }
@@ -1637,11 +1670,11 @@ bool NavMesh::CheckNeighborCells()
 
     xWorld = (float)(cellX2 << 12) + 4096.0;
     ProbeHolder* east = reinterpret_cast<ProbeGrid*>(GetParentCell())->FUN_0054ddd0(cellX2 + 1, cellY8)->FUN_005875a0();
-    if (east != 0 && east->FUN_0070ec90() != 0)
+    if (east != 0 && east->DetailedActorPathHandler_GetCurrentNodeIndex() != 0)
     {
-        for (unsigned int eastIdx = 0; eastIdx < east->FUN_0070ec90()->GetReferenceFlags(); ++eastIdx)
+        for (unsigned int eastIdx = 0; eastIdx < east->DetailedActorPathHandler_GetCurrentNodeIndex()->GetReferenceFlags(); ++eastIdx)
         {
-            if (!FUN_005d4a40(this, east->FUN_0070ec90()->FUN_00464f60(eastIdx).FUN_00458b50(), 1, xWorld, 0.0f))
+            if (!Cmd_Default_Execute(this, east->DetailedActorPathHandler_GetCurrentNodeIndex()->FUN_00464f60(eastIdx).AnimatingText_GetFullText(), 1, xWorld, 0.0f))
             {
                 result = false;
             }
@@ -1650,11 +1683,11 @@ bool NavMesh::CheckNeighborCells()
 
     float yWorld = (float)(cellY8 << 12);
     ProbeHolder* southVal = reinterpret_cast<ProbeGrid*>(GetParentCell())->FUN_0054ddd0(cellX2, cellY8 - 1)->FUN_005875a0();
-    if (southVal != 0 && southVal->FUN_0070ec90() != 0)
+    if (southVal != 0 && southVal->DetailedActorPathHandler_GetCurrentNodeIndex() != 0)
     {
-        for (unsigned int southIdx = 0; southIdx < southVal->FUN_0070ec90()->GetReferenceFlags(); ++southIdx)
+        for (unsigned int southIdx = 0; southIdx < southVal->DetailedActorPathHandler_GetCurrentNodeIndex()->GetReferenceFlags(); ++southIdx)
         {
-            if (!FUN_005d4a40(this, southVal->FUN_0070ec90()->FUN_00464f60(southIdx).FUN_00458b50(), 0, 0.0f, yWorld))
+            if (!Cmd_Default_Execute(this, southVal->DetailedActorPathHandler_GetCurrentNodeIndex()->FUN_00464f60(southIdx).AnimatingText_GetFullText(), 0, 0.0f, yWorld))
             {
                 result = false;
             }
@@ -1663,11 +1696,11 @@ bool NavMesh::CheckNeighborCells()
 
     yWorld = (float)(cellY8 << 12) + 4096.0;
     ProbeHolder* north2 = reinterpret_cast<ProbeGrid*>(GetParentCell())->FUN_0054ddd0(cellX2, cellY8 + 1)->FUN_005875a0();
-    if (north2 != 0 && north2->FUN_0070ec90() != 0)
+    if (north2 != 0 && north2->DetailedActorPathHandler_GetCurrentNodeIndex() != 0)
     {
-        for (unsigned int northIdx = 0; northIdx < north2->FUN_0070ec90()->GetReferenceFlags(); ++northIdx)
+        for (unsigned int northIdx = 0; northIdx < north2->DetailedActorPathHandler_GetCurrentNodeIndex()->GetReferenceFlags(); ++northIdx)
         {
-            if (!FUN_005d4a40(this, north2->FUN_0070ec90()->FUN_00464f60(northIdx).FUN_00458b50(), 0, 0.0f, yWorld))
+            if (!Cmd_Default_Execute(this, north2->DetailedActorPathHandler_GetCurrentNodeIndex()->FUN_00464f60(northIdx).AnimatingText_GetFullText(), 0, 0.0f, yWorld))
             {
                 result = false;
             }
@@ -1684,7 +1717,7 @@ bool NavMeshTriangle::GetFlag(int aFlag)
     return (aFlag & *(unsigned int*)((char*)this + 0xc)) != 0;
 }
 
-float __cdecl FUN_00406ce0(float x);
+float __cdecl floorf(float x);
 void __cdecl ClampInt(int* value, int lo, int hi);
 
 // @fnv 0x006912a0
@@ -1695,11 +1728,11 @@ void NavMeshGrid::GetCellCoords(NiPoint3 const& point, unsigned int& outRow, uns
     float gx1 = dxH / this->m_fFirstGridValue;
     float gY = dY0 / this->NavMeshPointEntry;
 
-    int nCol = (int)FUN_00406ce0(gx1);
+    int nCol = (int)floorf(gx1);
     ClampInt(&nCol, 0, (int)this->m_uiGridIndex - 1);
     outCol = nCol;
 
-    int row = (int)FUN_00406ce0(gY);
+    int row = (int)floorf(gY);
     ClampInt(&row, 0, (int)this->m_uiGridIndex - 1);
     outRow = row;
 }
@@ -1730,7 +1763,7 @@ unsigned int NavMesh::CollectTriangleCells(unsigned short tri, OutArr& out)
     unsigned int minY7 = 0xFFFFFFFF;
     for (unsigned int i = 0; i < 3; i++)
     {
-        const NiPoint3& pt2 = FUN_0068f0a0(pTri6->FUN_005582d0(i));
+        const NiPoint3& pt2 = GetVertex_0068f0a0(pTri6->GetVert_005582d0(i));
         unsigned int x9 = 0;
         unsigned int y6 = 0;
         reinterpret_cast<GridStub*>(&m_kGrid)->GetCoords(pt2, x9, y6);
@@ -1758,7 +1791,7 @@ struct AvoidNodeDescription
     float point1[3], point2[3];
     float radius, cost;
     unsigned int type, flags;
-    void FUN_00691590(void* source, unsigned short triangle, float radius, float cost);
+    void NavMeshStaticAvoidNode_NavMeshStaticAvoidNode_0(void* source, unsigned short triangle, float radius, float cost);
 };
 struct StaticAvoidOps : BSSimpleArray<NavMeshStaticAvoidNode, 1024>
 {
@@ -1768,25 +1801,27 @@ struct StaticAvoidOps : BSSimpleArray<NavMeshStaticAvoidNode, 1024>
 void NavMesh::AddAvoidNode(void* source, unsigned short triangle, float radius, float cost)
 {
     AvoidNodeDescription avoidNode;
-    avoidNode.FUN_00691590(source, triangle, radius, cost);
-    Triangles.GetAt((int)triangle).FUN_00691570(0x80000000u);
+    avoidNode.NavMeshStaticAvoidNode_NavMeshStaticAvoidNode_0(source, triangle, radius, cost);
+    Triangles.GetAt((int)triangle).SetFlag_00691570(0x80000000u);
     reinterpret_cast<StaticAvoidOps*>(&m_kStaticAvoidNodes)->AddData(&avoidNode);
 }
 
 
 // @fnv 0x00691570
-void NavMeshTriangle::FUN_00691570(unsigned int aFlag)
+// src: COMMUNITY 0x00691570
+void NavMeshTriangle::SetFlag_00691570(unsigned int aFlag)
 {
     *(unsigned int*)((char*)this + 0xc) |= aFlag;
 }
 
 // @fnv 0x0068efd0
-EdgeT* NavMesh::FUN_0068efd0(EdgeT* out, unsigned short tri, int idx)
+// src: COMMUNITY 0x0068efd0
+EdgeT* NavMesh::GetEdge_0068efd0(EdgeT* out, unsigned short tri, int idx)
 {
     EdgeT r;
-    r.a = FUN_005582f0(tri)->FUN_005582d0(idx);
+    r.a = FUN_005582f0(tri)->GetVert_005582d0(idx);
     int m2 = (idx + 1) % 3;
-    r.b = FUN_005582f0(tri)->FUN_005582d0(m2);
+    r.b = FUN_005582f0(tri)->GetVert_005582d0(m2);
     *out = r;
     return out;
 }
@@ -1802,7 +1837,8 @@ bool NavMeshTriangle::IsEdgeFlagSet(int aiEdgeIndex)
 
 // Returns true if the triangle's edge entry at aiEdgeIndex is not 0xFFFF.
 // @fnv 0x0068f200
-unsigned char NavMeshTriangle::FUN_0068f200(int aiEdgeIndex)
+// src: XBOX_PDB 0x0068f200
+unsigned char NavMeshTriangle::IsEdgeConnected(int aiEdgeIndex)
 {
     return (unsigned int)(((unsigned short*)((char*)this + 6))[aiEdgeIndex] != 0xFFFF);
 }
@@ -1821,11 +1857,12 @@ struct D2d0Cls
     float m_0c;
     int m_10, m_14, m_18, m_1c, m_20;
     D2d0Elem* m_24;
-    void FUN_0069d2d0();
+    void Clear_0069d2d0();
 };
 // Deletes the m_24 array and clears it, resets m_00 to 0 and sets m_0c to DAT_01016970.
 // @fnv 0x0069d2d0
-void D2d0Cls::FUN_0069d2d0()
+// src: COMMUNITY 0x0069d2d0
+void D2d0Cls::Clear_0069d2d0()
 {
     if (m_24)
     {
@@ -1838,7 +1875,8 @@ void D2d0Cls::FUN_0069d2d0()
 
 NiPointer<NavMesh> MakeNavMeshPointer(NavMesh* pMesh);
 // @fnv 0x0068f3b0
-bool NavMesh::FUN_0068f3b0(unsigned short usTri, int m_iEdgeNumber, NiPointer<NavMesh>& apMeshOut, int a4,
+// src: XBOX_PDB 0x0068f3b0
+bool NavMesh::GetMatchingEdge(unsigned short usTri, int m_iEdgeNumber, NiPointer<NavMesh>& apMeshOut, int a4,
                                     int a5)
 {
     NavMesh* pMesh = 0;
@@ -1855,7 +1893,7 @@ bool NavMesh::FUN_0068f3b0(unsigned short usTri, int m_iEdgeNumber, NiPointer<Na
 
 struct ProxyX
 {
-    bool FUN_0068f2e0(void** appOut);
+    bool NavMeshInfo_GetNavMesh_0(void** appOut);
 };
 
 struct EInfoX
@@ -1872,10 +1910,10 @@ struct EInfoX
 // @fnv 0x0068f460
 bool NavMesh::FindAdjacentEdge(unsigned short aTri, int aEdge, NavMesh** appOutMesh, unsigned short* apTri, int* apEdge)
 {
-    if (aTri >= this->FUN_00558200())
+    if (aTri >= this->NavMesh_GetTriangleCount())
         return false;
     NavMeshTriangle* pTri = this->GetTriangle(aTri);
-    if (pTri->FUN_0068f200(aEdge))
+    if (pTri->IsEdgeConnected(aEdge))
     {
         if (pTri->IsEdgeFlagSet(aEdge))
         {
@@ -1887,10 +1925,10 @@ bool NavMesh::FindAdjacentEdge(unsigned short aTri, int aEdge, NavMesh** appOutM
             else
             {
                 NavMesh* pMesh;
-                if (pEdgeInfo->portal->FUN_0068f2e0((void**)&pMesh))
+                if (pEdgeInfo->portal->NavMeshInfo_GetNavMesh_0((void**)&pMesh))
                 {
                     unsigned short usPortalTri = pEdgeInfo->tri;
-                    if (usPortalTri >= pMesh->FUN_00558200())
+                    if (usPortalTri >= pMesh->NavMesh_GetTriangleCount())
                         return false;
                     NavMeshTriangle* pAdjTriangle = pMesh->GetTriangle(usPortalTri);
                     int q;
@@ -1901,7 +1939,7 @@ bool NavMesh::FindAdjacentEdge(unsigned short aTri, int aEdge, NavMesh** appOutM
                             EInfoX* pE = reinterpret_cast<EInfoX*>(pMesh->GetEdgeInfo(usPortalTri, q));
                             if (!pE)
                                 continue;
-                            if (reinterpret_cast<const void*>(pE->portal) == this->FUN_0068efb0() && pE->tri == aTri)
+                            if (reinterpret_cast<const void*>(pE->portal) == this->GetNavMeshInfo_0068efb0() && pE->tri == aTri)
                                 break;
                         }
                     }
@@ -1926,12 +1964,12 @@ bool NavMesh::FindAdjacentEdge(unsigned short aTri, int aEdge, NavMesh** appOutM
         else
         {
             *appOutMesh = this;
-            *apTri = pTri->FUN_0068f2c0(aEdge);
+            *apTri = pTri->GetEdgeExtraInfo_0068f2c0(aEdge);
             NavMeshTriangle* pAdjTriangle = this->GetTriangle(*apTri);
             int r;
             for (r = 0; r < 3; r++)
             {
-                if (!pAdjTriangle->IsEdgeFlagSet(r) && pAdjTriangle->FUN_0068f2c0(r) == aTri)
+                if (!pAdjTriangle->IsEdgeFlagSet(r) && pAdjTriangle->GetEdgeExtraInfo_0068f2c0(r) == aTri)
                     break;
             }
             if (r >= 3)
@@ -1967,14 +2005,15 @@ public:
 
 // On success, stores the adjacent mesh's navigation info, triangle ID, and edge number in pkOut.
 // @fnv 0x0068f340
-bool NavMesh::FUN_0068f340(const NavMeshEdgeRef* pkRef, NavMeshEdgeOut* pkOut)
+// src: COMMUNITY 0x0068f340
+bool NavMesh::GetMatchingEdge_1(const NavMeshEdgeRef* pkRef, NavMeshEdgeOut* pkOut)
 {
     NavMesh* m_pLocationNavMesh = 0;
     int edgeIndex = -1;
     unsigned short triangle;
     if (FindAdjacentEdge(pkRef->m_usTriangleID, pkRef->m_iEdgeNumber, &m_pLocationNavMesh, &triangle, &edgeIndex))
     {
-        pkOut->m_pNavigationMesh = m_pLocationNavMesh->FUN_0068efb0();
+        pkOut->m_pNavigationMesh = m_pLocationNavMesh->GetNavMeshInfo_0068efb0();
         pkOut->m_usTriangleID = triangle;
         pkOut->m_iEdgeNumber = edgeIndex;
         return true;

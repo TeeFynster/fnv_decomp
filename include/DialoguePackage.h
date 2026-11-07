@@ -107,18 +107,18 @@ public:
     unsigned char unkCC;
 
     void SavePackage();
-    void FUN_00484ce0(void*, int);
+    void TESForm_SaveGameDataOLD(void*, int);
     void ForwardToSaveLoadGame(void*, int);
     void Stop();
     DialogueActor* First();
     DialogueActor* Second();
     DialogueActor* Target();
     void CopyFromPackage(TESForm*);
-    void FUN_009ee060(TESForm* apCopy);
-    unsigned short FUN_009ef560();
-    void FUN_009ef6e0();
-    void FUN_009f0740(BGSLoadFormBuffer* apLoadGameBuffer);
-    void FUN_009f0460(BGSLoadFormBuffer* apSaveBuffer);
+    void Copy_009ee060(TESForm* apCopy);
+    unsigned short GetSaveSize_009ef560();
+    void SaveGame_009ef6e0();
+    void InitLoadGame_009f0740(BGSLoadFormBuffer* apLoadGameBuffer);
+    void LoadGame_009f0460(BGSLoadFormBuffer* apSaveBuffer);
     void LoadSaveData();
     void ResolveReferences();
     void* Destroy(unsigned int flags);
@@ -126,11 +126,11 @@ public:
     bool IsPointerMatch(const void* apValue);
     unsigned char GetByteAtBC();
     Actor* FUN_008d80e0(); // 0x008d80e0
-    Actor* FUN_009ee040(); // 0x009ee040
+    Actor* DialoguePackage_GetActorStartedConversation(); // 0x009ee040
     bool FUN_008e95e0(); // 0x008e95e0
     bool FUN_008e95a0(); // 0x008e95a0
     void FUN_008e9600(int); // 0x008e9600
-    bool __thiscall FUN_008e95c0();
+    bool __thiscall DialoguePackage_GetTargetContinueMoving();
     bool FUN_0087eed0();                     // 0x0087eed0 (HighProcess::Update 0x008eeec0)
-    void FUN_009ee0a0(bool process);
+    void DialoguePackage_Speak(bool process);
 };

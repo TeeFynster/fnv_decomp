@@ -10,7 +10,7 @@ void __cdecl operator delete(void*);
 
 struct FUN_004edb30_t
 {
-    void FUN_004edb30();
+    void SetVtableAndProcessState_004edb30();
     void* __thiscall FUN_004edd50(unsigned int flags);
 };
 
@@ -18,7 +18,7 @@ struct FUN_004edb30_t
 // @fnv 0x004edd50
 void* __thiscall FUN_004edb30_t::FUN_004edd50(unsigned int flags)
 {
-    FUN_004edb30();
+    SetVtableAndProcessState_004edb30();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -31,11 +31,12 @@ struct NiPointerListBase
 {
     void* p;
     void* q;
-    void __thiscall FUN_004edc60();
+    void __thiscall ReleaseStorage_004edc60();
 };
 
 // @fnv 0x004edc60
-void __thiscall NiPointerListBase::FUN_004edc60()
+// src: GUESS 0x004edc60 (confidence: medium)
+void __thiscall NiPointerListBase::ReleaseStorage_004edc60()
 {
     p = &DAT_010232b4;
     NiTMallocInterface<void*>::Deallocate((void**)q);
@@ -49,11 +50,12 @@ struct FUN_004edf70_t
 };
 struct FUN_004edc90_t
 {
-    void* __thiscall FUN_004edc90(int a, int b);
+    void* __thiscall NiTPrimitiveArray_enum_BSTextureManager_eTextureType_NiTPrimitiveArray(int a, int b);
 };
 // Calls FUN_004edf70 with the two arguments, then stores the address of DAT_010232bc as the object's first field and returns this.
 // @fnv 0x004edc90
-void* __thiscall FUN_004edc90_t::FUN_004edc90(int a, int b)
+// src: EXE 0x004edc90
+void* __thiscall FUN_004edc90_t::NiTPrimitiveArray_enum_BSTextureManager_eTextureType_NiTPrimitiveArray(int a, int b)
 {
     reinterpret_cast<FUN_004edf70_t*>(this)->FUN_004edf70(a, b);
     *reinterpret_cast<int**>(this) = &DAT_010232bc;
@@ -96,7 +98,8 @@ int* __thiscall FUN_004edcf0_t::InitWithGlobal(int a, int b)
 void __cdecl NiFreeAlias(void*);
 
 // @fnv 0x004ede70
-void __cdecl FUN_004ede70(void* apMemory)
+// src: XBOX_PDB 0x004ede70
+void __cdecl NiTMallocInterface_unsigned_int_Deallocate(void* apMemory)
 {
     NiFreeAlias(apMemory);
 }
@@ -109,10 +112,11 @@ struct MyMap
 };
 struct FUN_004eda30_t
 {
-    void __thiscall FUN_004eda30();
+    void __thiscall SetVtableAndProcessState_004eda30();
 };
 // @fnv 0x004eda30
-void __thiscall FUN_004eda30_t::FUN_004eda30()
+// src: GUESS 0x004eda30 (confidence: low)
+void __thiscall FUN_004eda30_t::SetVtableAndProcessState_004eda30()
 {
     *(int**)(void*)this = (int*)&DAT_01023254;
     ((MyMap*)(void*)this)->RemoveAll();
@@ -190,11 +194,12 @@ void* __cdecl NiMalloc(unsigned int size);
 void* __cdecl memset(void* dst, int c, unsigned int n);
 struct FUN_004eda60_t
 {
-    void* __thiscall FUN_004eda60(unsigned int count);
+    void* __thiscall NiTMapBase_NiTPointerAllocator_unsigned_int_TESWaterForm_bool_NiTMapBase_NiTPointerAllocator_unsigned_int_TESWaterForm_bool(unsigned int count);
 };
 // Sets the vtable, stores count, allocates count*4 bytes, zeroes the buffer, and returns this.
 // @fnv 0x004eda60
-void* __thiscall FUN_004eda60_t::FUN_004eda60(unsigned int count)
+// src: COMMUNITY 0x004eda60
+void* __thiscall FUN_004eda60_t::NiTMapBase_NiTPointerAllocator_unsigned_int_TESWaterForm_bool_NiTMapBase_NiTPointerAllocator_unsigned_int_TESWaterForm_bool(unsigned int count)
 {
     unsigned int size;
     *(int*)this = (int)&DAT_01023274;
@@ -211,11 +216,12 @@ void* __cdecl _NiMalloc(unsigned int);
 void* __cdecl memset(void*, int, unsigned int);
 struct FUN_004edb60_t
 {
-    int* __thiscall FUN_004edb60(int size);
+    int* __thiscall NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_WadingWaterData_NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_WadingWaterData(int size);
 };
 // Sets the vtable, stores size, allocates size*4 bytes, zeroes the buffer and returns this.
 // @fnv 0x004edb60
-int* __thiscall FUN_004edb60_t::FUN_004edb60(int size)
+// src: COMMUNITY 0x004edb60
+int* __thiscall FUN_004edb60_t::NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_WadingWaterData_NiTMapBase_NiTPointerAllocator_unsigned_int_TESObjectREFR_WadingWaterData(int size)
 {
     int tmp;
     *(int*)this = (int)&DAT_01023294;
@@ -267,7 +273,7 @@ struct FUN_004eddb0_t
 // @fnv 0x004eddb0
 void* FUN_004eddb0_t::FUN_004eddb0(unsigned int flags)
 {
-    ((NiPointerListBase*)this)->FUN_004edc60();
+    ((NiPointerListBase*)this)->ReleaseStorage_004edc60();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -276,14 +282,14 @@ void* FUN_004eddb0_t::FUN_004eddb0(unsigned int flags)
 void __cdecl operator delete(void*);
 struct FUN_004ebb30_shell
 {
-    void FUN_004ebb30();
+    void ForwardCall_004ebb30();
     void* __thiscall FUN_004edde0(unsigned int flags);
 };
 // Calls FUN_004ebb30, then frees this with operator delete when flags has bit 0 set, and returns this.
 // @fnv 0x004edde0
 void* FUN_004ebb30_shell::FUN_004edde0(unsigned int flags)
 {
-    FUN_004ebb30();
+    ForwardCall_004ebb30();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -307,14 +313,14 @@ namespace fnv_004ede40 {
 void __cdecl operator delete(void*);
 struct FUN_004ebb50_shell
 {
-    void __thiscall FUN_004ebb50();
+    void __thiscall InitAndDeallocate_Thunk();
     void* __thiscall FUN_004ede40(unsigned int flags);
 };
 // Calls FUN_004ebb50, then deletes this if flags has bit 0 set, and returns this.
 // @fnv 0x004ede40
 void* __thiscall FUN_004ebb50_shell::FUN_004ede40(unsigned int flags)
 {
-    FUN_004ebb50();
+    InitAndDeallocate_Thunk();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -356,7 +362,7 @@ struct FUN_004edd20_shell
 // @fnv 0x004edd20
 void* FUN_004edd20_shell::FUN_004edd20(unsigned int flags)
 {
-    ((FUN_004eda30_t*)this)->FUN_004eda30();
+    ((FUN_004eda30_t*)this)->SetVtableAndProcessState_004eda30();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -427,7 +433,8 @@ extern int DAT_01023274;
 
 // Sets the first word to DAT_01023274, calls RemoveAll, then frees the pointer at offset 8 with NiFreeAlias.
 // @fnv 0x004edb30
-void FUN_004edb30_t::FUN_004edb30()
+// src: GUESS 0x004edb30 (confidence: low)
+void FUN_004edb30_t::SetVtableAndProcessState_004edb30()
 {
     *(int**)this = &DAT_01023274;
     ((MyMap*)this)->RemoveAll();

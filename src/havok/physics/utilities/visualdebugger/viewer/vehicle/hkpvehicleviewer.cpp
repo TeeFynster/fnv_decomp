@@ -24,7 +24,7 @@
 
 
 
-void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* array, int numElements, int sizeElem);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* alloc, void* array, int numElements, int sizeElem);
 void __cdecl D625A0MemMove(void* dst, const void* src, unsigned int nbytes);
 
 
@@ -34,7 +34,8 @@ void __cdecl D625A0MemMove(void* dst, const void* src, unsigned int nbytes);
 
 extern char d_010d17d0;
 // @fnv 0x00d634d0
-char* FUN_00d634d0()
+// src: GUESS 0x00d634d0 (confidence: low)
+char* Hkpvehicleviewer_GetD010d17d0Address()
 {
     return &d_010d17d0;
 }
@@ -104,19 +105,19 @@ struct Container : hkReferencedObject, hkProcess, OurPart, NotifyTarget, SecondT
 };
 
 // Listener registration is not declared in hkpWorld's shared header yet.
-extern void FUN_00c937a0();
+extern void hkpWorld_addActionListener();
 
 __forceinline void RegisterNotifyTarget(hkpWorld* world, NotifyTarget* target)
 {
     typedef void (__thiscall* RegisterFn)(hkpWorld*, NotifyTarget*);
-    reinterpret_cast<RegisterFn>(FUN_00c937a0)(world, target);
+    reinterpret_cast<RegisterFn>(hkpWorld_addActionListener)(world, target);
 }
 
 // @fnv 0x00d63520
 void OurPart::RegisterAndNotify(hkpWorld* apRegistry)
 {
     RegisterNotifyTarget(apRegistry, (Container*)((char*)this - 0x20));
-    apRegistry->FUN_00c93920(static_cast<SecondTarget*>((Container*)((char*)this - 0x20)));
+    apRegistry->hkpWorld_addWorldPostSimulationListener(static_cast<SecondTarget*>((Container*)((char*)this - 0x20)));
 
     hkpPhysicsSystem* pItemList = apRegistry->getWorldAsOneSystem();
     for (int i = 0; i < pItemList->m_ppActions.m_iElementCount; i++)
@@ -130,7 +131,8 @@ extern hkProcessFactory* DAT_01269cd0;
 extern const char DAT_010d17c4;
 extern void AllocAndInitObject();
 // @fnv 0x00d63da0
-void __cdecl FUN_00d63da0()
+// src: GUESS 0x00d63da0 (confidence: low)
+void __cdecl Object_UpdateFields_00d63da0()
 {
     DAT_01268fcc = DAT_01269cd0->RegisterProcess(&DAT_010d17c4, (void*)AllocAndInitObject);
 }
@@ -138,7 +140,8 @@ void __cdecl FUN_00d63da0()
 extern int g_D63DC0Value;
 
 // @fnv 0x00d63dc0
-int __cdecl FUN_00d63dc0()
+// src: GUESS 0x00d63dc0 (confidence: low)
+int __cdecl Object_GetG_D63DC0Value_00d63dc0()
 {
     return g_D63DC0Value;
 }
@@ -149,7 +152,7 @@ int __cdecl FUN_00d63dc0()
 // the code recovers the owner pointer (this - 0x20) and passes it on to the
 // two Target methods, which are called with the owner as their `this`.
 // These two listener-removal methods are absent from the shared hkpWorld declaration.
-extern void FUN_00c91700();
+extern void hkpWorld_removeActionListener();
 extern void FUN_00c918e0();
 
 struct FUN_00d63480_cls
@@ -172,7 +175,7 @@ void FUN_00d63480_cls::PassMembersToTarget(hkpWorld* apTarget)
 {
     char* pOwner = (char*)this - 0x20;
     typedef void (__thiscall* RemoveListenerFn)(hkpWorld*, void*);
-    reinterpret_cast<RemoveListenerFn>(FUN_00c91700)(apTarget, pOwner ? (void*)((char*)this + 8) : (void*)0);
+    reinterpret_cast<RemoveListenerFn>(hkpWorld_removeActionListener)(apTarget, pOwner ? (void*)((char*)this + 8) : (void*)0);
     reinterpret_cast<RemoveListenerFn>(FUN_00c918e0)(apTarget, pOwner ? (void*)((char*)this + 0xc) : (void*)0);
 }
 
@@ -242,7 +245,7 @@ FUN_00d63c50::FUN_00d63c50(ViewerArg* arg) : WorldViewerBase(arg)
     m_38 = 0x80000000;
 }
 
-void* __cdecl FUN_00c85750() throw();
+void* __cdecl hkMemoryRouter_getInstance() throw();
 struct S_B20
 {
     virtual void b20v0();
@@ -262,7 +265,7 @@ inline hkpWorldPostSimulationListener::~hkpWorldPostSimulationListener() throw()
 // hkArray<T>::~hkArray() = clearAndDeallocate() on the heap allocator.
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return reinterpret_cast<hkMemoryAllocator&>(((hkMemoryRouter*)FUN_00c85750())->heap());
+    return reinterpret_cast<hkMemoryAllocator&>(((hkMemoryRouter*)hkMemoryRouter_getInstance())->heap());
 }
 template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& heap)
 {
@@ -294,7 +297,7 @@ FUN_00d63cb0::~FUN_00d63cb0() throw()
 }
 
 namespace fnv_00d63d60 {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00d63d60_obj
 {
@@ -309,7 +312,7 @@ struct FUN_00d63d60_obj
 // @fnv 0x00d63d60
 void* AllocAndInitObject(int a1)
 {
-    hkMemoryRouter* pAllocHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter* pAllocHolder = reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     hkMemoryAllocator* pAllocator = pAllocHolder->m_heap;
     typedef void* (__thiscall* AllocFn)(hkMemoryAllocator*, unsigned int);
     FUN_00d63d60_obj* obj = reinterpret_cast<FUN_00d63d60_obj*>(
@@ -325,7 +328,7 @@ void* AllocAndInitObject(int a1)
 }  // namespace fnv_00d63d60
 
 namespace fnv_00d63e10 {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00d63e10_cls
 {
@@ -345,7 +348,7 @@ FUN_00d63e10_cls* FUN_00d63e10_cls::Destroy(unsigned char acFlags)
     FUN_00d63cb0();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }
@@ -354,7 +357,7 @@ FUN_00d63e10_cls* FUN_00d63e10_cls::Destroy(unsigned char acFlags)
 }  // namespace fnv_00d63e10
 
 namespace hkD635 {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iSizeElem) throw();
@@ -382,7 +385,7 @@ __forceinline hkVtableClassRegistry* GetVtableClassRegistry(hkBuiltinTypeRegistr
 }
 
 // hkClass's superclass test is external to this unit.
-extern void FUN_00d46d80();
+extern void hkClass_isSuperClass();
 
 namespace hkD635 {
 extern hkBuiltinTypeRegistry* DAT_01268b08;
@@ -408,7 +411,7 @@ __forceinline void _pushBack(hkArray<T>& array, hkMemoryRouter& router, const T&
 template <class T>
 __forceinline void AddBack(hkArray<T>& array, const T& t)
 {
-    _pushBack(array, hkD635::FUN_00c85750(), t);
+    _pushBack(array, hkD635::hkMemoryRouter_getInstance(), t);
 }
 
 class VehicleViewerD635
@@ -435,7 +438,7 @@ void VehicleViewerD635::AddVehicle(hkReferencedObject* pkObj)
         void (*address)();
         IsSuperClassFn method;
     } isSuperClass;
-    isSuperClass.address = FUN_00d46d80;
+    isSuperClass.address = hkClass_isSuperClass;
     if (pkVehicleClass && pkObjClass && (pkVehicleClass->*isSuperClass.method)(*pkObjClass))
     {
         pkObj->addReference();
@@ -476,20 +479,21 @@ static TO g_thunk;
 // `this` back by the size of the primary base (8 = vptr + one int field).
 struct PrimaryBase
 {
-    virtual void FUN_00d63de0();
+    virtual void AdjustThisAndForward_00d63de0();
     int unk04;
 };
 
 struct SecondaryBase
 {
-    virtual void FUN_00d63de0();
+    virtual void AdjustThisAndForward_00d63de0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00d63de0
-    virtual void FUN_00d63de0();
+// src: GUESS 0x00d63de0 (confidence: low)
+    virtual void AdjustThisAndForward_00d63de0();
 };
 
 Derived::Derived()
@@ -518,20 +522,21 @@ Parent::Parent()
 struct A1_00d63e00
 {
     A1_00d63e00();
-    virtual void FUN_00d63e00();
+    virtual void AdjustThisAndForward_00d63e00();
     char pad[0x28];
 };
 struct A2_00d63e00
 {
     A2_00d63e00();
-    virtual void FUN_00d63e00();
+    virtual void AdjustThisAndForward_00d63e00();
 };
 struct Own_00d63e00 : A1_00d63e00, A2_00d63e00
 {
     Own_00d63e00();
     virtual void key_fn();
 // @fnv 0x00d63e00
-    void FUN_00d63e00();
+// src: GUESS 0x00d63e00 (confidence: low)
+    void AdjustThisAndForward_00d63e00();
 };
 Own_00d63e00::Own_00d63e00()
 {}
@@ -569,12 +574,13 @@ class D63590List
     int unk04;
     hkArray<unsigned int> m_items;
 
-    void FUN_00d63590(unsigned int value);
+    void hkpVehicleViewer_actionRemovedCallback(unsigned int value);
 };
 
 // Finds value in m_items, removes it at that index, and releases its reference.
 // @fnv 0x00d63590
-void D63590List::FUN_00d63590(unsigned int value)
+// src: HAVOK_LIB 0x00d63590
+void D63590List::hkpVehicleViewer_actionRemovedCallback(unsigned int value)
 {
     int index = indexOf(m_items, value);
     if (index != -1)
@@ -597,7 +603,7 @@ void hkArrayBase<char>::_spliceInto(hkMemoryAllocator& kSharedAlloc, int index, 
     {
         int iDoubledCapacity = 2 * iCapacity;
         int iNewCapacity = (iNewLength < iDoubledCapacity) ? iDoubledCapacity : iNewLength;
-        FUN_00c908c0(&alloc, this, iNewCapacity, sizeof(char));
+        hkArrayUtil__reserve(&alloc, this, iNewCapacity, sizeof(char));
     }
     D625A0MemMove(m_data + index + aiNumInsert, m_data + index + aiNumDelete, numtomove * sizeof(char));
     char* dst = m_data + index;

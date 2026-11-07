@@ -11,7 +11,7 @@
 namespace fnv_00a3b150 {
 struct MorphMemoryManager
 {
-    void* FUN_00aa3e40(unsigned int size);
+    void* Game_DoHeapAlloc(unsigned int size);
 };
 extern MorphMemoryManager DAT_011f6238;
 struct BinaryReader
@@ -190,8 +190,8 @@ struct MorphStream
     unsigned int unk280;
     unsigned short unk284;
     unsigned short legacyFlags;
-    void FUN_00a645b0();
-    void FUN_00a64670();
+    void ReadLinkID();
+    void NiStream_ReadMultipleLinkIDs();
     NiInterpolator* FUN_00a64620();
 };
 struct LoadBase : NiInterpController
@@ -208,7 +208,7 @@ struct LoadItem
     {}
     static void* operator new[](unsigned int size) throw()
     {
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
 };
 struct MorphLoad : LoadBase
@@ -221,17 +221,18 @@ struct MorphLoad : LoadBase
     bool m_bUpdateNormals;
     bool m_bNeedsUpdate;
     bool m_bUpdateBounds;
-    void FUN_00a3b150(MorphStream& stream);
+    void NiGeomMorpherController_LoadBinary(MorphStream& stream);
 };
 // @fnv 0x00a3b150
-void MorphLoad::FUN_00a3b150(MorphStream& stream)
+// src: XBOX_PDB 0x00a3b150
+void MorphLoad::NiGeomMorpherController_LoadBinary(MorphStream& stream)
 {
     LoadBase::LoadBinary(stream);
     if (stream.version < 0x0a000102)
         m_uiObjectFlags = (stream.legacyFlags >> 5) & 0x3f;
     else
         stream.reader->Read(&m_uiObjectFlags, 2);
-    stream.FUN_00a645b0();
+    stream.ReadLinkID();
     if (stream.version >= 0x04000002)
     {
         unsigned char value;
@@ -242,7 +243,7 @@ void MorphLoad::FUN_00a3b150(MorphStream& stream)
     {
         if (stream.version < 0x14010003)
         {
-            stream.FUN_00a64670();
+            stream.NiStream_ReadMultipleLinkIDs();
         }
         else
         {

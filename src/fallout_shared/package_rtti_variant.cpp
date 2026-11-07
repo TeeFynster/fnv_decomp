@@ -17,15 +17,15 @@ struct P : TESPackage
     int GetPackType();
     bool FUN_00678610();
     bool HasFlag400000();
-    bool FUN_0067a460();
+    bool TESPackage_GetDrawWeaponFlag();
     bool FUN_00441b00();
     void SetPackageType(int);
-    void FUN_00671a20(bool);
+    void SetDrawWeaponFlag(bool);
     void SetFlag200000(bool);
     void SetMustReachLocation(bool);
     void SetMustComplete(bool);
-    void FUN_00671d30(Loc*);
-    void FUN_00672fc0(Target*);
+    void SetPackageLocation(Loc*);
+    void SetPackageTarget(Target*);
     void SetProcedureType(int);
     Target* FUN_00671d10();
     bool IsSpellInList(A*);
@@ -42,7 +42,7 @@ struct Loc
     int unk00, unk04, unk08;
     Loc();
     ~Loc();
-    void FUN_0067f3c0(A*);
+    void PackageLocation_SetLocReference(A*);
 };
 struct Target
 {
@@ -814,36 +814,37 @@ struct A
     int unk60;
     int unk64;
     Proc* process;
-    A* FUN_0084e3a0();
+    A* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     Proc* GetCurrentProcess();
     unsigned char GetByteAt7C4();
-    P* FUN_00881510();
+    P* Actor_GetPackageSetAsPcurrent();
     P* GetCurrentPackage();
-    P* FUN_005d43c0();
-    bool FUN_00493bb0();
-    bool FUN_008a6650(int);
+    P* BSFile_GetDevice();
+    bool Actor_IsInCombat();
+    bool Actor_IsFleeing(int);
     unsigned int FUN_0044ddc0();
-    bool FUN_00833c20();
-    void FUN_00881680(int);
+    bool ActiveEffect_IsActive();
+    void Actor_EndInterruptPackage(int);
     Cls* GetClass();
     void FUN_008bf4e0(int);
-    bool FUN_005653d0();
+    bool TESObjectREFR_GetRefPersists_005653d0();
     void AddActor(A*);
-    void FUN_008bed50(A*, int, bool, A*);
+    void Actor_InitiateAlarm(A*, int, bool, A*);
 };
 struct Extra
 {
-    P* FUN_0041cb10();
+    P* ExtraDataList_GetPackageExtra();
 };
 // @fnv 0x008bed50
-void A::FUN_008bed50(A* source, int value, bool react, A* target)
+// src: COMMUNITY 0x008bed50
+void A::Actor_InitiateAlarm(A* source, int value, bool react, A* target)
 {
     if (process && process->GetAssignedPackage() && process->GetAssignedPackage()->GetPackType() == 21)
         return;
     if (IsSpecial())
     {
         if (source && !target)
-            target = source->FUN_0084e3a0();
+            target = source->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         List* val;
         val = gLists.CollectActorsByPackage(target, 21, 0);
         if (!val)
@@ -869,16 +870,16 @@ void A::FUN_008bed50(A* source, int value, bool react, A* target)
         ResetState();
     P* v = 0;
     P* package2;
-    package2 = FUN_00881510();
+    package2 = Actor_GetPackageSetAsPcurrent();
     if (package2 && package2->FUN_00678610())
-        package2 = ((Extra*)FUN_005d43c0())->FUN_0041cb10();
-    if ((FUN_00493bb0() || IsState(0) || FUN_008a6650(0) ||
+        package2 = ((Extra*)BSFile_GetDevice())->ExtraDataList_GetPackageExtra();
+    if ((Actor_IsInCombat() || IsState(0) || Actor_IsFleeing(0) ||
          (package2 && package2->HasFlag400000() && source &&
           source->FUN_0044ddc0() != (unsigned int)process->GetTarget())) &&
         react)
     {
-        if (!IsState(0) && !source->FUN_00833c20())
-            process->React(this, source->FUN_0084e3a0(), source);
+        if (!IsState(0) && !source->ActiveEffect_IsActive())
+            process->React(this, source->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), source);
         return;
     }
     process->Prepare();
@@ -887,22 +888,22 @@ void A::FUN_008bed50(A* source, int value, bool react, A* target)
         if (GetCurrentPackage()->GetPackType() == 21)
             v = GetCurrentPackage();
         else if (GetCurrentPackage()->FUN_00678610())
-            FUN_00881680(0);
+            Actor_EndInterruptPackage(0);
     }
     if (source && GetClass()->IsGuard())
     {
         source->FUN_008bf4e0(1);
-        if (source->FUN_0084e3a0()->IsActor() && source->FUN_0084e3a0() != player &&
-            !source->FUN_0084e3a0()->FUN_00493bb0() && source->FUN_0084e3a0()->FUN_005653d0())
+        if (source->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->IsActor() && source->GetHavokWorldObjectCountInSceneGraph_0084e3a0() != player &&
+            !source->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->Actor_IsInCombat() && source->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->TESObjectREFR_GetRefPersists_005653d0())
         {
             A* locationX;
-            locationX = source->FUN_0084e3a0();
-            if (!locationX->FUN_008a6650(0))
+            locationX = source->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            if (!locationX->Actor_IsFleeing(0))
                 locationX->Flee(this, 0, 1, 1, 0, 0, -1.0f, -1.0f);
             FleePackage* flee;
             flee = dynamic_cast<FleePackage*>(static_cast<TESPackage*>(locationX->GetCurrentPackage()));
             if (flee)
-                flee->FUN_009f1310(this);
+                flee->AddAvoidedRef(this);
         }
     }
     if (!v)
@@ -913,26 +914,26 @@ void A::FUN_008bed50(A* source, int value, bool react, A* target)
         current->SetPackageType(21);
         if (tmp)
         {
-            current->FUN_00671a20(tmp->FUN_0067a460());
+            current->SetDrawWeaponFlag(tmp->TESPackage_GetDrawWeaponFlag());
             current->SetFlag200000(tmp->FUN_00441b00());
         }
         current->SetMustReachLocation(true);
         current->SetMustComplete(true);
         Loc* s = new Loc;
         if (source)
-            s->FUN_0067f3c0(source->FUN_0084e3a0());
+            s->PackageLocation_SetLocReference(source->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
         else
-            s->FUN_0067f3c0(target);
-        current->FUN_00671d30(s);
+            s->PackageLocation_SetLocReference(target);
+        current->SetPackageLocation(s);
         delete s;
         Target* created;
         created = new Target;
-        current->FUN_00672fc0(created);
+        current->SetPackageTarget(created);
         delete created;
         current->SetProcedureType(11);
         current->FUN_00671d10()->FUN_006800b0(0);
         if (source)
-            current->FUN_00671d10()->FUN_00680110(source->FUN_0084e3a0());
+            current->FUN_00671d10()->FUN_00680110(source->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
         else
             current->FUN_00671d10()->FUN_00680110(target);
         GetCurrentProcess()->Reset();
@@ -942,6 +943,6 @@ void A::FUN_008bed50(A* source, int value, bool react, A* target)
             source->AddActor(this);
         process->SetValue(value);
     }
-    else if (source && process->GetTarget() == source->FUN_0084e3a0() && !v->IsSpellInList(source))
+    else if (source && process->GetTarget() == source->GetHavokWorldObjectCountInSceneGraph_0084e3a0() && !v->IsSpellInList(source))
         v->AddHeadAtOffset(source);
 }

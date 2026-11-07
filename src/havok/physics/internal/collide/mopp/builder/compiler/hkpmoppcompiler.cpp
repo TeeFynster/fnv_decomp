@@ -14,7 +14,7 @@ struct SubFirst
     int m_i10;
     int m_i14;
 
-    void FUN_00dd50f0(InitArg* apArg);
+    void hkpMoppSplitter_hkpMoppSplitParams_hkpMoppSplitParams(InitArg* apArg);
 };
 
 struct SubSecond
@@ -28,7 +28,7 @@ struct SubSecond
     int m_i18;
     int m_i1c;
 
-    void FUN_00dd5150(InitArg* apArg);
+    void hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(InitArg* apArg);
 };
 
 struct FUN_00dd4bf0
@@ -52,8 +52,8 @@ struct FUN_00dd4bf0
 // @fnv 0x00dd4bf0
 FUN_00dd4bf0::FUN_00dd4bf0(InitArg* apArg)
 {
-    m_kFirst.FUN_00dd50f0(apArg);
-    m_kSecond.FUN_00dd5150(apArg);
+    m_kFirst.hkpMoppSplitter_hkpMoppSplitParams_hkpMoppSplitParams(apArg);
+    m_kSecond.hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(apArg);
 
     m_fCoefficientA = 0.5f;
     m_fB = 0.2f;

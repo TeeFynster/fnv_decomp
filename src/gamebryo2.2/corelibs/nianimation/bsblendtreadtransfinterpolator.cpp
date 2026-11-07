@@ -26,13 +26,14 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f3ed0;
 
 // @fnv 0x00a42fe0
-GlobalObjectO2_00a7b610* __cdecl FUN_00a42fe0()
+// src: COMMUNITY 0x00a42fe0
+GlobalObjectO2_00a7b610* __cdecl BSBlendTreadTransfInterpolator_GetRTTI()
 {
     return &g_011f3ed0;
 }
 
 extern int DAT_01097904;
-NiBlendInterpolator* __fastcall FUN_00a36890(NiBlendInterpolator*);
+NiBlendInterpolator* __fastcall NiBlendInterpolator_NiBlendInterpolator(NiBlendInterpolator*);
 // @fnv 0x00a42ff0
 NiObject* BSBlendTreadTransfInterpolator::MakeClone(CloningProcess& kCloning)
 {
@@ -40,7 +41,7 @@ NiObject* BSBlendTreadTransfInterpolator::MakeClone(CloningProcess& kCloning)
     pkObject = (BSBlendTreadTransfInterpolator*)BSFadeNode::operator new(0x34);
     if (pkObject)
     {
-        FUN_00a36890(pkObject);
+        NiBlendInterpolator_NiBlendInterpolator(pkObject);
         pkObject->m_fPhase = 0.0f;
         *(void**)pkObject = (void*)&DAT_01097904;
     }
@@ -54,7 +55,8 @@ NiObject* BSBlendTreadTransfInterpolator::MakeClone(CloningProcess& kCloning)
 }
 
 // @fnv 0x00a39100
-bool __stdcall FUN_00a39100(NiInterpolator* pkInterpolator)
+// src: COMMUNITY 0x00a39100
+bool __stdcall NiBlendAccumTransformInterpolator_InterpolatorIsCorrectType(NiInterpolator* pkInterpolator)
 {
     return pkInterpolator->IsTransformValueSupported();
 }
@@ -134,34 +136,38 @@ bool BSBlendTreadTransfInterpolator::UpdateAccumulatedTransform(float time, NiOb
     return true;
 }
 
-void __cdecl FUN_00a36f80();
+void __cdecl NiBlendInterpolator_RegisterStreamables();
 // @fnv 0x00a40a00
-void __cdecl FUN_00a40a00()
+// src: XBOX_PDB 0x00a40a00
+void __cdecl BSBlendTreadTransfInterpolator_RegisterStreamables()
 {
-    FUN_00a36f80();
+    NiBlendInterpolator_RegisterStreamables();
 }
 
-void __cdecl FUN_00a37ec0();
+void __cdecl NiBlendInterpolator_SaveBinary();
 // @fnv 0x00a40a10
-void __cdecl FUN_00a40a10()
+// src: XBOX_PDB 0x00a40a10
+void __cdecl BSBlendTreadTransfInterpolator_SaveBinary()
 {
-    FUN_00a37ec0();
+    NiBlendInterpolator_SaveBinary();
 }
 
-void __cdecl FUN_00a37980();
+void __cdecl NiBlendInterpolator_LoadBinary();
 
 // @fnv 0x00a42fc0
-void __cdecl FUN_00a42fc0()
+// src: XBOX_PDB 0x00a42fc0
+void __cdecl BSBlendTreadTransfInterpolator_LoadBinary()
 {
-    FUN_00a37980();
+    NiBlendInterpolator_LoadBinary();
 }
 
-void __cdecl FUN_00a36fd0();
+void __cdecl NiBlendInterpolator_IsEqual();
 
 // @fnv 0x00a42fd0
-void __cdecl FUN_00a42fd0()
+// src: XBOX_PDB 0x00a42fd0
+void __cdecl BSBlendTreadTransfInterpolator_IsEqual()
 {
-    FUN_00a36fd0();
+    NiBlendInterpolator_IsEqual();
 }
 
 extern float DAT_0109696c;
@@ -207,7 +213,8 @@ extern int DAT_0109697c;
 void __fastcall InitializeInterpolator(NiInterpolator* interpolator);
 
 // @fnv 0x00a36890
-NiBlendInterpolator* __fastcall FUN_00a36890(NiBlendInterpolator* interpolator)
+// src: GAMEBRYO_LIB 0x00a36890
+NiBlendInterpolator* __fastcall NiBlendInterpolator_NiBlendInterpolator(NiBlendInterpolator* interpolator)
 {
     InitializeInterpolator(interpolator);
     *reinterpret_cast<void**>(interpolator) = &DAT_0109697c;

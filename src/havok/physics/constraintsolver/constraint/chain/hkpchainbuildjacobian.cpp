@@ -188,12 +188,12 @@ __forceinline void hkMatrix3::setZero()
     getColumn(2) = zero;
 }
 
-void __cdecl FUN_00cd5530(hkMatrix3* thisMatrix, const hkMatrix3& aTb, const hkMatrix3& bTc);
-void __cdecl FUN_00cd55a0(hkMatrix3& thisMatrix);
+void __cdecl hkMatrix3_MultiplyMatrixColumns(hkMatrix3* thisMatrix, const hkMatrix3& aTb, const hkMatrix3& bTc);
+void __cdecl Object_ForwardCall_00cd55a0(hkMatrix3& thisMatrix);
 
 __forceinline void hkMatrix3::_setMul(const hkMatrix3& aTb, const hkMatrix3& bTc)
 {
-    FUN_00cd5530(this, aTb, bTc);
+    hkMatrix3_MultiplyMatrixColumns(this, aTb, bTc);
 }
 
 template <class T> class ByteView
@@ -461,7 +461,7 @@ __forceinline void buildConstraintMatrixLuDecompositionForBallAndSocketChain(
             hkReal& e = triple[row].m_diagInv(k, k);
             e = hkMath_max2<hkReal>(e, 1.192092896e-07F);
         }
-        FUN_00cd55a0(triple[row].m_diagInv);
+        Object_ForwardCall_00cd55a0(triple[row].m_diagInv);
         triple[row].m_upper._setMul(triple[row].m_diagInv, nonDiag);
         prevNonDiag = nonDiag;
         prevUpper = triple[row].m_upper;
@@ -470,7 +470,8 @@ __forceinline void buildConstraintMatrixLuDecompositionForBallAndSocketChain(
 
 // Initializes a BallSocketChainSchema, builds LU-decomposed constraint matrices, and advances the schema pointer past the schema block.
 // @fnv 0x00dd0ad0
-extern "C" void FUN_00dd0ad0(int numConstraints, hkReal tau, hkReal afMotorDamping, hkReal cfm,
+// src: XBOX_PDB 0x00dd0ad0
+extern "C" void hkBallSocketChainBuildJacobian(int numConstraints, hkReal tau, hkReal afMotorDamping, hkReal cfm,
                              QuantizedBoundsDataOffset* accumulatorOffsets, const QuantizedBoundsData* accumsBase,
                              Matrix3LowerDiagonalUpperFactors* tripleBuffer, int bufferSize,
                              hkPadSpu<SolverSchemaHeader*>& schemaInOut)

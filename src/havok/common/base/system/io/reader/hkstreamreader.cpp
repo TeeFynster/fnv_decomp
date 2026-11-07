@@ -49,33 +49,37 @@ int Stream::ReadChar()
 
 struct S_00cb1570
 {
-    int FUN_00cb1570(void* pArg);
+    int ReturnOne(void* pArg);
 };
 // @fnv 0x00cb1570
-int S_00cb1570::FUN_00cb1570(void* pArg)
+// src: GUESS 0x00cb1570 (confidence: high)
+int S_00cb1570::ReturnOne(void* pArg)
 {
     return 1;
 }
 
 // @fnv 0x00cb1580
-int __cdecl FUN_00cb1580()
+// src: GUESS 0x00cb1580 (confidence: high)
+int __cdecl Object_ReturnOne()
 {
     return 1;
 }
 
 // @fnv 0x00cb15c0
-void __stdcall FUN_00cb15c0(char* p)
+// src: HAVOK_SRC 0x00cb15c0
+void __stdcall hkStreamReader_seekTellSupported(char* p)
 {
     *p = 0;
 }
 
 struct CB1590Object
 {
-    virtual int FUN_00cb1590(const void* a, const void* b) const;
+    virtual int ReturnOne(const void* a, const void* b) const;
 };
 
 // @fnv 0x00cb1590
-int CB1590Object::FUN_00cb1590(const void* a, const void* b) const
+// src: GUESS 0x00cb1590 (confidence: high)
+int CB1590Object::ReturnOne(const void* a, const void* b) const
 {
     return 1;
 }
@@ -92,17 +96,19 @@ struct CB15B0Bool
 
 struct CB15B0Object
 {
-    virtual CB15B0Bool FUN_00cb15b0() const;
+    virtual CB15B0Bool hkStreamReader_markSupported() const;
 };
 
 // @fnv 0x00cb15b0
-CB15B0Bool CB15B0Object::FUN_00cb15b0() const
+// src: HAVOK_SRC 0x00cb15b0
+CB15B0Bool CB15B0Object::hkStreamReader_markSupported() const
 {
     return false;
 }
 
 // @fnv 0x00cb15a0
-int FUN_00cb15a0()
+// src: HAVOK_SRC 0x00cb15a0
+int hkStreamReader_tell()
 {
     return -1;
 }

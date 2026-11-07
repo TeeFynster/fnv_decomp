@@ -39,10 +39,10 @@ public:
     int GetObjectFlags();
 
     void* FUN_00418f10(unsigned int flags);
-    void FUN_00418f40();
+    void DestroyFields();
     void FUN_0044aed0(void* value);
-    void FUN_0044e010(bool flag);
-    void* FUN_006ecba0(bool flag, void* value);
+    void LockFreeMap_MarkedPointer_SetMark(bool flag);
+    void* SetTaggedPointer(bool flag, void* value);
     GO* FUN_008228f0(unsigned int flags);
 
     static void* operator new[](std::size_t size);

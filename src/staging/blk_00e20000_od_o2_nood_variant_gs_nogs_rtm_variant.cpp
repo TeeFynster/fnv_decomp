@@ -79,27 +79,27 @@ struct Hull {
     Vertex vertices[55];
     Face* freeFaces[100];
     Face faces[4];
-    void FUN_00e2d440();
+    void ProcessEntries_00e2d440();
 };
 struct E29Src { int idx[4]; int n; };
 struct E29SrcList { E29Src* data; int count; };
 struct E29Item { LocalM128 a; LocalM128 b; char flag20; int val24; };
 struct E29Out1 { E29Item item; void* ptr30; int one34; int zero38; char unk3c; char flag3d; };
 struct E29Out2 { E29Item items[4]; int count; char flagC4; void* ptrs[4]; int unkD8; int unkDC; int zeros[4]; int unkF0; };
-void FUN_00e29a10(E29SrcList* src, const LocalM128* posA, const LocalM128* posB, char* base, E29Out1* out1, int* outCount1, E29Out2* out2, int* outCount2);
+void Runtime_ProcessEntries_00e29a10(E29SrcList* src, const LocalM128* posA, const LocalM128* posB, char* base, E29Out1* out1, int* outCount1, E29Out2* out2, int* outCount2);
 inline void* operator new(unsigned int, void* p) { return p; }
 void __cdecl ResizeAudioStream(void* mem, void* array, int sizeOfElement);
 struct __declspec(align(16)) Key_e3a1 {
     float m_ax, m_ay, m_az, m_aw;
     float m_bx, m_by, m_bz, m_bw;
-    Key_e3a1* FUN_00e39e50();
+    Key_e3a1* InitializeFields_00e39e50();
 };
 struct Track_e3a1 {
     int unk00, unk04;
     int m_numKeys;
     int m_pRayCursor;
     hkArray<Key_e3a1> m_keys;
-    void FUN_00e3a1e0(int numKeys);
+    void hkpTyremarksWheel_setNumPoints(int numKeys);
 };
 using ::_mm_load_ss;
 using ::_mm_unpacklo_ps;
@@ -108,8 +108,8 @@ using ::_mm_setr_ps;
 extern int DAT_010dbacc, DAT_010dbad8, DAT_010dbae4, DAT_010dbaf8;
 extern int DAT_010ccfac, DAT_010ccfa0, DAT_010ccf8c, DAT_010c3bb8;
 extern void* DAT_011b3830[];
-void __cdecl FUN_00d1bb50(void*, void*, void*, void*, void*, void*, void*, void*, void*, int) throw();
-void __cdecl FUN_00d1d490(void*, void*, int, void*, void*, void*) throw();
+void __cdecl Runtime_UpdateState_00d1bb50(void*, void*, void*, void*, void*, void*, void*, void*, void*, int) throw();
+void __cdecl hkAabbTreeQueryUtils_ForwardCall_00d1d490(void*, void*, int, void*, void*, void*) throw();
 typedef LocalM128 FourFloatVector;
 __forceinline FourFloatVector packFractions(float x,float y,float z,float w) { FourFloatVector v; v.m128_f32[0]=x; v.m128_f32[1]=y; v.m128_f32[2]=z; v.m128_f32[3]=w; return v; }
 struct RaySource {
@@ -172,7 +172,7 @@ struct Bundle {
 struct FractionValues { float x,y,z,w; };
 struct FractionArg { FourFloatVector* ptr; };
 struct Owner { unsigned unk00, unk04, unk08, unk0c; void* context; };
-void __cdecl FUN_00e2b510(Owner* owner, RayBatch* input, int mode, FourFloatVector& fractions);
+void __cdecl Runtime_ProcessEntries_00e2b510(Owner* owner, RayBatch* input, int mode, FourFloatVector& fractions);
 extern "C" void _ReadWriteBarrier(void);
 extern DWORD DAT_0126835c;
 unsigned __int64 __cdecl __rdtsc(void);
@@ -192,7 +192,7 @@ public:
 class JobTarget
 {
 public:
-    void FUN_00d04380();
+    void hkSemaphore_acquire();
 };
 struct __declspec(align(16)) AutoJob
 {
@@ -282,7 +282,7 @@ struct SplitResult
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
 };
-void __cdecl FUN_00e29b80(int a, int b, int n, void* p1, void* p2, void* p3, SplitResult* pOut);
+void __cdecl Object_ProcessEntries_00e29b80(int a, int b, int n, void* p1, void* p2, void* p3, SplitResult* pOut);
 __forceinline void ProfMark(const char* pName)
 {
     hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -346,7 +346,7 @@ template <class T> __forceinline void ArrClearFree(hkArray<T>& arr)
     arr.m_data = 0;
     arr.m_iCapacityState = 0x80000000;
 }
-void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pSrc, JobQueue* m_pPrimaryTaskProcessor, JobWaiter* pWaiter, int iParam, bool bAuto);
+void __cdecl hkTreeBundleRayCastUtil_startWorldRayCastWithAutoBundleJobs(int a, int b, int n, float f1, float f2, JobSource* pSrc, JobQueue* m_pPrimaryTaskProcessor, JobWaiter* pWaiter, int iParam, bool bAuto);
 using ::_mm_max_ps;
 namespace SplineMax {
 // Kept POD: FUN_00e314c0 returns MaxVec4 by value through the hidden pointer.
@@ -419,7 +419,8 @@ static inline S2d6c0_ScalarResult S2d6c0_sqrt(float x) { S2d6c0_ScalarResult r; 
 
 
 // @fnv 0x00e2d6c0
-extern "C" void __cdecl FUN_00e2d6c0(::Hull* a, ::Hull* b, S2d6c0_Vector* out,
+// src: GUESS 0x00e2d6c0 (confidence: low)
+extern "C" void __cdecl Object_ProcessEntries_00e2d6c0(::Hull* a, ::Hull* b, S2d6c0_Vector* out,
                           ::Face** pa, ::Face** pb)
 {
     float best = DAT_0104da48;

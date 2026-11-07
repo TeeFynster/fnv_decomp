@@ -8,7 +8,7 @@ extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 struct FUN_00b02310_shell
 {
-    bool FUN_00b02310(unsigned char* param);
+    bool BSWin32TaskletManager_CloseTaskGroupData(unsigned char* param);
 };
 struct DelObj
 {
@@ -39,10 +39,10 @@ extern "C" __declspec(dllimport) void __stdcall ExitThread(unsigned long);
 struct Unk00b023f0
 {
     void CallVfn1OnAllEntries();
-    void FUN_00b02460();
+    void BSWin32TaskletManager_ProcessQueue();
     void CallVirtualOnAllEntries();
 };
-void __stdcall FUN_00b023f0(Unk00b023f0* p);
+void __stdcall BSWin32TaskletManager_ThreadProc(Unk00b023f0* p);
 extern "C" __declspec(dllimport) unsigned long __stdcall ResumeThread(void*);
 struct FUN_00b02420_Data
 {
@@ -70,7 +70,7 @@ extern "C" __declspec(dllimport) void __stdcall ReleaseSemaphore(void* hSemaphor
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* lpAddend);
 struct FUN_00b020a0_shell
 {
-    char FUN_00b020a0(void* p);
+    char BSWin32TaskletManager_OpenTaskGroupData(void* p);
 };
 extern "C" __declspec(dllimport) unsigned long __stdcall WaitForMultipleObjects(unsigned long nCount,
                                                                                 const void* const* lpHandles,
@@ -79,7 +79,7 @@ extern "C" __declspec(dllimport) unsigned long __stdcall WaitForMultipleObjects(
 extern "C" __declspec(dllimport) int __stdcall CloseHandle(void* hObject);
 struct FUN_00b01f50_shell
 {
-    void FUN_00b01f50();
+    void BSWin32TaskletManager_ShutdownAllTasks();
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedCompareExchange(long volatile*, long, long);
 struct Lock_00b02220
@@ -142,7 +142,7 @@ struct Spawned_b02010
     Spawned_b02010();
     static void* operator new(unsigned int size)
     {
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
     static void operator delete(void*)
     {}
@@ -151,11 +151,12 @@ struct Spawned_b02010
 struct Owner_b02010
 {
     unsigned int unk00;
-    bool FUN_00b02010(Spawned_b02010** out);
+    bool BSWin32TaskletManager_CreateTaskGroupData(Spawned_b02010** out);
 };
 
 // @fnv 0x00b02010
-bool Owner_b02010::FUN_00b02010(Spawned_b02010** out)
+// src: COMMUNITY 0x00b02010
+bool Owner_b02010::BSWin32TaskletManager_CreateTaskGroupData(Spawned_b02010** out)
 {
     Spawned_b02010* v = new Spawned_b02010;
     *out = v;
@@ -254,10 +255,11 @@ struct JobThread
     Job** pQueueTails[64];
     JobSemaphore kSemaphore;
     bool QueueItem(void* p);
-    void FUN_00b02460();
+    void BSWin32TaskletManager_ProcessQueue();
 };
 // @fnv 0x00b02460
-void JobThread::FUN_00b02460()
+// src: COMMUNITY 0x00b02460
+void JobThread::BSWin32TaskletManager_ProcessQueue()
 {
     Job* pJobB;
     JobOwner* pOwner;

@@ -9,17 +9,17 @@
 #include "../../../include/BSTempEffectGeometryDecal.h"
 extern const NiRTTI g_011d6b04;
 extern unsigned char* DAT_011f5b04;
-unsigned char* FUN_00683a60();
+unsigned char* NiParallelUpdateTaskManager_Get();
 extern "C" void __cdecl PowFloat(float, int);
 void __cdecl ForwardFloatAndInt(float f, int i);
 struct NiFixedString;
 extern NiFixedString* DAT_011c6228;
-NiFixedString* __cdecl FUN_00688460();
+NiFixedString* __cdecl FixedStrings_GetDecal();
 extern const NiRTTI g_011f5b2c;
 void* __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 struct FUN_00685e60_shell
 {
-    void __thiscall FUN_00685e60(unsigned int, unsigned int);
+    void __thiscall NiSkinPartition_ReplacePartitions(unsigned int, unsigned int);
 };
 extern "C" void __cdecl _delete(void* p, unsigned int size);
 
@@ -27,10 +27,11 @@ extern "C" void __cdecl _Call_a5d3a0();
 extern int DAT_0109e47c;
 struct FUN_00a81f90_class
 {
-    void* __thiscall FUN_00a81f90();
+    void* __thiscall NiSkinPartition_NiSkinPartition();
 };
 // @fnv 0x00a81f90
-void* __thiscall FUN_00a81f90_class::FUN_00a81f90()
+// src: EXE 0x00a81f90
+void* __thiscall FUN_00a81f90_class::NiSkinPartition_NiSkinPartition()
 {
     _Call_a5d3a0();
     *(int*)this = (int)&DAT_0109e47c;
@@ -40,7 +41,7 @@ void* __thiscall FUN_00a81f90_class::FUN_00a81f90()
 
 #include <windows.h>
 #include "../../../include/NiSkinInstance.h"
-void __cdecl FUN_00aa10f0(void* p) throw();
+void __cdecl _NiFree_00aa10f0(void* p) throw();
 struct S_00a85580_RefObject
 {
     virtual ~S_00a85580_RefObject() throw();
@@ -149,7 +150,7 @@ struct FUN_00a85580 : S_00a85580_Object
 // @fnv 0x00a85580
 FUN_00a85580::~FUN_00a85580() throw()
 {
-    FUN_00aa10f0(unk14);
+    _NiFree_00aa10f0(unk14);
     if (DAT_011f4748)
         DAT_011f4748->PurgeSkinInstance(this);
 }

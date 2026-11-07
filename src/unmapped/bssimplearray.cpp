@@ -27,7 +27,7 @@ extern int DAT_0106b8a0;
 struct FUN_006cf9d0
 {
     int* vfptr;
-    void FUN_009a3d00(unsigned int maxSize, unsigned int growBy);
+    void BSSimpleArray_WeaponData_1024_InitialSetup(unsigned int maxSize, unsigned int growBy);
     FUN_006cf9d0(unsigned int maxSize, unsigned int growBy);
 };
 
@@ -35,7 +35,7 @@ struct FUN_006cf9d0
 // @fnv 0x006cf9d0
 FUN_006cf9d0::FUN_006cf9d0(unsigned int maxSize, unsigned int growBy) : vfptr(&DAT_0106b8a0)
 {
-    this->FUN_009a3d00(maxSize, growBy);
+    this->BSSimpleArray_WeaponData_1024_InitialSetup(maxSize, growBy);
 }
 
 extern int DAT_0106b91c;
@@ -69,10 +69,11 @@ void* __thiscall FUN_006cf250_Class::AllocateBuffer(unsigned int count)
 extern "C" void* __cdecl _Reallocate(void* p, unsigned int size);
 struct FUN_006cf280_Class
 {
-    void* __thiscall FUN_006cf280(void* p, unsigned int n);
+    void* __thiscall _Reallocate_Thunk_006cf280(void* p, unsigned int n);
 };
 // @fnv 0x006cf280
-void* __thiscall FUN_006cf280_Class::FUN_006cf280(void* p, unsigned int n)
+// src: GUESS 0x006cf280 (confidence: medium)
+void* __thiscall FUN_006cf280_Class::_Reallocate_Thunk_006cf280(void* p, unsigned int n)
 {
     return _Reallocate(p, n * 0x18);
 }
@@ -86,7 +87,7 @@ bool AreBytesEqual(const unsigned char* pucA, const unsigned char* pucB)
 extern int DAT_0106b8c8;
 struct Dummy_0061bf20
 {
-    void FUN_006b3f40(int, int);
+    void BSSimpleArray_NavMeshPOVSearchNode_1024_InitialSetup(int, int);
 };
 struct FUN_006cf9a0 : Dummy_0061bf20
 {
@@ -98,7 +99,7 @@ struct FUN_006cf9a0 : Dummy_0061bf20
 FUN_006cf9a0::FUN_006cf9a0(int maxSize, int growBy)
 {
     vfptr = &DAT_0106b8c8;
-    FUN_006b3f40(maxSize, growBy);
+    BSSimpleArray_NavMeshPOVSearchNode_1024_InitialSetup(maxSize, growBy);
 }
 
 extern int DAT_0106c9e0;
@@ -109,10 +110,11 @@ struct GlobalObject_00869f00
 struct FUN_006cfaa0
 {
     int* vfptr;
-    void FUN_006cfaa0_();
+    void ResetVirtualTableAndClear_006cfaa0();
 };
 // @fnv 0x006cfaa0
-void FUN_006cfaa0::FUN_006cfaa0_()
+// src: GUESS 0x006cfaa0 (confidence: medium)
+void FUN_006cfaa0::ResetVirtualTableAndClear_006cfaa0()
 {
     vfptr = &DAT_0106c9e0;
     ((GlobalObject_00869f00*)this)->Clear(true);
@@ -148,7 +150,7 @@ extern int DAT_0106d4e8;
 struct FUN_006e9230_class
 {
     int* vfptr;
-    void FUN_006e97a0(int a, int b);
+    void BSSimpleArray_PathingNode_1024_InitialSetup(int a, int b);
     FUN_006e9230_class();
 };
 // Sets the vtable pointer to DAT_0106d4e8 and calls FUN_006e97a0 with 0, 0.
@@ -156,7 +158,7 @@ struct FUN_006e9230_class
 FUN_006e9230_class::FUN_006e9230_class()
 {
     vfptr = &DAT_0106d4e8;
-    FUN_006e97a0(0, 0);
+    BSSimpleArray_PathingNode_1024_InitialSetup(0, 0);
 }
 
 extern int DAT_0106d4e8;
@@ -167,10 +169,11 @@ struct PSNodeStub
 };
 struct FUN_006e9260Class : PSNodeStub
 {
-    void FUN_006e9260();
+    void SetVirtualTableAndProcessState_006e9260();
 };
 // @fnv 0x006e9260
-void FUN_006e9260Class::FUN_006e9260()
+// src: GUESS 0x006e9260 (confidence: low)
+void FUN_006e9260Class::SetVirtualTableAndProcessState_006e9260()
 {
     vfptr = (int*)&DAT_0106d4e8;
     FUN_006cf120(true);
@@ -189,18 +192,20 @@ void* __cdecl Reallocate(void* p, int size);
 
 struct FUN_006e93f0
 {
-    void* __thiscall FUN_006e93f0_(void* p, int n);
+    void* __thiscall Reallocate_Thunk(void* p, int n);
 };
 
 // @fnv 0x006e93f0
-void* __thiscall FUN_006e93f0::FUN_006e93f0_(void* p, int aiCount)
+// src: GUESS 0x006e93f0 (confidence: medium)
+void* __thiscall FUN_006e93f0::Reallocate_Thunk(void* p, int aiCount)
 {
     return Reallocate(p, aiCount * 0x3c);
 }
 
 // Returns true if this point's x, y and z are all equal to the corresponding components of a.
 // @fnv 0x004390c0
-bool NiPoint3::FUN_004390c0(const NiPoint3& aPoint)
+// src: GUESS 0x004390c0 (confidence: high)
+bool NiPoint3::HasEqualComponents(const NiPoint3& aPoint)
 {
     return x == aPoint.x && y == aPoint.y && z == aPoint.z;
 }
@@ -320,19 +325,20 @@ struct ArrHelper
 };
 struct S5460
 {
-    unsigned int __thiscall FUN_00978bc0();
+    unsigned int __thiscall BSSimpleArray_NiPoint3_1024_AddUninitialized();
 };
 struct FUN_006cf4c0_Array
 {
     ParentSpaceNode* pDummy;
     ParentSpaceNode* pBuffer;
     unsigned int iSize;
-    unsigned int FUN_006cf4c0(const ParentSpaceNode& aValue);
+    unsigned int BSSimpleArray_ParentSpaceNode_1024_Add(const ParentSpaceNode& aValue);
 };
 // @fnv 0x006cf4c0
-unsigned int FUN_006cf4c0_Array::FUN_006cf4c0(const ParentSpaceNode& aValue)
+// src: XBOX_PDB 0x006cf4c0
+unsigned int FUN_006cf4c0_Array::BSSimpleArray_ParentSpaceNode_1024_Add(const ParentSpaceNode& aValue)
 {
-    unsigned int iElementIndex = ((S5460*)this)->FUN_00978bc0();
+    unsigned int iElementIndex = ((S5460*)this)->BSSimpleArray_NiPoint3_1024_AddUninitialized();
     ((ArrHelper*)this)->ConstructParentSpaceNodes((ParentSpaceNode*)((char*)pBuffer + iElementIndex * 12), 1);
     *(ParentSpaceNode*)((char*)pBuffer + iElementIndex * 12) = aValue;
     return iElementIndex;
@@ -493,23 +499,24 @@ void* __thiscall FUN_006cfd40_Class::FUN_006cfd40(unsigned int flags)
 struct FUN_006e9410_shell
 {
     void FUN_006e90a0(int a, int b);
-    void* FUN_006e8f40(int a, void* b);
+    void* GetElementAddress30_006e8f40(int a, void* b);
 };
 struct FUN_006e9530_shell
 {
-    void FUN_006e9530();
+    void VirtualPathingNode_Copy();
 };
 struct FUN_006e9410_class
 {
-    void __thiscall FUN_006e9410(void* arg);
+    void __thiscall BSSimpleArray_VirtualPathingNode_1024_Copy(void* arg);
 };
 // @fnv 0x006e9410
-void __thiscall FUN_006e9410_class::FUN_006e9410(void* arg)
+// src: COMMUNITY 0x006e9410
+void __thiscall FUN_006e9410_class::BSSimpleArray_VirtualPathingNode_1024_Copy(void* arg)
 {
     ((FUN_006e9410_shell*)arg)->FUN_006e90a0(*(int*)((char*)this + 8), 1);
     for (unsigned int i = 0; i < *(unsigned int*)((char*)this + 8); ++i)
-        ((FUN_006e9530_shell*)((FUN_006e9410_shell*)arg)->FUN_006e8f40(i, (char*)*(void**)((char*)this + 4) + i * 0x30))
-            ->FUN_006e9530();
+        ((FUN_006e9530_shell*)((FUN_006e9410_shell*)arg)->GetElementAddress30_006e8f40(i, (char*)*(void**)((char*)this + 4) + i * 0x30))
+            ->VirtualPathingNode_Copy();
 }
 
 namespace fnv_007a1c30 {
@@ -519,7 +526,7 @@ struct FUN_007a86b0_Item
 };
 struct FUN_007a63b0_holder
 {
-    void FUN_007a63b0(FUN_007a86b0_Item*, unsigned int);
+    void BSSimpleArray_BSStringT_char_1024_DestructItems(FUN_007a86b0_Item*, unsigned int);
 };
 struct FUN_007a1c30_holder
 {
@@ -534,7 +541,7 @@ void FUN_007a1c30_holder::ClearBuffer(bool freeStorage)
 {
     if (pBuffer)
     {
-        ((FUN_007a63b0_holder*)this)->FUN_007a63b0(pBuffer, iSize);
+        ((FUN_007a63b0_holder*)this)->BSSimpleArray_BSStringT_char_1024_DestructItems(pBuffer, iSize);
         if (freeStorage)
         {
             FreeSimpleArrayStorage(this);
@@ -580,11 +587,12 @@ void* __cdecl FUN_00ec7230(char* dst, const char* src, unsigned int size);
 
 struct FUN_006dc6e0_Class
 {
-    void __thiscall FUN_006dc6e0(char* a, char* b, unsigned int count);
+    void __thiscall BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(char* a, char* b, unsigned int count);
 };
 
 // @fnv 0x006dc6e0
-void __thiscall FUN_006dc6e0_Class::FUN_006dc6e0(char* pDst, char* pSrc, unsigned int count)
+// src: XBOX_PDB 0x006dc6e0
+void __thiscall FUN_006dc6e0_Class::BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(char* pDst, char* pSrc, unsigned int count)
 {
     if (count <= 0)
         return;
@@ -629,10 +637,11 @@ struct FUN_006dc590
     TypeValueCount* pBuffer;
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
-    void __thiscall FUN_006dc590_(unsigned int aiNewSize, unsigned int aiCopyCount);
+    void __thiscall UpdateState_006dc590(unsigned int aiNewSize, unsigned int aiCopyCount);
 };
 // @fnv 0x006dc590
-void __thiscall FUN_006dc590::FUN_006dc590_(unsigned int aiNewSize, unsigned int aiCopyCount)
+// src: GUESS 0x006dc590 (confidence: low)
+void __thiscall FUN_006dc590::UpdateState_006dc590(unsigned int aiNewSize, unsigned int aiCopyCount)
 {
     if (pBuffer)
     {
@@ -645,7 +654,7 @@ void __thiscall FUN_006dc590::FUN_006dc590_(unsigned int aiNewSize, unsigned int
         {
             TypeValueCount* pnewBuffer =
                 (TypeValueCount*)((void*(__thiscall*)(void*, unsigned int))vfptr[1])(this, aiNewSize);
-            ((FUN_006dc6e0_Class*)this)->FUN_006dc6e0((char*)pnewBuffer, (char*)pBuffer, aiCopyCount);
+            ((FUN_006dc6e0_Class*)this)->BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems((char*)pnewBuffer, (char*)pBuffer, aiCopyCount);
             FreeSimpleArrayStorage(this);
             pBuffer = pnewBuffer;
         }
@@ -663,7 +672,7 @@ struct FUN_0072ba80_shell
 };
 struct FUN_006f9eb0_class
 {
-    void FUN_006f9eb0(unsigned int newSize, int oldSize);
+    void BSSimpleArray_Resize_0(unsigned int newSize, int oldSize);
 };
 struct FUN_006f9790_class
 {
@@ -671,10 +680,11 @@ struct FUN_006f9790_class
     char* pBuffer;
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
-    void FUN_006f9790(unsigned int aiReserveSize);
+    void BSSimpleArray_SetAllocSize(unsigned int aiReserveSize);
 };
 // @fnv 0x006f9790
-void FUN_006f9790_class::FUN_006f9790(unsigned int aiReserveSize)
+// src: COMMUNITY 0x006f9790
+void FUN_006f9790_class::BSSimpleArray_SetAllocSize(unsigned int aiReserveSize)
 {
     if (aiReserveSize == SimpleArrayStorage)
     {
@@ -686,7 +696,7 @@ void FUN_006f9790_class::FUN_006f9790(unsigned int aiReserveSize)
             ((FUN_0072ba80_shell*)this)->FUN_0072ba80(pBuffer + aiReserveSize * 32, iSize - aiReserveSize);
             iSize = aiReserveSize;
         }
-        ((FUN_006f9eb0_class*)this)->FUN_006f9eb0(aiReserveSize, iSize);
+        ((FUN_006f9eb0_class*)this)->BSSimpleArray_Resize_0(aiReserveSize, iSize);
         SimpleArrayStorage = aiReserveSize;
     }
 }
@@ -707,11 +717,12 @@ struct FUN_0084b5c0_Array
     void** pBuffer;
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
-    void FUN_0084b5c0(unsigned int aiReserveSize);
+    void BSSimpleArray_TESObjectREFR_1024_SetReservedSize(unsigned int aiReserveSize);
 };
 
 // @fnv 0x0084b5c0
-void FUN_0084b5c0_Array::FUN_0084b5c0(unsigned int aiReserveSize)
+// src: XBOX_PDB 0x0084b5c0
+void FUN_0084b5c0_Array::BSSimpleArray_TESObjectREFR_1024_SetReservedSize(unsigned int aiReserveSize)
 {
     if (aiReserveSize == SimpleArrayStorage)
         return;
@@ -742,11 +753,12 @@ struct FUN_009a4320_arr
     unsigned int iSize;
     void FUN_0072ba80(void* p, unsigned int n);
     void FUN_0042fb60(char* a, char* b, unsigned int n);
-    void FUN_009a4320(unsigned int aiIndex, unsigned int aiHowMany);
+    void BSSimpleArray_Actor_1024_RemoveFast(unsigned int aiIndex, unsigned int aiHowMany);
 };
 // Removes aiHowMany elements at aiIndex from the buffer, shifting the trailing elements down and shrinking iSize.
 // @fnv 0x009a4320
-void FUN_009a4320_arr::FUN_009a4320(unsigned int aiIndex, unsigned int aiHowMany)
+// src: XBOX_PDB 0x009a4320
+void FUN_009a4320_arr::BSSimpleArray_Actor_1024_RemoveFast(unsigned int aiIndex, unsigned int aiHowMany)
 {
     unsigned int iitemsToMove = FUN_0042f5a0(iSize - aiIndex - aiHowMany, aiHowMany);
     FUN_0072ba80((char*)pBuffer + aiIndex * 4, aiHowMany);
@@ -758,7 +770,7 @@ void FUN_009a4320_arr::FUN_009a4320(unsigned int aiIndex, unsigned int aiHowMany
 namespace fnv_009f6540 {
 struct FUN_006c8bd0_Class
 {
-    void FUN_006c8bd0(const char*, const char*, unsigned int);
+    void BSSimpleArray_NiColorA_1024_CopyItems(const char*, const char*, unsigned int);
 };
 struct FUN_009f6540_Class
 {
@@ -769,10 +781,11 @@ struct FUN_009f6540_Class
     void* pBuffer;
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
-    void FUN_009f6540(unsigned int aiNewSize, unsigned int aiCopyCount);
+    void BSSimpleArray_TeleportLink_1024_ReallocateBuffer(unsigned int aiNewSize, unsigned int aiCopyCount);
 };
 // @fnv 0x009f6540
-void FUN_009f6540_Class::FUN_009f6540(unsigned int aiNewSize, unsigned int aiCopyCount)
+// src: XBOX_PDB 0x009f6540
+void FUN_009f6540_Class::BSSimpleArray_TeleportLink_1024_ReallocateBuffer(unsigned int aiNewSize, unsigned int aiCopyCount)
 {
     if (pBuffer)
     {
@@ -783,7 +796,7 @@ void FUN_009f6540_Class::FUN_009f6540(unsigned int aiNewSize, unsigned int aiCop
         else
         {
             unsigned int pnewBuffer = (unsigned int)FUN_009f6540_1(aiNewSize);
-            ((FUN_006c8bd0_Class*)this)->FUN_006c8bd0((const char*)pnewBuffer, (const char*)pBuffer, aiCopyCount);
+            ((FUN_006c8bd0_Class*)this)->BSSimpleArray_NiColorA_1024_CopyItems((const char*)pnewBuffer, (const char*)pBuffer, aiCopyCount);
             FreeSimpleArrayStorage(this);
             pBuffer = (void*)pnewBuffer;
         }
@@ -798,12 +811,12 @@ void FUN_009f6540_Class::FUN_009f6540(unsigned int aiNewSize, unsigned int aiCop
 
 struct FUN_006e1280_Class
 {
-    void FUN_006e1280(char* p, unsigned int n);
+    void VisitPlacementAddresses(char* p, unsigned int n);
 };
 
 struct FUN_006cf520_Class
 {
-    int __thiscall FUN_006cf520(const unsigned char* aValue);
+    int __thiscall BSScrapArray_bool_1024_Add(const unsigned char* aValue);
 };
 
 struct FUN_006d0450_Class
@@ -812,11 +825,12 @@ struct FUN_006d0450_Class
 };
 
 // @fnv 0x006cf520
-int __thiscall FUN_006cf520_Class::FUN_006cf520(const unsigned char* aValue)
+// src: COMMUNITY 0x006cf520
+int __thiscall FUN_006cf520_Class::BSScrapArray_bool_1024_Add(const unsigned char* aValue)
 {
     int iVar1;
     iVar1 = ((FUN_006d0450_Class*)this)->GetNextIndex();
-    ((FUN_006e1280_Class*)this)->FUN_006e1280((char*)(*(int*)((char*)this + 4) + iVar1), 1);
+    ((FUN_006e1280_Class*)this)->VisitPlacementAddresses((char*)(*(int*)((char*)this + 4) + iVar1), 1);
     *(unsigned char*)(*(int*)((char*)this + 4) + iVar1) = *aValue;
     return iVar1;
 }
@@ -891,12 +905,12 @@ struct NavMeshEdgeReference
 
 struct FUN_006f3170_Class
 {
-    bool FUN_006f3170();
+    bool BSSimpleArray_HasSufficientCapacity();
 };
 
 struct FUN_00869600_Class
 {
-    unsigned int FUN_00869600();
+    unsigned int BSSimpleArray_GetOptimalCapacity();
 };
 
 typedef BSSimpleArray<NavMeshEdgeReference, 1024> FUN_0061bf70_Class;
@@ -908,17 +922,17 @@ template <> void BSSimpleArray<NavMeshEdgeReference, 1024>::RemoveAt(unsigned in
     unsigned int inewSize;
     NavMeshEdgeReference* pnewBuffer;
 
-    if (abShrink && reinterpret_cast<FUN_006f3170_Class*>(this)->FUN_006f3170())
+    if (abShrink && reinterpret_cast<FUN_006f3170_Class*>(this)->BSSimpleArray_HasSufficientCapacity())
     {
-        inewSize = reinterpret_cast<FUN_00869600_Class*>(this)->FUN_00869600();
+        inewSize = reinterpret_cast<FUN_00869600_Class*>(this)->BSSimpleArray_GetOptimalCapacity();
         pnewBuffer = this->_Allocate(inewSize);
 
-        reinterpret_cast<FUN_006dc6e0_Class*>(this)->FUN_006dc6e0(reinterpret_cast<char*>(pnewBuffer),
+        reinterpret_cast<FUN_006dc6e0_Class*>(this)->BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(reinterpret_cast<char*>(pnewBuffer),
                                                                   reinterpret_cast<char*>(this->pBuffer), aiIndex);
 
         reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(reinterpret_cast<char*>(this->pBuffer + aiIndex), 1);
 
-        reinterpret_cast<FUN_006dc6e0_Class*>(this)->FUN_006dc6e0(reinterpret_cast<char*>(pnewBuffer + aiIndex),
+        reinterpret_cast<FUN_006dc6e0_Class*>(this)->BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(reinterpret_cast<char*>(pnewBuffer + aiIndex),
                                                                   reinterpret_cast<char*>(this->pBuffer + aiIndex + 1),
                                                                   this->iSize - 1);
 
@@ -931,7 +945,7 @@ template <> void BSSimpleArray<NavMeshEdgeReference, 1024>::RemoveAt(unsigned in
     {
         reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(reinterpret_cast<char*>(this->pBuffer + aiIndex), 1);
 
-        reinterpret_cast<FUN_006dc6e0_Class*>(this)->FUN_006dc6e0(reinterpret_cast<char*>(this->pBuffer + aiIndex),
+        reinterpret_cast<FUN_006dc6e0_Class*>(this)->BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(reinterpret_cast<char*>(this->pBuffer + aiIndex),
                                                                   reinterpret_cast<char*>(this->pBuffer + aiIndex + 1),
                                                                   this->iSize - aiIndex - 1);
     }
@@ -1031,7 +1045,7 @@ void BSSimpleArray<NiColorA, 1024>::SetSize(unsigned int newSize, bool freeMemor
 extern int DAT_0106c954;
 struct FUN_006d0310_Class
 {
-    void FUN_006d0310(unsigned int, unsigned int);
+    void BSSimpleArray_NavMeshEdgeLocation_1024_InitialSetup(unsigned int, unsigned int);
 };
 struct FUN_006cf200
 {
@@ -1043,12 +1057,13 @@ struct FUN_006cf200
 FUN_006cf200::FUN_006cf200()
 {
     vfptr = (int*)&DAT_0106c954;
-    ((FUN_006d0310_Class*)this)->FUN_006d0310(0, 0);
+    ((FUN_006d0310_Class*)this)->BSSimpleArray_NavMeshEdgeLocation_1024_InitialSetup(0, 0);
 }
 
 // @fnv 0x006cf670
 template <>
-void* __thiscall BSScrapArray<unsigned char>::FUN_006cf670(unsigned int size)
+// src: XBOX_PDB 0x006cf670
+void* __thiscall BSScrapArray<unsigned char>::BSScrapArray_bool_1024_Allocate(unsigned int size)
 {
     void* result;
     result = m_pPoolBase->Allocate(size, DAT_010a2720);
@@ -1081,12 +1096,13 @@ struct FUN_006cf900_Class : EH
         int m_08;
     } m_Location;
 
-    FUN_006cf900_Class& FUN_006cf900(const FUN_006cf900_Class* aLocation);
+    FUN_006cf900_Class& CopyFields_006cf900(const FUN_006cf900_Class* aLocation);
 };
 
 // Copies the base EH part and the m_Location sub-object from aLocation into this object and returns *this.
 // @fnv 0x006cf900
-FUN_006cf900_Class& FUN_006cf900_Class::FUN_006cf900(const FUN_006cf900_Class* aLocation)
+// src: GUESS 0x006cf900 (confidence: medium)
+FUN_006cf900_Class& FUN_006cf900_Class::CopyFields_006cf900(const FUN_006cf900_Class* aLocation)
 {
     EH::operator=(*aLocation);
     m_Location = aLocation->m_Location;
@@ -1100,12 +1116,12 @@ struct PSClearStub
 
 struct SaveGameSizeState
 {
-    void __thiscall FUN_006e95d0(unsigned int pBuffer, unsigned int ItemUpdateArray);
+    void __thiscall BSSimpleArray_VirtualPathingNode_1024_ConstructItems(unsigned int pBuffer, unsigned int ItemUpdateArray);
 };
 
 struct S5460Helper
 {
-    void __thiscall FUN_006cfe70(unsigned int aiNewSize, unsigned int uiOldSize);
+    void __thiscall BSSimpleArray_VirtualPathingNode_1024_ReallocateBuffer(unsigned int aiNewSize, unsigned int uiOldSize);
 };
 
 typedef BSSimpleArray<PacketNodeRecord, 1024> FUN_006e90a0_class;
@@ -1127,11 +1143,11 @@ template <> void BSSimpleArray<PacketNodeRecord, 1024>::SetSize(unsigned int aiN
         }
         else
         {
-            reinterpret_cast<S5460Helper*>(this)->FUN_006cfe70(aiNewSize, this->iSize);
+            reinterpret_cast<S5460Helper*>(this)->BSSimpleArray_VirtualPathingNode_1024_ReallocateBuffer(aiNewSize, this->iSize);
             this->SimpleArrayStorage = aiNewSize;
         }
 
-        reinterpret_cast<SaveGameSizeState*>(this)->FUN_006e95d0(
+        reinterpret_cast<SaveGameSizeState*>(this)->BSSimpleArray_VirtualPathingNode_1024_ConstructItems(
             reinterpret_cast<unsigned int>(this->pBuffer + this->iSize * 0x30), aiNewSize - this->iSize);
         this->iSize = aiNewSize;
     }
@@ -1143,13 +1159,13 @@ template <> void BSSimpleArray<PacketNodeRecord, 1024>::SetSize(unsigned int aiN
 
         if (abFreeMemory && aiNewSize <= this->SimpleArrayStorage / 4)
         {
-            reinterpret_cast<S5460Helper*>(this)->FUN_006cfe70(aiNewSize, aiNewSize);
+            reinterpret_cast<S5460Helper*>(this)->BSSimpleArray_VirtualPathingNode_1024_ReallocateBuffer(aiNewSize, aiNewSize);
             this->SimpleArrayStorage = aiNewSize;
         }
     }
     else
     {
-        reinterpret_cast<SaveGameSizeState*>(this)->FUN_006e95d0(
+        reinterpret_cast<SaveGameSizeState*>(this)->BSSimpleArray_VirtualPathingNode_1024_ConstructItems(
             reinterpret_cast<unsigned int>(this->pBuffer + this->iSize * 0x30), aiNewSize - this->iSize);
         this->iSize = aiNewSize;
     }
@@ -1278,19 +1294,20 @@ struct FUN_006bf8f0_Class
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
 
-    void __thiscall FUN_006bf8f0(unsigned int aiIndex, bool abShrink);
+    void __thiscall BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned int aiIndex, bool abShrink);
 };
 
 // Removes the element at aiIndex from the buffer, optionally reallocating to a smaller size and shifting the remaining elements down.
 // @fnv 0x006bf8f0
-void __thiscall FUN_006bf8f0_Class::FUN_006bf8f0(unsigned int aiIndex, bool abShrink)
+// src: XBOX_PDB 0x006bf8f0
+void __thiscall FUN_006bf8f0_Class::BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned int aiIndex, bool abShrink)
 {
     unsigned int inewSize;
     char* pnewBuffer;
 
-    if (abShrink && reinterpret_cast<FUN_006f3170_Class*>(this)->FUN_006f3170())
+    if (abShrink && reinterpret_cast<FUN_006f3170_Class*>(this)->BSSimpleArray_HasSufficientCapacity())
     {
-        inewSize = reinterpret_cast<FUN_00869600_Class*>(this)->FUN_00869600();
+        inewSize = reinterpret_cast<FUN_00869600_Class*>(this)->BSSimpleArray_GetOptimalCapacity();
         pnewBuffer = FUN_006bf8f0_reallocate(inewSize);
 
         reinterpret_cast<FUN_0042fb60_shell*>(this)->FUN_0042fb60(pnewBuffer, pBuffer, aiIndex);
@@ -1318,7 +1335,7 @@ void __thiscall FUN_006bf8f0_Class::FUN_006bf8f0(unsigned int aiIndex, bool abSh
 
 struct FUN_006a2270_class
 {
-    void FUN_006a2270(char* pDest, char* pSource, unsigned int ItemUpdateArray);
+    void BSSimpleArray_PathingNode_1024_CopyItems(char* pDest, char* pSource, unsigned int ItemUpdateArray);
 };
 
 // @fnv 0x006cf000
@@ -1327,17 +1344,17 @@ void BSSimpleArray<PathingGraphNode, 1024>::RemoveAt(unsigned int uiIndex, bool 
 {
     PathingGraphNode* newBuffer;
 
-    if (bCondition && reinterpret_cast<FUN_006f3170_Class*>(this)->FUN_006f3170())
+    if (bCondition && reinterpret_cast<FUN_006f3170_Class*>(this)->BSSimpleArray_HasSufficientCapacity())
     {
-        unsigned int newSize = reinterpret_cast<FUN_00869600_Class*>(this)->FUN_00869600();
+        unsigned int newSize = reinterpret_cast<FUN_00869600_Class*>(this)->BSSimpleArray_GetOptimalCapacity();
         newBuffer = this->_Allocate(newSize);
 
-        reinterpret_cast<FUN_006a2270_class*>(this)->FUN_006a2270(reinterpret_cast<char*>(newBuffer),
+        reinterpret_cast<FUN_006a2270_class*>(this)->BSSimpleArray_PathingNode_1024_CopyItems(reinterpret_cast<char*>(newBuffer),
                                                                   reinterpret_cast<char*>(this->pBuffer), uiIndex);
 
         ReleaseElements(this->pBuffer + uiIndex, 1);
 
-        reinterpret_cast<FUN_006a2270_class*>(this)->FUN_006a2270(reinterpret_cast<char*>(newBuffer + uiIndex),
+        reinterpret_cast<FUN_006a2270_class*>(this)->BSSimpleArray_PathingNode_1024_CopyItems(reinterpret_cast<char*>(newBuffer + uiIndex),
                                                                   reinterpret_cast<char*>(this->pBuffer + uiIndex + 1),
                                                                   this->iSize - 1);
 
@@ -1350,7 +1367,7 @@ void BSSimpleArray<PathingGraphNode, 1024>::RemoveAt(unsigned int uiIndex, bool 
     {
         ReleaseElements(this->pBuffer + uiIndex, 1);
 
-        reinterpret_cast<FUN_006a2270_class*>(this)->FUN_006a2270(reinterpret_cast<char*>(this->pBuffer + uiIndex),
+        reinterpret_cast<FUN_006a2270_class*>(this)->BSSimpleArray_PathingNode_1024_CopyItems(reinterpret_cast<char*>(this->pBuffer + uiIndex),
                                                                   reinterpret_cast<char*>(this->pBuffer + uiIndex + 1),
                                                                   this->iSize - uiIndex - 1);
     }
@@ -1360,7 +1377,7 @@ void BSSimpleArray<PathingGraphNode, 1024>::RemoveAt(unsigned int uiIndex, bool 
 
 struct S5460_FUN_006e3d30_Helper
 {
-    void* __thiscall FUN_006e3d30(unsigned int newSize, unsigned int oldSize);
+    void* __thiscall BSSimpleArray_PathingAvoidNode_1024_ReallocateBuffer(unsigned int newSize, unsigned int oldSize);
 };
 
 struct BSSimpleArray_PathingAvoidNode_1024
@@ -1394,7 +1411,7 @@ void BSSimpleArray_PathingAvoidNode_1024::SetSize(unsigned int aiNewSize, bool a
         }
         else
         {
-            ((S5460_FUN_006e3d30_Helper*)this)->FUN_006e3d30(aiNewSize, iSize);
+            ((S5460_FUN_006e3d30_Helper*)this)->BSSimpleArray_PathingAvoidNode_1024_ReallocateBuffer(aiNewSize, iSize);
             SimpleArrayStorage = aiNewSize;
         }
 
@@ -1410,7 +1427,7 @@ void BSSimpleArray_PathingAvoidNode_1024::SetSize(unsigned int aiNewSize, bool a
 
             if (abFreeMemory && aiNewSize <= SimpleArrayStorage / 4)
             {
-                ((S5460_FUN_006e3d30_Helper*)this)->FUN_006e3d30(aiNewSize, aiNewSize);
+                ((S5460_FUN_006e3d30_Helper*)this)->BSSimpleArray_PathingAvoidNode_1024_ReallocateBuffer(aiNewSize, aiNewSize);
                 SimpleArrayStorage = aiNewSize;
             }
         }
@@ -1426,12 +1443,12 @@ class SandBoxChoiceListItem;
 
 struct FUN_009f6540_Helper
 {
-    void __thiscall FUN_009f6540(unsigned int, unsigned int);
+    void __thiscall BSSimpleArray_TeleportLink_1024_ReallocateBuffer(unsigned int, unsigned int);
 };
 
 struct Host9f6340
 {
-    void __thiscall FUN_009f6460(int, int);
+    void __thiscall BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(int, int);
 };
 
 struct FUN_009f6200_Class
@@ -1443,11 +1460,12 @@ struct FUN_009f6200_Class
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
 
-    void FUN_009f6200(unsigned int aiNewSize, bool abFreeMemory);
+    void BSSimpleArray_SandBoxChoiceListItem_1024_SetSize(unsigned int aiNewSize, bool abFreeMemory);
 };
 
 // @fnv 0x009f6200
-void FUN_009f6200_Class::FUN_009f6200(unsigned int aiNewSize, bool abFreeMemory)
+// src: XBOX_PDB 0x009f6200
+void FUN_009f6200_Class::BSSimpleArray_SandBoxChoiceListItem_1024_SetSize(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
@@ -1464,11 +1482,11 @@ void FUN_009f6200_Class::FUN_009f6200(unsigned int aiNewSize, bool abFreeMemory)
         }
         else
         {
-            reinterpret_cast<FUN_009f6540_Helper*>(this)->FUN_009f6540(aiNewSize, iSize);
+            reinterpret_cast<FUN_009f6540_Helper*>(this)->BSSimpleArray_TeleportLink_1024_ReallocateBuffer(aiNewSize, iSize);
             SimpleArrayStorage = aiNewSize;
         }
 
-        reinterpret_cast<Host9f6340*>(this)->FUN_009f6460(reinterpret_cast<int>(pBuffer + iSize * 16),
+        reinterpret_cast<Host9f6340*>(this)->BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(reinterpret_cast<int>(pBuffer + iSize * 16),
                                                           static_cast<int>(aiNewSize - iSize));
         iSize = aiNewSize;
     }
@@ -1479,13 +1497,13 @@ void FUN_009f6200_Class::FUN_009f6200(unsigned int aiNewSize, bool abFreeMemory)
 
         if (abFreeMemory && aiNewSize <= (SimpleArrayStorage >> 2))
         {
-            reinterpret_cast<FUN_009f6540_Helper*>(this)->FUN_009f6540(aiNewSize, aiNewSize);
+            reinterpret_cast<FUN_009f6540_Helper*>(this)->BSSimpleArray_TeleportLink_1024_ReallocateBuffer(aiNewSize, aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
     }
     else
     {
-        reinterpret_cast<Host9f6340*>(this)->FUN_009f6460(reinterpret_cast<int>(pBuffer + iSize * 16),
+        reinterpret_cast<Host9f6340*>(this)->BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(reinterpret_cast<int>(pBuffer + iSize * 16),
                                                           static_cast<int>(aiNewSize - iSize));
         iSize = aiNewSize;
     }
@@ -1501,7 +1519,7 @@ struct FUN_0069cfe0_Elem
 struct FUN_0069cfe0_Dst
 {
     void FUN_0069cea0(unsigned int count, int flag);
-    FUN_0069cfe0_Elem* FUN_006a1440(unsigned int index);
+    FUN_0069cfe0_Elem* Object_GetIndexedValue_006a1440(unsigned int index);
 };
 
 struct FUN_0069cfe0_cls
@@ -1519,7 +1537,7 @@ void FUN_0069cfe0_cls::CopyElementsTo(FUN_0069cfe0_Dst* dst)
     dst->FUN_0069cea0(this->m_08, 1);
     for (unsigned int i = 0; i < this->m_08; i++)
     {
-        *dst->FUN_006a1440(i) = *(this->m_04 + i);
+        *dst->Object_GetIndexedValue_006a1440(i) = *(this->m_04 + i);
     }
 }
 
@@ -1540,13 +1558,13 @@ struct HeapProvider
     void* FUN_00aa42e0();
 };
 
-HeapProvider* __cdecl FUN_00401020();
+HeapProvider* __cdecl MemoryManager_Instance();
 
 struct FUN_006cf2a0 : FUN_005e0510
 {
     void* m_pStreamAllocator;
     FUN_006cf2a0(int first, int second, void* heap);
-    void FUN_006b3eb0(int first, int second);
+    void BSSimpleArray_float_1024_InitialSetup(int first, int second);
 };
 
 // Sets the vtable, stores heap or a default heap from FUN_00401020, then calls FUN_006b3eb0 with first and second.
@@ -1554,8 +1572,8 @@ struct FUN_006cf2a0 : FUN_005e0510
 FUN_006cf2a0::FUN_006cf2a0(int first, int second, void* heap)
 {
     m_vftable = &DAT_0106c968;
-    m_pStreamAllocator = heap ? heap : FUN_00401020()->FUN_00aa42e0();
-    FUN_006b3eb0(first, second);
+    m_pStreamAllocator = heap ? heap : MemoryManager_Instance()->FUN_00aa42e0();
+    BSSimpleArray_float_1024_InitialSetup(first, second);
 }
 
 namespace fnv_006cf3a0 {
@@ -1563,7 +1581,7 @@ struct DefaultPathSource
 {
     void* FUN_00aa42e0();
 };
-DefaultPathSource* __cdecl FUN_00401020();
+DefaultPathSource* __cdecl MemoryManager_Instance();
 struct FUN_005e04c0
 {
     FUN_005e04c0();
@@ -1577,13 +1595,13 @@ struct FUN_006cf3a0 : FUN_005e04c0
     void* unk10;
     FUN_006cf3a0(int arg1, int arg2, void* source);
     virtual ~FUN_006cf3a0();
-    void FUN_006b3eb0(int arg1, int arg2);
+    void BSSimpleArray_float_1024_InitialSetup(int arg1, int arg2);
 };
 // @fnv 0x006cf3a0
 FUN_006cf3a0::FUN_006cf3a0(int arg1, int arg2, void* source) : FUN_005e04c0()
 {
-    unk10 = source ? source : FUN_00401020()->FUN_00aa42e0();
-    FUN_006b3eb0(arg1, arg2);
+    unk10 = source ? source : MemoryManager_Instance()->FUN_00aa42e0();
+    BSSimpleArray_float_1024_InitialSetup(arg1, arg2);
 }
 }  // namespace fnv_006cf3a0
 
@@ -1631,7 +1649,7 @@ struct ParamHost
 
 struct ItemFinish
 {
-    void FUN_006cf900();
+    void CopyFields_006cf900();
 };
 
 struct FUN_006cf8a0_cls
@@ -1650,7 +1668,7 @@ void FUN_006cf8a0_cls::ProcessItems(ParamHost* pHost)
     pHost->Prepare(iCount, 1);
     for (unsigned int i = 0; i < iCount; i++)
     {
-        ((ItemFinish*)pHost->ProcessItem(i, &pItems[i]))->FUN_006cf900();
+        ((ItemFinish*)pHost->ProcessItem(i, &pItems[i]))->CopyFields_006cf900();
     }
 }
 
@@ -1661,7 +1679,7 @@ struct FUN_006cf940_Item
 
 struct FUN_006cf940_Owner
 {
-    void FUN_006cff60(unsigned int count, int flag);
+    void ResizeArrayStorage(unsigned int count, int flag);
     FUN_006cf940_Item* FUN_00691750(unsigned int index, char* pItem);
 };
 
@@ -1671,13 +1689,14 @@ struct FUN_006cf940_cls
     char* m_04;
     unsigned int m_08;
 
-    void FUN_006cf940(FUN_006cf940_Owner* a1);
+    void BSSimpleArray_CopyTo_0(FUN_006cf940_Owner* a1);
 };
 
 // @fnv 0x006cf940
-void FUN_006cf940_cls::FUN_006cf940(FUN_006cf940_Owner* pOwner)
+// src: COMMUNITY 0x006cf940
+void FUN_006cf940_cls::BSSimpleArray_CopyTo_0(FUN_006cf940_Owner* pOwner)
 {
-    pOwner->FUN_006cff60(this->m_08, 1);
+    pOwner->ResizeArrayStorage(this->m_08, 1);
     for (unsigned int i = 0; i < this->m_08; ++i)
     {
         pOwner->FUN_00691750(i, this->m_04 + i * 0x28)->FUN_006dcce0();
@@ -1704,14 +1723,14 @@ struct FUN_00aa42e0_cls
     int FUN_00aa42e0();
 };
 
-void* __cdecl FUN_00401020();
+void* __cdecl MemoryManager_Instance();
 
 class FUN_006cfa00 : public FUN_006cfa00_base
 {
   public:
     int m_10;
 
-    void FUN_006dc440(int a, int b);
+    void BSSimpleArray_NavMeshTriHandle_1024_InitialSetup(int a, int b);
 
     FUN_006cfa00(int a1, int a2, int a3);
 };
@@ -1720,8 +1739,8 @@ class FUN_006cfa00 : public FUN_006cfa00_base
 // @fnv 0x006cfa00
 FUN_006cfa00::FUN_006cfa00(int aiFirst, int aiSecond, int aiValue)
 {
-    m_10 = (aiValue != 0) ? aiValue : ((FUN_00aa42e0_cls*)FUN_00401020())->FUN_00aa42e0();
-    FUN_006dc440(aiFirst, aiSecond);
+    m_10 = (aiValue != 0) ? aiValue : ((FUN_00aa42e0_cls*)MemoryManager_Instance())->FUN_00aa42e0();
+    BSSimpleArray_NavMeshTriHandle_1024_InitialSetup(aiFirst, aiSecond);
 }
 }  // namespace fnv_006cfa00
 
@@ -1758,7 +1777,7 @@ struct FUN_00aa42e0_obj
     void* __thiscall FUN_00aa42e0();
 };
 
-FUN_00aa42e0_obj* __cdecl FUN_00401020();
+FUN_00aa42e0_obj* __cdecl MemoryManager_Instance();
 
 struct FUN_006cfb20_cls : FUN_00694de0_base
 {
@@ -1768,7 +1787,7 @@ struct FUN_006cfb20_cls : FUN_00694de0_base
     int unk0c;
     void* m_10;
 
-    void FUN_006b3eb0(int a, int b);
+    void BSSimpleArray_float_1024_InitialSetup(int a, int b);
     FUN_006cfb20_cls(int a, int b, void* c);
 };
 
@@ -1777,8 +1796,8 @@ struct FUN_006cfb20_cls : FUN_00694de0_base
 FUN_006cfb20_cls::FUN_006cfb20_cls(int aiArg1, int aiArg2, void* apData)
 {
     vfptr = (int*)&DAT_0106c9f4;
-    m_10 = apData != 0 ? apData : FUN_00401020()->FUN_00aa42e0();
-    FUN_006b3eb0(aiArg1, aiArg2);
+    m_10 = apData != 0 ? apData : MemoryManager_Instance()->FUN_00aa42e0();
+    BSSimpleArray_float_1024_InitialSetup(aiArg1, aiArg2);
 }
 }  // namespace fnv_006cfb20
 
@@ -1793,16 +1812,17 @@ struct FUN_006d0540_shell
     int unk08;
     int unk0c;
 
-    void __thiscall FUN_006d0540(void* newItem, void* oldItem, unsigned int count);
+    void __thiscall CopyOverlappingElements30(void* newItem, void* oldItem, unsigned int count);
 };
 
 struct FUN_006cfe70_Class : public FUN_006d0540_shell
 {
-    void __thiscall FUN_006cfe70(int value, int count);
+    void __thiscall BSSimpleArray_VirtualPathingNode_1024_ReallocateBuffer(int value, int count);
 };
 
 // @fnv 0x006cfe70
-void __thiscall FUN_006cfe70_Class::FUN_006cfe70(int value, int count)
+// src: COMMUNITY 0x006cfe70
+void __thiscall FUN_006cfe70_Class::BSSimpleArray_VirtualPathingNode_1024_ReallocateBuffer(int value, int count)
 {
     if (this->unk04 != 0)
     {
@@ -1813,7 +1833,7 @@ void __thiscall FUN_006cfe70_Class::FUN_006cfe70(int value, int count)
         else
         {
             void* newItem = this->vf04(value);
-            this->FUN_006d0540(newItem, this->unk04, count);
+            this->CopyOverlappingElements30(newItem, this->unk04, count);
             FreeSimpleArrayStorage(this);
             this->unk04 = newItem;
         }
@@ -1860,8 +1880,8 @@ void FUN_006e3c90_cls::ConstructSpawnedObjects(char* base, unsigned int count)
 
 struct FUN_006e9470_Helper
 {
-    void FUN_006e9280(unsigned int count, int flag);
-    void* FUN_006e8f80(int index, void* item);
+    void BSSimpleArray_PathingNode_1024_SetSize(unsigned int count, int flag);
+    void* GetPathingGraphNodeAddress(int index, void* item);
 };
 
 struct FUN_006e9470_Obj
@@ -1875,34 +1895,36 @@ struct FUN_006e9470_cls
     char* m_04;
     unsigned int m_08;
 
-    void FUN_006e9470(FUN_006e9470_Helper* pHelper);
+    void BSSimpleArray_PathingNode_1024_Copy(FUN_006e9470_Helper* pHelper);
 };
 
 // @fnv 0x006e9470
-void FUN_006e9470_cls::FUN_006e9470(FUN_006e9470_Helper* pHelper)
+// src: COMMUNITY 0x006e9470
+void FUN_006e9470_cls::BSSimpleArray_PathingNode_1024_Copy(FUN_006e9470_Helper* pHelper)
 {
-    pHelper->FUN_006e9280(m_08, 1);
+    pHelper->BSSimpleArray_PathingNode_1024_SetSize(m_08, 1);
     for (unsigned int i = 0; i < m_08; i++)
     {
-        ((FUN_006e9470_Obj*)pHelper->FUN_006e8f80(i, m_04 + i * 60))->FUN_006e9570();
+        ((FUN_006e9470_Obj*)pHelper->GetPathingGraphNodeAddress(i, m_04 + i * 60))->FUN_006e9570();
     }
 }
 
 struct S_00a0d000_Class
 {
-    virtual unsigned int FUN_00a0d000();
+    virtual unsigned int ReserveSlotAndIncrementSize();
     virtual void* FUN_00a0d010(unsigned int size);
 
     void* pBuffer;
     unsigned int m_uiSize;
     unsigned int m_uiReservedSize;
 
-    void FUN_00a0d0c0(unsigned int newCapacity, unsigned int copyCount);
+    void UpdateFields_00a0d0c0(unsigned int newCapacity, unsigned int copyCount);
 };
 
 // Grows the buffer when size equals reserved size, then increments m_uiSize and returns the index of the newly added slot.
 // @fnv 0x00a0d000
-unsigned int S_00a0d000_Class::FUN_00a0d000()
+// src: GUESS 0x00a0d000 (confidence: medium)
+unsigned int S_00a0d000_Class::ReserveSlotAndIncrementSize()
 {
     unsigned int allocationSize;
     unsigned int newCapacity;
@@ -1930,7 +1952,7 @@ unsigned int S_00a0d000_Class::FUN_00a0d000()
         else
         {
             newCapacity = (this->m_uiReservedSize > 8) ? this->m_uiReservedSize + 8 : this->m_uiReservedSize << 1;
-            this->FUN_00a0d0c0(newCapacity, this->m_uiSize);
+            this->UpdateFields_00a0d0c0(newCapacity, this->m_uiSize);
             this->m_uiReservedSize = newCapacity;
         }
     }
@@ -2015,14 +2037,15 @@ struct FUN_006e9280_shell
     FUN_006e9280_Item* m_pBuffer;
     unsigned int m_uiSize;
     unsigned int m_uiCapacity;
-    void FUN_006a21c0(unsigned int uiNewAlloc, unsigned int uiCopy);
+    void BSSimpleArray_PathingNode_1024_ReallocateBuffer(unsigned int uiNewAlloc, unsigned int uiCopy);
     void ConstructArray(FUN_006e9280_Item* pItems, unsigned int ItemUpdateArray);
     void FUN_006cff20(FUN_006e9280_Item* pItems, unsigned int ItemUpdateArray);
-    void FUN_006e9280(unsigned int uiNewSize, bool bShrink);
+    void BSSimpleArray_PathingNode_1024_SetSize(unsigned int uiNewSize, bool bShrink);
 };
 
 // @fnv 0x006e9280
-void FUN_006e9280_shell::FUN_006e9280(unsigned int uiNewSize, bool bShrink)
+// src: XBOX_PDB 0x006e9280
+void FUN_006e9280_shell::BSSimpleArray_PathingNode_1024_SetSize(unsigned int uiNewSize, bool bShrink)
 {
     if (uiNewSize == 0)
     {
@@ -2037,7 +2060,7 @@ void FUN_006e9280_shell::FUN_006e9280(unsigned int uiNewSize, bool bShrink)
         }
         else
         {
-            FUN_006a21c0(uiNewSize, m_uiSize);
+            BSSimpleArray_PathingNode_1024_ReallocateBuffer(uiNewSize, m_uiSize);
             m_uiCapacity = uiNewSize;
         }
         ConstructArray(&m_pBuffer[m_uiSize], uiNewSize - m_uiSize);
@@ -2049,7 +2072,7 @@ void FUN_006e9280_shell::FUN_006e9280(unsigned int uiNewSize, bool bShrink)
         m_uiSize = uiNewSize;
         if (bShrink && uiNewSize <= m_uiCapacity >> 2)
         {
-            FUN_006a21c0(uiNewSize, uiNewSize);
+            BSSimpleArray_PathingNode_1024_ReallocateBuffer(uiNewSize, uiNewSize);
             m_uiCapacity = uiNewSize;
         }
     }
@@ -2073,19 +2096,19 @@ struct FUN_006cf570 : FUN_006d0420_Base
     void* m_pThreadAllocator;
     FUN_006cf570(unsigned int initialSize, unsigned int growth, void* allocator);
     virtual ~FUN_006cf570();
-    void __thiscall FUN_0069b940(unsigned int initialSize, unsigned int growth);
+    void __thiscall BSSimpleArray_char_1024_InitialSetup(unsigned int initialSize, unsigned int growth);
 };
 // @fnv 0x006cf570
 FUN_006cf570::FUN_006cf570(unsigned int initialSize, unsigned int growth, void* allocator) : FUN_006d0420_Base()
 {
-    m_pThreadAllocator = allocator ? allocator : FUN_00401020()->FUN_00aa42e0();
-    FUN_0069b940(initialSize, growth);
+    m_pThreadAllocator = allocator ? allocator : MemoryManager_Instance()->FUN_00aa42e0();
+    BSSimpleArray_char_1024_InitialSetup(initialSize, growth);
 }
 
 struct FUN_0069f920_Sub
 {
-    void* __thiscall FUN_006a1920();
-    void* __thiscall FUN_006e8f80(unsigned int);
+    void* __thiscall ProcessAndReturnValue_006a1920();
+    void* __thiscall GetPathingGraphNodeAddress(unsigned int);
 };
 struct FUN_006e2280
 {
@@ -2099,14 +2122,15 @@ struct FUN_0069f920_cls
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     FUN_0069f920_Sub unk20;
-    void* __thiscall FUN_0069f920(int, int);
+    void* __thiscall PathingSolution_AddPathingNode(int, int);
 };
 // Calls unk20.FUN_006a1920 for a node, constructs FUN_006e2280(a, b) at the address FUN_006e8f80 returns for it, and returns the node.
 // @fnv 0x0069f920
-void* __thiscall FUN_0069f920_cls::FUN_0069f920(int aiArg1, int aiArg2)
+// src: COMMUNITY 0x0069f920
+void* __thiscall FUN_0069f920_cls::PathingSolution_AddPathingNode(int aiArg1, int aiArg2)
 {
-    void* pNode = unk20.FUN_006a1920();
-    void* pPlace = unk20.FUN_006e8f80((unsigned int)pNode);
+    void* pNode = unk20.ProcessAndReturnValue_006a1920();
+    void* pPlace = unk20.GetPathingGraphNodeAddress((unsigned int)pNode);
     new (pPlace) FUN_006e2280(aiArg1, aiArg2);
     return pNode;
 }
@@ -2119,7 +2143,8 @@ struct FUN_009f6500
 
 // Calls the FUN_009f6500 placement constructor on each 16-byte element of the arr array, count times.
 // @fnv 0x009f6460
-void Host9f6340::FUN_009f6460(int arr, int count)
+// src: XBOX_PDB 0x009f6460
+void Host9f6340::BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(int arr, int count)
 {
     for (unsigned int i = 0; i < (unsigned int)count; ++i)
     {

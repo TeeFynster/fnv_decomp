@@ -49,12 +49,12 @@ public:
     void StartReanimation();
 
     unsigned short __thiscall FUN_00804f80(Actor* apActor);
-    unsigned short __thiscall FUN_00827440(Actor* apActor);
+    unsigned short __thiscall GetSaveSize_00827440(Actor* apActor);
     void FUN_00827510(Actor* apActor);
-    void __thiscall FUN_008276e0(Actor* apActor);
-    void FUN_008274a0(Actor* apActor);
-    ActiveEffect* FUN_008266a0();
-    void __thiscall FUN_00827230();
+    void __thiscall Revert_008276e0(Actor* apActor);
+    void SaveGame_008274a0(Actor* apActor);
+    ActiveEffect* Copy_008266a0();
+    void __thiscall Finish_00827230();
     void FUN_00805760(Actor* actor);
-    bool __thiscall FUN_00827340(TESObjectREFR* apRef);
+    bool __thiscall CheckTarget_00827340(TESObjectREFR* apRef);
 };

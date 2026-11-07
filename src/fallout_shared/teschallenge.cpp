@@ -410,7 +410,8 @@ struct ChallengeLegacyFormIO : TESForm
 };
 
 // @fnv 0x005a7770
-unsigned short __thiscall TESChallenge::FUN_005a7770(unsigned int aiFlags)
+// src: XBOX_PDB 0x005a7770
+unsigned short __thiscall TESChallenge::TESCaravanCard_GetSaveSize(unsigned int aiFlags)
 {
     unsigned short isize = 0;
     isize += static_cast<unsigned short>(TESForm::GetSaveSize(aiFlags));
@@ -425,13 +426,15 @@ void TESChallenge::ClearProgress()
 }
 
 // @fnv 0x0059adb0
-void __thiscall TESChallenge::FUN_0059adb0(unsigned int aiFlags)
+// src: XBOX_PDB 0x0059adb0
+void __thiscall TESChallenge::TESCaravanCard_SaveGame(unsigned int aiFlags)
 {
     reinterpret_cast<ChallengeLegacyFormIO*>(this)->SaveChangeFlags(aiFlags);
 }
 
 // @fnv 0x00616640
-void __thiscall TESChallenge::FUN_00616640(unsigned int aiFlags, unsigned int aiCurrentFlags)
+// src: XBOX_PDB 0x00616640
+void __thiscall TESChallenge::TESCaravanCard_LoadGame(unsigned int aiFlags, unsigned int aiCurrentFlags)
 {
     reinterpret_cast<ChallengeLegacyFormIO*>(this)->LoadChangeFlags(aiFlags, aiCurrentFlags);
 }
@@ -458,33 +461,33 @@ bool __thiscall TESChallenge::Compare(TESForm* apCompare)
     return false;
 }
 
-bool __cdecl FUN_00401500();
-void __cdecl FUN_00485910(unsigned int, unsigned int);
+bool __cdecl TESForm_QEndianSwapOnSave();
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
 // @fnv 0x005f5540
 void __thiscall TESChallenge::Initialize()
 {
-    TESForm::FUN_004855a0();
-    TESFullName::FUN_00487010();
+    TESForm::BeginFormRecord();
+    TESFullName::Save_00487010();
     TESIcon::Save(0x4e4f4349);
     BGSMessageIcon::Save(0x4f43494d);
-    TESScriptableForm::FUN_0048cca0();
-    TESDescription::FUN_00482cb0();
-    if (FUN_00401500())
+    TESScriptableForm::Save_0048cca0();
+    TESDescription::Save_00482cb0();
+    if (TESForm_QEndianSwapOnSave())
         ((ChallengeData*)((char*)this + 0x54))->SwapEndianFields();
-    TESForm::FUN_00485e20(&data, 0x18);
-    if (FUN_00401500())
+    TESForm::TESForm___SaveData(&data, 0x18);
+    if (TESForm_QEndianSwapOnSave())
         ((ChallengeData*)((char*)this + 0x54))->SwapEndianFields();
     if (*(unsigned int*)((char*)this + 0x74))
     {
         unsigned int v1 = ((TESForm**)((char*)this + 0x74))[0]->GetFormID();
-        FUN_00485910(0x4d414e53, v1);
+        TESForm_AddChunk_00485910(0x4d414e53, v1);
     }
     if (*(unsigned int*)((char*)this + 0x78))
     {
         unsigned int v2 = ((TESForm**)((char*)this + 0x78))[0]->GetFormID();
-        FUN_00485910(0x4d414e58, v2);
+        TESForm_AddChunk_00485910(0x4d414e58, v2);
     }
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 
@@ -506,7 +509,8 @@ void __thiscall TESChallenge::CopyFromChallenge(TESForm* apCopy)
 
 // Calls the base save routine, then writes the 4-byte values at offsets 0x6C and 0x70 into the save buffer.
 // @fnv 0x005f5780
-void __thiscall TESChallenge::FUN_005f5780(BGSSaveFormBuffer* apBuffer)
+// src: XBOX_PDB 0x005f5780
+void __thiscall TESChallenge::SaveGame_005f5780(BGSSaveFormBuffer* apBuffer)
 {
     reinterpret_cast<ChallengeLegacyFormIO*>(this)->SaveIfChanged(apBuffer);
     apBuffer->SaveData((char*)this + 0x6C, 4, 0);

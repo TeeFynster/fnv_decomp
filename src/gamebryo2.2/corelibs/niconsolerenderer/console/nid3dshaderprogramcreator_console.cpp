@@ -97,7 +97,7 @@ struct FakeDevice
     virtual long __stdcall CreateVertexShader(const unsigned long* pFunction, void** ppShader);
 };
 extern FakeDevice* DAT_0126fa28;
-int __cdecl FUN_00aa0020(int, int, const char*, long);
+int __cdecl NiShaderFactory_ReportError(int, int, const char*, long);
 // Creates a vertex shader via DAT_0126fa28; on failure logs an error with the HRESULT and returns 0, otherwise returns the shader pointer.
 // @fnv 0x00e98890
 void* __stdcall CreateVertexShaderChecked(void* pShaderBytecode, void* pUnused, unsigned int uiUnused, void* pUnused2,
@@ -106,7 +106,7 @@ void* __stdcall CreateVertexShaderChecked(void* pShaderBytecode, void* pUnused, 
     long hr = DAT_0126fa28->CreateVertexShader((const unsigned long*)pShaderBytecode, (void**)&pShaderBytecode);
     if (hr < 0)
     {
-        FUN_00aa0020(1, 0, "Failed to create vertex shader\nError 0x%08x\n", hr);
+        NiShaderFactory_ReportError(1, 0, "Failed to create vertex shader\nError 0x%08x\n", hr);
         return 0;
     }
     return pShaderBytecode;
@@ -135,14 +135,15 @@ struct PixelShaderDevice : FakeDevice
 
 // Creates a pixel shader from pvCode via DAT_0126fa28, logging an error and returning 0 on failure.
 // @fnv 0x00e988d0
-GeometryRelatedType* __stdcall FUN_00e988d0(void* pvShaderCode)
+// src: GAMEBRYO_LIB 0x00e988d0
+GeometryRelatedType* __stdcall NiD3DShaderProgramCreator_CreatePixelShader(void* pvShaderCode)
 {
     GeometryRelatedType* hShader;
     long m_kResult =
         ((PixelShaderDevice*)DAT_0126fa28)->CreatePixelShader((const unsigned long*)pvShaderCode, &hShader);
     if (m_kResult < 0)
     {
-        FUN_00aa0020(1, 0, "Failed to create pixel shader\nError 0x%08x\n", m_kResult);
+        NiShaderFactory_ReportError(1, 0, "Failed to create pixel shader\nError 0x%08x\n", m_kResult);
         return 0;
     }
     return hShader;

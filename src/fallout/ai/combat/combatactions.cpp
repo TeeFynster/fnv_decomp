@@ -396,9 +396,10 @@ double __cdecl GetWeaponDPSDeficit(CombatController*, int);
 
 // Returns the sum of FUN_00979e40(apCombatController, aiActionValue) and GetWeaponDPSDeficit(apCombatController, 1).
 // @fnv 0x0097b070
-float CombatActionAttackRangedFromCover::FUN_0097b070(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097b070
+float CombatActionAttackRangedFromCover::GetCost_0097b070(CombatController* apCombatController, int aiActionValue)
 {
-    return FUN_00979e40(apCombatController, aiActionValue) + GetWeaponDPSDeficit(apCombatController, 1);
+    return GetCost_00979e40(apCombatController, aiActionValue) + GetWeaponDPSDeficit(apCombatController, 1);
 }
 
 namespace fnv_0097b240 {
@@ -406,9 +407,10 @@ float __cdecl GetWeaponDPSDeficit(CombatController*, int);
 }  // namespace fnv_0097b240
 
 // @fnv 0x0097b240
-float CombatActionAttackRangedExplosive::FUN_0097b240(CombatController* apController, int v)
+// src: COMMUNITY 0x0097b240
+float CombatActionAttackRangedExplosive::GetCost_0097b240(CombatController* apController, int v)
 {
-    return FUN_00979e40(apController, v) + fnv_0097b240::GetWeaponDPSDeficit(apController, 0);
+    return GetCost_00979e40(apController, v) + fnv_0097b240::GetWeaponDPSDeficit(apController, 0);
 }
 
 namespace fnv_0097b4a0 {
@@ -417,9 +419,10 @@ float __cdecl GetWeaponDPSDeficit(CombatController*, int);
 
 // Returns the sum of FUN_00979e40(c, v) and fnv_0097b4a0::GetWeaponDPSDeficit(c, 2).
 // @fnv 0x0097b4a0
-float CombatActionAttackMelee::FUN_0097b4a0(CombatController* apController, int v)
+// src: XBOX_PDB 0x0097b4a0
+float CombatActionAttackMelee::GetCost_0097b4a0(CombatController* apController, int v)
 {
-    return FUN_00979e40(apController, v) + fnv_0097b4a0::GetWeaponDPSDeficit(apController, 2);
+    return GetCost_00979e40(apController, v) + fnv_0097b4a0::GetWeaponDPSDeficit(apController, 2);
 }
 
 namespace fnv_0097b5a0 {
@@ -428,20 +431,22 @@ float __cdecl GetWeaponDPSDeficit(CombatController*, int);
 }  // namespace fnv_0097b5a0
 
 // @fnv 0x0097b5a0
-float CombatActionAttackHandToHand::FUN_0097b5a0(CombatController* c, int iValue)
+// src: XBOX_PDB 0x0097b5a0
+float CombatActionAttackHandToHand::GetCost_0097b5a0(CombatController* c, int iValue)
 {
     if (c->GetFieldBC() && reinterpret_cast<Actor*>(c->GetFieldBC())->IsPlayerTeammate() &&
         reinterpret_cast<Actor*>(c->GetFieldBC())->GetActiveWeapon())
         return fnv_0097b5a0::DAT_0108cb10;
-    return FUN_00979e40(c, iValue) + fnv_0097b5a0::GetWeaponDPSDeficit(c, 6);
+    return GetCost_00979e40(c, iValue) + fnv_0097b5a0::GetWeaponDPSDeficit(c, 6);
 }
 
 // @fnv 0x0097b840
-bool CombatActionAttackGrenadeFlushTarget::FUN_0097b840(CombatController* apController, CombatWorldStateArray* w, int aiValue)
+// src: XBOX_PDB 0x0097b840
+bool CombatActionAttackGrenadeFlushTarget::CanExecute_0097b840(CombatController* apController, CombatWorldStateArray* w, int aiValue)
 {
-    if (!FUN_00979e90(apController, w, aiValue))
+    if (!CanExecute(apController, w, aiValue))
         return false;
-    return static_cast<Tile*>(static_cast<CombatControllerAccess*>(apController)->GetCombatState(0xb))->FUN_0099ac20();
+    return static_cast<Tile*>(static_cast<CombatControllerAccess*>(apController)->GetCombatState(0xb))->FindCombatLocation_0099ac20();
 }
 
 struct B006815c0
@@ -451,11 +456,12 @@ struct B006815c0
 
 struct FUN_0097b940_shell
 {
-    void FUN_0097b940();
+    void CombatLocation_GetPoint();
 };
 
 // @fnv 0x0097b940
-void FUN_0097b940_shell::FUN_0097b940()
+// src: XBOX_PDB 0x0097b940
+void FUN_0097b940_shell::CombatLocation_GetPoint()
 {
     reinterpret_cast<B006815c0*>(this)->_ref_006815c0();
 }
@@ -473,12 +479,13 @@ float __cdecl GetWeaponDPSDeficit(CombatController*, int);
 }  // namespace fnv_0097b980
 
 // @fnv 0x0097b980
-float CombatActionAttackGrenadeFlushTarget::FUN_0097b980(CombatController* apCombatController, int v)
+// src: XBOX_PDB 0x0097b980
+float CombatActionAttackGrenadeFlushTarget::GetCost_0097b980(CombatController* apCombatController, int v)
 {
     float attack = fnv_0097b980::GetWeaponDPSDeficit(apCombatController, 3);
     if (attack >= fnv_0097b980::DAT_0108cb10)
         return fnv_0097b980::DAT_0108cb10;
-    return FUN_00979e40(apCombatController, v) + attack;
+    return GetCost_00979e40(apCombatController, v) + attack;
 }
 
 namespace fnv_0097bb90 {
@@ -487,40 +494,44 @@ float __cdecl GetWeaponDPSDeficit(CombatController*, int);
 
 // Returns the sum of FUN_00979e40(c, v) and fnv_0097bb90::GetWeaponDPSDeficit(c, 3).
 // @fnv 0x0097bb90
-float CombatActionAttackGrenadeFromCover::FUN_0097bb90(CombatController* apCombatController, int v)
+// src: COMMUNITY 0x0097bb90
+float CombatActionAttackGrenadeFromCover::CombatActionAttackGrenade_GetCost(CombatController* apCombatController, int v)
 {
-    return FUN_00979e40(apCombatController, v) + fnv_0097bb90::GetWeaponDPSDeficit(apCombatController, 3);
+    return GetCost_00979e40(apCombatController, v) + fnv_0097bb90::GetWeaponDPSDeficit(apCombatController, 3);
 }
 
 bool __cdecl IsCombatActionValid(CombatController*, int);
 
 
 // @fnv 0x0097bc80
-bool CombatActionMove::FUN_0097bc80(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097bc80
+bool CombatActionMove::CheckIdentical(CombatController* apCombatController, int aiActionValue)
 {
     return IsCombatActionValid(apCombatController, aiActionValue);
 }
 
 namespace fnv_0097bca0 {
-void __cdecl FUN_0097bed0(CombatController*, int);
+void __cdecl CombatActionMove_StartMovementProcedure(CombatController*, int);
 }
 
 
 // @fnv 0x0097bca0
-void CombatActionMove::FUN_0097bca0(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097bca0
+void CombatActionMove::Execute_0097bca0(CombatController* apCombatController, int aiActionValue)
 {
-    fnv_0097bca0::FUN_0097bed0(apCombatController, aiActionValue);
+    fnv_0097bca0::CombatActionMove_StartMovementProcedure(apCombatController, aiActionValue);
 }
 
 struct Sub
 {
-    float FUN_0097bd00();
+    float CombatPlannerData_GetCombatLocationCost();
 };
 // @fnv 0x0097bcc0
-float CombatActionMove::FUN_0097bcc0(CombatController* apController, int v)
+// src: XBOX_PDB 0x0097bcc0
+float CombatActionMove::GetCost_0097bcc0(CombatController* apController, int v)
 {
-    float cost = FUN_00979e40(apController, v);
-    cost += static_cast<CombatControllerAccess*>(apController)->Get(v)->FUN_0097bd00();
+    float cost = GetCost_00979e40(apController, v);
+    cost += static_cast<CombatControllerAccess*>(apController)->Get(v)->CombatPlannerData_GetCombatLocationCost();
     return cost;
 }
 
@@ -528,11 +539,12 @@ float CombatActionMove::FUN_0097bcc0(CombatController* apController, int v)
 class CombatLocations
 {
 public:
-    float FUN_0097bd00(unsigned int index);
+    float CombatPlannerData_GetCombatLocationCost(unsigned int index);
 };
 
 // @fnv 0x0097bd00
-float CombatLocations::FUN_0097bd00(unsigned int uiIndex)
+// src: XBOX_PDB 0x0097bd00
+float CombatLocations::CombatPlannerData_GetCombatLocationCost(unsigned int uiIndex)
 {
     return reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0xb8)[uiIndex];
 }
@@ -551,13 +563,14 @@ void CombatActionMoveAndAttackRangedExplosive::FUN_0097c470()
     FUN_00979c80();
 }
 
-bool __cdecl FUN_0097beb0(CombatController*, CombatWorldStateArray*, int);
+bool __cdecl CombatController_FindCombatLocation(CombatController*, CombatWorldStateArray*, int);
 // @fnv 0x0097c490
-bool CombatActionMoveAndAttackRangedExplosive::FUN_0097c490(CombatController* apController, CombatWorldStateArray* w, int aiValue)
+// src: XBOX_PDB 0x0097c490
+bool CombatActionMoveAndAttackRangedExplosive::CombatActionMove_CanExecute(CombatController* apController, CombatWorldStateArray* w, int aiValue)
 {
-    if (!FUN_00979e90(apController, w, aiValue))
+    if (!CanExecute(apController, w, aiValue))
         return false;
-    return FUN_0097beb0(apController, w, aiValue);
+    return CombatController_FindCombatLocation(apController, w, aiValue);
 }
 
 namespace fnv_0097c4d0 {
@@ -567,17 +580,19 @@ float __cdecl GetWeaponDPSDeficit(CombatController*, int);
 
 // Returns DAT_0108cb10 if fnv_0097c4d0::GetWeaponDPSDeficit(c, 0) is at least DAT_0108cb10, otherwise returns FUN_00979e40(c, v).
 // @fnv 0x0097c4d0
-float CombatActionMoveAndAttackRangedExplosive::FUN_0097c4d0(CombatController* c, int iValue)
+// src: XBOX_PDB 0x0097c4d0
+float CombatActionMoveAndAttackRangedExplosive::GetCost_0097c4d0(CombatController* c, int iValue)
 {
     if (fnv_0097c4d0::GetWeaponDPSDeficit(c, 0) >= fnv_0097c4d0::DAT_0108cb10)
         return fnv_0097c4d0::DAT_0108cb10;
-    return FUN_00979e40(c, iValue);
+    return GetCost_00979e40(c, iValue);
 }
 
 extern const char* DAT_011a5700[];
 int _sprintf_s(char*, unsigned int, const char*, ...);
 // @fnv 0x0097c520
-void CombatActionMoveAndAttackRangedExplosive::FUN_0097c520(char* pcBuffer, unsigned int size, int v)
+// src: XBOX_PDB 0x0097c520
+void CombatActionMoveAndAttackRangedExplosive::CombatActionActivateCombatItem_GetDebugText(char* pcBuffer, unsigned int size, int v)
 {
     _sprintf_s(pcBuffer, size, "%s: %s", GetCombatActionName(), DAT_011a5700[v & 0xffff]);
 }
@@ -589,11 +604,12 @@ float __cdecl GetWeaponDPSDeficit(CombatController*, int);
 
 // Returns DAT_0108cb10 if fnv_0097c6b0::GetWeaponDPSDeficit(c, 3) reaches it, otherwise returns FUN_00979e40(c, v).
 // @fnv 0x0097c6b0
-float CombatActionMoveAndAttackGrenade::FUN_0097c6b0(CombatController* c, int v)
+// src: XBOX_PDB 0x0097c6b0
+float CombatActionMoveAndAttackGrenade::GetCost_0097c6b0(CombatController* c, int v)
 {
     if (fnv_0097c6b0::GetWeaponDPSDeficit(c, 3) >= fnv_0097c6b0::DAT_0108cb10)
         return fnv_0097c6b0::DAT_0108cb10;
-    return FUN_00979e40(c, v);
+    return GetCost_00979e40(c, v);
 }
 
 int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
@@ -602,7 +618,8 @@ extern const char* DAT_0118a8a8[];
 
 // Writes "%s: %s" into apDebugText using GetCombatActionName() and DAT_0118a8a8[aiActionValue].
 // @fnv 0x0097c990
-void CombatActionDrawWeapon::FUN_0097c990(char* apDebugText, unsigned int aiMaxLength, int aiActionValue)
+// src: XBOX_PDB 0x0097c990
+void CombatActionDrawWeapon::GetDebugText_0097c990(char* apDebugText, unsigned int aiMaxLength, int aiActionValue)
 {
     _sprintf_s(apDebugText, aiMaxLength, "%s: %s", GetCombatActionName(), DAT_0118a8a8[aiActionValue]);
 }
@@ -612,7 +629,8 @@ namespace fnv_0097ccf0 {
 }  // namespace fnv_0097ccf0
 
 // @fnv 0x0097ccf0
-void CombatActionIgnoreBlockedTarget::FUN_0097ccf0(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097ccf0
+void CombatActionIgnoreBlockedTarget::Execute_0097ccf0(CombatController* apCombatController, int aiActionValue)
 {
     static_cast<CombatState*>(static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState())->SetTargetBlocked(static_cast<unsigned char>(0));
 }
@@ -636,7 +654,8 @@ int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 
 // Writes "<name>: <value>" into apDebugText using _sprintf_s, with the name from GetCombatActionName and aiActionValue.
 // @fnv 0x0097d370
-void CombatActionHide::FUN_0097d370(char* apDebugText, unsigned int aiMaxLength, int aiActionValue)
+// src: XBOX_PDB 0x0097d370
+void CombatActionHide::GetDebugText_0097d370(char* apDebugText, unsigned int aiMaxLength, int aiActionValue)
 {
     _sprintf_s(apDebugText, aiMaxLength, "%s: %i", GetCombatActionName(), aiActionValue);
 }
@@ -648,9 +667,10 @@ struct FUN_009d8b60
 };
 // Allocates a new FUN_009d8b60 and passes it to c->FUN_009801b0; v is unused.
 // @fnv 0x0097caf0
-void CombatActionSearch::FUN_0097caf0(CombatController* c, int aiValue)
+// src: XBOX_PDB 0x0097caf0
+void CombatActionSearch::Execute_0097caf0(CombatController* c, int aiValue)
 {
-    c->FUN_009801b0(reinterpret_cast<CombatProcedure*>(new FUN_009d8b60));
+    c->SetMovementProcedure(reinterpret_cast<CombatProcedure*>(new FUN_009d8b60));
 }
 
 namespace fnv_0097ae00 {
@@ -664,7 +684,8 @@ extern float DAT_0108cb10;
 }  // namespace fnv_0097ae00
 
 // @fnv 0x0097ae00
-float CombatActionAttackRanged::FUN_0097ae00(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097ae00
+float CombatActionAttackRanged::GetCost_0097ae00(CombatController* apCombatController, int aiActionValue)
 {
     if (apCombatController->GetFieldBC() &&
         reinterpret_cast<Actor*>(apCombatController->GetFieldBC())->IsPlayerTeammate() &&
@@ -672,7 +693,7 @@ float CombatActionAttackRanged::FUN_0097ae00(CombatController* apCombatControlle
     {
         return fnv_0097ae00::DAT_0108cb10;
     }
-    return CombatAction::FUN_00979e40(apCombatController, aiActionValue) +
+    return CombatAction::GetCost_00979e40(apCombatController, aiActionValue) +
            fnv_0097ae00::GetWeaponDPSDeficit(apCombatController, 1);
 }
 
@@ -697,11 +718,12 @@ struct FUN_009d2440
 
 // Creates a FUN_009d0890 and a FUN_009d2440 from GetFieldValue of the controller's combat state, passing both to the controller's FUN_00980110 and FUN_009801b0.
 // @fnv 0x0097af70
-void CombatActionAttackRangedFromCover::FUN_0097af70(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097af70
+void CombatActionAttackRangedFromCover::Execute_0097af70(CombatController* apCombatController, int aiActionValue)
 {
-    apCombatController->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097af70::FUN_009d0890()));
+    apCombatController->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097af70::FUN_009d0890()));
     apCombatController
-        ->FUN_009801b0(reinterpret_cast<CombatProcedure*>(new fnv_0097af70::FUN_009d2440(fnv_0097af70::GetFieldValue((unsigned int*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState()))));
+        ->SetMovementProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097af70::FUN_009d2440(fnv_0097af70::GetFieldValue((unsigned int*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState()))));
 }
 
 namespace fnv_0097b170 {
@@ -723,10 +745,11 @@ struct FUN_009d3a00
 
 // Allocates a FUN_009d0890 and a FUN_009d3a00 and passes them to FUN_00980110 and FUN_009801b0 on the combat controller.
 // @fnv 0x0097b170
-void CombatActionAttackRangedExplosive::FUN_0097b170(CombatController* apCombatController, int aiActionValue)
+// src: COMMUNITY 0x0097b170
+void CombatActionAttackRangedExplosive::CombatActionAttackRanged_AddProcedureToController(CombatController* apCombatController, int aiActionValue)
 {
-    apCombatController->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097b170::FUN_009d0890()));
-    apCombatController->FUN_009801b0(reinterpret_cast<CombatProcedure*>(new fnv_0097b170::FUN_009d3a00()));
+    apCombatController->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097b170::FUN_009d0890()));
+    apCombatController->SetMovementProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097b170::FUN_009d3a00()));
 }
 
 namespace fnv_0097b410 {
@@ -742,9 +765,10 @@ struct FUN_009cc0c0
 
 // Allocates a FUN_009cc0c0 object and passes it to the combat controller's FUN_00980110 method.
 // @fnv 0x0097b410
-void CombatActionAttackMelee::FUN_0097b410(CombatController* apCombatController, int aiActionValue)
+// src: COMMUNITY 0x0097b410
+void CombatActionAttackMelee::AddProcedureToController(CombatController* apCombatController, int aiActionValue)
 {
-    apCombatController->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097b410::FUN_009cc0c0));
+    apCombatController->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097b410::FUN_009cc0c0));
 }
 
 namespace fnv_0097b6d0 {
@@ -766,10 +790,11 @@ struct FUN_009d3a00
 
 // Allocates a FUN_009cadf0 and a FUN_009d3a00 and passes each to the combat controller's FUN_00980110 and FUN_009801b0 methods.
 // @fnv 0x0097b6d0
-void CombatActionAttackGrenade::FUN_0097b6d0(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097b6d0
+void CombatActionAttackGrenade::Execute_0097b6d0(CombatController* apCombatController, int aiActionValue)
 {
-    apCombatController->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097b6d0::FUN_009cadf0()));
-    apCombatController->FUN_009801b0(reinterpret_cast<CombatProcedure*>(new fnv_0097b6d0::FUN_009d3a00()));
+    apCombatController->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097b6d0::FUN_009cadf0()));
+    apCombatController->SetMovementProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097b6d0::FUN_009d3a00()));
 }
 
 namespace fnv_0097b880 {
@@ -779,7 +804,7 @@ int __fastcall GetField18C(char*);
 
 struct FUN_0097b940_shell
 {
-    int FUN_0097b940();
+    int CombatLocation_GetPoint();
 };
 
 
@@ -793,13 +818,14 @@ struct FUN_009caee0
 }  // namespace fnv_0097b880
 
 // @fnv 0x0097b880
-void CombatActionAttackGrenadeFlushTarget::FUN_0097b880(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097b880
+void CombatActionAttackGrenadeFlushTarget::Execute_0097b880(CombatController* apCombatController, int aiActionValue)
 {
     CombatState* pcombatState = (CombatState*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState();
     fnv_0097b880::CombatAvoidanceSphere* pcombatLocation =
         (fnv_0097b880::CombatAvoidanceSphere*)fnv_0097b880::GetField18C((char*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState());
     apCombatController
-        ->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097b880::FUN_009caee0(((fnv_0097b880::FUN_0097b940_shell*)pcombatLocation)->FUN_0097b940(),
+        ->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097b880::FUN_009caee0(((fnv_0097b880::FUN_0097b940_shell*)pcombatLocation)->CombatLocation_GetPoint(),
                                              ((CombatState*)pcombatState)->GetByte76())));
 }
 
@@ -823,11 +849,12 @@ struct FUN_009d2440
 }  // namespace fnv_0097bab0
 
 // @fnv 0x0097bab0
-void CombatActionAttackGrenadeFromCover::FUN_0097bab0(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097bab0
+void CombatActionAttackGrenadeFromCover::Execute_0097bab0(CombatController* apCombatController, int aiActionValue)
 {
-    apCombatController->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097bab0::FUN_009cadf0()));
+    apCombatController->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097bab0::FUN_009cadf0()));
     apCombatController
-        ->FUN_009801b0(reinterpret_cast<CombatProcedure*>(new fnv_0097bab0::FUN_009d2440(fnv_0097bab0::GetFieldValue((unsigned int*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState()))));
+        ->SetMovementProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097bab0::FUN_009d2440(fnv_0097bab0::GetFieldValue((unsigned int*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState()))));
 }
 
 namespace fnv_0097c090 {
@@ -843,11 +870,12 @@ struct FUN_009da720
 }  // namespace fnv_0097c090
 
 // @fnv 0x0097c090
-void CombatActionMoveAndSwitchToMelee::FUN_0097c090(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097c090
+void CombatActionMoveAndSwitchToMelee::Execute_0097c090(CombatController* apCombatController, int aiActionValue)
 {
-    FUN_0097bca0(apCombatController, aiActionValue);
+    Execute_0097bca0(apCombatController, aiActionValue);
     TESObjectWEAP* pweapon = ((CombatState*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState())->GetCombatWeapon(2);
-    apCombatController->FUN_00980270(reinterpret_cast<CombatProcedure*>(new fnv_0097c090::FUN_009da720(pweapon)));
+    apCombatController->AddBackgroundProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097c090::FUN_009da720(pweapon)));
     static_cast<CombatControllerAccess*>(apCombatController)->SetWeapon((int)pweapon);
 }
 
@@ -859,17 +887,18 @@ struct FUN_009d0890
     FUN_009d0890();
 };
 
-void __cdecl FUN_0097bed0(CombatController*, int);
+void __cdecl CombatActionMove_StartMovementProcedure(CombatController*, int);
 
 
 }  // namespace fnv_0097c280
 
 // Allocates a FUN_009d0890 object, passes it to the combat controller's FUN_00980110, then calls FUN_0097bed0 with the action value.
 // @fnv 0x0097c280
-void CombatActionMoveAndAttackRanged::FUN_0097c280(CombatController* apCombatController, int aiActionValue)
+// src: COMMUNITY 0x0097c280
+void CombatActionMoveAndAttackRanged::AddProcedureToController_0097c280(CombatController* apCombatController, int aiActionValue)
 {
-    apCombatController->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097c280::FUN_009d0890));
-    fnv_0097c280::FUN_0097bed0(apCombatController, aiActionValue);
+    apCombatController->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097c280::FUN_009d0890));
+    fnv_0097c280::CombatActionMove_StartMovementProcedure(apCombatController, aiActionValue);
 }
 
 namespace fnv_0097c310 {
@@ -884,7 +913,8 @@ extern float DAT_0108cb10;
 
 // Returns DAT_0108cb10 when GetWeaponDPSDeficit reaches it or the actor is a teammate with CombatStyleMelee 1.0, otherwise FUN_00979e40's result.
 // @fnv 0x0097c310
-float CombatActionMoveAndAttackRanged::FUN_0097c310(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097c310
+float CombatActionMoveAndAttackRanged::GetCost_0097c310(CombatController* apCombatController, int aiActionValue)
 {
     if (fnv_0097c310::GetWeaponDPSDeficit(apCombatController, 1) >= fnv_0097c310::DAT_0108cb10)
     {
@@ -896,7 +926,7 @@ float CombatActionMoveAndAttackRanged::FUN_0097c310(CombatController* apCombatCo
     {
         return fnv_0097c310::DAT_0108cb10;
     }
-    return CombatAction::FUN_00979e40(apCombatController, aiActionValue);
+    return CombatAction::GetCost_00979e40(apCombatController, aiActionValue);
 }
 
 namespace fnv_0097c620 {
@@ -907,17 +937,18 @@ struct FUN_009cadf0
     FUN_009cadf0();
 };
 
-void __cdecl FUN_0097bed0(CombatController*, int);
+void __cdecl CombatActionMove_StartMovementProcedure(CombatController*, int);
 
 
 }  // namespace fnv_0097c620
 
 // Allocates a FUN_009cadf0 object, passes it to FUN_00980110 on the controller, then calls FUN_0097bed0 with the action value.
 // @fnv 0x0097c620
-void CombatActionMoveAndAttackGrenade::FUN_0097c620(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097c620
+void CombatActionMoveAndAttackGrenade::Execute_0097c620(CombatController* apCombatController, int aiActionValue)
 {
-    apCombatController->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097c620::FUN_009cadf0));
-    fnv_0097c620::FUN_0097bed0(apCombatController, aiActionValue);
+    apCombatController->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097c620::FUN_009cadf0));
+    fnv_0097c620::CombatActionMove_StartMovementProcedure(apCombatController, aiActionValue);
 }
 
 namespace fnv_0097c790 {
@@ -933,7 +964,8 @@ struct FUN_009da720
 }  // namespace fnv_0097c790
 
 // @fnv 0x0097c790
-void CombatActionDrawWeapon::FUN_0097c790(CombatController* apCombatController, int aiActionValue)
+// src: COMMUNITY 0x0097c790
+void CombatActionDrawWeapon::AddProcedureToController_0097c790(CombatController* apCombatController, int aiActionValue)
 {
     TESObjectWEAP* pweapon = 0;
     int ecombatWeaponType = aiActionValue;
@@ -941,7 +973,7 @@ void CombatActionDrawWeapon::FUN_0097c790(CombatController* apCombatController, 
     {
         pweapon = ((CombatState*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState())->GetCombatWeapon(ecombatWeaponType);
     }
-    apCombatController->FUN_00980270(reinterpret_cast<CombatProcedure*>(new fnv_0097c790::FUN_009da720(pweapon)));
+    apCombatController->AddBackgroundProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097c790::FUN_009da720(pweapon)));
     static_cast<CombatControllerAccess*>(apCombatController)->SetWeapon((int)pweapon);
 }
 
@@ -949,13 +981,14 @@ namespace fnv_0097c8e0 {
 
 extern float DAT_0108cb10;
 
-bool __fastcall FUN_006450c0(TESObjectWEAP*);
+bool __fastcall TESObjectWEAP_IsMeleeWeapon(TESObjectWEAP*);
 
 
 }  // namespace fnv_0097c8e0
 
 // @fnv 0x0097c8e0
-float CombatActionSwitchWeapon::FUN_0097c8e0(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097c8e0
+float CombatActionSwitchWeapon::GetCost_0097c8e0(CombatController* apCombatController, int aiActionValue)
 {
     if (apCombatController->GetFieldBC() &&
         reinterpret_cast<Actor*>(apCombatController->GetFieldBC())->IsPlayerTeammate() &&
@@ -967,12 +1000,12 @@ float CombatActionSwitchWeapon::FUN_0097c8e0(CombatController* apCombatControlle
         {
             pweapon = ((CombatState*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState())->GetCombatWeapon(ecombatWeaponType);
         }
-        if (pweapon && !fnv_0097c8e0::FUN_006450c0(pweapon))
+        if (pweapon && !fnv_0097c8e0::TESObjectWEAP_IsMeleeWeapon(pweapon))
         {
             return fnv_0097c8e0::DAT_0108cb10;
         }
     }
-    return CombatAction::FUN_00979e40(apCombatController, aiActionValue);
+    return CombatAction::GetCost_00979e40(apCombatController, aiActionValue);
 }
 
 namespace fnv_0097cdb0 {
@@ -991,11 +1024,12 @@ struct FUN_009d6030
 }  // namespace fnv_0097cdb0
 
 // @fnv 0x0097cdb0
-void CombatActionFlee::FUN_0097cdb0(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097cdb0
+void CombatActionFlee::Execute_0097cdb0(CombatController* apCombatController, int aiActionValue)
 {
     ((BSFaceGenNiNode*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState())->SetApplyRotToParent(2);
     apCombatController
-        ->FUN_009801b0(reinterpret_cast<CombatProcedure*>(new fnv_0097cdb0::FUN_009d6030(fnv_0097cdb0::GetFieldValue((unsigned int*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState()),
+        ->SetMovementProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097cdb0::FUN_009d6030(fnv_0097cdb0::GetFieldValue((unsigned int*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState()),
                                              *fnv_0097cdb0::originalRuntimeFloatSetting432.Float(), true, true)));
 }
 
@@ -1020,14 +1054,15 @@ struct FUN_009ca5f0
 }  // namespace fnv_0097cf10
 
 // @fnv 0x0097cf10
-void CombatActionActivateCombatItem::FUN_0097cf10(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097cf10
+void CombatActionActivateCombatItem::Execute_0097cf10(CombatController* apCombatController, int aiActionValue)
 {
     fnv_0097cf10::CombatReferenceEntry* pcombatItem =
         (fnv_0097cf10::CombatReferenceEntry*)((CombatState*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState())->GetActionAtIndex(static_cast<unsigned int>(aiActionValue - 17));
     if (pcombatItem)
     {
         apCombatController
-            ->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097cf10::FUN_009ca5f0(pcombatItem->pRef, pcombatItem->m_pBaseObject)));
+            ->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097cf10::FUN_009ca5f0(pcombatItem->pRef, pcombatItem->m_pBaseObject)));
     }
 }
 
@@ -1046,13 +1081,14 @@ struct FUN_009daa10
 
 // Looks up a TESBoundObject for the given action value minus 17 and, if found, passes a new FUN_009daa10 wrapping it to the combat controller.
 // @fnv 0x0097d060
-void CombatActionUseCombatItem::FUN_0097d060(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097d060
+void CombatActionUseCombatItem::Execute_0097d060(CombatController* apCombatController, int aiActionValue)
 {
     ::TESBoundObject* pitem =
         (::TESBoundObject*)((CombatState*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState())->GetAt(aiActionValue - 17);
     if (pitem)
     {
-        apCombatController->FUN_00980110(reinterpret_cast<CombatProcedure*>(new fnv_0097d060::FUN_009daa10(pitem)));
+        apCombatController->SetActionProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097d060::FUN_009daa10(pitem)));
     }
 }
 
@@ -1071,10 +1107,11 @@ struct FUN_009d6030
 
 // Allocates a FUN_009d6030 from the combat controller's combat state and aiActionValue, then passes it to FUN_009801b0.
 // @fnv 0x0097d2d0
-void CombatActionHide::FUN_0097d2d0(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x0097d2d0
+void CombatActionHide::Execute_0097d2d0(CombatController* apCombatController, int aiActionValue)
 {
     apCombatController
-        ->FUN_009801b0(reinterpret_cast<CombatProcedure*>(new fnv_0097d2d0::FUN_009d6030(
+        ->SetMovementProcedure(reinterpret_cast<CombatProcedure*>(new fnv_0097d2d0::FUN_009d6030(
             fnv_0097d2d0::GetFieldValue((unsigned int*)static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState()), (float)aiActionValue, 0, 0)));
 }
 
@@ -1087,7 +1124,7 @@ struct AvoidSphere
 
 struct CombatAvoidanceSphere : AvoidSphere
 {
-    bool FUN_0097be60(int);
+    bool CombatLocation_GetFlag(int);
 };
 
 struct FUN_009d5ad0
@@ -1105,7 +1142,8 @@ struct FUN_009d69f0
 int __fastcall GetField18C(char*);
 
 // @fnv 0x0097bed0
-void FUN_0097bed0(CombatController* apCombatController, int aiLocation)
+// src: XBOX_PDB 0x0097bed0
+void CombatActionMove_StartMovementProcedure(CombatController* apCombatController, int aiLocation)
 {
     CombatProcedure* pmovementProcedure = 0;
     CombatAvoidanceSphere* pcombatLocation;
@@ -1113,7 +1151,7 @@ void FUN_0097bed0(CombatController* apCombatController, int aiLocation)
     pcombatLocation = reinterpret_cast<CombatAvoidanceSphere*>(
         GetField18C(reinterpret_cast<char*>(static_cast<CombatControllerAccess*>(apCombatController)->GetCombatState())));
 
-    if (pcombatLocation->FUN_0097be60(1))
+    if (pcombatLocation->CombatLocation_GetFlag(1))
     {
         pmovementProcedure = reinterpret_cast<CombatProcedure*>(new FUN_009d5ad0(aiLocation));
     }
@@ -1123,7 +1161,7 @@ void FUN_0097bed0(CombatController* apCombatController, int aiLocation)
             new FUN_009d69f0(pcombatLocation, pcombatLocation->GetRadius(), aiLocation));
     }
 
-    apCombatController->FUN_009801b0(pmovementProcedure);
+    apCombatController->SetMovementProcedure(pmovementProcedure);
 }
 }  // namespace fnv_0097bed0
 
@@ -1141,11 +1179,12 @@ struct FUN_0097be60_cls
     int unk14;
     int unk18;
     unsigned int m_1c;
-    unsigned char FUN_0097be60(unsigned int aValue);
+    unsigned char CombatLocation_GetFlag(unsigned int aValue);
 };
 
 // @fnv 0x0097be60
-unsigned char FUN_0097be60_cls::FUN_0097be60(unsigned int aValue)
+// src: COMMUNITY 0x0097be60
+unsigned char FUN_0097be60_cls::CombatLocation_GetFlag(unsigned int aValue)
 {
     return (m_1c & aValue) != 0;
 }
@@ -1161,7 +1200,7 @@ int __fastcall GetField18C(char*);
 
 int __fastcall GetField38(char*);
 
-unsigned int __fastcall FUN_0044edb0(void*);
+unsigned int __fastcall TESMain_GetThread(void*);
 
 // The procedure-specific accessors are not yet declared in the shared header.
 class CombatProcedureAccess : public CombatProcedure
@@ -1169,14 +1208,14 @@ class CombatProcedureAccess : public CombatProcedure
 public:
     int GetSection();
     const char* GetEntryPoint();
-    ActionDescriptor* FUN_0097be80(char*);
+    ActionDescriptor* CombatProcedureMove_GetDestinationPos(char*);
 };
 
 struct CombatLocationAccess
 {
     int GetSection();
-    bool FUN_0097be60(int);
-    ActionDescriptor* FUN_0097b940(ActionDescriptor*);
+    bool CombatLocation_GetFlag(int);
+    ActionDescriptor* CombatLocation_GetPoint(ActionDescriptor*);
 };
 
 // Checks the current form header and interface tile against the given section and action type, returning false on any mismatch.
@@ -1233,11 +1272,11 @@ bool __cdecl IsCombatActionValid(CombatController* controller, int iSection)
 
             return false;
 
-        if (FUN_0044edb0(iStack_c) != 0)
+        if (TESMain_GetThread(iStack_c) != 0)
 
         {
 
-            if (FUN_0044edb0(iStack_c) != GetField38((char*)piStack4))
+            if (TESMain_GetThread(iStack_c) != GetField38((char*)piStack4))
 
                 return false;
         }
@@ -1247,15 +1286,15 @@ bool __cdecl IsCombatActionValid(CombatController* controller, int iSection)
         {
 
             if (iStack_c
-                    ->FUN_0097b940(
+                    ->CombatLocation_GetPoint(
 
-                        piStack4->FUN_0097be80((char*)&auStack2))
+                        piStack4->CombatProcedureMove_GetDestinationPos((char*)&auStack2))
                     ->_Call_439090())
 
                 return false;
         }
 
-        if (iStack_c->FUN_0097be60(1))
+        if (iStack_c->CombatLocation_GetFlag(1))
 
             return false;
     }
@@ -1270,7 +1309,7 @@ bool __cdecl IsCombatActionValid(CombatController* controller, int iSection)
 
             piStack_18 = static_cast<CombatProcedureAccess*>(piStack_c2);
 
-            if (!iStack_c->FUN_0097be60(1))
+            if (!iStack_c->CombatLocation_GetFlag(1))
 
                 return false;
 

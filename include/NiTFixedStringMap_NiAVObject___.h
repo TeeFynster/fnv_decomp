@@ -15,7 +15,7 @@ public:
     void GetNext(void*& position, NiFixedString& key, NiAVObject*& value);
     __declspec(noalias) void GetNext(void*& position, NiFixedString& key, NiAVObject*& value) const;
     void GetNextEntry(MapItem*& position, NiFixedString& key, NiObjPtr& value);
-    MapItem* FUN_00ee8ac0();
+    MapItem* NiTMapIterator_GetFirstPos();
     bool Lookup(unsigned int* key, NiRefObject** value);
     bool GetAt(const NiFixedString& key, NiAVObject*& value);
     void RemoveAll();

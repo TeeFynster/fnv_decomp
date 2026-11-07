@@ -8,7 +8,8 @@
 extern "C" void* g_01202580;
 
 // @fnv 0x00c25870
-void* __cdecl FUN_00c25870()
+// src: COMMUNITY 0x00c25870
+void* __cdecl NiPSysUpdateTask_GetRTTI()
 {
     return &g_01202580;
 }
@@ -186,7 +187,7 @@ struct PoolAlloc_00c25b30
 extern PoolAlloc_00c25b30 DAT_011f6238;
 
 // Builds the array of 20-byte link records (lives in another unit of the game).
-void* __cdecl FUN_00c25990(unsigned int count);
+void* __cdecl NiTNewInterface_NiPSysUpdateTask_Allocate(unsigned int count);
 
 // The link-id set: { items, capacity, size, head }.
 struct LinkIDSet_00c25b30
@@ -212,7 +213,7 @@ void LinkIDSet_00c25b30::AppendRecords(unsigned int count)
         pNewBlock->m_uiItemCount = count;
         pNewBlock->m_next = 0;
         if (count > 0)
-            pNewBlock->m_data = (unsigned char*)FUN_00c25990(count);
+            pNewBlock->m_data = (unsigned char*)NiTNewInterface_NiPSysUpdateTask_Allocate(count);
         else
             pNewBlock->m_data = 0;
         pBlock = pNewBlock;
@@ -260,7 +261,8 @@ extern void(__stdcall* DAT_00fdf05c)(void*);
 extern void(__stdcall* DAT_00fdf100)(void*);
 
 // @fnv 0x00c25be0
-bool NiPSysUpdateTask::FUN_00c25be0()
+// src: XBOX_PDB 0x00c25be0
+bool NiPSysUpdateTask::Clear_00c25be0()
 {
     NiRefObject* pObj = reinterpret_cast<NiRefObject*>(reinterpret_cast<NiParticleSystem* volatile&>(m_pkParticleSystem));
 
@@ -285,7 +287,7 @@ bool NiPSysUpdateTask::FUN_00c25be0()
 }
 
 void __cdecl operator delete(void* pv, int iSize);
-void __cdecl FUN_00aa1490(void* pv, unsigned int uiSize);
+void __cdecl NiMemObject_ReleaseStorage_00aa1490(void* pv, unsigned int uiSize);
 
 __forceinline void NiPSysUpdateTask::Destruct()
 {
@@ -321,7 +323,7 @@ void* NiPSysUpdateTask::DestroyElements(unsigned int uiFlags)
             pkElem->Destruct();
         }
         if (uiFlags & 1)
-            FUN_00aa1490(piCount, 0x14);
+            NiMemObject_ReleaseStorage_00aa1490(piCount, 0x14);
         return piCount;
     }
     Destroy();

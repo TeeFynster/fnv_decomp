@@ -74,18 +74,19 @@ void FUN_00593370_shell::SwapEndianFields()
     BSEndian((int*)this + 8, EndianSizeTag<4>());
 }
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(void*, void*, unsigned int);
 struct FUN_00593320_shell
 {
-    void FUN_00593320(void*);
+    void ProcessState_00593320(void*);
 };
 // @fnv 0x00593320
-void FUN_00593320_shell::FUN_00593320(void* a1)
+// src: GUESS 0x00593320 (confidence: low)
+void FUN_00593320_shell::ProcessState_00593320(void* a1)
 {
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((DecalData*)this)->SwapEndianFields();
     AppendChunk(a1, this, 0x24);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((DecalData*)this)->SwapEndianFields();
 }

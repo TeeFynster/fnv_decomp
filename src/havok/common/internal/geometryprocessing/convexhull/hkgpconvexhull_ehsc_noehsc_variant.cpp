@@ -18,11 +18,11 @@ struct FUN_00d74dd0_Class
     void* m_08;
     void* m_0c;
     void* m_10;
-    void FUN_00d74dd0();
+    void hkgpConvexHull_deleteUserObject();
 };
 struct FUN_00d7ac40_class
 {
-    void FUN_00d7ac40(int);
+    void hkgpConvexHullImpl_reset(int);
 };
 struct FUN_00d75850_class
 {
@@ -31,9 +31,9 @@ struct FUN_00d75850_class
     FUN_00d7ac40_class* m2;
     int m3;
     int m4;
-    void FUN_00d75850();
+    void hkgpConvexHull_reset();
 };
-int __stdcall FUN_00d76300(const int* p, int i);
+int __stdcall hkgpConvexHull_getNeighbour(const int* p, int i);
 struct FUN_00d7c200_cls
 {
     void __thiscall FreeAll();
@@ -44,9 +44,9 @@ struct FUN_00d7c250_cls
 };
 struct FUN_00d7c950_cls
 {
-    void __thiscall FUN_00d7c950();
+    void __thiscall ProcessState_00d7c950();
 };
-int __stdcall FUN_00d752c0(int* arr, int idx);
+int __stdcall hkgpConvexHull_getVertex(int* arr, int idx);
 struct CpuScalar
 {
     unsigned int unk00;
@@ -164,7 +164,7 @@ struct CpuObject
     unsigned int unk00;
     unsigned int unk04;
     CpuScalar* value;
-    int FUN_00d74df0();
+    int GetNestedValue();
 };
 struct ValueBlock
 {
@@ -249,10 +249,10 @@ struct PayloadOwner
     int unk0c;
     int m_iPayload;
 };
-int* __stdcall FUN_00d74ed0(PayloadOwner* apOwner);
+int* __stdcall Hkgpconvexhull_GetPayloadAddress(PayloadOwner* apOwner);
 struct TargetCallee
 {
-    void FUN_00d7a5a0(void* p1, void* p2, void* p3, void* p4, float p5);
+    void ProcessEntries_00d7a5a0(void* p1, void* p2, void* p3, void* p4, float p5);
 };
 struct FUN_00d74ee0_Class : FUN_00d74dd0_Class
 {
@@ -277,7 +277,7 @@ struct D75060Outer
     int unk04;
     D75060Inner* unk08;
 
-    int FUN_00d75060();
+    int GetUnk24_00d75060();
 };
 struct TextBuffer
 {
@@ -286,9 +286,9 @@ struct TextBuffer
     int unk08;
     int storage[128];
     void FUN_00cb1600(char* buffer, int capacity);
-    TextBuffer* FUN_00cc01c0(const char* first, const char* middle, const char* last);
-    TextBuffer* FUN_00cc01c0();
-    TextBuffer* FUN_00cc02d0();
+    TextBuffer* ProcessAndReturnValue_00cc01c0(const char* first, const char* middle, const char* last);
+    TextBuffer* ProcessAndReturnValue_00cc01c0();
+    TextBuffer* EvaluateValue_00cc02d0();
     void FUN_00cc00e0();
 };
 struct ChildData
@@ -447,9 +447,9 @@ struct Owner
     int unk2c;
     int unk30;
     int unk34;
-    int FUN_00d75070(Request* request);
+    int hkgpConvexHull_getIndex(Request* request);
 };
-int __stdcall FUN_00d75120(int* p);
+int __stdcall Object_ReadPointedValue_00d75120(int* p);
 struct D75130Inner
 {
     int unk00;
@@ -476,9 +476,9 @@ struct D75130Outer
     int unk04;
     D75130Inner* unk08;
 
-    int FUN_00d75130();
+    int EvaluateValue_00d75130();
 };
-int __stdcall FUN_00d75200(const int* value);
+int __stdcall Object_ReadPointedValue_00d75200(const int* value);
 struct S_00d75210_ErrStream
 {
     void* m_vt;
@@ -634,7 +634,7 @@ struct S_00d75210_Self
     int unk00;
     int unk04;
     S_00d75210_Config* m_pConfiguration;
-    int FUN_00d75210(const S_00d75210_Data* v) const throw();
+    int hkgpConvexHull_getPlaneIndex(const S_00d75210_Data* v) const throw();
 };
 struct D762F0Target
 {
@@ -646,24 +646,24 @@ struct D762F0Owner
     int unk04;
     D762F0Target* m_target;
 
-    void FUN_00d762f0();
+    void ForwardCall_00d762f0();
 };
 struct D76910Inner
 {
-    void FUN_00d7cf00();
+    void ProcessEntries_00d7cf00();
 };
 struct D76910Owner
 {
     int unk00;
     int unk04;
     D76910Inner* inner;
-    void FUN_00d76910();
+    void ForwardCall_00d76910();
 };
 struct FUN_00d76990_State
 {
     int unk00;
     float unk04;
-    void FUN_00d7d2a0();
+    void ProcessEntries_00d7d2a0();
 };
 struct FUN_00d76990_Class
 {
@@ -678,13 +678,13 @@ struct __declspec(align(16)) hkVec4
 };
 struct Shape
 {
-    float FUN_00d768b0(const hkVec4& v);
-    float FUN_00d76840(const hkVec4& v);
-    float FUN_00d769c0(const NiPoint3& p);
+    float ComputeValues_00d768b0(const hkVec4& v);
+    float ProcessAndReturnValue_00d76840(const hkVec4& v);
+    float ProcessAndReturnValue_00d769c0(const NiPoint3& p);
 };
 struct AudioSink
 {
-    void FUN_00d7df60(void* apFirst, void* apSecond, bool abIsNull, void* apThird);
+    void hkgpConvexHullImpl_generateIndexedFaces_int_int(void* apFirst, void* apSecond, bool abIsNull, void* apThird);
 };
 struct FUN_00d76c50_cls
 {
@@ -701,25 +701,25 @@ struct Vec4i
 struct FUN_00d81510_Class
 {
     Vec4i m_00;
-    void FUN_00d81510(int a, int b, int c, int d);
+    void hkgpConvexHullImpl_build(int a, int b, int c, int d);
 };
 struct FUN_00d771c0_Owner
 {
     int unk00;
     int unk04;
     FUN_00d81510_Class* unk08;
-    void FUN_00d771c0(int a, int b, const Vec4i& v);
+    void hkgpConvexHull_build(int a, int b, const Vec4i& v);
 };
 struct FUN_00d83430_class
 {
-    void FUN_00d83430(int, int, int, float);
+    void AllocateStorage_00d83430(int, int, int, float);
 };
 struct FUN_00d790a0_class
 {
     int unk00;
     int unk04;
     FUN_00d83430_class* unk08;
-    void FUN_00d790a0(int a, int b, int c, float d);
+    void hkgpConvexHull_splitByPlane(int a, int b, int c, float d);
 };
 struct S_00d79f90_Opts
 {
@@ -730,15 +730,15 @@ struct S_00d79f90_Opts
 struct S_00d79f90_Result
 {
     virtual ~S_00d79f90_Result();
-    void FUN_00d78720(float f, const S_00d79f90_Opts& opts);
+    void ProcessEntries_00d78720(float f, const S_00d79f90_Opts& opts);
 };
 struct S_00d79f90_World
 {
-    S_00d79f90_Result* FUN_00d76cf0();
+    S_00d79f90_Result* hkgpConvexHull_clone();
 };
-void __cdecl FUN_00d79ab0(S_00d79f90_World* world, int a, void* b, float c);
-void __cdecl FUN_00d79580(S_00d79f90_Result* res, void* b, int n, float eps);
-void __cdecl FUN_00d79f90(S_00d79f90_World* world, int a, void* b, int n, float d);
+void __cdecl HkgpconvexhullGsEhscNogsNoehsc_ReleaseStorage_00d79ab0(S_00d79f90_World* world, int a, void* b, float c);
+void __cdecl hkgpConvexHull_booleanSubtraction_00d79580(S_00d79f90_Result* res, void* b, int n, float eps);
+void __cdecl hkgpConvexHull_createVoronoiFeatures(S_00d79f90_World* world, int a, void* b, int n, float d);
 struct S_00d7a010_Alloc
 {
     virtual void unk0();
@@ -754,7 +754,7 @@ struct S_00d7a010_Router
     int unk8;
     int unkc;
     S_00d7a010_Alloc* m_pStreamAllocator;
-    static S_00d7a010_Router& FUN_00c85750() throw();
+    static S_00d7a010_Router& hkMemoryRouter_getInstance() throw();
     S_00d7a010_Alloc& heap() throw()
     {
         return *m_pStreamAllocator;
@@ -789,7 +789,7 @@ struct S_00d7a010_Obj
     virtual ~S_00d7a010_Obj() throw();
     void operator delete(void* p) throw();
 };
-void __cdecl FUN_00d79f90(int a, int b, S_00d7a010_Array<S_00d7a010_Obj*>& out, int c, float f) throw();
+void __cdecl hkgpConvexHull_createVoronoiFeatures(int a, int b, S_00d7a010_Array<S_00d7a010_Obj*>& out, int c, float f) throw();
 void __cdecl DeleteCollectedObjects(int a, int b, int c, float f);
 struct S_00d7c200_Heap
 {
@@ -836,7 +836,7 @@ struct S_00d7c340_Router
         return unk10;
     }
 };
-S_00d7c340_Router* FUN_00c85750();
+S_00d7c340_Router* hkMemoryRouter_getInstance();
 int ResizeAudioStream(S_00d7c340_Allocator* alloc, void* array, int elemSize);
 struct S_00d7c340_Elem
 {
@@ -903,7 +903,7 @@ struct PoolList
     void* unk08;
     Node* head;
     int activeCount;
-    NodeBank* FUN_00d7c2a0();
+    NodeBank* hkGeometryProcessing_PoolAllocator_struct_hkgpConvexHullImpl_Vertex_32_struct_hkContainerHeapAllocator_allocateNewPool();
     Node* CloneNode(Node* source);
 };
 extern float DAT_0106ea1c;
@@ -919,7 +919,7 @@ class FUN_00d74d40_cls
     volatile unsigned char m_0c;
     volatile unsigned char m_0d;
 
-    FUN_00d74d40_cls* FUN_00d74d40();
+    FUN_00d74d40_cls* hkgpConvexHull_BuildConfig_BuildConfig();
 };
 struct FUN_00d74d70_cls
 {
@@ -929,7 +929,7 @@ struct FUN_00d74d70_cls
     float m_0c;
     unsigned char m_10;
     unsigned char m_11;
-    FUN_00d74d70_cls* FUN_00d74d70();
+    FUN_00d74d70_cls* hkgpConvexHull_SimplifyConfig_SimplifyConfig();
 };
 extern float DAT_0104da4c;
 struct FUN_00d74d90_cls
@@ -937,7 +937,7 @@ struct FUN_00d74d90_cls
     int m_i00;
     float m_f04;
 
-    FUN_00d74d90_cls* FUN_00d74d90();
+    FUN_00d74d90_cls* InitializeFields_00d74d90();
 };
 struct SpawnedInner
 {
@@ -1055,7 +1055,7 @@ struct FUN_00d74e10_cls
     int unk04;
     SpawnedInner* m_pInner;
 
-    int FUN_00d74e10();
+    int GetInnerField1A8();
 };
 struct FUN_00d74e20_class
 {
@@ -1084,18 +1084,18 @@ struct FUN_00d75050_cls
     int unk04;
     Inner* m_pInner;
 
-    int FUN_00d75050();
+    int EvaluateValue_00d75050();
 };
 struct FUN_00d7a180_target
 {
-    void FUN_00d7a180();
+    void ProcessEntries_00d7a180();
 };
 struct FUN_00d752d0_cls
 {
     void* m_00;
     void* m_04;
     FUN_00d7a180_target* m_08;
-    void FUN_00d752d0();
+    void ForwardCall_00d752d0();
 };
 struct DiagStream
 {
@@ -1104,9 +1104,9 @@ struct DiagStream
     unsigned int m_08;
     unsigned int m_buf[128];
     void FUN_00cb1600(unsigned int* buf, unsigned int size);
-    DiagStream* FUN_00cc01c0(const char* fmt, unsigned int count, const char* tail);
-    DiagStream* FUN_00cc02d0();
-    void FUN_00cc01c0();
+    DiagStream* ProcessAndReturnValue_00cc01c0(const char* fmt, unsigned int count, const char* tail);
+    DiagStream* EvaluateValue_00cc02d0();
+    void ProcessAndReturnValue_00cc01c0();
     void FUN_00cc00e0();
 };
 struct DiagLogger
@@ -1242,7 +1242,7 @@ extern const double DAT_010d35e8;
 extern const double DAT_010d35e0;
 struct FUN_00d75440_cls
 {
-    float FUN_00d752e0();
+    float hkgpConvexHull_getVolume();
     double GetMass();
     float ComputeScaledPowerRatio();
 };
@@ -1253,7 +1253,7 @@ struct FUN_00d75820_Tmp8
 };
 struct FUN_00d75820_Target
 {
-    void FUN_00d7a200(int a, float b, FUN_00d75820_Tmp8* c, int d);
+    void ProcessEntries_00d7a200(int a, float b, FUN_00d75820_Tmp8* c, int d);
 };
 struct FUN_00d75820_cls
 {
@@ -1265,25 +1265,25 @@ struct FUN_00d75820_cls
 };
 struct FUN_00d7b330_cls
 {
-    void FUN_00d7b330(int a1, int a2, float a3);
+    void ProcessEntries_00d7b330(int a1, int a2, float a3);
 };
 struct FUN_00d76100_cls
 {
     void* unk00;
     void* unk04;
     FUN_00d7b330_cls* m_08;
-    void FUN_00d76100(int a1, int a2, float a3);
+    void hkgpConvexHull_isPointInside(int a1, int a2, float a3);
 };
 struct FUN_00d7caa0_class
 {
-    void __thiscall FUN_00d7caa0(float, int);
+    void __thiscall ProcessEntries_00d7caa0(float, int);
 };
 struct FUN_00d76920_class
 {
     void* m_00;
     void* m_04;
     FUN_00d7caa0_class* m_08;
-    void FUN_00d76920(float, int);
+    void hkgpConvexHull_fetchBevelPlanes(float, int);
 };
 struct SpawnedObject
 {
@@ -1298,14 +1298,14 @@ struct TailCallee
 class FUN_00d77bc0_cls
 {
   public:
-    void FUN_00d77bc0();
+    void UpdateFields_00d77bc0();
 };
 struct ArgPair
 {
     int m_kPointA;
     int m_kPointB;
 };
-void __cdecl FUN_00d78ea0(int first, ArgPair* apPairs, int count);
+void __cdecl hkgpConvexHull_createCompound(int first, ArgPair* apPairs, int count);
 void __cdecl CallWithPair(int a0, int a1, int a2);
 struct D79090Target
 {
@@ -1317,7 +1317,7 @@ struct D79090Owner
     int unk04;
     D79090Target* m_target;
 
-    void FUN_00d79090();
+    void ForwardCall_00d79090();
 };
 // FUN_00d79510 (0x00d79510, 102 bytes)
 //
@@ -1350,7 +1350,7 @@ struct FUN_00d79510_Object
 struct FUN_00d79510_A;
 struct FUN_00d79510_B;
 void __cdecl FUN_00d79250_helper(FUN_00d79510_A* a, FUN_00d79510_B* b, FUN_00d79510_Object** out, void* p, float f);
-bool __cdecl FUN_00d79510(FUN_00d79510_A* a, FUN_00d79510_B* b, FUN_00d79510_Object* c, float f);
+bool __cdecl hkgpConvexHull_booleanSubtraction(FUN_00d79510_A* a, FUN_00d79510_B* b, FUN_00d79510_Object* c, float f);
 static int SortKeyOf(void* p)
 {
     return ((int*)p)[0xe];
@@ -1360,7 +1360,7 @@ struct RandomGenerator
 {
     unsigned int stateFlags;
     unsigned int seed;
-    void FUN_00d7a4b0(float* components);
+    void hkPseudoRandomGenerator_getRandomVector11(float* components);
 };
 struct Record
 {
@@ -1372,7 +1372,8 @@ static __forceinline bool Greater(const Record& a, const Record& b)
     return a.key - b.key > 0.0f;
 }
 // @fnv 0x00d7b270
-extern "C" void FUN_00d7b270(Record* records, int left, int right, int context)
+// src: HAVOK_LIB 0x00d7b270
+extern "C" void hkAlgorithm_quickSortRecursive_struct_hkgpConvexHullImpl_SortedTriangle_class_hkAlgorithm_less_struct_hkgpConvexHullImpl_SortedTriangle(Record* records, int left, int right, int context)
 {
     int i;
     int j;
@@ -1409,7 +1410,7 @@ extern "C" void FUN_00d7b270(Record* records, int left, int right, int context)
 
         if (left < j)
         {
-            FUN_00d7b270(records, left, j, context);
+            hkAlgorithm_quickSortRecursive_struct_hkgpConvexHullImpl_SortedTriangle_class_hkAlgorithm_less_struct_hkgpConvexHullImpl_SortedTriangle(records, left, j, context);
         }
         if (i >= right)
         {
@@ -1483,7 +1484,7 @@ struct FUN_00d7c2a0_cls
     void** m_00;
     int m_04;
     int m_08;
-    void* FUN_00d7c2a0();
+    void* hkGeometryProcessing_PoolAllocator_struct_hkgpConvexHullImpl_Vertex_32_struct_hkContainerHeapAllocator_allocateNewPool();
 };
 // Candidate for ClearAndFlush (115 bytes).
 //
@@ -1602,9 +1603,9 @@ struct D76250MemoryRouter
     }
 };
 namespace fnvc_adapt {
-extern "C" D76250MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D76250MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 }
-void __cdecl FUN_00c908c0(D76250Allocator* alloc, void* array, int numElements, int sizeElem);
+void __cdecl hkArrayUtil__reserve(D76250Allocator* alloc, void* array, int numElements, int sizeElem);
 typedef hkArray<hkVector4> D76250VectorArray;
 struct D76250Shape
 {
@@ -1615,7 +1616,7 @@ struct D76250Shape
 };
 struct FUN_00d81510_cls
 {
-    void FUN_00d81510(int a1, int a2, int a3, int a4);
+    void hkgpConvexHullImpl_build(int a1, int a2, int a3, int a4);
 };
 struct FUN_00d77320_cls
 {
@@ -1630,13 +1631,13 @@ struct FnvCpu_FUN_00d74e00_CpuObject
     unsigned int unk00;
     unsigned int unk04;
     int value;
-    int FUN_00d74e00();
+    int GetValue_00d74e00();
 };
 struct S_00cc01c0_Class
 {
-    S_00cc01c0_Class* FUN_00cc02d0();
-    void FUN_00cc01c0();
-    S_00cc01c0_Class* FUN_00cc01c0(const char*, int, char*);
+    S_00cc01c0_Class* EvaluateValue_00cc02d0();
+    void ProcessAndReturnValue_00cc01c0();
+    S_00cc01c0_Class* ProcessAndReturnValue_00cc01c0(const char*, int, char*);
 };
 struct S_00d752e0_Entity
 {
@@ -1756,7 +1757,7 @@ struct S_00d752e0_Class
     int unk00;
     int unk04;
     S_00d752e0_Entity* unk08;
-    float FUN_00d752e0();
+    float hkgpConvexHull_getVolume();
 };
 extern const char str_010d3540[];
 extern const char str_010d358c[];
@@ -1895,7 +1896,7 @@ struct S_00cb1600_Class
     int unk208;
 
     void FUN_00cb1600(int*, unsigned int);
-    S_00cc01c0_Class* FUN_00cc01c0(const char*, int, char*);
+    S_00cc01c0_Class* ProcessAndReturnValue_00cc01c0(const char*, int, char*);
     void FUN_00cc00e0();
 };
 // Recursive quicksort partition over 12-byte records keyed by a float at +8;
@@ -1906,7 +1907,7 @@ struct SortRec12
     unsigned int m4;
     float key;
 };
-void __cdecl FUN_00d7b160(SortRec12* base, int lo, int hi, int unkArg);
+void __cdecl hkAlgorithm_quickSortRecursive_struct_hkgpConvexHullImpl_SortedEdge_class_hkAlgorithm_less_struct_hkgpConvexHullImpl_SortedEdge(SortRec12* base, int lo, int hi, int unkArg);
 struct DistanceScalar
 {
     __m128 q;
@@ -1961,7 +1962,7 @@ struct DistanceLess
         return values.first < values.second;
     }
 };
-void FUN_00d7aaf0(DistanceVector* pa, int lo, int hi, DistanceLess less);
+void Hkgpconvexhull_SortDistanceVectors(DistanceVector* pa, int lo, int hi, DistanceLess less);
 struct S00d7d1c0_Alloc
 {
     virtual void s0();
@@ -2014,7 +2015,7 @@ struct S00d7d1c0_Derived : S00d7d1c0_Base
         m08.FreeAll();
         m08.ClearAndFlush();
     }
-    S00d7d1c0_Derived* FUN_00d7d1c0(int flags);
+    S00d7d1c0_Derived* hkgpAbstractMesh_hkgpConvexHullImpl_Edge_hkgpConvexHullImpl_Vertex_hkgpConvexHullImpl_Triangle_hkContainerHeapAllocator_Destroy(int flags);
 };
 
 class Ostream_d751
@@ -2184,11 +2185,12 @@ class ConvexHull_d751
     int unk04;
     ConvexHullData_d751* m_data;
 
-    unsigned int FUN_00d75150(const Vertex_d751* pkVertex) const;
+    unsigned int hkgpConvexHull_getIndex_00d75150(const Vertex_d751* pkVertex) const;
 };
 
 // @fnv 0x00d75150
-unsigned int ConvexHull_d751::FUN_00d75150(const Vertex_d751* pkVertex) const
+// src: HAVOK_LIB 0x00d75150
+unsigned int ConvexHull_d751::hkgpConvexHull_getIndex_00d75150(const Vertex_d751* pkVertex) const
 {
     const ConvexHullData_d751* pkData = m_data;
     if (!pkData->m_bHasIndexing)
@@ -2218,7 +2220,7 @@ struct Singleton
     Allocator* m_10;
 };
 
-void __cdecl FUN_00c908c0(Allocator* ctx, void* pVec, int sz, int elem);
+void __cdecl hkArrayUtil__reserve(Allocator* ctx, void* pVec, int sz, int elem);
 
 struct Elem64
 {
@@ -2253,12 +2255,12 @@ template <class T> struct CloneArray
         {
             int twice = capacity() * 2;
             int cap = n < twice ? twice : n;
-            FUN_00c908c0(&a, this, cap, sizeof(T));
+            hkArrayUtil__reserve(&a, this, cap, sizeof(T));
         }
     }
     __forceinline void SetSizeAndGrow(int n)
     {
-        Singleton* s = reinterpret_cast<Singleton*>(FUN_00c85750());
+        Singleton* s = reinterpret_cast<Singleton*>(hkMemoryRouter_getInstance());
         reserve(*s->m_10, n);
         int extra = n - m_iArrayLength;
         T* start = m_pData + m_iArrayLength;
@@ -2348,7 +2350,7 @@ struct Sub30
     int m_00, m_04, m_08;
     CloneNode* m_0c;
     int m_10, m_14;
-    CloneFace* FUN_00d7efc0(void* node);
+    CloneFace* hkgpAbstractMeshDefinitions_List_struct_hkgpConvexHullImpl_Triangle_struct_hkgpAbstractMeshDefinitions_List_struct_hkgpConvexHullImpl_Vertex_struct_hkgpConvexHull_Vertex_struct_hkGeometryProcessing_PoolAllocator_struct_hkgpConvexHullImpl_Vertex_32_struct_hkContainerHeapAllocator_Item_struct_hkGeometryProcessing_PoolAllocator_struct_hkgpConvexHullImpl_Triangle_32_struct_hkContainerHeapAllocator_allocate(void* node);
 };
 enum MapStatus
 {
@@ -2367,14 +2369,14 @@ struct CloneMapBase
     {}
     ~CloneMapBase()
     {
-        FUN_00a29680();
+        Object_DoNothing();
     }
     void EnsureCapacity(Allocator*, int);
-    int FUN_00cb1870(Allocator*, unsigned long, unsigned long);
+    int hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(Allocator*, unsigned long, unsigned long);
     unsigned long LookupHashEntry(unsigned long, unsigned long) const;
-    MapStatus FUN_00cb1fb0(unsigned long);
+    MapStatus hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(unsigned long);
     void ProcessArgument(Allocator*);
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 struct CloneHeapMap : CloneMapBase
 {
@@ -2388,17 +2390,17 @@ struct CloneHeapMap : CloneMapBase
     }
     __forceinline void reserve(int n)
     {
-        Singleton* s = (Singleton*)FUN_00c85750();
+        Singleton* s = (Singleton*)hkMemoryRouter_getInstance();
         EnsureCapacity(s->m_10, n);
     }
     __forceinline int insert(unsigned long k, unsigned long v)
     {
-        Singleton* s = (Singleton*)FUN_00c85750();
-        return FUN_00cb1870(s->m_10, k, v);
+        Singleton* s = (Singleton*)hkMemoryRouter_getInstance();
+        return hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(s->m_10, k, v);
     }
     void clear()
     {
-        Singleton* s = (Singleton*)FUN_00c85750();
+        Singleton* s = (Singleton*)hkMemoryRouter_getInstance();
         ProcessArgument(s->m_10);
     }
 };
@@ -2415,7 +2417,7 @@ template <class K, class V> struct CloneMap
     }
     MapStatus remove(K k)
     {
-        return map.FUN_00cb1fb0((unsigned long)k);
+        return map.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove((unsigned long)k);
     }
     void reserve(int n)
     {
@@ -2466,13 +2468,14 @@ struct ThisCls
     int m_1b8;
     int m_1bc;
     ThisCls* FUN_00d7f6a0();
-    ThisCls* FUN_00d7f720();
+    ThisCls* AllocateAndProcessEntries_00d7f720();
 };
 
 // @fnv 0x00d7f720
-ThisCls* ThisCls::FUN_00d7f720()
+// src: GUESS 0x00d7f720 (confidence: low)
+ThisCls* ThisCls::AllocateAndProcessEntries_00d7f720()
 {
-    Singleton* s = reinterpret_cast<Singleton*>(FUN_00c85750());
+    Singleton* s = reinterpret_cast<Singleton*>(hkMemoryRouter_getInstance());
     Allocator* alloc = s->m_10;
     ThisCls* dst;
     void* fields2 = alloc->Alloc(0x1c0);
@@ -2547,7 +2550,7 @@ ThisCls* ThisCls::FUN_00d7f720()
         if (node)
             do
             {
-                CloneFace* base = dst->m_30.FUN_00d7efc0(node);
+                CloneFace* base = dst->m_30.hkgpAbstractMeshDefinitions_List_struct_hkgpConvexHullImpl_Triangle_struct_hkgpAbstractMeshDefinitions_List_struct_hkgpConvexHullImpl_Vertex_struct_hkgpConvexHull_Vertex_struct_hkGeometryProcessing_PoolAllocator_struct_hkgpConvexHullImpl_Vertex_32_struct_hkContainerHeapAllocator_Item_struct_hkGeometryProcessing_PoolAllocator_struct_hkgpConvexHullImpl_Triangle_32_struct_hkContainerHeapAllocator_allocate(node);
                 unsigned long* x = base->vertices;
                 int count = 3;
                 do

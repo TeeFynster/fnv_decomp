@@ -17,7 +17,8 @@
 
 
 // @fnv 0x00e3b720
-void hkpPoweredChainData::FUN_00e3b720(int* info) const
+// src: HAVOK_LIB 0x00e3b720
+void hkpPoweredChainData::getConstraintInfo_00e3b720(int* info) const
 {
     info[4] = (int)&m_kBridgeAtoms;
     int zero = 0;
@@ -52,7 +53,8 @@ struct FUN_00e3b7d0_object
 
 // Clears a two-bit field at the given bit position in the byte at index within a 48-byte-strided block and sets it to 2.
 // @fnv 0x00e3b7d0
-void FUN_00e3b7d0(FUN_00e3b7d0_object* object, int index, int bit)
+// src: HAVOK_LIB 0x00e3b7d0
+void hkpPoweredChainData_disableMotor(FUN_00e3b7d0_object* object, int index, int bit)
 {
     int count = object->first->m_pConstraintInfo.m_iElementCount;
     FUN_00e3b7d0_second* second = object->second;
@@ -65,7 +67,8 @@ void FUN_00e3b7d0(FUN_00e3b7d0_object* object, int index, int bit)
 }
 
 // @fnv 0x00e3b670
-int hkpPoweredChainData::FUN_00e3b670()
+// src: GUESS 0x00e3b670 (confidence: high)
+int hkpPoweredChainData::ReturnConstant_102()
 {
     return 102;
 }
@@ -89,7 +92,7 @@ struct FUN_00d21ce0_cls
     {
         m_type = 1;
     }
-    void FUN_00d21ce0(void* owner) throw();
+    void hkpBridgeConstraintAtom_init(void* owner) throw();
 };
 
 // The shared hkpPoweredChainData declares these methods, but its bridge member
@@ -125,7 +128,7 @@ FUN_00e3b8f0::FUN_00e3b8f0() throw()
     m_34 = 1.1920929e-08f;
     m_38 = 1.0f;
     m_3c = 0.1f;
-    m_link.FUN_00d21ce0(this);
+    m_link.hkpBridgeConstraintAtom_init(this);
 }
 
 namespace fnv_00e3b960 {
@@ -134,7 +137,7 @@ struct FUN_00d21ce0_cls
     int unk00;
     int unk04;
     void* m_08;
-    void FUN_00d21ce0(void* p) throw();
+    void hkpBridgeConstraintAtom_init(void* p) throw();
 };
 
 struct hkMemberE3B9 : public FUN_00d21ce0_cls
@@ -142,7 +145,7 @@ struct hkMemberE3B9 : public FUN_00d21ce0_cls
     hkMemberE3B9(FinishingFlag flag)
     {
         if (flag.m_bFinishing)
-            FUN_00d21ce0(m_08);
+            hkpBridgeConstraintAtom_init(m_08);
     }
 };
 
@@ -160,15 +163,15 @@ class FUN_00e3b960 : public hkReferencedObject
 FUN_00e3b960::FUN_00e3b960(FinishingFlag flag) : hkReferencedObject(flag), m_kMemberDescriptor(flag)
 {
     if (flag.m_bFinishing)
-        m_kMemberDescriptor.FUN_00d21ce0(this);
+        m_kMemberDescriptor.hkpBridgeConstraintAtom_init(this);
 }
 }  // namespace fnv_00e3b960
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 inline void hkReferencedObject::operator delete(void* p)
 {
-    reinterpret_cast<hkMemoryAllocator&>(::FUN_00c85750().heap())
+    reinterpret_cast<hkMemoryAllocator&>(::hkMemoryRouter_getInstance().heap())
         .blockFree(p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
 }
 
@@ -176,7 +179,8 @@ inline hkpConstraintData::~hkpConstraintData() throw()
 {}
 
 // @fnv 0x00e3b770
-void hkpPoweredChainData::FUN_00e3b770(int unused, RuntimeInfo* result)
+// src: HAVOK_LIB 0x00e3b770
+void hkpPoweredChainData::getRuntimeInfo_00e3b770(int unused, RuntimeInfo* result)
 {
     int size = m_pConstraintInfo.m_iElementCount;
     int stride = size * 6;
@@ -215,11 +219,12 @@ extern void __cdecl ResizeAudioStream(void* allocator, hkArray<hkpPoweredChainDa
 extern const __m128 DAT_012683b0;
 // Appends a constraint entry, storing frames and motor pointers, and retaining each motor.
 // @fnv 0x00e3b850
-void hkpPoweredChainData::FUN_00e3b850(const __m128* apFrameA, const __m128* apFrameB, const __m128* apFrameC,
+// src: XBOX_PDB 0x00e3b850
+void hkpPoweredChainData::addConstraintInfoInBodySpace(const __m128* apFrameA, const __m128* apFrameB, const __m128* apFrameC,
                                     Motor* motorA, Motor* motorB, Motor* motorC)
 {
     hkArray<hkpPoweredChainDataConstraintInfo>* array = &m_pConstraintInfo;
-    hkMemoryRouter* router = FUN_00c85750();
+    hkMemoryRouter* router = hkMemoryRouter_getInstance();
     if (array->m_iElementCount == (int)(array->m_iCapacityState & 0x3fffffff))
         ResizeAudioStream(router->m_heap, array, sizeof(hkpPoweredChainDataConstraintInfo));
     hkpPoweredChainDataConstraintInfo& info = array->m_data[array->m_iElementCount++];
@@ -268,7 +273,8 @@ struct S00e3b810_Dst
 };
 
 // @fnv 0x00e3b810
-static __declspec(noinline) void FUN_00e3b810(const S00e3b810_Src* src, S00e3b810_Dst* d, S00e3b810_Out* out,
+// src: HAVOK_LIB 0x00e3b810
+static __declspec(noinline) void hk1dAngularVelocityMotorCommitJacobianInMotorInfo(const S00e3b810_Src* src, S00e3b810_Dst* d, S00e3b810_Out* out,
                                               const float* s)
 {
     out->m_uiX = src->m_uiZ * s[1];
@@ -286,13 +292,13 @@ S00e3b810_Dst* volatile g_S00e3b810_d;
 
 void S00e3b810_Caller()
 {
-    FUN_00e3b810(g_S00e3b810_src, g_S00e3b810_d, g_S00e3b810_out, g_S00e3b810_s);
+    hk1dAngularVelocityMotorCommitJacobianInMotorInfo(g_S00e3b810_src, g_S00e3b810_d, g_S00e3b810_out, g_S00e3b810_s);
 }
 
 // hkArray<T>::~hkArray() = clearAndDeallocate() on the heap allocator (slot 4 frees).
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return reinterpret_cast<hkMemoryAllocator&>(::FUN_00c85750().heap());
+    return reinterpret_cast<hkMemoryAllocator&>(::hkMemoryRouter_getInstance().heap());
 }
 template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {

@@ -98,7 +98,7 @@ public:
     BSSimpleList<HUDMainMenu__RadiationUpdate*> m_kRadiationUpdates;
     float m_fRadiationUpdateTimer;
 
-    void FUN_005de380();
+    void HUDMainMenu_KillQuestUpdates();
 
     static HUDMainMenu* g_pHudMainMenuInstance;
     static void SetCrosshairTarget(TESObjectREFR*, bool);

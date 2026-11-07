@@ -27,10 +27,11 @@ struct OffsetView
     int unk00;
     int unk04;
     char* unk08;
-    char* FUN_00e02a70();
+    char* hkPlatformObjectWriter_getLayout();
 };
 // @fnv 0x00e02a70
-char* OffsetView::FUN_00e02a70()
+// src: XBOX_PDB 0x00e02a70
+char* OffsetView::hkPlatformObjectWriter_getLayout()
 {
     return unk08 + 12;
 }
@@ -45,7 +46,7 @@ struct FUN_00e02c70_audio_iface
     virtual __declspec(nothrow) void v1();
     virtual __declspec(nothrow) void v2(void* object, unsigned int value);
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct BaseE02c70
 {
     int unk04;
@@ -67,7 +68,7 @@ FUN_00e02c70_Class::~FUN_00e02c70_Class()
     if (pHelper)
     {
         pHelper->ClearAndFreeData();
-        hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         reinterpret_cast<FUN_00e02c70_audio_iface*>(pAudioHolder->m_heap)->v2(pHelper, 0x24);
     }
 }
@@ -121,29 +122,30 @@ struct FUN_00e02bb0_cls
     void* m_p08;
     void* m_p0c;
 
-    char* FUN_00e02a70();
-    FUN_00e02bb0_cls* FUN_00e02bb0(int a1);
+    char* hkPlatformObjectWriter_getLayout();
+    FUN_00e02bb0_cls* hkPlatformObjectWriter_hkPlatformObjectWriter(int a1);
 };
 
 // Sets the vtable and flag, allocates and initialises a blob from a key and a1, and conditionally allocates a small object whose Make result is stored in m_p0c.
 // @fnv 0x00e02bb0
-FUN_00e02bb0_cls* FUN_00e02bb0_cls::FUN_00e02bb0(int a1)
+// src: XBOX_PDB 0x00e02bb0
+FUN_00e02bb0_cls* FUN_00e02bb0_cls::hkPlatformObjectWriter_hkPlatformObjectWriter(int a1)
 {
     m_w06 = 1;
     m_vptr = DAT_010ea370;
-    hkMemoryRouter* pAllocHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pAllocHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     SpawnedBlob* blob = (SpawnedBlob*)pAllocHolder->m_heap->blockAlloc(0x18);
     blob->m_w04 = 0x18;
     KeyRef key;
     key.Set(&DAT_011b7b88);
     m_p08 = blob->Init(&key, a1, IntTemp(2));
 
-    unsigned char* pucData = (unsigned char*)FUN_00e02a70();
+    unsigned char* pucData = (unsigned char*)hkPlatformObjectWriter_getLayout();
     SpawnedSmall* small = 0;
     if (!(pucData[0] == (unsigned char)DAT_011b7b88[0] && pucData[1] == (unsigned char)DAT_011b7b88[1] &&
           pucData[2] == (unsigned char)DAT_011b7b88[2] && pucData[3] == (unsigned char)DAT_011b7b88[3]))
     {
-        hkMemoryRouter* pAllocHolder2 = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* pAllocHolder2 = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         small = (SpawnedSmall*)pAllocHolder2->m_heap->blockAlloc(0x24);
     }
     m_p0c = small != 0 ? small->Make() : 0;
@@ -153,7 +155,7 @@ FUN_00e02bb0_cls* FUN_00e02bb0_cls::FUN_00e02bb0(int a1)
 // The local array used the hkArray layout and _reserveMore at 0x00c90940.
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    hkMemoryRouter& kMem = *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter& kMem = *static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     return *reinterpret_cast<hkMemoryAllocator*>(kMem.m_heap);
 }
 
@@ -240,7 +242,7 @@ struct E02Allocator
     virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
 };
 
-void __cdecl FUN_00c856c0(void* allocator, void* element);
+void __cdecl hkMemoryRouter_easyFree(void* allocator, void* element);
 
 struct E02Sub
 {
@@ -249,7 +251,7 @@ struct E02Sub
     int unk08;
 
     void ProcessArgument(void* value);
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 
 struct FUN_00e02d40_cls
@@ -264,7 +266,7 @@ struct FUN_00e02d40_cls
 
     void ClearAndFreeData();
     void ProcessArgument(void* value);
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 
 // @fnv 0x00e02d40
@@ -276,12 +278,12 @@ void FUN_00e02d40_cls::ClearAndFreeData()
         do
         {
             void* pElement = m_pData[i];
-            hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
-            FUN_00c856c0(pHolder->m_heap, pElement);
+            hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
+            hkMemoryRouter_easyFree(pHolder->m_heap, pElement);
             ++i;
         } while (i < m_iArrayLength);
     }
-    hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     E02Allocator* pAllocator = reinterpret_cast<E02Allocator*>(pHolder->m_heap);
     m_iArrayLength = 0;
     unsigned int uCapBits = m_uCapBits;
@@ -292,16 +294,16 @@ void FUN_00e02d40_cls::ClearAndFreeData()
     m_pData = 0;
     m_uCapBits = 0x80000000u;
     E02Sub* pSub = &m_sub;
-    pSub->ProcessArgument(((hkMemoryRouter*)FUN_00c85750())->m_heap);
-    pSub->FUN_00a29680();
-    ProcessArgument(((hkMemoryRouter*)FUN_00c85750())->m_heap);
-    FUN_00a29680();
+    pSub->ProcessArgument(((hkMemoryRouter*)hkMemoryRouter_getInstance())->m_heap);
+    pSub->Object_DoNothing();
+    ProcessArgument(((hkMemoryRouter*)hkMemoryRouter_getInstance())->m_heap);
+    Object_DoNothing();
 }
 
 struct E02DE0Allocator;
 
 namespace fnvc_adapt {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 }
 
 struct E02DE0Map
@@ -312,7 +314,7 @@ struct E02DE0Map
 
     E02DE0Map() : m_kPrimitiveElement(0), m_iCapacityFlags(0), m_iPairCount(-1)
     {
-        reserve(*reinterpret_cast<E02DE0Allocator*>((&fnvc_adapt::FUN_00c85750().heap())), 0);
+        reserve(*reinterpret_cast<E02DE0Allocator*>((&fnvc_adapt::hkMemoryRouter_getInstance().heap())), 0);
     }
 
     void reserve(E02DE0Allocator& alloc, int numElements);
@@ -340,7 +342,7 @@ struct E02E40Allocator
     virtual void ReleaseBlock(void* p, int numBytes);
 };
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00e02e40
 {
@@ -353,7 +355,7 @@ struct FUN_00e02e40
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00e02e40* b = static_cast<FUN_00e02e40*>(p);
-        reinterpret_cast<E02E40Allocator*>((&FUN_00c85750().heap()))->ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        reinterpret_cast<E02E40Allocator*>((&hkMemoryRouter_getInstance().heap()))->ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 
@@ -365,17 +367,18 @@ FUN_00e02e40::FUN_00e02e40()
 
 struct E02A80LayoutView : OffsetView
 {
-    __declspec(noinline) char* FUN_00e02a70();
+    __declspec(noinline) char* hkPlatformObjectWriter_getLayout();
 };
 
-__declspec(noinline) char* E02A80LayoutView::FUN_00e02a70()
+// src: XBOX_PDB 0x00e02a70
+__declspec(noinline) char* E02A80LayoutView::hkPlatformObjectWriter_getLayout()
 {
     return unk08 + 12;
 }
 
 extern const char str_010d66fc[];
 
-int __cdecl FUN_00cb0fa0(const char* name, const char* s);
+int __cdecl hkString_strCmp(const char* name, const char* s);
 
 struct E02A80Helper
 {
@@ -439,18 +442,19 @@ struct E02A80_cls
     E02A80Iface* unk08;
     E02A80Helper* unk0c;
 
-    int FUN_00e02a80(E02A80Arg* arg1, int arg2, E02A80Helper* arg3, int arg4);
+    int hkPlatformObjectWriter_writeObject(E02A80Arg* arg1, int arg2, E02A80Helper* arg3, int arg4);
 };
 
 // Resolves a helper, optionally seeks and builds a box via the iface, then calls unk0C and returns whether the result string is empty.
 // @fnv 0x00e02a80
-int E02A80_cls::FUN_00e02a80(E02A80Arg* apArg, int aiValue, E02A80Helper* apHelper, int arg4)
+// src: HAVOK_SRC 0x00e02a80
+int E02A80_cls::hkPlatformObjectWriter_writeObject(E02A80Arg* apArg, int aiValue, E02A80Helper* apHelper, int arg4)
 {
     E02A80Helper* pResolvedHelper;
     E02A80Helper* pHelper = unk0c;
     if (pHelper != 0)
     {
-        pResolvedHelper = pHelper->Resolve(apHelper, reinterpret_cast<E02A80LayoutView*>(this)->FUN_00e02a70());
+        pResolvedHelper = pHelper->Resolve(apHelper, reinterpret_cast<E02A80LayoutView*>(this)->hkPlatformObjectWriter_getLayout());
     }
     else
     {
@@ -459,9 +463,9 @@ int E02A80_cls::FUN_00e02a80(E02A80Arg* apArg, int aiValue, E02A80Helper* apHelp
     E02A80Local a;
     void* b;
     E02A80Arg* e;
-    if (unk0c != 0 && FUN_00cb0fa0(pResolvedHelper->Name(), str_010d66fc) == 0)
+    if (unk0c != 0 && hkString_strCmp(pResolvedHelper->Name(), str_010d66fc) == 0)
     {
-        b = unk0c->Resolve(reinterpret_cast<void*>(aiValue), reinterpret_cast<E02A80LayoutView*>(this)->FUN_00e02a70());
+        b = unk0c->Resolve(reinterpret_cast<void*>(aiValue), reinterpret_cast<E02A80LayoutView*>(this)->hkPlatformObjectWriter_getLayout());
         e = apArg;
         a.Seek(e->unk20(), 0);
         E02A80Box box;

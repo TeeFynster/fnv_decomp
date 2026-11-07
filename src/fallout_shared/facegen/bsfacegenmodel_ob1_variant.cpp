@@ -375,7 +375,8 @@ class length_error : public logic_error
 };
 }
 // @fnv 0x00ac0b00
-void __cdecl FUN_00ac0b00()
+// src: GUESS 0x00ac0b00 (confidence: medium)
+void __cdecl Object_Length_error_Thunk()
 {
     throw std::length_error("vector<T> too long");
 }
@@ -709,13 +710,14 @@ struct BxLengthError : public BxLogicError
 
 struct BxVecBase
 {
-    static void FUN_00b0fb80();
+    static void BxLengthError_Thunk();
 };
 }
 using namespace xlenb0f;
 
 // @fnv 0x00b0fb80
-void BxVecBase::FUN_00b0fb80()
+// src: GUESS 0x00b0fb80 (confidence: medium)
+void BxVecBase::BxLengthError_Thunk()
 {
     throw BxLengthError("vector<T> too long");
 }

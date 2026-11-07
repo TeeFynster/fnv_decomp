@@ -34,13 +34,14 @@ struct UnkHolder
     volatile int mC;
     volatile int m10;
     volatile int m14;
-    UnkRet* FUN_00c85750();
-    void FUN_00c72210();
+    UnkRet* hkMemoryRouter_getInstance();
+    void UpdateState_00c72210();
 };
 // @fnv 0x00c72210
-void UnkHolder::FUN_00c72210()
+// src: GUESS 0x00c72210 (confidence: low)
+void UnkHolder::UpdateState_00c72210()
 {
-    UnkRet* r = FUN_00c85750();
+    UnkRet* r = hkMemoryRouter_getInstance();
     UnkCallee* c = r->p10;
     int v = m14;
     m10 = 0;

@@ -92,7 +92,8 @@ inline NiPoint3& NiPoint3::operator-=(const NiPoint3& p)
 extern "C" const void* g_012026a0;
 
 // @fnv 0x00c281f0
-const void* __cdecl FUN_00c281f0()
+// src: COMMUNITY 0x00c281f0
+const void* __cdecl NiPSysSphericalCollider_GetRTTI()
 {
     return &g_012026a0;
 }
@@ -108,12 +109,13 @@ struct NiPSysSphericalCollider : NiPSysCollider
     NiTransform m_kCachedNodeTransform;
     NiTransform m_kCachedOwnerTransform;
 
-    void FUN_00c28070(NiStream&);
+    void LoadBinary_00c28070(NiStream&);
     void BaseResolve(float fInitialTime, NiPSysData* pkData, unsigned short usCurrentParticle);
     void ResolveSphericalCollision(float fInitialTime, NiPSysData* pkData, unsigned short usCurrentParticle);
 };
 // @fnv 0x00c28070
-void NiPSysSphericalCollider::FUN_00c28070(NiStream& kStream)
+// src: XBOX_PDB 0x00c28070
+void NiPSysSphericalCollider::LoadBinary_00c28070(NiStream& kStream)
 {
     NiPSysCollider::LoadBinary(kStream);
     kStream.ResetStreamState();
@@ -146,14 +148,14 @@ void* NiPSysSphericalCollider::FUN_00c28200(unsigned int flags)
 
 struct Collider : BSFadeNode
 {
-    Collider* __thiscall FUN_00c28110(float, int, int, int, int, float);
+    Collider* __thiscall NiPSysSphericalCollider_NiPSysSphericalCollider(float, int, int, int, int, float);
 };
 // @fnv 0x00c282a0
 Collider* CreateCollider()
 {
     Collider* p = (Collider*)BSFadeNode::operator new(0xb0);
     if (p)
-        return p->FUN_00c28110(1.0f, 0, 0, 0, 0, 1.0f);
+        return p->NiPSysSphericalCollider_NiPSysSphericalCollider(1.0f, 0, 0, 0, 0, 1.0f);
     return 0;
 }
 
@@ -212,7 +214,7 @@ Collider* SphericalColliderClone::CloneCollider(CloningProcess& kCloning)
 {
     Collider* pkObject = (Collider*)BSFadeNode::operator new(0xb0);
     if (pkObject)
-        pkObject = pkObject->FUN_00c28110(1.0f, 0, 0, 0, 0, 1.0f);
+        pkObject = pkObject->NiPSysSphericalCollider_NiPSysSphericalCollider(1.0f, 0, 0, 0, 0, 1.0f);
     else
         pkObject = 0;
     ((NiPSysPlanarCollider*)this)->CopyMemberData((NiPSysPlanarCollider*)pkObject, kCloning);
@@ -329,9 +331,9 @@ void NiPSysSphericalCollider::ResolveSphericalCollision(float fInitialTime, NiPS
     BaseResolve(fInitialTime, pkData, usCurrentParticle);
 }
 
-char* __cdecl FUN_00a7d330(const void*);
-char* __cdecl FUN_00a7d5e0(const char*, const char*);
-char* __cdecl FUN_00a7d550(const char*, float);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const void*);
+char* __cdecl NiGetViewerString_00a7d5e0(const char*, const char*);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
 extern const char DAT_010be8cc[];
 extern const char DAT_01015a9c[];
 extern const char DAT_0102909c[];
@@ -357,15 +359,16 @@ struct ColliderInfo
     InfoName* info;
     float radius;
     void AppendProperties(StrArr*);
-    void FUN_00c282d0(StrArr* strings);
+    void NiPSysSphericalCollider_GetViewerStrings(StrArr* strings);
 };
 // @fnv 0x00c282d0
-void ColliderInfo::FUN_00c282d0(StrArr* strings)
+// src: XBOX_PDB 0x00c282d0
+void ColliderInfo::NiPSysSphericalCollider_GetViewerStrings(StrArr* strings)
 {
     AppendProperties(strings);
-    strings->AppendInline(FUN_00a7d330(g_012026a0));
-    strings->AppendInline(FUN_00a7d5e0(DAT_010be8cc, info ? info->name : DAT_0102909c));
-    strings->AppendInline(FUN_00a7d550(DAT_01015a9c, radius));
+    strings->AppendInline(NiViewerStrings_NiGetViewerString_Title(g_012026a0));
+    strings->AppendInline(NiGetViewerString_00a7d5e0(DAT_010be8cc, info ? info->name : DAT_0102909c));
+    strings->AppendInline(NiGetViewerString_00a7d550(DAT_01015a9c, radius));
 }
 
 struct SphericalColliderComparison
@@ -383,14 +386,15 @@ struct SphericalColliderComparison
     int unk28;
     NiObject* m_pkColliderObject;
     float m_fBoundRadius;
-    bool FUN_00c27ae0(SphericalColliderComparison* pkObject);
+    bool NiPSysSphericalCollider_IsEqual(SphericalColliderComparison* pkObject);
 };
 
 extern "C" void ColliderIsEqual();
 
 // Returns false if the base comparison, collider-object comparison, or bound-radius comparison fails.
 // @fnv 0x00c27ae0
-bool SphericalColliderComparison::FUN_00c27ae0(SphericalColliderComparison* pkObject)
+// src: XBOX_PDB 0x00c27ae0
+bool SphericalColliderComparison::NiPSysSphericalCollider_IsEqual(SphericalColliderComparison* pkObject)
 {
     if (!reinterpret_cast<bool (__thiscall*)(const NiPSysCollider*, NiObject*)>(ColliderIsEqual)(
             reinterpret_cast<const NiPSysCollider*>(this), reinterpret_cast<NiObject*>(pkObject)))
@@ -559,7 +563,7 @@ void PlanarColliderUpdate::Update()
         rotation = DAT_011a9448;
         ColliderNormal normal = ColliderNormal::Cross(
             reinterpret_cast<const CollisionVector&>(axis2), reinterpret_cast<const CollisionVector&>(axis1));
-        reinterpret_cast<NiPoint3&>(normal).FUN_004a0c10();
+        reinterpret_cast<NiPoint3&>(normal).Unitize_004a0c10();
         float w = width;
         float h = height;
         if (node)
@@ -574,7 +578,7 @@ void PlanarColliderUpdate::Update()
             memcpy(&center, &relative.m_Translate, sizeof(center));
             rotation = reinterpret_cast<const ColliderMatrix&>(relative.m_Rotate.m_pEntry[0][0]);
             static_cast<CollisionVector&>(normal) = rotation * normal;
-            reinterpret_cast<NiPoint3&>(normal).FUN_004a0c10();
+            reinterpret_cast<NiPoint3&>(normal).Unitize_004a0c10();
             w *= relative.m_fScale;
             h *= relative.m_fScale;
             memcpy(&cachedNode, &nodeWorld, sizeof(cachedNode));
@@ -597,7 +601,8 @@ extern "C" void InitializeColliderBase();
 
 // Initializes collider fields, passes settings to the base initializer, sets a nonnegative radius, and initializes cached transforms.
 // @fnv 0x00c28110
-Collider* Collider::FUN_00c28110(float fBounce, int bSpawnOnCollide, int bDieOnCollide, int pkSpawnModifier,
+// src: EXE 0x00c28110
+Collider* Collider::NiPSysSphericalCollider_NiPSysSphericalCollider(float fBounce, int bSpawnOnCollide, int bDieOnCollide, int pkSpawnModifier,
                                  int pkColliderObj, float fRadius)
 {
     UpdateCollider* p = (UpdateCollider*)this;

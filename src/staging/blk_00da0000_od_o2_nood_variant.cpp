@@ -31,7 +31,7 @@ struct ScratchBlock
     unsigned int unk3C;
 };
 
-void __cdecl FUN_00da6fd0(ScratchBlock* block);
+void __cdecl Object_InitializeDispatchFunctionTable(ScratchBlock* block);
 
 class ScratchOwner
 {
@@ -40,7 +40,8 @@ class ScratchOwner
 };
 
 // @fnv 0x00da7020
-void __cdecl FUN_00da7020(ScratchOwner* owner)
+// src: HAVOK_LIB 0x00da7020
+void __cdecl hkListAgent3_registerAgent3(ScratchOwner* owner)
 {
     __declspec(align(16)) ScratchBlock s;
     s.unk30 = 0;
@@ -51,7 +52,7 @@ void __cdecl FUN_00da7020(ScratchOwner* owner)
     s.unk20 = 0;
     s.unk24 = 0;
     s.unk28 = 0;
-    FUN_00da6fd0(&s);
+    Object_InitializeDispatchFunctionTable(&s);
     owner->AddEntry(&s, -1, 9);
 }
 
@@ -73,7 +74,8 @@ class __declspec(align(16)) S00da0780_Object
 };
 
 // @fnv 0x00da0780
-const void* __cdecl FUN_00da0780()
+// src: HAVOK_LIB 0x00da0780
+const void* __cdecl getVtablehkLocalFrameGroup()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -124,7 +126,8 @@ class __declspec(align(16)) S00da07d0_Object
 };
 
 // @fnv 0x00da07d0
-const void* __cdecl FUN_00da07d0()
+// src: HAVOK_LIB 0x00da07d0
+const void* __cdecl getVtablehkSimpleLocalFrame()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -144,11 +147,12 @@ __declspec(align(16)) struct FUN_00da7180_cls
     unsigned int m_i2C;
     unsigned int m_i30;
 
-    FUN_00da7180_cls* FUN_00da7180(const FUN_00da7180_cls* src);
+    FUN_00da7180_cls* AssignFields_00da7180(const FUN_00da7180_cls* src);
 };
 
 // @fnv 0x00da7180
-FUN_00da7180_cls* FUN_00da7180_cls::FUN_00da7180(const FUN_00da7180_cls* src)
+// src: GUESS 0x00da7180 (confidence: low)
+FUN_00da7180_cls* FUN_00da7180_cls::AssignFields_00da7180(const FUN_00da7180_cls* src)
 {
     _mm_store_ps((float*)&m_v00, _mm_load_ps((const float*)&src->m_v00));
     _mm_store_ps((float*)&m_v10, _mm_load_ps((const float*)&src->m_v10));
@@ -195,7 +199,8 @@ class __declspec(align(16)) S00db7c40_Object
 };
 
 // @fnv 0x00db7c40
-const void* __cdecl FUN_00db7c40()
+// src: HAVOK_LIB 0x00db7c40
+const void* __cdecl getVtablehkpPhysicsSystem()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;

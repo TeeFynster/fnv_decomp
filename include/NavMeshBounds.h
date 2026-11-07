@@ -23,6 +23,6 @@ public:
     NavMeshBounds();
     ~NavMeshBounds();
     void CopyTo(NavMeshBounds* other);
-    NiPoint3 FUN_0069c070(const NiPoint3& point);
+    NiPoint3 DistanceFromPointToBounds(const NiPoint3& point);
     bool ContainsPoint(const NiPoint3& point);
 };

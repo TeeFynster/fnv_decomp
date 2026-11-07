@@ -16,9 +16,9 @@
 // The helper inherits the shared layout and adds no data or virtual slots.
 struct RegionMapMerge : TESRegionDataMap
 {
-    bool FUN_004f1540();
+    bool TESRegionData_GetOverride();
     void FUN_004f15a0(bool value);
-    unsigned char FUN_005bb4d0();
+    unsigned char TESRegionData_GetPriority();
     bool FUN_004f15c0(unsigned char value);
     void SaveMapData();
     TESRegionData* CreateRegionData() const;
@@ -63,13 +63,13 @@ struct H4280
 {
     unsigned int GetLengthPlusOne();
 };
-void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
+void __cdecl TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 // @fnv 0x004f3e40
 void RegionMapMerge::SaveMapData()
 {
     TESRegionData::Save();
     if (((S7010*)&m_kMapName)->Length())
-        FUN_004856f0(0x504D4452, (void*)(unsigned int)*(Flt*)&m_kMapName,
+        TESForm_AddChunkArray(0x504D4452, (void*)(unsigned int)*(Flt*)&m_kMapName,
                      ((H4280*)&m_kMapName)->GetLengthPlusOne());
 }
 
@@ -122,8 +122,8 @@ void RegionMapMerge::MergeMapData(RegionMapMerge* apOther, void* context)
         return;
     if (m_bHasRegionData)
     {
-        FUN_004f15a0(other->FUN_004f1540());
-        FUN_004f15c0(other->FUN_005bb4d0());
+        FUN_004f15a0(other->TESRegionData_GetOverride());
+        FUN_004f15c0(other->TESRegionData_GetPriority());
         vf12(other->GetRegionMapName());
     }
     else if (other->m_bHasRegionData)
@@ -132,26 +132,26 @@ void RegionMapMerge::MergeMapData(RegionMapMerge* apOther, void* context)
     }
     else if (bOverride)
     {
-        if (other->FUN_004f1540() && other->FUN_005bb4d0() > FUN_005bb4d0())
+        if (other->TESRegionData_GetOverride() && other->TESRegionData_GetPriority() > TESRegionData_GetPriority())
         {
-            FUN_004f15a0(other->FUN_004f1540());
-            FUN_004f15c0(other->FUN_005bb4d0());
+            FUN_004f15a0(other->TESRegionData_GetOverride());
+            FUN_004f15c0(other->TESRegionData_GetPriority());
             vf12(other->GetRegionMapName());
         }
         return;
     }
-    else if (other->FUN_004f1540())
+    else if (other->TESRegionData_GetOverride())
     {
-        FUN_004f15a0(other->FUN_004f1540());
-        FUN_004f15c0(other->FUN_005bb4d0());
+        FUN_004f15a0(other->TESRegionData_GetOverride());
+        FUN_004f15c0(other->TESRegionData_GetPriority());
         vf12(other->GetRegionMapName());
     }
     else
     {
-        if (other->FUN_005bb4d0() > FUN_005bb4d0())
+        if (other->TESRegionData_GetPriority() > TESRegionData_GetPriority())
             vf12(other->GetRegionMapName());
-        float priority = FUN_005bb4d0() * FUN_005bb4d0() + (100 - FUN_005bb4d0()) * other->FUN_005bb4d0();
-        priority += (100 - other->FUN_005bb4d0()) * FUN_005bb4d0() + other->FUN_005bb4d0() * other->FUN_005bb4d0();
+        float priority = TESRegionData_GetPriority() * TESRegionData_GetPriority() + (100 - TESRegionData_GetPriority()) * other->TESRegionData_GetPriority();
+        priority += (100 - other->TESRegionData_GetPriority()) * TESRegionData_GetPriority() + other->TESRegionData_GetPriority() * other->TESRegionData_GetPriority();
         priority *= 0.005f;
         FUN_004f15c0((unsigned char)floor(priority));
     }

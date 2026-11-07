@@ -99,12 +99,13 @@ extern TESWorldSpace* BGSSaveLoadGlobalDataWorldspacePtr;
 
 void __cdecl InitCombatActions();
 void __cdecl InitCombatGoalTable();
-void __cdecl FUN_00990070();
+void __cdecl CombatGroupStrategy_InitGroupStrategies();
 void __cdecl NegateCharacterControllerValue();
 void __cdecl EnsureGlobalAllocated();
 
 // @fnv 0x00990f20
-void __cdecl FUN_00990f20()
+// src: COMMUNITY 0x00990f20
+void __cdecl CombatManager_Create()
 {
     if (BGSSaveLoadGlobalDataWorldspacePtr)
         return;
@@ -114,20 +115,21 @@ void __cdecl FUN_00990f20()
     BGSSaveLoadGlobalDataWorldspacePtr = reinterpret_cast<TESWorldSpace*>(new CombatThreatMap());
     InitCombatActions();
     InitCombatGoalTable();
-    FUN_00990070();
+    CombatGroupStrategy_InitGroupStrategies();
     NegateCharacterControllerValue();
     EnsureGlobalAllocated();
 }
 
 struct FUN_00991dc0_shell : public CombatManager
 {
-    void FUN_00991dc0();
+    void CombatManager_UpdateCombatants();
 };
 
 typedef void(__thiscall* ActorVFn)(Actor*);
 // Iterates every group, calls a virtual function on each member actor, and re-reads the member count when it changes.
 // @fnv 0x00991dc0
-void FUN_00991dc0_shell::FUN_00991dc0()
+// src: XBOX_PDB 0x00991dc0
+void FUN_00991dc0_shell::CombatManager_UpdateCombatants()
 {
     for (unsigned int i = 0; i < ((NiTPrimitiveArray<ActorCombatGroup*>*)this)->GetSize(); i++)
     {
@@ -225,9 +227,9 @@ struct DetectionEvent
     NiPoint3 pos;
 };
 
-NiAVObject* __fastcall FUN_00524cf0(TESObjectCELL*);
-NiAVObject* __cdecl FUN_00c56680(float, int, int, NiColorA const&);
-NiAVObject* __cdecl FUN_00c5a0f0(NiPoint3 const&, NiPoint3 const&, float, float, NiColorA const&, NiColorA const&);
+NiAVObject* __fastcall TESObjectCELL_GetMarkerNode(TESObjectCELL*);
+NiAVObject* __cdecl BSTestObjects_CreateSphere(float, int, int, NiColorA const&);
+NiAVObject* __cdecl BSTestObjects_Create3DArrow(NiPoint3 const&, NiPoint3 const&, float, float, NiColorA const&, NiColorA const&);
 void __cdecl AttachLightingPropertyRecursive(unsigned int);
 
 extern float const g_011d86e0_arg1;
@@ -276,7 +278,7 @@ void FUN_00991770_shell::UpdateDetectionVisuals()
     }
     *reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0x38) = 0;
     if (!reinterpret_cast<TESObjectREFR*>(g_thePlayer)->GetParentCell() ||
-        !FUN_00524cf0(reinterpret_cast<TESObjectREFR*>(g_thePlayer)->GetParentCell()))
+        !TESObjectCELL_GetMarkerNode(reinterpret_cast<TESObjectREFR*>(g_thePlayer)->GetParentCell()))
     {
         return;
     }
@@ -287,7 +289,7 @@ void FUN_00991770_shell::UpdateDetectionVisuals()
             *reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0x38) = new NiNode(0);
         }
         unsigned int iHighActorCount =
-            reinterpret_cast<TopicInfoArray*>(const_cast<NiPoint3*>(&DAT_011e0e80.GetPosition()))->FUN_005be5c0(0);
+            reinterpret_cast<TopicInfoArray*>(const_cast<NiPoint3*>(&DAT_011e0e80.GetPosition()))->ProcessArray_GetProcessLevelTail(0);
         for (unsigned int i = 0; i < iHighActorCount + 1; ++i)
         {
             MobileObject* pMobileObject =
@@ -306,13 +308,13 @@ void FUN_00991770_shell::UpdateDetectionVisuals()
                     NiColorA sphereColor(0.0f, g_011d86e0_arg1, g_011d86e0_arg1, 0.5f);
                     NiColorA color(1.0f, DAT_0108da38, DAT_0108aff0, 0.5f);
                     float fradius = pdetectionEvent->soundLevel + 32.0;
-                    NiAVObject* psphere = FUN_00c56680(fradius, 10, 10, sphereColor);
-                    psphere->FUN_00440460(pdetectionEvent->pos);
+                    NiAVObject* psphere = BSTestObjects_CreateSphere(fradius, 10, 10, sphereColor);
+                    psphere->NiAVObject_SetTranslate(pdetectionEvent->pos);
                     reinterpret_cast<NiNode*>(
                         static_cast<unsigned int>(*reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x38)))
                         ->AttachChildInAvailableSlot(psphere, true);
                     DetectionVisualPosition actorPos = *reinterpret_cast<const DetectionVisualPosition*>(reinterpret_cast<const TESObjectREFR*>(pactor)->GetPos());
-                    NiAVObject* parrow = FUN_00c5a0f0(reinterpret_cast<const NiPoint3&>(actorPos), pdetectionEvent->pos, _DAT_010162c0, _DAT_010162c0,
+                    NiAVObject* parrow = BSTestObjects_Create3DArrow(reinterpret_cast<const NiPoint3&>(actorPos), pdetectionEvent->pos, _DAT_010162c0, _DAT_010162c0,
                                                       arrowColor, sphereColor);
                     reinterpret_cast<NiNode*>(
                         static_cast<unsigned int>(*reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x38)))
@@ -324,7 +326,7 @@ void FUN_00991770_shell::UpdateDetectionVisuals()
     if (*reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x38))
     {
         NiAlphaProperty* pAlphaProperty = new NiAlphaProperty();
-        pAlphaProperty->FUN_0049ed90(true);
+        pAlphaProperty->NiAlphaProperty_SetAlphaBlending(true);
         reinterpret_cast<NiAVObject*>(
             static_cast<unsigned int>(*reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x38)))
             ->AttachProperty(reinterpret_cast<NiObject*>(pAlphaProperty));
@@ -332,7 +334,7 @@ void FUN_00991770_shell::UpdateDetectionVisuals()
         BSShaderManager::UpdateObjectTypeRecurse(reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(
                                                      *reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x38))),
                                                  false, false);
-        reinterpret_cast<NiNode*>(FUN_00524cf0(reinterpret_cast<TESObjectREFR*>(g_thePlayer)->GetParentCell()))
+        reinterpret_cast<NiNode*>(TESObjectCELL_GetMarkerNode(reinterpret_cast<TESObjectREFR*>(g_thePlayer)->GetParentCell()))
             ->AttachChildInAvailableSlot(reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(
                                              *reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x38))),
                                          true);
@@ -402,7 +404,7 @@ struct FUN_00435de0_ctor
     void* FUN_00435de0(float);
 };
 
-float __cdecl FUN_00435dd0();
+float __cdecl CombatTimer_GetTimer();
 
 extern double _gModifierZero;
 extern float DAT_0108d9b0;
@@ -421,7 +423,7 @@ bool FUN_00992d90_shell::UpdateCombatMusic()
     bool bplayingMusic =
         (reinterpret_cast<RegionPoint*>(reinterpret_cast<char*>(this) + 0x20)->GetX() != -DAT_0108d9b0) ? true : false;
     if (!reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x2c)->CheckTimer() ||
-        g_BGSSaveLoadGame->FUN_0042ce10())
+        g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
     {
         return bplayingMusic;
     }
@@ -533,9 +535,9 @@ bool FUN_00992d90_shell::UpdateCombatMusic()
     {
         if (bplayCombatMusic)
         {
-            reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x24)->FUN_00910b10();
+            reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x24)->TESWeightForm_InitializeDataComponent();
             FUN_00435de0_ctor ts1;
-            ts1.FUN_00435de0(FUN_00435dd0());
+            ts1.FUN_00435de0(CombatTimer_GetTimer());
             *reinterpret_cast<FUN_00435de0_ctor*>(reinterpret_cast<char*>(this) + 0x20) = ts1;
         }
         else if (!reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x24)->IsRunning())
@@ -548,7 +550,7 @@ bool FUN_00992d90_shell::UpdateCombatMusic()
             FUN_00435de0_ctor ts2;
             ts2.FUN_00435de0(-DAT_0108d9b0);
             *reinterpret_cast<FUN_00435de0_ctor*>(reinterpret_cast<char*>(this) + 0x20) = ts2;
-            reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x24)->FUN_00910b10();
+            reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x24)->TESWeightForm_InitializeDataComponent();
         }
     }
     return reinterpret_cast<RegionPoint*>(reinterpret_cast<char*>(this) + 0x20)->GetX() != -DAT_0108d9b0;
@@ -572,11 +574,12 @@ ActorCombatGroup* CombatManager::FindByKey(unsigned int key)
 
 struct FUN_00992530_shell : public CombatManager
 {
-    bool FUN_00992530(Actor* apActor, Actor* apTarget);
+    bool CombatManager_GetWanttoHelpGroup(Actor* apActor, Actor* apTarget);
 };
 
 // @fnv 0x00992530
-bool FUN_00992530_shell::FUN_00992530(Actor* apActor, Actor* apTarget)
+// src: XBOX_PDB 0x00992530
+bool FUN_00992530_shell::CombatManager_GetWanttoHelpGroup(Actor* apActor, Actor* apTarget)
 {
     unsigned int kIresult = 0;
     if (!reinterpret_cast<bool (__thiscall*)(Actor*, Actor*)>(&Actor_FUN_008b0970)(apActor, apTarget))
@@ -586,11 +589,11 @@ bool FUN_00992530_shell::FUN_00992530(Actor* apActor, Actor* apTarget)
         ActorCombatGroup* pgroup2 = apTarget->GetCombatGroup();
         if (pgroup2)
         {
-            unsigned int ihelperCount4 = pgroup2->FUN_005a4320();
+            unsigned int ihelperCount4 = pgroup2->PathingSolution_GetVirtualNodeCount();
             unsigned int imemberCount5;
             for (unsigned int i5 = 0; i5 < ihelperCount4; i5++)
             {
-                Actor* phelper2 = reinterpret_cast<Actor*>(pgroup2->FUN_00968630(i5));
+                Actor* phelper2 = reinterpret_cast<Actor*>(pgroup2->CombatGroup_GetTarget(i5));
                 if (reinterpret_cast<bool (__thiscall*)(Actor*, Actor*)>(&Actor_FUN_008b0970)(apActor, phelper2))
                     return false;
             }
@@ -609,13 +612,14 @@ bool FUN_00992530_shell::FUN_00992530(Actor* apActor, Actor* apTarget)
 
 struct CombatBox
 {
-    void FUN_00992a50(unsigned int a, unsigned int b);
-    void FUN_009926c0(unsigned int a, unsigned int b);
+    void CombatManager_TargetLocalActor(unsigned int a, unsigned int b);
+    void CombatManager_NotifyCombatGroupAddedTarget(unsigned int a, unsigned int b);
 };
 // @fnv 0x009926c0
-void CombatBox::FUN_009926c0(unsigned int uiFirst, unsigned int uiSecond)
+// src: XBOX_PDB 0x009926c0
+void CombatBox::CombatManager_NotifyCombatGroupAddedTarget(unsigned int uiFirst, unsigned int uiSecond)
 {
-    FUN_00992a50(uiSecond, uiFirst);
+    CombatManager_TargetLocalActor(uiSecond, uiFirst);
 }
 
 namespace fnv_009926e0 {
@@ -634,23 +638,25 @@ void CombatBox::SwapAndDispatch(unsigned int uiFirst, unsigned int uiSecond)
 namespace fnv_00992700 {
 struct CombatBox
 {
-    void FUN_009929e0(unsigned int a);
-    void FUN_00992700(unsigned int a, unsigned int b);
+    void CombatManager_AddLocalActor(unsigned int a);
+    void CombatManager_NotifyCombatGroupAddedMember(unsigned int a, unsigned int b);
 };
 // @fnv 0x00992700
-void CombatBox::FUN_00992700(unsigned int uiUnused, unsigned int uiValue)
+// src: XBOX_PDB 0x00992700
+void CombatBox::CombatManager_NotifyCombatGroupAddedMember(unsigned int uiUnused, unsigned int uiValue)
 {
-    FUN_009929e0(uiValue);
+    CombatManager_AddLocalActor(uiValue);
 }
 }  // namespace fnv_00992700
 
 struct CombatFlagHolder
 {
     bool HasCombatFlag(unsigned int mask);
-    bool FUN_009928a0();
+    bool TESCombatStyle_GetExplosiveWeaponsIgnoreSelf();
 };
 // @fnv 0x009928a0
-bool CombatFlagHolder::FUN_009928a0()
+// src: XBOX_PDB 0x009928a0
+bool CombatFlagHolder::TESCombatStyle_GetExplosiveWeaponsIgnoreSelf()
 {
     return HasCombatFlag(0x20);
 }
@@ -695,10 +701,11 @@ bool CombatFlagHolder::HasCombatFlag80()
 
 struct CombatOwner
 {
-    void FUN_009929e0(unsigned int key);
+    void CombatManager_AddLocalActor(unsigned int key);
 };
 // @fnv 0x009929e0
-void CombatOwner::FUN_009929e0(unsigned int key)
+// src: XBOX_PDB 0x009929e0
+void CombatOwner::CombatManager_AddLocalActor(unsigned int key)
 {
     unsigned __int64 pair = 0;
     if (!(*(NiTMap<Actor*, unsigned __int64>**)((char*)this + 0x10))->GetAt(reinterpret_cast<Actor*>(key), pair))
@@ -707,10 +714,11 @@ void CombatOwner::FUN_009929e0(unsigned int key)
 
 struct CombatMapOwner
 {
-    void FUN_00992a30(unsigned int key);
+    void CombatManager_RemoveLocalActor(unsigned int key);
 };
 // @fnv 0x00992a30
-void CombatMapOwner::FUN_00992a30(unsigned int key)
+// src: COMMUNITY 0x00992a30
+void CombatMapOwner::CombatManager_RemoveLocalActor(unsigned int key)
 {
     (*(NiTMap<Actor*, unsigned __int64>**)((char*)this + 0x10))->RemoveAt(reinterpret_cast<Actor*>(key));
 }
@@ -723,12 +731,13 @@ struct CPStandIn00992a50
 {
     int f0, f4, f8, fc;
     NiTMap<Actor*, unsigned __int64>* pHelper;
-    void FUN_00992a50(Actor* pactor, Flt& flt);
+    void CombatManager_TargetLocalActor(Actor* pactor, Flt& flt);
 };
 
 // Reads a bit mask for pactor, sets the bit given by flt if clear, and writes the mask back.
 // @fnv 0x00992a50
-void CPStandIn00992a50::FUN_00992a50(Actor* pactor, Flt& aiBitIndex)
+// src: XBOX_PDB 0x00992a50
+void CPStandIn00992a50::CombatManager_TargetLocalActor(Actor* pactor, Flt& aiBitIndex)
 {
     __int64 ullBit;
     unsigned __int64 ullMask = 0;
@@ -831,10 +840,11 @@ struct CombatMap
 };
 struct CombatMapRef
 {
-    void FUN_009950a0(CombatMap** p);
+    void CombatPlanner_GetNodeKey(CombatMap** p);
 };
 // @fnv 0x009950a0
-void CombatMapRef::FUN_009950a0(CombatMap** ppCombatMap)
+// src: COMMUNITY 0x009950a0
+void CombatMapRef::CombatPlanner_GetNodeKey(CombatMap** ppCombatMap)
 {
     (*ppCombatMap)->ComputeHash();
 }
@@ -857,12 +867,13 @@ struct FUN_00991e80_shell
     char pad_00[0x34];
     unsigned int m_uiDebugFlags;
 
-    FUN_00985d10* FUN_00991e80();
+    FUN_00985d10* CombatManager_CreateCombatGroup();
 };
 
 // Allocates a combat group with the next id, adds it to the manager, warns if the returned position exceeds 0x40, and sets that position as its quantity.
 // @fnv 0x00991e80
-FUN_00985d10* FUN_00991e80_shell::FUN_00991e80()
+// src: XBOX_PDB 0x00991e80
+FUN_00985d10* FUN_00991e80_shell::CombatManager_CreateCombatGroup()
 {
     AutoMemHelper tempMemContext(0x2b, true, $SG8126, 0x161);
     FUN_00985d10* pgroup = new FUN_00985d10(m_uiDebugFlags++);
@@ -908,7 +919,7 @@ namespace fnv_009923d0 {
 
 struct FUN_009923d0_shell
 {
-    ActorCombatGroup* FUN_00991e80();
+    ActorCombatGroup* CombatManager_CreateCombatGroup();
 
     CombatController* CreateCombatController(void* arg1, void* arg2);
 };
@@ -917,7 +928,7 @@ struct FUN_009923d0_shell
 // @fnv 0x009923d0
 CombatController* FUN_009923d0_shell::CreateCombatController(void* arg1, void* arg2)
 {
-    ActorCombatGroup* m_pCombatData = FUN_00991e80();
+    ActorCombatGroup* m_pCombatData = CombatManager_CreateCombatGroup();
     m_pCombatData = m_pCombatData;
     reinterpret_cast<void (__thiscall*)(ActorCombatGroup*, void*)>(&ActorCombatGroup_AddActor)(m_pCombatData, arg1);
     CombatController* m_pCombatController = new CombatController(arg1, reinterpret_cast<ActorCombatGroup*>(m_pCombatData), arg2);
@@ -931,7 +942,7 @@ extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 struct CombatMapOwner
 {
-    void FUN_00992a30(unsigned int);
+    void CombatManager_RemoveLocalActor(unsigned int);
 };
 
 
@@ -1027,7 +1038,7 @@ struct FUN_00992920_shell : CombatMapOwner
 // @fnv 0x00992920
 void FUN_00992920_shell::ProcessCombatTarget(TargetObj* pTarget)
 {
-    if (g_BGSSaveLoadGame->FUN_0042ce10())
+    if (g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
         return;
 
     TargetObj* pActor = 0;
@@ -1043,7 +1054,7 @@ void FUN_00992920_shell::ProcessCombatTarget(TargetObj* pTarget)
 
     if (pActor)
     {
-        CombatMapOwner::FUN_00992a30((unsigned int)pActor);
+        CombatMapOwner::CombatManager_RemoveLocalActor((unsigned int)pActor);
         member_1c->RemoveEntry((unsigned int)pActor);
     }
 
@@ -1084,7 +1095,7 @@ struct blob12
 };
 struct FUN_00991600_shell : public CombatManager
 {
-    void FUN_00991600(bool);
+    void CombatManager_UpdateMainThread(bool);
 };
 
 
@@ -1092,9 +1103,10 @@ struct FUN_00991770_obj
 {
     void UpdateDetectionVisuals();
 };
-int __fastcall FUN_009938b0(void*);
+int __fastcall NiTArray_char_NiTMallocInterface_char_GetEffectiveSize(void*);
 // @fnv 0x00991600
-void FUN_00991600_shell::FUN_00991600(bool abTimeStopped)
+// src: COMMUNITY 0x00991600
+void FUN_00991600_shell::CombatManager_UpdateMainThread(bool abTimeStopped)
 {
     unsigned int igroupCount = ((NiTPrimitiveArray<ActorCombatGroup*>*)this)->GetSize();
     if (igroupCount)
@@ -1108,7 +1120,7 @@ void FUN_00991600_shell::FUN_00991600(bool abTimeStopped)
                 m_kCombatGroups.SetAt(i, static_cast<ActorCombatGroup*>(0));
             }
         }
-        if (!FUN_009938b0(this))
+        if (!NiTArray_char_NiTMallocInterface_char_GetEffectiveSize(this))
         {
             m_kCombatGroups.Compact();
             m_pActorCombatGroupMap->RemoveAll();
@@ -1142,11 +1154,12 @@ namespace fnv_00992640 {
 
 struct FUN_00992640_shell : TESWorldSpace
 {
-    bool FUN_00992640(Actor*, Actor*);
+    bool CombatManager_GetWantToHelpTarget(Actor*, Actor*);
 };
 
 // @fnv 0x00992640
-bool FUN_00992640_shell::FUN_00992640(Actor* apActor, Actor* apAttacker)
+// src: XBOX_PDB 0x00992640
+bool FUN_00992640_shell::CombatManager_GetWantToHelpTarget(Actor* apActor, Actor* apAttacker)
 {
     ActorCombatGroup* pgroup = apAttacker->GetCombatGroup();
     if (pgroup == 0)
@@ -1156,8 +1169,8 @@ bool FUN_00992640_shell::FUN_00992640(Actor* apActor, Actor* apAttacker)
     unsigned int iGroupCount = ((PathingSolution*)pgroup)->GetVirtualNodeCount();
     for (unsigned int i = 0; i < iGroupCount; ++i)
     {
-        Actor* pGroupMember = reinterpret_cast<Actor*>(pgroup->FUN_00968630(i));
-        if (FUN_00992530(apActor, pGroupMember))
+        Actor* pGroupMember = reinterpret_cast<Actor*>(pgroup->CombatGroup_GetTarget(i));
+        if (CombatManager_GetWanttoHelpGroup(apActor, pGroupMember))
         {
             return true;
         }
@@ -1220,7 +1233,7 @@ struct FUN_00985d10
 };
 struct ThreatShim
 {
-    void FUN_009a5a70(BGSLoadGameBuffer*);
+    void CombatThreatMap_LoadGame(BGSLoadGameBuffer*);
 };
 struct StampShim
 {
@@ -1251,7 +1264,7 @@ void FUN_00993440_shell::LoadCombatState(BGSLoadGameBuffer* apLoadGameBuffer)
         reinterpret_cast<void (__thiscall*)(ActorCombatGroup*, BGSLoadGameBuffer*)>(&ActorCombatGroup_LoadGame)(pgroup, apLoadGameBuffer);
         m_kCombatGroups.SetAtGrow(igroupNum, pgroup);
     }
-    ((CMView*)this)->m_pThreatMap->FUN_009a5a70(apLoadGameBuffer);
+    ((CMView*)this)->m_pThreatMap->CombatThreatMap_LoadGame(apLoadGameBuffer);
     icount = ((BGSLoadFormBuffer*)apLoadGameBuffer)->ReadElementCount();
     for (unsigned int i = 0; i < icount; i++)
     {
@@ -1285,15 +1298,16 @@ struct S009a5f90
 
 struct FUN_009932d0_shell
 {
-    void FUN_009932d0(BGSSaveFormBuffer* apBuffer);
+    void CombatManager_SaveGame(BGSSaveFormBuffer* apBuffer);
 };
 
 // @fnv 0x009932d0
-void FUN_009932d0_shell::FUN_009932d0(BGSSaveFormBuffer* apBuffer)
+// src: COMMUNITY 0x009932d0
+void FUN_009932d0_shell::CombatManager_SaveGame(BGSSaveFormBuffer* apBuffer)
 {
     apBuffer->SaveData((char*)this + 0x34, 4, 0);
     unsigned int uiSavedCount = 0;
-    unsigned int uiPos = apBuffer->FUN_00865f20();
+    unsigned int uiPos = apBuffer->StartVariableSizedValue();
     {
         unsigned int uiMapCount;
         unsigned int uiPos2;
@@ -1313,10 +1327,10 @@ void FUN_009932d0_shell::FUN_009932d0(BGSSaveFormBuffer* apBuffer)
                 uiSavedCount++;
             }
         }
-        apBuffer->FUN_00865ff0(uiSavedCount, uiPos);
+        apBuffer->SaveVariableSizedValue_00865ff0(uiSavedCount, uiPos);
         ((S009a59e0*)*(void**)((char*)this + 0x14))->SaveThreats(apBuffer);
         uiMapCount = 0;
-        uiPos2 = apBuffer->FUN_00865f20();
+        uiPos2 = apBuffer->StartVariableSizedValue();
         for (void* pMapPos = (*(NiTMap<Actor*, unsigned __int64>**)((char*)this + 0x10))->GetFirstPos();
              pMapPos;)
         {
@@ -1326,7 +1340,7 @@ void FUN_009932d0_shell::FUN_009932d0(BGSSaveFormBuffer* apBuffer)
             apBuffer->SerializeFormData((void*)uiKey, 0);
             uiMapCount++;
         }
-        apBuffer->FUN_00865ff0(uiMapCount, uiPos2);
+        apBuffer->SaveVariableSizedValue_00865ff0(uiMapCount, uiPos2);
     }
     ((S009a5f90*)((char*)this + 0x20))->SaveTimeStamp(apBuffer);
     reinterpret_cast<TimeoutTimer*>((char*)this + 0x24)->SaveGame(apBuffer);
@@ -1396,13 +1410,14 @@ int Manager496::CountNearbyActors(NiPoint3 origin, float range, float time, Acto
 typedef void(__thiscall* SetCombatGroupProc_00991f80)(Actor*, ActorCombatGroup*);
 typedef unsigned int(__thiscall* GetActorValueProc_00991f80)(Actor*);
 extern const char UNK_0108dab0[];
-void __cdecl FUN_005b5e40(const char*, unsigned int, unsigned int);
+void __cdecl Warning_005b5e40(const char*, unsigned int, unsigned int);
 struct FUN_00991f80_shell : CombatManager
 {
-    FUN_00985d10* FUN_00991f80(Actor* actor);
+    FUN_00985d10* CombatManager_SplitPlayerCombatGroup(Actor* actor);
 };
 // @fnv 0x00991f80
-FUN_00985d10* FUN_00991f80_shell::FUN_00991f80(Actor* apActor)
+// src: EXE 0x00991f80
+FUN_00985d10* FUN_00991f80_shell::CombatManager_SplitPlayerCombatGroup(Actor* apActor)
 {
     ActorCombatGroup* pGroup = g_thePlayer->GetCombatGroup();
     reinterpret_cast<void (__thiscall*)(ActorCombatGroup*, Actor*)>(&ActorCombatGroup_RemoveActor)(pGroup, apActor);
@@ -1410,10 +1425,10 @@ FUN_00985d10* FUN_00991f80_shell::FUN_00991f80(Actor* apActor)
     {
         ActorCombatGroup* pOldGroup = pGroup;
         reinterpret_cast<void (__thiscall*)(ActorCombatGroup*, Actor*)>(&ActorCombatGroup_RemoveActor)(pOldGroup, (Actor*)g_thePlayer);
-        pGroup = (ActorCombatGroup*)((FUN_00991e80_shell*)this)->FUN_00991e80();
+        pGroup = (ActorCombatGroup*)((FUN_00991e80_shell*)this)->CombatManager_CreateCombatGroup();
         reinterpret_cast<bool (__thiscall*)(ActorCombatGroup*, Actor*)>(&ActorCombatGroup_AddActor)(pGroup, (Actor*)g_thePlayer);
         ((SetCombatGroupProc_00991f80)(*(void***)g_thePlayer)[0xff])((Actor*)g_thePlayer, pGroup);
-        pGroup->FUN_00986740(pOldGroup);
+        pGroup->CombatGroup_CopyTargets(pOldGroup);
         for (unsigned int uStack_14 = 0; uStack_14 < pOldGroup->GetCount(); uStack_14++)
         {
             Actor* piVar5 = pOldGroup->GetIntAt(static_cast<int>(uStack_14));
@@ -1427,37 +1442,38 @@ FUN_00985d10* FUN_00991f80_shell::FUN_00991f80(Actor* apActor)
                 }
                 else
                 {
-                    FUN_005b5e40(UNK_0108dab0,
+                    Warning_005b5e40(UNK_0108dab0,
                                  reinterpret_cast<int (__thiscall*)(Actor*)>(&Actor_FUN_00474cb0)(piVar5)
                                      ? ((GetActorValueProc_00991f80)(*(void***)piVar5)[0x130 / 4])(piVar5)
-                                     : reinterpret_cast<unsigned int>(piVar5->FUN_0055d520()),
-                                 static_cast<unsigned int>(piVar5->FUN_0084e3a0()));
+                                     : reinterpret_cast<unsigned int>(piVar5->TESObjectREFR_GetFullName()),
+                                 static_cast<unsigned int>(piVar5->GetHavokWorldObjectCountInSceneGraph_0084e3a0()));
                 }
             }
         }
     }
-    pGroup->FUN_00986410(apActor);
-    FUN_00985d10* pResult = ((FUN_00991e80_shell*)this)->FUN_00991e80();
+    pGroup->CombatGroup_AddTarget(apActor);
+    FUN_00985d10* pResult = ((FUN_00991e80_shell*)this)->CombatManager_CreateCombatGroup();
     reinterpret_cast<bool (__thiscall*)(ActorCombatGroup*, Actor*)>(&ActorCombatGroup_AddActor)(reinterpret_cast<ActorCombatGroup*>(pResult), apActor);
     return pResult;
 }
 
 struct FUN_00992110_shell : public FUN_00991e80_shell
 {
-    CombatController* FUN_00992110(Actor* apActor, Actor* apTarget, int aiArg3, int aiArg4);
+    CombatController* CombatManager_AddCombatant(Actor* apActor, Actor* apTarget, int aiArg3, int aiArg4);
 };
 
 // @fnv 0x00992110
-CombatController* FUN_00992110_shell::FUN_00992110(Actor* apActor, Actor* apTarget, int aiArg3, int aiArg4)
+// src: COMMUNITY 0x00992110
+CombatController* FUN_00992110_shell::CombatManager_AddCombatant(Actor* apActor, Actor* apTarget, int aiArg3, int aiArg4)
 {
     AutoMemHelper kMem(0x2b, true, $SG8126, 0x1a7);
     CombatController* pController = apActor->GetCombatController();
     ActorCombatGroup* pGroup2 = 0;
     if (!pController)
     {
-        if (!apActor->FUN_008b0670(apTarget))
+        if (!apActor->Actor_CanAttackActor(apTarget))
             return 0;
-        pGroup2 = (ActorCombatGroup*)FUN_00991e80();
+        pGroup2 = (ActorCombatGroup*)CombatManager_CreateCombatGroup();
         reinterpret_cast<bool (__thiscall*)(ActorCombatGroup*, Actor*)>(&ActorCombatGroup_AddActor)(pGroup2, apActor);
         pController = new CombatController(apActor, (ActorCombatGroup*)pGroup2, false);
         if (!reinterpret_cast<bool (__thiscall*)(ActorCombatGroup*, Actor*)>(&ActorCombatGroup_AddTarget)(pGroup2, apTarget))
@@ -1479,7 +1495,7 @@ extern SettingT_GameSettingCollection_ DAT_011cea74;
 extern SettingT_GameSettingCollection_ DAT_011ce3cc;
 struct ThreatState
 {
-    bool FUN_009928a0();
+    bool TESCombatStyle_GetExplosiveWeaponsIgnoreSelf();
     bool HasCombatFlag40();
     bool HasCombatFlag80();
 };
@@ -1535,7 +1551,7 @@ struct ThreatActor
     ThreatValueOwner values;
     float FUN_00477900();
     float FUN_006a78f0();
-    ThreatState* FUN_008a7f80();
+    ThreatState* Actor_GetCombatStyle();
 };
 struct ThreatPosition
 {
@@ -1565,12 +1581,12 @@ bool ThreatManager::IsThreatWithinLimits(ThreatActor* actor, ThreatActor* target
     int third8 = 0;
     int fourth_2 = 0;
     int result2 = CountNearbyActors(position, strength, radius, actor, &firstB, &second_, &third8, &fourth_2);
-    ThreatState* state = actor->FUN_008a7f80();
-    if (firstB && !state->FUN_009928a0())
+    ThreatState* state = actor->Actor_GetCombatStyle();
+    if (firstB && !state->TESCombatStyle_GetExplosiveWeaponsIgnoreSelf())
         return false;
     if (second_ && !state->HasCombatFlag40())
         return false;
-    if (fourth_2 && actor->values.Value(3) >= *DAT_011ce3cc.FUN_0043d4d0() && !state->HasCombatFlag80())
+    if (fourth_2 && actor->values.Value(3) >= *DAT_011ce3cc.Setting_Int() && !state->HasCombatFlag80())
         return false;
     return true;
 }
@@ -1794,13 +1810,14 @@ namespace fnv_00992480 {
 
 struct CombatOwner_SV
 {
-    void FUN_009929e0(unsigned int);
-    void FUN_00992480(Actor* a1, Actor* a2);
+    void CombatManager_AddLocalActor(unsigned int);
+    void CombatManager_AddSpectatorForCombatGroup(Actor* a1, Actor* a2);
 };
 
 // Calls Unk_103 and reloads the package if its type is not 0x18; passes a2 to a SpectatorPackage if present, then calls FUN_009929e0 on a1.
 // @fnv 0x00992480
-void CombatOwner_SV::FUN_00992480(Actor* apActor, Actor* apTarget)
+// src: XBOX_PDB 0x00992480
+void CombatOwner_SV::CombatManager_AddSpectatorForCombatGroup(Actor* apActor, Actor* apTarget)
 {
     if (apActor == apTarget)
         return;
@@ -1820,6 +1837,6 @@ void CombatOwner_SV::FUN_00992480(Actor* apActor, Actor* apTarget)
         SpectatorPackage* spectatorPackage = (SpectatorPackage*)package;
         reinterpret_cast<void (__thiscall*)(SpectatorPackage*, Actor*)>(&SpectatorPackage_SetTarget)(spectatorPackage, apTarget);
     }
-    FUN_009929e0((unsigned int)apActor);
+    CombatManager_AddLocalActor((unsigned int)apActor);
 }
 }  // namespace fnv_00992480

@@ -13,7 +13,7 @@ struct Global
     unsigned int unk00, unk04, unk08, unk0c;
     Heap* heap10;
 };
-Global* FUN_00c85750();
+Global* hkMemoryRouter_getInstance();
 struct FUN_00d2dc40
 {
     int unk04;
@@ -26,6 +26,6 @@ FUN_00d2dc40::~FUN_00d2dc40()
 {}
 void FUN_00d2dc40::operator delete(void* p)
 {
-    Global* global = FUN_00c85750();
+    Global* global = hkMemoryRouter_getInstance();
     global->heap10->Free(p, 0xc);
 }

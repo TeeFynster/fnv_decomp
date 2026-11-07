@@ -30,7 +30,7 @@ struct FUN_008cd6a0_Class
         d[10] = 1.0f;
         m_vTranslation.setZero4();
     }
-    void FUN_00cb2d90(void* p);
+    void hkRotation_set(void* p);
 };
 struct __declspec(align(16)) ShapeBase : hkReferencedObject
 {
@@ -53,7 +53,7 @@ struct __declspec(align(16)) FUN_00e0af50 : ShapeBase
 
     FUN_00e0af50(const hkVec4f& v, int a, int b);
 };
-void __stdcall FUN_00e0af40(int a, int b);
+void __stdcall nullsub_91(int a, int b);
 
 extern "C" ::__m128 _mm_setr_ps(float, float, float, float);
 extern "C" void _ReadWriteBarrier();
@@ -76,7 +76,7 @@ struct SphereBuildMemory
     SphereBuildAllocator* m_10;
 };
 
-SphereBuildMemory* __cdecl FUN_00c85750();
+SphereBuildMemory* __cdecl hkMemoryRouter_getInstance();
 
 struct SphereBuildVertex
 {
@@ -123,8 +123,8 @@ struct SphereBuildGeometry
     SphereBuildFaces faces;
 };
 
-extern "C" void __cdecl FUN_00c908c0(SphereBuildAllocator* ctx, void* arr, int newCap, int stride);
-void __cdecl FUN_00e0afe0(void* obj, int idx, float v, float f2);
+extern "C" void __cdecl hkArrayUtil__reserve(SphereBuildAllocator* ctx, void* arr, int newCap, int stride);
+void __cdecl _subdivideRecursive(void* obj, int idx, float v, float f2);
 
 struct SphereMeshBuilder
 {
@@ -156,13 +156,14 @@ struct SphereMeshBuilder
     int m_64;
     int m_68;
     float m_6c;
-    void FUN_00e0b360();
+    void hkDisplaySphere_buildGeometry();
 };
 
 // @fnv 0x00e0b360
-__declspec(noinline) void SphereMeshBuilder::FUN_00e0b360()
+// src: HAVOK_SRC 0x00e0b360
+__declspec(noinline) void SphereMeshBuilder::hkDisplaySphere_buildGeometry()
 {
-    SphereBuildMemory* holder = FUN_00c85750();
+    SphereBuildMemory* holder = hkMemoryRouter_getInstance();
     SphereBuildGeometry* raw = (SphereBuildGeometry*)holder->m_10->Alloc(0x18);
     SphereBuildGeometry* geo;
     SphereBuildVertex* zero;
@@ -188,7 +189,7 @@ __declspec(noinline) void SphereMeshBuilder::FUN_00e0b360()
     float s = (float)(v * DAT_010ea650);
     float t = (float)(v * DAT_010ea648);
     _ReadWriteBarrier();
-    SphereBuildMemory* vertexHolder = FUN_00c85750();
+    SphereBuildMemory* vertexHolder = hkMemoryRouter_getInstance();
     SphereBuildAllocator* va = vertexHolder->m_10;
     _ReadWriteBarrier();
     if ((geo->verts.m_iCap & 0x3fffffff) < 12)
@@ -196,7 +197,7 @@ __declspec(noinline) void SphereMeshBuilder::FUN_00e0b360()
         int nc = (geo->verts.m_iCap & 0x3fffffff) + (geo->verts.m_iCap & 0x3fffffff);
         if (nc <= 12)
             nc = 12;
-        FUN_00c908c0(va, &geo->verts, nc, 0x10);
+        hkArrayUtil__reserve(va, &geo->verts, nc, 0x10);
     }
     geo->verts.m_iArrayLength = 12;
     ((SphereBuildVertex* const&)geo->verts.m_pData)[0].set(-s, 0.0f, t, 0.0f);
@@ -216,7 +217,7 @@ __declspec(noinline) void SphereMeshBuilder::FUN_00e0b360()
     ((SphereBuildVertex* const&)geo->verts.m_pData)[10].set(t, -s, 0.0f, 0.0f);
     geo->verts.m_pData[11].q = (_mm_setr_ps)(-t, -s, 0.0f, 0.0f);
     SphereBuildFaces* fv = &((SphereBuildGeometry*)m_08)->faces;
-    SphereBuildMemory* faceHolder = FUN_00c85750();
+    SphereBuildMemory* faceHolder = hkMemoryRouter_getInstance();
     SphereBuildAllocator* fa = faceHolder->m_10;
     _ReadWriteBarrier();
     if ((fv->m_iCap & 0x3fffffff) < 20)
@@ -224,7 +225,7 @@ __declspec(noinline) void SphereMeshBuilder::FUN_00e0b360()
         int nc2 = (fv->m_iCap & 0x3fffffff) + (fv->m_iCap & 0x3fffffff);
         if (nc2 <= 20)
             nc2 = 20;
-        FUN_00c908c0(fa, fv, nc2, 0x10);
+        hkArrayUtil__reserve(fa, fv, nc2, 0x10);
     }
     fv->m_iArrayLength = 20;
     SphereBuildSetFace(fv->m_pData + 0, 1, 4, (int)zero);
@@ -248,5 +249,5 @@ __declspec(noinline) void SphereMeshBuilder::FUN_00e0b360()
     SphereBuildSetFace(fv->m_pData + 18, 5, 2, 9);
     SphereBuildSetFace(fv->m_pData + 19, 11, 2, 7);
     for (int i = 0; i < 20; ++i)
-        FUN_00e0afe0(m_08, i, v, 2.0f);
+        _subdivideRecursive(m_08, i, v, 2.0f);
 }

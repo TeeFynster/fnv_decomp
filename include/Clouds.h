@@ -17,7 +17,7 @@ public:
     NiColor& GetPointAt(int);
     void SetCloudCount(int);
     void ClearCloudLayers();
-    void FUN_0063a610();
+    void ForceTransTextureUpdate();
 
     NiPointer<NiGeometry> m_pCloudLayerGeometry[4];
     NiPointer<NiTexture> m_pCloudLayerTexture[4];

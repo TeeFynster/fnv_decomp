@@ -49,43 +49,50 @@ NiShader* __fastcall DestroyShader(NiShader* shader, void*, unsigned char flags)
 }
 
 // @fnv 0x00a8f3e0
-int __stdcall FUN_00a8f3e0(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
+// src: COMMUNITY 0x00a8f3e0
+int __stdcall NiD3DShader_UpdatePipeline(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
 {
     return 0;
 }
 
 // @fnv 0x00a8f3f0
-int __stdcall FUN_00a8f3f0(int a, int b, int c, int d, int e, int f, int g, int h)
+// src: COMMUNITY 0x00a8f3f0
+int __stdcall ThisCall_Ret0_8Args(int a, int b, int c, int d, int e, int f, int g, int h)
 {
     return 0;
 }
 
 // @fnv 0x00a8f400
-int __stdcall FUN_00a8f400(int arg0, int arg1, int arg2, int arg3)
+// src: GUESS 0x00a8f400 (confidence: high)
+int __stdcall Object_ReturnZero(int arg0, int arg1, int arg2, int arg3)
 {
     return 0;
 }
 
 // @fnv 0x00a8f410
-int __stdcall FUN_00a8f410(int arg0, int arg1)
+// src: COMMUNITY 0x00a8f410
+int __stdcall ThisCall_Ret0_2Args(int arg0, int arg1)
 {
     return 0;
 }
 
 // @fnv 0x00a8f420
-bool __stdcall FUN_00a8f420(int a, int b, int c, int d, int e, int f)
+// src: XBOX_PDB 0x00a8f420
+bool __stdcall NiShader_SetAlphaOverride(int a, int b, int c, int d, int e, int f)
 {
     return false;
 }
 
 // @fnv 0x00a8f430
-char __stdcall FUN_00a8f430(int a, int b, int c, int d, int e)
+// src: COMMUNITY 0x00a8f430
+char __stdcall NiD3DShaderProgram_SetShaderConstantArray(int a, int b, int c, int d, int e)
 {
     return 0;
 }
 
 // @fnv 0x00c9a420
-bool __stdcall FUN_00c9a420(void* unk00)
+// src: XBOX_PDB 0x00c9a420
+bool __stdcall BSShaderTextureSet_IsEqual(void* unk00)
 {
     return false;
 }

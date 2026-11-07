@@ -14,37 +14,41 @@ inline void* operator new(size_t, NiPSysModifierFloatCtlr* object)
 extern const void* g_01202728;
 
 // @fnv 0x00c2b360
-const void* __cdecl FUN_00c2b360()
+// src: COMMUNITY 0x00c2b360
+const void* __cdecl NiPSysEmitterSpeedCtlr_GetRTTI()
 {
     return &g_01202728;
 }
 
 struct NiPSysEmitterSpeedCtlr : NiPSysModifierFloatCtlr
 {
-    void FUN_00c2b370(float& rfValue);
-    void FUN_00c29fa0(float fValue);
+    void GetEmissionSpeed(float& rfValue);
+    void UpdateFields_00c29fa0(float fValue);
     void FUN_00c32de0(void* obj, unsigned int a1);
-    void* FUN_00c2b380(unsigned int a1);
+    void* CreateClone_00c2b380(unsigned int a1);
 };
 
 // @fnv 0x00c2b370
-void NiPSysEmitterSpeedCtlr::FUN_00c2b370(float& rfValue)
+// src: GUESS 0x00c2b370 (confidence: high)
+void NiPSysEmitterSpeedCtlr::GetEmissionSpeed(float& rfValue)
 {
     NiPSysEmitter* pkTarget = static_cast<NiPSysEmitter*>(m_pkTargetModifier);
     rfValue = pkTarget->m_fEmissionSpeed;
 }
 
 // @fnv 0x00c29fa0
-void NiPSysEmitterSpeedCtlr::FUN_00c29fa0(float fValue)
+// src: GUESS 0x00c29fa0 (confidence: low)
+void NiPSysEmitterSpeedCtlr::UpdateFields_00c29fa0(float fValue)
 {
     static_cast<NiPSysEmitter*>(m_pkTargetModifier)->m_fEmissionSpeed = fValue;
 }
-void __stdcall FUN_00c32f60(StrArr*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 char* __cdecl _FUN_00a7d330(const void*);
 // @fnv 0x00c2b3d0
-void __stdcall FUN_00c2b3d0(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c2b3d0
+void __stdcall NiPSysEmitterSpeedCtlr_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00c32f60(pkStrings);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pkStrings);
     char* psz = _FUN_00a7d330(g_01202728);
     unsigned int uiSize = pkStrings->m_usSize;
     if (uiSize >= pkStrings->m_usMaxSize)
@@ -52,14 +56,15 @@ void __stdcall FUN_00c2b3d0(StrArr* pkStrings)
     pkStrings->SetAt(uiSize, psz);
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern char DAT_010bf654[];
 
 // Allocates a 0x40-byte object, runs its base constructor and sets its vtable, then passes it to FUN_00c32de0 with a1 and returns it.
 // @fnv 0x00c2b380
-void* NiPSysEmitterSpeedCtlr::FUN_00c2b380(unsigned int a1)
+// src: XBOX_PDB 0x00c2b380
+void* NiPSysEmitterSpeedCtlr::CreateClone_00c2b380(unsigned int a1)
 {
-    NiPSysEmitterSpeedCtlr* p = (NiPSysEmitterSpeedCtlr*)FUN_00aa13e0(0x40);
+    NiPSysEmitterSpeedCtlr* p = (NiPSysEmitterSpeedCtlr*)Object_DispatchCommandFour(0x40);
     if (p != 0)
     {
         ::new (static_cast<NiPSysModifierFloatCtlr*>(p)) NiPSysModifierFloatCtlr;

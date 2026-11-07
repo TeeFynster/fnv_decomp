@@ -4,7 +4,8 @@
 extern "C" int __cdecl FUN_00eccbdc(int, int);
 
 // @fnv 0x00aa2d10
-int FUN_00aa2d10(int aiValue1, int aiValue2)
+// src: COMMUNITY 0x00aa2d10
+int NiPath_GetCurrentWorkingDirectory(int aiValue1, int aiValue2)
 {
     int r = FUN_00eccbdc(aiValue1, aiValue2);
     r = !r;
@@ -12,7 +13,7 @@ int FUN_00aa2d10(int aiValue1, int aiValue2)
     return r;
 }
 
-extern "C" int __cdecl FUN_00aa1370(const char* a, const char* b, unsigned int n);
+extern "C" int __cdecl NiStrnicmp(const char* a, const char* b, unsigned int n);
 extern "C" char* __cdecl FUN_00ec7690(const char* s, int c);
 extern "C" int __cdecl FUN_00eca7f4(int c);
 
@@ -23,11 +24,11 @@ extern char DAT_01013444[];
 // @fnv 0x00aa2c50
 char* __cdecl SkipPathPrefix(char* szPath)
 {
-    if (FUN_00aa1370(szPath, str_010a2564, 2) == 0)
+    if (NiStrnicmp(szPath, str_010a2564, 2) == 0)
     {
         return FUN_00ec7690(szPath + 2, 0x5c) + 1;
     }
-    if (FUN_00aa1370(szPath, DAT_01013444, 1) == 0)
+    if (NiStrnicmp(szPath, DAT_01013444, 1) == 0)
     {
         goto skip;
     }
@@ -53,7 +54,8 @@ done:
 int __cdecl FUN_00eca7f4(int);
 // Returns false for slash-prefixed paths or a drive letter followed by a colon in the first two characters; otherwise true.
 // @fnv 0x00aa2cc0
-bool __cdecl FUN_00aa2cc0(const char* pcPath)
+// src: GUESS 0x00aa2cc0 (confidence: medium)
+bool __cdecl Path_IsRelative(const char* pcPath)
 {
     char c1stChar;
     char c2ndChar;

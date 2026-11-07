@@ -19,20 +19,20 @@ class NiRenderTargetGroup : public NiObject
 
     virtual unsigned int Unk_23(unsigned int);
     virtual void* vf36(unsigned int);
-    virtual int FUN_00ee84d0() const;
-    virtual int FUN_00ee84e0() const;
+    virtual int GetDepthStencilWidth() const;
+    virtual int GetDepthStencilHeight() const;
     virtual void* vf39(unsigned int);
     virtual const NiPixelFormat* __thiscall GetPixelFormat() const;
     virtual void vf41();
     virtual void vf42(void* a, int b);
     virtual bool __thiscall SetDepthStencilBuffer(NiDepthStencilBuffer* pkDepthBuffer);
-    virtual NiMemObject* __thiscall FUN_00ee84f0(unsigned int uiIndex) const;
+    virtual NiMemObject* __thiscall GetBuffer_00ee84f0(unsigned int uiIndex) const;
     virtual void vf45();
     virtual void vf46();
-    virtual void __thiscall FUN_00ee8550(bool abResolve);
+    virtual void __thiscall SetResolveDepthBufferMode(bool abResolve);
     virtual void vf48();
-    virtual void FUN_00ee8460(RendererData* pkRendererData);
-    virtual void* FUN_00ee86e0(unsigned int uiIndex) const;
+    virtual void SetRendererData_00ee8460(RendererData* pkRendererData);
+    virtual void* GetBufferRendererData(unsigned int uiIndex) const;
     virtual void vf51();
 
     NiMemObject** GetBuffers()

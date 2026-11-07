@@ -33,8 +33,8 @@ public:
     void SetMultiBound(BSMultiBound* bound);
     bool CheckProcStateAndPlane(NiPoint3 viewPoint, NiCullingProcess& culler, BSOcclusionPlane* plane);
     void CopyMemberData(BSMultiBoundNode* destination, CloningProcess& cloning);
-    void FUN_00c1b6f0(BSMultiBoundNode* pDest, CloningProcess& kCloning);
-    void FUN_00c3a5b0(NiUpdateData& data, unsigned int flags);
+    void CopyMembers_00c1b6f0(BSMultiBoundNode* pDest, CloningProcess& kCloning);
+    void UpdateDownwardPass_00c3a5b0(NiUpdateData& data, unsigned int flags);
 
 public:
     BSMultiBound* spMultiBound;

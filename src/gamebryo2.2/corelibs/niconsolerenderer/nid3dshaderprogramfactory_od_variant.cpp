@@ -6,7 +6,7 @@
 #include "../../../../include/NiTStringPointerMap.h"
 struct Program;
 extern Program* DAT_0126fa10;
-Program* FUN_00e92eb0();
+Program* NiD3DShaderProgramFactory_GetInstance();
 struct Program
 {
     virtual void Destroy(int);
@@ -25,10 +25,10 @@ struct Lst
     int b;
     Nd* head;
 };
-int __fastcall FUN_00e92fe0(Lst* l, int, Nd** pos);
-void FUN_00e93df0();
+int __fastcall NiD3D10ShaderProgramFactory_GetFirstProgramDirectory(Lst* l, int, Nd** pos);
+void NiD3DShaderProgramFactory__SDMInit();
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
-void __cdecl FUN_00e93e00();
+void __cdecl UpdateFields_00e93e00();
 struct P03MM
 {
     void* __thiscall Allocate(unsigned int size);
@@ -53,10 +53,11 @@ template <class T> struct PoolAllocatorBase
 };
 struct FUN_0045cee0_shell
 {
-    void __thiscall FUN_0045cee0(void*);
+    void __thiscall NiTPointerAllocator_unsigned_int_Deallocate(void*);
 };
 // @fnv 0x0045cee0
-void __thiscall FUN_0045cee0_shell::FUN_0045cee0(void* pkItem)
+// src: XBOX_PDB 0x0045cee0
+void __thiscall FUN_0045cee0_shell::NiTPointerAllocator_unsigned_int_Deallocate(void* pkItem)
 {
     g_011c5f80.Lock(0);
     PoolAllocatorBase<unsigned int>::LinkedListEntry* pkNode =

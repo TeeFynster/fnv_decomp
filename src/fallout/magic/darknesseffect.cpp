@@ -13,18 +13,19 @@ DarknessEffect::DarknessEffect(void* apArg1, void* apArg2, void* apArg3)
 {
 }
 
-void __cdecl FUN_00b55b00(int, float);
+void __cdecl BSShaderManager_RecursiveSetForcedDarkness(int, float);
 // @fnv 0x0080c850
 void DarknessEffect::Revert(Actor* apActor)
 {
     reinterpret_cast<TESForm*>(this)->TESForm::Revert(reinterpret_cast<BGSLoadFormBuffer*>(apActor));
     if (apActor->GetReferenceType())
-        FUN_00b55b00(apActor->GetReferenceType(), 1.0F);
+        BSShaderManager_RecursiveSetForcedDarkness(apActor->GetReferenceType(), 1.0F);
 }
 
 // Allocates and constructs a new DarknessEffect from the three given arguments and returns it.
 // @fnv 0x0080c730
-DarknessEffect* __cdecl FUN_0080c730(void* a, void* b, void* c)
+// src: COMMUNITY 0x0080c730
+DarknessEffect* __cdecl DarknessEffect_Create(void* a, void* b, void* c)
 {
     return new DarknessEffect(a, b, c);
 }
@@ -61,7 +62,7 @@ void DarknessEffect::Start()
         if (fnewDarkness > 1.0)
             fnewDarkness = 1.0f;
 
-        FUN_00b55b00(reinterpret_cast<int>(ptargetActor->GetNiNode()), fnewDarkness);
+        BSShaderManager_RecursiveSetForcedDarkness(reinterpret_cast<int>(ptargetActor->GetNiNode()), fnewDarkness);
     }
 }
 
@@ -82,14 +83,14 @@ void DarknessEffect::Finish()
         if (fnewDarkness > 1.0)
             fnewDarkness = 1.0f;
 
-        FUN_00b55b00(reinterpret_cast<int>(ptargetActor->GetNiNode()), fnewDarkness);
+        BSShaderManager_RecursiveSetForcedDarkness(reinterpret_cast<int>(ptargetActor->GetNiNode()), fnewDarkness);
     }
 }
 
 // @fnv 0x0080c7b0
 void DarknessEffect::FinishLoadGameTES(Actor* apActor)
 {
-    reinterpret_cast<InvisibilityEffect*>(this)->FUN_0082cd10(apActor);
+    reinterpret_cast<InvisibilityEffect*>(this)->ValueModifierEffect_FinishInitLoadGame(apActor);
 
     float fnewDarkness = 1.0 - apActor->GetCurrentActorValue(m_eActorValue) / g_d100;
 
@@ -100,5 +101,5 @@ void DarknessEffect::FinishLoadGameTES(Actor* apActor)
         fnewDarkness = 1.0f;
 
     if (apActor->GetReferenceType() != 0)
-        FUN_00b55b00(apActor->GetReferenceType(), fnewDarkness);
+        BSShaderManager_RecursiveSetForcedDarkness(apActor->GetReferenceType(), fnewDarkness);
 }

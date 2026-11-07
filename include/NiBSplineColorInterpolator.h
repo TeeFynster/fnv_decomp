@@ -6,7 +6,7 @@
 class NiBSplineColorInterpolator : public NiBSplineInterpolator
 {
 public:
-    unsigned int FUN_00a51a20(unsigned short usChannel);
+    unsigned int GetControlHandle(unsigned short usChannel);
     void CopyTo(NiBSplineColorInterpolator* source, CloningProcess& proc);
 
     NiColorA m_kDiffuseColor;

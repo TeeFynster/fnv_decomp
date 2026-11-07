@@ -26,7 +26,7 @@ struct ThisClass
     char pad2[0x90];
     Entry entries2[3];
 
-    void FUN_00da9790(Dest* out);
+    void hkpGsk_exitAndExportCacheImpl(Dest* out);
 };
 
 // local form of hkVector4: 0x00daa7e0 needs its original trivial packet calls (shared extent 1117 vs 1109).
@@ -125,17 +125,17 @@ public:
     int maxAxis() const;
     float GetAngle();
 
-    void FUN_00416870(float x, float y, float z);
-    SimplexVectorCallLocal_00daa7e0 FUN_00439ef0(const SimplexVectorCallLocal_00daa7e0& vector);
+    void SetComponents(float x, float y, float z);
+    SimplexVectorCallLocal_00daa7e0 SubtractIntoVector(const SimplexVectorCallLocal_00daa7e0& vector);
     SimplexVectorCallLocal_00daa7e0 FUN_00439e90(const SimplexVectorCallLocal_00daa7e0& vector);
-    void FUN_00439180(float value);
-    void FUN_004a0c10();
-    void FUN_005611c0();
-    void FUN_00c66320(const SimplexVectorCallLocal_00daa7e0* a, const SimplexVectorCallLocal_00daa7e0* b);
-    void FUN_00c74ac0(const SimplexVectorCallLocal_00daa7e0* a, const SimplexVectorCallLocal_00daa7e0* b);
-    void FUN_00c74c90(SimplexVectorCallLocal_00daa7e0* vector);
-    void FUN_00c7f640(const Transform& transform, const SimplexVectorCallLocal_00daa7e0& point);
-    void FUN_00cb2450(const SimplexVectorCallLocal_00daa7e0* vector, float value);
+    void ScaleComponents(float value);
+    void Unitize_004a0c10();
+    void normalize_005611c0();
+    void setMul(const SimplexVectorCallLocal_00daa7e0* a, const SimplexVectorCallLocal_00daa7e0* b);
+    void setMulInverse(const SimplexVectorCallLocal_00daa7e0* a, const SimplexVectorCallLocal_00daa7e0* b);
+    void hkQuaternion_getAxis(SimplexVectorCallLocal_00daa7e0* vector);
+    void setTransformedPos_00c7f640(const Transform& transform, const SimplexVectorCallLocal_00daa7e0& point);
+    void hkQuaternion_setAxisAngle(const SimplexVectorCallLocal_00daa7e0* vector, float value);
     void FUN_00cb26e0(const hkRotation* rotation);
 
     template <int I> void splat(const SimplexVectorCallLocal_00daa7e0& vector);
@@ -160,7 +160,7 @@ extern const float runtimeFloatSettingDefault726;
 
 int __cdecl TestPenetration(void*, void*, const Transform*, float, SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*, int, SolverOutput*);
 
-void __cdecl FUN_00d22e40(SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*);
+void __cdecl hkLineSegmentUtil_closestLineSegLineSeg(SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*, SimplexVectorCallLocal_00daa7e0*);
 
 struct Simplex
 {
@@ -175,9 +175,9 @@ struct Simplex
 
     SimplexVectorCallLocal_00daa7e0 result, axis;
 
-    void FUN_00da98f0();
+    void hkpGsk_reduceDimensionExtended();
 
-    void FUN_00daa7e0(void*, void*, const Transform*);
+    void hkpGsk_processEdgeTriangle(void*, void*, const Transform*);
 };
 
 static __forceinline SimplexVectorCallLocal_00daa7e0 copyVector(const PlainVector& p)
@@ -188,7 +188,8 @@ static __forceinline SimplexVectorCallLocal_00daa7e0 copyVector(const PlainVecto
 }
 
 // @fnv 0x00daa7e0
-void Simplex::FUN_00daa7e0(void* arg1, void* arg2, const Transform* transform)
+// src: XBOX_PDB 0x00daa7e0
+void Simplex::hkpGsk_processEdgeTriangle(void* arg1, void* arg2, const Transform* transform)
 {
 
     int count = 4;
@@ -326,7 +327,7 @@ void Simplex::FUN_00daa7e0(void* arg1, void* arg2, const Transform* transform)
     } while (j >= 0);
 
     if (countA + countB > 4)
-        FUN_00da98f0();
+        hkpGsk_reduceDimensionExtended();
 
     if (countA == 2 && countB == 2)
     {
@@ -337,7 +338,7 @@ void Simplex::FUN_00daa7e0(void* arg1, void* arg2, const Transform* transform)
 
         db.q = _mm_sub_ps(verticesB[1].q, verticesB[0].q);
 
-        FUN_00d22e40(a, &da, verticesB, &db, &axis);
+        hkLineSegmentUtil_closestLineSegLineSeg(a, &da, verticesB, &db, &axis);
         status = 1;
     }
 

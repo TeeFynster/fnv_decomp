@@ -64,7 +64,8 @@
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 // @fnv 0x006047c0
-void TESNPC::FUN_006047c0(TESObjectREFR* a2, bool a3, bool a4, bool a5, bool a6)
+// src: XBOX_PDB 0x006047c0
+void TESNPC::InitDefaultWorn(TESObjectREFR* a2, bool a3, bool a4, bool a5, bool a6)
 {
     InventoryChanges* j;
     InventoryStackRecord* item;
@@ -99,11 +100,11 @@ void TESNPC::FUN_006047c0(TESObjectREFR* a2, bool a3, bool a4, bool a5, bool a6)
             bool val = true;
             TESBoundObject* p;
             p = item->FUN_0044ddc0();
-            if ((!res || !res->HasBipedModel(i, false, NULL)) && !a2->FUN_00575400(p))
+            if ((!res || !res->HasBipedModel(i, false, NULL)) && !a2->TESObjectREFR_WearingObject(p))
             {
-                if (item->FUN_00559450())
+                if (item->Modelloader_GetReferencedThis())
                 {
-                    pExtra = item->FUN_00559450()->GetItem();
+                    pExtra = item->Modelloader_GetReferencedThis()->GetItem();
                 }
                 else
                 {
@@ -140,13 +141,13 @@ void TESNPC::FUN_006047c0(TESObjectREFR* a2, bool a3, bool a4, bool a5, bool a6)
         if (pWeaponExtra)
         {
             bool pItem = true;
-            if (!a2->FUN_00575400(pWeaponExtra->FUN_0044ddc0()))
+            if (!a2->TESObjectREFR_WearingObject(pWeaponExtra->FUN_0044ddc0()))
             {
                 ExtraDataList* fWeight;
                 fWeight = NULL;
-                if (pWeaponExtra->FUN_00559450())
+                if (pWeaponExtra->Modelloader_GetReferencedThis())
                 {
-                    fWeight = pWeaponExtra->FUN_00559450()->GetItem();
+                    fWeight = pWeaponExtra->Modelloader_GetReferencedThis()->GetItem();
                     pItem = false;
                 }
                 else

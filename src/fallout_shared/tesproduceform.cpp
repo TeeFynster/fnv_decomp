@@ -27,7 +27,7 @@ void TESProduceForm::CopyFromSource(void* pSource)
         __memcpy((char*)this + 8, pSource, 4);
 }
 
-void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
+void __cdecl TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 void __cdecl _FUN_00485910(unsigned int, unsigned int);
 // @fnv 0x0048b5c0
 void TESProduceForm::Save()
@@ -35,10 +35,10 @@ void TESProduceForm::Save()
     unsigned int tmp;
     if (pIngredient != 0)
     {
-        tmp = pIngredient->FUN_0084e3a0();
+        tmp = pIngredient->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         _FUN_00485910(0x47494650, tmp);
     }
-    FUN_004856f0(0x43504650, cProdChance, 4);
+    TESForm_AddChunkArray(0x43504650, cProdChance, 4);
 }
 
 // Casts apCopyFC to TESProduceForm, initializes this from its ingredient value, then copies the data at offset 8.
@@ -68,7 +68,7 @@ bool TESProduceForm::CompareWithBase(BaseFormComponent* apOther)
 }
 
 void ResolveFormID(unsigned int* apFormID, TESFile* apFile);
-TESForm* FUN_004839c0(unsigned int aFormID);
+TESForm* TESForm_GetFormByNumericID(unsigned int aFormID);
 void FNV_Warning(const char* apMsg, ...);
 
 extern const char DAT_0101d2b4[];
@@ -83,18 +83,18 @@ void TESProduceForm::ResolveIngredient(TESForm* apArg)
     {
         unsigned int formID = (unsigned int)pIngredient;
         ResolveFormID(&formID, apArg->GetFile(-1));
-        pIngredient = dynamic_cast<IngredientItem*>(FUN_004839c0(formID));
+        pIngredient = dynamic_cast<IngredientItem*>(TESForm_GetFormByNumericID(formID));
         if (pIngredient == 0)
         {
             if (apArg != 0)
             {
-                if (apArg->FUN_00474cb0())
+                if (apArg->GetFormEditorIDLength())
                 {
                     FNV_Warning(DAT_0101d340, formID, apArg->GetName());
                 }
                 else
                 {
-                    FNV_Warning(DAT_0101d2f8, formID, apArg->FUN_0084e3a0());
+                    FNV_Warning(DAT_0101d2f8, formID, apArg->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                 }
             }
             else

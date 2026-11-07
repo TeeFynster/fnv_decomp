@@ -56,14 +56,14 @@ class BloodSplatterShaderLocal_00b80d30 : public BSShader
     BSShader* CreateShader();
     void InitializeShaderData();
     bool ConfigureShaderPass();
-    void FUN_00b81110(unsigned int);
-    void FUN_00b805d0(unsigned int);
-    void FUN_00b80600(NiRefObject*);
+    void BSShaderBloodSplatterProperty_SetClampD3D(unsigned int);
+    void BSShaderBloodSplatter_InitPass(unsigned int);
+    void NiD3DPass_SetPixelShader(NiRefObject*);
     void SetupConstantMaps();
     virtual ~BloodSplatterShaderLocal_00b80d30();
-    int FUN_00b807c0(void*, void*);
-    void FUN_00b80380();
-    bool FUN_00b80b20();
+    int ImageSpaceShader_GetShaderDeclaration(void*, void*);
+    void X_Shader_ClearPassStages();
+    bool BSShaderBloodSplatter_ReloadShaders();
     void* FUN_00b80e40(unsigned int);
     void CreateShaderConstantMaps();
     void InitPassItems(struct FUN_00b80b30_arg*);
@@ -146,7 +146,7 @@ class BeamStage
     unsigned char layoutStage[0x54];
     unsigned int m_uiRefCount;
     void ApplyPairToState(void*);
-    void FUN_00e7def0(unsigned int);
+    void NiD3DTextureStage_SetFilterMode(unsigned int);
     void ReturnToPool();
     void DecRefCount()
     {
@@ -222,7 +222,7 @@ bool BloodSplatterShaderLocal_00b80d30::ConfigureShaderPass()
         NiPointer<BeamStage> stage;
         BeamStage::CreateNewStage(stage);
         ConfigureBeamStage(stage, i, 3, 2, true);
-        stage->FUN_00e7def0(1);
+        stage->NiD3DTextureStage_SetFilterMode(1);
         spRenderPass[0].m_pObject->AppendStage(stage);
     }
     spRenderPass[0].m_pObject->SetRenderState(27, 1, true);
@@ -241,7 +241,7 @@ bool BloodSplatterShaderLocal_00b80d30::ConfigureShaderPass()
         NiPointer<BeamStage> stage;
         BeamStage::CreateNewStage(stage);
         ConfigureBeamStage(stage, i, 3, 2, true);
-        stage->FUN_00e7def0(1);
+        stage->NiD3DTextureStage_SetFilterMode(1);
         spRenderPass[1].m_pObject->AppendStage(stage);
     }
     spRenderPass[1].m_pObject->SetRenderState(27, 1, true);
@@ -302,13 +302,15 @@ void BloodSplatterShaderLocal_00b80d30::InitializeShaderData()
 }
 
 // @fnv 0x00b81110
-void BloodSplatterShaderLocal_00b80d30::FUN_00b81110(unsigned int value)
+// src: XBOX_PDB 0x00b81110
+void BloodSplatterShaderLocal_00b80d30::BSShaderBloodSplatterProperty_SetClampD3D(unsigned int value)
 {
     iShaderType = (value != 3) ? 3 : 0;
 }
 
 // @fnv 0x00b805d0
-void BloodSplatterShaderLocal_00b80d30::FUN_00b805d0(unsigned int pass)
+// src: COMMUNITY 0x00b805d0
+void BloodSplatterShaderLocal_00b80d30::BSShaderBloodSplatter_InitPass(unsigned int pass)
 {
     switch (pass)
     {
@@ -323,7 +325,8 @@ void BloodSplatterShaderLocal_00b80d30::FUN_00b805d0(unsigned int pass)
 
 // Assigns value to the NiRefObject pointer at offset 0x44, releasing the old reference and incrementing the new one's ref count.
 // @fnv 0x00b80600
-void BloodSplatterShaderLocal_00b80d30::FUN_00b80600(NiRefObject* value)
+// src: COMMUNITY 0x00b80600
+void BloodSplatterShaderLocal_00b80d30::NiD3DPass_SetPixelShader(NiRefObject* value)
 {
     NiRefObject** ppSlot = reinterpret_cast<NiRefObject**>(&m_uiRemainingStages);
     NiRefObject* old = *ppSlot;
@@ -338,7 +341,8 @@ void BloodSplatterShaderLocal_00b80d30::FUN_00b80600(NiRefObject* value)
 }
 
 // @fnv 0x00b807c0
-int __thiscall BloodSplatterShaderLocal_00b80d30::FUN_00b807c0(void* a, void* b)
+// src: COMMUNITY 0x00b807c0
+int __thiscall BloodSplatterShaderLocal_00b80d30::ImageSpaceShader_GetShaderDeclaration(void* a, void* b)
 {
     return reinterpret_cast<int>(m_spShaderDecl.m_pObject);
 }
@@ -346,14 +350,16 @@ int __thiscall BloodSplatterShaderLocal_00b80d30::FUN_00b807c0(void* a, void* b)
 extern int g_011fedc8;
 
 // @fnv 0x00b807b0
-int* __cdecl FUN_00b807b0()
+// src: COMMUNITY 0x00b807b0
+int* __cdecl BSShaderBloodSplatter_GetRTTI()
 {
     return &g_011fedc8;
 }
 
 // Clears the texture stages in both shader passes.
 // @fnv 0x00b80380
-void BloodSplatterShaderLocal_00b80d30::FUN_00b80380()
+// src: COMMUNITY 0x00b80380
+void BloodSplatterShaderLocal_00b80d30::X_Shader_ClearPassStages()
 {
     NiPointer<NiD3DPass>* p = spRenderPass;
     int n = 2;
@@ -368,7 +374,8 @@ void BloodSplatterShaderLocal_00b80d30::FUN_00b80380()
 }
 
 // @fnv 0x00b80b20
-bool BloodSplatterShaderLocal_00b80d30::FUN_00b80b20()
+// src: COMMUNITY 0x00b80b20
+bool BloodSplatterShaderLocal_00b80d30::BSShaderBloodSplatter_ReloadShaders()
 {
     InitializeShaderData();
     return ConfigureShaderPass();
@@ -402,7 +409,7 @@ inline NiPoint3 NiPoint3::operator-(const NiPoint3& kV) const
 
 struct Picker_00b803b0
 {
-    bool FUN_00b5bca0(const NiPoint3& akStart, const NiPoint3& kWorldPosition, NiPoint3& kHit);
+    bool ShadowSceneNode_GetAverageLightPos(const NiPoint3& akStart, const NiPoint3& kWorldPosition, NiPoint3& kHit);
 };
 extern Picker_00b803b0* DAT_011f91c8;
 extern float DAT_011fed90;
@@ -422,11 +429,12 @@ struct Camera_00b803b0
 };
 
 // @fnv 0x00b803b0
-void __cdecl FUN_00b803b0(Camera_00b803b0* pkCamera)
+// src: COMMUNITY 0x00b803b0
+void __cdecl BSShaderBloodSplatter_ComputeScreenSpaceLightLoc(Camera_00b803b0* pkCamera)
 {
     DAT_011fed90 = 0.0f;
     NiPoint3 kHit;
-    if (DAT_011f91c8->FUN_00b5bca0(pkCamera->m_kWorldTranslate, NiPoint3(pkCamera->m00, pkCamera->m10, pkCamera->m20),
+    if (DAT_011f91c8->ShadowSceneNode_GetAverageLightPos(pkCamera->m_kWorldTranslate, NiPoint3(pkCamera->m00, pkCamera->m10, pkCamera->m20),
                                    kHit))
     {
         NiPoint3 kWorldPosition(pkCamera->m00, pkCamera->m10, pkCamera->m20);
@@ -624,7 +632,7 @@ struct FUN_00b80b30_arg
 
 struct FUN_00b80b30_mgr
 {
-    void* FUN_00ba3780();
+    void* ImageSpaceTexture_GetTexture();
 };
 
 extern FUN_00b80b30_mgr DAT_012005a4;
@@ -655,9 +663,9 @@ void BloodSplatterShaderLocal_00b80d30::InitPassItems(FUN_00b80b30_arg* apArg)
         void* value0 = sub->v51();
         pFirstItem->ApplyPairToState(value0);
         BeamStage* pSecondItem = pass->m_kStages.m_pBase[1].m_pObject;
-        if (DAT_012005a4.FUN_00ba3780())
+        if (DAT_012005a4.ImageSpaceTexture_GetTexture())
         {
-            pSecondItem->m_uiTexture = (unsigned int)DAT_012005a4.FUN_00ba3780();
+            pSecondItem->m_uiTexture = (unsigned int)DAT_012005a4.ImageSpaceTexture_GetTexture();
         }
         else
         {

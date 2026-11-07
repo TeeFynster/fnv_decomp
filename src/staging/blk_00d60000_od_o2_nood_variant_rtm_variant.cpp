@@ -51,7 +51,8 @@ struct __declspec(align(16)) LoadedObject
 };
 
 // @fnv 0x00d6ae50
-const char* FUN_00d6ae50()
+// src: HAVOK_LIB 0x00d6ae50
+const char* getVtablehkpConstraintInstance()
 {
     FinishLoadedObjectFlag kFlag;
     kFlag.m_iFinishing = 0;
@@ -129,7 +130,7 @@ __declspec(align(16)) class FUN_00d6aec0_obj
     int unkE8;
     int unkEC;
 };
-int FUN_00d6aec0() throw();
+int Object_ProcessAndReturnValue_00d6aec0() throw();
 #include <xmmintrin.h>
 #include <math.h>
 #include "../../include/Vec4.h"
@@ -150,8 +151,8 @@ struct FUN_004b4ab0_Class
     {
         __m128 value;
     };
-    void FUN_004b4ab0(int basis, int vector);
-    void FUN_00c7f700(const Basis* basis, const FUN_004b4ab0_Class* vector);
+    void hkVector4_setRotatedInverseDir(int basis, int vector);
+    void hkVector4_setRotatedDir(const Basis* basis, const FUN_004b4ab0_Class* vector);
 };
 struct MotionInput
 {
@@ -199,7 +200,7 @@ static __forceinline void buildBasis(const MotionInput* input, __m128 normal, Ba
     basis.y = up;
     basis.z = input->axis;
 }
-void __cdecl FUN_00d6aef0(const MotionInput* input, float outputBits);
+void __cdecl hkpCharacterMovementUtil_calculateMovement(const MotionInput* input, float outputBits);
 struct BodySource
 {
     Vec4 m_000, m_010, m_020, m_030, m_040, m_050, m_060, m_070;
@@ -227,7 +228,7 @@ struct BodyOut
     Vec4 m_20;
     Vec4 m_30;
 };
-void FUN_00d6b4b0(BodyList* list, BodyOut* out);
+void hkaKeyFrameHierarchyUtility_initialize(BodyList* list, BodyOut* out);
 struct __declspec(align(16)) V16
 {
     float x, y, z, w;
@@ -260,16 +261,16 @@ struct D6Idx
     unsigned char unk01;
     unsigned char idx02;
 };
-extern "C" void __cdecl FUN_00dcf280(D6Vec3* s, void* d, void* e);
+extern "C" void __cdecl hk1dLinearBilateralConstraintBuildJacobian(D6Vec3* s, void* d, void* e);
 extern "C" V16* __cdecl D6GetArray(void);
-void FUN_00d6c030(D6Owner* a, V16* b, D6Idx* c, void* d, void* e);
+void Runtime_UpdateState_00d6c030(D6Owner* a, V16* b, D6Idx* c, void* d, void* e);
 volatile D6Owner* g_d6Owner;
 volatile D6Idx* g_d6Idx;
 volatile void* g_d6D;
 volatile void* g_d6E;
 extern "C" __declspec(noinline) void d6c030_dummy_caller(void)
 {
-    FUN_00d6c030((D6Owner*)g_d6Owner, D6GetArray(), (D6Idx*)g_d6Idx, (void*)g_d6D, (void*)g_d6E);
+    Runtime_UpdateState_00d6c030((D6Owner*)g_d6Owner, D6GetArray(), (D6Idx*)g_d6Idx, (void*)g_d6D, (void*)g_d6E);
 }
 
 namespace SimdC {
@@ -432,7 +433,7 @@ __forceinline void PoseQsTransform::SetProduct(const PoseQsTransform& a, const P
     PoseVector4 extra;
     extra.setRotatedTranslation(a.rotation, b.position);
     position.setAdd4(extra, a.position);
-    rotation.FUN_00c66320(a.rotation, b.rotation);
+    rotation.setMul(a.rotation, b.rotation);
     scale.setMul4(a.scale, b.scale);
 }
 __forceinline SimdC::LocalM128 blendPosition(const PoseVector4& position, const PoseVector4& target, float weight)
@@ -445,7 +446,8 @@ __forceinline SimdC::LocalM128 blendPosition(const PoseVector4& position, const 
 
 extern "C" unsigned int __security_cookie;
 extern "C" void __fastcall __security_check_cookie(unsigned int);
-__declspec(noinline) void hkQuaternion::FUN_00c66320(const hkQuaternion& a, const hkQuaternion& b)
+// src: COMMUNITY 0x00c66320
+__declspec(noinline) void hkQuaternion::setMul(const hkQuaternion& a, const hkQuaternion& b)
 {
     SimdC::LocalM128 av = reinterpret_cast<const PoseVector4&>(a).m_vComponents, bv = reinterpret_cast<const PoseVector4&>(b).m_vComponents;
     SimdC::LocalM128 cross =
@@ -466,7 +468,8 @@ __declspec(noinline) void hkQuaternion::FUN_00c66320(const hkQuaternion& a, cons
 }
 
 // @fnv 0x00d6b510
-static __declspec(noinline) void FUN_00d6b510(Binding* binding, Weight* weights, const PoseQsTransform* root,
+// src: GUESS 0x00d6b510 (confidence: low)
+static __declspec(noinline) void hkQuaternion_ProcessEntries_00d6b510(Binding* binding, Weight* weights, const PoseQsTransform* root,
                                               PoseQsTransform* output, const PoseQsTransform* __restrict transforms)
 {
     for (int i = 0; i < binding->count; ++i)
@@ -495,7 +498,7 @@ static __declspec(noinline) void FUN_00d6b510(Binding* binding, Weight* weights,
             reference.rotation = *reinterpret_cast<const hkQuaternion*>(&node->m_160);
             PoseQsTransform composed;
             composed.SetProduct(reference, input);
-            local.rotation.FUN_00cb2850(local.rotation, composed.rotation, weight);
+            local.rotation.D3D_ComputeClearColor(local.rotation, composed.rotation, weight);
             local.position.quad() = blendPosition(local.position, composed.position, weight);
         }
         PoseVector4 offset;
@@ -509,5 +512,5 @@ static __declspec(noinline) void FUN_00d6b510(Binding* binding, Weight* weights,
 void RunCompose_d6b510(Binding* binding, Weight* weights, const PoseQsTransform* root, PoseQsTransform* output,
                        const PoseQsTransform* __restrict transforms)
 {
-    FUN_00d6b510(binding, weights, root, output, transforms);
+    hkQuaternion_ProcessEntries_00d6b510(binding, weights, root, output, transforms);
 }

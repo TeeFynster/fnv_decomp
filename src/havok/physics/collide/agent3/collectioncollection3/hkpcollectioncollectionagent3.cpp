@@ -3,12 +3,12 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 extern "C" void __cdecl InitAndReturnTail(void*, void*, void*);
-extern "C" void __cdecl FUN_00d34db0(void*, void*, void*);
-extern "C" void __cdecl FUN_00d34d30(void*, void*, void*);
+extern "C" void __cdecl hkpCollectionCollectionAgent3_updateFilter(void*, void*, void*);
+extern "C" void __cdecl hkpCollectionCollectionAgent3_calcStatistics(void*, void*, void*);
 extern "C" void __cdecl ForwardCall(void*, void*, void*);
-extern "C" void __cdecl FUN_00d34d80(void*, void*, void*);
-extern "C" void __cdecl FUN_00d35770(void*, void*, void*);
-extern "C" void __cdecl FUN_00da6dc0(void*, void*, void*);
+extern "C" void __cdecl Object__hkAgent1nMachine_WarpTime_Thunk_00d34d80(void*, void*, void*);
+extern "C" void __cdecl process_00d35770(void*, void*, void*);
+extern "C" void __cdecl Object_HkAgent1nMachine_Destroy_Thunk(void*, void*, void*);
 
 struct FUN_00d36270_s {
     void* m_vt;
@@ -28,30 +28,32 @@ struct FUN_00d36270_s {
 
 // Initializes the object's vtable and function pointers, clears several pointer fields to zero, and sets m_flag to 1.
 // @fnv 0x00d36270
-void FUN_00d36270(FUN_00d36270_s* self)
+// src: GUESS 0x00d36270 (confidence: low)
+void hkpCollectionCollectionAgent3_updateFilter_UpdateState_00d36270(FUN_00d36270_s* self)
 {
     self->m_vt = &InitAndReturnTail;
-    self->m_k = &FUN_00d35770;
+    self->m_k = &process_00d35770;
     self->m_iUnknownValue = 0;
     self->m_kPointB = 0;
     self->m_iThirdValue = 0;
     self->m_iFourthElementInteger = 0;
     self->m_usTrailingValue = 0;
-    self->m_f = &FUN_00d34db0;
-    self->m_g = &FUN_00d34d30;
+    self->m_f = &hkpCollectionCollectionAgent3_updateFilter;
+    self->m_g = &hkpCollectionCollectionAgent3_calcStatistics;
     self->m_h = &ForwardCall;
-    self->m_i = &FUN_00d34d80;
-    self->m_kPointA = &FUN_00da6dc0;
+    self->m_i = &Object__hkAgent1nMachine_WarpTime_Thunk_00d34d80;
+    self->m_kPointA = &Object_HkAgent1nMachine_Destroy_Thunk;
     self->m_flag = 1;
 }
 
-void __cdecl FUN_00da35f0(void*, float, float, void*);
+void __cdecl _hkAgent1nMachine_WarpTime(void*, float, float, void*);
 
 // Calls FUN_00da35f0 with b, c, d and e, ignoring a.
 // @fnv 0x00d34d80
-void __cdecl FUN_00d34d80(void* apUnused, void* b, float afValue1, float afValue2, void* e)
+// src: GUESS 0x00d34d80 (confidence: medium)
+void __cdecl Object__hkAgent1nMachine_WarpTime_Thunk_00d34d80(void* apUnused, void* b, float afValue1, float afValue2, void* e)
 {
-    FUN_00da35f0(b, afValue1, afValue2, e);
+    _hkAgent1nMachine_WarpTime(b, afValue1, afValue2, e);
 }
 
 struct FUN_00cf5830_cls {
@@ -63,11 +65,12 @@ struct FUN_00cf5830_cls {
     unsigned short unk14;
     unsigned short m_16;
 
-    int FUN_00cf5830();
+    int hkpListShape_getNumChildShapes();
 };
 
 // @fnv 0x00cf5830
-int FUN_00cf5830_cls::FUN_00cf5830() {
+// src: HAVOK_LIB 0x00cf5830
+int FUN_00cf5830_cls::hkpListShape_getNumChildShapes() {
     return m_0c - m_16;
 }
 
@@ -88,17 +91,18 @@ struct __declspec(align(16)) D36270Data {
     unsigned char flag1;
     unsigned char flag2;
 };
-void FUN_00d36270(D36270Data*);
+void hkpCollectionCollectionAgent3_updateFilter_UpdateState_00d36270(D36270Data*);
 struct D362Script {
     void AddEntry(D36270Data*, int row, int column);
 };
 extern unsigned char DAT_01268ad5;
 // @fnv 0x00d362c0
-void FUN_00d362c0(D362Script* script) {
+// src: HAVOK_LIB 0x00d362c0
+void hkpCollectionCollectionAgent3_registerAgent3(D362Script* script) {
     D36270Data data;
     data.flag0 = 0; data.flag1 = 0; data.flag2 = 0;
     data.f = 0; data.g = 0; data.h = 0; data.i = 0; data.j = 0;
-    FUN_00d36270(&data);
+    hkpCollectionCollectionAgent3_updateFilter_UpdateState_00d36270(&data);
     script->AddEntry(&data, 8, 8);
     data.flag1 = 1; data.flag2 = 1;
     script->AddEntry(&data, 7, 8);
@@ -110,7 +114,7 @@ void FUN_00d362c0(D362Script* script) {
 
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 
-extern "C" void __cdecl FUN_00d97250(void*, void*, void*);
+extern "C" void __cdecl hkpAgentMachineUtil_calc1nStatistics(void*, void*, void*);
 extern "C" const char str_010ceca8[];
 
 struct S00d34d30_Obj
@@ -126,11 +130,12 @@ struct S00d34d30_Obj
 };
 
 // @fnv 0x00d34d30
-void __cdecl FUN_00d34d30(void* a, void* b, void* c, void* d)
+// src: XBOX_PDB 0x00d34d30
+void __cdecl hkpCollectionCollectionAgent3_calcStatistics(void* a, void* b, void* c, void* d)
 {
     S00d34d30_Obj* obj = (S00d34d30_Obj*)d;
     obj->m6(str_010ceca8);
-    FUN_00d97250(b, c, d);
+    hkpAgentMachineUtil_calc1nStatistics(b, c, d);
     obj->m7();
 }
 
@@ -153,11 +158,12 @@ struct Local {
     void* f7;
 };
 
-extern "C" void __cdecl FUN_00da4900(void*, void*);
+extern "C" void __cdecl Object_HkAgent1nMachine_VisitAllAgents_Thunk(void*, void*);
 
 // Fills a Local struct with a3 through a7 and the m10() results of the objects at a3 and a4, then calls FUN_00da4900 with a2 and the struct.
 // @fnv 0x00d34db0
-void __cdecl FUN_00d34db0(void* apUnused, void* a2, void* apFirstObj, void* apSecondObj, void* a5, void* a6, void* a7)
+// src: HAVOK_LIB 0x00d34db0
+void __cdecl hkpCollectionCollectionAgent3_updateFilter(void* apUnused, void* a2, void* apFirstObj, void* apSecondObj, void* a5, void* a6, void* a7)
 {
     Local s;
     void* pFirstObj = *(void**)apFirstObj;
@@ -171,7 +177,7 @@ void __cdecl FUN_00d34db0(void* apUnused, void* a2, void* apFirstObj, void* apSe
     s.f2 = ((Obj*)pFirstObj)->m10();
     s.f3 = ((Obj*)pSecondObj)->m10();
 
-    FUN_00da4900(a2, &s);
+    Object_HkAgent1nMachine_VisitAllAgents_Thunk(a2, &s);
 }
 
 // Keep the intrinsic vector free of byte-array aliases, which add /GS checks absent from this unit.
@@ -296,7 +302,7 @@ struct SweptTransformSamples
     hkTransformq m_shapeToMotion;
 };
 
-void __cdecl FUN_00cbec90(const hkMotionStateq* motionState, SweptTransformSamples* out);
+void __cdecl hkMotionStateq_SampleSweptMotionTransforms(const hkMotionStateq* motionState, SweptTransformSamples* out);
 
 struct hkAabbq
 {
@@ -432,7 +438,7 @@ struct hkAabbUint32Less
     unsigned char m_unused;
 };
 
-void __cdecl FUN_00d36360(hkAabbUint32Key* arr, int iStart, int iEnd, hkAabbUint32Less cmp);
+void __cdecl hkAlgorithm_quickSortRecursive_struct_hk1AxisSweep_AabbInt_class_hkAlgorithm_less_struct_hk1AxisSweep_AabbInt(hkAabbUint32Key* arr, int iStart, int iEnd, hkAabbUint32Less cmp);
 
 static __forceinline void expandAabbUint32(hkAabbUint32Key* out, const hkAabbUint32* in)
 {
@@ -474,7 +480,8 @@ static __forceinline void copyCachedAabbs(const BoundingVolumeData& bvd, int use
 }
 
 // @fnv 0x00d351c0
-int __cdecl FUN_00d351c0(const hkpCdBodyq* body, int useCache, const hkpShapeContainerq* container,
+// src: XBOX_PDB 0x00d351c0
+int __cdecl hkCollectionBvTreeAgent3_extractCachedAabbsOrRecalculate(const hkpCdBodyq* body, int useCache, const hkpShapeContainerq* container,
                          const hkpProcessCollisionInputq* input, hkAabbUint32Key* aabbsOut)
 {
     SweptTransformSamples samples;
@@ -527,7 +534,7 @@ int __cdecl FUN_00d351c0(const hkpCdBodyq* body, int useCache, const hkpShapeCon
     {
         const hkpCdBodyq* root = body->getRootCollidable();
         const hkMotionStateq* motion = (const hkMotionStateq*)root->m_pMotionState;
-        FUN_00cbec90(motion, &samples);
+        hkMotionStateq_SampleSweptMotionTransforms(motion, &samples);
     }
 
     {
@@ -630,7 +637,7 @@ sortAabbs:
     hkAabbUint32Less comparator = {0};
     if (numAabbs > 1)
     {
-        FUN_00d36360(aabbsOut, 0, numAabbs - 1, comparator);
+        hkAlgorithm_quickSortRecursive_struct_hk1AxisSweep_AabbInt_class_hkAlgorithm_less_struct_hk1AxisSweep_AabbInt(aabbsOut, 0, numAabbs - 1, comparator);
     }
 done:
     return numAabbs;
@@ -682,7 +689,8 @@ __forceinline void hkSwap(T& x, T& y)
 
 // Sorts pArr[d..h] in place with quicksort, using the middle element as pivot and the cmpLess comparator.
 // @fnv 0x00d36360
-void __cdecl FUN_00d36360(SortEntry* pArr, int aiLow, int aiHigh, SortEntryLess cmpLess)
+// src: HAVOK_LIB 0x00d36360
+void __cdecl hkAlgorithm_quickSortRecursive_struct_hk1AxisSweep_AabbInt_class_hkAlgorithm_less_struct_hk1AxisSweep_AabbInt(SortEntry* pArr, int aiLow, int aiHigh, SortEntryLess cmpLess)
 {
     int i, j;
     SortEntry strPivot;
@@ -704,7 +712,7 @@ begin:
             i++;
         }
     } while (i <= j);
-    if (aiLow < j) FUN_00d36360(pArr, aiLow, j, cmpLess);
+    if (aiLow < j) hkAlgorithm_quickSortRecursive_struct_hk1AxisSweep_AabbInt_class_hkAlgorithm_less_struct_hk1AxisSweep_AabbInt(pArr, aiLow, j, cmpLess);
     if (i < aiHigh) { aiLow = i; goto begin; }
 }
 
@@ -754,7 +762,8 @@ static __forceinline void quantizeAabb(const hkAabbq& aabb, const hkpProcessColl
 }
 
 // @fnv 0x00d34e10
-void __cdecl FUN_00d34e10(const hkpAgent3ProcessInputq& input, const hkpShapeContainerq* container, const hkpCdBodyq* body,
+// src: GUESS 0x00d34e10 (confidence: low)
+void __cdecl hkpAgent3ProcessInputq_ProcessEntries_00d34e10(const hkpAgent3ProcessInputq& input, const hkpShapeContainerq* container, const hkpCdBodyq* body,
                           const hkpShapeKey* keys, int numKeys, hkAabbUint32Key* __restrict aabbsOut)
 {
     SweptTransformSamples samples;
@@ -763,7 +772,7 @@ void __cdecl FUN_00d34e10(const hkpAgent3ProcessInputq& input, const hkpShapeCon
     int useContinuous = input.m_pRayCastInput->m_pCollisionQualityInfo->m_iQualityInfoValue10;
     if (useContinuous)
     {
-        FUN_00cbec90((const hkMotionStateq*)body->getRootCollidable()->m_pMotionState, &samples);
+        hkMotionStateq_SampleSweptMotionTransforms((const hkMotionStateq*)body->getRootCollidable()->m_pMotionState, &samples);
     }
 
     for (int i = 0; i < numKeys; i++)

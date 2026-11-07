@@ -28,7 +28,7 @@ public:
     void Wakeup();
     void Run();
     unsigned int GetThreadID();
-    bool FUN_008905f0();
+    bool TESAnimGroup_GetDecal();
     void FUN_00aa6430(int stackSize, const char* name, bool suspended);
     void FUN_00aa6540(const char* name);
     void FUN_00aa6550(unsigned int priority);

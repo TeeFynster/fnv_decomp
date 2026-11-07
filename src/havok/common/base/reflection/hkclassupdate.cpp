@@ -4,21 +4,21 @@
 
 #include "../../../../../include/BSAudio.h"
 
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 struct TypeNode;
 struct VisitMap
 {
     unsigned int LookupHashEntry(TypeNode*, int);
-    void FUN_00cb1870(Allocator*, TypeNode*, unsigned int);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(Allocator*, TypeNode*, unsigned int);
 };
 struct Member
 {
     void* type;
-    TypeNode* FUN_00d86920();
+    TypeNode* getClass();
 };
 struct TypeNode
 {
-    TypeNode* FUN_00d46d60();
+    TypeNode* hkClass_getParent();
     int FUN_00d46f70();
     Member* FUN_00d46f80(int);
 };
@@ -31,30 +31,30 @@ void __cdecl VisitTypeMembers(TypeNode* node, VisitMap* visited, unsigned int ma
         unsigned int flags = visited->LookupHashEntry(node, 0);
         if (mask & flags)
             return;
-        BSAudio* audio = FUN_00c85750();
-        visited->FUN_00cb1870(reinterpret_cast<Allocator*>(audio->pListener), node, flags | mask);
+        BSAudio* audio = hkMemoryRouter_getInstance();
+        visited->hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(reinterpret_cast<Allocator*>(audio->pListener), node, flags | mask);
         for (int i = 0; i < node->FUN_00d46f70(); ++i)
         {
             Member* member = node->FUN_00d46f80(i);
-            TypeNode* child = member->FUN_00d86920();
+            TypeNode* child = member->getClass();
             if (child)
                 VisitTypeMembers(child, visited, mask, callback);
             callback(member);
         }
-        if (!node->FUN_00d46d60())
+        if (!node->hkClass_getParent())
             return;
-        node = node->FUN_00d46d60();
+        node = node->hkClass_getParent();
     }
 }
 
 namespace fnv_00e04bb0 {
 struct Allocator;
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 struct TypeNode;
 struct VisitMap
 {
     unsigned int LookupHashEntry(TypeNode*, int);
-    void FUN_00cb1870(Allocator*, TypeNode*, unsigned int);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(Allocator*, TypeNode*, unsigned int);
 };
 struct Member
 {
@@ -64,7 +64,7 @@ struct Member
 };
 struct TypeNode
 {
-    TypeNode* FUN_00d46d60();
+    TypeNode* hkClass_getParent();
     int FUN_00d46f70();
     Member* FUN_00d46f80(int);
 };
@@ -87,14 +87,14 @@ void VisitTypeNode(TypeNode* node, VisitMap* visited)
     unsigned int flags = visited->LookupHashEntry(node, 0);
     if (!(flags & 1))
     {
-        BSAudio* audio = FUN_00c85750();
-        visited->FUN_00cb1870(reinterpret_cast<Allocator*>(audio->pListener), node, flags | 1);
+        BSAudio* audio = hkMemoryRouter_getInstance();
+        visited->hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(reinterpret_cast<Allocator*>(audio->pListener), node, flags | 1);
         unsigned int offset = DAT_0126ed90.FUN_00d46fe0(DAT_010ea4cc)->offset;
         TypeNode* ancestor = node;
-        while (ancestor->FUN_00d46d60())
+        while (ancestor->hkClass_getParent())
         {
             *reinterpret_cast<int*>(reinterpret_cast<char*>(ancestor) + offset) = 0;
-            ancestor = ancestor->FUN_00d46d60();
+            ancestor = ancestor->hkClass_getParent();
         }
         if (*reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(ancestor) + offset))
         {
@@ -108,15 +108,15 @@ void VisitTypeNode(TypeNode* node, VisitMap* visited)
             if (member->type)
                 VisitTypeNode(member->FUN_00d86910(), visited);
         }
-        if (node->FUN_00d46d60())
-            VisitTypeNode(node->FUN_00d46d60(), visited);
+        if (node->hkClass_getParent())
+            VisitTypeNode(node->hkClass_getParent(), visited);
     }
 }
 }  // namespace fnv_00e04bb0
 
 void __cdecl VisitTypeNode(void* registry, void* context);
 void __cdecl VisitTypeMembers(void* registry, void* context, int size, void(__cdecl* func)(void*));
-void __cdecl FUN_00e04a60(void* data);
+void __cdecl Object_UpdateFields_00e04a60(void* data);
 void __cdecl UpdateStateFlags(void* data);
 
 extern void* g_E04D30Last;
@@ -138,7 +138,7 @@ void __cdecl RegisterContextHandlers(void* registry, void* context, int level)
         E04D30Finish(registry);
     }
     if (level < 4)
-        VisitTypeMembers(registry, context, 2, FUN_00e04a60);
+        VisitTypeMembers(registry, context, 2, Object_UpdateFields_00e04a60);
     if (level < 5)
         VisitTypeMembers(registry, context, 8, UpdateStateFlags);
 }
@@ -159,25 +159,26 @@ struct TypeDefinition
 };
 struct TypeRegistry
 {
-    TypeDefinition* FUN_00d46f20(int index);
+    TypeDefinition* getMember(int index);
 };
 extern TypeRegistry DAT_0126ca58;
 extern const char DAT_010d27bc[];
-int __cdecl FUN_00cb0fa0(const char*, const char*);
+int __cdecl hkString_strCmp(const char*, const char*);
 
 // Marks the node visited and, when its name matches DAT_010d27bc, writes 0x19 at the selected member offset.
 // @fnv 0x00e04cc0
-static __declspec(noinline) void __cdecl FUN_00e04cc0(TraverseNode* node, VisitMap* visited)
+// src: GUESS 0x00e04cc0 (confidence: low)
+static __declspec(noinline) void __cdecl Object_UpdateFields_00e04cc0(TraverseNode* node, VisitMap* visited)
 {
     unsigned int flags = visited->LookupHashEntry(reinterpret_cast<TypeNode*>(node), 0);
     if ((flags & 4) == 0)
     {
-        BSAudio* audio = FUN_00c85750();
-        visited->FUN_00cb1870(reinterpret_cast<Allocator*>(audio->pListener), reinterpret_cast<TypeNode*>(node), flags | 4);
-        if (FUN_00cb0fa0(node->FUN_00d46d40(), DAT_010d27bc) == 0)
+        BSAudio* audio = hkMemoryRouter_getInstance();
+        visited->hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(reinterpret_cast<Allocator*>(audio->pListener), reinterpret_cast<TypeNode*>(node), flags | 4);
+        if (hkString_strCmp(node->FUN_00d46d40(), DAT_010d27bc) == 0)
         {
             char* member = node->FUN_00d46f80(2);
-            TypeDefinition* type = DAT_0126ca58.FUN_00d46f20(4);
+            TypeDefinition* type = DAT_0126ca58.getMember(4);
             member[type->fieldOffset] = 0x19;
         }
     }
@@ -185,7 +186,7 @@ static __declspec(noinline) void __cdecl FUN_00e04cc0(TraverseNode* node, VisitM
 
 void CallTraversal(TraverseNode* node, VisitMap* visited)
 {
-    FUN_00e04cc0(node, visited);
+    Object_UpdateFields_00e04cc0(node, visited);
 }
 
 struct ParentNodeView : TypeNode
@@ -193,11 +194,12 @@ struct ParentNodeView : TypeNode
     const char* name;
     TypeNode* parent;
 
-    TypeNode* FUN_00d46d60();
+    TypeNode* hkClass_getParent();
 };
 
 // @fnv 0x00d46d60
-TypeNode* ParentNodeView::FUN_00d46d60()
+// src: XBOX_PDB 0x00d46d60
+TypeNode* ParentNodeView::hkClass_getParent()
 {
     return parent;
 }

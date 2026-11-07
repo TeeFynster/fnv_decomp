@@ -30,7 +30,8 @@ inline NiBinaryStream& NiStream::Istr() { return **(NiBinaryStream**)((char*)thi
 extern "C" void* g_012027a8;
 
 // @fnv 0x00c2f590
-void* __cdecl FUN_00c2f590()
+// src: COMMUNITY 0x00c2f590
+void* __cdecl NiPSysAirFieldModifier_GetRTTI()
 {
     return &g_012027a8;
 }
@@ -61,7 +62,7 @@ struct CloningProcess
 struct AirTmp : NiPSysFieldModifier
 {
     AirTmp* __thiscall FUN_00c2f5c0();
-    void __thiscall FUN_00c2f500(void*);
+    void __thiscall NiPSysAirFieldModifier_SetDirection(void*);
 };
 // @fnv 0x00c2fad0
 NiObject* __thiscall NiPSysFieldModifier::Clone(CloningProcess& kCloning)
@@ -73,7 +74,7 @@ NiObject* __thiscall NiPSysFieldModifier::Clone(CloningProcess& kCloning)
     else
         pkObject = 0;
     CopyMemberData(pkObject, kCloning);
-    pkObject->FUN_00c2f500((char*)this + 0x40);
+    pkObject->NiPSysAirFieldModifier_SetDirection((char*)this + 0x40);
     return (NiObject*)pkObject;
 }
 
@@ -97,11 +98,12 @@ struct TmpVec3
     int x;
     int y;
     int z;
-    void __thiscall FUN_004a0c10();
+    void __thiscall Unitize_004a0c10();
 };
 // Copies three ints from param into this+0x40 and this+0x4c, calls FUN_004a0c10, and replaces the vector with DAT_011a946c/70/74 if it equals DAT_011f426c/70/74.
 // @fnv 0x00c2f500
-void AirTmp::FUN_00c2f500(void* pSource)
+// src: XBOX_PDB 0x00c2f500
+void AirTmp::NiPSysAirFieldModifier_SetDirection(void* pSource)
 {
     int* p = (int*)pSource;
     int* a = (int*)((char*)this + 0x40);
@@ -112,7 +114,7 @@ void AirTmp::FUN_00c2f500(void* pSource)
     v->x = p[0];
     v->y = p[1];
     v->z = p[2];
-    v->FUN_004a0c10();
+    v->Unitize_004a0c10();
     if (*(float*)&v->x == DAT_011f426c && *(float*)&v->y == DAT_011f4270 && *(float*)&v->z == DAT_011f4274)
     {
         v->x = *(int*)&DAT_011a946c;
@@ -148,11 +150,12 @@ struct FUN_00c2fb10_cls
     SubObject40 m_40;
 
     bool FUN_00c32060(void* other);
-    bool FUN_00c2fb10(void* other);
+    bool NiPSysAirFieldModifier_IsEqual(void* other);
 };
 
 // @fnv 0x00c2fb10
-bool FUN_00c2fb10_cls::FUN_00c2fb10(void* other)
+// src: XBOX_PDB 0x00c2fb10
+bool FUN_00c2fb10_cls::NiPSysAirFieldModifier_IsEqual(void* other)
 {
     FUN_00c2fb10_cls* p = (FUN_00c2fb10_cls*)other;
     if (FUN_00c32060(other) == false)
@@ -276,12 +279,12 @@ struct ViewerSub
     int unk04;
     int unk08;
 
-    void* FUN_00a59af0(const char* name);
+    void* GetViewerString_00a59af0(const char* name);
 };
 
-void* __cdecl FUN_00a7d330(void* g);
-void* __cdecl FUN_00a7d550(const char* name, float value);
-void* __cdecl FUN_00a7d370(const char* name, bool value);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* g);
+void* __cdecl NiGetViewerString_00a7d550(const char* name, float value);
+void* __cdecl NiGetViewerString(const char* name, bool value);
 
 struct FUN_00c303c0_cls
 {
@@ -331,48 +334,50 @@ static void AddViewerString(ViewerStrings* s, void* value)
 void FUN_00c303c0_cls::BuildViewerStrings(ViewerStrings* s)
 {
     FUN_00c322b0(s);
-    void* v = FUN_00a7d330(g_012027a8);
+    void* v = NiViewerStrings_NiGetViewerString_Title(g_012027a8);
     AddViewerString(s, v);
-    v = m_40.FUN_00a59af0("Direction");
+    v = m_40.GetViewerString_00a59af0("Direction");
     AddViewerString(s, v);
-    v = m_4c.FUN_00a59af0("Unit Direction");
+    v = m_4c.GetViewerString_00a59af0("Unit Direction");
     AddViewerString(s, v);
-    v = FUN_00a7d550("AirFriction", m_58);
+    v = NiGetViewerString_00a7d550("AirFriction", m_58);
     AddViewerString(s, v);
-    v = FUN_00a7d550("Inherit Velocity", m_5c);
+    v = NiGetViewerString_00a7d550("Inherit Velocity", m_5c);
     AddViewerString(s, v);
-    v = FUN_00a7d370("Inherit Rotation", m_60);
+    v = NiGetViewerString("Inherit Rotation", m_60);
     AddViewerString(s, v);
-    v = FUN_00a7d370("Component Only", m_61);
+    v = NiGetViewerString("Component Only", m_61);
     AddViewerString(s, v);
-    v = FUN_00a7d370("Enable Spread", m_62);
+    v = NiGetViewerString("Enable Spread", m_62);
     AddViewerString(s, v);
-    v = FUN_00a7d550("Spread", m_64);
+    v = NiGetViewerString_00a7d550("Spread", m_64);
     AddViewerString(s, v);
 }
 
 struct AirFieldModifier
 {
     void __thiscall FUN_00c2e520(NiStream& stream);
-    void __thiscall FUN_00c2f4e0(NiStream& stream);
+    void __thiscall NiPSysAirFieldModifier_LinkObject(NiStream& stream);
 };
 
 // @fnv 0x00c2f4e0
-void __thiscall AirFieldModifier::FUN_00c2f4e0(NiStream& stream)
+// src: XBOX_PDB 0x00c2f4e0
+void __thiscall AirFieldModifier::NiPSysAirFieldModifier_LinkObject(NiStream& stream)
 {
     FUN_00c2e520(stream);
 }
 
 struct FUN_00c61f60_class
 {
-    unsigned char __thiscall FUN_00c28b60(int param);
-    unsigned char __thiscall FUN_00c2f4f0(int param);
+    unsigned char __thiscall NiPSysAgeDeathModifier_RegisterStreamables(int param);
+    unsigned char __thiscall NiPSysAirFieldModifier_RegisterStreamables(int param);
 };
 
 // @fnv 0x00c2f4f0
-unsigned char __thiscall FUN_00c61f60_class::FUN_00c2f4f0(int param)
+// src: XBOX_PDB 0x00c2f4f0
+unsigned char __thiscall FUN_00c61f60_class::NiPSysAirFieldModifier_RegisterStreamables(int param)
 {
-    return FUN_00c28b60(param);
+    return NiPSysAgeDeathModifier_RegisterStreamables(param);
 }
 
 inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
@@ -622,15 +627,16 @@ struct S00c30170_Obj
     bool m_62;
     float m_64;
     void __thiscall LoadFromStream(NiStream*);
-    void __thiscall FUN_00c30170(NiStream* stream);
+    void __thiscall NiPSysAirFieldModifier_LoadBinary(NiStream* stream);
 };
 // Calls LoadFromStream, reads m_40, applies FUN_00c2f500 to it, then reads m_58, m_5c, m_60, m_61, m_62, and m_64.
 // @fnv 0x00c30170
-void __thiscall S00c30170_Obj::FUN_00c30170(NiStream* stream)
+// src: XBOX_PDB 0x00c30170
+void __thiscall S00c30170_Obj::NiPSysAirFieldModifier_LoadBinary(NiStream* stream)
 {
     LoadFromStream(stream);
     m_40.FUN_00a59be0(stream);
-    ((AirTmp*)this)->FUN_00c2f500(&m_40);
+    ((AirTmp*)this)->NiPSysAirFieldModifier_SetDirection(&m_40);
     ReadBinaryValue(stream, m_58);
     ReadBinaryValue(stream, m_5c);
     unsigned char b;
@@ -734,8 +740,8 @@ struct AirPoint3
     {}
     bool FUN_00439090(const AirPoint3&) const;
     float FUN_00457910();
-    void FUN_004a0c10();
-    AirPoint3 FUN_0053d280(float) const;
+    void Unitize_004a0c10();
+    AirPoint3 ProcessAndReturnValue_0053d280(float) const;
     AirPoint3 operator+(const AirPoint3& v) const
     {
         return AirPoint3(x + v.x, y + v.y, z + v.z);
@@ -821,11 +827,12 @@ struct AirModifier
     float spread;
     void UpdateParticleAirFriction(float, NiPSysData*);
     void UpdateAirFriction(float, NiPSysData*);
-    void FUN_00c2fb40(float, NiPSysData*);
+    void NiPSysAirFieldModifier_Update(float, NiPSysData*);
 };
 // Updates particle velocities using the field direction and magnitude, with optional spread, distance limiting, attenuation, and inherited velocity.
 // @fnv 0x00c2fb40
-void AirModifier::FUN_00c2fb40(float time, NiPSysData* apParticles)
+// src: XBOX_PDB 0x00c2fb40
+void AirModifier::NiPSysAirFieldModifier_Update(float time, NiPSysData* apParticles)
 {
     if (apParticles->m_usActive == 0 || !source)
         return;
@@ -852,7 +859,7 @@ void AirModifier::FUN_00c2fb40(float time, NiPSysData* apParticles)
     AirPoint3 unitVelocity = NiPoint3_ZERO;
     if (previousPosition.FUN_00439090(DAT_011af220) && previousTime != 3.4028234663852886e38 && previousTime != time)
     {
-        unitVelocity = ((AirVector(ownerWorld.m_Translate) - previousPosition) * inheritVelocity).FUN_0053d280(time - previousTime);
+        unitVelocity = ((AirVector(ownerWorld.m_Translate) - previousPosition) * inheritVelocity).ProcessAndReturnValue_0053d280(time - previousTime);
     }
     previousTime = time;
     previousPosition = AirVector(ownerWorld.m_Translate);
@@ -885,7 +892,7 @@ void AirModifier::FUN_00c2fb40(float time, NiPSysData* apParticles)
             if (enableSpread)
             {
                 velocity = offset;
-                velocity.FUN_004a0c10();
+                velocity.Unitize_004a0c10();
                 float dot = fieldVelocity.Dot(velocity);
                 if (dot < fMinDot)
                     continue;

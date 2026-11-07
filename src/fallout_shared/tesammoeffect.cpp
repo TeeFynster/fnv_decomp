@@ -86,18 +86,18 @@ void* TESAmmoEffect::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 // @fnv 0x00599ef0
 void TESAmmoEffect::SaveAmmoEffect()
 {
-    TESForm::FUN_004855a0();
-    TESFullName::FUN_00487010();
-    if (FUN_00401500())
+    TESForm::BeginFormRecord();
+    TESFullName::Save_00487010();
+    if (TESForm_QEndianSwapOnSave())
         ((ContainerItemExtraFileData*)((char*)this + 0x24))->Endian();
-    TESForm::FUN_00485e20((char*)this + 0x24, 0xc);
-    if (FUN_00401500())
+    TESForm::TESForm___SaveData((char*)this + 0x24, 0xc);
+    if (TESForm_QEndianSwapOnSave())
         ((ContainerItemExtraFileData*)((char*)this + 0x24))->Endian();
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 void* __memcpy(void*, const void*, unsigned int);
@@ -115,7 +115,7 @@ struct AmmoEffectValue
 {
     int FUN_0045cd60();
     int FUN_0059bb30();
-    float FUN_00759450();
+    float NiPSysSpawnModifier_GetLifeSpan();
 };
 struct AmmoEffectList
 {
@@ -149,7 +149,7 @@ float ComputeAmmoEffectValue(int iEffectType, AmmoEffectList* pEffectList, float
         sorted = sorted->FUN_00726070();
         int effectType = effect->FUN_0059bb30();
         int iOperation = effect->FUN_0045cd60();
-        float magnitude = effect->FUN_00759450();
+        float magnitude = effect->NiPSysSpawnModifier_GetLifeSpan();
         if (effectType != iEffectType)
             continue;
         switch (iOperation)

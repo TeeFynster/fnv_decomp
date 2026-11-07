@@ -78,7 +78,7 @@ struct Vec_de4af0
         v = b.v;
         return *this;
     }
-    void FUN_00c7f700(Frame_de4af0* f, Vec_de4af0* v);
+    void hkVector4_setRotatedDir(Frame_de4af0* f, Vec_de4af0* v);
 };
 // Three-column rotation used by the transform helpers.
 struct Frame_de4af0
@@ -93,8 +93,8 @@ struct VecArr_de4af0
     int m_iArrayLength;         // +0x04
     unsigned int m_uCap;  // +0x08
 };
-Holder_de4af0* FUN_00c85750();
-extern "C" void FUN_00c908c0(void* alloc, VecArr_de4af0* arr, unsigned int newCap, unsigned int stride);
+Holder_de4af0* hkMemoryRouter_getInstance();
+extern "C" void hkArrayUtil__reserve(void* alloc, VecArr_de4af0* arr, unsigned int newCap, unsigned int stride);
 struct ArcSamples_de4af0
 {
     int unk00;         // +0x00
@@ -128,10 +128,11 @@ struct ArcSamples_de4af0
     float m_f94;       // +0x94
     float m_f98;       // +0x98
     int m_i9c;         // +0x9c
-    void FUN_00de4af0(VecArr_de4af0* arr);
+    void hkDisplaySemiCircle_generatePoints(VecArr_de4af0* arr);
 };
 // @fnv 0x00de4af0
-void ArcSamples_de4af0::FUN_00de4af0(VecArr_de4af0* arr)
+// src: XBOX_PDB 0x00de4af0
+void ArcSamples_de4af0::hkDisplaySemiCircle_generatePoints(VecArr_de4af0* arr)
 {
     const Vec_de4af0& origin = m_v80;
     __declspec(align(16)) float step = (m_f94 - m_f90) / (float)m_i9c;
@@ -140,11 +141,11 @@ void ArcSamples_de4af0::FUN_00de4af0(VecArr_de4af0* arr)
     Vec_de4af0 x;
     _mm_store_ps(&x.m_f00,
                  _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&m_f98), _mm_load_ss(&m_f98), 0), _mm_load_ps(&m_v70.m_f00)));
-    x.FUN_00c7f700(&local, &x);
+    x.hkVector4_setRotatedDir(&local, &x);
     x.add(origin, x);
     local.FUN_00cb2e30(&m_v60, step);
     int n = m_i9c + 2;
-    Holder_de4af0* h = FUN_00c85750();
+    Holder_de4af0* h = hkMemoryRouter_getInstance();
     _ReadWriteBarrier();
     void* alloc = h->m_pAllocator;
     unsigned int cap = arr->m_uCap & 0x3fffffffu;
@@ -155,7 +156,7 @@ void ArcSamples_de4af0::FUN_00de4af0(VecArr_de4af0* arr)
         {
             newCap = n;
         }
-        FUN_00c908c0(alloc, arr, newCap, 0x10);
+        hkArrayUtil__reserve(alloc, arr, newCap, 0x10);
     }
     LocalM128 initial = x.v;
     arr->m_iArrayLength = n;
@@ -168,7 +169,7 @@ void ArcSamples_de4af0::FUN_00de4af0(VecArr_de4af0* arr)
         {
             Vec_de4af0 y;
             _mm_store_ps(&y.m_f00, _mm_sub_ps(_mm_load_ps(&x.m_f00), _mm_load_ps(&m_v80.m_f00)));
-            y.FUN_00c7f700(&local, &y);
+            y.hkVector4_setRotatedDir(&local, &y);
             y.add(origin, y);
             _mm_store_ps(&arr->m_pData[off + 1].m_f00, _mm_load_ps(&y.m_f00));
             x = y;

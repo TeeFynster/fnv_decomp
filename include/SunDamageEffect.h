@@ -16,9 +16,9 @@ public:
 
     void LoadGame(Actor* apActor) override;
     void UpdateEffect(float arg);
-    bool FUN_0082a150();
-    double FUN_0082a1b0();
-    void FUN_00829e00(bool abApply);
+    bool IsCausingDamage();
+    double GetDamageAmount();
+    void UpdateHitEffect(bool abApply);
     int FUN_0055b980();
 
     float fValue;

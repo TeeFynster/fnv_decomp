@@ -45,7 +45,7 @@ NiAnimationKey* __fastcall GetInterpolatorKey(NiKeyBasedInterpolator* self, void
 }
 
 namespace fnv_00a3cbf0 {
-extern "C" void FUN_00a570b0();
+extern "C" void NiInterpolator_GetViewerStrings();
 char* _FUN_00a7d330(const char*);
 extern const char* _DAT_011f3740;
 
@@ -54,7 +54,7 @@ extern const char* _DAT_011f3740;
 void __fastcall GetKeyBasedViewerStrings(NiKeyBasedInterpolator* self, void*, StrArr* pkStrings)
 {
     typedef void(__thiscall * GetBaseViewerStrings)(NiInterpolator*, StrArr*);
-    reinterpret_cast<GetBaseViewerStrings>(FUN_00a570b0)(self, pkStrings);
+    reinterpret_cast<GetBaseViewerStrings>(NiInterpolator_GetViewerStrings)(self, pkStrings);
     char* pcStr = _FUN_00a7d330(_DAT_011f3740);
     unsigned int uiSize = pkStrings->m_usSize;
     if (uiSize >= pkStrings->m_usMaxSize)

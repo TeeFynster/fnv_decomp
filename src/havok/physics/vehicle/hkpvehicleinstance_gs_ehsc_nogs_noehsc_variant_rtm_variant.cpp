@@ -345,12 +345,13 @@ class S00e384e0_WheelCollectorE38
     unsigned int unk44;
     S00e384e0_WheelInfoE38* m_kWheelInfoArray;
 
-    void FUN_00e384e0(const S00e384e0_ChassisE38* pkChassis, const S00e384e0_VehicleDataE38* pkData, int iWheel,
+    void hkpVehicleInstance_calcCurrentPositionAndRotation(const S00e384e0_ChassisE38* pkChassis, const S00e384e0_VehicleDataE38* pkData, int iWheel,
                       S00e384e0_hkVector4E38& kPosOut, S00e384e0_hkQuaternionE38& kRotOut);
 };
 
 // @fnv 0x00e384e0
-void S00e384e0_WheelCollectorE38::FUN_00e384e0(const S00e384e0_ChassisE38* pkChassis,
+// src: HAVOK_SRC 0x00e384e0
+void S00e384e0_WheelCollectorE38::hkpVehicleInstance_calcCurrentPositionAndRotation(const S00e384e0_ChassisE38* pkChassis,
                                                const S00e384e0_VehicleDataE38* pkData, int iWheel,
                                                S00e384e0_hkVector4E38& kPosOut, S00e384e0_hkQuaternionE38& kRotOut)
 {

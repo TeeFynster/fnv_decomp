@@ -106,5 +106,5 @@ class PlayerQuestData
   public:
     PerkEntryConditionSet* GetConditions();
 };
-TESCombatStyle* FUN_00505000();
+TESCombatStyle* TESCombatStyle_GetDefaultCombatStyle();
 #endif

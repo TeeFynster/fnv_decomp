@@ -98,8 +98,8 @@ extern const char DAT_0107f894[];
 extern const char DAT_0107f8d0[];
 extern const char DAT_0107f938[];
 void LogWarning(const char*, ...);
-bool FUN_0084f860(INITIAL_DATA_TYPE);
-bool FUN_0084f840(INITIAL_DATA_TYPE);
+bool BGSSaveLoadInitialData_IsInitialDataCellType(INITIAL_DATA_TYPE);
+bool BGSSaveLoadInitialData_IsInitialDataRefType(INITIAL_DATA_TYPE);
 unsigned int LoadFormData(BGSLoadFormBuffer*, INITIAL_DATA_TYPE, void*);
 struct CellDetachTimeData
 {

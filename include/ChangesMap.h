@@ -13,5 +13,5 @@ public:
 
     ChangesMap();
     bool HasFormChanges(TESForm*, bool);
-    bool FUN_00855220(unsigned int, bool);
+    bool RemoveChanges(unsigned int, bool);
 };

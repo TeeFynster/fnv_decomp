@@ -27,20 +27,22 @@ extern "C" void _mm_store_ss(float* p, LocalM128 a);
 // src/havok/physics/dynamics/constraint/contact/hkpsimplecontactconstraintdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/contact/hkpsimplecontactconstraintdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern "C" void __cdecl FUN_00d21a60(void* atom, unsigned short index, unsigned int arg);
+extern "C" void __cdecl hkpConstraintData_getConstraintInfoUtil(void* atom, unsigned short index, unsigned int arg);
 struct FUN_00d927b0_class
 {
-    void FUN_00d927b0(unsigned int arg);
+    void hkpSimpleContactConstraintData_getConstraintInfo(unsigned int arg);
 };
 // @fnv 0x00d927b0
-void FUN_00d927b0_class::FUN_00d927b0(unsigned int arg)
+// src: HAVOK_LIB 0x00d927b0
+void FUN_00d927b0_class::hkpSimpleContactConstraintData_getConstraintInfo(unsigned int arg)
 {
     void* atom = *(void**)((char*)this + 0x28);
-    FUN_00d21a60(atom, *(unsigned short*)((char*)atom + 2), arg);
+    hkpConstraintData_getConstraintInfoUtil(atom, *(unsigned short*)((char*)atom + 2), arg);
 }
 
 // @fnv 0x00d927d0
-void __stdcall FUN_00d927d0(int, int* paiValues)
+// src: HAVOK_LIB 0x00d927d0
+void __stdcall hkpSimpleContactConstraintData_getRuntimeInfo(int, int* paiValues)
 {
     paiValues[0] = 0;
     paiValues[1] = 0;
@@ -66,12 +68,13 @@ struct S_00d92690_Mgr
 };
 
 hkpSimpleContactConstraintAtom* AllocateBlock(int cap, int a, int b, int maxCap);
-void FUN_00d925b0(hkpSimpleContactConstraintAtom* dst, hkpSimpleContactConstraintAtom* src);
+void hkpSimpleContactConstraintAtom_ProcessEntries_00d925b0(hkpSimpleContactConstraintAtom* dst, hkpSimpleContactConstraintAtom* src);
 int RoundUpToBucketSize(int size);
-S_00d92690_Mgr* FUN_00c85750();
+S_00d92690_Mgr* hkMemoryRouter_getInstance();
 
 // @fnv 0x00d92690
-hkpSimpleContactConstraintAtom* FUN_00d92690(hkpSimpleContactConstraintAtom* apContainer, bool* grew)
+// src: HAVOK_LIB 0x00d92690
+hkpSimpleContactConstraintAtom* hkpSimpleContactConstraintAtomUtil_expandOne(hkpSimpleContactConstraintAtom* apContainer, bool* grew)
 {
     hkpSimpleContactConstraintAtom* result = apContainer;
     hkpSimpleContactConstraintAtom* pContainer = apContainer;
@@ -83,9 +86,9 @@ hkpSimpleContactConstraintAtom* FUN_00d92690(hkpSimpleContactConstraintAtom* apC
         if (iNewCapacity >= apContainer->m_usMaxNumContactPointProperties)
             iNewCapacity = apContainer->m_usMaxNumContactPointProperties;
         result = AllocateBlock(iNewCapacity, apContainer->m_ucNumReservedContactPoints, apContainer->m_ucNumContactPointProperties, apContainer->m_usMaxNumContactPointProperties);
-        FUN_00d925b0(result, apContainer);
+        hkpSimpleContactConstraintAtom_ProcessEntries_00d925b0(result, apContainer);
         int size = RoundUpToBucketSize(apContainer->m_usSizeOfAllAtoms);
-        FUN_00c85750()->GetAllocator()->Free(apContainer, size);
+        hkMemoryRouter_getInstance()->GetAllocator()->Free(apContainer, size);
         pContainer = result;
         *grew = true;
     }
@@ -98,13 +101,15 @@ hkpSimpleContactConstraintAtom* FUN_00d92690(hkpSimpleContactConstraintAtom* apC
 }
 
 // @fnv 0x00d92810
-int __cdecl FUN_00d92810()
+// src: GUESS 0x00d92810 (confidence: high)
+int __cdecl hkpSimpleContactConstraintData_ReturnConstant_11()
 {
     return 11;
 }
 
 // @fnv 0x00d92800
-void __stdcall FUN_00d92800(bool* p)
+// src: XBOX_PDB 0x00d92800
+void __stdcall hkpSimpleContactConstraintData_isValid(bool* p)
 {
     *p = true;
 }
@@ -186,10 +191,10 @@ struct S_00d92fd0_Atom
     unsigned short unk02;
     int unk04, unk08, unk0c, unk10;
     S_00d92fd0_Atom* next;
-    void FUN_00d21d00(int a, float b, int c, int d, int e, int f);
-    void FUN_00d21d10(int a, float b, int c, int d, int e, int f);
-    void FUN_00d21fc0(int a, float b, int c, int d, int e, int f);
-    void FUN_00d22260(int a, float b, int c, int d, int e, int f);
+    void nullsub_31(int a, float b, int c, int d, int e, int f);
+    void UpdateState_00d21d10(int a, float b, int c, int d, int e, int f);
+    void CopyData_00d21fc0(int a, float b, int c, int d, int e, int f);
+    void ProcessState_00d22260(int a, float b, int c, int d, int e, int f);
 };
 struct S_00d92fd0_Alloc : S_00d92690_Alloc
 {
@@ -233,7 +238,7 @@ void S_00d92fd0_This::DispatchAtomHandlers(int aiArg1, float afArg2, int aiArg3,
     S_00d92fd0_Atom* a = holder->head;
     while (a->type >= 0x17)
     {
-        S_00d92690_Mgr* pMgr = FUN_00c85750();
+        S_00d92690_Mgr* pMgr = hkMemoryRouter_getInstance();
         if (arr.size == (arr.cap & 0x3fffffff))
             ResizeAudioStream(pMgr->GetAllocator(), &arr, 4);
         arr.data[arr.size] = a;
@@ -246,20 +251,20 @@ void S_00d92fd0_This::DispatchAtomHandlers(int aiArg1, float afArg2, int aiArg3,
         switch (x->type)
         {
         case 0x18:
-            x->FUN_00d21d00(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
+            x->nullsub_31(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
             break;
         case 0x17:
-            x->FUN_00d21d10(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
+            x->UpdateState_00d21d10(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
             break;
         case 0x1a:
-            x->FUN_00d21fc0(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
+            x->CopyData_00d21fc0(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
             break;
         case 0x1c:
-            x->FUN_00d22260(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
+            x->ProcessState_00d22260(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
             break;
         }
     }
-    S_00d92fd0_Alloc* pAlloc = (S_00d92fd0_Alloc*)FUN_00c85750()->GetAllocator();
+    S_00d92fd0_Alloc* pAlloc = (S_00d92fd0_Alloc*)hkMemoryRouter_getInstance()->GetAllocator();
     arr.size = 0;
     if ((arr.cap & 0x80000000) == 0)
         pAlloc->Free2(arr.data, (arr.cap & 0x3fffffff) * 4);
@@ -289,7 +294,7 @@ unsigned int FUN_00d93140_cls::ReplaceOrAppendByte(unsigned char value)
         }
         i--;
     }
-    S_00d92690_Mgr* mgr = FUN_00c85750();
+    S_00d92690_Mgr* mgr = hkMemoryRouter_getInstance();
     if (m_len == (m_cap & 0x3fffffff))
     {
         ResizeAudioStream(mgr->unk10, this, 1);
@@ -302,7 +307,8 @@ unsigned int FUN_00d93140_cls::ReplaceOrAppendByte(unsigned char value)
 }
 
 // @fnv 0x00d927f0
-int __stdcall FUN_00d927f0(int arg)
+// src: GUESS 0x00d927f0 (confidence: high)
+int __stdcall hkpSimpleContactConstraintData_ReturnZero(int arg)
 {
     return 0;
 }
@@ -310,11 +316,12 @@ int __stdcall FUN_00d927f0(int arg)
 struct FUN_00d92820_cls
 {
     int unk00;
-    char* FUN_00d92820();
+    char* hkpSimpleContactConstraintData_getSimpleConstraintContactMgr();
 };
 
 // @fnv 0x00d92820
-char* FUN_00d92820_cls::FUN_00d92820()
+// src: XBOX_PDB 0x00d92820
+char* FUN_00d92820_cls::hkpSimpleContactConstraintData_getSimpleConstraintContactMgr()
 {
     return (char*)this - 0x14;
 }
@@ -331,8 +338,8 @@ struct hkNodeX
 
     void ScaleInverseInertia(int a1, int a2, int a3, int a4, int a5);
     void SetGlobalVectors(int a1, int a2, int a3, int a4, int a5);
-    void FUN_00d21f50(int a1, int a2, int a3, int a4, int a5);
-    void FUN_00d22160(int a1, int a2, int a3, int a4, int a5);
+    void CopyMemory_00d21f50(int a1, int a2, int a3, int a4, int a5);
+    void UpdateFields_00d22160(int a1, int a2, int a3, int a4, int a5);
 };
 
 struct hkHolderX
@@ -379,10 +386,10 @@ void hkClsX::DispatchNodeCallbacks(int a1, int a2, int a3, int a4, int a5)
             node->SetGlobalVectors(a1, a2, a3, a4, a5);
             break;
         case 0x1A:
-            node->FUN_00d21f50(a1, a2, a3, a4, a5);
+            node->CopyMemory_00d21f50(a1, a2, a3, a4, a5);
             break;
         case 0x1C:
-            node->FUN_00d22160(a1, a2, a3, a4, a5);
+            node->UpdateFields_00d22160(a1, a2, a3, a4, a5);
             break;
         }
         node = node->next;
@@ -440,7 +447,7 @@ inline int hkpSimpleContactConstraintAtom::getContactPointPropertiesStriding() c
     return m_ucContactPointPropertiesStriding;
 }
 
-hkpSimpleContactConstraintAtom* FUN_00d92690(hkpSimpleContactConstraintAtom* atom, hkBool* atomReallocated);
+hkpSimpleContactConstraintAtom* hkpSimpleContactConstraintAtomUtil_expandOne(hkpSimpleContactConstraintAtom* atom, hkBool* atomReallocated);
 void __cdecl ReplaceEntry(void* constraint, hkpSimpleContactConstraintAtom* oldAtom,
                           hkpSimpleContactConstraintAtom* newAtom, int newSize);
 
@@ -471,7 +478,8 @@ struct ContactAtomIdsCallView { int ReplaceOrAppendByte(int index); };
 
 // Adds a contact point at index size, initializes its properties, updates constraint stats, and reallocates the atom if needed.
 // @fnv 0x00d92df0
-int hkpSimpleContactConstraintData::FUN_00d92df0(hkpConstraintOwner& constraintOwner, hkContactPoint** cpOut,
+// src: HAVOK_LIB 0x00d92df0
+int hkpSimpleContactConstraintData::allocateContactPoint(hkpConstraintOwner& constraintOwner, hkContactPoint** cpOut,
                                                  PhysicsMaterial** cpPropsOut)
 {
     hkpSimpleContactConstraintAtom* atom = m_pAtom;
@@ -480,7 +488,7 @@ int hkpSimpleContactConstraintData::FUN_00d92df0(hkpConstraintOwner& constraintO
 
     hkpSimpleContactConstraintAtom* oldAtom = m_pAtom;
     hkBool atomReallocated = false;
-    m_pAtom = FUN_00d92690(m_pAtom, &atomReallocated);
+    m_pAtom = hkpSimpleContactConstraintAtomUtil_expandOne(m_pAtom, &atomReallocated);
     hkpSimpleContactConstraintAtom* localAtom = m_pAtom;
 
     hkContactPoint* cp = &localAtom->getContactPoints()[size];
@@ -923,9 +931,10 @@ struct S00d92900_QueryIn
 struct S00d92900_Mgr;
 struct S00d92900_Data
 {
-    S00d92900_Mgr* FUN_00d92820();
+    S00d92900_Mgr* hkpSimpleContactConstraintData_getSimpleConstraintContactMgr();
 };
-__declspec(noinline) S00d92900_Mgr* S00d92900_Data::FUN_00d92820()
+// src: XBOX_PDB 0x00d92820
+__declspec(noinline) S00d92900_Mgr* S00d92900_Data::hkpSimpleContactConstraintData_getSimpleConstraintContactMgr()
 {
     return (S00d92900_Mgr*)((char*)this - 0x14);
 }
@@ -998,20 +1007,20 @@ struct __declspec(align(16)) S00d92900_BreachInfo
     }
 };
 
-extern float FUN_00df2510(const S00d92900_Body* a, const S00d92900_Body* b, const float* comA, const float* comB,
+extern float hkpSimpleContactConstraintUtil_calculateSeparatingVelocity(const S00d92900_Body* a, const S00d92900_Body* b, const float* comA, const float* comB,
                           const hkContactPoint* cp);
-extern void FUN_00d00ca0(S00d92900_World* world, S00d92900_Event& event);
-extern void FUN_00cfff00(S00d92900_Body* entity, S00d92900_Event& event);
-extern void FUN_00d9ee50(S00d92900_Data* data, const hkContactPoint& cp, S00d92900_CollideParams& params,
+extern void hkpWorldCallbackUtil_fireContactPointCallback(S00d92900_World* world, S00d92900_Event& event);
+extern void hkpEntityCallbackUtil_fireContactPointCallbackInternal(S00d92900_Body* entity, S00d92900_Event& event);
+extern void hkMatrix3_setMul_ProcessEntries_00d9ee50(S00d92900_Data* data, const hkContactPoint& cp, S00d92900_CollideParams& params,
                          S00d92900_Body* rbA, S00d92900_Body* rbB, S00d92900_Accum* accA, S00d92900_Accum* accB,
                          S00d92900_Output& output);
-extern void FUN_00d01700(S00d92900_World* world, const S00d92900_BreachInfo* info, int num);
+extern void hkpWorldCallbackUtil_fireContactImpulseLimitBreached(S00d92900_World* world, const S00d92900_BreachInfo* info, int num);
 
 static __forceinline void S00d92900_fireEntity(S00d92900_Body* entity, S00d92900_Event& event)
 {
     if (entity->m_contactListenersSize)
     {
-        FUN_00cfff00(entity, event);
+        hkpEntityCallbackUtil_fireContactPointCallbackInternal(entity, event);
     }
 }
 
@@ -1049,14 +1058,14 @@ static __forceinline void dispatchContacts(S00d92900_Data* constraintData, const
         unsigned char& flags = cpp->asProperties()->m_flags;
         if (flags & 1)
         {
-            float projectedVel = FUN_00df2510(rbA, rbB, in->m_pBodyA->getCenterOfMassInWorld(),
+            float projectedVel = hkpSimpleContactConstraintUtil_calculateSeparatingVelocity(rbA, rbB, in->m_pBodyA->getCenterOfMassInWorld(),
                                               in->m_pBodyB->getCenterOfMassInWorld(), cp);
             {
                 unsigned int* extendedUserData = cpp->asProperties()->getStartOfExtendedUserData(atom);
-                S00d92900_Event event(2, rbA, rbB, constraintData->FUN_00d92820(), type, cp, cpp->asProperties(),
+                S00d92900_Event event(2, rbA, rbB, constraintData->hkpSimpleContactConstraintData_getSimpleConstraintContactMgr(), type, cp, cpp->asProperties(),
                                       &projectedVel, 0, fireCallbacksForNewPoints, i == bound, i == 0, extendedUserData,
                                       accA, accB);
-                FUN_00d00ca0(world, event);
+                hkpWorldCallbackUtil_fireContactPointCallback(world, event);
                 event.m_pObservedSource = 0;
                 S00d92900_fireEntity(rbA, event);
                 event.m_pObservedSource = 1;
@@ -1096,13 +1105,13 @@ static __forceinline void dispatchContacts(S00d92900_Data* constraintData, const
                     S00d92900_Accum* bodyA = in->m_pBodyA;
                     S00d92900_Accum* bodyB = in->m_pBodyB;
                     S00d92900_Output output;
-                    FUN_00d9ee50(constraintData, *cp, params, rbA, rbB, bodyA, bodyB, output);
+                    hkMatrix3_setMul_ProcessEntries_00d9ee50(constraintData, *cp, params, rbA, rbB, bodyA, bodyB, output);
                     S00d92900_Props* props = cpp->asProperties();
                     if (params.m_bCollisionOption)
                     {
                         S00d92900_BreachInfo bi;
                         bi.set(in->m_pConstraintChainInstance, props, cp, false);
-                        FUN_00d01700(world, &bi, 1);
+                        hkpWorldCallbackUtil_fireContactImpulseLimitBreached(world, &bi, 1);
                     }
                     cpp->asProperties()->m_fAccumulatedImpulse = 0.0f;
                     cpp->asProperties()->m_uiUserData = 0.0f;
@@ -1125,9 +1134,9 @@ static __forceinline void dispatchContacts(S00d92900_Data* constraintData, const
         else if (fireCallbacksForNewPoints)
         {
             unsigned int* extendedUserData = cpp->asProperties()->getStartOfExtendedUserData(atom);
-            S00d92900_Event event(2, rbA, rbB, constraintData->FUN_00d92820(), type, cp, cpp->asProperties(), 0, 0,
+            S00d92900_Event event(2, rbA, rbB, constraintData->hkpSimpleContactConstraintData_getSimpleConstraintContactMgr(), type, cp, cpp->asProperties(), 0, 0,
                                   true, i == bound, i == 0, extendedUserData, accA, accB);
-            FUN_00d00ca0(world, event);
+            hkpWorldCallbackUtil_fireContactPointCallback(world, event);
             event.m_pObservedSource = 0;
             S00d92900_fireEntity(rbA, event);
             event.m_pObservedSource = 1;
@@ -1144,7 +1153,8 @@ static __forceinline void dispatchContacts(S00d92900_Data* constraintData, const
 
 // Wraps dispatchContacts to process contact points for a constraint atom, firing events and resolving collisions.
 // @fnv 0x00d92900
-void FUN_00d92900(S00d92900_Data* constraintData, const S00d92900_QueryIn* in, hkpSimpleContactConstraintAtom* atom, int type)
+// src: XBOX_PDB 0x00d92900
+void hkSimpleContactConstraintData_fireCallbacks(S00d92900_Data* constraintData, const S00d92900_QueryIn* in, hkpSimpleContactConstraintAtom* atom, int type)
 {
     int bound;
     dispatchContacts(constraintData, in, atom, type, bound);

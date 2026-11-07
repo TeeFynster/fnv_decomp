@@ -87,12 +87,12 @@ class BGSReconstructFormsInAllFilesMap
 class NavMeshObstacleMap : public BGSReconstructFormsInAllFilesMap
 {
   public:
-    void FUN_006947e0(void*&, unsigned short&, NiPointer<ObstacleData>&);
-    void FUN_006946a0(unsigned short, NiPointer<ObstacleData>);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_ObstacleData_unsigned_short_NiPointer_ObstacleData_GetNext(void*&, unsigned short&, NiPointer<ObstacleData>&);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_NavMeshObstacleData_unsigned_short_NiPointer_NavMeshObstacleData_SetAt(unsigned short, NiPointer<ObstacleData>);
 };
 class NavMeshPOVMap : public BGSReconstructFormsInAllFilesMap
 {
   public:
-    void FUN_00694d30(void*&, unsigned short&, NavMeshPOVData&);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NavMeshPOVData_unsigned_short_NavMeshPOVData_GetNext(void*&, unsigned short&, NavMeshPOVData&);
     void InsertOrUpdate(unsigned short, NavMeshPOVData);
 };

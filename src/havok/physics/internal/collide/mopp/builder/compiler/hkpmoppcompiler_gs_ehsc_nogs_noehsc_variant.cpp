@@ -66,12 +66,12 @@ public:
     PacketCallLocal_00dd4cb0(float x, float y, float z, float w);
     PacketCallLocal_00dd4cb0(const __m128& vector);
 
-    PacketCallLocal_00dd4cb0* FUN_005532a0(float x, float y, float z, float w);
-    void FUN_004a3f10(PacketCallLocal_00dd4cb0* vector);
-    void __thiscall FUN_004b4db0(const PacketCallLocal_00dd4cb0* vector);
-    PacketCallLocal_00dd4cb0& FUN_00e531a0(int parameter);
-    PacketCallLocal_00dd4cb0 FUN_00e53260(int parameter);
-    void FUN_005611c0();
+    PacketCallLocal_00dd4cb0* hkVector4_hkVector4(float x, float y, float z, float w);
+    void SetValue(PacketCallLocal_00dd4cb0* vector);
+    void __thiscall SetQuaternionComponentsFromVector(const PacketCallLocal_00dd4cb0* vector);
+    PacketCallLocal_00dd4cb0& ComputeValue_00e531a0(int parameter);
+    PacketCallLocal_00dd4cb0 ProcessAndReturnValue_00e53260(int parameter);
+    void normalize_005611c0();
 
     void operator=(const PacketCallLocal_00dd4cb0& vector);
     float& operator()(int index);
@@ -126,7 +126,7 @@ struct SubFirst
     int m_i10;
     int m_i14;
 
-    void FUN_00dd50f0(InitArg* apArg);
+    void hkpMoppSplitter_hkpMoppSplitParams_hkpMoppSplitParams(InitArg* apArg);
 };
 struct SubSecond
 {
@@ -139,7 +139,7 @@ struct SubSecond
     int m_i18;
     int m_i1c;
 
-    void FUN_00dd5150(InitArg* apArg);
+    void hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(InitArg* apArg);
 };
 struct FUN_00dd4bf0
 {
@@ -205,9 +205,9 @@ struct Allocator
     virtual void freeBlock(void*, int) throw();
 };
 void* __cdecl FUN_00c85690(Allocator*, int) throw();
-void __cdecl FUN_00c856c0(Allocator*, void*) throw();
-void __cdecl FUN_00c908c0(Allocator*, void*, int, int) throw();
-void __cdecl FUN_00cb1260(void*, const void*, int) throw();
+void __cdecl hkMemoryRouter_easyFree(Allocator*, void*) throw();
+void __cdecl hkArrayUtil__reserve(Allocator*, void*, int, int) throw();
+void __cdecl hkString_memCpy(void*, const void*, int) throw();
 template <class T> struct MergeArray
 {
     T* data;
@@ -236,14 +236,14 @@ template <class T> struct MergeArray
         if (cap < n)
         {
             int cap2 = 2 * cap;
-            FUN_00c908c0(&a, this, n < cap2 ? cap2 : n, sizeof(T));
+            hkArrayUtil__reserve(&a, this, n < cap2 ? cap2 : n, sizeof(T));
         }
     }
     void reserveExactly(int n)
     {
         Allocator& a = reinterpret_cast<Allocator&>((&hkMemoryRouter::getInstance())->heap());
         if (getCapacity() < n)
-            FUN_00c908c0(&a, this, n, sizeof(T));
+            hkArrayUtil__reserve(&a, this, n, sizeof(T));
     }
     void SetSizeAndGrow(int n)
     {
@@ -300,7 +300,7 @@ struct hkpMoppCodeGenerator : hkReferencedObject
     unsigned char* byteData;
     MergeArray<int> state;
     hkpMoppCodeGenerator(int) throw();
-    hkpMoppCode* FUN_00e064f0() throw();
+    hkpMoppCode* AllocateStorage_00e064f0() throw();
     ~hkpMoppCodeGenerator() throw();
 };
 struct CostSettings
@@ -387,16 +387,16 @@ struct hkpMoppDefaultSplitter
     PrimitiveSource* source;
     int unk2C, unk30, unk34, treeDepth;
     void FUN_00e09ba0() throw();
-    void FUN_00e09bd0() throw();
+    void Hkpmoppdefaultsplitter_UpdateState_00e09bd0() throw();
     hkpMoppDefaultSplitter() throw()
     {
         FUN_00e09ba0();
     }
     ~hkpMoppDefaultSplitter() throw()
     {
-        FUN_00e09bd0();
+        Hkpmoppdefaultsplitter_UpdateState_00e09bd0();
     }
-    int FUN_00e0a550(PrimitiveSource*, hkpMoppCostFunction*, hkpMoppDefaultAssembler*, int*, ScratchLayout*) throw();
+    int hkpMoppDefaultSplitter_buildTree(PrimitiveSource*, hkpMoppCostFunction*, hkpMoppDefaultAssembler*, int*, ScratchLayout*) throw();
 };
 struct EncodedReference
 {
@@ -426,10 +426,11 @@ struct MoppBuilder
     CostSettings cost;
     AssemblerSettings assembler;
     int FUN_00dd4b80(PrimitiveSource*) throw();
-    hkpMoppCode* FUN_00dd4cb0(PrimitiveSource*, void*, int) throw();
+    hkpMoppCode* AllocateStorage_00dd4cb0(PrimitiveSource*, void*, int) throw();
 };
 // @fnv 0x00dd4cb0
-hkpMoppCode* MoppBuilder::FUN_00dd4cb0(PrimitiveSource* source, void* buffer, int bufferSize)
+// src: GUESS 0x00dd4cb0 (confidence: low)
+hkpMoppCode* MoppBuilder::AllocateStorage_00dd4cb0(PrimitiveSource* source, void* buffer, int bufferSize)
 {
     int primitiveCount = source->count() + extraPrimitives;
     hkpMoppCodeGenerator generator(primitiveCount * 12);
@@ -449,18 +450,18 @@ hkpMoppCode* MoppBuilder::FUN_00dd4cb0(PrimitiveSource* source, void* buffer, in
     int status;
     {
         hkpMoppDefaultSplitter splitter;
-        status = splitter.FUN_00e0a550(source, &costFunction, &output, &options, &layout);
+        status = splitter.hkpMoppDefaultSplitter_buildTree(source, &costFunction, &output, &options, &layout);
     }
     if (scratch != buffer)
     {
         Allocator* heap = reinterpret_cast<Allocator*>(&(&hkMemoryRouter::getInstance())->heap());
-        FUN_00c856c0(heap, scratch);
+        hkMemoryRouter_easyFree(heap, scratch);
     }
     result = status;
     hkpMoppCode* code;
     if (!chunks)
     {
-        code = generator.FUN_00e064f0();
+        code = generator.AllocateStorage_00e064f0();
     }
     else
     {
@@ -497,8 +498,8 @@ hkpMoppCode* MoppBuilder::FUN_00dd4cb0(PrimitiveSource* source, void* buffer, in
         for (int i = 0; i < chunks->count; ++i)
         {
             unsigned char* dest = bytes.data + offsets.data[i];
-            hkpMoppCode* part = chunks->at(i).generator->FUN_00e064f0();
-            FUN_00cb1260(dest, part->m_data.m_data, part->m_data.m_iElementCount);
+            hkpMoppCode* part = chunks->at(i).generator->AllocateStorage_00e064f0();
+            hkString_memCpy(dest, part->m_data.m_data, part->m_data.m_iElementCount);
             delete part;
             chunks->at(i).generator->removeReference();
         }

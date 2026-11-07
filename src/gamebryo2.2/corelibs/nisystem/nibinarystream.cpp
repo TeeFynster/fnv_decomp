@@ -7,7 +7,8 @@
 extern unsigned char DAT_011f607c;
 
 // @fnv 0x00aa1d40
-unsigned char __cdecl FUN_00aa1d40()
+// src: COMMUNITY 0x00aa1d40
+unsigned char __cdecl NiBinaryStream_GetEndianMatchHint()
 {
     return DAT_011f607c;
 }
@@ -60,11 +61,12 @@ struct C00aa1d50
 {
     char pad00[0x4];
     int m4;
-    int FUN_00aa1d50();
+    int NiBinaryStream_GetPosition();
 };
 
 // @fnv 0x00aa1d50
-int C00aa1d50::FUN_00aa1d50()
+// src: COMMUNITY 0x00aa1d50
+int C00aa1d50::NiBinaryStream_GetPosition()
 {
     return m4;
 }

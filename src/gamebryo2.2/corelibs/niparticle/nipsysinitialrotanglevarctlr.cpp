@@ -6,12 +6,13 @@
 extern "C" void* g_012026e8;
 
 // @fnv 0x00c2a080
-void* __cdecl FUN_00c2a080()
+// src: COMMUNITY 0x00c2a080
+void* __cdecl NiPSysInitialRotAngleVarCtlr_GetRTTI()
 {
     return &g_012026e8;
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int uiSize);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int uiSize);
 extern "C" char DAT_010beebc;
 
 struct Item
@@ -30,7 +31,7 @@ struct Creator
 // @fnv 0x00c2a0c0
 Item* Creator::CreateItem(int iArg)
 {
-    Item* pkItem = (Item*)FUN_00aa13e0(0x40);
+    Item* pkItem = (Item*)Object_DispatchCommandFour(0x40);
     if (pkItem)
     {
         pkItem->FUN_00c32d80();
@@ -69,11 +70,11 @@ template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(co
 
 typedef NiTArray<char*, NiTMallocInterface<char*> > C2A110StringArray;
 
-extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
+extern "C" char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcText);
 
 struct C2A110Base
 {
-    void FUN_00c32f60(C2A110StringArray* pkStrings);
+    void NiPSysModifierFloatCtlr_GetViewerStrings(C2A110StringArray* pkStrings);
 };
 
 struct C2A110Object : C2A110Base
@@ -100,7 +101,7 @@ struct C2A110Object : C2A110Base
 // @fnv 0x00c2a110
 void C2A110Object::AppendRTTIName(C2A110StringArray* pkStrings)
 {
-    C2A110Base::FUN_00c32f60(pkStrings);
-    char* pcString = FUN_00a7d330(ms_kRTTI.GetName());
+    C2A110Base::NiPSysModifierFloatCtlr_GetViewerStrings(pkStrings);
+    char* pcString = NiViewerStrings_NiGetViewerString_Title(ms_kRTTI.GetName());
     pkStrings->Add(pcString);
 }

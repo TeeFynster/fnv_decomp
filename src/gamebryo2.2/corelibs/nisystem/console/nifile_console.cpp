@@ -90,7 +90,7 @@ extern const char kModeWriteBinary[];
 typedef struct _iobuf FILE;
 
 extern "C" int __cdecl FUN_00ec9a5e(FILE** ppFile, const char* name, const char* mode);
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 
 struct NiBinaryStreamBase
 {
@@ -113,13 +113,13 @@ struct FUN_00aa14d0_cls : NiBinaryStreamBase
     unsigned char m_bGood;
 
     FUN_00aa14d0_cls(const char* name, unsigned int mode, unsigned int bufSize);
-    void FUN_00aa1b30(unsigned int);
+    void NiFile_SetEndianSwap(unsigned int);
 };
 
 // @fnv 0x00aa14d0
 FUN_00aa14d0_cls::FUN_00aa14d0_cls(const char* name, unsigned int mode, unsigned int bufSize)
 {
-    FUN_00aa1b30(0);
+    NiFile_SetEndianSwap(0);
     m_uiTotalFileSize = 0;
     m_eMode = mode;
     const char* openMode;
@@ -135,7 +135,7 @@ FUN_00aa14d0_cls::FUN_00aa14d0_cls(const char* name, unsigned int mode, unsigned
     m_uiBufferReadSize = 0;
     m_uiPos = 0;
     if ((unsigned char)bOpened != 0 && bufSize > 0)
-        m_pBuffer = (char*)FUN_00aa1070(bufSize);
+        m_pBuffer = (char*)_NiMalloc_00aa1070(bufSize);
     else
         m_pBuffer = 0;
 }
@@ -155,12 +155,13 @@ int __cdecl FUN_00aa85c0(void*, int, int);
 
 struct FUN_00aa16d0_cls : NiFile
 {
-    void FUN_00aa16d0(unsigned int offset, unsigned int whence);
+    void NiFile_Seek(unsigned int offset, unsigned int whence);
 };
 
 // Seeks the file: advances within the read buffer when possible, otherwise flushes and calls the underlying seek, updating position and good flag.
 // @fnv 0x00aa16d0
-void FUN_00aa16d0_cls::FUN_00aa16d0(unsigned int offset, unsigned int whence)
+// src: XBOX_PDB 0x00aa16d0
+void FUN_00aa16d0_cls::NiFile_Seek(unsigned int offset, unsigned int whence)
 {
     if (!m_bGood)
     {
@@ -235,7 +236,8 @@ unsigned int AA1F10BinaryStream::ReadLine(char* pcLineBuffer, unsigned int uiMax
 
 #include <windows.h>
 // @fnv 0x00aa1650
-unsigned char __cdecl FUN_00aa1650(char* path)
+// src: COMMUNITY 0x00aa1650
+unsigned char __cdecl _CreateDirectoryA(char* path)
 {
     return CreateDirectoryA(path, 0) != 0;
 }

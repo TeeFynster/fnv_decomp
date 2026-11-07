@@ -27,7 +27,7 @@ class TESConditionItem
 
     TESConditionItem();                                                // 0x006811e0
     ~TESConditionItem();                                               // empty; scalar deleting destructor 0x007b3fa0 (folded)
-    unsigned int FUN_005eb680();                                       // 0x005eb680
+    unsigned int GetConditionFunction();                                       // 0x005eb680
     bool IsFlagSet();                                                  // 0x005ec040
     int GetComparisonCondition();                                      // 0x005ec060
     void SetObjectType(int objectType);                                // 0x00600ab0

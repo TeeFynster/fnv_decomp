@@ -128,7 +128,7 @@ void S_00ebf4a0_Class::ProjectOntoAxes(const NiPoint3* in, NiPoint3* out)
     norm.x = unk6C;
     norm.y = unk70;
     norm.z = unk74;
-    norm.FUN_004a0c10();
+    norm.Unitize_004a0c10();
 
     if (norm.x <= DAT_01032980)
     {
@@ -159,7 +159,7 @@ void S_00ebf4a0_Class::ProjectOntoAxes(const NiPoint3* in, NiPoint3* out)
     float fDotZ = norm.x * unk60.x + norm.y * unk60.y + norm.z * unk60.z;
     out->z = fDotZ / (unk74 * unk74);
 
-    out->FUN_004a0c10();
+    out->Unitize_004a0c10();
 }
 
 #include <math.h>
@@ -179,12 +179,13 @@ struct NiOBB
     float m_afWorldExtent[3];
     NiOBBRoot* m_pkTreeNode;
 
-    int FUN_00ebc2a0(const NiOBB& kBox, float& rfTime, NiPoint3& rkPoint);
+    int NiOBBox_FindIntersection(const NiOBB& kBox, float& rfTime, NiPoint3& rkPoint);
 };
 
 // Tests swept OBB collision against kBox, writing the earliest collision time to rfTime and the contact point to rkPoint, returning 1 on hit or 0 on miss.
 // @fnv 0x00ebc2a0
-int NiOBB::FUN_00ebc2a0(const NiOBB& kBox, float& rfHitTime, NiPoint3& rkHitPoint)
+// src: GAMEBRYO_LIB 0x00ebc2a0
+int NiOBB::NiOBBox_FindIntersection(const NiOBB& kBox, float& rfHitTime, NiPoint3& rkHitPoint)
 {
     const NiPoint3* pkA = m_akWorldBasis;
     const NiPoint3* pkB = kBox.m_akWorldBasis;
@@ -1229,11 +1230,12 @@ struct BoxE
     {
         return extents[i];
     }
-    int FUN_00eba680(const BoxE& other);
+    int NiOBBox_TestIntersection(const BoxE& other);
 };
 // Performs a swept OBB vs OBB collision test using relative motion over root->GetDeltaTime(), returning 1 if the boxes intersect during the sweep.
 // @fnv 0x00eba680
-int BoxE::FUN_00eba680(const BoxE& other)
+// src: GAMEBRYO_LIB 0x00eba680
+int BoxE::NiOBBox_TestIntersection(const BoxE& other)
 {
     const NiPoint3* a = axes;
     const NiPoint3* b = other.axes;

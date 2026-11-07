@@ -1,7 +1,7 @@
 #ifndef FNV_ORIGINAL_FLOAT_CALL_INITIALIZERS_H
 #define FNV_ORIGINAL_FLOAT_CALL_INITIALIZERS_H
 // Helpers and operands stay original (bound by address); helpers lack canonical names.
-float FUN_004019b0(float);
+float sqrt_004019b0(float);
 extern float fnvFloat_01011440;
 extern float fnvFloat_01011444;
 extern float fnvFloat_010115a4;

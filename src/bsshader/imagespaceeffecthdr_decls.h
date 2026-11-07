@@ -43,7 +43,7 @@ class ImageSpaceShaderParam : public HdrEffectParamLocalForm
         return g_memoryManager.Allocate(size);
     }
     void AllocateShaderConstants(int, int);
-    void FUN_00b8a7c0();
+    void SetBlurClearMode();
     void CopyParamData(int, const float*, unsigned int);
 };
 class ImageSpaceEffect

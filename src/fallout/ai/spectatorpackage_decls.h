@@ -2,6 +2,6 @@
 #ifndef SPECTATORPACKAGE_DECLS_H
 #define SPECTATORPACKAGE_DECLS_H
 #include "../../../include/SpectatorPackage.h"
-void __stdcall FUN_009f9c20(SpectatorPackage*);
-int __stdcall FUN_009f9bb0(SpectatorPackage*, const SpectatorPackage*);
+void __stdcall Object_ReleaseMediaTypeData(SpectatorPackage*);
+int __stdcall Runtime_CopyMemory_009f9bb0(SpectatorPackage*, const SpectatorPackage*);
 #endif

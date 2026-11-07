@@ -15,7 +15,7 @@ void AddMiscStat(MiscStatManager::MiscStat eStat, int delta)
     {
         DAT_011c6d50[eStat]->value += delta;
         ChallengeManager::UpdateChallengeProgress(CHALLENGE_TYPE_CHALLENGE_TYPE_MISC_STAT, delta, 0, 0, (unsigned short)eStat, 0, 0);
-        StatsMenu* menu = (StatsMenu*)((Tile*)Tile::FindMenuById(FUN_004d5e00()))->GetMenu();
+        StatsMenu* menu = (StatsMenu*)((Tile*)Tile::FindMenuById(StatsMenu_GetClassStatic()))->GetMenu();
         if (menu)
             menu->RefreshMiscStat(eStat);
     }
@@ -66,7 +66,7 @@ extern const char* DAT_01189280[];
 
 void FNV_Warning(const char* format, ...);
 void FUN_007dc0a0(int* a1);
-int FUN_00404dc0(const char* a1, const char* a2);
+int BSstricmp(const char* a1, const char* a2);
 
 // Searches the 0x2b-entry misc stat name table for a1 and returns its index, or warns and returns 0x2b if not found.
 // @fnv 0x004d5eb0
@@ -76,7 +76,7 @@ int FindMiscStatIndex(const char* pcStatName)
 
     for (i = 0; i < 0x2b; FUN_007dc0a0(&i))
     {
-        if (DAT_01189280[i] != 0 && FUN_00404dc0(DAT_01189280[i], pcStatName) == 0)
+        if (DAT_01189280[i] != 0 && BSstricmp(DAT_01189280[i], pcStatName) == 0)
         {
             return i;
         }

@@ -54,7 +54,7 @@ template <class K, class V> class BSMap : public BSMapBase<K, V>
   public:
 };
 
-bool FUN_00489280(int);
+bool TESModel_IsModelChunk(int);
 extern "C" void* __cdecl _alloca(unsigned int);
 #pragma intrinsic(_alloca)
 
@@ -70,5 +70,5 @@ class TaskQueueInterface
 void* __cdecl operator new(unsigned int);
 
 extern NiFixedString EmptyFS;
-void FUN_0043ba60(const NiFixedString&);
+void NiGlobalStringTable_IncRefCount(const NiFixedString&);
 #endif

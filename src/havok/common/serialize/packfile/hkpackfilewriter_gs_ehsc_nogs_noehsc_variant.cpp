@@ -52,7 +52,7 @@ inline hkMemoryRouter* router()
     return (&hkMemoryRouter::getInstance());
 }
 
-int __cdecl FUN_00cb0fa0(const char*, const char*) throw();
+int __cdecl hkString_strCmp(const char*, const char*) throw();
 template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
     m_iElementCount = 0;
@@ -112,7 +112,8 @@ struct Ragdoll
     Ragdoll* __thiscall FUN_00ce2510(hkArray<RigidBody*>*, hkArray<Constraint*>*, Skeleton*, hkArray<int>*) throw();
 };
 // @fnv 0x00cea810
-Ragdoll* __cdecl FUN_00cea810(Skeleton* skeleton, const hkArray<RigidBody*>& bodies,
+// src: HAVOK_LIB 0x00cea810
+Ragdoll* __cdecl hkaRagdollUtils_createRagdollInstanceFromSkeleton(Skeleton* skeleton, const hkArray<RigidBody*>& bodies,
                               const hkArray<Constraint*>& constraints)
 {
     int count = skeleton->boneCount;
@@ -135,14 +136,14 @@ Ragdoll* __cdecl FUN_00cea810(Skeleton* skeleton, const hkArray<RigidBody*>& bod
         {
             RigidBody* candidate = bodies.m_data[j];
             const char* name = candidate->name.text();
-            if (name && FUN_00cb0fa0(name, bone.name.text()) == 0)
+            if (name && hkString_strCmp(name, bone.name.text()) == 0)
             {
                 if (!body)
                     body = candidate;
                 else
                 {
                     hkOstream message(static_cast<void*>(buffer), 512);
-                    message.FUN_00cc01c0("Some RBS have duplicated names : ").FUN_00cc01c0((const char*)name);
+                    message.ProcessAndReturnValue_00cc01c0("Some RBS have duplicated names : ").ProcessAndReturnValue_00cc01c0((const char*)name);
                     hkError::s_instance->message(1, 0xabba98aa, buffer, ".\\Utils\\hkaRagdollUtils.cpp", 0x26b);
                 }
             }
@@ -170,10 +171,10 @@ Ragdoll* __cdecl FUN_00cea810(Skeleton* skeleton, const hkArray<RigidBody*>& bod
                 else
                 {
                     hkOstream message(static_cast<void*>(buffer), 512);
-                    message.FUN_00cc01c0("Found more than one constraint between rigid bodies ")
-                        .FUN_00cc01c0((const char*)(a->name.text()))
-                        .FUN_00cc01c0(" and ")
-                        .FUN_00cc01c0((const char*)(b->name.text()));
+                    message.ProcessAndReturnValue_00cc01c0("Found more than one constraint between rigid bodies ")
+                        .ProcessAndReturnValue_00cc01c0((const char*)(a->name.text()))
+                        .ProcessAndReturnValue_00cc01c0(" and ")
+                        .ProcessAndReturnValue_00cc01c0((const char*)(b->name.text()));
                     hkError::s_instance->message(1, 0xabba82ff, buffer, ".\\Utils\\hkaRagdollUtils.cpp", 0x291);
                 }
             }
@@ -181,7 +182,7 @@ Ragdoll* __cdecl FUN_00cea810(Skeleton* skeleton, const hkArray<RigidBody*>& bod
         if (!constraint)
         {
             hkOstream message(static_cast<void*>(buffer), 512);
-            message.FUN_00cc01c0("Couldn't find constraint for bone : ").WriteName(*reinterpret_cast<const hkStringPtr*>(&bone));
+            message.ProcessAndReturnValue_00cc01c0("Couldn't find constraint for bone : ").WriteName(*reinterpret_cast<const hkStringPtr*>(&bone));
             hkError::s_instance->message(1, 0xabba9f9f, buffer, ".\\Utils\\hkaRagdollUtils.cpp", 0x298);
             return 0;
         }
@@ -191,7 +192,7 @@ Ragdoll* __cdecl FUN_00cea810(Skeleton* skeleton, const hkArray<RigidBody*>& bod
     {
         {
             hkOstream message(static_cast<void*>(buffer), 512);
-            message.FUN_00cc01c0("Some bones have no name - can't create rag doll");
+            message.ProcessAndReturnValue_00cc01c0("Some bones have no name - can't create rag doll");
             hkError::s_instance->message(1, 0xabbae6a2, buffer, ".\\Utils\\hkaRagdollUtils.cpp", 0x2a3);
         }
         return 0;
@@ -199,7 +200,7 @@ Ragdoll* __cdecl FUN_00cea810(Skeleton* skeleton, const hkArray<RigidBody*>& bod
     if (!matchedBodies.m_iElementCount)
     {
         hkOstream message(static_cast<void*>(buffer), 512);
-        message.FUN_00cc01c0("Skeleton has no associated rigid bodies - can't create rag doll");
+        message.ProcessAndReturnValue_00cc01c0("Skeleton has no associated rigid bodies - can't create rag doll");
         hkError::s_instance->message(1, 0xabbae6e4, buffer, ".\\Utils\\hkaRagdollUtils.cpp", 0x2aa);
         return 0;
     }

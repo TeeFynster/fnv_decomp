@@ -21,10 +21,10 @@ class NiStencilProperty : public NiProperty
     void* DestroyAndFree(unsigned int flags);
     void Destroy();
     void DestroyBase();
-    bool FUN_00a6f070(NiObject* object);
-    void FUN_00a6f500(NiStream& stream);
-    void FUN_00a6f740(NiStream* stream);
-    void FUN_00a6f7d0(StrArr* strings);
+    bool IsEqual_00a6f070(NiObject* object);
+    void LoadBinary_00a6f500(NiStream& stream);
+    void SaveBinary_00a6f740(NiStream* stream);
+    void GetViewerStrings_00a6f7d0(StrArr* strings);
 
     union
     {

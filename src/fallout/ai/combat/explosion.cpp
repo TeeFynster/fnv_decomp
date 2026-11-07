@@ -31,7 +31,8 @@
 
 
 // @fnv 0x009ac170
-void __thiscall Explosion::FUN_009ac170(ActorCause* apActorCause)
+// src: COMMUNITY 0x009ac170
+void __thiscall Explosion::SetActorCause_009ac170(ActorCause* apActorCause)
 {
     m_pActorCause = apActorCause;
 }
@@ -56,7 +57,8 @@ const NiRTTI* __thiscall bhkLiquidAction::GetRTTI() const
     return &g_01268420;
 }
 
-NavMesh* NavMeshPtr::FUN_00458b50()
+// src: XBOX_PDB 0x00458b50
+NavMesh* NavMeshPtr::AnimatingText_GetFullText()
 {
     return 0;
 }
@@ -64,13 +66,14 @@ NavMesh* NavMeshPtr::FUN_00458b50()
 struct FUN_009afc30_shell
 {
     NavMeshPtr m_navMeshPtr;
-    NavMesh* FUN_009afc30();
+    NavMesh* hkpFixedBufferCdPointCollector_getHits();
 };
 
 // @fnv 0x009afc30
-NavMesh* FUN_009afc30_shell::FUN_009afc30()
+// src: XBOX_PDB 0x009afc30
+NavMesh* FUN_009afc30_shell::hkpFixedBufferCdPointCollector_getHits()
 {
-    return ((NavMeshPtr*)((char*)this + 8))->FUN_00458b50();
+    return ((NavMeshPtr*)((char*)this + 8))->AnimatingText_GetFullText();
 }
 
 // This is the distinct 0x00932d60 load step; shared MobileObject only
@@ -81,7 +84,8 @@ struct MobileObjectLoadStep
 };
 
 // @fnv 0x009b2770
-void Explosion::FUN_009b2770(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009b2770
+void Explosion::FinishLoadGame_009b2770(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     reinterpret_cast<MobileObjectLoadStep*>(this)->ApplyLoadBuffer(apLoadGameBuffer);
 }
@@ -96,18 +100,18 @@ struct FUN_009afbb0_shell
 {
     virtual ~FUN_009afbb0_shell();
     void* FUN_009afbb0(unsigned int flags);
-    void FUN_009afc10();
+    void ForwardCall_009afc10();
 };
 
-extern "C" void __cdecl FUN_009afbe0(void*);
+extern "C" void __cdecl Object_UpdateFields_009afbe0(void*);
 
 // Calls FUN_009afc10, then if bit 0 of flags is set calls FUN_009afbe0 on this, and returns this.
 // @fnv 0x009afbb0
 void* FUN_009afbb0_shell::FUN_009afbb0(unsigned int flags)
 {
-    FUN_009afc10();
+    ForwardCall_009afc10();
     if (flags & 1)
-        FUN_009afbe0(this);
+        Object_UpdateFields_009afbe0(this);
     return this;
 }
 
@@ -118,11 +122,12 @@ struct FUN_00621100_shell
 
 struct FUN_009afc10_shell
 {
-    void __thiscall FUN_009afc10();
+    void __thiscall ForwardCall_009afc10();
 };
 
 // @fnv 0x009afc10
-void __thiscall FUN_009afc10_shell::FUN_009afc10()
+// src: GUESS 0x009afc10 (confidence: low)
+void __thiscall FUN_009afc10_shell::ForwardCall_009afc10()
 {
     ((FUN_00621100_shell*)this)->SetVtable();
 }
@@ -131,13 +136,14 @@ struct FUN_009afc50_shell
 {
     char m_auiShapeKeys[0x14];
     NavMeshPtr m_navMeshPtr;
-    NavMesh* FUN_009afc30();
+    NavMesh* hkpFixedBufferCdPointCollector_getHits();
 };
 
 // @fnv 0x009afc50
-NavMesh* FUN_009afc50_shell::FUN_009afc30()
+// src: XBOX_PDB 0x009afc30
+NavMesh* FUN_009afc50_shell::hkpFixedBufferCdPointCollector_getHits()
 {
-    return m_navMeshPtr.FUN_00458b50();
+    return m_navMeshPtr.AnimatingText_GetFullText();
 }
 
 void __cdecl FUN_009ac940(void*);
@@ -183,7 +189,8 @@ struct GameTimerAccessorBridge
 extern GameTimerRecord g_timeGlobal;
 
 // @fnv 0x009ae580
-void Explosion::FUN_009ae580(float afDelta)
+// src: XBOX_PDB 0x009ae580
+void Explosion::ProcessMovement(float afDelta)
 {
     float fdelta = reinterpret_cast<GameTimerAccessorBridge*>(&g_timeGlobal)->GetStoredFloatValue();
     Update(fdelta);
@@ -198,7 +205,8 @@ struct UnkObj
     virtual void f2(void*, int);
 };
 // @fnv 0x009afbe0
-void __cdecl FUN_009afbe0(void* a1)
+// src: GUESS 0x009afbe0 (confidence: low)
+void __cdecl Object_UpdateFields_009afbe0(void* a1)
 {
     if (a1 != 0)
     {
@@ -209,19 +217,20 @@ void __cdecl FUN_009afbe0(void* a1)
 
 struct H00622570
 {
-    void __thiscall FUN_00622570(bool);
+    void __thiscall UpdateState_00622570(bool);
 };
 struct S009afc70
 {
     char m_auiShapeKeys[0x14];
     NavMeshPtr m_navMeshPtr;
-    void* __thiscall FUN_009afc70(void*);
+    void* __thiscall hkpFixedBufferCdPointCollector_hasHit(void*);
 };
 // Calls FUN_00622570 on a1 with true when m_navMeshPtr.FUN_00458b50() returns a value greater than 0, then returns a1.
 // @fnv 0x009afc70
-void* __thiscall S009afc70::FUN_009afc70(void* apTarget)
+// src: COMMUNITY 0x009afc70
+void* __thiscall S009afc70::hkpFixedBufferCdPointCollector_hasHit(void* apTarget)
 {
-    ((H00622570*)apTarget)->FUN_00622570((int)m_navMeshPtr.FUN_00458b50() > 0);
+    ((H00622570*)apTarget)->UpdateState_00622570((int)m_navMeshPtr.AnimatingText_GetFullText() > 0);
     return apTarget;
 }
 
@@ -276,13 +285,14 @@ struct RagdollCallView
 };
 struct FUN_009b0d30_shell
 {
-    void __thiscall FUN_00c9c1d0();
-    void __thiscall FUN_009b0d30(int);
+    void __thiscall activate_00c9c1d0();
+    void __thiscall hkpRigidBody_applyAngularImpulse(int);
 };
 // @fnv 0x009b0d30
-void __thiscall FUN_009b0d30_shell::FUN_009b0d30(int a1)
+// src: COMMUNITY 0x009b0d30
+void __thiscall FUN_009b0d30_shell::hkpRigidBody_applyAngularImpulse(int a1)
 {
-    this->FUN_00c9c1d0();
+    this->activate_00c9c1d0();
     reinterpret_cast<RagdollCallView*>(reinterpret_cast<TESDataHandler*>(this)->GetBGSRagdollList())->F21(a1);
 }
 
@@ -329,7 +339,8 @@ struct RetObj
 };
 // Returns true if _FNV_GetObjectReference() is non-null and its vf37() call returns true, otherwise false.
 // @fnv 0x00565690
-bool Actor::FUN_00565690()
+// src: COMMUNITY 0x00565690
+bool Actor::TESObjectREFR_BaseIsQuestItem()
 {
     return _FNV_GetObjectReference() ? _FNV_GetObjectReference()->vf37() : false;
 }
@@ -355,14 +366,14 @@ struct FUN_009ae0f0
     float mC;
     float m10;
     float m14;
-    void __thiscall FUN_00537bb0();
+    void __thiscall hkUnaryActionCinfo_hkUnaryActionCinfo();
     FUN_009ae0f0();
 };
 // Calls FUN_00537bb0, then sets m8 to runtimeFloatSettingDefault247 and mC, m10, m14 to 15.0f, 64.0f, 15.0f.
 // @fnv 0x009ae0f0
 FUN_009ae0f0::FUN_009ae0f0()
 {
-    FUN_00537bb0();
+    hkUnaryActionCinfo_hkUnaryActionCinfo();
     m8 = runtimeFloatSettingDefault247;
     mC = 15.0f;
     m10 = 64.0f;
@@ -389,7 +400,8 @@ struct FUN_00825ad0
 };
 
 // @fnv 0x009b22c0
-void Explosion::FUN_009b22c0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009b22c0
+void Explosion::LoadGame_009b22c0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     MobileObject::ApplyLoadBuffer(apLoadGameBuffer);
     apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_fFirstFloatValue), 4u);
@@ -705,11 +717,12 @@ struct FUN_005762b0_cls
     {
         return 0;
     }
-    int FUN_005762b0(int a1);
+    int TESObjectREFR_GetLookingAtLocation(int a1);
 };
 // Calls vf125 with a1 and the result of a chain of vf118/vf119 calls on local Vec3f values, then passes that to Callee00439e90, and returns a1.
 // @fnv 0x005762b0
-int FUN_005762b0_cls::FUN_005762b0(int a1)
+// src: COMMUNITY 0x005762b0
+int FUN_005762b0_cls::TESObjectREFR_GetLookingAtLocation(int a1)
 {
     Vec3f a2;
     Vec3f bTmp;
@@ -804,10 +817,10 @@ struct BaseObject
 {
     virtual ~BaseObject();
     unsigned int unk04;
-    void __thiscall FUN_00621060();
+    void __thiscall hkpCdPointCollector_hkpCdPointCollector();
     BaseObject()
     {
-        FUN_00621060();
+        hkpCdPointCollector_hkpCdPointCollector();
     }
 };
 struct FUN_009afaf0 : BaseObject
@@ -901,7 +914,8 @@ struct MobileObjectFinishLoadStep
 };
 
 // @fnv 0x009b25b0
-void Explosion::FUN_009b25b0(void* apBuffer)
+// src: COMMUNITY 0x009b25b0
+void Explosion::InitLoadGame_009b25b0(void* apBuffer)
 {
     reinterpret_cast<MobileObjectFinishLoadStep*>(this)->BaseFinishLoad(apBuffer);
     pOwnerRef = pOwnerRef ? dynamic_cast<TESObjectREFR*>(GetFormByID((unsigned int)pOwnerRef)) : 0;
@@ -944,7 +958,7 @@ struct GlobalObject_0042f730
     GlobalObject_0042f730(void* p);
     ~GlobalObject_0042f730();
     int m_ptr;
-    void FUN_0042f780(void* p);
+    void AssignRetainedObject(void* p);
 };
 struct GlobalObject_006815c0
 {
@@ -1051,7 +1065,7 @@ FUN_009abf30::FUN_009abf30() : m_a0(0), m_c4(0), m_d0(0)
     m_9c = 1.0f;
     m_a0 = 0;
     m_c4 = 0;
-    m_d0.FUN_0042f780(0);
+    m_d0.AssignRetainedObject(0);
     m_c8 = 0;
     m_cc = 0;
     m_e0 = 0;
@@ -1329,7 +1343,7 @@ struct AC_0042f730;
 struct Holder0042f780
 {
     int m_00;
-    Holder0042f780* FUN_0042f780(AC_0042f730* p);
+    Holder0042f780* AssignRetainedObject(AC_0042f730* p);
 };
 
 struct HeadW7
@@ -1354,14 +1368,15 @@ struct Vec3W7
 extern Vec3W7 __NiPoint3_ZERO;
 
 // @fnv 0x009b2790
-void Explosion::FUN_009b2790(BGSLoadFormBuffer* apBuffer)
+// src: COMMUNITY 0x009b2790
+void Explosion::RevertBGS_009b2790(BGSLoadFormBuffer* apBuffer)
 {
     MobileObject::Revert(apBuffer);
     ReferenceCauseInfo = 0;
     m_bFlagD5 = 0;
     m_bFlagD6 = 0;
     m_bFlagD7 = 0;
-    reinterpret_cast<Holder0042f780&>(m_pActorCause).FUN_0042f780(0);
+    reinterpret_cast<Holder0042f780&>(m_pActorCause).AssignRetainedObject(0);
     m_fFourthRecordValue = 1.0f;
     MagicWeaponState = 0;
     bUnderwater = 0;
@@ -1391,7 +1406,7 @@ struct MatrixWater
 };
 struct SaveX
 {
-    bool FUN_0042ce10();
+    bool BGSSaveLoadGame_GetSaveGameLoading();
 };
 extern SaveX* g_BGSSaveLoadGame;
 struct SceneX
@@ -1461,9 +1476,9 @@ struct SceneX
     virtual void v62();
     virtual void v63();
     void FUN_00450f90(bool);
-    void FUN_00476ab0();
-    void FUN_00440460(const ExplosionPosition&);
-    void FUN_00a5a040();
+    void BSFadeNode_TurnFadeNodeOn();
+    void NiAVObject_SetTranslate(const ExplosionPosition&);
+    void UpdateProperties();
 };
 struct IdFlagState
 {
@@ -1477,24 +1492,24 @@ struct IdFlagState
 };
 struct AudioX
 {
-    IdFlagState FUN_00ad7550(const char*, unsigned);
+    IdFlagState BSAudio_GetSoundHandleByEditorName(const char*, unsigned);
 };
-AudioX* FUN_00453a70();
+AudioX* BSAudio_QInstance();
 extern Setting DAT_011d0520, DAT_011d0280, DAT_011d0da4, DAT_011d0ce4, DAT_011d0a78, DAT_011c7ae8;
 struct RefX;
 struct BaseX
 {
-    void* FUN_004fd380();
+    void* EffectSetting_GetLight();
     float GetScaledValue();
-    float FUN_008d01e0();
-    int* FUN_004fb810();
+    float NiAVObject_GetWorldScale();
+    int* BGSExplosion_GetSoundLevelValue();
 };
 struct CellX
 {
     void RemoveReference(RefX*);
     void AddReference(RefX*, bool);
     SceneX* FUN_005497a0();
-    float FUN_005471e0();
+    float TESObjectCELL_GetWaterHeight();
 };
 struct ActorProcX
 {
@@ -1745,26 +1760,26 @@ struct RefX
     bool disabled;
 
     BaseX* FUN_004181e0();
-    float FUN_00644930();
-    void FUN_009b2940();
-    void FUN_009ad670();
+    float Explosion_GetRadius();
+    void Explosion_TestExplosionUnderWater();
+    void Init3D();
     bool IsNotCulled();
-    void FUN_009acd00();
-    void* FUN_00575d70();
+    void Explosion_AttachDistant();
+    void* TESObjectREFR_GetWorldSpace();
     CellX* FUN_008d6f30();
     const ExplosionPosition& FUN_00430830();
-    void FUN_009b13a0();
-    struct ExtraX* FUN_005d43c0();
+    void Explosion_UpdateRadiation();
+    struct ExtraX* BSFile_GetDevice();
     void UpdateCastSound();
-    unsigned FUN_009ad610();
-    void FUN_009b1090();
+    unsigned QUserData();
+    void StartSounds();
     unsigned char GetByteAtOffsetD9();
     void UpdateExplosion();
 };
 extern RefX* DAT_011dea3c;
 struct ExtraX
 {
-    void FUN_00422220(float);
+    void ExtraDataList_SetRadius(float);
 };
 struct HandlerX
 {
@@ -1774,7 +1789,7 @@ extern HandlerX* DAT_011c3f2c;
 extern ProcessLists DAT_011e0e80;
 struct ListX
 {
-    void FUN_0076b660(RefX* const&);
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddHead(RefX* const&);
 };
 extern ListX DAT_011c7b8c;
 struct TesX
@@ -1783,39 +1798,39 @@ struct TesX
 };
 extern TesX* DAT_011dea10;
 SceneX* CreateOctahedron(float, const NiColorA*, int);
-void* FUN_009ad630();
+void* TESImageSpaceModifier_GetExplosionInFace();
 void FUN_005299a0(void*, float, SceneX*);
 float ComputeSquaredRatioComplement(float, float);
 float GetAnimValueByPrefix(SceneX*, const char*, const char*);
 void UpdateDistanceFade(float, const ExplosionPosition&);
-float FUN_004a4240();
-void FUN_00689210(CellX*, float, const char*, MatrixWater, ExplosionPosition, float, int, int);
+float RandomFloatTwoPi();
+void BSTempEffectParticle_Spawn_00689210(CellX*, float, const char*, MatrixWater, ExplosionPosition, float, int, int);
 // Updates an explosion reference: scales by distance, spawns effects, updates cell membership, reacts actors, plays splash sounds and applies image-space effects.
 // @fnv 0x009acd60
 void RefX::UpdateExplosion()
 {
     AutoMemContext memory3(49, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\Combat\\Explosion.cpp", 376);
-    bool loading4 = g_BGSSaveLoadGame->FUN_0042ce10();
+    bool loading4 = g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading();
     bool newProcess2 = (bool)(unsigned char)(process == 0);
     if (newProcess2)
         process = new HighProcess;
     float distance = (DAT_011dea3c->GetPosition() - GetPosition()).Length();
-    float scaled = ComputeSquaredRatioComplement(FUN_00644930(), distance);
-    if (scaled > *DAT_011d0520.FUN_00403e20() && !disabled)
-        FUN_005299a0(FUN_009ad630(), 1.0f, 0);
-    FUN_009b2940();
-    FUN_009ad670();
+    float scaled = ComputeSquaredRatioComplement(Explosion_GetRadius(), distance);
+    if (scaled > *DAT_011d0520.Setting_Float_00403e20() && !disabled)
+        FUN_005299a0(TESImageSpaceModifier_GetExplosionInFace(), 1.0f, 0);
+    Explosion_TestExplosionUnderWater();
+    Init3D();
     if (IsNotCulled())
-        FUN_009acd00();
+        Explosion_AttachDistant();
     else
     {
-        if (!loading4 && FUN_004181e0()->FUN_004fd380())
-            DAT_011c3f2c->PlaceObjectReference(FUN_004181e0()->FUN_004fd380(), GetPosition(), FUN_00430830(),
-                                               FUN_008d6f30(), FUN_00575d70(), 0, 0, 0);
-        if (!loading4 && FUN_004181e0()->GetScaledValue() > 0.0 && FUN_004181e0()->FUN_008d01e0() > 0.0)
+        if (!loading4 && FUN_004181e0()->EffectSetting_GetLight())
+            DAT_011c3f2c->PlaceObjectReference(FUN_004181e0()->EffectSetting_GetLight(), GetPosition(), FUN_00430830(),
+                                               FUN_008d6f30(), TESObjectREFR_GetWorldSpace(), 0, 0, 0);
+        if (!loading4 && FUN_004181e0()->GetScaledValue() > 0.0 && FUN_004181e0()->NiAVObject_GetWorldScale() > 0.0)
         {
-            FUN_009b13a0();
-            FUN_005d43c0()->FUN_00422220(FUN_004181e0()->GetScaledValue());
+            Explosion_UpdateRadiation();
+            BSFile_GetDevice()->ExtraDataList_SetRadius(FUN_004181e0()->GetScaledValue());
             SetFlags(0x40000000);
         }
         UpdateCastSound();
@@ -1829,13 +1844,13 @@ void RefX::UpdateExplosion()
         }
         SceneX* sceneB = GetScene();
         if (sceneB)
-            sceneB->FUN_00450f90(scaled > *DAT_011d0520.FUN_00403e20() && !disabled);
+            sceneB->FUN_00450f90(scaled > *DAT_011d0520.Setting_Float_00403e20() && !disabled);
         if (sceneB && cell->FUN_005497a0())
             cell->FUN_005497a0()->Attach(sceneB, true);
         SceneX* node7 = sceneB ? sceneB->AsNode() : 0;
         SceneX* fade9 = node7 ? node7->AsFade() : 0;
         if (fade9)
-            fade9->FUN_00476ab0();
+            fade9->BSFadeNode_TurnFadeNodeOn();
         animationTime = GetAnimValueByPrefix(sceneB, "SpecialIdle_AreaEffect", "Hit");
     }
     if (!loading4)
@@ -1844,23 +1859,23 @@ void RefX::UpdateExplosion()
         if (actorPointer && static_cast<Actor*>(*actorPointer) && static_cast<Actor*>(*actorPointer)->FUN_008d8520())
         {
             Actor* actor = static_cast<Actor*>(*actorPointer);
-            reinterpret_cast<ActorProcX*>(actor->FUN_008d8520())->React((RefX*)actor, GetPosition(), FUN_004181e0()->FUN_004fb810(), 2,
-                                         FUN_009ad610());
+            reinterpret_cast<ActorProcX*>(actor->FUN_008d8520())->React((RefX*)actor, GetPosition(), FUN_004181e0()->BGSExplosion_GetSoundLevelValue(), 2,
+                                         QUserData());
         }
-        FUN_009b1090();
+        StartSounds();
         if (soundAC.FUN_00ad8ce0() || soundB8.FUN_00ad8ce0())
-            UpdateDistanceFade(radius * *DAT_011d0280.FUN_00403e20(), GetPosition());
+            UpdateDistanceFade(radius * *DAT_011d0280.Setting_Float_00403e20(), GetPosition());
         if (FUN_008d6f30() && GetByteAtOffsetD9())
         {
             ExplosionPosition position8 = GetPosition();
-            position8.z = FUN_008d6f30()->FUN_005471e0();
-            float size_2 = FUN_00644930() / *DAT_011d0da4.FUN_00403e20();
+            position8.z = FUN_008d6f30()->TESObjectCELL_GetWaterHeight();
+            float size_2 = Explosion_GetRadius() / *DAT_011d0da4.Setting_Float_00403e20();
             MatrixWater rotationA;
-            rotationA.FUN_004a0c90(FUN_004a4240());
-            FUN_00689210(DAT_011dea3c->FUN_008d6f30(), 1.0f, DAT_011d0ce4.FUN_00403df0(), rotationA, position8, size_2,
+            rotationA.FUN_004a0c90(RandomFloatTwoPi());
+            BSTempEffectParticle_Spawn_00689210(DAT_011dea3c->FUN_008d6f30(), 1.0f, DAT_011d0ce4.FUN_00403df0(), rotationA, position8, size_2,
                          7, 0);
             IdFlagState sound;
-            sound = FUN_00453a70()->FUN_00ad7550("CWaterExplosionSplash", 0x102);
+            sound = BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("CWaterExplosionSplash", 0x102);
             if (sound.FUN_00ad8ce0())
             {
                 sound.FUN_00ad8b60(position8.x, position8.y, position8.z);
@@ -1868,19 +1883,19 @@ void RefX::UpdateExplosion()
             }
         }
     }
-    if (*DAT_011d0a78.FUN_0043d4d0() > 0)
+    if (*DAT_011d0a78.Setting_Int() > 0)
     {
         NiColorA params(1.0f, 1.0f, 1.0f, 0.65f);
         SceneX* effect2 = CreateOctahedron(2.5f, &params, 1);
-        effect2->FUN_00a5a040();
-        effect2->FUN_00440460(GetPosition());
+        effect2->UpdateProperties();
+        effect2->NiAVObject_SetTranslate(GetPosition());
         DAT_011dea10->FUN_00458e20(effect2, 10.0f);
     }
     if (newProcess2)
-        DAT_011e0e80.FUN_0096d450(this, 0, false, 0, false);
+        DAT_011e0e80.ProcessLists_AddReference(this, 0, false, 0, false);
     if (*DAT_011c7ae8.FUN_00408d60())
     {
-        DAT_011c7b8c.FUN_0076b660(this);
+        DAT_011c7b8c.NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddHead(this);
     }
 }
 
@@ -2083,9 +2098,9 @@ struct DRRef : DRRefPrimary, DRRefSecondary
     ~DRRef();
     DRObject3D* Get3DSimple();
     DRCell* GetParentCell();
-    void FUN_009b12d0();
-    void FUN_0092ed60(bool abFlag);
-    void FUN_009b11c0();
+    void Explosion_FreeLight();
+    void MobileObject_CleanUpOtherMobileObjects(bool abFlag);
+    void Explosion_StopSounds();
 };
 
 // Retained: defining the destructor with the shared member types changes
@@ -2117,7 +2132,7 @@ FUN_009ac5a0::~FUN_009ac5a0()
     if (0)
     {
     }
-    FUN_009b12d0();
+    Explosion_FreeLight();
     if (spController)
         spController->Stop();
     spController = 0;
@@ -2127,8 +2142,8 @@ FUN_009ac5a0::~FUN_009ac5a0()
         kItems.RemoveHead();
     }
     if (!g_pDRDataHandler->IsShuttingDown())
-        FUN_0092ed60(false);
-    FUN_009b11c0();
+        MobileObject_CleanUpOtherMobileObjects(false);
+    Explosion_StopSounds();
     kCause = 0;
     if (pOwned)
         delete pOwned;
@@ -2173,7 +2188,7 @@ class SavedActorCausePointer
 {
   public:
     SavedActorCause* object;
-    SavedActorCause* FUN_00559450();
+    SavedActorCause* Modelloader_GetReferencedThis();
 };
 class CasterReference
 {
@@ -2197,14 +2212,14 @@ class ExplosionCasterData
 // The shared base has no declaration for the 0x00932880 save step.
 struct MobileObjectSaveStep
 {
-    void FUN_00932880(BGSSaveFormBuffer*);
+    void MobileObject_SaveGame(BGSSaveFormBuffer*);
 };
 
 // Writes explosion save fields, actor cause ID, and optional caster data to the save buffer.
 // @fnv 0x009b2040
 void Explosion::WriteToSaveBuffer(BGSSaveFormBuffer* buffer)
 {
-    reinterpret_cast<MobileObjectSaveStep*>(this)->FUN_00932880(buffer);
+    reinterpret_cast<MobileObjectSaveStep*>(this)->MobileObject_SaveGame(buffer);
     buffer->FUN_00865e50(&m_fFirstFloatValue, 4, 0);
     buffer->FUN_00865e50(&f3DLifetime, 4, 0);
     buffer->FUN_00865e50(&fOuterRadius, 4, 0);
@@ -2221,7 +2236,7 @@ void Explosion::WriteToSaveBuffer(BGSSaveFormBuffer* buffer)
     buffer->FUN_00865df0(pOwnerRef, 0);
     buffer->FUN_00865df0(ReferenceSoundCauseData, 0);
     buffer->FUN_00865df0(m_pFiringWeapon, 0);
-    unsigned int causeID = reinterpret_cast<SavedActorCausePointer&>(m_pActorCause).FUN_00559450() ? reinterpret_cast<SavedActorCausePointer&>(m_pActorCause).FUN_00559450()->FUN_00825c00() : -1;
+    unsigned int causeID = reinterpret_cast<SavedActorCausePointer&>(m_pActorCause).Modelloader_GetReferencedThis() ? reinterpret_cast<SavedActorCausePointer&>(m_pActorCause).Modelloader_GetReferencedThis()->FUN_00825c00() : -1;
     buffer->FUN_00865e50(&causeID, 4, 0);
     bool casterPresent = reinterpret_cast<ExplosionCasterData*>(m_pEffectInstance);
     buffer->FUN_00865e50(&casterPresent, 1, 0);
@@ -2243,14 +2258,14 @@ struct Base2
 };
 struct FUN_0057c400_shell
 {
-    Base2* FUN_0057c400(int a);
+    Base2* bhkTTNode_TESObjectREFR_GetEntry(int a);
 };
 // TESObjectREFR.h does not declare this adjusted-result helper.
 struct FUN_00576870_cls
 {
     int unk00;
     FUN_0057c400_shell m_sub;
-    Base1* FUN_00576870(int a);
+    Base1* ZoneEntry_GetZoneEntry_0(int a);
 };
 struct Derived : Base1, Base2
 {
@@ -2258,7 +2273,8 @@ struct Derived : Base1, Base2
 
 // Calls m_sub.FUN_0057c400(a) and returns the result cast to Derived*.
 // @fnv 0x00576870
-Base1* FUN_00576870_cls::FUN_00576870(int a)
+// src: COMMUNITY 0x00576870
+Base1* FUN_00576870_cls::ZoneEntry_GetZoneEntry_0(int a)
 {
-    return static_cast<Derived*>(m_sub.FUN_0057c400(a));
+    return static_cast<Derived*>(m_sub.bhkTTNode_TESObjectREFR_GetEntry(a));
 }

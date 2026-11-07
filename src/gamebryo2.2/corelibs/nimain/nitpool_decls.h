@@ -14,7 +14,7 @@ public:
     unsigned int m_pRayCursor;
 
     void Realloc(unsigned int);
-    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    void ProcessEntries_00a56e60(unsigned int ItemUpdateArray);
     unsigned int Find(Item* item);
     int Find(unsigned int value);
     void Add(Item* item);
@@ -28,7 +28,7 @@ struct D3DRenderStateGroup
 {
     unsigned char data[20];
 };
-D3DRenderStateGroup* FUN_00e7f0a0(unsigned int);
+D3DRenderStateGroup* Object_CreateElementArray(unsigned int);
 inline void NiStreamLinkIDSet_nitpool_decls::Add(D3DRenderStateGroup* p)
 {
     if (m_pRayCursor == m_uiItemCount)
@@ -48,7 +48,7 @@ template <class T, class A> class ObjectPoolBlock
     ObjectPoolBlock(unsigned int n) throw() : count(n), next(0)
     {
         if (n > 0)
-            objects = FUN_00e7f0a0(n);
+            objects = Object_CreateElementArray(n);
         else
             objects = 0;
     }

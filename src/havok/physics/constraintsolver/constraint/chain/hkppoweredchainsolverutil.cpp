@@ -502,15 +502,16 @@ struct __declspec(align(16)) BufB
 };
 
 extern void __cdecl ResetJacobianRows(int a, int b, void* c, void* d);
-extern void __cdecl FUN_00df07c0(int a, void* b);
-extern void __cdecl FUN_00e29250(void* a, void* b);
-extern void __cdecl FUN_00e29470(void* a, void* b, int c);
-extern void __cdecl FUN_00e29380(void* a, void* b);
-extern void __cdecl FUN_00e298f0(void* a, void* b);
+extern void __cdecl Object_ProcessEntries_00df07c0(int a, void* b);
+extern void __cdecl _hkMatrix6SetTranspose(void* a, void* b);
+extern void __cdecl hkMatrix3_ProcessEntries_00e29470(void* a, void* b, int c);
+extern void __cdecl Object_SubtractVectorBundles(void* a, void* b);
+extern void __cdecl Runtime_ForwardCall_00e298f0(void* a, void* b);
 extern float DAT_0104da4c;
 
 // @fnv 0x00df0870
-void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4)
+// src: GUESS 0x00df0870 (confidence: low)
+void __cdecl Hkppoweredchainsolverutil_UpdateState_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4)
 {
     void* p180;
     float fClamped;
@@ -546,9 +547,9 @@ void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3
     *(__m128*)&A.f170 = *(__m128*)&obj->f3b0;
 
     ResetJacobianRows(arg2, arg0, &A.f000, &A.f0c0);
-    FUN_00df07c0(arg2, arg3);
-    FUN_00e29250(obj, arg3);
-    FUN_00e29470(&C, obj, *arg4);
+    Object_ProcessEntries_00df07c0(arg2, arg3);
+    _hkMatrix6SetTranspose(obj, arg3);
+    hkMatrix3_ProcessEntries_00e29470(&C, obj, *arg4);
 
     dst = (__m128*)(&obj->f0c0);
     dst[0] = *(__m128*)&A.f000;
@@ -564,7 +565,7 @@ void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3
     dst[10] = *(__m128*)&A.f0a0;
     dst[11] = *(__m128*)&A.f0b0;
 
-    FUN_00e29380(dst, &C);
+    Object_SubtractVectorBundles(dst, &C);
 
     input = obj->f0c0;
     fClamped = (DAT_0104da4c < input) ? input : DAT_0104da4c;
@@ -598,10 +599,10 @@ void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3
     *(__m128*)&B.f0a0 = dst[10];
     *(__m128*)&B.f0b0 = dst[11];
 
-    FUN_00e298f0(dst, &B.f000);
+    Runtime_ForwardCall_00e298f0(dst, &B.f000);
 
     p180 = &obj->f180;
-    FUN_00e29470(p180, dst, (int)(&A.f0c0));
+    hkMatrix3_ProcessEntries_00e29470(p180, dst, (int)(&A.f0c0));
 
     arg3[0] = *(__m128*)&obj->f300;
     arg3[1] = *(__m128*)&obj->f310;
@@ -628,10 +629,11 @@ struct InputStruct
     hkAabb* aabbs;
 };
 
-extern "C" void __cdecl FUN_00e29510(void* out, const void* matrix, const void* in);
+extern "C" void __cdecl hkVector4_ComputeValues_00e29510(void* out, const void* matrix, const void* in);
 
 // @fnv 0x00df11a0
-void __cdecl FUN_00df11a0(InputStruct* apInput, hkAabb* out)
+// src: GUESS 0x00df11a0 (confidence: low)
+void __cdecl hkAabb_ProcessEntries_00df11a0(InputStruct* apInput, hkAabb* out)
 {
     out++;
     out[-1].m_kMinimumCorner.m_vComponents = _mm_setzero_ps();
@@ -652,12 +654,12 @@ void __cdecl FUN_00df11a0(InputStruct* apInput, hkAabb* out)
             float maxX, maxY, maxZ, maxW;
         } tempAabbStorage;
         hkAabb& tempAabb = *(hkAabb*)&tempAabbStorage;
-        FUN_00e29510(&tempAabb, &apInput->matrices[i].data0, &out[i - 1]);
+        hkVector4_ComputeValues_00e29510(&tempAabb, &apInput->matrices[i].data0, &out[i - 1]);
         tempAabb.m_kMinimumCorner.m_vComponents =
             _mm_sub_ps(_mm_load_ps(&aabb->m_kMinimumCorner.x), tempAabb.m_kMinimumCorner.m_vComponents);
         tempAabb.m_kMaximumCorner.m_vComponents =
             _mm_sub_ps(_mm_load_ps(&aabb->m_kMaximumCorner.x), tempAabb.m_kMaximumCorner.m_vComponents);
-        FUN_00e29510(&out[i], &apInput->matrices[i].data1, &tempAabb);
+        hkVector4_ComputeValues_00e29510(&out[i], &apInput->matrices[i].data1, &tempAabb);
         ++i;
         offset += sizeof(hkAabb);
     } while (i < apInput->count);

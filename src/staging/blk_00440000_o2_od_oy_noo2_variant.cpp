@@ -11,10 +11,11 @@
 struct S004586d0_Obj
 {
     __declspec(align(16)) float x, y, z, w;
-    float FUN_004586d0();
+    float EvaluateValue_004586d0();
 };
 // @fnv 0x004586d0
-float S004586d0_Obj::FUN_004586d0()
+// src: GUESS 0x004586d0 (confidence: low)
+float S004586d0_Obj::EvaluateValue_004586d0()
 {
     float tmp;
     _mm_store_ss(&tmp, *(__m128*)this);
@@ -25,11 +26,12 @@ struct Holder
 {
     __m128 value;
     void FUN_004a3c90(Holder* other);
-    Holder* FUN_00458700(Holder* target, int index);
+    Holder* hkVector4_getSimdAt(Holder* target, int index);
 };
 
 // @fnv 0x00458700
-Holder* Holder::FUN_00458700(Holder* target, int index)
+// src: COMMUNITY 0x00458700
+Holder* Holder::hkVector4_getSimdAt(Holder* target, int index)
 {
     switch (index)
     {
@@ -51,7 +53,7 @@ Holder* Holder::FUN_00458700(Holder* target, int index)
 class S00458900_Comparison
 {
   public:
-    bool FUN_00458990(int mask) const;  // allAreSet
+    bool hkVector4Comparison_allAreSet(int mask) const;  // allAreSet
     __m128 m_uiMask;
 };
 
@@ -59,33 +61,35 @@ class S00458900_Vector
 {
   public:
     S00458900_Vector();                                                       // FUN_006815c0
-    void FUN_00458a10(const S00458900_Vector* a, const S00458900_Vector* b);  // setSub4
-    void FUN_00458ad0(const S00458900_Vector* v);                             // setAbs4
-    void FUN_004589c0(float f);
-    S00458900_Comparison FUN_00458a60(const S00458900_Vector* v) const;  // compareLessThan4
-    bool FUN_00458900(const S00458900_Vector* v, float epsilon) const;   // equals3
+    void hkVector4_setSub4(const S00458900_Vector* a, const S00458900_Vector* b);  // setSub4
+    void hkVector4_setAbs4(const S00458900_Vector* v);                             // setAbs4
+    void hkVector4_setAll(float f);
+    S00458900_Comparison hkVector4_compareLessThanEqual4(const S00458900_Vector* v) const;  // compareLessThan4
+    bool hkVector4_equals3(const S00458900_Vector* v, float epsilon) const;   // equals3
     __m128 m_vComponents;
 };
 
 // @fnv 0x00458900
-bool S00458900_Vector::FUN_00458900(const S00458900_Vector* v, float epsilon) const
+// src: XBOX_PDB 0x00458900
+bool S00458900_Vector::hkVector4_equals3(const S00458900_Vector* v, float epsilon) const
 {
     S00458900_Vector kDiff;
-    kDiff.FUN_00458a10(this, v);
-    kDiff.FUN_00458ad0(&kDiff);
+    kDiff.hkVector4_setSub4(this, v);
+    kDiff.hkVector4_setAbs4(&kDiff);
     S00458900_Vector kEpsilon;
-    kEpsilon.FUN_004589c0(epsilon);
-    return kDiff.FUN_00458a60(&kEpsilon).FUN_00458990(7);
+    kEpsilon.hkVector4_setAll(epsilon);
+    return kDiff.hkVector4_compareLessThanEqual4(&kEpsilon).hkVector4Comparison_allAreSet(7);
 }
 
 struct FUN_00458990_Holder
 {
     __m128 m_v;
-    int FUN_00458990(int mask);
+    int hkVector4Comparison_allAreSet(int mask);
 };
 
 // @fnv 0x00458990
-int FUN_00458990_Holder::FUN_00458990(int mask)
+// src: COMMUNITY 0x00458990
+int FUN_00458990_Holder::hkVector4Comparison_allAreSet(int mask)
 {
     return (_mm_movemask_ps(m_v) & mask) == mask;
 }
@@ -93,10 +97,11 @@ int FUN_00458990_Holder::FUN_00458990(int mask)
 struct FUN_004589c0_cls
 {
     __m128 m_v;
-    void FUN_004589c0(float value);
+    void hkVector4_setAll(float value);
 };
 // @fnv 0x004589c0
-void FUN_004589c0_cls::FUN_004589c0(float value)
+// src: COMMUNITY 0x004589c0
+void FUN_004589c0_cls::hkVector4_setAll(float value)
 {
     m_v = _mm_set1_ps(value);
 }
@@ -104,11 +109,12 @@ void FUN_004589c0_cls::FUN_004589c0(float value)
 struct S00458a10_Vector
 {
     __m128 m_vComponents;
-    void FUN_00458a10(const S00458a10_Vector* a, const S00458a10_Vector* b);
+    void hkVector4_setSub4(const S00458a10_Vector* a, const S00458a10_Vector* b);
 };
 
 // @fnv 0x00458a10
-void S00458a10_Vector::FUN_00458a10(const S00458a10_Vector* a, const S00458a10_Vector* b)
+// src: XBOX_PDB 0x00458a10
+void S00458a10_Vector::hkVector4_setSub4(const S00458a10_Vector* a, const S00458a10_Vector* b)
 {
     m_vComponents = _mm_sub_ps(a->m_vComponents, b->m_vComponents);
 }
@@ -127,11 +133,12 @@ class VecMask
 {
   public:
     __m128 m_v;
-    Mask4* FUN_00458a60(Mask4* out, const __m128* b);
+    Mask4* hkVector4_compareLessThanEqual4(Mask4* out, const __m128* b);
 };
 
 // @fnv 0x00458a60
-Mask4* VecMask::FUN_00458a60(Mask4* out, const __m128* b)
+// src: COMMUNITY 0x00458a60
+Mask4* VecMask::hkVector4_compareLessThanEqual4(Mask4* out, const __m128* b)
 {
     MaskVec t;
     t.v = _mm_cmple_ps(m_v, *b);
@@ -144,11 +151,12 @@ extern __m128 DAT_01017d10;  // abs mask (0x7fffffff x4)
 struct S00458ad0_Vector
 {
     __m128 m_vComponents;
-    void FUN_00458ad0(const S00458ad0_Vector* v);  // setAbs4
+    void hkVector4_setAbs4(const S00458ad0_Vector* v);  // setAbs4
 };
 
 // @fnv 0x00458ad0
-void S00458ad0_Vector::FUN_00458ad0(const S00458ad0_Vector* v)
+// src: COMMUNITY 0x00458ad0
+void S00458ad0_Vector::hkVector4_setAbs4(const S00458ad0_Vector* v)
 {
     m_vComponents = _mm_and_ps(v->m_vComponents, DAT_01017d10);
 }

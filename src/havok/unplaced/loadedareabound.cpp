@@ -25,15 +25,15 @@ struct ObjA
 };
 struct Refr
 {
-    int FUN_00575ca0();
-    bool FUN_00568680();
+    int TESObjectREFR_GetSpace();
+    bool TESObjectREFR_IsFurniture();
     Refr* FUN_0067f390();
-    int FUN_00678ca0();
-    void* FUN_00567790();
-    bool FUN_005785e0(Actor* a, bool b);
-    ObjA* FUN_007af430();
-    int FUN_005682c0(bool b);
-    bool FUN_00568500(int a, int b);
+    int PackageLocation_GetLocType();
+    void* TESObjectREFR_GetOwner();
+    bool TESObjectREFR_IsAnOwner(Actor* a, bool b);
+    ObjA* BGSSaveFormBuffer_GetForm();
+    int TESObjectREFR_GetFirstFreeMarkerIndex(bool b);
+    bool TESObjectREFR_GetMarkerAtIndex(int a, int b);
 };
 struct Obj44
 {
@@ -458,36 +458,37 @@ struct Pkg
 };
 struct TopicArr
 {
-    unsigned int FUN_005be5c0(unsigned int a);
-    Actor* FUN_00968670(unsigned int i);
+    unsigned int ProcessArray_GetProcessLevelTail(unsigned int a);
+    Actor* ProcessArray_GetItem(unsigned int i);
 };
 struct MgrNode
 {
     bool FUN_008256d0();
     Refr** FUN_006815c0();
-    void FUN_00905330(Refr** pp);
+    void RemoveMatchingItem(Refr** pp);
     MgrNode* FUN_00726070();
 };
 struct IOMgr
 {
-    void FUN_00c3dfa0(int a);
+    void LoadQueuedPriority(int a);
 };
 extern TES* DAT_011dea10;
 extern IOMgr* DAT_01202d98;
-void* __fastcall FUN_00575d70(Actor* a);
+void* __fastcall TESObjectREFR_GetWorldSpace(Actor* a);
 void __cdecl FUN_006d6f80(void* a, void* b, NiPoint3* c, NiPoint3* d);
 struct ThisCls
 {
     int m_00;
     TopicArr m_04;
-    void FUN_00972d30();
+    void ProcessLists_PlaceActorsinBedsOrChairs();
 };
 // @fnv 0x00972d30
-void ThisCls::FUN_00972d30()
+// src: XBOX_PDB 0x00972d30
+void ThisCls::ProcessLists_PlaceActorsinBedsOrChairs()
 {
     bool resultFlag;
     {
-        MgrNode* iter = DAT_011dea10->FUN_0055ac00();
+        MgrNode* iter = DAT_011dea10->TES_GetBedChairList();
         Refr* currentReference;
         currentReference = 0;
         ObjA* chosen;
@@ -497,10 +498,10 @@ void ThisCls::FUN_00972d30()
             Actor* b;
             b = 0;
             int slot;
-            for (slot = 0; slot < m_04.FUN_005be5c0(0); slot++)
+            for (slot = 0; slot < m_04.ProcessArray_GetProcessLevelTail(0); slot++)
             {
                 Actor* j;
-                b = m_04.FUN_00968670(slot);
+                b = m_04.ProcessArray_GetItem(slot);
                 j = 0;
                 if (!!b)
                 {
@@ -513,7 +514,7 @@ void ThisCls::FUN_00972d30()
                     {
                         if (j->IsCharacter())
                         {
-                            if (!j->FUN_004938e0())
+                            if (!j->IsMoving_004938e0())
                             {
                                 if (!j->FUN_008a3b30())
                                 {
@@ -523,13 +524,13 @@ void ThisCls::FUN_00972d30()
                                             continue;
                                         {
                                             j->FUN_008c3c40(0, 0);
-                                            int pObj4 = (int)j->FUN_00575ca0();
+                                            int pObj4 = (int)j->TESObjectREFR_GetSpace();
                                             Refr* accepted = 0;
                                             bool visible = false;
                                             bool _x = false;
                                             Refr* refr38;
-                                            Refr* found = j->FUN_00886080();
-                                            refr38 = j->FUN_00881650();
+                                            Refr* found = j->Actor_GetCurrentPackageLocation();
+                                            refr38 = j->Actor_GetCurrentPackageTarget();
                                             Pkg* tmp26 = (Pkg*)j->FUN_009344a0();
                                             if (!!tmp26)
                                             {
@@ -553,8 +554,8 @@ void ThisCls::FUN_00972d30()
                                                 q = found->FUN_0067f390();
                                             if (found != 0)
                                             {
-                                                if (found->FUN_00678ca0() == 6)
-                                                    q = (Refr*)j->FUN_00569b80();
+                                                if (found->PackageLocation_GetLocType() == 6)
+                                                    q = (Refr*)j->TESObjectREFR_GetLinkedRef();
                                             }
                                             if (!q)
                                             {
@@ -563,28 +564,28 @@ void ThisCls::FUN_00972d30()
                                             long _object;
                                             _object = ((Proc*)j->FUN_008d8520())->v4d4();
                                             unsigned int idx13 = -1;
-                                            if (refr38 != 0 && refr38->FUN_00568680() &&
-                                                refr38->FUN_00575ca0() == pObj4)
+                                            if (refr38 != 0 && refr38->TESObjectREFR_IsFurniture() &&
+                                                refr38->TESObjectREFR_GetSpace() == pObj4)
                                             {
                                                 accepted = refr38;
-                                                chosen = accepted->FUN_007af430();
+                                                chosen = accepted->BGSSaveFormBuffer_GetForm();
                                                 if (chosen->FUN_00509420())
                                                     visible = true;
-                                                idx13 = accepted->FUN_005682c0(true);
-                                                if (idx13 == -1 || !accepted->FUN_00568500(idx13, _object))
+                                                idx13 = accepted->TESObjectREFR_GetFirstFreeMarkerIndex(true);
+                                                if (idx13 == -1 || !accepted->TESObjectREFR_GetMarkerAtIndex(idx13, _object))
                                                 {
                                                     accepted = 0;
                                                     _x = true;
                                                 }
                                             }
-                                            else if (q != 0 && q->FUN_00568680() && q->FUN_00575ca0() == pObj4)
+                                            else if (q != 0 && q->TESObjectREFR_IsFurniture() && q->TESObjectREFR_GetSpace() == pObj4)
                                             {
                                                 accepted = q;
-                                                chosen = accepted->FUN_007af430();
+                                                chosen = accepted->BGSSaveFormBuffer_GetForm();
                                                 if (chosen->FUN_00509420())
                                                     visible = true;
-                                                idx13 = accepted->FUN_005682c0(true);
-                                                if (idx13 == -1 || !accepted->FUN_00568500(idx13, _object))
+                                                idx13 = accepted->TESObjectREFR_GetFirstFreeMarkerIndex(true);
+                                                if (idx13 == -1 || !accepted->TESObjectREFR_GetMarkerAtIndex(idx13, _object))
                                                 {
                                                     accepted = 0;
                                                     _x = true;
@@ -593,7 +594,7 @@ void ThisCls::FUN_00972d30()
                                             else if (tmp26 != 0 && tmp26->FUN_0041ca90() == 4 &&
                                                      tmp26->v13c(j, 0, -1.0f, 0))
                                             {
-                                                if (!j->FUN_00579670())
+                                                if (!j->Actor_IsSleeping())
                                                 {
                                                     ((Proc*)j->FUN_008d8520())->v284(1);
                                                 }
@@ -601,20 +602,20 @@ void ThisCls::FUN_00972d30()
                                                 {
                                                     currentReference = *iter->FUN_006815c0();
                                                     bool flag49 = false;
-                                                    if (currentReference->FUN_00575ca0() == pObj4)
+                                                    if (currentReference->TESObjectREFR_GetSpace() == pObj4)
                                                     {
-                                                        if (currentReference->FUN_00567790() == 0 ||
-                                                            currentReference->FUN_005785e0(j, true))
+                                                        if (currentReference->TESObjectREFR_GetOwner() == 0 ||
+                                                            currentReference->TESObjectREFR_IsAnOwner(j, true))
                                                         {
-                                                            chosen = currentReference->FUN_007af430();
+                                                            chosen = currentReference->BGSSaveFormBuffer_GetForm();
                                                             if (chosen->FUN_00509420())
                                                             {
-                                                                idx13 = currentReference->FUN_005682c0(true);
+                                                                idx13 = currentReference->TESObjectREFR_GetFirstFreeMarkerIndex(true);
                                                                 if (idx13 == -1 ||
-                                                                    !currentReference->FUN_00568500(idx13, _object))
+                                                                    !currentReference->TESObjectREFR_GetMarkerAtIndex(idx13, _object))
                                                                 {
-                                                                    iter->FUN_00905330(&currentReference);
-                                                                    iter = DAT_011dea10->FUN_0055ac00();
+                                                                    iter->RemoveMatchingItem(&currentReference);
+                                                                    iter = DAT_011dea10->TES_GetBedChairList();
                                                                     flag49 = true;
                                                                 }
                                                                 else
@@ -632,9 +633,9 @@ void ThisCls::FUN_00972d30()
                                             else if (tmp26 != 0 && tmp26->FUN_0041ca90() == 3 &&
                                                      tmp26->v13c(j, 0, -1.0f, 0))
                                             {
-                                                if (j->FUN_00891d30() != 0)
+                                                if (j->Actor_GetBestFoodItem() != 0)
                                                 {
-                                                    if (!j->FUN_008a7870())
+                                                    if (!j->IsEating())
                                                     {
                                                         ((Proc*)j->FUN_008d8520())->v288(j, 1);
                                                         j->Unk_80(1);
@@ -643,21 +644,21 @@ void ThisCls::FUN_00972d30()
                                                     {
                                                         currentReference = *iter->FUN_006815c0();
                                                         bool flag4a = false;
-                                                        if (currentReference->FUN_00575ca0() == pObj4 &&
+                                                        if (currentReference->TESObjectREFR_GetSpace() == pObj4 &&
                                                             currentReference != 0)
                                                         {
-                                                            if (currentReference->FUN_00567790() == 0 ||
-                                                                currentReference->FUN_005785e0(j, true))
+                                                            if (currentReference->TESObjectREFR_GetOwner() == 0 ||
+                                                                currentReference->TESObjectREFR_IsAnOwner(j, true))
                                                             {
-                                                                chosen = currentReference->FUN_007af430();
+                                                                chosen = currentReference->BGSSaveFormBuffer_GetForm();
                                                                 if (chosen->FUN_005093f0())
                                                                 {
-                                                                    idx13 = currentReference->FUN_005682c0(true);
+                                                                    idx13 = currentReference->TESObjectREFR_GetFirstFreeMarkerIndex(true);
                                                                     if (idx13 == -1 ||
-                                                                        !currentReference->FUN_00568500(idx13, _object))
+                                                                        !currentReference->TESObjectREFR_GetMarkerAtIndex(idx13, _object))
                                                                     {
-                                                                        iter->FUN_00905330(&currentReference);
-                                                                        iter = DAT_011dea10->FUN_0055ac00();
+                                                                        iter->RemoveMatchingItem(&currentReference);
+                                                                        iter = DAT_011dea10->TES_GetBedChairList();
                                                                         flag4a = true;
                                                                     }
                                                                     else
@@ -675,16 +676,16 @@ void ThisCls::FUN_00972d30()
                                             }
                                             if (accepted != 0 && j->GetNiNode() != 0)
                                             {
-                                                resultFlag = j->FUN_0088d2f0(accepted, _object, idx13, visible);
+                                                resultFlag = j->Actor_PutActorInChairBedQuick(accepted, _object, idx13, visible);
                                             }
                                             else if (_x)
                                             {
                                                 NiPoint3* _origin;
                                                 _origin = (NiPoint3*)static_cast<const MobileObject*>(j)->GetPos();
                                                 NiPoint3 pt = *_origin;
-                                                FUN_006d6f80(FUN_00575d70(j), j->FUN_008d6f30(), _origin, &pt);
-                                                j->FUN_00575830(&pt);
-                                                j->FUN_00562020();
+                                                FUN_006d6f80(TESObjectREFR_GetWorldSpace(j), j->FUN_008d6f30(), _origin, &pt);
+                                                j->TESObjectREFR_SetLocationOnReference(&pt);
+                                                j->TESObjectREFR_Update3DPosition();
                                             }
                                         }
                                     }
@@ -695,7 +696,7 @@ void ThisCls::FUN_00972d30()
                 }
             }
             if (resultFlag)
-                DAT_01202d98->FUN_00c3dfa0(0);
+                DAT_01202d98->LoadQueuedPriority(0);
         }
         DAT_011dea10->ClearList();
     }
@@ -712,11 +713,11 @@ struct FUN_00437c10
 struct CF845
 {
     CF845(void* p);
-    int FUN_0043b4d0();
+    int CFilter_GetLayer();
     int unk;
 };
 
-TESObjectREFR* __cdecl FUN_0062b4e0(void* p);
+TESObjectREFR* __cdecl TESHavokUtilities_FindCollidableRef(void* p);
 
 struct PickedObj
 {
@@ -725,16 +726,16 @@ struct PickedObj
 
 struct Arg1
 {
-    PickedObj* FUN_00628d10(char* flag, FUN_00437c10* t);
-    int FUN_00628c50(FUN_00437c10* t);
+    PickedObj* hkAabb_contains(char* flag, FUN_00437c10* t);
+    int hkAabb_overlaps(FUN_00437c10* t);
 };
 
 struct ItemObj
 {
-    void* FUN_00460140();
+    void* TESDataHandler_GetWorldSpaceList();
     const char* operator_str();
     void* FUN_007d6bb0();
-    void* FUN_0043b540();
+    void* hkpCollidable_getCollisionFilterInfo();
 };
 
 struct Arg2Item
@@ -745,7 +746,7 @@ struct Arg2Item
 struct Arg2
 {
     int FUN_00726070();
-    Arg2Item* FUN_00629ab0(int i);
+    Arg2Item* NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(int i);
 };
 
 struct TargetObj
@@ -775,33 +776,34 @@ struct Arg3
 
 struct FUN_00628df0_class
 {
-    void FUN_00628df0(Arg1* a1, Arg2* a2, Arg3* a3);
-    void FUN_006295e0(TESObjectREFR* r);
+    void ProcessEntries_00628df0(Arg1* a1, Arg2* a2, Arg3* a3);
+    void LoadedAreaBound_WarpActor(TESObjectREFR* r);
 };
 
 // For each a2 item with a string, calls a3's target vfunc_0x3c; if the a1 checks fail and the item type is 0x1e, passes its REFR to FUN_006295e0.
 // @fnv 0x00628df0
-void FUN_00628df0_class::FUN_00628df0(Arg1* a1, Arg2* apItems, Arg3* apTarget)
+// src: GUESS 0x00628df0 (confidence: low)
+void FUN_00628df0_class::ProcessEntries_00628df0(Arg1* a1, Arg2* apItems, Arg3* apTarget)
 {
     FUN_00437c10 tmp;
     for (int i = 0; i < apItems->FUN_00726070(); ++i)
     {
-        ItemObj* p38 = (ItemObj*)apItems->FUN_00629ab0(i)->pItem->FUN_00460140();
+        ItemObj* p38 = (ItemObj*)apItems->NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(i)->pItem->TESDataHandler_GetWorldSpaceList();
         if (p38->operator_str())
         {
             TargetObj* pTarget = apTarget->FUN_006286d0();
             pTarget->vfunc_0x3c(p38->FUN_007d6bb0(), &tmp);
             char flag;
-            if (!a1->FUN_00628d10(&flag, &tmp)->FUN_005609f0() || !a1->FUN_00628c50(&tmp))
+            if (!a1->hkAabb_contains(&flag, &tmp)->FUN_005609f0() || !a1->hkAabb_overlaps(&tmp))
             {
-                CF845 filter(p38->FUN_0043b540());
-                if (filter.FUN_0043b4d0() == 0x1e)
+                CF845 filter(p38->hkpCollidable_getCollisionFilterInfo());
+                if (filter.CFilter_GetLayer() == 0x1e)
                 {
-                    TESObjectREFR* refr = FUN_0062b4e0(p38);
+                    TESObjectREFR* refr = TESHavokUtilities_FindCollidableRef(p38);
                     if (refr && refr->IsActor())
                     {
                         TESObjectREFR* pRefr = refr;
-                        this->FUN_006295e0(pRefr);
+                        this->LoadedAreaBound_WarpActor(pRefr);
                     }
                 }
             }

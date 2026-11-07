@@ -67,5 +67,5 @@ class NiScreenLODData : public NiLODData
     int ClampToLODCount(int index);
     void SetProportionCount(unsigned int count);
     NiScreenLODData* InitializeScreenLODData();
-    void* FUN_00a95cb0();
+    void* NiScreenLODData_GetRTTI();
 };

@@ -43,8 +43,8 @@ public:
         hkFreeListAllocatorServer* m_blockServer;
 
         void Init();
-        void FUN_00dd7200();
-        void FUN_00dd7650(int, int, int, void*);
+        void freeAllMemory();
+        void hkFreeList_hkFreeList(int, int, int, void*);
     };
 
     virtual ~hkFreeListAllocator();
@@ -63,34 +63,34 @@ public:
     virtual void getMemoryStatistics(MemoryStatistics& kU);
     virtual int getAllocatedSize(const void* pObj, int iNbytes);
     virtual void resetPeakMemoryStatistics();
-    virtual void FUN_00d5ff50();
+    virtual void quit_00d5ff50();
     virtual void __thiscall PrintStatistics(int);
-    virtual void FUN_00d5fab0(int);
-    virtual void FUN_00d5fac0();
+    virtual void nullsub_80(int);
+    virtual void garbageCollect();
     virtual void AllocateBlocks(int iCount);
     virtual void UpdateTotalSize();
-    virtual void FUN_00d5fb70(int iValue);
-    virtual int FUN_00d5fba0();
-    virtual void FUN_00d5fc30();
-    virtual bool* __thiscall FUN_00d5f890(bool* __restrict pItem);
-    virtual int FUN_00d600c0(hkMemoryWalkCallback kCallback, void* pParam);
+    virtual void setMemorySoftLimit(int iValue);
+    virtual int GetUnkA94_00d5fba0();
+    virtual void releaseUnusedPagesToSystemMemory();
+    virtual bool* __thiscall isOk_00d5f890(bool* __restrict pItem);
+    virtual int walkMemory(hkMemoryWalkCallback kCallback, void* pParam);
 
     void unused1();
     void unused2();
     void freeBlock(hkFreeListNode* pNode);
-    void FUN_00d5fc70(FreeList* pItem);
+    void _deleteFreeList(FreeList* pItem);
     void* AllocateBlock(int iUnused, int iNumBytes);
     void FreeBlocks(void** pBlocks, int iNumBlocks, int iBlockSize);
-    void FUN_00d5f850();
-    void FUN_00d5f970(int iFirst);
+    void resetPeakMemoryStatistics_00d5f850();
+    void blockAlloc_00d5f970(int iFirst);
     unsigned char HasRoomFor(unsigned int uLimit);
-    hkFreeListAllocator* FUN_00d60270(int iA1);
-    void FUN_00d5fd70(void** pOut, int iCount, int iSize);
-    void FUN_00d5f980(void* pBlock, int iNumBytes);
-    void FUN_00d5f750(HkFLA_Stats* pOut);
-    void* FUN_00d5fca0(int* pItem);
-    void FUN_00d5ffd0();
-    FreeList* FUN_00d60020(int iA1, int iA2, int iA3);
+    hkFreeListAllocator* hkFreeListAllocator_00d60270(int iA1);
+    void blockAllocBatch_00d5fd70(void** pOut, int iCount, int iSize);
+    void blockFree_00d5f980(void* pBlock, int iNumBytes);
+    void getMemoryStatistics_00d5f750(HkFLA_Stats* pOut);
+    void* bufAlloc_00d5fca0(int* pItem);
+    void SetVtableAndProcessState_00d5ffd0();
+    FreeList* _newFreeList(int iA1, int iA2, int iA3);
     int Alloc(int iFirst, int iSecond, int iThird);
     void Reset(int iFirst);
 

@@ -15,29 +15,31 @@ NiInterpolator* BSMultiTargetTreadTransfController::GetInterpolator(unsigned sho
 GlobalObject_00a2e180::GlobalObject_00a2e180()
 {
     if (DAT_011f36a0++ == 0)
-        FUN_00aa2080(&DAT_00a2d8a0, &DAT_00a2de70);
+        NiStaticDataManager_AddLibrary(&DAT_00a2d8a0, &DAT_00a2de70);
 }
 
 struct FUN_00a35950_shell : public BSMultiTargetTreadTransfController
 {
-    void* FUN_00a35950();
+    void* BSMultiTargetTreadTransfController_GetRTTI();
 };
 
 extern int g_011f36e4;
 
 // @fnv 0x00a35950
-void* FUN_00a35950_shell::FUN_00a35950()
+// src: COMMUNITY 0x00a35950
+void* FUN_00a35950_shell::BSMultiTargetTreadTransfController_GetRTTI()
 {
     return &g_011f36e4;
 }
 
 struct FUN_00a35e90_shell : public BSMultiTargetTreadTransfController
 {
-    char* FUN_00a35e90(unsigned short);
+    char* BSMultiTargetTreadTransfController_GetInterpolatorID(unsigned short);
 };
 
 // @fnv 0x00a35e90
-char* FUN_00a35e90_shell::FUN_00a35e90(unsigned short ausIndex)
+// src: XBOX_PDB 0x00a35e90
+char* FUN_00a35e90_shell::BSMultiTargetTreadTransfController_GetInterpolatorID(unsigned short ausIndex)
 {
     char** arr = *(char***)((char*)this + 0x3c);
     char* p = arr[ausIndex];
@@ -139,14 +141,14 @@ void __thiscall FUN_00a35f70_struct::SetSlotEntry(unsigned short usIndex, void* 
 
 struct S_00a36050
 {
-    void __thiscall FUN_00a35960();
+    void __thiscall ProcessEntries_00a35960();
     void* __thiscall DestroyIfFlagged(unsigned int);
 };
 void __cdecl _delete(void*, unsigned int);
 // @fnv 0x00a36050
 void* __thiscall S_00a36050::DestroyIfFlagged(unsigned int uiFlags)
 {
-    FUN_00a35960();
+    ProcessEntries_00a35960();
     if (uiFlags & 1)
         _delete(this, 0x44);
     return this;
@@ -211,10 +213,11 @@ struct Ctrl00a358b0
     char _0[52];
     Interp00a358b0* m_base;
     unsigned short m_num;
-    void __thiscall FUN_00a358b0(float afStartTime, float afEndTime);
+    void __thiscall BSMultiTargetTreadTransfController_GuaranteeTimeRange(float afStartTime, float afEndTime);
 };
 // @fnv 0x00a358b0
-void __thiscall Ctrl00a358b0::FUN_00a358b0(float afStartTime, float afEndTime)
+// src: XBOX_PDB 0x00a358b0
+void __thiscall Ctrl00a358b0::BSMultiTargetTreadTransfController_GuaranteeTimeRange(float afStartTime, float afEndTime)
 {
     unsigned short us = 0;
     if (us < m_num)
@@ -281,7 +284,8 @@ struct InterpStub_00a2fac0
 };
 
 // @fnv 0x00a2fac0
-bool __stdcall FUN_00a2fac0(InterpStub_00a2fac0* apInterpolator, unsigned short ausIndex)
+// src: COMMUNITY 0x00a2fac0
+bool __stdcall NiMultiTargetTransformController_InterpolatorIsCorrectType(InterpStub_00a2fac0* apInterpolator, unsigned short ausIndex)
 {
     return apInterpolator->IsCorrectType();
 }
@@ -304,19 +308,20 @@ struct FUN_00a35900_cls
     int m_i2C;
     int m_i30;
     TreadEntry* m_pEntries;
-    TreadEntry* FUN_00a35900(unsigned short usIndex, int aParam1, int aParam2, int aParam3, int aParam4);
+    TreadEntry* BSMultiTargetTreadTransfController_GetBlendInterpolator(unsigned short usIndex, int aParam1, int aParam2, int aParam3, int aParam4);
 };
 
 // @fnv 0x00a35900
-TreadEntry* FUN_00a35900_cls::FUN_00a35900(unsigned short usIndex, int aParam1, int aParam2, int aParam3, int aParam4)
+// src: XBOX_PDB 0x00a35900
+TreadEntry* FUN_00a35900_cls::BSMultiTargetTreadTransfController_GetBlendInterpolator(unsigned short usIndex, int aParam1, int aParam2, int aParam3, int aParam4)
 {
     return &m_pEntries[usIndex];
 }
 
 extern char DAT_01096694;
-void* __cdecl FUN_00aa13e0(unsigned int size) throw();
+void* __cdecl Object_DispatchCommandFour(unsigned int size) throw();
 
-void* __fastcall FUN_00a2f8c0(void* controller) throw();
+void* __fastcall NiInterpController_NiInterpController(void* controller) throw();
 
 struct TreadInterpolator : NiInterpController
 {
@@ -331,18 +336,18 @@ struct TreadInterpolator : NiInterpController
 struct TreadController
 {
     TreadInterpolator* __thiscall CreateInterpolator(unsigned int index);
-    void __thiscall FUN_00a2f8a0(TreadInterpolator* interp, unsigned int index);
+    void __thiscall BSMultiTargetTreadTransfController_CopyMembers(TreadInterpolator* interp, unsigned int index);
 };
 
 // @fnv 0x00a35a10
 TreadInterpolator* TreadController::CreateInterpolator(unsigned int index)
 {
     TreadInterpolator* interp;
-    TreadInterpolator* storage = static_cast<TreadInterpolator*>(FUN_00aa13e0(sizeof(TreadInterpolator)));
+    TreadInterpolator* storage = static_cast<TreadInterpolator*>(Object_DispatchCommandFour(sizeof(TreadInterpolator)));
     if (storage)
     {
         // The shared base has no declaration for the original constructor yet.
-        FUN_00a2f8c0(storage);
+        NiInterpController_NiInterpController(storage);
         *reinterpret_cast<void**>(storage) = &DAT_01096694;
         storage->unk34 = 0;
         storage->unk38 = 0;
@@ -354,7 +359,7 @@ TreadInterpolator* TreadController::CreateInterpolator(unsigned int index)
     {
         interp = 0;
     }
-    FUN_00a2f8a0(interp, index);
+    BSMultiTargetTreadTransfController_CopyMembers(interp, index);
     return interp;
 }
 
@@ -451,14 +456,15 @@ struct FUN_00a35fe0_shell
     Entry_00a35fe0** unk3C;
     unsigned short unk40;
 
-    unsigned short __thiscall FUN_00a35fe0(Target_00a35fe0* target, unsigned short id, void* value);
+    unsigned short __thiscall BSMultiTargetTreadTransfController_AddInterpolatorTarget(Target_00a35fe0* target, unsigned short id, void* value);
 };
 
 extern unsigned short DAT_01096320;
 
 // Finds the first free entry slot, stores the value, id and target in it, sets bit 0x80 on the target, and returns the slot index or DAT_01096320 if none is free.
 // @fnv 0x00a35fe0
-unsigned short __thiscall FUN_00a35fe0_shell::FUN_00a35fe0(Target_00a35fe0* target, unsigned short id, void* value)
+// src: XBOX_PDB 0x00a35fe0
+unsigned short __thiscall FUN_00a35fe0_shell::BSMultiTargetTreadTransfController_AddInterpolatorTarget(Target_00a35fe0* target, unsigned short id, void* value)
 {
     for (unsigned short index = 0; index < unk40; ++index)
     {
@@ -550,7 +556,7 @@ struct Holder
     Entry* m_14;
     Entry2* m_18;
     void AssignInterpolatorRef(unsigned int idx, SmartPtr<RefObj>& out) throw();
-    void FUN_00a32b80(unsigned int idx);
+    void NiControllerSequence_RemoveInterpolator_0(unsigned int idx);
 };
 
 void Holder::AssignInterpolatorRef(unsigned int idx, SmartPtr<RefObj>& out) throw()
@@ -563,7 +569,8 @@ void Holder::AssignInterpolatorRef(unsigned int idx, SmartPtr<RefObj>& out) thro
 
 // Clears the entry at idx by moving its RefObj into a temporary SmartPtr, which releases it when the pointer goes out of scope.
 // @fnv 0x00a32b80
-void Holder::FUN_00a32b80(unsigned int uiIndex)
+// src: COMMUNITY 0x00a32b80
+void Holder::NiControllerSequence_RemoveInterpolator_0(unsigned int uiIndex)
 {
     SmartPtr<RefObj> sp;
     AssignInterpolatorRef(uiIndex, sp);
@@ -574,7 +581,8 @@ struct NiStream;
 extern void __cdecl LoadBinary(NiStream*);
 
 // @fnv 0x00a35840
-void __cdecl FUN_00a35840(NiStream* stream)
+// src: XBOX_PDB 0x00a35840
+void __cdecl BSMultiTargetTreadTransfController_LoadBinary(NiStream* stream)
 {
     return LoadBinary(stream);
 }
@@ -690,11 +698,12 @@ struct Controller112
     unsigned short count, field3a;
     Link112** links;
     unsigned short linkCount;
-    void FUN_00a35c00(float* time);
+    void BSMultiTargetTreadTransfController_Update(float* time);
 };
 
 // @fnv 0x00a35c00
-void Controller112::FUN_00a35c00(float* time)
+// src: XBOX_PDB 0x00a35c00
+void Controller112::BSMultiTargetTreadTransfController_Update(float* time)
 {
     if (Active() & 1)
     {
@@ -721,7 +730,7 @@ void Controller112::FUN_00a35c00(float* time)
                         NiQuaternion& rotation = *reinterpret_cast<NiQuaternion*>(rotationStorage);
                         rotation.Slerp(1.0f - weight, rotation1, rotation0);
                         links[j]->node->position = position;
-                        rotation.FUN_004f0180(&links[j]->node->matrix);
+                        rotation.NiQuaternion_ToRotation(&links[j]->node->matrix);
                     }
                 }
             }
@@ -731,11 +740,11 @@ void Controller112::FUN_00a35c00(float* time)
 
 extern char DAT_01096694;
 extern char DAT_011f6238;
-void __cdecl FUN_00aa10f0(void* p);
+void __cdecl _NiFree_00aa10f0(void* p);
 
 struct S00a35960_Heap
 {
-    void __thiscall FUN_00aa4060(void* p);
+    void __thiscall MemoryManager_Deallocate(void* p);
 };
 
 struct S00a35960_Obj
@@ -751,13 +760,14 @@ struct S00a35960_Cls : NiInterpController
     void** m3c;
     unsigned short m40;
     unsigned short m42;
-    void FUN_00a35960();
+    void ProcessEntries_00a35960();
     void FUN_00a6d290();
 };
 
 // Sets the vtable, disposes of m34 and m3c storage, then calls FUN_00a6d290.
 // @fnv 0x00a35960
-void S00a35960_Cls::FUN_00a35960()
+// src: GUESS 0x00a35960 (confidence: low)
+void S00a35960_Cls::ProcessEntries_00a35960()
 {
     S00a35960_Obj* pObj = m34;
     *reinterpret_cast<void**>(this) = &DAT_01096694;
@@ -770,14 +780,14 @@ void S00a35960_Cls::FUN_00a35960()
         }
         else
         {
-            ((S00a35960_Heap*)&DAT_011f6238)->FUN_00aa4060(h);
+            ((S00a35960_Heap*)&DAT_011f6238)->MemoryManager_Deallocate(h);
         }
     }
     for (unsigned short i = 0; i < m40; i++)
     {
-        ((S00a35960_Heap*)&DAT_011f6238)->FUN_00aa4060(m3c[i]);
+        ((S00a35960_Heap*)&DAT_011f6238)->MemoryManager_Deallocate(m3c[i]);
     }
-    FUN_00aa10f0(m3c);
+    _NiFree_00aa10f0(m3c);
     FUN_00a6d290();
 }
 

@@ -2288,41 +2288,44 @@ BSSimpleArray<NavMesh*, 1024>::~BSSimpleArray()
 
 struct FUN_00869a20_class
 {
-    void FUN_00869a40();
-    void FUN_00869a20();
+    void UpdateFields_00869a40();
+    void NiTObjectArray_TESObjectREFR_Free();
 };
 
 // @fnv 0x00869a20
-void FUN_00869a20_class::FUN_00869a20()
+// src: COMMUNITY 0x00869a20
+void FUN_00869a20_class::NiTObjectArray_TESObjectREFR_Free()
 {
-    FUN_00869a40();
+    UpdateFields_00869a40();
 }
 
 struct FUN_00869b70_Class
 {
     void __thiscall InitializeAndReleaseNext();
-    void __thiscall FUN_00869b70();
+    void __thiscall NiTObjectArray_BipedAnim_Free();
 };
 
 // @fnv 0x00869b70
-void __thiscall FUN_00869b70_Class::FUN_00869b70()
+// src: COMMUNITY 0x00869b70
+void __thiscall FUN_00869b70_Class::NiTObjectArray_BipedAnim_Free()
 {
     InitializeAndReleaseNext();
 }
 
 struct FUN_00869e10_class
 {
-    void __thiscall FUN_00869e30();
-    void __thiscall FUN_00869e10();
+    void __thiscall UpdateState_00869e30();
+    void __thiscall NiTObjectArray_NiPointer_BSTempEffect_Free();
 };
 // @fnv 0x00869e10
-void __thiscall FUN_00869e10_class::FUN_00869e10()
+// src: COMMUNITY 0x00869e10
+void __thiscall FUN_00869e10_class::NiTObjectArray_NiPointer_BSTempEffect_Free()
 {
-    FUN_00869e30();
+    UpdateState_00869e30();
 }
 
 extern int DAT_010a47b8;
-bool __cdecl FUN_00b00d50(void*);
+bool __cdecl BSTaskletManager_RegisterOnStartupCallback(void*);
 bool __cdecl QueueTasklet(void*);
 // @fnv 0x00b00e40
 BSTaskletManagerCallback* BSTaskletManagerCallback::Initialize(int a)
@@ -2332,7 +2335,7 @@ BSTaskletManagerCallback* BSTaskletManagerCallback::Initialize(int a)
     switch (a)
     {
     case 0:
-        b = FUN_00b00d50(this);
+        b = BSTaskletManager_RegisterOnStartupCallback(this);
         break;
     default:
         b = QueueTasklet(this);
@@ -2410,7 +2413,7 @@ struct FUN_0045d180_Interface
     virtual void unk08(FUN_0045d110*);
 };
 
-FUN_0045d180_Interface* __cdecl FUN_0045d180();
+FUN_0045d180_Interface* __cdecl SettingT_RendererSettingCollection_GetCollection();
 
 struct FUN_0045d110 : FUN_00404950
 {
@@ -2420,7 +2423,7 @@ struct FUN_0045d110 : FUN_00404950
 // @fnv 0x0045d110
 FUN_0045d110::~FUN_0045d110()
 {
-    FUN_0045d180()->unk08(this);
+    SettingT_RendererSettingCollection_GetCollection()->unk08(this);
 }
 
 struct SpawnedHelper
@@ -2461,11 +2464,12 @@ SettingT<INIPrefSettingCollection>::~SettingT()
 #include <windows.h>
 struct FUN_0044fb00_Shim
 {
-    void FUN_0044fb00();
+    void DeleteCriticalSection_Thunk();
 };
 
 // @fnv 0x0044fb00
-void FUN_0044fb00_Shim::FUN_0044fb00()
+// src: GUESS 0x0044fb00 (confidence: high)
+void FUN_0044fb00_Shim::DeleteCriticalSection_Thunk()
 {
     DeleteCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(this));
 }

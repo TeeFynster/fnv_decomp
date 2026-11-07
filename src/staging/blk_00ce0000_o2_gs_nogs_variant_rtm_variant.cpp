@@ -42,40 +42,40 @@ struct FUN_00cf4ca0_class {
     int m_auiShapeKeys[6];
     hkReferencedObject* m_kPointA;
     hkReferencedObject* m_kPointB;
-    void FUN_00cf4ca0();
+    void hkpBinaryAction__referenceBodies();
 };
 struct FUN_00d06d50_cls {
     int __thiscall FindClass(int);
 };
-extern "C" void __cdecl FUN_00cf6920(int, int, int);
-void __cdecl FUN_00cf6950(int a, int b);
+extern "C" void __cdecl hkStatisticsCollectorUtil_addClassContentsAll(int, int, int);
+void __cdecl hkStatisticsCollectorUtil_addClassContentsAll_00cf6950(int a, int b);
 struct FUN_00cf86f0_class {
     int IsFieldEqual();
 };
-unsigned short FUN_00cfcb80(unsigned short a, unsigned short b);
+unsigned short hkMath_min2_unsigned_short(unsigned short a, unsigned short b);
 extern int DAT_010cb864;
 struct FUN_00ce4ae0_cls {
-    int __thiscall FUN_00ce4ae0(int);
-    void __thiscall FUN_00ce5310();
+    int __thiscall AssignFields_00ce4ae0(int);
+    void __thiscall hkaSkeletonMapperData_hkaSkeletonMapperData();
 };
 struct FUN_00ce4a20_cls {
     int m_kPointA;
     short m_kPointB;
     short m_iThirdValue;
     int m_iFourthElementInteger;
-    int __thiscall FUN_00ce4a20(int a);
+    int __thiscall ProcessAndReturnValue_00ce4a20(int a);
 };
 extern int DAT_0102e378;
-void __cdecl FUN_00cf69a0(int* a);
+void __cdecl Object_UpdateFields_00cf69a0(int* a);
 struct FUN_00cf69c0_class {
     int m_kPointA;
     int m_auiShapeKeys;
     int m_kPointB;
-    int __thiscall FUN_00cf69c0(int a);
+    int __thiscall hkSingletonInitNode_findByName(int a);
 };
-int __cdecl FUN_00cb0fa0(int a, int b);
+int __cdecl hkString_strCmp(int a, int b);
 struct FUN_00cf86e0_class {
-    void FUN_00cf86e0(float f);
+    void hkpSimulation_setFrameTimeMarker(float f);
 };
 extern int DAT_010cc2e0;
 struct FUN_00cf4820_class {
@@ -88,7 +88,7 @@ struct FUN_00cf4820_class {
 };
 extern int DAT_0102e388;
 struct FUN_00cf86d0_cls {
-    void FUN_00cf86d0();
+    void SetVtableAndProcessState_00cf86d0();
 };
 // FUN_00ce29e0: member function that (re)initialises the object.
 //   - installs the base vtable pointer at [this],
@@ -98,7 +98,7 @@ extern int DAT_010cb864;
 extern int DAT_0102e388;
 // Sub-object at +0x10; FUN_00ce5370 is the game's constructor for it.
 struct FUN_00ce5370_cls {
-    void FUN_00ce5370();
+    void UpdateState_00ce5370();
 };
 struct FUN_00ce29e0_cls {
     int* m_pVTable;          // +0x00
@@ -106,7 +106,7 @@ struct FUN_00ce29e0_cls {
     int unk08;               // +0x08
     int unk0C;               // +0x0C
     FUN_00ce5370_cls m_sub;  // +0x10
-    void FUN_00ce29e0();
+    void UpdateFields_00ce29e0();
 };
 struct FnvSpawnedObject;
 struct FnvProbe {
@@ -126,11 +126,11 @@ struct FnvSpawnedObject {
     FnvProbe m_20;
     unsigned char* Check(FnvSpawnedObject** ref);
 };
-bool __cdecl FUN_00ce2a00(int unused, FnvSpawnedObject* obj);
-void __cdecl FUN_00ce2ca0(int a1, int a2, int* a3, int a4);
-void __cdecl FUN_00ce2cf0(int param_1, int param_2, int param_3);
-void __cdecl FUN_00ce3090(int a1, int a2, int a3, int a4, int a5, int a6);
-void __cdecl FUN_00ce4330(int a1, int a2, int a3, int a4);
+bool __cdecl hkaSkeletonMapper_checkTransform(int unused, FnvSpawnedObject* obj);
+void __cdecl Object_UpdateFields_00ce2ca0(int a1, int a2, int* a3, int a4);
+void __cdecl hkaSkeletonMapper_mapExtractedMotion(int param_1, int param_2, int param_3);
+void __cdecl hkaSkeletonMapper_mapPoseLocalSpace(int a1, int a2, int a3, int a4, int a5, int a6);
+void __cdecl hkaSkeletonMapper_mapPoseLocalSpace_00ce4330(int a1, int a2, int a3, int a4);
 struct FnvKeyRec {
     unsigned short m_iOwnerObjectOffset;
     int unk04;
@@ -156,19 +156,19 @@ struct FUN_00ce5480_cls {
     int m_uiItemCount;
 };
 void* __cdecl FindKeyRecord(unsigned short aKey, FUN_00ce5480_cls* pBox);
-void __cdecl FUN_00d86160(void* stream, void* self);
+void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(void* stream, void* self);
 struct FUN_00cf4490_cls {
     char unk00[0x14];
     unsigned int m_14;
     unsigned int m_18;
     unsigned char m_1c;
-    void FUN_00cf4490(void* stream);
+    void bhkVelocityConstraintMotor_SaveBinary(void* stream);
 };
 struct CpuOpaque;
 extern CpuOpaque DAT_01268740;
-CpuOpaque* __cdecl FUN_00cf45f0();
+CpuOpaque* __cdecl bhkSpringDamperConstraintMotor_GetRTTI();
 struct SerializedObject { int base00,base04,base08,base0C,base10,word14,word18;void __thiscall SerializeToStream(int source); };
-extern "C" void __cdecl FUN_00d86160(int,SerializedObject*);
+extern "C" void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(int,SerializedObject*);
 // Save a Havok-wrapped object: write its type id, then let a type-specific saver write the rest.
 extern __declspec(thread) int g_iCF4BC0AllocTag;
 struct CF4BC0AllocTagScope {
@@ -214,10 +214,10 @@ public:
     void SetObject(CF4BC0Object* pkObject);
 };
 CF4BC0Saver* __cdecl CF4BC0CreateSaver(unsigned int uiType);
-void __cdecl FUN_00cf4bc0(NiStream& kStream, CF4BC0Object* pkObject);
+void __cdecl bhkConstraintManager_SaveBinary(NiStream& kStream, CF4BC0Object* pkObject);
 extern int DAT_010cc2fc;
 extern int DAT_0102e388;
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct SubObject_b3813 {
     int unk00;
     void Release();
@@ -300,13 +300,13 @@ public:
     void InitFromSource(FUN_00cf4f70_src* src);
 };
 struct FUN_00cf6980_class {
-    virtual void FUN_00cf6980(int);
+    virtual void Object_ForwardCall_00cf6980(int);
 };
-void __cdecl FUN_00cf6980(FUN_00cf6980_class* object);
+void __cdecl Object_ForwardCall_00cf6980(FUN_00cf6980_class* object);
 extern int DAT_01268748;
-int* __cdecl FUN_00cf6990();
+int* __cdecl Runtime_GetDAT01268748Address();
 extern int DAT_0102e378;
-int* __cdecl FUN_00cf69b0();
+int* __cdecl Runtime_GetDAT0102e378Address();
 extern int DAT_01268794;
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf05c(int value);
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf100(int value);
@@ -321,12 +321,12 @@ struct FUN_00cf6d50_cls {
     int m_00;
     unsigned short m_04;
     unsigned short m_06;
-    void FUN_00cf6d50();
+    void UpdateState_00cf6d50();
 };
 struct FUN_00cf6f80_cls {
     unsigned int m_ucLowNibble;
     unsigned int m_ucHighNibble;
-    unsigned __int64 FUN_00cf6f80();
+    unsigned __int64 ComputeValue_00cf6f80();
 };
 // FUN_00cf8710 : thiscall member returning a bool.
 //
@@ -353,7 +353,7 @@ struct FUN_00cf8710_cls
     float m_14;
     float m_18;
 
-    bool FUN_00cf8710();
+    bool hkpSimulation_isSimulationAtPsi();
 };
 extern MemoryManager _g_memoryManager;
 class CF4840Saver {
@@ -416,15 +416,16 @@ public:
 };
 F4A30Creator* __cdecl F4A30FindCreator(int iTypeID);
 F4A30Result* CreateF4A30Result(F4A30Node* pkNode, void* pvContext);
-void __cdecl FUN_00ce51f0();
-void __cdecl FUN_00ce5300();
+void __cdecl BuildMatrixFromRotationScaleAndPosition();
+void __cdecl Object_ForwardCall_00ce5300();
 class FUN_00ce5360_This {
 public:
 // @fnv 0x00ce5360
     virtual ~FUN_00ce5360_This() {}
-    unsigned int FUN_00ce5360(unsigned int arg);
+    unsigned int ComputeValue_00ce5360(unsigned int arg);
 };
-unsigned int FUN_00ce5360_This::FUN_00ce5360(unsigned int arg) {
+// src: GUESS 0x00ce5360 (confidence: low)
+unsigned int FUN_00ce5360_This::ComputeValue_00ce5360(unsigned int arg) {
     return reinterpret_cast<unsigned int>(this);
 }
 class FUN_00ce9800_obj {
@@ -455,7 +456,7 @@ static inline void WriteData(NiBinaryStream* s, void* data, int size)
     unsigned int count = size;
     s->BinaryWrite(data, size, &count, 1);
 }
-void FUN_00cf09a0(NiStream* owner, Record* rec);
+void bhkPoseArray_bhkPose_SaveBinary(NiStream* owner, Record* rec);
 extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long);
 struct ArrayData {
     unsigned int* m_data;
@@ -493,23 +494,23 @@ struct FUN_00cf4190 : FUN_00cdf560 {
     FUN_00cf4190();
 };
 extern int DAT_01268730;
-int* FUN_00cf41b0();
-extern "C" void __cdecl FUN_00d86100(void* view, void* object);
+int* bhkPositionConstraintMotor_GetRTTI();
+extern "C" void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(void* view, void* object);
 struct SerializedRecord {
     unsigned int unk00, unk04, unk08, unk0c, unk10;
     unsigned int m_14, m_18, m_1c, m_20;
-    void FUN_00cf41c0(NiStream* view);
+    void bhkPositionConstraintMotor_LoadBinary(NiStream* view);
 };
 struct CpuOpaque;
 extern CpuOpaque DAT_01268738;
-CpuOpaque* __cdecl FUN_00cf43f0();
+CpuOpaque* __cdecl bhkVelocityConstraintMotor_GetRTTI();
 template <class T>
 inline void NiStreamSaveBinaryCF46(NiBinaryStream& kStream, const T& kValue)
 {
     unsigned int uiSize = sizeof(T);
     kStream.BinaryWrite(&kValue, sizeof(T), &uiSize, 1);
 }
-void __cdecl FUN_00d86100(NiStream* ar, void* obj);
+void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(NiStream* ar, void* obj);
 class hkObjCF46 {
 public:
     int unk00;
@@ -524,10 +525,10 @@ public:
 };
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs) throw();
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* cs) throw();
-unsigned int __cdecl FUN_00d87a40() throw();
+unsigned int __cdecl Object_ForwardCall_00d87a40() throw();
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs) throw();
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* cs) throw();
-unsigned int __cdecl FUN_00d87a40() throw();
+unsigned int __cdecl Object_ForwardCall_00d87a40() throw();
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs) throw();
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* cs) throw();
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs) throw();
@@ -536,10 +537,10 @@ struct CC9F10Shape {
     void FUN_00c90510();
 };
 struct FUN_00cf7490_class {
-    void FUN_00cf7490();
+    void j_hkReferencedObject_addReference();
 };
 void __cdecl FUN_00c905b0(void);
-void __cdecl FUN_00cf74a0(void);
+void __cdecl j_hkReferencedObject_removeReference(void);
 struct hkOwnerCF74;
 // 0x00cf74b0 sorts by owner->m_d4, then the subindex at +0x08: an owner/subindex record.
 struct OwnerSubindexEntry {
@@ -554,7 +555,7 @@ struct hkOwnerCF74 {
     int unk9C, unkA0, unkA4, unkA8, unkAC, unkB0, unkB4, unkB8, unkBC, unkC0, unkC4, unkC8, unkCC, unkD0;
     unsigned int m_d4;
 };
-int __cdecl FUN_00cf74b0(const OwnerSubindexEntry& a, const OwnerSubindexEntry& b);
+int __cdecl hkpWorldBodyOperationQueueSortCmp(const OwnerSubindexEntry& a, const OwnerSubindexEntry& b);
 struct hkQualityCF74 {
     int unk00;
     int unk04;
@@ -626,15 +627,15 @@ struct hkPairCF74 {
     hkEntityCF74* m_kPointB;
 };
 hkBool __cdecl LessThanPairPriority(const hkPairCF74& x, const hkPairCF74& y);
-void* __cdecl FUN_00cfb050(void* pvUnused, bool* pbOut, void* pvResult);
-void FUN_00cfb060();
-int __cdecl FUN_00cfb070(int a, int b, int c);
-void __stdcall FUN_00cfc580(int, int, int, int, int);
+void* __cdecl Runtime_UpdateState_00cfb050(void* pvUnused, bool* pbOut, void* pvResult);
+void nullsub_7();
+int __cdecl Runtime_GetC(int a, int b, int c);
+void __stdcall nullsub_59(int, int, int, int, int);
 extern int DAT_0102e388;
 struct FUN_00cfc590_class {
     int* vtable;
 
-    void __thiscall FUN_00cfc590();
+    void __thiscall SetVtable();
 };
 extern int DAT_010cc86c;
 struct S_00cfc5a0 {
@@ -695,7 +696,7 @@ struct FUN_00cfc5a0 {
 
     FUN_00cfc5a0(int a1, S_00cfc5a0* a2, S_00cfc5a0* a3);
 };
-void FUN_00cfdb40();
+void Object_DoNothing_00cfdb40();
 // Per-thread profiler ring: TlsGetValue(index) -> buffer with head@+4 / end@+0xc,
 // 0xc-byte events {tag, timestamp, pad}.
 struct CE0020Event {
@@ -776,10 +777,10 @@ public:
     virtual void Unk05();
     virtual void EnableConstraints();
 };
-void __cdecl FUN_00d27690(CE0020Target* pTarget, CE0020Subject* pSubject, int iType);
+void __cdecl hkpWorldConstraintUtil_removeAndDeleteModifier(CE0020Target* pTarget, CE0020Subject* pSubject, int iType);
 void __cdecl EnableConstraintsAndZeroArrays(CE0020Target* pTarget, CE0020Subject* pSubject);
-void __cdecl FUN_00ce2d10();
-void __cdecl FUN_00ce2f30();
+void __cdecl Runtime_ProcessEntries_00ce2d10();
+void __cdecl Runtime_ForwardCall_00ce2f30();
 template <class T>
 inline void NiStreamLoadBinaryCF42(NiBinaryStream& kStream, T& kValue)
 {
@@ -787,7 +788,7 @@ inline void NiStreamLoadBinaryCF42(NiBinaryStream& kStream, T& kValue)
     kStream.BinaryRead(&kValue, sizeof(T), &uiSize, 1);
 }
 class SerializableCF42;
-void __cdecl FUN_00d86160(NiStream& kStream, SerializableCF42* pkObject);
+void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(NiStream& kStream, SerializableCF42* pkObject);
 class SerializableCF42 {
 public:
     int unk00, unk04, unk08, unk0C, unk10;
@@ -796,7 +797,7 @@ public:
     unsigned int m_uiValue1C;
     unsigned int m_uiValue20;
 
-    void FUN_00cf4260(NiStream& kStream);
+    void bhkPositionConstraintMotor_SaveBinary(NiStream& kStream);
 };
 // bhkVelocityConstraintMotor ctor (hkpVelocityConstraintMotor chain):
 // vptr(0), memSizeAndFlags(4), referenceCount(6), motor type(8), min/max force, tau, damping, velocity-clamp bool.
@@ -826,7 +827,7 @@ inline void NiStreamLoadBinaryCF44(NiBinaryStream& kStream, T& kValue)
     kStream.BinaryRead(&kValue, sizeof(T), &uiSize, 1);
 }
 class SerializableCF44;
-void __cdecl FUN_00d86100(NiStream& kStream, SerializableCF44* pkObject);
+void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(NiStream& kStream, SerializableCF44* pkObject);
 class SerializableCF44 {
 public:
     int unk00, unk04, unk08, unk0C, unk10;
@@ -834,7 +835,7 @@ public:
     unsigned int m_uiValue18;
     unsigned char m_ucValue1C;
 
-    void FUN_00cf4400(NiStream& kStream);
+    void bhkVelocityConstraintMotor_LoadBinary(NiStream& kStream);
 };
 class CF4BC0SaverLoader {
 public:
@@ -847,8 +848,8 @@ public:
 struct TagState { int oldTag; int newTag; };
 __forceinline TagState GetTag(int tag) { TagState state={g_iCF4BC0AllocTag,tag}; return state; }
 struct AllocScope { int saved; AllocScope(TagState t):saved(t.oldTag){g_iCF4BC0AllocTag=t.newTag;} ~AllocScope(){g_iCF4BC0AllocTag=saved;} };
-hkReferencedObject* __cdecl FUN_00cf4af0(NiStream& kStream);
-void FUN_00cf6d10();
+hkReferencedObject* __cdecl bhkConstraintManager_LoadBinary(NiStream& kStream);
+void Runtime_DoNothing_00cf6d10();
 class hkRefObjCF70 : public hkBaseObject {
 public:
     unsigned short m_usMemSizeAndFlags;
@@ -879,11 +880,11 @@ struct SimdReal {
     __forceinline SimdReal(__m128 r) : m_vValue(r) {}
     __forceinline operator __m128() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
 };
-static void FUN_00ce2a50(hkVector4* a, hkVector4* b);
+static void hkVector4_ComputeValues_00ce2a50(hkVector4* a, hkVector4* b);
 void CallerX(hkVector4* a, hkVector4* b);
 struct SubMatrix {
     __m128 m_row[4];
-    void FUN_00cb2d90(const float* pQuat);
+    void hkRotation_set(const float* pQuat);
 };
 struct TransformOwner {
     int unk00;
@@ -964,7 +965,7 @@ struct TransformOwner {
 };
 extern "C" TransformOwner* cf8b60_self(void);
 extern "C" __m128* cf8b60_quat(void);
-static void FUN_00cf8b60(TransformOwner* self, __m128* pQuat);
+static void Object_UpdateFields_00cf8b60(TransformOwner* self, __m128* pQuat);
 void cf8b60_caller(void);
 struct ResultByte { char value; __forceinline ResultByte(bool b) : value(b) {} };
 struct ScalarValue {
@@ -985,7 +986,7 @@ struct VectorValue {
     }
 };
 extern double DAT_01032980;
-ResultByte FUN_00ceb6f0(float& outT,float& outU,float& outV,const VectorValue& position,const VectorValue& direction,const VectorValue& a,const VectorValue& b,const VectorValue& c,bool cull);
+ResultByte Runtime_UpdateState_00ceb6f0(float& outT,float& outU,float& outV,const VectorValue& position,const VectorValue& direction,const VectorValue& a,const VectorValue& b,const VectorValue& c,bool cull);
 
 extern float DAT_01011d78;
 extern const __m128 DAT_010c71e0;
@@ -1045,10 +1046,10 @@ struct RotationX {
     void operator=(const RotationX& a) { vec=a.vec; }
     void flipped(const hkVector4&);
     __forceinline const hkVector4& imag() const { return vec; }
-    void FUN_00cd9d10(const hkVector4&, const hkVector4&) throw();
-    void FUN_00c74ac0(const RotationX&, const RotationX&) throw();
-    void FUN_00ce0ca0(const RotationX&) throw();
-    void FUN_00c66320(const RotationX&, const RotationX&) throw();
+    void ComputeValues_00cd9d10(const hkVector4&, const hkVector4&) throw();
+    void setMulInverse(const RotationX&, const RotationX&) throw();
+    void SetQuaternionProduct(const RotationX&) throw();
+    void setMul(const RotationX&, const RotationX&) throw();
 };
 static __forceinline void RotateVector(hkVector4& out,const RotationX& q,const hkVector4& dir) {
     hkVector4 half; half.getQuad()=DAT_010c71e0;
@@ -1066,7 +1067,8 @@ static __forceinline __m128 reciprocalRootX(__m128 a) {
     __m128 r=_mm_rsqrt_ps(a);
     return _mm_mul_ps(_mm_mul_ps(_mm_set1_ps(0.5f),r),_mm_sub_ps(_mm_set1_ps(3.0f),_mm_mul_ps(_mm_mul_ps(r,a),r)));
 }
-__declspec(noinline) void RotationX::FUN_00cd9d10(const hkVector4& from,const hkVector4& to) throw() {
+// src: GUESS 0x00cd9d10 (confidence: low)
+__declspec(noinline) void RotationX::ComputeValues_00cd9d10(const hkVector4& from,const hkVector4& to) throw() {
     __m128 dp=from.dot3(to).broadcast();
     __m128 nearOne=_mm_set1_ps(1.0f-1e-5f);
     __m128 nearNegative=_mm_set1_ps(-(1.0f-1e-3f));
@@ -1094,7 +1096,8 @@ __declspec(noinline) void RotationX::FUN_00cd9d10(const hkVector4& from,const hk
         vec.getQuad()=_mm_shuffle_ps(perpendicular.getQuad(),_mm_unpackhi_ps(perpendicular.getQuad(),real),0xc4);
     }
 }
-inline void RotationX::FUN_00c66320(const RotationX& a,const RotationX& b) throw() {
+// src: COMMUNITY 0x00c66320
+inline void RotationX::setMul(const RotationX& a,const RotationX& b) throw() {
     hkVector4 result; result.setCross(a.imag(),b.imag());
     result.addMul4(a.vec.getSimdAt(3),b.imag());
     result.addMul4(b.vec.getSimdAt(3),a.imag());
@@ -1102,7 +1105,8 @@ inline void RotationX::FUN_00c66320(const RotationX& a,const RotationX& b) throw
     hkVector4 real; real.setMul4(a.vec,b.vec); real.sub4(d);
     vec.setXYZW(result,real);
 }
-inline void RotationX::FUN_00ce0ca0(const RotationX& b) throw() {
+// src: GUESS 0x00ce0ca0 (confidence: medium)
+inline void RotationX::SetQuaternionProduct(const RotationX& b) throw() {
     hkVector4 result; result.setCross(imag(),b.imag());
     result.addMul4(vec.getSimdAt(3),b.imag());
     result.addMul4(b.vec.getSimdAt(3),imag());
@@ -1110,7 +1114,8 @@ inline void RotationX::FUN_00ce0ca0(const RotationX& b) throw() {
     hkVector4 real; real.setMul4(vec,b.vec); real.sub4(d);
     vec.setXYZW(result,real);
 }
-inline void RotationX::FUN_00c74ac0(const RotationX& a,const RotationX& b) throw() {
+// src: COMMUNITY 0x00c74ac0
+inline void RotationX::setMulInverse(const RotationX& a,const RotationX& b) throw() {
     hkVector4 result; result.setCross(b.imag(),a.imag());
     result.subMul4(a.vec.getSimdAt(3),b.imag());
     result.addMul4(b.vec.getSimdAt(3),a.imag());
@@ -1154,11 +1159,11 @@ struct MapperX {
     PoseX motion;
     BoolX keepLocal;
     int property;
-    void __cdecl FUN_00ce3090(const PoseX*, PoseX*, const short*, const short*, bool) const;
+    void __cdecl hkaSkeletonMapper_mapPoseLocalSpace(const PoseX*, PoseX*, const short*, const short*, bool) const;
 };
-extern void __cdecl FUN_00ce2f30(const PoseX*, const PoseX*, const short*, int, PoseX*) throw();
-extern void __cdecl FUN_00ce2f40(const PoseX*, const PoseX*, const short*, int, PoseX*) throw();
-extern void __cdecl FUN_00ce2ca0(int, PoseX&, const PoseX&, const PoseX&) throw();
+extern void __cdecl Runtime_ForwardCall_00ce2f30(const PoseX*, const PoseX*, const short*, int, PoseX*) throw();
+extern void __cdecl hkaSkeletonMapper_additivePoseFromCombinedPoseAndReferencePose(const PoseX*, const PoseX*, const short*, int, PoseX*) throw();
+extern void __cdecl Object_UpdateFields_00ce2ca0(int, PoseX&, const PoseX&, const PoseX&) throw();
 
 struct ClockEventX { const char* tag; unsigned stamp; int unused; };
 struct ClockListX : ClockEventX { const char* split; };
@@ -1202,7 +1207,7 @@ public:
     __forceinline T get() const throw() { return value; }
 };
 template<class T> __forceinline T* stackAllocateX(int n) {
-    T** top=(T**)FUN_00c85750();
+    T** top=(T**)hkMemoryRouter_getInstance();
     T* result=*top;
     *top=(T*)((char*)result+((n*int(sizeof(T))+127)&~127));
     return result;
@@ -1212,9 +1217,10 @@ template<class T> struct BufferX {
     int debugSize;
     __forceinline BufferX(int n) throw() { data=stackAllocateX<T>(n); }
     __forceinline T* begin() throw() { return data; }
-    __forceinline ~BufferX() throw() { *(T**)FUN_00c85750()=data.get(); }
+    __forceinline ~BufferX() throw() { *(T**)hkMemoryRouter_getInstance()=data.get(); }
 };
-static __declspec(noinline) void FUN_00ce2a50(hkVector4& a,hkVector4& b) throw() {
+// src: GUESS 0x00ce2a50 (confidence: low)
+static __declspec(noinline) void hkVector4_ComputeValues_00ce2a50(hkVector4& a,hkVector4& b) throw() {
     hkVector4 al; al.getQuad()=a.dot3(a).broadcast();
     hkVector4 bl; bl.getQuad()=b.dot3(b).broadcast();
     hkVector4 packed;
@@ -1227,7 +1233,8 @@ static __declspec(noinline) void FUN_00ce2a50(hkVector4& a,hkVector4& b) throw()
 }
 
 // @fnv 0x00ce3090
-void __cdecl MapperX::FUN_00ce3090(const PoseX* original,PoseX* output,const short* mapA,const short* mapB,bool additive) const {
+// src: XBOX_PDB 0x00ce3090
+void __cdecl MapperX::hkaSkeletonMapper_mapPoseLocalSpace(const PoseX* original,PoseX* output,const short* mapA,const short* mapB,bool additive) const {
     {
         ClockX& timer=ClockX::instance();
         if(timer.current<timer.end) {
@@ -1260,7 +1267,7 @@ void __cdecl MapperX::FUN_00ce3090(const PoseX* original,PoseX* output,const sho
     }
     const BoolX sparse=mapA&&mapB;
     BufferX<PoseX> scratch(first->bones.count());
-    if (additive) FUN_00ce2f30(original,first->reference.begin(),mapA,first->bones.count(),scratch.begin());
+    if (additive) Runtime_ForwardCall_00ce2f30(original,first->reference.begin(),mapA,first->bones.count(),scratch.begin());
     const PoseX* input=additive?scratch.begin():original;
     {
         const int total=records.count();
@@ -1269,7 +1276,7 @@ void __cdecl MapperX::FUN_00ce3090(const PoseX* original,PoseX* output,const sho
             const RecordX& r=records[i];
             int a=r.a,b=r.b;
             if(sparse) { a=mapA[a]; if(a<0) continue; b=mapB[b]; }
-            FUN_00ce2ca0(property,output[b],r.offset,input[a]);
+            Object_UpdateFields_00ce2ca0(property,output[b],r.offset,input[a]);
             _mm_prefetch((const char*)&input[a]+128,_MM_HINT_NTA);
             _mm_prefetch((const char*)&output[b]+128,_MM_HINT_NTA);
         }
@@ -1318,16 +1325,16 @@ void __cdecl MapperX::FUN_00ce3090(const PoseX* original,PoseX* output,const sho
             }
             int a=r.a,c=r.c,b=r.b,d=r.d;
             if(sparse) { a=mapA[a];c=mapB[c];b=mapA[b];d=mapB[d]; }
-            FUN_00ce2ca0(property,output[c],r.root,input[a]);
-            FUN_00ce2a50(posA,posB);
-            RotationX shortest; shortest.FUN_00cd9d10(posB,posA);
+            Object_UpdateFields_00ce2ca0(property,output[c],r.root,input[a]);
+            hkVector4_ComputeValues_00ce2a50(posA,posB);
+            RotationX shortest; shortest.ComputeValues_00cd9d10(posB,posA);
             RotationX offset; offset.vec=r.end.translation;
-            RotationX applied; applied.FUN_00c74ac0(shortest,offset);
-            output[c].rotation.FUN_00ce0ca0(applied);
-            output[d].rotation.FUN_00c66320(r.end.rotation,input[b].rotation);
+            RotationX applied; applied.setMulInverse(shortest,offset);
+            output[c].rotation.SetQuaternionProduct(applied);
+            output[d].rotation.setMul(r.end.rotation,input[b].rotation);
         }
     }
-    if(additive) FUN_00ce2f40(output,second->reference.begin(),mapB,second->bones.count(),output);
+    if(additive) hkaSkeletonMapper_additivePoseFromCombinedPoseAndReferencePose(output,second->reference.begin(),mapB,second->bones.count(),output);
     {
         ClockX& timer=ClockX::instance();
         if(timer.current<timer.end) {

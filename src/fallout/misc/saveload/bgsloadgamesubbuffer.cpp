@@ -97,7 +97,7 @@ BGSLoadFormBuffer* BGSLoadGameSubBuffer::CreateFormBuffer(TESForm* form)
         {
             char* data = pBuffer;
             reinterpret_cast<TESRecipe*>(result)->SetSkill((int)form);
-            result->FUN_008a8150((unsigned char)*data);
+            result->ExtraDismemberedLimbs_SetEaten((unsigned char)*data);
             offset = 1;
             {
                 unsigned int value;
@@ -202,13 +202,13 @@ void LoadGameSubBufferQueue::ProcessQueuedSubBuffers(QUEUED_SUB_BUFFER_TYPE eSub
                             {
                             case 0:
                                 if (actor)
-                                    reinterpret_cast<BGSLoadGameSubBuffer*>(&subBuffer)->FUN_00435b20();
+                                    reinterpret_cast<BGSLoadGameSubBuffer*>(&subBuffer)->DeleteBuffer();
                                 else if (reference)
                                     reference->GetExtraData()->SetSavedAnimation(
                                         reinterpret_cast<char*>((TESForm*)reinterpret_cast<NiPointer<TESForm>&>(subBuffer)));
                                 break;
                             case 1:
-                                reinterpret_cast<BGSLoadGameSubBuffer*>(&subBuffer)->FUN_00435b20();
+                                reinterpret_cast<BGSLoadGameSubBuffer*>(&subBuffer)->DeleteBuffer();
                                 break;
                             case 2:
                                 if (reference)
@@ -331,11 +331,12 @@ void SubBufferMap::GetNextEntry(void*& apPosition, TESForm*& key, SubBufferValue
 struct Holder
 {
     void FUN_0085efc0(DummyPointerMap*, unsigned int, unsigned short);
-    void FUN_0085f010(TESForm*, unsigned short);
+    void TESSaveLoadGame_QueueAnimationLoad(TESForm*, unsigned short);
 };
 // Looks up the parent form's ID in the map at offset 0x58; if present, uses 0 instead, then passes the ID and type to FUN_0085efc0.
 // @fnv 0x0085f010
-void Holder::FUN_0085f010(TESForm* apParentForm, unsigned short aeType)
+// src: COMMUNITY 0x0085f010
+void Holder::TESSaveLoadGame_QueueAnimationLoad(TESForm* apParentForm, unsigned short aeType)
 {
     unsigned int uiExistingValue;
     unsigned int formID = apParentForm->GetFormID();
@@ -353,14 +354,14 @@ void BGSLoadGameSubBuffer::SaveGame(BGSSaveGameBuffer* apSaveGameBuffer)
     padvancedBuffer = pBuffer + 1;
     isize = 0;
     padvancedBuffer += ReadEncodedInteger(padvancedBuffer, isize);
-    apSaveGameBuffer->FUN_00865f60(isize);
+    apSaveGameBuffer->SaveVariableSizedValue(isize);
     apSaveGameBuffer->WriteAtOffset(padvancedBuffer, isize, 1);
 }
 
 struct FUN_00865660_This
 {
     void* vtable;
-    void FUN_008656c0(unsigned int);
+    void NiTMapBase_DFALL_NiTMapItem_TESForm_BGSLoadGameSubBuffer_TESForm_BGSLoadGameSubBuffer_NiTMapBase_DFALL_NiTMapItem_TESForm_BGSLoadGameSubBuffer_TESForm_BGSLoadGameSubBuffer(unsigned int);
     FUN_00865660_This* Construct(unsigned int);
 };
 extern int DAT_01082288;
@@ -368,7 +369,7 @@ extern int DAT_01082288;
 // @fnv 0x00865660
 FUN_00865660_This* FUN_00865660_This::Construct(unsigned int size)
 {
-    FUN_008656c0(size);
+    NiTMapBase_DFALL_NiTMapItem_TESForm_BGSLoadGameSubBuffer_TESForm_BGSLoadGameSubBuffer_NiTMapBase_DFALL_NiTMapItem_TESForm_BGSLoadGameSubBuffer_TESForm_BGSLoadGameSubBuffer(size);
     vtable = (void*)&DAT_01082288;
     return this;
 }
@@ -413,11 +414,12 @@ struct FUN_008656c0_This
     unsigned int m_uiCount;
     void* m_pItems;
     unsigned int m_uiSize;
-    FUN_008656c0_This* FUN_008656c0(unsigned int count);
+    FUN_008656c0_This* NiTMapBase_DFALL_NiTMapItem_TESForm_BGSLoadGameSubBuffer_TESForm_BGSLoadGameSubBuffer_NiTMapBase_DFALL_NiTMapItem_TESForm_BGSLoadGameSubBuffer_TESForm_BGSLoadGameSubBuffer(unsigned int count);
 };
 // Sets the vtable, stores count, allocates count*4 bytes for m_pItems, zeroes them, and returns this.
 // @fnv 0x008656c0
-FUN_008656c0_This* FUN_008656c0_This::FUN_008656c0(unsigned int count)
+// src: COMMUNITY 0x008656c0
+FUN_008656c0_This* FUN_008656c0_This::NiTMapBase_DFALL_NiTMapItem_TESForm_BGSLoadGameSubBuffer_TESForm_BGSLoadGameSubBuffer_NiTMapBase_DFALL_NiTMapItem_TESForm_BGSLoadGameSubBuffer_TESForm_BGSLoadGameSubBuffer(unsigned int count)
 {
     unsigned int uiBytes;
     vtable = (void*)&DAT_010822a8;

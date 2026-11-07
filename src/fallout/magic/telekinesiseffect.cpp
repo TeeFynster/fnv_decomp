@@ -55,7 +55,8 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 // Returns the effect's save size: base size from FUN_00802d90 plus 4, plus 8 more when the save version is at least 0x40.
 // @fnv 0x0082b190
-unsigned short __thiscall TelekinesisEffect::FUN_0082b190(Actor* apActor)
+// src: XBOX_PDB 0x0082b190
+unsigned short __thiscall TelekinesisEffect::GetSaveSize_0082b190(Actor* apActor)
 {
     unsigned short uiSaveSize = 0;
     uiSaveSize += FUN_00802d90(apActor);
@@ -78,21 +79,22 @@ void TelekinesisEffect::LoadFromSave(Actor* apActor)
     unk58 = irefID;
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x40)
     {
-        g_TESSaveLoadGame->FUN_008579e0(&m_50, 4);
-        g_TESSaveLoadGame->FUN_008579e0(&m_54, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&m_50, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&m_54, 4);
     }
 }
 
-void* __cdecl FUN_00703390();
+void* __cdecl Interface_GetTelekinesisREFR();
 // This base start helper has no shared declaration; its receiver uses ECX.
 void __fastcall StartValueModifierEffect(ValueModifierEffect* effect);
 
 // Calls FUN_0082c000, stores the result of FUN_00703390 at offset 0x58, calls StartTelekinesisEffect, and clears the byte at offset 0x5d.
 // @fnv 0x0082a670
-void __thiscall TelekinesisEffect::FUN_0082a670()
+// src: XBOX_PDB 0x0082a670
+void __thiscall TelekinesisEffect::Start_0082a670()
 {
     StartValueModifierEffect(this);
-    target = static_cast<TESObjectREFR*>(FUN_00703390());
+    target = static_cast<TESObjectREFR*>(Interface_GetTelekinesisREFR());
     StartTelekinesisEffect();
     m_5d = 0;
 }
@@ -108,20 +110,21 @@ MagicCaster* __thiscall PlayerCharacter::GetFloatAsUInt()
     return reinterpret_cast<MagicCaster*>(((Flt*)((char*)this + 0x634))->operator unsigned int());
 }
 
-void* __cdecl FUN_004b5a80(void const*);
+void* __cdecl bhkEntity_Getbhk(void const*);
 
 struct FUN_0082aeb0_shell
 {
-    void* __thiscall FUN_0082aee0();
-    void* __thiscall FUN_0082aeb0();
+    void* __thiscall bhkUnaryAction_GethkRigidBody();
+    void* __thiscall bhkUnaryAction_GetRigidBody();
 };
 
 // Calls FUN_0082aee0 and passes its result to FUN_004b5a80, returning that value.
 // @fnv 0x0082aeb0
-void* __thiscall FUN_0082aeb0_shell::FUN_0082aeb0()
+// src: XBOX_PDB 0x0082aeb0
+void* __thiscall FUN_0082aeb0_shell::bhkUnaryAction_GetRigidBody()
 {
-    void* result = FUN_0082aee0();
-    return FUN_004b5a80(result);
+    void* result = bhkUnaryAction_GethkRigidBody();
+    return bhkEntity_Getbhk(result);
 }
 
 // Destroys the GO and ValueModifierEffect subobjects without changing the vtable.
@@ -140,10 +143,11 @@ struct Calendar
 };
 struct FUN_0082aee0_shell
 {
-    unsigned int __thiscall FUN_0082aee0();
+    unsigned int __thiscall bhkUnaryAction_GethkRigidBody();
 };
 // @fnv 0x0082aee0
-unsigned int FUN_0082aee0_shell::FUN_0082aee0()
+// src: XBOX_PDB 0x0082aee0
+unsigned int FUN_0082aee0_shell::bhkUnaryAction_GethkRigidBody()
 {
     Calendar* calendar = reinterpret_cast<Calendar*>((reinterpret_cast<NullableReferenceFlagsAccessor*>(this))->GetLocalData());
     return calendar ? calendar->GetDaysPassed() : 0;
@@ -158,15 +162,16 @@ unsigned int __fastcall GetField63C(PlayerCharacter* player)
 
 struct FUN_00974a50_shell
 {
-    void __thiscall FUN_00974a50(void* a, void* b);
+    void __thiscall ProcessLists_FinishMagicShaderHitEffect(void* a, void* b);
 };
 extern int DAT_011e0e80;
 // @fnv 0x0082af60
-void __thiscall TelekinesisEffect::FUN_0082af60()
+// src: XBOX_PDB 0x0082af60
+void __thiscall TelekinesisEffect::Finish_0082af60()
 {
-    FUN_0082afa0();
+    RemoveSpring();
     ((FUN_00974a50_shell*)(&DAT_011e0e80))
-        ->FUN_00974a50(target, GetEffectSetting()->GetEffectShader());
+        ->ProcessLists_FinishMagicShaderHitEffect(target, GetEffectSetting()->GetEffectShader());
     ApplyEffect();
 }
 
@@ -184,21 +189,22 @@ void TelekinesisEffect::SaveLoad(Actor* apActor)
     FUN_00802db0(apActor);
     irefID = 0;
     if (unk58)
-        irefID = target->FUN_0084e3a0();
-    g_TESSaveLoadGame->FUN_00857a10((int)&irefID, 4);
+        irefID = target->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID((int)&irefID, 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x40)
     {
-        g_TESSaveLoadGame->FUN_008579b0(&m_50, 4);
-        g_TESSaveLoadGame->FUN_008579b0(&m_54, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_50, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_54, 4);
     }
 }
 
 TESForm* __cdecl GetFormByID(unsigned int id);
 
 // @fnv 0x0082b300
-void TelekinesisEffect::FUN_0082b300(Actor* apActor)
+// src: XBOX_PDB 0x0082b300
+void TelekinesisEffect::FinishInitLoadGame_0082b300(Actor* apActor)
 {
-    ValueModifierEffect::FUN_0082cd10(apActor);
+    ValueModifierEffect::ValueModifierEffect_FinishInitLoadGame(apActor);
     TESObjectREFR* pRef = target;
     if (pRef)
         target = dynamic_cast<TESObjectREFR*>(GetFormByID(reinterpret_cast<unsigned int>(pRef)));
@@ -222,8 +228,8 @@ ActiveEffect* TelekinesisEffect::CreateCopy()
 struct SceneObject
 {
 };
-bhkCollisionObject* __cdecl FUN_004b5260(SceneObject*);
-void __cdecl FUN_00807ac0(bhkWorldObject*);
+bhkCollisionObject* __cdecl FindFirstCollisionObject(SceneObject*);
+void __cdecl bhkTelekinesisListener_RemoveTelekinesisListeners(bhkWorldObject*);
 struct ReferenceForm
 {
     int FUN_00401170();
@@ -366,7 +372,7 @@ struct TelekinesisConstraint
     TelekinesisConstraint(TelekinesisReference*, bhkWorldObject*, unsigned int);
 };
 extern NiRTTI DAT_011f9140;
-NiObject* __cdecl FUN_00653270(const NiRTTI*, SceneObject*);
+NiObject* __cdecl NiObject_DynamicCast(const NiRTTI*, SceneObject*);
 struct CasterPosition
 {
     void ApplyTurnUndeadEffect(NiPoint3*);
@@ -458,7 +464,7 @@ struct ShaderEffect
 };
 struct EffectManager
 {
-    void FUN_00973fd0(ShaderEffect*);
+    void ProcessLists_AddTempEffect(ShaderEffect*);
 };
 
 // Validates the target's collision object, creates a TelekinesisConstraint, applies the telekinesis effect to the player, and starts the effect shader.
@@ -477,25 +483,25 @@ void TelekinesisEffect::StartTelekinesisEffect()
         return;
     }
     SceneObject* h = reinterpret_cast<TelekinesisReference*>(target)->GetSceneObject();
-    bhkCollisionObject* a = h ? FUN_004b5260(h) : 0;
-    bhkWorldObject* i = a ? a->FUN_006fa820() : 0;
+    bhkCollisionObject* a = h ? FindFirstCollisionObject(h) : 0;
+    bhkWorldObject* i = a ? a->bhkNiCollisionObject_GetWorldObject() : 0;
     if (i)
-        FUN_00807ac0(i);
-    if (!i || (i->FUN_0043b4f0().FUN_0043b4d0() != 4 && i->FUN_0043b4f0().FUN_0043b4d0() != 5))
+        bhkTelekinesisListener_RemoveTelekinesisListeners(i);
+    if (!i || (i->bhkWorldObject_GetCollisionFilter().CFilter_GetLayer() != 4 && i->bhkWorldObject_GetCollisionFilter().CFilter_GetLayer() != 5))
     {
         Dispel(false);
         return;
     }
-    void* p = i->FUN_004ae750();
-    new TelekinesisConstraint(reinterpret_cast<TelekinesisReference*>(target), i, i->FUN_0043b4f0().value);
-    NiObject* eb = FUN_00653270(&DAT_011f9140, h);
+    void* p = i->Bipedanim_GetReferenceFlagsOrZero();
+    new TelekinesisConstraint(reinterpret_cast<TelekinesisReference*>(target), i, i->bhkWorldObject_GetCollisionFilter().value);
+    NiObject* eb = NiObject_DynamicCast(&DAT_011f9140, h);
     if (eb)
-        eb->FUN_00b4dec0(6);
+        eb->BSFadeNode_SetLODMultType(6);
     if (g_thePlayer->GetFloatAsUInt())
-        g_thePlayer->FUN_00961280();
+        g_thePlayer->PlayerCharacter_DestroyMouseSpring();
     if (!g_TESSaveLoadGame->FUN_0047c850())
         magnitude = DAT_01022958;
-    g_thePlayer->FUN_0095f930(reinterpret_cast<TelekinesisReference*>(target), 3, magnitude);
+    g_thePlayer->PlayerCharacter_CreateMouseSpring(reinterpret_cast<TelekinesisReference*>(target), 3, magnitude);
     NiPoint3 s;
     NiPoint3 f;
     g_thePlayer->GetCameraPosAndDir(&s, &f, true);
@@ -514,7 +520,7 @@ void TelekinesisEffect::StartTelekinesisEffect()
                                                 reinterpret_cast<ShaderDefinition*>(GetEffectSetting()->GetEffectShader()),
                                                 DAT_01012054);
         if (shader->Start())
-            ((EffectManager*)&DAT_011e0e80)->FUN_00973fd0(shader);
+            ((EffectManager*)&DAT_011e0e80)->ProcessLists_AddTempEffect(shader);
         else
             delete shader;
     }
@@ -525,7 +531,7 @@ struct World
 };
 struct Cell
 {
-    World* FUN_004543c0();
+    World* TESObjectCELL_GetbhkWorld();
 };
 struct Ref
 {
@@ -545,18 +551,18 @@ struct Ref
 };
 struct Target
 {
-    void* FUN_0082aeb0();
+    void* bhkUnaryAction_GetRigidBody();
 };
 // This reference lookup is absent from the shared player declaration too.
-Ref* __fastcall FUN_0089f4e0(PlayerCharacter* player);
+Ref* __fastcall PlayerCharacter_GetGrabObject(PlayerCharacter* player);
 extern PlayerCharacter* DAT_011dea3c;
 struct Input
 {
-    int FUN_00a24660(int, int);
+    int Controls_GetUserAction(int, int);
 };
 struct OS
 {
-    Input* FUN_00877720();
+    Input* Main_GetControls();
 };
 extern OS* DAT_011dea0c;
 extern Setting originalRuntimeFloatSetting1168;
@@ -571,57 +577,57 @@ void TelekinesisEffect::UpdateGrabEffect(float delta)
 {
     ValueModifierEffect::Update(delta);
     Target* grab = reinterpret_cast<Target*>(DAT_011dea3c->GetFloatAsUInt());
-    if (!grab->FUN_0082aeb0())
+    if (!grab->bhkUnaryAction_GetRigidBody())
     {
         Dispel(false);
         return;
     }
-    World* casterWorld = GetTelekinesisCaster(this) && FUN_0089f4e0(DAT_011dea3c)->FUN_008d6f30()
-                             ? reinterpret_cast<Ref*>(GetTelekinesisCaster(this))->GetReference()->FUN_008d6f30()->FUN_004543c0()
+    World* casterWorld = GetTelekinesisCaster(this) && PlayerCharacter_GetGrabObject(DAT_011dea3c)->FUN_008d6f30()
+                             ? reinterpret_cast<Ref*>(GetTelekinesisCaster(this))->GetReference()->FUN_008d6f30()->TESObjectCELL_GetbhkWorld()
                              : 0;
-    World* playerWorld = FUN_0089f4e0(DAT_011dea3c) && FUN_0089f4e0(DAT_011dea3c)->FUN_008d6f30()
-                             ? FUN_0089f4e0(DAT_011dea3c)->FUN_008d6f30()->FUN_004543c0()
+    World* playerWorld = PlayerCharacter_GetGrabObject(DAT_011dea3c) && PlayerCharacter_GetGrabObject(DAT_011dea3c)->FUN_008d6f30()
+                             ? PlayerCharacter_GetGrabObject(DAT_011dea3c)->FUN_008d6f30()->TESObjectCELL_GetbhkWorld()
                              : 0;
-    if (!grab || target != reinterpret_cast<TESObjectREFR*>(FUN_0089f4e0(DAT_011dea3c)) || GetField63C(DAT_011dea3c) != 3 ||
+    if (!grab || target != reinterpret_cast<TESObjectREFR*>(PlayerCharacter_GetGrabObject(DAT_011dea3c)) || GetField63C(DAT_011dea3c) != 3 ||
         casterWorld != playerWorld)
     {
         Dispel(false);
         return;
     }
-    if (DAT_011dea0c->FUN_00877720()->FUN_00a24660(6, 0) && DAT_011dea0c->FUN_00877720()->FUN_00a24660(4, 0))
+    if (DAT_011dea0c->Main_GetControls()->Controls_GetUserAction(6, 0) && DAT_011dea0c->Main_GetControls()->Controls_GetUserAction(4, 0))
     {
         if (velocity >
-            *originalRuntimeFloatSetting1168.FUN_00403e20() + *originalRuntimeFloatSetting1169.FUN_00403e20() * 0.1f)
+            *originalRuntimeFloatSetting1168.Setting_Float_00403e20() + *originalRuntimeFloatSetting1169.Setting_Float_00403e20() * 0.1f)
             released = true;
         Dispel(false);
     }
-    else if (DAT_011dea0c->FUN_00877720()->FUN_00a24660(4, 0))
+    else if (DAT_011dea0c->Main_GetControls()->Controls_GetUserAction(4, 0))
     {
-        if (velocity < *originalRuntimeFloatSetting1168.FUN_00403e20())
-            velocity = *originalRuntimeFloatSetting1168.FUN_00403e20();
-        velocity += *originalRuntimeFloatSetting1169.FUN_00403e20() * delta;
-        if (velocity > *originalRuntimeFloatSetting1170.FUN_00403e20())
-            velocity = *originalRuntimeFloatSetting1170.FUN_00403e20();
+        if (velocity < *originalRuntimeFloatSetting1168.Setting_Float_00403e20())
+            velocity = *originalRuntimeFloatSetting1168.Setting_Float_00403e20();
+        velocity += *originalRuntimeFloatSetting1169.Setting_Float_00403e20() * delta;
+        if (velocity > *originalRuntimeFloatSetting1170.Setting_Float_00403e20())
+            velocity = *originalRuntimeFloatSetting1170.Setting_Float_00403e20();
     }
-    else if (DAT_011dea0c->FUN_00877720()->FUN_00a24660(6, 0))
+    else if (DAT_011dea0c->Main_GetControls()->Controls_GetUserAction(6, 0))
     {
-        if (velocity > -*originalRuntimeFloatSetting1168.FUN_00403e20())
-            velocity = -*originalRuntimeFloatSetting1168.FUN_00403e20();
-        velocity -= *originalRuntimeFloatSetting1169.FUN_00403e20() * delta;
-        if (velocity < -*originalRuntimeFloatSetting1170.FUN_00403e20())
-            velocity = -*originalRuntimeFloatSetting1170.FUN_00403e20();
+        if (velocity > -*originalRuntimeFloatSetting1168.Setting_Float_00403e20())
+            velocity = -*originalRuntimeFloatSetting1168.Setting_Float_00403e20();
+        velocity -= *originalRuntimeFloatSetting1169.Setting_Float_00403e20() * delta;
+        if (velocity < -*originalRuntimeFloatSetting1170.Setting_Float_00403e20())
+            velocity = -*originalRuntimeFloatSetting1170.Setting_Float_00403e20();
     }
     else
         velocity = 0.0f;
     strength = GetTelekinesisStrength(DAT_011dea3c);
     strength += velocity * delta;
-    if (strength < *originalRuntimeFloatSetting1171.FUN_00403e20())
-        strength = *originalRuntimeFloatSetting1171.FUN_00403e20();
-    if (strength > *originalRuntimeFloatSetting1112.FUN_00403e20() * GetFloatAtOffset1C() * *g_011d18fc.FUN_00403e20())
-        strength = *originalRuntimeFloatSetting1112.FUN_00403e20() * GetFloatAtOffset1C() * *g_011d18fc.FUN_00403e20();
+    if (strength < *originalRuntimeFloatSetting1171.Setting_Float_00403e20())
+        strength = *originalRuntimeFloatSetting1171.Setting_Float_00403e20();
+    if (strength > *originalRuntimeFloatSetting1112.Setting_Float_00403e20() * GetFloatAtOffset1C() * *g_011d18fc.Setting_Float_00403e20())
+        strength = *originalRuntimeFloatSetting1112.Setting_Float_00403e20() * GetFloatAtOffset1C() * *g_011d18fc.Setting_Float_00403e20();
     DAT_011dea3c->SetField644(strength);
     if (!skipCost)
-        DAT_011dea3c->FUN_00960520(delta);
+        DAT_011dea3c->PlayerCharacter_UpdateMouseSpring(delta);
     skipCost = false;
 }
 

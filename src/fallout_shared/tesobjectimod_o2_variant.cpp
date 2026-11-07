@@ -21,7 +21,7 @@
 
 struct B1
 {
-    virtual void FUN_0051a680(unsigned int);
+    virtual void AdjustThisAndForward_0051a680(unsigned int);
     int unk04;
     int unk08;
     int unk0c;
@@ -40,14 +40,15 @@ struct B1
 
 struct B2
 {
-    virtual void FUN_0051a680(unsigned int);
+    virtual void AdjustThisAndForward_0051a680(unsigned int);
 };
 
 struct Derived : B1, B2
 {
     Derived();
 // @fnv 0x0051a680
-    virtual void FUN_0051a680(unsigned int);
+// src: GUESS 0x0051a680 (confidence: low)
+    virtual void AdjustThisAndForward_0051a680(unsigned int);
 };
 
 Derived::Derived()

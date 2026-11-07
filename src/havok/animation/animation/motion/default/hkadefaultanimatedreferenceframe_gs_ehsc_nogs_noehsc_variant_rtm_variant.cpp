@@ -98,7 +98,7 @@ struct Motion363
     __m128 vector;
     hkQuaternion angular;
 };
-void FUN_00e41220(Projection363_Owner* a, Motion363* __restrict b, Projection363_Input* c, hkVector4* out);
+void hkaDefaultAnimatedReferenceFrame_project(Projection363_Owner* a, Motion363* __restrict b, Projection363_Input* c, hkVector4* out);
 inline hkVector4::hkVector4(const hkVector4& a)
 {
     memcpy(m_f, a.m_f, sizeof(m_f));
@@ -226,7 +226,8 @@ inline void hkQuaternion::SetConjugate(const hkQuaternion& q)
 {
     reinterpret_cast<hkVector4*>(&unk00)->setNeg3(q.getImag());
 }
-inline void hkQuaternion::FUN_00c66320(const hkQuaternion& a, const hkQuaternion& b)
+// src: COMMUNITY 0x00c66320
+inline void hkQuaternion::setMul(const hkQuaternion& a, const hkQuaternion& b)
 {
     hkVector4 imaginary;
     imaginary.setCross(a.getImag(), b.getImag());
@@ -290,7 +291,7 @@ struct AnimatedFrame
     int unk04, unk08, unk0c;
     int unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
     float m_fAnimationDuration;
-    void FUN_00e413d0(float time, float nextTime, int loops, hkTransform& output) const;
+    void hkaDefaultAnimatedReferenceFrame_getDeltaReferenceFrame(float time, float nextTime, int loops, hkTransform& output) const;
 };
 
 extern __m128 DAT_010ec7f0;
@@ -309,11 +310,12 @@ struct S00e41100_LinearKeyTrack
     int m_numKeys;
     int m_iCapacityState;
 
-    void FUN_00e41100(float time, hkQsTransform& out);
+    void hkaDefaultAnimatedReferenceFrame_getReferenceFrame(float time, hkQsTransform& out);
 };
 
 // @fnv 0x00e41100
-void S00e41100_LinearKeyTrack::FUN_00e41100(float time, hkQsTransform& out)
+// src: HAVOK_SRC 0x00e41100
+void S00e41100_LinearKeyTrack::hkaDefaultAnimatedReferenceFrame_getReferenceFrame(float time, hkQsTransform& out)
 {
     int last = m_numKeys - 1;
     float dt = m_fAnimationDuration / last;
@@ -341,6 +343,6 @@ void S00e41100_LinearKeyTrack::FUN_00e41100(float time, hkQsTransform& out)
         v = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, t), a.getQuad()), _mm_mul_ps(b.getQuad(), t));
     }
     out.m_vTranslation.getQuad() = v;
-    out.m_rotation.FUN_00cb2450(m_kAxisEndPoints, v.m128_f32[3]);
+    out.m_rotation.hkQuaternion_setAxisAngle(m_kAxisEndPoints, v.m128_f32[3]);
     out.m_vScale.getQuad() = _mm_set_ps1(1.0f);
 }

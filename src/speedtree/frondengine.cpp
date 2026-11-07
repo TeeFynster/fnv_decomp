@@ -7,12 +7,13 @@ struct FUN_00b1ada0_class
     float a;
     float b;
     float c;
-    FUN_00b1ada0_class* FUN_00b1ada0(float x, float y, float z);
+    FUN_00b1ada0_class* SetThreeComponents(float x, float y, float z);
 };
 
 // Stores x, y and z into the object's a, b and c fields and returns this.
 // @fnv 0x00b1ada0
-FUN_00b1ada0_class* FUN_00b1ada0_class::FUN_00b1ada0(float x, float y, float z)
+// src: GUESS 0x00b1ada0 (confidence: medium)
+FUN_00b1ada0_class* FUN_00b1ada0_class::SetThreeComponents(float x, float y, float z)
 {
     a = x;
     b = y;
@@ -39,12 +40,13 @@ void FUN_00b1add0::Set(float a, float b, float c)
 
 struct FUN_00b39460_class
 {
-    void __thiscall FUN_00b39460();
+    void __thiscall FreeStoredPointer_00b39460();
 };
 
 // Frees the pointer stored at the start of this object via operator delete.
 // @fnv 0x00b39460
-void __thiscall FUN_00b39460_class::FUN_00b39460()
+// src: GUESS 0x00b39460 (confidence: medium)
+void __thiscall FUN_00b39460_class::FreeStoredPointer_00b39460()
 {
     void* v = *(void**)this;
     operator delete(v);
@@ -79,11 +81,12 @@ struct FUN_00b1db00_class
     int i8;
     int ic;
     int i10;
-    unsigned int __thiscall FUN_00b1db00(unsigned int a);
+    unsigned int __thiscall GetElementAddress38_00b1db00(unsigned int a);
 };
 // Bounds-checks index a against (i10 - ic) / 56, calls FUN_00ec7c56 if out of range, and returns ic + a * 56.
 // @fnv 0x00b1db00
-unsigned int __thiscall FUN_00b1db00_class::FUN_00b1db00(unsigned int uiIndex)
+// src: GUESS 0x00b1db00 (confidence: low)
+unsigned int __thiscall FUN_00b1db00_class::GetElementAddress38_00b1db00(unsigned int uiIndex)
 {
     if (uiIndex >= (unsigned int)((i10 - ic) / 56))
         FUN_00ec7c56();
@@ -97,12 +100,13 @@ struct FUN_00b1ff00_class
 {
     int x;
     int y;
-    int FUN_00b1ff00(FUN_00b1ff00_class* other);
+    int GetIteratorDistance38(FUN_00b1ff00_class* other);
 };
 
 // Calls FUN_00ec7c56 unless this->x is nonzero and equal to other->x, then returns (this->y - other->y) / 0x38.
 // @fnv 0x00b1ff00
-int FUN_00b1ff00_class::FUN_00b1ff00(FUN_00b1ff00_class* other)
+// src: GUESS 0x00b1ff00 (confidence: medium)
+int FUN_00b1ff00_class::GetIteratorDistance38(FUN_00b1ff00_class* other)
 {
     if (!static_cast<bool>(static_cast<int>(this->x != 0)) || !static_cast<bool>(static_cast<int>(this->x == other->x)))
         FUN_00ec7c56();
@@ -114,12 +118,13 @@ unsigned int __cdecl FUN_00ec7c56(void);
 
 struct FUN_00b30fd0_class
 {
-    unsigned int FUN_00b30fd0(unsigned int n);
+    unsigned int GetDoubledIndexElementChecked(unsigned int n);
 };
 
 // Doubles n, bounds-checks it against the element count in the array at this+0x100, and returns the address of the element at that index.
 // @fnv 0x00b30fd0
-unsigned int FUN_00b30fd0_class::FUN_00b30fd0(unsigned int uiIndex)
+// src: GUESS 0x00b30fd0 (confidence: medium)
+unsigned int FUN_00b30fd0_class::GetDoubledIndexElementChecked(unsigned int uiIndex)
 {
     unsigned int count = uiIndex << 1;
     char* p = (char*)this + 0x100;
@@ -135,11 +140,12 @@ struct FUN_00b319a0_class
     int m_8;
     int m_iThirdValue;
     int m_10;
-    int __thiscall FUN_00b319a0(int n);
+    int __thiscall ProcessAndReturnValue_00b319a0(int n);
 };
 unsigned int __cdecl FUN_00ec7c56();
 // @fnv 0x00b319a0
-int __thiscall FUN_00b319a0_class::FUN_00b319a0(int uiIndex)
+// src: GUESS 0x00b319a0 (confidence: low)
+int __thiscall FUN_00b319a0_class::ProcessAndReturnValue_00b319a0(int uiIndex)
 {
     if (uiIndex >= (unsigned int)((m_10 - m_iThirdValue) / 24))
         FUN_00ec7c56();
@@ -156,11 +162,12 @@ struct FUN_00b1ec70_class
     int* q;
     int* r;
     void __thiscall FUN_00b1ebc0(int* a, int* b);
-    void __thiscall FUN_00b1ec70();
+    void __thiscall ReleaseStorage_00b1ec70();
 };
 // Frees the buffer at p after calling FUN_00b1ebc0 on p and q, then resets p, q and r to null.
 // @fnv 0x00b1ec70
-void __thiscall FUN_00b1ec70_class::FUN_00b1ec70()
+// src: GUESS 0x00b1ec70 (confidence: low)
+void __thiscall FUN_00b1ec70_class::ReleaseStorage_00b1ec70()
 {
     int a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12;
     if (p)
@@ -207,7 +214,7 @@ FUN_00b1ff50::FUN_00b1ff50(const FUN_00b1ff50& src)
 
 struct FUN_00b12af0_shell
 {
-    void FUN_00b12af0();
+    void CRotTransform_CRotTransform();
 };
 struct FUN_00b18b20
 {
@@ -225,7 +232,7 @@ FUN_00b18b20::FUN_00b18b20()
     f8 = 0.0f;
     f4 = 0.0f;
     f0 = 0.0f;
-    sub.FUN_00b12af0();
+    sub.CRotTransform_CRotTransform();
     *(float*)((char*)this + 0x30) = 0.0f;
     *(int*)((char*)this + 0x34) = 0;
 }
@@ -239,11 +246,12 @@ struct FUN_00b1fe80_helper
     int* m10;
     int* m14;
     void __thiscall FUN_00b22650(int* a, int* b);
-    void __thiscall FUN_00b1fe80();
+    void __thiscall UpdateFields_00b1fe80();
 };
 // Frees the array at mC after calling FUN_00b22650 on it, then nulls mC, m10 and m14.
 // @fnv 0x00b1fe80
-void FUN_00b1fe80_helper::FUN_00b1fe80()
+// src: GUESS 0x00b1fe80 (confidence: low)
+void FUN_00b1fe80_helper::UpdateFields_00b1fe80()
 {
     int a0;
     int a1;
@@ -284,12 +292,13 @@ struct FUN_00b1f650_class
     void* pc;
     void* pe;
     void* pp;
-    void __thiscall FUN_00b1f650();
+    void __thiscall ReleaseStorage_00b1f650();
 };
 
 // Frees the pc buffer via FUN_00b20c30 and operator delete, then resets pc, pe and pp to null.
 // @fnv 0x00b1f650
-void FUN_00b1f650_class::FUN_00b1f650()
+// src: GUESS 0x00b1f650 (confidence: low)
+void FUN_00b1f650_class::ReleaseStorage_00b1f650()
 {
     char buf[0x50];
     {
@@ -367,7 +376,7 @@ struct CopyableStateBlock
     int i30;
     int i34;
 
-    void __thiscall FUN_00b24ae0(const CopyableStateBlock* that);
+    void __thiscall AssignVectorElements_00b24ae0(const CopyableStateBlock* that);
     CopyableStateBlock* __thiscall CopyFrom(const CopyableStateBlock& that);
 };
 
@@ -376,7 +385,7 @@ CopyableStateBlock* __thiscall CopyableStateBlock::CopyFrom(const CopyableStateB
 {
     FUN_00b249d0_local local;
 
-    FUN_00b24ae0(&aOther);
+    AssignVectorElements_00b24ae0(&aOther);
 
     f18 = aOther.f18;
     f1c = aOther.f1c;
@@ -390,10 +399,11 @@ CopyableStateBlock* __thiscall CopyableStateBlock::CopyFrom(const CopyableStateB
     return this;
 }
 
-void __cdecl FUN_00b269d0(char* a, char* b, char* c, bool d);
+void __cdecl Frondengine_SortThreeByField2C(char* a, char* b, char* c, bool d);
 
 // @fnv 0x00b26160
-void __cdecl FUN_00b26160(char* pBegin, char* pMiddle, char* pEnd, bool bFlag)
+// src: GUESS 0x00b26160 (confidence: low)
+void __cdecl Object_UpdateFields_00b26160(char* pBegin, char* pMiddle, char* pEnd, bool bFlag)
 {
     int i;
     int j;
@@ -403,27 +413,27 @@ void __cdecl FUN_00b26160(char* pBegin, char* pMiddle, char* pEnd, bool bFlag)
     {
         i = ((pEnd - pBegin) / 56 + 1) / 8;
 
-        FUN_00b269d0(pBegin, pBegin + i * 56, pBegin + 2 * i * 56, bFlag);
-        FUN_00b269d0(pMiddle - i * 56, pMiddle, pMiddle + i * 56, bFlag);
-        FUN_00b269d0(pEnd - 2 * i * 56, pEnd - i * 56, pEnd, bFlag);
-        FUN_00b269d0(pBegin + i * 56, pMiddle, pEnd - i * 56, bFlag);
+        Frondengine_SortThreeByField2C(pBegin, pBegin + i * 56, pBegin + 2 * i * 56, bFlag);
+        Frondengine_SortThreeByField2C(pMiddle - i * 56, pMiddle, pMiddle + i * 56, bFlag);
+        Frondengine_SortThreeByField2C(pEnd - 2 * i * 56, pEnd - i * 56, pEnd, bFlag);
+        Frondengine_SortThreeByField2C(pBegin + i * 56, pMiddle, pEnd - i * 56, bFlag);
     }
     else
     {
-        FUN_00b269d0(pBegin, pMiddle, pEnd, bFlag);
+        Frondengine_SortThreeByField2C(pBegin, pMiddle, pEnd, bFlag);
     }
 }
 
-extern int* __cdecl FUN_0044d600(int*, int*, int*);
+extern int* __cdecl std_Move_float_float(int*, int*, int*);
 extern int* __cdecl UninitCopyChecked(int*, int*, int*, void*);
-extern void __cdecl FormHeap_Free(void*);
+extern void __cdecl FormHeapFreeAndLog_00401030(void*);
 struct C00b1d5d0
 {
     int a, b, alloc;
     int *first, *last, *limit;
-    void FUN_0044a0a0();
-    bool FUN_0044a240(unsigned);
-    C00b1d5d0& FUN_00b1d5d0(const C00b1d5d0& rhs);
+    void std_vector_float_std_allocator_float_clear();
+    bool InitializeElementStorage(unsigned);
+    C00b1d5d0& AssignVectorContents(const C00b1d5d0& rhs);
 };
 struct Frame00b1d5d0
 {
@@ -459,21 +469,22 @@ struct Frame00b1d5d0
 };
 // Copy-assigns rhs into this, reusing existing storage when it is large enough and otherwise reallocating and copying the elements.
 // @fnv 0x00b1d5d0
-C00b1d5d0& C00b1d5d0::FUN_00b1d5d0(const C00b1d5d0& rhs)
+// src: GUESS 0x00b1d5d0 (confidence: medium)
+C00b1d5d0& C00b1d5d0::AssignVectorContents(const C00b1d5d0& rhs)
 {
     Frame00b1d5d0 f;
     if (this != &rhs)
     {
         if (rhs.last - rhs.first == 0)
         {
-            FUN_0044a0a0();
+            std_vector_float_std_allocator_float_clear();
         }
         else
         {
             f.n3c = rhs.last - rhs.first;
             if (f.n3c <= (unsigned)(last - first))
             {
-                f.p4 = FUN_0044d600(rhs.first, rhs.last, first);
+                f.p4 = std_Move_float_float(rhs.first, rhs.last, first);
                 f.p6c = last;
                 f.p68 = f.p6c;
                 f.p64 = f.p4;
@@ -486,7 +497,7 @@ C00b1d5d0& C00b1d5d0::FUN_00b1d5d0(const C00b1d5d0& rhs)
                 if (f.n70 <= (first == 0 ? 0 : (unsigned)(limit - first)))
                 {
                     f.p8 = rhs.first + (last - first);
-                    FUN_0044d600(rhs.first, f.p8, first);
+                    std_Move_float_float(rhs.first, f.p8, first);
                     f.pbc = last;
                     f.pb8 = rhs.last;
                     last = UninitCopyChecked(f.p8, f.pb8, f.pbc, &alloc);
@@ -502,10 +513,10 @@ C00b1d5d0& C00b1d5d0::FUN_00b1d5d0(const C00b1d5d0& rhs)
                         f.bbd = f.bbe;
                         f.pd8 = (int*)(limit - first);
                         f.pd4 = first;
-                        FormHeap_Free(f.pd4);
+                        FormHeapFreeAndLog_00401030(f.pd4);
                     }
                     f.ndc = rhs.last - rhs.first;
-                    if (FUN_0044a240(f.ndc))
+                    if (InitializeElementStorage(f.ndc))
                     {
                         f.p170 = first;
                         f.p16c = rhs.last;
@@ -538,11 +549,12 @@ struct SpawnEntry : StringLike
     float f24;
     float f28;
     int __thiscall Init(SpawnEntry*, int, int);
-    SpawnEntry* __thiscall FUN_00b22f80(SpawnEntry* that);
+    SpawnEntry* __thiscall AssignFields_00b22f80(SpawnEntry* that);
 };
 // Clears the entry, initialises it with g_010173f0, copies the f1c/f20/f24/f28 fields from the passed entry, and returns this.
 // @fnv 0x00b22f80
-SpawnEntry* SpawnEntry::FUN_00b22f80(SpawnEntry* apSource)
+// src: GUESS 0x00b22f80 (confidence: low)
+SpawnEntry* SpawnEntry::AssignFields_00b22f80(SpawnEntry* apSource)
 {
     char buf[0x60];
     Clear(false, 0);
@@ -567,7 +579,8 @@ extern int DAT_01140ef8;
 
 // Clamps n to 0 when not positive, reports an error if n exceeds the max element count, then allocates n*0x38 bytes.
 // @fnv 0x00b23980
-void* __cdecl FUN_00b23980(unsigned int n)
+// src: GUESS 0x00b23980 (confidence: medium)
+void* __cdecl Object_AllocateElementStorage_00b23980(unsigned int n)
 {
     int pad;
     if (!(n > 0))
@@ -627,18 +640,19 @@ struct BadAlloc
     int vt;
     const char* w;
     int f;
-    BadAlloc* FUN_0044d6c0(const char*);
+    BadAlloc* std_bad_alloc_bad_alloc(const char*);
 };
 // Clamps n to zero, throws BadAlloc if n*4 overflows, and returns a 4-byte-per-element allocation of n*4 bytes.
 // @fnv 0x0044d670
-int* FUN_0044d670(unsigned int n)
+// src: XBOX_PDB 0x0044d670
+int* std_allocator_SIdvLeafTexture_allocator_SIdvLeafTexture(unsigned int n)
 {
     if (n <= 0)
         n = 0;
     else if ((unsigned int)-1 / n < 4)
     {
         BadAlloc e;
-        e.FUN_0044d6c0(0);
+        e.std_bad_alloc_bad_alloc(0);
         FUN_00ec7894(&e, &DAT_01140ef8);
     }
     return (int*)FormHeap_Allocate(n * 4);
@@ -646,7 +660,8 @@ int* FUN_0044d670(unsigned int n)
 
 // Sets the nine floats at instance to the 3x3 identity matrix and returns instance.
 // @fnv 0x00b12af0
-FUN_00b12af0_shell* __fastcall FUN_00b12af0(FUN_00b12af0_shell* apMatrix)
+// src: COMMUNITY 0x00b12af0
+FUN_00b12af0_shell* __fastcall CRotTransform_CRotTransform(FUN_00b12af0_shell* apMatrix)
 {
     *(float*)apMatrix = 1.0f;
     *(float*)((char*)apMatrix + 4) = 0.0f;
@@ -697,7 +712,8 @@ struct FUN_0044a4c0_Str
 
 // Formats variadic arguments into a local buffer using fmt, then assigns the result to out and returns out.
 // @fnv 0x00b18860
-FUN_0044a4c0_Str* __cdecl FUN_00b18860(FUN_0044a4c0_Str* out, char const* fmt, ...)
+// src: XBOX_PDB 0x00b18860
+FUN_0044a4c0_Str* __cdecl IdvFormatString(FUN_0044a4c0_Str* out, char const* fmt, ...)
 {
     FmtCtx ctx;
     char buf2[0x400];
@@ -731,17 +747,18 @@ struct Geo_00b1c6d0
     char pad24[0x64];
     Vec_00b1c6d0 m_ppIndices;
 
-    void FUN_00b31070(char cTex, const float* afCoords);
+    void CIndexedGeometry_ChangeTexCoord(char cTex, const float* afCoords);
 };
 
 struct Class_00b1c6d0
 {
-    void FUN_00b1c6d0(Geo_00b1c6d0* geo, char cTex, const float* pTexCoords, bool bFlip);
+    void CFrondEngine_SetTextureCoords(Geo_00b1c6d0* geo, char cTex, const float* pTexCoords, bool bFlip);
 };
 
 // Copies pTexCoords into afCoords, negates odd-indexed values when bFlip is set, then calls FUN_00b31070 once per triangle in m_ppIndices.
 // @fnv 0x00b1c6d0
-void Class_00b1c6d0::FUN_00b1c6d0(Geo_00b1c6d0* geo, char cTex, const float* pTexCoords, bool bFlip)
+// src: COMMUNITY 0x00b1c6d0
+void Class_00b1c6d0::CFrondEngine_SetTextureCoords(Geo_00b1c6d0* geo, char cTex, const float* pTexCoords, bool bFlip)
 {
     float afCoords[8];
     _memmove(afCoords, pTexCoords, 32);
@@ -760,7 +777,7 @@ void Class_00b1c6d0::FUN_00b1c6d0(Geo_00b1c6d0* geo, char cTex, const float* pTe
         for (j_ = 0; j_ < (unsigned short)(((unsigned int)((p2 = &geo->m_ppIndices)->_Mylast - p2->_Myfirst)) / 3);
              ++j_)
         {
-            geo->FUN_00b31070(chIndex, afCoords);
+            geo->CIndexedGeometry_ChangeTexCoord(chIndex, afCoords);
             geo->m_usTriCount++;
         }
     }
@@ -789,12 +806,13 @@ struct Ctx
 
 struct StringHolder : std::string
 {
-    StringHolder* __thiscall FUN_00b1d100();
+    StringHolder* __thiscall ReleaseStringBuffer();
 };
 
 // Calls _Tidy(false, 0) to release the string's internal buffer and returns this.
 // @fnv 0x00b1d100
-StringHolder* __thiscall StringHolder::FUN_00b1d100()
+// src: GUESS 0x00b1d100 (confidence: medium)
+StringHolder* __thiscall StringHolder::ReleaseStringBuffer()
 {
     Ctx obj;
     char* p = &obj.r;
@@ -803,7 +821,7 @@ StringHolder* __thiscall StringHolder::FUN_00b1d100()
     return this;
 }
 
-void __cdecl FUN_00b23760(unsigned int a, unsigned int b, unsigned int c);
+void __cdecl Object_ProcessAndReturnValue_00b23760(unsigned int a, unsigned int b, unsigned int c);
 
 struct S00b1dd80_Obj
 {
@@ -814,12 +832,13 @@ struct S00b1dd80_Obj
     unsigned int p10;
 
     void __thiscall FUN_00b1ebc0(int* a, int* b);
-    int* __thiscall FUN_00b1dd80(int* out, int* p, unsigned int q);
+    int* __thiscall EraseElement38(int* out, int* p, unsigned int q);
 };
 
 // Shifts the 0x38-byte elements after q down, drops the last one (p10 -= 0x38), and returns out holding i0 and q; calls FUN_00ec7c56 if q is out of range.
 // @fnv 0x00b1dd80
-int* __thiscall S00b1dd80_Obj::FUN_00b1dd80(int* out, int* p, unsigned int q)
+// src: GUESS 0x00b1dd80 (confidence: medium)
+int* __thiscall S00b1dd80_Obj::EraseElement38(int* out, int* p, unsigned int q)
 {
     int u0;
     int u1;
@@ -847,7 +866,7 @@ int* __thiscall S00b1dd80_Obj::FUN_00b1dd80(int* out, int* p, unsigned int q)
     int u23;
     int u24;
 
-    FUN_00b23760(q + 0x38, p10, q);
+    Object_ProcessAndReturnValue_00b23760(q + 0x38, p10, q);
     FUN_00b1ebc0((int*)(p10 - 0x38), (int*)p10);
     p10 -= 0x38;
 
@@ -884,15 +903,16 @@ struct Pool_00b1f920
     E44_00b1f920* m_last;       // 0x10
     E44_00b1f920* m_pFreeList;  // 0x14
 
-    bool FUN_00b1f920(unsigned int n);
+    bool AllocateElementStorage_00b1f920(unsigned int n);
 };
 
-void __cdecl FUN_00b0fb80();
-void* __cdecl FUN_00b23b50(unsigned int n, int b);
+void __cdecl BxLengthError_Thunk();
+void* __cdecl Frondengine_UpdateState_00b23b50(unsigned int n, int b);
 
 // Clears the three pointers; returns false if n is 0, else allocates n E44_00b1f920 nodes into them (or calls FUN_00b0fb80 if n is too large) and returns true.
 // @fnv 0x00b1f920
-bool Pool_00b1f920::FUN_00b1f920(unsigned int aiNodeCount)
+// src: GUESS 0x00b1f920 (confidence: medium)
+bool Pool_00b1f920::AllocateElementStorage_00b1f920(unsigned int aiNodeCount)
 {
     m_pHeadNode = 0;
     m_last = 0;
@@ -904,10 +924,10 @@ bool Pool_00b1f920::FUN_00b1f920(unsigned int aiNodeCount)
         unsigned int cap = 0x5D1745D;
         Big_00b1f920 big;
         if ((cap > 0 ? cap : 1) < aiNodeCount)
-            FUN_00b0fb80();
+            BxLengthError_Thunk();
         else
         {
-            m_pHeadNode = (E44_00b1f920*)FUN_00b23b50(aiNodeCount, 0);
+            m_pHeadNode = (E44_00b1f920*)Frondengine_UpdateState_00b23b50(aiNodeCount, 0);
             m_last = m_pHeadNode;
             m_pFreeList = m_pHeadNode + aiNodeCount;
         }
@@ -927,7 +947,8 @@ struct FUN_0044d6c0_class
 };
 // Returns operator new(n * 0x18), throwing if n * 0x18 would overflow; n of 0 allocates 0 bytes.
 // @fnv 0x00b23aa0
-void* __cdecl FUN_00b23aa0(unsigned int n)
+// src: GUESS 0x00b23aa0 (confidence: medium)
+void* __cdecl Object_AllocateElementStorage_00b23aa0(unsigned int n)
 {
     if (n <= 0)
         n = 0;
@@ -953,7 +974,8 @@ struct B1c
 
 // Copies [first, last) backward element by element so the copy ends at dst, and returns dst - (last - first).
 // @fnv 0x00b24710
-CopyableStateBlock* FUN_00b24710(CopyableStateBlock* first, CopyableStateBlock* last, CopyableStateBlock* dst)
+// src: GUESS 0x00b24710 (confidence: medium)
+CopyableStateBlock* Frondengine_CopyRangeBackward(CopyableStateBlock* first, CopyableStateBlock* last, CopyableStateBlock* dst)
 {
     B1c a;
     B1c aa = {};
@@ -999,7 +1021,7 @@ struct S00b24a80_Obj
     float f20;
     float f24;
     float f28;
-    S00b24a80_Obj* __thiscall FUN_00b24a80(S00b24a80_Obj* src);
+    S00b24a80_Obj* __thiscall CopyFields_00b24a80(S00b24a80_Obj* src);
 };
 
 void S00b24a80_Spawn::AssignSubstring(S00b24a80_Obj* a, int b, unsigned int c)
@@ -1007,7 +1029,8 @@ void S00b24a80_Spawn::AssignSubstring(S00b24a80_Obj* a, int b, unsigned int c)
 
 // Copies the substring reference and the four float fields from src into this object, then returns this.
 // @fnv 0x00b24a80
-S00b24a80_Obj* S00b24a80_Obj::FUN_00b24a80(S00b24a80_Obj* src)
+// src: GUESS 0x00b24a80 (confidence: medium)
+S00b24a80_Obj* S00b24a80_Obj::CopyFields_00b24a80(S00b24a80_Obj* src)
 {
     int u1;
     int u2;
@@ -1038,7 +1061,7 @@ S00b24a80_Obj* S00b24a80_Obj::FUN_00b24a80(S00b24a80_Obj* src)
     return this;
 }
 
-void __cdecl FUN_00b26ab0(CopyableStateBlock* a, CopyableStateBlock* b);
+void __cdecl Frondengine_UpdateState_00b26ab0(CopyableStateBlock* a, CopyableStateBlock* b);
 struct PairQ
 {
     CopyableStateBlock* first;
@@ -1064,14 +1087,15 @@ struct InlQ
 };
 // Three-way partitions [_First, _Last) around a median pivot by f2c and returns in pRet the range of elements equal to the pivot.
 // @fnv 0x00b25680
-PairQ* __cdecl FUN_00b25680(PairQ* pRet, CopyableStateBlock* _First, CopyableStateBlock* _Last, bool _Pred)
+// src: GUESS 0x00b25680 (confidence: medium)
+PairQ* __cdecl Object_PartitionByPivotField(PairQ* pRet, CopyableStateBlock* _First, CopyableStateBlock* _Last, bool _Pred)
 {
     InlQ t_kvalxz;
     CopyableStateBlock* s_v;
     int p_kqlvt[14];
     int pMid_yn;
     CopyableStateBlock* iD_roiodc = _First + (_Last - _First) / 2;
-    FUN_00b26160((char*)_First, (char*)iD_roiodc, (char*)(_Last - 1), _Pred);
+    Object_UpdateFields_00b26160((char*)_First, (char*)iD_roiodc, (char*)(_Last - 1), _Pred);
     CopyableStateBlock* pPf_zm = iD_roiodc;
     CopyableStateBlock* pPl_mxtma = pPf_zm + 1;
     while (_First < pPf_zm && !((unsigned char)((pPf_zm[-1]).f2c > (*pPf_zm).f2c ? 1 : 0)) &&
@@ -1092,7 +1116,7 @@ PairQ* __cdecl FUN_00b25680(PairQ* pRet, CopyableStateBlock* _First, CopyableSta
             else
             {
                 t_kvalxz.s1 = pPl_mxtma++;
-                FUN_00b26ab0(t_kvalxz.s1, pGf_rbjuzd);
+                Frondengine_UpdateState_00b26ab0(t_kvalxz.s1, pGf_rbjuzd);
             }
         for (; _First < pGl_sm; --pGl_sm)
             if (((unsigned char)((pGl_sm[-1]).f2c > (*pPf_zm).f2c ? 1 : 0)))
@@ -1102,7 +1126,7 @@ PairQ* __cdecl FUN_00b25680(PairQ* pRet, CopyableStateBlock* _First, CopyableSta
             else
             {
                 t_kvalxz.s2 = --pPf_zm;
-                FUN_00b26ab0(t_kvalxz.s2, pGl_sm - 1);
+                Frondengine_UpdateState_00b26ab0(t_kvalxz.s2, pGl_sm - 1);
             }
         if (pGl_sm == _First && pGf_rbjuzd == _Last)
         {
@@ -1116,31 +1140,31 @@ PairQ* __cdecl FUN_00b25680(PairQ* pRet, CopyableStateBlock* _First, CopyableSta
             {
                 t_kvalxz.s3r = pPl_mxtma;
                 t_kvalxz.s3l = pPf_zm;
-                FUN_00b26ab0(t_kvalxz.s3l, t_kvalxz.s3r);
+                Frondengine_UpdateState_00b26ab0(t_kvalxz.s3l, t_kvalxz.s3r);
             }
             ++pPl_mxtma;
             t_kvalxz.s4r = pGf_rbjuzd;
             t_kvalxz.s4l = pPf_zm++;
             pGf_rbjuzd++;
-            FUN_00b26ab0(t_kvalxz.s4l, t_kvalxz.s4r);
+            Frondengine_UpdateState_00b26ab0(t_kvalxz.s4l, t_kvalxz.s4r);
         }
         else if (pGf_rbjuzd == _Last)
         {
             if (--pGl_sm != --pPf_zm)
             {
                 t_kvalxz.s5 = pPf_zm;
-                FUN_00b26ab0(pGl_sm, t_kvalxz.s5);
+                Frondengine_UpdateState_00b26ab0(pGl_sm, t_kvalxz.s5);
             }
             --pPl_mxtma;
             t_kvalxz.s6r = pPl_mxtma;
             t_kvalxz.s6l = pPf_zm;
-            FUN_00b26ab0(t_kvalxz.s6l, t_kvalxz.s6r);
+            Frondengine_UpdateState_00b26ab0(t_kvalxz.s6l, t_kvalxz.s6r);
         }
         else
         {
             --pGl_sm;
             s_v = pGf_rbjuzd;
-            FUN_00b26ab0(s_v, pGl_sm);
+            Frondengine_UpdateState_00b26ab0(s_v, pGl_sm);
             ++pGf_rbjuzd;
         }
     }
@@ -1155,11 +1179,12 @@ struct RangePtr
     int entry;
     int scratch;
 };
-extern "C" void __cdecl FUN_00b25fa0(int first, int last, int dest, int count, TagByte mode, TagByte zero);
+extern "C" void __cdecl Object_ProcessEntries_00b25fa0(int first, int last, int dest, int count, TagByte mode, TagByte zero);
 
 // Calls FUN_00b25fa0(a, b, c, d) with two one-byte tag arguments.
 // @fnv 0x00b26450
-void __cdecl FUN_00b26450(int a, int b, int aiDest, int d)
+// src: GUESS 0x00b26450 (confidence: low)
+void __cdecl Range_ForwardWithTagBytes_00b26450(int a, int b, int aiDest, int d)
 {
     TagByte tag = {};
     TagByte end;
@@ -1167,7 +1192,7 @@ void __cdecl FUN_00b26450(int a, int b, int aiDest, int d)
     int t = b;
     RangePtr pos;
     pos.entry = a;
-    FUN_00b25fa0(pos.entry, t, aiDest, d, flags, tag);
+    Object_ProcessEntries_00b25fa0(pos.entry, t, aiDest, d, flags, tag);
 }
 
 namespace fnv_00b264f0 {
@@ -1178,7 +1203,8 @@ struct B1c
 
 // Copies the range of CopyableStateBlock elements from first to last into dst and returns a pointer past the last copied element.
 // @fnv 0x00b264f0
-CopyableStateBlock* FUN_00b264f0(CopyableStateBlock* first, CopyableStateBlock* last, CopyableStateBlock* dst)
+// src: GUESS 0x00b264f0 (confidence: medium)
+CopyableStateBlock* Frondengine_CopyStateBlockRange(CopyableStateBlock* first, CopyableStateBlock* last, CopyableStateBlock* dst)
 {
     CopyableStateBlock* pDstEnd = dst + (last - first);
     B1c a8 = {};
@@ -1193,11 +1219,12 @@ CopyableStateBlock* FUN_00b264f0(CopyableStateBlock* first, CopyableStateBlock* 
 }
 }  // namespace fnv_00b264f0
 
-extern "C" void __cdecl FUN_00b26ab0(char* a, char* b);
+extern "C" void __cdecl Frondengine_UpdateState_00b26ab0(char* a, char* b);
 
 // Calls FUN_00b26ab0 on (b, a), (c, b), then (b, a) whenever the float at offset 0x2C of the first exceeds that of the second.
 // @fnv 0x00b269d0
-void __cdecl FUN_00b269d0(char* a, char* b, char* c)
+// src: GUESS 0x00b269d0 (confidence: medium)
+void __cdecl Frondengine_SortThreeByField2C(char* a, char* b, char* c)
 {
     int pad1;
     int pad2;
@@ -1252,15 +1279,15 @@ void __cdecl FUN_00b269d0(char* a, char* b, char* c)
     int pad51;
     if ((bool)((*(float*)(b + 0x2C) > *(float*)(a + 0x2C)) ? 1 : 0))
     {
-        FUN_00b26ab0(b, a);
+        Frondengine_UpdateState_00b26ab0(b, a);
     }
     if ((bool)((*(float*)(c + 0x2C) > *(float*)(b + 0x2C)) ? 1 : 0))
     {
-        FUN_00b26ab0(c, b);
+        Frondengine_UpdateState_00b26ab0(c, b);
     }
     if ((bool)((*(float*)(b + 0x2C) > *(float*)(a + 0x2C)) ? 1 : 0))
     {
-        FUN_00b26ab0(b, a);
+        Frondengine_UpdateState_00b26ab0(b, a);
     }
 }
 
@@ -1275,7 +1302,8 @@ void __stdcall FUN_00ec7894(int a, int b);
 
 // Stores *src into each of count V3b244a0 elements starting at dest; the catch handler calls FUN_00ec7894(0, 0).
 // @fnv 0x00b244a0
-void __cdecl FUN_00b244a0(V3b244a0* dest, unsigned int count, const V3b244a0* src)
+// src: GUESS 0x00b244a0 (confidence: medium)
+void __cdecl Object_FillElementRange(V3b244a0* dest, unsigned int count, const V3b244a0* src)
 {
     V3b244a0* first = dest;
 
@@ -1390,7 +1418,8 @@ void* __cdecl FormHeap_Allocate(unsigned int bytes);
 
 // Allocates a 12-byte-per-element array of count items, throwing AllocationException on overflow.
 // @fnv 0x00b23bb0
-void* __cdecl FUN_00b23bb0(unsigned int count)
+// src: GUESS 0x00b23bb0 (confidence: high)
+void* __cdecl Frondengine_AllocateElementArray12Checked(unsigned int count)
 {
     if (count <= 0u)
         count = 0;

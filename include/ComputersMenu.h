@@ -21,7 +21,7 @@ public:
         BGSTerminal* FindItemData(Tile*);
         Tile* Insert(BGSTerminal*, int, int, int);
         void Traverse(void (*)(Tile*, TESObjectREFR*), int, int);
-        void FUN_007314c0(void (__cdecl*)(Tile*, void*), int, int);
+        void ListBox_ItemChange_Traverse(void (__cdecl*)(Tile*, void*), int, int);
     };
 
     ComputersMenu();
@@ -79,7 +79,7 @@ public:
     void (*callbackf4)();
     int unkf8;
 
-    void FUN_00754c00(int aiID, Tile* apTile);
+    void CompanionWheelMenu_AttachTileByID(int aiID, Tile* apTile);
     int __thiscall GetMenuId();
     bool __thiscall HasAllTiles(int*);
     bool HandleButtonInput(int, float);
@@ -89,9 +89,9 @@ public:
     void SetTextSource(TextSource*);
     void SetTextSource(int);
     void PlayNoteSound(BGSNote*);
-    void FUN_00757f70(int, Tile*);
-    void FUN_00758470();
-    void FUN_007586e0(int);
-    void FUN_007586e0(bool);
-    void FUN_00758a80();
+    void DoClick(int, Tile*);
+    void DoIdle_00758470();
+    void DisplayTerminal(int);
+    void DisplayTerminal(bool);
+    void DisplayPreviousTerminal();
 };

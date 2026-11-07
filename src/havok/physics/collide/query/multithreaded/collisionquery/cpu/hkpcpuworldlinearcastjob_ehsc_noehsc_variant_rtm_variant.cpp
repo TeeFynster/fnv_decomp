@@ -82,7 +82,7 @@ struct FUN_00df71c0_Class {
     int unk08;
     int unk0c;
     FUN_00df71c0_Value* unk10;
-    float FUN_00df71c0();
+    float GetValue_00df71c0();
 };
 struct TargetBase { void CastAgainstCollidable(volatile Data *value); };
 struct FUN_00df72c0_class {
@@ -91,7 +91,7 @@ struct FUN_00df72c0_class {
     void ForwardToBase(volatile Data *value);
 };
 struct Param { unsigned int unk00; unsigned int unk04; unsigned int unk08; Param* next0c; };
-struct This { int CastAgainstCollidable(Param*); int FUN_00df72e0(Param*); };
+struct This { int CastAgainstCollidable(Param*); int hkCpuWorldLinearCastCollector_addLeaf(Param*); };
 
 struct DF7230CdPointCollector {
     int unk00;
@@ -263,7 +263,7 @@ struct FUN_00df7320_Shape {
 };
 struct FUN_00df7320_Collector {
     float CastAgainstCollidable(FUN_00df7320_Shape* value);
-    float FUN_00df7320(FUN_00df7320_Shape* shape, FUN_00df7320_Shape* other);
+    float ProcessAndReturnValue_00df7320(FUN_00df7320_Shape* shape, FUN_00df7320_Shape* other);
 };
 struct Base1 { virtual void FUN_00df7190(); };
 struct Base2 { virtual void FUN_00df7190(); };
@@ -300,7 +300,7 @@ struct S_00df71d0_Router {
     S_00df71d0_Heap* unk10;
     S_00df71d0_Heap& heap() { return *unk10; }
 };
-S_00df71d0_Router* FUN_00c85750();
+S_00df71d0_Router* hkMemoryRouter_getInstance();
 
 struct S_00df71d0_B2 {
     virtual void f2() {}
@@ -346,7 +346,7 @@ struct FUN_00df71d0 : hkpBroadPhaseCastCollector, hkKdTreeCastCollector, S_00df7
     FUN_00df71d0();
 // @fnv 0x00df71d0
     virtual ~FUN_00df71d0() {}
-    static void operator delete(void* p, unsigned int n) { FUN_00c85750()->heap().ReleaseBlock(p, n); }
+    static void operator delete(void* p, unsigned int n) { hkMemoryRouter_getInstance()->heap().ReleaseBlock(p, n); }
 };
 FUN_00df71d0::FUN_00df71d0() {}
 
@@ -696,7 +696,8 @@ const hkpCollidable*m_kCollidable;
 hkpShapeType m_iType;
 ShapeSweepParameters m_pRayCastInput;};
 // @fnv 0x00df7340
-int __cdecl FUN_00df7340(JobDispatcher&jobQueue,JobDispatcher::JobQueueSlot&nextJobOut)
+// src: XBOX_PDB 0x00df7340
+int __cdecl hkCpuWorldLinearCastJob(JobDispatcher&jobQueue,JobDispatcher::JobQueueSlot&nextJobOut)
 {
 {hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.getEnd()<mStream.getCapacityMinus16()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "CollQueryWorldLinearCast";h->setTime();mStream.setEnd((char*)(h+1));}};
 const RayCastCommandJob&worldLinearCastJob=reinterpret_cast<RayCastCommandJob&>(nextJobOut);

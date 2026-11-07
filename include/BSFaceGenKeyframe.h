@@ -28,9 +28,9 @@ public:
 
     float GetTime();
     bool SetTime(float time);
-    double FUN_00621b00();
+    double ActorPackage_GetPackageStartTime();
     bool FUN_006828a0(float fArg);
-    bool FUN_006830a0(float fArg);
+    bool BSTempEffectDebris_Update(float fArg);
 
     BS_FACEGEN_MORPH_TYPE eType;
     float fTime;

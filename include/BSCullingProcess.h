@@ -49,7 +49,7 @@ public:
     void SetCompoundFrustum(TaskArg1* frustum);
     void FUN_004a0f60();
     void* FUN_004a0ff0(unsigned int flags);
-    void FUN_00c4f1d0(NiGeometry& kVisible);
+    void AppendVirtual(NiGeometry& kVisible);
 
     int unk90;
     int unk94;

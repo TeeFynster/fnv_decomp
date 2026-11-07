@@ -165,16 +165,16 @@ void Moon::Initialize(NiNode* root, const char* name)
     shadowIndicesA[5] = 3;
     m_pMoonShape = new MoonSceneShapeAllocation(4, moonVertices4, aMoonNormals, moonColors4, (NiPoint2*)moonUVX, 1, 0, 2,
                                   moonIndices4);
-    ((NiTriShape*)m_pMoonShape)->FUN_004902f0(true);
+    ((NiTriShape*)m_pMoonShape)->NiAVObject_SetSelectiveUpdate(true);
     m_pMoonShadowShape =
         new MoonSceneShapeAllocation(4, k, shadowNormals9, shadowColors_, (NiPoint2*)kc, 1, 0, 2, shadowIndicesA);
-    ((NiTriShape*)m_pMoonShadowShape)->FUN_004902f0(true);
+    ((NiTriShape*)m_pMoonShadowShape)->NiAVObject_SetSelectiveUpdate(true);
     {
         NiPointer<NiAlphaProperty> alpha(new NiAlphaProperty);
-        ((NiAlphaProperty*)alpha)->FUN_0049ed90(true);
-        ((NiAlphaProperty*)alpha)->FUN_00439340(6);
-        ((NiAlphaProperty*)alpha)->FUN_00439390(0);
-        ((NiAlphaProperty*)alpha)->FUN_00636000(true);
+        ((NiAlphaProperty*)alpha)->NiAlphaProperty_SetAlphaBlending(true);
+        ((NiAlphaProperty*)alpha)->NiAlphaProperty_SetSrcBlendMode(6);
+        ((NiAlphaProperty*)alpha)->NiAlphaProperty_SetDestBlendMode(0);
+        ((NiAlphaProperty*)alpha)->NiAlphaProperty_SetNoSorter(true);
         ((NiTriShape*)m_pMoonShape)->AttachProperty(alpha);
         alpha = 0;
     }
@@ -184,7 +184,7 @@ void Moon::Initialize(NiNode* root, const char* name)
     kB.AddProperties(m_pMoonShape, 1);
     kB.shadowType = 7;
     kB.AddProperties(m_pMoonShadowShape, 1);
-    if (Sky::GetInstance()->FUN_00476c90() == 3 || Sky::GetInstance()->FUN_00476c90() == 2)
+    if (Sky::GetInstance()->Sky_GetMode() == 3 || Sky::GetInstance()->Sky_GetMode() == 2)
     {
         SkyShaderProperty* texture = ((NiTriShape*)m_pMoonShadowShape)->GetProperty(3);
         NiPointer<NiTexture> loaded(0);
@@ -192,13 +192,13 @@ void Moon::Initialize(NiNode* root, const char* name)
         NiTexture* shader = loaded;
         if (shader)
             texture->SetTexture(shader);
-        ((NiTriShape*)m_pMoonShadowShape)->FUN_00635fe0(shader != 0);
+        ((NiTriShape*)m_pMoonShadowShape)->NiAVObject_SetDisplayObject(shader != 0);
         m_eUpdateStatus = US_INITIALIZE;
     }
     m_pMoonNode = new MoonSceneNodeAllocation(0);
     m_pMoonShadowNode = new MoonSceneNodeAllocation(0);
-    ((NiNode*)m_pMoonNode)->FUN_004902f0(true);
-    ((NiNode*)m_pMoonShadowNode)->FUN_004902f0(true);
+    ((NiNode*)m_pMoonNode)->NiAVObject_SetSelectiveUpdate(true);
+    ((NiNode*)m_pMoonShadowNode)->NiAVObject_SetSelectiveUpdate(true);
     ((NiNode*)m_pMoonNode)->AttachChildInAvailableSlot((NiAVObject*)(NiTriShape*)m_pMoonShape, true);
     ((NiNode*)m_pMoonShadowNode)->AttachChildInAvailableSlot((NiAVObject*)(NiTriShape*)m_pMoonShadowShape, true);
     ((NiNode*)m_pRootNode)->AttachChildInAvailableSlot((NiAVObject*)(NiNode*)m_pMoonShadowNode, true);
@@ -206,10 +206,10 @@ void Moon::Initialize(NiNode* root, const char* name)
     {
         B006815c0 rotation;
         rotation.FUN_00524ac0(-1.5707963705062866f);
-        ((NiTriShape*)m_pMoonShape)->FUN_004bc1f0(0, 512, 0);
-        ((NiTriShape*)m_pMoonShape)->FUN_0043fa80(&rotation);
-        ((NiTriShape*)m_pMoonShadowShape)->FUN_004bc1f0(0, 512, 0);
-        ((NiTriShape*)m_pMoonShadowShape)->FUN_0043fa80(&rotation);
+        ((NiTriShape*)m_pMoonShape)->NiAVObject_SetTranslate_004bc1f0(0, 512, 0);
+        ((NiTriShape*)m_pMoonShape)->SetRotate_0043fa80(&rotation);
+        ((NiTriShape*)m_pMoonShadowShape)->NiAVObject_SetTranslate_004bc1f0(0, 512, 0);
+        ((NiTriShape*)m_pMoonShadowShape)->SetRotate_0043fa80(&rotation);
         FUN_00b57e30(m_pRootNode, 0, 0);
     }
 }

@@ -7,7 +7,8 @@
 #include "../../../../include/NiPoint3.h"
 
 // @fnv 0x00a62ae0
-void __cdecl FUN_00a62ae0()
+// src: COMMUNITY 0x00a62ae0
+void __cdecl NiRenderer__SDMShutdown()
 {
     NiRenderer::ms_pRenderer = 0;
 }
@@ -15,7 +16,8 @@ void __cdecl FUN_00a62ae0()
 extern char const* const g_0126f0f0_arg1;
 
 // @fnv 0x00a62b50
-char const* const* __cdecl FUN_00a62b50()
+// src: COMMUNITY 0x00a62b50
+char const* const* __cdecl NiRenderer_GetRTTI()
 {
     return &g_0126f0f0_arg1;
 }
@@ -37,7 +39,8 @@ void __stdcall AppendCameraPathEntries(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 // Appends the string returned by _FUN_00a7d330 to the StrArr, growing its size when it is full.
 // @fnv 0x00a63260
-void __stdcall FUN_00a63260(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a63260
+void __stdcall NiRenderer_GetViewerStrings(StrArr* pkStrings)
 {
     AppendCameraPathEntries(pkStrings);
     char* psz = _FUN_00a7d330(g_0126f0f0_arg1);
@@ -168,7 +171,8 @@ inline float AcosClamped(float v)
 
 // Computes four corner points and right/up axes around a center, using a basis or target direction and a given width.
 // @fnv 0x00a62be0
-bool __cdecl FUN_00a62be0(const NiPoint3** basis, const NiPoint3* apCenter, const NiPoint3* target, float width,
+// src: XBOX_PDB 0x00a62be0
+bool __cdecl NiRenderer_PackParticleStripUtil_GetVerts(const NiPoint3** basis, const NiPoint3* apCenter, const NiPoint3* target, float width,
                           NiPoint3* corners, NiPoint3* axes, NiPoint3& direction)
 {
     FUN_00a62be0_Matrix3 rotMatrix;
@@ -183,7 +187,7 @@ bool __cdecl FUN_00a62be0(const NiPoint3** basis, const NiPoint3* apCenter, cons
         const NiPoint3* current = basis[0];
         const NiPoint3& currentNormal = *current;
         NiPoint3 axis = direction.Cross(*basis[0]);
-        axis.FUN_004a0c10();
+        axis.Unitize_004a0c10();
         rotMatrix.FUN_004168a0(AcosClamped(currentNormal * direction), axis.x, axis.y, axis.z);
         const NiPoint3& basisRight = *basis[1];
         right = rotMatrix.FUN_004b4500(basisRight);
@@ -194,27 +198,27 @@ bool __cdecl FUN_00a62be0(const NiPoint3** basis, const NiPoint3* apCenter, cons
     {
         direction = target->Sub(*center);
         right = NiPoint3(0.0f, 0.1f, 1.0f);
-        right.FUN_004a0c10();
+        right.Unitize_004a0c10();
         up = right.Cross(direction);
-        up.FUN_004a0c10();
+        up.Unitize_004a0c10();
         right = up.Cross(direction);
-        right.FUN_004a0c10();
+        right.Unitize_004a0c10();
     }
     else
     {
         NiPoint3 delta = *target - *center;
-        delta.FUN_004a0c10();
+        delta.Unitize_004a0c10();
         direction = *normal + delta;
-        direction.FUN_004a0c10();
+        direction.Unitize_004a0c10();
         const NiPoint3& currentNormal = *basis[0];
         NiPoint3 axis = direction.Cross(*basis[0]);
-        axis.FUN_004a0c10();
+        axis.Unitize_004a0c10();
         float angle = AcosClamped(direction * currentNormal);
         rotMatrix.MakeAxisAngleRotation(angle, axis);
         right = rotMatrix.FUN_004b4500(*basis[1]);
         up = rotMatrix.FUN_004b4500(*basis[2]);
     }
-    direction.FUN_004a0c10();
+    direction.Unitize_004a0c10();
     corners[0] = center->Add(up * (float)(width * 0.5));
     corners[1] = center->Sub(up * (float)(width * 0.5));
     corners[2] = center->Add(right * (float)(width * 0.5));

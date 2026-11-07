@@ -64,7 +64,7 @@ extern GlobalObjectO2_00a7b610 g_011f4054;
 
 void __stdcall AppendCameraPathEntries(StrArr*);
 void* __cdecl _FUN_00a7d330(void*);
-char* __cdecl FUN_00a7d510(char const*, unsigned int);
+char* __cdecl NiGetViewerString_00a7d510(char const*, unsigned int);
 
 // @fnv 0x00a53ba0
 void __fastcall GetBoolViewerStrings(NiBoolData* data, void*, StrArr* apViewerStrings)
@@ -80,7 +80,7 @@ void __fastcall GetBoolViewerStrings(NiBoolData* data, void*, StrArr* apViewerSt
 
     apViewerStrings->SetAt(uiIndex, pString);
 
-    pString = FUN_00a7d510("m_uiNumKeys", data->m_uiNumKeys);
+    pString = NiGetViewerString_00a7d510("m_uiNumKeys", data->m_uiNumKeys);
     uiIndex = apViewerStrings->m_usSize;
     uiCapacity = apViewerStrings->m_usMaxSize;
 
@@ -150,7 +150,7 @@ void __fastcall SaveBoolData(NiBoolData* data, void*, NiStream& stream)
     }
 }
 
-void __cdecl FUN_00a3d630(unsigned int mode, NiAnimationKey::KeyType type, BooleanKey* sourceKeys,
+void __cdecl NiAnimationKey_CopySequence(unsigned int mode, NiAnimationKey::KeyType type, BooleanKey* sourceKeys,
                           unsigned int sourceCount, float startTime, float endTime, BooleanKey** outputKeys,
                           unsigned int* outputCount);
 
@@ -169,7 +169,7 @@ void __fastcall CloneBoolDataForTimeRange(NiBoolData* data, void*, float startTi
     {
         BooleanKey* keys = 0;
         unsigned int count = 0;
-        FUN_00a3d630(5, data->m_eRequestType, data->m_pKeyArray, data->m_uiNumKeys, startTime, endTime, &keys, &count);
+        NiAnimationKey_CopySequence(5, data->m_eRequestType, data->m_pKeyArray, data->m_uiNumKeys, startTime, endTime, &keys, &count);
         copy->SetColorKeys(keys, count, data->m_eRequestType);
     }
 

@@ -11,7 +11,8 @@
 #include "../../../../include/NiBillboardNode.h"
 
 // @fnv 0x0051d000
-void NiBillboardNode::FUN_0051d000(int a)
+// src: COMMUNITY 0x0051d000
+void NiBillboardNode::SetMode_0051d000(int a)
 {
     reinterpret_cast<NiTriBasedGeom*>(this)->SetBitfield(static_cast<unsigned short>(a), 7, 0);
 }

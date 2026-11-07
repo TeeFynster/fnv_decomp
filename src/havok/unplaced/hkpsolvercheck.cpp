@@ -1,8 +1,8 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-void FUN_00cb1750(const char* msg);
-int FUN_00e29910();
+void _hkErrorMessage(const char* msg);
+int Hksystemtime_Time64_Thunk();
 
 static const char* const s_keyCode = "0x72a843c2-0x3bbeff2a:2011-10-29.Physics.Obsidian_Bethesda_FalloutNewVegas";
 
@@ -53,13 +53,13 @@ int ValidateHavokKeyCode(bool* pbValid)
     const char* dot = nextField(s_keyCode);
     if (!dot)
     {
-        FUN_00cb1750("Product:hkp Key Code is invalid.\nPlease contact Havok.com\nNo simulation possible.");
+        _hkErrorMessage("Product:hkp Key Code is invalid.\nPlease contact Havok.com\nNo simulation possible.");
         return 1;
     }
     dot = nextField(dot + 1);
     if (!dot)
     {
-        FUN_00cb1750("Product:hkp Key Code is invalid.\nPlease contact Havok.com\nNo simulation possible.");
+        _hkErrorMessage("Product:hkp Key Code is invalid.\nPlease contact Havok.com\nNo simulation possible.");
         return 1;
     }
     const char* product = dot + 1;
@@ -67,11 +67,11 @@ int ValidateHavokKeyCode(bool* pbValid)
     if (expiring)
     {
         int expiry = (key1 ^ 0xf2e6ef51) & 0x7fffffff;
-        int now = FUN_00e29910() >> 8;
+        int now = Hksystemtime_Time64_Thunk() >> 8;
         int remaining = expiry - now;
         if (expiry < now || remaining > 0x96c99)
         {
-            FUN_00cb1750(
+            _hkErrorMessage(
                 "Product:hkp Key Code has expired .\nPlease contact Havok.com for an extension.\nNo simulation possible.");
             return 2;
         }
@@ -85,7 +85,7 @@ int ValidateHavokKeyCode(bool* pbValid)
             hash = hash * 23 + *++c;
         if (key2 != ((hash ^ 0xf2e6ef51) & 0x7fffffff))
         {
-            FUN_00cb1750("Product:hkp Key Code is invalid.\nPlease contact Havok.com\nNo simulation possible.");
+            _hkErrorMessage("Product:hkp Key Code is invalid.\nPlease contact Havok.com\nNo simulation possible.");
             return 1;
         }
     }

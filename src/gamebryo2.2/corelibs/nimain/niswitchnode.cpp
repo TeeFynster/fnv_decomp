@@ -19,7 +19,8 @@
 extern char const* const g_011f5f1c_arg1;
 
 // @fnv 0x00a943f0
-char const* const* __cdecl FUN_00a943f0()
+// src: COMMUNITY 0x00a943f0
+char const* const* __cdecl NiSwitchNode_GetNiRTTI()
 {
     return &g_011f5f1c_arg1;
 }
@@ -28,9 +29,10 @@ char const* const* __cdecl FUN_00a943f0()
 // Switch-specific trailing state and undeclared helper methods remain local.
 // Calls FUN_00a5e600, then returns true only if m_0b0 matches and the low bit of m_0ac matches the other object's.
 // @fnv 0x00a94000
-bool __thiscall NiSwitchNode::FUN_00a94000(NiObject* other)
+// src: XBOX_PDB 0x00a94000
+bool __thiscall NiSwitchNode::IsEqual_00a94000(NiObject* other)
 {
-    if (!FUN_00a5e600(other) || m_0b0 != static_cast<NiSwitchNode*>(other)->m_0b0 || (m_0ac ^ static_cast<NiSwitchNode*>(other)->m_0ac) & 1)
+    if (!NiNode_IsEqual(other) || m_0b0 != static_cast<NiSwitchNode*>(other)->m_0b0 || (m_0ac ^ static_cast<NiSwitchNode*>(other)->m_0ac) & 1)
         return false;
     return true;
 }
@@ -41,7 +43,8 @@ extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 
 // Locks DAT_011f4380, deletes the extra data at index a1 if it is below the count at offset 0x14, and returns whether it was removed.
 // @fnv 0x00a5bf50
-bool __thiscall NiObjectNET::FUN_00a5bf50(unsigned short ausIndex)
+// src: COMMUNITY 0x00a5bf50
+bool __thiscall NiObjectNET::RemoveExtraDataAt(unsigned short ausIndex)
 {
     EnterCriticalSection(&DAT_011f4380);
     if (ausIndex < m_usExtraDataSize)
@@ -56,10 +59,11 @@ bool __thiscall NiObjectNET::FUN_00a5bf50(unsigned short ausIndex)
 
 struct FUN_00a93c00_shell : NiSwitchNode
 {
-    void __thiscall FUN_00a93c00(NiSwitchNode*, CloningProcess&);
+    void __thiscall NiSwitchNode_CopyMembers(NiSwitchNode*, CloningProcess&);
 };
 // @fnv 0x00a93c00
-void __thiscall FUN_00a93c00_shell::FUN_00a93c00(NiSwitchNode* pkDest, CloningProcess& kCloning)
+// src: COMMUNITY 0x00a93c00
+void __thiscall FUN_00a93c00_shell::NiSwitchNode_CopyMembers(NiSwitchNode* pkDest, CloningProcess& kCloning)
 {
     NiNode::CopyMemberData(pkDest, kCloning);
     pkDest->m_usFlags = m_usFlags;
@@ -72,10 +76,11 @@ struct NiNodeHack
 };
 struct SwitchHack : public NiSwitchNode
 {
-    void FUN_00a94300(NiUpdateData&);
+    void NiSwitchNode_UpdateControllers(NiUpdateData&);
 };
 // @fnv 0x00a94300
-void SwitchHack::FUN_00a94300(NiUpdateData& data)
+// src: XBOX_PDB 0x00a94300
+void SwitchHack::NiSwitchNode_UpdateControllers(NiUpdateData& data)
 {
     if (m_0ac & 1)
     {
@@ -167,14 +172,15 @@ template <> __declspec(nothrow) inline NiPointer<NiRefObject>::~NiPointer()
 }
 struct S2
 {
-    void __thiscall FUN_00a5e780(NiRefObject*, NiPointer<NiRefObject>&) throw();
+    void __thiscall NiNode_DetachChild_00a5e780(NiRefObject*, NiPointer<NiRefObject>&) throw();
 };
 struct Target : NiSwitchNode
 {
-    void __thiscall FUN_00a93ca0(NiRefObject*, NiPointer<NiRefObject>&);
+    void __thiscall NiSwitchNode_DetachChild(NiRefObject*, NiPointer<NiRefObject>&);
 };
 // @fnv 0x00a93ca0
-void Target::FUN_00a93ca0(NiRefObject* child, NiPointer<NiRefObject>& out)
+// src: XBOX_PDB 0x00a93ca0
+void Target::NiSwitchNode_DetachChild(NiRefObject* child, NiPointer<NiRefObject>& out)
 {
     m_uiRevID = 1;
     unsigned int uiIndex = 0;
@@ -196,7 +202,7 @@ void Target::FUN_00a93ca0(NiRefObject* child, NiPointer<NiRefObject>& out)
         ++uiIndex;
     }
     NiPointer<NiRefObject> refTemp;
-    ((S2*)this)->FUN_00a5e780(child, refTemp);
+    ((S2*)this)->NiNode_DetachChild_00a5e780(child, refTemp);
     int active = m_iIndex;
     if (active > -1 && (active >= (int)m_kChildren.m_usSize || !((NiRefObject**)m_kChildren.m_pBase)[active]))
         m_iIndex = -1;
@@ -422,11 +428,12 @@ extern unsigned char DAT_011f4288;
 struct FUN_00a94130_cls : NiSwitchNode
 {
     void FUN_00a5ded0(NiUpdateData& upd, unsigned int flag);
-    void FUN_00a94130(NiUpdateData& upd, unsigned int flag);
+    void NiSwitchNode_UpdateSelectedDownwardPass(NiUpdateData& upd, unsigned int flag);
 };
 
 // @fnv 0x00a94130
-void FUN_00a94130_cls::FUN_00a94130(NiUpdateData& upd, unsigned int flag)
+// src: XBOX_PDB 0x00a94130
+void FUN_00a94130_cls::NiSwitchNode_UpdateSelectedDownwardPass(NiUpdateData& upd, unsigned int flag)
 {
     unsigned char* pUpdBytes = (unsigned char*)&upd;
     m_fSavedTime = upd.fTime;
@@ -520,8 +527,8 @@ NiSwitchNode::NiSwitchNode()
 
 struct Node_a94440 : NiSwitchNode
 {
-    void FUN_00a5ed10(void* a1, int a2);
-    void FUN_00a94440(void* a1, int a2);
+    void NiNode_AttachChild(void* a1, int a2);
+    void NiSwitchNode_AttachChild(void* a1, int a2);
 };
 
 inline void AppendRevision(NiTPrimitiveArray<unsigned int>& array, const unsigned int& item)
@@ -534,14 +541,15 @@ inline void AppendRevision(NiTPrimitiveArray<unsigned int>& array, const unsigne
 
 // Calls FUN_00a5ed10 with the given arguments, sets m_b8 to 1, and appends a null entry to m_kArrBC.
 // @fnv 0x00a94440
-void Node_a94440::FUN_00a94440(void* a1, int a2)
+// src: XBOX_PDB 0x00a94440
+void Node_a94440::NiSwitchNode_AttachChild(void* a1, int a2)
 {
-    FUN_00a5ed10(a1, a2);
+    NiNode_AttachChild(a1, a2);
     m_uiRevID = 1;
     AppendRevision(m_kChildRevID, 0);
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 struct SwitchNode_a94550
 {
@@ -551,7 +559,7 @@ struct SwitchNode_a94550
 // @fnv 0x00a94550
 SwitchNode_a94550* __cdecl CreateSwitchNode()
 {
-    SwitchNode_a94550* p = (SwitchNode_a94550*)FUN_00aa13e0(0xcc);
+    SwitchNode_a94550* p = (SwitchNode_a94550*)Object_DispatchCommandFour(0xcc);
     if (p)
         return p->FUN_00a94360();
     return 0;
@@ -584,11 +592,12 @@ template <class T> inline void BA94570LoadBinary(NiStream& kStream, T& value)
 
 struct FUN_00a94570_Node : NiSwitchNode
 {
-    void FUN_00a94570(NiStream& stream);
+    void NiSwitchNode_LoadBinary(NiStream& stream);
 };
 
 // @fnv 0x00a94570
-void FUN_00a94570_Node::FUN_00a94570(NiStream& kStream)
+// src: XBOX_PDB 0x00a94570
+void FUN_00a94570_Node::NiSwitchNode_LoadBinary(NiStream& kStream)
 {
     NiNode::LoadBinary(kStream);
 
@@ -602,13 +611,13 @@ void FUN_00a94570_Node::FUN_00a94570(NiStream& kStream)
 }
 
 extern char* DAT_011f5eb4;
-char* __cdecl FUN_00a7d330(char const*);
-char* __cdecl FUN_00a7d4d0(char const*, int);
-char* __cdecl FUN_00a7d370(char const*, bool);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char const*);
+char* __cdecl NiGetViewerString_00a7d4d0(char const*, int);
+char* __cdecl NiGetViewerString(char const*, bool);
 
 struct FUN_00a5ea70_Obj
 {
-    void FUN_00a5ea70(StrArr* pkStrings);
+    void NiNode_GetViewerStrings(StrArr* pkStrings);
 };
 
 __forceinline void AddString(StrArr* pkStrings, char* pStr)
@@ -629,11 +638,11 @@ struct FUN_00a94680_shell : public NiSwitchNode
 // @fnv 0x00a94680
 void FUN_00a94680_shell::AppendDebugStrings(StrArr* pkStrings)
 {
-    reinterpret_cast<FUN_00a5ea70_Obj*>(this)->FUN_00a5ea70(pkStrings);
-    AddString(pkStrings, FUN_00a7d330(DAT_011f5eb4));
-    AddString(pkStrings, FUN_00a7d4d0("m_iIndex", m_iIndex));
+    reinterpret_cast<FUN_00a5ea70_Obj*>(this)->NiNode_GetViewerStrings(pkStrings);
+    AddString(pkStrings, NiViewerStrings_NiGetViewerString_Title(DAT_011f5eb4));
+    AddString(pkStrings, NiGetViewerString_00a7d4d0("m_iIndex", m_iIndex));
     bool bUpdateOnlyActive = m_0ac & 1;
-    AddString(pkStrings, FUN_00a7d370("m_bUpdateOnlyActive", bUpdateOnlyActive));
+    AddString(pkStrings, NiGetViewerString("m_bUpdateOnlyActive", bUpdateOnlyActive));
 }
 
 // FNV_UpdateFlags, FNV_Color4, DAT_011f4288 and FUN_004eff50 are declared by the translation unit.
@@ -641,12 +650,13 @@ void FUN_00a94680_shell::AppendDebugStrings(StrArr* pkStrings)
 class SwitchNodeUpdate : public NiSwitchNode
 {
   public:
-    void FUN_00a5e1f0(FNV_UpdateFlags* apData, unsigned int auiFlags);
-    void FUN_00a94220(FNV_UpdateFlags* apData, unsigned int auiFlags);
+    void NiNode_UpdateRigidDownwardPass(FNV_UpdateFlags* apData, unsigned int auiFlags);
+    void NiSwitchNode_UpdateRigidDownwardPass(FNV_UpdateFlags* apData, unsigned int auiFlags);
 };
 
 // @fnv 0x00a94220
-void SwitchNodeUpdate::FUN_00a94220(FNV_UpdateFlags* apData, unsigned int auiFlags)
+// src: XBOX_PDB 0x00a94220
+void SwitchNodeUpdate::NiSwitchNode_UpdateRigidDownwardPass(FNV_UpdateFlags* apData, unsigned int auiFlags)
 {
     m_fSavedTime = apData->time;
     if (m_usFlags & 1)
@@ -677,7 +687,7 @@ void SwitchNodeUpdate::FUN_00a94220(FNV_UpdateFlags* apData, unsigned int auiFla
     }
     else
     {
-        FUN_00a5e1f0(apData, auiFlags);
+        NiNode_UpdateRigidDownwardPass(apData, auiFlags);
     }
 }
 

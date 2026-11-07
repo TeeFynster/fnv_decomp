@@ -58,11 +58,12 @@ struct ElemPtrArray
         m_data[m_iElementCount] = e;
         ++m_iElementCount;
     }
-    void FUN_00e80420(unsigned int count);
+    void NiTPool_NiD3DPass_CreateNewObjects(unsigned int count);
 };
 
 // @fnv 0x00e80420
-void ElemPtrArray::FUN_00e80420(unsigned int count)
+// src: COMMUNITY 0x00e80420
+void ElemPtrArray::NiTPool_NiD3DPass_CreateNewObjects(unsigned int count)
 {
     void* mem = g_heap_11f6238.Allocate(sizeof(Block));
     Block* blk = mem ? new (mem) Block(count) : 0;

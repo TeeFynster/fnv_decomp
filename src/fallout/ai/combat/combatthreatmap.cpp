@@ -107,11 +107,12 @@ struct NiBound;
 extern NiBound DAT_011f4288;
 struct FUN_0043d450_Owner
 {
-    NiBound* FUN_0043d450();
+    NiBound* NiAVObject_GetWorldBound();
 };
 // Returns the bound stored at offset 0x20 of this object, or the global DAT_011f4288 when that pointer is null.
 // @fnv 0x0043d450
-NiBound* FUN_0043d450_Owner::FUN_0043d450()
+// src: XBOX_PDB 0x0043d450
+NiBound* FUN_0043d450_Owner::NiAVObject_GetWorldBound()
 {
     NiBound* pBound = ((NiBound**)this)[8] ? ((NiBound**)this)[8] : &DAT_011f4288;
     return pBound;
@@ -169,7 +170,7 @@ struct ThreatLock
     void Unlock();
 };
 extern double DAT_01012060;
-float __cdecl FUN_00435dd0();
+float __cdecl CombatTimer_GetTimer();
 
 struct ThreatMap
 {
@@ -193,7 +194,7 @@ float ThreatMap::EvaluateThreats(NiPoint3 pos, int arg, float delay, float a, Co
     if (delay < DAT_01012060)
         fTime = delay;
     else
-        fTime = FUN_00435dd0() + delay;
+        fTime = CombatTimer_GetTimer() + delay;
     void* iter = GetFirstPos();
     while (iter)
     {

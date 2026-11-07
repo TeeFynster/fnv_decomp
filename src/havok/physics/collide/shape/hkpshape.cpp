@@ -30,7 +30,8 @@ extern "C" LocalM128 _mm_rcp_ps(LocalM128 a);
 #include "../../../../../include/hkpShape.h"
 
 // @fnv 0x00c9e3f0
-int __stdcall FUN_00c9e3f0(void* p, int size)
+// src: HAVOK_SRC 0x00c9e3f0
+int __stdcall hkpConvexTransformShapeBase_calcSizeForSpu(void* p, int size)
 {
     return -1;
 }

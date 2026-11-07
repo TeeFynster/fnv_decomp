@@ -166,8 +166,8 @@ class hkVector4
     Vector4Comparison compareLessThanZero4() const;
     void _setRotatedDir(const hkRotation& rotation, const hkVector4& vector);
     void SetTransformedPosition(const hkTransform& transform, const hkVector4& vector);
-    void FUN_00c7f690(const hkTransform& transform, const hkVector4& vector);
-    void FUN_00c7f690(const hkTransform* transform, const hkVector4* vector);
+    void hkVector4_setTransformedInversePos(const hkTransform& transform, const hkVector4& vector);
+    void hkVector4_setTransformedInversePos(const hkTransform* transform, const hkVector4* vector);
     hkSimdReal normalizeWithLength3();
     __forceinline void setNeg3(const hkVector4& vector);
     void setReciprocal3(const hkVector4& vector);
@@ -197,12 +197,12 @@ class hkVector4
     int lessZero3() const;
 
     hkVector4 FUN_00630b40() const;
-    float FUN_004586d0() const;
-    void FUN_0062aea0();
-    void FUN_00627920(const hkSimdReal& scalar);
-    void FUN_00630df0(const hkVector4& a, const hkVector4& b);
-    hkSimdReal& FUN_00458700(hkSimdReal& value, int index) const;
-    int FUN_00e4dc70(const hkVector4& vector, const hkVector4* vectors, void* data);
+    float EvaluateValue_004586d0() const;
+    void normalize3_0062aea0();
+    void hkVector4_mul4(const hkSimdReal& scalar);
+    void ComputeValues_00630df0(const hkVector4& a, const hkVector4& b);
+    hkSimdReal& hkVector4_getSimdAt(hkSimdReal& value, int index) const;
+    int GetTriangleEdgeSignMask(const hkVector4& vector, const hkVector4* vectors, void* data);
 
 #ifdef FNV64_HKVECTOR4_PACKET_BODIES
     __forceinline hkVector4(__m128 value) : m_vComponents(value) {}
@@ -277,13 +277,13 @@ class hkVector4
     void SetTransformedPoint(const hkTransform& transform, const hkVector4& vector);
     void setRotatedCached(const hkQuaternion& quaternion, const hkVector4& vector,
                           const __m128& yz, const __m128& zx) throw();
-    void FUN_004b4ab0(const hkRotation& rotation, const hkVector4& vector);
-    void FUN_005611c0();
+    void hkVector4_setRotatedInverseDir(const hkRotation& rotation, const hkVector4& vector);
+    void normalize_005611c0();
     void FUN_006815c0();
-    void FUN_00c7f640(const hkTransform& transform, const hkVector4& vector);
-    void FUN_00c7f700(const hkRotation& rotation, const hkVector4& vector);
-    void FUN_00c7f700(const hkRotation* rotation, const hkVector4* vector);
-    void FUN_00c7f750(const hkMatrix3& matrix, const hkVector4& vector);
+    void setTransformedPos_00c7f640(const hkTransform& transform, const hkVector4& vector);
+    void hkVector4_setRotatedDir(const hkRotation& rotation, const hkVector4& vector);
+    void hkVector4_setRotatedDir(const hkRotation* rotation, const hkVector4* vector);
+    void hkVector4_setMul3(const hkMatrix3& matrix, const hkVector4& vector);
 
     static void* __cdecl operator new(size_t size);
     __forceinline static const hkVector4& __cdecl getZero();
@@ -298,9 +298,9 @@ class hkVector4
     void add(const hkVector4&, const hkVector4&);
     void sub(const hkVector4&, const hkVector4&);
     void scale(const Scalar&);
-    void FUN_00c7f750(const void*, const hkVector4*);
-    void FUN_00c7f640(const Matrix*, const hkVector4*);
-    void FUN_00c7f700(const void*, const hkVector4*);
+    void hkVector4_setMul3(const void*, const hkVector4*);
+    void setTransformedPos_00c7f640(const Matrix*, const hkVector4*);
+    void hkVector4_setRotatedDir(const void*, const hkVector4*);
     // Typed scalar and transform call surfaces retained from the matched hkVector4 units.
     hkVector4(float x, float y, float z);
     hkVector4 operator*(float value) const;
@@ -339,24 +339,24 @@ class hkVector4
     int maxAxisSecond() const;
     int maxAxis() const;
     float GetAngle();
-    void FUN_00416870(float x, float y, float z);
-    hkVector4 FUN_00439ef0(const hkVector4& vector);
+    void SetComponents(float x, float y, float z);
+    hkVector4 SubtractIntoVector(const hkVector4& vector);
     hkVector4 FUN_00439e90(const hkVector4& vector);
-    void FUN_00439180(float value);
-    void FUN_004a0c10();
-    void FUN_00c66320(const hkVector4* a, const hkVector4* b);
-    void FUN_00c74ac0(const hkVector4* a, const hkVector4* b);
-    void FUN_00c74c90(hkVector4* vector);
-    void FUN_00c7f640(const Transform& transform, const hkVector4& point);
-    void FUN_00cb2450(const hkVector4* vector, float value);
+    void ScaleComponents(float value);
+    void Unitize_004a0c10();
+    void setMul(const hkVector4* a, const hkVector4* b);
+    void setMulInverse(const hkVector4* a, const hkVector4* b);
+    void hkQuaternion_getAxis(hkVector4* vector);
+    void setTransformedPos_00c7f640(const Transform& transform, const hkVector4& point);
+    void hkQuaternion_setAxisAngle(const hkVector4* vector, float value);
     void FUN_00cb26e0(const hkRotation* rotation);
     template <int I> void splat(const hkVector4& vector);
     // Typed vector calls recovered from the former FourFloatVector declarations.
-    hkVector4* FUN_005532a0(float x, float y, float z, float w);
-    void FUN_004a3f10(hkVector4* vector);
-    void __thiscall FUN_004b4db0(const hkVector4* vector);
-    hkVector4& FUN_00e531a0(int parameter);
-    hkVector4 FUN_00e53260(int parameter);
+    hkVector4* hkVector4_hkVector4(float x, float y, float z, float w);
+    void SetValue(hkVector4* vector);
+    void __thiscall SetQuaternionComponentsFromVector(const hkVector4* vector);
+    hkVector4& ComputeValue_00e531a0(int parameter);
+    hkVector4 ProcessAndReturnValue_00e53260(int parameter);
     float& At(int index);
     const float& At(int index) const;
     __m128 length3PacketCall() const;

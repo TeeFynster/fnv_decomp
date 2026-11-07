@@ -86,7 +86,7 @@ struct ObjD85 : BaseD85
     int unk124;
     int unk128;
     int unk12c;
-    ObjD85& FUN_00d85ba0(const ObjD85& o);
+    ObjD85& ProcessAndReturnValue_00d85ba0(const ObjD85& o);
 };
 struct __declspec(align(16)) StandinClass
 {
@@ -99,7 +99,7 @@ struct __declspec(align(16)) StandinClass
     LocalM128 value60;
     LocalM128 value70;
     LocalM128 value80;
-    StandinClass& FUN_00d85300(const StandinClass* source);
+    StandinClass& ComputeValue_00d85300(const StandinClass* source);
 };
 
 struct __declspec(align(16)) S00d9db60_ProjectedEntry
@@ -153,13 +153,13 @@ struct S00d9db60_Router
         return *m_pStreamAllocator;
     }
 };
-S00d9db60_Router* __cdecl FUN_00c85750();
+S00d9db60_Router* __cdecl hkMemoryRouter_getInstance();
 
 struct S00d9db60_HeapAllocator
 {
     __forceinline S00d9db60_Allocator& get(const void*)
     {
-        return FUN_00c85750()->heap();
+        return hkMemoryRouter_getInstance()->heap();
     }
 };
 
@@ -279,7 +279,7 @@ struct S00d9db60_SparseWriter
     LocalM128 m_kVectorBuffer[BUFFER_SIZE];
     int m_uiEdgeIndex;
     void FUN_00df3110();  // constructor
-    void FUN_00df3160();  // flush, from the inline destructor
+    void hkKdTreeBuilderSparseWriter_flush();  // flush, from the inline destructor
 };
 
 struct S00d9db60_BuildRecursiveInput
@@ -300,14 +300,15 @@ struct S00d9db60_BuildRecursiveInput
 
 void __cdecl FillAabbArray(S00d9db60_Mediator*, int, int, S00d9db60_ProjectedEntry*);
 void __cdecl MixChannels(S00d9db60_WorkingSet&, S00d9db60_Node*, S00d9db60_ProjectedEntry*, int, int, int, int&);
-void __cdecl FUN_00df37b0(const S00d9db60_WorkingSet&, S00d9db60_Node*, int, int, S00d9db60_BuildRecursiveInput*, int*,
+void __cdecl ProcessEntries_00df37b0(const S00d9db60_WorkingSet&, S00d9db60_Node*, int, int, S00d9db60_BuildRecursiveInput*, int*,
                           S00d9db60_ProjectedEntry&);
-int __cdecl FUN_00df56a0(const S00d9db60_BuildRecursiveInput&, S00d9db60_TreeStream*, S00d9db60_ProjectedEntry*, int*,
+int __cdecl hkKdTreeBuilder_hkKdTreeProjectedEntry_const_hkKdTreeProjectedEntry_restrict_0_buildTreeRecursive(const S00d9db60_BuildRecursiveInput&, S00d9db60_TreeStream*, S00d9db60_ProjectedEntry*, int*,
                          int*);
-void __cdecl FUN_00d9d950(S00d9db60_KdTree*, int, int*, int*);
+void __cdecl hkKdTreeBuildingUtils_completeDistributedBuild(S00d9db60_KdTree*, int, int*, int*);
 
 // @fnv 0x00d9db60
-void __cdecl FUN_00d9db60(S00d9db60_Mediator& mediator, S00d9db60_KdTree* tree)
+// src: GUESS 0x00d9db60 (confidence: low)
+void __cdecl Object_ProcessEntries_00d9db60(S00d9db60_Mediator& mediator, S00d9db60_KdTree* tree)
 {
     S00d9db60_Node* root = tree->getRoot();
 
@@ -342,7 +343,7 @@ void __cdecl FUN_00d9db60(S00d9db60_Mediator& mediator, S00d9db60_KdTree* tree)
     subTreeInputs[3].m_pWorkingSet = &subTreeBuffers[3];
 
     int numPrimitivesPerSubTree[4];
-    FUN_00df37b0(buffers, root, tree->m_kNodeCollection.GetLogicalSize(), mediator.GetNumEntries(), subTreeInputs,
+    ProcessEntries_00df37b0(buffers, root, tree->m_kNodeCollection.GetLogicalSize(), mediator.GetNumEntries(), subTreeInputs,
                  numPrimitivesPerSubTree, rootBounds);
 
     int numReservedEmptyNodes = tree->getNumReservedEmptyNodes();
@@ -379,12 +380,12 @@ void __cdecl FUN_00d9db60(S00d9db60_Mediator& mediator, S00d9db60_KdTree* tree)
         numPrimitivesPerSubTree[i] += emptyNodesPerSubTree[i] + (emptyNodesPerSubTree[i] & 1);
         currentNodeIdx += numPrimitivesPerSubTree[i];
 
-        subTreeDepths[i] = FUN_00df56a0(input, &stream, tree->getProjectedEntries(), &depth, &emptyNodesPerSubTree[i]);
+        subTreeDepths[i] = hkKdTreeBuilder_hkKdTreeProjectedEntry_const_hkKdTreeProjectedEntry_restrict_0_buildTreeRecursive(input, &stream, tree->getProjectedEntries(), &depth, &emptyNodesPerSubTree[i]);
         subTreeDepths[i] += 2;
-        writer.FUN_00df3160();
+        writer.hkKdTreeBuilderSparseWriter_flush();
     }
 
-    FUN_00d9d950(tree, mediator.GetNumEntries(), subTreeDepths, numPrimitivesPerSubTree);
+    hkKdTreeBuildingUtils_completeDistributedBuild(tree, mediator.GetNumEntries(), subTreeDepths, numPrimitivesPerSubTree);
     S00d9db60_Array_ClearAndRelease(entriesB);
     S00d9db60_Array_ClearAndRelease(entriesA);
 }

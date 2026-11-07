@@ -5,7 +5,8 @@
 extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(void* h, unsigned long ms);
 
 // @fnv 0x00d04380
-int __fastcall FUN_00d04380(void* h, int)
+// src: XBOX_PDB 0x00d04380
+int __fastcall hkSemaphore_acquire(void* h, int)
 {
     return WaitForSingleObject(*(void**)h, (unsigned long)-1);
 }
@@ -71,11 +72,12 @@ struct FUN_00d04370_cls
 {
     HANDLE m_hHandle;
 
-    void FUN_00d04370();
+    void ForwardCall_00d04370();
 };
 
 // @fnv 0x00d04370
-void FUN_00d04370_cls::FUN_00d04370()
+// src: GUESS 0x00d04370 (confidence: low)
+void FUN_00d04370_cls::ForwardCall_00d04370()
 {
     CloseHandle(m_hHandle);
 }

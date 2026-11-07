@@ -76,12 +76,12 @@ struct AmmoRecord
 struct ComparisonInfo
 {
     int __thiscall FUN_00484e60(int);
-    int __thiscall FUN_00474cb0();
-    unsigned int __thiscall FUN_0084e3a0();
+    int __thiscall GetFormEditorIDLength();
+    unsigned int __thiscall GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 void __cdecl ResolveFormID(void**, int);
-void* __cdecl FUN_004839c0(void*);
-void __cdecl FUN_005b5e40(const char*, ...);
+void* __cdecl TESForm_GetFormByNumericID(void*);
+void __cdecl Warning_005b5e40(const char*, ...);
 extern const char str_0101a3c8[];
 extern const char str_0101a404[];
 extern const char str_0101a444[];
@@ -93,7 +93,7 @@ void BGSAmmoForm::InitItem(TESForm* apCompareFC)
     {
         void* oldAmmo = m_pAmmo;
         ResolveFormID(&oldAmmo, reinterpret_cast<ComparisonInfo*>(apCompareFC)->FUN_00484e60(-1));
-        m_pAmmo = static_cast<TESForm*>(FUN_004839c0(oldAmmo));
+        m_pAmmo = static_cast<TESForm*>(TESForm_GetFormByNumericID(oldAmmo));
         if (m_pAmmo && reinterpret_cast<AmmoRecord*>(m_pAmmo)->FUN_00401170() != 0x29 &&
             reinterpret_cast<AmmoRecord*>(m_pAmmo)->FUN_00401170() != 0x55)
         {
@@ -103,20 +103,20 @@ void BGSAmmoForm::InitItem(TESForm* apCompareFC)
         {
             if (apCompareFC)
             {
-                if (reinterpret_cast<ComparisonInfo*>(apCompareFC)->FUN_00474cb0())
+                if (reinterpret_cast<ComparisonInfo*>(apCompareFC)->GetFormEditorIDLength())
                 {
-                    FUN_005b5e40(str_0101a444, oldAmmo,
+                    Warning_005b5e40(str_0101a444, oldAmmo,
                                  (reinterpret_cast<int(__thiscall*)(TESForm*)>(
                                      (*reinterpret_cast<void***>(apCompareFC))[0x130 / 4]))(apCompareFC));
                 }
                 else
                 {
-                    FUN_005b5e40(str_0101a404, oldAmmo, reinterpret_cast<DeallocHolder*>(apCompareFC)->_ref_0084e3a0());
+                    Warning_005b5e40(str_0101a404, oldAmmo, reinterpret_cast<DeallocHolder*>(apCompareFC)->_ref_0084e3a0());
                 }
             }
             else
             {
-                FUN_005b5e40(str_0101a3c8, oldAmmo);
+                Warning_005b5e40(str_0101a3c8, oldAmmo);
             }
         }
     }

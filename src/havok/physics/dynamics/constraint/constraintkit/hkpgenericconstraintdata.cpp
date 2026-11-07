@@ -79,11 +79,12 @@ struct FUN_00d503a0_class
     int m_uiValueCount;
     int m_o;
     int m_p;
-    void FUN_00d503a0(int, int* out);
+    void hkpGenericConstraintData_getRuntimeInfo(int, int* out);
 };
 
 // @fnv 0x00d503a0
-void FUN_00d503a0_class::FUN_00d503a0(int, int* paiOut)
+// src: HAVOK_LIB 0x00d503a0
+void FUN_00d503a0_class::hkpGenericConstraintData_getRuntimeInfo(int, int* paiOut)
 {
     int v = *(int*)((char*)this + 0x20);
     paiOut[1] = v;
@@ -794,10 +795,11 @@ struct FUN_00d50520_s
     int zx;
     int zy;
     int zz;
-    void FUN_00d50520(int* o);
+    void hkpGenericConstraintData_getConstraintInfo(int* o);
 };
 // @fnv 0x00d50520
-void FUN_00d50520_s::FUN_00d50520(int* aiOut)
+// src: HAVOK_LIB 0x00d50520
+void FUN_00d50520_s::hkpGenericConstraintData_getConstraintInfo(int* aiOut)
 {
     aiOut[4] = (int)((char*)this + 0xc);
     aiOut[0] = 0;
@@ -815,23 +817,26 @@ struct FUN_00d50560_class
 {
     char pad[0x28];
     int* m_items;
-    int* FUN_00d50560(unsigned int index);
+    int* hkpGenericConstraintData_getParameters(unsigned int index);
 };
 
 // @fnv 0x00d50560
-int* FUN_00d50560_class::FUN_00d50560(unsigned int index)
+// src: HAVOK_LIB 0x00d50560
+int* FUN_00d50560_class::hkpGenericConstraintData_getParameters(unsigned int index)
 {
     return m_items + index * 4;
 }
 
 // @fnv 0x00d50500
-void __stdcall FUN_00d50500(unsigned char* out)
+// src: XBOX_PDB 0x00d50500
+void __stdcall hkpGenericConstraintData_isValid(unsigned char* out)
 {
     *out = 1;
 }
 
 // @fnv 0x00d50510
-int FUN_00d50510()
+// src: GUESS 0x00d50510 (confidence: high)
+int hkpGenericConstraintData_ReturnConstant_10()
 {
     return 10;
 }
@@ -839,11 +844,12 @@ int FUN_00d50510()
 class CFoo
 {
   public:
-    void* FUN_00d504f0();
+    void* hkpGenericConstraintData_getScheme();
 };
 
 // @fnv 0x00d504f0
-void* CFoo::FUN_00d504f0()
+// src: XBOX_PDB 0x00d504f0
+void* CFoo::hkpGenericConstraintData_getScheme()
 {
     return (void*)((char*)this + 0x18);
 }
@@ -890,15 +896,16 @@ struct FUN_00d50bd0_owner
     hkpBridgeAtoms m_kBridgeAtoms;
     hkpGenericConstraintDataScheme m_kConstraintDataScheme;
 
-    void FUN_00d50640(hkpGenericConstraintDataScheme* scheme, SolverItem* item, int index);
-    void FUN_00d50bd0(SolverItem* item, int index);
+    void hkpGenericConstraintData_hatchScheme(hkpGenericConstraintDataScheme* scheme, SolverItem* item, int index);
+    void hkpGenericConstraintData_buildJacobian(SolverItem* item, int index);
 };
 
 // @fnv 0x00d50bd0
-void FUN_00d50bd0_owner::FUN_00d50bd0(SolverItem* item, int index)
+// src: XBOX_PDB 0x00d50bd0
+void FUN_00d50bd0_owner::hkpGenericConstraintData_buildJacobian(SolverItem* item, int index)
 {
     AppendEventRecord(item, index, item->unk64, 8);
-    FUN_00d50640(&m_kConstraintDataScheme, item, index);
+    hkpGenericConstraintData_hatchScheme(&m_kConstraintDataScheme, item, index);
 }
 
 struct FUN_00d51620_Alloc
@@ -919,7 +926,7 @@ struct FUN_00d51620_Router
     FUN_00d51620_Alloc* m_pThreadAllocator;
 };
 
-FUN_00d51620_Router* FUN_00c85750();
+FUN_00d51620_Router* hkMemoryRouter_getInstance();
 
 struct FUN_00d51620_class
 {
@@ -946,7 +953,7 @@ struct FUN_00d51620_class
 // @fnv 0x00d51620
 void FUN_00d51620_class::FreeArrays()
 {
-    FUN_00d51620_Router* m = FUN_00c85750();
+    FUN_00d51620_Router* m = hkMemoryRouter_getInstance();
     FUN_00d51620_Alloc* alloc = m->m_pThreadAllocator;
     int c = m_3c;
     m_38 = 0;
@@ -954,7 +961,7 @@ void FUN_00d51620_class::FreeArrays()
         alloc->free(m_34, (c & 0x3fffffff) * 4);
     m_34 = 0;
     m_3c = 0x80000000;
-    m = FUN_00c85750();
+    m = hkMemoryRouter_getInstance();
     alloc = m->m_pThreadAllocator;
     c = m_30;
     m_2c = 0;
@@ -962,7 +969,7 @@ void FUN_00d51620_class::FreeArrays()
         alloc->free(m_28, (c & 0x3fffffff) * 4);
     m_28 = 0;
     m_30 = 0x80000000;
-    m = FUN_00c85750();
+    m = hkMemoryRouter_getInstance();
     alloc = m->m_pThreadAllocator;
     c = m_24;
     m_20 = 0;
@@ -970,7 +977,7 @@ void FUN_00d51620_class::FreeArrays()
         alloc->free(m_1c, (c & 0x3fffffff) * 4);
     m_1c = 0;
     m_24 = 0x80000000;
-    m = FUN_00c85750();
+    m = hkMemoryRouter_getInstance();
     alloc = m->m_pThreadAllocator;
     c = m_a18;
     m_a14 = 0;
@@ -995,7 +1002,7 @@ struct FnvCpu_FUN_00d516f0_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00d516f0_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00d516f0_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00d516f0_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00d516f0_CpuObject
 {
     unsigned int unk00;
@@ -1009,7 +1016,7 @@ FnvCpu_FUN_00d516f0_CpuObject* FnvCpu_FUN_00d516f0_CpuObject::FUN_00d516f0(unsig
     FUN_00d50c50();
     if (flags & 1)
     {
-        FnvCpu_FUN_00d516f0_CpuAllocatorHolder* holder = FUN_00c85750();
+        FnvCpu_FUN_00d516f0_CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;
@@ -1032,24 +1039,25 @@ struct FUN_00d503c0_src
 };
 
 extern "C" LocalM128 __cdecl _mm_setzero_ps(void);
-void __cdecl FUN_00dcf280(FUN_00d503c0_m* m, void* obj, void* out);
+void __cdecl hk1dLinearBilateralConstraintBuildJacobian(FUN_00d503c0_m* m, void* obj, void* out);
 
 // Copies two vectors from src, sets a third to each unit axis in turn calling FUN_00dcf280 each time, then adds 3 to src->unkB8.
 // @fnv 0x00d503c0
-void __stdcall FUN_00d503c0(int a, int b, int c, FUN_00d503c0_src* src, void* obj, void* out)
+// src: XBOX_PDB 0x00d503c0
+void __stdcall hkpGenericConstraintData_constrainAllLinearW(int a, int b, int c, FUN_00d503c0_src* src, void* obj, void* out)
 {
     FUN_00d503c0_m m;
     m.r0.m_vComponents = src->r0.m_vComponents;
     m.r1.m_vComponents = src->r1.m_vComponents;
     m.r2.m_vComponents = _mm_setzero_ps();
     m.r2.m_vec.x = 1.0f;
-    FUN_00dcf280(&m, obj, out);
+    hk1dLinearBilateralConstraintBuildJacobian(&m, obj, out);
     m.r2.m_vec.x = 0.0f;
     m.r2.m_vec.y = 1.0f;
-    FUN_00dcf280(&m, obj, out);
+    hk1dLinearBilateralConstraintBuildJacobian(&m, obj, out);
     m.r2.m_vec.y = 0.0f;
     m.r2.m_vec.z = 1.0f;
-    FUN_00dcf280(&m, obj, out);
+    hk1dLinearBilateralConstraintBuildJacobian(&m, obj, out);
     src->unkB8 += 3;
 }
 
@@ -1071,7 +1079,7 @@ struct BridgeAtom
     void* constraintData;
     BridgeAtom() : type(1)
     {}
-    void FUN_00d21ce0(FUN_00d50c90* parent);
+    void hkpBridgeConstraintAtom_init(FUN_00d50c90* parent);
 };
 template <class T> struct ConstraintArray
 {
@@ -1106,7 +1114,7 @@ struct FUN_00d50c90 : ReferenceFields
 FUN_00d50c90::FUN_00d50c90()
 {
     *(volatile int*)&scheme.info.m_iSchemaByteSize += 16;
-    atom.FUN_00d21ce0(this);
+    atom.hkpBridgeConstraintAtom_init(this);
 }
 
 struct S00d50e10_Rows
@@ -1116,11 +1124,12 @@ struct S00d50e10_Rows
     LocalM128 v2;
 };
 
-void __cdecl FUN_00dcee80(S00d50e10_Rows* out, int d, int e);
+void __cdecl hk1dAngularBilateralConstraintBuildJacobian(S00d50e10_Rows* out, int d, int e);
 
 // Builds three S00d50e10_Rows from vectors in p, calls FUN_00dcee80 on each with d and e, and adds 3 to the int at p+0xB8.
 // @fnv 0x00d50e10
-void __stdcall FUN_00d50e10(int a0, int a1, int a2, void* p, int d, int e)
+// src: GUESS 0x00d50e10 (confidence: low)
+void __stdcall hkpGenericConstraintData_UpdateState_00d50e10(int a0, int a1, int a2, void* p, int d, int e)
 {
     float* base = reinterpret_cast<float*>(p);
     S00d50e10_Rows out1;
@@ -1129,17 +1138,17 @@ void __stdcall FUN_00d50e10(int a0, int a1, int a2, void* p, int d, int e)
     out1.v0 = (*reinterpret_cast<const LocalM128*>(base + 0x14));
     out1.v2 = (*reinterpret_cast<const LocalM128*>(base + 0x24));
     out1.v1 = (*reinterpret_cast<const LocalM128*>(base + 0x1C));
-    FUN_00dcee80(&out1, d, e);
+    hk1dAngularBilateralConstraintBuildJacobian(&out1, d, e);
 
     out.v0 = (*reinterpret_cast<const LocalM128*>(base + 0x18));
     out.v2 = (*reinterpret_cast<const LocalM128*>(base + 0x28));
     out.v1 = out1.v0;
-    FUN_00dcee80(&out, d, e);
+    hk1dAngularBilateralConstraintBuildJacobian(&out, d, e);
 
     out.v2 = (*reinterpret_cast<const LocalM128*>(base + 0x20));
     out.v1 = out.v0;
     out.v0 = out1.v1;
-    FUN_00dcee80(&out, d, e);
+    hk1dAngularBilateralConstraintBuildJacobian(&out, d, e);
 
     *reinterpret_cast<int*>(reinterpret_cast<char*>(p) + 0xB8) += 3;
 }
@@ -1205,13 +1214,14 @@ struct SolverStateD510
     int m_numJacobians;
 };
 
-void __cdecl FUN_00dcfec0(const hkVector4q* pkLinA, const hkVector4q* pkAngA, const hkVector4q* pkLinB,
+void __cdecl Object_UpdateFields_00dcfec0(const hkVector4q* pkLinA, const hkVector4q* pkAngA, const hkVector4q* pkLinB,
                           const hkVector4q* pkAngB, hkVector4q* pkJac, float* pfOut);
-void __cdecl FUN_00d6cb30(const SolverInfoD510* pkInfo, void* pvA, void* pvB);
+void __cdecl HkpbuildjacobianfromatomsGsNogs_UpdateState_00d6cb30(const SolverInfoD510* pkInfo, void* pvA, void* pvB);
 
 // Reads two indices from ppSchema, computes a Jacobian via FUN_00dcfec0, stores it with two floats from ppData, and calls FUN_00d6cb30.
 // @fnv 0x00d51060
-void __stdcall FUN_00d51060(const char** ppSchema, const float** ppData, void* pvUnused, SolverStateD510* pkState,
+// src: HAVOK_LIB 0x00d51060
+void __stdcall hkpGenericConstraintData_setTwistLimitW(const char** ppSchema, const float** ppData, void* pvUnused, SolverStateD510* pkState,
                             void* pvA, void* pvB)
 {
     SolverInfoD510 kInfo;
@@ -1221,13 +1231,13 @@ void __stdcall FUN_00d51060(const char** ppSchema, const float** ppData, void* p
     int iIndexB = *(const int*)*ppSchema;
     kInfo.m_vScale = 0.5f;
     const hkVector4q* pkVecs = (const hkVector4q*)pkState;
-    FUN_00dcfec0(&pkVecs[iIndexA + 5], &pkVecs[iIndexA + 8], &pkVecs[iIndexB + 5], &pkVecs[iIndexB + 8],
+    Object_UpdateFields_00dcfec0(&pkVecs[iIndexA + 5], &pkVecs[iIndexA + 8], &pkVecs[iIndexB + 5], &pkVecs[iIndexB + 8],
                  &kInfo.m_jacobian, &kInfo.m_out);
     const float* pVector4 = *ppData;
     kInfo.m_f0 = pVector4[0];
     *ppData = pVector4 + 4;
     kInfo.m_f1 = pVector4[1];
-    FUN_00d6cb30(&kInfo, pvA, pvB);
+    HkpbuildjacobianfromatomsGsNogs_UpdateState_00d6cb30(&kInfo, pvA, pvB);
     pkState->m_numJacobians++;
 }
 
@@ -1282,7 +1292,8 @@ extern "C" void __cdecl DAT_00dcefb0(d51390_item* item, d51390_ctx* ctx, void* a
 
 // Advances the stream, builds an item from a pool record and the cursor value with a destination offset by pool->unkB8, calls DAT_00dcefb0, and increments unkB8.
 // @fnv 0x00d51390
-void __stdcall FUN_00d51390(int** stream, float** cursor, int a3, d51390_pool* pool, d51390_ctx* ctx, void* a6)
+// src: GUESS 0x00d51390 (confidence: low)
+void __stdcall hkpGenericConstraintData_UpdateState_00d51390(int** stream, float** cursor, int a3, d51390_pool* pool, d51390_ctx* ctx, void* a6)
 {
     int destBase = ctx->unk64;
     (*stream) += 1;
@@ -1347,7 +1358,8 @@ float __cdecl Atan2(float y, float x);
 
 // Dots columns of m_rotB with a column of m_rotA, chosen by axis through two lookup tables, and passes the results to Atan2 as sine and cosine.
 // @fnv 0x00d50450
-static __declspec(noinline) float FUN_00d50450(const AngularFrames* frames, int axis)
+// src: XBOX_PDB 0x00d50450
+static __declspec(noinline) float calcDeltaAngleAroundAxis(const AngularFrames* frames, int axis)
 {
     const hkVector4q& dirA = frames->m_rotA.getColumn(DAT_011b5a90[axis]);
     const float sinAngle = frames->m_rotB.getColumn(DAT_011b5a94[axis]).dot3(dirA);
@@ -1357,7 +1369,7 @@ static __declspec(noinline) float FUN_00d50450(const AngularFrames* frames, int 
 
 float calcAngleForAxis(const AngularFrames* frames, int axis)
 {
-    return FUN_00d50450(frames, axis);
+    return calcDeltaAngleAroundAxis(frames, axis);
 }
 
 extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
@@ -1370,11 +1382,12 @@ struct S00d505c0_Blk
     int idx;
 };
 
-void __cdecl FUN_00dcf100(S00d505c0_Blk* in, int* cfg, int index);
+void __cdecl hk1dLinearFrictionBuildJacobian(S00d505c0_Blk* in, int* cfg, int index);
 
 // Builds an S00d505c0_Blk from vectors in c, a float read via b and a destination offset, calls FUN_00dcf100 with basePtr and index, and increments c[0xb8/4].
 // @fnv 0x00d505c0
-void __stdcall FUN_00d505c0(int** a, int* b, void* unused, int* c, int* basePtr, int index)
+// src: XBOX_PDB 0x00d505c0
+void __stdcall hkpGenericConstraintData_setLinearFrictionW(int** a, int* b, void* unused, int* c, int* basePtr, int index)
 {
     int idxBase = basePtr[0x64 / 4];
 
@@ -1392,7 +1405,7 @@ void __stdcall FUN_00d505c0(int** a, int* b, void* unused, int* c, int* basePtr,
 
     blk.idx = idxBase + c[0xb8 / 4] * 8;
 
-    FUN_00dcf100(&blk, basePtr, index);
+    hk1dLinearFrictionBuildJacobian(&blk, basePtr, index);
 
     c[0xb8 / 4]++;
 }
@@ -1423,11 +1436,12 @@ extern unsigned int DAT_011b5a90;
 extern unsigned int DAT_011b5a94;
 extern unsigned int DAT_010c44d0;
 
-void __cdecl FUN_00dcee80(void* pair, int a2, int a3);
+void __cdecl hk1dAngularBilateralConstraintBuildJacobian(void* pair, int a2, int a3);
 
 // Loads three vectors into out, calls FUN_00dcee80, sets a to old b XORed with a constant and b to old a, calls it again, and adds 2 to data->numDecoded.
 // @fnv 0x00d50d60
-void __stdcall FUN_00d50d60(unsigned int** a0, int aiUnused1, int aiUnused2, D50D60_Stream* apStream, int a4, int a5)
+// src: GUESS 0x00d50d60 (confidence: low)
+void __stdcall Object_UpdateFields_00d50d60(unsigned int** a0, int aiUnused1, int aiUnused2, D50D60_Stream* apStream, int a4, int a5)
 {
     D50D60_Out out;
     ++*a0;
@@ -1435,12 +1449,12 @@ void __stdcall FUN_00d50d60(unsigned int** a0, int aiUnused1, int aiUnused2, D50
     _mm_store_ps(&out.b.m_vec.x, apStream->vecs[(&DAT_011b5a90)[idx] + 5].m_vComponents);
     _mm_store_ps(&out.a.m_vec.x, apStream->vecs[(&DAT_011b5a94)[idx] + 5].m_vComponents);
     _mm_store_ps(&out.c.m_vec.x, apStream->vecs[idx + 8].m_vComponents);
-    FUN_00dcee80(&out, a4, a5);
+    hk1dAngularBilateralConstraintBuildJacobian(&out, a4, a5);
     LocalM128 cur = _mm_load_ps(&out.b.m_vec.x);
     LocalM128 t = _mm_xor_ps(_mm_load_ps((const float*)&DAT_010c44d0), cur);
     _mm_store_ps(&out.b.m_vec.x, _mm_load_ps(&out.a.m_vec.x));
     _mm_store_ps(&out.a.m_vec.x, t);
-    FUN_00dcee80(&out, a4, a5);
+    hk1dAngularBilateralConstraintBuildJacobian(&out, a4, a5);
     apStream->numDecoded += 2;
 }
 }  // namespace fnv_00d50d60
@@ -1497,7 +1511,7 @@ static inline float hkToReal(LocalM128 v)
     return s;
 }
 
-extern "C" void FUN_00d6cb30(hkAngInfo* info, int p1, int p2);
+extern "C" void HkpbuildjacobianfromatomsGsNogs_UpdateState_00d6cb30(hkAngInfo* info, int p1, int p2);
 
 static inline LocalM128 hkLenSq3(LocalM128 v)
 {
@@ -1508,7 +1522,8 @@ static inline LocalM128 hkLenSq3(LocalM128 v)
 
 // Builds a normalized cross product and dot of m_colsA[idx] and m_colsB[idx] with two floats from data and calls FUN_00d6cb30, unless the cross is near zero.
 // @fnv 0x00d50ec0
-void __stdcall FUN_00d50ec0(int** cmds, ::hkVector4** data, int unused, hkSchemeVecs* apSchemeVecs, int p5, int p6)
+// src: GUESS 0x00d50ec0 (confidence: low)
+void __stdcall hkVector4_ProcessAndReturnValue_00d50ec0(int** cmds, ::hkVector4** data, int unused, hkSchemeVecs* apSchemeVecs, int p5, int p6)
 {
     float lenSq;
     int idx = *++*cmds;
@@ -1536,7 +1551,7 @@ void __stdcall FUN_00d50ec0(int** cmds, ::hkVector4** data, int unused, hkScheme
     ::hkVector4* v = (*data)++;
     info.m_kPointA = v->x;
     info.m_kPointB = v->y;
-    FUN_00d6cb30(&info, p5, p6);
+    HkpbuildjacobianfromatomsGsNogs_UpdateState_00d6cb30(&info, p5, p6);
     apSchemeVecs->m_uiItemCount++;
 }
 
@@ -1549,10 +1564,11 @@ struct S00d51100_Blk
     float f1;
 };
 
-void __cdecl FUN_00dcfa30(S00d51100_Blk* in, int* cfg, int index);
+void __cdecl hk1dLinearLimitBuildJacobian(S00d51100_Blk* in, int* cfg, int index);
 
 // @fnv 0x00d51100
-void __stdcall FUN_00d51100(int** a, int* b, void* unused, int* c, int* basePtr, int index)
+// src: GUESS 0x00d51100 (confidence: low)
+void __stdcall Object_UpdateFields_00d51100(int** a, int* b, void* unused, int* c, int* basePtr, int index)
 {
     (*a)++;
     int val = **a;
@@ -1566,7 +1582,7 @@ void __stdcall FUN_00d51100(int** a, int* b, void* unused, int* c, int* basePtr,
     blk.f0 = bv[0];
     blk.f1 = bv[1];
 
-    FUN_00dcfa30(&blk, basePtr, index);
+    hk1dLinearLimitBuildJacobian(&blk, basePtr, index);
 
     c[0xb8 / 4]++;
 }
@@ -1586,7 +1602,8 @@ extern "C" void __cdecl _mm_store_ss(float*, LocalM128);
 extern int DAT_011b5a90[];
 extern float Atan2(float, float);
 extern float dotAngle(LocalM128, LocalM128);
-static __declspec(noinline) float FUN_00d50450(AnglePool* pool, int index)
+// src: XBOX_PDB 0x00d50450
+static __declspec(noinline) float calcDeltaAngleAroundAxis(AnglePool* pool, int index)
 {
     LocalM128 first = pool->vectors[DAT_011b5a90[index] + 5];
     LocalM128 basis[3] = {pool->vectors[8], pool->vectors[9], pool->vectors[10]};
@@ -1601,7 +1618,8 @@ struct AngleRecord
 
 // Reads an index from stream, computes an angle via pool and FUN_00d50450, adjusts it to stay within ±π of the previous angle, stores it, and calls FUN_00d6cb30.
 // @fnv 0x00d51170
-void __stdcall FUN_00d51170(int** __restrict stream, AngleRecord** cursor, int unused, AnglePool* pool, void* a,
+// src: GUESS 0x00d51170 (confidence: medium)
+void __stdcall hkpGenericConstraintData_UnwrapAxisAngleAndProcessConstraint(int** __restrict stream, AngleRecord** cursor, int unused, AnglePool* pool, void* a,
                             void* b)
 {
     SolverInfoD510 info;
@@ -1609,7 +1627,7 @@ void __stdcall FUN_00d51170(int** __restrict stream, AngleRecord** cursor, int u
     int index = **stream;
     info.m_vScale = DAT_01016248;
     (LocalM128&)info.m_jacobian = pool->vectors[index + 5];
-    info.m_out = FUN_00d50450(pool, index);
+    info.m_out = calcDeltaAngleAroundAxis(pool, index);
     AngleRecord* pRecord = *cursor;
     info.m_f0 = pRecord->x;
     *cursor = pRecord + 1;
@@ -1627,7 +1645,7 @@ void __stdcall FUN_00d51170(int** __restrict stream, AngleRecord** cursor, int u
             info.m_out = adjusted;
     }
     pRecord->angle = info.m_out;
-    FUN_00d6cb30(&info, a, b);
+    HkpbuildjacobianfromatomsGsNogs_UpdateState_00d6cb30(&info, a, b);
     ++pool->unkB8;
 }
 }  // namespace fnv_00d51170
@@ -1713,12 +1731,13 @@ struct SixIntegerData
 
 void __cdecl ComputeJacobian(const ::hkVector4* axis, const ::hkVector4* posB, SixteenWordFloatRecord* in,
                              void* currentSchema, SolverElementTemp* input);
-void __cdecl FUN_00dcfff0(const hkpConstraintMotor* motor, const SolverElementTemp* input, SixIntegerData* output);
-void __cdecl FUN_00dd03c0(SixIntegerData* output, SixteenWordFloatRecord* in, void* currentSchema, void** schemaPtr);
+void __cdecl _hkCalcMotorData(const hkpConstraintMotor* motor, const SolverElementTemp* input, SixIntegerData* output);
+void __cdecl _hk1dLinearVelocityMotorCommitJacobian(SixIntegerData* output, SixteenWordFloatRecord* in, void* currentSchema, void** schemaPtr);
 
 // Advances the command and data pointers, computes a dot product for a motor constraint, and updates the solver state if a motor is present.
 // @fnv 0x00d51270
-void __stdcall FUN_00d51270(const int** commands, const ::hkVector4** data, hkpGenericConstraintDataScheme* scheme,
+// src: GUESS 0x00d51270 (confidence: medium)
+void __stdcall hkVector4_AdvanceStreamsAndProcessMotor(const int** commands, const ::hkVector4** data, hkpGenericConstraintDataScheme* scheme,
                             GenericConstraintRuntime* runtime, SixteenWordFloatRecord* apStepInfo, void** schema)
 {
     *commands += 1;
@@ -1762,8 +1781,8 @@ void __stdcall FUN_00d51270(const int** commands, const ::hkVector4** data, hkpG
         input.m_deltaPosition = -dot;
         input.m_pStepInfo = apStepInfo;
 
-        FUN_00dcfff0(motor, &input, &output);
-        FUN_00dd03c0(&output, apStepInfo, currentSchema, schema);
+        _hkCalcMotorData(motor, &input, &output);
+        _hk1dLinearVelocityMotorCommitJacobian(&output, apStepInfo, currentSchema, schema);
     }
 
     runtime->m_solverResultIndex += 1;
@@ -1868,9 +1887,9 @@ extern int DAT_011b5a90[];
 extern double DAT_0101ff58;
 
 extern "C" void _ReadWriteBarrier(void);
-extern "C" void __cdecl FUN_00d6cd70(Vec* axis, QueryIn* in, void* schema, MotorStuff* packet);
-void __cdecl FUN_00dcfff0(Motor* motor, MotorStuff* input, float* output);
-extern "C" void __cdecl FUN_00d6ce70(float* negAndOut, QueryIn* in, void* schema, void** out);
+extern "C" void __cdecl Hkpbuildjacobianfromatoms_ComputeJacobianInverseEffectiveMass(Vec* axis, QueryIn* in, void* schema, MotorStuff* packet);
+void __cdecl _hkCalcMotorData(Motor* motor, MotorStuff* input, float* output);
+extern "C" void __cdecl Hkpbuildjacobianfromatoms_UpdateState_00d6ce70(float* negAndOut, QueryIn* in, void* schema, void** out);
 
 static __forceinline LocalM128 dot3(LocalM128 p, LocalM128 q)
 {
@@ -1899,7 +1918,8 @@ struct StepScratch
 };
 // Computes and unwraps an angle from runtime vectors, stores it back, and if a motor exists calls FUN_00dcfff0 and FUN_00d6ce70; then increments m_iFirstInteger.
 // @fnv 0x00d51410
-void __stdcall FUN_00d51410(int** cmdPtr, Vec** dataPtr, Scheme* scheme, Runtime* runtime, QueryIn* apQuery, void** out)
+// src: GUESS 0x00d51410 (confidence: medium)
+void __stdcall hkpGenericConstraintData_UnwrapAngleAndProcessMotor(int** cmdPtr, Vec** dataPtr, Scheme* scheme, Runtime* runtime, QueryIn* apQuery, void** out)
 {
     StepScratch v;
     ++*cmdPtr;
@@ -1943,7 +1963,7 @@ void __stdcall FUN_00d51410(int** cmdPtr, Vec** dataPtr, Scheme* scheme, Runtime
         MotorStuff packet;
         packet.last0f = 0.0f;
         packet.last1f = 0.0f;
-        FUN_00d6cd70(axisVec, apQuery, schema, &packet);
+        Hkpbuildjacobianfromatoms_ComputeJacobianInverseEffectiveMass(axisVec, apQuery, schema, &packet);
         packet.query = apQuery;
         int index = runtime->m_iFirstInteger;
         Pair* pSolverResults = *static_cast<Pair* volatile*>(&v.sr);
@@ -1951,8 +1971,8 @@ void __stdcall FUN_00d51410(int** cmdPtr, Vec** dataPtr, Scheme* scheme, Runtime
         packet.zero = 0.0f;
         v.sum = (float)(v.z * 6.2831854820251465 + v.ang);
         packet.negTarget = -v.sum;
-        FUN_00dcfff0(v.motor, &packet, &packet.out0);
-        FUN_00d6ce70(&packet.out0, apQuery, schema, out);
+        _hkCalcMotorData(v.motor, &packet, &packet.out0);
+        Hkpbuildjacobianfromatoms_UpdateState_00d6ce70(&packet.out0, apQuery, schema, out);
     }
     runtime->m_iFirstInteger++;
 }
@@ -1969,7 +1989,7 @@ struct FUN_00cdf250_class
         c1 = m.c1;
         c2 = m.c2;
     }
-    void FUN_00cd55b0(int*, int);
+    void hkMatrix3_setMul(int*, int);
 };
 struct __declspec(align(16)) InputD506
 {
@@ -2006,23 +2026,23 @@ struct ConstraintCommandCallback
 {
     ConstraintCommandCallbackVTable* vtable;
 };
-extern "C" void FUN_00c7f640();
+extern "C" void setTransformedPos_00c7f640();
 typedef void(__thiscall* PivotD506)(hkVector4q*, const void*, const hkVector4q*);
 struct InterpreterD506
 {
-    void FUN_00d50640(hkpGenericConstraintDataScheme*, const InputD506*, void*);
-    void FUN_00d50d00(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d503c0(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d50d60(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d50e10(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51100(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51170(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d50ec0(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51060(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51410(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51270(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51390(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d505c0(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkpGenericConstraintData_hatchScheme(hkpGenericConstraintDataScheme*, const InputD506*, void*);
+    void hkpGenericConstraintData_constrainLinearW(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkpGenericConstraintData_constrainAllLinearW(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void Object_UpdateFields_00d50d60(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkpGenericConstraintData_UpdateState_00d50e10(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void Object_UpdateFields_00d51100(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkpGenericConstraintData_UnwrapAxisAngleAndProcessConstraint(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkVector4_ProcessAndReturnValue_00d50ec0(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkpGenericConstraintData_setTwistLimitW(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkpGenericConstraintData_UnwrapAngleAndProcessMotor(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkVector4_AdvanceStreamsAndProcessMotor(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkpGenericConstraintData_UpdateState_00d51390(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void hkpGenericConstraintData_setLinearFrictionW(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
 };
 typedef void(__thiscall* HandlerD506)(InterpreterD506*, int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*,
                                       InputD506*, void*);
@@ -2042,7 +2062,8 @@ static __forceinline void rotateD506(hkVector4q& out, const FUN_00cdf250_class* 
 
 // Executes a byte-code program from a constraint scheme, dispatching on command codes to update state and call handler functions.
 // @fnv 0x00d50640
-void InterpreterD506::FUN_00d50640(hkpGenericConstraintDataScheme* scheme, const InputD506* input, void* output)
+// src: XBOX_PDB 0x00d50640
+void InterpreterD506::hkpGenericConstraintData_hatchScheme(hkpGenericConstraintDataScheme* scheme, const InputD506* input, void* output)
 {
     InputD506 localInput = *input;
     StateD506 state;
@@ -2099,21 +2120,21 @@ void InterpreterD506::FUN_00d50640(hkpGenericConstraintDataScheme* scheme, const
             break;
         }
         case 6:
-            FUN_00d50d00(&command, &data, scheme, &state, &localInput, output);
+            hkpGenericConstraintData_constrainLinearW(&command, &data, scheme, &state, &localInput, output);
             break;
         case 7:
-            FUN_00d503c0(&command, &data, scheme, &state, &localInput, output);
+            hkpGenericConstraintData_constrainAllLinearW(&command, &data, scheme, &state, &localInput, output);
             break;
         case 8: {
             FUN_00cdf250_class* m = (FUN_00cdf250_class*)data;
             data += 3;
-            state.basisA.FUN_00cd55b0((int*)state.transformA, (int)m);
+            state.basisA.hkMatrix3_setMul((int*)state.transformA, (int)m);
             break;
         }
         case 9: {
             FUN_00cdf250_class* m = (FUN_00cdf250_class*)data;
             data += 3;
-            state.basisB.FUN_00cd55b0((int*)state.transformB, (int)m);
+            state.basisB.hkMatrix3_setMul((int*)state.transformB, (int)m);
             break;
         }
         case 10:
@@ -2123,41 +2144,41 @@ void InterpreterD506::FUN_00d50640(hkpGenericConstraintDataScheme* scheme, const
             state.basisB = *state.transformB;
             break;
         case 12:
-            FUN_00d50d60(&command, &data, scheme, &state, &localInput, output);
+            Object_UpdateFields_00d50d60(&command, &data, scheme, &state, &localInput, output);
             break;
         case 13:
-            FUN_00d50e10(&command, &data, scheme, &state, &localInput, output);
+            hkpGenericConstraintData_UpdateState_00d50e10(&command, &data, scheme, &state, &localInput, output);
             break;
         case 16:
-            FUN_00d51100(&command, &data, scheme, &state, &localInput, output);
+            Object_UpdateFields_00d51100(&command, &data, scheme, &state, &localInput, output);
             break;
         case 17:
-            FUN_00d51170(&command, &data, scheme, &state, &localInput, output);
+            hkpGenericConstraintData_UnwrapAxisAngleAndProcessConstraint(&command, &data, scheme, &state, &localInput, output);
             break;
         case 18:
-            FUN_00d50ec0(&command, &data, scheme, &state, &localInput, output);
+            hkVector4_ProcessAndReturnValue_00d50ec0(&command, &data, scheme, &state, &localInput, output);
             break;
         case 19:
-            FUN_00d51060(&command, &data, scheme, &state, &localInput, output);
+            hkpGenericConstraintData_setTwistLimitW(&command, &data, scheme, &state, &localInput, output);
             break;
         case 14:
-            FUN_00d51410(&command, &data, scheme, &state, &localInput, output);
+            hkpGenericConstraintData_UnwrapAngleAndProcessMotor(&command, &data, scheme, &state, &localInput, output);
             break;
         case 15:
-            FUN_00d51270(&command, &data, scheme, &state, &localInput, output);
+            hkVector4_AdvanceStreamsAndProcessMotor(&command, &data, scheme, &state, &localInput, output);
             break;
         case 20:
-            FUN_00d51390(&command, &data, scheme, &state, &localInput, output);
+            hkpGenericConstraintData_UpdateState_00d51390(&command, &data, scheme, &state, &localInput, output);
             break;
         case 21:
-            FUN_00d505c0(&command, &data, scheme, &state, &localInput, output);
+            hkpGenericConstraintData_setLinearFrictionW(&command, &data, scheme, &state, &localInput, output);
             break;
         case 1:
-            state.pivotA.FUN_00c7f640(*(const hkTransform*)state.transformA, *data);
+            state.pivotA.setTransformedPos_00c7f640(*(const hkTransform*)state.transformA, *data);
             ++data;
             break;
         case 2:
-            state.pivotB.FUN_00c7f640(*(const hkTransform*)state.transformB, *data);
+            state.pivotB.setTransformedPos_00c7f640(*(const hkTransform*)state.transformB, *data);
             ++data;
             break;
         case 22: {
@@ -2182,7 +2203,8 @@ void InterpreterD506::FUN_00d50640(hkpGenericConstraintDataScheme* scheme, const
 }
 
 // @fnv 0x00d50d00
-void __stdcall FUN_00d50d00(int** commands, int unusedData, int unusedScheme, Runtime* runtime, void* input,
+// src: XBOX_PDB 0x00d50d00
+void __stdcall hkpGenericConstraintData_constrainLinearW(int** commands, int unusedData, int unusedScheme, Runtime* runtime, void* input,
                             void* output)
 {
     ++*commands;
@@ -2190,6 +2212,6 @@ void __stdcall FUN_00d50d00(int** commands, int unusedData, int unusedScheme, Ru
     packet.r2.m_vComponents = runtime->v[**commands + 2].m;
     packet.r0.m_vComponents = runtime->v[0].m;
     packet.r1.m_vComponents = runtime->v[1].m;
-    FUN_00dcf280(&packet, input, output);
+    hk1dLinearBilateralConstraintBuildJacobian(&packet, input, output);
     ++runtime->m_iFirstInteger;
 }

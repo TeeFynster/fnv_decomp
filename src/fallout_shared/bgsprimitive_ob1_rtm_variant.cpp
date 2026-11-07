@@ -38,11 +38,12 @@ struct S00c365f0_Box
     NiPoint3 center;
     NiPoint3 extents;
     S00c365f0_Mat rotation;
-    int FUN_00c365f0(const NiBound& sphere);
+    int BSMultiBoundOBB_CheckBound(const NiBound& sphere);
 };
 
 // @fnv 0x00c365f0
-int S00c365f0_Box::FUN_00c365f0(const NiBound& sphere)
+// src: XBOX_PDB 0x00c365f0
+int S00c365f0_Box::BSMultiBoundOBB_CheckBound(const NiBound& sphere)
 {
     NiPoint3 c2 = sphere.m_kCenter;
     float r = sphere.m_fBoundRadius;

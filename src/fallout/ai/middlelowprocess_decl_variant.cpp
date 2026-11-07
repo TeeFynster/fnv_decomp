@@ -11,7 +11,8 @@
 using ::SettingT;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting236;
 // @fnv 0x0092cab0
-void LowProcess::FUN_0092cab0(Actor* source)
+// src: XBOX_PDB 0x0092cab0
+void LowProcess::MiddleLowProcess_ProcessCombat(Actor* source)
 {
     int iterations = (int)(*originalRuntimeFloatSetting236.Float() * 2);
     Actor* actor = 0;
@@ -20,7 +21,7 @@ void LowProcess::FUN_0092cab0(Actor* source)
     if (!pTarget || actor->GetDisabled() || actor->GetDeleted() || actor->HasHealth(false))
     {
         source->Unk_10D(0);
-        source->FUN_00881680(false);
+        source->Actor_EndInterruptPackage(false);
     }
     else if (actor && actor->GetProcess() && actor->GetProcess()->GetProcessLevel() == 2)
     {

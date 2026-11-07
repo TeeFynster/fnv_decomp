@@ -4,7 +4,7 @@
 #include "../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../include/hkMemoryRouter.h"
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00e02230
 {
@@ -14,7 +14,7 @@ struct FUN_00e02230
     virtual ~FUN_00e02230();
     static void operator delete(void* apMemory)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         unsigned int uiSize = ((FUN_00e02230*)apMemory)->m_u04;
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, unsigned int);

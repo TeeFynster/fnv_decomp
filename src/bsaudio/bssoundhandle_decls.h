@@ -10,7 +10,7 @@ class SystemColorManager
     class SystemColor
     {
       public:
-        void FUN_007193b0(NiColor&);
+        void SystemColorManager_SystemColor_GetColor(NiColor&);
     };
 
     SystemColor* Find(int);

@@ -71,7 +71,7 @@ struct FUN_00d5a630_ctxB
     void InitB();
 };
 extern float DAT_0106ea1c;
-void __cdecl FUN_00d5a630(void* a1, int a2, int a3);
+void __cdecl hkGeometryUtility_createConvexGeometry(void* a1, int a2, int a3);
 struct S_00d5a6b0_Array
 {
     Vec4* m_data;
@@ -99,7 +99,7 @@ struct D5C110MemoryRouter
         return *m_pStreamAllocator;
     }
 };
-extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D5C110MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 // hkArray<hkVector4> without a destructor (Havok was built without EH): explicit cleanup.
 struct D5C110VertexArray
 {
@@ -112,7 +112,7 @@ struct D5C110VertexArray
 
     void ClearAndRelease()
     {
-        D5C110Allocator& alloc = FUN_00c85750().heap();
+        D5C110Allocator& alloc = hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(Vec4));
@@ -137,19 +137,19 @@ void __cdecl InitAndSetB(const D5C110StridedVertices& vertices, D5C110Geometry& 
 void __cdecl BuildGeometryFromShape(const void* shape, D5C110Geometry& aGeometry);
 struct D5C110VertexArray;
 void __cdecl ProcessArg(const void* shape, D5C110VertexArray& vertices);
-void __cdecl FUN_00d5a6a0(const void* shape, D5C110VertexArray& vertices);
+void __cdecl hkGeometryUtility_createVerticesFromPlaneEquations(const void* shape, D5C110VertexArray& vertices);
 #include <math.h>
 struct S00d5ad60_cls
 {
     float m_f00;
     unsigned char S00d5ad60_call(float* other, float threshold);
 };
-static unsigned char FUN_00d5ad60(S00d5ad60_cls* self, float* other, float threshold);
+static unsigned char approxEquals(S00d5ad60_cls* self, float* other, float threshold);
 #ifndef _INCLUDED_MM2
 extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 #endif
 extern float DAT_01011d78;
-static int FUN_00d5ad90(const float* pVec, float fTol);
+static int Hkgeometryutility_IsMaximumAbsoluteComponentNearOne(const float* pVec, float fTol);
 int __cdecl S00d5ad90_Wrap(const float* pVec, float fTol);
 struct S00d5c060_Src
 {
@@ -158,9 +158,9 @@ struct S00d5c060_Src
     int m_iElementIndex;
 };
 char* __cdecl AllocateWithHeader(D5C110Allocator* alloc, int size);
-char* __cdecl FUN_00c856c0(D5C110Allocator* owner, char* data);
-void __cdecl FUN_00d5beb0(Vec4* self, char* data, int count, int flags, float scale);
-Vec4 FUN_00d5c060(const S00d5c060_Src* src, float scale);
+char* __cdecl hkMemoryRouter_easyFree(D5C110Allocator* owner, char* data);
+void __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(Vec4* self, char* data, int count, int flags, float scale);
+Vec4 hkGeometryUtility_createMinBoundingSphere(const S00d5c060_Src* src, float scale);
 extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
 extern "C" float _mm_cvtss_f32(LocalM128);
 extern "C" void _mm_store_ss(float*, LocalM128);
@@ -170,7 +170,8 @@ extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
 extern "C" LocalM128 _mm_sqrt_ss(LocalM128);
 extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
 extern const float DAT_01012054;
-static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t)
+// src: GUESS 0x00d5bb10 (confidence: low)
+static __declspec(noinline) Vec4* Hkgeometryutilityfull_UpdateState_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -178,7 +179,8 @@ static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, fl
     res->w = a.y;
     return res;
 }
-static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
+// src: GUESS 0x00d5bb80 (confidence: low)
+static __declspec(noinline) Vec4* Object_ProcessAndReturnValue_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -186,7 +188,8 @@ static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Ve
     res->w = a.y;
     return res;
 }
-static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
+// src: GUESS 0x00d5bce0 (confidence: low)
+static __declspec(noinline) Vec4* Object_ComputeValue_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -194,7 +197,7 @@ static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Ve
     res->w = a.y;
     return res;
 }
-LocalM128* __cdecl FUN_00d5beb0(LocalM128* out, Vec4* pts, int count, int depth, float t);
+LocalM128* __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(LocalM128* out, Vec4* pts, int count, int depth, float t);
 
 namespace MeanCovIntrinsics {
 extern "C"
@@ -241,7 +244,7 @@ struct MeanCovObbStride
 {
     int v;
 };
-void __cdecl FUN_00c908c0(void*, void*, int, int);
+void __cdecl hkArrayUtil__reserve(void*, void*, int, int);
 struct MeanCovTrivialElements
 {
 };
@@ -256,7 +259,7 @@ struct MeanCovArrayHeap
 {
     __forceinline D5C110Allocator& get(const void*)
     {
-        return FUN_00c85750().heap();
+        return hkMemoryRouter_getInstance().heap();
     }
 };
 template <class T> class MeanCovArrayBase
@@ -280,7 +283,7 @@ template <class T> class MeanCovArrayBase
         {
             int doubled = oldCapacity * 2;
             int chosen = count < doubled ? doubled : count;
-            FUN_00c908c0(&heap, this, chosen, sizeof(T));
+            hkArrayUtil__reserve(&heap, this, chosen, sizeof(T));
         }
     }
     __forceinline T* expand(D5C110Allocator& heap, int count)
@@ -329,7 +332,7 @@ struct MeanCovObbRandom
     int seed0, seed1;
     void NextFloat4(Vec4& out);
 };
-void __cdecl FUN_00c908c0(void*, void*, int, int);
+void __cdecl hkArrayUtil__reserve(void*, void*, int, int);
 static __forceinline LocalM128 MeanCovsplat(float x)
 {
     LocalM128 r = MeanCovIntrinsics::_mm_load_ss(&x);
@@ -351,7 +354,8 @@ static __forceinline float MeanCovarea(LocalM128 e0, LocalM128 e1)
     return len * 0.5;
 }
 // @fnv 0x00d5c1a0
-extern "C" __declspec(noinline) void __cdecl FUN_00d5c1a0(const void* vertices, int count, MeanCovObbStride stride,
+// src: XBOX_PDB 0x00d5c1a0
+extern "C" __declspec(noinline) void __cdecl getMeanAndCovariance(const void* vertices, int count, MeanCovObbStride stride,
                                                           MeanCovObbRot* covariance, Vec4* center,
                                                           MeanCovObbFlag perturb)
 {

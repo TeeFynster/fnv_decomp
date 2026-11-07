@@ -11,7 +11,7 @@
 #include <string.h>
 
 extern "C" void* g_012026b0;
-void* __cdecl FUN_00c285c0();
+void* __cdecl NiPSysRadialFieldModifier_GetRTTI();
 
 inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
@@ -83,7 +83,7 @@ struct ParticleSystem
     Particle* particles;
 };
 
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMAX_00404010(float, float);
 extern "C" double __cdecl pow(double, double);
 inline float NiPow(float fBase, float fExponent)
 {
@@ -104,11 +104,12 @@ class RadialField
     float radiusSquared;
     float attenuation;
     void Update(float time, ParticleSystem* system);
-    void FUN_00c287a0(float time, ParticleSystem* system);
+    void NiPSysRadialFieldModifier_Update(float time, ParticleSystem* system);
 };
 
 // @fnv 0x00c287a0
-void RadialField::FUN_00c287a0(float time, ParticleSystem* system)
+// src: XBOX_PDB 0x00c287a0
+void RadialField::NiPSysRadialFieldModifier_Update(float time, ParticleSystem* system)
 {
     if (strength == 0.0f || system->count == 0 || source == 0)
         return;
@@ -148,7 +149,7 @@ void RadialField::FUN_00c287a0(float time, ParticleSystem* system)
             if (exponent != 0.0f && distanceSquared != 0.0f)
             {
                 change = ScalePoint((deltaTime * strength) /
-                                        FUN_00404010(1.0f, NiPow(distanceSquared, halfExponent) * attenuation),
+                                        BSMAX_00404010(1.0f, NiPow(distanceSquared, halfExponent) * attenuation),
                                     difference.x, difference);
             }
             else

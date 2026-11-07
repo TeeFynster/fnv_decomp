@@ -11,11 +11,12 @@ struct DialogueTargetComparison
 // comparison method that is not yet declared by the shared header.
 struct DialoguePackageComparison : TESDialoguePackageData
 {
-    bool FUN_0067b470(void*);
+    bool TESDialoguePackageData_Compare(void*);
 };
 
 // @fnv 0x0067b470
-bool DialoguePackageComparison::FUN_0067b470(void* object)
+// src: XBOX_PDB 0x0067b470
+bool DialoguePackageComparison::TESDialoguePackageData_Compare(void* object)
 {
     DialoguePackageComparison* other = reinterpret_cast<DialoguePackageComparison*>(
         dynamic_cast< ::TESDialoguePackageData*>(static_cast< ::TESPackageData*>(object)));

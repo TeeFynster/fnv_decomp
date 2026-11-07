@@ -50,7 +50,8 @@ char __fastcall EnsureD3DShaderInitialized(NiD3DShader* shader, void*, int arg)
 extern char const* const g_01270918_arg1;
 
 // @fnv 0x00e8d360
-char const* const* __cdecl FUN_00e8d360()
+// src: COMMUNITY 0x00e8d360
+char const* const* __cdecl NiShader_NiShaderInstanceDescriptor_GetRTTI()
 {
     return &g_01270918_arg1;
 }
@@ -78,7 +79,8 @@ void* __thiscall NiShaderInstanceDescriptor::FUN_00e8d370(unsigned int mode)
 extern "C" void* g_01270918;
 
 // @fnv 0x00e8d530
-void* __cdecl FUN_00e8d530()
+// src: COMMUNITY 0x00e8d530
+void* __cdecl NiFragmentShaderInstanceDescriptor_GetRTTI()
 {
     return &g_01270918;
 }
@@ -89,7 +91,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_0126f9d8;
 
 // @fnv 0x00e8d580
-GlobalObjectO2_00a7b610* __cdecl FUN_00e8d580()
+// src: COMMUNITY 0x00e8d580
+GlobalObjectO2_00a7b610* __cdecl NiDX9FragmentShader_GetRTTI()
 {
     return &g_0126f9d8;
 }
@@ -117,7 +120,8 @@ void NiTPointerListBase<NiTPointerAllocator<unsigned int>, void*>::AddHead(void*
 
 void __cdecl FUN_00e81470();
 // @fnv 0x00e8d340
-void __cdecl FUN_00e8d340()
+// src: COMMUNITY 0x00e8d340
+void __cdecl NiDX9FragmentShader_DestroyRendererData()
 {
     return FUN_00e81470();
 }
@@ -130,11 +134,12 @@ struct NiD3DVertexDeclaration
 
 struct NiConsoleShaderDeclaration_shellEx
 {
-    NiD3DVertexDeclaration* __thiscall FUN_00e8d410(unsigned int a, unsigned int b);
+    NiD3DVertexDeclaration* __thiscall NiDX9FragmentShader_CreateShaderDeclaration(unsigned int a, unsigned int b);
 };
 
 // @fnv 0x00e8d410
-NiD3DVertexDeclaration* __thiscall NiConsoleShaderDeclaration_shellEx::FUN_00e8d410(unsigned int a, unsigned int b)
+// src: COMMUNITY 0x00e8d410
+NiD3DVertexDeclaration* __thiscall NiConsoleShaderDeclaration_shellEx::NiDX9FragmentShader_CreateShaderDeclaration(unsigned int a, unsigned int b)
 {
     NiD3DVertexDeclaration* p = NiD3DVertexDeclaration::Create(NiRenderer::ms_pRenderer, a, b);
     void** vtable = *(void***)this;
@@ -166,7 +171,7 @@ void* __thiscall NiFragmentShaderInstanceDescriptor::FUN_00e8d540(unsigned int f
 }
 
 extern BSShaderBloodSplatter* DAT_0126f74c;
-int __fastcall FUN_00b79950(char*, int, NiRefObject*);
+int __fastcall NiD3DPass_SetVertexShader(char*, int, NiRefObject*);
 struct FUN_00e8d5f0_Param
 {
     char _0[8];
@@ -184,10 +189,10 @@ bool __stdcall ProcessShaderParam(unsigned int a1, FUN_00e8d5f0_Param* pParam, v
     switch (pParam->m8)
     {
     case 0:
-        FUN_00b79950((char*)p, (int)pParam, (NiRefObject*)pParam);
+        NiD3DPass_SetVertexShader((char*)p, (int)pParam, (NiRefObject*)pParam);
         break;
     case 2:
-        p->FUN_00b80600((NiRefObject*)pParam);
+        p->NiD3DPass_SetPixelShader((NiRefObject*)pParam);
         return true;
     }
     return true;
@@ -217,8 +222,8 @@ struct IShaderVt
 
 struct Obj18
 {
-    void FUN_00e6fe30(unsigned int a, unsigned int b, unsigned int c, unsigned int d, unsigned int e);
-    void FUN_00e6fbb0(unsigned int a, unsigned int b);
+    void NiDX9Renderer_CalculateBoneMatrices(unsigned int a, unsigned int b, unsigned int c, unsigned int d, unsigned int e);
+    void NiDX9Renderer_SetModelTransform(unsigned int a, unsigned int b);
 };
 
 struct FragHost
@@ -231,22 +236,23 @@ struct FragHost
 
     int FUN_00e807d0(unsigned int a, unsigned int b, unsigned int c, unsigned int d, unsigned int e, unsigned int f,
                      unsigned int g, unsigned int h);
-    int FUN_00e8d260(unsigned int p1, unsigned int p2, Rec24* p3, unsigned int p4, unsigned int p5, unsigned int p6,
+    int NiDX9FragmentShader_SetupTransformations(unsigned int p1, unsigned int p2, Rec24* p3, unsigned int p4, unsigned int p5, unsigned int p6,
                      unsigned int p7, unsigned int p8);
 };
 
 // @fnv 0x00e8d260
-int FragHost::FUN_00e8d260(unsigned int p1, unsigned int p2, Rec24* pRec, unsigned int p4, unsigned int p5,
+// src: COMMUNITY 0x00e8d260
+int FragHost::NiDX9FragmentShader_SetupTransformations(unsigned int p1, unsigned int p2, Rec24* pRec, unsigned int p4, unsigned int p5,
                            unsigned int p6, unsigned int p7, unsigned int p8)
 {
     if (pRec != 0)
     {
         if (m38 == 0)
         {
-            m18->FUN_00e6fe30(p2, p7, 1, 3, 1);
+            m18->NiDX9Renderer_CalculateBoneMatrices(p2, p7, 1, 3, 1);
         }
         m1c->v11(pRec->m24);
-        m18->FUN_00e6fbb0(p7, 0);
+        m18->NiDX9Renderer_SetModelTransform(p7, 0);
         return 0;
     }
     return FUN_00e807d0(p1, p2, 0, p4, p5, p6, p7, p8);
@@ -306,7 +312,8 @@ struct S_00e8d590_Obj
 };
 void __cdecl FUN_00e804d0(S_00e8d590_Obj** out);
 // @fnv 0x00e8d590
-bool __stdcall FUN_00e8d590(int* out)
+// src: COMMUNITY 0x00e8d590
+bool __stdcall NiDX9FragmentShader_AppendRenderPass(int* out)
 {
     S_00e8d590_Obj* obj = 0;
     if (DAT_0126f74c == 0)
@@ -390,17 +397,19 @@ FUN_00e8db90::FUN_00e8db90(unsigned int a)
     m_3c.m_inner.FUN_00ee8a10(a);
 }
 
-unsigned int __stdcall FUN_00e805b0(void* a, void* b, void* c, void* d, void* e, void* f, void* g);
+unsigned int __stdcall NiD3DShader_SetupRenderingPass(void* a, void* b, void* c, void* d, void* e, void* f, void* g);
 
 // @fnv 0x00e8d250
-unsigned int __stdcall FUN_00e8d250(void* a, void* b, void* c, void* d, void* e, void* f, void* g)
+// src: COMMUNITY 0x00e8d250
+unsigned int __stdcall NiDX9FragmentShader_SetupRenderingPass(void* a, void* b, void* c, void* d, void* e, void* f, void* g)
 {
-    return FUN_00e805b0(a, b, c, d, e, f, g);
+    return NiD3DShader_SetupRenderingPass(a, b, c, d, e, f, g);
 }
 
 void __cdecl FUN_00e811d0();
 // @fnv 0x00e8d2e0
-void __cdecl FUN_00e8d2e0()
+// src: COMMUNITY 0x00e8d2e0
+void __cdecl NiDX9FragmentShader_SetupShaderPrograms()
 {
     FUN_00e811d0();
 }
@@ -408,29 +417,33 @@ void __cdecl FUN_00e8d2e0()
 extern int __cdecl PrepareShaderAndStreams();
 
 // @fnv 0x00e8d2f0
-int __cdecl FUN_00e8d2f0()
+// src: COMMUNITY 0x00e8d2f0
+int __cdecl NiDX9FragmentShader_PrepareGeometryForRendering()
 {
     return PrepareShaderAndStreams();
 }
 
-extern "C" void __cdecl FUN_00a8f3f0();
+extern "C" void __cdecl ThisCall_Ret0_8Args();
 // @fnv 0x00e8d300
-void __cdecl FUN_00e8d300()
+// src: COMMUNITY 0x00e8d300
+void __cdecl j_retn0_1()
 {
-    FUN_00a8f3f0();
+    ThisCall_Ret0_8Args();
 }
 
 __declspec(noreturn) void __cdecl FUN_00e805f0();
 
 // @fnv 0x00e8d310
-void __cdecl FUN_00e8d310()
+// src: XBOX_PDB 0x00e8d310
+void __cdecl NiDX9FragmentShader_PostProcessPipeline()
 {
     FUN_00e805f0();
 }
 
 void __cdecl FUN_00e80580();
 // @fnv 0x00e8d320
-void __cdecl FUN_00e8d320()
+// src: COMMUNITY 0x00e8d320
+void __cdecl NiDX9FragmentShader_FirstPass()
 {
     FUN_00e80580();
 }
@@ -438,7 +451,8 @@ void __cdecl FUN_00e8d320()
 void __cdecl FUN_00e80590();
 
 // @fnv 0x00e8d330
-void __cdecl FUN_00e8d330()
+// src: COMMUNITY 0x00e8d330
+void __cdecl NiDX9FragmentShader_NextPass()
 {
     FUN_00e80590();
 }
@@ -495,10 +509,11 @@ struct ShaderStandIn
 };
 struct FUN_00bd16e0_shell : ShaderStandIn
 {
-    unsigned int __thiscall FUN_00bd16e0(void* a, void* b, void* c, void* d, void* e, void* f, void* g);
+    unsigned int __thiscall NiDX9FragmentShader_PreProcessPipeline(void* a, void* b, void* c, void* d, void* e, void* f, void* g);
 };
 // @fnv 0x00bd16e0
-unsigned int __thiscall FUN_00bd16e0_shell::FUN_00bd16e0(void* a, void* b, void* c, void* d, void* e, void* f, void* g)
+// src: XBOX_PDB 0x00bd16e0
+unsigned int __thiscall FUN_00bd16e0_shell::NiDX9FragmentShader_PreProcessPipeline(void* a, void* b, void* c, void* d, void* e, void* f, void* g)
 {
     return FUN_00e81170(a, b, c, d, e, f, g);
 }
@@ -540,8 +555,8 @@ struct BloodSplatterView
     int unk28;
     int unk2c;
     BloodMap* unk30;
-    BloodArrView* FUN_00e7f7c0(void);
-    void FUN_00b71a10(unsigned int a, int b, int c);
+    BloodArrView* NiD3DPass_GetD3DRenderState(void);
+    void NiD3DPass_SetRenderState(unsigned int a, int b, int c);
 };
 
 BloodMap* __stdcall FUN_00e7f5d0(void);
@@ -564,11 +579,11 @@ bool __stdcall SetBloodSplatter(unsigned int auiShaderType, bool abEnabled, bool
             pkSplat->unk30 = FUN_00e7f5d0();
         pkSplat->unk30->SetNodeValue(0x1b, 1, 1);
 
-        BloodArrView* pkArr = pkSplat->FUN_00e7f7c0();
+        BloodArrView* pkArr = pkSplat->NiD3DPass_GetD3DRenderState();
 
         if (!bParam3)
         {
-            pkSplat->FUN_00b71a10(0x13, pkArr->m20[aiIndex], 0);
+            pkSplat->NiD3DPass_SetRenderState(0x13, pkArr->m20[aiIndex], 0);
         }
         else
         {
@@ -579,7 +594,7 @@ bool __stdcall SetBloodSplatter(unsigned int auiShaderType, bool abEnabled, bool
 
         if (!bParam5)
         {
-            pkSplat->FUN_00b71a10(0x14, pkArr->m20[aiSecondIndex], 0);
+            pkSplat->NiD3DPass_SetRenderState(0x14, pkArr->m20[aiSecondIndex], 0);
         }
         else
         {
@@ -823,18 +838,19 @@ struct ShaderGeometry
 
 struct ShaderBaseView
 {
-    void FUN_00a8f3e0(void*, void*, void*, ShaderGeometry*, void*, void*, void*);
+    void NiD3DShader_UpdatePipeline(void*, void*, void*, ShaderGeometry*, void*, void*, void*);
 };
 
 struct ShaderView : ShaderBaseView
 {
     void BindShaderInput(void*, void*, void*);
-    void FUN_00e8dc30(void*, void*, void*, ShaderGeometry*, void*, void*, void*);
+    void NiDX9FragmentShader_UpdatePipeline(void*, void*, void*, ShaderGeometry*, void*, void*, void*);
 };
 
 // Iterates the global list, calls BindShaderInput for nonnull entries, then invokes the base class routine.
 // @fnv 0x00e8dc30
-void ShaderView::FUN_00e8dc30(void* a, void* b, void* c, ShaderGeometry* geometry, void* e, void* f, void* g)
+// src: COMMUNITY 0x00e8dc30
+void ShaderView::NiDX9FragmentShader_UpdatePipeline(void* a, void* b, void* c, ShaderGeometry* geometry, void* e, void* f, void* g)
 {
     ShaderConstantList* pConstantList = reinterpret_cast<ShaderConstantList*>(DAT_0126f74c);
     if (pConstantList)
@@ -846,7 +862,7 @@ void ShaderView::FUN_00e8dc30(void* a, void* b, void* c, ShaderGeometry* geometr
                 BindShaderInput(entry, geometry->property, e);
         }
     }
-    ShaderBaseView::FUN_00a8f3e0(a, b, c, geometry, e, f, g);
+    ShaderBaseView::NiD3DShader_UpdatePipeline(a, b, c, geometry, e, f, g);
 }
 
 extern "C" void _ReadWriteBarrier();
@@ -1000,10 +1016,10 @@ struct Descriptor
     unsigned int field30, field34, field38, field3c, field40, field44, field48, field4c;
     unsigned int field50, field54, field58;
     unsigned short property;
-    unsigned int FUN_00e7ddf0();
+    unsigned int NiD3DTextureStage_GetTexCoordIndex();
     bool QueryFlagB();
     void ApplyPairToState(unsigned int);
-    void FUN_00e7def0(unsigned int);
+    void NiD3DTextureStage_SetFilterMode(unsigned int);
 };
 struct ShaderHost
 {
@@ -1075,7 +1091,7 @@ void ShaderHost::BindShaderInput(Descriptor* descriptor, Geometry* geometry, Pro
                 if ((selector & 0xf0000000) == 0x10000000)
                 {
                     unsigned int value = stream->format & 255;
-                    value |= descriptor->FUN_00e7ddf0() & 0xffff0000;
+                    value |= descriptor->NiD3DTextureStage_GetTexCoordIndex() & 0xffff0000;
                     bool flag = descriptor->QueryFlagB();
                     descriptor->state->SetStageValue(11, value, flag);
                 }
@@ -1119,5 +1135,5 @@ void ShaderHost::BindShaderInput(Descriptor* descriptor, Geometry* geometry, Pro
 finish:
     descriptor->data = data;
     descriptor->ApplyPairToState(dimension);
-    descriptor->FUN_00e7def0(format);
+    descriptor->NiD3DTextureStage_SetFilterMode(format);
 }

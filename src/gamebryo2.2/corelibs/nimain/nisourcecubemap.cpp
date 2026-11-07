@@ -11,7 +11,7 @@
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 inline void NiRefObject::IncRefCount()
 {
@@ -70,7 +70,8 @@ extern "C"
 }
 
 // @fnv 0x00a60850
-bool __stdcall FUN_00a60850(NiStream& kStream)
+// src: XBOX_PDB 0x00a60850
+bool __stdcall NiSourceCubeMap_RegisterStreamables(NiStream& kStream)
 {
     return AttachToListener(&kStream);
 }
@@ -79,7 +80,8 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f4454;
 
 // @fnv 0x00a60cb0
-GlobalObjectO2_00a7b610* __cdecl FUN_00a60cb0()
+// src: COMMUNITY 0x00a60cb0
+GlobalObjectO2_00a7b610* __cdecl NiSourceCubeMap_GetRTTI()
 {
     return &g_011f4454;
 }
@@ -101,9 +103,10 @@ NiSourceCubeMap* __cdecl CreateNiSourceCubeMap()
 
 // Calls FUN_00a5fae0 on pkObject, then compares four fields of this and pkObject and returns true only if all match.
 // @fnv 0x00a60880
-bool __thiscall NiSourceCubeMap::FUN_00a60880(NiObject* pkObject)
+// src: GAMEBRYO_LIB 0x00a60880
+bool __thiscall NiSourceCubeMap::IsEqual_00a60880(NiObject* pkObject)
 {
-    if (FUN_00a5fae0(pkObject))
+    if (NiSourceTexture_IsEqual(pkObject))
     {
         NiSourceCubeMap* pkTexture = reinterpret_cast<NiSourceCubeMap*>(pkObject);
         if (m_kFormatPrefs.m_ePreferredPixelLayout == pkTexture->m_kFormatPrefs.m_ePreferredPixelLayout &&
@@ -173,7 +176,8 @@ struct LegacyTextureStream
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 
 // @fnv 0x00a60ba0
-void NiSourceCubeMap::FUN_00a60ba0(NiStream& kStream)
+// src: XBOX_PDB 0x00a60ba0
+void NiSourceCubeMap::LinkObject_00a60ba0(NiStream& kStream)
 {
     if (kStream.version() < 0x0A030006)
     {
@@ -213,9 +217,9 @@ void NiSourceCubeMap::FUN_00a60ba0(NiStream& kStream)
 
 extern "C"
 {
-    void* __cdecl FUN_00aa13e0(unsigned int size);
-    void __cdecl FUN_00a57500(char** pp);
-    void __cdecl FUN_00a76960(char** pp, unsigned int* p);
+    void* __cdecl Object_DispatchCommandFour(unsigned int size);
+    void __cdecl NiStandardizeFilePath(char** pp);
+    void __cdecl NiImageConverter_ConvertFilenameToPlatformSpecific_(char** pp, unsigned int* p);
 }
 
 inline void* operator new(unsigned int, void* p)
@@ -229,7 +233,7 @@ extern "C" unsigned char DAT_011a9594;
 // @fnv 0x00a60f60
 NiSourceCubeMap* __cdecl CreateSpawnedCubeShell(char** ppName, NiRenderer* pOwner, unsigned int* pVals)
 {
-    void* mem = FUN_00aa13e0(0x4c);
+    void* mem = Object_DispatchCommandFour(0x4c);
     NiSourceCubeMap* pShell = mem != 0 ? ::new (mem) NiSourceCubeMap() : 0;
     pShell->m_kFormatPrefs.m_ePreferredPixelLayout = (NiTexture::TextureFormatPreferences::PixelLayout)pVals[0];
     pShell->m_kFormatPrefs.m_eAlphaFormat = (NiTexture::TextureFormatPreferences::AlphaFormat)pVals[1];
@@ -248,8 +252,8 @@ NiSourceCubeMap* __cdecl CreateSpawnedCubeShell(char** ppName, NiRenderer* pOwne
         }
         *ppStoredName = s;
     }
-    FUN_00a57500(ppStoredName);
-    FUN_00a76960(ppStoredName, (unsigned int*)&pShell->m_kPlatformFilename.m_kHandle);
+    NiStandardizeFilePath(ppStoredName);
+    NiImageConverter_ConvertFilenameToPlatformSpecific_(ppStoredName, (unsigned int*)&pShell->m_kPlatformFilename.m_kHandle);
     if (pShell->m_uiFace != 0)
     {
         pShell->m_uiFace = 0;
@@ -267,7 +271,8 @@ NiSourceCubeMap* __cdecl CreateSpawnedCubeShell(char** ppName, NiRenderer* pOwne
 }
 
 // @fnv 0x00a61040
-NiSourceCubeMap* __cdecl FUN_00a61040(char** ppName, int aValue, NiRenderer* pRenderer, int* pVec)
+// src: XBOX_PDB 0x00a61040
+NiSourceCubeMap* __cdecl NiSourceCubeMap_Create(char** ppName, int aValue, NiRenderer* pRenderer, int* pVec)
 {
     NiSourceCubeMap* p = new NiSourceCubeMap();
     p->m_kFormatPrefs.m_ePreferredPixelLayout = (NiTexture::TextureFormatPreferences::PixelLayout)pVec[0];
@@ -290,8 +295,8 @@ NiSourceCubeMap* __cdecl FUN_00a61040(char** ppName, int aValue, NiRenderer* pRe
         *ppNameSlot = name;
     }
 
-    FUN_00a57500(ppNameSlot);
-    FUN_00a76960(ppNameSlot, (unsigned int*)&p->m_kPlatformFilename.m_kHandle);
+    NiStandardizeFilePath(ppNameSlot);
+    NiImageConverter_ConvertFilenameToPlatformSpecific_(ppNameSlot, (unsigned int*)&p->m_kPlatformFilename.m_kHandle);
 
     if (p->m_uiFace != 0)
     {
@@ -384,7 +389,8 @@ inline void LoadEnum(NiStream& kStream, int& eValue)
 }
 
 // @fnv 0x00a612a0
-void NiSourceCubeMap::FUN_00a612a0(NiStream& kStream)
+// src: XBOX_PDB 0x00a612a0
+void NiSourceCubeMap::LoadBinary_00a612a0(NiStream& kStream)
 {
     if (kStream.version() < 0x0A030006)
     {
@@ -424,12 +430,13 @@ void NiSourceCubeMap::FUN_00a612a0(NiStream& kStream)
     }
 }
 
-void __cdecl FUN_00a60600();
+void __cdecl NiSourceTexture_SaveBinary();
 
 // @fnv 0x00a60870
-void __cdecl FUN_00a60870()
+// src: XBOX_PDB 0x00a60870
+void __cdecl NiSourceCubeMap_SaveBinary()
 {
-    FUN_00a60600();
+    NiSourceTexture_SaveBinary();
 }
 
 struct NiGPUProgram;
@@ -496,11 +503,11 @@ struct CubeMapLoader
     void SetPath(void* p);
 };
 
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 int __cdecl FUN_00ec65a6(char* dst, unsigned int n, const char* src);
-void __cdecl FUN_00aa2a00(char* p);
+void __cdecl NiPath_Standardize(char* p);
 void* __cdecl GetPathWithExtension(char* p);
-bool __cdecl FUN_00aa1a30(const char* p, int a);
+bool __cdecl NiFile_Access(const char* p, int a);
 
 static __forceinline void S00a60cc0_ReleaseAll(NiRefObject** res)
 {
@@ -531,16 +538,16 @@ void NiSourceCubeMap::LoadResources(char* apName0, char* apName1, char* apName2,
     {
         char* src = names[idx];
         unsigned int len = strlen(src) + 1;
-        char* copy = (char*)FUN_00aa1070(len);
+        char* copy = (char*)_NiMalloc_00aa1070(len);
         FUN_00ec65a6(copy, len, src);
-        FUN_00aa2a00(copy);
+        NiPath_Standardize(copy);
         void* tmp = GetPathWithExtension(copy);
         apLoader->SetPath(tmp);
         apLoader->v01();
         if (apLoader->v02(buf, 260))
         {
         retry:
-            if (!FUN_00aa1a30(buf, 0))
+            if (!NiFile_Access(buf, 0))
             {
                 if (apLoader->v02(buf, 260))
                     goto retry;
@@ -566,7 +573,7 @@ void NiSourceCubeMap::LoadResources(char* apName0, char* apName1, char* apName2,
             return;
         }
     }
-    FUN_00a60940(res[0], res[1], res[2], res[3], res[4], res[5]);
+    LoadFromPixelData(res[0], res[1], res[2], res[3], res[4], res[5]);
     S00a60cc0_ReleaseAll(res);
 }
 
@@ -669,9 +676,10 @@ struct PixelPtr
 
 // Allocates a Pixels object with six faces, copies each level from the six inputs, then releases their references.
 // @fnv 0x00a60940
-void NiSourceCubeMap::FUN_00a60940(Pixels* a, Pixels* b, Pixels* c, Pixels* d, Pixels* e, Pixels* f)
+// src: COMMUNITY 0x00a60940
+void NiSourceCubeMap::LoadFromPixelData(Pixels* a, Pixels* b, Pixels* c, Pixels* d, Pixels* e, Pixels* f)
 {
-    void* storage = FUN_00aa13e0(sizeof(Pixels));
+    void* storage = Object_DispatchCommandFour(sizeof(Pixels));
     Pixels* created;
     if (storage)
     {

@@ -22,11 +22,11 @@ public:
     template <class String>
     char CheckSignature(const String& path);
 
-    char FUN_00ac3fe0(const std::string& path);
-    bool FUN_00ac3fe0(const BxString& path);
-    bool FUN_00ac3fe0(const char* name);
+    char ProcessAndReturnValue_00ac3fe0(const std::string& path);
+    bool ProcessAndReturnValue_00ac3fe0(const BxString& path);
+    bool ProcessAndReturnValue_00ac3fe0(const char* name);
     template <class String>
-    char FUN_00ac3fe0(const String& path);
+    char ProcessAndReturnValue_00ac3fe0(const String& path);
 
     std::string signature;
     std::string path;

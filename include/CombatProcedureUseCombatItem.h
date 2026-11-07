@@ -25,8 +25,8 @@ public:
     void* DestroyIfFlagged(unsigned int flags);
     void UpdateCombatItemUse();
     void PrintDebugInfo(CombatItemDebugOutput* pPrinter, unsigned int a2, unsigned int a3);
-    void FUN_009dac80(BGSLoadFormBuffer* apLoadGameBuffer);
-    UCIActor* FUN_00996de0();
+    void LoadGame_009dac80(BGSLoadFormBuffer* apLoadGameBuffer);
+    UCIActor* CombatProcedure_GetAttacker();
     void SetState();
 
     TESBoundObject* pItem;

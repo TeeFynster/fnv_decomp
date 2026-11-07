@@ -2,10 +2,10 @@
 // src/havok/physics/collide/agent/convexagent/boxbox/hkpboxboxagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/boxbox/hkpboxboxagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern "C" void* __cdecl FUN_00d401d0(void);
-extern "C" void* __cdecl FUN_00d406c0(void);
+extern "C" void* __cdecl hkpBoxBoxAgent_createBoxBoxAgent(void);
+extern "C" void* __cdecl hkpBoxBoxAgent_staticGetPenetrations(void);
 extern "C" void* __cdecl FUN_00dac450(void);
-extern "C" void* __cdecl FUN_00daf8e0(void);
+extern "C" void* __cdecl Object_ProcessEntries_00daf8e0(void);
 
 struct FUN_00d408e0_1
 {
@@ -19,12 +19,13 @@ struct FUN_00d408e0_1
 
 // Fills the struct with four function pointers and clears two byte flags.
 // @fnv 0x00d408e0
-void __cdecl FUN_00d408e0(FUN_00d408e0_1* a)
+// src: GUESS 0x00d408e0 (confidence: medium)
+void __cdecl Object_InitializeAgentFunctionTable_00d408e0(FUN_00d408e0_1* a)
 {
-    a->p1 = (void*)&FUN_00d401d0;
-    a->p2 = (void*)&FUN_00d406c0;
+    a->p1 = (void*)&hkpBoxBoxAgent_createBoxBoxAgent;
+    a->p2 = (void*)&hkpBoxBoxAgent_staticGetPenetrations;
     a->p3 = (void*)&FUN_00dac450;
-    a->p4 = (void*)&FUN_00daf8e0;
+    a->p4 = (void*)&Object_ProcessEntries_00daf8e0;
     a->b1 = 0;
     a->b2 = 0;
 }
@@ -101,7 +102,7 @@ void __cdecl RegisterStaticCollisionAgent(D41FD0CollisionDispatcher* dispatcher)
 extern "C" const double DAT_010cf200;
 extern "C" char DAT_010cf1c4;
 extern "C" void* __cdecl FUN_00dacc00(void* a1, void* a2, void* a3, void* a4);
-extern "C" void* __cdecl FUN_00c85750(void);
+extern "C" void* __cdecl hkMemoryRouter_getInstance(void);
 
 class Allocator
 {
@@ -131,7 +132,7 @@ class SrcObj
 class SubStub
 {
   public:
-    void FUN_00db0920();
+    void InitializeEmptyEntries();
 };
 
 class SpawnedObject
@@ -144,7 +145,8 @@ class SpawnedObject
 };
 
 // @fnv 0x00d401d0
-void* FUN_00d401d0(void* apFirst, void* apSecond, void* a3, void* a4)
+// src: HAVOK_LIB 0x00d401d0
+void* hkpBoxBoxAgent_createBoxBoxAgent(void* apFirst, void* apSecond, void* a3, void* a4)
 {
     SrcObj* src = (SrcObj*)a3;
     float fSrcValue = src->m_08;
@@ -158,51 +160,54 @@ void* FUN_00d401d0(void* apFirst, void* apSecond, void* a3, void* a4)
     {
         goto callPath;
     }
-    Holder* pHolder = (Holder*)FUN_00c85750();
+    Holder* pHolder = (Holder*)hkMemoryRouter_getInstance();
     Allocator* pAllocator = pHolder->m_pAllocator;
     SpawnedObject* pSpawned = (SpawnedObject*)pAllocator->Alloc(0x50);
     pSpawned->m_04 = 0x50;
     pSpawned->m_06 = 1;
     pSpawned->m_08 = a4;
     pSpawned->vptr = &DAT_010cf1c4;
-    ((SubStub*)((char*)pSpawned + 0x10))->FUN_00db0920();
+    ((SubStub*)((char*)pSpawned + 0x10))->InitializeEmptyEntries();
     return pSpawned;
 callPath:
     return FUN_00dacc00(apFirst, apSecond, a3, a4);
 }
 
-extern "C" void __cdecl FUN_00d40470(void* a, void* b, void* c, void* d);
+extern "C" void __cdecl hkpBoxBoxAgent_staticGetClosestPoints(void* a, void* b, void* c, void* d);
 
 // @fnv 0x00d406a0
-extern "C" void __stdcall FUN_00d406a0(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
+// src: HAVOK_SRC 0x00d406a0
+extern "C" void __stdcall hkpBoxBoxAgent_getClosestPoints(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
 {
-    FUN_00d40470(apArg1, apArg2, apArg3, apArg4);
+    hkpBoxBoxAgent_staticGetClosestPoints(apArg1, apArg2, apArg3, apArg4);
 }
 
 typedef void(__cdecl* FUN_00d406c0_fn4)(void*, void*, void*, void*);
 
-extern "C" void* __cdecl FUN_00d406c0(void);
+extern "C" void* __cdecl hkpBoxBoxAgent_staticGetPenetrations(void);
 
 // @fnv 0x00d408c0
-void __stdcall FUN_00d408c0(void* a1, void* a2, void* a3, void* a4)
+// src: HAVOK_SRC 0x00d408c0
+void __stdcall hkpBoxBoxAgent_getPenetrations(void* a1, void* a2, void* a3, void* a4)
 {
-    ((FUN_00d406c0_fn4)FUN_00d406c0)(a1, a2, a3, a4);
+    ((FUN_00d406c0_fn4)hkpBoxBoxAgent_staticGetPenetrations)(a1, a2, a3, a4);
 }
 
-__declspec(noinline) void __cdecl FUN_00d408e0(FUN_00d408e0_1*);
+__declspec(noinline) void __cdecl Object_InitializeAgentFunctionTable_00d408e0(FUN_00d408e0_1*);
 
 struct BoxAgentRegistry
 {
-    void __thiscall FUN_00cfbbe0(const FUN_00d408e0_1& kFuncs, int a, int b);
+    void __thiscall AppendRecordAndRegisterAgents(const FUN_00d408e0_1& kFuncs, int a, int b);
 };
 
 // Initializes a FUN_00d408e0_1 struct with zeroed fields, calls FUN_00d408e0 to populate it, and registers it with pkObj via FUN_00cfbbe0.
 // @fnv 0x00d40910
-void __cdecl FUN_00d40910(BoxAgentRegistry* pkObj)
+// src: HAVOK_LIB 0x00d40910
+void __cdecl hkpBoxBoxAgent_registerAgent(BoxAgentRegistry* pkObj)
 {
     FUN_00d408e0_1 kFuncs;
     kFuncs.b1 = 0;
     kFuncs.b2 = 0;
-    FUN_00d408e0(&kFuncs);
-    pkObj->FUN_00cfbbe0(kFuncs, 4, 4);
+    Object_InitializeAgentFunctionTable_00d408e0(&kFuncs);
+    pkObj->AppendRecordAndRegisterAgents(kFuncs, 4, 4);
 }

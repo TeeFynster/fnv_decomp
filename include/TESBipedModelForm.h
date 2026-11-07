@@ -39,11 +39,11 @@ public:
     bool IsPowerArmor();
     bool IsPlayable();
     bool FUN_0047c850();
-    bool FUN_00480d30();
+    bool TESBipedModelForm_HasBackpack();
     bool FUN_00480af0(int slot, bool hair, bool modelList);
-    bool FUN_00480d90();
-    void FUN_00480d50(bool value);
-    BSFaceGenModel* FUN_00480ce0();
+    bool TESBipedModelForm_GetPlayable();
+    void TESBipedModelForm_SetAddOnModel(bool value);
+    BSFaceGenModel* GetBipedConstraint();
     bool GetIsHeavyArmor() const;
     bool GetIsMediumArmor() const;
     bool HasBipedModel(BIPED_OBJECT slot, bool hair, BGSBipedModelList* modelList);

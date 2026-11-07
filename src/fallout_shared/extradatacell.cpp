@@ -262,12 +262,13 @@ struct FUN_0040f3a0_cls
     int m_0c;
 
     bool IsDifferentFrom(void* a1);
-    bool FUN_0040f3a0(void* a1);
+    bool ExtraCellWaterType_Compare(void* a1);
 };
 
 // Looks up a node via FUN_00ec43fb and returns true if it is null, IsDifferentFrom succeeds, or the node's m_0c differs from this object's m_0c.
 // @fnv 0x0040f3a0
-bool FUN_0040f3a0_cls::FUN_0040f3a0(void* a1)
+// src: XBOX_PDB 0x0040f3a0
+bool FUN_0040f3a0_cls::ExtraCellWaterType_Compare(void* a1)
 {
     FUN_0040f3a0_node* p = (FUN_0040f3a0_node*)FUN_00ec43fb(a1, 0, &DAT_01183b2c, &DAT_01183c38, 0);
     if (p == 0)
@@ -399,12 +400,13 @@ extern int DAT_01183b84;
 struct ExtraMusicTypeShell : BSExtraData
 {
     BGSMusicType* pType;
-    bool FUN_0040ef60(BSExtraData* extra);
+    bool ExtraCellMusicType_Compare(BSExtraData* extra);
 };
 
 // Returns true if the cast fails, IsDifferentFrom(extra) is true, or the two pType pointers differ; otherwise false.
 // @fnv 0x0040ef60
-bool ExtraMusicTypeShell::FUN_0040ef60(BSExtraData* apOther)
+// src: XBOX_PDB 0x0040ef60
+bool ExtraMusicTypeShell::ExtraCellMusicType_Compare(BSExtraData* apOther)
 {
     ExtraMusicTypeShell* pOther =
         static_cast<ExtraMusicTypeShell*>(FUN_00ec43fb(apOther, 0, &DAT_01183b2c, &DAT_01183b84, 0));
@@ -438,11 +440,12 @@ struct FUN_0040f0a0_shell : BSExtraData
 {
     void* pField;
     bool IsDifferentFrom(BSExtraData*);
-    bool FUN_0040f0a0(BSExtraData* extra);
+    bool ExtraCellClimate_Compare(BSExtraData* extra);
 };
 // Returns true if the cast fails, IsDifferentFrom(extra) returns true, or the pField pointers differ; otherwise false.
 // @fnv 0x0040f0a0
-bool FUN_0040f0a0_shell::FUN_0040f0a0(BSExtraData* apOther)
+// src: XBOX_PDB 0x0040f0a0
+bool FUN_0040f0a0_shell::ExtraCellClimate_Compare(BSExtraData* apOther)
 {
     FUN_0040f0a0_shell* cast = (FUN_0040f0a0_shell*)FUN_00ec43fb(apOther, 0, &DAT_01183b2c, &DAT_01183bd0, 0);
     if (!cast)
@@ -465,12 +468,13 @@ struct CellImpactCompare : BSExtraData
 {
     CellImpactSwapValue* m_pCellImpactSwapValue;
 
-    bool FUN_0040f2d0(BSExtraData* apCompare);
+    bool ExtraCellImpactSwap_Compare(BSExtraData* apCompare);
 };
 
 // Returns true if the cast fails, IsDifferentFrom(apCompare) is true, or the payload comparison returns true.
 // @fnv 0x0040f2d0
-bool CellImpactCompare::FUN_0040f2d0(BSExtraData* apCompare)
+// src: XBOX_PDB 0x0040f2d0
+bool CellImpactCompare::ExtraCellImpactSwap_Compare(BSExtraData* apCompare)
 {
     CellImpactCompare* pComp;
 

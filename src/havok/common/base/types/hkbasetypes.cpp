@@ -9,12 +9,13 @@ extern unsigned char str_010c7d44;
 struct FUN_00ca9360_cls
 {
     unsigned char m_00;
-    FUN_00ca9360_cls* FUN_00ca9360(const float* key);
+    FUN_00ca9360_cls* FindFloatTableIndex(const float* key);
 };
 
 // Binary-searches a sorted float table for the value at key and stores the resulting index in m_00, or 0 if below the first entry.
 // @fnv 0x00ca9360
-FUN_00ca9360_cls* FUN_00ca9360_cls::FUN_00ca9360(const float* key)
+// src: GUESS 0x00ca9360 (confidence: medium)
+FUN_00ca9360_cls* FUN_00ca9360_cls::FindFloatTableIndex(const float* key)
 {
     FUN_00ca9360_cls* pResult = this;
     unsigned lo;

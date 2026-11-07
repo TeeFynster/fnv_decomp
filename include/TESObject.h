@@ -35,7 +35,7 @@ public:
     const char* GetEditorID();
     bool vfn_62();
     bool AtA0();
-    bool FUN_00409700();
+    bool TESObjectBOOK_GetScroll();
 
     int GetFormType() const;
     unsigned int GetFormType();

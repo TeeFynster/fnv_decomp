@@ -17,7 +17,7 @@ extern "C" void* memset(void* dst, int val, unsigned int size);
 class PrimaryBase
 {
   public:
-    virtual void FUN_0059bf40();
+    virtual void AdjustThisAndForward_0059bf40();
     int unk04;
     int unk08;
     int unk0C;
@@ -37,14 +37,15 @@ class PrimaryBase
 class SecondaryBase
 {
   public:
-    virtual void FUN_0059bf40();
+    virtual void AdjustThisAndForward_0059bf40();
 };
 
 class Derived : public PrimaryBase, public SecondaryBase
 {
   public:
 // @fnv 0x0059bf40
-    virtual void FUN_0059bf40();
+// src: GUESS 0x0059bf40 (confidence: low)
+    virtual void AdjustThisAndForward_0059bf40();
     Derived();
 };
 

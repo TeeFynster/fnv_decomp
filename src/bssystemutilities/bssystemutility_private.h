@@ -21,7 +21,7 @@ class DownloadableContentManager
 {
   public:
     static DownloadableContentManager& GetRandomGenerator();
-    void FUN_00af2c80();
+    void DoNothing_00af2c80();
 };
 
 class FNVVTableSlot4
@@ -49,14 +49,14 @@ class FNVVTableSlot8Args
 
 void FUN_00af2370();
 void FUN_00af2360();
-void FUN_00af2750();
-void FUN_00af2760();
-void FUN_00af2d30();
-FNVVTableSlot8* FUN_00af3850();
+void Runtime_EvaluateValue_00af2750();
+void Object_ClearGlobalObject();
+void Runtime_DoNothing();
+FNVVTableSlot8* BSSysInfoSystemUtility_GetSingleton();
 FNVVTableSlot8Args* GetStaticSlot();
-FNVVTableSlot8* FUN_00af2e50();
+FNVVTableSlot8* BSSaveDataSystemUtility_GetSingleton();
 FNVVTableSlot8* GetVTableSlot8();
-FNVVTableSlot8* FUN_00af34f0();
+FNVVTableSlot8* BSGameDataSystemUtility_GetSingleton();
 FNVVTableSlot8* GetInitObj();
 
 extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);

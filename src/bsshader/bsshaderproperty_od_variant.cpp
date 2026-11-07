@@ -19,10 +19,11 @@ struct FUN_0043a010_t
 };
 struct FUN_0043a010_shell
 {
-    FUN_0043a010_t* FUN_0043a010();
+    FUN_0043a010_t* NiGeometry_AddProperty();
 };
 // @fnv 0x0043a010
-FUN_0043a010_t* FUN_0043a010_shell::FUN_0043a010()
+// src: COMMUNITY 0x0043a010
+FUN_0043a010_t* FUN_0043a010_shell::NiGeometry_AddProperty()
 {
     g_011c5f80.Lock(0);
     if (DAT_011c5f58 == 0)

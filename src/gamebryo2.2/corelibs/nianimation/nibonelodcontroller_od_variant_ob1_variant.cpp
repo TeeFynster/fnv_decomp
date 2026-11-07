@@ -20,22 +20,22 @@ struct FUN_00a543f0_shell
 {
     void* m_kPointA;
     void* m_ptr;
-    void FUN_00a543f0();
+    void ReleaseStorage_00a543f0();
 };
 struct GlobalObjectO2_00a7b610
 {
 };
 extern GlobalObjectO2_00a7b610 g_011f405c;
-GlobalObjectO2_00a7b610* __cdecl FUN_00a55120();
+GlobalObjectO2_00a7b610* __cdecl NiBoneLODController_GetRTTI();
 struct Unknown_00c536a0
 {
-    bool FUN_00a6d0f0(int);
-    bool FUN_00c536a0(int);
+    bool NiTimeController_RegisterStreamables(int);
+    bool NiBSBoneLODController_RegisterStreamables(int);
 };
 extern GlobalObjectO2_00a7b610 g_012031b8;
 struct FUN_00c53e00_shell
 {
-    GlobalObjectO2_00a7b610* __thiscall FUN_00c53e00();
+    GlobalObjectO2_00a7b610* __thiscall NiBSBoneLODController_GetRTTI();
 };
 class CloningProcess
 {
@@ -47,7 +47,7 @@ class CloneableObj
     int m34;
     int m38;
     void FUN_00a6cfe0(NiBSBoneLODController*, CloningProcess*);
-    void FUN_00c533f0(NiBSBoneLODController*, CloningProcess*);
+    void NiBSBoneLODController_CopyMembers(NiBSBoneLODController*, CloningProcess*);
 };
 void operator delete(void*, unsigned int);
 struct S_00c53e10
@@ -66,10 +66,10 @@ struct S_00c53ed0
 {
     char _pad[0x2C];
     Inner_00c53ed0* m_ptr;
-    bool FUN_00c53ed0();
+    bool NiBSBoneLODController_TargetIsRequiredType();
 };
 extern "C" void __cdecl CallAnimCallback(void*, const void*);
-extern "C" void __cdecl FUN_0044adf0(void*, const void*);
+extern "C" void __cdecl NiStreamSaveBinary_unsigned_int(void*, const void*);
 struct ObjectWriter
 {
     virtual void f00();
@@ -112,7 +112,7 @@ struct BoneLODControllerSave : NiBSBoneLODController
     unsigned short unk44;
     unsigned short groupCount;
     void __thiscall FUN_00a6d730(NiStream*);
-    void __thiscall FUN_00c536d0(NiStream*);
+    void __thiscall NiBSBoneLODController_SaveBinary(NiStream*);
 };
 struct RefList
 {
@@ -146,7 +146,7 @@ struct ControllerObject
     unsigned short unk44;
     unsigned short listCount;
     void FUN_00a6d500(BinaryStream*);
-    void FUN_00c53a10(BinaryStream*);
+    void NiBSBoneLODController_LinkObject(BinaryStream*);
 };
 struct S_00c53cf0_Arr
 {
@@ -175,7 +175,7 @@ struct S_00c53cf0_Cls
     S_00c53cf0_Arr** unk40;
     short unk44;
     unsigned short unk46;
-    bool FUN_00c53cf0();
+    bool ProcessEntries_00c53cf0();
 };
 
 class FUN_00a6d220
@@ -282,7 +282,7 @@ FUN_00c53e40::~FUN_00c53e40()
 }
 
 extern MemoryManager DAT_011f6238;
-void* FUN_00aa1070(unsigned int n);
+void* _NiMalloc_00aa1070(unsigned int n);
 struct ArrW
 {
     void** m_pBase;
@@ -291,12 +291,12 @@ struct ArrW
     static void* operator new(unsigned int n)
     {
         int aiD[2];
-        return DAT_011f6238.FUN_00aa3e40(n);
+        return DAT_011f6238.Game_DoHeapAlloc(n);
     }
     ArrW(unsigned int uiMax = 0)
     {
         if (uiMax > 0)
-            m_pBase = (void**)FUN_00aa1070(sizeof(void*) * uiMax);
+            m_pBase = (void**)_NiMalloc_00aa1070(sizeof(void*) * uiMax);
         else
             m_pBase = 0;
         m_uiMax = 0;
@@ -333,7 +333,7 @@ struct TargetW
     int m_i34;
     char pad2[0x3c - 0x38];
     TArrW m_kArr;
-    void FUN_00c52960(int i);
+    void NiBSBoneLODController_SetBoneLOD(int i);
 };
 struct ObjW;
 struct MapW
@@ -352,10 +352,11 @@ class SelfW
     unsigned short m44;
     unsigned short m_usElementCount;
     void FUN_00a6d0c0(StreamW* p);
-    void FUN_00c53430(StreamW* pkStream);
+    void NiBSBoneLODController_ProcessClone(StreamW* pkStream);
 };
 // @fnv 0x00c53430
-void SelfW::FUN_00c53430(StreamW* pkStream)
+// src: XBOX_PDB 0x00c53430
+void SelfW::NiBSBoneLODController_ProcessClone(StreamW* pkStream)
 {
     int iSaved;
     {
@@ -396,7 +397,7 @@ void SelfW::FUN_00c53430(StreamW* pkStream)
             }
             iSaved = pkTarget->m_i34;
             pkTarget->m_i34 = -1;
-            pkTarget->FUN_00c52960(iSaved);
+            pkTarget->NiBSBoneLODController_SetBoneLOD(iSaved);
         }
     }
 }
@@ -436,14 +437,14 @@ struct FUN_00c53af0
         unsigned int n = m_usElementCount;
         return n;
     }
-    bool FUN_00a6cc80(FUN_00c53af0* pkObj);
+    bool NiTimeController_IsEqual(FUN_00c53af0* pkObj);
     bool IsEqual(FUN_00c53af0* pkObj);
 };
 // @fnv 0x00c53af0
 bool FUN_00c53af0::IsEqual(FUN_00c53af0* pkObj)
 {
     unsigned int i;
-    if (!FUN_00a6cc80(pkObj))
+    if (!NiTimeController_IsEqual(pkObj))
         return false;
     FUN_00c53af0* pkOther = pkObj;
     if (m_i34 != pkOther->m_i34 || m_i38 != pkOther->m_i38 || GetCount() != pkOther->m_usElementCount)
@@ -482,11 +483,11 @@ template <class T> inline void NiBinaryStreamLoad(NiBinaryStream& kStream, T* pV
 
 struct LinkIDSet
 {
-    void FUN_00a311e0(unsigned int uiNewSize);
+    void NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(unsigned int uiNewSize);
     unsigned int Add(const unsigned int& uiElement)
     {
         if (m_uiAllocatedCapacity == m_uiElementCount)
-            FUN_00a311e0(m_uiElementCount > 0 ? (2 * m_uiElementCount) : 1);
+            NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(m_uiElementCount > 0 ? (2 * m_uiElementCount) : 1);
         m_pBase[m_uiAllocatedCapacity] = uiElement;
         return m_uiAllocatedCapacity++;
     }
@@ -657,7 +658,7 @@ struct NiStreamLoader
     LinkIDSet m_kSecondFollowingStreamField;
 };
 
-void __cdecl FUN_00a26df0(NiStreamLoader* pkStream, void* pvValue);
+void __cdecl NiStreamLoadBinary_float(NiStreamLoader* pkStream, void* pvValue);
 
 class BoneLODController;
 
@@ -794,7 +795,7 @@ class TimeController
 class BoneLODController : public TimeController
 {
   public:
-    void FUN_00c53870(NiStreamLoader& kStream);
+    void NiBSBoneLODController_LoadBinary(NiStreamLoader& kStream);
 
     int m_iLOD;
     unsigned int m_uiNumLODs;
@@ -802,16 +803,17 @@ class BoneLODController : public TimeController
 };
 
 // @fnv 0x00c53870
-void BoneLODController::FUN_00c53870(NiStreamLoader& kStream)
+// src: XBOX_PDB 0x00c53870
+void BoneLODController::NiBSBoneLODController_LoadBinary(NiStreamLoader& kStream)
 {
     TimeController::FUN_00a6d5e0(kStream);
 
-    FUN_00a26df0(&kStream, &m_iLOD);
-    FUN_00a26df0(&kStream, &m_uiNumLODs);
+    NiStreamLoadBinary_float(&kStream, &m_iLOD);
+    NiStreamLoadBinary_float(&kStream, &m_uiNumLODs);
 
     unsigned int i;
     unsigned int uiNumLODs5 = 0;
-    FUN_00a26df0(&kStream, &uiNumLODs5);
+    NiStreamLoadBinary_float(&kStream, &uiNumLODs5);
 
     for (i = 0; i < uiNumLODs5; i++)
     {
@@ -819,7 +821,7 @@ void BoneLODController::FUN_00c53870(NiStreamLoader& kStream)
         m_kBoneSetArray.SetAtGrow(i, pkSet);
 
         unsigned int uiNumBones4 = 0;
-        FUN_00a26df0(&kStream, &uiNumBones4);
+        NiStreamLoadBinary_float(&kStream, &uiNumBones4);
         for (unsigned int j = 0; j < uiNumBones4; j++)
         {
             pkSet->AppendLinkID(this);
@@ -856,19 +858,20 @@ class FUN_00c53d70 : public NiBSBoneLODController
 class CloneOwner_c53360 : public CloneableObj
 {
   public:
-    NiBSBoneLODController* FUN_00c53360(CloningProcess* process);
+    NiBSBoneLODController* NiBSBoneLODController_CreateClone(CloningProcess* process);
 };
 // @fnv 0x00c53360
-NiBSBoneLODController* CloneOwner_c53360::FUN_00c53360(CloningProcess* process)
+// src: XBOX_PDB 0x00c53360
+NiBSBoneLODController* CloneOwner_c53360::NiBSBoneLODController_CreateClone(CloningProcess* process)
 {
     NiBSBoneLODController* result = new FUN_00c53d70;
-    this->FUN_00c533f0(result, process);
+    this->NiBSBoneLODController_CopyMembers(result, process);
     return result;
 }
 }  // namespace fnv_00c53360
 
 namespace fnv_00c537f0 {
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct FUN_00c53d70
 {
     int unk00;
@@ -894,12 +897,13 @@ struct FUN_00c53d70
     {
         int unused[2];
         (void)unused;
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     FUN_00c53d70();
 };
 // @fnv 0x00c537f0
-FUN_00c53d70* __cdecl FUN_00c537f0()
+// src: EXE 0x00c537f0
+FUN_00c53d70* __cdecl NiBSBoneLODController_CreateObject()
 {
     return new FUN_00c53d70;
 }

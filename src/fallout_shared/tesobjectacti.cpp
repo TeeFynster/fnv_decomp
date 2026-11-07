@@ -141,11 +141,12 @@ bool TESObjectACTI::Load(TESFile* file)
 
 struct FUN_004fd3a0_shell : public TESObjectACTI
 {
-    TESSound* FUN_004fd3a0();
+    TESSound* TESChallenge_GetFormOne();
 };
 
 // @fnv 0x004fd3a0
-TESSound* FUN_004fd3a0_shell::FUN_004fd3a0()
+// src: COMMUNITY 0x004fd3a0
+TESSound* FUN_004fd3a0_shell::TESChallenge_GetFormOne()
 {
     return *(TESSound**)((char*)this + 0x74);
 }
@@ -153,7 +154,8 @@ TESSound* FUN_004fd3a0_shell::FUN_004fd3a0()
 extern int DAT_01029ee0;
 
 // @fnv 0x00510620
-void* __fastcall FUN_00510620(void** pThis)
+// src: EXE 0x00510620
+void* __fastcall BGSOpenCloseForm_BGSOpenCloseForm(void** pThis)
 {
     *pThis = &DAT_01029ee0;
     return pThis;
@@ -161,11 +163,12 @@ void* __fastcall FUN_00510620(void** pThis)
 
 struct FloatValueProvider : public TESObjectACTI
 {
-    void FUN_00510ea0(BSStringT<char> s);
+    void TESObjectACTI_SetActivationPrompt(BSStringT<char> s);
 };
 // Sets the activation prompt at offset 0x88 to the given string.
 // @fnv 0x00510ea0
-void FloatValueProvider::FUN_00510ea0(BSStringT<char> s)
+// src: COMMUNITY 0x00510ea0
+void FloatValueProvider::TESObjectACTI_SetActivationPrompt(BSStringT<char> s)
 {
     m_kActivationPrompt.Set(s);
 }
@@ -176,7 +179,8 @@ struct TESFullName_ext : TESFullName
 };
 
 // @fnv 0x00511840
-const char* __fastcall FUN_00511840(char* apObject)
+// src: XBOX_PDB 0x00511840
+const char* __fastcall TESSound_GetFilename(char* apObject)
 {
     return ((TESFullName_ext*)(apObject + 0x30))->GetFullName();
 }
@@ -206,10 +210,11 @@ struct FNStub
 };
 struct FUN_00511860_holder
 {
-    void FUN_00511860(BGSSaveFormBuffer* apSaveGameBuffer);
+    void TESObjectACTI_SaveGame(BGSSaveFormBuffer* apSaveGameBuffer);
 };
 // @fnv 0x00511860
-void FUN_00511860_holder::FUN_00511860(BGSSaveFormBuffer* apSaveGameBuffer)
+// src: XBOX_PDB 0x00511860
+void FUN_00511860_holder::TESObjectACTI_SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     ((FUN_00484d60_holder*)this)->SaveIfChanged(apSaveGameBuffer);
     if (((BGSLoadFormBuffer*)apSaveGameBuffer)->GetChangeFlags(4).operator bool())
@@ -252,7 +257,7 @@ BSStringT<char> FUN_005110e0_Holder::GetString()
 
 struct FUN_00510770_shell : public TESObjectACTI
 {
-    void FUN_00510770();
+    void TESObjectACTI_InitItem();
 };
 
 struct BGSDestructibleObjectFormInitItemProxy
@@ -276,7 +281,8 @@ void TESModelTextureSwapInitItemProxy::InitItem(TESForm* form)
 
 // Resolves the activator's sound, water and radio-station form IDs, warns when a lookup fails, and initializes the scriptable, destructible and model sub-forms.
 // @fnv 0x00510770
-void FUN_00510770_shell::FUN_00510770()
+// src: XBOX_PDB 0x00510770
+void FUN_00510770_shell::TESObjectACTI_InitItem()
 {
     if (IsFormInitialized())
         return;
@@ -355,11 +361,12 @@ struct ACTIView : public TESObjectACTI
     TESSound* GetFormFourA();
     BSStringT<char> GetPromptA();
     bool CompareFormA(TESForm* apForm);
-    bool FUN_005111e0(TESForm* apForm);
+    bool TESObjectACTI_Compare(TESForm* apForm);
 };
 
 // @fnv 0x005111e0
-bool ACTIView::FUN_005111e0(TESForm* apForm)
+// src: XBOX_PDB 0x005111e0
+bool ACTIView::TESObjectACTI_Compare(TESForm* apForm)
 {
     int iCompare;
     ACTIView* pOther = (ACTIView*)dynamic_cast<TESObjectACTI*>(apForm);
@@ -385,14 +392,14 @@ bool ACTIView::FUN_005111e0(TESForm* apForm)
 
 struct SoundId
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct Chunk487010
 {
     int unk00;
     int unk04;
     int unk08;
-    void FUN_00487010();
+    void Save_00487010();
 };
 struct Chunk48a520
 {
@@ -411,7 +418,7 @@ struct Chunk48cca0
     int unk00;
     int unk04;
     int unk08;
-    void FUN_0048cca0();
+    void Save_0048cca0();
 };
 struct Chunk477f20
 {
@@ -420,8 +427,8 @@ struct Chunk477f20
     int unk08;
     void FUN_00477f20();
 };
-void FUN_00485910(unsigned int, unsigned int);
-void FUN_004856f0(unsigned int, void*, unsigned int);
+void TESForm_AddChunk_00485910(unsigned int, unsigned int);
+void TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 
 struct ActiSave
 {
@@ -448,7 +455,7 @@ struct ActiSave
     SoundId* m_pTalkingActivator;
     BSStringT<char> m_kActivationPrompt;
 
-    void FUN_004855a0();
+    void BeginFormRecord();
     void FinishSave();
     BSStringT<char> GetString();
     void Save();
@@ -458,39 +465,39 @@ struct ActiSave
 // @fnv 0x00510f00
 void ActiSave::Save()
 {
-    FUN_004855a0();
-    name30.FUN_00487010();
+    BeginFormRecord();
+    name30.Save_00487010();
     model3c.ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    script5c.FUN_0048cca0();
+    script5c.Save_0048cca0();
     destruct68.FUN_00477f20();
     if (m_pSoundEffect)
     {
-        unsigned int uiSoundId = m_pSoundEffect->FUN_0084e3a0();
-        FUN_00485910(0x4d414e53, uiSoundId);
+        unsigned int uiSoundId = m_pSoundEffect->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e53, uiSoundId);
     }
     if (m_pLoopSound)
     {
-        unsigned int uiSoundId = m_pLoopSound->FUN_0084e3a0();
-        FUN_00485910(0x4d414e56, uiSoundId);
+        unsigned int uiSoundId = m_pLoopSound->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e56, uiSoundId);
     }
     if (pRadioTemplate)
     {
-        unsigned int uiSoundId = pRadioTemplate->FUN_0084e3a0();
-        FUN_00485910(0x4d414e49, uiSoundId);
+        unsigned int uiSoundId = pRadioTemplate->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e49, uiSoundId);
     }
     if (m_pWaterForm)
     {
-        unsigned int uiSoundId = m_pWaterForm->FUN_0084e3a0();
-        FUN_00485910(0x4d414e57, uiSoundId);
+        unsigned int uiSoundId = m_pWaterForm->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e57, uiSoundId);
     }
     if (m_pTalkingActivator)
     {
-        unsigned int uiSoundId = m_pTalkingActivator->FUN_0084e3a0();
-        FUN_00485910(0x4d414e52, uiSoundId);
+        unsigned int uiSoundId = m_pTalkingActivator->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e52, uiSoundId);
     }
     if (m_kActivationPrompt.Length() > 0)
     {
-        FUN_004856f0(0x4f544158, (void*)GetString().String(), GetString().Length() + 1);
+        TESForm_AddChunkArray(0x4f544158, (void*)GetString().String(), GetString().Length() + 1);
     }
     FinishSave();
 }
@@ -515,11 +522,12 @@ struct S_005118c0
     int unk2c;
     FUN_00489100_cls unk30;
     void FUN_00484da0(BGSLoadFormBuffer* stream);
-    void FUN_005118c0(BGSLoadFormBuffer* stream);
+    void TESObjectACTI_LoadGame(BGSLoadFormBuffer* stream);
 };
 // Reads a flag from the stream, and if set reads a string into buf and stores it in unk30.
 // @fnv 0x005118c0
-void S_005118c0::FUN_005118c0(BGSLoadFormBuffer* stream)
+// src: XBOX_PDB 0x005118c0
+void S_005118c0::TESObjectACTI_LoadGame(BGSLoadFormBuffer* stream)
 {
     char buf[260];
     FUN_00484da0(stream);
@@ -668,10 +676,10 @@ class ActiV511
     virtual void v79();
     virtual TESWaterForm* GetWaterForm();
 
-    TESSound* FUN_004fd3a0();
+    TESSound* TESChallenge_GetFormOne();
     TESEffectShader* FUN_00407840();
-    TESSound* FUN_00407820();
-    TESSound* FUN_004fd3c0();
+    TESSound* GetEffectShader_00407820();
+    TESSound* BGSProjectile_GetExplosion();
     BSStringT<char> GetString();
 
     void FUN_004febb0(TESSound* pkSound);
@@ -679,23 +687,24 @@ class ActiV511
     void FUN_00442a80(TESSound* pkSound);
     void SetWaterForm(TESWaterForm* pkWater);
     void FUN_004fb090(TESSound* pkSound);
-    void FUN_004851b0(TESForm* pkForm);
+    void TESForm_CopyAllComponents(TESForm* pkForm);
 
-    void FUN_00511120(TESForm* pkForm);
+    void TESObjectACTI_Copy(TESForm* pkForm);
 };
 
 // @fnv 0x00511120
-void ActiV511::FUN_00511120(TESForm* pkForm)
+// src: XBOX_PDB 0x00511120
+void ActiV511::TESObjectACTI_Copy(TESForm* pkForm)
 {
     ActiV511* pkActi = (ActiV511*)dynamic_cast<TESObjectACTI*>(pkForm);
     if (!pkActi)
         return;
 
-    FUN_004febb0(pkActi->FUN_004fd3a0());
+    FUN_004febb0(pkActi->TESChallenge_GetFormOne());
     FUN_004febd0(pkActi->FUN_00407840());
-    FUN_00442a80(pkActi->FUN_00407820());
+    FUN_00442a80(pkActi->GetEffectShader_00407820());
     SetWaterForm(pkActi->GetWaterForm());
-    FUN_004fb090(pkActi->FUN_004fd3c0());
+    FUN_004fb090(pkActi->BGSProjectile_GetExplosion());
     ((TESObjectACTI*)this)->SetActivationPrompt(pkActi->GetString());
-    FUN_004851b0(pkForm);
+    TESForm_CopyAllComponents(pkForm);
 }

@@ -317,7 +317,7 @@ class ReorientApplyBodyView
     unsigned int unk1b8;
     unsigned int unk1bc;
     ReorientApplyVector m_kAngularVelocity;
-    void FUN_00c9c1d0();
+    void activate_00c9c1d0();
 };
 
 struct ReorientApplyStepInfo
@@ -338,10 +338,11 @@ inline float reorientApplyAngle(float value)
 // The shared action has no applyAction declaration; this data-less adapter uses its checked layout.
 struct ReorientApplyActionView : hkpReorientAction
 {
-    __declspec(noinline) void FUN_00e445b0(const ReorientApplyStepInfo& info);
+    __declspec(noinline) void hkpReorientAction_applyAction(const ReorientApplyStepInfo& info);
 };
 // @fnv 0x00e445b0
-__declspec(noinline) void ReorientApplyActionView::FUN_00e445b0(const ReorientApplyStepInfo& info)
+// src: HAVOK_SRC 0x00e445b0
+__declspec(noinline) void ReorientApplyActionView::hkpReorientAction_applyAction(const ReorientApplyStepInfo& info)
 {
     ReorientApplyBodyView* body = reinterpret_cast<ReorientApplyBodyView*>(m_pEntity);
     ReorientApplyVector up;
@@ -364,6 +365,6 @@ __declspec(noinline) void ReorientApplyActionView::FUN_00e445b0(const ReorientAp
     ReorientApplyVector impulse;
     impulse.mul(m_fSpringStrength * angle * info.inverse, axis);
     impulse.sub(drag);
-    body->FUN_00c9c1d0();
+    body->activate_00c9c1d0();
     body->m_pMotionState.ApplyAngularImpulseToBodies(impulse);
 }

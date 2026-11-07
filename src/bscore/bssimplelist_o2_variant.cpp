@@ -22,10 +22,11 @@ struct MyHost
 {
     char _pad[0xC];
     MyCtrl* m_pFirstNode;
-    MyCtrl* FUN_00a5c570(const MyRTTI* pkRTTI) const;
+    MyCtrl* NiObjectNET_GetController(const MyRTTI* pkRTTI) const;
 };
 // @fnv 0x00a5c570
-MyCtrl* MyHost::FUN_00a5c570(const MyRTTI* pkRTTI) const
+// src: GAMEBRYO_LIB 0x00a5c570
+MyCtrl* MyHost::NiObjectNET_GetController(const MyRTTI* pkRTTI) const
 {
     MyCtrl* pkCtrl = m_pFirstNode;
     while (pkCtrl)

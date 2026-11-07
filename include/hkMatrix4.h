@@ -43,9 +43,9 @@ public:
     void transformDirection(const hkVector4& directionIn, hkVector4& directionOut) const;
     void setMulAffine(const hkMatrix4& a, const hkMatrix4& b);
 
-    void FUN_00de8da0(const hkMatrix4& a, const hkMatrix4& b);
-    void FUN_00de8e50(const hkMatrix4& b);
-    void FUN_00de9140(const hkMatrix4& a, const hkMatrix4& b);
-    void FUN_00de88a0(const hkSimdReal& s, const hkMatrix4& m);
-    int FUN_00de8910(float epsilon);
+    void hkMatrix4_setMul(const hkMatrix4& a, const hkMatrix4& b);
+    void MultiplyInPlace(const hkMatrix4& b);
+    void UpdateFields_00de9140(const hkMatrix4& a, const hkMatrix4& b);
+    void ProcessAndReturnValue_00de88a0(const hkSimdReal& s, const hkMatrix4& m);
+    int UpdateState_00de8910(float epsilon);
 };

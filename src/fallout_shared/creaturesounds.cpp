@@ -27,7 +27,7 @@ bool CreatureSounds::SetSoundName(const char* text)
 // @fnv 0x005f0380
 void CreatureSounds::ClearSounds()
 {
-    FUN_005f0820();
+    FreeAllCreatureSoundLists();
 }
 
 // @fnv 0x005f7bf0
@@ -121,7 +121,8 @@ struct FUN_005f0860_helper
 
 // Calls ClearSoundList for each index from 0 to 21 on this object.
 // @fnv 0x005f0820
-void CreatureSounds::FUN_005f0820()
+// src: COMMUNITY 0x005f0820
+void CreatureSounds::FreeAllCreatureSoundLists()
 {
     for (char i = 0; i < 22; ++i)
     {
@@ -186,7 +187,7 @@ struct FUN_005f0640_shell : public CreatureSounds
 // @fnv 0x005f0640
 void FUN_005f0640_shell::CopyCreatureSoundLists(CreatureSounds* apCopy)
 {
-    FUN_005f0820();
+    FreeAllCreatureSoundLists();
     if (apCopy)
     {
         for (char i = 0; i < 22; ++i)
@@ -227,16 +228,17 @@ unsigned int FUN_005f0a30_shell::GetRandomCreatureSound(CREATURE_SOUND_TYPE aeSo
     return result2;
 }
 
-void __cdecl FUN_004858f0(unsigned int, unsigned char);
+void __cdecl TESForm_AddChunk_3(unsigned int, unsigned char);
 void __cdecl _FUN_00485910(unsigned int, unsigned int);
 
 struct FUN_005f03a0_shell : public CreatureSounds
 {
-    void FUN_005f03a0();
+    void ProcessEntries_005f03a0();
 };
 
 // @fnv 0x005f03a0
-void FUN_005f03a0_shell::FUN_005f03a0()
+// src: GUESS 0x005f03a0 (confidence: low)
+void FUN_005f03a0_shell::ProcessEntries_005f03a0()
 {
     for (int i = 0; i < 22; ++i)
     {
@@ -255,7 +257,7 @@ void FUN_005f03a0_shell::FUN_005f03a0()
                     formID = SoundAssetTmp->SoundAssetTmp->GetFormID();
 
                 _FUN_00485910(0x49445343, formID);
-                FUN_004858f0(0x43445343, SoundAssetTmp->m_ucSortOrder);
+                TESForm_AddChunk_3(0x43445343, SoundAssetTmp->m_ucSortOrder);
 
                 pSoundList = pSoundList->GetNext();
             }

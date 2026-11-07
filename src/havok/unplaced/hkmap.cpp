@@ -8,11 +8,12 @@ struct FUN_00cb18f0_t
     int m_iPairCount;
     int FindSlot(int);
     int RemoveEntry(int);
-    int FUN_00cb1fb0(int key);
+    int hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(int key);
 };
 
 // @fnv 0x00cb1fb0
-int __thiscall FUN_00cb18f0_t::FUN_00cb1fb0(int key)
+// src: XBOX_PDB 0x00cb1fb0
+int __thiscall FUN_00cb18f0_t::hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(int key)
 {
     int found = FindSlot(key);
     if (found <= m_iPairCount)
@@ -24,7 +25,8 @@ int __thiscall FUN_00cb18f0_t::FUN_00cb1fb0(int key)
 }
 
 // @fnv 0x00cb1810
-int __cdecl FUN_00cb1810(int key)
+// src: XBOX_PDB 0x00cb1810
+int __cdecl hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_getSizeInBytesFor(int key)
 {
     int iDoubled = key * 2;
     int size = 8;
@@ -64,7 +66,8 @@ int FUN_00cb1930_t::LookupHashEntry(int key, int defaultValue)
 }
 
 // @fnv 0x00cb17f0
-int FUN_00cb17f0(int value)
+// src: GUESS 0x00cb17f0 (confidence: low)
+int Hkmap_ProcessEntries_00cb17f0(int value)
 {
     int required = value * 2;
     int size = 8;
@@ -136,7 +139,7 @@ struct DepthLimit
     int m_flags;
     int m_uiItemCount;
 
-    void FUN_00cb1870(void* allocator, void* key, int value);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(void* allocator, void* key, int value);
     void ResizeAndRehash(Allocator* allocator, int count);
 };
 
@@ -162,7 +165,7 @@ void DepthLimit::ResizeAndRehash(Allocator* allocator, int count)
     for (int i = 0; i < iOldCapacity; ++i)
     {
         if (pOldEntries[i].m_key != -1)
-            this->FUN_00cb1870(allocator, reinterpret_cast<void*>(pOldEntries[i].m_key),
+            this->hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(allocator, reinterpret_cast<void*>(pOldEntries[i].m_key),
                                pOldEntries[i].m_uiFilterValue);
     }
 
@@ -191,13 +194,14 @@ struct FUN_00cb1e40_t
     int m_flags;
     int m_uiItemCount;
 
-    void FUN_00cb1e00();
-    void FUN_00cb1e40(FUN_00cb1e40_arg_t* arg);
+    void ProcessEntries_00cb1e00();
+    void hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_clearAndDeallocate(FUN_00cb1e40_arg_t* arg);
 };
 
-void FUN_00cb1e40_t::FUN_00cb1e40(FUN_00cb1e40_arg_t* arg)
+// src: XBOX_PDB 0x00cb1e40
+void FUN_00cb1e40_t::hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_clearAndDeallocate(FUN_00cb1e40_arg_t* arg)
 {
-    FUN_00cb1e00();
+    ProcessEntries_00cb1e00();
 
     if (!(m_flags & 0x80000000))
     {
@@ -247,11 +251,12 @@ struct FUN_00cb17e0_cls
     int m_uiStandInValue;
     int m_iValueAfterStandIn;
     int m_iPairCount;
-    int FUN_00cb17e0();
+    int hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_getMemSize();
 };
 
 // @fnv 0x00cb17e0
-int FUN_00cb17e0_cls::FUN_00cb17e0()
+// src: XBOX_PDB 0x00cb17e0
+int FUN_00cb17e0_cls::hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_getMemSize()
 {
     return m_iPairCount * 8 + 8;
 }
@@ -370,11 +375,12 @@ class hkMapCB1E
     int m_iCapacityFlags;
     int m_iPairCount;
 
-    void FUN_00cb1e00();
+    void ProcessEntries_00cb1e00();
 };
 
 // @fnv 0x00cb1e00
-void hkMapCB1E::FUN_00cb1e00()
+// src: GUESS 0x00cb1e00 (confidence: low)
+void hkMapCB1E::ProcessEntries_00cb1e00()
 {
     int n = m_iPairCount + 1;
     for (int i = 0; i < n; i++)
@@ -413,18 +419,19 @@ class FUN_00cb2000_cls
     int m_04;
     int m_pFreeList;
 
-    int FUN_00cb1c60(int iArg0, int iArg1);
-    void FUN_00cb1d20(int iCount);
-    int FUN_00cb2000(int iArg0, int iArg1);
+    int hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_findKey(int iArg0, int iArg1);
+    void hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_remove(int iCount);
+    int ProcessAndReturnValue_00cb2000(int iArg0, int iArg1);
 };
 
 // @fnv 0x00cb2000
-int FUN_00cb2000_cls::FUN_00cb2000(int iArg0, int iArg1)
+// src: GUESS 0x00cb2000 (confidence: low)
+int FUN_00cb2000_cls::ProcessAndReturnValue_00cb2000(int iArg0, int iArg1)
 {
-    int iCount = FUN_00cb1c60(iArg0, iArg1);
+    int iCount = hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_findKey(iArg0, iArg1);
     if (iCount <= m_pFreeList)
     {
-        FUN_00cb1d20(iCount);
+        hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_remove(iCount);
         return 0;
     }
     return 1;
@@ -476,12 +483,13 @@ class hkMapBaseCB18
     int m_iPairCount;
 
     void ResizeAndRehash(hkMemoryAllocatorCB18& alloc, int newHashMod);
-    int FUN_00cb1870(hkMemoryAllocatorCB18& alloc, unsigned int key, unsigned int val);
+    int hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocatorCB18& alloc, unsigned int key, unsigned int val);
 };
 
 // Inserts or updates a key/val pair in the hash map, resizing if needed, and returns 1 if the key was new.
 // @fnv 0x00cb1870
-int hkMapBaseCB18::FUN_00cb1870(hkMemoryAllocatorCB18& alloc, unsigned int key, unsigned int val)
+// src: XBOX_PDB 0x00cb1870
+int hkMapBaseCB18::hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocatorCB18& alloc, unsigned int key, unsigned int val)
 {
     if ((m_iCapacityFlags & 0x7fffffff) * 2 > m_iPairCount)
         ResizeAndRehash(alloc, m_iPairCount + m_iPairCount + 2);
@@ -516,9 +524,9 @@ struct EdgeMap
     int unk08;
     void EnsureCapacity(Allocator& allocator, int count);
     int FindSlot(int key);
-    void FUN_00cb1870(Allocator& allocator, int key, int value);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(Allocator& allocator, int key, int value);
     void ProcessArgument(Allocator& allocator);
-    void FUN_00a29680();
+    void Object_DoNothing();
     int first() const
     {
         int i;
@@ -548,7 +556,7 @@ struct Manager
         return *unk10;
     }
 };
-Manager* __cdecl FUN_00c85750();
+Manager* __cdecl hkMemoryRouter_getInstance();
 struct Target
 {
     int unk00, unk04;
@@ -556,14 +564,15 @@ struct Target
     int unk0c, unk10;
     unsigned char* unk14;
     int unk18;
-    bool* FUN_00e48e80(bool* out);
+    bool* hkpConvexVerticesConnectivity_isClosed(bool* out);
 };
 // Checks that every edge in the vertex list appears exactly twice with opposite orientation, returning true only when all edge keys have value 3.
 // @fnv 0x00e48e80
-bool* Target::FUN_00e48e80(bool* apResult)
+// src: HAVOK_LIB 0x00e48e80
+bool* Target::hkpConvexVerticesConnectivity_isClosed(bool* apResult)
 {
     EdgeMap edgeMap = {0, 0, -1};
-    Allocator& allocator = FUN_00c85750()->heap();
+    Allocator& allocator = hkMemoryRouter_getInstance()->heap();
     edgeMap.EnsureCapacity(allocator, 0);
     int count = unk18;
     int iVertexOffset = 0;
@@ -589,16 +598,16 @@ bool* Target::FUN_00e48e80(bool* apResult)
                 if (value & iOrientation)
                 {
                     *apResult = false;
-                    edgeMap.ProcessArgument(FUN_00c85750()->heap());
-                    edgeMap.FUN_00a29680();
+                    edgeMap.ProcessArgument(hkMemoryRouter_getInstance()->heap());
+                    edgeMap.Object_DoNothing();
                     return apResult;
                 }
                 edgeMap.unk00[index].value = value | iOrientation;
             }
             else
             {
-                Allocator& allocator = FUN_00c85750()->heap();
-                edgeMap.FUN_00cb1870(allocator, keyPlus, iOrientation);
+                Allocator& allocator = hkMemoryRouter_getInstance()->heap();
+                edgeMap.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(allocator, keyPlus, iOrientation);
             }
             iPrevVertex = iCurrVertex;
         }
@@ -609,14 +618,14 @@ bool* Target::FUN_00e48e80(bool* apResult)
         if (edgeMap.unk00[index].value != 3)
         {
             *apResult = false;
-            edgeMap.ProcessArgument(FUN_00c85750()->heap());
-            edgeMap.FUN_00a29680();
+            edgeMap.ProcessArgument(hkMemoryRouter_getInstance()->heap());
+            edgeMap.Object_DoNothing();
             return apResult;
         }
     }
     *apResult = true;
-    edgeMap.ProcessArgument(FUN_00c85750()->heap());
-    edgeMap.FUN_00a29680();
+    edgeMap.ProcessArgument(hkMemoryRouter_getInstance()->heap());
+    edgeMap.Object_DoNothing();
     return apResult;
 }
 
@@ -648,12 +657,13 @@ struct MapCB1C
     KeyValue* m_kPrimitiveElement;
     int m_iCapacityFlags;
     int m_iPairCount;
-    hkUint64CB1C FUN_00cb1cb0(hkUint64CB1C key, hkUint64CB1C def) const;
+    hkUint64CB1C hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_getWithDefault(hkUint64CB1C key, hkUint64CB1C def) const;
 };
 
 // Looks up a key in the primitive element array and returns its value, or def when the key is not present.
 // @fnv 0x00cb1cb0
-hkUint64CB1C MapCB1C::FUN_00cb1cb0(hkUint64CB1C key, hkUint64CB1C def) const
+// src: HAVOK_LIB 0x00cb1cb0
+hkUint64CB1C MapCB1C::hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_getWithDefault(hkUint64CB1C key, hkUint64CB1C def) const
 {
     typedef MapOpsCB1C OPS;
     if (m_iPairCount > 0)
@@ -699,12 +709,13 @@ class hkMapBaseU64
     int m_iCapacityFlags;
     int m_iPairCount;
 
-    void FUN_00cb1d20(unsigned it);
+    void hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_remove(unsigned it);
 };
 
 // Invalidates the entry at index it and rehashes subsequent entries to close the gap in the open-addressed map.
 // @fnv 0x00cb1d20
-void hkMapBaseU64::FUN_00cb1d20(unsigned aiIndex)
+// src: XBOX_PDB 0x00cb1d20
+void hkMapBaseU64::hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_remove(unsigned aiIndex)
 {
     unsigned i = aiIndex;
     --m_iCapacityFlags;
@@ -764,12 +775,13 @@ class MapBase_cb1e
     int m_iPairCount;
 
     void InsertKeyValue(Allocator_cb1e& alloc, unsigned __int64 key, unsigned __int64 val);
-    void FUN_00cb1e70(Allocator_cb1e& alloc, int newcap);
+    void hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_resizeTable(Allocator_cb1e& alloc, int newcap);
 };
 
 // Reallocates the pair array to newcap (min 8), reinserts old pairs, and frees the old block unless the high bit of m_iCapacityFlags was set.
 // @fnv 0x00cb1e70
-void MapBase_cb1e::FUN_00cb1e70(Allocator_cb1e& alloc, int aiNewCapacity)
+// src: HAVOK_LIB 0x00cb1e70
+void MapBase_cb1e::hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_resizeTable(Allocator_cb1e& alloc, int aiNewCapacity)
 {
     if (aiNewCapacity <= 8)
         aiNewCapacity = 8;
@@ -818,7 +830,7 @@ class hkMapBaseCB1F
 {
   public:
     void ResizeAndRehash(hkMemoryAllocatorCB1F& alloc, int newcap);
-    int FUN_00cb1f40(hkMemoryAllocatorCB1F& alloc, unsigned int key, unsigned int val);
+    int InsertKeyIfAbsent(hkMemoryAllocatorCB1F& alloc, unsigned int key, unsigned int val);
 
     hkMapPairCB1F* m_kPrimitiveElement;
     int m_iCapacityFlags;
@@ -827,7 +839,8 @@ class hkMapBaseCB1F
 
 // Grows the table if over half full, adds key/val if key is absent, and returns the key's slot index.
 // @fnv 0x00cb1f40
-int hkMapBaseCB1F::FUN_00cb1f40(hkMemoryAllocatorCB1F& alloc, unsigned int key, unsigned int uiValue)
+// src: GUESS 0x00cb1f40 (confidence: medium)
+int hkMapBaseCB1F::InsertKeyIfAbsent(hkMemoryAllocatorCB1F& alloc, unsigned int key, unsigned int uiValue)
 {
     {
         int numElems = m_iCapacityFlags & static_cast<int>(0x7fffffff);

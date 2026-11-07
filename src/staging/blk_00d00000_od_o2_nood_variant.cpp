@@ -52,11 +52,12 @@ struct BigState
     char unk127;
     float unk128;
 
-    BigState& FUN_00d105b0(const BigState& o);
+    BigState& UpdateState_00d105b0(const BigState& o);
 };
 
 // @fnv 0x00d105b0
-BigState& BigState::FUN_00d105b0(const BigState& o)
+// src: GUESS 0x00d105b0 (confidence: low)
+BigState& BigState::UpdateState_00d105b0(const BigState& o)
 {
     unk00 = o.unk00;
     unk04 = o.unk04;
@@ -236,7 +237,8 @@ struct __declspec(align(16)) FUN_00c9ce00_cls
     void FUN_00c9ce00(int);
 };
 // @fnv 0x00d1f1a0
-int FUN_00d1f1a0()
+// src: HAVOK_LIB 0x00d1f1a0
+int getVtablehkpEntity()
 {
     FUN_00c9ce00_cls holder;
     holder.FUN_00c9ce00(W().x);

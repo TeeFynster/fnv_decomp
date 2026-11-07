@@ -81,13 +81,13 @@ public:
                        BSSimpleArray<const NavMeshInfo*, 1024>*);
     void AddAvoidanceNodes();
     void InsertNode(unsigned int, const PathSmootherPOVAvoidanceNode&, float);
-    bool FUN_006b3380(BSSimpleArray<PathSmootherPOVAvoidanceNode, 1024>*,
+    bool AStarSearch_PathSmootherPOVNode_PathSmootherPOVLink_Search(BSSimpleArray<PathSmootherPOVAvoidanceNode, 1024>*,
                       BSSimpleArray<NavMeshEdgeSegment, 1024>*, bool);
     void BuildPOVLinks();
     bool TryAddLastNode();
     void InsertPOVPoint(BSSimpleArray<NavMeshEdgeRecord, 1024>*, unsigned int, bool);
     void BuildFallbackPath();
-    bool FUN_006b2fc0(BSSimpleArray<NavMeshTriangleEdgeReference, 1024>*);
+    bool AddIntersectingPOVsAsBadNodes(BSSimpleArray<NavMeshTriangleEdgeReference, 1024>*);
     void CollectUniqueNavMeshes();
     void BuildSmoothedPath();
     void AddPathPoints(bool);
@@ -96,10 +96,10 @@ public:
     bool FindPathToPoint(const POVNode*, PathSmootherPOVPoint*, BSSimpleArray<POVNode*, 1024>*);
     bool CalculatePathCost(PathSmootherPOVPoint*, PathSmootherPOVPoint*,
                            const NiPoint3&, const NiPoint3&, float*);
-    bool FUN_006b1e50(const NavMeshEdgePoint&, Sphere&, CircularArc, NavMeshEdgePoint*);
-    bool FUN_006b23d0(const NavMeshEdgePoint&, Sphere&, CircularArc);
-    bool FUN_006b25f0(const NavMeshEdgePoint&, const NiPoint3&, NavMeshEdgePoint*, bool, bool, float&);
-    unsigned int FUN_0069f900(PathSmootherPOVPoint*, ANGLE_DIRECTION);
+    bool CheckArcAgainstNavMesh(const NavMeshEdgePoint&, Sphere&, CircularArc, NavMeshEdgePoint*);
+    bool DoubleCheckArcAgainstNavMesh(const NavMeshEdgePoint&, Sphere&, CircularArc);
+    bool TripleCheckSegmentAgainstNavMesh(const NavMeshEdgePoint&, const NiPoint3&, NavMeshEdgePoint*, bool, bool, float&);
+    unsigned int GetKeyForNode(PathSmootherPOVPoint*, ANGLE_DIRECTION);
     int InsertOrUpdateNode(unsigned int, float, POVNode*&);
     void SetPOVSearchNode(POVNode*, PathSmootherPOVPoint*, ANGLE_DIRECTION);
 };

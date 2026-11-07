@@ -11,11 +11,11 @@
 #include "../../include/MemoryManager.h"
 #include "../../include/AutoMemContext.h"
 extern BGSMoviePlayer* DAT_0126fac4;
-int __stdcall FUN_00ec16b0(int a);
+int __stdcall MoviePlayer_PlaySequenceThread(int a);
 extern MemoryManager g_memoryManager;
 struct FUN_00ec1a40_Class
 {
-    void* FUN_00ec1a40();
+    void* NiTMap_char_const_char_NewItem();
 };
 extern "C" int __cdecl _NiStricmp(const char*, const char*);
 struct FUN_00ec1c90_class
@@ -29,13 +29,13 @@ struct FUN_00ec1dc0_Class
 };
 struct FUN_00ec1f20Class
 {
-    void FUN_00ec1570();
-    void* FUN_00ec1f20();
+    void Movie_ClearData();
+    void* Movie_Movie();
 };
 struct FUN_00ec1f40Class
 {
-    void __thiscall FUN_00ec1020();
-    void __thiscall FUN_00ec1f40();
+    void __thiscall Movie_Stop();
+    void __thiscall Movie_Stop_Thunk();
 };
 struct FUN_00ec29b0_class
 {
@@ -56,7 +56,7 @@ struct FUN_00ec2c10
     int m_0028;
     int m_002c;
     void __thiscall SetThreadPriorityLevel(int);
-    void __thiscall FUN_00ec2c10_init();
+    void __thiscall IncreaseThreadPriorityUpToFive();
 };
 struct FUN_00ec1570_t
 {
@@ -71,7 +71,7 @@ struct FUN_00ec1570_t
     int i;
     bool j;
 };
-void __fastcall FUN_00ec1570(FUN_00ec1570_t* p);
+void __fastcall Movie_ClearData(FUN_00ec1570_t* p);
 struct FUN_00ec15e0_shell
 {
     void __thiscall FUN_00ec15e0();
@@ -145,7 +145,7 @@ struct FUN_00ec2a60_class
     int m_0008;
     int m_000c;
     int m_0010;
-    void __thiscall FUN_00ec2a60();
+    void __thiscall MoviePlayer_Resume();
 };
 struct FUN_00ec2bb0_Class
 {
@@ -161,7 +161,7 @@ struct FUN_00ec2bb0_Class
     virtual void v9();
     virtual unsigned int v10();
     virtual unsigned int v11();
-    float FUN_00ec2bb0(float, unsigned int, bool);
+    float MoviePlayer_CalculateYOffset(float, unsigned int, bool);
 };
 extern "C" __declspec(dllimport) int __stdcall GetExitCodeThread(void* hThread, unsigned long* pExitCode);
 struct FUN_00ec17c0_Class
@@ -169,13 +169,13 @@ struct FUN_00ec17c0_Class
     int m_0000;
     int m_0004;
     void* m_0008;
-    bool FUN_00ec17c0();
+    bool MoviePlayer_GetPlayingSequence();
 };
 struct FUN_00ec19a0_Class
 {
     int m_0000;
     void* m_0004;
-    void __thiscall FUN_00ec19a0();
+    void __thiscall WaitForStoredHandle();
 };
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf1c8(void* a, int b);
 struct FUN_00ec1a60_t
@@ -216,7 +216,7 @@ struct FUN_00ec1a90_Class
 };
 struct FUN_00ec1d30_Class : FUN_00ec1a90_Class
 {
-    void __thiscall FUN_00ec1d30();
+    void __thiscall UpdateState_00ec1d30();
 };
 struct FUN_00ec0460_cls
 {
@@ -291,7 +291,7 @@ struct FUN_00ec0460_cls
     virtual void __stdcall v68(void);
     virtual void __stdcall v69(int a, int b, int c);
 };
-void __cdecl FUN_00ec0460(FUN_00ec0460_cls* p);
+void __cdecl Setup_Renderstate(FUN_00ec0460_cls* p);
 struct GridDesc
 {
     int unk00;
@@ -311,8 +311,8 @@ struct GridDesc
     int unk38;
     unsigned int cellSize;
 };
-void __cdecl FUN_00ec0720(int target, float x, float y, float sx, float sy, unsigned int w, unsigned int h);
-void __cdecl FUN_00ec0550(GridDesc* grid, float startX, float startY, float scaleX, float scaleY);
+void __cdecl Object_UpdateFields_00ec0720(int target, float x, float y, float sx, float sy, unsigned int w, unsigned int h);
+void __cdecl Runtime_ProcessEntries_00ec0550(GridDesc* grid, float startX, float startY, float scaleX, float scaleY);
 struct NiPlaybackFrameSize
 {
     unsigned int uiWidth;
@@ -359,7 +359,7 @@ struct FUN_00ec1020_cls
     int m_00;
     int m_04;
     int m_08;
-    void FUN_00ec1020();
+    void Movie_Stop();
 };
 struct FUN_00ec14d0_bink
 {
@@ -424,10 +424,10 @@ class BEC16D0MoviePlayerThread
     BEC16D0Semaphore m_kStartSemaphore;
 
     void SetPriority(int iPriority);
-    void FUN_00ec16d0(void* pvParam, bool bFlag22, int iPriority, bool bFlag23, bool bFlag24, float fValue28);
+    void MoviePlayer_StartSequence(void* pvParam, bool bFlag22, int iPriority, bool bFlag23, bool bFlag24, float fValue28);
 };
 extern int DAT_010f1ca4;
-void __cdecl FUN_00aa10f0(int aValue);
+void __cdecl _NiFree_00aa10f0(int aValue);
 extern MemoryManager DAT_011f6238;
 struct FUN_00ec1df0_cls
 {
@@ -477,7 +477,7 @@ struct FUN_00ec2c40_cls
     int m_0028;
     int m_002c;
     void __thiscall SetThreadPriorityLevel(int);
-    void FUN_00ec2c40();
+    void MoviePlayer_DecreaseSequenceThreadPriority();
 };
 // Look up the file name registered under a key and copy it into a MAX_PATH buffer.
 extern "C" int __cdecl strcpy_s(char* pcDest, unsigned int uiSize, const char* pcSrc);
@@ -723,11 +723,12 @@ struct FUN_00ec2490_Class
     Movie* cached;
     bool hasCached;
     void PauseMovie();
-    void FUN_00ec25e0();
-    unsigned char FUN_00ec2490(int, unsigned char);
+    void MoviePlayer_Stop();
+    unsigned char BGSMoviePlayer_PlayBackground(int, unsigned char);
 };
 // @fnv 0x00ec2490
-unsigned char FUN_00ec2490_Class::FUN_00ec2490(int value, unsigned char option)
+// src: COMMUNITY 0x00ec2490
+unsigned char FUN_00ec2490_Class::BGSMoviePlayer_PlayBackground(int value, unsigned char option)
 {
     Scope2490 scope;
     PauseMovie();
@@ -743,7 +744,7 @@ unsigned char FUN_00ec2490_Class::FUN_00ec2490(int value, unsigned char option)
     }
     unsigned char result = movie->InitAndCheck(value, option);
     if (!result)
-        FUN_00ec25e0();
+        MoviePlayer_Stop();
     return result;
 }
 
@@ -771,7 +772,8 @@ struct SpawnedObject
 };
 
 // @fnv 0x00ec2ca0
-int __stdcall FUN_00ec2ca0(int a1)
+// src: COMMUNITY 0x00ec2ca0
+int __stdcall MoviePlayer_MovieLoadingThread(int a1)
 {
     SpawnedObject* obj = new SpawnedObject();
     obj->FUN_00ec0ac0(a1, 1, 1, 1);
@@ -865,19 +867,21 @@ struct MoviePlayerA
     int unk38;
     bool unk3c;
 
-    void FUN_00ec2320(const char* name, bool first, int a, int b, bool c, bool d, int e, bool f, bool g);
-    void FUN_00ec1a00()
+    void MoviePlayer_Play(const char* name, bool first, int a, int b, bool c, bool d, int e, bool f, bool g);
+// src: COMMUNITY 0x00ec1a00
+    void MoviePlayer_SignalBinkOpen()
     {
         MovieSemaphore* semaphore = &semaphore30;
         ReleaseSemaphore(semaphore->handle, 1, 0);
         FUN_00fdf1c0(semaphore);
         unk3c = true;
     }
-    void FUN_00ec2760(const char* list);
+    void MoviePlayer_PlaySequence(const char* list);
 };
 
 // @fnv 0x00ec2760
-void MoviePlayerA::FUN_00ec2760(const char* list)
+// src: XBOX_PDB 0x00ec2760
+void MoviePlayerA::MoviePlayer_PlaySequence(const char* list)
 {
     char* ext2;
     int tidTmp3 = g_tlsAllocTag;
@@ -899,7 +903,7 @@ void MoviePlayerA::FUN_00ec2760(const char* list)
             {
                 bool* setting =
                     &g_0126fac8 ? &g_0126fac8.value : (*(bool*)& DAT_01202800 = false, (bool*)&DAT_01202800);
-                FUN_00ec2320(tok_2, first, 1, 0, *setting, unk22, 0, unk23, unk24);
+                MoviePlayer_Play(tok_2, first, 1, 0, *setting, unk22, 0, unk23, unk24);
             }
             else
             {
@@ -915,7 +919,7 @@ void MoviePlayerA::FUN_00ec2760(const char* list)
     {
         unsigned long previous5 = GetCurrentThreadId();
         if (previous5 != GetThreadId() && !unk3c)
-            FUN_00ec1a00();
+            MoviePlayer_SignalBinkOpen();
     }
     Unlock();
 }
@@ -1178,7 +1182,8 @@ struct ScopedAllocContext
 };
 
 // @fnv 0x00ec1ff0
-void* __stdcall FUN_00ec1ff0(unsigned int size)
+// src: GUESS 0x00ec1ff0 (confidence: low)
+void* __stdcall Runtime_AllocateStorage_00ec1ff0(unsigned int size)
 {
     ScopedAllocContext ctx(0x14);
     return DAT_011f6238.Allocate(size);
@@ -1231,7 +1236,7 @@ class PlaybackEC2200
 {
   public:
     void Close();
-    bool FUN_00ec2200(const char* pcName, bool bA, bool bB, bool bC);
+    bool MoviePlayer_MovieLoadingThreadWithSettings(const char* pcName, bool bA, bool bB, bool bC);
     int unk00;
     int unk04;
     int unk08;
@@ -1239,7 +1244,8 @@ class PlaybackEC2200
 };
 
 // @fnv 0x00ec2200
-bool PlaybackEC2200::FUN_00ec2200(const char* pcName, bool bA, bool bB, bool bC)
+// src: COMMUNITY 0x00ec2200
+bool PlaybackEC2200::MoviePlayer_MovieLoadingThreadWithSettings(const char* pcName, bool bA, bool bB, bool bC)
 {
     AutoMemContext kContext(20);
     m_pFile = new PlaybackFileEC2200;
@@ -1284,7 +1290,7 @@ class BSMovieJob
         return g_memoryManager.Allocate(uiSize);
     }
     static void operator delete(void* pv);
-    bool FUN_00ec0e00(void* pFile, bool a, bool b, bool c, bool d, bool e, bool f, bool g, float fScale);
+    bool Movie_Play(void* pFile, bool a, bool b, bool c, bool d, bool e, bool f, bool g, float fScale);
 };
 
 class BSMovieThread
@@ -1298,12 +1304,13 @@ class BSMovieThread
     int unk1c, unk20, unk24;
     float m_fScale;
     void PauseMovie();
-    void FUN_00ec25e0();
-    bool FUN_00ec2320(void* pFile, bool a, bool b, bool c, bool d, bool e, bool bReuse, bool f, bool g);
+    void MoviePlayer_Stop();
+    bool MoviePlayer_Play(void* pFile, bool a, bool b, bool c, bool d, bool e, bool bReuse, bool f, bool g);
 };
 
 // @fnv 0x00ec2320
-bool BSMovieThread::FUN_00ec2320(void* pFile, bool a, bool b, bool c, bool d, bool e, bool bReuse, bool f, bool g)
+// src: COMMUNITY 0x00ec2320
+bool BSMovieThread::MoviePlayer_Play(void* pFile, bool a, bool b, bool c, bool d, bool e, bool bReuse, bool f, bool g)
 {
     MemContextGuard kGuard(20);
     if (!bReuse)
@@ -1320,8 +1327,8 @@ bool BSMovieThread::FUN_00ec2320(void* pFile, bool a, bool b, bool c, bool d, bo
             m_pkCurrent = new BSMovieJob;
         }
     }
-    bool bResult = m_pkCurrent->FUN_00ec0e00(pFile, a, b, c, d, e, f, g, m_fScale);
-    FUN_00ec25e0();
+    bool bResult = m_pkCurrent->Movie_Play(pFile, a, b, c, d, e, f, g, m_fScale);
+    MoviePlayer_Stop();
     return bResult;
 }
 
@@ -1550,11 +1557,12 @@ struct EC2650Owner
     int unk04;
     int unk08;
     EC1060Target* unk0c;
-    unsigned char FUN_00ec2650(unsigned char a, unsigned char b);
+    unsigned char MoviePlayer_Update(unsigned char a, unsigned char b);
 };
 
 // @fnv 0x00ec2650
-unsigned char EC2650Owner::FUN_00ec2650(unsigned char a, unsigned char b)
+// src: COMMUNITY 0x00ec2650
+unsigned char EC2650Owner::MoviePlayer_Update(unsigned char a, unsigned char b)
 {
     HeapZoneGuard guard(0x14);
     if (unk0c && unk0c->IsReady())
@@ -1635,7 +1643,7 @@ struct BaseE40
     virtual ~BaseE40()
     {
         FUN_00438af0();
-        FUN_00aa10f0((int)m_ppkHashTable);
+        _NiFree_00aa10f0((int)m_ppkHashTable);
     }
     virtual unsigned int KeyToHashIndex(int key) const;
     virtual bool IsKeysEqual(int a, int b) const;
@@ -1753,8 +1761,9 @@ class BSMoviePlayer
     MovieSemaphore semaphore;
     int unk3c;
     BSTCaseInsensitiveStringMap<char*> strings;
-    void FUN_00ec25e0();
-    void FUN_00ec2e50()
+    void MoviePlayer_Stop();
+// src: GUESS 0x00ec2e50 (confidence: low)
+    void ReleaseStorage_00ec2e50()
     {
         NiTMapIterator pos = strings.GetFirstPos();
         while (pos)
@@ -1772,8 +1781,8 @@ class BSMoviePlayer
 BSMoviePlayer::~BSMoviePlayer()
 {
     while (unk0c != 0)
-        FUN_00ec25e0();
-    FUN_00ec2e50();
+        MoviePlayer_Stop();
+    ReleaseStorage_00ec2e50();
 }
 }  // namespace fnv_00ec15e0
 
@@ -2107,8 +2116,8 @@ struct S0EPlaybackFile
 
     bool InitPlayback(const char* pcName, bool bQuiet, bool bLoop, bool bLooping);
     bool Update(bool bWait, bool b2, bool b3);
-    void FUN_00ec1020();
-    unsigned char FUN_00ec0e00(const char* pcName, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7,
+    void Movie_Stop();
+    unsigned char Movie_Play(const char* pcName, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7,
                                float afFinalFloat);
 };
 
@@ -2120,7 +2129,8 @@ __forceinline S0EBufferData* DynamicCastBufferData(S0EObject* pkObject)
 }
 
 // @fnv 0x00ec0e00
-unsigned char S0EPlaybackFile::FUN_00ec0e00(const char* pcName, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6,
+// src: COMMUNITY 0x00ec0e00
+unsigned char S0EPlaybackFile::Movie_Play(const char* pcName, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6,
                                             bool b7, float afFinalFloat)
 {
     S0EBufferData* pkCast2;
@@ -2166,7 +2176,7 @@ unsigned char S0EPlaybackFile::FUN_00ec0e00(const char* pcName, bool b1, bool b2
     }
 
     bRet = m_uiFrame >= m_pkBink->m_uiFrames;
-    FUN_00ec1020();
+    Movie_Stop();
     if (b6)
         DAT_0126fac4->EndMoviePlayback();
     if (b7)

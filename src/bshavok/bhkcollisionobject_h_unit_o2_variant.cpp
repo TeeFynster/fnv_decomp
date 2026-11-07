@@ -32,7 +32,7 @@ bhkCollisionObject* bhkCollisionObject::GetFromRigidBody(const hkpRigidBody* bod
         DynamicCastByRTTI(const_cast<NiRTTI*>(&ms_kRTTI), reinterpret_cast<NiNode*>(collision)));
 }
 
-void* __fastcall FUN_00c6b910(void*);
+void* __fastcall NiRTTI_UpdateState_00c6b910(void*);
 extern int DAT_0103046c;
 struct MyType
 {
@@ -44,12 +44,13 @@ struct MyType
     char d[0x14];
     MyType()
     {
-        FUN_00c6b910(this);
+        NiRTTI_UpdateState_00c6b910(this);
         *(void**)this = (void*)&DAT_0103046c;
     }
 };
 // @fnv 0x00c65830
-void* FUN_00c65830()
+// src: EXE 0x00c65830
+void* bhkCollisionObject_CreateObject()
 {
     return new MyType;
 }
@@ -104,16 +105,17 @@ struct ScopedMemoryContext
 
 struct FUN_00c659d0_shell : bhkCollisionObject
 {
-    void FUN_00c6ba30(MyType*, void*);
-    MyType* FUN_00c659d0(void* param);
+    void bhkNiCollisionObject_CopyMembers(MyType*, void*);
+    MyType* bhkCollisionObject_CreateClone(void* param);
 };
 
 // @fnv 0x00c659d0
-MyType* FUN_00c659d0_shell::FUN_00c659d0(void* param)
+// src: XBOX_PDB 0x00c659d0
+MyType* FUN_00c659d0_shell::bhkCollisionObject_CreateClone(void* param)
 {
     ScopedMemoryContext scope(0x10);
     MyType* obj = new MyType;
-    FUN_00c6ba30(obj, param);
+    bhkNiCollisionObject_CopyMembers(obj, param);
     return obj;
 }
 
@@ -138,12 +140,13 @@ struct FUN_00c65890_cls
     FUN_00c65890_Callee* m_08;
     int unk0c;
     FUN_00c65890_Tgt* m_10;
-    void FUN_00c65890(int param);
+    void bhkCollisionObject_UpdateWorldData(int param);
     void UpdateState(int param);
 };
 
 // @fnv 0x00c65890
-void FUN_00c65890_cls::FUN_00c65890(int param)
+// src: XBOX_PDB 0x00c65890
+void FUN_00c65890_cls::bhkCollisionObject_UpdateWorldData(int param)
 {
     FUN_00c65890_Tgt* tgt = m_10;
     if (tgt != 0)
@@ -176,10 +179,11 @@ struct CollisionState
     int unk08;
     int unk0C;
     CollisionNode* node;
-    bool FUN_00c659a0();
+    bool bhkCollisionObject_QKeyframe();
 };
 // @fnv 0x00c659a0
-bool CollisionState::FUN_00c659a0()
+// src: XBOX_PDB 0x00c659a0
+bool CollisionState::bhkCollisionObject_QKeyframe()
 {
     if (node)
     {
@@ -203,11 +207,11 @@ struct SpinLock_c65f40
 };
 extern SpinLock_c65f40 g_lock_c65f40;
 
-char __cdecl FUN_00c8cce0(int* type);
+char __cdecl bhkRigidBody_IsMotionTypeDynamic(int* type);
 
 inline bool Check(int t)
 {
-    return FUN_00c8cce0(&t) != 0;
+    return bhkRigidBody_IsMotionTypeDynamic(&t) != 0;
 }
 
 struct WorldObj_c65f40
@@ -360,11 +364,12 @@ struct ColObj_c65f40
     unsigned short flags;
     short unk0E;
     RigidBody_c65f40* body;
-    void FUN_00c65f40(int type, NiObj_c65f40* obj, bool update);
+    void bhkCollisionObject_SetMotionType(int type, NiObj_c65f40* obj, bool update);
 };
 
 // @fnv 0x00c65f40
-void ColObj_c65f40::FUN_00c65f40(int type, NiObj_c65f40* obj, bool update)
+// src: XBOX_PDB 0x00c65f40
+void ColObj_c65f40::bhkCollisionObject_SetMotionType(int type, NiObj_c65f40* obj, bool update)
 {
     RigidBody_c65f40* rb;
     int t;
@@ -377,7 +382,7 @@ void ColObj_c65f40::FUN_00c65f40(int type, NiObj_c65f40* obj, bool update)
     int cur = rb->hkObj ? rb->hkObj->motionType : 5;
     if (cur == type)
         return;
-    if (type == 1 && FUN_00c8cce0(&cur))
+    if (type == 1 && bhkRigidBody_IsMotionTypeDynamic(&cur))
         return;
     g_lock_c65f40.Lock(0);
     bool ok = rb->SetMotion(type);
@@ -391,7 +396,7 @@ void ColObj_c65f40::FUN_00c65f40(int type, NiObj_c65f40* obj, bool update)
     if (update)
     {
         t = rb->GetType();
-        if (FUN_00c8cce0(&t))
+        if (bhkRigidBody_IsMotionTypeDynamic(&t))
         {
             WorldObj_c65f40* w = (WorldObj_c65f40*)rb->hkObj;
             if (w)
@@ -637,11 +642,12 @@ class CollisionObj : public CollisionParent
     {
         return (m_usFlags & 0x20) && !(bool)((m_usFlags >> 6) & 1);
     }
-    void FUN_00c66060(ViewerStrings* apViewerStrings);
+    void bhkCollisionObject_AddViewerStrings(ViewerStrings* apViewerStrings);
 };
 
 // @fnv 0x00c66060
-void CollisionObj::FUN_00c66060(ViewerStrings* apViewerStrings)
+// src: XBOX_PDB 0x00c66060
+void CollisionObj::bhkCollisionObject_AddViewerStrings(ViewerStrings* apViewerStrings)
 {
     MemContextGuard guard(0x10);
     ParentViewerStrings(apViewerStrings);
@@ -658,7 +664,7 @@ struct Xform
 struct Quat
 {
     float w, x, y, z;
-    void FUN_004f0180(Mat3& a1) const;
+    void NiQuaternion_ToRotation(Mat3& a1) const;
 };
 struct HkEntity
 {
@@ -733,8 +739,8 @@ struct BhkBody
     int unk00;
     int unk04;
     HkEntity* pNode08;
-    void FUN_00560c20(Quat& a1);
-    void FUN_00560bc0(NiPoint3& a1);
+    void bhkRigidBody_GetRotation(Quat& a1);
+    void bhkRigidBody_GetPosition(NiPoint3& a1);
 };
 
 struct CollObj
@@ -790,11 +796,12 @@ struct CollObj
     SceneObj* pObj08;
     int unk0C;
     BhkBody* pBody10;
-    void FUN_00c65a80();
+    void bhkCollisionObject_hktoNiTransform();
 };
 
 // @fnv 0x00c65a80
-void CollObj::FUN_00c65a80()
+// src: XBOX_PDB 0x00c65a80
+void CollObj::bhkCollisionObject_hktoNiTransform()
 {
     BhkBody* pBody = pBody10;
     if (pBody == 0)
@@ -812,8 +819,8 @@ void CollObj::FUN_00c65a80()
     // The body getters fill the transform without calling Mat3/NiPoint3 constructors.
     void* transformStorage[sizeof(Xform) / sizeof(void*)];
     Xform& t = *reinterpret_cast<Xform*>(transformStorage);
-    pBody->FUN_00560c20(q);
-    q.FUN_004f0180(t.m_kOrientation);
-    pBody->FUN_00560bc0(t.m_kTranslation);
+    pBody->bhkRigidBody_GetRotation(q);
+    q.NiQuaternion_ToRotation(t.m_kOrientation);
+    pBody->bhkRigidBody_GetPosition(t.m_kTranslation);
     s46(t);
 }

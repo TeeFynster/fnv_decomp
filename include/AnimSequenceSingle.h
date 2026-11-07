@@ -16,7 +16,7 @@ public:
     virtual BSAnimGroupSequence* GetControllerSequence(TESAnimGroup*) override;
     virtual char ContainsSequence(BSAnimGroupSequence*) override;
 
-    bool FUN_0048f080(BSAnimGroupSequence* apSeq, bool abReleaseModelLoader);
+    bool RemoveSequence(BSAnimGroupSequence* apSeq, bool abReleaseModelLoader);
     void __local_vftable_ctor_closure();
 
     BSAnimGroupSequence* pForwardSequence;

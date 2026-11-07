@@ -5,5 +5,5 @@
 class BSMultiBoundRoom : public BSMultiBoundNode
 {
 public:
-    void* FUN_006ab360();
+    void* TESCombatStyle_GetAdvancedData();
 };

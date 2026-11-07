@@ -2,7 +2,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00da2b20
-int __stdcall FUN_00da2b20(int arg0, int arg1)
+// src: XBOX_PDB 0x00da2b20
+int __stdcall hkStackTracer_getStackTrace(int arg0, int arg1)
 {
     return 0;
 }

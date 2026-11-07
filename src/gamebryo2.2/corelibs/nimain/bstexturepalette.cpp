@@ -68,7 +68,8 @@ struct FUN_00a61890_stub
 void* __cdecl FindNodeByObject(const void* p);
 extern int DAT_011f4484;
 // @fnv 0x00a61f30
-bool FUN_00a61f30(const void* apTexture)
+// src: COMMUNITY 0x00a61f30
+bool BSTexturePalette_RemoveTexture(const void* apTexture)
 {
     bool bres = false;
     if (DAT_011f4468)
@@ -91,8 +92,8 @@ bool FUN_00a61f30(const void* apTexture)
 extern MemoryManager g_memoryManager;
 
 unsigned int __cdecl GetPathHash(const char*, bool);
-unsigned int __cdecl FUN_00a61530(const char*);
-bool __cdecl FUN_00a614d0(const char*, const char*);
+unsigned int __cdecl BSTexturePalette_GetContainerNumber(const char*);
+bool __cdecl BSTexturePalette_ArePathsEqual(const char*, const char*);
 
 inline void* BSTexMapItem::operator new(size_t size)
 {
@@ -111,13 +112,13 @@ BSTexMapItem* FUN_00a617c0_shell::FindOrInsertTexture(NiTexture* apTex)
     const char* path = apTex->GetPath().m_kHandle;
     unsigned int offset = GetPathHash(path, true);
     path += offset;
-    unsigned int hash = FUN_00a61530(path);
+    unsigned int hash = BSTexturePalette_GetContainerNumber(path);
 
     for (BSTexMapItem* item = reinterpret_cast<BSTexMapItem**>(this)[hash]; item; item = item->pNext)
     {
         const char* otherPath = item->spTexture->GetPath().m_kHandle +
                                 item->m_sTextureCacheValue;
-        if (FUN_00a614d0(path, otherPath))
+        if (BSTexturePalette_ArePathsEqual(path, otherPath))
             return item;
     }
 
@@ -143,7 +144,7 @@ bool __cdecl FindTextureByPath(const char* path, NiTexture** ppTex)
         g_spinLock.Lock(0);
         unsigned int offset = GetPathHash(path, true);
         const char* name = path + offset;
-        unsigned int hash = FUN_00a61530(path + offset);
+        unsigned int hash = BSTexturePalette_GetContainerNumber(path + offset);
         NiTexture* pOldTexture = *ppTex;
         if (pOldTexture)
         {
@@ -206,7 +207,7 @@ struct TexMap
 };
 extern unsigned char DAT_011f4461;
 extern int DAT_011a95fc;
-bool __cdecl FUN_00a616e0(TexMapIter& arIter);
+bool __cdecl BSTexturePalette_GetFirstPos(TexMapIter& arIter);
 __declspec(noinline) bool TexMap::GetNext(TexMapIter& it, TexPtr& tex)
 {
     if (it.pItem)
@@ -250,7 +251,8 @@ inline bool Next(TexMapIter& it, TexPtr& tex, bool cross = true)
     }
     return more;
 }
-__declspec(noinline) bool __cdecl FUN_00a616e0(TexMapIter& it)
+// src: COMMUNITY 0x00a616e0
+__declspec(noinline) bool __cdecl BSTexturePalette_GetFirstPos(TexMapIter& it)
 {
     unsigned int idx = 7;
     bool found;
@@ -280,7 +282,8 @@ __declspec(noinline) bool __cdecl FUN_00a616e0(TexMapIter& it)
 
 // Iterates texture cache entries, removes entries whose object ref count is 2 up to a limit, then decrements the last object's ref count.
 // @fnv 0x00a61cd0
-void __cdecl FUN_00a61cd0()
+// src: XBOX_PDB 0x00a61cd0
+void __cdecl BSTexturePalette_PurgeUnusedTextures()
 {
     if (DAT_011f4468)
     {
@@ -288,7 +291,7 @@ void __cdecl FUN_00a61cd0()
         int removed = 0;
         DAT_011f4461 = 0;
         TexMapIter it;
-        if (FUN_00a616e0(it))
+        if (BSTexturePalette_GetFirstPos(it))
         {
             TexPtr tex = {0};
             bool more;

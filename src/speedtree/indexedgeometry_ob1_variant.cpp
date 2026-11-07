@@ -82,46 +82,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 
@@ -134,7 +134,7 @@ public:
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00b30060_shell
 {
-    int FUN_00b30060(float* p);
+    int GetIndexedValue_00b30060(float* p);
 };
 struct FloatVec
 {
@@ -143,7 +143,7 @@ struct FloatVec
 struct FUN_00b30190_shell
 {
     char m_ucUnknownByte[0xb8];
-    void FUN_00b30190(const float* p);
+    void AppendThreeFloatComponents(const float* p);
 };
 unsigned int __cdecl FUN_00ec7c56(void);
 struct Vec28
@@ -158,7 +158,7 @@ struct Cls
     unsigned short m1;
     unsigned short m2;
     Vec28 mVec;
-    void FUN_00b306d0(unsigned short);
+    void CIndexedGeometry_ResetStripCounter(unsigned short);
 };
 struct SubA
 {
@@ -206,7 +206,7 @@ struct FUN_00b300c0_cls
     char m_pad89[0x17];
     FloatVec m_veca0;
 
-    void FUN_00b300c0(const float* p);
+    void UpdateFields_00b300c0(const float* p);
 };
 struct FrameBuf
 {
@@ -298,9 +298,9 @@ struct FUN_00b304f0_cls
     int unk144;
     FloatVec m_148;
 
-    void FUN_00b304f0(const float& v);
+    void CIndexedGeometry_AddVertexTexCoord1(const float& v);
 };
-bool __cdecl FUN_00b0d7a0(void);
+bool __cdecl CSpeedTreeRT_GetTextureFlip(void);
 void __cdecl FreeBlock(void* p);
 class FUN_00b32c60_cls
 {
@@ -312,7 +312,7 @@ class FUN_00b32c60_cls
     int m_last;
     int m_kRayEnd;
     void DestroyRange(int first, int last);
-    void FUN_00b32c60();
+    void UpdateFields_00b32c60();
 };
 struct K
 {
@@ -320,12 +320,12 @@ struct K
     int fC;
     int f10;
     int f14;
-    int __thiscall FUN_00b33110(int, int);
-    void __thiscall FUN_00b331c0();
+    int __thiscall ForwardCall_00b33110(int, int);
+    void __thiscall ReleaseStorage_00b331c0();
 };
-void __cdecl FormHeap_Free(void*);
+void __cdecl FormHeapFreeAndLog_00401030(void*);
 unsigned int __cdecl FUN_00ec7c56(void);
-void __cdecl FormHeap_Free(void*);
+void __cdecl FormHeapFreeAndLog_00401030(void*);
 struct InnerVec
 {
     int unk00;
@@ -346,11 +346,11 @@ struct OuterVec
 };
 struct FUN_00b32350_shell
 {
-    void FUN_00b32350();
+    void std_vector_clear();
 };
 struct FUN_00b32120_shell
 {
-    void FUN_00b32120();
+    void m_vStrips_clear();
 };
 struct ScratchFrame
 {
@@ -602,7 +602,8 @@ template <class T> struct Vector_StripJoin : ValueBase<T>
 struct Lengths : Vector_StripJoin<unsigned short>
 {
 
-    void FUN_00b32410(const unsigned short& value)
+// src: GUESS 0x00b32410 (confidence: low)
+    void UpdateState_00b32410(const unsigned short& value)
     {
         if (size() < capacitySize())
             last = fill(last, 1, value);
@@ -610,13 +611,14 @@ struct Lengths : Vector_StripJoin<unsigned short>
             insert(end(), value);
     }
 
-    void FUN_00b32540();
+    void ProcessState_00b32540();
 };
 
 struct Strips : Vector_StripJoin<unsigned short*>
 {
 
-    void FUN_00b15390(unsigned short* const& value)
+// src: GUESS 0x00b15390 (confidence: low)
+    void UpdateState_00b15390(unsigned short* const& value)
     {
         if (size() < capacitySize())
             last = fill(last, 1, value);
@@ -624,7 +626,7 @@ struct Strips : Vector_StripJoin<unsigned short*>
             insert(end(), value);
     }
 
-    void FUN_00b32350();
+    void std_vector_clear();
 };
 
 struct FUN_00b31350 : ValueBase<Lengths>
@@ -672,12 +674,12 @@ struct FUN_00b31350 : ValueBase<Lengths>
 
     ~FUN_00b31350()
     {
-        FUN_00b32c60();
+        UpdateFields_00b32c60();
     }
 
-    void FUN_00b32c60();
+    void UpdateFields_00b32c60();
 
-    Lengths* FUN_00b319a0(unsigned int);
+    Lengths* ProcessAndReturnValue_00b319a0(unsigned int);
     __forceinline Lengths& operator[](unsigned int index)
     {
         if (index >= (unsigned int)((Lengths*)unk10 - (Lengths*)unkc))
@@ -685,7 +687,7 @@ struct FUN_00b31350 : ValueBase<Lengths>
         return ((Lengths*)unkc)[index];
     }
 
-    void FUN_00b314f0(const FUN_00b31350&);
+    void UpdateState_00b314f0(const FUN_00b31350&);
 };
 
 struct FUN_00b31ad0 : ValueBase<Strips>
@@ -733,12 +735,12 @@ struct FUN_00b31ad0 : ValueBase<Strips>
 
     ~FUN_00b31ad0()
     {
-        FUN_00b331c0();
+        ReleaseStorage_00b331c0();
     }
 
-    void FUN_00b331c0();
+    void ReleaseStorage_00b331c0();
 
-    Strips* FUN_00b319a0(unsigned int);
+    Strips* ProcessAndReturnValue_00b319a0(unsigned int);
     __forceinline Strips& operator[](unsigned int index)
     {
         if (index >= (unsigned int)((Strips*)unk10 - (Strips*)unkc))
@@ -746,7 +748,7 @@ struct FUN_00b31ad0 : ValueBase<Strips>
         return ((Strips*)unkc)[index];
     }
 
-    void FUN_00b31c70(const FUN_00b31ad0&);
+    void UpdateState_00b31c70(const FUN_00b31ad0&);
 };
 
 struct FUN_00b311b0 : ValueBase<unsigned int>
@@ -794,12 +796,12 @@ struct FUN_00b311b0 : ValueBase<unsigned int>
 
     ~FUN_00b311b0()
     {
-        FUN_00b17f50();
+        UpdateState_00b17f50();
     }
 
-    void FUN_00b17f50();
+    void UpdateState_00b17f50();
 
-    unsigned int* FUN_00b31230(unsigned int);
+    unsigned int* EvaluateValue_00b31230(unsigned int);
     __forceinline unsigned int& operator[](unsigned int index)
     {
         if (index >= (unsigned int)((unsigned int*)unk10 - (unsigned int*)unkc))
@@ -807,7 +809,7 @@ struct FUN_00b311b0 : ValueBase<unsigned int>
         return ((unsigned int*)unkc)[index];
     }
 
-    void FUN_00b36330(const FUN_00b311b0&);
+    void UpdateState_00b36330(const FUN_00b311b0&);
 };
 
 struct Mesh
@@ -829,13 +831,14 @@ struct Mesh
 
     Vector_StripJoin<unsigned int> triangles;
 
-    void FUN_00b2ed70(bool);
+    void CIndexedGeometry_CombineStrips(bool);
 
     void ClearOuter();
 };
 
 // @fnv 0x00b2ed70
-void Mesh::FUN_00b2ed70(bool preserve)
+// src: COMMUNITY 0x00b2ed70
+void Mesh::CIndexedGeometry_CombineStrips(bool preserve)
 {
     if ((unsigned short)(triangles.size() / 3) > 0)
     {
@@ -847,7 +850,7 @@ void Mesh::FUN_00b2ed70(bool preserve)
             int combinedLength = 0;
             for (unsigned short index = 0;
                  index <
-                 ((short)group > -1 ? (unsigned short)strips.FUN_00b319a0((short)group)->size() : (unsigned short)0);
+                 ((short)group > -1 ? (unsigned short)strips.ProcessAndReturnValue_00b319a0((short)group)->size() : (unsigned short)0);
                  ++index)
                 combinedLength += lengths[group][index];
             if (combinedLength > 0)
@@ -855,7 +858,7 @@ void Mesh::FUN_00b2ed70(bool preserve)
                 if (preserve)
                 {
                     for (unsigned short join = 0;
-                         join < ((short)group > -1 ? (unsigned short)strips.FUN_00b319a0((short)group)->size()
+                         join < ((short)group > -1 ? (unsigned short)strips.ProcessAndReturnValue_00b319a0((short)group)->size()
                                                    : (unsigned short)0) -
                                     1;
                          ++join)
@@ -869,7 +872,7 @@ void Mesh::FUN_00b2ed70(bool preserve)
                 }
                 else
                 {
-                    int joins = ((short)group > -1 ? (unsigned short)strips.FUN_00b319a0((short)group)->size()
+                    int joins = ((short)group > -1 ? (unsigned short)strips.ProcessAndReturnValue_00b319a0((short)group)->size()
                                                    : (unsigned short)0);
                     if (joins > 0)
                         joins--;
@@ -878,14 +881,14 @@ void Mesh::FUN_00b2ed70(bool preserve)
                 unsigned short* writer = new unsigned short[combinedLength];
                 unsigned short* joined = writer;
                 for (unsigned short strip = 0;
-                     strip < ((short)group > -1 ? (unsigned short)strips.FUN_00b319a0((short)group)->size()
+                     strip < ((short)group > -1 ? (unsigned short)strips.ProcessAndReturnValue_00b319a0((short)group)->size()
                                                 : (unsigned short)0);
                      ++strip)
                 {
                     unsigned short copyLength = lengths[group][strip];
                     memcpy(joined, strips[group][strip], copyLength * sizeof(unsigned short));
                     joined += copyLength;
-                    if (strip < ((short)group > -1 ? (unsigned short)strips.FUN_00b319a0((short)group)->size()
+                    if (strip < ((short)group > -1 ? (unsigned short)strips.ProcessAndReturnValue_00b319a0((short)group)->size()
                                                    : (unsigned short)0) -
                                     1)
                     {
@@ -913,21 +916,21 @@ void Mesh::FUN_00b2ed70(bool preserve)
                         }
                     }
                 }
-                newLengths[group].FUN_00b32410((unsigned short)combinedLength);
-                newStrips[group].FUN_00b15390(writer);
+                newLengths[group].UpdateState_00b32410((unsigned short)combinedLength);
+                newStrips[group].UpdateState_00b15390(writer);
                 newCounts[group] = combinedLength - 2;
             }
             else
             {
-                newLengths.FUN_00b319a0(group)->FUN_00b32540();
-                newStrips.FUN_00b319a0(group)->FUN_00b32350();
-                *newCounts.FUN_00b31230(group) = 0;
+                newLengths.ProcessAndReturnValue_00b319a0(group)->ProcessState_00b32540();
+                newStrips.ProcessAndReturnValue_00b319a0(group)->std_vector_clear();
+                *newCounts.EvaluateValue_00b31230(group) = 0;
             }
         }
         ClearOuter();
-        lengths.FUN_00b314f0(newLengths);
-        strips.FUN_00b31c70(newStrips);
-        counts.FUN_00b36330(newCounts);
+        lengths.UpdateState_00b314f0(newLengths);
+        strips.UpdateState_00b31c70(newStrips);
+        counts.UpdateState_00b36330(newCounts);
     }
 }
 }
@@ -994,10 +997,11 @@ struct Geometry366
     GeometryFloatBuffer normalData;
     float* GetVertex(int);
     float* GetPlaneNormal(int);
-    void FUN_00b2fc50(const Matrix4&);
+    void CIndexedGeometry_Transform(const Matrix4&);
 };
 // @fnv 0x00b2fc50
-void Geometry366::FUN_00b2fc50(const Matrix4& matrix)
+// src: COMMUNITY 0x00b2fc50
+void Geometry366::CIndexedGeometry_Transform(const Matrix4& matrix)
 {
     unsigned short count;
     int i;
@@ -1009,7 +1013,7 @@ void Geometry366::FUN_00b2fc50(const Matrix4& matrix)
     {
         vertex2 = GetVertex(i);
         point2.Set(vertex2[0], vertex2[1], vertex2[2]);
-        memcpy(&point2, &point2.FUN_00b05000(&matrix), sizeof(point2));
+        memcpy(&point2, &point2.TransformPointByMatrix4(&matrix), sizeof(point2));
         _memmove(vertex2, &point2, 12);
         if (normals)
         {
@@ -1017,7 +1021,7 @@ void Geometry366::FUN_00b2fc50(const Matrix4& matrix)
             {
                 normal = GetPlaneNormal(i);
                 point2.Set(normal[0], normal[1], normal[2]);
-                memcpy(&point2, &point2.FUN_00b05000(&matrix), sizeof(point2));
+                memcpy(&point2, &point2.TransformPointByMatrix4(&matrix), sizeof(point2));
                 _memmove(normal, &point2, 12);
             }
         }
@@ -1066,11 +1070,11 @@ struct S_0060b3f0
     }
     void insert_n(VecConstIterator<float> where, unsigned count, const float& value);
     iterator erase(VecConstIterator<float> first, VecConstIterator<float> last);
-    void FUN_0060b410(unsigned count, float value);
+    void std_vector_float_std_allocator_float_resize_0060b410(unsigned count, float value);
 
     inline void resize(unsigned count)
     {
-        FUN_0060b410(count, float());
+        std_vector_float_std_allocator_float_resize_0060b410(count, float());
     }
     __forceinline unsigned size() const
     {
@@ -1098,7 +1102,8 @@ struct AuxFloatArray
     }
     void insert_n(VecConstIterator<float> where, unsigned count, const float& value);
     iterator erase(VecConstIterator<float> first, VecConstIterator<float> last);
-    void FUN_0060b410(unsigned count, float value)
+// src: COMMUNITY 0x0060b410
+    void std_vector_float_std_allocator_float_resize_0060b410(unsigned count, float value)
     {
         if (size() < count)
             insert_n(finish(), count - size(), value);
@@ -1108,7 +1113,7 @@ struct AuxFloatArray
 
     inline void resize(unsigned count)
     {
-        FUN_0060b410(count, float());
+        std_vector_float_std_allocator_float_resize_0060b410(count, float());
     }
     __forceinline unsigned size() const
     {
@@ -1136,11 +1141,11 @@ struct ByteArray
     }
     void insert_n(iterator where, unsigned count, const unsigned char& value);
     iterator erase(iterator first, iterator last);
-    void FUN_00b0e200(unsigned count, unsigned char value);
+    void ProcessState_00b0e200(unsigned count, unsigned char value);
 
     inline void resize(unsigned count)
     {
-        FUN_00b0e200(count, (unsigned char)0);
+        ProcessState_00b0e200(count, (unsigned char)0);
     }
     __forceinline unsigned size() const
     {
@@ -1247,10 +1252,11 @@ struct CoordinateWriter
     S_0060b3f0 mainCoordinates;
     AuxFloatArray auxiliaryCoordinates;
     ByteArray indices;
-    void FUN_00b301f0(const float* point, short index);
+    void CIndexedGeometry_AddVertexTexCoord0(const float* point, short index);
 };
 // @fnv 0x00b301f0
-void CoordinateWriter::FUN_00b301f0(const float* point, short index)
+// src: COMMUNITY 0x00b301f0
+void CoordinateWriter::CIndexedGeometry_AddVertexTexCoord0(const float* point, short index)
 {
     if (count == mainCoordinates.size() / 2)
     {
@@ -1268,7 +1274,7 @@ void CoordinateWriter::FUN_00b301f0(const float* point, short index)
         auxiliaryCoordinates[2 * count + 1] = point[1];
     }
     mainCoordinates[2 * count] = point[0];
-    mainCoordinates[2 * count + 1] = FUN_00b0d7a0() ? -point[1] : point[1];
+    mainCoordinates[2 * count + 1] = CSpeedTreeRT_GetTextureFlip() ? -point[1] : point[1];
 }
 
 struct ScalarTag
@@ -1363,7 +1369,8 @@ template <class T> struct RandomIterator : IteratorWithBase<T>
 template <class T> struct ConstIterT : RandomIterator<T>
 {
     unsigned int* ptr;
-    ConstIterT<T>& FUN_00b2e330(int n)
+// src: GUESS 0x00b2e330 (confidence: low)
+    ConstIterT<T>& UpdateState_00b2e330(int n)
     {
         if (!this->IsContainerSet())
             FUN_00ec7c56();
@@ -1383,7 +1390,8 @@ template <class T> struct ConstIterT : RandomIterator<T>
             FUN_00ec7c56();
         return ptr == r.ptr;
     }
-    bool FUN_00b16830(const ConstIterT<T>& r) const
+// src: GUESS 0x00b16830 (confidence: medium)
+    bool AreValuesEqual_00b16830(const ConstIterT<T>& r) const
     {
         return !Equal(r);
     }
@@ -1401,7 +1409,7 @@ template <class T> struct VecIterT : ConstIterT<T>
     {}
     VecIterT<T>& operator+=(int n)
     {
-        ((ConstIterT<T>*)this)->FUN_00b2e330(n);
+        ((ConstIterT<T>*)this)->UpdateState_00b2e330(n);
         return *this;
     }
     VecIterT<T> operator+(int n) const
@@ -1442,7 +1450,8 @@ template <class T> struct UIntVecT : VectorContainer
     unsigned int* Ufill(unsigned int*, unsigned int, const unsigned int&);
     unsigned int* Umove(unsigned int*, unsigned int*, unsigned int*);
     void MoveBackward(unsigned int*, unsigned int*, unsigned int*);
-    void FUN_00b16070(ConstIterT<T> where, unsigned int n, const unsigned int& val)
+// src: GUESS 0x00b16070 (confidence: low)
+    void UpdateState_00b16070(ConstIterT<T> where, unsigned int n, const unsigned int& val)
     {
         unsigned int cap = capacity();
         if (n == 0)
@@ -1517,11 +1526,12 @@ template <class T> struct UIntVecT : VectorContainer
     {
         return VecIterT<T>(where.ptr, this);
     }
-    VecIterT<T> FUN_00b335c0(ConstIterT<T> a, ConstIterT<T> b)
+// src: GUESS 0x00b335c0 (confidence: low)
+    VecIterT<T> ProcessAndReturnValue_00b335c0(ConstIterT<T> a, ConstIterT<T> b)
     {
         VecIterT<T> f = MakeIter(a);
         VecIterT<T> l = MakeIter(b);
-        if (f.FUN_00b16830(l))
+        if (f.AreValuesEqual_00b16830(l))
         {
             unsigned int* result = CopyUnchecked(l.ptr, last, f.ptr);
             Destroy(result, last);
@@ -1529,7 +1539,7 @@ template <class T> struct UIntVecT : VectorContainer
         }
         return f;
     }
-    void FUN_00b333e0(unsigned int n, unsigned int val);
+    void ProcessState_00b333e0(unsigned int n, unsigned int val);
 };
 
 template <class T> inline const UIntVecT<T>* ConstIterT<T>::GetContainer() const
@@ -1538,12 +1548,13 @@ template <class T> inline const UIntVecT<T>* ConstIterT<T>::GetContainer() const
 }
 
 // @fnv 0x00b333e0
-template <> void UIntVecT<unsigned int>::FUN_00b333e0(unsigned int n, unsigned int val)
+// src: GUESS 0x00b333e0 (confidence: low)
+template <> void UIntVecT<unsigned int>::ProcessState_00b333e0(unsigned int n, unsigned int val)
 {
     if (size() < n)
-        FUN_00b16070(end(), n - size(), val);
+        UpdateState_00b16070(end(), n - size(), val);
     else if (n < size())
-        FUN_00b335c0(begin() + n, end());
+        ProcessAndReturnValue_00b335c0(begin() + n, end());
 }
 
 inline void Dead8_acad60()
@@ -1568,12 +1579,12 @@ inline CatQ_acad60 PtrCat_acad60(char*&, char*&)
     CatQ_acad60 c;
     return c;
 }
-void __cdecl FUN_00b10cf0(char* _First, unsigned int _Count, const char& _Val);
+void __cdecl Runtime_ProcessState_00b10cf0(char* _First, unsigned int _Count, const char& _Val);
 inline void UFill2_acad60(char* _First, unsigned int _Count, const char& _Val, AlQ_acad60& _Al, CatQ_acad60,
                           TagQ_acad60)
 {
     Dead8_acad60();
-    FUN_00b10cf0(_First, _Count, _Val);
+    Runtime_ProcessState_00b10cf0(_First, _Count, _Val);
 }
 inline void UFillN_acad60(char* _First, unsigned int _Count, const char& _Val, AlQ_acad60& _Al)
 {
@@ -1621,8 +1632,8 @@ struct VecQ_acad60
         UFillN_acad60(_Ptr, _Count, _Val, _Alval);
         return _Ptr + _Count;
     }
-    ItQ_acad60 FUN_00b0e3e0(CItQ_acad60 _Where, const char& _Val);
-    void FUN_00b0dae0(const char& _Val);
+    ItQ_acad60 ProcessAndReturnValue_00b0e3e0(CItQ_acad60 _Where, const char& _Val);
+    void UpdateFields_00b0dae0(const char& _Val);
 };
 inline CItQ_acad60::CItQ_acad60(char* _Ptr, const VecQ_acad60* _Pvector) : _Myaux(0)
 {
@@ -1635,18 +1646,19 @@ inline CItQ_acad60::CItQ_acad60(char* _Ptr, const VecQ_acad60* _Pvector) : _Myau
     _Myptr = _Ptr;
 }
 // @fnv 0x00b0dae0
-void VecQ_acad60::FUN_00b0dae0(const char& _Val)
+// src: GUESS 0x00b0dae0 (confidence: low)
+void VecQ_acad60::UpdateFields_00b0dae0(const char& _Val)
 {
     if (size() < capacity())
         _Mylast = _Ufill(_Mylast, 1, _Val);
     else
     {
-        FUN_00b0e3e0(end(), _Val);
+        ProcessAndReturnValue_00b0e3e0(end(), _Val);
         Dead11_acad60();
     }
 }
 
-void __cdecl FormHeap_Free(void* p);
+void __cdecl FormHeapFreeAndLog_00401030(void* p);
 struct VB9
 {
     inline void*& PP()
@@ -1655,7 +1667,7 @@ struct VB9
     }
     inline void Dealloc(void* q)
     {
-        FormHeap_Free(q);
+        FormHeapFreeAndLog_00401030(q);
     }
     ~VB9()
     {
@@ -1761,7 +1773,7 @@ struct FUN_00b2e9c0
     VC9 v178;
     inline void Free(void* p)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
     void ClearOuter();
     ~FUN_00b2e9c0();
@@ -1796,7 +1808,7 @@ struct BoundsBox
 {
     GlobalObject_00b3f100 minObj;
     GlobalObject_00b3f100 maxObj;
-    BoundsBox FUN_00b3caa0(Vec3f* point);
+    BoundsBox ComputeValue_00b3caa0(Vec3f* point);
 };
 
 struct ShapeHost
@@ -1851,20 +1863,21 @@ struct ShapeHost
         b->y = a2.y;
         b->z = a2.z;
     }
-    Vec3f* FUN_00b30f80(int index);
-    void FUN_00b2fa30(BoundsBox* out);
+    Vec3f* CIndexedGeometry_GetVertexCoord(int index);
+    void CIndexedGeometry_ComputeExtents(BoundsBox* out);
 };
 
 // @fnv 0x00b2fa30
-void ShapeHost::FUN_00b2fa30(BoundsBox* out)
+// src: COMMUNITY 0x00b2fa30
+void ShapeHost::CIndexedGeometry_ComputeExtents(BoundsBox* out)
 {
     unsigned short count = getCount();
     for (int i = 0; i < count; ++i)
     {
-        Vec3f* pX = FUN_00b30f80(i);
+        Vec3f* pX = CIndexedGeometry_GetVertexCoord(i);
         Vec3f b;
         fill(pX, &b);
-        *out = out->FUN_00b3caa0(&b);
+        *out = out->ComputeValue_00b3caa0(&b);
     }
 }
 
@@ -3053,10 +3066,11 @@ struct VectorSet
     std::vector<unsigned int> values;
     std::vector<std::vector<unsigned short> > first;
     std::vector<std::vector<unsigned int> > second;
-    void FUN_00b2fb30(unsigned short size);
+    void CIndexedGeometry_SetNumLodLevels(unsigned short size);
 };
 // @fnv 0x00b2fb30
-void VectorSet::FUN_00b2fb30(unsigned short size)
+// src: COMMUNITY 0x00b2fb30
+void VectorSet::CIndexedGeometry_SetNumLodLevels(unsigned short size)
 {
     first.clear();
     second.clear();
@@ -3080,11 +3094,11 @@ template <class T> struct CheckedVector
 };
 struct CheckedUnsignedShortVector : CheckedVector<unsigned short>
 {
-    void FUN_00b337f0(unsigned int count, unsigned short value);
+    void ProcessState_00b337f0(unsigned int count, unsigned short value);
 };
 struct IntVector : CheckedVector<unsigned int>
 {
-    void FUN_00b333e0(unsigned int count, unsigned int value);
+    void ProcessState_00b333e0(unsigned int count, unsigned int value);
 };
 struct Target
 {
@@ -3102,14 +3116,15 @@ struct Target
     CheckedVector<unsigned int> counts;
     CheckedVector<CheckedUnsignedShortVector> shorts;
     CheckedVector<IntVector> values;
-    void FUN_00b2fdc0(unsigned short index, unsigned int value, unsigned short amount);
+    void CIndexedGeometry_AddStrip(unsigned short index, unsigned int value, unsigned short amount);
 };
 __forceinline unsigned int& SlotRef(unsigned int& r)
 {
     return r;
 }
 // @fnv 0x00b2fdc0
-void Target::FUN_00b2fdc0(unsigned short index, unsigned int value, unsigned short amount)
+// src: COMMUNITY 0x00b2fdc0
+void Target::CIndexedGeometry_AddStrip(unsigned short index, unsigned int value, unsigned short amount)
 {
     {
         unsigned int position = index;
@@ -3118,7 +3133,7 @@ void Target::FUN_00b2fdc0(unsigned short index, unsigned int value, unsigned sho
             FUN_00ec7c56();
         unsigned int row = columns + 1;
         CheckedUnsignedShortVector* vector = &count->first[position];
-        vector->FUN_00b337f0(row, 0);
+        vector->ProcessState_00b337f0(row, 0);
     }
     {
         unsigned int position = index;
@@ -3161,7 +3176,7 @@ void Target::FUN_00b2fdc0(unsigned short index, unsigned int value, unsigned sho
             {
                 unsigned int row = columns + 1;
                 IntVector* vector = &count->first[position];
-                vector->FUN_00b333e0(row, 0);
+                vector->ProcessState_00b333e0(row, 0);
             }
         }
     }
@@ -3241,7 +3256,7 @@ struct S00b30660_Obj
     int unkCC;
     FloatVec m_vec;
 
-    void FUN_00b30660(const float* p);
+    void UpdateFields_00b30660(const float* p);
 };
 
 inline void S00b30660_Push(FloatVec& v, const float& x)
@@ -3276,7 +3291,8 @@ inline void S00b30660_Push(FloatVec& v, const float& x)
 }
 
 // @fnv 0x00b30660
-void S00b30660_Obj::FUN_00b30660(const float* p)
+// src: GUESS 0x00b30660 (confidence: low)
+void S00b30660_Obj::UpdateFields_00b30660(const float* p)
 {
     float f7 = p[0];
     float f1 = p[1];
@@ -3627,7 +3643,7 @@ template <class _Ty> class vectorS : public _Vector_valS<_Ty>
 class FUN_00b30730_Tree
 {
   public:
-    int* FUN_00b30730(unsigned short usIndex);
+    int* CIndexedGeometry_GetStripsPointer(unsigned short usIndex);
     int unk00;
     int unk04;
     int unk08;
@@ -3654,7 +3670,8 @@ class FUN_00b30730_Tree
 };
 
 // @fnv 0x00b30730
-int* FUN_00b30730_Tree::FUN_00b30730(unsigned short usIndex)
+// src: XBOX_PDB 0x00b30730
+int* FUN_00b30730_Tree::CIndexedGeometry_GetStripsPointer(unsigned short usIndex)
 {
     return m_kLists[usIndex].size() ? &m_kLists[usIndex][0] : 0;
 }
@@ -3708,7 +3725,8 @@ __forceinline float& LocalVec3::operator[](int i)
     return (&x)[i];
 }
 
-inline LocalVec3 LocalVec3::FUN_00b05000(const Matrix4* matrix)
+// src: GUESS 0x00b05000 (confidence: medium)
+inline LocalVec3 LocalVec3::TransformPointByMatrix4(const Matrix4* matrix)
 {
     float ax = matrix->m[0][0] * x + matrix->m[1][0] * y + matrix->m[2][0] * z + matrix->m[3][0];
     float ay = matrix->m[0][1] * x + matrix->m[1][1] * y + matrix->m[2][1] * z + matrix->m[3][1];
@@ -3743,7 +3761,8 @@ struct GeometryProcessor
     DataVector<U32> extraB8, extraD0, extraE8, extra100, extra118, extra130, extra148;
     DataVector<float> blendFactors;
     DataVector<unsigned char> transformIndices;
-    inline U16 FUN_00b0a9a0(short index)
+// src: XBOX_PDB 0x00b0a9a0
+    inline U16 CIndexedGeometry_GetNumStrips(short index)
     {
         return index > -1 ? (U16)vertexIndices[index].indices.size() : 0;
     }
@@ -3751,7 +3770,7 @@ struct GeometryProcessor
     {
         return initialized;
     }
-    unsigned char FUN_00b30800(U16 index);
+    unsigned char CIndexedGeometry_ComputeWindEffect(U16 index);
 };
 __forceinline Matrix4* Matrix(U16 pose)
 {
@@ -3765,7 +3784,8 @@ extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 #pragma intrinsic(memcpy)
 
 // @fnv 0x00b30800
-unsigned char GeometryProcessor::FUN_00b30800(U16 index)
+// src: COMMUNITY 0x00b30800
+unsigned char GeometryProcessor::CIndexedGeometry_ComputeWindEffect(U16 index)
 {
     unsigned char changed = 0;
     if (!GetInitialized())
@@ -3779,7 +3799,7 @@ unsigned char GeometryProcessor::FUN_00b30800(U16 index)
         InitializeOrigin(transformed);
         LocalVec3 _interpolatedPosition;
         InitializeOrigin(_interpolatedPosition);
-        for (int group4 = 0; group4 < FUN_00b0a9a0(index); ++group4)
+        for (int group4 = 0; group4 < CIndexedGeometry_GetNumStrips(index); ++group4)
         {
             for (int kEntry = 0; kEntry < vertexCounts[index].counts[group4]; ++kEntry)
             {
@@ -3791,7 +3811,7 @@ unsigned char GeometryProcessor::FUN_00b30800(U16 index)
                     transformed.Set(original->x, original->y, original->z);
                     U16 pose3 = transformIndices[vertexId];
                     // Preserve the original trivial assignment's bitwise copy.
-                    memcpy(&transformed, &transformed.FUN_00b05000(Matrix(pose3)), sizeof(transformed));
+                    memcpy(&transformed, &transformed.TransformPointByMatrix4(Matrix(pose3)), sizeof(transformed));
                     _interpolatedPosition.Set(Blend(original->x, transformed[0], factor5),
                                               Blend(original->y, transformed[1], factor5),
                                               Blend(original->z, transformed[2], factor5));
@@ -3861,8 +3881,8 @@ struct IntStdVector : VecVal
     int* fin;
     Iter begin();
     Iter end();
-    inline CIter FUN_00b33030(CIter a, CIter b);
-    void FUN_00b32120();
+    inline CIter UpdateState_00b33030(CIter a, CIter b);
+    void m_vStrips_clear();
 };
 
 inline CIter::CIter(int* p, const IntStdVector* v)
@@ -3890,7 +3910,8 @@ inline Iter IntStdVector::end()
     return Iter(last, this);
 }
 
-inline CIter IntStdVector::FUN_00b33030(CIter a, CIter b)
+// src: GUESS 0x00b33030 (confidence: low)
+inline CIter IntStdVector::UpdateState_00b33030(CIter a, CIter b)
 {
     int s0, s1, s2, s3, s4, s5, s6, s7;
     int t0, t1, t2, t3, t4, t5, t6, t7;
@@ -3933,21 +3954,22 @@ inline CIter IntStdVector::FUN_00b33030(CIter a, CIter b)
 }
 
 // @fnv 0x00b32120
-void IntStdVector::FUN_00b32120()
+// src: COMMUNITY 0x00b32120
+void IntStdVector::m_vStrips_clear()
 {
-    FUN_00b33030(begin(), end());
+    UpdateState_00b33030(begin(), end());
 }
 
 struct ScalarAllocator
 {
     __forceinline void deallocate(unsigned int* _Ptr, unsigned int)
     {
-        FormHeap_Free(_Ptr);
+        FormHeapFreeAndLog_00401030(_Ptr);
     }
 };
 
-unsigned int* __cdecl FUN_00b42e50(unsigned int*, unsigned int*, unsigned int*);
-unsigned int* __cdecl FUN_00b177e0(unsigned int*, unsigned int*, unsigned int*, ScalarAllocator&);
+unsigned int* __cdecl std__Move(unsigned int*, unsigned int*, unsigned int*);
+unsigned int* __cdecl Object_ProcessAndReturnValue_00b177e0(unsigned int*, unsigned int*, unsigned int*, ScalarAllocator&);
 __forceinline ScalarTag PtrCatQ(unsigned int*&, unsigned int*&)
 {
     ScalarTag _Cat;
@@ -3968,7 +3990,7 @@ struct VectorStorage
     unsigned int* last;
     unsigned int* end;
     bool ResizeArray(unsigned int);
-    void FUN_00b32350();
+    void std_vector_clear();
     __forceinline unsigned int size() const
     {
         return (last - first);
@@ -3983,9 +4005,9 @@ struct VectorStorage
     }
     __forceinline unsigned int* UcopyQ(unsigned int* _First, unsigned int* _Last, unsigned int* _Ptr)
     {
-        return FUN_00b177e0(_First, _Last, _Ptr, allocator);
+        return Object_ProcessAndReturnValue_00b177e0(_First, _Last, _Ptr, allocator);
     }
-    VectorStorage& FUN_00b36330(const VectorStorage& _Right);
+    VectorStorage& UpdateState_00b36330(const VectorStorage& _Right);
 };
 __forceinline void HA()
 {
@@ -4076,18 +4098,19 @@ __forceinline void HD()
     int HD_33;
 }
 // @fnv 0x00b36330
-VectorStorage& VectorStorage::FUN_00b36330(const VectorStorage& _Right)
+// src: GUESS 0x00b36330 (confidence: low)
+VectorStorage& VectorStorage::UpdateState_00b36330(const VectorStorage& _Right)
 {
     if (this != &_Right)
     {
         HA();
         if (_Right.size() == 0)
-            FUN_00b32350();
+            std_vector_clear();
         else if (_Right.size() <= size())
         {
             HB();
             HB2();
-            unsigned int* _Ptr = FUN_00b42e50(_Right.first, _Right.last, first);
+            unsigned int* _Ptr = std__Move(_Right.first, _Right.last, first);
             DestroyQ(_Ptr, last);
             last = first + _Right.size();
         }
@@ -4095,7 +4118,7 @@ VectorStorage& VectorStorage::FUN_00b36330(const VectorStorage& _Right)
         {
             HC();
             unsigned int* _Ptr = _Right.first + size();
-            FUN_00b42e50(_Right.first, _Ptr, first);
+            std__Move(_Right.first, _Ptr, first);
             last = UcopyQ(_Ptr, _Right.last, last);
         }
         else
@@ -4186,8 +4209,8 @@ struct RandomState
 };
 struct RenderObject
 {
-    void FUN_00b2fb30(unsigned short);
-    void FUN_00b306d0(unsigned short);
+    void CIndexedGeometry_SetNumLodLevels(unsigned short);
+    void CIndexedGeometry_ResetStripCounter(unsigned short);
 };
 struct StateVector;
 struct StateIterator
@@ -4215,14 +4238,15 @@ struct StateVector
         StateIterator it(last, this);
         return it;
     }
-    StateIterator FUN_00b335c0(StateIterator, StateIterator);
-    inline void FUN_00b32350()
+    StateIterator ProcessAndReturnValue_00b335c0(StateIterator, StateIterator);
+// src: COMMUNITY 0x00b32350
+    inline void std_vector_clear()
     {
         StateIterator stop = finish();
         StateIterator start = begin();
-        FUN_00b335c0(start, stop);
+        ProcessAndReturnValue_00b335c0(start, stop);
     }
-    void FUN_00b15390(const int&);
+    void UpdateState_00b15390(const int&);
 };
 inline StateIterator::StateIterator(int* p, StateVector* v) : owner(0)
 {
@@ -4250,7 +4274,7 @@ inline void SetRandomSeed(int seed)
 }
 inline void AddValue(int item)
 {
-    DAT_011f8c50.FUN_00b15390(item);
+    DAT_011f8c50.UpdateState_00b15390(item);
 }
 inline int ShortCount(int count)
 {
@@ -4268,7 +4292,7 @@ struct Renderer
     int unk38, unk3c, unk40;
     int unk44, unk48, unk4c;
     Renderer(int);
-    void FUN_00b11050(int, float, int, void*, float, float, const Matrix&, const Float3&, RenderObject*, void*, float,
+    void CIdvBranch_Compute(int, float, int, void*, float, float, const Matrix&, const Float3&, RenderObject*, void*, float,
                       int, float);
 };
 struct Target
@@ -4295,19 +4319,20 @@ struct Target
     bool flag;
     int unkf4, unkf8, unkfc, unk100, unk104;
     int mode;
-    void FUN_00b2c130();
-    void FUN_00b2c890(float);
-    void FUN_00b2af80(float);
+    void BuildBranchLods();
+    void CTreeEngine_BuildLeafLods(float);
+    void CTreeEngine_Compute(float);
 };
 // @fnv 0x00b2af80
-void Target::FUN_00b2af80(float elapsed)
+// src: COMMUNITY 0x00b2af80
+void Target::CTreeEngine_Compute(float elapsed)
 {
     SetEnabled(flag == 0);
     renderer = new Renderer(0);
     if (!flag)
         elements = new ArrayElement[capacity];
     SetMode(mode);
-    DAT_011f8c50.FUN_00b32350();
+    DAT_011f8c50.std_vector_clear();
     DAT_011f8bf4 = &unk94;
     for (unsigned i = 0; i < values.size(); ++i)
     {
@@ -4326,17 +4351,17 @@ void Target::FUN_00b2af80(float elapsed)
         }
     }
     random.FUN_00b3f160(seed);
-    object->FUN_00b2fb30((unsigned short)ShortCount(count));
-    object->FUN_00b306d0(0);
+    object->CIndexedGeometry_SetNumLodLevels((unsigned short)ShortCount(count));
+    object->CIndexedGeometry_ResetStripCounter(0);
     SetRandomSeed(seed);
     {
-        renderer->FUN_00b11050(seed, value, 0, &position, 0.0f, 0.0f,
+        renderer->CIdvBranch_Compute(seed, value, 0, &position, 0.0f, 0.0f,
                                Matrix(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f), Float3(0.0f, 0.0f, 1.0f),
                                object, &offset, 1.0f, seed, -1.0f);
     }
-    FUN_00b2c130();
+    BuildBranchLods();
     if (!flag)
-        FUN_00b2c890(elapsed);
+        CTreeEngine_BuildLeafLods(elapsed);
     srand((unsigned)_time64(0));
 }
 }  // namespace fnv_00b2af80
@@ -4345,7 +4370,7 @@ namespace fnv_00b2c890 {
 #include <string.h>
 
 void* operator new(unsigned int);
-void FormHeap_Free(void*);
+void FormHeapFreeAndLog_00401030(void*);
 namespace std {
 class exception
 {
@@ -4418,7 +4443,7 @@ template <class T> struct NativeAllocator
 {
     void deallocate(T* ptr, unsigned int)
     {
-        fnv_00b2c890::FormHeap_Free(ptr);
+        fnv_00b2c890::FormHeapFreeAndLog_00401030(ptr);
     }
     T* allocate(unsigned int count)
     {
@@ -4582,7 +4607,8 @@ struct FUN_00b355d0 : ContainerAux
     {
         return UncheckedUninitCopy(start, finish, dest, allocator);
     }
-    FUN_00b355d0& FUN_00b36330(const FUN_00b355d0& src)
+// src: GUESS 0x00b36330 (confidence: low)
+    FUN_00b355d0& UpdateState_00b36330(const FUN_00b355d0& src)
     {
         if (this != &src)
         {
@@ -4613,7 +4639,8 @@ struct FUN_00b355d0 : ContainerAux
         }
         return *this;
     }
-    void FUN_00b17f50()
+// src: GUESS 0x00b17f50 (confidence: low)
+    void UpdateState_00b17f50()
     {
         if (first != 0)
         {
@@ -4624,7 +4651,7 @@ struct FUN_00b355d0 : ContainerAux
     }
     ~FUN_00b355d0()
     {
-        FUN_00b17f50();
+        UpdateState_00b17f50();
     }
 };
 inline ConstFloatIterator::ConstFloatIterator(float* position, const ContainerAux* owner)
@@ -4675,7 +4702,7 @@ struct Init : PairArray
     void* source;
     float stepFactor;
     Init(void*, float, float, float);
-    FUN_00b355d0 FUN_00b40b30(FUN_00b355d0);
+    FUN_00b355d0 UpdateState_00b40b30(FUN_00b355d0);
 };
 struct Record
 {
@@ -4776,10 +4803,11 @@ struct Target
     int unkf4;
     int unkf8;
     float parameter;
-    void FUN_00b2c890(float step);
+    void CTreeEngine_BuildLeafLods(float step);
 };
 // @fnv 0x00b2c890
-void Target::FUN_00b2c890(float step)
+// src: XBOX_PDB 0x00b2c890
+void Target::CTreeEngine_BuildLeafLods(float step)
 {
     float maximum = -1.0f;
     {
@@ -4799,12 +4827,12 @@ void Target::FUN_00b2c890(float step)
             maximum = 10.0f;
         if (values)
         {
-            values[0].FUN_00b36330(initial);
+            values[0].UpdateState_00b36330(initial);
             for (iteration = 1; iteration < count; iteration++)
             {
                 stepFactor = 1.0f + iteration * step;
                 Init operation(&unk94, (float)(maximum * 10.0), parameter, stepFactor);
-                values[iteration].FUN_00b36330(operation.FUN_00b40b30(values[iteration - 1]));
+                values[iteration].UpdateState_00b36330(operation.UpdateState_00b40b30(values[iteration - 1]));
             }
         }
     }

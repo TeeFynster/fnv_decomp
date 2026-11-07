@@ -142,13 +142,13 @@ bool MediaSet::UpdateLayerLocation(unsigned int time, bool force, MediaLocationC
     else
     {
         bool a;  // Restart after the previous incidental reaches its fade window.
-        unsigned int fMinPercent = FUN_00830970(MEDIATYPE_MEDIA_LOCATION);
+        unsigned int fMinPercent = FalloutAudioMedia_MediaGetSubDuration(MEDIATYPE_MEDIA_LOCATION);
         a = false;
         if (m_uiMediaValue3 && fMinPercent && time > m_uiMediaValue3 + fMinPercent - m_fMediaParameter3 * 1000.0)
         {
             FalloutAudioMedia::FadeOutMedia(static_cast<int>(m_fMediaParameter3 * 1000.0), MEDIATYPE_MEDIA_LOCATION);
             m_uiMediaValue3 = time;
-            if (!controller->FUN_00598000())
+            if (!controller->GetLoop())
                 a = true;
             else
                 return false;
@@ -241,12 +241,12 @@ bool MediaSet::UpdateLayerLocation(unsigned int time, bool force, MediaLocationC
             {
                 DAT_011dd37c = static_cast<unsigned int>(time + m_fMediaParameter1 * 1000.0);
                 unsigned int uiElapsedMilliseconds = 0;
-                if (FUN_00830a20(MEDIATYPE_MEDIA_LOCATION) && !a)
-                    uiElapsedMilliseconds = time - FUN_00830a20(MEDIATYPE_MEDIA_LOCATION);
+                if (FalloutAudioMedia_MediaGetPosition(MEDIATYPE_MEDIA_LOCATION) && !a)
+                    uiElapsedMilliseconds = time - FalloutAudioMedia_MediaGetPosition(MEDIATYPE_MEDIA_LOCATION);
                 FalloutAudioMedia::PlayMedia(
                     MEDIATYPE_MEDIA_LOCATION,
                     reinterpret_cast<const char*>(reinterpret_cast<const NiPointer<NiNode>*>(pLayer)->operator->()),
-                    static_cast<unsigned int>(m_fMediaParameter3 * 1000.0), !controller->FUN_00598000(), true,
+                    static_cast<unsigned int>(m_fMediaParameter3 * 1000.0), !controller->GetLoop(), true,
                     pLayer->Attenuation, uiElapsedMilliseconds);
                 FalloutAudioMedia::EndMediaUpdate();
                 m_uiMediaValue3 = time;
@@ -277,7 +277,8 @@ void MediaSetEntry::Reset()
 }
 
 // @fnv 0x007d9ec0
-void __fastcall FUN_007d9ec0(BSStringT<char>* apString)
+// src: GUESS 0x007d9ec0 (confidence: medium)
+void __fastcall BSStringT_BSStringT_Thunk(BSStringT<char>* apString)
 {
     apString->BSStringT<char>::~BSStringT<char>();
 }
@@ -288,12 +289,13 @@ extern "C" void* __cdecl _alloca(unsigned int);
 
 struct MediaSetLoad : public MediaSet
 {
-    bool FUN_00598bc0(TESFile* apFile);
+    bool MediaSet_Load(TESFile* apFile);
 };
 
 // Reads a MediaSet record from the file, handling EDID, OBND, FULL, type, name, attenuation, percent, sound and float chunks, then returns true.
 // @fnv 0x00598bc0
-bool MediaSetLoad::FUN_00598bc0(TESFile* apFile)
+// src: XBOX_PDB 0x00598bc0
+bool MediaSetLoad::MediaSet_Load(TESFile* apFile)
 {
     unsigned int itempint = 0;
     int chunkid;
@@ -471,7 +473,8 @@ bool MediaSetLoad::FUN_00598bc0(TESFile* apFile)
 }
 
 // @fnv 0x00598000
-int MediaLocationController::FUN_00598000()
+// src: COMMUNITY 0x00598000
+int MediaLocationController::GetLoop()
 {
     return (iFlags >> 4) & 3;
 }
@@ -523,22 +526,22 @@ struct MediaFormWriter
     void Finish();
 };
 
-void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
-void __cdecl FUN_004858f0(unsigned int, unsigned char);
+void __cdecl TESForm_AddChunkArray(unsigned int, void*, unsigned int);
+void __cdecl TESForm_AddChunk_3(unsigned int, unsigned char);
 void __cdecl _FUN_00485910(unsigned int, unsigned int);
 void __cdecl _FUN_00485910(unsigned int, float);
 
 // @fnv 0x005991b0
 void MediaSet::SaveMediaSet()
 {
-    TESForm::FUN_004855a0();
-    TESFullName::FUN_00487010();
+    TESForm::BeginFormRecord();
+    TESFullName::Save_00487010();
 
     _FUN_00485910(0x314d414e, *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x44));
 
     if (reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x48)->Length() > 0)
     {
-        FUN_004856f0(0x324d414e,
+        TESForm_AddChunkArray(0x324d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
                          *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x48)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x48)->Length() + 1);
@@ -546,7 +549,7 @@ void MediaSet::SaveMediaSet()
 
     if (reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x58)->Length() > 0)
     {
-        FUN_004856f0(0x334d414e,
+        TESForm_AddChunkArray(0x334d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
                          *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x58)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x58)->Length() + 1);
@@ -554,7 +557,7 @@ void MediaSet::SaveMediaSet()
 
     if (reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x68)->Length() > 0)
     {
-        FUN_004856f0(0x344d414e,
+        TESForm_AddChunkArray(0x344d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
                          *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x68)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x68)->Length() + 1);
@@ -562,7 +565,7 @@ void MediaSet::SaveMediaSet()
 
     if (reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x78)->Length() > 0)
     {
-        FUN_004856f0(0x354d414e,
+        TESForm_AddChunkArray(0x354d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
                          *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x78)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x78)->Length() + 1);
@@ -570,7 +573,7 @@ void MediaSet::SaveMediaSet()
 
     if (reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x88)->Length() > 0)
     {
-        FUN_004856f0(0x364d414e,
+        TESForm_AddChunkArray(0x364d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
                          *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x88)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x88)->Length() + 1);
@@ -578,7 +581,7 @@ void MediaSet::SaveMediaSet()
 
     if (reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x98)->Length() > 0)
     {
-        FUN_004856f0(0x374d414e,
+        TESForm_AddChunkArray(0x374d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
                          *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x98)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x98)->Length() + 1);
@@ -597,7 +600,7 @@ void MediaSet::SaveMediaSet()
     _FUN_00485910(0x4d414e4e, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x94));
     _FUN_00485910(0x4d414e4f, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0xa4));
 
-    FUN_004858f0(0x4d414e50, *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0xa8));
+    TESForm_AddChunk_3(0x4d414e50, *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0xa8));
 
     _FUN_00485910(0x4d414e44, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0xac));
     _FUN_00485910(0x4d414e45, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0xb0));
@@ -619,15 +622,15 @@ void MediaSet::SaveMediaSet()
     }
 
     reinterpret_cast<MediaFormWriter*>(this)->Finish();
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // @fnv 0x005978b0
 MediaSet::~MediaSet()
 {}
 
-float __fastcall FUN_00595ea0(void* apSky);
-float __fastcall FUN_00596030(void* apSky);
+float __fastcall Sky_GetSunriseBegin(void* apSky);
+float __fastcall Sky_GetSunsetEnd(void* apSky);
 
 extern TES* g_TES;
 
@@ -646,8 +649,8 @@ bool MediaSetBattle::UpdateBattleMusic(unsigned int auiTime)
         return true;
     }
     Sky* pWeatherSky = g_TES->GetSky();
-    bool m_bConditionWasTrue = pWeatherSky ? (FUN_00595ea0(pWeatherSky) <= pWeatherSky->GetFieldEC() &&
-                                              pWeatherSky->GetFieldEC() <= FUN_00596030(pWeatherSky))
+    bool m_bConditionWasTrue = pWeatherSky ? (Sky_GetSunriseBegin(pWeatherSky) <= pWeatherSky->GetFieldEC() &&
+                                              pWeatherSky->GetFieldEC() <= Sky_GetSunsetEnd(pWeatherSky))
                                            : true;
     if (m_bConditionWasTrue)
     {
@@ -712,7 +715,7 @@ struct TextValue
     char* text;
     unsigned short length;
     unsigned short capacity;
-    TextValue* FUN_00559450(int flag);
+    TextValue* Modelloader_GetReferencedThis(int flag);
     ~TextValue();
 };
 struct StringRecord
@@ -723,7 +726,7 @@ struct StringRecord
 // @fnv 0x00599700
 void StringRecord::SetValues(TextValue aTextValue, float afFirst, float afSecond)
 {
-    FUN_004037f0(aTextValue.FUN_00559450(0));
+    FUN_004037f0(aTextValue.Modelloader_GetReferencedThis(0));
     reinterpret_cast<MediaSetEntry*>(this)->Attenuation = afFirst;
     reinterpret_cast<MediaSetEntry*>(this)->Percent = afSecond;
 }
@@ -731,18 +734,19 @@ void StringRecord::SetValues(TextValue aTextValue, float afFirst, float afSecond
 struct LayerInfo : MediaSetEntry
 {
 
-    const char* __thiscall FUN_00559450(unsigned int index);
+    const char* __thiscall Modelloader_GetReferencedThis(unsigned int index);
     int __thiscall FUN_00408a80(const char* text);
-    bool __thiscall FUN_00599a50(LayerInfo other);
+    bool __thiscall EvaluateValue_00599a50(LayerInfo other);
 };
 // @fnv 0x00599a50
-bool LayerInfo::FUN_00599a50(LayerInfo other)
+// src: GUESS 0x00599a50 (confidence: low)
+bool LayerInfo::EvaluateValue_00599a50(LayerInfo other)
 {
     if (Attenuation != other.Attenuation)
         return true;
     if (Percent != other.Percent)
         return true;
-    if (FUN_00408a80(other.FUN_00559450(0)))
+    if (FUN_00408a80(other.Modelloader_GetReferencedThis(0)))
         return false;
     return true;
 }
@@ -757,8 +761,8 @@ MediaSetNameHolder::~MediaSetNameHolder()
 {}
 
 bool __fastcall GetControllerCondition(MediaLocationController* controller);
-bool __cdecl FUN_00830750(unsigned long, bool);
-unsigned int __cdecl FUN_008308c0(unsigned long);
+bool __cdecl FalloutAudioMedia_MediaIsPlaying(unsigned long, bool);
+unsigned int __cdecl FalloutAudioMedia_MediaGetDuration(unsigned long);
 void __cdecl StartFade(int, int);
 void __cdecl PlayAudioMedia(int, const char*, unsigned int, bool, bool, float, unsigned int);
 void __cdecl FUN_008304c0();
@@ -774,14 +778,14 @@ bool MediaSet::PointLocation(unsigned int auiTime, bool abEnabled, MediaLocation
     bool b4;
     MediaSetEntry* ptrLocal;
     int local4;
-    b2 = FUN_00830750(3, true);
+    b2 = FalloutAudioMedia_MediaIsPlaying(3, true);
     retVal = true;
     b4 = reinterpret_cast<TESObjectREFR*>(apCtrl)->GetScale() < 100.0;
     if (this->m_bActorStateFlag == 0 && abEnabled)
     {
         DAT_011dd37c = 0;
     }
-    local7 = FUN_008308c0(2);
+    local7 = FalloutAudioMedia_MediaGetDuration(2);
     flagDTmp = false;
     if (this->m_uiMediaValue3 != 0 && local7 != 0)
     {
@@ -789,7 +793,7 @@ bool MediaSet::PointLocation(unsigned int auiTime, bool abEnabled, MediaLocation
         {
             StartFade((int)(this->m_fMediaParameter3 * 1000.0), 2);
             this->m_uiMediaValue3 = auiTime;
-            if (apCtrl->FUN_00598000() == 0)
+            if (apCtrl->GetLoop() == 0)
             {
                 flagDTmp = true;
             }
@@ -810,7 +814,7 @@ bool MediaSet::PointLocation(unsigned int auiTime, bool abEnabled, MediaLocation
         {
             if (this->m_pSound1 != 0 && !this->bEffectFlag)
             {
-                BSAudio::FUN_00453a70()->FUN_00ad73b0((int)this->m_pSound1->TESForm::FUN_0084e3a0(), 0x901).Play(false);
+                BSAudio::BSAudio_QInstance()->GetSoundHandleByFormID_00ad73b0((int)this->m_pSound1->TESForm::GetHavokWorldObjectCountInSceneGraph_0084e3a0(), 0x901).Play(false);
             }
             ptrLocal = &this->m_kMediaSetEntry1;
             this->bEffectFlag = 1;
@@ -819,7 +823,7 @@ bool MediaSet::PointLocation(unsigned int auiTime, bool abEnabled, MediaLocation
         {
             if (this->bEffectFlag && this->m_pSound2 != 0)
             {
-                BSAudio::FUN_00453a70()->FUN_00ad73b0((int)this->m_pSound2->TESForm::FUN_0084e3a0(), 0x901).Play(false);
+                BSAudio::BSAudio_QInstance()->GetSoundHandleByFormID_00ad73b0((int)this->m_pSound2->TESForm::GetHavokWorldObjectCountInSceneGraph_0084e3a0(), 0x901).Play(false);
             }
             ptrLocal = &this->m_kMediaSetEntry3;
             this->bEffectFlag = 0;
@@ -828,7 +832,7 @@ bool MediaSet::PointLocation(unsigned int auiTime, bool abEnabled, MediaLocation
         {
             if (this->bEffectFlag && this->m_pSound2 != 0)
             {
-                BSAudio::FUN_00453a70()->FUN_00ad73b0((int)this->m_pSound2->TESForm::FUN_0084e3a0(), 0x901).Play(false);
+                BSAudio::BSAudio_QInstance()->GetSoundHandleByFormID_00ad73b0((int)this->m_pSound2->TESForm::GetHavokWorldObjectCountInSceneGraph_0084e3a0(), 0x901).Play(false);
             }
             ptrLocal = &this->m_kMediaSetEntry2;
             this->bEffectFlag = 0;
@@ -841,9 +845,9 @@ bool MediaSet::PointLocation(unsigned int auiTime, bool abEnabled, MediaLocation
                 DAT_011dd37c = (unsigned int)(this->m_fMediaParameter1 * 1000.0 + (double)DAT_011dd37c);
             }
             local4 = 0;
-            if (FUN_00830a20((MEDIATYPE)3) != 0 && !flagDTmp)
+            if (FalloutAudioMedia_MediaGetPosition((MEDIATYPE)3) != 0 && !flagDTmp)
             {
-                local4 = auiTime - FUN_00830a20((MEDIATYPE)3);
+                local4 = auiTime - FalloutAudioMedia_MediaGetPosition((MEDIATYPE)3);
             }
             if (ptrLocal == &this->m_kMediaSetEntry1)
             {
@@ -891,9 +895,9 @@ struct DungeonController
     void FUN_007037c0(unsigned int);
 };
 extern DungeonController* DAT_011dd374;
-bool FUN_00830750(unsigned long, bool);
-unsigned int FUN_008308c0(unsigned long);
-void FUN_008305e0();
+bool FalloutAudioMedia_MediaIsPlaying(unsigned long, bool);
+unsigned int FalloutAudioMedia_MediaGetDuration(unsigned long);
+void FalloutAudioMedia_MediaPause();
 void ResetThreadFlags();
 void StartFade(int, int);
 struct DungeonMediaSet : MediaSet
@@ -908,7 +912,7 @@ bool DungeonMediaSet::UpdatePlayback(bool active, unsigned int time, int mediaTy
     if (active)
     {
         changed = false;
-        bool playing = FUN_00830750(mediaType, false);
+        bool playing = FalloutAudioMedia_MediaIsPlaying(mediaType, false);
         if (!playing && !bEffectFlag)
         {
             if (m_pSound1 && !bEffectFlag)
@@ -919,14 +923,14 @@ bool DungeonMediaSet::UpdatePlayback(bool active, unsigned int time, int mediaTy
                                          (unsigned int)(fSkillValueBonus * 1000.0), true, true,
                                          m_kMediaSetEntry1.Attenuation, 0);
             FalloutAudioMedia::EndMediaUpdate();
-            FUN_008305e0();
+            FalloutAudioMedia_MediaPause();
         }
         if (time > DAT_011ca9fc + m_fMediaParameter1)
         {
             ResetThreadFlags();
             bEffectFlag = true;
         }
-        unsigned int length = FUN_008308c0(mediaType);
+        unsigned int length = FalloutAudioMedia_MediaGetDuration(mediaType);
         if (length && time > DAT_011ca9fc + length - 1000)
         {
             FalloutAudioMedia::PlayMedia((MEDIATYPE)mediaType, m_kMediaSetEntry1.Name.String(),
@@ -939,7 +943,7 @@ bool DungeonMediaSet::UpdatePlayback(bool active, unsigned int time, int mediaTy
     else
     {
         bool fading = false;
-        if (FUN_00830750(mediaType, false) && bEffectFlag)
+        if (FalloutAudioMedia_MediaIsPlaying(mediaType, false) && bEffectFlag)
         {
             fading = true;
             StartFade((int)(fSkillValueBonus * 1000.0), mediaType);
@@ -960,11 +964,11 @@ bool DungeonMediaSet::UpdatePlayback(bool active, unsigned int time, int mediaTy
 
 struct MediaLayerCompare
 {
-    bool FUN_00599a50(MediaLayerData other);
+    bool EvaluateValue_00599a50(MediaLayerData other);
 };
 struct MediaFormCompare
 {
-    bool FUN_00485270(TESForm* other);
+    bool TESForm_CompareAllComponents(TESForm* other);
 };
 struct MediaSetCompare : MediaSet
 {
@@ -981,22 +985,22 @@ bool MediaSetCompare::IsDifferentFrom(TESForm* form)
     if (other->Type != Type)
         return true;
     if (reinterpret_cast<MediaLayerCompare*>(&m_kMediaSetEntry1)
-            ->FUN_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry1)))
+            ->EvaluateValue_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry1)))
         return true;
     if (reinterpret_cast<MediaLayerCompare*>(&m_kMediaSetEntry2)
-            ->FUN_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry2)))
+            ->EvaluateValue_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry2)))
         return true;
     if (reinterpret_cast<MediaLayerCompare*>(&m_kMediaSetEntry3)
-            ->FUN_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry3)))
+            ->EvaluateValue_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry3)))
         return true;
     if (reinterpret_cast<MediaLayerCompare*>(&m_kMediaSetEntry4)
-            ->FUN_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry4)))
+            ->EvaluateValue_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry4)))
         return true;
     if (reinterpret_cast<MediaLayerCompare*>(&m_kMediaSetEntry5)
-            ->FUN_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry5)))
+            ->EvaluateValue_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry5)))
         return true;
     if (reinterpret_cast<MediaLayerCompare*>(&m_kMediaSetEntry6)
-            ->FUN_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry6)))
+            ->EvaluateValue_00599a50(*reinterpret_cast<MediaLayerData*>(&other->m_kMediaSetEntry6)))
         return true;
     if (m_cMediaFlag != other->m_cMediaFlag)
         return true;
@@ -1012,7 +1016,7 @@ bool MediaSetCompare::IsDifferentFrom(TESForm* form)
         return true;
     if (m_pSound2 != other->m_pSound2)
         return true;
-    if (reinterpret_cast<MediaFormCompare*>(this)->FUN_00485270(other))
+    if (reinterpret_cast<MediaFormCompare*>(this)->TESForm_CompareAllComponents(other))
         return true;
     return false;
 }

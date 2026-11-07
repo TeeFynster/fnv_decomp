@@ -23,7 +23,7 @@ public:
     ~CombatThreatRecord_nitmapbase_ob1_variant();
     bool IsXLessThan(float);
     void LoadGame(BGSLoadGameBuffer*);
-    void __thiscall FUN_009a5e50();
+    void __thiscall SetVtableAndProcessState_009a5e50();
 };
 
 extern int DAT_01189c40;
@@ -211,11 +211,12 @@ struct MapOwnerStandIn
     int unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C;
     NiTPointerMap<unsigned int, void*> m_kFormatEntries;
 
-    void FUN_00ec2e50();
+    void ReleaseStorage_00ec2e50();
 };
 
 // @fnv 0x00ec2e50
-void MapOwnerStandIn::FUN_00ec2e50()
+// src: GUESS 0x00ec2e50 (confidence: low)
+void MapOwnerStandIn::ReleaseStorage_00ec2e50()
 {
     NiTMapIterator pos = m_kFormatEntries.GetFirstPos();
     while (pos)

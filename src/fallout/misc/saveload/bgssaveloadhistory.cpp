@@ -46,8 +46,8 @@ void SaveLoadChangeHistory::Init()
 // @fnv 0x0084c270
 void BGSSaveLoadHistory_Destroy(unsigned char flags)
 {
-    FUN_0084c2a0(0, 12, flags);
-    FUN_0084c2a0(1000, 1001, flags);
+    BGSSaveLoadGlobalData_RevertGlobalDataRange(0, 12, flags);
+    BGSSaveLoadGlobalData_RevertGlobalDataRange(1000, 1001, flags);
 }
 
 // @fnv 0x0084e020
@@ -57,7 +57,7 @@ void SaveLoadChangeHistory::AddNoteWithArguments(const char* format, char* argum
     int length;
     if (!*reinterpret_cast<unsigned char*>(reinterpret_cast<Setting*>(0x11de0a4)->Bool()))
         return;
-    length = FUN_00407000(locals.buffer, format, arguments);
+    length = BSvsprintf(locals.buffer, format, arguments);
     if (length > 0)
     {
         locals.allocation = static_cast<char*>(::operator new(length + 1));

@@ -90,13 +90,13 @@ class NavMeshTriangleDoorPortal
 class NavMeshObstacleMap : public BGSReconstructFormsInAllFilesMap
 {
   public:
-    void FUN_006947e0(void*&, unsigned short&, NiPointer<ObstacleData>&);
-    void FUN_006946a0(unsigned short, NiPointer<ObstacleData>);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_ObstacleData_unsigned_short_NiPointer_ObstacleData_GetNext(void*&, unsigned short&, NiPointer<ObstacleData>&);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_NavMeshObstacleData_unsigned_short_NiPointer_NavMeshObstacleData_SetAt(unsigned short, NiPointer<ObstacleData>);
 };
 class NavMeshPOVMap : public BGSReconstructFormsInAllFilesMap
 {
   public:
-    void FUN_00694d30(void*&, unsigned short&, NavMeshPOVData&);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NavMeshPOVData_unsigned_short_NavMeshPOVData_GetNext(void*&, unsigned short&, NavMeshPOVData&);
     void InsertOrUpdate(unsigned short, NavMeshPOVData);
 };
 #include "../../../include/ActiveEffect.h"
@@ -133,7 +133,7 @@ void NavMesh::ForceSetFormID(unsigned int formID)
 void NavMesh::InitItem()
 {
     if (GetDisabled())
-        ((TESForm*)FUN_0068efb0())->SetCollisionDisabled(true);
+        ((TESForm*)GetNavMeshInfo_0068efb0())->SetCollisionDisabled(true);
     if (IsDeleted())
     {
         bool altered = g_TES->GetActiveCell()->FUN_00460340();
@@ -152,7 +152,7 @@ void NavMesh::CopyNavMeshDataTo(NavMeshPtr& copy)
     Triangles.CopyTo(&static_cast<const NavMeshPtr&>(copy)->Triangles);
     m_kEdgeExtraInfo.CopyTo(&static_cast<const NavMeshPtr&>(copy)->m_kEdgeExtraInfo);
     m_kIndexList.CopyTo(&static_cast<const NavMeshPtr&>(copy)->m_kIndexList);
-    m_kGrid.FUN_0069dd50(&static_cast<const NavMeshPtr&>(copy)->m_kGrid);
+    m_kGrid.CopyTo_0069dd50(&static_cast<const NavMeshPtr&>(copy)->m_kGrid);
     m_kObstacleUndoData.CopyTo(&static_cast<const NavMeshPtr&>(copy)->m_kObstacleUndoData);
     m_kClosedDoorInfo.CopyTo(&static_cast<const NavMeshPtr&>(copy)->m_kClosedDoorInfo);
     void* pos = ((NavMeshObstacleMap*)pTriangleToObstacleMap)->GetFirstPos();
@@ -160,15 +160,15 @@ void NavMesh::CopyNavMeshDataTo(NavMeshPtr& copy)
     {
         unsigned short triangle;
         NiPointer<ObstacleData> m_spRegisteredObstacle(0);
-        ((NavMeshObstacleMap*)pTriangleToObstacleMap)->FUN_006947e0(pos, triangle, m_spRegisteredObstacle);
-        ((NavMeshObstacleMap*)static_cast<const NavMeshPtr&>(copy)->pTriangleToObstacleMap)->FUN_006946a0(triangle, m_spRegisteredObstacle);
+        ((NavMeshObstacleMap*)pTriangleToObstacleMap)->NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_ObstacleData_unsigned_short_NiPointer_ObstacleData_GetNext(pos, triangle, m_spRegisteredObstacle);
+        ((NavMeshObstacleMap*)static_cast<const NavMeshPtr&>(copy)->pTriangleToObstacleMap)->NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_NavMeshObstacleData_unsigned_short_NiPointer_NavMeshObstacleData_SetAt(triangle, m_spRegisteredObstacle);
     }
     pos = ((NavMeshPOVMap*)&POVPointerArray)->GetFirstPos();
     while (pos)
     {
         NavMeshPOVData POV;
         unsigned short key;
-        ((NavMeshPOVMap*)&POVPointerArray)->FUN_00694d30(pos, key, POV);
+        ((NavMeshPOVMap*)&POVPointerArray)->NiTMapBase_DFALL_NiTMapItem_unsigned_short_NavMeshPOVData_unsigned_short_NavMeshPOVData_GetNext(pos, key, POV);
         ((NavMeshPOVMap*)&static_cast<const NavMeshPtr&>(copy)->POVPointerArray)->InsertOrUpdate(key, POV);
     }
     m_kAdditionalIndexList.CopyTo(&static_cast<const NavMeshPtr&>(copy)->m_kAdditionalIndexList);
@@ -183,7 +183,8 @@ bool NavMeshTriangle::HasFlag40()
 }
 
 // @fnv 0x00693b90
-bool NavMeshTriangle::FUN_00693b90()
+// src: XBOX_PDB 0x00693b90
+bool NavMeshTriangle::IsNoLargeCreature()
 {
     return FUN_00691140(0x10);
 }
@@ -197,7 +198,8 @@ class GlobalObject_00869f00
 };
 
 // @fnv 0x00694e10
-void __fastcall FUN_00694e10(GlobalObject_00869f00* pThis)
+// src: GUESS 0x00694e10 (confidence: low)
+void __fastcall NavmeshLoadsave_UpdateState_00694e10(GlobalObject_00869f00* pThis)
 {
     *(unsigned int**)pThis = &DAT_0106b0dc;
     pThis->Clear(true);
@@ -213,22 +215,23 @@ struct DA00694f20
     int x;
     E00694f20* data;
     unsigned int count;
-    E00694f20* FUN_006a1440(unsigned int);
-    void FUN_00694b10(unsigned int, int);
+    E00694f20* Object_GetIndexedValue_006a1440(unsigned int);
+    void BSSimpleArray_EdgeExtraInfo_1024_SetSize(unsigned int, int);
 };
 struct SA00694f20
 {
     int x;
     E00694f20* data;
     unsigned int count;
-    void FUN_00694f20(DA00694f20* dest);
+    void BSSimpleArray_EdgeExtraInfo_1024_CopyTo_1024(DA00694f20* dest);
 };
 // @fnv 0x00694f20
-void SA00694f20::FUN_00694f20(DA00694f20* dest)
+// src: COMMUNITY 0x00694f20
+void SA00694f20::BSSimpleArray_EdgeExtraInfo_1024_CopyTo_1024(DA00694f20* dest)
 {
-    dest->FUN_00694b10(count, 1);
+    dest->BSSimpleArray_EdgeExtraInfo_1024_SetSize(count, 1);
     for (unsigned int i = 0; i < count; i++)
-        dest->FUN_006a1440(i)->Assign(data[i]);
+        dest->Object_GetIndexedValue_006a1440(i)->Assign(data[i]);
 }
 
 // Resizes dest to this container's count and copies each element via GetAt.
@@ -252,19 +255,20 @@ struct DA00694fe0
     NN00694fe0* data;
     unsigned int count;
     NN00694fe0& GetAt(unsigned int);
-    void FUN_00695230(unsigned int, int);
+    void BSSimpleArray_NiPointer_1024_SetSize(unsigned int, int);
 };
 struct SA00694fe0
 {
     int x;
     NN00694fe0* data;
     unsigned int count;
-    void FUN_00694fe0(DA00694fe0* dest);
+    void BSSimpleArray_NiPointer_ObstacleUndoData_1024_CopyTo_1024(DA00694fe0* dest);
 };
 // @fnv 0x00694fe0
-void SA00694fe0::FUN_00694fe0(DA00694fe0* dest)
+// src: COMMUNITY 0x00694fe0
+void SA00694fe0::BSSimpleArray_NiPointer_ObstacleUndoData_1024_CopyTo_1024(DA00694fe0* dest)
 {
-    dest->FUN_00695230(count, 1);
+    dest->BSSimpleArray_NiPointer_1024_SetSize(count, 1);
     for (unsigned int i = 0; i < count; i++)
         dest->GetAt(i) = data[i];
 }
@@ -282,10 +286,11 @@ struct SA00695040
     int x;
     TwoIntRecord* data;
     unsigned int count;
-    void FUN_00695040(DA00695040* dest);
+    void BSSimpleArray_NavMeshClosedDoorInfo_1024_CopyTo_1024(DA00695040* dest);
 };
 // @fnv 0x00695040
-void SA00695040::FUN_00695040(DA00695040* dest)
+// src: COMMUNITY 0x00695040
+void SA00695040::BSSimpleArray_NavMeshClosedDoorInfo_1024_CopyTo_1024(DA00695040* dest)
 {
     dest->FUN_006950f0(count, 1);
     for (unsigned int i = 0; i < count; i++)
@@ -365,11 +370,12 @@ struct Map00694d30
     virtual unsigned int KeyToHashIndex(unsigned short);
     unsigned int size;
     Item00694d30** buckets;
-    void FUN_00694d30(Item00694d30** pos, unsigned short* key, NavMeshPOVData* val);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NavMeshPOVData_unsigned_short_NavMeshPOVData_GetNext(Item00694d30** pos, unsigned short* key, NavMeshPOVData* val);
 };
 // Reads the key and value of the entry at *pos, then advances *pos to the next entry or the next non-empty bucket, or null at the end.
 // @fnv 0x00694d30
-void Map00694d30::FUN_00694d30(Item00694d30** pos, unsigned short* key, NavMeshPOVData* val)
+// src: COMMUNITY 0x00694d30
+void Map00694d30::NiTMapBase_DFALL_NiTMapItem_unsigned_short_NavMeshPOVData_unsigned_short_NavMeshPOVData_GetNext(Item00694d30** pos, unsigned short* key, NavMeshPOVData* val)
 {
     Item00694d30* pkItem = *pos;
     *key = pkItem->key;
@@ -398,7 +404,7 @@ void BSSimpleArray<NavMeshVertex, 1024>::CopyTo<1024>(BSSimpleArray<NavMeshVerte
 {
     dest->SetSize(iSize, true);
     for (unsigned int i = 0; i < iSize; i++)
-        dest->FUN_006a1440(i) = pBuffer[i];
+        dest->Object_GetIndexedValue_006a1440(i) = pBuffer[i];
 }
 
 // @fnv 0x00694ea0
@@ -420,7 +426,7 @@ void ClampUnsignedShort(unsigned short* pusValue, unsigned short usMin, unsigned
         *pusValue = usMin;
 }
 
-void __fastcall FUN_00694e10(void*);
+void __fastcall NavmeshLoadsave_UpdateState_00694e10(void*);
 void _Deallocate(void*);
 
 struct FUN_006950a0_shell
@@ -432,7 +438,7 @@ struct FUN_006950a0_shell
 // @fnv 0x006950a0
 void* FUN_006950a0_shell::FUN_006950a0(unsigned int flags)
 {
-    FUN_00694e10(this);
+    NavmeshLoadsave_UpdateState_00694e10(this);
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -441,7 +447,7 @@ void* FUN_006950a0_shell::FUN_006950a0(unsigned int flags)
 namespace fnv_00694b10 {
 struct S5460
 {
-    void FUN_006a2770(unsigned int, unsigned int);
+    void BSSimpleArray_NiPoint2_1024_ReallocateBuffer(unsigned int, unsigned int);
 };
 struct GlobalObject_00869f00
 {
@@ -461,10 +467,11 @@ struct FUN_00694b10_shell
     void* p;
     unsigned int allocated;
     unsigned int capacity;
-    void FUN_00694b10(unsigned int size, bool flag);
+    void BSSimpleArray_EdgeExtraInfo_1024_SetSize(unsigned int size, bool flag);
 };
 // @fnv 0x00694b10
-void FUN_00694b10_shell::FUN_00694b10(unsigned int size, bool abShrink)
+// src: COMMUNITY 0x00694b10
+void FUN_00694b10_shell::BSSimpleArray_EdgeExtraInfo_1024_SetSize(unsigned int size, bool abShrink)
 {
     if (size == 0)
     {
@@ -479,7 +486,7 @@ void FUN_00694b10_shell::FUN_00694b10(unsigned int size, bool abShrink)
         }
         else
         {
-            ((S5460*)this)->FUN_006a2770(size, allocated);
+            ((S5460*)this)->BSSimpleArray_NiPoint2_1024_ReallocateBuffer(size, allocated);
             capacity = size;
         }
         ((FUN_00692320_shell*)this)->ConstructEntries((char*)p + allocated * 0xc, size - allocated);
@@ -491,7 +498,7 @@ void FUN_00694b10_shell::FUN_00694b10(unsigned int size, bool abShrink)
         allocated = size;
         if (abShrink && size <= capacity / 4)
         {
-            ((S5460*)this)->FUN_006a2770(size, size);
+            ((S5460*)this)->BSSimpleArray_NiPoint2_1024_ReallocateBuffer(size, size);
             capacity = size;
         }
     }
@@ -506,7 +513,7 @@ void FUN_00694b10_shell::FUN_00694b10(unsigned int size, bool abShrink)
 namespace fnv_006bc8e0 {
 struct S006bebd0
 {
-    void FUN_006bebd0();
+    void NavMeshObstacleCutter_RemoveTrianglesFromNavMeshGrid();
 };
 struct InnerB006bc8e0
 {
@@ -526,15 +533,16 @@ struct Host006bc8e0
     InnerA006bc8e0* p0;
     int _4;
     InnerB006bc8e0* p8;
-    bool FUN_006bc8e0(InnerA006bc8e0*, InnerB006bc8e0*);
+    bool NavMeshObstacleCutter_ResetNavMeshFromObstacleUndoData(InnerA006bc8e0*, InnerB006bc8e0*);
 };
 // Stores the two inner pointers, calls FUN_006bebd0, then forwards b's v10 and v18 to the two sub-objects with flag 1 and returns true.
 // @fnv 0x006bc8e0
-bool Host006bc8e0::FUN_006bc8e0(InnerA006bc8e0* pInnerA, InnerB006bc8e0* pInnerB)
+// src: COMMUNITY 0x006bc8e0
+bool Host006bc8e0::NavMeshObstacleCutter_ResetNavMeshFromObstacleUndoData(InnerA006bc8e0* pInnerA, InnerB006bc8e0* pInnerB)
 {
     p0 = pInnerA;
     p8 = pInnerB;
-    ((S006bebd0*)this)->FUN_006bebd0();
+    ((S006bebd0*)this)->NavMeshObstacleCutter_RemoveTrianglesFromNavMeshGrid();
     p0->o28.SetSize(p8->v10, true);
     p0->o38.SetSize(p8->v18, true);
     return true;
@@ -553,10 +561,11 @@ struct FUN_00694620_shell : TESForm
 {
     char _pad[0x104 - sizeof(TESForm)];
     TESForm* m_pNavigationMesh;
-    void FUN_00694620(BGSLoadFormBuffer* apLoadGameBuffer);
+    void NavMesh_FinishLoadGameBGS(BGSLoadFormBuffer* apLoadGameBuffer);
 };
 // @fnv 0x00694620
-void FUN_00694620_shell::FUN_00694620(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: COMMUNITY 0x00694620
+void FUN_00694620_shell::NavMesh_FinishLoadGameBGS(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     TESForm::Revert((unsigned int)apLoadGameBuffer);
     if (m_pNavigationMesh != 0)
@@ -595,7 +604,7 @@ struct NavMeshInfoSaveData
 typedef char _sizecheck_EdgeExtraInfoOLD[sizeof(NavMeshInfoSaveData) == 48 ? 1 : -1];
 struct FUN_00692950_shell : public NavMesh
 {
-    bool FUN_00692950(TESFile*);
+    bool NavMesh_Load(TESFile*);
 };
 
 extern "C" void* __cdecl _alloca(unsigned int);
@@ -643,11 +652,11 @@ TESForm* GetFormByID(unsigned int);
 
 struct SeqObj
 {
-    void FUN_00401970();
+    void NiRefObject_DecRefCount();
 };
 struct G00559a40
 {
-    void FUN_0040f6e0();
+    void NiRefObject_IncRefCount();
 };
 // Exe 0x00692950: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
 struct NavmeshOffset08View
@@ -678,48 +687,48 @@ struct ProcessListsView
 
 struct VertArr
 {
-    ContainerItemExtraFileData* FUN_006a1440(unsigned int);
+    ContainerItemExtraFileData* Object_GetIndexedValue_006a1440(unsigned int);
 };
 struct EdgeS
 {
-    void FUN_0069d240(TESFile*, char*);
+    void EdgeExtraInfo_LoadV5(TESFile*, char*);
     void ReadFromFile(TESFile*, char*);
-    unsigned int FUN_00693d10();
-    unsigned int FUN_00693cd0();
+    unsigned int EdgeExtraInfo_GetSizeOfV5();
+    unsigned int EdgeExtraInfo_GetSizeOfV9();
 };
 struct EdgeArr
 {
-    EdgeS* FUN_006a1440(unsigned int);
+    EdgeS* Object_GetIndexedValue_006a1440(unsigned int);
 };
 struct DoorS
 {
     unsigned int DoorRef;
     unsigned short m_usTriangleIdentifier;
-    void FUN_004141e0();
+    void CHUNK_Endian();
 };
 struct DoorArr
 {
     DoorS* GetElement(unsigned int);
-    void FUN_00844c90(unsigned int, int);
+    void BSSimpleArray_RemoveAt(unsigned int, int);
 };
 struct TriS
 {
     bool HasFlag40();
-    bool FUN_00693b90();
-    void FUN_00693bb0();
-    void FUN_00693c10();
-    void FUN_00693bd0(int);
-    bool FUN_00690e10();
+    bool IsNoLargeCreature();
+    void NavMeshTriangle_ToggleLargeActor();
+    void NavMeshTriangle_endianSwap();
+    void NavMeshTriangle_SetObjectCount(int);
+    bool NavMeshTriangle_HasEdgeExtraInfo();
     bool IsEdgeFlagSet(int);
-    unsigned short FUN_0068f2c0(int);
+    unsigned short GetEdgeExtraInfo_0068f2c0(int);
 };
 struct TriArr
 {
-    TriS& FUN_00558dd0(int);
+    TriS& GetElementAddress16(int);
 };
 struct DA00694f20
 {
-    void FUN_00694b10(unsigned int, int);
+    void BSSimpleArray_EdgeExtraInfo_1024_SetSize(unsigned int, int);
 };
 struct DA00694f80
 {
@@ -732,22 +741,23 @@ struct GridS
 };
 struct InfoMapS
 {
-    void FUN_006b6990(unsigned int);
+    void ProcessState_006b6990(unsigned int);
 };
-unsigned int FUN_00693db0();
-TESForm* __fastcall FUN_00690830(const NavMeshInfo*);
+unsigned int EdgeExtraInfo_GetSizeOfV0();
+TESForm* __fastcall NavMeshInfo_GetParentSpace(const NavMeshInfo*);
 extern TESObjectCELL* DAT_011c3f30;
 extern ProcessListsView g_011d6ca8;
 
 // Reads a NavMesh record from a TESFile, parsing subrecords, converting old versions, and resolving the parent cell and NavMeshInfo.
 // @fnv 0x00692950
-bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
+// src: COMMUNITY 0x00692950
+bool FUN_00692950_shell::NavMesh_Load(TESFile* apFile)
 {
     AutoMemHelper tempMemContext(
         0x2e, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Pathfinding\\NavMesh_LoadSave.cpp", 0x113);
     if (((TESForm*)this)->IsDeleted())
     {
-        ((SeqObj*)((char*)this + 0x1c))->FUN_00401970();
+        ((SeqObj*)((char*)this + 0x1c))->NiRefObject_DecRefCount();
         return false;
     }
     unsigned char formid;
@@ -798,7 +808,7 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                 }
                 Vertices.SetSize(saveStruct.VertexCount, true);
                 Triangles.SetSize(saveStruct.GetTriangleTotal, true);
-                ((DA00694f20*)((char*)this + 0x48))->FUN_00694b10(saveStruct.m_uiField3, 1);
+                ((DA00694f20*)((char*)this + 0x48))->BSSimpleArray_EdgeExtraInfo_1024_SetSize(saveStruct.m_uiField3, 1);
                 ((DA00694f80*)((char*)this + 0x78))->SetSize(saveStruct.m_uiField4, true);
                 m_kDoorPortals.SetSize(saveStruct.m_uiField5, true);
                 TESForm::RemapFormIDForFile(saveStruct.m_uiField0, apFile);
@@ -817,13 +827,13 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                 }
                 break;
             case 0x5856564e:  // NVVX
-                apFile->GetChunkData(((VertArr*)((char*)this + 0x28))->FUN_006a1440(0),
+                apFile->GetChunkData(((VertArr*)((char*)this + 0x28))->Object_GetIndexedValue_006a1440(0),
                                      ((NavmeshOffset08View*)((char*)this + 0x28))->GetFlags() * 12);
                 if (apFile->QEndian())
                 {
                     unsigned int isize = ((NavmeshOffset08View*)((char*)this + 0x28))->GetFlags();
                     for (unsigned int i = 0; i < isize; ++i)
-                        ((VertArr*)((char*)this + 0x28))->FUN_006a1440(i)->Endian();
+                        ((VertArr*)((char*)this + 0x28))->Object_GetIndexedValue_006a1440(i)->Endian();
                 }
                 break;
             case 0x4143564e:  // NVCA
@@ -843,7 +853,7 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                 for (int i = 0; i < isize; ++i)
                 {
                     if (apFile->QEndian())
-                        ((DoorArr*)((char*)this + 0x58))->GetElement(i)->FUN_004141e0();
+                        ((DoorArr*)((char*)this + 0x58))->GetElement(i)->CHUNK_Endian();
                     unsigned int idoorID = ((DoorArr*)((char*)this + 0x58))->GetElement(i)->DoorRef;
                     TESForm::RemapFormIDForFile(idoorID, apFile);
                     TESObjectREFR* pdoor = (TESObjectREFR*)GetFormByID(idoorID);
@@ -861,9 +871,9 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                         unsigned int itriIndex =
                             ((DoorArr*)((char*)this + 0x58))->GetElement(i)->m_usTriangleIdentifier;
                         if (itriIndex < ((NavmeshOffset08View*)((char*)this + 0x38))->GetFlags())
-                            ((BSXFlags_shell&)((TriArr*)((char*)this + 0x38))->FUN_00558dd0(itriIndex))
+                            ((BSXFlags_shell&)((TriArr*)((char*)this + 0x38))->GetElementAddress16(itriIndex))
                                 .ClearFlags(0x400);
-                        ((DoorArr*)((char*)this + 0x58))->FUN_00844c90(i, 1);
+                        ((DoorArr*)((char*)this + 0x58))->BSSimpleArray_RemoveAt(i, 1);
                         --i;
                         --isize;
                     }
@@ -872,14 +882,14 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
             break;
             case 0x5254564e:  // NVTR
             {
-                apFile->GetChunkData(&((TriArr*)((char*)this + 0x38))->FUN_00558dd0(0),
+                apFile->GetChunkData(&((TriArr*)((char*)this + 0x38))->GetElementAddress16(0),
                                      ((NavmeshOffset08View*)((char*)this + 0x38))->GetFlags() * 16);
                 unsigned int isize = ((NavmeshOffset08View*)((char*)this + 0x38))->GetFlags();
                 for (unsigned int i = 0; i < isize; ++i)
                 {
                     if (apFile->QEndian())
-                        ((TriArr*)((char*)this + 0x38))->FUN_00558dd0(i).FUN_00693c10();
-                    ((TriArr*)((char*)this + 0x38))->FUN_00558dd0(i).FUN_00693bd0(0);
+                        ((TriArr*)((char*)this + 0x38))->GetElementAddress16(i).NavMeshTriangle_endianSwap();
+                    ((TriArr*)((char*)this + 0x38))->GetElementAddress16(i).NavMeshTriangle_SetObjectCount(0);
                 }
             }
             break;
@@ -894,7 +904,7 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                     ((TESForm*)this)->GetDebugName(&navmeshString);
                     Warning("MASTERFILE: Navmesh %s has a bad navmesh grid, please touch and resave",
                             (unsigned int)(const Flt&)navmeshString);
-                    FUN_006959b0();
+                    CreateGrid();
                 }
                 ::operator delete(pchunkData);
             }
@@ -919,8 +929,8 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                         *(NavMeshInfo**)pbufferLoc = oldFormat.m_pNavMeshInfo;
                         pbufferLoc += 4;
                         *(unsigned short*)pbufferLoc = oldFormat.m_usTriangleIdentifier;
-                        ((EdgeArr*)((char*)this + 0x48))->FUN_006a1440(i)->FUN_0069d240(apFile, newFormat);
-                        pchunkPointer += FUN_00693db0();
+                        ((EdgeArr*)((char*)this + 0x48))->Object_GetIndexedValue_006a1440(i)->EdgeExtraInfo_LoadV5(apFile, newFormat);
+                        pchunkPointer += EdgeExtraInfo_GetSizeOfV0();
                     }
                 }
                 else if (ifileVersionNumber < 9)
@@ -928,8 +938,8 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                     unsigned int isize = ((NavmeshOffset08View*)((char*)this + 0x48))->GetFlags();
                     for (unsigned int i = 0; i < isize; ++i)
                     {
-                        ((EdgeArr*)((char*)this + 0x48))->FUN_006a1440(i)->FUN_0069d240(apFile, pchunkPointer);
-                        pchunkPointer += ((EdgeArr*)((char*)this + 0x48))->FUN_006a1440(i)->FUN_00693d10();
+                        ((EdgeArr*)((char*)this + 0x48))->Object_GetIndexedValue_006a1440(i)->EdgeExtraInfo_LoadV5(apFile, pchunkPointer);
+                        pchunkPointer += ((EdgeArr*)((char*)this + 0x48))->Object_GetIndexedValue_006a1440(i)->EdgeExtraInfo_GetSizeOfV5();
                     }
                 }
                 else
@@ -937,8 +947,8 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                     unsigned int isize = ((NavmeshOffset08View*)((char*)this + 0x48))->GetFlags();
                     for (unsigned int i = 0; i < isize; ++i)
                     {
-                        ((EdgeArr*)((char*)this + 0x48))->FUN_006a1440(i)->ReadFromFile(apFile, pchunkPointer);
-                        pchunkPointer += ((EdgeArr*)((char*)this + 0x48))->FUN_006a1440(i)->FUN_00693cd0();
+                        ((EdgeArr*)((char*)this + 0x48))->Object_GetIndexedValue_006a1440(i)->ReadFromFile(apFile, pchunkPointer);
+                        pchunkPointer += ((EdgeArr*)((char*)this + 0x48))->Object_GetIndexedValue_006a1440(i)->EdgeExtraInfo_GetSizeOfV9();
                     }
                 }
                 ::operator delete(pchunkdata);
@@ -961,8 +971,8 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
     }
     if (((TESForm*)this)->IsDeleted())
     {
-        ((G00559a40*)((char*)this + 0x1c))->FUN_0040f6e0();
-        ((InfoMapS*)g_TES->GetActiveCell())->FUN_006b6990(((TESForm*)this)->GetFormID());
+        ((G00559a40*)((char*)this + 0x1c))->NiRefObject_IncRefCount();
+        ((InfoMapS*)g_TES->GetActiveCell())->ProcessState_006b6990(((TESForm*)this)->GetFormID());
         return false;
     }
     if (*(NavMeshInfo**)((char*)this + 0x104))
@@ -1010,8 +1020,8 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
             for (unsigned int i = 0; i < isize; ++i)
             {
                 TriS* ptri = reinterpret_cast<TriS*>(FUN_005582f0((unsigned short)i));
-                if (ptri->FUN_00693b90())
-                    ptri->FUN_00693bb0();
+                if (ptri->IsNoLargeCreature())
+                    ptri->NavMeshTriangle_ToggleLargeActor();
             }
         }
         if (!g_TES->GetActiveCell())
@@ -1026,7 +1036,7 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
         }
         else
         {
-            if (!FUN_00690830(*(NavMeshInfo**)((char*)this + 0x104)))
+            if (!NavMeshInfo_GetParentSpace(*(NavMeshInfo**)((char*)this + 0x104)))
                 *(unsigned int*)((char*)*(NavMeshInfo**)((char*)this + 0x104) + 4) =
                     GetDoorForm()->GetFormID();
             ((TESRecipe*)*(NavMeshInfo**)((char*)this + 0x104))->SetCategory((unsigned int)this);
@@ -1043,7 +1053,7 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
             }
             if (*(NavMeshInfo**)((char*)this + 0x104) && isize)
                 ((ActiveEffect*)*(NavMeshInfo**)((char*)this + 0x104))
-                    ->FUN_00693d50((float)ipreferredTris / (float)isize);
+                    ->BaseProcess_SetLastTimeProcessed((float)ipreferredTris / (float)isize);
         }
         if (ifileVersionNumber < 11)
         {
@@ -1053,14 +1063,14 @@ bool FUN_00692950_shell::FUN_00692950(TESFile* apFile)
                 TriS* ptri = reinterpret_cast<TriS*>(FUN_005582f0((unsigned short)i));
                 if (ptri->HasFlag40())
                 {
-                    if (!ptri->FUN_00690e10())
+                    if (!ptri->NavMeshTriangle_HasEdgeExtraInfo())
                         continue;
                     for (int e = 0; e < 3; ++e)
                     {
                         if (!ptri->IsEdgeFlagSet(e))
                             continue;
                         EdgeExtraInfo* pinfo;
-                        unsigned short extraInfoIndex = ptri->FUN_0068f2c0(e);
+                        unsigned short extraInfoIndex = ptri->GetEdgeExtraInfo_0068f2c0(e);
                         pinfo = reinterpret_cast<EdgeExtraInfo*>(GetEdge(extraInfoIndex));
                         if (!*(NavMeshInfo**)((char*)this + 0x104))
                             continue;
@@ -1284,11 +1294,11 @@ struct FUN_00693f30_cls
     char pad[0x38];
     FUN_00693f30_count triCount;
     FUN_00693f30_obj* FUN_0059bb30();
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     void PrintNavMeshInfo(void* a1);
 };
 
-int FUN_00406f60(void*, const char*, ...);
+int BSStringT_char_SPrintF(void*, const char*, ...);
 
 // Builds a name via the nav object's vfn_90 and prints the navmesh id, triangle count and cell name through FUN_00406f60.
 // @fnv 0x00693f30
@@ -1303,7 +1313,7 @@ void FUN_00693f30_cls::PrintNavMeshInfo(void* a1)
             nav->vfn_90(&name);
         }
     }
-    FUN_00406f60(a1, "NavMesh (%08X) with %d Triangles in Cell %s", FUN_0084e3a0(), triCount.FUN_0044ddc0(),
+    BSStringT_char_SPrintF(a1, "NavMesh (%08X) with %d Triangles in Cell %s", GetHavokWorldObjectCountInSceneGraph_0084e3a0(), triCount.FUN_0044ddc0(),
                  name.c_str());
 }
 
@@ -1381,12 +1391,13 @@ struct FUN_00693fe0_cls
     void* GetC();
     void* GetD();
 
-    void FUN_00693fe0(unsigned char arg);
+    void NavMesh_SetDelete(unsigned char arg);
 };
 
 // If arg differs from GetA, updates state via Foo and v32 based on GetB(0)->Test(); when arg is non-zero, calls Bar(GetC()) and Fin() on the active TES navmesh map.
 // @fnv 0x00693fe0
-void FUN_00693fe0_cls::FUN_00693fe0(unsigned char arg)
+// src: XBOX_PDB 0x00693fe0
+void FUN_00693fe0_cls::NavMesh_SetDelete(unsigned char arg)
 {
     bool flag;
     if (arg != GetA())
@@ -1487,7 +1498,7 @@ struct PathingService
     virtual void UnknownVirtual_42();
     virtual void UnknownVirtual_43();
     virtual unsigned char DispatchAction(NavMeshAction* action, unsigned char enabled, unsigned char option);
-    unsigned char FUN_00485be0(unsigned int triangleIndex);
+    unsigned char TESForm_FormIDMatchesWithoutIndex(unsigned int triangleIndex);
 };
 struct NavMeshActionController
 {
@@ -1514,7 +1525,7 @@ unsigned char NavMeshActionController::ProcessNavMeshAction(NavMeshAction* apAct
         case 8:
         case 9: {
             unsigned char valid = 0;
-            if (service->FUN_00485be0(apAction->triangleIndex))
+            if (service->TESForm_FormIDMatchesWithoutIndex(apAction->triangleIndex))
                 valid = 1;
             if (valid)
             {
@@ -1628,11 +1639,12 @@ class FUN_006947e0_cls
     unsigned int m_uiCount;
     FUN_006947e0_node** m_ppItems;
 
-    void FUN_006947e0(FUN_006947e0_node** ppNode, unsigned short* pKey, NiPointer<ObstacleData>* pOwner);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_ObstacleData_unsigned_short_NiPointer_ObstacleData_GetNext(FUN_006947e0_node** ppNode, unsigned short* pKey, NiPointer<ObstacleData>* pOwner);
 };
 
 // @fnv 0x006947e0
-void FUN_006947e0_cls::FUN_006947e0(FUN_006947e0_node** ppNode, unsigned short* pKey, NiPointer<ObstacleData>* pOwner)
+// src: COMMUNITY 0x006947e0
+void FUN_006947e0_cls::NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_ObstacleData_unsigned_short_NiPointer_ObstacleData_GetNext(FUN_006947e0_node** ppNode, unsigned short* pKey, NiPointer<ObstacleData>* pOwner)
 {
     FUN_006947e0_node* node = *ppNode;
     *pKey = node->usKey;
@@ -1659,7 +1671,7 @@ void FUN_006947e0_cls::FUN_006947e0(FUN_006947e0_node** ppNode, unsigned short* 
 struct Mesh69
 {
     bool FUN_00440da0();
-    void FUN_00484af0(bool);
+    void TESForm_SetDisabled(bool);
     void LinkMatchingEdges();
 };
 struct Info69
@@ -1674,7 +1686,8 @@ struct Map69
 void __cdecl FNV_Warning(const char*, ...);
 // Looks up the NavMeshInfo for a NavMesh ID and sets its mesh disabled state, warning and returning false if the info or mesh is missing.
 // @fnv 0x00694500
-bool __cdecl FUN_00694500(unsigned int uiNavMeshId, bool disabled)
+// src: COMMUNITY 0x00694500
+bool __cdecl NavMesh_SetDisableNavMesh(unsigned int uiNavMeshId, bool disabled)
 {
     Info69* info = reinterpret_cast<Map69*>(g_TES->GetActiveCell(uiNavMeshId))->FUN_00693d70();
     if (!info)
@@ -1692,12 +1705,12 @@ bool __cdecl FUN_00694500(unsigned int uiNavMeshId, bool disabled)
                         uiNavMeshId);
             return false;
         }
-        else if (reinterpret_cast<Mesh69*>(navMeshPtr.FUN_00559450())->FUN_00440da0() != disabled)
+        else if (reinterpret_cast<Mesh69*>(navMeshPtr.Modelloader_GetReferencedThis())->FUN_00440da0() != disabled)
         {
-            reinterpret_cast<Mesh69*>(navMeshPtr.FUN_00559450())->FUN_00484af0(disabled);
+            reinterpret_cast<Mesh69*>(navMeshPtr.Modelloader_GetReferencedThis())->TESForm_SetDisabled(disabled);
             info->FUN_00693ef0(disabled);
             if (!disabled)
-                reinterpret_cast<Mesh69*>(navMeshPtr.FUN_00559450())->LinkMatchingEdges();
+                reinterpret_cast<Mesh69*>(navMeshPtr.Modelloader_GetReferencedThis())->LinkMatchingEdges();
         }
     }
     return true;
@@ -1720,12 +1733,13 @@ struct Map6946a0
     unsigned int m_uiHashSize;
     Item6946a0** m_ppkHashTable;
     unsigned int m_uiCount;
-    void FUN_006946a0(unsigned short key, NiPointer<ObstacleData> val);
+    void NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_NavMeshObstacleData_unsigned_short_NiPointer_NavMeshObstacleData_SetAt(unsigned short key, NiPointer<ObstacleData> val);
 };
 
 // Looks up the bucket for key, updates the value if the key exists, otherwise inserts a new item and increments the count.
 // @fnv 0x006946a0
-void Map6946a0::FUN_006946a0(unsigned short key, NiPointer<ObstacleData> aRefVal)
+// src: COMMUNITY 0x006946a0
+void Map6946a0::NiTMapBase_DFALL_NiTMapItem_unsigned_short_NiPointer_NavMeshObstacleData_unsigned_short_NiPointer_NavMeshObstacleData_SetAt(unsigned short key, NiPointer<ObstacleData> aRefVal)
 {
     unsigned int uiIndex = KeyToHashIndex(key);
     Item6946a0* pkItem = m_ppkHashTable[uiIndex];

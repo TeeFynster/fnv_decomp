@@ -12,7 +12,8 @@
 #include "../../../../include/ProcessLists.h"
 
 // @fnv 0x007bfbc0
-int SleepWaitMenu::FUN_007bfbc0()
+// src: COMMUNITY 0x007bfbc0
+int SleepWaitMenu::GetClass_007bfbc0()
 {
     return 0x3f4;
 }
@@ -59,7 +60,7 @@ void Menu::UpdateClockText()
                       time < 12.0 ? DAT_011d24fc.FUN_00403df0() : DAT_011d27f0.FUN_00403df0());
         }
     }
-    static_cast<SleepWaitMenu*>(this)->m_pTiles[SleepWaitMenu::TI_TIME_TEXT]->FUN_00a01350(0xfc4, szClockText, true);
+    static_cast<SleepWaitMenu*>(this)->m_pTiles[SleepWaitMenu::TI_TIME_TEXT]->Tile_Set_00a01350(0xfc4, szClockText, true);
 }
 
 namespace fnv_007c01b0 {
@@ -74,11 +75,12 @@ extern SleepwaitmenuInterfaceView* DAT_011d8804;
 extern SleepWaitMenu* DAT_011da920;
 
 // @fnv 0x007c01b0
-void FUN_007c01b0()
+// src: XBOX_PDB 0x007c01b0
+void SleepWaitMenu_Close()
 {
     if (DAT_011da920)
     {
-        if (!g_BGSSaveLoadGame->FUN_0042ce10())
+        if (!g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
             DAT_011e0e80.UpdateActor3D();
         if (DAT_011da920->m_bState2)
             DAT_011d8804->FUN_007010e0(0, 0);
@@ -89,7 +91,7 @@ void FUN_007c01b0()
 }  // namespace fnv_007c01b0
 
 extern void* DAT_011da918;
-void* __cdecl FUN_00a01860(const char* asName);
+void* __cdecl Tile_TextToTrait(const char* asName);
 
 // Initializes m_fCameraTransitionTime, m_bState1, m_fWaitTime and m_bState3 to zero and stores the result of FUN_00a01860("_current_value") in DAT_011da918.
 // @fnv 0x007bfb30
@@ -99,13 +101,13 @@ SleepWaitMenu::SleepWaitMenu()
     m_bState1 = 0;
     m_fWaitTime = 0.0f;
     m_bState3 = 0;
-    DAT_011da918 = FUN_00a01860("_current_value");
+    DAT_011da918 = Tile_TextToTrait("_current_value");
 }
 
 namespace fnv_007c0220 {
 struct DecCfg
 {
-    float* FUN_00403e20(int);
+    float* Setting_Float_00403e20(int);
 };
 struct DecGate
 {
@@ -123,12 +125,12 @@ struct DecMgr
 {
     void FUN_005c1a00(int);
     void FUN_005c1a00(int, int);
-    bool FUN_005c7870();
+    bool PlayerCharacter_GetInChargen();
 };
 struct DecBox
 {
-    void FUN_00974fc0();
-    void FUN_00975160();
+    void ProcessLists_StopAllActorsInDialog();
+    void ProcessLists_KillAllProjectiles();
 };
 
 extern DecCfg DAT_011c3e7c;
@@ -140,14 +142,15 @@ extern DecMgr* DAT_011dea3c;
 extern DecBox DAT_011e0e80;
 
 int __cdecl FUN_00ec62c0();
-void __cdecl FUN_00717280(int);
+void __cdecl InterfaceManager_PlayMenuSound(int);
 void __cdecl FUN_004d5c60(int);
-void __cdecl FUN_007c01b0();
+void __cdecl SleepWaitMenu_Close();
 
 }  // namespace fnv_007c0220
 
 // @fnv 0x007c0220
-void SleepWaitMenu::FUN_007c0220(int slot, int value)
+// src: XBOX_PDB 0x007c0220
+void SleepWaitMenu::DoClick_007c0220(int slot, int value)
 {
     using namespace fnv_007c0220;
     using fnv_007c0220::DAT_011da918;
@@ -158,14 +161,14 @@ void SleepWaitMenu::FUN_007c0220(int slot, int value)
     switch (slot)
     {
     case 4:
-        FUN_00717280(1);
+        InterfaceManager_PlayMenuSound(1);
         if ((m_bState2 && *DAT_011d89f0.FUN_00408d60()) || (!m_bState2 && *DAT_011d8974.FUN_00408d60()))
         {
             DAT_011de134->ResetAndUpdate();
         }
         if (m_bState2 != 0)
         {
-            DAT_011d8804->FUN_00700960(0, *DAT_011c3e7c.FUN_00403e20(0));
+            DAT_011d8804->FUN_00700960(0, *DAT_011c3e7c.Setting_Float_00403e20(0));
         }
         m_bState1 = 1;
         m_pTiles[4]->FUN_00700320(0xfaf, 0);
@@ -177,16 +180,16 @@ void SleepWaitMenu::FUN_007c0220(int slot, int value)
         {
             FUN_004d5c60(0x17);
         }
-        if (!DAT_011dea3c->FUN_005c7870())
+        if (!DAT_011dea3c->PlayerCharacter_GetInChargen())
         {
-            DAT_011e0e80.FUN_00974fc0();
+            DAT_011e0e80.ProcessLists_StopAllActorsInDialog();
         }
-        DAT_011e0e80.FUN_00975160();
+        DAT_011e0e80.ProcessLists_KillAllProjectiles();
         break;
     case 5:
-        FUN_00717280(2);
+        InterfaceManager_PlayMenuSound(2);
         DAT_011dea3c->FUN_005c1a00(0, 0);
-        FUN_007c01b0();
+        SleepWaitMenu_Close();
         break;
     }
 }
@@ -196,25 +199,26 @@ extern float DAT_0104a494;
 extern float DAT_010162c0;
 extern int DAT_011da918;
 extern char str_01070250[];
-int __cdecl FUN_00a01860(const char* s);
+int __cdecl Tile_TextToTrait(const char* s);
 
 }  // namespace fnv_007c04d0
 
 // @fnv 0x007c04d0
-bool SleepWaitMenu::FUN_007c04d0(int a1, int aiUnused)
+// src: XBOX_PDB 0x007c04d0
+bool SleepWaitMenu::DoGamepad_007c04d0(int a1, int aiUnused)
 {
     using namespace fnv_007c04d0;
     using fnv_007c04d0::DAT_011da918;
-    using fnv_007c04d0::FUN_00a01860;
+    using fnv_007c04d0::Tile_TextToTrait;
     bool done = false;
     if (m_pTiles[TI_WAIT_BUTTON]->IsTraitNonZero(0xfaf))
     {
         if (a1 == 0xf || a1 == 0x10)
         {
             // Preserve the unused second argument passed by the original getter call.
-            m_pTiles[TI_SCROLLBAR]->FUN_00a012d0(DAT_011da918,
+            m_pTiles[TI_SCROLLBAR]->Tile_Set(DAT_011da918,
                 (m_pTiles[TI_SCROLLBAR]->*reinterpret_cast<float (Tile::*)(int, int)>(static_cast<float (Tile::*)(int)>(&Tile::FUN_00a011b0)))(DAT_011da918, 0) + (a1 == 0xf ? DAT_0104a494 : DAT_010162c0));
-            m_pTiles[TI_SCROLLBAR]->SetTraitFloat(FUN_00a01860(str_01070250), 1.0f);
+            m_pTiles[TI_SCROLLBAR]->SetTraitFloat(Tile_TextToTrait(str_01070250), 1.0f);
             done = true;
         }
     }
@@ -224,8 +228,8 @@ bool SleepWaitMenu::FUN_007c04d0(int a1, int aiUnused)
 namespace fnv_007c03a0 {
 extern int DAT_011da918;
 extern Setting DAT_011d3ae0, DAT_011d448c;
-int __cdecl FUN_00406d90(float f);
-void __cdecl FUN_00706f30(int a);
+int __cdecl FloatToInt(float f);
+void __cdecl Interface_PlayMenuSound(int a);
 
 }  // namespace fnv_007c03a0
 
@@ -240,12 +244,12 @@ void SleepWaitMenu::UpdateGaugeDisplay()
     {
         if (m_pTiles[TI_WAIT_BUTTON]->IsTraitNonZero(0xfaf))
         {
-            FUN_00706f30(4);
+            Interface_PlayMenuSound(4);
         }
         m_fWaitTime = m_pTiles[TI_SCROLLBAR]->FUN_00a011b0(DAT_011da918);
-        sprintf_s(szText, 0x104, "%d %s", FUN_00406d90((float)(m_fWaitTime + 1.0)),
+        sprintf_s(szText, 0x104, "%d %s", FloatToInt((float)(m_fWaitTime + 1.0)),
                   (m_fWaitTime > 0.0) ? DAT_011d3ae0.FUN_00403df0() : DAT_011d448c.FUN_00403df0());
-        m_pTiles[TI_HOURS_TEXT]->FUN_00a01350(0xfc4, szText, true);
+        m_pTiles[TI_HOURS_TEXT]->Tile_Set_00a01350(0xfc4, szText, true);
     }
 }
 
@@ -253,16 +257,16 @@ void SleepWaitMenu::UpdateGaugeDisplay()
 class InputManager
 {
 public:
-    int FUN_00a24660();
+    int Controls_GetUserAction();
 };
 
 struct PlayerStub
 {
     bool FUN_0094df60();
-    bool FUN_004d1360();
-    void FUN_00969c30();
-    void FUN_0094df80();
-    int FUN_005cde20();
+    bool PlayerCharacter_IsHardcore();
+    void PlayerCharacter_UpdateHardcoreMode();
+    void PlayerCharacter_PlayerSleep();
+    int PlayerCharacter_GetSleepHours();
 };
 
 struct TimeGlobalStub
@@ -272,7 +276,7 @@ struct TimeGlobalStub
 
 struct TESStub
 {
-    void FUN_00455490();
+    void TES_RunScripts();
 };
 
 extern OSGlobals* DAT_011dea0c;
@@ -280,19 +284,20 @@ extern PlayerStub* DAT_011dea3c;
 extern TESStub* DAT_011dea10;
 extern TimeGlobalStub DAT_011f6394;
 
-bool __cdecl FUN_00703d50();
+bool __cdecl Interface_IsConsoleVisible();
 
 // Handles input state flags and, while m_bState1 is set, advances m_fCameraTransitionTime by the frame time and updates the tile's _current_value and _SetInCode when it reaches 1.0.
 // @fnv 0x007c0580
-bool SleepWaitMenu::FUN_007c0580()
+// src: COMMUNITY 0x007c0580
+bool SleepWaitMenu::UpdateSleep()
 {
-    if (DAT_011dea0c->FUN_00877720(15, 2)->FUN_00a24660())
+    if (DAT_011dea0c->Main_GetControls(15, 2)->Controls_GetUserAction())
     {
         m_bState3 = 1;
     }
-    if ((m_bState3 && DAT_011dea0c->FUN_00877720(15, 1)->FUN_00a24660()) || (m_bState1 && !DAT_011dea3c->FUN_0094df60()))
+    if ((m_bState3 && DAT_011dea0c->Main_GetControls(15, 1)->Controls_GetUserAction()) || (m_bState1 && !DAT_011dea3c->FUN_0094df60()))
     {
-        if (!FUN_00703d50())
+        if (!Interface_IsConsoleVisible())
         {
             HandleSelection(5, 0);
             return false;
@@ -311,14 +316,14 @@ bool SleepWaitMenu::FUN_007c0580()
     {
         return false;
     }
-    DAT_011dea10->FUN_00455490();
-    if (DAT_011dea3c->FUN_004d1360())
+    DAT_011dea10->TES_RunScripts();
+    if (DAT_011dea3c->PlayerCharacter_IsHardcore())
     {
-        DAT_011dea3c->FUN_00969c30();
+        DAT_011dea3c->PlayerCharacter_UpdateHardcoreMode();
     }
-    DAT_011dea3c->FUN_0094df80();
-    m_pTiles[TI_SCROLLBAR]->FUN_00700320((int)FUN_00a01860("_current_value"), DAT_011dea3c->FUN_005cde20() - 1);
-    m_pTiles[TI_SCROLLBAR]->SetTraitFloat((int)FUN_00a01860("_SetInCode"), 1.0f);
+    DAT_011dea3c->PlayerCharacter_PlayerSleep();
+    m_pTiles[TI_SCROLLBAR]->FUN_00700320((int)Tile_TextToTrait("_current_value"), DAT_011dea3c->PlayerCharacter_GetSleepHours() - 1);
+    m_pTiles[TI_SCROLLBAR]->SetTraitFloat((int)Tile_TextToTrait("_SetInCode"), 1.0f);
     UpdateClockText();
     return true;
 }
@@ -329,14 +334,14 @@ extern SleepWaitMenu* g_pkSleepWaitMenu_011da920;
 
 struct SwInterface
 {
-    Tile* FUN_00586150();
+    Tile* CombatController_GetCombatState();
 };
-SwInterface* __cdecl FUN_004b7210();
-int __cdecl FUN_00705770();
-Menu* __cdecl FUN_00a09030(int m_uiSoundID);
-void __cdecl FUN_005b5e40(const char* pcFormat, ...);
+SwInterface* __cdecl InterfaceManager_GetSingleton();
+int __cdecl ret_1012();
+Menu* __cdecl Tile_GetMenuByClass(int m_uiSoundID);
+void __cdecl Warning_005b5e40(const char* pcFormat, ...);
 int __cdecl FUN_00406d30(char* pcDest, unsigned int uiSize, const char* pcSrc);
-int __cdecl FUN_00406d00(char* pcDest, unsigned int uiSize, const char* pcFormat, ...);
+int __cdecl BSsprintf(char* pcDest, unsigned int uiSize, const char* pcFormat, ...);
 extern "C" int __cdecl toupper(int c);
 
 struct SwSoundHandle
@@ -348,7 +353,7 @@ struct SwSoundHandle
 struct SwAudio
 {
     static SwAudio* GetSingleton();
-    SwSoundHandle FUN_00ad7550(const char* pcName, unsigned int uiFlags, int i);
+    SwSoundHandle BSAudio_GetSoundHandleByEditorName(const char* pcName, unsigned int uiFlags, int i);
 };
 
 extern Setting g_s_011d3948;
@@ -370,23 +375,23 @@ extern const char g_szSleepWaitEnd[] = "";
 // @fnv 0x007bfc30
 Tile* __cdecl CreateSleepWaitMenu(bool bSleep)
 {
-    SwInterface* pkInterfaceY = FUN_004b7210();
-    Menu* pkOld_ = FUN_00a09030(FUN_00705770());
+    SwInterface* pkInterfaceY = InterfaceManager_GetSingleton();
+    Menu* pkOld_ = Tile_GetMenuByClass(ret_1012());
     if (pkOld_)
         delete pkOld_;
-    Tile* pkTileTmp2 = pkInterfaceY->FUN_00586150()->FUN_00a01b00(s_szMenuPath);
-    g_pkSleepWaitMenu_011da920 = static_cast<SleepWaitMenu*>(pkTileTmp2->FUN_00a03c90());
-    if (g_pkSleepWaitMenu_011da920 && g_pkSleepWaitMenu_011da920->GetClass() == FUN_00705770())
+    Tile* pkTileTmp2 = pkInterfaceY->CombatController_GetCombatState()->Tile_ReadFile(s_szMenuPath);
+    g_pkSleepWaitMenu_011da920 = static_cast<SleepWaitMenu*>(pkTileTmp2->Tile_GetMenu());
+    if (g_pkSleepWaitMenu_011da920 && g_pkSleepWaitMenu_011da920->GetClass() == ret_1012())
     {
         g_pkSleepWaitMenu_011da920->FUN_00a1dc70(reinterpret_cast<TileMenu*>(pkTileTmp2), false);
-        if (!g_pkSleepWaitMenu_011da920->FUN_007abdb0())
+        if (!g_pkSleepWaitMenu_011da920->QuantityMenu_IsWellFormedMenu())
         {
-            FUN_005b5e40(s_szError);
+            Warning_005b5e40(s_szError);
             return 0;
         }
-        SwAudio::GetSingleton()->FUN_00ad7550(s_szSound, 0x121, 0).FUN_00ad8830();
+        SwAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName(s_szSound, 0x121, 0).FUN_00ad8830();
         if (pkTileTmp2->FUN_00a011b0(0xfa7) == 6006.0 || pkTileTmp2->FUN_00a011b0(0xfa7) == 102.0)
-            pkTileTmp2->FUN_00a012d0(0xfad, FUN_00a01530(), true);
+            pkTileTmp2->Tile_Set(0xfad, FUN_00a01530(), true);
         g_pkSleepWaitMenu_011da920->m_bSleep = bSleep;
         char acVerb[0x104];
         if (bSleep)
@@ -394,17 +399,17 @@ Tile* __cdecl CreateSleepWaitMenu(bool bSleep)
         else
             FUN_00406d30(acVerb, 0x104, g_s_011d23ac.FUN_00403df0());
         char acText[0x104];
-        FUN_00406d00(acText, 0x104, s_szTitleFormat, g_s_011d2910.FUN_00403df0(), acVerb);
-        g_pkSleepWaitMenu_011da920->m_pTiles[SleepWaitMenu::TI_HOW_MANY_TEXT]->FUN_00a01350(0xfc4, acText, true);
+        BSsprintf(acText, 0x104, s_szTitleFormat, g_s_011d2910.FUN_00403df0(), acVerb);
+        g_pkSleepWaitMenu_011da920->m_pTiles[SleepWaitMenu::TI_HOW_MANY_TEXT]->Tile_Set_00a01350(0xfc4, acText, true);
         acVerb[0] = toupper(acVerb[0]);
-        g_pkSleepWaitMenu_011da920->m_pTiles[SleepWaitMenu::TI_WAIT_BUTTON]->FUN_00a01350(0xfc4, acVerb, true);
-        FUN_00406d00(acText, 0x104, s_szHourFormat, g_s_011d448c.FUN_00403df0());
-        g_pkSleepWaitMenu_011da920->m_pTiles[SleepWaitMenu::TI_HOURS_TEXT]->FUN_00a01350(0xfc4, acText, true);
+        g_pkSleepWaitMenu_011da920->m_pTiles[SleepWaitMenu::TI_WAIT_BUTTON]->Tile_Set_00a01350(0xfc4, acVerb, true);
+        BSsprintf(acText, 0x104, s_szHourFormat, g_s_011d448c.FUN_00403df0());
+        g_pkSleepWaitMenu_011da920->m_pTiles[SleepWaitMenu::TI_HOURS_TEXT]->Tile_Set_00a01350(0xfc4, acText, true);
         g_pkSleepWaitMenu_011da920->UpdateClockText();
-        g_pkSleepWaitMenu_011da920->m_pTiles[SleepWaitMenu::TI_CANCEL_BUTTON]->FUN_00a01350(0xfc4, g_s_011d29f4.FUN_00403df0(), true);
+        g_pkSleepWaitMenu_011da920->m_pTiles[SleepWaitMenu::TI_CANCEL_BUTTON]->Tile_Set_00a01350(0xfc4, g_s_011d29f4.FUN_00403df0(), true);
         g_pkSleepWaitMenu_011da920->FUN_00726070()
             ->GetNamedChild(s_szBackground)
-            ->FUN_00a012d0(0xfa9, *g_s_011d3174.FUN_00403e20() * 255.0, true);
+            ->Tile_Set(0xfa9, *g_s_011d3174.Setting_Float_00403e20() * 255.0, true);
         g_pkSleepWaitMenu_011da920->FUN_00a1dc20(0);
         return pkTileTmp2;
     }

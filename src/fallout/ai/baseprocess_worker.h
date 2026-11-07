@@ -36,7 +36,7 @@ class MiddleHighProcessCall
 class CopyCall00914c60
 {
   public:
-    void FUN_00914c60(CopyCall00914c60*);
+    void MiddleHighProcess_MiddleHighCopy(CopyCall00914c60*);
 };
 class CachedValuesCopyCall
 {

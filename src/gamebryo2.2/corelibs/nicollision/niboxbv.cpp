@@ -53,20 +53,20 @@ public:
     double DotProduct(const PodPoint3& point);
     float Length() const;
 
-    PodPoint3& FUN_00439180(float scalar);
+    PodPoint3& ScaleComponents(float scalar);
     PodPoint3 FUN_00439e90(const PodPoint3& shift) const;
     PodPoint3* FUN_00439e90(PodPoint3* output, const PodPoint3* other) const;
-    PodPoint3 FUN_00439ef0(const PodPoint3& other) const;
-    void FUN_00439ef0();
+    PodPoint3 SubtractIntoVector(const PodPoint3& other) const;
+    void SubtractIntoVector();
     PodPoint3 FUN_004b3800(const PodPoint3& axis) const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_00457910();
     float FUN_00457990() const;
     double FUN_004a7290();
     PodPoint3* FUN_006815c0();
-    PodPoint3* FUN_00416870(float x, float y, float z);
+    PodPoint3* SetComponents(float x, float y, float z);
     void FUN_0043d410(float x, int y, int z);
-    char* FUN_00a59af0(const char* text);
+    char* GetViewerString_00a59af0(const char* text);
 
     static void* operator new[](size_t size);
     static void operator delete[](void* memory);
@@ -157,46 +157,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 #include <string.h>
@@ -273,7 +273,8 @@ inline bool LocalVec3::operator!=(const LocalVec3& o) const
 
 // Returns the constant value 1.
 // @fnv 0x00b6f470
-int __cdecl FUN_00b6f470()
+// src: COMMUNITY 0x00b6f470
+int __cdecl _return1()
 {
     return 1;
 }
@@ -292,19 +293,20 @@ void __thiscall NiBoxBV::SaveBinary(NiStream& kStream)
 
 struct FakeBox
 {
-    bool __thiscall FUN_00eae520(const FakeBox&) const;
+    bool __thiscall HasEqualBoxComponents(const FakeBox&) const;
 };
 struct StandIn
 {
-    int __thiscall FUN_00ea07a0(const NiBoundingVolume&);
+    int __thiscall ProcessAndReturnValue_00ea07a0(const NiBoundingVolume&);
 };
 // @fnv 0x00ea07a0
-int __thiscall StandIn::FUN_00ea07a0(const NiBoundingVolume& kABV)
+// src: GUESS 0x00ea07a0 (confidence: low)
+int __thiscall StandIn::ProcessAndReturnValue_00ea07a0(const NiBoundingVolume& kABV)
 {
     if (kABV.F3() == 1)
     {
         if (reinterpret_cast<const FakeBox*>(reinterpret_cast<const char*>(&kABV) + 4)
-                ->FUN_00eae520(*reinterpret_cast<const FakeBox*>(reinterpret_cast<const char*>(this) + 4)))
+                ->HasEqualBoxComponents(*reinterpret_cast<const FakeBox*>(reinterpret_cast<const char*>(this) + 4)))
             return 1;
     }
     return 0;
@@ -380,32 +382,33 @@ struct Isect
     int pad[0x14];
     void __thiscall InitRegion(const void* a, const void* b, float c, float d, float e, int f);
     void __thiscall Solve(const void* a, const void* b);
-    float __thiscall FUN_00eae6f0();
+    float __thiscall NiIntersector_GetContactTime();
     int __thiscall FUN_00be0aa0();
-    const NiPoint3& __thiscall FUN_00eae700();
-    const NiPoint3& __thiscall FUN_00eae710();
-    void __thiscall FUN_00eae6d0();
+    const NiPoint3& __thiscall NiIntersector_GetContactPoint();
+    const NiPoint3& __thiscall NiIntersector_GetContactNormal();
+    void __thiscall SetVtbl();
 };
 // @fnv 0x00ea3950
-bool FUN_00ea3950(float afLength, const void* pA, const void* pB, const void* pC, const void* pD, float* pfTime,
+// src: XBOX_PDB 0x00ea3950
+bool NiBoxBV_BoxSphereFindIntersect(float afLength, const void* pA, const void* pB, const void* pC, const void* pD, float* pfTime,
                   NiPoint3* pPoint, bool bNormal, NiPoint3* pNormal, NiPoint3* pNegNormal)
 {
     Isect k;
     k.InitRegion(pA, pC, afLength, 0.001f, g_011c5aa8_arg1, 0x20);
     k.Solve(pB, pD);
-    *pfTime = k.FUN_00eae6f0();
+    *pfTime = k.NiIntersector_GetContactTime();
     if (k.FUN_00be0aa0() != 3 && k.FUN_00be0aa0() != 2)
     {
-        k.FUN_00eae6d0();
+        k.SetVtbl();
         return false;
     }
-    *pPoint = k.FUN_00eae700();
+    *pPoint = k.NiIntersector_GetContactPoint();
     if (bNormal)
     {
-        *pNormal = k.FUN_00eae710();
+        *pNormal = k.NiIntersector_GetContactNormal();
         *pNegNormal = -*pNormal;
     }
-    k.FUN_00eae6d0();
+    k.SetVtbl();
     return true;
 }
 
@@ -450,14 +453,15 @@ struct Ea07Owner
 {
     int m_00;
     Ea07Sub m_04;
-    void __thiscall FUN_00a89af0(int a);
-    void __thiscall FUN_00ea07e0(int a);
+    void __thiscall nullsub_3(int a);
+    void __thiscall NiBoxBV_LoadBinary(int a);
 };
 
 // @fnv 0x00ea07e0
-void Ea07Owner::FUN_00ea07e0(int a)
+// src: GAMEBRYO_SRC 0x00ea07e0
+void Ea07Owner::NiBoxBV_LoadBinary(int a)
 {
-    this->FUN_00a89af0(a);
+    this->nullsub_3(a);
     m_04.WriteToStream(a);
 }
 
@@ -469,32 +473,33 @@ struct PointPairState
     int unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44, unk48, unk4c;
     void FUN_00eb3890(const void*, const void*, float, float, float, int);
     void Solve(const void*, const void*);
-    float FUN_00eae6f0();
+    float NiIntersector_GetContactTime();
     int FUN_00be0aa0();
-    const NiPoint3& FUN_00eae700();
-    const NiPoint3& FUN_00eae710();
-    void FUN_00eae6d0();
+    const NiPoint3& NiIntersector_GetContactPoint();
+    const NiPoint3& NiIntersector_GetContactNormal();
+    void SetVtbl();
 };
 // @fnv 0x00ea3c50
-bool FUN_00ea3c50(float length, const void* a, const void* b, const void* c, const void* d, float* pfTime, NiPoint3* point,
+// src: XBOX_PDB 0x00ea3c50
+bool NiBoxBV_BoxCapsuleFindIntersect(float length, const void* a, const void* b, const void* c, const void* d, float* pfTime, NiPoint3* point,
                   bool normals, NiPoint3* normal, NiPoint3* negative)
 {
     PointPairState isect;
     isect.FUN_00eb3890(a, c, length, DAT_01017d00, DAT_010141cc, 32);
     isect.Solve(b, d);
-    *pfTime = isect.FUN_00eae6f0();
+    *pfTime = isect.NiIntersector_GetContactTime();
     if (isect.FUN_00be0aa0() != 3 && isect.FUN_00be0aa0() != 2)
     {
-        isect.FUN_00eae6d0();
+        isect.SetVtbl();
         return false;
     }
-    *point = isect.FUN_00eae700();
+    *point = isect.NiIntersector_GetContactPoint();
     if (normals)
     {
-        *normal = isect.FUN_00eae710();
+        *normal = isect.NiIntersector_GetContactNormal();
         *negative = -*normal;
     }
-    isect.FUN_00eae6d0();
+    isect.SetVtbl();
     return true;
 }
 
@@ -1341,7 +1346,8 @@ class OBoxBV
 };
 
 // @fnv 0x00ea0ad0
-bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const PodPoint3& kV0, const OBoxBV& kBV1, const PodPoint3& kV1)
+// src: GAMEBRYO_LIB 0x00ea0ad0
+bool __cdecl NiBoxBV_BoxBoxTestIntersect(float fTime, const OBoxBV& kBV0, const PodPoint3& kV0, const OBoxBV& kBV1, const PodPoint3& kV1)
 {
     const OBox& kBox0 = kBV0.m_kBoundsBox;
     const OBox& kBox1 = kBV1.m_kBoundsBox;
@@ -1826,7 +1832,7 @@ struct NormalVec
         z -= a.z;
         return *this;
     }
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
 };
 extern "C" NormalVec FNV_NiPoint3Zero;
 extern const float DAT_0104da4c;
@@ -1834,11 +1840,12 @@ struct BoxNormal
 {
     int unk00, unk04, unk08, unk0c;
     NormalVec axis0, axis1, axis2;
-    NormalVec FUN_00ea3a60(int, int, int, NormalVec);
+    NormalVec CopyData_00ea3a60(int, int, int, NormalVec);
 };
 // Builds a vector from side-selected box axes, including an axis when velocity is zero or its axis dot velocity exceeds the threshold.
 // @fnv 0x00ea3a60
-NormalVec BoxNormal::FUN_00ea3a60(int iXSide, int iYSide, int iZSide, NormalVec kMotionVelocity)
+// src: GUESS 0x00ea3a60 (confidence: low)
+NormalVec BoxNormal::CopyData_00ea3a60(int iXSide, int iYSide, int iZSide, NormalVec kMotionVelocity)
 {
     int iNumAxes = 0;
     NormalVec kNormal;
@@ -1884,12 +1891,12 @@ NormalVec BoxNormal::FUN_00ea3a60(int iXSide, int iYSide, int iZSide, NormalVec 
         }
     }
     if (iNumAxes != 1)
-        kNormal.FUN_004a0c10();
+        kNormal.Unitize_004a0c10();
     return kNormal;
 }
 
 extern char DAT_010f1844;
-void* __cdecl FUN_00aa1070(unsigned int length);
+void* __cdecl _NiMalloc_00aa1070(unsigned int length);
 int __cdecl FUN_00a305b0(char* output, unsigned int outputSize, const char* format, const char* value);
 struct FnvStringArray
 {
@@ -1912,7 +1919,7 @@ void FnvTextProcessor::AddString(const char* text, FnvStringArray* array)
 {
     unsigned int length = (unsigned int)strlen(text) + 10;
     const char* q = text;
-    text = (const char*)FUN_00aa1070(length);
+    text = (const char*)_NiMalloc_00aa1070(length);
     FUN_00a305b0((char*)text, length, &DAT_010f1844, q);
     unsigned int index = array->count;
     if (index >= array->capacity)
@@ -2078,7 +2085,8 @@ static inline float AbsF(float f)
 
 // Checks if a sphere overlaps a box via axis projections, or if their velocities cause a collision within the given time step.
 // @fnv 0x00ea2030
-bool FUN_00ea2030(float fTime, const CenteredPointBounds* pBox, const void* pVel0, const SphereShape* pSphere, const void* pVel1)
+// src: XBOX_PDB 0x00ea2030
+bool NiBoxBV_BoxCapsuleTestIntersect(float fTime, const CenteredPointBounds* pBox, const void* pVel0, const SphereShape* pSphere, const void* pVel1)
 {
     BoxPt d = pSphere->center - pBox->center;
 
@@ -2144,7 +2152,8 @@ class ReworkPoint
     {
         return ReworkPoint(-x, -y, -z);
     }
-    void __thiscall FUN_004a0c10()
+// src: XBOX_PDB 0x004a0c10
+    void __thiscall Unitize_004a0c10()
     {
         float length = (float)sqrt(x * x + y * y + z * z);
         if (length > 1e-6)
@@ -2211,7 +2220,8 @@ inline float ReworkAbs(float fValue)
 
 // Tests a moving triangle against an oriented bounding box, returning the earliest hit time, point, and optional normals.
 // @fnv 0x00ea3d60
-bool __cdecl FUN_00ea3d60(float maxTime, const ReworkBox& box, const ReworkPoint& vel0, const ReworkPoint& p0,
+// src: COMMUNITY 0x00ea3d60
+bool __cdecl NiBoxBV_BoxTriFindIntersect(float maxTime, const ReworkBox& box, const ReworkPoint& vel0, const ReworkPoint& p0,
                           const ReworkPoint& p1, const ReworkPoint& p2, const ReworkPoint& vel1, float& hitTime,
                           ReworkPoint& hitPoint, bool wantNormals, ReworkPoint& normal0, ReworkPoint& normal1)
 {
@@ -3537,7 +3547,7 @@ bool __cdecl FUN_00ea3d60(float maxTime, const ReworkBox& box, const ReworkPoint
     {
 
         normal1 = vTriNormal;
-        normal1.FUN_004a0c10();
+        normal1.Unitize_004a0c10();
         normal0 = -normal1;
     }
 
@@ -3561,7 +3571,8 @@ class SweepPoint
     {
         return SweepPoint(x + o.x, y + o.y, z + o.z);
     }
-    SweepPoint FUN_00439ef0(const SweepPoint& o) const
+// src: GUESS 0x00439ef0 (confidence: high)
+    SweepPoint SubtractIntoVector(const SweepPoint& o) const
     {
         return SweepPoint(x - o.x, y - o.y, z - o.z);
     }
@@ -3578,7 +3589,7 @@ class SweepPoint
     {
         return x * x + y * y + z * z;
     }
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float& operator[](int i)
     {
         float* base = &x;
@@ -3636,7 +3647,8 @@ void __cdecl ClampPositionToBoxes(float fTime, const SweepBox* pkBox0, const Swe
 
 // Tests two moving boxes over maxTime and writes hitTime and hitPoint, with normal outputs when requested.
 // @fnv 0x00ea7d40
-bool __cdecl FUN_00ea7d40(float maxTime, const SweepBox& box0, const SweepPoint& vel0, const SweepBox& box1,
+// src: XBOX_PDB 0x00ea7d40
+bool __cdecl NiBoxBV_BoxBoxFindIntersect(float maxTime, const SweepBox& box0, const SweepPoint& vel0, const SweepBox& box1,
                           const SweepPoint& vel1, float& hitTime, SweepPoint& hitPoint, bool wantNormals,
                           SweepPoint& normal0, SweepPoint& normal1)
 {
@@ -3662,8 +3674,8 @@ bool __cdecl FUN_00ea7d40(float maxTime, const SweepBox& box0, const SweepPoint&
     float R1;
     float R;
     float Rsum;
-    W = vel1.FUN_00439ef0(vel0);
-    vRelPos0 = b1.GetNavMeshData().FUN_00439ef0(b0.GetNavMeshData());
+    W = vel1.SubtractIntoVector(vel0);
+    vRelPos0 = b1.GetNavMeshData().SubtractIntoVector(b0.GetNavMeshData());
     vRelPos1 = vRelPos0.FUN_00439e90(FUN_004a3760(maxTime, W));
     unsigned int hitAxis = 0;
     int side = 0;
@@ -4180,7 +4192,7 @@ bool __cdecl FUN_00ea7d40(float maxTime, const SweepBox& box0, const SweepPoint&
     case 0: {
         hitPoint = FUN_004a3760(0.5f, b0.GetNavMeshData().FUN_00439e90(b1.GetNavMeshData()));
         if (wantNormals)
-            normal0 = hitPoint.FUN_00439ef0(b0.GetNavMeshData());
+            normal0 = hitPoint.SubtractIntoVector(b0.GetNavMeshData());
         break;
     }
     case 1:
@@ -4743,7 +4755,7 @@ bool __cdecl FUN_00ea7d40(float maxTime, const SweepBox& box0, const SweepPoint&
         if (NiAbs(fNormalSqrLength - 1.0) > DAT_0104da4c)
         {
             if (fNormalSqrLength > DAT_0104da4c)
-                normal0.FUN_004a0c10();
+                normal0.Unitize_004a0c10();
             else
                 normal0 = reinterpret_cast<const SweepPoint&>(DAT_011a946c);
         }

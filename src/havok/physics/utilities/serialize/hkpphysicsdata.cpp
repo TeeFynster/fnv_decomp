@@ -92,7 +92,7 @@ int FUN_00d4c050_obj::FindMatchingEntry(int a)
 extern int DAT_0102f0ec;
 
 
-void* FUN_00c85750() throw();
+void* hkMemoryRouter_getInstance() throw();
 void __cdecl InitializeWorld(void*) throw();
 void __cdecl RunWithLocalContext(void*, void*, void*) throw();
 
@@ -205,7 +205,7 @@ __forceinline hkMemoryAllocator& hkThreadMemory::heap()
 
 __forceinline void* hkpWorld::operator new(size_t size) throw()
 {
-    void* p = ((hkThreadMemory*)FUN_00c85750())->allocateChunk(size);
+    void* p = ((hkThreadMemory*)hkMemoryRouter_getInstance())->allocateChunk(size);
     ((unsigned short*)p)[2] = (unsigned short)size;
     return p;
 }
@@ -235,11 +235,11 @@ hkpWorld* PhysicsDataExt::CreateWorld(char bRegisterWithMemoryManager) throw()
     hkpWorld* world;
     if (this->m_pWorldCinfo == 0)
     {
-        world = ((hkpWorld*)hkpWorld::operator new(0x350))->FUN_00c95a80(reinterpret_cast<const hkpWorldCinfo*>(&defaultCinfo));
+        world = ((hkpWorld*)hkpWorld::operator new(0x350))->hkpWorld_hkpWorld(reinterpret_cast<const hkpWorldCinfo*>(&defaultCinfo));
     }
     else
     {
-        world = ((hkpWorld*)hkpWorld::operator new(0x350))->FUN_00c95a80(this->m_pWorldCinfo);
+        world = ((hkpWorld*)hkpWorld::operator new(0x350))->hkpWorld_hkpWorld(this->m_pWorldCinfo);
     }
 
     if (bRegisterWithMemoryManager)
@@ -249,7 +249,7 @@ hkpWorld* PhysicsDataExt::CreateWorld(char bRegisterWithMemoryManager) throw()
 
     for (int i = 0; i < this->m_kPhysicsSystems.m_iElementCount; ++i)
     {
-        world->FUN_00c97f80(this->m_kPhysicsSystems.m_data[i]);
+        world->hkpWorld_addPhysicsSystem(this->m_kPhysicsSystems.m_data[i]);
         if (this->m_kPhysicsSystems.m_data[i]->vfunc4().val)
         {
             ContactOptions opts;
@@ -265,7 +265,7 @@ hkpWorld* PhysicsDataExt::CreateWorld(char bRegisterWithMemoryManager) throw()
 
     if (this->m_pWorldCinfo && ((FUN_00553540*)this->m_pWorldCinfo)->m_pCollisionFilter.m_pRetainedObject)
     {
-        world->FUN_00c96ff0(0, 1);
+        world->hkpWorld_updateCollisionFilterOnWorld(0, 1);
     }
 
     return world;
@@ -281,7 +281,7 @@ class FUN_00dcecc0
 
     static void operator delete(void* p) throw()
     {
-        ((hkThreadMemory*)FUN_00c85750())->heap().blockFree(p, static_cast<FUN_00dcecc0*>(p)->m_usMemSizeAndFlags);
+        ((hkThreadMemory*)hkMemoryRouter_getInstance())->heap().blockFree(p, static_cast<FUN_00dcecc0*>(p)->m_usMemSizeAndFlags);
     }
 
     FUN_00dcecc0* Destroy(unsigned int uiFlags) throw();
@@ -298,7 +298,7 @@ FUN_00dcecc0* FUN_00dcecc0::Destroy(unsigned int uiFlags) throw()
 }
 }  // namespace fnv_00d4c8e0
 
-extern void* __cdecl FUN_00c85750(void);
+extern void* __cdecl hkMemoryRouter_getInstance(void);
 extern int DAT_010d07f4;
 extern void __cdecl ProcessCollisionRecords(void*, void*, void*);
 extern void __cdecl ResizeAudioStream(void*, void*, int);
@@ -351,7 +351,7 @@ struct SmallType
 
 struct ClientType
 {
-    void FUN_00c91c50(void*);
+    void hkpWorld_getCinfo(void*);
     void AddPhysicsSystem(void*);
 };
 struct HostType
@@ -360,22 +360,23 @@ struct HostType
     int m_04;
     void* m_08;
     hkArray<SmallType*> m_0c;
-    void FUN_00d4c2d0(ClientType*, unsigned char);
+    void hkpPhysicsData_populateFromWorld(ClientType*, unsigned char);
 };
 
 // Ensures m_08 is allocated, registers client and m_0c, and when value is set allocates a SmallType, calls ProcessCollisionRecords, and appends it to m_0c.
 // @fnv 0x00d4c2d0
-void HostType::FUN_00d4c2d0(ClientType* client, unsigned char ubFlag)
+// src: HAVOK_LIB 0x00d4c2d0
+void HostType::hkpPhysicsData_populateFromWorld(ClientType* client, unsigned char ubFlag)
 {
     if (m_08 == 0)
     {
-        hkThreadMemory* holder = (hkThreadMemory*)FUN_00c85750();
+        hkThreadMemory* holder = (hkThreadMemory*)hkMemoryRouter_getInstance();
         BigType* big = (BigType*)holder->allocateChunk(0xF0);
         big->m_04 = 0xF0;
         m_08 = big->FUN_00c90b80();
     }
 
-    client->FUN_00c91c50(m_08);
+    client->hkpWorld_getCinfo(m_08);
     hkArray<SmallType*>* array = &m_0c;
     client->AddPhysicsSystem(array);
 
@@ -390,7 +391,7 @@ void HostType::FUN_00d4c2d0(ClientType* client, unsigned char ubFlag)
         local.m_flag = 0;
         local.m_uiFilterValue = 0;
 
-        hkThreadMemory* holder = (hkThreadMemory*)FUN_00c85750();
+        hkThreadMemory* holder = (hkThreadMemory*)hkMemoryRouter_getInstance();
         SmallType* small = (SmallType*)holder->allocateChunk(0x50);
         small->m_04 = 0x50;
         small->FUN_00d065e0();
@@ -402,7 +403,7 @@ void HostType::FUN_00d4c2d0(ClientType* client, unsigned char ubFlag)
 
         small->m_40 = 0;
 
-        holder = (hkThreadMemory*)FUN_00c85750();
+        holder = (hkThreadMemory*)hkMemoryRouter_getInstance();
         if (array->m_iElementCount == (array->m_iCapacityState & 0x3fffffff))
         {
             ResizeAudioStream(holder->m_pMemoryAllocator, array, 4);
@@ -417,7 +418,7 @@ extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 
 struct Value
 {
-    BoolResult FUN_00c9bff0();
+    BoolResult isActive_00c9bff0();
 };
 struct Owner
 {
@@ -425,7 +426,7 @@ struct Owner
     int unk04;
     int** m_08;
     int m_0c;
-    void FUN_00d06130(int index);
+    void hkpPhysicsSystem_removeRigidBody(int index);
 };
 struct Entity
 {
@@ -469,7 +470,8 @@ template <class T> __forceinline int findValue(T* self, Value* value)
 typedef int Owner::*MemberPtr;
 // If value is in owner's list but not entity's, sets entity->m_40, calls entity->AddShape(value) and owner->FUN_00d06130 with the owner index.
 // @fnv 0x00d4bf70
-static __declspec(noinline) void FUN_00d4bf70(Owner* owner, Entity* volatile apEntity, MemberPtr valueArg)
+// src: HAVOK_LIB 0x00d4bf70
+static __declspec(noinline) void tryMoveEntity(Owner* owner, Entity* volatile apEntity, MemberPtr valueArg)
 {
     Entity* entity = apEntity;
     Value* pValue;
@@ -479,9 +481,9 @@ static __declspec(noinline) void FUN_00d4bf70(Owner* owner, Entity* volatile apE
     int entityIndex = findValue(entity, value);
     if (entityIndex == -1 && ownerIndex != -1)
     {
-        entity->m_40 = entity->m_40 || value->FUN_00c9bff0().val;
+        entity->m_40 = entity->m_40 || value->isActive_00c9bff0().val;
         entity->AddShape((int)value);
-        owner->FUN_00d06130(ownerIndex);
+        owner->hkpPhysicsSystem_removeRigidBody(ownerIndex);
     }
 }
 Owner* volatile probeOwner;
@@ -491,7 +493,7 @@ void probeCaller()
 {
     OwnerArg o = {probeOwner};
     ValueArg v = {probeValue};
-    FUN_00d4bf70(o.p, probeEntity, *(MemberPtr*)&v.p);
+    tryMoveEntity(o.p, probeEntity, *(MemberPtr*)&v.p);
 }
 
 
@@ -499,7 +501,7 @@ void probeCaller()
 template <typename T, typename Allocator>
 __forceinline hkArray<T, Allocator>::~hkArray() throw()
 {
-    hkMemoryAllocator& alloc = ((hkThreadMemory*)FUN_00c85750())->heap();
+    hkMemoryAllocator& alloc = ((hkThreadMemory*)hkMemoryRouter_getInstance())->heap();
     m_iElementCount = 0;
     if ((m_iCapacityState & 0x80000000) == 0)
         alloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));

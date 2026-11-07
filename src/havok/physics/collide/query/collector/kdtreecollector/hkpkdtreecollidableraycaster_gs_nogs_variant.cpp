@@ -8,7 +8,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00d97a10_Class
 {
-    void FUN_00d97a10(float* p) const;
+    void hkKdTreeCollidableRayBundleCaster_getHitFractions(float* p) const;
 };
 struct S_00d979e0_Inner
 {
@@ -25,7 +25,7 @@ struct S_00d979e0
     int unk8;
     int unkC;
     S_00d979e0_Inner* unk10;
-    float FUN_00d979e0() const;
+    float hkpKdTreeCollidableRaycaster_getHitFraction() const;
 };
 struct S_00d98300_Entry
 {
@@ -222,11 +222,12 @@ struct Raycaster
     Hdr2* m_10;
     int m_14;
 
-    bool* FUN_00d97a40(bool* const out, Ray* a1);
+    bool* hkpKdTreeCollidableRaycaster_addMidPhaseHit(bool* const out, Ray* a1);
 };
 
 // @fnv 0x00d97a40
-bool* Raycaster::FUN_00d97a40(bool* const out, Ray* a1)
+// src: HAVOK_SRC 0x00d97a40
+bool* Raycaster::hkpKdTreeCollidableRaycaster_addMidPhaseHit(bool* const out, Ray* a1)
 {
     Node* v = a1->m_00;
     if (v)

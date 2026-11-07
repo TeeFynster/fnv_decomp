@@ -168,7 +168,7 @@ public:
                          int, int, unsigned char, bool);
     void SetComponentFormat(int, unsigned char, unsigned int*);
     void SetComponentFormat(Format, unsigned char, unsigned int*);
-    void FUN_00a7c9f0(Format, unsigned char, unsigned int*);
+    void NiPixelFormat_ConvertOldPixelFormat(Format, unsigned char, unsigned int*);
     static unsigned int CalcMaskSize(unsigned int);
 
     union

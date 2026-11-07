@@ -28,11 +28,12 @@ struct BoxBounds
 {
     BoxCorner m_ucLowNibble;
     BoxCorner m_ucHighNibble;
-    BoxBounds FUN_00b3caa0(const Vec3Pt* p) const;
+    BoxBounds ComputeValue_00b3caa0(const Vec3Pt* p) const;
 };
 
 // @fnv 0x00b3caa0
-BoxBounds BoxBounds::FUN_00b3caa0(const Vec3Pt* p) const
+// src: GUESS 0x00b3caa0 (confidence: low)
+BoxBounds BoxBounds::ComputeValue_00b3caa0(const Vec3Pt* p) const
 {
 
     BoxBounds tmp = *this;

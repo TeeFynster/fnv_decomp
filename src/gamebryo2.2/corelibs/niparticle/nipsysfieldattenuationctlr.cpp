@@ -9,7 +9,8 @@
 extern "C" void* g_01202720;
 
 // @fnv 0x00c2b230
-void* __cdecl FUN_00c2b230()
+// src: COMMUNITY 0x00c2b230
+void* __cdecl NiPSysFieldAttenuationCtlr_GetRTTI()
 {
     return &g_01202720;
 }
@@ -24,11 +25,12 @@ NiPSysModifier* __cdecl FUN_00c1b0f0();
 extern char const* const g_01202688_arg1;
 struct NiPSysFieldAttenuationCtlr : BaseStandIn
 {
-    bool FUN_00c2b290(NiObjectNET*);
+    bool InterpTargetIsCorrectType_00c2b290(NiObjectNET*);
 };
 // Calls the base check on pkTarget, resolves a NiPSysModifier from this+0x38, and returns true if its RTTI chain contains g_01202688_arg1.
 // @fnv 0x00c2b290
-bool NiPSysFieldAttenuationCtlr::FUN_00c2b290(NiObjectNET* pkTarget)
+// src: XBOX_PDB 0x00c2b290
+bool NiPSysFieldAttenuationCtlr::InterpTargetIsCorrectType_00c2b290(NiObjectNET* pkTarget)
 {
     if (!BaseStandIn::IsTargetParticleSystem(pkTarget))
         return false;
@@ -108,14 +110,15 @@ NiPSysFieldAttenuationCtlr* Owner::CreateFieldAttenuationController(NiObjectNET*
     return (NiPSysFieldAttenuationCtlr*)pCtlr;
 }
 
-char* __cdecl FUN_00a7d330(char*);
-void __stdcall FUN_00c32f60(StrArr*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 // Appends the string returned by FUN_00a7d330(g_01202720) to the array, growing it if the index reaches capacity.
 // @fnv 0x00c2b2e0
-void __stdcall FUN_00c2b2e0(StrArr* array)
+// src: XBOX_PDB 0x00c2b2e0
+void __stdcall NiPSysFieldAttenuationCtlr_GetViewerStrings(StrArr* array)
 {
-    FUN_00c32f60(array);
-    char* value = FUN_00a7d330(static_cast<char*>(g_01202720));
+    NiPSysModifierFloatCtlr_GetViewerStrings(array);
+    char* value = NiViewerStrings_NiGetViewerString_Title(static_cast<char*>(g_01202720));
     unsigned int index = array->m_usSize;
     unsigned int capacity = array->m_usMaxSize;
     if (index >= capacity)

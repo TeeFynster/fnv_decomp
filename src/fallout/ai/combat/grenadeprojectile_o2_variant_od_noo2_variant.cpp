@@ -34,8 +34,8 @@ class FUN_009b3fa0 : public FUN_009bbc70
 };
 struct S4700
 {
-    bool FUN_009c43e0(int, bool);
-    bool FUN_009b4700(int, bool);
+    bool Projectile_DisarmPlacedExplosives(int, bool);
+    bool TurnOff(int, bool);
     virtual void f0(), f1(), f2(), f3(), f4(), f5(), f6(), f7(), f8(), f9(), f10(), f11(), f12(), f13(), f14(), f15(),
         f16(), f17(), f18(), f19(), f20(), f21(), f22(), f23(), f24(), f25(), f26(), f27(), f28(), f29(), f30(), f31(),
         f32(), f33(), f34(), f35(), f36(), f37(), f38(), f39(), f40(), f41(), f42(), f43(), f44(), f45(), f46(), f47(),
@@ -56,28 +56,29 @@ struct S4700
 extern double _gModifierZero;
 struct C009c58e0
 {
-    void __thiscall FUN_009c58e0(BGSLoadFormBuffer*);
+    void __thiscall RevertBGS_009c58e0(BGSLoadFormBuffer*);
 };
 struct S009b4d10 : public FUN_009b3fa0
 {
-    void __thiscall FUN_009b4d10(BGSLoadFormBuffer* apLoadGameBuffer);
+    void __thiscall RevertBGS_009b4d10(BGSLoadFormBuffer* apLoadGameBuffer);
 };
 
 #include <xmmintrin.h>
 struct S_00561240
 {
-    __m128* __thiscall FUN_00561240(__m128* out);
+    __m128* __thiscall hkSimdReal_broadcast(__m128* out);
 };
 
 struct S_00627920
 {
     __m128 unk00;
-    void __thiscall FUN_00627920(S_00561240* param);
+    void __thiscall hkVector4_mul4(S_00561240* param);
 };
 
 // @fnv 0x00627920
-void __thiscall S_00627920::FUN_00627920(S_00561240* param)
+// src: XBOX_PDB 0x00627920
+void __thiscall S_00627920::hkVector4_mul4(S_00561240* param)
 {
     __m128 tmp;
-    unk00 = _mm_mul_ps(*param->FUN_00561240(&tmp), unk00);
+    unk00 = _mm_mul_ps(*param->hkSimdReal_broadcast(&tmp), unk00);
 }

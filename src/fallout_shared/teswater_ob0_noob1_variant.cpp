@@ -107,12 +107,13 @@ class C4E7770TriShapeData
 class C4E7770QuadFactory
 {
   public:
-    C4E7770TriShapeData* FUN_004e7770(float m_fGlyphWidthInPixels, float m_fGlyphExtent, int iUnused, unsigned int uiTiles,
+    C4E7770TriShapeData* TESWaterSystem_CreateQuadData_0(float m_fGlyphWidthInPixels, float m_fGlyphExtent, int iUnused, unsigned int uiTiles,
                                       bool bGenerateNormals, bool bColors);
 };
 
 // @fnv 0x004e7770
-C4E7770TriShapeData* C4E7770QuadFactory::FUN_004e7770(float m_fGlyphWidthInPixels, float m_fGlyphExtent, int iUnused, unsigned int uiTiles,
+// src: COMMUNITY 0x004e7770
+C4E7770TriShapeData* C4E7770QuadFactory::TESWaterSystem_CreateQuadData_0(float m_fGlyphWidthInPixels, float m_fGlyphExtent, int iUnused, unsigned int uiTiles,
                                                       bool bGenerateNormals, bool bColors)
 {
     C4E7770Point3* pkNormalsDir;

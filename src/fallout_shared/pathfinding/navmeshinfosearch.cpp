@@ -43,7 +43,7 @@ class TeleportableReference
     const NiPoint3& GetPosition();
 };
 extern TES* g_TES;
-void __cdecl FUN_005330e0(float&, float, float);
+void __cdecl BSClamp_float(float&, float, float);
 template <class NodeDataType, class LinkDataType> class AStarNode
 {
   public:
@@ -94,7 +94,7 @@ bool NavMeshInfoSearch::CollectConnections(const AStarNodeType* pNode,
     float fInitialCost = pNode->m_fPathingCostCur;
     const NavMeshInfo* m_pNavigationMesh = pNode->ObjectResolver;
     float fCostMultiplier = 1.0f - m_pNavigationMesh->FUN_007df1f0() * 100.0;
-    FUN_005330e0(fCostMultiplier, 0.1f, 1.0f);
+    BSClamp_float(fCostMultiplier, 0.1f, 1.0f);
     unsigned int ItemUpdateArray = const_cast<NavMeshInfo*>(m_pNavigationMesh)->m_kConnectedNavMeshInfos.GetSize();
     for (unsigned int i = 0; i < ItemUpdateArray; ++i)
     {
@@ -186,7 +186,7 @@ bool NavMeshInfoSearch::CollectConnections(const AStarNodeType* pNode,
             {
                 const NavMeshInfo* pNextMesh =
                     g_TES->GetActiveCell(pExtraNavMeshPortal->m_uiNavMeshID)->FindReferenceByFormId();
-                if (pNextMesh && !pNextMesh->FUN_0068f320())
+                if (pNextMesh && !pNextMesh->NavMeshInfo_GetDisabled())
                 {
                     NiPoint3 Start = m_pNavigationMesh == m_pStartNavMeshInfo ? m_kPathStartPosition
                                                                               : m_pNavigationMesh->m_kNavMeshPosition;
@@ -281,7 +281,7 @@ void NavMeshInfoMap::RegisterNavMeshInfo(TeleportableReference* pInfo)
     SetAltered(true);
 }
 
-TESWorldSpace* __fastcall FUN_00690800(const NavMeshInfo*);
+TESWorldSpace* __fastcall NavMeshInfo_GetWorldSpace(const NavMeshInfo*);
 // @fnv 0x006b8c50
 bool NavMeshInfoSearch::SetupNavMeshSearch(PathingActorData* apActorLockData, void* aStartLocation, void* apStartMesh,
                                            void* aGoalLocation, void* apGoalMesh, void* apReturnNodes,
@@ -294,8 +294,8 @@ bool NavMeshInfoSearch::SetupNavMeshSearch(PathingActorData* apActorLockData, vo
     m_pPathingActorData = apActorLockData;
     m_eDoorLockDisposition = static_cast<Pathing::DOOR_LOCK_DISPOSITION>(aeDoorLockDisposition);
     m_bUseGoalDistanceHeuristic = false;
-    if (FUN_00690800((const NavMeshInfo*)apStartMesh) &&
-        FUN_00690800((const NavMeshInfo*)apStartMesh) == FUN_00690800((const NavMeshInfo*)apGoalMesh))
+    if (NavMeshInfo_GetWorldSpace((const NavMeshInfo*)apStartMesh) &&
+        NavMeshInfo_GetWorldSpace((const NavMeshInfo*)apStartMesh) == NavMeshInfo_GetWorldSpace((const NavMeshInfo*)apGoalMesh))
         m_bUseGoalDistanceHeuristic = true;
     float fstartheuristic = 3.402823466e+38F;
     if (m_bUseGoalDistanceHeuristic)

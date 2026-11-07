@@ -30,8 +30,8 @@ inline hkpConstraintData::hkpConstraintData(FinishingFlag flag) : hkReferencedOb
 inline hkpConstraintData::~hkpConstraintData() throw() {}
 
 // Shared hkMemoryRouter view: 0x00c85750 returns this record, with its heap pointer at +0x10.
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
-__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*) { return FUN_00c85750().heap(); }
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*) { return hkMemoryRouter_getInstance().heap(); }
 template <class T> inline void hkMemoryAllocator::_bufFree(void* p, int count)
 {
     bufFree(p, count * sizeof(T));
@@ -60,7 +60,7 @@ template <class T, class Allocator> __forceinline hkArray<T, Allocator>::~hkArra
 }
 inline void hkReferencedObject::operator delete(void* p)
 {
-    FUN_00c85750().heap().blockFree(p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
+    hkMemoryRouter_getInstance().heap().blockFree(p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
 }
 
 inline hkpConstraintChainData::hkpConstraintChainData() {}
@@ -73,7 +73,7 @@ inline hkpBridgeConstraintAtom::hkpBridgeConstraintAtom() : hkpConstraintAtom(TY
 inline hkpBridgeConstraintAtom::hkpBridgeConstraintAtom(FinishingFlag flag) : hkpConstraintAtom(flag)
 {
     if (flag.m_bFinishing)
-        FUN_00d21ce0(m_pConstraintData);
+        hkpBridgeConstraintAtom_init(m_pConstraintData);
 }
 
 // Two 16-byte pivots at stride 0x20 (0x00d53d30/0x00d53e80), unlike include/Pair.h's two integers.
@@ -106,7 +106,7 @@ public:
     void GetConstraintSizeInfo(bool enabled, ChainRuntimeInfo* info);
     void Push(const LocalM128& a, const LocalM128& b);
     hkpBallSocketChainData* DestroyAndFree(unsigned int flags) throw();
-    void FUN_00d53e80(const PortQuery& input, QueryResultSchema& output);
+    void buildJacobian_00d53e80(const PortQuery& input, QueryResultSchema& output);
 };
 
 // @fnv 0x00d53cf0
@@ -143,7 +143,8 @@ void hkpBallSocketChainData::InitChainData(char* out)
 
 extern int g_target_00d53c90;
 // @fnv 0x00d53c90
-void* FUN_00d53c90()
+// src: GUESS 0x00d53c90 (confidence: low)
+void* hkpBallSocketChainData_GetTarget00d53c90Address()
 {
     return &g_target_00d53c90;
 }
@@ -155,7 +156,7 @@ hkpBallSocketChainData::hkpBallSocketChainData()
     m_fMotorDamping = 1.0f;
     m_fMaxErrorDistance = 1.1920929e-08f;
     m_fMaximumAngularImpulse = 0.1f;
-    m_kBridgeAtoms.m_kBridgeAtom.FUN_00d21ce0(this);
+    m_kBridgeAtoms.m_kBridgeAtom.hkpBridgeConstraintAtom_init(this);
 }
 
 // @fnv 0x00d53df0
@@ -163,7 +164,7 @@ hkpBallSocketChainData::hkpBallSocketChainData(FinishingFlag flag)
     : hkpConstraintChainData(flag), m_kBridgeAtoms(flag), m_pConstraintInfo(flag)
 {
     if (flag.m_bFinishing)
-        m_kBridgeAtoms.m_kBridgeAtom.FUN_00d21ce0(this);
+        m_kBridgeAtoms.m_kBridgeAtom.hkpBridgeConstraintAtom_init(this);
 }
 
 // @fnv 0x00d53e30
@@ -202,7 +203,7 @@ struct DummyClass
 // @fnv 0x00d549d0
 void DummyClass::ClearArrays()
 {
-    hkMemoryRouter& pThreadContext2 = ::FUN_00c85750();
+    hkMemoryRouter& pThreadContext2 = ::hkMemoryRouter_getInstance();
     hkMemoryAllocator& mem2 = pThreadContext2.heap();
     int iCapacity2 = cap2;
     size2 = 0;
@@ -213,7 +214,7 @@ void DummyClass::ClearArrays()
     data2 = 0;
     cap2 = 0x80000000;
 
-    hkMemoryRouter& pThreadContext1 = ::FUN_00c85750();
+    hkMemoryRouter& pThreadContext1 = ::hkMemoryRouter_getInstance();
     hkMemoryAllocator& mem1 = pThreadContext1.heap();
     int iCapacity1 = cap1;
     size1 = 0;
@@ -232,7 +233,7 @@ void ResizeAudioStream(void* alloc, void* arr, int elemSize);
 void hkpBallSocketChainData::Push(const LocalM128& a, const LocalM128& b)
 {
     hkArray<hkpBallSocketChainDataConstraintInfo>& arr = m_pConstraintInfo;
-    hkMemoryRouter& router = FUN_00c85750();
+    hkMemoryRouter& router = hkMemoryRouter_getInstance();
     if (arr.m_iElementCount == (arr.m_iCapacityState & 0x3fffffff))
         ResizeAudioStream(router.m_heap, &arr, 0x20);
     hkpBallSocketChainDataConstraintInfo& e = arr.m_data[arr.m_iElementCount++];
@@ -390,15 +391,16 @@ struct OffsetForChain
 extern "C"
 {
     void AppendEventRecord(const PortQuery*, QueryResultSchema*, void*, int);
-    char* FUN_00dd13c0(void*);
-    void FUN_00dcee70(PortQuery*);
-    void FUN_00dcfc00(const PortVector*, const PortVector*, float, PortQuery*, char*);
-    void FUN_00dd0ad0(int, float, float, float, OffsetForChain*, const QuantizedBoundsData*, char*, const PortQuery*,
+    char* hkJacobianBallSocketChainSchema_getJacobians(void*);
+    void hkLoadVelocityAccumulators(PortQuery*);
+    void hkStabilizedBallSocketConstraintBuildJacobian_noSchema(const PortVector*, const PortVector*, float, PortQuery*, char*);
+    void hkBallSocketChainBuildJacobian(int, float, float, float, OffsetForChain*, const QuantizedBoundsData*, char*, const PortQuery*,
                       QueryResultSchema*);
 }
 // Iterates a rigid-body constraint chain, computing transformed pivot positions and accumulating query results into the output schema.
 // @fnv 0x00d53e80
-void hkpBallSocketChainData::FUN_00d53e80(const PortQuery& input, QueryResultSchema& output)
+// src: XBOX_PDB 0x00d53e80
+void hkpBallSocketChainData::buildJacobian_00d53e80(const PortQuery& input, QueryResultSchema& output)
 {
     void* solver = input.m_pByteBuffer.val();
     AppendEventRecord(&input, &output, solver, 8);
@@ -419,7 +421,7 @@ void hkpBallSocketChainData::FUN_00d53e80(const PortQuery& input, QueryResultSch
     localQuery.m_kBodyBLocalFrame = &motion->getTransform();
     localQuery.m_fFourthQueryValue = 1.0f;
     localQuery.m_fThirdQueryValue = localQuery.m_kThirdChainValue;
-    char* schema = FUN_00dd13c0(output.m_pQueryResultSchema);
+    char* schema = hkJacobianBallSocketChainSchema_getJacobians(output.m_pQueryResultSchema);
     for (int index = 0; index < count; ++index)
     {
         localQuery.m_pBodyA = localQuery.m_pBodyB;
@@ -433,9 +435,9 @@ void hkpBallSocketChainData::FUN_00d53e80(const PortQuery& input, QueryResultSch
         PortVector a, b;
         a._setTransformedPos(*localQuery.m_kBodyALocalFrame, m_pConstraintInfo.m_data[index].m_kPivotInA);
         b._setTransformedPos(*localQuery.m_kBodyBLocalFrame, m_pConstraintInfo.m_data[index].m_kPivotInB);
-        FUN_00dcee70(&localQuery);
-        FUN_00dcfc00(&a, &b, m_fMaximumAngularImpulse, &localQuery, schema);
+        hkLoadVelocityAccumulators(&localQuery);
+        hkStabilizedBallSocketConstraintBuildJacobian_noSchema(&a, &b, m_fMaximumAngularImpulse, &localQuery, schema);
         schema += 0x90;
     }
-    FUN_00dd0ad0(count, m_fTau, m_fMotorDamping, m_fMaxErrorDistance, offsets.begin(), base, schema, &input, &output);
+    hkBallSocketChainBuildJacobian(count, m_fTau, m_fMotorDamping, m_fMaxErrorDistance, offsets.begin(), base, schema, &input, &output);
 }

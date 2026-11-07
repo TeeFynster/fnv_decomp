@@ -19,8 +19,8 @@ extern Setting g_kSetting2EC;
 struct HandleB09
 {
     int m_iValue;
-    bool FUN_00624070();
-    int FUN_0043b4d0();
+    bool CFilter_QBipLayer();
+    int CFilter_GetLayer();
 };
 struct FormB09
 {
@@ -93,15 +93,15 @@ struct RefB09
     virtual void vr03a();
     virtual void vr03b();
     virtual hkVector4* GetPosF0(hkVector4* pOut);
-    HandleB09* FUN_0043b4f0(HandleB09* pOut);
-    void* FUN_004ae750();
-    void FUN_009b0bf0(const NiPoint3& kImpulse);
-    void FUN_009b0c90(const NiPoint3& kImpulse);
+    HandleB09* bhkWorldObject_GetCollisionFilter(HandleB09* pOut);
+    void* Bipedanim_GetReferenceFlagsOrZero();
+    void bhkRigidBody_ApplyLinearImpulseNi(const NiPoint3& kImpulse);
+    void bhkRigidBody_ApplyAngularImpulseNi(const NiPoint3& kImpulse);
 };
 FormB09* __cdecl FUN_004b5a20(void* pBase);
-void* __cdecl FUN_0056f930(void* pForm);
-float __cdecl FUN_0062b520(float fValue, RefB09* pRef, int iFlag);
-float __cdecl FUN_0040ebd0(float fA, float fB);
+void* __cdecl TESObjectREFR_FindReferenceFor3D(void* pForm);
+float __cdecl TESHavokUtilities_ScaleGameplayImpulseForce(float fValue, RefB09* pRef, int iFlag);
+float __cdecl BSMIN(float fA, float fB);
 float __cdecl FUN_00476b70(float fMin, float fScaledValue);
 struct OwnerB09
 {
@@ -232,14 +232,15 @@ struct OwnerB09
     virtual void vo07c();
     virtual NiPoint3* GetPos1F4();
     ProcessB09* FUN_004181e0();
-    void* FUN_009ad610();
-    void FUN_009b0920(RefB09* pRef);
+    void* QUserData();
+    void Explosion_PushRigidBody(RefB09* pRef);
 };
 
 // Shared vector unions need strict GS checking to retain the original stack cookies.
 #pragma strict_gs_check(push, on)
 // @fnv 0x009b0920
-void OwnerB09::FUN_009b0920(RefB09* pRef)
+// src: COMMUNITY 0x009b0920
+void OwnerB09::Explosion_PushRigidBody(RefB09* pRef)
 {
     if (pRef)
     {
@@ -252,58 +253,60 @@ void OwnerB09::FUN_009b0920(RefB09* pRef)
             NiPoint3 kWorldPosition = kRefPos - *GetPos1F4();
             kWorldPosition.Unitize();
             HandleB09 kHandle;
-            if (pRef->FUN_0043b4f0(&kHandle)->FUN_00624070())
+            if (pRef->bhkWorldObject_GetCollisionFilter(&kHandle)->CFilter_QBipLayer())
                 kWorldPosition[2] += *g_kSettingE70.GetFloat();
             bool bMatched = false;
-            if (FUN_009ad610())
+            if (QUserData())
             {
-                FormB09* pForm = FUN_004b5a20(pRef->FUN_004ae750());
+                FormB09* pForm = FUN_004b5a20(pRef->Bipedanim_GetReferenceFlagsOrZero());
                 void* pBase = pForm ? pForm->FUN_0044ddc0() : 0;
-                void* pOther = FUN_0056f930(pBase);
-                if (pOther && pOther == FUN_009ad610())
+                void* pOther = TESObjectREFR_FindReferenceFor3D(pBase);
+                if (pOther && pOther == QUserData())
                 {
                     HandleB09 kHandle2;
-                    if (pRef->FUN_0043b4f0(&kHandle2)->FUN_0043b4d0() == 20)
+                    if (pRef->bhkWorldObject_GetCollisionFilter(&kHandle2)->CFilter_GetLayer() == 20)
                         pRef->SetFlagE4(1);
                     fForce *= *g_kSettingDBC.GetFloat();
                     bMatched = true;
                 }
             }
-            fForce = FUN_0062b520(fForce, pRef, 1);
+            fForce = TESHavokUtilities_ScaleGameplayImpulseForce(fForce, pRef, 1);
             if (!bMatched)
-                fForce = FUN_0040ebd0(fForce, *g_kSettingC9C.GetFloat());
-            pRef->FUN_009b0bf0(kWorldPosition * fForce * *g_kSettingF64.GetFloat());
+                fForce = BSMIN(fForce, *g_kSettingC9C.GetFloat());
+            pRef->bhkRigidBody_ApplyLinearImpulseNi(kWorldPosition * fForce * *g_kSettingF64.GetFloat());
             NiPoint3 kRandom(FUN_00476b70(-1.0f, 1.0f), FUN_00476b70(-1.0f, 1.0f), FUN_00476b70(-1.0f, 1.0f));
-            pRef->FUN_009b0c90(kRandom * fForce * *g_kSetting2EC.GetFloat());
+            pRef->bhkRigidBody_ApplyAngularImpulseNi(kRandom * fForce * *g_kSetting2EC.GetFloat());
         }
     }
 }
 
-int __cdecl FUN_004a3e00(hkVector4*, int);
+int __cdecl NI2HK(hkVector4*, int);
 struct S009b0bf0_Obj
 {
-    void FUN_009b0c50(int);
-    void FUN_009b0bf0(int a0);
+    void bhkRigidBody_ApplyLinearImpulse(int);
+    void bhkRigidBody_ApplyLinearImpulseNi(int a0);
 };
 // @fnv 0x009b0bf0
-void S009b0bf0_Obj::FUN_009b0bf0(int a0)
+// src: COMMUNITY 0x009b0bf0
+void S009b0bf0_Obj::bhkRigidBody_ApplyLinearImpulseNi(int a0)
 {
     hkVector4 box;
-    FUN_009b0c50(FUN_004a3e00(&box, a0));
+    bhkRigidBody_ApplyLinearImpulse(NI2HK(&box, a0));
 }
 
-hkVector4& FUN_004a3e00(hkVector4& out, const NiPoint3& in);
+hkVector4& NI2HK(hkVector4& out, const NiPoint3& in);
 struct S_009b0c90
 {
     int unk00;
-    void FUN_009b0cf0(const hkVector4& v);
-    void FUN_009b0c90(const NiPoint3& p);
+    void bhkRigidBody_ApplyAngularImpulse(const hkVector4& v);
+    void bhkRigidBody_ApplyAngularImpulseNi(const NiPoint3& p);
 };
 // @fnv 0x009b0c90
-void S_009b0c90::FUN_009b0c90(const NiPoint3& p)
+// src: COMMUNITY 0x009b0c90
+void S_009b0c90::bhkRigidBody_ApplyAngularImpulseNi(const NiPoint3& p)
 {
     hkVector4 v;
-    FUN_009b0cf0(FUN_004a3e00(v, p));
+    bhkRigidBody_ApplyAngularImpulse(NI2HK(v, p));
 }
 
 #pragma strict_gs_check(pop)
@@ -320,7 +323,7 @@ struct FUN_00621c40
     unsigned int keyB;
     unsigned int shapePathB[8];
     FUN_00621c40();
-    FUN_00621c40& FUN_006212c0(const FUN_00621c40&);
+    FUN_00621c40& InitializeFields_006212c0(const FUN_00621c40&);
 };
 struct Predicate369
 {
@@ -328,14 +331,15 @@ struct Predicate369
     int CompareBool(const FUN_00621c40&, const FUN_00621c40&) const;
 };
 // @fnv 0x009b2ed0
-void FUN_009b2ed0(FUN_00621c40* base, int lo, int hi, Predicate369 predicate)
+// src: XBOX_PDB 0x009b2ed0
+void hkAlgorithm_quickSortRecursive_hkpRootCdPoint_hkAlgorithm_less_hkpRootCdPoint(FUN_00621c40* base, int lo, int hi, Predicate369 predicate)
 {
     FUN_00621c40 pivot;
 // Reuse the pivot while iterating the right partition (tail recursion).
 restart: {
     int j = hi;
     int i = lo;
-    pivot.FUN_006212c0(base[(lo + hi) >> 1]);
+    pivot.InitializeFields_006212c0(base[(lo + hi) >> 1]);
     do
     {
         while (predicate.CompareBool(base[i], pivot))
@@ -349,16 +353,16 @@ restart: {
                 FUN_00621c40 temp;
                 FUN_00621c40* high = &base[j];
                 FUN_00621c40* low = &base[i];
-                temp.FUN_006212c0(*high);
-                high->FUN_006212c0(*low);
-                low->FUN_006212c0(temp);
+                temp.InitializeFields_006212c0(*high);
+                high->InitializeFields_006212c0(*low);
+                low->InitializeFields_006212c0(temp);
             }
             --j;
             ++i;
         }
     } while (i <= j);
     if (lo < j)
-        FUN_009b2ed0(base, lo, j, predicate);
+        hkAlgorithm_quickSortRecursive_hkpRootCdPoint_hkAlgorithm_less_hkpRootCdPoint(base, lo, j, predicate);
     if (i < hi)
     {
         lo = i;

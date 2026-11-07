@@ -29,7 +29,7 @@
 
 #include "../../../../include/MapMenu.h"
 
-InterfaceManager* FUN_004b7210();
+InterfaceManager* InterfaceManager_GetSingleton();
 extern MapMenu* DAT_011da368;
 extern bool DAT_011da36d;
 extern int DAT_011da348;

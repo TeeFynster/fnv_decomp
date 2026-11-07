@@ -21,7 +21,7 @@ extern "C" void _mm_store_ss(float*, __m128);
 struct WVec4
 {
     __m128 m_vComponents;
-    void FUN_00c7f700(const struct hkRotation& r, const WVec4& v);
+    void hkVector4_setRotatedDir(const struct hkRotation& r, const WVec4& v);
     float dot3(const WVec4& a) const
     {
         __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
@@ -368,11 +368,12 @@ struct WVehicle
     hkpVehicleFrictionStatus m_kFrictionStatus;
     int unk9c;
     hkBool* m_kSecondRealArray;
-    void FUN_00e38310(float deltaTime, const int* groundBody, const WGround* ground);
+    void ProcessEntries_00e38310(float deltaTime, const int* groundBody, const WGround* ground);
 };
 
 // @fnv 0x00e38310
-void WVehicle::FUN_00e38310(float deltaTime, const int* groundBody, const WGround* ground)
+// src: GUESS 0x00e38310 (confidence: low)
+void WVehicle::ProcessEntries_00e38310(float deltaTime, const int* groundBody, const WGround* ground)
 {
     for (int w = 0; w < m_data->m_iWheelCount; ++w)
     {
@@ -387,7 +388,7 @@ void WVehicle::FUN_00e38310(float deltaTime, const int* groundBody, const WGroun
         wheel.m_fSuspensionForce = status.m_fAxisStatusMetric1;
 
         WVec4 forward;
-        forward.FUN_00c7f700(m_pEntity->m_rotation, m_data->m_chassisOrientation1);
+        forward.hkVector4_setRotatedDir(m_pEntity->m_rotation, m_data->m_chassisOrientation1);
         const float chassisVel = forward.dot3(m_pEntity->m_kTranslationalVelocity);
 
         if (!m_kSecondRealArray[w])

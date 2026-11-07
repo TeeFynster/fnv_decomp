@@ -326,7 +326,8 @@ class ConstructibleExtraSpecialRenderFlags : public ExtraSpecialRenderFlags
 #include "../../include/ExtraDataList.h"
 
 // @fnv 0x004103d0
-void ExtraDataList::FUN_004103d0(BSExtraData* apExtra)
+// src: XBOX_PDB 0x004103d0
+void ExtraDataList::AddExtraCopy(BSExtraData* apExtra)
 {
     if (!apExtra || !AttachExtraData(apExtra))
         return;
@@ -761,7 +762,7 @@ void ExtraDataList::FUN_004103d0(BSExtraData* apExtra)
             pRenderFlags = new ConstructibleExtraSpecialRenderFlags;
             AddExtra((BSExtraData*)pRenderFlags);
         }
-        pRenderFlags->FUN_00438330(apExtra);
+        pRenderFlags->Copy_00438330(apExtra);
         break;
     }
     default:

@@ -64,7 +64,7 @@ public:
 
     void DeleteAllNodes();
     unsigned short GetSaveRecordSize(unsigned int);
-    unsigned short FUN_0081ad00(unsigned int flags);
+    unsigned short GetSaveSize_0081ad00(unsigned int flags);
     bool IsAboveZero();
     void FUN_008196e0();
     MagicCaster* FUN_009185e0();

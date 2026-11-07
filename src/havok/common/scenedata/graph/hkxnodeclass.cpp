@@ -104,7 +104,7 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
@@ -118,7 +118,7 @@ CpuObject* CpuObject::FUN_00dfd900(unsigned int flags)
     FUN_00e3ed80();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
+        CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;
@@ -146,7 +146,7 @@ struct FUN_00dfd8d0_MemoryRouter
     }
 };
 
-extern "C" FUN_00dfd8d0_MemoryRouter& __cdecl FUN_00c85750();
+extern "C" FUN_00dfd8d0_MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00dfd8d0
 {
@@ -159,7 +159,7 @@ struct FUN_00dfd8d0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dfd8d0* b = static_cast<FUN_00dfd8d0*>(p);
-        FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 

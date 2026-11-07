@@ -28,7 +28,8 @@ struct InlineStorageString
     ~InlineStorageString();
 };
 // @fnv 0x00cfc1d0
-void hkpCollisionDispatcher::FUN_00cfc1d0()
+// src: HAVOK_LIB 0x00cfc1d0
+void hkpCollisionDispatcher::debugPrintTable()
 {
     ((hkError*)DAT_01268360)->beginSection(0x5e4345e4, "hkpCollisionDispatcher::debugPrintTable");
     if (!m_tableDiscrete || !m_tableContinuous)

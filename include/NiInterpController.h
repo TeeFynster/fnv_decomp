@@ -31,7 +31,7 @@ public:
     virtual bool ControlsTransform(NiInterpolator* interpolator, unsigned short index) const;
 
     void CopyMemberData(NiInterpController* pkClone, CloningProcess& kCloning);
-    void FUN_004f0640(NiAVObject* object);
+    void NiMultiTargetTransformController_RemoveNodeRecurse(NiAVObject* object);
 
     static const unsigned short INVALID_INDEX;
 };

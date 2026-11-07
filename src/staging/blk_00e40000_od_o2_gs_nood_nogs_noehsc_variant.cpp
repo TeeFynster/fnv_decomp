@@ -24,14 +24,15 @@ struct VectorAttribute
 
 struct AttributeHolder
 {
-    VectorAttribute* FUN_00e5c650(const char* name);
-    int FUN_00e5ca80(const char* name, unsigned char warn, hkVector4& out);
+    VectorAttribute* Runtime_ForwardCall_00e5c650(const char* name);
+    int ProcessAndReturnValue_00e5ca80(const char* name, unsigned char warn, hkVector4& out);
 };
 
 // @fnv 0x00e5ca80
-int AttributeHolder::FUN_00e5ca80(const char* name, unsigned char warn, hkVector4& out)
+// src: GUESS 0x00e5ca80 (confidence: low)
+int AttributeHolder::ProcessAndReturnValue_00e5ca80(const char* name, unsigned char warn, hkVector4& out)
 {
-    VectorAttribute* attr = FUN_00e5c650(name);
+    VectorAttribute* attr = Runtime_ForwardCall_00e5c650(name);
     if (attr)
     {
         out.m_vComponents = attr->m_uiFilterValue->m_vComponents;

@@ -74,7 +74,7 @@ extern double _gModifierZero;
 struct Uniform
 {
     float Next();
-    float FUN_00b3f2a0(float x) const;
+    float Density_00b3f2a0(float x) const;
 };
 
 // @fnv 0x00b3f280
@@ -85,7 +85,8 @@ float Uniform::Next()
 
 // Returns 1.0f when x is within [_gModifierZero, 1.0], otherwise 0.0f.
 // @fnv 0x00b3f2a0
-float Uniform::FUN_00b3f2a0(float afValue) const
+// src: XBOX_PDB 0x00b3f2a0
+float Uniform::Density_00b3f2a0(float afValue) const
 {
     return (afValue < _gModifierZero || afValue > 1.0) ? 0.0f : 1.0f;
 }

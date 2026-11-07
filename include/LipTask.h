@@ -17,12 +17,12 @@ public:
     virtual bool GetDescription(char* description, unsigned int bufferSize);
 
     void InitTerrainManager();
-    void FUN_00905d20();
+    void LipTask_Finish();
     void HandleStateChange(int aePreviousState, void* apTaskOwner);
-    bool FUN_00905e00(char* apDescription, unsigned int aiBufferSize);
+    bool GetDescription_00905e00(char* apDescription, unsigned int aiBufferSize);
     int FUN_00c3cff0(int a1, int a2);
-    using IOTask::FUN_00c3cb70;
-    void FUN_00c3cb70(int state, void* owner);
+    using IOTask::QueuedFile_Cancel;
+    void QueuedFile_Cancel(int state, void* owner);
 
     union
     {

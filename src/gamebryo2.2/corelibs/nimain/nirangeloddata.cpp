@@ -24,7 +24,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_011f5ef8;
 
 // @fnv 0x00a976f0
-GlobalObjectO2_00a7b610* __cdecl FUN_00a976f0()
+// src: COMMUNITY 0x00a976f0
+GlobalObjectO2_00a7b610* __cdecl NiRangeLODData_GetRTTI()
 {
     return &g_011f5ef8;
 }
@@ -196,7 +197,8 @@ inline NiRangeLODData::NiRangeLODData() throw() : m_kCenter(g_kA97CE0Zero), m_ui
 {}
 
 // @fnv 0x00a97ce0
-NiObject* NiRangeLODData::FUN_00a97ce0(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a97ce0
+NiObject* NiRangeLODData::CreateClone_00a97ce0(CloningProcess& kCloning)
 {
     NiRangeLODData* pkClone = new NiRangeLODData;
     CopyMemberData(pkClone, kCloning);

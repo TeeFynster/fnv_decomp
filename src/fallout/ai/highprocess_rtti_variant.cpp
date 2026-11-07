@@ -19,17 +19,17 @@ struct Package
 {
     virtual void PackageTypeAnchor();
     int FUN_0041ca90();
-    void FUN_009f8660(List*);
-    bool FUN_009f7fe0();
-    NiPoint3 FUN_009f8300();
-    void FUN_009f8020(Actor*);
-    void FUN_009f7f20(Actor*, int);
-    void FUN_009f7d70(Actor*, int);
+    void SpectatorPackage_CopyThreatInfoList(List*);
+    bool SpectatorPackage_IsComplete();
+    NiPoint3 SpectatorPackage_GetEventCenter();
+    void SpectatorPackage_Update(Actor*);
+    void SpectatorPackage_LookAtCombatants(Actor*, int);
+    void SpectatorPackage_MakeCombatComment(Actor*, int);
     unsigned int FUN_004fb070();
     void SetWaterForm(unsigned int);
-    float FUN_00507e10();
-    int FUN_009f8570();
-    void FUN_009f1310(void*);
+    float BGSProjectile_GetMuzzleFlashDuration();
+    int SpectatorPackage_CreateAvoidNodeArray();
+    void AddAvoidedRef(void*);
 };
 struct List
 {
@@ -37,7 +37,7 @@ struct List
     List();
     ~List();
     int FUN_0044ddc0();
-    void** FUN_006a7ad0(int);
+    void** BSSimpleArray_NiAVObject_1024_GetAt(int);
 };
 struct Process
 {
@@ -151,14 +151,14 @@ struct Request
     void InitFromActor(Actor*);
     void SetCantOpenDoors(bool);
     void SetPathingLocation(const Location&);
-    void FUN_008dbd80(float);
+    void PathingRequestHide_SetMinHideDistance(float);
     void FUN_006d3b00(float);
     void FUN_006d61e0(int);
 };
 
 struct System
 {
-    bool FUN_008d0300(Actor*, int);
+    bool Actor_CheckAttackDisarm(Actor*, int);
 };
 extern System* DAT_011f1958;
 extern Setting DAT_011cd814, DAT_011cddb8, DAT_011cd990, DAT_011cdfe4;
@@ -173,7 +173,8 @@ extern double DAT_0102e430, DAT_010240c0;
 }
 
 // @fnv 0x008db810
-void Actor::FUN_008db810(Actor* actor)
+// src: XBOX_PDB 0x008db810
+void Actor::HighProcess_ProcessObserveCombat(Actor* actor)
 {
     using namespace PackagePathing;
     // The shared hierarchy lacks these two virtual signatures; retain their calling conventions here.
@@ -186,57 +187,57 @@ void Actor::FUN_008db810(Actor* actor)
         package = current;
     if (!package)
         return;
-    if (DAT_011f1958->FUN_008d0300(actor, 0) || actor->GetActorValue(static_cast<ActorValue::Index>(1)) <= 0)
+    if (DAT_011f1958->Actor_CheckAttackDisarm(actor, 0) || actor->GetActorValue(static_cast<ActorValue::Index>(1)) <= 0)
     {
         List targetsSlot0;
-        package->FUN_009f8660(&targetsSlot0);
+        package->SpectatorPackage_CopyThreatInfoList(&targetsSlot0);
         int count = targetsSlot0.FUN_0044ddc0();
         if (count > 0)
         {
-            actor->FUN_00881680(0);
+            actor->Actor_EndInterruptPackage(0);
             reinterpret_cast<StartCall>((*reinterpret_cast<void***>(actor))[0x410 / 4])(
-                actor, *targetsSlot0.FUN_006a7ad0(0), 1, 1, 1, 0, 0, DAT_01012054, DAT_01012054);
+                actor, *targetsSlot0.BSSimpleArray_NiAVObject_1024_GetAt(0), 1, 1, 1, 0, 0, DAT_01012054, DAT_01012054);
             ::FleePackage* following = dynamic_cast< ::FleePackage*>(reinterpret_cast<TESPackage*>(actor->FUN_009344a0()));
             if (following)
             {
                 for (int index = 0; index < count; index++)
-                    following->AddAvoidedReference(static_cast< ::Actor*>(*targetsSlot0.FUN_006a7ad0(index)));
+                    following->AddAvoidedReference(static_cast< ::Actor*>(*targetsSlot0.BSSimpleArray_NiAVObject_1024_GetAt(index)));
             }
             return;
         }
     }
-    if (package->FUN_009f7fe0())
+    if (package->SpectatorPackage_IsComplete())
     {
-        actor->FUN_00881680(0);
+        actor->Actor_EndInterruptPackage(0);
         return;
     }
     float nearDistanceSlot10 = 0.0f;
     float farDistanceSlot35 = 0.0f;
     NiPoint3 unusedSlot11;
     int flagsSlot15 = 513;
-    NiPoint3 pointSlot13 = package->FUN_009f8300();
+    NiPoint3 pointSlot13 = package->SpectatorPackage_GetEventCenter();
     float distanceSlot14 = actor->GetLightLevelAtPoint(pointSlot13);
     Cell* cell = reinterpret_cast<Cell*>(actor->FUN_008d6f30());
     bool nearSlot19 = false;
     if (cell && cell->FUN_00425fd0())
     {
-        nearDistanceSlot10 = *DAT_011cd814.FUN_00403e20();
-        farDistanceSlot35 = *DAT_011cddb8.FUN_00403e20();
+        nearDistanceSlot10 = *DAT_011cd814.Setting_Float_00403e20();
+        farDistanceSlot35 = *DAT_011cddb8.Setting_Float_00403e20();
         if (distanceSlot14 < nearDistanceSlot10)
             nearSlot19 = true;
     }
     else
     {
-        nearDistanceSlot10 = *DAT_011cd990.FUN_00403e20();
-        farDistanceSlot35 = *DAT_011cdfe4.FUN_00403e20();
+        nearDistanceSlot10 = *DAT_011cd990.Setting_Float_00403e20();
+        farDistanceSlot35 = *DAT_011cdfe4.Setting_Float_00403e20();
         if (distanceSlot14 < farDistanceSlot35)
             nearSlot19 = true;
     }
-    package->FUN_009f8020(actor);
+    package->SpectatorPackage_Update(actor);
     if (actor->FUN_008b3bb0())
     {
-        package->FUN_009f7f20(actor, 1);
-        package->FUN_009f7d70(actor, 1);
+        package->SpectatorPackage_LookAtCombatants(actor, 1);
+        package->SpectatorPackage_MakeCombatComment(actor, 1);
         unsigned int time = DAT_011f6394.FUN_00825c00();
         if (time > package->FUN_004fb070() + 1500)
         {
@@ -246,16 +247,16 @@ void Actor::FUN_008db810(Actor* actor)
             requestSlot13.InitFromActor(actor);
             if (actor->IsCreature())
                 requestSlot13.SetCantOpenDoors(reinterpret_cast<PackagePathing::Base*>(actor->FUN_004181e0())->race.Flag());
-            requestSlot13.SetPathingLocation(Location(package->FUN_009f8300(), actor));
-            requestSlot13.FUN_008dbd80(package->FUN_00507e10() + DAT_0102e430);
+            requestSlot13.SetPathingLocation(Location(package->SpectatorPackage_GetEventCenter(), actor));
+            requestSlot13.PathingRequestHide_SetMinHideDistance(package->BGSProjectile_GetMuzzleFlashDuration() + DAT_0102e430);
             requestSlot13.FUN_006d3b00(DAT_0101e6ec);
-            int mode = package->FUN_009f8570();
+            int mode = package->SpectatorPackage_CreateAvoidNodeArray();
             requestSlot13.FUN_006d61e0(mode);
-            if (!actor->FUN_008bb630(reinterpret_cast<PathingRequest*>(&requestSlot13)))
+            if (!actor->Actor_SetPathfindingFlee(reinterpret_cast<PathingRequest*>(&requestSlot13)))
                 return;
-            if (actor->FUN_00894d60())
-                actor->FUN_00894cc0(0);
-            actor->FUN_008b39f0(512);
+            if (actor->GetBlocked())
+                actor->Actor_SetBlock(0);
+            actor->Actor_SetMoveMode(512);
             NiPoint3 targetSlot6Slot10;
             if (reinterpret_cast<PackagePathing::Process*>(actor->m_pActorMover)->GetPathCoordinate(&targetSlot6Slot10))
             {
@@ -269,10 +270,10 @@ void Actor::FUN_008db810(Actor* actor)
     }
     else if (actor->IsCharacter())
     {
-        package->FUN_009f7f20(actor, 1);
-        package->FUN_009f7d70(actor, 1);
+        package->SpectatorPackage_LookAtCombatants(actor, 1);
+        package->SpectatorPackage_MakeCombatComment(actor, 1);
     }
-    if (actor->FUN_008b3b90())
+    if (actor->DidPathingFail())
         return;
     if (distanceSlot14 > farDistanceSlot35 * 2.0f)
     {

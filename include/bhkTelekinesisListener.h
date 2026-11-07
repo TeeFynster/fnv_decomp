@@ -15,7 +15,7 @@ public:
 
     // The scalar deleting destructor (0x008078e0, primary vftable slot 3), spelled as a member.
     void* Destroy(unsigned int flags);
-    void FUN_00807980(void* entity);
-    void FUN_008079e0(hkpEntity* entity);
-    void FUN_00807a10(hkpEntity* entity);
+    void bhkTelekinesisListener_entityDeletedCallback(void* entity);
+    void bhkTelekinesisListener_entityDeactivatedCallback(hkpEntity* entity);
+    void bhkTelekinesisListener_Finish(hkpEntity* entity);
 };

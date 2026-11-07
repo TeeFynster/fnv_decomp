@@ -17,7 +17,7 @@ public:
     int GetFriendHitSlotCount();
     void Destroy();
     void* ScalarDeletingDestructor(unsigned int flags);
-    void FUN_00435d40();
+    void ExtraFriendHits_AddHit();
 
     BSSimpleArray<CombatTargetTimestamp> kHits;
 };

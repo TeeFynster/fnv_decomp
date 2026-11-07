@@ -43,11 +43,11 @@ public:
     void ResetFormData();
     bool Load(TESFile*);
     bool IsTeleportDoor();
-    bool FUN_005194d0();
-    bool FUN_00517fa0();
+    bool IsRandomDoor();
+    bool IsAutomaticDoor();
     bool IsFlag4Set();
-    bool FUN_00518080();
-    void FUN_00518030(bool);
+    bool IsSlidingDoor();
+    void SetMinimalUse(bool);
     void FUN_00517500();
     void* FUN_005174d0(unsigned int);
     bool Activate(TESObjectREFR*, TESObjectREFR*, bool, TESBoundObject*, int);
@@ -55,7 +55,7 @@ public:
     void QueueDoorTeleport(TESObjectREFR*);
     TESSound* GetOpenSound();
     void ClearRandomTeleportList();
-    BSSimpleList<TESForm*>* FUN_00871a30();
+    BSSimpleList<TESForm*>* TESDataHandler_GetFactions();
     NiNode* Create3DModel(TESObjectREFR*);
     bool HasEntry(TESForm* destination);
 

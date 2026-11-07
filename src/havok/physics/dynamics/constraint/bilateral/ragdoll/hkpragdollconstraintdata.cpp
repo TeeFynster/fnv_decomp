@@ -88,7 +88,8 @@ __forceinline void hkTransform::setIdentity()
 }
 
 // @fnv 0x00cde9d0
-void __stdcall FUN_00cde9d0(int* apUnused, int* apiOut)
+// src: HAVOK_LIB 0x00cde9d0
+void __stdcall hkpRagdollConstraintData_getRuntimeInfo(int* apUnused, int* apiOut)
 {
     apiOut[1] = 0xc;
     apiOut[0] = 0x80;
@@ -106,12 +107,12 @@ void __thiscall hkpRagdollConstraintData::vf03(float a)
     m_kBridgeAtoms.m_kBallSocket.m_usFlags = a;
 }
 
-void* __cdecl FUN_00d21a60(void* a, int b, int c);
+void* __cdecl hkpConstraintData_getConstraintInfoUtil(void* a, int b, int c);
 
 // @fnv 0x00cde9b0
 char* hkpRagdollConstraintData::vf15(int aiIndex)
 {
-    return (char*)FUN_00d21a60(&m_kBridgeAtoms, sizeof(m_kBridgeAtoms), aiIndex);
+    return (char*)hkpConstraintData_getConstraintInfoUtil(&m_kBridgeAtoms, sizeof(m_kBridgeAtoms), aiIndex);
 }
 
 // @fnv 0x00cdf1f0
@@ -149,7 +150,8 @@ int hkpRagdollConstraintData::vf06()
 }
 
 // @fnv 0x00cdead0
-int __cdecl FUN_00cdead0()
+// src: GUESS 0x00cdead0 (confidence: high)
+int __cdecl hkpRagdollConstraintData_ReturnConstant_7()
 {
     return 7;
 }
@@ -177,10 +179,10 @@ struct FnvCpu_FUN_00cdf530_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00cdf530_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00cdf530_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00cdf530_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 __forceinline void hkReferencedObject::operator delete(void* block)
 {
-    FnvCpu_FUN_00cdf530_CpuAllocatorHolder* holder = FUN_00c85750();
+    FnvCpu_FUN_00cdf530_CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
     holder->allocator->Invoke(block, static_cast<hkReferencedObject*>(block)->m_usMemSizeAndFlags);
 }
 
@@ -314,7 +316,7 @@ extern const LocalM128 DAT_010c71e0;
 struct Quat
 {
     LocalM128 m_vec;
-    void FUN_00cb2450(const LocalM128* axis, float angle);
+    void hkQuaternion_setAxisAngle(const LocalM128* axis, float angle);
 };
 
 __forceinline void Vec4::setCross(const Vec4& a, const Vec4& b)
@@ -354,7 +356,7 @@ void hkpRagdollConstraintData::setPlaneAngularLimit(float afStart, float afEnd)
     float& m_halfRange = m_kBridgeAtoms.m_kConeLimit.m_fMaxAngle;
     float center = (afStart + afEnd) * 0.5;
     Quat q;
-    q.FUN_00cb2450(&m_kAxisEndPoints.getQuad(), -center);
+    q.hkQuaternion_setAxisAngle(&m_kAxisEndPoints.getQuad(), -center);
     m_dir.SetRotatedDirection(q, m_dir);
     // Access through the byte view preserves the original post-rotation reload.
     const unsigned int frameBOffset = offsetof(hkpRagdollConstraintData, m_kBridgeAtoms)
@@ -386,7 +388,7 @@ __declspec(noinline) hkpLimitedHingeConstraintDataAtoms::hkpLimitedHingeConstrai
     *limit = 0xc;
     static_cast<volatile unsigned short&>(m_kBallSocket.m_type) = 5;
     m_kBallSocket.m_ucBodiesToNotify = 0;
-    reinterpret_cast<hkUFloat8&>(m_kBallSocket.m_solvingMethod).FUN_00ca9360(&f);
+    reinterpret_cast<hkUFloat8&>(m_kBallSocket.m_solvingMethod).FindFloatTableIndex(&f);
     m_kBallSocket.m_usFlags = DAT_0104da48;
 }
 

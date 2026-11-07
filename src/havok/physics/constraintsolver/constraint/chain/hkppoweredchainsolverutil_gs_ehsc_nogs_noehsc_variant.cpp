@@ -487,13 +487,13 @@ struct __declspec(align(16)) BufB
     float f0bc;
 };
 extern void __cdecl ResetJacobianRows(int a, int b, void* c, void* d);
-extern void __cdecl FUN_00df07c0(int a, void* b);
-extern void __cdecl FUN_00e29250(void* a, void* b);
-extern void __cdecl FUN_00e29470(void* a, void* b, int c);
-extern void __cdecl FUN_00e29380(void* a, void* b);
-extern void __cdecl FUN_00e298f0(void* a, void* b);
+extern void __cdecl Object_ProcessEntries_00df07c0(int a, void* b);
+extern void __cdecl _hkMatrix6SetTranspose(void* a, void* b);
+extern void __cdecl hkMatrix3_ProcessEntries_00e29470(void* a, void* b, int c);
+extern void __cdecl Object_SubtractVectorBundles(void* a, void* b);
+extern void __cdecl Runtime_ForwardCall_00e298f0(void* a, void* b);
 extern float DAT_0104da4c;
-void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4);
+void __cdecl Hkppoweredchainsolverutil_UpdateState_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4);
 struct MatrixGroup
 {
     char data0[0xc0];
@@ -509,8 +509,8 @@ struct InputStruct
     char pad2[8];
     hkAabb* aabbs;
 };
-extern "C" void __cdecl FUN_00e29510(void* out, const void* matrix, const void* in);
-void __cdecl FUN_00df11a0(InputStruct* a, hkAabb* out);
+extern "C" void __cdecl hkVector4_ComputeValues_00e29510(void* out, const void* matrix, const void* in);
+void __cdecl hkAabb_ProcessEntries_00df11a0(InputStruct* a, hkAabb* out);
 
 template <class T> class Slot
 {
@@ -637,7 +637,8 @@ struct PoweredChain
 };
 
 // @fnv 0x00df1260
-extern "C" void __cdecl FUN_00df1260(PoweredChain* chain, int* chosenConstraint, int* chosenAxis, float* chosenImpulse)
+// src: GUESS 0x00df1260 (confidence: low)
+extern "C" void __cdecl Object_ProcessEntries_00df1260(PoweredChain* chain, int* chosenConstraint, int* chosenAxis, float* chosenImpulse)
 {
     const Quad8* target = chain->m_velocities + 1;
     float worst = 0.0f;
@@ -648,7 +649,7 @@ extern "C" void __cdecl FUN_00df1260(PoweredChain* chain, int* chosenConstraint,
     for (int i = chain->m_iConstraintCount - 1; i >= 0; i--)
     {
         Quad8 product;
-        FUN_00e29510(&product, &chain->m_kMatrices[i].m_kMiddle, &accum);
+        hkVector4_ComputeValues_00e29510(&product, &chain->m_kMatrices[i].m_kMiddle, &accum);
         accum.setSub8(target[i], product);
         for (int axis = 0; axis < 3; axis++)
         {

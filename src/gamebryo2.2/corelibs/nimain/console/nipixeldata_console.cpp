@@ -1,7 +1,7 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 
 class FUN_00a8f010_cls
 {
@@ -41,7 +41,7 @@ void FUN_00a8f010_cls::AllocateBuffers(int aiCount, volatile int aiRows, int aiS
     unsigned int stride = (unsigned int)(aiStride + 3) & 0xfffffffcu;
     int rows = aiRows * (int)stride;
     unsigned int total = (unsigned int)(rows + aiCount * 12 + 4);
-    char* base = (char*)FUN_00aa1070(total);
+    char* base = (char*)_NiMalloc_00aa1070(total);
     m_50 = base;
     m_54 = base + rows;
     m_58 = m_54 + aiCount * 4;

@@ -39,10 +39,10 @@ public:
     bool Load(TESFile* file);
     void Initialize();
     void CopyFromChallenge(TESForm* form);
-    unsigned short __thiscall FUN_005a7770(unsigned int aiFlags);
-    void __thiscall FUN_0059adb0(unsigned int aiFlags);
-    void __thiscall FUN_00616640(unsigned int aiFlags, unsigned int aiCurrentFlags);
-    void FUN_005f5780(BGSSaveFormBuffer* buffer);
+    unsigned short __thiscall TESCaravanCard_GetSaveSize(unsigned int aiFlags);
+    void __thiscall TESCaravanCard_SaveGame(unsigned int aiFlags);
+    void __thiscall TESCaravanCard_LoadGame(unsigned int aiFlags, unsigned int aiCurrentFlags);
+    void SaveGame_005f5780(BGSSaveFormBuffer* buffer);
     void SetFormOne(TESForm* form);
     void SetFormTwo(TESForm* form);
     TESForm* GetFormOne();
@@ -65,10 +65,10 @@ public:
     int GetProgressValue();
     void SetShowZero(bool show);
     void MarkForSave();
-    bool FUN_0060fd70();
-    TESQuest* FUN_004fd380();
-    void FUN_005defe0(bool b);
-    void FUN_005f60e0(int amount);
+    bool TESQuestStageItem_GetEndQuest();
+    TESQuest* EffectSetting_GetLight();
+    void RemoveRecurringFromChallenge(bool b);
+    void IncrementProgress_005f60e0(int amount);
 
     ChallengeData data;
     union

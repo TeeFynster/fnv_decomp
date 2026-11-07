@@ -35,7 +35,7 @@ template <class T> class LockFreeQueue : public InterfacedClass
     volatile int iCount;
     RecursiveSpinLock kLock;
 
-    bool FUN_006c6030(T& item);
+    bool LockFreeQueue_bhkRigidBody_Pop(T& item);
 };
 
 #include "LockFreeQueue_LockFreeQueueNode.h"

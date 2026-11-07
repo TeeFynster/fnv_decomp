@@ -39,7 +39,8 @@ NiCollisionObject::NiCollisionObject(NiAVObject* apSceneObject) : m_pkSceneObjec
 extern char const* const g_01267b70_arg1;
 
 // @fnv 0x00a810a0
-char const* const* __cdecl FUN_00a810a0()
+// src: COMMUNITY 0x00a810a0
+char const* const* __cdecl NiCollisionObject_GetRTTI()
 {
     return &g_01267b70_arg1;
 }
@@ -89,14 +90,14 @@ template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(co
 }
 
 extern const char* g_pcA81100Name;
-const char* __cdecl FUN_00a7d330(const char* pcString);
-const char* __cdecl FUN_00a7d5a0(char const* pcName, void* pvObj);
+const char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcString);
+const char* __cdecl NiGetViewerString_00a7d5a0(char const* pcName, void* pvObj);
 
 // @fnv 0x00a81100
 void NiCollisionObject::GetViewerStrings(NiViewerStringsArray* pkStrings)
 {
     NiObject::AddViewerStrings(pkStrings);
-    pkStrings->Add(FUN_00a7d330(g_pcA81100Name));
+    pkStrings->Add(NiViewerStrings_NiGetViewerString_Title(g_pcA81100Name));
     AddViewerStrings(pkStrings);
 }
 
@@ -104,7 +105,7 @@ void NiCollisionObject::GetViewerStrings(NiViewerStringsArray* pkStrings)
 void NiCollisionObject::AddViewerStrings(NiViewerStringsArray* pkStrings)
 {
     {
-        const char* p = FUN_00a7d330(g_pcA81100Name);
+        const char* p = NiViewerStrings_NiGetViewerString_Title(g_pcA81100Name);
         unsigned int uiPos = pkStrings->m_usSize;
         unsigned int uiSize = pkStrings->m_usMaxSize;
         if (uiPos >= uiSize)
@@ -114,7 +115,7 @@ void NiCollisionObject::AddViewerStrings(NiViewerStringsArray* pkStrings)
         pkStrings->SetAt(uiPos, p);
     }
     {
-        const char* q = FUN_00a7d5a0("m_pkSceneObject", m_pkSceneObject);
+        const char* q = NiGetViewerString_00a7d5a0("m_pkSceneObject", m_pkSceneObject);
         unsigned int uiPos = pkStrings->m_usSize;
         unsigned int uiSize = pkStrings->m_usMaxSize;
         if (uiPos >= uiSize)

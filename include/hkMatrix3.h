@@ -46,14 +46,14 @@ public:
     hkResult DiagonalizeSymmetric(hkMatrix3& eigenVec, hkVector4& eigenVal,
                                  int maxIter = 5, float epsilon = 1e-4f) const throw();
 
-    int FUN_00cd4f10(float epsilon);
-    void __thiscall FUN_00cd4bf0(char* a, char* b);
-    hkBool FUN_00cd4af0() const;
-    unsigned char* FUN_00cd4e00(unsigned char* result, const hkMatrix3* other, float epsilon);
-    bool FUN_00cd4e90(float epsilon);
-    void FUN_00cd5050();
-    float FUN_00cd53a0();
-    void FUN_00cd5680(const hkMatrix3& other);
+    int invert_00cd4f10(float epsilon);
+    void __thiscall SetTransposeProduct(char* a, char* b);
+    hkBool isOk_00cd4af0() const;
+    unsigned char* CompareMatrixColumnsWithinTolerance(unsigned char* result, const hkMatrix3* other, float epsilon);
+    bool hkMatrix3_isSymmetric(float epsilon);
+    void ComputeInverseWithDeterminantThreshold();
+    float _offDiagNorm();
+    void hkMatrix3f_mul(const hkMatrix3& other);
 
     static void* __cdecl operator new(size_t nbytes);
     static const hkMatrix3& __cdecl GetIdentityTransform() throw();

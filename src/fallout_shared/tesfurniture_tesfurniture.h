@@ -14,7 +14,7 @@
 class NiAVObject;
 class NiNode;
 class Script;
-NiAVObject* FUN_00c54400(NiNode*);
+NiAVObject* BSFurnitureMarker_Find(NiNode*);
 int Warning(const char*, ...);
 extern SettingT<GameSettingCollection>* g_ppFurnitureMarkerOffsetSettings[][4];
 extern "C" void* __cdecl _alloca(size_t auiBytes);

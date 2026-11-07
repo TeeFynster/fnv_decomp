@@ -12,11 +12,12 @@ struct Container
 };
 struct Owner
 {
-    int FUN_00d6a910(Container* container);
+    int ClearAdjustedValue(Container* container);
 };
 // Passes a pointer to this+8 (or null when this equals 0x20) to container->ClearValue and returns its result.
 // @fnv 0x00d6a910
-int Owner::FUN_00d6a910(Container* container)
+// src: GUESS 0x00d6a910 (confidence: medium)
+int Owner::ClearAdjustedValue(Container* container)
 {
     void* value;
     if ((char*)this - 0x20)
@@ -28,28 +29,30 @@ int Owner::FUN_00d6a910(Container* container)
 
 struct FUN_00dd9380_StandIn
 {
-    int FUN_00dd9380(const char* name, void* constructor);
+    int hkProcessFactory_registerProcess(const char* name, void* constructor);
 };
 extern FUN_00dd9380_StandIn* DAT_01269cd0;
 extern int DAT_01269028;
 extern char DAT_010c65b0;
-void FUN_00d6ad00();
+void hkpBroadphaseViewer_Create();
 // @fnv 0x00d6ad40
-void __cdecl FUN_00d6ad40()
+// src: GUESS 0x00d6ad40 (confidence: low)
+void __cdecl Object_UpdateFields_00d6ad40()
 {
-    DAT_01269028 = DAT_01269cd0->FUN_00dd9380(&DAT_010c65b0, (void*)&FUN_00d6ad00);
+    DAT_01269028 = DAT_01269cd0->hkProcessFactory_registerProcess(&DAT_010c65b0, (void*)&hkpBroadphaseViewer_Create);
 }
 
 extern int DAT_01269028;
 // @fnv 0x00d6ad60
-int FUN_00d6ad60()
+// src: GUESS 0x00d6ad60 (confidence: low)
+int Object_GetDAT_01269028_00d6ad60()
 {
     return DAT_01269028;
 }
 
 struct Target
 {
-    void FUN_00c93920(void* apArg);
+    void hkpWorld_addWorldPostSimulationListener(void* apArg);
 };
 
 struct FUN_00d6a8e0_cls
@@ -70,7 +73,7 @@ struct FUN_00d6a8e0_cls
 // @fnv 0x00d6a8e0
 void FUN_00d6a8e0_cls::CallTargetWithSelfOffset(Target* apTarget)
 {
-    apTarget->FUN_00c93920(((char*)this - 0x20) != 0 ? (char*)this + 8 : 0);
+    apTarget->hkpWorld_addWorldPostSimulationListener(((char*)this - 0x20) != 0 ? (char*)this + 8 : 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -152,7 +155,7 @@ struct PostSimListener
 // one shape of the world; 0xc93920 appends a listener to its list at +0x164
 struct BroadElem
 {
-    void FUN_00c93920(PostSimListener* p);
+    void hkpWorld_addWorldPostSimulationListener(PostSimListener* p);
 };
 
 // the primary base at 0x00 (its vptr is the one at 0x00)
@@ -229,12 +232,12 @@ FUN_00d6a940::FUN_00d6a940(void* a) : WorldViewerBase(a)
         for (int i = 0; i < m_ctx->count; i++)
         {
             BroadElem* e = (BroadElem*)m_ctx->arr[i];
-            e->FUN_00c93920(this);  // this+0x28: the listener subobject
+            e->hkpWorld_addWorldPostSimulationListener(this);  // this+0x28: the listener subobject
         }
     }
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct SpawnedItem
 {
@@ -353,7 +356,7 @@ FUN_00d6ac40_cls::~FUN_00d6ac40_cls() throw()
             m_pSharedOwner->m_ppItems[i]->ClearValue(static_cast<SubObject*>(this));
         }
     }
-    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     SpawnedItem* p = m_pData;
     if (m_iField30 > 0)
@@ -380,7 +383,7 @@ FUN_00d6ac40_cls::~FUN_00d6ac40_cls() throw()
 }
 
 namespace fnv_00d6ad00 {
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct SpawnedObject
 {
@@ -404,9 +407,10 @@ struct SpawnedObject
 
 // Allocates a 0x38-byte object from the holder's allocator, sets its size, calls Init(arg), and returns the result plus 8 or 0.
 // @fnv 0x00d6ad00
-int FUN_00d6ad00(int arg)
+// src: COMMUNITY 0x00d6ad00
+int hkpBroadphaseViewer_Create(int arg)
 {
-    hkMemoryRouter* pAllocHolder = FUN_00c85750();
+    hkMemoryRouter* pAllocHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAllocHolder->m_heap);
     SpawnedObject* pObject = (SpawnedObject*)(*reinterpret_cast<void* (__thiscall**)(hkMemoryAllocator*, int)>(
         *reinterpret_cast<char**>(pAllocator) + 4))(pAllocator, 0x38);
@@ -450,14 +454,14 @@ Derived::Derived()
 struct D6AD80Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00d6ad80();
+    virtual void AdjustThisAndForward_00d6ad80();
 
     int unk04;
 };
 
 struct D6AD80Secondary
 {
-    virtual void FUN_00d6ad80();
+    virtual void AdjustThisAndForward_00d6ad80();
 };
 
 struct D6AD80Object : D6AD80Primary, D6AD80Secondary
@@ -465,7 +469,8 @@ struct D6AD80Object : D6AD80Primary, D6AD80Secondary
     D6AD80Object();
 
 // @fnv 0x00d6ad80
-    virtual void FUN_00d6ad80();
+// src: GUESS 0x00d6ad80 (confidence: low)
+    virtual void AdjustThisAndForward_00d6ad80();
 };
 
 D6AD80Object::D6AD80Object()
@@ -504,7 +509,7 @@ D6AD90Object::D6AD90Object()
 {}
 
 namespace fnv_00d6ada0 {
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 
 inline hkMemoryAllocator& Heap(hkMemoryRouter* holder)
 {
@@ -524,7 +529,7 @@ struct S_00d6ada0_ReferencedObject
     void operator delete(void* p, unsigned int)
     {
         S_00d6ada0_ReferencedObject* b = static_cast<S_00d6ada0_ReferencedObject*>(p);
-        ReleaseBlock(Heap(FUN_00c85750()), p, b->m_usMemSizeAndFlags);
+        ReleaseBlock(Heap(hkMemoryRouter_getInstance()), p, b->m_usMemSizeAndFlags);
     }
     virtual ~S_00d6ada0_ReferencedObject()
     {}

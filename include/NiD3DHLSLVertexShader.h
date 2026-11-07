@@ -22,9 +22,9 @@ public:
 
     void SetSoftwareVP(unsigned int bSoftwareVP);
     const char* GetConstantName(unsigned int uiIndex);
-    void __thiscall FUN_00e95e20(const char* pcEntryPoint);
-    void __thiscall FUN_00e95e80(const char* pcShaderTarget);
-    void __thiscall FUN_00e971d0();
+    void __thiscall SetEntryPoint_00e95e20(const char* pcEntryPoint);
+    void __thiscall SetShaderTarget_00e95e80(const char* pcShaderTarget);
+    void __thiscall SetVtableAndProcessState_00e971d0();
     void* __thiscall DestroyVertexShader(unsigned int flags);
 
     char* m_pcShaderEntryPoint;

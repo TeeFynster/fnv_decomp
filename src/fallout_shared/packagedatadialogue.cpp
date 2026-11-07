@@ -42,11 +42,12 @@ struct FUN_0067b920_host
     int pad4;
     int pad8;
     FUN_0067fc50_impl* padC;
-    void FUN_0067b920(BGSLoadFormBuffer*);
+    void TESDialoguePackageData_InitLoadGame(BGSLoadFormBuffer*);
 };
 // If padC is non-null, forwards apLoadGameBuffer to padC's ResolveObject.
 // @fnv 0x0067b920
-void FUN_0067b920_host::FUN_0067b920(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x0067b920
+void FUN_0067b920_host::TESDialoguePackageData_InitLoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     if (padC != 0)
         padC->ResolveObject(apLoadGameBuffer);
@@ -67,7 +68,7 @@ struct FUN_0067b100_Class
     bool m_bThirdFlag;
     int m_iTrailingValue;
 
-    void FUN_0067b100();
+    void PACK_DIALOGUE_DATA_Endian();
 };
 
 typedef FUN_0067b100_Class FunctionObject;
@@ -108,12 +109,12 @@ void FUN_0067b630_cls::SaveTopicData()
         saveData.m_uiTopicFormID = pMenuTopicEntry->GetFormID();
 
     if (_FUN_00401500())
-        saveData.FUN_0067b100();
+        saveData.PACK_DIALOGUE_DATA_Endian();
 
     _FUN_00485990(0x44444b50, &saveData, 0x18);
 
     if (_FUN_00401500())
-        saveData.FUN_0067b100();
+        saveData.PACK_DIALOGUE_DATA_Endian();
 
     if (m_pTargetLocation)
         m_pTargetLocation->Save(0x32444c50);
@@ -121,7 +122,7 @@ void FUN_0067b630_cls::SaveTopicData()
 
 struct FUNObj
 {
-    void FUN_0067fb60(void*);
+    void PackageLocation_SaveGame(void*);
 };
 
 struct FUN_0067b6f0_cls : TESPackageData
@@ -155,7 +156,7 @@ void FUN_0067b6f0_cls::SavePackageData(BGSSaveFormBuffer* apSaveGameBuffer)
     bool bhasLocation = m_pTargetLocation;
     apSaveGameBuffer->SaveData(&bhasLocation, 1, 0);
     if (bhasLocation)
-        m_pTargetLocation->FUN_0067fb60(apSaveGameBuffer);
+        m_pTargetLocation->PackageLocation_SaveGame(apSaveGameBuffer);
 }
 
 struct PairOfBytes
@@ -210,7 +211,7 @@ struct TESEatPackageData_
     int field0;
     int field4;
 
-    void FUN_0067fbe0(BGSLoadFormBuffer* buffer);
+    void PackageLocation_LoadGame_0067fbe0(BGSLoadFormBuffer* buffer);
 };
 
 struct B0067f030 : TESEatPackageData_
@@ -233,12 +234,13 @@ struct FUN_0067b7d0_shell
     unsigned char field18;
     unsigned int field1c;
 
-    void FUN_0067b7d0(BGSLoadFormBuffer* apLoadGameBuffer);
+    void TESDialoguePackageData_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer);
 };
 
 // Reads fields from apLoadGameBuffer, resolves pMenuTopicEntry by form ID, and optionally allocates and reads m_pTargetLocation.
 // @fnv 0x0067b7d0
-void FUN_0067b7d0_shell::FUN_0067b7d0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x0067b7d0
+void FUN_0067b7d0_shell::TESDialoguePackageData_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     apLoadGameBuffer->ReadTypedData((void*)&field4, 4u);
     apLoadGameBuffer->ReadTypedData((void*)&field10, 1u);
@@ -255,6 +257,6 @@ void FUN_0067b7d0_shell::FUN_0067b7d0(BGSLoadFormBuffer* apLoadGameBuffer)
     if (bhasLocation)
     {
         m_pTargetLocation = (LocationDescriptor*)new B0067f030;
-        ((TESEatPackageData_*)m_pTargetLocation)->FUN_0067fbe0(apLoadGameBuffer);
+        ((TESEatPackageData_*)m_pTargetLocation)->PackageLocation_LoadGame_0067fbe0(apLoadGameBuffer);
     }
 }

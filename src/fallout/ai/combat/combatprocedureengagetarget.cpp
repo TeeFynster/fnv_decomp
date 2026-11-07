@@ -66,7 +66,7 @@ CombatProcedureEngageTarget::~CombatProcedureEngageTarget()
 
 struct CoordinateTriple
 {
-    void FUN_00527b70(void*);
+    void BGSWorldLocation_SaveGame(void*);
 };
 
 // Retained: TimeoutTimer.h does not declare SaveGame (0x009a5eb0).
@@ -93,8 +93,8 @@ void CombatProcedureEngageTarget::SaveGame(BGSSaveFormBuffer* buffer)
     buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x32), 1, 0);
     buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x34), 12, 0);
 
-    reinterpret_cast<CoordinateTriple*>(reinterpret_cast<char*>(this) + 0x40)->FUN_00527b70(buffer);
-    reinterpret_cast<CoordinateTriple*>(reinterpret_cast<char*>(this) + 0x50)->FUN_00527b70(buffer);
+    reinterpret_cast<CoordinateTriple*>(reinterpret_cast<char*>(this) + 0x40)->BGSWorldLocation_SaveGame(buffer);
+    reinterpret_cast<CoordinateTriple*>(reinterpret_cast<char*>(this) + 0x50)->BGSWorldLocation_SaveGame(buffer);
 
     buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x33), 1, 0);
 
@@ -105,7 +105,7 @@ namespace fnv_009d5990 {
 
 struct FUN_00527ba0_Class
 {
-    void FUN_00527ba0(void* buffer);
+    void BGSLoadGameBuffer_LoadBGSWorldLocation(void* buffer);
 };
 
 extern float DAT_01022958;
@@ -140,8 +140,8 @@ void CombatProcedureEngageTarget::LoadGame(BGSLoadFormBuffer* buffer)
     buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x32), 1u);
     buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x34), 12u);
 
-    reinterpret_cast<FUN_00527ba0_Class*>(reinterpret_cast<char*>(this) + 0x40)->FUN_00527ba0(buffer);
-    reinterpret_cast<FUN_00527ba0_Class*>(reinterpret_cast<char*>(this) + 0x50)->FUN_00527ba0(buffer);
+    reinterpret_cast<FUN_00527ba0_Class*>(reinterpret_cast<char*>(this) + 0x40)->BGSLoadGameBuffer_LoadBGSWorldLocation(buffer);
+    reinterpret_cast<FUN_00527ba0_Class*>(reinterpret_cast<char*>(this) + 0x50)->BGSLoadGameBuffer_LoadBGSWorldLocation(buffer);
 
     if (buffer->GetVersion() >= 10)
     {
@@ -171,7 +171,7 @@ struct Query
     int unk1c;
     Query();
     Vec4& FUN_006815c0();
-    void* FUN_0097b940();
+    void* CombatLocation_GetPoint();
 };
 struct RequestA
 {
@@ -225,19 +225,19 @@ struct RequestA
     int unkbc;
     RequestA();
     ~RequestA();
-    void FUN_00507610(float);
-    void FUN_006e5ee0(float);
-    void FUN_006e4ef0(float);
-    void FUN_006e4320(float);
+    void PathingRequestClosePoint_SetMinDistance(float);
+    void SetMaxDistance_006e5ee0(float);
+    void PathingRequestCoveredMove_SetAttackerHeight(float);
+    void PathingRequestCoveredMove_SetAttackerSneakHeight(float);
 };
 struct Controller
 {
-    bool FUN_0099e840(float, float, float, float, Query*, bool);
-    bool FUN_009a02a0(const Vec4&, bool, bool);
+    bool CombatState_FindOptimalLocation(float, float, float, float, Query*, bool);
+    bool CombatState_CheckMovement_009a02a0(const Vec4&, bool, bool);
 };
 struct Context
 {
-    Controller* FUN_00586150();
+    Controller* CombatController_GetCombatState();
 };
 // Retained: CombatProcedureEngageTarget.h lacks these fields and the pathing helper declarations.
 struct Procedure
@@ -252,9 +252,9 @@ struct Procedure
     int unk34, unk38, unk3c;
     Vec4 point, target;
     Timer time;
-    Actor* FUN_00996de0();
-    Actor* FUN_00996e00();
-    void FUN_00996e20(int);
+    Actor* CombatProcedure_GetAttacker();
+    Actor* GetTarget_00996e00();
+    void SetMoveMode_00996e20(int);
     bool CheckAndApply(bool);
 };
 // @fnv 0x009d5000
@@ -265,40 +265,40 @@ bool Procedure::CheckAndApply(bool mode)
     active = true;
     if (DAT_011a5b70)
     {
-        Actor* actor = FUN_00996de0();
-        Actor* targetActor3 = FUN_00996e00();
+        Actor* actor = CombatProcedure_GetAttacker();
+        Actor* targetActor3 = GetTarget_00996e00();
         RequestA request;
         actor->PathToLocation(&request, static_cast<const Actor*>(targetActor3)->GetPos(), actor->FUN_008d6f30(),
-                              actor->FUN_00575d70(DAT_0101e57c), false);
-        request.FUN_00507610(range);
-        request.FUN_006e5ee0(height);
-        request.FUN_006e4ef0(range * DAT_01011588);
-        request.FUN_006e4320(angle);
+                              actor->TESObjectREFR_GetWorldSpace(DAT_0101e57c), false);
+        request.PathingRequestClosePoint_SetMinDistance(range);
+        request.SetMaxDistance_006e5ee0(height);
+        request.PathingRequestCoveredMove_SetAttackerHeight(range * DAT_01011588);
+        request.PathingRequestCoveredMove_SetAttackerSneakHeight(angle);
         if (!actor->SetPathingRequestAvoidNodes(&request))
             return false;
-        target = targetActor3->FUN_00575650();
-        FUN_00996e20(mode ? 3 : 1);
+        target = targetActor3->TESObjectREFR_GetWorldLocation();
+        SetMoveMode_00996e20(mode ? 3 : 1);
         active = false;
         return true;
     }
     else
     {
-        Actor* actor2 = FUN_00996de0();
-        Actor* targetActor2 = FUN_00996e00();
+        Actor* actor2 = CombatProcedure_GetAttacker();
+        Actor* targetActor2 = GetTarget_00996e00();
         Query query2;
-        Controller* controller5 = context->FUN_00586150();
-        if (!controller5->FUN_0099e840(range, height, range * DAT_01011588, angle, &query2, true))
+        Controller* controller5 = context->CombatController_GetCombatState();
+        if (!controller5->CombatState_FindOptimalLocation(range, height, range * DAT_01011588, angle, &query2, true))
             return false;
-        if (!controller5->FUN_009a02a0(query2.FUN_006815c0(), true, false))
+        if (!controller5->CombatState_CheckMovement_009a02a0(query2.FUN_006815c0(), true, false))
             return false;
         PathRequest_combatprocedureengagetarget request2;
-        actor2->PathToLocation(&request2, query2.FUN_0097b940(), actor2->FUN_008d6f30(),
-                               actor2->FUN_00575d70(DAT_0101e57c), false);
+        actor2->PathToLocation(&request2, query2.CombatLocation_GetPoint(), actor2->FUN_008d6f30(),
+                               actor2->TESObjectREFR_GetWorldSpace(DAT_0101e57c), false);
         if (!actor2->SetPathingRequestAvoidNodes(&request2))
             return false;
         point = query2.FUN_006815c0();
-        target = targetActor2->FUN_00575650();
-        FUN_00996e20(mode ? 3 : 1);
+        target = targetActor2->TESObjectREFR_GetWorldLocation();
+        SetMoveMode_00996e20(mode ? 3 : 1);
         return true;
     }
 }
@@ -390,7 +390,7 @@ void Engage::PrintDebugInfo(Output* pOutput, int a, int b)
         pOutput->Print(a, b, text_6, range14, range18);
         if (actor)
         {
-            WorldLocation location = actor->FUN_00575650<WorldLocation>();
+            WorldLocation location = actor->TESObjectREFR_GetWorldLocation<WorldLocation>();
             pOutput->Print(a, b, text_7, location.Distance(&target), 200.0);
         }
         break;
@@ -399,7 +399,7 @@ void Engage::PrintDebugInfo(Output* pOutput, int a, int b)
         pOutput->Print(a, b, text_9, range14, range18);
         if (actor)
         {
-            WorldLocation location = actor->FUN_00575650<WorldLocation>();
+            WorldLocation location = actor->TESObjectREFR_GetWorldLocation<WorldLocation>();
             pOutput->Print(a, b, text_10, location.Distance(&target), 200.0);
         }
         break;
@@ -856,9 +856,9 @@ void EngageProc::UpdateEngagement()
         changed = true;
     }
     Location targetLocX;
-    target->FUN_00575650(static_cast<void*>(&targetLocX));
+    target->TESObjectREFR_GetWorldLocation(static_cast<void*>(&targetLocX));
     Location actorLocY;
-    actorZ->FUN_00575650(static_cast<void*>(&actorLocY));
+    actorZ->TESObjectREFR_GetWorldLocation(static_cast<void*>(&actorLocY));
     float distSqD = actorLocY.GetDistSq(&targetLocX);
     bool tooFar4 = distSqD > m_fMaxRange * m_fMaxRange;
     bool tooClose4 = distSqD < m_fMinRange * m_fMinRange;
@@ -911,7 +911,7 @@ void EngageProc::UpdateEngagement()
                 m_timer28.Reset();
                 PathRequest_combatprocedureengagetarget req2;
                 actorZ->PathToLocation(reinterpret_cast<PathingRequest*>(&req2), *reinterpret_cast<const NiPoint3*>(&m_dodgePos),
-                                       actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->FUN_00575d70()),
+                                       actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->TESObjectREFR_GetWorldSpace()),
                                        0.0f, 0);
                 if (actorZ->SetPathingRequestAvoidNodes(&req2))
                 {
@@ -951,7 +951,7 @@ void EngageProc::UpdateEngagement()
                         PathRequest_combatprocedureengagetarget req34;
                         actorZ->PathToLocation(
                             reinterpret_cast<PathingRequest*>(&req34), *reinterpret_cast<const NiPoint3*>(search.GetResult()),
-                            actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->FUN_00575d70()), DAT_0101e57c, 0);
+                            actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->TESObjectREFR_GetWorldSpace()), DAT_0101e57c, 0);
                         RawPoint dir;
                         req34.GetDirection(&dir)->FUN_005c3420();
                         req34.SetDirection(&dir, dodgeDist + DAT_010231d8);
@@ -1039,7 +1039,7 @@ void EngageProc::UpdateEngagement()
                     PathRequest_combatprocedureengagetarget req62;
                     actorZ->PathToLocation(
                         reinterpret_cast<PathingRequest*>(&req62), *reinterpret_cast<const NiPoint3*>(search2.GetResult()),
-                        actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->FUN_00575d70()), DAT_0101e57c, 0);
+                        actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->TESObjectREFR_GetWorldSpace()), DAT_0101e57c, 0);
                     RawPoint dir2;
                     req62.GetDirection(&dir2)->FUN_005c3420();
                     req62.SetDirection(&dir2, dist + DAT_010231d8);
@@ -1088,7 +1088,7 @@ void EngageProc::UpdateEngagement()
     case 6:
     case 7:
         m_bDodging = false;
-        if (actorZ->FUN_008b3b90())
+        if (actorZ->DidPathingFail())
         {
             if (!static_cast<ActorPathingAccess*>(actorZ)->PathHasError())
             {
@@ -1135,7 +1135,7 @@ void EngageProc::UpdateEngagement()
         m_bDodging = false;
         bool done = false;
         bool fallback = false;
-        if (actorZ->FUN_008b3b90())
+        if (actorZ->DidPathingFail())
         {
             if (!static_cast<ActorPathingAccess*>(actorZ)->PathHasError())
             {
@@ -1203,7 +1203,7 @@ void EngageProc::UpdateEngagement()
         }
         if (m_iFadeIndex == 3 || m_iFadeIndex == 4)
         {
-            if (!done && m_cFallback == 0 && !actorZ->FUN_008b3bf0())
+            if (!done && m_cFallback == 0 && !actorZ->IsWaitingOnPath())
             {
                 m_cFallback = 1;
                 NiPoint3 fallbackPos;
@@ -1289,10 +1289,10 @@ struct FUN_00906f60
 struct FUN_0097ee20_shell
 {
     int data[4];
-    void FUN_0097ede0();
+    void BGSWorldLocation_BGSWorldLocation();
     FUN_0097ee20_shell()
     {
-        FUN_0097ede0();
+        BGSWorldLocation_BGSWorldLocation();
     }
 };
 

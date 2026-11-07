@@ -13,7 +13,7 @@ class BSDecalPlacementVectorExtraData : public NiIntegerExtraData
 
         ExtraList();
         ~ExtraList();
-        void FUN_00c64710();
+        void ReleaseStorage_00c64710();
     };
 
     BSDecalPlacementVectorExtraData(int value);

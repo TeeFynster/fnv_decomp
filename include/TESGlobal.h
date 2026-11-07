@@ -28,5 +28,5 @@ public:
     void SetValue(float value);
     float GetValue();
     bool IsConstantGlobal();
-    float FUN_00526ac0();
+    float BSMultiBoundCapsule_QMultiBoundRadius();
 };

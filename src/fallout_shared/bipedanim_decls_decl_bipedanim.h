@@ -64,11 +64,11 @@ class ModelLoader
 {
   public:
     void CallContainedObject();
-    void FUN_004aaf10();
+    void ModelLoader_UnlockModelMap();
     void QueueModelFilePath(const char*, IO_TASK_PRIORITY, QueuedFile*);
     void ProcessModelRequest(TESModel*, IO_TASK_PRIORITY, QueuedFile*, int, bool, bool, bool);
     void QueueFile(const char*, IO_TASK_PRIORITY, QueuedFile*, int, bool, bool, bool);
-    void FUN_0045a5e0(const char*);
+    void ModelLoader_ReleaseFile(const char*);
     NiNode* LoadFile(const char*, int, bool, bool, bool, bool);
 };
 
@@ -91,7 +91,7 @@ class BipedAnimObject
 class BipedAnim
 {
   public:
-    void FUN_004abd30(IO_TASK_PRIORITY priority, NiPointer<QueuedHelmet>& queuedHelmet,
+    void QueueBipedParts(IO_TASK_PRIORITY priority, NiPointer<QueuedHelmet>& queuedHelmet,
                       QueuedFile* file);  // declared for the original code (decl_variants.py) public:
     NiNode* root;
     BipedAnimBone bone[5];
@@ -123,7 +123,7 @@ class BipedAnim
     static BIPED_OBJECT GetBipedObjectFromShaderProperty(NiAVObject*, BSShaderPPLightingProperty*);
     bool IsModelPathMatch(TESModel*, char*);
     TESModel* GetModelForSlot(BIPED_OBJECT, TESModel*);
-    TESModel* FUN_004afa20(BIPED_OBJECT, char*);
+    TESModel* BipedAnim_Store1stPersonModel(BIPED_OBJECT, char*);
     void RemovePart(BIPED_OBJECT, bool, TESForm*);
     void RemovePartsByParent(TESForm*);
     void SetBipedObject(TESForm*, TESModel*, BIPED_OBJECT);
@@ -133,4 +133,4 @@ class BipedAnim
 extern PlayerCharacter* g_thePlayer;
 extern ModelLoader* g_modelLoader;
 extern SettingT<INISettingCollection> DAT_011c5ef0;
-bool FUN_0043faf0();
+bool BSFaceGenManager_GetUseFaceGenHeads();

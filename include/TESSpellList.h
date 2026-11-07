@@ -30,9 +30,9 @@ public:
     void BaseFormRecord(BaseFormComponent* component);
     void InitItem(TESForm* form);
     void Save();
-    void FUN_0048d210(TESLevSpell* spell);
-    void FUN_0048d290(unsigned int spellID);
-    void FUN_0048d330();
+    void TESSpellList_AddSpell_0048d210(TESLevSpell* spell);
+    void TESSpellList_AddSpell_0048d290(unsigned int spellID);
+    void TESSpellList_SaveSubRecord();
     BSSimpleList<InventoryStackRecord*>* GetOffsetC();
     void LoadGame(BGSLoadFormBuffer* buffer);
     static bool RemoveSpell(BSFileEntry* spell);

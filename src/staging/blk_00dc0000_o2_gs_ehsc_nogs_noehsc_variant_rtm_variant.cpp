@@ -68,7 +68,7 @@ struct FUN_00ddf050_cls
 {
     void ClearContainer();
 };
-extern "C" void __cdecl FUN_00d51760(int* p1, int* p2);
+extern "C" void __cdecl hkpConstraintConstructionKit_computeConstraintInfo(int* p1, int* p2);
 struct FUN_00dd0420_Class
 {
     int m_00;
@@ -79,11 +79,11 @@ struct FUN_00dd0420_Class
     int m_14;
     int m_18;
     int m_1c;
-    FUN_00dd0420_Class* __thiscall FUN_00dd0420(int arg);
+    FUN_00dd0420_Class* __thiscall hkpGenericConstraintDataScheme_hkpGenericConstraintDataScheme(int arg);
 };
 struct FUN_00dd4b70_class
 {
-    void __thiscall FUN_00dd4b70(unsigned char value);
+    void __thiscall hkpMoppCompiler_enableInterleavedBuilding(unsigned char value);
 };
 extern int DAT_0102e388;
 struct FUN_00dd51d0_class
@@ -91,13 +91,13 @@ struct FUN_00dd51d0_class
     int m_00;
     int m_04;
     int m_08;
-    void FUN_00dd51d0();
+    void InitializeFields_00dd51d0();
 };
 struct FUN_00ddfb70_cls
 {
     int m_00;
     int m_04;
-    FUN_00ddfb70_cls* FUN_00ddfb70();
+    FUN_00ddfb70_cls* hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment();
 };
 struct FUN_00dccb70_Class
 {
@@ -120,7 +120,7 @@ struct FUN_00dc9e70_Class
     int m_10;
     int m_14;
     int m_18;
-    FUN_00dc9e70_Class* FUN_00dc9e70();
+    FUN_00dc9e70_Class* InitializeFields_00dc9e70();
 };
 struct FUN_00dcc5a0_vt
 {
@@ -135,18 +135,18 @@ struct FUN_00dcc5a0_class
     int m_00;
     int m_04;
     FUN_00dcc5a0_vt* m_08;
-    FUN_00dcc5a0_class* FUN_00dcc5a0(int arg);
+    FUN_00dcc5a0_class* ProcessAndReturnValue_00dcc5a0(int arg);
 };
 struct FUN_00cb0a70
 {
     void __thiscall m(int);
 };
-void __cdecl FUN_00dccae0(void* a, void* b);
+void __cdecl Object_ProcessState_00dccae0(void* a, void* b);
 struct S_00d49310_Lock
 {
     ~S_00d49310_Lock();
 };
-void __cdecl FUN_00dccb10(char* p);
+void __cdecl Runtime_UpdateState_00dccb10(char* p);
 extern int DAT_010d77b4[];
 extern void __cdecl _Deallocate(void* p);
 struct FUN_00dcd4b0_Class
@@ -168,7 +168,7 @@ struct D2B3D0Map
 };
 struct FUN_00ddf030_Class
 {
-    void __thiscall FUN_00ddf030(int arg);
+    void __thiscall Clear_Thunk(int arg);
 };
 extern int DAT_010d8094;
 struct FUN_00ddfb80_s
@@ -181,16 +181,16 @@ struct FUN_00ddfb80_s
     void* m_0c;
     void* m_10;
 };
-FUN_00ddfb80_s* __fastcall FUN_00ddfb80(FUN_00ddfb80_s* self, int, const void* src);
-int __stdcall FUN_00dc1660(int a1);
+FUN_00ddfb80_s* __fastcall hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(FUN_00ddfb80_s* self, int, const void* src);
+int __stdcall Object_ReturnArgument_00dc1660(int a1);
 extern int DAT_011b7b88;
 struct FUN_00dc1670_cls
 {
     int m_00;
-    FUN_00dc1670_cls* FUN_00dc1670();
+    FUN_00dc1670_cls* hkStructureLayout_hkStructureLayout();
 };
-void __stdcall FUN_00dd8fe0(float* out, int a, int b);
-float FUN_00dc5bb0();
+void __stdcall hkIArchive_readArrayGeneric(float* out, int a, int b);
+float hkIArchive_readFloat32();
 struct ArrayBlock
 {
     unsigned int* values;
@@ -206,8 +206,8 @@ struct AllocatorState
         return pool;
     }
 };
-extern "C" AllocatorState* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00c908c0(void*, ArrayBlock*, int, int);
+extern "C" AllocatorState* __cdecl hkMemoryRouter_getInstance();
+extern "C" void __cdecl hkArrayUtil__reserve(void*, ArrayBlock*, int, int);
 struct ArrayHost
 {
     int unk00, unk04, unk08;
@@ -227,7 +227,7 @@ struct FUN_00dcc180_Class
     int unk04;
     FUN_00dcc180_Interface* unk08;
 
-    unsigned char* __thiscall FUN_00dcc180(unsigned char* value);
+    unsigned char* __thiscall hkIstream_isOk(unsigned char* value);
 };
 struct Target
 {
@@ -242,7 +242,7 @@ struct FUN_00dcc660_cls
     int unk00;
     int unk04;
     Target* m_pFlagTarget;
-    void FUN_00dcc660(int a);
+    void InvokeVirtualMethod_00dcc660(int a);
 };
 struct FUN_00dcc670_Manager
 {
@@ -263,21 +263,21 @@ struct FUN_00dcc670_Class
 extern int DAT_010d7540;
 extern FUN_00dcc670_Manager* DAT_01268364;
 extern int g_unk01269bb4;
-int* __cdecl FUN_00dccb00();
+int* __cdecl Object_GetGlobalObjectAddress_00dccb00();
 extern int DAT_01269be4;
-int* __cdecl FUN_00dccb30();
+int* __cdecl Runtime_GetDAT01269be4Address();
 struct FUN_00dced30_cls
 {
     virtual void m_v00(int arg);
 };
-void __cdecl FUN_00dced30(FUN_00dced30_cls* pObject);
+void __cdecl Object_ForwardCall_00dced30(FUN_00dced30_cls* pObject);
 extern int DAT_01269c44;
-int __cdecl FUN_00dced40();
+int __cdecl Object_ComputeValue_00dced40();
 struct FUN_00d4dfc0_class
 {
     void __thiscall FUN_00d4dfc0(unsigned int value);
 };
-void __cdecl FUN_00dced50(FUN_00d4dfc0_class* object, unsigned int value);
+void __cdecl Runtime_ProcessState_00dced50(FUN_00d4dfc0_class* object, unsigned int value);
 struct S_00dd4bb0_Class
 {
     unsigned char unk00;
@@ -298,7 +298,7 @@ struct FUN_00dd50f0_cls
     int m_0c;
     int m_10;
     unsigned char m_14;
-    FUN_00dd50f0_cls* FUN_00dd50f0(int mode);
+    FUN_00dd50f0_cls* hkpMoppSplitter_hkpMoppSplitParams_hkpMoppSplitParams(int mode);
 };
 // FUN_00dd5150: initialises six float members of the object: five of them to
 // 1.0 and the last one to the global float constant DAT_01016248; returns the
@@ -312,12 +312,12 @@ struct FUN_00dd5150_cls
     float m_f0c;
     float m_f10;
     float m_f14;
-    void* FUN_00dd5150(int arg);
+    void* hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(int arg);
 };
 extern void* DAT_010d7ba8;
 struct FUN_00dd5150_component
 {
-    void FUN_00dd5150(int value);
+    void hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(int value);
 };
 struct FUN_00dd51a0
 {
@@ -408,7 +408,7 @@ struct FUN_00dd8bc0_cls
     int unk9C;
     int unkA0;
     FUN_00dd8bc0_Node m_kNode;
-    void FUN_00dd83a0();
+    void _makeTopValid();
     unsigned int GetUsedMemory();
 };
 struct S_00dd8cf0_Ret
@@ -476,10 +476,11 @@ struct SpawnedObject
     int m_b8;
     int m_bc;
     int m_c0;
-    void FUN_00dd7f10();
+    void _init_00dd7f10();
     SpawnedObject* Construct(int value);
 };
-void SpawnedObject::FUN_00dd7f10()
+// src: HAVOK_LIB 0x00dd7f10
+void SpawnedObject::_init_00dd7f10()
 {
     m_c0 = 0;
     m_bc = 0;
@@ -531,7 +532,7 @@ struct FUN_00ddfbb0_cls
     int unk08;
     int unk0C;
     int m_10;
-    void FUN_00ddfbb0();
+    void ClearField10();
 };
 void __cdecl FUN_00c90510();
 struct FUN_00dcc130_Class
@@ -540,7 +541,7 @@ struct FUN_00dcc130_Class
     unsigned short unk04;
     unsigned short enabled06;
     int unk08;
-    int* __thiscall FUN_00dcc130(int* value);
+    int* __thiscall hkIstream_hkIstream(int* value);
 };
 struct S_00dcc740_Cls
 {
@@ -554,7 +555,8 @@ struct IniTokenStream
     void* m_vt;
 };
 extern "C" void ReadIniLine(void);
-static __declspec(noinline) unsigned short FUN_00dcc240(IniTokenStream* stream, unsigned char* negative)
+// src: HAVOK_LIB 0x00dcc240
+static __declspec(noinline) unsigned short readInteger64(IniTokenStream* stream, unsigned char* negative)
 {
     *negative = 0;
     ReadIniLine();
@@ -573,7 +575,7 @@ struct Lock_dd9
     int* m_pkCriticalSection;
     int FindEntry(int iKey);
     int InvokeRecord(int iIndex, int iArg);
-    int FUN_00dd9330(int iKey, int iArg);
+    int hkProcessFactory_createProcess(int iKey, int iArg);
 };
 extern int DAT_010d7db8;
 struct Bool1
@@ -606,7 +608,8 @@ struct S_00dcc790_Class
     S_00dcc790_Class* __thiscall ReadSignedValue(unsigned short* result);
 };
 extern "C" void __cdecl SkipWhitespace(void);
-static __declspec(noinline) unsigned short FUN_00dcc240(unsigned char* ok, S_00dcc240_Reader* reader)
+// src: HAVOK_LIB 0x00dcc240
+static __declspec(noinline) unsigned short readInteger64(unsigned char* ok, S_00dcc240_Reader* reader)
 {
     *ok = 0;
     SkipWhitespace();
@@ -696,9 +699,9 @@ struct S_00dcc600_Class
 
     int __thiscall ReadUntilValue(unsigned char* buffer, int length, signed char value);
 };
-void __cdecl FUN_00dccb20();
-void __cdecl FUN_00dccb40();
-void __cdecl FUN_00dd4b00();
+void __cdecl nullsub_121();
+void __cdecl nullsub_122();
+void __cdecl Object_DoNothing_00dd4b00();
 struct Bool388
 {
     unsigned char value;
@@ -721,7 +724,7 @@ struct Allocator388
     Block388* lower;
     Bool388 ValidateBlock(Block388* block);
 };
-static void FUN_00dd8fd0(unsigned char* a, unsigned char* b);
+static void Runtime_UpdateState_00dd8fd0(unsigned char* a, unsigned char* b);
 extern "C" unsigned char* GetPtr();
 void Caller(unsigned char* a);
 // The copied router/resize scaffolding was used only by the obsolete local array implementation.
@@ -774,7 +777,8 @@ static stub_cls* volatile g_stub_self;
 static int volatile g_stub_v;
 static int volatile g_stub_out;
 extern "C" int stub_val(void);
-static __declspec(noinline) float FUN_00dcc3b0(int arg)
+// src: HAVOK_LIB 0x00dcc3b0
+static __declspec(noinline) float readFloat(int arg)
 {
     g_stub_out = arg;
     stub_cls* s = g_stub_self;
@@ -783,7 +787,7 @@ static __declspec(noinline) float FUN_00dcc3b0(int arg)
 }
 float stub_caller(void)
 {
-    return FUN_00dcc3b0(stub_val());
+    return readFloat(stub_val());
 }
 class FUN_00dcc5c0_cls
 {
@@ -802,7 +806,8 @@ struct S_00dcc7e0_Stream
     void* m_vt;
 };
 extern "C" void ReadIniLine(void);
-static __declspec(noinline) int FUN_00dcc240(S_00dcc7e0_Stream* stream, unsigned char* negative)
+// src: HAVOK_LIB 0x00dcc240
+static __declspec(noinline) int readInteger64(S_00dcc7e0_Stream* stream, unsigned char* negative)
 {
     *negative = 0;
     ReadIniLine();
@@ -871,7 +876,7 @@ struct S00dcd1b0_Obj
     int unk3C;
     ArrayBlock m_40;
     unsigned char m_4c;
-    void FUN_00dcd1b0(int value);
+    void hkpMeshShape_initWeldingInfo(int value);
 };
 struct S00dcd270_Rec
 {
@@ -921,7 +926,7 @@ struct S00dcd270_cls
 // The copied chunk-validation declarations have no callers or definitions in this RTM unit.
 #include <xmmintrin.h>
 extern __m128 DAT_010ce1c0;
-static bool FUN_00dd2fb0(const __m128* a, const __m128* b);
+static bool Runtime_UpdateState_00dd2fb0(const __m128* a, const __m128* b);
 volatile int g_in0, g_in1;
 volatile int g_out;
 void caller_dd2fb0();
@@ -930,7 +935,7 @@ struct Comparison4
 {
     __m128 value;
 };
-static Comparison4 FUN_00dd31b0(const __m128* l, const __m128* r);
+static Comparison4 Runtime_ComputeValues_00dd31b0(const __m128* l, const __m128* r);
 extern const __m128 g_a, g_b;
 void hcaller(const __m128* ca, const __m128* cb, __m128* cd);
 
@@ -1048,14 +1053,15 @@ struct LongRayVm
     const void* m_kCollisionBody;
     const void* m_pShapeCollection;
     int m_iCurrentChunkId;
-    __declspec(noinline) void FUN_00dd1f30(const MachineVectorIndexRecord* query, const unsigned char* PC,
+    __declspec(noinline) void hkpMoppLongRayVirtualMachine_queryRayOnTree(const MachineVectorIndexRecord* query, const unsigned char* PC,
                                            Vector4Pair* fq, int level);
-    void FUN_00dd2ed0(const void* collection, const MoppCode* code, const RayInput& input, const void* body,
+    void hkpMoppLongRayVirtualMachine_queryLongRay(const void* collection, const MoppCode* code, const RayInput& input, const void* body,
                       RayCollector* collector);
 };
 
 // @fnv 0x00dd2ed0
-void LongRayVm::FUN_00dd2ed0(const void* collection, const MoppCode* code, const RayInput& input, const void* body,
+// src: XBOX_PDB 0x00dd2ed0
+void LongRayVm::hkpMoppLongRayVirtualMachine_queryLongRay(const void* collection, const MoppCode* code, const RayInput& input, const void* body,
                              RayCollector* collector)
 {
     m_pShapeCollection = collection;
@@ -1086,12 +1092,13 @@ void LongRayVm::FUN_00dd2ed0(const void* collection, const MoppCode* code, const
         query.m_iIndex = 0;
         query.m_kProperties[0] = 0;
         m_iCurrentChunkId = (*PC == 0xd) ? -1 : 0;
-        FUN_00dd1f30(&query, PC, &fq, 0);
+        hkpMoppLongRayVirtualMachine_queryRayOnTree(&query, PC, &fq, 0);
     }
 }
 
 extern void consumeRay(LongRayVm*, const MachineVectorIndexRecord*, float, float, unsigned int, int);
-void LongRayVm::FUN_00dd1f30(const MachineVectorIndexRecord* query, const unsigned char* PC, Vector4Pair* fq, int level)
+// src: XBOX_PDB 0x00dd1f30
+void LongRayVm::hkpMoppLongRayVirtualMachine_queryRayOnTree(const MachineVectorIndexRecord* query, const unsigned char* PC, Vector4Pair* fq, int level)
 {
     consumeRay(this, query, fq->m_kPointBundles[0].m_q[0], fq->m_kPointBundles[1].m_q[0],
                query->m_uiPropertyCount + *PC, level);

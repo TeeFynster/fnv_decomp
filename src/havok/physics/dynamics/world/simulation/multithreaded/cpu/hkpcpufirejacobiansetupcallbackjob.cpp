@@ -82,7 +82,7 @@ struct S_00d94c40_Router
     }
 };
 
-S_00d94c40_Router* FUN_00c85750();
+S_00d94c40_Router* hkMemoryRouter_getInstance();
 
 struct S_00d94c40_Instance;
 struct S_00d94c40_Runtime;
@@ -319,7 +319,7 @@ struct S_00d94c40_JobQueue
     void ProcessCallback(S_00d94c40_Job* finishedJob, S_00d94c40_Job& jobOut, int waitStatus);
 };
 
-void __cdecl FUN_00d92900(S_00d94c40_Data* data, S_00d94c40_Input* input, S_00d94c40_Node* node, int mode);
+void __cdecl hkSimpleContactConstraintData_fireCallbacks(S_00d94c40_Data* data, S_00d94c40_Input* input, S_00d94c40_Node* node, int mode);
 
 // For each callback, fills input from its constraint and runs FUN_00d92900 and/or update per its flags, frees the array, then calls jobQueue->ProcessCallback.
 // @fnv 0x00d94c40
@@ -349,7 +349,7 @@ void __cdecl ExecuteConstraintCallbacks(S_00d94c40_Context* context, S_00d94c40_
                 {
                     node = node->m_next;
                 }
-                FUN_00d92900(data, &input, node, 2);
+                hkSimpleContactConstraintData_fireCallbacks(data, &input, node, 2);
                 S_00d94c40_Runtime* newRuntime = pConstraint->ms_uiThreadLocalStorageIndex->m_pByteBuffer;
                 if (oldRuntime != newRuntime)
                 {
@@ -365,7 +365,7 @@ void __cdecl ExecuteConstraintCallbacks(S_00d94c40_Context* context, S_00d94c40_
         }
         int iNumCallbacks = taskData->m_numCallbacks;
         S_00d94c40_Callback* p = taskData->m_kCallbackFunctions;
-        FUN_00c85750()->heap().ReleaseBlock(p, iNumCallbacks * sizeof(S_00d94c40_Callback));
+        hkMemoryRouter_getInstance()->heap().ReleaseBlock(p, iNumCallbacks * sizeof(S_00d94c40_Callback));
         taskData->m_kCallbackFunctions = 0;
         taskData->m_numCallbacks = 0;
         S_00d94c40_Timer("lt");

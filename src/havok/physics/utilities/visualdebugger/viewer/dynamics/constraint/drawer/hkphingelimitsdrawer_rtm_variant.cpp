@@ -62,7 +62,7 @@ struct HingeDrawRotation
 struct Holder
 {
     void* p;
-    void FUN_00e10a10(Visitor* a);
+    void hkpPrimitiveDrawer_setDisplayHandler(Visitor* a);
 };
 
 extern const double DAT_0106d4c8;
@@ -79,10 +79,10 @@ struct T
     HingeDrawRotation m60;
     HingeDrawRotation m90;
     Holder mc;
-    void FUN_00de47e0(Src* a, Mat4* b, Mat4* c);
-    void FUN_00de44c0(int a, int b);
-    void FUN_00de4530(int a, int b);
-    void FUN_00de6d80(Src* a1, Visitor* a2, int a3, int a4);
+    void hkpConstraintDrawer_updateCommonParameters(Src* a, Mat4* b, Mat4* c);
+    void hkpConstraintDrawer_drawPivots(int a, int b);
+    void hkpConstraintDrawer_drawBodyFrames(int a, int b);
+    void ProcessEntries_00de6d80(Src* a1, Visitor* a2, int a3, int a4);
 };
 
 int __cdecl PackColorBigEndian(float a, float b, float c, float d);
@@ -90,7 +90,8 @@ int __cdecl PackColorBigEndian(float a, float b, float c, float d);
 typedef void(__thiscall* DrawFn)(Visitor*, void*, void*, int, int, int);
 
 // @fnv 0x00de6d80
-void T::FUN_00de6d80(Src* a1, Visitor* a2, int a3, int a4)
+// src: GUESS 0x00de6d80 (confidence: low)
+void T::ProcessEntries_00de6d80(Src* a1, Visitor* a2, int a3, int a4)
 {
     struct Work
     {
@@ -101,16 +102,16 @@ void T::FUN_00de6d80(Src* a1, Visitor* a2, int a3, int a4)
         LocalM128 buf[12];
     } w;
     unsigned char* e = a1->m0c;
-    mc.FUN_00e10a10(a2);
-    FUN_00de47e0(a1, &w.matA, &w.matB);
+    mc.hkpPrimitiveDrawer_setDisplayHandler(a2);
+    hkpConstraintDrawer_updateCommonParameters(a1, &w.matA, &w.matB);
     // Mat4 has the hkTransform layout, HingeDrawRotation the hkRotation one; 0x00c7f640 = hkVector4::_setTransformedPos,
     // 0x00c7f700 = hkVector4::_setRotatedDir.
-    m50.FUN_00c7f640(reinterpret_cast<const hkTransform&>(w.matA), *reinterpret_cast<const hkVector4*>(e + 0x90));
-    m40.FUN_00c7f640(reinterpret_cast<const hkTransform&>(w.matB), *reinterpret_cast<const hkVector4*>(e + 0x50));
-    FUN_00de44c0(a3, a4);
-    FUN_00de4530(a3, a4);
-    w.vb.FUN_00c7f700(reinterpret_cast<const hkRotation*>(&m90), reinterpret_cast<const hkVector4*>(e + ((((int)e[0xa2] + 1) % 3) + 6) * 16));
-    w.va.FUN_00c7f700(reinterpret_cast<const hkRotation*>(&m90), reinterpret_cast<const hkVector4*>(e + ((((int)e[0xa2] + 2) % 3) + 6) * 16));
+    m50.setTransformedPos_00c7f640(reinterpret_cast<const hkTransform&>(w.matA), *reinterpret_cast<const hkVector4*>(e + 0x90));
+    m40.setTransformedPos_00c7f640(reinterpret_cast<const hkTransform&>(w.matB), *reinterpret_cast<const hkVector4*>(e + 0x50));
+    hkpConstraintDrawer_drawPivots(a3, a4);
+    hkpConstraintDrawer_drawBodyFrames(a3, a4);
+    w.vb.hkVector4_setRotatedDir(reinterpret_cast<const hkRotation*>(&m90), reinterpret_cast<const hkVector4*>(e + ((((int)e[0xa2] + 1) % 3) + 6) * 16));
+    w.va.hkVector4_setRotatedDir(reinterpret_cast<const hkRotation*>(&m90), reinterpret_cast<const hkVector4*>(e + ((((int)e[0xa2] + 2) % 3) + 6) * 16));
     float s = f1c * f00;
     float t = s;
     float sd = s + t;

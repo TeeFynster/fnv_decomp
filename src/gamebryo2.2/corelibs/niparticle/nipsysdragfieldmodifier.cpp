@@ -19,7 +19,8 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_01202770;
 
 // @fnv 0x00c2c800
-GlobalObjectO2_00a7b610* __cdecl FUN_00c2c800()
+// src: COMMUNITY 0x00c2c800
+GlobalObjectO2_00a7b610* __cdecl NiPSysDragFieldModifier_GetRTTI()
 {
     return &g_01202770;
 }
@@ -51,7 +52,7 @@ struct CloningProcess
 };
 struct NiPSysDragFieldModifier : NiPSysFieldModifier
 {
-    NiPSysFieldModifier* __thiscall FUN_00c2c8d0(CloningProcess&);
+    NiPSysFieldModifier* __thiscall CreateClone_00c2c8d0(CloningProcess&);
 };
 inline void* operator new(unsigned int, void* p)
 {
@@ -60,7 +61,8 @@ inline void* operator new(unsigned int, void* p)
 
 // Allocates and initialises a NiPSysDragFieldModifier clone, copies the byte at offset 0x30 and the NiPoint3 at offset 0x34 from this, and returns it.
 // @fnv 0x00c2c8d0
-NiPSysFieldModifier* __thiscall NiPSysDragFieldModifier::FUN_00c2c8d0(CloningProcess& process)
+// src: XBOX_PDB 0x00c2c8d0
+NiPSysFieldModifier* __thiscall NiPSysDragFieldModifier::CreateClone_00c2c8d0(CloningProcess& process)
 {
     NiPSysFieldModifier* clone = static_cast<NiPSysFieldModifier*>(BSFadeNode::operator new(0x40));
     if (clone)
@@ -183,11 +185,12 @@ struct FUN_00c2cae0_cls
     unsigned char m_30;
     DragFieldData m_34;
     bool FUN_00c32060(FUN_00c2cae0_cls* other);
-    bool FUN_00c2cae0(FUN_00c2cae0_cls* other);
+    bool NiPSysDragFieldModifier_IsEqual(FUN_00c2cae0_cls* other);
 };
 
 // @fnv 0x00c2cae0
-bool FUN_00c2cae0_cls::FUN_00c2cae0(FUN_00c2cae0_cls* other)
+// src: XBOX_PDB 0x00c2cae0
+bool FUN_00c2cae0_cls::NiPSysDragFieldModifier_IsEqual(FUN_00c2cae0_cls* other)
 {
     if (FUN_00c32060(other))
     {
@@ -263,11 +266,12 @@ struct FNVMain
     unsigned char state31, state32, state33;
     FNVChild child34;
     void __thiscall FUN_00c321f0(FNVParameter*);
-    void __thiscall FUN_00c2ce70(FNVParameter*);
+    void __thiscall NiPSysDragFieldModifier_SaveBinary(FNVParameter*);
 };
 // Calls FUN_00c321f0, invokes the owner's callback0c with the enabled byte and adds its result to total04, then calls child34.FUN_00a69780.
 // @fnv 0x00c2ce70
-void __thiscall FNVMain::FUN_00c2ce70(FNVParameter* pParameter)
+// src: XBOX_PDB 0x00c2ce70
+void __thiscall FNVMain::NiPSysDragFieldModifier_SaveBinary(FNVParameter* pParameter)
 {
     FUN_00c321f0(pParameter);
     unsigned char enabled = enabled30;
@@ -292,7 +296,7 @@ struct FNVArray195
 struct FNVSubObject195
 {
     int unk00;
-    void* __thiscall FUN_00a59af0(const void* key);
+    void* __thiscall GetViewerString_00a59af0(const void* key);
 };
 struct GlobalObjectO2_00a7b610
 {
@@ -301,8 +305,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_01202770;
 extern char UNK_010bffd0;
 extern char UNK_01044b44;
-void* __cdecl FUN_00a7d330(void* object);
-void* __cdecl FUN_00a7d370(const void* key, unsigned int attribute);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* object);
+void* __cdecl NiGetViewerString(const void* key, unsigned int attribute);
 struct FNVObject195
 {
     int unk00, unk04, unk08, unk0c;
@@ -311,28 +315,29 @@ struct FNVObject195
     unsigned char attribute30;
     FNVSubObject195 subobject34;
     void __thiscall FUN_00c322b0(FNVArray195* storage);
-    void __thiscall FUN_00c2cec0(FNVArray195* storage);
+    void __thiscall NiPSysDragFieldModifier_GetViewerStrings(FNVArray195* storage);
 };
 // @fnv 0x00c2cec0
-void __thiscall FNVObject195::FUN_00c2cec0(FNVArray195* pArray)
+// src: XBOX_PDB 0x00c2cec0
+void __thiscall FNVObject195::NiPSysDragFieldModifier_GetViewerStrings(FNVArray195* pArray)
 {
     FNVArray195* const array = pArray;
     FUN_00c322b0(array);
-    void* value = FUN_00a7d330(g_01202770.object);
+    void* value = NiViewerStrings_NiGetViewerString_Title(g_01202770.object);
     unsigned int uiIndex = array->count;
     if (uiIndex >= array->capacity)
     {
         array->FUN_0096ad30(uiIndex + array->growBy);
     }
     array->FUN_0096ae90(uiIndex, &value);
-    value = FUN_00a7d370(&UNK_010bffd0, attribute30);
+    value = NiGetViewerString(&UNK_010bffd0, attribute30);
     uiIndex = array->count;
     if (uiIndex >= array->capacity)
     {
         array->FUN_0096ad30(uiIndex + array->growBy);
     }
     array->FUN_0096ae90(uiIndex, &value);
-    value = subobject34.FUN_00a59af0(&UNK_01044b44);
+    value = subobject34.GetViewerString_00a59af0(&UNK_01044b44);
     uiIndex = array->count;
     if (uiIndex >= array->capacity)
     {
@@ -480,7 +485,7 @@ extern "C" double __cdecl sqrt(double);
 struct NiPoint3Helper : NiPoint3
 {
     bool __thiscall FUN_00439090(const NiPoint3& kPt) const;
-    void __thiscall FUN_004a0c10();
+    void __thiscall Unitize_004a0c10();
 };
 
 
@@ -524,12 +529,13 @@ struct DragModifier
 
     void __thiscall ApplyDragDamping(float fTime, BoundDataBlock* pkData);
     void __thiscall ApplyFieldModToParticles(float fTime, BoundDataBlock* pkData);
-    void __thiscall FUN_00c2cb20(float fTime, BoundDataBlock* pkData);
+    void __thiscall NiPSysDragFieldModifier_Update(float fTime, BoundDataBlock* pkData);
 };
 
 // Applies a drag field modifier to active particles, scaling or zeroing their velocity based on influence, distance, and motion direction.
 // @fnv 0x00c2cb20
-void __thiscall DragModifier::FUN_00c2cb20(float fTime, BoundDataBlock* pkData)
+// src: XBOX_PDB 0x00c2cb20
+void __thiscall DragModifier::NiPSysDragFieldModifier_Update(float fTime, BoundDataBlock* pkData)
 {
     if (m_fInfluence == 0.0f)
         return;
@@ -564,7 +570,7 @@ void __thiscall DragModifier::FUN_00c2cb20(float fTime, BoundDataBlock* pkData)
         {
             kSub = kFieldWorld.FUN_004b4500(&m_kLightVector);
             CopyPoint(b, kSub);
-            ((NiPoint3Helper*)&b)->FUN_004a0c10();
+            ((NiPoint3Helper*)&b)->Unitize_004a0c10();
         }
     }
 
@@ -599,7 +605,7 @@ void __thiscall DragModifier::FUN_00c2cb20(float fTime, BoundDataBlock* pkData)
             const PointWords& srcV = (const PointWords&)y->velocity;
             PointWords words = {srcV.x, srcV.y, srcV.z};
             (PointWords&)kMotionVelocity = words;
-            ((NiPoint3Helper*)&kMotionVelocity)->FUN_004a0c10();
+            ((NiPoint3Helper*)&kMotionVelocity)->Unitize_004a0c10();
             fDot = (kMotionVelocity.x * b.x) + (b.y * kMotionVelocity.y) + (b.z * kMotionVelocity.z);
         }
 

@@ -6,7 +6,7 @@
 // @fnv 0x004f0380
 void AnimationInterpolatorNode::UpdateInterpolatorsAtTime(float time, bool selective)
 {
-    if (!FUN_004f05a0() || !m_usNumInterps)
+    if (!NiTimeController_GetActive() || !m_usNumInterps)
         return;
 
     int iIndex;
@@ -20,60 +20,62 @@ void AnimationInterpolatorNode::UpdateInterpolatorsAtTime(float time, bool selec
             target = m_ppTargetObjects[iIndex];
             if (!target)
                 continue;
-            if (!selective && !target->FUN_004f0140())
+            if (!selective && !target->GetSelectiveUpdate())
                 continue;
-            else if (selective && target->FUN_004f0140())
+            else if (selective && target->GetSelectiveUpdate())
                 continue;
 
             if (m_pkBlendInterpolators[iIndex].UpdateTransform(time, target, transform))
             {
                 if (transform.IsTranslateXNotNegatedConstant())
-                    target->FUN_00440460(transform.GetTranslate());
+                    target->NiAVObject_SetTranslate(transform.GetTranslate());
                 if (transform.IsRotateValid())
-                    target->FUN_004f0160(transform.GetOffsetC());
+                    target->NiNode_SetRotate(transform.GetOffsetC());
                 if (transform.IsScaleValid())
-                    target->FUN_00440490(transform.GetFloatAtOffset1C());
+                    target->NiAVObject_SetScale(transform.GetFloatAtOffset1C());
             }
         }
 
         target = m_ppTargetObjects[iIndex];
-        if (!target || (!selective && !target->FUN_004f0140()))
+        if (!target || (!selective && !target->GetSelectiveUpdate()))
             return;
         if (m_pkBlendInterpolators[iIndex].UpdateTransform(time, target, transform))
         {
             if (transform.IsTranslateXNotNegatedConstant())
-                target->FUN_00440460(transform.GetTranslate());
+                target->NiAVObject_SetTranslate(transform.GetTranslate());
             if (transform.IsRotateValid())
-                target->FUN_004f0160(transform.GetOffsetC());
+                target->NiNode_SetRotate(transform.GetOffsetC());
             if (transform.IsScaleValid())
-                target->FUN_00440490(transform.GetFloatAtOffset1C());
+                target->NiAVObject_SetScale(transform.GetFloatAtOffset1C());
         }
     }
 }
 
 struct FUN_004f0000_shell : public NiAVObject
 {
-    bool FUN_004f0000();
+    bool NiAVObject_GetHasPropertyController();
 };
 
 struct FUN_00456630_helper
 {
-    bool FUN_00456630(unsigned int);
+    bool NiAVObject_GetBit(unsigned int);
 };
 
 // @fnv 0x004f0000
-bool FUN_004f0000_shell::FUN_004f0000()
+// src: COMMUNITY 0x004f0000
+bool FUN_004f0000_shell::NiAVObject_GetHasPropertyController()
 {
-    return ((FUN_00456630_helper*)this)->FUN_00456630(0x40000);
+    return ((FUN_00456630_helper*)this)->NiAVObject_GetBit(0x40000);
 }
 
 struct FUN_004f00e0_shell : public NiAVObject
 {
-    void FUN_004f00e0(void*);
+    void NiAVObject_SetWorldTranslate(void*);
 };
 
 // @fnv 0x004f00e0
-void FUN_004f00e0_shell::FUN_004f00e0(void* kTrn)
+// src: XBOX_PDB 0x004f00e0
+void FUN_004f00e0_shell::NiAVObject_SetWorldTranslate(void* kTrn)
 {
     *reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x8C) = *reinterpret_cast<const NiPoint3*>(kTrn);
 }
@@ -106,7 +108,8 @@ void FUN_004f0040_shell::UpdateControls(float afTime)
 __declspec(thread) int DAT_tls_0x2c0;
 
 // @fnv 0x004f0020
-void FUN_004f0020(int value)
+// src: XBOX_PDB 0x004f0020
+void bhkNiCollisionObject_SetSyncMode(int value)
 {
     DAT_tls_0x2c0 = value;
 }

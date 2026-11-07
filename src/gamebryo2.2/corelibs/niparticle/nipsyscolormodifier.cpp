@@ -44,7 +44,8 @@ void NiPSysColorModifier::LoadBinary(NiStream& kStream)
 extern "C" void* g_01202778;
 
 // @fnv 0x00c2d170
-void* __cdecl FUN_00c2d170()
+// src: COMMUNITY 0x00c2d170
+void* __cdecl NiPSysColorModifier_GetRTTI()
 {
     return &g_01202778;
 }

@@ -8,10 +8,11 @@ struct CallTarget_00d5ed80
 };
 struct SearchObject
 {
-    int FUN_00d5eda0(unsigned int arg0, unsigned int arg1, unsigned int arg2);
+    int ProcessAndReturnValue_00d5eda0(unsigned int arg0, unsigned int arg1, unsigned int arg2);
 };
 // @fnv 0x00d5eda0
-int SearchObject::FUN_00d5eda0(unsigned int arg0, unsigned int arg1, unsigned int arg2)
+// src: GUESS 0x00d5eda0 (confidence: low)
+int SearchObject::ProcessAndReturnValue_00d5eda0(unsigned int arg0, unsigned int arg1, unsigned int arg2)
 {
     unsigned int callResult0 =
         (unsigned int)((CallTarget_00d5ed80*)this)->Search((int)arg0, (int)arg1, (int)arg2, (int)1u);

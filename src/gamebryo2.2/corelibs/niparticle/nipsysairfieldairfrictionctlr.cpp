@@ -12,24 +12,27 @@
 extern int g_012027b8;
 
 // @fnv 0x00c307c0
-int* __cdecl FUN_00c307c0()
+// src: COMMUNITY 0x00c307c0
+int* __cdecl NiPSysAirFieldAirFrictionCtlr_GetRTTI()
 {
     return &g_012027b8;
 }
 
 // @fnv 0x00c307d0
-void NiPSysAirFieldAirFrictionCtlr::FUN_00c307d0(float& rfValue)
+// src: XBOX_PDB 0x00c307d0
+void NiPSysAirFieldAirFrictionCtlr::GetTargetFloatValue_00c307d0(float& rfValue)
 {
     NiPSysModifier* pTarget = m_pkTargetModifier;
     rfValue = *(float*)((char*)pTarget + 0x58);
 }
 
-void __stdcall FUN_00c32f60(StrArr*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 char* __cdecl _FUN_00a7d330(int);
 // @fnv 0x00c30880
-void __stdcall FUN_00c30880(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c30880
+void __stdcall NiPSysAirFieldAirFrictionCtlr_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00c32f60(pkStrings);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pkStrings);
     char* pcStr = _FUN_00a7d330(g_012027b8);
     unsigned int uiSize = pkStrings->m_usSize;
     unsigned int uiAlloc = pkStrings->m_usMaxSize;
@@ -81,7 +84,7 @@ void __fastcall SetAirFriction(NiPSysAirFieldAirFrictionCtlr* controller, void*,
 
 extern "C" char g_010c06e4;
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 void __cdecl FUN_00c32d80();
 void __cdecl FUN_00c32de0();
@@ -92,7 +95,7 @@ NiPSysAirFieldAirFrictionCtlr* __fastcall CreateSpawnedObject(NiPSysAirFieldAirF
 {
     typedef void (__thiscall* Initialize)(NiPSysAirFieldAirFrictionCtlr*);
     typedef void (__thiscall* CopyMembers)(NiPSysAirFieldAirFrictionCtlr*, NiPSysAirFieldAirFrictionCtlr*, unsigned int);
-    NiPSysAirFieldAirFrictionCtlr* obj = (NiPSysAirFieldAirFrictionCtlr*)FUN_00aa13e0(0x40);
+    NiPSysAirFieldAirFrictionCtlr* obj = (NiPSysAirFieldAirFrictionCtlr*)Object_DispatchCommandFour(0x40);
     if (obj != 0)
     {
         ((Initialize)&FUN_00c32d80)(obj);
@@ -109,38 +112,43 @@ NiPSysAirFieldAirFrictionCtlr* __fastcall CreateSpawnedObject(NiPSysAirFieldAirF
 void __cdecl LoadBinaryWithVersionCheck(NiPSysModifierCtlr*, int, NiStream&);
 
 // @fnv 0x00c29e80
-void __cdecl FUN_00c29e80(NiPSysModifierCtlr* a1, int a2, NiStream& a3)
+// src: XBOX_PDB 0x00c29e80
+void __cdecl NiPSysAirFieldAirFrictionCtlr_LoadBinary(NiPSysModifierCtlr* a1, int a2, NiStream& a3)
 {
     LoadBinaryWithVersionCheck(a1, a2, a3);
 }
 
-extern "C" void __cdecl FUN_00a44cd0();
+extern "C" void __cdecl BSFrustumFOVController_RegisterStreamables();
 
 // @fnv 0x00c29f80
-void __cdecl FUN_00c29f80()
+// src: XBOX_PDB 0x00c29f80
+void __cdecl NiPSysAirFieldAirFrictionCtlr_RegisterStreamables()
 {
-    FUN_00a44cd0();
+    BSFrustumFOVController_RegisterStreamables();
 }
 
 void __cdecl FUN_00c32e10();
 
 // @fnv 0x00c2b450
-void __cdecl FUN_00c2b450()
+// src: XBOX_PDB 0x00c2b450
+void __cdecl NiPSysAirFieldAirFrictionCtlr_LinkObject()
 {
     FUN_00c32e10();
 }
 
-void __cdecl FUN_00a41220();
+void __cdecl NiColorExtraDataController_SaveBinary();
 // @fnv 0x00c2b8a0
-void __cdecl FUN_00c2b8a0()
+// src: XBOX_PDB 0x00c2b8a0
+void __cdecl NiPSysAirFieldAirFrictionCtlr_SaveBinary()
 {
-    FUN_00a41220();
+    NiColorExtraDataController_SaveBinary();
 }
 
-bool __cdecl FUN_00c32df0(int, int);
+bool __cdecl NiPSysModifierBoolCtlr_IsEqual(int, int);
 
 // @fnv 0x00c2a190
-bool __cdecl FUN_00c2a190(int param_1, int param_2)
+// src: XBOX_PDB 0x00c2a190
+bool __cdecl NiPSysAirFieldAirFrictionCtlr_IsEqual(int param_1, int param_2)
 {
-    return FUN_00c32df0(param_1, param_2);
+    return NiPSysModifierBoolCtlr_IsEqual(param_1, param_2);
 }

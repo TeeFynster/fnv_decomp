@@ -46,7 +46,8 @@ void ActorValueStore::ResetCacheValues()
 
 // Stores value into the cached actor-value info for avIndex and clears its flag when avIndex is within the actor-value range.
 // @fnv 0x008c6f00
-void ActorValueStore::FUN_008c6f00(ActorValue::Index avIndex, float value)
+// src: COMMUNITY 0x008c6f00
+void ActorValueStore::CachedActorValues_SetActorValue(ActorValue::Index avIndex, float value)
 {
     if (avIndex >= 0 && avIndex < ActorValue::ActorValue__Index_ACTOR_VALUE_COUNT)
     {

@@ -118,7 +118,7 @@ bool PerkEntryConditionSet::ContainsTrait(TESObjectREFR* subject, TESObjectREFR*
     state.definiteFalse = false;
     if (target)
     {
-        state.replacement = target->FUN_005693d0();
+        state.replacement = target->TESObjectREFR_GetXTarget();
         if (state.replacement)
             target = state.replacement;
     }
@@ -217,7 +217,8 @@ struct FUN_005e9530_Obj
 
 // Sets the object's vftable to DAT_01046b48 and clears bytes b4 and b5, then returns the object.
 // @fnv 0x005e9530
-void* __fastcall FUN_005e9530(FUN_005e9530_Obj* pThis)
+// src: EXE 0x005e9530
+void* __fastcall BGSPerkEntry_BGSPerkEntry(FUN_005e9530_Obj* pThis)
 {
     pThis->vftable = &DAT_01046b48;
     pThis->b4 = 0;
@@ -289,11 +290,12 @@ void PerkEntryConditionSet::ProcessItems()
 
 struct FUN_00404760_shell
 {
-    void FUN_00404760(PerkEntryConditionSet*);
+    void EffectItem_SetConditions(PerkEntryConditionSet*);
 };
 // Passes source to the object at this+0x1c, or an empty value when source is null.
 // @fnv 0x00404760
-void FUN_00404760_shell::FUN_00404760(PerkEntryConditionSet* source)
+// src: COMMUNITY 0x00404760
+void FUN_00404760_shell::EffectItem_SetConditions(PerkEntryConditionSet* source)
 {
     if (source)
         ((PerkEntryConditionSet*)((char*)this + 0x1c))->CopyConditions(source, 0);
@@ -306,7 +308,7 @@ void FUN_00404760_shell::FUN_00404760(PerkEntryConditionSet* source)
 
 extern "C" void __stdcall FUN_00ec5fce(void* object, int elementSize, int count, void (PerkEntryConditionSet::*callback)());
 
-extern "C" void __cdecl FormHeap_Free(void* apMemory);
+extern "C" void __cdecl FormHeapFreeAndLog_00401030(void* apMemory);
 
 // @fnv 0x005ea2c0
 void* PerkEntryConditionSet::DeleteConditions(unsigned int flags)
@@ -317,7 +319,7 @@ void* PerkEntryConditionSet::DeleteConditions(unsigned int flags)
 
         if (flags & 1)
         {
-            FormHeap_Free(reinterpret_cast<char*>(this) - 4);
+            FormHeapFreeAndLog_00401030(reinterpret_cast<char*>(this) - 4);
         }
 
         return reinterpret_cast<char*>(this) - 4;
@@ -327,7 +329,7 @@ void* PerkEntryConditionSet::DeleteConditions(unsigned int flags)
 
     if (flags & 1)
     {
-        FormHeap_Free(this);
+        FormHeapFreeAndLog_00401030(this);
     }
 
     return this;

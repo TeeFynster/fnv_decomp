@@ -21,6 +21,6 @@ public:
 
     void* DestroyIfFlagged(unsigned int);
     void UpdateItemModTile(int, Tile*);
-    bool FUN_00783af0(EqEntry*);
-    void FUN_00783ed0(int, int);
+    bool ItemModItem(EqEntry*);
+    void DoEnter(int, int);
 };

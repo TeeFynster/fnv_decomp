@@ -26,7 +26,7 @@ struct BIPED_MODEL_OLD
 {
     unsigned short m_uiBipedModelFlags;
     unsigned char m_ucBipedModelData;
-    void FUN_00512810();
+    void BSEndian_Thunk();
 };
 class RegionDataEntry
 {
@@ -92,7 +92,7 @@ bool TESObjectARMA::Load(TESFile* file)
                 BIPED_MODEL_OLD oldData;
                 file->GetChunkData(&oldData, 4);
                 if (file->IsEndianConversionRequired())
-                    oldData.FUN_00512810();
+                    oldData.BSEndian_Thunk();
                 bipedFlags = oldData.m_ucBipedModelData;
                 partMask = oldData.m_uiBipedModelFlags;
             }
@@ -228,14 +228,14 @@ struct FUN_00484d60_holder
 };
 struct FUN_0048ea40_holder
 {
-    void FUN_0048ea40(unsigned int);
+    void SaveGameBGS_0048ea40(unsigned int);
 };
 
 // @fnv 0x005144c0
 void ArmorAddonOperations::SaveArmorGame(unsigned int flags)
 {
     reinterpret_cast<FUN_00484d60_holder*>(this)->SaveIfChanged(flags);
-    reinterpret_cast<FUN_0048ea40_holder*>(reinterpret_cast<char*>(this) + 0x58)->FUN_0048ea40(flags);
+    reinterpret_cast<FUN_0048ea40_holder*>(reinterpret_cast<char*>(this) + 0x58)->SaveGameBGS_0048ea40(flags);
 }
 
 struct TESFormBufferAccess
@@ -274,7 +274,8 @@ template <int N> struct EndianSizeTag
 void __cdecl BSEndian(unsigned short*, EndianSizeTag<2>);
 // Byte-swaps the 16-bit value at the start of this object by calling BSEndian.
 // @fnv 0x00512810
-void BIPED_MODEL_OLD::FUN_00512810()
+// src: GUESS 0x00512810 (confidence: medium)
+void BIPED_MODEL_OLD::BSEndian_Thunk()
 {
     BSEndian((unsigned short*)this, EndianSizeTag<2>());
 }
@@ -282,7 +283,7 @@ void BIPED_MODEL_OLD::FUN_00512810()
 void* __memcpy(void*, const void*, unsigned int);
 struct FUN_005e78f0_t
 {
-    void FUN_004851b0(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
 };
 // If apCopy is a TESObjectARMO, copies 0xc bytes at offset 0x178 from apCopy into this and calls FUN_004851b0(apCopy).
 // @fnv 0x005128e0
@@ -292,7 +293,7 @@ void ArmorAddonOperations::CopyArmor(TESForm* apCopy)
     if (parmo == 0)
         return;
     __memcpy((char*)this + 0x178, (char*)apCopy + 0x178, 0xc);
-    ((FUN_005e78f0_t*)this)->FUN_004851b0(apCopy);
+    ((FUN_005e78f0_t*)this)->TESForm_CopyAllComponents(apCopy);
 }
 
 struct FUN_004855a0_shell
@@ -301,21 +302,21 @@ struct FUN_004855a0_shell
 };
 struct S_00487010
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 struct FUN_00479350_shell
 {
-    void FUN_00479350();
+    void BGSEquipType_Save();
 };
 struct FUN_00485e00_shell
 {
-    void FUN_00485e00();
+    void TESForm_SaveData();
 };
 struct FUN_00485680_shell
 {
     void M();
 };
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int size, void* apDest, unsigned int flags);
 // The shared biped header has no declaration for its save routine.
 struct BipedModelSaveAccess
@@ -327,14 +328,14 @@ struct BipedModelSaveAccess
 void ArmorAddonOperations::SaveArmor()
 {
     ((FUN_004855a0_shell*)this)->M();
-    ((S_00487010*)((char*)this + 0x30))->FUN_00487010();
+    ((S_00487010*)((char*)this + 0x30))->Save_00487010();
     ((BipedModelSaveAccess*)((char*)this + 0x70))->Save();
-    ((FUN_00479350_shell*)((char*)this + 0x154))->FUN_00479350();
-    ((FUN_00485e00_shell*)this)->FUN_00485e00();
-    if (FUN_00401500())
+    ((FUN_00479350_shell*)((char*)this + 0x154))->BGSEquipType_Save();
+    ((FUN_00485e00_shell*)this)->TESForm_SaveData();
+    if (TESForm_QEndianSwapOnSave())
         ((ArmorDataEndianAccess*)((char*)this + 0x178))->Endian();
     AppendChunk(0x4d414e44, (char*)this + 0x178, 0xc);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((ArmorDataEndianAccess*)((char*)this + 0x178))->Endian();
     ((FUN_00485680_shell*)this)->M();
 }
@@ -342,7 +343,7 @@ void ArmorAddonOperations::SaveArmor()
 extern int __cdecl _memcmp(const void* a, const void* b, unsigned int n);
 struct FUN_005e79a0_t
 {
-    bool FUN_00485270(TESForm*);
+    bool TESForm_CompareAllComponents(TESForm*);
 };
 // @fnv 0x00512940
 bool ArmorAddonOperations::CompareArmor(TESForm* apCompare)
@@ -350,7 +351,7 @@ bool ArmorAddonOperations::CompareArmor(TESForm* apCompare)
     TESObjectARMA* pcomp = dynamic_cast<TESObjectARMA*>(apCompare);
     if (!pcomp)
         return true;
-    if (((FUN_005e79a0_t*)this)->FUN_00485270(pcomp))
+    if (((FUN_005e79a0_t*)this)->TESForm_CompareAllComponents(pcomp))
         return true;
     if (_memcmp(&data, &pcomp->data, sizeof(data)))
         return true;

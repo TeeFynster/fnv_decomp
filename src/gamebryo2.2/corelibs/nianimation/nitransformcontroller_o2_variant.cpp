@@ -49,10 +49,11 @@ struct RefObj
 void __fastcall FUN_00a6d290(void*);
 struct Unknown
 {
-    void FUN_00a360d0();
+    void ReleaseReference_00a360d0();
 };
 // @fnv 0x00a360d0
-void Unknown::FUN_00a360d0()
+// src: GUESS 0x00a360d0 (confidence: medium)
+void Unknown::ReleaseReference_00a360d0()
 {
     RefObj* p = *(RefObj**)((char*)this + 0x34);
     if (p)
@@ -65,10 +66,11 @@ void Unknown::FUN_00a360d0()
 
 struct FakeTransformController : NiSingleInterpController
 {
-    void FUN_00a36190(NiStream&);
+    void NiTransformController_LoadBinary(NiStream&);
 };
 // @fnv 0x00a36190
-void FakeTransformController::FUN_00a36190(NiStream& kStream)
+// src: XBOX_PDB 0x00a36190
+void FakeTransformController::NiTransformController_LoadBinary(NiStream& kStream)
 {
     NiSingleInterpController::LoadBinary(kStream);
     if (*(unsigned int*)((char*)&kStream + 0xD8) < 0x0A010068)
@@ -78,12 +80,13 @@ void FakeTransformController::FUN_00a36190(NiStream& kStream)
 extern int g_011f371c;
 
 // @fnv 0x00a36480
-int* __cdecl FUN_00a36480()
+// src: COMMUNITY 0x00a36480
+int* __cdecl NiBlendAccumTransformInterpolator_GetRTTI()
 {
     return &g_011f371c;
 }
 
-void __fastcall FUN_00a39290(void*);
+void __fastcall NiBlendAccumTransformInterpolator_ReleaseStorage_00a39290(void*);
 void __cdecl _delete(void*, unsigned int);
 struct S_00a36490
 {
@@ -92,7 +95,7 @@ struct S_00a36490
 // @fnv 0x00a36490
 void* __thiscall S_00a36490::FUN_00a36490(unsigned int flag)
 {
-    FUN_00a39290(this);
+    NiBlendAccumTransformInterpolator_ReleaseStorage_00a39290(this);
     if (flag & 1)
         _delete(this, 0x58);
     return this;
@@ -101,20 +104,22 @@ void* __thiscall S_00a36490::FUN_00a36490(unsigned int flag)
 extern "C" void* g_011f36ec;
 
 // @fnv 0x00a36580
-void* __cdecl FUN_00a36580()
+// src: COMMUNITY 0x00a36580
+void* __cdecl NiTransformController_GetRTTI()
 {
     return &g_011f36ec;
 }
 
 namespace fnv_00a36840 {
 void __stdcall FUN_00a390a0(StrArr*);
-char* __cdecl FUN_00a7d330(const char*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
 extern const char* g_011f36ec;
 // @fnv 0x00a36840
-void __stdcall FUN_00a36840(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a36840
+void __stdcall NiTransformController_GetViewerStrings(StrArr* pkStrings)
 {
     FUN_00a390a0(pkStrings);
-    char* pszString = FUN_00a7d330(g_011f36ec);
+    char* pszString = NiViewerStrings_NiGetViewerString_Title(g_011f36ec);
     unsigned int uiSize = pkStrings->m_usSize;
     if (uiSize >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(uiSize + pkStrings->m_usGrowBy);
@@ -140,11 +145,12 @@ struct S00a36100
     char _pad[0x2c];
     NiAVObject* m_spReferencedObject;
 
-    NiTransformInterpolator* FUN_00a36100(unsigned short usIndex);
+    NiTransformInterpolator* NiTransformController_CreatePoseInterpolator(unsigned short usIndex);
 };
 
 // @fnv 0x00a36100
-NiTransformInterpolator* S00a36100::FUN_00a36100(unsigned short usIndex)
+// src: XBOX_PDB 0x00a36100
+NiTransformInterpolator* S00a36100::NiTransformController_CreatePoseInterpolator(unsigned short usIndex)
 {
     NiAVObject* pkTarget = m_spReferencedObject;
     NiQuaternion kRotate;
@@ -159,19 +165,20 @@ NiTransformInterpolator* S00a36100::FUN_00a36100(unsigned short usIndex)
 
 struct FUN_00a2f8a0_Holder
 {
-    void FUN_00a2f8a0(NiInterpController* pkDest, CloningProcess& kCloning);
+    void BSMultiTargetTreadTransfController_CopyMembers(NiInterpController* pkDest, CloningProcess& kCloning);
 };
 
 struct FUN_00a38ef0_Class : NiInterpController
 {
     NiInterpolator* m_spControllerInterpolator;
-    void FUN_00a38ef0(FUN_00a38ef0_Class* pkDest, CloningProcess& kCloning);
+    void NiSingleInterpController_CopyMembers(FUN_00a38ef0_Class* pkDest, CloningProcess& kCloning);
 };
 
 // @fnv 0x00a38ef0
-void FUN_00a38ef0_Class::FUN_00a38ef0(FUN_00a38ef0_Class* pkDest, CloningProcess& kCloning)
+// src: GAMEBRYO_LIB 0x00a38ef0
+void FUN_00a38ef0_Class::NiSingleInterpController_CopyMembers(FUN_00a38ef0_Class* pkDest, CloningProcess& kCloning)
 {
-    ((FUN_00a2f8a0_Holder*)this)->FUN_00a2f8a0(pkDest, kCloning);
+    ((FUN_00a2f8a0_Holder*)this)->BSMultiTargetTreadTransfController_CopyMembers(pkDest, kCloning);
 
     if (m_spControllerInterpolator != 0)
     {
@@ -197,10 +204,11 @@ struct NiTimeController_Call
 };
 struct S_00a36560
 {
-    void* FUN_00a36560();
+    void* NiTransformController_NiTransformController();
 };
 // @fnv 0x00a36560
-void* S_00a36560::FUN_00a36560()
+// src: EXE 0x00a36560
+void* S_00a36560::NiTransformController_NiTransformController()
 {
     ((NiTimeController_Call*)this)->SetControllerActive();
     *(void**)this = &DAT_0109687c;
@@ -227,7 +235,7 @@ struct NiSingleInterpControllerBase
 };
 struct FUN_00a35a80_Obj
 {
-    void FUN_00a35a80(int a1, int a2);
+    void BSMultiTargetTreadTransfController_AllocateStorage(int a1, int a2);
 };
 struct FUN_00a36070 : NiSingleInterpControllerBase
 {
@@ -245,7 +253,7 @@ FUN_00a36070::FUN_00a36070(int a1, int a2)
     unk3c = 0;
     *(int**)this = &DAT_01096694;
     unk40 = 0;
-    ((FUN_00a35a80_Obj*)this)->FUN_00a35a80(a1, a2);
+    ((FUN_00a35a80_Obj*)this)->BSMultiTargetTreadTransfController_AllocateStorage(a1, a2);
 }
 
 extern double DAT_010241b0;
@@ -275,11 +283,12 @@ struct FUN_00a364b0_cls
     float unk28;
     Tgt* unk2c;
 
-    void FUN_00a364b0(V3 aT0, V4 aR0, float fScale);
+    void NiTransformInterpolator_SetPoseValue(V3 aT0, V4 aR0, float fScale);
 };
 
 // @fnv 0x00a364b0
-void FUN_00a364b0_cls::FUN_00a364b0(V3 aT0, V4 aR0, float fScale)
+// src: XBOX_PDB 0x00a364b0
+void FUN_00a364b0_cls::NiTransformInterpolator_SetPoseValue(V3 aT0, V4 aR0, float fScale)
 {
     if (aR0.f1 != DAT_010241b0)
     {
@@ -373,11 +382,12 @@ class A36590Controller
     int unk28;
     NiAVObject* m_pkSource;
 
-    void FUN_00a36590(A36590Object* pkObject, int iUnused);
+    void NiTransformController_SynchronizePoseInterpolator(A36590Object* pkObject, int iUnused);
 };
 
 // @fnv 0x00a36590
-void A36590Controller::FUN_00a36590(A36590Object* pkObject, int iUnused)
+// src: XBOX_PDB 0x00a36590
+void A36590Controller::NiTransformController_SynchronizePoseInterpolator(A36590Object* pkObject, int iUnused)
 {
     A36590Node* pkNode = !pkObject ? 0 : (A36590Node*)pkObject->DynamicCast(&g_kA36590NodeRTTI);
     NiAVObject* pkSource = m_pkSource;
@@ -392,14 +402,14 @@ void A36590Controller::FUN_00a36590(A36590Object* pkObject, int iUnused)
     pkNode->SetTargetTransform(kTransform);
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 class NiTransformInitA
 {
   public:
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     void* InitA(int a, float b, int c);
 };
@@ -409,13 +419,14 @@ class NiTransformInitB
   public:
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     void* InitB(int a, float b, int c);
 };
 
 // @fnv 0x00a36620
-void* __stdcall FUN_00a36620(int a1, int a2, unsigned char a3, float a4, int a5)
+// src: XBOX_PDB 0x00a36620
+void* __stdcall NiTransformController_CreateBlendInterpolator(int a1, int a2, unsigned char a3, float a4, int a5)
 {
     void* obj;
     if (a3 != 0)
@@ -521,7 +532,7 @@ struct Flags_00a36680
 
 struct TransformCtl_t : NiTimeController
 {
-    void FUN_00a36680(UpdData_00a36680&);
+    void NiTransformController_Update(UpdData_00a36680&);
     unsigned short GetField(unsigned short uMask, unsigned short uPos) const
     {
         return (*(const unsigned short*)((const char*)this + 8) & uMask) >> uPos;
@@ -533,7 +544,8 @@ struct TransformCtl_t : NiTimeController
 };
 
 // @fnv 0x00a36680
-void TransformCtl_t::FUN_00a36680(UpdData_00a36680& UpdateData)
+// src: XBOX_PDB 0x00a36680
+void TransformCtl_t::NiTransformController_Update(UpdData_00a36680& UpdateData)
 {
     Interp_00a36680*& spInterp = *(Interp_00a36680**)((char*)this + 0x34);
     if (GetManagerControlled())

@@ -76,7 +76,7 @@ inline unsigned short StrArr::GetGrowBy() const
 }
 struct FUN_00a62a40_this
 {
-    void FUN_00a5ca80(StrArr*);
+    void NiObjectNET_GetViewerStrings(StrArr*);
     void AppendString(StrArr*);
 };
 extern char const* const g_011f4408_arg1;
@@ -85,7 +85,7 @@ char* __cdecl _FUN_00a7d330(char const*);
 // @fnv 0x00a5d850
 void FUN_00a62a40_this::AppendString(StrArr* pkStrings)
 {
-    FUN_00a5ca80(pkStrings);
+    NiObjectNET_GetViewerStrings(pkStrings);
     char* pcStr = _FUN_00a7d330(g_011f4408_arg1);
     unsigned int uiSize = static_cast<const StrArr*>(pkStrings)->GetSize();
     if (uiSize >= pkStrings->GetMaxSize())

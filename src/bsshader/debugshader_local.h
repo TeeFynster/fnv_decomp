@@ -127,7 +127,7 @@ class BeamStage
     unsigned char layoutPaddingC[0x54];
     unsigned int m_uiRefCount;
     static void CreateNewStage(NiPointer<BeamStage>&);
-    void FUN_00e7def0(unsigned int);
+    void NiD3DTextureStage_SetFilterMode(unsigned int);
     void ReturnToPool();
     void IncRefCount()
     {

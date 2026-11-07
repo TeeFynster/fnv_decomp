@@ -5,12 +5,13 @@
 extern "C" void* g_012026d8;
 
 // @fnv 0x00c29e90
-void* __cdecl FUN_00c29e90()
+// src: COMMUNITY 0x00c29e90
+void* __cdecl NiPSysInitialRotSpeedVarCtlr_GetRTTI()
 {
     return &g_012026d8;
 }
 
-void __cdecl FUN_00c31260(void);
+void __cdecl NiPSysModifierCtlr_NiPSysModifierCtlr(void);
 extern int DAT_010c0e44;
 
 struct FUN_00c32d80
@@ -21,13 +22,13 @@ struct FUN_00c32d80
 // @fnv 0x00c32d80
 FUN_00c32d80::FUN_00c32d80()
 {
-    FUN_00c31260();
+    NiPSysModifierCtlr_NiPSysModifierCtlr();
     *(int*)this = (int)&DAT_010c0e44;
 }
 
 extern "C" void* g_012026d8;
-void __stdcall FUN_00c32f60(void* p);
-void* __cdecl FUN_00a7d330(void* p);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(void* p);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* p);
 
 struct FUN_00c29f00_Array
 {
@@ -43,10 +44,11 @@ struct FUN_00c29f00_Array
 
 // Grows the array if its count has reached capacity, then stores the item obtained from g_012026d8 at the current count.
 // @fnv 0x00c29f00
-void __stdcall FUN_00c29f00(FUN_00c29f00_Array* arr)
+// src: XBOX_PDB 0x00c29f00
+void __stdcall NiPSysInitialRotSpeedVarCtlr_GetViewerStrings(FUN_00c29f00_Array* arr)
 {
-    FUN_00c32f60(arr);
-    void* item = FUN_00a7d330(g_012026d8);
+    NiPSysModifierFloatCtlr_GetViewerStrings(arr);
+    void* item = NiViewerStrings_NiGetViewerString_Title(g_012026d8);
     unsigned int count = arr->unk0A;
     if (count >= arr->unk08)
         arr->FUN_0096ad30(count + arr->unk0E);
@@ -54,7 +56,7 @@ void __stdcall FUN_00c29f00(FUN_00c29f00_Array* arr)
 }
 
 extern "C" char DAT_010becbc;
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct SpawnedCtlr
 {
@@ -72,7 +74,7 @@ struct SpawnedHost
 // @fnv 0x00c29eb0
 SpawnedCtlr* SpawnedHost::CreateSpawnedCtlr(void* a1)
 {
-    SpawnedCtlr* obj = (SpawnedCtlr*)FUN_00aa13e0(0x40);
+    SpawnedCtlr* obj = (SpawnedCtlr*)Object_DispatchCommandFour(0x40);
     if (obj != 0)
     {
         obj->FUN_00c32d80();
@@ -86,14 +88,14 @@ SpawnedCtlr* SpawnedHost::CreateSpawnedCtlr(void* a1)
     return obj;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct SpawnedFloat
 {
     unsigned int unk00[6];
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 
     SpawnedFloat(float value) throw();

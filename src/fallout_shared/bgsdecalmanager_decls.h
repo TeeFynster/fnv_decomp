@@ -66,7 +66,7 @@ extern "C" const char DAT_0101e19c[];
 extern "C" const char DAT_0101e174[];
 
 #include "../../include/NiRenderer.h"
-NiRenderer* FUN_0043c4b0();
+NiRenderer* NiXenonRenderer_GetRenderer();
 int __cdecl Warning(const char*, ...);
 
 class DecalVtableCall

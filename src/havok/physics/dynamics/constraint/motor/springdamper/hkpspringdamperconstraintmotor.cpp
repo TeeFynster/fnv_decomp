@@ -27,7 +27,7 @@ struct S00d862a0_Router
 };
 
 namespace S00d862a0_Rt {
-extern "C" S00d862a0_Router& __cdecl FUN_00c85750() throw();
+extern "C" S00d862a0_Router& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 class S00d862a0_Base
@@ -53,7 +53,7 @@ class S00d862a0_Ref : public S00d862a0_Base
 
     static void* operator new(unsigned int nbytes)
     {
-        S00d862a0_Ref* b = static_cast<S00d862a0_Ref*>(S00d862a0_Rt::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
+        S00d862a0_Ref* b = static_cast<S00d862a0_Ref*>(S00d862a0_Rt::hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -92,12 +92,13 @@ class S00d862a0_Spring : public S00d862a0_Limited
         : S00d862a0_Limited(o), m_fSpringConstant(o.m_fSpringConstant), m_fSpringDamping(o.m_fSpringDamping)
     {}
 
-    S00d862a0_Spring* FUN_00d862a0() const;
+    S00d862a0_Spring* hkpSpringDamperConstraintMotor_clone() const;
 };
 
 // Allocates a new S00d862a0_Spring via the Havok heap and initializes it as a copy of the current object.
 // @fnv 0x00d862a0
-S00d862a0_Spring* S00d862a0_Spring::FUN_00d862a0() const
+// src: HAVOK_LIB 0x00d862a0
+S00d862a0_Spring* S00d862a0_Spring::hkpSpringDamperConstraintMotor_clone() const
 {
     return new S00d862a0_Spring(*this);
 }

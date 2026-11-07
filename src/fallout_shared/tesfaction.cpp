@@ -242,11 +242,12 @@ unsigned short FactionAccess::GetFactionSaveSize(unsigned int aiFlags)
 
 struct FUN_005ff520_shell
 {
-    unsigned int FUN_005ff520(unsigned int flags);
+    unsigned int TESIdleForm_GetIndexForChild(unsigned int flags);
 };
 
 // @fnv 0x005ff520
-unsigned int FUN_005ff520_shell::FUN_005ff520(unsigned int apForm)
+// src: COMMUNITY 0x005ff520
+unsigned int FUN_005ff520_shell::TESIdleForm_GetIndexForChild(unsigned int apForm)
 {
     unsigned int index = 0xffffffff;
     if (*reinterpret_cast<NiFormArray**>(reinterpret_cast<char*>(this) + 0x40))
@@ -266,11 +267,12 @@ struct Class005a6b10
     int m0;
     int m1;
     int m2;
-    void FUN_005a6b10();
+    void TESRegionSound_Endian();
 };
 // Byte-swaps the three int fields m0, m1 and m2 via BSEndian.
 // @fnv 0x005a6b10
-void Class005a6b10::FUN_005a6b10()
+// src: XBOX_PDB 0x005a6b10
+void Class005a6b10::TESRegionSound_Endian()
 {
     BSEndian(&m0, EndianSizeTag<2>());
     BSEndian(&m1, EndianSizeTag<2>());
@@ -344,14 +346,14 @@ void FactionAccess::ResolveReactions(unsigned int auiArg1, unsigned int auiArg2)
 
 struct Unk38
 {
-    void FUN_00616c20(int);
+    void TESReputation_CommitCrime(int);
 };
 // @fnv 0x005fda00
 void FactionAccess::ModifyReputation(int aiCount, bool bModRep)
 {
     m_iSecondFactionValue += aiCount;
     if (pReputationData != 0 && bModRep)
-        reinterpret_cast<Unk38*>(pReputationData)->FUN_00616c20(0);
+        reinterpret_cast<Unk38*>(pReputationData)->TESReputation_CommitCrime(0);
     MarkAsModified(0x80000000);
 }
 
@@ -411,7 +413,7 @@ void FactionAccess::SaveFactionGame(BGSSaveFormBuffer* buffer)
 }
 
 namespace fnv_005fd850 {
-int __fastcall FUN_00871a30(int);
+int __fastcall TESDataHandler_GetFactions(int);
 int __fastcall FNV_GetFormType(TESForm*);
 void FNV_Warning(const char*, ...);
 struct Node_006815c0
@@ -436,7 +438,7 @@ struct Reaction_5fd850
 // @fnv 0x005fd850
 void ValidateFactionReactions()
 {
-    BSSimpleList<TESFaction*>* pIter = (BSSimpleList<TESFaction*>*)FUN_00871a30((int)g_dataHandler);
+    BSSimpleList<TESFaction*>* pIter = (BSSimpleList<TESFaction*>*)TESDataHandler_GetFactions((int)g_dataHandler);
     while (pIter)
     {
         TESFaction* pFaction = (TESFaction*)*((Node_006815c0*)pIter)->_ref_006815c0();
@@ -651,17 +653,17 @@ bool FactionLoader::LoadFactionRecord(TESFile* file)
 #include <string.h>
 struct FactionCompareAccess : TESFaction
 {
-    bool FUN_00485270(TESForm*);
-    const FactionSaveData* FUN_006a9540();
+    bool TESForm_CompareAllComponents(TESForm*);
+    const FactionSaveData* NiAVObject_GetRotate_006a9540();
     TESReputation* GetField38();
-    BSSimpleList<FactionRankPresentation*>* FUN_005a8080();
+    BSSimpleList<FactionRankPresentation*>* ComputeValue_005a8080();
     bool IsDifferentFrom(TESForm* other);
 };
 
 struct RankStringAccess : BSStringT<char>
 {
-    unsigned int FUN_004048e0() const;
-    const char* FUN_00559450() const;
+    unsigned int BSStringT_char_Length() const;
+    const char* Modelloader_GetReferencedThis() const;
     int FUN_00408a80(const char*, bool) const;
 };
 
@@ -672,39 +674,39 @@ bool FactionCompareAccess::IsDifferentFrom(TESForm* other)
     FactionCompareAccess* faction2 = static_cast<FactionCompareAccess*>(dynamic_cast<TESFaction*>(other));
     if (!faction2)
         return true;
-    if (FUN_00485270(faction2))
+    if (TESForm_CompareAllComponents(faction2))
         return true;
-    if (memcmp(&data, faction2->FUN_006a9540(), 4))
+    if (memcmp(&data, faction2->NiAVObject_GetRotate_006a9540(), 4))
         return true;
     if (pReputationData != faction2->GetField38())
         return true;
 
-    BSSimpleList<FactionRankPresentation*>* node1 = FUN_005a8080();
-    BSSimpleList<FactionRankPresentation*>* node2 = faction2->FUN_005a8080();
+    BSSimpleList<FactionRankPresentation*>* node1 = ComputeValue_005a8080();
+    BSSimpleList<FactionRankPresentation*>* node2 = faction2->ComputeValue_005a8080();
     while (node1 && !node1->IsEmpty())
     {
         if (!node2 || !node2->GetItem())
             return true;
         FactionRankPresentation* current2 = node1->GetItem();
         FactionRankPresentation* current = node2->GetItem();
-        if (static_cast<RankStringAccess&>(current2->m_kMaleRankName).FUN_004048e0() ||
-            static_cast<RankStringAccess&>(current->m_kMaleRankName).FUN_004048e0())
+        if (static_cast<RankStringAccess&>(current2->m_kMaleRankName).BSStringT_char_Length() ||
+            static_cast<RankStringAccess&>(current->m_kMaleRankName).BSStringT_char_Length())
         {
-            if (static_cast<RankStringAccess&>(current2->m_kMaleRankName).FUN_004048e0() !=
-                static_cast<RankStringAccess&>(current->m_kMaleRankName).FUN_004048e0())
+            if (static_cast<RankStringAccess&>(current2->m_kMaleRankName).BSStringT_char_Length() !=
+                static_cast<RankStringAccess&>(current->m_kMaleRankName).BSStringT_char_Length())
                 return true;
             else if (static_cast<RankStringAccess&>(current2->m_kMaleRankName)
-                         .FUN_00408a80(static_cast<RankStringAccess&>(current->m_kMaleRankName).FUN_00559450(), false))
+                         .FUN_00408a80(static_cast<RankStringAccess&>(current->m_kMaleRankName).Modelloader_GetReferencedThis(), false))
                 return true;
         }
-        if (static_cast<RankStringAccess&>(current2->m_kFemaleRankName).FUN_004048e0() ||
-            static_cast<RankStringAccess&>(current->m_kFemaleRankName).FUN_004048e0())
+        if (static_cast<RankStringAccess&>(current2->m_kFemaleRankName).BSStringT_char_Length() ||
+            static_cast<RankStringAccess&>(current->m_kFemaleRankName).BSStringT_char_Length())
         {
-            if (static_cast<RankStringAccess&>(current2->m_kFemaleRankName).FUN_004048e0() !=
-                static_cast<RankStringAccess&>(current->m_kFemaleRankName).FUN_004048e0())
+            if (static_cast<RankStringAccess&>(current2->m_kFemaleRankName).BSStringT_char_Length() !=
+                static_cast<RankStringAccess&>(current->m_kFemaleRankName).BSStringT_char_Length())
                 return true;
             else if (static_cast<RankStringAccess&>(current2->m_kFemaleRankName)
-                         .FUN_00408a80(static_cast<RankStringAccess&>(current->m_kFemaleRankName).FUN_00559450(),
+                         .FUN_00408a80(static_cast<RankStringAccess&>(current->m_kFemaleRankName).Modelloader_GetReferencedThis(),
                                        false))
                 return true;
         }

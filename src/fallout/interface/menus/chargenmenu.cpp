@@ -10,7 +10,8 @@
 #include "../../../../include/Setting.h"
 
 // @fnv 0x00753340
-int __thiscall CharGenMenu::FUN_00753340()
+// src: COMMUNITY 0x00753340
+int __thiscall CharGenMenu::GetMenuID_00753340()
 {
     return 0x418;
 }
@@ -26,7 +27,8 @@ void CharGenMenu::SetTile(int aiIndex, Tile* tile)
 }
 
 // @fnv 0x00753760
-int __cdecl FUN_00753760()
+// src: COMMUNITY 0x00753760
+int __cdecl CharGenMenu_GetMenuID_()
 {
     return 0x418;
 }
@@ -42,7 +44,8 @@ struct PC7d
 };
 extern PC7d* g_thePlayer;
 // @fnv 0x00754530
-void __cdecl FUN_00754530(Tile* tile, ActorValue::Index index)
+// src: COMMUNITY 0x00754530
+void __cdecl CharGenMenu_TagSkillsFunc(Tile* tile, ActorValue::Index index)
 {
     if (tile->GetFloat(0xfac) == _gModifierZero)
         DAT_011d92a0 = 0;
@@ -100,7 +103,8 @@ extern int DAT_011d9214;
 extern int DAT_011d9224;
 
 // @fnv 0x00754330
-void __cdecl FUN_00754330(Tile* tile)
+// src: COMMUNITY 0x00754330
+void __cdecl callback_Tile_T(Tile* tile)
 {
     if (DAT_011d920c)
     {
@@ -187,11 +191,12 @@ int __cdecl GetTileValueID(char const*, int);
 
 struct FUN_00754950_shell
 {
-    bool __thiscall FUN_00754950(Tile* apSelectItem);
+    bool __thiscall ListBox_enum_ActorValue_Index_IsSelected(Tile* apSelectItem);
 };
 
 // @fnv 0x00754950
-bool FUN_00754950_shell::FUN_00754950(Tile* apSelectItem)
+// src: XBOX_PDB 0x00754950
+bool FUN_00754950_shell::ListBox_enum_ActorValue_Index_IsSelected(Tile* apSelectItem)
 {
     static int selectedTrait = GetTileValueID("_selected", -1);
 
@@ -200,36 +205,37 @@ bool FUN_00754950_shell::FUN_00754950(Tile* apSelectItem)
 
 struct Proxy_884350
 {
-    void* FUN_00884350();
+    void* Actor_GetClass();
 };
 struct Proxy_884350b
 {
-    void* FUN_00884350(int, int);
+    void* Actor_GetClass(int, int);
 };
 struct Proxy_5f6e80
 {
     void FUN_005f6e80();
 };
 extern int DAT_011dea3c;
-int __cdecl FUN_005d9660();
-void __cdecl FUN_00754460(Tile*, int);
+int __cdecl NiStencilProperty_GetType();
+void __cdecl CharGenMenu_SetAttributesFunc(Tile*, int);
 
 // @fnv 0x007537b0
-void __cdecl FUN_007537b0()
+// src: XBOX_PDB 0x007537b0
+void __cdecl CharGenMenu_Close()
 {
     if (DAT_011d920c != 0)
     {
         if (DAT_011d920c->eMode == 0)
         {
-            DAT_011d920c->list.Traverse((void(__cdecl*)(Tile*, ActorValue::Index))FUN_00754460, 0, 0x7fffffff);
+            DAT_011d920c->list.Traverse((void(__cdecl*)(Tile*, ActorValue::Index))CharGenMenu_SetAttributesFunc, 0, 0x7fffffff);
         }
         else
         {
-            for (int i = 0; ((Proxy_884350*)DAT_011dea3c)->FUN_00884350(), i < FUN_005d9660(); i++)
+            for (int i = 0; ((Proxy_884350*)DAT_011dea3c)->Actor_GetClass(), i < NiStencilProperty_GetType(); i++)
             {
-                ((Proxy_5f6e80*)((Proxy_884350b*)DAT_011dea3c)->FUN_00884350(i, -1))->FUN_005f6e80();
+                ((Proxy_5f6e80*)((Proxy_884350b*)DAT_011dea3c)->Actor_GetClass(i, -1))->FUN_005f6e80();
             }
-            DAT_011d920c->list.Traverse(FUN_00754530, 0, 0x7fffffff);
+            DAT_011d920c->list.Traverse(CharGenMenu_TagSkillsFunc, 0, 0x7fffffff);
         }
         DAT_011d920c->FUN_00726070()->Set(0x1772, 1);
         DAT_011d920c->LoadMenuData();
@@ -241,9 +247,9 @@ struct LBList
     virtual void Select(Tile*);
     void* FindItemData(Tile*);
 };
-char const* __cdecl FUN_0066e9f0(ActorValue::Index);
+char const* __cdecl ActorValue_GetActorValueIcon(ActorValue::Index);
 char const* __cdecl GetActorValueDescription(ActorValue::Index);
-void __cdecl FUN_00706f30(int);
+void __cdecl Interface_PlayMenuSound(int);
 
 // @fnv 0x00753870
 void CharGenMenu::HandleTileClick(int id, Tile* tile)
@@ -254,11 +260,11 @@ void CharGenMenu::HandleTileClick(int id, Tile* tile)
     case 9:
         if (tile->GetFloat(0xfac) != unk50)
         {
-            m_pTiles[2]->Set(0xfcc, FUN_0066e9f0((ActorValue::Index)(int)((LBList*)&list)->FindItemData(tile)), true);
+            m_pTiles[2]->Set(0xfcc, ActorValue_GetActorValueIcon((ActorValue::Index)(int)((LBList*)&list)->FindItemData(tile)), true);
             m_pTiles[3]->Set(0xfc4, GetActorValueDescription((ActorValue::Index)(int)((LBList*)&list)->FindItemData(tile)), true);
             m_pTiles[2]->Set(0xfa3, 1);
             m_pTiles[3]->Set(0xfa3, 1);
-            FUN_00706f30(4);
+            Interface_PlayMenuSound(4);
             unk50 = tile->GetFloat(0xfac);
         }
         break;
@@ -279,7 +285,7 @@ struct List
 };
 struct Animation
 {
-    void FUN_00718630(int, int, int);
+    void InterfaceManager_TutorialManager_ShowMessage(int, int, int);
 };
 struct MenuState
 {
@@ -594,7 +600,7 @@ struct MenuState
     unsigned int unk4d0;
     Animation animation;
 };
-MenuState* __cdecl FUN_004b7210();
+MenuState* __cdecl InterfaceManager_GetSingleton();
 unsigned int __cdecl FUN_0066ecf0(int);
 int __cdecl FUN_0066ec10(int, unsigned char);
 const char* __cdecl FUN_0066e950(int);
@@ -659,8 +665,8 @@ void CharGenMenu::InitMenu()
     if (!editing)
         m_iPointsRemaining -= 7;
     ((fnv_007539a0::List*)&list)->FUN_0075a0d0(m_pTiles[1], fnv_007539a0::DAT_01071c88);
-    m_pTiles[1]->FUN_00a012d0(4002, fnv_007539a0::DAT_01071c84, true);
-    fnv_007539a0::FUN_004b7210()->animation.FUN_00718630(12, GetClass(), 500);
+    m_pTiles[1]->Tile_Set(4002, fnv_007539a0::DAT_01071c84, true);
+    fnv_007539a0::InterfaceManager_GetSingleton()->animation.InterfaceManager_TutorialManager_ShowMessage(12, GetClass(), 500);
     for (unsigned int i = 0; i < fnv_007539a0::FUN_0066ecf0(0); ++i)
     {
         int e = fnv_007539a0::FUN_0066ec10(0, (unsigned char)i);
@@ -668,7 +674,7 @@ void CharGenMenu::InitMenu()
         int c = fnv_007539a0::DAT_011dea3c->values.GetPermanentActorValue((ActorValue::Index)e);
         j->FUN_00700320(4010, 8);
         j->FUN_00700320(fnv_007539a0::DAT_011d9210, c);
-        j->FUN_00a012d0(fnv_007539a0::DAT_011d9224, 0.0f, true);
+        j->Tile_Set(fnv_007539a0::DAT_011d9224, 0.0f, true);
         UpdateValueString(j);
         if (!editing)
             m_iPointsUsed += c - 1;
@@ -912,11 +918,12 @@ struct FUN_00754460_obj
     virtual void v229(int, float);
     char pad_04[0xa0];
     ActorValueOwner m_a4;
-    void FUN_0093a850(int, float);
+    void PlayerCharacter_SetActorBaseValueF(int, float);
 };
 
 // @fnv 0x00754460
-void __cdecl FUN_00754460(Tile* pSelf, int a2)
+// src: COMMUNITY 0x00754460
+void __cdecl CharGenMenu_SetAttributesFunc(Tile* pSelf, int a2)
 {
     if (DAT_011d920c != 0 && DAT_011d920c->m_bValueStringNeedsUpdate != 0 &&
         DAT_011d920c->eMode == 0)
@@ -927,7 +934,7 @@ void __cdecl FUN_00754460(Tile* pSelf, int a2)
     else
     {
         ((FUN_00754460_obj*)DAT_011dea3c)
-            ->FUN_0093a850(a2, (float)((double)pSelf->FUN_00a011b0(DAT_011d9210) + pSelf->FUN_00a011b0(DAT_011d9224)));
+            ->PlayerCharacter_SetActorBaseValueF(a2, (float)((double)pSelf->FUN_00a011b0(DAT_011d9210) + pSelf->FUN_00a011b0(DAT_011d9224)));
     }
 }
 
@@ -936,11 +943,11 @@ struct Manager753
 {
     Tile* Root();
 };
-Manager753* __cdecl FUN_004b7210();
+Manager753* __cdecl InterfaceManager_GetSingleton();
 CharGenMenu* __cdecl Lookup753(int);
 float __cdecl Scale753();
 void __cdecl FNV_Warning(const char*);
-int __cdecl FUN_00a01860(const char*);
+int __cdecl Tile_TextToTrait(const char*);
 extern Setting g_011d33d8, g_011d35c4;
 struct List753
 {
@@ -950,22 +957,23 @@ struct List753
 
 extern CharGenMenu* menu753;
 extern int DAT_011d9218, DAT_011d921c;
-int __cdecl FUN_00753760();
+int __cdecl CharGenMenu_GetMenuID_();
 const char* __cdecl Name753(int);
 const char* __cdecl Desc753(int);
 // Validates kind and points, rebuilds the menu from a tile file, attaches it, sets kind/points/flags and labels, then shows it and returns the tile.
 // @fnv 0x00753420
-Tile* __cdecl FUN_00753420(int kind, int points, bool onlyAdd, bool flag)
+// src: COMMUNITY 0x00753420
+Tile* __cdecl CharGenMenu_Create(int kind, int points, bool onlyAdd, bool flag)
 {
     CharGenMenu* oldMenu = Lookup753(0x418);
-    Manager753* manager = FUN_004b7210();
+    Manager753* manager = InterfaceManager_GetSingleton();
     if (points <= 0 || kind < 0 || kind > 1)
         return 0;
     if (oldMenu)
         delete oldMenu;
     Tile* aTile = manager->Root()->ReadFile(str_01071c5c);
     menu753 = static_cast<CharGenMenu*>(aTile->GetMenu());
-    if (menu753 && menu753->GetClass() == FUN_00753760())
+    if (menu753 && menu753->GetClass() == CharGenMenu_GetMenuID_())
     {
         menu753->FUN_00a1dc70((TileMenu*)aTile, false);
         if (!menu753->HasAllSlotsSet())
@@ -979,7 +987,7 @@ Tile* __cdecl FUN_00753420(int kind, int points, bool onlyAdd, bool flag)
         menu753->eMode = kind;
         menu753->flag = flag;
         menu753->onlyAdd = onlyAdd;
-        menu753->FUN_00726070()->SetInt(FUN_00a01860(str_01071bfc), onlyAdd);
+        menu753->FUN_00726070()->SetInt(Tile_TextToTrait(str_01071bfc), onlyAdd);
         menu753->m_pTiles[5]->Set(0xfc4, g_011d33d8.String(), true);
         menu753->m_pTiles[6]->Set(0xfc4, g_011d35c4.String(), true);
         if (kind == 0)
@@ -1067,7 +1075,7 @@ struct SkillPlayer : PC7d
 };
 struct SkillInterfacePart
 {
-    void FUN_00718630(int, int, int);
+    void InterfaceManager_TutorialManager_ShowMessage(int, int, int);
 };
 struct SkillInterface
 {
@@ -1382,10 +1390,10 @@ struct SkillInterface
     int unk4d0;
     SkillInterfacePart skills;
 };
-SkillInterface* __cdecl FUN_004b7210();
+SkillInterface* __cdecl InterfaceManager_GetSingleton();
 unsigned int __cdecl FUN_0066ecf0(int);
 ActorValue::Index __cdecl FUN_0066ec10(int, unsigned char);
-bool __cdecl FUN_00406d70(ActorValue::Index, unsigned int);
+bool __cdecl ActorValue_IsFlagSet(ActorValue::Index, unsigned int);
 const char* __cdecl FUN_0066e950(ActorValue::Index);
 void __cdecl CompareActorValueNames();
 extern Setting DAT_011ccf5c;
@@ -1401,11 +1409,11 @@ void CharGenMenu::BuildSkillList()
 {
     ((fnv_00753b10::SkillList*)&list)->Initialize(m_pTiles[1], fnv_00753b10::DAT_01071ca0);
     m_pTiles[1]->Set(4002, fnv_00753b10::g_011c72f0_arg1, true);
-    fnv_00753b10::FUN_004b7210()->skills.FUN_00718630(14, GetClass(), 500);
+    fnv_00753b10::InterfaceManager_GetSingleton()->skills.InterfaceManager_TutorialManager_ShowMessage(14, GetClass(), 500);
     for (unsigned int i = 0; i < fnv_00753b10::FUN_0066ecf0(2); ++i)
     {
         ActorValue::Index skill = fnv_00753b10::FUN_0066ec10(2, (unsigned char)i);
-        if (!fnv_00753b10::FUN_00406d70(skill, 8192))
+        if (!fnv_00753b10::ActorValue_IsFlagSet(skill, 8192))
         {
             Tile* tile = ((fnv_00753b10::SkillList*)&list)->AddListEntry(skill, fnv_00753b10::FUN_0066e950(skill), 0, 0);
             float value = (float)((fnv_00753b10::SkillPlayer*)g_thePlayer)->values.GetPermanentActorValue(skill);
@@ -1468,7 +1476,7 @@ FUN_00754b40::FUN_00754b40()
 
 struct Proxy_724430
 {
-    bool FUN_00724430();
+    bool ListBox_enum_ActorValue_Index_IsEnabled();
 };
 
 struct Proxy_7242f0
@@ -1495,7 +1503,7 @@ struct ScopeGuard
 // @fnv 0x00754a00
 bool Proxy_754a00::SetTraitSelected(void* pTarget, int action)
 {
-    if (((Proxy_724430*)this)->FUN_00724430())
+    if (((Proxy_724430*)this)->ListBox_enum_ActorValue_Index_IsEnabled())
     {
         if (pTarget != 0)
         {
@@ -1557,15 +1565,15 @@ struct SkPerkList
 };
 struct SkMgr
 {
-    SkPerkList* FUN_00884350();
+    SkPerkList* Actor_GetClass();
 };
 extern SkMgr* g_skMgr_11dea3c;
 extern Setting g_skSetting_11ccf5c;
 struct SkItemList
 {
     void* FindItemData(Tile*);
-    void FUN_00754930(Tile*);
-    bool FUN_00754950(Tile*);
+    void ListBox_enum_ActorValue_Index_ToggleSelection(Tile*);
+    bool ListBox_enum_ActorValue_Index_IsSelected(Tile*);
 };
 
 // Processes skill menu commands by ID, toggling or adjusting skill points and updating the display accordingly.
@@ -1576,14 +1584,14 @@ void CharGenMenu::HandleSkillMenuCommand(int aiID, Tile* apTile)
     {
     case 9: {
         void* pItemData = ((SkItemList*)&list)->FindItemData(apTile);
-        bool selected = ((SkItemList*)&list)->FUN_00754950(apTile);
+        bool selected = ((SkItemList*)&list)->ListBox_enum_ActorValue_Index_IsSelected(apTile);
         if ((!selected && m_iPointsUsed < m_iPointsRemaining) ||
-            (selected && (!bLimit || !g_skMgr_11dea3c->FUN_00884350()->FUN_005a5f40(pItemData))))
+            (selected && (!bLimit || !g_skMgr_11dea3c->Actor_GetClass()->FUN_005a5f40(pItemData))))
         {
-            ((SkItemList*)&list)->FUN_00754930(apTile);
-            apTile->FUN_00a012d0(DAT_011d9224, ((SkItemList*)&list)->FUN_00754950(apTile) ? *g_skSetting_11ccf5c.FUN_00403e20() : 0.0f,
+            ((SkItemList*)&list)->ListBox_enum_ActorValue_Index_ToggleSelection(apTile);
+            apTile->Tile_Set(DAT_011d9224, ((SkItemList*)&list)->ListBox_enum_ActorValue_Index_IsSelected(apTile) ? *g_skSetting_11ccf5c.Setting_Float_00403e20() : 0.0f,
                                   true);
-            FUN_00706f30(3);
+            Interface_PlayMenuSound(3);
             m_iPointsUsed += selected ? -1 : 1;
             FUN_00726070()->Set(DAT_011d9218, m_iPointsUsed);
             UpdateValueString(apTile);
@@ -1597,26 +1605,26 @@ void CharGenMenu::HandleSkillMenuCommand(int aiID, Tile* apTile)
         int delta = aiID != 10 ? 1 : -1;
         m_iPointsUsed += delta;
         FUN_00726070()->Set(DAT_011d9218, m_iPointsUsed);
-        apTile->FUN_0045cd60()->FUN_00a012d0(DAT_011d9224, apTile->FUN_0045cd60()->FUN_00a011b0(DAT_011d9224) + delta,
+        apTile->FUN_0045cd60()->Tile_Set(DAT_011d9224, apTile->FUN_0045cd60()->FUN_00a011b0(DAT_011d9224) + delta,
                                                true);
         UpdateValueString(apTile->FUN_0045cd60());
         UpdatePointsDisplay();
         break;
     }
     case 6:
-        FUN_007537b0();
+        CharGenMenu_Close();
         break;
     case 5: {
         int iOldPointsUsed = m_iPointsUsed;
         m_iPointsUsed = 0;
         if (eMode == 0)
-            list.Traverse((void(__cdecl*)(Tile*, ActorValue::Index))FUN_00754330, 0, 0x7fffffff);
+            list.Traverse((void(__cdecl*)(Tile*, ActorValue::Index))callback_Tile_T, 0, 0x7fffffff);
         if (eMode == 1)
             list.Traverse(fnv_007543c0::UpdateTagSkillTile, 0, 0x7fffffff);
         FUN_00726070()->Set(DAT_011d9218, m_iPointsUsed);
         UpdatePointsDisplay();
         if (m_iPointsUsed != iOldPointsUsed)
-            FUN_00706f30(1);
+            Interface_PlayMenuSound(1);
         break;
     }
     }
@@ -1629,7 +1637,8 @@ struct SubList
 };
 
 // @fnv 0x00754150
-bool CharGenMenu::FUN_00754150(int a1, float amount)
+// src: GUESS 0x00754150 (confidence: low)
+bool CharGenMenu::UpdateState_00754150(int a1, float amount)
 {
     bool result = false;
 
@@ -1640,10 +1649,10 @@ bool CharGenMenu::FUN_00754150(int a1, float amount)
         if (this->eMode == 0 && ((SubList*)&this->list)->Selected())
         {
             int var_8 = (a1 != 4) + 10;
-            Tile* var_c = ((SubList*)&this->list)->Selected()->FUN_00a03eb0(var_8);
+            Tile* var_c = ((SubList*)&this->list)->Selected()->Tile_GetChildByID(var_8);
             if (var_c && var_c->IsTraitNonZero(0xfa3))
             {
-                var_c->FUN_00a0b110(0xfcb);
+                var_c->Tile_PlayTileSound(0xfcb);
                 this->HandleSelection(var_8, var_c);
             }
             result = true;

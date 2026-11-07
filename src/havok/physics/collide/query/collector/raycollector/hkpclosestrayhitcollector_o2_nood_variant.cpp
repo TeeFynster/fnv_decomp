@@ -6,7 +6,7 @@
 // src/havok/physics/collide/query/collector/raycollector/hkpclosestrayhitcollector.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/query/collector/raycollector/hkpclosestrayhitcollector.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern void __cdecl operator delete(void*);
-void __fastcall FUN_0059cf00(void*);
+void __fastcall Object_UpdateFields_0059cf00(void*);
 struct HKPCloseStrayHitCollector
 {
     void* __thiscall Destroy(unsigned int flags);
@@ -55,11 +55,12 @@ struct FUN_00ca9440_cls
     unsigned int m_5c;
     HKPCloseNode* m_60;
 
-    void FUN_00ca9440(HKPCloseNode* node, FUN_00ca9440_src* src);
+    void hkpClosestRayHitCollector_addRayHit(HKPCloseNode* node, FUN_00ca9440_src* src);
 };
 
 // @fnv 0x00ca9440
-void FUN_00ca9440_cls::FUN_00ca9440(HKPCloseNode* node, FUN_00ca9440_src* src)
+// src: XBOX_PDB 0x00ca9440
+void FUN_00ca9440_cls::hkpClosestRayHitCollector_addRayHit(HKPCloseNode* node, FUN_00ca9440_src* src)
 {
     if (src->m_10 < m_20)
     {

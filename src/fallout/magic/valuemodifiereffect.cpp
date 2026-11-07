@@ -5,7 +5,7 @@ namespace ActorValue {
 bool IsSkill(Index);
 bool IsDerivedAttribute(Index);
 }
-bool FUN_005d1260(ActorValue::Index);
+bool ActorValue_IsAttribute(ActorValue::Index);
 
 #include "../../../include/ActiveEffect.h"
 #include "../../../include/ValueModifierEffect.h"
@@ -57,7 +57,7 @@ class TaskQueueInterface
   public:
     static TaskQueueInterface* GetSingleton();
 };
-void __cdecl FUN_0087a8b0(TaskQueueInterface*, int, Actor*, ...);
+void __cdecl TaskQueueInterface_QueueScriptFunctionCall(TaskQueueInterface*, int, Actor*, ...);
 
 // Getter bodies are shared by the original linker. The receiver overlays below
 // preserve canonical symbol bindings: +0x24 target, +0x28 caster, +0x0c source.
@@ -100,7 +100,7 @@ void ValueModifierEffect::Finalize()
     {
         m_fElapsedTime = -m_fElapsedTime;
         if (actor && GetActorValue() == 16 &&
-            ((ActiveEffect*)this)->FUN_0084e3a0()->GetRange())
+            ((ActiveEffect*)this)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->GetRange())
         {
             Actor* caster = ((HighProcess*)this)->GetProcessLevel()
                                 ? ((MagicCaster*)((HighProcess*)this)->GetProcessLevel())->GetCasterActor()
@@ -115,9 +115,9 @@ void ValueModifierEffect::Finalize()
 float ValueModifierEffect::GetModifiedMagnitude(float magnitude)
 {
     float adjusted = magnitude;
-    if (FUN_007df210())
+    if (HasConditions())
         return adjusted;
-    if ((FUN_005d1260(GetActorValue()) || ActorValue::IsDerivedAttribute(GetActorValue()) ||
+    if ((ActorValue_IsAttribute(GetActorValue()) || ActorValue::IsDerivedAttribute(GetActorValue()) ||
          ActorValue::IsSkill(GetActorValue())) &&
         magnitude <= 0.0)
     {
@@ -167,7 +167,7 @@ void ValueModifierEffect::RefreshPlayerActorValue()
 {
     if ((MagicTarget*)((ActorMover*)this)->GetCurrentMoveModeType() ==
             (g_thePlayer ? (MagicTarget*)((char*)g_thePlayer + (sizeof(MobileObject) + sizeof(MagicCaster))) : 0) &&
-        (FUN_005d1260((ActorValue::Index)pEffect->GetAffectedActorValue()) ||
+        (ActorValue_IsAttribute((ActorValue::Index)pEffect->GetAffectedActorValue()) ||
          ActorValue::IsSkill((ActorValue::Index)pEffect->GetAffectedActorValue())) &&
         pEffect->IsHostile())
     {
@@ -197,7 +197,7 @@ void ValueModifierEffect::ApplyActorValueModifier(Actor* actor, float magnitude,
             Warning("ValueModifierEffect tried to modify an actor value without specifying which actor value to");
         return;
     }
-    bool ability = m_eSpellType == 4 && !FUN_007df210();
+    bool ability = m_eSpellType == 4 && !HasConditions();
     if (actor->IsPlayerRef() && ability && pEffect->GetEffectSetting()->IsFlagSet(2))
         actor->ForceActorValue(value, magnitude, 0);
     else
@@ -205,8 +205,8 @@ void ValueModifierEffect::ApplyActorValueModifier(Actor* actor, float magnitude,
         Actor* caster = ((HighProcess*)this)->GetProcessLevel()
                             ? ((MagicCaster*)((HighProcess*)this)->GetProcessLevel())->GetCasterActor()
                             : 0;
-        if (!((ActiveEffect*)this)->FUN_0084e3a0()->GetRange() ||
-            !((ActiveEffect*)this)->FUN_0084e3a0()->IsHostile())
+        if (!((ActiveEffect*)this)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->GetRange() ||
+            !((ActiveEffect*)this)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->IsHostile())
             caster = 0;
         if (pEffect->GetEffectSetting()->IsFlagSet(2))
             actor->ModActorValue(value, magnitude, caster);
@@ -217,14 +217,15 @@ void ValueModifierEffect::ApplyActorValueModifier(Actor* actor, float magnitude,
                 actor->GetProcess()->ApplyDamageToActor(g_thePlayer, -magnitude);
             actor->DamageActorValue(value, magnitude, caster);
             if (magnitude < 0.0 && value == 16)
-                FUN_0087a8b0(TaskQueueInterface::GetSingleton(), 0x116c, actor, -magnitude);
+                TaskQueueInterface_QueueScriptFunctionCall(TaskQueueInterface::GetSingleton(), 0x116c, actor, -magnitude);
         }
     }
 }
 
 // Allocates and constructs a ValueModifierEffect from the three given arguments and returns it.
 // @fnv 0x0082bc30
-ValueModifierEffect* __cdecl FUN_0082bc30(void* p1, void* p2, void* p3)
+// src: XBOX_PDB 0x0082bc30
+ValueModifierEffect* __cdecl ValueModifierEffect_Instantiate(void* p1, void* p2, void* p3)
 {
     return new ValueModifierEffect(p1, p2, p3);
 }
@@ -237,10 +238,11 @@ LimbConditionEffect::LimbConditionEffect(void* apArg1, void* apArg2, void* apArg
 struct FUN_0082ccb0_Cls : ActiveEffect
 {
     EffectSetting* GetEffectSetting();
-    bool FUN_0082ccb0();
+    bool ValueModifierEffect_IsCausingDamage();
 };
 // @fnv 0x0082ccb0
-bool FUN_0082ccb0_Cls::FUN_0082ccb0()
+// src: XBOX_PDB 0x0082ccb0
+bool FUN_0082ccb0_Cls::ValueModifierEffect_IsCausingDamage()
 {
     return *(int*)((char*)this + 0x48) == 16 && GetEffectSetting()->IsFlagSet(4) && !GetEffectSetting()->IsFlagSet(2);
 }
@@ -298,12 +300,13 @@ struct LoadedValueEffect : ValueModifierEffect
     ParentCellStub* GetParentCell();
     CasterStub* GetCaster();
     float GetMagnitude();
-    void FUN_0082cd10(Actor* apActor);
+    void ValueModifierEffect_FinishInitLoadGame(Actor* apActor);
 };
 
 // Restarts the effect on the actor, then for save versions 0x5f-0x61 re-applies the magnitude to the player target via SetActorValueF and ModActorValue.
 // @fnv 0x0082cd10
-void LoadedValueEffect::FUN_0082cd10(Actor* apActor)
+// src: XBOX_PDB 0x0082cd10
+void LoadedValueEffect::ValueModifierEffect_FinishInitLoadGame(Actor* apActor)
 {
     Restart(apActor);
     if (g_TESSaveLoadGame->GetCurrentVersion() >= 0x5f && g_TESSaveLoadGame->GetCurrentVersion() < 0x62)
@@ -323,7 +326,7 @@ struct TargetGetter
 {
     Actor* FUN_00822b40();
 };
-float __cdecl FUN_0040ebd0(float, float);
+float __cdecl BSMIN(float, float);
 void __cdecl FUN_004d5e10(int, int);
 struct LocalEffect
 {
@@ -348,10 +351,11 @@ struct LocalEffect
     int which;
     TargetGetter* FUN_0059bb30();
     MagicItem* FUN_0044ddc0();
-    void FUN_0082c490();
+    void ValueModifierEffect_Continue();
 };
 // @fnv 0x0082c490
-void LocalEffect::FUN_0082c490()
+// src: XBOX_PDB 0x0082c490
+void LocalEffect::ValueModifierEffect_Continue()
 {
     Actor* target = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : 0;
     if (target == (Actor*)g_thePlayer && effect && effect->GetDuration() > 0 && which == 16)
@@ -361,13 +365,13 @@ void LocalEffect::FUN_0082c490()
         MagicItem* pMagicItem = FUN_0044ddc0();
         bool potion = pMagicItem->GetSpellType() == 7;
         AlchemyItem* item = potion ? dynamic_cast<AlchemyItem*>(pMagicItem) : 0;
-        if (item && item->FUN_004029d0(2))
+        if (item && item->AlchemyItem_IsFlagSet(2))
         {
-            FUN_004d5e10(18, (int)FUN_0040ebd0(magnitude * effect->GetDuration(), missing));
+            FUN_004d5e10(18, (int)BSMIN(magnitude * effect->GetDuration(), missing));
         }
-        if (item && item->FUN_004029d0(4))
+        if (item && item->AlchemyItem_IsFlagSet(4))
         {
-            FUN_004d5e10(16, (int)FUN_0040ebd0(magnitude * effect->GetDuration(), missing));
+            FUN_004d5e10(16, (int)BSMIN(magnitude * effect->GetDuration(), missing));
         }
     }
 }
@@ -475,7 +479,7 @@ typedef char _sizecheck_TESScriptableForm[sizeof(TESScriptableForm) == 12 ? 1 : 
 typedef char _sizecheck_TESWeightForm[sizeof(TESWeightForm) == 8 ? 1 : -1];
 struct FUN_0082c000_shell : public ValueModifierEffect
 {
-    void FUN_0082c000();
+    void ValueModifierEffect_Start();
 };
 
 struct BGSMessageInitAccess
@@ -964,13 +968,14 @@ struct ProcessRads
 #include "../../../include/MiscStatManager.h"
 
 
-float FUN_0040ebd0(float, float);
+float BSMIN(float, float);
 float __fastcall GetFloatAtOffset1C(char*);
 extern double _gModifierZero;
 
 // Updates a modifier, may add misc stats or call Kill, and may update radiation rate and player effects.
 // @fnv 0x0082c000
-void FUN_0082c000_shell::FUN_0082c000()
+// src: XBOX_PDB 0x0082c000
+void FUN_0082c000_shell::ValueModifierEffect_Start()
 {
     Actor* pActor = ((ActorMover*)this)->GetCurrentMoveModeType()
                         ? ((MagicTarget*)((ActorMover*)this)->GetCurrentMoveModeType())->GetOwnerActor()
@@ -990,12 +995,12 @@ void FUN_0082c000_shell::FUN_0082c000()
             MagicItem* pMagicItem = (MagicItem*)((InventoryStackRecord*)this)->GetObject();
             bool bpotion = pMagicItem->GetSpellType() == 7;
             AlchemyItem* ppotion = bpotion ? dynamic_cast<AlchemyItem*>(pMagicItem) : 0;
-            if (ppotion && ppotion->FUN_004029d0(2))
+            if (ppotion && ppotion->AlchemyItem_IsFlagSet(2))
                 MiscStatManager::AddMiscStat((MiscStatManager::MiscStat)0x12,
-                                             (int)FUN_0040ebd0(*(float*)((char*)this + 0x1c), fPlayerHealthDiff));
-            if (ppotion && ppotion->FUN_004029d0(4))
+                                             (int)BSMIN(*(float*)((char*)this + 0x1c), fPlayerHealthDiff));
+            if (ppotion && ppotion->AlchemyItem_IsFlagSet(4))
                 MiscStatManager::AddMiscStat((MiscStatManager::MiscStat)0x10,
-                                             (int)FUN_0040ebd0(*(float*)((char*)this + 0x1c), fPlayerHealthDiff));
+                                             (int)BSMIN(*(float*)((char*)this + 0x1c), fPlayerHealthDiff));
         }
         if (*(int*)((char*)this + 0x48) == 7 && *(float*)((char*)this + 0x1c) < _gModifierZero &&
             pActor->GetCurrentActorValue((ActorValue::Index)16) <= 1.0)
@@ -1017,16 +1022,16 @@ void FUN_0082c000_shell::FUN_0082c000()
         MagicItem* pMagicItem = (MagicItem*)((InventoryStackRecord*)this)->GetObject();
         bool bpotion = pMagicItem->GetSpellType() == 7;
         AlchemyItem* ppotion = bpotion ? dynamic_cast<AlchemyItem*>(pMagicItem) : 0;
-        if (ppotion && ppotion->FUN_004029d0(2))
+        if (ppotion && ppotion->AlchemyItem_IsFlagSet(2))
             MiscStatManager::AddMiscStat(
                 (MiscStatManager::MiscStat)0x12,
-                (int)FUN_0040ebd0((*(EffectItem**)((char*)this + 0xc))->GetDuration() *
+                (int)BSMIN((*(EffectItem**)((char*)this + 0xc))->GetDuration() *
                                       *(float*)((char*)this + 0x1c),
                                   fPlayerHealthDiff));
-        if (ppotion && ppotion->FUN_004029d0(4))
+        if (ppotion && ppotion->AlchemyItem_IsFlagSet(4))
             MiscStatManager::AddMiscStat(
                 (MiscStatManager::MiscStat)0x10,
-                (int)FUN_0040ebd0((*(EffectItem**)((char*)this + 0xc))->GetDuration() *
+                (int)BSMIN((*(EffectItem**)((char*)this + 0xc))->GetDuration() *
                                       *(float*)((char*)this + 0x1c),
                                   fPlayerHealthDiff));
     }

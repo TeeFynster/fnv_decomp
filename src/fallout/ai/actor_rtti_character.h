@@ -367,7 +367,7 @@ NiPoint3* Actor::GetMagicCaster(NiPoint3* output)
 {
     if (!*(unsigned char*)((char*)this + 0x64a) && DAT_011e07d0)
     {
-        NiPoint3 result = DAT_011e07d0->FUN_0045bb80();
+        NiPoint3 result = DAT_011e07d0->NiAVObject_GetWorldTranslate();
         *output = result;
         return output;
     }
@@ -394,7 +394,7 @@ void Actor::UpdateActorMovement(float delta)
                 steps = ((unsigned int)(pCurrentAnimation->FUN_00453700() * 1000.0) -
                          ((ActorProcessView*)GetProcess())->GetTime()) /
                         33;
-            pCurrentAnimation->SetAnimationAmount(((ActorProcessView*)GetProcess())->GetBuffer()->FUN_004d50e0(steps));
+            pCurrentAnimation->SetAnimationAmount(((ActorProcessView*)GetProcess())->GetBuffer()->LipSynchAnim_GetPuppetValue(steps));
             if (((ActorProcessView*)GetProcess())->GetBuffer() &&
                 steps >
                     (unsigned int)((NiPointer<NiNode>*)((ActorProcessView*)GetProcess())->GetBuffer())->operator->())
@@ -418,12 +418,12 @@ void Actor::UpdateActorMovement(float delta)
                 {
                     SetAnimationGroupAction(1);
                     ((ActorPacketView*)this)->Reset();
-                    pCurrentAnimation->FUN_004955c0(20, 0xe0, -1, 0.0f, -1);
+                    pCurrentAnimation->Animation_ForceSection(20, 0xe0, -1, 0.0f, -1);
                     NiControllerSequence* sequence = pCurrentAnimation->GetControllerSequence(1);
                     if (sequence)
                     {
-                        sequence->FUN_0098adb0(sequence->FUN_00508100());
-                        pCurrentAnimation->Update(this, 0.0f, sequence->FUN_00508100());
+                        sequence->PathingLOSGridMap_SetSightRadius(sequence->GetEndKeyTime_00508100());
+                        pCurrentAnimation->Update(this, 0.0f, sequence->GetEndKeyTime_00508100());
                         pCurrentAnimation->UpdateMovement(this);
                     }
                     RefreshActorData();

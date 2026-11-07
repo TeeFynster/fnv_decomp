@@ -9,11 +9,12 @@ struct FUN_00a311e0_s
     unsigned int* m_pBase;
     unsigned int m_uiElementCount;
     unsigned int m_uiAllocatedCapacity;
-    void FUN_00a311e0(unsigned int element);
+    void NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(unsigned int element);
 };
 
 // @fnv 0x00a311e0
-void FUN_00a311e0_s::FUN_00a311e0(unsigned int uiCapacity)
+// src: XBOX_PDB 0x00a311e0
+void FUN_00a311e0_s::NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(unsigned int uiCapacity)
 {
     if (uiCapacity != m_uiElementCount)
     {

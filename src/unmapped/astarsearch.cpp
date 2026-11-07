@@ -5,20 +5,22 @@
 
 struct AlphaColor
 {
-    void FUN_0052ce20(float);
+    void TESRegionPoint_SetX(float);
 };
 struct FUN_006a7d30_shell
 {
-    void FUN_006a7d30(float f);
+    void AStarSearch_NavMeshSearchNode_NavMeshSearchLink_SetMaxFitness(float f);
 };
 // @fnv 0x006a7d30
-void FUN_006a7d30_shell::FUN_006a7d30(float afValue)
+// src: COMMUNITY 0x006a7d30
+void FUN_006a7d30_shell::AStarSearch_NavMeshSearchNode_NavMeshSearchLink_SetMaxFitness(float afValue)
 {
-    ((AlphaColor*)((char*)this + 0x1ff4))->FUN_0052ce20(afValue);
+    ((AlphaColor*)((char*)this + 0x1ff4))->TESRegionPoint_SetX(afValue);
 }
 
 // @fnv 0x006a7f50
-float __fastcall FUN_006a7f50(const CombatTargetTimestamp* timestamp)
+// src: GUESS 0x006a7f50 (confidence: low)
+float __fastcall AStarSearch_EvaluateValue_006a7f50(const CombatTargetTimestamp* timestamp)
 {
     return timestamp->fTimeStamp;
 }
@@ -28,11 +30,12 @@ extern int DAT_0106b660;
 struct GlobalObject_00869f00
 {
     void Clear(bool);
-    void FUN_006a7f90();
+    void SetVtableAndProcessState_006a7f90();
 };
 
 // @fnv 0x006a7f90
-void GlobalObject_00869f00::FUN_006a7f90()
+// src: GUESS 0x006a7f90 (confidence: low)
+void GlobalObject_00869f00::SetVtableAndProcessState_006a7f90()
 {
     *(int*)this = (int)&DAT_0106b660;
     this->Clear(true);
@@ -40,7 +43,7 @@ void GlobalObject_00869f00::FUN_006a7f90()
 
 struct AX
 {
-    void FUN_006b3eb0(unsigned int, unsigned int);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 };
 struct FUN_006a7f60
 {
@@ -52,5 +55,5 @@ struct FUN_006a7f60
 FUN_006a7f60::FUN_006a7f60()
 {
     vtable = &DAT_0106b660;
-    ((AX*)this)->FUN_006b3eb0(0, 0);
+    ((AX*)this)->BSSimpleArray_float_1024_InitialSetup(0, 0);
 }

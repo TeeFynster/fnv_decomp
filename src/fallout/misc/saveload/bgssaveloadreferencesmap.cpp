@@ -100,7 +100,7 @@ struct FUN_00852a70
 FUN_00852a70::FUN_00852a70() : a(0x25), c(0x25)
 {}
 
-extern "C" bool __cdecl FUN_009a3830(const unsigned int&, const unsigned int&);
+extern "C" bool __cdecl Actor_AreReferencedValuesEqual(const unsigned int&, const unsigned int&);
 
 // @fnv 0x00852a10
 void BGSCellNumericIDArrayMap::RemoveReference(unsigned int auiKey, unsigned int a2)
@@ -108,7 +108,7 @@ void BGSCellNumericIDArrayMap::RemoveReference(unsigned int auiKey, unsigned int
     BSSimpleArray<unsigned int, 1024>* referenceIDs = 0;
     if (GetAt(auiKey, referenceIDs))
     {
-        unsigned int idx = referenceIDs->Find(a2, 0, FUN_009a3830);
+        unsigned int idx = referenceIDs->Find(a2, 0, Actor_AreReferencedValuesEqual);
         if (idx != 0xFFFFFFFF)
         {
             referenceIDs->UpdateEntryValue(idx, 1);
@@ -208,8 +208,8 @@ FUN_00852ae0::~FUN_00852ae0()
 
 struct Loader2e40
 {
-    void* FUN_00559450();
-    void* FUN_00866390();
+    void* Modelloader_GetReferencedThis();
+    void* BGSUnloadedFormBuffer_GetAdvancedBuffer();
 };
 struct Change2e40
 {
@@ -222,52 +222,53 @@ struct Changes2e40
 };
 struct Host2e40
 {
-    Changes2e40* FUN_00559450();
+    Changes2e40* Modelloader_GetReferencedThis();
     void ApplyUnloadedChanges(TESObjectCELL*);
 };
 extern Host2e40* DAT_011ddf38;
-int __cdecl FUN_0084e730(unsigned int, int, int);
-void __cdecl FUN_00845cc0(const char*, ...);
+int __cdecl BGSSaveLoadInitialData_GetInitialDataType(unsigned int, int, int);
+void __cdecl SaveGameWarning(const char*, ...);
 struct Info2e40
 {
     int unk00, unk04, cellID, x, y, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
     Info2e40();
-    bool FUN_0084e6a0(TESObjectCELL**, TESWorldSpace**);
+    bool ReferenceInitialData_GetOriginalLocationCellAndWorld(TESObjectCELL**, TESWorldSpace**);
 };
-void __cdecl FUN_0084e930(void*, int, Info2e40*);
+void __cdecl BGSSaveLoadInitialData_LoadInitialDataStruct(void*, int, Info2e40*);
 TESObjectCELL* __cdecl ResolveReferenceForm(unsigned int, Info2e40*, bool);
 struct Forms2e40
 {
-    void FUN_00843750(TESObjectCELL*, unsigned int, bool);
-    void FUN_008438b0(TESWorldSpace*, int, int, unsigned int, bool);
+    void BGSReconstructFormsInAllFilesMap_AddReference(TESObjectCELL*, unsigned int, bool);
+    void BGSReconstructFormsInAllFilesMap_AddReference_008438b0(TESWorldSpace*, int, int, unsigned int, bool);
 };
 struct Target2e40
 {
-    void FUN_00852e40(unsigned int, Forms2e40*);
+    void BGSSaveLoadReferencesMap_LoadChangedReference(unsigned int, Forms2e40*);
 };
 // @fnv 0x00852e40
-void Target2e40::FUN_00852e40(unsigned int uiRefID, Forms2e40* forms)
+// src: XBOX_PDB 0x00852e40
+void Target2e40::BGSSaveLoadReferencesMap_LoadChangedReference(unsigned int uiRefID, Forms2e40* forms)
 {
-    Change2e40* change = DAT_011ddf38->FUN_00559450()->FUN_009a4250(uiRefID);
+    Change2e40* change = DAT_011ddf38->Modelloader_GetReferencedThis()->FUN_009a4250(uiRefID);
     if (change)
     {
-        int iChangeType = FUN_0084e730(uiRefID, 0x3a, change->key);
+        int iChangeType = BGSSaveLoadInitialData_GetInitialDataType(uiRefID, 0x3a, change->key);
         if (iChangeType != 5 && iChangeType != 6)
         {
-            FUN_00845cc0(
+            SaveGameWarning(
                 "SAVELOAD: Ref %08X is in the references map but is neither a created reference or a moved reference",
                 uiRefID);
             return;
         }
-        if (!change->loader.FUN_00559450())
+        if (!change->loader.Modelloader_GetReferencedThis())
         {
-            FUN_00845cc0(
+            SaveGameWarning(
                 "SAVELOAD: Ref %08X is in the references map but there is no unloaded buffer for it in the changes map",
                 uiRefID);
             return;
         }
         Info2e40 changeInfo;
-        FUN_0084e930(change->loader.FUN_00866390(), iChangeType, &changeInfo);
+        BGSSaveLoadInitialData_LoadInitialDataStruct(change->loader.BGSUnloadedFormBuffer_GetAdvancedBuffer(), iChangeType, &changeInfo);
         if (iChangeType == 5)
         {
             TESObjectCELL* cell = ResolveReferenceForm(uiRefID, &changeInfo, false);
@@ -278,16 +279,16 @@ void Target2e40::FUN_00852e40(unsigned int uiRefID, Forms2e40* forms)
         {
             TESObjectCELL* interior = 0;
             TESWorldSpace* world = 0;
-            if (changeInfo.FUN_0084e6a0(&interior, &world))
+            if (changeInfo.ReferenceInitialData_GetOriginalLocationCellAndWorld(&interior, &world))
             {
                 if (interior)
-                    forms->FUN_00843750(interior, uiRefID, false);
+                    forms->BGSReconstructFormsInAllFilesMap_AddReference(interior, uiRefID, false);
                 else
-                    forms->FUN_008438b0(world, changeInfo.x, changeInfo.y, uiRefID, false);
+                    forms->BGSReconstructFormsInAllFilesMap_AddReference_008438b0(world, changeInfo.x, changeInfo.y, uiRefID, false);
             }
             else
             {
-                FUN_00845cc0("CELLS: Could not find cell or worldspace %08X for moved reference %08X",
+                SaveGameWarning("CELLS: Could not find cell or worldspace %08X for moved reference %08X",
                              changeInfo.cellID, uiRefID);
             }
         }

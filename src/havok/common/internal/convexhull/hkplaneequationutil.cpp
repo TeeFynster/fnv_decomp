@@ -15,7 +15,7 @@ struct B
     int f2;
     int f3;
 
-    void* FUN_00d74d40();
+    void* hkgpConvexHull_BuildConfig_BuildConfig();
 };
 
 struct A
@@ -27,9 +27,9 @@ struct A
     int f4;
 
     void FUN_00d76ca0();
-    int FUN_00d774a0(void*, int, void*);
-    void FUN_00d76120(int, int);
-    void FUN_00d76940();
+    int ProcessEntries_00d774a0(void*, int, void*);
+    void ProcessState_00d76120(int, int);
+    void ReleaseStorage_00d76940();
 };
 
 // @fnv 0x00dd6270
@@ -48,16 +48,16 @@ int __cdecl ProcessArg(Arg* a, int second)
     int count = a->count;
     void* data = a->data;
 
-    void* q = objB.FUN_00d74d40();
-    int iResult = objA.FUN_00d774a0(data, count, q);
+    void* q = objB.hkgpConvexHull_BuildConfig_BuildConfig();
+    int iResult = objA.ProcessEntries_00d774a0(data, count, q);
 
     if (iResult != -1)
     {
-        objA.FUN_00d76120(1, second);
-        objA.FUN_00d76940();
+        objA.ProcessState_00d76120(1, second);
+        objA.ReleaseStorage_00d76940();
         return 0;
     }
 
-    objA.FUN_00d76940();
+    objA.ReleaseStorage_00d76940();
     return 1;
 }

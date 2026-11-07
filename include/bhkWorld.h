@@ -32,16 +32,16 @@ public:
     bool StepSimulation();
     static bool __cdecl QPickCountOverride();
 
-    void FUN_00c67430(const char* name);
-    void FUN_00c674d0(void* p, unsigned int count) throw();
-    void FUN_00c6aac0() throw();
-    void FUN_00c6a540(float f) throw();
-    void FUN_00c66a00() throw();
-    void FUN_00c66e20(float f) throw();
-    void FUN_00c68de0() throw();
-    void FUN_00c6b540(bool);
-    void FUN_00c66310();
-    void FUN_00c66300();
+    void bhkWorld_SaveSnapshot(const char* name);
+    void bhkWorld_AddEntities(void* p, unsigned int count) throw();
+    void bhkWorld_AddBatchedActions() throw();
+    void bhkWorld_UpdateActions(float f) throw();
+    void bhkWorld_ScaleSolverInfo() throw();
+    void bhkWorld_UpdateListeners(float f) throw();
+    void bhkWorld_UpdateDebugger() throw();
+    void bhkWorld_StopBatchingAdds(bool);
+    void bhkWorld_StartBatchingRemovals();
+    void bhkWorld_StartBatchingAdds();
 
     unsigned int unk0C;
     void* pDebugger;

@@ -11,11 +11,12 @@
 struct Vec4Sum
 {
     __m128 v;
-    void FUN_00458880(const __m128* a, const __m128* b);
+    void hkVector4_setAdd4(const __m128* a, const __m128* b);
 };
 
 // @fnv 0x00458880
-void Vec4Sum::FUN_00458880(const __m128* a, const __m128* b)
+// src: COMMUNITY 0x00458880
+void Vec4Sum::hkVector4_setAdd4(const __m128* a, const __m128* b)
 {
     v = _mm_add_ps(*a, *b);
 }

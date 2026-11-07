@@ -5,13 +5,13 @@
 #include "tesobjectrefr_decls.h"
 #include "../../include/TESBoundObject.h"
 #include "../../include/TESForm.h"
-GarbageCollectorUpdateState* FUN_00446ef0();
-void* FUN_0056a8c0();
-void FUN_005743f0();
-void FUN_00575c90(unsigned char value);
-float FUN_005790b0();
-float FUN_005790d0();
-void FUN_0057acc0(unsigned int index);
+GarbageCollectorUpdateState* MemoryLevelManager_GetSingleton();
+void* DecalData_GetDefaultDecalData();
+void FalloutRadio_NewCellEntered();
+void TESWaterSystem_SetPlayerForceUnderwater(unsigned char value);
+float BSAudio_GetMinDialogDist();
+float BSAudio_GetMaxDialogDist();
+void CheckWithinMultiBoundTask_CancelAttachment(unsigned int index);
 
 extern "C" void* __cdecl _alloca(unsigned int);
 struct LoadFile
@@ -172,10 +172,11 @@ struct RefLoad
     ExtraLoad* Extra();
     void Mark(int);
     unsigned int ID();
-    bool FUN_0055af90(LoadFile* file);
+    bool TESObjectREFR_Load(LoadFile* file);
 };
 // @fnv 0x0055af90
-bool RefLoad::FUN_0055af90(LoadFile* file)
+// src: XBOX_PDB 0x0055af90
+bool RefLoad::TESObjectREFR_Load(LoadFile* file)
 {
     int chunkID = 0;
     TransformLoad initial4;

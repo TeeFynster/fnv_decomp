@@ -209,11 +209,11 @@ class ModelLoader
 {
   public:
     void CallContainedObject();
-    void FUN_004aaf10();
+    void ModelLoader_UnlockModelMap();
     void QueueModelFilePath(const char*, IO_TASK_PRIORITY, QueuedFile*);
     void ProcessModelRequest(TESModel*, IO_TASK_PRIORITY, QueuedFile*, int, bool, bool, bool);
     void QueueFile(const char*, IO_TASK_PRIORITY, QueuedFile*, int, bool, bool, bool);
-    void FUN_0045a5e0(const char*);
+    void ModelLoader_ReleaseFile(const char*);
     NiNode* LoadFile(const char*, int, bool, bool, bool, bool);
 };
 
@@ -267,7 +267,7 @@ class BipedAnim
     static BIPED_OBJECT GetBipedObjectFromShaderProperty(NiAVObject*, BSShaderPPLightingProperty*);
     bool IsModelPathMatch(TESModel*, char*);
     TESModel* GetModelForSlot(BIPED_OBJECT, TESModel*);
-    TESModel* FUN_004afa20(BIPED_OBJECT, char*);
+    TESModel* BipedAnim_Store1stPersonModel(BIPED_OBJECT, char*);
     void RemovePart(BIPED_OBJECT, bool, TESForm*);
     void RemovePartsByParent(TESForm*);
     void SetBipedObject(TESForm*, TESModel*, BIPED_OBJECT);
@@ -282,8 +282,8 @@ extern SettingT<INISettingCollection> DAT_011c5ef0;
 extern int DAT_01188be8[20];
 extern const char* DAT_01188b98[20];
 extern NiMatrix3 DAT_011a9448;
-bool FUN_0043faf0();
-void FUN_006570e0(TESBoundObject*);
+bool BSFaceGenManager_GetUseFaceGenHeads();
+void BSFaceGenManager_ClearBodyTexturesFromPalette(TESBoundObject*);
 bool IsObjectProcessable(NiObject*);
 bool UpdateObjectVisibility(NiAVObject*);
 int __cdecl Warning(const char*, ...);
@@ -296,10 +296,10 @@ class DialogMenuInterfaceCalls
 
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 
-const NiFixedString& FUN_004ab220();
-NiAVObject* FUN_004ade00(NiNode*, const NiFixedString&);
-void FUN_004add50(char*, const char*, unsigned int);
-int FUN_00404dc0(const char*, const char*);
+const NiFixedString& FixedStrings_QDVPG();
+NiAVObject* BSUtilities_GetObjectByName_004ade00(NiNode*, const NiFixedString&);
+void BSstrncpy(char*, const char*, unsigned int);
+int BSstricmp(const char*, const char*);
 extern "C" int __cdecl _strnicmp(const char*, const char*, unsigned int);
 template <class T> unsigned int BSStringLength(const T*);
 
@@ -316,12 +316,12 @@ struct SceneObjectRemover
 {
     void RemoveObject(NiAVObject* object);
 };
-void FUN_00572220(bool);
-int FUN_00408b20(const char*, const char*);
+void FalloutAudio_LockAcousticSpace(bool);
+int BSstrcmp(const char*, const char*);
 class VATS
 {
   public:
-    void FUN_009c8950(bool abForceQuit, bool abFinishCommandPlayback);
+    void QuitVATSPlayback(bool abForceQuit, bool abFinishCommandPlayback);
 };
 extern VATS DAT_011f2250;
 extern TESDataHandler* g_dataHandler;
@@ -329,8 +329,8 @@ class BGSListForm;
 
 class SkyShaderProperty;
 extern NiRTTI DAT_011f4a38, DAT_011f9140, DAT_011f444c;
-SkyShaderProperty* FUN_00653270(const NiRTTI*, NiProperty*);
-const NiFixedString& FUN_004ae780();
+SkyShaderProperty* NiObject_DynamicCast(const NiRTTI*, NiProperty*);
+const NiFixedString& FixedStrings_QPrn();
 class TimeGlobal
 {
   public:
@@ -339,26 +339,26 @@ class TimeGlobal
 extern TimeGlobal g_timeGlobal;
 bool HandleUnparentedObjectNode(NiNode*);
 void SetCollisionRefFlag(NiNode*, bool);
-void FUN_00c6a2e0(NiNode*, bool, bool);
-void FUN_00c6a350(NiNode*, int, bool, bool, bool);
-const char* FUN_00464f30(const char*, bool);
+void bhkWorld_KillHavok(NiNode*, bool, bool);
+void bhkWorld_SetMotion(NiNode*, int, bool, bool, bool);
+const char* ConvertFromUni(const char*, bool);
 extern const char* DAT_01199e8c[2];
 void FUN_00b4f5e0(char*, const char*, const char*, bool);
 void FUN_00b55840(const char*, bool, NiPointer<NiTexture>&, bool, bool);
-NiTexture* FUN_004af8a0();
+NiTexture* BSFaceGenUtils_GetDefaultDetailModulationTexture();
 extern int DAT_01188b88[3];
 extern const char* DAT_01188c38[5];
 extern TESModel DAT_011c5d10[20];
 extern SettingT<INISettingCollection> DAT_011d5a10, DAT_011d5a44;
-bool FUN_004910d0(NiNode*);
-unsigned int FUN_004af350();
-int FUN_004af340();
+bool Animation_FindSkinnedNode(NiNode*);
+unsigned int NiMaterialProperty_GetType();
+int NiTexturingProperty_GetType();
 class TaskQueueInterface
 {
   public:
     static void CopyStringToBuffer(char*, unsigned int, const char*);
 };
-char* FUN_0040ab30(char*, int);
+char* strrchr_0040ab30(char*, int);
 int strcat_s(char*, unsigned int, const char*);
 extern "C" int __cdecl sprintf_s(char*, unsigned int, const char*, ...);
 class FileFinder
@@ -371,8 +371,8 @@ class FileFinder
     static FILE_LOCATION Exist(const char*, char*, unsigned int, unsigned int);
 };
 extern ActorTaskManager DAT_011c5cf0;
-const NiFixedString& FUN_00448a80();
-void FUN_00577e20(NiNode*);
+const NiFixedString& BSXFlags_Tag();
+void TESObjectREFR_AddAddonNodes(NiNode*);
 struct BipedSkinNameMatch
 {
     const char* name;
@@ -462,7 +462,7 @@ class BGSPerkEntry;
 class TESHairCanBeNPCData
 {
   public:
-    TESHairRaceResult* FUN_004ac110();
+    TESHairRaceResult* TESNPC_GetRace();
 };
 
 // These object and string getters are identical folded functions in the PC executable.

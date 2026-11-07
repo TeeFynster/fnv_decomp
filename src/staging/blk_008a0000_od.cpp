@@ -11,11 +11,12 @@
 
 struct FUN_008a0250_class
 {
-    void FUN_008a0250();
+    void CombatController_SetForceCombat();
 };
 
 // @fnv 0x008a0250
-void FUN_008a0250_class::FUN_008a0250()
+// src: COMMUNITY 0x008a0250
+void FUN_008a0250_class::CombatController_SetForceCombat()
 {
     *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0xc4) = true;
 }
@@ -29,10 +30,11 @@ bool Actor::GetByteAt7C4()
 // Actor.h does not yet declare this entry point; retain its local shell.
 struct FUN_008a1a40_shell : Actor
 {
-    void FUN_008a1a40(Actor* p);
+    void Actor_SetCriticalStage(Actor* p);
 };
 // @fnv 0x008a1a40
-void FUN_008a1a40_shell::FUN_008a1a40(Actor* apActor)
+// src: COMMUNITY 0x008a1a40
+void FUN_008a1a40_shell::Actor_SetCriticalStage(Actor* apActor)
 {
     *reinterpret_cast<Actor**>(&m_eCriticalStage) = apActor;
     ProcessQueuedActorUpdate();
@@ -62,7 +64,7 @@ float __thiscall FUN_008ae4a0_Class::GetField1B8()
 
 struct FUN_008b3b10_Class
 {
-    void FUN_008b3b10();
+    void ActorMover_ResumeMoving();
 };
 
 struct FUN_008b3af0_Class
@@ -169,22 +171,24 @@ struct FUN_008b3af0_Class
     void* m_18c;
     void* m_190;
 
-    void FUN_008b3af0();
+    void Actor_ResumeMoving();
 };
 
 // @fnv 0x008b3af0
-void FUN_008b3af0_Class::FUN_008b3af0()
+// src: XBOX_PDB 0x008b3af0
+void FUN_008b3af0_Class::Actor_ResumeMoving()
 {
-    ((FUN_008b3b10_Class*)m_190)->FUN_008b3b10();
+    ((FUN_008b3b10_Class*)m_190)->ActorMover_ResumeMoving();
 }
 
 struct FUN_008b3b10_class
 {
-    void FUN_008b3b10();
+    void ActorMover_ResumeMoving();
 };
 
 // @fnv 0x008b3b10
-void FUN_008b3b10_class::FUN_008b3b10()
+// src: XBOX_PDB 0x008b3b10
+void FUN_008b3b10_class::ActorMover_ResumeMoving()
 {
     *(char*)((char*)this + 0x72) = 0;
 }
@@ -213,8 +217,8 @@ unsigned char FUN_008b4cf0_class::GetByte65()
 
 struct FUN_00884920_holder
 {
-    bool FUN_00884920();
-    void FUN_008beb50(void*);
+    bool BaseProcess_HasCachedValues();
+    void BaseProcess_GetCachedActorAssistance(void*);
 };
 struct FUN_008beae0_vt
 {
@@ -240,8 +244,8 @@ struct FUN_008beae0 : FUN_008beae0_vt
 // @fnv 0x008beae0
 void FUN_008beae0::ProcessCoverLOSResult()
 {
-    if (*(FUN_00884920_holder**)((char*)this + 0x68) && (*(FUN_00884920_holder**)((char*)this + 0x68))->FUN_00884920())
-        (*(FUN_00884920_holder**)((char*)this + 0x68))->FUN_008beb50(this ? (char*)this + 0xa8 : 0);
+    if (*(FUN_00884920_holder**)((char*)this + 0x68) && (*(FUN_00884920_holder**)((char*)this + 0x68))->BaseProcess_HasCachedValues())
+        (*(FUN_00884920_holder**)((char*)this + 0x68))->BaseProcess_GetCachedActorAssistance(this ? (char*)this + 0xa8 : 0);
     else
         ((FUN_008beae0_vt*)((char*)this + 0xa8))->v13();
 }
@@ -372,11 +376,12 @@ void FUN_008b3a80_Class::ForwardToVtSlot(void* arg)
 
 struct FUN_008b5190_Class
 {
-    bool FUN_008b5190();
+    bool BGSBodyPart_IsSeverablePart();
 };
 
 // @fnv 0x008b5190
-bool FUN_008b5190_Class::FUN_008b5190()
+// src: COMMUNITY 0x008b5190
+bool FUN_008b5190_Class::BGSBodyPart_IsSeverablePart()
 {
     return ((unsigned char*)((char*)this + 0x60))[0] & 1 ? true : false;
 }
@@ -744,12 +749,13 @@ struct FUN_008a81e0_Class
     void* unk064;
     FUN_008a81e0_FieldBase* unk068;
 
-    int FUN_008a81e0(int);
+    int Actor_GetDetectionLevelValue(int);
 };
 
 // If unk068 is set, calls its FUN_008a81e0_FieldCall with param and 0 and returns unk04 of the result, otherwise returns 0.
 // @fnv 0x008a81e0
-int FUN_008a81e0_Class::FUN_008a81e0(int param)
+// src: XBOX_PDB 0x008a81e0
+int FUN_008a81e0_Class::Actor_GetDetectionLevelValue(int param)
 {
     int result = 0;
 
@@ -829,7 +835,8 @@ class B9565Outer
 };
 
 // @fnv 0x008bc270
-void FUN_008bc270(B9565Outer* pOuter, B9565Obj* pObj)
+// src: COMMUNITY 0x008bc270
+void Actor_HandleGrabIKNote(B9565Outer* pOuter, B9565Obj* pObj)
 {
     B9565Outer* a = pOuter;
     B9565Obj* b5 = pObj;
@@ -857,7 +864,7 @@ struct FUN_008be220_vt
 struct FUN_008be220_obj
 {
     float m_uiFilterValue;
-    bool FUN_00884e90(int flag);
+    bool CachedValues_IsDirty(int flag);
 };
 
 struct FUN_008be220_cls
@@ -874,13 +881,14 @@ struct FUN_008be220_cls
     int unk24;
     int unk28;
     FUN_008be220_obj* m_2c;
-    float FUN_008be220(FUN_008be220_vt* a1);
+    float BaseProcess_GetCachedRadius(FUN_008be220_vt* a1);
 };
 
 // @fnv 0x008be220
-float FUN_008be220_cls::FUN_008be220(FUN_008be220_vt* apVt)
+// src: XBOX_PDB 0x008be220
+float FUN_008be220_cls::BaseProcess_GetCachedRadius(FUN_008be220_vt* apVt)
 {
-    return m_2c == 0 ? 0.0f : (!m_2c->FUN_00884e90(1) ? m_2c->m_uiFilterValue : apVt->v0());
+    return m_2c == 0 ? 0.0f : (!m_2c->CachedValues_IsDirty(1) ? m_2c->m_uiFilterValue : apVt->v0());
 }
 
 class Fun008be490Inner
@@ -917,12 +925,13 @@ class FUN_008be490_cls
     int unk24;
     int unk28;
     Fun008be490Inner* m_pInner;
-    float FUN_008be490(Fun008be490Arg* arg);
+    float BaseProcess_GetCachedForwardLength(Fun008be490Arg* arg);
 };
 
 // Returns 0 if m_pInner is null, m_pInner->m_f0c if its Check(0x8000) fails, otherwise arg->GetValue().
 // @fnv 0x008be490
-float FUN_008be490_cls::FUN_008be490(Fun008be490Arg* arg)
+// src: XBOX_PDB 0x008be490
+float FUN_008be490_cls::BaseProcess_GetCachedForwardLength(Fun008be490Arg* arg)
 {
     return m_pInner == 0 ? 0.0f : (!m_pInner->Check(0x8000) ? m_pInner->m_f0c : arg->GetValue());
 }
@@ -983,12 +992,13 @@ class C8BEB50Holder
     int unk28;
     C8BEB50Data* m_pUserData;
 
-    int FUN_008beb50(C8BEB50Source* pkSource);
+    int BaseProcess_GetCachedActorAssistance(C8BEB50Source* pkSource);
 };
 
 // Returns 0 if the data pointer is null, the data's m_iValue if flag 0x800 is clear, otherwise the source's GetValue().
 // @fnv 0x008beb50
-int C8BEB50Holder::FUN_008beb50(C8BEB50Source* pkSource)
+// src: XBOX_PDB 0x008beb50
+int C8BEB50Holder::BaseProcess_GetCachedActorAssistance(C8BEB50Source* pkSource)
 {
     return !m_pUserData ? 0 : (!m_pUserData->IsFlagSet(0x800) ? m_pUserData->m_iValue : pkSource->GetValue());
 }
@@ -1109,12 +1119,13 @@ class FUN_008bec20_cls
     int unk24;
     int unk28;
     Fun008bec20Inner* m_pInner;
-    float FUN_008bec20(Fun008bec20Arg* arg);
+    float BaseProcess_GetCachedMedicineEffectivenessMult(Fun008bec20Arg* arg);
 };
 
 // Returns 0.0f if m_pInner is null, otherwise m_pInner->m_f14 unless IsSomething(16) is set, in which case it returns arg->GetValue().
 // @fnv 0x008bec20
-float FUN_008bec20_cls::FUN_008bec20(Fun008bec20Arg* arg)
+// src: XBOX_PDB 0x008bec20
+float FUN_008bec20_cls::BaseProcess_GetCachedMedicineEffectivenessMult(Fun008bec20Arg* arg)
 {
     return m_pInner == 0 ? 0.0f : (!m_pInner->IsSomething(16) ? m_pInner->m_f14 : arg->GetValue());
 }
@@ -1122,8 +1133,8 @@ float FUN_008bec20_cls::FUN_008bec20(Fun008bec20Arg* arg)
 struct S_008bec80_Base;
 struct S_008bec80_Tgt
 {
-    bool FUN_00884920();
-    void FUN_008becf0(S_008bec80_Base* p);
+    bool BaseProcess_HasCachedValues();
+    void BaseProcess_GetCachedSurvivalEffectivenessMult(S_008bec80_Base* p);
 };
 struct S_008bec80_Base
 {
@@ -1182,15 +1193,16 @@ struct S_008bec80_Head
 };
 struct S_008bec80 : S_008bec80_Head, S_008bec80_Base
 {
-    void FUN_008bec80();
+    void Actor_GetSurvivalEffectivenessMultiplier();
 };
 // If unk68 exists and its FUN_00884920 returns true, calls unk68->FUN_008becf0(this); otherwise calls v6().
 // @fnv 0x008bec80
-void S_008bec80::FUN_008bec80()
+// src: XBOX_PDB 0x008bec80
+void S_008bec80::Actor_GetSurvivalEffectivenessMultiplier()
 {
-    if (unk68 && unk68->FUN_00884920())
+    if (unk68 && unk68->BaseProcess_HasCachedValues())
     {
-        unk68->FUN_008becf0(this);
+        unk68->BaseProcess_GetCachedSurvivalEffectivenessMult(this);
     }
     else
     {
@@ -1224,7 +1236,7 @@ struct FUN_008becf0_Shape
     unsigned int unk14;
     float m_18;
     unsigned int unk1C;
-    bool FUN_00884e90(unsigned int flags);
+    bool CachedValues_IsDirty(unsigned int flags);
 };
 
 struct FUN_008becf0_cls
@@ -1242,13 +1254,14 @@ struct FUN_008becf0_cls
     unsigned int unk28;
     FUN_008becf0_Shape* m_2c;
 
-    float FUN_008becf0(FUN_008becf0_ParamObj* param);
+    float BaseProcess_GetCachedSurvivalEffectivenessMult(FUN_008becf0_ParamObj* param);
 };
 
 // @fnv 0x008becf0
-float FUN_008becf0_cls::FUN_008becf0(FUN_008becf0_ParamObj* param)
+// src: XBOX_PDB 0x008becf0
+float FUN_008becf0_cls::BaseProcess_GetCachedSurvivalEffectivenessMult(FUN_008becf0_ParamObj* param)
 {
-    return (m_2c == 0) ? 0.0f : ((!m_2c->FUN_00884e90(0x80000000)) ? m_2c->m_18 : param->v6());
+    return (m_2c == 0) ? 0.0f : ((!m_2c->CachedValues_IsDirty(0x80000000)) ? m_2c->m_18 : param->v6());
 }
 
 struct PkgData
@@ -1266,7 +1279,7 @@ struct PkgLoc
 {
     PkgLoc();
     ~PkgLoc();
-    void FUN_0067f3c0(void*);
+    void PackageLocation_SetLocReference(void*);
     int unk00;
     int unk04;
     int unk08;
@@ -1285,8 +1298,8 @@ struct Pkg
     void SetPackageType(int);
     void SetMustReachLocation(bool);
     void SetMustComplete(bool);
-    void FUN_00671d30(PkgLoc*);
-    void FUN_00672fc0(PkgTarget*);
+    void SetPackageLocation(PkgLoc*);
+    void SetPackageTarget(PkgTarget*);
     void FUN_00984f60(unsigned int);
     PkgData* GetData();
     void SetFlag200000(bool);
@@ -2081,7 +2094,7 @@ struct MeBase
 };
 struct Player
 {
-    void FUN_00966e50();
+    void PlayerCharacter_ModPickPocketWarning();
 };
 extern Player* g_thePlayer;
 struct Me : MeBase
@@ -2112,16 +2125,17 @@ struct Me : MeBase
     int unk60;
     int unk64;
     Sub68* unk68;
-    bool FUN_00493bb0();
+    bool Actor_IsInCombat();
     Proc* FUN_008d8520();
     CurPkg* GetCurrentPackage();
-    void FUN_008bf500(void* arg);
+    void Actor_InitiatePickPocketWarning(void* arg);
 };
 
 // @fnv 0x008bf500
-void Me::FUN_008bf500(void* arg)
+// src: XBOX_PDB 0x008bf500
+void Me::Actor_InitiatePickPocketWarning(void* arg)
 {
-    if (FUN_00493bb0())
+    if (Actor_IsInCombat())
         return;
     unk68->v133();
     FUN_008d8520()->v401(1);
@@ -2133,11 +2147,11 @@ void Me::FUN_008bf500(void* arg)
     pNewPkg->SetMustReachLocation(true);
     pNewPkg->SetMustComplete(true);
     PkgLoc* pLocation = new PkgLoc;
-    pLocation->FUN_0067f3c0(arg);
-    pNewPkg->FUN_00671d30(pLocation);
+    pLocation->PackageLocation_SetLocReference(arg);
+    pNewPkg->SetPackageLocation(pLocation);
     delete pLocation;
     PkgTarget* target = new PkgTarget;
-    pNewPkg->FUN_00672fc0(target);
+    pNewPkg->SetPackageTarget(target);
     delete target;
     pNewPkg->FUN_00984f60(0x2b);
     pNewPkg->GetData()->FUN_006800b0(0);
@@ -2148,7 +2162,7 @@ void Me::FUN_008bf500(void* arg)
     FUN_008d8520()->v10();
     FUN_008d8520()->v452(this);
     v189(pNewPkg, 0, 1);
-    g_thePlayer->FUN_00966e50();
+    g_thePlayer->PlayerCharacter_ModPickPocketWarning();
 }
 
 struct X38
@@ -2164,17 +2178,17 @@ struct A3
 };
 struct A2
 {
-    NiTransform* FUN_00461130();
+    NiTransform* NiAVObject_GetWorldRotate();
 };
 struct RObj
 {
-    NiTransform* FUN_00461130();
+    NiTransform* NiAVObject_GetWorldRotate();
 };
 struct ResObj
 {
-    void FUN_00440460(const NiPoint3& p);
-    void FUN_0043fa80(void* p);
-    void FUN_00440490(float f);
+    void NiAVObject_SetTranslate(const NiPoint3& p);
+    void SetRotate_0043fa80(void* p);
+    void NiAVObject_SetScale(float f);
 };
 struct NodeObj
 {
@@ -2182,8 +2196,8 @@ struct NodeObj
 };
 struct Glob
 {
-    NodeObj* LoadModel(const char* n, int a, bool b, bool c, bool d, bool e);
-    void FUN_0045a5e0(const char* n);
+    NodeObj* ModelLoader_LoadFile(const char* n, int a, bool b, bool c, bool d, bool e);
+    void ModelLoader_ReleaseFile(const char* n);
 };
 extern Glob* DAT_011c3b3c;
 struct NameObj
@@ -2202,13 +2216,13 @@ struct MidObj
 };
 struct P2
 {
-    bool FUN_008b4360();
+    bool BGSBodyPart_IsExplodablePart();
     int FUN_005e3fa0();
     MidObj* FUN_008d8520();
     unsigned char GetUnk66();
     double FUN_009b0bd0();
     NameObj* FUN_005d8a70();
-    float FUN_009b88c0();
+    float LowProcess_GetPlayerDamageDealt();
 };
 struct P
 {
@@ -2442,7 +2456,7 @@ struct ThisC
     virtual RObj* GetR116(NiTransform* t);
     BaseObj* FUN_004181e0();
     int FUN_008d6f30();
-    double FUN_00567400();
+    double TESObjectREFR_GetScale_00567400();
     ResObj* CreateNodeFromTransform(void* a1, A2* a2, A3* a3, unsigned char a4);
 };
 
@@ -2462,21 +2476,21 @@ ResObj* ThisC::CreateNodeFromTransform(void* pLookupKey, A2* pTransformSource, A
             p4 = p9->GetValueByIndex(pLookupKey);
             if (p4 != 0)
             {
-                if (p4->FUN_008b4360())
+                if (p4->BGSBodyPart_IsExplodablePart())
                 {
                     if (bApplyTransform != 0)
                     {
                         if (p4->FUN_005e3fa0() != 0)
                         {
                             CreateProjectileRef(p4->FUN_005e3fa0(), 0, 0, FUN_008d6f30(), pPlacement->m_24,
-                                                reinterpret_cast<const TrivialValue<NiMatrix3>&>(pTransformSource->FUN_00461130()->m_Rotate));
+                                                reinterpret_cast<const TrivialValue<NiMatrix3>&>(pTransformSource->NiAVObject_GetWorldRotate()->m_Rotate));
                         }
                         if (p4->FUN_008d8520() != 0)
                         {
                             if (p4->GetUnk66() > 0)
                             {
                                 p4->FUN_008d8520()->FUN_004fa6f0(FUN_008d6f30(), &pPlacement->m_24, p4->GetUnk66(),
-                                                                 (float)(FUN_00567400() * p4->FUN_009b0bd0()));
+                                                                 (float)(TESObjectREFR_GetScale_00567400() * p4->FUN_009b0bd0()));
                             }
                         }
                     }
@@ -2485,20 +2499,20 @@ ResObj* ThisC::CreateNodeFromTransform(void* pLookupKey, A2* pTransformSource, A
                         if (pTransformSource != 0)
                         {
                             NodeObj* u;
-                            u = DAT_011c3b3c->LoadModel(p4->FUN_005d8a70()->GetNameV5(), 0, 1, 0, 0, 0);
+                            u = DAT_011c3b3c->ModelLoader_LoadFile(p4->FUN_005d8a70()->GetNameV5(), 0, 1, 0, 0, 0);
                             if (u != 0)
                             {
                                 X38 x_(1.0f);
                                 retValA = u->FUN_00a5d2c0(&x_);
                                 NiTransform t1;
                                 NiTransform t2;
-                                GetR116(&t1)->FUN_00461130()->InvertTransform();
-                                t2 = t1 * *pTransformSource->FUN_00461130();
-                                retValA->FUN_00440460(t2.m_Translate);
-                                retValA->FUN_0043fa80(&t2);
-                                retValA->FUN_00440490(p4->FUN_009b88c0());
+                                GetR116(&t1)->NiAVObject_GetWorldRotate()->InvertTransform();
+                                t2 = t1 * *pTransformSource->NiAVObject_GetWorldRotate();
+                                retValA->NiAVObject_SetTranslate(t2.m_Translate);
+                                retValA->SetRotate_0043fa80(&t2);
+                                retValA->NiAVObject_SetScale(p4->LowProcess_GetPlayerDamageDealt());
                             }
-                            DAT_011c3b3c->FUN_0045a5e0(p4->FUN_005d8a70()->GetNameV5());
+                            DAT_011c3b3c->ModelLoader_ReleaseFile(p4->FUN_005d8a70()->GetNameV5());
                         }
                     }
                 }
@@ -2550,7 +2564,7 @@ struct Sub4
 };
 struct Faction
 {
-    bool FUN_0047d7c0();
+    bool GetEvil();
 };
 struct RefObj
 {
@@ -2822,10 +2836,10 @@ struct RefObj
     virtual void r265(void*, int, int, int, int, int, int, int);
     TESForm* GetOwner();
     ExtraList* GetExtraData();
-    int FUN_008a0d10(int, Actor*, char*, int, int, int, int);
-    void FUN_008bff50();
-    void FUN_008b7c00(int, int);
-    void FUN_008bf7b0(Actor*, TESForm*);
+    int Actor_GetDetectionLevelAgainstActor(int, Actor*, char*, int, int, int, int);
+    void Actor_IncrementMinorCrimes();
+    void Actor_AddFactionMinorCrime(int, int);
+    void Actor_InitiateStealWarning(Actor*, TESForm*);
     ProcV* GetProcess();
 };
 struct ProcV
@@ -3134,11 +3148,11 @@ struct NewObj
     char pad[0x3c];
     static void* operator new(size_t_ n);
     NewObj(int, RefObj*, Actor*, int, int, TESForm*);
-    void FUN_008bff50();
-    void FUN_008b7c00(int, int);
-    void FUN_008bf7b0(Actor*, TESForm*);
-    int FUN_008a0d10(int, Actor*, char*, int, int, int, int);
-    void* FUN_0084e3a0();
+    void Actor_IncrementMinorCrimes();
+    void Actor_AddFactionMinorCrime(int, int);
+    void Actor_InitiateStealWarning(Actor*, TESForm*);
+    int Actor_GetDetectionLevelAgainstActor(int, Actor*, char*, int, int, int, int);
+    void* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     void AddActor(RefObj*);
 };
 struct G67
@@ -3146,12 +3160,12 @@ struct G67
     float FUN_00867da0();
     unsigned int FUN_00867d20();
     char FUN_00867d60();
-    unsigned int FUN_00867c60();
+    unsigned int Calendar_GetYear();
 };
 struct Z
 {
-    RefObj* FUN_00970b30(Faction*, int, int);
-    RefObj* FUN_00970a20(TESForm*, int);
+    RefObj* ProcessLists_GetActorRefInHigh_00970b30(Faction*, int, int);
+    RefObj* ProcessLists_GetActorRefInHigh(TESForm*, int);
     void AddObjectToList(NewObj*);
 };
 // Calls at 0x008bffa0, 0x008bff70 and 0x00964100 lack shared declarations;
@@ -3160,13 +3174,13 @@ struct TheftAlarmRuntimeCalls : Actor
 {
     int GetField228();
     void AddToField(int, int);
-    void* FUN_00964100(int);
+    void* PlayerCharacter_GetPlayerAction(int);
 };
 
 int __fastcall FNV_GetFormType(TESForm* p);
 float __cdecl FUN_0048ebc0(int, bool);
-bool __fastcall FUN_004d1360(void* p);
-unsigned int __cdecl FUN_0047e040(float f);
+bool __fastcall PlayerCharacter_IsHardcore(void* p);
+unsigned int __cdecl TESActorBaseData_GetAlignmentForKarma(float f);
 int __cdecl GetTopicSubTypeName(int, int);
 void __cdecl SetTlsInt(int);
 
@@ -3207,7 +3221,7 @@ void Actor::StealAlarm(TESObjectREFR* apSource, int a2, int aiArg3, int aiArg4, 
     s = apForm;
     if (!s && i)
         s = i->GetOwner();
-    a = FUN_0048ebc0(a2, FUN_004d1360(DAT_011dea3c));
+    a = FUN_0048ebc0(a2, PlayerCharacter_IsHardcore(DAT_011dea3c));
     if (a > DAT_01012060)
     {
         a = a * ((FloatSetting*)&DAT_011cdf84)->Float()->f;
@@ -3218,24 +3232,24 @@ void Actor::StealAlarm(TESObjectREFR* apSource, int a2, int aiArg3, int aiArg4, 
     else if (::FNV_GetFormType(s) == 8)
     {
         ax = (Faction*)s;
-        if (!ax->FUN_0047d7c0())
+        if (!ax->GetEvil())
             f = true;
-        p = ((Z*)&DAT_011e0e80)->FUN_00970b30(ax, 1, 0);
+        p = ((Z*)&DAT_011e0e80)->ProcessLists_GetActorRefInHigh_00970b30(ax, 1, 0);
     }
     else
     {
         aj = s;
         if (aj)
         {
-            q = FUN_0047e040(reinterpret_cast<Sub4*>(reinterpret_cast<char*>(aj) + 0x100)->s3(0x17));
+            q = TESActorBaseData_GetAlignmentForKarma(reinterpret_cast<Sub4*>(reinterpret_cast<char*>(aj) + 0x100)->s3(0x17));
             if (q != 2 && q != 4)
                 f = true;
-            p = ((Z*)&DAT_011e0e80)->FUN_00970a20(aj, 1);
+            p = ((Z*)&DAT_011e0e80)->ProcessLists_GetActorRefInHigh(aj, 1);
         }
     }
     if (f)
         static_cast<PlayerCharacter*>(DAT_011dea3c)->ModifyKarmaForTheft((int)((FloatSetting*)&DAT_011cde20)->Float()->f);
-    if (p && !p->r200() && (b = p->FUN_008a0d10(0, this, &ak, 0, 0, 0, 0)) > 0)
+    if (p && !p->r200() && (b = p->Actor_GetDetectionLevelAgainstActor(0, this, &ak, 0, 0, 0, 0)) > 0)
     {
         k = 0;
         if (a2)
@@ -3243,8 +3257,8 @@ void Actor::StealAlarm(TESObjectREFR* apSource, int a2, int aiArg3, int aiArg4, 
         else
             k = new NewObj(0, reinterpret_cast<RefObj*>(apSource), this, a2, aiArg4, apForm);
         p->GetExtraData()->AddOrCreateExtraItem(k, ((G67*)&DAT_011de7b8)->FUN_00867da0());
-        p->FUN_008bff50();
-        p->FUN_008b7c00(1, 1);
+        p->Actor_IncrementMinorCrimes();
+        p->Actor_AddFactionMinorCrime(1, 1);
         ((Z*)&DAT_011e0e80)->AddObjectToList(k);
         k->AddActor(p);
         if (this->m_bActorListValid)
@@ -3267,21 +3281,21 @@ void Actor::StealAlarm(TESObjectREFR* apSource, int a2, int aiArg3, int aiArg4, 
         }
         else
         {
-            if (!static_cast<TheftAlarmRuntimeCalls*>(DAT_011dea3c)->FUN_00964100(5))
+            if (!static_cast<TheftAlarmRuntimeCalls*>(DAT_011dea3c)->PlayerCharacter_GetPlayerAction(5))
             {
                 this->m_bActorListValid = 1;
                 this->m_iIntegerAfterActorListValid = (((G67*)&DAT_011de7b8)->FUN_00867d20() << 9) |
                              (signed char)((G67*)&DAT_011de7b8)->FUN_00867d60() |
-                             (((G67*)&DAT_011de7b8)->FUN_00867c60() << 13);
+                             (((G67*)&DAT_011de7b8)->Calendar_GetYear() << 13);
             }
         }
         if (h)
         {
-            p->FUN_008bf7b0(this, apForm);
+            p->Actor_InitiateStealWarning(this, apForm);
             return;
         }
         SetTlsInt((int)s);
-        this->FUN_0057bd60(reinterpret_cast<Actor*>(k->FUN_0084e3a0()));
+        this->EffectSetting_SetLight(reinterpret_cast<Actor*>(k->GetHavokWorldObjectCountInSceneGraph_0084e3a0()));
         l = GetTopicSubTypeName(2, 9);
         p->GetProcess()->p169(p, l, 0, 0, 1, 0);
         SetTlsInt(0);

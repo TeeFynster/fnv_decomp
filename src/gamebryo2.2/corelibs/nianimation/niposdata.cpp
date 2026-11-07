@@ -77,7 +77,7 @@ class NiPosDataOperations : public NiPosData
     void SetKeys(void*, unsigned int, int);
     bool Equals(const NiPosDataOperations*);
     void SaveToStream(NiStream&);
-    void FUN_00a89af0(NiStream&);
+    void nullsub_3(NiStream&);
     void AppendCameraPathEntries(FUN_0096ad30_param*);
     void AddViewerEntries(FUN_0096ad30_param*);
     void FUN_00a5d510(NiPosDataOperations**);
@@ -139,7 +139,8 @@ struct BaseUnk
     int _04;
 };
 // @fnv 0x00a49020
-NiPosData* FUN_00a49020()
+// src: EXE 0x00a49020
+NiPosData* NiPosData_CreateObject()
 {
     NiPosData* p = (NiPosData*)BSFadeNode::operator new(sizeof(NiPosData));
     if (p)
@@ -229,7 +230,7 @@ extern SavePosKeys g_apfnSavePosKeys[];
 // @fnv 0x00a49300
 void NiPosDataOperations::SaveToStream(NiStream& kStream)
 {
-    FUN_00a89af0(kStream);
+    nullsub_3(kStream);
     kStream.GetBinaryStream()->Write((const void*)&m_uiNumKeys, 4);
     if (m_uiNumKeys > 0)
     {
@@ -240,8 +241,8 @@ void NiPosDataOperations::SaveToStream(NiStream& kStream)
 
 extern char str_01097164[];
 extern int DAT_011f3f68;
-extern int __cdecl FUN_00a7d330(int);
-extern int __cdecl FUN_00a7d510(char*, int);
+extern int __cdecl NiViewerStrings_NiGetViewerString_Title(int);
+extern int __cdecl NiGetViewerString_00a7d510(char*, int);
 
 struct FUN_0096ad30_param
 {
@@ -263,14 +264,14 @@ void NiPosDataOperations::AddViewerEntries(FUN_0096ad30_param* param)
     unsigned int index;
 
     AppendCameraPathEntries(param);
-    value = FUN_00a7d330(DAT_011f3f68);
+    value = NiViewerStrings_NiGetViewerString_Title(DAT_011f3f68);
     index = param->unk0A;
     if (index >= (unsigned int)param->unk08)
     {
         param->FUN_0096ad30((unsigned int)param->unk0E + index);
     }
     param->FUN_0096ae90(index, &value);
-    value = FUN_00a7d510(str_01097164, m_uiNumKeys);
+    value = NiGetViewerString_00a7d510(str_01097164, m_uiNumKeys);
     index = param->unk0A;
     if (index >= (unsigned int)param->unk08)
     {
@@ -280,7 +281,7 @@ void NiPosDataOperations::AddViewerEntries(FUN_0096ad30_param* param)
 }
 
 
-void FUN_00a3d630(int, int, int, int, float, float, unsigned int*, unsigned int*);
+void NiAnimationKey_CopySequence(int, int, int, int, float, float, unsigned int*, unsigned int*);
 
 
 // @fnv 0x00a49140
@@ -300,7 +301,7 @@ void NiPosDataOperations::CopyKeyRange(float a1, float a2, NiPosDataOperations**
     {
         uiOut1 = 0;
         uiOut2 = 0;
-        FUN_00a3d630(1, m_eRequestType, (int)m_pKeyArray, (int)m_uiNumKeys, a1, a2, &uiOut1, &uiOut2);
+        NiAnimationKey_CopySequence(1, m_eRequestType, (int)m_pKeyArray, (int)m_uiNumKeys, a1, a2, &uiOut1, &uiOut2);
         p->SetColorKeys((PositionKeyInterpolator*)uiOut1, uiOut2, m_eRequestType);
     }
     NiPosDataOperations* old = *apObj;

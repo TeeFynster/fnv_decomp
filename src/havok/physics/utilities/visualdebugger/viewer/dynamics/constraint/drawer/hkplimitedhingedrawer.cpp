@@ -28,8 +28,8 @@ struct Matrix;
 struct __declspec(align(16)) HingeVectorStorageLocal_00de
 {
     __m128 value;
-    void FUN_00c7f640(const Matrix*, const HingeVectorStorageLocal_00de*);
-    void FUN_00c7f700(const void*, const HingeVectorStorageLocal_00de*);
+    void setTransformedPos_00c7f640(const Matrix*, const HingeVectorStorageLocal_00de*);
+    void hkVector4_setRotatedDir(const void*, const HingeVectorStorageLocal_00de*);
 };
 struct AxisPair
 {
@@ -41,7 +41,7 @@ struct Matrix
 };
 struct Shape
 {
-    void FUN_00de4950(float, float, float, int, const HingeVectorStorageLocal_00de*, const HingeVectorStorageLocal_00de*, const HingeVectorStorageLocal_00de*);
+    void UpdateState_00de4950(float, float, float, int, const HingeVectorStorageLocal_00de*, const HingeVectorStorageLocal_00de*, const HingeVectorStorageLocal_00de*);
 };
 struct Array
 {
@@ -66,7 +66,7 @@ struct Allocator
     virtual void v3();
     virtual void freeBuffer(void*, int);
 };
-void __cdecl FUN_00c908c0(Allocator*, Array*, int, int);
+void __cdecl hkArrayUtil__reserve(Allocator*, Array*, int, int);
 unsigned __cdecl PackColorBigEndian(float, float, float, float);
 struct Display
 {
@@ -89,7 +89,7 @@ struct Display
 struct DisplayContext
 {
     int a, b, c, d;
-    void FUN_00e10a10(Display*);
+    void hkpPrimitiveDrawer_setDisplayHandler(Display*);
 };
 // hkpLimitedHingeConstraintData seen as 16-byte rows (constraint instance +0xc): header row, atom transforms/axes, angle-limit enable byte, min/max angle
 struct LimitedHingeDataView
@@ -113,10 +113,10 @@ struct Viewer
     HingeVectorStorageLocal_00de m60, m70, m80, m90, ma0, mb0;
     DisplayContext context;
     Shape shape;
-    void FUN_00de47e0(Input*, Matrix*, Matrix*);
-    void FUN_00de4530(int, int);
-    void FUN_00de44c0(int, int);
-    void FUN_00de7a70(Input*, Display*, int, int);
+    void hkpConstraintDrawer_updateCommonParameters(Input*, Matrix*, Matrix*);
+    void hkpConstraintDrawer_drawBodyFrames(int, int);
+    void hkpConstraintDrawer_drawPivots(int, int);
+    void DrawHingeConstraintGeometry(Input*, Display*, int, int);
 };
 __forceinline __m128 broadcast(float value)
 {
@@ -131,20 +131,21 @@ __forceinline __m128 broadcastScalar(float value)
 }
 // Draws lines via display->line and, when data->enabled and the range is small, a shape via display->geometry, using vectors transformed from input->data.
 // @fnv 0x00de7a70
-void Viewer::FUN_00de7a70(Input* input, Display* display, int id, int tag)
+// src: GUESS 0x00de7a70 (confidence: medium)
+void Viewer::DrawHingeConstraintGeometry(Input* input, Display* display, int id, int tag)
 {
     LimitedHingeDataView* data = input->data;
-    context.FUN_00e10a10(display);
+    context.hkpPrimitiveDrawer_setDisplayHandler(display);
     Matrix first, second;
-    FUN_00de47e0(input, &first, &second);
-    origin.FUN_00c7f640(&first, &data->v90);
-    pivot.FUN_00c7f640(&second, &data->v50);
-    FUN_00de4530(id, tag);
-    FUN_00de44c0(id, tag);
+    hkpConstraintDrawer_updateCommonParameters(input, &first, &second);
+    origin.setTransformedPos_00c7f640(&first, &data->v90);
+    pivot.setTransformedPos_00c7f640(&second, &data->v50);
+    hkpConstraintDrawer_drawBodyFrames(id, tag);
+    hkpConstraintDrawer_drawPivots(id, tag);
     AxisPair axes;
     DrawWork scratch;
-    axes.axis.FUN_00c7f700(&m90, &data->v60);
-    axes.other.FUN_00c7f700(&m90, &data->v80);
+    axes.axis.hkVector4_setRotatedDir(&m90, &data->v60);
+    axes.other.hkVector4_setRotatedDir(&m90, &data->v80);
     display->line(&pivot, &origin, 0xffff0000, id, tag);
     {
         float distance = length * multiplier;
@@ -155,7 +156,7 @@ void Viewer::FUN_00de7a70(Input* input, Display* display, int id, int tag)
         display->line(&scratch.line.base, &scratch.line.axis, PackColorBigEndian(0.0f, 0.5f, 1.0f, 1.0f), id, tag);
     }
     {
-        scratch.line.axis.FUN_00c7f700(&m60, &data->v20);
+        scratch.line.axis.hkVector4_setRotatedDir(&m60, &data->v20);
         float distance = length * multiplier;
         scratch.line.base.value =
             _mm_add_ps(pivot.value, _mm_mul_ps(broadcastScalar(0.75 * distance), scratch.line.axis.value));
@@ -168,7 +169,7 @@ void Viewer::FUN_00de7a70(Input* input, Display* display, int id, int tag)
         float high = data->maximum, low = data->minimum;
         if (high - low < 100000000376832.0)
         {
-            shape.FUN_00de4950(scale * multiplier, low, high, flags, &origin, &axes.axis, &axes.other);
+            shape.UpdateState_00de4950(scale * multiplier, low, high, flags, &origin, &axes.axis, &axes.other);
             scratch.shapes.data = 0;
             scratch.shapes.size = 0;
             scratch.shapes.capacity = 0x80000000;
@@ -180,7 +181,7 @@ void Viewer::FUN_00de7a70(Input* input, Display* display, int id, int tag)
                 capacity *= 2;
                 if (capacity <= 1)
                     capacity = 1;
-                FUN_00c908c0(allocator, &scratch.shapes, capacity, 4);
+                hkArrayUtil__reserve(allocator, &scratch.shapes, capacity, 4);
             }
             scratch.shapes.size = 1;
             scratch.shapes.data[0] = &shape;
@@ -201,7 +202,7 @@ void Viewer::FUN_00de7a70(Input* input, Display* display, int id, int tag)
         display->line(&scratch.line.base, &scratch.line.end, 0xffffff00, id, tag);
     }
     {
-        scratch.line.axis.FUN_00c7f700(&m60, &data->v40);
+        scratch.line.axis.hkVector4_setRotatedDir(&m60, &data->v40);
         float distance = length * multiplier;
 
         float magnitude = float(0.75 * distance);

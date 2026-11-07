@@ -73,7 +73,8 @@ class MemHeap
 
 // If p is non-null, clears the field at p-0x10 and calls heap->Free on the block at p minus the offset stored at p-8, with size from p-0xc plus 0x10.
 // @fnv 0x00c85660
-void __cdecl FUN_00c85660(MemHeap* heap, char* apBlock)
+// src: HAVOK_LIB 0x00c85660
+void __cdecl hkMemoryRouter_alignedFree(MemHeap* heap, char* apBlock)
 {
     if (apBlock == 0)
     {
@@ -100,7 +101,8 @@ struct FNV_BlockHeader
 
 // If data is non-null, clears the block header's first field and dispatches the header with its size plus 0x10 to owner->unk08.
 // @fnv 0x00c856c0
-void FUN_00c856c0(FNV_Dispatch* owner, char* data)
+// src: HAVOK_LIB 0x00c856c0
+void hkMemoryRouter_easyFree(FNV_Dispatch* owner, char* data)
 {
     if (data == 0)
         return;
@@ -153,7 +155,8 @@ namespace fnv_00c85760 {
 extern DWORD g_dwTlsIndex;
 
 // @fnv 0x00c85760
-void* FUN_00c85760()
+// src: XBOX_PDB 0x00c85760
+void* hkMemoryRouter_getInstancePtr()
 {
     return TlsGetValue(g_dwTlsIndex);
 }

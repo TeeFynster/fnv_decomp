@@ -32,10 +32,10 @@ class NiBoolTimelineInterpolator : public NiBoolInterpolator
     void* ReleaseRef(unsigned int flags);
     void AppendString(StrArr* pkStrings);
     void CloneTo(NiBoolTimelineInterpolator* dest, CloningProcess& cloning);
-    NiBoolTimelineInterpolator* FUN_00a52f80(CloningProcess& cloning);
+    NiBoolTimelineInterpolator* CreateClone_00a52f80(CloningProcess& cloning);
     bool EvaluateBoolAtTime(float time, void* target, bool& out);
     bool Update(float time, NiObjectNET* target, bool& out);
-    bool FUN_00a52d10();
+    bool IsEqual_00a52d10();
 
     unsigned int m_uiLastIndex;
     bool m_bBoolValue;

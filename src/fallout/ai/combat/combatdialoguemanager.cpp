@@ -5,14 +5,15 @@
 #include "../../../../include/CombatController.h"
 struct CombatDialogueHandler
 {
-    bool FUN_00983970(CombatController*, int, int, bool);
+    bool CombatDialogueManager_StartDialogue(CombatController*, int, int, bool);
     bool TryStartDialogue(CombatActor*, CombatActor*, int, int, bool, CombatController*);
 };
 // Starts dialogue with the combat controller's actors, dialogue type, topic and interrupt flag.
 // @fnv 0x00983970
-bool CombatDialogueHandler::FUN_00983970(CombatController* apCombatController, int aiDialogueType, int aiDialogueTopic,
+// src: XBOX_PDB 0x00983970
+bool CombatDialogueHandler::CombatDialogueManager_StartDialogue(CombatController* apCombatController, int aiDialogueType, int aiDialogueTopic,
                                          bool abInterrupt)
 {
-    return TryStartDialogue(apCombatController->GetFieldBC(), apCombatController->FUN_004030b0(),
+    return TryStartDialogue(apCombatController->GetFieldBC(), apCombatController->CombatController_GetTarget(),
                             aiDialogueType, aiDialogueTopic, abInterrupt, apCombatController);
 }

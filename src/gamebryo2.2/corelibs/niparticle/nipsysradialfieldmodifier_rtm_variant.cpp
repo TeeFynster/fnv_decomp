@@ -15,7 +15,7 @@
 // src/gamebryo2.2/corelibs/niparticle/nipsysradialfieldmodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysradialfieldmodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern "C" void* g_012026b0;
-void* __cdecl FUN_00c285c0();
+void* __cdecl NiPSysRadialFieldModifier_GetRTTI();
 extern int DAT_010c0b5c;
 struct FUN_00c31ff0 : NiPSysPositionModifier
 {
@@ -28,7 +28,7 @@ struct FUN_00c31ff0 : NiPSysPositionModifier
     FUN_00c31ff0();
 };
 extern "C" char __stdcall FUN_00c32060(void*);
-unsigned char __stdcall FUN_00c285a0(void* p);
+unsigned char __stdcall NiPSysRadialFieldModifier_IsEqual(void* p);
 struct S_00c28a90_Arr
 {
     int unk00;
@@ -57,8 +57,8 @@ struct S_00c28a90_Base
     void FUN_00c322b0(S_00c28a90_Arr* a);
 };
 extern const char* DAT_012026b0;
-char* __cdecl FUN_00a7d330(const char* s);
-char* __cdecl FUN_00a7d550(const char* name, float value);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* s);
+char* __cdecl NiGetViewerString_00a7d550(const char* name, float value);
 struct S_00c28a90 : S_00c28a90_Base
 {
     float m30;
@@ -96,7 +96,7 @@ struct FieldMod
 };
 
 extern int DAT_010be99c;
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct RadialFieldObject_00c285d0 : FUN_00c31ff0
 {
@@ -115,14 +115,15 @@ struct RadialFieldObject_00c285d0 : FUN_00c31ff0
 struct FUN_00c285d0_cls
 {
     int unk0;
-    void FUN_00c32020(void* obj, unsigned int a1);
-    void* FUN_00c285d0(unsigned int a1);
+    void NiPSysFieldModifier_CopyMembers(void* obj, unsigned int a1);
+    void* NiPSysRadialFieldModifier_CreateClone(unsigned int a1);
 };
 
 // @fnv 0x00c285d0
-void* FUN_00c285d0_cls::FUN_00c285d0(unsigned int a1)
+// src: XBOX_PDB 0x00c285d0
+void* FUN_00c285d0_cls::NiPSysRadialFieldModifier_CreateClone(unsigned int a1)
 {
-    RadialFieldObject_00c285d0* p = new (FUN_00aa13e0(0x34)) RadialFieldObject_00c285d0;
-    FUN_00c32020(p, a1);
+    RadialFieldObject_00c285d0* p = new (Object_DispatchCommandFour(0x34)) RadialFieldObject_00c285d0;
+    NiPSysFieldModifier_CopyMembers(p, a1);
     return p;
 }

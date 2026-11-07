@@ -6,7 +6,8 @@
 
 // FUN_00cbfb90: stdcall, 7 stack params, returns the last one.
 // @fnv 0x00cbfb90
-int __stdcall FUN_00cbfb90(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+// src: COMMUNITY 0x00cbfb90
+int __stdcall bhkCollisionFilter_numShapeKeyHitsLimitBreached(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
     return a7;
 }

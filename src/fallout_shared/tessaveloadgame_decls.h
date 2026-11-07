@@ -19,7 +19,7 @@ class ChangesMap : public NiTPointerMap<unsigned int, TESObjectREFR*>
 {
   public:
     bool HasFormChanges(TESForm*, bool);
-    bool FUN_00855220(unsigned int, bool);
+    bool RemoveChanges(unsigned int, bool);
 };
 class BGSNote;
 class BGSCameraShot;

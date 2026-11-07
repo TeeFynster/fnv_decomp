@@ -10,10 +10,11 @@ struct PlaceHolder
 {
     char _pad[0x24];
     char* m_h;
-    void FUN_00e81c60(char*&);
+    void NiShaderConstantMapEntry_SetVariableName(char*&);
 };
 // @fnv 0x00e81c60
-void PlaceHolder::FUN_00e81c60(char*& kHandle)
+// src: COMMUNITY 0x00e81c60
+void PlaceHolder::NiShaderConstantMapEntry_SetVariableName(char*& kHandle)
 {
     char* pkSrc = kHandle;
     if (m_h != pkSrc)

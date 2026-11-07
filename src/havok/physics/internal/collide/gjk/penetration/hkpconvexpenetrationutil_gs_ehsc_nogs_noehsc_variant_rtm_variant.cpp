@@ -33,7 +33,7 @@ struct Obj
     int m_iThirdValue;
     int m_auiShapeKeys[4];
     Entry m_usTrailingValue[4];
-    void FUN_00e2d440();
+    void ProcessEntries_00e2d440();
     void SetEntries(const hkVector4* a, const hkVector4* b, const hkVector4* c);
 };
 struct FUN_00df9c40_Obj
@@ -89,7 +89,7 @@ struct hkpCdVertexPairDF9B
 class hkpMinkowskiDF9B
 {
   public:
-    void FUN_00df9b50(const hkVector4& kDirection, hkpCdVertexPairDF9B& kOut) const;
+    void UpdateState_00df9b50(const hkVector4& kDirection, hkpCdVertexPairDF9B& kOut) const;
 
     hkTransform m_kTransform;
     unsigned int unk40, unk44, unk48, unk4C, unk50;
@@ -125,9 +125,9 @@ struct S00df9ef0_Hit
 };
 struct S00df9ef0_Obj
 {
-    void FUN_00df9b50(const hkVector4* in, hkVector4* out);
+    void UpdateState_00df9b50(const hkVector4* in, hkVector4* out);
 
-    void FUN_00df9ef0(hkVector4* p, S00df9ef0_Pad<hkVector4> r, S00df9ef0_Hit* q, S00df9ef0_Pad<float> outF);
+    void ComputeValues_00df9ef0(hkVector4* p, S00df9ef0_Pad<hkVector4> r, S00df9ef0_Hit* q, S00df9ef0_Pad<float> outF);
 };
 static float S00df9ef0_Dot3(__m128 v)
 {
@@ -164,7 +164,7 @@ struct Edges
 };
 struct Result4 : hkVector4
 {
-    __declspec(noalias) void FUN_004b4ab0(const Edges* edges, const Tri* tri);
+    __declspec(noalias) void hkVector4_setRotatedInverseDir(const Edges* edges, const Tri* tri);
 };
 struct Shape
 {
@@ -173,8 +173,8 @@ struct Shape
     int unk08;
     int m_iThirdValue;
     int m_10;
-    int FUN_00dfb040(const Tri* tri, const hkVector4* pos, int* outA, int* outB);
-    int FUN_00e2d1b0(int a, int b, const hkVector4* pos);
+    int hkWingedEdge_findVisibilityBoundaryEdges(const Tri* tri, const hkVector4* pos, int* outA, int* outB);
+    int AllocateTriangleFan(int a, int b, const hkVector4* pos);
 };
 struct Tester
 {
@@ -195,7 +195,7 @@ struct Tester
     int unk38;
     int unk3C;
     hkVector4 m_40;
-    int FUN_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int* result);
+    int ComputeValues_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int* result);
 };
 
 extern "C" void _ReadWriteBarrier();
@@ -228,7 +228,7 @@ extern const float DAT_01017718;
 extern const float DAT_01016248;
 extern const double DAT_010c9300;
 extern const int DAT_01267e30;
-void __cdecl FUN_00cd7530(const void* g, void* a, void* b, void* c, void* out);
+void __cdecl Hkpconvexpenetrationutil_ComputeTriangleBarycentricCoordinates(const void* g, void* a, void* b, void* c, void* out);
 
 struct Scalar
 {
@@ -315,10 +315,10 @@ struct Host
     int unk64;
     hkVector4* pts;
     int feat;
-    void FUN_00df9b50(const hkVector4* direction, Support* support);
+    void UpdateState_00df9b50(const hkVector4* direction, Support* support);
     void PushVectorTriple(const Support* support);
-    void FUN_00df9ef0(const hkVector4* direction, const hkVector4* point, Support* support, float* distance);
-    int FUN_00df9fe0(Output* out, int* pfeat);
+    void ComputeValues_00df9ef0(const hkVector4* direction, const hkVector4* point, Support* support, float* distance);
+    int ProcessAndReturnValue_00df9fe0(Output* out, int* pfeat);
 };
 
 static inline float absScalar(float v)
@@ -347,7 +347,8 @@ static __forceinline void makePerp(const hkVector4& edge, hkVector4& perp)
     perp.m_vComponents.m128_f32[sel] = -edge.m_vComponents.m128_f32[other];
 }
 // @fnv 0x00df9fe0
-int Host::FUN_00df9fe0(Output* out, int* pfeat)
+// src: GUESS 0x00df9fe0 (confidence: low)
+int Host::ProcessAndReturnValue_00df9fe0(Output* out, int* pfeat)
 {
     const hkVector4* point;
     int best = -1;
@@ -448,7 +449,7 @@ stage0: {
     }
     if (lv <= thresh)
         initial.m_vComponents = DAT_01268380;
-    FUN_00df9b50(&initial, &support);
+    UpdateState_00df9b50(&initial, &support);
     PushVectorTriple(&support);
     point = pts;
     float nextLen = point[0].dot(point[0]);
@@ -460,12 +461,12 @@ stage0: {
 pointSupport: {
     point = pts;
     best = 1;
-    FUN_00df9b50(point, &support2);
+    UpdateState_00df9b50(point, &support2);
     hkVector4 delta, negative;
     delta.sub(support2.c, pts[0]);
     float distance = delta.dot(delta);
     negative.m_vComponents = _mm_xor_ps(point->m_vComponents, DAT_010c44d0);
-    FUN_00df9b50(&negative, &support);
+    UpdateState_00df9b50(&negative, &support);
     hkVector4 delta2;
     delta2.sub(support.c, pts[0]);
     float distance2 = delta2.dot(delta2);
@@ -486,8 +487,8 @@ lineSupport: {
     perp.normalize();
     second.normalize();
     float d1, d2;
-    FUN_00df9ef0(&perp, pts, &support, &d1);
-    FUN_00df9ef0(&second, pts, &support2, &d2);
+    ComputeValues_00df9ef0(&perp, pts, &support, &d1);
+    ComputeValues_00df9ef0(&second, pts, &support2, &d2);
     if (d1 > d2)
     {
         PushVectorTriple(&support);
@@ -500,7 +501,7 @@ triangleSupport: {
     best = 3;
     normal.normalize();
     float distance;
-    FUN_00df9ef0(&normal, pts, &support, &distance);
+    ComputeValues_00df9ef0(&normal, pts, &support, &distance);
     if (distance < f40)
         goto outTriangle;
     PushVectorTriple(&support);
@@ -537,7 +538,7 @@ outLine: {
 outTriangle: {
     out->distance = 0.0f;
     out->direction = normal;
-    FUN_00cd7530(&DAT_01267e30, pts, &pts[1], &pts[2], &scratch);
+    Hkpconvexpenetrationutil_ComputeTriangleBarycentricCoordinates(&DAT_01267e30, pts, &pts[1], &pts[2], &scratch);
     __m128 c0 = _mm_load_ss(&scratch.m_vComponents.m128_f32[0]);
     __m128 c1, c2;
     {

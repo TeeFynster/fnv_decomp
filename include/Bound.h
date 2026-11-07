@@ -31,13 +31,13 @@ public:
         return radius;
     }
     float Radius() const;
-    float FUN_0050ebf0();
+    float TESBoundObject_GetBoundSize();
     float FUN_0084d030();
     NiPoint3& FUN_006815c0();
-    void FUN_00439680(const NiPoint3&);
-    void FUN_004396b0(const Matrix&);
-    void FUN_00c39270(NiPoint3* out);
-    void FUN_00c38b00(Geometry*, Geometry*, Color);
+    void BSMultiBound_SetHalfExtents(const NiPoint3&);
+    void BSMultiBoundAABB_SetAxis(const Matrix&);
+    void BSMultiBoundAABB_GetVertices(NiPoint3* out);
+    void BSMultiBoundAABB_MakeDebugGeom(Geometry*, Geometry*, Color);
     void Recalculate(unsigned short, RenderPoint3*);
     void ComputeBoundingSphere(unsigned short, NiPoint3*);
     void Calculate(unsigned short, void*);

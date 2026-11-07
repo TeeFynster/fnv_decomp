@@ -118,7 +118,7 @@ __forceinline NP::~NP()
     }
 }
 
-extern "C" void __fastcall FUN_00a36890(void*);
+extern "C" void __fastcall NiBlendInterpolator_NiBlendInterpolator(void*);
 extern int DAT_0109750c;
 struct FUN_00a409b0_class
 {
@@ -128,19 +128,20 @@ struct FUN_00a409b0_class
 // @fnv 0x00a409b0
 FUN_00a409b0_class::FUN_00a409b0_class()
 {
-    FUN_00a36890(this);
+    NiBlendInterpolator_NiBlendInterpolator(this);
     vtbl = (void*)&DAT_0109750c;
 }
 
-void __fastcall FUN_00a36890(void*);
+void __fastcall NiBlendInterpolator_NiBlendInterpolator(void*);
 
 // @fnv 0x00a409d0
-void* __cdecl FUN_00a409d0()
+// src: EXE 0x00a409d0
+void* __cdecl NiBlendTransformInterpolator_CreateObject()
 {
     void* p = NiObject::operator new(0x30);
     if (p)
     {
-        FUN_00a36890(p);
+        NiBlendInterpolator_NiBlendInterpolator(p);
         *(void**)p = (void*)0x0109750c;
         return p;
     }
@@ -153,7 +154,8 @@ extern int DAT_010975fc;
 
 // Allocates a 0x40-byte BSFadeNode, initialises it via InitTimeController, sets its vtable to DAT_010975fc and returns it, or returns 0 on allocation failure.
 // @fnv 0x00a411f0
-int* __cdecl FUN_00a411f0()
+// src: EXE 0x00a411f0
+int* __cdecl NiFloatExtraDataController_CreateObject()
 {
     int* p = static_cast<int*>(NiObject::operator new(0x40));
     if (p)
@@ -167,12 +169,13 @@ int* __cdecl FUN_00a411f0()
 }  // namespace fnv_00a411f0
 
 // @fnv 0x00a42050
-float FUN_00a42050(float afT, float afFrom, float afTo)
+// src: GAMEBRYO_LIB 0x00a42050
+float NiInterpScalar_Linear(float afT, float afFrom, float afTo)
 {
     return afFrom * (1.0f - afT) + afTo * afT;
 }
 
-void __fastcall FUN_00a36890(void*);
+void __fastcall NiBlendInterpolator_NiBlendInterpolator(void*);
 extern int DAT_01097904;
 
 struct FUN_00a42f60
@@ -186,7 +189,7 @@ struct FUN_00a42f60
 // @fnv 0x00a42f60
 FUN_00a42f60::FUN_00a42f60()
 {
-    FUN_00a36890(this);
+    NiBlendInterpolator_NiBlendInterpolator(this);
     m_f = 0.0f;
     m_pVTable = &DAT_01097904;
 }
@@ -294,12 +297,13 @@ void FUN_00a57870_Class::ReleaseString()
 
 // Allocates a 0x34-byte BSFadeNode, runs FUN_00a36890 on it, zeroes the float at offset 0x30, sets its vtable, and returns it (or null).
 // @fnv 0x00a42f90
-void* __cdecl FUN_00a42f90()
+// src: EXE 0x00a42f90
+void* __cdecl BSBlendTreadTransfInterpolator_CreateObject()
 {
     void* p = NiObject::operator new(0x34);
     if (p)
     {
-        FUN_00a36890(p);
+        NiBlendInterpolator_NiBlendInterpolator(p);
         *(float*)((char*)p + 0x30) = 0.0f;
         *(int*)p = (int)&DAT_01097904;
         return p;
@@ -339,7 +343,8 @@ struct BaseHolder
 };
 // Allocates a 0x24-byte BSFadeNode, initialises it via FUN_00a57f20, sets its vtable and a 0xffff field, and returns it (or null).
 // @fnv 0x00a50ad0
-void* __cdecl FUN_00a50ad0()
+// src: EXE 0x00a50ad0
+void* __cdecl NiBSplineFloatInterpolator_CreateObject()
 {
     void* p = NiObject::operator new(0x24);
     if (p)
@@ -356,7 +361,8 @@ void __fastcall _Call_a5d3a0(void*);
 extern int DAT_01099e54;
 
 // @fnv 0x00a51e10
-void* __cdecl FUN_00a51e10()
+// src: EXE 0x00a51e10
+void* __cdecl NiBSplineData_CreateObject()
 {
     void* p = NiObject::operator new(0x18);
     if (p)
@@ -413,16 +419,17 @@ void* __thiscall FUN_00a54160_class::FUN_00a54160(unsigned char flags)
     return this;
 }
 
-void __cdecl FUN_00a57500(NiFixedString*);
-void __cdecl FUN_00a76960(void*, void*);
+void __cdecl NiStandardizeFilePath(NiFixedString*);
+void __cdecl NiImageConverter_ConvertFilenameToPlatformSpecific_(void*, void*);
 
 struct FUN_00a5fba0_class
 {
-    void __thiscall FUN_00a5fba0(const NiFixedString* kFilename);
+    void __thiscall NiSourceTexture_SetFilePath(const NiFixedString* kFilename);
 };
 // Assigns kFilename's handle to the NiFixedString at this+0x30 with refcount updates, then calls FUN_00a57500 and FUN_00a76960 on it.
 // @fnv 0x00a5fba0
-void __thiscall FUN_00a5fba0_class::FUN_00a5fba0(const NiFixedString* kFilename)
+// src: COMMUNITY 0x00a5fba0
+void __thiscall FUN_00a5fba0_class::NiSourceTexture_SetFilePath(const NiFixedString* kFilename)
 {
     const char* kHandle = kFilename->m_kHandle;
     NiFixedString* pDest = (NiFixedString*)((char*)this + 0x30);
@@ -434,13 +441,14 @@ void __thiscall FUN_00a5fba0_class::FUN_00a5fba0(const NiFixedString* kFilename)
             InterlockedDecrement((volatile long*)(pDest->m_kHandle - 8));
         pDest->m_kHandle = const_cast<char*>(kHandle);
     }
-    FUN_00a57500(pDest);
-    FUN_00a76960(pDest, (char*)this + 0x34);
+    NiStandardizeFilePath(pDest);
+    NiImageConverter_ConvertFilenameToPlatformSpecific_(pDest, (char*)this + 0x34);
 }
 
 // Hashes the first len&~3 bytes of s four at a time with h*33+c, then hashes remaining chars until NUL, returning h % 513.
 // @fnv 0x00a5b270
-unsigned int __stdcall FUN_00a5b270(const char* pcString, unsigned int uiLength)
+// src: XBOX_PDB 0x00a5b270
+unsigned int __stdcall NiGlobalStringTable_HashFunction(const char* pcString, unsigned int uiLength)
 {
     unsigned int h = 0;
     uiLength &= 0xfffffffc;
@@ -468,7 +476,8 @@ unsigned int __stdcall FUN_00a5b270(const char* pcString, unsigned int uiLength)
 extern "C" unsigned int __cdecl _strcpy_s(char* dst, unsigned int size, const char* src);
 void __cdecl _fnv_StandardizeFilePath(char*);
 // @fnv 0x00a57500
-void __cdecl FUN_00a57500(NiFixedString* apString)
+// src: COMMUNITY 0x00a57500
+void __cdecl NiStandardizeFilePath(NiFixedString* apString)
 {
     char path[0x104];
     _strcpy_s(path, sizeof(path), apString->m_kHandle);
@@ -485,16 +494,17 @@ void __cdecl FUN_00a57500(NiFixedString* apString)
 extern int DAT_0109b00c;
 struct FUN_004a4650_ListBase
 {
-    void FUN_004a4650();
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_NiPointer_BSMultiBoundRoom_RemoveAll();
 };
 struct FUN_00a5a390_shell
 {
-    void FUN_00a5a390();
+    void ReleaseStorage_00a5a390();
     void DestroyFogProperty();
 };
 
 // @fnv 0x00a5a390
-void FUN_00a5a390_shell::FUN_00a5a390()
+// src: GUESS 0x00a5a390 (confidence: low)
+void FUN_00a5a390_shell::ReleaseStorage_00a5a390()
 {
     char* p = (char*)this;
     void* old = *(void**)(p + 0x20);
@@ -503,7 +513,7 @@ void FUN_00a5a390_shell::FUN_00a5a390()
         _g_memoryManager.Deallocate(old);
     *(unsigned int*)(p + 0x30) &= 0xfff7ffff;
     *(void**)(p + 0x20) = 0;
-    ((FUN_004a4650_ListBase*)(p + 0x24))->FUN_004a4650();
+    ((FUN_004a4650_ListBase*)(p + 0x24))->NiTPointerListBase_NiTPointerAllocator_unsigned_int_NiPointer_BSMultiBoundRoom_RemoveAll();
     char* obj = (char*)*(void**)(p + 0x1c);
     if (obj)
     {
@@ -511,7 +521,7 @@ void FUN_00a5a390_shell::FUN_00a5a390()
             (*(void(__thiscall*)(void*))(*(void***)obj)[1])(obj);
         *(void**)(p + 0x1c) = 0;
     }
-    ((FUN_004a4650_ListBase*)(p + 0x24))->FUN_004a4650();
+    ((FUN_004a4650_ListBase*)(p + 0x24))->NiTPointerListBase_NiTPointerAllocator_unsigned_int_NiPointer_BSMultiBoundRoom_RemoveAll();
     obj = (char*)*(void**)(p + 0x1c);
     if (obj)
     {
@@ -573,7 +583,8 @@ A51BF0* CreateA51BF0()
 }
 
 // @fnv 0x00a42070
-float FUN_00a42070(float param_1, float param_2, float param_3, float param_4, float param_5)
+// src: GUESS 0x00a42070 (confidence: low)
+float Runtime_UpdateState_00a42070(float param_1, float param_2, float param_3, float param_4, float param_5)
 {
     float fTerm1 = (param_5 + param_3) - (param_4 - param_2) * 2.0f;
     float fTerm2 = (param_4 - param_2) * 3.0f - (param_3 * 2.0f + param_5);
@@ -639,7 +650,8 @@ FUN_00a44f90_class::FUN_00a44f90_class()
 namespace fnv_00a47f20 {
 
 // @fnv 0x00a47f20
-void* FUN_00a47f20()
+// src: EXE 0x00a47f20
+void* NiSequence_CreateObject()
 {
     NiSequence* p = static_cast<NiSequence*>(NiObject::operator new(0x34));
 
@@ -668,11 +680,12 @@ struct A51BF0Base
 };
 struct FUN_00a50aa0_class : A51BF0Base
 {
-    void FUN_00a50aa0(void* dst, void* proc);
+    void NiBSplineFloatInterpolator_CopyMembers(void* dst, void* proc);
 };
 // Copies the base part via FUN_00a57fd0, then copies the float at offset 0x1c and the int at offset 0x20 from this into dst.
 // @fnv 0x00a50aa0
-void FUN_00a50aa0_class::FUN_00a50aa0(void* apDest, void* proc)
+// src: GAMEBRYO_LIB 0x00a50aa0
+void FUN_00a50aa0_class::NiBSplineFloatInterpolator_CopyMembers(void* apDest, void* proc)
 {
     FUN_00a57fd0(apDest, proc);
     *(float*)((char*)apDest + 0x1c) = *(float*)((char*)this + 0x1c);
@@ -692,7 +705,8 @@ struct FUN_00a5d3a0_class : NiObject
 };
 
 // @fnv 0x00a537f0
-void* FUN_00a537f0()
+// src: EXE 0x00a537f0
+void* NiBoolData_CreateObject()
 {
     FUN_00a5d3a0_class* p = (FUN_00a5d3a0_class*)NiObject::operator new(0x18);
     if (p)
@@ -745,7 +759,8 @@ extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(CRITICAL_SE
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(CRITICAL_SECTION_STUB*);
 
 // @fnv 0x00a5f7b0
-void __fastcall FUN_00a5f7b0(int pNode)
+// src: COMMUNITY 0x00a5f7b0
+void __fastcall NiTexture_AddTextureToList(int pNode)
 {
     EnterCriticalSection((CRITICAL_SECTION_STUB*)&DAT_011f4580);
     if (DAT_011f4500 == 0)
@@ -772,7 +787,8 @@ struct ControllerAllocation
 };
 
 // @fnv 0x00a411c0
-ControllerAllocation* __stdcall FUN_00a411c0(unsigned int auiUnused1, void* target, unsigned int unused2, float value,
+// src: COMMUNITY 0x00a411c0
+ControllerAllocation* __stdcall NiGeomMorpherController_CreateBlendInterpolator(unsigned int auiUnused1, void* target, unsigned int unused2, float value,
                                              unsigned int flags)
 {
     ControllerAllocation* controller = static_cast<ControllerAllocation*>(NiObject::operator new(52));
@@ -879,10 +895,11 @@ struct S_00a42290_Cls
     int unk0c;
     NiPointer<S_00a42290_Q> m10;
     int unk14;
-    void FUN_00a42290(void* a, unsigned int b, int c);
+    void NiFloatInterpolator_SetKeys(void* a, unsigned int b, int c);
 };
 // @fnv 0x00a42290
-void S_00a42290_Cls::FUN_00a42290(void* a, unsigned int b, int c)
+// src: COMMUNITY 0x00a42290
+void S_00a42290_Cls::NiFloatInterpolator_SetKeys(void* a, unsigned int b, int c)
 {
     if (b > 0)
     {
@@ -920,11 +937,12 @@ class A42380Owner
     int unk38;
     NiPointer<NiRefObject> m_spTransformData;
 
-    void FUN_00a42380(NiRefObject* pkData);
+    void UpdateFields_00a42380(NiRefObject* pkData);
 };
 
 // @fnv 0x00a42380
-void A42380Owner::FUN_00a42380(NiRefObject* pkData)
+// src: GUESS 0x00a42380 (confidence: low)
+void A42380Owner::UpdateFields_00a42380(NiRefObject* pkData)
 {
     if (pkData)
         m_spTransformData = pkData;
@@ -1012,12 +1030,13 @@ static inline bool IsKindOfRTTI(const NiRTTI* pkTarget, const NiObject* pkObj)
     return false;
 }
 
-void __cdecl FUN_00a427e0(StubController* p);
+void __cdecl NiOldAnimationConverter_ConvertRollController(StubController* p);
 void __cdecl CreateInterpolator(StubController* p);
 void __cdecl ConvertLegacyController(StubController* p);
 
 // @fnv 0x00a42b70
-void __cdecl FUN_00a42b70(void* pArg, StubAVObject* pkObject)
+// src: COMMUNITY 0x00a42b70
+void __cdecl NiOldAnimationConverter_RecurseScene(void* pArg, StubAVObject* pkObject)
 {
     if (!pkObject)
         return;
@@ -1029,7 +1048,7 @@ void __cdecl FUN_00a42b70(void* pArg, StubAVObject* pkObject)
     {
         StubController* pkNext = pkCtrl->m_pkNext;
         if (IsKindOfRTTI(&CtrlRTTI_A_a42b70, pkCtrl))
-            FUN_00a427e0(pkCtrl);
+            NiOldAnimationConverter_ConvertRollController(pkCtrl);
         else if (IsKindOfRTTI(&CtrlRTTI_B_a42b70, pkCtrl))
             CreateInterpolator(pkCtrl);
         else if (IsKindOfRTTI(&CtrlRTTI_C_a42b70, pkCtrl))
@@ -1040,7 +1059,7 @@ void __cdecl FUN_00a42b70(void* pArg, StubAVObject* pkObject)
     if (pkObject->IsSceneNode())
     {
         for (unsigned int i = 0; i < pkObject->m_kChildList.m_usSize; i++)
-            FUN_00a42b70(pArg, pkObject->m_kChildList.m_pBase[i]);
+            NiOldAnimationConverter_RecurseScene(pArg, pkObject->m_kChildList.m_pBase[i]);
     }
 }
 
@@ -1053,10 +1072,11 @@ struct FUN_00a42c80_virtual
     virtual int* f02();
 };
 
-void __cdecl FUN_00a42b70(void* a1, void* a2);
+void __cdecl NiOldAnimationConverter_RecurseScene(void* a1, void* a2);
 
 // @fnv 0x00a42c80
-void __cdecl FUN_00a42c80(int* param1, FUN_00a42c80_virtual* pVirtual)
+// src: COMMUNITY 0x00a42c80
+void __cdecl NiOldAnimationConverter_Convert(int* param1, FUN_00a42c80_virtual* pVirtual)
 {
     if (*(unsigned int*)((char*)param1 + 0xD8) >= 0xA010068u)
         return;
@@ -1072,7 +1092,7 @@ void __cdecl FUN_00a42c80(int* param1, FUN_00a42c80_virtual* pVirtual)
     {
         if (node == &DAT_011f4304)
         {
-            FUN_00a42b70(param1, pVirtual);
+            NiOldAnimationConverter_RecurseScene(param1, pVirtual);
             break;
         }
 
@@ -1242,7 +1262,7 @@ struct ParentData
     unsigned int unk3c;
     void FUN_00a6d290();
 };
-void __cdecl FUN_00aa10f0(void*);
+void __cdecl _NiFree_00aa10f0(void*);
 struct FUN_00a49d60 : public ParentData
 {
     RefPointer first;
@@ -1256,7 +1276,7 @@ FUN_00a49d60::~FUN_00a49d60()
     vtable = &DAT_0109893c;
     first.Clear();
     second.Clear();
-    FUN_00aa10f0(resource);
+    _NiFree_00aa10f0(resource);
     second.Release();
     first.Release();
     ParentData::FUN_00a6d290();
@@ -1312,7 +1332,7 @@ void FUN_00a53c90_cls::GetNextEntry(FUN_00a53c90_Node** ppCursor, unsigned int* 
     *ppCursor = 0;
 }
 
-extern void* __cdecl FUN_00aa1070(unsigned int size);
+extern void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 
 struct FUN_00a54110
 {
@@ -1329,7 +1349,7 @@ FUN_00a54110::FUN_00a54110(unsigned int count)
 {
     if (count > 0)
     {
-        pBuffer = static_cast<int*>(FUN_00aa1070(count * sizeof(int)));
+        pBuffer = static_cast<int*>(_NiMalloc_00aa1070(count * sizeof(int)));
     }
     else
     {
@@ -1401,7 +1421,8 @@ struct FUN_00a575b0_Object
 };
 
 // @fnv 0x00a575b0
-void __cdecl FUN_00a575b0(FUN_00a575b0_Object* object, int value)
+// src: COMMUNITY 0x00a575b0
+void __cdecl NiStreamLoadBinary_00a575b0(FUN_00a575b0_Object* object, int value)
 {
     int result = 4;
     object->unk04 += object->unk08(object, value, 4, &result, 1);
@@ -1526,12 +1547,13 @@ class FUN_00a59c60_cls
     int unk10;
     int unk14;
     FUN_00a59c60_target* m_18;
-    void FUN_00a59c60(int a1);
+    void NiAVObject_Update(int a1);
 };
 
 // Calls v41 with the given argument and 0, then calls v63 on m_18 if it is non-null.
 // @fnv 0x00a59c60
-void FUN_00a59c60_cls::FUN_00a59c60(int aiValue)
+// src: XBOX_PDB 0x00a59c60
+void FUN_00a59c60_cls::NiAVObject_Update(int aiValue)
 {
     v41(aiValue, 0);
     if (m_18 != 0)
@@ -1540,17 +1562,18 @@ void FUN_00a59c60_cls::FUN_00a59c60(int aiValue)
 
 struct SingletonTarget
 {
-    void __thiscall FUN_00a5b3c0();
+    void __thiscall NiGlobalStringTable_FreeStrings();
 };
 extern SingletonTarget* g_011f42c0;
 
 // @fnv 0x00a5b460
-void __cdecl FUN_00a5b460()
+// src: COMMUNITY 0x00a5b460
+void __cdecl NiGlobalStringTable_FreeUnusedStrings()
 {
-    g_011f42c0->FUN_00a5b3c0();
+    g_011f42c0->NiGlobalStringTable_FreeStrings();
 }
 
-extern void __cdecl FUN_00aa10f0(char* psz);
+extern void __cdecl _NiFree_00aa10f0(char* psz);
 extern int DAT_0102102c;
 
 struct Ent
@@ -1592,7 +1615,7 @@ void FUN_00a5b470_cls::ResetEntries()
     {
         p = p - 1;
         p->m_f0 = &DAT_0102102c;
-        FUN_00aa10f0(GetStr(p));
+        _NiFree_00aa10f0(GetStr(p));
     }
 }
 
@@ -1694,12 +1717,13 @@ class A5B660StringTable
 
     static A5B660StringTable* ms_pStringTable;
 
-    static void FUN_00a5b660();
+    static void ClearStaticStringTable();
 };
 
 // Deletes the static string table instance and clears the pointer to null.
 // @fnv 0x00a5b660
-void A5B660StringTable::FUN_00a5b660()
+// src: GUESS 0x00a5b660 (confidence: medium)
+void A5B660StringTable::ClearStaticStringTable()
 {
     delete ms_pStringTable;
     ms_pStringTable = 0;
@@ -1766,7 +1790,7 @@ __declspec(noinline) NiRefObject::~NiRefObject()
     InterlockedDecrement((volatile long*)&ms_lObjectCount);
 }
 
-extern void* __cdecl FUN_00aa13e0(unsigned int);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern int DAT_0109b5ac;
 extern int DAT_0101fbd4;
 struct NiObjectBase
@@ -1783,9 +1807,10 @@ struct ObjectState
     unsigned short enabled;
 };
 // @fnv 0x00a5f030
-NiObjectBase* __cdecl FUN_00a5f030()
+// src: EXE 0x00a5f030
+NiObjectBase* __cdecl NiNode_CreateObject()
 {
-    NiObjectBase* object = static_cast<NiObjectBase*>(FUN_00aa13e0(0xac));
+    NiObjectBase* object = static_cast<NiObjectBase*>(Object_DispatchCommandFour(0xac));
     if (object)
     {
         object->FUN_00a5aa20();
@@ -1879,13 +1904,14 @@ struct FUN_00a5fca0_cls
     CountedRef* m_38;
     CountedRef* m_3c;
 
-    void FUN_00a5f800();
+    void NiTexture_RemoveTextureFromList();
     void DestroyFogProperty();
-    void FUN_00a5fca0();
+    void UpdateFields_00a5fca0();
 };
 
 // @fnv 0x00a5fca0
-void FUN_00a5fca0_cls::FUN_00a5fca0()
+// src: GUESS 0x00a5fca0 (confidence: low)
+void FUN_00a5fca0_cls::UpdateFields_00a5fca0()
 {
     *(void* volatile*)&m_vptr = (void*)&DAT_0109b9ec;
     CountedRef* a = *(CountedRef* volatile*)&m_3c;
@@ -1936,7 +1962,7 @@ void FUN_00a5fca0_cls::FUN_00a5fca0()
     {
         e->Vslot00(1);
     }
-    FUN_00a5f800();
+    NiTexture_RemoveTextureFromList();
     DestroyFogProperty();
 }
 
@@ -2016,12 +2042,13 @@ class FUN_00a42310_cls
     unsigned int unk34;
     NiRefObject* m_pObject;
 
-    void FUN_00a42310(NiRefObject* obj);
+    void NiLookAtInterpolator_SetTranslateInterpolator(NiRefObject* obj);
 };
 
 // Releases the current m_pObject and stores obj with an incremented reference count, or clears m_pObject when obj is null.
 // @fnv 0x00a42310
-void FUN_00a42310_cls::FUN_00a42310(NiRefObject* apObject)
+// src: COMMUNITY 0x00a42310
+void FUN_00a42310_cls::NiLookAtInterpolator_SetTranslateInterpolator(NiRefObject* apObject)
 {
     if (apObject != 0)
     {
@@ -2071,12 +2098,13 @@ class FUN_00a423f0_cls
     unsigned int unk3c;
     NiRefObject* m_pObject;
 
-    void FUN_00a423f0(NiRefObject* obj);
+    void NiLookAtInterpolator_SetScaleInterpolator(NiRefObject* obj);
 };
 
 // Releases the previous m_pObject reference and stores obj with an incremented ref count, or clears m_pObject when obj is null.
 // @fnv 0x00a423f0
-void FUN_00a423f0_cls::FUN_00a423f0(NiRefObject* apObject)
+// src: COMMUNITY 0x00a423f0
+void FUN_00a423f0_cls::NiLookAtInterpolator_SetScaleInterpolator(NiRefObject* apObject)
 {
     if (apObject != 0)
     {
@@ -2108,9 +2136,9 @@ struct ConvertedController;
 struct ControllerInterpolator;
 struct ControllerHost
 {
-    ConvertedController* FUN_00a5c570(const NiRTTI*);
+    ConvertedController* NiObjectNET_GetController(const NiRTTI*);
     void FUN_00a5c000(ConvertedController*);
-    void FUN_00a5c480(StubController*);
+    void NiObjectNET_RemoveController(StubController*);
 };
 struct ControllerFields
 {
@@ -2190,7 +2218,7 @@ struct ControllerFields
 struct ConvertedController : ControllerFields
 {
     NiPointer<ConvertedController> next;
-    ConvertedController* FUN_00a36560();
+    ConvertedController* NiTransformController_NiTransformController();
 };
 struct ControllerInterpolator : ControllerFields
 {
@@ -2294,7 +2322,7 @@ void __cdecl ConvertLegacyController(StubController* p)
 {
     LegacyController* old = static_cast<LegacyController*>(p);
     ControllerHost* host = reinterpret_cast<ControllerHost*>(old->unk2C);
-    ConvertedController* controller = host->FUN_00a5c570(&DAT_011f36ec);
+    ConvertedController* controller = host->NiObjectNET_GetController(&DAT_011f36ec);
     if (controller)
         controller->IncRefCount();
     ControllerInterpolator* allocation = static_cast<ControllerInterpolator*>(NiObject::operator new(0x5c));
@@ -2325,7 +2353,7 @@ void __cdecl ConvertLegacyController(StubController* p)
     else
     {
         ConvertedController* fresh = static_cast<ConvertedController*>(NiObject::operator new(0x38));
-        fresh = fresh ? fresh->FUN_00a36560() : 0;
+        fresh = fresh ? fresh->NiTransformController_NiTransformController() : 0;
         if (controller != fresh)
         {
             if (controller)
@@ -2350,7 +2378,7 @@ void __cdecl ConvertLegacyController(StubController* p)
     }
     interpolator->Update();
     if (host)
-        host->FUN_00a5c480(p);
+        host->NiObjectNET_RemoveController(p);
     controller->DecRefCount();
 }
 
@@ -2373,11 +2401,12 @@ class FUN_00a47420_cls
     int unk28;
     NiPointer<NiRefObject> m_pReferencedObject;
 
-    void FUN_00a47420(NiRefObject* obj);
+    void SetReferencedObject_00a47420(NiRefObject* obj);
 };
 
 // @fnv 0x00a47420
-void FUN_00a47420_cls::FUN_00a47420(NiRefObject* apObject)
+// src: GUESS 0x00a47420 (confidence: medium)
+void FUN_00a47420_cls::SetReferencedObject_00a47420(NiRefObject* apObject)
 {
     m_pReferencedObject = apObject;
 }
@@ -2410,7 +2439,7 @@ struct Obj
     int unk2c;
     Obj* next;
     Obj* Cast(const RTT*) throw();
-    bool FUN_00a5bf50(unsigned short) throw();
+    bool RemoveExtraDataAt(unsigned short) throw();
     void ClearExtraData() throw();
     void IncRefCount() throw()
     {
@@ -2478,7 +2507,7 @@ struct Result
     int unk30;
     static void* operator new(unsigned int) throw();
     Result(const char*, int, int) throw();
-    void FUN_00a47420(Obj*) throw();
+    void SetReferencedObject_00a47420(Obj*) throw();
     void AddSeq(void*, Obj*) throw();
 };
 struct Stream
@@ -2644,8 +2673,8 @@ Result* __cdecl CreateResultFromStreamObject(Stream* stream, unsigned int index,
         Obj* found = extra ? extra->Cast(&g_011f3f28) : 0;
         if (found)
         {
-            result->FUN_00a47420(found);
-            source->FUN_00a5bf50((unsigned short)i);
+            result->SetReferencedObject_00a47420(found);
+            source->RemoveExtraDataAt((unsigned short)i);
             break;
         }
     }
@@ -2884,13 +2913,15 @@ template <> SequenceStringMap::~NiTStringTemplateMap()
 
 void __cdecl FUN_00a57130(int a1);
 // @fnv 0x00a41220
-void __cdecl FUN_00a41220(int a1)
+// src: XBOX_PDB 0x00a41220
+void __cdecl NiColorExtraDataController_SaveBinary(int a1)
 {
     FUN_00a57130(a1);
 }
 
 // @fnv 0x00a420e0
-void __cdecl FUN_00a420e0(float a0, float a1, float* p2, float a3, float a4, float* p5, float a6, float a7, float* p8,
+// src: GAMEBRYO_LIB 0x00a420e0
+void __cdecl NiInterpScalar_AdjustBezier(float a0, float a1, float* p2, float a3, float a4, float* p5, float a6, float a7, float* p8,
                           float* p9)
 {
     float f = a3 - a0;
@@ -2910,10 +2941,11 @@ void __cdecl FUN_00a420e0(float a0, float a1, float* p2, float a3, float a4, flo
 
 struct FUN_00a44840_stub
 {
-    void* __thiscall FUN_00a44840(unsigned int);
+    void* __thiscall NiObject_CreateClone(unsigned int);
 };
 // @fnv 0x00a44840
-void* __thiscall FUN_00a44840_stub::FUN_00a44840(unsigned int)
+// src: COMMUNITY 0x00a44840
+void* __thiscall FUN_00a44840_stub::NiObject_CreateClone(unsigned int)
 {
     return this;
 }
@@ -2958,7 +2990,8 @@ namespace a47 {
 extern "C" void __cdecl FUN_00a39010();
 
 // @fnv 0x00a57c00
-void __cdecl FUN_00a57c00()
+// src: XBOX_PDB 0x00a57c00
+void __cdecl NiBoolInterpController_SaveBinary()
 {
     FUN_00a39010();
 }
@@ -3001,9 +3034,9 @@ struct A5D6E0This : NiRefObject
 {
     void AppendCameraPathEntries(NiTArray<BGSCameraPath*, NiTMallocInterface<BGSCameraPath*> >*);
 };
-extern void* __cdecl FUN_00a7d330(int);
-extern void* __cdecl FUN_00a7d5a0(const char*, void*);
-extern void* __cdecl FUN_00a7d510(const char*, unsigned int);
+extern void* __cdecl NiViewerStrings_NiGetViewerString_Title(int);
+extern void* __cdecl NiGetViewerString_00a7d5a0(const char*, void*);
+extern void* __cdecl NiGetViewerString_00a7d510(const char*, unsigned int);
 // Appends three values obtained from FUN_00a7d330, FUN_00a7d5a0 and FUN_00a7d510 to the array, growing it via SetSize when full.
 // @fnv 0x00a5d6e0
 void A5D6E0This::AppendCameraPathEntries(NiTArray<BGSCameraPath*, NiTMallocInterface<BGSCameraPath*> >* apEntries)
@@ -3012,7 +3045,7 @@ void A5D6E0This::AppendCameraPathEntries(NiTArray<BGSCameraPath*, NiTMallocInter
     unsigned int size;
     unsigned int maxSize;
     {
-        BGSCameraPath* firstValue = (BGSCameraPath*)FUN_00a7d330(g_011f36dc_arg1);
+        BGSCameraPath* firstValue = (BGSCameraPath*)NiViewerStrings_NiGetViewerString_Title(g_011f36dc_arg1);
         entries = apEntries;
         size = entries->m_usSize;
         maxSize = entries->m_usMaxSize;
@@ -3022,7 +3055,7 @@ void A5D6E0This::AppendCameraPathEntries(NiTArray<BGSCameraPath*, NiTMallocInter
         entries->SetAt(size, firstValue);
     }
     {
-        BGSCameraPath* currentValue = (BGSCameraPath*)FUN_00a7d5a0("this", this);
+        BGSCameraPath* currentValue = (BGSCameraPath*)NiGetViewerString_00a7d5a0("this", this);
         size = entries->m_usSize;
         maxSize = entries->m_usMaxSize;
         if (size >= maxSize)
@@ -3032,7 +3065,7 @@ void A5D6E0This::AppendCameraPathEntries(NiTArray<BGSCameraPath*, NiTMallocInter
     }
     {
         unsigned int referenceCount = m_uiRefCount;
-        BGSCameraPath* currentValue = (BGSCameraPath*)FUN_00a7d510("m_uiRefCount", referenceCount);
+        BGSCameraPath* currentValue = (BGSCameraPath*)NiGetViewerString_00a7d510("m_uiRefCount", referenceCount);
         size = entries->m_usSize;
         maxSize = entries->m_usMaxSize;
         if (size >= maxSize)
@@ -3042,17 +3075,19 @@ void A5D6E0This::AppendCameraPathEntries(NiTArray<BGSCameraPath*, NiTMallocInter
     }
 }
 
-extern void __cdecl FUN_00a5c290();
+extern void __cdecl NiObjectNET_CopyMembers();
 
 // @fnv 0x00a5d7a0
-void __cdecl FUN_00a5d7a0()
+// src: XBOX_PDB 0x00a5d7a0
+void __cdecl NiProperty_CopyMembers()
 {
-    FUN_00a5c290();
+    NiObjectNET_CopyMembers();
 }
 
 void __cdecl SaveNiObjectLinks();
 // @fnv 0x00a5d7b0
-void __cdecl FUN_00a5d7b0()
+// src: XBOX_PDB 0x00a5d7b0
+void __cdecl NiSequenceStreamHelper_SaveBinary()
 {
     SaveNiObjectLinks();
 }
@@ -3067,7 +3102,7 @@ NiPointer<AnimIdle>::operator=(const NiPointer<AnimIdle>& other);
 struct S654
 {
     NiTListItem<NiPointer<AnimIdle> >* m_pkHead;
-    NP FUN_0057c5d0(NiPointer<AnimIdle>& item) throw();
+    NP NiTPointerListBase_NiPropertyPtr_Remove(NiPointer<AnimIdle>& item) throw();
 };
 
 struct ExtraOwner
@@ -3082,12 +3117,13 @@ struct ExtraOwner
     int unk1c;
     int unk20;
     S654 list;
-    void FUN_00a5aac0(int type, NiPointer<AnimIdle>& output);
+    void NiAVObject_RemoveProperty_0(int type, NiPointer<AnimIdle>& output);
 };
 
 // If type is under 7, removes the first list entry whose Type() equals type and stores it in output; otherwise, or if none matches, sets output to null.
 // @fnv 0x00a5aac0
-void ExtraOwner::FUN_00a5aac0(int type, NiPointer<AnimIdle>& output)
+// src: COMMUNITY 0x00a5aac0
+void ExtraOwner::NiAVObject_RemoveProperty_0(int type, NiPointer<AnimIdle>& output)
 {
     if (type >= 7)
     {
@@ -3110,7 +3146,7 @@ void ExtraOwner::FUN_00a5aac0(int type, NiPointer<AnimIdle>& output)
             if (reinterpret_cast<int (__thiscall*)(AnimIdle*)>((*reinterpret_cast<void***>(p))[35])(p) == type)
             {
                 {
-                    NP removed = list.FUN_0057c5d0(current);
+                    NP removed = list.NiTPointerListBase_NiPropertyPtr_Remove(current);
                 }
                 NiPointer<AnimIdle>* pCurrent = &current;
                 output = *pCurrent;
@@ -3175,10 +3211,10 @@ NiObject* NiObject::Clone()
     return pkClone;
 }
 
-extern void* __cdecl FUN_00aa13e0(unsigned int size);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern char* __cdecl FUN_00a5b690(const char* text);
-extern void __cdecl FUN_00a57500(void* fixed);
-extern void __cdecl FUN_00a76960(void* fixed, void* out);
+extern void __cdecl NiStandardizeFilePath(void* fixed);
+extern void __cdecl NiImageConverter_ConvertFilenameToPlatformSpecific_(void* fixed, void* out);
 extern int DAT_0109b220;
 extern unsigned char DAT_011a9594;
 extern void(__stdcall* DAT_00fdf1c0)(void*);
@@ -3251,16 +3287,17 @@ struct FnvSourceTexture
     unsigned short unk42;
     int source;
 
-    FnvSourceTexture* __thiscall FUN_00a5fc10();
+    FnvSourceTexture* __thiscall NiSourceTexture_NiSourceTexture();
 };
 
 // Allocates a FnvSourceTexture, sets its dimensions, flags, source, and filename, then deletes it if not loaded when DAT_011a9594 is set.
 // @fnv 0x00a5fe30
-FnvSourceTexture* __cdecl FUN_00a5fe30(int source, const char* name, const int* size, unsigned char flags)
+// src: COMMUNITY 0x00a5fe30
+FnvSourceTexture* __cdecl NiSourceTexture_CreateTexture(int source, const char* name, const int* size, unsigned char flags)
 {
-    FnvSourceTexture* object = (FnvSourceTexture*)FUN_00aa13e0(0x48);
+    FnvSourceTexture* object = (FnvSourceTexture*)Object_DispatchCommandFour(0x48);
     if (object)
-        object = object->FUN_00a5fc10();
+        object = object->NiSourceTexture_NiSourceTexture();
     else
         object = 0;
 
@@ -3283,8 +3320,8 @@ FnvSourceTexture* __cdecl FUN_00a5fe30(int source, const char* name, const int* 
                 release(*fixed - 8);
             *fixed = value;
         }
-        FUN_00a57500(fixed);
-        FUN_00a76960(fixed, &object->normalizedName);
+        NiStandardizeFilePath(fixed);
+        NiImageConverter_ConvertFilenameToPlatformSpecific_(fixed, &object->normalizedName);
         if (value != (char*)DAT_0109b220)
             release(value - 8);
     }
@@ -3297,7 +3334,7 @@ FnvSourceTexture* __cdecl FUN_00a5fe30(int source, const char* name, const int* 
 }
 
 namespace fnv_00a5ff10 {
-extern void* __cdecl FUN_00aa13e0(unsigned int);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern void* __cdecl FUN_00a5b690(void*);
 extern int DAT_0109b220;
 extern unsigned char DAT_011a9594;
@@ -3313,7 +3350,7 @@ struct RefCounted
 
 struct FUN_00a5fc10_class
 {
-    void* __thiscall FUN_00a5fc10();
+    void* __thiscall NiSourceTexture_NiSourceTexture();
 };
 struct Texture
 {
@@ -3387,10 +3424,11 @@ struct OwnerTriple
 
 // Allocates a Texture, copies owner fields, updates the parent reference count, sets the filename, and deletes the object if preloading is not allowed.
 // @fnv 0x00a5ff10
-Texture* __cdecl FUN_00a5ff10(RefCounted* parent, void* filename, const OwnerTriple* apOwnerFields)
+// src: XBOX_PDB 0x00a5ff10
+Texture* __cdecl NiSourceTexture_Create(RefCounted* parent, void* filename, const OwnerTriple* apOwnerFields)
 {
-    void* memory = FUN_00aa13e0(0x48);
-    Texture* object = memory ? static_cast<Texture*>(((FUN_00a5fc10_class*)memory)->FUN_00a5fc10()) : 0;
+    void* memory = Object_DispatchCommandFour(0x48);
+    Texture* object = memory ? static_cast<Texture*>(((FUN_00a5fc10_class*)memory)->NiSourceTexture_NiSourceTexture()) : 0;
     OwnerTriple* storage = reinterpret_cast<OwnerTriple*>(&object->m_pSharedOwner);
     storage->m_pSharedOwner = apOwnerFields->m_pSharedOwner;
     storage->m_pFlagTarget = apOwnerFields->m_pFlagTarget;
@@ -3411,7 +3449,7 @@ Texture* __cdecl FUN_00a5ff10(RefCounted* parent, void* filename, const OwnerTri
     if (filename)
     {
         const char* value = (const char*)FUN_00a5b690(filename);
-        ((FUN_00a5fba0_class*)object)->FUN_00a5fba0(reinterpret_cast<const NiFixedString*>(&value));
+        ((FUN_00a5fba0_class*)object)->NiSourceTexture_SetFilePath(reinterpret_cast<const NiFixedString*>(&value));
         if (value != (const char*)DAT_0109b220)
             release((volatile long*)(value - 8));
     }
@@ -3466,7 +3504,7 @@ struct S00a427e0_Track : NiObject
     virtual void Reset();
     virtual void GetTimeRange(float&, float&);
     virtual void SetTimeRange(float, float);
-    void FUN_00a42380(S00a427e0_Interp*);
+    void UpdateFields_00a42380(S00a427e0_Interp*);
 };
 struct S00a427e0_Ctrl : NiObject
 {
@@ -3504,7 +3542,7 @@ struct S00a427e0_Mgr
 {
     unsigned int unk00, unk04, unk08;
     S00a427e0_Ctrl* head;
-    void FUN_00a5c480(S00a427e0_Seq*);
+    void NiObjectNET_RemoveController(S00a427e0_Seq*);
 };
 struct S00a427e0_Seq
 {
@@ -3526,7 +3564,8 @@ struct S00a427e0_Seq
 void __cdecl CopyControllerSettings(S00a427e0_Seq*, S00a427e0_Ctrl*);
 // Finds the first controller with a matching track, installs a new interpolator on the track, resets it, then calls manager->FUN_00a5c480(sequence).
 // @fnv 0x00a427e0
-void __cdecl FUN_00a427e0(StubController* p)
+// src: COMMUNITY 0x00a427e0
+void __cdecl NiOldAnimationConverter_ConvertRollController(StubController* p)
 {
     S00a427e0_Seq* sequence = (S00a427e0_Seq*)p;
     S00a427e0_Mgr* manager = sequence->manager;
@@ -3539,7 +3578,7 @@ void __cdecl FUN_00a427e0(StubController* p)
             if (S00a427e0_NiIsKindOf(&DAT_011f3f90, track))
             {
                 void* data = sequence->data;
-                track->FUN_00a42380(new S00a427e0_Interp(data));
+                track->UpdateFields_00a42380(new S00a427e0_Interp(data));
                 CopyControllerSettings(sequence, controller);
                 float start, end;
                 track->GetTimeRange(start, end);
@@ -3551,7 +3590,7 @@ void __cdecl FUN_00a427e0(StubController* p)
         }
         controller = controller->next;
     }
-    manager->FUN_00a5c480(sequence);
+    manager->NiObjectNET_RemoveController(sequence);
 }
 
 // Stores the key and referenced sequence in a map entry.
@@ -3563,25 +3602,26 @@ template <> void SequenceMapBase::SetValue(EntryType* apItem, const char* key,
     apItem->m_val = obj;
 }
 
-void __cdecl FUN_00aa10f0(void*);
+void __cdecl _NiFree_00aa10f0(void*);
 
 struct ArrayBuffer
 {
     void* m_pBuffer;
-    void FUN_00a541e0();
+    void _NiFree_00aa10f0_Thunk();
 };
 
 // @fnv 0x00a541e0
-void ArrayBuffer::FUN_00a541e0()
+// src: GUESS 0x00a541e0 (confidence: medium)
+void ArrayBuffer::_NiFree_00aa10f0_Thunk()
 {
-    FUN_00aa10f0(m_pBuffer);
+    _NiFree_00aa10f0(m_pBuffer);
 }
 
 struct FUN_00a5abe0_lock
 {
     int m_pOwnerObject;
     int m_uiItemCount;
-    void FUN_0040fbf0(int mode);
+    void BSSpinLock_Lock(int mode);
 };
 extern FUN_00a5abe0_lock DAT_011f42a0;
 
@@ -3637,7 +3677,7 @@ struct FUN_00a5abe0_item
 
 struct FUN_00a5abe0_sub
 {
-    void FUN_00439fd0(void** p);
+    void NiAVObject_AttachProperty_00439fd0(void** p);
 };
 
 struct FUN_00a5abe0_owner
@@ -3654,9 +3694,10 @@ struct FUN_00a5abe0_list
 
 // Under a global lock, walks the list p2 and for each item with vfn35() below 7 resolves it with ctx and passes it to self->m_24.FUN_00439fd0.
 // @fnv 0x00a5abe0
-void __stdcall FUN_00a5abe0(FUN_00a5abe0_owner* apOwner, void* apList, void* volatile apContext)
+// src: XBOX_PDB 0x00a5abe0
+void __stdcall NiAVObject_CloneProperties(FUN_00a5abe0_owner* apOwner, void* apList, void* volatile apContext)
 {
-    DAT_011f42a0.FUN_0040fbf0(0);
+    DAT_011f42a0.BSSpinLock_Lock(0);
     FUN_00a5abe0_node* node = ((FUN_00a5abe0_list*)apList)->m_pFirstNode;
     while (node != 0)
     {
@@ -3673,7 +3714,7 @@ void __stdcall FUN_00a5abe0(FUN_00a5abe0_owner* apOwner, void* apList, void* vol
             continue;
         apList = item;
         InterlockedIncrement(&item->m_iWordAt04);
-        apOwner->m_24.FUN_00439fd0(&apList);
+        apOwner->m_24.NiAVObject_AttachProperty_00439fd0(&apList);
         if (InterlockedDecrement(&item->m_iWordAt04) == 0)
         {
             item->vSlot01();
@@ -3696,16 +3737,17 @@ class RefObjB
 
 struct ExtraOwnerB
 {
-    void FUN_00a5aac0(int type, RefObjB*& output) throw();
-    void FUN_00a5b230(int type);
+    void NiAVObject_RemoveProperty_0(int type, RefObjB*& output) throw();
+    void NiAVObject_RemoveProperty(int type);
 };
 
 // Calls FUN_00a5aac0 with type to get a RefObjB, then decrements its reference count and calls DeleteThis if it reaches zero.
 // @fnv 0x00a5b230
-void ExtraOwnerB::FUN_00a5b230(int type)
+// src: XBOX_PDB 0x00a5b230
+void ExtraOwnerB::NiAVObject_RemoveProperty(int type)
 {
     RefObjB* out = 0;
-    FUN_00a5aac0(type, out);
+    NiAVObject_RemoveProperty_0(type, out);
     RefObjB* p = *(RefObjB* volatile*)&out;
     if (p)
     {
@@ -3722,23 +3764,24 @@ struct FUN_00a5b790_cls
     unsigned short m_0a;
     unsigned short m_0c;
 
-    void FUN_00a5b790(unsigned int newSize);
+    void NiTArray_unsigned_short_NiTMallocInterface_unsigned_short_SetSize(unsigned int newSize);
 };
 
-void* __cdecl FUN_00aa1070(unsigned int size);
-void __cdecl FUN_00aa10f0(void* p);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
+void __cdecl _NiFree_00aa10f0(void* p);
 
 template <class T> struct Alloc
 {
     static T* AllocMem(unsigned int n)
     {
-        return (T*)FUN_00aa1070(n * sizeof(T));
+        return (T*)_NiMalloc_00aa1070(n * sizeof(T));
     }
 };
 
 // Resizes the m_04 buffer to newSize, zeroing new slots, adjusting m_0c for cleared slots, and freeing the old buffer.
 // @fnv 0x00a5b790
-void FUN_00a5b790_cls::FUN_00a5b790(unsigned int newSize)
+// src: COMMUNITY 0x00a5b790
+void FUN_00a5b790_cls::NiTArray_unsigned_short_NiTMallocInterface_unsigned_short_SetSize(unsigned int newSize)
 {
     if (newSize == m_08)
         return;
@@ -3774,7 +3817,7 @@ void FUN_00a5b790_cls::FUN_00a5b790(unsigned int newSize)
     {
         m_04 = 0;
     }
-    FUN_00aa10f0(old);
+    _NiFree_00aa10f0(old);
 }
 
 // Invokes the virtual vf09 on pStream, passing this object as the owner argument.
@@ -3950,12 +3993,13 @@ class Owner
     unsigned char unk043;
     Task* m_pkTask;
 
-    bool FUN_00a5f8b0();
+    bool NiSourceTexture_CreateRendererData();
 };
 
 // Returns false if there is no manager, true if m_iTarget is set (deleting m_pkTask in both), else false if CanAttach fails or true after clearing m_pkTask.
 // @fnv 0x00a5f8b0
-bool Owner::FUN_00a5f8b0()
+// src: XBOX_PDB 0x00a5f8b0
+bool Owner::NiSourceTexture_CreateRendererData()
 {
     Manager* pkManager = DAT_011f4748;
     if (!pkManager)
@@ -4177,11 +4221,12 @@ struct Owner
     Ref68* m_pkRef68;
     Ref58* m_pkRef58;
 
-    int FUN_00a5f970();
+    int NiSourceTexture_GetHeight();
 };
 
 // @fnv 0x00a5f970
-int Owner::FUN_00a5f970()
+// src: XBOX_PDB 0x00a5f970
+int Owner::NiSourceTexture_GetHeight()
 {
     if (m_pkSource)
         return m_pkSource->m_iValue;
@@ -4301,7 +4346,7 @@ struct Controller
     unsigned char unk041;
     bool m_bUsePrimary;
 
-    void FUN_00a47360(Stream* pkStream);
+    void NiSequenceStreamHelper_LinkObject(Stream* pkStream);
     void Load(Stream* pkStream);
 };
 
@@ -4309,7 +4354,7 @@ struct Controller
 // @fnv 0x00a5f9a0
 void Controller::Load(Stream* pkStream)
 {
-    FUN_00a47360(pkStream);
+    NiSequenceStreamHelper_LinkObject(pkStream);
     if (pkStream->FUN_00a63460())
     {
         if (pkStream->m_uiFileVersion >= 0x14020004 && m_bUsePrimary)
@@ -4421,20 +4466,22 @@ struct FUN_00a5fa50_Obj
     {}
     virtual void vfA8()
     {}
-    virtual void FUN_00a5f8b0()
+// src: XBOX_PDB 0x00a5f8b0
+    virtual void NiSourceTexture_CreateRendererData()
     {}
 
-    void FUN_00a5fa50(int param);
+    void NiSourceTexture_PostLinkObject(int param);
 };
 
 // If DAT_011a9594 is set, acquires DAT_011f4800, calls FUN_00a5f8b0, and releases the critical section.
 // @fnv 0x00a5fa50
-void __thiscall FUN_00a5fa50_Obj::FUN_00a5fa50(int param)
+// src: XBOX_PDB 0x00a5fa50
+void __thiscall FUN_00a5fa50_Obj::NiSourceTexture_PostLinkObject(int param)
 {
     if (DAT_011a9594)
     {
         DAT_00fdf05c(&DAT_011f4800);
-        FUN_00a5f8b0();
+        NiSourceTexture_CreateRendererData();
         return DAT_00fdf100(&DAT_011f4800);
     }
 }
@@ -4505,7 +4552,7 @@ struct Owner
     Listener* m_pkPrimary;
     Listener* m_pkSecondary;
 
-    bool FUN_00a62130(Item* pkItem);
+    bool NiSequenceStreamHelper_RegisterStreamables(Item* pkItem);
     bool AttachToListener(Item* pkItem);
 };
 
@@ -4513,7 +4560,7 @@ struct Owner
 // @fnv 0x00a5fa90
 bool Owner::AttachToListener(Item* pkItem)
 {
-    if (!FUN_00a62130(pkItem))
+    if (!NiSequenceStreamHelper_RegisterStreamables(pkItem))
         return false;
     pkItem->SetOwnerData(&m_iData);
     Listener* pkListener = m_pkPrimary;
@@ -4582,15 +4629,16 @@ class Controller
     bool m_b41;
     bool m_b42;
 
-    bool FUN_00a62140(Controller* pkOther);
-    bool FUN_00a5fae0(Controller* pkOther);
+    bool NiSequenceStreamHelper_IsEqual(Controller* pkOther);
+    bool NiSourceTexture_IsEqual(Controller* pkOther);
 };
 
 // Returns true if FUN_00a62140 passes and m_i18, m_i1c, m_i20, m_i30, the three bool flags, and objects m_spA and m_spB all match pkOther.
 // @fnv 0x00a5fae0
-bool Controller::FUN_00a5fae0(Controller* pkOther)
+// src: XBOX_PDB 0x00a5fae0
+bool Controller::NiSourceTexture_IsEqual(Controller* pkOther)
 {
-    if (!FUN_00a62140(pkOther))
+    if (!NiSequenceStreamHelper_IsEqual(pkOther))
         return false;
     if (m_i30 != pkOther->m_i30)
         return false;
@@ -4811,25 +4859,26 @@ extern unsigned int DAT_011f42c4;
 
 struct ThreadedTableEntry
 {
-    void __thiscall FUN_00a5b4b0(const char** key);
+    void __thiscall NiTPrimitiveArray_DWORD_AddFirstEmpty(const char** key);
 };
 
 struct ThreadedTable
 {
-    unsigned int __thiscall FUN_00a5b270(const char* key, unsigned int flags);
-    void __thiscall FUN_00a5b5a0(const char** key, unsigned int flags);
+    unsigned int __thiscall NiGlobalStringTable_HashFunction(const char* key, unsigned int flags);
+    void __thiscall NiGlobalStringTable_InsertString(const char** key, unsigned int flags);
 };
 
 // Temporarily sets per-thread field 0x2b4 to 8; under the lock calls FUN_00a5b4b0 on the entry indexed by FUN_00a5b270 and updates two counters.
 // @fnv 0x00a5b5a0
-void __thiscall ThreadedTable::FUN_00a5b5a0(const char** key, unsigned int flags)
+// src: XBOX_PDB 0x00a5b5a0
+void __thiscall ThreadedTable::NiGlobalStringTable_InsertString(const char** key, unsigned int flags)
 {
     unsigned int tlsIndex = _tls_index;
     unsigned char* threadData = reinterpret_cast<unsigned char**>(__readfsdword(0x2c))[tlsIndex];
     const unsigned int previousMode = *reinterpret_cast<unsigned int*>(threadData + 0x2b4);
     *reinterpret_cast<unsigned int*>(threadData + 0x2b4) = 8;
 
-    unsigned int index = FUN_00a5b270(*key, flags);
+    unsigned int index = NiGlobalStringTable_HashFunction(*key, flags);
     CRITICAL_SECTION_STUB* criticalSection =
         reinterpret_cast<CRITICAL_SECTION_STUB*>(reinterpret_cast<char*>(this) + 0x2080);
     EnterCriticalSection(criticalSection);
@@ -4838,7 +4887,7 @@ void __thiscall ThreadedTable::FUN_00a5b5a0(const char** key, unsigned int flags
     if (*reinterpret_cast<short*>(reinterpret_cast<char*>(this) + entryOffset + 0x0c) != 0)
         ++DAT_011f42c8;
 
-    reinterpret_cast<ThreadedTableEntry*>(reinterpret_cast<char*>(this) + entryOffset)->FUN_00a5b4b0(key);
+    reinterpret_cast<ThreadedTableEntry*>(reinterpret_cast<char*>(this) + entryOffset)->NiTPrimitiveArray_DWORD_AddFirstEmpty(key);
     ++DAT_011f42c4;
     LeaveCriticalSection(criticalSection);
     *reinterpret_cast<unsigned int*>(threadData + 0x2b4) = previousMode;
@@ -4909,14 +4958,15 @@ struct StringTable169
     unsigned int unk2078;
     unsigned int unk207c;
     CRITICAL_SECTION_STUB lock;
-    unsigned int FUN_00a5b270(const char*, unsigned int);
-    char* FUN_00a5b300(const char* key, unsigned int length);
+    unsigned int NiGlobalStringTable_HashFunction(const char*, unsigned int);
+    char* NiGlobalStringTable_FindString(const char* key, unsigned int length);
 };
 // Hashes key, locks the table, scans the bucket's entries for an exact match, and returns the stored string or null.
 // @fnv 0x00a5b300
-char* StringTable169::FUN_00a5b300(const char* key, unsigned int length)
+// src: XBOX_PDB 0x00a5b300
+char* StringTable169::NiGlobalStringTable_FindString(const char* key, unsigned int length)
 {
-    unsigned int uiHash = FUN_00a5b270(key, length);
+    unsigned int uiHash = NiGlobalStringTable_HashFunction(key, length);
     CRITICAL_SECTION_STUB* bucket = &lock;
     EnterCriticalSection(bucket);
     unsigned int idx = buckets[uiHash].count;
@@ -4938,7 +4988,7 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile lo
 extern "C" __declspec(dllimport) void __stdcall fnv_EnterCriticalSection(void* cs);
 extern "C" __declspec(dllimport) void __stdcall fnv_LeaveCriticalSection(void* cs);
 extern unsigned char DAT_011f4380;
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 void __cdecl NiFreeAlias(void*);
 extern "C" void* __cdecl memmove(void* dst, const void* src, unsigned int n);
 struct ExtraName
@@ -4952,11 +5002,12 @@ struct ExtraName
 
 struct Holder : NiObjectNET
 {
-    bool FUN_00a5ba40(NiTexture* p);
+    bool NiObjectNET_AddExtraData(NiTexture* p);
 };
 // Inserts p into the sorted texture array, growing it as needed, and returns false if a duplicate name is found.
 // @fnv 0x00a5ba40
-bool Holder::FUN_00a5ba40(NiTexture* p)
+// src: COMMUNITY 0x00a5ba40
+bool Holder::NiObjectNET_AddExtraData(NiTexture* p)
 {
     if (!p)
         return false;
@@ -4965,7 +5016,7 @@ bool Holder::FUN_00a5ba40(NiTexture* p)
     if (m_usMaxSize < 1)
     {
         m_usExtraDataSize = m_usMaxSize = 1;
-        m_ppkExtra = (NiExtraData**)FUN_00aa1070(4);
+        m_ppkExtra = (NiExtraData**)_NiMalloc_00aa1070(4);
         m_ppkExtra[0] = (NiExtraData*)p;
         fnv_LeaveCriticalSection(&DAT_011f4380);
         return true;
@@ -4973,7 +5024,7 @@ bool Holder::FUN_00a5ba40(NiTexture* p)
     if (m_usExtraDataSize == m_usMaxSize)
     {
         m_usMaxSize = (unsigned short)(m_usMaxSize * 2 + 1);
-        NiTexture** newData = (NiTexture**)FUN_00aa1070(m_usMaxSize * 4);
+        NiTexture** newData = (NiTexture**)_NiMalloc_00aa1070(m_usMaxSize * 4);
         memmove(newData, m_ppkExtra, m_usExtraDataSize * 4);
         NiFreeAlias(m_ppkExtra);
         m_ppkExtra = (NiExtraData**)newData;
@@ -4986,7 +5037,7 @@ bool Holder::FUN_00a5ba40(NiTexture* p)
     for (j = (unsigned short)(m_usExtraDataSize - 1); j > 0; --j)
     {
         NiTexture**& data = reinterpret_cast<NiTexture**&>(m_ppkExtra);
-        int diff = data[j - 1]->FUN_00a62660() - data[j]->FUN_00a62660();
+        int diff = data[j - 1]->GetFilename_00a62660() - data[j]->GetFilename_00a62660();
         if (diff == 0)
         {
             DeleteExtraData(j);
@@ -5026,12 +5077,13 @@ struct FUN_00a53540_cls
     int unk1c;
 
     void BaseCleanup();
-    FUN_00a53540_cls* FUN_00a53540(unsigned char acFlags);
+    FUN_00a53540_cls* NiFloatInterpolator_Destroy_deleting_destructor_(unsigned char acFlags);
 };
 
 // Releases the m_pCounted reference, calls BaseCleanup, and frees this memory if acFlags has bit 0 set.
 // @fnv 0x00a53540
-FUN_00a53540_cls* FUN_00a53540_cls::FUN_00a53540(unsigned char acFlags)
+// src: COMMUNITY 0x00a53540
+FUN_00a53540_cls* FUN_00a53540_cls::NiFloatInterpolator_Destroy_deleting_destructor_(unsigned char acFlags)
 {
     a53540_Counted* pCounted = *(a53540_Counted* volatile*)&m_pCounted;
     if (pCounted != 0)
@@ -5051,7 +5103,8 @@ FUN_00a53540_cls* FUN_00a53540_cls::FUN_00a53540(unsigned char acFlags)
 
 // Locks the table and, for each of its 513 buckets, frees string records whose refs is zero and clears their entry slots.
 // @fnv 0x00a5b3c0
-void SingletonTarget::FUN_00a5b3c0()
+// src: COMMUNITY 0x00a5b3c0
+void SingletonTarget::NiGlobalStringTable_FreeStrings()
 {
     struct
     {
@@ -5084,7 +5137,7 @@ void SingletonTarget::FUN_00a5b3c0()
                 StringRecord169* pkRecord = (StringRecord169*)(pcString - 8);
                 if (pkRecord->refs == 0)
                 {
-                    FUN_00aa10f0(pkRecord);
+                    _NiFree_00aa10f0(pkRecord);
                     if (ui >= pkBucket->count)
                     {
                         pkBucket->count = ui + 1;
@@ -5104,7 +5157,8 @@ void SingletonTarget::FUN_00a5b3c0()
 
 // Unlinks the given NiTexture node from the doubly linked list guarded by DAT_011f4580, updating head, tail and neighbour pointers.
 // @fnv 0x00a5f800
-void __fastcall FUN_00a5f800(NiTexture* texture)
+// src: XBOX_PDB 0x00a5f800
+void __fastcall NiTexture_RemoveTextureFromList(NiTexture* texture)
 {
     EnterCriticalSection(reinterpret_cast<CRITICAL_SECTION_STUB*>(&DAT_011f4580));
     if (DAT_011f4500 == reinterpret_cast<int>(texture))

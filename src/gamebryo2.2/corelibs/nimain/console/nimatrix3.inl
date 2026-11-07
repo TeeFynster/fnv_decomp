@@ -71,7 +71,7 @@ NiMatrix3 NiMatrix3::Transpose() const {
 // @fnv 0x0043F850
 void NiMatrix3::MakeYRotation(float angle) {
  float s,c;
- FUN_004169a0(angle,s,c);
+ NiSinCos_004169a0(angle,s,c);
  m_pEntry[0][0]=c; m_pEntry[0][1]=0.0f; m_pEntry[0][2]=-s;
  m_pEntry[1][0]=0.0f; m_pEntry[1][1]=1.0f; m_pEntry[1][2]=0.0f;
  m_pEntry[2][0]=s; m_pEntry[2][1]=0.0f; m_pEntry[2][2]=c;
@@ -89,7 +89,7 @@ NiTransform NiTransform::operator*(const NiTransform& other) const {
 // @fnv 0x004168A0
 void NiMatrix3::MakeRotation(float angle,float x,float y,float z) {
  struct {float omc,xy,ys,xz,zs,z2,yz,xs,c,s,x2,y2;} v;
- FUN_004169a0(angle,v.s,v.c);
+ NiSinCos_004169a0(angle,v.s,v.c);
  v.omc=1.0f-v.c;
  v.x2=x*x; v.y2=y*y; v.z2=z*z;
  v.xy=x*y*v.omc; v.xz=x*z*v.omc; v.yz=y*z*v.omc;
@@ -113,7 +113,7 @@ bool NiMatrix3::Inverse(NiMatrix3& out) const {
  out.m_pEntry[2][1]=m_pEntry[0][1]*m_pEntry[2][0]-m_pEntry[0][0]*m_pEntry[2][1];
  out.m_pEntry[2][2]=m_pEntry[0][0]*m_pEntry[1][1]-m_pEntry[0][1]*m_pEntry[1][0];
  v.det=m_pEntry[0][0]*out.m_pEntry[0][0]+m_pEntry[0][1]*out.m_pEntry[1][0]+m_pEntry[0][2]*out.m_pEntry[2][0];
- if(FUN_00408820(v.det)<=DAT_01017cf8) return false;
+ if(NiAbs_00408820(v.det)<=DAT_01017cf8) return false;
  v.inv=1.0f/v.det;
  for(v.row=0;v.row<3;v.row++)
   for(v.col=0;v.col<3;v.col++)

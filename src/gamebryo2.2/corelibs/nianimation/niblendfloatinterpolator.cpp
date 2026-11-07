@@ -120,7 +120,7 @@ NiBlendFloatInterpolator::NiBlendFloatInterpolator(bool onlyUseHighestWeight, fl
     m_fFloatValue = DAT_0109a918;
 }
 
-void __fastcall FUN_00a36890(void*);
+void __fastcall NiBlendInterpolator_NiBlendInterpolator(void*);
 extern const void* vftable_NiBlendFloatInterpolator[];
 
 // @fnv 0x00a40580
@@ -129,7 +129,7 @@ void* __cdecl CreateNiBlendFloatInterpolator()
     void* pInterpolator = NiObject::operator new(0x34);
     if (pInterpolator)
     {
-        FUN_00a36890(pInterpolator);
+        NiBlendInterpolator_NiBlendInterpolator(pInterpolator);
         *(void**)pInterpolator = (void*)vftable_NiBlendFloatInterpolator;
         *(float*)((char*)pInterpolator + 0x30) = DAT_0109a918;
         return pInterpolator;
@@ -155,7 +155,8 @@ struct GlobalObjectO2_00a7b610
 };
 extern GlobalObjectO2_00a7b610 g_011f3e58;
 // @fnv 0x00a405e0
-void* __cdecl FUN_00a405e0()
+// src: COMMUNITY 0x00a405e0
+void* __cdecl NiBlendFloatInterpolator_GetRTTI()
 {
     return &g_011f3e58;
 }
@@ -193,35 +194,35 @@ struct M76Glob
     int pad;
 };
 extern M76Glob* g_011f3e58;
-char* __cdecl FUN_00a7d330(M76Glob*);
-char* __cdecl FUN_00a7d550(const char*, float);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(M76Glob*);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
 // Appends the base interpolator strings, type name, and formatted float value.
 // @fnv 0x00a408f0
 void __fastcall AppendFloatValueStrings(NiBlendFloatInterpolator* self, int, M76Arr* pkStrings)
 {
     self->NiBlendInterpolator::AppendInterpolatorStrings(reinterpret_cast<StrArr*>(pkStrings));
-    pkStrings->Add(FUN_00a7d330(g_011f3e58));
-    pkStrings->Add(FUN_00a7d550("m_fFloatValue", self->m_fFloatValue));
+    pkStrings->Add(NiViewerStrings_NiGetViewerString_Title(g_011f3e58));
+    pkStrings->Add(NiGetViewerString_00a7d550("m_fFloatValue", self->m_fFloatValue));
 }
 }  // namespace fnv_00a408f0
 
-extern void* __cdecl FUN_00aa13e0(unsigned int size);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct CopyMembersArguments
 {
     NiBlendFloatInterpolator* destination;
     void* cloningProcess;
 };
-extern "C" void __fastcall FUN_00a37510(void* source, CopyMembersArguments args);
+extern "C" void __fastcall NiBlendInterpolator_CopyMembers(void* source, CopyMembersArguments args);
 
 // Allocates and initializes a clone, then copies the base and float members.
 // @fnv 0x00a405f0
 NiBlendFloatInterpolator* __fastcall CloneFloatInterpolator(NiBlendFloatInterpolator* self, int, void* pCloningProcess)
 {
     NiBlendFloatInterpolator* copy =
-        static_cast<NiBlendFloatInterpolator*>(FUN_00aa13e0(sizeof(NiBlendFloatInterpolator)));
+        static_cast<NiBlendFloatInterpolator*>(Object_DispatchCommandFour(sizeof(NiBlendFloatInterpolator)));
     if (copy)
     {
-        FUN_00a36890(copy);
+        NiBlendInterpolator_NiBlendInterpolator(copy);
         *reinterpret_cast<const void***>(copy) = vftable_NiBlendFloatInterpolator;
         copy->m_fFloatValue = DAT_0109a918;
     }
@@ -230,7 +231,7 @@ NiBlendFloatInterpolator* __fastcall CloneFloatInterpolator(NiBlendFloatInterpol
         copy = 0;
     }
     CopyMembersArguments args = {copy, pCloningProcess};
-    FUN_00a37510(self, args);
+    NiBlendInterpolator_CopyMembers(self, args);
     copy->m_fFloatValue = self->m_fFloatValue;
     return copy;
 }

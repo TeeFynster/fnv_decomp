@@ -84,15 +84,15 @@ public:
     void SetupDepthCameras(NiCamera* camera, NiCamera* firstPersonCamera);
     void SetAccumulate(bool bAccumulate);
     bool __thiscall HasListedItemInRange(unsigned int a, int b);
-    void FUN_004a1020(void*);
+    void BSShaderAccumulator_SetShadowSceneNode(void*);
     void FUN_004a1040(unsigned int);
-    void FUN_004ea860(unsigned char abFlag);
-    void FUN_004ea880(const NiColorA* apData);
-    void FUN_004ec7c0(bool);
-    void FUN_005db4c0(bool);
-    void FUN_00936aa0(bool);
-    void __thiscall FUN_00b63120(unsigned int a, int b);
-    void FUN_00b64570(void* camera, BSRenderedTexture* texture);
+    void BSShaderAccumulator_SetWaterReflection(unsigned char abFlag);
+    void BSShaderAccumulator_SetSilhouetteColor(const NiColorA* apData);
+    void BSShaderAccumulator_SetRenderWaterDepth(bool);
+    void BSShaderAccumulator_SetRenderDecals(bool);
+    void MobileObject_SetSoundCallBackSuccess(bool);
+    void __thiscall GetWaterRefractionPassWithinRange(unsigned int a, int b);
+    void BSShaderAccumulator_RenderNormals(void* camera, BSRenderedTexture* texture);
 
     etAccumulationMode _unverified_eAccumulationMode;
     bool bWorldGeometry;

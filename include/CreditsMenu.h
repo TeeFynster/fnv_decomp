@@ -26,7 +26,7 @@ public:
     {
         CreditSceneNode* data;
         void FUN_0066b0d0(CreditSceneNode*);
-        CreditSceneNode* FUN_00559450();
+        CreditSceneNode* Modelloader_GetReferencedThis();
     };
 
     struct NiFixedStringArray
@@ -138,12 +138,12 @@ public:
     int FUN_0075f1c0();
     void FUN_0075f910();
     bool IsKeyHandled(int, int);
-    bool FUN_0073af60();
-    void FUN_0075fb90();
+    bool IsWellFormedMenu();
+    void InitCreditsRoot();
     void AdvanceToNewline();
-    void FUN_00760b80();
+    void SkipKey();
     void WriteTextUntilDelimiter(OutputA*);
     void WriteTextUntilDelimiter(CreditString&);
-    CreditNode* FUN_00760cf0(CreditTextureSource*, int, int, float);
-    CreditSceneNode* FUN_00760cf0(const CreditString&, int, int, float);
+    CreditNode* CreateImage(CreditTextureSource*, int, int, float);
+    CreditSceneNode* CreateImage(const CreditString&, int, int, float);
 };

@@ -13,7 +13,8 @@ extern int DAT_0109b72c;
 
 // Allocates a 0x1c-byte NiProperty, constructs it, sets a short field at offset 0x18 to 8 and installs the vtable, returning the object or null.
 // @fnv 0x00a5f280
-NiProperty* FUN_00a5f280()
+// src: EXE 0x00a5f280
+NiProperty* NiVertexColorProperty_CreateObject()
 {
     NiVertexColorProperty* p = static_cast<NiVertexColorProperty*>(BSFadeNode::operator new(0x1c));
     if (p)
@@ -82,7 +83,7 @@ void __fastcall AppendVertexColorProperties(NiVertexColorProperty* self, void*, 
     strings->SetAt(index, value);
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 void __stdcall CreateVertexBufferSet(void* self, unsigned int arg);
 
 // @fnv 0x00a5f210
@@ -90,7 +91,7 @@ void* __fastcall CloneVertexColorProperty(NiVertexColorProperty* self, void*, un
 {
     if (self->m_spControllers != 0)
     {
-        NiVertexColorProperty* p = static_cast<NiVertexColorProperty*>(FUN_00aa13e0(0x1c));
+        NiVertexColorProperty* p = static_cast<NiVertexColorProperty*>(Object_DispatchCommandFour(0x1c));
         if (p)
         {
             p->NiProperty::NiProperty();

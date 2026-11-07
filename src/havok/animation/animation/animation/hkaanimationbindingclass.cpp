@@ -17,7 +17,7 @@ struct Holder
     int unk0c;
     Manager* manager;
 };
-Holder* FUN_00c85750();
+Holder* hkMemoryRouter_getInstance();
 struct Record
 {
     int unk00;
@@ -32,7 +32,7 @@ Record* Record::FUN_00dfea70(unsigned int flags)
     ClearReferences();
     if (flags & 1)
     {
-        Holder* holder = FUN_00c85750();
+        Holder* holder = hkMemoryRouter_getInstance();
         holder->manager->Notify(this, value);
     }
     return this;
@@ -68,14 +68,14 @@ struct CalleeA
 };
 struct CalleeB
 {
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
 
 // @fnv 0x00dfe9e0
 void Record::ClearReferences()
 {
     ReclaimState* pState = reinterpret_cast<ReclaimState*>(this);
-    Holder* pManagerHolder = FUN_00c85750();
+    Holder* pManagerHolder = hkMemoryRouter_getInstance();
     ManagerSlots* pManager = reinterpret_cast<ManagerSlots*>(pManagerHolder->manager);
     pState->m_20 = 0;
     if ((pState->m_24 & 0x80000000u) == 0)
@@ -85,7 +85,7 @@ void Record::ClearReferences()
     pState->m_1c = 0;
     pState->m_24 = 0x80000000u;
 
-    pManagerHolder = FUN_00c85750();
+    pManagerHolder = hkMemoryRouter_getInstance();
     pManager = reinterpret_cast<ManagerSlots*>(pManagerHolder->manager);
     pState->unk14 = 0;
     if ((pState->unk18 & 0x80000000u) == 0)
@@ -101,6 +101,6 @@ void Record::ClearReferences()
         reinterpret_cast<CalleeA*>(p)->FUN_00c905b0();
     }
     pState->unk0c = 0;
-    reinterpret_cast<CalleeB*>(&pState->unk08)->FUN_00cb0c00();
+    reinterpret_cast<CalleeB*>(&pState->unk08)->Object_UpdateFields_00cb0c00();
     pState->vptr = (void*)&DAT_0102e388;
 }

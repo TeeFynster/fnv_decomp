@@ -27,12 +27,12 @@ InvisibilityEffect::InvisibilityEffect(void* a, void* b, void* c) : ValueModifie
 
 extern float DAT_0107a214;
 extern Actor* g_thePlayer;
-bool __cdecl FUN_005b9b00(void);
+bool __cdecl BSShaderManager_IsRefractionEnabled(void);
 // @fnv 0x0080e540
 void __thiscall InvisibilityEffect::ApplyInvisibility(Actor* actor)
 {
-    FUN_0082cd10(actor);
-    if (FUN_005b9b00() && actor == g_thePlayer)
+    ValueModifierEffect_FinishInitLoadGame(actor);
+    if (BSShaderManager_IsRefractionEnabled() && actor == g_thePlayer)
     {
         actor->SetAlpha(1.0f);
         actor->Unk_E1(1, DAT_0107a214);
@@ -47,7 +47,7 @@ void __thiscall InvisibilityEffect::ApplyInvisibility(Actor* actor)
 void InvisibilityEffect::RevertInvisibility(Actor* apActor)
 {
     reinterpret_cast<TESForm*>(this)->TESForm::Revert(reinterpret_cast<BGSLoadFormBuffer*>(apActor));
-    if (FUN_005b9b00() && apActor == g_thePlayer)
+    if (BSShaderManager_IsRefractionEnabled() && apActor == g_thePlayer)
         apActor->Unk_E1(1, 0.0f);
     else
         apActor->UpdateActorPresentation();
@@ -90,17 +90,18 @@ struct Effect
     int unk44;
     int unk48;
     Target* FUN_0059bb30();
-    void FUN_0082c000();
-    void FUN_0080e110();
+    void ValueModifierEffect_Start();
+    void InvisibilityEffect_Start();
 };
 // @fnv 0x0080e110
-void Effect::FUN_0080e110()
+// src: XBOX_PDB 0x0080e110
+void Effect::InvisibilityEffect_Start()
 {
     Actor* actor = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : 0;
-    FUN_0082c000();
+    ValueModifierEffect_Start();
     if (actor && actor->GetActorValue(static_cast<ActorValue::Index>(unk48)) > 0.0)
     {
-        if (FUN_005b9b00() && actor == g_thePlayer)
+        if (BSShaderManager_IsRefractionEnabled() && actor == g_thePlayer)
         {
             actor->SetAlpha(1.0f);
             actor->Unk_E1(1, DAT_0107a214);
@@ -109,7 +110,7 @@ void Effect::FUN_0080e110()
         {
             HighProcess* pHighProcess = dynamic_cast<HighProcess*>(actor->GetProcess());
             if (pHighProcess && static_cast<BaseProcess*>(pHighProcess)->GetCurrentFadeState() != 4)
-                pHighProcess->FUN_008fe960(actor, 0, 0);
+                pHighProcess->HighProcess_FadeOut(actor, 0, 0);
         }
     }
 }
@@ -229,14 +230,14 @@ struct MVActiveEffect
 
 struct MVProcessLists
 {
-    void FUN_00973fd0(MVActiveEffect* apEffect);
+    void ProcessLists_AddTempEffect(MVActiveEffect* apEffect);
 };
 
 extern Actor* g_pMVPlayer;
 extern MVProcessLists g_kMVProcessLists;
 extern const float g_fMVEffectArg;
-bool __cdecl FUN_005b9b00();
-float __cdecl FUN_0040df50();
+bool __cdecl BSShaderManager_IsRefractionEnabled();
+float __cdecl MagicSystem_GetChameleonMaxRefraction();
 float __cdecl GetOriginalRuntimeFloatSetting9();
 float __cdecl LinearInterpolate(float a1, float a2, float a3, float a4, float a5);
 
@@ -265,17 +266,18 @@ struct MVEffect
     void ApplyEffect();
     MVMagicTarget* GetTarget();
     MVEffectSetting* GetEffectSetting();
-    void FUN_0080e230();
+    void InvisibilityEffect_Finish();
 };
 
 // @fnv 0x0080e230
-void MVEffect::FUN_0080e230()
+// src: XBOX_PDB 0x0080e230
+void MVEffect::InvisibilityEffect_Finish()
 {
     ApplyEffect();
     Actor* pTarget = GetTarget() ? GetTarget()->GetActor() : 0;
     if (pTarget && pTarget->GetActorValue(static_cast<ActorValue::Index>(m_eAssociatedActorValue)) == 0.0)
     {
-        if (FUN_005b9b00() && pTarget == g_pMVPlayer)
+        if (BSShaderManager_IsRefractionEnabled() && pTarget == g_pMVPlayer)
         {
             pTarget->Unk_E1(1, 0.0f);
         }
@@ -289,9 +291,9 @@ void MVEffect::FUN_0080e230()
         float m_fElapsedTime = 0.0f;
         if (m_fElapsedTime > 0.0)
         {
-            if (FUN_005b9b00())
+            if (BSShaderManager_IsRefractionEnabled())
             {
-                float fValue = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), FUN_0040df50(), 0.0f, 1.0f,
+                float fValue = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), MagicSystem_GetChameleonMaxRefraction(), 0.0f, 1.0f,
                                                  1.0f - m_fElapsedTime);
                 pTarget->Unk_E1(1, fValue);
             }
@@ -305,7 +307,7 @@ void MVEffect::FUN_0080e230()
         if (GetEffectSetting()->kFullName.GetLength() > 0)
             pEffect5 = new MVActiveEffect(pTarget, GetEffectSetting()->kFullName.GetValue(g_fMVEffectArg));
         if (pEffect5 && pEffect5->IsValid())
-            g_kMVProcessLists.FUN_00973fd0(pEffect5);
+            g_kMVProcessLists.ProcessLists_AddTempEffect(pEffect5);
         else
             delete pEffect5;
     }

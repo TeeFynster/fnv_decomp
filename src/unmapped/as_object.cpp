@@ -13,7 +13,7 @@
 class NavMesh;
 struct S00561ef0
 {
-    bool FUN_00561ef0(TESObjectCELL*);
+    bool TESObjectREFR_MoveToEditorLocation(TESObjectCELL*);
 };
 struct P01ObjA
 {
@@ -25,7 +25,7 @@ struct FUN_00881d10
 };
 struct FUN_00452440_shell
 {
-    bool FUN_00452440();
+    bool BGSPlaceableWater_IsAutomaticWater();
 };
 struct CellReferenceList
 {
@@ -33,7 +33,7 @@ struct CellReferenceList
     TESObjectREFR** FUN_006815c0();
     void FUN_0063f7b0();
     CellReferenceList* FUN_00726070();
-    void FUN_00905330(TESObjectREFR* const&);
+    void RemoveMatchingItem(TESObjectREFR* const&);
 };
 struct CF845
 {
@@ -50,7 +50,7 @@ struct FUN_008d0370_shell
     bool FUN_008d0370(TESObjectREFR*);
 };
 int __fastcall GetReferenceFlags(void*);
-void FUN_00867f90(TESObjectREFR*);
+void GarbageCollector_Add_TESObjectREFR(TESObjectREFR*);
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 extern FUN_008d0370_shell* g_TESSaveLoadGame;
 extern BGSLoadedReferenceCollection* DAT_011c95c8;
@@ -69,8 +69,8 @@ void TESObjectCELL::RemoveNonPersistentRefs()
         {
             CellReferenceList* pNode;
             bool bOldAllow = g_BGSSaveLoadGame->SetThreadAllowChanges(false);
-            FUN_005576c0();
-            pNode = (CellReferenceList*)FUN_009604f0();
+            RemoveObstaclesAndDoors();
+            pNode = (CellReferenceList*)GetRefList_009604f0();
             pPrevNode = 0;
             while (pNode && !pNode->FUN_008256d0())
             {
@@ -80,14 +80,14 @@ void TESObjectCELL::RemoveNonPersistentRefs()
                 {
                     if (pPrevNode)
                     {
-                        pPrevNode->FUN_00905330(pRef);
+                        pPrevNode->RemoveMatchingItem(pRef);
                         pNode = pPrevNode->FUN_00726070();
                     }
                     else
                     {
                         pNode->FUN_0063f7b0();
                     }
-                    DAT_011c95c8->FUN_005270b0(pRef);
+                    DAT_011c95c8->RemoveReference_005270b0(pRef);
                     if (pRef->IsActor())
                     {
                         MobileObject* pActor = (MobileObject*)pRef;
@@ -97,18 +97,18 @@ void TESObjectCELL::RemoveNonPersistentRefs()
                     g_TESSaveLoadGame->FUN_008d0370(pRef);
                     g_BGSSaveLoadGame->FUN_00849730(pRef, 0);
                     bool bPrint = true;
-                    if (g_BGSSaveLoadGame->FUN_0042ce10() &&
+                    if (g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading() &&
                         ((Class_0084a700*)g_BGSSaveLoadGame)->HasChangeForForm(pRef, CF845(8)) &&
-                        ((S00561ef0*)pRef)->FUN_00561ef0(this))
+                        ((S00561ef0*)pRef)->TESObjectREFR_MoveToEditorLocation(this))
                         bPrint = false;
                     if (((P01ObjA*)pRef)->GetNext() && ((P01ObjA*)pRef)->GetNext()->FNV_GetFormType() == 0x23)
                     {
                         FUN_00452440_shell* pBase = (FUN_00452440_shell*)((P01ObjA*)pRef)->GetNext();
-                        if (pBase->FUN_00452440())
-                            FUN_00558ba0(pRef);
+                        if (pBase->BGSPlaceableWater_IsAutomaticWater())
+                            RemoveAutoWaterReferenceFromReferencesCurrentWater(pRef);
                     }
                     if (bPrint && pRef != g_thePlayer)
-                        FUN_00867f90(pRef);
+                        GarbageCollector_Add_TESObjectREFR(pRef);
                 }
                 else
                 {
@@ -140,12 +140,12 @@ void TESObjectCELL::RemoveNonPersistentRefs()
                 if (!pNavFile || pNavFile->IsMasterFile())
                 {
                     NavMeshPtr apSearchNavMesh = pNavMeshArray->GetNavMeshAt(i);
-                    g_BGSSaveLoadGame->FUN_00849730(apSearchNavMesh.FUN_00458b50(), 0);
+                    g_BGSSaveLoadGame->FUN_00849730(apSearchNavMesh.AnimatingText_GetFullText(), 0);
                     pNavMeshArray->RemoveAndCollect(i);
                     i--;
                 }
             }
         }
     }
-    FUN_00551440(false);
+    TESObjectCELL_SetHasTempData(false);
 }

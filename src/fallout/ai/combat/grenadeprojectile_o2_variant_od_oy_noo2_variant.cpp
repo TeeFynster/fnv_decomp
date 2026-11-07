@@ -44,9 +44,9 @@ class RigidBodyMotionAccess
 };
 
 bhkCollisionObject* __cdecl FUN_0043b610(void* pvRoot);
-bool __cdecl FUN_00c8cce0(int* piFlags);
+bool __cdecl bhkRigidBody_IsMotionTypeDynamic(int* piFlags);
 bool __cdecl CanProjectileHit(TESObjectREFR* pkTarget, int iArg, void* pvActor, void* pvProcess);
-void __cdecl FUN_0062b8d0(void* pvRoot, const void* pvPos, int iFlag);
+void __cdecl TESHavokUtilities_AddVelocity(void* pvRoot, const void* pvPos, int iFlag);
 extern const float g_kZeroPoint9B4[3];
 
 // 0x009b4460 calls Projectile::OnCollision (0x009bf5a0), tests impacts at +0x88 and sets the impact flag at +0x90.
@@ -209,23 +209,24 @@ class GrenadeImpactState
     void* GetProjectileBase();
     bool ProcessCollision(TESObjectREFR* pkTarget, int a2, int a3, int a4, int a5, int a6);
     float FUN_00885bd0();
-    void FUN_009b4740();
-    bool FUN_009b4460(TESObjectREFR* pkTarget, int a2, int a3, int a4, int a5, int a6);
+    void Object_ProcessAndReturnValue_009b4740();
+    bool GrenadeProjectile_AddImpact(TESObjectREFR* pkTarget, int a2, int a3, int a4, int a5, int a6);
 };
 
 // @fnv 0x009b4460
-bool GrenadeImpactState::FUN_009b4460(TESObjectREFR* pkTarget, int a2, int a3, int a4, int a5, int a6)
+// src: XBOX_PDB 0x009b4460
+bool GrenadeImpactState::GrenadeProjectile_AddImpact(TESObjectREFR* pkTarget, int a2, int a3, int a4, int a5, int a6)
 {
     if (g_kGameMode9B4.GetMode() == 4)
     {
         bhkCollisionObject* pkNode = FUN_0043b610(Get3D());
         if (pkNode)
         {
-            RigidBodyMotionAccess* pkObject = reinterpret_cast<RigidBodyMotionAccess*>(pkNode->FUN_006fa820());
+            RigidBodyMotionAccess* pkObject = reinterpret_cast<RigidBodyMotionAccess*>(pkNode->bhkNiCollisionObject_GetWorldObject());
             if (pkObject)
             {
                 int iFlags = pkObject->GetMotionType();
-                if (FUN_00c8cce0(&iFlags))
+                if (bhkRigidBody_IsMotionTypeDynamic(&iFlags))
                 {
                     ProjectileVelocityVector kVelocity;
                     float fAlpha = g_fBaseAlpha9B4;
@@ -243,11 +244,11 @@ bool GrenadeImpactState::FUN_009b4460(TESObjectREFR* pkTarget, int a2, int a3, i
     {
         if (pkTarget && pkTarget->IsActor())
         {
-            FUN_0062b8d0(Get3D(), g_kZeroPoint9B4, 1);
+            TESHavokUtilities_AddVelocity(Get3D(), g_kZeroPoint9B4, 1);
         }
         else if (FUN_00885bd0() == 0.0)
         {
-            FUN_009b4740();
+            Object_ProcessAndReturnValue_009b4740();
             m_bHasImpactData = true;
         }
         return true;
@@ -259,10 +260,11 @@ bool GrenadeImpactState::FUN_009b4460(TESObjectREFR* pkTarget, int a2, int a3, i
 struct hkVector4Mul
 {
     __m128 m_vComponents;
-    void FUN_009b4670(const hkVector4Mul& a);
+    void MultiplyComponentsInPlace(const hkVector4Mul& a);
 };
 // @fnv 0x009b4670
-void hkVector4Mul::FUN_009b4670(const hkVector4Mul& a)
+// src: GUESS 0x009b4670 (confidence: high)
+void hkVector4Mul::MultiplyComponentsInPlace(const hkVector4Mul& a)
 {
     m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents);
 }

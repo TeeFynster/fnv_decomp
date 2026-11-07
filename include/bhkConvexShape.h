@@ -24,8 +24,8 @@ public:
     float GetRadius();
     void SetRadius(float radius);
     void CopyCinfo(PhysicsShapeClass& cinfo);
-    void FUN_0056e810(unsigned int);
-    void FUN_00cab820(int a);
+    void bhkBoxShape_Init(unsigned int);
+    void bhkCapsuleShape_Init_00cab820(int a);
 
     static bhkConvexShape* GetFromRigidBody(const hkpShape* shape);
 

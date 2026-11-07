@@ -182,7 +182,7 @@ void* __cdecl FUN_00401460(void* dst, const void* src, unsigned int size);
 
 struct FUN_005054b0_shell
 {
-    void __thiscall FUN_004851b0(TESForm* form);
+    void __thiscall TESForm_CopyAllComponents(TESForm* form);
 };
 
 struct FUN_005932b0_decal
@@ -191,7 +191,8 @@ struct FUN_005932b0_decal
 };
 
 // @fnv 0x0058dd10
-void __thiscall BGSImpactData::FUN_0058dd10(int arg)
+// src: XBOX_PDB 0x0058dd10
+void __thiscall BGSImpactData::Copy_0058dd10(int arg)
 {
     BGSImpactData* source =
         reinterpret_cast<BGSImpactData*>(FUN_00ec43fb(arg, 0, DAT_01183028, DAT_011862fc, 0));
@@ -199,7 +200,7 @@ void __thiscall BGSImpactData::FUN_0058dd10(int arg)
     if (source == 0)
         return;
 
-    reinterpret_cast<FUN_005054b0_shell*>(this)->FUN_004851b0(source);
+    reinterpret_cast<FUN_005054b0_shell*>(this)->TESForm_CopyAllComponents(source);
     FUN_00401460(reinterpret_cast<char*>(this) + 0x30, reinterpret_cast<char*>(source) + 0x30, 0x18);
     reinterpret_cast<FUN_005932b0_decal*>(reinterpret_cast<char*>(this) + 0x54)
         ->FUN_005932b0(reinterpret_cast<FUN_005932b0_decal*>(reinterpret_cast<char*>(source) + 0x54));
@@ -210,7 +211,7 @@ void __thiscall BGSImpactData::FUN_0058dd10(int arg)
 
 struct FUN_005e79a0_t
 {
-    bool FUN_00485270(TESForm*);
+    bool TESForm_CompareAllComponents(TESForm*);
 };
 struct FUN_005932e0_shell
 {
@@ -223,7 +224,7 @@ bool BGSImpactData::IsDifferentFrom(TESForm* apCompare)
     BGSImpactData* pOther = dynamic_cast<BGSImpactData*>(apCompare);
     if (!pOther)
         return true;
-    if (((FUN_005e79a0_t*)this)->FUN_00485270(pOther))
+    if (((FUN_005e79a0_t*)this)->TESForm_CompareAllComponents(pOther))
         return true;
     if (memcmp((char*)this + 0x30, (char*)pOther + 0x30, 0x18) != 0)
         return true;
@@ -248,7 +249,7 @@ bool __thiscall BGSImpactData::IsFlagSet()
 struct TagX
 {
 };
-void FUN_00401080(void* p, TagX t);
+void BSEndian_00401080(void* p, TagX t);
 class SelfX
 {
   public:
@@ -266,25 +267,26 @@ class SelfX
     int m2c;
     int m30;
     int m34;
-    void FUN_0058e250();
+    void SwapMemberByteOrder();
 };
 // Calls FUN_00401080 with TagX() for each listed member.
 // @fnv 0x0058e250
-void SelfX::FUN_0058e250()
+// src: GUESS 0x0058e250 (confidence: medium)
+void SelfX::SwapMemberByteOrder()
 {
-    FUN_00401080(&m00, TagX());
-    FUN_00401080(&m14, TagX());
-    FUN_00401080(&m1c, TagX());
-    FUN_00401080(&m20, TagX());
-    FUN_00401080(&m04, TagX());
-    FUN_00401080(&m08, TagX());
-    FUN_00401080(&m0c, TagX());
-    FUN_00401080(&m18, TagX());
-    FUN_00401080(&m24, TagX());
-    FUN_00401080(&m28, TagX());
-    FUN_00401080(&m2c, TagX());
-    FUN_00401080(&m30, TagX());
-    FUN_00401080(&m34, TagX());
+    BSEndian_00401080(&m00, TagX());
+    BSEndian_00401080(&m14, TagX());
+    BSEndian_00401080(&m1c, TagX());
+    BSEndian_00401080(&m20, TagX());
+    BSEndian_00401080(&m04, TagX());
+    BSEndian_00401080(&m08, TagX());
+    BSEndian_00401080(&m0c, TagX());
+    BSEndian_00401080(&m18, TagX());
+    BSEndian_00401080(&m24, TagX());
+    BSEndian_00401080(&m28, TagX());
+    BSEndian_00401080(&m2c, TagX());
+    BSEndian_00401080(&m30, TagX());
+    BSEndian_00401080(&m34, TagX());
 }
 
 template <int N> struct EndianSizeTag
@@ -305,12 +307,12 @@ void BGSImpactData__IMPACT_DATA_DATA::Endian()
 
 struct FUN_00485e00_shell
 {
-    void FUN_00485e20(int, int);
+    void TESForm___SaveData(int, int);
 };
 
 struct FUN_00593320_shell
 {
-    void FUN_00593320(void*);
+    void ProcessState_00593320(void*);
 };
 
 bool _FUN_00401500();
@@ -318,9 +320,10 @@ void _FUN_00485910(int, int);
 
 // Calls base helpers, processes bytes at offset 0x30, and passes non-null form IDs to _FUN_00485910.
 // @fnv 0x0058e450
-void BGSImpactData::FUN_0058e450()
+// src: XBOX_PDB 0x0058e450
+void BGSImpactData::Save_0058e450()
 {
-    TESForm::FUN_004855a0();
+    TESForm::BeginFormRecord();
 
     reinterpret_cast<TESModel*>(reinterpret_cast<unsigned char*>(this) + 0x18)
         ->WriteToBuffer(0x4c444f4d, 0x54444f4d);
@@ -330,7 +333,7 @@ void BGSImpactData::FUN_0058e450()
         reinterpret_cast<BGSImpactData__IMPACT_DATA_DATA*>(reinterpret_cast<unsigned char*>(this) + 0x30)->Endian();
     }
 
-    reinterpret_cast<FUN_00485e00_shell*>(this)->FUN_00485e20(
+    reinterpret_cast<FUN_00485e00_shell*>(this)->TESForm___SaveData(
         reinterpret_cast<int>(reinterpret_cast<unsigned char*>(this) + 0x30), 0x18);
 
     if (_FUN_00401500())
@@ -341,7 +344,7 @@ void BGSImpactData::FUN_0058e450()
     if (!IsFlagSet())
     {
         reinterpret_cast<FUN_00593320_shell*>(reinterpret_cast<unsigned char*>(this) + 0x54)
-            ->FUN_00593320(reinterpret_cast<void*>(0x54444f44));
+            ->ProcessState_00593320(reinterpret_cast<void*>(0x54444f44));
     }
 
     {
@@ -374,11 +377,11 @@ void BGSImpactData::FUN_0058e450()
         }
     }
 
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
-void* __fastcall FUN_0056a880(char*);
-void* FUN_0056a8c0();
+void* __fastcall BGSTextureSet_GetDecalData(char*);
+void* DecalData_GetDefaultDecalData();
 // DecalData::Copy is 0x005932b0 (see decaldata.cpp); the shared BGSImpactData.h omits it.
 struct DecalDataCopy
 {
@@ -395,12 +398,12 @@ void BGSImpactData::CopyDecalData()
         {
             reinterpret_cast<DecalDataCopy*>(reinterpret_cast<char*>(this) + 0x54)
                 ->Copy(reinterpret_cast<DecalData*>(
-                    FUN_0056a880(reinterpret_cast<char*>(GetDecalTextureSet()))));
+                    BGSTextureSet_GetDecalData(reinterpret_cast<char*>(GetDecalTextureSet()))));
         }
         else
         {
             reinterpret_cast<DecalDataCopy*>(reinterpret_cast<char*>(this) + 0x54)
-                ->Copy(reinterpret_cast<DecalData*>(FUN_0056a8c0()));
+                ->Copy(reinterpret_cast<DecalData*>(DecalData_GetDefaultDecalData()));
         }
     }
 }

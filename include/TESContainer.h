@@ -64,11 +64,11 @@ public:
     void MultiplyContainerCounts(int multiplier);
     void ScaleEntryCounts(int multiplier);
     void SetClothingModifier(float modifier);
-    void FUN_00482090(float modifier);
+    void ApplyHealthPercentToContainer(float modifier);
     void AddContentsFromReference(TESObjectREFR* reference, bool value);
-    void FUN_004821a0(TESObjectREFR* reference, bool value);
-    void FUN_004821a0(TickPlayer* reference, int value);
-    void FUN_004821a0(void* reference, bool value);
+    void AddContainerToReference(TESObjectREFR* reference, bool value);
+    void AddContainerToReference(TickPlayer* reference, int value);
+    void AddContainerToReference(void* reference, bool value);
     void AddInventoryChangesToContainer(int value, InventoryChanges* changes);
     TESAmmo* GetBestAmmoForActor(TESActorBase* actor);
     TESObjectWEAP* GetBestWeapon(TESActorBase* actor);

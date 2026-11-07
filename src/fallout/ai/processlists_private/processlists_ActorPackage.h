@@ -5,7 +5,7 @@
 class ActorPackageContext
 {
   public:
-    float FUN_00621b00();
+    float ActorPackage_GetPackageStartTime();
     TESPackage* pPackage;     // +0x0
     ActorPackageData* pData;  // +0x4
     TESObjectREFR* pTarget;   // +0x8

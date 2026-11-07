@@ -26,7 +26,8 @@ struct StaticHelper
 };
 
 // @fnv 0x00d22d70
-void hkDisplayCapsule::FUN_00d22d70()
+// src: HAVOK_LIB 0x00d22d70
+void hkDisplayCapsule::buildGeometry()
 {
     StaticHelper::HandleObjectEvent((char*)this + 0x60, (char*)this + 0x70, *(float*)((char*)this + 0x80),
                                     *(void**)((char*)this + 0x88), *(void**)((char*)this + 0x84), (char*)this + 0x10,
@@ -34,7 +35,8 @@ void hkDisplayCapsule::FUN_00d22d70()
 }
 
 // @fnv 0x00d22db0
-void __stdcall FUN_00d22db0(int, int)
+// src: COMMUNITY 0x00d22db0
+void __stdcall nullsub_74(int, int)
 {}
 
 extern "C"
@@ -94,7 +96,8 @@ static __forceinline void crossProduct(hkVector4& result, const hkVector4& a, co
 }
 // Projects a point onto a Limit cone defined by axis, origin, slope, and positive/negative limits, applying scale and transform constraints.
 // @fnv 0x00d234e0
-static __declspec(noinline) void FUN_00d234e0(Limit* apLimit, const hkVector4* point, hkVector4* out, Other* other)
+// src: GUESS 0x00d234e0 (confidence: medium)
+static __declspec(noinline) void hkVector4_ProjectPointToLimitCone(Limit* apLimit, const hkVector4* point, hkVector4* out, Other* other)
 {
     float slope = apLimit->slope;
     float scale = apLimit->scale;
@@ -177,7 +180,7 @@ hkVector4* volatile outputPoint;
 Other* volatile inputOther;
 void invokeProjection()
 {
-    FUN_00d234e0(inputLimit, inputPoint, outputPoint, inputOther);
+    hkVector4_ProjectPointToLimitCone(inputLimit, inputPoint, outputPoint, inputOther);
 }
 
 extern "C"
@@ -266,7 +269,8 @@ static __forceinline LocalM128 prefixColumns(Context* context, Record* a, Record
 }
 // Uses the cross product of a and b's axes to compute a point written to out; if that is degenerate or out of bounds, calls FUN_00d234e0 on both records.
 // @fnv 0x00d23850
-static __declspec(noinline) void FUN_00d23850(Context* context, Record* a, Record* b, VecArg point, hkVector4* out)
+// src: GUESS 0x00d23850 (confidence: low)
+static __declspec(noinline) void hkVector4_ComputeValues_00d23850(Context* context, Record* a, Record* b, VecArg point, hkVector4* out)
 {
     float threshold = DAT_0104da4c;
     hkVector4 raw;
@@ -334,13 +338,13 @@ fallback:
     hkVector4* src = point.p;
     if (a->priority > b->priority)
     {
-        FUN_00d234e0(b, src, dst, &ca.p->base);
-        FUN_00d234e0(a, dst, dst, &ca.p->base);
+        hkVector4_ProjectPointToLimitCone(b, src, dst, &ca.p->base);
+        hkVector4_ProjectPointToLimitCone(a, dst, dst, &ca.p->base);
     }
     else
     {
-        FUN_00d234e0(a, src, dst, &ca.p->base);
-        FUN_00d234e0(b, dst, dst, &ca.p->base);
+        hkVector4_ProjectPointToLimitCone(a, src, dst, &ca.p->base);
+        hkVector4_ProjectPointToLimitCone(b, dst, dst, &ca.p->base);
     }
 }
 
@@ -352,7 +356,7 @@ extern hkVector4* volatile testOut;
 void invokeGeometry()
 {
     VecArg p(testPoint);
-    FUN_00d23850(testContext, testLeft, testRight, p, testOut);
+    hkVector4_ComputeValues_00d23850(testContext, testLeft, testRight, p, testOut);
 }
 
 struct V
@@ -480,7 +484,7 @@ struct IntersectionContext
     PlaneStatusStore* status;
 };
 
-extern void __cdecl FUN_00d23380(IntersectionContext* context);
+extern void __cdecl Object_ProcessEntries_00d23380(IntersectionContext* context);
 
 inline void V::cross(const V& a, const V& b)
 {
@@ -511,7 +515,7 @@ inline LocalM128 distances3(float a, float b, float c)
     return _mm_setr_ps(a, b, c, DAT_01011d78);
 }
 
-extern void __cdecl FUN_00d234e0(IntersectionContext*, PlaneRecord*, const LocalM128*);
+extern void __cdecl hkVector4_ProjectPointToLimitCone(IntersectionContext*, PlaneRecord*, const LocalM128*);
 
 extern const double DAT_01011588 = 0.5;
 
@@ -530,7 +534,8 @@ struct PairWrite
     LocalM128* p;
 };
 
-static __declspec(noinline) void FUN_00d23850(IntersectionContext* ctx, PairPlane aw, PairPlane bw, PairRead fw,
+// src: GUESS 0x00d23850 (confidence: low)
+static __declspec(noinline) void hkVector4_ComputeValues_00d23850(IntersectionContext* ctx, PairPlane aw, PairPlane bw, PairRead fw,
                                               PairWrite rw)
 
 {
@@ -619,13 +624,13 @@ static __declspec(noinline) void FUN_00d23850(IntersectionContext* ctx, PairPlan
     if (a->metadata.priority > b->metadata.priority)
     {
 
-        FUN_00d234e0(ctx, b, fw.p);
-        FUN_00d234e0(ctx, a, rw.p);
+        hkVector4_ProjectPointToLimitCone(ctx, b, fw.p);
+        hkVector4_ProjectPointToLimitCone(ctx, a, rw.p);
     }
     else
     {
-        FUN_00d234e0(ctx, a, fw.p);
-        FUN_00d234e0(ctx, b, rw.p);
+        hkVector4_ProjectPointToLimitCone(ctx, a, fw.p);
+        hkVector4_ProjectPointToLimitCone(ctx, b, rw.p);
     }
 }
 
@@ -656,7 +661,8 @@ struct Wrap_result
 
 // Computes the intersection point of three planes using a cross-product basis, falling back to sequential pairwise intersection if the determinant is near zero.
 // @fnv 0x00d23ca0
-static __declspec(noinline) void FUN_00d23ca0(IntersectionContext* ctx, PlaneRecord* apPlaneA, PlaneRecord* apPlaneB,
+// src: GUESS 0x00d23ca0 (confidence: low)
+static __declspec(noinline) void Object_ProcessAndReturnValue_00d23ca0(IntersectionContext* ctx, PlaneRecord* apPlaneA, PlaneRecord* apPlaneB,
                                               PlaneRecord* apPlaneC, Wrap_reorder reorder, Wrap_fallback fallback,
                                               Wrap_result result)
 {
@@ -695,7 +701,7 @@ static __declspec(noinline) void FUN_00d23ca0(IntersectionContext* ctx, PlaneRec
 sequential:
     if (reorder.p)
     {
-        FUN_00d23380(ctx);
+        Object_ProcessEntries_00d23380(ctx);
         apPlaneA = ctx->first;
         apPlaneB = ctx->second;
         apPlaneC = ctx->third;
@@ -708,21 +714,21 @@ sequential:
         PairPlane pa = {apPlaneA}, pb = {apPlaneB};
         PairRead pf = {fallback.p};
         PairWrite pr = {result.p};
-        FUN_00d23850(ctx, pa, pb, pf, pr);
+        hkVector4_ComputeValues_00d23850(ctx, pa, pb, pf, pr);
     }
     if (oldCount == ctx->count)
     {
         PairPlane pa = {apPlaneA}, pc = {apPlaneC};
         PairRead pf = {result.p};
         PairWrite pr = {result.p};
-        FUN_00d23850(ctx, pa, pc, pf, pr);
+        hkVector4_ComputeValues_00d23850(ctx, pa, pc, pf, pr);
     }
     if (oldCount == ctx->count)
     {
         PairPlane pb = {apPlaneB}, pc = {apPlaneC};
         PairRead pf = {result.p};
         PairWrite pr = {result.p};
-        FUN_00d23850(ctx, pb, pc, pf, pr);
+        hkVector4_ComputeValues_00d23850(ctx, pb, pc, pf, pr);
     }
 }
 
@@ -752,7 +758,7 @@ void emit_intersection()
 
     Wrap_result w_result = {feed_result};
 
-    FUN_00d23ca0(feed_ctx, feed_a, w_b.p, w_c.p, w_reorder, w_fallback, w_result);
+    Object_ProcessAndReturnValue_00d23ca0(feed_ctx, feed_a, w_b.p, w_c.p, w_reorder, w_fallback, w_result);
 }
 
 extern float runtimeFloatSettingDefault166;
@@ -803,7 +809,8 @@ struct SimplexInfo
     SimplexOutput* m_pRayCastOutput;
 };
 
-static __declspec(noinline) void FUN_00d234e0(const SimplexInfo& other_, const PlaneRecord& self_, const Vec4& point_,
+// src: GUESS 0x00d234e0 (confidence: medium)
+static __declspec(noinline) void hkVector4_ProjectPointToLimitCone(const SimplexInfo& other_, const PlaneRecord& self_, const Vec4& point_,
                                               Vec4& out_)
 {
     const Limit* self = (const Limit*)&self_;
@@ -886,7 +893,8 @@ static __declspec(noinline) void FUN_00d234e0(const SimplexInfo& other_, const P
     out->m_vComponents = origin.m_vComponents;
 }
 
-static __declspec(noinline) hkBool FUN_00d23480(const PlaneRecord& sci, const Vec4& velocityIn)
+// src: GUESS 0x00d23480 (confidence: low)
+static __declspec(noinline) hkBool hkBool_ProcessAndReturnValue_00d23480(const PlaneRecord& sci, const Vec4& velocityIn)
 {
     V relativeVelocity;
     relativeVelocity.v = _mm_sub_ps(velocityIn.getQuad(), sci.point.v);
@@ -898,7 +906,8 @@ static __declspec(noinline) hkBool FUN_00d23480(const PlaneRecord& sci, const Ve
     return true;
 }
 
-static __declspec(noinline) void FUN_00d23850(SimplexInfo& ctx_, const PlaneRecord* a_, const PlaneRecord* b_,
+// src: GUESS 0x00d23850 (confidence: low)
+static __declspec(noinline) void hkVector4_ComputeValues_00d23850(SimplexInfo& ctx_, const PlaneRecord* a_, const PlaneRecord* b_,
                                               const Vec4* fw_, Vec4* rw_)
 {
     IntersectionContext* ctx = (IntersectionContext*)&ctx_;
@@ -960,17 +969,18 @@ static __declspec(noinline) void FUN_00d23850(SimplexInfo& ctx_, const PlaneReco
     *(const PlaneRecord* const volatile*)&b_;
     if (a->metadata.priority > b->metadata.priority)
     {
-        FUN_00d234e0(ctx_, *b, fw, rw);
-        FUN_00d234e0(ctx_, *a, rw, rw);
+        hkVector4_ProjectPointToLimitCone(ctx_, *b, fw, rw);
+        hkVector4_ProjectPointToLimitCone(ctx_, *a, rw, rw);
     }
     else
     {
-        FUN_00d234e0(ctx_, *a, fw, rw);
-        FUN_00d234e0(ctx_, *b, rw, rw);
+        hkVector4_ProjectPointToLimitCone(ctx_, *a, fw, rw);
+        hkVector4_ProjectPointToLimitCone(ctx_, *b, rw, rw);
     }
 }
 
-static __declspec(noinline) void FUN_00d23ca0(SimplexInfo& ctx_, const PlaneRecord* a, const PlaneRecord* b,
+// src: GUESS 0x00d23ca0 (confidence: low)
+static __declspec(noinline) void Object_ProcessAndReturnValue_00d23ca0(SimplexInfo& ctx_, const PlaneRecord* a, const PlaneRecord* b,
                                               const PlaneRecord* c, int allowResort, const Vec4& fallback, Vec4& result)
 {
     IntersectionContext* ctx = (IntersectionContext*)&ctx_;
@@ -1001,7 +1011,7 @@ static __declspec(noinline) void FUN_00d23ca0(SimplexInfo& ctx_, const PlaneReco
     }
     if (allowResort)
     {
-        FUN_00d23380(ctx);
+        Object_ProcessEntries_00d23380(ctx);
         a = ctx->first;
         b = ctx->second;
         c = ctx->third;
@@ -1010,14 +1020,14 @@ static __declspec(noinline) void FUN_00d23ca0(SimplexInfo& ctx_, const PlaneReco
     ctx->status->entries[b - ctx->geometry->planes].marked = 1;
     ctx->status->entries[c - ctx->geometry->planes].marked = 1;
     int oldNum = ctx->count;
-    FUN_00d23850(ctx_, a, b, &fallback, &result);
+    hkVector4_ComputeValues_00d23850(ctx_, a, b, &fallback, &result);
     if (ctx->count == oldNum)
     {
-        FUN_00d23850(ctx_, a, c, &result, &result);
+        hkVector4_ComputeValues_00d23850(ctx_, a, c, &result, &result);
     }
     if (ctx->count == oldNum)
     {
-        FUN_00d23850(ctx_, b, c, &result, &result);
+        hkVector4_ComputeValues_00d23850(ctx_, b, c, &result, &result);
     }
 }
 
@@ -1029,7 +1039,8 @@ template <typename T> static __forceinline T hkMax2(T a, T b)
 // Scratch velocities use the existing aligned, uninitialized hkVector4 storage; callees write all four lanes.
 // Iteratively reduces the active plane set by testing velocity against planes and resolving intersections until a stable result is written to the ray-cast output.
 // @fnv 0x00d23f50
-static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
+// src: GUESS 0x00d23f50 (confidence: low)
+static __declspec(noinline) void hkVector4_ProcessEntries_00d23f50(SimplexInfo& info)
 {
     while (true)
     {
@@ -1037,15 +1048,15 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
         {
         case 1: {
             PlaneRecord* sci = info.m_kActivePlanes[0].m_pHavokConstraint;
-            FUN_00d234e0(info, *sci, info.m_pRayCastInput->m_fVelocity, info.m_pRayCastOutput->m_fVelocity);
+            hkVector4_ProjectPointToLimitCone(info, *sci, info.m_pRayCastInput->m_fVelocity, info.m_pRayCastOutput->m_fVelocity);
             return;
         }
         case 2: {
             hkVector4 velocityStorage;
             Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
-            FUN_00d234e0(info, *info.m_kActivePlanes[1].m_pHavokConstraint, info.m_pRayCastInput->m_fVelocity,
+            hkVector4_ProjectPointToLimitCone(info, *info.m_kActivePlanes[1].m_pHavokConstraint, info.m_pRayCastInput->m_fVelocity,
                          velocity);
-            hkBool plane0Used = FUN_00d23480(*info.m_kActivePlanes[0].m_pHavokConstraint, velocity);
+            hkBool plane0Used = hkBool_ProcessAndReturnValue_00d23480(*info.m_kActivePlanes[0].m_pHavokConstraint, velocity);
             if (!plane0Used)
             {
                 info.m_pRayCastOutput->m_fVelocity.getQuad() = velocity.getQuad();
@@ -1053,7 +1064,7 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                 info.m_iActivePlaneCount = 1;
                 return;
             }
-            FUN_00d23850(info, info.m_kActivePlanes[0].m_pHavokConstraint, info.m_kActivePlanes[1].m_pHavokConstraint,
+            hkVector4_ComputeValues_00d23850(info, info.m_kActivePlanes[0].m_pHavokConstraint, info.m_kActivePlanes[1].m_pHavokConstraint,
                          &info.m_pRayCastInput->m_fVelocity, &info.m_pRayCastOutput->m_fVelocity);
             return;
         }
@@ -1061,12 +1072,12 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
             {
                 hkVector4 velocityStorage;
                 Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
-                FUN_00d234e0(info, *info.m_kActivePlanes[2].m_pHavokConstraint, info.m_pRayCastInput->m_fVelocity,
+                hkVector4_ProjectPointToLimitCone(info, *info.m_kActivePlanes[2].m_pHavokConstraint, info.m_pRayCastInput->m_fVelocity,
                              velocity);
-                hkBool plane0Used = FUN_00d23480(*info.m_kActivePlanes[0].m_pHavokConstraint, velocity);
+                hkBool plane0Used = hkBool_ProcessAndReturnValue_00d23480(*info.m_kActivePlanes[0].m_pHavokConstraint, velocity);
                 if (!plane0Used)
                 {
-                    hkBool plane1Used = FUN_00d23480(*info.m_kActivePlanes[1].m_pHavokConstraint, velocity);
+                    hkBool plane1Used = hkBool_ProcessAndReturnValue_00d23480(*info.m_kActivePlanes[1].m_pHavokConstraint, velocity);
                     if (!plane1Used)
                     {
                         info.m_pRayCastOutput->m_fVelocity.getQuad() = velocity.getQuad();
@@ -1082,10 +1093,10 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                 {
                     hkVector4 velocityStorage;
                     Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
-                    FUN_00d23850(info, info.m_kActivePlanes[testPlane].m_pHavokConstraint,
+                    hkVector4_ComputeValues_00d23850(info, info.m_kActivePlanes[testPlane].m_pHavokConstraint,
                                  info.m_kActivePlanes[2].m_pHavokConstraint, &info.m_pRayCastInput->m_fVelocity,
                                  &velocity);
-                    bool planeUsed = FUN_00d23480(*info.m_kActivePlanes[1 - testPlane].m_pHavokConstraint, velocity);
+                    bool planeUsed = hkBool_ProcessAndReturnValue_00d23480(*info.m_kActivePlanes[1 - testPlane].m_pHavokConstraint, velocity);
                     if (!planeUsed)
                     {
                         info.m_kActivePlanes[0] = info.m_kActivePlanes[testPlane];
@@ -1100,23 +1111,23 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                     break;
                 }
             }
-            FUN_00d23ca0(info, info.m_kActivePlanes[0].m_pHavokConstraint, info.m_kActivePlanes[1].m_pHavokConstraint,
+            Object_ProcessAndReturnValue_00d23ca0(info, info.m_kActivePlanes[0].m_pHavokConstraint, info.m_kActivePlanes[1].m_pHavokConstraint,
                          info.m_kActivePlanes[2].m_pHavokConstraint, true, info.m_pRayCastInput->m_fVelocity,
                          info.m_pRayCastOutput->m_fVelocity);
             return;
         }
         case 4: {
-            FUN_00d23380((IntersectionContext*)&info);
+            Object_ProcessEntries_00d23380((IntersectionContext*)&info);
             bool dropped_a_plane = false;
             for (int i = 0; i < 3; i++)
             {
                 hkVector4 velocityStorage;
                 Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
-                FUN_00d23ca0(info, info.m_kActivePlanes[(i + 1) % 3].m_pHavokConstraint,
+                Object_ProcessAndReturnValue_00d23ca0(info, info.m_kActivePlanes[(i + 1) % 3].m_pHavokConstraint,
                              info.m_kActivePlanes[(i + 2) % 3].m_pHavokConstraint,
                              info.m_kActivePlanes[3].m_pHavokConstraint, false, info.m_pRayCastInput->m_fVelocity,
                              velocity);
-                hkBool planeUsed = FUN_00d23480(*info.m_kActivePlanes[i].m_pHavokConstraint, velocity);
+                hkBool planeUsed = hkBool_ProcessAndReturnValue_00d23480(*info.m_kActivePlanes[i].m_pHavokConstraint, velocity);
                 if (!planeUsed)
                 {
                     info.m_kActivePlanes[i] = info.m_kActivePlanes[2];
@@ -1144,10 +1155,10 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                 PlaneRecord* sci2 = info.m_kActivePlanes[2].m_pHavokConstraint;
                 PlaneRecord* sci3 = info.m_kActivePlanes[3].m_pHavokConstraint;
                 int oldNum = info.m_iActivePlaneCount;
-                FUN_00d23ca0(info, sci0, sci1, sci2, false, velocity, velocity);
+                Object_ProcessAndReturnValue_00d23ca0(info, sci0, sci1, sci2, false, velocity, velocity);
                 if (oldNum == info.m_iActivePlaneCount)
                 {
-                    FUN_00d23ca0(info, sci0, sci1, sci3, false, velocity, velocity);
+                    Object_ProcessAndReturnValue_00d23ca0(info, sci0, sci1, sci3, false, velocity, velocity);
                 }
                 try
                 {
@@ -1158,7 +1169,7 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                 {
                     throw;
                 }
-                FUN_00d23ca0(info, sci0, sci2, sci3, false, velocity, velocity);
+                Object_ProcessAndReturnValue_00d23ca0(info, sci0, sci2, sci3, false, velocity, velocity);
             skip2:
                 try
                 {
@@ -1169,7 +1180,7 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                 {
                     throw;
                 }
-                FUN_00d23ca0(info, sci1, sci2, sci3, false, velocity, velocity);
+                Object_ProcessAndReturnValue_00d23ca0(info, sci1, sci2, sci3, false, velocity, velocity);
             skip3:
                 info.m_pRayCastOutput->m_fVelocity.getQuad() = velocity.getQuad();
             }
@@ -1204,5 +1215,5 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
 SimplexInfo* volatile g_simplexInfo;
 void invokeExamineActivePlanes()
 {
-    FUN_00d23f50(*g_simplexInfo);
+    hkVector4_ProcessEntries_00d23f50(*g_simplexInfo);
 }

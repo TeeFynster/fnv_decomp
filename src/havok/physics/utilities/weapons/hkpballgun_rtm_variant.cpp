@@ -151,7 +151,7 @@ template <typename T> struct CapacityGrowingArray
     int m_pTail;
     int m_iNodeCount;
 
-    void FUN_00e45460(int n);
+    void hkQueue_hkpRigidBody_setCapacity(int n);
 
     __forceinline int GetLogicalSize() const
     {
@@ -162,11 +162,11 @@ template <typename T> struct CapacityGrowingArray
     {
         if (m_pRayCursor == 0)
         {
-            FUN_00e45460(8);
+            hkQueue_hkpRigidBody_setCapacity(8);
         }
         else
         {
-            FUN_00e45460(m_pRayCursor * 2);
+            hkQueue_hkpRigidBody_setCapacity(m_pRayCursor * 2);
         }
     }
 
@@ -195,10 +195,10 @@ template <typename T> struct CapacityGrowingArray
     }
 };
 
-void FUN_00cf07a0(const hkpShapeBase* shape, hkReal mass, FUN_00cf5ea0& out);
-int FUN_00e464e0(hkpWorld* world, const hkVector4& start, hkReal radius, const hkVector4& end,
+void hkpInertiaTensorComputer_setShapeVolumeMassProperties(const hkpShapeBase* shape, hkReal mass, FUN_00cf5ea0& out);
+int hkpWorldq_CastSphereAndStoreHit(hkpWorld* world, const hkVector4& start, hkReal radius, const hkVector4& end,
                  hkpBallGunSweepOutput& output);
-void FUN_00e463d0(const hkVector4& position, const hkVector4& target, const hkVector4& gravity,
+void hkpFirstPersonGun_calcVelocityToTarget(const hkVector4& position, const hkVector4& target, const hkVector4& gravity,
                   hkReal speed, hkVector4& velocityOut);
 
 // The shared hkpBallGun has no fireGun declaration yet; ECX carries the gun and
@@ -221,16 +221,16 @@ void __fastcall fireBallGun(hkpBallGun* gun, void*, hkpWorld* world, const hkQua
     ci.m_iAutoRemoveLevel = 6;
     ci.m_bFlag = 2;
     ci.m_fElasticity = 1.0f;
-    FUN_00cf07a0(ci.m_pCollisionShape, gun->m_fBulletMass * 2.0f, ci);
+    hkpInertiaTensorComputer_setShapeVolumeMassProperties(ci.m_pCollisionShape, gun->m_fBulletMass * 2.0f, ci);
     ci.m_fViscosityFriction = gun->m_fBulletMass;
     ci.m_fLinearDamping = 0.0f;
     ci.m_fAngularDamping = 0.4f;
     ci.m_vContactPosition.setAdd4(start, gun->m_kBulletDirection);
 
     hkpBallGunSweepOutput output;
-    if (!FUN_00e464e0(world, start, gun->m_fBulletRadius, end, output))
+    if (!hkpWorldq_CastSphereAndStoreHit(world, start, gun->m_fBulletRadius, end, output))
     {
-        FUN_00e463d0(ci.m_vContactPosition, output.m_vContactPosition, world->m_kGravity, gun->m_fBulletVelocity,
+        hkpFirstPersonGun_calcVelocityToTarget(ci.m_vContactPosition, output.m_vContactPosition, world->m_kGravity, gun->m_fBulletVelocity,
                      ci.m_kTranslationalVelocity);
     }
     else
@@ -254,7 +254,7 @@ void __fastcall fireBallGun(hkpBallGun* gun, void*, hkpWorld* world, const hkQua
         static_cast<hkpBallGunListener*>(gun->m_kListeners.m_data[i])->bulletCreatedCallback(bullet);
     }
 
-    world->FUN_00c914d0(bullet, 1);
+    world->hkpWorld_addEntity(bullet, 1);
 
     CapacityGrowingArray<hkpRigidBody*>* addedBodies =
         static_cast<CapacityGrowingArray<hkpRigidBody*>*>(gun->m_pBulletQueue);

@@ -47,7 +47,7 @@ struct VCall_00a0e470 {
     virtual int f3();
     virtual int f4(int, int, int, const char*, char*, int);
 };
-int __cdecl FUN_00a0e470(DebugText* a1, int aiX, const char* apFormatString, ...);
+int __cdecl DebugText_PrintX(DebugText* a1, int aiX, const char* apFormatString, ...);
 struct FakeV_00a0e4b0 {
     virtual void f0() {}
     virtual void f1() {}
@@ -65,7 +65,7 @@ struct FUN_00a0e580_VTab {
     virtual int m5();
     virtual int __thiscall m6(int, int, const char*, char*, int);
 };
-int __cdecl FUN_00a0e580(FUN_00a0e580_VTab* pThis, int aeLocation, int aeJustify, const char* apFormatString, ...);
+int __cdecl DebugText_PrintLine(FUN_00a0e580_VTab* pThis, int aeLocation, int aeJustify, const char* apFormatString, ...);
 struct FakeCall {
     virtual void f0();
     virtual void f1();
@@ -73,7 +73,7 @@ struct FakeCall {
     virtual void f3();
     virtual int f4(int, int, int, const char*, char*, const NiColorA&);
 };
-int FUN_00a0e690(DebugText* aObj, int aiX, const NiColorA& apTextColor, const char* apFormatString, ...);
+int DebugText_PrintXC(DebugText* aObj, int aiX, const NiColorA& apTextColor, const char* apFormatString, ...);
 struct FUN_00a0e6d0_this {
     virtual int f0();
     virtual int f1();
@@ -82,10 +82,10 @@ struct FUN_00a0e6d0_this {
     virtual int VFunc(int, int, int, const char*, char*, void*);
 };
 int __cdecl InvokeVFuncWithVarArgs(FUN_00a0e6d0_this* p0, int p1, void* p2, int p3, int p4, const char* p5, ...);
-extern "C" unsigned char __cdecl FUN_00702fc0();
+extern "C" unsigned char __cdecl Interface_IsDebugTextVisible();
 extern int DAT_011f33dc;
 extern void (__stdcall *DAT_00fdf05c)(int*);
-void __cdecl FUN_00a11820();
+void __cdecl DebugText_Lock();
 
 struct P03MM {
     void* __thiscall Allocate(unsigned int size);
@@ -93,14 +93,14 @@ struct P03MM {
 extern P03MM g_memoryManager;
 struct ChangeData;
 struct FUN_00a11c00_shell {
-    void FUN_00a11c00(NiTMapItem<unsigned int, void*>* item);
+    void NiTList_AddTail(NiTMapItem<unsigned int, void*>* item);
 };
 
 struct PendingObj {
     void FUN_00a0dcc0();
 };
 struct PendingOwner {
-    void FUN_00aa4060(PendingObj* p);
+    void MemoryManager_Deallocate(PendingObj* p);
 };
 extern PendingOwner g_011f6238;
 extern PendingObj* g_011f33a8;
@@ -109,7 +109,7 @@ void __cdecl ClearPendingObject();
 extern Setting DAT_011f33c8,DAT_011debac,DAT_011deec0;
 extern int DAT_01202800;
 extern Font** DAT_011f33f8;
-bool FUN_00703150();
+bool Interface_GetFullHelp();
 struct LayoutObject {
  int unk0000,unk0004,unk0008,unk000c,unk0010,unk0014,unk0018,unk001c,unk0020,unk0024;
  int unk0028,unk002c,unk0030,unk0034,unk0038,unk003c,unk0040,unk0044,unk0048,unk004c;
@@ -626,7 +626,7 @@ struct ListNode_b5742 {
     unsigned int m_08;
 };
 struct FUN_00aa4060_shell {
-    void __thiscall FUN_00aa4060(void* p);
+    void __thiscall MemoryManager_Deallocate(void* p);
 };
 extern FUN_00aa4060_shell DAT_011f6238;
 struct FUN_00a1c080_shell {
@@ -712,11 +712,12 @@ struct PendingD9 {
     int m_f0, m_f1, m_f2;
     PendingD9();
     static void* operator new(unsigned int size) { return g_memoryManager.Allocate(size); }
-    static void operator delete(void* p) { g_011f6238.FUN_00aa4060((PendingObj*)p); }
+    static void operator delete(void* p) { g_011f6238.MemoryManager_Deallocate((PendingObj*)p); }
 };
 extern PendingD9* DAT_011f33a8;
 // @fnv 0x00a0d9e0
-PendingD9* FUN_00a0d9e0(bool bCreate)
+// src: XBOX_PDB 0x00a0d9e0
+PendingD9* DebugText_Instance(bool bCreate)
 {
     if (!DAT_011f33a8 && bCreate)
     {
@@ -726,8 +727,8 @@ PendingD9* FUN_00a0d9e0(bool bCreate)
     return DAT_011f33a8;
 }
 
-bool FUN_00702360();
-void FUN_00a11820();
+bool Interface_IsInMenuMode();
+void DebugText_Lock();
 void ReleaseLock();
 extern float DAT_011f63a0;
 inline float GetElapsed() { float value=DAT_011f63a0; return value; }
@@ -832,9 +833,9 @@ struct Entry {
 struct DynamicEntry {
  int unk00,unk04,unk08; NodePtr node; BSStringT<char> text; float lifetime;
  ~DynamicEntry() { ClearEntryString(text); int stringDestructorScratch; }
- static void operator delete(void* p) { DAT_011f6238.FUN_00aa4060(p); }
+ static void operator delete(void* p) { DAT_011f6238.MemoryManager_Deallocate(p); }
 };
-struct Link { Link* next; Link* prev; DynamicEntry* data; static void operator delete(void* value) { DAT_011f6238.FUN_00aa4060(value); } };
+struct Link { Link* next; Link* prev; DynamicEntry* data; static void operator delete(void* value) { DAT_011f6238.MemoryManager_Deallocate(value); } };
 struct TextList {
  Link* first; Link* last; unsigned count;
  __forceinline Link* GetFirst() { return first; }
@@ -867,7 +868,8 @@ struct TextList {
   --count;
   return data;
  }
- DynamicEntry* FUN_00a11c40(DynamicEntry*& entry) {
+// src: GUESS 0x00a11c40 (confidence: low)
+ DynamicEntry* ProcessAndReturnValue_00a11c40(DynamicEntry*& entry) {
   Link* position=Find(entry);
   return position?RemoveNode(position):entry;
  }
@@ -876,20 +878,21 @@ struct DebugState {
  int unk00;
  Entry entries[200];
  TextList list;
- static DebugState* FUN_00a0d9e0(bool);
+ static DebugState* DebugText_Instance(bool);
 };
-Owner* FUN_00706d10();
+Owner* Interface_GetDebugTextRoot();
 // @fnv 0x00a0df80
-void FUN_00a0df80() {
- if (FUN_00702360()) return;
- DebugState* _debug = DebugState::FUN_00a0d9e0(true);
+// src: COMMUNITY 0x00a0df80
+void DebugText_Idle() {
+ if (Interface_IsInMenuMode()) return;
+ DebugState* _debug = DebugState::DebugText_Instance(true);
  for (int index=0; index<200; ++index) {
   if (_debug->entries[index].lifetime > 0.0) {
    _debug->entries[index].lifetime -= GetElapsed();
    if (_debug->entries[index].lifetime <= 0.0) {
     if (_debug->entries[index].node) {
-     FUN_00a11820();
-     FUN_00706d10()->Remove(_debug->entries[index].node);
+     DebugText_Lock();
+     Interface_GetDebugTextRoot()->Remove(_debug->entries[index].node);
      _debug->entries[index].node.FUN_0066b0d0(0);
      _debug->entries[index].active=0;
      _debug->entries[index].x=0.0f;
@@ -905,15 +908,15 @@ void FUN_00a0df80() {
  while (iter) {
   DynamicEntry* entry2=_debug->list.Next(iter);
   if (((SceneNode*)entry2->node)->GetRefs()<2) {
-   delete _debug->list.FUN_00a11c40(entry2);
+   delete _debug->list.ProcessAndReturnValue_00a11c40(entry2);
   } else if (entry2->lifetime>0.0) {
    entry2->lifetime-=GetElapsed();
    if (entry2->lifetime<0.0) {
-    FUN_00a11820();
+    DebugText_Lock();
     ((SceneNode*)entry2->node)->GetParent()->Remove(entry2->node);
     entry2->node.FUN_0066b0d0(0);
     ReleaseLock();
-    delete _debug->list.FUN_00a11c40(entry2);
+    delete _debug->list.ProcessAndReturnValue_00a11c40(entry2);
    }
   }
  }
@@ -926,9 +929,9 @@ extern Setting DAT_011f33bc;
 extern "C" __declspec(thread) int DAT_00a0fe20_tlsstate;
 extern "C" unsigned long __readfsdword(unsigned long);
 
-unsigned char __cdecl FUN_00703d50();
+unsigned char __cdecl Interface_IsConsoleVisible();
 float __cdecl FUN_00706df0();
-int __cdecl FUN_00706d10();
+int __cdecl Interface_GetDebugTextRoot();
 void __cdecl ReleaseLock();
 
 inline int A0FE20GetState() { return DAT_00a0fe20_tlsstate; }
@@ -986,9 +989,9 @@ struct A0FE20PropertyState {
     static void operator delete(void* p) { ((A0FE20MemoryFree*)&g_memoryManager)->Deallocate(p); }
 };
 unsigned int FUN_0040fc90();
-int FUN_0043b460(volatile long*, long, long);
-void FUN_0040fca0(unsigned long);
-void FUN_0040fbe0();
+int BSAtomicCompareExchange(volatile long*, long, long);
+void BSSleep(unsigned long);
+void ProgramFlow();
 struct A0FE20Lock {
     volatile long owner;
     unsigned int depth;
@@ -997,12 +1000,12 @@ struct A0FE20Lock {
         if (owner == threadId) ++depth;
         else {
             unsigned int spins = 0;
-            while (FUN_0043b460(&owner, 0, threadId)) {
+            while (BSAtomicCompareExchange(&owner, 0, threadId)) {
                 ++spins;
-                if (spins > 10000) FUN_0040fca0(1);
-                else FUN_0040fca0(0);
+                if (spins > 10000) BSSleep(1);
+                else BSSleep(0);
             }
-            FUN_0040fbe0();
+            ProgramFlow();
             depth = 1;
         }
     }
@@ -1014,17 +1017,18 @@ struct A0FE20ScopedLock {
     A0FE20ScopedLock(A0FE20Lock& l) : lock(l) { lock.Lock(0); }
     ~A0FE20ScopedLock() { if (--DAT_011f42a4 == 0) lock.owner = 0; }
 };
-struct A0FE20PropertyParent { void FUN_00a5e3a0(A0FE20PropertyState*&); };
+struct A0FE20PropertyParent { void NiNode_UpdatePropertiesUpward(A0FE20PropertyState*&); };
 
 class TESObjectDoorController : public NiMemObjectBase {
 public:
     TESObjectDoorController(unsigned int);
     void Update(A0FE20Upd const&);
-    void FUN_00a5a040() {
+// src: XBOX_PDB 0x00a5a040
+    void UpdateProperties() {
         A0FE20PropertyState* state = 0;
         A0FE20ScopedLock guard(DAT_011f42a0);
         A0FE20PropertyParent* parent = (A0FE20PropertyParent*)unk18;
-        if (parent) parent->FUN_00a5e3a0(state);
+        if (parent) parent->NiNode_UpdatePropertiesUpward(state);
         else state = new A0FE20PropertyState;
         NiAVObject* object = (NiAVObject*)this;
         object->UpdatePropertiesDownwardPass(reinterpret_cast<NiPropertyState*>(state));
@@ -1041,16 +1045,17 @@ public:
 inline Font** A0FE20RecTable() { Font** p = (Font**)DAT_011f33f8; return p; }
 inline Font* A0FE20RecAt(int i) { return A0FE20RecTable()[i - 1]; }
 struct A0FE20Cls {
-    TESObjectDoorController* FUN_00a0fe20(char*, float, float, int, int, NiColorA*);
+    TESObjectDoorController* DebugText_CreateDebugText(char*, float, float, int, int, NiColorA*);
 };
 
 // @fnv 0x00a0fe20
-TESObjectDoorController* A0FE20Cls::FUN_00a0fe20(char* pcText, float fX, float fY, int iMode, int iSlot, NiColorA* pkColor)
+// src: COMMUNITY 0x00a0fe20
+TESObjectDoorController* A0FE20Cls::DebugText_CreateDebugText(char* pcText, float fX, float fY, int iMode, int iSlot, NiColorA* pkColor)
 {
     A0FE20StateGuard ao(13);
 
     if (!*pcText) return 0;
-    if (!FUN_00703d50() && !FUN_00702fc0()) return 0;
+    if (!Interface_IsConsoleVisible() && !Interface_IsDebugTextVisible()) return 0;
 
     float aj = 1.0f;
     if (DAT_011c70eb) aj = 1.33333f;
@@ -1079,7 +1084,7 @@ TESObjectDoorController* A0FE20Cls::FUN_00a0fe20(char* pcText, float fX, float f
 
     int ak = iSlot;
     if (!ak) ak = A0FE20DefSlotRef();
-    NiAVObject* ab = reinterpret_cast<NiAVObject*>(A0FE20RecAt(ak)->FUN_00a12460(0.0f, 0.0f, 0.0f, &an, &ae, ad, &aa, 1, 1));
+    NiAVObject* ab = reinterpret_cast<NiAVObject*>(A0FE20RecAt(ak)->Font_MakeString(0.0f, 0.0f, 0.0f, &an, &ae, ad, &aa, 1, 1));
     ab->SetPosition(0.0f, 0.0f, 0.0f);
     ((NiNode*)aw)->AttachChildInAvailableSlot(ab, true);
 
@@ -1089,12 +1094,12 @@ TESObjectDoorController* A0FE20Cls::FUN_00a0fe20(char* pcText, float fX, float f
     if (0) aw->m_flags |= A0FE20Bit();
     else aw->m_flags &= ~A0FE20Bit();
 
-    FUN_00a11820();
-    if (FUN_00706d10()) {
-        ((NiNode*)FUN_00706d10())->AttachChildInAvailableSlot((NiAVObject*)aw, true);
+    DebugText_Lock();
+    if (Interface_GetDebugTextRoot()) {
+        ((NiNode*)Interface_GetDebugTextRoot())->AttachChildInAvailableSlot((NiAVObject*)aw, true);
     }
     aw->SetPosition(fX, -50.0f, fY);
-    aw->FUN_00a5a040();
+    aw->UpdateProperties();
 
     A0FE20Upd ah;
     ah.fTime = 0.0f;
@@ -1113,7 +1118,7 @@ struct FUN_00a1c800_A {
 struct FUN_00a1c800_B {
     int unk00;
     ~FUN_00a1c800_B();
-    static void operator delete(void* p) { DAT_011f6238.FUN_00aa4060(p); }
+    static void operator delete(void* p) { DAT_011f6238.MemoryManager_Deallocate(p); }
 };
 
 // Gamebryo NiTMapBase::GetFirstPos, inlined here under /Ob1.
@@ -1138,7 +1143,8 @@ template <> inline void NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned i
 // @fnv 0x00a1c800
 extern NiTPointerMap<unsigned int, FUN_00a1c800_A*> DAT_011f34e0;
 extern NiTPointerMap<unsigned int, FUN_00a1c800_B*> DAT_011f34f4;
-void FUN_00a1c800()
+// src: COMMUNITY 0x00a1c800
+void Menu_FreeXMLArchive()
 {
     void* pos2;
     void* iter;
@@ -1285,10 +1291,11 @@ struct ArrQ : BSSimpleArray<void*> {
 struct MgrQ {
     int unk[0x2270 / 4];
     ArrQ m_kNode;
-    int FUN_00a0f730(const char* name, int key);
+    int SetEntryText(const char* name, int key);
 };
 // @fnv 0x00a0f730
-int MgrQ::FUN_00a0f730(const char* name, int key)
+// src: GUESS 0x00a0f730 (confidence: medium)
+int MgrQ::SetEntryText(const char* name, int key)
 {
     bool found = false;
     for (unsigned int i = 0; !found && i < m_kNode.Count(); i++) {
@@ -1305,13 +1312,13 @@ int MgrQ::FUN_00a0f730(const char* name, int key)
         n->key = key;
         n->ent = e;
         n->unk4 = 0;
-        m_kNode.FUN_00a11d20((void*&)n);
+        m_kNode.BSSimpleArray_Add((void*&)n);
     }
  DeadQ3();     return key;
 }
 
 extern NiRTTI DAT_011f4428;
-unsigned char __cdecl FUN_00a10c00(NiObject* pkObject, int a, int b, float c);
+unsigned char __cdecl DebugText_AddFloatingText(NiObject* pkObject, int a, int b, float c);
 
 __forceinline bool KindOfRTTI(const NiRTTI& kRTTI, const NiObject* pkObject)
 {
@@ -1342,13 +1349,14 @@ __forceinline T* CastParentIfKind(const NiRTTI& kRTTI, NiObject* pkObject)
 }
 
 // @fnv 0x00a11470
-unsigned char __cdecl FUN_00a11470(NiObject* pkObject, int a, int b, float c)
+// src: GUESS 0x00a11470 (confidence: medium)
+unsigned char __cdecl NiObject_AddFloatingTextForCompatibleObject(NiObject* pkObject, int a, int b, float c)
 {
     NiObject* pkCast = CastIfKind<NiObject>(DAT_011f4428, pkObject);
     if (pkCast == 0 && pkObject != 0)
         pkCast = CastParentIfKind<NiObject>(DAT_011f4428, pkObject);
     if (pkCast != 0)
-        return FUN_00a10c00(pkCast, a, b, c);
+        return DebugText_AddFloatingText(pkCast, a, b, c);
     else
         return 0;
 }
@@ -1366,7 +1374,7 @@ namespace fnv_00a11560 {
 
 extern NiRTTI DAT_011f4428;
 
-void __cdecl FUN_00a11640(NiAVObject* a, int b);
+void __cdecl Object_ProcessEntries_00a11640(NiAVObject* a, int b);
 
 __forceinline NiAVObject* A11560ParentKind(NiAVObject* a) {
     NiAVObject* p = a->m_pkParent;
@@ -1376,7 +1384,8 @@ __forceinline NiAVObject* A11560ParentKind(NiAVObject* a) {
 }
 
 // @fnv 0x00a11560
-void __cdecl FUN_00a11560(NiAVObject* a1, int a2) {
+// src: GUESS 0x00a11560 (confidence: low)
+void __cdecl NiAVObject_UpdateFields_00a11560(NiAVObject* a1, int a2) {
     NiAVObject* r;
     if (a1 == 0)
         r = 0;
@@ -1385,7 +1394,7 @@ void __cdecl FUN_00a11560(NiAVObject* a1, int a2) {
     if (r == 0 && a1 != 0)
         r = A11560ParentKind(a1);
     if (r)
-        FUN_00a11640(r, a2);
+        Object_ProcessEntries_00a11640(r, a2);
 }
 }  // namespace fnv_00a11560
 
@@ -1427,7 +1436,8 @@ inline unsigned char A11740HasMarker(const NiRTTI*& p)
 }
 
 // @fnv 0x00a11740
-DebugTextExtraData* __cdecl FUN_00a11740(NiAVObject* input, int unused, int expected, int* outValue)
+// src: COMMUNITY 0x00a11740
+DebugTextExtraData* __cdecl DebugText_GetFloatingText(NiAVObject* input, int unused, int expected, int* outValue)
 {
     DebugTextExtraData* res;
     unsigned int indexB;
@@ -1532,7 +1542,7 @@ struct A11List {
     inline unsigned int RemoveHead();
     inline unsigned int RemoveTail();
     inline unsigned int RemovePos(A11Node** p);
-    unsigned int __thiscall FUN_00a11c40(unsigned int* aKey);
+    unsigned int __thiscall ProcessAndReturnValue_00a11c40(unsigned int* aKey);
 };
 
 inline A11Node* A11List::Find(unsigned int* aKey) {
@@ -1616,7 +1626,8 @@ inline unsigned int A11List::RemovePos(A11Node** p) {
 }
 
 // @fnv 0x00a11c40
-unsigned int A11List::FUN_00a11c40(unsigned int* aKey) {
+// src: GUESS 0x00a11c40 (confidence: low)
+unsigned int A11List::ProcessAndReturnValue_00a11c40(unsigned int* aKey) {
     A11Node* r7;
     r7 = Find(aKey);
     return r7 != 0 ? RemovePos(&r7) : *aKey;
@@ -1735,7 +1746,7 @@ struct DebugItem {
     int unk24;
     int unk28;
     ~DebugItem();
-    static void operator delete(void* p) { g_011f6238.FUN_00aa4060((PendingObj*)p); }
+    static void operator delete(void* p) { g_011f6238.MemoryManager_Deallocate((PendingObj*)p); }
 };
 
 struct ListGuard {
@@ -1752,19 +1763,20 @@ struct TextList {
         iter = iter->next;
         return *value;
     }
-    inline DebugItem* FUN_00a11c40(DebugItem*& entry);
-    void FUN_00a1c2d0();
+    inline DebugItem* ProcessAndReturnValue_00a11c40(DebugItem*& entry);
+    void ClearLinkedNodes();
     ~TextList() {
         TextList* self = this;
         ListGuard guard;
-        self->FUN_00a1c2d0();
+        self->ClearLinkedNodes();
     }
 };
 
-inline DebugItem* TextList::FUN_00a11c40(DebugItem*& entry) {
+// src: GUESS 0x00a11c40 (confidence: low)
+inline DebugItem* TextList::ProcessAndReturnValue_00a11c40(DebugItem*& entry) {
     unsigned s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16;
     s0 = s1 = s2 = s3 = s4 = s5 = s6 = s7 = s8 = s9 = s10 = s11 = s12 = s13 = s14 = s15 = s16 = 0;
-    if (s0 == 1) return FUN_00a11c40(entry);
+    if (s0 == 1) return ProcessAndReturnValue_00a11c40(entry);
     return entry;
 }
 
@@ -1776,23 +1788,23 @@ struct FUN_00a0dcc0 {
     DebugItem items[200];
     TextList list;
     Helper2270 tail;
-    void FUN_00a0de80();
+    void DebugText_DeleteAllDebugText();
     virtual ~FUN_00a0dcc0();
 };
 
 // @fnv 0x00a0dcc0
 FUN_00a0dcc0::~FUN_00a0dcc0()
 {
-    FUN_00a0de80();
+    DebugText_DeleteAllDebugText();
     Link* pos = list.GetFirst();
-    FUN_00a11820();
+    DebugText_Lock();
     while (pos) {
         DebugItem* item = list.Next(pos);
         if (item->node->GetRefs() > 2) {
             item->node->GetParent()->Remove(item->node);
             item->node.FUN_0066b0d0(0);
         }
-        delete list.FUN_00a11c40(item);
+        delete list.ProcessAndReturnValue_00a11c40(item);
     }
     ReleaseLock();
 }
@@ -1861,7 +1873,7 @@ struct ObjVT {
     virtual void v58(void* aItem);
 };
 
-ObjVT* __cdecl FUN_00706d10();
+ObjVT* __cdecl Interface_GetDebugTextRoot();
 void __cdecl ReleaseLock();
 
 
@@ -1885,7 +1897,7 @@ struct ArrayItem {
 
 struct FUN_00a0de80_cls {
     ArrayItem m_items[200];
-    void FUN_00a0de80();
+    void DebugText_DeleteAllDebugText();
 };
 
 extern float DAT_01012054;
@@ -1897,14 +1909,15 @@ struct Scratch10 {
 __forceinline void* Store(void*& out, ItemHolder& h) { return out = h.m_p; }
 
 // @fnv 0x00a0de80
-void FUN_00a0de80_cls::FUN_00a0de80() {
-    FUN_00a11820();
+// src: COMMUNITY 0x00a0de80
+void FUN_00a0de80_cls::DebugText_DeleteAllDebugText() {
+    DebugText_Lock();
     for (int i = 0; i < 200; i++) {
         void* item = m_items[i].m_10.m_p;
         if (item != 0) {
             Scratch10 buf;
             void* elem;
-            FUN_00706d10()->v58(Store(elem, m_items[i].m_10));
+            Interface_GetDebugTextRoot()->v58(Store(elem, m_items[i].m_10));
             m_items[i].m_10.Free(0);
             m_items[i].m_0c = 0;
             m_items[i].m_04 = 0.0f;
@@ -2016,7 +2029,8 @@ struct ListOwner
 };
 
 // @fnv 0x00a11640
-void __cdecl FUN_00a11640(ListOwner* pkOwner, int iEntry)
+// src: GUESS 0x00a11640 (confidence: low)
+void __cdecl Object_ProcessEntries_00a11640(ListOwner* pkOwner, int iEntry)
 {
     DebugTextExtraData* pkHit = 0;
     unsigned int i = 0;
@@ -2100,7 +2114,7 @@ struct AudioSource {
     int priority;
     NiColorA color;
     ~AudioSource();
-    static void operator delete(void* p) { DAT_011f6238.FUN_00aa4060(p); }
+    static void operator delete(void* p) { DAT_011f6238.MemoryManager_Deallocate(p); }
 };
 struct AudioRequest {
     AudioSource* source;
@@ -2108,7 +2122,7 @@ struct AudioRequest {
     int line;
     float duration;
     int voice;
-    static void operator delete(void* p) { DAT_011f6238.FUN_00aa4060(p); }
+    static void operator delete(void* p) { DAT_011f6238.MemoryManager_Deallocate(p); }
 };
 struct RequestQueue {
     virtual void slot0();
@@ -2145,25 +2159,26 @@ struct AudioManager {
     AudioSlot slots[200];
     int unk2264,unk2268,unk226c;
     RequestQueue pending;
-    Playback* FUN_00a0fe20(const char*,float,float,int,int,const NiColorA*);
-    void FUN_00a0e770();
+    Playback* DebugText_CreateDebugText(const char*,float,float,int,int,const NiColorA*);
+    void DebugText_HandleQueuedPrints();
 };
 struct TextRecord {
-    void FUN_00a160c0(BSStringT<char>*,int*,int*,int,int);
+    void Font_LineBreakText(BSStringT<char>*,int*,int*,int,int);
 };
 inline TextRecord** Records() { TextRecord** p=(TextRecord**)DAT_011f33f8; return p; }
 inline TextRecord* RecordAt(int i) { return Records()[i-1]; }
-void __cdecl FUN_005b5e40(const char*);
+void __cdecl Warning_005b5e40(const char*);
 extern char DAT_01094f60;
 // @fnv 0x00a0e770
-void AudioManager::FUN_00a0e770() {
+// src: COMMUNITY 0x00a0e770
+void AudioManager::DebugText_HandleQueuedPrints() {
     for(unsigned i=0;i<pending.size();++i) {
         switch(pending[i]->kind) {
         case 0:
             {
                 if(slots[pending[i]->slot].playback) {
-                    FUN_00a11820();
-                    FUN_00706d10()->Remove(slots[pending[i]->slot].playback);
+                    DebugText_Lock();
+                    Interface_GetDebugTextRoot()->Remove(slots[pending[i]->slot].playback);
                     slots[pending[i]->slot].playback.FUN_0066b0d0(0);
                     slots[pending[i]->slot].identifier=0;
                     slots[pending[i]->slot].x=0.0f;
@@ -2177,8 +2192,8 @@ void AudioManager::FUN_00a0e770() {
                     if(!strcmp(slots[pending[i]->slot].filename,pending[i]->source->filename)) changed=true;
                 }
                 if(!changed) {
-                    FUN_00a11820();
-                    slots[pending[i]->slot].playback.FUN_0066b0d0(FUN_00a0fe20(pending[i]->source->filename,
+                    DebugText_Lock();
+                    slots[pending[i]->slot].playback.FUN_0066b0d0(DebugText_CreateDebugText(pending[i]->source->filename,
                         slots[pending[i]->slot].x,slots[pending[i]->slot].y,slots[pending[i]->slot].identifier,0,0));
                     ReleaseLock();
                 }
@@ -2187,7 +2202,7 @@ void AudioManager::FUN_00a0e770() {
         case 1:
             {
                 ScopedThreadState state3(13);
-                if(!FUN_00706d10()) return;
+                if(!Interface_GetDebugTextRoot()) return;
                 bool reuse=false;
                 unsigned end3=0;
                 bool failed4=false;
@@ -2199,7 +2214,7 @@ void AudioManager::FUN_00a0e770() {
                     int style=1200;
                     int option=0;
                     if(DAT_011c70eb) style=(int)(style*DAT_01094f90);
-                    RecordAt(voice)->FUN_00a160c0(&text4,&style,&option,0,10);
+                    RecordAt(voice)->Font_LineBreakText(&text4,&style,&option,0,10);
                 } else {
                     failed4=true;
                     pending[i]->line=0;
@@ -2231,7 +2246,7 @@ void AudioManager::FUN_00a0e770() {
                     for(slotX=0;slotX<200;++slotX) {
                         if(!slots[slotX].identifier) break;
                     }
-                    if(slotX==200) { FUN_005b5e40(&DAT_01094f60); return; }
+                    if(slotX==200) { Warning_005b5e40(&DAT_01094f60); return; }
                 } else {
                     if(!failed4) {
                         if(slots[slotX].playback && StringEquals(slots[slotX].filename,text4)) {
@@ -2240,17 +2255,17 @@ void AudioManager::FUN_00a0e770() {
                     } else reuse=false;
                     if(!reuse) {
                         if(slots[slotX].playback) {
-                            FUN_00a11820();
-                            FUN_00706d10()->Remove(slots[slotX].playback);
+                            DebugText_Lock();
+                            Interface_GetDebugTextRoot()->Remove(slots[slotX].playback);
                             slots[slotX].playback.FUN_0066b0d0(0);
                             ReleaseLock();
                         }
                     }
                 }
                 if(!reuse) {
-                    FUN_00a11820();
+                    DebugText_Lock();
                     if(!failed4) {
-                        slots[slotX].playback.FUN_0066b0d0(FUN_00a0fe20(text4,pending[i]->source->x,pending[i]->source->y,
+                        slots[slotX].playback.FUN_0066b0d0(DebugText_CreateDebugText(text4,pending[i]->source->x,pending[i]->source->y,
                             pending[i]->source->identifier,voice,&pending[i]->source->color));
                     } else slots[slotX].playback.FUN_0066b0d0(0);
                     if(slots[slotX].playback) {
@@ -2305,14 +2320,14 @@ struct A0F8List {
     int m_00;
     A0F8Item** m_04;
     unsigned int m_08;
-    unsigned int FUN_00a11d20(A0F8Item*& aValue);
+    unsigned int BSSimpleArray_Add(A0F8Item*& aValue);
     unsigned int GetCount() { return m_08; }
 };
 
 struct A0F8Self {
 int unk0000; int unk0004; int unk0008; int unk000C; int unk0010; int unk0014; int unk0018; int unk001C; int unk0020; int unk0024; int unk0028; int unk002C; int unk0030; int unk0034; int unk0038; int unk003C; int unk0040; int unk0044; int unk0048; int unk004C; int unk0050; int unk0054; int unk0058; int unk005C; int unk0060; int unk0064; int unk0068; int unk006C; int unk0070; int unk0074; int unk0078; int unk007C; int unk0080; int unk0084; int unk0088; int unk008C; int unk0090; int unk0094; int unk0098; int unk009C; int unk00A0; int unk00A4; int unk00A8; int unk00AC; int unk00B0; int unk00B4; int unk00B8; int unk00BC; int unk00C0; int unk00C4; int unk00C8; int unk00CC; int unk00D0; int unk00D4; int unk00D8; int unk00DC; int unk00E0; int unk00E4; int unk00E8; int unk00EC; int unk00F0; int unk00F4; int unk00F8; int unk00FC; int unk0100; int unk0104; int unk0108; int unk010C; int unk0110; int unk0114; int unk0118; int unk011C; int unk0120; int unk0124; int unk0128; int unk012C; int unk0130; int unk0134; int unk0138; int unk013C; int unk0140; int unk0144; int unk0148; int unk014C; int unk0150; int unk0154; int unk0158; int unk015C; int unk0160; int unk0164; int unk0168; int unk016C; int unk0170; int unk0174; int unk0178; int unk017C; int unk0180; int unk0184; int unk0188; int unk018C; int unk0190; int unk0194; int unk0198; int unk019C; int unk01A0; int unk01A4; int unk01A8; int unk01AC; int unk01B0; int unk01B4; int unk01B8; int unk01BC; int unk01C0; int unk01C4; int unk01C8; int unk01CC; int unk01D0; int unk01D4; int unk01D8; int unk01DC; int unk01E0; int unk01E4; int unk01E8; int unk01EC; int unk01F0; int unk01F4; int unk01F8; int unk01FC; int unk0200; int unk0204; int unk0208; int unk020C; int unk0210; int unk0214; int unk0218; int unk021C; int unk0220; int unk0224; int unk0228; int unk022C; int unk0230; int unk0234; int unk0238; int unk023C; int unk0240; int unk0244; int unk0248; int unk024C; int unk0250; int unk0254; int unk0258; int unk025C; int unk0260; int unk0264; int unk0268; int unk026C; int unk0270; int unk0274; int unk0278; int unk027C; int unk0280; int unk0284; int unk0288; int unk028C; int unk0290; int unk0294; int unk0298; int unk029C; int unk02A0; int unk02A4; int unk02A8; int unk02AC; int unk02B0; int unk02B4; int unk02B8; int unk02BC; int unk02C0; int unk02C4; int unk02C8; int unk02CC; int unk02D0; int unk02D4; int unk02D8; int unk02DC; int unk02E0; int unk02E4; int unk02E8; int unk02EC; int unk02F0; int unk02F4; int unk02F8; int unk02FC; int unk0300; int unk0304; int unk0308; int unk030C; int unk0310; int unk0314; int unk0318; int unk031C; int unk0320; int unk0324; int unk0328; int unk032C; int unk0330; int unk0334; int unk0338; int unk033C; int unk0340; int unk0344; int unk0348; int unk034C; int unk0350; int unk0354; int unk0358; int unk035C; int unk0360; int unk0364; int unk0368; int unk036C; int unk0370; int unk0374; int unk0378; int unk037C; int unk0380; int unk0384; int unk0388; int unk038C; int unk0390; int unk0394; int unk0398; int unk039C; int unk03A0; int unk03A4; int unk03A8; int unk03AC; int unk03B0; int unk03B4; int unk03B8; int unk03BC; int unk03C0; int unk03C4; int unk03C8; int unk03CC; int unk03D0; int unk03D4; int unk03D8; int unk03DC; int unk03E0; int unk03E4; int unk03E8; int unk03EC; int unk03F0; int unk03F4; int unk03F8; int unk03FC; int unk0400; int unk0404; int unk0408; int unk040C; int unk0410; int unk0414; int unk0418; int unk041C; int unk0420; int unk0424; int unk0428; int unk042C; int unk0430; int unk0434; int unk0438; int unk043C; int unk0440; int unk0444; int unk0448; int unk044C; int unk0450; int unk0454; int unk0458; int unk045C; int unk0460; int unk0464; int unk0468; int unk046C; int unk0470; int unk0474; int unk0478; int unk047C; int unk0480; int unk0484; int unk0488; int unk048C; int unk0490; int unk0494; int unk0498; int unk049C; int unk04A0; int unk04A4; int unk04A8; int unk04AC; int unk04B0; int unk04B4; int unk04B8; int unk04BC; int unk04C0; int unk04C4; int unk04C8; int unk04CC; int unk04D0; int unk04D4; int unk04D8; int unk04DC; int unk04E0; int unk04E4; int unk04E8; int unk04EC; int unk04F0; int unk04F4; int unk04F8; int unk04FC; int unk0500; int unk0504; int unk0508; int unk050C; int unk0510; int unk0514; int unk0518; int unk051C; int unk0520; int unk0524; int unk0528; int unk052C; int unk0530; int unk0534; int unk0538; int unk053C; int unk0540; int unk0544; int unk0548; int unk054C; int unk0550; int unk0554; int unk0558; int unk055C; int unk0560; int unk0564; int unk0568; int unk056C; int unk0570; int unk0574; int unk0578; int unk057C; int unk0580; int unk0584; int unk0588; int unk058C; int unk0590; int unk0594; int unk0598; int unk059C; int unk05A0; int unk05A4; int unk05A8; int unk05AC; int unk05B0; int unk05B4; int unk05B8; int unk05BC; int unk05C0; int unk05C4; int unk05C8; int unk05CC; int unk05D0; int unk05D4; int unk05D8; int unk05DC; int unk05E0; int unk05E4; int unk05E8; int unk05EC; int unk05F0; int unk05F4; int unk05F8; int unk05FC; int unk0600; int unk0604; int unk0608; int unk060C; int unk0610; int unk0614; int unk0618; int unk061C; int unk0620; int unk0624; int unk0628; int unk062C; int unk0630; int unk0634; int unk0638; int unk063C; int unk0640; int unk0644; int unk0648; int unk064C; int unk0650; int unk0654; int unk0658; int unk065C; int unk0660; int unk0664; int unk0668; int unk066C; int unk0670; int unk0674; int unk0678; int unk067C; int unk0680; int unk0684; int unk0688; int unk068C; int unk0690; int unk0694; int unk0698; int unk069C; int unk06A0; int unk06A4; int unk06A8; int unk06AC; int unk06B0; int unk06B4; int unk06B8; int unk06BC; int unk06C0; int unk06C4; int unk06C8; int unk06CC; int unk06D0; int unk06D4; int unk06D8; int unk06DC; int unk06E0; int unk06E4; int unk06E8; int unk06EC; int unk06F0; int unk06F4; int unk06F8; int unk06FC; int unk0700; int unk0704; int unk0708; int unk070C; int unk0710; int unk0714; int unk0718; int unk071C; int unk0720; int unk0724; int unk0728; int unk072C; int unk0730; int unk0734; int unk0738; int unk073C; int unk0740; int unk0744; int unk0748; int unk074C; int unk0750; int unk0754; int unk0758; int unk075C; int unk0760; int unk0764; int unk0768; int unk076C; int unk0770; int unk0774; int unk0778; int unk077C; int unk0780; int unk0784; int unk0788; int unk078C; int unk0790; int unk0794; int unk0798; int unk079C; int unk07A0; int unk07A4; int unk07A8; int unk07AC; int unk07B0; int unk07B4; int unk07B8; int unk07BC; int unk07C0; int unk07C4; int unk07C8; int unk07CC; int unk07D0; int unk07D4; int unk07D8; int unk07DC; int unk07E0; int unk07E4; int unk07E8; int unk07EC; int unk07F0; int unk07F4; int unk07F8; int unk07FC; int unk0800; int unk0804; int unk0808; int unk080C; int unk0810; int unk0814; int unk0818; int unk081C; int unk0820; int unk0824; int unk0828; int unk082C; int unk0830; int unk0834; int unk0838; int unk083C; int unk0840; int unk0844; int unk0848; int unk084C; int unk0850; int unk0854; int unk0858; int unk085C; int unk0860; int unk0864; int unk0868; int unk086C; int unk0870; int unk0874; int unk0878; int unk087C; int unk0880; int unk0884; int unk0888; int unk088C; int unk0890; int unk0894; int unk0898; int unk089C; int unk08A0; int unk08A4; int unk08A8; int unk08AC; int unk08B0; int unk08B4; int unk08B8; int unk08BC; int unk08C0; int unk08C4; int unk08C8; int unk08CC; int unk08D0; int unk08D4; int unk08D8; int unk08DC; int unk08E0; int unk08E4; int unk08E8; int unk08EC; int unk08F0; int unk08F4; int unk08F8; int unk08FC; int unk0900; int unk0904; int unk0908; int unk090C; int unk0910; int unk0914; int unk0918; int unk091C; int unk0920; int unk0924; int unk0928; int unk092C; int unk0930; int unk0934; int unk0938; int unk093C; int unk0940; int unk0944; int unk0948; int unk094C; int unk0950; int unk0954; int unk0958; int unk095C; int unk0960; int unk0964; int unk0968; int unk096C; int unk0970; int unk0974; int unk0978; int unk097C; int unk0980; int unk0984; int unk0988; int unk098C; int unk0990; int unk0994; int unk0998; int unk099C; int unk09A0; int unk09A4; int unk09A8; int unk09AC; int unk09B0; int unk09B4; int unk09B8; int unk09BC; int unk09C0; int unk09C4; int unk09C8; int unk09CC; int unk09D0; int unk09D4; int unk09D8; int unk09DC; int unk09E0; int unk09E4; int unk09E8; int unk09EC; int unk09F0; int unk09F4; int unk09F8; int unk09FC; int unk0A00; int unk0A04; int unk0A08; int unk0A0C; int unk0A10; int unk0A14; int unk0A18; int unk0A1C; int unk0A20; int unk0A24; int unk0A28; int unk0A2C; int unk0A30; int unk0A34; int unk0A38; int unk0A3C; int unk0A40; int unk0A44; int unk0A48; int unk0A4C; int unk0A50; int unk0A54; int unk0A58; int unk0A5C; int unk0A60; int unk0A64; int unk0A68; int unk0A6C; int unk0A70; int unk0A74; int unk0A78; int unk0A7C; int unk0A80; int unk0A84; int unk0A88; int unk0A8C; int unk0A90; int unk0A94; int unk0A98; int unk0A9C; int unk0AA0; int unk0AA4; int unk0AA8; int unk0AAC; int unk0AB0; int unk0AB4; int unk0AB8; int unk0ABC; int unk0AC0; int unk0AC4; int unk0AC8; int unk0ACC; int unk0AD0; int unk0AD4; int unk0AD8; int unk0ADC; int unk0AE0; int unk0AE4; int unk0AE8; int unk0AEC; int unk0AF0; int unk0AF4; int unk0AF8; int unk0AFC; int unk0B00; int unk0B04; int unk0B08; int unk0B0C; int unk0B10; int unk0B14; int unk0B18; int unk0B1C; int unk0B20; int unk0B24; int unk0B28; int unk0B2C; int unk0B30; int unk0B34; int unk0B38; int unk0B3C; int unk0B40; int unk0B44; int unk0B48; int unk0B4C; int unk0B50; int unk0B54; int unk0B58; int unk0B5C; int unk0B60; int unk0B64; int unk0B68; int unk0B6C; int unk0B70; int unk0B74; int unk0B78; int unk0B7C; int unk0B80; int unk0B84; int unk0B88; int unk0B8C; int unk0B90; int unk0B94; int unk0B98; int unk0B9C; int unk0BA0; int unk0BA4; int unk0BA8; int unk0BAC; int unk0BB0; int unk0BB4; int unk0BB8; int unk0BBC; int unk0BC0; int unk0BC4; int unk0BC8; int unk0BCC; int unk0BD0; int unk0BD4; int unk0BD8; int unk0BDC; int unk0BE0; int unk0BE4; int unk0BE8; int unk0BEC; int unk0BF0; int unk0BF4; int unk0BF8; int unk0BFC; int unk0C00; int unk0C04; int unk0C08; int unk0C0C; int unk0C10; int unk0C14; int unk0C18; int unk0C1C; int unk0C20; int unk0C24; int unk0C28; int unk0C2C; int unk0C30; int unk0C34; int unk0C38; int unk0C3C; int unk0C40; int unk0C44; int unk0C48; int unk0C4C; int unk0C50; int unk0C54; int unk0C58; int unk0C5C; int unk0C60; int unk0C64; int unk0C68; int unk0C6C; int unk0C70; int unk0C74; int unk0C78; int unk0C7C; int unk0C80; int unk0C84; int unk0C88; int unk0C8C; int unk0C90; int unk0C94; int unk0C98; int unk0C9C; int unk0CA0; int unk0CA4; int unk0CA8; int unk0CAC; int unk0CB0; int unk0CB4; int unk0CB8; int unk0CBC; int unk0CC0; int unk0CC4; int unk0CC8; int unk0CCC; int unk0CD0; int unk0CD4; int unk0CD8; int unk0CDC; int unk0CE0; int unk0CE4; int unk0CE8; int unk0CEC; int unk0CF0; int unk0CF4; int unk0CF8; int unk0CFC; int unk0D00; int unk0D04; int unk0D08; int unk0D0C; int unk0D10; int unk0D14; int unk0D18; int unk0D1C; int unk0D20; int unk0D24; int unk0D28; int unk0D2C; int unk0D30; int unk0D34; int unk0D38; int unk0D3C; int unk0D40; int unk0D44; int unk0D48; int unk0D4C; int unk0D50; int unk0D54; int unk0D58; int unk0D5C; int unk0D60; int unk0D64; int unk0D68; int unk0D6C; int unk0D70; int unk0D74; int unk0D78; int unk0D7C; int unk0D80; int unk0D84; int unk0D88; int unk0D8C; int unk0D90; int unk0D94; int unk0D98; int unk0D9C; int unk0DA0; int unk0DA4; int unk0DA8; int unk0DAC; int unk0DB0; int unk0DB4; int unk0DB8; int unk0DBC; int unk0DC0; int unk0DC4; int unk0DC8; int unk0DCC; int unk0DD0; int unk0DD4; int unk0DD8; int unk0DDC; int unk0DE0; int unk0DE4; int unk0DE8; int unk0DEC; int unk0DF0; int unk0DF4; int unk0DF8; int unk0DFC; int unk0E00; int unk0E04; int unk0E08; int unk0E0C; int unk0E10; int unk0E14; int unk0E18; int unk0E1C; int unk0E20; int unk0E24; int unk0E28; int unk0E2C; int unk0E30; int unk0E34; int unk0E38; int unk0E3C; int unk0E40; int unk0E44; int unk0E48; int unk0E4C; int unk0E50; int unk0E54; int unk0E58; int unk0E5C; int unk0E60; int unk0E64; int unk0E68; int unk0E6C; int unk0E70; int unk0E74; int unk0E78; int unk0E7C; int unk0E80; int unk0E84; int unk0E88; int unk0E8C; int unk0E90; int unk0E94; int unk0E98; int unk0E9C; int unk0EA0; int unk0EA4; int unk0EA8; int unk0EAC; int unk0EB0; int unk0EB4; int unk0EB8; int unk0EBC; int unk0EC0; int unk0EC4; int unk0EC8; int unk0ECC; int unk0ED0; int unk0ED4; int unk0ED8; int unk0EDC; int unk0EE0; int unk0EE4; int unk0EE8; int unk0EEC; int unk0EF0; int unk0EF4; int unk0EF8; int unk0EFC; int unk0F00; int unk0F04; int unk0F08; int unk0F0C; int unk0F10; int unk0F14; int unk0F18; int unk0F1C; int unk0F20; int unk0F24; int unk0F28; int unk0F2C; int unk0F30; int unk0F34; int unk0F38; int unk0F3C; int unk0F40; int unk0F44; int unk0F48; int unk0F4C; int unk0F50; int unk0F54; int unk0F58; int unk0F5C; int unk0F60; int unk0F64; int unk0F68; int unk0F6C; int unk0F70; int unk0F74; int unk0F78; int unk0F7C; int unk0F80; int unk0F84; int unk0F88; int unk0F8C; int unk0F90; int unk0F94; int unk0F98; int unk0F9C; int unk0FA0; int unk0FA4; int unk0FA8; int unk0FAC; int unk0FB0; int unk0FB4; int unk0FB8; int unk0FBC; int unk0FC0; int unk0FC4; int unk0FC8; int unk0FCC; int unk0FD0; int unk0FD4; int unk0FD8; int unk0FDC; int unk0FE0; int unk0FE4; int unk0FE8; int unk0FEC; int unk0FF0; int unk0FF4; int unk0FF8; int unk0FFC; int unk1000; int unk1004; int unk1008; int unk100C; int unk1010; int unk1014; int unk1018; int unk101C; int unk1020; int unk1024; int unk1028; int unk102C; int unk1030; int unk1034; int unk1038; int unk103C; int unk1040; int unk1044; int unk1048; int unk104C; int unk1050; int unk1054; int unk1058; int unk105C; int unk1060; int unk1064; int unk1068; int unk106C; int unk1070; int unk1074; int unk1078; int unk107C; int unk1080; int unk1084; int unk1088; int unk108C; int unk1090; int unk1094; int unk1098; int unk109C; int unk10A0; int unk10A4; int unk10A8; int unk10AC; int unk10B0; int unk10B4; int unk10B8; int unk10BC; int unk10C0; int unk10C4; int unk10C8; int unk10CC; int unk10D0; int unk10D4; int unk10D8; int unk10DC; int unk10E0; int unk10E4; int unk10E8; int unk10EC; int unk10F0; int unk10F4; int unk10F8; int unk10FC; int unk1100; int unk1104; int unk1108; int unk110C; int unk1110; int unk1114; int unk1118; int unk111C; int unk1120; int unk1124; int unk1128; int unk112C; int unk1130; int unk1134; int unk1138; int unk113C; int unk1140; int unk1144; int unk1148; int unk114C; int unk1150; int unk1154; int unk1158; int unk115C; int unk1160; int unk1164; int unk1168; int unk116C; int unk1170; int unk1174; int unk1178; int unk117C; int unk1180; int unk1184; int unk1188; int unk118C; int unk1190; int unk1194; int unk1198; int unk119C; int unk11A0; int unk11A4; int unk11A8; int unk11AC; int unk11B0; int unk11B4; int unk11B8; int unk11BC; int unk11C0; int unk11C4; int unk11C8; int unk11CC; int unk11D0; int unk11D4; int unk11D8; int unk11DC; int unk11E0; int unk11E4; int unk11E8; int unk11EC; int unk11F0; int unk11F4; int unk11F8; int unk11FC; int unk1200; int unk1204; int unk1208; int unk120C; int unk1210; int unk1214; int unk1218; int unk121C; int unk1220; int unk1224; int unk1228; int unk122C; int unk1230; int unk1234; int unk1238; int unk123C; int unk1240; int unk1244; int unk1248; int unk124C; int unk1250; int unk1254; int unk1258; int unk125C; int unk1260; int unk1264; int unk1268; int unk126C; int unk1270; int unk1274; int unk1278; int unk127C; int unk1280; int unk1284; int unk1288; int unk128C; int unk1290; int unk1294; int unk1298; int unk129C; int unk12A0; int unk12A4; int unk12A8; int unk12AC; int unk12B0; int unk12B4; int unk12B8; int unk12BC; int unk12C0; int unk12C4; int unk12C8; int unk12CC; int unk12D0; int unk12D4; int unk12D8; int unk12DC; int unk12E0; int unk12E4; int unk12E8; int unk12EC; int unk12F0; int unk12F4; int unk12F8; int unk12FC; int unk1300; int unk1304; int unk1308; int unk130C; int unk1310; int unk1314; int unk1318; int unk131C; int unk1320; int unk1324; int unk1328; int unk132C; int unk1330; int unk1334; int unk1338; int unk133C; int unk1340; int unk1344; int unk1348; int unk134C; int unk1350; int unk1354; int unk1358; int unk135C; int unk1360; int unk1364; int unk1368; int unk136C; int unk1370; int unk1374; int unk1378; int unk137C; int unk1380; int unk1384; int unk1388; int unk138C; int unk1390; int unk1394; int unk1398; int unk139C; int unk13A0; int unk13A4; int unk13A8; int unk13AC; int unk13B0; int unk13B4; int unk13B8; int unk13BC; int unk13C0; int unk13C4; int unk13C8; int unk13CC; int unk13D0; int unk13D4; int unk13D8; int unk13DC; int unk13E0; int unk13E4; int unk13E8; int unk13EC; int unk13F0; int unk13F4; int unk13F8; int unk13FC; int unk1400; int unk1404; int unk1408; int unk140C; int unk1410; int unk1414; int unk1418; int unk141C; int unk1420; int unk1424; int unk1428; int unk142C; int unk1430; int unk1434; int unk1438; int unk143C; int unk1440; int unk1444; int unk1448; int unk144C; int unk1450; int unk1454; int unk1458; int unk145C; int unk1460; int unk1464; int unk1468; int unk146C; int unk1470; int unk1474; int unk1478; int unk147C; int unk1480; int unk1484; int unk1488; int unk148C; int unk1490; int unk1494; int unk1498; int unk149C; int unk14A0; int unk14A4; int unk14A8; int unk14AC; int unk14B0; int unk14B4; int unk14B8; int unk14BC; int unk14C0; int unk14C4; int unk14C8; int unk14CC; int unk14D0; int unk14D4; int unk14D8; int unk14DC; int unk14E0; int unk14E4; int unk14E8; int unk14EC; int unk14F0; int unk14F4; int unk14F8; int unk14FC; int unk1500; int unk1504; int unk1508; int unk150C; int unk1510; int unk1514; int unk1518; int unk151C; int unk1520; int unk1524; int unk1528; int unk152C; int unk1530; int unk1534; int unk1538; int unk153C; int unk1540; int unk1544; int unk1548; int unk154C; int unk1550; int unk1554; int unk1558; int unk155C; int unk1560; int unk1564; int unk1568; int unk156C; int unk1570; int unk1574; int unk1578; int unk157C; int unk1580; int unk1584; int unk1588; int unk158C; int unk1590; int unk1594; int unk1598; int unk159C; int unk15A0; int unk15A4; int unk15A8; int unk15AC; int unk15B0; int unk15B4; int unk15B8; int unk15BC; int unk15C0; int unk15C4; int unk15C8; int unk15CC; int unk15D0; int unk15D4; int unk15D8; int unk15DC; int unk15E0; int unk15E4; int unk15E8; int unk15EC; int unk15F0; int unk15F4; int unk15F8; int unk15FC; int unk1600; int unk1604; int unk1608; int unk160C; int unk1610; int unk1614; int unk1618; int unk161C; int unk1620; int unk1624; int unk1628; int unk162C; int unk1630; int unk1634; int unk1638; int unk163C; int unk1640; int unk1644; int unk1648; int unk164C; int unk1650; int unk1654; int unk1658; int unk165C; int unk1660; int unk1664; int unk1668; int unk166C; int unk1670; int unk1674; int unk1678; int unk167C; int unk1680; int unk1684; int unk1688; int unk168C; int unk1690; int unk1694; int unk1698; int unk169C; int unk16A0; int unk16A4; int unk16A8; int unk16AC; int unk16B0; int unk16B4; int unk16B8; int unk16BC; int unk16C0; int unk16C4; int unk16C8; int unk16CC; int unk16D0; int unk16D4; int unk16D8; int unk16DC; int unk16E0; int unk16E4; int unk16E8; int unk16EC; int unk16F0; int unk16F4; int unk16F8; int unk16FC; int unk1700; int unk1704; int unk1708; int unk170C; int unk1710; int unk1714; int unk1718; int unk171C; int unk1720; int unk1724; int unk1728; int unk172C; int unk1730; int unk1734; int unk1738; int unk173C; int unk1740; int unk1744; int unk1748; int unk174C; int unk1750; int unk1754; int unk1758; int unk175C; int unk1760; int unk1764; int unk1768; int unk176C; int unk1770; int unk1774; int unk1778; int unk177C; int unk1780; int unk1784; int unk1788; int unk178C; int unk1790; int unk1794; int unk1798; int unk179C; int unk17A0; int unk17A4; int unk17A8; int unk17AC; int unk17B0; int unk17B4; int unk17B8; int unk17BC; int unk17C0; int unk17C4; int unk17C8; int unk17CC; int unk17D0; int unk17D4; int unk17D8; int unk17DC; int unk17E0; int unk17E4; int unk17E8; int unk17EC; int unk17F0; int unk17F4; int unk17F8; int unk17FC; int unk1800; int unk1804; int unk1808; int unk180C; int unk1810; int unk1814; int unk1818; int unk181C; int unk1820; int unk1824; int unk1828; int unk182C; int unk1830; int unk1834; int unk1838; int unk183C; int unk1840; int unk1844; int unk1848; int unk184C; int unk1850; int unk1854; int unk1858; int unk185C; int unk1860; int unk1864; int unk1868; int unk186C; int unk1870; int unk1874; int unk1878; int unk187C; int unk1880; int unk1884; int unk1888; int unk188C; int unk1890; int unk1894; int unk1898; int unk189C; int unk18A0; int unk18A4; int unk18A8; int unk18AC; int unk18B0; int unk18B4; int unk18B8; int unk18BC; int unk18C0; int unk18C4; int unk18C8; int unk18CC; int unk18D0; int unk18D4; int unk18D8; int unk18DC; int unk18E0; int unk18E4; int unk18E8; int unk18EC; int unk18F0; int unk18F4; int unk18F8; int unk18FC; int unk1900; int unk1904; int unk1908; int unk190C; int unk1910; int unk1914; int unk1918; int unk191C; int unk1920; int unk1924; int unk1928; int unk192C; int unk1930; int unk1934; int unk1938; int unk193C; int unk1940; int unk1944; int unk1948; int unk194C; int unk1950; int unk1954; int unk1958; int unk195C; int unk1960; int unk1964; int unk1968; int unk196C; int unk1970; int unk1974; int unk1978; int unk197C; int unk1980; int unk1984; int unk1988; int unk198C; int unk1990; int unk1994; int unk1998; int unk199C; int unk19A0; int unk19A4; int unk19A8; int unk19AC; int unk19B0; int unk19B4; int unk19B8; int unk19BC; int unk19C0; int unk19C4; int unk19C8; int unk19CC; int unk19D0; int unk19D4; int unk19D8; int unk19DC; int unk19E0; int unk19E4; int unk19E8; int unk19EC; int unk19F0; int unk19F4; int unk19F8; int unk19FC; int unk1A00; int unk1A04; int unk1A08; int unk1A0C; int unk1A10; int unk1A14; int unk1A18; int unk1A1C; int unk1A20; int unk1A24; int unk1A28; int unk1A2C; int unk1A30; int unk1A34; int unk1A38; int unk1A3C; int unk1A40; int unk1A44; int unk1A48; int unk1A4C; int unk1A50; int unk1A54; int unk1A58; int unk1A5C; int unk1A60; int unk1A64; int unk1A68; int unk1A6C; int unk1A70; int unk1A74; int unk1A78; int unk1A7C; int unk1A80; int unk1A84; int unk1A88; int unk1A8C; int unk1A90; int unk1A94; int unk1A98; int unk1A9C; int unk1AA0; int unk1AA4; int unk1AA8; int unk1AAC; int unk1AB0; int unk1AB4; int unk1AB8; int unk1ABC; int unk1AC0; int unk1AC4; int unk1AC8; int unk1ACC; int unk1AD0; int unk1AD4; int unk1AD8; int unk1ADC; int unk1AE0; int unk1AE4; int unk1AE8; int unk1AEC; int unk1AF0; int unk1AF4; int unk1AF8; int unk1AFC; int unk1B00; int unk1B04; int unk1B08; int unk1B0C; int unk1B10; int unk1B14; int unk1B18; int unk1B1C; int unk1B20; int unk1B24; int unk1B28; int unk1B2C; int unk1B30; int unk1B34; int unk1B38; int unk1B3C; int unk1B40; int unk1B44; int unk1B48; int unk1B4C; int unk1B50; int unk1B54; int unk1B58; int unk1B5C; int unk1B60; int unk1B64; int unk1B68; int unk1B6C; int unk1B70; int unk1B74; int unk1B78; int unk1B7C; int unk1B80; int unk1B84; int unk1B88; int unk1B8C; int unk1B90; int unk1B94; int unk1B98; int unk1B9C; int unk1BA0; int unk1BA4; int unk1BA8; int unk1BAC; int unk1BB0; int unk1BB4; int unk1BB8; int unk1BBC; int unk1BC0; int unk1BC4; int unk1BC8; int unk1BCC; int unk1BD0; int unk1BD4; int unk1BD8; int unk1BDC; int unk1BE0; int unk1BE4; int unk1BE8; int unk1BEC; int unk1BF0; int unk1BF4; int unk1BF8; int unk1BFC; int unk1C00; int unk1C04; int unk1C08; int unk1C0C; int unk1C10; int unk1C14; int unk1C18; int unk1C1C; int unk1C20; int unk1C24; int unk1C28; int unk1C2C; int unk1C30; int unk1C34; int unk1C38; int unk1C3C; int unk1C40; int unk1C44; int unk1C48; int unk1C4C; int unk1C50; int unk1C54; int unk1C58; int unk1C5C; int unk1C60; int unk1C64; int unk1C68; int unk1C6C; int unk1C70; int unk1C74; int unk1C78; int unk1C7C; int unk1C80; int unk1C84; int unk1C88; int unk1C8C; int unk1C90; int unk1C94; int unk1C98; int unk1C9C; int unk1CA0; int unk1CA4; int unk1CA8; int unk1CAC; int unk1CB0; int unk1CB4; int unk1CB8; int unk1CBC; int unk1CC0; int unk1CC4; int unk1CC8; int unk1CCC; int unk1CD0; int unk1CD4; int unk1CD8; int unk1CDC; int unk1CE0; int unk1CE4; int unk1CE8; int unk1CEC; int unk1CF0; int unk1CF4; int unk1CF8; int unk1CFC; int unk1D00; int unk1D04; int unk1D08; int unk1D0C; int unk1D10; int unk1D14; int unk1D18; int unk1D1C; int unk1D20; int unk1D24; int unk1D28; int unk1D2C; int unk1D30; int unk1D34; int unk1D38; int unk1D3C; int unk1D40; int unk1D44; int unk1D48; int unk1D4C; int unk1D50; int unk1D54; int unk1D58; int unk1D5C; int unk1D60; int unk1D64; int unk1D68; int unk1D6C; int unk1D70; int unk1D74; int unk1D78; int unk1D7C; int unk1D80; int unk1D84; int unk1D88; int unk1D8C; int unk1D90; int unk1D94; int unk1D98; int unk1D9C; int unk1DA0; int unk1DA4; int unk1DA8; int unk1DAC; int unk1DB0; int unk1DB4; int unk1DB8; int unk1DBC; int unk1DC0; int unk1DC4; int unk1DC8; int unk1DCC; int unk1DD0; int unk1DD4; int unk1DD8; int unk1DDC; int unk1DE0; int unk1DE4; int unk1DE8; int unk1DEC; int unk1DF0; int unk1DF4; int unk1DF8; int unk1DFC; int unk1E00; int unk1E04; int unk1E08; int unk1E0C; int unk1E10; int unk1E14; int unk1E18; int unk1E1C; int unk1E20; int unk1E24; int unk1E28; int unk1E2C; int unk1E30; int unk1E34; int unk1E38; int unk1E3C; int unk1E40; int unk1E44; int unk1E48; int unk1E4C; int unk1E50; int unk1E54; int unk1E58; int unk1E5C; int unk1E60; int unk1E64; int unk1E68; int unk1E6C; int unk1E70; int unk1E74; int unk1E78; int unk1E7C; int unk1E80; int unk1E84; int unk1E88; int unk1E8C; int unk1E90; int unk1E94; int unk1E98; int unk1E9C; int unk1EA0; int unk1EA4; int unk1EA8; int unk1EAC; int unk1EB0; int unk1EB4; int unk1EB8; int unk1EBC; int unk1EC0; int unk1EC4; int unk1EC8; int unk1ECC; int unk1ED0; int unk1ED4; int unk1ED8; int unk1EDC; int unk1EE0; int unk1EE4; int unk1EE8; int unk1EEC; int unk1EF0; int unk1EF4; int unk1EF8; int unk1EFC; int unk1F00; int unk1F04; int unk1F08; int unk1F0C; int unk1F10; int unk1F14; int unk1F18; int unk1F1C; int unk1F20; int unk1F24; int unk1F28; int unk1F2C; int unk1F30; int unk1F34; int unk1F38; int unk1F3C; int unk1F40; int unk1F44; int unk1F48; int unk1F4C; int unk1F50; int unk1F54; int unk1F58; int unk1F5C; int unk1F60; int unk1F64; int unk1F68; int unk1F6C; int unk1F70; int unk1F74; int unk1F78; int unk1F7C; int unk1F80; int unk1F84; int unk1F88; int unk1F8C; int unk1F90; int unk1F94; int unk1F98; int unk1F9C; int unk1FA0; int unk1FA4; int unk1FA8; int unk1FAC; int unk1FB0; int unk1FB4; int unk1FB8; int unk1FBC; int unk1FC0; int unk1FC4; int unk1FC8; int unk1FCC; int unk1FD0; int unk1FD4; int unk1FD8; int unk1FDC; int unk1FE0; int unk1FE4; int unk1FE8; int unk1FEC; int unk1FF0; int unk1FF4; int unk1FF8; int unk1FFC; int unk2000; int unk2004; int unk2008; int unk200C; int unk2010; int unk2014; int unk2018; int unk201C; int unk2020; int unk2024; int unk2028; int unk202C; int unk2030; int unk2034; int unk2038; int unk203C; int unk2040; int unk2044; int unk2048; int unk204C; int unk2050; int unk2054; int unk2058; int unk205C; int unk2060; int unk2064; int unk2068; int unk206C; int unk2070; int unk2074; int unk2078; int unk207C; int unk2080; int unk2084; int unk2088; int unk208C; int unk2090; int unk2094; int unk2098; int unk209C; int unk20A0; int unk20A4; int unk20A8; int unk20AC; int unk20B0; int unk20B4; int unk20B8; int unk20BC; int unk20C0; int unk20C4; int unk20C8; int unk20CC; int unk20D0; int unk20D4; int unk20D8; int unk20DC; int unk20E0; int unk20E4; int unk20E8; int unk20EC; int unk20F0; int unk20F4; int unk20F8; int unk20FC; int unk2100; int unk2104; int unk2108; int unk210C; int unk2110; int unk2114; int unk2118; int unk211C; int unk2120; int unk2124; int unk2128; int unk212C; int unk2130; int unk2134; int unk2138; int unk213C; int unk2140; int unk2144; int unk2148; int unk214C; int unk2150; int unk2154; int unk2158; int unk215C; int unk2160; int unk2164; int unk2168; int unk216C; int unk2170; int unk2174; int unk2178; int unk217C; int unk2180; int unk2184; int unk2188; int unk218C; int unk2190; int unk2194; int unk2198; int unk219C; int unk21A0; int unk21A4; int unk21A8; int unk21AC; int unk21B0; int unk21B4; int unk21B8; int unk21BC; int unk21C0; int unk21C4; int unk21C8; int unk21CC; int unk21D0; int unk21D4; int unk21D8; int unk21DC; int unk21E0; int unk21E4; int unk21E8; int unk21EC; int unk21F0; int unk21F4; int unk21F8; int unk21FC; int unk2200; int unk2204; int unk2208; int unk220C; int unk2210; int unk2214; int unk2218; int unk221C; int unk2220; int unk2224; int unk2228; int unk222C; int unk2230; int unk2234; int unk2238; int unk223C; int unk2240; int unk2244; int unk2248; int unk224C; int unk2250; int unk2254; int unk2258; int unk225C; int unk2260; int unk2264; int unk2268; int unk226C;     A0F8List m_kNode;
 
-    int FUN_00a0f8b0(const char* pcText, float fX, float fY, int iFlags,
+    int DebugText_Print(const char* pcText, float fX, float fY, int iFlags,
                      int m_iPayloadInteger, float fScale, int iUnused, NiColorA* pkColor);
 };
 
@@ -2339,7 +2354,8 @@ inline bool SetNewStr(BSStringT<char>& rStr,const char* pcText) { int len; int e
 inline bool SetStringText(BSStringT<char>& string, const char* text) { return string.Set(text, 0); }
 
 // @fnv 0x00a0f8b0
-int A0F8Self::FUN_00a0f8b0(const char* pcText, float fX, float fY, int iFlags,
+// src: XBOX_PDB 0x00a0f8b0
+int A0F8Self::DebugText_Print(const char* pcText, float fX, float fY, int iFlags,
                            int m_iPayloadInteger, float fScale, int iUnused, NiColorA* pkColor)
 {
     bool found = false;
@@ -2393,7 +2409,7 @@ int A0F8Self::FUN_00a0f8b0(const char* pcText, float fX, float fY, int iFlags,
         pItem->m_0C = m_iPayloadInteger;
         pItem->m_10 = fScale;
         pItem->m_14 = iUnused;
-        this->m_kNode.FUN_00a11d20(pItem);
+        this->m_kNode.BSSimpleArray_Add(pItem);
     }
     return 0;
 }
@@ -2431,14 +2447,14 @@ extern "C" float DAT_0101ff38;
 extern "C" float DAT_01016b78;
 extern "C" float DAT_0102b3c8;
 char* __cdecl FUN_00a5b690(const char*);
-void __cdecl FUN_004381d0(void*);
+void __cdecl NiGlobalStringTable_DecRefCount(void*);
 extern "C" double __cdecl sin(double);
 extern "C" double __cdecl cos(double);
 extern "C" double __cdecl fabs(double);
 struct S107 {
     char* data;
     __forceinline S107(const char* p) { if (!p) data=DAT_0109b220; else data=FUN_00a5b690(p); }
-    __forceinline ~S107() { FUN_004381d0(this); }
+    __forceinline ~S107() { NiGlobalStringTable_DecRefCount(this); }
 };
 
 struct P107 { float x,y,z; };
@@ -2456,16 +2472,17 @@ struct State107 {
 };
 State107* State107::Create() { return new State107; }
 void State107::Destroy(State107* state) { delete state; }
-struct Lock107 { unsigned owner; void FUN_0040fbf0(const char*); };
+struct Lock107 { unsigned owner; void BSSpinLock_Lock(const char*); };
 extern Lock107 DAT_011f42a0;
 extern unsigned DAT_011f42a4;
-struct Parent107 { void FUN_00a5e3a0(State107*&); };
+struct Parent107 { void NiNode_UpdatePropertiesUpward(State107*&); };
 } // namespace fnv_00a10770
-inline void NiAVObject::FUN_00a5a040() {
+// src: XBOX_PDB 0x00a5a040
+inline void NiAVObject::UpdateProperties() {
     using namespace fnv_00a10770;
     State107* state=0;
-    DAT_011f42a0.FUN_0040fbf0(0);
-    if(m_pkParent) ((Parent107*)m_pkParent)->FUN_00a5e3a0(state);
+    DAT_011f42a0.BSSpinLock_Lock(0);
+    if(m_pkParent) ((Parent107*)m_pkParent)->NiNode_UpdatePropertiesUpward(state);
     else state=State107::Create();
     UpdatePropertiesDownwardPass(reinterpret_cast<NiPropertyState*>(state));
     State107::Destroy(state);
@@ -2482,7 +2499,8 @@ __forceinline Font* GetFont(int idx) {
     Font* selected=fonts[idx]; return selected;
 }
 // @fnv 0x00a10770
-NiAVObject* __cdecl FUN_00a10770(const char* text,float x,float y,float scale,int idx,int p1,int p2,bool flag) {
+// src: COMMUNITY 0x00a10770
+NiAVObject* __cdecl FloatingText_FloatingText(const char* text,float x,float y,float scale,int idx,int p1,int p2,bool flag) {
     NiAVObject* a;
     { a = new NiBillboardNode; }
     a->SetName((const NiFixedString&)S107(&DAT_01094f9c));
@@ -2490,7 +2508,7 @@ NiAVObject* __cdecl FUN_00a10770(const char* text,float x,float y,float scale,in
     BSStringT<char> s(text);
     NiAVObject* h;
     {
-        h=reinterpret_cast<NiAVObject*>(GetFont(idx)->FUN_00a12460(x,y,0.0f,&s,&eb,p1,reinterpret_cast<void*>(p2),0,flag));
+        h=reinterpret_cast<NiAVObject*>(GetFont(idx)->Font_MakeString(x,y,0.0f,&s,&eb,p1,reinterpret_cast<void*>(p2),0,flag));
     }
     if (!h) return 0;
     static_cast<NiNode*>(a)->AttachChildInAvailableSlot(h,true);
@@ -2503,13 +2521,13 @@ NiAVObject* __cdecl FUN_00a10770(const char* text,float x,float y,float scale,in
     a->SetRotation(((const NiMatrix3_OutOfLineProduct&)((const NiMatrix3_OutOfLineProduct&)i * cf)) * a->m_kLocal.m_Rotate);
     a->m_kLocal.m_fScale=(double)(float)fabs(scale);
     NiAlphaProperty* p=new NiAlphaProperty;
-    p->FUN_00633ba0(true,1u);
-    p->FUN_00633ba0(false,0x2000u);
-    a->FUN_00439410(p);
-    a->FUN_00a5a040();
+    p->NiAlphaProperty_SetBit(true,1u);
+    p->NiAlphaProperty_SetBit(false,0x2000u);
+    a->NiAVObject_AttachProperty(p);
+    a->UpdateProperties();
     U107 f;
     f.FUN_0043d410(0.0f,false,false);
-    a->FUN_00a59c60(reinterpret_cast<NiUpdateData&>(f));
+    a->NiAVObject_Update(reinterpret_cast<NiUpdateData&>(f));
     return a;
 }
 }  // namespace fnv_00a10770
@@ -2542,16 +2560,17 @@ extern "C" void __cdecl FUN_00b57e30(NiAVObject*,int,int);
 extern "C" void __cdecl SetExtraDataName();
 typedef bool (__thiscall *ExtraAttach)(NiObject*,DebugTextExtraData*);
 // @fnv 0x00a10c00
-unsigned char __cdecl FUN_00a10c00(NiObject* root,int text,int height,float duration) {
+// src: COMMUNITY 0x00a10c00
+unsigned char __cdecl DebugText_AddFloatingText(NiObject* root,int text,int height,float duration) {
  if(!root) return false;
  bool found=false;
  int zt=(int)static_cast<NiAVObject*>(root)->GetBound().m_kCenter.z;
- DebugTextExtraData* extra34=(DebugTextExtraData*)FUN_00a11740((NiAVObject*)root,text,height,&zt);
+ DebugTextExtraData* extra34=(DebugTextExtraData*)DebugText_GetFloatingText((NiAVObject*)root,text,height,&zt);
  NiAVObject* nodeB;
  if(extra34) {
-  Link* pos=DebugState::FUN_00a0d9e0(true)->list.GetFirst();
+  Link* pos=DebugState::DebugText_Instance(true)->list.GetFirst();
   while(pos) {
-   DynamicEntry* existing=DebugState::FUN_00a0d9e0(true)->list.Next(pos);
+   DynamicEntry* existing=DebugState::DebugText_Instance(true)->list.Next(pos);
    if((bool)(int)(existing->node.ptr==(SceneNode*)extra34->node)) { existing->lifetime=duration; return true; }
   }
   static_cast<NiNode*>(root)->RemoveObject(extra34->node);
@@ -2567,7 +2586,7 @@ unsigned char __cdecl FUN_00a10c00(NiObject* root,int text,int height,float dura
  int limit3=10000;
  StringConstructionScratch();
  BSStringT<char> str1((const char*)text);
- NiAVObject* mesh6=reinterpret_cast<NiAVObject*>(FontSystem::GetSingleton()->GetFont(1)->FUN_00a12460(0,0,0,&str1,&limit3,2,&DAT_011a9be0,0,1));
+ NiAVObject* mesh6=reinterpret_cast<NiAVObject*>(FontSystem::GetSingleton()->GetFont(1)->Font_MakeString(0,0,0,&str1,&limit3,2,&DAT_011a9be0,0,1));
  if(!mesh6) return false;
  static_cast<NiNode*>(nodeB)->AttachChildInAvailableSlot(mesh6,true);
  extra34->text=(const char*)text;
@@ -2582,13 +2601,13 @@ unsigned char __cdecl FUN_00a10c00(NiObject* root,int text,int height,float dura
  nodeB->SetScale(0.5f);
  extra34->node=nodeB;
  NiAlphaProperty* alphaB=new NiAlphaProperty;
- alphaB->FUN_00633ba0(true,static_cast<unsigned short>(1));
- alphaB->FUN_00633ba0(false,static_cast<unsigned short>(0x2000));
+ alphaB->NiAlphaProperty_SetBit(true,static_cast<unsigned short>(1));
+ alphaB->NiAlphaProperty_SetBit(false,static_cast<unsigned short>(0x2000));
  nodeB->AttachProperty(alphaB);
  FUN_00b57e30(mesh6,0,0);
  if(!found) reinterpret_cast<ExtraAttach>(SetExtraDataName)(root,extra34);
  static_cast<NiNode*>(root)->AttachChildInAvailableSlot(nodeB,true);
- nodeB->FUN_00a5a040();
+ nodeB->UpdateProperties();
  NiUpdateData updateD3(0,false,false);
  nodeB->Update(updateD3);
  TextEntry* entry7=(TextEntry*)new FUN_00a11880;
@@ -2597,6 +2616,6 @@ unsigned char __cdecl FUN_00a10c00(NiObject* root,int text,int height,float dura
  entry7->duration=duration;
  entry7->text=(const char*)text;
  entry7->node.FUN_0066b0d0(nodeB);
- reinterpret_cast<FUN_00a11c00_shell*>(&DebugState::FUN_00a0d9e0(true)->list)->FUN_00a11c00(reinterpret_cast<NiTMapItem<unsigned int, void*>*>(&entry7));
+ reinterpret_cast<FUN_00a11c00_shell*>(&DebugState::DebugText_Instance(true)->list)->NiTList_AddTail(reinterpret_cast<NiTMapItem<unsigned int, void*>*>(&entry7));
  return true;
 }

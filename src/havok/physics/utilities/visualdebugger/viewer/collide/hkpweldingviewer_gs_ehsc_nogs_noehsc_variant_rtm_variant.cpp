@@ -297,7 +297,7 @@ static void __cdecl RegisterViewer(void);
 static inline const char*__cdecl getName(void){return "WeldingViewer";}
 virtual int GetOperationType(void){return m_ucOperationType;}
 // The recipe retains the original recovered symbol for the callback entry.
-virtual void FUN_00d62780(hkpWorld*world);
+virtual void ProcessEntries_00d62780(hkpWorld*world);
 protected:
 hkpWeldingViewer(const hkArray<hkProcessContext*>&contexts);
 virtual ~hkpWeldingViewer() throw();
@@ -386,7 +386,8 @@ extern const double DAT_010d1640;
 // +0x28. Recover the shared hkProcess subobject at +0x08; unk10 is the
 // display-handler pointer used by this callback.
 // @fnv 0x00d62780
-void hkpWeldingViewer::FUN_00d62780(hkpWorld*world)
+// src: GUESS 0x00d62780 (confidence: low)
+void hkpWeldingViewer::ProcessEntries_00d62780(hkpWorld*world)
 {
 {hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "hkpActiveContactPointViewer::postSimulationCallback";h->setTime();mStream.setEnd((char*)(h+1));}};ScopedTimer timeblock18;
 world->lock();

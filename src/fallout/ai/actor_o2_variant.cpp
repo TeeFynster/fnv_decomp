@@ -37,7 +37,8 @@ void* bhkRagdollController::FUN_00c7de30(unsigned int flag)
 extern "C" void* g_012685f8;
 
 // @fnv 0x00c7fa60
-void* __cdecl FUN_00c7fa60()
+// src: COMMUNITY 0x00c7fa60
+void* __cdecl bhkStiffSpringConstraint_GetRTTI()
 {
     return &g_012685f8;
 }
@@ -64,53 +65,56 @@ extern int DAT_01084e54;
 
 struct FUN_00cb9900_cls
 {
-    void __thiscall FUN_00cb9900();
+    void __thiscall UpdateFields_00cb9900();
 };
 
 // @fnv 0x00cb9900
-void __thiscall FUN_00cb9900_cls::FUN_00cb9900()
+// src: GUESS 0x00cb9900 (confidence: low)
+void __thiscall FUN_00cb9900_cls::UpdateFields_00cb9900()
 {
     *(int*)this = (int)&DAT_01084e54;
     FUN_0062d4b0();
 }
 
-void __cdecl FUN_00cda340();
+void __cdecl hkaPose_syncModelSpace();
 void __cdecl FUN_00cd9fe0();
 
 struct FUN_00cda4b0_cls
 {
-    void __thiscall FUN_00cda4b0();
+    void __thiscall hkaPose_accessSyncedPoseModelSpace();
 };
 
 // @fnv 0x00cda4b0
-void __thiscall FUN_00cda4b0_cls::FUN_00cda4b0()
+// src: COMMUNITY 0x00cda4b0
+void __thiscall FUN_00cda4b0_cls::hkaPose_accessSyncedPoseModelSpace()
 {
-    FUN_00cda340();
+    hkaPose_syncModelSpace();
     ((void(__thiscall*)(void*))FUN_00cd9fe0)(this);
 }
 
 struct FUN_00cda8d0_class
 {
-    void FUN_00cda340();
-    void* FUN_00cda8d0();
+    void hkaPose_syncModelSpace();
+    void* hkaPose_getSyncedPoseModelSpace();
 };
 
 // @fnv 0x00cda8d0
-void* FUN_00cda8d0_class::FUN_00cda8d0()
+// src: HAVOK_LIB 0x00cda8d0
+void* FUN_00cda8d0_class::hkaPose_getSyncedPoseModelSpace()
 {
-    FUN_00cda340();
+    hkaPose_syncModelSpace();
     return (char*)this + 0x10;
 }
 
 struct FUN_00cdb290
 {
-    void __thiscall FUN_00cda690();
+    void __thiscall syncLocalSpace();
     void* __thiscall GetPlus4();
 };
 // @fnv 0x00cdb290
 void* __thiscall FUN_00cdb290::GetPlus4()
 {
-    FUN_00cda690();
+    syncLocalSpace();
     return (char*)this + 4;
 }
 
@@ -147,7 +151,8 @@ Outer* __thiscall Outer::FUN_00c7e970(unsigned int a)
 
 
 // @fnv 0x00c802d0
-NiCollisionObject* __cdecl FUN_00c802d0(NiAVObject* p)
+// src: COMMUNITY 0x00c802d0
+NiCollisionObject* __cdecl bhkUtilFunctions_FindNextCollisionObject(NiAVObject* p)
 {
     NiCollisionObject* r = p->m_spCollisionObject.m_pObject;
     if (!r && p->IsSceneNode())
@@ -158,7 +163,7 @@ NiCollisionObject* __cdecl FUN_00c802d0(NiAVObject* p)
                 break;
             NiAVObject* child = static_cast<NiNode*>(p)->m_kChildren.m_pBase[i].m_pObject;
             if (child)
-                r = FUN_00c802d0(child);
+                r = bhkUtilFunctions_FindNextCollisionObject(child);
         }
     }
     return r;
@@ -263,14 +268,15 @@ struct Target
 
 struct FUN_00c6ffc0_Class
 {
-    Target* FUN_00c6e0b0();
-    void FUN_00c6ffc0();
+    Target* bhkCharacterController_GetCollisionDebugNode();
+    void bhkCharacterController_RemoveCollisionDebug();
 };
 
 // @fnv 0x00c6ffc0
-void FUN_00c6ffc0_Class::FUN_00c6ffc0()
+// src: COMMUNITY 0x00c6ffc0
+void FUN_00c6ffc0_Class::bhkCharacterController_RemoveCollisionDebug()
 {
-    Target* p = FUN_00c6e0b0();
+    Target* p = bhkCharacterController_GetCollisionDebugNode();
     NiPointer<MyRef> sp;
     Target18* t;
     if (p && (t = p->field_18))
@@ -332,16 +338,17 @@ struct RArr
     void ConstructElementArray(RElem*, int);
 };
 struct RCtx;
-RObj* __cdecl FUN_00c4b470(RCtx*, RKey*, int);
+RObj* __cdecl BSUtilities_GetObjectByName_00c4b470(RCtx*, RKey*, int);
 
 // @fnv 0x00c7bcb0
-void __cdecl FUN_00c7bcb0(RCtx* ctx, RObj* obj, RArr* arr)
+// src: COMMUNITY 0x00c7bcb0
+void __cdecl CopyPoseFunctor(RCtx* ctx, RObj* obj, RArr* arr)
 {
     RKey key(obj->name);
     key.obj = obj;
     if (key.name.Equals("Bip01 NonAccum"))
         key.obj = obj->parent;
-    RObj* bone = FUN_00c4b470(ctx, &key, 1);
+    RObj* bone = BSUtilities_GetObjectByName_00c4b470(ctx, &key, 1);
     if (bone)
     {
         RElem e;
@@ -361,13 +368,13 @@ void __cdecl FUN_00c7bcb0(RCtx* ctx, RObj* obj, RArr* arr)
         {
             RObj* child = (RObj*)node->m_kChildren.m_pBase[i].m_pObject;
             if (child)
-                FUN_00c7bcb0(ctx, child, arr);
+                CopyPoseFunctor(ctx, child, arr);
         }
     }
 }
 
 void __cdecl SetFlagRecursive(int, void*);
-void __cdecl FUN_00c7bcb0(void*, void*, void*);
+void __cdecl CopyPoseFunctor(void*, void*, void*);
 
 inline unsigned char GetFlag6(unsigned short w)
 {
@@ -375,9 +382,10 @@ inline unsigned char GetFlag6(unsigned short w)
 }
 
 // @fnv 0x00c7d3b0
-void __cdecl FUN_00c7d3b0(NiNode* param_1, void* param_2, void* param_3, char* param_4, unsigned int* param_5)
+// src: XBOX_PDB 0x00c7d3b0
+void __cdecl bhkRagdollController_CopyPoseTo3D(NiNode* param_1, void* param_2, void* param_3, char* param_4, unsigned int* param_5)
 {
-    NiCollisionObject* node = FUN_00c802d0(param_1);
+    NiCollisionObject* node = bhkUtilFunctions_FindNextCollisionObject(param_1);
     char flag;
     if (!node || !(*(unsigned short*)((char*)node + 0xc) & 0x20) || GetFlag6(*(unsigned short*)((char*)node + 0xc)))
     {
@@ -412,7 +420,7 @@ void __cdecl FUN_00c7d3b0(NiNode* param_1, void* param_2, void* param_3, char* p
     }
     if (param_1 && param_2)
     {
-        FUN_00c7bcb0(param_1, param_2, param_3);
+        CopyPoseFunctor(param_1, param_2, param_3);
         NiUpdateData updateData;
         updateData.fTime = 0.0f;
         updateData.pad1 = false;
@@ -424,7 +432,7 @@ void __cdecl FUN_00c7d3b0(NiNode* param_1, void* param_2, void* param_3, char* p
     }
 }
 
-void FUN_00c74dd0(void*, NiTransform*);
+void NI2HK_00c74dd0(void*, NiTransform*);
 extern bool DAT_01267c28;
 extern bool DAT_01267c34;
 extern bool DAT_01267c40;
@@ -477,20 +485,21 @@ struct FUN_00c7d630_t
     NiNode* m_pkNode;
     char pad5c[4];
     NiMatrix3 m_kRot;
-    void FUN_00c7d630(float);
-    void FUN_00c79680();
-    void FUN_00c7cb50(int);
-    void FUN_00c76350(void*);
-    void FUN_00c751f0(void*);
-    void FUN_00c7aa60(void*);
-    void FUN_00c7ba50(void*, void*, bool*);
-    void FUN_00c7d030(void*);
-    void FUN_00c7c870();
-    void FUN_00c79a50();
+    void bhkRagdollController_DoRagdollAnim(float);
+    void bhkRagdollController_GetSGPoseLocalSpace();
+    void bhkRagdollController_UpdateDebugLines(int);
+    void bhkRagdollController_DoFootIK(void*);
+    void bhkRagdollController_DoGrabIK(void*);
+    void bhkRagdollController_DoLookAtIK(void*);
+    void bhkRagdollController_DoPoseMatching(void*, void*, bool*);
+    void bhkRagdollController_UpdateRagdollRigidBodies(void*);
+    void bhkRagdollController_DoRagdollFeedback();
+    void bhkRagdollController_SetSGPoseLocalSpace();
 };
 
 // @fnv 0x00c7d630
-void FUN_00c7d630_t::FUN_00c7d630(float)
+// src: XBOX_PDB 0x00c7d630
+void FUN_00c7d630_t::bhkRagdollController_DoRagdollAnim(float)
 {
     char* self = (char*)this;
     if (*(bool*)(self + 0x43) && !*(bool*)(self + 0xb3) && !*(bool*)(self + 0x222) && !*(bool*)(self + 0x21e) &&
@@ -504,73 +513,74 @@ void FUN_00c7d630_t::FUN_00c7d630(float)
         NiTransform kWorld = static_cast<const NiAVObject*>(m_pkNode)->GetParent()->m_kWorld * m_pkNode->m_kLocal;
         kWorld.m_Rotate = static_cast<const NiMatrix3&>(m_kRot) * kWorld.m_Rotate;
         kWorld.m_fScale = 1.0f;
-        FUN_00c74dd0(self + 0x10, &kWorld);
+        NI2HK_00c74dd0(self + 0x10, &kWorld);
         if (!*(bool*)(self + 0x40))
         {
-            FUN_00c79680();
-            FUN_00c7cb50(0);
+            bhkRagdollController_GetSGPoseLocalSpace();
+            bhkRagdollController_UpdateDebugLines(0);
             if (DAT_01267c34 && (*(bool*)(self + 0x222) || *(bool*)(self + 0x223)))
-                FUN_00c76350(self + 0x10);
+                bhkRagdollController_DoFootIK(self + 0x10);
             if (DAT_01267c40 && *(bool*)(self + 0x21e))
-                FUN_00c751f0(self + 0x10);
+                bhkRagdollController_DoGrabIK(self + 0x10);
             if (DAT_01267c4c && *(bool*)(self + 0xb3))
-                FUN_00c7aa60(self + 0x10);
+                bhkRagdollController_DoLookAtIK(self + 0x10);
         }
         unsigned int count = m_48->GetInner()->GetCount();
         bool bOk = false;
         RagScrapMarker kScrap(count);
-        FUN_00c7d030((DAT_01267c64 && *(bool*)(self + 0x256) && (FUN_00c7ba50(self + 0x10, kScrap.p, &bOk), bOk))
+        bhkRagdollController_UpdateRagdollRigidBodies((DAT_01267c64 && *(bool*)(self + 0x256) && (bhkRagdollController_DoPoseMatching(self + 0x10, kScrap.p, &bOk), bOk))
                          ? kScrap.p
                          : 0);
-        FUN_00c7cb50(1);
+        bhkRagdollController_UpdateDebugLines(1);
         if (!*(bool*)(self + 0x40))
         {
             if (DAT_01267c58 && *(bool*)(self + 0x28e))
-                FUN_00c7c870();
-            FUN_00c7cb50(2);
-            FUN_00c79a50();
+                bhkRagdollController_DoRagdollFeedback();
+            bhkRagdollController_UpdateDebugLines(2);
+            bhkRagdollController_SetSGPoseLocalSpace();
         }
     }
 }
 
 namespace fnv_00c7d810 {
 
-void __cdecl FUN_00c74dd0(void*, void*);
+void __cdecl NI2HK_00c74dd0(void*, void*);
 
 struct XObj
 {
-    void FUN_00cdb3e0();
+    void hkaRagdollRigidBodyController_reinitialize();
 };
 
 struct FUN_00c7d810_Cls
 {
-    void FUN_00c79680();
-    void FUN_00c7d030(int);
-    void FUN_00c7d810();
+    void bhkRagdollController_GetSGPoseLocalSpace();
+    void bhkRagdollController_UpdateRagdollRigidBodies(int);
+    void bhkRagdollController_SyncRagdollTo3D();
 };
 
 // @fnv 0x00c7d810
-void FUN_00c7d810_Cls::FUN_00c7d810()
+// src: XBOX_PDB 0x00c7d810
+void FUN_00c7d810_Cls::bhkRagdollController_SyncRagdollTo3D()
 {
     NiTransform nitrans;
     nitrans = *(NiTransform*)((char*)(*(void**)((char*)this + 0x58)) + 0x68);
     nitrans.m_Rotate = *(const NiMatrix3*)((char*)this + 0x60) * nitrans.m_Rotate;
     nitrans.m_fScale = 1.0f;
-    FUN_00c74dd0((char*)this + 0x10, &nitrans);
-    FUN_00c79680();
+    NI2HK_00c74dd0((char*)this + 0x10, &nitrans);
+    bhkRagdollController_GetSGPoseLocalSpace();
     int etype = *(int*)((char*)this + 0xc);
     *(int*)((char*)this + 0xc) = 1;
-    FUN_00c7d030(0);
+    bhkRagdollController_UpdateRagdollRigidBodies(0);
     *(int*)((char*)this + 0xc) = etype;
     XObj* p = *(XObj**)((char*)this + 0x4c);
     if (p)
-        p->FUN_00cdb3e0();
+        p->hkaRagdollRigidBodyController_reinitialize();
 }
 }  // namespace fnv_00c7d810
 
 struct FUN_00cb0c00_class
 {
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
 
 struct VObjExt : VObj
@@ -584,17 +594,18 @@ struct FUN_00c7d890_cls
     void* _0;
     int _4;
     unsigned int _8;
-    void FUN_00c7d890();
+    void ProcessEntries_00c7d890();
 };
 
 // @fnv 0x00c7d890
-void FUN_00c7d890_cls::FUN_00c7d890()
+// src: GUESS 0x00c7d890 (confidence: low)
+void FUN_00c7d890_cls::ProcessEntries_00c7d890()
 {
     VObjExt* p = (VObjExt*)_FUN_00c85750()->p;
     int count = _4;
     char* base = (char*)_0;
     for (int i = 0; i < count; i++)
-        ((FUN_00cb0c00_class*)(base + i * 8))->FUN_00cb0c00();
+        ((FUN_00cb0c00_class*)(base + i * 8))->Object_UpdateFields_00cb0c00();
     unsigned int flags = _8;
     _4 = 0;
     if (!(flags & 0x80000000))
@@ -606,7 +617,8 @@ void FUN_00c7d890_cls::FUN_00c7d890()
 void* __cdecl FUN_00ec7230(char*, char const*, unsigned int);
 
 // @fnv 0x00c7f900
-void __stdcall FUN_00c7f900(char* dst, char* src, unsigned int count)
+// src: COMMUNITY 0x00c7f900
+void __stdcall BSSimpleArray_bhkUtilFunctions_AVLevel_1024_CopyItems(char* dst, char* src, unsigned int count)
 {
     if (count <= 0)
         return;
@@ -623,18 +635,19 @@ void __stdcall FUN_00c7f900(char* dst, char* src, unsigned int count)
     }
 }
 
-void __cdecl FUN_00d6b4b0(void*, unsigned int);
+void __cdecl hkaKeyFrameHierarchyUtility_initialize(void*, unsigned int);
 
 struct FUN_00cdb3e0_cls
 {
     char pad[0x2c];
-    void FUN_00cdb3e0();
+    void hkaRagdollRigidBodyController_reinitialize();
 };
 
 // @fnv 0x00cdb3e0
-void FUN_00cdb3e0_cls::FUN_00cdb3e0()
+// src: HAVOK_LIB 0x00cdb3e0
+void FUN_00cdb3e0_cls::hkaRagdollRigidBodyController_reinitialize()
 {
-    FUN_00d6b4b0((char*)this + 0x18, *(unsigned int*)((char*)this + 0x2c));
+    hkaKeyFrameHierarchyUtility_initialize((char*)this + 0x18, *(unsigned int*)((char*)this + 0x2c));
 }
 
 struct S_c6a200_Info
@@ -651,9 +664,10 @@ struct S_c6a200_Ev
 };
 extern void* DAT_011afecc;
 S_c6a200_Info* __cdecl GetExtraDataChecked(void* obj);
-void __cdecl FUN_00c68900(void* obj, S_c6a200_Ev* ev, void* extra);
+void __cdecl bhkWorld_DoObjectRec(void* obj, S_c6a200_Ev* ev, void* extra);
 // @fnv 0x00c6a200
-bool __cdecl FUN_00c6a200(void* obj, unsigned char a1, unsigned char a2, unsigned char a3)
+// src: XBOX_PDB 0x00c6a200
+bool __cdecl bhkWorld_SetDisabled(void* obj, unsigned char a1, unsigned char a2, unsigned char a3)
 {
     bool r = false;
     if (obj)
@@ -668,7 +682,7 @@ bool __cdecl FUN_00c6a200(void* obj, unsigned char a1, unsigned char a2, unsigne
             ev.unk08 = 0x11;
             ev.unk0c = a1;
             if (DAT_011afecc)
-                FUN_00c68900(obj, &ev, DAT_011afecc);
+                bhkWorld_DoObjectRec(obj, &ev, DAT_011afecc);
         }
     }
     return r;
@@ -676,16 +690,17 @@ bool __cdecl FUN_00c6a200(void* obj, unsigned char a1, unsigned char a2, unsigne
 
 struct FlagController
 {
-    void FUN_00c7b6a0(int);
-    void FUN_00c7ba10(bool);
+    void bhkRagdollController_SetRagdollFeedbackActive(int);
+    void bhkRagdollController_EnableRagdollFeedback(bool);
 };
 // @fnv 0x00c7ba10
-void FlagController::FUN_00c7ba10(bool enabled)
+// src: XBOX_PDB 0x00c7ba10
+void FlagController::bhkRagdollController_EnableRagdollFeedback(bool enabled)
 {
     unsigned char* state = (unsigned char*)this;
     bool target = state[0x28c] && enabled;
     if (!target && state[0x28e])
-        FUN_00c7b6a0(0);
+        bhkRagdollController_SetRagdollFeedbackActive(0);
     state[0x28d] = target;
 }
 
@@ -785,7 +800,7 @@ struct FUN_00c7d480_cls
     unsigned int m_04;
     unsigned int m_08;
     unsigned int m_0c;
-    void FUN_00c7d480();
+    void UpdateFields_00c7d480();
 };
 
 struct ScopeGuard
@@ -809,7 +824,8 @@ struct ScopeGuard
     }
 };
 
-void FUN_00c7d480_cls::FUN_00c7d480()
+// src: GUESS 0x00c7d480 (confidence: low)
+void FUN_00c7d480_cls::UpdateFields_00c7d480()
 {
     ScopeGuard guard(this);
     unsigned int count = m_0c;
@@ -837,7 +853,7 @@ struct FUN_00c7d520_cls
     unsigned int m_04;
     unsigned int m_08;
     unsigned int m_0c;
-    void FUN_00c7d520();
+    void UpdateFields_00c7d520();
 };
 
 struct ScopeGuard
@@ -861,7 +877,8 @@ struct ScopeGuard
     }
 };
 
-void FUN_00c7d520_cls::FUN_00c7d520()
+// src: GUESS 0x00c7d520 (confidence: low)
+void FUN_00c7d520_cls::UpdateFields_00c7d520()
 {
     ScopeGuard guard(this);
     unsigned int count = m_0c;
@@ -878,7 +895,7 @@ void FUN_00c7d520_cls::FUN_00c7d520()
 // hkMemoryRouter::m_pAllocator (+0x10) is the thread's heap, an hkMemoryAllocator (slot 4 = bufFree); the
 // "AudioAllocator" stand-in used here before was that class.
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00c7d5c0_elem
 {
@@ -892,13 +909,14 @@ struct FUN_00c7d5c0_cls
     int m_iArrayLength;
     unsigned int m_uCap;
 
-    void FUN_00c7d5c0();
+    void ProcessEntries_00c7d5c0();
 };
 
 // @fnv 0x00c7d5c0
-void FUN_00c7d5c0_cls::FUN_00c7d5c0()
+// src: GUESS 0x00c7d5c0 (confidence: low)
+void FUN_00c7d5c0_cls::ProcessEntries_00c7d5c0()
 {
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     FUN_00c7d5c0_elem* pElem = m_pData;
     if (m_iArrayLength > 0)
@@ -995,7 +1013,7 @@ class BCB9810Registry
 {
   public:
     void AppendTailPair(void* pvOwner, BCB9810Node* pkNode);
-    void FUN_00cb9810(void* pvOwner, BCB9810Node* pkNode);
+    void bhkFilteredCdBodyCollector_addCdBodyPair(void* pvOwner, BCB9810Node* pkNode);
 
     int unk00;
     int unk04;
@@ -1004,7 +1022,8 @@ class BCB9810Registry
 };
 
 // @fnv 0x00cb9810
-void BCB9810Registry::FUN_00cb9810(void* pvOwner, BCB9810Node* pkNode)
+// src: XBOX_PDB 0x00cb9810
+void BCB9810Registry::bhkFilteredCdBodyCollector_addCdBodyPair(void* pvOwner, BCB9810Node* pkNode)
 {
     BCB9810AllocTagScope kScope(0x10);
     bool bFound = false;
@@ -1064,23 +1083,24 @@ struct CE4360Context
     int m_iMode;
 };
 
-void __cdecl FUN_00ce3a00(CE4360Context* pkContext, int a, int b, int c, int d);
-void __cdecl FUN_00ce4330(CE4360Context* pkContext, int a, int b, int c);
+void __cdecl mapPose(CE4360Context* pkContext, int a, int b, int c, int d);
+void __cdecl hkaSkeletonMapper_mapPoseLocalSpace_00ce4330(CE4360Context* pkContext, int a, int b, int c);
 
 // @fnv 0x00ce4360
-void __cdecl FUN_00ce4360(CE4360Context* pkContext, CE4360Iter* pkFrom, CE4360Iter* pkTo, int iValue)
+// src: HAVOK_LIB 0x00ce4360
+void __cdecl hkaSkeletonMapper_mapPose(CE4360Context* pkContext, CE4360Iter* pkFrom, CE4360Iter* pkTo, int iValue)
 {
     if (pkContext->m_iMode == 0)
     {
         int a = *pkFrom->GetFirst();
         int b = *pkTo->GetSecond();
-        FUN_00ce3a00(pkContext, a, b, *pkTo->GetThird(), iValue);
+        mapPose(pkContext, a, b, *pkTo->GetThird(), iValue);
     }
     else if (pkContext->m_iMode == 1)
     {
         int a = *pkFrom->GetSecond();
         int b = *pkTo->GetFourth();
-        FUN_00ce4330(pkContext, a, b, 0);
+        hkaSkeletonMapper_mapPoseLocalSpace_00ce4330(pkContext, a, b, 0);
     }
 }
 
@@ -1155,8 +1175,8 @@ struct S
     virtual void v37();
     virtual void v38();
     virtual void SetMode(int iMode);
-    void FUN_00561690(int);
-    void FUN_005617c0(float* pf);
+    void bhkRigidBody_SetLinearVelocity_00561690(int);
+    void bhkRigidBody_SetAngularVelocity_005617c0(float* pf);
 };
 
 struct Cast_c9b
@@ -1199,7 +1219,8 @@ __forceinline bool IsNode_c9b(Obj_c9b* pkObj)
 }
 
 // @fnv 0x00c9bdf0
-void __cdecl FUN_00c9bdf0(Obj_c9b* pkObj, float f)
+// src: XBOX_PDB 0x00c9bdf0
+void __cdecl bhkBlendController_DoGetUp(Obj_c9b* pkObj, float f)
 {
     if (pkObj && IsNode_c9b(pkObj) && pkObj->m_usElementCount > 0)
     {
@@ -1216,8 +1237,8 @@ void __cdecl FUN_00c9bdf0(Obj_c9b* pkObj, float f)
                     if (pkS)
                     {
                         pkS->SetMode(4);
-                        pkS->FUN_00561690((int)&DAT_01267e30);
-                        pkS->FUN_005617c0(&DAT_01267e30);
+                        pkS->bhkRigidBody_SetLinearVelocity_00561690((int)&DAT_01267e30);
+                        pkS->bhkRigidBody_SetAngularVelocity_005617c0(&DAT_01267e30);
                     }
                 }
             }
@@ -1226,7 +1247,7 @@ void __cdecl FUN_00c9bdf0(Obj_c9b* pkObj, float f)
     ApplyCollisionEffect(pkObj, f);
 }
 
-void __stdcall FUN_00c7f900(char* dst, char* src, unsigned int count);
+void __stdcall BSSimpleArray_bhkUtilFunctions_AVLevel_1024_CopyItems(char* dst, char* src, unsigned int count);
 class FUN_00c7f970_cls
 {
   public:
@@ -1238,11 +1259,12 @@ class FUN_00c7f970_cls
     char* m_pData;
     void* unk;
     unsigned int m_uiSize;
-    void FUN_00c7f970(unsigned int uiNew, unsigned int uiOld);
+    void BSSimpleArray_bhkUtilFunctions_AVLevel_1024_ReallocateBuffer(unsigned int uiNew, unsigned int uiOld);
 };
 
 // @fnv 0x00c7f970
-void FUN_00c7f970_cls::FUN_00c7f970(unsigned int uiNew, unsigned int uiOld)
+// src: COMMUNITY 0x00c7f970
+void FUN_00c7f970_cls::BSSimpleArray_bhkUtilFunctions_AVLevel_1024_ReallocateBuffer(unsigned int uiNew, unsigned int uiOld)
 {
     if (m_pData)
     {
@@ -1253,7 +1275,7 @@ void FUN_00c7f970_cls::FUN_00c7f970(unsigned int uiNew, unsigned int uiOld)
         else
         {
             char* pNew = Alloc(uiNew);
-            ((void(__thiscall*)(void*, char*, char*, unsigned int))FUN_00c7f900)(this, pNew, m_pData, uiOld);
+            ((void(__thiscall*)(void*, char*, char*, unsigned int))BSSimpleArray_bhkUtilFunctions_AVLevel_1024_CopyItems)(this, pNew, m_pData, uiOld);
             Free(m_pData);
             m_pData = pNew;
         }
@@ -1307,21 +1329,22 @@ struct FUN_00cb9650_Object
     virtual void vf08();
     virtual NiNode* vf0C();
 
-    void* FUN_00a5c570(const void* typeInfo);
-    void FUN_00a5c480(int value);
+    void* NiObjectNET_GetController(const void* typeInfo);
+    void NiObjectNET_RemoveController(int value);
 };
 
 extern const char DAT_012683f4[];
 
 // @fnv 0x00cb9650
-void __cdecl FUN_00cb9650(FUN_00cb9650_Object* object)
+// src: XBOX_PDB 0x00cb9650
+void __cdecl bhkForceController_RemoveForce(FUN_00cb9650_Object* object)
 {
     if (object != 0)
     {
-        void* controller = object->FUN_00a5c570(DAT_012683f4);
+        void* controller = object->NiObjectNET_GetController(DAT_012683f4);
         if (controller != 0)
         {
-            object->FUN_00a5c480((int)controller);
+            object->NiObjectNET_RemoveController((int)controller);
         }
 
         NiNode* node = object->vf0C();
@@ -1329,7 +1352,7 @@ void __cdecl FUN_00cb9650(FUN_00cb9650_Object* object)
         {
             for (unsigned int index = 0; index < node->m_kChildren.m_usSize; ++index)
             {
-                FUN_00cb9650((FUN_00cb9650_Object*)node->m_kChildren.m_pBase[index].m_pObject);
+                bhkForceController_RemoveForce((FUN_00cb9650_Object*)node->m_kChildren.m_pBase[index].m_pObject);
             }
         }
     }
@@ -1367,10 +1390,11 @@ struct RagController
     {
         return *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x180);
     }
-    void FUN_00c75580(unsigned char enabled);
+    void bhkRagdollController_SetLookIKActive(unsigned char enabled);
 };
 // @fnv 0x00c75580
-void RagController::FUN_00c75580(unsigned char enabled)
+// src: XBOX_PDB 0x00c75580
+void RagController::bhkRagdollController_SetLookIKActive(unsigned char enabled)
 {
     int state;
     if (controlFlag() == 0)
@@ -1399,7 +1423,7 @@ void RagController::FUN_00c75580(unsigned char enabled)
 }
 
 extern "C" double __cdecl sqrt(double x);
-__int64 __cdecl FUN_00aa4d80();
+__int64 __cdecl BSPrecisionTimer_GetTimer();
 extern float DAT_011b02e4;
 extern float DAT_011ac39c;
 struct NodeC
@@ -1445,15 +1469,15 @@ struct MidC
     int m024;
     int m028;
     InnerC* inner;
-    void FUN_00ce18f0(void*, void*);
+    void hkaRagdollInstance_getPoseModelSpace(void*, void*);
 };
 struct Obj248
 {
-    int FUN_00ce11f0(void*, float*);
+    int hkaPoseMatchingUtility_findBestCandidatePoseIndex(void*, float*);
 };
 struct Obj250
 {
-    void FUN_00cc1420(void*, void*, int);
+    void bhkPoseArray_CreatePoseForRagdoll(void*, void*, int);
 };
 struct ScrapMarker
 {
@@ -1461,7 +1485,7 @@ struct ScrapMarker
     unsigned int size;
     ScrapMarker(unsigned int count)
     {
-        char** top = (char**)FUN_00c85750();
+        char** top = (char**)hkMemoryRouter_getInstance();
         unsigned int size = (count * 48 + 0x7f) & ~0x7fu;
         char* old = *top;
         *top = old + size;
@@ -1469,7 +1493,7 @@ struct ScrapMarker
     }
     ~ScrapMarker()
     {
-        *(char**)FUN_00c85750() = p;
+        *(char**)hkMemoryRouter_getInstance() = p;
     }
 };
 
@@ -1635,11 +1659,12 @@ struct Cls
     bool m_284;
     int m_288;
 
-    void FUN_00c7ba50(void* a1, void* a2, bool* a3);
+    void bhkRagdollController_DoPoseMatching(void* a1, void* a2, bool* a3);
 };
 
 // @fnv 0x00c7ba50
-void Cls::FUN_00c7ba50(void* a1, void* a2, bool* a3)
+// src: COMMUNITY 0x00c7ba50
+void Cls::bhkRagdollController_DoPoseMatching(void* a1, void* a2, bool* a3)
 {
     NiPoint3* wp = &m_058->world.m_Translate;
     float dx = m_pos.x - wp->x;
@@ -1648,11 +1673,11 @@ void Cls::FUN_00c7ba50(void* a1, void* a2, bool* a3)
     float lenSq = dx * dx + dy * dy + dz * dz;
     double d = (float)sqrt((double)lenSq);
     float dist = (float)d;
-    if (FUN_00aa4d80() - m_260 > m_268 || (m_284 && dist > m_27c) || m_288 != -1)
+    if (BSPrecisionTimer_GetTimer() - m_260 > m_268 || (m_284 && dist > m_27c) || m_288 != -1)
     {
         if (m_288 != -1)
         {
-            m_250->FUN_00cc1420(a2, m_048->inner, m_288);
+            m_250->bhkPoseArray_CreatePoseForRagdoll(a2, m_048->inner, m_288);
             m_00c = 3;
             *a3 = true;
             m_258 = m_288;
@@ -1663,15 +1688,15 @@ void Cls::FUN_00c7ba50(void* a1, void* a2, bool* a3)
             m_pos = *(const NiPoint3*)&m_058->world.m_Translate;
             InnerC* inner = m_048->inner;
             ScrapMarker marker(inner->count);
-            m_048->FUN_00ce18f0(marker.p, a1);
-            int id = m_248->FUN_00ce11f0(marker.p, &m_008);
+            m_048->hkaRagdollInstance_getPoseModelSpace(marker.p, a1);
+            int id = m_248->hkaPoseMatchingUtility_findBestCandidatePoseIndex(marker.p, &m_008);
             if (m_008 < DAT_011b02e4 && id != m_258)
             {
                 m_258 = id;
                 if (id != -1)
                 {
                     Obj250* o250 = m_250;
-                    o250->FUN_00cc1420(a2, inner, id);
+                    o250->bhkPoseArray_CreatePoseForRagdoll(a2, inner, id);
                     m_00c = 3;
                     *a3 = true;
                 }
@@ -1690,7 +1715,7 @@ void Cls::FUN_00c7ba50(void* a1, void* a2, bool* a3)
             }
         }
         volatile float f = m_280;
-        m_260 = FUN_00aa4d80();
+        m_260 = BSPrecisionTimer_GetTimer();
         m_268 = (__int64)(f * DAT_011ac39c);
     }
 }
@@ -1762,7 +1787,7 @@ struct RagEntry
 };
 struct RagSystem
 {
-    void FUN_00c6b320(RagEntry* entry);
+    void bhkWorld_Add_00c6b320(RagEntry* entry);
 };
 struct RagWorld
 {
@@ -2017,7 +2042,7 @@ struct RagCtrl48
         {
             RagEntry* e = entries[i];
             if (!e->owner)
-                sys->FUN_00c6b320(e);
+                sys->bhkWorld_Add_00c6b320(e);
         }
     }
 };
@@ -2216,12 +2241,13 @@ struct RagdollCtl
     RagSkel* skel;
     int unk2a8;
     int unk2ac;
-    void FUN_00c7b6a0(bool);
-    void FUN_00c7c150(bool);
+    void bhkRagdollController_SetRagdollFeedbackActive(bool);
+    void bhkRagdollController_DisableRagdollAnim(bool);
 };
 
 // @fnv 0x00c7c150
-void RagdollCtl::FUN_00c7c150(bool b)
+// src: XBOX_PDB 0x00c7c150
+void RagdollCtl::bhkRagdollController_DisableRagdollAnim(bool b)
 {
     if (active)
     {
@@ -2238,7 +2264,7 @@ void RagdollCtl::FUN_00c7c150(bool b)
         unk180 = true;
         unk130 = true;
         if (unk28d)
-            FUN_00c7b6a0(false);
+            bhkRagdollController_SetRagdollFeedbackActive(false);
         if (skel)
         {
             int n = skel->info->boneCount;
@@ -2271,7 +2297,8 @@ void RagdollCtl::FUN_00c7c150(bool b)
 }
 
 // @fnv 0x00c7f4a0
-static __declspec(noinline) unsigned char* FUN_00c7f4a0(unsigned char* out, const float* src, int count)
+// src: HAVOK_LIB 0x00c7f4a0
+static __declspec(noinline) unsigned char* hkVector4isOk(unsigned char* out, const float* src, int count)
 {
     int i = 0;
     if (count > 0)
@@ -2293,12 +2320,12 @@ static __declspec(noinline) unsigned char* FUN_00c7f4a0(unsigned char* out, cons
 }
 unsigned char* S00c7f4a0_Call(unsigned char* out, const float* src, int count)
 {
-    return FUN_00c7f4a0(out, src, count);
+    return hkVector4isOk(out, src, count);
 }
 
 struct HkFloatCheck
 {
-    void FUN_00c7f500(bool* pOut);
+    void hkVector4_isOk4(bool* pOut);
 };
 static inline bool IsFiniteFloat(float r)
 {
@@ -2317,7 +2344,8 @@ static __declspec(noinline) bool* CheckFloatsValid(const float* pData, int iCoun
     return pOut;
 }
 // @fnv 0x00c7f500
-void HkFloatCheck::FUN_00c7f500(bool* pOut)
+// src: HAVOK_LIB 0x00c7f500
+void HkFloatCheck::hkVector4_isOk4(bool* pOut)
 {
     CheckFloatsValid((const float*)this, 4, pOut);
 }
@@ -2330,7 +2358,7 @@ struct S_Out
 };
 struct S_Inner
 {
-    int FUN_00c85c80(int arg);
+    int bhkWorldObject_GetAVObject(int arg);
 };
 struct S_Val
 {
@@ -2361,7 +2389,7 @@ struct S_Elem
     int unk08;
     S_Inner* unk0c;
 };
-int* __cdecl FUN_00c85ef0(S_Out* out, void* ptr, void* tag);
+int* __cdecl bhkWorldObject_GetProperty(S_Out* out, void* ptr, void* tag);
 inline void* GetOwner(S_Obj* c)
 {
     return (char*)c + c->unk10;
@@ -2375,24 +2403,25 @@ inline S_Elem* GetPhantom(S_Obj* c)
     return c->unk18 == 2 ? (S_Elem*)GetOwner(c) : 0;
 }
 // @fnv 0x00c7fa90
-int __cdecl FUN_00c7fa90(S_Obj* p)
+// src: XBOX_PDB 0x00c7fa90
+int __cdecl bhkUtilFunctions_GetNiAVObject(S_Obj* p)
 {
     int result = 0;
     if (S_Elem* e = GetEntity(p))
     {
         S_Out out;
-        S_Val* v = *(S_Val**)FUN_00c85ef0(&out, e, &DAT_01267b70);
+        S_Val* v = *(S_Val**)bhkWorldObject_GetProperty(&out, e, &DAT_01267b70);
         if (v)
             result = v->unk08;
     }
     else if (S_Elem* ph = GetPhantom(p))
     {
         S_Out out;
-        S_Val* v = *(S_Val**)FUN_00c85ef0(&out, ph, &DAT_01267b70);
+        S_Val* v = *(S_Val**)bhkWorldObject_GetProperty(&out, ph, &DAT_01267b70);
         if (v)
             result = v->unk08;
         else if (ph->unk0c)
-            result = ph->unk0c->FUN_00c85c80(0);
+            result = ph->unk0c->bhkWorldObject_GetAVObject(0);
     }
     return result;
 }
@@ -2468,14 +2497,15 @@ struct PoseState
     int count;
     int unk24;
     bool ready;
-    void FUN_00cda340();
-    void FUN_00cda4c0();
+    void hkaPose_syncModelSpace();
+    void ProcessEntries_00cda4c0();
 };
 // @fnv 0x00cda4c0
-void PoseState::FUN_00cda4c0()
+// src: GUESS 0x00cda4c0 (confidence: low)
+void PoseState::ProcessEntries_00cda4c0()
 {
     int n = model->count;
-    FUN_00cda340();
+    hkaPose_syncModelSpace();
     for (int i = 0; i < n; ++i)
     {
         bool locked = model->bones[i].locked != 0;
@@ -2724,7 +2754,7 @@ bhkRagdollController::~bhkRagdollController()
 }
 
 namespace fnv_00cda110 {
-void sub_00cb1260(void*, void*, unsigned int);
+void hkString_memCpy(void*, void*, unsigned int);
 
 struct A
 {
@@ -2748,10 +2778,11 @@ struct S
     float* arr2c;  // 0x2c
 };
 // @fnv 0x00cda110
-void __fastcall FUN_00cda110(S* s)
+// src: HAVOK_LIB 0x00cda110
+void __fastcall hkaPose_setToReferencePose(S* s)
 {
     int i;
-    sub_00cb1260(s->p04, s->a->p24, s->a->count * 0x30);
+    hkString_memCpy(s->p04, s->a->p24, s->a->count * 0x30);
     for (i = 0; i < s->a->count; i++)
         s->arr1c[i] = 2;
     s->b28 = 0;
@@ -2910,10 +2941,11 @@ struct KNode : KObject
     }
 };
 
-__declspec(noalias) void* FUN_00c81c50(void* node);
+__declspec(noalias) void* bhkBlendCollisionObject_GetFirstCollisionObject(void* node);
 
 // @fnv 0x00c821b0
-void FUN_00c821b0(KObject* root, KPoint3* outDelta, bool update)
+// src: XBOX_PDB 0x00c821b0
+void bhkBlendCollisionObject_SetBipTransform(KObject* root, KPoint3* outDelta, bool update)
 {
     bool weightless;
     bool fromNode;
@@ -2934,7 +2966,7 @@ void FUN_00c821b0(KObject* root, KPoint3* outDelta, bool update)
     KNode* grand = c1->GetAsNode();
     if (!grand)
         return;
-    KRagInfo* info = (KRagInfo*)FUN_00c81c50(child);
+    KRagInfo* info = (KRagInfo*)bhkBlendCollisionObject_GetFirstCollisionObject(child);
     if (!info)
         return;
     weightless = true;
@@ -3007,9 +3039,9 @@ struct StringPtr
     void* m_data;
     __forceinline ~StringPtr()
     {
-        FUN_00cb0c00();
+        Object_UpdateFields_00cb0c00();
     }
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
 struct Bone
 {
@@ -3040,7 +3072,7 @@ template <class T> __forceinline void AlternateFree(hkMemoryAllocator& a, void* 
 }
 template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-        hkMemoryAllocator& alloc = *reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->m_heap);
+        hkMemoryAllocator& alloc = *reinterpret_cast<hkMemoryAllocator*>(hkMemoryRouter_getInstance()->m_heap);
         int sz = m_iElementCount;
         T* p = m_data;
         for (int i = 0; i < sz; ++i, ++p)
@@ -3060,7 +3092,7 @@ template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 }
 template<> __forceinline hkArray<LocalFrameOnBone>::~hkArray()
 {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         hkMemoryAllocator& alloc = *reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
         int sz = m_iElementCount;
         LocalFrameOnBone* const p = m_data;
@@ -3086,7 +3118,7 @@ template<> __forceinline hkArray<LocalFrameOnBone>::~hkArray()
 }
 template<> __forceinline hkArray<short>::~hkArray()
 {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         hkMemoryAllocator& alloc = *reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
         unsigned int flag = 0x80000000;
         unsigned int cap = m_iCapacityState;
@@ -3101,7 +3133,7 @@ template<> __forceinline hkArray<short>::~hkArray()
 }
 template<> __forceinline hkArray<QsTransform>::~hkArray()
 {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         hkMemoryAllocator& alloc = *reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
         unsigned int flag = 0x80000000;
         unsigned int cap = m_iCapacityState;
@@ -3140,12 +3172,12 @@ typedef unsigned char u8;
 
 struct RagdollAnimationResetView
 {
-    __declspec(noinline) void FUN_00cdb3e0();
+    __declspec(noinline) void hkaRagdollRigidBodyController_reinitialize();
 };
 
 struct RagdollAnimBodyView
 {
-    void FUN_00c68d50(int a1);
+    void bhkWorld_Remove_00c68d50(int a1);
 };
 
 struct RagdollAnimEntry
@@ -3573,15 +3605,16 @@ struct RagdollAnimControllerView
     u8 unk28D;
     u8 b28E;
     u8 unk28F;
-    int FUN_00c7a8d0();
+    int bhkRagdollController_EnableRagdollAnim();
 };
 
 // @fnv 0x00c7a8d0
-int RagdollAnimControllerView::FUN_00c7a8d0()
+// src: XBOX_PDB 0x00c7a8d0
+int RagdollAnimControllerView::bhkRagdollController_EnableRagdollAnim()
 {
     if (b41 == 0 && p4C != 0)
     {
-        p4C->FUN_00cdb3e0();
+        p4C->hkaRagdollRigidBodyController_reinitialize();
     }
     u8 old = b222;
     u8 flag = b42;
@@ -3609,7 +3642,7 @@ int RagdollAnimControllerView::FUN_00c7a8d0()
                 RagdollAnimEntry* b = z->arr14[i];
                 if (!!b->p08)
                 {
-                    obj->FUN_00c68d50((int)b);
+                    obj->bhkWorld_Remove_00c68d50((int)b);
                 }
             }
         }

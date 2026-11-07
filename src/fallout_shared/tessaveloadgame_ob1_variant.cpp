@@ -66,7 +66,7 @@ FUN_00c3da50::FUN_00c3da50() : BaseListL(10, 1, 120)
     m_pFirstData = GetDataAt(0);
 }
 
-extern "C" void FUN_0044dd60(void* p);
+extern "C" void BSTask_int64_DecRefCount(void* p);
 extern "C" long __stdcall InterlockedCompareExchange(long volatile* dest, long exchange, long comparand);
 
 struct Node006c6fe0
@@ -117,7 +117,7 @@ struct C006c6fe0
                 old = *pending;
                 if (old != 0)
                 {
-                    FUN_0044dd60(old->value);
+                    BSTask_int64_DecRefCount(old->value);
                     *pending = 0;
                 }
                 return false;
@@ -150,7 +150,7 @@ struct C00449f80
     int unk0c;
     int unk10;
     void* unk14;
-    C006c6fe0* FUN_00449f80(unsigned int a);
+    C006c6fe0* LockFreeMap_GetInterface_0(unsigned int a);
 };
 
 struct S_00c3e490 : C00449f80
@@ -158,14 +158,15 @@ struct S_00c3e490 : C00449f80
     int unk18;
     int unk1c;
     RecursiveSpinLock m_lock;
-    bool FUN_00c3e490(unsigned int a);
+    bool LockFreeQueue_NiPointer_IOTask_Pop_00c3e490(unsigned int a);
 };
 
 // @fnv 0x00c3e490
-bool S_00c3e490::FUN_00c3e490(unsigned int a)
+// src: COMMUNITY 0x00c3e490
+bool S_00c3e490::LockFreeQueue_NiPointer_IOTask_Pop_00c3e490(unsigned int a)
 {
     m_lock.Lock(0);
-    bool r = FUN_00449f80(a)->TryDequeue();
+    bool r = LockFreeMap_GetInterface_0(a)->TryDequeue();
     m_lock.Unlock();
     return r;
 }

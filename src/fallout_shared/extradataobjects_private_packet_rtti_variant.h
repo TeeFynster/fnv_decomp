@@ -323,7 +323,7 @@ template <class T, unsigned int N> class BSSimpleArray
     template <class U> unsigned int Find(U&, unsigned int, bool(__cdecl*)(U&, U&));
     unsigned int Add(T&);
 };
-bool __cdecl FUN_009a3830(NavMeshInfo*&, NavMeshInfo*&);
+bool __cdecl Actor_AreReferencedValuesEqual(NavMeshInfo*&, NavMeshInfo*&);
 class ExtraGuardedRefData
 {
   public:

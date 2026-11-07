@@ -22,7 +22,7 @@ enum BGSCameraShot__CAM_OBJECT
 class BGSCameraShot__CAMERA_SHOT_DATA
 {
 public:
-    void FUN_0058c3c0();
+    void ProcessState_0058c3c0();
 
     BGSCameraShot__CAM_ACTION m_eAction;
     BGSCameraShot__CAM_OBJECT pInputFile;

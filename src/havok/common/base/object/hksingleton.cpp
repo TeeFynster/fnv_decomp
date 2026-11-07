@@ -41,7 +41,7 @@ class SpawnedHelper
     SpawnedHelper(LocalTag tag) throw();
     ~SpawnedHelper() throw();
 
-    void FUN_00d874d0(void* value, FirstNode* node) throw();
+    void hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_insert(void* value, FirstNode* node) throw();
     FoundEntry* GetValue(void* key, int zero) throw();
 };
 
@@ -70,7 +70,7 @@ void __cdecl RelinkSecondListFromHelper(SecondNode* pSecondList, FirstNode* pFir
 
     for (FirstNode* node = pFirstList; node != 0; node = node->m_08)
     {
-        helper.FUN_00d874d0(node->m_00, node);
+        helper.hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_insert(node->m_00, node);
     }
 
     for (SecondNode* node = pSecondList; node != 0; node = node->m_08)
@@ -120,7 +120,7 @@ struct StringMap
     unsigned int unk0c;
 
     void FUN_00d87790(NameFlag aFlag);
-    void FUN_00d874d0(const char* aKey, int aValue);
+    void hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_insert(const char* aKey, int aValue);
     void* GetValue(const char* aKey, int aDefault);
     void FreeBuffer();
 };
@@ -139,7 +139,7 @@ void ClearMatchingRefs(FirstNode* pNodesToClear, FirstNode* pKeyNodes)
         FirstNode* pKeyNode = pKeyNodes;
         do
         {
-            nodeMap.FUN_00d874d0(pKeyNode->m_00, (int)pKeyNode);
+            nodeMap.hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_insert(pKeyNode->m_00, (int)pKeyNode);
             pKeyNode = pKeyNode->m_08;
         } while (pKeyNode != 0);
     }

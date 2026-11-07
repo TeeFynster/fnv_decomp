@@ -200,7 +200,8 @@ void __fastcall FUN_005890c0(int* self, FUN_00527770_arg a);
 
 // Calls FUN_005890c0 on self, then stores the address of DAT_01031fac into *self and returns self.
 // @fnv 0x00527770
-int* __fastcall FUN_00527770(int* self, FUN_00527770_arg a)
+// src: EXE 0x00527770
+int* __fastcall NiTMap_unsigned_int_TESObjectREFR_NiTMap(int* self, FUN_00527770_arg a)
 {
     FUN_005890c0(self, a);
     *self = (int)&DAT_01031fac;
@@ -270,7 +271,7 @@ void ActorPackageContext::Revert(unsigned int aiFlags)
         Clear();
 }
 
-int __cdecl FUN_0096a820(int);
+int __cdecl Procedure_GetProcedureCount(int);
 
 // @fnv 0x008c6970
 void ActorPackageContext::InitLoadGame(BGSLoadFormBuffer* apBuffer)
@@ -289,7 +290,7 @@ void ActorPackageContext::InitLoadGame(BGSLoadFormBuffer* apBuffer)
         if (pPackage->GetProcedureType() == -1)
             pPackage->SetTargetFromReference(0);
         pPackage->AddRef();
-        int iCount = FUN_0096a820(pPackage->GetProcedureType());
+        int iCount = Procedure_GetProcedureCount(pPackage->GetProcedureType());
         if (m_iPackageValue >= iCount)
             m_iPackageValue = iCount - 1;
     }
@@ -297,7 +298,7 @@ void ActorPackageContext::InitLoadGame(BGSLoadFormBuffer* apBuffer)
         pData->InitLoadGame(apBuffer);
     pTarget = pTarget ? dynamic_cast<TESObjectREFR*>(TESForm::GetFormByID((unsigned int)pTarget)) : 0;
     if (pTarget)
-        pTarget->FUN_00564db0(true);
+        pTarget->TESObjectREFR_SetTargeted(true);
 }
 
 // @fnv 0x008c61a0
@@ -380,7 +381,7 @@ void ActorPackageContext::InitLoadGame(unsigned a, unsigned auiUnused)
         }
         if (pPackage)
         {
-            int elapsed = FUN_0096a820(pPackage->GetProcedureType());
+            int elapsed = Procedure_GetProcedureCount(pPackage->GetProcedureType());
             if (m_iPackageValue >= elapsed)
                 m_iPackageValue = elapsed - 1;
         }
@@ -396,24 +397,24 @@ void ActorPackageContext::SaveGame(unsigned int auiFlags)
     {
         auiFormId = pPackage->GetFormID();
     }
-    g_TESSaveLoadGame->FUN_00857a10(&auiFormId, 4u);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(&auiFormId, 4u);
     if (auiFormId != 0)
     {
         if ((auiFlags & 0) != 0 && g_dataHandler->FormIDExists(auiFormId))
         {
             unsigned char ucType = pPackage->GetPackType();
-            g_TESSaveLoadGame->FUN_008579b0(&ucType, 1);
+            g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&ucType, 1);
             if ((auiFlags & 0) == 0)
             {
                 pPackage->SaveGameTESAlt();
             }
         }
-        g_TESSaveLoadGame->FUN_008579b0(&m_iPackageValue, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_iPackageValue, 4);
     }
-    g_TESSaveLoadGame->FUN_008579b0(&m_fPackageValue, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_fPackageValue, 4);
 }
 
-extern "C" void __cdecl FUN_005b5e40(const char* apFormat, ...);
+extern "C" void __cdecl Warning_005b5e40(const char* apFormat, ...);
 
 // @fnv 0x008c6320
 void ActorPackageContext::LoadGame(unsigned int aiFlags, unsigned int aiUnused)
@@ -429,7 +430,7 @@ void ActorPackageContext::LoadGame(unsigned int aiFlags, unsigned int aiUnused)
         if ((aiFlags & 0) && g_dataHandler->FormIDExists(auiFormId))
         {
             unsigned char ucType;
-            g_TESSaveLoadGame->FUN_008579e0(&ucType, 1);
+            g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&ucType, 1);
             if (!(aiFlags & 0))
             {
                 TESPackage* pNew = g_TESSaveLoadGame->CreatePackageForType(auiFormId, ucType);
@@ -457,7 +458,7 @@ void ActorPackageContext::LoadGame(unsigned int aiFlags, unsigned int aiUnused)
                 bFailed = true;
             }
         }
-        g_TESSaveLoadGame->FUN_008579e0(&m_iPackageValue, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&m_iPackageValue, 4);
     }
     else if (bRead)
     {
@@ -469,13 +470,13 @@ void ActorPackageContext::LoadGame(unsigned int aiFlags, unsigned int aiUnused)
     {
         if (auiFormId)
         {
-            FUN_005b5e40("AI: Couldn't find package %08X while loading and will try to choose a new one.", auiFormId);
+            Warning_005b5e40("AI: Couldn't find package %08X while loading and will try to choose a new one.", auiFormId);
         }
         else
         {
-            FUN_005b5e40("AI: Couldn't find a plugin package while loading and will try to choose a new one.");
+            Warning_005b5e40("AI: Couldn't find a plugin package while loading and will try to choose a new one.");
         }
         SetPackageInfoState(-1);
     }
-    g_TESSaveLoadGame->FUN_008579e0(&m_fPackageValue, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&m_fPackageValue, 4);
 }

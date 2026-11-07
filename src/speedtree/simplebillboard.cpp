@@ -43,7 +43,7 @@ void SimpleBillboard::CalculateBillboardTransform(const float* afPosition)
     frame.cRot.m_fComponents[2][0] = 0.0f;
     frame.cRot.m_fComponents[2][1] = 0.0f;
     frame.cRot.m_fComponents[2][2] = 1.0f;
-    frame.cRot.FUN_00b273d0(frame.fAngleDifference);
+    frame.cRot.CRotTransform_RotateY(frame.fAngleDifference);
     DAT_011f8d08 = corners[0] * frame.cRot;
     DAT_011f8d14 = corners[1] * frame.cRot;
     DAT_011f8d20 = corners[2] * frame.cRot;

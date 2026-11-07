@@ -65,11 +65,12 @@ struct Owner
     int unk0b4;
     NiPointer<Target> m_spReferencedObject;
 
-    int FUN_004a5200(int iArg);
+    int NiGeometry_SetModelBound(int iArg);
 };
 
 // @fnv 0x004a5200
-int Owner::FUN_004a5200(int iArg)
+// src: COMMUNITY 0x004a5200
+int Owner::NiGeometry_SetModelBound(int iArg)
 {
     return static_cast<Target*>(m_spReferencedObject)->ForwardToMember(iArg);
 }

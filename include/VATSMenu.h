@@ -47,7 +47,7 @@ public:
 
         TargetCommand();
         ~TargetCommand();
-        void FUN_009ca500();
+        void VATS_COMMAND_Initialize();
     };
 
     virtual ~VATSMenu();
@@ -96,20 +96,20 @@ public:
     TargetCommand m_acTargetText;
 
     VATSMenu();
-    void FUN_00720140(int aiID, Tile* apTile);
+    void AttachTileByID(int aiID, Tile* apTile);
     int GetSelectedTargetIndex();
     unsigned int Create();
     unsigned int GetFilteredCount();
     unsigned int GetUnfilteredCount();
-    int FUN_007a7830();
-    int FUN_007267c0();
+    int ListBox_BGSQuestObjective_NumUnfiltered();
+    int ListBox_enum_MiscStatManager_MiscStatID_NumUnfiltered();
 
     void HandleClick(int aiID, int aiArg);
     bool HandleKey(int aiKey);
-    void FUN_007ef7b0(int aiID, int aiArg);
-    void FUN_007ef830(int aiID, int aiOther);
-    void FUN_007ef760(int aiID, Tile* apTarget);
-    void FUN_007ef8b0(int aiID, Tile* apTarget);
+    void DoEnter_007ef7b0(int aiID, int aiArg);
+    void DoLeave_007ef830(int aiID, int aiOther);
+    void DoWheelMove_007ef760(int aiID, Tile* apTarget);
+    void DoStillDown_007ef8b0(int aiID, Tile* apTarget);
 
     BSSimpleList<TargetX*>* FindListEntryForTarget(ActorX* apTarget);
     TargetListM* FindListEntryForTarget(ActorM* apTarget);
@@ -118,16 +118,16 @@ public:
     LimbListM* FindListEntryByValue(int aiLimb);
     void UpdateLimbHighlight();
     void UpdateQueueEntry(TargetCommand* apCmd, bool abArg2, bool abArg3);
-    float FUN_007f48e0();
+    float CalculateProbableEnemyHealth();
     void UpdateHitChanceDisplay();
     bool UpdateVatsTargeting();
-    void FUN_007f3070();
-    bool FUN_007f28d0();
-    bool FUN_007f6af0();
-    int FUN_007f3bf0(int aiLimb);
+    void VATSMenu_SetTargetLimb();
+    bool UpdateAmmo();
+    bool VATSMenu_PickNewTarget();
+    int VATSMenu_GetActorValueFromBodyPart(int aiLimb);
     int GetConsecutiveMatchCount();
     void UpdateLimbTiles();
     float CalculateVATSChance(LimbListM* apTarget);
-    bool FUN_007f06d0(LimbM* apLimb);
+    bool VATSMenu_LimbOnScreen(LimbM* apLimb);
     void Update();
 };

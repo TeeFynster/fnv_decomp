@@ -12,7 +12,7 @@ public:
     void Clear(bool abFree);
     Nav*& FUN_00877a30(unsigned);
     NavMeshInfo*& GetFirstForm();
-    void FUN_006b3eb0(unsigned int, unsigned int);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 
     int unk00;
     int unk04;

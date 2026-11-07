@@ -37,7 +37,7 @@ class __declspec(novtable) TESActorBase : public TESBoundAnimObject,
                      public BGSDestructibleObjectForm
 {
 public:
-    TESObjectREFR* FUN_00516bf0(); // 0x00516bf0
+    TESObjectREFR* BGSExplosion_GetImpactDataSet(); // 0x00516bf0
     TESActorBase();
     virtual ~TESActorBase();
 
@@ -70,21 +70,21 @@ public:
     void NotifyFormIDChanged(int flags);
     virtual void LoadGame(BGSLoadFormBuffer* buffer);
 
-    int FUN_005f0b00();
-    void FUN_005f0b30(int value);
-    bool FUN_005f0b50();
-    bool FUN_005f0ba0();
-    bool FUN_005f0bf0();
-    bool FUN_005f0c40();
-    bool FUN_005f0c80();
-    float FUN_005f0d60(TESForm* form);
-    void FUN_005f1690(int flags);
-    unsigned short FUN_005f16f0(unsigned int flags);
-    void FUN_005f18c0(unsigned int flags);
-    void FUN_005f1b30(unsigned int flags, unsigned int arg);
-    void FUN_005f1f30(unsigned int buffer);
-    void FUN_005f20a0(bool value);
-    void* FUN_004fd3c0();
+    int GetHealth_005f0b00();
+    void SetHealth_005f0b30(int value);
+    bool DoesSwim();
+    bool FightsInWater();
+    bool DoesWalk();
+    bool DoesFly();
+    bool IsImmobile();
+    float GetDesirability(TESForm* form);
+    void RemoveChange(int flags);
+    unsigned short GetSaveSize_005f16f0(unsigned int flags);
+    void SaveGame_005f18c0(unsigned int flags);
+    void LoadGame_005f1b30(unsigned int flags, unsigned int arg);
+    void SaveGame_005f1f30(unsigned int buffer);
+    void Reset3DForLoadedActors(bool value);
+    void* BGSProjectile_GetExplosion();
 
     void LimbRTTIAnchor();
     void rttiAnchor();

@@ -13,5 +13,5 @@ public:
     NavMeshEdgePoint();
     NavMeshEdgePoint(const NavMeshEdgePoint&); // 0x006a0e50 (0x006b1e50 copy-constructs through it)
     NavMeshEdgePoint& operator=(const NavMeshEdgePoint& src);
-    NavMeshEdgePoint& FUN_006dbb40(const NavMeshEdgePoint& src);
+    NavMeshEdgePoint& CopyFields_006dbb40(const NavMeshEdgePoint& src);
 };

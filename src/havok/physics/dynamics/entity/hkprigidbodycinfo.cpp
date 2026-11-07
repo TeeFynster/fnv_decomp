@@ -13,11 +13,12 @@ struct Owner
     __m128 axisX, axisY, axisZ, translation;
     volatile float mass, drag, tolerance, friction, restitution, damping, maxSpeed, maxAngularSpeed, limit;
     volatile unsigned char enabled, awake, mode, group, flag0, flag1, flag2, flag3;
-    Owner* FUN_00cf5ea0();
+    Owner* InitializePhysicsFields();
 };
 // Resets position, rotation, velocity, and axes to defaults, sets physical properties, flags, and returns this.
 // @fnv 0x00cf5ea0
-Owner* Owner::FUN_00cf5ea0()
+// src: GUESS 0x00cf5ea0 (confidence: medium)
+Owner* Owner::InitializePhysicsFields()
 {
     _mm_store_ps(reinterpret_cast<float*>(&position), _mm_setzero_ps());
     _mm_store_ps(reinterpret_cast<float*>(&rotation), identityRotation);
@@ -99,12 +100,13 @@ struct S_00cf5f80
     S_00cf5f80_Vec m_kColumn2;
     S_00cf5f80_Vec m_vTranslation;
     float m_f90;
-    void FUN_00cf5f80(const S_00cf5f80_In* in);
+    void CopyTransformFields(const S_00cf5f80_In* in);
 };
 
 // Copies m_f4, the three columns and the translation from in into this object.
 // @fnv 0x00cf5f80
-void S_00cf5f80::FUN_00cf5f80(const S_00cf5f80_In* in)
+// src: GUESS 0x00cf5f80 (confidence: medium)
+void S_00cf5f80::CopyTransformFields(const S_00cf5f80_In* in)
 {
     m_f90 = in->m_f4;
     m_kColumn0.m_vComponents = in->m_kColumn0.m_vComponents;
@@ -145,11 +147,12 @@ struct S_00cf5fc0
     int unk0C;
     __declspec(align(16)) S_00cf5fc0_Vec unk10;
     S_00cf5fc0_Sub unk20;
-    void FUN_00cf5fc0(const S_00cf5fc0_Src* p);
+    void UpdateFields_00cf5fc0(const S_00cf5fc0_Src* p);
 };
 // Copies the 16-byte vector from p->unk30 into unk10 and calls unk20.FUN_00cb26e0 with p.
 // @fnv 0x00cf5fc0
-void S_00cf5fc0::FUN_00cf5fc0(const S_00cf5fc0_Src* apSrc)
+// src: GUESS 0x00cf5fc0 (confidence: low)
+void S_00cf5fc0::UpdateFields_00cf5fc0(const S_00cf5fc0_Src* apSrc)
 {
     reinterpret_cast<__m128&>(unk10) = reinterpret_cast<const __m128&>(apSrc->unk30);
     unk20.FUN_00cb26e0(apSrc);

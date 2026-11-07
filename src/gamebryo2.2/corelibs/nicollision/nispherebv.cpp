@@ -35,9 +35,9 @@ public:
     float GetSquaredXYLength();
     float GetSquaredXYLength() const;
 
-    void FUN_004a0c10();
-    LocalPt3* FUN_00439ef0(LocalPt3* out, LocalPt3* other);
-    LocalPt3 FUN_00439ef0(const LocalPt3& rhs);
+    void Unitize_004a0c10();
+    LocalPt3* SubtractIntoVector(LocalPt3* out, LocalPt3* other);
+    LocalPt3 SubtractIntoVector(const LocalPt3& rhs);
     bool FUN_00439090(LocalPt3* other);
     float FUN_00457990() const;
 
@@ -171,7 +171,8 @@ struct P03MM
 };
 extern P03MM g_memoryManager;
 // @fnv 0x00eac170
-NiSphereBV* FUN_00eac170(NiStream& kStream)
+// src: COMMUNITY 0x00eac170
+NiSphereBV* NiSphereBV_CreateFromStream(NiStream& kStream)
 {
     void* mem = g_memoryManager.Allocate(20);
     NiSphereBV* p;
@@ -342,7 +343,7 @@ bool CheckSweptSphereOverlap(float fTime, const NiBoundingVolume& kBV0, const Ni
 }
 
 extern "C" unsigned int __cdecl strlen(const char*);
-extern "C" void* __cdecl FUN_00aa1070(unsigned int);
+extern "C" void* __cdecl _NiMalloc_00aa1070(unsigned int);
 extern "C" int __cdecl FUN_00a305b0(char*, unsigned int, const char*, ...);
 extern const char str_010f18a4[];
 extern const char str_010f1898[];
@@ -361,7 +362,7 @@ struct Stream0
 };
 struct StringPart0
 {
-    char* FUN_00a59af0(const char*);
+    char* GetViewerString_00a59af0(const char*);
 };
 struct Display0
 {
@@ -378,19 +379,19 @@ void Display0::AppendFormattedText(char* text, Stream0* out)
     char* original;
     unsigned int bytes = strlen(text) + 13;
     original = text;
-    text = (char*)FUN_00aa1070(bytes);
+    text = (char*)_NiMalloc_00aa1070(bytes);
     FUN_00a305b0(text, bytes, str_010f18a4, original);
     unsigned int size = out->size0a;
     if (size >= out->capacity08)
         out->FUN_0096ad30(size + out->grow0e);
     out->FUN_0096ae90(size, &text);
-    text = child04.FUN_00a59af0(str_010f1898);
+    text = child04.GetViewerString_00a59af0(str_010f1898);
     size = out->size0a;
     if (size >= out->capacity08)
         out->FUN_0096ad30(size + out->grow0e);
     out->FUN_0096ae90(size, &text);
     bytes = strlen(original) + 30;
-    text = (char*)FUN_00aa1070(bytes);
+    text = (char*)_NiMalloc_00aa1070(bytes);
     int scaled = (int)(rate10 * DAT_01017a40);
     FUN_00a305b0(text, bytes, str_010f1884, (float)scaled / DAT_01017a40);
     size = out->size0a;
@@ -431,7 +432,7 @@ inline bool SpherePointsDiffer(const NiPoint3& a, const NiPoint3& b)
     return !SpherePointsEqual(a, b);
 }
 
-float FUN_00eb1d20(const Segment3&, const Triangle3&, float*, float*, float*);
+float NiSqrDistance_Compute_00eb1d20(const Segment3&, const Triangle3&, float*, float*, float*);
 float GetSquaredDistanceToTriangle(const NiPoint3&, const Triangle3&, float*, float*);
 
 // Builds a triangle from three points and tests whether the sphere's center swept along kV0-kV1 over fTime comes within the sphere radius of the triangle.
@@ -457,7 +458,7 @@ bool SphereTriangleSweepTest(float fTime, const NiSphereBV& kBV0, const NiPoint3
         seg.m_kLightVector = kDelta * fTime;
 
         float fSegP;
-        fSqrDistance = FUN_00eb1d20(seg, kTriangle, &fSegP, &fTriP0, &fTriP1);
+        fSqrDistance = NiSqrDistance_Compute_00eb1d20(seg, kTriangle, &fSegP, &fTriP0, &fTriP1);
     }
     else
     {
@@ -707,7 +708,7 @@ struct V3
     {
         return x * x + y * y + z * z;
     }
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
 };
 inline V3 operator*(float f, const V3& v)
 {
@@ -765,7 +766,7 @@ bool IntersectSpheres(float afDuration, const NiSphereBV& A, const V3& B, const 
                         if (fDistSq > 1.1920928955078125e-7f)
                         {
                             normal0 = vCenterDiff;
-                            normal0.FUN_004a0c10();
+                            normal0.Unitize_004a0c10();
                         }
                         else
                             normal0 = DAT_011a946c;
@@ -789,7 +790,7 @@ bool IntersectSpheres(float afDuration, const NiSphereBV& A, const V3& B, const 
                 if (flag)
                 {
                     normal0 = a;
-                    normal0.FUN_004a0c10();
+                    normal0.Unitize_004a0c10();
                     V3 n;
                     n = V3(-normal0.x, -normal0.y, -normal0.z);
                     normal1 = n;
@@ -809,14 +810,14 @@ bool IntersectSpheres(float afDuration, const NiSphereBV& A, const V3& B, const 
     if (fDistBSq > dotBB)
     {
         normal0 = reinterpret_cast<const V3&>(C.m_kBoundingSphere) - reinterpret_cast<const V3&>(A.m_kBoundingSphere);
-        normal0.FUN_004a0c10();
+        normal0.Unitize_004a0c10();
         float radius = A.m_kBoundingSphere.r;
         local_point = reinterpret_cast<const V3&>(A.m_kBoundingSphere) + radius * normal0;
         normal1 = -normal0;
         return true;
     }
     normal1 = reinterpret_cast<const V3&>(A.m_kBoundingSphere) - reinterpret_cast<const V3&>(C.m_kBoundingSphere);
-    normal1.FUN_004a0c10();
+    normal1.Unitize_004a0c10();
     local_point = reinterpret_cast<const V3&>(C.m_kBoundingSphere) + C.m_kBoundingSphere.r * normal1;
     normal0 = -normal1;
     return true;
@@ -826,7 +827,7 @@ struct Triangle
 {
     LocalPt3 origin, edge0, edge1;
     float radiusSquared, b, q;
-    LocalPt3 FUN_00eb3830() const;
+    LocalPt3 NiTrigon_GetNormal() const;
 };
 float __cdecl GetSquaredDistanceToTriangle(LocalPt3 const&, Triangle const&, float&, float&);
 LocalPt3 __cdecl FUN_004a3760(float, LocalPt3 const&);
@@ -861,11 +862,11 @@ struct Isect
     float unk68;
     void FUN_00eb5e30(NiSphereBV const&, LocalPt3 const&, LocalPt3 const&, LocalPt3 const&, float, float, float, int);
     void Solve(LocalPt3 const&, LocalPt3 const&);
-    float FUN_00eae6f0();
+    float NiIntersector_GetContactTime();
     int FUN_00be0aa0();
-    void FUN_00eae6d0();
-    LocalPt3 const& FUN_00eae700();
-    LocalPt3 const& FUN_00eae710();
+    void SetVtbl();
+    LocalPt3 const& NiIntersector_GetContactPoint();
+    LocalPt3 const& NiIntersector_GetContactNormal();
 };
 struct Query
 {
@@ -892,7 +893,7 @@ bool __cdecl SphereTriangleCollision(float time, NiSphereBV const& sphere, Local
         contactPoint = query.k.origin + query.k.edge0 * query.k.b + query.k.edge1 * query.k.q;
         if (calcNormals)
         {
-            triangleNormal = query.k.FUN_00eb3830();
+            triangleNormal = query.k.NiTrigon_GetNormal();
             sphereNormal = -triangleNormal;
         }
         return true;
@@ -911,7 +912,7 @@ bool __cdecl SphereTriangleCollision(float time, NiSphereBV const& sphere, Local
         float extentSquared = query.k.radiusSquared * normalSquared;
         if (difference * difference > extentSquared)
         {
-            normal.FUN_004a0c10();
+            normal.Unitize_004a0c10();
             LocalPt3 vSupport;
             if (centerProjection > planeProjection)
             {
@@ -939,19 +940,19 @@ bool __cdecl SphereTriangleCollision(float time, NiSphereBV const& sphere, Local
     Isect intersection;
     intersection.FUN_00eb5e30(sphere, v0, v1, v2, time, 0.001f, 0.0001f, 32);
     intersection.Solve(sphereVelocity, triangleVelocity);
-    contactTime = intersection.FUN_00eae6f0();
+    contactTime = intersection.NiIntersector_GetContactTime();
     if (intersection.FUN_00be0aa0() != 3 && intersection.FUN_00be0aa0() != 2)
     {
-        intersection.FUN_00eae6d0();
+        intersection.SetVtbl();
         return false;
     }
-    contactPoint = intersection.FUN_00eae700();
+    contactPoint = intersection.NiIntersector_GetContactPoint();
     if (calcNormals)
     {
-        sphereNormal = intersection.FUN_00eae710();
+        sphereNormal = intersection.NiIntersector_GetContactNormal();
         triangleNormal = -sphereNormal;
     }
-    intersection.FUN_00eae6d0();
+    intersection.SetVtbl();
     return true;
 }
 

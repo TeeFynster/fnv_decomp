@@ -67,7 +67,8 @@ inline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, float 
 }
 
 // @fnv 0x00d230e0
-int __cdecl FUN_00d230e0(const hkVector4& akPoint, const hkVector4& kA, const hkVector4& kB,
+// src: COMMUNITY 0x00d230e0
+int __cdecl hkLineSegmentUtil_closestPointLineSeg(const hkVector4& akPoint, const hkVector4& kA, const hkVector4& kB,
                          hkVector4& kClosestOut)
 {
     hkVector4 kAP;
@@ -149,7 +150,8 @@ struct VectorPairResult
 
 // Computes the closest points on two line segments defined by A/dA and B/dB, storing them and the squared distance in result.
 // @fnv 0x00d22e40
-int FUN_00d22e40(const hkVector4& A, const hkVector4& dA, const hkVector4& B, const hkVector4& dB,
+// src: XBOX_PDB 0x00d22e40
+int hkLineSegmentUtil_closestLineSegLineSeg(const hkVector4& A, const hkVector4& dA, const hkVector4& B, const hkVector4& dB,
                  VectorPairResult& result)
 {
     hkVector4 kDelta;

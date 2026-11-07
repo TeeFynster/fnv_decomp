@@ -25,11 +25,11 @@ struct Item : hkReferencedObject
     int unk20;
     int unk24;
     int unk28;
-    void FUN_00d07c80(void* owner);
+    void removePhantomOverlapListener_00d07c80(void* owner);
 };
 struct Manager
 {
-    void FUN_00c95800(Item** entries, int count);
+    void hkpWorld_removePhantomBatch(Item** entries, int count);
 };
 struct Collection
 {
@@ -52,13 +52,13 @@ void AllocatorOwner::ReleaseEntries()
 {
     if (manager == 0)
         return;
-    manager->FUN_00c95800(entries, 6);
+    manager->hkpWorld_removePhantomBatch(entries, 6);
     Item** pEntry = entries;
     void* owner = &unk0C;
     int count = 6;
     do
     {
-        (*pEntry)->FUN_00d07c80(owner);
+        (*pEntry)->removePhantomOverlapListener_00d07c80(owner);
         (*pEntry)->removeReference();
         *pEntry = 0;
         ++pEntry;
@@ -78,7 +78,7 @@ struct DispatchItem
     unsigned int unknown00;
     unsigned int unknown04;
     DispatchOwner* owner;
-    void FUN_00ca8420(unsigned char, unsigned char, unsigned char);
+    void hkpRigidBody_setMotionType(unsigned char, unsigned char, unsigned char);
 };
 struct Dispatcher
 {
@@ -104,10 +104,10 @@ void Dispatcher::DispatchItemByMode(DispatchItem* item)
     switch (mode)
     {
     case 0:
-        item->FUN_00ca8420(5, 1, 0);
+        item->hkpRigidBody_setMotionType(5, 1, 0);
         break;
     case 1:
-        item->FUN_00ca8420(5, 1, 0);
+        item->hkpRigidBody_setMotionType(5, 1, 0);
         break;
     case 2:
         if (item->owner == owner)
@@ -130,7 +130,8 @@ typedef bool (*S_00e10760_Less)(S_00e10760_Item* a, S_00e10760_Item* b);
 
 // Sorts the range [d, h] of pArr in place using a Hoare-partition quicksort with cmpLess, recursing on the left part and looping on the right.
 // @fnv 0x00e10760
-void FUN_00e10760(S_00e10760_Item** apItems, int aiLow, int aiHigh, S_00e10760_Less apLess)
+// src: XBOX_PDB 0x00e10760
+void hkAlgorithm_quickSortRecursive_hkMonitorStreamAnalyzerPrintByTypeInfo_bool_cdecl_hkMonitorStreamAnalyzerPrintByTypeInfo_const_hkMonitorStreamAnalyzerPrintByTypeInfo_const(S_00e10760_Item** apItems, int aiLow, int aiHigh, S_00e10760_Less apLess)
 {
     int i, iRight;
     __declspec(align(16)) S_00e10760_Item* pPivot;
@@ -160,7 +161,7 @@ begin:
     } while (i <= iRight);
     if (aiLow < iRight)
     {
-        FUN_00e10760(apItems, aiLow, iRight, apLess);
+        hkAlgorithm_quickSortRecursive_hkMonitorStreamAnalyzerPrintByTypeInfo_bool_cdecl_hkMonitorStreamAnalyzerPrintByTypeInfo_const_hkMonitorStreamAnalyzerPrintByTypeInfo_const(apItems, aiLow, iRight, apLess);
     }
     if (i < aiHigh)
     {
@@ -171,7 +172,7 @@ begin:
 
 struct OwnerDest
 {
-    void FUN_00c91a70(void* p);
+    void hkpWorld_removeWorldDeletionListener(void* p);
     void ClearValue(void* p);
 };
 
@@ -182,13 +183,14 @@ struct FUN_00d0b530_cls
     int unk08;
     OwnerDest* m_0C;
 
-    void FUN_00d0b530(int unused);
+    void hkpBroadPhaseBorder_worldDeletedCallback(int unused);
 };
 
 // @fnv 0x00d0b530
-void FUN_00d0b530_cls::FUN_00d0b530(int unused)
+// src: HAVOK_LIB 0x00d0b530
+void FUN_00d0b530_cls::hkpBroadPhaseBorder_worldDeletedCallback(int unused)
 {
-    m_0C->FUN_00c91a70(((char*)this - 8) ? (void*)this : 0);
+    m_0C->hkpWorld_removeWorldDeletionListener(((char*)this - 8) ? (void*)this : 0);
     m_0C->ClearValue(((char*)this - 8) ? (void*)((char*)this + 8) : 0);
     ((hkReferencedObject*)((char*)this - 8))->removeReference();
 }
@@ -196,8 +198,8 @@ void FUN_00d0b530_cls::FUN_00d0b530(int unused)
 struct D0B630Entity;
 
 int __cdecl CompareByOffsetD4(const void* a, const void* b);
-void __cdecl FUN_00e10760(D0B630Entity** data, int lo, int hi, int(__cdecl* cmp)(const void*, const void*));
-void __cdecl FUN_00c90740(D0B630Entity** objects, int numObjects, int strideInBytes);
+void __cdecl hkAlgorithm_quickSortRecursive_hkMonitorStreamAnalyzerPrintByTypeInfo_bool_cdecl_hkMonitorStreamAnalyzerPrintByTypeInfo_const_hkMonitorStreamAnalyzerPrintByTypeInfo_const(D0B630Entity** data, int lo, int hi, int(__cdecl* cmp)(const void*, const void*));
+void __cdecl hkReferencedObject_removeReferences(D0B630Entity** objects, int numObjects, int strideInBytes);
 
 class D0B630Primary
 {
@@ -242,15 +244,15 @@ void D0B630Collector::FlushDeferredEntities(const void* event)
     if (m_numDeferred)
     {
         if (m_numDeferred > 1)
-            FUN_00e10760(m_deferred, 0, m_numDeferred - 1, CompareByOffsetD4);
+            hkAlgorithm_quickSortRecursive_hkMonitorStreamAnalyzerPrintByTypeInfo_bool_cdecl_hkMonitorStreamAnalyzerPrintByTypeInfo_const_hkMonitorStreamAnalyzerPrintByTypeInfo_const(m_deferred, 0, m_numDeferred - 1, CompareByOffsetD4);
         for (int i = 0; i < m_numDeferred; i++)
             entityAdded(m_deferred[i]);
-        FUN_00c90740(m_deferred, m_numDeferred, sizeof(D0B630Entity*));
+        hkReferencedObject_removeReferences(m_deferred, m_numDeferred, sizeof(D0B630Entity*));
         m_numDeferred = 0;
     }
 }
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
 
 struct D0B6A0Collidable
@@ -286,7 +288,7 @@ static __forceinline void D0B6A0EntityArray_construct(hkReferencedObject** p, in
 
 static __forceinline void D0B6A0EntityArray_AddBack(hkArrayBase<hkReferencedObject*>& self, hkReferencedObject* const& e)
 {
-        hkMemoryRouter& holder = FUN_00c85750();
+        hkMemoryRouter& holder = hkMemoryRouter_getInstance();
         if (self.m_iElementCount == self.getCapacity())
             ResizeAudioStream(holder.m_heap, (&self), sizeof(hkReferencedObject*));
         D0B6A0EntityArray_construct(self.m_data + self.m_iElementCount, 1, e);
@@ -355,7 +357,7 @@ void D0B6A0Collector::HandleEvent(const D0B6A0Event& event)
 class BSAudio;
 namespace fnv_00d0bb20 {
 
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 
 extern int DAT_010cd3c4;
 extern int DAT_010cd3b4;
@@ -411,7 +413,7 @@ void FUN_00d0bb20_cls::Destroy()
         pEntry++;
         i--;
     } while (i != 0);
-    hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAudioAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     m_iArrayLength = i;
     unsigned int uiCapBits = m_uCapBits;
@@ -433,7 +435,8 @@ void FUN_00d0bb20_cls::Destroy()
 }  // namespace fnv_00d0bb20
 
 // @fnv 0x00d0b520
-void __stdcall FUN_00d0b520(int)
+// src: COMMUNITY 0x00d0b520
+void __stdcall nullsub_65(int)
 {}
 
 // hkpBroadPhaseBorder (the RTTI name in the image) has one primary base and
@@ -451,21 +454,22 @@ void __stdcall FUN_00d0b520(int)
 struct hkBroadPhasePrimary
 {
     hkBroadPhasePrimary();
-    virtual void FUN_00d0bbc0(int flag);
+    virtual void AdjustThisAndForward_00d0bbc0(int flag);
     int unk04;
 };
 
 struct hkBroadPhaseSecondary
 {
     hkBroadPhaseSecondary();
-    virtual void FUN_00d0bbc0(int flag);
+    virtual void AdjustThisAndForward_00d0bbc0(int flag);
 };
 
 struct hkBroadPhaseBorder : public hkBroadPhasePrimary, public hkBroadPhaseSecondary
 {
     hkBroadPhaseBorder();
 // @fnv 0x00d0bbc0
-    virtual void FUN_00d0bbc0(int flag);
+// src: GUESS 0x00d0bbc0 (confidence: low)
+    virtual void AdjustThisAndForward_00d0bbc0(int flag);
 };
 
 hkBroadPhasePrimary::hkBroadPhasePrimary()
@@ -479,7 +483,7 @@ hkBroadPhaseBorder::hkBroadPhaseBorder() : hkBroadPhasePrimary(), hkBroadPhaseSe
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (0x10).
 struct PrimaryBase
 {
-    virtual void FUN_00d0bbe0();
+    virtual void AdjustThisAndForward_00d0bbe0();
     int unk04;
     int unk08;
     int unk0C;
@@ -487,14 +491,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00d0bbe0();
+    virtual void AdjustThisAndForward_00d0bbe0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00d0bbe0
-    virtual void FUN_00d0bbe0();
+// src: GUESS 0x00d0bbe0 (confidence: low)
+    virtual void AdjustThisAndForward_00d0bbe0();
 };
 
 Derived::Derived()
@@ -517,7 +522,7 @@ struct Manager
     Allocator* allocator;
 };
 
-extern "C" Manager* __cdecl FUN_00c85750();
+extern "C" Manager* __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00d0bbf0
 {
@@ -536,7 +541,7 @@ struct FUN_00d0bbf0
     void* unk2c;
     static void operator delete(void* object)
     {
-        Manager* manager = FUN_00c85750();
+        Manager* manager = hkMemoryRouter_getInstance();
         manager->allocator->Deallocate(object, ((FUN_00d0bbf0*)object)->unk04);
     }
 };

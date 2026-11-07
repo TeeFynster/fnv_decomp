@@ -20,7 +20,7 @@ struct S_00da2560_Router
         return *m_pStreamAllocator;
     }
 };
-S_00da2560_Router* FUN_00c85750();
+S_00da2560_Router* hkMemoryRouter_getInstance();
 
 struct S_00da2560_Member
 {
@@ -31,7 +31,7 @@ struct S_00da2560_Member
     void FUN_00cce530() throw();
     void operator delete(void* p)
     {
-        FUN_00c85750()->heap().ReleaseBlock(p, 0x18);
+        hkMemoryRouter_getInstance()->heap().ReleaseBlock(p, 0x18);
     }
 };
 

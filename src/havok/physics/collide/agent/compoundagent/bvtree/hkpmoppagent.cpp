@@ -5,7 +5,7 @@
 #include "../../../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../../../include/hkMemoryRouter.h"
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 extern int DAT_010ce8f4;
 extern int DAT_0102e388;
@@ -27,7 +27,7 @@ struct FUN_00d2f380_cls
 void FUN_00d2f380_cls::DestroyArray()
 {
     m_vptr00 = (int)&DAT_010ce8f4;
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uCapBits = m_uCapBits;
     m_iArrayLength = 0;

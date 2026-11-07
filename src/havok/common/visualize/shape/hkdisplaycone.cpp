@@ -35,15 +35,15 @@ struct GlobalContext
     int unk00, unk04, unk08, unk0c;
     Allocator* allocator;
 };
-extern "C" GlobalContext* __cdecl FUN_00c85750();
+extern "C" GlobalContext* __cdecl hkMemoryRouter_getInstance();
 extern "C" void __cdecl ResizeAudioStream(Allocator*, hkArray<Vertex>*, int);
-extern "C" void __cdecl FUN_00c908c0(Allocator*, hkArray<Edge>*, int, int);
+extern "C" void __cdecl hkArrayUtil__reserve(Allocator*, hkArray<Edge>*, int, int);
 struct ForwardArg
 {
     GeometryBuffers* value;
 };
 struct MeshBuilder;
-extern "C" void __fastcall FUN_00de54b0(MeshBuilder*, ForwardArg);
+extern "C" void __fastcall hkDisplayCone_generateConeVertices(MeshBuilder*, ForwardArg);
 struct MeshBuilder
 {
     int unk00;
@@ -79,16 +79,16 @@ struct MeshBuilder
 // @fnv 0x00de57a0
 void __thiscall MeshBuilder::InitializeGeometry()
 {
-    GlobalContext* context = FUN_00c85750();
+    GlobalContext* context = hkMemoryRouter_getInstance();
     Allocator* resourceAllocator = context->allocator;
     GeometryBuffers* raw = static_cast<GeometryBuffers*>(resourceAllocator->Allocate(sizeof(GeometryBuffers)));
     GeometryBuffers* buffers = raw ? new (raw) GeometryBuffers() : 0;
     geometry = buffers;
     ForwardArg arg;
     arg.value = buffers;
-    FUN_00de54b0(this, arg);
+    hkDisplayCone_generateConeVertices(this, arg);
     hkArray<Vertex>& vertices = geometry->vertices;
-    GlobalContext* manager = FUN_00c85750();
+    GlobalContext* manager = hkMemoryRouter_getInstance();
     if (vertices.m_iElementCount == (vertices.m_iCapacityState & 0x3fffffffu))
     {
         ResizeAudioStream(manager->allocator, &vertices, sizeof(Vertex));
@@ -98,7 +98,7 @@ void __thiscall MeshBuilder::InitializeGeometry()
     ++vertices.m_iElementCount;
     hkArray<Edge>& edges = geometry->edges;
     int required = segmentCount;
-    GlobalContext* manager2 = FUN_00c85750();
+    GlobalContext* manager2 = hkMemoryRouter_getInstance();
     Allocator* edgeAllocator = manager2->allocator;
     int capacity = edges.m_iCapacityState & 0x3fffffffu;
     if (capacity < required)
@@ -106,7 +106,7 @@ void __thiscall MeshBuilder::InitializeGeometry()
         int newCapacity = capacity * 2;
         if (required >= newCapacity)
             newCapacity = required;
-        FUN_00c908c0(edgeAllocator, &edges, newCapacity, sizeof(Edge));
+        hkArrayUtil__reserve(edgeAllocator, &edges, newCapacity, sizeof(Edge));
     }
     edges.m_iElementCount = required;
     int index = 0;
@@ -177,8 +177,8 @@ struct S_00de58c0_Local
 };
 
 struct S_00de58c0_Alloc;
-S_00de58c0_Router* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(S_00de58c0_Alloc* a, S_00de58c0_Arr* arr, int n, int elemSize);
+S_00de58c0_Router* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(S_00de58c0_Alloc* a, S_00de58c0_Arr* arr, int n, int elemSize);
 
 struct S_00de58c0_Obj
 {
@@ -212,8 +212,8 @@ struct S_00de58c0_Obj
     int unk78;
     int unk7c;
     int m_80;
-    void FUN_00de54b0(struct S_00de58c0_Local* out);
-    void FUN_00de58c0(struct S_00de58c0_Arr* out, struct S_00de58c0_Alloc* alloc);
+    void hkDisplayCone_generateConeVertices(struct S_00de58c0_Local* out);
+    void hkDisplayCone_getWireframeGeometry(struct S_00de58c0_Arr* out, struct S_00de58c0_Alloc* alloc);
 };
 
 static inline __m128& Q(S_00de58c0_V4& v)
@@ -223,19 +223,20 @@ static inline __m128& Q(S_00de58c0_V4& v)
 
 // Fills a local array via FUN_00de54b0, then writes four vectors per entry to out (m_60, entry i twice, entry i+1 mod m_80), growing out as needed.
 // @fnv 0x00de58c0
-void S_00de58c0_Obj::FUN_00de58c0(S_00de58c0_Arr* out, S_00de58c0_Alloc* alloc)
+// src: HAVOK_SRC 0x00de58c0
+void S_00de58c0_Obj::hkDisplayCone_getWireframeGeometry(S_00de58c0_Arr* out, S_00de58c0_Alloc* alloc)
 {
     S_00de58c0_Local tmp;
     tmp.m_data = (S_00de58c0_V4*)tmp.m_buf;
     tmp.m_iElementCount = 0;
     tmp.m_cap = 0x80000100;
-    FUN_00de54b0(&tmp);
+    hkDisplayCone_generateConeVertices(&tmp);
     int n = m_80;
     int newSize = n * 4;
     if ((out->m_cap & 0x3fffffff) < newSize)
     {
         int iDoubledCap = (out->m_cap & 0x3fffffff) * 2;
-        FUN_00c908c0(alloc, out, newSize < iDoubledCap ? iDoubledCap : newSize, 16);
+        hkArrayUtil__reserve(alloc, out, newSize < iDoubledCap ? iDoubledCap : newSize, 16);
     }
     out->m_iElementCount = newSize;
     int iWrite = 0;
@@ -247,7 +248,7 @@ void S_00de58c0_Obj::FUN_00de58c0(S_00de58c0_Arr* out, S_00de58c0_Alloc* alloc)
         iRead++;
         Q(out->m_data[iWrite++]) = Q(tmp.m_data[iRead % m_80]);
     }
-    S_00de58c0_Heap& h = FUN_00c85750()->heap();
+    S_00de58c0_Heap& h = hkMemoryRouter_getInstance()->heap();
     tmp.m_iElementCount = 0;
     if ((tmp.m_cap & 0x80000000) == 0)
         h.ReturnMemory(tmp.m_data, (tmp.m_cap & 0x3fffffff) * 16);

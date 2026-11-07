@@ -144,7 +144,7 @@ FloatIntPair* Normal::vf05(FloatIntPair* p)
 
 struct Dummy44a3a0
 {
-    void __thiscall FUN_0044a3d0();
+    void __thiscall SetVtableAndProcessState_0044a3d0();
     void* __thiscall DestroyIfFlagged(unsigned int);
 };
 void __cdecl _Deallocate(void*);
@@ -152,13 +152,13 @@ void __cdecl _Deallocate(void*);
 // @fnv 0x0044a3a0
 void* __thiscall Dummy44a3a0::DestroyIfFlagged(unsigned int flags)
 {
-    this->FUN_0044a3d0();
+    this->SetVtableAndProcessState_0044a3d0();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-extern "C" void __cdecl FUN_00b43480(int);
+extern "C" void __cdecl DoNothing(int);
 
 // Throws if RandomSeed is zero, picks an index from Random::Raw()*128, refills that sample slot with a new raw value and returns the old sample.
 // @fnv 0x00b433a0
@@ -167,8 +167,8 @@ float Random::Next()
     if (RandomSeed == 0.0)
         throw std::logic_error("Random number generator not initialised");
     int i = (int)(Random::Raw() * 128.0);
-    FUN_00b43480(i);
-    FUN_00b43480(i);
+    DoNothing(i);
+    DoNothing(i);
     float f = randomSamples[i];
     randomSamples[i] = Random::Raw();
     return f;
@@ -292,7 +292,8 @@ struct S_00b42f40_Er
 
 // Copies n elements from src into the array at p, rethrowing on exception after walking local up to p.
 // @fnv 0x00b42f40
-void __cdecl FUN_00b42f40(S_00b42f40_Er* pDest, unsigned int n, S_00b42f40_Er* pSource)
+// src: GUESS 0x00b42f40 (confidence: medium)
+void __cdecl Object_CopyElementRange_00b42f40(S_00b42f40_Er* pDest, unsigned int n, S_00b42f40_Er* pSource)
 {
     S_00b42f40_Er* pStart = pDest;
     try
@@ -345,7 +346,7 @@ struct TagUndefinedMove
 {
 };
 
-Elem8* __cdecl FUN_00b43230(Elem8* _First, Elem8* _Last, Elem8* _Dest, Alloc8& _Al, TagNonscalar _Tag0,
+Elem8* __cdecl RobertdaviesRandom_ProcessEntries_00b43230(Elem8* _First, Elem8* _Last, Elem8* _Dest, Alloc8& _Al, TagNonscalar _Tag0,
                             TagRangeChecked _Tag1);
 
 inline TagUndefinedMove MoveCat(Elem8* const& _Iter)
@@ -373,7 +374,7 @@ inline Elem8* CheckedBase(Elem8*& _It)
 
 inline Elem8* unchecked_uninitialized_copy(Elem8* _First, Elem8* _Last, Elem8* _Dest, Alloc8& _Al)
 {
-    return FUN_00b43230(CheckedBase(_First), CheckedBase(_Last), _Dest, _Al, PtrCat(_First, _Dest), TagRangeChecked());
+    return RobertdaviesRandom_ProcessEntries_00b43230(CheckedBase(_First), CheckedBase(_Last), _Dest, _Al, PtrCat(_First, _Dest), TagRangeChecked());
 }
 
 template <class _MoveCatTy>
@@ -383,7 +384,8 @@ inline Elem8* UninitMove(Elem8* _First, Elem8* _Last, Elem8* _Dest, Alloc8& _Al,
 }
 
 // @fnv 0x00b43010
-Elem8* __cdecl FUN_00b43010(Elem8* _First, Elem8* _Last, Elem8* _Dest, Alloc8& _Al)
+// src: GUESS 0x00b43010 (confidence: medium)
+Elem8* __cdecl RobertdaviesRandom_MoveRangeToUninitializedStorage(Elem8* _First, Elem8* _Last, Elem8* _Dest, Alloc8& _Al)
 {
     return UninitMove(CheckedBase(_First), CheckedBase(_Last), _Dest, _Al, MoveCat(_Dest), TagRangeChecked());
 }
@@ -494,15 +496,16 @@ struct CopyElement
     unsigned int second;
 };
 
-CopyElement* __cdecl FUN_00b43230(CopyElement* first, CopyElement* last, CopyElement* destination,
+CopyElement* __cdecl RobertdaviesRandom_ProcessEntries_00b43230(CopyElement* first, CopyElement* last, CopyElement* destination,
                                   std::allocator<CopyElement>& allocator, std::_Nonscalar_ptr_iterator_tag,
                                   std::_Range_checked_iterator_tag);
 
 // @fnv 0x00b431e0
-CopyElement* __cdecl FUN_00b431e0(CopyElement* _First, CopyElement* _Last, CopyElement* _Dest,
+// src: GUESS 0x00b431e0 (confidence: low)
+CopyElement* __cdecl Object_ProcessAndReturnValue_00b431e0(CopyElement* _First, CopyElement* _Last, CopyElement* _Dest,
                                   std::allocator<CopyElement>& _Al)
 {
-    return FUN_00b43230(std::_Checked_base(_First), std::_Checked_base(_Last), _Dest, _Al, std::_Ptr_cat(_First, _Dest),
+    return RobertdaviesRandom_ProcessEntries_00b43230(std::_Checked_base(_First), std::_Checked_base(_Last), _Dest, _Al, std::_Ptr_cat(_First, _Dest),
                         std::_Range_checked_iterator_tag());
 }
 
@@ -524,7 +527,8 @@ inline void Destroy(SpawnedPair* p)
 }
 
 // @fnv 0x00b43230
-SpawnedPair* __cdecl FUN_00b43230(const SpawnedPair* apSource, const SpawnedPair* apSourceEnd, SpawnedPair* apDest)
+// src: GUESS 0x00b43230 (confidence: low)
+SpawnedPair* __cdecl RobertdaviesRandom_ProcessEntries_00b43230(const SpawnedPair* apSource, const SpawnedPair* apSourceEnd, SpawnedPair* apDest)
 {
     SpawnedPair* pConstructed = apDest;
     try
@@ -542,7 +546,8 @@ SpawnedPair* __cdecl FUN_00b43230(const SpawnedPair* apSource, const SpawnedPair
 }
 
 // @fnv 0x00b43480
-extern "C" void __cdecl FUN_00b43480(int)
+// src: COMMUNITY 0x00b43480
+extern "C" void __cdecl DoNothing(int)
 {}
 
 struct input_iterator_tagS
@@ -919,7 +924,8 @@ template <class _Ty> class vectorS : public _Vector_valS<_Ty>
 };
 // Forwards the range [_First, _Last) and _Dest to _Copy_optS with a range-checked tag and returns its result.
 // @fnv 0x00b42e50
-int* __cdecl FUN_00b42e50(int* _First, int* _Last, int* _Dest)
+// src: COMMUNITY 0x00b42e50
+int* __cdecl std__Move(int* _First, int* _Last, int* _Dest)
 {
     return (_Copy_optS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Iter_randomS(_First, _Dest),
                        _Ptr_catS(_First, _Dest), _Range_checked_iterator_tagS()));
@@ -1469,7 +1475,8 @@ inline void S_00b42ed0_Pad()
 
 // Assigns val through first for each position, advancing first until it equals last.
 // @fnv 0x00b42ed0
-void __cdecl FUN_00b42ed0(S_00b42ed0_Iter first, S_00b42ed0_Iter last, const bool& val)
+// src: GUESS 0x00b42ed0 (confidence: medium)
+void __cdecl RobertdaviesRandom_FillIteratorRange(S_00b42ed0_Iter first, S_00b42ed0_Iter last, const bool& val)
 {
     for (; first != last; first.Increment())
     {

@@ -108,7 +108,8 @@ void Character::LoadGame(BGSLoadFormBuffer* buffer)
 }
 
 // @fnv 0x008d1e90
-void __fastcall FUN_008d1e90(Character* this_ptr, float value)
+// src: COMMUNITY 0x008d1e90
+void __fastcall Character_SetFlyInventoryWeight(Character* this_ptr, float value)
 {
     *(float*)((char*)this_ptr + 0x1c4) = value;
 }
@@ -121,11 +122,12 @@ struct FUN_009dcc80_target
 struct FUN_008b3b30_shell
 {
     NiPoint3* GetAddTopicList();
-    NiPoint3 FUN_008b3b30(float f);
+    NiPoint3 Actor_GetAnticipatedLocation(float f);
 };
 // Returns the stored point when f is not above _gModifierZero, otherwise delegates to the object at offset 0x190 with f.
 // @fnv 0x008b3b30
-NiPoint3 FUN_008b3b30_shell::FUN_008b3b30(float f)
+// src: COMMUNITY 0x008b3b30
+NiPoint3 FUN_008b3b30_shell::Actor_GetAnticipatedLocation(float f)
 {
     if (f <= _gModifierZero)
     {
@@ -152,31 +154,33 @@ FUN_008d1f10_shell* FUN_008d1f10_shell::FUN_008d1f10(unsigned int aiFlags)
     return this;
 }
 
-int __cdecl FUN_00646310(void*, int, float*, float*);
+int __cdecl CombatFormulas_CalcHandToHandDamage(void*, int, float*, float*);
 struct FUN_008d24a0_shell : public Character
 {
-    int FUN_008d24a0();
+    int Character_GetAttackDamage();
 };
 // Calls FUN_00646310 on the object at offset 0xa4 to fill fx and fy, then returns fx as an int.
 // @fnv 0x008d24a0
-int FUN_008d24a0_shell::FUN_008d24a0()
+// src: COMMUNITY 0x008d24a0
+int FUN_008d24a0_shell::Character_GetAttackDamage()
 {
     float fx = 0.0f;
     float fy = 0.0f;
-    FUN_00646310(this ? (char*)this + 0xa4 : 0, 0, &fx, &fy);
+    CombatFormulas_CalcHandToHandDamage(this ? (char*)this + 0xa4 : 0, 0, &fx, &fy);
     return (int)fx;
 }
 
 struct FUN_008d32b0_shell : public Character
 {
-    unsigned short FUN_008a9020(unsigned int);
-    unsigned short FUN_008d32b0(unsigned int aiFlags);
+    unsigned short Actor_GetSaveSize(unsigned int);
+    unsigned short Character_GetSaveSize(unsigned int aiFlags);
 };
 // @fnv 0x008d32b0
-unsigned short FUN_008d32b0_shell::FUN_008d32b0(unsigned int aiFlags)
+// src: XBOX_PDB 0x008d32b0
+unsigned short FUN_008d32b0_shell::Character_GetSaveSize(unsigned int aiFlags)
 {
     unsigned short isize = 0;
-    isize += FUN_008a9020(aiFlags);
+    isize += Actor_GetSaveSize(aiFlags);
     return isize;
 }
 
@@ -186,38 +190,41 @@ struct FUN_008a9380_target
 };
 struct FUN_008d32f0_shell
 {
-    void FUN_008d32f0(unsigned int aiFlags);
+    void Character_SaveGame(unsigned int aiFlags);
 };
 // @fnv 0x008d32f0
-void FUN_008d32f0_shell::FUN_008d32f0(unsigned int aiFlags)
+// src: XBOX_PDB 0x008d32f0
+void FUN_008d32f0_shell::Character_SaveGame(unsigned int aiFlags)
 {
     ((FUN_008a9380_target*)this)->SaveActorData(aiFlags);
 }
 
 struct FUN_008d3310_shell : public Character
 {
-    void FUN_008a9940(unsigned int, unsigned int);
-    void FUN_008d3310(unsigned int aiFlags, unsigned int aiCurrentFlags);
+    void Actor_LoadGame(unsigned int, unsigned int);
+    void Character_LoadGame(unsigned int aiFlags, unsigned int aiCurrentFlags);
 };
 // @fnv 0x008d3310
-void FUN_008d3310_shell::FUN_008d3310(unsigned int aiFlags, unsigned int aiCurrentFlags)
+// src: XBOX_PDB 0x008d3310
+void FUN_008d3310_shell::Character_LoadGame(unsigned int aiFlags, unsigned int aiCurrentFlags)
 {
-    FUN_008a9940(aiFlags, aiCurrentFlags);
+    Actor_LoadGame(aiFlags, aiCurrentFlags);
 }
 
 #include "../../../include/TESSaveLoadGame.h"
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 struct FUN_008d3330_shell : public Character
 {
-    void FUN_008aa210(unsigned int);
-    void FUN_008d3330(unsigned int aiFlags);
+    void Actor_RevertTES(unsigned int);
+    void Character_RevertTES(unsigned int aiFlags);
 };
 // Calls FUN_008aa210 with aiFlags, then if g_TESSaveLoadGame->FUN_0055f5b0() succeeds, sets two floats to -1.0f.
 // @fnv 0x008d3330
-void FUN_008d3330_shell::FUN_008d3330(unsigned int aiFlags)
+// src: COMMUNITY 0x008d3330
+void FUN_008d3330_shell::Character_RevertTES(unsigned int aiFlags)
 {
-    FUN_008aa210(aiFlags);
-    if (g_TESSaveLoadGame->FUN_0055f5b0())
+    Actor_RevertTES(aiFlags);
+    if (g_TESSaveLoadGame->TESSaveLoadGame_GetRevertBefore())
     {
         m_fFirstResetValue = -1.0f;
         m_fSecondValue = -1.0f;
@@ -226,25 +233,26 @@ void FUN_008d3330_shell::FUN_008d3330(unsigned int aiFlags)
 
 struct FUN_008d3380_shell : public Character
 {
-    void FUN_008aa4c0(unsigned int, unsigned int);
-    void FUN_008d3380(unsigned int, unsigned int);
+    void Actor_InitLoadGame(unsigned int, unsigned int);
+    void Character_InitLoadGame(unsigned int, unsigned int);
 };
 // @fnv 0x008d3380
-void FUN_008d3380_shell::FUN_008d3380(unsigned int a, unsigned int b)
+// src: XBOX_PDB 0x008d3380
+void FUN_008d3380_shell::Character_InitLoadGame(unsigned int a, unsigned int b)
 {
-    FUN_008aa4c0(a, b);
+    Actor_InitLoadGame(a, b);
 }
 
 struct FUN_008d33a0_shell : public Character
 {
-    void FUN_008aaf40(BGSSaveFormBuffer*);
+    void Actor_SaveGame(BGSSaveFormBuffer*);
     void SaveFormData(BGSSaveFormBuffer*);
 };
 // Calls FUN_008aaf40, then saves the two bytes at offsets 0x1c0 and 0x1c1 of this into the save buffer.
 // @fnv 0x008d33a0
 void FUN_008d33a0_shell::SaveFormData(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    FUN_008aaf40(apSaveGameBuffer);
+    Actor_SaveGame(apSaveGameBuffer);
     apSaveGameBuffer->SaveData((char*)this + 0x1c0, 1, 0);
     apSaveGameBuffer->SaveData((char*)this + 0x1c1, 1, 0);
 }
@@ -259,17 +267,18 @@ void FUN_009396f0_shell::SetFieldD64(int value)
     *(int*)((char*)this + 0xd64) = value;
 }
 
-bool __fastcall FUN_00524d10(bool*);
+bool __fastcall PlayerCharacter_IsActually3rdPerson(bool*);
 struct FUN_00950ad0_shell : public PlayerCharacter
 {
     BipedAnim* GetBipedAnimation(bool);
-    BipedAnim* FUN_00950ad0();
+    BipedAnim* PlayerCharacter_GetCurrentBiped();
 };
 // Returns the BipedAnim for the player, choosing the variant based on the result of FUN_00524d10(this).
 // @fnv 0x00950ad0
-BipedAnim* FUN_00950ad0_shell::FUN_00950ad0()
+// src: COMMUNITY 0x00950ad0
+BipedAnim* FUN_00950ad0_shell::PlayerCharacter_GetCurrentBiped()
 {
-    return GetBipedAnimation(!FUN_00524d10((bool*)this));
+    return GetBipedAnimation(!PlayerCharacter_IsActually3rdPerson((bool*)this));
 }
 
 struct MediaLocation;
@@ -306,7 +315,7 @@ MediaLocationController* FUN_009698a0_shell::GetMediaLocationController()
 
 struct ExtraDataList_Accessor
 {
-    void FUN_0042e060(BGSTalkingActivator*, TESObjectREFR*);
+    void ExtraDataList_SetTalkingActorExtra(BGSTalkingActivator*, TESObjectREFR*);
     void* FUN_0042e110();
 };
 
@@ -392,14 +401,15 @@ struct Slot12cHolder
 
 struct FUN_008b1910_shell
 {
-    TESObjectREFR* FUN_008b1910(TESObjectREFR* apRefr, TESObjectREFR*& apOutRefr);
+    TESObjectREFR* Actor_SetUpTalkingActivatorActor(TESObjectREFR* apRefr, TESObjectREFR*& apOutRefr);
 };
 
 // @fnv 0x008b1910
-TESObjectREFR* FUN_008b1910_shell::FUN_008b1910(TESObjectREFR* apRefr, TESObjectREFR*& apOutRefr)
+// src: COMMUNITY 0x008b1910
+TESObjectREFR* FUN_008b1910_shell::Actor_SetUpTalkingActivatorActor(TESObjectREFR* apRefr, TESObjectREFR*& apOutRefr)
 {
     BGSTalkingActivator* m_pLinkedReference = (BGSTalkingActivator*)((TESObject*)apRefr)->GetNext();
-    ((ExtraDataList_Accessor*)apRefr->GetExtraData())->FUN_0042e060(m_pLinkedReference, apRefr);
+    ((ExtraDataList_Accessor*)apRefr->GetExtraData())->ExtraDataList_SetTalkingActorExtra(m_pLinkedReference, apRefr);
     apRefr->MarkAsModified(0x80000000);
     void* extra9 = ((ExtraDataList_Accessor*)apRefr->GetExtraData())->FUN_0042e110();
     if (extra9)
@@ -422,17 +432,18 @@ struct TopicH
 
 struct FUN_00968690_shell : public Character
 {
-    NiPoint3 FUN_00968690(float f);
+    NiPoint3 PlayerCharacter_GetAnticipatedLocation(float f);
 };
 
 // @fnv 0x00968690
-NiPoint3 FUN_00968690_shell::FUN_00968690(float f)
+// src: COMMUNITY 0x00968690
+NiPoint3 FUN_00968690_shell::PlayerCharacter_GetAnticipatedLocation(float f)
 {
     NiPoint3 kPos = *(NiPoint3*)((TopicH*)this)->GetAddTopicList();
     NiPoint3 kMotionVelocity;
     if (f > 0.0 && GetPhysicsCharacterController())
     {
-        GetPhysicsCharacterController()->FUN_0066ca00(&kMotionVelocity);
+        GetPhysicsCharacterController()->bhkCharacterProxy_GetLinearVelocity(&kMotionVelocity);
         kPos += reinterpret_cast<const NiPoint3&>(kMotionVelocity) * f;
     }
     return reinterpret_cast<const NiPoint3&>(kPos);
@@ -1593,12 +1604,13 @@ struct FUN_008ac850_owner
     virtual void* f0265();
     virtual FUN_008ac850_object* f0266();
 
-    void __thiscall FUN_008ac850(void* value);
+    void __thiscall Actor_SetCombatGroup(void* value);
 };
 
 // Retrieves the object via f0266 and, if non-null, forwards value to its SetWaterForm method.
 // @fnv 0x008ac850
-void __thiscall FUN_008ac850_owner::FUN_008ac850(void* value)
+// src: COMMUNITY 0x008ac850
+void __thiscall FUN_008ac850_owner::Actor_SetCombatGroup(void* value)
 {
     FUN_008ac850_object* object = f0266();
     if (object != 0)
@@ -2068,11 +2080,12 @@ struct ActorAVUpdater
 
 struct FUN_0093a8f0_shell : public Actor
 {
-    void FUN_0093a8f0(int aiAV, int aiAmount);
+    void PlayerCharacter_ModActorBaseValueI(int aiAV, int aiAmount);
 };
 
 // @fnv 0x0093a8f0
-void FUN_0093a8f0_shell::FUN_0093a8f0(int aiAV, int aiAmount)
+// src: COMMUNITY 0x0093a8f0
+void FUN_0093a8f0_shell::PlayerCharacter_ModActorBaseValueI(int aiAV, int aiAmount)
 {
     float fOld = IsAVModifiable(aiAV) ? GetCurrentActorValue((ActorValue::Index)aiAV) : 0.0f;
     bool bFound4 = false;
@@ -2100,17 +2113,17 @@ struct XAObj
 {
     void FUN_00826b40(int);
     void FUN_00826b90(int);
-    void FUN_00671d30(void*);
+    void SetPackageLocation(void*);
     void FUN_00984f60(int);
     void* FUN_00671d10(int);
-    void FUN_00672fc0(void*);
+    void SetPackageTarget(void*);
 };
 struct XPObj
 {
     XPObj();
     ~XPObj();
-    void FUN_0067f140(int);
-    void FUN_0067f3c0(void*);
+    void PackageLocation_SetLocType(int);
+    void PackageLocation_SetLocReference(void*);
     void* unk00;
     void* unk04;
     void* unk08;
@@ -2741,33 +2754,34 @@ struct XObj
     virtual void v2ec();
     virtual void v2f0();
     virtual void Finish(XAObj*, int, int);
-    void FUN_009694d0(void* arg0);
-    void FUN_005cc7a0(int);
-    void FUN_00950340(int);
+    void PlayerCharacter_InitiateCannibalPackage(void* arg0);
+    void PlayerCharacter_SetAIControlledPackage(int);
+    void PlayerCharacter_ForceTemp3rdPerson(int);
     XUpdatable* FUN_008d8520();
     void* unk04[25];
     XMember* member68;
 };
 
 // @fnv 0x009694d0
-void XObj::FUN_009694d0(void* arg0)
+// src: COMMUNITY 0x009694d0
+void XObj::PlayerCharacter_InitiateCannibalPackage(void* arg0)
 {
     if (((XA8a*)arg0)->GetExtraDataVersion())
         return;
-    FUN_005cc7a0(1);
-    FUN_00950340(1);
+    PlayerCharacter_SetAIControlledPackage(1);
+    PlayerCharacter_ForceTemp3rdPerson(1);
     member68->Attach(0, this);
     member68->Detach(0);
     XAObj* A5 = (XAObj*)CreatePackageByType(0x26);
     A5->FUN_00826b40(1);
     A5->FUN_00826b90(1);
     XPObj* P = new XPObj;
-    P->FUN_0067f140(0);
-    P->FUN_0067f3c0(this);
-    A5->FUN_00671d30(P);
+    P->PackageLocation_SetLocType(0);
+    P->PackageLocation_SetLocReference(this);
+    A5->SetPackageLocation(P);
     delete P;
     XVObj* X = new XVObj;
-    A5->FUN_00672fc0(X);
+    A5->SetPackageTarget(X);
     delete X;
     A5->FUN_00984f60(0x2F);
     ((XTmpObj*)A5->FUN_00671d10(0))->FUN_006800b0();
@@ -2819,7 +2833,7 @@ struct LocBF
     char data[12];
     LocBF();
     ~LocBF();
-    void FUN_0067f3c0(void*);
+    void PackageLocation_SetLocReference(void*);
 };
 struct DataBF
 {
@@ -2835,26 +2849,27 @@ struct PackBF
     void SetPackageType(int);
     void FUN_00826b40(bool);
     void FUN_00826b90(bool);
-    void FUN_00671d30(LocBF*);
-    void FUN_00672fc0(DataBF*);
+    void SetPackageLocation(LocBF*);
+    void SetPackageTarget(DataBF*);
     void FUN_00984f60(int);
     DataBF* FUN_00671d10();
 };
 void* __cdecl CreatePackageByType(int);
 struct GlobalBF
 {
-    void FUN_00966e00();
+    void PlayerCharacter_IssueStealWarning();
 };
 extern "C" char DAT_011dea3c;
 // Actor.h lacks this package-assignment method; inherit its checked layout without duplicating it.
 struct PackageAssignment : Actor
 {
-    void FUN_008bf7b0(void*, int);
+    void Actor_InitiateStealWarning(void*, int);
 };
 // @fnv 0x008bf7b0
-void PackageAssignment::FUN_008bf7b0(void* arg, int unused)
+// src: XBOX_PDB 0x008bf7b0
+void PackageAssignment::Actor_InitiateStealWarning(void* arg, int unused)
 {
-    if (FUN_00493bb0())
+    if (Actor_IsInCombat())
         return;
     ((OtherBF*)m_pBaseProcess)->reset();
     ((ProcBF*)GetProcess())->set(true);
@@ -2866,11 +2881,11 @@ void PackageAssignment::FUN_008bf7b0(void* arg, int unused)
     pack->FUN_00826b40(true);
     pack->FUN_00826b90(true);
     LocBF* loc = new LocBF;
-    loc->FUN_0067f3c0(arg);
-    pack->FUN_00671d30(loc);
+    loc->PackageLocation_SetLocReference(arg);
+    pack->SetPackageLocation(loc);
     delete loc;
     DataBF* kDat = new DataBF;
-    pack->FUN_00672fc0(kDat);
+    pack->SetPackageTarget(kDat);
     delete kDat;
     pack->FUN_00984f60(0x2a);
     pack->FUN_00671d10()->FUN_006800b0(0);
@@ -2880,7 +2895,7 @@ void PackageAssignment::FUN_008bf7b0(void* arg, int unused)
     ((ProcBF*)GetProcess())->update(this);
     // Slot 0x2f4 takes a package and two flags; the shared Unk_BD declaration lacks its arguments.
     ((XObj*)this)->Finish((XAObj*)pack, 0, 1);
-    (*(GlobalBF**)&DAT_011dea3c)->FUN_00966e00();
+    (*(GlobalBF**)&DAT_011dea3c)->PlayerCharacter_IssueStealWarning();
 }
 
 struct AssignedProcess
@@ -3498,7 +3513,7 @@ struct AssignedTargetView
 };
 struct AssignedExtraView
 {
-    void FUN_0041c930(void*, unsigned int, unsigned int, bool, bool, bool);
+    void AllocateStorage_0041c930(void*, unsigned int, unsigned int, bool, bool, bool);
 };
 struct AssignedArgument
 {
@@ -3506,15 +3521,16 @@ struct AssignedArgument
 };
 struct AssignedCharacter : Character
 {
-    bool FUN_00493bb0();
+    bool Actor_IsInCombat();
     AssignedPackageView* FUN_009344a0();
-    AssignedExtraView* FUN_005d43c0();
-    void FUN_008d2a80(AssignedArgument* argument);
+    AssignedExtraView* BSFile_GetDevice();
+    void Character_InitiateCannibalPackage(AssignedArgument* argument);
 };
 // @fnv 0x008d2a80
-void AssignedCharacter::FUN_008d2a80(AssignedArgument* argument)
+// src: COMMUNITY 0x008d2a80
+void AssignedCharacter::Character_InitiateCannibalPackage(AssignedArgument* argument)
 {
-    if (FUN_00493bb0())
+    if (Actor_IsInCombat())
         return;
     ((AssignedProcess*)m_pBaseProcess)->Attach(0, this);
     ((AssignedProcess*)GetProcess())->Detach(0);
@@ -3528,12 +3544,12 @@ void AssignedCharacter::FUN_008d2a80(AssignedArgument* argument)
     location->FUN_00826b40(1);
     location->FUN_00826b90(1);
     package = new XPObj;
-    package->FUN_0067f140(0);
-    package->FUN_0067f3c0(this);
-    location->FUN_00671d30(package);
+    package->PackageLocation_SetLocType(0);
+    package->PackageLocation_SetLocReference(this);
+    location->SetPackageLocation(package);
     delete package;
     XVObj* target = new XVObj;
-    location->FUN_00672fc0(target);
+    location->SetPackageTarget(target);
     delete target;
     location->FUN_00984f60(47);
     ((AssignedPackageDataView*)location)->FUN_00671d10()->FUN_006800b0(0);
@@ -3542,7 +3558,7 @@ void AssignedCharacter::FUN_008d2a80(AssignedArgument* argument)
     ((AssignedProcess*)GetProcess())->Update();
     if (((AssignedProcess*)m_pBaseProcess)->GetTarget())
     {
-        FUN_005d43c0()->FUN_0041c930(
+        BSFile_GetDevice()->AllocateStorage_0041c930(
             ((AssignedProcess*)m_pBaseProcess)->GetTarget(), ((AssignedProcess*)m_pBaseProcess)->State23c(),
             ((AssignedProcess*)m_pBaseProcess)->State128(), ((AssignedProcess*)m_pBaseProcess)->State11c(),
             ((AssignedProcess*)m_pBaseProcess)->State4e8(), ((AssignedProcess*)m_pBaseProcess)->State5a4());

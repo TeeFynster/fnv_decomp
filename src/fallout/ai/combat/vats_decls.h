@@ -15,7 +15,7 @@ class ShadowSceneLight;
 class Animation
 {
   public:
-    void FUN_0088b030(float);
+    void Animation_SetGlobalTimeMultiplier(float);
 };
 
 class TimeGlobal
@@ -32,7 +32,7 @@ class PlayerCharacter
     unsigned char layoutPadding0[0xE18];
     float fVATSTimer;
     unsigned char layoutPaddingE1C[0x34];
-    bool FUN_004eaf60();
+    bool PlayerCharacter_Is3rdPerson();
     Animation* GetAnimation(bool firstPerson);
     static bool UpdatePlayerStatus();
 };
@@ -53,8 +53,8 @@ class BGSCameraShot
 {
   public:
     void ResetCameraShot();
-    bool FUN_0058d630();
-    float FUN_00639aa0();
+    bool IsInitialized();
+    float TESCombatStyle_GetTargetingFOV();
     char _pdbpad_1[55];
     char Data_pad37_pad37_pad37[40];
     char spLocationNode_pad5f_pad5f_pad5f[4];
@@ -123,7 +123,7 @@ class hkpCharacterContext
   public:
     static float GetReferenceTimeStep();
 };
-float FUN_009443f0();
+float BSTimer_QGlobalTimeMultiplierTarget();
 
 extern TimeGlobal g_timeGlobal;
 extern PlayerCharacter* g_thePlayer;

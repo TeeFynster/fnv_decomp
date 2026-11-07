@@ -486,7 +486,8 @@ void FUN_00a37260_shell::UpdateNormalizedWeights()
 
 extern const char* const g_011f371c_arg1;
 // @fnv 0x00a36960
-const char* const* __cdecl FUN_00a36960()
+// src: COMMUNITY 0x00a36960
+const char* const* __cdecl NiBlendInterpolator_GetRTTI()
 {
     return &g_011f371c_arg1;
 }
@@ -648,7 +649,8 @@ struct BlendInterpS : InterpS
     InterpS* m_pSingleInterpolator;
 };
 // @fnv 0x00a36e10
-void __fastcall FUN_00a36e10(BlendInterpS* self, int, float m_fStartTime, float m_fMaximumDistance)
+// src: XBOX_PDB 0x00a36e10
+void __fastcall NiBlendInterpolator_GuaranteeTimeRange(BlendInterpS* self, int, float m_fStartTime, float m_fMaximumDistance)
 {
     if (self->m_ucInterpCount == 1)
     {
@@ -668,7 +670,7 @@ namespace fnv_00a36f80 {
 struct InterpS
 {
     virtual void v0();
-    bool FUN_00a81fe0(NiStream& s);
+    bool BSTextureSet_RegisterStreamables(NiStream& s);
     virtual void v1();
     virtual void v2();
     virtual void v3();
@@ -734,9 +736,10 @@ struct BlendInterpS : InterpS
 };
 // Registers the base streamables, then registers each item's interpolator when the flag bit is clear; returns false if the base call fails.
 // @fnv 0x00a36f80
-bool __fastcall FUN_00a36f80(BlendInterpS* self, int, NiStream& kStream)
+// src: XBOX_PDB 0x00a36f80
+bool __fastcall NiBlendInterpolator_RegisterStreamables(BlendInterpS* self, int, NiStream& kStream)
 {
-    if (!self->FUN_00a81fe0(kStream))
+    if (!self->BSTextureSet_RegisterStreamables(kStream))
         return false;
     if (!(self->m_uiObjectFlags & 1))
     {
@@ -805,12 +808,13 @@ struct BlendS
     InterpS* m_pSingleInterpolator;
     float m_fWeightThreshold;
     float m_fSingleInterpolatorTime;
-    bool FUN_00ba87d0(ObjS* o);
+    bool BSAnimNotes_IsEqual(ObjS* o);
 };
 // @fnv 0x00a36fd0
-bool __fastcall FUN_00a36fd0(BlendS* self, int, ObjS* pkObject)
+// src: XBOX_PDB 0x00a36fd0
+bool __fastcall NiBlendInterpolator_IsEqual(BlendS* self, int, ObjS* pkObject)
 {
-    if (!self->FUN_00ba87d0(pkObject))
+    if (!self->BSAnimNotes_IsEqual(pkObject))
         return false;
     BlendS* pkDest = (BlendS*)pkObject;
     if (self->m_ucArraySize != pkDest->m_ucArraySize)
@@ -845,7 +849,8 @@ struct FUN_00a370a0_obj
     int field0;
 };
 // @fnv 0x00a370a0
-FUN_00a370a0_obj* __fastcall FUN_00a370a0(FUN_00a370a0_obj* self, int)
+// src: GUESS 0x00a370a0 (confidence: low)
+FUN_00a370a0_obj* __fastcall Object_InitializeFields_00a370a0(FUN_00a370a0_obj* self, int)
 {
     self->field0 = 0;
     return self;
@@ -1054,8 +1059,8 @@ extern "C" char UNK_01096af4, UNK_01096adc, UNK_01096ac4;
 extern "C" char UNK_01096ab4, UNK_01096aa4;
 extern "C" char UNK_01095dbc, UNK_01096a98, UNK_01096a8c;
 extern "C" char UNK_01096a78, UNK_01096a68;
-extern "C" const char* __cdecl FUN_00a7d330(void*);
-extern "C" const char* __cdecl FUN_00a7d410(const void*, unsigned int);
+extern "C" const char* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
+extern "C" const char* __cdecl NiGetViewerString_00a7d410(const void*, unsigned int);
 struct ViewerBool
 {
     bool flag;
@@ -1065,10 +1070,10 @@ union ViewerValue
     const char* value;
     ViewerBool boolean;
 };
-extern "C" const char* __cdecl FUN_00a7d370(const void*, ViewerBool);
-extern "C" const char* __cdecl FUN_00a7d4d0(const void*, int);
-extern "C" const char* __cdecl FUN_00a7d550(const void*, float);
-extern "C" const char* __cdecl FUN_00a7d5e0(const void*, void*);
+extern "C" const char* __cdecl NiGetViewerString(const void*, ViewerBool);
+extern "C" const char* __cdecl NiGetViewerString_00a7d4d0(const void*, int);
+extern "C" const char* __cdecl NiGetViewerString_00a7d550(const void*, float);
+extern "C" const char* __cdecl NiGetViewerString_00a7d5e0(const void*, void*);
 struct InterpolatorRegistry
 {
     LinkedInterpolator* func_0x00a2e570(NiInterpolator*, unsigned int);
@@ -1076,41 +1081,42 @@ struct InterpolatorRegistry
 class BlendSerializer : public NiBlendInterpolator
 {
   public:
-    void FUN_00a38080(NiViewerStringsArray* stream);
+    void NiBlendInterpolator_GetViewerStrings(NiViewerStringsArray* stream);
 };
 // Appends viewer strings for the blend interpolator's fields and, for each array entry with a linked interpolator, its priority, weights and interpolator strings.
 // @fnv 0x00a38080
-void BlendSerializer::FUN_00a38080(NiViewerStringsArray* stream)
+// src: XBOX_PDB 0x00a38080
+void BlendSerializer::NiBlendInterpolator_GetViewerStrings(NiViewerStringsArray* stream)
 {
     this->NiInterpolator::GetViewerStrings(stream);
     const char* uiValue;
     {
         ViewerValue temp;
-        temp.value = FUN_00a7d330(DAT_011f36fc);
+        temp.value = NiViewerStrings_NiGetViewerString_Title(DAT_011f36fc);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d410(&UNK_01096b68, this->m_ucArraySize);
+        temp.value = NiGetViewerString_00a7d410(&UNK_01096b68, this->m_ucArraySize);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d410(&UNK_01096b54, DAT_011a83ff);
+        temp.value = NiGetViewerString_00a7d410(&UNK_01096b54, DAT_011a83ff);
         stream->Add(temp.value);
         temp.boolean.flag = (this->m_uiObjectFlags & 1) != 0;
-        temp.value = FUN_00a7d370(&UNK_01096b40, temp.boolean);
+        temp.value = NiGetViewerString(&UNK_01096b40, temp.boolean);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d550(&UNK_01096b2c, this->m_fWeightThreshold);
+        temp.value = NiGetViewerString_00a7d550(&UNK_01096b2c, this->m_fWeightThreshold);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d4d0(&UNK_01096b1c, this->m_cHighPriority);
+        temp.value = NiGetViewerString_00a7d4d0(&UNK_01096b1c, this->m_cHighPriority);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d4d0(&UNK_01096b08, this->m_cNextHighPriority);
+        temp.value = NiGetViewerString_00a7d4d0(&UNK_01096b08, this->m_cNextHighPriority);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d550(&UNK_01096af4, this->m_fHighSumOfWeights);
+        temp.value = NiGetViewerString_00a7d550(&UNK_01096af4, this->m_fHighSumOfWeights);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d550(&UNK_01096adc, this->m_fNextHighSumOfWeights);
+        temp.value = NiGetViewerString_00a7d550(&UNK_01096adc, this->m_fNextHighSumOfWeights);
         stream->Add(temp.value);
         temp.boolean.flag = ((this->m_uiObjectFlags >> 1) & 1) != 0;
-        temp.value = FUN_00a7d370(&UNK_01096ac4, temp.boolean);
+        temp.value = NiGetViewerString(&UNK_01096ac4, temp.boolean);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d410(&UNK_01096ab4, this->m_ucInterpCount);
+        temp.value = NiGetViewerString_00a7d410(&UNK_01096ab4, this->m_ucInterpCount);
         stream->Add(temp.value);
-        temp.value = FUN_00a7d410(&UNK_01096aa4, this->m_ucSingleIdx);
+        temp.value = NiGetViewerString_00a7d410(&UNK_01096aa4, this->m_ucSingleIdx);
         stream->Add(temp.value);
     }
     for (unsigned int index = 0; index < this->m_ucArraySize; ++index)
@@ -1127,15 +1133,15 @@ void BlendSerializer::FUN_00a38080(NiViewerStringsArray* stream)
             if (linked)
             {
                 void* linkedObject = linked->m_object;
-                uiValue = FUN_00a7d5e0(&UNK_01095dbc, linkedObject);
+                uiValue = NiGetViewerString_00a7d5e0(&UNK_01095dbc, linkedObject);
                 stream->Add(uiValue);
-                uiValue = FUN_00a7d410(&UNK_01096a98, (unsigned char)this->m_pInterpArray[index].m_cPriority);
+                uiValue = NiGetViewerString_00a7d410(&UNK_01096a98, (unsigned char)this->m_pInterpArray[index].m_cPriority);
                 stream->Add(uiValue);
-                uiValue = FUN_00a7d550(&UNK_01096a8c, this->m_pInterpArray[index].m_fWeight);
+                uiValue = NiGetViewerString_00a7d550(&UNK_01096a8c, this->m_pInterpArray[index].m_fWeight);
                 stream->Add(uiValue);
-                uiValue = FUN_00a7d550(&UNK_01096a78, this->m_pInterpArray[index].m_fNormalizedWeight);
+                uiValue = NiGetViewerString_00a7d550(&UNK_01096a78, this->m_pInterpArray[index].m_fNormalizedWeight);
                 stream->Add(uiValue);
-                uiValue = FUN_00a7d550(&UNK_01096a68, this->m_pInterpArray[index].m_fEaseSpinner);
+                uiValue = NiGetViewerString_00a7d550(&UNK_01096a68, this->m_pInterpArray[index].m_fEaseSpinner);
                 stream->Add(uiValue);
                 NiInterpolator* finalInterpolator = this->m_pInterpArray[index].m_spControllerInterpolator.m_pObject;
                 finalInterpolator->GetViewerStrings(stream);
@@ -1204,12 +1210,13 @@ struct SBObject : SBBase
     int m_iValue28;
     int m_iValue2C;
 
-    void FUN_00a37ec0(NiStream& arStream);
+    void NiBlendInterpolator_SaveBinary(NiStream& arStream);
 };
 
 // Serializes the base fields, then unless flag bit 1 is set writes the extra bytes and values, each entry, and the link ID.
 // @fnv 0x00a37ec0
-void SBObject::FUN_00a37ec0(NiStream& arStream)
+// src: XBOX_PDB 0x00a37ec0
+void SBObject::NiBlendInterpolator_SaveBinary(NiStream& arStream)
 {
     SBBase::SaveBinary(arStream);
     SBStreamSaveBinary(arStream, m_ucFlags);

@@ -90,9 +90,9 @@ struct TextBuilder
     int length;
     int bufferCapacity;
     void FUN_00cb1600(char*, unsigned int);
-    TextBuilder* FUN_00cc01c0(const char*, int);
-    TextBuilder* FUN_00cc01c0(const char*, float);
-    void FUN_00cc02d0();
+    TextBuilder* ProcessAndReturnValue_00cc01c0(const char*, int);
+    TextBuilder* ProcessAndReturnValue_00cc01c0(const char*, float);
+    void EvaluateValue_00cc02d0();
     void WriteFloat();
     void FUN_00cc00e0();
 };
@@ -123,55 +123,55 @@ void TrackStatistics::LogStatistics()
         char* outputWords[128];
         DAT_01268360->begin(0x432434a4u, str_010ec758);
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec74c, total0 + total1)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec74c, total0 + total1)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 47);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec70c, field0)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec70c, field0)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 48);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec6f4, field1)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec6f4, field1)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 49);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec6e0, field2)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec6e0, field2)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 50);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec6cc, field3)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec6cc, field3)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 51);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec6b4, field4)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec6b4, field4)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 52);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec69c, field5)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec69c, field5)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 53);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec688, field6)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec688, field6)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 54);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec670, field7)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec670, field7)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 55);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec658, field8)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec658, field8)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 56);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec644, field9)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec644, field9)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 57);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec6f40, field10)->FUN_00cc02d0();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec6f40, field10)->EvaluateValue_00cc02d0();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 58);
         textBuilder.FUN_00cc00e0();
         textBuilder.FUN_00cb1600(reinterpret_cast<char*>(outputWords), 512);
-        textBuilder.FUN_00cc01c0(str_010ec624, rate)->WriteFloat();
+        textBuilder.ProcessAndReturnValue_00cc01c0(str_010ec624, rate)->WriteFloat();
         DAT_01268360->write(0, -1, reinterpret_cast<char*>(outputWords), str_010ec724, 59);
         textBuilder.FUN_00cc00e0();
     }
@@ -229,10 +229,10 @@ struct TrackBuffers_e50650
     hkArray<float> m_kCubicCoefficient;
     hkArray<unsigned char> m_kE;
 
-    void FUN_00e50ca0();
+    void ReleaseFiveArrays();
 };
 
-void FUN_00e4f910(TrackBuffers_e50650* pkBuffers, void* pkArg, void* pkArgCur, hkBool bFlag);
+void hkaTrackAnalysis_analyzeQsTransform(TrackBuffers_e50650* pkBuffers, void* pkArg, void* pkArgCur, hkBool bFlag);
 
 // @fnv 0x00e50650
 void ExpandTrackSource(const TrackSource_e50650* pkSource, void* pkArg, void* pkArgCur)
@@ -272,8 +272,8 @@ void ExpandTrackSource(const TrackSource_e50650* pkSource, void* pkArg, void* pk
         kBuffers.m_kCubicCoefficient.m_data[i] = pkSource->m_fD;
         kBuffers.m_kE.m_data[i] = pkSource->m_ucE;
     }
-    FUN_00e4f910(&kBuffers, pkArg, pkArgCur, true);
-    kBuffers.FUN_00e50ca0();
+    hkaTrackAnalysis_analyzeQsTransform(&kBuffers, pkArg, pkArgCur, true);
+    kBuffers.ReleaseFiveArrays();
 }
 
 struct StatsB0
@@ -294,7 +294,8 @@ __declspec(noinline) void __cdecl CountTail(const unsigned short* p, void* a1, u
 }
 // Initializes selected StatsB0 fields, counts mask values from both inputs, and computes derived fields and a ratio in m_34.
 // @fnv 0x00e4ebb0
-void __cdecl FUN_00e4ebb0(const unsigned short* apFirst, void* apSecond, unsigned int aiFirstCount,
+// src: HAVOK_LIB 0x00e4ebb0
+void __cdecl hkaTrackAnalysis_calcStats(const unsigned short* apFirst, void* apSecond, unsigned int aiFirstCount,
                           unsigned int aiSecondCount, StatsB0* psStats)
 {
     psStats->m_34 = 0.0f;
@@ -366,7 +367,8 @@ static float readComponent(const float*& stat, const float*& dynamic, unsigned i
 }
 // Decodes transform and float tracks from static/dynamic data into 12-float transforms and a float array, using masks to select sources and defaults.
 // @fnv 0x00e4f640
-void FUN_00e4f640(const TrackData* apTrackData, float* transforms, float* floats)
+// src: XBOX_PDB 0x00e4f640
+void hkaTrackAnalysis_recompose(const TrackData* apTrackData, float* transforms, float* floats)
 {
     const float* staticData = apTrackData->staticData;
     const float* dynamicData = apTrackData->dynamicData;
@@ -466,8 +468,8 @@ static __forceinline void ClearStatistics(TrackStatistics& s)
     s.rate = 0.0f;
 }
 
-void __cdecl FUN_00e4ead0(const unsigned short* mask, unsigned int count, TrackStatistics* result);
-void __cdecl FUN_00e4ebb0(const unsigned short* maskT, const unsigned short* maskF, unsigned int numT,
+void __cdecl hkaTrackAnalysis_calcStatsQsTransform(const unsigned short* mask, unsigned int count, TrackStatistics* result);
+void __cdecl hkaTrackAnalysis_calcStats(const unsigned short* maskT, const unsigned short* maskF, unsigned int numT,
                           unsigned int numF, TrackStatistics* result);
 
 // Own the array storage explicitly: release() restores the stack router before freeing heap spillover.
@@ -522,13 +524,14 @@ struct FloatLocalArray
 
 // Computes per-track min/max over poses, marks float tracks static when range is below tolerance, and optionally logs statistics.
 // @fnv 0x00e50920
-void __cdecl FUN_00e50920(const PerTransformIn& input, const PerFloatIn& apFloatIn, unsigned short* staticMask,
+// src: HAVOK_LIB 0x00e50920
+void __cdecl hkaTrackAnalysis_analyze(const PerTransformIn& input, const PerFloatIn& apFloatIn, unsigned short* staticMask,
                           float* staticDOFs, hkBool displayStatsReport)
 {
-    FUN_00e4f910((TrackBuffers_e50650*)&input, staticMask, staticDOFs, false);
+    hkaTrackAnalysis_analyzeQsTransform((TrackBuffers_e50650*)&input, staticMask, staticDOFs, false);
     TrackStatistics statistics;
     ClearStatistics(statistics);
-    FUN_00e4ead0(staticMask, input.numberOfTransformTracks, &statistics);
+    hkaTrackAnalysis_calcStatsQsTransform(staticMask, input.numberOfTransformTracks, &statistics);
     float* pStaticDOF = staticDOFs + statistics.field0 + statistics.field1 + statistics.field2;
     FloatLocalArray minimum;
     minimum.allocate(apFloatIn.numberOfFloatTracks);
@@ -566,7 +569,7 @@ void __cdecl FUN_00e50920(const PerTransformIn& input, const PerFloatIn& apFloat
     {
         const PerTransformIn* __restrict src = &input;
         ClearStatistics(statistics);
-        FUN_00e4ebb0(staticMask, staticMask + src->numberOfTransformTracks, src->numberOfTransformTracks,
+        hkaTrackAnalysis_calcStats(staticMask, staticMask + src->numberOfTransformTracks, src->numberOfTransformTracks,
                      apFloatIn.numberOfFloatTracks, &statistics);
         statistics.LogStatistics();
     }
@@ -596,7 +599,8 @@ __declspec(noinline) void AnalyzeTrackBits(const unsigned short* values, unsigne
 }
 // Accumulates bit-field counts from mask values, calls FUN_00e4e570 for remaining fields, and computes a rate from total0 and the summed counts.
 // @fnv 0x00e4ead0
-void __cdecl FUN_00e4ead0(const unsigned short* mask, unsigned int count, StatisticsResult* result)
+// src: HAVOK_LIB 0x00e4ead0
+void __cdecl hkaTrackAnalysis_calcStatsQsTransform(const unsigned short* mask, unsigned int count, StatisticsResult* result)
 {
     result->rate = 0.0f;
     StatisticsResult* pResult = result;

@@ -25,7 +25,8 @@ typedef void* (__stdcall *DashpotApplyTlsGetter)(unsigned long dwTlsIndex);
 static inline __m128 dashpotApplyBroadcast(float f) { __m128 t = _mm_load_ss(&f); return _mm_shuffle_ps(t,t,0); }
 
 // @fnv 0x00d4da60
-void hkpDashpotAction::FUN_00d4da60(hkPadSpu<const hkStepInfo*> stepInfo)
+// src: HAVOK_SRC 0x00d4da60
+void hkpDashpotAction::applyAction_00d4da60(hkPadSpu<const hkStepInfo*> stepInfo)
 {
     DashpotApplyTlsGetter pfnTls = TlsGetValue;
 
@@ -52,8 +53,8 @@ void hkpDashpotAction::FUN_00d4da60(hkPadSpu<const hkStepInfo*> stepInfo)
     hkpEntity* entityB = m_pEntityB;
 
     struct DashpotScratch { hkVector4 points[2]; hkVector4 opposite; } scratch;
-    scratch.points[1].FUN_00c7f640(entityA->m_pMotionState.m_kMotionState.m_kMotionTransform, m_kPoint[0]);
-    scratch.points[0].FUN_00c7f640(entityB->m_pMotionState.m_kMotionState.m_kMotionTransform, m_kPoint[1]);
+    scratch.points[1].setTransformedPos_00c7f640(entityA->m_pMotionState.m_kMotionState.m_kMotionTransform, m_kPoint[0]);
+    scratch.points[0].setTransformedPos_00c7f640(entityB->m_pMotionState.m_kMotionState.m_kMotionTransform, m_kPoint[1]);
 
     __m128 relVel = _mm_sub_ps(entityA->m_pMotionState.m_kTranslationalVelocity.m_vComponents, entityB->m_pMotionState.m_kTranslationalVelocity.m_vComponents);
     __m128 dir = _mm_sub_ps(scratch.points[1].m_vComponents, scratch.points[0].m_vComponents);
@@ -68,9 +69,9 @@ void hkpDashpotAction::FUN_00d4da60(hkPadSpu<const hkStepInfo*> stepInfo)
     _mm_store_ps(&impulse->x, _mm_add_ps(_mm_mul_ps(dampingVec, relVel), impulse->m_vComponents));
     _ReadWriteBarrier();
     _mm_store_ps(&scratch.opposite.x, _mm_mul_ps(dashpotApplyBroadcast(DAT_01012054), impulse->m_vComponents));
-    entityA->FUN_00c9c1d0();
+    entityA->activate_00c9c1d0();
     entityA->m_pMotionState.ApplyImpulseAtPoint(scratch.opposite, scratch.points[1]);
-    entityB->FUN_00c9c1d0();
+    entityB->activate_00c9c1d0();
     entityB->m_pMotionState.ApplyImpulseAtPoint(*impulse, scratch.points[0]);
 
     {

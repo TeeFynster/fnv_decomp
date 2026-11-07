@@ -30,7 +30,7 @@ public:
     TESRegion* Clone(TESRegion* destination);
     void WarnCopyUnsupported(TESRegion* destination);
     ListProxy* FUN_00441110();
-    DataProxy* FUN_009611e0();
+    DataProxy* NiAVObject_GetParent();
     void UpdateWeather();
     RegionDataList* GetRegionDataList() const;
     BSSimpleList<RegionPointList*>* GetRegionPointLists() const;

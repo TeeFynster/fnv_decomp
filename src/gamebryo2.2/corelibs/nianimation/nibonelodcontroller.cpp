@@ -27,7 +27,7 @@ public:
     unsigned int m_pRayCursor;
 
     void Realloc(unsigned int);
-    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    void ProcessEntries_00a56e60(unsigned int ItemUpdateArray);
     unsigned int Find(Item* item);
     int Find(unsigned int value);
     void Add(Item* item);
@@ -46,11 +46,12 @@ struct FUN_00a543f0_shell
 {
     void* m_kPointA;
     void* m_ptr;
-    void FUN_00a543f0();
+    void ReleaseStorage_00a543f0();
 };
 
 // @fnv 0x00a543f0
-void FUN_00a543f0_shell::FUN_00a543f0()
+// src: GUESS 0x00a543f0 (confidence: low)
+void FUN_00a543f0_shell::ReleaseStorage_00a543f0()
 {
     void* p = m_ptr;
     m_kPointA = &DAT_0109a2a4;
@@ -64,7 +65,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_011f405c;
 
 // @fnv 0x00a55120
-GlobalObjectO2_00a7b610* __cdecl FUN_00a55120()
+// src: COMMUNITY 0x00a55120
+GlobalObjectO2_00a7b610* __cdecl NiBoneLODController_GetRTTI()
 {
     return &g_011f405c;
 }
@@ -138,7 +140,8 @@ void* FUN_00a54410_shell::FreeAndMaybeDeallocate(unsigned int flags)
 }  // namespace fnv_00a54410
 
 // @fnv 0x00a552c0
-NiBoneLODController* NiBoneLODController::FUN_00a552c0(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a552c0
+NiBoneLODController* NiBoneLODController::CreateClone_00a552c0(CloningProcess& kCloning)
 {
     NiBoneLODController* pkObject = static_cast<NiBoneLODController*>(BSFadeNode::operator new(0x68));
     if (pkObject)
@@ -176,7 +179,8 @@ void* NiBoneLODController::FUN_00a553f0(unsigned int flags)
 
 // Calls NiObject::LinkObject, saves m_iLOD, sets m_iLOD to -1, then passes the saved value to FUN_00a541f0.
 // @fnv 0x00a54340
-void NiBoneLODController::FUN_00a54340(NiStream& kStream)
+// src: GAMEBRYO_LIB 0x00a54340
+void NiBoneLODController::PostLinkObject_00a54340(NiStream& kStream)
 {
     NiObject::LinkObject(kStream);
     int iLOD = m_iLOD;
@@ -250,7 +254,8 @@ class GeometrySkinInstancePair
 
 // Calls the base RegisterStreamables, then registers the skin instance of every skin info in each LOD skin info set, returning false if the base call fails.
 // @fnv 0x00a53d00
-bool NiBoneLODController::FUN_00a53d00(NiStream& kStream)
+// src: XBOX_PDB 0x00a53d00
+bool NiBoneLODController::RegisterStreamables_00a53d00(NiStream& kStream)
 {
     if (!NiTimeController::RegisterStreamables(kStream))
         return false;
@@ -419,10 +424,10 @@ bool BoneLODLevelMethods::SetLOD(int desiredLOD)
 
 struct MemoryAllocator
 {
-    void FUN_00aa4060(void* object);
+    void MemoryManager_Deallocate(void* object);
 };
 extern MemoryAllocator g_011f6238;
-extern "C" void __cdecl FUN_00aa10f0(void* object);
+extern "C" void __cdecl _NiFree_00aa10f0(void* object);
 extern "C" long __declspec(dllimport) __stdcall InterlockedDecrement(volatile long* addend);
 
 struct FirstEntry
@@ -451,8 +456,8 @@ void NiBoneLODController::ClearEntries()
         FirstEntry* entry = reinterpret_cast<FirstEntry**>(m_kBoneSetArray.m_pBase)[i];
         if (entry)
         {
-            FUN_00aa10f0(entry->allocation);
-            g_011f6238.FUN_00aa4060(entry);
+            _NiFree_00aa10f0(entry->allocation);
+            g_011f6238.MemoryManager_Deallocate(entry);
         }
     }
     for (unsigned short i = 0; i < m_kBoneSetArray.m_usSize; ++i)
@@ -473,11 +478,11 @@ void NiBoneLODController::ClearEntries()
                     NiRefObject* reference = object->reference;
                     if (reference && InterlockedDecrement(reinterpret_cast<volatile long*>(&reference->m_uiRefCount)) == 0)
                         reference->DeleteThis();
-                    g_011f6238.FUN_00aa4060(object);
+                    g_011f6238.MemoryManager_Deallocate(object);
                 }
             }
-            FUN_00aa10f0(group->objects);
-            g_011f6238.FUN_00aa4060(group);
+            _NiFree_00aa10f0(group->objects);
+            g_011f6238.MemoryManager_Deallocate(group);
         }
     }
     for (unsigned short i = 0; i < m_kSkinInfoSets.m_usSize; ++i)
@@ -493,7 +498,7 @@ typedef NiTArray<char*, NiTMallocInterface<char*> > BA55320StringArray;
 
 extern const char* g_pcA55320ClassName;
 
-char* __cdecl FUN_00a7d330(const char* pcString);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcString);
 char* __cdecl A55320GetViewerStringInt(const char* pcPrefix, int iValue);
 char* __cdecl A55320GetViewerStringUInt(const char* pcPrefix, unsigned int uiValue);
 
@@ -502,7 +507,7 @@ char* __cdecl A55320GetViewerStringUInt(const char* pcPrefix, unsigned int uiVal
 void NiBoneLODController::AppendViewerStrings(NiViewerStringsArray* strings)
 {
     BA55320StringArray* pkStrings = reinterpret_cast<BA55320StringArray*>(strings);
-    pkStrings->Add(FUN_00a7d330(g_pcA55320ClassName));
+    pkStrings->Add(NiViewerStrings_NiGetViewerString_Title(g_pcA55320ClassName));
     pkStrings->Add(A55320GetViewerStringInt("m_iLOD", m_iLOD));
     pkStrings->Add(A55320GetViewerStringUInt("m_uiNumLODs", m_uiNumLODs));
 }
@@ -555,7 +560,8 @@ class NiTimeControllerEqualityMethods : public NiTimeController
 
 // Compares LOD, LOD counts, node/skin/shape sets and their elements against pkObject after BaseIsEqual, returning false on any mismatch.
 // @fnv 0x00a53ea0
-bool NiBoneLODController::FUN_00a53ea0(NiObject* pkObject)
+// src: XBOX_PDB 0x00a53ea0
+bool NiBoneLODController::IsEqual_00a53ea0(NiObject* pkObject)
 {
     if (!reinterpret_cast<NiTimeControllerEqualityMethods*>(this)->BaseIsEqual(pkObject))
         return false;
@@ -620,8 +626,8 @@ bool NiBoneLODController::FUN_00a53ea0(NiObject* pkObject)
     return true;
 }
 
-void* __cdecl FUN_00aa1070(unsigned int);
-void __cdecl FUN_00aa10f0(void*);
+void* __cdecl _NiMalloc_00aa1070(unsigned int);
+void __cdecl _NiFree_00aa10f0(void*);
 
 inline unsigned int NiBinaryStream::Read(void* data, unsigned int size)
 {
@@ -637,7 +643,7 @@ static inline void ReadLOD32(NiStream& stream, void* data)
 
 struct LODPool
 {
-    void* FUN_00aa3e40(unsigned int);
+    void* Game_DoHeapAlloc(unsigned int);
 };
 extern LODPool DAT_011f6238;
 template <class T> struct LinkGroup
@@ -647,7 +653,7 @@ template <class T> struct LinkGroup
     unsigned int count;
     static void* operator new(unsigned int size)
     {
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
     LinkGroup() : data(0), capacity(0), count(0)
     {}
@@ -658,13 +664,13 @@ template <class T> struct LinkGroup
             T* replacement;
             if (size > 0)
             {
-                replacement = (T*)FUN_00aa1070(size * sizeof(T));
+                replacement = (T*)_NiMalloc_00aa1070(size * sizeof(T));
                 for (unsigned int i = 0; i < count; i++)
                     replacement[i] = data[i];
             }
             else
                 replacement = 0;
-            FUN_00aa10f0(data);
+            _NiFree_00aa10f0(data);
             data = replacement;
             capacity = size;
         }
@@ -683,7 +689,7 @@ struct LinkSkinInfo
     void* skin;
     static void* operator new(unsigned int size)
     {
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
     LinkSkinInfo() : skin(0)
     {}
@@ -794,7 +800,8 @@ template <class T> inline void SaveStream(NiStream& kStream, const T& value)
 }
 // Serializes the LOD level, node groups, skin groups, and default nodes of a bone LOD entry to the stream.
 // @fnv 0x00a549d0
-void NiBoneLODController::FUN_00a549d0(NiStream& stream)
+// src: XBOX_PDB 0x00a549d0
+void NiBoneLODController::SaveBinary_00a549d0(NiStream& stream)
 {
     reinterpret_cast<NiTimeControllerStreamMethods*>(this)->NiTimeControllerStreamMethods::SaveBinary(stream);
     NiTPrimitiveArray<BoneSet*>& nodes = m_kBoneSetArray;
@@ -863,7 +870,7 @@ __declspec(nothrow) inline NiTArray<T, TAlloc>::NiTArray(unsigned int size, unsi
     m_usSize = 0;
     m_usESize = 0;
     if (m_usMaxSize > 0)
-        m_pBase = (T*)FUN_00aa1070(m_usMaxSize * sizeof(T));
+        m_pBase = (T*)_NiMalloc_00aa1070(m_usMaxSize * sizeof(T));
     else
         m_pBase = 0;
 }
@@ -892,7 +899,7 @@ __declspec(nothrow) inline NiTPrimitiveArray<NiBoneLODController::SkinInfoSet*>:
     m_usSize = 0;
     m_usESize = 0;
     if (m_usMaxSize > 0)
-        m_pBase = (NiBoneLODController::SkinInfoSet**)FUN_00aa1070(m_usMaxSize * sizeof(NiBoneLODController::SkinInfoSet*));
+        m_pBase = (NiBoneLODController::SkinInfoSet**)_NiMalloc_00aa1070(m_usMaxSize * sizeof(NiBoneLODController::SkinInfoSet*));
     else
         m_pBase = 0;
     *reinterpret_cast<void**>(this) = &DAT_0109a2c8;
@@ -915,25 +922,25 @@ struct A54440Remap
 };
 struct A54440Heap : MemoryAllocator
 {
-    void* FUN_00aa3e40(unsigned int bytes);
+    void* Game_DoHeapAlloc(unsigned int bytes);
 };
-void* __cdecl FUN_00aa1070(unsigned int);
+void* __cdecl _NiMalloc_00aa1070(unsigned int);
 struct A54440PointerGroup
 {
     static void* operator new(unsigned int bytes)
     {
-        return ((A54440Heap*)&g_011f6238)->FUN_00aa3e40(bytes);
+        return ((A54440Heap*)&g_011f6238)->Game_DoHeapAlloc(bytes);
     }
     A54440PointerGroup() : elements(0), capacity(0), count(0)
     {}
     void** elements;
     unsigned int capacity;
     unsigned int count;
-    void FUN_00a311e0(unsigned int nextCapacity);
+    void NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(unsigned int nextCapacity);
     void Append(void* item)
     {
         if (count == capacity)
-            FUN_00a311e0(capacity > 0 ? capacity * 2 : 1);
+            NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(capacity > 0 ? capacity * 2 : 1);
         elements[count++] = item;
     }
 };
@@ -959,13 +966,13 @@ struct A54440GrowGroup
                 void** newData;
                 if (newCapacity > 0)
                 {
-                    newData = (void**)FUN_00aa1070(newCapacity * 4);
+                    newData = (void**)_NiMalloc_00aa1070(newCapacity * 4);
                     for (unsigned int j = 0; j < count; j++)
                         newData[j] = elements[j];
                 }
                 else
                     newData = 0;
-                FUN_00aa10f0(elements);
+                _NiFree_00aa10f0(elements);
                 elements = newData;
                 capacity = newCapacity;
             }
@@ -977,7 +984,7 @@ struct A54440LinkGroup
 {
     static void* operator new(unsigned int bytes)
     {
-        return ((A54440Heap*)&g_011f6238)->FUN_00aa3e40(bytes);
+        return ((A54440Heap*)&g_011f6238)->Game_DoHeapAlloc(bytes);
     }
     A54440LinkGroup() : entries(0), capacity(0), count(0)
     {}
@@ -993,13 +1000,13 @@ struct A54440LinkGroup
                 A54440Link** newData;
                 if (newCapacity > 0)
                 {
-                    newData = (A54440Link**)FUN_00aa1070(newCapacity * 4);
+                    newData = (A54440Link**)_NiMalloc_00aa1070(newCapacity * 4);
                     for (unsigned int j = 0; j < count; j++)
                         newData[j] = entries[j];
                 }
                 else
                     newData = 0;
-                FUN_00aa10f0(entries);
+                _NiFree_00aa10f0(entries);
                 entries = newData;
                 capacity = newCapacity;
             }
@@ -1068,7 +1075,7 @@ struct A54440SourceLink
 {
     static void* operator new(unsigned int bytes)
     {
-        return ((A54440Heap*)&g_011f6238)->FUN_00aa3e40(bytes);
+        return ((A54440Heap*)&g_011f6238)->Game_DoHeapAlloc(bytes);
     }
     A54440SourceLink() : ref(0)
     {}
@@ -1273,7 +1280,8 @@ template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* p)
 
 // Calls the base LinkObject, then loads objects into bone sets, skin pair fields, and shape groups.
 // @fnv 0x00a53d70
-void NiBoneLODController::FUN_00a53d70(NiStream& kStream)
+// src: GAMEBRYO_LIB 0x00a53d70
+void NiBoneLODController::LinkObject_00a53d70(NiStream& kStream)
 {
     NiTimeController::LinkObject(kStream);
 

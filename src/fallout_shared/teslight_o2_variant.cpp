@@ -15,7 +15,7 @@ NiLight* FindLightInNode(NiNode* node);
 
 struct PrimaryBase
 {
-    virtual void FUN_0050e680();
+    virtual void AdjustThisAndForward_0050e680();
     int unk04;
     int unk08;
     int unk0C;
@@ -54,14 +54,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_0050e680();
+    virtual void AdjustThisAndForward_0050e680();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x0050e680
-    virtual void FUN_0050e680();
+// src: GUESS 0x0050e680 (confidence: low)
+    virtual void AdjustThisAndForward_0050e680();
 };
 
 Derived::Derived()

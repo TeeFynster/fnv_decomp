@@ -15,7 +15,7 @@ CREATE_ASTARNODE_RESULT AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdg
     unsigned int uiKey, float m_fPathingCostCur, AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>*& pNodeOut)
 {
     AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>** ppBucket =
-        &m_kNodeHashTable.m_ppNodes[m_kNodeHashTable.FUN_00996840(uiKey)];
+        &m_kNodeHashTable.m_ppNodes[m_kNodeHashTable.AStarNodeMap_GetBucketIndex(uiKey)];
     if (*ppBucket)
     {
         if ((*ppBucket)->iKey == uiKey)
@@ -67,7 +67,7 @@ CREATE_ASTARNODE_RESULT AStarSearch<AStarNodeData*, AStarNodeLink*>::CreateOrUpd
     unsigned int uiKey, float m_fPathingCostCur, AStarNode<AStarNodeData*, AStarNodeLink*>*& pNodeOut)
 {
     AStarNode<AStarNodeData*, AStarNodeLink*>** ppBucket =
-        &m_kNodeHashTable.m_ppNodes[m_kNodeHashTable.FUN_00996840(uiKey)];
+        &m_kNodeHashTable.m_ppNodes[m_kNodeHashTable.AStarNodeMap_GetBucketIndex(uiKey)];
     if (*ppBucket)
     {
         if ((*ppBucket)->iKey == uiKey)
@@ -106,7 +106,7 @@ CREATE_ASTARNODE_RESULT AStarSearch<AStarNodeData*, AStarNodeLink*>::CreateOrUpd
             }
         }
     }
-    pNodeOut = m_kNodeAllocator.FUN_006b9420();
+    pNodeOut = m_kNodeAllocator.AStarNodeHeap_CombatPlanNode_CombatPlanLink_AllocateNode();
     pNodeOut->iKey = uiKey;
     pNodeOut->m_fPathingCostCur = m_fPathingCostCur;
     pNodeOut->m_pNextHashNode = *ppBucket;
@@ -175,7 +175,7 @@ AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* AStarSearch<N
             if (++uiCounter == 50)
             {
                 uiCounter = 0;
-                FUN_0040fca0(0);
+                BSSleep(0);
             }
         }
         i = m_pCurrentNode;
@@ -209,7 +209,7 @@ bool AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdgeReference>::Search
         pOutNode = NULL;
     }
     if (pOutNode)
-        FUN_006a8290(pOutNode, uiParam1, uiParam2);
+        AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(pOutNode, uiParam1, uiParam2);
     return bSuccess;
 }
 

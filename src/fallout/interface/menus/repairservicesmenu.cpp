@@ -12,20 +12,23 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x007b74c0
-int RepairServicesMenu::FUN_007b74c0()
+// src: COMMUNITY 0x007b74c0
+int RepairServicesMenu::GetMenuID_007b74c0()
 {
     return 0x422;
 }
 
 // @fnv 0x007b7890
-int __cdecl FUN_007b7890()
+// src: COMMUNITY 0x007b7890
+int __cdecl RepairServicesMenu_GetMenuID_()
 {
     return 0x422;
 }
 
 // Returns true only if all 16 menu tiles are non-null.
 // @fnv 0x007b78a0
-bool __thiscall RepairServicesMenu::FUN_007b78a0()
+// src: COMMUNITY 0x007b78a0
+bool __thiscall RepairServicesMenu::CompanionWheelMenu_IsWellFormedMenu()
 {
     for (int i = 0; i < 16; ++i)
     {
@@ -49,7 +52,8 @@ void RepairServicesMenu::UpdateRepairServiceTiles(int aiID, Tile* apTarget)
 void __cdecl StartDialogueForTopic(TESTopic*);
 extern RepairServicesMenu* DAT_011da7f0;
 // @fnv 0x007b78e0
-void __cdecl FUN_007b78e0()
+// src: XBOX_PDB 0x007b78e0
+void __cdecl RepairServicesMenu_Close()
 {
     StartDialogueForTopic(TESTopic::GetAudioBackendData(5, 5));
     reinterpret_cast<Tile*>(DAT_011da7f0->pMenu)->Set(0x1772, 1);
@@ -61,7 +65,8 @@ extern int DAT_011da7dc;
 extern RepairServicesMenu* DAT_011da7f0;
 
 // @fnv 0x007b82c0
-void __cdecl FUN_007b82c0(Tile* pTile, void* pItem)
+// src: XBOX_PDB 0x007b82c0
+void __cdecl RepairServicesMenu_RepairAllFunc(Tile* pTile, void* pItem)
 {
     if (pTile->ContainsTrait(DAT_011da7dc))
         DAT_011da7f0->ApplyRepair(pItem);
@@ -84,7 +89,8 @@ struct ListBoxItem
 extern int DAT_011da7dc;
 
 // @fnv 0x007b7c40
-int __cdecl FUN_007b7c40(ListBoxItem* apItem1, ListBoxItem* apItem2)
+// src: COMMUNITY 0x007b7c40
+int __cdecl RepairServicesMenu_Compare(ListBoxItem* apItem1, ListBoxItem* apItem2)
 {
     bool bisGreyedOut1;
     bool bisGreyedOut2;
@@ -115,11 +121,11 @@ int __cdecl FUN_007b7c40(ListBoxItem* apItem1, ListBoxItem* apItem2)
         }
         else
         {
-            if (apItem1->m_pInventoryEntryData->FUN_004bddd0(false))
+            if (apItem1->m_pInventoryEntryData->ItemChange_GetWorn(false))
             {
                 iresult = -1;
             }
-            else if (apItem2->m_pInventoryEntryData->FUN_004bddd0(false))
+            else if (apItem2->m_pInventoryEntryData->ItemChange_GetWorn(false))
             {
                 iresult = 1;
             }
@@ -139,16 +145,16 @@ extern char DAT_01075d94;
 extern int DAT_011da7e0;
 extern int DAT_011da7e8;
 extern int DAT_011da7e4;
-extern int __cdecl FUN_00a01860(const char*);
+extern int __cdecl Tile_TextToTrait(const char*);
 
 // Initializes the repair service traits and clears the total cost.
 // @fnv 0x007b7400
 RepairServicesMenu::RepairServicesMenu()
 {
-    DAT_011da7e0 = FUN_00a01860(&DAT_0106ed20);
-    DAT_011da7e8 = FUN_00a01860(&DAT_0106ed18);
-    DAT_011da7e4 = FUN_00a01860(&DAT_01075da0);
-    DAT_011da7dc = FUN_00a01860(&DAT_01075d94);
+    DAT_011da7e0 = Tile_TextToTrait(&DAT_0106ed20);
+    DAT_011da7e8 = Tile_TextToTrait(&DAT_0106ed18);
+    DAT_011da7e4 = Tile_TextToTrait(&DAT_01075da0);
+    DAT_011da7dc = Tile_TextToTrait(&DAT_01075d94);
     iTotalCost = 0;
 }
 
@@ -193,20 +199,20 @@ struct Obj
     virtual void v90();
     virtual bool v94();
     int FUN_00401170();
-    double FUN_004be060();
-    double FUN_004be180();
-    bool FUN_00480d90();
+    double TESObjectARMO_GetArmorRating();
+    double TESObjectARMO_GetDamageThreshold();
+    bool TESBipedModelForm_GetPlayable();
 };
 
 struct Holder
 {
     Obj* FUN_0044ddc0();
-    double FUN_004bcdb0(int);
+    double ItemChange_GetItemHealth(int);
 };
 
 struct Cfg
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 
 extern Cfg DAT_011d018c;
@@ -214,25 +220,26 @@ extern double DAT_01020758;
 extern double DAT_01012060;
 
 Obj* __cdecl FUN_00480db0(Obj*);
-bool __cdecl FUN_00481f10(Obj*);
+bool __cdecl TESContainer_IsGold(Obj*);
 int __cdecl GetHealthForm(Obj*);
 
 // Checks the holder's object and its state, comparing a value against config thresholds and returning whether the condition holds.
 // @fnv 0x007b7b40
-bool __cdecl FUN_007b7b40(Holder* pHolder)
+// src: COMMUNITY 0x007b7b40
+bool __cdecl RepairServicesMenu_ShouldHideItem(Holder* pHolder)
 {
     bool result2 = true;
     Obj* a7 = pHolder->FUN_0044ddc0();
     Obj* b = FUN_00480db0(a7);
-    if (a7 == 0 || (b != 0 && !b->FUN_00480d90()) || FUN_00481f10(a7) || a7->v94())
+    if (a7 == 0 || (b != 0 && !b->TESBipedModelForm_GetPlayable()) || TESContainer_IsGold(a7) || a7->v94())
     {
         result2 = true;
     }
     else
     {
         result2 =
-            GetHealthForm(a7) == 0 || pHolder->FUN_004bcdb0(1) >= (double)*DAT_011d018c.FUN_00403e20() * DAT_01020758 ||
-            (a7->FUN_00401170() == 0x18 && a7->FUN_004be060() <= DAT_01012060 && a7->FUN_004be180() <= DAT_01012060);
+            GetHealthForm(a7) == 0 || pHolder->ItemChange_GetItemHealth(1) >= (double)*DAT_011d018c.Setting_Float_00403e20() * DAT_01020758 ||
+            (a7->FUN_00401170() == 0x18 && a7->TESObjectARMO_GetArmorRating() <= DAT_01012060 && a7->TESObjectARMO_GetDamageThreshold() <= DAT_01012060);
     }
     return result2;
 }
@@ -245,7 +252,7 @@ extern RepairPlayer* DAT_011dea3c;
 extern void* DAT_011da7f4;
 extern int DAT_011da7e4;
 extern char DAT_01075d38, DAT_01073a94;
-bool __cdecl FUN_007b82c0(void*, void*);
+bool __cdecl RepairServicesMenu_RepairAllFunc(void*, void*);
 
 // @fnv 0x007b7d80
 void RepairServicesMenu::HandleRepairAction(int iActionId, RepairTile* tile)
@@ -268,22 +275,22 @@ void RepairServicesMenu::HandleRepairAction(int iActionId, RepairTile* tile)
         }
         break;
     case 14:
-        kRepairList.FUN_007314c0(FUN_007b82c0, 0, 0x7fffffff);
+        kRepairList.ListBox_ItemChange_Traverse(RepairServicesMenu_RepairAllFunc, 0, 0x7fffffff);
         DAT_011dea3c->FUN_008924e0(DAT_011da7f4, totalCost);
         BSAudio::GetSingleton()->GetSoundHandleByEditorID(&DAT_01075d38, 0x121).Play(false);
         RefreshRepairMenu();
         break;
     case 15:
-        FUN_007b78e0();
+        RepairServicesMenu_Close();
         break;
     }
 }
 
-void __cdecl FUN_0040fbe0(const char* apMessage);
+void __cdecl ProgramFlow(const char* apMessage);
 void __cdecl FNV_Warning(const char* apMessage);
-int __cdecl FUN_00408b20(const char* apString1, const char* apString2);
+int __cdecl BSstrcmp(const char* apString1, const char* apString2);
 float __cdecl FUN_00a01530();
-void __cdecl FUN_00763ff0();
+void __cdecl DialogMenu_ServiceStart();
 
 struct RSMInterfaceManager
 {
@@ -307,8 +314,8 @@ struct RSMActor
     RSMExtraList kExtraList;
 };
 
-int __cdecl FUN_007b7890();
-RepairServicesMenu* __cdecl FUN_00a09030(int aiMenuID);
+int __cdecl RepairServicesMenu_GetMenuID_();
+RepairServicesMenu* __cdecl Tile_GetMenuByClass(int aiMenuID);
 
 extern RepairServicesMenu* g_pRepairServicesMenu;
 extern RSMActor* g_pRepairServicesVendor;
@@ -331,22 +338,22 @@ Tile* __cdecl CreateRepairServicesMenu(RSMActor* apVendor)
 
     if (!apVendor)
     {
-        FUN_0040fbe0(
+        ProgramFlow(
             "Create() -- Missing vendor parameter.  4 bytes large, responds to the name 'Vendy'.  Please call if you see him!");
         return 0;
     }
 
     pInterfaceMgr2 = RSMInterfaceManager::GetSingleton();
-    pOldMenu5 = FUN_00a09030(FUN_007b7890());
+    pOldMenu5 = Tile_GetMenuByClass(RepairServicesMenu_GetMenuID_());
     if (pOldMenu5)
         delete pOldMenu5;
 
     pTile = pInterfaceMgr2->GetMenuRoot()->ReadFile("Data\\Menus\\repair_services_menu.xml");
     g_pRepairServicesMenu = reinterpret_cast<RepairServicesMenu*>(pTile->GetMenu());
-    if (g_pRepairServicesMenu && g_pRepairServicesMenu->GetClass() == FUN_007b7890())
+    if (g_pRepairServicesMenu && g_pRepairServicesMenu->GetClass() == RepairServicesMenu_GetMenuID_())
     {
         g_pRepairServicesMenu->SetTileMenu(reinterpret_cast<TileMenu*>(pTile), false);
-        if (!g_pRepairServicesMenu->FUN_007b78a0())
+        if (!g_pRepairServicesMenu->CompanionWheelMenu_IsWellFormedMenu())
         {
             FNV_Warning("MENUS: Repair Services Menu Creation Failed... Are your menu and art resources up to date?");
             return 0;
@@ -359,8 +366,8 @@ Tile* __cdecl CreateRepairServicesMenu(RSMActor* apVendor)
         g_pRepairServicesMenu->iUnk9C = apVendor->kExtraList.GetByType(0x27);
         g_pRepairServicesMenu->kRepairList.Initialize(g_pRepairServicesMenu->pTile30, "RSM_RepairListTemplate");
         g_pRepairServicesMenu->RefreshRepairMenu();
-        FUN_00763ff0();
-        if (FUN_00408b20(g_kLanguageSetting.GetString(), "ENGLISH"))
+        DialogMenu_ServiceStart();
+        if (BSstrcmp(g_kLanguageSetting.GetString(), "ENGLISH"))
         {
             pTile->GetNamedChild("RSM_Headline_Title")
                 ->SetString(g_iRepairServicesValue1, g_kHeadlineSetting.GetString(), true);
@@ -387,7 +394,7 @@ struct RSItem
 {
     RSItemForm* GetType();
     float GetConditionPercent(bool abPercent);
-    bool FUN_004bddd0(bool abUnk);
+    bool ItemChange_GetWorn(bool abUnk);
 };
 
 struct RSTileList
@@ -404,7 +411,7 @@ struct RSPlayer
 
 extern RepairServicesMenu* g_pRepairServicesMenu;
 extern RSPlayer* g_pRSPlayer;
-int __cdecl FUN_0048e8a0(RSItemForm* apForm);
+int __cdecl TESValueForm_GetFormValue(RSItemForm* apForm);
 int __cdecl GetLevelAdjustedMult(int aiSkill, float afHealth, float afValue);
 
 // @fnv 0x007b7920
@@ -414,7 +421,7 @@ void __cdecl UpdateRepairMenuTile(Tile* apTile, RSItem* apItem)
         return;
 
     int iCost = GetLevelAdjustedMult(g_pRepairServicesMenu->iSkill, apItem->GetConditionPercent(true),
-                                     FUN_0048e8a0(apItem->GetType()));
+                                     TESValueForm_GetFormValue(apItem->GetType()));
     float fAlpha4 = (iCost > 0 && iCost <= g_pRSPlayer->GetCaps()) ? 255.0f : 128.0f;
     apTile->SetInt(0xfaa, 0x11);
     apTile->SetInt(DAT_011da7e4, iCost);
@@ -425,7 +432,7 @@ void __cdecl UpdateRepairMenuTile(Tile* apTile, RSItem* apItem)
     apTile->SetInt(0xfa3, apTile->GetFloat(0xfac) >= 0.0);
     apTile->GetChildById(0x12)->SetFloat(0xfb1, apItem->GetConditionPercent(true) * (double)0.6f, true);
     apTile->SetInt(DAT_011da7dc, fAlpha4 == 255.0);
-    if (apItem->FUN_004bddd0(false))
+    if (apItem->ItemChange_GetWorn(false))
         reinterpret_cast<RSTileList*>(&apTile->m_kChildTileList)->GetAt(reinterpret_cast<RSTileList*>(&apTile->m_kChildTileList)->GetHeadPos())->SetInt(0xfa3, 1);
 }
 
@@ -444,17 +451,17 @@ struct RepairListView
 };
 struct RepairPlayerView
 {
-    int FUN_00891d70();
+    int Actor_GetGoldAmount();
 };
 struct RepairSetting
 {
     const char* FUN_00403df0();
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 extern RepairSetting DAT_011d3a08, DAT_011d25b0, DAT_011d4030, DAT_011d4780;
 extern char DAT_01075f34, DAT_01070854;
 void __cdecl UpdateRepairMenuTile(Tile*, void*);
-int __cdecl FUN_00406d00(char*, int, const char*, ...);
+int __cdecl BSsprintf(char*, int, const char*, ...);
 
 // @fnv 0x007b8b30
 void RepairServicesMenu::RefreshRepairMenu()
@@ -464,36 +471,36 @@ void RepairServicesMenu::RefreshRepairMenu()
     {
         ((RepairServicesMenu*)DAT_011da7f0)->totalCost = 0;
         ((RepairServicesMenu*)DAT_011da7f0)->HandleMouseoverTileAlt(17, 0);
-        DAT_011da7f0->kRepairList.PopulateInventoryList(DAT_011dea3c, FUN_007b7b40, 0, 0, 1, 0);
-        DAT_011da7f0->kRepairList.FUN_007314c0(UpdateRepairMenuTile, -1, 0x7fffffff);
-        ((RepairListView*)&((RepairServicesMenu*)DAT_011da7f0)->kRepairList)->Sort(FUN_007b7c40);
-        if (((RepairPlayerView*)DAT_011dea3c)->FUN_00891d70() > *DAT_011d3a08.FUN_0043d4d0())
-            FUN_00406d00(szText, 64, &DAT_01075f34, DAT_011d25b0.FUN_00403df0(), *DAT_011d3a08.FUN_0043d4d0());
+        DAT_011da7f0->kRepairList.PopulateInventoryList(DAT_011dea3c, RepairServicesMenu_ShouldHideItem, 0, 0, 1, 0);
+        DAT_011da7f0->kRepairList.ListBox_ItemChange_Traverse(UpdateRepairMenuTile, -1, 0x7fffffff);
+        ((RepairListView*)&((RepairServicesMenu*)DAT_011da7f0)->kRepairList)->Sort(RepairServicesMenu_Compare);
+        if (((RepairPlayerView*)DAT_011dea3c)->Actor_GetGoldAmount() > *DAT_011d3a08.Setting_Int())
+            BSsprintf(szText, 64, &DAT_01075f34, DAT_011d25b0.FUN_00403df0(), *DAT_011d3a08.Setting_Int());
         else
-            FUN_00406d00(szText, 64, &DAT_01070854, DAT_011d25b0.FUN_00403df0(),
-                         ((RepairPlayerView*)DAT_011dea3c)->FUN_00891d70());
-        ((Tile*)tiles[1])->FUN_00a01350(0xfc4, szText, true);
-        FUN_00406d00(szText, 64, &DAT_01070854, DAT_011d4030.FUN_00403df0(), displayedCost);
-        ((Tile*)tiles[0])->FUN_00a01350(0xfc4, szText, true);
-        FUN_00406d00(szText, 64, DAT_011d4780.FUN_00403df0(), ((RepairServicesMenu*)DAT_011da7f0)->totalCost);
-        ((Tile*)((RepairServicesMenu*)DAT_011da7f0)->tiles[14])->FUN_00a01350(0xfc4, szText, true);
+            BSsprintf(szText, 64, &DAT_01070854, DAT_011d25b0.FUN_00403df0(),
+                         ((RepairPlayerView*)DAT_011dea3c)->Actor_GetGoldAmount());
+        ((Tile*)tiles[1])->Tile_Set_00a01350(0xfc4, szText, true);
+        BSsprintf(szText, 64, &DAT_01070854, DAT_011d4030.FUN_00403df0(), displayedCost);
+        ((Tile*)tiles[0])->Tile_Set_00a01350(0xfc4, szText, true);
+        BSsprintf(szText, 64, DAT_011d4780.FUN_00403df0(), ((RepairServicesMenu*)DAT_011da7f0)->totalCost);
+        ((Tile*)((RepairServicesMenu*)DAT_011da7f0)->tiles[14])->Tile_Set_00a01350(0xfc4, szText, true);
         ((Tile*)((RepairServicesMenu*)DAT_011da7f0)->tiles[14])
             ->Set(0xfaf,
                   ((RepairServicesMenu*)DAT_011da7f0)->totalCost > 0 &&
-                      ((RepairServicesMenu*)DAT_011da7f0)->totalCost <= ((RepairPlayerView*)DAT_011dea3c)->FUN_00891d70());
+                      ((RepairServicesMenu*)DAT_011da7f0)->totalCost <= ((RepairPlayerView*)DAT_011dea3c)->Actor_GetGoldAmount());
     }
 }
 
 struct StatForm
 {
     int FUN_00401170();
-    double FUN_004be060();
-    double FUN_004be180();
+    double TESObjectARMO_GetArmorRating();
+    double TESObjectARMO_GetDamageThreshold();
 };
 struct StatItem
 {
     StatForm* FUN_0044ddc0();
-    double FUN_004bcdb0(int);
+    double ItemChange_GetItemHealth(int);
     const char* GetIconFilename(int);
 };
 struct StatItemProvider
@@ -507,14 +514,14 @@ struct StatValue
 struct StatSetting
 {
     const char* FUN_00403df0();
-    StatValue* FUN_00403e20();
+    StatValue* Setting_Float_00403e20();
 };
 extern StatSetting DAT_011d2c7c, DAT_011d396c, DAT_011d20c4, DAT_011d0ff0, DAT_011d4ee8, DAT_011d3cf4;
 float __cdecl GetWeaponDamage(StatForm*, float, StatItem*, int);
 double __cdecl FUN_004bd510(float, float);
 double __cdecl FUN_00646360(int, float);
-float __cdecl FUN_0040ebd0(float, float);
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMIN(float, float);
+float __cdecl BSMAX_00404010(float, float);
 int __cdecl RepairCopyString(char*, unsigned int, const char*);
 int __cdecl RepairAppendString(char*, unsigned int, const char*);
 int __cdecl RepairFormatString(char*, unsigned int, const char*, ...);
@@ -532,7 +539,7 @@ void RepairServicesMenu::UpdateItemComparison(int event, StatTile* tile)
         field38->Set(0xfa3, 1);
         field34->Set(0xfcc, selectedItemTmp->GetIconFilename(0), true);
         field34->Set(0xfa3, 1);
-        health2 = selectedItemTmp->FUN_004bcdb0(1) / 100.0;
+        health2 = selectedItemTmp->ItemChange_GetItemHealth(1) / 100.0;
         field3c->Set(0x1004, health2, true);
         if (selectedItemTmp->FUN_0044ddc0()->FUN_00401170() == 40)
         {
@@ -543,8 +550,8 @@ void RepairServicesMenu::UpdateItemComparison(int event, StatTile* tile)
         }
         else if (selectedItemTmp->FUN_0044ddc0()->FUN_00401170() == 24)
         {
-            float armor3 = FUN_00646360((int)selectedItemTmp->FUN_0044ddc0()->FUN_004be060(), health2);
-            float threshold0 = FUN_00646360((int)selectedItemTmp->FUN_0044ddc0()->FUN_004be180(), health2);
+            float armor3 = FUN_00646360((int)selectedItemTmp->FUN_0044ddc0()->TESObjectARMO_GetArmorRating(), health2);
+            float threshold0 = FUN_00646360((int)selectedItemTmp->FUN_0044ddc0()->TESObjectARMO_GetDamageThreshold(), health2);
             if (threshold0 > 0.0)
             {
                 ((RepairServicesMenu*)DAT_011da7f0)->field40->Set(DAT_011da7e0, DAT_011d396c.FUN_00403df0(), true);
@@ -563,10 +570,10 @@ void RepairServicesMenu::UpdateItemComparison(int event, StatTile* tile)
                 ((RepairServicesMenu*)DAT_011da7f0)->field40->Set(DAT_011da7e8, empty0, true);
             }
         }
-        projected6 = DAT_011d0ff0.FUN_00403e20()->value +
-                     (((StatSetting&)DAT_011d018c).FUN_00403e20()->value - DAT_011d0ff0.FUN_00403e20()->value) *
+        projected6 = DAT_011d0ff0.Setting_Float_00403e20()->value +
+                     (((StatSetting&)DAT_011d018c).Setting_Float_00403e20()->value - DAT_011d0ff0.Setting_Float_00403e20()->value) *
                          (iRepairSkill / 100.0f);
-        projected6 = FUN_0040ebd0(projected6 / 10.0, 1.0f);
+        projected6 = BSMIN(projected6 / 10.0, 1.0f);
         if (FUN_004bd510(projected6, 0.001f) <= FUN_004bd510(health2, 0.001f))
         {
             RepairFormatString(text, 64, DAT_011d4ee8.FUN_00403df0(), projected6 * 100.0, "%");
@@ -586,8 +593,8 @@ void RepairServicesMenu::UpdateItemComparison(int event, StatTile* tile)
             }
             else if (selectedItemTmp->FUN_0044ddc0()->FUN_00401170() == 24)
             {
-                float aThreshold1 = FUN_00646360((int)selectedItemTmp->FUN_0044ddc0()->FUN_004be060(), projected6);
-                float armor6 = FUN_00646360((int)selectedItemTmp->FUN_0044ddc0()->FUN_004be180(), projected6);
+                float aThreshold1 = FUN_00646360((int)selectedItemTmp->FUN_0044ddc0()->TESObjectARMO_GetArmorRating(), projected6);
+                float armor6 = FUN_00646360((int)selectedItemTmp->FUN_0044ddc0()->TESObjectARMO_GetDamageThreshold(), projected6);
                 if (armor6 > 0.0)
                 {
                     ((RepairServicesMenu*)DAT_011da7f0)->field54->Set(DAT_011da7e0, DAT_011d396c.FUN_00403df0(), true);
@@ -608,8 +615,8 @@ void RepairServicesMenu::UpdateItemComparison(int event, StatTile* tile)
             }
             float healthDelta_2 = (field50->FUN_00a011b0(0x1004) - field3c->FUN_00a011b0(0x1004)) * 100.0;
             float statDelta2 = field54->FUN_00a011b0(DAT_011da7e8) - field40->FUN_00a011b0(DAT_011da7e8);
-            healthDelta_2 = FUN_00404010(0.0f, healthDelta_2);
-            statDelta2 = FUN_00404010(0.0f, statDelta2);
+            healthDelta_2 = BSMAX_00404010(0.0f, healthDelta_2);
+            statDelta2 = BSMAX_00404010(0.0f, statDelta2);
             RepairFormatString(text, 64, "+%i", (int)(healthDelta_2 + 0.5));
             RepairAppendString(text, 64, "%");
             field44->Set(0xfc4, text, true);
@@ -622,7 +629,7 @@ void RepairServicesMenu::UpdateItemComparison(int event, StatTile* tile)
     }
 }
 
-float __cdecl FUN_0040ebd0(float afValue, float afMin);
+float __cdecl BSMIN(float afValue, float afMin);
 unsigned int __cdecl FUN_004873d0(TESBoundObject* apObject);
 
 struct ExtraListNode
@@ -660,9 +667,9 @@ void RepairServicesMenu::ApplyRepair(RepairEntry* apEntry)
     int iCount8;
 
     float fHealthPercent = 0.0f;
-    fHealthPercent = DAT_011d0ff0.FUN_00403e20()->value +
-              (*DAT_011d018c.FUN_00403e20() - DAT_011d0ff0.FUN_00403e20()->value) * (iRepairSkill / 100.0f);
-    fHealthPercent = FUN_0040ebd0(fHealthPercent / 10.0, 1.0f);
+    fHealthPercent = DAT_011d0ff0.Setting_Float_00403e20()->value +
+              (*DAT_011d018c.Setting_Float_00403e20() - DAT_011d0ff0.Setting_Float_00403e20()->value) * (iRepairSkill / 100.0f);
+    fHealthPercent = BSMIN(fHealthPercent / 10.0, 1.0f);
     pWeapon = dynamic_cast<TESObjectWEAP*>(apEntry->FUN_0044ddc0());
     if (pWeapon)
         fHealthPercent *= pWeapon->GetModdedValue(apEntry->HasEffect(10));
@@ -683,8 +690,8 @@ void RepairServicesMenu::ApplyRepair(RepairEntry* apEntry)
     {
         if (apEntry->FUN_0044ddc0()->FUN_00401170() == 0x18 && apEntry->FUN_004bde40())
             break;
-        if (!(*pNodeOut->GetItem())->FUN_004126c0(pNewList4, 1, 0) &&
-            !pNewList4->FUN_004126c0(*pNodeOut->GetItem(), 1, 0))
+        if (!(*pNodeOut->GetItem())->ExtraDataList_CompareListForContainer(pNewList4, 1, 0) &&
+            !pNewList4->ExtraDataList_CompareListForContainer(*pNodeOut->GetItem(), 1, 0))
         {
             (*pNodeOut->GetItem())->SetCount((*pNodeOut->GetItem())->GetCount() + 1);
             bMergedTmp = true;
@@ -701,7 +708,7 @@ void RepairServicesMenu::ApplyRepair(RepairEntry* apEntry)
         pPlayerEntry->GetExtraLists()->Remove(pOldListOut);
     if (bMergedTmp || iCount8 == 1)
     {
-        pNewList4->FUN_00419f80(0);
+        pNewList4->ExtraDataList_SetScriptLocals(0);
         // Preserve virtual deletion through slot zero, exposed as vf00 by BaseExtraList.
         delete reinterpret_cast<Menu*>(pNewList4);
     }

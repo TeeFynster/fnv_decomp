@@ -10,25 +10,27 @@ struct LocationDescriptor
 {
     LocationDescriptor();
     char pad[12];
-    void __thiscall FUN_0067f6c0(int);
+    void __thiscall PackageLocation_Save(int);
     void ResolveObject(BGSLoadFormBuffer*);
-    void FUN_0067fbe0(BGSLoadFormBuffer*);
+    void PackageLocation_LoadGame_0067fbe0(BGSLoadFormBuffer*);
     void* FUN_00670b30(int aFlags);
     unsigned char __thiscall IsDifferentFrom(int a1);
 };
 
 // @fnv 0x0067bbb0
-void __thiscall TESEatPackageData::FUN_0067bbb0()
+// src: XBOX_PDB 0x0067bbb0
+void __thiscall TESEatPackageData::Save_0067bbb0()
 {
     _FUN_004856d0(0x44454b50);
     if (this->m_pPackageTarget != 0)
     {
-        m_pPackageTarget->FUN_0067f6c0(0x32444c50);
+        m_pPackageTarget->PackageLocation_Save(0x32444c50);
     }
 }
 
 // @fnv 0x0067bfa0
-void TESEatPackageData::FUN_0067bfa0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: GUESS 0x0067bfa0 (confidence: low)
+void TESEatPackageData::ProcessState_0067bfa0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     if (m_pPackageTarget != 0)
     {
@@ -44,7 +46,7 @@ void __thiscall TESEatPackageData::Load(BGSLoadFormBuffer* apLoadGameBuffer)
     if (bhasLocation)
     {
         m_pPackageTarget = new LocationDescriptor;
-        m_pPackageTarget->FUN_0067fbe0(apLoadGameBuffer);
+        m_pPackageTarget->PackageLocation_LoadGame_0067fbe0(apLoadGameBuffer);
     }
 }
 
@@ -68,7 +70,8 @@ struct FUN_0067bb40_Result
 };
 
 // @fnv 0x0067bb40
-unsigned char __thiscall TESEatPackageData::FUN_0067bb40(int arg)
+// src: XBOX_PDB 0x0067bb40
+unsigned char __thiscall TESEatPackageData::Compare_0067bb40(int arg)
 {
     FUN_0067bb40_Result* result = (FUN_0067bb40_Result*)FUN_00ec43fb(arg, 0, &DAT_0119bdec, &DAT_0119be3c, 0);
 

@@ -17,17 +17,17 @@ public:
 
     void __thiscall HandleTraitSelection(int, int);
     void __thiscall ClearTraitSelection();
-    int __thiscall FUN_007e7ac0();
+    int __thiscall GetMenuID_007e7ac0();
     void __thiscall FUN_007e7b30();
-    bool __thiscall FUN_007e7da0();
+    bool __thiscall HasTiles_007e7da0();
     void __thiscall SetTileByID(int, Tile*);
-    void __thiscall FUN_007e7e30(int, Tile*);
-    void __thiscall FUN_007e8280(int, Tile*);
-    void __thiscall FUN_007e82b0(int, int);
-    void __thiscall FUN_007e8310(float);
-    void __thiscall FUN_007e8470(int, bool);
-    void __thiscall FUN_007e8840();
-    void __thiscall FUN_007e8860(int);
+    void __thiscall DoClick_007e7e30(int, Tile*);
+    void __thiscall DoEnter_007e8280(int, Tile*);
+    void __thiscall DoWheelMove_007e82b0(int, int);
+    void __thiscall ScrollForm(float);
+    void __thiscall SetScroll(int, bool);
+    void __thiscall ClearCheckBox();
+    void __thiscall ToggleCheckBox(int);
     void SelectTrait(int, int);
     void SelectTrait(int, bool);
     bool HandleKeyInput(int, int);

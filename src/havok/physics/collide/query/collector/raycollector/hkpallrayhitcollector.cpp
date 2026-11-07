@@ -5,7 +5,7 @@
 #include "../../../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../../../include/hkMemoryRouter.h"
 
-void __cdecl FUN_00c852c0(void* owner, int a2, int a3, int a4);
+void __cdecl hkAlgorithm_quickSortRecursive_hknpCollisionResult_hkAlgorithm_less_hknpCollisionResult(void* owner, int a2, int a3, int a4);
 
 class FUN_00c855f0_cls
 {
@@ -17,12 +17,13 @@ class FUN_00c855f0_cls
     void* m_10;
     int m_14;
 
-    void FUN_00c855f0();
+    void hknpAllHitsCollector_sortHits();
 };
 
 // If m_14 exceeds 1, calls FUN_00c852c0 on m_10 with 0 and m_14 - 1.
 // @fnv 0x00c855f0
-void FUN_00c855f0_cls::FUN_00c855f0()
+// src: COMMUNITY 0x00c855f0
+void FUN_00c855f0_cls::hknpAllHitsCollector_sortHits()
 {
     union
     {
@@ -32,13 +33,13 @@ void FUN_00c855f0_cls::FUN_00c855f0()
     flag.b = 0;
     if (m_14 > 1)
     {
-        FUN_00c852c0(m_10, 0, m_14 - 1, flag.i);
+        hkAlgorithm_quickSortRecursive_hknpCollisionResult_hkAlgorithm_less_hknpCollisionResult(m_10, 0, m_14 - 1, flag.i);
     }
 }
 
 #include <xmmintrin.h>
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(hkMemoryAllocator* apAllocator, void* apContainer, unsigned int auiElemSize);
 void __cdecl CollectValuesReversed(void* apDst, unsigned int auiSize, void* apOwner);
 
@@ -115,7 +116,7 @@ struct FUN_00c85520_cls
 void FUN_00c85520_cls::AddEntry(ChainOwner* apOwner, SourceEntry* apSource)
 {
     EntryListNode* pList = &m_kNode;
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     if (pList->m_uCount == (pList->m_uCapFlags & 0x3fffffffu))
     {
         ResizeAudioStream(reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap), pList, sizeof(SpawnedEntry));

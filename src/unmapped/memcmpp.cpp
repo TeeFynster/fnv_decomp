@@ -9,11 +9,12 @@ struct FUN_00a3dd00_class
     void* m_p4;
     void* m_p5;
     void* m_p6;
-    int FUN_00a3dd00(int& a, int& b, char& c);
+    int NiPathInterpolator_GetPathKeys(int& a, int& b, char& c);
 };
 
 // @fnv 0x00a3dd00
-int FUN_00a3dd00_class::FUN_00a3dd00(int& a, int& b, char& c)
+// src: GAMEBRYO_LIB 0x00a3dd00
+int FUN_00a3dd00_class::NiPathInterpolator_GetPathKeys(int& a, int& b, char& c)
 {
     int result = 0;
     void* p = m_p6;

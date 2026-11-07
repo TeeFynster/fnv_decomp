@@ -6,7 +6,8 @@
 #include "../../../../../../include/hkThreadMemory.h"
 
 // @fnv 0x00cbc440
-int __stdcall FUN_00cbc440(int a, int b)
+// src: COMMUNITY 0x00cbc440
+int __stdcall hkMemorySystem_debugTagAddress(int a, int b)
 {
     return 1;
 }
@@ -14,7 +15,8 @@ int __stdcall FUN_00cbc440(int a, int b)
 extern int DAT_01268418;
 
 // @fnv 0x00cbbfc0
-int FUN_00cbbfc0()
+// src: XBOX_PDB 0x00cbbfc0
+int hkMemorySystem_getInstance()
 {
     return DAT_01268418;
 }
@@ -22,7 +24,8 @@ int FUN_00cbbfc0()
 extern int g_CBBFD0Value;
 
 // @fnv 0x00cbbfd0
-int __cdecl FUN_00cbbfd0()
+// src: GUESS 0x00cbbfd0 (confidence: low)
+int __cdecl hkMemorySystem_GetCBBFD0Value()
 {
     return g_CBBFD0Value;
 }
@@ -32,11 +35,12 @@ extern int DAT_010c8efc;
 struct FUN_00cbbfe0_This
 {
     int unk00;
-    void __thiscall FUN_00cbbfe0();
+    void __thiscall SetVirtualTable_00cbbfe0();
 };
 
 // @fnv 0x00cbbfe0
-void FUN_00cbbfe0_This::FUN_00cbbfe0()
+// src: GUESS 0x00cbbfe0 (confidence: low)
+void FUN_00cbbfe0_This::SetVirtualTable_00cbbfe0()
 {
     this->unk00 = reinterpret_cast<int>(&DAT_010c8efc);
 }
@@ -68,27 +72,30 @@ static const VTable g_vtbl = {
 struct MyCls
 {
     const VTable* m_vtbl;
-    __declspec(noinline) void FUN_00cbbfe0();
-    MyCls* FUN_00cbc450(int arg);
+    __declspec(noinline) void SetVirtualTable_00cbbfe0();
+    MyCls* EvaluateValue_00cbc450(int arg);
 };
 
-void MyCls::FUN_00cbbfe0()
+// src: GUESS 0x00cbbfe0 (confidence: low)
+void MyCls::SetVirtualTable_00cbbfe0()
 {
     m_vtbl = &g_vtbl;
 }
 
 // @fnv 0x00cbc450
-MyCls* MyCls::FUN_00cbc450(int arg)
+// src: GUESS 0x00cbc450 (confidence: low)
+MyCls* MyCls::EvaluateValue_00cbc450(int arg)
 {
-    FUN_00cbbfe0();
+    SetVirtualTable_00cbbfe0();
     return this;
 }
 
 // @fnv 0x00cbbff0
-void __cdecl FUN_00cbbff0()
+// src: COMMUNITY 0x00cbbff0
+void __cdecl nullsub_54()
 {}
 
-void __cdecl FUN_00cc0410(int handle, const char* fmt, ...);
+void __cdecl hkOstream_printf(int handle, const char* fmt, ...);
 extern const char str_010c9078[];
 extern const char str_010c9058[];
 extern const char str_010c902c[];
@@ -113,7 +120,8 @@ struct S00cbc000_Stats
 
 // Formats values derived from S00cbc000_Stats and limit through FUN_00cc0410.
 // @fnv 0x00cbc000
-static __declspec(noinline) void FUN_00cbc000(S00cbc000_Stats* apStats, unsigned int limit, int handle,
+// src: HAVOK_LIB 0x00cbc000
+static __declspec(noinline) void printDetailedStatistics(S00cbc000_Stats* apStats, unsigned int limit, int handle,
                                               const char* name)
 {
     unsigned int total = S00cbc000_max(apStats->unk00, apStats->unk04);
@@ -128,27 +136,27 @@ static __declspec(noinline) void FUN_00cbc000(S00cbc000_Stats* apStats, unsigned
     unsigned int reserved = total - limit;
     unsigned int soft = limit < comp ? limit : comp;
     float invPct = (float)(100.0 / (float)soft);
-    FUN_00cc0410(handle, str_010c9078, name);
-    FUN_00cc0410(handle, str_010c9058, total);
+    hkOstream_printf(handle, str_010c9078, name);
+    hkOstream_printf(handle, str_010c9058, total);
     if (limit < total)
     {
-        FUN_00cc0410(handle, str_010c902c, reserved, (double)(((float)reserved * 100.0) / (float)comp));
-        FUN_00cc0410(handle, str_010c900c, limit);
+        hkOstream_printf(handle, str_010c902c, reserved, (double)(((float)reserved * 100.0) / (float)comp));
+        hkOstream_printf(handle, str_010c900c, limit);
     }
-    FUN_00cc0410(handle, str_010c8fe0, diff, (double)((fDiff * 100.0) / fLimit));
-    FUN_00cc0410(handle, str_010c8fc0, comp);
-    FUN_00cc0410(handle, str_010c8f94, apStats->unk04, (double)((float)apStats->unk04 * invPct));
-    FUN_00cc0410(handle, str_010c8f68, apStats->unk0c, (double)((float)apStats->unk0c * invPct));
-    FUN_00cc0410(handle, str_010c8f3c, apStats->unk08, (double)((float)apStats->unk08 * invPct));
+    hkOstream_printf(handle, str_010c8fe0, diff, (double)((fDiff * 100.0) / fLimit));
+    hkOstream_printf(handle, str_010c8fc0, comp);
+    hkOstream_printf(handle, str_010c8f94, apStats->unk04, (double)((float)apStats->unk04 * invPct));
+    hkOstream_printf(handle, str_010c8f68, apStats->unk0c, (double)((float)apStats->unk0c * invPct));
+    hkOstream_printf(handle, str_010c8f3c, apStats->unk08, (double)((float)apStats->unk08 * invPct));
 }
 
 void S00cbc000_Caller(S00cbc000_Stats* s, int handle, unsigned int limit, const char* name)
 {
-    FUN_00cbc000(s, limit, handle, name);
+    printDetailedStatistics(s, limit, handle, name);
 }
 
 struct hkOstream;
-int __cdecl FUN_00cc0410(hkOstream* ostr, const char* fmt, ...);
+int __cdecl hkOstream_printf(hkOstream* ostr, const char* fmt, ...);
 
 struct SixUnsignedValueRecord
 {
@@ -195,7 +203,7 @@ struct AllocatorHolder
         return *m_pSolverAllocator;
     }
 };
-AllocatorHolder* __cdecl FUN_00c85750();
+AllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 
 namespace MathUtilities {
 template <typename T> inline T max2(T x, T y)
@@ -208,7 +216,8 @@ template <typename T> inline T min2(T x, T y)
 }
 }
 
-static __declspec(noinline) void FUN_00cbc000(hkOstream* ostr, const char* name, const SixUnsignedValueRecord& s,
+// src: HAVOK_LIB 0x00cbc000
+static __declspec(noinline) void printDetailedStatistics(hkOstream* ostr, const char* name, const SixUnsignedValueRecord& s,
                                               unsigned int softLimit)
 {
     unsigned int total = MathUtilities::max2(s.m_uiFirstValue, s.m_pAllocationMap);
@@ -222,44 +231,45 @@ static __declspec(noinline) void FUN_00cbc000(hkOstream* ostr, const char* name,
     unsigned int reserved = total - softLimit;
     unsigned int avail = MathUtilities::min2(softLimit, available);
     float scale = (float)(100.0 / avail);
-    FUN_00cc0410(ostr, "\t%s:\n", name);
-    FUN_00cc0410(ostr, "            totalSize:   %10i\n", total);
+    hkOstream_printf(ostr, "\t%s:\n", name);
+    hkOstream_printf(ostr, "            totalSize:   %10i\n", total);
     if (softLimit < total)
     {
-        FUN_00cc0410(ostr, "\n            - reserved:  %10i (%4.1f%%)\n", reserved, reserved * 100.0 / available);
-        FUN_00cc0410(ostr, "            = softlimit: %10i\n", softLimit);
+        hkOstream_printf(ostr, "\n            - reserved:  %10i (%4.1f%%)\n", reserved, reserved * 100.0 / available);
+        hkOstream_printf(ostr, "            = softlimit: %10i\n", softLimit);
     }
-    FUN_00cc0410(ostr, "            - overhead:  %10i (%4.1f%%)\n", overhead, fOverhead * 100.0 / fLimit);
-    FUN_00cc0410(ostr, "            = available: %10i\n", available);
-    FUN_00cc0410(ostr, "              used:      %10i (%4.1f%%)\n", s.m_pAllocationMap, s.m_pAllocationMap * scale);
-    FUN_00cc0410(ostr, "              free:      %10i (%4.1f%%)\n", s.m_uiFourthUnsignedValue,
+    hkOstream_printf(ostr, "            - overhead:  %10i (%4.1f%%)\n", overhead, fOverhead * 100.0 / fLimit);
+    hkOstream_printf(ostr, "            = available: %10i\n", available);
+    hkOstream_printf(ostr, "              used:      %10i (%4.1f%%)\n", s.m_pAllocationMap, s.m_pAllocationMap * scale);
+    hkOstream_printf(ostr, "              free:      %10i (%4.1f%%)\n", s.m_uiFourthUnsignedValue,
                  s.m_uiFourthUnsignedValue * scale);
-    FUN_00cc0410(ostr, "              peak:      %10i (%4.1f%%)\n\n", s.m_uiThirdValue, s.m_uiThirdValue * scale);
+    hkOstream_printf(ostr, "              peak:      %10i (%4.1f%%)\n\n", s.m_uiThirdValue, s.m_uiThirdValue * scale);
 }
 
 // Writes heap, thread, stack, solver, and debug memory statistics to ostr using info and FUN_00cbc000.
 // @fnv 0x00cbc220
-void __stdcall FUN_00cbc220(hkOstream* ostr, MemSystemInfo* info)
+// src: HAVOK_LIB 0x00cbc220
+void __stdcall hkMemorySystem__printStatistics(hkOstream* ostr, MemSystemInfo* info)
 {
     SixUnsignedValueRecord stats;
     info->m_pStreamAllocator->getMemoryStatistics(reinterpret_cast<hkMemoryAllocator::MemoryStatistics&>(stats));
     unsigned int heapInUse = stats.m_pAllocationMap;
-    FUN_00cbc000(ostr, "Heap", stats, info->m_heapSoftLimit);
+    printDetailedStatistics(ostr, "Heap", stats, info->m_heapSoftLimit);
 
-    FUN_00cc0410(ostr, "\tThreadMemory (=CachedHeapMemory)\n");
+    hkOstream_printf(ostr, "\tThreadMemory (=CachedHeapMemory)\n");
     int total = 0;
     for (int i = 0; i < info->m_threadMemory.GetLogicalSize(); i++)
     {
         unsigned int iStackSize = info->m_threadMemory[i]->ComputeWeightedSum();
         if (iStackSize > 0)
         {
-            FUN_00cc0410(ostr, "            Thread %i  size %10i\n", i, iStackSize);
+            hkOstream_printf(ostr, "            Thread %i  size %10i\n", i, iStackSize);
             total += iStackSize;
         }
     }
-    FUN_00cc0410(ostr, "            = total %i\n\n", total);
+    hkOstream_printf(ostr, "            = total %i\n\n", total);
 
-    FUN_00cc0410(ostr, "\tStackMemory\n");
+    hkOstream_printf(ostr, "\tStackMemory\n");
     int stackTotal = 0;
     for (int iStackIndex = 0; iStackIndex < info->m_kAllocatorList.GetLogicalSize(); iStackIndex++)
     {
@@ -268,28 +278,28 @@ void __stdcall FUN_00cbc220(hkOstream* ostr, MemSystemInfo* info)
         int iStackSize = (char*)pStackTriple->m_end.val() - (char*)pStackTriple->m_start.val();
         stackTotal += iStackSize;
         used = iStackSize - (int)((char*)pStackTriple->m_end.val() - (char*)pStackTriple->m_next.val());
-        FUN_00cc0410(ostr, "            Thread %i  size %10i      used:    %6i (%4.1f%%)\n", iStackIndex, iStackSize,
+        hkOstream_printf(ostr, "            Thread %i  size %10i      used:    %6i (%4.1f%%)\n", iStackIndex, iStackSize,
                      used, used * 100.0 / iStackSize);
     }
     if (info->m_kAllocatorList.GetLogicalSize() == 0)
     {
         stackTotal = info->m_stackTotal;
     }
-    FUN_00cc0410(ostr, "            = total %i\n\n", stackTotal);
+    hkOstream_printf(ostr, "            = total %i\n\n", stackTotal);
 
-    FUN_00c85750()->solverAllocator().getMemoryStatistics(reinterpret_cast<hkMemoryAllocator::MemoryStatistics&>(stats));
-    FUN_00cc0410(ostr, "\t%s:\n", "Solver");
-    FUN_00cc0410(ostr, "            totalSize:   %10i\n", stats.m_uiFirstValue);
-    FUN_00cc0410(ostr, "              peak:      %10i (%4.1f%%)\n\n", stats.m_uiThirdValue,
+    hkMemoryRouter_getInstance()->solverAllocator().getMemoryStatistics(reinterpret_cast<hkMemoryAllocator::MemoryStatistics&>(stats));
+    hkOstream_printf(ostr, "\t%s:\n", "Solver");
+    hkOstream_printf(ostr, "            totalSize:   %10i\n", stats.m_uiFirstValue);
+    hkOstream_printf(ostr, "              peak:      %10i (%4.1f%%)\n\n", stats.m_uiThirdValue,
                  (float)stats.m_uiThirdValue * 100.0 / (float)stats.m_uiFirstValue);
 
-    FUN_00c85750()->debugAllocator().getMemoryStatistics(reinterpret_cast<hkMemoryAllocator::MemoryStatistics&>(stats));
+    hkMemoryRouter_getInstance()->debugAllocator().getMemoryStatistics(reinterpret_cast<hkMemoryAllocator::MemoryStatistics&>(stats));
     if (heapInUse == stats.m_pAllocationMap)
     {
-        FUN_00cc0410(ostr, "\tDebugMem: Not used.\n\n");
+        hkOstream_printf(ostr, "\tDebugMem: Not used.\n\n");
     }
     else
     {
-        FUN_00cbc000(ostr, "DebugMem", stats, 0x7fffffff);
+        printDetailedStatistics(ostr, "DebugMem", stats, 0x7fffffff);
     }
 }

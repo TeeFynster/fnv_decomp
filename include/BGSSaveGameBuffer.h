@@ -66,7 +66,7 @@ public:
     void ShiftBuffer(unsigned int, int);
     void WriteAtOffset(void*, unsigned int, unsigned int);
     void FUN_00865c40(void*);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(unsigned int, unsigned int);
-    void FUN_00865f60(unsigned int);
+    unsigned int StartVariableSizedValue();
+    void SaveVariableSizedValue_00865ff0(unsigned int, unsigned int);
+    void SaveVariableSizedValue(unsigned int);
 };

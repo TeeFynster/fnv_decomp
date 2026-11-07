@@ -11,5 +11,5 @@ public:
 
     NiObjPtr& operator=(const NiObjPtr& other);
     ~NiObjPtr();
-    NiObj* FUN_00559450();
+    NiObj* Modelloader_GetReferencedThis();
 };

@@ -18,7 +18,7 @@ public:
     ~CombatThreatRecord_nitmapbase();
     bool IsXLessThan(float);
     void LoadGame(BGSLoadGameBuffer*);
-    void __thiscall FUN_009a5e50();
+    void __thiscall SetVtableAndProcessState_009a5e50();
 };
 
 extern int DAT_01189c40;

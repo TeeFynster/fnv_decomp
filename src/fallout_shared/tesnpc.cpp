@@ -134,10 +134,10 @@ class ActivationMenuState
 extern ActivationMenuState DAT_011f2250;
 BSAudio* GetAudioSystem();
 extern PlayerCharacter* g_thePlayer;
-bool FUN_00754d90(Actor*);
+bool CompanionWheelMenu_GetShouldCompanionWheelOpen(Actor*);
 void OpenDialogueMenu(int, TESObjectREFR*, TESTopic*, void*, int, bool);
 bool ShowMessage(const char*, int, const char*, const char*, float, bool);
-int FUN_00702640();
+int Interface_GetMenuModeType();
 extern "C" int sprintf(char*, const char*, ...);
 class ContainerItemExtra
 {
@@ -153,13 +153,13 @@ struct InventoryItemEntry
     int iCount;
     TESForm* pForm;
     ContainerItemExtra* pExtra;
-    void FUN_00462230();
+    void TwoValues_Endian();
 };
 struct ContainerItem
 {
     int iCount;
     unsigned int iFormID;
-    void FUN_00462230();
+    void TwoValues_Endian();
 };
 extern InventoryItemEntry* DAT_011cb7d8;
 struct PackedRecordData
@@ -183,12 +183,12 @@ struct FaceGenCoordinateValue
 {
     float* value;
     unsigned int offset;
-    const float* FUN_00629ab0();
+    const float* NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt();
 };
 class FaceGenCoordinateBasis
 {
   public:
-    FaceGenCoordinateValue FUN_0060b370(unsigned int, unsigned int);
+    FaceGenCoordinateValue ForwardCall_0060b370(unsigned int, unsigned int);
 };
 class NiTexture;
 class FaceGenUndo;
@@ -228,13 +228,13 @@ TESForm* GetFormByID(unsigned int);
 int Warning(const char*, ...);
 
 
-bool FUN_009a3830(BGSHeadPart*&, BGSHeadPart*&);
+bool Actor_AreReferencedValuesEqual(BGSHeadPart*&, BGSHeadPart*&);
 extern unsigned char DAT_011a9448;
 extern "C" const NiPoint3 NiPoint3_ZERO;
 class ActorAnimData
 {
   public:
-    class NiControllerManager* FUN_00496940();
+    class NiControllerManager* GetControllerManager_00496940();
 };
 struct BIPED_OBJECT_DATA
 {
@@ -251,13 +251,13 @@ class BipedAnim
     void AddBipedWeapon(TESObjectWEAP*, unsigned char);
     unsigned char bipedData[0x2b4];
     NiNode* GetBoneNode(BIPED_BONE);
-    BIPED_OBJECT_DATA* FUN_00606800();
+    BIPED_OBJECT_DATA* BipedAnim_QBufferedObjects();
     void UpdateRaceSex(TESRace*, SEX);
 };
 void AddObjectToPalette(NiNode*, NiDefaultAVObjectPalette*);
 void ComputeAngleRange(float*, float*);
 void ClampMinMaxFromSetting(float*, float*);
-void FUN_00649fe0(float*, float*);
+void BSFaceGenAnimationData_GetTrackDeadZoneXYMinMax(float*, float*);
 void GetEyeAngleLimits(float*, float*);
 
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
@@ -266,7 +266,7 @@ class GameSettingCollection;
 using ::SettingT;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting327;
 int TruncateFloatToInt(float);
-double FUN_00404040(float);
+double FloatFloor(float);
 int ComputeIntelligenceResult(int, bool);
 void GetSkillAttributeAndBase(ActorValue::Index, int*, float*);
 class AIFormulas
@@ -285,13 +285,13 @@ struct DismembermentPart
 };
 bool FUN_004abfa0();
 extern BSSimpleList<TESNPC*> DAT_011cb764;
-TESCombatStyle* FUN_00505000();
+TESCombatStyle* TESCombatStyle_GetDefaultCombatStyle();
 class SceneObjectLookup
 {
   public:
     static NiAVObject* GetObjectByName(NiNode*, const char*);
 };
-const char* FUN_00605d40(bool);
+const char* TESRace_GetHeadPartNodeName(bool);
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 extern const char* DAT_01188b98[];
@@ -306,10 +306,10 @@ TESNPC::TESNPC() : m_pkPrimaryFaceGenNode(0), m_pkSecondaryFaceGenNode(0), m_pkF
 {
     SetFormType(ENUM_FORM_ID_NPC__ID);
     ResetFormData();
-    TESAIForm::FUN_0047ef50(50, false);
-    TESAIForm::FUN_0047ee00(0, false);
-    TESAIForm::FUN_0047eed0(2, false);
-    TESAIForm::FUN_0047ef00(50, false);
+    TESAIForm::TESAIForm_SetResponsibility(50, false);
+    TESAIForm::TESAIForm_SetAggression(0, false);
+    TESAIForm::TESAIForm_SetConfidence(2, false);
+    TESAIForm::TESAIForm_SetEnergy(50, false);
     m_ulTopicFlags = 0;
 }
 
@@ -336,8 +336,8 @@ void TESNPC::ResetFormData()
         0, 0);
     for (int r = 0; r < 2; ++r)
         for (int c = 0; c < 2; ++c)
-            if (m_kFaceGenCoordinates[r][c].FUN_009611e0())
-                m_kFaceGenCoordinates[r][c].FUN_0060b3b0();
+            if (m_kFaceGenCoordinates[r][c].NiAVObject_GetParent())
+                m_kFaceGenCoordinates[r][c].FillMemory_0060b3b0();
     for (int i = 0; i < 14; ++i)
     {
         data.skills[i] = 5;
@@ -422,7 +422,7 @@ bool TESNPC::Load(TESFile* file)
                     memset(&item, 0, 8);
                     file->GetChunkData(&item, 8);
                     if (file->IsEndianConversionRequired())
-                        item.FUN_00462230();
+                        item.TwoValues_Endian();
                     DAT_011cb7d8 = TESContainer::AddContainerObject(&item);
                     break;
                 }
@@ -439,7 +439,7 @@ bool TESNPC::Load(TESFile* file)
             case 'OLPS': {
                 unsigned int spell = 0;
                 file->GetChunkData(&spell);
-                TESSpellList::FUN_0048d290(spell);
+                TESSpellList::TESSpellList_AddSpell_0048d290(spell);
                 break;
             }
             case 'MTIE': {
@@ -497,7 +497,7 @@ bool TESNPC::Load(TESFile* file)
             case 'DIKP': {
                 unsigned int package = 0;
                 file->GetChunkData(&package);
-                TESAIForm::FUN_0047f500(package);
+                TESAIForm::TESAIForm_AddPackage(package);
                 break;
             }
             case 'MANS': {
@@ -596,7 +596,7 @@ bool TESNPC::Load(TESFile* file)
                     if (file->IsEndianConversionRequired())
                         BSEndian(&cursor.values[index], EndianSizeTag<4>());
                     *const_cast<float*>(
-                        reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[cursor.row][cursor.column])->FUN_0060b370(index, 0).FUN_00629ab0()) =
+                        reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[cursor.row][cursor.column])->ForwardCall_0060b370(index, 0).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt()) =
                         cursor.values[index];
                 }
                 break;
@@ -611,7 +611,7 @@ bool TESNPC::Load(TESFile* file)
                 RemapFormIDForFile(resolved.formID, file);
                 resolved.part = dynamic_cast<BGSHeadPart*>(TESForm::GetFormByID(resolved.formID));
                 if (resolved.part)
-                    FUN_00602170()->AddHead(resolved.part);
+                    InterfaceManager_GetVATSEffect()->AddHead(resolved.part);
                 else
                     Warning("MASTERFILE: Could not find headpart (%08X) on NPC '%s' (%08X).", resolved.formID,
                             GetName(), GetFormID());
@@ -640,7 +640,7 @@ bool TESNPC::Load(TESFile* file)
                     length = 0.0f;
                 if (length > 1.0)
                     length = 1.0f;
-                FUN_00601c10(length);
+                SetHairLength(length);
                 break;
             }
             case 'MANE': {
@@ -762,7 +762,7 @@ void TESNPC::InitItem()
         }
     }
     if (!TESNPC::GetCombatStyle())
-        SetCombatStyle(FUN_00505000());
+        SetCombatStyle(TESCombatStyle_GetDefaultCombatStyle());
     if (TESHealthForm::GetBaseHealth() <= 0)
         SetEssentialState(true);
     if (m_fGlyphExtent == 0.0)
@@ -801,15 +801,15 @@ void TESNPC::Copy(TESForm* form)
 // @fnv 0x00603790
 void TESNPC::CopyActorBaseData(TESNPC* source)
 {
-    FUN_00602170()->RemoveAll();
+    InterfaceManager_GetVATSEffect()->RemoveAll();
     m_pHair = source->GetHair();
-    m_fHairLength = source->FUN_00602130();
+    m_fHairLength = source->GetHairLength();
     m_pEyes = source->FUN_00602150();
-    iHairColor = source->FUN_004169d0();
-    BSSimpleList<BGSHeadPart*>* node = source->FUN_00602170();
+    iHairColor = source->TESDataHandler_GetRegionList();
+    BSSimpleList<BGSHeadPart*>* node = source->InterfaceManager_GetVATSEffect();
     while (node && !node->IsEmpty())
     {
-        FUN_00602170()->AddTail(node->GetItem());
+        InterfaceManager_GetVATSEffect()->AddTail(node->GetItem());
         node = node->GetNext();
     }
     BSFaceGenManager::CopyFaceGenCoordinates(source->GetOffsetFaceCoord(), GetOffsetFaceCoord(), 0, 0);
@@ -836,7 +836,7 @@ TESHair* TESNPC::GetHair()
 {
     TESHair* hair = m_pHair;
     if (m_pAssignedRace && this != g_thePlayer->GetObjectReference())
-        hair = GetFormRace()->FUN_00613870(TESActorBase::GetSex());
+        hair = GetFormRace()->TESRace_GetDefaultHair(TESActorBase::GetSex());
     return hair;
 }
 
@@ -877,11 +877,11 @@ void TESNPC::UpdateActorBaseData(bool menu)
                 }
                 luck = TESAttributes::GetAttributeValue(11);
                 budget.iSkillPoints = ComputeIntelligenceResult(TESAttributes::GetAttributeValue(9), true);
-                iLevel = TESActorBaseData::FUN_0047ded0();
+                iLevel = TESActorBaseData::TESActorBaseData_GetLevel();
                 budget.iSkillPoints = (iLevel - 1) * budget.iSkillPoints;
                 budget.iRemainingTagSkills = (menu ? 1 : 0) + 3;
                 budget.fPointsPerSkill =
-                    FUN_00404040((float)budget.iSkillPoints / budget.iRemainingTagSkills) * DAT_011cd6c0.Int()->i;
+                    FloatFloor((float)budget.iSkillPoints / budget.iRemainingTagSkills) * DAT_011cd6c0.Int()->i;
                 budget.overflow = 0.0f;
                 --budget.iRemainingTagSkills;
                 for (int iIndex = 0; iIndex < 14; ++iIndex)
@@ -929,8 +929,8 @@ void TESNPC::UpdateActorBaseData(bool menu)
 // @fnv 0x006041d0
 float TESNPC::GetDefaultHeight()
 {
-    if (FUN_004ac110())
-        return FUN_004ac110()->GetHeight(TESActorBase::GetSex());
+    if (TESNPC_GetRace())
+        return TESNPC_GetRace()->GetHeight(TESActorBase::GetSex());
     return 0.0f;
 }
 
@@ -970,10 +970,10 @@ void TESNPC::UpdateModel3D(TESObjectREFR* refr, bool armor, bool weapon, bool up
             bool bShouldEquip = true;
             TESBoundObject* pItemObject = equipment.pArmorItem->FUN_0044ddc0();
             if ((!equipment.pBodyModel || !equipment.pBodyModel->HasBipedModel(iBipedObject, false, 0)) &&
-                !refr->FUN_00575400(pItemObject))
+                !refr->TESObjectREFR_WearingObject(pItemObject))
             {
-                if (equipment.pArmorItem->FUN_00559450())
-                    equipment.pExtraData = equipment.pArmorItem->FUN_00559450()->GetItem();
+                if (equipment.pArmorItem->Modelloader_GetReferencedThis())
+                    equipment.pExtraData = equipment.pArmorItem->Modelloader_GetReferencedThis()->GetItem();
                 else
                     equipment.pExtraData = 0;
                 if (iBipedObject == 2)
@@ -998,12 +998,12 @@ void TESNPC::UpdateModel3D(TESObjectREFR* refr, bool armor, bool weapon, bool up
         if (pArmorItem)
         {
             bool bDeleteItem = true;
-            if (!refr->FUN_00575400(pArmorItem->FUN_0044ddc0()))
+            if (!refr->TESObjectREFR_WearingObject(pArmorItem->FUN_0044ddc0()))
             {
                 ExtraDataList* pExtraData = 0;
-                if (pArmorItem->FUN_00559450())
+                if (pArmorItem->Modelloader_GetReferencedThis())
                 {
-                    pExtraData = pArmorItem->FUN_00559450()->GetItem();
+                    pExtraData = pArmorItem->Modelloader_GetReferencedThis()->GetItem();
                     bDeleteItem = false;
                 }
                 else
@@ -1062,7 +1062,7 @@ void TESNPC::AttachHeadParts(TESObjectREFR* refr, NiNode* node)
     }
     context.biped->FUN_00450f90(false);
     context.skinned->FUN_00450f90(false);
-    context.hair = SceneObjectLookup::GetObjectByName(node, FUN_00605d40(true));
+    context.hair = SceneObjectLookup::GetObjectByName(node, TESRace_GetHeadPartNodeName(true));
     {
         char hairName[32];
         NiAVObject* hair[2];
@@ -1111,7 +1111,7 @@ void TESNPC::RebuildHeadModel(TESObjectREFR* refr, BipedAnim* biped, bool rebuil
         {
             if (!rebuild)
                 for (unsigned int i = 0; i < 20; ++i)
-                    if (biped->FUN_00606800()[i].pObject)
+                    if (biped->BipedAnim_QBufferedObjects()[i].pObject)
                         return;
             biped->UpdateRaceSex(TESRaceForm::GetFormRace(), (SEX)((actorData.m_uiActorFlags & 1) != 0));
         }
@@ -1179,7 +1179,7 @@ void TESNPC::GetFaceGenNodes(BSFaceGenNiNode*& headBiped, BSFaceGenNiNode*& head
     if (!m_pkPrimaryFaceGenNode && !m_pkSecondaryFaceGenNode && GetFormRace())
     {
         GetFormRace()->BuildFaceGenHead(headBiped, headSkinned, this, true, false, (SEX)0);
-        m_usLastRace = GetFormRace()->FUN_00607350();
+        m_usLastRace = GetFormRace()->GetFaceCoordNum_00607350();
     }
 }
 
@@ -1203,20 +1203,21 @@ void TESNPC::SetCombatStyle(TESCombatStyle* style)
 
 
 // @fnv 0x004169d0
-unsigned int TESNPC::FUN_004169d0()
+// src: COMMUNITY 0x004169d0
+unsigned int TESNPC::TESDataHandler_GetRegionList()
 {
     return *(unsigned int*)((char*)this + 0x1d8);
 }
 
 
-void __cdecl FUN_004169a0(float, float&, float&);
+void __cdecl NiSinCos_004169a0(float, float&, float&);
 
 // Computes the sine and cosine of the angle and writes a 3x3 rotation matrix about Z into the object's fields.
 // @fnv 0x004a0c90
 void NiMatrix3::MakeZRotation(float afAngle)
 {
     float fSin, fCos;
-    FUN_004169a0(afAngle, fSin, fCos);
+    NiSinCos_004169a0(afAngle, fSin, fCos);
 
     *(float*)((char*)this + 0x00) = fCos;
     *(float*)((char*)this + 0x04) = fSin;
@@ -1255,21 +1256,24 @@ FaceGenMatrix<float> (*TESNPC::GetOffsetFaceCoord())[2]
 
 
 // @fnv 0x00601c10
-void TESNPC::FUN_00601c10(float afHairLength)
+// src: COMMUNITY 0x00601c10
+void TESNPC::SetHairLength(float afHairLength)
 {
     *(float*)((char*)this + 0x1bc) = afHairLength;
 }
 
 
 // @fnv 0x00602130
-float TESNPC::FUN_00602130()
+// src: COMMUNITY 0x00602130
+float TESNPC::GetHairLength()
 {
     return *(float*)((char*)this + 0x1bc);
 }
 
 
 // @fnv 0x00602170
-BSSimpleList<BGSHeadPart*>* TESNPC::FUN_00602170()
+// src: XBOX_PDB 0x00602170
+BSSimpleList<BGSHeadPart*>* TESNPC::InterfaceManager_GetVATSEffect()
 {
     return &m_kHeadPartList;
 }
@@ -1300,18 +1304,20 @@ float TESRace::GetHeight(SEX aeSex)
 
 
 // @fnv 0x006044c0
-TESNPC* TESNPC::FUN_006044c0()
+// src: COMMUNITY 0x006044c0
+TESNPC* TESNPC::GetCopyFrom()
 {
     return *(TESNPC**)((char*)this + 0x1f0);
 }
 
 struct FUN_006047a0_shell : public PlayerCharacter
 {
-    bool FUN_006047a0();
+    bool PlayerCharacter_IsPCYoung();
 };
 
 // @fnv 0x006047a0
-bool FUN_006047a0_shell::FUN_006047a0()
+// src: XBOX_PDB 0x006047a0
+bool FUN_006047a0_shell::PlayerCharacter_IsPCYoung()
 {
     return *((bool*)((char*)this + 0x7c5));
 }
@@ -1369,7 +1375,7 @@ struct VN_00605d70
 };
 struct PC_00605d70 : PlayerCharacter
 {
-    bool FUN_004eaf60();
+    bool PlayerCharacter_Is3rdPerson();
     NiNode* GetNode(bool);
 };
 void FUN_004ac1e0_x();
@@ -1379,10 +1385,11 @@ struct BA_00605d70
 };
 struct TESNPCSceneUpdates : TESNPC
 {
-    void FUN_00605d70(TESObjectREFR* apRef);
+    void TESNPC_ReplaceRefModel(TESObjectREFR* apRef);
 };
 // @fnv 0x00605d70
-void TESNPCSceneUpdates::FUN_00605d70(TESObjectREFR* apRef)
+// src: XBOX_PDB 0x00605d70
+void TESNPCSceneUpdates::TESNPC_ReplaceRefModel(TESObjectREFR* apRef)
 {
     int iPasses;
     BipedAnim* pbiped;
@@ -1396,7 +1403,7 @@ void TESNPCSceneUpdates::FUN_00605d70(TESObjectREFR* apRef)
     {
         if (apRef == g_thePlayer && iPasses == 1)
         {
-            pbiped = g_thePlayer->GetBipedAnim(((PC_00605d70*)g_thePlayer)->FUN_004eaf60());
+            pbiped = g_thePlayer->GetBipedAnim(((PC_00605d70*)g_thePlayer)->PlayerCharacter_Is3rdPerson());
             pobj = reinterpret_cast<NiAVObject*>(((PC_00605d70*)g_thePlayer)->GetNode(true));
         }
         RebuildHeadModel(apRef, pbiped, false);
@@ -1532,11 +1539,12 @@ bool TESNPC::InitWornObject(TESObjectREFR* apRef, BipedAnim* apBipedAnim, TESBou
 struct BipedAnimObject;
 struct FUN_00606800_shell : public BipedAnim
 {
-    BipedAnimObject* FUN_00606800();
+    BipedAnimObject* BipedAnim_QBufferedObjects();
 };
 
 // @fnv 0x00606800
-BipedAnimObject* FUN_00606800_shell::FUN_00606800()
+// src: XBOX_PDB 0x00606800
+BipedAnimObject* FUN_00606800_shell::BipedAnim_QBufferedObjects()
 {
     return reinterpret_cast<BipedAnimObject*>(reinterpret_cast<char*>(this) + 0x16c);
 }
@@ -1558,19 +1566,20 @@ struct NiStream;
 class NiExtraData;
 class NiFixedString;
 
-const NiFixedString& __cdecl FUN_00607340();
+const NiFixedString& __cdecl BSFaceGenModelExtraData_GetTag();
 
 
 // Returns the extra data named by FUN_00607340 from apGeom, or null if apGeom is null.
 // @fnv 0x00607310
 NiExtraData* __cdecl GetGeomExtraData(NiTriBasedGeom* apGeom)
 {
-    return apGeom ? apGeom->GetExtraData(FUN_00607340()) : 0;
+    return apGeom ? apGeom->GetExtraData(BSFaceGenModelExtraData_GetTag()) : 0;
 }
 
 
 // @fnv 0x00607350
-unsigned short TESRace::FUN_00607350()
+// src: COMMUNITY 0x00607350
+unsigned short TESRace::GetFaceCoordNum_00607350()
 {
     return *reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(this) + 0x4f8);
 }
@@ -1587,21 +1596,23 @@ void bhkRagdollController::SetBoneMaxAngle(int aeBone, float afMaxAngle)
 
 
 // @fnv 0x00607830
-void bhkRagdollController::FUN_00607830(float afAngle)
+// src: COMMUNITY 0x00607830
+void bhkRagdollController::SetMaxEyePitch(float afAngle)
 {
     *(float*)(reinterpret_cast<char*>(this) + 0x1a8) = afAngle;
 }
 
 struct FUN_00608d80_shell : public Actor
 {
-    bool FUN_00608d80();
+    bool Actor_IsReanimated();
 };
 
 
 // @fnv 0x00608d80
-bool FUN_00608d80_shell::FUN_00608d80()
+// src: XBOX_PDB 0x00608d80
+bool FUN_00608d80_shell::Actor_IsReanimated()
 {
-    return (int)((GameSettingCollection*)this)->FUN_004f8960() == 4 ? true : false;
+    return (int)((GameSettingCollection*)this)->GameSettingCollection_File() == 4 ? true : false;
 }
 
 
@@ -1637,17 +1648,18 @@ void TESNPC::Revert(BGSLoadFormBuffer* apLoadGameBuffer)
     if (cresetFlags & 8)
         ResetFaceGen();
     if (cresetFlags)
-        FUN_005f20a0(cresetFlags);
+        Reset3DForLoadedActors(cresetFlags);
 }
 
 struct S_0060af60
 {
     void SetMaskedBits(unsigned short, int, int);
-    void FUN_0060af60(unsigned short a);
+    void NiTexturingProperty_Map_SetFilterMode(unsigned short a);
 };
 // Calls SetMaskedBits with the given unsigned short, 0xf00 and 8.
 // @fnv 0x0060af60
-void S_0060af60::FUN_0060af60(unsigned short ausValue)
+// src: XBOX_PDB 0x0060af60
+void S_0060af60::NiTexturingProperty_Map_SetFilterMode(unsigned short ausValue)
 {
     SetMaskedBits(ausValue, 0xf00, 8);
 }
@@ -1671,49 +1683,53 @@ struct H_0060b3b0
     char pad[0x18];
     unsigned int a;
     unsigned int b;
-    float* FUN_006578b0(unsigned int) const;
-    void FUN_0060b3b0();
+    float* GetElementPointerChecked(unsigned int) const;
+    void FillMemory_0060b3b0();
 };
 // Zeroes the buffer returned by FUN_006578b0(0), clearing a*b*4 bytes.
 // @fnv 0x0060b3b0
-void H_0060b3b0::FUN_0060b3b0()
+// src: GUESS 0x0060b3b0 (confidence: medium)
+void H_0060b3b0::FillMemory_0060b3b0()
 {
-    memset(FUN_006578b0(0), 0, a * b * 4);
+    memset(GetElementPointerChecked(0), 0, a * b * 4);
 }
 
 struct S_0060b3f0
 {
-    void FUN_0060b410(unsigned int, float);
-    void FUN_0060b3f0(unsigned int a);
+    void std_vector_float_std_allocator_float_resize_0060b410(unsigned int, float);
+    void std_vector_float_std_allocator_float_resize(unsigned int a);
 };
 // @fnv 0x0060b3f0
-void S_0060b3f0::FUN_0060b3f0(unsigned int auiValue)
+// src: COMMUNITY 0x0060b3f0
+void S_0060b3f0::std_vector_float_std_allocator_float_resize(unsigned int auiValue)
 {
-    FUN_0060b410(auiValue, 0.0f);
+    std_vector_float_std_allocator_float_resize_0060b410(auiValue, 0.0f);
 }
 
 struct S_0060ba10
 {
     char pad[0xa];
     unsigned short s;
-    void FUN_0060bd90(unsigned short, int);
-    void FUN_0060ba10(int a);
+    void NiTObjectArray_NiPointer_NiTexture_SetAtGrow(unsigned short, int);
+    void NiTObjectArray_NiPointer_NiTexture_Add(int a);
 };
 // Forwards the stored short s and the given int to FUN_0060bd90.
 // @fnv 0x0060ba10
-void S_0060ba10::FUN_0060ba10(int aiValue)
+// src: COMMUNITY 0x0060ba10
+void S_0060ba10::NiTObjectArray_NiPointer_NiTexture_Add(int aiValue)
 {
-    FUN_0060bd90(s, aiValue);
+    NiTObjectArray_NiPointer_NiTexture_SetAtGrow(s, aiValue);
 }
 
 struct FUN_00629ab0_shell
 {
     float* p;
-    float& FUN_00629ab0(unsigned int i);
+    float& NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(unsigned int i);
 };
 
 // @fnv 0x00629ab0
-float& FUN_00629ab0_shell::FUN_00629ab0(unsigned int uiIndex)
+// src: XBOX_PDB 0x00629ab0
+float& FUN_00629ab0_shell::NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(unsigned int uiIndex)
 {
     return p[uiIndex];
 }
@@ -1727,11 +1743,12 @@ struct GlobalObject_00528cb0
 struct QueueHelper
 {
     void QueueTaskByKey(int, GlobalObject_00528cb0*, int, int, int, bool, bool, bool);
-    void FUN_00444040(int, int, int, int, bool, bool, bool);
+    void ModelLoader_QueueModel_00444040(int, int, int, int, bool, bool, bool);
 };
 // Constructs a GlobalObject_00528cb0 with 0 and forwards it with the remaining arguments to QueueTaskByKey.
 // @fnv 0x00444040
-void QueueHelper::FUN_00444040(int aiArg1, int aiArg2, int aiArg3, int aiArg4, bool abFlag1, bool abFlag2, bool abFlag3)
+// src: XBOX_PDB 0x00444040
+void QueueHelper::ModelLoader_QueueModel_00444040(int aiArg1, int aiArg2, int aiArg3, int aiArg4, bool abFlag1, bool abFlag2, bool abFlag3)
 {
     GlobalObject_00528cb0 obj(0);
     QueueTaskByKey(aiArg1, &obj, aiArg2, aiArg3, aiArg4, abFlag1, abFlag2, abFlag3);
@@ -1742,7 +1759,7 @@ extern BSFaceGenManager* DAT_011d59e8;
 // @fnv 0x006045f0
 int __cdecl GetFaceGenManagerValue()
 {
-    return static_cast<const NP&>(DAT_011d59e8 ? *reinterpret_cast<NP*>(&DAT_011d59e8->m_spBaseTexture) : NP(0)).FUN_00559450();
+    return static_cast<const NP&>(DAT_011d59e8 ? *reinterpret_cast<NP*>(&DAT_011d59e8->m_spBaseTexture) : NP(0)).Modelloader_GetReferencedThis();
 }
 
 
@@ -1791,7 +1808,8 @@ unsigned char TESAttributes::GetAttributeValue7()
 
 // Stores param at offset 0x130 of this and calls the virtual function at vtable offset 0x48 with 0x400.
 // @fnv 0x00601c70
-void TESNPC::FUN_00601c70(TESClass* aiValue)
+// src: COMMUNITY 0x00601c70
+void TESNPC::SetClass(TESClass* aiValue)
 {
     m_pClass = aiValue;
     ((void(__thiscall*)(void*, int)) * (int**)(*(int*)this + 0x48))(this, 0x400);
@@ -1815,18 +1833,20 @@ TESRace* TESNPCRaceQueries::GetRaceOrNull()
 extern NiFixedString* DAT_011c6210;
 
 // @fnv 0x006041c0
-NiFixedString* __cdecl FUN_006041c0()
+// src: GUESS 0x006041c0 (confidence: low)
+NiFixedString* __cdecl NiFixedString_GetDAT_011c6210_006041c0()
 {
     return DAT_011c6210;
 }
 
 struct TESRaceVoiceQueries : TESRace
 {
-    int __thiscall FUN_00604780(int index);
+    int __thiscall TESRace_GetDefaultVoiceType(int index);
 };
 
 // @fnv 0x00604780
-int __thiscall TESRaceVoiceQueries::FUN_00604780(int index)
+// src: COMMUNITY 0x00604780
+int __thiscall TESRaceVoiceQueries::TESRace_GetDefaultVoiceType(int index)
 {
     return *(int*)((char*)this + 0x4FC + index * 4);
 }
@@ -1836,7 +1856,8 @@ namespace fnv_00607340 {
 extern BSFadeNode* DAT_011d5b50;
 
 // @fnv 0x00607340
-BSFadeNode* __cdecl FUN_00607340()
+// src: COMMUNITY 0x00607340
+BSFadeNode* __cdecl BSFaceGenModelExtraData_GetTag()
 {
     return DAT_011d5b50;
 }
@@ -1855,11 +1876,12 @@ struct FUN_00472660_shell
 };
 struct TESNPCFileQueries : TESNPC
 {
-    bool FUN_00609bf0(TESFile* apFile);
+    bool TESNPC_FindInFileFast(TESFile* apFile);
 };
 // Checks apFile and the offset at this+0x1e8, seeks there, compares the read value to DAT_011871f8 and the form ID to GetFormID.
 // @fnv 0x00609bf0
-bool TESNPCFileQueries::FUN_00609bf0(TESFile* apFile)
+// src: COMMUNITY 0x00609bf0
+bool TESNPCFileQueries::TESNPC_FindInFileFast(TESFile* apFile)
 {
     if (apFile && *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x1e8) &&
         reinterpret_cast<FileH*>(apFile)->OpenTESFile(0, false) &&
@@ -1921,15 +1943,16 @@ void TESNPCActorBaseQueries::RevertFormOnly(BGSLoadFormBuffer* apLoadGameBuffer)
 
 struct TESNPCSaveSizeQueries : TESNPC
 {
-    unsigned short __thiscall FUN_00608da0(unsigned int aiFlags);
+    unsigned short __thiscall TESNPC_GetSaveSize(unsigned int aiFlags);
 };
 
 // Accumulates the base size from FUN_005f16f0 and adds 0xe when aiFlags has 0x200 set, returning the total.
 // @fnv 0x00608da0
-unsigned short __thiscall TESNPCSaveSizeQueries::FUN_00608da0(unsigned int aiFlags)
+// src: XBOX_PDB 0x00608da0
+unsigned short __thiscall TESNPCSaveSizeQueries::TESNPC_GetSaveSize(unsigned int aiFlags)
 {
     unsigned short isize = 0;
-    isize += TESActorBase::FUN_005f16f0(aiFlags);
+    isize += TESActorBase::GetSaveSize_005f16f0(aiFlags);
     if (aiFlags & 0x200)
         isize += 0xe;
     if (aiFlags & 0)
@@ -1954,14 +1977,15 @@ void* TESNPCDeleteAccess::FUN_00601370(unsigned int flags)
 
 struct FUN_006013a0_shell
 {
-    void __thiscall FUN_0060b9b0();
-    void __thiscall FUN_006013a0();
+    void __thiscall SetVtableAndProcessState_0060b9b0();
+    void __thiscall ForwardCall_006013a0();
 };
 
 // @fnv 0x006013a0
-void __thiscall FUN_006013a0_shell::FUN_006013a0()
+// src: GUESS 0x006013a0 (confidence: low)
+void __thiscall FUN_006013a0_shell::ForwardCall_006013a0()
 {
-    FUN_0060b9b0();
+    SetVtableAndProcessState_0060b9b0();
 }
 
 extern SettingT_GameSettingCollection_ g_011d2718;
@@ -1984,17 +2008,18 @@ struct FUN_00603bb0_Owner
     char pad[0x1C4];
     GO a;
     GO b;
-    void FUN_00603bb0();
+    void TESNPC_ClearFaceGenModels();
 };
 // @fnv 0x00603bb0
-void FUN_00603bb0_Owner::FUN_00603bb0()
+// src: COMMUNITY 0x00603bb0
+void FUN_00603bb0_Owner::TESNPC_ClearFaceGenModels()
 {
     a = 0;
     b = 0;
 }
 
 namespace fnv_006072c0 {
-int __fastcall FUN_00559450(int*);
+int __fastcall Modelloader_GetReferencedThis(int*);
 struct Inner6072
 {
     char _c[16];
@@ -2004,12 +2029,13 @@ struct Outer6072
 {
     char _pad[8];
     Inner6072* p;
-    NiSkinInstance* FUN_006072c0();
+    NiSkinInstance* BSFaceGenModel_GetSkinInstance();
 };
 // @fnv 0x006072c0
-NiSkinInstance* Outer6072::FUN_006072c0()
+// src: COMMUNITY 0x006072c0
+NiSkinInstance* Outer6072::BSFaceGenModel_GetSkinInstance()
 {
-    return (p && FUN_00559450(&p->_v)) ? ((NiTriBasedGeom*)FUN_00559450(&p->_v))->GetSkinInstance() : 0;
+    return (p && Modelloader_GetReferencedThis(&p->_v)) ? ((NiTriBasedGeom*)Modelloader_GetReferencedThis(&p->_v))->GetSkinInstance() : 0;
 }
 }  // namespace fnv_006072c0
 
@@ -2054,25 +2080,27 @@ struct S8
 {
     int v0;
     int v1;
-    S8* FUN_0060b8e0(int);
-    S8* FUN_0060b820(S8*, int);
+    S8* FaceGenDataBufferUnk000_SetUnk004toSelfPlusOffsetMultByFour_(int);
+    S8* FaceGenDataBuffer_SetsBufferUnk000Unk004toSelfPlusOffsetMultByFour(S8*, int);
 };
 // @fnv 0x0060b820
-S8* S8::FUN_0060b820(S8* out, int arg)
+// src: COMMUNITY 0x0060b820
+S8* S8::FaceGenDataBuffer_SetsBufferUnk000Unk004toSelfPlusOffsetMultByFour(S8* out, int arg)
 {
     S8 tmp = *this;
-    *out = *tmp.FUN_0060b8e0(arg);
+    *out = *tmp.FaceGenDataBufferUnk000_SetUnk004toSelfPlusOffsetMultByFour_(arg);
     return out;
 }
 
 void __cdecl FillRange(int, int, int, void*);
 struct Unk060b8a0
 {
-    int FUN_0060b8a0(int, int, int);
+    int ProcessAndReturnValue_0060b8a0(int, int, int);
 };
 // Calls FillRange with the three arguments and this+8, then returns a + b*4.
 // @fnv 0x0060b8a0
-int Unk060b8a0::FUN_0060b8a0(int aiFirst, int aiSecond, int aiThird)
+// src: GUESS 0x0060b8a0 (confidence: low)
+int Unk060b8a0::ProcessAndReturnValue_0060b8a0(int aiFirst, int aiSecond, int aiThird)
 {
     FillRange(aiFirst, aiSecond, aiThird, (char*)this + 8);
     return aiFirst + aiSecond * 4;
@@ -2081,43 +2109,46 @@ int Unk060b8a0::FUN_0060b8a0(int aiFirst, int aiSecond, int aiThird)
 struct FUN_0060b8e0_shell
 {
     void Advance(int);
-    void* FUN_0060b8e0(int);
+    void* FaceGenDataBufferUnk000_SetUnk004toSelfPlusOffsetMultByFour_(int);
 };
 
 // @fnv 0x0060b8e0
-void* FUN_0060b8e0_shell::FUN_0060b8e0(int a)
+// src: COMMUNITY 0x0060b8e0
+void* FUN_0060b8e0_shell::FaceGenDataBufferUnk000_SetUnk004toSelfPlusOffsetMultByFour_(int a)
 {
     Advance(a);
     return this;
 }
 
-int __fastcall FUN_00559450(int*);
+int __fastcall Modelloader_GetReferencedThis(int*);
 struct S_0060b980
 {
     int* p;
-    int FUN_0060b980();
+    int FaceGenData_Iterator_FaceGenData_GetUnk00();
 };
 // Returns the result of FUN_00559450 on the stored pointer, or 0 when the pointer is null.
 // @fnv 0x0060b980
-int S_0060b980::FUN_0060b980()
+// src: COMMUNITY 0x0060b980
+int S_0060b980::FaceGenData_Iterator_FaceGenData_GetUnk00()
 {
-    return p ? FUN_00559450(p) : 0;
+    return p ? Modelloader_GetReferencedThis(p) : 0;
 }
 
 extern int DAT_0104aae0;
-void __cdecl FUN_004ede70(void*);
+void __cdecl NiTMallocInterface_unsigned_int_Deallocate(void*);
 struct Holder_FUN_0060b9b0
 {
     void* vfptr;
     void* m_data;
-    void FUN_0060b9b0();
+    void SetVtableAndProcessState_0060b9b0();
 };
 // Sets the vtable pointer to DAT_0104aae0 and calls FUN_004ede70 on m_data.
 // @fnv 0x0060b9b0
-void Holder_FUN_0060b9b0::FUN_0060b9b0()
+// src: GUESS 0x0060b9b0 (confidence: low)
+void Holder_FUN_0060b9b0::SetVtableAndProcessState_0060b9b0()
 {
     vfptr = (void*)&DAT_0104aae0;
-    FUN_004ede70(m_data);
+    NiTMallocInterface_unsigned_int_Deallocate(m_data);
 }
 
 // Returns the element of _arr at index a1 when a1 is in [0,2), otherwise returns 0.0f.
@@ -2133,10 +2164,11 @@ struct FUN_0060b860_Cls
     int _c;
     char _pad1[4];
     int _t;
-    int FUN_0060b860();
+    int FaceGenData_GetUnk014MinusMinDivBy4();
 };
 // @fnv 0x0060b860
-int FUN_0060b860_Cls::FUN_0060b860()
+// src: COMMUNITY 0x0060b860
+int FUN_0060b860_Cls::FaceGenData_GetUnk014MinusMinDivBy4()
 {
     return _c == 0 ? 0 : (_t - _c) >> 2;
 }
@@ -2144,11 +2176,12 @@ int FUN_0060b860_Cls::FUN_0060b860()
 struct STR_0060b9e0
 {
     void FUN_0060bd20(unsigned int, unsigned int);
-    void* FUN_0060b9e0(unsigned int, unsigned int);
+    void* NiTPrimitiveArray_FaceGenUndo_NiTPrimitiveArray(unsigned int, unsigned int);
 };
 extern int DAT_0104aae8;
 // @fnv 0x0060b9e0
-void* STR_0060b9e0::FUN_0060b9e0(unsigned int arg1, unsigned int arg2)
+// src: EXE 0x0060b9e0
+void* STR_0060b9e0::NiTPrimitiveArray_FaceGenUndo_NiTPrimitiveArray(unsigned int arg1, unsigned int arg2)
 {
     FUN_0060bd20(arg1, arg2);
     *(void**)this = &DAT_0104aae8;
@@ -2157,7 +2190,7 @@ void* STR_0060b9e0::FUN_0060b9e0(unsigned int arg1, unsigned int arg2)
 
 struct NpcList_t
 {
-    void FUN_00905330(TESNPC* const&);
+    void RemoveMatchingItem(TESNPC* const&);
 };
 
 // @fnv 0x006013c0
@@ -2166,7 +2199,7 @@ TESNPC::~TESNPC()
     TESNPC::ClearData();
     if (TESActorBaseData::GetFlag(4))
     {
-        ((NpcList_t*)&DAT_011cb764)->FUN_00905330(this);
+        ((NpcList_t*)&DAT_011cb764)->RemoveMatchingItem(this);
     }
 }
 
@@ -2188,7 +2221,7 @@ struct Helper62d0
 extern TES* g_TES;
 struct FUN_00604310_shell
 {
-    bool FUN_00604310(int, char*, unsigned int);
+    bool TESNPC_GetHeadPartModTextureFileName(int, char*, unsigned int);
 };
 void* GetFaceGenManagerValue();
 
@@ -2206,7 +2239,7 @@ void TESNPCPartTextures::CreatePartTexture(int aePart, void* aspTexture)
         return;
     }
     char filename[260];
-    if (!((FUN_00604310_shell*)this)->FUN_00604310(aePart, filename, 0x104))
+    if (!((FUN_00604310_shell*)this)->TESNPC_GetHeadPartModTextureFileName(aePart, filename, 0x104))
     {
         *(GO*)aspTexture = 0;
         return;
@@ -2217,22 +2250,23 @@ void TESNPCPartTextures::CreatePartTexture(int aePart, void* aspTexture)
 }
 }  // namespace fnv_006044e0
 
-int __cdecl FUN_00408b20(char const*, char const*);
+int __cdecl BSstrcmp(char const*, char const*);
 
 // @fnv 0x00603220
-int FUN_00603220(char** apFirst, char** apSecond)
+// src: COMMUNITY 0x00603220
+int PresetIndexSortFunction(char** apFirst, char** apSecond)
 {
     char** localA = apFirst;
     char** localB = apSecond;
     if (!localA || !*localA || !localB || !*localB)
         return 0;
-    return FUN_00408b20(reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(*localA) + 0xd0)->GetFullName(),
+    return BSstrcmp(reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(*localA) + 0xd0)->GetFullName(),
                         reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(*localB) + 0xd0)->GetFullName());
 }
 
 struct PC7d
 {
-    void FUN_00484ce0(unsigned int, int);
+    void TESForm_SaveGameDataOLD(unsigned int, int);
 };
 struct FUN_00484d20_Class
 {
@@ -2240,16 +2274,17 @@ struct FUN_00484d20_Class
 };
 struct FUN_00608e00_shell
 {
-    void FUN_005f18c0(unsigned int);
-    void FUN_00608e00(unsigned int aiFlags);
+    void SaveGame_005f18c0(unsigned int);
+    void TESNPC_SaveGame(unsigned int aiFlags);
 };
 
 // @fnv 0x00608e00
-void FUN_00608e00_shell::FUN_00608e00(unsigned int aiFlags)
+// src: XBOX_PDB 0x00608e00
+void FUN_00608e00_shell::TESNPC_SaveGame(unsigned int aiFlags)
 {
-    FUN_005f18c0(aiFlags);
+    SaveGame_005f18c0(aiFlags);
     if (aiFlags & 0x200)
-        reinterpret_cast<PC7d*>(this)->FUN_00484ce0(
+        reinterpret_cast<PC7d*>(this)->TESForm_SaveGameDataOLD(
             reinterpret_cast<unsigned int>(reinterpret_cast<char*>(this) + 0x114), 0xe);
     if (aiFlags & 0)
     {
@@ -2266,27 +2301,28 @@ struct TESCombatStyle;
 TESForm* __cdecl GetFormByID(unsigned int);
 struct STR00
 {
-    void FUN_00484d00(void*, unsigned int);
+    void TESForm_LoadGameDataOLD(void*, unsigned int);
 };
 struct FUN_00484d40_Host
 {
-    void FUN_00484d40(unsigned int*, int);
+    void TESForm_LoadNumericID(unsigned int*, int);
 };
 struct FUN_00608e80_shell
 {
-    void FUN_005f1b30(unsigned int, unsigned int);
-    void FUN_00608e80(unsigned int aiFlags, unsigned int aiCurrentFlags);
+    void LoadGame_005f1b30(unsigned int, unsigned int);
+    void TESNPC_LoadGame(unsigned int aiFlags, unsigned int aiCurrentFlags);
 };
 // @fnv 0x00608e80
-void FUN_00608e80_shell::FUN_00608e80(unsigned int aiFlags, unsigned int aiCurrentFlags)
+// src: XBOX_PDB 0x00608e80
+void FUN_00608e80_shell::TESNPC_LoadGame(unsigned int aiFlags, unsigned int aiCurrentFlags)
 {
-    FUN_005f1b30(aiFlags, aiCurrentFlags);
+    LoadGame_005f1b30(aiFlags, aiCurrentFlags);
     if (aiFlags & 0x200)
-        ((STR00*)this)->FUN_00484d00((char*)this + 0x114, 0xe);
+        ((STR00*)this)->TESForm_LoadGameDataOLD((char*)this + 0x114, 0xe);
     if (aiFlags & 0)
     {
         unsigned int icombatstyleID;
-        ((FUN_00484d40_Host*)this)->FUN_00484d40(&icombatstyleID, 4);
+        ((FUN_00484d40_Host*)this)->TESForm_LoadNumericID(&icombatstyleID, 4);
         *(TESCombatStyle**)((char*)this + 0x1d4) =
             (TESCombatStyle*)dynamic_cast<TESCombatStyle*>(GetFormByID(icombatstyleID));
     }
@@ -2296,12 +2332,12 @@ namespace fnv_006046a0 {
 
 struct FUN_006047a0_shell : public TESObject
 {
-    bool FUN_006047a0();
+    bool PlayerCharacter_IsPCYoung();
 };
 
 struct TESRaceVoiceQueries : TESRace
 {
-    int FUN_00604780(int);
+    int TESRace_GetDefaultVoiceType(int);
 };
 
 
@@ -2320,7 +2356,7 @@ TESForm* FUN_006046a0_shell::GetHeadPartForm()
     {
         if (reinterpret_cast<TESActorBase*>(reinterpret_cast<char*>(this) - 0x30)->GetSex() == 0)
         {
-            if (!_g_thePlayer->FUN_006047a0())
+            if (!_g_thePlayer->PlayerCharacter_IsPCYoung())
                 *reinterpret_cast<TESForm**>(reinterpret_cast<char*>(this) + 0x20) =
                     reinterpret_cast<TESForm*>(BGSDefaultObjectManager::GetDefaultObjectByIndex(0x0e));
             else
@@ -2329,7 +2365,7 @@ TESForm* FUN_006046a0_shell::GetHeadPartForm()
         }
         else
         {
-            if (!_g_thePlayer->FUN_006047a0())
+            if (!_g_thePlayer->PlayerCharacter_IsPCYoung())
                 *reinterpret_cast<TESForm**>(reinterpret_cast<char*>(this) + 0x20) =
                     reinterpret_cast<TESForm*>(BGSDefaultObjectManager::GetDefaultObjectByIndex(0x10));
             else
@@ -2345,7 +2381,7 @@ TESForm* FUN_006046a0_shell::GetHeadPartForm()
         reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(reinterpret_cast<char*>(this) + 0xdc)->GetNext();
 
     if (list)
-        return reinterpret_cast<TESForm*>(reinterpret_cast<TESRaceVoiceQueries*>(list)->FUN_00604780(
+        return reinterpret_cast<TESForm*>(reinterpret_cast<TESRaceVoiceQueries*>(list)->TESRace_GetDefaultVoiceType(
             reinterpret_cast<TESActorBase*>(reinterpret_cast<char*>(this) - 0x30)->GetSex()));
 
     return 0;
@@ -2358,30 +2394,30 @@ TESForm* FUN_006046a0_shell::GetHeadPartForm()
 
 struct SaveField
 {
-    void FUN_00487010();
+    void Save_00487010();
     void WriteToBuffer(unsigned int, unsigned int);
     void DestroySoundHandles();
     void ReleaseSound();
-    void FUN_0048d330();
+    void TESSpellList_SaveSubRecord();
     void FUN_0047bd70();
     void FUN_00477f20();
     void FUN_00483710();
-    unsigned int FUN_009611e0();
+    unsigned int NiAVObject_GetParent();
 };
 struct FaceValue
 {
     float* data;
     unsigned int offset;
-    const float* FUN_00629ab0();
+    const float* NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt();
 };
 struct FaceMatrix
 {
-    unsigned int FUN_009611e0();
-    FaceValue FUN_0060b370(unsigned int index, unsigned int column);
+    unsigned int NiAVObject_GetParent();
+    FaceValue ForwardCall_0060b370(unsigned int index, unsigned int column);
 };
 struct GameForm
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct HeadPartNode
 {
@@ -2389,25 +2425,25 @@ struct HeadPartNode
     GameForm** FUN_006815c0();
     HeadPartNode* FUN_00726070();
 };
-extern void __cdecl FUN_00485910(unsigned int tag, unsigned int data);
-extern void __cdecl FUN_00485910(unsigned int tag, float value);
-extern void __cdecl FUN_00485950(unsigned int tag, unsigned int value);
+extern void __cdecl TESForm_AddChunk_00485910(unsigned int tag, unsigned int data);
+extern void __cdecl TESForm_AddChunk_00485910(unsigned int tag, float value);
+extern void __cdecl TESForm_AddChunk_00485950(unsigned int tag, unsigned int value);
 extern void __cdecl AppendChunk(unsigned int tag, void* ptr, unsigned int length);
-extern void __cdecl FUN_00485710(unsigned int tag, const void* ptr, unsigned int length);
-extern void __cdecl FUN_00403d30(void*, int, unsigned int);
+extern void __cdecl TESForm_AddChunkArray_00485710(unsigned int tag, const void* ptr, unsigned int length);
+extern void __cdecl ourMemset(void*, int, unsigned int);
 extern void* __cdecl FormHeap_Allocate(unsigned int size);
-extern void __cdecl FormHeap_Free(void*);
-extern bool __cdecl FUN_00401500();
+extern void __cdecl FormHeapFreeAndLog_00401030(void*);
+extern bool __cdecl TESForm_QEndianSwapOnSave();
 
 struct NPCSerializer
 {
-    void FUN_004855a0();
-    void FUN_00485e00();
-    HeadPartNode* FUN_00602170();
+    void BeginFormRecord();
+    void TESForm_SaveData();
+    HeadPartNode* InterfaceManager_GetVATSEffect();
     GameForm* FUN_00603b50();
-    float FUN_00602130();
+    float GetHairLength();
     GameForm* FUN_00602150();
-    void FUN_00485680();
+    void FinishFormRecord();
     void WriteToStream();
 };
 
@@ -2416,101 +2452,101 @@ struct NPCSerializer
 void NPCSerializer::WriteToStream()
 {
     unsigned int count;
-    FUN_004855a0();
-    ((SaveField*)((char*)this + 0xd0))->FUN_00487010();
+    BeginFormRecord();
+    ((SaveField*)((char*)this + 0xd0))->Save_00487010();
     ((SaveField*)((char*)this + 0xdc))->WriteToBuffer(0x4c444f4d, 0x54444f4d);
     ((SaveField*)((char*)this + 0x30))->DestroySoundHandles();
     ((SaveField*)((char*)this + 0x10c))->ReleaseSound();
-    ((SaveField*)((char*)this + 0x7c))->FUN_0048d330();
+    ((SaveField*)((char*)this + 0x7c))->TESSpellList_SaveSubRecord();
     ((SaveField*)((char*)this + 0x70))->FUN_0047bd70();
     ((SaveField*)((char*)this + 0x104))->FUN_00477f20();
 
     if (*(GameForm**)((char*)this + 0x130))
     {
-        count = (*(GameForm**)((char*)this + 0x130))->FUN_0084e3a0();
-        FUN_00485910(0x4d414e43, count);
+        count = (*(GameForm**)((char*)this + 0x130))->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e43, count);
     }
-    FUN_00485e00();
-    if (FUN_00401500())
+    TESForm_SaveData();
+    if (TESForm_QEndianSwapOnSave())
         ((SaveField*)((char*)this + 0x114))->FUN_00483710();
     AppendChunk(0x4d414e44, (char*)this + 0x114, 0x1c);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((SaveField*)((char*)this + 0x114))->FUN_00483710();
 
-    HeadPartNode* head = FUN_00602170();
+    HeadPartNode* head = InterfaceManager_GetVATSEffect();
     while (head && !head->FUN_008256d0())
     {
         GameForm* item = *head->FUN_006815c0();
-        FUN_00485910(0x4d414e50, item->FUN_0084e3a0());
+        TESForm_AddChunk_00485910(0x4d414e50, item->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
         head = head->FUN_00726070();
     }
 
     if (FUN_00603b50())
     {
-        FUN_00485910(0x4d414e48, FUN_00603b50()->FUN_0084e3a0());
-        FUN_00485910(0x4d414e4c, FUN_00602130());
+        TESForm_AddChunk_00485910(0x4d414e48, FUN_00603b50()->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
+        TESForm_AddChunk_00485910(0x4d414e4c, GetHairLength());
     }
     if (FUN_00602150())
     {
-        FUN_00485910(0x4d414e45, FUN_00602150()->FUN_0084e3a0());
+        TESForm_AddChunk_00485910(0x4d414e45, FUN_00602150()->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
     }
-    FUN_00485910(0x524c4348, *(unsigned int*)((char*)this + 0x1d8));
+    TESForm_AddChunk_00485910(0x524c4348, *(unsigned int*)((char*)this + 0x1d8));
 
     typedef GameForm*(__thiscall * GetExtraFace)(NPCSerializer*);
     if (((GetExtraFace)((*(void***)this)[0x188 / 4]))(this))
     {
-        FUN_00485910(0x4d414e5a, ((GetExtraFace)((*(void***)this)[0x188 / 4]))(this)->FUN_0084e3a0());
+        TESForm_AddChunk_00485910(0x4d414e5a, ((GetExtraFace)((*(void***)this)[0x188 / 4]))(this)->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
     }
-    FUN_00485910(0x344d414e, *(unsigned int*)((char*)this + 0x1e4));
+    TESForm_AddChunk_00485910(0x344d414e, *(unsigned int*)((char*)this + 0x1e4));
 
-    unsigned int formID = ((FaceMatrix*)((char*)this + 0x134))->FUN_009611e0();
+    unsigned int formID = ((FaceMatrix*)((char*)this + 0x134))->NiAVObject_GetParent();
     if (formID != 0)
     {
         unsigned int values = formID * 4;
         float* bytes = (float*)FormHeap_Allocate(values);
-        FUN_00403d30(bytes, 0, values);
+        ourMemset(bytes, 0, values);
         for (unsigned int index = 0; index < formID; ++index)
         {
-            bytes[index] = *((FaceMatrix*)((char*)this + 0x134))->FUN_0060b370(index, 0).FUN_00629ab0();
+            bytes[index] = *((FaceMatrix*)((char*)this + 0x134))->ForwardCall_0060b370(index, 0).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt();
         }
-        FUN_00485710(0x53474746, bytes, formID);
-        FormHeap_Free(bytes);
+        TESForm_AddChunkArray_00485710(0x53474746, bytes, formID);
+        FormHeapFreeAndLog_00401030(bytes);
         bytes = 0;
     }
-    formID = ((FaceMatrix*)((char*)this + 0x154))->FUN_009611e0();
+    formID = ((FaceMatrix*)((char*)this + 0x154))->NiAVObject_GetParent();
     if (formID != 0)
     {
         unsigned int bytesSecond = formID * 4;
         float* valuesSecond = (float*)FormHeap_Allocate(bytesSecond);
-        FUN_00403d30(valuesSecond, 0, bytesSecond);
+        ourMemset(valuesSecond, 0, bytesSecond);
         for (unsigned int indexSecond = 0; indexSecond < formID; ++indexSecond)
         {
             valuesSecond[indexSecond] =
-                *((FaceMatrix*)((char*)this + 0x154))->FUN_0060b370(indexSecond, 0).FUN_00629ab0();
+                *((FaceMatrix*)((char*)this + 0x154))->ForwardCall_0060b370(indexSecond, 0).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt();
         }
-        FUN_00485710(0x41474746, valuesSecond, formID);
-        FormHeap_Free(valuesSecond);
+        TESForm_AddChunkArray_00485710(0x41474746, valuesSecond, formID);
+        FormHeapFreeAndLog_00401030(valuesSecond);
         valuesSecond = 0;
     }
-    formID = ((FaceMatrix*)((char*)this + 0x174))->FUN_009611e0();
+    formID = ((FaceMatrix*)((char*)this + 0x174))->NiAVObject_GetParent();
     if (formID != 0)
     {
         unsigned int bytesThird = formID * 4;
         float* valuesThird = (float*)FormHeap_Allocate(bytesThird);
-        FUN_00403d30(valuesThird, 0, bytesThird);
+        ourMemset(valuesThird, 0, bytesThird);
         for (unsigned int indexThird = 0; indexThird < formID; ++indexThird)
         {
-            valuesThird[indexThird] = *((FaceMatrix*)((char*)this + 0x174))->FUN_0060b370(indexThird, 0).FUN_00629ab0();
+            valuesThird[indexThird] = *((FaceMatrix*)((char*)this + 0x174))->ForwardCall_0060b370(indexThird, 0).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt();
         }
-        FUN_00485710(0x53544746, valuesThird, formID);
-        FormHeap_Free(valuesThird);
+        TESForm_AddChunkArray_00485710(0x53544746, valuesThird, formID);
+        FormHeapFreeAndLog_00401030(valuesThird);
         valuesThird = 0;
     }
 
-    FUN_00485950(0x354d414e, *(unsigned short*)((char*)this + 0x1d0));
-    FUN_00485910(0x364d414e, *(float*)((char*)this + 0x1f4));
-    FUN_00485910(0x374d414e, *(float*)((char*)this + 0x1f8));
-    FUN_00485680();
+    TESForm_AddChunk_00485950(0x354d414e, *(unsigned short*)((char*)this + 0x1d0));
+    TESForm_AddChunk_00485910(0x364d414e, *(float*)((char*)this + 0x1f4));
+    TESForm_AddChunk_00485910(0x374d414e, *(float*)((char*)this + 0x1f8));
+    FinishFormRecord();
 }
 
 void __cdecl LoadFullNameChunk(TESFullName* apName, TESFile* apFile);
@@ -2526,11 +2562,12 @@ extern NpcFaceGenQueue* DAT_011dea3c;
 class NpcLoadShell : public TESNPC
 {
   public:
-    bool FUN_00602190(TESFile* apFile);
+    bool TESNPC_Load(TESFile* apFile);
 };
 
 // @fnv 0x00602190
-bool NpcLoadShell::FUN_00602190(TESFile* apFile)
+// src: XBOX_PDB 0x00602190
+bool NpcLoadShell::TESNPC_Load(TESFile* apFile)
 {
     unsigned char _type;
     bool _found;
@@ -2591,7 +2628,7 @@ bool NpcLoadShell::FUN_00602190(TESFile* apFile)
                 memset(&kItem, 0, sizeof(kItem));
                 apFile->GetChunkData(&kItem, sizeof(kItem));
                 if (apFile->IsEndianConversionRequired())
-                    kItem.FUN_00462230();
+                    kItem.TwoValues_Endian();
                 DAT_011cb7d8 = TESContainer::AddContainerObject(&kItem);
                 break;
             }
@@ -2608,7 +2645,7 @@ bool NpcLoadShell::FUN_00602190(TESFile* apFile)
         case 0x4F4C5053 /* SPLO */: {
             unsigned int uiSpell = 0;
             apFile->GetChunkData(&uiSpell);
-            TESSpellList::FUN_0048d290(uiSpell);
+            TESSpellList::TESSpellList_AddSpell_0048d290(uiSpell);
             break;
         }
         case 0x4D544945 /* EITM */: {
@@ -2671,7 +2708,7 @@ bool NpcLoadShell::FUN_00602190(TESFile* apFile)
         case 0x44494B50 /* PKID */: {
             unsigned int uiPackage = 0;
             apFile->GetChunkData(&uiPackage);
-            TESAIForm::FUN_0047f500(uiPackage);
+            TESAIForm::TESAIForm_AddPackage(uiPackage);
             break;
         }
         case 0x4D414E53 /* SNAM */: {
@@ -2767,7 +2804,7 @@ bool NpcLoadShell::FUN_00602190(TESFile* apFile)
             {
                 if (apFile->IsEndianConversionRequired())
                     BSEndian(&buf3[i], EndianSizeTag<4>());
-                *(float*)reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[iRow_2][aType])->FUN_0060b370(i, 0).FUN_00629ab0() = buf3[i];
+                *(float*)reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[iRow_2][aType])->ForwardCall_0060b370(i, 0).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt() = buf3[i];
             }
             break;
         }
@@ -2777,7 +2814,7 @@ bool NpcLoadShell::FUN_00602190(TESFile* apFile)
             TESForm::RemapFormIDForFile(uiPartID, apFile);
             BGSHeadPart* pHeadPart = dynamic_cast<BGSHeadPart*>(GetFormByID(uiPartID));
             if (pHeadPart)
-                FUN_00602170()->AddHead(pHeadPart);
+                InterfaceManager_GetVATSEffect()->AddHead(pHeadPart);
             else
                 MasterFileWarning("MASTERFILE: Could not find headpart (%08X) on NPC '%s' (%08X).", uiPartID, GetName(),
                                   GetFormID());
@@ -2802,7 +2839,7 @@ bool NpcLoadShell::FUN_00602190(TESFile* apFile)
                 fScaleMultiplier = 0.0f;
             if (fScaleMultiplier > 1.0)
                 fScaleMultiplier = 1.0f;
-            FUN_00601c10(fScaleMultiplier);
+            SetHairLength(fScaleMultiplier);
             break;
         }
         case 0x4D414E45 /* ENAM */: {
@@ -2886,21 +2923,22 @@ struct FUN_00603280_Api
 {
     int FUN_00726070();
     int FUN_00401170();
-    int FUN_004ac110();
+    int TESNPC_GetRace();
     int FUN_005f0cc0();
     bool FUN_00461580(int);
-    int FUN_007af430();
+    int BGSSaveFormBuffer_GetForm();
     void FUN_007cb2e0(int*);
-    bool FUN_0076b610();
-    void FUN_00729970(int (*)(char**, char**));
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
+    void BSSimpleArray_Sort(int (*)(char**, char**));
 };
 
 extern int DAT_011c3f2c;
 extern int DAT_011dea3c;
-int FUN_00603220(char** a, char** b);
+int PresetIndexSortFunction(char** a, char** b);
 
 // @fnv 0x00603280
-void FUN_00603280(int aiFirstValue, int aiSecondValue, int pCollector)
+// src: COMMUNITY 0x00603280
+void TESNPC_FillCharGenPresetList(int aiFirstValue, int aiSecondValue, int pCollector)
 {
     if (pCollector == 0)
     {
@@ -2915,21 +2953,21 @@ void FUN_00603280(int aiFirstValue, int aiSecondValue, int pCollector)
             if (((FUN_00603280_Api*)pEntry)->FUN_00401170() == 0x2a)
             {
                 int item = pEntry;
-                if (((FUN_00603280_Api*)item)->FUN_004ac110() == aiFirstValue &&
+                if (((FUN_00603280_Api*)item)->TESNPC_GetRace() == aiFirstValue &&
                     ((FUN_00603280_Api*)item)->FUN_005f0cc0() == aiSecondValue)
                 {
                     if (!flag || ((FUN_00603280_Api*)(item + 0x30))->FUN_00461580(4))
                     {
-                        if (item != ((FUN_00603280_Api*)DAT_011dea3c)->FUN_007af430())
+                        if (item != ((FUN_00603280_Api*)DAT_011dea3c)->BGSSaveFormBuffer_GetForm())
                         {
                             ((FUN_00603280_Api*)pCollector)->FUN_007cb2e0(&item);
                         }
                     }
                 }
             }
-            pEntry = ((FUN_00603280_Api*)pEntry)->FUN_007af430();
+            pEntry = ((FUN_00603280_Api*)pEntry)->BGSSaveFormBuffer_GetForm();
         }
-        if (((FUN_00603280_Api*)pCollector)->FUN_0076b610() && flag)
+        if (((FUN_00603280_Api*)pCollector)->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() && flag)
         {
             flag = false;
         }
@@ -2938,14 +2976,14 @@ void FUN_00603280(int aiFirstValue, int aiSecondValue, int pCollector)
             break;
         }
     }
-    ((FUN_00603280_Api*)pCollector)->FUN_00729970(FUN_00603220);
+    ((FUN_00603280_Api*)pCollector)->BSSimpleArray_Sort(PresetIndexSortFunction);
 }
 }  // namespace fnv_00603280
 
 struct LevelProxy
 {
     unsigned int data;
-    unsigned short FUN_0047ded0();
+    unsigned short TESActorBaseData_GetLevel();
 };
 struct CountProxy
 {
@@ -2959,7 +2997,7 @@ struct AttributeProxy
 };
 struct SettingProxy
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern SettingProxy DAT_011cd27c, DAT_011cd544, DAT_011cd908;
 struct Context
@@ -3016,14 +3054,14 @@ struct Context
 // @fnv 0x00603fc0
 int Context::ComputeAttributeValue(bool includeCount)
 {
-    int a = level.FUN_0047ded0();
+    int a = level.TESActorBaseData_GetLevel();
     if (a < 1)
         a = 1;
     int j =
         count.FUN_00726070()
             ? (int)((includeCount ? count.FUN_00726070() : 0) +
-                    (attributes.GetAttributeValue7() + *DAT_011cd27c.FUN_00403e20()) * *DAT_011cd544.FUN_00403e20() +
-                    (a - 1) * *DAT_011cd908.FUN_00403e20())
+                    (attributes.GetAttributeValue7() + *DAT_011cd27c.Setting_Float_00403e20()) * *DAT_011cd544.Setting_Float_00403e20() +
+                    (a - 1) * *DAT_011cd908.Setting_Float_00403e20())
             : 0;
     if (j < 0)
         j = 0;
@@ -3052,7 +3090,7 @@ public:
 // @fnv 0x006040d0
 int NPCDerivedValueQueries::ComputeDerivedValue(bool bUseBase)
 {
-    int iLevel = TESActorBaseData::FUN_0047ded0();
+    int iLevel = TESActorBaseData::TESActorBaseData_GetLevel();
     if (iLevel < 1)
         iLevel = 1;
     int iResult = static_cast<const NPCDerivedValueQueries*>(this)->GetFatigue()
@@ -3072,20 +3110,20 @@ struct WeightAccessor
 };
 struct TESNPCWeightQueries : TESNPC
 {
-    int FUN_0084e3a0();
-    WeightAccessor* FUN_004ac110();
-    WeightAccessor* FUN_004ac110(void*);
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    WeightAccessor* TESNPC_GetRace();
+    WeightAccessor* TESNPC_GetRace(void*);
     void* FUN_005f0cc0();
-    float FUN_00944300();
+    float TESNPC_GetHeight();
 };
 // @fnv 0x00604250
 float TESNPC::GetWeight()
 {
-    if (static_cast<TESNPCWeightQueries*>(this)->FUN_0084e3a0() == 7)
+    if (static_cast<TESNPCWeightQueries*>(this)->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == 7)
     {
-        return fWeight == DAT_01012060 && static_cast<TESNPCWeightQueries*>(this)->FUN_004ac110() ? static_cast<TESNPCWeightQueries*>(this)->FUN_004ac110(static_cast<TESNPCWeightQueries*>(this)->FUN_005f0cc0())->GetArrValue() : fWeight;
+        return fWeight == DAT_01012060 && static_cast<TESNPCWeightQueries*>(this)->TESNPC_GetRace() ? static_cast<TESNPCWeightQueries*>(this)->TESNPC_GetRace(static_cast<TESNPCWeightQueries*>(this)->FUN_005f0cc0())->GetArrValue() : fWeight;
     }
-    return static_cast<TESNPCWeightQueries*>(this)->FUN_00944300();
+    return static_cast<TESNPCWeightQueries*>(this)->TESNPC_GetHeight();
 }
 
 struct FUN_00605fc0_obj
@@ -3631,15 +3669,16 @@ struct VirtHolder
 struct ProcessHost
 {
     void* FUN_008d8520();
-    void* FUN_00950bb0(int a);
-    void* FUN_0045bc00(int a);
-    void* FUN_0056fac0(OutBuf* out, CopyBlob9* blob);
-    void FUN_0043fa80(void* a);
-    void FUN_0060a890(int a1);
+    void* PlayerCharacter_Get3D_00950bb0(int a);
+    void* NiNode_GetAtChecked(int a);
+    void* TESObjectREFR_MultipleMatrixByRace(OutBuf* out, CopyBlob9* blob);
+    void SetRotate_0043fa80(void* a);
+    void TESNPC_InitLoadFaceGen(int a1);
 };
 
 // @fnv 0x0060a890
-void ProcessHost::FUN_0060a890(int pObject)
+// src: COMMUNITY 0x0060a890
+void ProcessHost::TESNPC_InitLoadFaceGen(int pObject)
 {
     CopyBlob9 blob;
     DAT_011c5cb4 = 1;
@@ -3651,13 +3690,13 @@ void ProcessHost::FUN_0060a890(int pObject)
         int x;
         int y;
         int p;
-        x = (int)((ProcessHost*)DAT_011dea3c)->FUN_00950bb0(1);
+        x = (int)((ProcessHost*)DAT_011dea3c)->PlayerCharacter_Get3D_00950bb0(1);
         y = x != 0 ? x : 0;
-        p = y != 0 ? (int)((ProcessHost*)y)->FUN_0045bc00(0) : 0;
+        p = y != 0 ? (int)((ProcessHost*)y)->NiNode_GetAtChecked(0) : 0;
         blob = *(CopyBlob9*)&DAT_011a9448;
         if (p != 0)
         {
-            ((ProcessHost*)p)->FUN_0043fa80(((ProcessHost*)DAT_011dea3c)->FUN_0056fac0(&out, &blob));
+            ((ProcessHost*)p)->SetRotate_0043fa80(((ProcessHost*)DAT_011dea3c)->TESObjectREFR_MultipleMatrixByRace(&out, &blob));
         }
     }
 }
@@ -3678,8 +3717,8 @@ struct FaceCoordinateCursor
 {
     int owner;
     int* current;
-    bool FUN_005ca4f0();
-    FaceCoordinateRange* FUN_0060b980();
+    bool ActorCause_IsValid();
+    FaceCoordinateRange* FaceGenData_Iterator_FaceGenData_GetUnk00();
     FaceCoordinateCursor* Advance(int count);
 };
 
@@ -3687,7 +3726,7 @@ struct FaceCoordinateCursor
 // @fnv 0x0060b900
 FaceCoordinateCursor* FaceCoordinateCursor::Advance(int count)
 {
-    if (!FUN_005ca4f0())
+    if (!ActorCause_IsValid())
     {
         FUN_00ec7c56();
     }
@@ -3695,7 +3734,7 @@ FaceCoordinateCursor* FaceCoordinateCursor::Advance(int count)
     {
     } while (false);
 
-    if (current + count > FUN_0060b980()->end || current + count < FUN_0060b980()->begin)
+    if (current + count > FaceGenData_Iterator_FaceGenData_GetUnk00()->end || current + count < FaceGenData_Iterator_FaceGenData_GetUnk00()->begin)
     {
         FUN_00ec7c56();
     }
@@ -3709,21 +3748,21 @@ FaceCoordinateCursor* FaceCoordinateCursor::Advance(int count)
 
 struct FaceSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern FaceSetting DAT_011cb7a0;
 
 
 void FUN_006521f0(void*);
-void FUN_00652fc0(float, void*, void*);
-float FUN_00652440(void*, int, int);
-void FUN_00652470(void*, int, int, float);
+void Object_ProcessState_00652fc0(float, void*, void*);
+float BSFaceGenManager_GetFaceCoordAttribute(void*, int, int);
+void BSFaceGenManager_SetFaceCoordAttribute(void*, int, int, float);
 float FUN_005c5420();
-float FUN_00404010(float, float);
-float FUN_0040ebd0(float, float);
-void FUN_00652e00(void*, void*, void*, int);
-bool FUN_00652900(void*, void*);
-void FUN_006529a0(void*, void*, int, int);
+float BSMAX_00404010(float, float);
+float BSMIN(float, float);
+void BSFaceGenManager_OffsetFaceGenCoord(void*, void*, void*, int);
+bool BSFaceGenManager_CompareFaceGenCoord(void*, void*);
+void BSFaceGenManager_CopyFaceGenCoord(void*, void*, int, int);
 struct FaceMatrixLocal
 {
     FaceMatrixLocal();
@@ -3754,20 +3793,20 @@ void FaceNpc::RandomizeFace(bool keepAge, bool keepShape, bool keepOther)
     FaceMatrixLocal _result[2][2];
     float first2, second, value, other7;
     FUN_006521f0(_result);
-    FUN_00652fc0(*DAT_011cb7a0.FUN_00403e20(), GetFormRace()->GetMeanFaceCoord(static_cast<SEX>(FUN_005f0cc0())), source9);
-    first2 = FUN_00652440(source9, 0, 0);
-    second = FUN_00652440(source9, 0, 1);
+    Object_ProcessState_00652fc0(*DAT_011cb7a0.Setting_Float_00403e20(), GetFormRace()->GetMeanFaceCoord(static_cast<SEX>(FUN_005f0cc0())), source9);
+    first2 = BSFaceGenManager_GetFaceCoordAttribute(source9, 0, 0);
+    second = BSFaceGenManager_GetFaceCoordAttribute(source9, 0, 1);
     if (keepAge)
         value = first2;
     else
         value = FUN_005c5420() * 50.0 + 15.0;
     other7 = second - (first2 - value);
-    value = FUN_0040ebd0(FUN_00404010(value, 15.0f), 65.0f);
-    other7 = FUN_0040ebd0(FUN_00404010(other7, 15.0f), 65.0f);
-    FUN_00652470(source9, 0, 0, value);
-    FUN_00652470(source9, 0, 1, other7);
-    first2 = FUN_00652440(source9, 1, 0);
-    second = FUN_00652440(source9, 1, 1);
+    value = BSMIN(BSMAX_00404010(value, 15.0f), 65.0f);
+    other7 = BSMIN(BSMAX_00404010(other7, 15.0f), 65.0f);
+    BSFaceGenManager_SetFaceCoordAttribute(source9, 0, 0, value);
+    BSFaceGenManager_SetFaceCoordAttribute(source9, 0, 1, other7);
+    first2 = BSFaceGenManager_GetFaceCoordAttribute(source9, 1, 0);
+    second = BSFaceGenManager_GetFaceCoordAttribute(source9, 1, 1);
     if (keepShape)
     {
         value = first2;
@@ -3778,16 +3817,16 @@ void FaceNpc::RandomizeFace(bool keepAge, bool keepShape, bool keepOther)
         value = FUN_005c5420() * 4.0 - 2.0;
         other7 = second - (first2 - value);
     }
-    value = FUN_0040ebd0(FUN_00404010(value, -2.0f), 2.0f);
-    other7 = FUN_0040ebd0(FUN_00404010(other7, -2.0f), 2.0f);
-    FUN_00652470(source9, 1, 0, value);
-    FUN_00652470(source9, 1, 1, other7);
+    value = BSMIN(BSMAX_00404010(value, -2.0f), 2.0f);
+    other7 = BSMIN(BSMAX_00404010(other7, -2.0f), 2.0f);
+    BSFaceGenManager_SetFaceCoordAttribute(source9, 1, 0, value);
+    BSFaceGenManager_SetFaceCoordAttribute(source9, 1, 1, other7);
     if (!keepOther)
-        FUN_00601c10(FUN_005c5420());
-    FUN_00652e00(GetFormRace()->GetMeanFaceCoord(static_cast<SEX>(FUN_005f0cc0())), source9, _result, 0);
-    if (FUN_00652900(_result, GetOffsetFaceCoord()))
+        SetHairLength(FUN_005c5420());
+    BSFaceGenManager_OffsetFaceGenCoord(GetFormRace()->GetMeanFaceCoord(static_cast<SEX>(FUN_005f0cc0())), source9, _result, 0);
+    if (BSFaceGenManager_CompareFaceGenCoord(_result, GetOffsetFaceCoord()))
     {
-        FUN_006529a0(_result, GetOffsetFaceCoord(), 0, 0);
+        BSFaceGenManager_CopyFaceGenCoord(_result, GetOffsetFaceCoord(), 0, 0);
         reinterpret_cast<HeadPointer&>(m_pkFaceGenTexture) = 0;
     }
 }
@@ -3796,15 +3835,15 @@ void FaceNpc::RandomizeFace(bool keepAge, bool keepShape, bool keepOther)
 
 struct NPCCompare : TESNPC
 {
-    bool FUN_00485270(TESForm*);
+    bool TESForm_CompareAllComponents(TESForm*);
     bool IsDifferentFrom(TESForm* form);
 };
 struct HeadPartCompare : HeadPartNode
 {
     unsigned int FUN_005ae380();
-    bool FUN_005f65d0(GameForm*&);
+    bool BSSimpleList_TESLevSpell_IsInList(GameForm*&);
 };
-bool __cdecl FUN_00652900(void*, void*);
+bool __cdecl BSFaceGenManager_CompareFaceGenCoord(void*, void*);
 
 // Compares this NPC against another TESNPC, returning true if any class, hair, head part, combat style or related field differs.
 // @fnv 0x00603880
@@ -3813,7 +3852,7 @@ bool NPCCompare::IsDifferentFrom(TESForm* form)
     TESNPC* npc = dynamic_cast<TESNPC*>(form);
     if (!npc)
         return true;
-    if (FUN_00485270(npc))
+    if (TESForm_CompareAllComponents(npc))
         return true;
     if (memcmp(&data, npc->GetTextureManager(), sizeof(data)))
         return true;
@@ -3821,26 +3860,26 @@ bool NPCCompare::IsDifferentFrom(TESForm* form)
         return true;
     if (m_pHair != npc->GetHair())
         return true;
-    if (m_fHairLength != npc->FUN_00602130())
+    if (m_fHairLength != npc->GetHairLength())
         return true;
     if (m_pEyes != npc->FUN_00602150())
         return true;
-    if (iHairColor != npc->FUN_004169d0())
+    if (iHairColor != npc->TESDataHandler_GetRegionList())
         return true;
-    if (FUN_00652900(GetOffsetFaceCoord(),
+    if (BSFaceGenManager_CompareFaceGenCoord(GetOffsetFaceCoord(),
                      npc->GetOffsetFaceCoord()))
         return true;
     if (static_cast<const TESActorBase*>(this)->GetCombatStyle() != static_cast<const TESActorBase*>(npc)->GetCombatStyle())
         return true;
     if (static_cast<const TESNPC*>(this)->GetBloodImpactMaterial() != static_cast<const TESNPC*>(npc)->GetBloodImpactMaterial())
         return true;
-    if (reinterpret_cast<HeadPartCompare*>(FUN_00602170())->FUN_005ae380() !=
-        reinterpret_cast<HeadPartCompare*>(npc->FUN_00602170())->FUN_005ae380())
+    if (reinterpret_cast<HeadPartCompare*>(InterfaceManager_GetVATSEffect())->FUN_005ae380() !=
+        reinterpret_cast<HeadPartCompare*>(npc->InterfaceManager_GetVATSEffect())->FUN_005ae380())
         return true;
-    HeadPartNode* node = reinterpret_cast<HeadPartNode*>(FUN_00602170());
+    HeadPartNode* node = reinterpret_cast<HeadPartNode*>(InterfaceManager_GetVATSEffect());
     while (node && !node->FUN_008256d0())
     {
-        if (!reinterpret_cast<HeadPartCompare*>(npc->FUN_00602170())->FUN_005f65d0(*node->FUN_006815c0()))
+        if (!reinterpret_cast<HeadPartCompare*>(npc->InterfaceManager_GetVATSEffect())->BSSimpleList_TESLevSpell_IsInList(*node->FUN_006815c0()))
             return true;
         node = node->FUN_00726070();
     }
@@ -3853,39 +3892,40 @@ bool NPCCompare::IsDifferentFrom(TESForm* form)
 
 extern const char str_0104a714[], str_0104a704[], str_0104a6cc[], str_0104a694[], str_0104a660[];
 int __cdecl FUN_004564f0(const char*, const char*, unsigned int);
-int __cdecl FUN_00406d00(char*, unsigned int, const char*, ...);
+int __cdecl BSsprintf(char*, unsigned int, const char*, ...);
 struct FileName
 {
     const char* FUN_00891170();
 };
 struct RaceID
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 // Extra texture-path helpers are still unit-specific; NPC storage is shared.
 struct Target : TESNPC
 {
-    bool FUN_00604310(const char*, char*, unsigned int);
+    bool TESNPC_GetHeadPartModTextureFileName(const char*, char*, unsigned int);
     FileName* FUN_00484ee0();
-    unsigned int FUN_0084e3a0();
-    RaceID* FUN_004ac110();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    RaceID* TESNPC_GetRace();
 };
 // @fnv 0x00604310
-bool Target::FUN_00604310(const char* extension, char* output, unsigned int length)
+// src: COMMUNITY 0x00604310
+bool Target::TESNPC_GetHeadPartModTextureFileName(const char* extension, char* output, unsigned int length)
 {
     if (m_pTemplateNPC)
     {
         Target* face = static_cast<Target*>(m_pTemplateNPC);
-        while (face && face->FUN_006044c0())
-            face = static_cast<Target*>(face->FUN_006044c0());
-        return face->FUN_00604310(extension, output, length);
+        while (face && face->GetCopyFrom())
+            face = static_cast<Target*>(face->GetCopyFrom());
+        return face->TESNPC_GetHeadPartModTextureFileName(extension, output, length);
     }
     FileName* file = FUN_00484ee0();
     if (!file)
         return false;
-    unsigned int npcID = FUN_0084e3a0() & 0x00ffffffu;
-    unsigned int raceID6 = FUN_004ac110()->FUN_0084e3a0() & 0x00ffffffu;
+    unsigned int npcID = GetHavokWorldObjectCountInSceneGraph_0084e3a0() & 0x00ffffffu;
+    unsigned int raceID6 = TESNPC_GetRace()->GetHavokWorldObjectCountInSceneGraph_0084e3a0() & 0x00ffffffu;
     bool master = false;
     if (!FUN_004564f0(file->FUN_00891170(), str_0104a714, 6))
         master = true;
@@ -3893,18 +3933,18 @@ bool Target::FUN_00604310(const char* extension, char* output, unsigned int leng
     {
         if (FUN_005f0cc0() == 1)
         {
-            FUN_00406d00(output, length, str_0104a6cc, !master ? file->FUN_00891170() : str_0104a704, raceID6, npcID,
+            BSsprintf(output, length, str_0104a6cc, !master ? file->FUN_00891170() : str_0104a704, raceID6, npcID,
                          extension);
         }
         else
         {
-            FUN_00406d00(output, length, str_0104a694, !master ? file->FUN_00891170() : str_0104a704, raceID6, npcID,
+            BSsprintf(output, length, str_0104a694, !master ? file->FUN_00891170() : str_0104a704, raceID6, npcID,
                          extension);
         }
     }
     else
     {
-        FUN_00406d00(output, length, str_0104a660, !master ? file->FUN_00891170() : str_0104a704, npcID, extension);
+        BSsprintf(output, length, str_0104a660, !master ? file->FUN_00891170() : str_0104a704, npcID, extension);
     }
     return true;
 }
@@ -3921,7 +3961,7 @@ struct BaseFormRecord
     void FUN_004786e0(BaseFormRecord*);
     void CopyAttributesFromComponent(BaseFormRecord*);
     void CopyHealthForm(BaseFormRecord*);
-    void FUN_0048d630(BaseFormRecord*);
+    void TESSpellList_CopyComponent(BaseFormRecord*);
     void FUN_0047bdd0(BaseFormRecord*);
     void FUN_0047f1e0(BaseFormRecord*);
     void FUN_0047f2d0(BaseFormRecord*);
@@ -4327,7 +4367,7 @@ struct CopyData
     unsigned char skills[14];
     unsigned char skillOffsets[14];
 
-    void FUN_00604ba0(CopyPrefix*);
+    void TESNPC_CopyFromTemplateForm(CopyPrefix*);
 
     CopyNpc* FUN_0059bb30();
     bool FUN_0047cdd0();
@@ -4341,15 +4381,15 @@ struct CopyData
     bool FUN_00461580(bool, bool);
     void FUN_0047dd50(bool, bool);
     void SetClampedValue(float);
-    unsigned short FUN_0047d3d0();
-    void FUN_0047dea0(unsigned short);
+    unsigned short GetRefCount_0047d3d0();
+    void TESActorBaseData_SetBaseDisposition(unsigned short);
     unsigned short FUN_0047d370();
     void FUN_0047dfe0(unsigned short);
     bool FUN_00461560();
     void FUN_005d1070(bool);
-    unsigned short FUN_0047d390();
+    unsigned short GetCalcLevelMin_0047d390();
     void FUN_0047de40(unsigned short);
-    unsigned short FUN_0047d3b0();
+    unsigned short GetAnimGroupType_0047d3b0();
     void FUN_0047de70(unsigned short);
     unsigned short GetShortAtOffset12();
     void SetSpeedMult(unsigned short);
@@ -4363,13 +4403,13 @@ struct CopyData
 struct CopyNpc : public CopyPrefix, public CopyData
 {
 
-    void FUN_0050eaa0(CopyNpc*);
+    void TESBoundObject_CopyBoundData(CopyNpc*);
     void FUN_00603790(CopyNpc*);
-    void FUN_00601c70(int);
-    float FUN_00944300();
-    void FUN_009442e0(float);
+    void SetClass(int);
+    float TESNPC_GetHeight();
+    void PlayerCharacter_SetTimeSinceLastAmmoRegenTick(float);
     float GetWeight();
-    void FUN_006053f0(float);
+    void TESNPC_SetWeight(float);
     int FUN_00502430();
     void InitAttributesAndSkills(int);
 };
@@ -4381,7 +4421,7 @@ struct DefaultNpcValue
 
 struct DefaultNpcManager
 {
-    DefaultNpcValue* FUN_004ea950();
+    DefaultNpcValue* BGSProjectile_GetData();
     DefaultNpcValue* FUN_006130e0();
 };
 
@@ -4393,7 +4433,8 @@ CopyNpc* FindFirstNonActorBaseTemplate(CopyNpc*, unsigned short*);
 
 // Copies selected fields from a source NPC (or a default fallback) into this record according to the active copy flags, then applies the template form.
 // @fnv 0x00604ba0
-void CopyData::FUN_00604ba0(CopyPrefix* apSource)
+// src: COMMUNITY 0x00604ba0
+void CopyData::TESNPC_CopyFromTemplateForm(CopyPrefix* apSource)
 {
 
     CopyNpc* source9;
@@ -4422,9 +4463,9 @@ void CopyData::FUN_00604ba0(CopyPrefix* apSource)
 
                 source9 = reinterpret_cast<CopyNpc*>(&fallback);
 
-                source9->race.FUN_006ecd40(*DAT_011c3f2c->FUN_004ea950()->FUN_006815c0());
+                source9->race.FUN_006ecd40(*DAT_011c3f2c->BGSProjectile_GetData()->FUN_006815c0());
 
-                source9->FUN_00601c70(*DAT_011c3f2c->FUN_006130e0()->FUN_006815c0());
+                source9->SetClass(*DAT_011c3f2c->FUN_006130e0()->FUN_006815c0());
             }
             else if (source9->FUN_0059bb30() && !source9->FUN_0047cca0())
                 source9->Reset(0);
@@ -4454,7 +4495,7 @@ void CopyData::FUN_00604ba0(CopyPrefix* apSource)
 
                 animation.FUN_0047fb50(source9 ? &source9->animation : 0);
 
-                reinterpret_cast<CopyNpc*>(reinterpret_cast<char*>(this) - sizeof(CopyPrefix))->FUN_0050eaa0(source9);
+                reinterpret_cast<CopyNpc*>(reinterpret_cast<char*>(this) - sizeof(CopyPrefix))->TESBoundObject_CopyBoundData(source9);
 
                 reinterpret_cast<CopyNpc*>(reinterpret_cast<char*>(this) - sizeof(CopyPrefix))
                     ->SetValue(source9->GetValue());
@@ -4476,17 +4517,17 @@ void CopyData::FUN_00604ba0(CopyPrefix* apSource)
                 race.FUN_006ecd40(source9->race.FUN_00726070());
 
                 reinterpret_cast<CopyNpc*>(reinterpret_cast<char*>(this) - sizeof(CopyPrefix))
-                    ->FUN_009442e0(source9->FUN_00944300());
+                    ->PlayerCharacter_SetTimeSinceLastAmmoRegenTick(source9->TESNPC_GetHeight());
 
                 reinterpret_cast<CopyNpc*>(reinterpret_cast<char*>(this) - sizeof(CopyPrefix))
-                    ->FUN_006053f0(source9->GetWeight());
+                    ->TESNPC_SetWeight(source9->GetWeight());
 
                 reinterpret_cast<CopyNpc*>(reinterpret_cast<char*>(this) - sizeof(CopyPrefix))
-                    ->FUN_00601c70(source9->FUN_00502430());
+                    ->SetClass(source9->FUN_00502430());
 
                 SetClampedValue(source9->GetFactor());
 
-                FUN_0047dea0(FUN_0047d3d0());
+                TESActorBaseData_SetBaseDisposition(GetRefCount_0047d3d0());
 
                 reinterpret_cast<CopyNpc*>(reinterpret_cast<char*>(this) - sizeof(CopyPrefix))
                     ->SetStyle(source9->GetStyle());
@@ -4499,9 +4540,9 @@ void CopyData::FUN_00604ba0(CopyPrefix* apSource)
 
                 FUN_005d1070(source9->FUN_00461560());
 
-                FUN_0047de40(source9->FUN_0047d390());
+                FUN_0047de40(source9->GetCalcLevelMin_0047d390());
 
-                FUN_0047de70(source9->FUN_0047d3b0());
+                FUN_0047de70(source9->GetAnimGroupType_0047d3b0());
 
                 attributes.CopyAttributesFromComponent(source9 ? &source9->attributes : 0);
 
@@ -4529,7 +4570,7 @@ void CopyData::FUN_00604ba0(CopyPrefix* apSource)
             if (FUN_0047cd40(3))
             {
 
-                spell.FUN_0048d630(source9 ? &source9->spell : 0);
+                spell.TESSpellList_CopyComponent(source9 ? &source9->spell : 0);
 
                 touch.FUN_0047bdd0(source9 ? &source9->touch : 0);
             }
@@ -4898,8 +4939,8 @@ struct EqNode
     virtual void v0B4();
     virtual void v0B8();
     virtual void vBC();
-    void FUN_00a5a040();
-    void FUN_00a59c60(const struct EqUpdateData& kData);
+    void UpdateProperties();
+    void NiAVObject_Update(const struct EqUpdateData& kData);
 };
 struct EqUpdateData
 {
@@ -5040,7 +5081,7 @@ struct EqInventory
 struct EqItemList
 {
     unsigned int FUN_0044ddc0();
-    int* FUN_006a7ad0(unsigned int auiIndex);
+    int* BSSimpleArray_NiAVObject_1024_GetAt(unsigned int auiIndex);
 };
 struct EqSimpleList
 {
@@ -5139,7 +5180,7 @@ void FUN_00605e70_Owner::ProcessInventoryItems(EqRef* apRef, EqInventory* apInve
 
     for (i4 = 0; i4 < apItems->FUN_0044ddc0(); i4++)
     {
-        iItem7 = *apItems->FUN_006a7ad0(i4);
+        iItem7 = *apItems->BSSimpleArray_NiAVObject_1024_GetAt(i4);
         FUN_006061b0(apRef, apInventory, iItem7);
     }
 
@@ -5151,10 +5192,10 @@ void FUN_00605e70_Owner::ProcessInventoryItems(EqRef* apRef, EqInventory* apInve
     pNode = apRef->Get3D();
     if (pNode)
     {
-        pNode->FUN_00a5a040();
+        pNode->UpdateProperties();
         pNode->vBC();
         EqUpdateData kData(0.0f, 0, 0);
-        pNode->FUN_00a59c60(kData);
+        pNode->NiAVObject_Update(kData);
     }
 }
 
@@ -5182,7 +5223,7 @@ struct FaceSkinData
 };
 struct FaceExtraModel
 {
-    NiSkinInstance* FUN_006072c0();
+    NiSkinInstance* BSFaceGenModel_GetSkinInstance();
 };
 struct FaceExtraData
 {
@@ -5364,11 +5405,11 @@ struct FaceObject
     FaceObject* GetAt(unsigned int);
     unsigned int FUN_00726070();
     FaceObject* FUN_00a5d2c0(FaceCloneProcess&);
-    FaceGeometryData* FUN_005495f0();
-    NiSkinInstance* FUN_0043fad0();
-    FaceObject* FUN_0064c5a0();
-    void FUN_00440460(const NiPoint3&);
-    void FUN_0043fa80(const void*);
+    FaceGeometryData* NiGeometry_GetModelData();
+    NiSkinInstance* NiGeometry_GetSkinInstance();
+    FaceObject* BSFaceGenAnimationData_CreateCopyBS();
+    void NiAVObject_SetTranslate(const NiPoint3&);
+    void SetRotate_0043fa80(const void*);
     void Update(const NiUpdateData&);
 };
 struct FacePointerCompare
@@ -5381,7 +5422,7 @@ struct HeadBipedLookup
 };
 struct HeadPlayerCheck
 {
-    bool FUN_00950b30(NiPointer<BipedAnim>*);
+    bool PlayerCharacter_Is1stPersonBiped(NiPointer<BipedAnim>*);
 };
 struct HeadRefCalls
 {
@@ -5518,20 +5559,21 @@ struct HeadMatrix
     HeadMatrix();
 };
 int __cdecl FUN_00651b30();
-bool __cdecl FUN_0043faf0();
+bool __cdecl BSFaceGenManager_GetUseFaceGenHeads();
 void __cdecl AddObjectToPaletteRecursive(FaceObject*, NiAVObjectPalette*);
 struct HeadNPC : TESNPC
 {
-    void FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped);
+    void TESNPC_LinearFaceGenHeadLoad(TESObjectREFR* ref, NiPointer<BipedAnim>* biped);
 };
 
 // Creates and attaches the NPC head and duplicate head face geometry to the biped head node, cloning face data and updating the face animation.
 // @fnv 0x00606820
-void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
+// src: XBOX_PDB 0x00606820
+void HeadNPC::TESNPC_LinearFaceGenHeadLoad(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
 {
     NiPointer<NiAVObject> copiedData(0);
-    if (FUN_00651b30() && (BipedAnim*)*biped && FUN_0043faf0() &&
-        (ref != (TESObjectREFR*)DAT_011dea3c || !((HeadPlayerCheck*)DAT_011dea3c)->FUN_00950b30(biped)))
+    if (FUN_00651b30() && (BipedAnim*)*biped && BSFaceGenManager_GetUseFaceGenHeads() &&
+        (ref != (TESObjectREFR*)DAT_011dea3c || !((HeadPlayerCheck*)DAT_011dea3c)->PlayerCharacter_Is1stPersonBiped(biped)))
     {
         FaceObject* node1_2 = (FaceObject*)ref->Get3DSimple();
         FaceObject* aNode2 = 0;
@@ -5540,8 +5582,8 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
         FaceObject* bipedNodeB = ((HeadBipedLookup*)biped)->FUN_004ab230(0);
         HeadMatrix a;
         NiAVObjectPalette* p = 0;
-        if (((HeadRefCalls*)ref)->GetAnimData() && ((HeadRefCalls*)ref)->GetAnimData()->FUN_00496940())
-            p = ((HeadRefCalls*)ref)->GetAnimData()->FUN_00496940()->GetStringAtOffset();
+        if (((HeadRefCalls*)ref)->GetAnimData() && ((HeadRefCalls*)ref)->GetAnimData()->GetControllerManager_00496940())
+            p = ((HeadRefCalls*)ref)->GetAnimData()->GetControllerManager_00496940()->GetStringAtOffset();
         NiAVObjectPalette* f = p;
         if (bipedNodeB && aNode2)
         {
@@ -5573,7 +5615,7 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                         aNode5 = node7_2 ? node7_2->IsTriBasedGeom() : 0;
                         if (aNode5 && ((FacePointerCompare*)&m_pkPrimaryFaceGenNode)->FUN_0052aa80(node9))
                         {
-                            aNode5->FUN_005495f0()->FUN_00a5d510(copiedData);
+                            aNode5->NiGeometry_GetModelData()->FUN_00a5d510(copiedData);
                             bipedNode_2 = (NiAVObject*)copiedData;
                             if ((NiAVObject*)bipedNode_2)
                                 aNode5->SetGeometryData((NiAVObject*)bipedNode_2);
@@ -5581,7 +5623,7 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                     }
                     if (((FacePointerCompare*)&m_pkPrimaryFaceGenNode)->FUN_0052aa80(node9))
                     {
-                        nodeB = node9->GetFaceAnimation()->FUN_0064c5a0();
+                        nodeB = node9->GetFaceAnimation()->BSFaceGenAnimationData_CreateCopyBS();
                         if (nodeB)
                             node9->SetFaceAnimation(nodeB);
                     }
@@ -5604,18 +5646,18 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                         {
                             if (((FacePointerCompare*)&m_pkSecondaryFaceGenNode)->FUN_0052aa80(bipedNodeVal))
                             {
-                                aNode5->FUN_005495f0()->FUN_00a5d510(copiedData);
+                                aNode5->NiGeometry_GetModelData()->FUN_00a5d510(copiedData);
                                 bipedNode_2 = (NiAVObject*)copiedData;
                                 if ((NiAVObject*)bipedNode_2)
                                     aNode5->SetGeometryData((NiAVObject*)bipedNode_2);
                             }
-                            if (aNode5->FUN_0043fad0() && aNode5->FUN_0043fad0()->GetControllers())
+                            if (aNode5->NiGeometry_GetSkinInstance() && aNode5->NiGeometry_GetSkinInstance()->GetControllers())
                             {
                                 FaceExtraData* extra = (FaceExtraData*)GetGeomExtraData((NiTriBasedGeom*)aNode5);
-                                if (extra && extra->GetModelFilePath() && extra->GetModelFilePath()->FUN_006072c0())
+                                if (extra && extra->GetModelFilePath() && extra->GetModelFilePath()->BSFaceGenModel_GetSkinInstance())
                                 {
-                                    NiSkinInstance* l = extra->GetModelFilePath()->FUN_006072c0();
-                                    NiSkinInstance* k = aNode5->FUN_0043fad0();
+                                    NiSkinInstance* l = extra->GetModelFilePath()->BSFaceGenModel_GetSkinInstance();
+                                    NiSkinInstance* k = aNode5->NiGeometry_GetSkinInstance();
                                     FaceObject** ba = l->FUN_00825c00();
                                     unsigned int b = reinterpret_cast<FaceSkinData*>(l->GetSkinData())->FUN_008041a0();
                                     for (unsigned int j = 0; j < b; j++)
@@ -5627,10 +5669,10 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                                         "MODELS: Could not correctly handle skinning for duplicate NPC \"%s\" (%08X).",
                                         GetName(), GetFormID());
                                 }
-                                ((FaceGeometryData*)aNode5->FUN_0043fad0()->GetControllers())->FUN_00a5d510(copiedData);
+                                ((FaceGeometryData*)aNode5->NiGeometry_GetSkinInstance()->GetControllers())->FUN_00a5d510(copiedData);
                                 aBipedNode = (NiAVObject*)copiedData;
                                 if ((NiAVObject*)aBipedNode)
-                                    aNode5->FUN_0043fad0()->FUN_004addc0((NiSkinInstance*)(NiAVObject*)aBipedNode);
+                                    aNode5->NiGeometry_GetSkinInstance()->BSMultiBound_SetShape((NiSkinInstance*)(NiAVObject*)aBipedNode);
                             }
                         }
                     }
@@ -5638,7 +5680,7 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                     {
                         if (!nodeB)
                         {
-                            nodeB = bipedNodeVal->GetFaceAnimation()->FUN_0064c5a0();
+                            nodeB = bipedNodeVal->GetFaceAnimation()->BSFaceGenAnimationData_CreateCopyBS();
                             if (nodeB)
                                 bipedNodeVal->SetFaceAnimation(nodeB);
                         }
@@ -5652,7 +5694,7 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                     bool female = false;
                     ((HeadRaceCalls*)GetFormRace())
                         ->CreateFaceGenNodes(node9, bipedNodeVal, this, female, false, false);
-                    m_usLastRace = GetFormRace()->FUN_00607350();
+                    m_usLastRace = GetFormRace()->GetFaceCoordNum_00607350();
                     m_pkPrimaryFaceGenNode = (BSFaceGenNiNode*)node9;
                     m_pkSecondaryFaceGenNode = (BSFaceGenNiNode*)bipedNodeVal;
                 }
@@ -5667,8 +5709,8 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                     }
                     node9->SetFlag114(true);
                     node9->SetFlag11c(true);
-                    node9->FUN_00440460(NiPoint3_ZERO);
-                    node9->FUN_0043fa80(&DAT_011a9448);
+                    node9->NiAVObject_SetTranslate(NiPoint3_ZERO);
+                    node9->SetRotate_0043fa80(&DAT_011a9448);
                     bipedNodeB->AttachChildInAvailableSlot(node9, true);
                     node9->owner = ref;
                     AddObjectToPaletteRecursive(node9, f);
@@ -5678,7 +5720,7 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                     a = *(HeadMatrix*)&DAT_011a9448;
                     bipedNodeVal->SetFlag114(node9 == 0);
                     bipedNodeVal->SetFlag11c(node9 == 0);
-                    bipedNodeVal->FUN_00440460(NiPoint3_ZERO);
+                    bipedNodeVal->NiAVObject_SetTranslate(NiPoint3_ZERO);
                     aNode2->AttachChildInAvailableSlot(bipedNodeVal, true);
                     bipedNodeVal->owner = ref;
                     AddObjectToPaletteRecursive(bipedNodeVal, f);
@@ -5712,7 +5754,7 @@ void TESNPCFaceSerialization::SerializeFaceGenData(int unused)
         unsigned int j = 0;
         for (; j < 2; ++j)
         {
-            unsigned int rows = this->m_kFaceGenCoordinates[i2][j].FUN_009611e0();
+            unsigned int rows = this->m_kFaceGenCoordinates[i2][j].NiAVObject_GetParent();
             unsigned int cols = this->m_kFaceGenCoordinates[i2][j].FUN_00441110();
             unsigned int row = 0;
             for (; row < rows; ++row)
@@ -5720,8 +5762,8 @@ void TESNPCFaceSerialization::SerializeFaceGenData(int unused)
                 unsigned int col = 0;
                 for (; col < cols; ++col)
                 {
-                    float value = *reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[i2][j])->FUN_0060b370(row, col).FUN_00629ab0();
-                    ((PC7d*)this)->FUN_00484ce0((unsigned int)&value, 4);
+                    float value = *reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[i2][j])->ForwardCall_0060b370(row, col).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt();
+                    ((PC7d*)this)->TESForm_SaveGameDataOLD((unsigned int)&value, 4);
                 }
             }
         }
@@ -5744,14 +5786,14 @@ void TESNPCFaceSerialization::SerializeFaceGenData(int unused)
         eyeID = (int)this->m_pEyes->GetFormID();
     }
     ((FUN_00484d20_Class*)this)->ForwardToSaveLoadGame(&eyeID, 4);
-    ((PC7d*)this)->FUN_00484ce0((unsigned int)&this->m_fHairLength, 4);
-    ((PC7d*)this)->FUN_00484ce0((unsigned int)&this->iHairColor, 4);
+    ((PC7d*)this)->TESForm_SaveGameDataOLD((unsigned int)&this->m_fHairLength, 4);
+    ((PC7d*)this)->TESForm_SaveGameDataOLD((unsigned int)&this->iHairColor, 4);
     unsigned char sex = 0;
     if (this->TESActorBase::GetSex() == 1)
     {
         sex = 1;
     }
-    ((PC7d*)this)->FUN_00484ce0((unsigned int)&sex, 1);
+    ((PC7d*)this)->TESForm_SaveGameDataOLD((unsigned int)&sex, 1);
 }
 
 struct ContainerModelView : TESContainer
@@ -5830,35 +5872,36 @@ struct Facade410
 {
     unsigned int v0;
     unsigned int v1;
-    FoundPair FUN_0060b820(int index);
+    FoundPair FaceGenDataBuffer_SetsBufferUnk000Unk004toSelfPlusOffsetMultByFour(int index);
 };
 
 struct Vec410
 {
-    unsigned int FUN_00662820() const;
+    unsigned int std_vector_float_std_allocator_float_size() const;
     IterPair& CallWithSelf(IterPair* out);
     void Insert(unsigned int, unsigned int, unsigned int, float const&);
-    Facade410 FUN_0044a170();
-    FoundPair FUN_0044a1a0(int, int, int, int);
-    void FUN_0060b410(unsigned int level, float value);
+    Facade410 SetIteratorDataAndOwner();
+    FoundPair std_vector_float_std_allocator_float_erase(int, int, int, int);
+    void std_vector_float_std_allocator_float_resize_0060b410(unsigned int level, float value);
 };
 
 // @fnv 0x0060b410
-void Vec410::FUN_0060b410(unsigned int level, float value)
+// src: COMMUNITY 0x0060b410
+void Vec410::std_vector_float_std_allocator_float_resize_0060b410(unsigned int level, float value)
 {
-    if (FUN_00662820() < level)
+    if (std_vector_float_std_allocator_float_size() < level)
     {
         IterPair beg;
         IterPair it = CallWithSelf(&beg);
-        Insert(it.v0, it.v1, level - FUN_00662820(), value);
+        Insert(it.v0, it.v1, level - std_vector_float_std_allocator_float_size(), value);
     }
-    else if (level < FUN_00662820())
+    else if (level < std_vector_float_std_allocator_float_size())
     {
         IterPair seek;
         IterPair res = CallWithSelf(&seek);
         FoundPair target;
-        target = FUN_0044a170().FUN_0060b820(level);
-        FUN_0044a1a0(target.v0, target.v1, res.v0, res.v1);
+        target = SetIteratorDataAndOwner().FaceGenDataBuffer_SetsBufferUnk000Unk004toSelfPlusOffsetMultByFour(level);
+        std_vector_float_std_allocator_float_erase(target.v0, target.v1, res.v0, res.v1);
     }
 }
 
@@ -5874,7 +5917,7 @@ struct H3370
     void FUN_005ae3d0(void*);
     void FUN_0048cd90(void*);
     void FUN_00481bb0(void*);
-    void FUN_0047f4c0(void*);
+    void TESAIForm_InitItem(void*);
     void FUN_0048b920(void*);
     void FUN_0047d8b0(void*);
     void FUN_0048d400(void*);
@@ -5882,16 +5925,16 @@ struct H3370
     void FUN_00478be0(void*);
     void* FUN_00484e60(int);
     void InitAttributesAndSkills(bool);
-    void* FUN_0084e3a0();
+    void* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     unsigned FUN_00726070();
-    void FUN_00565210(bool);
+    void TESObjectREFR_SetHasTemp3D(bool);
     float FUN_006041d0();
     void FUN_00484ab0(bool);
 };
 void __cdecl ResolveFormID(void*, void*);
-TESForm* __cdecl FUN_004839c0(void*);
+TESForm* __cdecl TESForm_GetFormByNumericID(void*);
 void* __cdecl FUN_00ec43fb(void*, int, void*, void*, int);
-void __cdecl FUN_005b5e40(void*, void*, void*, void*);
+void __cdecl Warning_005b5e40(void*, void*, void*, void*);
 struct C3370
 {
     virtual void v0();
@@ -6000,10 +6043,11 @@ struct C3370
     void* field1d4;
     char pad1d8[0x1c];
     float field1f4;
-    void FUN_00603370();
+    void TESNPC_InitItem();
 };
 // @fnv 0x00603370
-void C3370::FUN_00603370()
+// src: XBOX_PDB 0x00603370
+void C3370::TESNPC_InitItem()
 {
     C3370* c;
     void* a;
@@ -6017,7 +6061,7 @@ void C3370::FUN_00603370()
     }
     ((H3370*)((char*)this + 0xf4))->FUN_0048cd90(this);
     ((H3370*)((char*)this + 0x64))->FUN_00481bb0(this);
-    ((H3370*)((char*)this + 0x90))->FUN_0047f4c0(this);
+    ((H3370*)((char*)this + 0x90))->TESAIForm_InitItem(this);
     ((H3370*)((char*)this + 0x10c))->FUN_0048b920(this);
     ((H3370*)((char*)this + 0x30))->FUN_0047d8b0(this);
     ((H3370*)((char*)this + 0x7c))->FUN_0048d400(this);
@@ -6027,7 +6071,7 @@ void C3370::FUN_00603370()
     {
         a = field130;
         ResolveFormID(&a, ((H3370*)this)->FUN_00484e60(-1));
-        field130 = dynamic_cast<TESClass*>(FUN_004839c0(a));
+        field130 = dynamic_cast<TESClass*>(TESForm_GetFormByNumericID(a));
     }
     if (v81())
         ((H3370*)this)->InitAttributesAndSkills(false);
@@ -6037,15 +6081,15 @@ void C3370::FUN_00603370()
         if (b)
         {
             ResolveFormID(&b, ((H3370*)this)->FUN_00484e60(-1));
-            field1d4 = dynamic_cast<TESCombatStyle*>(FUN_004839c0(b));
+            field1d4 = dynamic_cast<TESCombatStyle*>(TESForm_GetFormByNumericID(b));
             if (!field1d4)
-                FUN_005b5e40(&DAT_0104a600, b, ((H3370*)this)->FUN_0084e3a0(), v76());
+                Warning_005b5e40(&DAT_0104a600, b, ((H3370*)this)->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), v76());
         }
     }
     if (!v98())
-        v99(FUN_00505000());
+        v99(TESCombatStyle_GetDefaultCombatStyle());
     if (((H3370*)((char*)this + 0xb0))->FUN_00726070() <= 0)
-        ((H3370*)this)->FUN_00565210(true);
+        ((H3370*)this)->TESObjectREFR_SetHasTemp3D(true);
     if (field1f4 == 0.0)
         field1f4 = ((H3370*)this)->FUN_006041d0();
     ((H3370*)this)->FUN_00484ab0(true);
@@ -6101,12 +6145,12 @@ void NPC_Helper::InitAttributesAndSkills(bool arg1)
         long tmp;
         tmp = ComputeIntelligenceResult(GetAttributeValue(9), true);
         long fRemainder;
-        fRemainder = FUN_0047ded0();
+        fRemainder = TESActorBaseData_GetLevel();
         tmp = (fRemainder - 1) * tmp;
         int kIter;
         kIter = (arg1 ? 1 : 0) + 3;
         float q;
-        q = (float)(FUN_00404040((float)tmp / kIter) * DAT_011cd6c0.Int()->i);
+        q = (float)(FloatFloor((float)tmp / kIter) * DAT_011cd6c0.Int()->i);
         float y;
         y = 0.0f;
         --kIter;
@@ -6204,8 +6248,8 @@ struct Process : Slots<282>
 struct Ref
 {
     Process* FUN_008d8520();
-    Extras* FUN_005d43c0();
-    void* FUN_0043fcd0();
+    Extras* BSFile_GetDevice();
+    void* TESObjectREFR_Get3D();
     TESPackage* FUN_009344a0();
 };
 struct FUN_004459e0
@@ -6215,7 +6259,7 @@ struct FUN_004459e0
 typedef FUN_004459e0 Item;
 struct Inventory
 {
-    Item* FUN_004c8c10(int, int);
+    Item* InventoryChanges_GetWornItem(int, int);
 };
 struct BipedData
 {
@@ -6224,7 +6268,7 @@ struct BipedData
 };
 struct Biped
 {
-    BipedData* FUN_00606800();
+    BipedData* BipedAnim_QBufferedObjects();
     void FUN_004ab250(void*);
 };
 struct Field
@@ -6233,8 +6277,8 @@ struct Field
 };
 struct Player
 {
-    void* FUN_007af430();
-    Biped* FUN_00950b00(bool);
+    void* BGSSaveFormBuffer_GetForm();
+    Biped* GetBiped(bool);
 };
 void* __cdecl FUN_00ec43fb(void*, int, void*, void*, int);
 Inventory* __cdecl FUN_004bf220(Ref*);
@@ -6246,14 +6290,15 @@ struct Shell
     char pad2[212];
     Field field;
     bool FUN_005f1590(Ref*);
-    void FUN_006047c0(Ref*, bool, bool, int, int);
-    void FUN_00606820(Ref*, Biped*);
+    void InitDefaultWorn(Ref*, bool, bool, int, int);
+    void TESNPC_LinearFaceGenHeadLoad(Ref*, Biped*);
     void InitWornObjects(Ref*, Biped*);
     void UpdateFaceGenHairVisibility(Ref*, int);
-    void FUN_00606540(Ref* ref, Biped* biped, bool force);
+    void TESNPC_InitParts(Ref* ref, Biped* biped, bool force);
 };
 // @fnv 0x00606540
-void Shell::FUN_00606540(Ref* ref, Biped* biped, bool force)
+// src: XBOX_PDB 0x00606540
+void Shell::TESNPC_InitParts(Ref* ref, Biped* biped, bool force)
 {
     if (biped)
     {
@@ -6261,7 +6306,7 @@ void Shell::FUN_00606540(Ref* ref, Biped* biped, bool force)
         {
             for (unsigned i = 0; i < 20; ++i)
             {
-                if (biped->FUN_00606800()[i].p)
+                if (biped->BipedAnim_QBufferedObjects()[i].p)
                     return;
             }
         }
@@ -6271,7 +6316,7 @@ void Shell::FUN_00606540(Ref* ref, Biped* biped, bool force)
     if (actor && actor->FUN_008d8520())
     {
         bool valid = true;
-        Extra* extra = actor->FUN_005d43c0()->FUN_0042e8c0();
+        Extra* extra = actor->BSFile_GetDevice()->FUN_0042e8c0();
         if (extra && extra->count.FUN_0044ddc0() && extra->GetInfoAt(0))
         {
             for (unsigned j = 0; j < extra->count.FUN_0044ddc0(); ++j)
@@ -6286,17 +6331,17 @@ void Shell::FUN_00606540(Ref* ref, Biped* biped, bool force)
             actor->FUN_008d8520()->FUN_00606540_slot(true);
         }
     }
-    if (!ref->FUN_0043fcd0() || force)
+    if (!ref->TESObjectREFR_Get3D() || force)
     {
         bool update = FUN_005f1590(ref) | force;
-        if (this == (*(Player**)&DAT_011dea3c)->FUN_007af430())
+        if (this == (*(Player**)&DAT_011dea3c)->BGSSaveFormBuffer_GetForm())
         {
             Inventory* inv = FUN_004bf220(ref);
             if (inv)
             {
                 for (int k = 0; k < 20; ++k)
                 {
-                    Item* item = inv->FUN_004c8c10(k, 0);
+                    Item* item = inv->InventoryChanges_GetWornItem(k, 0);
                     if (item)
                     {
                         update = false;
@@ -6313,14 +6358,14 @@ void Shell::FUN_00606540(Ref* ref, Biped* biped, bool force)
             TESPackage* equip = actor->FUN_009344a0();
             if (equip && equip->FUN_00441b00())
                 package = false;
-            FUN_006047c0(ref, true, package, 0, 0);
+            InitDefaultWorn(ref, true, package, 0, 0);
         }
     }
     if (!FUN_004abfa0())
-        FUN_00606820(ref, biped);
+        TESNPC_LinearFaceGenHeadLoad(ref, biped);
     InitWornObjects(ref, biped);
     bool other = true;
-    if (biped == (*(Player**)&DAT_011dea3c)->FUN_00950b00(true))
+    if (biped == (*(Player**)&DAT_011dea3c)->GetBiped(true))
         other = false;
     if (other)
         UpdateFaceGenHairVisibility(ref, 0);
@@ -6347,9 +6392,9 @@ void TESNPC::UpdateActorFaceGen(TESObjectREFR* apRefr, BipedAnim* apBiped, BSFac
     NiAVObjectPalette* f54;
     NiMatrix3 ptr;
     f54 = NULL;
-    if (reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData()) && reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData())->FUN_00496940())
+    if (reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData()) && reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData())->GetControllerManager_00496940())
     {
-        f54 = reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData())->FUN_00496940()->GetStringAtOffset();
+        f54 = reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData())->GetControllerManager_00496940()->GetStringAtOffset();
     }
     NiDefaultAVObjectPalette* val;
     val = (NiDefaultAVObjectPalette*)f54;
@@ -6368,7 +6413,7 @@ void TESNPC::UpdateActorFaceGen(TESObjectREFR* apRefr, BipedAnim* apBiped, BSFac
             }
             apHeadBiped->SetAnimationUpdate(true);
             apHeadBiped->SetApplyRotToParent(true);
-            apHeadBiped->FUN_00440460(NiPoint3_ZERO);
+            apHeadBiped->NiAVObject_SetTranslate(NiPoint3_ZERO);
             apHeadBiped->SetLocalRotation(*(const NiMatrix3*)&DAT_011a9448);
             idx->AttachChildInAvailableSlot(static_cast<NiAVObject*>(apHeadBiped), true);
             AddObjectToPalette(apHeadBiped, val);
@@ -6379,7 +6424,7 @@ void TESNPC::UpdateActorFaceGen(TESObjectREFR* apRefr, BipedAnim* apBiped, BSFac
             ptr = *(const NiMatrix3*)&DAT_011a9448;
             apHeadSkinned->SetAnimationUpdate(0 == apHeadBiped);
             apHeadSkinned->SetApplyRotToParent(apHeadBiped == 0);
-            apHeadSkinned->FUN_00440460(NiPoint3_ZERO);
+            apHeadSkinned->NiAVObject_SetTranslate(NiPoint3_ZERO);
             a->AttachChildInAvailableSlot(static_cast<NiAVObject*>(apHeadSkinned), true);
             AddObjectToPalette(apHeadSkinned, val);
             reinterpret_cast<void (__thiscall*)(BSFaceGenNiNode*, NiNode*, bool)>((*reinterpret_cast<void***>(apHeadSkinned))[0x4a])(apHeadSkinned, a, true);
@@ -6405,9 +6450,9 @@ void TESNPC::UpdateActorFaceGen(TESObjectREFR* apRefr, BipedAnim* apBiped, BSFac
                     float res;
                     ComputeAngleRange(&obj3D, &v);
                     ClampMinMaxFromSetting(&obj3D, &res);
-                    pObj->m_pRagdollController->FUN_00607830(res);
+                    pObj->m_pRagdollController->SetMaxEyePitch(res);
                     pObj->m_pRagdollController->SetBoneMaxAngle(0, v);
-                    FUN_00649fe0(&obj3D, &v);
+                    BSFaceGenAnimationData_GetTrackDeadZoneXYMinMax(&obj3D, &v);
                     GetEyeAngleLimits(&obj3D, &res);
                     pObj->m_pRagdollController->SetSlotFloats(0, v, res);
                 }
@@ -6437,7 +6482,7 @@ struct FloatInsertIterator
 struct FloatInsertAllocator
 {
     unsigned int state;
-    float* FUN_0044abd0(unsigned int count);
+    float* ForwardCall_0044abd0(unsigned int count);
     void FUN_0064df10(float* first, unsigned int count);
 };
 struct FloatInsertVector
@@ -6448,50 +6493,50 @@ struct FloatInsertVector
     float* first;
     float* last;
     float* end;
-    unsigned int FUN_0060b860() const;
-    unsigned int FUN_00662820() const;
-    unsigned int FUN_0044a2c0() const;
-    float* FUN_0060bb40(float*, float*, float*);
-    float* FUN_0060b8a0(float*, unsigned int, const float&);
-    void FUN_0065f2b0(float*, float*);
+    unsigned int FaceGenData_GetUnk014MinusMinDivBy4() const;
+    unsigned int std_vector_float_std_allocator_float_size() const;
+    unsigned int FaceGenData_Return1() const;
+    float* ForwardCall_0060bb40(float*, float*, float*);
+    float* ProcessAndReturnValue_0060b8a0(float*, unsigned int, const float&);
+    void std_vector_float_std_allocator_float_Destroy(float*, float*);
     void Insert(FloatInsertIterator where, unsigned int count, const float& value);
 };
 void __cdecl ThrowVectorTooLong();
-void __cdecl FUN_0060bb70(float*, float*, const float&);
-float* __cdecl FUN_0060bba0(float*, float*, float*);
+void __cdecl Runtime_ProcessRangeWithCallFlags(float*, float*, const float&);
+float* __cdecl Object_DispatchIteratorRange_0060bba0(float*, float*, float*);
 
 // Inserts count copies of value at where, growing or reallocating the buffer when capacity is insufficient.
 // @fnv 0x0060b4d0
 void FloatInsertVector::Insert(FloatInsertIterator where, unsigned int count, const float& value)
 {
-    unsigned int capacity = FUN_0060b860();
+    unsigned int capacity = FaceGenData_GetUnk014MinusMinDivBy4();
     if (count == 0)
         ;
-    else if (FUN_0044a2c0() - FUN_00662820() < count)
+    else if (FaceGenData_Return1() - std_vector_float_std_allocator_float_size() < count)
         ThrowVectorTooLong();
-    else if (capacity < FUN_00662820() + count)
+    else if (capacity < std_vector_float_std_allocator_float_size() + count)
     {
-        capacity = FUN_0044a2c0() - capacity / 2 < capacity ? 0 : capacity + capacity / 2;
-        if (capacity < FUN_00662820() + count)
-            capacity = FUN_00662820() + count;
-        float* ptr = allocator.FUN_0044abd0(capacity);
+        capacity = FaceGenData_Return1() - capacity / 2 < capacity ? 0 : capacity + capacity / 2;
+        if (capacity < std_vector_float_std_allocator_float_size() + count)
+            capacity = std_vector_float_std_allocator_float_size() + count;
+        float* ptr = allocator.ForwardCall_0044abd0(capacity);
         float* pWritePos = ptr;
         try
         {
-            pWritePos = FUN_0060bb40(first, where.current, ptr);
-            pWritePos = FUN_0060b8a0(pWritePos, count, value);
-            FUN_0060bb40(where.current, last, pWritePos);
+            pWritePos = ForwardCall_0060bb40(first, where.current, ptr);
+            pWritePos = ProcessAndReturnValue_0060b8a0(pWritePos, count, value);
+            ForwardCall_0060bb40(where.current, last, pWritePos);
         }
         catch (...)
         {
-            FUN_0065f2b0(ptr, pWritePos);
+            std_vector_float_std_allocator_float_Destroy(ptr, pWritePos);
             allocator.FUN_0064df10(ptr, capacity);
             throw;
         }
-        count += FUN_00662820();
+        count += std_vector_float_std_allocator_float_size();
         if (first != 0)
         {
-            FUN_0065f2b0(first, last);
+            std_vector_float_std_allocator_float_Destroy(first, last);
             allocator.FUN_0064df10(first, end - first);
         }
         end = ptr + capacity;
@@ -6501,26 +6546,26 @@ void FloatInsertVector::Insert(FloatInsertIterator where, unsigned int count, co
     else if ((unsigned int)(last - where.current) < count)
     {
         float tmp = value;
-        FUN_0060bb40(where.current, last, where.current + count);
+        ForwardCall_0060bb40(where.current, last, where.current + count);
         try
         {
-            FUN_0060b8a0(last, count - (last - where.current), tmp);
+            ProcessAndReturnValue_0060b8a0(last, count - (last - where.current), tmp);
         }
         catch (...)
         {
-            FUN_0065f2b0(where.current + count, last + count);
+            std_vector_float_std_allocator_float_Destroy(where.current + count, last + count);
             throw;
         }
         last += count;
-        FUN_0060bb70(where.current, last - count, tmp);
+        Runtime_ProcessRangeWithCallFlags(where.current, last - count, tmp);
     }
     else
     {
         float tmp = value;
         float* oldend = last;
-        last = FUN_0060bb40(oldend - count, oldend, last);
-        FUN_0060bba0(where.current, oldend - count, oldend);
-        FUN_0060bb70(where.current, where.current + count, tmp);
+        last = ForwardCall_0060bb40(oldend - count, oldend, last);
+        Object_DispatchIteratorRange_0060bba0(where.current, oldend - count, oldend);
+        Runtime_ProcessRangeWithCallFlags(where.current, where.current + count, tmp);
     }
 }
 
@@ -6534,13 +6579,13 @@ struct Buffer75
 {
     virtual unsigned char Version();
     Flag75 FUN_00428110(unsigned int);
-    void FUN_00864980(void*, unsigned int);
+    void LoadData(void*, unsigned int);
     unsigned int FUN_008648a0();
     unsigned int FUN_00864a60();
-    bool FUN_0042ce90();
+    bool BGSLoadFormBuffer_GetReconstructedForm();
 };
 
-TESForm* FUN_004839c0(unsigned int);
+TESForm* TESForm_GetFormByNumericID(unsigned int);
 
 
 
@@ -6567,7 +6612,7 @@ struct Saved75
     ~Saved75();
     void FUN_007cb2e0(BGSHeadPart* const&);
     int FUN_00719b20(BGSHeadPart*&, int, bool (*)(BGSHeadPart*&, BGSHeadPart*&));
-    void FUN_009a4320(int, int);
+    void BSSimpleArray_Actor_1024_RemoveFast(int, int);
     unsigned int FUN_0044ddc0();
 };
 
@@ -6583,14 +6628,14 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
     TESActorBase::LoadGame(buffer);
 
     if (reinterpret_cast<Buffer75*>(buffer)->FUN_00428110(0x200).FUN_004280f0())
-        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&data, 28);
+        reinterpret_cast<Buffer75*>(buffer)->LoadData(&data, 28);
 
     if (reinterpret_cast<Buffer75*>(buffer)->FUN_00428110(0x400).FUN_004280f0())
-        m_pClass = dynamic_cast<TESClass*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
+        m_pClass = dynamic_cast<TESClass*>(TESForm_GetFormByNumericID(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
 
     unsigned char changed1 = 0;
 
-    if (reinterpret_cast<Buffer75*>(buffer)->FUN_0042ce90())
+    if (reinterpret_cast<Buffer75*>(buffer)->BGSLoadFormBuffer_GetReconstructedForm())
         changed1 |= 0x1b;
 
     bool updateHeight27 = false;
@@ -6603,7 +6648,7 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
 
         TESRace* newRace = 0;
 
-        newRace = dynamic_cast<TESRace*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
+        newRace = dynamic_cast<TESRace*>(TESForm_GetFormByNumericID(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
 
         if (newRace != GetFormRace())
         {
@@ -6611,7 +6656,7 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
             changed1 |= 0x1b;
         }
 
-        m_pAssignedRace = dynamic_cast<TESRace*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
+        m_pAssignedRace = dynamic_cast<TESRace*>(TESForm_GetFormByNumericID(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
     }
 
     if (updateHeight27)
@@ -6622,7 +6667,7 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
 
         bool useAlternate7 = false;
 
-        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&useAlternate7, 1);
+        reinterpret_cast<Buffer75*>(buffer)->LoadData(&useAlternate7, 1);
 
         FaceGenMatrix<float>(*coordinates20)[2] = m_kFaceGenCoordinates;
 
@@ -6642,7 +6687,7 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
             for (unsigned int group = 0; group < 2; ++group)
             {
 
-                unsigned int rows7 = coordinates20[set][group].FUN_009611e0();
+                unsigned int rows7 = coordinates20[set][group].NiAVObject_GetParent();
 
                 unsigned int cols2 = coordinates20[set][group].FUN_00441110();
 
@@ -6653,12 +6698,12 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
                     {
 
                         float value = 0.0f;
-                        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&value, 4);
+                        reinterpret_cast<Buffer75*>(buffer)->LoadData(&value, 4);
 
-                        if (*reinterpret_cast<FaceGenCoordinateBasis*>(&coordinates20[set][group])->FUN_0060b370(row, col).FUN_00629ab0() != value)
+                        if (*reinterpret_cast<FaceGenCoordinateBasis*>(&coordinates20[set][group])->ForwardCall_0060b370(row, col).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt() != value)
                         {
 
-                            *const_cast<float*>(reinterpret_cast<FaceGenCoordinateBasis*>(&coordinates20[set][group])->FUN_0060b370(row, col).FUN_00629ab0()) = value;
+                            *const_cast<float*>(reinterpret_cast<FaceGenCoordinateBasis*>(&coordinates20[set][group])->ForwardCall_0060b370(row, col).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt()) = value;
                             changed1 |= 8;
                         }
                     }
@@ -6671,11 +6716,11 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
         float oldLength23 = m_fHairLength;
         float oldColor22 = (float)iHairColor;
 
-        m_pHair = dynamic_cast<TESHair*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
-        m_pEyes = dynamic_cast<TESEyes*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
+        m_pHair = dynamic_cast<TESHair*>(TESForm_GetFormByNumericID(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
+        m_pEyes = dynamic_cast<TESEyes*>(TESForm_GetFormByNumericID(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
 
-        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&m_fHairLength, 4);
-        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&iHairColor, 4);
+        reinterpret_cast<Buffer75*>(buffer)->LoadData(&m_fHairLength, 4);
+        reinterpret_cast<Buffer75*>(buffer)->LoadData(&iHairColor, 4);
 
         bool partsChanged41 = false;
 
@@ -6703,7 +6748,7 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
                 for (unsigned int index = 0; index < count33; ++index)
                 {
                     BGSHeadPart* part = 0;
-                    part = dynamic_cast<BGSHeadPart*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
+                    part = dynamic_cast<BGSHeadPart*>(TESForm_GetFormByNumericID(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
                     if (part)
                         reinterpret_cast<Node75*>(&m_kHeadPartList)->FUN_005ae3d0(part);
                 }
@@ -6717,14 +6762,14 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
 
                     if (part)
                     {
-                        int found = saved14.FUN_00719b20(part, 0, FUN_009a3830);
+                        int found = saved14.FUN_00719b20(part, 0, Actor_AreReferencedValuesEqual);
                         if (found == -1)
                         {
                             partsChanged41 = true;
                             break;
                         }
                         else
-                            saved14.FUN_009a4320(found, 1);
+                            saved14.BSSimpleArray_Actor_1024_RemoveFast(found, 1);
                     }
 
                     node17 = node17->FUN_00726070();
@@ -6744,7 +6789,7 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
     {
 
         bool sex = false;
-        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&sex, 1);
+        reinterpret_cast<Buffer75*>(buffer)->LoadData(&sex, 1);
 
         if (TESActorBaseData::GetFlag(1) != sex)
         {
@@ -6757,19 +6802,19 @@ void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
         ResetFaceGen();
 
     if (changed1)
-        FUN_005f20a0(changed1);
+        Reset3DForLoadedActors(changed1);
 }
 
 #include "../../include/BGSChangeFlags.h"
 class Shell_00608f00_Base
 {
   public:
-    void FUN_005f1f30(unsigned int);
+    void SaveGame_005f1f30(unsigned int);
 };
 class Shell_00608f00_Row
 {
   public:
-    float& FUN_00629ab0(unsigned int);
+    float& NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(unsigned int);
 };
 struct Shell_00608f00_RowVal : public Shell_00608f00_Row
 {
@@ -6779,7 +6824,7 @@ struct Shell_00608f00_RowVal : public Shell_00608f00_Row
 class Shell_00608f00_Mat
 {
   public:
-    Shell_00608f00_RowVal FUN_0060b370(int);
+    Shell_00608f00_RowVal ForwardCall_0060b370(int);
 };
 class Shell_00608f00_Item
 {
@@ -6797,14 +6842,15 @@ class Shell_00608f00_Flag
 class TESNPCSaveBufferWriter : public TESNPC
 {
   public:
-    void FUN_00608f00(BGSSaveFormBuffer* apFile);
+    void TESNPC_SaveGame_00608f00(BGSSaveFormBuffer* apFile);
 };
 
 // Writes NPC data to the buffer, including face coordinates, hair, eyes, head parts, and selected flag state.
 // @fnv 0x00608f00
-void TESNPCSaveBufferWriter::FUN_00608f00(BGSSaveFormBuffer* apFile)
+// src: XBOX_PDB 0x00608f00
+void TESNPCSaveBufferWriter::TESNPC_SaveGame_00608f00(BGSSaveFormBuffer* apFile)
 {
-    ((Shell_00608f00_Base*)this)->FUN_005f1f30((unsigned int)apFile);
+    ((Shell_00608f00_Base*)this)->SaveGame_005f1f30((unsigned int)apFile);
     if (apFile->FUN_00428110().Test(0x200))
         apFile->FUN_00865e50(&data, 0x1c, 0);
     if (apFile->FUN_00428110().Test(0x400))
@@ -6829,13 +6875,13 @@ void TESNPCSaveBufferWriter::FUN_00608f00(BGSSaveFormBuffer* apFile)
         {
             for (unsigned int j = 0; j < 2; j++)
             {
-                unsigned int uiRows = pCoord[i][j].FUN_009611e0();
+                unsigned int uiRows = pCoord[i][j].NiAVObject_GetParent();
                 unsigned int cols = pCoord[i][j].FUN_00441110();
                 for (unsigned int k = 0; k < uiRows; k++)
                 {
                     for (unsigned int l = 0; l < cols; l++)
                     {
-                        float fValue = ((Shell_00608f00_Mat*)&pCoord[i][j])->FUN_0060b370(k).FUN_00629ab0(l);
+                        float fValue = ((Shell_00608f00_Mat*)&pCoord[i][j])->ForwardCall_0060b370(k).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(l);
                         apFile->FUN_00865e50(&fValue, 4, 0);
                     }
                 }
@@ -6847,7 +6893,7 @@ void TESNPCSaveBufferWriter::FUN_00608f00(BGSSaveFormBuffer* apFile)
         apFile->FUN_00865e50(&iHairColor, 4, 0);
         {
             int iNumParts = 0;
-            unsigned int uiElapsedMilliseconds = apFile->FUN_00865f20();
+            unsigned int uiElapsedMilliseconds = apFile->StartVariableSizedValue();
             Shell_00608f00_Node* pIter = (Shell_00608f00_Node*)&m_kHeadPartList;
             while (pIter)
             {
@@ -6860,7 +6906,7 @@ void TESNPCSaveBufferWriter::FUN_00608f00(BGSSaveFormBuffer* apFile)
                 }
                 pIter = ::FUN_00726070(pIter);
             }
-            apFile->FUN_00865ff0(iNumParts, uiElapsedMilliseconds);
+            apFile->SaveVariableSizedValue_00865ff0(iNumParts, uiElapsedMilliseconds);
         }
     }
     if (apFile->FUN_00428110().Test(0x1000000))
@@ -6921,7 +6967,7 @@ bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef,
 
     if (!pTarget->HasHealth(false) || GetActorKnockState(pTarget) == 6)
     {
-        if (pTarget->FUN_00437bd0() || pTarget->GetHasKnockedState() || GetActorKnockState(pTarget) == 6)
+        if (pTarget->Actor_IsUnConscious() || pTarget->GetHasKnockedState() || GetActorKnockState(pTarget) == 6)
         {
             sprintf(szLine, "%s %s", pTarget->GetFullName(), DAT_011d210c.IsContentAvailable());
             ShowMessage(szLine, 0, "Interfac\\Icons\\Message Icons\\glow_message_vaultboy_surprised.dds", 0, 2.0f,
@@ -6932,7 +6978,7 @@ bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef,
         {
             CombatController* m_pCombatController = pTarget->GetCombatController();
             if (!m_pCombatController || !m_pCombatController->SetActive(g_thePlayer) ||
-                g_thePlayer->FUN_00894d60())
+                g_thePlayer->GetBlocked())
             {
                 sprintf(szLine, "%s %s", pTarget->GetFullName(), DAT_011d2538.IsContentAvailable());
                 ShowMessage(szLine, 0, "Interface\\Icons\\Message Icons\\glow_message_vaultboy_sad.dds", 0, 2.0f,
@@ -6944,7 +6990,7 @@ bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef,
 
     if (pTarget->IsPlayerTeammate() && apActivatorRef == g_thePlayer)
     {
-        if (FUN_00754d90(pTarget))
+        if (CompanionWheelMenu_GetShouldCompanionWheelOpen(pTarget))
             OpenDialogueMenu(8, apTargetRef, 0, 0, 0, false);
         return false;
     }
@@ -6965,25 +7011,25 @@ bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef,
         if (pActivator != g_thePlayer && pActivator->GetProcess())
             pActivator->GetProcess()->SetProcessConditionMet(true);
 
-        if (pTarget->FUN_00493bb0() && pActivator == g_thePlayer &&
+        if (pTarget->Actor_IsInCombat() && pActivator == g_thePlayer &&
             pTarget->IsPlayerTeammate())
         {
             DAT_011f2250.SetEquipmentState(0, 0);
             OpenDialogueMenu(4, pTarget, 0, 0, 1, false);
         }
-        else if (pTarget && (!pTarget->FUN_00493bb0() || pTarget->GetHasKnockedState()) &&
+        else if (pTarget && (!pTarget->Actor_IsInCombat() || pTarget->GetHasKnockedState()) &&
                  (pActivator != g_thePlayer || !pTarget->GetSitSleepState() || pTarget->GetSitSleepState() == 9 ||
                   pTarget->GetSitSleepState() == 4 ||
                   (pTarget->GetProcess()->GetFurnitureMarkerData() &&
                    pTarget->GetProcess()->GetFurnitureMarkerData()->cMarkerType > 19)))
         {
-            if (pTarget->FUN_00608d80())
+            if (pTarget->Actor_IsReanimated())
                 return false;
 
             if (!pTarget->HasHealth(false))
             {
                 int iAttackReason = 0;
-                if (!pTarget->FUN_00437bf0() && !pTarget->GetIsParalyzed())
+                if (!pTarget->Actor_IsRestrained() && !pTarget->GetIsParalyzed())
                 {
                     if (pActivator != g_thePlayer && pActivator->IsHostileToActor(pTarget, 0, &iAttackReason, false))
                     {
@@ -7071,8 +7117,8 @@ bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef,
                             {
                                 if (!pTarget->HasEssentialStatus() && !pTarget->IsMovementActive())
                                     pTarget->GetProcess()->StopActorMovement(pTarget);
-                                pActivator->FUN_008a8e50();
-                                pTarget->FUN_008a8e50();
+                                pActivator->Actor_StopAttack();
+                                pTarget->Actor_StopAttack();
                                 DialoguePackage* pDialoguePackage =
                                     dynamic_cast<DialoguePackage*>(pActivator->MobileObject::GetCurrentPackage());
                                 if (pDialoguePackage)
@@ -7081,8 +7127,8 @@ bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef,
                                 if (pTarget->GetPackageTargetRef() == g_thePlayer && pTargetCurrentPackage &&
                                     !pTargetCurrentPackage->GetPackType())
                                 {
-                                    if (pTargetCurrentPackage->FUN_0041d8a0() &&
-                                        !GetScheduleListNext(pTargetCurrentPackage->FUN_0041d8a0()))
+                                    if (pTargetCurrentPackage->TESPackage_GetPackageSchedule() &&
+                                        !GetScheduleListNext(pTargetCurrentPackage->TESPackage_GetPackageSchedule()))
                                         pProcess->SetProcessTarget(pActivator, 2);
                                     else
                                         pProcess->SetProcessTarget(pTarget, 1);
@@ -7103,33 +7149,33 @@ bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef,
                                     pTarget->Unk_106();
                                 }
                             }
-                            else if (FUN_00702640() != 0x3f1)
+                            else if (Interface_GetMenuModeType() != 0x3f1)
                             {
                                 if (!g_thePlayer->GetProcess()->IsAimingAtActor(pActivator))
                                     return false;
                                 BSAudio::GetSingleton()->SetAudioState(4);
-                                pActivator->FUN_008a8e50();
-                                pTarget->FUN_008a8e50();
+                                pActivator->Actor_StopAttack();
+                                pTarget->Actor_StopAttack();
                                 pDialogueReference = pActivator;
-                                if (!pActivator->FUN_00493bb0())
+                                if (!pActivator->Actor_IsInCombat())
                                 {
                                     DialoguePackage* pActivatorDialogue =
                                         dynamic_cast<DialoguePackage*>(pActivator->MobileObject::GetCurrentPackage());
                                     if (pActivatorDialogue)
                                         pMenuTopic = reinterpret_cast<TESTopic*>(pActivatorDialogue->topic);
                                 }
-                                if (pActivatorPackage->FUN_0041d8a0() &&
-                                    !GetScheduleListNext(pActivatorPackage->FUN_0041d8a0()))
+                                if (pActivatorPackage->TESPackage_GetPackageSchedule() &&
+                                    !GetScheduleListNext(pActivatorPackage->TESPackage_GetPackageSchedule()))
                                     pActivator->GetProcess()->SetProcessTarget(pActivator, 2);
                                 else
                                     pActivator->GetProcess()->SetProcessTarget(pActivator, 1);
                                 pTarget->RemoveCastingArt();
                                 if (pTarget == g_thePlayer)
-                                    pTarget->FUN_008a7a90();
+                                    pTarget->Actor_ForceIdleAnimation();
                                 else
                                     pTarget->GetProcess()->AddPostAnimAction(BaseProcess::_PostAnimAction::FORCE_IDLE_ANIMATION);
                                 if (pActivator == g_thePlayer)
-                                    pActivator->FUN_008a7a90();
+                                    pActivator->Actor_ForceIdleAnimation();
                                 else
                                     pActivator->GetProcess()->AddPostAnimAction(BaseProcess::_PostAnimAction::FORCE_IDLE_ANIMATION);
                                 DAT_011f2250.SetEquipmentState(0, 0);
@@ -7173,7 +7219,7 @@ bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef,
                                 if (pActivator->IsCombatStateActive())
                                 {
                                     TESPackage* pDialoguePkg = pActivator->MobileObject::GetCurrentPackage();
-                                    if (!GetPackageDialogueNoHeadtrack(pDialoguePkg) && !pDialoguePkg->FUN_006727b0())
+                                    if (!GetPackageDialogueNoHeadtrack(pDialoguePkg) && !pDialoguePkg->GetDialogueDoNotControlTarget())
                                         pTarget->SetReferenceHeading(*static_cast<const TESObjectREFR*>(pActivator)->GetPos(), false);
                                 }
                                 else

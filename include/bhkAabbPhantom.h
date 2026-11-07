@@ -12,7 +12,7 @@ public:
 
     void FUN_00c9f530();
     void* FUN_0056e5e0(unsigned int flags);
-    void FUN_00c9f460();
+    void bhkPhantom_UpdateCFilter();
     static NiObject* __cdecl CreateObject();
 
     int m4;

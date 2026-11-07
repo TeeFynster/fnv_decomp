@@ -6,10 +6,10 @@
 // src/havok/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include "../../../../../../../include/hkpCylinderShape.h"
-int __cdecl FUN_00d571b0();
+int __cdecl hkpCylinderShape_ReturnConstant_0x12();
 extern char DAT_01268940[];
-void __cdecl FUN_00c90360(void* item, const char* type);
-void __cdecl FUN_00d571c0(void* item, const char*);
+void __cdecl hkReferencedObject_calcContentStatistics(void* item, const char* type);
+void __cdecl hkpCylinderShape_calcContentStatistics(void* item, const char*);
 struct C00d573e0 {
     char  pad00[0x10];
     volatile float f10;
@@ -24,7 +24,8 @@ struct C00d573e0 {
 extern char DAT_010305a8;
 extern char DAT_010d0f1c;
 extern float DAT_011b5be8;
-static __declspec(noinline) float FUN_00d571d0()
+// src: HAVOK_LIB 0x00d571d0
+static __declspec(noinline) float minValueRoundedUpTo1()
 {
     return 0.0f;
 }
@@ -34,7 +35,7 @@ struct S00d57b20_Obj {
     int unk08;
     int unk0C;
 
-    S00d57b20_Obj* __thiscall FUN_00d57b20(int condition);
+    S00d57b20_Obj* __thiscall hkpCylinderShape_hkpCylinderShape_00d57b20(int condition);
 };
 
 #include <xmmintrin.h>
@@ -43,7 +44,8 @@ extern int DAT_010d0f1c;
 extern float DAT_011b5be8;
 extern float DAT_01030ff0;
 
-static __declspec(noinline) float FUN_00d571d0()
+// src: HAVOK_LIB 0x00d571d0
+static __declspec(noinline) float minValueRoundedUpTo1()
 {
     return DAT_01030ff0;
 }
@@ -77,7 +79,7 @@ struct S00d57aa0_Obj {
     float unk38;
     float unk3c;
 
-    void* __thiscall FUN_00d57aa0(
+    void* __thiscall hkpCylinderShape_hkpCylinderShape(
         const float* a,
         const float* b,
         float c,
@@ -86,7 +88,8 @@ struct S00d57aa0_Obj {
 };
 
 // @fnv 0x00d57aa0
-void* __thiscall S00d57aa0_Obj::FUN_00d57aa0(
+// src: XBOX_PDB 0x00d57aa0
+void* __thiscall S00d57aa0_Obj::hkpCylinderShape_hkpCylinderShape(
     const float* a,
     const float* b,
     float c,
@@ -99,7 +102,7 @@ void* __thiscall S00d57aa0_Obj::FUN_00d57aa0(
     vft = &DAT_010d0f1c;
 
     if (DAT_011b5be8 < 0.0f) {
-        DAT_011b5be8 = 1.0f - FUN_00d571d0();
+        DAT_011b5be8 = 1.0f - minValueRoundedUpTo1();
     }
 
     _mm_store_ps(&unk20, _mm_load_ps(a));

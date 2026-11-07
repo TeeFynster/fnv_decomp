@@ -51,7 +51,8 @@ class BlendInterp
 };
 
 // @fnv 0x00a2feb0
-void NiMultiTargetTransformController::FUN_00a2feb0(unsigned short n)
+// src: XBOX_PDB 0x00a2feb0
+void NiMultiTargetTransformController::AllocateStorage(unsigned short n)
 {
     m_usNumInterps = n;
     if (n == 0)
@@ -95,7 +96,8 @@ struct FUN_00a409b0_class : public SNAEntry
 extern void(__stdcall* DAT_00fdf1c0)(void*);
 
 // @fnv 0x00a30160
-void NiMultiTargetTransformController::FUN_00a30160()
+// src: XBOX_PDB 0x00a30160
+void NiMultiTargetTransformController::ClearInterpolators()
 {
     if (m_usNumInterps == 0)
         return;

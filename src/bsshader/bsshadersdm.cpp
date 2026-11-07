@@ -30,18 +30,18 @@ void BSShaderInitializer::InitializeMultiBounds()
     }
 }
 
-void __stdcall FUN_00bc2660(float, float);
-void __stdcall FUN_00bc1cc0(float, float);
+void __stdcall BoltShaderProperty_ExtendBolt(float, float);
+void __stdcall BoltShaderProperty_CleanupBolt(float, float);
 // Calls FUN_00bc2660 with a and b when flag is false, otherwise calls FUN_00bc1cc0 with a and c.
 // @fnv 0x00bc28b0
 void __stdcall DispatchFloatPair(float afFirst, float afSecond, float afThird, bool abUseThird)
 {
     if (!abUseThird)
     {
-        FUN_00bc2660(afFirst, afSecond);
+        BoltShaderProperty_ExtendBolt(afFirst, afSecond);
         return;
     }
-    FUN_00bc1cc0(afFirst, afThird);
+    BoltShaderProperty_CleanupBolt(afFirst, afThird);
 }
 
 void __stdcall WriteToSettingArray(StrArr*);
@@ -52,7 +52,8 @@ struct GlobalObjectO2_00a7b610
 };
 extern GlobalObjectO2_00a7b610 g_01201f68;
 // @fnv 0x00bc28f0
-void __stdcall FUN_00bc28f0(StrArr* pStrArr)
+// src: XBOX_PDB 0x00bc28f0
+void __stdcall BoltShaderProperty_GetViewerStrings(StrArr* pStrArr)
 {
     WriteToSettingArray(pStrArr);
     char* pStr = _FUN_00a7d330(g_01201f68.f0);

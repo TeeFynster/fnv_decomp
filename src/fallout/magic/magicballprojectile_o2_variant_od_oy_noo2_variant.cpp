@@ -28,7 +28,7 @@ union __declspec(align(16)) xM128
 };
 struct xFilter
 {
-    unsigned int FUN_004a3a20();
+    unsigned int CFilter_GetGroup();
     unsigned int m_uiFilterValue;
 };
 struct xCell;
@@ -111,14 +111,14 @@ struct __declspec(align(16)) xCtlCinfo
 {
     xCtlCinfo(int);
     ~xCtlCinfo();
-    void FUN_00810550(float);
-    void FUN_00407860(float);
+    void bhkCharacterControllerCinfo_SetAcrobatics(float);
+    void bhkCharacterControllerCinfo_SetGravity(float);
     void SetWaterForm(void*);
-    void FUN_00810510(const xP3&);
+    void bhkCharacterControllerCinfo_SetPosition(const xP3&);
     void SetSound(xWorld*);
     void SetPointer(void*);
-    void FUN_00810530(bool);
-    void FUN_00810590(int, unsigned int);
+    void bhkCharacterControllerCinfo_SetAvoidBox(bool);
+    void bhkCharacterControllerCinfo_SetColFilter(int, unsigned int);
     void SetAssociatedActorValue(int);
     xM128 m_q[12];
 };
@@ -192,17 +192,17 @@ struct xCharCtl
     }
     static void operator delete(void*);
     xCharCtl(xCtlCinfo*, xActor*);
-    void FUN_008106b0(float);
-    void FUN_00810610(bool);
-    void FUN_008105e0(bool);
-    void FUN_00810640(xActor*);
-    void FUN_0057b1d0(float);
-    xWorld* FUN_00621ad0();
-    void FUN_00c70c90(xWorld*);
-    void* FUN_00810660();
-    void FUN_00c6d7a0(void*);
-    void FUN_005620e0(xP3*);
-    xFilter FUN_0070c440();
+    void bhkCharacterController_SetFallTime(float);
+    void bhkCharacterController_SetQuickSimulate(bool);
+    void bhkCharacterController_SetProjectile(bool);
+    void bhkCharacterController_SetMOBObject(xActor*);
+    void bhkCharacterController_SetWaterHeight(float);
+    xWorld* bhkCharacterController_GetWorld();
+    void bhkCharacterController_SetWorld(xWorld*);
+    void* bhkCharacterController_GetNiObject();
+    void bhkCharacterController_SetNiObject(void*);
+    void SetPosition_005620e0(xP3*);
+    xFilter bhkCharacterController_GetCollisionFilter();
     int m_auiShapeKeys[0x197];
 };
 
@@ -516,11 +516,12 @@ struct xActor
     xCharCtl* FUN_009306d0();
     xCell* FUN_008d6f30();
     xFilter FUN_00931ed0();
-    void FUN_008caea0(xActor* apOther, float afVal);
+    void ArrowProjectile_InitHavok(xActor* apOther, float afVal);
 };
 
 // @fnv 0x008caea0
-void xActor::FUN_008caea0(xActor* apOther, float afVal)
+// src: XBOX_PDB 0x008caea0
+void xActor::ArrowProjectile_InitHavok(xActor* apOther, float afVal)
 {
     if (!m_68 || m_68->FUN_0045cd60())
         return;
@@ -530,44 +531,44 @@ void xActor::FUN_008caea0(xActor* apOther, float afVal)
     if (!CTL)
     {
         xCtlCinfo CI(1);
-        CI.FUN_00810550(0.0f);
+        CI.bhkCharacterControllerCinfo_SetAcrobatics(0.0f);
         if (apOther)
-            CI.FUN_00407860(xFUN_00646660(afVal, 50.0f, apOther->m_a4.FUN_0066ef20(0xb)));
+            CI.bhkCharacterControllerCinfo_SetGravity(xFUN_00646660(afVal, 50.0f, apOther->m_a4.FUN_0066ef20(0xb)));
         CI.SetWaterForm(FUN_1d0());
-        CI.FUN_00810510(*FUN_1f4());
+        CI.bhkCharacterControllerCinfo_SetPosition(*FUN_1f4());
         CI.SetSound(WORLD);
         CI.SetPointer(new xShape(0.1f, true));
-        CI.FUN_00810530(false);
+        CI.bhkCharacterControllerCinfo_SetAvoidBox(false);
         if (apOther)
-            CI.FUN_00810590(6, apOther->FUN_00931ed0().FUN_004a3a20());
+            CI.bhkCharacterControllerCinfo_SetColFilter(6, apOther->FUN_00931ed0().CFilter_GetGroup());
         else
-            CI.FUN_00810590(6, xFUN_008cddb0());
+            CI.bhkCharacterControllerCinfo_SetColFilter(6, xFUN_008cddb0());
         CI.SetAssociatedActorValue(6);
         CTL = new xCharCtl(&CI, this);
-        CTL->FUN_008106b0(1.0f);
-        CTL->FUN_00810610(xFUN_00525420());
-        CTL->FUN_008105e0(true);
+        CTL->bhkCharacterController_SetFallTime(1.0f);
+        CTL->bhkCharacterController_SetQuickSimulate(xFUN_00525420());
+        CTL->bhkCharacterController_SetProjectile(true);
         m_68->FUN_290(CTL);
-        CTL->FUN_00810640(this);
+        CTL->bhkCharacterController_SetMOBObject(this);
     }
     if (CTL)
     {
         if (CELL && WORLD)
-            CTL->FUN_0057b1d0(xFUN_005471e0(CELL));
+            CTL->bhkCharacterController_SetWaterHeight(xFUN_005471e0(CELL));
         else
-            CTL->FUN_0057b1d0(xg_1015f5c);
-        xWorld* PREV = CTL->FUN_00621ad0();
-        CTL->FUN_00c70c90(WORLD);
+            CTL->bhkCharacterController_SetWaterHeight(xg_1015f5c);
+        xWorld* PREV = CTL->bhkCharacterController_GetWorld();
+        CTL->bhkCharacterController_SetWorld(WORLD);
         void* NODE = FUN_1d0();
-        void* CUR = CTL->FUN_00810660();
+        void* CUR = CTL->bhkCharacterController_GetNiObject();
         bool ADD = true;
         if (CUR != NODE)
         {
-            CTL->FUN_00c6d7a0(NODE);
+            CTL->bhkCharacterController_SetNiObject(NODE);
             if (WORLD && xFUN_004bae00(WORLD))
             {
                 CTL->FUN_d0(0);
-                xFUN_00b6b910(CTL->FUN_00810660(), 1);
+                xFUN_00b6b910(CTL->bhkCharacterController_GetNiObject(), 1);
             }
             xFUN_00c6a350(NODE, 4, true, false, true);
             ADD = true;
@@ -582,11 +583,11 @@ void xActor::FUN_008caea0(xActor* apOther, float afVal)
         }
         if (WORLD)
         {
-            CTL->FUN_005620e0(&POS);
+            CTL->SetPosition_005620e0(&POS);
             if (ADD)
             {
-                xFilter FILTER = CTL->FUN_0070c440();
-                unsigned int LAYER = FILTER.FUN_004a3a20();
+                xFilter FILTER = CTL->bhkCharacterController_GetCollisionFilter();
+                unsigned int LAYER = FILTER.CFilter_GetGroup();
                 WORLD->FUN_d0(NODE, 1, 0, LAYER, 0);
             }
             else

@@ -20,7 +20,7 @@ struct FUN_00d2dbe0
 {
     int unk00[3];
     Result* result;
-    Result* FUN_00c85750();
+    Result* hkMemoryRouter_getInstance();
     virtual void Virtual0();
     FUN_00d2dbe0(unsigned int flags);
 };
@@ -30,7 +30,7 @@ FUN_00d2dbe0::FUN_00d2dbe0(unsigned int flags)
 {
     if (flags & 1)
     {
-        Result* value = FUN_00c85750();
+        Result* value = hkMemoryRouter_getInstance();
         value->callback->Run(this, 8);
     }
 }
@@ -149,12 +149,13 @@ struct VecHolder
     hkVector4 m_10;
     VecDispatch* m_20;
 
-    void FUN_00da70e0(const VecArg& arg);
+    void hkpSymmetricAgentFlipCastCollector_addCdPoint(const VecArg& arg);
 };
 
 // Builds a packet with arg.m_00 + m_10 * arg.m_10's w and arg.m_10 negated, dispatches it via m_20, and copies m_20->m_04 to m_04.
 // @fnv 0x00da70e0
-void VecHolder::FUN_00da70e0(const VecArg& arg)
+// src: XBOX_PDB 0x00da70e0
+void VecHolder::hkpSymmetricAgentFlipCastCollector_addCdPoint(const VecArg& arg)
 {
     VecPacket p(arg.m_24, arg.m_20);
     hkVector4 w;

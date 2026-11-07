@@ -30,11 +30,11 @@ __forceinline const float& hkVector4::operator()(int index) const
 struct Object
 {
 };
-void __cdecl FUN_00cebdf0(float* source, float value, Object* destination);
-void __cdecl FUN_00cebe50(float* source, float scale, Object* destination);
+void __cdecl Hkpinertiatensorcomputer_CopyAndScalePropertyBlock(float* source, float value, Object* destination);
+void __cdecl hkpInertiaTensorComputer_setAndScaleToDensity(float* source, float scale, Object* destination);
 struct Receiver
 {
-    void FUN_00cecc90(float value);
+    void SetScalarAndRescaleVector(float value);
 };
 struct State
 {
@@ -42,7 +42,7 @@ struct State
     int count;
     int context;
 };
-void FUN_00cebbb0(void* state, float zero, void* receiver);
+void hkpInertiaTensorComputer_computeConvexHullMassProperties(void* state, float zero, void* receiver);
 int __cdecl ApplyLimitToReceiver(int owner, int context, int count, float limit, Receiver* receiver, float value);
 struct FUN_00cebe80_Struct
 {
@@ -50,7 +50,7 @@ struct FUN_00cebe80_Struct
     float unk04;
     float unk08;
 };
-void __cdecl FUN_00cebe80(FUN_00cebe80_Struct* pThis, float fParam2, float* pOut);
+void __cdecl hkpInertiaTensorComputer_shiftInertiaToCom(FUN_00cebe80_Struct* pThis, float fParam2, float* pOut);
 void __cdecl AddInertiaTensor(float* param_1, float param_2, float* param_3);
 struct FUN_00cec6b0_cls
 {
@@ -90,7 +90,7 @@ struct FUN_00cec6b0_cls
     float m_84;
     float m_88;
 
-    void FUN_00cec6b0(float a1, float b, float* p, float* M);
+    void InternalInertiaTensorComputer_computeInertialTensorInternal(float a1, float b, float* p, float* M);
 };
 struct CECCD0Value
 {
@@ -141,7 +141,7 @@ static inline float S_MaxLT(float x, float y)
 {
     return (x < y) ? y : x;
 }
-void __cdecl FUN_00ced230(float d, S_00ced230_T* p);
+void __cdecl hkpInertiaTensorComputer_clipInertia(float d, S_00ced230_T* p);
 struct S_00cee1c0_Heap
 {
     virtual void v00();
@@ -165,8 +165,8 @@ struct S_00cee1c0_Arr
     unsigned int m_cap;
     unsigned int* m_pTrailingData;
 };
-S_00cee1c0_Router* FUN_00c85750();
-float __cdecl FUN_00cedec0(S_00cee1c0_Arr* arr, int unk, float value);
+S_00cee1c0_Router* hkMemoryRouter_getInstance();
+float __cdecl hkInertiaTensorComputer_optimizeInertiasOfConstraintTreeInt(S_00cee1c0_Arr* arr, int unk, float value);
 void __cdecl ProcessArrayWithValue(unsigned int* source, int count, int unk, float value);
 namespace fnv_anon_00cec3d0 {}
 using namespace fnv_anon_00cec3d0;
@@ -187,7 +187,7 @@ struct S00cec3d0_Base
     float m_fComponent5;
     float m_fComponent6;
 
-    __declspec(noinline) void FUN_00cec000(const float* v);
+    __declspec(noinline) void InternalInertiaTensorComputer_compProjectionIntegrals(const float* v);
 };
 }
 struct S00cec3d0_Face : S00cec3d0_Base
@@ -204,7 +204,7 @@ struct S00cec3d0_Face : S00cec3d0_Base
     float m_fVertex2X;
     float m_fVertex2Y;
     float m_fVertex2Z;
-    void FUN_00cec3d0(const float* verts, const float* n);
+    void InternalInertiaTensorComputer_compFaceIntegrals(const float* verts, const float* n);
 };
 static inline float S00cec3d0_Sqr(float x)
 {
@@ -214,7 +214,8 @@ static inline float S00cec3d0_Cube(float x)
 {
     return x * x * x;
 }
-void S00cec3d0_Base::FUN_00cec000(const float* v)
+// src: HAVOK_LIB 0x00cec000
+void S00cec3d0_Base::InternalInertiaTensorComputer_compProjectionIntegrals(const float* v)
 {
     P1 = v[A] * v[B];
     Pa = v[A];
@@ -224,7 +225,7 @@ struct Matrix
     hkVector4 c0, c1, c2;
 };
 extern const hkVector4 DAT_01017d10;
-void FUN_00d5ac50(char*, Matrix*, hkVector4*, hkVector4*, hkVector4*);
+void HkgeometryutilityGsEhscNogsNoehsc_ComputeValues_00d5ac50(char*, Matrix*, hkVector4*, hkVector4*, hkVector4*);
 struct Shape
 {
     virtual void v0();
@@ -236,13 +237,13 @@ struct Shape
     virtual void v6();
     virtual void getAabb(const Transform*, float, hkAabb*);
 };
-void FUN_00cedae0(Shape* shape, const Matrix* input, hkVector4* outA, hkVector4* outB);
+void Object_GetAABBExtentAxes(Shape* shape, const Matrix* input, hkVector4* outA, hkVector4* outB);
 extern const float DAT_01011d78;
 extern const double DAT_010240b0;
 struct CE50Matrix
 {
     hkVector4 row0, row1, row2;
-    void FUN_00c6cd00(const CE50Matrix* source);
+    void CopyThreeVectors(const CE50Matrix* source);
     void Subtract(const CE50Matrix* source);
 };
 struct CE50Body
@@ -258,7 +259,8 @@ struct CE50Body
         _mm_store_ps(&inertia.row2.x, _mm_setzero_ps());
     }
 };
-__declspec(noinline) void __cdecl FUN_00cebaf0(const float* radii, float mass, CE50Body* result)
+// src: XBOX_PDB 0x00cebaf0
+__declspec(noinline) void __cdecl hkpInertiaTensorComputer_computeBoxVolumeMassProperties(const float* radii, float mass, CE50Body* result)
 {
     _mm_store_ps(&result->center.x, _mm_setzero_ps());
     result->mass = mass;
@@ -268,7 +270,8 @@ __declspec(noinline) void __cdecl FUN_00cebaf0(const float* radii, float mass, C
     result->inertia.row1.y = scale * (radii[0] * radii[0] + radii[2] * radii[2]);
     result->inertia.row2.z = scale * (radii[0] * radii[0] + radii[1] * radii[1]);
 }
-static __declspec(noinline) void FUN_00cebfd0(CE50Body* body, float scale)
+// src: XBOX_PDB 0x00cebfd0
+static __declspec(noinline) void hkMatrix3_mul(CE50Body* body, float scale)
 {
     body->mass *= scale;
     body->inertia.row0.x *= scale;
@@ -281,12 +284,13 @@ static __declspec(noinline) void FUN_00cebfd0(CE50Body* body, float scale)
     body->inertia.row2.y *= scale;
     body->inertia.row2.z *= scale;
 }
-int __cdecl FUN_00cece50(float* src, float mass, float thickness, CE50Body* out, ...);
+int __cdecl hkVector4_UpdateState_00cece50(float* src, float mass, float thickness, CE50Body* out, ...);
 extern const float DAT_0104da48;
 extern const float DAT_01016248;
 extern const __m128 DAT_010c44d0;
 extern const __m128 DAT_010ec7f0;
-__declspec(noinline) void __cdecl FUN_00cec7f0(int first, int count, float* b, float* a)
+// src: GUESS 0x00cec7f0 (confidence: high)
+__declspec(noinline) void __cdecl Hkpinertiatensorcomputer_ComputePointsAabbCenterAndExtent(int first, int count, float* b, float* a)
 {
     _mm_store_ps(b, _mm_setzero_ps());
     _mm_store_ps(a, _mm_setzero_ps());
@@ -305,7 +309,7 @@ __declspec(noinline) void __cdecl FUN_00cec7f0(int first, int count, float* b, f
         _mm_store_ps(a, _mm_sub_ps(hi, lo));
     }
 }
-__int64 __cdecl FUN_00cebaf0(float* source, float value, void* dest);
+__int64 __cdecl hkpInertiaTensorComputer_computeBoxVolumeMassProperties(float* source, float value, void* dest);
 // distinct from Pair: exe 0x00ced8e0 passes this 16-byte-aligned floating output prefix to 0x00cebaf0; shared Pair holds two integers.
 __declspec(align(16)) struct InertiaOutputPrefix
 {
@@ -361,8 +365,8 @@ __declspec(align(16)) struct Solver
     float unk60;
     float unk64;
     float unk68, unk6c, unk70, unk74, unk78, unk7c, unk80, unk84, unk88;
-    void __thiscall FUN_00ced390(State* self, float* a);
-    void __thiscall FUN_00cec6b0(float value, float ratio, float* vec, float* mat);
+    void __thiscall ProcessEntries_00ced390(State* self, float* a);
+    void __thiscall InternalInertiaTensorComputer_computeInertialTensorInternal(float value, float ratio, float* vec, float* mat);
 };
 __declspec(align(16)) struct Work
 {
@@ -381,7 +385,8 @@ struct OutBlock
     float m10, m11, m12, m13;
     float m20, m21, m22, m23;
 };
-__declspec(noinline) __int64 __cdecl FUN_00cebaf0(float* source, float value, void* dest)
+// src: XBOX_PDB 0x00cebaf0
+__declspec(noinline) __int64 __cdecl hkpInertiaTensorComputer_computeBoxVolumeMassProperties(float* source, float value, void* dest)
 {
     if (value <= 0.0f)
         return 1;
@@ -400,7 +405,8 @@ __declspec(noinline) __int64 __cdecl FUN_00cebaf0(float* source, float value, vo
     result->unk04 = value;
     return 0;
 }
-__declspec(noinline) void Solver::FUN_00cec6b0(float value, float ratio, float* vec, float* mat)
+// src: HAVOK_LIB 0x00cec6b0
+__declspec(noinline) void Solver::InternalInertiaTensorComputer_computeInertialTensorInternal(float value, float ratio, float* vec, float* mat)
 {
     vec[0] = unk68 / unk64;
     vec[1] = unk6c / unk64;
@@ -430,7 +436,8 @@ struct MeshInput
     MeshTriangle* triangles;
     int triangleCount;
 };
-__declspec(noinline) void Solver::FUN_00ced390(State* self, float* shift)
+// src: GUESS 0x00ced390 (confidence: low)
+__declspec(noinline) void Solver::ProcessEntries_00ced390(State* self, float* shift)
 {
     MeshInput* mesh = (MeshInput*)self;
     unk64 = unk68 = unk6c = unk70 = unk74 = unk78 = unk7c = unk80 = unk84 = unk88 = 0.0f;
@@ -476,7 +483,7 @@ inline float MaxVal(float a, float b)
 {
     return a > b ? a : b;
 }
-int __cdecl FUN_00ced8e0(State* self, float value, OutBlock* out);
+int __cdecl Object_ProcessEntries_00ced8e0(State* self, float value, OutBlock* out);
 struct S00cf0690_Mass
 {
     float volume;
@@ -488,9 +495,10 @@ struct S00cf0690_Xf
 {
     hkVector4 row0, row1, row2, translation;
 };
-void __cdecl FUN_00ceff00(void*, const S00cf0690_Xf*, float, S00cf0690_Mass*);
+void __cdecl computeRecursiveShapeVolumeMassProperties(void*, const S00cf0690_Xf*, float, S00cf0690_Mass*);
 extern const float DAT_01013ea4;
-static __declspec(noinline) void FUN_00cebfd0(S00cf0690_Mass* p, float density)
+// src: XBOX_PDB 0x00cebfd0
+static __declspec(noinline) void hkMatrix3_mul(S00cf0690_Mass* p, float density)
 {
     float newMass = density * p->volume;
     float k = newMass / p->mass;
@@ -500,7 +508,7 @@ static __declspec(noinline) void FUN_00cebfd0(S00cf0690_Mass* p, float density)
     *(__m128*)&p->row1 = _mm_mul_ps(*(__m128*)&p->row1, f);
     *(__m128*)&p->row2 = _mm_mul_ps(*(__m128*)&p->row2, f);
 }
-void __cdecl FUN_00cf0690(void* shape, float mass, S00cf0690_Mass* result);
+void __cdecl hkpInertiaTensorComputer_computeShapeVolumeMassProperties(void* shape, float mass, S00cf0690_Mass* result);
 
 #include <math.h>
 struct Triangle159
@@ -524,11 +532,12 @@ struct Integrals159
     float first[3];
     float second[3];
     float products[3];
-    void FUN_00cec000(const hkVector4* triangle);
-    void FUN_00cec3d0(const hkVector4* triangle, const hkVector4* normal);
-    void FUN_00ced390(Mesh159* mesh, const hkVector4* offset);
+    void InternalInertiaTensorComputer_compProjectionIntegrals(const hkVector4* triangle);
+    void InternalInertiaTensorComputer_compFaceIntegrals(const hkVector4* triangle, const hkVector4* normal);
+    void ProcessEntries_00ced390(Mesh159* mesh, const hkVector4* offset);
 };
-__declspec(noinline) void Integrals159::FUN_00cec000(const hkVector4* triangle)
+// src: HAVOK_LIB 0x00cec000
+__declspec(noinline) void Integrals159::InternalInertiaTensorComputer_compProjectionIntegrals(const hkVector4* triangle)
 {
     P1 = Pa = Pb = m_fComponent0 = m_fComponent1 = m_fComponent2 = m_fComponent3 = m_fComponent4 = m_fComponent5 =
         m_fComponent6 = 0.0f;
@@ -572,9 +581,10 @@ __declspec(noinline) void Integrals159::FUN_00cec000(const hkVector4* triangle)
     m_fComponent4 /= 60.0f;
     m_fComponent5 /= -60.0f;
 }
-__declspec(noinline) void Integrals159::FUN_00cec3d0(const hkVector4* triangle, const hkVector4* normal)
+// src: HAVOK_LIB 0x00cec3d0
+__declspec(noinline) void Integrals159::InternalInertiaTensorComputer_compFaceIntegrals(const hkVector4* triangle, const hkVector4* normal)
 {
-    FUN_00cec000(triangle);
+    InternalInertiaTensorComputer_compProjectionIntegrals(triangle);
     float w = -normal->x * triangle[0].x - normal->y * triangle[0].y - normal->z * triangle[0].z;
     float na = (*normal)(axisA), nb = (*normal)(axisB);
     float k1 = 1.0f / (*normal)(axisC), k2 = k1 * k1, k3 = k2 * k1, k4 = k3 * k1;
@@ -597,7 +607,8 @@ __declspec(noinline) void Integrals159::FUN_00cec3d0(const hkVector4* triangle, 
                      w * (2 * (na * m_fComponent0 + nb * m_fComponent1) + w * Pa));
 }
 // @fnv 0x00ced390
-void Integrals159::FUN_00ced390(Mesh159* mesh, const hkVector4* offset)
+// src: GUESS 0x00ced390 (confidence: low)
+void Integrals159::ProcessEntries_00ced390(Mesh159* mesh, const hkVector4* offset)
 {
     int triangleCount = mesh->count;
     volume = first[0] = first[1] = first[2] = second[0] = second[1] = second[2] = products[0] = products[1] =
@@ -635,7 +646,7 @@ void Integrals159::FUN_00ced390(Mesh159* mesh, const hkVector4* offset)
                     axisC = (ny > nz) ? 1 : 2;
                 axisA = (axisC + 1) % 3;
                 axisB = (axisA + 1) % 3;
-                FUN_00cec3d0(points, &normal);
+                InternalInertiaTensorComputer_compFaceIntegrals(points, &normal);
                 int a = axisA;
                 float projected = (a == 0) ? face[0] : ((axisB == 0) ? face[1] : face[2]);
                 volume += static_cast<volatile float&>(normal.x) * projected;

@@ -16,17 +16,19 @@ struct B1
 
 struct FUN_0056d6c0_class : B1
 {
-    void FUN_0056d6c0();
+    void DestroyFields_0056d6c0();
 };
 
 // @fnv 0x0056d6c0
-void FUN_0056d6c0_class::FUN_0056d6c0()
+// src: GUESS 0x0056d6c0 (confidence: medium)
+void FUN_0056d6c0_class::DestroyFields_0056d6c0()
 {
     B1::~B1();
 }
 
 // @fnv 0x00624e70
-int hkFileSystem::FUN_00624e70(const char*, void*)
+// src: COMMUNITY 0x00624e70
+int hkFileSystem::return_1_0(const char*, void*)
 {
     return 1;
 }
@@ -36,14 +38,16 @@ struct FUN_006264d0
     void __thiscall FUN_006264d1();
 };
 // @fnv 0x00625650
-void __thiscall HavokError::FUN_00625650()
+// src: XBOX_PDB 0x00625650
+void __thiscall HavokError::enableAll_00625650()
 {
     ((FUN_006264d0*)((char*)this + 0x14))->FUN_006264d1();
 }
 
 extern "C" void __cdecl _FNV_Warning(int, const char*);
 // @fnv 0x00625a80
-void HavokError::FUN_00625a80(const char* pcMessage)
+// src: XBOX_PDB 0x00625a80
+void HavokError::showString(const char* pcMessage)
 {
     MessageHandler::Handler();
     _FNV_Warning(4, pcMessage);
@@ -52,11 +56,12 @@ void HavokError::FUN_00625a80(const char* pcMessage)
 struct FUN_00625bd0_class
 {
     void FUN_006264f0();
-    void FUN_00625bd0();
+    void ForwardCall_00625bd0();
 };
 
 // @fnv 0x00625bd0
-void FUN_00625bd0_class::FUN_00625bd0()
+// src: GUESS 0x00625bd0 (confidence: low)
+void FUN_00625bd0_class::ForwardCall_00625bd0()
 {
     FUN_006264f0();
 }
@@ -64,7 +69,7 @@ void FUN_00625bd0_class::FUN_00625bd0()
 extern int DAT_0104dfb4;
 struct FUN_00538ef0_class
 {
-    void* FUN_00538ef0();
+    void* UpdateState_00538ef0();
 };
 struct FUN_00625fc0_class : FUN_00538ef0_class
 {
@@ -74,7 +79,7 @@ struct FUN_00625fc0_class : FUN_00538ef0_class
 // @fnv 0x00625fc0
 FUN_00625fc0_class::FUN_00625fc0_class()
 {
-    FUN_00538ef0();
+    UpdateState_00538ef0();
     vtbl = (void*)&DAT_0104dfb4;
 }
 
@@ -82,13 +87,14 @@ namespace fnv_00625fe0 {
 extern int DAT_0104dfe8;
 struct FUN_00538ef0_class
 {
-    void* FUN_00538ef0();
-    void* FUN_00625fe0();
+    void* UpdateState_00538ef0();
+    void* InitializeFields_00625fe0();
 };
 // @fnv 0x00625fe0
-void* FUN_00538ef0_class::FUN_00625fe0()
+// src: GUESS 0x00625fe0 (confidence: low)
+void* FUN_00538ef0_class::InitializeFields_00625fe0()
 {
-    FUN_00538ef0();
+    UpdateState_00538ef0();
     *(int**)this = &DAT_0104dfe8;
     return this;
 }
@@ -103,12 +109,13 @@ struct FUN_00626000_Class
     unsigned char pad[3];
     unsigned char flag;
     void FUN_00625fc0();
-    FUN_00626000_Class* FUN_00626000(int);
+    FUN_00626000_Class* ProcessAndReturnValue_00626000(int);
 };
 
 // Calls FUN_00625fc0, sets pStr to "0`b", writes 1 at offset 0xc, and returns this.
 // @fnv 0x00626000
-FUN_00626000_Class* FUN_00626000_Class::FUN_00626000(int)
+// src: GUESS 0x00626000 (confidence: low)
+FUN_00626000_Class* FUN_00626000_Class::ProcessAndReturnValue_00626000(int)
 {
     FUN_00625fc0();
     pStr = "0`b";
@@ -144,43 +151,45 @@ struct FUN_00626320
 // @fnv 0x00626320
 void FUN_00626320::Method(const void* data, unsigned int size)
 {
-    file->FUN_00473180(data, size);
+    file->NiBinaryStream_Write(data, size);
 }
 
-extern "C" BSAudio* __cdecl FUN_00c85750();
-void __cdecl FUN_00c856c0(void* a, void* b);
+extern "C" BSAudio* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkMemoryRouter_easyFree(void* a, void* b);
 // @fnv 0x00626760
-void __cdecl FUN_00626760(void* a)
+// src: GUESS 0x00626760 (confidence: low)
+void __cdecl Object_UpdateFields_00626760(void* a)
 {
-    BSAudio* p = FUN_00c85750();
-    FUN_00c856c0(p->GetAudioBackendData(), a);
+    BSAudio* p = hkMemoryRouter_getInstance();
+    hkMemoryRouter_easyFree(p->GetAudioBackendData(), a);
 }
 
 struct FUN_006264b0_Class
 {
-    void FUN_006264b0(int);
+    void hkPointerMap_int_int_hkContainerHeapAllocator_remove(int);
 };
 struct FUN_00626470_Class
 {
-    void FUN_00626470(int, int);
+    void hkPointerMap_int_int_hkContainerHeapAllocator_insert(int, int);
 };
 // HavokError: shared header lacks the SetErrorCodeEnabled override used here.
 struct FUN_006255d0_class
 {
     char pad[0x14];
-    void FUN_006255d0(int a, int b);
+    void HavokError_setEnabled(int a, int b);
 };
 // Converts the hkBool stored in b; if true forwards a to FUN_006264b0 at this+0x14, otherwise calls FUN_00626470 with a and 1.
 // @fnv 0x006255d0
-void FUN_006255d0_class::FUN_006255d0(int a, int b)
+// src: XBOX_PDB 0x006255d0
+void FUN_006255d0_class::HavokError_setEnabled(int a, int b)
 {
     if (reinterpret_cast<const hkBool*>(&b)->operator bool())
-        ((FUN_006264b0_Class*)((char*)this + 0x14))->FUN_006264b0(a);
+        ((FUN_006264b0_Class*)((char*)this + 0x14))->hkPointerMap_int_int_hkContainerHeapAllocator_remove(a);
     else
-        ((FUN_00626470_Class*)((char*)this + 0x14))->FUN_00626470(a, 1);
+        ((FUN_00626470_Class*)((char*)this + 0x14))->hkPointerMap_int_int_hkContainerHeapAllocator_insert(a, 1);
 }
 
-void __cdecl FUN_00538eb0(void*);
+void __cdecl Tesland_UpdateState_00538eb0(void*);
 struct FUN_00625f80_class : FUN_0056d6c0_class
 {
     FUN_00625f80_class* FUN_00625f80(unsigned int flags);
@@ -188,13 +197,13 @@ struct FUN_00625f80_class : FUN_0056d6c0_class
 // @fnv 0x00625f80
 FUN_00625f80_class* FUN_00625f80_class::FUN_00625f80(unsigned int flags)
 {
-    FUN_0056d6c0();
+    DestroyFields_0056d6c0();
     if (flags & 1)
-        FUN_00538eb0(this);
+        Tesland_UpdateState_00538eb0(this);
     return this;
 }
 
-void __cdecl FUN_00538eb0(void*);
+void __cdecl Tesland_UpdateState_00538eb0(void*);
 struct FUN_00626030_class
 {
     void __thiscall FUN_00626060();
@@ -206,11 +215,11 @@ void* __thiscall FUN_00626030_class::FUN_00626030(unsigned int flags)
 {
     FUN_00626060();
     if (flags & 1)
-        FUN_00538eb0(this);
+        Tesland_UpdateState_00538eb0(this);
     return this;
 }
 
-void __cdecl FUN_00538eb0(void*);
+void __cdecl Tesland_UpdateState_00538eb0(void*);
 struct FUN_00626250_class
 {
     void __thiscall FUN_00626280();
@@ -222,30 +231,31 @@ void* __thiscall FUN_00626250_class::FUN_00626250(unsigned int flags)
 {
     FUN_00626280();
     if (flags & 1)
-        FUN_00538eb0(this);
+        Tesland_UpdateState_00538eb0(this);
     return this;
 }
 
-int __fastcall FUN_004720a0(char*);
+int __fastcall BSFile_Tell(char*);
 
 struct FUN_00626390_class
 {
     void* pad0;
     void* pad1;
     BSFile* pFile;
-    int FUN_00626390();
+    int HavokFileStreambufReader_tell();
 };
 
 // Returns the result of FUN_004720a0 on pFile, or 0 when pFile is null.
 // @fnv 0x00626390
-int FUN_00626390_class::FUN_00626390()
+// src: COMMUNITY 0x00626390
+int FUN_00626390_class::HavokFileStreambufReader_tell()
 {
-    return pFile ? FUN_004720a0(reinterpret_cast<char*>(pFile)) : 0;
+    return pFile ? BSFile_Tell(reinterpret_cast<char*>(pFile)) : 0;
 }
 
 int __cdecl strcat_s(char*, unsigned int, const char*);
 int __cdecl FUN_00462d40(const char*, int, int, int, int, char*, int, char*, int);
-char* __cdecl FUN_00cb1410(const char*);
+char* __cdecl hkString_strDup_00cb1410(const char*);
 struct FUN_00626420_shell
 {
     char* p;
@@ -253,19 +263,20 @@ struct FUN_00626420_shell
 };
 struct ErrorFileList
 {
-    char* __thiscall FUN_00626420(FUN_00626420_shell*);
+    char* __thiscall UpdateFields_00626420(FUN_00626420_shell*);
 };
 // @fnv 0x00625e70
-void HavokError::FUN_00625e70(const char* apFile, int aiLine)
+// src: XBOX_PDB 0x00625e70
+void HavokError::disableReport(const char* apFile, int aiLine)
 {
     char pfile[128];
     char pext[32];
     FUN_00626420_shell ap;
     FUN_00462d40(apFile, 0, 0, 0, 0, pfile, 128, pext, 32);
     strcat_s(pfile, 128, pext);
-    ap.p = FUN_00cb1410(pfile);
+    ap.p = hkString_strDup_00cb1410(pfile);
     ap.aiLine = aiLine;
-    ((ErrorFileList*)((char*)this + 8))->FUN_00626420(&ap);
+    ((ErrorFileList*)((char*)this + 8))->UpdateFields_00626420(&ap);
 }
 
 struct $SG2686
@@ -330,31 +341,31 @@ void* __thiscall FUN_00625b40_class::FUN_00625b10(unsigned int flags)
 {
     this->FUN_00625b40_class::~FUN_00625b40_class();
     if (flags & 1)
-        FUN_00538eb0(this);
+        Tesland_UpdateState_00538eb0(this);
     return this;
 }
 
 struct CalleeObj
 {
-    void FUN_00622570(bool);
+    void UpdateState_00622570(bool);
 };
 struct FUN_00626160
 {
     void* pad0;
     void* pad1;
     void* pFile;
-    bool FUN_008905f0();
+    bool TESAnimGroup_GetDecal();
     CalleeObj* Method(CalleeObj*);
 };
 // Calls FUN_00622570 on o with the result of FUN_008905f0 on pFile, or false when pFile is null, and returns o.
 // @fnv 0x00626160
 CalleeObj* FUN_00626160::Method(CalleeObj* apCallee)
 {
-    apCallee->FUN_00622570(pFile ? ((FUN_00626160*)pFile)->FUN_008905f0() : false);
+    apCallee->UpdateState_00622570(pFile ? ((FUN_00626160*)pFile)->TESAnimGroup_GetDecal() : false);
     return apCallee;
 }
 
-extern "C" void* __cdecl FUN_0056d280(unsigned int size);
+extern "C" void* __cdecl Object_AllocateStorage_0056d280(unsigned int size);
 
 struct FUN_00626000
 {
@@ -366,18 +377,19 @@ struct FUN_00626000
     FUN_00626000(int index);
     static __forceinline void* operator new(unsigned int size)
     {
-        return FUN_0056d280(size);
+        return Object_AllocateStorage_0056d280(size);
     }
 };
 
 struct FUN_00624e90_Class
 {
-    FUN_00626000* FUN_00624e90(int index);
+    FUN_00626000* HavokStreambufFactory_openReader(int index);
 };
 
 // Allocates and constructs a FUN_00626000 object with the given index, returning the new object.
 // @fnv 0x00624e90
-FUN_00626000* FUN_00624e90_Class::FUN_00624e90(int index)
+// src: XBOX_PDB 0x00624e90
+FUN_00626000* FUN_00624e90_Class::HavokStreambufFactory_openReader(int index)
 {
     return new FUN_00626000(index);
 }
@@ -411,12 +423,13 @@ class FUN_00625f10_cls : public B625F10Base, public B625F10List
 FUN_00625f10_cls::FUN_00625f10_cls()
 {}
 
-extern void __cdecl FUN_00c66670();
+extern void __cdecl bhkWorld_QuitSystem();
 
 // @fnv 0x00625fb0
-void __cdecl FUN_00625fb0()
+// src: COMMUNITY 0x00625fb0
+void __cdecl HavokSystem_Kill()
 {
-    FUN_00c66670();
+    bhkWorld_QuitSystem();
 }
 
 struct FUN_00626120_obj
@@ -723,7 +736,7 @@ FUN_00624f90::FUN_00624f90()
 
 struct FUN_00626490_Class
 {
-    int FUN_00626490(int a, int b);
+    int hkPointerMap_int_int_hkContainerHeapAllocator_getWithDefault(int a, int b);
 };
 
 // HavokError: shared header lacks the isEnabled override used here.
@@ -731,14 +744,15 @@ struct FUN_00625610_Class
 {
     char unk00[0x14];
     FUN_00626490_Class m_sub;
-    CalleeObj* FUN_00625610(CalleeObj* obj, int b);
+    CalleeObj* HavokError_isEnabled(CalleeObj* obj, int b);
 };
 
 // Calls FUN_00626490(b, 0) on m_sub, passes whether the result equals 0 to obj->FUN_00622570, and returns obj.
 // @fnv 0x00625610
-CalleeObj* FUN_00625610_Class::FUN_00625610(CalleeObj* obj, int b)
+// src: XBOX_PDB 0x00625610
+CalleeObj* FUN_00625610_Class::HavokError_isEnabled(CalleeObj* obj, int b)
 {
-    obj->FUN_00622570(m_sub.FUN_00626490(b, 0) == 0);
+    obj->UpdateState_00622570(m_sub.hkPointerMap_int_int_hkContainerHeapAllocator_getWithDefault(b, 0) == 0);
     return obj;
 }
 
@@ -760,7 +774,7 @@ struct ErrorHandler6256
     virtual void ShowError(const char* pcType, int aiSoundId, const char* pcMessage, const char* pcFile, int iLine);
     virtual void ShowWarning(const char* pcType, int aiSoundId, const char* pcMessage, const char* pcFile, int iLine);
     virtual void ShowReport(const char* pcType, int aiSoundId, const char* pcMessage, const char* pcFile, int iLine);
-    bool FUN_00625c50(const char* pcFile, int iLine);
+    bool HavokError_isReportEnabled(const char* pcFile, int iLine);
     int ReportMessage(int iType, int aiSoundId, const char* pcMessage, const char* pcFile, int iLine);
 };
 
@@ -769,7 +783,7 @@ int ErrorHandler6256::ReportMessage(int iType, int iMessageId, const char* pcMes
 {
     if (iMessageId == -1)
     {
-        if (!FUN_00625c50(pcFile, iLine))
+        if (!HavokError_isReportEnabled(pcFile, iLine))
             return 0;
     }
     else if (!IsEnabled(iMessageId).operator bool())
@@ -805,7 +819,7 @@ struct LogStub6257
     virtual int __cdecl Report(const char* pcFile, int iLine, const char* pcMessage);
 };
 
-LogStub6257* __cdecl FUN_0043bd00();
+LogStub6257* __cdecl BSCoreMessage_GetInstance();
 
 struct FUN_00622570
 {
@@ -824,12 +838,13 @@ struct ErrorHandler6257
     virtual void Raise(int aiSoundId, FUN_00622570 kResult);
     char m_acPad4[0x1c];
     char m_acSdkPath[0x104];
-    void FUN_00625790(const char* pcPrefix, int aiSoundId, const char* pcMessage, const char* pcFile, int iLine);
+    void HavokError_assertMessage(const char* pcPrefix, int aiSoundId, const char* pcMessage, const char* pcFile, int iLine);
 };
 
 // Builds a prefix/message string, resolves the report file path against m_acSdkPath, reports it with the line number, and raises on result 5.
 // @fnv 0x00625790
-void ErrorHandler6257::FUN_00625790(const char* pcPrefix, int aiSoundId, const char* pcMessage, const char* pcFile,
+// src: XBOX_PDB 0x00625790
+void ErrorHandler6257::HavokError_assertMessage(const char* pcPrefix, int aiSoundId, const char* pcMessage, const char* pcFile,
                                     int iLine)
 {
     char acMsg[0x400];
@@ -869,20 +884,21 @@ void ErrorHandler6257::FUN_00625790(const char* pcPrefix, int aiSoundId, const c
         pcReportFile = pcFile;
         iLineNo = iLine;
     }
-    if (FUN_0043bd00()->Report(pcReportFile, iLineNo, acMsg) == 5)
+    if (BSCoreMessage_GetInstance()->Report(pcReportFile, iLineNo, acMsg) == 5)
         Raise(aiSoundId, FUN_00622570(false));
 }
 
-const char* __cdecl FUN_00cb1150(const char*, int);
+const char* __cdecl hkString_strRchr(const char*, int);
 
 
 // @fnv 0x00625aa0
-const char* HavokError::FUN_00625aa0(const char* apPath)
+// src: XBOX_PDB 0x00625aa0
+const char* HavokError::hkGetFileBaseName(const char* apPath)
 {
     const char* pSeparators = "/\\";
     for (int iIndex = 0; iIndex < 2; ++iIndex)
     {
-        const char* pSeparatorPos = FUN_00cb1150(apPath, pSeparators[iIndex]);
+        const char* pSeparatorPos = hkString_strRchr(apPath, pSeparators[iIndex]);
         if (!pSeparatorPos)
             apPath = pSeparatorPos;
         else
@@ -899,21 +915,22 @@ struct FUN_00625bf0_Item
 struct FUN_00625bf0_Container
 {
     int FUN_00726070();
-    FUN_00625bf0_Item* FUN_00626660(int index);
+    FUN_00625bf0_Item* ComputeValue_00626660(int index);
 };
-void __cdecl FUN_00626760(void* object);
+void __cdecl Object_UpdateFields_00626760(void* object);
 struct FUN_00625bf0_Class
 {
-    void FUN_00625bf0(FUN_00625bf0_Container* container);
+    void ProcessEntries_00625bf0(FUN_00625bf0_Container* container);
 };
 // Iterates the container's items and calls FUN_00626760 on each item's unk00 pointer.
 // @fnv 0x00625bf0
-void FUN_00625bf0_Class::FUN_00625bf0(FUN_00625bf0_Container* container)
+// src: GUESS 0x00625bf0 (confidence: low)
+void FUN_00625bf0_Class::ProcessEntries_00625bf0(FUN_00625bf0_Container* container)
 {
     for (int index = 0; index < container->FUN_00726070(); ++index)
     {
-        FUN_00625bf0_Item item = *container->FUN_00626660(index);
-        FUN_00626760(item.unk00);
+        FUN_00625bf0_Item item = *container->ComputeValue_00626660(index);
+        Object_UpdateFields_00626760(item.unk00);
     }
 }
 
@@ -928,7 +945,7 @@ struct FileEntry625c
 struct FileList625c
 {
     int FUN_00726070();
-    FileEntry625c* FUN_00626660(int iIndex);
+    FileEntry625c* ComputeValue_00626660(int iIndex);
 };
 
 // HavokError: shared header lacks FUN_00625c50 and the file-list member.
@@ -938,12 +955,13 @@ struct FileFilter625c
     int unk04;
     FileList625c m_kList;
 
-    bool FUN_00625c50(const char* pcPath, int iValue);
+    bool HavokError_isReportEnabled(const char* pcPath, int iValue);
 };
 
 // Builds a name-plus-extension string from pcPath, then returns false if any list entry matches it and has the same iValue; otherwise returns true.
 // @fnv 0x00625c50
-bool FileFilter625c::FUN_00625c50(const char* pcPath, int iValue)
+// src: XBOX_PDB 0x00625c50
+bool FileFilter625c::HavokError_isReportEnabled(const char* pcPath, int iValue)
 {
     if (m_kList.FUN_00726070())
     {
@@ -953,7 +971,7 @@ bool FileFilter625c::FUN_00625c50(const char* pcPath, int iValue)
         strcat_s(acName, 0x80, acExtBuf);
         for (int i3 = 0; i3 < m_kList.FUN_00726070(); i3++)
         {
-            FileEntry625c kEntry = *m_kList.FUN_00626660(i3);
+            FileEntry625c kEntry = *m_kList.ComputeValue_00626660(i3);
             if (!CompareStringsCaseInsensitive(acName, kEntry.m_pcName) && iValue == kEntry.m_iValue)
                 return false;
         }
@@ -971,7 +989,7 @@ struct FileEntry625c
 struct FileList625c
 {
     int FUN_00726070();
-    FileEntry625c* FUN_00626660(int iIndex);
+    FileEntry625c* ComputeValue_00626660(int iIndex);
     void RemoveAt(int iIndex);
 };
 
@@ -987,10 +1005,10 @@ void HavokError::RemoveEntryByPathAndValue(const char* pcPath, int iValue)
     strcat_s(acName, 0x80, acExtBuf);
     for (int i3 = 0; i3 < ((fnv_00625d60::FileList625c*)((char*)this + 8))->FUN_00726070(); i3++)
     {
-        fnv_00625d60::FileEntry625c kEntry = *((fnv_00625d60::FileList625c*)((char*)this + 8))->FUN_00626660(i3);
+        fnv_00625d60::FileEntry625c kEntry = *((fnv_00625d60::FileList625c*)((char*)this + 8))->ComputeValue_00626660(i3);
         if (!CompareStringsCaseInsensitive(acName, kEntry.m_pcName) && iValue == kEntry.m_iValue)
         {
-            FUN_00626760((void*)kEntry.m_pcName);
+            Object_UpdateFields_00626760((void*)kEntry.m_pcName);
             ((fnv_00625d60::FileList625c*)((char*)this + 8))->RemoveAt(i3);
             break;
         }
@@ -1011,7 +1029,7 @@ struct StreamObject : StreamBase
     StreamObject(void* path);
     static __forceinline void* operator new(unsigned int size)
     {
-        return FUN_0056d280(size);
+        return Object_AllocateStorage_0056d280(size);
     }
 };
 struct StreamFactory
@@ -1057,7 +1075,7 @@ class FUN_00625b40 : public FUN_0056d6c0
   public:
     virtual ~FUN_00625b40();
 
-    void FUN_00625bf0(FUN_0057c530* pkList);
+    void ProcessEntries_00625bf0(FUN_0057c530* pkList);
 
     FUN_0057c530 m_kList;
     FUN_00625bd0 m_kRef;
@@ -1067,5 +1085,5 @@ class FUN_00625b40 : public FUN_0056d6c0
 // @fnv 0x00625b40
 FUN_00625b40::~FUN_00625b40()
 {
-    FUN_00625bf0(&m_kList);
+    ProcessEntries_00625bf0(&m_kList);
 }

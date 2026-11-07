@@ -20,12 +20,13 @@ struct FUN_00600ad0_cls
 {
     const char* v;
     void __thiscall FUN_00600fd0(int, int);
-    FUN_00600ad0_cls* __thiscall FUN_00600ad0(int a, bool b);
+    FUN_00600ad0_cls* __thiscall BSTCaseInsensitiveStringMap_IDLE_ANIM_ROOT_BSTCaseInsensitiveStringMap(int a, bool b);
 };
 
 // Calls FUN_00600fd0 with the two arguments, sets v to a string literal, and returns this.
 // @fnv 0x00600ad0
-FUN_00600ad0_cls* __thiscall FUN_00600ad0_cls::FUN_00600ad0(int a, bool b)
+// src: EXE 0x00600ad0
+FUN_00600ad0_cls* __thiscall FUN_00600ad0_cls::BSTCaseInsensitiveStringMap_IDLE_ANIM_ROOT_BSTCaseInsensitiveStringMap(int a, bool b)
 {
     FUN_00600fd0(a, b);
     v = "@\r`";
@@ -34,13 +35,13 @@ FUN_00600ad0_cls* __thiscall FUN_00600ad0_cls::FUN_00600ad0(int a, bool b)
 
 struct FUN_00600d70_shell
 {
-    void FUN_00600d70();
+    void ForwardCall_00600d70();
 };
 
 struct FUN_00600b00_shell
 {
     const char* m_p;
-    void FUN_00600d70();
+    void ForwardCall_00600d70();
     ~FUN_00600b00_shell();
 };
 
@@ -48,7 +49,7 @@ struct FUN_00600b00_shell
 FUN_00600b00_shell::~FUN_00600b00_shell()
 {
     m_p = "@\r`";
-    FUN_00600d70();
+    ForwardCall_00600d70();
 }
 
 extern int DAT_0104a068;
@@ -66,13 +67,13 @@ FUN_00600d10_class::FUN_00600d10_class(int aiArg1, int aiArg2)
     m_vft = (int)&DAT_0104a068;
 }
 
-extern "C" void __cdecl FUN_00601100(int);
+extern "C" void __cdecl NiTMapBase_DFALL_NiTMapItem_char_const_IDLE_ANIM_ROOT_char_const_IDLE_ANIM_ROOT_Init(int);
 extern int DAT_0104a090;
 
 struct FUN_006010d0_Class
 {
     int m_field_0;
-    int __thiscall FUN_00601100(int);
+    int __thiscall NiTMapBase_DFALL_NiTMapItem_char_const_IDLE_ANIM_ROOT_char_const_IDLE_ANIM_ROOT_Init(int);
     int __thiscall InitializeWithGlobal(int param);
 };
 
@@ -80,18 +81,19 @@ struct FUN_006010d0_Class
 // @fnv 0x006010d0
 int __thiscall FUN_006010d0_Class::InitializeWithGlobal(int param)
 {
-    FUN_00601100(param);
+    NiTMapBase_DFALL_NiTMapItem_char_const_IDLE_ANIM_ROOT_char_const_IDLE_ANIM_ROOT_Init(param);
     m_field_0 = (int)&DAT_0104a090;
     return (int)this;
 }
 
 struct FUN_006053f0_class
 {
-    void FUN_006053f0(float value);
+    void TESNPC_SetWeight(float value);
 };
 
 // @fnv 0x006053f0
-void FUN_006053f0_class::FUN_006053f0(float value)
+// src: COMMUNITY 0x006053f0
+void FUN_006053f0_class::TESNPC_SetWeight(float value)
 {
     *(float*)((char*)this + 0x1f8) = value;
 }
@@ -104,7 +106,8 @@ struct GlobalObject_0045cf30
 GlobalObject_0045cf30 g_011cb99c;
 
 // @fnv 0x00605d50
-unsigned char FUN_00605d50()
+// src: COMMUNITY 0x00605d50
+unsigned char General_bFaceGenTexturing_Get()
 {
     return g_011cb99c.Bool()[0];
 }
@@ -122,37 +125,40 @@ void GlobalObject_00869f00::Reset()
     this->Clear(true);
 }
 
-extern "C" void __cdecl FUN_0060be00(void*, void*, void*, void*);
+extern "C" void __cdecl Object_ProcessState_0060be00(void*, void*, void*, void*);
 
 struct FUN_0060bb40_class
 {
-    void __thiscall FUN_0060bb40(void* a, void* b, void* c);
+    void __thiscall ForwardCall_0060bb40(void* a, void* b, void* c);
 };
 
 // @fnv 0x0060bb40
-void __thiscall FUN_0060bb40_class::FUN_0060bb40(void* apArg1, void* apArg2, void* apArg3)
+// src: GUESS 0x0060bb40 (confidence: low)
+void __thiscall FUN_0060bb40_class::ForwardCall_0060bb40(void* apArg1, void* apArg2, void* apArg3)
 {
-    FUN_0060be00(apArg1, apArg2, apArg3, (char*)this + 8);
+    Object_ProcessState_0060be00(apArg1, apArg2, apArg3, (char*)this + 8);
 }
 
 namespace fnv_0060bdd0 {
 extern void* DAT_0104ab04;
 struct AX
 {
-    void FUN_006b3eb0(unsigned int, unsigned int);
-    AX* FUN_0060bdd0();
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
+    AX* BSSimpleArray_BGSHeadPart_1024_BSSimpleArray_BGSHeadPart_1024();
 };
 // @fnv 0x0060bdd0
-AX* AX::FUN_0060bdd0()
+// src: COMMUNITY 0x0060bdd0
+AX* AX::BSSimpleArray_BGSHeadPart_1024_BSSimpleArray_BGSHeadPart_1024()
 {
     *reinterpret_cast<void**>(this) = &DAT_0104ab04;
-    FUN_006b3eb0(0, 0);
+    BSSimpleArray_float_1024_InitialSetup(0, 0);
     return this;
 }
 }  // namespace fnv_0060bdd0
 
 // @fnv 0x0060be50
-void FUN_0060be50(int start, int end, const float* apfSrc)
+// src: GUESS 0x0060be50 (confidence: low)
+void Runtime_ProcessEntries_0060be50(int start, int end, const float* apfSrc)
 {
     for (; start != end; start += 4)
         *(float*)start = *apfSrc;
@@ -161,7 +167,8 @@ void FUN_0060be50(int start, int end, const float* apfSrc)
 extern "C" void __cdecl CallWithFlagValues(void*, void*, void*);
 
 // @fnv 0x0060bed0
-void __cdecl FUN_0060bed0(void* apArg1, void* apArg2, void* apArg3)
+// src: GUESS 0x0060bed0 (confidence: medium)
+void __cdecl Runtime_CallWithFlagValues_Thunk(void* apArg1, void* apArg2, void* apArg3)
 {
     CallWithFlagValues(apArg1, apArg2, apArg3);
 }
@@ -169,19 +176,21 @@ void __cdecl FUN_0060bed0(void* apArg1, void* apArg2, void* apArg3)
 extern "C" void __cdecl UninitCopyChecked(int, int, int, int);
 
 // @fnv 0x0060c270
-void __cdecl FUN_0060c270(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
+// src: GUESS 0x0060c270 (confidence: low)
+void __cdecl Runtime_ForwardCall_0060c270(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
 {
     UninitCopyChecked(aiArg1, aiArg2, aiArg3, aiArg4);
 }
 
 struct FUN_0060c5c0_class
 {
-    FUN_0060c5c0_class* FUN_0060c5c0();
+    FUN_0060c5c0_class* TESQuest_Data_Init();
 };
 
 // Clears the two leading bytes and the float at offset 4 of this object, then returns this.
 // @fnv 0x0060c5c0
-FUN_0060c5c0_class* FUN_0060c5c0_class::FUN_0060c5c0()
+// src: COMMUNITY 0x0060c5c0
+FUN_0060c5c0_class* FUN_0060c5c0_class::TESQuest_Data_Init()
 {
     *(char*)this = 0;
     *((char*)this + 1) = 0;
@@ -214,22 +223,24 @@ bool FUN_00610190_cls::IsFlagSet()
 
 struct FUN_006130c0_Class
 {
-    void* FUN_006130c0(int index);
+    void* TESRace_GetSkillBonus(int index);
 };
 
 // @fnv 0x006130c0
-void* FUN_006130c0_Class::FUN_006130c0(int index)
+// src: COMMUNITY 0x006130c0
+void* FUN_006130c0_Class::TESRace_GetSkillBonus(int index)
 {
     return &((char*)this)[0x50 + index * 2];
 }
 
 struct FUN_00613870_Class
 {
-    int FUN_00613870(int index);
+    int TESRace_GetDefaultHair(int index);
 };
 
 // @fnv 0x00613870
-int FUN_00613870_Class::FUN_00613870(int index)
+// src: COMMUNITY 0x00613870
+int FUN_00613870_Class::TESRace_GetDefaultHair(int index)
 {
     return *(int*)((char*)this + 0x94 + index * 4);
 }
@@ -245,16 +256,18 @@ void __thiscall FUN_00613890_Class::SetIndexedInt(int index, int value)
     *(int*)((char*)this + 0x94 + index * 4) = value;
 }
 
-void __fastcall FUN_00618940(void*);
+void __fastcall Object_ForwardCall_00618940(void*);
 
 // @fnv 0x00618920
-void __fastcall FUN_00618920(void* self)
+// src: GUESS 0x00618920 (confidence: low)
+void __fastcall Object_ForwardCall_00618920(void* self)
 {
-    FUN_00618940(self);
+    Object_ForwardCall_00618940(self);
 }
 
 // @fnv 0x0061bbf0
-char FUN_0061bbf0(unsigned char a)
+// src: COMMUNITY 0x0061bbf0
+char TESTopic_IsFormTypeDialogueChild(unsigned char a)
 {
     if (a == 0x46)
         return 1;
@@ -295,7 +308,8 @@ void __thiscall FUN_0061bf50_Class::InitAndClear()
 }  // namespace fnv_0061bf50
 
 // @fnv 0x0061f420
-bool FUN_0061f420(unsigned int auiValue, unsigned int auiOther)
+// src: GUESS 0x0061f420 (confidence: low)
+bool Object_ComputeValue_0061f420(unsigned int auiValue, unsigned int auiOther)
 {
     if (auiValue < auiOther)
         return true;
@@ -317,14 +331,15 @@ void FUN_0061f440::ClearResponses()
 extern int DAT_0104d948;
 struct FUN_0061fa10_class
 {
-    void __thiscall FUN_0061fa70(int);
-    int __thiscall FUN_0061fa10(int a);
+    void __thiscall NiTMapBase_DFALL_NiTMapItem_TESObjectREFR_int_TESObjectREFR_int_NiTMapBase(int);
+    int __thiscall NiTMap_TESObjectREFR_int_NiTMap(int a);
 };
 // Calls FUN_0061fa70 with a, stores the address of DAT_0104d948 at this, and returns this.
 // @fnv 0x0061fa10
-int __thiscall FUN_0061fa10_class::FUN_0061fa10(int a)
+// src: EXE 0x0061fa10
+int __thiscall FUN_0061fa10_class::NiTMap_TESObjectREFR_int_NiTMap(int a)
 {
-    FUN_0061fa70(a);
+    NiTMapBase_DFALL_NiTMapItem_TESObjectREFR_int_TESObjectREFR_int_NiTMapBase(a);
     *reinterpret_cast<int*>(this) = reinterpret_cast<int>(&DAT_0104d948);
     return reinterpret_cast<int>(this);
 }
@@ -338,12 +353,13 @@ struct FUN_00600eb0_cls
     int a;
     void* b;
     void RemoveAll();
-    void FUN_00600eb0();
+    void SetVtableAndProcessState_00600eb0();
 };
 
 // Sets the vtable pointer, calls RemoveAll, then frees the b pointer via NiFreeAlias.
 // @fnv 0x00600eb0
-void FUN_00600eb0_cls::FUN_00600eb0()
+// src: GUESS 0x00600eb0 (confidence: low)
+void FUN_00600eb0_cls::SetVtableAndProcessState_00600eb0()
 {
     *reinterpret_cast<void**>(this) = &DAT_0104a0b0;
     RemoveAll();
@@ -355,12 +371,13 @@ void NiFreeAlias(void*);
 
 struct NiTPointerMapIntInt : public NiTPointerMap<int, int>
 {
-    void FUN_0061fb40();
+    void ReleaseStorage_0061fb40();
 };
 
 // Resets the vtable pointer, removes all entries, then frees the pointer stored at offset 8.
 // @fnv 0x0061fb40
-void NiTPointerMapIntInt::FUN_0061fb40()
+// src: GUESS 0x0061fb40 (confidence: medium)
+void NiTPointerMapIntInt::ReleaseStorage_0061fb40()
 {
     *(int**)this = &DAT_0104d968;
     RemoveAll();
@@ -373,11 +390,12 @@ struct FUN_00600b90_Cls
 {
     void* m0;
     void* m4;
-    void __thiscall FUN_00600b90();
+    void __thiscall ReleaseMemberStorage();
 };
 // Sets m0 to the address of DAT_0104a060 and frees the m4 pointer via MyDeallocate.
 // @fnv 0x00600b90
-void __thiscall FUN_00600b90_Cls::FUN_00600b90()
+// src: GUESS 0x00600b90 (confidence: medium)
+void __thiscall FUN_00600b90_Cls::ReleaseMemberStorage()
 {
     m0 = (void*)&DAT_0104a060;
     MyDeallocate(m4);
@@ -394,7 +412,7 @@ struct FUN_00600ee0_cls
 // @fnv 0x00600ee0
 void* FUN_00600ee0_cls::FUN_00600ee0(unsigned int flags)
 {
-    ((FUN_00600eb0_cls*)this)->FUN_00600eb0();
+    ((FUN_00600eb0_cls*)this)->SetVtableAndProcessState_00600eb0();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -434,7 +452,7 @@ void* FUN_00600d90_shell::FUN_00600f40(unsigned int flags)
 
 struct FUN_005ffbd0_cls
 {
-    void FUN_00600b90();
+    void ReleaseMemberStorage();
 };
 void __cdecl Deallocate(void*);
 struct FUN_00600f70_cls
@@ -444,7 +462,7 @@ struct FUN_00600f70_cls
 // @fnv 0x00600f70
 void* FUN_00600f70_cls::FUN_00600f70(unsigned int flags)
 {
-    ((FUN_005ffbd0_cls*)this)->FUN_00600b90();
+    ((FUN_005ffbd0_cls*)this)->ReleaseMemberStorage();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -453,7 +471,7 @@ void* FUN_00600f70_cls::FUN_00600f70(unsigned int flags)
 namespace fnv_00600fa0 {
 struct FUN_005ffbd0_cls
 {
-    void FUN_005ffbd0();
+    void ForwardCall_005ffbd0();
     void* __thiscall FUN_00600fa0(unsigned int flags);
 };
 void __cdecl operator delete(void*);
@@ -461,7 +479,7 @@ void __cdecl operator delete(void*);
 // @fnv 0x00600fa0
 void* __thiscall FUN_005ffbd0_cls::FUN_00600fa0(unsigned int flags)
 {
-    FUN_005ffbd0();
+    ForwardCall_005ffbd0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -471,7 +489,7 @@ void* __thiscall FUN_005ffbd0_cls::FUN_00600fa0(unsigned int flags)
 extern int DAT_0104a0d0;
 struct FUN_006010a0_holder
 {
-    void __thiscall FUN_006010a0(int, bool);
+    void __thiscall NiTStringTemplateMap_NiTMap_char_const_IDLE_ANIM_ROOT_IDLE_ANIM_ROOT_NiTStringTemplateMap(int, bool);
 };
 struct FUN_00600fd0 : FUN_006010a0_holder
 {
@@ -480,7 +498,7 @@ struct FUN_00600fd0 : FUN_006010a0_holder
 // @fnv 0x00600fd0
 FUN_00600fd0::FUN_00600fd0(int a, bool b)
 {
-    FUN_006010a0(a, b);
+    NiTStringTemplateMap_NiTMap_char_const_IDLE_ANIM_ROOT_IDLE_ANIM_ROOT_NiTStringTemplateMap(a, b);
     *(void**)this = (void*)&DAT_0104a0d0;
 }
 
@@ -493,7 +511,7 @@ struct FUN_00601070_shell : FUN_00600b00_shell
 // @fnv 0x00601070
 void* __thiscall FUN_00601070_shell::FUN_00601070(unsigned int flags)
 {
-    FUN_00600d70();
+    ForwardCall_00600d70();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -507,11 +525,12 @@ struct FUN_006010a0_Class
     int m_field_8;
     int m_field_c;
     unsigned char m_field_10;
-    FUN_006010a0_Class* __thiscall FUN_006010a0(int a, unsigned char b);
+    FUN_006010a0_Class* __thiscall NiTStringTemplateMap_NiTMap_char_const_IDLE_ANIM_ROOT_IDLE_ANIM_ROOT_NiTStringTemplateMap(int a, unsigned char b);
 };
 // Calls InitializeWithGlobal on this, sets the vtable to DAT_0104a070, stores b in m_field_10 and returns this.
 // @fnv 0x006010a0
-FUN_006010a0_Class* __thiscall FUN_006010a0_Class::FUN_006010a0(int a, unsigned char b)
+// src: EXE 0x006010a0
+FUN_006010a0_Class* __thiscall FUN_006010a0_Class::NiTStringTemplateMap_NiTMap_char_const_IDLE_ANIM_ROOT_IDLE_ANIM_ROOT_NiTStringTemplateMap(int a, unsigned char b)
 {
     ((FUN_006010d0_Class*)this)->InitializeWithGlobal(a);
     m_vft = &DAT_0104a070;
@@ -527,11 +546,12 @@ struct FUN_00601100_cls
     int a;
     void* b;
     int c;
-    FUN_00601100_cls* __thiscall FUN_00601100(int size);
+    FUN_00601100_cls* __thiscall NiTMapBase_DFALL_NiTMapItem_char_const_IDLE_ANIM_ROOT_char_const_IDLE_ANIM_ROOT_Init(int size);
 };
 // Sets the vtable, stores size, allocates size*4 bytes, zeroes them into b, and returns this.
 // @fnv 0x00601100
-FUN_00601100_cls* __thiscall FUN_00601100_cls::FUN_00601100(int size)
+// src: COMMUNITY 0x00601100
+FUN_00601100_cls* __thiscall FUN_00601100_cls::NiTMapBase_DFALL_NiTMapItem_char_const_IDLE_ANIM_ROOT_char_const_IDLE_ANIM_ROOT_Init(int size)
 {
     int n;
     vtbl = &DAT_0104a0b0;
@@ -546,7 +566,8 @@ FUN_00601100_cls* __thiscall FUN_00601100_cls::FUN_00601100(int size)
 extern "C" void* __cdecl DAT_01199fc4[];
 
 // @fnv 0x00605d40
-void* __cdecl FUN_00605d40(int index)
+// src: XBOX_PDB 0x00605d40
+void* __cdecl TESRace_GetHeadPartNodeName(int index)
 {
     return DAT_01199fc4[index];
 }
@@ -554,9 +575,10 @@ void* __cdecl FUN_00605d40(int index)
 int __cdecl CallWithFlag(int*);
 // Computes a value from a and b via CallWithFlag and passes both results with c to FUN_0060be50.
 // @fnv 0x0060bb70
-void __cdecl FUN_0060bb70(int a, int b, float const* c)
+// src: GUESS 0x0060bb70 (confidence: low)
+void __cdecl Runtime_ProcessRangeWithCallFlags(int a, int b, float const* c)
 {
-    FUN_0060be50(CallWithFlag(&a), CallWithFlag(&b), c);
+    Runtime_ProcessEntries_0060be50(CallWithFlag(&a), CallWithFlag(&b), c);
 }
 
 namespace fnv_0060bc60 {
@@ -564,7 +586,7 @@ extern "C" void __cdecl Deallocate(void*);
 
 struct FUN_006013a0_shell
 {
-    void FUN_0060b9b0();
+    void SetVtableAndProcessState_0060b9b0();
     void* __thiscall FUN_0060bc60(int flags);
 };
 
@@ -572,7 +594,7 @@ struct FUN_006013a0_shell
 // @fnv 0x0060bc60
 void* __thiscall FUN_006013a0_shell::FUN_0060bc60(int flags)
 {
-    FUN_0060b9b0();
+    SetVtableAndProcessState_0060b9b0();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -581,7 +603,7 @@ void* __thiscall FUN_006013a0_shell::FUN_0060bc60(int flags)
 
 struct FUN_006013a0_shell
 {
-    void __thiscall FUN_006013a0();
+    void __thiscall ForwardCall_006013a0();
     FUN_006013a0_shell* __thiscall FUN_0060bc90(unsigned int flags);
 };
 
@@ -589,7 +611,7 @@ struct FUN_006013a0_shell
 // @fnv 0x0060bc90
 FUN_006013a0_shell* __thiscall FUN_006013a0_shell::FUN_0060bc90(unsigned int flags)
 {
-    FUN_006013a0();
+    ForwardCall_006013a0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -632,25 +654,27 @@ struct FUN_0060bd90_cls
     unsigned short m8;
     char _a[4];
     unsigned short mE;
-    void __thiscall FUN_0060c120(unsigned int, unsigned int);
-    unsigned int __thiscall FUN_0060bd90(unsigned int, unsigned int);
+    void __thiscall NiTObjectArray_NiPointer_NiTexture_SetAt(unsigned int, unsigned int);
+    unsigned int __thiscall NiTObjectArray_NiPointer_NiTexture_SetAtGrow(unsigned int, unsigned int);
 };
 // Grows the array to mE + a when a is at least m8, then calls FUN_0060c120(a, b) and returns a.
 // @fnv 0x0060bd90
-unsigned int __thiscall FUN_0060bd90_cls::FUN_0060bd90(unsigned int uiIndex, unsigned int b)
+// src: COMMUNITY 0x0060bd90
+unsigned int __thiscall FUN_0060bd90_cls::NiTObjectArray_NiPointer_NiTexture_SetAtGrow(unsigned int uiIndex, unsigned int b)
 {
     if (uiIndex >= m8)
     {
         ((NiTArray<int, NiTMallocInterface<int> >*)this)->SetSize((unsigned int)(mE + uiIndex));
     }
-    FUN_0060c120(uiIndex, b);
+    NiTObjectArray_NiPointer_NiTexture_SetAt(uiIndex, b);
     return uiIndex;
 }
 
 extern "C" void* __cdecl FUN_00ec7ce3(void* dst, unsigned int dstSize, void* src, unsigned int srcSize);
 
 // @fnv 0x0060c290
-void* __cdecl FUN_0060c290(char* apSource, char* pDest, char* pEnd)
+// src: GUESS 0x0060c290 (confidence: low)
+void* __cdecl Runtime_UpdateState_0060c290(char* apSource, char* pDest, char* pEnd)
 {
     int nCount = (pDest - apSource) >> 2;
     void* pResult4 = (void*)(pEnd - nCount * 4);
@@ -661,7 +685,8 @@ void* __cdecl FUN_0060c290(char* apSource, char* pDest, char* pEnd)
 
 // Copies the float value pointed to by param_3 into param_2 consecutive floats starting at param_1.
 // @fnv 0x0060c410
-void __cdecl FUN_0060c410(float* afDest, unsigned int auiCount, float* afValue)
+// src: GUESS 0x0060c410 (confidence: high)
+void __cdecl Runtime_FillFloatRange(float* afDest, unsigned int auiCount, float* afValue)
 {
     for (; auiCount > 0; auiCount--, afDest++)
     {
@@ -687,21 +712,22 @@ void* __thiscall FUN_0060f410_class::FUN_0060f410(unsigned int flags)
 
 struct S_00616a60
 {
-    void __thiscall FUN_00616a20();
-    void __thiscall FUN_00616a40();
-    void __thiscall FUN_00616a60(int);
+    void __thiscall TESReputation_GetPositiveRatio();
+    void __thiscall TESReputation_GetNegativeRatio();
+    void __thiscall TESReputation_GetReputationPct(int);
 };
 // Calls FUN_00616a20 when a equals 1, otherwise calls FUN_00616a40.
 // @fnv 0x00616a60
-void __thiscall S_00616a60::FUN_00616a60(int a)
+// src: COMMUNITY 0x00616a60
+void __thiscall S_00616a60::TESReputation_GetReputationPct(int a)
 {
     if (a == 1)
     {
-        FUN_00616a20();
+        TESReputation_GetPositiveRatio();
         return;
         return;
     }
-    FUN_00616a40();
+    TESReputation_GetNegativeRatio();
 }
 
 struct FUN_00618890_cls
@@ -719,7 +745,7 @@ FUN_00618890_cls* __thiscall FUN_00618890_cls::FUN_00618890(unsigned int flags)
     return this;
 }
 
-void __fastcall FUN_0061bcf0(void*);
+void __fastcall UpdateState_0061bcf0(void*);
 void __cdecl operator delete(void*);
 struct FUN_0061c090_class
 {
@@ -728,13 +754,13 @@ struct FUN_0061c090_class
 // @fnv 0x0061c090
 void* __thiscall FUN_0061c090_class::FUN_0061c090(unsigned int flags)
 {
-    FUN_0061bcf0(this);
+    UpdateState_0061bcf0(this);
     if (flags & 1)
         operator delete(this);
     return this;
 }
 
-void __fastcall FUN_00618940(void*);
+void __fastcall Object_ForwardCall_00618940(void*);
 void __cdecl operator delete(void*);
 struct FUN_0061c0c0_class
 {
@@ -744,7 +770,7 @@ struct FUN_0061c0c0_class
 // @fnv 0x0061c0c0
 void* __thiscall FUN_0061c0c0_class::FUN_0061c0c0(unsigned int flags)
 {
-    FUN_00618940(this);
+    Object_ForwardCall_00618940(this);
     if (flags & 1)
         operator delete(this);
     return this;
@@ -814,11 +840,12 @@ extern "C" void* __cdecl NiMalloc(unsigned int size);
 extern "C" void* __cdecl memset(void* dst, int c, unsigned int n);
 struct FUN_0061fa70_class
 {
-    int __thiscall FUN_0061fa70(int a);
+    int __thiscall NiTMapBase_DFALL_NiTMapItem_TESObjectREFR_int_TESObjectREFR_int_NiTMapBase(int a);
 };
 // Sets the vtable, stores the count, allocates count*4 bytes, zeroes them, and returns this.
 // @fnv 0x0061fa70
-int __thiscall FUN_0061fa70_class::FUN_0061fa70(int aiCount)
+// src: EXE 0x0061fa70
+int __thiscall FUN_0061fa70_class::NiTMapBase_DFALL_NiTMapItem_TESObjectREFR_int_TESObjectREFR_int_NiTMapBase(int aiCount)
 {
     *reinterpret_cast<void**>(this) = &DAT_0104d968;
     reinterpret_cast<int*>(this)[1] = aiCount;
@@ -838,7 +865,7 @@ struct FUN_0061fb70_Cls
 // @fnv 0x0061fb70
 void* __thiscall FUN_0061fb70_Cls::FUN_0061fb70(unsigned int flags)
 {
-    ((NiTPointerMapIntInt*)this)->FUN_0061fb40();
+    ((NiTPointerMapIntInt*)this)->ReleaseStorage_0061fb40();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -899,24 +926,25 @@ FUN_0060bd20_class::FUN_0060bd20_class(unsigned short a, unsigned short b)
 
 struct FUN_00616c20_cls
 {
-    void __thiscall FUN_00615730(int, float);
+    void __thiscall AddReputationValue(int, float);
 };
 extern Setting originalRuntimeFloatSetting51;
 extern Setting originalRuntimeFloatSetting50;
 struct FUN_00616c20_shell : FUN_00616c20_cls
 {
-    void __thiscall FUN_00616c20(bool b);
+    void __thiscall TESReputation_CommitCrime(bool b);
 };
 // Reads one of two runtime float settings depending on b and passes it to FUN_00615730 with index 0.
 // @fnv 0x00616c20
-void __thiscall FUN_00616c20_shell::FUN_00616c20(bool abUseFirstSetting)
+// src: XBOX_PDB 0x00616c20
+void __thiscall FUN_00616c20_shell::TESReputation_CommitCrime(bool abUseFirstSetting)
 {
     float f;
     if (abUseFirstSetting)
         f = *originalRuntimeFloatSetting51.Float();
     else
         f = *originalRuntimeFloatSetting50.Float();
-    FUN_00615730(0, f);
+    AddReputationValue(0, f);
 }
 
 struct FUN_00619a90_shell
@@ -936,7 +964,8 @@ struct DH
 extern DH* g_dataHandler;
 // If a is non-zero, walks the list from g_dataHandler and calls ProcessTopicInfoList(a) on each item until _ref_008256d0 is true.
 // @fnv 0x00619b60
-void FUN_00619b60(int a)
+// src: COMMUNITY 0x00619b60
+void TESTopic_ClearAllSaidOnceInfosForQuest(int a)
 {
     if (a)
     {
@@ -981,7 +1010,8 @@ void* __cdecl FUN_00ec7ce3(void* dst, unsigned int dstSize, void* src, unsigned 
 
 // Computes the element count between param_1 and param_2, copies that many 4-byte elements from param_1 to param_3, and returns the end pointer in param_3.
 // @fnv 0x0060c3c0
-void* __cdecl FUN_0060c3c0(void* pBegin, void* pEnd, void* pDest)
+// src: GUESS 0x0060c3c0 (confidence: low)
+void* __cdecl Object_ProcessAndReturnValue_0060c3c0(void* pBegin, void* pEnd, void* pDest)
 {
     unsigned int count = ((char*)pEnd - (char*)pBegin) >> 2;
     void* result = (char*)pDest + count * 4;
@@ -995,7 +1025,7 @@ void* __cdecl FUN_0060c3c0(void* pBegin, void* pEnd, void* pDest)
 struct GlobalObject_0040c150 : public StartMenu
 {
     bool __thiscall GetReputationRank(int value);
-    char const* FUN_006167d0();
+    char const* TESReputation_GetThresholdIcon();
 };
 
 extern GlobalObject_0040c150 g_011cba18;
@@ -1016,7 +1046,8 @@ extern GlobalObject_0040c150 g_011cbd38;
 extern GlobalObject_0040c150 g_011cbd44;
 
 // @fnv 0x006167d0
-char const* GlobalObject_0040c150::FUN_006167d0()
+// src: COMMUNITY 0x006167d0
+char const* GlobalObject_0040c150::TESReputation_GetThresholdIcon()
 {
     const StartMenu* menuTable[4][4] = {{&g_011cbbfc, &g_011cbbcc, &g_011cbbaec, &g_011cbd44},
                                   {&g_011cbcf0, &g_011cba4c, &g_011cbb4c, &g_011cbb8c},
@@ -1048,7 +1079,7 @@ FUN_0061fc50::~FUN_0061fc50()
 class FNVNode;
 class FNVHeap;
 
-FNVHeap* FUN_00401020();
+FNVHeap* MemoryManager_Instance();
 
 class FNVHeap
 {
@@ -1072,15 +1103,15 @@ class FUN_0060ba40_cls : public FNVBaseObj
     virtual ~FUN_0060ba40_cls();
     FNVNode* m_10;
     FUN_0060ba40_cls();
-    void FUN_006b3eb0(unsigned int a, unsigned int b);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int a, unsigned int b);
 };
 
 // Initializes m_10 from FUN_00401020()->FUN_00aa42e0() and calls FUN_006b3eb0 with 0, 0.
 // @fnv 0x0060ba40
 FUN_0060ba40_cls::FUN_0060ba40_cls()
 {
-    m_10 = FUN_00401020()->FUN_00aa42e0();
-    FUN_006b3eb0(0, 0);
+    m_10 = MemoryManager_Instance()->FUN_00aa42e0();
+    BSSimpleArray_float_1024_InitialSetup(0, 0);
 }
 
 class FUN_0060bac0_base
@@ -1118,17 +1149,18 @@ struct S_0060bba0_TagB
 struct S_0060bba0_TagC
 {
 };
-S_0060bba0_TagB FUN_0065e750(int*);
-S_0060bba0_TagA FUN_0065fd70(int*, int*);
+S_0060bba0_TagB std_Move_cat_unsigned_char(int*);
+S_0060bba0_TagA return_value(int*, int*);
 int CallWithFlag(int*);
 void CallWithFlagByte(int, int, int, S_0060bba0_TagA, S_0060bba0_TagB, S_0060bba0_TagC);
 
 // Calls CallWithFlagByte with CallWithFlag results for param1 and param2, param3, and FUN_0065fd70/FUN_0065e750 results plus a TagC.
 // @fnv 0x0060bba0
-void __cdecl FUN_0060bba0(int param1, int param2, int param3)
+// src: GUESS 0x0060bba0 (confidence: low)
+void __cdecl Object_DispatchIteratorRange_0060bba0(int param1, int param2, int param3)
 {
-    CallWithFlagByte(CallWithFlag(&param1), CallWithFlag(&param2), param3, FUN_0065fd70(&param1, &param3),
-                     FUN_0065e750(&param3), S_0060bba0_TagC());
+    CallWithFlagByte(CallWithFlag(&param1), CallWithFlag(&param2), param3, return_value(&param1, &param3),
+                     std_Move_cat_unsigned_char(&param3), S_0060bba0_TagC());
 }
 
 struct B60BC10PtrCatTag
@@ -1169,7 +1201,8 @@ void C60BE00UninitCopy(C60BE00Element* pFirst, C60BE00Element* pLast, C60BE00Ele
 // std::uninitialized_copy
 // Copies the element range [_First, _Last) to _Dest using _Al, passing the destination pointer category and a checked tag to C60BE00UninitCopy.
 // @fnv 0x0060be00
-void FUN_0060be00(C60BE00Element* _First, C60BE00Element* _Last, C60BE00Element* _Dest, C60BE00Allocator* _Al)
+// src: GUESS 0x0060be00 (confidence: low)
+void Object_ProcessState_0060be00(C60BE00Element* _First, C60BE00Element* _Last, C60BE00Element* _Dest, C60BE00Allocator* _Al)
 {
     C60BE00UninitCopy(C60BE00Unchecked(&_First), C60BE00Unchecked(&_Last), _Dest, _Al, C60BE00PtrCat(&_Dest),
                       C60BE00CheckedTag());
@@ -1209,14 +1242,14 @@ struct S_0060c2e0_Ret
     S_0060c2e0_Ret(int);
 };
 
-extern "C" S_0060c2e0_Ret __cdecl FUN_0065fd70(void* value);
+extern "C" S_0060c2e0_Ret __cdecl return_value(void* value);
 extern "C" void __cdecl ProcessFloatRange(void* a, void* b, void* c, int d, int e);
 
 // Calls ProcessFloatRange with a1, a2, a3 plus the byte returned by FUN_0065fd70(&a1) and a zero flag byte.
 // @fnv 0x0060c2e0
 void __cdecl CallWithFlagValues(void* a1, void* a2, void* a3)
 {
-    ProcessFloatRange(a1, a2, a3, FUN_0065fd70(&a1).v, S_0060c2e0_Flag().v);
+    ProcessFloatRange(a1, a2, a3, return_value(&a1).v, S_0060c2e0_Flag().v);
 }
 
 class B616A20Meter
@@ -1241,11 +1274,12 @@ class B616A20Meter
     float m_fMaximum;
     float m_fCurrent;
 
-    float FUN_00616a20();
+    float TESReputation_GetPositiveRatio();
 };
 
 // @fnv 0x00616a20
-float B616A20Meter::FUN_00616a20()
+// src: XBOX_PDB 0x00616a20
+float B616A20Meter::TESReputation_GetPositiveRatio()
 {
     return m_fCurrent / m_fMaximum;
 }
@@ -1272,11 +1306,12 @@ struct FUN_00616a40_cls
     float m_f40;
     float m_f44;
     float m_f48;
-    float __thiscall FUN_00616a40();
+    float __thiscall TESReputation_GetNegativeRatio();
 };
 
 // @fnv 0x00616a40
-float __thiscall FUN_00616a40_cls::FUN_00616a40()
+// src: XBOX_PDB 0x00616a40
+float __thiscall FUN_00616a40_cls::TESReputation_GetNegativeRatio()
 {
     return m_f48 / m_f40;
 }
@@ -1284,11 +1319,12 @@ float __thiscall FUN_00616a40_cls::FUN_00616a40()
 struct Comparison
 {
     char __thiscall GetReputationRank(int);
-    char __thiscall FUN_00616a90(char mode);
+    char __thiscall TESReputation_GetReputationThreshold(char mode);
 };
 // Reads two comparison results and maps their combination, depending on mode, to a result code (0-6).
 // @fnv 0x00616a90
-char Comparison::FUN_00616a90(char mode)
+// src: COMMUNITY 0x00616a90
+char Comparison::TESReputation_GetReputationThreshold(char mode)
 {
     char second = GetReputationRank(1);
     char first = GetReputationRank(0);
@@ -1354,7 +1390,7 @@ char Comparison::FUN_00616a90(char mode)
     return 0;
 }
 
-extern "C" void __cdecl FUN_00401080(void* p, bool flag);
+extern "C" void __cdecl BSEndian_00401080(void* p, bool flag);
 
 struct FUN_00616c70_flag
 {
@@ -1376,13 +1412,13 @@ struct FUN_00616c70_cls
 void FUN_00616c70_cls::InitializeFields()
 {
     FUN_00616c70_flag a = {};
-    FUN_00401080(this, a.m_bValue);
+    BSEndian_00401080(this, a.m_bValue);
     FUN_00616c70_flag b = {};
-    FUN_00401080((char*)this + 4, b.m_bValue);
+    BSEndian_00401080((char*)this + 4, b.m_bValue);
     FUN_00616c70_flag c5 = {};
-    FUN_00401080((char*)this + 8, c5.m_bValue);
+    BSEndian_00401080((char*)this + 8, c5.m_bValue);
     FUN_00616c70_flag d = {};
-    FUN_00401080((char*)this + 0x10, d.m_bValue);
+    BSEndian_00401080((char*)this + 0x10, d.m_bValue);
 }
 
 int __cdecl FUN_00406d50(char* destination, unsigned int capacity, const char* source);
@@ -1396,12 +1432,13 @@ struct OutputStringDC
 
 struct FUN_00616e20_shell
 {
-    bool FUN_00616e20(OutputStringDC* output, const char* first, const char* second, const char* third,
+    bool TESResponse_TestAudioFullPath(OutputStringDC* output, const char* first, const char* second, const char* third,
                       const char* fourth, const char* fifth);
 };
 
 // @fnv 0x00616e20
-bool FUN_00616e20_shell::FUN_00616e20(OutputStringDC* output, const char* pcFirst, const char* pcSecond,
+// src: COMMUNITY 0x00616e20
+bool FUN_00616e20_shell::TESResponse_TestAudioFullPath(OutputStringDC* output, const char* pcFirst, const char* pcSecond,
                                       const char* pcThird, const char* pcFourth, const char* pcFifth)
 {
     bool succeeded2;
@@ -1724,7 +1761,7 @@ struct CleanupItem
 };
 struct CleanupArray
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     void FUN_0061bd20(unsigned int, CleanupItem* const&);
 };
 struct CleanupTopic
@@ -1775,7 +1812,7 @@ FUN_006186d0::~FUN_006186d0()
     while (list && *list->FUN_006815c0())
     {
         CleanupTopic* topic = *list->FUN_006815c0();
-        unsigned int count = topic->FUN_00717e50()->FUN_0084e3a0();
+        unsigned int count = topic->FUN_00717e50()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         for (unsigned int i = 0; i < count; ++i)
         {
             CleanupItem* item = GetTopicInfoByIndex(topic, i);
@@ -2064,7 +2101,7 @@ class StringHashTable
     int unk00;
     unsigned int m_uiBuckets;
 
-    unsigned int FUN_00659210(unsigned char ucChar, unsigned int uiHash);
+    unsigned int NiTStringTemplateMap_NiTMap_char_const_TESForm_TESForm_HashChar(unsigned char ucChar, unsigned int uiHash);
     unsigned int HashKey(const char* pcKey);
 };
 
@@ -2080,7 +2117,7 @@ unsigned int StringHashTable::HashKey(const char* pcKey)
     {
     }
     while (*pcKey)
-        uiHash = FUN_00659210((unsigned char)tolower(*pcKey++), uiHash);
+        uiHash = NiTStringTemplateMap_NiTMap_char_const_TESForm_TESForm_HashChar((unsigned char)tolower(*pcKey++), uiHash);
     return uiHash % m_uiBuckets;
 }
 
@@ -2098,7 +2135,7 @@ struct FUN_00600d90_node
     void* value;
 };
 
-void __cdecl FUN_00aa10f0(void* value);
+void __cdecl _NiFree_00aa10f0(void* value);
 
 struct FUN_00600e50
 {
@@ -2127,7 +2164,7 @@ FUN_00600d90::~FUN_00600d90()
             {
                 FUN_00600d90_node* current = node;
                 node = node->next;
-                FUN_00aa10f0(current->value);
+                _NiFree_00aa10f0(current->value);
             }
         }
     }
@@ -2191,7 +2228,8 @@ FUN_006188c0::~FUN_006188c0()
 
 // Casts the form to TESRaceForm and returns its race via GetFormRace, or null if the cast fails.
 // @fnv 0x00617270
-TESRace* __cdecl FUN_00617270(TESForm* form)
+// src: COMMUNITY 0x00617270
+TESRace* __cdecl TESRaceForm_GetFormRace(TESForm* form)
 {
     TESRaceForm* pRaceForm;
     pRaceForm = dynamic_cast<TESRaceForm*>(form);

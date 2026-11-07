@@ -767,23 +767,23 @@ public:
     char HasAllTiles();
     bool HasFlag(unsigned int flag);
     void Enable(int mask, int set);
-    bool FUN_00740f10(unsigned int flag);
+    bool IsFlagSet_00740f10(unsigned int flag);
 
-    int FUN_0073bb30();
+    int GetClass_0073bb30();
     void FUN_0073bba0();
     void* Destroy(unsigned int flags);
     bool RebuildCardLists();
     void InitCaravanTable();
     void InitMenu();
-    void FUN_0073d020();
-    void FUN_0073ea90();
+    void SetupCurrency();
+    void PrepareGameMenu();
     void ComputePlayerAndTargetTotals();
     void InitType15State(int type, int pad);
     bool HandleKey(int key);
     void HandleEvent(unsigned int event, unsigned int unused);
-    bool FUN_00747d30(int key, int unused);
-    bool FUN_007490e0(int type, int unused);
-    void FUN_00741500();
+    bool CaravanMenu_DoGamepad(int key, int unused);
+    bool CaravanMenu_DoGamepadUpEvent(int type, int unused);
+    void CaravanMenu_DoIdle();
     void UpdateCaravanMenu();
 
     void PlaceBillsAndCoins(int skill, int amount);
@@ -810,12 +810,12 @@ public:
     bool CheckCaravanResult();
     int CompareToTwentyOneToTwentySix(int value);
 
-    void FUN_00749a40(int slot);
-    void FUN_0074a000(int slot, float amount);
-    void FUN_0074e220(int track, int row, int card);
-    void FUN_0074ecb0(int index);
-    void FUN_0074ed40(int index);
-    void FUN_0074edd0();
-    int FUN_0074f600(int track, int row);
-    void FUN_0074fdc0(E_Move* move);
+    void UpdateTileAlpha(int slot);
+    void SetTileTextAlpha(int slot, float amount);
+    void UpdateTrackCardTexture(int track, int row, int card);
+    void SelectWholeTrack(int index);
+    void DeselectWholeTrack(int index);
+    void DeselectTrackCard();
+    int GetRowValue(int track, int row);
+    void CaravanMenu_ProcessAI(E_Move* move);
 };

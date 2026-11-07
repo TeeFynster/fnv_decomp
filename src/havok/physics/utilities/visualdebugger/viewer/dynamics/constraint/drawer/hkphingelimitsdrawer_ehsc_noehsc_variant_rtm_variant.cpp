@@ -216,7 +216,7 @@ class DebugDisplayHandlerHolder
 
   public:
     DebugDisplayHandlerHolder();
-    void FUN_00e10a10(hkDebugDisplayHandler* displayHandler);
+    void hkpPrimitiveDrawer_setDisplayHandler(hkDebugDisplayHandler* displayHandler);
 };
 class ConstraintDrawer
 {
@@ -230,9 +230,9 @@ class ConstraintDrawer
     }
 
   protected:
-    void FUN_00de44c0(int id, int tag);
-    void FUN_00de4530(int id, int tag);
-    void FUN_00de47e0(const hkpConstraintInstance* constraint, hkTransform& refLocalToWorld,
+    void hkpConstraintDrawer_drawPivots(int id, int tag);
+    void hkpConstraintDrawer_drawBodyFrames(int id, int tag);
+    void hkpConstraintDrawer_updateCommonParameters(const hkpConstraintInstance* constraint, hkTransform& refLocalToWorld,
                       hkTransform& attLocalToWorld);
 
   private:
@@ -318,20 +318,20 @@ __forceinline void HingeConstraintDrawer::drawHinge(hkpConstraintInstance* const
                                                     hkDebugDisplayHandler* displayHandler, int id, int tag)
 {
     const hkpHingeLimitsData* lhinge = static_cast<const hkpHingeLimitsData*>(constraint->getData());
-    m_kDisplayGeometry.FUN_00e10a10(displayHandler);
+    m_kDisplayGeometry.hkpPrimitiveDrawer_setDisplayHandler(displayHandler);
     hkTransform refLocalToWorld;
     hkTransform attLocalToWorld;
-    FUN_00de47e0(constraint, refLocalToWorld, attLocalToWorld);
-    m_vVectorAtOffset50.FUN_00c7f640(refLocalToWorld, hkVector4::getZero());
-    m_vVectorAtOffset40.FUN_00c7f640(attLocalToWorld, hkVector4::getZero());
-    FUN_00de4530(id, tag);
-    FUN_00de44c0(id, tag);
+    hkpConstraintDrawer_updateCommonParameters(constraint, refLocalToWorld, attLocalToWorld);
+    m_vVectorAtOffset50.setTransformedPos_00c7f640(refLocalToWorld, hkVector4::getZero());
+    m_vVectorAtOffset40.setTransformedPos_00c7f640(attLocalToWorld, hkVector4::getZero());
+    hkpConstraintDrawer_drawBodyFrames(id, tag);
+    hkpConstraintDrawer_drawPivots(id, tag);
     const hkVector4* baseA = &lhinge->m_kBridgeAtoms.m_kLocalRotations.m_kRotationA.getColumn(0);
     const hkVector4* baseB = &lhinge->m_kBridgeAtoms.m_kLocalRotations.m_kRotationB.getColumn(0);
     hkVector4 axisInWorld;
-    axisInWorld.FUN_00c7f700(m_kSecondRotation, baseB[0]);
+    axisInWorld.hkVector4_setRotatedDir(m_kSecondRotation, baseB[0]);
     hkVector4 axisPerpInWorld;
-    axisPerpInWorld.FUN_00c7f700(m_kSecondRotation, baseB[2]);
+    axisPerpInWorld.hkVector4_setRotatedDir(m_kSecondRotation, baseB[2]);
     displayHandler->DisplayLine(m_vVectorAtOffset40, m_vVectorAtOffset50, hkColor::RED, id, tag);
     {
         hkVector4 startAxis, endAxis;
@@ -344,7 +344,7 @@ __forceinline void HingeConstraintDrawer::drawHinge(hkpConstraintInstance* const
     {
         hkReal thetaMax = lhinge->getMaxAngularLimit();
         hkReal thetaMin = lhinge->getMinAngularLimit();
-        m_fAngularLimit.FUN_00de4950(getArcRadiusForDraw(), thetaMin, thetaMax, getNumArcSegmentsForDraw(),
+        m_fAngularLimit.UpdateState_00de4950(getArcRadiusForDraw(), thetaMin, thetaMax, getNumArcSegmentsForDraw(),
                                      m_vVectorAtOffset50, axisInWorld, axisPerpInWorld);
         hkArray<hkDisplayGeometry*> geometry;
         geometry.setSize(1);
@@ -359,7 +359,7 @@ __forceinline void HingeConstraintDrawer::drawHinge(hkpConstraintInstance* const
         end.addMul4(hkSimdReal(getLineLengthForDraw() * 0.75), axisPerpInWorld);
         displayHandler->DisplayLine(start, end, hkColor::YELLOW, id, tag);
         hkVector4 axisPerpA;
-        axisPerpA.FUN_00c7f700(m_kFirstRotation, baseA[2]);
+        axisPerpA.hkVector4_setRotatedDir(m_kFirstRotation, baseA[2]);
         axisPerpA.normalize3();
         start = m_vVectorAtOffset40;
         end = start;
@@ -368,7 +368,8 @@ __forceinline void HingeConstraintDrawer::drawHinge(hkpConstraintInstance* const
     }
 }
 // @fnv 0x00de5fe0
-extern "C" __declspec(noinline) void __fastcall FUN_00de5fe0(HingeConstraintDrawer* drawer, void*,
+// src: GUESS 0x00de5fe0 (confidence: medium)
+extern "C" __declspec(noinline) void __fastcall hkpConstraintInstance_DrawHinge_Thunk(HingeConstraintDrawer* drawer, void*,
                                                              hkpConstraintInstance* constraint,
                                                              hkDebugDisplayHandler* handler, int id, int tag)
 {

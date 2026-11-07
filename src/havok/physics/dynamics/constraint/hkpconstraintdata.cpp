@@ -7,22 +7,24 @@
 #include "../../../../../include/hkpConstraintAtom.h"
 #include "../../../../../include/hkpSimpleContactConstraintAtom.h"
 
-extern "C" void __cdecl FUN_00cb1280(void* dst, int n, int len);
+extern "C" void __cdecl hkString_memSet(void* dst, int n, int len);
 
 struct FUN_00d21a30_class
 {
-    void __thiscall FUN_00d21a30(int a, int b, int c);
+    void __thiscall hkpConstraintData_addInstance(int a, int b, int c);
 };
 
 // @fnv 0x00d21a30
-void __thiscall FUN_00d21a30_class::FUN_00d21a30(int a, int pBuffer, int uiLength)
+// src: HAVOK_LIB 0x00d21a30
+void __thiscall FUN_00d21a30_class::hkpConstraintData_addInstance(int a, int pBuffer, int uiLength)
 {
     if (pBuffer)
-        FUN_00cb1280((void*)pBuffer, 0, uiLength);
+        hkString_memSet((void*)pBuffer, 0, uiLength);
 }
 
 // @fnv 0x00d21a50
-int __stdcall FUN_00d21a50(int a)
+// src: GUESS 0x00d21a50 (confidence: low)
+int __stdcall hkpConstraintData_GetA(int a)
 {
     return a;
 }
@@ -51,7 +53,8 @@ inline void addAngularFriction(GenericConstraintAtomScheme* out, int schema, int
 }
 // Fills a GenericConstraintAtomScheme with solver schema sizes, result counts, and temps by walking the hkpConstraintAtom array.
 // @fnv 0x00d21a60
-void __cdecl FUN_00d21a60(const hkpConstraintAtom* atoms, int sizeOfAllAtoms, GenericConstraintAtomScheme* info)
+// src: HAVOK_LIB 0x00d21a60
+void __cdecl hkpConstraintData_getConstraintInfoUtil(const hkpConstraintAtom* atoms, int sizeOfAllAtoms, GenericConstraintAtomScheme* info)
 {
     info->atoms = atoms;
     info->sizeOfAllAtoms = sizeOfAllAtoms;

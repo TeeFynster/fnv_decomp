@@ -8,7 +8,8 @@
 #pragma optimize("", off)
 int TruncateFloatToInt(float value);
 // @fnv 0x005394a0
-bool TESLandFlagsView::FUN_005394a0()
+// src: XBOX_PDB 0x005394a0
+bool TESLandFlagsView::TESPackage_GetLockDoorsAtStart()
 {
     if (flags & 8)
         return true;
@@ -32,7 +33,8 @@ FUN_00533240_helper* FUN_00533240_helper::InitVtable()
 }
 
 // @fnv 0x00534550
-void* __fastcall FUN_00534550(PathingActorData* pThis)
+// src: COMMUNITY 0x00534550
+void* __fastcall NiTConvertingStrideIterator_NiTConvertingStrideIterator(PathingActorData* pThis)
 {
     pThis->PathingActorData::PathingActorData();
     return pThis;
@@ -106,12 +108,12 @@ struct blob12
     char b[12];
 };
 
-CellMopp* __fastcall FUN_0041bb10(void* pThis);
+CellMopp* __fastcall ExtraDataList_GetCellMopp(void* pThis);
 
 // @fnv 0x00537b30
 CellMopp* __fastcall GetCellMopp(char* pThis)
 {
-    return FUN_0041bb10(pThis + 0x28);
+    return ExtraDataList_GetCellMopp(pThis + 0x28);
 }
 
 extern int DAT_0102e388;
@@ -130,7 +132,8 @@ void __fastcall SetVtable(FUN_00538e30_class* this_ptr)
 
 // Returns a new NiPoint3 with each component divided by denom.
 // @fnv 0x0053d280
-NiPoint3 NiPoint3::FUN_0053d280(float denom) const
+// src: GUESS 0x0053d280 (confidence: low)
+NiPoint3 NiPoint3::ProcessAndReturnValue_0053d280(float denom) const
 {
     float inv = 1.0f / denom;
     return NiPoint3(inv * this->x, inv * this->y, inv * this->z);

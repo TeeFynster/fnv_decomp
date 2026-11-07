@@ -49,7 +49,8 @@ struct VisualDebuggerFactoryObject
 };
 // Allocates and constructs a VisualDebuggerFactoryObject object and returns it as a BSFadeNode pointer.
 // @fnv 0x00ccf890
-BSFadeNode* FUN_00ccf890()
+// src: EXE 0x00ccf890
+BSFadeNode* bhkConvexListShape_CreateObject()
 {
     return reinterpret_cast<BSFadeNode*>(new VisualDebuggerFactoryObject);
 }
@@ -93,9 +94,9 @@ void hkVisualDebugger::serve(int iListenPort)
             unsigned int streamStorage[sizeof(hkOstream) / sizeof(unsigned int)];
             hkOstream& kReportStream = *reinterpret_cast<hkOstream*>(streamStorage);
             kReportStream.FUN_00cb1600(auiReportBuf, sizeof(auiReportBuf));
-            kReportStream.FUN_00cc01c0("Server created and will poll for new client(s) on port ")
+            kReportStream.ProcessAndReturnValue_00cc01c0("Server created and will poll for new client(s) on port ")
                 .WriteInt(iListenPort)
-                .FUN_00cc01c0(" every frame");
+                .ProcessAndReturnValue_00cc01c0(" every frame");
             DAT_01268360->message(0, -1, (char*)auiReportBuf, ".\\hkVisualDebugger.cpp", 103);
             kReportStream.FUN_00cc00e0();
         }
@@ -105,7 +106,7 @@ void hkVisualDebugger::serve(int iListenPort)
             unsigned int streamStorage[sizeof(hkOstream) / sizeof(unsigned int)];
             hkOstream& kReportStream = *reinterpret_cast<hkOstream*>(streamStorage);
             kReportStream.FUN_00cb1600(auiReportBuf, sizeof(auiReportBuf));
-            kReportStream.FUN_00cc01c0(
+            kReportStream.ProcessAndReturnValue_00cc01c0(
                 "Server could not be created, please check that you platform supports sockets with the hkBase library");
             DAT_01268360->message(0, -1, (char*)auiReportBuf, ".\\hkVisualDebugger.cpp", 107);
             kReportStream.FUN_00cc00e0();
@@ -117,7 +118,7 @@ void hkVisualDebugger::serve(int iListenPort)
         unsigned int streamStorage[sizeof(hkOstream) / sizeof(unsigned int)];
         hkOstream& kReportStream = *reinterpret_cast<hkOstream*>(streamStorage);
         kReportStream.FUN_00cb1600(auiReportBuf, sizeof(auiReportBuf));
-        kReportStream.FUN_00cc01c0(
+        kReportStream.ProcessAndReturnValue_00cc01c0(
             "Server has already been created, only one server allowed per visual debugger instance");
         DAT_01268360->message(0, -1, (char*)auiReportBuf, ".\\hkVisualDebugger.cpp", 112);
         kReportStream.FUN_00cc00e0();
@@ -149,10 +150,10 @@ class hkTargetCD0E
 class hkControllerCD0E
 {
   public:
-    void FUN_00d60960(int mode);
-    void FUN_00d605d0(unsigned int flags);
+    void hkOArchive_write32u(int mode);
+    void hkOArchive_write8u(unsigned int flags);
     void HashUInt(float t);
-    hkTargetCD0E* FUN_00d60800();
+    hkTargetCD0E* hkOArchive_getStreamWriter();
 };
 
 class hkItemCD0E
@@ -193,10 +194,10 @@ void hkOwnerCD0E::ActivateEntry(int aiIndex, float t)
     if (e.m_item->m_uiContentCount.isActive())
     {
         hkControllerCD0E* c = e.m_item->m_controller;
-        c->FUN_00d60960(5);
-        c->FUN_00d605d0(0);
+        c->hkOArchive_write32u(5);
+        c->hkOArchive_write8u(0);
         c->HashUInt(t);
-        c->FUN_00d60800()->activate();
+        c->hkOArchive_getStreamWriter()->activate();
     }
 }
 
@@ -247,7 +248,7 @@ void hkVisualDebugger::shutdown() throw()
         unsigned int streamStorage[sizeof(hkOstream) / sizeof(unsigned int)];
         hkOstream& kReportStream = *reinterpret_cast<hkOstream*>(streamStorage);
         kReportStream.FUN_00cb1600(auiReportBuf, sizeof(auiReportBuf));
-        kReportStream.FUN_00cc01c0("Client deleted.");
+        kReportStream.ProcessAndReturnValue_00cc01c0("Client deleted.");
         fnv_00cd11a0::DAT_01268360->message(0, -1, (char*)auiReportBuf, ".\\hkVisualDebugger.cpp", 81);
         kReportStream.FUN_00cc00e0();
     }
@@ -259,7 +260,7 @@ void hkVisualDebugger::shutdown() throw()
         unsigned int streamStorage[sizeof(hkOstream) / sizeof(unsigned int)];
         hkOstream& kReportStream = *reinterpret_cast<hkOstream*>(streamStorage);
         kReportStream.FUN_00cb1600(auiReportBuf, sizeof(auiReportBuf));
-        kReportStream.FUN_00cc01c0("Server deleted.");
+        kReportStream.ProcessAndReturnValue_00cc01c0("Server deleted.");
         fnv_00cd11a0::DAT_01268360->message(0, -1, (char*)auiReportBuf, ".\\hkVisualDebugger.cpp", 88);
         kReportStream.FUN_00cc00e0();
     }
@@ -375,12 +376,13 @@ class FUN_00cd1710_C
     EntryCD17* m_pEntries;
     int m_iNumEntries;
 
-    void FUN_00cd1710(SinkCD17* pkSink);
+    void hkVisualDebugger_getCurrentProcesses(SinkCD17* pkSink);
 };
 
 // For each entry with inventory data, calls pkSink->Search using m_i04, m_i38, and m_i3C.
 // @fnv 0x00cd1710
-void FUN_00cd1710_C::FUN_00cd1710(SinkCD17* pkSink)
+// src: HAVOK_LIB 0x00cd1710
+void FUN_00cd1710_C::hkVisualDebugger_getCurrentProcesses(SinkCD17* pkSink)
 {
     int iEntryIndex = m_iNumEntries;
     for (int i = 0; i < iEntryIndex; i++)
@@ -648,7 +650,7 @@ void hkVisualDebugger::removeTrackedObject(void* obj)
     }
 }
 
-void __cdecl FUN_00c908c0(hkMemoryAllocator* heap, void* array, int numElements, int sizeOfElement) throw();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* heap, void* array, int numElements, int sizeOfElement) throw();
 void __cdecl WriteCompilerInfo(void* p) throw();
 
 template <class T> __forceinline T& allocateDebuggerEntry(hkArray<T>& a) throw()
@@ -662,7 +664,7 @@ template <class T> __forceinline T& allocateDebuggerEntry(hkArray<T>& a) throw()
         int cap2 = 2 * cap;
         if (newSize >= cap2)
             cap2 = newSize;
-        FUN_00c908c0(&heap, &a, cap2, sizeof(T));
+        hkArrayUtil__reserve(&heap, &a, cap2, sizeof(T));
     }
     a.m_iElementCount++;
     return a.m_data[n];
@@ -778,7 +780,7 @@ void hkVisualDebugger::pollForNewClients()
             unsigned int streamStorage[sizeof(hkOstream) / sizeof(unsigned int)];
             hkOstream& ostr = *reinterpret_cast<hkOstream*>(streamStorage);
             ostr.FUN_00cb1600(szBuffer, sizeof(szBuffer));
-            ostr.FUN_00cc01c0(DAT_010cafd8);
+            ostr.ProcessAndReturnValue_00cc01c0(DAT_010cafd8);
             DAT_01268360->message(0, -1, (char*)szBuffer, DAT_010cae1c, 0xe8);
             ostr.FUN_00cc00e0();
             createClient(reinterpret_cast<hkSocket*>(client), reinterpret_cast<hkStreamReader*>(client + 8),
@@ -825,9 +827,9 @@ namespace fnv_00cd1610 {
 struct DefaultProcessSlot
 {
     unsigned int taggedPtr;
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
-extern "C" int __cdecl FUN_00cb0fa0(unsigned int taggedObject, unsigned int wanted);
+extern "C" int __cdecl hkString_strCmp(unsigned int taggedObject, unsigned int wanted);
 
 extern "C" hkError* DAT_01268360;
 struct FUN_00cd1610_cls
@@ -854,18 +856,19 @@ struct FUN_00cd1610_cls
     unsigned int unk4c;
     DefaultProcessSlot* m_processes;
     int m_uiItemCount;
-    void FUN_00cd1610(unsigned int wanted);
+    void hkVisualDebugger_removeDefaultProcess(unsigned int wanted);
 };
 // Removes the process slot matching wanted from m_processes, or logs an error via DAT_01268360 if it is not found.
 // @fnv 0x00cd1610
-void FUN_00cd1610_cls::FUN_00cd1610(unsigned int wanted)
+// src: HAVOK_LIB 0x00cd1610
+void FUN_00cd1610_cls::hkVisualDebugger_removeDefaultProcess(unsigned int wanted)
 {
     for (int i = 0; i < m_uiItemCount; ++i)
     {
         unsigned int current = m_processes[i].taggedPtr;
-        if (FUN_00cb0fa0(current & ~1u, wanted) == 0)
+        if (hkString_strCmp(current & ~1u, wanted) == 0)
         {
-            m_processes[i].FUN_00cb0c00();
+            m_processes[i].Object_UpdateFields_00cb0c00();
             --m_uiItemCount;
             if (m_uiItemCount != i)
             {
@@ -880,9 +883,9 @@ void FUN_00cd1610_cls::FUN_00cd1610(unsigned int wanted)
     hkOstream& message = *reinterpret_cast<hkOstream*>(reportStorage);
     char* reportBuffer = reinterpret_cast<char*>(reportStorage + sizeof(hkOstream) / sizeof(unsigned int));
     message.FUN_00cb1600(reportBuffer, 512);
-    message.FUN_00cc01c0("The default Process'")
-        .FUN_00cc01c0((const char*)wanted)
-        .FUN_00cc01c0("', cannot not be removed from the default process list as it cannot be found!");
+    message.ProcessAndReturnValue_00cc01c0("The default Process'")
+        .ProcessAndReturnValue_00cc01c0((const char*)wanted)
+        .ProcessAndReturnValue_00cc01c0("', cannot not be removed from the default process list as it cannot be found!");
     DAT_01268360->message(0, -1, reportBuffer, ".\\hkVisualDebugger.cpp", 318);
     message.FUN_00cc00e0();
     DAT_01268360->endSection();

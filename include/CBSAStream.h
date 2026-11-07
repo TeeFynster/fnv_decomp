@@ -17,6 +17,6 @@ public:
     virtual void vf05();
     virtual void vf06();
 
-    void FUN_0082f1d0();
+    void Unlock_0082f1d0();
     unsigned __int64 GetStreamPosition(unsigned __int64* puiPosition);
 };

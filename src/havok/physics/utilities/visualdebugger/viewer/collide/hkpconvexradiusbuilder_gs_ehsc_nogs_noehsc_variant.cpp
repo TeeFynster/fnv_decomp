@@ -55,12 +55,13 @@ struct D31Tbl
 
 __declspec(align(16)) D31Tbl tbl_0101b330;
 
-D31Tbl2* __cdecl FUN_00c85750();
+D31Tbl2* __cdecl hkMemoryRouter_getInstance();
 
 extern float DAT_0101b31c;
 
 // @fnv 0x00de3110
-static __declspec(noinline) float FUN_00de3110(int dummy, D31Mgr* mgr)
+// src: XBOX_PDB 0x00de3110
+static __declspec(noinline) float _getPlaneToSurfaceDistance(int dummy, D31Mgr* mgr)
 {
     D31Pair* pair = mgr->FUN_00d58d50();
     D31Arr out;
@@ -103,7 +104,7 @@ static __declspec(noinline) float FUN_00de3110(int dummy, D31Mgr* mgr)
         } while (oc != 0);
     }
 
-    D31Tbl2* t2 = FUN_00c85750();
+    D31Tbl2* t2 = hkMemoryRouter_getInstance();
     D31VtIface* vt = t2->sub;
     unsigned int cap = out.capacityAndFlags;
     out.count = 0;
@@ -116,5 +117,5 @@ static __declspec(noinline) float FUN_00de3110(int dummy, D31Mgr* mgr)
 
 float __cdecl S00de3110_Entry()
 {
-    return FUN_00de3110(0, (D31Mgr*)tbl_0101b330.t);
+    return _getPlaneToSurfaceDistance(0, (D31Mgr*)tbl_0101b330.t);
 }

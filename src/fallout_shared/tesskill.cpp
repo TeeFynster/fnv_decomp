@@ -38,12 +38,13 @@ void __thiscall SkillData::SwapEndian()
     }
 }
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 // @fnv 0x00485910
-void __cdecl FUN_00485910(unsigned int a, int aiValue)
+// src: XBOX_PDB 0x00485910
+void __cdecl TESForm_AddChunk_00485910(unsigned int a, int aiValue)
 {
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         BSEndian(&aiValue, EndianSizeTag<3>());
     AppendChunk(a, &aiValue, 4);
 }
@@ -77,28 +78,28 @@ void __thiscall TESSkill::InitializeComponent()
 }
 
 namespace fnv_00617fc0 {
-void __cdecl FUN_00485910(int, int);
+void __cdecl TESForm_AddChunk_00485910(int, int);
 void __cdecl WriteDescChunk(void*, int);
-int __cdecl FUN_00401500();
+int __cdecl TESForm_QEndianSwapOnSave();
 }  // namespace fnv_00617fc0
 
 // @fnv 0x00617fc0
 void __thiscall TESSkill::SaveForm()
 {
-    ((TESForm*)this)->FUN_004855a0();
-    fnv_00617fc0::FUN_00485910(0x58444e49, *(int*)((char*)this + 0x2c));
+    ((TESForm*)this)->BeginFormRecord();
+    fnv_00617fc0::TESForm_AddChunk_00485910(0x58444e49, *(int*)((char*)this + 0x2c));
     ((TESDescription*)((char*)this + 0x18))->Save();
     ((TESTexture*)((char*)this + 0x20))->Save(0x4e4f4349);
-    if ((unsigned char)fnv_00617fc0::FUN_00401500())
+    if ((unsigned char)fnv_00617fc0::TESForm_QEndianSwapOnSave())
         ((SkillData*)((char*)this + 0x2c))->SwapEndian();
-    ((TESForm*)this)->FUN_00485e20((char*)this + 0x2c, 0x14);
-    if ((unsigned char)fnv_00617fc0::FUN_00401500())
+    ((TESForm*)this)->TESForm___SaveData((char*)this + 0x2c, 0x14);
+    if ((unsigned char)fnv_00617fc0::TESForm_QEndianSwapOnSave())
         ((SkillData*)((char*)this + 0x2c))->SwapEndian();
     fnv_00617fc0::WriteDescChunk((char*)this + 0x40, 0x4d414e41);
     fnv_00617fc0::WriteDescChunk((char*)this + 0x48, 0x4d414e4a);
     fnv_00617fc0::WriteDescChunk((char*)this + 0x50, 0x4d414e45);
     fnv_00617fc0::WriteDescChunk((char*)this + 0x58, 0x4d414e4d);
-    ((TESForm*)this)->FUN_00485680();
+    ((TESForm*)this)->FinishFormRecord();
 }
 
 extern "C" void* __cdecl _alloca(unsigned int);
@@ -115,7 +116,7 @@ bool TESSkill::LoadForm(TESFile* apFile)
 
     this->FUN_00485110(apFile);
 
-    while ((chunkID = apFile->FUN_004726b0()) != 0)
+    while ((chunkID = apFile->TESFile_GetTESChunk()) != 0)
     {
         switch (chunkID)
         {

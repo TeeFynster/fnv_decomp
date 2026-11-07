@@ -127,7 +127,7 @@ void FUN_00ddf050_cls::ClearContainer()
     *(unsigned long*)((char*)this + 0x18) = 0;
 }
 
-extern "C" void __cdecl FUN_00d51760(int* p1, int* p2);
+extern "C" void __cdecl hkpConstraintConstructionKit_computeConstraintInfo(int* p1, int* p2);
 struct FUN_00dd0420_Class
 {
     int m_00;
@@ -138,11 +138,12 @@ struct FUN_00dd0420_Class
     int m_14;
     int m_18;
     int m_1c;
-    FUN_00dd0420_Class* __thiscall FUN_00dd0420(int arg);
+    FUN_00dd0420_Class* __thiscall hkpGenericConstraintDataScheme_hkpGenericConstraintDataScheme(int arg);
 };
 // If arg is nonzero, zeroes m_00/m_08/m_0c, sets m_04 to 0x10, calls FUN_00d51760 on m_1c and this, then sets m_00 to m_04; returns this.
 // @fnv 0x00dd0420
-FUN_00dd0420_Class* __thiscall FUN_00dd0420_Class::FUN_00dd0420(int aiFlag)
+// src: HAVOK_LIB 0x00dd0420
+FUN_00dd0420_Class* __thiscall FUN_00dd0420_Class::hkpGenericConstraintDataScheme_hkpGenericConstraintDataScheme(int aiFlag)
 {
     if (aiFlag)
     {
@@ -150,7 +151,7 @@ FUN_00dd0420_Class* __thiscall FUN_00dd0420_Class::FUN_00dd0420(int aiFlag)
         m_08 = 0;
         m_0c = 0;
         m_04 = 0x10;
-        FUN_00d51760(&m_1c, (int*)this);
+        hkpConstraintConstructionKit_computeConstraintInfo(&m_1c, (int*)this);
         m_00 = m_04;
     }
     return this;
@@ -158,10 +159,11 @@ FUN_00dd0420_Class* __thiscall FUN_00dd0420_Class::FUN_00dd0420(int aiFlag)
 
 struct FUN_00dd4b70_class
 {
-    void __thiscall FUN_00dd4b70(unsigned char value);
+    void __thiscall hkpMoppCompiler_enableInterleavedBuilding(unsigned char value);
 };
 // @fnv 0x00dd4b70
-void __thiscall FUN_00dd4b70_class::FUN_00dd4b70(unsigned char value)
+// src: HAVOK_LIB 0x00dd4b70
+void __thiscall FUN_00dd4b70_class::hkpMoppCompiler_enableInterleavedBuilding(unsigned char value)
 {
     *(unsigned char*)(this + 0x1c) = value;
     *(unsigned char*)(this + 0x64) = value;
@@ -174,11 +176,12 @@ struct FUN_00dd51d0_class
     int m_00;
     int m_04;
     int m_08;
-    void FUN_00dd51d0();
+    void InitializeFields_00dd51d0();
 };
 
 // @fnv 0x00dd51d0
-void FUN_00dd51d0_class::FUN_00dd51d0()
+// src: GUESS 0x00dd51d0 (confidence: low)
+void FUN_00dd51d0_class::InitializeFields_00dd51d0()
 {
     m_08 = 0;
     m_00 = (int)&DAT_0102e388;
@@ -188,11 +191,12 @@ struct FUN_00ddfb70_cls
 {
     int m_00;
     int m_04;
-    FUN_00ddfb70_cls* FUN_00ddfb70();
+    FUN_00ddfb70_cls* hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment();
 };
 
 // @fnv 0x00ddfb70
-FUN_00ddfb70_cls* FUN_00ddfb70_cls::FUN_00ddfb70()
+// src: HAVOK_LIB 0x00ddfb70
+FUN_00ddfb70_cls* FUN_00ddfb70_cls::hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment()
 {
     m_00 = 8;
     m_04 = 8;
@@ -236,12 +240,13 @@ struct FUN_00dc9e70_Class
     int m_10;
     int m_14;
     int m_18;
-    FUN_00dc9e70_Class* FUN_00dc9e70();
+    FUN_00dc9e70_Class* InitializeFields_00dc9e70();
 };
 
 // Initializes the object's fields to zero/defaults, sets up the embedded CountArray at m_0c, and returns this.
 // @fnv 0x00dc9e70
-FUN_00dc9e70_Class* FUN_00dc9e70_Class::FUN_00dc9e70()
+// src: GUESS 0x00dc9e70 (confidence: low)
+FUN_00dc9e70_Class* FUN_00dc9e70_Class::InitializeFields_00dc9e70()
 {
     m_00 = 0;
     m_04 = 0;
@@ -269,10 +274,11 @@ struct FUN_00dcc5a0_class
     int m_00;
     int m_04;
     FUN_00dcc5a0_vt* m_08;
-    FUN_00dcc5a0_class* FUN_00dcc5a0(int arg);
+    FUN_00dcc5a0_class* ProcessAndReturnValue_00dcc5a0(int arg);
 };
 // @fnv 0x00dcc5a0
-FUN_00dcc5a0_class* FUN_00dcc5a0_class::FUN_00dcc5a0(int arg)
+// src: GUESS 0x00dcc5a0 (confidence: low)
+FUN_00dcc5a0_class* FUN_00dcc5a0_class::ProcessAndReturnValue_00dcc5a0(int arg)
 {
     m_08->v4(arg, 1);
     return this;
@@ -283,7 +289,8 @@ struct FUN_00cb0a70
     void __thiscall m(int);
 };
 // @fnv 0x00dccae0
-void __cdecl FUN_00dccae0(void* a, void* iValue)
+// src: GUESS 0x00dccae0 (confidence: low)
+void __cdecl Object_ProcessState_00dccae0(void* a, void* iValue)
 {
     if (a)
         ((FUN_00cb0a70*)((char*)a + 4))->m((int)iValue);
@@ -295,7 +302,8 @@ struct S_00d49310_Lock
 };
 
 // @fnv 0x00dccb10
-void __cdecl FUN_00dccb10(char* p)
+// src: GUESS 0x00dccb10 (confidence: low)
+void __cdecl Runtime_UpdateState_00dccb10(char* p)
 {
     p += 4;
     S_00d49310_Lock* lock = reinterpret_cast<S_00d49310_Lock*>(p);
@@ -345,10 +353,11 @@ struct D2B3D0Map
 };
 struct FUN_00ddf030_Class
 {
-    void __thiscall FUN_00ddf030(int arg);
+    void __thiscall Clear_Thunk(int arg);
 };
 // @fnv 0x00ddf030
-void __thiscall FUN_00ddf030_Class::FUN_00ddf030(int arg)
+// src: GUESS 0x00ddf030 (confidence: medium)
+void __thiscall FUN_00ddf030_Class::Clear_Thunk(int arg)
 {
     ((D2B3D0Map*)((char*)this + 0x20))->clear();
 }
@@ -360,7 +369,8 @@ struct D2B3D0Map
 };
 
 // @fnv 0x00ddf040
-void __fastcall FUN_00ddf040(char* ecx, int edx)
+// src: GUESS 0x00ddf040 (confidence: medium)
+void __fastcall Object_Clear_Thunk(char* ecx, int edx)
 {
     ((D2B3D0Map*)(ecx + 0x20))->clear();
 }
@@ -381,7 +391,8 @@ struct FUN_00ddfb80_s
 
 // Initialises the object: sets field at offset 6 to 1, assigns the vtable, copies two pointers from src, and zeroes the field at offset 16.
 // @fnv 0x00ddfb80
-FUN_00ddfb80_s* __fastcall FUN_00ddfb80(FUN_00ddfb80_s* self, int, const void* src)
+// src: HAVOK_LIB 0x00ddfb80
+FUN_00ddfb80_s* __fastcall hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(FUN_00ddfb80_s* self, int, const void* src)
 {
     *(unsigned short*)((char*)self + 6) = 1;
     self->m_vt = &DAT_010d8094;
@@ -393,7 +404,8 @@ FUN_00ddfb80_s* __fastcall FUN_00ddfb80(FUN_00ddfb80_s* self, int, const void* s
 
 // FUN_00dc1660: __stdcall identity on its single stack parameter.
 // @fnv 0x00dc1660
-int __stdcall FUN_00dc1660(int a1)
+// src: GUESS 0x00dc1660 (confidence: high)
+int __stdcall Object_ReturnArgument_00dc1660(int a1)
 {
     return a1;
 }
@@ -403,23 +415,25 @@ extern int DAT_011b7b88;
 struct FUN_00dc1670_cls
 {
     int m_00;
-    FUN_00dc1670_cls* FUN_00dc1670();
+    FUN_00dc1670_cls* hkStructureLayout_hkStructureLayout();
 };
 
 // @fnv 0x00dc1670
-FUN_00dc1670_cls* FUN_00dc1670_cls::FUN_00dc1670()
+// src: COMMUNITY 0x00dc1670
+FUN_00dc1670_cls* FUN_00dc1670_cls::hkStructureLayout_hkStructureLayout()
 {
     this->m_00 = DAT_011b7b88;
     return this;
 }
 
-void __stdcall FUN_00dd8fe0(float* out, int a, int b);
+void __stdcall hkIArchive_readArrayGeneric(float* out, int a, int b);
 
 // @fnv 0x00dc5bb0
-float FUN_00dc5bb0()
+// src: HAVOK_LIB 0x00dc5bb0
+float hkIArchive_readFloat32()
 {
     float value;
-    FUN_00dd8fe0(&value, 4, 1);
+    hkIArchive_readArrayGeneric(&value, 4, 1);
     return value;
 }
 
@@ -429,8 +443,8 @@ struct ArrayBlock
     int size;
     unsigned int reservedAndFlags;
 };
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00c908c0(void*, ArrayBlock*, int, int);
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
+extern "C" void __cdecl hkArrayUtil__reserve(void*, ArrayBlock*, int, int);
 struct ArrayHost
 {
     int unk00, unk04, unk08;
@@ -442,14 +456,14 @@ struct ArrayHost
 void ArrayHost::ResizeArray(int desired)
 {
     ArrayBlock* values = &array;
-    void* pool = (&FUN_00c85750()->heap());
+    void* pool = (&hkMemoryRouter_getInstance()->heap());
     int capacity = values->reservedAndFlags & 0x3fffffff;
     if (capacity < desired)
     {
         int nextCapacity = capacity * 2;
         if (desired >= nextCapacity)
             nextCapacity = desired;
-        FUN_00c908c0(pool, values, nextCapacity, 4);
+        hkArrayUtil__reserve(pool, values, nextCapacity, 4);
     }
     int extra = desired - values->size;
     unsigned int* next = values->values + values->size;
@@ -471,8 +485,8 @@ struct AllocatorIface
     virtual void Free(void* pBuffer, unsigned int size);
 };
 
-hkMemoryRouter* FUN_00c85750();
-void FUN_00c908c0(AllocatorIface* alloc, void* arr, unsigned int newCap, int elemSize);
+hkMemoryRouter* hkMemoryRouter_getInstance();
+void hkArrayUtil__reserve(AllocatorIface* alloc, void* arr, unsigned int newCap, int elemSize);
 
 struct DwordArray
 {
@@ -497,7 +511,7 @@ class FUN_00dc9e20_cls
 void FUN_00dc9e20_cls::ReserveDwordArray(int count)
 {
     DwordArray* arr = &m_aiIndexedValues;
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     AllocatorIface* alloc = reinterpret_cast<AllocatorIface*>(holder->m_heap);
     int cap = arr->m_iReserved & 0x3fffffff;
     if (cap < count)
@@ -507,7 +521,7 @@ void FUN_00dc9e20_cls::ReserveDwordArray(int count)
         {
             newCap = count;
         }
-        FUN_00c908c0(alloc, arr, (unsigned int)newCap, 4);
+        hkArrayUtil__reserve(alloc, arr, (unsigned int)newCap, 4);
     }
 }
 }  // namespace fnv_00dc9e20
@@ -526,12 +540,13 @@ struct FUN_00dcc180_Class
     int unk04;
     FUN_00dcc180_Interface* unk08;
 
-    unsigned char* __thiscall FUN_00dcc180(unsigned char* value);
+    unsigned char* __thiscall hkIstream_isOk(unsigned char* value);
 };
 
 // If unk08 is set, forwards value to its virtual method; otherwise writes 0 to *value and returns value.
 // @fnv 0x00dcc180
-unsigned char* __thiscall FUN_00dcc180_Class::FUN_00dcc180(unsigned char* pucValue)
+// src: HAVOK_LIB 0x00dcc180
+unsigned char* __thiscall FUN_00dcc180_Class::hkIstream_isOk(unsigned char* pucValue)
 {
     if (unk08)
         unk08->FUN_00dcc180_03(pucValue);
@@ -555,11 +570,12 @@ struct FUN_00dcc660_cls
     int unk00;
     int unk04;
     Target* m_pFlagTarget;
-    void FUN_00dcc660(int a);
+    void InvokeVirtualMethod_00dcc660(int a);
 };
 
 // @fnv 0x00dcc660
-void FUN_00dcc660_cls::FUN_00dcc660(int a)
+// src: GUESS 0x00dcc660 (confidence: low)
+void FUN_00dcc660_cls::InvokeVirtualMethod_00dcc660(int a)
 {
     m_pFlagTarget->Forward(a);
 }
@@ -604,7 +620,7 @@ struct AllocIface
     virtual void* Alloc(unsigned int size);
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 extern char DAT_010d7540[];
 
@@ -623,16 +639,17 @@ struct FUN_00dcc6a0_cls
     unsigned short m_w06;
     void* m_p08;
 
-    FUN_00dcc6a0_cls* FUN_00dcc6a0(int a1, int a2);
+    FUN_00dcc6a0_cls* hkIstream_hkIstream_00dcc6a0(int a1, int a2);
 };
 
 // Sets m_w06 to 1 and the vtable, allocates a 0x1c-byte blob via the allocator, stores its Init result in m_p08, and returns this.
 // @fnv 0x00dcc6a0
-FUN_00dcc6a0_cls* FUN_00dcc6a0_cls::FUN_00dcc6a0(int a1, int a2)
+// src: HAVOK_LIB 0x00dcc6a0
+FUN_00dcc6a0_cls* FUN_00dcc6a0_cls::hkIstream_hkIstream_00dcc6a0(int a1, int a2)
 {
     m_w06 = 1;
     m_vptr = DAT_010d7540;
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     SpawnedBlob* blob = (SpawnedBlob*)reinterpret_cast<AllocIface*>(holder->m_heap)->Alloc(0x1c);
     blob->m_w04 = 0x1c;
     m_p08 = blob->Init(a1, a2, 2);
@@ -647,7 +664,7 @@ struct AllocIface
     virtual void* Alloc(unsigned int size);
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 extern char DAT_010d7540[];
 
@@ -666,16 +683,17 @@ struct FUN_00dcc6f0_cls
     unsigned short m_w06;
     void* m_p08;
 
-    FUN_00dcc6f0_cls* FUN_00dcc6f0(int a1);
+    FUN_00dcc6f0_cls* hkIstream_hkIstream_00dcc6f0(int a1);
 };
 
 // Sets m_w06 to 1 and the vtable, allocates a 0x14-byte blob via the allocator, sets its m_w04 to 0x14, stores blob->Init(a1, 2) in m_p08 and returns this.
 // @fnv 0x00dcc6f0
-FUN_00dcc6f0_cls* FUN_00dcc6f0_cls::FUN_00dcc6f0(int a1)
+// src: HAVOK_LIB 0x00dcc6f0
+FUN_00dcc6f0_cls* FUN_00dcc6f0_cls::hkIstream_hkIstream_00dcc6f0(int a1)
 {
     m_w06 = 1;
     m_vptr = DAT_010d7540;
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     SpawnedBlob* blob = (SpawnedBlob*)reinterpret_cast<AllocIface*>(holder->m_heap)->Alloc(0x14);
     blob->m_w04 = 0x14;
     m_p08 = blob->Init(a1, 2);
@@ -693,7 +711,7 @@ struct S_00dcc9c0_Allocator
     virtual void ReturnMemory(void* p, int numBytes);
 };
 
-hkMemoryRouter* FUN_00c85750() throw();
+hkMemoryRouter* hkMemoryRouter_getInstance() throw();
 
 inline S_00dcc9c0_Allocator& temp(hkMemoryRouter* holder)
 {
@@ -710,7 +728,7 @@ struct S_00dcc9c0_StringBuf
     S_00dcc9c0_StringBuf() throw();
     ~S_00dcc9c0_StringBuf() throw()
     {
-        S_00dcc9c0_Allocator& a = temp(FUN_00c85750());
+        S_00dcc9c0_Allocator& a = temp(hkMemoryRouter_getInstance());
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             a.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(char));
@@ -719,21 +737,22 @@ struct S_00dcc9c0_StringBuf
 
 struct S_00dcc9c0_Target
 {
-    void __thiscall FUN_00cb0c10(const char* name) throw();
+    void __thiscall UpdateState_00cb0c10(const char* name) throw();
 };
 
 struct S_00dcc9c0_Class
 {
     void __thiscall ReadToken(S_00dcc9c0_StringBuf* buf) throw();
-    S_00dcc9c0_Class* __thiscall FUN_00dcc9c0(S_00dcc9c0_Target* target) throw();
+    S_00dcc9c0_Class* __thiscall ProcessAndReturnValue_00dcc9c0(S_00dcc9c0_Target* target) throw();
 };
 
 // @fnv 0x00dcc9c0
-S_00dcc9c0_Class* S_00dcc9c0_Class::FUN_00dcc9c0(S_00dcc9c0_Target* target) throw()
+// src: GUESS 0x00dcc9c0 (confidence: low)
+S_00dcc9c0_Class* S_00dcc9c0_Class::ProcessAndReturnValue_00dcc9c0(S_00dcc9c0_Target* target) throw()
 {
     S_00dcc9c0_StringBuf buf;
     this->ReadToken(&buf);
-    target->FUN_00cb0c10(buf.m_data);
+    target->UpdateState_00cb0c10(buf.m_data);
     return this;
 }
 }  // namespace fnv_00dcc9c0
@@ -741,7 +760,8 @@ S_00dcc9c0_Class* S_00dcc9c0_Class::FUN_00dcc9c0(S_00dcc9c0_Target* target) thro
 extern int g_unk01269bb4;
 
 // @fnv 0x00dccb00
-int* __cdecl FUN_00dccb00()
+// src: GUESS 0x00dccb00 (confidence: low)
+int* __cdecl Object_GetGlobalObjectAddress_00dccb00()
 {
     return &g_unk01269bb4;
 }
@@ -749,7 +769,8 @@ int* __cdecl FUN_00dccb00()
 extern int DAT_01269be4;
 
 // @fnv 0x00dccb30
-int* __cdecl FUN_00dccb30()
+// src: GUESS 0x00dccb30 (confidence: low)
+int* __cdecl Runtime_GetDAT01269be4Address()
 {
     return &DAT_01269be4;
 }
@@ -761,21 +782,22 @@ struct FnvCpu_FUN_00dcd480_CpuAllocator
     virtual void slot04();
     virtual void Invoke(void* block, unsigned int size);
 };
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00dcd480_CpuObject
 {
     unsigned int unk00;
     unsigned short size;
     void FUN_00d4bd60();
-    FnvCpu_FUN_00dcd480_CpuObject* FUN_00dcd480(unsigned int flags);
+    FnvCpu_FUN_00dcd480_CpuObject* hkpMeshShape_Destroy(unsigned int flags);
 };
 // @fnv 0x00dcd480
-FnvCpu_FUN_00dcd480_CpuObject* FnvCpu_FUN_00dcd480_CpuObject::FUN_00dcd480(unsigned int flags)
+// src: COMMUNITY 0x00dcd480
+FnvCpu_FUN_00dcd480_CpuObject* FnvCpu_FUN_00dcd480_CpuObject::hkpMeshShape_Destroy(unsigned int flags)
 {
     FUN_00d4bd60();
     if (flags & 1)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         reinterpret_cast<FnvCpu_FUN_00dcd480_CpuAllocator*>(holder->m_heap)->Invoke(this, size);
     }
     return this;
@@ -788,7 +810,8 @@ struct FUN_00dced30_cls
 };
 
 // @fnv 0x00dced30
-void __cdecl FUN_00dced30(FUN_00dced30_cls* pObject)
+// src: GUESS 0x00dced30 (confidence: low)
+void __cdecl Object_ForwardCall_00dced30(FUN_00dced30_cls* pObject)
 {
     pObject->m_v00(0);
 }
@@ -796,7 +819,8 @@ void __cdecl FUN_00dced30(FUN_00dced30_cls* pObject)
 extern int DAT_01269c44;
 
 // @fnv 0x00dced40
-int __cdecl FUN_00dced40()
+// src: GUESS 0x00dced40 (confidence: low)
+int __cdecl Object_ComputeValue_00dced40()
 {
     return reinterpret_cast<int>(&DAT_01269c44);
 }
@@ -807,7 +831,8 @@ struct FUN_00d4dfc0_class
 };
 
 // @fnv 0x00dced50
-void __cdecl FUN_00dced50(FUN_00d4dfc0_class* object, unsigned int value)
+// src: GUESS 0x00dced50 (confidence: low)
+void __cdecl Runtime_ProcessState_00dced50(FUN_00d4dfc0_class* object, unsigned int value)
 {
     if (object)
         object->FUN_00d4dfc0(value);
@@ -842,12 +867,13 @@ struct FUN_00dd50f0_cls
     int m_0c;
     int m_10;
     unsigned char m_14;
-    FUN_00dd50f0_cls* FUN_00dd50f0(int mode);
+    FUN_00dd50f0_cls* hkpMoppSplitter_hkpMoppSplitParams_hkpMoppSplitParams(int mode);
 };
 
 // Initialises the object's fields to defaults, then overrides m_00 and m_08 depending on mode (0 or 1), and returns this.
 // @fnv 0x00dd50f0
-FUN_00dd50f0_cls* FUN_00dd50f0_cls::FUN_00dd50f0(int mode)
+// src: HAVOK_LIB 0x00dd50f0
+FUN_00dd50f0_cls* FUN_00dd50f0_cls::hkpMoppSplitter_hkpMoppSplitParams_hkpMoppSplitParams(int mode)
 {
     m_00 = DAT_0101e2bc;
     m_10 = 5;
@@ -881,11 +907,12 @@ struct FUN_00dd5150_cls
     float m_f0c;
     float m_f10;
     float m_f14;
-    void* FUN_00dd5150(int arg);
+    void* hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(int arg);
 };
 
 // @fnv 0x00dd5150
-void* FUN_00dd5150_cls::FUN_00dd5150(int aiUnused)
+// src: HAVOK_LIB 0x00dd5150
+void* FUN_00dd5150_cls::hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(int aiUnused)
 {
     this->m_f00 = 1.0f;
     this->m_f04 = 1.0f;
@@ -900,7 +927,7 @@ extern void* DAT_010d7ba8;
 
 struct FUN_00dd5150_component
 {
-    void FUN_00dd5150(int value);
+    void hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(int value);
 };
 
 struct FUN_00dd51a0
@@ -919,7 +946,7 @@ FUN_00dd51a0::FUN_00dd51a0(const int* data)
 {
     enabled06 = 1;
     vftable = &DAT_010d7ba8;
-    component08.FUN_00dd5150(0);
+    component08.hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(0);
     CopySixInts(data);
 }
 
@@ -1026,7 +1053,7 @@ struct FUN_00dd8bc0_cls
     int unk9C;
     int unkA0;
     FUN_00dd8bc0_Node m_kNode;
-    void FUN_00dd83a0();
+    void _makeTopValid();
     unsigned int GetUsedMemory();
 };
 
@@ -1034,7 +1061,7 @@ struct FUN_00dd8bc0_cls
 unsigned int FUN_00dd8bc0_cls::GetUsedMemory()
 {
     unsigned int used = 0;
-    FUN_00dd83a0();
+    _makeTopValid();
     FUN_00dd8bc0_Node* node = m_kNode.m_next;
     if (node != &m_kNode)
     {
@@ -1145,11 +1172,12 @@ struct SpawnedObject
     int m_b8;
     int m_bc;
     int m_c0;
-    void FUN_00dd7f10();
+    void _init_00dd7f10();
     SpawnedObject* Construct(int value);
 };
 
-void SpawnedObject::FUN_00dd7f10()
+// src: HAVOK_LIB 0x00dd7f10
+void SpawnedObject::_init_00dd7f10()
 {
     m_c0 = 0;
     m_bc = 0;
@@ -1202,7 +1230,7 @@ SpawnedObject* SpawnedObject::Construct(int value)
     m_vptr = &DAT_010d7c34;
     m_04 = 0;
     m_98 = value;
-    this->FUN_00dd7f10();
+    this->_init_00dd7f10();
     return this;
 }
 
@@ -1216,14 +1244,14 @@ struct RecArray
     unsigned int m_uiCapacity;
 };
 
-extern "C" hkMemoryRouter* FUN_00c85750();
+extern "C" hkMemoryRouter* hkMemoryRouter_getInstance();
 extern "C" void ResizeAudioStream(void* pAllocator, RecArray* pArray, int iElementSize);
 
 // Grows the array via the allocator when full, writes uiValue at the count index, and increments the count.
 // @fnv 0x00dd8db0
 void AppendToRecArray(unsigned int uiValue, unsigned int uiUnused, RecArray* pArray)
 {
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
 
     if (pArray->m_uiCount == (pArray->m_uiCapacity & 0x3fffffff))
     {
@@ -1252,14 +1280,15 @@ struct S_00dd8fa0_S
     unsigned short m_06;
 };
 
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 extern "C" S_00dd8fa0_Vtable DAT_010d7c58;
 
 // Gets a caller, calls its object's vtable method with 8, then sets m_04 to 8, m_06 to 1 and the vtable to DAT_010d7c58.
 // @fnv 0x00dd8fa0
-void __cdecl FUN_00dd8fa0()
+// src: GUESS 0x00dd8fa0 (confidence: low)
+void __cdecl Object_UpdateFields_00dd8fa0()
 {
-    hkMemoryRouter* caller = FUN_00c85750();
+    hkMemoryRouter* caller = hkMemoryRouter_getInstance();
     S_00dd8fa0_S* object = reinterpret_cast<S_00dd8fa0_S*>(caller->m_heap);
 
     object = object->vtable->method(object, 8);
@@ -1290,12 +1319,13 @@ struct FUN_00dd9160_Class
     unsigned short unk06;  // +0x06: state, set to 1
     unsigned int unk08;    // +0x08: result of the virtual call
     unsigned char unk0c;   // +0x0c: flag copied from the second parameter
-    FUN_00dd9160_Class* FUN_00dd9160(unsigned int arg, unsigned char flag);
+    FUN_00dd9160_Class* hkIArchive_hkIArchive(unsigned int arg, unsigned char flag);
 };
 
 // Sets unk06 to 1, unk00 to &UNK_010d7c80, stores flag in unk0c and the result of DAT_01268364->vfn3(arg) in unk08, then returns this.
 // @fnv 0x00dd9160
-FUN_00dd9160_Class* FUN_00dd9160_Class::FUN_00dd9160(unsigned int arg, unsigned char flag)
+// src: HAVOK_LIB 0x00dd9160
+FUN_00dd9160_Class* FUN_00dd9160_Class::hkIArchive_hkIArchive(unsigned int arg, unsigned char flag)
 {
     unk06 = 1;
     unk00 = &UNK_010d7c80;
@@ -1317,7 +1347,7 @@ inline DD91A0Allocator& heap(hkMemoryRouter& holder)
     return *reinterpret_cast<DD91A0Allocator*>(holder.m_heap);
 }
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 class DD91A0ReferencedObject
 {
@@ -1331,7 +1361,7 @@ class DD91A0ReferencedObject
     static void* operator new(unsigned int nbytes)
     {
         DD91A0ReferencedObject* b =
-            static_cast<DD91A0ReferencedObject*>(heap(FUN_00c85750()).AllocateMemoryBlock(nbytes));
+            static_cast<DD91A0ReferencedObject*>(heap(hkMemoryRouter_getInstance()).AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = static_cast<unsigned short>(nbytes);
         return b;
     }
@@ -1382,7 +1412,7 @@ inline DDC160Allocator& heap(hkMemoryRouter& holder)
     return *reinterpret_cast<DDC160Allocator*>(holder.m_heap);
 }
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 class DDC160ReferencedObject
 {
@@ -1395,7 +1425,7 @@ class DDC160ReferencedObject
     static void* operator new(unsigned int nbytes)
     {
         DDC160ReferencedObject* b =
-            static_cast<DDC160ReferencedObject*>(heap(FUN_00c85750()).AllocateMemoryBlock(nbytes));
+            static_cast<DDC160ReferencedObject*>(heap(hkMemoryRouter_getInstance()).AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = static_cast<unsigned short>(nbytes);
         return b;
     }
@@ -1443,11 +1473,12 @@ struct FUN_00ddfbb0_cls
     int unk08;
     int unk0C;
     int m_10;
-    void FUN_00ddfbb0();
+    void ClearField10();
 };
 
 // @fnv 0x00ddfbb0
-void FUN_00ddfbb0_cls::FUN_00ddfbb0()
+// src: GUESS 0x00ddfbb0 (confidence: low)
+void FUN_00ddfbb0_cls::ClearField10()
 {
     m_10 = 0;
 }
@@ -1460,12 +1491,13 @@ struct FUN_00dcc130_Class
     unsigned short unk04;
     unsigned short enabled06;
     int unk08;
-    int* __thiscall FUN_00dcc130(int* value);
+    int* __thiscall hkIstream_hkIstream(int* value);
 };
 
 // Sets enabled06 to 1, installs the vtable, stores value in unk08, calls FUN_00c90510, and returns this.
 // @fnv 0x00dcc130
-int* FUN_00dcc130_Class::FUN_00dcc130(int* value)
+// src: HAVOK_LIB 0x00dcc130
+int* FUN_00dcc130_Class::hkIstream_hkIstream(int* value)
 {
     enabled06 = 1;
     m_vtbl = &DAT_010d7540;
@@ -1491,7 +1523,8 @@ extern "C" void ReadIniLine(void);
 
 // Stand-in for the unit's integer parser: its body is not this function's code, it only makes
 // the compiler reproduce the original custom convention (stream on the stack, sign flag in eax).
-static __declspec(noinline) unsigned short FUN_00dcc240(IniTokenStream* stream, unsigned char* negative)
+// src: HAVOK_LIB 0x00dcc240
+static __declspec(noinline) unsigned short readInteger64(IniTokenStream* stream, unsigned char* negative)
 {
     *negative = 0;
     ReadIniLine();
@@ -1502,7 +1535,7 @@ static __declspec(noinline) unsigned short FUN_00dcc240(IniTokenStream* stream, 
 S_00dcc740_Cls* S_00dcc740_Cls::ReadSignedShort(unsigned short* out)
 {
     unsigned char flag;
-    short r = (short)FUN_00dcc240((IniTokenStream*)m_08, &flag);
+    short r = (short)readInteger64((IniTokenStream*)m_08, &flag);
     *out = flag != 0 ? (unsigned short)(-r) : (unsigned short)r;
     return this;
 }
@@ -1521,11 +1554,12 @@ struct Lock_dd9
     int* m_pkCriticalSection;
     int FindEntry(int iKey);
     int InvokeRecord(int iIndex, int iArg);
-    int FUN_00dd9330(int iKey, int iArg);
+    int hkProcessFactory_createProcess(int iKey, int iArg);
 };
 
 // @fnv 0x00dd9330
-int Lock_dd9::FUN_00dd9330(int iKey, int iArg)
+// src: HAVOK_LIB 0x00dd9330
+int Lock_dd9::hkProcessFactory_createProcess(int iKey, int iArg)
 {
     int* pkCS = m_pkCriticalSection;
     DAT_00fdf05c(pkCS);
@@ -1584,7 +1618,8 @@ struct S_00dcc790_Class
 
 extern "C" void __cdecl SkipWhitespace(void);
 
-static __declspec(noinline) unsigned short FUN_00dcc240(unsigned char* ok, S_00dcc240_Reader* reader)
+// src: HAVOK_LIB 0x00dcc240
+static __declspec(noinline) unsigned short readInteger64(unsigned char* ok, S_00dcc240_Reader* reader)
 {
     *ok = 0;
     SkipWhitespace();
@@ -1596,7 +1631,7 @@ static __declspec(noinline) unsigned short FUN_00dcc240(unsigned char* ok, S_00d
 S_00dcc790_Class* __thiscall S_00dcc790_Class::ReadSignedValue(unsigned short* result)
 {
     unsigned char ok;
-    unsigned short value = FUN_00dcc240(&ok, m_08);
+    unsigned short value = readInteger64(&ok, m_08);
 
     *result = ok ? (unsigned short)-(int)value : value;
     return this;
@@ -1746,15 +1781,18 @@ int S_00dcc600_Class::ReadUntilValue(unsigned char* buffer, int length, signed c
 }
 
 // @fnv 0x00dccb20
-void __cdecl FUN_00dccb20()
+// src: COMMUNITY 0x00dccb20
+void __cdecl nullsub_121()
 {}
 
 // @fnv 0x00dccb40
-void __cdecl FUN_00dccb40()
+// src: COMMUNITY 0x00dccb40
+void __cdecl nullsub_122()
 {}
 
 // @fnv 0x00dd4b00
-void __cdecl FUN_00dd4b00()
+// src: GUESS 0x00dd4b00 (confidence: high)
+void __cdecl Object_DoNothing_00dd4b00()
 {}
 
 struct Bool388
@@ -1821,7 +1859,8 @@ Bool388 Allocator388::ValidateBlock(Block388* block)
 }
 
 // @fnv 0x00dd8fd0
-static __declspec(noinline) void FUN_00dd8fd0(unsigned char* a, unsigned char* b)
+// src: GUESS 0x00dd8fd0 (confidence: low)
+static __declspec(noinline) void Runtime_UpdateState_00dd8fd0(unsigned char* a, unsigned char* b)
 {
     unsigned char t = *a;
     *a = *b;
@@ -1832,11 +1871,11 @@ extern "C" unsigned char* GetPtr();
 
 void Caller(unsigned char* a)
 {
-    FUN_00dd8fd0(a, GetPtr());
+    Runtime_UpdateState_00dd8fd0(a, GetPtr());
 }
 
 namespace hkRouterDDFB {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 inline hkMemoryAllocator& heap(hkMemoryRouter& holder)
@@ -1859,7 +1898,7 @@ struct hkPairDDFB
 
 template <> inline void hkArray<hkPairDDFB>::pushBack(const hkPairDDFB& t)
 {
-    hkMemoryAllocator& alloc = heap(hkRouterDDFB::FUN_00c85750());
+    hkMemoryAllocator& alloc = heap(hkRouterDDFB::hkMemoryRouter_getInstance());
     if (m_iElementCount == getCapacity())
         hkArrayUtil::_reserveMore(alloc, this, sizeof(hkPairDDFB));
     new (m_data + m_iElementCount) hkPairDDFB(t);
@@ -1927,7 +1966,8 @@ extern "C" int stub_val(void);
 
 // Placeholder body for the unsolved 0x00dcc3b0 (models its call for 0x00dcc5c0); annotated so the target pack drops it.
 // @fnv 0x00dcc3b0
-static __declspec(noinline) float FUN_00dcc3b0(int arg)
+// src: HAVOK_LIB 0x00dcc3b0
+static __declspec(noinline) float readFloat(int arg)
 {
     g_stub_out = arg;
     stub_cls* s = g_stub_self;
@@ -1937,7 +1977,7 @@ static __declspec(noinline) float FUN_00dcc3b0(int arg)
 
 float stub_caller(void)
 {
-    return FUN_00dcc3b0(stub_val());
+    return readFloat(stub_val());
 }
 
 class FUN_00dcc5c0_cls
@@ -1953,7 +1993,7 @@ class FUN_00dcc5c0_cls
 // @fnv 0x00dcc5c0
 FUN_00dcc5c0_cls* __thiscall FUN_00dcc5c0_cls::GetFloatValue(float* out)
 {
-    *out = FUN_00dcc3b0(m_08);
+    *out = readFloat(m_08);
     return this;
 }
 
@@ -1970,7 +2010,8 @@ extern "C" void ReadIniLine(void);
 // Stand-in for the unit's integer parser (int flavour): its body is not this
 // function's code, it only makes the compiler reproduce the original custom
 // convention (stream on the stack, sign flag in eax).
-static __declspec(noinline) int FUN_00dcc240(S_00dcc7e0_Stream* stream, unsigned char* negative)
+// src: HAVOK_LIB 0x00dcc240
+static __declspec(noinline) int readInteger64(S_00dcc7e0_Stream* stream, unsigned char* negative)
 {
     *negative = 0;
     ReadIniLine();
@@ -1991,7 +2032,7 @@ struct FUN_00dcc7e0_Class
 FUN_00dcc7e0_Class* FUN_00dcc7e0_Class::ReadSignedInt(int* out)
 {
     unsigned char flag;
-    int value = FUN_00dcc240((S_00dcc7e0_Stream*)m_08, &flag);
+    int value = readInteger64((S_00dcc7e0_Stream*)m_08, &flag);
     *out = flag != 0 ? -value : value;
     return this;
 }
@@ -2069,12 +2110,13 @@ struct S00dcd1b0_Obj
     int unk3C;
     ArrayBlock m_40;
     unsigned char m_4c;
-    void FUN_00dcd1b0(int value);
+    void hkpMeshShape_initWeldingInfo(int value);
 };
 
 // Sets m_4c to value; if value is 6, frees the m_40 array block, otherwise computes cumulative offsets and resizes the block to fit total.
 // @fnv 0x00dcd1b0
-void S00dcd1b0_Obj::FUN_00dcd1b0(int value)
+// src: HAVOK_LIB 0x00dcd1b0
+void S00dcd1b0_Obj::hkpMeshShape_initWeldingInfo(int value)
 {
     int total;
 
@@ -2089,13 +2131,13 @@ void S00dcd1b0_Obj::FUN_00dcd1b0(int value)
         }
 
         ArrayBlock* block = &m_40;
-        hkMemoryRouter* allocator = FUN_00c85750();
+        hkMemoryRouter* allocator = hkMemoryRouter_getInstance();
         if ((int)(block->reservedAndFlags & 0x3fffffff) < total)
         {
-            FUN_00c908c0((&allocator->heap()), block, total, 2);
+            hkArrayUtil__reserve((&allocator->heap()), block, total, 2);
         }
 
-        allocator = FUN_00c85750();
+        allocator = hkMemoryRouter_getInstance();
         void* pool = (&allocator->heap());
         int capacity = (int)(block->reservedAndFlags & 0x3fffffff);
         if (capacity < total)
@@ -2105,13 +2147,13 @@ void S00dcd1b0_Obj::FUN_00dcd1b0(int value)
             {
                 newSize = total;
             }
-            FUN_00c908c0(pool, block, newSize, 2);
+            hkArrayUtil__reserve(pool, block, newSize, 2);
         }
         block->size = total;
     }
     else
     {
-        S00dcd1b0_Pool* pool = reinterpret_cast<S00dcd1b0_Pool*>((&FUN_00c85750()->heap()));
+        S00dcd1b0_Pool* pool = reinterpret_cast<S00dcd1b0_Pool*>((&hkMemoryRouter_getInstance()->heap()));
         total = 0;
         m_40.size = total;
         int flags = (int)m_40.reservedAndFlags;
@@ -2175,7 +2217,7 @@ struct S00dcd270_cls
 S00dcd270_Rec* S00dcd270_cls::AddRecord(const S00dcd270_Rec* apRecord)
 {
     S00dcd270_Arr* a = &arr;
-    hkMemoryRouter* h = FUN_00c85750();
+    hkMemoryRouter* h = hkMemoryRouter_getInstance();
     if (a->m_iElementCount == (a->m_cap & 0x3fffffff))
         ResizeAudioStream((&h->heap()), a, 0x38);
     S00dcd270_Rec* r = &a->m_data[a->m_iElementCount];
@@ -2246,12 +2288,13 @@ bool __fastcall IsValidLargeBlockAllocatorChunk(const hkLargeBlockAllocator* all
     return true;
 }
 
-extern "C" int FUN_00d86940();
+extern "C" int getCstyleArraySize();
 
 // @fnv 0x00dc1be0
-int FUN_00dc1be0()
+// src: GUESS 0x00dc1be0 (confidence: low)
+int Object_ProcessAndReturnValue_00dc1be0()
 {
-    int r = FUN_00d86940();
+    int r = getCstyleArraySize();
     if (r != 0)
         return r;
     return 1;
@@ -2270,11 +2313,12 @@ struct S_00dc6fc0_Class
     int unk08;
     S_00dc6fc0_Target* m_0c;
 
-    int __thiscall FUN_00dc6fc0();
+    int __thiscall ProcessAndTransformResult_00dc6fc0();
 };
 
 // @fnv 0x00dc6fc0
-int S_00dc6fc0_Class::FUN_00dc6fc0()
+// src: GUESS 0x00dc6fc0 (confidence: low)
+int S_00dc6fc0_Class::ProcessAndTransformResult_00dc6fc0()
 {
     return m_0c->v01() ^ 0x20;
 }
@@ -2327,7 +2371,8 @@ void MatchCaller()
 struct CpuOpaque;
 extern CpuOpaque DAT_01269c14;
 // @fnv 0x00dccb50
-CpuOpaque* __cdecl FUN_00dccb50()
+// src: GUESS 0x00dccb50 (confidence: low)
+CpuOpaque* __cdecl Runtime_GetDAT01269c14Address()
 {
     return &DAT_01269c14;
 }
@@ -2433,7 +2478,8 @@ __forceinline float Clamp(const float& value, const float& hi, const float& lo)
 
 // Switches on a->m08: modes 1 to 3 fill six floats in out from a and b; mode 4 calls the function pointer stored in a.
 // @fnv 0x00dcfff0
-void __cdecl FUN_00dcfff0(ObjA* a, ObjB* b, float* out)
+// src: HAVOK_LIB 0x00dcfff0
+void __cdecl _hkCalcMotorData(ObjA* a, ObjB* b, float* out)
 {
     float s0, s4, s8, sC, s10, t18;
     switch ((int)a->m08 - 1)
@@ -2544,7 +2590,8 @@ struct OW
     {}
 };
 // @fnv 0x00dd3120
-static __declspec(noinline) int FUN_00dd3120(const LocalM128* self, OW other, const LocalM128* a)
+// src: XBOX_PDB 0x00dd3120
+static __declspec(noinline) int hkpProcessFlyingColors(const LocalM128* self, OW other, const LocalM128* a)
 {
     LocalM128 k = DAT_010c7170;
     LocalM128 av = *a;
@@ -2562,7 +2609,7 @@ volatile int g_s, g_a, g_o, g_r;
 void mask_test_caller()
 {
     OW o((const LocalM128*)g_o);
-    g_r = FUN_00dd3120((const LocalM128*)g_s, o, (const LocalM128*)g_a);
+    g_r = hkpProcessFlyingColors((const LocalM128*)g_s, o, (const LocalM128*)g_a);
 }
 
 // Converts four unsigned bytes from src to floats stored in dst[0] through dst[3].
@@ -2641,7 +2688,7 @@ struct Table
 {
     int a, b, c;
     Entry* entries;
-    unsigned int FUN_00dcb2b0(unsigned int);
+    unsigned int StructArrayImplementation__find(unsigned int);
     DispatchTarget* entryAt(unsigned int i)
     {
         return entries[i].target;
@@ -2652,11 +2699,12 @@ struct Owner
     int a, b, c;
     Table* table;
     int context;
-    void FUN_00dcb460(unsigned int);
+    void StructArrayImplementation_Object_asObject(unsigned int);
 };
-void Owner::FUN_00dcb460(unsigned int i)
+// src: XBOX_PDB 0x00dcb460
+void Owner::StructArrayImplementation_Object_asObject(unsigned int i)
 {
-    table->entryAt(table->FUN_00dcb2b0(i))->forward(context);
+    table->entryAt(table->StructArrayImplementation__find(i))->forward(context);
 }
 
 #include <stdlib.h>
@@ -2743,12 +2791,13 @@ class FUN_00dd9240_cls
     int m_unk14;
     CRITICAL_SECTION* m_pCrit;
 
-    int FUN_00dd9240(int index);
+    int hkProcessFactory_getProcessName(int index);
 };
 
 // Reads the entry at index from m_pEntryData under m_pCrit, clears the lowest bit, and returns the result.
 // @fnv 0x00dd9240
-int FUN_00dd9240_cls::FUN_00dd9240(int index)
+// src: HAVOK_LIB 0x00dd9240
+int FUN_00dd9240_cls::hkProcessFactory_getProcessName(int index)
 {
     EnterCriticalSection(this->m_pCrit);
     int value = this->m_pEntryData[index * 3] & 0xfffffffe;
@@ -2756,7 +2805,7 @@ int FUN_00dd9240_cls::FUN_00dd9240(int index)
     return value;
 }
 
-int __cdecl FUN_00cb0fa0(unsigned int entry, unsigned int flag);
+int __cdecl hkString_strCmp(unsigned int entry, unsigned int flag);
 
 // Stand-in for the class owning this function.
 //   +0x0c : int*   array of 12-byte records (first dword = flagged pointer)
@@ -2792,7 +2841,7 @@ int FUN_00dd9270_cls::FindEntry(unsigned int flag)
             {
                 if (flag == 0)
                     goto next;
-                result = FUN_00cb0fa0(entry, flag);
+                result = hkString_strCmp(entry, flag);
             }
             else
             {
@@ -2870,12 +2919,13 @@ struct FUN_00dd9d20_Object
     int unk0C;
     void* unk10;
 
-    void __thiscall FUN_00dd9d20();
+    void __thiscall UpdateFields_00dd9d20();
 };
 
 // Sets unk00 and unk08 to data pointers, and if unk10 is set deletes that critical section and frees it via vf08 of the object at offset 0x10 of FUN_00c85750().
 // @fnv 0x00dd9d20
-void __thiscall FUN_00dd9d20_Object::FUN_00dd9d20()
+// src: GUESS 0x00dd9d20 (confidence: low)
+void __thiscall FUN_00dd9d20_Object::UpdateFields_00dd9d20()
 {
     void* criticalSection = unk10;
 
@@ -2886,7 +2936,7 @@ void __thiscall FUN_00dd9d20_Object::FUN_00dd9d20()
     {
         DeleteCriticalSection(static_cast<LPCRITICAL_SECTION>(criticalSection));
 
-        hkMemoryRouter* audio = FUN_00c85750();
+        hkMemoryRouter* audio = hkMemoryRouter_getInstance();
         FUN_00dd9d20_Target* target = reinterpret_cast<FUN_00dd9d20_Target*>(audio->m_heap);
 
         target->vf08(criticalSection, 0x18);
@@ -2900,7 +2950,8 @@ void __thiscall FUN_00dd9d20_Object::FUN_00dd9d20()
 double FUN_00ecdf2d(const char* s, char** end);
 // Skips whitespace, reads a numeric token from the stream with commas turned into dots, and returns it as a float, or -1.0f if no token starts.
 // @fnv 0x00dcc3b0
-static float FUN_00dcc3b0(TokenReader* stream)
+// src: HAVOK_LIB 0x00dcc3b0
+static float readFloat(TokenReader* stream)
 {
     struct Buf256
     {
@@ -2937,7 +2988,7 @@ static float FUN_00dcc3b0(TokenReader* stream)
 }
 float MatchCaller(TokenReader* s)
 {
-    return FUN_00dcc3b0(s);
+    return readFloat(s);
 }
 
 namespace fnv_00dcc8e0 {
@@ -2952,7 +3003,7 @@ struct TokenOwner
 {
     int unk00;
     void FUN_00d61cc0();
-    TokenBuffer* FUN_00d61470();
+    TokenBuffer* ReturnSelf();
 };
 
 struct TokenStream
@@ -3018,7 +3069,7 @@ TokenReader* TokenReader::ReadToken(TokenOwner* owner)
 {
     const int one = 1;
     owner->FUN_00d61cc0();
-    TokenBuffer* buf = owner->FUN_00d61470();
+    TokenBuffer* buf = owner->ReturnSelf();
     TokenParsing::SkipWhitespace(m_08);
     m_08->v07(one);
     int c = m_08->ReadChar();
@@ -3030,7 +3081,7 @@ TokenReader* TokenReader::ReadToken(TokenOwner* owner)
             {
                 break;
             }
-            hkMemoryRouter* h = FUN_00c85750();
+            hkMemoryRouter* h = hkMemoryRouter_getInstance();
             if (buf->m_len == (buf->m_cap & 0x3fffffff))
             {
                 ResizeAudioStream((int)h->m_temp, buf, one);
@@ -3044,7 +3095,7 @@ TokenReader* TokenReader::ReadToken(TokenOwner* owner)
         } while (c != -1);
     }
     m_08->v08();
-    hkMemoryRouter* h2 = FUN_00c85750();
+    hkMemoryRouter* h2 = hkMemoryRouter_getInstance();
     if (buf->m_len == (buf->m_cap & 0x3fffffff))
     {
         ResizeAudioStream((int)h2->m_temp, buf, one);
@@ -3058,7 +3109,8 @@ TokenReader* TokenReader::ReadToken(TokenOwner* owner)
 }  // namespace fnv_00dcc8e0
 
 // @fnv 0x00dccb60
-void __stdcall FUN_00dccb60(int value)
+// src: GUESS 0x00dccb60 (confidence: high)
+void __stdcall Object_DoNothing_00dccb60(int value)
 {}
 
 extern "C"
@@ -3282,7 +3334,8 @@ struct S_00dd1180_Hdr
 
 // Writes a type 0x1d header and n triples of floats into the buffer at *pp, copies n+1 pointers, and advances *pp by the block size.
 // @fnv 0x00dd1180
-void FUN_00dd1180(int n, float a, float b, float c, char** src, int stride, int u1, int u2, char** pp)
+// src: XBOX_PDB 0x00dd1180
+void hkStiffSpringChainBuildJacobian(int n, float a, float b, float c, char** src, int stride, int u1, int u2, char** pp)
 {
     char** s = src;
     char* cmd = *pp;
@@ -3364,7 +3417,8 @@ struct Wrap
 
 // For three vector pairs computes B*D + A*E and merges it into C under mask M1 and into O under mask M2, returning O.
 // @fnv 0x00dd3020
-static __declspec(noinline) V FUN_00dd3020(V B, V A, V C, V O, Wrap E, V D, V M1, V M2)
+// src: GUESS 0x00dd3020 (confidence: low)
+static __declspec(noinline) V Object_ProcessAndReturnValue_00dd3020(V B, V A, V C, V O, Wrap E, V D, V M1, V M2)
 {
     LocalM128 value;
     value = _mm_add_ps(_mm_mul_ps(B[0], *D), _mm_mul_ps(A[0], *E.p));
@@ -3381,5 +3435,5 @@ static __declspec(noinline) V FUN_00dd3020(V B, V A, V C, V O, Wrap E, V D, V M1
 
 void call_interleave(V B, V A, V C, V O, Wrap E, V D, V M1, V M2)
 {
-    FUN_00dd3020(B, A, C, O, E, D, M1, M2);
+    Object_ProcessAndReturnValue_00dd3020(B, A, C, O, E, D, M1, M2);
 }

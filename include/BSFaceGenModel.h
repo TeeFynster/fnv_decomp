@@ -34,5 +34,5 @@ public:
     void ClearTextureData();
     bool CloneTriBasedGeom(NiPointer<NiTriBasedGeom>& out);
     bool HasMorphs();
-    bool FUN_00a72720(int, void*, void*, void*, void*, void*, void*);
+    bool NiAdditionalGeometryData_GetDataStream(int, void*, void*, void*, void*, void*, void*);
 };

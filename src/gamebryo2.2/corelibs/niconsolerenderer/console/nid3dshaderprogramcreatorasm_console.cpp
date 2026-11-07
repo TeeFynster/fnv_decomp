@@ -96,7 +96,7 @@ bool ShaderLoader::AssembleShaderFile(const char* pcFile, void** ppvBytecode, un
     return false;
 }
 
-extern "C" long __stdcall FUN_00ee6e52(const char*, unsigned int, const void*, void*, unsigned int, ID3DXBuffer**,
+extern "C" long __stdcall D3DXAssembleShader_00ee6e52(const char*, unsigned int, const void*, void*, unsigned int, ID3DXBuffer**,
                                        ID3DXBuffer**);
 extern "C" void* __cdecl memmove(void*, const void*, unsigned int);
 
@@ -110,12 +110,13 @@ struct FUN_00e98080_shell
     void* vtable;
     unsigned int flags;
 
-    bool FUN_00e98080(const char*, unsigned int, void**, unsigned int*, void**, unsigned int*, int);
+    bool NiD3DShaderProgramCreatorAsm_LoadShaderCodeFromBuffer(const char*, unsigned int, void**, unsigned int*, void**, unsigned int*, int);
 };
 
 // Assembles source, logs failures, and copies successful output into a newly allocated buffer returned through data.
 // @fnv 0x00e98080
-bool FUN_00e98080_shell::FUN_00e98080(const char* source, unsigned int length, void** ppBytecode,
+// src: COMMUNITY 0x00e98080
+bool FUN_00e98080_shell::NiD3DShaderProgramCreatorAsm_LoadShaderCodeFromBuffer(const char* source, unsigned int length, void** ppBytecode,
                                       unsigned int* puiBytecodeSize, void** reserved, unsigned int* reservedSize,
                                       int context)
 {
@@ -133,7 +134,7 @@ bool FUN_00e98080_shell::FUN_00e98080(const char* source, unsigned int length, v
     {
         unsigned int options = (flags | g_uiShaderAssembleFlags) & 3;
         long status =
-            FUN_00ee6e52(source, length, 0, 0, options, (ID3DXBuffer**)&ppBytecode, (ID3DXBuffer**)&puiBytecodeSize);
+            D3DXAssembleShader_00ee6e52(source, length, 0, 0, options, (ID3DXBuffer**)&ppBytecode, (ID3DXBuffer**)&puiBytecodeSize);
         if (status < 0)
         {
             char* pszError = 0;

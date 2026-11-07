@@ -15,7 +15,8 @@ struct ValueModifierEffectSerialization
 };
 
 // @fnv 0x0080df90
-unsigned short FrenzyEffect::FUN_0080df90(Actor* apActor)
+// src: XBOX_PDB 0x0080df90
+unsigned short FrenzyEffect::GetSaveSize_0080df90(Actor* apActor)
 {
     unsigned short isize = 0;
     isize += reinterpret_cast<ValueModifierEffectSerialization*>(this)->FUN_00802d90(apActor);
@@ -23,14 +24,15 @@ unsigned short FrenzyEffect::FUN_0080df90(Actor* apActor)
     return isize;
 }
 
-extern "C" float __cdecl FUN_00404010(float, float);
+extern "C" float __cdecl BSMAX_00404010(float, float);
 extern float DAT_011dc778;
 
 // Subtracts FUN_00404010(0.0f, value) from DAT_011dc778 and stores the result back into DAT_011dc778.
 // @fnv 0x0080fc90
-void FUN_0080fc90(float value)
+// src: COMMUNITY 0x0080fc90
+void _11DC778_Subtract(float value)
 {
-    DAT_011dc778 = DAT_011dc778 - FUN_00404010(0.0f, value);
+    DAT_011dc778 = DAT_011dc778 - BSMAX_00404010(0.0f, value);
 }
 
 extern int DAT_0107a16c;
@@ -51,15 +53,17 @@ void* FrenzyEffect::ConstructFrenzyEffect(void* apArg1, void* apArg2, void* apAr
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 // Calls FUN_00802db0 on the actor, then passes this+0x4c and 1 to TESSaveLoadGame::FUN_008579b0.
 // @fnv 0x0080dfd0
-void __thiscall FrenzyEffect::FUN_0080dfd0(Actor* actor)
+// src: XBOX_PDB 0x0080dfd0
+void __thiscall FrenzyEffect::SaveGame_0080dfd0(Actor* actor)
 {
     reinterpret_cast<ValueModifierEffectSerialization*>(this)->FUN_00802db0(actor);
-    g_TESSaveLoadGame->FUN_008579b0(&exhausted, 1);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&exhausted, 1);
 }
 
 
 // @fnv 0x0080e000
-void FrenzyEffect::FUN_0080e000(Actor* apActor)
+// src: XBOX_PDB 0x0080e000
+void FrenzyEffect::LoadGame_0080e000(Actor* apActor)
 {
     reinterpret_cast<ValueModifierEffectSerialization*>(this)->FUN_00802dd0(apActor);
     g_TESSaveLoadGame->ReadTypedData(&exhausted, 1);
@@ -71,7 +75,8 @@ struct Proc_S
 };
 // Calls FUN_0082c000, resolves target and caster, and sets byte at offset 0x4c to 1 when both exist and the target check passes.
 // @fnv 0x0080dd30
-void FrenzyEffect::FUN_0080dd30()
+// src: XBOX_PDB 0x0080dd30
+void FrenzyEffect::Start_0080dd30()
 {
     ValueModifierEffect::Start();
     Actor* target = ActiveEffect::FUN_0059bb30() ? ActiveEffect::FUN_0059bb30()->GetOwnerActor() : 0;
@@ -82,7 +87,8 @@ void FrenzyEffect::FUN_0080dd30()
 
 // Allocates a FrenzyEffect, copies exhausted, calls CopyData and returns the copy.
 // @fnv 0x0080dbf0
-FrenzyEffect* FrenzyEffect::FUN_0080dbf0()
+// src: XBOX_PDB 0x0080dbf0
+FrenzyEffect* FrenzyEffect::Copy_0080dbf0()
 {
     FrenzyEffect* copy = new FrenzyEffect(m_pEffectInstance, pSpell, pEffect);
     copy->exhausted = exhausted;
@@ -99,8 +105,8 @@ void* __cdecl CreateFrenzyEffectObject(void* apFirst, void* apSecond, void* apTh
 
 struct Population
 {
-    unsigned int FUN_005be5c0(unsigned int unused);
-    Actor* FUN_00968670(unsigned int index);
+    unsigned int ProcessArray_GetProcessLevelTail(unsigned int unused);
+    Actor* ProcessArray_GetItem(unsigned int index);
 };
 
 struct World
@@ -111,27 +117,28 @@ struct World
 extern "C" World DAT_011e0e80;
 
 // @fnv 0x0080ddd0
-void FrenzyEffect::FUN_0080ddd0()
+// src: XBOX_PDB 0x0080ddd0
+void FrenzyEffect::Finish_0080ddd0()
 {
     ApplyEffect();
     if (exhausted)
         return;
     {
         Actor* actor = ActiveEffect::FUN_0059bb30() ? ActiveEffect::FUN_0059bb30()->FUN_00822b40() : 0;
-        if (actor != 0 && actor->FUN_00493bb0())
+        if (actor != 0 && actor->Actor_IsInCombat())
         {
             actor->Unk_10D(0);
             Population* pPopulation = DAT_011e0e80.FUN_00717e50();
-            for (unsigned int uiIndex = 0; uiIndex < pPopulation->FUN_005be5c0(0); uiIndex++)
+            for (unsigned int uiIndex = 0; uiIndex < pPopulation->ProcessArray_GetProcessLevelTail(0); uiIndex++)
             {
-                Actor* element = pPopulation->FUN_00968670(uiIndex);
+                Actor* element = pPopulation->ProcessArray_GetItem(uiIndex);
                 if (element != actor)
                 {
                     Actor* pOtherActor = element != 0 && element->IsActor() ? element : 0;
                     if (pOtherActor)
                     {
-                        pOtherActor->FUN_008a6730(actor);
-                        if (pOtherActor->FUN_00493bb0())
+                        pOtherActor->Actor_RemoveFleeTarget(actor);
+                        if (pOtherActor->Actor_IsInCombat())
                             pOtherActor->Unk_10D(actor);
                     }
                 }
@@ -333,18 +340,19 @@ struct FrenzyCheckCharacter
     virtual void v184();
     virtual void v185();
     virtual bool IsImmune();
-    unsigned short FUN_0087f9f0();
+    unsigned short GetLevel_0087f9f0();
 };
 
-bool FUN_006494d0(int aiLevel, float afMagnitude);
+bool MagicFormulas_CheckTargetLevelMagnitude(int aiLevel, float afMagnitude);
 
 // Checks whether apTarget is a valid, non-dead, non-immune character that passes the level and magnitude check for the Frenzy effect.
 // @fnv 0x0080dca0
-bool FrenzyEffect::FUN_0080dca0(MagicTarget* apTarget)
+// src: XBOX_PDB 0x0080dca0
+bool FrenzyEffect::CheckTarget_0080dca0(MagicTarget* apTarget)
 {
     FrenzyCheckCharacter* pChar =
         static_cast<FrenzyCheckCharacter*>(FUN_00ec43fb(apTarget, 0, &DAT_011a0ef8, &DAT_011a0f14, 0));
-    if (pChar && !pChar->IsDead(false) && !pChar->IsImmune() && FUN_006494d0(pChar->FUN_0087f9f0(), GetFloatAtOffset1C()))
+    if (pChar && !pChar->IsDead(false) && !pChar->IsImmune() && MagicFormulas_CheckTargetLevelMagnitude(pChar->GetLevel_0087f9f0(), GetFloatAtOffset1C()))
         return true;
     return false;
 }

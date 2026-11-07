@@ -18,11 +18,11 @@ struct FUN_00e3f950_class
     int m_0c;
     int m_10;
     int m_14;
-    int FUN_00e3f950(int a, int b);
+    int hkaInterleavedUncompressedAnimation_getNumDataChunks(int a, int b);
 };
 struct FUN_00e3f970_class
 {
-    int FUN_00e3f970();
+    int hkaInterleavedUncompressedAnimation_getMaxSizeOfCombinedDataChunks();
 };
 struct FUN_00e3f990_class
 {
@@ -34,14 +34,15 @@ struct FUN_00e3f920_class
     virtual void v04();
     virtual void v08();
     virtual void v0c();
-    virtual void FUN_00e3f920(float, int, int, int);
+    virtual void hkaInterleavedUncompressedAnimation_sampleTracks(float, int, int, int);
 };
 struct S00e3fb60_Anim : public hkaInterleavedUncompressedAnimation
 {
-    void FUN_00e2f7c0(float time, int& frameIndex, float& weight) const;
-    void FUN_00e3fb60(float time, const short* tracks, int numTracks, float* out);
+    void hkaAnimation_getFrameAndDelta(float time, int& frameIndex, float& weight) const;
+    void hkaInterleavedUncompressedAnimation_sampleIndividualFloatTracks(float time, const short* tracks, int numTracks, float* out);
 };
-__declspec(noinline) void S00e3fb60_Anim::FUN_00e2f7c0(float time, int& frameIndex, float& weight) const
+// src: HAVOK_LIB 0x00e2f7c0
+__declspec(noinline) void S00e3fb60_Anim::hkaAnimation_getFrameAndDelta(float time, int& frameIndex, float& weight) const
 {
     unsigned int numPoses = m_kTransforms.m_iElementCount / m_iNumTransformTracks;
     float f = (time / m_fAnimationDuration) * (float)(numPoses - 1);
@@ -65,7 +66,7 @@ struct S00e3fd20_Desc
     int m_2c;
     int m_30;
     int m_34;
-    void __thiscall FUN_00e3fd20(int scale, int unused1, int* out, int unused2);
+    void __thiscall hkaInterleavedUncompressedAnimation_getDataChunks(int scale, int unused1, int* out, int unused2);
 };
 #include <xmmintrin.h>
 #include "../../../../../../include/hkQsTransform.h"
@@ -123,7 +124,7 @@ class FUN_00e402e0 : public BaseAnimX
     XformArrayX m_kTransforms;
     FloatArrayX m_kFloats;
 };
-void* FUN_00c85750();
+void* hkMemoryRouter_getInstance();
 extern int DAT_010e5474;
 extern "C" unsigned __int64 __rdtsc(void);
 extern "C" void _ReadWriteBarrier(void);
@@ -161,15 +162,15 @@ inline SampleRec* S00e3ffc0_zero(SampleRec* recs)
 }
 struct FUN_00e2f7c0_Obj
 {
-    void FUN_00e2f7c0(float a1, int* a2, float* a3);
+    void hkaAnimation_getFrameAndDelta(float a1, int* a2, float* a3);
 };
 __forceinline int S00e3ffc0_getFrame(FUN_00e2f7c0_Obj* o, float t, float* d)
 {
     int f;
-    o->FUN_00e2f7c0(t, &f, d);
+    o->hkaAnimation_getFrameAndDelta(t, &f, d);
     return f;
 }
-void __cdecl FUN_00e3fda0(int frame, float delta, unsigned int nT, QsT* tOut, unsigned int nF, float* fOut,
+void __cdecl hkaInterleavedUncompressedAnimation_samplePartialWithDataChunks(int frame, float delta, unsigned int nT, QsT* tOut, unsigned int nF, float* fOut,
                           SampleRec* recs, int n);
 struct hkaAnimSlot : hkaInterleavedUncompressedAnimation
 {
@@ -183,7 +184,7 @@ struct hkaAnimSlot : hkaInterleavedUncompressedAnimation
     virtual void v8();
     virtual void v9();
     virtual void SampleIndividualTracks(int frame, float delta, SampleRec* recs, int n);
-    void FUN_00e3ffc0(float time, unsigned int nT, QsT* tOut, unsigned int nF, float* fOut, int a6);
+    void hkaInterleavedUncompressedAnimation_samplePartialTracks(float time, unsigned int nT, QsT* tOut, unsigned int nF, float* fOut, int a6);
 };
 
 namespace E3fda0Simd {
@@ -217,7 +218,7 @@ struct DataChunk
 struct FUN_005611c0_t
 {
     float x, y, z, w;
-    void FUN_005611c0();
+    void normalize_005611c0();
 };
 
 extern ::__m128 DAT_010ec7f0;
@@ -248,7 +249,8 @@ struct TransformLane
 
 extern "C" void _ReadWriteBarrier();
 // @fnv 0x00e3fda0
-void FUN_00e3fda0(unsigned int frameIndex, float frameDelta, unsigned int maxNumTransformTracks,
+// src: XBOX_PDB 0x00e3fda0
+void hkaInterleavedUncompressedAnimation_samplePartialWithDataChunks(unsigned int frameIndex, float frameDelta, unsigned int maxNumTransformTracks,
                   hkQsTransform* transformOutArg, int maxNumFloatTracks, float* floatOutArg,
                   const DataChunk* dataChunks, int numDataChunks)
 {
@@ -310,7 +312,7 @@ void FUN_00e3fda0(unsigned int frameIndex, float frameDelta, unsigned int maxNum
                 E3fda0Simd::_mm_store_ps(&quat.x,
                                          E3fda0Simd::_mm_add_ps(E3fda0Simd::_mm_mul_ps(signedAll, pose1->rotation.v),
                                                                 E3fda0Simd::_mm_mul_ps(invAll, r0)));
-                quat.FUN_005611c0();
+                quat.normalize_005611c0();
                 transformTracksOut->rotation.v = E3fda0Simd::_mm_load_ps(&quat.x);
                 pose0++;
                 pose1++;

@@ -9,7 +9,7 @@
 struct FUN_00c6fd20_class
 {
     void* m_60c;
-    int FUN_00c6fd20();
+    int bhkCharacterController_GetSupportBody();
 };
 
 #include <xmmintrin.h>
@@ -514,9 +514,9 @@ struct __declspec(align(16)) Particle
         sum.Add(delta);
         ++impulseCount;
     }
-    const ParticleVectorLocal_00c6f500* FUN_00621a40() const;
+    const ParticleVectorLocal_00c6f500* bhkCharacterProxy_GethkPosition() const;
     void UpdateMaxVelocity(NiPoint3* direction, float timeStep);
-    void FUN_00c6cbc0(float angle, float impactStrength);
+    void UpdateLargestAbsoluteThreshold(float angle, float impactStrength);
 };
 struct Source
 {
@@ -571,11 +571,11 @@ struct Source
     Particle* particle;
     void FUN_00c90510();
     void FUN_00c905b0();
-    const ParticleVectorLocal_00c6f500* FUN_00cac950();
+    const ParticleVectorLocal_00c6f500* hkpCharacterProxy_getLinearVelocity();
 };
 extern void __cdecl FUN_00458620(NiPoint3* result, const ParticleVectorLocal_00c6f500* value);
-extern float __cdecl FUN_0040ebd0(float fTargetUpperBound, float value);
-extern float __cdecl FUN_00404010(float fTargetUpperBound, float value);
+extern float __cdecl BSMIN(float fTargetUpperBound, float value);
+extern float __cdecl BSMAX_00404010(float fTargetUpperBound, float value);
 struct ParticleController
 {
     unsigned int unk_000;
@@ -983,7 +983,7 @@ struct ControllerPrefix
 };
 struct ControllerOwner : ControllerPrefix, ParticleController
 {
-    const ParticleVectorLocal_00c6f500* FUN_00807080() const;
+    const ParticleVectorLocal_00c6f500* bhkCharacterProxy_GethkLinearVelocity() const;
 };
 extern const float DAT_01267bcc;
 __declspec(noinline) void Particle::UpdateMaxVelocity(NiPoint3* direction, float timeStep)
@@ -1000,15 +1000,16 @@ __declspec(noinline) void Particle::UpdateMaxVelocity(NiPoint3* direction, float
         modifier = proposed;
     }
 }
-float __cdecl FUN_004587d0(float);
+float __cdecl HK2NI(float);
 __declspec(noinline) void __cdecl FUN_00458620(NiPoint3* result, const ParticleVectorLocal_00c6f500* value)
 {
-    result->x = FUN_004587d0(float(ScalarValue((_mm_load_ss)(&value->At(0)))));
-    result->y = FUN_004587d0(float(ScalarValue((_mm_load_ss)(&value->At(1)))));
-    result->z = FUN_004587d0(float(ScalarValue((_mm_load_ss)(&value->At(2)))));
+    result->x = HK2NI(float(ScalarValue((_mm_load_ss)(&value->At(0)))));
+    result->y = HK2NI(float(ScalarValue((_mm_load_ss)(&value->At(1)))));
+    result->z = HK2NI(float(ScalarValue((_mm_load_ss)(&value->At(2)))));
 }
 // @fnv 0x00c6f500
-__declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void*, unsigned int mode, Source* source,
+// src: COMMUNITY 0x00c6f500
+__declspec(noinline) void __fastcall bhkCharacterListener_characterInteractionCallback_0(ParticleController* self, void*, unsigned int mode, Source* source,
                                                   const ParticleVectorLocal_00c6f500* transform)
 {
     ControllerOwner* owner;
@@ -1025,13 +1026,13 @@ __declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void
         return;
     {
         NiPoint3 adjusted;
-        ParticleVectorLocal_00c6f500 ownVelocity = *source->FUN_00cac950();
+        ParticleVectorLocal_00c6f500 ownVelocity = *source->hkpCharacterProxy_getLinearVelocity();
         ParticleVectorLocal_00c6f500 normal = transform[1];
         normal.At(2) = 0.0f;
         if (float(normal.LengthSq()) > 0.0f)
             normal.Normalize();
         owner = static_cast<ControllerOwner*>(self);
-        ownVelocity = *owner->FUN_00807080();
+        ownVelocity = *owner->bhkCharacterProxy_GethkLinearVelocity();
         ownVelocity.At(2) = 0.0f;
         float speed = ownVelocity.Length();
         if (sizeFlag == 2)
@@ -1045,7 +1046,7 @@ __declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void
     if (!(particle->flags & 1u))
         return;
     ParticleVectorLocal_00c6f500 separation = transform[0];
-    separation.Sub(*particle->FUN_00621a40());
+    separation.Sub(*particle->bhkCharacterProxy_GethkPosition());
     separation.At(2) = 0.0f;
     ParticleVectorLocal_00c6f500 projection = particle->localDirection;
     projection.At(2) = 0.0f;
@@ -1056,13 +1057,13 @@ __declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void
     ParticleVectorLocal_00c6f500 otherNormal = transform[1];
     otherNormal.At(2) = 0.0f;
     otherNormal.Normalize();
-    ParticleVectorLocal_00c6f500 current = *owner->FUN_00807080();
+    ParticleVectorLocal_00c6f500 current = *owner->bhkCharacterProxy_GethkLinearVelocity();
     current.At(2) = 0.0f;
     float angle = 0.0f;
     if (current.NormalizeNonzero())
         angle = -otherNormal.Dot(current);
     scale *= angle;
-    scale = FUN_00404010(0.0f, FUN_0040ebd0(1.0f, scale));
+    scale = BSMAX_00404010(0.0f, BSMIN(1.0f, scale));
     if (scale > 0.0f)
     {
         ParticleVectorLocal_00c6f500 side;
@@ -1070,6 +1071,6 @@ __declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void
         if (side.At(2) > 0.0f)
             scale *= DAT_0101a6b0;
         scale *= 2.0f;
-        particle->FUN_00c6cbc0(scale, DAT_0101df44);
+        particle->UpdateLargestAbsoluteThreshold(scale, DAT_0101df44);
     }
 }

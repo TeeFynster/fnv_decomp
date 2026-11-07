@@ -28,8 +28,8 @@ public:
     using hkMoppBvTreeShapeBase::GetAabbHits;
 
     const hkpShapeCollection* getShapeCollection() const;
-    void FUN_00d54380(const hkAabb& kAabbIn, hkArray<unsigned int>& kHits) const;
-    Vector4Comparison FUN_00d54610(const ShapeRayBundleCastInput& kInput, ShapeRayCastOutputArray& kOutput,
+    void hkMoppBvTreeShapeBase_queryAabb(const hkAabb& kAabbIn, hkArray<unsigned int>& kHits) const;
+    Vector4Comparison castRayBundleImpl(const ShapeRayBundleCastInput& kInput, ShapeRayCastOutputArray& kOutput,
                                   hkVector4ComparisonParameter kMask) const throw();
 
     hkpSingleShapeContainer m_pChildAtom;

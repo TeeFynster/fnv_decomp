@@ -79,16 +79,16 @@ class NiGeometryData : public NiObject
     unsigned short GetVertexCount() const;
     unsigned short GetUVSetCount() const;
 
-    int FUN_00457b80();
+    int GetConsistency_00457b80();
     void FUN_004410f0(int);
-    NiPoint2* FUN_00a66960(unsigned short);
+    NiPoint2* NiGeometryData_GetTextureSet(unsigned short);
     unsigned short* FUN_00a75f10();
-    void FUN_00a66bb0(unsigned short, TangentPoint3*, TangentPoint3*, NiColorA*,
+    void NiGeometryData_ReplaceData(unsigned short, TangentPoint3*, TangentPoint3*, NiColorA*,
                       NiPoint2*, unsigned short, unsigned int);
     void FUN_00a67050(int);
-    void FUN_00a673d0();
-    void FUN_00a67410(GeometryBufferView&);
-    void FUN_00a67410(GeometryVertexBuffer&);
+    void NiGeometryData_UnlockPackedVertexData();
+    void NiGeometryData_GetVerticesIterator(GeometryBufferView&);
+    void NiGeometryData_GetVerticesIterator(GeometryVertexBuffer&);
 
     unsigned short m_usVertices;
     unsigned short m_usID;

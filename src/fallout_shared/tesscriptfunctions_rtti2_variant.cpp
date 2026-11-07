@@ -27,7 +27,8 @@ extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESO
                         ScriptLocals*, ...);
 
 // @fnv 0x005c6c80
-bool __cdecl FUN_005c6c80(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj,
+// src: EXE 0x005c6c80
+bool __cdecl Cmd_DuplicateNPCStats_Execute(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj,
                           TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result,
                           unsigned int& opcodeOffsetPtr)
 {
@@ -43,8 +44,8 @@ bool __cdecl FUN_005c6c80(const ScriptParameter* paramInfo, const char* scriptDa
 
         if (npc1 != 0 && npc4 != 0)
         {
-            npc1->FUN_00601c70(npc4->TESActorBase::GetClass());
-            npc1->SetLevel(npc4->FUN_0047ded0());
+            npc1->SetClass(npc4->TESActorBase::GetClass());
+            npc1->SetLevel(npc4->TESActorBaseData_GetLevel());
             npc1->AutoCalcStats(false);
         }
     }
@@ -55,7 +56,7 @@ bool __cdecl FUN_005c6c80(const ScriptParameter* paramInfo, const char* scriptDa
 class FNVActorContext
 {
   public:
-    void FUN_00419dc0(TESObjectREFR*);
+    void ExtraDataList_SetHeadTrackTargetExtra(TESObjectREFR*);
 };
 struct FNVWipController_SV
 {
@@ -554,9 +555,9 @@ struct FNVWipController_SV
 };
 struct Actor_5c98e0_Shell
 {
-    FNVActorContext* FUN_005d43c0();
+    FNVActorContext* BSFile_GetDevice();
     FNVWipController_SV* FUN_008d8520();
-    void FUN_008b3d30();
+    void ClearLookAtTarget();
 };
 
 extern "C" void* __cdecl FNV_DynamicCast(void*, long, const void*, const void*, int);
@@ -564,7 +565,8 @@ extern char DAT_011841cc;
 extern char DAT_011846d4;
 
 // @fnv 0x005c98e0
-bool __cdecl FUN_005c98e0(const ScriptParameter* apParameters, const char* apCompiledParams,
+// src: EXE 0x005c98e0
+bool __cdecl Cmd_StopLook_Execute(const ScriptParameter* apParameters, const char* apCompiledParams,
                           TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript,
                           ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
 {
@@ -574,11 +576,11 @@ bool __cdecl FUN_005c98e0(const ScriptParameter* apParameters, const char* apCom
             static_cast<Actor_5c98e0_Shell*>(FNV_DynamicCast(apRefObject, 0, &DAT_011841cc, &DAT_011846d4, 0));
         if (actor)
         {
-            actor->FUN_005d43c0()->FUN_00419dc0(0);
+            actor->BSFile_GetDevice()->ExtraDataList_SetHeadTrackTargetExtra(0);
             if (actor->FUN_008d8520())
             {
                 actor->FUN_008d8520()->v648(1);
-                actor->FUN_008b3d30();
+                actor->ClearLookAtTarget();
                 actor->FUN_008d8520()->v7ac(0);
             }
         }

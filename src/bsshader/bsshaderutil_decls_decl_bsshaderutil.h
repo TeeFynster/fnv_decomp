@@ -91,7 +91,7 @@ extern NiCamera* DAT_011f917c;
 extern void* DAT_011fa050;
 extern void* DAT_011fa054;
 extern MemoryManager g_memoryManager;
-void FUN_00b54b10(BSShaderAccumulatorView* accumulator);
+void BSShaderManager_SetCurrentAccumulator(BSShaderAccumulatorView* accumulator);
 
 struct BSShaderUtilTextureName
 {

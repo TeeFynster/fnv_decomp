@@ -8,10 +8,10 @@
 #include "../../../../../include/hkReferencedObject.h"
 #include "../../../../../include/Pair.h"
 
-void __cdecl FUN_00d48620(int a, int b, int c);
-void __cdecl FUN_00d48640(int a, int b);
-extern "C" int __cdecl FUN_00d485a0(int, int, int, int, int);
-void __cdecl FUN_00d48660(int a, int b, int c);
+void __cdecl Object_ForwardCall_00d48620(int a, int b, int c);
+void __cdecl Object_ForwardCall_00d48640(int a, int b);
+extern "C" int __cdecl Object_ProcessAndReturnValue_00d485a0(int, int, int, int, int);
+void __cdecl Object_ForwardCall_00d48660(int a, int b, int c);
 extern int DAT_0102e388;
 extern int DAT_010d7540;
 struct FUN_00dcc160_cls
@@ -19,7 +19,7 @@ struct FUN_00dcc160_cls
     void* vtbl;
     int a;
     hkReferencedObject* b;
-    void FUN_00dcc160();
+    void SetVirtualTable_00dcc160();
 };
 struct FUN_00dbc670_storage
 {
@@ -80,9 +80,9 @@ struct FUN_00dbc670_storage
 struct FUN_00dbc670_shell
 {
     void FUN_00dbc670();
-    void FUN_00dbda50(int, int, int);
+    void hkPackfileWriter_setContents(int, int, int);
     int ProcessPoly(int, int);
-    void FUN_00dbc6e0();
+    void SetVirtualTableAndProcessState_00dbc6e0();
 };
 struct GlobalDispatch
 {
@@ -92,18 +92,18 @@ struct GlobalDispatch
     virtual int Dispatch(int, int, int, int, int);
 };
 extern GlobalDispatch* DAT_01269b74;
-int __cdecl FUN_00d484a0(int a1, int a2, int a3, int a4, int useLocal, int a6);
-extern void* FUN_00d48d30(void* obj_b, int a2, int a3);
+int __cdecl hkSerializeUtil_savePackfile(int a1, int a2, int a3, int a4, int useLocal, int a6);
+extern void* hkSerializeUtil_load(void* obj_b, int a2, int a3);
 struct CtorBox
 {
     CtorBox* InitFromValue(void* arg);
-    void FUN_00dcc160();
+    void SetVirtualTable_00dcc160();
 
     void* f0;
     int f4;
     void* b;
 };
-void* __cdecl FUN_00d48ec0(void* a1, int a2, int a3);
+void* __cdecl hkSerializeUtil_load_00d48ec0(void* a1, int a2, int a3);
 struct S_00d49310_Lock
 {
     int unk0;
@@ -117,15 +117,15 @@ struct S_00d49310_Result
     S_00d49310_Result(int v) : m_uiFilterValue(v)
     {}
 };
-void FUN_00d48af0(void* stream, int* out) throw();
-S_00d49310_Result FUN_00d49310(void* stream);
-int FUN_00cb0fa0(const char* a, const char* b);
+void hkSerializeUtil_detectFormat(void* stream, int* out) throw();
+S_00d49310_Result hkSerializeUtil_detectFormat_00d49310(void* stream);
+int hkString_strCmp(const char* a, const char* b);
 static inline int S_00d49350_Compare(const char* a, const char* b)
 {
     if (a)
     {
         if (b)
-            return FUN_00cb0fa0(a, b);
+            return hkString_strCmp(a, b);
         return 1;
     }
     return b ? -1 : 0;
@@ -186,14 +186,14 @@ struct GlobalObj
 };
 struct Obj5
 {
-    void* FUN_00dba680();
-    void FUN_00dba660();
+    void* hkDataClass_getName();
+    void Object_DoNothing_00dba660();
 };
 struct Obj2
 {
     void GetObjectValue(Obj5* apOut);
-    int FUN_00dba980();
-    void FUN_00dba660();
+    int hkDataObject_isNull();
+    void Object_DoNothing_00dba660();
     void GetSourcePair(Pair* apOut);
 };
 struct Obj1
@@ -266,7 +266,8 @@ static __declspec(noinline) int helper(int a, void* b, int* c)
     return dispatch(&p, c, a, b);
 }
 // @fnv 0x00d485a0
-extern "C" int __cdecl FUN_00d485a0(int a1, int a2, int a3, int a4, int a5)
+// src: GUESS 0x00d485a0 (confidence: low)
+extern "C" int __cdecl Object_ProcessAndReturnValue_00d485a0(int a1, int a2, int a3, int a4, int a5)
 {
     Lister lister;
     World world;

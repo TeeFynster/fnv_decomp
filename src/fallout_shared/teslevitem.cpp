@@ -55,7 +55,7 @@ bool TESLevItem::LoadForm(TESFile* file)
         case 0x444c564c: {
             unsigned char chance = 0;
             file->GetChunkData(&chance, 0);
-            FUN_0042e680(chance);
+            ExtraWeaponModFlags_SetWeaponModFlags(chance);
             break;
         }
         case 0x464c564c:
@@ -104,10 +104,10 @@ struct LevItemSerialization : public TESLevItem
 // @fnv 0x0050b530
 void LevItemSerialization::Save()
 {
-    TESForm::FUN_004855a0();
+    TESForm::BeginFormRecord();
     TESForm::ClearData();
     TESLeveledList::Save();
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // @fnv 0x0050adb0
@@ -119,12 +119,13 @@ void LevItemSerialization::SaveGame(BGSSaveFormBuffer* buffer)
 
 struct LevItemCopyEntry : public ::TESLevItem
 {
-    void FUN_0050b800(::TESForm* source);
+    void TESLevItem_Copy(::TESForm* source);
 };
 
 // Casts the source TESForm to a TESLevItem and, if valid, calls FUN_004851b0 to copy the source into this entry.
 // @fnv 0x0050b800
-void LevItemCopyEntry::FUN_0050b800(::TESForm* source)
+// src: XBOX_PDB 0x0050b800
+void LevItemCopyEntry::TESLevItem_Copy(::TESForm* source)
 {
     ::TESLevItem* sourceItem;
     sourceItem = dynamic_cast< ::TESLevItem*>(source);
@@ -135,11 +136,12 @@ void LevItemCopyEntry::FUN_0050b800(::TESForm* source)
 
 struct LevItemComparison : public ::TESLevItem
 {
-    bool FUN_0050b840(::TESForm*);
+    bool TESLevItem_Compare(::TESForm*);
 };
 
 // @fnv 0x0050b840
-bool LevItemComparison::FUN_0050b840(::TESForm* other)
+// src: XBOX_PDB 0x0050b840
+bool LevItemComparison::TESLevItem_Compare(::TESForm* other)
 {
     ::TESLevItem* pLevItem = dynamic_cast< ::TESLevItem*>(other);
     if (!pLevItem)

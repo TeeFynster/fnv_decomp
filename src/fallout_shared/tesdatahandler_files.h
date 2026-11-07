@@ -6,8 +6,8 @@ struct TESRecordHeader
 {
     unsigned int type, size, flags, formID;
 };
-void FUN_0040fbe0(const char*, ...);
-void FUN_0043b2b0(bool);
+void ProgramFlow(const char*, ...);
+void MessageHandler_IncDisableWarningCount(bool);
 const char* PrepareScriptMessage(const char*, bool);
 class CompileWarningSetting
 {
@@ -24,7 +24,7 @@ class TaskQueueInterface
     static void CopyStringToBuffer(char*, unsigned int, const char*);
 };
 extern "C" int sprintf_s(char*, unsigned int, const char*, ...);
-char* FUN_0040ab30(char*, int);
+char* strrchr_0040ab30(char*, int);
 class Archive;
 class ArchiveManager
 {
@@ -35,7 +35,7 @@ Archive* FindArchiveByName(const char*);
 class PlayerBase
 {
   public:
-    void FUN_008d50e0();
+    void CharacterProgression_InitializeData();
 };
 extern PlayerCharacter* g_thePlayer;
 class IdleAnimationManager
@@ -44,14 +44,14 @@ class IdleAnimationManager
     void InitializeIdleAnimations();
 };
 extern IdleAnimationManager* DAT_011cb6a0;
-void FUN_00408df0();
+void EffectSettingCollection_InitItems();
 void ValidateFactionReactions();
 
 class Calendar
 {
   public:
     void ResetCachedValues();
-    void FUN_00867890();
+    void Calendar_InitGlobals();
 };
 extern Calendar g_calendar;
 extern TESDataHandler* g_dataHandler;
@@ -86,7 +86,7 @@ extern "C" int* _errno();
 
 extern "C" int _mbsnicmp(const unsigned char*, const unsigned char*, unsigned int);
 extern "C" int _mbsicmp(const unsigned char*, const unsigned char*);
-int FUN_00404dc0(const char*, const char*);
+int BSstricmp(const char*, const char*);
 // DataHandlerLock: unit-local 8-byte lock, not the 32-byte RecursiveSpinLock: FAMThread's at +0x34 (0x0082f610
 // constructs it with the folded two-dword ctor 0x0096a2d0, state at +0x3c) and DAT_011c4000; Lock/Unlock are the out-of-line 0x0040fbf0/0x0040fba0
 class DataHandlerLock

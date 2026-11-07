@@ -129,7 +129,7 @@ struct Node_00c658c0
     __m128 m_kPointA;
     __m128 m_kPointB;
     void OnTrigger(const __m128* v);
-    void FUN_00561800(const __m128* v);
+    void hkpRigidBody_setAngularVelocity(const __m128* v);
 };
 
 struct Owner_00c658c0
@@ -137,7 +137,7 @@ struct Owner_00c658c0
     int unk00;
     int unk04;
     Node_00c658c0* m_node;
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 
 struct Cls_00c658c0
@@ -147,11 +147,12 @@ struct Cls_00c658c0
     int unk08;
     int unk0C;
     Owner_00c658c0* m_pOwnerObject;
-    void FUN_00c658c0();
+    void bhkCollisionObject_ClearVelocities();
 };
 
 // @fnv 0x00c658c0
-void Cls_00c658c0::FUN_00c658c0()
+// src: XBOX_PDB 0x00c658c0
+void Cls_00c658c0::bhkCollisionObject_ClearVelocities()
 {
     Owner_00c658c0* o = m_pOwnerObject;
     if (o)
@@ -163,9 +164,9 @@ void Cls_00c658c0::FUN_00c658c0()
         __m128 ok = _mm_cmple_ps(_mm_and_ps(d, DAT_01017d10), eps);
         if ((_mm_movemask_ps(ok) & 7) != 7 && n)
         {
-            o->FUN_00a29680();
+            o->Object_DoNothing();
             n->OnTrigger(&DAT_01267e30);
-            o->FUN_00a29680();
+            o->Object_DoNothing();
         }
         n = o->m_node;
         p = n ? &n->m_kPointB : &DAT_01267e30;
@@ -173,9 +174,9 @@ void Cls_00c658c0::FUN_00c658c0()
         ok = _mm_cmple_ps(_mm_and_ps(d, DAT_01017d10), eps);
         if ((_mm_movemask_ps(ok) & 7) != 7 && n)
         {
-            o->FUN_00a29680();
-            n->FUN_00561800(&DAT_01267e30);
-            o->FUN_00a29680();
+            o->Object_DoNothing();
+            n->hkpRigidBody_setAngularVelocity(&DAT_01267e30);
+            o->Object_DoNothing();
         }
     }
 }
@@ -197,9 +198,9 @@ struct Quaternion
 struct __declspec(align(16)) HavokQuaternion
 {
     float x, y, z, w;
-    void FUN_005611c0();
+    void normalize_005611c0();
 };
-void __cdecl FUN_004a3e00(hkVector4*, const NiPoint3*);
+void __cdecl NI2HK(hkVector4*, const NiPoint3*);
 struct MotionData
 {
     int unk00;
@@ -382,7 +383,7 @@ struct PhysicsLock
 {
     int owner;
     int count;
-    void FUN_0040fbf0(const char*);
+    void BSSpinLock_Lock(const char*);
     void unlock()
     {
         if (--count == 0)
@@ -398,14 +399,14 @@ struct Body
     BodyVTable* vtable;
     int refCount;
     MotionData* data;
-    void* FUN_00c87a40();
-    void FUN_00c8e160(const NiPoint3*, const Quaternion*, PhysicsLock*);
-    hkVector4* FUN_00560d80();
-    hkVector4* FUN_00560e10();
-    void FUN_00561690(const hkVector4*);
-    void FUN_005617c0(const hkVector4*);
+    void* bhkWorldObject_GethkWorld();
+    void bhkRigidBody_ApplyHardKeyframe(const NiPoint3*, const Quaternion*, PhysicsLock*);
+    hkVector4* bhkRigidBody_GetLinearVelocity_00560d80();
+    hkVector4* bhkRigidBody_GetAngularVelocity();
+    void bhkRigidBody_SetLinearVelocity_00561690(const hkVector4*);
+    void bhkRigidBody_SetAngularVelocity_005617c0(const hkVector4*);
 };
-char __cdecl FUN_00c8cce0(int*);
+char __cdecl bhkRigidBody_IsMotionTypeDynamic(int*);
 struct CollisionSync
 {
     void* vtable;
@@ -413,14 +414,15 @@ struct CollisionSync
     NiAVObject* node;
     unsigned short flags;
     Body* body;
-    bool FUN_0047b470();
+    bool bhkCollisionObject_GetUseVelocity();
     unsigned char flagSet(unsigned bit) const
     {
         return (flags >> bit) & 1;
     }
-    void FUN_00c65b00();
+    void bhkCollisionObject_NitohkTransform();
 };
-__declspec(noinline) hkVector4* Body::FUN_00560e10()
+// src: COMMUNITY 0x00560e10
+__declspec(noinline) hkVector4* Body::bhkRigidBody_GetAngularVelocity()
 {
     hkVector4* p = data ? &data->angularVelocity : &DAT_01267e30;
     __m128 m = _mm_and_ps(p->quad, DAT_01017d10.quad);
@@ -451,7 +453,8 @@ __declspec(noinline) hkVector4* Body::FUN_00560e10()
     return _mm_movemask_ps(_mm_cmpeq_ps(total, DAT_01267e30.quad)) == 15 ? &DAT_01267e30 : p;
 }
 // @fnv 0x00c65b00
-void CollisionSync::FUN_00c65b00()
+// src: XBOX_PDB 0x00c65b00
+void CollisionSync::bhkCollisionObject_NitohkTransform()
 {
 
     // The game fills aligned SIMD scratch storage through the shared vector type.
@@ -472,7 +475,7 @@ void CollisionSync::FUN_00c65b00()
     if (!b)
         return;
     int type = b->data ? b->data->motionType : 5;
-    if (type == 5 && b->FUN_00c87a40())
+    if (type == 5 && b->bhkWorldObject_GethkWorld())
         return;
     if (!b->data)
         return;
@@ -482,21 +485,21 @@ void CollisionSync::FUN_00c65b00()
     if (flagSet(6))
     {
 
-        FUN_004a3e00(reinterpret_cast<hkVector4*>(&forcedPos), &world->m_Translate);
+        NI2HK(reinterpret_cast<hkVector4*>(&forcedPos), &world->m_Translate);
 
         forcedQ.x = rot.x;
         forcedQ.y = rot.y;
         forcedQ.z = rot.z;
         forcedQ.w = rot.w;
-        forcedQ.FUN_005611c0();
-        DAT_01267b80.FUN_0040fbf0(0);
+        forcedQ.normalize_005611c0();
+        DAT_01267b80.BSSpinLock_Lock(0);
         b->vtable->SetGeometryTransform(b, reinterpret_cast<hkVector4*>(&forcedPos), &forcedQ);
         DAT_01267b80.unlock();
     }
     else if (!n->flagSet(22) && !n->flagSet(27) && !n->flagSet(3) && !n->flagSet(4))
     {
 
-        FUN_004a3e00(reinterpret_cast<hkVector4*>(distancePos), &world->m_Translate);
+        NI2HK(reinterpret_cast<hkVector4*>(distancePos), &world->m_Translate);
         b->vtable->getPosition(b, reinterpret_cast<hkVector4*>(&old));
         __m128 delta = _mm_sub_ps(distancePos[0], old);
         __m128 sq = _mm_mul_ps(delta, delta);
@@ -506,65 +509,65 @@ void CollisionSync::FUN_00c65b00()
         _mm_store_ss(&dist, _mm_add_ss(z, _mm_add_ss(y, sq)));
         if (dist > 1.0f)
         {
-            if (FUN_0047b470())
+            if (bhkCollisionObject_GetUseVelocity())
             {
-                b->FUN_00c8e160(&world->m_Translate, &rot, &DAT_01267b80);
+                b->bhkRigidBody_ApplyHardKeyframe(&world->m_Translate, &rot, &DAT_01267b80);
                 return;
             }
-            if (FUN_00c8cce0(&type))
+            if (bhkRigidBody_IsMotionTypeDynamic(&type))
             {
-                b->FUN_00c8e160(&world->m_Translate, &rot, &DAT_01267b80);
+                b->bhkRigidBody_ApplyHardKeyframe(&world->m_Translate, &rot, &DAT_01267b80);
                 return;
             }
 
             __m128 nearPos;
-            FUN_004a3e00(reinterpret_cast<hkVector4*>(&nearPos), &world->m_Translate);
+            NI2HK(reinterpret_cast<hkVector4*>(&nearPos), &world->m_Translate);
 
             nearQ.x = rot.x;
             nearQ.y = rot.y;
             nearQ.z = rot.z;
             nearQ.w = rot.w;
-            nearQ.FUN_005611c0();
-            DAT_01267b80.FUN_0040fbf0(0);
+            nearQ.normalize_005611c0();
+            DAT_01267b80.BSSpinLock_Lock(0);
             b->vtable->SetGeometryTransform(b, reinterpret_cast<hkVector4*>(&nearPos), &nearQ);
             DAT_01267b80.unlock();
         }
         else
         {
-            const hkVector4* linearPtr = b->FUN_00560d80();
+            const hkVector4* linearPtr = b->bhkRigidBody_GetLinearVelocity_00560d80();
             __m128 scalarTolerance = _mm_load_ss(&DAT_01017d00);
             __m128 tolerance = _mm_shuffle_ps(scalarTolerance, scalarTolerance, 0);
             __m128 cmp =
                 _mm_cmple_ps(_mm_and_ps(_mm_sub_ps(linearPtr->quad, DAT_01267e30.quad), DAT_01017d10.quad), tolerance);
             if ((_mm_movemask_ps(cmp) & 15) != 15)
-                b->FUN_00561690(&DAT_01267e30);
-            __m128 angular = b->FUN_00560e10()->quad;
+                b->bhkRigidBody_SetLinearVelocity_00561690(&DAT_01267e30);
+            __m128 angular = b->bhkRigidBody_GetAngularVelocity()->quad;
             cmp = _mm_cmple_ps(_mm_and_ps(_mm_sub_ps(angular, DAT_01267e30.quad), DAT_01017d10.quad), tolerance);
             if ((_mm_movemask_ps(cmp) & 15) != 15)
-                b->FUN_005617c0(&DAT_01267e30);
+                b->bhkRigidBody_SetAngularVelocity_005617c0(&DAT_01267e30);
         }
     }
     else
     {
-        if (FUN_0047b470())
+        if (bhkCollisionObject_GetUseVelocity())
         {
-            b->FUN_00c8e160(&world->m_Translate, &rot, &DAT_01267b80);
+            b->bhkRigidBody_ApplyHardKeyframe(&world->m_Translate, &rot, &DAT_01267b80);
             return;
         }
-        if (FUN_00c8cce0(&type))
+        if (bhkRigidBody_IsMotionTypeDynamic(&type))
         {
-            b->FUN_00c8e160(&world->m_Translate, &rot, &DAT_01267b80);
+            b->bhkRigidBody_ApplyHardKeyframe(&world->m_Translate, &rot, &DAT_01267b80);
             return;
         }
 
-        FUN_004a3e00(reinterpret_cast<hkVector4*>(&flaggedPos), &world->m_Translate);
+        NI2HK(reinterpret_cast<hkVector4*>(&flaggedPos), &world->m_Translate);
 
         flaggedQ.x = rot.x;
         flaggedQ.y = rot.y;
         flaggedQ.z = rot.z;
         flaggedQ.w = rot.w;
-        flaggedQ.FUN_005611c0();
-        DAT_01267b80.FUN_0040fbf0(0);
+        flaggedQ.normalize_005611c0();
+        DAT_01267b80.BSSpinLock_Lock(0);
         b->vtable->SetGeometryTransform(b, reinterpret_cast<hkVector4*>(&flaggedPos), &flaggedQ);
         DAT_01267b80.unlock();
     }

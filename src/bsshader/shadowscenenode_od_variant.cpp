@@ -7,11 +7,12 @@
 
 struct FUN_00c5b5a0_cls
 {
-    int __thiscall FUN_00c5b5a0(int idx);
+    int __thiscall BSPortalGraph_GetAlwaysRenderAt(int idx);
 };
 
 // @fnv 0x00c5b5a0
-int __thiscall FUN_00c5b5a0_cls::FUN_00c5b5a0(int idx)
+// src: COMMUNITY 0x00c5b5a0
+int __thiscall FUN_00c5b5a0_cls::BSPortalGraph_GetAlwaysRenderAt(int idx)
 {
     int* p = *(int**)((char*)this + 0x40) + idx;
     int result = *p;
@@ -110,10 +111,10 @@ struct Provider2180
     virtual void s63();
     virtual float get();
 };
-Provider2180* FUN_0045c670();
-int FUN_004dc200();
-int FUN_004dc1f0();
-float FUN_0057dd70(float);
+Provider2180* Main_GetWorldSceneGraph();
+int Renderer_GetScreenHeight();
+int Renderer_GetScreenWidth();
+float tan_0057dd70(float);
 struct FUN_00a712f0
 {
     int bytes[0x114 / 4];
@@ -121,41 +122,42 @@ struct FUN_00a712f0
     static void operator delete(void*, unsigned int);
     FUN_00a712f0();
     void FUN_00712e60(const Rect2180&);
-    void FUN_00507700(float);
+    void NiCamera_SetMaxFarNearRatio(float);
     void FUN_00a6faf0(const Frustum2180&);
     void SetLookAt(const NiPoint3&, const NiPoint3&);
-    void FUN_00733fd0(float);
-    void FUN_00a59c60(const Update2180&);
+    void NiCamera_SetMinNearPlaneDist(float);
+    void NiAVObject_Update(const Update2180&);
     void AssignFixedString(const String2180&);
 };
 struct Target2180
 {
-    FUN_00a712f0* FUN_007c2180();
+    FUN_00a712f0* BlackJackMenu_SetupCamera();
 };
 // @fnv 0x007c2180
-FUN_00a712f0* Target2180::FUN_007c2180()
+// src: COMMUNITY 0x007c2180
+FUN_00a712f0* Target2180::BlackJackMenu_SetupCamera()
 {
     FUN_00a712f0* camera5 = new FUN_00a712f0;
     Rect2180 rect(0.0f, 1.0f, 1.0f, 0.0f);
     camera5->FUN_00712e60(rect);
     Frustum2180 frustum5(false);
-    frustum5.farz = FUN_0045c670()->get();
-    frustum5.nearz = *((Setting*)&DAT_01203144)->FUN_00403e20();
-    camera5->FUN_00507700(frustum5.farz / frustum5.nearz);
-    float ratio3 = (double)(*(unsigned char*)&DAT_011f9426 ? *(int*)&DAT_011f9434 : FUN_004dc200()) / FUN_004dc1f0();
+    frustum5.farz = Main_GetWorldSceneGraph()->get();
+    frustum5.nearz = *((Setting*)&DAT_01203144)->Setting_Float_00403e20();
+    camera5->NiCamera_SetMaxFarNearRatio(frustum5.farz / frustum5.nearz);
+    float ratio3 = (double)(*(unsigned char*)&DAT_011f9426 ? *(int*)&DAT_011f9434 : Renderer_GetScreenHeight()) / Renderer_GetScreenWidth();
     float nearz = *(float*)&DAT_01016264;
-    float angle = *((Setting*)&DAT_01203150)->FUN_00403e20() * *(double*)&DAT_01023128 * *(double*)&DAT_01070c80;
-    frustum5.left = -FUN_0057dd70(angle) * nearz;
-    frustum5.right = FUN_0057dd70(angle) * nearz;
-    frustum5.bottom = -FUN_0057dd70(angle) * ratio3 * nearz;
-    frustum5.top = FUN_0057dd70(angle) * ratio3 * nearz;
+    float angle = *((Setting*)&DAT_01203150)->Setting_Float_00403e20() * *(double*)&DAT_01023128 * *(double*)&DAT_01070c80;
+    frustum5.left = -tan_0057dd70(angle) * nearz;
+    frustum5.right = tan_0057dd70(angle) * nearz;
+    frustum5.bottom = -tan_0057dd70(angle) * ratio3 * nearz;
+    frustum5.top = tan_0057dd70(angle) * ratio3 * nearz;
     frustum5.ortho = false;
     camera5->FUN_00a6faf0(frustum5);
     camera5->SetLookAt(NiPoint3(0.0f, 0.0f, 1.0f), NiPoint3(0.0f, 0.0f, 1.0f));
-    camera5->FUN_00733fd0(1.0f);
+    camera5->NiCamera_SetMinNearPlaneDist(1.0f);
     Update2180 update2;
     update2.FUN_0043d410(0.0f, false, false);
-    camera5->FUN_00a59c60(update2);
+    camera5->NiAVObject_Update(update2);
     camera5->AssignFixedString(String2180(&DAT_01070c70));
     return camera5;
 }

@@ -96,7 +96,8 @@ void __fastcall ConvertRgb565ToRgb888(char* pThis, int, unsigned char* pucSrc, u
 }
 
 // @fnv 0x00a8d590
-void __fastcall FUN_00a8d590(char* this_ptr, int, unsigned char* pSrcIndices, unsigned char* pDst)
+// src: GUESS 0x00a8d590 (confidence: low)
+void __fastcall NiDDSReader_ProcessEntries_00a8d590(char* this_ptr, int, unsigned char* pSrcIndices, unsigned char* pDst)
 {
     for (unsigned int i = 0; i < *(unsigned short*)(this_ptr + 0x10e); i++)
     {
@@ -112,7 +113,8 @@ void __fastcall FUN_00a8d590(char* this_ptr, int, unsigned char* pSrcIndices, un
 
 int __cdecl NiStricmp(const char*, const char*);
 // @fnv 0x00a8c0e0
-bool __stdcall FUN_00a8c0e0(const char* extension)
+// src: XBOX_PDB 0x00a8c0e0
+bool __stdcall NiDDSReader_CanReadFile(const char* extension)
 {
     if (NiStricmp(extension, ".dds") != 0)
         return false;
@@ -171,7 +173,8 @@ FUN_00a8c190::FUN_00a8c190()
 
 // For each of the count at self+0x10e, reads a byte from src, subtracts the byte at self+0x104, and writes the result to dst.
 // @fnv 0x00a8d4a0
-void __fastcall FUN_00a8d4a0(char* self, int edx, const unsigned char* src, unsigned char* dst)
+// src: GUESS 0x00a8d4a0 (confidence: medium)
+void __fastcall Object_CopyBytesWithOffset(char* self, int edx, const unsigned char* src, unsigned char* dst)
 {
     unsigned int i;
     for (i = 0; i < *(unsigned short*)(self + 0x10e); i++)
@@ -182,7 +185,8 @@ void __fastcall FUN_00a8d4a0(char* self, int edx, const unsigned char* src, unsi
 }
 
 // @fnv 0x00a8d600
-void __fastcall FUN_00a8d600(char* self, int edx, const unsigned char* src, unsigned char* dst)
+// src: GUESS 0x00a8d600 (confidence: low)
+void __fastcall Object_ProcessEntries_00a8d600(char* self, int edx, const unsigned char* src, unsigned char* dst)
 {
     for (unsigned int i = 0; i < *(unsigned short*)(self + 0x10e); ++i)
     {
@@ -202,7 +206,8 @@ struct FUN_00a8d670_obj
     unsigned short width;
 };
 // @fnv 0x00a8d670
-void __fastcall FUN_00a8d670(FUN_00a8d670_obj* self, int unused, const unsigned char* src, unsigned char* dst)
+// src: GUESS 0x00a8d670 (confidence: high)
+void __fastcall NiDDSReader_SwapRedBlue24BitPixels(FUN_00a8d670_obj* self, int unused, const unsigned char* src, unsigned char* dst)
 {
     for (unsigned int i = 0; i < self->width; i++)
     {
@@ -219,7 +224,8 @@ struct FUN_00a8d6c0_obj
     unsigned short width;
 };
 // @fnv 0x00a8d6c0
-void __fastcall FUN_00a8d6c0(FUN_00a8d6c0_obj* self, int unused, const unsigned char* src, unsigned char* dst)
+// src: GUESS 0x00a8d6c0 (confidence: low)
+void __fastcall Object_ProcessEntries_00a8d6c0(FUN_00a8d6c0_obj* self, int unused, const unsigned char* src, unsigned char* dst)
 {
     for (unsigned int i = 0; i < self->width; i++)
     {
@@ -303,7 +309,7 @@ extern int DAT_0109f4b0;
 extern int DAT_0109f3d0;
 extern void(__stdcall* DAT_00fdf058)(void*);
 
-void __cdecl FUN_00aa10f0(void* apMemory);
+void __cdecl _NiFree_00aa10f0(void* apMemory);
 
 extern MemoryManager DAT_011f6238;
 
@@ -328,7 +334,7 @@ FUN_00a8d850_cls* FUN_00a8d850_cls::DestroyImageReader(unsigned char acFlags)
 {
     void* pFirst = m_p164;
     *(int*)this = (int)&DAT_0109f4b0;
-    FUN_00aa10f0(pFirst);
+    _NiFree_00aa10f0(pFirst);
     void* pSecond = m_p16c;
     DAT_011f6238.Deallocate(pSecond);
     *(int*)this = (int)&DAT_0109f3d0;
@@ -342,11 +348,11 @@ FUN_00a8d850_cls* FUN_00a8d850_cls::DestroyImageReader(unsigned char acFlags)
 
 struct ClsSub
 {
-    ClsSub* FUN_00a8b110(int b, int w, int d);
+    ClsSub* NiPalette_NiPalette_00a8b110(int b, int w, int d);
 };
-extern void* __cdecl FUN_00aa13e0(unsigned int size);
-extern void __cdecl FUN_00aa10f0(void* p);
-extern void* __cdecl FUN_00aa1070(unsigned int size);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int size);
+extern void __cdecl _NiFree_00aa10f0(void* p);
+extern void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 extern void(__stdcall* DAT_00fdf05c)(void*);
 extern void(__stdcall* DAT_00fdf100)(void*);
 
@@ -441,7 +447,7 @@ NiPixelData* ClsReader::ReadImage(NiBinaryStream* stream, NiPixelData* image)
     }
     else
     {
-        void* pImageMem = FUN_00aa13e0(0x74);
+        void* pImageMem = Object_DispatchCommandFour(0x74);
         if (pImageMem != 0)
         {
             result = ::new (pImageMem) NiPixelData((int)(unsigned short)w10e, (int)(unsigned short)w110, &m_eFormat, 1, 1);
@@ -454,23 +460,23 @@ NiPixelData* ClsReader::ReadImage(NiBinaryStream* stream, NiPixelData* image)
     }
     if (b116 != 0)
     {
-        void* pSubMem = FUN_00aa13e0(0x24);
+        void* pSubMem = Object_DispatchCommandFour(0x24);
         ClsSub* sub;
         if (pSubMem != 0)
         {
-            sub = ((ClsSub*)pSubMem)->FUN_00a8b110((int)(unsigned char)b115, (int)(unsigned short)w106, d16c);
+            sub = ((ClsSub*)pSubMem)->NiPalette_NiPalette_00a8b110((int)(unsigned char)b115, (int)(unsigned short)w106, d16c);
         }
         else
         {
             sub = 0;
         }
-        image->FUN_00a76a60(reinterpret_cast<NiPalette*>(sub));
+        image->NiPixelData_SetPalette(reinterpret_cast<NiPalette*>(sub));
     }
     if (m_pRayCursor < (unsigned int)count)
     {
         m_pRayCursor = count;
-        FUN_00aa10f0(m_buffer);
-        m_buffer = (unsigned char*)FUN_00aa1070(m_pRayCursor);
+        _NiFree_00aa10f0(m_buffer);
+        m_buffer = (unsigned char*)_NiMalloc_00aa1070(m_pRayCursor);
     }
     int iOffset = (int)*image->m_puiOffsetInBytes + (int)image->m_pucPixels;
     int step = image->m_uiPixelStride * (int)*image->m_puiWidth;
@@ -523,7 +529,7 @@ inline void ReadBinaryValue(NiBinaryStream& kStream, unsigned int& uiValue)
     NiBinaryStreamLoad(kStream, &uiValue, 1);
 }
 
-void __cdecl FUN_00a575b0(NiBinaryStream& kStream, unsigned int& uiValue);
+void __cdecl NiStreamLoadBinary_00a575b0(NiBinaryStream& kStream, unsigned int& uiValue);
 NiPixelFormat __cdecl CreateFromMasks(unsigned int uiBitsPerPixel, unsigned int uiRedMask, unsigned int uiGreenMask,
                                       unsigned int uiBlueMask, unsigned int uiAlphaMask);
 
@@ -566,7 +572,8 @@ __declspec(noinline) bool NiDDSReader::IsValidBitDepth(unsigned int uiRedMask, u
 
 // Parses a DDS header from kIst, validating magic, size, and pixel format, then sets uiWidth, uiHeight, kFormat, bMipmap, and uiFaces.
 // @fnv 0x00a8c1e0
-bool NiDDSReader::FUN_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsigned int& uiHeight,
+// src: XBOX_PDB 0x00a8c1e0
+bool NiDDSReader::ReadHeader_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsigned int& uiHeight,
                                NiPixelFormat& kFormat, bool& bMipmap, unsigned int& uiFaces)
 {
     Lock();
@@ -672,11 +679,11 @@ bool NiDDSReader::FUN_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsi
         unsigned int uiGBitMask;
         unsigned int uiBBitMask;
         unsigned int uiABitMask;
-        FUN_00a575b0(kIst, uiRGBBitCount);
-        FUN_00a575b0(kIst, uiRBitMask);
-        FUN_00a575b0(kIst, uiGBitMask);
-        FUN_00a575b0(kIst, uiBBitMask);
-        FUN_00a575b0(kIst, uiABitMask);
+        NiStreamLoadBinary_00a575b0(kIst, uiRGBBitCount);
+        NiStreamLoadBinary_00a575b0(kIst, uiRBitMask);
+        NiStreamLoadBinary_00a575b0(kIst, uiGBitMask);
+        NiStreamLoadBinary_00a575b0(kIst, uiBBitMask);
+        NiStreamLoadBinary_00a575b0(kIst, uiABitMask);
         if (!(uiPFFlags & 0x1))
             uiABitMask = 0;
         if (!IsValidBitDepth(uiRBitMask, uiGBitMask, uiBBitMask, uiABitMask, uiRGBBitCount))
@@ -695,7 +702,7 @@ bool NiDDSReader::FUN_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsi
     }
 
     unsigned int uiCaps1;
-    FUN_00a575b0(kIst, uiCaps1);
+    NiStreamLoadBinary_00a575b0(kIst, uiCaps1);
     if (!(uiCaps1 & 0x8) && !(uiCaps1 & 0x401000))
     {
         Unlock();
@@ -703,7 +710,7 @@ bool NiDDSReader::FUN_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsi
     }
 
     unsigned int uiCaps2;
-    FUN_00a575b0(kIst, uiCaps2);
+    NiStreamLoadBinary_00a575b0(kIst, uiCaps2);
     if (uiCaps2 & 0x200000)
     {
         Unlock();
@@ -803,7 +810,8 @@ struct FormatView
 };
 // Reads one mip level from a stream and expands its packed pixels into RGBA bytes, forcing alpha to 255 when the source format has no alpha channel.
 // @fnv 0x00a8c7a0
-void __cdecl FUN_00a8c7a0(NiBinaryStream* stream, NiPixelData* data, NiPixelFormat source, NiPixelFormat dest,
+// src: XBOX_PDB 0x00a8c7a0
+void __cdecl NiDDSReader_Read32Bit(NiBinaryStream* stream, NiPixelData* data, NiPixelFormat source, NiPixelFormat dest,
                           unsigned int level, unsigned int face)
 {
     unsigned char* __restrict pixels = data->m_pucPixels + data->m_puiOffsetInBytes[level] + data->m_puiOffsetInBytes[data->m_uiMipmapLevels] * face;
@@ -985,13 +993,13 @@ extern const NiPixelFormat DAT_011aa210;
 extern const NiPixelFormat DAT_011aa258;
 extern const NiPixelFormat DAT_011aa2a0;
 void __fastcall DecodeBytes(char* self, int edx, const unsigned char* src, unsigned char* dst);
-void __fastcall FUN_00a8d4a0(char* self, int edx, const unsigned char* src, unsigned char* dst);
+void __fastcall Object_CopyBytesWithOffset(char* self, int edx, const unsigned char* src, unsigned char* dst);
 void __fastcall ExpandGrayToRgb(void* thisPtr, int, unsigned char* src, unsigned char* dst);
 void __fastcall ConvertRgb565ToRgb888(char* pThis, int, unsigned char* pucSrc, unsigned char* pucDest);
-void __fastcall FUN_00a8d590(char* this_ptr, int, unsigned char* pSrc, unsigned char* pDst);
-void __fastcall FUN_00a8d600(char* self, int edx, const unsigned char* src, unsigned char* dst);
-void __fastcall FUN_00a8d670(char*, int, unsigned char*, unsigned char*);
-void __fastcall FUN_00a8d6c0(char*, int, unsigned char*, unsigned char*);
+void __fastcall NiDDSReader_ProcessEntries_00a8d590(char* this_ptr, int, unsigned char* pSrc, unsigned char* pDst);
+void __fastcall Object_ProcessEntries_00a8d600(char* self, int edx, const unsigned char* src, unsigned char* dst);
+void __fastcall NiDDSReader_SwapRedBlue24BitPixels(char*, int, unsigned char*, unsigned char*);
+void __fastcall Object_ProcessEntries_00a8d6c0(char*, int, unsigned char*, unsigned char*);
 struct DDSReader : NiImageReader
 {
     unsigned char b100, b101, b102, unk103;
@@ -1005,11 +1013,12 @@ struct DDSReader : NiImageReader
     void(__fastcall* m_pfnPixelConverter)(char*, int, unsigned char*, unsigned char*);
     unsigned int d174;
     unsigned char b178, b179, b17a, b17b;
-    bool FUN_00a8dce0(NiBinaryStream* stream, int* pA, int* pB, NiPixelFormat* pFmt, unsigned char* pByte, int* pFlag);
+    bool NiTGAReader_ReadHeader(NiBinaryStream* stream, int* pA, int* pB, NiPixelFormat* pFmt, unsigned char* pByte, int* pFlag);
 };
 // Seeks to the start, reads fields, selects m_eFormat and a converter, and writes values to pFlag, pA, pB, pFmt, and pByte.
 // @fnv 0x00a8dce0
-bool DDSReader::FUN_00a8dce0(NiBinaryStream* stream, int* apWidth, int* apHeight, NiPixelFormat* apFormat,
+// src: GAMEBRYO_SRC 0x00a8dce0
+bool DDSReader::NiTGAReader_ReadHeader(NiBinaryStream* stream, int* apWidth, int* apHeight, NiPixelFormat* apFormat,
                              unsigned char* pByte, int* pFlag)
 {
     NiBinaryStream& kReadStream = *stream;
@@ -1093,7 +1102,7 @@ bool DDSReader::FUN_00a8dce0(NiBinaryStream* stream, int* apWidth, int* apHeight
     case 8:
         b114 = 1;
         if (bHasPalette)
-            m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))FUN_00a8d4a0;
+            m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))Object_CopyBytesWithOffset;
         else
             m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))ExpandGrayToRgb;
         break;
@@ -1103,20 +1112,20 @@ bool DDSReader::FUN_00a8dce0(NiBinaryStream* stream, int* apWidth, int* apHeight
         if (bHasPalette)
         {
             if (bIs32Bit)
-                m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))FUN_00a8d600;
+                m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))Object_ProcessEntries_00a8d600;
             else
-                m_pfnPixelConverter = FUN_00a8d590;
+                m_pfnPixelConverter = NiDDSReader_ProcessEntries_00a8d590;
         }
         else
             m_pfnPixelConverter = ConvertRgb565ToRgb888;
         break;
     case 24:
         b114 = 3;
-        m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))FUN_00a8d670;
+        m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))NiDDSReader_SwapRedBlue24BitPixels;
         break;
     case 32:
         b114 = 4;
-        m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))FUN_00a8d6c0;
+        m_pfnPixelConverter = (void(__fastcall*)(char*, int, unsigned char*, unsigned char*))Object_ProcessEntries_00a8d6c0;
         break;
     }
     b178 = 0;
@@ -1235,7 +1244,8 @@ template <int C> static inline unsigned char Expand(unsigned int raw, const Chan
 
 // Reads packed pixel data from stream into buf, expands each channel via ChannelInfo, and writes RGBA or RGB bytes into data->m_pucPixels for the given mip and face.
 // @fnv 0x00a8cc40
-void __cdecl FUN_00a8cc40(NiBinaryStream* stream, NiPixelData* apPixelData, NiPixelFormat srcFmt, NiPixelFormat dstFmt,
+// src: XBOX_PDB 0x00a8cc40
+void __cdecl NiDDSReader_Read16Bit(NiBinaryStream* stream, NiPixelData* apPixelData, NiPixelFormat srcFmt, NiPixelFormat dstFmt,
                           unsigned int mip, unsigned int face)
 {
     unsigned char* dst =

@@ -32,11 +32,12 @@ struct RegionPoint
 typedef char _sizecheck_TESRegionPoint[sizeof(RegionPoint) == 8 ? 1 : -1];
 struct FUN_0052ce20_shell : public RegionPoint
 {
-    void FUN_0052ce20(float);
+    void TESRegionPoint_SetX(float);
 };
 
 // @fnv 0x0052ce20
-void FUN_0052ce20_shell::FUN_0052ce20(float afX)
+// src: XBOX_PDB 0x0052ce20
+void FUN_0052ce20_shell::TESRegionPoint_SetX(float afX)
 {
     *(float*)this = afX;
 }
@@ -59,11 +60,12 @@ extern int DAT_01023ec4;
 
 struct FUN_004f5920_shell
 {
-    void FUN_004f5920();
+    void SetVirtualTable_004f5920();
 };
 
 // @fnv 0x004f5920
-void FUN_004f5920_shell::FUN_004f5920()
+// src: GUESS 0x004f5920 (confidence: low)
+void FUN_004f5920_shell::SetVirtualTable_004f5920()
 {
     *reinterpret_cast<int**>(this) = &DAT_01023ec4;
 }
@@ -71,7 +73,7 @@ void FUN_004f5920_shell::FUN_004f5920()
 namespace fnv_004f55d0 {
 struct FUN_004f5920_shell
 {
-    void FUN_004f5920();
+    void SetVirtualTable_004f5920();
 };
 void __cdecl _Deallocate(void*);
 struct FUN_004f55d0_shell
@@ -82,7 +84,7 @@ struct FUN_004f55d0_shell
 // @fnv 0x004f55d0
 void* FUN_004f55d0_shell::FUN_004f55d0(unsigned int flags)
 {
-    ((FUN_004f5920_shell*)this)->FUN_004f5920();
+    ((FUN_004f5920_shell*)this)->SetVirtualTable_004f5920();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -102,10 +104,11 @@ struct FUN_004f5940_factory
     virtual int GetFirst();
     virtual void v2();
     virtual int GetSecond();
-    FUN_004f5590* FUN_004f5940(FUN_004f5590* existing);
+    FUN_004f5590* TESRegionGrassObject_Copy(FUN_004f5590* existing);
 };
 // @fnv 0x004f5940
-FUN_004f5590* FUN_004f5940_factory::FUN_004f5940(FUN_004f5590* existing)
+// src: XBOX_PDB 0x004f5940
+FUN_004f5590* FUN_004f5940_factory::TESRegionGrassObject_Copy(FUN_004f5590* existing)
 {
     FUN_004f5590* result = existing != 0 ? existing : new FUN_004f5590(GetFirst(), GetSecond());
     return result;

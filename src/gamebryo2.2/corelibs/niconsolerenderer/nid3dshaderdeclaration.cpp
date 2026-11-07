@@ -17,7 +17,8 @@ void* __fastcall DestroyIfFlagged(NiD3DShaderDeclaration* self, void*, unsigned 
 }
 
 // @fnv 0x00e942d0
-void NiVBBlock::FUN_00e942d0()
+// src: COMMUNITY 0x00e942d0
+void NiVBBlock::ClearAllData()
 {
     unsigned int zero = 0;
     m_00 = zero;

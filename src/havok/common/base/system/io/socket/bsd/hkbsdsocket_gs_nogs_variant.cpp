@@ -11,7 +11,7 @@
 // src/havok/common/base/system/io/socket/bsd/hkbsdsocket.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/system/io/socket/bsd/hkbsdsocket.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 // FUN_00ee6d9e: 6-byte 'jmp [IAT]' forwarder to WSOCK32 ordinal 21 (setsockopt, stdcall, 5 args).
-int __stdcall FUN_00ee6d9e(unsigned int s, int level, int optname, const char* optval, int optlen);
+int __stdcall setsockopt_0(unsigned int s, int level, int optname, const char* optval, int optlen);
 
 namespace fnv_00da3230 {
 inline hkMemoryAllocator& GetHeapAllocator(hkMemoryRouter& router)
@@ -19,12 +19,12 @@ inline hkMemoryAllocator& GetHeapAllocator(hkMemoryRouter& router)
     return *reinterpret_cast<hkMemoryAllocator*>(router.m_heap);
 }
 
-extern "C" int __stdcall FUN_00ee6dbc(int nfds, fd_set* pRead, fd_set* pWrite, fd_set* pExcept,
+extern "C" int __stdcall select_0(int nfds, fd_set* pRead, fd_set* pWrite, fd_set* pExcept,
                                       const timeval* pTimeout);
-extern "C" int __stdcall FUN_00ee6db6(unsigned int s, fd_set* pSet);
-extern "C" unsigned int __stdcall FUN_00ee6db0(unsigned int s, sockaddr_in* pAddr, int* pAddrLen);
-extern "C" unsigned short __stdcall FUN_00ee6daa(unsigned short usNet);
-extern "C" char* __stdcall FUN_00ee6da4(unsigned int uiAddr);
+extern "C" int __stdcall _WSAFDIsSet_0(unsigned int s, fd_set* pSet);
+extern "C" unsigned int __stdcall accept_0(unsigned int s, sockaddr_in* pAddr, int* pAddrLen);
+extern "C" unsigned short __stdcall ntohs_0(unsigned short usNet);
+extern "C" char* __stdcall inet_ntoa_0(unsigned int uiAddr);
 
 struct StrBufD32
 {
@@ -34,9 +34,9 @@ struct StrBufD32
     char m_kStorage[0x80];
 
     void InitBuffer();
-    void FUN_00cbbd40();
+    void UpdateFields_00cbbd40();
 };
-void __cdecl FUN_00d61d00(StrBufD32* pBuf, const char* pcFmt, ...);
+void __cdecl hkStringBuf_printf(StrBufD32* pBuf, const char* pcFmt, ...);
 
 struct OstreamD32
 {
@@ -61,7 +61,8 @@ extern ErrorD32* DAT_01268360;
 }  // namespace fnv_00da3230
 
 // @fnv 0x00da3230
-void* hkBsdSocket::FUN_00da3230()
+// src: HAVOK_LIB 0x00da3230
+void* hkBsdSocket::pollForNewClient()
 {
     using namespace fnv_00da3230;
     if (m_pSocket != -1)
@@ -113,16 +114,16 @@ void* hkBsdSocket::FUN_00da3230()
         t.tv_usec = 0;
         int nfds = int(m_pSocket);
         nfds++;
-        int numHits = FUN_00ee6dbc(nfds, &readFds, 0, &exceptFds, &t);
-        if ((numHits > 0) && FUN_00ee6db6(m_pSocket, &readFds))
+        int numHits = select_0(nfds, &readFds, 0, &exceptFds, &t);
+        if ((numHits > 0) && _WSAFDIsSet_0(m_pSocket, &readFds))
         {
             sockaddr_in from;
             int iFromLen = sizeof(from);
-            unsigned int s = FUN_00ee6db0(m_pSocket, &from, &iFromLen);
+            unsigned int s = accept_0(m_pSocket, &from, &iFromLen);
             StrBufD32 kMsg;
             kMsg.InitBuffer();
-            FUN_00d61d00(&kMsg, "Socket got connection from [%s:%d]\n", FUN_00ee6da4(from.sin_addr.S_un.S_addr),
-                         FUN_00ee6daa(from.sin_port));
+            hkStringBuf_printf(&kMsg, "Socket got connection from [%s:%d]\n", inet_ntoa_0(from.sin_addr.S_un.S_addr),
+                         ntohs_0(from.sin_port));
             {
                 char acBuf[512];
                 OstreamD32 kOstr;
@@ -133,15 +134,15 @@ void* hkBsdSocket::FUN_00da3230()
             }
             if (s == -1)
             {
-                kMsg.FUN_00cbbd40();
+                kMsg.UpdateFields_00cbbd40();
                 return 0;
             }
             int iNoDelay = 1;
-            FUN_00ee6d9e(s, 6, 1, (const char*)&iNoDelay, 4);
+            setsockopt_0(s, 6, 1, (const char*)&iNoDelay, 4);
             void* p = GetHeapAllocator(hkMemoryRouter::getInstance()).blockAlloc(0x24);
             ((unsigned short*)p)[2] = 0x24;
             void* pkSocket = ((hkBsdSocket*)p)->InitWithParam(s);
-            kMsg.FUN_00cbbd40();
+            kMsg.UpdateFields_00cbbd40();
             return pkSocket;
         }
     }

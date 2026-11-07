@@ -13,21 +13,23 @@ inline void* __cdecl operator new(unsigned int, void* p)
 extern "C" void* g_012027b0;
 
 // @fnv 0x00c30630
-void* __cdecl FUN_00c30630()
+// src: COMMUNITY 0x00c30630
+void* __cdecl NiPSysAirFieldInheritVelocityCtlr_GetRTTI()
 {
     return &g_012027b0;
 }
 
 struct NiPSysAirFieldInheritVelocityCtlr : NiPSysModifierFloatCtlr
 {
-    void FUN_00c30640(float& fValue);
+    void GetTargetFloatValue_00c30640(float& fValue);
     void SetModValue(float fValue);
     void FUN_00c32de0(NiPSysModifierFloatCtlr* obj, void* a1);
     NiPSysModifierFloatCtlr* CreateSpawnedCtlr(void* a1);
 };
 
 // @fnv 0x00c30640
-void __thiscall NiPSysAirFieldInheritVelocityCtlr::FUN_00c30640(float& fValue)
+// src: XBOX_PDB 0x00c30640
+void __thiscall NiPSysAirFieldInheritVelocityCtlr::GetTargetFloatValue_00c30640(float& fValue)
 {
     float* p = reinterpret_cast<float*>(m_pkTargetModifier);
     fValue = p[0x5c / 4];
@@ -76,13 +78,13 @@ void NiPSysAirFieldInheritVelocityCtlr::SetModValue(float fValue)
 }
 
 extern "C" char DAT_010c05e4;
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 // Allocates and initialises a controller, copies its members, and returns it.
 // @fnv 0x00c306a0
 NiPSysModifierFloatCtlr* NiPSysAirFieldInheritVelocityCtlr::CreateSpawnedCtlr(void* a1)
 {
-    NiPSysModifierFloatCtlr* obj = (NiPSysModifierFloatCtlr*)FUN_00aa13e0(0x40);
+    NiPSysModifierFloatCtlr* obj = (NiPSysModifierFloatCtlr*)Object_DispatchCommandFour(0x40);
     if (obj != 0)
     {
         ::new (obj) NiPSysModifierFloatCtlr;
@@ -96,14 +98,15 @@ NiPSysModifierFloatCtlr* NiPSysAirFieldInheritVelocityCtlr::CreateSpawnedCtlr(vo
     return obj;
 }
 
-char* __cdecl FUN_00a7d330(char*);
-void __stdcall FUN_00c32f60(StrArr*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 // Grows the array if its index has reached capacity, then stores the string returned by FUN_00a7d330 at that index.
 // @fnv 0x00c30740
-void __stdcall FUN_00c30740(StrArr* array)
+// src: XBOX_PDB 0x00c30740
+void __stdcall NiPSysAirFieldInheritVelocityCtlr_GetViewerStrings(StrArr* array)
 {
-    FUN_00c32f60(array);
-    char* value = FUN_00a7d330(static_cast<char*>(g_012027b0));
+    NiPSysModifierFloatCtlr_GetViewerStrings(array);
+    char* value = NiViewerStrings_NiGetViewerString_Title(static_cast<char*>(g_012027b0));
     unsigned int index = array->m_usSize;
     unsigned int capacity = array->m_usMaxSize;
     if (index >= capacity)

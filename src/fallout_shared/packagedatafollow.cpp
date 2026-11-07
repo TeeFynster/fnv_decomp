@@ -28,7 +28,7 @@ TESFollowPackageData* TESFollowPackageData::Construct(float afValue)
 }
 
 extern "C" void* __cdecl memset(void*, int, unsigned int);
-extern "C" bool __cdecl FUN_00401500();
+extern "C" bool __cdecl TESForm_QEndianSwapOnSave();
 extern "C" void __cdecl AppendChunk(int, void*, int);
 struct BipedModelForm
 {
@@ -44,10 +44,10 @@ void TESFollowPackageData::SaveFloatRecord()
     float fValue;
     memset(&fValue, 0, 4);
     fValue = m_08;
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((BipedModelForm*)&fValue)->Endian();
     AppendChunk(0x44464b50, &fValue, 4);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((BipedModelForm*)&fValue)->Endian();
     if (m_04)
         ((LocationDescriptor*)m_04)->Save(0x32444c50);
@@ -71,7 +71,8 @@ class FollowPackageField
     bool Cmp(FollowPackageField* p);
 };
 // @fnv 0x0067c220
-bool TESFollowPackageData::FUN_0067c220(TESPackageData* apData)
+// src: XBOX_PDB 0x0067c220
+bool TESFollowPackageData::Compare_0067c220(TESPackageData* apData)
 {
     TESFollowPackageData* other = dynamic_cast<TESFollowPackageData*>(apData);
     if (other == 0)
@@ -110,7 +111,8 @@ struct FUN_0067f030
 
 // For a compatible source, copies m_08, deletes the old m_04, and allocates and initializes m_04 when the source has one.
 // @fnv 0x0067c110
-void __thiscall TESFollowPackageData::FUN_0067c110(TESPackageData* other)
+// src: XBOX_PDB 0x0067c110
+void __thiscall TESFollowPackageData::Copy_0067c110(TESPackageData* other)
 {
     TESFollowPackageData* source = dynamic_cast<TESFollowPackageData*>(other);
     if (source)

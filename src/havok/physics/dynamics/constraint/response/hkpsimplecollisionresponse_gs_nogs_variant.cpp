@@ -143,7 +143,7 @@ struct D9Matrix
         return (&unk00)[i];
     }
     void FUN_00cd4b60();
-    void FUN_00cd55b0(const D9Matrix&, const D9Matrix&);
+    void hkMatrix3_setMul(const D9Matrix&, const D9Matrix&);
 };
 struct __declspec(align(16)) D9Rotation : D9Matrix
 {
@@ -491,10 +491,11 @@ struct Basis
         unk20.cross(normal, unk10);
     }
 };
-extern void __cdecl FUN_00df5950(const D9Row&, const D9Row&, const Basis&, D9Equation&);
-extern float __cdecl FUN_00df5f80(const D9Equation&, void*, D9Pair&, D9Pair&);
+extern void __cdecl hkpCollision_BuildResponseMatrices(const D9Row&, const D9Row&, const Basis&, D9Equation&);
+extern float __cdecl Object_ProcessAndReturnValue_00df5f80(const D9Equation&, void*, D9Pair&, D9Pair&);
 // @fnv 0x00d9ee50
-void __cdecl FUN_00d9ee50(D9Solver* solver, const D9Contact& contact, void* parameters, D9Body* ownerA, D9Body* ownerB,
+// src: GUESS 0x00d9ee50 (confidence: low)
+void __cdecl hkMatrix3_setMul_ProcessEntries_00d9ee50(D9Solver* solver, const D9Contact& contact, void* parameters, D9Body* ownerA, D9Body* ownerB,
                           D9Shape* accumulatorA, D9Shape* accumulatorB, float& result)
 {
     D9Row inputs[2];
@@ -523,7 +524,7 @@ void __cdecl FUN_00d9ee50(D9Solver* solver, const D9Contact& contact, void* para
                 scaled.column(0).multiply(sx, rotation.column(0));
                 scaled.column(1).multiply(sy, rotation.column(1));
                 scaled.column(2).multiply(sz, rotation.column(2));
-                input.unk10.FUN_00cd55b0(scaled, accumulator->rotation());
+                input.unk10.hkMatrix3_setMul(scaled, accumulator->rotation());
             }
             input.unk50 = &owner->unkf0;
             accumulator = accumulatorB;
@@ -534,8 +535,8 @@ void __cdecl FUN_00d9ee50(D9Solver* solver, const D9Contact& contact, void* para
     Basis basis;
     basis.setNormalBasis(contact.normal());
     solver->f40(contact, inputs[0], velocities[0], inputs[1], velocities[1]);
-    FUN_00df5950(inputs[0], inputs[1], basis, equation);
-    result = FUN_00df5f80(equation, parameters, velocities[0], velocities[1]);
+    hkpCollision_BuildResponseMatrices(inputs[0], inputs[1], basis, equation);
+    result = Object_ProcessAndReturnValue_00df5f80(equation, parameters, velocities[0], velocities[1]);
     solver->f44(contact, result, inputs[0], velocities[0], inputs[1], velocities[1]);
     accumulatorA->unk10 = velocities[0].unk00;
     if (ownerA->unke8 != 5)

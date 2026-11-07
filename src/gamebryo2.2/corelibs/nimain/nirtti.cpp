@@ -18,7 +18,8 @@ extern int DAT_01267b60;
 
 // Calls Construct on pThis, installs the DAT_010c4314 vtable, zeroes field at offset 16, increments DAT_01267b60 and sets a ushort at offset 12 to 0x41.
 // @fnv 0x00c6b910
-void* __fastcall FUN_00c6b910(void* apObject)
+// src: GUESS 0x00c6b910 (confidence: low)
+void* __fastcall NiRTTI_UpdateState_00c6b910(void* apObject)
 {
     Construct(apObject);
     *(int**)apObject = &DAT_010c4314;

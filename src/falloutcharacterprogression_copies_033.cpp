@@ -10,7 +10,7 @@ public:
     NiPointer<NiNode> pData;
 
     __declspec(noinline) bool GetBooleanValue();
-    void FUN_008d5270();
+    void CharacterProgression_FinishLevelUp();
 };
 
 // @fnv 0x008d0360

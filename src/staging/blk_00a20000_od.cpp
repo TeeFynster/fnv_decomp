@@ -47,11 +47,12 @@ struct FUN_00a25bf0_class
     int m_60;
     int m_64;
     int m_68;
-    char FUN_00a25bf0(int a);
+    char UpdateState_00a25bf0(int a);
 };
 
 // @fnv 0x00a25bf0
-char FUN_00a25bf0_class::FUN_00a25bf0(int aiUnused)
+// src: GUESS 0x00a25bf0 (confidence: low)
+char FUN_00a25bf0_class::UpdateState_00a25bf0(int aiUnused)
 {
     char b = ((const char*)this)[m_68];
     return b;
@@ -71,18 +72,20 @@ unsigned int FUN_00a25d50_Class::GetField14278()
 extern "C" __declspec(dllimport) char* __stdcall lstrcpyA(char* dst, const char* src);
 
 // @fnv 0x00a25e00
-char* __cdecl FUN_00a25e00(char* dst, char* src)
+// src: GUESS 0x00a25e00 (confidence: medium)
+char* __cdecl Object_LstrcpyA_Thunk(char* dst, char* src)
 {
     return lstrcpyA(dst + 4, src + 4);
 }
 
 struct FUN_00a24f10_Class
 {
-    unsigned int FUN_00a24f10(unsigned int i);
+    unsigned int Controls_GetKeybind(unsigned int i);
 };
 // Reads three bytes at offsets 0x1b94, 0x1bb0 and 0x1be8 indexed by i and packs them into a 24-bit value (high, mid, low).
 // @fnv 0x00a24f10
-unsigned int FUN_00a24f10_Class::FUN_00a24f10(unsigned int uiIndex)
+// src: COMMUNITY 0x00a24f10
+unsigned int FUN_00a24f10_Class::Controls_GetKeybind(unsigned int uiIndex)
 {
     unsigned int v = (unsigned char)((char*)this + uiIndex)[0x1b94] << 0x10;
     v |= (unsigned char)((char*)this + uiIndex)[0x1bb0] << 8;
@@ -94,12 +97,13 @@ extern int DAT_00ff0000;
 
 struct FUN_00a24f60_Class
 {
-    void FUN_00a24f60(int a, unsigned int b);
+    void Controls_SetKeybind(int a, unsigned int b);
 };
 
 // Writes the three bytes of b into three byte arrays at offsets 0x1b94, 0x1bb0 and 0x1be8 relative to this plus a.
 // @fnv 0x00a24f60
-void FUN_00a24f60_Class::FUN_00a24f60(int aiIndex, unsigned int b)
+// src: COMMUNITY 0x00a24f60
+void FUN_00a24f60_Class::Controls_SetKeybind(int aiIndex, unsigned int b)
 {
     *(char*)((char*)this + aiIndex + 0x1b94) = (char)((b & (unsigned int)&DAT_00ff0000) >> 0x10);
     *(char*)((char*)this + aiIndex + 0x1bb0) = (char)((b & 0xff00) >> 8);
@@ -108,15 +112,16 @@ void FUN_00a24f60_Class::FUN_00a24f60(int aiIndex, unsigned int b)
 
 struct InputManager
 {
-    void FUN_00a25410(int);
-    void FUN_00a253d0();
+    void Controls_ClearUserAction(int);
+    void Controls_ClearUserActions();
 };
 // Calls FUN_00a25410 for each index from 0 to 27.
 // @fnv 0x00a253d0
-void InputManager::FUN_00a253d0()
+// src: XBOX_PDB 0x00a253d0
+void InputManager::Controls_ClearUserActions()
 {
     for (int i = 0; i < 28; ++i)
-        FUN_00a25410(i);
+        Controls_ClearUserAction(i);
 }
 
 struct FUN_00a24080_Class
@@ -127,11 +132,12 @@ extern unsigned short DAT_011f35bc;
 extern unsigned short DAT_011f35ac;
 struct FUN_00a25560_Class
 {
-    void FUN_00a25560(int a);
+    void UpdateGlobalMaskedBits(int a);
 };
 // Computes a mask from a, clears those bits in DAT_011f35bc, then sets them from DAT_011f35ac.
 // @fnv 0x00a25560
-void FUN_00a25560_Class::FUN_00a25560(int a)
+// src: GUESS 0x00a25560 (confidence: medium)
+void FUN_00a25560_Class::UpdateGlobalMaskedBits(int a)
 {
     unsigned int v = ((FUN_00a24080_Class*)this)->GetFlagForType(a);
     DAT_011f35bc &= ~v;
@@ -145,10 +151,11 @@ struct FUN_00a269f0_Class
 };
 struct FUN_00a257c0_Class
 {
-    void FUN_00a257c0(float v);
+    void Controls_Poll(float v);
 };
 // @fnv 0x00a257c0
-void FUN_00a257c0_Class::FUN_00a257c0(float afValue)
+// src: COMMUNITY 0x00a257c0
+void FUN_00a257c0_Class::Controls_Poll(float afValue)
 {
     if (DAT_011f35c8 && *(unsigned char*)((char*)this + 0x1b88))
     {
@@ -159,7 +166,7 @@ void FUN_00a257c0_Class::FUN_00a257c0(float afValue)
 
 struct FUN_00a26010_Class
 {
-    unsigned char FUN_00a26010();
+    unsigned char return_1_3();
     int m_50;
     int m_68;
     void AddEntry(int a);
@@ -168,7 +175,7 @@ struct FUN_00a26010_Class
 // @fnv 0x00a25c20
 void FUN_00a26010_Class::AddEntry(int aiValue)
 {
-    if (FUN_00a26010() && aiValue)
+    if (return_1_3() && aiValue)
     {
         *(int*)((char*)this + 0x2c + *(int*)((char*)this + 0x50) * 8) = aiValue;
         *(int*)((char*)this + 0x28 + *(int*)((char*)this + 0x50) * 8) = *(int*)((char*)this + 0x68);
@@ -178,37 +185,41 @@ void FUN_00a26010_Class::AddEntry(int aiValue)
 
 struct FUN_00a25d80_Class
 {
-    char FUN_00a25d80();
+    char nullsub_306();
 };
 // @fnv 0x00a25d80
-char FUN_00a25d80_Class::FUN_00a25d80()
+// src: COMMUNITY 0x00a25d80
+char FUN_00a25d80_Class::nullsub_306()
 {
     return 0;
 }
 
 struct FUN_00a25dc0_Class
 {
-    void FUN_00a25dc0(int a);
+    void nullsub_303(int a);
 };
 
 // @fnv 0x00a25dc0
-void FUN_00a25dc0_Class::FUN_00a25dc0(int a)
+// src: COMMUNITY 0x00a25dc0
+void FUN_00a25dc0_Class::nullsub_303(int a)
 {}
 
 struct FUN_00a25dd0_Class
 {
-    void FUN_00a25dd0(int a);
+    void nullsub_302(int a);
 };
 // @fnv 0x00a25dd0
-void FUN_00a25dd0_Class::FUN_00a25dd0(int a)
+// src: COMMUNITY 0x00a25dd0
+void FUN_00a25dd0_Class::nullsub_302(int a)
 {}
 
 struct FUN_00a25fb0_Class
 {
-    void FUN_00a25fb0(int a, int b);
+    void nullsub_299(int a, int b);
 };
 // @fnv 0x00a25fb0
-void FUN_00a25fb0_Class::FUN_00a25fb0(int a, int b)
+// src: COMMUNITY 0x00a25fb0
+void FUN_00a25fb0_Class::nullsub_299(int a, int b)
 {}
 
 struct FUN_00a232d0_Class
@@ -240,11 +251,12 @@ unsigned int FUN_00a232d0_Class::GetFlag(int aiIndex, int aiBit)
 
 struct FUN_00a24eb0_Class
 {
-    void FUN_00a24eb0(int a, int b);
+    void Controls_RemoveDuplicateControls(int a, int b);
 };
 // Scans the 28-byte block at offset 0x1b94 + a*0x1c and replaces every byte equal to b with 0xff.
 // @fnv 0x00a24eb0
-void FUN_00a24eb0_Class::FUN_00a24eb0(int aiBlockIndex, int b)
+// src: COMMUNITY 0x00a24eb0
+void FUN_00a24eb0_Class::Controls_RemoveDuplicateControls(int aiBlockIndex, int b)
 {
     for (int i = 0; i < 0x1c; i++)
         if (((unsigned char*)this)[aiBlockIndex * 0x1c + i + 0x1b94] == b)
@@ -262,11 +274,12 @@ struct FUN_00a26480_class
     unsigned short m_16;
     unsigned short m_18;
     unsigned short m_1a;
-    unsigned int FUN_00a26480(FUN_00a26480_class* p, unsigned short n);
+    unsigned int ComputeValue_00a26480(FUN_00a26480_class* p, unsigned short n);
 };
 
 // @fnv 0x00a26480
-unsigned int FUN_00a26480_class::FUN_00a26480(FUN_00a26480_class* pData, unsigned short usMultiplier)
+// src: GUESS 0x00a26480 (confidence: low)
+unsigned int FUN_00a26480_class::ComputeValue_00a26480(FUN_00a26480_class* pData, unsigned short usMultiplier)
 {
     unsigned short q;
     if (!*(int*)((char*)pData + 0x14))
@@ -305,11 +318,12 @@ struct FUN_00a26310_Class
     int m_28;
     int m_2c;
     int m_30;
-    void FUN_00a26310(int a, FUN_00a26480_class* b);
+    void XRumbleControl_InitRumble(int a, FUN_00a26480_class* b);
 };
 
 // @fnv 0x00a26310
-void FUN_00a26310_Class::FUN_00a26310(int a, FUN_00a26480_class* b)
+// src: COMMUNITY 0x00a26310
+void FUN_00a26310_Class::XRumbleControl_InitRumble(int a, FUN_00a26480_class* b)
 {
     if (a == 0)
     {
@@ -357,10 +371,11 @@ struct FUN_00a22640_Class
     int m_30;
     int m_34;
     ::BSStringT<char> m_38;
-    void FUN_00a22640();
+    void ProcessState_00a22640();
 };
 // @fnv 0x00a22640
-void FUN_00a22640_Class::FUN_00a22640()
+// src: GUESS 0x00a22640 (confidence: low)
+void FUN_00a22640_Class::ProcessState_00a22640()
 {
     int a;
     int b;
@@ -380,11 +395,12 @@ struct FUN_00a24b70_Class
     unsigned char m_08[0x1b8c];
     unsigned char m_1b94[0x70];
 
-    void FUN_00a24b70(int param);
+    void Controls_InitDefaultKeybinds(int param);
 };
 
 // @fnv 0x00a24b70
-void FUN_00a24b70_Class::FUN_00a24b70(int param)
+// src: COMMUNITY 0x00a24b70
+void FUN_00a24b70_Class::Controls_InitDefaultKeybinds(int param)
 {
     for (int i = 0; i < 0x1c; ++i)
     {
@@ -484,21 +500,23 @@ void FUN_00a24b70_Class::FUN_00a24b70(int param)
 
 struct FUN_00a25d70_Class
 {
-    unsigned int FUN_00a25d70();
+    unsigned int nullsub_307();
 };
 
 // @fnv 0x00a25d70
-unsigned int FUN_00a25d70_Class::FUN_00a25d70()
+// src: COMMUNITY 0x00a25d70
+unsigned int FUN_00a25d70_Class::nullsub_307()
 {
     return 0;
 }
 
 struct FUN_00a25da0_Class
 {
-    char FUN_00a25da0();
+    char nullsub_304();
 };
 // @fnv 0x00a25da0
-char FUN_00a25da0_Class::FUN_00a25da0()
+// src: COMMUNITY 0x00a25da0
+char FUN_00a25da0_Class::nullsub_304()
 {
     return 0;
 }
@@ -507,11 +525,12 @@ void* _memmove(void* dst, const void* src, unsigned int count);
 
 struct FUN_00a25e20_Class
 {
-    void FUN_00a25e20(int* a, int* b, void* src);
+    void UpdateFields_00a25e20(int* a, int* b, void* src);
 };
 
 // @fnv 0x00a25e20
-void FUN_00a25e20_Class::FUN_00a25e20(int* a, int* b, void* src)
+// src: GUESS 0x00a25e20 (confidence: low)
+void FUN_00a25e20_Class::UpdateFields_00a25e20(int* a, int* b, void* src)
 {
     int size = 4;
     int* dst2 = (int*)*a;
@@ -524,11 +543,12 @@ void* __cdecl _memmove(void* dst, const void* src, unsigned int count);
 
 struct FUN_00a25e70_Class
 {
-    void FUN_00a25e70(int* a, int* b, int src);
+    void UpdateState_00a25e70(int* a, int* b, int src);
 };
 
 // @fnv 0x00a25e70
-void FUN_00a25e70_Class::FUN_00a25e70(int* apBufferPtr, int* b, int aiValue)
+// src: GUESS 0x00a25e70 (confidence: low)
+void FUN_00a25e70_Class::UpdateState_00a25e70(int* apBufferPtr, int* b, int aiValue)
 {
     int count = 1;
     int* dst = (int*)*apBufferPtr;
@@ -541,11 +561,12 @@ void* _memmove(void* dst, const void* src, unsigned int count);
 
 struct FUN_00a25ec0_Class
 {
-    void FUN_00a25ec0(int* a, int* b, void* src);
+    void UpdateFields_00a25ec0(int* a, int* b, void* src);
 };
 
 // @fnv 0x00a25ec0
-void FUN_00a25ec0_Class::FUN_00a25ec0(int* a, int* b, void* src)
+// src: GUESS 0x00a25ec0 (confidence: low)
+void FUN_00a25ec0_Class::UpdateFields_00a25ec0(int* a, int* b, void* src)
 {
     int* dst;
     int size_2 = 4;
@@ -574,11 +595,12 @@ void FUN_00a25f10_Class::CopyBytesToBuffer(int* pBufferPtr, int* b, void* src)
 
 struct FUN_00a26220_Class
 {
-    unsigned int FUN_00a26220();
+    unsigned int ProcessAndReturnValue_00a26220();
     unsigned int FUN_00a26240();
 };
 // @fnv 0x00a26220
-unsigned int FUN_00a26220_Class::FUN_00a26220()
+// src: GUESS 0x00a26220 (confidence: low)
+unsigned int FUN_00a26220_Class::ProcessAndReturnValue_00a26220()
 {
     int a;
     int b;
@@ -623,11 +645,12 @@ extern short DAT_011f35b2;
 
 struct FUN_00a23e10_Class : public FUN_00a24080_Class
 {
-    int FUN_00a23e10(int param1, int param2);
+    int Controls_GetControllerButton(int param1, int param2);
 };
 
 // @fnv 0x00a23e10
-int FUN_00a23e10_Class::FUN_00a23e10(int param1, int param2)
+// src: COMMUNITY 0x00a23e10
+int FUN_00a23e10_Class::Controls_GetControllerButton(int param1, int param2)
 {
     if (!DAT_011f35c8)
         return 0;
@@ -845,7 +868,7 @@ void ControlsIniLoader::LoadControlsFromIni()
         {
             end = 0;
             key = strtol(value3, &end, 16);
-            FUN_00a24f60(i6, key);
+            Controls_SetKeybind(i6, key);
         }
     }
 }
@@ -853,11 +876,12 @@ void ControlsIniLoader::LoadControlsFromIni()
 // FUN_00a232c0 : an empty __thiscall member function (an /Od build).
 struct FnvEmpty_00a232c0
 {
-    void FUN_00a232c0();
+    void nullsub_1();
 };
 
 // @fnv 0x00a232c0
-void FnvEmpty_00a232c0::FUN_00a232c0()
+// src: COMMUNITY 0x00a232c0
+void FnvEmpty_00a232c0::nullsub_1()
 {}
 
 struct ButtonDevice
@@ -2607,11 +2631,12 @@ struct ButtonDevice
     int swapped;
     unsigned int unk1b50, unk1b54;
     unsigned char clicks[8];
-    int FUN_00a23a50(int button, unsigned int query);
+    int Controls_GetMouseButton(int button, unsigned int query);
 };
 // Checks the button state against the requested query (held, pressed, released, changed, clicked) and returns 1 if it matches, 0 otherwise.
 // @fnv 0x00a23a50
-int ButtonDevice::FUN_00a23a50(int button, unsigned int query)
+// src: XBOX_PDB 0x00a23a50
+int ButtonDevice::Controls_GetMouseButton(int button, unsigned int query)
 {
     int result = 0;
     if (button == 8 || button == 9)
@@ -2761,19 +2786,20 @@ unsigned int A24080Property::GetFlagForType(int iType)
 
 struct FUN_00a25180_cls
 {
-    void FUN_00a24eb0(int a, int b);
-    void FUN_00a25180(int a1, int a2, unsigned char a3);
+    void Controls_RemoveDuplicateControls(int a, int b);
+    void Controls_SetActionMapping(int a1, int a2, unsigned char a3);
 };
 
 // Skips the write for a2==0 with a3 in {0xb7,1,0x29}; otherwise calls FUN_00a24eb0(a2,a3) and stores a3 at this + a2*0x1c + a1 + 0x1b94.
 // @fnv 0x00a25180
-void FUN_00a25180_cls::FUN_00a25180(int aiOffset, int a2, unsigned char a3)
+// src: COMMUNITY 0x00a25180
+void FUN_00a25180_cls::Controls_SetActionMapping(int aiOffset, int a2, unsigned char a3)
 {
     if (a2 == 0 && (a3 == 0xb7 || a3 == 1 || a3 == 0x29))
     {
         return;
     }
-    FUN_00a24eb0(a2, a3);
+    Controls_RemoveDuplicateControls(a2, a3);
     *((unsigned char*)this + (a2 * 0x1c + aiOffset) + 0x1b94) = a3;
 }
 
@@ -4546,9 +4572,9 @@ struct InputHandler
     unsigned char m_1b90;
     unsigned char m_1b91;
 
-    void FUN_00a237f0(unsigned int* out);
-    void FUN_00a25180(int index, int flags, unsigned char state);
-    int FUN_00a23a50(int index, int flags);
+    void HasResourceWithLookupValueOne(unsigned int* out);
+    void Controls_SetActionMapping(int index, int flags, unsigned char state);
+    int Controls_GetMouseButton(int index, int flags);
     bool HandleInput(int key);
 };
 
@@ -4560,20 +4586,20 @@ bool InputHandler::HandleInput(int key)
 
     if (key != -1)
         this->m_1b8c = key;
-    this->FUN_00a237f0(&v);
+    this->HasResourceWithLookupValueOne(&v);
     if (v != 0)
     {
-        this->FUN_00a25180(this->m_1b8c, 0, (unsigned char)v);
+        this->Controls_SetActionMapping(this->m_1b8c, 0, (unsigned char)v);
         this->m_1b90 = 0;
         this->m_1b91 = 1;
         return true;
     }
     for (i = 1; i <= 3; i++)
     {
-        if (this->FUN_00a23a50(i, 1))
+        if (this->Controls_GetMouseButton(i, 1))
         {
             v = i;
-            this->FUN_00a25180(this->m_1b8c, 1, (unsigned char)i);
+            this->Controls_SetActionMapping(this->m_1b8c, 1, (unsigned char)i);
             this->m_1b90 = 0;
             this->m_1b91 = 1;
             return true;
@@ -4610,7 +4636,7 @@ struct FUN_00a252d0_cls
 };
 
 void __cdecl FUN_00ec61c0(void* dst, int value, unsigned int size);
-void FUN_00a24830();
+void DIEnumDevicesCallback();
 
 // @fnv 0x00a252d0
 void FUN_00a252d0_cls::SetEnabled(unsigned char enable)
@@ -4618,7 +4644,7 @@ void FUN_00a252d0_cls::SetEnabled(unsigned char enable)
     if (enable != 0)
     {
         m_flags |= 1;
-        m_08->v10(0, (void*)FUN_00a24830, this, 1);
+        m_08->v10(0, (void*)DIEnumDevicesCallback, this, 1);
         if (m_18F4 == 0)
         {
             m_flags &= 0xfffffffe;
@@ -4653,7 +4679,7 @@ struct FUN_00a25810_Class
     void ResetTargetState();
 };
 
-extern "C" void __stdcall FUN_00ee820a(int, unsigned short*);
+extern "C" void __stdcall XInputManager_KillRumbles(int, unsigned short*);
 
 // If the byte at offset 0x1b88 is set, clears fields 0x0c and 0x20 of the target at 0x1b80 and calls FUN_00ee820a with a zeroed two-short struct.
 // @fnv 0x00a25810
@@ -4675,7 +4701,7 @@ void FUN_00a25810_Class::ResetTargetState()
 
         target->m_0c = 0;
         target->m_20 = 0;
-        FUN_00ee820a(0, &zeroValues.m_00);
+        XInputManager_KillRumbles(0, &zeroValues.m_00);
     }
 }
 
@@ -4685,7 +4711,8 @@ void FUN_00a25810_Class::ResetTargetState()
 extern unsigned char DAT_011f3630;
 
 // @fnv 0x00a25870
-unsigned char FUN_00a25870()
+// src: GUESS 0x00a25870 (confidence: low)
+unsigned char Runtime_GetDAT011f3630()
 {
     return DAT_011f3630;
 }
@@ -4782,29 +4809,32 @@ FUN_00a259b0::FUN_00a259b0()
 
 struct FUN_00a25bc0_Class
 {
-    void FUN_00a25bc0();
+    void nullsub_313();
 };
 
 // @fnv 0x00a25bc0
-void FUN_00a25bc0_Class::FUN_00a25bc0()
+// src: COMMUNITY 0x00a25bc0
+void FUN_00a25bc0_Class::nullsub_313()
 {}
 
 struct FUN_00a25bd0_cls
 {
     int unk00;
-    void FUN_00a25bd0();
+    void nullsub_312();
 };
 
 // @fnv 0x00a25bd0
-void FUN_00a25bd0_cls::FUN_00a25bd0()
+// src: COMMUNITY 0x00a25bd0
+void FUN_00a25bd0_cls::nullsub_312()
 {}
 
 struct S
 {
-    void FUN_00a25be0();
+    void nullsub_311();
 };
 // @fnv 0x00a25be0
-void S::FUN_00a25be0()
+// src: COMMUNITY 0x00a25be0
+void S::nullsub_311()
 {}
 
 extern int* DAT_011f63a8;
@@ -4872,15 +4902,16 @@ struct S_00a25c80_Class
     unsigned char m_85;
     unsigned char m_86;
     unsigned char m_87;
-    void FUN_00a25c80();
+    void ProcessAndReturnValue_00a25c80();
 };
 
 // @fnv 0x00a25c80
-void S_00a25c80_Class::FUN_00a25c80()
+// src: GUESS 0x00a25c80 (confidence: low)
+void S_00a25c80_Class::ProcessAndReturnValue_00a25c80()
 {
     if (!(*(reinterpret_cast<unsigned char*>(this) + this->m_68) != 0 &&
           *(reinterpret_cast<unsigned char*>(this) + 4) != 0 &&
-          reinterpret_cast<FUN_00a26010_Class*>(this)->FUN_00a26010() != 0))
+          reinterpret_cast<FUN_00a26010_Class*>(this)->return_1_3() != 0))
     {
         return;
     }
@@ -4900,60 +4931,66 @@ void S_00a25c80_Class::FUN_00a25c80()
 
 struct FUN_00a25d30_Class
 {
-    void FUN_00a25d30();
+    void nullsub_310();
 };
 
 // @fnv 0x00a25d30
-void FUN_00a25d30_Class::FUN_00a25d30()
+// src: COMMUNITY 0x00a25d30
+void FUN_00a25d30_Class::nullsub_310()
 {}
 
 struct FUN_00a25d40_cls
 {
     int unk00;
-    void FUN_00a25d40();
+    void nullsub_309();
 };
 
 // @fnv 0x00a25d40
-void FUN_00a25d40_cls::FUN_00a25d40()
+// src: COMMUNITY 0x00a25d40
+void FUN_00a25d40_cls::nullsub_309()
 {}
 
 struct FUN_00a25d90_cls
 {
     int m_00;
-    void FUN_00a25d90();
+    void nullsub_305();
 };
 
 // @fnv 0x00a25d90
-void FUN_00a25d90_cls::FUN_00a25d90()
+// src: COMMUNITY 0x00a25d90
+void FUN_00a25d90_cls::nullsub_305()
 {}
 
 struct FUN_00a25db0_cls
 {
     int unk00;
-    void FUN_00a25db0();
+    void nullsub_297();
 };
 
 // @fnv 0x00a25db0
-void FUN_00a25db0_cls::FUN_00a25db0()
+// src: COMMUNITY 0x00a25db0
+void FUN_00a25db0_cls::nullsub_297()
 {}
 
 struct FUN_00a25de0_Class
 {
-    void FUN_00a25de0();
+    void nullsub_301();
 };
 
 // @fnv 0x00a25de0
-void FUN_00a25de0_Class::FUN_00a25de0()
+// src: COMMUNITY 0x00a25de0
+void FUN_00a25de0_Class::nullsub_301()
 {}
 
 struct FUN_00a25df0_cls
 {
     int unk00;
-    void FUN_00a25df0();
+    void nullsub_300();
 };
 
 // @fnv 0x00a25df0
-void FUN_00a25df0_cls::FUN_00a25df0()
+// src: COMMUNITY 0x00a25df0
+void FUN_00a25df0_cls::nullsub_300()
 {}
 
 void __cdecl FUN_00ec44d0(int a, int b, int c);
@@ -4961,11 +4998,12 @@ void __cdecl FUN_00ec44d0(int a, int b, int c);
 class FUN_00a25f60_cls
 {
   public:
-    void FUN_00a25f60(int* p1, int* p2, int p3, int p4);
+    void UpdateFields_00a25f60(int* p1, int* p2, int p3, int p4);
 };
 
 // @fnv 0x00a25f60
-void FUN_00a25f60_cls::FUN_00a25f60(int* p1, int* p2, int aiArg, int aiDelta)
+// src: GUESS 0x00a25f60 (confidence: low)
+void FUN_00a25f60_cls::UpdateFields_00a25f60(int* p1, int* p2, int aiArg, int aiDelta)
 {
     int value = *p1;
     FUN_00ec44d0(value, aiArg, aiDelta);
@@ -4975,11 +5013,12 @@ void FUN_00a25f60_cls::FUN_00a25f60(int* p1, int* p2, int aiArg, int aiDelta)
 
 struct FUN_00a26300_Class
 {
-    void FUN_00a26300();
+    void nullsub_298();
 };
 
 // @fnv 0x00a26300
-void FUN_00a26300_Class::FUN_00a26300()
+// src: COMMUNITY 0x00a26300
+void FUN_00a26300_Class::nullsub_298()
 {}
 
 struct FUN_00a26410_arg
@@ -4990,7 +5029,7 @@ struct FUN_00a26410_arg
 
 struct FUN_00a26a50_Class
 {
-    unsigned short FUN_00a26a50(FUN_00a26410_arg* a, unsigned int b);
+    unsigned short UpdateState_00a26a50(FUN_00a26410_arg* a, unsigned int b);
 };
 
 struct FUN_00a26410_cls : FUN_00a26a50_Class
@@ -5010,7 +5049,7 @@ unsigned short FUN_00a26410_cls::ClampOrDispatchValue(FUN_00a26410_arg* a, unsig
         value = (unsigned short)(a->m_00 > 0xffff ? 0xffff : a->m_00);
         break;
     case 1:
-        value = this->FUN_00a26a50(a, uiValue);
+        value = this->UpdateState_00a26a50(a, uiValue);
         break;
     }
     return value;
@@ -5021,7 +5060,7 @@ struct FUN_00a26520_Class
     void UpdateWaveChannel(int a, short* b, int c);
 };
 
-void __stdcall FUN_00ee820a(int a, short* b);
+void __stdcall XInputManager_KillRumbles(int a, short* b);
 
 struct TwoShorts
 {
@@ -5038,7 +5077,7 @@ void FUN_00a269f0_Class::ReadTwoShorts(int a)
         TwoShorts s = {0, 0};
         ((FUN_00a26520_Class*)this)->UpdateWaveChannel(0, &s.x, a);
         ((FUN_00a26520_Class*)this)->UpdateWaveChannel(1, &s.x, a);
-        FUN_00ee820a(*(int*)this, &s.x);
+        XInputManager_KillRumbles(*(int*)this, &s.x);
     }
 }
 
@@ -5050,12 +5089,13 @@ double __cdecl FUN_00eca060(double v);
 
 struct FUN_00a26a50_cls
 {
-    unsigned short FUN_00a26a50(unsigned int* p, unsigned int angle);
+    unsigned short UpdateState_00a26a50(unsigned int* p, unsigned int angle);
 };
 
 // Computes a scaled value from *p and angle, then returns *p when angle mod 360 is in [0,180), otherwise 0.
 // @fnv 0x00a26a50
-unsigned short FUN_00a26a50_cls::FUN_00a26a50(unsigned int* puiValue, unsigned int angle)
+// src: GUESS 0x00a26a50 (confidence: low)
+unsigned short FUN_00a26a50_cls::UpdateState_00a26a50(unsigned int* puiValue, unsigned int angle)
 {
     unsigned short usResult;
     usResult = (unsigned short)((double)*puiValue * (FUN_00eca060((double)angle * DAT_01023128) + DAT_01012070) /
@@ -5081,7 +5121,7 @@ struct Scratch
 };
 extern Scratch DAT_011f35a8;
 extern Scratch DAT_011f35b8;
-int __stdcall FUN_009f996e(int user, Scratch* state);
+int __stdcall XInputGetState_009f996e(int user, Scratch* state);
 
 struct PollingDevice
 {
@@ -5119,15 +5159,16 @@ struct DeviceStatePair
 };
 struct InputPoller : InputHandler
 {
-    void FUN_00a23010();
+    void Controls_UpdateValues();
 };
 // @fnv 0x00a23010
-void InputPoller::FUN_00a23010()
+// src: COMMUNITY 0x00a23010
+void InputPoller::Controls_UpdateValues()
 {
     int i;
     long result;
     DAT_011f35b8 = DAT_011f35a8;
-    if (FUN_009f996e(0, &DAT_011f35a8) == 0 && *(unsigned char*)&m_0000 == 0)
+    if (XInputGetState_009f996e(0, &DAT_011f35a8) == 0 && *(unsigned char*)&m_0000 == 0)
         DAT_011f35c8 = true;
     else
         DAT_011f35c8 = false;
@@ -5175,7 +5216,7 @@ void InputPoller::FUN_00a23010()
         {
             FUN_00ec61c0(&m_1b24, 0, 20);
         }
-        reinterpret_cast<FnvEmpty_00a232c0*>(this)->FUN_00a232c0();
+        reinterpret_cast<FnvEmpty_00a232c0*>(this)->nullsub_1();
     }
 }
 
@@ -5210,7 +5251,7 @@ struct EventMemory
 };
 extern EventMemory _g_memoryManager;
 extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
-extern "C" void __stdcall FUN_00ee820a(int, unsigned short*);
+extern "C" void __stdcall XInputManager_KillRumbles(int, unsigned short*);
 struct Controller
 {
     int unk0000;
@@ -6976,11 +7017,12 @@ struct Controller
     EventQueue* queue;
     int unk1b84;
     unsigned char enabled;
-    void FUN_00a255b0(float left, float right, int a, int b, int value, unsigned char state, bool force);
+    void Controls_Rumble(float left, float right, int a, int b, int value, unsigned char state, bool force);
 };
 // If enabled and (when forced or the queue is empty) allocates a RumbleEvent, fills it from the arguments, adds it to the queue twice, and sends the motor speeds.
 // @fnv 0x00a255b0
-void Controller::FUN_00a255b0(float left, float right, int a, int b, int value, unsigned char state, bool force)
+// src: XBOX_PDB 0x00a255b0
+void Controller::Controls_Rumble(float left, float right, int a, int b, int value, unsigned char state, bool force)
 {
     if (!enabled)
         return;
@@ -7006,7 +7048,7 @@ void Controller::FUN_00a255b0(float left, float right, int a, int b, int value, 
     unsigned short motors5[2];
     motors5[0] = (unsigned short)left > 1 ? 65535 : (unsigned short)(left * 65535.0);
     motors5[1] = (unsigned short)right > 1 ? 65535 : (unsigned short)(right * 65535.0);
-    FUN_00ee820a(0, motors5);
+    XInputManager_KillRumbles(0, motors5);
 }
 
 int __cdecl FUN_00ec68e4(const char* name, unsigned int a1);
@@ -7014,11 +7056,12 @@ int __cdecl FUN_00ec68e4(const char* name, unsigned int a1);
 class FUN_00a261a0_cls
 {
   public:
-    int FUN_00a261a0(unsigned int a1);
+    int XGamerProfile_GetContentBit(unsigned int a1);
 };
 
 // @fnv 0x00a261a0
-int FUN_00a261a0_cls::FUN_00a261a0(unsigned int a1)
+// src: XBOX_PDB 0x00a261a0
+int FUN_00a261a0_cls::XGamerProfile_GetContentBit(unsigned int a1)
 {
     const char* names[4];
     names[0] = "Classic";
@@ -7168,18 +7211,19 @@ void WaveController::UpdateWaveChannel(int channel, short* output, unsigned int 
     }
 }
 
-void FUN_004de4a0();
+void SettingT_INIPrefSettingCollection_InitCollection();
 namespace a260 {
 extern SettingCollectionList<Setting>* DAT_011f35a0;
 }
 class RedeemedContentA26
 {
   public:
-    bool FUN_00a26020(unsigned int a1);
+    bool XGamerProfile_IsCodeRedeemed(unsigned int a1);
 };
 // Looks up the uiRedeemedContent:GamePlay setting and returns whether its value has a bit in the mask from FUN_00a261a0(a1); false if not found.
 // @fnv 0x00a26020
-bool RedeemedContentA26::FUN_00a26020(unsigned int a1)
+// src: XBOX_PDB 0x00a26020
+bool RedeemedContentA26::XGamerProfile_IsCodeRedeemed(unsigned int a1)
 {
     int unk20;
     int uiMask2;
@@ -7187,7 +7231,7 @@ bool RedeemedContentA26::FUN_00a26020(unsigned int a1)
     int unk1c;
     int unk10;
     int unk24;
-    FUN_004de4a0();
+    SettingT_INIPrefSettingCollection_InitCollection();
     SettingCollectionList<Setting>* pForm;
     pForm = a260::DAT_011f35a0;
     Setting* r;
@@ -7197,7 +7241,7 @@ bool RedeemedContentA26::FUN_00a26020(unsigned int a1)
     pSetting3 = r;
     {
         unsigned int unk08;
-        return pSetting3 ? (unk08 = ((FUN_00a261a0_cls*)this)->FUN_00a261a0(a1), (*reinterpret_cast<unsigned int*>(&pSetting3->uValue) & unk08) != 0)
+        return pSetting3 ? (unk08 = ((FUN_00a261a0_cls*)this)->XGamerProfile_GetContentBit(a1), (*reinterpret_cast<unsigned int*>(&pSetting3->uValue) & unk08) != 0)
                          : false;
     }
 }
@@ -7446,12 +7490,13 @@ struct FUN_00a25fd0_class
     int unk3A4;
     int unk3A8;
     S_00a25fd0_Node m_3ac;
-    bool FUN_00a25fd0();
+    bool WalkToListEndAndReturnTrue();
 };
 
 // Walks the linked list starting at m_3ac following m_04 until a null node or null m_00 is found, then returns true.
 // @fnv 0x00a25fd0
-bool FUN_00a25fd0_class::FUN_00a25fd0()
+// src: GUESS 0x00a25fd0 (confidence: low)
+bool FUN_00a25fd0_class::WalkToListEndAndReturnTrue()
 {
     S_00a25fd0_Node* p = &m_3ac;
     while (p != 0 && p->m_00 != 0)
@@ -7471,7 +7516,7 @@ bool FUN_00a25fd0_class::FUN_00a25fd0()
 extern unsigned int DAT_011f35a0;
 extern int DAT_01202800;
 
-void FUN_004de4a0();
+void SettingT_INIPrefSettingCollection_InitCollection();
 
 class RedeemSettingOwner
 {
@@ -7482,13 +7527,14 @@ class RedeemSettingOwner
 class FUN_00a26090_cls
 {
   public:
-    int FUN_00a26090(int a1);
-    int FUN_00a261a0(int a1);
+    int XGamerProfile_RedeemCode(int a1);
+    int XGamerProfile_GetContentBit(int a1);
 };
 
 // Looks up the uiRedeemedContent:GamePlay setting, ORs the result of FUN_00a261a0 into its second word, and returns whether that result was non-zero.
 // @fnv 0x00a26090
-int FUN_00a26090_cls::FUN_00a26090(int a1)
+// src: COMMUNITY 0x00a26090
+int FUN_00a26090_cls::XGamerProfile_RedeemCode(int a1)
 {
     unsigned int unk0;
     unsigned int unk1;
@@ -7496,12 +7542,12 @@ int FUN_00a26090_cls::FUN_00a26090(int a1)
     unsigned int unk3;
     unsigned int unk4;
     unsigned int unk5;
-    FUN_004de4a0();
+    SettingT_INIPrefSettingCollection_InitCollection();
     unsigned int nu = DAT_011f35a0;
     unsigned int tau = 0;
     reinterpret_cast<RedeemSettingOwner*>(nu)->Lookup("uiRedeemedContent:GamePlay", &tau);
     unsigned int* mu = reinterpret_cast<unsigned int*>(tau);
-    int changed = this->FUN_00a261a0(a1);
+    int changed = this->XGamerProfile_GetContentBit(a1);
     {
         unsigned int* omi = mu != 0 ? mu + 1 : (DAT_01202800 = 0, (unsigned int*)&DAT_01202800);
         **(unsigned int* volatile*)&omi |= changed;
@@ -7510,7 +7556,7 @@ int FUN_00a26090_cls::FUN_00a26090(int a1)
 }
 
 namespace fnv_00a26120 {
-void FUN_004de4a0();
+void SettingT_INIPrefSettingCollection_InitCollection();
 
 struct ObjA_a26120
 {
@@ -7522,13 +7568,14 @@ extern int DAT_01202800;
 struct FUN_00a26120_cls
 {
     unsigned int m_00;
-    unsigned int FUN_00a261a0(unsigned int a);
-    void FUN_00a26120(unsigned int mask);
+    unsigned int XGamerProfile_GetContentBit(unsigned int a);
+    void XGamerProfile_RevokeCode(unsigned int mask);
 };
 
 // Looks up uiRedeemedContent:GamePlay and clears, in its second word, the bits returned by FUN_00a261a0(mask).
 // @fnv 0x00a26120
-void FUN_00a26120_cls::FUN_00a26120(unsigned int mask)
+// src: COMMUNITY 0x00a26120
+void FUN_00a26120_cls::XGamerProfile_RevokeCode(unsigned int mask)
 {
     unsigned int* p;
     unsigned int u1;
@@ -7538,7 +7585,7 @@ void FUN_00a26120_cls::FUN_00a26120(unsigned int mask)
         unsigned int out;
         ObjA_a26120* obj;
 
-        FUN_004de4a0();
+        SettingT_INIPrefSettingCollection_InitCollection();
         obj = DAT_011f35a0;
         out = 0;
         obj->FindByKey("uiRedeemedContent:GamePlay", &out);
@@ -7552,7 +7599,7 @@ void FUN_00a26120_cls::FUN_00a26120(unsigned int mask)
     {
         unsigned int* volatile t =
             (p != 0) ? (unsigned int*)((char*)p + 4) : (DAT_01202800 = 0, (unsigned int*)&DAT_01202800);
-        *t &= ~this->FUN_00a261a0(mask);
+        *t &= ~this->XGamerProfile_GetContentBit(mask);
     }
 }
 }  // namespace fnv_00a26120
@@ -7597,18 +7644,20 @@ int __stdcall MatchObjectGuids(const ObjectInfo* obj, void* apFlags)
 // @fnv 0x00a25bb0
 struct X
 {
-    void FUN_00a25bb0();
+    void nullsub_314();
 };
-void X::FUN_00a25bb0()
+// src: COMMUNITY 0x00a25bb0
+void X::nullsub_314()
 {}
 
 namespace fnv_00a26010 {
 struct FUN_00a26010_Class
 {
-    char FUN_00a26010();
+    char return_1_3();
 };
 // @fnv 0x00a26010
-char FUN_00a26010_Class::FUN_00a26010()
+// src: COMMUNITY 0x00a26010
+char FUN_00a26010_Class::return_1_3()
 {
     int a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12;
     return 1;
@@ -7626,13 +7675,14 @@ extern const char* DAT_011a7e60[];
 
 struct S_00a22e10_Cls
 {
-    unsigned int FUN_00a24f10(unsigned int i);
-    void FUN_00a22e10();
+    unsigned int Controls_GetKeybind(unsigned int i);
+    void Controls_SaveControls();
 };
 
 // Writes 28 control values from FUN_00a24f10 to the ini file at DAT_01202fa0 plus DAT_011a2ff8 under the Controls section.
 // @fnv 0x00a22e10
-void S_00a22e10_Cls::FUN_00a22e10()
+// src: XBOX_PDB 0x00a22e10
+void S_00a22e10_Cls::Controls_SaveControls()
 {
     int i;
     char szPath[0x104];
@@ -7642,7 +7692,7 @@ void S_00a22e10_Cls::FUN_00a22e10()
     strcat_s(szPath, 0x104, dir);
     for (i = 0; i < 0x1c; i++)
     {
-        sprintf_s(buf, 0x40, "%08X", this->FUN_00a24f10(i));
+        sprintf_s(buf, 0x40, "%08X", this->Controls_GetKeybind(i));
         WritePrivateProfileStringA("Controls", DAT_011a7e60[i], buf, szPath);
     }
 }
@@ -7654,7 +7704,8 @@ extern unsigned short DAT_011f35b4;
 extern unsigned short DAT_011f35b6;
 
 // @fnv 0x00a25410
-void InputManager::FUN_00a25410(int offset)
+// src: XBOX_PDB 0x00a25410
+void InputManager::Controls_ClearUserAction(int offset)
 {
     for (int i = 0; i < 4; ++i)
     {

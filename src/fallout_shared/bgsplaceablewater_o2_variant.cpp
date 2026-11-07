@@ -7,11 +7,11 @@
 #include <malloc.h>
 struct FUN_004fc380_shell : public BGSPlaceableWater
 {
-    void FUN_004fc380(bool);
+    void BGSPlaceableWater_SetReflectsLand(bool);
 };
 struct FUN_004fc990_t
 {
-    void __thiscall FUN_004fc990(int, bool);
+    void __thiscall BGSPlaceableWater_SetFlag(int, bool);
 };
 struct FUN_004fc790_shell
 {
@@ -21,16 +21,16 @@ struct FUN_004fc790_shell
 };
 struct FUN_004fc420_shell : public BGSPlaceableWater
 {
-    void FUN_004fc420(bool);
+    void BGSPlaceableWater_SetUnderwaterFog(bool);
 };
 struct FUN_005e78f0_t
 {
-    void __thiscall FUN_004851b0(TESForm*);
+    void __thiscall TESForm_CopyAllComponents(TESForm*);
 };
 void* __cdecl __memcpy(void*, const void*, unsigned int);
 struct FUN_004fc860_shell : public BGSPlaceableWater
 {
-    void FUN_004fc860(TESForm* apCopy);
+    void BGSPlaceableWater_Copy(TESForm* apCopy);
 };
 
 // sub ecx,0x30; jmp target  ==  MSVC adjustor thunk: Derived overrides a virtual that both of its bases

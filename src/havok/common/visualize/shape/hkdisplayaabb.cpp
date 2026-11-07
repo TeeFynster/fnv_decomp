@@ -10,7 +10,7 @@ struct VertexBuffer
     unsigned int count;
     unsigned int capacityFlags;
 };
-extern "C" void __cdecl FUN_00c908c0(unsigned int allocator, VertexBuffer* output, unsigned int capacity,
+extern "C" void __cdecl hkArrayUtil__reserve(unsigned int allocator, VertexBuffer* output, unsigned int capacity,
                                      unsigned int alignment);
 struct BoundsWriter
 {
@@ -57,7 +57,7 @@ void BoundsWriter::WriteBoundsVertices(VertexBuffer* output, unsigned int alloca
         int newCapacity = oldCapacity * 2;
         if (newCapacity <= 24)
             newCapacity = 24;
-        FUN_00c908c0(allocator, output, newCapacity, 16);
+        hkArrayUtil__reserve(allocator, output, newCapacity, 16);
     }
     output->count = 24;
     output->values[0] = _mm_setr_ps(this->minX, this->minY, this->minZ, 0.0f);
@@ -121,12 +121,12 @@ struct Singleton
     AllocObj* m_10;
 };
 
-extern "C" Singleton* FUN_00c85750();
+extern "C" Singleton* hkMemoryRouter_getInstance();
 static void StorePs(Vec4f* dst, __m128 v)
 {
     dst->v = v;
 }
-extern "C" void FUN_00c908c0(void* ctx, void* arr, int newcap, int elemSize);
+extern "C" void hkArrayUtil__reserve(void* ctx, void* arr, int newcap, int elemSize);
 
 struct VertArr
 {
@@ -188,7 +188,7 @@ struct ThisCls
 // @fnv 0x00de15c0
 void ThisCls::InitBoxMesh()
 {
-    Singleton* s = FUN_00c85750();
+    Singleton* s = hkMemoryRouter_getInstance();
     AllocObj* ao = s->m_10;
     DisplayGeometry* p = (DisplayGeometry*)ao->vt->allocFn(ao, 24);
     DisplayGeometry* result;
@@ -213,7 +213,7 @@ void ThisCls::InitBoxMesh()
     // 8 box corners into verts
     {
         VertArr* a = &m_08->verts;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -222,14 +222,14 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMinimumCorner.x, m_60.m_kMinimumCorner.y, m_60.m_kMinimumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -238,14 +238,14 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMinimumCorner.x, m_60.m_kMinimumCorner.y, m_60.m_kMaximumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -254,14 +254,14 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMaximumCorner.x, m_60.m_kMinimumCorner.y, m_60.m_kMaximumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -270,14 +270,14 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMaximumCorner.x, m_60.m_kMinimumCorner.y, m_60.m_kMinimumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -286,14 +286,14 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMinimumCorner.x, m_60.m_kMaximumCorner.y, m_60.m_kMinimumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -302,14 +302,14 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMinimumCorner.x, m_60.m_kMaximumCorner.y, m_60.m_kMaximumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -318,14 +318,14 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMaximumCorner.x, m_60.m_kMaximumCorner.y, m_60.m_kMaximumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -334,7 +334,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMaximumCorner.x, m_60.m_kMaximumCorner.y, m_60.m_kMinimumCorner.z, DAT_01011d78));
@@ -343,7 +343,7 @@ void ThisCls::InitBoxMesh()
     // 12 index triples into faces
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -352,7 +352,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -363,7 +363,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -372,7 +372,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -383,7 +383,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -392,7 +392,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -403,7 +403,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -412,7 +412,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -423,7 +423,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -432,7 +432,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -443,7 +443,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -452,7 +452,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -463,7 +463,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -472,7 +472,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -483,7 +483,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -492,7 +492,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -503,7 +503,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -512,7 +512,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -523,7 +523,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -532,7 +532,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -543,7 +543,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -552,7 +552,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];
@@ -563,7 +563,7 @@ void ThisCls::InitBoxMesh()
     }
     {
         FaceArr* a = &m_08->faces;
-        Singleton* sg = FUN_00c85750();
+        Singleton* sg = hkMemoryRouter_getInstance();
         void* ctx = sg->m_10;
         int sz = a->size;
         int newSize = sz + 1;
@@ -572,7 +572,7 @@ void ThisCls::InitBoxMesh()
             int dbl = (a->cap & 0x3fffffff) * 2;
             if (newSize < dbl)
                 newSize = dbl;
-            FUN_00c908c0(ctx, a, newSize, 16);
+            hkArrayUtil__reserve(ctx, a, newSize, 16);
         }
         a->size += 1;
         Face* fp = &a->data[sz];

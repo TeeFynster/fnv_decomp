@@ -37,10 +37,10 @@ struct FUN_00d21ce0_cls
     void* m_base;
     void* m_pBridge;
     void* m_pConstraintData;
-    void FUN_00d21ce0(void* data);
+    void hkpBridgeConstraintAtom_init(void* data);
 };
-int __cdecl FUN_00d22120(void* pNode, void* a, void* b);
-void __stdcall FUN_00d21d00(int, int, int, int, int, int);
+int __cdecl hkpModifierConstraintAtom_addAllModifierDataToConstraintInfo(void* pNode, void* a, void* b);
+void __stdcall nullsub_31(int, int, int, int, int, int);
 struct FUN_00d21de0_cls
 {
     int unk00;
@@ -48,7 +48,7 @@ struct FUN_00d21de0_cls
     unsigned char unk08;
     unsigned char unk09;
     unsigned char unk0A;
-    FUN_00d21de0_cls* __thiscall FUN_00d21de0(int a);
+    FUN_00d21de0_cls* __thiscall hkpSimpleContactConstraintAtom_hkpSimpleContactConstraintAtom(int a);
 };
 #include "../../../../../../include/hkMatrix3.h"
 
@@ -133,7 +133,7 @@ struct ComChangerAtom
     Vec4 m_kDisplacementA;
     Vec4 m_kDisplacementB;
 
-    void FUN_00d22160(const void* cp, InitInput& inA, BodyVelocity& velA, InitInput& inB, BodyVelocity& velB);
+    void UpdateFields_00d22160(const void* cp, InitInput& inA, BodyVelocity& velA, InitInput& inB, BodyVelocity& velB);
 };
 extern LocalM128 DAT_012689a0;
 extern LocalM128 DAT_012689b0;
@@ -151,7 +151,7 @@ struct Cls_00d21fc0
     int unk18;
     int unk1c;
     Vec4 m_uiValueCount;
-    void __thiscall FUN_00d21fc0(LocalM128* a, int b, int c, int d, int e, int out);
+    void __thiscall CopyData_00d21fc0(LocalM128* a, int b, int c, int d, int e, int out);
 };
 
 extern LocalM128 DAT_010ec7f0;
@@ -176,10 +176,11 @@ struct SoftContactVelocityBlend
     int unk18;
     int unk1C;
     float m_fWeight;
-    void FUN_00d21d10(int a1, int a2, int a3, LocalM128* pkA, int a5, LocalM128* pkB);
+    void UpdateState_00d21d10(int a1, int a2, int a3, LocalM128* pkA, int a5, LocalM128* pkB);
 };
 // @fnv 0x00d21d10
-void SoftContactVelocityBlend::FUN_00d21d10(int a1, int a2, int a3, LocalM128* pkA, int a5, LocalM128* pkB)
+// src: GUESS 0x00d21d10 (confidence: low)
+void SoftContactVelocityBlend::UpdateState_00d21d10(int a1, int a2, int a3, LocalM128* pkA, int a5, LocalM128* pkB)
 {
     float t = m_fWeight;
     pkA[0] = Blend_d21d10(pkA[0], DAT_012689a0, t);

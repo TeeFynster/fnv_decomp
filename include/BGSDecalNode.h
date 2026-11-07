@@ -32,10 +32,10 @@ class BGSDecalNode : public NiNode
     static void RemoveAllDecals();
     void FUN_004ee1e0();
     void FUN_004ee390();
-    void FUN_004ee450(BSTempEffect* effect, bool firstAvailable);
-    void FUN_004ee4d0(NiAVObject* object, bool firstAvailable);
-    void FUN_004ee560(int value);
-    void FUN_004ee610(int value);
+    void AttachChild(BSTempEffect* effect, bool firstAvailable);
+    void AttachChild_004ee4d0(NiAVObject* object, bool firstAvailable);
+    void ProcessState_004ee560(int value);
+    void OnVisible_004ee610(int value);
     void* DestroyDecalNode(unsigned int flags);
 
     BSSimpleList<GO>* pList;

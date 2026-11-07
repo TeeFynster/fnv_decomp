@@ -479,7 +479,7 @@ bool __cdecl GetThreadLocalValue()
     return s_tlsData_005e23f0.bVal;
 }
 
-int __cdecl FUN_00407000(char* buffer, char const* format, char* varArgs);
+int __cdecl BSvsprintf(char* buffer, char const* format, char* varArgs);
 
 // Formats a message into a local buffer, logs it via DebugLog or Warning, then zeroes the script header size and flags the runner as failed.
 // @fnv 0x005e2410
@@ -489,7 +489,7 @@ void ScriptRunner::SetErrorMessage(Script* apScript, char* apFormat, ...)
     char* varArgs;
 
     varArgs = (char*)(&apFormat + 1);
-    FUN_00407000(buffer, apFormat, varArgs);
+    BSvsprintf(buffer, apFormat, varArgs);
     varArgs = 0;
 
     if (IsScriptDebuggingEnabled())
@@ -532,7 +532,8 @@ extern bool __fastcall IsScriptRunnerActive(ScriptRunner* runner);
 
 // Creates a ScriptRunner if needed, then calls RunScript on either it or a temporary runner.
 // @fnv 0x005e2730
-bool ScriptExecutor::FUN_005e2730(Script* apScript, TESObjectREFR* apOwnerObject, ScriptLocals* apOwnerVars)
+// src: XBOX_PDB 0x005e2730
+bool ScriptExecutor::ScriptRunManager_InitActionList(Script* apScript, TESObjectREFR* apOwnerObject, ScriptLocals* apOwnerVars)
 {
     if (!m_pReusableScriptRunner)
         m_pReusableScriptRunner = new ScriptRunner;

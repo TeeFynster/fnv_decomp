@@ -13,15 +13,15 @@ typedef union __declspec(intrin_type) __declspec(align(16)) {
 #include "../../../../../../../include/hkMonitorStream.h"
 #include "../../../../../../../include/hkMonitorStream.h"
 extern char const* const g_01268970_arg1;
-void __cdecl FUN_00c90360(char const* const*, char const* const*);
-void __cdecl FUN_00cd8040(char const* const* a1, char const* const* a2);
+void __cdecl hkReferencedObject_calcContentStatistics(char const* const*, char const* const*);
+void __cdecl hkpSphereShape_calcContentStatistics(char const* const* a1, char const* const* a2);
 extern int DAT_010cb5ac;
 struct FUN_00cd8160
 {
     FUN_00cd8160(float radius);
 };
-int __cdecl FUN_00cd8050();
-int __stdcall FUN_00cd87f0(int a1, int a2);
+int __cdecl hkpSphereShape_ReturnOne();
+int __stdcall hkpSphereShape_ReturnConstant_0x20(int a1, int a2);
 // Exe 0x00cd85c0 FUN_00cd85c0: retain this LocalM128 view; the CRT type does not preserve this unit.
 // VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
 
@@ -68,7 +68,7 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTls
 extern unsigned long DAT_0126835c;
 extern const char DAT_010cb5f4[];
 extern const char DAT_010c41f8[];
-void* __cdecl FUN_00cd85c0(void* pvResult, float fValue, int a, int b);
+void* __cdecl Object_ProcessAndReturnValue_00cd85c0(void* pvResult, float fValue, int a, int b);
 class HostCD81
 {
   public:
@@ -280,13 +280,13 @@ extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 struct ProbeSphere : hkpSphereShape
 {
-    RayMask FUN_00cd8220(const RayQuerySet&, RayHits&, const RayMask&) const;
+    RayMask hkpSphereShape_castRayBundleImpl(const RayQuerySet&, RayHits&, const RayMask&) const;
 };
 extern "C" LocalM128 _mm_setzero_ps(void);
 extern "C" void _mm_store_ps(float*, LocalM128);
-void __stdcall FUN_00cd8060(int direction, float* vertexOut);
+void __stdcall hkpSphereShape_getSupportingVertexImpl(int direction, float* vertexOut);
 extern "C" void __movsd(unsigned long*, const unsigned long*, unsigned long);
-void __stdcall FUN_00cd8080(int a0, __int64 packed);
+void __stdcall hkpSphereShape_convertVertexIdsToVerticesImpl(int a0, __int64 packed);
 extern "C" LocalM128 _mm_setzero_ps(void);
 struct __declspec(align(16)) CentreVectorCD80
 {
@@ -297,7 +297,7 @@ struct __declspec(align(16)) CentreVectorCD80
         m_vComponents = _mm_setzero_ps();
     }
 };
-CentreVectorCD80 __stdcall FUN_00cd80c0();
+CentreVectorCD80 __stdcall hkpSphereShape_getCentreImpl();
 struct FUN_00cd8140_Result
 {
     int unk00;
@@ -313,9 +313,9 @@ struct FUN_00cd8140_Obj
     int unk0C;
     float unk10;
 
-    void FUN_00cd8140(FUN_00cd8140_Result* result);
+    void hkpSphereShape_getCollisionSpheresImpl(FUN_00cd8140_Result* result);
 };
-void __stdcall FUN_00cd80e0(float* output);
+void __stdcall hkpSphereShape_getFirstVertex(float* output);
 
 extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
 extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
@@ -361,7 +361,8 @@ static __forceinline LocalM128 lerp(LocalM128 a, LocalM128 b, const float& t)
 }
 
 // @fnv 0x00cd85c0
-FnvBool __cdecl FUN_00cd85c0(float radius, const RayIn& input, RayHit& results)
+// src: GUESS 0x00cd85c0 (confidence: low)
+FnvBool __cdecl Object_ProcessAndReturnValue_00cd85c0(float radius, const RayIn& input, RayHit& results)
 {
     float extra, p2, gap, disc, negative, root, nearDist;
     LocalM128 point;

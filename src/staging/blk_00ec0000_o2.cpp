@@ -10,11 +10,12 @@ struct FUN_00ece2f0_cls
 {
     int m_vptr;
     void FUN_00ec79a1();
-    void FUN_00ece2f0();
+    void SetVtableAndProcessState_00ece2f0();
 };
 
 // @fnv 0x00ece2f0
-void FUN_00ece2f0_cls::FUN_00ece2f0()
+// src: GUESS 0x00ece2f0 (confidence: low)
+void FUN_00ece2f0_cls::SetVtableAndProcessState_00ece2f0()
 {
     m_vptr = (int)&DAT_010f20a8;
     FUN_00ec79a1();
@@ -23,7 +24,8 @@ void FUN_00ece2f0_cls::FUN_00ece2f0()
 extern "C" void __cdecl doexit(int code, int quick, int retcaller);
 
 // @fnv 0x00eccf00
-extern "C" void __cdecl FUN_00eccf00(void)
+// src: COMMUNITY 0x00eccf00
+extern "C" void __cdecl _c_exit(void)
 {
     doexit(0, 1, 1);
 }

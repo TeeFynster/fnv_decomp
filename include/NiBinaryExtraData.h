@@ -18,19 +18,19 @@ class NiBinaryExtraData : public NiExtraData
     virtual void SaveBinary(NiStream& stream);
     virtual bool IsEqual(NiObject* apObject) const;
 
-    NiExtraData* FUN_00a7f920(CloningProcess& cloning);
+    NiExtraData* CreateClone_00a7f920(CloningProcess& cloning);
     void FUN_00a7b2c0(NiStreamLike* stream);
     void FUN_00a7b2c0(NiStream* stream);
-    void FUN_00a7fa20(NiStreamLike* stream);
-    void FUN_00a7fa20(NiStream* stream);
+    void SaveBinary_00a7fa20(NiStreamLike* stream);
+    void SaveBinary_00a7fa20(NiStream* stream);
     void FUN_00a7b580(NiStream* stream);
-    void FUN_00a7fa90(NiStream* stream);
+    void GetViewerStrings_00a7fa90(NiStream* stream);
     void FUN_00a7b4a0(NiStream& stream);
-    void FUN_00a7f9a0(NiStream& stream);
-    void FUN_00a9af00(NiAVObject* object);
-    void FUN_00c430f0(NiAVObject* object);
-    bool FUN_00a89ae0(void* argument);
-    bool FUN_00c43110(void* argument);
+    void LoadBinary_00a7f9a0(NiStream& stream);
+    void NiBinaryExtraData_LinkObject(NiAVObject* object);
+    void BSXFlags_LinkObject(NiAVObject* object);
+    bool RegisterStreamables_00a89ae0(void* argument);
+    bool BSXFlags_RegisterStreamables(void* argument);
 
     union
     {

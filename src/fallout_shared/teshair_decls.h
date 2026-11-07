@@ -15,7 +15,7 @@ class BGSQuestObjective;
 class TESHairRaceResult
 {
   public:
-    BSSimpleList<BGSQuestObjective*>* FUN_0045bb80();
+    BSSimpleList<BGSQuestObjective*>* NiAVObject_GetWorldTranslate();
 };
 
 // TESHairCanBeNPCData_teshair_decls: local type (was include/TESHairCanBeNPCData.h, which had no evidence of one real class); its methods are 0x004ac110 TESNPC::GetRace
@@ -24,7 +24,7 @@ class TESHairRaceResult;
 class TESHairCanBeNPCData_teshair_decls
 {
 public:
-    TESHairRaceResult* FUN_004ac110();
+    TESHairRaceResult* TESNPC_GetRace();
 };
 class TESTextureLoader
 {

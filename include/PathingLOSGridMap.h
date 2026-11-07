@@ -24,10 +24,10 @@ public:
     virtual ~PathingLOSGridMap();
 
     void __thiscall ClearMap();
-    void __thiscall FUN_006e0320(void* p, float f);
+    void __thiscall Initialize_006e0320(void* p, float f);
     void __thiscall Reset();
     void __thiscall FUN_006e02a0();
-    void __thiscall FUN_00496910();
+    void __thiscall Animation_ResetVtableAndFinishScriptRunLock();
     void* __thiscall FUN_006e0270(unsigned int flags);
     void FUN_006e04b0();
     void* __thiscall FUN_006e0480(unsigned int flags);

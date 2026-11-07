@@ -100,15 +100,16 @@ struct DataLeveledList5e5f50
 {
     LevForm5e5f50* FUN_00726070();
 };
-Script* __fastcall FUN_00418800(ExtraDataList*);
-Script* __cdecl FUN_004826d0(BoundObj5e5f50*);
-bool __cdecl FUN_005e5b80(int, int, void*, int, unsigned char, void**, void*);
+Script* __fastcall ExtraDataList_GetScript(ExtraDataList*);
+Script* __cdecl TESScriptableForm_GetFormScript(BoundObj5e5f50*);
+bool __cdecl BGSEntryPointFunction_CheckFunctionArguments(int, int, void*, int, unsigned char, void**, void*);
 
 // @fnv 0x005e5f50
-void __cdecl FUN_005e5f50(void* apPerkOwner, int aeFunctionType, unsigned char acArgumentCount,
+// src: XBOX_PDB 0x005e5f50
+void __cdecl BGSEntryPointFunction_AddLeveledListToTargetFunction(void* apPerkOwner, int aeFunctionType, unsigned char acArgumentCount,
                           void** apFunctionArgument, void* apData)
 {
-    if (!FUN_005e5b80(1, 3, apPerkOwner, aeFunctionType, acArgumentCount, apFunctionArgument, apData))
+    if (!BGSEntryPointFunction_CheckFunctionArguments(1, 3, apPerkOwner, aeFunctionType, acArgumentCount, apFunctionArgument, apData))
         return;
     DataLeveledList5e5f50* pfunctionData = (DataLeveledList5e5f50*)apData;
     Actor* ptarget = (Actor*)*apFunctionArgument;
@@ -126,18 +127,18 @@ void __cdecl FUN_005e5f50(void* apPerkOwner, int aeFunctionType, unsigned char a
                 pboundObject = pdata->pObj;
             if (pboundObject)
             {
-                Script* pScript = FUN_004826d0(pdata->pObj);
+                Script* pScript = TESScriptableForm_GetFormScript(pdata->pObj);
                 if (pScript)
                 {
                     ExtraDataList* pExtra = 0;
                     for (int n = 0; n < pdata->m_iCountDelta; n++)
                     {
                         pExtra = new ExtraDataList;
-                        pExtra->FUN_00419ad0(1);
-                        if (pExtra && !FUN_00418800(pExtra))
+                        pExtra->ExtraDataList_SetCount(1);
+                        if (pExtra && !ExtraDataList_GetScript(pExtra))
                         {
-                            pExtra->FUN_00419ed0(pScript);
-                            pExtra->FUN_00419f80(FUN_00418800(pExtra)->GetOrCreateScriptLocals());
+                            pExtra->ExtraDataList_SetScript(pScript);
+                            pExtra->ExtraDataList_SetScriptLocals(ExtraDataList_GetScript(pExtra)->GetOrCreateScriptLocals());
                         }
                     }
                     ptarget->AddItem((TESForm*)pboundObject, pExtra, 1);

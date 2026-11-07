@@ -17,7 +17,7 @@
 
 struct PickupSoundActorView : public Actor
 {
-    char* __thiscall FUN_008adcf0(::TESBoundObject*, bool, bool);
+    char* __thiscall Actor_GetPickUpSoundName(::TESBoundObject*, bool, bool);
 };
 
 struct PickupSoundVirtualView
@@ -111,7 +111,8 @@ struct PickupAlchemySoundView
 };
 int __fastcall _FNV_GetFormType(void* pThis);
 // @fnv 0x008adcf0
-char* __thiscall PickupSoundActorView::FUN_008adcf0(::TESBoundObject* apobjREFR, bool abPickUp, bool abUse)
+// src: XBOX_PDB 0x008adcf0
+char* __thiscall PickupSoundActorView::Actor_GetPickUpSoundName(::TESBoundObject* apobjREFR, bool abPickUp, bool abUse)
 {
     const char* soundname;
     {

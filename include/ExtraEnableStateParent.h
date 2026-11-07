@@ -10,7 +10,7 @@ public:
     ExtraEnableStateParent();
 
     bool Compare(BSExtraData* apCompare) override;
-    bool FUN_00433340(BSExtraData* apCompare);
+    bool Compare_00433340(BSExtraData* apCompare);
 
     TESObjectREFR* pParent;
     unsigned char cFlags;

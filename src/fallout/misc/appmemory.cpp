@@ -8,7 +8,7 @@
 #include "../../../include/TES.h"
 
 unsigned int gm_GetCurrentThreadId();
-void FUN_0040fca0(unsigned long);
+void BSSleep(unsigned long);
 
 extern OSGlobals* g_osGlobals;
 
@@ -17,7 +17,7 @@ extern unsigned int DAT_011de70c;
 struct ScrapHeapManager
 {
     static ScrapHeapManager& Instance();
-    void FUN_00aa5c80();
+    void ScrapHeapManager_FreeAllBuffers();
 };
 struct Worker
 {
@@ -25,13 +25,13 @@ struct Worker
     void PurgeUnusedModels(int);
 };
 Worker* FUN_00652110();
-bool FUN_00652160();
-int FUN_00652130();
-void FUN_00652190();
+bool BSFaceGenManager_TryLockFaceGenAccess();
+int BSFaceGenModelMap_GetFaceGenLockCount();
+void BSFaceGenManager_UnlockFaceGenAccess();
 void SetTlsFlag(int);
-void FUN_00868d70(int);
-void FUN_00c459d0(int);
-void FUN_00aa7030();
+void GarbageCollector_ClearAll(int);
+void NiObjectGarbage_ClearAll(int);
+void MemoryPool_FreeUnusedPagesForAllPools_00aa7030();
 #include "../../../include/RecursiveSpinLock.h"
 extern RecursiveSpinLock DAT_011f11a0;
 
@@ -123,7 +123,7 @@ struct StateMachine
 int StateMachine::RunStep(void* context, unsigned int step, bool* finished)
 {
     *finished = true;
-    bool mainThread = gm_GetCurrentThreadId() == g_osGlobals->FUN_0044edb0();
+    bool mainThread = gm_GetCurrentThreadId() == g_osGlobals->TESMain_GetThread();
     switch (step)
     {
     case 0:
@@ -132,42 +132,42 @@ int StateMachine::RunStep(void* context, unsigned int step, bool* finished)
             g_TES->FUN_00452490(0);
         break;
     case 1:
-        ScrapHeapManager::Instance().FUN_00aa5c80();
+        ScrapHeapManager::Instance().ScrapHeapManager_FreeAllBuffers();
         break;
     case 2:
-        if (FUN_00652110() && FUN_00652110()->FUN_00529ea0() && FUN_00652160())
+        if (FUN_00652110() && FUN_00652110()->FUN_00529ea0() && BSFaceGenManager_TryLockFaceGenAccess())
         {
-            if (FUN_00652130() == 1)
+            if (BSFaceGenModelMap_GetFaceGenLockCount() == 1)
                 FUN_00652110()->PurgeUnusedModels(0);
-            FUN_00652190();
+            BSFaceGenManager_UnlockFaceGenAccess();
         }
         break;
     case 5:
         if (mainThread)
         {
             SetTlsFlag(0);
-            if (g_TES->FUN_00453a80())
+            if (g_TES->TES_ClearOldestBufferedCell())
                 step = step - 1;
             else
-                g_TES->FUN_004539a0(1, 0);
+                g_TES->TES_ClearAllCells(1, 0);
             g_TES->FUN_00452490(0);
             SetTlsFlag(1);
-            FUN_00868d70(1);
+            GarbageCollector_ClearAll(1);
         }
         else
             break;
     case 4:
-        if (DAT_011f11a0.FUN_0078d200())
+        if (DAT_011f11a0.BSSpinLock_TryLock())
         {
-            FUN_00868d70(1);
-            DAT_011f11a0.Leave();
+            GarbageCollector_ClearAll(1);
+            DAT_011f11a0.BSSpinLock_Unlock();
         }
     case 3:
-        FUN_00c459d0(1);
+        NiObjectGarbage_ClearAll(1);
         break;
     case 6:
         if (mainThread)
-            FUN_00aa7030();
+            MemoryPool_FreeUnusedPagesForAllPools_00aa7030();
         break;
     case 7:
         if (!*finished && mainThread)
@@ -183,15 +183,15 @@ int StateMachine::RunStep(void* context, unsigned int step, bool* finished)
             {
                 if (DAT_01202d98->CallSlotMethod(0) == gm_GetCurrentThreadId())
                 {
-                    DAT_01202d98->FUN_00866dc0(0);
+                    DAT_01202d98->IOManager_PauseThread(0);
                     DAT_01202d98->CallElementAt(0);
                 }
                 if (DAT_01202d98->CallSlotMethod(1) == gm_GetCurrentThreadId())
                 {
-                    DAT_01202d98->FUN_00866dc0(1);
+                    DAT_01202d98->IOManager_PauseThread(1);
                     DAT_01202d98->CallElementAt(1);
                 }
-                FUN_0040fca0(1);
+                BSSleep(1);
                 DAT_011de70c = DAT_011de70c + 1;
                 step = step - 1;
                 break;
@@ -208,7 +208,8 @@ int StateMachine::RunStep(void* context, unsigned int step, bool* finished)
 
 // Calls CreateMemoryPool repeatedly with fixed numeric values and matching "Pool N" names.
 // @fnv 0x00866770
-void MemoryManager::FUN_00866770()
+// src: COMMUNITY 0x00866770
+void MemoryManager::SpecifyPools()
 {
     CreateMemoryPool(8, 0x600000, "Pool 8");
     CreateMemoryPool(12, 0x500000, "Pool 12");

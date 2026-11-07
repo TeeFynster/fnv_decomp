@@ -77,7 +77,8 @@ struct SpawnedArray
 void __cdecl FUN_00ec44d0(int a, int b, int c);
 
 // @fnv 0x00c908c0
-void __cdecl FUN_00c908c0(hkMemoryAllocator* apObject, SpawnedArray* apArray, int aiSize, int stride)
+// src: HAVOK_LIB 0x00c908c0
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* apObject, SpawnedArray* apArray, int aiSize, int stride)
 {
     int iNewSize = aiSize * stride;
     if ((apArray->m_08 & 0x80000000u) == 0)
@@ -132,7 +133,7 @@ void ResizeAudioStream(hkMemoryAllocator* pAlloc, AudioStream* pStream, int elem
 
 typedef unsigned int hkUlong;
 
-extern void __cdecl FUN_00c908c0(void* alloc, void* arr, int n, int sizeElem);
+extern void __cdecl hkArrayUtil__reserve(void* alloc, void* arr, int n, int sizeElem);
 extern void __cdecl ResizeAudioStream(void* alloc, void* arr, int sizeElem);
 
 inline void* operator new(unsigned int, void* p)
@@ -166,7 +167,7 @@ struct S_00da2bd0_CallTree
         if (cap < n)
         {
             int cap2 = cap * 2;
-            FUN_00c908c0(alloc, this, n < cap2 ? cap2 : n, sizeof(S_00da2bd0_Node));
+            hkArrayUtil__reserve(alloc, this, n < cap2 ? cap2 : n, sizeof(S_00da2bd0_Node));
         }
         int numNew = n - m_iElementCount;
         S_00da2bd0_Node* p = m_data + m_iElementCount;
@@ -236,8 +237,8 @@ struct Holder
     void* m_pAllocator;
 };
 
-Holder* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(void* pAllocator, void* pBuf, int newCap, int bFlag);
+Holder* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(void* pAllocator, void* pBuf, int newCap, int bFlag);
 void __cdecl ResizeAudioStream(void* pAllocator, void* pBuf, int bFlag);
 extern "C" void _ReadWriteBarrier(void);
 
@@ -247,18 +248,19 @@ struct FUN_00e108b0_cls
     int m_len;
     unsigned int m_cap;
 
-    FUN_00e108b0_cls* FUN_00e108b0();
+    FUN_00e108b0_cls* InitializeStringBuffer();
 };
 
 // Initialises the string buffer (data, length, capacity), grows it to at least 0x40 if needed, appends a null terminator and returns this.
 // @fnv 0x00e108b0
-FUN_00e108b0_cls* FUN_00e108b0_cls::FUN_00e108b0()
+// src: GUESS 0x00e108b0 (confidence: medium)
+FUN_00e108b0_cls* FUN_00e108b0_cls::InitializeStringBuffer()
 {
     m_pData = 0;
     m_len = 0;
     m_cap = 0x80000000u;
 
-    Holder* h = FUN_00c85750();
+    Holder* h = hkMemoryRouter_getInstance();
     void* alloc = h->m_pAllocator;
     int cap = (int)(m_cap & 0x3fffffffu);
     if (cap < 0x40)
@@ -268,10 +270,10 @@ FUN_00e108b0_cls* FUN_00e108b0_cls::FUN_00e108b0()
         {
             newCap = 0x40;
         }
-        FUN_00c908c0(alloc, this, newCap, 1);
+        hkArrayUtil__reserve(alloc, this, newCap, 1);
     }
 
-    h = FUN_00c85750();
+    h = hkMemoryRouter_getInstance();
     if ((unsigned int)m_len == (m_cap & 0x3fffffffu))
     {
         ResizeAudioStream(h->m_pAllocator, this, 1);
@@ -363,7 +365,7 @@ struct S00c70de0_ArrayLocalForm
         {
             int cap2 = cap * 2;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&a, this, newSize, sizeof(ArrayVectorLocal_00c70de0));
+            hkArrayUtil__reserve(&a, this, newSize, sizeof(ArrayVectorLocal_00c70de0));
         }
     }
     __forceinline void reserve(int n)
@@ -401,7 +403,8 @@ struct S00c70de0_ArrayLocalForm
 
 // Builds 18 vertices using scaled start coordinates, end z, radius, and height, then passes them to CreateFromSource.
 // @fnv 0x00c70de0
-int __cdecl FUN_00c70de0(float* end, float* start, float radius, float height)
+// src: XBOX_PDB 0x00c70de0
+int __cdecl MakeConvex(float* end, float* start, float radius, float height)
 {
     S00c70de0_Guard memGuard(16);
     float fScaledRadius = radius * DAT_01267bcc;
@@ -467,7 +470,8 @@ extern "C" void* __cdecl memcpy(void*, const void*, size_t);
 
 // Reallocates an hkArrayVoid buffer to requestedCapacity, reusing inplaceMem when provided, otherwise calling BufRealloc on the allocator.
 // @fnv 0x00c909d0
-void __cdecl FUN_00c909d0(hkMemoryAllocator& alloc, void* array, int aiElementSize, void* apInPlaceMemory,
+// src: HAVOK_LIB 0x00c909d0
+void __cdecl hkArrayUtil__reduce(hkMemoryAllocator& alloc, void* array, int aiElementSize, void* apInPlaceMemory,
                           int requestedCapacity)
 {
     hkArrayVoid& arr = *static_cast<hkArrayVoid*>(array);
@@ -492,7 +496,7 @@ void __cdecl FUN_00c909d0(hkMemoryAllocator& alloc, void* array, int aiElementSi
 
 static __forceinline hkMemoryAllocator* getMeshAllocator()
 {
-    Holder* holder = FUN_00c85750();
+    Holder* holder = hkMemoryRouter_getInstance();
     return (hkMemoryAllocator*)holder->unk10;
 }
 
@@ -541,7 +545,7 @@ template <class T> struct MeshArray
         int old = cap & 0x3fffffff;
 
         if (old < n)
-            FUN_00c908c0(a, this, n < old * 2 ? old * 2 : n, sizeof(T));
+            hkArrayUtil__reserve(a, this, n < old * 2 ? old * 2 : n, sizeof(T));
     }
 
     __forceinline void SetSizeAndGrow(int n)
@@ -617,10 +621,11 @@ __declspec(noinline) MeshBool __cdecl CheckDuplicateValues(const MeshTriangle& t
     return MeshBool(tri.a == tri.b || tri.a == tri.c || tri.b == tri.c);
 }
 
-void __cdecl FUN_00da0f10(ScriptProgram*, MeshArray<MeshVertex>*, MeshArray<int>*, float);
+void __cdecl hkMemoryRouter_getInstance_ProcessEntries_00da0f10(ScriptProgram*, MeshArray<MeshVertex>*, MeshArray<int>*, float);
 
 // @fnv 0x00da12b0
-void __cdecl FUN_00da12b0(ScriptProgram* mesh, float tolerance, bool unique, MeshArray<int>* vertexMap,
+// src: GUESS 0x00da12b0 (confidence: low)
+void __cdecl hkMemoryAllocator_ProcessEntries_00da12b0(ScriptProgram* mesh, float tolerance, bool unique, MeshArray<int>* vertexMap,
                           MeshArray<int>* triangleMap)
 {
 
@@ -630,7 +635,7 @@ void __cdecl FUN_00da12b0(ScriptProgram* mesh, float tolerance, bool unique, Mes
 
     MeshArray<MeshVertex> vertices = {0, 0, 0x80000000};
 
-    FUN_00da0f10(mesh, &vertices, vertexMap, tolerance);
+    hkMemoryRouter_getInstance_ProcessEntries_00da0f10(mesh, &vertices, vertexMap, tolerance);
 
     if (unique)
     {

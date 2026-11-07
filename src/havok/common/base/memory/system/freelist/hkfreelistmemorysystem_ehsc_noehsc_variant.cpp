@@ -10,15 +10,15 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00cd06c0_t
 {
-    void __thiscall FUN_00cd06c0(int v);
+    void __thiscall hkFreeListMemorySystem_setAllocator(int v);
 };
 extern int DAT_010cacd0;
 struct FUN_00cd06a0
 {
     void* m_p00;
     FUN_00cd06a0(int aiArg);
-    void FUN_00d2c7a0();
-    void FUN_00cbf1a0();
+    void hkThreadMemory_releaseCachedMemory();
+    void UpdateFields_00cbf1a0();
 };
 struct Inner
 {
@@ -44,9 +44,9 @@ struct Outer
 {
     char pad[0x1c];
     Inner inner;
-    void FUN_00cd06e0();
+    void hkFreeListMemorySystem_garbageCollect();
 };
-void __cdecl FUN_00d2cab0(void*, int, unsigned int);
+void __cdecl hkMemUtil_memSet(void*, int, unsigned int);
 struct FUN_00cd0940_record
 {
     virtual void slot00() = 0;
@@ -74,7 +74,7 @@ struct FUN_00cd0940_shell
 {
     void __thiscall ResetRecordState(int* param, unsigned char mode);
 };
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct PtrArrayMember
 {
     void** m_ppData;
@@ -83,7 +83,7 @@ struct PtrArrayMember
 
     ~PtrArrayMember() throw()
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
@@ -103,7 +103,7 @@ struct FUN_00cd0c80
 };
 struct CallTarget_00cd1d80
 {
-    int FUN_00cd1d80(int, int, int, int, int);
+    int hkArrayBase__spliceInto(int, int, int, int, int);
 };
 struct SearchObject
 {
@@ -119,7 +119,7 @@ struct FUN_00cd06f0_cls
 };
 struct CD0730Object
 {
-    virtual int FUN_00cd0730(const void* info) const;
+    virtual int hkFreeListMemorySystem_Func010(const void* info) const;
 };
 extern const char str_01094d90[];
 struct Gap040
@@ -220,7 +220,7 @@ struct Owner
     int unk0b08;
     Sub0b0c sub0b0c;
     FUN_00d5e960_t cnt0b30;
-    Sub0b0c* FUN_00cd0740(const Pair* p, Flags flags);
+    Sub0b0c* hkFreeListMemorySystem_mainInit(const Pair* p, Flags flags);
 };
 extern "C" unsigned int DAT_012686cc;
 struct S_00cd0a60_sub8
@@ -917,10 +917,10 @@ struct S_00cd0a60_sub1c
     int unka90;
     int unka94;
     int unka98;
-    void FUN_00d60270(S_00cd0a60_sub8* a1);
+    void hkFreeListAllocator_00d60270(S_00cd0a60_sub8* a1);
     __forceinline S_00cd0a60_sub1c(S_00cd0a60_sub8* a1)
     {
-        FUN_00d60270(a1);
+        hkFreeListAllocator_00d60270(a1);
     }
 };
 struct S_00cd0a60_VtBase
@@ -959,10 +959,10 @@ struct S_00cd0a60_sub0ad0
     int unk24;
     int unk28;
     int unk2c;
-    void FUN_00cf6da0(int a1);
+    void ProcessAndReturnValue_00cf6da0(int a1);
     __forceinline S_00cd0a60_sub0ad0()
     {
-        FUN_00cf6da0(0);
+        ProcessAndReturnValue_00cf6da0(0);
     }
 };
 struct S_00cd0a60_sub0b00
@@ -1160,7 +1160,7 @@ struct S_00cd0a60_elem
     char unk12c;
     int unk130;
     int unk134;
-    void FUN_00d2c720();
+    void hkThreadMemory_hkThreadMemory();
 };
 struct S_00cd0a60_arr
 {
@@ -1170,7 +1170,7 @@ struct S_00cd0a60_arr
         S_00cd0a60_elem* p = e;
         for (int i = 31; i >= 0; --i)
         {
-            p->FUN_00d2c720();
+            p->hkThreadMemory_hkThreadMemory();
             p->unk128 = 0;
             p->unk12c = 0;
             p->unk130 = 0;
@@ -1201,7 +1201,7 @@ struct FUN_00cd0c70_cls
 {
     int unk00;
 
-    FUN_00cd0c70_cls* FUN_00cd0c70(int aiUnused);
+    FUN_00cd0c70_cls* EvaluateValue_00cd0c70(int aiUnused);
 };
 struct CD07B0_Allocator
 {
@@ -1288,11 +1288,11 @@ extern int DAT_010cad74;
 extern int DAT_010cad0c;
 extern int DAT_010cacd0;
 
-void __fastcall FUN_00d2c7a0(void* self);
-void __fastcall FUN_00cbf1a0(void* self);
+void __fastcall hkThreadMemory_releaseCachedMemory(void* self);
+void __fastcall UpdateFields_00cbf1a0(void* self);
 void __fastcall ResetVftableAndDeleteCriticalSection(void* self);
-void __fastcall FUN_00d5ffd0(void* self);
-void __fastcall FUN_00cbbfe0(void* self);
+void __fastcall SetVtableAndProcessState_00d5ffd0(void* self);
+void __fastcall SetVirtualTable_00cbbfe0(void* self);
 
 struct Base_cd09d0
 {
@@ -1303,7 +1303,7 @@ struct Base_cd09d0
     ~Base_cd09d0()
     {
         m_08 = &DAT_010cad0c;
-        FUN_00cbbfe0(this);
+        SetVirtualTable_00cbbfe0(this);
     }
 };
 struct Mem1c_cd09d0
@@ -1395,7 +1395,7 @@ struct Mem1c_cd09d0
     int unk0a80, unk0a84, unk0a88, unk0a8c, unk0a90, unk0a94, unk0a98;
     ~Mem1c_cd09d0()
     {
-        FUN_00d5ffd0(this);
+        SetVtableAndProcessState_00d5ffd0(this);
     }
 };
 struct MemAB8_cd09d0
@@ -1408,7 +1408,7 @@ struct MemAB8_cd09d0
     ~MemAB8_cd09d0()
     {
         DeleteCriticalSection(&m_kLock);
-        FUN_00cbf1a0(this);
+        UpdateFields_00cbf1a0(this);
     }
 };
 struct MemB30_cd09d0
@@ -1444,8 +1444,8 @@ struct Block_cd09d0
     ~Block_cd09d0()
     {
         m_vptr = &DAT_010cacd0;
-        FUN_00d2c7a0(this);
-        FUN_00cbf1a0(this);
+        hkThreadMemory_releaseCachedMemory(this);
+        UpdateFields_00cbf1a0(this);
     }
 };
 class Pool_cd09d0 : public Base_cd09d0

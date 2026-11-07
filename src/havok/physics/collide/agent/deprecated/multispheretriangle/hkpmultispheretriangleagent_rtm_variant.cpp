@@ -56,7 +56,7 @@ struct ContactCollector {
 struct TimerRecord { const char* name; unsigned int ticks; unsigned int extra; };
 struct Monitor { TimerRecord* start; TimerRecord* next; TimerRecord* capacity; TimerRecord* limit; };
 extern unsigned long DAT_0126835c;
-void __cdecl FUN_00cd7850(const SphereTrianglePacketLocal_00d38b00*, const SphereTrianglePacketLocal_00d38b00*, TriangleCache*, ClosestPointUtilities*, unsigned char*);
+void __cdecl hkpCollideTriangleUtil_closestPointTriangle(const SphereTrianglePacketLocal_00d38b00*, const SphereTrianglePacketLocal_00d38b00*, TriangleCache*, ClosestPointUtilities*, unsigned char*);
 static __forceinline SphereTriangleProcessSimd::LocalM128 TransformPoint(const SphereTriangleProcessSimd::LocalM128& tx, const SphereTriangleProcessSimd::LocalM128& ty, const SphereTriangleProcessSimd::LocalM128& tz, const SphereTriangleProcessSimd::LocalM128& tt, const SphereTriangleProcessSimd::LocalM128& v)
 {
     return SphereTriangleProcessSimd::_mm_add_ps(
@@ -123,7 +123,7 @@ void SphereTriangleClosestPointReceiver::closestPoints(const hkpCdBody* bodyA, c
         TriangleCache* triPlane = reinterpret_cast<TriangleCache*>(&m_kTriangleNormal);
             const SphereTrianglePacketLocal_00d38b00* current = &spheresWorld[index];
             float radiusSum=*static_cast<const volatile float*>(&triangle->m_fSphereRadius)+sourceSphere[index].values.w;
-            FUN_00cd7850(current, triangleWorld, triPlane, &closest, 0);
+            hkpCollideTriangleUtil_closestPointTriangle(current, triangleWorld, triPlane, &closest, 0);
 const float& distance = closest.distance;
 float threshold = input->tolerance + radiusSum;
             if (distance < threshold) {
@@ -288,12 +288,13 @@ struct ProcessManager {
     }
     __forceinline void remove(unsigned short id, void* owner) { removeImpl(id, owner); }
 };
-extern "C" int __cdecl FUN_00cd7850(const ProcessVector&, const ProcessVector*, const hkpMultiSphereTriangleAgent::TriangleNormal&, ProcessClosest&, void* = 0);
+extern "C" int __cdecl hkpCollideTriangleUtil_closestPointTriangle(const ProcessVector&, const ProcessVector*, const hkpMultiSphereTriangleAgent::TriangleNormal&, ProcessClosest&, void* = 0);
 struct SphereTriangleProcessReceiver : hkpMultiSphereTriangleAgent {
-    void FUN_00d38b00(const ProcessBody&, const ProcessBody&, const ProcessInput&, ProcessOutput&);
+    void hkpMultiSphereTriangleAgent_processCollision(const ProcessBody&, const ProcessBody&, const ProcessInput&, ProcessOutput&);
 };
 // @fnv 0x00d38b00
-void SphereTriangleProcessReceiver::FUN_00d38b00(const ProcessBody& a, const ProcessBody& b, const ProcessInput& input, ProcessOutput& output) {
+// src: HAVOK_SRC 0x00d38b00
+void SphereTriangleProcessReceiver::hkpMultiSphereTriangleAgent_processCollision(const ProcessBody& a, const ProcessBody& b, const ProcessInput& input, ProcessOutput& output) {
     {
         ProcessMonitor& monitor = ProcessMonitor::instance();
         if (monitor.available()) {
@@ -319,7 +320,7 @@ void SphereTriangleProcessReceiver::FUN_00d38b00(const ProcessBody& a, const Pro
         const float radiusSum = sphereRadius + triangle->getRadius();
         {
             ProcessClosest closest;
-            FUN_00cd7850(*current, triangleWorld, m_kTriangleNormal, closest);
+            hkpCollideTriangleUtil_closestPointTriangle(*current, triangleWorld, m_kTriangleNormal, closest);
             if (closest.distance < radiusSum + input.getTolerance()) {
                 ProcessPoint* point = output.reserve(1);
                 point->contact.getPosition().addScaled(*current, closest.direction, triangle->getRadius() - closest.distance);

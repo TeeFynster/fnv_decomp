@@ -15,12 +15,13 @@ struct __declspec(align(16)) FUN_00d72030_cls
     __m128 m_k60;
     __m128 m_k70;
 
-    FUN_00d72030_cls* FUN_00d72030(const FUN_00d72030_cls* apSrc);
+    FUN_00d72030_cls* InitializeFields_00d72030(const FUN_00d72030_cls* apSrc);
 };
 
 // Copies all fields from apSrc into this object and returns this.
 // @fnv 0x00d72030
-FUN_00d72030_cls* FUN_00d72030_cls::FUN_00d72030(const FUN_00d72030_cls* apSrc)
+// src: GUESS 0x00d72030 (confidence: low)
+FUN_00d72030_cls* FUN_00d72030_cls::InitializeFields_00d72030(const FUN_00d72030_cls* apSrc)
 {
     m_c00 = apSrc->m_c00;
     m_i04 = apSrc->m_i04;

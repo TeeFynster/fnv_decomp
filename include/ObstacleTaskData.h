@@ -34,5 +34,5 @@ public:
     bool AddOperation(const NiPointer<ObstacleData>&, OBSTACLE_TASK_TYPE);
     void vfn_04();
     void Run();
-    void FUN_006c8150();
+    void SortOperations();
 };

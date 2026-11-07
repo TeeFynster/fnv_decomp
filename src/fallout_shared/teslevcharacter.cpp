@@ -75,7 +75,7 @@ bool TESLevCharacter::LoadForm(TESFile* file)
         case 0x444c564c: {
             unsigned char chance = 0;
             file->GetChunkData(&chance, 0);
-            FUN_0042e680(chance);
+            ExtraWeaponModFlags_SetWeaponModFlags(chance);
             break;
         }
         case 0x464c564c:
@@ -110,7 +110,7 @@ bool TESLevCharacter::LoadForm(TESFile* file)
 namespace fnv_0050b3c0 {
 struct FUN_0050b3c0_shell : public TESLevItem
 {
-    void FUN_0050b3c0(BGSLoadFormBuffer*);
+    void TESLevCharacter_Revert(BGSLoadFormBuffer*);
 };
 
 struct TESLeveledList_Revert_Access
@@ -120,7 +120,8 @@ struct TESLeveledList_Revert_Access
 
 // Reverts the TESForm base and then the leveled list at offset 0x30 using the load game buffer.
 // @fnv 0x0050b3c0
-void FUN_0050b3c0_shell::FUN_0050b3c0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: COMMUNITY 0x0050b3c0
+void FUN_0050b3c0_shell::TESLevCharacter_Revert(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     TESForm::Revert(reinterpret_cast<unsigned int>(apLoadGameBuffer));
     reinterpret_cast<TESLeveledList_Revert_Access*>(reinterpret_cast<char*>(this) + 0x30)->Revert(apLoadGameBuffer);
@@ -172,35 +173,37 @@ void* FUN_0050a820_shell::FUN_0050a820(unsigned int flags)
 
 struct FUN_005e78f0_t
 {
-    void FUN_004851b0(TESForm*);
-    void FUN_0050acb0(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
+    void TESLevCharacter_Copy(TESForm*);
 };
 // Casts apCopy to TESLevCharacter and, if the cast succeeds, calls FUN_004851b0 with apCopy.
 // @fnv 0x0050acb0
-void FUN_005e78f0_t::FUN_0050acb0(TESForm* apCopy)
+// src: XBOX_PDB 0x0050acb0
+void FUN_005e78f0_t::TESLevCharacter_Copy(TESForm* apCopy)
 {
     TESLevCharacter* pllcopy = dynamic_cast<TESLevCharacter*>(apCopy);
     if (!pllcopy)
         return;
-    FUN_004851b0(apCopy);
+    TESForm_CopyAllComponents(apCopy);
 }
 
 namespace LevCharacterComparison {
 class Entry : public TESLevCharacter
 {
   public:
-    bool FUN_00485270(TESForm*);
-    bool FUN_0050acf0(TESForm*);
+    bool TESForm_CompareAllComponents(TESForm*);
+    bool TESLevCharacter_Compare(TESForm*);
 };
 
 // Returns true if the cast fails or FUN_00485270 returns true for the compared object.
 // @fnv 0x0050acf0
-bool Entry::FUN_0050acf0(TESForm* other)
+// src: XBOX_PDB 0x0050acf0
+bool Entry::TESLevCharacter_Compare(TESForm* other)
 {
     TESLevCharacter* compared = dynamic_cast<TESLevCharacter*>(other);
     if (!compared)
         return true;
-    if (FUN_00485270(compared))
+    if (TESForm_CompareAllComponents(compared))
         return true;
     return false;
 }

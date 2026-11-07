@@ -16,7 +16,8 @@
 extern "C" void* g_011f3fcc;
 
 // @fnv 0x00a4ef60
-void* __cdecl FUN_00a4ef60()
+// src: COMMUNITY 0x00a4ef60
+void* __cdecl NiFloatsExtraDataController_GetRTTI()
 {
     return &g_011f3fcc;
 }
@@ -26,7 +27,8 @@ extern int DAT_0109928c;
 extern int EmptyFS;
 
 // @fnv 0x00a4f000
-int* __cdecl FUN_00a4f000()
+// src: EXE 0x00a4f000
+int* __cdecl NiFloatsExtraDataController_CreateObject()
 {
     int* p = static_cast<int*>(BSFadeNode::operator new(0x48));
     if (p)
@@ -127,20 +129,20 @@ void __fastcall LoadFloatsExtraDataController(
 
 extern int DAT_01099270;
 void __stdcall FUN_00a57420(NiStream* stream);
-void* __cdecl FUN_00a7d330(void* source);
-void* __cdecl FUN_00a7d4d0(int* name, void* object);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* source);
+void* __cdecl NiGetViewerString_00a7d4d0(int* name, void* object);
 
 // @fnv 0x00a4f1e0
 void __fastcall RegisterFloatsExtraDataController(
     NiFloatsExtraDataController* controller, void*, NiStream* stream)
 {
     FUN_00a57420(stream);
-    void* value = FUN_00a7d330(g_011f3fcc);
+    void* value = NiViewerStrings_NiGetViewerString_Title(g_011f3fcc);
     unsigned int index = reinterpret_cast<unsigned short*>(stream)[5];
     if (index >= reinterpret_cast<unsigned short*>(stream)[4])
         stream->FUN_0096ad30(index + reinterpret_cast<unsigned short*>(stream)[7]);
     stream->FUN_0096ae90(index, reinterpret_cast<const unsigned int*>(&value));
-    value = FUN_00a7d4d0(&DAT_01099270, reinterpret_cast<void*>(controller->m_iFloatsExtraDataIndex));
+    value = NiGetViewerString_00a7d4d0(&DAT_01099270, reinterpret_cast<void*>(controller->m_iFloatsExtraDataIndex));
     index = reinterpret_cast<unsigned short*>(stream)[5];
     if (index >= reinterpret_cast<unsigned short*>(stream)[4])
         stream->FUN_0096ad30(index + reinterpret_cast<unsigned short*>(stream)[7]);
@@ -193,7 +195,7 @@ void __fastcall UpdateFloatsExtraDataController(NiFloatsExtraDataController* con
     {
         controller->m_fControllerTime = DAT_01096324;
     }
-    else if (controller->FUN_00a36250(*updateData))
+    else if (controller->DontDoUpdate(*updateData))
     {
         if (!controller->m_spControllerInterpolator.m_pObject ||
             !controller->m_spControllerInterpolator.m_pObject->AlwaysUpdate())

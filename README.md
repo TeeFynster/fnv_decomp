@@ -74,6 +74,62 @@ as a number: the check builds the unit again and the bytes at every function's a
 Exception-handling code resolves names through the whole of `build/units.json`, so when a pull request changes any
 names there, the check also rebuilds every unit with exception-handling code. That adds a few minutes.
 
+### Marking where a name comes from
+
+A pull request that gives functions, globals, classes or fields new names from outside sources must say, at each
+renamed definition, where the name came from. Then any group of names can be found and taken out again with a search,
+for example if a source turns out to be one the project should not use.
+
+Put the marker on the line before the definition (or at the end of its line), with the source tag and the original
+address:
+
+```cpp
+// src: EXE 0x00a7b610
+NiRTTI::NiRTTI(const char* name, const NiRTTI* baseRTTI)
+
+// src: COMMUNITY 0x00401000
+void* FormHeap_Allocate(unsigned int size)
+
+// src: XBOX_PDB 0x00401020
+MemoryManager* MemoryManager_GetSingleton()
+```
+
+| Tag | Where the name comes from |
+|---|---|
+| `EXE` | The game's own executable: RTTI type names, constructor and destructor pairs found through RTTI, the console and script command tables, strings that name the function |
+| `HAVOK_LIB` | A byte-identical function in the Havok 7.1.0 libraries |
+| `GAMEBRYO_LIB` | A byte-identical function in the Gamebryo 2.6 libraries |
+| `CRT_LIB` | A byte-identical function in the Visual C++ 2008 runtime or zlib 1.2.1 |
+| `COMMUNITY` | Community projects such as xNVSE and JIP LN (names only, never their code) |
+| `XBOX_PDB` | Debug symbols from an Xbox 360 development build |
+| `GAMEBRYO_SRC`, `HAVOK_SRC`, `HAVOK_PDB` | Gamebryo or Havok source code or symbols (names and layouts only, never copied code) |
+| `GUESS` | No source has a name: a best guess from what the code does (its strings, the functions it calls and that call it, the fields it uses). Treat it as a description, not the original name |
+
+A name you choose yourself from what the code does is marked `GUESS`, so readers can tell it from a sourced name and replace it when a real one turns up:
+
+```cpp
+// src: GUESS 0x00c4a2f0 (confidence: medium)
+void TESObjectREFR_ClearAnimationData(TESObjectREFR* ref)
+```
+
+Every `GUESS` marker rates how likely the name is to be right:
+
+| Confidence | Meaning |
+|---|---|
+| `high` | The code makes it unambiguous: a string names it, or its callers and callees leave one reading |
+| `medium` | What the code does is clear; why it does it is inferred |
+| `low` | Only the shape is known (for example a loop over entries, or a getter for a global); the name is a neutral label, often ending in the address |
+
+Search for one level with, for example, `grep -rn "GUESS .*confidence: low"`. Raise or lower the rating when you learn more.
+
+Renaming a `GUESS` name to a sourced one replaces the marker; renaming it to a better guess keeps `GUESS`.
+
+Use one tag per name: the most reliable source that gives it, in the order of the table. Never copy code from any of
+these sources.
+
+To take a group of names out again, search for its tag (for example `grep -rn "// src: XBOX_PDB"`), give each listed
+address back its placeholder name (`FUN_<address>`, `DAT_<address>`) in the source and in `build/units.json`, and
+delete the marker. As with any rename, the check has to stay byte-identical.
 ### Changing the build recipe
 
 Besides names, a pull request may change how `build/units.json` builds the functions, because the check builds both

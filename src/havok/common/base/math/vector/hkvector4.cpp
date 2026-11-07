@@ -26,7 +26,8 @@ struct Cls_c7f4e0
     void CheckFloatsFinite(void* out);
 };
 
-static __declspec(noinline) void* FUN_00c7f4a0(void* out, void* self, int count)
+// src: HAVOK_LIB 0x00c7f4a0
+static __declspec(noinline) void* hkVector4isOk(void* out, void* self, int count)
 {
     for (int i = 0; i < count; i++)
     {
@@ -45,7 +46,7 @@ static __declspec(noinline) void* FUN_00c7f4a0(void* out, void* self, int count)
 // @fnv 0x00c7f4e0
 void Cls_c7f4e0::CheckFloatsFinite(void* pResult)
 {
-    FUN_00c7f4a0(pResult, this, 3);
+    hkVector4isOk(pResult, this, 3);
 }
 
 #include <xmmintrin.h>
@@ -55,12 +56,12 @@ struct SubVecHolder;
 struct FUN_00c7f700_cls
 {
     __m128 m_result;
-    void FUN_00c7f700(void* first, void* second);
+    void hkVector4_setRotatedDir(void* first, void* second);
 };
 
 struct VecSource
 {
-    __m128* FUN_00cac910();
+    __m128* hkpCharacterProxy_getPosition();
 };
 
 struct HolderNode
@@ -70,7 +71,7 @@ struct HolderNode
     char* m_p08;
 };
 
-extern void __fastcall FUN_00c89720(bhkCharacterController* controller);
+extern void __fastcall bhkCharacterProxy_MarkRead(bhkCharacterController* controller);
 
 // Subtracts res.m_result from the selected vector and stores the difference in out.
 // @fnv 0x00c6e300
@@ -80,15 +81,15 @@ void bhkCharacterController::SubtractVectors(Vec4* apResult)
     char* base = holder ? holder->m_p08 : 0;
 
     FUN_00c7f700_cls res;
-    res.FUN_00c7f700(base + 0xb0, (char*)this + 0x570);
+    res.hkVector4_setRotatedDir(base + 0xb0, (char*)this + 0x570);
 
     __m128* vec = &DAT_01267e30;
     VecSource* src = reinterpret_cast<VecSource*>(m_pHavokObject);
     if (src != 0)
     {
-        FUN_00c89720(this);
-        vec = src->FUN_00cac910();
-        FUN_00c89720(this);
+        bhkCharacterProxy_MarkRead(this);
+        vec = src->hkpCharacterProxy_getPosition();
+        bhkCharacterProxy_MarkRead(this);
     }
 
     __m128 a = *vec;
@@ -99,8 +100,8 @@ void bhkCharacterController::SubtractVectors(Vec4* apResult)
 struct __declspec(align(16)) CastVector
 {
     float x, y, z, w;
-    void FUN_00c7f690(void* transform, const CastVector* value);
-    void FUN_00c7f700(void* transform, const CastVector* value);
+    void hkVector4_setTransformedInversePos(void* transform, const CastVector* value);
+    void hkVector4_setRotatedDir(void* transform, const CastVector* value);
 };
 
 typedef __m128 VecArr;
@@ -206,7 +207,8 @@ extern double DAT_0102f070;
 
 // Casts rays between transformed points, adjusts both z coordinates by advance, and returns true when a cast fraction is below 1.
 // @fnv 0x00c6fa20
-bool bhkCharacterController::FUN_00c6fa20()
+// src: COMMUNITY 0x00c6fa20
+bool bhkCharacterController::CheckInsideOfObject()
 {
     Node* node = *(Node**)((char*)this + 0x594);
     State* state = node ? node->state : 0;
@@ -215,7 +217,7 @@ bool bhkCharacterController::FUN_00c6fa20()
     CastVector value;
     *(__m128*)&value = _mm_setr_ps(DAT_01011d78, range, DAT_01011d78, DAT_01011d78);
     State* transformState = node ? node->state : 0;
-    value.FUN_00c7f700((char*)transformState + 0xb0, &value);
+    value.hkVector4_setRotatedDir((char*)transformState + 0xb0, &value);
     CastVector vStart;
     this->SubtractVectors(reinterpret_cast<Vec4*>(&vStart));
     VecArr vFinish;
@@ -252,8 +254,8 @@ bool bhkCharacterController::FUN_00c6fa20()
         Geometry* __restrict body = geom;
         CastInput input;
         HitResult result;
-        input.from.FUN_00c7f690(body->transform, &vStart);
-        input.to.FUN_00c7f690(geom->transform, (CastVector*)&vFinish);
+        input.from.hkVector4_setTransformedInversePos(body->transform, &vStart);
+        input.to.hkVector4_setTransformedInversePos(geom->transform, (CastVector*)&vFinish);
 
         bool hit = false;
         unsigned int j = 0;
@@ -273,8 +275,8 @@ bool bhkCharacterController::FUN_00c6fa20()
             }
         } while (++j < 3);
 
-        input.from.FUN_00c7f690(geom->transform, (CastVector*)&vFinish);
-        input.to.FUN_00c7f690(geom->transform, &vStart);
+        input.from.hkVector4_setTransformedInversePos(geom->transform, (CastVector*)&vFinish);
+        input.to.hkVector4_setTransformedInversePos(geom->transform, &vStart);
 
         if (!hit)
         {
@@ -309,12 +311,13 @@ struct __declspec(align(16)) FUN_00c7f640_cls
 {
     __m128 m_vResult;
 
-    void FUN_00c7f640(const SpawnedMatrix* apMatrix, const __m128* apVector);
+    void setTransformedPos_00c7f640(const SpawnedMatrix* apMatrix, const __m128* apVector);
 };
 
 // Combines the vector's first three components with matrix rows 0-2, adds row3, and stores the result in m_vResult.
 // @fnv 0x00c7f640
-void FUN_00c7f640_cls::FUN_00c7f640(const SpawnedMatrix* apMatrix, const __m128* apVector)
+// src: XBOX_PDB 0x00c7f640
+void FUN_00c7f640_cls::setTransformedPos_00c7f640(const SpawnedMatrix* apMatrix, const __m128* apVector)
 {
     __m128 vVec = *apVector;
     __m128 vY = _mm_shuffle_ps(vVec, vVec, 0x55);
@@ -338,12 +341,13 @@ struct S_00c7f690_M
 };
 struct FUN_00c7f690_cls
 {
-    void FUN_00c7f690(const S_00c7f690_M* m, const S_00c7f690_V* v);
+    void hkVector4_setTransformedInversePos(const S_00c7f690_M* m, const S_00c7f690_V* v);
 };
 
 // Subtracts m->c3 from v, multiplies the difference by components assembled from m->c0 through m->c2, and stores the result in this.
 // @fnv 0x00c7f690
-void FUN_00c7f690_cls::FUN_00c7f690(const S_00c7f690_M* apMatrix, const S_00c7f690_V* apVector)
+// src: XBOX_PDB 0x00c7f690
+void FUN_00c7f690_cls::hkVector4_setTransformedInversePos(const S_00c7f690_M* apMatrix, const S_00c7f690_V* apVector)
 {
     S_00c7f690_V vDelta;
     vDelta.q = _mm_sub_ps(apVector->q, apMatrix->c3.q);
@@ -372,12 +376,13 @@ struct FUN_00c7f700_cls
 {
     __m128 m_result;
 
-    void FUN_00c7f700(MatrixRows3x4* matrix, __m128* vec);
+    void hkVector4_setRotatedDir(MatrixRows3x4* matrix, __m128* vec);
 };
 
 // Multiplies a 3D vector by the first three rows of a 3x4 matrix and stores the result in m_result.
 // @fnv 0x00c7f700
-void FUN_00c7f700_cls::FUN_00c7f700(MatrixRows3x4* matrix, __m128* apVector)
+// src: XBOX_PDB 0x00c7f700
+void FUN_00c7f700_cls::hkVector4_setRotatedDir(MatrixRows3x4* matrix, __m128* apVector)
 {
     __m128 v = *apVector;
     __m128 vx = _mm_shuffle_ps(v, v, 0x00);
@@ -393,11 +398,12 @@ void FUN_00c7f700_cls::FUN_00c7f700(MatrixRows3x4* matrix, __m128* apVector)
 
 struct FUN_00c7f750_shell
 {
-    void __thiscall FUN_00c7f750(float* matrix, float* vector);
+    void __thiscall hkVector4_setMul3(float* matrix, float* vector);
 };
 // Multiplies a 3D vector by a 3x3 matrix using SSE and stores the resulting vector in the object.
 // @fnv 0x00c7f750
-void __thiscall FUN_00c7f750_shell::FUN_00c7f750(float* matrix, float* vector)
+// src: XBOX_PDB 0x00c7f750
+void __thiscall FUN_00c7f750_shell::hkVector4_setMul3(float* matrix, float* vector)
 {
     __m128 v = *(__m128*)vector;
     __m128 y = _mm_mul_ps(_mm_shuffle_ps(v, v, _MM_SHUFFLE(1, 1, 1, 1)), *(__m128*)(matrix + 4));
@@ -459,8 +465,8 @@ struct QueryVector
         q = ref;
         return *this;
     }
-    void FUN_00c7f640(void* a, const QueryVector* v);
-    void FUN_00c7f690(const Mat16* t, const QueryVector* v);
+    void setTransformedPos_00c7f640(void* a, const QueryVector* v);
+    void hkVector4_setTransformedInversePos(const Mat16* t, const QueryVector* v);
 };
 struct Mat16
 {
@@ -489,7 +495,7 @@ struct BoundingVolumeNode
             BoundingVolumeNode* f34;
         };
     };
-    int FUN_00c84f10(int key);
+    int bhkShape_GetSubshapeMaterial(int key);
 };
 struct VarObj
 {
@@ -697,9 +703,9 @@ __declspec(noinline) void* __cdecl GetValidatedPointer(void* obj)
     return result;
 }
 void __cdecl ComputeInverseLengths(const QueryVector* triangle, Plane* plane);
-void __cdecl FUN_00cd6520(const QueryVector* ray, float tolerance, const QueryVector* triangle, float radius,
+void __cdecl hkCollideCapsuleUtilCapsVsTri(const QueryVector* ray, float tolerance, const QueryVector* triangle, float radius,
                           const Plane* plane, float zero, int flags, Contacts* contacts, void* extra);
-char __cdecl FUN_00c6d7e0(BoundingVolumeNode* obj, int one, char v, int id);
+char __cdecl bhkCharacterController_IsShapeConsideredPenetrating(BoundingVolumeNode* obj, int one, char v, int id);
 typedef char(__cdecl* PredFn)(int v);
 extern PredFn DAT_01267bc8;
 extern "C" void _ReadWriteBarrier();
@@ -758,7 +764,8 @@ struct CastWorkspace
 // @fnv 0x00c6eb00
 // The shared controller has no declaration for this routine yet. The unused
 // EDX argument preserves its original thiscall stack argument layout.
-char __fastcall FUN_00c6eb00(bhkCharacterController* controller, void*, ArgObj* arg)
+// src: COMMUNITY 0x00c6eb00
+char __fastcall bhkCharacterController_IsStep(bhkCharacterController* controller, void*, ArgObj* arg)
 {
     ArgObj* a = arg;
     VarObj* o20 = a->f20;
@@ -795,7 +802,7 @@ char __fastcall FUN_00c6eb00(bhkCharacterController* controller, void*, ArgObj* 
         if (found && found->child)
         {
             BoundingVolumeNode* child = found->child;
-            int v = key != -1 ? child->FUN_00c84f10(key) : child->f10 & 31;
+            int v = key != -1 ? child->bhkShape_GetSubshapeMaterial(key) : child->f10 & 31;
             char c = 0;
             if (DAT_01267bc8)
                 c = DAT_01267bc8(v);
@@ -842,7 +849,7 @@ char __fastcall FUN_00c6eb00(bhkCharacterController* controller, void*, ArgObj* 
                     if (i == 1)
                         direction.q.m128_f32[1] = (float)(direction.q.m128_f32[1] * -1.0);
                 }
-                (reinterpret_cast<QueryVector*>((char*)controller + 0x5b0))[i].FUN_00c7f640(tm, &direction);
+                (reinterpret_cast<QueryVector*>((char*)controller + 0x5b0))[i].setTransformedPos_00c7f640(tm, &direction);
                 (reinterpret_cast<QueryVector*>((char*)controller + 0x5b0))[i].q.m128_f32[2] += (*reinterpret_cast<float*>((char*)controller + 0x470));
                 input.vectors[i] = subtractVectors(pos, (reinterpret_cast<QueryVector*>((char*)controller + 0x5b0))[i]);
             }
@@ -904,7 +911,7 @@ char __fastcall FUN_00c6eb00(bhkCharacterController* controller, void*, ArgObj* 
                 input.vectors[0].q = pos.q;
                 input.vectors[1].q.m128_f32[0] -= scalar(direction.q) * (*reinterpret_cast<float*>((char*)controller + 0x474));
                 input.vectors[1].q.m128_f32[1] -= scalar(_mm_shuffle_ps(direction.q, direction.q, 85)) * (*reinterpret_cast<float*>((char*)controller + 0x474));
-                FUN_00cd6520(input.vectors, 0.05f, scratch.col, triangle->radius, &plane, 0.0f, 0, &output.contacts, 0);
+                hkCollideCapsuleUtilCapsVsTri(input.vectors, 0.05f, scratch.col, triangle->radius, &plane, 0.0f, 0, &output.contacts, 0);
                 flag = output.contacts.hit[0].distance >= 0.0f && output.contacts.hit[1].distance >= 0.0f;
                 goto end;
             }
@@ -925,8 +932,8 @@ char __fastcall FUN_00c6eb00(bhkCharacterController* controller, void*, ArgObj* 
             scratch.col[1].q = decoded48->mat.col[1].q;
             scratch.col[2].q = decoded48->mat.col[2].q;
             scratch.col[3].q = decoded48->mat.col[3].q;
-            input.vectors[0].FUN_00c7f690(&scratch, &origin);
-            input.vectors[1].FUN_00c7f690(&scratch, &endpoint);
+            input.vectors[0].hkVector4_setTransformedInversePos(&scratch, &origin);
+            input.vectors[1].hkVector4_setTransformedInversePos(&scratch, &endpoint);
             ((RayShape*)shape)->cast(input, output.ray);
             if (output.ray.fraction < 1.0f)
             {
@@ -937,7 +944,7 @@ char __fastcall FUN_00c6eb00(bhkCharacterController* controller, void*, ArgObj* 
                         break;
                     uiLastKey = key;
                 }
-                flag = FUN_00c6d7e0(shape, 1, side, uiLastKey) == 0;
+                flag = bhkCharacterController_IsShapeConsideredPenetrating(shape, 1, side, uiLastKey) == 0;
             }
             else
             {

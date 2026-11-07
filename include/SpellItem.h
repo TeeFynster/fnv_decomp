@@ -15,8 +15,8 @@ public:
     int ContainsAnyFlag(unsigned int mask);
     bool FUN_0040e210(int flag);
     bool FUN_0040e210(unsigned int flag);
-    bool FUN_00823c20();
-    bool FUN_008c2e30();
+    bool ActiveEffect_IsExtendDuration();
+    bool ContainsAnyFlag_Thunk();
 
     union
     {

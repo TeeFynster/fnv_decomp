@@ -173,13 +173,15 @@ bool BGSTextureSet::LoadForm(TESFile* file)
 }
 
 // @fnv 0x00593210
-void FUN_00593210()
+// src: COMMUNITY 0x00593210
+void BGSTextureSet_ClearNullTextureSet()
 {
     BGSTextureSet::s_pNullTextureSet = 0;
 }
 
 // @fnv 0x00593220
-BGSTextureSet* __cdecl FUN_00593220()
+// src: COMMUNITY 0x00593220
+BGSTextureSet* __cdecl BGSTextureSet_GetNullTextureSet()
 {
     return BGSTextureSet::s_pNullTextureSet;
 }
@@ -228,30 +230,30 @@ void BGSTextureSetMethods::SetFullNameByType(int aeType, char const* apFilename)
 
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
 struct FUN_00593320_shell
 {
-    void FUN_00593320(void*);
+    void ProcessState_00593320(void*);
 };
-void __cdecl FUN_00485950(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_00485950(unsigned int, unsigned int);
 extern unsigned int DAT_0118c574[6];
 // @fnv 0x00592810
 void BGSTextureSetMethods::SaveTextureSet()
 {
     int i;
-    TESForm::FUN_004855a0();
+    TESForm::BeginFormRecord();
     for (i = 0; i < 6; ++i)
-        ((FUN_0048e370_obj*)&pTextures[i])->FUN_0048e370(DAT_0118c574[i]);
+        ((FUN_0048e370_obj*)&pTextures[i])->TESTexture_Save(DAT_0118c574[i]);
     if (m_pDecalData)
-        ((FUN_00593320_shell*)m_pDecalData)->FUN_00593320((void*)0x54444f44);
-    FUN_00485950(0x4d414e44, iFlags);
-    TESForm::FUN_00485680();
+        ((FUN_00593320_shell*)m_pDecalData)->ProcessState_00593320((void*)0x54444f44);
+    TESForm_AddChunk_00485950(0x4d414e44, iFlags);
+    TESForm::FinishFormRecord();
 }
 
 struct FUN_005e79a0_t : public TESForm
 {
-    bool FUN_00485270(TESForm*);
+    bool TESForm_CompareAllComponents(TESForm*);
 };
 
 struct FUN_005932e0_shell
@@ -299,7 +301,7 @@ bool BGSTextureSetMethods::CompareTextureSet(TESForm* apCompare)
     if (iFlags != pcompare->iFlags)
         return true;
 
-    if (reinterpret_cast<FUN_005e79a0_t*>(this)->FUN_00485270(pcompare))
+    if (reinterpret_cast<FUN_005e79a0_t*>(this)->TESForm_CompareAllComponents(pcompare))
         return true;
 
     return false;
@@ -382,12 +384,13 @@ struct Owner
     ValueList m_kList3;
     ValueList m_kList4;
 
-    void FUN_00593030(unsigned int uiType, int iValue);
+    void BGSTextureSet_SetTexturePath(unsigned int uiType, int iValue);
 };
 
 // Dispatches iValue to the ValueList member selected by uiType, calling FUN_00489100 on the matching list.
 // @fnv 0x00593030
-void Owner::FUN_00593030(unsigned int uiType, int iValue)
+// src: COMMUNITY 0x00593030
+void Owner::BGSTextureSet_SetTexturePath(unsigned int uiType, int iValue)
 {
     switch (uiType)
     {

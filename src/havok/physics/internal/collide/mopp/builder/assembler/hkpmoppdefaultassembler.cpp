@@ -270,11 +270,12 @@ struct S_00e06aa0
     int unk6C;
     int unk70;
     bool m_enabled;
-    void FUN_00e06aa0(S_00e06aa0_Item* item);
+    void hkpMoppDefaultAssembler_releaseNode(S_00e06aa0_Item* item);
 };
 // If the item is not flagged and this object is enabled, frees the item's two pointers through the pool and nulls them.
 // @fnv 0x00e06aa0
-void S_00e06aa0::FUN_00e06aa0(S_00e06aa0_Item* item)
+// src: HAVOK_LIB 0x00e06aa0
+void S_00e06aa0::hkpMoppDefaultAssembler_releaseNode(S_00e06aa0_Item* item)
 {
     if (!item->m_flag && m_enabled)
     {
@@ -306,7 +307,8 @@ struct Node
 };
 // Walks the linked list from node, marking each node's unk39 flag until one is already set or the list ends.
 // @fnv 0x00e06b20
-void __stdcall FUN_00e06b20(Node* node)
+// src: HAVOK_LIB 0x00e06b20
+void __stdcall hkpMoppDefaultAssembler_fixScale(Node* node)
 {
     while (node)
     {
@@ -363,7 +365,7 @@ void __stdcall AdjustLimits(Limits* first, Limits* second, Limits* third)
 
 struct E06C20Writer
 {
-    void FUN_00e069a0(int size, void* data);
+    void hkpMoppCodeGenerator_addCommand32(int size, void* data);
 };
 
 struct E06C20Object
@@ -374,13 +376,14 @@ struct E06C20Object
     int unk0C;
     E06C20Writer* m_pStreamWriter;
 
-    int FUN_00e06c20(void* data);
+    int hkpMoppDefaultAssembler_addJumpChunk(void* data);
 };
 
 // @fnv 0x00e06c20
-int E06C20Object::FUN_00e06c20(void* data)
+// src: HAVOK_LIB 0x00e06c20
+int E06C20Object::hkpMoppDefaultAssembler_addJumpChunk(void* data)
 {
-    m_pStreamWriter->FUN_00e069a0(0x70, data);
+    m_pStreamWriter->hkpMoppCodeGenerator_addCommand32(0x70, data);
     return 5;
 }
 
@@ -395,12 +398,13 @@ struct Node
 struct FUN_00e06db0_class
 {
     __declspec(nothrow) void WriteOp(int a, void* p);
-    void FUN_00e06db0(int* flag, Node* b, Node* c);
+    void hkpMoppDefaultAssembler_checkAndAddProperties(int* flag, Node* b, Node* c);
 };
 
 // If *flag is set, calls WriteOp(0, c->m_40) when c->m_44 is 0 and b->m_44 is nonzero; otherwise when c->m_44 is 0 and c->m_40 is set.
 // @fnv 0x00e06db0
-void FUN_00e06db0_class::FUN_00e06db0(int* piFlag, Node* pNodeB, Node* pNodeC)
+// src: HAVOK_LIB 0x00e06db0
+void FUN_00e06db0_class::hkpMoppDefaultAssembler_checkAndAddProperties(int* piFlag, Node* pNodeB, Node* pNodeC)
 {
     if (*piFlag)
     {
@@ -444,7 +448,8 @@ template <class T> inline T S_00e07040_Min(T a, T b)
 {
     return a < b ? a : b;
 }
-int __stdcall FUN_00e07040(S_00e07040_A* a, S_00e07040_B* b)
+// src: HAVOK_LIB 0x00e07040
+int __stdcall hkpMoppDefaultAssembler_calcRescaleBits(S_00e07040_A* a, S_00e07040_B* b)
 {
     int n = b->unk08 - 8;
     if (n <= 0)
@@ -478,17 +483,18 @@ struct E07510Input
 
 struct E07510Solver
 {
-    void FUN_00e07070(void* b, void* c, void* d);
+    void hkpMoppDefaultAssembler_recalcRescale(void* b, void* c, void* d);
     void AdjustLimits(E07510Input* a, void* b, void* c);
-    void FUN_00e07510(E07510Input* a, void* b, void* c, void* d);
+    void hkpMoppDefaultAssembler_initTopDown(E07510Input* a, void* b, void* c, void* d);
 };
 
 // If the input's m_type is 1, calls FUN_00e07070 with b, c and d, then always calls AdjustLimits with a, b and c.
 // @fnv 0x00e07510
-void E07510Solver::FUN_00e07510(E07510Input* pInput, void* b, void* c, void* d)
+// src: HAVOK_LIB 0x00e07510
+void E07510Solver::hkpMoppDefaultAssembler_initTopDown(E07510Input* pInput, void* b, void* c, void* d)
 {
     if (pInput->m_type == 1)
-        FUN_00e07070(b, c, d);
+        hkpMoppDefaultAssembler_recalcRescale(b, c, d);
     AdjustLimits(pInput, b, c);
 }
 
@@ -513,10 +519,10 @@ struct S_e07c50
     int unk20;
     int unk24;
     int m_uiItemCount;
-    void FUN_00e06b20(S_e07c50_Item* item);
-    void FUN_00e06e00(S_e07c50_Item* item, int b, int c);
-    void FUN_00e07550(S_e07c50_Item* item, int c);
-    int FUN_00e07c50(S_e07c50_Item* item, int b, int c);
+    void hkpMoppDefaultAssembler_fixScale(S_e07c50_Item* item);
+    void hkpMoppDefaultAssembler_addTerminals(S_e07c50_Item* item, int b, int c);
+    void hkpMoppDefaultAssembler_addCut(S_e07c50_Item* item, int c);
+    int hkpMoppDefaultAssembler_assembleCutAndTerminalCommand(S_e07c50_Item* item, int b, int c);
 };
 struct S_e07c50_Item
 {
@@ -549,13 +555,14 @@ struct S_e07c50_Item
     int m_kRayEnd;
 };
 // @fnv 0x00e07c50
-int S_e07c50::FUN_00e07c50(S_e07c50_Item* item, int b, int c)
+// src: HAVOK_LIB 0x00e07c50
+int S_e07c50::hkpMoppDefaultAssembler_assembleCutAndTerminalCommand(S_e07c50_Item* item, int b, int c)
 {
-    FUN_00e06b20(item);
+    hkpMoppDefaultAssembler_fixScale(item);
     m_uiItemCount++;
     int start = m_buf->m_iElementCount;
-    FUN_00e06e00(item, b, c);
-    FUN_00e07550(item, c);
+    hkpMoppDefaultAssembler_addTerminals(item, b, c);
+    hkpMoppDefaultAssembler_addCut(item, c);
     item->m_kRayEnd = m_buf->m_iElementCount;
     int r = m_buf->m_iElementCount - start;
     item->m_flag38 = 1;
@@ -581,7 +588,7 @@ struct __declspec(align(8)) State
     State()
     {}
     State(const State&, Node*, float*);
-    void FUN_00e095d0(const State*, Node*, float*);
+    void UpdateState_00e095d0(const State*, Node*, float*);
 };
 struct MergeInfo
 {
@@ -603,8 +610,8 @@ struct Tracker
 {
     int unk00, unk04, unk08, count;
 };
-void __stdcall FUN_00e06b20(Node*);
-void __stdcall FUN_00e07510(Node*, void*, State*, MergeInfo*);
+void __stdcall hkpMoppDefaultAssembler_fixScale(Node*);
+void __stdcall hkpMoppDefaultAssembler_initTopDown(Node*, void*, State*, MergeInfo*);
 struct TreeOptimizer
 {
     int unk00, unk04, unk08, unk0C;
@@ -613,10 +620,10 @@ struct TreeOptimizer
     float config30, config34, config38, config3C, config40, config44, config48, config4C, config50, config54, config58,
         config5C, config60, config64, config68, config6C;
     int period;
-    CheckResult FUN_00e06af0(Node*, State*);
-    int FUN_00e07c50(Node*, void*, State*);
-    void FUN_00e06aa0(Node*);
-    int FUN_00e07ca0(Node*, void*, State*, MergeInfo*);
+    CheckResult hkpMoppDefaultAssembler_shouldAssemble(Node*, State*);
+    int hkpMoppDefaultAssembler_assembleCutAndTerminalCommand(Node*, void*, State*);
+    void hkpMoppDefaultAssembler_releaseNode(Node*);
+    int hkpMoppDefaultAssembler_assembleNonTerminalCommand(Node*, void*, State*, MergeInfo*);
     int OptimizeTree(Node*, void*, State*);
 };
 // Recursively optimizes a node tree, retrying with a reduced threshold, merging child results and returning a combined score or -1.
@@ -650,16 +657,16 @@ int TreeOptimizer::OptimizeTree(Node* node, void* context, State* state)
     }
     if (node->leaf)
     {
-        FUN_00e06b20(node);
-        if (FUN_00e06af0(node, state))
-            return FUN_00e07c50(node, context, state);
+        hkpMoppDefaultAssembler_fixScale(node);
+        if (hkpMoppDefaultAssembler_shouldAssemble(node, state))
+            return hkpMoppDefaultAssembler_assembleCutAndTerminalCommand(node, context, state);
     }
     else
     {
         MergeInfo info;
         info.changed = false;
         info.index = -1;
-        FUN_00e07510(node, context, state, &info);
+        hkpMoppDefaultAssembler_initTopDown(node, context, state, &info);
         int score = -1;
         {
 
@@ -667,24 +674,24 @@ int TreeOptimizer::OptimizeTree(Node* node, void* context, State* state)
             if (rightChild)
             {
                 State stateCopy;
-                stateCopy.FUN_00e095d0(state, rightChild, &config30);
+                stateCopy.UpdateState_00e095d0(state, rightChild, &config30);
                 score = OptimizeTree(rightChild, state, &stateCopy);
                 if (score >= 0)
-                    FUN_00e06aa0(rightChild);
+                    hkpMoppDefaultAssembler_releaseNode(rightChild);
             }
             Node* leftChild = node->left;
             if (leftChild)
             {
                 State stateCopy;
-                stateCopy.FUN_00e095d0(state, leftChild, &config30);
+                stateCopy.UpdateState_00e095d0(state, leftChild, &config30);
                 int leftResult = OptimizeTree(leftChild, state, &stateCopy);
                 if (leftResult >= 0)
                 {
-                    FUN_00e06aa0(leftChild);
-                    if (score >= 0 && FUN_00e06af0(node, state))
+                    hkpMoppDefaultAssembler_releaseNode(leftChild);
+                    if (score >= 0 && hkpMoppDefaultAssembler_shouldAssemble(node, state))
                     {
                         ++count;
-                        return FUN_00e07ca0(node, context, state, &info) + leftResult + score;
+                        return hkpMoppDefaultAssembler_assembleNonTerminalCommand(node, context, state, &info) + leftResult + score;
                     }
                 }
             }
@@ -700,7 +707,7 @@ struct Allocator
     virtual void* unk04(void* p);
     virtual void __thiscall ReleaseBlock(void* p, unsigned short size);
 };
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00e09640_class
 {
     virtual void unknownVirtual();
@@ -714,7 +721,7 @@ FUN_00e09640_class* __thiscall FUN_00e09640_class::FUN_00e09640(int flags)
     DestroyAudioBuffer();
     if (flags & 1)
     {
-        hkMemoryRouter* router = FUN_00c85750();
+        hkMemoryRouter* router = hkMemoryRouter_getInstance();
         ((Allocator*)router->m_heap)->ReleaseBlock(this, unk04);
     }
     return this;
@@ -729,11 +736,12 @@ struct FUN_00e06800_cls
     char* m_buf;
 
     void __thiscall Flush();
-    void __thiscall FUN_00e06800(char a, int v);
+    void __thiscall hkpMoppCodeGenerator_addCommand16(char a, int v);
 };
 
 // @fnv 0x00e06800
-void __thiscall FUN_00e06800_cls::FUN_00e06800(char acByte, int aiValue)
+// src: HAVOK_LIB 0x00e06800
+void __thiscall FUN_00e06800_cls::hkpMoppCodeGenerator_addCommand16(char acByte, int aiValue)
 {
     m_buf[m_cap - m_uiItemCount - 1] = (char)aiValue;
     m_uiItemCount++;
@@ -761,12 +769,13 @@ struct FUN_00e06880_cls
     char* m_buf;
 
     void __thiscall Flush();
-    void __thiscall FUN_00e06880(char a, int v);
+    void __thiscall hkpMoppCodeGenerator_addCommand24(char a, int v);
 };
 
 // Writes the low three bytes of v and then a into the buffer from the end, flushing whenever the buffer fills.
 // @fnv 0x00e06880
-void __thiscall FUN_00e06880_cls::FUN_00e06880(char acTrailingByte, int aiValue)
+// src: HAVOK_LIB 0x00e06880
+void __thiscall FUN_00e06880_cls::hkpMoppCodeGenerator_addCommand24(char acTrailingByte, int aiValue)
 {
     m_buf[m_cap - m_uiItemCount - 1] = (char)aiValue;
     m_uiItemCount++;
@@ -798,12 +807,13 @@ struct FUN_00e069a0_cls
     char* m_buf;
 
     void __thiscall Flush();
-    void __thiscall FUN_00e069a0(char a, unsigned int v);
+    void __thiscall hkpMoppCodeGenerator_addCommand32(char a, unsigned int v);
 };
 
 // Writes the four bytes of v and then a into m_buf from the end backwards, flushing whenever the buffer fills.
 // @fnv 0x00e069a0
-void __thiscall FUN_00e069a0_cls::FUN_00e069a0(char a, unsigned int auValue)
+// src: HAVOK_LIB 0x00e069a0
+void __thiscall FUN_00e069a0_cls::hkpMoppCodeGenerator_addCommand32(char a, unsigned int auValue)
 {
     m_buf[m_cap - m_uiItemCount - 1] = (char)auValue;
     m_uiItemCount++;
@@ -915,12 +925,13 @@ struct FUN_00e06780_owner : public FUN_00e06780_class
     int unk10;
     int unk14;
     int unk18;  // +0x18
-    char* __thiscall FUN_00e06af0(char* out, FUN_00e06780_actor* actor, int* value);
+    char* __thiscall hkpMoppDefaultAssembler_shouldAssemble(char* out, FUN_00e06780_actor* actor, int* value);
 };
 
 // Writes 1 to out if actor->unk08 is below 0x16 or *value exceeds this->unk18, otherwise writes 0, and returns out.
 // @fnv 0x00e06af0
-char* FUN_00e06780_owner::FUN_00e06af0(char* pResult, FUN_00e06780_actor* actor, int* piValue)
+// src: HAVOK_LIB 0x00e06af0
+char* FUN_00e06780_owner::hkpMoppDefaultAssembler_shouldAssemble(char* pResult, FUN_00e06780_actor* actor, int* piValue)
 {
     if (actor->unk08 < 0x16)
     {
@@ -959,7 +970,7 @@ struct Stream
         }
     }
 
-    void FUN_00e06800(int a, int b);
+    void hkpMoppCodeGenerator_addCommand16(int a, int b);
 };
 
 struct FUN_00e06c40_class
@@ -967,15 +978,16 @@ struct FUN_00e06c40_class
     char pad[0x10];
     Stream* m_stream;
 
-    int __thiscall FUN_00e06c40(int a1, int a2);
+    int __thiscall hkpMoppDefaultAssembler_addDataOffset(int a1, int a2);
 };
 
 // @fnv 0x00e06c40
-int __thiscall FUN_00e06c40_class::FUN_00e06c40(int a1, int a2)
+// src: HAVOK_LIB 0x00e06c40
+int __thiscall FUN_00e06c40_class::hkpMoppDefaultAssembler_addDataOffset(int a1, int a2)
 {
     m_stream->AppendChar((char)a2);
     m_stream->AppendChar((char)(a2 >> 8));
-    m_stream->FUN_00e06800(0xd, a1);
+    m_stream->hkpMoppCodeGenerator_addCommand16(0xd, a1);
     return 5;
 }
 
@@ -1074,9 +1086,9 @@ struct S_00e06e00_Buf
     int unkC;
     int unk10;
     void PutBytePair(int tag, unsigned int v);
-    void FUN_00e06800(int tag, unsigned int v);
-    void FUN_00e06880(int tag, unsigned int v);
-    void FUN_00e069a0(int tag, unsigned int v);
+    void hkpMoppCodeGenerator_addCommand16(int tag, unsigned int v);
+    void hkpMoppCodeGenerator_addCommand24(int tag, unsigned int v);
+    void hkpMoppCodeGenerator_addCommand32(int tag, unsigned int v);
 };
 
 struct S_00e06e00_A0
@@ -1144,12 +1156,13 @@ struct S_00e06e00_Cls
     int unk8;
     int unkC;
     S_00e06e00_Buf* unk10;
-    int FUN_00e06e00(S_00e06e00_A0* a, S_00e06e00_A1* b, S_00e06e00_A2* c);
+    int hkpMoppDefaultAssembler_addTerminals(S_00e06e00_A0* a, S_00e06e00_A1* b, S_00e06e00_A2* c);
     void WriteOp(int idx, S_00e06e00_Item* item);
 };
 
 // @fnv 0x00e06e00
-int S_00e06e00_Cls::FUN_00e06e00(S_00e06e00_A0* a, S_00e06e00_A1* b, S_00e06e00_A2* c)
+// src: HAVOK_LIB 0x00e06e00
+int S_00e06e00_Cls::hkpMoppDefaultAssembler_addTerminals(S_00e06e00_A0* a, S_00e06e00_A1* b, S_00e06e00_A2* c)
 {
     int start = unk10->unkC;
     unsigned int v = *a->unk60 - c->unk34;
@@ -1169,15 +1182,15 @@ int S_00e06e00_Cls::FUN_00e06e00(S_00e06e00_A0* a, S_00e06e00_A1* b, S_00e06e00_
     }
     else if (v < 0x10000)
     {
-        buf->FUN_00e06800(0x51, v);
+        buf->hkpMoppCodeGenerator_addCommand16(0x51, v);
     }
     else if (v < (unsigned int)&DAT_01000000)
     {
-        buf->FUN_00e06880(0x52, v);
+        buf->hkpMoppCodeGenerator_addCommand24(0x52, v);
     }
     else
     {
-        buf->FUN_00e069a0(0x53, v);
+        buf->hkpMoppCodeGenerator_addCommand32(0x53, v);
     }
     for (int i = 0; i < a->unk2C; i++)
     {
@@ -1276,12 +1289,13 @@ struct S_00e07070_Result
     int q[3];
 };
 
-extern "C" int __stdcall FUN_00e07040(S_00e07070_Object* a, S_00e07070_Object* b);
+extern "C" int __stdcall hkpMoppDefaultAssembler_calcRescaleBits(S_00e07070_Object* a, S_00e07070_Object* b);
 
 // @fnv 0x00e07070
-void __stdcall FUN_00e07070(S_00e07070_Object* a, S_00e07070_Object* b, S_00e07070_Result* out)
+// src: HAVOK_LIB 0x00e07070
+void __stdcall hkpMoppDefaultAssembler_recalcRescale(S_00e07070_Object* a, S_00e07070_Object* b, S_00e07070_Result* out)
 {
-    int n = FUN_00e07040(a, b);
+    int n = hkpMoppDefaultAssembler_calcRescaleBits(a, b);
     out->ok = 0;
     if (n > 0)
     {
@@ -1342,11 +1356,12 @@ struct S_00e07680
     int unkc;
     S_00e07680_Writer* w;
     void WriteOffsetDelta(int);
-    void FUN_00e07680(int a1, int a2, int a3, int a4, int a5);
+    void hkpMoppDefaultAssembler_addSplit(int a1, int a2, int a3, int a4, int a5);
 };
 
 // @fnv 0x00e07680
-void S_00e07680::FUN_00e07680(int a1, int a2, int a3, int a4, int a5)
+// src: HAVOK_LIB 0x00e07680
+void S_00e07680::hkpMoppDefaultAssembler_addSplit(int a1, int a2, int a3, int a4, int a5)
 {
     int e = w->m_pos;
     int d = e - a5;
@@ -1427,31 +1442,32 @@ struct Handler
 {
     int unk00, unk04, unk08, unk0c;
     Entry* unk10;
-    void __thiscall FUN_00e06b20(Entry*);
+    void __thiscall hkpMoppDefaultAssembler_fixScale(Entry*);
     int __thiscall ClassifyVec3Region(int);
-    void __thiscall FUN_00e07880(Entry*, Entry*, Entry**, Entry**);
-    void __thiscall FUN_00e07680(Entry*, Entry*, int, int, int);
+    void __thiscall hkpMoppDefaultAssembler_findPlanes(Entry*, Entry*, Entry**, Entry**);
+    void __thiscall hkpMoppDefaultAssembler_addSplit(Entry*, Entry*, int, int, int);
     void __thiscall WriteSize(int);
-    void __thiscall FUN_00e06db0(Entry*, Entry*, Entry*);
-    void __thiscall FUN_00e07550(Entry*, Entry*);
+    void __thiscall hkpMoppDefaultAssembler_checkAndAddProperties(Entry*, Entry*, Entry*);
+    void __thiscall hkpMoppDefaultAssembler_addCut(Entry*, Entry*);
     void __thiscall WritePacket(char*);
-    int __thiscall FUN_00e07ca0(Entry*, Entry*, Entry*, char*);
+    int __thiscall hkpMoppDefaultAssembler_assembleNonTerminalCommand(Entry*, Entry*, Entry*, char*);
 };
 // @fnv 0x00e07ca0
-int __thiscall Handler::FUN_00e07ca0(Entry* first, Entry* second, Entry* third, char* flag)
+// src: HAVOK_LIB 0x00e07ca0
+int __thiscall Handler::hkpMoppDefaultAssembler_assembleNonTerminalCommand(Entry* first, Entry* second, Entry* third, char* flag)
 {
     Entry* originalFirst = first;
-    FUN_00e06b20(originalFirst);
+    hkpMoppDefaultAssembler_fixScale(originalFirst);
     int previous = unk10->unk0c;
     int value = ClassifyVec3Region(originalFirst->unk60);
     Entry* originalThird = third;
-    FUN_00e07880(originalFirst, originalThird, &first, &third);
-    FUN_00e07680(third, first, value, originalFirst->unk70->unk5c, originalFirst->unk74->unk5c);
+    hkpMoppDefaultAssembler_findPlanes(originalFirst, originalThird, &first, &third);
+    hkpMoppDefaultAssembler_addSplit(third, first, value, originalFirst->unk70->unk5c, originalFirst->unk74->unk5c);
     int difference = originalThird->unk34 - second->unk34;
     if (difference != 0)
         WriteSize(difference);
-    FUN_00e06db0(originalFirst, second, originalThird);
-    FUN_00e07550(originalFirst, originalThird);
+    hkpMoppDefaultAssembler_checkAndAddProperties(originalFirst, second, originalThird);
+    hkpMoppDefaultAssembler_addCut(originalFirst, originalThird);
     if (*flag)
         WritePacket(flag);
     originalFirst->unk5c = unk10->unk0c;
@@ -1459,7 +1475,7 @@ int __thiscall Handler::FUN_00e07ca0(Entry* first, Entry* second, Entry* third, 
     return unk10->unk0c - previous;
 }
 
-extern int __cdecl FUN_00cbfef0(float f);
+extern int __cdecl hkMath_hkFloatToInt(float f);
 
 struct S_00e07da0_Bounds
 {
@@ -1490,7 +1506,7 @@ struct S_00e07da0_Region : S_00e07da0_Bounds
     int hi54[3];
 
     void BuildScaledRanges(struct S_00e07da0_Node* node, void* p);
-    void FUN_00e09540();
+    void hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 };
 
 struct S_00e07da0_Result
@@ -1567,9 +1583,9 @@ struct S_00e07da0_Tree
 
     void BuildRegion(S_00e07da0_Node* node, S_00e07da0_Region* parent, S_00e07da0_Region* region);
     void ComputeNodeBounds(S_00e07da0_Node* node, S_00e07da0_Region* region);
-    void FUN_00e07070(S_00e07da0_Region* parent, S_00e07da0_Region* region, S_00e07da0_Result* out);
+    void hkpMoppDefaultAssembler_recalcRescale(S_00e07da0_Region* parent, S_00e07da0_Region* region, S_00e07da0_Result* out);
     int ClassifyVec3Region(void* p);
-    void FUN_00e07880(S_00e07da0_Node* node, S_00e07da0_Region* region, int* lo, int* hi);
+    void hkpMoppDefaultAssembler_findPlanes(S_00e07da0_Node* node, S_00e07da0_Region* region, int* lo, int* hi);
 };
 
 // Recursively builds a region for node from parent and region, merging child bounds and states into node->info.
@@ -1589,12 +1605,12 @@ void S_00e07da0_Tree::BuildRegion(S_00e07da0_Node* node, S_00e07da0_Region* pare
 
     S_00e07da0_Result out;
     if (info->b2 == 1)
-        FUN_00e07070(parent, region, &out);
+        hkpMoppDefaultAssembler_recalcRescale(parent, region, &out);
     region->AlignRanges();
     int axis = ClassifyVec3Region(node->unk60);
     {
         int lo, hi;
-        FUN_00e07880(node, region, &lo, &hi);
+        hkpMoppDefaultAssembler_findPlanes(node, region, &lo, &hi);
     }
 
     S_00e07da0_Node* first = node->child74;
@@ -1606,7 +1622,7 @@ void S_00e07da0_Tree::BuildRegion(S_00e07da0_Node* node, S_00e07da0_Region* pare
     {
         float sc = unk3C;
         float* ps = &sc;
-        FUN_00cbfef0(unk54 * *ps);
+        hkMath_hkFloatToInt(unk54 * *ps);
         info->mins[k] = 0;
         info->maxs[k] = 0x7fffffff;
     }
@@ -1630,7 +1646,7 @@ void S_00e07da0_Tree::BuildRegion(S_00e07da0_Node* node, S_00e07da0_Region* pare
         childRegion.BuildScaledRanges(child, &unk30);
         childRegion.unk0 = region->unk0 + 1;
         childRegion.b4 = 0;
-        childRegion.FUN_00e09540();
+        childRegion.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
         BuildRegion(child, region, &childRegion);
 
         if (child == first)
@@ -1719,7 +1735,7 @@ struct FUN_00e09450_cls
 void FUN_00e09450_cls::DestroyAudioBuffer()
 {
     m_vptr00 = (int)&DAT_010ea5dc;
-    hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAudioAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     m_iArrayLength = 0;
     unsigned int uCapacityBits = m_uCapBits;
@@ -1732,7 +1748,7 @@ void FUN_00e09450_cls::DestroyAudioBuffer()
     m_vptr00 = (int)&DAT_0102e388;
 }
 
-int __cdecl FUN_00cbfe20(float v);
+int __cdecl hkMath_hkFloorToInt(float v);
 
 struct FUN_00e094a0_floatpair
 {
@@ -1767,10 +1783,10 @@ void FUN_00e094a0_cls::BuildScaledRanges(FUN_00e094a0_floatset* pFloatSet, float
     {
         volatile float s = pValues[3];
         float v = (pFloatSet->pairs[i].lo - pValues[i]) * s;
-        this->m_0c[i].a = FUN_00cbfe20(v);
+        this->m_0c[i].a = hkMath_hkFloorToInt(v);
         volatile float fScale2 = pValues[3];
         float w = (pFloatSet->pairs[i].hi - pValues[i]) * fScale2;
-        this->m_0c[i].b = FUN_00cbfe20(w) + 1;
+        this->m_0c[i].b = hkMath_hkFloorToInt(w) + 1;
         int iSpan = this->m_0c[i].b - this->m_0c[i].a;
         if (best <= iSpan)
             best = iSpan;
@@ -1798,11 +1814,12 @@ struct FUN_00e09540_Self
     int unk18;  // y max
     int unk1c;  // z min
     int unk20;  // z max
-    void FUN_00e09540();
+    void hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 };
 
 // @fnv 0x00e09540
-void FUN_00e09540_Self::FUN_00e09540()
+// src: HAVOK_LIB 0x00e09540
+void FUN_00e09540_Self::hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits()
 {
     int size = this->unk10 - this->unk0c;
     int other = this->unk18 - this->unk14;
@@ -1863,21 +1880,22 @@ class FUN_00e095d0_cls
     unsigned int unk40;
     unsigned int unk44;
 
-    FUN_00e095d0_cls* __thiscall FUN_00e095d0(FUN_00e095d0_cls* src, unsigned int a2, unsigned int a3);
+    FUN_00e095d0_cls* __thiscall UpdateState_00e095d0(FUN_00e095d0_cls* src, unsigned int a2, unsigned int a3);
     void __thiscall CopyOffsets(unsigned int a);
     void __thiscall BuildScaledRanges(unsigned int a, unsigned int b);
-    void __thiscall FUN_00e09540();
+    void __thiscall hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 };
 
 // @fnv 0x00e095d0
-FUN_00e095d0_cls* FUN_00e095d0_cls::FUN_00e095d0(FUN_00e095d0_cls* pSource, unsigned int a2, unsigned int a3)
+// src: GUESS 0x00e095d0 (confidence: low)
+FUN_00e095d0_cls* FUN_00e095d0_cls::UpdateState_00e095d0(FUN_00e095d0_cls* pSource, unsigned int a2, unsigned int a3)
 {
     *this = *pSource;
     CopyOffsets(a2);
     BuildScaledRanges(a2, a3);
     m_00 = pSource->m_00 + 1;
     m_04 = 0;
-    FUN_00e09540();
+    hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
     return this;
 }
 
@@ -1938,15 +1956,15 @@ void FUN_00e06ed0_Class::WriteOffsetDelta(int iTargetValue)
         if (iOffset < 0xff)
             m_pStreamWriter->PutBytePair(5, iOffset);
         else if (iOffset < 0xffff)
-            m_pStreamWriter->FUN_00e06800(6, iOffset);
+            m_pStreamWriter->hkpMoppCodeGenerator_addCommand16(6, iOffset);
         else if (iOffset < 0xffffff)
-            m_pStreamWriter->FUN_00e06880(7, iOffset);
+            m_pStreamWriter->hkpMoppCodeGenerator_addCommand24(7, iOffset);
         else
-            m_pStreamWriter->FUN_00e069a0(8, iOffset);
+            m_pStreamWriter->hkpMoppCodeGenerator_addCommand32(8, iOffset);
     }
 }
 
-extern int __cdecl FUN_00cbfef0(float f);
+extern int __cdecl hkMath_hkFloatToInt(float f);
 
 struct Node07400
 {
@@ -2016,7 +2034,7 @@ void Tree07400::ComputeNodeBounds(Node07400* node, Region07400* region)
         if (fExtent < fMaxCount)
             fCount = Min07400(fCount, fMaxCount);
         float fScale = m_fScale;
-        int iMargin = FUN_00cbfef0(fScale * fCount);
+        int iMargin = hkMath_hkFloatToInt(fScale * fCount);
         int iHi = region->ranges[i].hi;
         node->mins[i] = region->ranges[i].lo - iMargin;
         node->maxs[i] = iHi + iMargin + 1;
@@ -2068,11 +2086,12 @@ struct FUN_00e07550_cls
     int unk08;
     int unk0c;
     BufWriter* m_10;
-    void __thiscall FUN_00e07550(Arg1Flags* a1, Arg2Layout* a2);
+    void __thiscall hkpMoppDefaultAssembler_addCut(Arg1Flags* a1, Arg2Layout* a2);
 };
 
 // @fnv 0x00e07550
-void FUN_00e07550_cls::FUN_00e07550(Arg1Flags* apFlags, Arg2Layout* apLayout)
+// src: HAVOK_LIB 0x00e07550
+void FUN_00e07550_cls::hkpMoppDefaultAssembler_addCut(Arg1Flags* apFlags, Arg2Layout* apLayout)
 {
     int i = 0;
     int* pHighValue = &apLayout->m_0c[0].b;
@@ -2133,7 +2152,7 @@ struct KdCtx
 
     void __thiscall CopyOffsets(KdNode* k);
     void __thiscall BuildScaledRanges(KdNode* k, float* p);
-    void __thiscall FUN_00e09540();
+    void __thiscall hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 };
 
 struct KdNode
@@ -2199,8 +2218,8 @@ struct MyTree
     int unk5c;
     float f60[3];
 
-    int __thiscall FUN_00e07040(KdCtx* a, KdCtx* c);
-    void __thiscall FUN_00e07070(KdCtx* a, KdCtx* c, S_00e07070_Result* o);
+    int __thiscall hkpMoppDefaultAssembler_calcRescaleBits(KdCtx* a, KdCtx* c);
+    void __thiscall hkpMoppDefaultAssembler_recalcRescale(KdCtx* a, KdCtx* c, S_00e07070_Result* o);
     int __thiscall Recurse(KdNode* n, KdCtx* a, KdCtx* c);
 };
 
@@ -2227,7 +2246,7 @@ int __thiscall MyTree::Recurse(KdNode* apNode, KdCtx* a, KdCtx* c)
             {
                 d = f3c;
                 int cp;
-                cp = FUN_00cbfef0(d * q);
+                cp = hkMath_hkFloatToInt(d * q);
                 if ((cp << 7) >= pObj)
                 {
                     prev = q;
@@ -2238,7 +2257,7 @@ int __thiscall MyTree::Recurse(KdNode* apNode, KdCtx* a, KdCtx* c)
                 }
             }
         }
-        unsigned int cp = (unsigned int)FUN_00cbfef0(f3c * double(0.9f) * prev);
+        unsigned int cp = (unsigned int)hkMath_hkFloatToInt(f3c * double(0.9f) * prev);
         int k = 0;
         while (cp)
         {
@@ -2248,14 +2267,14 @@ int __thiscall MyTree::Recurse(KdNode* apNode, KdCtx* a, KdCtx* c)
         int v = k + 6;
         return v > lo ? v : lo;
     }
-    if (!apNode->a && c->level < lim && FUN_00e07040(a, c) > 2)
+    if (!apNode->a && c->level < lim && hkpMoppDefaultAssembler_calcRescaleBits(a, c) > 2)
     {
         apNode->bb = 1;
     }
     S_00e07070_Result buf;
     if (apNode->bb == 1)
     {
-        FUN_00e07070(a, c, &buf);
+        hkpMoppDefaultAssembler_recalcRescale(a, c, &buf);
     }
     long r[2] = {-1, -1};
     long t = 0x7fffffff;
@@ -2270,7 +2289,7 @@ int __thiscall MyTree::Recurse(KdNode* apNode, KdCtx* a, KdCtx* c)
             stCtx.BuildScaledRanges(k, reinterpret_cast<float*>(&unk30));
             stCtx.level = c->level + 1;
             stCtx.flag = 0;
-            stCtx.FUN_00e09540();
+            stCtx.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
             r[i] = Recurse(k, c, &stCtx);
             if (t >= stCtx.shift)
                 t = stCtx.shift;
@@ -2325,7 +2344,8 @@ struct FUN_00e07b90_vector
 };
 // Stores the minimum corner of bounds into result and sets result->w to a scale factor derived from the largest axis extent.
 // @fnv 0x00e07b90
-void __stdcall FUN_00e07b90(const FUN_00e07b90_bounds* bounds, FUN_00e07b90_vector* result)
+// src: XBOX_PDB 0x00e07b90
+void __stdcall hkpMoppDefaultAssembler_getScaleInfo(const FUN_00e07b90_bounds* bounds, FUN_00e07b90_vector* result)
 {
     __m128 minCorner = _mm_setr_ps(bounds->minimumX, bounds->minimumY, bounds->minimumZ, 0.0f);
     _mm_store_ps(&result->x, minCorner);
@@ -2380,11 +2400,12 @@ struct S_00e07d60
     __m128 v;
     int i;
     char b;
-    void FUN_00e07d60(const S_00e07d60_Info& info);
+    void UpdateFields_00e07d60(const S_00e07d60_Info& info);
 };
 
 // @fnv 0x00e07d60
-void S_00e07d60::FUN_00e07d60(const S_00e07d60_Info& info)
+// src: GUESS 0x00e07d60 (confidence: low)
+void S_00e07d60::UpdateFields_00e07d60(const S_00e07d60_Info& info)
 {
     x = info.x;
     y = info.y;
@@ -2406,13 +2427,14 @@ void __cdecl ResizeAudioStream(hkMemoryAllocator* a, void* arr, int elemSize);
 
 // Copies all pairs from srcp to dst, adding delta to each pair's a field, growing dst when full.
 // @fnv 0x00e08320
-static __declspec(noinline) void FUN_00e08320(hkArrayBase<Pair>* srcp, hkArrayBase<Pair>* dst, int delta)
+// src: HAVOK_LIB 0x00e08320
+static __declspec(noinline) void copyJumpCommandInfo(hkArrayBase<Pair>* srcp, hkArrayBase<Pair>* dst, int delta)
 {
     hkArrayBase<Pair>* const* pp = &srcp;
     hkArrayBase<Pair>* src = *pp;
     for (int i = 0; i < src->m_iElementCount; i++)
     {
-        hkMemoryRouter* h = FUN_00c85750();
+        hkMemoryRouter* h = hkMemoryRouter_getInstance();
         if (dst->m_iElementCount == (dst->m_iCapacityState & 0x3fffffff))
             ResizeAudioStream(h->m_heap, dst, 8);
         int n = dst->m_iElementCount;
@@ -2425,7 +2447,7 @@ static __declspec(noinline) void FUN_00e08320(hkArrayBase<Pair>* srcp, hkArrayBa
 
 void e08320_caller(e083::SrcW sw, hkArrayBase<Pair>* dst, int delta)
 {
-    FUN_00e08320(sw.p, dst, delta);
+    copyJumpCommandInfo(sw.p, dst, delta);
 }
 
 struct BvAllocator
@@ -2439,11 +2461,11 @@ struct BvAllocator
 void __cdecl ResizeAudioStream(void*, void*, int);
 inline BvAllocator& GetHeap()
 {
-    return *(BvAllocator*)FUN_00c85750()->m_heap;
+    return *(BvAllocator*)hkMemoryRouter_getInstance()->m_heap;
 }
 inline hkMemoryRouter* GetBvRouter()
 {
-    return FUN_00c85750();
+    return hkMemoryRouter_getInstance();
 }
 template <class T>
 static __forceinline void BvArray_clear(hkArrayBase<T>& self);
@@ -2499,7 +2521,7 @@ struct FUN_00e065f0
     hkArrayBase<BvFixup> m_buffer;
 
     void FillWithPattern(int);
-    void FUN_00e06480();
+    void nullsub_26();
     FUN_00e065f0(unsigned int id) throw();
     void Destroy();
     void* operator new(unsigned int n)
@@ -2588,9 +2610,10 @@ struct BvRange
     int unk10;
 };
 
-void __stdcall FUN_00e07c50(struct BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack);
-void* __cdecl FUN_00cb1260(void*, const void*, int);
-static void FUN_00e08320(hkArrayBase<BvFixup>* destination, hkArrayBase<BvFixup>* source, int adjustment)
+void __stdcall hkpMoppDefaultAssembler_assembleCutAndTerminalCommand(struct BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack);
+void* __cdecl hkString_memCpy(void*, const void*, int);
+// src: HAVOK_LIB 0x00e08320
+static void copyJumpCommandInfo(hkArrayBase<BvFixup>* destination, hkArrayBase<BvFixup>* source, int adjustment)
 {
     for (int i = 0; i < source->m_iElementCount; ++i)
     {
@@ -2603,7 +2626,8 @@ static void FUN_00e08320(hkArrayBase<BvFixup>* destination, hkArrayBase<BvFixup>
         out->offset = source->m_data[i].offset + adjustment;
     }
 }
-static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, hkArrayBase<int>* refs, FUN_00e065f0* destination)
+// src: HAVOK_LIB 0x00e08380
+static int copyCodeAndEmbedTerminals(BvTree* tree, FUN_00e065f0* source, hkArrayBase<int>* refs, FUN_00e065f0* destination)
 {
     int padding = (-source->m_offset) & 3;
     if (!tree->m_converter)
@@ -2612,20 +2636,20 @@ static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, hkArrayBase<int>* re
     {
         int bytes = tree->m_converter->ConvertReferences(refs->m_data, refs->m_iElementCount);
         destination->FillWithPattern(bytes);
-        hkMemoryRouter* router = FUN_00c85750();
+        hkMemoryRouter* router = hkMemoryRouter_getInstance();
         unsigned char* temporary = static_cast<unsigned char*>(router->m_stack.m_next.m_storage);
         router->m_stack.m_next.m_storage = temporary + ((bytes + 127) & ~127);
         tree->m_converter->writeBuffer(refs->m_data, refs->m_iElementCount, temporary);
-        FUN_00cb1260(destination->m_data + destination->m_pRayCursor - destination->m_offset, temporary, bytes);
-        FUN_00c85750()->m_stack.m_next.m_storage = temporary;
+        hkString_memCpy(destination->m_data + destination->m_pRayCursor - destination->m_offset, temporary, bytes);
+        hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = temporary;
     }
     int before = destination->m_offset;
     destination->FillWithPattern(source->m_offset + padding);
-    FUN_00cb1260(destination->m_data + destination->m_pRayCursor - destination->m_offset,
+    hkString_memCpy(destination->m_data + destination->m_pRayCursor - destination->m_offset,
                  source->m_data + source->m_pRayCursor - source->m_offset, source->m_offset);
-    source->FUN_00e06480();
-    FUN_00e08320(&destination->m_buffer, &source->m_buffer, destination->m_offset - source->m_offset);
-    destination->FUN_00e06480();
+    source->nullsub_26();
+    copyJumpCommandInfo(&destination->m_buffer, &source->m_buffer, destination->m_offset - source->m_offset);
+    destination->nullsub_26();
     return destination->m_offset - before;
 }
 
@@ -2645,16 +2669,17 @@ struct BvBuilder
     int unk2c;
     int m_info30;
 
-    void FUN_00e06c40(int offset, int count);
-    void FUN_00e08470(BvNode* node);
-    void FUN_00e07510(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
-    void FUN_00e07ca0(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
-    void FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth, hkArrayBase<int>* refs);
+    void hkpMoppDefaultAssembler_addDataOffset(int offset, int count);
+    void hkpMoppDefaultAssembler_assembleJumpChunkCommand(BvNode* node);
+    void hkpMoppDefaultAssembler_initTopDown(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
+    void hkpMoppDefaultAssembler_assembleNonTerminalCommand(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
+    void hkpMoppDefaultAssembler_assembleSubNodeIntoChunks(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth, hkArrayBase<int>* refs);
 };
 
 // Recursively walks a BvNode: deep nodes go to a separate writer, leaves add their edge index to refs, other nodes recurse into both children.
 // @fnv 0x00e08a60
-void BvBuilder::FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth,
+// src: HAVOK_LIB 0x00e08a60
+void BvBuilder::hkpMoppDefaultAssembler_assembleSubNodeIntoChunks(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth,
                              hkArrayBase<int>* refs)
 {
     if (node->m_depth > 0 && !stack->m_04)
@@ -2670,28 +2695,28 @@ void BvBuilder::FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d
             subRefs.m_data = 0;
             subRefs.m_iElementCount = 0;
             subRefs.m_iCapacityState = 0x80000000;
-            FUN_00e08a60(node, parent, stack, depthValue, &subRefs);
+            hkpMoppDefaultAssembler_assembleSubNodeIntoChunks(node, parent, stack, depthValue, &subRefs);
             if (m_iValueAt40->m_converter != 0)
             {
                 int offset = m_pStreamWriter->m_offset + 5;
-                FUN_00e06c40(offset + ((-offset) & 3), subRefs.m_iElementCount);
+                hkpMoppDefaultAssembler_addDataOffset(offset + ((-offset) & 3), subRefs.m_iElementCount);
             }
             entry.m_pStreamWriter = new FUN_00e065f0(entry.m_iOwnerObjectOffset);
-            FUN_00e08380(m_iValueAt40, m_pStreamWriter, &subRefs, entry.m_pStreamWriter);
+            copyCodeAndEmbedTerminals(m_iValueAt40, m_pStreamWriter, &subRefs, entry.m_pStreamWriter);
             BvArray_clear(m_pStreamWriter->m_buffer);
             BvArray_ClearAndRelease(subRefs, GetHeap());
             writer.Destroy();
         }
         m_pStreamWriter = saved;
-        FUN_00e08470(node);
+        hkpMoppDefaultAssembler_assembleJumpChunkCommand(node);
         return;
     }
 
     if (node->m_isLeaf)
     {
-        FUN_00e07c50(node, parent, stack);
+        hkpMoppDefaultAssembler_assembleCutAndTerminalCommand(node, parent, stack);
         const int& index = node->m_info->m_uiEdgeIndex;
-        BvArray_AddBack((*(refs)), *FUN_00c85750(), index);
+        BvArray_AddBack((*(refs)), *hkMemoryRouter_getInstance(), index);
         return;
     }
 
@@ -2700,14 +2725,14 @@ void BvBuilder::FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d
         FUN_00e095d0_cls child;
         range.m_valid = false;
         range.m_uiEdgeIndex = -1;
-        FUN_00e07510(node, parent, stack, &range);
+        hkpMoppDefaultAssembler_initTopDown(node, parent, stack, &range);
         BvNode* right = node->m_fMaximumU;
-        child.FUN_00e095d0(stack, (unsigned int)right, (unsigned int)&m_info30);
-        FUN_00e08a60(right, stack, &child, depth, refs);
+        child.UpdateState_00e095d0(stack, (unsigned int)right, (unsigned int)&m_info30);
+        hkpMoppDefaultAssembler_assembleSubNodeIntoChunks(right, stack, &child, depth, refs);
         BvNode* left = node->m_fMinimumU;
-        child.FUN_00e095d0(stack, (unsigned int)left, (unsigned int)&m_info30);
-        FUN_00e08a60(left, stack, &child, depth, refs);
-        FUN_00e07ca0(node, parent, stack, &range);
+        child.UpdateState_00e095d0(stack, (unsigned int)left, (unsigned int)&m_info30);
+        hkpMoppDefaultAssembler_assembleSubNodeIntoChunks(left, stack, &child, depth, refs);
+        hkpMoppDefaultAssembler_assembleNonTerminalCommand(node, parent, stack, &range);
     }
 }
 
@@ -2732,7 +2757,7 @@ struct P154Array
     void Search(hkMemoryAllocator*, int, int*, int);
     void append(const int& v)
     {
-        hkMemoryRouter* s = FUN_00c85750();
+        hkMemoryRouter* s = hkMemoryRouter_getInstance();
         if (count == int(capacity & 0x3fffffff))
             ResizeAudioStream((hkMemoryAllocator*)s->m_heap, this, 4);
         constructCopy(data + count, 1, v);
@@ -2740,13 +2765,13 @@ struct P154Array
     }
     void insert(int* src, int pos, int n)
     {
-        hkMemoryRouter* r = FUN_00c85750();
+        hkMemoryRouter* r = hkMemoryRouter_getInstance();
         hkMemoryAllocator* a = (hkMemoryAllocator*)r->m_heap;
         Search(a, pos, src, n);
     }
     void clear()
     {
-        hkMemoryRouter* r = FUN_00c85750();
+        hkMemoryRouter* r = hkMemoryRouter_getInstance();
         hkMemoryAllocator* a = (hkMemoryAllocator*)r->m_heap;
         count = 0;
         if (!(capacity & 0x80000000))
@@ -2762,7 +2787,7 @@ struct P154PairArray
     unsigned capacity;
     Pair& grow()
     {
-        hkMemoryRouter* s = FUN_00c85750();
+        hkMemoryRouter* s = hkMemoryRouter_getInstance();
         if (count == int(capacity & 0x3fffffff))
             ResizeAudioStream((hkMemoryAllocator*)s->m_heap, this, 8);
         for (int i = 0; i < 1; ++i)
@@ -2795,7 +2820,7 @@ struct P154Region
     int unk24, unk28, unk2c, unk30, context, unk38, unk3c, unk40, unk44;
     void CopyOffsets(struct P154Node*);
     void BuildScaledRanges(struct P154Node*, float*);
-    void FUN_00e09540();
+    void hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 };
 struct P154Node
 {
@@ -2831,9 +2856,9 @@ struct P154Tree
     P154Settings* settings;
     int unk18, unk1c, unk20, unk24, unk28, unk2c;
     int scale30, scale34, scale38;
-    void FUN_00e07c50(P154Node*, P154Region*, P154Region*);
-    void FUN_00e07510(P154Node*, P154Region*, P154Region*, P154Result*);
-    void FUN_00e07ca0(P154Node*, P154Region*, P154Region*, P154Result*);
+    void hkpMoppDefaultAssembler_assembleCutAndTerminalCommand(P154Node*, P154Region*, P154Region*);
+    void hkpMoppDefaultAssembler_initTopDown(P154Node*, P154Region*, P154Region*, P154Result*);
+    void hkpMoppDefaultAssembler_assembleNonTerminalCommand(P154Node*, P154Region*, P154Region*, P154Result*);
     __forceinline int getCost(P154Array& a, int size)
     {
         int result = size;
@@ -2841,11 +2866,12 @@ struct P154Tree
             result += settings->metric->cost(a.data, a.count);
         return result;
     }
-    int FUN_00e084f0(P154Node*, P154Region*, P154Region*, P154Array*);
+    int hkpMoppDefaultAssembler_calcChunkPoints(P154Node*, P154Region*, P154Region*, P154Array*);
 };
 // Recursively sizes node's children via writer->count with optional metric costs, collapses the costlier child while size reaches limit minus base, returns size.
 // @fnv 0x00e084f0
-int P154Tree::FUN_00e084f0(P154Node* node, P154Region* parent, P154Region* region, P154Array* output)
+// src: HAVOK_LIB 0x00e084f0
+int P154Tree::hkpMoppDefaultAssembler_calcChunkPoints(P154Node* node, P154Region* parent, P154Region* region, P154Array* output)
 {
     int size;
     if (settings->metric)
@@ -2855,7 +2881,7 @@ int P154Tree::FUN_00e084f0(P154Node* node, P154Region* parent, P154Region* regio
         if (settings->metric)
             region->context = *node->values;
         int start = writer->count;
-        FUN_00e07c50(node, parent, region);
+        hkpMoppDefaultAssembler_assembleCutAndTerminalCommand(node, parent, region);
         int leafSize = writer->count - start;
         output->append(*node->values);
         int value = *node->values;
@@ -2869,7 +2895,7 @@ int P154Tree::FUN_00e084f0(P154Node* node, P154Region* parent, P154Region* regio
         P154Result info;
         info.valid = false;
         info.value = -1;
-        FUN_00e07510(node, parent, region, &info);
+        hkpMoppDefaultAssembler_initTopDown(node, parent, region, &info);
         region->context = parent->context;
         P154Array lowValues;
         P154Node* low = node->low;
@@ -2878,9 +2904,9 @@ int P154Tree::FUN_00e084f0(P154Node* node, P154Region* parent, P154Region* regio
         child.BuildScaledRanges(low, reinterpret_cast<float*>(&scale30));
         child.depth = region->depth + 1;
         child.leaf = false;
-        child.FUN_00e09540();
+        child.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
         int lowSize = writer->count;
-        FUN_00e084f0(low, region, &child, &lowValues);
+        hkpMoppDefaultAssembler_calcChunkPoints(low, region, &child, &lowValues);
         lowSize = writer->count - lowSize;
         int lowCost = getCost(lowValues, lowSize);
         P154Array highValues;
@@ -2890,13 +2916,13 @@ int P154Tree::FUN_00e084f0(P154Node* node, P154Region* parent, P154Region* regio
         child.BuildScaledRanges(high, reinterpret_cast<float*>(&scale30));
         child.depth = region->depth + 1;
         child.leaf = false;
-        child.FUN_00e09540();
+        child.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
         int highSize = writer->count;
-        FUN_00e084f0(high, region, &child, &highValues);
+        hkpMoppDefaultAssembler_calcChunkPoints(high, region, &child, &highValues);
         highSize = writer->count - highSize;
         int highCost = getCost(highValues, highSize);
         int splitSize = writer->count;
-        FUN_00e07ca0(node, parent, region, &info);
+        hkpMoppDefaultAssembler_assembleNonTerminalCommand(node, parent, region, &info);
         splitSize = writer->count - splitSize;
         P154Array merged;
         merged.insert(lowValues.data, 0, lowValues.count);
@@ -2965,7 +2991,7 @@ struct PairList
 };
 
 
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 void ResizeAudioStream(void* allocator, PairList* list, unsigned int elemSize);
 
 struct SlotPair
@@ -3033,12 +3059,13 @@ struct FUN_00e08240_cls
     int unk0C;
     int unk10;
     Ctx* m_14;
-    int FUN_00e08240(Node* a1, int a2, int a3);
+    int hkpMoppDefaultAssembler_calcTerminalIdsForChunks(Node* a1, int a2, int a3);
 };
 
 // Recursively visits a1's m_74 and m_70 children, setting m_24/m_28 and, when m_04 is set, appending a pair entry to the context list; returns an index.
 // @fnv 0x00e08240
-int FUN_00e08240_cls::FUN_00e08240(Node* apNode, int a2, int aiIndex)
+// src: HAVOK_LIB 0x00e08240
+int FUN_00e08240_cls::hkpMoppDefaultAssembler_calcTerminalIdsForChunks(Node* apNode, int a2, int aiIndex)
 {
     int* pIndex = &aiIndex;
     int idx = aiIndex;
@@ -3065,7 +3092,7 @@ int FUN_00e08240_cls::FUN_00e08240(Node* apNode, int a2, int aiIndex)
             SlotPair* slot = apNode->m_60;
             slot->m_10 = slot->m_00;
             PairList* list = &this->m_14->m_kNode;
-            hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
+            hkMemoryRouter* holder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
             if (list->m_uiItemCount == (int)(list->m_capBits & 0x3fffffff))
             {
                 fnv_00e08240::ResizeAudioStream(holder->m_heap, list, 8);
@@ -3082,9 +3109,9 @@ int FUN_00e08240_cls::FUN_00e08240(Node* apNode, int a2, int aiIndex)
     else
     {
         Node* f = apNode->m_74;
-        int r = this->FUN_00e08240(f, hi, idx);
+        int r = this->hkpMoppDefaultAssembler_calcTerminalIdsForChunks(f, hi, idx);
         Node* g = apNode->m_70;
-        idx = this->FUN_00e08240(g, hi, r);
+        idx = this->hkpMoppDefaultAssembler_calcTerminalIdsForChunks(g, hi, r);
     }
     if (this->m_14->m_1c != 0)
     {
@@ -3151,7 +3178,7 @@ struct S_00e08470_Data
     hkMemoryRouter* unk10;
     S_00e08470_Vector unk14;
 
-    void __thiscall FUN_00e06480();
+    void __thiscall nullsub_26();
 };
 
 extern "C" void __cdecl ResizeAudioStream(void*, S_00e08470_Vector*, int);
@@ -3164,17 +3191,18 @@ struct S_00e08470_Class
     int unk0c;
     S_00e08470_Data* unk10;
 
-    void __thiscall FUN_00e06c20(int);
-    int __thiscall FUN_00e08470(S_00e08470_Context*);
+    void __thiscall hkpMoppDefaultAssembler_addJumpChunk(int);
+    int __thiscall hkpMoppDefaultAssembler_assembleJumpChunkCommand(S_00e08470_Context*);
 };
 
 // Calls FUN_00e06c20 with context->unk40, records the new pointer and unk40 in a vector entry, and returns its difference from the old pointer.
 // @fnv 0x00e08470
-int __thiscall S_00e08470_Class::FUN_00e08470(S_00e08470_Context* context)
+// src: HAVOK_LIB 0x00e08470
+int __thiscall S_00e08470_Class::hkpMoppDefaultAssembler_assembleJumpChunkCommand(S_00e08470_Context* context)
 {
     void* saved = this->unk10->unk0c;
 
-    this->FUN_00e06c20(context->unk40);
+    this->hkpMoppDefaultAssembler_addJumpChunk(context->unk40);
 
     void* current = this->unk10->unk0c;
 
@@ -3183,7 +3211,7 @@ int __thiscall S_00e08470_Class::FUN_00e08470(S_00e08470_Context* context)
 
     S_00e08470_Vector* vector = (S_00e08470_Vector*)((char*)this->unk10 + 0x14);
 
-    hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* holder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
 
     if (vector->unk04 == (vector->unk08 & 0x3fffffff))
     {
@@ -3196,7 +3224,7 @@ int __thiscall S_00e08470_Class::FUN_00e08470(S_00e08470_Context* context)
     entry->unk04 = context->unk40;
     entry->unk00 = current;
 
-    this->unk10->FUN_00e06480();
+    this->unk10->nullsub_26();
 
     return (unsigned int)current - (unsigned int)saved;
 }
@@ -3208,7 +3236,8 @@ struct CodeCopySource : FUN_00e065f0
 
 // Writes converter-produced reference data and then source's data into destination, adjusts fixups, and returns how far destination's offset grew.
 // @fnv 0x00e08380
-static __declspec(noinline) int FUN_00e08380(BvTree* tree, CodeCopySource* source, hkArrayBase<int>* refs,
+// src: HAVOK_LIB 0x00e08380
+static __declspec(noinline) int copyCodeAndEmbedTerminals(BvTree* tree, CodeCopySource* source, hkArrayBase<int>* refs,
                                              FUN_00e065f0* destination)
 {
     int padding = (-source->m_offset) & 3;
@@ -3220,26 +3249,26 @@ static __declspec(noinline) int FUN_00e08380(BvTree* tree, CodeCopySource* sourc
         int count = refs->m_iElementCount;
         int bytes = tree->m_converter->ConvertReferences(data, count);
         destination->FillWithPattern(bytes);
-        hkMemoryRouter* router = FUN_00c85750();
+        hkMemoryRouter* router = hkMemoryRouter_getInstance();
         unsigned char* temporary = static_cast<unsigned char*>(router->m_stack.m_next.m_storage);
         router->m_stack.m_next.m_storage = temporary + ((bytes + 127) & ~127);
         tree->m_converter->writeBuffer(refs->m_data, refs->m_iElementCount, temporary);
-        FUN_00cb1260(destination->m_data + destination->m_pRayCursor - destination->m_offset, temporary, bytes);
-        FUN_00c85750()->m_stack.m_next.m_storage = temporary;
+        hkString_memCpy(destination->m_data + destination->m_pRayCursor - destination->m_offset, temporary, bytes);
+        hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = temporary;
     }
     int before = destination->m_offset;
     destination->FillWithPattern(source->m_offset + padding);
-    FUN_00cb1260(destination->m_data + destination->m_pRayCursor - destination->m_offset,
+    hkString_memCpy(destination->m_data + destination->m_pRayCursor - destination->m_offset,
                  source->m_data + source->m_pRayCursor - source->m_offset, source->m_offset);
-    source->FUN_00e06480();
-    FUN_00e08320(&destination->m_buffer, &source->m_buffer, destination->m_offset - source->m_offset);
-    destination->FUN_00e06480();
+    source->nullsub_26();
+    copyJumpCommandInfo(&destination->m_buffer, &source->m_buffer, destination->m_offset - source->m_offset);
+    destination->nullsub_26();
     return destination->m_offset - before;
 }
 
 int copy_code_caller(BvTree* tree, CodeCopySource* source, hkArrayBase<int>* refs, FUN_00e065f0* destination)
 {
-    return FUN_00e08380(tree, source, refs, destination);
+    return copyCodeAndEmbedTerminals(tree, source, refs, destination);
 }
 
 extern "C" void* __cdecl memset(void*, int, unsigned int);
@@ -3305,7 +3334,7 @@ struct MyArray
     }
     __forceinline ~MyArray() throw()
     {
-        hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* holder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
         m_iElementCount = 0;
         if (!(m_iCapacityState & 0x80000000))
@@ -3313,7 +3342,7 @@ struct MyArray
     }
     __forceinline void ClearAndRelease() throw()
     {
-        hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(((hkMemoryRouter*)FUN_00c85750())->m_heap);
+        hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(((hkMemoryRouter*)hkMemoryRouter_getInstance())->m_heap);
         int cap = m_iCapacityState;
         m_iElementCount = 0;
         if (!(cap & 0x80000000))
@@ -3352,7 +3381,7 @@ struct __declspec(align(8)) MyBounds
 
     void BuildScaledRanges(S_00e07da0_Node* node, void* p) throw();
     void CopyOffsets(S_00e07da0_Node* node) throw();
-    void FUN_00e09540() throw();
+    void hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits() throw();
 };
 
 struct __declspec(align(8)) MyRegion : public MyBounds
@@ -3366,11 +3395,11 @@ struct __declspec(align(8)) MyRegion : public MyBounds
 
     void CopyOffsets(S_00e07da0_Node* node) throw();
     void BuildScaledRanges(S_00e07da0_Node* node, void* p) throw();
-    void FUN_00e09540() throw();
-    void FUN_00e095d0(MyBounds* src, S_00e07da0_Node* node, void* p) throw();
+    void hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits() throw();
+    void UpdateState_00e095d0(MyBounds* src, S_00e07da0_Node* node, void* p) throw();
 };
 
-extern "C" void __cdecl FUN_00e08380(AssemblerHelper*, ObjectWriter*, void*) throw();
+extern "C" void __cdecl copyCodeAndEmbedTerminals(AssemblerHelper*, ObjectWriter*, void*) throw();
 
 struct Tree : public FUN_00e09640_class
 {
@@ -3378,7 +3407,7 @@ struct Tree : public FUN_00e09640_class
     virtual void vf08() throw();
     virtual void vf0c() throw();
     virtual void vf10() throw();
-    virtual void FUN_00e08cc0(S_00e07da0_Node* node, int arg2, int arg3);
+    virtual void hkpMoppDefaultAssembler_assemble(S_00e07da0_Node* node, int arg2, int arg3);
     virtual void vf18(S_00e07da0_Node* node, void* p) throw();
 
     int unk08;
@@ -3412,17 +3441,18 @@ struct Tree : public FUN_00e09640_class
     void Recurse(S_00e07da0_Node* node, MyBounds* b, MyRegion* r) throw();
     void BuildRegion(S_00e07da0_Node* node, MyRegion* r1, MyRegion* r2) throw();
     void OptimizeTree(S_00e07da0_Node* node, MyBounds* b1, MyBounds* b2) throw();
-    void FUN_00e084f0(S_00e07da0_Node* node, MyBounds* b, MyRegion* r, void* arr) throw();
-    void FUN_00e08240(S_00e07da0_Node* node, int a, int b) throw();
-    void FUN_00e08a60(S_00e07da0_Node* node, MyBounds* b1, MyBounds* b2, int a, void* arr) throw();
-    void FUN_00e06c40(int a, int b) throw();
+    void hkpMoppDefaultAssembler_calcChunkPoints(S_00e07da0_Node* node, MyBounds* b, MyRegion* r, void* arr) throw();
+    void hkpMoppDefaultAssembler_calcTerminalIdsForChunks(S_00e07da0_Node* node, int a, int b) throw();
+    void hkpMoppDefaultAssembler_assembleSubNodeIntoChunks(S_00e07da0_Node* node, MyBounds* b1, MyBounds* b2, int a, void* arr) throw();
+    void hkpMoppDefaultAssembler_addDataOffset(int a, int b) throw();
 };
 
 typedef void(__thiscall* Vf18Fn)(Tree*, S_00e07da0_Node*, void*) throw();
 
 // Sets up MyBounds and MyRegion state for node, then writes node data into streams via m_pAssemblerHelper if present, else calls FUN_00e08040.
 // @fnv 0x00e08cc0
-void Tree::FUN_00e08cc0(S_00e07da0_Node* node, int arg2, int arg3)
+// src: HAVOK_LIB 0x00e08cc0
+void Tree::hkpMoppDefaultAssembler_assemble(S_00e07da0_Node* node, int arg2, int arg3)
 {
     MyRegion p;
     MyBounds s;
@@ -3456,14 +3486,14 @@ void Tree::FUN_00e08cc0(S_00e07da0_Node* node, int arg2, int arg3)
     s.unk34 = 0;
     s.unk04 = 0;
     s.CopyOffsets(node);
-    s.FUN_00e09540();
+    s.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 
     (MyBounds&)p = s;
     p.CopyOffsets(node);
     p.BuildScaledRanges(node, &this->unk30);
     p.unk00 = s.unk00 + 1;
     p.unk04 = 0;
-    p.FUN_00e09540();
+    p.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 
     this->Recurse(node, &s, &p);
 
@@ -3476,14 +3506,14 @@ void Tree::FUN_00e08cc0(S_00e07da0_Node* node, int arg2, int arg3)
     p.unk34 = 0;
     p.unk04 = 0;
     p.CopyOffsets(node);
-    p.FUN_00e09540();
+    p.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 
     (MyBounds&)n = (MyBounds&)p;
     n.CopyOffsets(node);
     n.BuildScaledRanges(node, &this->unk30);
     n.unk00 = p.unk00 + 1;
     n.unk04 = 0;
-    n.FUN_00e09540();
+    n.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
     this->BuildRegion(node, &p, &n);
 
     x = s;
@@ -3491,7 +3521,7 @@ void Tree::FUN_00e08cc0(S_00e07da0_Node* node, int arg2, int arg3)
     x.BuildScaledRanges(node, &this->unk30);
     x.unk00 = s.unk00 + 1;
     x.unk04 = 0;
-    x.FUN_00e09540();
+    x.hkpMoppAssemblerNodeInfo_calcMaxExtentsSignificantBits();
 
     if (!this->m_pAssemblerHelper)
     {
@@ -3502,21 +3532,21 @@ void Tree::FUN_00e08cc0(S_00e07da0_Node* node, int arg2, int arg3)
     node->info.unk8 = 0;
     {
         EntryArray& entries = this->m_pAssemblerHelper->m_entries;
-        hkMemoryRouter* router = FUN_00c85750();
+        hkMemoryRouter* router = hkMemoryRouter_getInstance();
         if (entries.m_iElementCount == (entries.m_iCapacityState & 0x3fffffff))
             ResizeAudioStream(router->m_heap, &entries, 8);
         entries.m_iElementCount++;
     }
 
     ObjectWriter* saved = this->m_stream;
-    p.FUN_00e095d0(&s, node, &this->unk30);
+    p.UpdateState_00e095d0(&s, node, &this->unk30);
 
     MyArray<unsigned int> arr1;
     {
         ObjectWriter stream1(0x100000);
         this->m_stream = &stream1;
-        this->FUN_00e084f0(node, &s, &p, &arr1);
-        this->FUN_00e08240(node, node->info.unk8, 0);
+        this->hkpMoppDefaultAssembler_calcChunkPoints(node, &s, &p, &arr1);
+        this->hkpMoppDefaultAssembler_calcTerminalIdsForChunks(node, node->info.unk8, 0);
     }
 
     arr1.ClearAndRelease();
@@ -3524,14 +3554,14 @@ void Tree::FUN_00e08cc0(S_00e07da0_Node* node, int arg2, int arg3)
     {
         ObjectWriter stream2(0x100000);
         this->m_stream = &stream2;
-        this->FUN_00e08a60(node, &s, &x, node->info.unk8, &arr1);
+        this->hkpMoppDefaultAssembler_assembleSubNodeIntoChunks(node, &s, &x, node->info.unk8, &arr1);
         if (this->m_pAssemblerHelper->unk1C)
         {
             int pos = this->m_stream->m_pos + 5;
-            this->FUN_00e06c40(pos + (-pos & 3), arr1.m_iElementCount);
+            this->hkpMoppDefaultAssembler_addDataOffset(pos + (-pos & 3), arr1.m_iElementCount);
         }
         this->m_stream = saved;
-        FUN_00e08380(this->m_pAssemblerHelper, &stream2, &arr1);
+        copyCodeAndEmbedTerminals(this->m_pAssemblerHelper, &stream2, &arr1);
         HelperEntry* entry = &this->m_pAssemblerHelper->m_entries.m_data[node->info.unk8];
         ObjectWriter* w = this->m_stream;
         entry->ptr = w;

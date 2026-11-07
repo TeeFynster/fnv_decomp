@@ -142,7 +142,7 @@ NiAVObject* NiNode::GetObjectByName(const NiFixedString& name) const
 // @fnv 0x00a5dc80
 void NiNode::CopyMemberData(NiNode* target, CloningProcess& process)
 {
-    NiAVObject::FUN_00a5ac90(target, process);
+    NiAVObject::CopyMembers_00a5ac90(target, process);
     for (unsigned int i = 0; i < m_kChildren.m_usSize; ++i)
     {
         NiAVObject* child = m_kChildren.m_pBase[i].m_pObject;
@@ -346,7 +346,8 @@ void NiNode::UpdateSelectedDownwardPass(NiUpdateData& aUpdateData, unsigned int 
 #pragma optimize("", off)
 // Stores the dimmer and updates the revision ID.
 // @fnv 0x0050dd20
-void NiPointLight::FUN_0050dd20(float afValue)
+// src: XBOX_PDB 0x0050dd20
+void NiPointLight::NiLight_SetDimmer(float afValue)
 {
     m_fDimmer = afValue;
     FUN_004bc2c0();
@@ -358,12 +359,13 @@ struct NiCullingProcess;
 
 struct FUN_00a5db30_shell : public NiNode
 {
-    void FUN_00a5db30();
+    void NiNode_UpdateUpwardPass();
 };
 
 // Calls the object's virtual at offset 0xbc, then if the parent pointer at 0x18 is set, calls the parent's virtual at offset 0xfc.
 // @fnv 0x00a5db30
-void FUN_00a5db30_shell::FUN_00a5db30()
+// src: XBOX_PDB 0x00a5db30
+void FUN_00a5db30_shell::NiNode_UpdateUpwardPass()
 {
     int* pParent = *(int**)((char*)this + 0x18);
     (*(void(__thiscall**)(void*))(*(int*)this + 0xbc))(this);
@@ -392,11 +394,12 @@ struct bhkRigidBody;
 
 struct FUN_00a5dbe0_shell : public NiNode
 {
-    void FUN_00a5dbe0(NiCullingProcess*);
+    void NiNode_OnVisible(NiCullingProcess*);
 };
 
 // @fnv 0x00a5dbe0
-void FUN_00a5dbe0_shell::FUN_00a5dbe0(NiCullingProcess* kCuller)
+// src: XBOX_PDB 0x00a5dbe0
+void FUN_00a5dbe0_shell::NiNode_OnVisible(NiCullingProcess* kCuller)
 {
     if (*(void**)((char*)this + 0x20) && *(float*)(*(char**)((char*)this + 0x20) + 0xc) != 0.0f)
     {
@@ -416,12 +419,13 @@ using ::NiMemObject;
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
 struct FUN_00a5dce0_shell : public NiNode
 {
-    void FUN_00a5dce0(CloningProcess*);
+    void NiNode_ProcessClone(CloningProcess*);
 };
 
 // Processes the clone of this node and recursively processes each child node through the cloning map.
 // @fnv 0x00a5dce0
-void FUN_00a5dce0_shell::FUN_00a5dce0(CloningProcess* kCloning)
+// src: XBOX_PDB 0x00a5dce0
+void FUN_00a5dce0_shell::NiNode_ProcessClone(CloningProcess* kCloning)
 {
     ((NiAVObjectBaseCalls*)this)->ProcessClone(*kCloning);
 
@@ -443,11 +447,12 @@ namespace fnv_00a5dd40 {
 
 struct FUN_00a5dd40_shell : public NiNode
 {
-    void FUN_00a5dd40(NiStream*);
+    void NiNode_LoadBinary(NiStream*);
 };
 
 // @fnv 0x00a5dd40
-void FUN_00a5dd40_shell::FUN_00a5dd40(NiStream* kStream)
+// src: XBOX_PDB 0x00a5dd40
+void FUN_00a5dd40_shell::NiNode_LoadBinary(NiStream* kStream)
 {
     ((NiAVObjectBaseCalls*)this)->LoadBinary(*kStream);
     kStream->ReadUnsignedInteger();
@@ -460,11 +465,12 @@ bool __fastcall HasNodeWithNonZeroValue(NiAVObject* pThis);
 
 struct FUN_00a5e3a0_Helper
 {
-    void FUN_00a5e3a0(NiPropertyState*& pkState);
+    void NiNode_UpdatePropertiesUpward(NiPropertyState*& pkState);
 };
 
 // @fnv 0x00a5e3a0
-void __fastcall FUN_00a5e3a0(NiAVObject* pThis, int, NiPropertyState*& pkState)
+// src: XBOX_PDB 0x00a5e3a0
+void __fastcall NiNode_UpdatePropertiesUpward(NiAVObject* pThis, int, NiPropertyState*& pkState)
 {
     NiPropertyState* pkParentState = 0;
 
@@ -476,7 +482,7 @@ void __fastcall FUN_00a5e3a0(NiAVObject* pThis, int, NiPropertyState*& pkState)
     FUN_00a5e3a0_Helper* pkParent = *(FUN_00a5e3a0_Helper**)((char*)pThis + 0x18);
     if (pkParent)
     {
-        pkParent->FUN_00a5e3a0(pkParentState);
+        pkParent->NiNode_UpdatePropertiesUpward(pkParentState);
     }
     else
     {
@@ -500,7 +506,7 @@ void __fastcall FUN_00a5e3a0(NiAVObject* pThis, int, NiPropertyState*& pkState)
     }
 }
 
-void __fastcall FUN_00a5e930(void* pThis);
+void __fastcall UpdateFields_00c5faa0(void* pThis);
 
 #include "../../../../include/NiMemObject.h"
 
@@ -508,7 +514,7 @@ void __fastcall FUN_00a5e930(void* pThis);
 // @fnv 0x00a5ece0
 void* __fastcall FUN_00a5ece0(void* pThis, int, unsigned int flags)
 {
-    FUN_00a5e930(pThis);
+    UpdateFields_00c5faa0(pThis);
     if (flags & 1)
     {
         NiMemObject::operator delete(pThis, 0xAC);
@@ -656,7 +662,8 @@ struct NodeStub
 };
 
 // @fnv 0x00a5d8f0
-void __fastcall FUN_00a5d8f0(NiNode* node, int, NiAVObject* pkChild)
+// src: XBOX_PDB 0x00a5d8f0
+void __fastcall NiNode_DetachChild(NiNode* node, int, NiAVObject* pkChild)
 {
     NiRefObject* spRetainedObject = 0;
     ((NodeStub*)node)->InsertChild(pkChild, spRetainedObject);
@@ -731,7 +738,8 @@ struct BaseStub
 
 // Calls FUN_00a59e50 on the node, then calls PurgeRendererData on each non-null child in the node's child array.
 // @fnv 0x00a5dc30
-void __fastcall FUN_00a5dc30(NiNode* node, int, NiRenderer* pkRenderer)
+// src: XBOX_PDB 0x00a5dc30
+void __fastcall NiNode_PurgeRendererData(NiNode* node, int, NiRenderer* pkRenderer)
 {
     ((BaseStub*)node)->FUN_00a59e50(pkRenderer);
     for (unsigned int i = 0; i < *(unsigned short*)((char*)node + 0xa6); i++)
@@ -743,7 +751,8 @@ void __fastcall FUN_00a5dc30(NiNode* node, int, NiRenderer* pkRenderer)
 }
 
 // @fnv 0x00a5e1f0
-void __fastcall FUN_00a5e1f0(NiNode* node, int, NiUpdateData& kData, unsigned int uFlags)
+// src: XBOX_PDB 0x00a5e1f0
+void __fastcall NiNode_UpdateRigidDownwardPass(NiNode* node, int, NiUpdateData& kData, unsigned int uFlags)
 {
     unsigned int nodeFlags = *(unsigned int*)((char*)node + 0x30);
     bool bOldUpdateControllers = UpdateControllersFlag(kData);
@@ -980,7 +989,7 @@ void __fastcall SetChildAt(NiNode* node, int, unsigned int uiIndex, NiAVObject* 
 
 extern const char* DAT_011f4428;
 char* __cdecl _FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d370(const char*, bool);
+char* __cdecl NiGetViewerString(const char*, bool);
 
 struct FUN_00a5ea70_t
 {
@@ -988,16 +997,17 @@ struct FUN_00a5ea70_t
     NiBound* m_kWorldBound;
 
     void FUN_00a5ad00(StrArr*);
-    void FUN_00a5ea70(StrArr* pkStrings);
+    void NiNode_GetViewerStrings(StrArr* pkStrings);
 };
 
 // @fnv 0x00a5ea70
-void FUN_00a5ea70_t::FUN_00a5ea70(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a5ea70
+void FUN_00a5ea70_t::NiNode_GetViewerStrings(StrArr* pkStrings)
 {
     FUN_00a5ad00(pkStrings);
     pkStrings->AddInline(_FUN_00a7d330(DAT_011f4428));
     int bVisual = (m_kWorldBound && ((NiBound*)m_kWorldBound)->m_fRadius != 0.0f) ? 1 : 0;
-    pkStrings->AddInline(FUN_00a7d370("m_bVisual", bVisual != 0));
+    pkStrings->AddInline(NiGetViewerString("m_bVisual", bVisual != 0));
 }
 
 struct StandInPt3
@@ -1205,11 +1215,12 @@ struct ChildNode
     int unk94;
     int unk98;
     NodeChildArray m_kChildList;
-    void FUN_00a5ee30(unsigned int i, ChildObj* pkChild, ChildObj*& spOld);
+    void NiNode_SetAt(unsigned int i, ChildObj* pkChild, ChildObj*& spOld);
 };
 
 // @fnv 0x00a5ee30
-void ChildNode::FUN_00a5ee30(unsigned int i, ChildObj* pkChild, ChildObj*& spOld)
+// src: XBOX_PDB 0x00a5ee30
+void ChildNode::NiNode_SetAt(unsigned int i, ChildObj* pkChild, ChildObj*& spOld)
 {
     if (m_kChildList.m_usSize <= i)
     {
@@ -1411,11 +1422,12 @@ class FUN_00a5edc0_cls
     FUN_00a5edc0_sub m_sub;
 
     void SetParent(void* owner);
-    void FUN_00a5edc0(NiRefObject* a1, NiRefObject* a2);
+    void NiNode_InsertChildAt(NiRefObject* a1, NiRefObject* a2);
 };
 
 // @fnv 0x00a5edc0
-void FUN_00a5edc0_cls::FUN_00a5edc0(NiRefObject* apArg, NiRefObject* apRefObject)
+// src: XBOX_PDB 0x00a5edc0
+void FUN_00a5edc0_cls::NiNode_InsertChildAt(NiRefObject* apArg, NiRefObject* apRefObject)
 {
     if (apRefObject)
     {
@@ -1519,13 +1531,14 @@ class BA5EFA0Node : public BA5EFA0AVObject
     virtual ~BA5EFA0Node();
 
     void CopyMemberData(BA5EFA0Node* pkDest, BA5EFA0CloningProcess& kCloning);
-    BA5EFA0Node* FUN_00a5efa0(BA5EFA0CloningProcess& kCloning);
+    BA5EFA0Node* NiNode_CreateClone(BA5EFA0CloningProcess& kCloning);
 
     BA5EFA0ObjectArray m_kChildList;
 };
 
 // @fnv 0x00a5efa0
-BA5EFA0Node* BA5EFA0Node::FUN_00a5efa0(BA5EFA0CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a5efa0
+BA5EFA0Node* BA5EFA0Node::NiNode_CreateClone(BA5EFA0CloningProcess& kCloning)
 {
     BA5EFA0Node* pkClone = new BA5EFA0Node;
     CopyMemberData(pkClone, kCloning);
@@ -1538,7 +1551,7 @@ struct Bnd
 {
     NiPoint3 c;
     float r;
-    void FUN_00a7f3f0(const Bnd* b);
+    void NiBound_Merge(const Bnd* b);
     void Set(const NiPoint3& cc, float rr)
     {
         c = cc;
@@ -1597,7 +1610,7 @@ void Node2::UpdateWorldBoundFromChildren()
                 {
                     AV* pOtherChild = m_pBase[i];
                     if (pOtherChild && pOtherChild->m_pWorldBound && pOtherChild->m_pWorldBound->r != 0.0f)
-                        m_pWorldBound->FUN_00a7f3f0(pOtherChild->m_pWorldBound);
+                        m_pWorldBound->NiBound_Merge(pOtherChild->m_pWorldBound);
                     i++;
                 }
             }
@@ -1662,11 +1675,12 @@ struct S_00a5eb20_Arr
     unsigned short m_usGrowBy;
     void FUN_0060bef0(unsigned int n);
     void FUN_004b0310(unsigned int i, const S_00a5eb20_Ptr& e);
-    unsigned int FUN_00a5eb20(const S_00a5eb20_Ptr& e);
+    unsigned int NiTArray_NiPointer_NiAVObject_NiTNewInterface_NiPointer_NiAVObject_AddFirstEmpty(const S_00a5eb20_Ptr& e);
 };
 // Adds a ref-counted pointer to the array: reuses the first null slot or appends, growing the array if needed, and returns its index or -1 for a null pointer.
 // @fnv 0x00a5eb20
-unsigned int S_00a5eb20_Arr::FUN_00a5eb20(const S_00a5eb20_Ptr& e)
+// src: XBOX_PDB 0x00a5eb20
+unsigned int S_00a5eb20_Arr::NiTArray_NiPointer_NiAVObject_NiTNewInterface_NiPointer_NiAVObject_AddFirstEmpty(const S_00a5eb20_Ptr& e)
 {
     if (e == S_00a5eb20_Ptr(0))
         return (unsigned int)-1;
@@ -1716,10 +1730,11 @@ struct NiEqAVObject
 struct NiNodeEq : NiNode
 {
     bool FUN_00a5a260(NiAVObject* pkObject);
-    bool FUN_00a5e600(NiAVObject* pkObject);
+    bool NiNode_IsEqual(NiAVObject* pkObject);
 };
 // @fnv 0x00a5e600
-bool NiNodeEq::FUN_00a5e600(NiAVObject* pkObject)
+// src: XBOX_PDB 0x00a5e600
+bool NiNodeEq::NiNode_IsEqual(NiAVObject* pkObject)
 {
     if (!FUN_00a5a260(pkObject))
         return false;
@@ -1749,11 +1764,12 @@ class FUN_00a59dc0_shell
 {
   public:
     void SetBoundObject(void*);
-    void FUN_00a7fdb0(void*);
+    void NiGeometry_SetBound(void*);
 };
 
 // @fnv 0x00a7fdb0
-void FUN_00a59dc0_shell::FUN_00a7fdb0(void* pValue)
+// src: XBOX_PDB 0x00a7fdb0
+void FUN_00a59dc0_shell::NiGeometry_SetBound(void* pValue)
 {
     SetBoundObject(pValue);
 }
@@ -1781,12 +1797,13 @@ class NodeA5E8
     unsigned short m_usSize;
 
     void FUN_00a5a900(NiStream& kStream);
-    void FUN_00a5e880(NiStream& kStream);
+    void NiNode_SaveBinary(NiStream& kStream);
 };
 
 // Saves the node's size, child link IDs, and a terminating zero to the stream after calling the base save routine.
 // @fnv 0x00a5e880
-void NodeA5E8::FUN_00a5e880(NiStream& kStream)
+// src: XBOX_PDB 0x00a5e880
+void NodeA5E8::NiNode_SaveBinary(NiStream& kStream)
 {
     FUN_00a5a900(kStream);
     unsigned int ItemUpdateArray = m_usSize;
@@ -1847,7 +1864,7 @@ struct SUNode
     unsigned int m_uFlags;
     bool FUN_00a5a0e0();
     bool HasNodeWithNonZeroValue();
-    void FUN_00a5e440(bool& bSelectiveUpdate, bool bSelectiveUpdateTransforms, bool& bRigid);
+    void NiNode_SetSelectiveUpdateFlags(bool& bSelectiveUpdate, bool bSelectiveUpdateTransforms, bool& bRigid);
     bool GetSelectiveUpdateTransformsOverride() const
     {
         return (m_uFlags >> 7) & 1;
@@ -1892,7 +1909,8 @@ struct SUArray
 
 // Computes selective update flags from this node and child results, then stores them in this node's flag word.
 // @fnv 0x00a5e440
-void SUNode::FUN_00a5e440(bool& bSelectiveUpdate, bool bSelectiveUpdateTransforms, bool& bRigid)
+// src: XBOX_PDB 0x00a5e440
+void SUNode::NiNode_SetSelectiveUpdateFlags(bool& bSelectiveUpdate, bool bSelectiveUpdateTransforms, bool& bRigid)
 {
     bool bTransformControllers = FUN_00a5a0e0();
     if (!bSelectiveUpdateTransforms)
@@ -2171,10 +2189,11 @@ struct NodeStandIn
     unsigned int unk64, unk68, unk6c, unk70, unk74, unk78, unk7c, unk80;
     unsigned int unk84, unk88, unk8c, unk90, unk94, unk98;
     ChildArray m_kChildList;
-    void FUN_00a5e780(RefObj* pkChild, RefPtr& pChild);
+    void NiNode_DetachChild_00a5e780(RefObj* pkChild, RefPtr& pChild);
 };
 // @fnv 0x00a5e780
-void NodeStandIn::FUN_00a5e780(RefObj* pkChild, RefPtr& spRemovedChild)
+// src: XBOX_PDB 0x00a5e780
+void NodeStandIn::NiNode_DetachChild_00a5e780(RefObj* pkChild, RefPtr& spRemovedChild)
 {
     for (unsigned int i = 0; i < m_kChildList.GetSize(); i++)
     {
@@ -2382,7 +2401,7 @@ struct ChildArray
     unsigned short m_usGrowBy;
     void FUN_0060bef0(unsigned int uiSize) throw();
     void FUN_004b0310(unsigned int uiIndex, const HeldChild& element) throw();
-    void FUN_00a5eb20(const HeldChild& element) throw();
+    void NiTArray_NiPointer_NiAVObject_NiTNewInterface_NiPointer_NiAVObject_AddFirstEmpty(const HeldChild& element) throw();
     void Add(const HeldChild& element) throw()
     {
         unsigned int uiIndex = m_usSize;
@@ -2434,7 +2453,7 @@ struct ChildNode
     int unk94;
     int unk98;
     ChildArray m_kChildList;
-    void FUN_00a5ed10(ChildObj* pkChild, bool firstAvailable) throw();
+    void NiNode_AttachChild(ChildObj* pkChild, bool firstAvailable) throw();
 };
 
 struct HeldChild
@@ -2486,7 +2505,8 @@ __declspec(noinline) void ChildArray::FUN_004b0310(unsigned int uiIndex, const H
             element.object->IncRefCount();
     }
 }
-__declspec(noinline) void ChildArray::FUN_00a5eb20(const HeldChild& element) throw()
+// src: XBOX_PDB 0x00a5eb20
+__declspec(noinline) void ChildArray::NiTArray_NiPointer_NiAVObject_NiTNewInterface_NiPointer_NiAVObject_AddFirstEmpty(const HeldChild& element) throw()
 {
     if (!element.object)
         return;
@@ -2512,7 +2532,8 @@ __declspec(noinline) void ChildArray::FUN_00a5eb20(const HeldChild& element) thr
 
 // Adds pkChild to m_kChildList, placing it in the first available slot if firstAvailable is true, otherwise appending it.
 // @fnv 0x00a5ed10
-void ChildNode::FUN_00a5ed10(ChildObj* pkChild, bool firstAvailable)
+// src: XBOX_PDB 0x00a5ed10
+void ChildNode::NiNode_AttachChild(ChildObj* pkChild, bool firstAvailable)
 {
     if (pkChild)
     {
@@ -2520,7 +2541,7 @@ void ChildNode::FUN_00a5ed10(ChildObj* pkChild, bool firstAvailable)
         pkChild->SetParent(this);
         if (firstAvailable)
         {
-            m_kChildList.FUN_00a5eb20(pkChild);
+            m_kChildList.NiTArray_NiPointer_NiAVObject_NiTNewInterface_NiPointer_NiAVObject_AddFirstEmpty(pkChild);
         }
         else
         {

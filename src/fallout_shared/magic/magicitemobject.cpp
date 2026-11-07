@@ -57,12 +57,12 @@ bool MagicItemObject::Load(TESFile* file)
 // @fnv 0x0040c5f0
 void MagicItemObject::ClearData()
 {
-    TESForm::FUN_004855a0();
-    TESFullName::FUN_00487010();
+    TESForm::BeginFormRecord();
+    TESFullName::Save_00487010();
     ClearMagicItemData();
     SaveMagicItemData();
     FUN_004056d0(reinterpret_cast<char*>(this) + kEffectListOffset);
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // The shared classes do not declare these comparison and copy entry points yet.

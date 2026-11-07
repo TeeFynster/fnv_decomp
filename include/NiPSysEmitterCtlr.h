@@ -19,8 +19,8 @@ public:
     virtual void vf60();
 
     void CopyMemberData(NiPSysEmitterCtlr* destination, CloningProcess& process);
-    void FUN_00c5cb20(NiPSysEmitterCtlr* destination, void* process);
-    NiPSysEmitterCtlr* FUN_00c5ca90(void* process);
+    void BSPSysMultiTargetEmitterCtlr_CopyMembers(NiPSysEmitterCtlr* destination, void* process);
+    NiPSysEmitterCtlr* BSPSysMultiTargetEmitterCtlr_CreateClone(void* process);
 
     NiPointer<NiInterpolator> m_spVisibilityInterpolator;
     NiInterpolator* m_pEmitterActiveInterpolator;

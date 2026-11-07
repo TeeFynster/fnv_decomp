@@ -5,7 +5,7 @@
 class TESAmmoInitCalls
 {
   public:
-    void* FUN_00923000();
+    void* TESAmmo_GetAmmoEffectList();
 };
 extern Setting DAT_011ce2c0;
 extern Setting DAT_011cece8;
@@ -20,9 +20,9 @@ extern PlayerCharacter* g_thePlayer;
 extern const double runtimeInitializationDouble2;
 float GetWeaponHealthConditionMultiplier(float);
 float GetArmorConditionFactor(float);
-float FUN_0040ebd0(float, float);
-float FUN_00404010(float, float);
-void FUN_005330e0(float&, float, float);
+float BSMIN(float, float);
+float BSMAX_00404010(float, float);
+void BSClamp_float(float&, float, float);
 float RandomFloat(float, float);
 void ApplyPerkModifiers(int, Actor*, ...);
 class CombatWeaponCritical

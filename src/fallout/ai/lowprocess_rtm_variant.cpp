@@ -86,9 +86,9 @@ class List907
 class Shell8e
 {
   public:
-    bool FUN_008e30e0();
+    bool TESPackage_SearchGetAllowBuying();
     bool IsFlag400Set();
-    bool FUN_008e3100();
+    bool TESPackage_SearchGetAllowKilling();
 };
 
 class Act907
@@ -232,17 +232,17 @@ class Act907
     virtual bool v21c();
 
     bool FUN_00566950();
-    int FUN_00891d70();
-    bool FUN_00493bb0();
-    float FUN_005723b0(TESObjectREFR* ref, int a, int b);
-    bool FUN_00891db0(TESBoundObject* item, int a, int b, int c, int* out);
-    TESForm* FUN_007af430();
+    int Actor_GetGoldAmount();
+    bool Actor_IsInCombat();
+    float TESObjectREFR_GetDistanceFromReference(TESObjectREFR* ref, int a, int b);
+    bool Actor_HasObjects(TESBoundObject* item, int a, int b, int c, int* out);
+    TESForm* BGSSaveFormBuffer_GetForm();
 };
 
 class AcquireAIServiceQuery
 {
   public:
-    bool FUN_0047f600(TESBoundObject* item);
+    bool TESAIForm_SellBuysItem(TESBoundObject* item);
 };
 
 class AcquireActorBaseView
@@ -295,7 +295,7 @@ class AcquireActorReference
 };
 
 extern "C" TESBoundObject* DAT_011ca268;
-int __cdecl FUN_0048e8a0(TESBoundObject* item);
+int __cdecl TESValueForm_GetFormValue(TESBoundObject* item);
 
 }
 
@@ -306,9 +306,9 @@ void LowProcess::ProcessAcquire(Actor* arg)
 {
     List907* itF = reinterpret_cast<List907*>(&this->m_kDetectionDataList);
     Shell8e* pkg_h = (Shell8e*)static_cast<const LowProcess*>(this)->GetOneTimePackage();
-    bool bA7 = pkg_h ? pkg_h->FUN_008e30e0() : false;
+    bool bA7 = pkg_h ? pkg_h->TESPackage_SearchGetAllowBuying() : false;
     bool bBI = pkg_h ? pkg_h->IsFlag400Set() : false;
-    bool bCB = pkg_h ? pkg_h->FUN_008e3100() : false;
+    bool bCB = pkg_h ? pkg_h->TESPackage_SearchGetAllowKilling() : false;
     bool bDoneZ;
 
     while (itF != 0 && itF->FUN_006815c0())
@@ -329,14 +329,14 @@ void LowProcess::ProcessAcquire(Actor* arg)
                 bValid7 = false;
         }
 
-        if ((pRefA->GetOwner() && pRefA->GetOwner() != reinterpret_cast<Act907*>(arg)->FUN_007af430()) || pRefA->IsActor())
+        if ((pRefA->GetOwner() && pRefA->GetOwner() != reinterpret_cast<Act907*>(arg)->BGSSaveFormBuffer_GetForm()) || pRefA->IsActor())
         {
             bool b313 = false;
             bool b32Ptr = false;
-            int nG = FUN_0048e8a0(pItemR);
+            int nG = TESValueForm_GetFormValue(pItemR);
             TESNPC* pNPCA = 0;
 
-            if (!pRefA->HasHealth(false) && reinterpret_cast<Act907*>(arg)->FUN_00891d70() >= nG)
+            if (!pRefA->HasHealth(false) && reinterpret_cast<Act907*>(arg)->Actor_GetGoldAmount() >= nG)
             {
                 AcquireActorReference* pProjQ = 0;
                 if (pRefA->IsCharacter())
@@ -349,12 +349,12 @@ void LowProcess::ProcessAcquire(Actor* arg)
                     if (pNPCA)
                         pProjQ = (AcquireActorReference*)DAT_011e0e80.GetValueFromForm(pNPCA, false);
                 }
-                if (pProjQ && bA7 && pProjQ->FUN_004181e0()->sub90.FUN_0047f600(pItemR))
+                if (pProjQ && bA7 && pProjQ->FUN_004181e0()->sub90.TESAIForm_SellBuysItem(pItemR))
                 {
-                    if (!reinterpret_cast<Act907*>(arg)->FUN_00493bb0())
+                    if (!reinterpret_cast<Act907*>(arg)->Actor_IsInCombat())
                     {
                         pNodeM->eType = 2;
-                        pNodeM->iB = (int)reinterpret_cast<Act907*>(arg)->FUN_005723b0(pRefA, 0, 0);
+                        pNodeM->iB = (int)reinterpret_cast<Act907*>(arg)->TESObjectREFR_GetDistanceFromReference(pRefA, 0, 0);
                         bDoneZ = true;
                     }
                     else
@@ -392,7 +392,7 @@ void LowProcess::ProcessAcquire(Actor* arg)
                         {
                             int x = 0;
                             pNodeM->eType = 4;
-                            bool okD = reinterpret_cast<Act907*>(arg)->FUN_00891db0(DAT_011ca268, 0, 1, 0, &x);
+                            bool okD = reinterpret_cast<Act907*>(arg)->Actor_HasObjects(DAT_011ca268, 0, 1, 0, &x);
                             if (!okD && pRefA->GetLock())
                                 bValid7 = false;
                         }
@@ -403,7 +403,7 @@ void LowProcess::ProcessAcquire(Actor* arg)
                     }
                     else if (b313)
                     {
-                        if (!reinterpret_cast<Act907*>(arg)->FUN_00493bb0())
+                        if (!reinterpret_cast<Act907*>(arg)->Actor_IsInCombat())
                         {
                             pNodeM->eType = 4;
                         }
@@ -414,7 +414,7 @@ void LowProcess::ProcessAcquire(Actor* arg)
                     }
                     else if (b32Ptr)
                     {
-                        if (!reinterpret_cast<Act907*>(arg)->FUN_00493bb0() && !reinterpret_cast<Act907*>(arg)->FUN_00566950())
+                        if (!reinterpret_cast<Act907*>(arg)->Actor_IsInCombat() && !reinterpret_cast<Act907*>(arg)->FUN_00566950())
                         {
                             if (!actor_p || (actor_p && !actor_p->FUN_00566950()))
                                 pNodeM->eType = 5;
@@ -433,7 +433,7 @@ void LowProcess::ProcessAcquire(Actor* arg)
                     {
                         bValid7 = false;
                     }
-                    else if (pRefA->IsActor() && !pRefA->IsCharacter() && pRefA->GetOwner() != reinterpret_cast<Act907*>(arg)->FUN_007af430() &&
+                    else if (pRefA->IsActor() && !pRefA->IsCharacter() && pRefA->GetOwner() != reinterpret_cast<Act907*>(arg)->BGSSaveFormBuffer_GetForm() &&
                              !reinterpret_cast<Act907*>(arg)->FUN_00566950())
                     {
                         if (actor_p && !actor_p->FUN_00566950())
@@ -451,12 +451,12 @@ void LowProcess::ProcessAcquire(Actor* arg)
         }
         else
         {
-            pNodeM->iB = (int)reinterpret_cast<Act907*>(arg)->FUN_005723b0(pRefA, 0, 0);
+            pNodeM->iB = (int)reinterpret_cast<Act907*>(arg)->TESObjectREFR_GetDistanceFromReference(pRefA, 0, 0);
         }
 
         if (bValid7)
         {
-            pNodeM->pObject->FUN_00564db0(true);
+            pNodeM->pObject->TESObjectREFR_SetTargeted(true);
             reinterpret_cast<List907&>(this->ReferenceListNode).FUN_00905820(pNodeM);
         }
         else

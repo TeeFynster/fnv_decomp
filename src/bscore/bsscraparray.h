@@ -7,15 +7,15 @@ template <>
 ScrapArrayWithBase<NiPointer<NiAVObject>, 1024>::ScrapArrayWithBase()
 {
 
-    m_pAllocator = FUN_00401020()->GetGeneralAllocator();
-    FUN_00822860(0, false);
+    m_pAllocator = MemoryManager_Instance()->GetGeneralAllocator();
+    BSSimpleArray_NiPointer_ObstacleUndoData_1024_InitialSetup(0, false);
 }
 template <>
 // @fnv 0x009789e0
 ScrapArrayWithBase<Animation*, 1024>::ScrapArrayWithBase()
 {
 
-    m_pAllocator = FUN_00401020()->GetGeneralAllocator();
-    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(this)->FUN_006b3eb0(0, false);
+    m_pAllocator = MemoryManager_Instance()->GetGeneralAllocator();
+    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(this)->BSSimpleArray_float_1024_InitialSetup(0, false);
 }
 #endif

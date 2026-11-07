@@ -27,7 +27,7 @@ struct D0B6A0MemoryRouter
         return *m_pStreamAllocator;
     }
 };
-extern "C" D0B6A0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D0B6A0MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 struct D0B6A0Allocator
 {
     virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
@@ -39,7 +39,7 @@ struct D0B6A0Allocator
 
 inline void* __cdecl hkReferencedObject::operator new(std::size_t nbytes)
 {
-    hkReferencedObject* b = static_cast<hkReferencedObject*>(FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(nbytes));
     b->m_usMemSizeAndFlags = static_cast<unsigned short>(nbytes);
     return b;
 }
@@ -77,9 +77,9 @@ struct hkpBroadPhaseBorder : hkReferencedObject,
         hkpAabbPhantom* phantom =
             static_cast<hkpAabbPhantom*>(hkReferencedObject::operator new(0xe0))->FUN_00cf2cb0(aabb, 0);
         phantom->m_kCollidable.m_kBroadPhaseHandle.setType(3);
-        phantom->FUN_00d07de0(this);
+        phantom->addPhantomOverlapListener_00d07de0(this);
         m_kPhantoms[i] = phantom;
-        world->FUN_00c936a0(phantom);
+        world->hkpWorld_addPhantom(phantom);
     }
     hkpWorld* m_pOwningWorld;
     hkpPhantom* m_kPhantoms[6];
@@ -97,8 +97,8 @@ bpb::hkpBroadPhaseBorder::hkpBroadPhaseBorder(hkpWorld* world, int type, bool po
     m_pOwningWorld = world;
     m_bPostponeAndSortCallbacks = postponeAndSortCallbacks;
     addReference();
-    m_pOwningWorld->FUN_00c93a60(static_cast<hkpWorldDeletionListener*>(this));
-    m_pOwningWorld->FUN_00c93920(static_cast<hkpWorldPostSimulationListener*>(this));
+    m_pOwningWorld->hkpWorld_addWorldDeletionListener(static_cast<hkpWorldDeletionListener*>(this));
+    m_pOwningWorld->hkpWorld_addWorldPostSimulationListener(static_cast<hkpWorldPostSimulationListener*>(this));
 
     // These temporary bounds require uninitialized, aligned storage, as in the original unit.
     struct __declspec(align(16)) BorderBounds

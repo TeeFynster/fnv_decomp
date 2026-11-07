@@ -71,7 +71,7 @@ void BGSBipedModelList::InitItem(TESForm* owner)
                     break;
                 }
                 else
-                    model->FUN_00480d50(true);
+                    model->TESBipedModelForm_SetAddOnModel(true);
                 iter = iter->GetNext();
             }
         }
@@ -88,7 +88,8 @@ extern "C" void __cdecl _FUN_00485910(unsigned int, unsigned int);
 
 // Save is not declared by the shared component; retain it as a typed helper.
 // @fnv 0x00474d60
-void __fastcall FUN_00474d60(BGSBipedModelList* component)
+// src: COMMUNITY 0x00474d60
+void __fastcall BGSBipedModelList_Save(BGSBipedModelList* component)
 {
     if (component->pListForm)
     {
@@ -100,10 +101,11 @@ void __fastcall FUN_00474d60(BGSBipedModelList* component)
 void __cdecl _FUN_00485910(unsigned int, unsigned int);
 struct FUN_00479350_shell
 {
-    void FUN_00479350();
+    void BGSEquipType_Save();
 };
 // @fnv 0x00479350
-void FUN_00479350_shell::FUN_00479350()
+// src: COMMUNITY 0x00479350
+void FUN_00479350_shell::BGSEquipType_Save()
 {
     unsigned int tempint;
     tempint = *(unsigned int*)((char*)this + 4);

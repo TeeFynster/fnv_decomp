@@ -27,7 +27,7 @@ public:
     void ClearComponent();
     void BaseFormRecord(BaseFormComponent* component);
     bool IsEqualToBase(BaseFormComponent* component);
-    bool FUN_0048e4f0(TESTexture* component);
+    bool TESTexture_CompareComponent(TESTexture* component);
     void Save(int chunk);
 
     static unsigned int GetTextureNameLength(TESForm* form);

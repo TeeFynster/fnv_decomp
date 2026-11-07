@@ -2,5 +2,5 @@
 #pragma once
 
 
-const char* __cdecl FUN_007ab810();
-void __cdecl FUN_007ab7c0();
+const char* __cdecl XVirtualKeyboard_IsActive();
+void __cdecl Object_GetGlobalValue_007ab7c0();

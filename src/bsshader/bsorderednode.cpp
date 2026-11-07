@@ -72,7 +72,8 @@ inline bool NiBound::operator==(const NiBound& b) const
 }
 // Returns true when this NiBound differs from b, i.e. the negation of operator==.
 // @fnv 0x00a926b0
-bool NiBound::FUN_00a926b0(const NiBound& b)
+// src: GUESS 0x00a926b0 (confidence: high)
+bool NiBound::IsDifferent(const NiBound& b)
 {
     return !(*this == b);
 }
@@ -109,7 +110,7 @@ class DummyNode
     unsigned char unk9c[0x10];  // +0x9c
     NiSphere bound;             // +0xac
     bool staticBound;           // +0xbc
-    void FUN_00a5dbe0(NiCullingProcess* culling);
+    void NiNode_OnVisible(NiCullingProcess* culling);
     void UpdateCullingBound(NiCullingProcess* culling);
 };
 
@@ -125,7 +126,7 @@ void DummyNode::UpdateCullingBound(NiCullingProcess* culling)
     if (staticBound)
     {
         NiPoint3 centre;
-        xform.FUN_00524c40(&centre, &bound);
+        xform.ComputeValue_00524c40(&centre, &bound);
 
         // The original fills this storage without calling the NiBound constructor.
         NiSphere storage;
@@ -142,11 +143,11 @@ void DummyNode::UpdateCullingBound(NiCullingProcess* culling)
         accum->RenderBound(*b, 0);
     }
 
-    FUN_00a5dbe0(culling);
+    NiNode_OnVisible(culling);
     accum->DispatchBatchRenderer();
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct SpawnedObject
 {
@@ -159,7 +160,7 @@ struct SpawnedObject
 
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 
     SpawnedObject();
@@ -187,7 +188,7 @@ struct FUN_00bc2ee0_cls : NiNode
     NiBound bound;
     bool staticBound;
 
-    void FUN_00a5e880(NiStream& aStream);
+    void NiNode_SaveBinary(NiStream& aStream);
     void LoadBoundSphereAndStaticBound(NiStream& aStream);
 };
 
@@ -195,7 +196,7 @@ struct FUN_00bc2ee0_cls : NiNode
 // @fnv 0x00bc2ee0
 void FUN_00bc2ee0_cls::LoadBoundSphereAndStaticBound(NiStream& aStream)
 {
-    FUN_00a5e880(aStream);
+    NiNode_SaveBinary(aStream);
     bound.LoadBinary(aStream);
 
     aStream.Istr().BinaryRead(static_cast<void*>(&staticBound), 1);
@@ -214,11 +215,11 @@ struct S_00bc2f30_Arr
 };
 struct S_00bc2f30_Base
 {
-    void FUN_00a5ea70(S_00bc2f30_Arr* a);
+    void NiNode_GetViewerStrings(S_00bc2f30_Arr* a);
 };
 extern const char* DAT_01201f84;
-char* __cdecl FUN_00a7d330(const char* s);
-char* __cdecl FUN_00a7d370(const char* fmt, ...);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* s);
+char* __cdecl NiGetViewerString(const char* fmt, ...);
 struct S_00bc2f30_Cls : S_00bc2f30_Base
 {
     int unk00;
@@ -266,15 +267,15 @@ __forceinline void S_00bc2f30_Add(S_00bc2f30_Arr* a, char* s)
 // @fnv 0x00bc2f30
 void S_00bc2f30_Cls::AppendAlphaSortBound(S_00bc2f30_Arr* a)
 {
-    FUN_00a5ea70(a);
-    S_00bc2f30_Add(a, FUN_00a7d330(DAT_01201f84));
-    S_00bc2f30_Add(a, FUN_00a7d370("bHasStaticBound", mBC));
+    NiNode_GetViewerStrings(a);
+    S_00bc2f30_Add(a, NiViewerStrings_NiGetViewerString_Title(DAT_01201f84));
+    S_00bc2f30_Add(a, NiGetViewerString("bHasStaticBound", mBC));
     NiPoint3 sortVec;
-    m68.FUN_00524c40(&sortVec, reinterpret_cast<const NiSphere*>(&mAC));
+    m68.ComputeValue_00524c40(&sortVec, reinterpret_cast<const NiSphere*>(&mAC));
     // The original fills this storage without calling the NiBound constructor.
     NiSphere storage;
     NiBound& b = *reinterpret_cast<NiBound*>(&storage);
     b.m_fRadius = mAC.m_fRadius * m68.m_fScale;
     b.m_kCenter = sortVec;
-    S_00bc2f30_Add(a, b.FUN_00a7fb20("Alpha Sort Bound"));
+    S_00bc2f30_Add(a, b.GetViewerString_00a7fb20("Alpha Sort Bound"));
 }

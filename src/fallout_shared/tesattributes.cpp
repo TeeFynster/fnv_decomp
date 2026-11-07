@@ -114,7 +114,7 @@ void TESAttributes::SaveGame(unsigned int aiFlags)
 {
     if (aiFlags & 0)
     {
-        g_TESSaveLoadGame->FUN_008579b0((void*)((char*)this + 4), 7);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((void*)((char*)this + 4), 7);
     }
 }
 

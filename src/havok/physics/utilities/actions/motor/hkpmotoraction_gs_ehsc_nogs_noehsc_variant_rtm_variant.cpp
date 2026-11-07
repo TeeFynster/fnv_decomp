@@ -91,18 +91,19 @@ struct Motion
 // until it declares GetInertiaLocal and StepMotion with their arguments.
 inline void StepMotion(hkpRigidBody* rb, float dt, const hkVector4& t)
 {
-    rb->FUN_00c9c1d0();
+    rb->activate_00c9c1d0();
     reinterpret_cast<Motion*>(&rb->m_pMotionState)->StepMotion(dt, t);
 }
 
 // The shared hkpMotorAction does not yet declare this entry point.
 struct MotorAction : hkpMotorAction
 {
-    void FUN_00d4d860(const TimeInterval& stepInfo);
+    void hkpMotorAction_applyAction(const TimeInterval& stepInfo);
 };
 
 // @fnv 0x00d4d860
-void MotorAction::FUN_00d4d860(const TimeInterval& stepInfo)
+// src: HAVOK_SRC 0x00d4d860
+void MotorAction::hkpMotorAction_applyAction(const TimeInterval& stepInfo)
 {
     if (!m_bSlotEnabled)
         return;
@@ -111,7 +112,7 @@ void MotorAction::FUN_00d4d860(const TimeInterval& stepInfo)
     hkVector4 currentAngVel;
     const hkRotation& rotation = reinterpret_cast<const hkRotation&>(
         rb->m_pMotionState.m_kMotionState.m_kMotionTransform);
-    currentAngVel.FUN_004b4ab0(rotation, rb->m_pMotionState.m_kAngularVelocity);
+    currentAngVel.hkVector4_setRotatedInverseDir(rotation, rb->m_pMotionState.m_kAngularVelocity);
 
     const hkVector4& axis = m_kAxisEndPoints;
     float currentRate = currentAngVel.dot3(axis);
@@ -122,8 +123,8 @@ void MotorAction::FUN_00d4d860(const TimeInterval& stepInfo)
     __declspec(align(16)) hkMatrix3 worldInertia;
     reinterpret_cast<const Motion*>(&rb->m_pMotionState)->GetInertiaLocal(worldInertia);
 
-    angularDelta.FUN_00c7f750(worldInertia, angularDelta);
-    angularDelta.FUN_00c7f700(rotation, angularDelta);
+    angularDelta.hkVector4_setMul3(worldInertia, angularDelta);
+    angularDelta.hkVector4_setRotatedDir(rotation, angularDelta);
 
     StepMotion(rb, stepInfo.m_fTimeStep, angularDelta);
 }

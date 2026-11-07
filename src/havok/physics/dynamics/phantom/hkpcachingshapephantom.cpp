@@ -38,7 +38,8 @@ inline hkpShapeType hkpShape::getType() const
 void __cdecl SortEntriesByCollisionKey(void*, int, int, int);
 
 // @fnv 0x00d4c910
-int FUN_00d4c910()
+// src: COMMUNITY 0x00d4c910
+int hkpCachingShapePhantom_getType()
 {
     return 2;
 }
@@ -75,22 +76,22 @@ public:
     static void* operator new(unsigned int uiSize) throw();
     static void operator delete(void* p) throw();
     hkpCachingShapePhantom(const hkpShape* shape, const hkTransform& transform, hkUint32 filter) throw();
-    void FUN_00d4d090();
+    void ensureDeterministicOrder();
     void DispatchCollisionAgents(WorldOperationEntry& output, GskAgentInput* input);
     void GetPenetrations(hkpCdBodyPairCollector& collector, const hkpCollisionInput* input);
     hkBool ContainsCollidable(const hkpCollidable* collidable) const;
     void AddToCollector(hkStatisticsCollector* collector, const hkClass* cls) const throw();
-    hkpWorldObject* FUN_00d4d0d0() const throw();
-    void FUN_00d4cca0(hkpCollidable* collidable);
+    hkpWorldObject* clone_00d4d0d0() const throw();
+    void removeOverlappingCollidable(hkpCollidable* collidable);
     // The shared hkBoolResult preserves NotifyAll's nontrivial byte-copy ABI.
     void NotifyAll(hkpCollidable* collidable, hkBoolResult found);
-    int FUN_00ca94c0(hkpCollidable* collidable) throw();
-    void FUN_00d4cf10(hkpCollidable* collidable) throw();
+    int hkpPhantom_fireCollidableAdded(hkpCollidable* collidable) throw();
+    void addOverlappingCollidable(hkpCollidable* collidable) throw();
     void QueryCollisionDetails();
-    void FUN_00c9e820();
-    void FUN_00d4d030();
-    void FUN_00d07ec0(const hkAabb& aabb);
-    void FUN_00d4cab0(const hkVector4& position, const LinearCastParameters& input,
+    void hkpShapePhantom_deallocateInternalArrays();
+    void deallocateInternalArrays();
+    void hkpPhantom_updateBroadPhase(const hkAabb& aabb);
+    void setPositionAndLinearCast(const hkVector4& position, const LinearCastParameters& input,
                     hkpCdPointCollector& collector, hkpCdPointCollector* startCollector);
     void CopyFrom(const hkTransform& transform, const LinearCastParameters& input,
                   hkpCdPointCollector& collector, hkpCdPointCollector* startCollector);
@@ -106,7 +107,8 @@ __forceinline void WritePhantomLists(const hkpCachingShapePhantom* object, hkSta
 }
 
 // @fnv 0x00d4d090
-void hkpCachingShapePhantom::FUN_00d4d090()
+// src: HAVOK_SRC 0x00d4d090
+void hkpCachingShapePhantom::ensureDeterministicOrder()
 {
     if (m_bOrderDirty)
     {
@@ -191,7 +193,7 @@ hkBool hkpCachingShapePhantom::ContainsCollidable(const hkpCollidable* pkCollida
 
 extern const hkClass DAT_0126902c;
 
-int __cdecl FUN_00d06f80(const void* pvChunk, int iNumBytes) throw();
+int __cdecl hkStatisticsCollector_getAllocatedSize(const void* pvChunk, int iNumBytes) throw();
 
 // The collector header lacks the one-argument beginObject and this unit's virtual slot ordering.
 __forceinline void BeginAgentCollection(hkStatisticsCollector* collector, const char* name)
@@ -213,7 +215,7 @@ template <class T> __forceinline void CollectAgentArray(hkStatisticsCollector* c
 {
     if ((array.m_iCapacityState & 0x80000000) == 0 || collector->m_reportInplaceAllocations)
     {
-        int allocated = FUN_00d06f80(array.m_data, array.getCapacity() * sizeof(T));
+        int allocated = hkStatisticsCollector_getAllocatedSize(array.m_data, array.getCapacity() * sizeof(T));
         typedef void (__thiscall* Dispatch)(hkStatisticsCollector*, int, const char*, const void*, int, int);
         reinterpret_cast<Dispatch>((*reinterpret_cast<void***>(collector))[5])(
             collector, 3, name, array.m_data, array.GetLogicalSize() * sizeof(T), allocated);
@@ -233,9 +235,9 @@ void hkpCachingShapePhantom::AddToCollector(hkStatisticsCollector* pkCollector,
     EndAgentCollection(pkCollector);
 }
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
-__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*) { return FUN_00c85750().heap(); }
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*) { return hkMemoryRouter_getInstance().heap(); }
 
 template <typename T> T* hkMemoryAllocator::_bufAlloc(int& requested)
 {
@@ -250,7 +252,7 @@ template <typename T> void hkMemoryAllocator::_bufFree(void* p, int count)
 }
 template <typename T, typename A> __forceinline hkArray<T, A>& hkArray<T, A>::operator=(const hkArray& other)
 {
-    hkMemoryAllocator& alloc = FUN_00c85750().heap();
+    hkMemoryAllocator& alloc = hkMemoryRouter_getInstance().heap();
     if (getCapacity() < other.GetLogicalSize())
     {
         if ((m_iCapacityState & 0x80000000) == 0)
@@ -282,7 +284,7 @@ __forceinline void CopyWorldObjectEntries(hkpWorldObject* object, const hkpWorld
 
 __forceinline void* hkpCachingShapePhantom::operator new(unsigned int uiSize) throw()
 {
-    hkpWorldObject* p = (hkpWorldObject*)FUN_00c85750().heap().blockAlloc(uiSize);
+    hkpWorldObject* p = (hkpWorldObject*)hkMemoryRouter_getInstance().heap().blockAlloc(uiSize);
     p->m_usMemSizeAndFlags = (hkUint16)uiSize;
     return p;
 }
@@ -290,7 +292,8 @@ __forceinline void* hkpCachingShapePhantom::operator new(unsigned int uiSize) th
 typedef char fnv_check_d4d0d0[(sizeof(hkpCachingShapePhantom) == 0x170) ? 1 : -1];
 
 // @fnv 0x00d4d0d0
-hkpWorldObject* hkpCachingShapePhantom::FUN_00d4d0d0() const throw()
+// src: HAVOK_SRC 0x00d4d0d0
+hkpWorldObject* hkpCachingShapePhantom::clone_00d4d0d0() const throw()
 {
     const hkpCollidable* pkCollidable = &m_kCollidable;
     hkpCachingShapePhantom* pkPhantom =
@@ -350,7 +353,7 @@ hkpCachingShapePhantom* hkpCachingShapePhantom::DeleteStorage(unsigned int flags
 {
     ReleaseCollisionAgents();
     if (flags & 1)
-        FUN_00c85750().heap().blockFree(this, m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance().heap().blockFree(this, m_usMemSizeAndFlags);
     return this;
 }
 
@@ -362,7 +365,7 @@ void hkpCachingShapePhantom::CopyFrom(const hkTransform& transform, const Linear
     m_kMotionState.m_kMotionTransform.m_kColumn0 = transform.m_kColumn0;
     m_kMotionState.m_kMotionTransform.m_kColumn1 = transform.m_kColumn1;
     m_kMotionState.m_kMotionTransform.m_kColumn2 = transform.m_kColumn2;
-    FUN_00d4cab0(*reinterpret_cast<const hkVector4*>(&transform.m_vTranslation), input, collector, startCollector);
+    setPositionAndLinearCast(*reinterpret_cast<const hkVector4*>(&transform.m_vTranslation), input, collector, startCollector);
 }
 
 extern int DAT_010ccebc;
@@ -397,7 +400,8 @@ template <typename T> __forceinline void hkArrayBase<T>::removeAt(int index)
 
 // Removes a cached collidable, notifies overlap listeners, and marks the ordering dirty.
 // @fnv 0x00d4cca0
-void hkpCachingShapePhantom::FUN_00d4cca0(hkpCollidable* apOwned)
+// src: HAVOK_LIB 0x00d4cca0
+void hkpCachingShapePhantom::removeOverlappingCollidable(hkpCollidable* apOwned)
 {
     PhantomConstraintOwner visitor;
     visitor.m_sReferenceCount = 1;
@@ -464,7 +468,7 @@ struct hkpProcessCollisionInput : public hkpCollisionInput
     ~hkpProcessCollisionInput() throw()
     {
         if (m_pAgent1nSector)
-            FUN_00c85750().heap().blockFree(m_pAgent1nSector, 0x200);
+            hkMemoryRouter_getInstance().heap().blockFree(m_pAgent1nSector, 0x200);
     }
     void FUN_00cfa7d0(const hkpProcessCollisionInput& kOther);
 };
@@ -484,9 +488,10 @@ __forceinline hkpCollisionAgent* CreateCachedCollisionAgent(const hkpCollisionDi
 
 // Use pointer storage for the local input: the original function has no GS cookie.
 // @fnv 0x00d4cf10
-void hkpCachingShapePhantom::FUN_00d4cf10(hkpCollidable* pkCollidable) throw()
+// src: HAVOK_SRC 0x00d4cf10
+void hkpCachingShapePhantom::addOverlappingCollidable(hkpCollidable* pkCollidable) throw()
 {
-    if (pkCollidable->m_pCollisionShape != 0 && FUN_00ca94c0(pkCollidable) == 0)
+    if (pkCollidable->m_pCollisionShape != 0 && hkpPhantom_fireCollidableAdded(pkCollidable) == 0)
     {
         CollisionAgentPair& kDetail = m_kCollisionDetails.expandOne();
         __declspec(align(16)) void* inputStorage[sizeof(hkpProcessCollisionInput) / sizeof(void*)];
@@ -540,11 +545,12 @@ void hkpCachingShapePhantom::QueryCollisionDetails()
 
 // Releases m_kCollisionDetails's buffer when its element count is 0, then calls FUN_00c9e820.
 // @fnv 0x00d4d030
-void hkpCachingShapePhantom::FUN_00d4d030()
+// src: HAVOK_LIB 0x00d4d030
+void hkpCachingShapePhantom::deallocateInternalArrays()
 {
     if (m_kCollisionDetails.m_iElementCount == 0)
         m_kCollisionDetails.clearAndDeallocate();
-    FUN_00c9e820();
+    hkpShapePhantom_deallocateInternalArrays();
 }
 
 namespace CastSimd {
@@ -624,7 +630,8 @@ __forceinline void linearCast(hkpCollisionAgent* agent, const hkpCdBody& a, cons
 
 // Performs a linear cast against collidables by computing an expanded AABB and invoking linearCast on each collision agent pair.
 // @fnv 0x00d4cab0
-void hkpCachingShapePhantom::FUN_00d4cab0(const hkVector4& position, const LinearCastParameters& input,
+// src: HAVOK_SRC 0x00d4cab0
+void hkpCachingShapePhantom::setPositionAndLinearCast(const hkVector4& position, const LinearCastParameters& input,
                                                hkpCdPointCollector& castCollector, hkpCdPointCollector* startCollector)
 {
     *(CastSimd::LocalM128*)&m_kMotionState.m_kMotionTransform.m_vTranslation = *(CastSimd::LocalM128*)&position;
@@ -651,7 +658,7 @@ void hkpCachingShapePhantom::FUN_00d4cab0(const hkVector4& position, const Linea
     *(CastSimd::LocalM128*)&aabb.m_kMinimumCorner = auiLowerBounds;
     *(CastSimd::LocalM128*)&aabb.m_kMaximumCorner = auiUpperBounds;
 
-    FUN_00d07ec0(aabb);
+    hkpPhantom_updateBroadPhase(aabb);
 
     // The shared collision input has no default constructor; initialize the sweep storage here.
     __declspec(align(16)) void* linearInputStorage[sizeof(ShapeSweepParameters) / sizeof(void*)];

@@ -42,7 +42,7 @@ TESImageSpaceModifiableForm::TESImageSpaceModifiableForm()
     ClearComponent();
 }
 
-extern "C" void FUN_00485910(unsigned int, unsigned int);
+extern "C" void TESForm_AddChunk_00485910(unsigned int, unsigned int);
 
 // @fnv 0x00487450
 void TESImageSpaceModifiableForm::Save()
@@ -50,7 +50,7 @@ void TESImageSpaceModifiableForm::Save()
     if (m_pImageSpaceModifier)
     {
         unsigned int id = m_pImageSpaceModifier->GetFormID();
-        FUN_00485910(0x4D414E4D, id);
+        TESForm_AddChunk_00485910(0x4D414E4D, id);
     }
 }
 

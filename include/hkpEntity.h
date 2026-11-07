@@ -66,16 +66,16 @@ public:
     virtual ~hkpEntity() throw();
     virtual void vf05();
 
-    int FUN_00c9c380() throw();
+    int getNumConstraints() throw();
     int GetEntryAt(int i) throw();
     hkBoolH isFixed() const;
     hkUint32 GetUid() const;
     const ResizableArray<ConstraintRuntimeInfo>& getConstraintMastersImpl() const;
     hkpSimulationIsland* GetSimulationIsland() const;
-    void __thiscall FUN_00ca0c40(const SpringVector* point, SpringVector* velocity);
-    unsigned char* __thiscall FUN_00c9bff0(unsigned char* out);
-    void __thiscall FUN_00c9c1d0();
-    void FUN_00c9c670(void* arg1);
+    void __thiscall hkpRigidBody_getPointVelocity(const SpringVector* point, SpringVector* velocity);
+    unsigned char* __thiscall isActive_00c9bff0(unsigned char* out);
+    void __thiscall activate_00c9c1d0();
+    void removeEntityListener_00c9c670(void* arg1);
     void ApplyForceAtPoint(float dt, const hkVector4& force, const SpringVector& point);
     void __thiscall AddContactListener(void* listener);
     void __thiscall RemoveContactListener(void* listener);

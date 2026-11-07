@@ -62,20 +62,20 @@ public:
     }
     bool IsFlag();
     // 0x00af9bf0: finds the folder and file indices of a directory/file hash pair.
-    bool FUN_00af9bf0(int arDirHash, int arFileHash, int* apFolderIndex, int apFileIndex, int apFileName);
+    bool FindFile_00af9bf0(int arDirHash, int arFileHash, int* apFolderIndex, int apFileIndex, int apFileName);
     // 0x00afa6e0: returns the file record of a directory/file hash pair, or 0.
-    int FUN_00afa6e0(int arDirectoryHash, int arFileNameHash, int apFileName);
+    int GetFileEntryForFile(int arDirectoryHash, int arFileNameHash, int apFileName);
     ArchiveFile* CreateArchiveFile(BSFileEntry*, unsigned int, unsigned int);
-    const char* FUN_00af9ba0(ArchiveFileEntry* pkEntry);
-    int FUN_00af96d0(int, unsigned int);
+    const char* Archive_GetFileNameForFileEntry(ArchiveFileEntry* pkEntry);
+    int Archive_GetFileString(int, unsigned int);
     void FUN_00865e50(void* apData, unsigned int aSize, int aFlags);
     // 0x00af8f10: (re)reads the name table; called on every archive of the global archive list (0x00af59f0).
     void LoadNames();
     // 0x00afd020: whether the names are to be cached (global switches, archive flags 0x80/8/0x10/0x20,
     // the per-type cache modes).
-    bool FUN_00afd020();
+    bool GetLoadStrings();
     // 0x00afb170: whether a per-type cache request (archive flag) is met under cache mode aiMode.
-    bool FUN_00afb170(bool abRequested, int aiMode);
+    bool Archive_CheckRetain(bool abRequested, int aiMode);
     // 0x00afad00
     void ClearMatchedEntries();
 

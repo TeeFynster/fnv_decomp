@@ -37,7 +37,7 @@ struct Struct3C
     Struct24 bounds;
 };
 
-float sub_eb50f0(Struct24* b, Struct60* t, float* res, int* u1, int* u2, int* u3);
+float NiSqrDistance_Compute_00eb50f0(Struct24* b, Struct60* t, float* res, int* u1, int* u2, int* u3);
 
 struct TestClass
 {
@@ -49,12 +49,13 @@ struct TestClass
     int unk48;
     int unk4c;
 
-    float FUN_00eb38f0(const NiPoint3& a1, const NiPoint3& a2, float a3);
+    float NiBoxCapsuleIntersector_Pseudodistance(const NiPoint3& a1, const NiPoint3& a2, float a3);
 };
 
 // Scales both points by a3, offsets copies of unk38->data and unk3c->bounds, calls sub_eb50f0 and returns its result times unk40 minus 1.0.
 // @fnv 0x00eb38f0
-float TestClass::FUN_00eb38f0(const NiPoint3& a1, const NiPoint3& a2, float afScale)
+// src: GAMEBRYO_LIB 0x00eb38f0
+float TestClass::NiBoxCapsuleIntersector_Pseudodistance(const NiPoint3& a1, const NiPoint3& a2, float afScale)
 {
     NiPoint3 vOffset = a1 * afScale;
 
@@ -67,7 +68,7 @@ float TestClass::FUN_00eb38f0(const NiPoint3& a1, const NiPoint3& a2, float afSc
     boundsCopy.min += vOffset;
 
     float res;
-    return sub_eb50f0(&boundsCopy, &dataCopy, &res, &unk44, &unk48, &unk4c) * unk40 - 1.0;
+    return NiSqrDistance_Compute_00eb50f0(&boundsCopy, &dataCopy, &res, &unk44, &unk48, &unk4c) * unk40 - 1.0;
 }
 
 struct Inner
@@ -88,7 +89,7 @@ struct FUN_00eb3a00_cls
     int unk3c, unk40;
     float k0, k1, k2;
 
-    void FUN_00eb3a00(const NiPoint3* a, const NiPoint3* b);
+    void NiBoxCapsuleIntersector_ComputeContactInformation(const NiPoint3* a, const NiPoint3* b);
 };
 
 inline void Accumulate(NiPoint3& result, const NiPoint3& v)
@@ -109,7 +110,8 @@ inline void Scale(NiPoint3& result, const NiPoint3& v, float s)
 
 // Sets pos from *a scaled by s0 plus in->a, b, c, and d weighted by k0, k1, and k2, then stores in->Compute's result in out.
 // @fnv 0x00eb3a00
-void FUN_00eb3a00_cls::FUN_00eb3a00(const NiPoint3* a, const NiPoint3* b)
+// src: GAMEBRYO_LIB 0x00eb3a00
+void FUN_00eb3a00_cls::NiBoxCapsuleIntersector_ComputeContactInformation(const NiPoint3* a, const NiPoint3* b)
 {
     NiPoint3 t;
     Scale(t, *a, s0);

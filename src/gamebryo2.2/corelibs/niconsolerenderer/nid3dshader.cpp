@@ -73,7 +73,7 @@ void NiD3DShader::InitializePoint3()
             InterlockedDecrement((long volatile*)(oldString - 8));
     }
     DAT_0126f738 = &SetShadowWorldView;
-    DAT_0126f73c = &FUN_00e80a50;
+    DAT_0126f73c = &NiD3DShader_PackWorldPerspectiveEffect;
     DAT_0126f740 = &UpdateWorldViewMatrix;
     DAT_0126f744 = &SetWorldViewFromShadow;
     DAT_0126f748 = &SetWorldViewMatrix;
@@ -150,13 +150,14 @@ NiDX9AdditionalDepthStencilBufferData* NiDX9AdditionalDepthStencilBufferData::Cr
     return data;
 }
 
-extern "C" void __cdecl FUN_00e80150();
+extern "C" void __cdecl NiD3DPass_InitializePools();
 extern "C" void __cdecl CreateStagePool();
 
 // @fnv 0x00e80620
-void __cdecl FUN_00e80620()
+// src: COMMUNITY 0x00e80620
+void __cdecl NiD3DShader_InitializePools()
 {
-    FUN_00e80150();
+    NiD3DPass_InitializePools();
     CreateStagePool();
 }
 
@@ -164,7 +165,8 @@ extern "C" void __cdecl ClearSpawnedObject();
 extern "C" void __cdecl DestroyStagePool();
 
 // @fnv 0x00e80630
-void __cdecl FUN_00e80630()
+// src: COMMUNITY 0x00e80630
+void __cdecl NiD3DShader_ShutdownPools()
 {
     ClearSpawnedObject();
     DestroyStagePool();
@@ -221,7 +223,8 @@ struct FakeRenderer008
     virtual unsigned int V8(void*, void*, void*, void*, void*, void*, void*, int);
 };
 // @fnv 0x00e805b0
-unsigned int __stdcall FUN_00e805b0(void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7)
+// src: COMMUNITY 0x00e805b0
+unsigned int __stdcall NiD3DShader_SetupRenderingPass(void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7)
 {
     return ((FakeRenderer008*)DAT_0126f74c)->V8(a1, a2, a3, a4, a5, a6, a7, 0);
 }
@@ -310,14 +313,14 @@ void __fastcall BuildVertexShader(NiD3DShader* shader, void*)
 }
 
 // Render-state group helper.
-void __fastcall FUN_00e7ef40(void*);
+void __fastcall NiD3DRenderStateGroup_RestoreRenderStates(void*);
 
 // @fnv 0x00e805f0
 unsigned int __fastcall UpdateGeometryEffects(NiD3DShader* shader, void*, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7)
 {
     void* decl = shader->m_pkRenderStateGroup;
     if (decl)
-        FUN_00e7ef40(decl);
+        NiD3DRenderStateGroup_RestoreRenderStates(decl);
     return 0;
 }
 
@@ -406,7 +409,7 @@ struct ShaderLibrary
     virtual void v18();
     virtual void ReleaseShaderInstance(const char* pcName, unsigned int uiImpl);
 };
-ShaderLibrary* FUN_00e91f10();
+ShaderLibrary* NiD3DShaderFactory_GetD3DShaderFactory();
 
 // NiDX9Renderer::PurgeShader (0x00e75310) is not declared by the shared header.
 void PurgeD3DShader();
@@ -421,7 +424,7 @@ NiD3DShader::~NiD3DShader() throw()
 {
     if (m_kName.Exists() && m_kName.GetLength() != 0)
     {
-        ShaderLibrary* pkLib = FUN_00e91f10();
+        ShaderLibrary* pkLib = NiD3DShaderFactory_GetD3DShaderFactory();
         if (this == pkLib->AcquireShader(m_kName, GetImplementation(this)))
             pkLib->ReleaseShaderInstance(m_kName, GetImplementation(this));
         if (m_bIsBestImplementation)
@@ -441,9 +444,9 @@ NiD3DShader::~NiD3DShader() throw()
 
 struct RenderState
 {
-    void FUN_00e6fe30(void* geometry, void* context, int flags, int mode, int reserved);
+    void NiDX9Renderer_CalculateBoneMatrices(void* geometry, void* context, int flags, int mode, int reserved);
     void ApplyGeometryTransforms(void* geometry, void* info, void* context);
-    void FUN_00e6fbb0(void* context, int enabled);
+    void NiDX9Renderer_SetModelTransform(void* context, int enabled);
 };
 struct IndexController
 {
@@ -469,7 +472,7 @@ int __fastcall SetupTransformations(NiD3DShader* shader, void*, void* unusedFirs
         if (shader->m_uiCurrentPass == 0)
         {
             reinterpret_cast<RenderState*>(shader->m_pkD3DRenderer)
-                ->FUN_00e6fe30(geometry, context, 0, 4, 0);
+                ->NiDX9Renderer_CalculateBoneMatrices(geometry, context, 0, 4, 0);
         }
         reinterpret_cast<IndexController*>(shader->m_pkD3DRenderState)
             ->vfn_2c(*reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(info) + 0x24));
@@ -482,7 +485,7 @@ int __fastcall SetupTransformations(NiD3DShader* shader, void*, void* unusedFirs
     {
         reinterpret_cast<IndexController*>(shader->m_pkD3DRenderState)->vfn_2c(0);
         reinterpret_cast<RenderState*>(shader->m_pkD3DRenderer)
-            ->FUN_00e6fbb0(context, 1);
+            ->NiDX9Renderer_SetModelTransform(context, 1);
     }
     return 0;
 }
@@ -642,7 +645,8 @@ unsigned int __fastcall RenderPartitionedSkinGeometry(NiD3DShader* shader, void*
 }  // namespace fnv_00e811d0
 
 // @fnv 0x00e814f0
-char __cdecl FUN_00e814f0(void)
+// src: COMMUNITY 0x00e814f0
+char __cdecl NiD3DShader_GetVSPresentAllPasses(void)
 {
     return *(int*)(DAT_0126f74c + 0x5c) != 0;
 }
@@ -656,7 +660,8 @@ struct RendererState008
 };
 
 // @fnv 0x00e81500
-unsigned char FUN_00e81500()
+// src: COMMUNITY 0x00e81500
+unsigned char NiD3DShader_GetPSPresentAllPasses()
 {
     RendererState008* pState = reinterpret_cast<RendererState008*>(DAT_0126f74c);
     return pState->m_iFadeIndex != 0;
@@ -1369,7 +1374,8 @@ extern unsigned int DAT_0126f0e4;
 
 // Sets beam texture state values, flags m_bFlag5e from DAT_0126f0e4, and builds pkState->m_kWorldView from the renderer view, rotation and translation.
 // @fnv 0x00e80a50
-void __cdecl FUN_00e80a50(const ModelMatrix3* pkRot, const ModelPoint3* pkTrans, ModelXformState* pkState, bool bSave,
+// src: COMMUNITY 0x00e80a50
+void __cdecl NiD3DShader_PackWorldPerspectiveEffect(const ModelMatrix3* pkRot, const ModelPoint3* pkTrans, ModelXformState* pkState, bool bSave,
                           const ModelRendererView* pkRenderer)
 {
     pkState->m_pCurrentRenderState->SetStageValue(0xb, 0x20000, bSave);
@@ -1398,7 +1404,7 @@ void __cdecl FUN_00e80a50(const ModelMatrix3* pkRot, const ModelPoint3* pkTrans,
     M._14 = M._24 = M._34 = M._44 = 0.0f;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 struct ConstantEntry
 {
     unsigned int unk00, unk04, unk08;
@@ -1430,7 +1436,7 @@ struct FUN_00ee8910
     Binding* pixels;
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     FUN_00ee8910(char**, unsigned int, unsigned int);
     void AddVertex(unsigned int pass, ConstantEntry* entry, void* data)
@@ -1452,7 +1458,7 @@ struct GeometryAccess
     void* FUN_00a5bdd0(const NiFixedString&);
     bool SetExtraDataName(FUN_00ee8910*);
 };
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 // @fnv 0x00e81510
 extern "C" void __cdecl BindShaderConstants(NiD3DShader* shader, NiGeometry* geometry)
 {
@@ -1576,7 +1582,8 @@ extern "C" void __cdecl BindShaderConstants(NiD3DShader* shader, NiGeometry* geo
 extern "C" void __cdecl FUN_00e81a90();
 
 // @fnv 0x00e80570
-void __cdecl FUN_00e80570()
+// src: XBOX_PDB 0x00e80570
+void __cdecl NiD3DShader_Initialize()
 {
     FUN_00e81a90();
 }
@@ -1594,10 +1601,11 @@ struct FnvCpu_FUN_00eea530_CpuObject
     unsigned int unk20;
     unsigned int unk24;
     int value;
-    int FUN_00eea530();
+    int NiD3DShader_GetShaderDecl();
 };
 // @fnv 0x00eea530
-int FnvCpu_FUN_00eea530_CpuObject::FUN_00eea530()
+// src: COMMUNITY 0x00eea530
+int FnvCpu_FUN_00eea530_CpuObject::NiD3DShader_GetShaderDecl()
 {
     return value;
 }

@@ -32,14 +32,15 @@ NiUInt32 NiD3DShaderProgram::GetCodeSize() const
 extern MemoryManager g_memoryManager;
 struct S
 {
-    S* FUN_00e9ee60(void*);
+    S* NiUnionBV_NiUnionBV(void*);
 };
 // @fnv 0x00e9efb0
-S* __fastcall FUN_00e9efb0(void* self)
+// src: GAMEBRYO_SRC 0x00e9efb0
+S* __fastcall NiUnionBV_Clone(void* self)
 {
     S* p = (S*)g_memoryManager.Allocate(0x18);
     if (p)
-        return p->FUN_00e9ee60(self);
+        return p->NiUnionBV_NiUnionBV(self);
     return 0;
 }
 
@@ -53,7 +54,8 @@ S* __fastcall FUN_00e9efb0(void* self)
 extern int g_fnv_00e9ecc0_value_anchor;
 
 // @fnv 0x00e9ecc0
-int FUN_00e9ecc0()
+// src: COMMUNITY 0x00e9ecc0
+int bhkCharacterStateFlying_Update()
 {
     return (int)(&g_fnv_00e9ecc0_value_anchor) + 4;
 }
@@ -68,12 +70,13 @@ class S00e9e860_Obj
     unsigned short unk0c;
     unsigned short m_uCount;
     unsigned short m_u10;
-    void FUN_00e9e860();
+    void NiUnionBV_RemoveAllBoundingVolumes();
 };
 
 // Deletes each item in m_ppItems, nulls the pointers, and resets m_uCount and m_u10 to zero.
 // @fnv 0x00e9e860
-void S00e9e860_Obj::FUN_00e9e860()
+// src: GAMEBRYO_LIB 0x00e9e860
+void S00e9e860_Obj::NiUnionBV_RemoveAllBoundingVolumes()
 {
     {
         unsigned int iIndex = 0;

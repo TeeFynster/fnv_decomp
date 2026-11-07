@@ -77,7 +77,7 @@ __declspec(noinline) unsigned int __fastcall GetNumMembers(const hkClass* cls)
     return total;
 }
 
-int __cdecl FUN_00cb0fa0(const char*, const char*);
+int __cdecl hkString_strCmp(const char*, const char*);
 
 // Scans the container's members by index and returns the first whose name matches the given string, or 0 if none match.
 // @fnv 0x00d46f90
@@ -90,7 +90,7 @@ const hkClassMember* __fastcall FindDeclaredMemberByName(const hkClass* self, vo
         {
             const hkClassMember* member = &self->GetDeclaredMember(i);
             const char* pcMemberName = member->m_name;
-            if (!FUN_00cb0fa0(pcMemberName, name))
+            if (!hkString_strCmp(pcMemberName, name))
                 return member;
             ++i;
         } while (i < self->GetNumDeclaredMembers());
@@ -104,8 +104,8 @@ __declspec(noinline) const hkClassMember* __fastcall FindMemberByName(const hkCl
 {
     for (int i = 0; i < (int)GetNumMembers(cls); i++)
     {
-        const hkClassMember* m = &cls->FUN_00d46f20(i);
-        if (FUN_00cb0fa0(m->m_name, name) == 0)
+        const hkClassMember* m = &cls->getMember(i);
+        if (hkString_strCmp(m->m_name, name) == 0)
             return m;
     }
     return 0;
@@ -120,7 +120,7 @@ int __fastcall FindDeclaredMemberIndexByName(const hkClass* cls, void*, const ch
     {
         do
         {
-            if (FUN_00cb0fa0(cls->GetDeclaredMember(i).m_name, name) == 0)
+            if (hkString_strCmp(cls->GetDeclaredMember(i).m_name, name) == 0)
                 return i;
             ++i;
         } while (i < cls->GetNumDeclaredMembers());
@@ -180,7 +180,7 @@ __declspec(noinline) const hkClass* __fastcall GetParent(const hkClass* cls)
 // @fnv 0x00d46f60
 const hkClassMember* __fastcall GetInheritedMember(const hkClass* cls, void*, int a1)
 {
-    return &cls->FUN_00d46f20(a1);
+    return &cls->getMember(a1);
 }
 
 // @fnv 0x00d46f70
@@ -243,7 +243,7 @@ const hkClassEnum* __fastcall FindDeclaredEnumByName(const hkClass* cls, void*, 
     {
         typedef const hkClassEnum* (__thiscall *EnumAt)(const hkClass*, int);
         const hkClassEnum* entry = reinterpret_cast<EnumAt>(GetDeclaredEnum)(cls, i);
-        if (FUN_00cb0fa0(entry->m_name, name) == 0)
+        if (hkString_strCmp(entry->m_name, name) == 0)
             return entry;
     }
     return 0;
@@ -262,11 +262,11 @@ struct SmallFlag
 struct hkOArchive_ExplicitDtorView
 {
     unsigned int unk00, unk04, unk08, unk0c;
-    void __thiscall FUN_00d60830(void* stream, SmallFlag swap);
+    void __thiscall hkOArchive_InitializeWriterWithByteSwap(void* stream, SmallFlag swap);
     void __thiscall WriteInt(int value);
     void __thiscall FUN_00d60900(unsigned short value);
-    int __thiscall FUN_00d607b0(const void* data, int bytes);
-    void __thiscall FUN_00d60590();
+    int __thiscall hkOArchive_writeRaw(const void* data, int bytes);
+    void __thiscall ReleaseReference_00d60590();
 };
 // 0x00d868a0 indexes 12-byte native-type properties at 0x011b6ab0, not hkTypeInfo objects.
 struct NativeTypeProperties
@@ -276,13 +276,13 @@ struct NativeTypeProperties
     short m_size;
     short m_alignment;
 };
-NativeTypeProperties* __cdecl FUN_00d868a0(unsigned int which);
-int __cdecl FUN_00cb10d0(const char* str);
+NativeTypeProperties* __cdecl hkClassMember_getClassMemberTypeProperties(unsigned int which);
+int __cdecl hkString_strLen(const char* str);
 // @fnv 0x00d47490
 __declspec(noinline) void __fastcall SerializeClass(const hkClass* cls, void*, void* stream)
 {
     hkOArchive_ExplicitDtorView out;
-    out.FUN_00d60830(stream, SmallFlag(false));
+    out.hkOArchive_InitializeWriterWithByteSwap(stream, SmallFlag(false));
     out.WriteInt(cls->m_iNumImplementedInterfaces);
     for (int enumIndex = 0; enumIndex < cls->m_kDeclaredEnums.m_iElementCount; ++enumIndex)
     {
@@ -295,7 +295,7 @@ __declspec(noinline) void __fastcall SerializeClass(const hkClass* cls, void*, v
         hkClassMember info = member;
         if (info.m_type == 0x18 || info.m_type == 0x1f)
         {
-            unsigned short typeWidth = FUN_00d868a0(info.m_eSubtype)->m_size;
+            unsigned short typeWidth = hkClassMember_getClassMemberTypeProperties(info.m_eSubtype)->m_size;
             info.m_flags ^= typeWidth * 8;
             info.m_eSubtype = 0;
         }
@@ -310,7 +310,7 @@ __declspec(noinline) void __fastcall SerializeClass(const hkClass* cls, void*, v
         }
         if (info.m_class && member.m_type != 0x14 && member.m_eSubtype != 0x14)
         {
-            const hkClass* parentClass = member.FUN_00d86920();
+            const hkClass* parentClass = member.getClass();
             while (parentClass)
             {
                 reinterpret_cast<ClassSerializer>(SerializeClass)(parentClass, stream);
@@ -319,7 +319,7 @@ __declspec(noinline) void __fastcall SerializeClass(const hkClass* cls, void*, v
         }
         if (info.m_pClassEnum)
             reinterpret_cast<EnumSerializer>(SerializeEnum)(GetMemberEnum(&member), stream);
-        out.FUN_00d607b0(info.m_name, FUN_00cb10d0(info.m_name));
+        out.hkOArchive_writeRaw(info.m_name, hkString_strLen(info.m_name));
         out.FUN_00d60900(info.m_type);
         out.FUN_00d60900(info.m_eSubtype);
         if (altType != 0)
@@ -328,7 +328,7 @@ __declspec(noinline) void __fastcall SerializeClass(const hkClass* cls, void*, v
         out.FUN_00d60900(info.m_flags);
     }
     out.WriteInt(cls->m_kDeclaredMembers.m_iElementCount);
-    out.FUN_00d60590();
+    out.ReleaseReference_00d60590();
 }
 
 struct FUN_00db7870
@@ -337,7 +337,7 @@ struct FUN_00db7870
     int unk04;
     int unk08;
     FUN_00db7870(int);
-    unsigned int FUN_00db7860();
+    unsigned int ComputeValue_00db7860();
 };
 
 // Computes a CRC over this class and, unless SIGNATURE_LOCAL is set, over its parent chain, returning the CRC value.
@@ -355,10 +355,10 @@ unsigned int __fastcall ComputeSignature(const hkClass* cls, void*, int signatur
         }
         c = GetParent(c);
     }
-    return crc.FUN_00db7860();
+    return crc.ComputeValue_00db7860();
 }
 
-void __cdecl FUN_00cb1260(void* dst, const void* src, int n);
+void __cdecl hkString_memCpy(void* dst, const void* src, int n);
 
 struct ReflectionTypeTag
 {
@@ -394,11 +394,11 @@ struct ReflectionValueStorage
 // @fnv 0x00d476e0
 __declspec(noinline) int ReflectionValueStorage::SetData(const void* src, unsigned int type)
 {
-    NativeTypeProperties* info = FUN_00d868a0(type);
+    NativeTypeProperties* info = hkClassMember_getClassMemberTypeProperties(type);
     if ((unsigned short)info->m_size <= 0x40)
     {
         m_type = type;
-        FUN_00cb1260(m_data, src, info->m_size);
+        hkString_memCpy(m_data, src, info->m_size);
         return 0;
     }
     return 1;
@@ -415,7 +415,7 @@ const hkVariant* hkCustomAttributes::FindEntry(const char* pcName) const
 {
     for (int i = 0; i < m_iElementCount; i++)
     {
-        if (FUN_00cb0fa0(m_data[i].m_name, pcName) == 0)
+        if (hkString_strCmp(m_data[i].m_name, pcName) == 0)
             return &m_data[i].m_value;
     }
     return 0;
@@ -423,7 +423,8 @@ const hkVariant* hkCustomAttributes::FindEntry(const char* pcName) const
 
 // Resolves a member index across the hkClass parent chain.
 // @fnv 0x00d46f20
-__declspec(noinline) const hkClassMember& hkClass::FUN_00d46f20(int aiIndex) const
+// src: HAVOK_LIB 0x00d46f20
+__declspec(noinline) const hkClassMember& hkClass::getMember(int aiIndex) const
 {
     const hkClass* pNode = this;
     int iOffset = aiIndex - GetNumMembers(this);
@@ -447,7 +448,7 @@ int __fastcall FindMemberIndexByName(const hkClass* cls, void*, const char* name
 {
     for (int i = 0; i < (int)GetNumMembers(cls); i++)
     {
-        if (FUN_00cb0fa0(cls->FUN_00d46f20(i).m_name, name) == 0)
+        if (hkString_strCmp(cls->getMember(i).m_name, name) == 0)
             return i;
     }
     return -1;
@@ -554,7 +555,8 @@ S00d47350_Res __fastcall FUN_00d47130(const hkClass* self, DefaultValueAddress o
 
 // Uses the member returned by FUN_00d47130 to populate output according to the member's type.
 // @fnv 0x00d47350
-S00d47350_Res __fastcall FUN_00d47350(const hkClass* self, int, void* data, ReflectionValueStorage* output)
+// src: HAVOK_LIB 0x00d47350
+S00d47350_Res __fastcall hkClass_getDefault(const hkClass* self, int, void* data, ReflectionValueStorage* output)
 {
     const hkClassMember* holder;
     Outs r;
@@ -569,7 +571,7 @@ S00d47350_Res __fastcall FUN_00d47350(const hkClass* self, int, void* data, Refl
     unsigned char type = member->m_type;
     if (type == 0x14)
     {
-        const void* d = member->FUN_00d86920();
+        const void* d = member->getClass();
         output->m_type = 0x14;
         output->m_value = data;
         output->m_descriptor = d;
@@ -595,7 +597,8 @@ S00d47350_Res __fastcall FUN_00d47350(const hkClass* self, int, void* data, Refl
 namespace fnv_00cb0fa0 {
 // Returns the result of comparing two null-terminated strings using strcmp.
 // @fnv 0x00cb0fa0
-int __cdecl FUN_00cb0fa0(const char* pcA, const char* pcB)
+// src: HAVOK_LIB 0x00cb0fa0
+int __cdecl hkString_strCmp(const char* pcA, const char* pcB)
 {
     return strcmp(pcA, pcB);
 }
@@ -647,7 +650,7 @@ hkResult __fastcall ReadDeclaredDefaultValue(const hkClass* cls, void*, int iInd
 
             if (ucType == 0x14)
             {
-                const hkClass* pkClass = kMember.FUN_00d86920();
+                const hkClass* pkClass = kMember.getClass();
                 pvAddr = *(const void* const*)pvAddr;
                 kOut.m_descriptor = pkClass;
                 kOut.m_value = pvAddr;
@@ -677,26 +680,28 @@ hkResult __fastcall ReadDeclaredDefaultValue(const hkClass* cls, void*, int iInd
 int __fastcall WriteDefaultValueAddress(const hkClass* cls, void*, int index, int stream);
 typedef int (__thiscall *DefaultWriter)(const hkClass*, int, int);
 
-static __declspec(noinline) int FUN_00e03100(const hkClassMember* node)
+// src: GUESS 0x00e03100 (confidence: low)
+static __declspec(noinline) int Object_ProcessAndReturnValue_00e03100(const hkClassMember* node)
 {
-    if (node->FUN_00d86940())
-        return node->FUN_00d86940();
+    if (node->getCstyleArraySize())
+        return node->getCstyleArraySize();
     return 1;
 }
 
 // @fnv 0x00e03240
-int __cdecl FUN_00e03240(const hkClass* holder, const hkClassMember* node, int value, int flags)
+// src: GUESS 0x00e03240 (confidence: low)
+int __cdecl hkClass_ProcessEntries_00e03240(const hkClass* holder, const hkClassMember* node, int value, int flags)
 {
     int result = reinterpret_cast<DefaultWriter>(WriteDefaultValueAddress)(holder, value, flags);
 
     if (node->m_type != 0x19)
         return result;
 
-    const hkClass* childHolder = node->FUN_00d86920();
+    const hkClass* childHolder = node->getClass();
     if (!childHolder)
         return result;
 
-    int rounds = FUN_00e03100(node);
+    int rounds = Object_ProcessAndReturnValue_00e03100(node);
     if (rounds <= 0)
         return result;
 
@@ -705,9 +710,9 @@ int __cdecl FUN_00e03240(const hkClass* holder, const hkClassMember* node, int v
     {
         for (int index = 0; index < (int)GetNumMembers(childHolder); ++index)
         {
-            const hkClassMember* child = &childHolder->FUN_00d46f20(index);
+            const hkClassMember* child = &childHolder->getMember(index);
 
-            if (!FUN_00e03240(childHolder, child, index, flags))
+            if (!hkClass_ProcessEntries_00e03240(childHolder, child, index, flags))
                 result = 0;
         }
     } while (--outerCount);

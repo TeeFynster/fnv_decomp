@@ -5,7 +5,7 @@
 
 #include "../../../../../include/hkMemoryRouter.h"
 
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 
 struct S_00e028e0_Alloc
 {
@@ -25,20 +25,20 @@ struct S_00e028e0_Base
 };
 struct S_00e028e0_Obj : S_00e028e0_Base
 {
-    void FUN_00e029d0() throw();
+    void hkStorageStringMap_int_struct_hkContainerHeapAllocator_clear() throw();
     ~S_00e028e0_Obj() throw()
     {
-        FUN_00e029d0();
+        hkStorageStringMap_int_struct_hkContainerHeapAllocator_clear();
     }
     void operator delete(void* p, unsigned int n)
     {
-        reinterpret_cast<S_00e028e0_Alloc*>((&FUN_00c85750()->heap()))->ReleaseBlock(p, n);
+        reinterpret_cast<S_00e028e0_Alloc*>((&hkMemoryRouter_getInstance()->heap()))->ReleaseBlock(p, n);
     }
 };
 
 template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-        { S_00e028e0_Alloc& a = *reinterpret_cast<S_00e028e0_Alloc*>((&FUN_00c85750()->heap()));
+        { S_00e028e0_Alloc& a = *reinterpret_cast<S_00e028e0_Alloc*>((&hkMemoryRouter_getInstance()->heap()));
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             a.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
@@ -80,22 +80,23 @@ FUN_00e028e0::~FUN_00e028e0() throw()
 
 struct FUN_00e029d0_cls
 {
-    unsigned int FUN_00d87410();
+    unsigned int hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_getIterator();
     unsigned int GetEntry(unsigned int a1);
     unsigned int FindNextUsedSlot(unsigned int a1);
     void SetBoolFromThreshold(unsigned char* apFlag, unsigned int a1);
     unsigned int ClearEntries();
 
-    unsigned int FUN_00e029d0();
+    unsigned int hkStorageStringMap_int_struct_hkContainerHeapAllocator_clear();
 };
 
 void CallSwappedArgs(unsigned int a1, int a2);
 
 // Iterates handles from FUN_00d87410, passing each item with the holder's allocator to CallSwappedArgs, then returns ClearEntries().
 // @fnv 0x00e029d0
-unsigned int FUN_00e029d0_cls::FUN_00e029d0()
+// src: HAVOK_LIB 0x00e029d0
+unsigned int FUN_00e029d0_cls::hkStorageStringMap_int_struct_hkContainerHeapAllocator_clear()
 {
-    unsigned int handle = FUN_00d87410();
+    unsigned int handle = hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_getIterator();
     {
         unsigned char flag;
         SetBoolFromThreshold(&flag, handle);
@@ -104,7 +105,7 @@ unsigned int FUN_00e029d0_cls::FUN_00e029d0()
             do
             {
                 unsigned int item = GetEntry(handle);
-                hkMemoryRouter* pAllocHolder = FUN_00c85750();
+                hkMemoryRouter* pAllocHolder = hkMemoryRouter_getInstance();
                 CallSwappedArgs(item, reinterpret_cast<int>((&pAllocHolder->heap())));
                 handle = FindNextUsedSlot(handle);
                 SetBoolFromThreshold(&flag, handle);

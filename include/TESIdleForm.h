@@ -42,7 +42,7 @@ public:
     void ResetFormData();
     void UnregisterIdleForm();
     bool IsFlag40Set();
-    bool FUN_005ff1d0();
+    bool TESIdleForm_GetAllowNoFile();
     NiFormArray* AssignParentPath();
     unsigned int GetChildCount();
     TESIdleForm* GetChildByIndex(unsigned int index);
@@ -59,7 +59,7 @@ public:
         TESObjectREFR* actionRef, TESObjectREFR* targetRef, bool recurseUp);
     int GetFlagsMasked();
     void* FUN_0067f390();
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     unsigned char GetRandomValue();
     unsigned short GetField3C();
 };

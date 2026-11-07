@@ -18,7 +18,7 @@ struct MemoryContextGuard
 };
 struct AllocationManager
 {
-    void* FUN_00aa3e40(unsigned int size);
+    void* Game_DoHeapAlloc(unsigned int size);
 };
 extern AllocationManager DAT_011f6238;
 struct FUN_00c8f510
@@ -29,7 +29,7 @@ struct FUN_00c8f510
 };
 __forceinline void* __cdecl operator new(unsigned int size, AllocationManager& allocator)
 {
-    unsigned char* storage = static_cast<unsigned char*>(allocator.FUN_00aa3e40(0xf0));
+    unsigned char* storage = static_cast<unsigned char*>(allocator.Game_DoHeapAlloc(0xf0));
     unsigned char adjustment = static_cast<unsigned char>(16 - (reinterpret_cast<unsigned int>(storage) & 15));
     storage += adjustment;
     storage[-1] = adjustment;
@@ -42,7 +42,7 @@ struct FUN_00c8f5a0_Class
     unsigned int referenceCount;
     void* havokObject;
     FUN_00c8f510* rigidBodyInfo;
-    void FUN_00c8cfd0(FUN_00c8f510* info);
+    void bhkRigidBody_CopyCinfo(FUN_00c8f510* info);
     FUN_00c8f510* GetOrCreateRigidBodyInfo(unsigned char* wasCreated);
 };
 // @fnv 0x00c8f5a0
@@ -55,7 +55,7 @@ FUN_00c8f510* FUN_00c8f5a0_Class::GetOrCreateRigidBodyInfo(unsigned char* wasCre
     {
         rigidBodyInfo = new (DAT_011f6238) FUN_00c8f510();
         if (havokObject)
-            FUN_00c8cfd0(rigidBodyInfo);
+            bhkRigidBody_CopyCinfo(rigidBodyInfo);
     }
     return rigidBodyInfo;
 }
@@ -91,7 +91,7 @@ struct C8F670MemoryRouter
     }
 };
 
-extern "C" C8F670MemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" C8F670MemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 struct C8F670Pair
 {
@@ -101,7 +101,7 @@ struct C8F670Pair
 
 template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-        C8F670Allocator& alloc = FUN_00c85750().heap();
+        C8F670Allocator& alloc = hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
@@ -274,20 +274,21 @@ class FUN_00c8d960_cls
     unsigned int m_uiValue1;
     C8D9List m_kList;
 
-    void FUN_00c9d530(C8D9Stream* pkStream);
-    void FUN_00c8d960(C8D9Stream* pkStream);
+    void bhkEntity_SaveBinary(C8D9Stream* pkStream);
+    void bhkRigidBody_SaveBinary(C8D9Stream* pkStream);
 };
 
 // Creates Havok data, swaps endianness when not in mode 1, saves list count and item link IDs, then swaps endianness back.
 // @fnv 0x00c8d960
-void FUN_00c8d960_cls::FUN_00c8d960(C8D9Stream* pkStream)
+// src: XBOX_PDB 0x00c8d960
+void FUN_00c8d960_cls::bhkRigidBody_SaveBinary(C8D9Stream* pkStream)
 {
     bool bCreated;
     C8D9HavokData* pkData = CreateHavokData(&bCreated);
     if (pkStream->m_ucMode != 1)
         pkData->SwapEndian();
 
-    FUN_00c9d530(pkStream);
+    bhkEntity_SaveBinary(pkStream);
 
     C8D9SaveBinary(pkStream, m_kList.ItemsInList());
 
@@ -328,7 +329,7 @@ struct DebugShape
 };
 
 extern void FUN_00458620(NiPoint3* dst, NiPoint3* src);
-extern void* FUN_00c59200(float r);
+extern void* BSTestObjects_CreateCoordinateJack(float r);
 
 struct WorldObject
 {
@@ -393,12 +394,13 @@ struct WorldObject
     virtual void v58();
     virtual void v59(void* out);
     void* AddDebugNodeToWorld(void* a1);
-    void* FUN_00c8d2f0(void* a1);
+    void* bhkRigidBody_CreateDisplayGeometry(void* a1);
 };
 
 // Gets a node from AddDebugNodeToWorld, creates a shape with 6.0f, sets its position, attaches it, and returns the node.
 // @fnv 0x00c8d2f0
-void* WorldObject::FUN_00c8d2f0(void* a1)
+// src: XBOX_PDB 0x00c8d2f0
+void* WorldObject::bhkRigidBody_CreateDisplayGeometry(void* a1)
 {
     WorldObject* pDebugNode = (WorldObject*)AddDebugNodeToWorld(a1);
     if (pDebugNode != 0)
@@ -407,7 +409,7 @@ void* WorldObject::FUN_00c8d2f0(void* a1)
         v59(&src);
         NiPoint3 p;
         FUN_00458620(&p, (NiPoint3*)&src);
-        DebugShape* __restrict pDebugShape = (DebugShape*)FUN_00c59200(6.0f);
+        DebugShape* __restrict pDebugShape = (DebugShape*)BSTestObjects_CreateCoordinateJack(6.0f);
         if (pDebugShape != 0)
         {
             pDebugShape->pos = p;

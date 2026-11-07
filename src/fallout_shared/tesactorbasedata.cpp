@@ -48,7 +48,7 @@ void TESActorBaseData::InitializeComponent()
     actorData.m_usField0C = 0;
     actorData.m_usField0E = 100;
     actorData.m_fField10 = g_011c5074.Float()->f;
-    actorData.m_usField14 = (unsigned short)*g_011c50d8.FUN_0043d4d0();
+    actorData.m_usField14 = (unsigned short)*g_011c50d8.Setting_Int();
     m_kFactionList = 0;
     m_pBaseTemplateForm = 0;
     m_ppTemplateForms = 0;
@@ -157,7 +157,8 @@ struct DummyActorBase : TESBoundAnimObject, TESActorBaseData
 };
 
 // @fnv 0x0047d130
-TESActorBase* __cdecl FUN_0047d130(TESActorBase* apOriginalBase, TESActorBase* apTemplateBase)
+// src: COMMUNITY 0x0047d130
+TESActorBase* __cdecl TESActorBaseData_CreateTemplateActorBase(TESActorBase* apOriginalBase, TESActorBase* apTemplateBase)
 {
     DummyActorBase* pnewbase;
     bool breset = g_BGSSaveLoadGame->SetThreadAllowChanges(false);
@@ -198,7 +199,8 @@ unsigned short TESActorBaseData::GetLevelExact()
 }
 
 // @fnv 0x0047d390
-unsigned short TESActorBaseData::FUN_0047d390()
+// src: COMMUNITY 0x0047d390
+unsigned short TESActorBaseData::GetCalcLevelMin_0047d390()
 {
     return actorData.m_usField0A;
 }
@@ -281,9 +283,10 @@ void TESActorBaseData::SetFatigue(unsigned short ausValue)
 
 extern StartMenu* DAT_01186d20[][50];
 extern const char DAT_01011584[];
-unsigned int __cdecl FUN_0047e040(float);
+unsigned int __cdecl TESActorBaseData_GetAlignmentForKarma(float);
 // @fnv 0x0047e0e0
-const char* FUN_0047e0e0(Actor* actor)
+// src: XBOX_PDB 0x0047e0e0
+const char* TESActorBaseData_GetKarmicTitle(Actor* actor)
 {
     const char* result = 0;
     if (actor)
@@ -296,7 +299,7 @@ const char* FUN_0047e0e0(Actor* actor)
             level = 0x31;
         if (level < 0)
             level = 0;
-        kind = FUN_0047e040((float)actor->GetActorValue(static_cast<ActorValue::Index>(0x17)));
+        kind = TESActorBaseData_GetAlignmentForKarma((float)actor->GetActorValue(static_cast<ActorValue::Index>(0x17)));
         if (kind > 2)
         {
             if (kind == 3)
@@ -424,7 +427,8 @@ extern SettingT_GameSettingCollection_ originalRuntimeFloatSetting23;
 
 // Maps a karma value to a level code (0-4) by comparing it against four runtime float thresholds.
 // @fnv 0x0047e040
-int FUN_0047e040(float afKarma)
+// src: XBOX_PDB 0x0047e040
+int TESActorBaseData_GetAlignmentForKarma(float afKarma)
 {
     int iLevel = 1;
     if (afKarma <= originalRuntimeFloatSetting20.Float()->f)
@@ -455,7 +459,8 @@ bool TESActorBaseData::GetCanBeAllRaces() const
 }
 
 // @fnv 0x0047d7e0
-bool __fastcall FUN_0047d7e0(const TESFaction* faction)
+// src: XBOX_PDB 0x0047d7e0
+bool __fastcall TESFaction_GetSpecialCombat(const TESFaction* faction)
 {
     return (faction->data.iFlags & 4) ? true : false;
 }
@@ -491,7 +496,8 @@ bool __fastcall HasFactionFlag8(const TESFaction* faction)
 }
 
 // @fnv 0x0047d7c0
-bool TESFaction::FUN_0047d7c0()
+// src: XBOX_PDB 0x0047d7c0
+bool TESFaction::GetEvil()
 {
     return (data.iFlags & 2) ? true : false;
 }
@@ -500,31 +506,31 @@ struct SoundH
 {
     void* Deallocate();
 };
-void __cdecl FUN_00485910(int, int);
+void __cdecl TESForm_AddChunk_00485910(int, int);
 void __cdecl AppendChunk(int, void*, int);
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 // @fnv 0x0047cac0
 void TESActorBaseData::Save()
 {
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         actorData.SwapEndianness();
     AppendChunk(0x53424341, (char*)this + 4, 0x18);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         actorData.SwapEndianness();
     if (m_pBaseTemplateForm)
     {
         unsigned int itempint = (unsigned int)((SoundH*)m_pBaseTemplateForm)->Deallocate();
-        FUN_00485910(0x4d414e49, itempint);
+        TESForm_AddChunk_00485910(0x4d414e49, itempint);
     }
     if (m_kFactionList)
     {
         unsigned int itempint = (unsigned int)((SoundH*)m_kFactionList)->Deallocate();
-        FUN_00485910(0x4b435456, itempint);
+        TESForm_AddChunk_00485910(0x4b435456, itempint);
     }
     if (m_ppTemplateForms)
     {
         unsigned int itempint = (unsigned int)((SoundH*)m_ppTemplateForms)->Deallocate();
-        FUN_00485910(0x544c5054, itempint);
+        TESForm_AddChunk_00485910(0x544c5054, itempint);
     }
 }
 
@@ -538,8 +544,8 @@ void TESActorBaseData::CopyFromBase(BaseFormComponent* apCopyFC)
     SetKarmaValue(static_cast<const TESActorBaseData*>(pCopy)->GetHealthRegeneration());
     SetBarterGold(pCopy->GetBarterGold());
     SetLevel(pCopy->GetLevelExact());
-    SetCalcLevelMin(pCopy->FUN_0047d390());
-    SetCalcLevelMax(pCopy->FUN_0047d3b0());
+    SetCalcLevelMin(pCopy->GetCalcLevelMin_0047d390());
+    SetCalcLevelMax(pCopy->GetAnimGroupType_0047d3b0());
     SetSpeedMult(pCopy->GetShortAtOffset12());
     SetBaseDisposition(pCopy->GetBaseDisposition());
     CopyFactionList(pCopy);
@@ -587,7 +593,7 @@ unsigned short TESActorBaseData::GetSaveSize(unsigned int aiFlags)
     pform = 0;
     pheader = pform;
 
-    if (fnv_0047e380::DAT_011de45c->FUN_00862110())
+    if (fnv_0047e380::DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
     {
         pform += 4;
         pform += 2;
@@ -679,7 +685,7 @@ bool TESActorBaseData::CanBeDetected()
         FactionLink* x = *p->FUN_006815c0();
         if (x != 0)
         {
-            if (!x->pFaction->FUN_0047d7c0())
+            if (!x->pFaction->GetEvil())
             {
                 bValid = false;
             }
@@ -807,11 +813,11 @@ bool TESActorBaseData::CompareWithBase(BaseFormComponent* component)
     {
         return true;
     }
-    if (this->FUN_0047d390() != other->FUN_0047d390())
+    if (this->GetCalcLevelMin_0047d390() != other->GetCalcLevelMin_0047d390())
     {
         return true;
     }
-    if (this->FUN_0047d3b0() != other->FUN_0047d3b0())
+    if (this->GetAnimGroupType_0047d3b0() != other->GetAnimGroupType_0047d3b0())
     {
         return true;
     }
@@ -874,20 +880,20 @@ public:
 
     int FUN_00418520();
     bool FUN_00418750();
-    short FUN_00418770();
-    bool FUN_004127e0(ExtraShell_tesactorbasedata*);
-    void FUN_00419ad0(int);
-    void FUN_00411ec0(ExtraShell_tesactorbasedata*);
+    short ExtraDataList_GetCount();
+    bool ExtraDataList_CompareList(ExtraShell_tesactorbasedata*);
+    void ExtraDataList_SetCount(int);
+    void ExtraDataList_CopyList(ExtraShell_tesactorbasedata*);
     signed char GetExtraByteValue();
-    void FUN_0042dec0();
+    void ExtraDataList_RemoveHotkey();
     OpacityFadeState* GetOffsetC();
     void FUN_0041aeb0();
-    void FUN_0041af50();
-    void* FUN_0042e250();
-    RefNode* FUN_0041df90();
-    void FUN_0041dfd0();
-    void FUN_0041de40(int a);
-    RefrShell* FUN_0041e310();
+    void ExtraDataList_RemoveScript();
+    void* ExtraDataList_GetModelSwap();
+    RefNode* ExtraDataList_GetDroppedItemList();
+    void ExtraDataList_RemoveDroppedItemList();
+    void ExtraDataList_SetItemDropper(int a);
+    RefrShell* ExtraDataList_GetAshPileRef();
 };
 namespace fnv_0047ce10 {
 struct LeveledShell
@@ -929,34 +935,34 @@ class RefShell
         v129(), v130(), v131(), v132(), v133(), v134(), v135(), v136(), v137(), v138(), v139(), v140(), v141(), v142(),
         v143(), v144();
     virtual void update();
-    bool FUN_0056afc0();
+    bool TESObjectREFR_HasLeveledCreatureCalced();
     void* FUN_008d8520();
-    ExtraShell_tesactorbasedata* FUN_005d43c0();
-    void FUN_00884f80();
-    void* FUN_007af430();
-    void FUN_0056b020(void*, void*);
-    void FUN_00575690(void*);
-    void FUN_00565730();
+    ExtraShell_tesactorbasedata* BSFile_GetDevice();
+    void SetWalkRunFlagDirty();
+    void* BGSSaveFormBuffer_GetForm();
+    void TESObjectREFR_SetLeveledCreature(void*, void*);
+    void TESObjectREFR_SetObjectReference(void*);
+    void TESObjectREFR_InitScript();
 };
 struct GlobalShell
 {
-    bool FUN_004121b0();
+    bool BGSSaveLoadGame_GetReconstructingForms();
 };
 struct StateShell
 {
-    int FUN_00559450();
-    void FUN_006ebd10(int);
+    int Modelloader_GetReferencedThis();
+    void PathManager_CancelCurrentPathsAndPause_0(int);
 };
 struct InvShell
 {
-    void FUN_004d1440();
-    void FUN_004d1610();
-    void FUN_004d1960();
-    bool FUN_0042cde0();
+    void InventoryChanges_InitLeveledItems();
+    void InventoryChanges_InitFromContainerExtra();
+    void InventoryChanges_InitScripts();
+    bool InventoryChanges_IsEmpty();
 };
 extern "C" char DAT_011ddf38;
 StateShell* GetPathManager();
-void* FUN_0047d130(void*, void*);
+void* TESActorBaseData_CreateTemplateActorBase(void*, void*);
 InvShell* FUN_004bf220(RefShell*);
 }  // namespace fnv_0047ce10
 
@@ -964,7 +970,7 @@ InvShell* FUN_004bf220(RefShell*);
 void TESActorBaseData::SetTemplateReference(::TESObjectREFR* ref)
 {
     using namespace fnv_0047ce10;
-    if (!ref || !GetUsesLeveledTemplate() || ((RefShell*)ref)->FUN_0056afc0())
+    if (!ref || !GetUsesLeveledTemplate() || ((RefShell*)ref)->TESObjectREFR_HasLeveledCreatureCalced())
         return;
     LeveledShell* level = 0;
     if (QTemplateForm()->FUN_00401170() == 45)
@@ -982,7 +988,7 @@ void TESActorBaseData::SetTemplateReference(::TESObjectREFR* ref)
         TESContainer container;
         level->AddLeveledItemsToContainer((RefShell*)ref, &container);
         void* base6 = (*reinterpret_cast<fnv_0047ce10::ListShell*>(container.FUN_00717e50())->FUN_006815c0())->value;
-        if (!*(GlobalShell**)&fnv_0047ce10::DAT_011ddf38 || !(*(GlobalShell**)&fnv_0047ce10::DAT_011ddf38)->FUN_004121b0())
+        if (!*(GlobalShell**)&fnv_0047ce10::DAT_011ddf38 || !(*(GlobalShell**)&fnv_0047ce10::DAT_011ddf38)->BGSSaveLoadGame_GetReconstructingForms())
         {
             if (((RefShell*)ref)->isActor())
             {
@@ -992,27 +998,27 @@ void TESActorBaseData::SetTemplateReference(::TESObjectREFR* ref)
             }
             ((RefShell*)ref)->reset(0, 1);
         }
-        if (GetPathManager()->FUN_00559450())
-            GetPathManager()->FUN_006ebd10(((RefShell*)ref)->FUN_005d43c0()->FUN_00418520());
-        ((RefShell*)ref)->FUN_005d43c0()->FUN_0041aeb0();
-        ((RefShell*)ref)->FUN_005d43c0()->FUN_0041af50();
+        if (GetPathManager()->Modelloader_GetReferencedThis())
+            GetPathManager()->PathManager_CancelCurrentPathsAndPause_0(((RefShell*)ref)->BSFile_GetDevice()->FUN_00418520());
+        ((RefShell*)ref)->BSFile_GetDevice()->FUN_0041aeb0();
+        ((RefShell*)ref)->BSFile_GetDevice()->ExtraDataList_RemoveScript();
         if (((RefShell*)ref)->isOther())
         {
             RefShell* other3 = (RefShell*)ref;
-            other3->FUN_00884f80();
+            other3->SetWalkRunFlagDirty();
         }
-        void* oldbase2 = ((RefShell*)ref)->FUN_007af430();
-        void* newbase = fnv_0047ce10::FUN_0047d130(oldbase2, base6);
-        ((RefShell*)ref)->FUN_0056b020(oldbase2, base6);
-        ((RefShell*)ref)->FUN_00575690(newbase);
-        ((RefShell*)ref)->FUN_00565730();
+        void* oldbase2 = ((RefShell*)ref)->BGSSaveFormBuffer_GetForm();
+        void* newbase = fnv_0047ce10::TESActorBaseData_CreateTemplateActorBase(oldbase2, base6);
+        ((RefShell*)ref)->TESObjectREFR_SetLeveledCreature(oldbase2, base6);
+        ((RefShell*)ref)->TESObjectREFR_SetObjectReference(newbase);
+        ((RefShell*)ref)->TESObjectREFR_InitScript();
         InvShell* inventory = FUN_004bf220((RefShell*)ref);
-        inventory->FUN_004d1440();
-        inventory->FUN_004d1610();
-        inventory->FUN_004d1960();
-        if (inventory->FUN_0042cde0())
+        inventory->InventoryChanges_InitLeveledItems();
+        inventory->InventoryChanges_InitFromContainerExtra();
+        inventory->InventoryChanges_InitScripts();
+        if (inventory->InventoryChanges_IsEmpty())
         {
-            ((RefShell*)ref)->FUN_005d43c0()->FUN_0041aeb0();
+            ((RefShell*)ref)->BSFile_GetDevice()->FUN_0041aeb0();
             inventory = 0;
         }
     }
@@ -1044,9 +1050,9 @@ class SaveGameBuffer
 extern SaveGameBuffer* DAT_011de45c;
 extern SettingT_GameSettingCollection_ DAT_011de4e8;
 
-void __cdecl FUN_005b5e40(const char* fmt, const char* file, int line);
-int __cdecl FUN_0040fbe0(const char* fmt, ...);
-TESForm* __cdecl FUN_004839c0(unsigned int formId);
+void __cdecl Warning_005b5e40(const char* fmt, const char* file, int line);
+int __cdecl ProgramFlow(const char* fmt, ...);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int formId);
 
 // @fnv 0x0047e4a0
 void TESActorBaseData::SaveGame(unsigned int flags)
@@ -1110,15 +1116,15 @@ void TESActorBaseData::SaveGame(unsigned int flags)
         aRefF = DAT_011de45c->GetSavedRef();
         if (aRefF)
         {
-            _obj = FUN_004839c0(aRefF->formId);
-            FUN_0040fbe0("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
+            _obj = TESForm_GetFormByNumericID(aRefF->formId);
+            ProgramFlow("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
                          endPos - startPosP, aRefF->formId, _obj->GetName(),
                          *(unsigned int*)((unsigned char*)aRefF + 5), 0xc77,
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESActorBaseData.cpp");
         }
         else
         {
-            FUN_0040fbe0("SaveGame(): %-5i ending at line %i in file %s", endPos - startPosP, 0xc77,
+            ProgramFlow("SaveGame(): %-5i ending at line %i in file %s", endPos - startPosP, 0xc77,
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESActorBaseData.cpp");
         }
     }
@@ -1129,7 +1135,7 @@ void TESActorBaseData::SaveGame(unsigned int flags)
         baseStart = blockPosY;
         if (endPosB > baseStart + 0xffff)
         {
-            FUN_005b5e40("SAVELOAD: Save Game Block in file %s on line %i is greater than maximum short size",
+            Warning_005b5e40("SAVELOAD: Save Game Block in file %s on line %i is greater than maximum short size",
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESActorBaseData.cpp", 0xc77);
         }
         *(unsigned short*)blockPosY = (unsigned short)(endPosB - baseStart);
@@ -1206,7 +1212,7 @@ class FactionReaction
 };
 
 void* __cdecl operator new(unsigned int);
-TESForm* __cdecl FUN_004839c0(unsigned int);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int);
 void __cdecl FNV_Warning(const char*, ...);
 
 }  // namespace fnv_0047e6f0
@@ -1231,15 +1237,15 @@ void TESActorBaseData::LoadGame(unsigned int changeFlags, unsigned int pBuffer)
     unsigned short readSize = 0;
     unsigned int offsetA = 0;
 
-    if (g_TESSaveLoadGame->FUN_00862110())
+    if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
     {
-        g_TESSaveLoadGame->FUN_008579e0(&type, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&type, 4);
         if (type != 0x424C4F4B)
         {
-            loadBuffer = static_cast<LoadingFormInfo*>(g_TESSaveLoadGame->FUN_004fd3c0());
+            loadBuffer = static_cast<LoadingFormInfo*>(g_TESSaveLoadGame->BGSProjectile_GetExplosion());
             if (loadBuffer)
             {
-                loadedForm = fnv_0047e6f0::FUN_004839c0(loadBuffer->formID);
+                loadedForm = fnv_0047e6f0::TESForm_GetFormByNumericID(loadBuffer->formID);
                 fnv_0047e6f0::FNV_Warning(
                     "SAVELOAD: (LoadGame Buffer error) Block Header is incorrect in file %s on line %i.  Currently loading form is %08X %s with version %i and flags %08X",
                     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESActorBaseData.cpp", 3200,
@@ -1256,22 +1262,22 @@ void TESActorBaseData::LoadGame(unsigned int changeFlags, unsigned int pBuffer)
             }
         }
         offsetA = g_TESSaveLoadGame->FUN_00825c00();
-        g_TESSaveLoadGame->FUN_008579e0(&readSize, 2);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&readSize, 2);
     }
 
     if (changeFlags & 2)
     {
-        g_TESSaveLoadGame->FUN_008579e0(&this->actorData, sizeof(this->actorData));
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&this->actorData, sizeof(this->actorData));
     }
 
     this->RemoveAllFactions();
 
-    g_TESSaveLoadGame->FUN_008579e0(&totalItems, 2);
+    g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&totalItems, 2);
     for (idx = 0; idx < totalItems; ++idx)
     {
         g_TESSaveLoadGame->FUN_00857aa0(&factID, 4);
-        g_TESSaveLoadGame->FUN_008579e0(&val, 1);
-        form2 = fnv_0047e6f0::FUN_004839c0(factID);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&val, 1);
+        form2 = fnv_0047e6f0::TESForm_GetFormByNumericID(factID);
         if (form2)
         {
             rank2 = new fnv_0047e6f0::FactionReaction;
@@ -1281,13 +1287,13 @@ void TESActorBaseData::LoadGame(unsigned int changeFlags, unsigned int pBuffer)
         }
     }
 
-    if (g_TESSaveLoadGame->FUN_00862110())
+    if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
     {
         curOff = g_TESSaveLoadGame->FUN_00825c00();
-        info = static_cast<LoadingFormInfo*>(g_TESSaveLoadGame->FUN_004fd3c0());
+        info = static_cast<LoadingFormInfo*>(g_TESSaveLoadGame->BGSProjectile_GetExplosion());
         if (info)
         {
-            formVal = fnv_0047e6f0::FUN_004839c0(info->formID);
+            formVal = fnv_0047e6f0::TESForm_GetFormByNumericID(info->formID);
             if (curOff > (unsigned int)(readSize + offsetA))
             {
                 fnv_0047e6f0::FNV_Warning(
@@ -1331,7 +1337,7 @@ void TESActorBaseData::LoadGame(unsigned int changeFlags, unsigned int pBuffer)
 
 void __cdecl ResolveFormID(unsigned int* pId, TESFile* pFile);
 
-bool __cdecl FUN_0040eb10(float a, float b, float c);
+bool __cdecl FloatEQ(float a, float b, float c);
 
 void __cdecl FNV_Warning(const char* fmt, ...);
 
@@ -1397,7 +1403,7 @@ void TESActorBaseData::InitItem(TESForm* param)
                 ResolveFormID((unsigned int*)&faction, file4);
 
                 link5->pFaction =
-                    (TESFaction*)dynamic_cast< ::TESFaction*>((TESForm*)FUN_004839c0((unsigned int)faction));
+                    (TESFaction*)dynamic_cast< ::TESFaction*>((TESForm*)TESForm_GetFormByNumericID((unsigned int)faction));
             }
 
             if (link5->pFaction != 0)
@@ -1425,7 +1431,7 @@ void TESActorBaseData::InitItem(TESForm* param)
 
         ResolveFormID((unsigned int*)&form4, file4);
 
-        m_kFactionList = (::BGSVoiceType*)dynamic_cast<BGSVoiceType*>((TESForm*)FUN_004839c0((unsigned int)form4));
+        m_kFactionList = (::BGSVoiceType*)dynamic_cast<BGSVoiceType*>((TESForm*)TESForm_GetFormByNumericID((unsigned int)form4));
     }
 
     form4 = (TESForm*)m_pBaseTemplateForm;
@@ -1435,7 +1441,7 @@ void TESActorBaseData::InitItem(TESForm* param)
 
         ResolveFormID((unsigned int*)&form4, file4);
 
-        m_pBaseTemplateForm = (::TESLevItem*)dynamic_cast<TESLevItem*>((TESForm*)FUN_004839c0((unsigned int)form4));
+        m_pBaseTemplateForm = (::TESLevItem*)dynamic_cast<TESLevItem*>((TESForm*)TESForm_GetFormByNumericID((unsigned int)form4));
 
         if (m_pBaseTemplateForm == 0)
         {
@@ -1452,7 +1458,7 @@ void TESActorBaseData::InitItem(TESForm* param)
 
         ResolveFormID((unsigned int*)&form4, file4);
 
-        m_ppTemplateForms = (TESForm*)FUN_004839c0((unsigned int)form4);
+        m_ppTemplateForms = (TESForm*)TESForm_GetFormByNumericID((unsigned int)form4);
 
         if (m_ppTemplateForms == 0)
         {
@@ -1471,7 +1477,7 @@ void TESActorBaseData::InitItem(TESForm* param)
             for (i2 = 0; i2 < 5; i2++)
             {
 
-                if ((int)FUN_0047e040(DAT_01186d08[i2]) != i2)
+                if ((int)TESActorBaseData_GetAlignmentForKarma(DAT_01186d08[i2]) != i2)
                 {
 
                     DAT_01186f78 = 1;
@@ -1496,27 +1502,27 @@ void TESActorBaseData::InitItem(TESForm* param)
         if (DAT_01186f78 == 1)
         {
 
-            if (FUN_0040eb10(actorData.m_fField10, DAT_01186d08[1], 0.001f))
+            if (FloatEQ(actorData.m_fField10, DAT_01186d08[1], 0.001f))
             {
 
                 actorData.m_fField10 = DAT_011c4e54.Float()->f - DAT_011c52a0 * 0.5f;
             }
-            else if (FUN_0040eb10(actorData.m_fField10, DAT_01186d08[0], 0.001f))
+            else if (FloatEQ(actorData.m_fField10, DAT_01186d08[0], 0.001f))
             {
 
                 actorData.m_fField10 = DAT_011c4e54.Float()->f + DAT_011c52a4 * 0.5f;
             }
-            else if (FUN_0040eb10(actorData.m_fField10, DAT_01186d08[2], 0.001f))
+            else if (FloatEQ(actorData.m_fField10, DAT_01186d08[2], 0.001f))
             {
 
                 actorData.m_fField10 = DAT_011c5144.Float()->f + DAT_011c529c * 0.5f;
             }
-            else if (FUN_0040eb10(actorData.m_fField10, DAT_01186d08[3], 0.001f))
+            else if (FloatEQ(actorData.m_fField10, DAT_01186d08[3], 0.001f))
             {
 
                 actorData.m_fField10 = DAT_011c5090.Float()->f + 100.0;
             }
-            else if (FUN_0040eb10(actorData.m_fField10, DAT_01186d08[4], 0.001f))
+            else if (FloatEQ(actorData.m_fField10, DAT_01186d08[4], 0.001f))
             {
 
                 actorData.m_fField10 = DAT_011c4f64.Float()->f - 100.0;

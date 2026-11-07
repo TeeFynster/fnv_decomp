@@ -62,8 +62,8 @@ struct __declspec(align(16)) StepReleaseFitQuaternion
             unsigned int ix, iy, iz, iw;
         };
     };
-    void FUN_00c66320(const StepReleaseFitQuaternion*, const StepReleaseFitQuaternion*);
-    void FUN_005611c0();
+    void setMul(const StepReleaseFitQuaternion*, const StepReleaseFitQuaternion*);
+    void normalize_005611c0();
 };
 struct StepReleaseFitMotionState
 {
@@ -78,7 +78,7 @@ struct StepReleaseFitMotionState
     float objectRadius, linearDamping, angularDamping;
     unsigned char maxLinear, maxAngular, unkAE, unkAF;
     unsigned int unkB0, unkB4, unkB8, unkBC;
-    void FUN_00cb2d90(const StepReleaseFitQuaternion*);
+    void hkRotation_set(const StepReleaseFitQuaternion*);
 };
 struct StepReleaseFitMotion
 {
@@ -181,16 +181,17 @@ static __forceinline void StepReleaseFitadvanceMotion(StepReleaseFitStateArgumen
         *(LocalM128*)&increment = _mm_mul_ps(StepReleaseFitbroadcast(factor), *(LocalM128*)&increment);
         increment.w = StepReleaseFitcosineApprox(angleSquared);
     }
-    previous.FUN_00c66320(&increment, &previous);
-    previous.FUN_005611c0();
+    previous.setMul(&increment, &previous);
+    previous.normalize_005611c0();
     state.deltaAngle = _mm_add_ps(*(LocalM128*)&increment, *(LocalM128*)&increment);
     float angle = (float)sqrt(angleSquared);
     state.deltaAngle.m128_f32[3] = (float)(angle * DAT_0101ff40);
     _mm_store_ps((float*)&state.rotation1, *(LocalM128*)&previous);
-    state.FUN_00cb2d90(&late.p->rotation1);
+    state.hkRotation_set(&late.p->rotation1);
 }
 // @fnv 0x00d28680
-extern "C" void __cdecl FUN_00d28680(StepReleaseFitStepArgs args)
+// src: XBOX_PDB 0x00d28680
+extern "C" void __cdecl hkRigidMotionUtilStep(StepReleaseFitStepArgs args)
 {
     for (int remaining = args.count - 1; remaining >= 0; args.advance(), --remaining)
     {

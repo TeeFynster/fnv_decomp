@@ -14,10 +14,10 @@ class CommandEffect : public ActiveEffect
 public:
     CommandEffect(MagicCaster*, MagicItem*, EffectItem*);
     virtual CommandEffect* Copy();
-    void FUN_0080b640(const char*);
-    void FUN_0080b660();
-    void FUN_0080b6f0(int);
-    void FUN_0080b7c0();
+    void CheckTarget_0080b640(const char*);
+    void Start_0080b660();
+    void Update_0080b6f0(int);
+    void Finish_0080b7c0();
 
     MagicCaster* FUN_0045cd60();
     void FUN_00804210(int);
@@ -48,7 +48,8 @@ CommandEffect* CommandEffect::Copy()
 }
 
 // @fnv 0x0080b640
-void CommandEffect::FUN_0080b640(const char* apName)
+// src: XBOX_PDB 0x0080b640
+void CommandEffect::CheckTarget_0080b640(const char* apName)
 {
     reinterpret_cast<const ActorValueInfo*>(this)->SetScriptName(apName);
 }
@@ -56,7 +57,8 @@ void CommandEffect::FUN_0080b640(const char* apName)
 void __cdecl StartHostilityAndCombat(Actor*, Actor*);
 
 // @fnv 0x0080b660
-void CommandEffect::FUN_0080b660()
+// src: XBOX_PDB 0x0080b660
+void CommandEffect::Start_0080b660()
 {
     Actor* pSourceActor = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : (Actor*)0;
     Actor* pCasterActor = FUN_0045cd60() ? FUN_0045cd60()->FUN_00815410() : (Actor*)0;
@@ -64,16 +66,17 @@ void CommandEffect::FUN_0080b660()
         StartHostilityAndCombat(pSourceActor, pCasterActor);
 }
 
-void FUN_0080b9e0(Actor*, Actor*, int);
+void CommandEffect_CleanupCommandedActor(Actor*, Actor*, int);
 
 // @fnv 0x0080b7c0
-void CommandEffect::FUN_0080b7c0()
+// src: XBOX_PDB 0x0080b7c0
+void CommandEffect::Finish_0080b7c0()
 {
     Actor* ptarget =
         ((BSThread*)this)->GetThreadID() ? ((MagicTarget*)((BSThread*)this)->GetThreadID())->GetOwnerActor() : 0;
     Actor* pcaster = FUN_0045cd60() ? FUN_0045cd60()->GetCasterActor() : 0;
     if (ptarget && pcaster)
-        FUN_0080b9e0(ptarget, pcaster, 1);
+        CommandEffect_CleanupCommandedActor(ptarget, pcaster, 1);
 }
 
 class EffectHost
@@ -267,9 +270,10 @@ class EffectHost
     virtual void v2e4();
     virtual bool v2e8();
 };
-void __cdecl FUN_0080b8f0(void*, void*);
+void __cdecl CommandEffect_UpdateCommandedActor(void*, void*);
 // @fnv 0x0080b6f0
-void CommandEffect::FUN_0080b6f0(int)
+// src: XBOX_PDB 0x0080b6f0
+void CommandEffect::Update_0080b6f0(int)
 {
     EffectHost* a;
     void* b;
@@ -282,7 +286,7 @@ void CommandEffect::FUN_0080b6f0(int)
         if (a->v22c(0) || a->v2e8())
             FUN_00804210(0);
         else
-            FUN_0080b8f0(a, b);
+            CommandEffect_UpdateCommandedActor(a, b);
     }
 }
 
@@ -1271,8 +1275,8 @@ struct VirtOwner
 struct ActorRef
 {
     VirtOwner* FUN_008d8520();
-    unsigned char FUN_00493bb0();
-    unsigned char FUN_00881570();
+    unsigned char Actor_IsInCombat();
+    unsigned char Actor_IsRunningRunOnce();
     void FUN_004534f0(void* other);
 };
 
@@ -1284,7 +1288,8 @@ struct ResultRef
 extern int DAT_011dea3c;
 
 // @fnv 0x0080b8f0
-void FUN_0080b8f0(void* pActor, void* pOther)
+// src: XBOX_PDB 0x0080b8f0
+void CommandEffect_UpdateCommandedActor(void* pActor, void* pOther)
 {
     void* w3;
     void* w1;
@@ -1302,7 +1307,7 @@ void FUN_0080b8f0(void* pActor, void* pOther)
             w0->v528(pOther);
         }
     }
-    if (reinterpret_cast<ActorRef*>(pActor)->FUN_00493bb0() == 0)
+    if (reinterpret_cast<ActorRef*>(pActor)->Actor_IsInCombat() == 0)
     {
         w3 = 0;
         if ((int)pOther != DAT_011dea3c)
@@ -1314,7 +1319,7 @@ void FUN_0080b8f0(void* pActor, void* pOther)
         w1 = w2->v27c();
         if (w3 == 0 || reinterpret_cast<ResultRef*>(w3)->FUN_0041ca90() == 0x12)
         {
-            if (w1 == 0 || reinterpret_cast<ActorRef*>(pActor)->FUN_00881570() == 0)
+            if (w1 == 0 || reinterpret_cast<ActorRef*>(pActor)->Actor_IsRunningRunOnce() == 0)
                 reinterpret_cast<ActorRef*>(pActor)->FUN_004534f0(pOther);
         }
     }
@@ -1333,7 +1338,8 @@ extern float DAT_01024100;
 
 // If the owner's FUN_008d8520 result is non-null and abFlag is set, calls slot 330 on it with 0, then calls slots 280 and 232 on apOwner.
 // @fnv 0x0080b9e0
-void FUN_0080b9e0(void* apOwner, int aValue, bool abFlag)
+// src: XBOX_PDB 0x0080b9e0
+void CommandEffect_CleanupCommandedActor(void* apOwner, int aValue, bool abFlag)
 {
     if (((FUN_008d8520_class*)apOwner)->FUN_008d8520() != 0 && abFlag)
     {

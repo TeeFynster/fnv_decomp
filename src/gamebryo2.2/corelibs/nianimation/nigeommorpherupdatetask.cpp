@@ -16,7 +16,7 @@ public:
     unsigned int m_pRayCursor;
 
     void Realloc(unsigned int);
-    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    void ProcessEntries_00a56e60(unsigned int ItemUpdateArray);
     unsigned int Find(Item* item);
     int Find(unsigned int value);
     void Add(Item* item);
@@ -48,7 +48,7 @@ NiGeomMorpherUpdateTask* __cdecl PopMorpherUpdateTask()
     EnterCriticalSection((void*)&DAT_011f4180);
     if (DAT_011a9414 == 0)
     {
-        ((NiStreamLinkIDSet_nigeommorpherupdatetask*)&DAT_011a940c)->FUN_00a56e60(DAT_011a941c);
+        ((NiStreamLinkIDSet_nigeommorpherupdatetask*)&DAT_011a940c)->ProcessEntries_00a56e60(DAT_011a941c);
         DAT_011a941c *= 2;
     }
     NiGeomMorpherUpdateTask* pkTask = DAT_011a940c[0];
@@ -180,7 +180,7 @@ void __fastcall SetMorpherRefObjects(NiGeomMorpherUpdateTask* task, void*, NiRef
 }
 
 extern "C" void __cdecl FUN_00aa1460(void* apMemory, unsigned int aiSize);
-extern "C" void __cdecl FUN_00aa1490(void* apMemory, unsigned int aiSize);
+extern "C" void __cdecl NiMemObject_ReleaseStorage_00aa1490(void* apMemory, unsigned int aiSize);
 
 // @fnv 0x00a56d40
 NiGeomMorpherUpdateTask* __fastcall DestroyMorpherUpdateTask(NiGeomMorpherUpdateTask* task, void*, unsigned char acFlags)
@@ -212,7 +212,7 @@ NiGeomMorpherUpdateTask* __fastcall DestroyMorpherUpdateTask(NiGeomMorpherUpdate
         }
         if (acFlags & 1)
         {
-            FUN_00aa1490(base, sizeof(NiGeomMorpherUpdateTask));
+            NiMemObject_ReleaseStorage_00aa1490(base, sizeof(NiGeomMorpherUpdateTask));
         }
         return (NiGeomMorpherUpdateTask*)base;
     }
@@ -315,10 +315,10 @@ extern MemoryManager g_memoryManager;
 class FUN_00a5e3a0_Helper
 {
   public:
-    void* FUN_00aa3e40(unsigned int uiSize);
+    void* Game_DoHeapAlloc(unsigned int uiSize);
 };
 
-NiGeomMorpherUpdateTask* __cdecl FUN_00a56ce0(unsigned int ItemUpdateArray) throw();
+NiGeomMorpherUpdateTask* __cdecl NiGeomMorpherUpdateTask_ConstructObject(unsigned int ItemUpdateArray) throw();
 
 struct TaskBlock
 {
@@ -329,7 +329,7 @@ struct TaskBlock
     TaskBlock(unsigned int ItemUpdateArray) : m_uiCount(ItemUpdateArray), m_pkNext(0)
     {
         if (ItemUpdateArray > 0)
-            m_pkTasks = FUN_00a56ce0(ItemUpdateArray);
+            m_pkTasks = NiGeomMorpherUpdateTask_ConstructObject(ItemUpdateArray);
         else
             m_pkTasks = 0;
     }
@@ -340,7 +340,7 @@ struct TaskBlock
 
     static void* operator new(unsigned int uiSize)
     {
-        return ((FUN_00a5e3a0_Helper*)&g_memoryManager)->FUN_00aa3e40(uiSize);
+        return ((FUN_00a5e3a0_Helper*)&g_memoryManager)->Game_DoHeapAlloc(uiSize);
     }
     static void operator delete(void*, int, int);
 };
@@ -353,7 +353,8 @@ inline void NiStreamLinkIDSet_nigeommorpherupdatetask::Add(NiGeomMorpherUpdateTa
 }
 
 // @fnv 0x00a56e60
-void NiStreamLinkIDSet_nigeommorpherupdatetask::FUN_00a56e60(unsigned int uiTaskCount)
+// src: GUESS 0x00a56e60 (confidence: low)
+void NiStreamLinkIDSet_nigeommorpherupdatetask::ProcessEntries_00a56e60(unsigned int uiTaskCount)
 {
     TaskBlock* pkBlock = new TaskBlock(uiTaskCount);
     for (unsigned int i = 0; i < uiTaskCount; i++)

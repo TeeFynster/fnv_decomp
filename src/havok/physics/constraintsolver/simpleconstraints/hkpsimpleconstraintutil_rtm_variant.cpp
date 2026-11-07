@@ -67,7 +67,7 @@ struct ContactParams
 
 extern __m128 DAT_010c44d0;
 void __cdecl FUN_00df22f0(bool* flag);
-void __cdecl FUN_00df5e80(ContactConstraint* c, void* bodyA, void* bodyB, hkVector4* outVel);
+void __cdecl hkVector4_UpdateFields_00df5e80(ContactConstraint* c, void* bodyA, void* bodyB, hkVector4* outVel);
 extern "C" __m128 _mm_and_ps(__m128, __m128);
 extern __m128 DAT_010cbfc0;
 struct ContactBody
@@ -81,7 +81,8 @@ static __forceinline __m128 transform(const hkVector4& a, const hkVector4& b, co
                                  _mm_mul_ps(_mm_shuffle_ps(v, v, 0), a.m_vComponents)),
                       _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), d.m_vComponents));
 }
-__declspec(noinline) void __cdecl FUN_00df5d20(ContactConstraint* c, hkVector4* impulse, void* bodyA, void* bodyB)
+// src: GUESS 0x00df5d20 (confidence: low)
+__declspec(noinline) void __cdecl Object_ProcessAndReturnValue_00df5d20(ContactConstraint* c, hkVector4* impulse, void* bodyA, void* bodyB)
 {
     ContactBody* a = static_cast<ContactBody*>(bodyA);
     ContactBody* b = static_cast<ContactBody*>(bodyB);
@@ -220,12 +221,13 @@ static __forceinline float contactSolve(ContactConstraint* c, ContactParams* p, 
         finalImp = impulse.m_vComponents.m128_f32[0];
     }
 
-    FUN_00df5d20(c, &impulse, bodyA, bodyB);
+    Object_ProcessAndReturnValue_00df5d20(c, &impulse, bodyA, bodyB);
     return finalImp;
 }
 
 // @fnv 0x00df5f80
-float __cdecl FUN_00df5f80(ContactConstraint* c, ContactParams* p, void* bodyA, void* bodyB)
+// src: GUESS 0x00df5f80 (confidence: low)
+float __cdecl Object_ProcessAndReturnValue_00df5f80(ContactConstraint* c, ContactParams* p, void* bodyA, void* bodyB)
 {
     static bool s_keyValid = false;
     if (!s_keyValid)
@@ -238,7 +240,7 @@ float __cdecl FUN_00df5f80(ContactConstraint* c, ContactParams* p, void* bodyA, 
     }
 
     hkVector4 relVel;
-    FUN_00df5e80(c, bodyA, bodyB, &relVel);
+    hkVector4_UpdateFields_00df5e80(c, bodyA, bodyB, &relVel);
 
     if (relVel.m_vComponents.m128_f32[0] > p->m_minNormalVel)
     {

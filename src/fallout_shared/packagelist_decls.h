@@ -8,9 +8,9 @@ int Warning(const char*, ...);
 class DurationData
 {
   public:
-    int FUN_00678ca0();
+    int PackageLocation_GetLocType();
     int GetSecondByte();
-    char FUN_00678ce0();
+    char Main_GameReset();
     char FUN_0086a460();
     int FUN_00726070();
 };
@@ -25,7 +25,7 @@ class Calendar
 };
 extern Calendar g_calendar;
 extern const char* g_packageTypeNames[];
-Actor* FUN_00703180();
+Actor* Interface_GetTargetREFR();
 bool IsHourInRange(int, int, float);
 unsigned short GetShortFromTable(int);
 const char* PrepareScriptMessage(const char*, bool);

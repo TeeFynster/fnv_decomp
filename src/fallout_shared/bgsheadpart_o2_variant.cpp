@@ -44,7 +44,7 @@ extern "C" unsigned char data_011c16bc[];
 // the first base (vptr + 8 ints = 0x24).
 struct PrimaryBase
 {
-    virtual void FUN_005e7a80();
+    virtual void AdjustThisAndForward_005e7a80();
     int unk04;
     int unk08;
     int unk0C;
@@ -57,14 +57,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_005e7a80();
+    virtual void AdjustThisAndForward_005e7a80();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x005e7a80
-    virtual void FUN_005e7a80();
+// src: GUESS 0x005e7a80 (confidence: low)
+    virtual void AdjustThisAndForward_005e7a80();
 };
 
 Derived::Derived()

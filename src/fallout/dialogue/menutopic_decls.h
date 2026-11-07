@@ -16,7 +16,7 @@ int __cdecl Warning(const char*, ...);
 class MenuTopicText
 {
   public:
-    void FUN_00965250();
+    void ImageSpaceModifierInstanceDOF_SetMaskConst();
 };
 class GlobalObject2_0040c150
 {

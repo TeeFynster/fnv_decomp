@@ -71,11 +71,11 @@ struct LoadingFontDimensions : FontManager
 // Tile.h does not yet declare this text-layout finalization entry point.
 struct LoadingStatsTile : Tile
 {
-    void ApplyRotationOnChildren();
+    void Tile_ApplyRotationOnChildren();
 };
 
-InterfaceManager* FUN_004b7210();
-unsigned int FUN_004af350();
+InterfaceManager* InterfaceManager_GetSingleton();
+unsigned int NiMaterialProperty_GetType();
 
 // The shared setting header lacks the float-returning accessor at 0x00450410.
 class LoadingFloatSetting : public SettingT_GameSettingCollection_
@@ -85,12 +85,12 @@ class LoadingFloatSetting : public SettingT_GameSettingCollection_
 };
 extern LoadingFloatSetting g_011da158, g_011da190, g_011da1a0;
 extern bool DAT_011a0294;
-bool FUN_0070edf0();
+bool StartMenu_MainMenuIsActive();
 unsigned int gm_GetTickCount();
 
 #include "../../../../include/ENUM_FORM_ID.h"
 
-int FUN_00408b20(const char*, const char*);
+int BSstrcmp(const char*, const char*);
 
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 class GlobalObject_0078d900
@@ -102,10 +102,10 @@ extern GlobalObject_0078d900 g_011da168;
 extern float DAT_011da16c;
 extern int DAT_011da170;
 extern SettingT_GameSettingCollection_ g_011d1f8c, g_011d40f0, g_011d2358;
-void FUN_0078d670();
+void LoadingMenu_FillDisplayData();
 
 extern SettingT_GameSettingCollection_ g_011ded5c;
-void FUN_0040fca0(unsigned long);
+void BSSleep(unsigned long);
 
 extern SettingT_GameSettingCollection_ g_011da108, g_011da124, g_011da138;
 class ParentSpaceNode;
@@ -113,7 +113,7 @@ class ParentSpaceNode;
 class ScriptVariableInfo;
 unsigned int __fastcall CountLoadingCandidates(BSSimpleList<BGSMusicType::MusicTrack*>* m_kLoadScreenItems);
 unsigned int FUN_0042f5a0(unsigned int, unsigned int);
-unsigned int FUN_005a00a0(unsigned int);
+unsigned int RandomUnsignedInt(unsigned int);
 class TESLoadScreenFlags
 {
   public:
@@ -122,7 +122,7 @@ class TESLoadScreenFlags
 };
 
 extern SettingT_GameSettingCollection_ g_011d0c60;
-void FUN_004581c0(bool);
+void LoadingMenu_FlagReset(bool);
 
 extern TESDataHandler* g_dataHandler;
 class OSGlobals;
@@ -130,7 +130,7 @@ extern OSGlobals* g_osGlobals;
 class DurationData
 {
   public:
-    char FUN_00678ce0();
+    char Main_GameReset();
 };
 extern bool DAT_011d8907;
 class NavMeshInfo;
@@ -179,7 +179,7 @@ LoadingMenuThread::LoadingMenuThread() : BSThread(), m_kFirstSemaphore(), m_kSec
 void LoadingMenu::UpdateLoadingScreenThread()
 {
     if (BSSystemUtility::s_iUpdateEnabled && BSSystemUtility::ms_pSystemUtility &&
-        reinterpret_cast<LoadingMenuThread*>(BSSystemUtility::ms_pSystemUtility)->FUN_008905f0() &&
+        reinterpret_cast<LoadingMenuThread*>(BSSystemUtility::ms_pSystemUtility)->TESAnimGroup_GetDecal() &&
         !reinterpret_cast<LoadingMenuThread*>(BSSystemUtility::ms_pSystemUtility)->m_bFirstThreadFlag)
     {
         reinterpret_cast<LoadingMenuThread*>(BSSystemUtility::ms_pSystemUtility)->SetThreadPriority(1);
@@ -192,18 +192,18 @@ void LoadingMenu::UpdateLoadingScreenThread()
 void LoadingMenu::SetLoadingScreenVisible(int visible)
 {
     NiGeometry* object;
-    Tile* tile = FUN_004b7210()->GetParent();
-    NiNode* node = tile ? tile->FUN_0056c7f0() : 0;
+    Tile* tile = InterfaceManager_GetSingleton()->GetParent();
+    NiNode* node = tile ? tile->GetModel_0056c7f0() : 0;
     object = 0;
     // object is deliberately initialized after obtaining the node.
     if (node)
     {
-        object = reinterpret_cast<NiGeometry*>(node->FUN_0045bc00(0));
+        object = reinterpret_cast<NiGeometry*>(node->NiNode_GetAtChecked(0));
         if (object)
         {
-            NiProperty* property = object->GetProperty((int)FUN_004af350());
+            NiProperty* property = object->GetProperty((int)NiMaterialProperty_GetType());
             if (property)
-                property->FUN_0068c9f0((float)visible);
+                property->NiMaterialProperty_SetAlpha((float)visible);
         }
     }
 }
@@ -213,7 +213,7 @@ void LoadingMenu::SetLoadingScreenVisible(int visible)
 void LoadingMenu::UpdateLoadingScreenTip()
 {
     float delay = 0.0f;
-    if (FUN_0070edf0())
+    if (StartMenu_MainMenuIsActive())
         delay = g_011da190.FUN_00450410();
     else if (DAT_011a0294)
         delay = g_011da158.FUN_00450410();
@@ -228,7 +228,7 @@ bool LoadingMenu::IsLoadScreenValid(TESLoadScreen* screen)
     bool valid = screen && screen->GetFormType() == ENUM_FORM_ID_LSCR_ID;
     for (BSSimpleList<TESLoadScreen*>* entry = &m_kLoadScreenItems; valid && entry && entry->GetItem(); entry = entry->GetNext())
     {
-        valid = FUN_00408b20(reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(screen) + offsetof(TESLoadScreen, FullNameComponent) - offsetof(TESFullName, m_kName))->GetFullName(), reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(entry->GetItem()) + 0x18)->GetFullName()) != 0;
+        valid = BSstrcmp(reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(screen) + offsetof(TESLoadScreen, FullNameComponent) - offsetof(TESFullName, m_kName))->GetFullName(), reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(entry->GetItem()) + 0x18)->GetFullName()) != 0;
     }
     return valid;
 }
@@ -236,8 +236,8 @@ bool LoadingMenu::IsLoadScreenValid(TESLoadScreen* screen)
 // @fnv 0x0078aec0
 void LoadingMenu::RefreshLoadingScreen()
 {
-    if (!g_BGSSaveLoadGame || !g_BGSSaveLoadGame->FUN_0042ce10())
-        FUN_0078d670();
+    if (!g_BGSSaveLoadGame || !g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
+        LoadingMenu_FillDisplayData();
     m_pTiles[10]->Set(0x1004, DAT_011da16c, true);
     m_pTiles[10]->GetFloat(0x1005, DAT_011da170);
     m_pTiles[3]->Set(0xfc4,
@@ -256,10 +256,10 @@ unsigned int LoadingMenuThread::ThreadProc()
     while (m_bThirdThreadFlag != true)
     {
         if (gm_GetTickCount() < interval)
-            FUN_0040fca0(interval - gm_GetTickCount());
+            BSSleep(interval - gm_GetTickCount());
         if (m_bFirstThreadFlag &&
             (!DAT_011a0294 || *reinterpret_cast<SettingT_GameSettingCollection_*>(&g_011ded5c)->String() ||
-             !reinterpret_cast<LoadingMenu*>(BSSystemUtility::s_iUpdateEnabled)->m_pTiles[0]->FUN_0078a1f0()))
+             !reinterpret_cast<LoadingMenu*>(BSSystemUtility::s_iUpdateEnabled)->m_pTiles[0]->Tile3D_IsPlaying()))
         {
             m_kSecondSemaphore.Signal();
             m_bSecondThreadFlag = true;
@@ -290,7 +290,7 @@ void LoadingMenu::SelectLoadScreens(BSSimpleArray<TESLoadScreen*, 1024>& aLoadSc
     while (maximum < count && reinterpret_cast<BSSimpleArray<ParentSpaceNode, 1024>*>(&aLoadScreens)->GetSize())
     {
         unsigned int index =
-            FUN_005a00a0(reinterpret_cast<BSSimpleArray<ParentSpaceNode, 1024>*>(&aLoadScreens)->GetSize());
+            RandomUnsignedInt(reinterpret_cast<BSSimpleArray<ParentSpaceNode, 1024>*>(&aLoadScreens)->GetSize());
         if (IsLoadScreenValid(
                 reinterpret_cast<TESLoadScreen*>(reinterpret_cast<NiFormArray*>(&aLoadScreens)->FUN_00877a30(index))))
         {
@@ -324,7 +324,7 @@ void LoadingMenu::LoadGame(BGSLoadGameBuffer* buffer)
         reinterpret_cast<LoadingMenu*>(BSSystemUtility::s_iUpdateEnabled)->m_pTiles[11]->Set(0xfa3, 1);
         reinterpret_cast<LoadingMenu*>(BSSystemUtility::s_iUpdateEnabled)->SetFloatFlag(8, false);
     }
-    FUN_004581c0(true);
+    LoadingMenu_FlagReset(true);
 }
 
 // @fnv 0x0078ac60
@@ -344,7 +344,7 @@ void LoadingMenu::CollectLoadScreens(BSSimpleArray<TESLoadScreen*, 1024>& aLoadS
             unsigned int index = reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(&aLoadScreens)
                                      ->Add(reinterpret_cast<NavMeshInfo*&>(entry->GetItem()));
             int type = reinterpret_cast<TESLoadScreen*>(entry->GetItem())->GetLoadScreenTypeDataType();
-            if ((DAT_011d8907 || (unsigned char)reinterpret_cast<DurationData*>(g_osGlobals)->FUN_00678ce0()) &&
+            if ((DAT_011d8907 || (unsigned char)reinterpret_cast<DurationData*>(g_osGlobals)->Main_GameReset()) &&
                 type != 3 && type != 0)
                 reinterpret_cast<BSSimpleArray<unsigned int, 1024>*>(&aLoadScreens)->UpdateEntryValue(index, 1);
         }
@@ -373,7 +373,7 @@ void LoadingMenu::UpdateLoadScreen(TESLoadScreen* screen, float alpha, int mode)
         {
         case 4:
             tiles = reinterpret_cast<Tile**>(reinterpret_cast<char*>(this) + 0xd0);
-            FUN_0078b100(alpha, mode);
+            UpdateStatsTilesAlphas(alpha, mode);
             break;
         case 3:
             tiles = reinterpret_cast<Tile**>(reinterpret_cast<char*>(this) + 0xf4);
@@ -392,7 +392,8 @@ void LoadingMenu::UpdateLoadScreen(TESLoadScreen* screen, float alpha, int mode)
 }
 
 // @fnv 0x004581c0
-void __cdecl FUN_004581c0(bool abOn)
+// src: XBOX_PDB 0x004581c0
+void __cdecl LoadingMenu_FlagReset(bool abOn)
 {
     if (BSSystemUtility::s_iUpdateEnabled)
     {
@@ -403,66 +404,70 @@ void __cdecl FUN_004581c0(bool abOn)
 struct SubObj
 {
     void FUN_004ed900();
-    void FUN_004ed8c0(int*);
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(int*);
 };
 // Calls s.FUN_004ed900, then passes &a and &b to s.FUN_004ed8c0 in turn.
 // @fnv 0x00788f30
-void LoadingMenu::FUN_00788f30()
+// src: COMMUNITY 0x00788f30
+void LoadingMenu::InitStatsTilesList()
 {
     reinterpret_cast<SubObj*>(&m_kFirstTileList)->FUN_004ed900();
-    reinterpret_cast<SubObj*>(&m_kFirstTileList)->FUN_004ed8c0(&*reinterpret_cast<int*>(&m_pTiles[17]));
-    reinterpret_cast<SubObj*>(&m_kFirstTileList)->FUN_004ed8c0(&*reinterpret_cast<int*>(&m_pTiles[18]));
+    reinterpret_cast<SubObj*>(&m_kFirstTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(&*reinterpret_cast<int*>(&m_pTiles[17]));
+    reinterpret_cast<SubObj*>(&m_kFirstTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(&*reinterpret_cast<int*>(&m_pTiles[18]));
 }
 
 struct FUN_Sub
 {
     void FUN_004ed900();
-    void FUN_004ed8c0(void* p);
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(void* p);
 };
 // Calls FUN_004ed900 on the FUN_Sub at self+0xdc, then FUN_004ed8c0 with self+0x94, self+0x34 and self+0x60.
 // @fnv 0x00788f80
-void __fastcall FUN_00788f80(char* self)
+// src: COMMUNITY 0x00788f80
+void __fastcall LoadingMenu_InitObjectiveTilesList(char* self)
 {
     ((FUN_Sub*)(self + 0xdc))->FUN_004ed900();
-    ((FUN_Sub*)(self + 0xdc))->FUN_004ed8c0(self + 0x94);
-    ((FUN_Sub*)(self + 0xdc))->FUN_004ed8c0(self + 0x34);
-    ((FUN_Sub*)(self + 0xdc))->FUN_004ed8c0(self + 0x60);
+    ((FUN_Sub*)(self + 0xdc))->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(self + 0x94);
+    ((FUN_Sub*)(self + 0xdc))->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(self + 0x34);
+    ((FUN_Sub*)(self + 0xdc))->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(self + 0x60);
 }
 
 struct M788
 {
     void FUN_004ed900();
-    void FUN_004ed8c0(void*);
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(void*);
 };
 // Calls m.FUN_004ed900, then passes six member addresses (offsets 0x68, 0x98, 0x9c, 0x64, 0x50, 0xa0) to m.FUN_004ed8c0.
 // @fnv 0x00788fe0
-void LoadingMenu::FUN_00788fe0()
+// src: COMMUNITY 0x00788fe0
+void LoadingMenu::InitXPProgressTilesList()
 {
     reinterpret_cast<M788*>(&m_kThirdTileList)->FUN_004ed900();
-    reinterpret_cast<M788*>(&m_kThirdTileList)->FUN_004ed8c0((char*)this + 0x68);
-    reinterpret_cast<M788*>(&m_kThirdTileList)->FUN_004ed8c0((char*)this + 0x98);
-    reinterpret_cast<M788*>(&m_kThirdTileList)->FUN_004ed8c0((char*)this + 0x9c);
-    reinterpret_cast<M788*>(&m_kThirdTileList)->FUN_004ed8c0((char*)this + 0x64);
-    reinterpret_cast<M788*>(&m_kThirdTileList)->FUN_004ed8c0((char*)this + 0x50);
-    reinterpret_cast<M788*>(&m_kThirdTileList)->FUN_004ed8c0((char*)this + 0xa0);
+    reinterpret_cast<M788*>(&m_kThirdTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail((char*)this + 0x68);
+    reinterpret_cast<M788*>(&m_kThirdTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail((char*)this + 0x98);
+    reinterpret_cast<M788*>(&m_kThirdTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail((char*)this + 0x9c);
+    reinterpret_cast<M788*>(&m_kThirdTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail((char*)this + 0x64);
+    reinterpret_cast<M788*>(&m_kThirdTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail((char*)this + 0x50);
+    reinterpret_cast<M788*>(&m_kThirdTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail((char*)this + 0xa0);
 }
 
 namespace fnv_00789080 {
 struct SubObj
 {
     void FUN_004ed900();
-    void FUN_004ed8c0(int*);
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(int*);
 };
 } // namespace fnv_00789080
 
 // Calls FUN_004ed900 then FUN_004ed8c0 on s1 with &a and on s2 with &b.
 // @fnv 0x00789080
-void LoadingMenu::FUN_00789080()
+// src: COMMUNITY 0x00789080
+void LoadingMenu::InitTipTilesList()
 {
     reinterpret_cast<fnv_00789080::SubObj*>(&m_kFourthTileList)->FUN_004ed900();
-    reinterpret_cast<fnv_00789080::SubObj*>(&m_kFourthTileList)->FUN_004ed8c0(&*reinterpret_cast<int*>(&m_pTiles[34]));
+    reinterpret_cast<fnv_00789080::SubObj*>(&m_kFourthTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(&*reinterpret_cast<int*>(&m_pTiles[34]));
     reinterpret_cast<fnv_00789080::SubObj*>(&m_kFifthTileList)->FUN_004ed900();
-    reinterpret_cast<fnv_00789080::SubObj*>(&m_kFifthTileList)->FUN_004ed8c0(&*reinterpret_cast<int*>(&m_pTiles[35]));
+    reinterpret_cast<fnv_00789080::SubObj*>(&m_kFifthTileList)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(&*reinterpret_cast<int*>(&m_pTiles[35]));
 }
 
 // Toggles the bit at position aBit in usFlags using XOR with 1 << aBit.
@@ -474,7 +479,8 @@ void LoadingMenu::ToggleFlagBit(int aBit)
 
 // Returns true if pSequence is set and its GetState() equals 1.
 // @fnv 0x0078a1f0
-bool Tile::FUN_0078a1f0()
+// src: XBOX_PDB 0x0078a1f0
+bool Tile::Tile3D_IsPlaying()
 {
     return *reinterpret_cast<NiControllerSequence**>(reinterpret_cast<char*>(this) + 0x3c) &&
            (*reinterpret_cast<NiControllerSequence**>(reinterpret_cast<char*>(this) + 0x3c))->GetState() == 1;
@@ -488,7 +494,8 @@ struct LoadingTileAnimation : Tile3D
 
 // Calls UpdateAnimation on the object at offset 0x54 with -1.0f and 0.
 // @fnv 0x0078a230
-void LoadingMenu::FUN_0078a230()
+// src: COMMUNITY 0x0078a230
+void LoadingMenu::ResetLoadingPinwheelAnimation()
 {
     (*reinterpret_cast<LoadingTileAnimation**>(reinterpret_cast<char*>(this) + 0x54))->UpdateAnimation(-1.0f, 0);
 }
@@ -512,15 +519,16 @@ int __cdecl PostIncrementInt(int* piValue)
 
 TESForm** __fastcall _ref_006815c0(void*);
 void* __fastcall _ref_00726070(void*);
-bool __fastcall FUN_004077c0(const void*);
+bool __fastcall TESForm_GetTemporary(const void*);
 void __fastcall FUN_00470470(void*);
 
 // @fnv 0x0078a940
-void __fastcall FUN_0078a940(char* this_ptr)
+// src: XBOX_PDB 0x0078a940
+void __fastcall LoadingMenu_FlushLoadScreenList(char* this_ptr)
 {
     for (void* pIter = this_ptr + 0x1d0; pIter && *_ref_006815c0(pIter); pIter = _ref_00726070(pIter))
     {
-        if (FUN_004077c0(*_ref_006815c0(pIter)))
+        if (TESForm_GetTemporary(*_ref_006815c0(pIter)))
         {
             delete *_ref_006815c0(pIter);
         }
@@ -536,7 +544,8 @@ bool TESLoadScreen::IsRefFlag400Set()
 }
 
 // @fnv 0x0078afa0
-void LoadingMenu::FUN_0078afa0(bool abShow)
+// src: COMMUNITY 0x0078afa0
+void LoadingMenu::ShowPlayerTiles(bool abShow)
 {
     SetFloatFlag(6, abShow);
 }
@@ -551,7 +560,8 @@ struct ListH
 };
 // Iterates the tile list from lst and calls Set(0xfa3, b) on each tile.
 // @fnv 0x0078b650
-void LoadingMenu::FUN_0078b650(bool b)
+// src: COMMUNITY 0x0078b650
+void LoadingMenu::UpdateStatsTilesVisibilities(bool b)
 {
     void* pos = (void*)(const char*)*reinterpret_cast<StrH*>(&m_kFirstTileList);
     while (pos)
@@ -573,7 +583,8 @@ struct ListH
 
 // Iterates the tile list starting at lst and calls Set(0xfa3, b) on each tile.
 // @fnv 0x0078b6a0
-void LoadingMenu::FUN_0078b6a0(bool b)
+// src: COMMUNITY 0x0078b6a0
+void LoadingMenu::UpdateObjectiveTilesVisibilities(bool b)
 {
     void* pos = (void*)(const char*)*reinterpret_cast<fnv_0078b6a0::StrH*>(&m_kSecondTileList);
     while (pos)
@@ -589,7 +600,8 @@ struct TL
 };
 // Sets property 0xfa3 to b on every tile in both lists l1 and l2 and on t1 and t2.
 // @fnv 0x0078b6f0
-void LoadingMenu::FUN_0078b6f0(bool b)
+// src: COMMUNITY 0x0078b6f0
+void LoadingMenu::UpdateTipTilesVisibilities(bool b)
 {
     void* pos = reinterpret_cast<TL*>(&m_kFourthTileList)->GetHead();
     while (pos)
@@ -622,7 +634,8 @@ struct ListH
 
 // Iterates the tile list starting at lst and calls Set(0xfa3, b) on each tile.
 // @fnv 0x0078b7c0
-void LoadingMenu::FUN_0078b7c0(bool b)
+// src: COMMUNITY 0x0078b7c0
+void LoadingMenu::UpdateXPProgressTilesVisibilities(bool b)
 {
     void* pos = (void*)(const char*)*reinterpret_cast<fnv_0078b7c0::StrH*>(&m_kThirdTileList);
     while (pos)
@@ -646,16 +659,17 @@ class LoadingMenuDiagnostics
     static void __cdecl PrintDebugMessage(BGSLoadGameBuffer*);
 };
 
-float __cdecl FUN_00404010(float, float);
-float __cdecl FUN_0040ebd0(float, float);
-float __cdecl FUN_00715da0(void);
-float __cdecl FUN_007177c0(void);
-float __cdecl FUN_00717820(void);
+float __cdecl BSMAX_00404010(float, float);
+float __cdecl BSMIN(float, float);
+float __cdecl InterfaceManager_GetScreenHeight(void);
+float __cdecl InterfaceManager_GetScreenSafeX(void);
+float __cdecl InterfaceManager_GetScreenSafeY(void);
 
 extern const double DAT_0106e7f8;
 
 // @fnv 0x0078b9b0
-void LoadingMenu::FUN_0078b9b0(void* apData)
+// src: EXE 0x0078b9b0
+void LoadingMenu::CalcLoadScreenTypeTextWindowVerts(void* apData)
 {
     if (apData == 0)
     {
@@ -669,9 +683,9 @@ void LoadingMenu::FUN_0078b9b0(void* apData)
     float fSafeHeight;
     float fConvertedHeight;
     float fCurrentScreenWidth = InterfaceManager::UpdateInterfaceState();
-    float fCurrentScreenHeight = FUN_00715da0();
-    fSafeWidth = fCurrentScreenWidth - FUN_007177c0();
-    fSafeHeight = fCurrentScreenHeight - FUN_00717820();
+    float fCurrentScreenHeight = InterfaceManager_GetScreenHeight();
+    fSafeWidth = fCurrentScreenWidth - InterfaceManager_GetScreenSafeX();
+    fSafeHeight = fCurrentScreenHeight - InterfaceManager_GetScreenSafeY();
 
     float fConvertedWidth;
     float fConvertedXPos = (double)((unsigned int*)apData)[1] / 1280.0 * fCurrentScreenWidth;
@@ -681,23 +695,25 @@ void LoadingMenu::FUN_0078b9b0(void* apData)
 
     if (((unsigned int*)apData)[0] != 0)
     {
-        *(int*)((char*)this + 0xc0) = (int)FUN_00404010(fConvertedXPos, FUN_007177c0());
-        *(int*)((char*)this + 0xc4) = (int)FUN_00404010(fConvertedYPos, FUN_00717820());
+        *(int*)((char*)this + 0xc0) = (int)BSMAX_00404010(fConvertedXPos, InterfaceManager_GetScreenSafeX());
+        *(int*)((char*)this + 0xc4) = (int)BSMAX_00404010(fConvertedYPos, InterfaceManager_GetScreenSafeY());
         *(int*)((char*)this + 0xc8) =
-            (int)FUN_0040ebd0((float)*(int*)((char*)this + 0xc0) + fConvertedWidth, fSafeWidth);
+            (int)BSMIN((float)*(int*)((char*)this + 0xc0) + fConvertedWidth, fSafeWidth);
         *(int*)((char*)this + 0xcc) =
-            (int)FUN_0040ebd0((float)*(int*)((char*)this + 0xc4) + fConvertedHeight, fSafeHeight);
+            (int)BSMIN((float)*(int*)((char*)this + 0xc4) + fConvertedHeight, fSafeHeight);
     }
 }
 
 // @fnv 0x0078bb40
-void LoadingMenu::FUN_0078bb40()
+// src: XBOX_PDB 0x0078bb40
+void LoadingMenu::InitPlayerTileSettings()
 {
-    FUN_0078bb60((int)m_pCurrentLoadScreen);
+    UpdatePlayerTileSettings((int)m_pCurrentLoadScreen);
 }
 
 // @fnv 0x0078bc60
-int __fastcall FUN_0078bc60(int apObject)
+// src: COMMUNITY 0x0078bc60
+int __fastcall TESLoadScreen_GetTypeData(int apObject)
 {
     return *(int*)(apObject + 0x34) + 0x18;
 }
@@ -710,19 +726,19 @@ class TaskThreadManager
     static TaskThreadManager* __cdecl GetSingleton();
 };
 
-NiRenderer* __cdecl FUN_0043c4b0(void);
-RecursiveLock* __cdecl FUN_00713d70(void);
-bool __fastcall FUN_0044b130(RecursiveLock*);
-int __fastcall FUN_0078d1d0(RecursiveLock*);
+NiRenderer* __cdecl NiXenonRenderer_GetRenderer(void);
+RecursiveLock* __cdecl Tile_GetTileUpdateAllCriticalSectionLock(void);
+bool __fastcall BSCriticalSection_TryLock(RecursiveLock*);
+int __fastcall NiCriticalSection_TryEnterCriticalSection(RecursiveLock*);
 bool __cdecl BSSpinLockGlobalTryLock(void);
-void __cdecl FUN_00452530(void);
+void __cdecl BSTexturePalette_Unlock(void);
 
 struct MTRenderingSystem_Helper
 {
-    void FUN_00ba2f30();
-    void FUN_00ba30f0(int, int);
-    void FUN_00ba3130(int, int);
-    void FUN_00ba2fa0();
+    void MTRenderingSystem_StartThreads();
+    void MTRenderingSystem_SetThreadStage(int, int);
+    void MTRenderingSystem_WaitOnThreadStage(int, int);
+    void MTRenderingSystem_WaitForThreads();
 };
 
 struct InterfaceManager_Helper
@@ -735,20 +751,21 @@ extern bool DAT_011a0295;
 extern bool DAT_011c70f8;
 
 // @fnv 0x0078d080
-void __cdecl FUN_0078d080(void)
+// src: XBOX_PDB 0x0078d080
+void __cdecl LoadingMenu_ShowChanges(void)
 {
-    FUN_0043c4b0()->StartScene();
-    RecursiveLock* pTileCritSect = FUN_00713d70();
-    if (!FUN_0044b130(pTileCritSect))
+    NiXenonRenderer_GetRenderer()->StartScene();
+    RecursiveLock* pTileCritSect = Tile_GetTileUpdateAllCriticalSectionLock();
+    if (!BSCriticalSection_TryLock(pTileCritSect))
     {
-        FUN_0043c4b0()->FinishScene();
+        NiXenonRenderer_GetRenderer()->FinishScene();
         return;
     }
 
-    if (!FUN_0078d1d0(&DAT_011f4380))
+    if (!NiCriticalSection_TryEnterCriticalSection(&DAT_011f4380))
     {
         pTileCritSect->Leave();
-        FUN_0043c4b0()->FinishScene();
+        NiXenonRenderer_GetRenderer()->FinishScene();
         return;
     }
 
@@ -756,29 +773,29 @@ void __cdecl FUN_0078d080(void)
     {
         DAT_011f4380.Leave();
         pTileCritSect->Leave();
-        FUN_0043c4b0()->FinishScene();
+        NiXenonRenderer_GetRenderer()->FinishScene();
         return;
     }
 
     if (DAT_011a0295)
     {
         Tile::UpdateAll(true);
-        FUN_00452530();
+        BSTexturePalette_Unlock();
     }
 
-    reinterpret_cast<MTRenderingSystem_Helper*>(TaskThreadManager::GetSingleton())->FUN_00ba2f30();
+    reinterpret_cast<MTRenderingSystem_Helper*>(TaskThreadManager::GetSingleton())->MTRenderingSystem_StartThreads();
     for (int i = 1; i < 23; ++i)
     {
-        reinterpret_cast<MTRenderingSystem_Helper*>(TaskThreadManager::GetSingleton())->FUN_00ba30f0(0, i);
-        reinterpret_cast<MTRenderingSystem_Helper*>(TaskThreadManager::GetSingleton())->FUN_00ba3130(1, i);
+        reinterpret_cast<MTRenderingSystem_Helper*>(TaskThreadManager::GetSingleton())->MTRenderingSystem_SetThreadStage(0, i);
+        reinterpret_cast<MTRenderingSystem_Helper*>(TaskThreadManager::GetSingleton())->MTRenderingSystem_WaitOnThreadStage(1, i);
     }
 
     DAT_011c70f8 = true;
-    reinterpret_cast<InterfaceManager_Helper*>(FUN_004b7210())->RenderMenu(0, 0);
+    reinterpret_cast<InterfaceManager_Helper*>(InterfaceManager_GetSingleton())->RenderMenu(0, 0);
     DAT_011c70f8 = false;
 
-    reinterpret_cast<MTRenderingSystem_Helper*>(TaskThreadManager::GetSingleton())->FUN_00ba2fa0();
-    FUN_0043c4b0()->FinishScene();
+    reinterpret_cast<MTRenderingSystem_Helper*>(TaskThreadManager::GetSingleton())->MTRenderingSystem_WaitForThreads();
+    NiXenonRenderer_GetRenderer()->FinishScene();
     pTileCritSect->Leave();
     DAT_011f4380.Leave();
 }
@@ -798,7 +815,8 @@ extern PlayerCharacter* pPlayer;
 float __cdecl GetLevelProgress();
 // Stores the player's FindAudioEntry result, GetLevelProgress result and level into g_011da168, DAT_011da16c and DAT_011da170.
 // @fnv 0x0078d670
-void FUN_0078d670()
+// src: XBOX_PDB 0x0078d670
+void LoadingMenu_FillDisplayData()
 {
     *(int*)&g_011da168 = pPlayer->FindAudioEntry();
     DAT_011da16c = GetLevelProgress();
@@ -810,10 +828,11 @@ namespace fnv_0078d880 {
 extern int DAT_0107410c;
 
 // @fnv 0x0078d880
-void* __fastcall FUN_0078d880(void* pThis)
+// src: COMMUNITY 0x0078d880
+void* __fastcall BSSimpleArray_TESLoadScreen_1024_BSSimpleArray_TESLoadScreen_1024(void* pThis)
 {
     *reinterpret_cast<int**>(pThis) = &DAT_0107410c;
-    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(pThis)->FUN_006b3eb0(0, false);
+    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(pThis)->BSSimpleArray_float_1024_InitialSetup(0, false);
     return pThis;
 }
 }  // namespace fnv_0078d880
@@ -827,7 +846,8 @@ class GlobalObject_00869f00
 };
 
 // @fnv 0x0078d8b0
-void __fastcall FUN_0078d8b0(GlobalObject_00869f00* pThis)
+// src: GUESS 0x0078d8b0 (confidence: low)
+void __fastcall LoadingMenu_UpdateState_0078d8b0(GlobalObject_00869f00* pThis)
 {
     *(int**)pThis = &DAT_0107410c;
     pThis->Clear(true);
@@ -913,7 +933,7 @@ class NiAVObjectV
     virtual void v38();
     virtual NiAVObjectV* GetObjectByName(const NiFixedString&);
     NiProperty* GetProperty(unsigned int);
-    void FUN_00440490(float);
+    void NiAVObject_SetScale(float);
     void SetLocalRotation(float, float, float, float);
     void SetAppCulled(bool);
 };
@@ -921,7 +941,7 @@ class NiAVObjectV
 class NiNodeV : public NiAVObjectV
 {
   public:
-    NiAVObjectV* FUN_0045bc00(unsigned int);
+    NiAVObjectV* NiNode_GetAtChecked(unsigned int);
     void Update(NiUpdateDataH&);
 };
 
@@ -976,7 +996,7 @@ class NiRendererV
 
 struct FUN_00424940_shell
 {
-    char FUN_00424940();
+    char InterfaceManager_GetMenuMode();
 };
 struct FUN_0041fd00_shell
 {
@@ -989,12 +1009,12 @@ struct TESGlobalValueReader
 };
 struct OSGlobalsH
 {
-    bool FUN_00678ce0();
+    bool Main_GameReset();
 };
 
 struct FUN_00575d10_shell
 {
-    bool FUN_00575d10();
+    bool TESObjectREFR_GetInterior();
 };
 extern const double DAT_010704f0;
 extern const double DAT_010704e8;
@@ -1013,9 +1033,9 @@ struct NiRendererH
     void StartScene();
     void FinishScene();
 };
-NiRendererV* __cdecl FUN_0043c4b0();
+NiRendererV* __cdecl NiXenonRenderer_GetRenderer();
 
-unsigned int __cdecl FUN_00438220();
+unsigned int __cdecl NiShadeProperty_GetType();
 void __cdecl _FNV_Warning(int, const char*, ...);
 
 } // namespace fnv_007890e0
@@ -1032,8 +1052,8 @@ void LoadingMenu::InitLoadingMenu(TESForm* apLocation)
         (*(Tile**)((char*)this + 4))->Set(0xfad, Tile::GetInterfaceScale(), true);
     }
 
-    if (((fnv_007890e0::FUN_00424940_shell*)FUN_004b7210())->FUN_00424940() != 3)
-        ((fnv_007890e0::FUN_0041fd00_shell*)FUN_004b7210())->FUN_0041fd00(2);
+    if (((fnv_007890e0::FUN_00424940_shell*)InterfaceManager_GetSingleton())->InterfaceManager_GetMenuMode() != 3)
+        ((fnv_007890e0::FUN_0041fd00_shell*)InterfaceManager_GetSingleton())->FUN_0041fd00(2);
 
     HUDMainMenu::UpdateVisibilityState(5);
     HUDMainMenu::UpdateTargetReference(0, false, false);
@@ -1052,16 +1072,16 @@ void LoadingMenu::InitLoadingMenu(TESForm* apLocation)
     {
         this->SetTileVisible(0, false);
     }
-    else if (DAT_011d8907 || ((fnv_007890e0::OSGlobalsH*)g_osGlobals)->FUN_00678ce0())
+    else if (DAT_011d8907 || ((fnv_007890e0::OSGlobalsH*)g_osGlobals)->Main_GameReset())
     {
-        this->FUN_0078afa0(false);
-        ((fnv_007890e0::NiRendererH*)fnv_007890e0::FUN_0043c4b0())->StartScene();
-        this->FUN_0078a230();
-        ((fnv_007890e0::NiRendererH*)fnv_007890e0::FUN_0043c4b0())->FinishScene();
+        this->ShowPlayerTiles(false);
+        ((fnv_007890e0::NiRendererH*)fnv_007890e0::NiXenonRenderer_GetRenderer())->StartScene();
+        this->ResetLoadingPinwheelAnimation();
+        ((fnv_007890e0::NiRendererH*)fnv_007890e0::NiXenonRenderer_GetRenderer())->FinishScene();
     }
     else
     {
-        if (*(TESForm**)((char*)this + 0x1e8) && !g_BGSSaveLoadGame->FUN_0042ce10())
+        if (*(TESForm**)((char*)this + 0x1e8) && !g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
         {
             switch ((*(TESForm**)((char*)this + 0x1e8))->GetFormType())
             {
@@ -1078,7 +1098,7 @@ void LoadingMenu::InitLoadingMenu(TESForm* apLocation)
             case 0x40:
             case 0x69:
                 this
-                    ->SetFloatFlag(9, ((fnv_007890e0::FUN_00575d10_shell*)*(TESForm**)((char*)this + 0x1e8))->FUN_00575d10());
+                    ->SetFloatFlag(9, ((fnv_007890e0::FUN_00575d10_shell*)*(TESForm**)((char*)this + 0x1e8))->TESObjectREFR_GetInterior());
                 break;
             }
         }
@@ -1091,22 +1111,22 @@ void LoadingMenu::InitLoadingMenu(TESForm* apLocation)
         }
         else
         {
-            this->FUN_0078afa0(true);
+            this->ShowPlayerTiles(true);
             this->RefreshLoadingScreen();
         }
-        ((fnv_007890e0::NiRendererH*)fnv_007890e0::FUN_0043c4b0())->StartScene();
-        this->FUN_0078a230();
-        ((fnv_007890e0::NiRendererH*)fnv_007890e0::FUN_0043c4b0())->FinishScene();
+        ((fnv_007890e0::NiRendererH*)fnv_007890e0::NiXenonRenderer_GetRenderer())->StartScene();
+        this->ResetLoadingPinwheelAnimation();
+        ((fnv_007890e0::NiRendererH*)fnv_007890e0::NiXenonRenderer_GetRenderer())->FinishScene();
     }
 
-    fnv_007890e0::FUN_0043c4b0()->SetBackgroundColor(&fnv_007890e0::DAT_011a9bd0);
+    fnv_007890e0::NiXenonRenderer_GetRenderer()->SetBackgroundColor(&fnv_007890e0::DAT_011a9bd0);
 
-    if (reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x54)))->FUN_0056c7f0()))
+    if (reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x54)))->GetModel_0056c7f0()))
     {
-        reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x54)))->FUN_0056c7f0())
-            ->FUN_00440490(fnv_007890e0::originalRuntimeFloatSetting1218.FUN_00450410());
+        reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x54)))->GetModel_0056c7f0())
+            ->NiAVObject_SetScale(fnv_007890e0::originalRuntimeFloatSetting1218.FUN_00450410());
         (*(Tile**)((char*)this + 0x54))->Set(0x1004, ((SettingT_GameSettingCollection_*)&fnv_007890e0::originalRuntimeFloatSetting1218)->Float()->f, true);
-        reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x54)))->FUN_0056c7f0())->SetLocalRotation(1.5707964f, 1.0f, 0.0f, 0.0f);
+        reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x54)))->GetModel_0056c7f0())->SetLocalRotation(1.5707964f, 1.0f, 0.0f, 0.0f);
     }
     else
     {
@@ -1120,41 +1140,41 @@ void LoadingMenu::InitLoadingMenu(TESForm* apLocation)
         fnv_007890e0::NiNodeV* pnode;
         Tile3D* p3dtile;
 
-        pav = reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->FUN_0056c7f0())->GetObjectByName(NiFixedString("Slide01"));
+        pav = reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->GetModel_0056c7f0())->GetObjectByName(NiFixedString("Slide01"));
         pnode = pav->IsSceneNode();
         if (pnode)
         {
-            *(NiProperty**)((char*)this + 0x1ec) = pnode->FUN_0045bc00(0)->GetProperty(fnv_007890e0::FUN_00438220());
-            pnode = (fnv_007890e0::NiNodeV*)reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->FUN_0056c7f0())
+            *(NiProperty**)((char*)this + 0x1ec) = pnode->NiNode_GetAtChecked(0)->GetProperty(fnv_007890e0::NiShadeProperty_GetType());
+            pnode = (fnv_007890e0::NiNodeV*)reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->GetModel_0056c7f0())
                         ->GetObjectByName(NiFixedString("Slide02"));
-            *(NiProperty**)((char*)this + 0x1f0) = pnode->FUN_0045bc00(0)->GetProperty(fnv_007890e0::FUN_00438220());
+            *(NiProperty**)((char*)this + 0x1f0) = pnode->NiNode_GetAtChecked(0)->GetProperty(fnv_007890e0::NiShadeProperty_GetType());
         }
         else
         {
-            *(NiProperty**)((char*)this + 0x1ec) = pav->GetProperty(fnv_007890e0::FUN_00438220());
-            pav = reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->FUN_0056c7f0())->GetObjectByName(NiFixedString("Slide02"));
-            *(NiProperty**)((char*)this + 0x1f0) = pav->GetProperty(fnv_007890e0::FUN_00438220());
+            *(NiProperty**)((char*)this + 0x1ec) = pav->GetProperty(fnv_007890e0::NiShadeProperty_GetType());
+            pav = reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->GetModel_0056c7f0())->GetObjectByName(NiFixedString("Slide02"));
+            *(NiProperty**)((char*)this + 0x1f0) = pav->GetProperty(fnv_007890e0::NiShadeProperty_GetType());
         }
 
         this->UpdateLoadingScreens();
         if (!DAT_011a0294)
         {
             this->UpdateLoadingScreenText(false);
-            this->FUN_0078a9f0();
+            this->LoadingMenu_AdvanceScreen();
             this->ApplyLoadingScreenTexture(false);
             this->UpdateLoadingScreenTip();
         }
 
-        reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->FUN_0056c7f0())->FUN_00440490(fnv_007890e0::DAT_01073f20);
-        reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->FUN_0056c7f0())->SetLocalRotation(1.5707964f, 1.0f, 0.0f, 0.0f);
+        reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->GetModel_0056c7f0())->NiAVObject_SetScale(fnv_007890e0::DAT_01073f20);
+        reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->GetModel_0056c7f0())->SetLocalRotation(1.5707964f, 1.0f, 0.0f, 0.0f);
         (*(Tile**)((char*)this + 0x28))
             ->Set(0x1004, InterfaceH_loadingmenu::GetFourthInterfaceFloat() / InterfaceH_loadingmenu::GetThirdInterfaceFloat(), true);
 
         p3dtile = (Tile3D*)(*(Tile**)((char*)this + 0x28));
-        p3dtile->FUN_00a20cc0("Left");
+        p3dtile->Tile3D_PlaySequence("Left");
         data.FUN_0043d410(0.0f, true, false);
-        reinterpret_cast<fnv_007890e0::NiNodeV*>(p3dtile->FUN_0056c7f0())->Update(data);
-        this->FUN_0078cc50();
+        reinterpret_cast<fnv_007890e0::NiNodeV*>(p3dtile->GetModel_0056c7f0())->Update(data);
+        this->FadeIn();
         *(unsigned int*)((char*)this + 0x1e4) = 0;
     }
 
@@ -1163,7 +1183,7 @@ void LoadingMenu::InitLoadingMenu(TESForm* apLocation)
     if ((DAT_011a0294 || !apLocation) && BSAudio::GetSingleton()->IsPatrolling() &&
         !*((SettingT_GameSettingCollection_*)&g_011ded5c)->String())
     {
-        if (!BSAudio::GetSingleton()->FUN_005bb4d0())
+        if (!BSAudio::GetSingleton()->TESRegionData_GetPriority())
         {
             BSAudio::GetSingleton()->SetUseMultipleThreads(true);
             this->SetFloatFlag(2, true);
@@ -1171,7 +1191,7 @@ void LoadingMenu::InitLoadingMenu(TESForm* apLocation)
     }
     else if (!DAT_011a0294 && BSAudio::GetSingleton()->IsPatrolling())
     {
-        if (!BSAudio::GetSingleton()->FUN_005bb4d0())
+        if (!BSAudio::GetSingleton()->TESRegionData_GetPriority())
         {
             BSAudio::GetSingleton()->SetUseMultipleThreads(true);
             this->SetFloatFlag(2, true);
@@ -1180,7 +1200,7 @@ void LoadingMenu::InitLoadingMenu(TESForm* apLocation)
     }
 
     *(unsigned int*)((char*)this + 0x5b4) = 0;
-    reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->FUN_0056c7f0())->SetAppCulled(true);
+    reinterpret_cast<fnv_007890e0::NiNodeV*>(((Tile3D*)(*(Tile**)((char*)this + 0x28)))->GetModel_0056c7f0())->SetAppCulled(true);
 }
 
 struct TileList
@@ -1277,7 +1297,8 @@ void LoadingMenu::ApplySettingsToTiles(LoadingTileSettings* apSettings)
 extern unsigned char DAT_011dcfb2;
 
 // @fnv 0x00788a90
-void FUN_00788a90(unsigned char value)
+// src: COMMUNITY 0x00788a90
+void FalloutAudio_SetNewGameMusic(unsigned char value)
 {
     DAT_011dcfb2 = value;
 }
@@ -1285,13 +1306,15 @@ void FUN_00788a90(unsigned char value)
 extern unsigned char DAT_011dcfb2;
 
 // @fnv 0x00788aa0
-unsigned char FUN_00788aa0()
+// src: COMMUNITY 0x00788aa0
+unsigned char FalloutAudio_GetNewGameMusic()
 {
     return DAT_011dcfb2;
 }
 
 // @fnv 0x00788f20
-int FUN_00788f20()
+// src: COMMUNITY 0x00788f20
+int LoadingMenu_GetClassStatic()
 {
     return 0x3ef;
 }
@@ -1313,12 +1336,12 @@ extern SettingT_GameSettingCollection_ g_011da0f0;
 void* memset(void*, int, unsigned int);
 int sprintf_s(char*, unsigned int, const char*, ...);
 unsigned int BSStringLength(const char*);
-void FUN_005330e0(float&, float, float);
-void FUN_00761460(bool);
-void FUN_00830660();
+void BSClamp_float(float&, float, float);
+void FalloutAudio_SetMainMenuMusic(bool);
+void FalloutAudioMedia_MediaMenuUnPause();
 int Warning(const char*, ...);
 TESForm** __fastcall _ref_006815c0(void*);
-void __fastcall FUN_0078a9f0(char*);
+void __fastcall LoadingMenu_AdvanceScreen(char*);
 class TESGlobalValueReader
 {
   public:
@@ -1344,7 +1367,8 @@ struct BSSimpleListTESRaceSize
 };
 
 // @fnv 0x00789820
-void LoadingMenu::FUN_00789820()
+// src: XBOX_PDB 0x00789820
+void LoadingMenu::Update_00789820()
 {
 
     DAT_011a0295 = true;
@@ -1378,15 +1402,15 @@ void LoadingMenu::FUN_00789820()
         float fTileAlpha = CrossTime * DAT_01073fb8;
         if (!this->m_uiFirstStateValue)
             fTileAlpha = 1.0f;
-        FUN_005330e0(fTileAlpha, 0.0f, 1.0f);
+        BSClamp_float(fTileAlpha, 0.0f, 1.0f);
         if (this->m_uiSecondStateValue % 2 == 0)
             fTileAlpha = 1.0f - fTileAlpha;
         float fSlide01Alpha = fTileAlpha;
-        FUN_005330e0(fSlide01Alpha, 0.0f, 1.0f);
+        BSClamp_float(fSlide01Alpha, 0.0f, 1.0f);
         if (this->m_pTiles[32])
             this->m_pTiles[32]->Set(0xfa9, (int)(fSlide01Alpha * 255.0));
         float fSlide02Alpha = 1.0f - fTileAlpha;
-        FUN_005330e0(fSlide02Alpha, 0.0f, 1.0f);
+        BSClamp_float(fSlide02Alpha, 0.0f, 1.0f);
         if (this->m_pTiles[33])
             this->m_pTiles[33]->Set(0xfa9, (int)(fSlide02Alpha * 255.0));
         this->UpdateLoadScreen(m_pCurrentLoadScreen, fSlide01Alpha, 1);
@@ -1405,12 +1429,12 @@ void LoadingMenu::FUN_00789820()
             memset(cfilename, 0, 64);
             sprintf_s(cfilename, 64, "Data\\Music\\Special\\%s.mp3",
                       ((SettingT_GameSettingCollection_*)&g_011da0f0)->String());
-            FUN_00761460(true);
+            FalloutAudio_SetMainMenuMusic(true);
             FalloutAudioMedia::PlayMedia(MEDIATYPE_MEDIA_MAINMENU, cfilename, 0, true, true, 0.0f, 0);
-            FUN_00830660();
+            FalloutAudioMedia_MediaMenuUnPause();
             DAT_011dd300 = 0.6f;
             DAT_011dd338 = 0.6f;
-            this->m_pTiles[0]->FUN_0056c7f0()->SetAppCulled(true);
+            this->m_pTiles[0]->GetModel_0056c7f0()->SetAppCulled(true);
             this->m_pTiles[32]->Set(0xfa9, 0.0f, true);
             this->m_pTiles[33]->Set(0xfa9, 255.0f, true);
             DAT_0126fac4->StartPlayback(((SettingT_GameSettingCollection_*)&g_011de740)->String(), 0, -1, 0, 0, 0.0f);
@@ -1425,9 +1449,9 @@ void LoadingMenu::FUN_00789820()
             memset(cfilename, 0, 64);
             sprintf_s(cfilename, 64, "Data\\Music\\Special\\%s.mp3",
                       ((SettingT_GameSettingCollection_*)&g_011da0f0)->String());
-            FUN_00761460(true);
+            FalloutAudio_SetMainMenuMusic(true);
             FalloutAudioMedia::PlayMedia(MEDIATYPE_MEDIA_MAINMENU, cfilename, 0, true, true, 0.0f, 0);
-            FUN_00830660();
+            FalloutAudioMedia_MediaMenuUnPause();
             DAT_011dd300 = 0.6f;
             DAT_011dd338 = 0.6f;
             DAT_011da0c9 = true;
@@ -1438,29 +1462,29 @@ void LoadingMenu::FUN_00789820()
         if (DAT_011a0294)
         {
             while (!g_TES)
-                FUN_0040fca0(5);
+                BSSleep(5);
             this->ApplyLoadingScreenTexture((void*)TileShaderState);
         }
         if (!LoadScreenData && this->GetFloat(4))
-            this->FUN_0078cc50();
+            this->FadeIn();
         else
             LoadScreenData = gm_GetTickCount();
         this->m_uiLoadScreenIndex = LoadScreenData;
     }
     else if (this->GetFloat(4))
     {
-        this->FUN_0078cc50();
+        this->FadeIn();
     }
     else if (!this->GetFloat(9) && gm_GetTickCount() >= this->m_uiLoadScreenIndex)
     {
         Tile3D* p3dtile = (Tile3D*)this->m_pTiles[0];
-        if (p3dtile->FUN_0078a1f0())
+        if (p3dtile->Tile3D_IsPlaying())
         {
-            if (!DAT_011a0294 && DAT_011c3f3c->GetValue() == _gModifierZero && !FUN_0070edf0() &&
+            if (!DAT_011a0294 && DAT_011c3f3c->GetValue() == _gModifierZero && !StartMenu_MainMenuIsActive() &&
                 (!this->GetFloat(3) ||
                  ((Tile*)this->m_pTiles[34])->ContainsTrait(0xfa3)))
                 this->UpdateLoadingScreenText(0);
-            ::FUN_0078a9f0((char*)this);
+            ::LoadingMenu_AdvanceScreen((char*)this);
             this->ApplyLoadingScreenTexture(0);
             ((NiControllerManager*)((TESTopicInfo*)p3dtile)->GetConversationData())
                 ->StopSequence(GetLoadingTileSequence(p3dtile), 0.0f);
@@ -1474,7 +1498,7 @@ void LoadingMenu::FUN_00789820()
             {
                 this->m_uiLoadScreenIndex = gm_GetTickCount();
                 this->ToggleFlagBit(1);
-                if (p3dtile->FUN_00a20cc0(this->GetFloat(1) ? "Forward" : "Backward"))
+                if (p3dtile->Tile3D_PlaySequence(this->GetFloat(1) ? "Forward" : "Backward"))
                 {
                     this->m_uiFirstStateValue = gm_GetTickCount();
                     this->m_uiSecondStateValue++;
@@ -1486,7 +1510,7 @@ void LoadingMenu::FUN_00789820()
                         this->SetFloatFlag(7, false);
                     }
                     NiUpdateData data(0.0f, true, false);
-                    ((NN_00605d70*)static_cast<Tile*>(p3dtile)->FUN_0056c7f0())->Update(data);
+                    ((NN_00605d70*)static_cast<Tile*>(p3dtile)->GetModel_0056c7f0())->Update(data);
                 }
                 else
                 {
@@ -1498,7 +1522,7 @@ void LoadingMenu::FUN_00789820()
     }
 
     if (((Tile*)this->m_pTiles[11])->IsVisible())
-        this->FUN_0078a230();
+        this->ResetLoadingPinwheelAnimation();
     BSAudio::GetSingleton()->Update(true);
     FalloutAudioMedia::Update();
 }
@@ -1506,7 +1530,8 @@ void LoadingMenu::FUN_00789820()
 extern unsigned char DAT_011cabb8;
 
 // @fnv 0x0078a930
-unsigned char __cdecl FUN_0078a930()
+// src: COMMUNITY 0x0078a930
+unsigned char __cdecl GetIsLocationSpecificLoadScreensOnly()
 {
     return DAT_011cabb8;
 }
@@ -1524,7 +1549,8 @@ struct TL
 
 // When aiState is 1, walks the tile list at this+0xd0, sets flag 0xfa3 to 1 on tiles where it is 0, and calls SetTileAlpha on each tile with afTime.
 // @fnv 0x0078b100
-void LoadingMenu::FUN_0078b100(float afTime, int aiState)
+// src: COMMUNITY 0x0078b100
+void LoadingMenu::UpdateStatsTilesAlphas(float afTime, int aiState)
 {
     if (aiState == 1)
     {
@@ -1681,8 +1707,8 @@ void LoadingMenu::CopyTileLayout()
 }
 
 void* __fastcall _ref_00726070(void* apNode);
-unsigned int __fastcall FUN_0044edb0(void* apList);
-void FUN_0078d670();
+unsigned int __fastcall TESMain_GetThread(void* apList);
+void LoadingMenu_FillDisplayData();
 extern float DAT_011da16c;
 extern int DAT_011da170;
 // @fnv 0x0078d6b0
@@ -1691,8 +1717,8 @@ void SaveLoadScreenData(BGSSaveFormBuffer* apSaveGameBuffer)
     unsigned int iElementIndex;
     void* pquest;
     bool bLocationSpecificOnly;
-    FUN_0078d670();
-    pquest = *(void**)&g_011da168 ? (void*)FUN_0044edb0(*(void**)&g_011da168) : 0;
+    LoadingMenu_FillDisplayData();
+    pquest = *(void**)&g_011da168 ? (void*)TESMain_GetThread(*(void**)&g_011da168) : 0;
     iElementIndex = *(void**)&g_011da168 ? (unsigned int)_ref_00726070(*(void**)&g_011da168) : 0;
     apSaveGameBuffer->SerializeFormData(pquest, 0);
     apSaveGameBuffer->SaveData(&iElementIndex, 4, 0);
@@ -1703,7 +1729,8 @@ void SaveLoadScreenData(BGSSaveFormBuffer* apSaveGameBuffer)
 }
 
 // @fnv 0x0078d280
-void FUN_0078d280(bool abCreate)
+// src: COMMUNITY 0x0078d280
+void LoadingMenu_SetupForMainMenu(bool abCreate)
 {
     if (BSSystemUtility::s_iUpdateEnabled)
         LoadingMenu::UpdateLoadingScreenThread();
@@ -1736,19 +1763,19 @@ void UpdateIfEnabled(int aiValue)
     if (BSSystemUtility::s_iUpdateEnabled != 0 && aiValue != 0 &&
         ((LoadingMenu*)BSSystemUtility::s_iUpdateEnabled)->pLocation == 0)
     {
-        FUN_004581c0(true);
-        ((LoadingMenu*)BSSystemUtility::s_iUpdateEnabled)->FUN_00788ab0(aiValue);
+        LoadingMenu_FlagReset(true);
+        ((LoadingMenu*)BSSystemUtility::s_iUpdateEnabled)->Reset_00788ab0(aiValue);
     }
 }
 
 class NiRenderer;
 namespace fnv_007887a0 {
-NiRenderer* __cdecl FUN_0043c4b0();
-void __cdecl FUN_00761460(unsigned char);
-void __cdecl FUN_00788a90(unsigned char);
-unsigned char __cdecl FUN_00788aa0();
-void __fastcall FUN_0078a940(char*);
-bool __cdecl FUN_00a61f30(const void*);
+NiRenderer* __cdecl NiXenonRenderer_GetRenderer();
+void __cdecl FalloutAudio_SetMainMenuMusic(unsigned char);
+void __cdecl FalloutAudio_SetNewGameMusic(unsigned char);
+unsigned char __cdecl FalloutAudio_GetNewGameMusic();
+void __fastcall LoadingMenu_FlushLoadScreenList(char*);
+bool __cdecl BSTexturePalette_RemoveTexture(const void*);
 extern char* _g_thePlayer;
 
 struct Flt
@@ -1757,7 +1784,7 @@ struct Flt
 };
 struct S1740
 {
-    void FUN_005d1740(int);
+    void BSAudio_UnMute(int);
 };
 struct SndX
 {
@@ -1827,28 +1854,28 @@ LoadingMenu::~LoadingMenu()
     {
         if (*(fnv_007887a0::Flt*)&m_kLoadScreenTextures[i])
         {
-            fnv_007887a0::FUN_00a61f30((const void*)(unsigned int)*(fnv_007887a0::Flt*)&m_kLoadScreenTextures[i]);
+            fnv_007887a0::BSTexturePalette_RemoveTexture((const void*)(unsigned int)*(fnv_007887a0::Flt*)&m_kLoadScreenTextures[i]);
             m_kLoadScreenTextures[i] = 0;
         }
     }
     DAT_011d8907 = false;
-    ((fnv_007887a0::RendX*)fnv_007887a0::FUN_0043c4b0())->SetBackground(&m_kLoadingScreenColor);
-    if (FUN_0070edf0() || (DAT_011a0294 && *((SettingT_GameSettingCollection_*)&g_011ded5c)->String()))
+    ((fnv_007887a0::RendX*)fnv_007887a0::NiXenonRenderer_GetRenderer())->SetBackground(&m_kLoadingScreenColor);
+    if (StartMenu_MainMenuIsActive() || (DAT_011a0294 && *((SettingT_GameSettingCollection_*)&g_011ded5c)->String()))
     {
         if (((PatrolActorPackageData*)BSAudio::GetSingleton())->IsPatrolling())
             fnv_007887a0::FalloutAudioMedia::FadeOutMedia(4000, (MEDIATYPE)0);
     }
-    if (fnv_007887a0::FUN_00788aa0())
+    if (fnv_007887a0::FalloutAudio_GetNewGameMusic())
     {
-        fnv_007887a0::FUN_00788a90(0);
-        fnv_007887a0::FUN_00761460(0);
+        fnv_007887a0::FalloutAudio_SetNewGameMusic(0);
+        fnv_007887a0::FalloutAudio_SetMainMenuMusic(0);
         fnv_007887a0::FalloutAudioMedia::FadeOutMedia(4000, (MEDIATYPE)0);
     }
-    if (this->GetFloat(2) && BSAudio::GetSingleton()->FUN_005bb4d0())
+    if (this->GetFloat(2) && BSAudio::GetSingleton()->TESRegionData_GetPriority())
         BSAudio::GetSingleton()->SetUseMultipleThreads(false);
-    ((fnv_007887a0::S1740*)BSAudio::GetSingleton())->FUN_005d1740(1000);
+    ((fnv_007887a0::S1740*)BSAudio::GetSingleton())->BSAudio_UnMute(1000);
     DAT_011a0294 = false;
-    fnv_007887a0::FUN_0078a940((char*)this);
+    fnv_007887a0::LoadingMenu_FlushLoadScreenList((char*)this);
     ((fnv_007887a0::SndX*)&m_kSecondDate)->Stop();
     ((fnv_007887a0::SndX*)&m_kSecondDate)->PausePlayback();
     ((fnv_007887a0::SndX*)&m_kFirstDate)->PausePlayback();
@@ -1932,7 +1959,7 @@ struct LMNode
     LMLoadScreen** GetItem();
 };
 extern TES* g_TES;
-bool FUN_00a61f30(const void* apTexture);
+bool BSTexturePalette_RemoveTexture(const void* apTexture);
 // Builds a texture path from the current candidate's full name, creates the texture image, stores it in a rotating slot, and assigns it to a tile shader property.
 // @fnv 0x0078a3e0
 void LoadingMenu::ApplyLoadingScreenTexture(TileShaderProperty* apProperty)
@@ -1951,7 +1978,7 @@ void LoadingMenu::ApplyLoadingScreenTexture(TileShaderProperty* apProperty)
     }
     if (*pSlot)
     {
-        FUN_00a61f30(*pSlot);
+        BSTexturePalette_RemoveTexture(*pSlot);
     }
     *pSlot = (NiSourceTexture*)spTexture;
     apProperty = (m_uiSecondStateValue % 2 == 0) ? m_pTiles[32]->GetShaderProperty() : m_pTiles[33]->GetShaderProperty();
@@ -2051,12 +2078,12 @@ void LoadingMenu::ApplyXPBarSettings(LoadingTileSettingsX* apSettings)
                 pTile->Set(0xfb3, apSettings->fGreen, true);
                 pTile->Set(0xfb4, apSettings->fBlue, true);
                 pTile->SetInt(0xff5, -1);
-                pTile->SetChangeFlag(8);
+                pTile->Tile_SetChangeFlag(8);
             }
         }
     }
     m_pTiles[16]->Set(0xffa, apSettings->fAlpha, true);
-    static_cast<LoadingStatsTile*>(m_pTiles[16])->ApplyRotationOnChildren();
+    static_cast<LoadingStatsTile*>(m_pTiles[16])->Tile_ApplyRotationOnChildren();
 }
 
 class Base_b7116
@@ -2098,12 +2125,12 @@ class LoadingMenuCreateTile : public Tile
 class LoadingMenuCreateProvider
 {
   public:
-    LoadingMenuCreateTile* FUN_00586150();
+    LoadingMenuCreateTile* CombatController_GetCombatState();
 };
 extern LoadingMenu* DAT_011da0c0;
 extern LoadingMenuThread* DAT_011da0c4;
 extern bool DAT_011da0c8;
-LoadingMenuCreateTile* FUN_00a09030(int);
+LoadingMenuCreateTile* Tile_GetMenuByClass(int);
 void FUN_00717740(int);
 void FUN_0078d020();
 void* __cdecl operator new(unsigned int);
@@ -2112,34 +2139,34 @@ void* __cdecl operator new(unsigned int);
 // @fnv 0x00788cc0
 LoadingMenuCreateTile* __cdecl CreateLoadingMenuTile(TESForm* form, bool refresh, bool visible)
 {
-    LoadingMenuCreateTile* menu = FUN_00a09030(FUN_00788f20());
+    LoadingMenuCreateTile* menu = Tile_GetMenuByClass(LoadingMenu_GetClassStatic());
     if (menu)
     {
         DAT_011da0c0->FUN_00458080(3, true);
-        DAT_011da0c0->FUN_00788ab0(form);
+        DAT_011da0c0->Reset_00788ab0(form);
         DAT_011da0c0->FUN_00458080(10, visible);
         return menu;
     }
     DAT_011da0c8 = true;
-    LoadingMenuCreateTile* existing = reinterpret_cast<LoadingMenuCreateProvider*>(FUN_004b7210())
-                                          ->FUN_00586150()
+    LoadingMenuCreateTile* existing = reinterpret_cast<LoadingMenuCreateProvider*>(InterfaceManager_GetSingleton())
+                                          ->CombatController_GetCombatState()
                                           ->ReadFile("Data\\Menus\\loading_menu.xml");
     DAT_011da0c8 = false;
     LoadingMenu* tile = existing->GetMenu();
-    if (tile && tile->GetClass() == FUN_00788f20())
+    if (tile && tile->GetClass() == LoadingMenu_GetClassStatic())
     {
         FUN_00717740(0);
         tile->FUN_00a1dc70(reinterpret_cast<TileMenu*>(existing), false);
         DAT_011da0c0 = tile;
         DAT_011da0c0->CopyTileLayout();
-        DAT_011da0c0->FUN_00788f30();
-        DAT_011da0c0->FUN_00788f80();
-        DAT_011da0c0->FUN_00789080();
-        DAT_011da0c0->FUN_00788fe0();
-        DAT_011da0c0->FUN_0078b6a0(false);
-        DAT_011da0c0->FUN_0078b6f0(false);
-        DAT_011da0c0->FUN_0078b650(false);
-        DAT_011da0c0->FUN_0078b7c0(false);
+        DAT_011da0c0->InitStatsTilesList();
+        DAT_011da0c0->LoadingMenu_InitObjectiveTilesList();
+        DAT_011da0c0->InitTipTilesList();
+        DAT_011da0c0->InitXPProgressTilesList();
+        DAT_011da0c0->UpdateObjectiveTilesVisibilities(false);
+        DAT_011da0c0->UpdateTipTilesVisibilities(false);
+        DAT_011da0c0->UpdateStatsTilesVisibilities(false);
+        DAT_011da0c0->UpdateXPProgressTilesVisibilities(false);
         DAT_011da0c0->InitLoadingMenu(form);
         DAT_011da0c0->FUN_00458080(10, visible);
         if (!DAT_011da0c4)
@@ -2199,8 +2226,8 @@ void LoadingMenu::UpdateLoadingScreens()
         Clear();
         cleared = true;
     }
-    SetFlag(5, FUN_0070edf0() || (unsigned char)schedule->FUN_00678ce0());
-    if (DAT_011a0294 && !FUN_0070edf0())
+    SetFlag(5, StartMenu_MainMenuIsActive() || (unsigned char)schedule->Main_GameReset());
+    if (DAT_011a0294 && !StartMenu_MainMenuIsActive())
     {
         int index = 0;
         if (IsSpecial(((SettingT_GameSettingCollection_*)&g_011de740)->String()))
@@ -2220,7 +2247,7 @@ void LoadingMenu::UpdateLoadingScreens()
         ScreenArray screenArray;
         Gather(screenArray);
         Build(screenArray);
-        if (pLocation && ((ScreenList*)&m_kLoadScreenItems)->Count() < *reinterpret_cast<unsigned int*>(((SettingT_GameSettingCollection_*)&g_011da138)->Int()) && !FUN_0078a930())
+        if (pLocation && ((ScreenList*)&m_kLoadScreenItems)->Count() < *reinterpret_cast<unsigned int*>(((SettingT_GameSettingCollection_*)&g_011da138)->Int()) && !GetIsLocationSpecificLoadScreensOnly())
         {
             pLocation = 0;
             Gather(screenArray);
@@ -2235,7 +2262,7 @@ void LoadingMenu::UpdateLoadingScreens()
         fallback->Prepare();
         ((ScreenList*)&m_kLoadScreenItems)->Add(fallback);
     }
-    if (cleared && !((Tile*)m_pTiles[0])->FUN_0078a1f0())
+    if (cleared && !((Tile*)m_pTiles[0])->Tile3D_IsPlaying())
     {
         ApplyLoadingScreenTexture(0);
         Refresh();
@@ -2303,8 +2330,8 @@ void LoadingMenu::ApplySettings(LoadingStatsSettings* settings)
                 firstTile->Set(0xfa2, y, true);
                 secondTile->Set(0xfa2, y, true);
                 y += spacing;
-                static_cast<LoadingStatsTile*>(firstTile)->SetChangeFlag(8);
-                static_cast<LoadingStatsTile*>(secondTile)->SetChangeFlag(8);
+                static_cast<LoadingStatsTile*>(firstTile)->Tile_SetChangeFlag(8);
+                static_cast<LoadingStatsTile*>(secondTile)->Tile_SetChangeFlag(8);
                 ++uiIndex;
             }
             else
@@ -2316,7 +2343,7 @@ void LoadingMenu::ApplySettings(LoadingStatsSettings* settings)
         }
     }
     static_cast<LoadingStatsTile*>(m_pTiles[31])->Set(0xffa, settings->first.fAlpha, true);
-    static_cast<LoadingStatsTile*>(m_pTiles[31])->ApplyRotationOnChildren();
+    static_cast<LoadingStatsTile*>(m_pTiles[31])->Tile_ApplyRotationOnChildren();
 }
 
 struct Extent
@@ -2386,7 +2413,7 @@ void LoadingMenu::UpdateMenuTiles(Options* options)
                 tile->Set(0xfb3, options->value2, true);
                 tile->Set(0xfb4, options->value3, true);
                 tile->SetInt(0xff5, -1);
-                tile->SetChangeFlag(8);
+                tile->Tile_SetChangeFlag(8);
             }
             else if (tile == m_pTiles[3])
             {
@@ -2400,7 +2427,7 @@ void LoadingMenu::UpdateMenuTiles(Options* options)
         }
     }
     m_pTiles[27]->Set(0xffa, options->alpha, true);
-    static_cast<LoadingStatsTile*>(m_pTiles[27])->ApplyRotationOnChildren();
+    static_cast<LoadingStatsTile*>(m_pTiles[27])->Tile_ApplyRotationOnChildren();
 }
 
 // @fnv 0x0078ce10
@@ -2410,11 +2437,11 @@ void LoadingMenu::SetTileAlpha(void* pkTile, float fAlpha)
         return;
     if (pkTile == m_pTiles[33])
         return;
-    fAlpha = FUN_0040ebd0(fAlpha, 1.0f);
-    fAlpha = FUN_00404010(fAlpha, 0.0f);
+    fAlpha = BSMIN(fAlpha, 1.0f);
+    fAlpha = BSMAX_00404010(fAlpha, 0.0f);
     if (((Tile*)pkTile)->GetType() == 0x388)
     {
-        SetAlphaRecursive(((Tile*)pkTile)->FUN_0056c7f0(), fAlpha);
+        SetAlphaRecursive(((Tile*)pkTile)->GetModel_0056c7f0(), fAlpha);
         return;
     }
     if (pkTile == m_pTiles[12])
@@ -2431,14 +2458,15 @@ extern bool DAT_011a0296;
 struct PerkEntryX : BGSPerkEntry
 {
     void* FUN_005f36f0();
-    int FUN_0078bc60();
+    int TESLoadScreen_GetTypeData();
     int FUN_005a7130();
 };
 } // namespace fnv_0078bb60
 
 // Applies the selected perk entry's settings to the loading menu tiles, XP bar, or menu tiles based on its type, then clears DAT_011a0296.
 // @fnv 0x0078bb60
-void LoadingMenu::FUN_0078bb60(BGSPerkEntry* entry)
+// src: XBOX_PDB 0x0078bb60
+void LoadingMenu::UpdatePlayerTileSettings(BGSPerkEntry* entry)
 {
     if (!FUN_00458110(6))
         return;
@@ -2453,8 +2481,8 @@ void LoadingMenu::FUN_0078bb60(BGSPerkEntry* entry)
     }
     if (((fnv_0078bb60::PerkEntryX*)entry)->FUN_005f36f0())
     {
-        int x = ((fnv_0078bb60::PerkEntryX*)entry)->FUN_0078bc60();
-        FUN_0078b9b0(x);
+        int x = ((fnv_0078bb60::PerkEntryX*)entry)->TESLoadScreen_GetTypeData();
+        CalcLoadScreenTypeTextWindowVerts(x);
         switch (((fnv_0078bb60::PerkEntryX*)entry)->FUN_005a7130())
         {
         case 4:
@@ -2485,12 +2513,13 @@ struct VATSCamera
 extern VATSCamera* DAT_011dea0c;
 extern bool DAT_011a0294;
 
-unsigned int FUN_00457fe0();
+unsigned int Cmd_GetSessionTime_Execute();
 
 } // namespace s78cc50
 
 // @fnv 0x0078cc50
-inline void LoadingMenu::FUN_0078cc50()
+// src: XBOX_PDB 0x0078cc50
+inline void LoadingMenu::FadeIn()
 {
     static float s_fDuration = reinterpret_cast<Tile*>(pMenu)->FUN_00a011b0(0xfc1) * 1000.0;
 
@@ -2499,16 +2528,16 @@ inline void LoadingMenu::FUN_0078cc50()
         if (s78cc50::DAT_011dea0c->FUN_0078cdf0() || s78cc50::DAT_011a0294)
         {
             reinterpret_cast<TileMenu*>(m_pTiles[12])->FUN_00a20610(s78cc50::DAT_011dea0c->FUN_0078cdf0());
-            LoadScreenData = (unsigned int)(s78cc50::FUN_00457fe0() + s_fDuration);
+            LoadScreenData = (unsigned int)(s78cc50::Cmd_GetSessionTime_Execute() + s_fDuration);
         }
         else
         {
-            LoadScreenData = s78cc50::FUN_00457fe0();
+            LoadScreenData = s78cc50::Cmd_GetSessionTime_Execute();
         }
     }
-    if (s78cc50::FUN_00457fe0() < LoadScreenData)
+    if (s78cc50::Cmd_GetSessionTime_Execute() < LoadScreenData)
     {
-        unsigned int uiRemaining = LoadScreenData - s78cc50::FUN_00457fe0();
+        unsigned int uiRemaining = LoadScreenData - s78cc50::Cmd_GetSessionTime_Execute();
         SetTileAlpha(reinterpret_cast<Tile*>(pMenu), 1.0f - uiRemaining / s_fDuration);
     }
     else
@@ -2528,7 +2557,7 @@ unsigned int gm_GetTickCount();
 bool LoadingMenu::UpdateLoadingScreen()
 {
     Tile* p3dtile = m_pTiles[0];
-    if (DAT_011a0294 && !GetFloat(0) && !p3dtile->FUN_0078a1f0())
+    if (DAT_011a0294 && !GetFloat(0) && !p3dtile->Tile3D_IsPlaying())
     {
         while (_ref_00726070(m_pkLoadScreenList))
             m_pkLoadScreenList = (BSSimpleList<TESLoadScreen*>*)_ref_00726070(m_pkLoadScreenList);
@@ -2544,7 +2573,8 @@ bool LoadingMenu::UpdateLoadingScreen()
 
 // For a selected screen with bShow true, dispatches settings by screen type; otherwise passes bShow to all four methods.
 // @fnv 0x0078b3f0
-void LoadingMenu::FUN_0078b3f0(TESLoadScreen* pLoadScreen, bool bShow)
+// src: XBOX_PDB 0x0078b3f0
+void LoadingMenu::UpdatePlayerTileVisibilities(TESLoadScreen* pLoadScreen, bool bShow)
 {
     if (!GetFloat(6))
     {
@@ -2570,51 +2600,51 @@ void LoadingMenu::FUN_0078b3f0(TESLoadScreen* pLoadScreen, bool bShow)
         switch (pLoadScreen->GetLoadScreenTypeDataType())
         {
         case 2:
-            FUN_0078b6a0(bShow);
-            FUN_0078b650(!bShow);
-            FUN_0078b6f0(!bShow);
-            FUN_0078b7c0(!bShow);
+            UpdateObjectiveTilesVisibilities(bShow);
+            UpdateStatsTilesVisibilities(!bShow);
+            UpdateTipTilesVisibilities(!bShow);
+            UpdateXPProgressTilesVisibilities(!bShow);
             break;
         case 4:
-            FUN_0078b6a0(!bShow);
-            FUN_0078b650(bShow);
-            FUN_0078b6f0(!bShow);
-            FUN_0078b7c0(!bShow);
+            UpdateObjectiveTilesVisibilities(!bShow);
+            UpdateStatsTilesVisibilities(bShow);
+            UpdateTipTilesVisibilities(!bShow);
+            UpdateXPProgressTilesVisibilities(!bShow);
             break;
         case 3:
-            FUN_0078b6a0(!bShow);
-            FUN_0078b650(!bShow);
-            FUN_0078b6f0(bShow);
-            FUN_0078b7c0(!bShow);
+            UpdateObjectiveTilesVisibilities(!bShow);
+            UpdateStatsTilesVisibilities(!bShow);
+            UpdateTipTilesVisibilities(bShow);
+            UpdateXPProgressTilesVisibilities(!bShow);
             break;
         case 1:
-            FUN_0078b6a0(!bShow);
-            FUN_0078b650(!bShow);
-            FUN_0078b6f0(!bShow);
-            FUN_0078b7c0(bShow);
+            UpdateObjectiveTilesVisibilities(!bShow);
+            UpdateStatsTilesVisibilities(!bShow);
+            UpdateTipTilesVisibilities(!bShow);
+            UpdateXPProgressTilesVisibilities(bShow);
             break;
         default:
-            FUN_0078b6a0(false);
-            FUN_0078b650(false);
-            FUN_0078b6f0(false);
-            FUN_0078b7c0(false);
+            UpdateObjectiveTilesVisibilities(false);
+            UpdateStatsTilesVisibilities(false);
+            UpdateTipTilesVisibilities(false);
+            UpdateXPProgressTilesVisibilities(false);
             break;
         }
     }
     else
     {
-        FUN_0078b6a0(bShow);
-        FUN_0078b650(bShow);
-        FUN_0078b6f0(bShow);
-        FUN_0078b7c0(bShow);
+        UpdateObjectiveTilesVisibilities(bShow);
+        UpdateStatsTilesVisibilities(bShow);
+        UpdateTipTilesVisibilities(bShow);
+        UpdateXPProgressTilesVisibilities(bShow);
     }
 }
 
 namespace fnv_00788ab0 {
 extern bool DAT_011a0295;
-void* __cdecl FUN_0043c4b0();
-void __cdecl FUN_00a04200(bool);
-void __fastcall FUN_0078a9f0(char*);
+void* __cdecl NiXenonRenderer_GetRenderer();
+void __cdecl Tile_UpdateAll(bool);
+void __fastcall LoadingMenu_AdvanceScreen(char*);
 class S00788ab0_StartMenu
 {
   public:
@@ -2629,41 +2659,42 @@ struct S00788ab0_MenuTileQuery
 {
     S00788ab0_StartMenu* GetMenu();
 };
-int FUN_0070ede0();
-S00788ab0_MenuTileQuery* FUN_00a09030(int);
+int StartMenu_GetClassStatic();
+S00788ab0_MenuTileQuery* Tile_GetMenuByClass(int);
 void FUN_0078cfc0();
 void FUN_0078d020();
-void __fastcall FUN_004a0370(char*);
-void __fastcall FUN_004a03c0(char*);
+void __fastcall NiXenonRenderer_LockRenderer(char*);
+void __fastcall NiXenonRenderer_UnlockRenderer(char*);
 struct S00788ab0_OSQuery
 {
-    bool FUN_00678ce0();
+    bool Main_GameReset();
 };
 } // namespace fnv_00788ab0
 
 // When GetFloat(3) is nonzero, updates timers and menu state, configures tiles, and assigns value to pLocation.
 // @fnv 0x00788ab0
-void LoadingMenu::FUN_00788ab0(int aiExtraCandidates)
+// src: COMMUNITY 0x00788ab0
+void LoadingMenu::Reset_00788ab0(int aiExtraCandidates)
 {
     if (GetFloat(3))
     {
         fnv_00788ab0::FUN_0078cfc0();
         m_uiFirstStateValue = gm_GetTickCount() - 4000;
-        if (DAT_011d8907 || g_BGSSaveLoadGame->FUN_0042ce10())
+        if (DAT_011d8907 || g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
         {
-            fnv_00788ab0::S00788ab0_StartMenu* menu = fnv_00788ab0::FUN_00a09030(fnv_00788ab0::FUN_0070ede0())->GetMenu();
+            fnv_00788ab0::S00788ab0_StartMenu* menu = fnv_00788ab0::Tile_GetMenuByClass(fnv_00788ab0::StartMenu_GetClassStatic())->GetMenu();
             if (menu && !menu->IsFlagSet(fnv_00788ab0::S00788ab0_StartMenu::Flag1))
             {
                 delete menu;
             }
         }
-        if (((fnv_00788ab0::S00788ab0_OSQuery*)g_osGlobals)->FUN_00678ce0())
+        if (((fnv_00788ab0::S00788ab0_OSQuery*)g_osGlobals)->Main_GameReset())
         {
-            this->FUN_0078afa0(false);
+            this->ShowPlayerTiles(false);
         }
         else
         {
-            this->FUN_0078afa0(true);
+            this->ShowPlayerTiles(true);
             FUN_0078aec0();
         }
         pLocation = (TESForm*)aiExtraCandidates;
@@ -2672,24 +2703,24 @@ void LoadingMenu::FUN_00788ab0(int aiExtraCandidates)
         m_uiLoadScreenIndex = gm_GetTickCount();
         ++m_uiSecondStateValue;
         this->UpdateLoadingScreenText(0);
-        fnv_00788ab0::FUN_0078a9f0((char*)this);
+        fnv_00788ab0::LoadingMenu_AdvanceScreen((char*)this);
         this->ApplyLoadingScreenTexture(0);
         FUN_0078abd0();
         ++m_uiSecondStateValue;
         this->UpdateLoadingScreenText(0);
-        fnv_00788ab0::FUN_0078a9f0((char*)this);
+        fnv_00788ab0::LoadingMenu_AdvanceScreen((char*)this);
         this->ApplyLoadingScreenTexture(0);
         FUN_0078abd0();
         this->FUN_00458080((TileIndex)3, false);
-        fnv_00788ab0::FUN_004a0370((char*)fnv_00788ab0::FUN_0043c4b0());
+        fnv_00788ab0::NiXenonRenderer_LockRenderer((char*)fnv_00788ab0::NiXenonRenderer_GetRenderer());
         if (!((Tile*)m_pTiles[11])->IsVisible())
         {
             m_pTiles[11]->Set(4003, 1);
-            this->FUN_0078a230();
+            this->ResetLoadingPinwheelAnimation();
         }
-        FUN_004b7210()->GetParent()->Set(4003, 0);
-        fnv_00788ab0::FUN_00a04200(true);
-        fnv_00788ab0::FUN_004a03c0((char*)fnv_00788ab0::FUN_0043c4b0());
+        InterfaceManager_GetSingleton()->GetParent()->Set(4003, 0);
+        fnv_00788ab0::Tile_UpdateAll(true);
+        fnv_00788ab0::NiXenonRenderer_UnlockRenderer((char*)fnv_00788ab0::NiXenonRenderer_GetRenderer());
         fnv_00788ab0::DAT_011a0295 = true;
         fnv_00788ab0::FUN_0078d020();
     }

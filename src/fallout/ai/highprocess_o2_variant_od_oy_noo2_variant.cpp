@@ -21,15 +21,15 @@ struct xProcess
 struct xFilter
 {
     xFilter(int);
-    void FUN_004a39f0(int);
-    void FUN_0059ce80(unsigned int);
-    int FUN_004a3a20();
-    unsigned int FUN_00559450();
+    void CFilter_SetLayer(int);
+    void CFilter_SetGroup(unsigned int);
+    int CFilter_GetGroup();
+    unsigned int Modelloader_GetReferencedThis();
     unsigned int m_uiFilterValue;
 };
 struct xHasFilter
 {
-    xFilter FUN_0070c440();
+    xFilter bhkCharacterController_GetCollisionFilter();
 };
 struct xVec4
 {
@@ -64,7 +64,7 @@ int __fastcall xFUN_004ae750(void*);
 struct xBodyV;
 struct xPtr
 {
-    unsigned int FUN_00559450();
+    unsigned int Modelloader_GetReferencedThis();
     xBodyV* operator->();
     void FUN_0066b0d0(void*);
 };
@@ -122,7 +122,7 @@ struct xCell
 void* __fastcall xFUN_004543c0(void*);
 struct xSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern xSetting xg_setting_11e029c;
 struct xMiddle
@@ -640,7 +640,7 @@ struct xActor
     char m_pad04[0x64];
     xMiddle* m_68;
     xCell* FUN_008d6f30();
-    float FUN_00567400();
+    float TESObjectREFR_GetScale_00567400();
 };
 struct xController
 {
@@ -811,18 +811,19 @@ struct xController
     char m_pad04[0x430];
     xPtr m_434;
     float m_438;
-    void FUN_008e4e50(xActor* apActor);
+    void HighProcess_SetupPhantom(xActor* apActor);
 };
 
 // @fnv 0x008e4e50
-void xController::FUN_008e4e50(xActor* apActor)
+// src: XBOX_PDB 0x008e4e50
+void xController::HighProcess_SetupPhantom(xActor* apActor)
 {
     if (apActor->m_68->FUN_5f0())
     {
-        if (!m_434.FUN_00559450())
+        if (!m_434.Modelloader_GetReferencedThis())
         {
             xPoint3 HALF = *apActor->m_68->FUN_5f0()->FUN_00500940();
-            float fActorScale = apActor->FUN_00567400();
+            float fActorScale = apActor->TESObjectREFR_GetScale_00567400();
             if (HALF.y > HALF.z)
                 HALF.y = HALF.y * fActorScale;
             else
@@ -831,16 +832,16 @@ void xController::FUN_008e4e50(xActor* apActor)
             HALF.z = HALF.z * fActorScale;
             xShape* SHAPE = new xShape(&HALF);
             xFilter FILTER(0);
-            FILTER.FUN_004a39f0(0x22);
+            FILTER.CFilter_SetLayer(0x22);
             xHasFilter* OWNER = FUN_28c();
             if (OWNER)
-                FILTER.FUN_0059ce80(OWNER->FUN_0070c440().FUN_004a3a20());
+                FILTER.CFilter_SetGroup(OWNER->bhkCharacterController_GetCollisionFilter().CFilter_GetGroup());
             xCinfo CINFO;
-            CINFO.m_uiFilterInfo = FILTER.FUN_00559450();
+            CINFO.m_uiFilterInfo = FILTER.Modelloader_GetReferencedThis();
             CINFO.m_pCollisionShape = xFUN_004ae750(SHAPE);
             CINFO.m_vContactPosition.SetFromScaledVector3(apActor->FUN_1f4());
             m_434.FUN_0066b0d0(new xBody(&CINFO));
-            m_438 = *xg_setting_11e029c.FUN_00403e20();
+            m_438 = *xg_setting_11e029c.Setting_Float_00403e20();
         }
         void* WORLD = xFUN_004543c0(apActor->FUN_008d6f30());
         m_434->FUN_9c(WORLD);
@@ -868,7 +869,7 @@ struct xConvexShape
 {
     xConvexShape();
     virtual ~xConvexShape();
-    void FUN_0056e810(xVec4*);
+    void bhkBoxShape_Init(xVec4*);
     int m_iWordAt04, m_8, m_iThirdValue;
 };
 struct xBoxShape : xConvexShape
@@ -882,6 +883,6 @@ xBoxShape::xBoxShape(const xP3& akHalfExtents)
 {
     ++xg_126825c;
     xVec4 HALF;
-    FUN_0056e810(xFUN_004a3e00(&HALF, akHalfExtents));
+    bhkBoxShape_Init(xFUN_004a3e00(&HALF, akHalfExtents));
 }
 }  // namespace fnv_008e5100

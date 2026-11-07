@@ -95,7 +95,7 @@ struct S00d369a0_Config
 struct S00d369a0_Transform
 {
     LocalM128 c0, c1, c2, translation;
-    void __thiscall FUN_00cb22f0(S00d369a0_Motion* a, S00d369a0_Motion* b);
+    void __thiscall hkTransform_setMulInverseMul(S00d369a0_Motion* a, S00d369a0_Motion* b);
 };
 struct S00d369a0_ProcessInput
 {
@@ -109,8 +109,8 @@ struct S00d369a0_ProcessInput
     LocalM128 unk60;
     LocalM128 tim;
 };
-extern "C" void* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00da4aa0(void* a, S00d369a0_ProcessInput* b, S00d369a0_Container* c, void* d, int e);
+extern "C" void* __cdecl hkMemoryRouter_getInstance();
+extern "C" void __cdecl hkAgent1nMachine_Process(void* a, S00d369a0_ProcessInput* b, S00d369a0_Container* c, void* d, int e);
 extern "C" unsigned int _rotl(unsigned int, int);
 extern "C" void _ReadWriteBarrier();
 // @fnv 0x00d369a0
@@ -138,9 +138,9 @@ void hkpListAgent::vf03(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
     input.tim = _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&f0), _mm_load_ss(&f0), 0), d0);
     input.tim = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&f1), _mm_load_ss(&f1), 0), d1), input.tim);
     input.tim.m128_f32[3] = (f0 * o->f9c) * o->fa0 + (f1 * p->f9c) * p->fa0;
-    input.transform.FUN_00cb22f0(o, p);
+    input.transform.hkTransform_setMulInverseMul(o, p);
     int count = bits->m1C;
-    unsigned int* out = (unsigned int*)FUN_00c85750();
+    unsigned int* out = (unsigned int*)hkMemoryRouter_getInstance();
     unsigned int* dst = (unsigned int*)*out;
     *out = (unsigned int)dst + ((count * 4 + 0x83) & 0xffffff80);
     int n = 0;
@@ -151,6 +151,6 @@ void hkpListAgent::vf03(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
             dst[n++] = i;
     }
     dst[n] = 0xffffffff;
-    FUN_00da4aa0(this->m0 + 4, &input, bits, dst, a4);
-    *(unsigned int*)FUN_00c85750() = (unsigned int)dst;
+    hkAgent1nMachine_Process(this->m0 + 4, &input, bits, dst, a4);
+    *(unsigned int*)hkMemoryRouter_getInstance() = (unsigned int)dst;
 }

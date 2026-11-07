@@ -34,7 +34,7 @@ BSFileCache::BSFileCache()
 
 struct FUN_00b011b0_shell : public BSFileCache
 {
-    bool FUN_00b011b0(int);
+    bool BSWin32FileCache_IsFileCached(int);
 };
 
 struct VT_00b011b0
@@ -48,13 +48,14 @@ struct VT_00b011b0
 };
 struct ST_00b011b0
 {
-    bool FUN_00b011e0(int);
+    bool BSWin32FileCache_IsFileCached_0(int);
 };
 // Calls v5 on the argument, then forwards the result to FUN_00b011e0 and returns its bool result.
 // @fnv 0x00b011b0
-bool FUN_00b011b0_shell::FUN_00b011b0(int a)
+// src: COMMUNITY 0x00b011b0
+bool FUN_00b011b0_shell::BSWin32FileCache_IsFileCached(int a)
 {
-    return ((ST_00b011b0*)this)->FUN_00b011e0(((VT_00b011b0*)this)->v5(a));
+    return ((ST_00b011b0*)this)->BSWin32FileCache_IsFileCached_0(((VT_00b011b0*)this)->v5(a));
 }
 
 struct FUN_00b01020
@@ -93,10 +94,11 @@ void Unk00b01040::CallVirtualWithField38()
 
 struct FUN_00b01070_Class
 {
-    void FUN_00b01070();
+    void nullsub_316();
 };
 // @fnv 0x00b01070
-void FUN_00b01070_Class::FUN_00b01070()
+// src: COMMUNITY 0x00b01070
+void FUN_00b01070_Class::nullsub_316()
 {}
 
 struct E00b011e0
@@ -117,11 +119,12 @@ struct C00b011e0
     int cnt;
     char _1[0x28];
     M00b011e0* mid;
-    bool FUN_00b011e0(int idx);
+    bool BSWin32FileCache_IsFileCached_0(int idx);
 };
 // Returns true when idx is within cnt and the entry at mid->arr[idx] has v equal to 2; otherwise false.
 // @fnv 0x00b011e0
-bool C00b011e0::FUN_00b011e0(int aiIndex)
+// src: COMMUNITY 0x00b011e0
+bool C00b011e0::BSWin32FileCache_IsFileCached_0(int aiIndex)
 {
     if (aiIndex < 0 || aiIndex >= cnt)
         return false;
@@ -133,11 +136,12 @@ extern int DAT_011ad02c;
 
 struct FUN_00b012f0_shell
 {
-    void FUN_00b012f0(int param_1, int param_2);
+    void BSFileCache_SetFileCacheList(int param_1, int param_2);
 };
 
 // @fnv 0x00b012f0
-void __thiscall FUN_00b012f0_shell::FUN_00b012f0(int aiValue1, int aiValue2)
+// src: COMMUNITY 0x00b012f0
+void __thiscall FUN_00b012f0_shell::BSFileCache_SetFileCacheList(int aiValue1, int aiValue2)
 {
     DAT_011ad028 = aiValue1;
     DAT_011ad02c = aiValue2;
@@ -164,31 +168,34 @@ void* FUN_00b01310_shell::FUN_00b01310(unsigned int flags)
 
 struct FUN_00b01340_Shell
 {
-    int FUN_00b01340(const char* apFileList, unsigned int aiCurrentPriority);
+    int BSFileCache_ParseCachedFileList(const char* apFileList, unsigned int aiCurrentPriority);
 };
 // @fnv 0x00b01340
-int FUN_00b01340_Shell::FUN_00b01340(const char* apFileList, unsigned int aiCurrentPriority)
+// src: COMMUNITY 0x00b01340
+int FUN_00b01340_Shell::BSFileCache_ParseCachedFileList(const char* apFileList, unsigned int aiCurrentPriority)
 {
     return 0;
 }
 
 struct FUN_00b01350_shell
 {
-    bool __thiscall FUN_00b01350(void* apCachedFile);
+    bool __thiscall _retn_0_(void* apCachedFile);
 };
 
 // @fnv 0x00b01350
-bool __thiscall FUN_00b01350_shell::FUN_00b01350(void* apCachedFile)
+// src: COMMUNITY 0x00b01350
+bool __thiscall FUN_00b01350_shell::_retn_0_(void* apCachedFile)
 {
     return false;
 }
 
 struct FUN_00b01360_Cls
 {
-    void FUN_00b01360(int a, int b, int c, int d);
+    void BSFileCache_WaitForFileCachingToFinish(int a, int b, int c, int d);
 };
 // @fnv 0x00b01360
-void FUN_00b01360_Cls::FUN_00b01360(int a, int b, int c, int d)
+// src: COMMUNITY 0x00b01360
+void FUN_00b01360_Cls::BSFileCache_WaitForFileCachingToFinish(int a, int b, int c, int d)
 {}
 
 struct StandIn
@@ -235,11 +242,12 @@ class B01130Task
     int m_iFadeIndex;
     void* m_pvThread;
 
-    void FUN_00b01130();
+    void BSFileCache_ForcePauseAndWaitForIdle();
 };
 
 // @fnv 0x00b01130
-void B01130Task::FUN_00b01130()
+// src: COMMUNITY 0x00b01130
+void B01130Task::BSFileCache_ForcePauseAndWaitForIdle()
 {
     if (!m_pvThread)
         return;
@@ -269,11 +277,12 @@ void S::WaitWhilePaused()
 
 struct FUN_00b010d0_cls : public BSFileCache
 {
-    void FUN_00b010d0();
+    void ProcessEntries_00b010d0();
 };
 
 // @fnv 0x00b010d0
-void FUN_00b010d0_cls::FUN_00b010d0()
+// src: GUESS 0x00b010d0 (confidence: low)
+void FUN_00b010d0_cls::ProcessEntries_00b010d0()
 {
     if (m_eCacheState == FILE_CACHING_IN_PROGRESS)
     {

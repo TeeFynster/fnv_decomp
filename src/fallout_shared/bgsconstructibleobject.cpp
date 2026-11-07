@@ -33,7 +33,7 @@ public:
 
 void* __cdecl _Deallocate(void*);
 extern "C" void* __cdecl _alloca(unsigned int);
-void __cdecl FUN_00485910(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
 
 struct ModelSave
 {
@@ -56,7 +56,8 @@ void* BGSConstructibleObject::Destroy(unsigned int flags)
 }
 
 // @fnv 0x004f9570
-void BGSConstructibleObject::FUN_004f9570()
+// src: XBOX_PDB 0x004f9570
+void BGSConstructibleObject::InitializeData()
 {
     m_pCreatedObject = 0;
     m_pWorkbenchKeyword = 0;
@@ -65,8 +66,8 @@ void BGSConstructibleObject::FUN_004f9570()
 // @fnv 0x004f9a90
 void ConstructibleObjectOperations::Save()
 {
-    TESForm::FUN_004855a0();
-    TESFullName::FUN_00487010();
+    TESForm::BeginFormRecord();
+    TESFullName::Save_00487010();
     ((ModelSave*)((char*)this + 0x3c))->ProcessAndFreeData(0x4C444f4d, 0x54444f4d, 0x53444f4d);
     TESIcon::Save(0x4e4f4349);
     BGSMessageIcon::Save(0x4f43494d);
@@ -75,15 +76,15 @@ void ConstructibleObjectOperations::Save()
     SaveEmptyData();
     if (m_pCreatedObject)
     {
-        unsigned int itempint = ((TESForm*)m_pCreatedObject)->FUN_0084e3a0();
-        FUN_00485910(0x4d414e52, itempint);
+        unsigned int itempint = ((TESForm*)m_pCreatedObject)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e52, itempint);
     }
     if (m_pWorkbenchKeyword)
     {
-        unsigned int itempint2 = ((TESForm*)m_pWorkbenchKeyword)->FUN_0084e3a0();
-        FUN_00485910(0x4d414e43, itempint2);
+        unsigned int itempint2 = ((TESForm*)m_pWorkbenchKeyword)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e43, itempint2);
     }
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // Loads a bound object record from the file, dispatching each chunk to the matching loader and returning true.
@@ -180,9 +181,9 @@ void ConstructibleObjectOperations::Copy(unsigned int a1)
     }
 }
 
-TESForm* __cdecl FUN_004839c0(unsigned int id);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int id);
 void __cdecl ResolveFormID(unsigned int* id, void* file);
-int __cdecl FUN_005b5e40(const char* fmt, ...);
+int __cdecl Warning_005b5e40(const char* fmt, ...);
 
 // @fnv 0x004f95a0
 void ConstructibleObjectOperations::LoadFormReferences()
@@ -194,19 +195,19 @@ void ConstructibleObjectOperations::LoadFormReferences()
     if (id)
     {
         ResolveFormID(&id, FUN_00484e60(-1));
-        m_pCreatedObject = dynamic_cast<BGSListForm*>(FUN_004839c0(id));
+        m_pCreatedObject = dynamic_cast<BGSListForm*>(TESForm_GetFormByNumericID(id));
         if (!m_pCreatedObject)
-            FUN_005b5e40("MASTERFILE: Could not find item list (%08X) on constructible object '%s' (%08X).", id, GetName(),
-                         FUN_0084e3a0());
+            Warning_005b5e40("MASTERFILE: Could not find item list (%08X) on constructible object '%s' (%08X).", id, GetName(),
+                         GetHavokWorldObjectCountInSceneGraph_0084e3a0());
     }
     id = (unsigned int)m_pWorkbenchKeyword;
     if (id)
     {
         ResolveFormID(&id, FUN_00484e60(-1));
-        m_pWorkbenchKeyword = dynamic_cast<TESBoundObject*>(FUN_004839c0(id));
+        m_pWorkbenchKeyword = dynamic_cast<TESBoundObject*>(TESForm_GetFormByNumericID(id));
         if (!m_pWorkbenchKeyword)
-            FUN_005b5e40("MASTERFILE: Could not find created item (%08X) on constructible object '%s' (%08X).", id,
-                         GetName(), FUN_0084e3a0());
+            Warning_005b5e40("MASTERFILE: Could not find created item (%08X) on constructible object '%s' (%08X).", id,
+                         GetName(), GetHavokWorldObjectCountInSceneGraph_0084e3a0());
     }
     SetInitializationState(true);
 }

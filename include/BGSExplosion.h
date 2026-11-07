@@ -30,9 +30,9 @@ public:
     // TESForm vtable slot 8 (vftable 0x1024a94 slot 8 = 0x4fb0d0)
     bool LoadForm(TESFile* file);
     float __thiscall GetScaledValue();
-    ExplosionEffectSettings* FUN_004fadc0();
-    BGSImpactDataSet* FUN_00516bf0();
-    void FUN_004fb0b0(BGSImpactDataSet* value);
+    ExplosionEffectSettings* GetData_004fadc0();
+    BGSImpactDataSet* BGSExplosion_GetImpactDataSet();
+    void SetImpactDataSet_004fb0b0(BGSImpactDataSet* value);
     void FUN_004febf0(TESSound* value);
     ExplosionEffectSettings* GetExplosionData();
     BGSImpactDataSet* GetImpactDataSet();

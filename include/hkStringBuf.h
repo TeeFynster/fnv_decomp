@@ -18,7 +18,7 @@ public:
     ~hkStringBuf() throw();
 
     void InitBuffer() throw();
-    __declspec(noinline) void FUN_00cbbd40() throw();
+    __declspec(noinline) void UpdateFields_00cbbd40() throw();
     void FUN_00d61c10(const char* pcString) throw();
 
     int indexOf(const char* needle, int start, int end) const throw();

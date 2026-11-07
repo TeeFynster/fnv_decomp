@@ -94,13 +94,14 @@ void FormComponentArray::InitializeFromForm(TESForm* form)
 
 struct FUN_0047c540_shell : public FormComponentArray
 {
-    void FUN_0047c540();
+    void FormComponentCollection_ClearFormComponentArray();
 };
 
 void* __cdecl memset(void*, int, unsigned int);
 
 // @fnv 0x0047c540
-void FUN_0047c540_shell::FUN_0047c540()
+// src: COMMUNITY 0x0047c540
+void FUN_0047c540_shell::FormComponentCollection_ClearFormComponentArray()
 {
     memset(this, 0, 0x98);
 }
@@ -134,11 +135,12 @@ struct Base_47c5b0
 struct Holder_47c5b0
 {
     Base_47c5b0* arr[38];
-    void FUN_0047c5b0();
+    void FormComponentCollection_ClearDataAllComponents();
 };
 // Iterates over the 38 pointers in arr and calls f1() on each non-null entry.
 // @fnv 0x0047c5b0
-void Holder_47c5b0::FUN_0047c5b0()
+// src: COMMUNITY 0x0047c5b0
+void Holder_47c5b0::FormComponentCollection_ClearDataAllComponents()
 {
     int i;
     for (i = 0; i < 38; i++)
@@ -181,12 +183,13 @@ bool FUN_0047c670_shell::CompareComponents(FormComponentArray* other)
 
 struct FUN_0047c600_cls : public FormComponentArray
 {
-    void FUN_0047c600(FormComponentArray* other);
+    void FormComponentCollection_CopyAllComponents(FormComponentArray* other);
 };
 
 // Copies each non-null entry of the other object's array into this object's matching non-null entry, for 38 slots.
 // @fnv 0x0047c600
-void FUN_0047c600_cls::FUN_0047c600(FormComponentArray* other)
+// src: COMMUNITY 0x0047c600
+void FUN_0047c600_cls::FormComponentCollection_CopyAllComponents(FormComponentArray* other)
 {
     if (other == 0)
     {

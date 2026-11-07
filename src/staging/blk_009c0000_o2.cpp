@@ -9,7 +9,7 @@
 // that moves this back by the first base's size (0x3e0 = vptr + 247 ints).
 struct PrimaryBase
 {
-    virtual void FUN_009c6a20();
+    virtual void AdjustThisAndForward_009c6a20();
     int unk04;
     int unk08;
     int unk0C;
@@ -261,14 +261,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_009c6a20();
+    virtual void AdjustThisAndForward_009c6a20();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x009c6a20
-    virtual void FUN_009c6a20();
+// src: GUESS 0x009c6a20 (confidence: low)
+    virtual void AdjustThisAndForward_009c6a20();
 };
 
 Derived::Derived()

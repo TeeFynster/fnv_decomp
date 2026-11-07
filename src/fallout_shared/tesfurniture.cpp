@@ -159,7 +159,7 @@ void TESFurniture::InitializeMarkerFlags()
         return;
     if (m_iMarkerCount == 0)
     {
-        if (!FUN_00c54400(Clone3DAlt(0)))
+        if (!BSFurnitureMarker_Find(Clone3DAlt(0)))
             Warning("MODELS: No FurnitureMarkers found in '%s'.", GetModelFilePath());
         else
             Warning("MODELS: You have not selected any FurnitureMarkers for '%s'.", GetName());
@@ -167,12 +167,13 @@ void TESFurniture::InitializeMarkerFlags()
     }
 }
 
-int __fastcall FUN_009938b0(void* pThis);
+int __fastcall NiTArray_char_NiTMallocInterface_char_GetEffectiveSize(void* pThis);
 
 // @fnv 0x00509490
-int __fastcall FUN_00509490(char* pThis)
+// src: XBOX_PDB 0x00509490
+int __fastcall BSFurnitureMarker_QNumMarks(char* pThis)
 {
-    return FUN_009938b0(pThis + 0xc);
+    return NiTArray_char_NiTMallocInterface_char_GetEffectiveSize(pThis + 0xc);
 }
 
 typedef char _sizecheck_FurnitureMark[sizeof(FurnitureMark) == 16 ? 1 : -1];
@@ -185,7 +186,7 @@ unsigned int FurnitureMark::QNumber()
 
 struct DummyArr
 {
-    void FUN_00558dd0(int);
+    void GetElementAddress16(int);
 };
 
 struct DummyThis
@@ -200,9 +201,10 @@ struct StackArg
 };
 
 // @fnv 0x005094d0
-void __fastcall FUN_005094d0(DummyThis* this_ptr, StackArg param_1)
+// src: XBOX_PDB 0x005094d0
+void __fastcall BSFurnitureMarker_QMark(DummyThis* this_ptr, StackArg param_1)
 {
-    this_ptr->arr.FUN_00558dd0(param_1.val);
+    this_ptr->arr.GetElementAddress16(param_1.val);
 }
 
 struct FUN_005099c0_shell : public TESFurniture
@@ -277,7 +279,7 @@ FUN_00508ee0::~FUN_00508ee0()
 
 struct S_00487010
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 struct S_0048a520
 {
@@ -285,36 +287,37 @@ struct S_0048a520
 };
 struct S_0048cca0
 {
-    void FUN_0048cca0();
+    void Save_0048cca0();
 };
 struct S_00477f20
 {
     void FUN_00477f20();
 };
-void __cdecl FUN_00485910(unsigned int, int);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, int);
 
 struct FUN_00509280_obj : public TESFurniture
 {
-    void FUN_004855a0();
-    void FUN_00485680();
-    void FUN_00509280();
+    void BeginFormRecord();
+    void FinishFormRecord();
+    void TESFurniture_Save();
 };
 
 // @fnv 0x00509280
-void FUN_00509280_obj::FUN_00509280()
+// src: XBOX_PDB 0x00509280
+void FUN_00509280_obj::TESFurniture_Save()
 {
-    FUN_004855a0();
-    ((S_00487010*)((char*)this + 0x30))->FUN_00487010();
+    BeginFormRecord();
+    ((S_00487010*)((char*)this + 0x30))->Save_00487010();
     ((S_0048a520*)((char*)this + 0x3c))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    ((S_0048cca0*)((char*)this + 0x5c))->FUN_0048cca0();
+    ((S_0048cca0*)((char*)this + 0x5c))->Save_0048cca0();
     ((S_00477f20*)((char*)this + 0x68))->FUN_00477f20();
-    FUN_00485910(0x4d414e4d, m_iMarkerCount);
-    FUN_00485680();
+    TESForm_AddChunk_00485910(0x4d414e4d, m_iMarkerCount);
+    FinishFormRecord();
 }
 
 struct FUN_005092f0_obj : public TESFurniture
 {
-    void FUN_004851b0(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
     void CopyFromFurniture(TESForm* apCopy);
 };
 
@@ -324,24 +327,25 @@ void FUN_005092f0_obj::CopyFromFurniture(TESForm* apCopy)
     TESFurniture* pcopy = dynamic_cast<TESFurniture*>(apCopy);
     if (!pcopy)
         return;
-    FUN_004851b0(apCopy);
+    TESForm_CopyAllComponents(apCopy);
     m_iMarkerCount = pcopy->m_iMarkerCount;
     InitializeMarkerFlags();
 }
 
 struct FUN_00509540_obj : public TESFurniture
 {
-    bool FUN_00485270(TESForm*);
-    bool FUN_00509540(TESForm* apCompare);
+    bool TESForm_CompareAllComponents(TESForm*);
+    bool TESFurniture_Compare(TESForm* apCompare);
 };
 
 // @fnv 0x00509540
-bool FUN_00509540_obj::FUN_00509540(TESForm* apCompare)
+// src: XBOX_PDB 0x00509540
+bool FUN_00509540_obj::TESFurniture_Compare(TESForm* apCompare)
 {
     TESFurniture* pcomp = dynamic_cast<TESFurniture*>(apCompare);
     if (!pcomp)
         return true;
-    if (FUN_00485270(pcomp))
+    if (TESForm_CompareAllComponents(pcomp))
         return true;
     if (m_iMarkerCount != pcomp->m_iMarkerCount)
         return true;

@@ -57,9 +57,9 @@ BGSMenuIcon::~BGSMenuIcon()
 // @fnv 0x00590470
 void BGSMenuIcon::SaveForm()
 {
-    TESForm::FUN_004855a0();
+    TESForm::BeginFormRecord();
     TESTexture::Save(0x4e4f4349);
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // Copies the base form data when the source is a menu icon.

@@ -6,10 +6,11 @@
 extern MemoryManager g_memoryManager;
 struct BSNiAllocator
 {
-    void FUN_00aa22b0(void* pvMemory, int aiAllocationType, unsigned int stSizeInBytes);
+    void Deallocate_00aa22b0(void* pvMemory, int aiAllocationType, unsigned int stSizeInBytes);
 };
 // @fnv 0x00aa22b0
-void BSNiAllocator::FUN_00aa22b0(void* pvMemory, int aiAllocationType, unsigned int stSizeInBytes)
+// src: XBOX_PDB 0x00aa22b0
+void BSNiAllocator::Deallocate_00aa22b0(void* pvMemory, int aiAllocationType, unsigned int stSizeInBytes)
 {
     if (aiAllocationType == 10)
     {
@@ -29,7 +30,8 @@ void BSNiAllocator::FUN_00aa22b0(void* pvMemory, int aiAllocationType, unsigned 
 namespace fnv_00aa23e0 {
 extern MemoryManager g_memoryManager;
 // @fnv 0x00aa23e0
-void __stdcall FUN_00aa23e0(void* pvMemory, int aiAllocationType, unsigned int stSizeInBytes)
+// src: XBOX_PDB 0x00aa23e0
+void __stdcall BSNiAllocator_DeallocateExternal(void* pvMemory, int aiAllocationType, unsigned int stSizeInBytes)
 {
     if (aiAllocationType == 0x10)
     {
@@ -149,7 +151,8 @@ void* __stdcall AllocateZeroedMemory(unsigned int& stSizeInBytes, unsigned int& 
 }
 
 // @fnv 0x00aa2420
-void* __stdcall FUN_00aa2420(void* pvMem, unsigned int& uiSize, unsigned char& ucAlignment, int aiAllocationType,
+// src: XBOX_PDB 0x00aa2420
+void* __stdcall BSNiAllocator_ReallocateExternal(void* pvMem, unsigned int& uiSize, unsigned char& ucAlignment, int aiAllocationType,
                              bool bProvideSize, unsigned int uiCurrentSize, const char* pcFile, int iLine,
                              const char* pcFunction)
 {

@@ -10,7 +10,7 @@ class hkStreamWriter;
 class hkClassEnum
 {
 public:
-    void FUN_00db7600(hkStreamWriter* writer) const;
+    void writeSignature(hkStreamWriter* writer) const;
     enum FlagValues
     {
         FLAGS_NONE = 0

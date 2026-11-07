@@ -44,7 +44,7 @@ public:
 // src/gamebryo2.2/corelibs/nianimation/nicontrollersequence.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/nicontrollersequence.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern const char* const g_011c7d74_arg1;
-const char* const* __cdecl FUN_00a31730();
+const char* const* __cdecl NiControllerSequence_GetRTTI();
 struct BaseH
 {
     virtual ~BaseH();
@@ -106,11 +106,11 @@ struct FUN_00a33bf0_s : NiObject
 };
 struct FUN_00a2e420_shell
 {
-    unsigned char FUN_00a2e420(float);
+    unsigned char NiControllerManager_StopTransSourceSequence(float);
 };
 struct FUN_00a30540_shell
 {
-    void FUN_00a30540();
+    void NiControllerSequence_DetachInterpolators();
 };
 extern float DAT_01015f5c;
 extern double DAT_010241b0;
@@ -120,7 +120,7 @@ struct FUN_00a35030_shell : NiControllerSequence
 };
 struct FUN_00a30900_shell
 {
-    void FUN_00a30900(char m_ucRegionPriority);
+    void AttachInterpolators(char m_ucRegionPriority);
 };
 struct A51BF0Base
 {
@@ -130,17 +130,17 @@ struct FUN_00a316a0_shell
 {
     void* __thiscall FUN_00a316a0();
 };
-void* __cdecl FUN_00a326c0();
+void* __cdecl NiControllerSequence_CreateObject();
 extern char DAT_01096584;
 extern void* _EmptyFS;
 extern int(__stdcall* DAT_00fdf1c4)(void*);
 struct FUN_00a31500_shell
 {
-    void __thiscall FUN_00a31500(int);
+    void __thiscall NiControllerSequence_InterpArrayItem_Free(int);
 };
 struct FUN_00a315b0_shell
 {
-    void __thiscall FUN_00a315b0(int);
+    void __thiscall NiControllerSequence_IDTag_Free(int);
 };
 struct FUN_00a31740_shell
 {
@@ -148,7 +148,7 @@ struct FUN_00a31740_shell
 };
 struct FUN_00a35640_shell
 {
-    void __thiscall FUN_00a35640();
+    void __thiscall ProcessState_00a35640();
 };
 struct RefBase
 {
@@ -320,12 +320,12 @@ struct SequenceA30970 : NiObject
     float lastTime34;
     float accumulated38;
     float scaled3c;
-    float __thiscall FUN_00a30970(float time, bool update);
+    float __thiscall ComputeScaledTime_00a30970(float time, bool update);
 };
 struct FUN_00a30c80_shell
 {
     unsigned __int64 __thiscall IsNotInChain(void* arg);
-    bool __thiscall FUN_00a30c80(void* arg);
+    bool __thiscall CanSyncTo(void* arg);
 };
 bool __stdcall MatchesTextKeys(void* arg);
 struct FUN_00a30cc0_target
@@ -443,7 +443,7 @@ struct SequenceView : ObjectView
     int unk68;
     RefView** notes;
     unsigned short noteCount;
-    bool FUN_00a30ea0(NiStream&);
+    bool RegisterStreamables_00a30ea0(NiStream&);
 };
 __declspec(dllimport) long __stdcall InterlockedIncrement(long* p);
 __declspec(dllimport) long __stdcall InterlockedDecrement(long* p);
@@ -489,7 +489,7 @@ extern int DAT_0109b220;
 extern int(__stdcall* DAT_00fdf1c4)(void*);
 struct S_00aa4060_Class
 {
-    void FUN_00aa4060(void* apMemory);
+    void MemoryManager_Deallocate(void* apMemory);
 };
 extern S_00aa4060_Class DAT_011f6238;
 struct FUN_00a315b0_Elem
@@ -503,7 +503,7 @@ struct FUN_00a315b0_Elem
 class FUN_00a315b0_Base
 {
   public:
-    void FUN_00a30750();
+    void NiControllerSequence_IDTag_Destroy();
 };
 class FUN_00a315b0_cls
 {
@@ -514,7 +514,7 @@ class FUN_00a315b0_cls
     char* m_0c;
     char* m_10;
 
-    FUN_00a315b0_cls* FUN_00a315b0(unsigned char acFlags);
+    FUN_00a315b0_cls* NiControllerSequence_IDTag_Free(unsigned char acFlags);
 };
 struct a31740_Ref
 {
@@ -547,7 +547,7 @@ struct FUN_00a317e0_interp
     void* unk04;
     void* unk08;
     void* unk0C;
-    void __thiscall FUN_00a31260();
+    void __thiscall ReleaseReferencedObjectsAndResetFlags();
 };
 struct FUN_00a317e0_tag
 {
@@ -595,7 +595,7 @@ struct SlotInfo
     unsigned int m_unk08;
     unsigned int m_unk0c;
     unsigned int m_unk10;
-    void FUN_00a31400(unsigned int value);
+    void NiControllerSequence_IDTag_Operator_Set(unsigned int value);
 };
 struct FUN_00a32bc0_cls
 {
@@ -607,7 +607,7 @@ struct FUN_00a32bc0_cls
     SlotEntry* m_pSlots;
     SlotInfo* m_pInfos;
 
-    bool FUN_00a32330();
+    bool NiControllerSequence_ReallocateArrays();
     int AssignSlot(RefObj* p1, unsigned int p2, unsigned char p3);
 };
 struct FUN_00a34480_obj
@@ -679,13 +679,13 @@ struct TagItem
     const char* fourth;
     const char* fifth;
 };
-void* __cdecl FUN_00a7d330(void*);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
 void* __cdecl FormatStringWithType(const char*, void*);
-void* __cdecl FUN_00a7d510(const char*, unsigned int);
-void* __cdecl FUN_00a7d550(const char*, float);
-void* __cdecl FUN_00a6d190(const char*, void*);
+void* __cdecl NiGetViewerString_00a7d510(const char*, unsigned int);
+void* __cdecl NiGetViewerString_00a7d550(const char*, float);
+void* __cdecl NiTimeController_GetViewerString(const char*, void*);
 int __cdecl FUN_00a305b0(char*, unsigned int, const char*, ...);
-void* __cdecl FUN_00a7d5e0(const char*, const char*);
+void* __cdecl NiGetViewerString_00a7d5e0(const char*, const char*);
 struct Position
 {
     unsigned int i;
@@ -799,11 +799,11 @@ struct HolderB3718
     SomeObjectB3718* m_pEntryObject;
 };
 extern HolderB3718* DAT_011f6080;
-void __cdecl FUN_00aa10f0(void* pv);
+void __cdecl _NiFree_00aa10f0(void* pv);
 struct FUN_00a30750_shell
 {
     char* m_kPointA[5];
-    void FUN_00a30750();
+    void NiControllerSequence_IDTag_Destroy();
 };
 extern int EmptyFS;
 struct EqObj
@@ -876,7 +876,7 @@ struct SeqEqStand : SequenceA30970
     unsigned int unk54;
     unsigned int unk58;
     void* root5c;
-    unsigned char FUN_00a30fb0(SeqEqStand* other);
+    unsigned char IsEqual_00a30fb0(SeqEqStand* other);
 };
 extern const char str_01020fd4[];
 extern const char str_01020fc8[];
@@ -888,7 +888,7 @@ extern const char str_01020f94[];
 extern const char str_0109655c[];
 struct S_00a31140_Allocator
 {
-    void* __thiscall FUN_00aa3e40(unsigned int);
+    void* __thiscall Game_DoHeapAlloc(unsigned int);
 };
 extern "C" void __cdecl FUN_00ec623a(void*, const char*, const char*, const char*);
 void* __cdecl FormatStringWithType(const char* arg1, void* arg2);
@@ -924,7 +924,7 @@ class A1400StringGroup
     A1400FixedString m_kName3;
     A1400FixedString m_kName4;
 
-    A1400StringGroup& FUN_00a31400(const A1400StringGroup& kOther);
+    A1400StringGroup& NiControllerSequence_IDTag_Operator_Set(const A1400StringGroup& kOther);
 };
 struct IDTagA33a50
 {
@@ -1012,9 +1012,9 @@ struct AnimationSequence : S_00a30880_Base
     UpdateNote** notes;
     unsigned short noteCount;
     float GetMorphedTime(AnimationSequence*, float);
-    float FUN_00a30970(float, bool);
-    void FUN_00a32290(float, float, float);
-    void FUN_00a34ba0(float time, bool update);
+    float ComputeScaledTime_00a30970(float, bool);
+    void NiControllerSequence_SetInterpsWeightAndTime(float, float, float);
+    void Update_00a34ba0(float time, bool update);
     __forceinline bool SetState(int value)
     {
         bool inactive = state == 0;
@@ -1178,16 +1178,16 @@ struct A33950Object
     unsigned char flag0d;
     void LoadFromStream(NiStream* stream);
 };
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct FUN_00a344f0_cls
 {
-    void __thiscall FUN_00a33570(void* obj, unsigned int param);
+    void __thiscall NiControllerSequence_CopyMembers(void* obj, unsigned int param);
     void* FUN_00a344f0(unsigned int param);
 };
 extern const float DAT_010141cc;
 struct FUN_00a350d0_seq : SeqA34f20
 {
-    bool FUN_00a350d0(SeqA34f20* pkTarget, float fTime, float m_fTimeout, int iPriority, float fSeqWeight,
+    bool StartBlend(SeqA34f20* pkTarget, float fTime, float m_fTimeout, int iPriority, float fSeqWeight,
                       float fTargetWeight, SeqA34f20* pkPartner);
 };
 
@@ -1283,7 +1283,7 @@ struct FUN_00a31680
     FixedStr object, property, type, controller, interpolator;
     FUN_00a31680() throw();
     ~FUN_00a31680();
-    void FUN_00a31400(const FUN_00a31680&);
+    void NiControllerSequence_IDTag_Operator_Set(const FUN_00a31680&);
     static void* operator new[](unsigned int size, MemoryManager& memory = _g_memoryManager) throw()
     {
         return memory.Allocate(size);
@@ -1328,10 +1328,11 @@ struct CloneSequence
     ClonePtr<RefObj>* notes;
     unsigned short noteCount;
     void CreateVertexBufferSet(CloneSequence*, void*);
-    void FUN_00a33570(CloneSequence*, void*);
+    void NiControllerSequence_CopyMembers(CloneSequence*, void*);
 };
 // @fnv 0x00a33570
-void CloneSequence::FUN_00a33570(CloneSequence* dest, void* context)
+// src: XBOX_PDB 0x00a33570
+void CloneSequence::NiControllerSequence_CopyMembers(CloneSequence* dest, void* context)
 {
     CreateVertexBufferSet(dest, context);
     dest->name = name;
@@ -1356,7 +1357,7 @@ void CloneSequence::FUN_00a33570(CloneSequence* dest, void* context)
             }
         }
         dest->controls[i].priority = controls[i].priority;
-        dest->tags[i].FUN_00a31400(tags[i]);
+        dest->tags[i].NiControllerSequence_IDTag_Operator_Set(tags[i]);
     }
     dest->weight = weight;
     dest->textKeys = textKeys;
@@ -1449,11 +1450,12 @@ struct SequenceArrays
     InterpArrayItem* m_pInterpArray;
     IDTag* m_pkIDTags;
 
-    bool FUN_00a32330();
+    bool NiControllerSequence_ReallocateArrays();
 };
 
 // @fnv 0x00a32330
-bool SequenceArrays::FUN_00a32330()
+// src: COMMUNITY 0x00a32330
+bool SequenceArrays::NiControllerSequence_ReallocateArrays()
 {
     if (m_uiNumIDTags == 0)
         return false;
@@ -1482,14 +1484,14 @@ bool SequenceArrays::FUN_00a32330()
 
 struct Memory71
 {
-    void* FUN_00aa3e40(unsigned int);
+    void* Game_DoHeapAlloc(unsigned int);
 };
 struct Array71
 {
     static void operator delete[](void*, unsigned int);
     static void* operator new[](unsigned int n) throw()
     {
-        return reinterpret_cast<Memory71&>(DAT_011f6238).FUN_00aa3e40(n);
+        return reinterpret_cast<Memory71&>(DAT_011f6238).Game_DoHeapAlloc(n);
     }
 };
 struct Interp71 : Array71
@@ -1605,17 +1607,18 @@ struct Sequence71
     Smart71* notes;
     unsigned short noteCount;
     void ReadGroup(NiStream&);
-    void FUN_00a33e40(NiStream&);
+    void NiControllerSequence_LoadBinary(NiStream&);
 };
 // @fnv 0x00a33e40
-void Sequence71::FUN_00a33e40(NiStream& stream)
+// src: XBOX_PDB 0x00a33e40
+void Sequence71::NiControllerSequence_LoadBinary(NiStream& stream)
 {
     ReadGroup(stream);
     if (stream.GetFileVersion() < 0x0a010068)
     {
         stream.ReadFixedString(reinterpret_cast<NiFixedString&>(name));
         stream.ReadFixedString(reinterpret_cast<NiFixedString&>(root));
-        stream.FUN_00a645b0();
+        stream.ReadLinkID();
         stream.GetBinaryStream()->Read(&count, 4);
         grow = 12;
         interpolators = new Interp71[count];
@@ -1625,7 +1628,7 @@ void Sequence71::FUN_00a33e40(NiStream& stream)
             String71 objectName;
             stream.ReadFixedString(reinterpret_cast<NiFixedString&>(objectName));
             tags[index].object = objectName;
-            stream.FUN_00a645b0();
+            stream.ReadLinkID();
             objectName.Release();
         }
         return;
@@ -1647,7 +1650,7 @@ void Sequence71::FUN_00a33e40(NiStream& stream)
         }
     }
     stream.GetBinaryStream()->Read(&weight, 4);
-    stream.FUN_00a645b0();
+    stream.ReadLinkID();
     {
         int cycleValue;
         stream.GetBinaryStream()->Read(&cycleValue, 4);
@@ -1666,7 +1669,7 @@ void Sequence71::FUN_00a33e40(NiStream& stream)
         bool backward;
         stream.GetBinaryStream()->Read(&backward, 1);
     }
-    stream.FUN_00a645b0();
+    stream.ReadLinkID();
     if (stream.GetFileVersion() < 0x14010001)
         stream.ReadFixedString(reinterpret_cast<NiFixedString&>(root));
     else
@@ -1676,13 +1679,13 @@ void Sequence71::FUN_00a33e40(NiStream& stream)
     else
         oldNotes = 0;
     if (stream.m_kHeader.m_uiVersion > 21 && stream.m_kHeader.m_uiVersion < 29)
-        stream.FUN_00a645b0();
+        stream.ReadLinkID();
     if (stream.m_kHeader.m_uiVersion > 28)
     {
         stream.GetBinaryStream()->Read(&noteCount, 2);
         if (noteCount > 0)
             notes = new Smart71[noteCount];
         for (unsigned short index = 0; index < noteCount; ++index)
-            stream.FUN_00a645b0();
+            stream.ReadLinkID();
     }
 }

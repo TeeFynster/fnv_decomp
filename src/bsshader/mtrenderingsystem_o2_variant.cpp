@@ -89,7 +89,8 @@ struct ThreadStages : ::TaskThreadManager
 };
 
 // @fnv 0x00ba3130
-extern "C" void __fastcall FUN_00ba3130(ThreadStages* system, void*, int threadIndex, int stage)
+// src: COMMUNITY 0x00ba3130
+extern "C" void __fastcall MTRenderingSystem_WaitOnThreadStage(ThreadStages* system, void*, int threadIndex, int stage)
 {
     if (!::DAT_011f94b4)
         return;
@@ -261,8 +262,8 @@ class TaskArg1
     void FUN_00c477f0(Class0xa4* obj);
 };
 
-void __cdecl FUN_00b6bee0(void* arg0, void* arg2, BSCullingProcess* pCulling);
-void __cdecl FUN_00b6bfc0(void* arg0, void* arg, BSCullingProcess* pCulling);
+void __cdecl BSShaderUtil_AccumulateScene(void* arg0, void* arg2, BSCullingProcess* pCulling);
+void __cdecl BSShaderUtil_AccumulateSceneList(void* arg0, void* arg, BSCullingProcess* pCulling);
 
 struct TaskItem
 {
@@ -303,7 +304,8 @@ class AccumTaskReceiver : public ::TaskThreadManager
 };
 
 // @fnv 0x00ba3390
-void __fastcall FUN_00ba3390(AccumTaskReceiver* self, void*, NiRefObject* a1, TaskArg1* a2, NiRefObject* a3, void* a4,
+// src: COMMUNITY 0x00ba3390
+void __fastcall MTRenderingSystem_AddAccumTask(AccumTaskReceiver* self, void*, NiRefObject* a1, TaskArg1* a2, NiRefObject* a3, void* a4,
                              void* a5, NiRefObject* a6, unsigned int a7, unsigned int a8, void* a9)
 {
     if (::DAT_011f94b4)
@@ -333,15 +335,15 @@ void __fastcall FUN_00ba3390(AccumTaskReceiver* self, void*, NiRefObject* a1, Ta
         culling.SetCompoundFrustum(reinterpret_cast<::TaskArg1*>(a2));
         if (a3)
         {
-            FUN_00b6bee0(a1, a3, &culling);
+            BSShaderUtil_AccumulateScene(a1, a3, &culling);
         }
         if (a4)
         {
-            FUN_00b6bfc0(a1, a4, &culling);
+            BSShaderUtil_AccumulateSceneList(a1, a4, &culling);
         }
         if (a5)
         {
-            FUN_00b6bfc0(a1, a5, &culling);
+            BSShaderUtil_AccumulateSceneList(a1, a5, &culling);
         }
     }
 }
@@ -369,7 +371,8 @@ struct RenderTaskManager : ::TaskThreadManager
     BSLinearTaskThread* tasks[2];
 };
 // @fnv 0x00ba2d80
-void __fastcall FUN_00ba2d80(RenderTaskManager* manager)
+// src: COMMUNITY 0x00ba2d80
+void __fastcall MTRenderingSystem_DestroyThreads(RenderTaskManager* manager)
 {
     if (!::DAT_011f94b4)
         return;
@@ -412,11 +415,12 @@ struct RenderTaskThread : BSLinearTaskThread
 struct ThreadOwner
 {
     RenderTaskThread* m_threads[2];
-    void FUN_00ba2e00(int index, unsigned int affinity, void(__cdecl* task)(), const char* name,
+    void MTRenderingSystem_AddThread(int index, unsigned int affinity, void(__cdecl* task)(), const char* name,
                       unsigned int stackSize);
 };
 // @fnv 0x00ba2e00
-void ThreadOwner::FUN_00ba2e00(int index, unsigned int affinity, void(__cdecl* task)(), const char* name,
+// src: COMMUNITY 0x00ba2e00
+void ThreadOwner::MTRenderingSystem_AddThread(int index, unsigned int affinity, void(__cdecl* task)(), const char* name,
                                unsigned int stackSize)
 {
     if (index < 3 && index < 2 && !m_threads[index])
@@ -443,10 +447,11 @@ class ThreadCoordinator_ba2f30
     BSLinearTaskThread* workers[2];
     unsigned int unk08;
     volatile unsigned int counters[2];
-    void FUN_00ba2f30();
+    void MTRenderingSystem_StartThreads();
 };
 // @fnv 0x00ba2f30
-void ThreadCoordinator_ba2f30::FUN_00ba2f30()
+// src: COMMUNITY 0x00ba2f30
+void ThreadCoordinator_ba2f30::MTRenderingSystem_StartThreads()
 {
     if (!DAT_011f94b4)
         return;
@@ -478,11 +483,12 @@ class FUN_00ba2fa0_C
   public:
     BSLinearTaskThread* m_apThreads[2];
 
-    void FUN_00ba2fa0();
+    void MTRenderingSystem_WaitForThreads();
 };
 
 // @fnv 0x00ba2fa0
-void FUN_00ba2fa0_C::FUN_00ba2fa0()
+// src: COMMUNITY 0x00ba2fa0
+void FUN_00ba2fa0_C::MTRenderingSystem_WaitForThreads()
 {
     if (DAT_011f94b4)
     {
@@ -574,11 +580,12 @@ class RenderingStageController : public TaskThreadManager
     volatile int stages[3];
     Semaphore semaphores[3];
 
-    void FUN_00ba30f0(int threadIndex, int stage);
+    void MTRenderingSystem_SetThreadStage(int threadIndex, int stage);
 };
 
 // @fnv 0x00ba30f0
-void RenderingStageController::FUN_00ba30f0(int threadIndex, int stage)
+// src: COMMUNITY 0x00ba30f0
+void RenderingStageController::MTRenderingSystem_SetThreadStage(int threadIndex, int stage)
 {
     if (DAT_011f94b4 && threadIndex < 2)
     {
@@ -605,18 +612,18 @@ extern MemoryManager g_memoryManager;
 
 struct MTRenderingSystem_Helper
 {
-    void FUN_00ba3130(int a, int b);
+    void MTRenderingSystem_WaitOnThreadStage(int a, int b);
 };
 
-void FUN_00b6bee0(NiRefObject* a, NiRefObject* b, BSCullingProcess* c);
-void FUN_00b6bfc0(NiRefObject* a, void* b, BSCullingProcess* c);
+void BSShaderUtil_AccumulateScene(NiRefObject* a, NiRefObject* b, BSCullingProcess* c);
+void BSShaderUtil_AccumulateSceneList(NiRefObject* a, void* b, BSCullingProcess* c);
 static inline void AddB(NiRefObject* a, NiRefObject* b, BSCullingProcess* c)
 {
-    FUN_00b6bee0(a, b, c);
+    BSShaderUtil_AccumulateScene(a, b, c);
 }
 static inline void AddC(NiRefObject* a, void* b, BSCullingProcess* c)
 {
-    FUN_00b6bfc0(a, b, c);
+    BSShaderUtil_AccumulateSceneList(a, b, c);
 }
 
 struct TaskRecordMt
@@ -648,12 +655,13 @@ static inline void Release(NiRefObject*& rp)
 }
 
 // @fnv 0x00ba3190
-void FUN_00ba3190()
+// src: COMMUNITY 0x00ba3190
+void MTRenderingSystem_TaskThreadCallback()
 {
     for (int i = 1; i < 24; i++)
     {
         TaskRecordMt* rec = &DAT_012000e4[i - 1];
-        ((MTRenderingSystem_Helper*)&DAT_01200088)->FUN_00ba3130(0, i);
+        ((MTRenderingSystem_Helper*)&DAT_01200088)->MTRenderingSystem_WaitOnThreadStage(0, i);
         if (rec->unk14)
         {
             *(int*)(((char**)__readfsdword(0x2c))[DAT_0126fd98] + 0x2bc) = rec->unk1C;
@@ -696,7 +704,7 @@ void FUN_00ba3190()
 }
 }  // namespace fnv_00ba3190
 
-void __cdecl FUN_00ba2d70();
+void __cdecl ForwardCall_00ba2d70();
 void __cdecl FUN_00ba3030();
 void __stdcall FUN_00ec5fce(void*, unsigned int, int, void(__cdecl*)());
 
@@ -724,7 +732,7 @@ struct LinearTaskGroup
     LinearTaskRecord tasks[3];
     __forceinline ~LinearTaskGroup()
     {
-        FUN_00ec5fce(tasks, sizeof(LinearTaskRecord), 3, FUN_00ba2d70);
+        FUN_00ec5fce(tasks, sizeof(LinearTaskRecord), 3, ForwardCall_00ba2d70);
     }
 };
 

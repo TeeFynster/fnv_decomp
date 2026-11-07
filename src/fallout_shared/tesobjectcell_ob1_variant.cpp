@@ -11,11 +11,11 @@
 #include "../../include/NiRefObject.h"
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
-unsigned int FUN_0054f4c0();
-NiAVObject* FUN_0054f4f0();
+unsigned int TESTerrainLODManager_GetGrassNode();
+NiAVObject* TESMain_GetWeatherRoot();
 
 extern double DAT_01017cf8;
-float __cdecl FUN_00408820(float);
+float __cdecl NiAbs_00408820(float);
 double __cdecl FUN_00ec6cde(double);
 double __cdecl FUN_00ec9f30(double);
 
@@ -98,11 +98,12 @@ struct BoxInput
     float halfWidth;
     float halfDepth;
     M_004b4500 rotation;
-    unsigned char FUN_00c34890(const SphereInput* sphere);
+    unsigned char BSOcclusionPlane_TestIntersection(const SphereInput* sphere);
 };
 
 // @fnv 0x00c34890
-unsigned char BoxInput::FUN_00c34890(const SphereInput* sphere)
+// src: COMMUNITY 0x00c34890
+unsigned char BoxInput::BSOcclusionPlane_TestIntersection(const SphereInput* sphere)
 {
     float halfA;
     M_004b4500 rotationB = rotation.Inverse();
@@ -167,7 +168,7 @@ typedef NiTListItem<CellRefPointer<NiRefObject> > CellRefItem;
 struct CellRefAllocator
 {
 
-    void FUN_0045cee0(CellRefItem* pkItem);
+    void NiTPointerAllocator_unsigned_int_Deallocate(CellRefItem* pkItem);
 };
 
 typedef NiTPointerListBase<CellRefAllocator, CellRefPointer<NiRefObject> > CellRefPointerList;
@@ -175,7 +176,7 @@ template <> inline void NiTPointerListBase<CellRefAllocator, CellRefPointer<NiRe
 {
         int unused[5];  // compiled-out debug locals of the inlined helper
         pkItem->m_element.FUN_0066b0d0(0);
-        m_kItemCount.FUN_0045cee0(pkItem);
+        m_kItemCount.NiTPointerAllocator_unsigned_int_Deallocate(pkItem);
         m_kItemCount.m_uiCount--;
     }
 
@@ -249,7 +250,7 @@ struct ListItem5b
 
 struct Alloc5b
 {
-    ListItem5b* FUN_0043a010();
+    ListItem5b* NiGeometry_AddProperty();
 };
 
 struct List5b
@@ -269,13 +270,13 @@ struct List5b
         return e;
     }
 
-    void FUN_00b5a9a0(ListItem5b*);
+    void NiTListBase_AddNodeTail(ListItem5b*);
 
     void AddHead(const SmartPtr5b<NiRefObject>& element)
     {
-        ListItem5b* pkNode = m_kItemCount.FUN_0043a010();
+        ListItem5b* pkNode = m_kItemCount.NiGeometry_AddProperty();
         pkNode->m_element.FUN_006e5cc0(element);
-        FUN_00b5a9a0(pkNode);
+        NiTListBase_AddNodeTail(pkNode);
     }
 
     SmartPtr5b<NiRefObject> RemovePos(ListItem5b*& pos);
@@ -305,11 +306,12 @@ struct Owner5b
     int unk4c;
     List5b m_list50;
     List5b m_list5c;
-    void FUN_00c5b1c0(NiRefObject* p);
+    void BSPortalGraph_AttachAlwaysRenderChild(NiRefObject* p);
 };
 
 // @fnv 0x00c5b1c0
-void Owner5b::FUN_00c5b1c0(NiRefObject* p)
+// src: COMMUNITY 0x00c5b1c0
+void Owner5b::BSPortalGraph_AttachAlwaysRenderChild(NiRefObject* p)
 {
     if (!p)
         return;
@@ -383,7 +385,7 @@ struct ItemNode
 
 struct NodePool
 {
-    ItemNode* FUN_0043a010();
+    ItemNode* NiGeometry_AddProperty();
 };
 
 struct ItemList
@@ -391,12 +393,12 @@ struct ItemList
     int unk00;
     int unk04;
     NodePool pool;
-    void FUN_00b5a9a0(ItemNode* node);
+    void NiTListBase_AddNodeTail(ItemNode* node);
     inline void AddTail(const CellRefPointer<NiRefObject>& ref)
     {
-        ItemNode* pNode = pool.FUN_0043a010();
+        ItemNode* pNode = pool.NiGeometry_AddProperty();
         pNode->item = ref;
-        FUN_00b5a9a0(pNode);
+        NiTListBase_AddNodeTail(pNode);
     }
 };
 
@@ -444,11 +446,12 @@ struct ItemQueue
     int unk54;
     int unk58;
     ItemList items;
-    void FUN_00c5b370(NiRefObject* obj);
+    void BSPortalGraph_DetachAlwaysRenderChild(NiRefObject* obj);
 };
 
 // @fnv 0x00c5b370
-void ItemQueue::FUN_00c5b370(NiRefObject* obj)
+// src: XBOX_PDB 0x00c5b370
+void ItemQueue::BSPortalGraph_DetachAlwaysRenderChild(NiRefObject* obj)
 {
     EnterCriticalSection(&DAT_01203328);
     items.AddTail(obj);

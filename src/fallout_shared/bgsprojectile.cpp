@@ -160,21 +160,21 @@ void BGSProjectile::InitItem()
         reinterpret_cast<EffectSetting*>(this)->SetEffectID(
             (int)dynamic_cast<TESSound*>(TESForm::GetFormByID(formID)));
     }
-    formID = (unsigned int)reinterpret_cast<InterfaceManager*>(this)->FUN_00586150();
+    formID = (unsigned int)reinterpret_cast<InterfaceManager*>(this)->CombatController_GetCombatState();
     if (formID)
     {
         TESForm::RemapFormIDForFile(formID, GetFile(-1));
         reinterpret_cast<EffectSetting*>(this)->SetAssociatedActorValue(
             (int)dynamic_cast<TESSound*>(TESForm::GetFormByID(formID)));
     }
-    formID = (unsigned int)reinterpret_cast<InterfaceManager*>(this)->FUN_004fd400();
+    formID = (unsigned int)reinterpret_cast<InterfaceManager*>(this)->GetAVEffect();
     if (formID)
     {
         TESForm::RemapFormIDForFile(formID, GetFile(-1));
-        reinterpret_cast<InterfaceManager*>(this)->FUN_00500a20(
+        reinterpret_cast<InterfaceManager*>(this)->BGSTerminal_SetPassword(
             reinterpret_cast<Tile*>(dynamic_cast<TESObjectWEAP*>(TESForm::GetFormByID(formID))));
     }
-    if (!FUN_004fd360())
+    if (!GetHasExplosion())
         reinterpret_cast<EffectSetting*>(this)->SetBoltSound(0);
     SetInitializationState(true);
 }
@@ -293,7 +293,8 @@ void FUN_004fcc20_shell::InitializeDefaults()
 }
 
 // @fnv 0x004fd360
-bool BGSProjectile::FUN_004fd360()
+// src: XBOX_PDB 0x004fd360
+bool BGSProjectile::GetHasExplosion()
 {
     return GetFlag(2);
 }
@@ -305,7 +306,8 @@ bool BGSProjectile::GetFlag(unsigned int aeFlag) const
 }
 
 // @fnv 0x00821640
-float TESCreature::FUN_00821640()
+// src: XBOX_PDB 0x00821640
+float TESCreature::TESObjectWEAP_GetShotsPerSecond()
 {
     return m_fFirstCreatureStat;
 }
@@ -334,7 +336,7 @@ int BGSProjectileMethods::GetProjectileCloneCount(TESObjectWEAP* apSourceWeapon)
     }
     else if (apSourceWeapon)
     {
-        int iprojectiles = (int)((TESCreature*)apSourceWeapon)->FUN_00821640() *
+        int iprojectiles = (int)((TESCreature*)apSourceWeapon)->TESObjectWEAP_GetShotsPerSecond() *
                            apSourceWeapon->GetDamageForActor(false, false, 0);
         int iprojectilesPerSecond7 = iprojectiles * 3;
         if (GetKind() != 0x20000)
@@ -382,7 +384,7 @@ void* __memcpy(void*, const void*, unsigned int);
 
 struct FUN_005e78f0_t
 {
-    void FUN_004851b0(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
 };
 
 struct FUN_004fdcf0_subobject
@@ -401,7 +403,7 @@ void BGSProjectileMethods::CopyFromProjectile(TESForm* apCopy)
     if (!pcopy)
         return;
 
-    ((FUN_005e78f0_t*)this)->FUN_004851b0(pcopy);
+    ((FUN_005e78f0_t*)this)->TESForm_CopyAllComponents(pcopy);
 
     ((FUN_004fdcf0_subobject*)((char*)this + 0xB4))->FUN_004fdcf0_copy((FUN_004fdcf0_subobject*)((char*)pcopy + 0xB4));
 
@@ -413,7 +415,7 @@ void BGSProjectileMethods::CopyFromProjectile(TESForm* apCopy)
 struct FUN_005e79a0_t
 {
   public:
-    bool FUN_00485270(TESForm* pForm);
+    bool TESForm_CompareAllComponents(TESForm* pForm);
 };
 
 struct FUN_004fdd80_field
@@ -436,7 +438,7 @@ bool BGSProjectileMethods::IsNotEqual(TESForm* apCompare)
     if (!pcomp)
         return true;
 
-    if (reinterpret_cast<FUN_005e79a0_t*>(this)->FUN_00485270(pcomp))
+    if (reinterpret_cast<FUN_005e79a0_t*>(this)->TESForm_CompareAllComponents(pcomp))
         return true;
 
     if (_memcmp(reinterpret_cast<const void*>(reinterpret_cast<char*>(this) + 0x60),
@@ -448,7 +450,7 @@ bool BGSProjectileMethods::IsNotEqual(TESForm* apCompare)
         return true;
 
     if (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0xcc) !=
-        reinterpret_cast<BSFadeNode*>(pcomp)->FUN_009ad610())
+        reinterpret_cast<BSFadeNode*>(pcomp)->QUserData())
         return true;
 
     return false;
@@ -704,21 +706,21 @@ struct S_004fdfb0_Obj
 };
 struct S_004fdfb0_Mgr
 {
-    void FUN_00443d30(TESModel* model, int a, int b, int c, int d, int e, int f);
+    void ModelLoader_QueueModel(TESModel* model, int a, int b, int c, int d, int e, int f);
 };
 extern S_004fdfb0_Mgr* DAT_011c3b3c;
-int __cdecl FUN_0045c6b0(BGSProjectile* proj);
+int __cdecl TES_GetLODMult(BGSProjectile* proj);
 
 // @fnv 0x004fdfb0
 void BGSProjectileMethods::QueueResourceLoad(IO_TASK_PRIORITY a, QueuedFile* b)
 {
     if (TESModel::GetModelLength())
     {
-        DAT_011c3b3c->FUN_00443d30(static_cast<TESModel*>(this), a, reinterpret_cast<int>(b), FUN_0045c6b0(this), 1, 0, 0);
+        DAT_011c3b3c->ModelLoader_QueueModel(static_cast<TESModel*>(this), a, reinterpret_cast<int>(b), TES_GetLODMult(this), 1, 0, 0);
     }
     if (m_kProjectileModel.GetModelLength())
     {
-        DAT_011c3b3c->FUN_00443d30(&this->m_kProjectileModel, a, reinterpret_cast<int>(b), 3, 1, 0, 0);
+        DAT_011c3b3c->ModelLoader_QueueModel(&this->m_kProjectileModel, a, reinterpret_cast<int>(b), 3, 1, 0, 0);
     }
     if (GetPreloadObject())
     {
@@ -773,8 +775,8 @@ void WriteValue(unsigned int, int);
 // @fnv 0x004fda00
 void BGSProjectileMethods::WriteProjectileSave()
 {
-    FUN_004855a0();
-    TESFullName::FUN_00487010();
+    BeginFormRecord();
+    TESFullName::Save_00487010();
     TESModel::WriteToBuffer(0x4c444f4d, 0x54444f4d);
     BGSDestructibleObjectForm::Save();
     SaveRef* saved70 = reinterpret_cast<SaveRef*>(Data.apTargetLight);
@@ -793,7 +795,7 @@ void BGSProjectileMethods::WriteProjectileSave()
     Data.m_pProjectileWeapon = Data.m_pProjectileWeapon ? reinterpret_cast<TESObjectWEAP*>(reinterpret_cast<SaveRef*>(Data.m_pProjectileWeapon)->Resolve()) : 0;
     if (IsEndian())
         Data.Endian();
-    FUN_00485e20(&Data, 0x54);
+    TESForm___SaveData(&Data, 0x54);
     if (IsEndian())
         Data.Endian();
     Data.apTargetLight = reinterpret_cast<TESObjectLIGH*>(saved70);
@@ -812,5 +814,5 @@ void BGSProjectileMethods::WriteProjectileSave()
         m_kProjectileModel.WriteToBuffer(0x314d414e, 0x324d414e);
     }
     WriteValue(0x4d414e56, m_eSoundLevel);
-    FUN_00485680();
+    FinishFormRecord();
 }

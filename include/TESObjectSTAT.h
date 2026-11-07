@@ -14,7 +14,7 @@ public:
     virtual bool LoadForm(TESFile* file);
 
     bool Load(TESFile* file);
-    void FUN_004fbb70();
+    void BGSMovableStatic_InitItem();
 
     char m_cType;
     unsigned char layoutPadding51[3];

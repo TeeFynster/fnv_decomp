@@ -117,7 +117,7 @@ template <class T> struct TreeBuildScratchArray : public hkArray<T>
 
 struct S00d09020_Builder
 {
-    void FUN_00d9ce50(S00d09020_Aabb* aabbs, hkpCollidable** elems, int n, hkArray<unsigned short>* out);
+    void hkAabbTree_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_build(S00d09020_Aabb* aabbs, hkpCollidable** elems, int n, hkArray<unsigned short>* out);
 };
 
 struct D090Rows
@@ -173,11 +173,12 @@ struct S00d09020_This
     int unk20;
     int unk24;
     S00d09020_Inner* m_inner;
-    void FUN_00d09020(hkArray<hkpCollidable*>* arg, int p2, int p3);
+    void hkpAabbTreeWorldManager_buildInactiveTree(hkArray<hkpCollidable*>* arg, int p2, int p3);
 };
 
 // @fnv 0x00d09020
-void S00d09020_This::FUN_00d09020(hkArray<hkpCollidable*>* arg, int p2, int p3)
+// src: XBOX_PDB 0x00d09020
+void S00d09020_This::hkpAabbTreeWorldManager_buildInactiveTree(hkArray<hkpCollidable*>* arg, int p2, int p3)
 {
     union BuilderTime
     {
@@ -265,7 +266,7 @@ void S00d09020_This::FUN_00d09020(hkArray<hkpCollidable*>* arg, int p2, int p3)
         }
     }
     if (n > 0)
-        builder.ptr->FUN_00d9ce50(aabbs.m_data, elems.m_data, n, &ids);
+        builder.ptr->hkAabbTree_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_build(aabbs.m_data, elems.m_data, n, &ids);
     {
         hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
         hkMonitorStream::TimerCommand* e = (hkMonitorStream::TimerCommand*)s->m_end.m_storage;

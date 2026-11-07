@@ -17,13 +17,14 @@ void __cdecl FUN_00458620(void* apTarget, const hkVector4& arVector);
 struct VectorSourceB00
 {
     void SubtractVectors(hkVector4& arOut);
-    void FUN_00812b00(void* apTarget);
+    void bhkCharacterController_GetPosition(void* apTarget);
 };
 
 // Preserve the original stack cookie with the shared vector's union layout.
 #pragma strict_gs_check(push, on)
 // @fnv 0x00812b00
-void VectorSourceB00::FUN_00812b00(void* apTarget)
+// src: XBOX_PDB 0x00812b00
+void VectorSourceB00::bhkCharacterController_GetPosition(void* apTarget)
 {
     hkVector4 kVector;
     SubtractVectors(kVector);
@@ -62,16 +63,16 @@ struct __declspec(align(16)) xAllHits
 {
     xAllHits();
     virtual ~xAllHits();
-    xHitList* FUN_00460140();
+    xHitList* TESDataHandler_GetWorldSpaceList();
     int m_q[0xc7];
 };
 struct __declspec(align(16)) xPick
 {
     xPick();
-    void FUN_004a3da0(xP3*);
-    void FUN_004a3eb0(const xP3&);
-    void FUN_004a3f70(xFilter);
-    void FUN_004a3fb0(xAllHits*);
+    void bhkPickData_SetFrom(xP3*);
+    void bhkPickData_SetTo(const xP3&);
+    void bhkPickData_SetFilter(xFilter);
+    void bhkPickData_SetAllCollector(xAllHits*);
     char m_buf[0xb0];
 };
 struct xWorld
@@ -133,7 +134,7 @@ struct xCell;
 xWorld* __fastcall xFUN_004543c0(xCell*);
 struct xOwner
 {
-    xFilter FUN_0070c440();
+    xFilter bhkCharacterController_GetCollisionFilter();
 };
 struct xActor;
 float __fastcall xFUN_0070c3b0(xActor*);
@@ -353,16 +354,17 @@ struct xActor
     virtual void v192();
     virtual void FUN_304(xP3, void*, xActor*, int);
     xCell* FUN_008d6f30();
-    float FUN_00567400();
+    float TESObjectREFR_GetScale_00567400();
     xFilter FUN_00931ed0();
     xOwner* FUN_009306d0();
     xShooterV* FUN_009185e0();
-    void FUN_0081eba0();
+    void MagicProjectile_CheckShotBehindWall();
 };
 
 extern xActor* xg_player_11dea3c;
 // @fnv 0x0081eba0
-void xActor::FUN_0081eba0()
+// src: XBOX_PDB 0x0081eba0
+void xActor::MagicProjectile_CheckShotBehindWall()
 {
     void* EFFECT = FUN_1d0();
     if ((FUN_009185e0() && FUN_009185e0()->FUN_2c() != xg_player_11dea3c) || !EFFECT)
@@ -373,26 +375,26 @@ void xActor::FUN_0081eba0()
     xP3 DIR;
     MYPOS = *FUN_1f4();
     PLPOS = *xg_player_11dea3c->FUN_1f4();
-    PLPOS.z = PLPOS.z + xFUN_0070c3b0(xg_player_11dea3c) * xg_player_11dea3c->FUN_00567400();
+    PLPOS.z = PLPOS.z + xFUN_0070c3b0(xg_player_11dea3c) * xg_player_11dea3c->TESObjectREFR_GetScale_00567400();
     DIR = MYPOS - PLPOS;
     xOwner* OWNER = FUN_009306d0();
     xFilter FILTER(0);
     if (OWNER)
-        FILTER = OWNER->FUN_0070c440();
+        FILTER = OWNER->bhkCharacterController_GetCollisionFilter();
     else
         FILTER = xg_player_11dea3c->FUN_00931ed0();
-    PICK.FUN_004a3f70(FILTER);
-    PICK.FUN_004a3da0(&PLPOS);
-    PICK.FUN_004a3eb0(PLPOS + DIR);
+    PICK.bhkPickData_SetFilter(FILTER);
+    PICK.bhkPickData_SetFrom(&PLPOS);
+    PICK.bhkPickData_SetTo(PLPOS + DIR);
     xAllHits HITS;
-    PICK.FUN_004a3fb0(&HITS);
+    PICK.bhkPickData_SetAllCollector(&HITS);
     bool DONE = false;
     if (xg_player_11dea3c->FUN_008d6f30() && xFUN_004543c0(xg_player_11dea3c->FUN_008d6f30())->FUN_c8(&PICK))
     {
         bool GO = true;
-        for (int I = 0; GO && I < HITS.FUN_00460140()->FUN_00726070() && !DONE; I++)
+        for (int I = 0; GO && I < HITS.TESDataHandler_GetWorldSpaceList()->FUN_00726070() && !DONE; I++)
         {
-            xHitInfo INFO(HITS.FUN_00460140()->GetEntryAt(I));
+            xHitInfo INFO(HITS.TESDataHandler_GetWorldSpaceList()->GetEntryAt(I));
             void* OBJ = xFUN_004b5820(INFO.m_50);
             if (OBJ)
             {
@@ -412,7 +414,7 @@ void xActor::FUN_0081eba0()
 extern const float DAT_010546cc;
 struct ImpactValue
 {
-    float* __thiscall FUN_00403e20();
+    float* __thiscall Setting_Float_00403e20();
 };
 extern ImpactValue DAT_011ce3e4, DAT_011cecac, DAT_011cf9d4, DAT_011ce798, DAT_011cf114, DAT_011ce224;
 struct ImpactState
@@ -422,17 +424,17 @@ struct ImpactState
 struct ImpactType
 {
     int value;
-    int __thiscall FUN_0043b4d0();
+    int __thiscall CFilter_GetLayer();
 };
 struct __declspec(align(16)) ImpactVector
 {
     __m128 coordinates;
     void __thiscall FUN_006815c0();
     void __thiscall FUN_005dbf20(float);
-    void __thiscall FUN_0062aea0();
-    void __thiscall FUN_00627920(ImpactVector*);
+    void __thiscall normalize3_0062aea0();
+    void __thiscall hkVector4_mul4(ImpactVector*);
 };
-extern void __cdecl FUN_004a3e00(ImpactVector*, const float*);
+extern void __cdecl NI2HK(ImpactVector*, const float*);
 struct ImpactResult
 {
     void __thiscall ApplyVirtualCall();
@@ -478,16 +480,17 @@ struct ImpactObject
     virtual void unknown_0090();
     virtual void unknown_0094();
     virtual ImpactState* unknown_0098();
-    void __thiscall FUN_0043b4f0(ImpactType*);
-    float __thiscall FUN_004b5400();
-    ImpactResult* __thiscall FUN_004ae750(ImpactVector*, ImpactVector*);
+    void __thiscall bhkWorldObject_GetCollisionFilter(ImpactType*);
+    float __thiscall bhkRigidBody_GetMass();
+    ImpactResult* __thiscall Bipedanim_GetReferenceFlagsOrZero(ImpactVector*, ImpactVector*);
 };
 struct ImpactOwner
 {
-    void __thiscall FUN_0081f000(float x, float y, float z, float dx, float dy, float dz, ImpactObject* object);
+    void __thiscall MagicProjectile_ApplyCollisionForce(float x, float y, float z, float dx, float dy, float dz, ImpactObject* object);
 };
 // @fnv 0x0081f000
-void ImpactOwner::FUN_0081f000(float x, float y, float z, float dx, float dy, float dz, ImpactObject* object)
+// src: XBOX_PDB 0x0081f000
+void ImpactOwner::MagicProjectile_ApplyCollisionForce(float x, float y, float z, float dx, float dy, float dz, ImpactObject* object)
 {
     if (!object)
         return;
@@ -496,40 +499,40 @@ void ImpactOwner::FUN_0081f000(float x, float y, float z, float dx, float dy, fl
     {
         float scale = DAT_010546cc;
         ImpactType type;
-        object->FUN_0043b4f0(&type);
-        switch (type.FUN_0043b4d0())
+        object->bhkWorldObject_GetCollisionFilter(&type);
+        switch (type.CFilter_GetLayer())
         {
         case 14:
-            scale *= *DAT_011ce3e4.FUN_00403e20();
+            scale *= *DAT_011ce3e4.Setting_Float_00403e20();
             break;
         case 8:
         case 29:
-            scale *= *DAT_011cecac.FUN_00403e20();
+            scale *= *DAT_011cecac.Setting_Float_00403e20();
             break;
         case 2:
         case 10:
-            scale *= *DAT_011cf9d4.FUN_00403e20();
+            scale *= *DAT_011cf9d4.Setting_Float_00403e20();
             break;
         default:
-            scale *= *DAT_011ce798.FUN_00403e20();
+            scale *= *DAT_011ce798.Setting_Float_00403e20();
             break;
         }
-        float weight = object->FUN_004b5400();
-        if (weight < *DAT_011cf114.FUN_00403e20())
-            scale = weight / *DAT_011cf114.FUN_00403e20() * scale;
-        scale *= *DAT_011ce224.FUN_00403e20();
+        float weight = object->bhkRigidBody_GetMass();
+        if (weight < *DAT_011cf114.Setting_Float_00403e20())
+            scale = weight / *DAT_011cf114.Setting_Float_00403e20() * scale;
+        scale *= *DAT_011ce224.Setting_Float_00403e20();
         ImpactVector direction;
         direction.FUN_006815c0();
-        FUN_004a3e00(&direction, &dx);
+        NI2HK(&direction, &dx);
         ImpactVector position;
         position.FUN_006815c0();
-        FUN_004a3e00(&position, &x);
-        direction.FUN_0062aea0();
+        NI2HK(&position, &x);
+        direction.normalize3_0062aea0();
         ImpactVector amount;
         amount.FUN_005dbf20(scale);
-        direction.FUN_00627920(&amount);
+        direction.hkVector4_mul4(&amount);
         state->FUN_00483710();
-        object->FUN_004ae750(&direction, &position)->ApplyVirtualCall();
+        object->Bipedanim_GetReferenceFlagsOrZero(&direction, &position)->ApplyVirtualCall();
         state->FUN_00483710();
     }
 }
@@ -560,7 +563,7 @@ struct xSound
 };
 struct xFltSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern xFltSetting xg_11d16f8;
 extern xFltSetting xg_11d1c28;
@@ -572,15 +575,15 @@ struct xRadius
 };
 struct xSndForm
 {
-    void* FUN_0084e3a0();
+    void* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct xEffect
 {
-    xSndForm* FUN_004fd3c0();
+    xSndForm* BGSProjectile_GetExplosion();
 };
 struct xCtl
 {
-    void FUN_0080fb00(xVec4*);
+    void bhkCharacterProxy_SetLinearVelocity(xVec4*);
 };
 struct xCell
 {
@@ -588,7 +591,7 @@ struct xCell
 };
 struct xOwner
 {
-    void FUN_0081c4a0(void*);
+    void MagicLight_Transfer(void*);
 };
 struct xA
 {
@@ -633,50 +636,50 @@ struct xProj : xBase
     xSound m_b4;
     xOwner* m_c0;
     xProj(int a, int b, int c, int d, xP3 kP1, xP3 kP2, void* apE, xOwner* apOwner);
-    xEffect* FUN_004fd400();
-    void FUN_00570f70(void*);
-    void FUN_0081e570(int);
+    xEffect* GetAVEffect();
+    void TESObjectREFR_Set3DSimple(void*);
+    void MagicProjectile_Load3D(int);
     void ResetProjectileIdleAnimation();
-    void FUN_0080feb0();
+    void MagicBallProjectile_InitHavok();
     xCtl* FUN_009306d0();
     xCell* FUN_008d6f30();
     xSound PlaySoundByFormID(void*, int, unsigned int, int);
-    void FUN_0081eba0();
+    void MagicProjectile_CheckShotBehindWall();
     xActorV* FUN_009185e0();
 };
 // @fnv 0x0080f810
 xProj::xProj(int a, int b, int c, int d, xP3 kP1, xP3 kP2, void* apE, xOwner* apOwner) : xBase(a, b, c, d, kP1, kP2)
 {
-    m_88 = ((xRadius*)FUN_004fd400())->FUN_009b0bd0() * *xg_11d16f8.FUN_00403e20();
+    m_88 = ((xRadius*)GetAVEffect())->FUN_009b0bd0() * *xg_11d16f8.Setting_Float_00403e20();
     m_ac = 0;
     m_a8 = 0.0f;
     m_b0 = 1.0f;
     m_c0 = 0;
     if (apE)
-        FUN_00570f70(apE);
+        TESObjectREFR_Set3DSimple(apE);
     else
-        FUN_0081e570(0);
+        MagicProjectile_Load3D(0);
     ResetProjectileIdleAnimation();
-    FUN_0080feb0();
+    MagicBallProjectile_InitHavok();
     xVec4 V(-xg_107a510, 0.0f, 0.0f, 0.0f);
-    FUN_009306d0()->FUN_0080fb00(&V);
+    FUN_009306d0()->bhkCharacterProxy_SetLinearVelocity(&V);
     FUN_008d6f30()->FUN_00548230(this, false);
-    if (FUN_004fd400()->FUN_004fd3c0())
+    if (GetAVEffect()->BGSProjectile_GetExplosion())
     {
-        void* NAME = FUN_004fd400()->FUN_004fd3c0()->FUN_0084e3a0();
+        void* NAME = GetAVEffect()->BGSProjectile_GetExplosion()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         if (m_b4.FUN_00ad8ce0())
             m_b4.FUN_00ad8d10();
         m_b4 = PlaySoundByFormID(NAME, 1, 0x40000102, 1);
     }
     if (apOwner)
     {
-        apOwner->FUN_0081c4a0(this);
+        apOwner->MagicLight_Transfer(this);
         m_c0 = apOwner;
     }
-    FUN_0081eba0();
+    MagicProjectile_CheckShotBehindWall();
     void* SHOOTER = FUN_009185e0() ? FUN_009185e0()->FUN_2c() : 0;
     if (SHOOTER != xg_player_11dea3c)
-        xFUN_0080fae0(*xg_11d1c28.FUN_00403e20());
+        xFUN_0080fae0(*xg_11d1c28.Setting_Float_00403e20());
     FUN_00484b60(0x10000000);
 }
 }  // namespace fnv_0080f810

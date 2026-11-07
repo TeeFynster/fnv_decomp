@@ -23,12 +23,12 @@ public:
 
     void* Destroy(unsigned int flags);
     void* FUN_00a4cd40(unsigned int flags);
-    void FUN_00a4c840(NiStream& stream);
-    NiLookAtController* FUN_00a4cd60(void* process);
-    void FUN_00a4ce20(NiStream& stream);
-    bool FUN_00a4c860(NiStream& stream);
-    void FUN_00a4cea0(NiStream* stream);
-    bool FUN_00a4c890(NiLookAtController* other);
+    void LinkObject_00a4c840(NiStream& stream);
+    NiLookAtController* CreateClone_00a4cd60(void* process);
+    void LoadBinary_00a4ce20(NiStream& stream);
+    bool RegisterStreamables_00a4c860(NiStream& stream);
+    void SaveBinary_00a4cea0(NiStream* stream);
+    bool IsEqual_00a4c890(NiLookAtController* other);
     void LookupAndLinkItem(void* item);
     void AppendString(StrArr* strings);
     void SetBit(bool value, unsigned short mask);

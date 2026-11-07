@@ -11,17 +11,18 @@ struct FUN_00d06f70_s
     int* p;
     int x;
     int y;
-    void FUN_00d06f70();
+    void InitializeFields_00d06f70();
 };
 
 // @fnv 0x00d06f70
-void FUN_00d06f70_s::FUN_00d06f70()
+// src: GUESS 0x00d06f70 (confidence: low)
+void FUN_00d06f70_s::InitializeFields_00d06f70()
 {
     y = 0;
     p = &DAT_0102e388;
 }
 
-int __cdecl FUN_00d06f80(void* apBuffer, int aiCount);
+int __cdecl hkStatisticsCollector_getAllocatedSize(void* apBuffer, int aiCount);
 
 struct FUN_00d06fb0_cls
 {
@@ -41,13 +42,13 @@ void FUN_00d06fb0_cls::DispatchWithMode(void* apFirst, void* apSecond, int aiCou
 {
     int iMode = aiMode;
     if (aiCount > 0 && iMode == 0)
-        iMode = FUN_00d06f80(apSecond, aiCount);
+        iMode = hkStatisticsCollector_getAllocatedSize(apSecond, aiCount);
 
     Dispatch(1, apFirst, apSecond, aiCount, iMode);
 }
 
-extern "C" int __cdecl FUN_00cb10d0(const char* s);
-extern "C" int __cdecl FUN_00d06f80(const char* s, int len);
+extern "C" int __cdecl hkString_strLen(const char* s);
+extern "C" int __cdecl hkStatisticsCollector_getAllocatedSize(const char* s, int len);
 
 class Handler
 {
@@ -68,8 +69,8 @@ void Handler::EmitString(int a, unsigned int* str)
     const char* s = (const char*)(*str & ~1u);
     if (s)
     {
-        int len = FUN_00cb10d0(s);
-        Emit(3, a, s, len, FUN_00d06f80(s, len));
+        int len = hkString_strLen(s);
+        Emit(3, a, s, len, hkStatisticsCollector_getAllocatedSize(s, len));
     }
 }
 
@@ -90,7 +91,7 @@ class Allocator
     virtual int ComputeHash(const void* data, int len);
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 void* __cdecl FUN_00ec44d0(void* dst, const void* src, unsigned int count);
 
 struct GrowBuf
@@ -101,7 +102,8 @@ struct GrowBuf
 };
 
 // @fnv 0x00d06cb0
-void __cdecl FUN_00d06cb0(GrowBuf* buf, unsigned int elemSize)
+// src: HAVOK_LIB 0x00d06cb0
+void __cdecl hkSmallArrayUtil__reserveMore(GrowBuf* buf, unsigned int elemSize)
 {
     unsigned int newCount;
     if (buf->m_uCap != 0)
@@ -113,7 +115,7 @@ void __cdecl FUN_00d06cb0(GrowBuf* buf, unsigned int elemSize)
         newCount = 1;
     }
 
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     void* newData = holder->m_heap->blockAlloc(newCount * elemSize);
     FUN_00ec44d0(newData, buf->m_pData, (unsigned int)buf->m_uCap * elemSize);
 
@@ -121,7 +123,7 @@ void __cdecl FUN_00d06cb0(GrowBuf* buf, unsigned int elemSize)
     {
         void* oldData = buf->m_pData;
         unsigned int oldBytes = (buf->m_uiObjectFlags & 0x3fffu) * elemSize;
-        hkMemoryRouter* pAllocHolder2 = FUN_00c85750();
+        hkMemoryRouter* pAllocHolder2 = hkMemoryRouter_getInstance();
         pAllocHolder2->m_heap->blockFree(oldData, oldBytes);
     }
 
@@ -244,7 +246,7 @@ void S_00d06dd0_Obj::DispatchIfNotFlagged(int a, unsigned int flags)
     if ((flags & 1) == 0)
     {
         int b = GetFlagsOrProcess(a);
-        int r = (&FUN_00c85750()->heap())->getAllocatedSize((const void*)a, b);
+        int r = (&hkMemoryRouter_getInstance()->heap())->getAllocatedSize((const void*)a, b);
         slot14(0, 0, a, b, r);
     }
 }
@@ -266,17 +268,18 @@ class FUN_00d06e10_cls
     virtual void v10();
     virtual void Emit(int kind, int a, const char* s, int len, int hash);
 
-    void FUN_00d06e10(int a1, int a2, unsigned char flag);
+    void hkStatisticsCollector_addObjectMemory(int a1, int a2, unsigned char flag);
 };
 
 // When flag bit 0 is clear, reads a length from a1, computes a hash through the allocator, and calls Emit with that length and hash.
 // @fnv 0x00d06e10
-void FUN_00d06e10_cls::FUN_00d06e10(int pSource, int pData, unsigned char flag)
+// src: HAVOK_LIB 0x00d06e10
+void FUN_00d06e10_cls::hkStatisticsCollector_addObjectMemory(int pSource, int pData, unsigned char flag)
 {
     if ((flag & 1) == 0)
     {
         int len = ((FUN_00d06e10_src*)pSource)->Read();
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         int hash = holder->m_heap->getAllocatedSize((const void*)pData, len);
         Emit(0, 0, (const char*)pData, len, hash);
     }
@@ -312,11 +315,12 @@ FUN_00d06f50::FUN_00d06f50(void* owner) : m_pOwnerObject(owner), m_flag(false)
 namespace fnv_00d06f80 {
 // If s is non-null, hashes it through the allocator; otherwise returns len.
 // @fnv 0x00d06f80
-extern "C" int __cdecl FUN_00d06f80(const char* pcString, int iLength)
+// src: HAVOK_LIB 0x00d06f80
+extern "C" int __cdecl hkStatisticsCollector_getAllocatedSize(const char* pcString, int iLength)
 {
     if (pcString)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         return holder->m_heap->getAllocatedSize(pcString, iLength);
     }
 
@@ -324,7 +328,7 @@ extern "C" int __cdecl FUN_00d06f80(const char* pcString, int iLength)
 }
 }  // namespace fnv_00d06f80
 
-int __cdecl FUN_00d06f80(int aiB, int aiC);
+int __cdecl hkStatisticsCollector_getAllocatedSize(int aiB, int aiC);
 
 struct FUN_00d06ff0_cls
 {
@@ -335,16 +339,17 @@ struct FUN_00d06ff0_cls
     virtual void v10();
     virtual void V14(int aiZero, int aiA, int aiB, int aiC, int aiR);
 
-    void FUN_00d06ff0(int aiA, int aiB, int aiC, int aiD);
+    void hkStatisticsCollector_addObjectChunk(int aiA, int aiB, int aiC, int aiD);
 };
 
 // If aiC is positive and aiD is zero, computes a result via FUN_00d06f80(aiB, aiC), then calls V14 with zero, aiA, aiB, aiC and the result.
 // @fnv 0x00d06ff0
-void FUN_00d06ff0_cls::FUN_00d06ff0(int aiA, int aiB, int aiC, int aiD)
+// src: HAVOK_LIB 0x00d06ff0
+void FUN_00d06ff0_cls::hkStatisticsCollector_addObjectChunk(int aiA, int aiB, int aiC, int aiD)
 {
     int iResult = aiD;
     if (aiC > 0 && aiD == 0)
-        iResult = FUN_00d06f80(aiB, aiC);
+        iResult = hkStatisticsCollector_getAllocatedSize(aiB, aiC);
     V14(0, aiA, aiB, aiC, iResult);
 }
 
@@ -357,7 +362,8 @@ extern const char str_0106f148[];
 
 // Returns one of five fixed string pointers for values 0 through 4, or a fallback pointer otherwise.
 // @fnv 0x00d06e60
-const char* __cdecl FUN_00d06e60(int value)
+// src: HAVOK_LIB 0x00d06e60
+const char* __cdecl hkStatisticsCollector_memoryTypeToCstring(int value)
 {
     switch (value)
     {

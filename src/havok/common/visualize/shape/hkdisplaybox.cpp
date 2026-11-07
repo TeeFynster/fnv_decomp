@@ -17,14 +17,14 @@ inline hkRotation::hkRotation() {}
 struct __declspec(align(16)) DisplayBoxVector
 {
     float x, y, z, w;
-    void FUN_00c7f640(const hkTransform& t, const DisplayBoxVector& p);
+    void setTransformedPos_00c7f640(const hkTransform& t, const DisplayBoxVector& p);
     void set(const DisplayBoxVector& o)
     {
         *(__m128*)&x = *(const __m128*)&o.x;
     }
 };
 
-__declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
+__declspec(nothrow) void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 
 typedef hkArrayBase<DisplayBoxVector> hkVector4Array;
 template<> __forceinline void hkArrayBase<DisplayBoxVector>::_setSize(hkMemoryAllocator& sharedAlloc, int n)
@@ -34,7 +34,7 @@ hkMemoryAllocator& alloc = reinterpret_cast<hkMemoryAllocator&>(sharedAlloc);
         if (getCapacity() < n)
         {
             int cap = 2 * getCapacity();
-            FUN_00c908c0(alloc, this, n < cap ? cap : n, sizeof(DisplayBoxVector));
+            hkArrayUtil__reserve(alloc, this, n < cap ? cap : n, sizeof(DisplayBoxVector));
         }
         m_iElementCount = n;
     
@@ -72,7 +72,7 @@ void hkBoxGeometry::GetEdgeLines(hkVector4Array& aEdgeLines, hkMemoryAllocator& 
             halfExtent.y *= -1.0;
         if (iVertex & 4)
             halfExtent.z *= -1.0;
-        verts[iVertex].FUN_00c7f640(m_kMotionTransform, halfExtent);
+        verts[iVertex].setTransformedPos_00c7f640(m_kMotionTransform, halfExtent);
     }
 
     int n = 0;

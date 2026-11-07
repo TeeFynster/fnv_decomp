@@ -41,12 +41,13 @@ struct FUN_009baee0_owner
 {
     char _pad[0x14];
     BGSProjectile* pItem;
-    void* FUN_009baee0();
+    void* MuzzleFlash_GetMuzzleFlashModel();
 };
 // @fnv 0x009baee0
-void* FUN_009baee0_owner::FUN_009baee0()
+// src: COMMUNITY 0x009baee0
+void* FUN_009baee0_owner::MuzzleFlash_GetMuzzleFlashModel()
 {
-    return (pItem && HasProjectileFlag8(pItem)) ? reinterpret_cast<BSMultiBoundRoom*>(pItem)->FUN_006ab360() : 0;
+    return (pItem && HasProjectileFlag8(pItem)) ? reinterpret_cast<BSMultiBoundRoom*>(pItem)->TESCombatStyle_GetAdvancedData() : 0;
 }
 
 extern double _gModifierZero;
@@ -60,23 +61,24 @@ struct FUN_009bb690_shell
     float unk8;
     char padC[8];
     PathingRequest* ptr14;
-    void FUN_009bb690();
+    void MuzzleFlash_Enable();
 };
 // If unk4 is at or below _gModifierZero, sets unk0 and unk2 to 1 and stores ptr14->FUN_00507e10() into unk8.
 // @fnv 0x009bb690
-void FUN_009bb690_shell::FUN_009bb690()
+// src: COMMUNITY 0x009bb690
+void FUN_009bb690_shell::MuzzleFlash_Enable()
 {
     if (unk4 <= _gModifierZero)
     {
         unk0 = 1;
         unk2 = 1;
-        unk8 = ptr14->FUN_00507e10();
+        unk8 = ptr14->BGSProjectile_GetMuzzleFlashDuration();
     }
 }
 
 struct ProjectileData
 {
-    float FUN_00507e10();
+    float BGSProjectile_GetMuzzleFlashDuration();
 };
 struct FUN_009bacb0
 {
@@ -95,13 +97,13 @@ FUN_009bacb0::FUN_009bacb0(Projectile* projectile, void* pContext) : first(0), s
     first = 0;
     second = 0;
     data = projectile ? projectile->FUN_004181e0() : 0;
-    handle = projectile ? projectile->FUN_00476c90() : 0;
+    handle = projectile ? projectile->Sky_GetMode() : 0;
     context = pContext;
     flagsA = 0;
     flagsB = 0;
     flagsC = 0;
     elapsed = 0.0f;
-    total = data->FUN_00507e10();
+    total = data->BGSProjectile_GetMuzzleFlashDuration();
     UpdateNodePosition(pContext);
 }
 
@@ -121,7 +123,7 @@ struct S_009baf50_Obj
 };
 struct S_009baf50_Mgr
 {
-    S_009baf50_Obj* LoadModel(unsigned int, int, int, int, int, int);
+    S_009baf50_Obj* ModelLoader_LoadFile(unsigned int, int, int, int, int, int);
 };
 extern S_009baf50_Mgr* DAT_011c3b3c;
 struct S_009baf50_Vec
@@ -131,21 +133,21 @@ struct S_009baf50_Vec
 };
 struct S_009baf50_Node
 {
-    void FUN_00a5a040();
-    void FUN_00a59c60(const S_009baf50_Vec&);
+    void UpdateProperties();
+    void NiAVObject_Update(const S_009baf50_Vec&);
 };
 struct S_009baf50_Ptr
 {
     NiNode* raw;
-    S_009baf50_Node* FUN_00559450();
+    S_009baf50_Node* Modelloader_GetReferencedThis();
 };
 extern float DAT_011c3c08;
 extern double DAT_01090008;
-void __cdecl FUN_0062bc10(S_009baf50_Node*);
-void __cdecl FUN_00a6d2d0(S_009baf50_Node*);
+void __cdecl TESHavokUtilities_RemoveHavokFromSceneGraph(S_009baf50_Node*);
+void __cdecl NiTimeController_StartAnimations(S_009baf50_Node*);
 struct S_009baf50_Self : FUN_009bacb0
 {
-    void* FUN_009baee0();
+    void* MuzzleFlash_GetMuzzleFlashModel();
     void UpdateMuzzleFlash(void*);
     void UpdateLightFromChallenge();
 };
@@ -153,29 +155,29 @@ struct S_009baf50_Self : FUN_009bacb0
 // @fnv 0x009baf50
 void FUN_009bacb0::UpdateNodePosition(void* arg)
 {
-    S_009baf50_Item* item = (S_009baf50_Item*)static_cast<S_009baf50_Self*>(this)->FUN_009baee0();
+    S_009baf50_Item* item = (S_009baf50_Item*)static_cast<S_009baf50_Self*>(this)->MuzzleFlash_GetMuzzleFlashModel();
     if (item)
     {
         if (item->FUN_0048cee0())
         {
-            S_009baf50_Obj* obj = DAT_011c3b3c->LoadModel(item->v5(), 0, 1, 0, 0, 0);
+            S_009baf50_Obj* obj = DAT_011c3b3c->ModelLoader_LoadFile(item->v5(), 0, 1, 0, 0, 0);
             if (obj)
             {
                 first = obj->FUN_00a5d680();
             }
         }
     }
-    if (!((S_009baf50_Ptr*)&first)->FUN_00559450())
+    if (!((S_009baf50_Ptr*)&first)->Modelloader_GetReferencedThis())
         return;
-    FUN_0062bc10(((S_009baf50_Ptr*)&first)->FUN_00559450());
+    TESHavokUtilities_RemoveHavokFromSceneGraph(((S_009baf50_Ptr*)&first)->Modelloader_GetReferencedThis());
     static_cast<S_009baf50_Self*>(this)->UpdateMuzzleFlash(arg);
     static_cast<S_009baf50_Self*>(this)->UpdateLightFromChallenge();
-    FUN_00a6d2d0(((S_009baf50_Ptr*)&first)->FUN_00559450());
-    ((S_009baf50_Ptr*)&first)->FUN_00559450()->FUN_00a5a040();
+    NiTimeController_StartAnimations(((S_009baf50_Ptr*)&first)->Modelloader_GetReferencedThis());
+    ((S_009baf50_Ptr*)&first)->Modelloader_GetReferencedThis()->UpdateProperties();
     S_009baf50_Vec pos((float)(DAT_011c3c08 - DAT_01090008), 1, 0);
-    ((S_009baf50_Ptr*)&first)->FUN_00559450()->FUN_00a59c60(pos);
+    ((S_009baf50_Ptr*)&first)->Modelloader_GetReferencedThis()->NiAVObject_Update(pos);
     pos.x = DAT_011c3c08;
-    ((S_009baf50_Ptr*)&first)->FUN_00559450()->FUN_00a59c60(pos);
+    ((S_009baf50_Ptr*)&first)->Modelloader_GetReferencedThis()->NiAVObject_Update(pos);
 }
 
 struct S_009bb080_Sub
@@ -304,7 +306,7 @@ struct S_009bb080_Node
 struct S_009bb080_Ptr
 {
     S_009bb080_Node* node;
-    S_009bb080_Node* FUN_00559450();
+    S_009bb080_Node* Modelloader_GetReferencedThis();
 };
 struct S_009bb080_Global
 {
@@ -314,8 +316,8 @@ extern S_009bb080_Global DAT_011f2250;
 extern double DAT_01012060;
 extern float DAT_0101e2bc;
 float FUN_00716440();
-void __cdecl FUN_00578060(void*);
-void __cdecl FUN_00578170(void*);
+void __cdecl TESObjectREFR_AddMasterParticleAddonNodes(void*);
+void __cdecl TESObjectREFR_RemoveMasterParticleAddonNodes(void*);
 struct S_009bb080
 {
     unsigned char unk0, unk1, unk2, unk3;
@@ -325,24 +327,25 @@ struct S_009bb080
     PathingRequest* unk14;
     void UpdateMuzzleFlash(S_009bb080_Base0*);
     void UpdateLightVisibility();
-    void FUN_009bb080(float dt, S_009bb080_Base0* proj);
+    void MuzzleFlash_Update(float dt, S_009bb080_Base0* proj);
 };
 // @fnv 0x009bb080
-void S_009bb080::FUN_009bb080(float afDeltaTime, S_009bb080_Base0* proj)
+// src: XBOX_PDB 0x009bb080
+void S_009bb080::MuzzleFlash_Update(float afDeltaTime, S_009bb080_Base0* proj)
 {
     S_009bb080_Base0* q;
-    if (!unkc.FUN_00559450())
+    if (!unkc.Modelloader_GetReferencedThis())
         return;
     UpdateMuzzleFlash(proj);
-    unkc.FUN_00559450()->FUN_00450f90(unk0 == 0);
+    unkc.Modelloader_GetReferencedThis()->FUN_00450f90(unk0 == 0);
     if (unk0 && !unk1)
     {
-        FUN_00578060(unkc.FUN_00559450()->FUN_vfnc());
+        TESObjectREFR_AddMasterParticleAddonNodes(unkc.Modelloader_GetReferencedThis()->FUN_vfnc());
         unk1 = 1;
     }
     if (!unk0 && unk1)
     {
-        FUN_00578170(unkc.FUN_00559450()->FUN_vfnc());
+        TESObjectREFR_RemoveMasterParticleAddonNodes(unkc.Modelloader_GetReferencedThis()->FUN_vfnc());
         unk1 = 0;
     }
     if (unk2)
@@ -363,7 +366,7 @@ void S_009bb080::FUN_009bb080(float afDeltaTime, S_009bb080_Base0* proj)
         unk8 = unk8 - afDeltaTime;
         if (unk8 <= DAT_01012060)
         {
-            unk8 = unk14->FUN_00507e10();
+            unk8 = unk14->BGSProjectile_GetMuzzleFlashDuration();
             unk4 = DAT_0101e2bc;
             unk0 = 0;
             unk2 = 1;
@@ -377,11 +380,11 @@ struct AnimCls
 };
 struct FUN_009611e0_shell
 {
-    int FUN_009611e0();
+    int NiAVObject_GetParent();
 };
 struct ObjCls
 {
-    NiTransform* FUN_00461130();
+    NiTransform* NiAVObject_GetWorldRotate();
     virtual void v00();
     virtual void v01();
     virtual void v02();
@@ -441,7 +444,7 @@ struct ObjCls
 };
 struct NodeCls
 {
-    NiTransform* FUN_00461130();
+    NiTransform* NiAVObject_GetWorldRotate();
 };
 struct ParamCls
 {
@@ -581,8 +584,8 @@ struct ParamCls
 };
 struct PlayerCls
 {
-    bool FUN_00524d10();
-    void* FUN_00950bb0(bool);
+    bool PlayerCharacter_IsActually3rdPerson();
+    void* PlayerCharacter_Get3D_00950bb0(bool);
     AnimCls* FUN_00950a60(bool);
     virtual void v00();
     virtual void v01();
@@ -709,11 +712,11 @@ struct PlayerCls
 };
 struct NiPtrC
 {
-    NiAVObject* FUN_00559450();
+    NiAVObject* Modelloader_GetReferencedThis();
 };
 struct NodeSrc
 {
-    NodeCls* FUN_00525700(void*);
+    NodeCls* TESObjectWEAP_GetFireNode(void*);
 };
 struct HolderCls
 {
@@ -723,10 +726,10 @@ struct TaskQ
 {
     void QueueTaskWithTwoObjects(NiAVObject*, ObjCls*, int, int);
 };
-bool FUN_008c7aa0();
+bool AILinearTaskThreadManager_ShouldQueue3DTask();
 TaskQ* FUN_004537b0();
 void FUN_00b6bb30(void*, float);
-void FUN_005b5e40(const char*);
+void Warning_005b5e40(const char*);
 extern PlayerCls* DAT_011dea3c;
 extern unsigned char DAT_011a59bc;
 struct ThisCls
@@ -740,13 +743,13 @@ struct ThisCls
 // @fnv 0x009bb240
 void ThisCls::UpdateMuzzleFlash(ParamCls* apParam)
 {
-    if (!(m_0c.FUN_00559450() && apParam && apParam->FUN_008d6f30() && apParam->v116()))
+    if (!(m_0c.Modelloader_GetReferencedThis() && apParam && apParam->FUN_008d6f30() && apParam->v116()))
         return;
     NodeCls* node2 =
         apParam->v64()
             ? (NodeCls*)apParam->v131()
-            : (((FUN_009611e0_shell*)this)->FUN_009611e0()
-                   ? (NodeCls*)((NodeSrc*)((FUN_009611e0_shell*)this)->FUN_009611e0())->FUN_00525700(apParam->v116())
+            : (((FUN_009611e0_shell*)this)->NiAVObject_GetParent()
+                   ? (NodeCls*)((NodeSrc*)((FUN_009611e0_shell*)this)->NiAVObject_GetParent())->TESObjectWEAP_GetFireNode(apParam->v116())
                    : (NodeCls*)0);
     bool _flag = false;
     float fResultTmp = 0.0f;
@@ -756,9 +759,9 @@ void ThisCls::UpdateMuzzleFlash(ParamCls* apParam)
         ObjCls* target2;
         if (apParam == (ParamCls*)DAT_011dea3c)
         {
-            if (!DAT_011dea3c->FUN_00524d10())
+            if (!DAT_011dea3c->PlayerCharacter_IsActually3rdPerson())
             {
-                target2 = (ObjCls*)DAT_011dea3c->FUN_00950bb0(true);
+                target2 = (ObjCls*)DAT_011dea3c->PlayerCharacter_Get3D_00950bb0(true);
             }
             else
             {
@@ -767,16 +770,16 @@ void ThisCls::UpdateMuzzleFlash(ParamCls* apParam)
             NiTransform B;
             if (target2)
             {
-                B.m_Rotate = target2->FUN_00461130()->FUN_004768c0();
-                B.m_fScale = 1.0f / target2->FUN_00461130()->m_fScale;
+                B.m_Rotate = target2->NiAVObject_GetWorldRotate()->FUN_004768c0();
+                B.m_fScale = 1.0f / target2->NiAVObject_GetWorldRotate()->m_fScale;
                 // Explicit copies preserve the original trivial-assignment code under /Od.
-                memcpy(&B.m_Translate, &target2->FUN_00461130()->m_Translate.FUN_004a0bd0(), sizeof(B.m_Translate));
+                memcpy(&B.m_Translate, &target2->NiAVObject_GetWorldRotate()->m_Translate.GetNegatedVector(), sizeof(B.m_Translate));
                 memcpy(&B.m_Translate, &B.FUN_004b4500(&B.m_Translate), sizeof(B.m_Translate));
-                B.m_Translate.FUN_00439180(B.m_fScale);
+                B.m_Translate.ScaleComponents(B.m_fScale);
             }
-            memcpy(&A_2, &B.FUN_0062c250(node2->FUN_00461130()), sizeof(A_2));
+            memcpy(&A_2, &B.FUN_0062c250(node2->NiAVObject_GetWorldRotate()), sizeof(A_2));
             _flag = true;
-            if (!DAT_011dea3c->FUN_00524d10())
+            if (!DAT_011dea3c->PlayerCharacter_IsActually3rdPerson())
             {
                 fResultTmp = DAT_011dea3c->FUN_00950a60(true) ? DAT_011dea3c->FUN_00950a60(true)->FUN_00453700() : 0.0f;
             }
@@ -787,40 +790,40 @@ void ThisCls::UpdateMuzzleFlash(ParamCls* apParam)
         }
         else
         {
-            memcpy(&A_2, node2->FUN_00461130(), sizeof(A_2));
+            memcpy(&A_2, node2->NiAVObject_GetWorldRotate(), sizeof(A_2));
             HolderCls* holder6 = (HolderCls*)apParam->FUN_008d6f30();
             target2 = holder6->FUN_005497a0();
         }
         if (target2)
         {
-            if (target2 != (void*)((FUN_009611e0_shell*)m_0c.FUN_00559450())->FUN_009611e0())
+            if (target2 != (void*)((FUN_009611e0_shell*)m_0c.Modelloader_GetReferencedThis())->NiAVObject_GetParent())
             {
-                if (!FUN_008c7aa0())
+                if (!AILinearTaskThreadManager_ShouldQueue3DTask())
                 {
-                    target2->v55(m_0c.FUN_00559450(), 1);
+                    target2->v55(m_0c.Modelloader_GetReferencedThis(), 1);
                 }
                 else
                 {
-                    FUN_004537b0()->QueueTaskWithTwoObjects(m_0c.FUN_00559450(), target2, 1, 0);
+                    FUN_004537b0()->QueueTaskWithTwoObjects(m_0c.Modelloader_GetReferencedThis(), target2, 1, 0);
                 }
-                FUN_00b6bb30(m_0c.FUN_00559450()->IsSceneNode(), 1.0f);
+                FUN_00b6bb30(m_0c.Modelloader_GetReferencedThis()->IsSceneNode(), 1.0f);
             }
         }
-        m_0c.FUN_00559450()->FUN_00440460(&A_2.m_Translate);
-        m_0c.FUN_00559450()->FUN_0043fa80(&A_2);
-        m_0c.FUN_00559450()->FUN_00440490(A_2.m_fScale);
+        m_0c.Modelloader_GetReferencedThis()->NiAVObject_SetTranslate(&A_2.m_Translate);
+        m_0c.Modelloader_GetReferencedThis()->SetRotate_0043fa80(&A_2);
+        m_0c.Modelloader_GetReferencedThis()->NiAVObject_SetScale(A_2.m_fScale);
         if (_flag)
         {
-            if (!FUN_008c7aa0())
+            if (!AILinearTaskThreadManager_ShouldQueue3DTask())
             {
                 NiUpdateData aUpd(fResultTmp, false, false);
-                m_0c.FUN_00559450()->FUN_00a59c60(aUpd);
+                m_0c.Modelloader_GetReferencedThis()->NiAVObject_Update(aUpd);
             }
             else
             {
                 if (DAT_011a59bc)
                 {
-                    FUN_005b5e40("Trying to update a Muzzle Flash when not in the main thread");
+                    Warning_005b5e40("Trying to update a Muzzle Flash when not in the main thread");
                     DAT_011a59bc = 0;
                 }
             }
@@ -1341,7 +1344,7 @@ struct FUN_00825c00_cls
 };
 struct FUN_009611e0_cls
 {
-    unsigned int FUN_009611e0();
+    unsigned int NiAVObject_GetParent();
 };
 struct FUN_00978740_cls
 {
@@ -1350,7 +1353,8 @@ struct FUN_00978740_cls
 extern FUN_00978740_cls DAT_011e0e80;
 
 // @fnv 0x009bb6d0
-void __cdecl FUN_009bb6d0(ProjTarget* pTarget, Projectile* pProjectile)
+// src: XBOX_PDB 0x009bb6d0
+void __cdecl MuzzleFlash_SpawnMuzzleFlash(ProjTarget* pTarget, Projectile* pProjectile)
 {
     if (pTarget != 0 && pProjectile != 0)
     {
@@ -1363,13 +1367,13 @@ void __cdecl FUN_009bb6d0(ProjTarget* pTarget, Projectile* pProjectile)
             {
                 if (!(item->v6b8() != 0 &&
                       ((FUN_00825c00_cls*)item->v6b8())->FUN_00825c00() == pProjectile->FUN_004181e0() &&
-                      ((FUN_009611e0_cls*)item->v6b8())->FUN_009611e0() == pProjectile->FUN_00476c90()))
+                      ((FUN_009611e0_cls*)item->v6b8())->NiAVObject_GetParent() == pProjectile->Sky_GetMode()))
                 {
                     item->v6c4();
                     item->v6b4(pProjectile, pTarget);
                 }
                 if (item->v6b8() != 0)
-                    ((FUN_009bb690_shell*)item->v6b8())->FUN_009bb690();
+                    ((FUN_009bb690_shell*)item->v6b8())->MuzzleFlash_Enable();
             }
         }
         else
@@ -1382,11 +1386,11 @@ void __cdecl FUN_009bb6d0(ProjTarget* pTarget, Projectile* pProjectile)
 struct TaskQueueInterface
 {
     static TaskQueueInterface* __cdecl GetInstance();
-    void FUN_0087ac60(unsigned int);
+    void TaskQueueInterface_QueueNodeDetach(unsigned int);
 };
 struct ModelLoader
 {
-    void FUN_0045a5e0(const char*);
+    void ModelLoader_ReleaseFile(const char*);
 };
 struct Loader_S;
 extern Loader_S* g_modelLoader;
@@ -1473,24 +1477,24 @@ struct FUN_009badc0
     GO m_pController;
     GO spOther;
     ~FUN_009badc0();
-    void FUN_009bb850();
+    void MuzzleFlash_DetachLight();
 };
 
 // For nonzero model length, passes its path to the loader; conditionally calls Release3D or FUN_0087ac60, then clears m_pController.
 // @fnv 0x009badc0
 FUN_009badc0::~FUN_009badc0()
 {
-    TESModel* m_kModelObjectsItem = (TESModel*)((FUN_009baee0_owner*)this)->FUN_009baee0();
+    TESModel* m_kModelObjectsItem = (TESModel*)((FUN_009baee0_owner*)this)->MuzzleFlash_GetMuzzleFlashModel();
     if (m_kModelObjectsItem->GetModelLength())
-        ((ModelLoader*)g_modelLoader)->FUN_0045a5e0(m_kModelObjectsItem->GetModelFilePath());
+        ((ModelLoader*)g_modelLoader)->ModelLoader_ReleaseFile(m_kModelObjectsItem->GetModelFilePath());
     if (*(Flt*)&m_pController && ((Calendar*)(unsigned int)*(Flt*)&m_pController)->GetDaysPassed())
     {
         if (!IsConditionMet())
             ((NodeX*)((Calendar*)(unsigned int)*(Flt*)&m_pController)->GetDaysPassed())
                 ->Release3D(*(Flt*)&m_pController);
         else
-            TaskQueueInterface::GetInstance()->FUN_0087ac60(*(Flt*)&m_pController);
+            TaskQueueInterface::GetInstance()->TaskQueueInterface_QueueNodeDetach(*(Flt*)&m_pController);
     }
     m_pController = 0;
-    FUN_009bb850();
+    MuzzleFlash_DetachLight();
 }

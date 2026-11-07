@@ -231,16 +231,16 @@ extern "C"
     unsigned char __cdecl _FUN_00401500();
 }
 
-void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
+void __cdecl TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 void __cdecl _FUN_00485990(unsigned int, void*, unsigned int);
 
 // @fnv 0x005f6810
 void __thiscall TESClass::SaveForm(void)
 {
     char cAttribData[7];
-    TESForm::FUN_004855a0();
-    TESFullName::FUN_00487010();
-    TESDescription::FUN_00482cb0();
+    TESForm::BeginFormRecord();
+    TESFullName::Save_00487010();
+    TESDescription::Save_00482cb0();
     TESTexture::Save(0x4e4f4349);
     if (_FUN_00401500())
     {
@@ -252,8 +252,8 @@ void __thiscall TESClass::SaveForm(void)
         data.SwapEndian();
     }
     TESAttributes::Save(cAttribData);
-    FUN_004856f0(0x52545441, cAttribData, 7);
-    TESForm::FUN_00485680();
+    TESForm_AddChunkArray(0x52545441, cAttribData, 7);
+    TESForm::FinishFormRecord();
 }
 
 void __cdecl _Deallocate(void*);
@@ -274,7 +274,7 @@ void TESClass::CopyFromTESClass(TESForm* apCopy)
     TESClass* cl = dynamic_cast<TESClass*>(apCopy);
     if (!cl)
         return;
-    FUN_004851b0(apCopy);
+    TESForm_CopyAllComponents(apCopy);
     __memcpy(&data, cl->GetClassData(), 0x1c);
 }
 
@@ -292,7 +292,7 @@ bool TESClass::CompareClass(TESForm* other)
     TESClass* pClass = dynamic_cast<TESClass*>(other);
     if (!pClass)
         return true;
-    if (FUN_00485270(pClass))
+    if (TESForm_CompareAllComponents(pClass))
         return true;
     if (_memcmp(&data, pClass->GetClassData(), sizeof(TESClassData)))
         return true;

@@ -21,7 +21,8 @@ bool GetLastHitLocationConditionFunction(TESObjectREFR* reference, void* arg1, v
 extern __declspec(thread) bool g_bShowConditionDebug;
 void __cdecl DebugLog(char const*, ...);
 // @fnv 0x0059c010
-bool __cdecl FUN_0059c010(TESObjectREFR* reference, void* parameter, void* unused, double& result)
+// src: XBOX_PDB 0x0059c010
+bool __cdecl Script_GetInZoneConditionFunction(TESObjectREFR* reference, void* parameter, void* unused, double& result)
 {
     result = 0.0;
     void* zone = parameter;
@@ -33,7 +34,7 @@ bool __cdecl FUN_0059c010(TESObjectREFR* reference, void* parameter, void* unuse
             found = cell->FUN_00546c20();
         if (!found)
         {
-            TESWorldSpace* world = reference->FUN_00575d70();
+            TESWorldSpace* world = reference->TESObjectREFR_GetWorldSpace();
             if (world)
                 found = world->GetFieldD0();
         }

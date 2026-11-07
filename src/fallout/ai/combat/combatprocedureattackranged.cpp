@@ -61,9 +61,10 @@ void FUN_009d0a10_shell::SetByteAt142(unsigned char value)
 
 
 // @fnv 0x009d1dc0
-void CombatProcedureAttackRanged::FUN_009d1dc0(Actor* apOpponent)
+// src: XBOX_PDB 0x009d1dc0
+void CombatProcedureAttackRanged::Disarmed_009d1dc0(Actor* apOpponent)
 {
-    FUN_009caac0("Disarmed");
+    CombatProcedure_SetFailed("Disarmed");
 }
 
 extern void _Deallocate(void* p);
@@ -621,7 +622,7 @@ extern char DAT_011f426c;
 
 struct Sub14
 {
-    unsigned char FUN_004390c0(const void* p);
+    unsigned char HasEqualComponents(const void* p);
 };
 
 struct Target
@@ -631,23 +632,23 @@ struct Target
 
 struct Holder04
 {
-    Target* FUN_007031c0();
+    Target* GetCurrentWeapon();
 };
 
-float __cdecl FUN_00404010(float a, float b);
+float __cdecl BSMAX_00404010(float a, float b);
 bool __cdecl IsWithinAimLimits(Actor* a, void* b, float f1, float f2);
 
 
 // @fnv 0x009d1de0
 bool __fastcall RangedCanShoot(CombatProcedureAttackRanged* self)
 {
-    if (((Sub14*)&self->m_14)->FUN_004390c0(&DAT_011f426c) != 0)
+    if (((Sub14*)&self->m_14)->HasEqualComponents(&DAT_011f426c) != 0)
     {
         return false;
     }
     Actor* actor = GetRangedActor(self);
-    Target* target = ((Holder04*)self->m_pCombatController)->FUN_007031c0();
-    float f2 = FUN_00404010(target->GetTarget(), DAT_0101e580) * DAT_01023128;
+    Target* target = ((Holder04*)self->m_pCombatController)->GetCurrentWeapon();
+    float f2 = BSMAX_00404010(target->GetTarget(), DAT_0101e580) * DAT_01023128;
     float fX = f2;
     bool r9 = IsWithinAimLimits(actor, &self->m_14, f2, fX);
     return r9;
@@ -948,8 +949,8 @@ struct RProcess
 struct RActor
 {
     RProcess* FUN_008d8520();
-    bool FUN_00894900();
-    unsigned char FUN_008b3bd0();
+    bool Actor_IsAttacking();
+    unsigned char IsPathing();
     bool TryAttack(int);
 
     virtual void slot000();
@@ -1116,7 +1117,7 @@ struct RMap
 };
 struct RAnimation
 {
-    unsigned short FUN_004301b0(int);
+    unsigned short Animation_GetGroup(int);
     RMap* FUN_00497280();
     int SequenceState(int);
     signed char AnimType(int);
@@ -1132,7 +1133,7 @@ struct RWeaponInfo
 struct RWeapon
 {
     RWeaponInfo* WeaponInfo(RActor*);
-    bool FUN_00524b40();
+    bool TESObjectWEAP_IsAutomaticWeapon();
     bool IsFlagSet();
     float GetTarget();
     float Range();
@@ -1142,14 +1143,14 @@ struct RWeapon
 };
 struct RTuning
 {
-    float FUN_00639aa0();
+    float TESCombatStyle_GetTargetingFOV();
     float GetFloatAtOffset50() const;
     float GetField54Float();
 };
 struct RState
 {
     bool Active();
-    bool FUN_0097ee90();
+    bool GetHasBufferedDetection_0097ee90();
     RAngle AimDirection();
     void RefreshState();
     bool InCover();
@@ -1222,23 +1223,23 @@ void __fastcall UpdateRangedAttack(CombatProcedureAttackRanged* self)
     RAnimation* animation0 = actor->GetAnimation();
     if (!weapon0 || !animation0 || !weapon0->WeaponInfo(actor))
     {
-        self->FUN_009caac0("Missing either weapon, animation, or weapon projectile");
+        self->CombatProcedure_SetFailed("Missing either weapon, animation, or weapon projectile");
         return;
     }
-    float fov16 = ((RContext*)self->m_pCombatController)->Tuning()->FUN_00639aa0();
+    float fov16 = ((RContext*)self->m_pCombatController)->Tuning()->TESCombatStyle_GetTargetingFOV();
     if (fov16 > 0.0 && target &&
         !TargetCone(actor, target->GetPosition(), float(fov16 * 0.01745329238474369), 6.2831854820251465f))
     {
-        self->FUN_009caac0("Target outside targeting FOV");
+        self->CombatProcedure_SetFailed("Target outside targeting FOV");
         return;
     }
     RWeaponInfo* info1 = weapon0->WeaponInfo(actor);
-    bool automatic77 = weapon0->FUN_00524b40();
+    bool automatic77 = weapon0->TESObjectWEAP_IsAutomaticWeapon();
     bool burstWeapon = automatic77 || weapon0->IsFlagSet();
     bool tooClose34 = false;
     RPoint destination;
     RangedTrajectoryCall(self, (FUN_009d1d30_Vec3*)&destination, 0);
-    bool ready = actor->FUN_008d8520()->IsReady() || actor->FUN_00894900();
+    bool ready = actor->FUN_008d8520()->IsReady() || actor->Actor_IsAttacking();
     if (((RContext*)self->m_pCombatController)->Disabled())
         ready = false;
     if (self->m_10 != 0 && !ready)
@@ -1265,7 +1266,7 @@ void __fastcall UpdateRangedAttack(CombatProcedureAttackRanged* self)
     if (combat2->Active())
         (*(RPoint*)&self->m_14) = destination;
 
-    if (combat2->Active() && combat2->FUN_0097ee90() && ready)
+    if (combat2->Active() && combat2->GetHasBufferedDetection_0097ee90() && ready)
     {
         switch (self->m_10)
         {
@@ -1275,7 +1276,7 @@ void __fastcall UpdateRangedAttack(CombatProcedureAttackRanged* self)
                 if (!self->m_28.IsRunning() && combat2->AimDirection().Heading() != -rangedMax)
                 {
                     float duration1 = *DAT_011ceef0.Float();
-                    unsigned short group = animation0->FUN_004301b0(4);
+                    unsigned short group = animation0->Animation_GetGroup(4);
                     if (::GetType(group) == 80 || ::GetType(group) == 86)
                     {
                         RSequenceBase* sequence;
@@ -1345,7 +1346,7 @@ void __fastcall UpdateRangedAttack(CombatProcedureAttackRanged* self)
             break;
         }
     }
-    if (target && combat2->FUN_0097ee90())
+    if (target && combat2->GetHasBufferedDetection_0097ee90())
         DAT_011f1708->Notify(((RContext*)self->m_pCombatController), 2, 0, 0);
     bool close2 = false;
     if (target)
@@ -1359,7 +1360,7 @@ void __fastcall UpdateRangedAttack(CombatProcedureAttackRanged* self)
     if (weapon0->GetTarget() > 0.0)
     {
         float angle = float(weapon0->GetTarget() * 0.01745329238474369);
-        if (!actor->FUN_008b3bd0())
+        if (!actor->IsPathing())
             angle *= *originalRuntimeFloatSetting428.Float();
         if ((*(RPoint*)&self->m_14).Equal(NiPoint3_ZERO) && TargetCone(actor, &(*(RPoint*)&self->m_14), angle, rangedMax))
             ((RContext*)self->m_pCombatController)->SetAim(4);
@@ -1368,7 +1369,7 @@ void __fastcall UpdateRangedAttack(CombatProcedureAttackRanged* self)
     }
     if (self->m_10 == 0)
     {
-        if (target && !combat2->InCover() && (combat2->Active() || (combat2->HasTarget() && combat2->FUN_0097ee90())))
+        if (target && !combat2->InCover() && (combat2->Active() || (combat2->HasTarget() && combat2->GetHasBufferedDetection_0097ee90())))
         {
             if ((*(RPoint*)&self->m_14).Equal(NiPoint3_ZERO) || combat2->ValidPoint(&(*(RPoint*)&self->m_14)))
                 RangedLookCall(self, (*(RPoint*)&self->m_14), 2);
@@ -1395,7 +1396,7 @@ void __fastcall UpdateRangedAttack(CombatProcedureAttackRanged* self)
     {
         bool canAttack = true;
         attackFlag12 = actor->FUN_008d8520()->AttackFlag(actor);
-        if (IsAttackAnim(animation0->FUN_004301b0(4)))
+        if (IsAttackAnim(animation0->Animation_GetGroup(4)))
         {
             int sequenceState = animation0->SequenceState(4);
             if (sequenceState < 1 || sequenceState >= 2)
@@ -2022,7 +2023,7 @@ struct RangedVec
 struct RangedActor
 {
     float GetAdjustedAngle();
-    unsigned char FUN_008b3bd0();
+    unsigned char IsPathing();
 };
 struct RangedDisplay
 {
@@ -2035,12 +2036,12 @@ struct RangedDisplay
 };
 struct RangedSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern RangedSetting DAT_011cfb84;
-void __cdecl FUN_009a88e0(RangedVec*, RangedActor*, RangedVec);
+void __cdecl CombatUtilities_GetAngleToProjectedPoint(RangedVec*, RangedActor*, RangedVec);
 float __cdecl FUN_004b1480(float);
-float __cdecl FUN_004b15e0(float, float, float*);
+float __cdecl GetAngleDelta(float, float, float*);
 float __cdecl FUN_00408840(float);
 // Prints the ranged combat state, timer values, target location and weapon firing arc to the debug display.
 // @fnv 0x009d1e80
@@ -2056,40 +2057,40 @@ void __fastcall PrintRangedDebugInfo(CombatProcedureAttackRanged* self, RangedDi
     case 1:
         display.value->Print(iX.value, iY.value, "FIRING");
         if (self->m_28.IsRunning())
-            display.value->Print(iX.value, iY.value, "Firing Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_28), self->m_28.FUN_006b9130());
+            display.value->Print(iX.value, iY.value, "Firing Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_28), self->m_28.CombatTimer_GetTargetTime());
         if (GetRangedTarget(self))
             display.value->Print(iX.value, iY.value, "Target location: %.02f, %.02f, %.02f", (*(RangedVec*)&self->m_14).x, (*(RangedVec*)&self->m_14).y, (*(RangedVec*)&self->m_14).z);
         if (!self->m_38.Expired())
-            display.value->Print(iX.value, iY.value, "Firing Delay Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_38), self->m_38.FUN_006b9130());
+            display.value->Print(iX.value, iY.value, "Firing Delay Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_38), self->m_38.CombatTimer_GetTargetTime());
         break;
     case 2:
         display.value->Print(iX.value, iY.value, "COOLDOWN");
-        display.value->Print(iX.value, iY.value, "Cooldown Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_30), self->m_30.FUN_006b9130());
+        display.value->Print(iX.value, iY.value, "Cooldown Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_30), self->m_30.CombatTimer_GetTargetTime());
         break;
     case 3:
         display.value->Print(iX.value, iY.value, "SUPPRESSIVE_FIRE");
         display.value->Print(iX.value, iY.value, "Suppression location: %.02f, %.02f, %.02f", (*(RangedVec*)&self->m_14).x, (*(RangedVec*)&self->m_14).y, (*(RangedVec*)&self->m_14).z);
-        display.value->Print(iX.value, iY.value, "Suppressive Fire Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_40), self->m_40.FUN_006b9130());
+        display.value->Print(iX.value, iY.value, "Suppressive Fire Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_40), self->m_40.CombatTimer_GetTargetTime());
         if (!self->m_38.Expired())
-            display.value->Print(iX.value, iY.value, "Firing Delay Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_38), self->m_38.FUN_006b9130());
+            display.value->Print(iX.value, iY.value, "Firing Delay Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_38), self->m_38.CombatTimer_GetTargetTime());
         break;
     }
     if (self->m_20.IsRunning())
         display.value->Print(iX.value, iY.value, "Explosive Projectile Blocked Timer: %.02f/%.02f", GetTimeoutTimerElapsed(&self->m_20),
-                       self->m_20.FUN_006b9130());
-    Target* target = ((Holder04*)self->m_pCombatController)->FUN_007031c0();
+                       self->m_20.CombatTimer_GetTargetTime());
+    Target* target = ((Holder04*)self->m_pCombatController)->GetCurrentWeapon();
     if ((*(RangedVec*)&self->m_14).FUN_00439090(&DAT_011f426c) && target && target->GetTarget() > 0.0)
     {
         RangedVec unused;
-        FUN_009a88e0(&unused, actor, (*(RangedVec*)&self->m_14));
+        CombatUtilities_GetAngleToProjectedPoint(&unused, actor, (*(RangedVec*)&self->m_14));
         float limit = actor->GetAdjustedAngle();
         unused.z = FUN_004b1480(unused.z);
         float arc = 0.0f;
-        float heading = FUN_00408840(FUN_004b15e0(limit, unused.z, &arc));
+        float heading = FUN_00408840(GetAngleDelta(limit, unused.z, &arc));
         float direction = target->GetTarget();
-        if (!actor->FUN_008b3bd0())
+        if (!actor->IsPathing())
         {
-            direction *= *DAT_011cfb84.FUN_00403e20();
+            direction *= *DAT_011cfb84.Setting_Float_00403e20();
             display.value->Print(iX.value, iY.value, "Weapon firing arc: ( %.2f/%.2f ) degrees (Stationary)",
                            heading * 2.0 * 57.2957763671875, direction);
         }
@@ -2107,7 +2108,7 @@ struct Target2
 };
 struct Holder2
 {
-    Target2* FUN_007031c0();
+    Target2* GetCurrentWeapon();
 };
 void __cdecl ComputeTrajectory(FUN_009d1d30_Vec3* apOut, Actor* apA, Actor* apB, unsigned int auiArg, int aiVal,
                                float afVal, int aiFlag);
@@ -2122,7 +2123,7 @@ FUN_009d1d30_Vec3 __fastcall GetRangedTrajectory(CombatProcedureAttackRanged* se
     pActor2 = GetRangedTarget(self);
     if (!pActor2)
         return *(FUN_009d1d30_Vec3*)&DAT_011f426c;
-    pTarget = ((Holder2*)self->m_pCombatController)->FUN_007031c0();
+    pTarget = ((Holder2*)self->m_pCombatController)->GetCurrentWeapon();
     ComputeTrajectory(&kResult3, GetRangedActor(self), pActor2, auiArg.value, pTarget->GetOrFallback(GetRangedActor(self)), 0.0f, 0);
     return kResult3;
 }

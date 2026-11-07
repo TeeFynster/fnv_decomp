@@ -9,9 +9,9 @@ public:
 
     void SetTile(int aiID, Tile* apTile);
     void OnRaceSelected(void*);
-    int __thiscall FUN_007ac4f0();
-    void FUN_007fe910(void* apList);
-    void FUN_007fe910(int aiIndex);
+    int __thiscall GetMenuID_007ac4f0();
+    void OnRaceSelected_Thunk(void* apList);
+    void OnRaceSelected_Thunk(int aiIndex);
 
     union
     {

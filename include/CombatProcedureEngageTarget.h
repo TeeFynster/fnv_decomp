@@ -38,10 +38,10 @@ public:
     void ResetCombatState();
     Actor* GetActor();
     Actor* GetTarget();
-    Actor* FUN_00996de0();
-    Actor* FUN_00996e00();
-    void FUN_00996e20(int mode);
-    void FUN_00996e40();
+    Actor* CombatProcedure_GetAttacker();
+    Actor* GetTarget_00996e00();
+    void SetMoveMode_00996e20(int mode);
+    void ClearMoveMode();
     bool CheckAndApply(bool mode);
     Ref* GetRef();
     void PrintDebugInfo(Output* out, int a, int b);

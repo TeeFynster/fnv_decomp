@@ -8,7 +8,8 @@
 extern "C" void* g_011f5c08;
 
 // @fnv 0x00a8b070
-void* __cdecl FUN_00a8b070()
+// src: COMMUNITY 0x00a8b070
+void* __cdecl NiPalette_GetRTTI()
 {
     return &g_011f5c08;
 }
@@ -36,9 +37,10 @@ void __fastcall UnlinkPalette(NiPalette* self)
 
 extern int DAT_0109f3fc;
 void __fastcall _Call_a5d3a0(void*);
-void __fastcall FUN_00a8afc0(void*);
+void __fastcall NiPalette_AddPaletteToList(void*);
 // @fnv 0x00a8b220
-void* FUN_00a8b220()
+// src: EXE 0x00a8b220
+void* NiPalette_CreateObject()
 {
     NiPalette* p = (NiPalette*)BSFadeNode::operator new(0x24);
     if (p)
@@ -50,7 +52,7 @@ void* FUN_00a8b220()
         p->unk14 = 0;
         p->unk10 = 1;
         p->unk18 = 0;
-        FUN_00a8afc0(p);
+        NiPalette_AddPaletteToList(p);
         return p;
     }
     return 0;
@@ -92,7 +94,8 @@ template <class T, class A> struct PaletteStringArray
 void __stdcall AppendCameraPathEntries(PaletteStringArray<char*, PaletteStringAllocator<char*> >*);
 char* __cdecl _FUN_00a7d330(void*);
 // @fnv 0x00a8b460
-void __stdcall FUN_00a8b460(PaletteStringArray<char*, PaletteStringAllocator<char*> >* pkStrings)
+// src: XBOX_PDB 0x00a8b460
+void __stdcall NiPalette_GetViewerStrings(PaletteStringArray<char*, PaletteStringAllocator<char*> >* pkStrings)
 {
     AppendCameraPathEntries(pkStrings);
     char* pszString = _FUN_00a7d330(g_011f5c08);
@@ -162,7 +165,7 @@ unsigned char __fastcall PaletteEquals(NiPalette* self, void*, NiPalette* apOthe
 
 struct A8b110Allocator
 {
-    void* FUN_00aa3e40(unsigned int size);  // allocates size bytes, callee pops
+    void* Game_DoHeapAlloc(unsigned int size);  // allocates size bytes, callee pops
 };
 extern A8b110Allocator DAT_011f6238;
 
@@ -170,7 +173,7 @@ struct A8b110Elem
 {
     static void* operator new[](unsigned int bytes)
     {
-        return DAT_011f6238.FUN_00aa3e40(bytes);
+        return DAT_011f6238.Game_DoHeapAlloc(bytes);
     }
     int m_uiFilterValue;
 };
@@ -269,7 +272,8 @@ void __cdecl FUN_00ec44d0(void* dst, void* src, unsigned int size);
 
 // Initializes the owner: stores the byte and count, allocates an element array, copies count*4 bytes from a3, and notifies DAT_011f4748.
 // @fnv 0x00a8b110
-void* __fastcall FUN_00a8b110(NiPalette* self, void*, unsigned char a1, unsigned int a2, void* pSrc)
+// src: EXE 0x00a8b110
+void* __fastcall NiPalette_NiPalette_00a8b110(NiPalette* self, void*, unsigned char a1, unsigned int a2, void* pSrc)
 {
     _Call_a5d3a0(self);
     *(unsigned char*)&self->unk08 = a1;
@@ -283,7 +287,7 @@ void* __fastcall FUN_00a8b110(NiPalette* self, void*, unsigned char a1, unsigned
     {
         DAT_011f4748->v54(self);
     }
-    FUN_00a8afc0(self);
+    NiPalette_AddPaletteToList(self);
     return self;
 }
 
@@ -559,7 +563,8 @@ template <class T> inline void A8B3C0SaveBinary(A8B3C0Stream& kStream, const T* 
 
 
 // @fnv 0x00a8b3c0
-void __fastcall FUN_00a8b3c0(NiPalette* self, void*, A8B3C0Stream& kStream)
+// src: XBOX_PDB 0x00a8b3c0
+void __fastcall NiPalette_SaveBinary(NiPalette* self, void*, A8B3C0Stream& kStream)
 {
     self->NiObject::SaveBinary(reinterpret_cast<NiStream&>(kStream));
     A8B3C0SaveBinary<unsigned char>(kStream, *reinterpret_cast<const bool*>(&self->unk08));
@@ -575,7 +580,8 @@ struct PaletteElement : A8b110Elem
 
 // Copies m_08, m_0C and a deep copy of the m_14 element array from src, then calls FUN_00a8afc0.
 // @fnv 0x00a8b080
-void* __fastcall FUN_00a8b080(NiPalette* self, void*, const NiPalette& src)
+// src: EXE 0x00a8b080
+void* __fastcall NiPalette_NiPalette(NiPalette* self, void*, const NiPalette& src)
 {
     _Call_a5d3a0(self);
     *(void**)self = &DAT_0109f3fc;
@@ -587,26 +593,27 @@ void* __fastcall FUN_00a8b080(NiPalette* self, void*, const NiPalette& src)
     self->unk18 = 0;
     if (DAT_011f4748)
         DAT_011f4748->v54(self);
-    FUN_00a8afc0(self);
+    NiPalette_AddPaletteToList(self);
     return self;
 }
 
 #include <string.h>
 struct MMAllocInterface
 {
-    void* FUN_00aa3e40(unsigned int);
+    void* Game_DoHeapAlloc(unsigned int);
 };
 struct ArrayElement
 {
     unsigned int value;
     static void* operator new[](unsigned int bytes)
     {
-        return ((MMAllocInterface*)&g_memoryManager)->FUN_00aa3e40(bytes);
+        return ((MMAllocInterface*)&g_memoryManager)->Game_DoHeapAlloc(bytes);
     }
 };
 // Copies the f08 scalar and the f14/f0C integer array from rhs, reallocating the array only when the element count differs.
 // @fnv 0x00a8b190
-NiPalette* __fastcall FUN_00a8b190(NiPalette* self, void*, const NiPalette* rhs)
+// src: COMMUNITY 0x00a8b190
+NiPalette* __fastcall NiPalette_Replace(NiPalette* self, void*, const NiPalette* rhs)
 {
     if (self != rhs)
     {
@@ -631,7 +638,8 @@ NiPalette* __fastcall FUN_00a8b190(NiPalette* self, void*, const NiPalette* rhs)
 
 // Appends the given node to the end of a doubly-linked list guarded by a critical section, updating the head and tail pointers.
 // @fnv 0x00a8afc0
-void __fastcall FUN_00a8afc0(void* apNode)
+// src: COMMUNITY 0x00a8afc0
+void __fastcall NiPalette_AddPaletteToList(void* apNode)
 {
     NiPalette* node = static_cast<NiPalette*>(apNode);
     EnterCriticalSection(&DAT_011f5c80);

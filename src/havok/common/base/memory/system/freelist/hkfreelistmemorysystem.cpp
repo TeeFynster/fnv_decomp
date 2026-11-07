@@ -7,10 +7,11 @@
 
 struct FUN_00cd06c0_t
 {
-    void __thiscall FUN_00cd06c0(int v);
+    void __thiscall hkFreeListMemorySystem_setAllocator(int v);
 };
 // @fnv 0x00cd06c0
-void __thiscall FUN_00cd06c0_t::FUN_00cd06c0(int v)
+// src: XBOX_PDB 0x00cd06c0
+void __thiscall FUN_00cd06c0_t::hkFreeListMemorySystem_setAllocator(int v)
 {
     *(int*)((char*)this + 4) = v;
     *(int*)((char*)this + 0x18) = v;
@@ -22,16 +23,16 @@ struct FUN_00cd06a0
 {
     void* m_p00;
     FUN_00cd06a0(int aiArg);
-    void FUN_00d2c7a0();
-    void FUN_00cbf1a0();
+    void hkThreadMemory_releaseCachedMemory();
+    void UpdateFields_00cbf1a0();
 };
 
 // @fnv 0x00cd06a0
 FUN_00cd06a0::FUN_00cd06a0(int aiArg)
 {
     m_p00 = &DAT_010cacd0;
-    FUN_00d2c7a0();
-    FUN_00cbf1a0();
+    hkThreadMemory_releaseCachedMemory();
+    UpdateFields_00cbf1a0();
 }
 
 struct Inner
@@ -58,15 +59,16 @@ struct Outer
 {
     char pad[0x1c];
     Inner inner;
-    void FUN_00cd06e0();
+    void hkFreeListMemorySystem_garbageCollect();
 };
 // @fnv 0x00cd06e0
-void Outer::FUN_00cd06e0()
+// src: HAVOK_LIB 0x00cd06e0
+void Outer::hkFreeListMemorySystem_garbageCollect()
 {
     inner.v16();
 }
 
-void __cdecl FUN_00d2cab0(void*, int, unsigned int);
+void __cdecl hkMemUtil_memSet(void*, int, unsigned int);
 struct FUN_00cd0940_record
 {
     virtual void slot00() = 0;
@@ -121,11 +123,11 @@ void __thiscall FUN_00cd0940_shell::ResetRecordState(int* aiParams, unsigned cha
         record->slot13();
         *(volatile int*)((unsigned char*)record + 0x128) = 0;
         *(volatile unsigned char*)((unsigned char*)record + 0x12c) = 0;
-        FUN_00d2cab0(aiParams, 0, 0x24);
+        hkMemUtil_memSet(aiParams, 0, 0x24);
     }
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct PtrArrayMember
 {
@@ -135,7 +137,7 @@ struct PtrArrayMember
 
     ~PtrArrayMember() throw()
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_debug);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
@@ -166,7 +168,7 @@ FUN_00cd0c80::~FUN_00cd0c80() throw()
 
 struct CallTarget_00cd1d80
 {
-    int FUN_00cd1d80(int, int, int, int, int);
+    int hkArrayBase__spliceInto(int, int, int, int, int);
 };
 struct SearchObject
 {
@@ -176,7 +178,7 @@ struct SearchObject
 int SearchObject::Search(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3)
 {
     unsigned int callResult0 =
-        (unsigned int)((CallTarget_00cd1d80*)this)->FUN_00cd1d80((int)arg0, (int)arg1, (int)0u, (int)arg2, (int)arg3);
+        (unsigned int)((CallTarget_00cd1d80*)this)->hkArrayBase__spliceInto((int)arg0, (int)arg1, (int)0u, (int)arg2, (int)arg3);
     return (int)callResult0;
 }
 
@@ -212,11 +214,12 @@ void FUN_00cd06f0_cls::AccumulateSpawnedSubTotals(int* out)
 
 struct CD0730Object
 {
-    virtual int FUN_00cd0730(const void* info) const;
+    virtual int hkFreeListMemorySystem_Func010(const void* info) const;
 };
 
 // @fnv 0x00cd0730
-int CD0730Object::FUN_00cd0730(const void* info) const
+// src: COMMUNITY 0x00cd0730
+int CD0730Object::hkFreeListMemorySystem_Func010(const void* info) const
 {
     return 1;
 }
@@ -326,12 +329,13 @@ struct Owner
     int unk0b08;
     Sub0b0c sub0b0c;
     FUN_00d5e960_t cnt0b30;
-    Sub0b0c* FUN_00cd0740(const Pair* p, Flags flags);
+    Sub0b0c* hkFreeListMemorySystem_mainInit(const Pair* p, Flags flags);
 };
 
 // Stores p->a and p->b into f0b00/f0b04, optionally calls v3 on sub0b0c and svc->s1 then cnt0b30, and returns &sub0b0c.
 // @fnv 0x00cd0740
-Sub0b0c* Owner::FUN_00cd0740(const Pair* apPair, Flags flags)
+// src: HAVOK_LIB 0x00cd0740
+Sub0b0c* Owner::hkFreeListMemorySystem_mainInit(const Pair* apPair, Flags flags)
 {
     f0b00 = apPair->a;
     f0b04 = apPair->b;
@@ -1048,10 +1052,10 @@ struct S_00cd0a60_sub1c
     int unka90;
     int unka94;
     int unka98;
-    void FUN_00d60270(S_00cd0a60_sub8* a1);
+    void hkFreeListAllocator_00d60270(S_00cd0a60_sub8* a1);
     __forceinline S_00cd0a60_sub1c(S_00cd0a60_sub8* a1)
     {
-        FUN_00d60270(a1);
+        hkFreeListAllocator_00d60270(a1);
     }
 };
 
@@ -1094,10 +1098,10 @@ struct S_00cd0a60_sub0ad0
     int unk24;
     int unk28;
     int unk2c;
-    void FUN_00cf6da0(int a1);
+    void ProcessAndReturnValue_00cf6da0(int a1);
     __forceinline S_00cd0a60_sub0ad0()
     {
-        FUN_00cf6da0(0);
+        ProcessAndReturnValue_00cf6da0(0);
     }
 };
 
@@ -1299,7 +1303,7 @@ struct S_00cd0a60_elem
     char unk12c;
     int unk130;
     int unk134;
-    void FUN_00d2c720();
+    void hkThreadMemory_hkThreadMemory();
 };
 
 struct S_00cd0a60_arr
@@ -1310,7 +1314,7 @@ struct S_00cd0a60_arr
         S_00cd0a60_elem* p = e;
         for (int i = 31; i >= 0; --i)
         {
-            p->FUN_00d2c720();
+            p->hkThreadMemory_hkThreadMemory();
             p->unk128 = 0;
             p->unk12c = 0;
             p->unk130 = 0;
@@ -1353,11 +1357,12 @@ struct FUN_00cd0c70_cls
 {
     int unk00;
 
-    FUN_00cd0c70_cls* FUN_00cd0c70(int aiUnused);
+    FUN_00cd0c70_cls* EvaluateValue_00cd0c70(int aiUnused);
 };
 
 // @fnv 0x00cd0c70
-FUN_00cd0c70_cls* FUN_00cd0c70_cls::FUN_00cd0c70(int aiUnused)
+// src: GUESS 0x00cd0c70 (confidence: low)
+FUN_00cd0c70_cls* FUN_00cd0c70_cls::EvaluateValue_00cd0c70(int aiUnused)
 {
     ((Helper*)this)->FUN_00cd09d0();
     return this;
@@ -1467,7 +1472,7 @@ int FUN_00cd07b0_cls::Cleanup(Flags akFlags)
 #include <windows.h>
 struct FUN_00d2c3a0_t
 {
-    void __thiscall FUN_00d2c3a0(unsigned int a, unsigned int b);
+    void __thiscall hkThreadMemory_setMemory(unsigned int a, unsigned int b);
 };
 
 struct Slot_1c_t
@@ -1510,7 +1515,7 @@ void FUN_00cd0830_cls::AcquireSlot(unsigned int* out, unsigned int a2, unsigned 
         char* slot = self + iSlotIndex * 0x138 + 0xc6c;
         *(unsigned int*)(slot + 0x128) = a2;
         unsigned int uiValue = *(unsigned int*)(self + 0xb08);
-        ((FUN_00d2c3a0_t*)slot)->FUN_00d2c3a0(uiValue, 8);
+        ((FUN_00d2c3a0_t*)slot)->hkThreadMemory_setMemory(uiValue, 8);
 
         uiZero = 0;
         out[3] = uiZero;
@@ -1549,7 +1554,7 @@ void FUN_00cd0830_cls::AcquireSlot(unsigned int* out, unsigned int a2, unsigned 
 
 struct FUN_00cbf1a0_t
 {
-    void FUN_00cbf1a0();
+    void UpdateFields_00cbf1a0();
 };
 
 struct FUN_00cd0c50_cls
@@ -1569,7 +1574,7 @@ struct FUN_00cd0c50_cls
 FUN_00cd0c50_cls* FUN_00cd0c50_cls::Destroy(int a1)
 {
     DeleteCriticalSection((LPCRITICAL_SECTION)((char*)this + 0x18));
-    reinterpret_cast<FUN_00cbf1a0_t*>(this)->FUN_00cbf1a0();
+    reinterpret_cast<FUN_00cbf1a0_t*>(this)->UpdateFields_00cbf1a0();
     return this;
 }
 
@@ -1577,12 +1582,12 @@ namespace fnv_00cd0b30 {
 extern "C" char str_010cade0;
 extern "C" char str_010cadb4;
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* pAllocator, void* pArray, unsigned int auiNewSize);
 
 struct Target_cc01
 {
-    void FUN_00cc01c0(char* pText);
+    void ProcessAndReturnValue_00cc01c0(char* pText);
 };
 
 struct VSlotObj
@@ -1626,17 +1631,18 @@ struct CtorLocal
 
 struct FUN_00cd0b30_cls
 {
-    void FUN_00cbc220(int a1, CtorLocal* pLocal);
-    void FUN_00cd0b30(int a1);
+    void hkMemorySystem__printStatistics(int a1, CtorLocal* pLocal);
+    void hkFreeListMemorySystem_printStatistics(int a1);
 };
 
 // Calls FUN_00cc01c0 twice, collects slot pointers and values, passes the local to FUN_00cbc220, then calls its FUN_00cd0c80 method.
 // @fnv 0x00cd0b30
-void FUN_00cd0b30_cls::FUN_00cd0b30(int apTarget)
+// src: HAVOK_LIB 0x00cd0b30
+void FUN_00cd0b30_cls::hkFreeListMemorySystem_printStatistics(int apTarget)
 {
     char* self = (char*)this;
-    ((Target_cc01*)apTarget)->FUN_00cc01c0(&str_010cade0);
-    ((Target_cc01*)apTarget)->FUN_00cc01c0(&str_010cadb4);
+    ((Target_cc01*)apTarget)->ProcessAndReturnValue_00cc01c0(&str_010cade0);
+    ((Target_cc01*)apTarget)->ProcessAndReturnValue_00cc01c0(&str_010cadb4);
 
     CtorLocal localData;
     localData.m_cA = 0x80000000u;
@@ -1657,7 +1663,7 @@ void FUN_00cd0b30_cls::FUN_00cd0b30(int apTarget)
     {
         if (*(p - 8) != 0)
         {
-            hkMemoryRouter* holder = FUN_00c85750();
+            hkMemoryRouter* holder = hkMemoryRouter_getInstance();
             if (localData.m_nCallbackId == (localData.m_cA & 0x3fffffffu))
             {
                 ResizeAudioStream(holder->m_debug, &localData.m_ppA, 4);
@@ -1665,7 +1671,7 @@ void FUN_00cd0b30_cls::FUN_00cd0b30(int apTarget)
             localData.m_ppA[localData.m_nCallbackId] = (void*)(p - 0x134);
             localData.m_nCallbackId++;
 
-            holder = FUN_00c85750();
+            holder = hkMemoryRouter_getInstance();
             if (localData.m_nB == (localData.m_cB & 0x3fffffffu))
             {
                 ResizeAudioStream(holder->m_debug, &localData.m_pB, 4);
@@ -1676,7 +1682,7 @@ void FUN_00cd0b30_cls::FUN_00cd0b30(int apTarget)
         p += 0x138;
     }
 
-    this->FUN_00cbc220(apTarget, &localData);
+    this->hkMemorySystem__printStatistics(apTarget, &localData);
     localData.FUN_00cd0c80();
 }
 }  // namespace fnv_00cd0b30

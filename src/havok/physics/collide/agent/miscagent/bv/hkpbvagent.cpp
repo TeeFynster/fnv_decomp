@@ -65,14 +65,14 @@ void FUN_00d452a0::Method(float afValue, float agValue, void* arg)
         p2->v10(afValue, agValue, arg);
 }
 
-void __cdecl FUN_00d45f30();
-void __cdecl FUN_00d46010();
-void __cdecl FUN_00d46050();
-void __cdecl FUN_00d46090();
-void __cdecl FUN_00d45480();
-void __cdecl FUN_00d45dd0();
-void __cdecl FUN_00d45af0();
-void __cdecl FUN_00d45800();
+void __cdecl hkpBvAgent_createShapeBvAgent();
+void __cdecl hkpBvAgent_staticGetPenetrations_UpdateState_00d46010();
+void __cdecl hkpBvAgent_staticGetClosestPoints_UpdateState_00d46050();
+void __cdecl hkpBvAgent_staticLinearCast_UpdateState_00d46090();
+void __cdecl hkpBvAgent_createBvShapeAgent();
+void __cdecl hkpBvAgent_staticGetPenetrations();
+void __cdecl hkpBvAgent_staticGetClosestPoints();
+void __cdecl hkpBvAgent_staticLinearCast();
 struct FUN_00cfbbe0_vtbl
 {
     void* v0;
@@ -90,17 +90,17 @@ struct FUN_00cfbbe0
 void __cdecl ConfigureVtblHandlers(FUN_00cfbbe0* p)
 {
     FUN_00cfbbe0_vtbl t1;
-    t1.v0 = (void*)FUN_00d45f30;
-    t1.v1 = (void*)FUN_00d46010;
-    t1.v2 = (void*)FUN_00d46050;
-    t1.v3 = (void*)FUN_00d46090;
+    t1.v0 = (void*)hkpBvAgent_createShapeBvAgent;
+    t1.v1 = (void*)hkpBvAgent_staticGetPenetrations_UpdateState_00d46010;
+    t1.v2 = (void*)hkpBvAgent_staticGetClosestPoints_UpdateState_00d46050;
+    t1.v3 = (void*)hkpBvAgent_staticLinearCast_UpdateState_00d46090;
     t1.b1 = 1;
     t1.b2 = 1;
     p->Method(&t1, -1, 0x1b);
-    t1.v0 = (void*)FUN_00d45480;
-    t1.v1 = (void*)FUN_00d45dd0;
-    t1.v2 = (void*)FUN_00d45af0;
-    t1.v3 = (void*)FUN_00d45800;
+    t1.v0 = (void*)hkpBvAgent_createBvShapeAgent;
+    t1.v1 = (void*)hkpBvAgent_staticGetPenetrations;
+    t1.v2 = (void*)hkpBvAgent_staticGetClosestPoints;
+    t1.v3 = (void*)hkpBvAgent_staticLinearCast;
     t1.b1 = 0;
     t1.b2 = 1;
     p->Method(&t1, 0x1b, -1);
@@ -126,12 +126,13 @@ struct TargetClass
     TargetVtbl* p1;
     TargetVtbl* p2;
 
-    void FUN_00d45230(void* arg);
+    void hkpBvAgent_cleanup(void* arg);
 };
 
 // Calls v7(arg) on p1 and, if set, on p2 (then clears p2), and finally deletes this object.
 // @fnv 0x00d45230
-void TargetClass::FUN_00d45230(void* arg)
+// src: HAVOK_LIB 0x00d45230
+void TargetClass::hkpBvAgent_cleanup(void* arg)
 {
     p1->v7(arg);
     if (p2)
@@ -160,11 +161,12 @@ struct Worker
     int a, b, c;
     WorkerIface* p1;
     WorkerIface* p2;
-    void __thiscall FUN_00d45270(void* value);
+    void __thiscall hkpBvAgent_invalidateTim(void* value);
 };
 // Forwards value to the v9 method of p1 and, if p2 is non-null, to the v9 method of p2.
 // @fnv 0x00d45270
-void Worker::FUN_00d45270(void* value)
+// src: HAVOK_LIB 0x00d45270
+void Worker::hkpBvAgent_invalidateTim(void* value)
 {
     p1->v9(value);
     if (p2)
@@ -194,10 +196,11 @@ struct FUN_00d45310_owner
     int unk08;
     int unk0c;
     FUN_00d45310_target* unk10;
-    void FUN_00d45310(int value);
+    void hkpBvAgent_commitPotential(int value);
 };
 // @fnv 0x00d45310
-void FUN_00d45310_owner::FUN_00d45310(int value)
+// src: HAVOK_LIB 0x00d45310
+void FUN_00d45310_owner::hkpBvAgent_commitPotential(int value)
 {
     if (unk10)
         unk10->v12(value);
@@ -282,17 +285,18 @@ struct Functor_d46010
     int m_uiFilterValue;
 };
 
-void __cdecl FUN_00d45dd0(int a, int b, int c, Functor_d46010* f);
+void __cdecl hkpBvAgent_staticGetPenetrations(int a, int b, int c, Functor_d46010* f);
 
 // Builds a Functor_d46010 with the given value and a false flag, then passes it with b, a and c to FUN_00d45dd0.
 // @fnv 0x00d46010
-void __cdecl FUN_00d46010(int aiArg1, int aiArg2, int aiArg3, int aiValue)
+// src: GUESS 0x00d46010 (confidence: low)
+void __cdecl hkpBvAgent_staticGetPenetrations_UpdateState_00d46010(int aiArg1, int aiArg2, int aiArg3, int aiValue)
 {
     Functor_d46010 f;
     f.m_uiFilterValue = aiValue;
     f.m_flag = false;
     f.m_vtbl = DAT_010ce81c;
-    FUN_00d45dd0(aiArg2, aiArg1, aiArg3, &f);
+    hkpBvAgent_staticGetPenetrations(aiArg2, aiArg1, aiArg3, &f);
 }
 
 struct FUN_00d452f0_vt
@@ -442,7 +446,7 @@ struct D45480MemoryRouter
     }
 };
 
-extern "C" D45480MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D45480MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 class D45480ReferencedObject
 {
@@ -450,7 +454,7 @@ class D45480ReferencedObject
     static void* operator new(unsigned int nbytes)
     {
         D45480ReferencedObject* b =
-            static_cast<D45480ReferencedObject*>(FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
+            static_cast<D45480ReferencedObject*>(hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -474,7 +478,8 @@ class D45480Object : public D45480ReferencedObject
 
 // Allocates a D45480Object via its four-argument constructor and returns the new object.
 // @fnv 0x00d45480
-D45480Object* __cdecl FUN_00d45480(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
+// src: HAVOK_LIB 0x00d45480
+D45480Object* __cdecl hkpBvAgent_createBvShapeAgent(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
 {
     return new D45480Object(apArg1, apArg2, apArg3, apArg4);
 }
@@ -491,13 +496,14 @@ struct FUN_00d46050_cls
 
 // Builds a FUN_00d46050_cls from DAT_0104da48 and a4, then calls FUN_00d45af0 with a2, a1, a3 and a pointer to it.
 // @fnv 0x00d46050
-void __cdecl FUN_00d46050(int aiArg1, int aiArg2, int aiArg3, int aiValue)
+// src: GUESS 0x00d46050 (confidence: low)
+void __cdecl hkpBvAgent_staticGetClosestPoints_UpdateState_00d46050(int aiArg1, int aiArg2, int aiArg3, int aiValue)
 {
     FUN_00d46050_cls local;
     local.f = DAT_0104da48;
     local.d = aiValue;
     local.vt = &DAT_010ce7fc;
-    ((void(__cdecl*)(int, int, int, FUN_00d46050_cls*))FUN_00d45af0)(aiArg2, aiArg1, aiArg3, &local);
+    ((void(__cdecl*)(int, int, int, FUN_00d46050_cls*))hkpBvAgent_staticGetClosestPoints)(aiArg2, aiArg1, aiArg3, &local);
 }
 
 struct CallTarget_00d45350
@@ -506,10 +512,11 @@ struct CallTarget_00d45350
 };
 struct SearchObject
 {
-    int FUN_00d46180(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
+    int ProcessAndReturnValue_00d46180(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
 };
 // @fnv 0x00d46180
-int SearchObject::FUN_00d46180(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3)
+// src: GUESS 0x00d46180 (confidence: low)
+int SearchObject::ProcessAndReturnValue_00d46180(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3)
 {
     unsigned int callResult0 =
         (unsigned int)((CallTarget_00d45350*)this)->ProcessShapeChildren((int)arg1, (int)arg0, (int)arg2, (int)arg3);
@@ -532,7 +539,7 @@ struct FUN_00d461a0_Owner
     int unk08;
     void* unk0c;
     void* unk10;
-    void FUN_00d45c50(int, int, int, void*);
+    void hkpBvAgent_getPenetrations(int, int, int, void*);
     virtual void DispatchWithArgs(int, int, int, int);
 };
 
@@ -544,7 +551,7 @@ void FUN_00d461a0_Owner::DispatchWithArgs(int aiArg1, int aiArg2, int aiArg3, in
     l.unk08 = aiArg4;
     l.unk04 = 0;
     l.unk00 = DAT_010ce81c;
-    this->FUN_00d45c50(aiArg2, aiArg1, aiArg3, &l);
+    this->hkpBvAgent_getPenetrations(aiArg2, aiArg1, aiArg3, &l);
 }
 
 namespace fnv_00d461e0 {
@@ -561,12 +568,13 @@ struct Rec
 struct FUN_00d461e0_Cls
 {
     void GetPenetrations(int, int, int, Rec*);
-    void FUN_00d461e0(int a1, int a2, int a3, int a4);
+    void UpdateFields_00d461e0(int a1, int a2, int a3, int a4);
 };
 
 // Builds a Rec from a4, DAT_0104da48 and DAT_010ce7fc, then calls GetPenetrations with a2, a1, a3 and the Rec.
 // @fnv 0x00d461e0
-void FUN_00d461e0_Cls::FUN_00d461e0(int aiArg1, int aiArg2, int aiArg3, int aiValue)
+// src: GUESS 0x00d461e0 (confidence: low)
+void FUN_00d461e0_Cls::UpdateFields_00d461e0(int aiArg1, int aiArg2, int aiArg3, int aiValue)
 {
     Rec rec;
     rec.m_i = aiValue;
@@ -675,7 +683,8 @@ union BeginRecordOrCollector
 };
 
 // @fnv 0x00d45af0
-void __cdecl FUN_00d45af0(CdBody* bodyA, CdBody* bodyB, CollisionInput* input, void* collector)
+// src: HAVOK_LIB 0x00d45af0
+void __cdecl hkpBvAgent_staticGetClosestPoints(CdBody* bodyA, CdBody* bodyB, CollisionInput* input, void* collector)
 {
     CdBody child;
     BeginRecordOrCollector scratch;
@@ -764,10 +773,11 @@ struct S00d454c0_Owner
     void* m_pManager;
     S00d454c0_Filter* m_iFilter;
     S00d454c0_Agent* m_pCollisionAgent;
-    void FUN_00d454c0(CdBody* bodyA, CdBody* bodyB, S00d454c0_Input* input, S00d454c0_Result* result);
+    void hkpBvAgent_processCollision(CdBody* bodyA, CdBody* bodyB, S00d454c0_Input* input, S00d454c0_Result* result);
 };
 // @fnv 0x00d454c0
-void S00d454c0_Owner::FUN_00d454c0(CdBody* bodyA, CdBody* bodyB, S00d454c0_Input* input, S00d454c0_Result* result)
+// src: HAVOK_LIB 0x00d454c0
+void S00d454c0_Owner::hkpBvAgent_processCollision(CdBody* bodyA, CdBody* bodyB, S00d454c0_Input* input, S00d454c0_Result* result)
 {
     TimerBeginObj(DAT_010cf414, DAT_010cf404);
     BvShape* shape = bodyA->m_pCollisionShape;
@@ -850,21 +860,22 @@ struct Simplex
 
 struct AgentBase
 {
-    void FUN_00d454c0(int a, int b, int c, Simplex* s);
+    void hkpBvAgent_processCollision(int a, int b, int c, Simplex* s);
 };
 
 struct Agent : AgentBase
 {
-    void FUN_00d46220(int a, int b, int c, Simplex* s);
+    void UpdateClosestPointSimplexState(int a, int b, int c, Simplex* s);
 };
 
 // Calls base FUN_00d454c0, then updates vertex SIMD data and swaps simplex dimension and id fields when the closest point distance changed.
 // @fnv 0x00d46220
-void Agent::FUN_00d46220(int a, int b, int c, Simplex* apSimplex)
+// src: GUESS 0x00d46220 (confidence: medium)
+void Agent::UpdateClosestPointSimplexState(int a, int b, int c, Simplex* apSimplex)
 {
     SimplexVertex* pVertex = apSimplex->m_kRayEnd;
     float oldDistance = apSimplex->m_fClosestPointDistanceSquared;
-    AgentBase::FUN_00d454c0(b, a, c, apSimplex);
+    AgentBase::hkpBvAgent_processCollision(b, a, c, apSimplex);
     for (; pVertex < apSimplex->m_kRayEnd; pVertex++)
     {
         const LocalM128* pb = &pVertex->m_kPointB;
@@ -938,7 +949,8 @@ typedef void(__cdecl* CollideFn5)(CdBody* a, CdBody* b, CollisionInput* input, v
 
 // Tests bodyA's bounding shape against bodyB via a dispatched collide function, then if a hit is found, re-tests the contained shape.
 // @fnv 0x00d45800
-void __cdecl FUN_00d45800(CdBody* bodyA, CdBody* bodyB, CollisionInput* input, void* c, void* d)
+// src: HAVOK_LIB 0x00d45800
+void __cdecl hkpBvAgent_staticLinearCast(CdBody* bodyA, CdBody* bodyB, CollisionInput* input, void* c, void* d)
 {
     volatile unsigned int ticks;
     D458Begin(DAT_010cf414, DAT_010cf404, ticks);
@@ -988,11 +1000,12 @@ struct Record_d2e9
     int m_uiFilterValue;
 };
 
-void __cdecl FUN_00d45800(int a1, int a2, Input_d2e9* input, Record_d2e9* rec, Record_d2e9* optRec);
+void __cdecl hkpBvAgent_staticLinearCast(int a1, int a2, Input_d2e9* input, Record_d2e9* rec, Record_d2e9* optRec);
 
 // Copies input, XORs its m_key with DAT_010c44d0, builds a Record_d2e9 with a4, and calls FUN_00d45800 with a second record when a5 is non-zero.
 // @fnv 0x00d46090
-void __cdecl FUN_00d46090(int a2, int a1, const Input_d2e9* input, int a4, int a5)
+// src: GUESS 0x00d46090 (confidence: low)
+void __cdecl hkpBvAgent_staticLinearCast_UpdateState_00d46090(int a2, int a1, const Input_d2e9* input, int a4, int a5)
 {
     Input_d2e9 local = *input;
     *reinterpret_cast<LocalM128*>(&local.m_key) =
@@ -1011,11 +1024,11 @@ void __cdecl FUN_00d46090(int a2, int a1, const Input_d2e9* input, int a4, int a
         rec2.m_fScalar = DAT_0104da48;
         rec2.m_key = input->m_key;
         rec2.m_uiFilterValue = a5;
-        FUN_00d45800(a1, a2, &local, &rec, &rec2);
+        hkpBvAgent_staticLinearCast(a1, a2, &local, &rec, &rec2);
     }
     else
     {
-        FUN_00d45800(a1, a2, &local, &rec, 0);
+        hkpBvAgent_staticLinearCast(a1, a2, &local, &rec, 0);
     }
 }
 
@@ -1412,13 +1425,14 @@ struct S_00d45c50_BvAgent
     S_00d45c50_BvAgentBase* m_pBoundingVolumeAgent;
     S_00d45c50_Agent* m_pAgent;
 
-    void FUN_00d45c50(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const S_00d45c50_Input& input,
+    void hkpBvAgent_getPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const S_00d45c50_Input& input,
                       S_00d45c50_Output& result);
 };
 
 // Checks bounding volume penetration between two collision bodies and, on hit, dispatches the contained-shape collision agent to fill the output result.
 // @fnv 0x00d45c50
-void S_00d45c50_BvAgent::FUN_00d45c50(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
+// src: HAVOK_LIB 0x00d45c50
+void S_00d45c50_BvAgent::hkpBvAgent_getPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                       const S_00d45c50_Input& input, S_00d45c50_Output& result)
 {
     {
@@ -1687,7 +1701,8 @@ struct S_00d45dd0_Input
 
 // Checks BvShape containment for bodyA against bodyB, then queries penetrations on the contained shape if a hit is found.
 // @fnv 0x00d45dd0
-void __cdecl FUN_00d45dd0(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const S_00d45dd0_Input& input,
+// src: HAVOK_LIB 0x00d45dd0
+void __cdecl hkpBvAgent_staticGetPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const S_00d45dd0_Input& input,
                           S_00d45dd0_CollectorBase& result)
 {
     {
@@ -1960,7 +1975,7 @@ struct SpawnedHolder
     SpawnedAllocator* m_pAllocator;
 };
 
-extern SpawnedHolder* __cdecl FUN_00c85750();
+extern SpawnedHolder* __cdecl hkMemoryRouter_getInstance();
 
 struct SpawnedBase
 {
@@ -1983,9 +1998,10 @@ inline void* __cdecl operator new(unsigned int, void* p) throw()
 
 // Allocates a SpawnedObject via the holder's allocator, sets its size field to 0x14, and constructs it in place with the given arguments.
 // @fnv 0x00d45f30
-void* __cdecl FUN_00d45f30(int a1, int a2, int a3, int a4)
+// src: HAVOK_LIB 0x00d45f30
+void* __cdecl hkpBvAgent_createShapeBvAgent(int a1, int a2, int a3, int a4)
 {
-    SpawnedHolder* pHolder = FUN_00c85750();
+    SpawnedHolder* pHolder = hkMemoryRouter_getInstance();
     SpawnedAllocator* pAlloc = pHolder->m_pAllocator;
     SpawnedObject* pObj = (SpawnedObject*)pAlloc->v1(0x14);
     pObj->m_iElementCount = 0x14;
@@ -2042,12 +2058,13 @@ struct Host
 
 struct Owner
 {
-    void FUN_00d46340(int a1, int a2, const Block* p, int a4, int a5);
+    void UpdateFields_00d46340(int a1, int a2, const Block* p, int a4, int a5);
 };
 
 // Copies p with its m_vec XORed by DAT_010c44d0, builds an Event from a4 (and a second from a5 if non-zero), and calls Host::Dispatch(a2, a1, ...).
 // @fnv 0x00d46340
-void Owner::FUN_00d46340(int a1, int a2, const Block* p, int a4, int a5)
+// src: GUESS 0x00d46340 (confidence: low)
+void Owner::UpdateFields_00d46340(int a1, int a2, const Block* p, int a4, int a5)
 {
     Event ev;
     ev.m_fHitFraction = DAT_0104da48;

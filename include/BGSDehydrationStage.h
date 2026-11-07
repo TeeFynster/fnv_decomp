@@ -17,7 +17,7 @@ class DehydrationStageData : public StageRecordData
 public:
     DehydrationStageData();
     void SwapEndian();
-    void FUN_00462230();
+    void TwoValues_Endian();
 };
 
 class BGSDehydrationStage : public TESForm
@@ -40,7 +40,7 @@ public:
     unsigned int FUN_00441110();
     void FUN_0050f9a0(SpellItem* spell);
     void* FUN_00500940(unsigned int size);
-    void FUN_004861f0(TESFile* file, void* data);
+    void TESForm_LoadData(TESFile* file, void* data);
 
     static BGSDehydrationStage* GetStage(unsigned int index);
     static BGSDehydrationStage* FindStage(float level);

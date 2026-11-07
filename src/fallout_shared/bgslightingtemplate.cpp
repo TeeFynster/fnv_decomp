@@ -87,17 +87,17 @@ struct LightingTemplateOperations : BGSLightingTemplate
     bool Compare(TESForm* form);
 };
 
-extern "C" bool __cdecl FUN_00401500();
+extern "C" bool __cdecl TESForm_QEndianSwapOnSave();
 // @fnv 0x00526730
 void LightingTemplateOperations::SaveForm()
 {
-    FUN_004855a0();
-    if (FUN_00401500())
+    BeginFormRecord();
+    if (TESForm_QEndianSwapOnSave())
         Data.Endian();
-    FUN_00485e20(&Data, sizeof(Data));
-    if (FUN_00401500())
+    TESForm___SaveData(&Data, sizeof(Data));
+    if (TESForm_QEndianSwapOnSave())
         Data.Endian();
-    FUN_00485680();
+    FinishFormRecord();
 }
 
 struct SwapTag

@@ -17,7 +17,8 @@
 extern "C" void* g_011f3ec8;
 
 // @fnv 0x00a42e80
-void* __cdecl FUN_00a42e80()
+// src: COMMUNITY 0x00a42e80
+void* __cdecl BSFrustumFOVController_GetRTTI()
 {
     return &g_011f3ec8;
 }
@@ -25,7 +26,8 @@ void* __cdecl FUN_00a42e80()
 extern int DAT_0109780c;
 
 // @fnv 0x00a42ee0
-void* __cdecl FUN_00a42ee0()
+// src: EXE 0x00a42ee0
+void* __cdecl BSFrustumFOVController_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x38);
     if (p)
@@ -41,7 +43,8 @@ void* __cdecl FUN_00a42ee0()
 extern const char* const g_011f5e6c_arg1;
 // Walks pkTarget's NiRTTI chain and returns true if any entry matches g_011f5e6c_arg1, false otherwise or when pkTarget is null.
 // @fnv 0x00a42d90
-bool __stdcall FUN_00a42d90(NiObjectNET* pkTarget)
+// src: XBOX_PDB 0x00a42d90
+bool __stdcall BSFrustumFOVController_InterpTargetIsCorrectType(NiObjectNET* pkTarget)
 {
     if (!pkTarget)
         return false;
@@ -55,13 +58,14 @@ bool __stdcall FUN_00a42d90(NiObjectNET* pkTarget)
     return false;
 }
 
-void __stdcall FUN_00a576c0(StrArr*);
+void __stdcall NiFloatInterpController_GetViewerStrings(StrArr*);
 char* __cdecl _FUN_00a7d330(void*);
 
 // @fnv 0x00a42f10
-void __stdcall FUN_00a42f10(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a42f10
+void __stdcall BSFrustumFOVController_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00a576c0(pkStrings);
+    NiFloatInterpController_GetViewerStrings(pkStrings);
     char* pcString = _FUN_00a7d330(g_011f3ec8);
     unsigned int uiIndex = pkStrings->m_usSize;
     unsigned int uiSize = pkStrings->m_usMaxSize;
@@ -112,14 +116,15 @@ inline T* NiPointer<T>::operator->() const
 
 struct Base840
 {
-    void FUN_00a57c00(NiStream& kStream);
-    void FUN_00a44ce0(NiStream& kStream);
+    void NiBoolInterpController_SaveBinary(NiStream& kStream);
+    void BSFrustumFOVController_SaveBinary(NiStream& kStream);
 };
 
 // @fnv 0x00a44ce0
-void Base840::FUN_00a44ce0(NiStream& kStream)
+// src: XBOX_PDB 0x00a44ce0
+void Base840::BSFrustumFOVController_SaveBinary(NiStream& kStream)
 {
-    FUN_00a57c00(kStream);
+    NiBoolInterpController_SaveBinary(kStream);
 }
 
 extern const float DAT_01096324;
@@ -132,7 +137,7 @@ void BSFrustumFOVController::Update(NiUpdateData& kUpdateData)
     {
         m_fControllerTime = DAT_01096324;
     }
-    else if (FUN_00a36250(kUpdateData.fTime) &&
+    else if (DontDoUpdate(kUpdateData.fTime) &&
              (!m_spControllerInterpolator.m_pObject || !m_spControllerInterpolator.m_pObject->AlwaysUpdate()))
     {
         return;
@@ -160,7 +165,8 @@ void BSFrustumFOVController::Update(NiUpdateData& kUpdateData)
 extern void FUN_00a57c10();
 
 // @fnv 0x00a44cf0
-void FUN_00a44cf0()
+// src: XBOX_PDB 0x00a44cf0
+void BSFrustumFOVController_IsEqual()
 {
     FUN_00a57c10();
 }

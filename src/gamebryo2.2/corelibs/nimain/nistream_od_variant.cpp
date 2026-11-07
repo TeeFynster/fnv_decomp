@@ -8,10 +8,11 @@ struct NiStream2
 {
     void ClearTopLevelObjects();
     void Clear();
-    void FUN_00c3b370();
+    void BSStream_FreeAllObjects();
 };
 // @fnv 0x00c3b370
-void NiStream2::FUN_00c3b370()
+// src: COMMUNITY 0x00c3b370
+void NiStream2::BSStream_FreeAllObjects()
 {
     ClearTopLevelObjects();
     *(int*)((char*)this + 0x25c) = 0;
@@ -97,14 +98,15 @@ struct S_Class
     int unk00;
     int unk04;
     S_Arr unk08;
-    void __thiscall FUN_00a89af0(S_Stream* stream);
-    void __thiscall FUN_00c64ad0(S_Stream* stream);
+    void __thiscall nullsub_3(S_Stream* stream);
+    void __thiscall BSNodeReferences_LinkObject(S_Stream* stream);
 };
 
 // @fnv 0x00c64ad0
-void __thiscall S_Class::FUN_00c64ad0(S_Stream* stream)
+// src: XBOX_PDB 0x00c64ad0
+void __thiscall S_Class::BSNodeReferences_LinkObject(S_Stream* stream)
 {
-    FUN_00a89af0(stream);
+    nullsub_3(stream);
     unsigned int count = stream->FUN_00a63460();
     if (count)
     {

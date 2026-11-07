@@ -252,7 +252,7 @@ static int __cdecl buildTreeRecursive(const hkKdTreeBuildInput::ProjectedBoundsC
 static void __cdecl checkBuildRecursiveInput(const hkKdTreeBuildInput::ProjectedBoundsContext&subJob);
 static hkSplitPrimitivesStatus __cdecl splitPrimitivesExactly(const hkKdTreeBuildInput::WorkingSet&buffersIn,int startPrimIdx,int endPrimIdx,
 SplitInfo&results,hkKdTreeBuildInput::WorkingSet&buffersOut,const FieldlessRecord&bounds);
-static void __cdecl FUN_00df37b0(const hkKdTreeBuildInput::WorkingSet&buffersIn,KdTreeNode*treeOut,int treeSize,int numPrimitives,hkKdTreeBuildInput::ProjectedBoundsContext*subJobs,int subTreeSizes[4],const FieldlessRecord&bounds);
+static void __cdecl ProcessEntries_00df37b0(const hkKdTreeBuildInput::WorkingSet&buffersIn,KdTreeNode*treeOut,int treeSize,int numPrimitives,hkKdTreeBuildInput::ProjectedBoundsContext*subJobs,int subTreeSizes[4],const FieldlessRecord&bounds);
 static void __cdecl writeEmptyLeaf(KdTreeNode*treeRoot,int nodeIdx,class KdTreeEdgeIndex*writer);
 static void __cdecl writeSinglePrimitiveToLeaf(KdTreeNode*treeRoot,FieldlessRecord*entriesIn,FieldlessRecord*projEntOut,int nodeIdx,int primIdx,KdTreeEdgeIndex*writer);
 static int __cdecl writeMultiplePrimitivesToLeaf(KdTreeNode*__restrict treeRoot,const FieldlessRecord*entriesIn,FieldlessRecord*__restrict projEntOut,int nodeIdx,int primIdx,int numPrims,KdTreeEdgeIndex*writer);
@@ -283,7 +283,8 @@ inline KdTreeEdgeIndex::KdTreeEdgeIndex()
 m_uiEdgeIndex=0;
 }
 // @fnv 0x00df37b0
-void hkKdTreeBuilder::FUN_00df37b0(const hkKdTreeBuildInput::WorkingSet&buffersIn,KdTreeNode*treeOut,int treeSize,int numPrimitives,hkKdTreeBuildInput::ProjectedBoundsContext*subJobs,int subTreeSizes[4],const FieldlessRecord&bounds)
+// src: GUESS 0x00df37b0 (confidence: low)
+void hkKdTreeBuilder::ProcessEntries_00df37b0(const hkKdTreeBuildInput::WorkingSet&buffersIn,KdTreeNode*treeOut,int treeSize,int numPrimitives,hkKdTreeBuildInput::ProjectedBoundsContext*subJobs,int subTreeSizes[4],const FieldlessRecord&bounds)
 {
 
 __declspec(align(128))int distIn[64][4];

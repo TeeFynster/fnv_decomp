@@ -51,7 +51,7 @@ namespace fnv_004f9ca0 {
 // the secondary base's vtable gets a thunk moving this back by sizeof(PrimaryBase) = 0x74.
 struct PrimaryBase
 {
-    virtual void FUN_004f9ca0();
+    virtual void AdjustThisAndForward_004f9ca0();
     int unk04;
     int unk08;
     int unk0C;
@@ -84,14 +84,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_004f9ca0();
+    virtual void AdjustThisAndForward_004f9ca0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x004f9ca0
-    virtual void FUN_004f9ca0();
+// src: GUESS 0x004f9ca0 (confidence: low)
+    virtual void AdjustThisAndForward_004f9ca0();
 };
 
 Derived::Derived()
@@ -103,7 +104,7 @@ namespace fnv_004f9cc0 {
 // the secondary base's thunk moves `this` back by sizeof(PrimaryBase) == 0x74.
 struct PrimaryBase
 {
-    virtual void FUN_004f9cc0();
+    virtual void AdjustThisAndForward_004f9cc0();
     int unk04;
     int unk08;
     int unk0C;
@@ -136,14 +137,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_004f9cc0();
+    virtual void AdjustThisAndForward_004f9cc0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x004f9cc0
-    virtual void FUN_004f9cc0();
+// src: GUESS 0x004f9cc0 (confidence: low)
+    virtual void AdjustThisAndForward_004f9cc0();
 };
 
 Derived::Derived()
@@ -153,7 +155,7 @@ Derived::Derived()
 namespace fnv_00503bc0 {
 struct Base1
 {
-    virtual void FUN_00503bc0();
+    virtual void AdjustThisAndForward_00503bc0();
     int unk04;
     int unk08;
     int unk0C;
@@ -186,13 +188,14 @@ struct Base1
 };
 struct Base2
 {
-    virtual void FUN_00503bc0();
+    virtual void AdjustThisAndForward_00503bc0();
 };
 struct Derived : Base1, Base2
 {
     Derived();
 // @fnv 0x00503bc0
-    virtual void FUN_00503bc0();
+// src: GUESS 0x00503bc0 (confidence: low)
+    virtual void AdjustThisAndForward_00503bc0();
 };
 Derived::Derived()
 {}
@@ -201,7 +204,7 @@ Derived::Derived()
 namespace fnv_00504fe0 {
 struct PrimaryBase
 {
-    virtual void FUN_00504fe0();
+    virtual void AdjustThisAndForward_00504fe0();
     int unk04;
     int unk08;
     int unk0C;
@@ -235,14 +238,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00504fe0();
+    virtual void AdjustThisAndForward_00504fe0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00504fe0
-    virtual void FUN_00504fe0();
+// src: GUESS 0x00504fe0 (confidence: low)
+    virtual void AdjustThisAndForward_00504fe0();
 };
 
 Derived::Derived()
@@ -338,7 +342,7 @@ namespace fnv_00515420 {
 // PrimaryBase is vptr + 32 int fields = 0x84 bytes.
 struct PrimaryBase
 {
-    virtual void FUN_00515420();
+    virtual void AdjustThisAndForward_00515420();
     int unk04;
     int unk08;
     int unk0C;
@@ -375,14 +379,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00515420();
+    virtual void AdjustThisAndForward_00515420();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00515420
-    virtual void FUN_00515420();
+// src: GUESS 0x00515420 (confidence: low)
+    virtual void AdjustThisAndForward_00515420();
 };
 
 Derived::Derived()
@@ -460,7 +465,7 @@ ThunkDerived::ThunkDerived() : ThunkPrimaryBase(), ThunkSecondaryBase()
 class X160E0Primary
 {
   public:
-    virtual void FUN_005160e0(unsigned int uiValue);
+    virtual void AdjustThisAndForward_005160e0(unsigned int uiValue);
     int unk04;
     int unk08;
     int unk0C;
@@ -487,7 +492,7 @@ class X160E0Primary
 class X160E0Secondary
 {
   public:
-    virtual void FUN_005160e0(unsigned int uiValue);
+    virtual void AdjustThisAndForward_005160e0(unsigned int uiValue);
 };
 
 class X160E0Derived : public X160E0Primary, public X160E0Secondary
@@ -495,7 +500,8 @@ class X160E0Derived : public X160E0Primary, public X160E0Secondary
   public:
     X160E0Derived();
 // @fnv 0x005160e0
-    virtual void FUN_005160e0(unsigned int uiValue);
+// src: GUESS 0x005160e0 (confidence: low)
+    virtual void AdjustThisAndForward_005160e0(unsigned int uiValue);
 };
 
 X160E0Derived::X160E0Derived()
@@ -505,20 +511,21 @@ X160E0Derived::X160E0Derived()
 struct A1_0051a660
 {
     A1_0051a660();
-    virtual void FUN_0051a660();
+    virtual void AdjustThisAndForward_0051a660();
     char pad[0x78];
 };
 struct A2_0051a660
 {
     A2_0051a660();
-    virtual void FUN_0051a660();
+    virtual void AdjustThisAndForward_0051a660();
 };
 struct Own_0051a660 : A1_0051a660, A2_0051a660
 {
     Own_0051a660();
     virtual void key_fn();
 // @fnv 0x0051a660
-    void FUN_0051a660();
+// src: GUESS 0x0051a660 (confidence: low)
+    void AdjustThisAndForward_0051a660();
 };
 Own_0051a660::Own_0051a660()
 {}
@@ -688,7 +695,7 @@ AdjustDerived::AdjustDerived()
 // sub ecx,0x84; jmp FUN_00523020 == MSVC adjustor thunk (multiple inheritance).
 struct AdjPrimaryBase
 {
-    virtual void FUN_00525c20();
+    virtual void AdjustThisAndForward_00525c20();
     int unk08;
     int unk0C;
     int unk10;
@@ -725,14 +732,15 @@ struct AdjPrimaryBase
 
 struct AdjSecondaryBase
 {
-    virtual void FUN_00525c20();
+    virtual void AdjustThisAndForward_00525c20();
 };
 
 struct AdjDerived : AdjPrimaryBase, AdjSecondaryBase
 {
     AdjDerived();
 // @fnv 0x00525c20
-    virtual void FUN_00525c20();
+// src: GUESS 0x00525c20 (confidence: low)
+    virtual void AdjustThisAndForward_00525c20();
 };
 
 AdjDerived::AdjDerived()
@@ -858,7 +866,7 @@ BF50Object::BF50Object()
 struct A1_0059bf60
 {
     A1_0059bf60();
-    virtual void FUN_0059bf60();
+    virtual void AdjustThisAndForward_0059bf60();
     char pad[0x74];
 };
 
@@ -866,14 +874,15 @@ struct A2_0059bf60
 {
     A2_0059bf60();
 // @fnv 0x0059bf60
-    virtual void FUN_0059bf60();
+// src: GUESS 0x0059bf60 (confidence: low)
+    virtual void AdjustThisAndForward_0059bf60();
 };
 
 struct Own_0059bf60 : A1_0059bf60, A2_0059bf60
 {
     Own_0059bf60();
     virtual void key_fn();  // key function - defined, so the vftable is emitted
-    void FUN_0059bf60();    // the shared override - declared only
+    void AdjustThisAndForward_0059bf60();    // the shared override - declared only
 };
 
 Own_0059bf60::Own_0059bf60()
@@ -890,7 +899,7 @@ Own_0059bf60* make_0059bf60()
 namespace fnv_0059bf80 {
 struct Base1
 {
-    virtual void FUN_0059bf80();
+    virtual void AdjustThisAndForward_0059bf80();
     int unk04;
     int unk08;
     int unk0C;
@@ -923,13 +932,14 @@ struct Base1
 };
 struct Base2
 {
-    virtual void FUN_0059bf80();
+    virtual void AdjustThisAndForward_0059bf80();
 };
 struct Derived : Base1, Base2
 {
     Derived();
 // @fnv 0x0059bf80
-    virtual void FUN_0059bf80();
+// src: GUESS 0x0059bf80 (confidence: low)
+    virtual void AdjustThisAndForward_0059bf80();
 };
 Derived::Derived()
 {}

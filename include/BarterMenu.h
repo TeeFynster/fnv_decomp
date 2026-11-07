@@ -77,8 +77,8 @@ public:
 
     void* __thiscall FUN_0072d070(unsigned int flags);
     void __thiscall FUN_0072d0a0();
-    void __thiscall FUN_0072db60();
-    void __thiscall FUN_0072e530(int, void*);
-    void __thiscall FUN_0072f680(int, int);
-    void __thiscall FUN_007306d0();
+    void __thiscall UpdateCapsLabels();
+    void __thiscall DoLeave(int, void*);
+    void __thiscall DoWheelMove(int, int);
+    void __thiscall DoIdle();
 };

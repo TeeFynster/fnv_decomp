@@ -7,7 +7,7 @@
 #include "../../../../../include/BSAudio.h"
 
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct RefElem_t
 {
@@ -51,7 +51,7 @@ FUN_00dff640_cls* FUN_00dff640_cls::FUN_00dff640(unsigned char acFlags)
     this->RefBase_cls::~RefBase_cls();
     if (bShouldFree)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }
@@ -59,7 +59,7 @@ FUN_00dff640_cls* FUN_00dff640_cls::FUN_00dff640(unsigned char acFlags)
 }
 
 namespace fnv_00dff730 {
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 
 struct PtrElem
 {
@@ -87,7 +87,7 @@ struct FUN_00dff730_cls
 // @fnv 0x00dff730
 void FUN_00dff730_cls::ClearArrays()
 {
-    hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pHolder = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     PtrElem** pData1 = m_pData1;
     int iCount1 = m_iCount1;
@@ -108,7 +108,7 @@ void FUN_00dff730_cls::ClearArrays()
     m_pData1 = 0;
     m_uCapBits1 = 0x80000000u;
 
-    hkMemoryRouter* pHolder2 = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* pHolder2 = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
     PtrElem** pData2 = (PtrElem**)m_pData2;
     int iCount2 = m_iCount2;
@@ -133,7 +133,7 @@ void FUN_00dff730_cls::ClearArrays()
 }  // namespace fnv_00dff730
 
 namespace fnv_00dff810 {
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 struct Owner
 {
     unsigned int unk00;
@@ -148,7 +148,7 @@ Owner* Owner::FUN_00dff810(unsigned int flags)
     FUN_00dff6a0();
     if (flags & 1u)
     {
-        BSAudio* audio = FUN_00c85750();
+        BSAudio* audio = hkMemoryRouter_getInstance();
         unsigned int bytes = size4;
         reinterpret_cast<hkMemoryAllocator*>(((hkMemoryRouter*)audio)->m_heap)->blockFree(this, bytes);
     }
@@ -157,7 +157,7 @@ Owner* Owner::FUN_00dff810(unsigned int flags)
 }  // namespace fnv_00dff810
 
 namespace fnv_00dff840 {
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
@@ -171,7 +171,7 @@ CpuObject* CpuObject::FUN_00dff840(unsigned int flags)
     ClearArrays();
     if (flags & 1)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         reinterpret_cast<hkMemoryAllocator*>(holder->m_heap)->blockFree(this, size);
     }
     return this;

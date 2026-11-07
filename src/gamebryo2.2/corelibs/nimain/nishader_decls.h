@@ -5,8 +5,8 @@
 class WaitableObject
 {
   public:
-    void FUN_00401970();
-    void FUN_0040f6e0();
+    void NiRefObject_DecRefCount();
+    void NiRefObject_IncRefCount();
 };
 template <> class NiPointer<NiAVObject>
 {

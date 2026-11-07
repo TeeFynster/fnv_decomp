@@ -3,7 +3,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00470bb0
-int __cdecl FUN_00470bb0()
+// src: COMMUNITY 0x00470bb0
+int __cdecl return15()
 {
     return 15;
 }

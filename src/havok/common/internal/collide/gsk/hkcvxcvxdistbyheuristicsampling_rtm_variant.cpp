@@ -138,7 +138,7 @@ struct Result
 {
     CvxDistVector4 pointA, pointB, localB, plane;
 };
-static void FUN_00e625c0(const Matrix* matrix, Shape* shape, Shape* other, const CvxDistVector4* normal, Result* result);
+static void Object_UpdateFields_00e625c0(const Matrix* matrix, Shape* shape, Shape* other, const CvxDistVector4* normal, Result* result);
 void ProjectShapes(const Matrix* matrix, Shape* shape, Shape* other, const CvxDistVector4* normal, Result* result);
 
 #include <string.h>
@@ -218,7 +218,8 @@ static __forceinline void SamplingSetMulS_e62740(::CvxDistVector4& o, ::LocalM12
     o.v = (_mm_mul_ps)((_mm_shuffle_ps)(s, s, 0), a.v);
 }
 
-static __declspec(noinline) void FUN_00e625c0(const Matrix* matrix, Shape* shape, Shape* other, CvxDistVector4* normal,
+// src: GUESS 0x00e625c0 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00e625c0(const Matrix* matrix, Shape* shape, Shape* other, CvxDistVector4* normal,
                                               Result* result)
 {
     Result* output = result;
@@ -243,7 +244,8 @@ static __declspec(noinline) void FUN_00e625c0(const Matrix* matrix, Shape* shape
 }
 
 // @fnv 0x00e62740
-__declspec(noinline) void FUN_00e62740(Shape* shape, Shape* other, const Matrix* matrix, ::CvxDistVector4* outA, ::CvxDistVector4* outB,
+// src: GUESS 0x00e62740 (confidence: low)
+__declspec(noinline) void Object_CopyData_00e62740(Shape* shape, Shape* other, const Matrix* matrix, ::CvxDistVector4* outA, ::CvxDistVector4* outB,
                                        SamplingOutPair_e62740* outPair)
 
 {
@@ -267,9 +269,9 @@ __declspec(noinline) void FUN_00e62740(Shape* shape, Shape* other, const Matrix*
 
         axis.v = (_mm_xor_ps)(DAT_010c44d0, axis.v);
 
-        FUN_00e625c0(matrix, shape, other, &axis, &result);
+        Object_UpdateFields_00e625c0(matrix, shape, other, &axis, &result);
 
-        FUN_00e625c0(matrix, shape, other, &axis, &result);
+        Object_UpdateFields_00e625c0(matrix, shape, other, &axis, &result);
 
     } while (--count != 0);
 
@@ -381,13 +383,13 @@ __declspec(noinline) void FUN_00e62740(Shape* shape, Shape* other, const Matrix*
 
         n4.v = (_mm_mul_ps)(sub4, splat2);
 
-        FUN_00e625c0(matrix, shape, other, &n1, &result);
+        Object_UpdateFields_00e625c0(matrix, shape, other, &n1, &result);
 
-        FUN_00e625c0(matrix, shape, other, &n2, &result);
+        Object_UpdateFields_00e625c0(matrix, shape, other, &n2, &result);
 
-        FUN_00e625c0(matrix, shape, other, &n3, &result);
+        Object_UpdateFields_00e625c0(matrix, shape, other, &n3, &result);
 
-        FUN_00e625c0(matrix, shape, other, &n4, &result);
+        Object_UpdateFields_00e625c0(matrix, shape, other, &n4, &result);
 
         limit = (float)(limit * 0.5);
 

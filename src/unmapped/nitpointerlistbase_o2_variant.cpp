@@ -13,7 +13,8 @@ struct A5E9C0RTTI
 extern A5E9C0RTTI g_A5E9C0RTTI;
 
 // @fnv 0x00a5e9c0
-const A5E9C0RTTI* __cdecl FUN_00a5e9c0()
+// src: COMMUNITY 0x00a5e9c0
+const A5E9C0RTTI* __cdecl NiNode_GetRTTI()
 {
     return &g_A5E9C0RTTI;
 }
@@ -35,11 +36,12 @@ struct AlphaList
     AlphaNode* head;
 
     unsigned int RemovePos(AlphaNode** pos);
-    unsigned int FUN_00e7db70(unsigned int* keyPtr);
+    unsigned int NiTPointerListBase_Remove(unsigned int* keyPtr);
 };
 
 // @fnv 0x00e7db70
-unsigned int AlphaList::FUN_00e7db70(unsigned int* keyPtr)
+// src: COMMUNITY 0x00e7db70
+unsigned int AlphaList::NiTPointerListBase_Remove(unsigned int* keyPtr)
 {
     AlphaNode* sel;
     AlphaNode* node = head;
@@ -82,13 +84,13 @@ struct A5E930RefObject
     }
 };
 
-extern "C" void __cdecl FUN_004b0220(void* p);
+extern "C" void __cdecl j_Deallocate_NiTNewInterface_V_NiPointer_VNiAVObject_SAXPAV_NiPointer_VNiAVObject_Z(void* p);
 
 struct A5E930Buffer
 {
     virtual ~A5E930Buffer()
     {
-        FUN_004b0220(m_pBase);
+        j_Deallocate_NiTNewInterface_V_NiPointer_VNiAVObject_SAXPAV_NiPointer_VNiAVObject_Z(m_pBase);
     }
 
     void* m_pBase;

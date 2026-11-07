@@ -12,32 +12,33 @@
 
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
-unsigned int FUN_0054f4c0();
-NiAVObject* FUN_0054f4f0();
+unsigned int TESTerrainLODManager_GetGrassNode();
+NiAVObject* TESMain_GetWeatherRoot();
 
 extern TES* g_TES;
 struct ModelLoader
 {
-    void QueueReference(TESObjectREFR*, void*, int);
+    void ModelLoader_QueueReference(TESObjectREFR*, void*, int);
 };
 extern ModelLoader* g_pModelLoader;
 extern TESObjectSTAT* DAT_011ca238;
 extern TESObjectSTAT* DAT_011ca230;
 // @fnv 0x005571a0
-void TESObjectCELL::FUN_005571a0(bool active)
+// src: XBOX_PDB 0x005571a0
+void TESObjectCELL::QueueReferences(bool active)
 {
     CellRefLockEnter();
-    void* list = g_TES->FUN_00458be0(this, 0);
-    BSSimpleList<TESObjectREFR*>* terrain = reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(FUN_009604f0());
+    void* list = g_TES->TES_GetCellPriority(this, 0);
+    BSSimpleList<TESObjectREFR*>* terrain = reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(GetRefList_009604f0());
     while (terrain)
     {
         TESObjectREFR* reference = terrain->GetItem();
-        if (reference && (reference->FUN_007af430() == DAT_011ca238 || reference->FUN_007af430() == DAT_011ca230))
+        if (reference && (reference->BGSSaveFormBuffer_GetForm() == DAT_011ca238 || reference->BGSSaveFormBuffer_GetForm() == DAT_011ca230))
         {
-            if (!reference->GetNiNode() || reference->FUN_005651e0())
+            if (!reference->GetNiNode() || reference->TESObjectREFR_HasTemp3D())
             {
-                if (!reference->FUN_00440da0() && !reference->IsDeleted() && (!active || reference->FUN_0056b250()))
-                    g_pModelLoader->QueueReference(reference, list, 1);
+                if (!reference->FUN_00440da0() && !reference->IsDeleted() && (!active || reference->TESObjectREFR_Is3DHighPriority()))
+                    g_pModelLoader->ModelLoader_QueueReference(reference, list, 1);
             }
             else
             {
@@ -47,16 +48,16 @@ void TESObjectCELL::FUN_005571a0(bool active)
         }
         terrain = terrain->GetNext();
     }
-    terrain = reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(FUN_009604f0());
+    terrain = reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(GetRefList_009604f0());
     while (terrain)
     {
         TESObjectREFR* other = terrain->GetItem();
-        if (other && other->FUN_007af430() != DAT_011ca238 && other->FUN_007af430() != DAT_011ca230)
+        if (other && other->BGSSaveFormBuffer_GetForm() != DAT_011ca238 && other->BGSSaveFormBuffer_GetForm() != DAT_011ca230)
         {
-            if (!other->GetNiNode() || other->FUN_005651e0())
+            if (!other->GetNiNode() || other->TESObjectREFR_HasTemp3D())
             {
-                if (!other->FUN_00440da0() && !other->IsDeleted() && (!active || other->FUN_0056b250()))
-                    g_pModelLoader->QueueReference(other, list, 1);
+                if (!other->FUN_00440da0() && !other->IsDeleted() && (!active || other->TESObjectREFR_Is3DHighPriority()))
+                    g_pModelLoader->ModelLoader_QueueReference(other, list, 1);
             }
             else
             {

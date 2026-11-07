@@ -63,12 +63,12 @@ public:
     void Initialize(CombatController*);
     void RunProcedure();
     void* DestroyIfFlagged(unsigned int flags);
-    void FUN_009ca6c0();
-    void* FUN_00996e00();
-    void FUN_00996e20(int aiCombatMoveMode);
-    void FUN_00996e40();
+    void SetVirtualTable_009ca6c0();
+    void* GetTarget_00996e00();
+    void SetMoveMode_00996e20(int aiCombatMoveMode);
+    void ClearMoveMode();
     void SetLookAtPoint(const NiPoint3& arLookAtPoint, unsigned char acPriority);
-    void FUN_00996ea0();
+    void ClearLookAtTarget_00996ea0();
     void SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffer);
-    void FUN_00996ef0(BGSLoadFormBuffer* buffer);
+    void LoadGame_00996ef0(BGSLoadFormBuffer* buffer);
 };

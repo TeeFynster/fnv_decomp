@@ -8,7 +8,8 @@
 extern "C" void* g_01202748;
 
 // @fnv 0x00c2b750
-void* __cdecl FUN_00c2b750()
+// src: COMMUNITY 0x00c2b750
+void* __cdecl NiPSysEmitterInitialRadiusCtlr_GetRTTI()
 {
     return &g_01202748;
 }
@@ -19,31 +20,34 @@ struct NiPSysEmitterInitialRadiusCtlr : NiPSysModifierFloatCtlr
     {}
     virtual ~NiPSysEmitterInitialRadiusCtlr();
 
-    void FUN_00c2b760(float& fOut) const;
-    void FUN_00c2b770(float value);
-    NiPSysEmitterInitialRadiusCtlr* FUN_00c2b780(void* pvProcess);
+    void GetTargetFloatValue_00c2b760(float& fOut) const;
+    void SetTargetFloatValue_00c2b770(float value);
+    NiPSysEmitterInitialRadiusCtlr* CreateClone_00c2b780(void* pvProcess);
 };
 
 // @fnv 0x00c2b760
-void NiPSysEmitterInitialRadiusCtlr::FUN_00c2b760(float& fOut) const
+// src: XBOX_PDB 0x00c2b760
+void NiPSysEmitterInitialRadiusCtlr::GetTargetFloatValue_00c2b760(float& fOut) const
 {
     fOut = *(float*)((const char*)m_pkTargetModifier + 0x40);
 }
 
 // @fnv 0x00c2b770
-void __thiscall NiPSysEmitterInitialRadiusCtlr::FUN_00c2b770(float value)
+// src: XBOX_PDB 0x00c2b770
+void __thiscall NiPSysEmitterInitialRadiusCtlr::SetTargetFloatValue_00c2b770(float value)
 {
     float* p = reinterpret_cast<float*>(m_pkTargetModifier);
     p[0x10] = value;
 }
 
-void __stdcall FUN_00c32f60(StrArr*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 // Appends the string returned by _FUN_00a7d330(g_01202748) to pkStrings, growing it via SetSize when full and storing it with SetAt.
 // @fnv 0x00c2b820
-void __stdcall FUN_00c2b820(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c2b820
+void __stdcall NiPSysEmitterInitialRadiusCtlr_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00c32f60(pkStrings);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pkStrings);
     char* psz = _FUN_00a7d330((const char*)g_01202748);
     unsigned int uiIdx = pkStrings->m_usSize;
     if (uiIdx >= pkStrings->m_usMaxSize)
@@ -55,7 +59,8 @@ void __stdcall FUN_00c2b820(StrArr* pkStrings)
 void __cdecl FUN_00c32de0();
 
 // @fnv 0x00c2b780
-NiPSysEmitterInitialRadiusCtlr* NiPSysEmitterInitialRadiusCtlr::FUN_00c2b780(void* pvProcess)
+// src: XBOX_PDB 0x00c2b780
+NiPSysEmitterInitialRadiusCtlr* NiPSysEmitterInitialRadiusCtlr::CreateClone_00c2b780(void* pvProcess)
 {
     NiPSysEmitterInitialRadiusCtlr* pkClone = new NiPSysEmitterInitialRadiusCtlr;
     typedef void (__thiscall* CopyModifierData)(NiPSysModifierFloatCtlr*, NiPSysModifierFloatCtlr*, void*);

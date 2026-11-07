@@ -11,8 +11,8 @@ class NiStringExtraData : public NiExtraData
 
     const NiFixedString& GetString();
     virtual bool IsEqual(NiObject* other) const;
-    char FUN_00c43160(const char* other);
-    void FUN_00a74200(NiStream& stream);
+    char BSXFlags_IsEqual(const char* other);
+    void SaveBinary_00a74200(NiStream& stream);
 
     union
     {

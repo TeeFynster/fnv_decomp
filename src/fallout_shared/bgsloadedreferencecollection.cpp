@@ -30,7 +30,8 @@ unsigned int __fastcall _FNV_GetFormType(TESForm* object);
 #include "../../include/BGSLoadedReferenceCollection.h"
 // Gets the form type of apRef's base object and adds apRef to the collection's per-type lists based on that type and extra data.
 // @fnv 0x005270b0
-void BGSLoadedReferenceCollection::FUN_005270b0(TESObjectREFR* apRef)
+// src: XBOX_PDB 0x005270b0
+void BGSLoadedReferenceCollection::RemoveReference_005270b0(TESObjectREFR* apRef)
 {
     unsigned int eformType;
 

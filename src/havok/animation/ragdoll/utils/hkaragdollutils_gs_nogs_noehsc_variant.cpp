@@ -9,19 +9,20 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern "C"
 {
-    int __cdecl FUN_00cea030(void*, void*);
-    int __cdecl FUN_00ce9db0(void*, void*);
-    int __cdecl FUN_00ce9e90(void*);
+    int __cdecl hkaRagdollUtils_reorderForRagdoll(void*, void*);
+    int __cdecl HkaragdollutilsFpfast_ProcessEntries_00ce9db0(void*, void*);
+    int __cdecl alignConstraintSpacesToChildren(void*);
 }
 
 // @fnv 0x00cea7c0
-int __cdecl FUN_00cea7c0(void* p1, void* p2, void* p3)
+// src: HAVOK_LIB 0x00cea7c0
+int __cdecl hkaRagdollUtils_reorderAndAlignForRagdoll(void* p1, void* p2, void* p3)
 {
-    if (FUN_00cea030(p1, p2))
+    if (hkaRagdollUtils_reorderForRagdoll(p1, p2))
         return 1;
-    if (FUN_00ce9db0(p2, p3))
+    if (HkaragdollutilsFpfast_ProcessEntries_00ce9db0(p2, p3))
         return 1;
-    if (FUN_00ce9e90(p2))
+    if (alignConstraintSpacesToChildren(p2))
         return 1;
     return 0;
 }
@@ -46,7 +47,7 @@ struct Counter
     int unk30;
 };
 extern "C" void __cdecl AssignNodeFlags(int, int, int);
-void __cdecl FUN_00ce9fa0(Container* c, int value, Counter* counter);
+void __cdecl hkaRagdollUtils_setCollisionLayer(Container* c, int value, Counter* counter);
 struct Inner
 {
     virtual void unk0();
@@ -79,7 +80,7 @@ struct SpawnedGlobal
     int unk0c;
     SpawnedAllocator* m_pAllocator;
 };
-SpawnedGlobal* __cdecl FUN_00c85750() throw();
+SpawnedGlobal* __cdecl hkMemoryRouter_getInstance() throw();
 struct SpawnedObject
 {
     int unk00;
@@ -146,7 +147,8 @@ extern char str_010cbd34[];
 extern char str_010cbd50[];
 
 // @fnv 0x00ce9c40
-static __declspec(noinline) void* FUN_00ce9c40(ShapeOwner* owner)
+// src: HAVOK_LIB 0x00ce9c40
+static __declspec(noinline) void* _accessConstraintPivotA(ShapeOwner* owner)
 {
     InnerShape* shape = owner->inner;
     switch (shape->getType())
@@ -176,5 +178,5 @@ volatile int g_in9c40;
 volatile int g_out9c40;
 void CallTarget_ce9c40()
 {
-    g_out9c40 = (int)FUN_00ce9c40((ShapeOwner*)g_in9c40);
+    g_out9c40 = (int)_accessConstraintPivotA((ShapeOwner*)g_in9c40);
 }

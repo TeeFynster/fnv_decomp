@@ -7,6 +7,6 @@ class NiPlane
     float normal[3];
     float constant;
     bool operator==(const NiPlane& other);
-    bool FUN_004390c0(const NiPlane& other);
+    bool HasEqualComponents(const NiPlane& other);
 };
 #endif

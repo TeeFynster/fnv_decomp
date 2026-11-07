@@ -17,22 +17,22 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile lo
 class WaitableObject
 {
   public:
-    void FUN_00401970();
-    void FUN_0040f6e0();
+    void NiRefObject_DecRefCount();
+    void NiRefObject_IncRefCount();
 };
 
 class KFModel
 {
   public:
-    void FUN_0044b050();
-    void FUN_0044b010();
+    void KFModel_DecRefCount();
+    void KFModel_IncRefCount();
 };
 
 class LoadedFile
 {
   public:
-    void FUN_0044b180();
-    void FUN_0044b0f0();
+    void LoadedFile_DecRefCount();
+    void LoadedFile_IncRefCount();
 };
 
 template <class T> struct NiPointerRefOps

@@ -8,5 +8,5 @@ class CombatActionSwitchWeapon : public CombatAction
 {
 public:
     CombatActionSwitchWeapon(COMBAT_ACTION type);
-    float FUN_0097c8e0(CombatController* apCombatController, int aiActionValue);
+    float GetCost_0097c8e0(CombatController* apCombatController, int aiActionValue);
 };

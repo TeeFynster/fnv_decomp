@@ -13,7 +13,8 @@
 #include <xmmintrin.h>
 
 // @fnv 0x00da0ce0
-void __cdecl FUN_00da0ce0(const hkTransform& t, hkArray<hkVector4>& points)
+// src: GUESS 0x00da0ce0 (confidence: low)
+void __cdecl hkTransform_ProcessEntries_00da0ce0(const hkTransform& t, hkArray<hkVector4>& points)
 {
     for (int i = 0; i < points.m_iElementCount; i++)
     {

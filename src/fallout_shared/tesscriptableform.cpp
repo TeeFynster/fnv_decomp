@@ -43,33 +43,36 @@ void TESScriptableForm::InitItem(TESForm* owner)
 }
 
 extern int DAT_0101d518;
-void __fastcall FUN_0048cc80(void* pThis);
+void __fastcall TESScriptableForm_InitializeDataComponent(void* pThis);
 
 // Initialises a BaseFormComponent: runs its base constructor, installs the vtable at DAT_0101d518, calls FUN_0048cc80, and returns pThis.
 // @fnv 0x0048cc50
-void* __fastcall FUN_0048cc50(BaseFormComponent* apComponent)
+// src: GUESS 0x0048cc50 (confidence: high)
+void* __fastcall TESScriptableForm_InitializeDataComponent_InitializeScriptableFormComponent(BaseFormComponent* apComponent)
 {
     apComponent->BaseFormComponent::BaseFormComponent();
     *(int**)apComponent = &DAT_0101d518;
-    FUN_0048cc80(apComponent);
+    TESScriptableForm_InitializeDataComponent(apComponent);
     return apComponent;
 }
 
 // @fnv 0x0048cc80
-void __fastcall FUN_0048cc80(void* pThis)
+// src: XBOX_PDB 0x0048cc80
+void __fastcall TESScriptableForm_InitializeDataComponent(void* pThis)
 {
     static_cast<TESScriptableForm*>(pThis)->m_pFormScript = 0;
     static_cast<TESScriptableForm*>(pThis)->m_bHasScript = false;
 }
 
-void __cdecl FUN_00485910(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
 // @fnv 0x0048cca0
-void TESScriptableForm::FUN_0048cca0()
+// src: COMMUNITY 0x0048cca0
+void TESScriptableForm::Save_0048cca0()
 {
     if (m_pFormScript)
     {
         unsigned int formID = m_pFormScript->GetFormID();
-        FUN_00485910(0x49524353, formID);
+        TESForm_AddChunk_00485910(0x49524353, formID);
     }
 }
 

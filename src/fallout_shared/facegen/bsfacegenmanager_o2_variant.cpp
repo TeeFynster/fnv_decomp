@@ -16,11 +16,12 @@ struct S00a67410
     char _pad34[6];
     unsigned char m_bModifierActive;  // +0x3a
 
-    void FUN_00a67410(BSFaceGenMorphData::Buffers* outData);
+    void NiGeometryData_GetVerticesIterator(BSFaceGenMorphData::Buffers* outData);
 };
 
 // @fnv 0x00a67410
-void S00a67410::FUN_00a67410(BSFaceGenMorphData::Buffers* outData)
+// src: COMMUNITY 0x00a67410
+void S00a67410::NiGeometryData_GetVerticesIterator(BSFaceGenMorphData::Buffers* outData)
 {
     if (!m_bModifierActive)
         return;
@@ -34,7 +35,7 @@ void S00a67410::FUN_00a67410(BSFaceGenMorphData::Buffers* outData)
     if (model && model->IsPacked())
     {
         vars[2] = 0;
-        model->FUN_00a72720(0, reinterpret_cast<char**>(&vars[0]), &vars[5], reinterpret_cast<unsigned short*>(&vars[3]),
+        model->NiAdditionalGeometryData_GetDataStream(0, reinterpret_cast<char**>(&vars[0]), &vars[5], reinterpret_cast<unsigned short*>(&vars[3]),
                             reinterpret_cast<int*>(&vars[4]), reinterpret_cast<int*>(&vars[2]), reinterpret_cast<int*>(&vars[1]));
     }
 
@@ -77,11 +78,12 @@ struct FUN_00a68e30_shell
     PoolAllocatorBase<unsigned int>::LinkedListEntry* m_pkTail;
     unsigned int m_uiCount;
 
-    void FUN_00a68e30();
+    void NiDynamicEffect_DetachAllUnaffectedNodes();
 };
 
 // @fnv 0x00a68e30
-void FUN_00a68e30_shell::FUN_00a68e30()
+// src: XBOX_PDB 0x00a68e30
+void FUN_00a68e30_shell::NiDynamicEffect_DetachAllUnaffectedNodes()
 {
     while (m_uiCount)
     {
@@ -137,12 +139,13 @@ class A72720StreamSet
     unsigned short unk24;
     unsigned short m_usBufferCount;
 
-    bool FUN_00a72720(unsigned int uiIndex, char** ppcData, void** ppvStream, unsigned short* pusVertexCount,
+    bool NiAdditionalGeometryData_GetDataStream(unsigned int uiIndex, char** ppcData, void** ppvStream, unsigned short* pusVertexCount,
                       int* piFormat, int* piStride, int* piUsage);
 };
 
 // @fnv 0x00a72720
-bool A72720StreamSet::FUN_00a72720(unsigned int uiIndex, char** ppcData, void** ppvStream,
+// src: COMMUNITY 0x00a72720
+bool A72720StreamSet::NiAdditionalGeometryData_GetDataStream(unsigned int uiIndex, char** ppcData, void** ppvStream,
                                    unsigned short* pusVertexCount, int* piFormat, int* piStride, int* piUsage)
 {
     if (uiIndex >= m_uiRecordCount)

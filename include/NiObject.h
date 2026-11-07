@@ -90,15 +90,15 @@ class NiObject : public NiRefObject
     NiObject** Children() const;
     void ApplyToAllObjects(unsigned int);
 
-    void* FUN_00621a40();
-    void FUN_00b4dec0(int);
+    void* bhkCharacterProxy_GethkPosition();
+    void BSFadeNode_SetLODMultType(int);
     void FUN_00a5d3d0();
-    void FUN_00528ce0(NiObject*);
+    void LockFreeMap_TESObjectREFR_NiPointer_QueuedReference_LockFreeMapInterface_RemoveAt_00528ce0(NiObject*);
     void FUN_00a809b0(unsigned int);
-    void FUN_00c21cb0(unsigned int);
-    void FUN_00c62140();
-    void FUN_00c61f30(NiStream&);
-    void FUN_00c64950(NiStream*);
-    void FUN_00c64aa0(NiStream&);
+    void NiMeshParticleSystem_PurgeRendererData(unsigned int);
+    void BSPSysArrayEmitter_SetupArray();
+    void BSPSysArrayEmitter_PostLinkObject(NiStream&);
+    void BSReference_SaveBinary(NiStream*);
+    void BSNodeReferences_LoadBinary(NiStream&);
 
 };

@@ -25,7 +25,8 @@ char* __cdecl _FUN_00a7d330(void const*);
 extern void const* const g_011f5f6c;
 // Appends the string returned by _FUN_00a7d330(g_011f5f6c) to the StrArr, growing it via SetSize when the size reaches the max.
 // @fnv 0x00a9b430
-void __stdcall FUN_00a9b430(StrArr* pStrArr)
+// src: XBOX_PDB 0x00a9b430
+void __stdcall NiAmbientLight_GetViewerStrings(StrArr* pStrArr)
 {
     AppendEffectProperties(pStrArr);
     char* pkString = _FUN_00a7d330(g_011f5f6c);
@@ -40,17 +41,19 @@ void __stdcall FUN_00a9b430(StrArr* pStrArr)
 void __cdecl FUN_00a72080();
 
 // @fnv 0x00a75c00
-void __cdecl FUN_00a75c00()
+// src: XBOX_PDB 0x00a75c00
+void __cdecl NiAmbientLight_LoadBinary()
 {
     FUN_00a72080();
 }
 
-void FUN_00a90010();
+void NiLight_RegisterStreamables();
 
 // @fnv 0x00a75c10
-void FUN_00a75c10()
+// src: XBOX_PDB 0x00a75c10
+void NiAmbientLight_RegisterStreamables()
 {
-    FUN_00a90010();
+    NiLight_RegisterStreamables();
 }
 
 class CloningProcessA9B3;
@@ -86,12 +89,13 @@ class CloneA9B3 : public FUN_00a71f60
     }
 
     void FUN_00a71ec0(CloneA9B3* dest, CloningProcessA9B3& cloning);
-    CloneA9B3* FUN_00a9b3d0(CloningProcessA9B3& cloning);
+    CloneA9B3* NiAmbientLight_CreateClone(CloningProcessA9B3& cloning);
 };
 
 // Allocates a new CloneA9B3, calls FUN_00a71ec0 with the instance and cloning argument, then returns it.
 // @fnv 0x00a9b3d0
-CloneA9B3* CloneA9B3::FUN_00a9b3d0(CloningProcessA9B3& cloning)
+// src: XBOX_PDB 0x00a9b3d0
+CloneA9B3* CloneA9B3::NiAmbientLight_CreateClone(CloningProcessA9B3& cloning)
 {
     CloneA9B3* p = new CloneA9B3;
     FUN_00a71ec0(p, cloning);

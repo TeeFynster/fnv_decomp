@@ -18,7 +18,7 @@ struct FUN_00485680
 };
 struct S_00487010
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 struct S_0048a520
 {
@@ -26,7 +26,7 @@ struct S_0048a520
 };
 struct S_0048cca0
 {
-    void FUN_0048cca0();
+    void Save_0048cca0();
 };
 struct FUN_0048b5c0_shell
 {
@@ -34,7 +34,7 @@ struct FUN_0048b5c0_shell
 };
 struct FUN_00508920_obj
 {
-    void FUN_00508920();
+    void TESFlora_Save();
 };
 
 struct Prim_508db0

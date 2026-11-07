@@ -17,7 +17,7 @@ namespace s59e490 {
 
 extern __declspec(thread) bool tls_bEchoConsole;
 
-void FUN_00703c00(const char* pcFormat, ...);
+void Interface_PrintLine(const char* pcFormat, ...);
 
 struct Quest
 {
@@ -27,7 +27,8 @@ struct Quest
 static const char s_szGetStageDoneFormat[] = "GetStageDone >> %0.2f";
 
 // @fnv 0x0059e490
-bool FUN_0059e490(void* pvThisObj, Quest* pkQuestArg, unsigned int uiStage, double* pdResult)
+// src: XBOX_PDB 0x0059e490
+bool Script_GetStageDoneConditionFunction(void* pvThisObj, Quest* pkQuestArg, unsigned int uiStage, double* pdResult)
 {
     Quest* pkQuest;
     unsigned int uiStageIndex;
@@ -38,7 +39,7 @@ bool FUN_0059e490(void* pvThisObj, Quest* pkQuestArg, unsigned int uiStage, doub
     if (pkQuest && pkQuest->FUN_0060d600((unsigned char)uiStageIndex))
         *pdResult = 1.0;
     if (tls_bEchoConsole)
-        FUN_00703c00(s_szGetStageDoneFormat, *pdResult);
+        Interface_PrintLine(s_szGetStageDoneFormat, *pdResult);
     return true;
 }
 

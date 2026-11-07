@@ -18,12 +18,12 @@ public:
     virtual void vf52();
 
     bhkFilter GetFilter();
-    bhkShape* FUN_004ae6a0();
-    bhkFilter FUN_0043b4f0();
+    bhkShape* bhkWorldObject_GetShape();
+    bhkFilter bhkWorldObject_GetCollisionFilter();
     void FUN_00c85790();
     void* FUN_0056d4c0(unsigned int flags);
-    void* FUN_004ae750();
-    float FUN_004b5400();
+    void* Bipedanim_GetReferenceFlagsOrZero();
+    float bhkRigidBody_GetMass();
 
     hkSerializableCinfo* pInfo;
     unsigned int iFlags;

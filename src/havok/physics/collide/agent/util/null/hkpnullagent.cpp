@@ -11,7 +11,8 @@ struct D107A0RTTI
 extern D107A0RTTI g_D107A0RTTI;
 
 // @fnv 0x00d107a0
-const D107A0RTTI* __cdecl FUN_00d107a0()
+// src: XBOX_PDB 0x00d107a0
+const D107A0RTTI* __cdecl hkpNullAgent_getNullAgent()
 {
     return &g_D107A0RTTI;
 }

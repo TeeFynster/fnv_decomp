@@ -13,11 +13,12 @@ double _DAT_010231b0;
 
 struct FUN_005471e0_shell
 {
-    float FUN_005471e0();
+    float TESObjectCELL_GetWaterHeight();
 };
 
 // @fnv 0x005471e0
-float FUN_005471e0_shell::FUN_005471e0()
+// src: XBOX_PDB 0x005471e0
+float FUN_005471e0_shell::TESObjectCELL_GetWaterHeight()
 {
     if (!((TESObjectCELL*)this)->HasWater() || ((TESObjectCELL*)this)->IsInterior())
     {

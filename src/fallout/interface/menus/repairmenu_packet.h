@@ -7,11 +7,11 @@
 
 class BGSPerkEntry;
 
-InterfaceManager* FUN_004b7210();
-int FUN_007b5720();
+InterfaceManager* InterfaceManager_GetSingleton();
+int RepairMenu_GetClassStatic();
 int Warning(const char*, ...);
-float FUN_004a4240();
-void FUN_004169a0(float, float&, float&);
+float RandomFloatTwoPi();
+void NiSinCos_004169a0(float, float&, float&);
 extern bool DAT_011d9e91;
 extern RepairMenu* DAT_011da75c;
 extern int DAT_011da754;

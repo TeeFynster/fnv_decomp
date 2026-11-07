@@ -10,7 +10,8 @@
 extern "C" void* g_01202700;
 
 // @fnv 0x00c2a8a0
-void* __cdecl FUN_00c2a8a0()
+// src: COMMUNITY 0x00c2a8a0
+void* __cdecl NiPSysGravityStrengthCtlr_GetRTTI()
 {
     return &g_01202700;
 }
@@ -41,10 +42,11 @@ struct BaseStandIn
 struct NiPSysGravityStrengthCtlr : BaseStandIn
 {
     void* m_p38;
-    bool FUN_00c2a910(NiObjectNET*);
+    bool InterpTargetIsCorrectType(NiObjectNET*);
 };
 // @fnv 0x00c2a910
-bool NiPSysGravityStrengthCtlr::FUN_00c2a910(NiObjectNET* pkTarget)
+// src: XBOX_PDB 0x00c2a910
+bool NiPSysGravityStrengthCtlr::InterpTargetIsCorrectType(NiObjectNET* pkTarget)
 {
     if (!BaseStandIn::IsTargetParticleSystem(pkTarget))
         return false;
@@ -55,17 +57,18 @@ bool NiPSysGravityStrengthCtlr::FUN_00c2a910(NiObjectNET* pkTarget)
 }
 
 namespace fnv_00c2a960 {
-void __stdcall FUN_00c32f60(StrArr*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 char* __cdecl _FUN_00a7d330(void*);
 struct NiPSysGravityStrengthCtlr
 {
-    void FUN_00c2a960(StrArr*);
+    void GetViewerStrings_00c2a960(StrArr*);
 };
 // Appends the string returned by _FUN_00a7d330(g_01202700) to pkStrings, growing the array if it is full.
 // @fnv 0x00c2a960
-void NiPSysGravityStrengthCtlr::FUN_00c2a960(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c2a960
+void NiPSysGravityStrengthCtlr::GetViewerStrings_00c2a960(StrArr* pkStrings)
 {
-    FUN_00c32f60(pkStrings);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pkStrings);
     char* pStr = _FUN_00a7d330(g_01202700);
     unsigned int uiSize = pkStrings->m_usSize;
     if (uiSize >= pkStrings->m_usMaxSize)
@@ -109,11 +112,12 @@ class C2A8C0Object : public C2A8C0Base
     virtual ~C2A8C0Object();
 
     void CopyMemberData(C2A8C0Object* pkDest, C2A8C0CloningProcess& kCloning);
-    C2A8C0Object* FUN_00c2a8c0(C2A8C0CloningProcess& kCloning);
+    C2A8C0Object* NiPSysGravityStrengthCtlr_CreateClone(C2A8C0CloningProcess& kCloning);
 };
 
 // @fnv 0x00c2a8c0
-C2A8C0Object* C2A8C0Object::FUN_00c2a8c0(C2A8C0CloningProcess& kCloning)
+// src: XBOX_PDB 0x00c2a8c0
+C2A8C0Object* C2A8C0Object::NiPSysGravityStrengthCtlr_CreateClone(C2A8C0CloningProcess& kCloning)
 {
     C2A8C0Object* pkDest = new C2A8C0Object;
     CopyMemberData(pkDest, kCloning);

@@ -97,7 +97,7 @@ void __fastcall ReleasePackedAGDBuffer(BSPackedAdditionalGeometryData::NiBSPacke
 bool __fastcall IsPackedAdditionalGeometryDataEqual(BSPackedAdditionalGeometryData* pData,
                                                    void*, const NiAdditionalGeometryData* pkObject)
 {
-    if (pData->FUN_00a727f0(pkObject) && pData->m_uiShaderDeclarationIndex == pkObject->m_uiShaderDeclarationIndex &&
+    if (pData->NiAdditionalGeometryData_IsEqual(pkObject) && pData->m_uiShaderDeclarationIndex == pkObject->m_uiShaderDeclarationIndex &&
         pData->m_uiUnknownValue == pkObject->m_uiUnknownValue)
         return true;
     return false;
@@ -333,12 +333,13 @@ struct Sphere
 {
     NiPt3 center;
     float radius;
-    void FUN_00a7f3f0(const Sphere& other);
+    void NiBound_Merge(const Sphere& other);
 };
 
 // Sets this sphere to the other when it contains this; otherwise adjusts center and radius to enclose both.
 // @fnv 0x00a7f3f0
-void Sphere::FUN_00a7f3f0(const Sphere& other)
+// src: GAMEBRYO_LIB 0x00a7f3f0
+void Sphere::NiBound_Merge(const Sphere& other)
 {
     NiPt3 vDelta = center - other.center;
     float distSq = vDelta.SqrLength();

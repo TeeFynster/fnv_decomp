@@ -17,7 +17,8 @@ void CombatProcedure::Initialize(CombatController* apCombatController)
 }
 
 // @fnv 0x006e4ba0
-int CombatProcedureActivateObject::FUN_006e4ba0()
+// src: COMMUNITY 0x006e4ba0
+int CombatProcedureActivateObject::Return8()
 {
     return 8;
 }
@@ -58,7 +59,7 @@ class S_BaseProcess
 {
   public:
     int GetProcessLevel();
-    bool FUN_008ff0b0(Actor* actor, unsigned int refid, void* target);
+    bool FindSpecialIdletoPlay(Actor* actor, unsigned int refid, void* target);
 };
 
 class S_FileSub
@@ -82,32 +83,32 @@ class S_FileEntry
 class S_Idle
 {
   public:
-    bool FUN_004985f0();
+    bool Animation_SpecialIdleDonePlaying();
     bool HasIdleForm(void* form);
-    bool FUN_00498f80();
+    bool Animation_SpecialIdleWorking();
     S_FileEntry* GetFileEntry();
-    S_HY* FUN_00921e30();
+    S_HY* Animation_GetSpecialIdleSequence();
     float FUN_00453700();
 };
 
 class S_HY
 {
   public:
-    float FUN_004eec60(float v);
+    float GetScaledTime(float v);
 };
 
 class S_Tile
 {
   public:
     void* GetActionAtIndex(int i);
-    void FUN_0099a780(int obj);
+    void CombatState_PreActivateReference(int obj);
     void EvaluateWeaponScores();
 };
 
 class S_TileProv
 {
   public:
-    S_Tile* FUN_00586150();
+    S_Tile* CombatController_GetCombatState();
 };
 
 class S_REFR
@@ -125,11 +126,12 @@ struct CombatProcedureActorAccess
 
 // Checks the target and actor idle state, updates status, activates the target reference, and may evaluate weapon scores.
 // @fnv 0x009ca760
-void CombatProcedureActivateObject::FUN_009ca760()
+// src: XBOX_PDB 0x009ca760
+void CombatProcedureActivateObject::Update_009ca760()
 {
     if (((S_REFR*)this->m_pReference) == 0)
     {
-        this->FUN_009caac0("Targeted reference is NULL for some reason");
+        this->CombatProcedure_SetFailed("Targeted reference is NULL for some reason");
         return;
     }
     Actor* actor = ((CombatProcedureActorAccess*)this)->GetActor();
@@ -138,10 +140,10 @@ void CombatProcedureActivateObject::FUN_009ca760()
     {
         if (this->status == 0)
         {
-            if (idle && (!idle->FUN_004985f0() || idle->HasIdleForm(0)))
+            if (idle && (!idle->Animation_SpecialIdleDonePlaying() || idle->HasIdleForm(0)))
                 return;
             S_BaseProcess* proc = (S_BaseProcess*)actor->GetProcess();
-            bool ok = proc->FUN_008ff0b0(actor, ((S_REFR*)this->m_pReference)->GetRefID(), ((S_REFR*)this->m_pReference));
+            bool ok = proc->FindSpecialIdletoPlay(actor, ((S_REFR*)this->m_pReference)->GetRefID(), ((S_REFR*)this->m_pReference));
             if (ok)
             {
                 this->status = 1;
@@ -154,7 +156,7 @@ void CombatProcedureActivateObject::FUN_009ca760()
         }
         else if (this->status == 1 || this->status == 3)
         {
-            if (idle && (!idle->FUN_004985f0() || idle->FUN_00498f80()))
+            if (idle && (!idle->Animation_SpecialIdleDonePlaying() || idle->Animation_SpecialIdleWorking()))
             {
                 if (this->status == 1)
                 {
@@ -169,8 +171,8 @@ void CombatProcedureActivateObject::FUN_009ca760()
                             const char* b = strrchr(str, '_');
                             if (b)
                                 val = (float)atof(b + 1);
-                            hy = idle->FUN_00921e30();
-                            if (!hy || val < hy->FUN_004eec60(idle->FUN_00453700()))
+                            hy = idle->Animation_GetSpecialIdleSequence();
+                            if (!hy || val < hy->GetScaledTime(idle->FUN_00453700()))
                                 this->status = 2;
                         }
                     }
@@ -182,7 +184,7 @@ void CombatProcedureActivateObject::FUN_009ca760()
     }
     if (this->status != 3)
     {
-        S_Tile* tile = ((S_TileProv*)this->m_pCombatController)->FUN_00586150();
+        S_Tile* tile = ((S_TileProv*)this->m_pCombatController)->CombatController_GetCombatState();
         if (((S_REFR*)this->m_pReference)->GetRefID() != (unsigned int)this->m_pBaseObject)
         {
             unsigned int cnt;
@@ -198,7 +200,7 @@ void CombatProcedureActivateObject::FUN_009ca760()
                     cnt++;
                 }
             }
-            tile->FUN_0099a780((int)((S_REFR*)this->m_pReference));
+            tile->CombatState_PreActivateReference((int)((S_REFR*)this->m_pReference));
             for (unsigned int j = 0; j < cnt; j++)
             {
                 int c = ((S_REFR*)this->m_pReference)->FUN_00575610(arr[j]);
@@ -212,10 +214,10 @@ void CombatProcedureActivateObject::FUN_009ca760()
         }
         else
         {
-            tile->FUN_0099a780((int)((S_REFR*)this->m_pReference));
+            tile->CombatState_PreActivateReference((int)((S_REFR*)this->m_pReference));
             ((S_REFR*)this->m_pReference)->Activate(actor, 1, 0, 1);
         }
-        if (!actor->FUN_00493bb0())
+        if (!actor->Actor_IsInCombat())
             return;
         tile->EvaluateWeaponScores();
     }
@@ -228,7 +230,8 @@ void CombatProcedureActivateObject::FUN_009ca760()
 }
 
 // @fnv 0x009caac0
-void __thiscall CombatProcedureActivateObject::FUN_009caac0(int arg1)
+// src: XBOX_PDB 0x009caac0
+void __thiscall CombatProcedureActivateObject::CombatProcedure_SetFailed(int arg1)
 {
     ((int*)this)[3] = arg1;
     ((int*)this)[2] = 1;
@@ -242,12 +245,13 @@ void CombatProcedureActivateObject::SetState()
 
 // If m_pReference matches apRef, clears it and passes a message string to FUN_009caac0.
 // @fnv 0x009cab00
-void CombatProcedureActivateObject::FUN_009cab00(TESObjectREFR* apRef)
+// src: XBOX_PDB 0x009cab00
+void CombatProcedureActivateObject::ClearReferencePointers_009cab00(TESObjectREFR* apRef)
 {
     if (m_pReference == apRef)
     {
         m_pReference = 0;
-        FUN_009caac0((int)"Targeted reference pointer was cleared");
+        CombatProcedure_SetFailed((int)"Targeted reference pointer was cleared");
     }
 }
 
@@ -288,14 +292,15 @@ void ActivateObjectDebugView::PrintDebug(FUN_009cab30_TextOutput* apOutput, int 
     {
         NiPoint3 kPos = *static_cast<const TESObjectREFR*>(m_pReference)->GetPos();
         apOutput->Print(aiX, aiY, "Target: '%s' (%08X) - Position: (%.02f,%.02f,%.02f)",
-                        m_pReference->FUN_00474cb0() ? m_pReference->GetName() : m_pReference->GetFullName(),
+                        m_pReference->GetFormEditorIDLength() ? m_pReference->GetName() : m_pReference->GetFullName(),
                         m_pReference->GetFormID(), kPos.x, kPos.y, kPos.z);
     }
 }
 
 // Saves the combat procedure state by calling SaveGame, serializing m_pReference and m_pBaseObject, and saving bFlag.
 // @fnv 0x009cacb0
-void CombatProcedureActivateObject::FUN_009cacb0(BGSSaveFormBuffer* apSaveBuffer)
+// src: XBOX_PDB 0x009cacb0
+void CombatProcedureActivateObject::SaveGame_009cacb0(BGSSaveFormBuffer* apSaveBuffer)
 {
     CombatProcedure::SaveGame(apSaveBuffer);
     apSaveBuffer->SerializeFormData(m_pReference, 0);
@@ -309,40 +314,43 @@ struct CPStandIn004534f0
 };
 struct CPStandIn00564db0
 {
-    void FUN_00564db0(int);
+    void TESObjectREFR_SetTargeted(int);
 };
-extern "C" TESForm* __cdecl FUN_004839c0(TESObjectREFR*);
+extern "C" TESForm* __cdecl TESForm_GetFormByNumericID(TESObjectREFR*);
 
 // Calls FUN_004534f0 with arg, assigns the cast result of FUN_004839c0 to m_pReference, then calls FUN_00564db0(1) if non-null.
 // @fnv 0x009cad70
-void CombatProcedureActivateObject::FUN_009cad70(unsigned int arg)
+// src: XBOX_PDB 0x009cad70
+void CombatProcedureActivateObject::InitLoadGame_009cad70(unsigned int arg)
 {
     ((CPStandIn004534f0*)this)->FUN_004534f0(arg);
-    m_pReference = m_pReference ? dynamic_cast<TESObjectREFR*>(FUN_004839c0(m_pReference)) : 0;
+    m_pReference = m_pReference ? dynamic_cast<TESObjectREFR*>(TESForm_GetFormByNumericID(m_pReference)) : 0;
     if (m_pReference)
-        ((CPStandIn00564db0*)m_pReference)->FUN_00564db0(1);
+        ((CPStandIn00564db0*)m_pReference)->TESObjectREFR_SetTargeted(1);
 }
 
 
 struct ScriptableFormForward : public TESScriptableForm
 {
-    void FUN_009cc4b0(unsigned int a);
+    void CombatProcedureAttackMelee_Initialize(unsigned int a);
 };
 
 // @fnv 0x009cc4b0
-void ScriptableFormForward::FUN_009cc4b0(unsigned int auiInitData)
+// src: XBOX_PDB 0x009cc4b0
+void ScriptableFormForward::CombatProcedureAttackMelee_Initialize(unsigned int auiInitData)
 {
     TESScriptableForm::Initialize(auiInitData);
 }
 
-::TESForm* __cdecl FUN_004839c0(unsigned int);
+::TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int);
 // Reads the activate object load view from a form buffer, loading the reference, base object, and flag.
 // @fnv 0x009cad00
-void CombatProcedureActivateObject::FUN_009cad00(BGSLoadFormBuffer* apBuffer)
+// src: XBOX_PDB 0x009cad00
+void CombatProcedureActivateObject::LoadGame_009cad00(BGSLoadFormBuffer* apBuffer)
 {
     CombatProcedure::LoadGame(apBuffer);
     apBuffer->ReadFormIdentifier(&m_pReference);
     m_pBaseObject =
-        dynamic_cast< ::TESBoundObject*>(FUN_004839c0(((BGSLoadGameBuffer*)apBuffer)->ReadFormIdentifier()));
+        dynamic_cast< ::TESBoundObject*>(TESForm_GetFormByNumericID(((BGSLoadGameBuffer*)apBuffer)->ReadFormIdentifier()));
     apBuffer->ReadTypedData(&bFlag, 1);
 }

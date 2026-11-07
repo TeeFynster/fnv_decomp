@@ -64,12 +64,12 @@ public:
     void* GetFieldD0();
     virtual char* GetName() const;
     int getFormType();
-    bool FUN_0099a3e0();
-    int FUN_009611e0();
-    bool FUN_00992530(Actor*, Actor*);
-    void FUN_00992480(Actor*, Actor*);
-    BSPortalGraph* FUN_006698d0();
-    void FUN_00588270(BSSimpleArray<TESObjectREFR*, 1024>&);
+    bool CombatProcedureBeInCover_GetBehindCover();
+    int NiAVObject_GetParent();
+    bool CombatManager_GetWanttoHelpGroup(Actor*, Actor*);
+    void CombatManager_AddSpectatorForCombatGroup(Actor*, Actor*);
+    BSPortalGraph* TESPackage_GetOnChangeIdle();
+    void BuildTeleportDoorList(BSSimpleArray<TESObjectREFR*, 1024>&);
     float GetFloatAt0xC8();
     bool SetDateTimeText(const char*);
     bool GetParentUseFlag(PARENT_USE_FLAG);
@@ -80,9 +80,9 @@ public:
     void* GetOrCreateCellOffsetData(TESFile*);
     static bool IsFormIDOwnedByFile(unsigned int, TESFile*);
     void ClearWorldSpaceReferences();
-    void FUN_00584150(float);
-    void FUN_00586110(float);
-    void FUN_00586130(float);
+    void SetWaterLODHeight(float);
+    void SetDefaultLandHeight(float);
+    void Projectile_SetPower(float);
     bool IsFlag4C20Set();
     void SetParent(TESWorldSpace*);
     void SetFieldD0(unsigned int);
@@ -133,25 +133,25 @@ public:
         unsigned int unk0C;
     };
 
-    void FUN_00583070();
-    void FUN_00583180();
-    void FUN_005877e0();
-    void FUN_00588c80();
+    void InitializeData_00583070();
+    void ClearData_00583180();
+    void ClearCellMap();
+    void FreeOffsetMap();
     void ClearAllLists();
     void DestroyMapEntries();
-    void FUN_00588030(TESObjectREFR*);
-    bool FUN_00587670(TESObjectCELL*);
-    void FUN_00587e40(TESObjectREFR*);
+    void RemovePersistentRef(TESObjectREFR*);
+    bool AddCell(TESObjectCELL*);
+    void RemoveFromPersistentRefData(TESObjectREFR*);
     TESObjectCELL* GetOrCreateCell();
-    TESClimate* FUN_00585fe0();
-    TESWaterForm* FUN_005860c0();
-    const char* FUN_00586440();
-    PointerPairData* FUN_00586400();
-    TESObjectCELL* FUN_00587550(const NiPoint3&);
+    TESClimate* GetClimate();
+    TESWaterForm* GetLODWaterType();
+    const char* GetWorldMapTextureName();
+    PointerPairData* GetWorldMapData();
+    TESObjectCELL* GetCellFromWorldCoord(const NiPoint3&);
     void RemoveCellFromMap(TESObjectCELL*);
     void AddCellReferences(TESObjectCELL*);
-    void FUN_005884e0(TESObjectREFR*);
-    void FUN_00587d10(TESObjectREFR*);
+    void GetCurrentCellMarkerDataRefs(TESObjectREFR*);
+    void AddToPersistentRefData(TESObjectREFR*);
 
     union
     {

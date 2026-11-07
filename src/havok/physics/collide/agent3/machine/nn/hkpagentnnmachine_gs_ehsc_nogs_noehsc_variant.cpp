@@ -79,7 +79,8 @@ struct Node
     Matrix rows;
 };
 // @fnv 0x00cfe1d0
-Entry* __cdecl FUN_00cfe1d0(Entry* h, Entry* out, hkVector4* b, unsigned int n, unsigned char* c)
+// src: XBOX_PDB 0x00cfe1d0
+Entry* __cdecl hkAgentMachine_processTransformedShapes(Entry* h, Entry* out, hkVector4* b, unsigned int n, unsigned char* c)
 {
     Node* node = h->node;
     if (node->type == 0xf)
@@ -109,8 +110,8 @@ Entry* __cdecl FUN_00cfe1d0(Entry* h, Entry* out, hkVector4* b, unsigned int n, 
             _mm_store_ps(&dst[-3].x, _mm_add_ps(_mm_load_ps(&m[3].x), _mm_load_ps(&dst[-3].x)));
             dst[-2].m_vComponents = m[4].m_vComponents;
             dst[-1].m_vComponents = m[5].m_vComponents;
-            dst->FUN_00c66320(m + 6, &node->v20);
-            (dst + 1)->FUN_00c66320(m + 7, &node->v20);
+            dst->setMul(m + 6, &node->v20);
+            (dst + 1)->setMul(m + 7, &node->v20);
 
             Entry* a = out;
             node->rows.inversePosition(dst[2], m[8]);

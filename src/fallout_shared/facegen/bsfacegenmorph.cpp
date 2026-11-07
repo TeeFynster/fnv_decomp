@@ -71,15 +71,15 @@ void BSFaceGenMorphDifferential::ApplyDifferentialMorph(NiTriBasedGeom* geom, BS
 {
     if (!geom || weight <= 0.0 || weight > 1.0)
         return;
-    NiGeometryData* pData = geom->FUN_005495f0();
+    NiGeometryData* pData = geom->NiGeometry_GetModelData();
     GeometryVertexBuffer localC;
-    pData->FUN_00a67410(localC);
+    pData->NiGeometryData_GetVerticesIterator(localC);
     NiPoint3 localD;
     unsigned int ItemUpdateArray = MinUnsigned(pData->NiGeometryData::GetVertexCount(), data[1]);
     for (unsigned int i = 0; i < ItemUpdateArray; ++i, localC.AddToA())
     {
         localC.CopyV3(localD);
-        localD.FUN_0063c8a0(((NiPoint3*)data[0])[i] * weight);
+        localD.ComputeValue_0063c8a0(((NiPoint3*)data[0])[i] * weight);
         localC.SetPoint(localD);
     }
 }
@@ -91,16 +91,16 @@ void BSFaceGenMorphStatistical::ApplyDifferentialMorph(NiTriBasedGeom* geom, BSF
     if (!geom || weight <= 0.0 || weight > 1.0 || !extra->GetVertices())
         return;
     NiPoint3* pData = extra->GetVertices();
-    NiGeometryData* pGeomData = geom->FUN_005495f0();
+    NiGeometryData* pGeomData = geom->NiGeometry_GetModelData();
     GeometryVertexBuffer localC;
-    pGeomData->FUN_00a67410(localC);
+    pGeomData->NiGeometryData_GetVerticesIterator(localC);
     NiPoint3 localD;
     unsigned int ItemUpdateArray;
     for (unsigned int i = 0; i < data[1]; ++i)
     {
         ItemUpdateArray = ((unsigned long*)data[0])[i];
-        localC.FUN_00534570(ItemUpdateArray, localD);
-        localD.FUN_0063c8a0((pData[this->extra + i] - pData[ItemUpdateArray]) * weight);
+        localC.NiGeometryDataIteratorNiPoint3_Get(ItemUpdateArray, localD);
+        localD.ComputeValue_0063c8a0((pData[this->extra + i] - pData[ItemUpdateArray]) * weight);
         localC.SetVertex(ItemUpdateArray, localD);
     }
 }

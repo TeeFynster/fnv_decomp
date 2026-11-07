@@ -10,19 +10,20 @@
 
 extern "C"
 {
-    int __cdecl FUN_00cea030(void*, void*);
-    int __cdecl FUN_00ce9db0(void*, void*);
-    int __cdecl FUN_00ce9e90(void*);
+    int __cdecl hkaRagdollUtils_reorderForRagdoll(void*, void*);
+    int __cdecl HkaragdollutilsFpfast_ProcessEntries_00ce9db0(void*, void*);
+    int __cdecl alignConstraintSpacesToChildren(void*);
 }
 
 // @fnv 0x00cea7c0
-int __cdecl FUN_00cea7c0(void* p1, void* p2, void* p3)
+// src: HAVOK_LIB 0x00cea7c0
+int __cdecl hkaRagdollUtils_reorderAndAlignForRagdoll(void* p1, void* p2, void* p3)
 {
-    if (FUN_00cea030(p1, p2))
+    if (hkaRagdollUtils_reorderForRagdoll(p1, p2))
         return 1;
-    if (FUN_00ce9db0(p2, p3))
+    if (HkaragdollutilsFpfast_ProcessEntries_00ce9db0(p2, p3))
         return 1;
-    if (FUN_00ce9e90(p2))
+    if (alignConstraintSpacesToChildren(p2))
         return 1;
     return 0;
 }
@@ -47,7 +48,7 @@ struct Counter
     int unk30;
 };
 extern "C" void __cdecl AssignNodeFlags(int, int, int);
-void __cdecl FUN_00ce9fa0(Container* c, int value, Counter* counter);
+void __cdecl hkaRagdollUtils_setCollisionLayer(Container* c, int value, Counter* counter);
 struct Inner
 {
     virtual void unk0();
@@ -80,7 +81,7 @@ struct SpawnedGlobal
     int unk0c;
     SpawnedAllocator* m_pAllocator;
 };
-SpawnedGlobal* __cdecl FUN_00c85750() throw();
+SpawnedGlobal* __cdecl hkMemoryRouter_getInstance() throw();
 struct SpawnedObject
 {
     int unk00;
@@ -113,14 +114,14 @@ struct StringRef
         FUN_00cb0a60();
     }
     void FUN_00cb0a60() throw();
-    void FUN_00cb0c10(const char*) throw();
-    void FUN_00cb0c30(const void*) throw();
+    void UpdateState_00cb0c10(const char*) throw();
+    void UpdateState_00cb0c30(const void*) throw();
 };
 struct Bone
 {
     StringRef name;
     bool lockTranslation;
-    void FUN_00cb0c00() throw();
+    void Object_UpdateFields_00cb0c00() throw();
 };
 struct Quaternion
 {
@@ -129,12 +130,13 @@ struct Quaternion
     {
         return value;
     }
-    __declspec(noinline) void FUN_00c66320(const Quaternion*, const Quaternion*) throw();
+    __declspec(noinline) void setMul(const Quaternion*, const Quaternion*) throw();
 };
 
 extern unsigned int DAT_011c16bc;
 extern "C" void __fastcall FUN_00ec408c(unsigned int);
-void Quaternion::FUN_00c66320(const Quaternion* first, const Quaternion* second) throw()
+// src: COMMUNITY 0x00c66320
+void Quaternion::setMul(const Quaternion* first, const Quaternion* second) throw()
 {
     unsigned int cookie = DAT_011c16bc;
     __m128 a = first->value;
@@ -165,14 +167,14 @@ struct RagdollQsTransform
     {
         return scale;
     }
-    void FUN_00ce5070(const RagdollQsTransform*) throw();
+    void setFromTransformNoScale(const RagdollQsTransform*) throw();
 };
 extern const __m128 DAT_010c71e0;
 extern const __m128 DAT_010c7170;
 extern const __m128 DAT_010c44d0;
 extern const __m128 DAT_010c4c00;
 extern const __m128 DAT_010c4c10;
-void __cdecl FUN_00c908c0(SpawnedAllocator*, void*, int, int) throw();
+void __cdecl hkArrayUtil__reserve(SpawnedAllocator*, void*, int, int) throw();
 struct SimdVector
 {
     __m128 quad;
@@ -201,7 +203,7 @@ static __forceinline void composeTransforms(RagdollQsTransform& destination, con
     tForward = _mm_add_ps(tForward, _mm_mul_ps(_mm_shuffle_ps(dForward, dForward, 0), qForward));
     tForward = _mm_add_ps(crossForward, tForward);
     destination.translation = _mm_add_ps(_mm_add_ps(tForward, tForward), parent.translation);
-    destination.rotation.FUN_00c66320(&parent.rotation, &child.rotation);
+    destination.rotation.setMul(&parent.rotation, &child.rotation);
     destination.scale = _mm_mul_ps(child.scale, parent.scale);
 }
 template <class T> struct ArrayLocalForm
@@ -219,12 +221,12 @@ template <class T> struct ArrayLocalForm
             int grown = available * 2;
             if (count >= grown)
                 grown = count;
-            FUN_00c908c0(allocator, this, grown, sizeof(T));
+            hkArrayUtil__reserve(allocator, this, grown, sizeof(T));
         }
     }
     void reserve(int count) throw()
     {
-        SpawnedGlobal* holder = FUN_00c85750();
+        SpawnedGlobal* holder = hkMemoryRouter_getInstance();
         reserve(holder->m_pAllocator, count);
     }
     void resize(int count) throw()
@@ -238,7 +240,7 @@ static __forceinline void destroyBones(Bone* bone, int count) throw()
 {
     for (int i = 0; i < count; ++i)
     {
-        bone->FUN_00cb0c00();
+        bone->Object_UpdateFields_00cb0c00();
         ++bone;
     }
 }
@@ -283,7 +285,7 @@ struct Skeleton : SkeletonHeader
     {}
     __forceinline void* operator new(unsigned int bytes)
     {
-        SpawnedGlobal* holder = FUN_00c85750();
+        SpawnedGlobal* holder = hkMemoryRouter_getInstance();
         SpawnedAllocator* allocator = holder->m_pAllocator;
         Skeleton* result = static_cast<Skeleton*>(allocator->allocate(bytes));
         result->memorySize = static_cast<unsigned short>(bytes);
@@ -378,7 +380,8 @@ struct ConstraintList
 };
 
 // @fnv 0x00ceb2c0
-Skeleton* __cdecl FUN_00ceb2c0(BodyList* bodies, ConstraintList* constraints) throw()
+// src: COMMUNITY 0x00ceb2c0
+Skeleton* __cdecl hkaRagdollUtils_constructSkeletonForRagdoll(BodyList* bodies, ConstraintList* constraints) throw()
 {
     Skeleton* result = new Skeleton;
     int count = bodies->size;
@@ -407,8 +410,8 @@ Skeleton* __cdecl FUN_00ceb2c0(BodyList* bodies, ConstraintList* constraints) th
         {
             RigidBody* parent = bodies->data[parentIndex];
             RagdollQsTransform childPose, parentPose;
-            childPose.FUN_00ce5070(&body->transform);
-            parentPose.FUN_00ce5070(&parent->transform);
+            childPose.setFromTransformNoScale(&body->transform);
+            parentPose.setFromTransformNoScale(&parent->transform);
             RagdollQsTransform& output = result->pose.data[i];
             const __m128& q = parentPose.rotation.value;
             SimdVector w = _mm_shuffle_ps(q, q, 0xff);
@@ -438,11 +441,11 @@ Skeleton* __cdecl FUN_00ceb2c0(BodyList* bodies, ConstraintList* constraints) th
         }
         else
         {
-            result->pose.data[i].FUN_00ce5070(&body->transform);
+            result->pose.data[i].setFromTransformNoScale(&body->transform);
         }
         const char* name = reinterpret_cast<const char*>(reinterpret_cast<unsigned int>(body->name) & ~1u);
         if (name)
-            currentBone.name.FUN_00cb0c10(name);
+            currentBone.name.UpdateState_00cb0c10(name);
         else
         {
             int buffer[128];
@@ -454,6 +457,6 @@ Skeleton* __cdecl FUN_00ceb2c0(BodyList* bodies, ConstraintList* constraints) th
         currentBone.lockTranslation = i != 0;
     }
     if (result->bones.size > 0)
-        result->name.FUN_00cb0c30(result->bones.data);
+        result->name.UpdateState_00cb0c30(result->bones.data);
     return result;
 }

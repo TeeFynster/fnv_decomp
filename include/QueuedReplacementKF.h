@@ -8,9 +8,9 @@ public:
     virtual void Finish();
     virtual bool GetDescription(char* description, unsigned int bufferSize);
 
-    void FUN_0043e4b0();
+    void QueuedKF_Finish();
     void IncrementCounter();
-    bool FUN_00449130();
-    void FUN_0043e940();
-    bool FUN_0043ea00(char* apDescription, unsigned int aiBufferSize);
+    bool BSTask_int64_GetTaskCanceled();
+    void Finish_0043e940();
+    bool GetDescription_0043ea00(char* apDescription, unsigned int aiBufferSize);
 };

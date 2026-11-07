@@ -6,7 +6,7 @@
 #include "../../../../../include/hkMemoryRouter.h"
 
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct ArrayMember
 {
@@ -16,7 +16,7 @@ struct ArrayMember
 
     ~ArrayMember() throw()
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
@@ -53,7 +53,7 @@ struct FUN_00dfc2c0 : SizedBase
 
     static void operator delete(void* apMemory) throw()
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(apMemory, ((FUN_00dfc2c0*)apMemory)->m_uSize);
     }
@@ -76,7 +76,7 @@ struct FUN_00dfc330
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dfc330* b = static_cast<FUN_00dfc330*>(p);
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(p, b->m_usMemSizeAndFlags);
     }

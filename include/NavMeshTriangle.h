@@ -8,21 +8,21 @@
 class NavMeshTriangle
 {
   public:
-    unsigned short FUN_005582d0(int index);               // 0x005582d0 Vertices[index] (folded ushort-array getter)
+    unsigned short GetVert_005582d0(int index);               // 0x005582d0 Vertices[index] (folded ushort-array getter)
     bool IsEdgeFlagSet(int edge);                          // 0x0068f1d0 m_uiTriangleFlags & (1 << edge)
-    unsigned char FUN_0068f200(int edge);                  // 0x0068f200 Triangles[edge] != 0xFFFF
-    unsigned short FUN_0068f2c0(int edge);                 // 0x0068f2c0 Triangles[edge]
+    unsigned char IsEdgeConnected(int edge);                  // 0x0068f200 Triangles[edge] != 0xFFFF
+    unsigned short GetEdgeExtraInfo_0068f2c0(int edge);                 // 0x0068f2c0 Triangles[edge]
     bool HasFlags();                                       // 0x00690770 m_uiTriangleFlags & 0x0FBE0000 (cover bits)
     void ClearFlag(int edge);                              // 0x00690790 clear bit edge, Triangles[edge] = 0xFFFF
     void SetArrayValue(int edge, unsigned short value);    // 0x006907d0 ClearFlag(edge), Triangles[edge] = value
     void SetEdge(int edge, unsigned short value);          // 0x006907d0 (same function)
     bool GetFlag(int flag);                                // 0x00691140 m_uiTriangleFlags & flag
     bool FUN_00691140(unsigned int flag);                  // 0x00691140 (same function)
-    void FUN_00691570(unsigned int flag);                  // 0x00691570 m_uiTriangleFlags |= flag
+    void SetFlag_00691570(unsigned int flag);                  // 0x00691570 m_uiTriangleFlags |= flag
     bool HasFlag40();                                      // 0x00693b70 m_uiTriangleFlags & 0x40
-    bool FUN_00693b90();                                   // 0x00693b90 GetFlag(0x10)
+    bool IsNoLargeCreature();                                   // 0x00693b90 GetFlag(0x10)
     unsigned short GetBits13To15();                        // 0x00699790 (m_uiTriangleFlags & 0xE000) >> 13
-    bool FUN_006a5ec0();                                   // 0x006a5ec0 GetFlag(0x200)
+    bool NavMeshTriangle_IsWater();                                   // 0x006a5ec0 GetFlag(0x200)
 
     unsigned short Vertices[3];     // +0x00
     unsigned short Triangles[3];    // +0x06

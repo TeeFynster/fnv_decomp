@@ -8,11 +8,12 @@ struct hkpCharacterStateManager
 {
     int m_auiShapeKeys[2];
     hkReferencedObject* m_states[32];
-    void FUN_00cbc4e0(hkReferencedObject* object, int index);
+    void registerState(hkReferencedObject* object, int index);
 };
 
 // @fnv 0x00cbc4e0
-void hkpCharacterStateManager::FUN_00cbc4e0(hkReferencedObject* object, int index)
+// src: HAVOK_LIB 0x00cbc4e0
+void hkpCharacterStateManager::registerState(hkReferencedObject* object, int index)
 {
     object->addReference();
     if (m_states[index])
@@ -55,11 +56,12 @@ struct CharacterStateSlotTable
 {
     int m_auiShapeKeys[2];
     hkReferencedObject* m_states[32];
-    hkReferencedObject* FUN_00cbc510(int index);
+    hkReferencedObject* GetIndexedValue_00cbc510(int index);
 };
 
 // @fnv 0x00cbc510
-hkReferencedObject* CharacterStateSlotTable::FUN_00cbc510(int index)
+// src: GUESS 0x00cbc510 (confidence: low)
+hkReferencedObject* CharacterStateSlotTable::GetIndexedValue_00cbc510(int index)
 {
     return m_states[index];
 }
@@ -78,7 +80,7 @@ struct FnvCpu_FUN_00cbc520_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00cbc520_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00cbc520_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00cbc520_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00cbc520_CpuObject
 {
     unsigned int unk00;
@@ -92,7 +94,7 @@ FnvCpu_FUN_00cbc520_CpuObject* FnvCpu_FUN_00cbc520_CpuObject::FUN_00cbc520(unsig
     FUN_00cbc4a0();
     if (flags & 1)
     {
-        FnvCpu_FUN_00cbc520_CpuAllocatorHolder* holder = FUN_00c85750();
+        FnvCpu_FUN_00cbc520_CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;

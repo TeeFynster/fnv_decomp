@@ -33,7 +33,8 @@ extern FUN_006ff690* DAT_011d8794;
 
 // Returns the global FUN_006ff690 instance, constructing it with new if it has not been created yet.
 // @fnv 0x006ff580
-FUN_006ff690* __cdecl FUN_006ff580()
+// src: COMMUNITY 0x006ff580
+FUN_006ff690* __cdecl SteamAPICallbacks_GetSingleton()
 {
     if (!DAT_011d8794)
         DAT_011d8794 = new FUN_006ff690;

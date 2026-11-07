@@ -8,10 +8,11 @@ extern char DAT_01048858[], DAT_010c6084[], DAT_010c6078[], DAT_01029400[], DAT_
     DAT_010c6064[], DAT_010c605c[];
 struct S
 {
-    const char* FUN_00c8d4a0();
+    const char* bhkRigidBodyCinfo_GetQualityTypeString();
 };
 // @fnv 0x00c8d4a0
-const char* S::FUN_00c8d4a0()
+// src: XBOX_PDB 0x00c8d4a0
+const char* S::bhkRigidBodyCinfo_GetQualityTypeString()
 {
     const char* r = 0;
     switch (*((signed char*)this + 0xd7))

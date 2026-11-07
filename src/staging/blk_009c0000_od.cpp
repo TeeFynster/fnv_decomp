@@ -19,21 +19,23 @@ void __cdecl SetNiPoint3FromHkVector4(hkVector4 const&, void*);
 struct FUN_009c1a50_shell
 {
     void* FUN_009c1a50();
-    void __thiscall FUN_009c1a20(hkVector4 const& v);
+    void __thiscall bhkPickData_NiGetLength(hkVector4 const& v);
 };
 // @fnv 0x009c1a20
-void __thiscall FUN_009c1a50_shell::FUN_009c1a20(hkVector4 const& aVector)
+// src: COMMUNITY 0x009c1a20
+void __thiscall FUN_009c1a50_shell::bhkPickData_NiGetLength(hkVector4 const& aVector)
 {
     SetNiPoint3FromHkVector4(aVector, FUN_009c1a50());
 }
 
 struct FUN_009c8600_Class
 {
-    bool __thiscall FUN_009c8600();
+    bool __thiscall BGSCameraShot_IsFirstPerson();
 };
 
 // @fnv 0x009c8600
-bool __thiscall FUN_009c8600_Class::FUN_009c8600()
+// src: COMMUNITY 0x009c8600
+bool __thiscall FUN_009c8600_Class::BGSCameraShot_IsFirstPerson()
 {
     return (reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x44)[0] & 8) ? true : false;
 }
@@ -55,10 +57,11 @@ struct Flt
 };
 struct FUN_009c8660_Class
 {
-    void FUN_009c8660();
+    void BGSCameraShot_GetTargetNode();
 };
 // @fnv 0x009c8660
-void FUN_009c8660_Class::FUN_009c8660()
+// src: XBOX_PDB 0x009c8660
+void FUN_009c8660_Class::BGSCameraShot_GetTargetNode()
 {
     ((Flt*)((char*)this + 0x64))->operator unsigned int();
 }
@@ -67,11 +70,12 @@ extern int DAT_01090874;
 
 struct FUN_009ca6c0_class
 {
-    void FUN_009ca6c0();
+    void SetVirtualTable_009ca6c0();
 };
 
 // @fnv 0x009ca6c0
-void FUN_009ca6c0_class::FUN_009ca6c0()
+// src: GUESS 0x009ca6c0 (confidence: low)
+void FUN_009ca6c0_class::SetVirtualTable_009ca6c0()
 {
     *(int*)this = (int)&DAT_01090874;
 }
@@ -89,18 +93,19 @@ float FUN_009d1b30_class::GetFloatAtOffset50() const
 
 struct FUN_006e4820_Class
 {
-    void FUN_006e4820();
+    void IsLedgeCover_006e4820();
 };
 
 struct FUN_009d3370_Class
 {
-    void FUN_009d3370();
+    void CombatCoverLocation_IsLedgeCover();
 };
 
 // @fnv 0x009d3370
-void FUN_009d3370_Class::FUN_009d3370()
+// src: XBOX_PDB 0x009d3370
+void FUN_009d3370_Class::CombatCoverLocation_IsLedgeCover()
 {
-    ((FUN_006e4820_Class*)((char*)this + 0x14))->FUN_006e4820();
+    ((FUN_006e4820_Class*)((char*)this + 0x14))->IsLedgeCover_006e4820();
 }
 
 struct FUN_009d7c40_Class
@@ -164,14 +169,15 @@ struct FUN_009d7c40_Class
     int m_e0;
     int m_e4;
     int m_e8;
-    void FUN_009a0560(int);
-    void FUN_009d7c40();
+    void CombatState_TryReserveCoverLocation(int);
+    void CombatState_TryReserveSecondaryCoverLocation();
 };
 
 // @fnv 0x009d7c40
-void FUN_009d7c40_Class::FUN_009d7c40()
+// src: XBOX_PDB 0x009d7c40
+void FUN_009d7c40_Class::CombatState_TryReserveSecondaryCoverLocation()
 {
-    FUN_009a0560(m_e8);
+    CombatState_TryReserveCoverLocation(m_e8);
 }
 
 struct FUN_009d7c60_class
@@ -187,22 +193,24 @@ char FUN_009d7c60_class::GetByteAtOffsetE1()
 
 struct FUN_009d9f00_Class
 {
-    unsigned int __thiscall FUN_009d9f00();
+    unsigned int __thiscall Projectile_GetSecondaryItemChange();
 };
 
 // @fnv 0x009d9f00
-unsigned int __thiscall FUN_009d9f00_Class::FUN_009d9f00()
+// src: XBOX_PDB 0x009d9f00
+unsigned int __thiscall FUN_009d9f00_Class::Projectile_GetSecondaryItemChange()
 {
     return *(unsigned int*)((char*)this + 0x144);
 }
 
 struct FUN_009d9f40_Class
 {
-    void* FUN_009d9f40();
+    void* CombatGroup_GetLastSearchAreaUpdateTimer();
 };
 
 // @fnv 0x009d9f40
-void* FUN_009d9f40_Class::FUN_009d9f40()
+// src: XBOX_PDB 0x009d9f40
+void* FUN_009d9f40_Class::CombatGroup_GetLastSearchAreaUpdateTimer()
 {
     return reinterpret_cast<char*>(this) + 0xE0;
 }
@@ -210,9 +218,10 @@ void* FUN_009d9f40_Class::FUN_009d9f40()
 #include "../../include/PathBuilder.h"
 
 // @fnv 0x009dfd50
-void* PathBuilder::FUN_009dfd50()
+// src: XBOX_PDB 0x009dfd50
+void* PathBuilder::BSSimpleArray_VirtualPathingNode_1024_GetLast()
 {
-    return FUN_006e8f40((char*)m_pAllocator - 1);
+    return GetElementAddress30_006e8f40((char*)m_pAllocator - 1);
 }
 
 
@@ -220,7 +229,7 @@ void* PathBuilder::FUN_009dfd50()
 // 0x009c8950 is VATS's command-playback update.
 struct VATS
 {
-    void FUN_009c8950(bool abForceQuit, bool abFinishCommandPlayback);
+    void QuitVATSPlayback(bool abForceQuit, bool abFinishCommandPlayback);
     void SetPointers(void* pFirst, void* pSecond);
 };
 
@@ -229,7 +238,7 @@ void VATS::SetPointers(void* pFirst, void* pSecond)
 {
     *(void**)((char*)this + 0x40) = pFirst;
     *(void**)((char*)this + 0x44) = pSecond;
-    FUN_009c8950(true, true);
+    QuitVATSPlayback(true, true);
 }
 
 struct FUN_009c1aa0_Class
@@ -251,12 +260,13 @@ struct FUN_009c1aa0_Class
     int m_38;
     int m_3c;
     int m_40;
-    FUN_009c1aa0_Class& __thiscall FUN_009c1aa0(FUN_009c1aa0_Class const& src);
+    FUN_009c1aa0_Class& __thiscall ProcessEntries_009c1aa0(FUN_009c1aa0_Class const& src);
     void __thiscall FUN_009c1b00(int);
 };
 // Copies src into this: calls FUN_009c1b00 on src, copies 8 ints from offset 8 and m_40.
 // @fnv 0x009c1aa0
-FUN_009c1aa0_Class& __thiscall FUN_009c1aa0_Class::FUN_009c1aa0(FUN_009c1aa0_Class const& aSource)
+// src: GUESS 0x009c1aa0 (confidence: low)
+FUN_009c1aa0_Class& __thiscall FUN_009c1aa0_Class::ProcessEntries_009c1aa0(FUN_009c1aa0_Class const& aSource)
 {
     FUN_009c1b00((int)&aSource);
     for (unsigned int i = 0; i < 8; ++i)
@@ -267,7 +277,7 @@ FUN_009c1aa0_Class& __thiscall FUN_009c1aa0_Class::FUN_009c1aa0(FUN_009c1aa0_Cla
 
 struct T_
 {
-    void __thiscall FUN_004a3f10(void*);
+    void __thiscall SetValue(void*);
 };
 struct FUN_009c1b00
 {
@@ -284,7 +294,7 @@ struct FUN_009c1b00
 // @fnv 0x009c1b00
 FUN_009c1b00* FUN_009c1b00::Set(FUN_009c1b00 const* apSource)
 {
-    ((T_*)this)->FUN_004a3f10((void*)apSource);
+    ((T_*)this)->SetValue((void*)apSource);
     m_10 = apSource->m_10;
     m_14 = apSource->m_14;
     for (unsigned int i = 0; i < 2; ++i)
@@ -301,10 +311,11 @@ struct Call741e0
 };
 struct FUN_009c6440_Class
 {
-    int FUN_009c6440(int a, int b);
+    int ProjectileListener_ProjectileListener(int a, int b);
 };
 // @fnv 0x009c6440
-int FUN_009c6440_Class::FUN_009c6440(int a, int aiStoredValue)
+// src: EXE 0x009c6440
+int FUN_009c6440_Class::ProjectileListener_ProjectileListener(int a, int aiStoredValue)
 {
     ((Call741e0*)this)->FUN_00c741e0(a);
     *(int*)this = (int)&DAT_01090594;
@@ -314,14 +325,14 @@ int FUN_009c6440_Class::FUN_009c6440(int a, int aiStoredValue)
     return (int)this;
 }
 
-extern "C" NiAVObject* __cdecl FUN_00c7fa90(NiAVObject* object);
+extern "C" NiAVObject* __cdecl bhkUtilFunctions_GetNiAVObject(NiAVObject* object);
 
 // Converts object via FUN_00c7fa90 and, if the result is non-null, returns the TESObjectREFR obtained from it; otherwise returns null.
 // @fnv 0x009c69e0
 TESObjectREFR* GetReferenceFromObject(NiAVObject* object)
 {
     TESObjectREFR* reference = 0;
-    NiAVObject* converted = FUN_00c7fa90(object);
+    NiAVObject* converted = bhkUtilFunctions_GetNiAVObject(object);
     if (converted)
         reference = TESObjectREFR::GetReferenceFromNiAVObject(converted);
     return reference;
@@ -330,7 +341,8 @@ TESObjectREFR* GetReferenceFromObject(NiAVObject* object)
 extern unsigned char DAT_011f9424;
 
 // @fnv 0x009c7190
-void FUN_009c7190(unsigned char value)
+// src: XBOX_PDB 0x009c7190
+void BSShaderManager_SetFullScreenMotionBlurVATS(unsigned char value)
 {
     DAT_011f9424 = value;
 }
@@ -338,7 +350,8 @@ void FUN_009c7190(unsigned char value)
 extern unsigned char DAT_012677cc;
 
 // @fnv 0x009c86a0
-void FUN_009c86a0(unsigned char value)
+// src: XBOX_PDB 0x009c86a0
+void bhkWorld_SetVatsReplay(unsigned char value)
 {
     DAT_012677cc = value;
 }
@@ -374,12 +387,13 @@ struct PathingRequestAvoidPointer
 };
 struct FUN_009d7c80_Class
 {
-    bool FUN_009d7c80();
+    bool CombatProcedureMove_CreatePath();
     void UpdateOutput(PathingRequestAvoidPointer*);
     bool UpdateMovementRequest(PathingRequestAvoidPointer*);
 };
 // @fnv 0x009d7c80
-bool FUN_009d7c80_Class::FUN_009d7c80()
+// src: XBOX_PDB 0x009d7c80
+bool FUN_009d7c80_Class::CombatProcedureMove_CreatePath()
 {
     PathingRequestAvoidPointer t(0);
     UpdateOutput(&t);
@@ -480,8 +494,8 @@ struct FUN_0070c3b0_Dummy
 extern FUN_0070c3b0_Dummy* _g_thePlayer;
 extern TESObjectREFR* DAT_011f21f0;
 
-NiPoint3* __fastcall FUN_0045bb80(int);
-float __fastcall FUN_0070c3b0(FUN_0070c3b0_Dummy*);
+NiPoint3* __fastcall NiAVObject_GetWorldTranslate(int);
+float __fastcall PlayerCharacter_GetEyeHeight(FUN_0070c3b0_Dummy*);
 
 struct FUN_009c8ac0_class
 {
@@ -491,11 +505,12 @@ struct FUN_009c8ac0_class
     int m_iThirdValue;
     FUN_0058d510_class* m_10;
 
-    NiPoint3* FUN_009c8ac0(NiPoint3*);
+    NiPoint3* VATS_GetCamshotTargetPos(NiPoint3*);
 };
 
 // @fnv 0x009c8ac0
-NiPoint3* FUN_009c8ac0_class::FUN_009c8ac0(NiPoint3* result)
+// src: COMMUNITY 0x009c8ac0
+NiPoint3* FUN_009c8ac0_class::VATS_GetCamshotTargetPos(NiPoint3* result)
 {
     NiPoint3 point = NiPoint3::ZERO;
 
@@ -506,13 +521,13 @@ NiPoint3* FUN_009c8ac0_class::FUN_009c8ac0(NiPoint3* result)
         point = *m_10->GetCameraPosition(reinterpret_cast<NiPoint3*>(sourcePoint));
     }
 
-    if (point.FUN_004390c0(NiPoint3::ZERO))
+    if (point.HasEqualComponents(NiPoint3::ZERO))
     {
         float offset[sizeof(NiPoint3) / sizeof(float)];
         // The original Set at 0x00416870 returns this in EAX; preserve that result here.
-        point = FUN_0045bb80(DAT_011f21f0->GetReferenceType())
+        point = NiAVObject_GetWorldTranslate(DAT_011f21f0->GetReferenceType())
                     ->operator+(((*reinterpret_cast<NiPoint3*>(offset)).*reinterpret_cast<NiPoint3& (NiPoint3::*)(float, float, float)>(
-                        &NiPoint3::Set))(0.0f, 0.0f, FUN_0070c3b0(_g_thePlayer)));
+                        &NiPoint3::Set))(0.0f, 0.0f, PlayerCharacter_GetEyeHeight(_g_thePlayer)));
     }
 
     *result = point;
@@ -565,7 +580,7 @@ void FUN_009d1b90_Class::SetNegatedTimestamp()
 
 struct FUN_00997520_Class
 {
-    void FUN_00997520(int);
+    void CoverSearch_Set(int);
 };
 struct FUN_009d7c00_Class
 {
@@ -576,7 +591,7 @@ struct FUN_009d7c00_Class
 // @fnv 0x009d7c00
 void FUN_009d7c00_Class::ForwardToSub(int aiValue)
 {
-    sub.FUN_00997520(aiValue);
+    sub.CoverSearch_Set(aiValue);
 }
 
 struct FUN_009c5ee0_sub
@@ -591,12 +606,13 @@ class FUN_009c5ee0_cls
     unsigned int m_00;
     FUN_009c5ee0_sub m_04;
     NiPoint3 m_08;
-    FUN_009c5ee0_cls* FUN_009c5ee0();
+    FUN_009c5ee0_cls* ProjectileTarget_ProjectileTarget();
 };
 
 // Clears m_00, calls m_04.Init(0), copies NiPoint3::ZERO into m_08, and returns this.
 // @fnv 0x009c5ee0
-FUN_009c5ee0_cls* FUN_009c5ee0_cls::FUN_009c5ee0()
+// src: XBOX_PDB 0x009c5ee0
+FUN_009c5ee0_cls* FUN_009c5ee0_cls::ProjectileTarget_ProjectileTarget()
 {
     m_00 = 0;
     m_04.Init(0);
@@ -606,7 +622,7 @@ FUN_009c5ee0_cls* FUN_009c5ee0_cls::FUN_009c5ee0()
 
 struct OrientationSource
 {
-    float __thiscall FUN_00966980();
+    float __thiscall GetGravity_00966980();
 };
 struct OrientationObject
 {
@@ -616,7 +632,7 @@ struct OrientationObject
     OrientationSource* __thiscall FUN_004181e0();
     void __thiscall SetOrientationFromDirection(NiPoint3 input);
 };
-extern "C" float __cdecl FUN_004b1460(float);
+extern "C" float __cdecl atanf(float);
 extern "C" float __cdecl GetDirectionAngle(NiPoint3*);
 extern "C" float __cdecl FUN_00408840(float);
 extern const double DAT_01012060;
@@ -629,15 +645,15 @@ void OrientationObject::SetOrientationFromDirection(NiPoint3 aDirection)
 {
     // The callee fills this storage; the original has no default-constructor call.
     float c[sizeof(NiPoint3) / sizeof(float)];
-    aDirection.FUN_00439ef0(reinterpret_cast<NiPoint3*>(c), ((GetContextFn*)vtable)[125](this));
+    aDirection.SubtractIntoVector(reinterpret_cast<NiPoint3*>(c), ((GetContextFn*)vtable)[125](this));
     NiPoint3 b = *reinterpret_cast<NiPoint3*>(c);
-    b.FUN_004a0c10();
+    b.Unitize_004a0c10();
     float e = ((GetAngleFn*)vtable)[175](this, 0);
     float d = FUN_00931d70();
-    float a = FUN_004181e0()->FUN_00966980();
+    float a = FUN_004181e0()->GetGravity_00966980();
     if (a == DAT_01012060)
     {
-        d = -FUN_004b1460(b.z / (1.0f - b.z * b.z));
+        d = -atanf(b.z / (1.0f - b.z * b.z));
     }
     e = GetDirectionAngle(&b);
     if (a == DAT_01012060 || FUN_00408840(e - ((GetAngleFn*)vtable)[175](this, 0)) <= DAT_01018c00)
@@ -1625,7 +1641,7 @@ struct DialogueCameraX : public TopicListX
     void AdvanceTopic();
     void Close(int aiArg, bool abArg);
     int GetState();
-    void FUN_009c7240();
+    void VATS_Update();
 };
 void __cdecl xSetDialogueActive(bool abActive);
 float __cdecl xGetFrameScale();
@@ -1664,7 +1680,8 @@ extern float xfCloseTimer;
 extern void* xpDefaultWeapon;
 extern TargetsX xkTargets;
 // @fnv 0x009c7240
-void DialogueCameraX::FUN_009c7240()
+// src: XBOX_PDB 0x009c7240
+void DialogueCameraX::VATS_Update()
 {
     void* qObI;
     float qXGDO;
@@ -2165,11 +2182,12 @@ class FUN_009c8b90_cls
     int unk14;
     int unk18;
     TESObjectREFR* m_1c;
-    void FUN_009c8b90(TESObjectREFR* a1);
+    void VATS_SetFirstProjectile(TESObjectREFR* a1);
 };
 
 // @fnv 0x009c8b90
-void FUN_009c8b90_cls::FUN_009c8b90(TESObjectREFR* a1)
+// src: XBOX_PDB 0x009c8b90
+void FUN_009c8b90_cls::VATS_SetFirstProjectile(TESObjectREFR* a1)
 {
     if (m_pEntryObject != 0)
     {
@@ -2216,8 +2234,8 @@ extern "C" double DAT_0108e058;
 
 struct FUN_009d4f50_obj
 {
-    bool FUN_00998a30();
-    TESObjectREFR* FUN_004030b0();
+    bool CombatController_GetAttackerCanSneak();
+    TESObjectREFR* CombatController_GetTarget();
     TESObjectREFR* GetFieldBC();
 };
 
@@ -2225,23 +2243,24 @@ struct FUN_009d4f50_cls
 {
     int unk00;
     FUN_009d4f50_obj* m_04;
-    bool FUN_009d4f50();
+    bool CombatProcedureEngageTarget_CanAttackerSneak();
 };
 
 // @fnv 0x009d4f50
-bool FUN_009d4f50_cls::FUN_009d4f50()
+// src: XBOX_PDB 0x009d4f50
+bool FUN_009d4f50_cls::CombatProcedureEngageTarget_CanAttackerSneak()
 {
     // Keep the original uninitialized vector buffers and explicit output-parameter call.
     float local24[sizeof(NiPoint3) / sizeof(float)];
     float local18[sizeof(NiPoint3) / sizeof(float)];
     float local0c[sizeof(NiPoint3) / sizeof(float)];
-    if (!m_04->FUN_00998a30())
+    if (!m_04->CombatController_GetAttackerCanSneak())
     {
         return false;
     }
-    *reinterpret_cast<NiPoint3*>(local18) = *static_cast<const TESObjectREFR*>(m_04->FUN_004030b0())->GetPos();
+    *reinterpret_cast<NiPoint3*>(local18) = *static_cast<const TESObjectREFR*>(m_04->CombatController_GetTarget())->GetPos();
     *reinterpret_cast<NiPoint3*>(local0c) = *static_cast<const TESObjectREFR*>(m_04->GetFieldBC())->GetPos();
-    reinterpret_cast<NiPoint3*>(local18)->FUN_00439ef0(reinterpret_cast<NiPoint3*>(local24), local0c);
+    reinterpret_cast<NiPoint3*>(local18)->SubtractIntoVector(reinterpret_cast<NiPoint3*>(local24), local0c);
     if (reinterpret_cast<NiPoint3*>(local24)->FUN_004a7290() < DAT_0108e058)
     {
         return false;
@@ -2256,11 +2275,12 @@ struct LinkedObject
 
 struct FUN_009d9ee0_Class
 {
-    void __thiscall FUN_009d9ee0(LinkedObject* linked);
+    void __thiscall PathingRequestLOS_SetIgnoreLocations(LinkedObject* linked);
 };
 
 // @fnv 0x009d9ee0
-void FUN_009d9ee0_Class::FUN_009d9ee0(LinkedObject* linked)
+// src: XBOX_PDB 0x009d9ee0
+void FUN_009d9ee0_Class::PathingRequestLOS_SetIgnoreLocations(LinkedObject* linked)
 {
     linked->CopyElementsTo(reinterpret_cast<char*>(this) + 0xb4);
 }
@@ -2487,20 +2507,20 @@ struct ImpPoint
     float x, y, z;
     ImpPoint();
     ImpPoint(float afX, float afY, float afZ);
-    ImpPoint FUN_00439ef0(const ImpPoint& arOther) const;
+    ImpPoint SubtractIntoVector(const ImpPoint& arOther) const;
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float DotProduct(const ImpPoint& arOther) const;
 };
 
 struct ImpRotation
 {
-    ImpPoint FUN_004a0bd0() const;
+    ImpPoint GetNegatedVector() const;
 };
 
 struct ImpCamera
 {
-    ImpPoint* FUN_0045bb80();
+    ImpPoint* NiAVObject_GetWorldTranslate();
 };
 
 struct ImpExtraList;
@@ -2572,12 +2592,12 @@ struct ImpTarget
     virtual void a03e();
     virtual void a03f();
     virtual bool IsActor();
-    ImpExtraList* FUN_005d43c0();
+    ImpExtraList* BSFile_GetDevice();
 };
 
 struct ImpSoundDesc
 {
-    void* FUN_00511840();
+    void* TESSound_GetFilename();
 };
 
 struct ImpTexture
@@ -2595,19 +2615,19 @@ struct ImpImpact
     char pad00[0x18];
     ImpTexture kTexture;
     void* FUN_006733e0();
-    float FUN_004a40a0();
+    float BGSImpactData_GetDecalMinWidth();
     float GetModifierValue();
     float GetNestedValue();
-    unsigned char FUN_004a4140();
+    unsigned char BGSImpactData_GetIsAlphaBlend();
     unsigned char CallMemberAtOffset54();
-    unsigned char FUN_004a4100();
-    unsigned char FUN_004a41e0();
+    unsigned char BGSImpactData_GetIsParallax();
+    unsigned char BGSImpactData_GetParallaxPasses();
     float FUN_004a41c0();
     float FUN_004a40e0();
-    float FUN_009a9350();
+    float TESCombatStyle_GetWeaponMinRangeMult();
     unsigned int GetNextFromSubobject();
     int FUN_005f36f0();
-    float FUN_00508100();
+    float GetEndKeyTime_00508100();
     int GetGlobalValue();
     ImpSoundDesc* GetField4C();
     ImpSoundDesc* GetGrass();
@@ -2615,13 +2635,13 @@ struct ImpImpact
 
 struct ImpImpactSet
 {
-    ImpImpact* FUN_00522ba0(int aiMaterial);
+    ImpImpact* TESObjectWEAP_GetImpactData(int aiMaterial);
 };
 
 struct ImpSurface
 {
-    void* FUN_00559450();
-    void* FUN_0043b540();
+    void* Modelloader_GetReferencedThis();
+    void* hkpCollidable_getCollisionFilterInfo();
 };
 
 struct ImpHit
@@ -2634,7 +2654,7 @@ struct ImpHit
 struct ImpHitList
 {
     int FUN_00726070();
-    ImpHit* FUN_0062e150(int aiIndex);
+    ImpHit* GetElementPointer16(int aiIndex);
 };
 
 struct ImpResults
@@ -2648,14 +2668,14 @@ struct ImpResults
 struct ImpDecal
 {
     void FUN_006233c0(int aiValue);
-    void FUN_004a1a10(int aiFlag, int aiValue);
-    void FUN_006231a0(void* apNode);
-    void FUN_00623090(ImpPoint* apPos, ImpResults* apResults);
+    void DecalCaster_SetCollision(int aiFlag, int aiValue);
+    void DecalCaster_Add(void* apNode);
+    void DecalCaster_GetPenetrations(ImpPoint* apPos, ImpResults* apResults);
 };
 
 struct ImpCell
 {
-    void* FUN_004543c0();
+    void* TESObjectCELL_GetbhkWorld();
 };
 
 struct ImpMaterialSet
@@ -2773,26 +2793,26 @@ struct ImpMaterial
     virtual void m031();
     virtual void m032();
     virtual ImpMaterialSet* FUN_vtcc();
-    int FUN_006205a0();
+    int bhkShape_QMaterial();
 };
 
 struct ImpSkin
 {
     int iData;
     ImpSkin(void* apObject);
-    int FUN_004a3a20();
+    int CFilter_GetGroup();
 };
 
 struct ImpAttach
 {
-    ImpAttach* FUN_009611e0();
+    ImpAttach* NiAVObject_GetParent();
 };
 
 struct ImpAttachHandle
 {
     int iData[2];
     ImpAttachHandle();
-    ImpAttach* FUN_00559450();
+    ImpAttach* Modelloader_GetReferencedThis();
 };
 
 struct ImpDecalParams
@@ -2833,12 +2853,12 @@ struct ImpDecalParams
 
 struct ImpDecalManager
 {
-    void FUN_004a3fe0(ImpDecalParams* apParams, int a2, int a3);
+    void TESObjectCELL_AddDecal(ImpDecalParams* apParams, int a2, int a3);
 };
 
 struct ImpDecalSystem
 {
-    ImpDecalManager* FUN_004519d0(ImpPoint kPosOut);
+    ImpDecalManager* TES_GetCellForPoint(ImpPoint kPosOut);
 };
 
 struct ImpShooterProcess
@@ -2916,7 +2936,7 @@ struct ImpShooter
 
 struct ImpOwnerRef
 {
-    ImpShooter* FUN_00559450();
+    ImpShooter* Modelloader_GetReferencedThis();
 };
 
 struct ImpSound
@@ -2929,30 +2949,30 @@ struct ImpSound
 
 struct ImpAudio
 {
-    ImpSound FUN_00ad7480(void* apSound, int aiFlags, ImpSoundDesc* apDesc);
+    ImpSound BSAudio_GetSoundHandleByFilename(void* apSound, int aiFlags, ImpSoundDesc* apDesc);
 };
 
 extern Setting DAT_011ce26c;
 extern ImpDecalSystem* DAT_011dea10;
 extern char DAT_011f4a20;
-ImpCamera* FUN_00524c90();
-bool FUN_00525420();
-bool __cdecl FUN_004b61d0(ImpPoint kPosOut, ImpCamera* apCamera, float afRadius);
-void __cdecl MarkBaseExtraListScriptEvent(void* apOwner, ImpExtraList* apExtra, int aiFlags);
+ImpCamera* Main_WorldRootCamera();
+bool Main_GetSceneIsComplex();
+bool __cdecl PointInFrustum(ImpPoint kPosOut, ImpCamera* apCamera, float afRadius);
+void __cdecl Script_SetActionFlag(void* apOwner, ImpExtraList* apExtra, int aiFlags);
 float __cdecl FUN_00476b70(float afMin, float afMax);
 ImpDecal* __cdecl FUN_00622a70(float afSize, int aiFlags);
-float __cdecl FUN_004a4240();
+float __cdecl RandomFloatTwoPi();
 float __cdecl FUN_00406cc0(float afValue);
-ImpMaterial* __cdecl FUN_004a3a40(void* apObject);
-void* __cdecl FUN_004b59f0(ImpSurface* apSurface);
-ImpAttachHandle __cdecl FUN_00c85ef0(void* apObject, void* apType);
-ImpAttach* __cdecl FUN_00c7fa90(ImpSurface* apSurface);
-void* __cdecl FUN_0056f930(ImpAttach* apAttach);
+ImpMaterial* __cdecl bhkShape_Getbhk(void* apObject);
+void* __cdecl hkpGetRigidBody(ImpSurface* apSurface);
+ImpAttachHandle __cdecl bhkWorldObject_GetProperty(void* apObject, void* apType);
+ImpAttach* __cdecl bhkUtilFunctions_GetNiAVObject(ImpSurface* apSurface);
+void* __cdecl TESObjectREFR_FindReferenceFor3D(ImpAttach* apAttach);
 bool __cdecl IsAcousticSpaceFormTypeAllowed(void* apGeometry, int aiFlags);
 ImpPoint __cdecl FUN_004a3760(float afScale, const ImpPoint& arPoint);
-void __cdecl FUN_006890b0(ImpCell* apCell, float afSize, const char* apTexture, ImpPoint kWorldPosition, ImpPoint kPos,
+void __cdecl BSTempEffectParticle_Spawn(ImpCell* apCell, float afSize, const char* apTexture, ImpPoint kWorldPosition, ImpPoint kPos,
                           float afScale, int aiFlags, int a7);
-ImpAudio* FUN_00453a70();
+ImpAudio* BSAudio_QInstance();
 
 struct ImpProjectile
 {
@@ -3063,55 +3083,55 @@ struct ImpProjectile
 void ImpProjectile::ApplyImpact(ImpTarget* apTarget, ImpPoint* apPos, ImpPoint* apNormal, int a4, int aiMaterial)
 {
     bool bSplatterTmp = true;
-    ImpPoint kDelta = apPos->FUN_00439ef0(*FUN_00524c90()->FUN_0045bb80());
-    if (FUN_00525420() || kDelta.FUN_00457990() > *DAT_011ce26c.FUN_00403e20() ||
-        !FUN_004b61d0(*apPos, FUN_00524c90(), 32.0f))
+    ImpPoint kDelta = apPos->SubtractIntoVector(*Main_WorldRootCamera()->NiAVObject_GetWorldTranslate());
+    if (Main_GetSceneIsComplex() || kDelta.FUN_00457990() > *DAT_011ce26c.Setting_Float_00403e20() ||
+        !PointInFrustum(*apPos, Main_WorldRootCamera(), 32.0f))
         bSplatterTmp = false;
     if (!apTarget || !apTarget->IsActor())
     {
         if (apTarget)
         {
-            MarkBaseExtraListScriptEvent(this, apTarget->FUN_005d43c0(), 0x80);
+            Script_SetActionFlag(this, apTarget->BSFile_GetDevice(), 0x80);
             if (pImpacts)
-                MarkBaseExtraListScriptEvent(pImpacts, apTarget->FUN_005d43c0(), 0x100);
+                Script_SetActionFlag(pImpacts, apTarget->BSFile_GetDevice(), 0x100);
         }
         int iMaterial = aiMaterial;
-        ImpImpact* pImpactTmp = pImpacts ? pImpacts->FUN_00522ba0(iMaterial) : 0;
+        ImpImpact* pImpactTmp = pImpacts ? pImpacts->TESObjectWEAP_GetImpactData(iMaterial) : 0;
         if (pImpactTmp)
         {
             void* m_pDecalData = pImpactTmp->FUN_006733e0();
             if (m_pDecalData)
             {
                 ImpPoint kNormal = *apNormal;
-                kNormal.FUN_004a0c10();
+                kNormal.Unitize_004a0c10();
                 ImpPoint kPosOut = *apPos;
                 if (m_fLifetime == 0.0)
-                    m_fLifetime = FUN_00476b70(pImpactTmp->FUN_004a40a0(), pImpactTmp->GetModifierValue());
+                    m_fLifetime = FUN_00476b70(pImpactTmp->BGSImpactData_GetDecalMinWidth(), pImpactTmp->GetModifierValue());
                 ImpDecal* pNewDecal = FUN_00622a70(m_fLifetime, 1);
                 pNewDecal->FUN_006233c0(0);
-                pNewDecal->FUN_004a1a10(8, 0);
-                pNewDecal->FUN_004a1a10(0x1d, 0);
+                pNewDecal->DecalCaster_SetCollision(8, 0);
+                pNewDecal->DecalCaster_SetCollision(0x1d, 0);
                 ImpCell* pCellPtr = FUN_008d6f30();
-                void* pCellNode = pCellPtr ? pCellPtr->FUN_004543c0() : 0;
+                void* pCellNode = pCellPtr ? pCellPtr->TESObjectCELL_GetbhkWorld() : 0;
                 if (pCellNode)
                 {
-                    pNewDecal->FUN_006231a0(pCellNode);
+                    pNewDecal->DecalCaster_Add(pCellNode);
                     ImpResults kResultsVal;
-                    pNewDecal->FUN_00623090(apPos, &kResultsVal);
+                    pNewDecal->DecalCaster_GetPenetrations(apPos, &kResultsVal);
                     int iTheCount = kResultsVal.FUN_00413f40()->FUN_00726070();
-                    float fPathHeading = FUN_004a4240();
+                    float fPathHeading = RandomFloatTwoPi();
                     unsigned char m_ucClipIdentifier = (int)FUN_00406cc0(FUN_00476b70(0.0f, 4.0f));
                     ImpSurface* pLastSurface = 0;
                     for (int i = 0; i < iTheCount; i++)
                     {
-                        ImpSurface* pSurfaceInfo = kResultsVal.FUN_00413f40()->FUN_0062e150(i)->pSurfaceInfo;
+                        ImpSurface* pSurfaceInfo = kResultsVal.FUN_00413f40()->GetElementPointer16(i)->pSurfaceInfo;
                         if (pSurfaceInfo)
                         {
                             int iSurfaceMaterialCur = aiMaterial;
-                            int iMaterialIndex = kResultsVal.FUN_00413f40()->FUN_0062e150(i)->iMaterialIndex;
+                            int iMaterialIndex = kResultsVal.FUN_00413f40()->GetElementPointer16(i)->iMaterialIndex;
                             if (iMaterialIndex != -1)
                             {
-                                ImpMaterial* pMaterial = FUN_004a3a40(pSurfaceInfo->FUN_00559450());
+                                ImpMaterial* pMaterial = bhkShape_Getbhk(pSurfaceInfo->Modelloader_GetReferencedThis());
                                 if (!pMaterial)
                                     continue;
                                 ImpMaterialSet* pSet = pMaterial->FUN_vtcc();
@@ -3120,35 +3140,35 @@ void ImpProjectile::ApplyImpact(ImpTarget* apTarget, ImpPoint* apPos, ImpPoint* 
                             }
                             else
                             {
-                                ImpMaterial* pSingle = FUN_004a3a40(pSurfaceInfo->FUN_00559450());
+                                ImpMaterial* pSingle = bhkShape_Getbhk(pSurfaceInfo->Modelloader_GetReferencedThis());
                                 if (!pSingle)
                                     continue;
-                                iSurfaceMaterialCur = pSingle->FUN_006205a0();
+                                iSurfaceMaterialCur = pSingle->bhkShape_QMaterial();
                             }
                             if (iSurfaceMaterialCur == aiMaterial && pSurfaceInfo != pLastSurface)
                             {
                                 pLastSurface = pSurfaceInfo;
-                                bool bHasAnimation = ImpSkin(pSurfaceInfo->FUN_0043b540()).FUN_004a3a20() == 1;
+                                bool bHasAnimation = ImpSkin(pSurfaceInfo->hkpCollidable_getCollisionFilterInfo()).CFilter_GetGroup() == 1;
                                 ImpAttach* pAttach = 0;
                                 if (bHasAnimation)
                                 {
-                                    void* pSkinRoot = FUN_004b59f0(pSurfaceInfo);
+                                    void* pSkinRoot = hkpGetRigidBody(pSurfaceInfo);
                                     if (pSkinRoot)
                                     {
-                                        pAttach = FUN_00c85ef0(pSkinRoot, &DAT_011f4a20).FUN_00559450();
-                                        if (pAttach && pAttach->FUN_009611e0())
-                                            pAttach = pAttach->FUN_009611e0();
+                                        pAttach = bhkWorldObject_GetProperty(pSkinRoot, &DAT_011f4a20).Modelloader_GetReferencedThis();
+                                        if (pAttach && pAttach->NiAVObject_GetParent())
+                                            pAttach = pAttach->NiAVObject_GetParent();
                                     }
                                 }
                                 else
                                 {
-                                    pAttach = FUN_00c7fa90(pSurfaceInfo);
+                                    pAttach = bhkUtilFunctions_GetNiAVObject(pSurfaceInfo);
                                 }
-                                void* pGeometryRef = FUN_0056f930(pAttach);
+                                void* pGeometryRef = TESObjectREFR_FindReferenceFor3D(pAttach);
                                 if (!bHasAnimation &&
                                     (!pGeometryRef || !IsAcousticSpaceFormTypeAllowed(pGeometryRef, 1)))
                                     continue;
-                                ImpDecalManager* pManager = DAT_011dea10->FUN_004519d0(*apPos);
+                                ImpDecalManager* pManager = DAT_011dea10->TES_GetCellForPoint(*apPos);
                                 ImpDecalParams kParamsCur;
                                 kParamsCur.kPosOut = kPosOut;
                                 kParamsCur.kNormal = kNormal;
@@ -3159,13 +3179,13 @@ void ImpProjectile::ApplyImpact(ImpTarget* apTarget, ImpPoint* apPos, ImpPoint* 
                                 kParamsCur.m_pDecalData = m_pDecalData;
                                 kParamsCur.fPathHeading = fPathHeading;
                                 kParamsCur.m_ucClipIdentifier = m_ucClipIdentifier;
-                                kParamsCur.ucFlagC = pImpactTmp->FUN_004a4140();
+                                kParamsCur.ucFlagC = pImpactTmp->BGSImpactData_GetIsAlphaBlend();
                                 kParamsCur.ucFlagB = pImpactTmp->CallMemberAtOffset54();
-                                kParamsCur.ucFlagA = pImpactTmp->FUN_004a4100();
+                                kParamsCur.ucFlagA = pImpactTmp->BGSImpactData_GetIsParallax();
                                 kParamsCur.fParallax = pImpactTmp->FUN_004a41c0();
-                                kParamsCur.ucFlagD = pImpactTmp->FUN_004a41e0();
+                                kParamsCur.ucFlagD = pImpactTmp->BGSImpactData_GetParallaxPasses();
                                 kParamsCur.m_fShininess = pImpactTmp->FUN_004a40e0();
-                                kParamsCur.m_fSpecularStrength = pImpactTmp->FUN_009a9350();
+                                kParamsCur.m_fSpecularStrength = pImpactTmp->TESCombatStyle_GetWeaponMinRangeMult();
                                 kParamsCur.kColor = ImpPoint(
                                     (unsigned char)(pImpactTmp->GetNextFromSubobject() & 0xff) / 255.0,
                                     (unsigned char)(((unsigned short)pImpactTmp->GetNextFromSubobject() >> 8) & 0xff) /
@@ -3173,7 +3193,7 @@ void ImpProjectile::ApplyImpact(ImpTarget* apTarget, ImpPoint* apPos, ImpPoint* 
                                     (unsigned char)((pImpactTmp->GetNextFromSubobject() >> 16) & 0xff) / 255.0);
                                 if (iSurfaceMaterialCur == 3)
                                     kParamsCur.ucSkinned = 1;
-                                pManager->FUN_004a3fe0(&kParamsCur, 1, 0);
+                                pManager->TESObjectCELL_AddDecal(&kParamsCur, 1, 0);
                             }
                         }
                     }
@@ -3192,47 +3212,47 @@ void ImpProjectile::ApplyImpact(ImpTarget* apTarget, ImpPoint* apPos, ImpPoint* 
                     {
                     case 0:
                         kWorldPosition = *apNormal;
-                        kWorldPosition.FUN_004a0c10();
+                        kWorldPosition.Unitize_004a0c10();
                         break;
                     case 1:
-                        kWorldPosition = kRotationBasis.FUN_004a0bd0();
-                        kWorldPosition.FUN_004a0c10();
+                        kWorldPosition = kRotationBasis.GetNegatedVector();
+                        kWorldPosition.Unitize_004a0c10();
                         break;
                     case 2: {
-                        ImpPoint kForward = kRotationBasis.FUN_004a0bd0();
-                        kForward.FUN_004a0c10();
+                        ImpPoint kForward = kRotationBasis.GetNegatedVector();
+                        kForward.Unitize_004a0c10();
                         ImpPoint kSurface = *apNormal;
-                        kSurface.FUN_004a0c10();
+                        kSurface.Unitize_004a0c10();
                         kWorldPosition =
-                            FUN_004a3760(2.0 * kSurface.DotProduct(kForward), kSurface).FUN_00439ef0(kForward);
+                            FUN_004a3760(2.0 * kSurface.DotProduct(kForward), kSurface).SubtractIntoVector(kForward);
                         break;
                     }
                     default:
                         kWorldPosition = *apNormal;
-                        kWorldPosition.FUN_004a0c10();
+                        kWorldPosition.Unitize_004a0c10();
                     }
-                    FUN_006890b0(FUN_008d6f30(), pImpactTmp->FUN_00508100(), pTexture, kWorldPosition, *apPos, 1.0f, 7,
+                    BSTempEffectParticle_Spawn(FUN_008d6f30(), pImpactTmp->GetEndKeyTime_00508100(), pTexture, kWorldPosition, *apPos, 1.0f, 7,
                                  0);
                 }
             }
             ImpOwnerRef* pOwnerResult = FUN_vt168();
-            if (pOwnerResult && pOwnerResult->FUN_00559450())
+            if (pOwnerResult && pOwnerResult->Modelloader_GetReferencedThis())
             {
-                ImpShooter* WeaponHitData = pOwnerResult->FUN_00559450();
+                ImpShooter* WeaponHitData = pOwnerResult->Modelloader_GetReferencedThis();
                 if (WeaponHitData->FUN_008d8520())
                     WeaponHitData->FUN_008d8520()->FUN_vtfc(WeaponHitData, *apPos, pImpactTmp->GetGlobalValue(), 0, 0);
             }
             ImpSoundDesc* SoundAssetTmp = pImpactTmp->GetField4C();
             if (SoundAssetTmp)
             {
-                ImpSound kSound = FUN_00453a70()->FUN_00ad7480(SoundAssetTmp->FUN_00511840(), 0x4102, SoundAssetTmp);
+                ImpSound kSound = BSAudio_QInstance()->BSAudio_GetSoundHandleByFilename(SoundAssetTmp->TESSound_GetFilename(), 0x4102, SoundAssetTmp);
                 kSound.FUN_00ad8b60(apPos->x, apPos->y, apPos->z);
                 kSound.FUN_00ad8830(0);
             }
             ImpSoundDesc* pSound2New = pImpactTmp->GetGrass();
             if (pSound2New)
             {
-                ImpSound kSound2 = FUN_00453a70()->FUN_00ad7480(pSound2New->FUN_00511840(), 0x4102, pSound2New);
+                ImpSound kSound2 = BSAudio_QInstance()->BSAudio_GetSoundHandleByFilename(pSound2New->TESSound_GetFilename(), 0x4102, pSound2New);
                 kSound2.FUN_00ad8b60(apPos->x, apPos->y, apPos->z);
                 kSound2.FUN_00ad8830(0);
             }

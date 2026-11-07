@@ -64,7 +64,7 @@ void BSFaceGenAnimationData::AddModifierKeyframe(float* values, float time)
         return;
     frame.SetTime(time);
     for (unsigned i = 0; i < 17; i++)
-        frame.FUN_0064a4d0(i, values[i]);
+        frame.SetQuantity_0064a4d0(i, values[i]);
     frame.InsertIntoKeyframeList((NiTPointerList<BSFaceGenKeyframe*>*)((char*)this + 0x88));
 }
 // @fnv 0x0064ad20
@@ -108,7 +108,7 @@ void BSFaceGenAnimationData::InsertPhonemeKeyframe(float* values, float time)
     }
     frame.SetTime(time);
     for (i = 0; i < 16; i++)
-        frame.FUN_0064a4d0(i, values[i]);
+        frame.SetQuantity_0064a4d0(i, values[i]);
     frame.InsertIntoKeyframeList((NiTPointerList<BSFaceGenKeyframe*>*)((char*)this + 0xbc));
 }
 // @fnv 0x0064b2b0
@@ -125,7 +125,7 @@ void BSFaceGenAnimationData::SetExpressionWeight(int expression, float quantity)
     }
     if (expression == -1 || quantity == 0.0)
         return;
-    target->FUN_0064a4d0(expression, quantity);
+    target->SetQuantity_0064a4d0(expression, quantity);
     if (!((BSFaceGenKeyframeMultiple*)((char*)this + 0x10))->vfn_2c(target))
         ClearTransitionTarget();
 }
@@ -133,9 +133,9 @@ void BSFaceGenAnimationData::SetExpressionWeight(int expression, float quantity)
 // @fnv 0x0064a100
 bool BSFaceGenAnimationData::CalculateRotationQuaternion(NiQuaternion& rotation)
 {
-    float fX = ((BSFaceGenKeyframeMultiple*)((char*)this + 0xa8))->FUN_005dd4e0(16);
-    float fZ = ((BSFaceGenKeyframeMultiple*)((char*)this + 0xa8))->FUN_005dd4e0(15);
-    float fY = ((BSFaceGenKeyframeMultiple*)((char*)this + 0xa8))->FUN_005dd4e0(14);
+    float fX = ((BSFaceGenKeyframeMultiple*)((char*)this + 0xa8))->BSFaceGenKeyframeMultiple_GetQuantity(16);
+    float fZ = ((BSFaceGenKeyframeMultiple*)((char*)this + 0xa8))->BSFaceGenKeyframeMultiple_GetQuantity(15);
+    float fY = ((BSFaceGenKeyframeMultiple*)((char*)this + 0xa8))->BSFaceGenKeyframeMultiple_GetQuantity(14);
     if (fX == DAT_010231b0)
         fX = 0.0f;
     fX = fX > DAT_01064f58 ? (fX < DAT_01064f50 ? fX : DAT_01064f50) : DAT_01064f58;
@@ -187,7 +187,8 @@ void BSFaceGenAnimationData::FadeOutMorphs(float time, bool expression, bool pho
 }
 // If index is within count and quantities[index] differs from value, stores value there and returns true; otherwise returns false.
 // @fnv 0x0064a4d0
-bool BSFaceGenKeyframeMultiple::FUN_0064a4d0(unsigned int index, float value)
+// src: XBOX_PDB 0x0064a4d0
+bool BSFaceGenKeyframeMultiple::SetQuantity_0064a4d0(unsigned int index, float value)
 {
     if (index < m_uiFaceGenValueCount && m_pfFaceGenValues[index] != value)
     {
@@ -201,7 +202,8 @@ extern NiFixedString* DAT_011d5744;
 
 // Allocates the "FAD" fixed string and stores it in DAT_011d5744.
 // @fnv 0x00649e40
-void FUN_00649e40()
+// src: COMMUNITY 0x00649e40
+void BSFaceGenAnimationData_InitTag()
 {
     DAT_011d5744 = ::new NiFixedString("FAD");
 }
@@ -240,9 +242,9 @@ void BSFaceGenAnimationData::ResetFaceGenAnimationData(float afTime, bool abRese
             if (abForDeath)
             {
                 reinterpret_cast<BSFaceGenKeyframeMultiple*>(reinterpret_cast<char*>(this) + 0xa8)
-                    ->FUN_0064a4d0(0, 1.0f);
+                    ->SetQuantity_0064a4d0(0, 1.0f);
                 reinterpret_cast<BSFaceGenKeyframeMultiple*>(reinterpret_cast<char*>(this) + 0xa8)
-                    ->FUN_0064a4d0(1, 1.0f);
+                    ->SetQuantity_0064a4d0(1, 1.0f);
             }
         }
         if (abResetPhoneme)
@@ -379,28 +381,28 @@ void BSFaceGenAnimationData::SetMoodExpression(int aiMoodindex, bool abTalking)
     switch (aiMoodindex)
     {
     case 0:
-        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->FUN_0064a4d0(5, 1.0f);
+        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->SetQuantity_0064a4d0(5, 1.0f);
         break;
     case 1:
-        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->FUN_0064a4d0(6, 1.0f);
+        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->SetQuantity_0064a4d0(6, 1.0f);
         break;
     case 2:
-        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->FUN_0064a4d0(7, 1.0f);
+        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->SetQuantity_0064a4d0(7, 1.0f);
         break;
     case 3:
-        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->FUN_0064a4d0(8, 1.0f);
+        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->SetQuantity_0064a4d0(8, 1.0f);
         break;
     case 4:
-        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->FUN_0064a4d0(9, 1.0f);
+        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->SetQuantity_0064a4d0(9, 1.0f);
         break;
     case 5:
-        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->FUN_0064a4d0(10, 1.0f);
+        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->SetQuantity_0064a4d0(10, 1.0f);
         break;
     case 6:
-        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->FUN_0064a4d0(11, 1.0f);
+        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->SetQuantity_0064a4d0(11, 1.0f);
         break;
     case 7:
-        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->FUN_0064a4d0(12, 1.0f);
+        (*reinterpret_cast<BSFaceGenKeyframeMultiple**>(reinterpret_cast<char*>(this) + 0x0c))->SetQuantity_0064a4d0(12, 1.0f);
         break;
     }
 
@@ -466,7 +468,8 @@ extern const double DAT_01023128;
 extern double _gModifierZero;
 void __cdecl ComputeAngleRange(float*, float*);
 // @fnv 0x00649fe0
-void FUN_00649fe0(float* afMin, float* afMax)
+// src: COMMUNITY 0x00649fe0
+void BSFaceGenAnimationData_GetTrackDeadZoneXYMinMax(float* afMin, float* afMax)
 {
     float fMin;
     float fScaledValue;
@@ -509,7 +512,7 @@ typedef char _sizecheck_NiPoint2[sizeof(NiPoint2) == 8 ? 1 : -1];
 
 extern double _gModifierZero;
 float RandomFloat0To1();
-bool FUN_0064bcb0();
+bool BSFaceGenManager_GetUseProceduralEyeBlinking();
 extern Setting originalRuntimeFloatSetting1263;
 extern Setting originalRuntimeFloatSetting1264;
 extern Setting originalRuntimeFloatSetting1265;
@@ -551,13 +554,13 @@ bool BSFaceGenAnimationData::UpdateFaceGenAnimation(float afTime)
     bool bchangedSpeech;
     float ftime = afTime;
     bool bchangedExp;
-    float flookdown = reinterpret_cast<BSFaceGenKeyframeMultiple*>((char*)this + 0xa8)->FUN_005dd4e0(8);
+    float flookdown = reinterpret_cast<BSFaceGenKeyframeMultiple*>((char*)this + 0xa8)->BSFaceGenKeyframeMultiple_GetQuantity(8);
     bool bchangedAnim;
     bool bchangedCust;
     bool bchangedMod;
     bool bchangedPhon;
 
-    if (fnv_0064b630::FUN_0064bcb0() && !*((bool*)this + 0x18e) && reinterpret_cast<NiTPointerList<BSFaceGenKeyframe*>*>((char*)this + 0x88)->IsEmpty() &&
+    if (fnv_0064b630::BSFaceGenManager_GetUseProceduralEyeBlinking() && !*((bool*)this + 0x18e) && reinterpret_cast<NiTPointerList<BSFaceGenKeyframe*>*>((char*)this + 0x88)->IsEmpty() &&
         *originalRuntimeFloatSetting1263.Float() > fnv_0064b630::_gModifierZero &&
         *originalRuntimeFloatSetting1264.Float() > fnv_0064b630::_gModifierZero &&
         *originalRuntimeFloatSetting1265.Float() > fnv_0064b630::_gModifierZero &&
@@ -684,7 +687,8 @@ bool BSFaceGenAnimationData::UpdateFaceGenAnimation(float afTime)
 extern unsigned char DAT_011d59e0;
 
 // @fnv 0x0064bcb0
-unsigned char __cdecl FUN_0064bcb0()
+// src: XBOX_PDB 0x0064bcb0
+unsigned char __cdecl BSFaceGenManager_GetUseProceduralEyeBlinking()
 {
     return DAT_011d59e0;
 }
@@ -702,7 +706,8 @@ void __fastcall SetFaceGenArrayElement(BSFaceGenKeyframeMultiple*, FaceGenArrayI
 
 // If the modifier index is below 0x11, forwards the index and value to the object at offset 0x38.
 // @fnv 0x00649c10
-void BSFaceGenAnimationData::FUN_00649c10(BS_FACEGEN_MODIFIER aeModifier, float afValue)
+// src: GUESS 0x00649c10 (confidence: medium)
+void BSFaceGenAnimationData::SetModifierKeyframeValue(BS_FACEGEN_MODIFIER aeModifier, float afValue)
 {
     if (aeModifier.m < 0x11)
     {
@@ -712,7 +717,8 @@ void BSFaceGenAnimationData::FUN_00649c10(BS_FACEGEN_MODIFIER aeModifier, float 
 
 // If aeExpression is below 15, forwards aeExpression and afValue to the contained SetArrayElement handler.
 // @fnv 0x00649a20
-void BSFaceGenAnimationData::FUN_00649a20(int aeExpression, float afValue)
+// src: COMMUNITY 0x00649a20
+void BSFaceGenAnimationData::SetExpressionValue(int aeExpression, float afValue)
 {
     if (aeExpression < 15)
         SetFaceGenArrayElement(&kf10, *reinterpret_cast<FaceGenArrayIndex*>(&aeExpression), afValue);
@@ -720,7 +726,8 @@ void BSFaceGenAnimationData::FUN_00649a20(int aeExpression, float afValue)
 
 // Forwards aeModifier and afValue to the SetArrayElement handler at offset 0x94 when aeModifier is below 0x11.
 // @fnv 0x00649a70
-void BSFaceGenAnimationData::FUN_00649a70(int aeModifier, float afValue)
+// src: COMMUNITY 0x00649a70
+void BSFaceGenAnimationData::SetModifierValue(int aeModifier, float afValue)
 {
     if (aeModifier < 0x11)
         SetFaceGenArrayElement(reinterpret_cast<BSFaceGenKeyframeMultiple*>(reinterpret_cast<char*>(this) + 0x94), *reinterpret_cast<FaceGenArrayIndex*>(&aeModifier), afValue);
@@ -728,7 +735,8 @@ void BSFaceGenAnimationData::FUN_00649a70(int aeModifier, float afValue)
 
 // If aePhoneme is below 0x10, forwards aePhoneme and afValue to m.SetArrayElement.
 // @fnv 0x00649ae0
-void BSFaceGenAnimationData::FUN_00649ae0(int aePhoneme, float afValue)
+// src: COMMUNITY 0x00649ae0
+void BSFaceGenAnimationData::SetPhonemeValue(int aePhoneme, float afValue)
 {
     if (aePhoneme < 0x10)
     {
@@ -739,7 +747,8 @@ void BSFaceGenAnimationData::FUN_00649ae0(int aePhoneme, float afValue)
 #include "../../../include/BS_FACEGEN_CUSTOM_MORPH.h"
 
 // @fnv 0x00649b50
-void BSFaceGenAnimationData::FUN_00649b50(BS_FACEGEN_CUSTOM_MORPH aeCustomMorph, float afValue)
+// src: COMMUNITY 0x00649b50
+void BSFaceGenAnimationData::SetCustomMorphValue(BS_FACEGEN_CUSTOM_MORPH aeCustomMorph, float afValue)
 {
     if (aeCustomMorph < 1)
         SetFaceGenArrayElement(reinterpret_cast<BSFaceGenKeyframeMultiple*>(reinterpret_cast<char*>(this) + 0xfc), *reinterpret_cast<FaceGenArrayIndex*>(&aeCustomMorph), afValue);
@@ -747,7 +756,8 @@ void BSFaceGenAnimationData::FUN_00649b50(BS_FACEGEN_CUSTOM_MORPH aeCustomMorph,
 
 // If aeExpression is below 15, forwards aeExpression and afValue to SetArrayElement on the member object.
 // @fnv 0x00649be0
-void BSFaceGenAnimationData::FUN_00649be0(int aeExpression, float afValue)
+// src: GUESS 0x00649be0 (confidence: medium)
+void BSFaceGenAnimationData::SetExpressionValue_00649be0(int aeExpression, float afValue)
 {
     if (aeExpression < 15)
         SetFaceGenArrayElement(&kf24, *reinterpret_cast<FaceGenArrayIndex*>(&aeExpression), afValue);
@@ -755,7 +765,8 @@ void BSFaceGenAnimationData::FUN_00649be0(int aeExpression, float afValue)
 
 // If aePhoneme is below 0x10, forwards the phoneme index and value to the SetArrayElement object at offset 0x4C.
 // @fnv 0x00649c40
-void BSFaceGenAnimationData::FUN_00649c40(int aePhoneme, float afValue)
+// src: GUESS 0x00649c40 (confidence: medium)
+void BSFaceGenAnimationData::SetPhonemeValue_00649c40(int aePhoneme, float afValue)
 {
     if (aePhoneme < 0x10)
     {
@@ -765,7 +776,8 @@ void BSFaceGenAnimationData::FUN_00649c40(int aePhoneme, float afValue)
 
 // If aeCustomMorph is less than 1, forwards aeCustomMorph and afValue to m.SetArrayElement.
 // @fnv 0x00649c70
-void BSFaceGenAnimationData::FUN_00649c70(int aeCustomMorph, float afValue)
+// src: GUESS 0x00649c70 (confidence: medium)
+void BSFaceGenAnimationData::SetCustomMorphKeyframeValue(int aeCustomMorph, float afValue)
 {
     if (aeCustomMorph < 1)
         SetFaceGenArrayElement(&kf60, *reinterpret_cast<FaceGenArrayIndex*>(&aeCustomMorph), afValue);
@@ -777,7 +789,8 @@ namespace fnv_00649ec0 {
 extern NiFixedString* DAT_011d5744;
 // Clears DAT_011d5744, deleting the previous fixed string if non-null.
 // @fnv 0x00649ec0
-void FUN_00649ec0()
+// src: GUESS 0x00649ec0 (confidence: low)
+void Object_UpdateFields_00649ec0()
 {
     NiFixedString* b = DAT_011d5744;
     NiFixedString* a;
@@ -819,9 +832,10 @@ extern NiPoint3 _NiPoint3_ZERO;
 
 // Tests the stored plane and the incoming point against zero, updates the flag at 0x174 and value at 0x178, stores the point at 0x124 and sets the byte at 0x189.
 // @fnv 0x0064bcc0
-void BSFaceGenAnimationData::FUN_0064bcc0(float afX, float afY, float afZ, int)
+// src: COMMUNITY 0x0064bcc0
+void BSFaceGenAnimationData::SetHeadTrackVector(float afX, float afY, float afZ, int)
 {
-    if (((NiPlane*)((char*)this + 0x124))->FUN_004390c0(_NiPoint3_ZERO))
+    if (((NiPlane*)((char*)this + 0x124))->HasEqualComponents(_NiPoint3_ZERO))
     {
         if (((NiPlane*)&afX)->operator==(_NiPoint3_ZERO))
         {
@@ -829,7 +843,7 @@ void BSFaceGenAnimationData::FUN_0064bcc0(float afX, float afY, float afZ, int)
             *(float*)((char*)this + 0x178) = 0.0f;
         }
     }
-    if (((NiPlane*)&afX)->FUN_004390c0(_NiPoint3_ZERO))
+    if (((NiPlane*)&afX)->HasEqualComponents(_NiPoint3_ZERO))
         *(int*)((char*)this + 0x174) = 0;
     *(NiPoint3*)((char*)this + 0x124) = *(NiPoint3*)&afX;
     *(char*)((char*)this + 0x189) = 1;
@@ -852,7 +866,7 @@ void BSFaceGenAnimationData::SetExpressionKeyframes(float* apQuantities)
     target = new BSFaceGenKeyframeMultiple(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_EXPRESSION, 15);
 
     for (unsigned int iexp = 0; iexp < 15; ++iexp)
-        target->FUN_0064a4d0(iexp, apQuantities[iexp]);
+        target->SetQuantity_0064a4d0(iexp, apQuantities[iexp]);
 
     if (!reinterpret_cast<BSFaceGenKeyframe*>(reinterpret_cast<char*>(this) + 0x10)->vfn_2c(target))
         ClearTransitionTarget();
@@ -879,7 +893,7 @@ void BSFaceGenAnimationData::SetKeyframeQuantities(float* quantities, float time
     keyframe.SetTime(time);
     for (unsigned int i = 0; i < 1; ++i)
     {
-        keyframe.FUN_0064a4d0(i, quantities[i]);
+        keyframe.SetQuantity_0064a4d0(i, quantities[i]);
     }
     keyframe.AddToCompatibleList(
         reinterpret_cast<NiTPointerList<BSFaceGenKeyframe*>*>(reinterpret_cast<char*>(this) + 0xf0));
@@ -947,10 +961,10 @@ unsigned char BSFaceGenAnimationData::Check(int aiMode)
     return 1;
 }
 
-unsigned char FUN_0064bcb0();
+unsigned char BSFaceGenManager_GetUseProceduralEyeBlinking();
 void ComputeAngleRange(float*, float*);
 void ClampMinMaxFromSetting(float*, float*);
-void FUN_005330e0(float&, float, float);
+void BSClamp_float(float&, float, float);
 
 class BSFaceGenEyeData
 {
@@ -1044,31 +1058,31 @@ void BSFaceGenEyeData::SetEyeHeadingAndPitch(float heading, float pitch)
     float maxHeading9;
     float minHeading3;
     float minPitch;
-    if (!FUN_0064bcb0())
+    if (!BSFaceGenManager_GetUseProceduralEyeBlinking())
         return;
     ComputeAngleRange(&minHeading3, &maxHeading9);
     ClampMinMaxFromSetting(&maxPitch6, &minPitch);
-    FUN_005330e0(heading, minHeading3, maxHeading9);
-    FUN_005330e0(pitch, maxPitch6, minPitch);
+    BSClamp_float(heading, minHeading3, maxHeading9);
+    BSClamp_float(pitch, maxPitch6, minPitch);
     if (heading >= 0.0)
     {
-        modifiers.FUN_0064a4d0(10, heading / maxHeading9);
-        modifiers.FUN_0064a4d0(9, 0.0f);
+        modifiers.SetQuantity_0064a4d0(10, heading / maxHeading9);
+        modifiers.SetQuantity_0064a4d0(9, 0.0f);
     }
     else
     {
-        modifiers.FUN_0064a4d0(10, 0.0f);
-        modifiers.FUN_0064a4d0(9, heading / minHeading3);
+        modifiers.SetQuantity_0064a4d0(10, 0.0f);
+        modifiers.SetQuantity_0064a4d0(9, heading / minHeading3);
     }
     if (pitch >= 0.0)
     {
-        modifiers.FUN_0064a4d0(11, pitch / minPitch);
-        modifiers.FUN_0064a4d0(8, 0.0f);
+        modifiers.SetQuantity_0064a4d0(11, pitch / minPitch);
+        modifiers.SetQuantity_0064a4d0(8, 0.0f);
     }
     else
     {
-        modifiers.FUN_0064a4d0(11, 0.0f);
-        modifiers.FUN_0064a4d0(8, pitch / maxPitch6);
+        modifiers.SetQuantity_0064a4d0(11, 0.0f);
+        modifiers.SetQuantity_0064a4d0(8, pitch / maxPitch6);
     }
     eyeHeading = heading;
     eyePitch = pitch;
@@ -1122,14 +1136,14 @@ bool AdvanceKeyframe(float afTime, NiTPointerList<BSFaceGenKeyframe*>* list, BSF
     return result2;
 }
 
-const NiFixedString& FUN_006499d0();
+const NiFixedString& Get_Ni_FAD();
 
 extern const NiPoint3 NiPoint3_ZERO;
 
 #pragma inline_depth(0)
 // @fnv 0x00649680
 BSFaceGenAnimationData::BSFaceGenAnimationData()
-    : NiExtraData(FUN_006499d0()), kf10(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_EXPRESSION, 15), kf24(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_EXPRESSION, 15), kf38(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_MODIFIER, 17), kf4c(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_PHONEME, 16),
+    : NiExtraData(Get_Ni_FAD()), kf10(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_EXPRESSION, 15), kf24(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_EXPRESSION, 15), kf38(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_MODIFIER, 17), kf4c(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_PHONEME, 16),
       kf60(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_CUSTOM, 1), kf74(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_EXPRESSION, 15), obj88(), kf94(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_MODIFIER, 17), kfa8(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_MODIFIER, 17), objbc(),
       kfc8(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_PHONEME, 16), kfdc(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_PHONEME, 16), objf0(), kffc(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_CUSTOM, 1), kf110(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_CUSTOM, 1), unk124(), unk1a0()
 {

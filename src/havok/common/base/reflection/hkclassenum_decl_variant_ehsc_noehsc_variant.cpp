@@ -20,19 +20,20 @@ class hkClassEnumItem
     int value;
     const char* name;
 };
-int __cdecl FUN_00cb10d0(const char*);
+int __cdecl hkString_strLen(const char*);
 // @fnv 0x00db7600
-void hkClassEnum::FUN_00db7600(hkStreamWriter* writer) const
+// src: HAVOK_LIB 0x00db7600
+void hkClassEnum::writeSignature(hkStreamWriter* writer) const
 {
     hkOArchive archive(writer, false);
     const char* name = m_name;
-    archive.WriteRaw(name, FUN_00cb10d0(name));
+    archive.WriteRaw(name, hkString_strLen(name));
     int count = m_items.m_iElementCount;
     for (int i = 0; i < count; ++i)
     {
         const hkClassEnumItem& item = m_items.m_data[i];
         const char* itemName = item.name;
-        archive.WriteRaw(itemName, FUN_00cb10d0(itemName));
+        archive.WriteRaw(itemName, hkString_strLen(itemName));
         archive.WriteInt(item.value);
     }
     archive.WriteInt(count);

@@ -5,7 +5,7 @@
 class Animation
 {
   public:
-    unsigned short FUN_004301b0(int);
+    unsigned short Animation_GetGroup(int);
     bool GetMovementDelta(NiPoint3*, TESObjectREFR*, bool, bool);
     NiControllerSequence* GetControllerSequence(int);
     void BlendOut(int, bool);

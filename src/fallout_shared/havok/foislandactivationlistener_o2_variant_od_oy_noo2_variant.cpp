@@ -13,16 +13,16 @@
 extern "C" void __cdecl _Deallocate(void*);
 extern int DAT_0104de10;
 extern int DAT_011f942c;
-void FUN_00624bd0();
+void BSShaderManager_ResetMotionBluredObject();
 struct hkVector4;
 struct TopicH
 {
     NiPoint3* GetAddTopicList();
     NiPoint3& _ref_006815c0();
 };
-void FUN_00624b10(NiTransform*, NiPoint3*);
+void HK2NI_00624b10(NiTransform*, NiPoint3*);
 NiPoint3& SetNiPoint3FromHkVector4(NiPoint3&, const hkVector4&);
-NiTransform* FUN_00624ad0(NiTransform* arNiTran, TopicH* arTopicH);
+NiTransform* HK2NI_00624ad0(NiTransform* arNiTran, TopicH* arTopicH);
 
 #include <xmmintrin.h>
 struct Node96;
@@ -31,20 +31,20 @@ struct Physics96;
 struct Geometry96;
 struct Input96
 {
-    struct Array96* FUN_00624700();
+    struct Array96* GetExtraPartList();
 };
 struct Array96
 {
     int FUN_00726070();
-    Node96*& FUN_00629ab0(int);
+    Node96*& NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(int);
 };
 struct Extra96
 {
-    void* FUN_0042e250();
+    void* ExtraDataList_GetModelSwap();
 };
 struct Cell96
 {
-    void FUN_00548880(Ref96*, int);
+    void TESObjectCELL_AttachReference3D(Ref96*, int);
 };
 struct Ref96
 {
@@ -248,9 +248,9 @@ struct Ref96
     virtual void slot197();
     virtual void slot198();
     virtual void Reset();
-    Extra96* FUN_005d43c0();
+    Extra96* BSFile_GetDevice();
     Cell96* FUN_008d6f30();
-    void* FUN_007af430();
+    void* BGSSaveFormBuffer_GetForm();
 };
 struct FUN_0056ded0
 {
@@ -372,26 +372,26 @@ struct Physics96
     virtual void slot045();
     virtual void SetTransform(NiTransform*);
     Node96* FUN_0044ddc0();
-    bool FUN_00624bb0();
-    void FUN_00573f00(bool);
+    bool bhkNiCollisionObject_GSetLocal();
+    void bhkNiCollisionObject_SetSetLocal(bool);
 };
 struct Descriptor96
 {
-    int FUN_0043b540();
+    int hkpCollidable_getCollisionFilterInfo();
 };
 struct Node96
 {
-    Descriptor96* FUN_00460140();
+    Descriptor96* TESDataHandler_GetWorldSpaceList();
 };
 struct Filter96
 {
     int value;
     Filter96(int);
-    int FUN_0043b4d0();
+    int CFilter_GetLayer();
 };
 Physics96* FUN_004b5a50(Node96*);
-Ref96* FUN_0056f930(Node96*);
-Geometry96* FUN_004b5a80(const void*);
+Ref96* TESObjectREFR_FindReferenceFor3D(Node96*);
+Geometry96* bhkEntity_Getbhk(const void*);
 unsigned int GetBSXFlags(unsigned int, unsigned int);
 struct Shadow96
 {
@@ -401,27 +401,28 @@ Shadow96* FUN_00450b80(unsigned int);
 extern void* DAT_011ca27c;
 extern void* DAT_011ca280;
 extern char DAT_012681c0;
-bool FUN_0043b300(const void*, Geometry96*);
-void FUN_00c6a350(Node96*, int, bool, bool, bool);
+bool NiObject_IsKindOf(const void*, Geometry96*);
+void bhkWorld_SetMotion(Node96*, int, bool, bool, bool);
 struct Manager96
 {
-    void FUN_00624720(Input96*);
+    void FOIslandActivationListener_islandDeactivatedCallback(Input96*);
 };
 
 // @fnv 0x00624720
-void Manager96::FUN_00624720(Input96* input)
+// src: COMMUNITY 0x00624720
+void Manager96::FOIslandActivationListener_islandDeactivatedCallback(Input96* input)
 {
     if (!input)
         return;
-    Array96* items = input->FUN_00624700();
+    Array96* items = input->GetExtraPartList();
     int count = items->FUN_00726070();
     for (int i = 0; i < count; i++)
     {
-        Node96* node = items->FUN_00629ab0(i);
+        Node96* node = items->NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt(i);
         Physics96* physics = FUN_004b5a50(node);
         Node96* linked = physics ? physics->FUN_0044ddc0() : 0;
-        Ref96* ref = linked ? FUN_0056f930(linked) : 0;
-        void* model = ref ? ref->FUN_005d43c0()->FUN_0042e250() : 0;
+        Ref96* ref = linked ? TESObjectREFR_FindReferenceFor3D(linked) : 0;
+        void* model = ref ? ref->BSFile_GetDevice()->ExtraDataList_GetModelSwap() : 0;
         bool flag8 = ref && GetBSXFlags(ref->GetNode(), 8) ? true : false;
         bool flag128 = ref && GetBSXFlags(ref->GetNode(), 128) ? true : false;
         if (ref)
@@ -432,35 +433,35 @@ void Manager96::FUN_00624720(Input96* input)
             {
                 Cell96* cell = ref->FUN_008d6f30();
                 if (cell)
-                    cell->FUN_00548880(ref, 0);
+                    cell->TESObjectCELL_AttachReference3D(ref, 0);
                 if (ref->NeedsUpdate())
-                    FUN_00624bd0();
+                    BSShaderManager_ResetMotionBluredObject();
             }
             else
             {
                 if (!ref->IsDisabled())
                     FUN_00450b80(0)->FUN_00b5d9f0(ref->GetNode(), 0);
             }
-            if (ref->FUN_007af430() == DAT_011ca27c || ref->FUN_007af430() == DAT_011ca280)
-                FUN_00c6a350(linked, 5, true, false, true);
+            if (ref->BGSSaveFormBuffer_GetForm() == DAT_011ca27c || ref->BGSSaveFormBuffer_GetForm() == DAT_011ca280)
+                bhkWorld_SetMotion(linked, 5, true, false, true);
         }
-        if (Filter96(node->FUN_00460140()->FUN_0043b540()).FUN_0043b4d0() == 20 && ref && !ref->IsDisabled())
+        if (Filter96(node->TESDataHandler_GetWorldSpaceList()->hkpCollidable_getCollisionFilterInfo()).CFilter_GetLayer() == 20 && ref && !ref->IsDisabled())
         {
-            Geometry96* geometry = FUN_004b5a80(node);
-            if (geometry && FUN_0043b300(&DAT_012681c0, geometry))
+            Geometry96* geometry = bhkEntity_Getbhk(node);
+            if (geometry && NiObject_IsKindOf(&DAT_012681c0, geometry))
             {
                 Geometry96* target = geometry;
                 target->SetFlags(4);
                 Physics96* body = FUN_004b5a50(node);
-                if (body && !body->FUN_00624bb0())
+                if (body && !body->bhkNiCollisionObject_GSetLocal())
                 {
-                    body->FUN_00573f00(true);
+                    body->bhkNiCollisionObject_SetSetLocal(true);
                     FUN_0056ded0 transform;
                     NiTransform niTransform;
                     target->GetTransform(&transform);
-                    FUN_00624ad0(&niTransform, (TopicH*)&transform);
+                    HK2NI_00624ad0(&niTransform, (TopicH*)&transform);
                     body->SetTransform(&niTransform);
-                    body->FUN_00573f00(false);
+                    body->bhkNiCollisionObject_SetSetLocal(false);
                 }
             }
         }

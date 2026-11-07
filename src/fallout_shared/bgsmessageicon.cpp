@@ -40,12 +40,12 @@ BGSMessageIcon::~BGSMessageIcon()
     ClearComponent();
 }
 
-void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
+void __cdecl TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 // @fnv 0x0047a240
 void BGSMessageIcon::Save(int chunk)
 {
     if (reinterpret_cast<TESFullName*>(&Icon)->GetModelLength())
-        FUN_004856f0(chunk, (void*)reinterpret_cast<TESFullName*>(&Icon)->GetFullName(),
+        TESForm_AddChunkArray(chunk, (void*)reinterpret_cast<TESFullName*>(&Icon)->GetFullName(),
                      reinterpret_cast<TESFullName*>(&Icon)->GetModelLength() + 1);
 }
 

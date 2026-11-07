@@ -93,26 +93,27 @@ struct S_00d54cd0_Result
     int unk28;
     bool unk2C;
 };
-S_00d54cd0_Result* FUN_00d54a40(S_00d54cd0_Base* col, void* world, S_00d54cd0_Input* in, void* out) throw();
+S_00d54cd0_Result* hkpMoppUtility_buildCodeInternal(S_00d54cd0_Base* col, void* world, S_00d54cd0_Input* in, void* out) throw();
 // @fnv 0x00d54cd0
-S_00d54cd0_Result* FUN_00d54cd0(void* world, S_00d54cd0_Input* pInput, void* out)
+// src: HAVOK_LIB 0x00d54cd0
+S_00d54cd0_Result* hkpMoppUtility_buildCode(void* world, S_00d54cd0_Input* pInput, void* out)
 {
     S_00d54cd0_Result* r;
     if (pInput->unk20)
     {
         S_00d54cd0_All col(world);
-        r = FUN_00d54a40(&col, world, pInput, out);
+        r = hkpMoppUtility_buildCodeInternal(&col, world, pInput, out);
     }
     else
     {
         S_00d54cd0_Closest col(world);
-        r = FUN_00d54a40(&col, world, pInput, out);
+        r = hkpMoppUtility_buildCodeInternal(&col, world, pInput, out);
     }
     r->unk2C = pInput->unk1E == 0;
     return r;
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct Record
 {
@@ -153,7 +154,7 @@ struct RecordArray
 
     ~RecordArray() throw()
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
@@ -299,11 +300,12 @@ struct FUN_00dd5660_cls
     int unk10;
     int unk14;
     int unk18;
-    int FUN_00dd5660();
+    int GetUnk18_00dd5660();
 };
 
 // @fnv 0x00dd5660
-int FUN_00dd5660_cls::FUN_00dd5660()
+// src: GUESS 0x00dd5660 (confidence: low)
+int FUN_00dd5660_cls::GetUnk18_00dd5660()
 {
     return unk18;
 }
@@ -386,13 +388,13 @@ inline float Dot3_00dd5b00(const LocalM128& a, const LocalM128& b)
 void Obj_00dd5b00::ComputeAxisRanges(Src_00dd5b00* apSource, int aiId, Item_00dd5b00* apItems, int aiCount)
 {
     int nVerts = apSource->v2c();
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     Vec4* m_pkDeltas = (Vec4*)pHolder->m_stack.m_next.m_storage;
     pHolder->m_stack.m_next.m_storage = (void*)((int)m_pkDeltas + ((nVerts * sizeof(Vec4) + 0x7f) & ~0x7f));
     apSource->v30(m_pkDeltas);
 
     Vec_00dd5b00* pList = &m_kNode;
-    hkMemoryRouter* pGrow = FUN_00c85750();
+    hkMemoryRouter* pGrow = hkMemoryRouter_getInstance();
     if (pList->m_iArrayLength == (int)(pList->m_uCapFlags & 0x3fffffff))
     {
         ResizeAudioStream(reinterpret_cast<hkMemoryAllocator*>(pGrow->m_heap), pList, 0x6c);
@@ -446,12 +448,12 @@ void Obj_00dd5b00::ComputeAxisRanges(Src_00dd5b00* apSource, int aiId, Item_00dd
         pEntry->m_ranges[i].m_fHi = hi;
     }
 
-    pHolder = FUN_00c85750();
+    pHolder = hkMemoryRouter_getInstance();
     pHolder->m_stack.m_next.m_storage = (void*)((int)m_pkDeltas);
 }
 
 namespace fnvc_adapt {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 inline hkMemoryAllocator& heap(hkMemoryRouter& holder)
 {
@@ -470,7 +472,7 @@ struct FUN_00dd5de0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dd5de0* b = static_cast<FUN_00dd5de0*>(p);
-        fnvc_adapt::heap(fnvc_adapt::FUN_00c85750()).blockFree(p, b->m_usMemSizeAndFlags);
+        fnvc_adapt::heap(fnvc_adapt::hkMemoryRouter_getInstance()).blockFree(p, b->m_usMemSizeAndFlags);
     }
 };
 
@@ -496,11 +498,12 @@ struct Owner
     unsigned int unk00, unk04, unk08, unk0c, unk10;
     OutCollection* collection;
     int count;
-    void FUN_00dd55f0(OutRecord* out);
+    void hkpMoppCachedShapeMediator_getPrimitives(OutRecord* out);
 };
 // Iterates the collection and writes each element's handle and index into the out array.
 // @fnv 0x00dd55f0
-void Owner::FUN_00dd55f0(OutRecord* out)
+// src: HAVOK_LIB 0x00dd55f0
+void Owner::hkpMoppCachedShapeMediator_getPrimitives(OutRecord* out)
 {
     int n = count;
     void* current = collection->Begin();

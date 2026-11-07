@@ -22,9 +22,9 @@ public:
 
     AbsorbEffect(MagicCaster* caster, MagicItem* item, EffectItem* effect);
     void __thiscall InitBoltEffect();
-    void __thiscall FUN_00803d00(Actor* apActor);
-    void FUN_0082a650(ActiveEffect* apDestination);
+    void __thiscall FinishInitLoadGame(Actor* apActor);
+    void CopyData_0082a650(ActiveEffect* apDestination);
     void FUN_00802e20();
     void* __thiscall Destroy(unsigned int flags);
-    void FUN_00803b70(float value);
+    void Update3D_00803b70(float value);
 };

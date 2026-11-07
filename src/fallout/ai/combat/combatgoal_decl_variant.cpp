@@ -26,14 +26,14 @@ class UnsignedIdHandle
   public:
     int type;
     int value;
-    int FUN_00559450();
+    int Modelloader_GetReferencedThis();
     int FUN_00726070();
 };
 class CombatStateValues
 {
   public:
     unsigned int GetCombatGoal(int);
-    bool FUN_009aadc0(int, int);
+    bool CombatWorldStateArray_IsTrue(int, int);
 };
 // @fnv 0x009843b0
 bool CombatGoal::vf00(CombatStateValues* values)
@@ -45,7 +45,7 @@ bool CombatGoal::vf00(CombatStateValues* values)
     while (current && current->GetItem())
     {
         value = current->GetItem();
-        state = value->FUN_00559450();
+        state = value->Modelloader_GetReferencedThis();
         type = value->FUN_00726070();
         if (state == 21)
         {
@@ -59,7 +59,7 @@ bool CombatGoal::vf00(CombatStateValues* values)
         }
         else
         {
-            if (!values->FUN_009aadc0(state, type))
+            if (!values->CombatWorldStateArray_IsTrue(state, type))
                 return false;
         }
         current = reinterpret_cast<BSSimpleList<UnsignedIdHandle*>*>(reinterpret_cast<CombatWorldStateListNode*>(current)->GetNext());  // 0x0062d990

@@ -18,7 +18,8 @@ extern "C" double __cdecl sin(double value);
 extern "C" double __cdecl exp(double value);
 
 // @fnv 0x00ba1480
-float __stdcall FUN_00ba1480(float x, float y)
+// src: COMMUNITY 0x00ba1480
+float __stdcall ImageSpaceEffectWaterFFT_Phillips(float x, float y)
 {
     float a = (float)((double)DAT_01200064 * DAT_0101ff40 / DAT_0104ed58);
     float fScaleB = (float)((double)DAT_01200060 / DAT_0108c160);

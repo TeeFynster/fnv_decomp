@@ -897,25 +897,29 @@ NiShaderAttributeDesc_AttributeType __cdecl GetAttributeTypeForMapping(unsigned 
 }
 
 // @fnv 0x00a9bd60
-unsigned int __stdcall FUN_00a9bd60(const char*, unsigned int, unsigned int, const char*)
+// src: COMMUNITY 0x00a9bd60
+unsigned int __stdcall NiShaderConstantMap_AddEntryAlt(const char*, unsigned int, unsigned int, const char*)
 {
     return 0x30;
 }
 
 // @fnv 0x00a9bd70
-int __stdcall FUN_00a9bd70(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j)
+// src: COMMUNITY 0x00a9bd70
+int __stdcall NiShaderConstantMap_AddEntry(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j)
 {
     return 0x30;
 }
 
 // @fnv 0x00a9bd80
-int __stdcall FUN_00a9bd80(int a, int b, int c, int d, int e, int f)
+// src: COMMUNITY 0x00a9bd80
+int __stdcall NiShaderConstantMap_AddOperatorEntry(int a, int b, int c, int d, int e, int f)
 {
     return 0x30;
 }
 
 // @fnv 0x00a9bd90
-unsigned int __stdcall FUN_00a9bd90(const char* pszKey, unsigned int uiShaderRegister, const char* pszVariableName,
+// src: COMMUNITY 0x00a9bd90
+unsigned int __stdcall NiShaderConstantMap_AddObjectEntry(const char* pszKey, unsigned int uiShaderRegister, const char* pszVariableName,
                                     unsigned int uiObjectIndex, int eObjectType)
 {
     return 0x30;

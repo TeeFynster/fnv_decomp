@@ -11,7 +11,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 extern "C" void __stdcall FUN_00a390a0(StrArr*);
-extern "C" char* __cdecl FUN_00a7d330(const char*);
+extern "C" char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
 extern "C" const char* const g_011f3ec8_arg1;
 extern const NiRTTI g_011f3738;
 
@@ -21,10 +21,11 @@ extern "C" void FUN_00a3c390();
 extern "C" void FUN_00a3c500();
 
 // @fnv 0x00a576c0
-void __stdcall FUN_00a576c0(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a576c0
+void __stdcall NiFloatInterpController_GetViewerStrings(StrArr* pkStrings)
 {
     FUN_00a390a0(pkStrings);
-    char* pStr = FUN_00a7d330(g_011f3ec8_arg1);
+    char* pStr = NiViewerStrings_NiGetViewerString_Title(g_011f3ec8_arg1);
     unsigned int idx = pkStrings->m_usSize;
     unsigned int cnt = pkStrings->m_usMaxSize;
     if (idx >= cnt)

@@ -5,10 +5,11 @@
 struct hkpAabbTreeCollidableRaycaster
 {
     void CollectRayHit(int);
-    float FUN_00d9a220(int);
+    float addLeaf(int);
 };
 // @fnv 0x00d9a220
-float hkpAabbTreeCollidableRaycaster::FUN_00d9a220(int a)
+// src: HAVOK_LIB 0x00d9a220
+float hkpAabbTreeCollidableRaycaster::addLeaf(int a)
 {
     CollectRayHit(*(int*)(a + 0x20));
     return *(float*)((char*)this + 0x1c);
@@ -18,10 +19,11 @@ namespace fnv_00d9a240 {
 struct hkpAabbTreeCollidableRaycaster
 {
     void __thiscall CollectRayHit(void*);
-    float __thiscall FUN_00d9a240(void* arg);
+    float __thiscall addLeaf_00d9a240(void* arg);
 };
 // @fnv 0x00d9a240
-float __thiscall hkpAabbTreeCollidableRaycaster::FUN_00d9a240(void* arg)
+// src: HAVOK_LIB 0x00d9a240
+float __thiscall hkpAabbTreeCollidableRaycaster::addLeaf_00d9a240(void* arg)
 {
     ((hkpAabbTreeCollidableRaycaster*)((char*)this - 4))->CollectRayHit(*(void**)((char*)arg + 12));
     return *(float*)((char*)this + 0x18);
@@ -150,19 +152,20 @@ void hkpAabbTreeCollidableRaycaster::CollectRayHit(int request)
 // sub ecx,4; jmp target  ==  MSVC adjustor thunk for a virtual overridden in a class with two bases.
 struct PrimaryBaseA
 {
-    virtual void FUN_00d9a260();
+    virtual void AdjustThisAndForward_00d9a260();
 };
 
 struct SecondaryBaseA
 {
-    virtual void FUN_00d9a260();
+    virtual void AdjustThisAndForward_00d9a260();
 };
 
 struct DerivedA : PrimaryBaseA, SecondaryBaseA
 {
     DerivedA();
 // @fnv 0x00d9a260
-    virtual void FUN_00d9a260();
+// src: GUESS 0x00d9a260 (confidence: low)
+    virtual void AdjustThisAndForward_00d9a260();
 };
 
 DerivedA::DerivedA()
@@ -182,7 +185,7 @@ struct S_00d9a270_Router
     int unk8;
     int unkC;
     S_00d9a270_Heap* m_pStreamAllocator;
-    static S_00d9a270_Router* FUN_00c85750();
+    static S_00d9a270_Router* hkMemoryRouter_getInstance();
     S_00d9a270_Heap& heap()
     {
         return *m_pStreamAllocator;
@@ -195,7 +198,7 @@ struct S_00d9a270_Base
     {}
     void operator delete(void* p, unsigned int nbytes)
     {
-        S_00d9a270_Router::FUN_00c85750()->heap().ReleaseBlock(p, nbytes);
+        S_00d9a270_Router::hkMemoryRouter_getInstance()->heap().ReleaseBlock(p, nbytes);
     }
 };
 

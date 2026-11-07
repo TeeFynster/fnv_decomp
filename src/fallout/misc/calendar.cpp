@@ -132,12 +132,13 @@ void Calendar::Update(float afDeltaTime)
 
 struct FUN_00867c60_shell : public Calendar
 {
-    unsigned int FUN_00867c60();
+    unsigned int Calendar_GetYear();
 };
 
 // Returns the value read by the TESGlobalValueReader stored at the start of the object, or 77.0f when that pointer is null.
 // @fnv 0x00867c60
-unsigned int FUN_00867c60_shell::FUN_00867c60()
+// src: XBOX_PDB 0x00867c60
+unsigned int FUN_00867c60_shell::Calendar_GetYear()
 {
     return (int)(*(TESGlobalValueReader**)this ? (*(TESGlobalValueReader**)this)->GetValue() : 77.0f);
 }
@@ -161,7 +162,8 @@ bool FUN_008aced0_cls::HasCachedFlag(unsigned int aeWhich)
 }
 
 // @fnv 0x00867a20
-void __fastcall FUN_00867a20(void* aThis)
+// src: XBOX_PDB 0x00867a20
+void __fastcall Menu_SetRenderedMenu(void* aThis)
 {
     *(char*)((char*)aThis + 0x1C) = 1;
 }
@@ -185,18 +187,19 @@ const char* CalendarProxy::GetDayName()
 extern double DAT_01012638;
 struct FUN_00526ac0_shell
 {
-    float FUN_00526ac0();
+    float BSMultiBoundCapsule_QMultiBoundRadius();
 };
 struct FUN_00867ea0_shell
 {
     char _pad[16];
     FUN_00526ac0_shell* m_ptr;
-    float FUN_00867ea0();
+    float Calendar_GetMinutesPassed();
 };
 // @fnv 0x00867ea0
-float FUN_00867ea0_shell::FUN_00867ea0()
+// src: COMMUNITY 0x00867ea0
+float FUN_00867ea0_shell::Calendar_GetMinutesPassed()
 {
-    float days = m_ptr ? m_ptr->FUN_00526ac0() : 1.0f;
+    float days = m_ptr ? m_ptr->BSMultiBoundCapsule_QMultiBoundRadius() : 1.0f;
     return days * 24.0 * DAT_01012638;
 }
 
@@ -234,12 +237,13 @@ DateString CalendarDateFormatter::FormatDate()
 struct Thing
 {
     int FUN_00867d20();
-    int FUN_00867ca0();
+    int Calendar_GetSeason();
 };
 
 // Maps values 0 through 11 to results 0 through 3 using a switch.
 // @fnv 0x00867ca0
-int Thing::FUN_00867ca0()
+// src: COMMUNITY 0x00867ca0
+int Thing::Calendar_GetSeason()
 {
     int result = 0;
     switch (FUN_00867d20())

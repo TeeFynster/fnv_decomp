@@ -3,7 +3,7 @@
 
 // Game-setting globals whose constructors are inlined (/Od /Ob1). Classes are named by original vtable, collection
 // and init-function addresses; vtables, destructors, the collection and init function stay original (bound by address).
-void FUN_004de4a0();
+void SettingT_INIPrefSettingCollection_InitCollection();
 class SetColl_011f35a0_004de4a0
 {
   public:
@@ -16,7 +16,7 @@ inline SetColl_011f35a0_004de4a0* GetSetColl_011f35a0_004de4a0()
     int a;
     int b;
     int c;
-    FUN_004de4a0();
+    SettingT_INIPrefSettingCollection_InitCollection();
     return g_coll_011f35a0;
 }
 void FUN_0044f570();

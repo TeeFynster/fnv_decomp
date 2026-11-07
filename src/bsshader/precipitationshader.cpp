@@ -107,7 +107,8 @@ template <class T> inline NiPointer<T>::operator T*() const
 extern "C" void* g_012005c0;
 
 // @fnv 0x00bb0540
-void* __cdecl FUN_00bb0540()
+// src: XBOX_PDB 0x00bb0540
+void* __cdecl PrecipitationShader_GetRTTI()
 {
     return &g_012005c0;
 }
@@ -115,29 +116,32 @@ void* __cdecl FUN_00bb0540()
 extern void* g_012005fc;
 
 // @fnv 0x00bb0d10
-void* __cdecl FUN_00bb0d10()
+// src: XBOX_PDB 0x00bb0d10
+void* __cdecl PrecipitationShaderProperty_GetRTTI()
 {
     return &g_012005fc;
 }
 
 struct FUN_00bb0d20_shell
 {
-    void* __thiscall FUN_00bb0d20();
+    void* __thiscall PrecipitationShaderProperty_GetClampNI();
 };
 
 // @fnv 0x00bb0d20
-void* FUN_00bb0d20_shell::FUN_00bb0d20()
+// src: XBOX_PDB 0x00bb0d20
+void* FUN_00bb0d20_shell::PrecipitationShaderProperty_GetClampNI()
 {
     return *reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x94);
 }
 
 struct FUN_00bb0d30_shell
 {
-    void __thiscall FUN_00bb0d30(int value);
+    void __thiscall PrecipitationShaderProperty_SetClampNI(int value);
 };
 
 // @fnv 0x00bb0d30
-void __thiscall FUN_00bb0d30_shell::FUN_00bb0d30(int value)
+// src: XBOX_PDB 0x00bb0d30
+void __thiscall FUN_00bb0d30_shell::PrecipitationShaderProperty_SetClampNI(int value)
 {
     *(int*)((char*)this + 0x94) = value;
 }
@@ -216,7 +220,8 @@ struct SpawnedObject : BSShader
 extern "C" void* g_011f9508;
 
 // @fnv 0x00bb0660
-void* __cdecl FUN_00bb0660()
+// src: COMMUNITY 0x00bb0660
+void* __cdecl PrecipitationShader_CreateShader()
 {
     NiDX9ShaderDeclaration* pHost = NiDX9ShaderDeclaration::Create((NiRenderer*)g_011f9508, 3, 2);
     pHost->SetEntry(0, 0, (NiShaderDeclaration::ShaderParameter)0, (NiShaderDeclaration::ShaderParameterType)2, 0);
@@ -253,8 +258,8 @@ public:
     unsigned char _pad00[0x60];
     unsigned int m_uiRefCount;
 
-    void FUN_00e7def0(int iFlag);
-    void FUN_00e7ecd0();
+    void NiD3DTextureStage_SetFilterMode(int iFlag);
+    void NiD3DTextureStage_ReturnStageToPool();
     void IncRefCount()
     {
         ++m_uiRefCount;
@@ -262,7 +267,7 @@ public:
     void DecRefCount()
     {
         if (--m_uiRefCount == 0)
-            FUN_00e7ecd0();
+            NiD3DTextureStage_ReturnStageToPool();
     }
 };
 
@@ -275,14 +280,15 @@ void __cdecl AssignStageFromPool(NiPointer<BeamStage>* pspPass);
 void __cdecl ConfigureBeamStage(BeamStage* pkPass, int a1, int a2, int a3, int a4);
 
 // @fnv 0x00bb0770
-bool __cdecl FUN_00bb0770()
+// src: COMMUNITY 0x00bb0770
+bool __cdecl PrecipitationShader_LoadStagesAndPasses()
 {
     NiPointer<BeamStage> spRenderPass;
     FUN_00e804d0(&g_pkPass_012005e0);
     AssignStageFromPool(&spRenderPass);
     ConfigureBeamStage(spRenderPass, 0, 3, 2, 1);
-    spRenderPass->FUN_00e7def0(1);
-    g_pkPass_012005e0->FUN_00e802b0(g_pkPass_012005e0->m_uiCurrentStage, spRenderPass);
+    spRenderPass->NiD3DTextureStage_SetFilterMode(1);
+    g_pkPass_012005e0->NiD3DPass_SetStage(g_pkPass_012005e0->m_uiCurrentStage, spRenderPass);
     g_pkPass_012005e0->m_spVertexShader = g_pkPixelShader_012005d0;
     g_pkPass_012005e0->m_spPixelShader = g_pkVertexShader_012005c8;
     GetRenderState(g_pkPass_012005e0->m_pkRenderStateGroup)->SetNodeValue(7, 1, true);
@@ -345,11 +351,12 @@ struct FUN_00bb0cf0_cls : BSShader
     int unk8C;
     int unk90;
     int m_94;
-    void __thiscall FUN_00bb0cf0(int value);
+    void __thiscall PrecipitationShaderProperty_SetClampD3D(int value);
 };
 
 // @fnv 0x00bb0cf0
-void FUN_00bb0cf0_cls::FUN_00bb0cf0(int value)
+// src: XBOX_PDB 0x00bb0cf0
+void FUN_00bb0cf0_cls::PrecipitationShaderProperty_SetClampD3D(int value)
 {
     m_94 = (value != 3) ? 3 : 0;
 }

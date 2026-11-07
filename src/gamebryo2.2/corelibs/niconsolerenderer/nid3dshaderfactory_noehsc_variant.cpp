@@ -68,11 +68,12 @@ class ShaderStringPointerMap
     ShaderMapAllocator m_kItemCount;
     bool m_bCopy;
 
-    void FUN_00e927f0(const char* key, NiPointer<ShaderRefObject> val) throw();
+    void NiTStringTemplateMap_NiTPointerMap_char_const_NiPointer_NiSequence_NiPointer_NiSequence_SetAt(const char* key, NiPointer<ShaderRefObject> val) throw();
 };
 
 // @fnv 0x00e927f0
-void ShaderStringPointerMap::FUN_00e927f0(const char* key, NiPointer<ShaderRefObject> val)
+// src: XBOX_PDB 0x00e927f0
+void ShaderStringPointerMap::NiTStringTemplateMap_NiTPointerMap_char_const_NiPointer_NiSequence_NiPointer_NiSequence_SetAt(const char* key, NiPointer<ShaderRefObject> val)
 {
     unsigned int uiIndex = KeyToHashIndex(key);
     NiTMapItem<const char*, NiPointer<ShaderRefObject> >* pkItem = m_ppkHashTable[uiIndex];

@@ -73,8 +73,8 @@ typedef char NavMeshInfoMapCheckCell[offsetof(NavMeshInfoMap, m_kNavMeshInfoArra
 
 typedef BSSimpleArray<TESObjectREFR*, 1024> NavMeshDoorArray;
 
-unsigned int FUN_006b7b30(NavMeshInfo*);
-bool FUN_009a3830(NavMeshInfo*&, NavMeshInfo*&);
+unsigned int NavMeshInfo_GetCellOrCoords(NavMeshInfo*);
+bool Actor_AreReferencedValuesEqual(NavMeshInfo*&, NavMeshInfo*&);
 
 // Scans every outer/inner map entry and returns false if any NavMeshInfoArray with more than one element has fewer than size-1 entries with bounds.
 // @fnv 0x006b7cb0
@@ -181,7 +181,7 @@ void NavMeshInfoMap::InsertNavMeshInfo(NavMeshInfo* info)
         unsigned int parentID;
         unsigned int cellKey;
     } lookup;
-    lookup.cellKey = FUN_006b7b30(info);
+    lookup.cellKey = NavMeshInfo_GetCellOrCoords(info);
     if (info->GetInteriorCell())
         lookup.parentID = 0;
     else
@@ -208,7 +208,7 @@ void NavMeshInfoMap::InsertNavMeshInfo(NavMeshInfo* info)
         array = new NavMeshInfoArray;
         ((NiTPointerMap<unsigned int, NavMeshInfoArray*>*)lookup.innerMap)->SetAt(lookup.cellKey, array);
     }
-    if (array->Find(info, 0, FUN_009a3830) != (unsigned int)-1)
+    if (array->Find(info, 0, Actor_AreReferencedValuesEqual) != (unsigned int)-1)
         return;
     array->Add(info);
 }
@@ -246,7 +246,8 @@ void __fastcall FUN_005890c0(int* self, FUN_006b7d90_arg a);
 
 // Calls FUN_005890c0 on self, then stores the address of DAT_01031fac into *self and returns self.
 // @fnv 0x006b7d90
-int* __fastcall FUN_006b7d90(int* self, FUN_006b7d90_arg aArg)
+// src: EXE 0x006b7d90
+int* __fastcall NiTPointerMap_unsigned_int_NavMeshInfo_NiTPointerMap(int* self, FUN_006b7d90_arg aArg)
 {
     FUN_005890c0(self, aArg);
     *self = (int)&DAT_01031fac;
@@ -265,7 +266,8 @@ void __fastcall FUN_005890c0(int* self, FUN_006b7dc0_arg a);
 
 // Calls FUN_005890c0 on self, then stores the address of DAT_01031fac into *self and returns self.
 // @fnv 0x006b7dc0
-int* __fastcall FUN_006b7dc0(int* self, FUN_006b7dc0_arg aArg)
+// src: EXE 0x006b7dc0
+int* __fastcall NiTMap_unsigned_int_NiTMap_unsigned_int_BSSimpleArray_NavMeshInfo_1024_NiTMap(int* self, FUN_006b7dc0_arg aArg)
 {
     FUN_005890c0(self, aArg);
     *self = (int)&DAT_01031fac;
@@ -285,7 +287,8 @@ void __fastcall FUN_005890c0(int* self, FUN_006b7df0_arg a);
 
 // Calls FUN_005890c0 on self, then stores the address of DAT_01031fac into *self and returns self.
 // @fnv 0x006b7df0
-int* __fastcall FUN_006b7df0(int* self, FUN_006b7df0_arg aArg)
+// src: EXE 0x006b7df0
+int* __fastcall NiTMap_unsigned_int_BSSimpleArray_NavMeshInfo_1024_NiTMap(int* self, FUN_006b7df0_arg aArg)
 {
     FUN_005890c0(self, aArg);
     *self = (int)&DAT_01031fac;
@@ -456,7 +459,8 @@ struct FUN_00484020_shell
 };
 // Returns true if apForm's form type is 0x43, otherwise delegates to IsLessThan.
 // @fnv 0x006b6910
-bool NavMeshInfoMap::FUN_006b6910(TESForm* apForm)
+// src: XBOX_PDB 0x006b6910
+bool NavMeshInfoMap::SavesBefore_006b6910(TESForm* apForm)
 {
     if (::_FNV_GetFormType(apForm) == 0x43)
         return true;
@@ -470,7 +474,8 @@ unsigned int PrepareScriptMessage(int);
 
 // Looks up the worldspace's map by form ID, then the cell's entry by prepared key, returning the stored info pointer or null.
 // @fnv 0x006b7850
-void* NavMeshInfoMap::FUN_006b7850(TESWorldSpace* apWorldSpace, int aiCellKey)
+// src: XBOX_PDB 0x006b7850
+void* NavMeshInfoMap::FindNavMeshInfoForCellKey(TESWorldSpace* apWorldSpace, int aiCellKey)
 {
     const DummyPointerMap* worldspaceMap;
     void* infoarray;
@@ -495,7 +500,8 @@ struct HArr
 }  // namespace fnv_006b7910
 
 // @fnv 0x006b7910
-void NavMeshInfoMap::FUN_006b7910(BSSimpleArray<void*, 1024>* pArray)
+// src: COMMUNITY 0x006b7910
+void NavMeshInfoMap::GetAllNavMeshInfo(BSSimpleArray<void*, 1024>* pArray)
 {
     ((fnv_006b7910::_Mem_20a4*)pArray)->SetSize(0, false);
     ((fnv_006b7910::HArr*)pArray)->GrowCapacity(0x800);
@@ -549,19 +555,21 @@ int __cdecl BuildCellKey(short, short);
 }  // namespace fnv_006b77e0
 
 // @fnv 0x006b77e0
-int NavMeshInfoMap::FUN_006b77e0(TESObjectCELL* cell)
+// src: XBOX_PDB 0x006b77e0
+int NavMeshInfoMap::FindNavMeshInfoForCell(TESObjectCELL* cell)
 {
     if (!cell)
         return 0;
     if (cell->IsInterior())
         return LookupScriptMessageValue(cell);
     else
-        return FUN_006b7850(((fnv_006b77e0::DoorH*)cell)->GetParentWorldSpace(),
+        return FindNavMeshInfoForCellKey(((fnv_006b77e0::DoorH*)cell)->GetParentWorldSpace(),
                             fnv_006b77e0::BuildCellKey((short)((fnv_006b77e0::CellH*)cell)->GetCellGridX(), (short)((fnv_006b77e0::CellH*)cell)->GetCellGridY()));
 }
 
 // @fnv 0x006b7770
-TESObjectCELL* NavMeshInfo::FUN_006b7770()
+// src: XBOX_PDB 0x006b7770
+TESObjectCELL* NavMeshInfo::GetCell()
 {
     TESWorldSpace* worldSpace = GetParentWorldSpace();
     if (worldSpace)
@@ -581,7 +589,7 @@ struct FormView
 };
 struct FormArray
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     FormView** FUN_00877a30(unsigned int);
 };
 extern FormArray* DAT_011c54c4;
@@ -591,16 +599,17 @@ struct InfoView
 };
 struct PtrView
 {
-    NavMesh* FUN_00559450();
+    NavMesh* Modelloader_GetReferencedThis();
 };
 // @fnv 0x006b6580
-bool NavMeshInfoMap::FUN_006b6580()
+// src: XBOX_PDB 0x006b6580
+bool NavMeshInfoMap::ProcessBeforeSave()
 {
     if (!FUN_00460340())
         return true;
     FormView* formTmp;
     unsigned int i5;
-    unsigned int total4 = DAT_011c54c4->FUN_0084e3a0();
+    unsigned int total4 = DAT_011c54c4->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     unsigned int count4 = 0;
     for (i5 = 0; i5 < total4; i5++)
     {
@@ -636,9 +645,9 @@ bool NavMeshInfoMap::FUN_006b6580()
         void* valueVal;
         m_kNavMeshInfosByFormID.GetNext(position, key3, reinterpret_cast<NavMeshInfo*&>(valueVal));
         NavMeshPtr mesh8;
-        if (((NavMeshInfo*)valueVal)->AcquireNavMesh(mesh8) && mesh8.FUN_00559450()->FUN_00460340() &&
-            !mesh8.FUN_00559450()->FUN_00440d80())
-            mesh8.FUN_00559450()->FUN_006986d0();
+        if (((NavMeshInfo*)valueVal)->AcquireNavMesh(mesh8) && mesh8.Modelloader_GetReferencedThis()->FUN_00460340() &&
+            !mesh8.Modelloader_GetReferencedThis()->FUN_00440d80())
+            mesh8.Modelloader_GetReferencedThis()->FUN_006986d0();
     }
     ValidateNavMeshes();
     return true;
@@ -659,15 +668,15 @@ struct ScopedNavPointer
 {
     void* current;
     void FUN_0042fb00();
-    void FUN_0042fa40();
-    void* FUN_00559450(int index);
+    void Object_ForwardCall_0042fa40();
+    void* Modelloader_GetReferencedThis(int index);
     ScopedNavPointer()
     {
         FUN_0042fb00();
     }
     ~ScopedNavPointer()
     {
-        FUN_0042fa40();
+        Object_ForwardCall_0042fa40();
     }
 };
 struct ActiveResolver
@@ -684,13 +693,13 @@ void NavMeshInfoMap::ActivateNavigationEntry(int identifier)
     NavigationRequest* entry;
     if (reinterpret_cast<BoundNavigationMap*>(&m_kNavMeshInfosByFormID)->FUN_00853130(identifier, &entry))
     {
-        FUN_006b7b70(entry);
+        RemoveInfoFromCellKeyMap(entry);
         bool isAccepted = false;
         ScopedNavPointer pointer;
         if (entry->FUN_00690860(&pointer))
         {
             VerifiedPath* active = reinterpret_cast<VerifiedPath*>(
-                reinterpret_cast<ActiveResolver*>(pointer.FUN_00559450(0))->FUN_00484e60());
+                reinterpret_cast<ActiveResolver*>(pointer.Modelloader_GetReferencedThis(0))->FUN_00484e60());
             if (active && active->FUN_00471c20())
                 isAccepted = true;
         }
@@ -705,14 +714,14 @@ void NavMeshInfoMap::ActivateNavigationEntry(int identifier)
     }
 }
 
-unsigned int FUN_006b7b30(NavMeshInfo*);
-bool FUN_009a3830(NavMeshInfo*&, NavMeshInfo*&);
+unsigned int NavMeshInfo_GetCellOrCoords(NavMeshInfo*);
+bool Actor_AreReferencedValuesEqual(NavMeshInfo*&, NavMeshInfo*&);
 struct InfoArray
 {
     virtual ~InfoArray();
     unsigned int FUN_00719b20(NavMeshInfo* const&, unsigned int, bool (*)(NavMeshInfo*&, NavMeshInfo*&));
-    void FUN_006bf8f0(unsigned int, bool);
-    bool FUN_0076b610();
+    void BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned int, bool);
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
 };
 struct InnerMap
 {
@@ -727,9 +736,10 @@ struct OuterMap
     bool RemoveKey(unsigned int);
 };
 // @fnv 0x006b7b70
-void NavMeshInfoMap::FUN_006b7b70(NavMeshInfo* info)
+// src: COMMUNITY 0x006b7b70
+void NavMeshInfoMap::RemoveInfoFromCellKeyMap(NavMeshInfo* info)
 {
-    unsigned int parent = FUN_006b7b30(info);
+    unsigned int parent = NavMeshInfo_GetCellOrCoords(info);
     unsigned int map;
     if (info->GetInteriorCell())
         map = 0;
@@ -741,11 +751,11 @@ void NavMeshInfoMap::FUN_006b7b70(NavMeshInfo* info)
     InfoArray* index;
     if (!array->FUN_00853130(parent, index))
         return;
-    unsigned int key = index->FUN_00719b20(info, 0, FUN_009a3830);
+    unsigned int key = index->FUN_00719b20(info, 0, Actor_AreReferencedValuesEqual);
     if (key == -1)
         return;
-    index->FUN_006bf8f0(key, true);
-    if (index->FUN_0076b610())
+    index->BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(key, true);
+    if (index->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
     {
         array->RemoveKey(parent);
         delete index;
@@ -810,7 +820,8 @@ struct CellKeyStand
 };
 bool __fastcall IsFieldCZero(DummyPointerMap* p);
 // @fnv 0x006b6990
-void NavMeshInfoMap::FUN_006b6990(unsigned int id)
+// src: GUESS 0x006b6990 (confidence: low)
+void NavMeshInfoMap::ProcessState_006b6990(unsigned int id)
 {
     unsigned int info;
     if (reinterpret_cast<NiTPointerMap<unsigned int, unsigned int>*>(&m_kNavMeshInfosByFormID)->GetAt(id, info))
@@ -818,7 +829,7 @@ void NavMeshInfoMap::FUN_006b6990(unsigned int id)
         reinterpret_cast<CellKeyMap*>(&m_kNavMeshInfosByFormID)->RemoveAt(id);
         if (!IsFieldCZero(reinterpret_cast<DummyPointerMap*>(&m_kNavMeshInfoArraysByWorldspace)))
         {
-            FUN_006b7b70(info);
+            RemoveInfoFromCellKeyMap(info);
         }
         SetAltered(true);
     }
@@ -963,17 +974,17 @@ struct MeshInfoArray
     unsigned int capacity;
     unsigned int FUN_0044ddc0();
     NavMeshInfo** FUN_00877a30(unsigned int);
-    NavMeshInfo** FUN_006a7ad0(unsigned int);
-    void FUN_006bf8f0(unsigned int, bool);
+    NavMeshInfo** BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
+    void BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned int, bool);
     unsigned int FUN_00719b20(NavMeshInfo* const&, unsigned int, bool(__cdecl*)(NavMeshInfo*&, NavMeshInfo*&));
 };
-TESForm* __fastcall FUN_00690830(const NavMeshInfo*);
+TESForm* __fastcall NavMeshInfo_GetParentSpace(const NavMeshInfo*);
 
 struct DataMatch
 {
     unsigned int key;
     NavMeshInfo* info;
-    bool FUN_0069e090();
+    bool NavMeshTriangleEdgePortal_IsValid();
 };
 struct GridRecord
 {
@@ -982,17 +993,17 @@ struct GridRecord
 };
 struct GridLookup
 {
-    MeshInfoArray* FUN_006b7850(NavMesh*, unsigned int);
+    MeshInfoArray* FindNavMeshInfoForCellKey(NavMesh*, unsigned int);
 };
 struct GridMap
 {
     GridMap();
     ~GridMap();
-    NavMesh* FUN_00559450();
+    NavMesh* Modelloader_GetReferencedThis();
     void* GetEdge(unsigned short);
     void* FUN_0068f6b0(unsigned short);
     unsigned int GetArrFlags();
-    unsigned int FUN_006b5a90();
+    unsigned int NavMesh_GetNumDoorPortals();
     void CollectTrianglesForDoor(NavMeshInfo*, void*);
 };
 struct LinkChecker
@@ -1003,7 +1014,7 @@ struct LinkChecker
     unsigned int capacity;
     LinkChecker();
     ~LinkChecker();
-    bool FUN_0076b610();
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
 };
 struct NavMeshInfoMapData
 {
@@ -1025,7 +1036,7 @@ extern char DAT_0106be98[];
 extern char DAT_0106be20[];
 extern char DAT_0106bdb0[];
 extern int __cdecl Warning(const char*, ...);
-extern bool __cdecl FUN_009a3830(NavMeshInfo*&, NavMeshInfo*&);
+extern bool __cdecl Actor_AreReferencedValuesEqual(NavMeshInfo*&, NavMeshInfo*&);
 extern void __cdecl RemoveNavMeshId(NavMeshInfo*);
 extern void __cdecl SplitUInt32(unsigned int, short*, short*);
 extern unsigned int __cdecl PackShortPair(unsigned short, unsigned short);
@@ -1046,7 +1057,7 @@ struct InfoResolver
 {
     unsigned int id;
     NavMeshInfo* info;
-    bool FUN_0069e090();
+    bool NavMeshTriangleEdgePortal_IsValid();
 };
 // Iterates the nav mesh map, warns about and collects invalid meshes, checks adjacency, m_kPreferredConnections links and m_kDoorReferences, and cleans up the collected meshes.
 // @fnv 0x006b6c60
@@ -1063,19 +1074,19 @@ void NavMeshInfoMap::ValidateNavMeshes()
                 while (iterator)
                 {
                     m_kNavMeshInfosByFormID.GetNext(iterator, identifier, reinterpret_cast<NavMeshInfo*&>(meshInfo));
-                    if (!FUN_00690830(meshInfo))
+                    if (!NavMeshInfo_GetParentSpace(meshInfo))
                     {
-                        Warning(DAT_0106c0d8, ((PtrView*)meshInfo)->FUN_00559450(),
-                                (((NavMeshInfo*)meshInfo)->FUN_006b7770()
-                                     ? ((CellView*)((NavMeshInfo*)meshInfo)->FUN_006b7770())->GetEditorID()
+                        Warning(DAT_0106c0d8, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                (((NavMeshInfo*)meshInfo)->GetCell()
+                                     ? ((CellView*)((NavMeshInfo*)meshInfo)->GetCell())->GetEditorID()
                                      : DAT_01011584));
                         invalidatedList.FUN_007cb2e0(&meshInfo);
                     }
                     else if (!meshInfo->HasNonZeroAtOffset54())
                     {
-                        Warning(DAT_0106c078, ((PtrView*)meshInfo)->FUN_00559450(),
-                                (((NavMeshInfo*)meshInfo)->FUN_006b7770()
-                                     ? ((CellView*)((NavMeshInfo*)meshInfo)->FUN_006b7770())->GetEditorID()
+                        Warning(DAT_0106c078, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                (((NavMeshInfo*)meshInfo)->GetCell()
+                                     ? ((CellView*)((NavMeshInfo*)meshInfo)->GetCell())->GetEditorID()
                                      : DAT_01011584));
                         RemoveNavMeshId(meshInfo);
                         invalidatedList.FUN_007cb2e0(&meshInfo);
@@ -1087,9 +1098,9 @@ void NavMeshInfoMap::ValidateNavMeshes()
                             if (!meshInfo->AcquireNavMesh(activeMesh))
                             {
                                 Warning(
-                                    DAT_0106c008, ((PtrView*)meshInfo)->FUN_00559450(),
-                                    (((NavMeshInfo*)meshInfo)->FUN_006b7770()
-                                         ? ((CellView*)((NavMeshInfo*)meshInfo)->FUN_006b7770())->GetEditorID()
+                                    DAT_0106c008, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                    (((NavMeshInfo*)meshInfo)->GetCell()
+                                         ? ((CellView*)((NavMeshInfo*)meshInfo)->GetCell())->GetEditorID()
                                          : DAT_01011584));
                                 invalidatedList.FUN_007cb2e0(&meshInfo);
                                 continue;
@@ -1103,19 +1114,19 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                 {
                                     if (!FUN_00693d70((unsigned int)((PtrView*)*((MeshInfoArray*)&meshInfo->m_kConnectedNavMeshInfos)
                                                                          ->FUN_00877a30(k))
-                                                          ->FUN_00559450()))
+                                                          ->Modelloader_GetReferencedThis()))
                                         invalid = true;
                                 }
                                 else
                                     invalid = true;
                                 if (invalid)
                                 {
-                                    Warning(DAT_0106bfa8, ((PtrView*)meshInfo)->FUN_00559450(),
-                                            (((NavMeshInfo*)meshInfo)->FUN_006b7770()
-                                                 ? ((CellView*)((NavMeshInfo*)meshInfo)->FUN_006b7770())
+                                    Warning(DAT_0106bfa8, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                            (((NavMeshInfo*)meshInfo)->GetCell()
+                                                 ? ((CellView*)((NavMeshInfo*)meshInfo)->GetCell())
                                                        ->GetEditorID()
                                                  : DAT_01011584));
-                                    ((InfoArray*)&meshInfo->m_kConnectedNavMeshInfos)->FUN_006bf8f0(k, true);
+                                    ((InfoArray*)&meshInfo->m_kConnectedNavMeshInfos)->BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(k, true);
                                     --k;
                                 }
                             }
@@ -1126,19 +1137,19 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                 {
                                     if (!FUN_00693d70((unsigned int)((PtrView*)*((MeshInfoArray*)&meshInfo->m_kPreferredConnections)
                                                                          ->FUN_00877a30(k))
-                                                          ->FUN_00559450()))
+                                                          ->Modelloader_GetReferencedThis()))
                                         invalid = true;
                                 }
                                 else
                                     invalid = true;
                                 if (invalid)
                                 {
-                                    Warning(DAT_0106bfa8, ((PtrView*)meshInfo)->FUN_00559450(),
-                                            (((NavMeshInfo*)meshInfo)->FUN_006b7770()
-                                                 ? ((CellView*)((NavMeshInfo*)meshInfo)->FUN_006b7770())
+                                    Warning(DAT_0106bfa8, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                            (((NavMeshInfo*)meshInfo)->GetCell()
+                                                 ? ((CellView*)((NavMeshInfo*)meshInfo)->GetCell())
                                                        ->GetEditorID()
                                                  : DAT_01011584));
-                                    ((InfoArray*)&meshInfo->m_kPreferredConnections)->FUN_006bf8f0(k, true);
+                                    ((InfoArray*)&meshInfo->m_kPreferredConnections)->BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(k, true);
                                     --k;
                                 }
                             }
@@ -1155,11 +1166,11 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                             continue;
                                         MeshInfoArray* pCellMeshes =
                                             ((GridLookup*)this)
-                                                ->FUN_006b7850((NavMesh*)meshInfo->GetParentWorldSpace(),
+                                                ->FindNavMeshInfoForCellKey((NavMesh*)meshInfo->GetParentWorldSpace(),
                                                                PackShortPair((unsigned short)x, (unsigned short)y));
                                         if (pCellMeshes)
                                             for (unsigned int i = 0; i < pCellMeshes->FUN_0044ddc0(); ++i)
-                                                neighborList.FUN_007cb2e0(pCellMeshes->FUN_006a7ad0(i));
+                                                neighborList.FUN_007cb2e0(pCellMeshes->BSSimpleArray_NiAVObject_1024_GetAt(i));
                                     }
                                 }
                             }
@@ -1173,10 +1184,10 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                         NavMeshInfo* record = *((MeshInfoArray*)&meshInfo->m_kConnectedNavMeshInfos)->FUN_00877a30(k);
                                         LinkChecker linkChecker;
                                         ((GridMap*)meshPtr.GetPtr())->CollectTrianglesForDoor(record, &linkChecker);
-                                        if (linkChecker.FUN_0076b610())
+                                        if (linkChecker.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
                                         {
-                                            Warning(DAT_0106bf18, ((PtrView*)meshInfo)->FUN_00559450(),
-                                                    ((PtrView*)record)->FUN_00559450());
+                                            Warning(DAT_0106bf18, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                                    ((PtrView*)record)->Modelloader_GetReferencedThis());
                                             corrupt = true;
                                             break;
                                         }
@@ -1186,10 +1197,10 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                         NavMeshInfo* record = *((MeshInfoArray*)&meshInfo->m_kPreferredConnections)->FUN_00877a30(k);
                                         LinkChecker linkChecker;
                                         ((GridMap*)meshPtr.GetPtr())->CollectTrianglesForDoor(record, &linkChecker);
-                                        if (linkChecker.FUN_0076b610())
+                                        if (linkChecker.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
                                         {
-                                            Warning(DAT_0106bf18, ((PtrView*)meshInfo)->FUN_00559450(),
-                                                    ((PtrView*)record)->FUN_00559450());
+                                            Warning(DAT_0106bf18, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                                    ((PtrView*)record)->Modelloader_GetReferencedThis());
                                             corrupt = true;
                                             break;
                                         }
@@ -1201,7 +1212,7 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                         if (((DataMatch*)&(
                                                  (GridRecord*)((GridMap*)meshPtr.GetPtr())->GetEdge((unsigned short)k))
                                                  ->info)
-                                                ->FUN_0069e090())
+                                                ->NavMeshTriangleEdgePortal_IsValid())
                                         {
                                             NavMeshInfo* other =
                                                 ((GridRecord*)((GridMap*)meshPtr.GetPtr())->GetEdge((unsigned short)k))
@@ -1223,26 +1234,26 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                                 }
                                             if (missing)
                                             {
-                                                if (neighborList.FUN_00719b20(other, 0, FUN_009a3830) !=
+                                                if (neighborList.FUN_00719b20(other, 0, Actor_AreReferencedValuesEqual) !=
                                                     (unsigned int)-1)
                                                 {
-                                                    Warning(DAT_0106be98, ((PtrView*)meshInfo)->FUN_00559450(),
-                                                            ((PtrView*)other)->FUN_00559450());
+                                                    Warning(DAT_0106be98, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                                            ((PtrView*)other)->Modelloader_GetReferencedThis());
                                                     corrupt = true;
                                                     break;
                                                 }
                                             }
                                         }
                                     }
-                                    for (unsigned int k = 0; k < ((GridMap*)meshPtr.GetPtr())->FUN_006b5a90(); ++k)
+                                    for (unsigned int k = 0; k < ((GridMap*)meshPtr.GetPtr())->NavMesh_GetNumDoorPortals(); ++k)
                                     {
                                         NavMeshInfo** other = (NavMeshInfo**)((GridMap*)meshPtr.GetPtr())
                                                                   ->FUN_0068f6b0((unsigned short)k);
-                                        if (((InfoArray*)&meshInfo->m_kDoorReferences)->FUN_00719b20(*other, 0, FUN_009a3830) ==
+                                        if (((InfoArray*)&meshInfo->m_kDoorReferences)->FUN_00719b20(*other, 0, Actor_AreReferencedValuesEqual) ==
                                             (unsigned int)-1)
                                         {
-                                            Warning(DAT_0106be20, ((PtrView*)meshInfo)->FUN_00559450(),
-                                                    ((TESObjectREFR*)*other)->FUN_0084e3a0());
+                                            Warning(DAT_0106be20, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                                    ((TESObjectREFR*)*other)->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                                             corrupt = true;
                                             break;
                                         }
@@ -1252,7 +1263,7 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                         NavMeshInfo* other = *((MeshInfoArray*)&meshInfo->m_kDoorReferences)->FUN_00877a30(k);
                                         {
                                             bool linkChecker = false;
-                                            for (unsigned int i = 0; i < ((GridMap*)meshPtr.GetPtr())->FUN_006b5a90();
+                                            for (unsigned int i = 0; i < ((GridMap*)meshPtr.GetPtr())->NavMesh_GetNumDoorPortals();
                                                  ++i)
                                             {
                                                 if (*(NavMeshInfo**)((GridMap*)meshPtr.GetPtr())
@@ -1264,8 +1275,8 @@ void NavMeshInfoMap::ValidateNavMeshes()
                                             }
                                             if (!linkChecker)
                                             {
-                                                Warning(DAT_0106bdb0, ((PtrView*)meshInfo)->FUN_00559450(),
-                                                        ((TESObjectREFR*)other)->FUN_0084e3a0());
+                                                Warning(DAT_0106bdb0, ((PtrView*)meshInfo)->Modelloader_GetReferencedThis(),
+                                                        ((TESObjectREFR*)other)->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                                                 corrupt = true;
                                                 break;
                                             }
@@ -1280,7 +1291,7 @@ void NavMeshInfoMap::ValidateNavMeshes()
                 }
                 for (unsigned int i = 0; i < invalidatedList.FUN_0044ddc0(); ++i)
                 {
-                    FUN_006b6990(((PtrView*)*invalidatedList.FUN_00877a30(i))->FUN_00559450());
+                    ProcessState_006b6990(((PtrView*)*invalidatedList.FUN_00877a30(i))->Modelloader_GetReferencedThis());
                     NavMeshInfo* info = *invalidatedList.FUN_00877a30(i);
                     NavMeshInfo* current = info;
                     current ? ((NavigationRequest*)current)->FUN_006b6390(true) : 0;
@@ -1292,11 +1303,11 @@ void NavMeshInfoMap::ValidateNavMeshes()
 
 using ::TESObjectCELL;
 
-::TESForm* __fastcall FUN_00690830(const ::NavMeshInfo*);
+::TESForm* __fastcall NavMeshInfo_GetParentSpace(const ::NavMeshInfo*);
 
 // Casts the TESForm* returned by FUN_00690830(this) to TESObjectCELL*.
 // @fnv 0x006b77b0
 TESObjectCELL* NavMeshInfo::GetInteriorCell()
 {
-    return dynamic_cast< ::TESObjectCELL*>(FUN_00690830(this));
+    return dynamic_cast< ::TESObjectCELL*>(NavMeshInfo_GetParentSpace(this));
 }

@@ -17,9 +17,9 @@ struct CallTarget_00e5c370
 };
 struct SearchObject
 {
-    int FUN_00e5c420(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
+    int ProcessAndReturnValue_00e5c420(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
 };
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct DispatchTarget
 {
     void CallWithFlag(void* aValue, int aZero, void* aOut);
@@ -46,7 +46,7 @@ struct FUN_00e5c460_cls
     int unk34;
     DispatchTarget m_38;
 
-    void FUN_00e5c460(OutObject* a1);
+    void hkpConstraintChainInstance_insertEntityAtFront(OutObject* a1);
 };
 #include <xmmintrin.h>
 __declspec(align(16)) struct XfOut_cls
@@ -58,7 +58,7 @@ __declspec(align(16)) struct XfOut_cls
 };
 struct FUN_00c7f690_cls
 {
-    void FUN_00c7f690(const __m128* m, const __m128* v);
+    void hkVector4_setTransformedInversePos(const __m128* m, const __m128* v);
 };
 struct XfSub_cls
 {
@@ -92,7 +92,7 @@ static char* XfSelectRec(char* rec)
     }
     return 0;
 }
-void FUN_00e5b3a0(XfScene_cls* a1, XfScene_cls* a2, const __m128* a3);
+void hkpConstraintChainUtil_addConstraintToBallSocketChain(XfScene_cls* a1, XfScene_cls* a2, const __m128* a3);
 // FUN_00e5b8f0: __cdecl, 317 bytes
 // Two 16-byte keys are filled by FUN_00e5ad40; the sorted-list tail is compared against
 // the owner's keys; the matching branch hands a 32-byte pair to a sub-object or holder.
@@ -124,7 +124,7 @@ struct KeyOwnerA
 };
 struct Sub18
 {
-    void FUN_00e5c440(hkMemoryAllocator* a, int b, Pair32* c);
+    void ProcessAndReturnValue_00e5c440(hkMemoryAllocator* a, int b, Pair32* c);
 };
 struct OwnerC
 {
@@ -156,10 +156,10 @@ struct ListB
     unsigned int* m_38;
     unsigned int m_3c;
     void AddReferencedObject(unsigned int key);
-    void FUN_00e5c460(unsigned int key);
+    void hkpConstraintChainInstance_insertEntityAtFront(unsigned int key);
 };
-int FUN_00e5ad40(KeyOwnerA* a, Tmp16* p, Tmp16* q);
-int FUN_00e5b8f0(KeyOwnerA* a1, ListB* a2, OwnerC* a3, ...);
+int hkpConstraintUtils_getConstraintPivots(KeyOwnerA* a, Tmp16* p, Tmp16* q);
+int hkpConstraintChainUtil_addConstraintToChain(KeyOwnerA* a1, ListB* a2, OwnerC* a3, ...);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
@@ -176,8 +176,8 @@ struct S_00e5c370_Elem
         reinterpret_cast<__m128&>(b) = reinterpret_cast<const __m128&>(o.b);
     }
 };
-void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
-void __cdecl FUN_00d2cc70(void* dst, const void* src, int nbytes);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
+void __cdecl hkMemUtil_memMove(void* dst, const void* src, int nbytes);
 template <class T>
 static __forceinline void S_00e5c370_ArrayBase_GrowArrayCapacity(hkArrayBase<T>& self, hkMemoryAllocator& a, int n);
 
@@ -189,7 +189,7 @@ static __forceinline void S_00e5c370_ArrayBase_GrowArrayCapacity(hkArrayBase<T>&
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(a, (&self), newSize, sizeof(T));
+            hkArrayUtil__reserve(a, (&self), newSize, sizeof(T));
         }
     }
 
@@ -303,7 +303,7 @@ struct Record
 };
 inline void* allocateObject(unsigned int size)
 {
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     void* memory = reinterpret_cast<hkMemoryAllocator*>(holder->m_heap)->blockAlloc(size);
     static_cast<RefObject*>(memory)->sizeFlags = (unsigned short)size;
     return memory;
@@ -320,7 +320,7 @@ struct FUN_00e3b8f0 : RefObject
     {
         return allocateObject(size);
     }
-    void FUN_00e3b850(const V4*, const V4*, const V4*, Body*, Body*, Body*);
+    void addConstraintInfoInBodySpace(const V4*, const V4*, const V4*, Body*, Body*, Body*);
 };
 struct FUN_00dd0530 : Edge
 {
@@ -339,7 +339,7 @@ struct Stream
 {
     int unk00, unk04, unk08;
     void FUN_00cb1600(void*, int);
-    void FUN_00cc01c0(const char*);
+    void ProcessAndReturnValue_00cc01c0(const char*);
     void FUN_00cc00e0();
 };
 struct Reporter;
@@ -360,7 +360,7 @@ static const char* const filename = ".\\Constraint\\Chain\\hkpConstraintChainUti
 static const char unordered[] =
     "Constraints are not ordered properly ! Two consecutive constraint share no common hkpEntity.";
 static const char nomotors[] = "No motors extracted from the original constraint.";
-int __cdecl FUN_00e5ad40(const Edge*, V4&, V4&);
+int __cdecl hkpConstraintUtils_getConstraintPivots(const Edge*, V4&, V4&);
 void __cdecl GetConstraintMotorValues(const void*, Body*&, Body*&, Body*&);
 struct Buffer
 {
@@ -389,7 +389,8 @@ inline void __fastcall SetRelativeRotation(V4* result, void*, const V4* left, co
 }
 
 // @fnv 0x00e5b510
-FUN_00dd0530* __cdecl FUN_00e5b510(Edges& edges, ByteFlag clone)
+// src: XBOX_PDB 0x00e5b510
+FUN_00dd0530* __cdecl hkpConstraintChainUtil_buildPoweredChain(Edges& edges, ByteFlag clone)
 {
     FUN_00e3b8f0* chain = new FUN_00e3b8f0;
     FUN_00dd0530* result = new FUN_00dd0530(chain);
@@ -412,10 +413,10 @@ FUN_00dd0530* __cdecl FUN_00e5b510(Edges& edges, ByteFlag clone)
         };
         V4 first;
         V4 second;
-        if (FUN_00e5ad40(edges[i], first, second) == 1)
+        if (hkpConstraintUtils_getConstraintPivots(edges[i], first, second) == 1)
         {
             validationStream.FUN_00cb1600(buffer, 512);
-            validationStream.FUN_00cc01c0(unsupported);
+            validationStream.ProcessAndReturnValue_00cc01c0(unsupported);
             DAT_01268360->vtable->report(DAT_01268360, 1, 0xabbad88d, buffer, filename, 183);
             validationStream.FUN_00cc00e0();
             chain->FUN_00c905b0();
@@ -428,7 +429,7 @@ FUN_00dd0530* __cdecl FUN_00e5b510(Edges& edges, ByteFlag clone)
             if (edges[i]->getB() != result->nodes.back())
             {
                 validationStream.FUN_00cb1600(buffer, 512);
-                validationStream.FUN_00cc01c0(unordered);
+                validationStream.ProcessAndReturnValue_00cc01c0(unordered);
                 DAT_01268360->vtable->report(DAT_01268360, 1, 0xabbad88d, buffer, filename, 194);
                 validationStream.FUN_00cc00e0();
                 chain->FUN_00c905b0();
@@ -444,7 +445,7 @@ FUN_00dd0530* __cdecl FUN_00e5b510(Edges& edges, ByteFlag clone)
         {
             Stream validationStream;
             validationStream.FUN_00cb1600(buffer, 512);
-            validationStream.FUN_00cc01c0(nomotors);
+            validationStream.ProcessAndReturnValue_00cc01c0(nomotors);
             DAT_01268360->vtable->report(DAT_01268360, 1, 0xabba88d3, buffer, filename, 207);
             validationStream.FUN_00cc00e0();
             chain->FUN_00c905b0();
@@ -461,7 +462,7 @@ FUN_00dd0530* __cdecl FUN_00e5b510(Edges& edges, ByteFlag clone)
             b = b->v0c();
             c = c->v0c();
         }
-        chain->FUN_00e3b850(&first, &second, &rotation, a, b, c);
+        chain->addConstraintInfoInBodySpace(&first, &second, &rotation, a, b, c);
         if (edges[i]->getA() == result->nodes.back())
         {
             chain->records[chain->count - 1].reversed = 1;
@@ -484,7 +485,7 @@ enum S5ba30_Result
 
 inline hkMemoryRouter& GetAudioHolder()
 {
-    return *FUN_00c85750();
+    return *hkMemoryRouter_getInstance();
 }
 
 inline hkMemoryAllocator& GetAudioHolderAllocator(hkMemoryRouter& holder)
@@ -569,7 +570,7 @@ struct S5ba30_ArrayOps
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, sizeof(T));
+            hkArrayUtil__reserve(alloc, this, newSize, sizeof(T));
         }
     }
     __forceinline void _setSize(hkMemoryAllocator& alloc, int n)
@@ -710,7 +711,7 @@ struct S5ba30_MapBase
         return i <= m_iPairCount;
     }
     Iterator FindSlot(unsigned long key) const;
-    int FUN_00cb1870(hkMemoryAllocator& a, unsigned long key, unsigned long val);
+    int hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocator& a, unsigned long key, unsigned long val);
     void ProcessArgument(hkMemoryAllocator& a);
     void EnsureCapacity(hkMemoryAllocator& a, int numElements);
     __forceinline Iterator findKey(unsigned long key) const
@@ -731,7 +732,7 @@ struct S5ba30_Map : public S5ba30_MapBase
     }
     __forceinline int insert(unsigned long key, unsigned long val)
     {
-        return FUN_00cb1870(S5ba30_HeapAllocator().get(this), key, val);
+        return hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(S5ba30_HeapAllocator().get(this), key, val);
     }
     __forceinline void reserve(int numElements)
     {
@@ -795,10 +796,10 @@ struct S5ba30_ErrStream
     void* m_pStreamWriter;
     S5ba30_ErrStream(void* buf, int bufSize);
     ~S5ba30_ErrStream();
-    S5ba30_ErrStream& FUN_00cc01c0(const char* str);
+    S5ba30_ErrStream& ProcessAndReturnValue_00cc01c0(const char* str);
     __forceinline S5ba30_ErrStream& operator<<(const char* str)
     {
-        return FUN_00cc01c0(str);
+        return ProcessAndReturnValue_00cc01c0(str);
     }
 };
 
@@ -826,7 +827,8 @@ struct S5ba30_EntityInfo
 }
 
 // @fnv 0x00e5ba30
-S5ba30_Result __cdecl FUN_00e5ba30(const S5ba30_Array<S5ba30_ConstraintInstance*>& allConstraints,
+// src: XBOX_PDB 0x00e5ba30
+S5ba30_Result __cdecl hkpConstraintChainUtil_findConstraintLinkBetweenEntities(const S5ba30_Array<S5ba30_ConstraintInstance*>& allConstraints,
                                    S5ba30_Entity* entityA, S5ba30_Entity* entityB,
                                    S5ba30_Array<S5ba30_Entity*>& entitiesOut,
                                    S5ba30_Array<S5ba30_ConstraintInstance*>& constraintsOut)
@@ -981,7 +983,7 @@ void hkArrayBase<S_00e5c370_Elem>::_spliceInto(hkMemoryAllocator& alloc, int ind
         int numtomove = m_iElementCount - index - numdel;
         if (newsize > getCapacity())
             S_00e5c370_ArrayBase_GrowArrayCapacity(*this, alloc, newsize);
-        FUN_00d2cc70(m_data + index + numtoinsert, m_data + index + numdel, numtomove * sizeof(S_00e5c370_Elem));
+        hkMemUtil_memMove(m_data + index + numtoinsert, m_data + index + numdel, numtomove * sizeof(S_00e5c370_Elem));
         S_00e5c370_Elem* dst = m_data + index;
         for (int i = 0; i < numtoinsert; i++)
             new (dst + i) S_00e5c370_Elem(p[i]);

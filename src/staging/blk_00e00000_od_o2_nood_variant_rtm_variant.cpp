@@ -30,7 +30,7 @@ struct __declspec(align(16)) FinishedObject
     int unk3c;
     FinishedObject(FinishingFlag);
 };
-void* __cdecl FUN_00e005f0();
+void* __cdecl Runtime_EvaluateValue_00e005f0();
 // Havok type-registration helper: construct the class in finish-loading mode (flag 0) on the stack,
 // then return its static registration data.
 extern char DAT_010e8ab0[];
@@ -62,7 +62,7 @@ struct __declspec(align(16)) S_00e00cd0_Obj
     unsigned int m_5c;
     S_00e00cd0_Obj(FinishingFlag flag);
 };
-const char* __cdecl FUN_00e00cd0();
+const char* __cdecl getVtablehkpFastMeshShape();
 // Havok vtable getter: finish-construct a throwaway instance in an aligned scratch buffer (the
 // FinishingFlag constructor only re-installs the vtable and runs the members'
 // finish constructors) and return its vtable pointer.
@@ -89,7 +89,7 @@ struct __declspec(align(16)) hkObjectE01710
     hkObjectE01710(FinishingFlag flag) : m_member18(flag), m_member1c(flag)
     {}
 };
-void* FUN_00e01710();
+void* hkObjectE01710_AllocateStorage_00e01710();
 // RTTI identifies hkpNullCollisionFilter. The finish constructor installs its
 // primary and four interface type headers; its filter kind is at offset0x20.
 struct __declspec(align(16)) FUN_00e00a80
@@ -118,7 +118,7 @@ struct __declspec(align(16)) FilterStorage402
     unsigned unk18, unk1c;
     unsigned filterType;
 };
-unsigned FUN_00e00a60();
+unsigned Object_ProcessAndReturnValue_00e00a60();
 class __declspec(align(16)) S00e000e0_Object
 {
   public:
@@ -148,14 +148,14 @@ class __declspec(align(16)) S00e000e0_Object
     int unk58;
     int unk5C;
 };
-const void* __cdecl FUN_00e000e0();
+const void* __cdecl Object_GetConstructedVirtualTable_00e000e0();
 struct Handle_e00290
 {
     int m_v;
 };
 struct FUN_00e00290_sub
 {
-    void FUN_00cb0a70(Handle_e00290 kHandle);
+    void ReturnSelf(Handle_e00290 kHandle);
     int m_00;
 };
 extern int DAT_010cc040;
@@ -188,7 +188,7 @@ struct __declspec(align(16)) FUN_00e00290_obj
     int unk48;
     int unk4C;
 };
-int* __cdecl FUN_00e00290();
+int* __cdecl getVtablehkpConstraintChainInstance();
 class __declspec(align(16)) S00e003b0_Object
 {
   public:
@@ -286,7 +286,7 @@ class __declspec(align(16)) S00e003b0_Object
     int unk168;
     int unk16C;
 };
-const void* __cdecl FUN_00e003b0();
+const void* __cdecl Runtime_GetVtableFromTemporary_00e003b0();
 class __declspec(align(16)) S00e004d0_Object
 {
   public:
@@ -348,7 +348,7 @@ class __declspec(align(16)) S00e004d0_Object
     int unkD8;
     int unkDC;
 };
-const void* __cdecl FUN_00e004d0();
+const void* __cdecl Runtime_GetVtableFromTemporary_00e004d0();
 class __declspec(align(16)) S00e006b0_Object
 {
   public:
@@ -366,7 +366,7 @@ class __declspec(align(16)) S00e006b0_Object
     int unk28;
     int unk2C;
 };
-const void* __cdecl FUN_00e006b0();
+const void* __cdecl Runtime_GetVtableFromTemporary_00e006b0();
 class __declspec(align(16)) S00e00b80_Object
 {
   public:
@@ -436,7 +436,7 @@ class __declspec(align(16)) S00e00b80_Object
     int unkF8;
     int unkFC;
 };
-const void* __cdecl FUN_00e00b80();
+const void* __cdecl getVtablehkpGroupFilter();
 class __declspec(align(16)) S00e00f90_Object
 {
   public:
@@ -454,7 +454,7 @@ class __declspec(align(16)) S00e00f90_Object
     int unk28;
     int unk2C;
 };
-const void* __cdecl FUN_00e00f90();
+const void* __cdecl Runtime_GetVtableFromTemporary_00e00f90();
 class __declspec(align(16)) S00e01230_Object
 {
   public:
@@ -476,7 +476,7 @@ class __declspec(align(16)) S00e01230_Object
     int unk38;
     int unk3C;
 };
-const void* __cdecl FUN_00e01230();
+const void* __cdecl Runtime_UpdateState_00e01230();
 struct LoadedPointer
 {
     int m_uiFilterValue;
@@ -492,7 +492,7 @@ struct __declspec(align(16)) LoadedObject
     LoadedObject(FinishingFlag flag) : m_pHeadNode(flag), m_iSecondInteger(flag), m_third(flag)
     {}
 };
-const void* FUN_00e01830();
+const void* Runtime_UpdateState_00e01830();
 class __declspec(align(16)) S00e01e50_Object
 {
   public:
@@ -506,7 +506,7 @@ class __declspec(align(16)) S00e01e50_Object
     int unk18;
     int unk1C;
 };
-const void* __cdecl FUN_00e01e50();
+const void* __cdecl Runtime_GetVtableFromTemporary_00e01e50();
 class __declspec(align(16)) S00e020f0_Object
 {
   public:
@@ -520,14 +520,14 @@ class __declspec(align(16)) S00e020f0_Object
     int unk18;
     int unk1C;
 };
-const void* __cdecl FUN_00e020f0();
+const void* __cdecl Runtime_GetVtableFromTemporary_00e020f0();
 struct Handle_e02180
 {
     int m_v;
 };
 struct FUN_00e02180_sub
 {
-    void FUN_00cb0a70(Handle_e02180 kHandle);
+    void ReturnSelf(Handle_e02180 kHandle);
     int m_00;
 };
 extern int DAT_010e9ccc;
@@ -546,7 +546,7 @@ struct __declspec(align(16)) FUN_00e02180_obj
     int unk28;
     int unk2C;
 };
-int* __cdecl FUN_00e02180();
+int* __cdecl Object_ProcessAndReturnValue_00e02180();
 class __declspec(align(16)) S00e02730_Object
 {
   public:
@@ -560,7 +560,7 @@ class __declspec(align(16)) S00e02730_Object
     int unk18;
     int unk1C;
 };
-const void* __cdecl FUN_00e02730();
+const void* __cdecl Runtime_GetVtableFromTemporary_00e02730();
 #include <xmmintrin.h>
 struct S_00e11530_Node
 {
@@ -579,7 +579,7 @@ struct S_00e11530_Owner
     int unk10;
     S_00e11530_Node* unk14;
 
-    LocalM128* FUN_00e11530(LocalM128* out);
+    LocalM128* ProcessEntries_00e11530(LocalM128* out);
 };
 struct VecQ
 {
@@ -597,8 +597,8 @@ struct __declspec(align(16)) RotationQ
 };
 struct ShapeQ
 {
-    void FUN_00e11a90(const TransformQ* t);
-    void FUN_00e11b40(const RotationQ* r);
+    void ProcessEntries_00e11a90(const TransformQ* t);
+    void UpdateFields_00e11b40(const RotationQ* r);
 };
 extern unsigned __int64 g_unk01268370[6];
 struct __declspec(align(16)) Rot
@@ -608,8 +608,8 @@ struct __declspec(align(16)) Rot
 #include "../../include/hkTransform.h"
 struct Owner
 {
-    void FUN_00e11a90(const hkTransform* xf);
-    void FUN_00e11ca0(const LocalM128* src);
+    void ProcessEntries_00e11a90(const hkTransform* xf);
+    void UpdateFields_00e11ca0(const LocalM128* src);
 };
 struct __declspec(align(16)) S00e00d70_Object
 {
@@ -637,9 +637,9 @@ struct __declspec(align(16)) S00e00d70_Object
     int unk54;
     int unk58;
     int unk5c;
-    void FUN_00d57b20(FinishingFlag arg);
+    void hkpCylinderShape_hkpCylinderShape_00d57b20(FinishingFlag arg);
 };
-int __cdecl FUN_00e00d70();
+int __cdecl hkpCylinderShape_hkpCylinderShape_00d57b20_EvaluateValue_00e00d70();
 namespace N {
 typedef ::__m128 LocalM128;
 extern "C"
@@ -822,10 +822,10 @@ struct EdgeMemory
     int unk0c;
     EdgeAllocator* allocator;
 };
-EdgeMemory* FUN_00c85750();
-void FUN_00c908c0(void*, void*, int, int);
+EdgeMemory* hkMemoryRouter_getInstance();
+void hkArrayUtil__reserve(void*, void*, int, int);
 void FUN_00c90940(void*, void*, int);
-float FUN_00e13870(EdgeNode*, int);
+float Hkgpmesh_ComputeValues_00e13870(EdgeNode*, int);
 float ClampedAcos(float);
 template <class T> inline void EdgeAllocator::reserve(EdgeArray<T>& array, int needed, int elementSize)
 {
@@ -835,12 +835,12 @@ template <class T> inline void EdgeAllocator::reserve(EdgeArray<T>& array, int n
         int next = available * 2;
         if (needed >= next)
             next = needed;
-        FUN_00c908c0(this, &array, next, elementSize);
+        hkArrayUtil__reserve(this, &array, next, elementSize);
     }
 }
 template <class T> inline void EdgeArray<T>::grow(int elementSize)
 {
-    EdgeMemory* memory = FUN_00c85750();
+    EdgeMemory* memory = hkMemoryRouter_getInstance();
     if (size == (capacity & 0x3fffffff))
         FUN_00c90940(memory->allocator, this, elementSize);
 }
@@ -866,12 +866,12 @@ struct EdgePool
     void* head;
     int size;
     int unk14;
-    PoolPage* FUN_00e23530();
+    PoolPage* AllocateChainedSlotBlock();
     template <class T> T* allocate(const T& value)
     {
         PoolPage* page;
         if (!pageCount || !(page = pages[0])->freeHead)
-            page = FUN_00e23530();
+            page = AllocateChainedSlotBlock();
         T* item = (T*)page->freeHead;
         page->freeHead = item->next;
         ++page->used;
@@ -915,8 +915,8 @@ struct EdgeProcessor
     int unk04;
     EdgePool vertices;
     EdgePool edges;
-    void FUN_00e11910(EdgeNode*);
-    void FUN_00e195c0(float threshold, float distance, const EdgeMesh* mesh);
+    void UpdateTriangleNormal(EdgeNode*);
+    void ProcessEntries_00e195c0(float threshold, float distance, const EdgeMesh* mesh);
 };
 
 #include "../../include/hkVector4.h"
@@ -949,7 +949,8 @@ struct FUN_00e11630_Params
 extern float DAT_0106c2e0;
 
 // @fnv 0x00e11630
-FUN_00e11630_Result __stdcall FUN_00e11630(const FUN_00e11630_Params* p)
+// src: GUESS 0x00e11630 (confidence: low)
+FUN_00e11630_Result __stdcall Runtime_ComputeValues_00e11630(const FUN_00e11630_Params* p)
 {
     FUN_00e11630_Result r;
     r.m_vComponents = _mm_add_ps(p->m_p0c->m_v10.m_vComponents, p->m_p08->m_v10.m_vComponents);

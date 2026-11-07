@@ -19,7 +19,7 @@ void BSEndian(float* value, EndianSizeTag<4>);
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_0051d760();
+    virtual void AdjustThisAndForward_0051d760();
     int unk04;
     int unk08;
     int unk0C;
@@ -35,14 +35,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_0051d760();
+    virtual void AdjustThisAndForward_0051d760();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x0051d760
-    virtual void FUN_0051d760();
+// src: GUESS 0x0051d760 (confidence: low)
+    virtual void AdjustThisAndForward_0051d760();
 };
 
 Derived::Derived()

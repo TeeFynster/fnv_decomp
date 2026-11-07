@@ -11,7 +11,7 @@ public:
     ExtraStartingPosition(TESObjectREFR* apObject);
 
     bool Compare(BSExtraData* extra) override;
-    bool FUN_00430850(BSExtraData* apCompare);
+    bool Compare_00430850(BSExtraData* apCompare);
 
     float x;
     float y;

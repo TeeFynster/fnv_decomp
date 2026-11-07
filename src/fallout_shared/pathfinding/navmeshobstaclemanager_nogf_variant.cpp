@@ -9,7 +9,7 @@ struct V3
 {
     float x, y, z;
     void FUN_006815c0();
-    V3* FUN_00439ef0(V3* ret, const V3* other);
+    V3* SubtractIntoVector(V3* ret, const V3* other);
     float FUN_004a7290();
 };
 struct S006c4ad0_Obs
@@ -25,13 +25,13 @@ struct S006c4ad0_Ptr
     S006c4ad0_Obs* p;
     S006c4ad0_Ptr(S006c4ad0_Obs* q);
     void FUN_0045cec0();
-    S006c4ad0_Obs* FUN_00559450();
+    S006c4ad0_Obs* Modelloader_GetReferencedThis();
     ~S006c4ad0_Ptr();
 };
 struct S006c4ad0_Body;
 struct S006c4ad0_Ref2
 {
-    void* FUN_004b4ec0();
+    void* hkpRigidBody_getPosition();
 };
 struct S006c4ad0_Queue
 {
@@ -40,7 +40,7 @@ struct S006c4ad0_Queue
     virtual void f2();
     virtual void f3();
     virtual unsigned int Count();
-    void FUN_006c6030(S006c4ad0_Body** out);
+    void LockFreeQueue_bhkRigidBody_Pop(S006c4ad0_Body** out);
 };
 struct S006c4ad0_Body
 {
@@ -48,11 +48,11 @@ struct S006c4ad0_Body
 };
 struct S006c4ad0_Map
 {
-    bool FUN_006c62d0(S006c4ad0_Body* k, S006c4ad0_Ptr* out);
+    bool NiTMapBase_DFALL_NiTMapItem_bhkRigidBody_NiPointer_ObstacleData_bhkRigidBody_NiPointer_ObstacleData_GetAt(S006c4ad0_Body* k, S006c4ad0_Ptr* out);
 };
 struct S006c4ad0_List
 {
-    void FUN_00631620(const S006c4ad0_Ptr* p);
+    void BSSimpleList_NiPointer_bhkAction_Remove(const S006c4ad0_Ptr* p);
 };
 __declspec(align(16)) struct S006c4ad0_Holder3
 {
@@ -120,30 +120,31 @@ struct ObsMgr
     int unkD8;
     int unkDC;
     S006c4ad0_Map mapE0;
-    void FUN_006c1760(S006c4ad0_Ptr* sp);
-    void FUN_006c4ad0();
+    void NavMeshObstacleManager_UpdateObstacle(S006c4ad0_Ptr* sp);
+    void NavMeshObstacleManager_ProcessDeactivatedObstacles();
 };
 
 // @fnv 0x006c4ad0
-void ObsMgr::FUN_006c4ad0()
+// src: COMMUNITY 0x006c4ad0
+void ObsMgr::NavMeshObstacleManager_ProcessDeactivatedObstacles()
 {
     unsigned int count = queueA0.Count();
     for (unsigned int i = 0; i < count; i++)
     {
         S006c4ad0_Body* body;
-        queueA0.FUN_006c6030(&body);
+        queueA0.LockFreeQueue_bhkRigidBody_Pop(&body);
         S006c4ad0_Ptr sp(0);
-        if (mapE0.FUN_006c62d0(body, &sp))
+        if (mapE0.NiTMapBase_DFALL_NiTMapItem_bhkRigidBody_NiPointer_ObstacleData_bhkRigidBody_NiPointer_ObstacleData_GetAt(body, &sp))
         {
             S006c4ad0_Holder3 h;
-            h.FUN_004a3c90(body->GetReferenceFlags()->FUN_004b4ec0());
+            h.FUN_004a3c90(body->GetReferenceFlags()->hkpRigidBody_getPosition());
             V3 v;
             v.FUN_006815c0();
             FUN_00458620(&v, &h);
             V3 tmp;
-            if (v.FUN_00439ef0(&tmp, &sp.FUN_00559450()->pos)->FUN_004a7290() > kObsDist)
-                FUN_006c1760(&sp);
-            list3C.FUN_00631620(&sp);
+            if (v.SubtractIntoVector(&tmp, &sp.Modelloader_GetReferencedThis()->pos)->FUN_004a7290() > kObsDist)
+                NavMeshObstacleManager_UpdateObstacle(&sp);
+            list3C.BSSimpleList_NiPointer_bhkAction_Remove(&sp);
         }
     }
 }

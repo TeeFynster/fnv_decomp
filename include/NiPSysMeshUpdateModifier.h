@@ -34,8 +34,8 @@ public:
     void CopyMemberData(NiPSysMeshUpdateModifier* destination, CloningProcess& process);
     NiPSysMeshUpdateModifier& operator=(const NiPSysMeshUpdateModifier& other);
     void Init();
-    void FUN_00c20f30(CloningProcess& process);
-    bool FUN_00c20f80(NiStream& stream);
+    void ProcessClone_00c20f30(CloningProcess& process);
+    bool RegisterStreamables_00c20f80(NiStream& stream);
     NiPSysMeshUpdateModifier* FUN_00c21890(CloningProcess& process);
 
     NiTObjectArray<NiPointer<NiAVObject> > m_kSceneObjects; // 0x18

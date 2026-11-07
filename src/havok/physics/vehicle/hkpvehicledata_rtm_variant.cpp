@@ -76,12 +76,12 @@ public:
     VehiclePacketLocal_00e2(float x, float y, float z, float w);
     VehiclePacketLocal_00e2(const __m128& vector);
 
-    VehiclePacketLocal_00e2* FUN_005532a0(float x, float y, float z, float w);
-    void FUN_004a3f10(VehiclePacketLocal_00e2* vector);
-    void __thiscall FUN_004b4db0(const VehiclePacketLocal_00e2* vector);
-    VehiclePacketLocal_00e2& FUN_00e531a0(int parameter);
-    VehiclePacketLocal_00e2 FUN_00e53260(int parameter);
-    void FUN_005611c0();
+    VehiclePacketLocal_00e2* hkVector4_hkVector4(float x, float y, float z, float w);
+    void SetValue(VehiclePacketLocal_00e2* vector);
+    void __thiscall SetQuaternionComponentsFromVector(const VehiclePacketLocal_00e2* vector);
+    VehiclePacketLocal_00e2& ComputeValue_00e531a0(int parameter);
+    VehiclePacketLocal_00e2 ProcessAndReturnValue_00e53260(int parameter);
+    void normalize_005611c0();
 
     void operator=(const VehiclePacketLocal_00e2& vector);
     float& operator()(int index);
@@ -142,8 +142,8 @@ __forceinline hkMemoryAllocator& heapOf(hkMemoryRouter* record)
 {
     return *record->m_heap;
 }
-hkMemoryRouter* FUN_00c85750();
-void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* array, int numElements, int sizeElem);
+hkMemoryRouter* hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* array, int numElements, int sizeElem);
 
 class SimdReal
 {
@@ -225,7 +225,7 @@ static __forceinline void Array_GrowArrayCapacity(hkArrayBase<T>& self, hkMemory
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, (&self), newSize, sizeof(T));
+            hkArrayUtil__reserve(alloc, (&self), newSize, sizeof(T));
         }
     }
 
@@ -239,7 +239,7 @@ static __forceinline void Array__setSize(hkArrayBase<T>& self, hkMemoryAllocator
 template <class T>
 static __forceinline void Array_SetSizeAndGrow(hkArrayBase<T>& self, int n)
 {
-        Array__setSize(self, heapOf(FUN_00c85750()), n);
+        Array__setSize(self, heapOf(hkMemoryRouter_getInstance()), n);
     }
 
 struct Motion
@@ -403,7 +403,7 @@ struct __declspec(align(16)) FrictionCinfo
     float m_fChassisUnitInertiaRoll;
 };
 
-void __cdecl FUN_00e593f0(const FrictionCinfo& ci, hkpVehicleFrictionDescription& out);
+void __cdecl hkVehicleFrictionDescriptionInitValues(const FrictionCinfo& ci, hkpVehicleFrictionDescription& out);
 
 __forceinline hkArrayBase<WheelComponentParams>& wheelParamsOf(hkpVehicleData& d)
 {
@@ -518,12 +518,13 @@ __forceinline void initVehicleComponents(hkpVehicleData& self,
             ci.m_fAxisFrictionTuning4[numAxles] += wp.m_fViscosityFriction * wp.m_fSphereRadius;
         }
 
-        FUN_00e593f0(ci, self.m_kFrictionDescription);
+        hkVehicleFrictionDescriptionInitValues(ci, self.m_kFrictionDescription);
     }
 }
 
 // @fnv 0x00e39ab0
-void __fastcall FUN_00e39ab0(hkpVehicleData* self, int, const hkArrayBase<SuspensionWheelParameters>& suspensionWheelParams,
+// src: HAVOK_SRC 0x00e39ab0
+void __fastcall hkpVehicleData_init(hkpVehicleData* self, int, const hkArrayBase<SuspensionWheelParameters>& suspensionWheelParams,
                              const RigidBody* chassis)
 {
     initVehicleComponents(*self, suspensionWheelParams, chassis);

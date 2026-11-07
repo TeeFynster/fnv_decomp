@@ -15,7 +15,7 @@ struct State
     float scale;
     float parameter;
     hkVector4 position, axis, basis0, basis1, basis2, extra0, extra1;
-    void FUN_00d72030(const State*);
+    void InitializeFields_00d72030(const State*);
 };
 struct Header
 {
@@ -66,7 +66,8 @@ static __forceinline float clampValue(float a)
     return 0.0f < a ? 0.0f : a;
 }
 // @fnv 0x00d9f6f0
-int __cdecl FUN_00d9f6f0(void* unused, const Header* header, const State* states, int limit, float* output)
+// src: GUESS 0x00d9f6f0 (confidence: low)
+int __cdecl hkVector4_ProcessEntries_00d9f6f0(void* unused, const Header* header, const State* states, int limit, float* output)
 {
     const State* first = states + header->first;
     const State* second = states + header->second;
@@ -101,15 +102,15 @@ int __cdecl FUN_00d9f6f0(void* unused, const Header* header, const State* states
             } while (*cursor == static_cast<signed char>(opcode));
             break;
         case 27: {
-            firstLocal.FUN_00d72030(first);
+            firstLocal.InitializeFields_00d72030(first);
             first = &firstLocal;
-            secondLocal.FUN_00d72030(second);
+            secondLocal.InitializeFields_00d72030(second);
             second = &secondLocal;
             hkVector4 firstAxis, secondAxis, firstBasis, secondBasis;
-            firstAxis.FUN_00c7f750(cursor, &firstLocal.axis);
-            secondAxis.FUN_00c7f750(cursor + 48, &secondLocal.axis);
-            firstBasis.FUN_00c7f750(cursor, &firstLocal.basis2);
-            secondBasis.FUN_00c7f750(cursor + 48, &secondLocal.basis2);
+            firstAxis.hkVector4_setMul3(cursor, &firstLocal.axis);
+            secondAxis.hkVector4_setMul3(cursor + 48, &secondLocal.axis);
+            firstBasis.hkVector4_setMul3(cursor, &firstLocal.basis2);
+            secondBasis.hkVector4_setMul3(cursor + 48, &secondLocal.basis2);
             firstLocal.position.set(_mm_add_ps(firstLocal.position.get(), firstAxis.get()));
             firstLocal.basis1.set(_mm_add_ps(firstLocal.basis1.get(), firstBasis.get()));
             secondLocal.position.set(_mm_add_ps(secondLocal.position.get(), secondAxis.get()));

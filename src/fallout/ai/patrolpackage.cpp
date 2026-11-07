@@ -28,11 +28,12 @@ class ArchiveManager
 
 struct PatrolPackage
 {
-    bool FUN_004f1540();
+    bool TESRegionData_GetOverride();
 };
 
 // @fnv 0x004f1540
-bool PatrolPackage::FUN_004f1540()
+// src: XBOX_PDB 0x004f1540
+bool PatrolPackage::TESRegionData_GetOverride()
 {
     return *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 4);
 }
@@ -73,7 +74,7 @@ bool PatrolActorPackageData::Init(Actor* apActor, TESPackage* apPackage)
     bool bvalid = (((ArchiveManager*)this)->*(bool(ArchiveManager::*)()) & ArchiveManager::CopyArchiveName)();
     if (bvalid)
     {
-        if (((PatrolPackage*)m_pEscortPackageData)->FUN_004f1540())
+        if (((PatrolPackage*)m_pEscortPackageData)->TESRegionData_GetOverride())
         {
             SetPatrolPosition((*(const NiPoint3&(__thiscall**)(Actor*))(*(int*)apActor + 0x1f4))(apActor));
         }
@@ -123,12 +124,12 @@ struct RefExtraHelper
 };
 struct ExtraHelper
 {
-    bool FUN_0042f3d0(void*);
-    void FUN_0042f300(void*);
+    bool ExtraDataList_GetPatrolRefCanBeUsedBy(void*);
+    void ExtraDataList_SetPatrolRefInUse(void*);
 };
 struct PatrolHelper
 {
-    void FUN_009f2b30();
+    void PatrolActorPackageData_ClearReservedPatrolRef();
 };
 void __cdecl ClampInt(unsigned int*, int, int);
 
@@ -141,7 +142,7 @@ using fnv_009f30d0::ClampInt;
 // @fnv 0x009f30d0
 bool PatrolActorPackageData::SetPatrolRefIndex(unsigned int aiRefIndex)
 {
-    if (References.FUN_0076b610() ||
+    if (References.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() ||
         !m_bReferenceFlag)
     {
         m_uiSecondValueAfterReferenceFlag = aiRefIndex;
@@ -156,10 +157,10 @@ bool PatrolActorPackageData::SetPatrolRefIndex(unsigned int aiRefIndex)
     ExtraDataList* pnewExtra = pnewRef ? (ExtraDataList*)((RefExtraHelper*)pnewRef)->GetExtra() : 0;
     if (pnewExtra)
     {
-        if (((ExtraHelper*)pnewExtra)->FUN_0042f3d0(pActor))
+        if (((ExtraHelper*)pnewExtra)->ExtraDataList_GetPatrolRefCanBeUsedBy(pActor))
         {
-            ((PatrolHelper*)this)->FUN_009f2b30();
-            ((ExtraHelper*)pnewExtra)->FUN_0042f300(pActor);
+            ((PatrolHelper*)this)->PatrolActorPackageData_ClearReservedPatrolRef();
+            ((ExtraHelper*)pnewExtra)->ExtraDataList_SetPatrolRefInUse(pActor);
             m_uiSecondValueAfterReferenceFlag = aiclampedRefIndex;
         }
         else
@@ -174,7 +175,7 @@ bool PatrolActorPackageData::SetPatrolRefIndex(unsigned int aiRefIndex)
 // @fnv 0x009f3390
 TESObjectREFR* PatrolActorPackageData::GetCurrentPatrolReference()
 {
-    if (!References.FUN_0076b610())
+    if (!References.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
     {
         return References.GetAt(m_uiSecondValueAfterReferenceFlag);
     }
@@ -186,18 +187,18 @@ TESObjectREFR* PatrolActorPackageData::GetCurrentPatrolReference()
 
 struct DH
 {
-    bool FUN_004226e0();
+    bool TESDataHandler_GetClearingData();
 };
 extern DH* g_dataHandler;
 struct PatrolCleanupAccess
 {
-    void FUN_009f2b30();
+    void PatrolActorPackageData_ClearReservedPatrolRef();
 };
 // @fnv 0x009f2a70
 PatrolActorPackageData::~PatrolActorPackageData()
 {
-    if (!g_dataHandler->FUN_004226e0())
-        ((PatrolCleanupAccess*)this)->FUN_009f2b30();
+    if (!g_dataHandler->TESDataHandler_GetClearingData())
+        ((PatrolCleanupAccess*)this)->PatrolActorPackageData_ClearReservedPatrolRef();
     References.SetSize(0, true);
     eState = PATROL_STATE_DEBUG_DESTRUCTED;
     pActor = 0;
@@ -217,7 +218,7 @@ void PatrolActorPackageData::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
     apSaveGameBuffer->SaveData(&m_uiValueAfterReferenceFlag, 4, 0);
     apSaveGameBuffer->SerializeFormData(pPackage, 0);
     unsigned int isaveGameCount = (reinterpret_cast<BSSimpleArray<TESObjectREFR*, 1024>*>(reinterpret_cast<char*>(this) + offsetof(PatrolActorPackageData, References))) ? References.GetSize() : 0;
-    apSaveGameBuffer->FUN_00865f60(isaveGameCount);
+    apSaveGameBuffer->SaveVariableSizedValue(isaveGameCount);
     for (unsigned int i = 0; i < isaveGameCount; ++i)
     {
         TESObjectREFR** ppRefr = (TESObjectREFR**)&reinterpret_cast<BSSimpleArray<unsigned int, 1024>&>(References).GetAt((int)i);
@@ -227,11 +228,11 @@ void PatrolActorPackageData::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 
 struct PatrolTarget
 {
-    bool FUN_0042f3d0(void* p);
+    bool ExtraDataList_GetPatrolRefCanBeUsedBy(void* p);
 };
 struct PatrolRef
 {
-    PatrolTarget* FUN_005d43c0();
+    PatrolTarget* BSFile_GetDevice();
 };
 
 
@@ -241,7 +242,7 @@ bool PatrolActorPackageData::AdvanceToNextReference(bool abApply)
 {
     int idx = m_uiSecondValueAfterReferenceFlag;
     bool bResult = true;
-    bool bLoop = m_pEscortPackageData ? ((PatrolPackage*)m_pEscortPackageData)->FUN_004f1540() : false;
+    bool bLoop = m_pEscortPackageData ? ((PatrolPackage*)m_pEscortPackageData)->TESRegionData_GetOverride() : false;
     if (m_bPatrolFlag)
     {
         idx++;
@@ -309,10 +310,10 @@ bool PatrolActorPackageData::AdvanceToNextReference(bool abApply)
                 for (unsigned int i = 0; i < numRefs; i++)
                 {
                     PatrolRef* pRef = (PatrolRef*)References.GetAt(i);
-                    PatrolTarget* pTarget = pRef ? pRef->FUN_005d43c0() : 0;
+                    PatrolTarget* pTarget = pRef ? pRef->BSFile_GetDevice() : 0;
                     if (i == m_uiSecondValueAfterReferenceFlag)
                         continue;
-                    if (!pTarget || !pTarget->FUN_0042f3d0(pActor))
+                    if (!pTarget || !pTarget->ExtraDataList_GetPatrolRefCanBeUsedBy(pActor))
                         uiValid--;
                 }
                 if (uiValid <= 0)
@@ -493,7 +494,7 @@ void PatrolActorPackageData::SelectClosestPatrolPoint(const NiPoint3& arPoint)
         AdvanceToNextReference(false);
         PatrolRefStub* pNext = (PatrolRefStub*)GetCurrentPatrolReference();
         PatrolTarget* pData = pNext ? pNext->GetTarget() : 0;
-        if (!pData || pData->FUN_0042f3d0(pActor))
+        if (!pData || pData->ExtraDataList_GetPatrolRefCanBeUsedBy(pActor))
         {
             pR = (PatrolRefStub*)GetCurrentPatrolReference();
             if (!pR)
@@ -660,7 +661,7 @@ void PatrolActorPackageData::SetReferenceTarget(TESObjectREFR* reference)
 {
     if (reference == (TESObjectREFR*)pActor)
     {
-        ((PatrolCleanupAccess*)this)->FUN_009f2b30();
+        ((PatrolCleanupAccess*)this)->PatrolActorPackageData_ClearReservedPatrolRef();
         eState = PATROL_STATE_DEBUG_ACTOR_DELETED;
         pActor = 0;
         pPackage = 0;
@@ -679,7 +680,7 @@ void PatrolActorPackageData::SetReferenceTarget(TESObjectREFR* reference)
                 index--;
             }
         }
-        if (pActor && !g_BGSSaveLoadGame->FUN_0042ce10())
+        if (pActor && !g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
         {
             if (!SetPatrolRefIndex(m_uiSecondValueAfterReferenceFlag))
             {

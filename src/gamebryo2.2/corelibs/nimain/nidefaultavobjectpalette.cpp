@@ -99,7 +99,8 @@ void NiDefaultAVObjectPalette::LoadBinary(NiStream& stream)
 extern MemoryManager g_memoryManager;
 
 // @fnv 0x00a6ef50
-void* __cdecl FUN_00a6ef50()
+// src: COMMUNITY 0x00a6ef50
+void* __cdecl NiTFixedStringMap_NiGlobalConstantEntry_NewItem()
 {
     void* p = g_memoryManager.Allocate(0xC);
     if (!p)
@@ -219,7 +220,8 @@ void __cdecl AddObjectToPaletteRecursive(NiAVObject* apObject, NiDefaultAVObject
 }
 
 // @fnv 0x00a6e8e0
-void __cdecl FUN_00a6e8e0(NiAVObject* object, NiDefaultAVObjectPalette* palette)
+// src: COMMUNITY 0x00a6e8e0
+void __cdecl RecurseAndRemoveObjectsFromPalette(NiAVObject* object, NiDefaultAVObjectPalette* palette)
 {
     if (object == 0)
         return;
@@ -231,11 +233,11 @@ void __cdecl FUN_00a6e8e0(NiAVObject* object, NiDefaultAVObjectPalette* palette)
     if (children == 0)
         return;
     for (unsigned int i = 0; i < children->m_usArraySize; ++i)
-        FUN_00a6e8e0((NiAVObject*)children->m_children[i], palette);
+        RecurseAndRemoveObjectsFromPalette((NiAVObject*)children->m_children[i], palette);
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
-extern "C" void* __cdecl FUN_00aa1070(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
+extern "C" void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 extern "C" void* __cdecl FUN_00ec61c0(void* buffer, int value, unsigned int size);
 extern "C" unsigned char DAT_01096284;
 extern "C" unsigned char DAT_01096114;
@@ -245,7 +247,7 @@ struct PaletteObject : NiDefaultAVObjectPalette
 {
     static __forceinline void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     __forceinline PaletteObject() throw()
     {
@@ -254,7 +256,7 @@ struct PaletteObject : NiDefaultAVObjectPalette
         hash.m_ppVirtualMethodTable = (void**)&DAT_01096114;
         hash.m_uiHashSize = 37;
         hash.m_kItemCount.m_uiCount = 0;
-        hash.m_ppkHashTable = (NiTMapItem<NiFixedString, NiAVObject*>**)FUN_00aa1070(148);
+        hash.m_ppkHashTable = (NiTMapItem<NiFixedString, NiAVObject*>**)_NiMalloc_00aa1070(148);
         FUN_00ec61c0(hash.m_ppkHashTable, 0, hash.m_uiHashSize * 4);
         hash.m_ppVirtualMethodTable = (void**)&DAT_0109618c;
         m_pkScene = 0;
@@ -262,7 +264,7 @@ struct PaletteObject : NiDefaultAVObjectPalette
 };
 struct PaletteOwner
 {
-    void __thiscall FUN_00aa1000(PaletteObject* palette, void* argument);
+    void __thiscall NiCollisionObject_CopyMembers(PaletteObject* palette, void* argument);
     PaletteObject* __thiscall CreatePalette(void* argument);
 };
 // Allocates a PaletteObject, initializes it via FUN_00aa1000 with argument, and returns it.
@@ -270,7 +272,7 @@ struct PaletteOwner
 PaletteObject* PaletteOwner::CreatePalette(void* argument)
 {
     PaletteObject* palette = new PaletteObject;
-    FUN_00aa1000(palette, argument);
+    NiCollisionObject_CopyMembers(palette, argument);
     return palette;
 }
 
@@ -438,12 +440,13 @@ void NiDefaultAVObjectPalette::ProcessClone(CloningProcess& kCloning)
     }
 }
 
-bool __stdcall FUN_00a84c70(void*);
+bool __stdcall BSAnimNote_RegisterStreamables(void*);
 
 // @fnv 0x00a6e540
-bool __stdcall FUN_00a6e540(void* p)
+// src: XBOX_PDB 0x00a6e540
+bool __stdcall NiDefaultAVObjectPalette_RegisterStreamables(void* p)
 {
-    return FUN_00a84c70(p);
+    return BSAnimNote_RegisterStreamables(p);
 }
 
 extern char* DAT_0109b220;
@@ -455,7 +458,7 @@ struct PaletteMap
     int unk04;
     void* unk08;
     unsigned int m_uiItemCount;
-    void* FUN_00ee8ac0();
+    void* NiTMapIterator_GetFirstPos();
     void FUN_00a8f770(void** iterator, char** key, void** object);
 };
 // Keep the equality implementation here until the shared class declares its override and base call.
@@ -474,7 +477,7 @@ bool PaletteEquality::Equals(PaletteEquality* other)
         return false;
     if (num)
     {
-        void* iterator = reinterpret_cast<PaletteMap&>(m_kObjectMap).FUN_00ee8ac0();
+        void* iterator = reinterpret_cast<PaletteMap&>(m_kObjectMap).NiTMapIterator_GetFirstPos();
         if (iterator)
         {
             void(__stdcall * deallocate)(void*) = DAT_00fdf1c4;
@@ -505,8 +508,8 @@ struct MapNoAlias : PaletteObjectMapView
 // The shared class does not yet declare its SaveBinary override.
 struct PaletteSaveShell : public NiDefaultAVObjectPalette
 {
-    void FUN_00a6e6c0(NiStream& kStream);
-    void FUN_00a724d0(NiStream& kStream);
+    void NiDefaultAVObjectPalette_SaveBinary(NiStream& kStream);
+    void NiInterpolator_LinkObject(NiStream& kStream);
 };
 
 template <class T> void WriteBinaryArray(NiBinaryStream& kOstr, const T* pValue, unsigned int uiNumValues)
@@ -516,9 +519,10 @@ template <class T> void WriteBinaryArray(NiBinaryStream& kOstr, const T* pValue,
 }
 
 // @fnv 0x00a6e6c0
-void PaletteSaveShell::FUN_00a6e6c0(NiStream& kStream)
+// src: XBOX_PDB 0x00a6e6c0
+void PaletteSaveShell::NiDefaultAVObjectPalette_SaveBinary(NiStream& kStream)
 {
-    FUN_00a724d0(kStream);
+    NiInterpolator_LinkObject(kStream);
 
     kStream.SaveLinkID(m_pkScene);
 
@@ -537,7 +541,7 @@ void PaletteSaveShell::FUN_00a6e6c0(NiStream& kStream)
             NiAVObject* pkObject;
             ((MapNoAlias&)m_kObjectMap).GetNext(pvPos, reinterpret_cast<NiFixedString&>(kKey), pkObject);
             pcKey = kKey.m_kHandle;
-            kStream.FUN_00a64160(pcKey);
+            kStream.SaveCString(pcKey);
             kStream.SaveLinkID(pkObject);
             if (pcKey != EmptyFS.m_kHandle)
                 InterlockedDecrement((volatile long*)(pcKey - 8));
@@ -547,7 +551,8 @@ void PaletteSaveShell::FUN_00a6e6c0(NiStream& kStream)
 
 void __cdecl CreateVertexBufferSet();
 // @fnv 0x00aa1000
-void __cdecl FUN_00aa1000()
+// src: XBOX_PDB 0x00aa1000
+void __cdecl NiCollisionObject_CopyMembers()
 {
     CreateVertexBufferSet();
 }
@@ -556,7 +561,7 @@ void __cdecl FUN_00aa1000()
 
 extern MemoryManager g_viewerMemoryManager;
 extern "C" int __cdecl sprintf(char*, const char*, ...);
-char* FUN_00a7d330(const char* pcName);
+char* NiViewerStrings_NiGetViewerString_Title(const char* pcName);
 extern const char* g_011f4a04;
 extern char* g_nullFixedStringHandle;
 struct ViewerStrings
@@ -630,14 +635,15 @@ struct PaletteHashViewer
 // The shared class does not yet declare its viewer override.
 struct NiDefaultAVObjectPaletteViewer : public NiDefaultAVObjectPalette
 {
-    void FUN_00a6ed90(ViewerStrings* pkStrings);
+    void NiDefaultAVObjectPalette_GetViewerStrings(ViewerStrings* pkStrings);
 };
 // Adds a formatted scene-name line and object-map keys to pkStrings, decrementing non-sentinel key handles.
 // @fnv 0x00a6ed90
-void NiDefaultAVObjectPaletteViewer::FUN_00a6ed90(ViewerStrings* pkStrings)
+// src: XBOX_PDB 0x00a6ed90
+void NiDefaultAVObjectPaletteViewer::NiDefaultAVObjectPalette_GetViewerStrings(ViewerStrings* pkStrings)
 {
     ((PaletteBaseViewer*)this)->GetViewerStrings(pkStrings);
-    char* pcRTTI = FUN_00a7d330(g_011f4a04);
+    char* pcRTTI = NiViewerStrings_NiGetViewerString_Title(g_011f4a04);
     pkStrings->Add(pcRTTI);
     char* pcScene = (char*)g_viewerMemoryManager.Allocate(0x60);
     sprintf(pcScene, "m_pkScene = %s", m_pkScene->m_kName.m_kHandle ? m_pkScene->m_kName.m_kHandle : "UNKNOWN");
@@ -668,7 +674,7 @@ extern int DAT_0109ca18;
 extern NiFixedString EmptyFS;
 
 void* __cdecl NiMalloc(unsigned int);
-void __cdecl FUN_00aa10f0(void*);
+void __cdecl _NiFree_00aa10f0(void*);
 extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
 struct Key
 {
@@ -719,7 +725,7 @@ struct NidefaultavobjectpaletteMapView
         FUN_00aa01f0();
         vtable = &DAT_0109ca08;
         FUN_00aa01f0();
-        FUN_00aa10f0(buckets);
+        _NiFree_00aa10f0(buckets);
     }
     __forceinline void* First() const
     {
@@ -809,11 +815,12 @@ __declspec(noinline) void NidefaultavobjectpaletteMapView::RemoveKey(const Key& 
 struct Palette : NiDefaultAVObjectPalette
 {
     void __thiscall CloneBase(void*);
-    void __thiscall FUN_00a6eb60(void*);
+    void __thiscall NiDefaultAVObjectPalette_LinkObject(void*);
 };
 // Clones the base object, then renames palette entries whose key differs from the object name by moving them in the map under the new key.
 // @fnv 0x00a6eb60
-void Palette::FUN_00a6eb60(void* apDest)
+// src: XBOX_PDB 0x00a6eb60
+void Palette::NiDefaultAVObjectPalette_LinkObject(void* apDest)
 {
     CloneBase(apDest);
     NidefaultavobjectpaletteMapView changes;

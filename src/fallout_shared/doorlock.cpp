@@ -174,7 +174,7 @@ DoorAccessData::DoorAccessData(TESObjectREFR* pRef)
 
     data.pRadioData = pRef->GetExtraRadioData();
     if (data.pRadioData != 0)
-        m_pDestinationCell = data.pRadioData->FUN_0043a2b0();
+        m_pDestinationCell = data.pRadioData->DoorTeleportData_GetTeleportCell();
     else
         m_pDestinationCell = 0;
 
@@ -328,14 +328,15 @@ ActorData::ActorData(Actor* apActor)
 
 struct FUN_00996800_shell : public DoorAccessData
 {
-    void FUN_00996800();
+    void AStarMap_AStarNode_NavMeshSearchNode_NavMeshSearchLink_Clear();
 };
 
 void* __cdecl memset(void*, int, unsigned int);
 
 // If the int at offset 0x1fdc is nonzero, zeroes the first 0x1fdc bytes of the object and resets that int to 0.
 // @fnv 0x00996800
-void FUN_00996800_shell::FUN_00996800()
+// src: XBOX_PDB 0x00996800
+void FUN_00996800_shell::AStarMap_AStarNode_NavMeshSearchNode_NavMeshSearchLink_Clear()
 {
     if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x1fdc) != 0)
     {
@@ -391,18 +392,19 @@ struct TeleportableReference
 typedef char _sizecheck_DoorTeleportData[sizeof(TeleportableReference) == 32 ? 1 : -1];
 struct FUN_00501e80_shell : public DoorAccessData
 {
-    void FUN_00501e80(TESObjectREFR*);
+    void DoorLock_SetFromDoorRef(TESObjectREFR*);
 };
 
 // @fnv 0x00501e80
-void FUN_00501e80_shell::FUN_00501e80(TESObjectREFR* apDoorRef)
+// src: XBOX_PDB 0x00501e80
+void FUN_00501e80_shell::DoorLock_SetFromDoorRef(TESObjectREFR* apDoorRef)
 {
     ExtraRadioData* ptel;
     LockExtraData* pDoorLock;
     m_pSourceCell = (TESObjectCELL*)((LowProcess*)apDoorRef)->LowProcess::GetTarget();
     ptel = apDoorRef->GetExtraRadioData();
     if (ptel)
-        m_pDestinationCell = ptel->FUN_0043a2b0();
+        m_pDestinationCell = ptel->DoorTeleportData_GetTeleportCell();
     else
         m_pDestinationCell = 0;
     pDoorLock = apDoorRef->GetLock();
@@ -448,7 +450,7 @@ struct LockActor;
 struct LockCell
 {
     void* GetOwner();
-    bool FUN_00546ca0(LockActor*);
+    bool IsActorCellOwner(LockActor*);
     bool IsInterior();
     bool IsFlag20Set();
 };
@@ -730,7 +732,7 @@ struct LockActor
     virtual void vf273();
     virtual bool vf274();
     LockCell* GetParentCell();
-    bool FUN_008a61b0();
+    bool Actor_IsAlarmed();
 };
 extern LockActor* DAT_011dea3c;
 struct DoorState
@@ -743,7 +745,7 @@ struct LockAccess
     LockCell* unk00;
     LockCell* cell;
     DoorState* state;
-    bool FUN_005021c0(LockActor*, bool);
+    bool DoorLock_IsAnOwner(LockActor*, bool);
     bool CanAccessLock(LockActor*, int, bool);
 };
 // Returns whether actor may access the lock: checks state, cell ownership, parent cell, and the global actor, returning true if any condition passes.
@@ -758,14 +760,14 @@ bool LockAccess::CanAccessLock(LockActor* actor, int unused, bool flag)
         else if (state && !state->FUN_005021a0() && flag)
             a = true;
         else if (actor != DAT_011dea3c && actor->GetParentCell() && actor->GetParentCell()->GetOwner() &&
-                 actor->GetParentCell()->FUN_00546ca0(actor))
+                 actor->GetParentCell()->IsActorCellOwner(actor))
         {
-            if (!cell || !cell->GetOwner() || cell->FUN_00546ca0(actor))
+            if (!cell || !cell->GetOwner() || cell->IsActorCellOwner(actor))
                 a = true;
         }
-        else if (actor != DAT_011dea3c && FUN_005021c0(actor, true))
+        else if (actor != DAT_011dea3c && DoorLock_IsAnOwner(actor, true))
             a = true;
-        else if (actor->vf193() && actor->FUN_008a61b0())
+        else if (actor->vf193() && actor->Actor_IsAlarmed())
             a = true;
         else if (actor == DAT_011dea3c && DAT_011dea3c->vf274() && cell && state && state->level != 100)
         {
@@ -778,7 +780,7 @@ bool LockAccess::CanAccessLock(LockActor* actor, int unused, bool flag)
 
 struct Nav
 {
-    void* FUN_00690800();
+    void* NavMeshInfo_GetWorldSpace();
     void* GetInteriorCell();
 };
 struct Position
@@ -792,7 +794,7 @@ struct Door
 struct Location
 {
     bool FUN_006dd6f0(int);
-    Nav* FUN_0044edb0();
+    Nav* TESMain_GetThread();
     NiPoint3 FUN_005c3420() const;
 };
 struct ParentSpaceNode
@@ -812,14 +814,14 @@ struct DoorArray
     int unk00, unk04, unk08, unk0C;
     unsigned FUN_0044ddc0();
     Door*& FUN_00877a30(unsigned);
-    void FUN_006dae00(const FUN_006d5320&);
+    void BSSimpleArray_TeleportLink_1024_Add(const FUN_006d5320&);
 };
 struct Result
 {
     int unk00, unk04, unk08, unk0C;
     DoorArray unk10;
     NiPoint3 unk20, unk2C;
-    unsigned FUN_006cf4c0(const ParentSpaceNode&);
+    unsigned BSSimpleArray_ParentSpaceNode_1024_Add(const ParentSpaceNode&);
 };
 #include "../../include/PathBuilderDetailedPathInfos.h"
 struct FUN_005e04c0
@@ -1911,14 +1913,14 @@ bool BuildPathWithDoors(Location* start, Location* end, Result* result, int a4, 
         FUN_006b8340 builder;
         PathBuilderDetailedPathInfos infos;
         FUN_005e04c0 doors;
-        if (builder.SetupNavMeshSearch(a4, start->FUN_005c3420(), start->FUN_0044edb0(), end->FUN_005c3420(),
-                                       end->FUN_0044edb0(), infos, doors, a5))
+        if (builder.SetupNavMeshSearch(a4, start->FUN_005c3420(), start->TESMain_GetThread(), end->FUN_005c3420(),
+                                       end->TESMain_GetThread(), infos, doors, a5))
         {
             ParentSpaceNode node;
-            node.unk04 = infos.FUN_00877a30(0)->FUN_00690800();
+            node.unk04 = infos.FUN_00877a30(0)->NavMeshInfo_GetWorldSpace();
             node.unk08 = infos.FUN_00877a30(0)->GetInteriorCell();
-            node.unk00 = infos.FUN_00877a30(0)->FUN_00690800() != 0;
-            result->FUN_006cf4c0(node);
+            node.unk00 = infos.FUN_00877a30(0)->NavMeshInfo_GetWorldSpace() != 0;
+            result->BSSimpleArray_ParentSpaceNode_1024_Add(node);
             for (unsigned i = 0; i < doors.FUN_0044ddc0(); ++i)
             {
                 if (doors.FUN_00877a30(i))
@@ -1926,12 +1928,12 @@ bool BuildPathWithDoors(Location* start, Location* end, Result* result, int a4, 
                     FUN_006d5320 entry;
                     entry.unk00 = doors.FUN_00877a30(i);
                     entry.unk04 = doors.FUN_00877a30(i)->FUN_00568e50()->FUN_00717e50();
-                    result->unk10.FUN_006dae00(entry);
+                    result->unk10.BSSimpleArray_TeleportLink_1024_Add(entry);
                     ParentSpaceNode next;
-                    next.unk04 = infos.FUN_00877a30(i + 1)->FUN_00690800();
+                    next.unk04 = infos.FUN_00877a30(i + 1)->NavMeshInfo_GetWorldSpace();
                     next.unk08 = infos.FUN_00877a30(i + 1)->GetInteriorCell();
-                    next.unk00 = infos.FUN_00877a30(i + 1)->FUN_00690800() != 0;
-                    result->FUN_006cf4c0(next);
+                    next.unk00 = infos.FUN_00877a30(i + 1)->NavMeshInfo_GetWorldSpace() != 0;
+                    result->BSSimpleArray_ParentSpaceNode_1024_Add(next);
                 }
             }
             result->unk20 = start->FUN_005c3420();

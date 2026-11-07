@@ -60,7 +60,7 @@ struct FUN_00d5a630_ctxB
     void InitB();
 };
 extern float DAT_0106ea1c;
-void __cdecl FUN_00d5a630(void* a1, int a2, int a3);
+void __cdecl hkGeometryUtility_createConvexGeometry(void* a1, int a2, int a3);
 struct S_00d5a6b0_Array
 {
     Vec4* m_data;
@@ -88,7 +88,7 @@ struct D5C110MemoryRouter
         return *m_pStreamAllocator;
     }
 };
-extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D5C110MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 // hkArray<hkVector4> without a destructor (Havok was built without EH): explicit cleanup.
 struct D5C110VertexArray
 {
@@ -101,7 +101,7 @@ struct D5C110VertexArray
 
     void ClearAndRelease()
     {
-        D5C110Allocator& alloc = FUN_00c85750().heap();
+        D5C110Allocator& alloc = hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(Vec4));
@@ -126,14 +126,14 @@ void __cdecl InitAndSetB(const D5C110StridedVertices& vertices, D5C110Geometry& 
 void __cdecl BuildGeometryFromShape(const void* shape, D5C110Geometry& aGeometry);
 struct D5C110VertexArray;
 void __cdecl ProcessArg(const void* shape, D5C110VertexArray& vertices);
-void __cdecl FUN_00d5a6a0(const void* shape, D5C110VertexArray& vertices);
+void __cdecl hkGeometryUtility_createVerticesFromPlaneEquations(const void* shape, D5C110VertexArray& vertices);
 #include <math.h>
 struct S00d5ad60_cls
 {
     float m_f00;
     unsigned char S00d5ad60_call(float* other, float threshold);
 };
-static unsigned char FUN_00d5ad60(S00d5ad60_cls* self, float* other, float threshold);
+static unsigned char approxEquals(S00d5ad60_cls* self, float* other, float threshold);
 #ifndef _INCLUDED_MM2
 union __declspec(intrin_type) __declspec(align(16)) __m128
 {
@@ -145,7 +145,7 @@ union __declspec(intrin_type) __declspec(align(16)) __m128
 extern "C" __m128 _mm_setr_ps(float, float, float, float);
 #endif
 extern float DAT_01011d78;
-static int FUN_00d5ad90(const float* pVec, float fTol);
+static int Hkgeometryutility_IsMaximumAbsoluteComponentNearOne(const float* pVec, float fTol);
 int __cdecl S00d5ad90_Wrap(const float* pVec, float fTol);
 struct S00d5c060_Src
 {
@@ -161,9 +161,9 @@ struct __declspec(align(16)) S00d5c060_Result
     unsigned int unk0C;
 };
 char* __cdecl AllocateWithHeader(D5C110Allocator* alloc, int size);
-char* __cdecl FUN_00c856c0(D5C110Allocator* owner, char* data);
-void __cdecl FUN_00d5beb0(S00d5c060_Result* self, char* data, int count, int flags, float scale);
-S00d5c060_Result FUN_00d5c060(const S00d5c060_Src* src, float scale);
+char* __cdecl hkMemoryRouter_easyFree(D5C110Allocator* owner, char* data);
+void __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(S00d5c060_Result* self, char* data, int count, int flags, float scale);
+S00d5c060_Result hkGeometryUtility_createMinBoundingSphere(const S00d5c060_Src* src, float scale);
 extern "C" __m128 _mm_add_ss(__m128, __m128);
 extern "C" float _mm_cvtss_f32(__m128);
 extern "C" void _mm_store_ss(float*, __m128);
@@ -177,7 +177,8 @@ struct MyPoint
 {
     __m128 v;
 };
-static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t)
+// src: GUESS 0x00d5bb10 (confidence: low)
+static __declspec(noinline) Vec4* Hkgeometryutilityfull_UpdateState_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -185,7 +186,8 @@ static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, fl
     res->w = a.y;
     return res;
 }
-static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
+// src: GUESS 0x00d5bb80 (confidence: low)
+static __declspec(noinline) Vec4* Object_ProcessAndReturnValue_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -193,7 +195,8 @@ static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Ve
     res->w = a.y;
     return res;
 }
-static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
+// src: GUESS 0x00d5bce0 (confidence: low)
+static __declspec(noinline) Vec4* Object_ComputeValue_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -201,7 +204,7 @@ static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Ve
     res->w = a.y;
     return res;
 }
-__m128* __cdecl FUN_00d5beb0(__m128* out, MyPoint* pts, int count, int depth, float t);
+__m128* __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(__m128* out, MyPoint* pts, int count, int depth, float t);
 extern "C" __m128 _mm_add_ps(__m128, __m128);
 extern "C" __m128 _mm_sub_ps(__m128, __m128);
 extern "C" __m128 _mm_add_ss(__m128, __m128);
@@ -300,7 +303,8 @@ struct ObbWord
     }
 };
 extern "C" int obbMix(int);
-static __declspec(noinline) void FUN_00d5ae60(const float* verts, int count, int stride, ObbWord ext,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const float* verts, int count, int stride, ObbWord ext,
                                               const ObbAxis* axes, ObbWord pos)
 {
     int triangles = count / 3;
@@ -316,7 +320,8 @@ static __declspec(noinline) void FUN_00d5ae60(const float* verts, int count, int
     ((ObbAxis*)ext.v)->operator()(0) = sum + axes[1](0) + (float)total;
     ((ObbAxis*)pos.v)->operator()(0) = (float)stride;
 }
-static __declspec(noinline) float FUN_00d5b0c0(const float* verts, int count, int stride, const ObbAxis* axes)
+// src: GUESS 0x00d5b0c0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00d5b0c0(const float* verts, int count, int stride, const ObbAxis* axes)
 {
     ObbAxis tmp[3];
     tmp[0] = axes[0];
@@ -328,10 +333,11 @@ static __declspec(noinline) float FUN_00d5b0c0(const float* verts, int count, in
     tmp[2].cross(axes[0], axes[1]);
     tmp[2].normalize();
     ObbAxis position, extents;
-    FUN_00d5ae60(verts, count, stride, ObbWord((int)&extents), tmp, ObbWord((int)&position));
+    Object_ProcessEntries_00d5ae60(verts, count, stride, ObbWord((int)&extents), tmp, ObbWord((int)&position));
     return extents(1) * extents(0) * extents(2);
 }
-static __declspec(noinline) void FUN_00d5b440(const ObbAxis* axes, ObbAxis* direction, float step, ObbAxis* out)
+// src: GUESS 0x00d5b440 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b440(const ObbAxis* axes, ObbAxis* direction, float step, ObbAxis* out)
 {
     for (int i = 0; i < 2; ++i)
     {
@@ -349,7 +355,7 @@ inline float obbRoot(float f)
 {
     return (float)sqrt((double)f);
 }
-static float FUN_00d5b640(const float* vertexArray, int numVertices, int striding, const ObbAxis* axes, float stepIn,
+static float Object_ProcessEntries_00d5b640(const float* vertexArray, int numVertices, int striding, const ObbAxis* axes, float stepIn,
                           ObbAxis* direction, int maxIter);
 const float* volatile obbVerts;
 const ObbAxis* volatile obbAxes;
@@ -489,7 +495,8 @@ __forceinline float axisInvSqrt(float f)
 {
     return 1.0f / axisSqrt(f);
 }
-static __declspec(noinline) void FUN_00d5ae60(const float* data, int count, int stride, Axis& size, const Axis* axes,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const float* data, int count, int stride, Axis& size, const Axis* axes,
                                               Axis& center)
 {
     Axis lower;
@@ -540,7 +547,8 @@ static __declspec(noinline) void FUN_00d5ae60(const float* data, int count, int 
     center.addMul4(midpoint(1), axes[1]);
     center.addMul4(midpoint(2), axes[2]);
 }
-static __declspec(noinline) float FUN_00d5b0c0(const float* data, int count, int stride, const Axis* axes)
+// src: GUESS 0x00d5b0c0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00d5b0c0(const float* data, int count, int stride, const Axis* axes)
 {
     Axis adjusted[3];
     adjusted[0] = axes[0];
@@ -553,23 +561,24 @@ static __declspec(noinline) float FUN_00d5b0c0(const float* data, int count, int
     adjusted[2].normalize3();
     Axis center;
     Axis size;
-    FUN_00d5ae60(data, count, stride, size, adjusted, center);
+    Object_ProcessEntries_00d5ae60(data, count, stride, size, adjusted, center);
     return size(0) * size(1) * size(2);
 }
-static __declspec(noinline) void FUN_00d5b2a0(const float* data, int count, int stride, const Axis* axes, float delta,
+// src: GUESS 0x00d5b2a0 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b2a0(const float* data, int count, int stride, const Axis* axes, float delta,
                                               Axis* direction)
 {
     Axis changed[3];
     changed[0] = axes[0];
     changed[1] = axes[1];
-    float base = FUN_00d5b0c0(data, count, stride, axes);
+    float base = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, axes);
     float invDelta = 1 / delta;
     for (int row = 0; row < 2; ++row)
     {
         for (int col = 0; col < 3; ++col)
         {
             changed[row](col) += delta;
-            float volume = FUN_00d5b0c0(data, count, stride, changed);
+            float volume = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             direction[row](col) = (volume - base) * invDelta;
             changed[row](col) = axes[row](col);
         }
@@ -583,7 +592,8 @@ static __declspec(noinline) void FUN_00d5b2a0(const float* data, int count, int 
         direction[1].mul4(invNorm);
     }
 }
-static __declspec(noinline) void FUN_00d5b440(const Axis* input, Axis* direction, float step, Axis* output)
+// src: GUESS 0x00d5b440 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b440(const Axis* input, Axis* direction, float step, Axis* output)
 {
     for (int axis = 0; axis < 2; ++axis)
     {
@@ -597,15 +607,16 @@ static __declspec(noinline) void FUN_00d5b440(const Axis* input, Axis* direction
     output[2].setCross(output[0], output[1]);
     output[2].normalize3();
 }
-static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int stride, const Axis* axes, float start,
+// src: GUESS 0x00d5b640 (confidence: low)
+static __declspec(noinline) float Object_ProcessEntries_00d5b640(const float* data, int count, int stride, const Axis* axes, float start,
                                                Axis* direction, int limit)
 {
     float fb = 0, fc = 0;
     float a = 0;
-    float fa = FUN_00d5b0c0(data, count, stride, axes);
+    float fa = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, axes);
     Axis changed[3];
-    FUN_00d5b440(axes, direction, start, changed);
-    float trial = FUN_00d5b0c0(data, count, stride, changed);
+    Object_ProcessEntries_00d5b440(axes, direction, start, changed);
+    float trial = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
     float b, c;
     if (fa > trial)
     {
@@ -615,8 +626,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         for (int iter = 0; iter < limit; ++iter)
         {
             c *= 1.2f;
-            FUN_00d5b440(axes, direction, c, changed);
-            fc = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, c, changed);
+            fc = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fc > fb)
                 break;
             else
@@ -636,8 +647,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         for (int iter = 0; iter < limit; ++iter)
         {
             b = (a + b) * 0.5;
-            FUN_00d5b440(axes, direction, b, changed);
-            fb = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, b, changed);
+            fb = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fa > fb && fc > fb)
                 break;
             if (iter == limit - 1)
@@ -655,8 +666,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         if (bc < ab)
         {
             x = b - golden * ab;
-            FUN_00d5b440(axes, direction, x, changed);
-            fx = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, x, changed);
+            fx = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fb > fx)
             {
                 c = b;
@@ -673,8 +684,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         else
         {
             x = b + golden * bc;
-            FUN_00d5b440(axes, direction, x, changed);
-            fx = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, x, changed);
+            fx = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fb > fx)
             {
                 a = b;
@@ -691,7 +702,7 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
     }
     return b;
 }
-static float FUN_00d5b990(const float* data, int count, int stride, const Axis* initial, Axis* result, int limit);
+static float Hkgeometryutility_UpdateState_00d5b990(const float* data, int count, int stride, const Axis* initial, Axis* result, int limit);
 const float* volatile probeData;
 int volatile probeCount, probeStride, probeLimit;
 Axis* volatile probeAxes;
@@ -823,7 +834,8 @@ static __forceinline void IncludeBoundsPoint(const BoundsVector* axes, const cha
     }
 }
 
-static __declspec(noinline) void FUN_00d5ae60(const BoundsVector* axes, const char* vertices, int count, int stride,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const BoundsVector* axes, const char* vertices, int count, int stride,
 
                                               BoundsVector* halfExtents, BoundsVector* center)
 {
@@ -863,7 +875,8 @@ static __declspec(noinline) void FUN_00d5ae60(const BoundsVector* axes, const ch
     center->packed = _mm_add_ps(center->packed, _mm_mul_ps(_mm_shuffle_ps(middle, middle, 0xaa), axes[2].packed));
 }
 
-static __declspec(noinline) float FUN_00d5b0c0(const BoundsVector* input, int stride, const char* vertices, int count)
+// src: GUESS 0x00d5b0c0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00d5b0c0(const BoundsVector* input, int stride, const char* vertices, int count)
 {
 
     // The zero comparison mask is dead when the bounds helper writes the extents.
@@ -901,7 +914,7 @@ static __declspec(noinline) float FUN_00d5b0c0(const BoundsVector* input, int st
 
     NormalizeThree<false>(axes[2], cross, halfExtents.packed, three, half);
 
-    FUN_00d5ae60(axes, vertices, count, stride, &halfExtents, &center);
+    Object_ProcessEntries_00d5ae60(axes, vertices, count, stride, &halfExtents, &center);
 
     return halfExtents.component[0] * halfExtents.component[1] * halfExtents.component[2];
 }
@@ -950,7 +963,8 @@ __forceinline void hkVector4::mul4(const float& s)
 }
 
 // @fnv 0x00d5b2a0
-static __declspec(noinline) void FUN_00d5b2a0(int a1, int a2, int a3, float d, int outI, const float* p)
+// src: GUESS 0x00d5b2a0 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b2a0(int a1, int a2, int a3, float d, int outI, const float* p)
 
 {
 
@@ -962,7 +976,7 @@ static __declspec(noinline) void FUN_00d5b2a0(int a1, int a2, int a3, float d, i
 
     *(__m128*)&tmp[4] = _mm_load_ps(p + 4);
 
-    float first = FUN_00d5b0c0((const BoundsVector*)p, a3, (const char*)a1, a2);
+    float first = Object_ProcessAndReturnValue_00d5b0c0((const BoundsVector*)p, a3, (const char*)a1, a2);
 
     float invD = 1.0f / d;
 
@@ -978,7 +992,7 @@ static __declspec(noinline) void FUN_00d5b2a0(int a1, int a2, int a3, float d, i
 
             columns[i].elements[k] = d + columns[i].elements[k];
 
-            out[i * 4 + k] = (FUN_00d5b0c0((const BoundsVector*)tmp, a3, (const char*)a1, a2) - first) * invD;
+            out[i * 4 + k] = (Object_ProcessAndReturnValue_00d5b0c0((const BoundsVector*)tmp, a3, (const char*)a1, a2) - first) * invD;
 
             columns[i].elements[k] = p[i * 4 + k];
         }
@@ -1025,7 +1039,7 @@ extern volatile float volumeValue;
 void EvaluateVolumeGradient()
 {
 
-    FUN_00d5b2a0((int)volumeVertices, volumeVertexCount, volumeVertexStride,
+    Object_ProcessEntries_00d5b2a0((int)volumeVertices, volumeVertexCount, volumeVertexStride,
 
                  volumeStep, (int)volumeGradient, volumeDirections);
 }
@@ -1033,7 +1047,7 @@ void EvaluateVolumeGradient()
 void EvaluateVolume()
 {
 
-    volumeValue = FUN_00d5b0c0((const BoundsVector*)volumeDirections, volumeVertexStride,
+    volumeValue = Object_ProcessAndReturnValue_00d5b0c0((const BoundsVector*)volumeDirections, volumeVertexStride,
 
                                volumeVertices, volumeVertexCount);
 }

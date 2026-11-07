@@ -22,7 +22,8 @@ void NiBSplineCompFloatInterpolator::LoadBinary(NiStream& stream)
 extern int g_011f401c;
 
 // @fnv 0x00a51520
-int* __cdecl FUN_00a51520()
+// src: COMMUNITY 0x00a51520
+int* __cdecl NiBSplineCompFloatInterpolator_GetRTTI()
 {
     return &g_011f401c;
 }
@@ -30,11 +31,12 @@ int* __cdecl FUN_00a51520()
 struct FUN_00a52d20_shell
 {
     int* m_p;
-    int __thiscall FUN_00a52d20(int* b, int* c, char* d);
+    int __thiscall NiBoolInterpolator_GetKeys(int* b, int* c, char* d);
 };
 
 // @fnv 0x00a52d20
-int __thiscall FUN_00a52d20_shell::FUN_00a52d20(int* b, int* c, char* d)
+// src: COMMUNITY 0x00a52d20
+int __thiscall FUN_00a52d20_shell::NiBoolInterpolator_GetKeys(int* b, int* c, char* d)
 {
     int* p = *(int**)((char*)this + 0x10);
     if (p)
@@ -132,7 +134,7 @@ bool __fastcall EvaluateAtTime(NiBSplineCompFloatInterpolator* self, int, float 
     return true;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 static const float kMaxCompScalar = 3.402823466e+38F;
 extern int DAT_01099b2c;
 
@@ -150,7 +152,7 @@ void __fastcall CopyFloatInterpolator(NiBSplineFloatInterpolator* self, int, NiB
 // @fnv 0x00a515c0
 NiBSplineCompFloatInterpolator* __fastcall CloneCompFloatInterpolator(NiBSplineCompFloatInterpolator* self, int, CloningProcess& cloning)
 {
-    NiBSplineCompFloatInterpolator* p = (NiBSplineCompFloatInterpolator*)FUN_00aa13e0(0x2c);
+    NiBSplineCompFloatInterpolator* p = (NiBSplineCompFloatInterpolator*)Object_DispatchCommandFour(0x2c);
     if (p)
     {
         InitializeCompFloatInterpolator(p);
@@ -166,7 +168,8 @@ NiBSplineCompFloatInterpolator* __fastcall CloneCompFloatInterpolator(NiBSplineC
 }
 
 // @fnv 0x00a51620
-NiBSplineCompFloatInterpolator* FUN_00a51620()
+// src: EXE 0x00a51620
+NiBSplineCompFloatInterpolator* NiBSplineCompFloatInterpolator_CreateObject()
 {
     NiBSplineCompFloatInterpolator* p = (NiBSplineCompFloatInterpolator*)NiBSplineCompFloatInterpolator::operator new(0x2c);
     if (p)

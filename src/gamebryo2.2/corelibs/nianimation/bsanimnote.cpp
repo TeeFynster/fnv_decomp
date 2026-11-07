@@ -13,7 +13,8 @@
 extern "C" void* g_011f3f00;
 
 // @fnv 0x00a44920
-void* __cdecl FUN_00a44920()
+// src: COMMUNITY 0x00a44920
+void* __cdecl BSAnimNotes_GetRTTI()
 {
     return &g_011f3f00;
 }
@@ -35,7 +36,8 @@ inline void* operator new(unsigned int, void* storage) { return storage; }
 
 // Allocates a 0x10-byte BSFadeNode, calls Init on it, sets its vtable to DAT_01097dd4, and returns the pointer or 0.
 // @fnv 0x00a44940
-void* __cdecl FUN_00a44940()
+// src: EXE 0x00a44940
+void* __cdecl BSAnimNotes_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x10);
     if (p)
@@ -121,7 +123,8 @@ void* BSAnimNotes::DestroyIfFlagged(unsigned int auiFlags)
 extern "C" unsigned char __stdcall MyHelper00a5d2f0(void* pObject);
 
 // @fnv 0x00a84c70
-bool __stdcall FUN_00a84c70(void* pObject)
+// src: XBOX_PDB 0x00a84c70
+bool __stdcall BSAnimNote_RegisterStreamables(void* pObject)
 {
     return MyHelper00a5d2f0(pObject);
 }
@@ -225,7 +228,8 @@ void BSAnimNote::GetViewerStrings(NiViewerStringsArray* apStrings)
 void __cdecl AppendCameraPathEntries();
 
 // @fnv 0x00a44910
-void __cdecl FUN_00a44910()
+// src: XBOX_PDB 0x00a44910
+void __cdecl BSAnimNotes_GetViewerStrings()
 {
     AppendCameraPathEntries();
 }

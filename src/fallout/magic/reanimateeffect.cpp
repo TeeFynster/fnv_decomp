@@ -13,7 +13,8 @@
 
 
 // @fnv 0x00827440
-unsigned short __thiscall ReanimateEffect::FUN_00827440(Actor* apActor)
+// src: XBOX_PDB 0x00827440
+unsigned short __thiscall ReanimateEffect::GetSaveSize_00827440(Actor* apActor)
 {
     unsigned short isize = 0;
     isize += FUN_00804f80(apActor);
@@ -101,7 +102,8 @@ struct BodyVirt
 };
 // Reverts this form, then restores body motion if the actor has 3D and iState is below 0x32.
 // @fnv 0x008276e0
-void __thiscall ReanimateEffect::FUN_008276e0(Actor* apActor)
+// src: XBOX_PDB 0x008276e0
+void __thiscall ReanimateEffect::Revert_008276e0(Actor* apActor)
 {
     ((TESForm*)this)->TESForm::Revert((unsigned int)apActor);
     if (iState < 0x32 && apActor && apActor->GetNiNode() && pBody)
@@ -112,19 +114,21 @@ void __thiscall ReanimateEffect::FUN_008276e0(Actor* apActor)
 
 // Allocates and constructs a reanimation effect from the three arguments, returning the new object.
 // @fnv 0x008273c0
-ReanimateEffect* FUN_008273c0(MagicCaster* apCaster, MagicItem* apSpell, EffectItem* apEffect)
+// src: GUESS 0x008273c0 (confidence: medium)
+ReanimateEffect* Object_ConstructObject(MagicCaster* apCaster, MagicItem* apSpell, EffectItem* apEffect)
 {
     return new ReanimateEffect(apCaster, apSpell, apEffect);
 }
 
 // @fnv 0x008274a0
-void ReanimateEffect::FUN_008274a0(Actor* apActor)
+// src: XBOX_PDB 0x008274a0
+void ReanimateEffect::SaveGame_008274a0(Actor* apActor)
 {
     ActiveEffect::SaveGame(apActor);
-    g_TESSaveLoadGame->FUN_008579b0(&m_4c, 4);
-    g_TESSaveLoadGame->FUN_008579b0(&m_50, 4);
-    g_TESSaveLoadGame->FUN_008579b0(m_54, 12);
-    g_TESSaveLoadGame->FUN_008579b0(m_60, 16);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_4c, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_50, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(m_54, 12);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(m_60, 16);
 }
 
 void* __cdecl operator new(unsigned int);
@@ -143,7 +147,8 @@ struct FUN_008266a0_copy60
 
 // Allocates a new effect from three fields of this, passes it to a17, copies fields at 0x48-0x6f into it and returns it.
 // @fnv 0x008266a0
-ActiveEffect* ReanimateEffect::FUN_008266a0()
+// src: XBOX_PDB 0x008266a0
+ActiveEffect* ReanimateEffect::Copy_008266a0()
 {
     ActiveEffect* presult = reinterpret_cast<ActiveEffect*>(
         new ReanimateEffect(m_pEffectInstance, pSpell, pEffect));
@@ -168,7 +173,7 @@ ActiveEffect* ReanimateEffect::FUN_008266a0()
 
 struct DH
 {
-    bool __thiscall FUN_004226e0();
+    bool __thiscall TESDataHandler_GetClearingData();
 };
 
 extern DH* g_dataHandler;
@@ -364,13 +369,14 @@ struct EffectVirt
     {}
 };
 
-void __cdecl FUN_0080b9e0(Actor*, Actor*, int);
+void __cdecl CommandEffect_CleanupCommandedActor(Actor*, Actor*, int);
 
 
 // @fnv 0x00827230
-void __thiscall ReanimateEffect::FUN_00827230()
+// src: XBOX_PDB 0x00827230
+void __thiscall ReanimateEffect::Finish_00827230()
 {
-    if (g_dataHandler->FUN_004226e0())
+    if (g_dataHandler->TESDataHandler_GetClearingData())
         return;
 
     Actor* pTarget = reinterpret_cast<ActiveEffect*>(this)->GetTarget()
@@ -381,7 +387,7 @@ void __thiscall ReanimateEffect::FUN_00827230()
     {
         if (m_4c < 0x32)
         {
-            pTarget->FUN_008acf10(false);
+            pTarget->Actor_SetGhost(false);
             if (m_48 != 0)
                 m_48->a57(1);
             pTarget->Kill(0, 0.0f);
@@ -398,7 +404,7 @@ void __thiscall ReanimateEffect::FUN_00827230()
                 : 0;
 
         if (pCasterActor != 0)
-            FUN_0080b9e0(pTarget, pCasterActor, 0);
+            CommandEffect_CleanupCommandedActor(pTarget, pCasterActor, 0);
     }
 }
 
@@ -511,15 +517,15 @@ struct ReanimateBody
 };
 struct ActorBodyAccess : Actor
 {
-    ReanimateBody* FUN_008adcb0();
+    ReanimateBody* Actor_GetFaceAnimationData();
 };
 struct BoneCollision
 {
-    BodyVirt* FUN_006fa820();
+    BodyVirt* bhkNiCollisionObject_GetWorldObject();
 };
 BoneCollision* FUN_0043b610(ReanimateNode*);
-void FUN_00c6a350(ReanimateNode*, bool, bool, bool, bool);
-void FUN_005b5e40(const char*);
+void bhkWorld_SetMotion(ReanimateNode*, bool, bool, bool, bool);
+void Warning_005b5e40(const char*);
 // @fnv 0x00827580
 void ReanimateEffect::UpdateReanimation(Actor* actor)
 {
@@ -527,7 +533,7 @@ void ReanimateEffect::UpdateReanimation(Actor* actor)
     ReanimateNode* root = reinterpret_cast<ReanimateNode*>(actor->GetNiNode());
     if (root)
     {
-        ReanimateBody* controller2 = static_cast<ActorBodyAccess*>(actor)->FUN_008adcb0();
+        ReanimateBody* controller2 = static_cast<ActorBodyAccess*>(actor)->Actor_GetFaceAnimationData();
         if (controller2)
         {
             if (state < 40)
@@ -536,20 +542,20 @@ void ReanimateEffect::UpdateReanimation(Actor* actor)
                 controller2->SetActive(false, false);
         }
         if (state < 30)
-            FUN_00c6a350(root, true, true, false, true);
+            bhkWorld_SetMotion(root, true, true, false, true);
         ReanimateNode* spine = root->GetObject(BoneName("Bip01 Spine2"));
         if (spine)
         {
             BoneCollision* collision8 = FUN_0043b610(spine);
             if (collision8)
             {
-                pBody = collision8->FUN_006fa820();
+                pBody = collision8->bhkNiCollisionObject_GetWorldObject();
                 pBody->b57(4);
             }
         }
         else
         {
-            FUN_005b5e40("SAVELOAD: No Bip01 Spine2 bone for reanimation. Need a backup bone!");
+            Warning_005b5e40("SAVELOAD: No Bip01 Spine2 bone for reanimation. Need a backup bone!");
         }
     }
 }
@@ -1577,10 +1583,11 @@ typedef TESObjectREFR* (__thiscall* ReanimationReferenceResolver)(TESObjectREFR*
 // The reference resolver at virtual slot 1 returns the candidate Character.
 // That return signature is not exposed by the shared TESObjectREFR declaration.
 // @fnv 0x00827340
-bool ReanimateEffect::FUN_00827340(TESObjectREFR* apRef)
+// src: XBOX_PDB 0x00827340
+bool ReanimateEffect::CheckTarget_00827340(TESObjectREFR* apRef)
 {
     Character* pChar = dynamic_cast<Character*>((*reinterpret_cast<ReanimationReferenceResolver**>(apRef))[1](apRef));
-    if (pChar != 0 && pChar->HasHealth(false) && !pChar->FUN_00608d80() && GetReanimationCharacterState(pChar) != 6)
+    if (pChar != 0 && pChar->HasHealth(false) && !pChar->Actor_IsReanimated() && GetReanimationCharacterState(pChar) != 6)
     {
         return true;
     }

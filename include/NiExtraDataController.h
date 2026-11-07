@@ -9,7 +9,7 @@ class NiExtraDataController : public NiSingleInterpController
 public:
     virtual bool IsEqual(NiObject* object) const;
 
-    void FUN_00a57400(NiStream& kStream);
+    void PostLinkObject_00a57400(NiStream& kStream);
 
     NiFixedString m_kDataName;
     NiPointer<NiExtraData> m_pExtraData;

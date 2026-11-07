@@ -10,11 +10,12 @@ void* _realloc(void* ptr, unsigned int size);
 
 struct FUN_00aa4200_Helper
 {
-    void* FUN_00aa4200(void* old, unsigned int size, unsigned int a, unsigned int b, unsigned int c);
+    void* _MemoryManager_Reallocate(void* old, unsigned int size, unsigned int a, unsigned int b, unsigned int c);
 };
 
 // @fnv 0x00aa4200
-void* FUN_00aa4200_Helper::FUN_00aa4200(void* old, unsigned int size, unsigned int a, unsigned int b, unsigned int c)
+// src: COMMUNITY 0x00aa4200
+void* FUN_00aa4200_Helper::_MemoryManager_Reallocate(void* old, unsigned int size, unsigned int a, unsigned int b, unsigned int c)
 {
     void* result2 = 0;
     unsigned int oldSize;

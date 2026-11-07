@@ -34,5 +34,5 @@ public:
     void SaveEyes();
     void Destroy();
     void* ReleaseIfFlagged(unsigned int flags);
-    void FUN_005fc1b0();
+    void InitializeData_005fc1b0();
 };

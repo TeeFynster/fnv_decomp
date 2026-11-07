@@ -18,30 +18,32 @@ public:
     char padC[4];
     char m_kBridgeAtoms[0xA0];
 
-    void FUN_00cbe190(float value);
-    float FUN_00cbe1a0();
-    void FUN_00cbe1b0(int index);
-    unsigned int FUN_00cbe1d0();
-    void* __thiscall FUN_00cbe210(int param);
+    void setMaxLinearImpulse(float value);
+    float getMaxLinearImpulse();
+    void setBodyToNotify(int index);
+    unsigned int getNotifiedBodyIndex();
+    void* __thiscall getConstraintInfo(int param);
     void SetLocalTransforms(const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
                             const hkVector4& pivot, const hkVector4& axis);
-    void FUN_00cbe400(const hkVector4& pivotA, const hkVector4& pivotB,
+    void SetConstraintPivotFrames(const hkVector4& pivotA, const hkVector4& pivotB,
                      const hkVector4& axisA, const hkVector4& axisB);
-    hkBool FUN_00cbe750() const;
+    hkBool hkpPointToPlaneConstraintData_isValid() const;
 };
 
 // @fnv 0x00cbe1b0
-void hkpHingeConstraintData::FUN_00cbe1b0(int index)
+// src: HAVOK_LIB 0x00cbe1b0
+void hkpHingeConstraintData::setBodyToNotify(int index)
 {
     reinterpret_cast<unsigned char*>(this)[0xa6] = (unsigned char)(1 << index);
 }
 
-extern "C" void* __cdecl FUN_00d21a60(void* thisPtr, int size, int param);
+extern "C" void* __cdecl hkpConstraintData_getConstraintInfoUtil(void* thisPtr, int size, int param);
 
 // @fnv 0x00cbe210
-void* __thiscall hkpHingeConstraintData::FUN_00cbe210(int param)
+// src: HAVOK_LIB 0x00cbe210
+void* __thiscall hkpHingeConstraintData::getConstraintInfo(int param)
 {
-    return FUN_00d21a60((char*)this + 0x10, 0x9c, param);
+    return hkpConstraintData_getConstraintInfoUtil((char*)this + 0x10, 0x9c, param);
 }
 
 // Writes 5 and 0x28 into target[1] and target[0] when param is nonzero, otherwise writes zeros.
@@ -61,13 +63,15 @@ void __stdcall SetTargetValues(char param, int* target)
 }
 
 // @fnv 0x00cbe190
-void hkpHingeConstraintData::FUN_00cbe190(float value)
+// src: HAVOK_LIB 0x00cbe190
+void hkpHingeConstraintData::setMaxLinearImpulse(float value)
 {
     *(float*)((char*)this + 0xa8) = value;
 }
 
 // @fnv 0x00cbe1a0
-float hkpHingeConstraintData::FUN_00cbe1a0()
+// src: XBOX_PDB 0x00cbe1a0
+float hkpHingeConstraintData::getMaxLinearImpulse()
 {
     return *reinterpret_cast<const float*>(reinterpret_cast<const char*>(this) + 0xA8);
 }
@@ -75,20 +79,23 @@ float hkpHingeConstraintData::FUN_00cbe1a0()
 // Reads a flag byte at +0xA6 and returns it shifted right by one.
 
 // @fnv 0x00cbe1d0
-unsigned int hkpHingeConstraintData::FUN_00cbe1d0()
+// src: HAVOK_LIB 0x00cbe1d0
+unsigned int hkpHingeConstraintData::getNotifiedBodyIndex()
 {
     return (unsigned int)reinterpret_cast<const unsigned char*>(this)[0xA6] >> 1;
 }
 
 // @fnv 0x00cbe230
-int __cdecl FUN_00cbe230()
+// src: GUESS 0x00cbe230 (confidence: high)
+int __cdecl hkpHingeConstraintData_ReturnOne()
 {
     return 1;
 }
 
 // The old transform stand-in called hkRotation::IsOrthonormal (0x00CB2E70), as bound by other units.
 // @fnv 0x00cbe750
-hkBool hkpHingeConstraintData::FUN_00cbe750() const
+// src: HAVOK_LIB 0x00cbe750
+hkBool hkpHingeConstraintData::hkpPointToPlaneConstraintData_isValid() const
 {
     const hkTransform& transformA = *reinterpret_cast<const hkTransform*>(m_kBridgeAtoms + 0x10);
     const hkTransform& transformB = *reinterpret_cast<const hkTransform*>(m_kBridgeAtoms + 0x50);
@@ -133,8 +140,8 @@ union hkVector4qView_00cbe240
         return reinterpret_cast<const hkReal*>(&m_vComponents)[i];
     }
 
-    void FUN_004b4ab0(const hkRotation& r, const hkVector4qView_00cbe240& v);
-    void FUN_00c7f690(const hkTransform& t, const hkVector4& v);
+    void hkVector4_setRotatedInverseDir(const hkRotation& r, const hkVector4qView_00cbe240& v);
+    void hkVector4_setTransformedInversePos(const hkTransform& t, const hkVector4& v);
 };
 
 struct hkpSetLocalTransformsAtom
@@ -221,15 +228,15 @@ void hkpHingeConstraintData::SetLocalTransforms(const hkTransform& bodyATransfor
     hkNormalize3(perpToAxle1);
     hkSetCross(perpToAxle2, axle, perpToAxle1);
 
-    t.m_kRotationA[0].FUN_004b4ab0(bodyATransform.m_rotation, axle);
-    t.m_kRotationA[1].FUN_004b4ab0(bodyATransform.m_rotation, perpToAxle1);
-    t.m_kRotationA[2].FUN_004b4ab0(bodyATransform.m_rotation, perpToAxle2);
-    t.m_kTranslationA.FUN_00c7f690(bodyATransform, pivot);
+    t.m_kRotationA[0].hkVector4_setRotatedInverseDir(bodyATransform.m_rotation, axle);
+    t.m_kRotationA[1].hkVector4_setRotatedInverseDir(bodyATransform.m_rotation, perpToAxle1);
+    t.m_kRotationA[2].hkVector4_setRotatedInverseDir(bodyATransform.m_rotation, perpToAxle2);
+    t.m_kTranslationA.hkVector4_setTransformedInversePos(bodyATransform, pivot);
 
-    t.m_kRotationB[0].FUN_004b4ab0(bodyBTransform.m_rotation, axle);
-    t.m_kRotationB[1].FUN_004b4ab0(bodyBTransform.m_rotation, perpToAxle1);
-    t.m_kRotationB[2].FUN_004b4ab0(bodyBTransform.m_rotation, perpToAxle2);
-    t.m_kTranslationB.FUN_00c7f690(bodyBTransform, pivot);
+    t.m_kRotationB[0].hkVector4_setRotatedInverseDir(bodyBTransform.m_rotation, axle);
+    t.m_kRotationB[1].hkVector4_setRotatedInverseDir(bodyBTransform.m_rotation, perpToAxle1);
+    t.m_kRotationB[2].hkVector4_setRotatedInverseDir(bodyBTransform.m_rotation, perpToAxle2);
+    t.m_kTranslationB.hkVector4_setTransformedInversePos(bodyBTransform, pivot);
 }
 
 
@@ -342,7 +349,8 @@ static __forceinline void hkSetCross(hkVector4qView_00cbe400& out, const hkVecto
 
 // Stores pivotA and pivotB as translations, and builds rotation matrices for A and B from axisA and axisB using hkCalculatePerpendicularVector and hkSetCross.
 // @fnv 0x00cbe400
-void hkpHingeConstraintData::FUN_00cbe400(const hkVector4& pivotA, const hkVector4& pivotB, const hkVector4& axisA,
+// src: GUESS 0x00cbe400 (confidence: medium)
+void hkpHingeConstraintData::SetConstraintPivotFrames(const hkVector4& pivotA, const hkVector4& pivotB, const hkVector4& axisA,
                                             const hkVector4& axisB)
 {
     using namespace fnv_00cbe400;

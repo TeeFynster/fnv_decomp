@@ -80,9 +80,9 @@ struct TransformOwner
     TransformObj* m_pSource;
 
     void ReleaseObject(TransformObj* pkObj, int iArg);
-    void FUN_00cc85b0(TransformObj* pkObj, int iArg);
+    void hkHingeLimitsConstraintCinfo_CloneData(TransformObj* pkObj, int iArg);
 };
-bool __stdcall FUN_00c84ec0(void* key);
+bool __stdcall bhkShape_CanShare(void* key);
 struct Cd2Target
 {
     virtual void v00();
@@ -173,7 +173,7 @@ class Cd2Owner
     {
         return this ? m_pShapeCollection : 0;
     }
-    bool FUN_00cd2f10(void* key);
+    bool bhkShapeCollection_CanShare(void* key);
 };
 extern "C"
 {
@@ -266,7 +266,7 @@ struct __declspec(align(16)) PoseVector
 struct PoseQuaternion
 {
     PoseVector vector;
-    void FUN_00c66320(const PoseQuaternion&, const PoseQuaternion&);
+    void setMul(const PoseQuaternion&, const PoseQuaternion&);
 };
 extern "C" unsigned int __security_cookie;
 extern "C" void __fastcall __security_check_cookie(unsigned int);
@@ -274,7 +274,8 @@ struct QuaternionProduct
 {
     __m128 quad;
 };
-__declspec(noinline) void PoseQuaternion::FUN_00c66320(const PoseQuaternion& a, const PoseQuaternion& b)
+// src: COMMUNITY 0x00c66320
+__declspec(noinline) void PoseQuaternion::setMul(const PoseQuaternion& a, const PoseQuaternion& b)
 {
     unsigned int cookie = __security_cookie;
     PoseVector cross;
@@ -318,7 +319,7 @@ struct PoseTransform
         PoseVector moved;
         moved.rotate(a.rotation.vector, b.translation);
         translation.value = _mm_add_ps(a.translation.value, moved.value);
-        rotation.FUN_00c66320(a.rotation, b.rotation);
+        rotation.setMul(a.rotation, b.rotation);
         scale.value = _mm_mul_ps(a.scale.value, b.scale.value);
     }
     __forceinline void relative(const PoseTransform& a, const PoseTransform& b)
@@ -345,12 +346,12 @@ struct PoseState
     int* flags;
     int unk20, unk24;
     bool synchronized;
-    const PoseTransform& FUN_00cda180(int);
+    const PoseTransform& hkaPose_calculateBoneModelSpace(int);
     __forceinline const PoseTransform& getWorld(int i)
     {
         if (!(flags[i] & 2))
             return world[i];
-        return FUN_00cda180(i);
+        return hkaPose_calculateBoneModelSpace(i);
     }
     __forceinline const PoseTransform& getLocal(int i)
     {
@@ -394,7 +395,7 @@ struct PoseState
             }
         }
     }
-    PoseTransform& FUN_00cda8e0(int index);
+    PoseTransform& hkaPose_accessBoneLocalSpace(int index);
 };
 struct FUN_00d4f2a0
 {
@@ -446,7 +447,7 @@ struct FUN_00cc5f30_cls
     int unk00;
     FUN_00d4f2a0* m_pSrc;
 
-    void FUN_00cc5f30(FUN_00d4f2a0* dst, int a2);
+    void hkRagdollLimitsConstraintCinfo_CloneData(FUN_00d4f2a0* dst, int a2);
     void ReleaseObject(FUN_00d4f2a0* dst, int a2);
 };
 struct S_00ccbce0_Source
@@ -531,8 +532,8 @@ struct S_00ccbce0_Owner
     int unk10;
     S_00ccbce0_Ref* unk14;
 
-    void __thiscall FUN_00c84e20(S_00ccbce0_Output* value);
-    void __thiscall FUN_00ccbce0(S_00ccbce0_Output* value);
+    void __thiscall bhkShape_CopyCinfo(S_00ccbce0_Output* value);
+    void __thiscall bhkExtendedMeshShape_CopyCinfo(S_00ccbce0_Output* value);
 };
 extern "C" __m128 _mm_setr_ps(float, float, float, float);
 struct BytePair
@@ -619,12 +620,12 @@ struct EntityOwner
     virtual void v45();
     virtual void v46();
     virtual int AddCinfo(EntityCinfo* info);
-    int FUN_00cc3050(EntityCinfo* info);
+    int bhkSpringAction_Init(EntityCinfo* info);
 };
 class S_00cd3c20_Obj
 {
   public:
-    void FUN_00c6cba0();
+    void bhkCharacterController_UpdateState();
     int unk000;
     int unk004;
     int unk008;
@@ -952,7 +953,7 @@ class S_00cd3c20_Obj
     int unk51c;
     int unk520;
 };
-void __stdcall FUN_00cd3c20(S_00cd3c20_Obj* obj);
+void __stdcall bhkCharacterStateClimbing_Update(S_00cd3c20_Obj* obj);
 struct IntegerBlock18
 {
     int unk00;
@@ -1047,7 +1048,7 @@ struct ShapeOwner
     virtual void vf45();
     virtual void vf46();
     virtual void finish(struct IntegerBlock18* pkInfo);
-    void FUN_00cc3710(IntegerBlock18* pkInfo);
+    void bhkMotorAction_Init(IntegerBlock18* pkInfo);
 };
 struct S00cc4610_Ref
 {
@@ -1158,7 +1159,7 @@ struct S00cc4610_Self
     virtual void v45();
     virtual void v46();
     virtual void v47(S00cc4610_In* i);
-    void FUN_00cc4610(S00cc4610_In* in);
+    void bhkAngularDashpotAction_Init(S00cc4610_In* in);
 };
 struct Cc7Bool
 {
@@ -1172,14 +1173,14 @@ struct Cc7Local
     Cc7Bool linearA[3], linearB[3];
     Cc7Bool angularA, angularB, pivotA, pivotB;
     void InitFromHelper(void* source);
-    void FUN_00d52000(void* out);
-    void FUN_00d51c30(void* tmp);
-    void* FUN_00d520a0(void* out);
-    void* FUN_00d51d40(void* tmp);
+    void ProcessAndReturnValue_00d52000(void* out);
+    void UpdateState_00d51c30(void* tmp);
+    void* ProcessAndReturnValue_00d520a0(void* out);
+    void* ProcessAndReturnValue_00d51d40(void* tmp);
     void AddBridgeAtoms();
     void AppendEntryAndAdvance();
-    void FUN_00d52ae0(float value);
-    void FUN_00d52ba0();
+    void ProcessAndReturnValue_00d52ae0(float value);
+    void hkpConstraintConstructionKit_restoreStrength();
     void AppendZeroItem();
 };
 struct __declspec(align(16)) Cc7Vector
@@ -1190,7 +1191,7 @@ struct Cc7Tmp
 {
     Cc7Vector column0, column1, column2;
     Cc7Vector translation;
-    void FUN_00cb22f0(void* base, void* arg);
+    void hkTransform_setMulInverseMul(void* base, void* arg);
 };
 extern const float g_011c5c70_arg1;
 struct Cc7Owner
@@ -1206,7 +1207,7 @@ struct Cc7Owner
     char* m10;
     void* m14;
     void* m18;
-    void FUN_00cc7fe0(void* arg);
+    void hkFixedConstraintCinfo_Fix(void* arg);
 };
 extern "C" void _ReadWriteBarrier();
 struct TypeHeader
@@ -1249,9 +1250,9 @@ struct LunaArgument
 };
 struct LunaTarget
 {
-    unsigned int FUN_00cca360(LunaArgument* argument);
+    unsigned int bhkMoppBvTreeShape_Init(LunaArgument* argument);
 };
-extern void* __cdecl FUN_00d54cd0(const void*, ScratchGeometry*, unsigned int);
+extern void* __cdecl hkpMoppUtility_buildCode(const void*, ScratchGeometry*, unsigned int);
 union Quaternion525
 {
     __m128 value;
@@ -1285,20 +1286,20 @@ class PositionText525
 {
   public:
     float x, y, z;
-    char* FUN_00a59af0(const char*);
+    char* GetViewerString_00a59af0(const char*);
 };
 extern void* DAT_01268670;
 extern const char DAT_0101c29c[];
 extern const char DAT_010ca6a4[];
-char* __cdecl FUN_00a7d330(void*);
-char* __cdecl FUN_00a7d550(const char*, float);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
 void __cdecl FUN_00458620(PositionText525*, const Quaternion525*);
 struct RotationOwner525
 {
     unsigned int unk00, unk04;
     RotationSource525* source;
-    void FUN_00d54ed0(StringArray525*);
-    void FUN_00ccb810(StringArray525*);
+    void bhkHeightFieldShape_GetViewerStrings(StringArray525*);
+    void bhkPlaneShape_GetViewerStrings(StringArray525*);
 };
 struct TlsState
 {
@@ -1501,8 +1502,8 @@ struct Holder
     CachedObj* unk0c;
     int unk10;
     int unk14;
-    void FUN_00ccbce0(void* p);
-    CachedObj* FUN_00ccbfa0(bool* created);
+    void bhkExtendedMeshShape_CopyCinfo(void* p);
+    CachedObj* bhkExtendedMeshShape_CreateCinfo(bool* created);
 };
 inline void* AllocAligned(unsigned int size)
 {
@@ -1891,13 +1892,13 @@ struct Body
 };
 extern Transform identity;
 extern const char nodeName[];
-void FUN_00624b10(Mat*, Transform*);
+void HK2NI_00624b10(Mat*, Transform*);
 void FUN_00458620(NiPoint3*, __m128*);
 struct Subject
 {
     int unk00, unk04;
     Body* body;
-    void FUN_00ccf150(ConvexShapeNode*, void*);
+    void bhkConvexTransformShape_BuildDisplayGeometry(ConvexShapeNode*, void*);
 };
 extern "C"
 {
@@ -1931,8 +1932,8 @@ class BoundsOwner
     int unk08;
     int unk0c;
     BoundsEntry* m_pEntries;
-    void FUN_00cda340();
-    void FUN_00cda610(BoundsBox* out);
+    void hkaPose_syncModelSpace();
+    void ProcessEntries_00cda610(BoundsBox* out);
 };
 extern __declspec(thread) int DAT_tls_field;
 struct S00cc2530_ScopedHeap306
@@ -2120,7 +2121,7 @@ struct S00cc2530_Owner306
     virtual void slotb4();
     virtual void slotb8();
     virtual void OnSource(S00cc2530_Source306*);
-    void FUN_00cc2530(S00cc2530_Source306*);
+    void bhkCachingShapePhantom_Init(S00cc2530_Source306*);
 };
 struct SourceGeometry
 {
@@ -2145,7 +2146,7 @@ struct RefCountedObject
     void FUN_00c905b0();
 };
 namespace fnvc_adapt {
-extern SourceGeometry* __cdecl FUN_00d54cd0(const void* attributes, ScratchGeometry* scratch, unsigned int options);
+extern SourceGeometry* __cdecl hkpMoppUtility_buildCode(const void* attributes, ScratchGeometry* scratch, unsigned int options);
 }
 extern int DAT_0102e368;
 struct Shape : RefCountedObject
@@ -2197,7 +2198,7 @@ struct FUN_00cc9d00 : RefCountedObject
 };
 struct OutputHandler
 {
-    void FUN_00cca6f0(InitializePathingRequestFromPosition* request);
+    void bhkMoppBvTreeShape_Init_00cca6f0(InitializePathingRequestFromPosition* request);
 };
 typedef void(__thiscall* OutputMethod)(OutputHandler*, void*);
 typedef void(__thiscall* RequestMethod)(OutputHandler*, InitializePathingRequestFromPosition*);
@@ -2422,13 +2423,13 @@ struct __declspec(align(16)) Blk
 struct TagObj
 {
     float x, y, z;
-    unsigned int FUN_00a59af0(const char* s);
+    unsigned int GetViewerString_00a59af0(const char* s);
 };
-unsigned int __cdecl FUN_00a7d330(unsigned int v);
+unsigned int __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int v);
 namespace fnvc_adapt {
-unsigned int __cdecl FUN_00a7d550(const char* s, float f);
+unsigned int __cdecl NiGetViewerString_00a7d550(const char* s, float f);
 }
-void __cdecl FUN_004a3970(TagObj* t, const __m128* v);
+void __cdecl HK2NINS(TagObj* t, const __m128* v);
 extern const char g_011d3e74_arg1[];
 extern const char str_010ca918[];
 extern const char str_010ca914[];
@@ -2437,8 +2438,8 @@ class NamedShape
   public:
     unsigned int unk00;
     void WriteLimitedHingeData(Blk* b);
-    void FUN_00c9fc50(NameArr* arr);
-    void FUN_00ccd960(NameArr* arr);
+    void bhkConvexShape_GetViewerStrings(NameArr* arr);
+    void bhkCylinderShape_GetViewerStrings(NameArr* arr);
 };
 static void AddName(NameArr* arr, const unsigned int& v)
 {
@@ -2503,7 +2504,7 @@ struct ContactManifold
     AlignedPairData m_kStorage[8];
     ContactManifold* m_other;
 
-    void FUN_00cd3080();
+    void ProcessEntries_00cd3080();
 };
 extern "C" __m128 _mm_setzero_ps();
 extern float DAT_011b153c;
@@ -2599,7 +2600,7 @@ struct ShapeOwner_SI
     virtual void vf45();
     virtual void vf46();
     virtual void finish(ShapeInfo_SI* pkInfo);
-    void FUN_00ccaee0(ShapeInfo_SI* pkInfo);
+    void bhkTriangleShape_Init(ShapeInfo_SI* pkInfo);
 };
 struct ParamSrc
 {
@@ -2660,10 +2661,10 @@ class CylinderInitOwner
     virtual void v46();
     virtual void v47(ParamSrc*);
     void __thiscall CreateAndDispatchObject(const __m128& lo, const __m128& hi, float f);
-    void __thiscall FUN_00ccd8c0(ParamSrc*);
+    void __thiscall bhkCylinderShape_Init(ParamSrc*);
 };
 void* __cdecl FUN_00ec44d0(void*, const void*, unsigned);
-void* __cdecl FUN_00aa13e0(unsigned);
+void* __cdecl Object_DispatchCommandFour(unsigned);
 void __cdecl FreeStorage(void*);
 using ::MemoryManager;
 using ::_g_memoryManager;
@@ -2768,7 +2769,7 @@ struct Mesh : FUN_00a5d3a0
 
     static void* operator new(unsigned n)
     {
-        return FUN_00aa13e0(n);
+        return Object_DispatchCommandFour(n);
     }
 
     Mesh() : count(0), parts(0)
@@ -2975,7 +2976,7 @@ struct ExtendedMeshBuilder
 
     virtual void Apply(Result*);
 
-    void FUN_00ccc980(ExtendedMeshInput*);
+    void bhkExtendedMeshShape_Init_00ccc980(ExtendedMeshInput*);
 };
 void* __cdecl NiMalloc(unsigned);
 __declspec(noinline) void IndexArray::Resize(unsigned requested)
@@ -3054,8 +3055,8 @@ struct FUN_00ccea00Holder
     int unk04;
     FUN_00ccea00Inner* m_08;
 
-    void FUN_00c9fb70(FUN_00ccea00Out* out);
-    void FUN_00ccea00(FUN_00ccea00Out* out);
+    void bhkConvexShape_CopyCinfo(FUN_00ccea00Out* out);
+    void bhkConvexTransformShape_CopyCinfo(FUN_00ccea00Out* out);
 };
 
 #include <math.h>
@@ -3136,19 +3137,20 @@ extern const hkVector4 DAT_010c71b0;
 struct Quat_cdb910
 {
     hkVector4 m_vec;
-    void FUN_00cb2700(const hkVector4& from);
-    void FUN_00cdb910(float t, const hkVector4& from, const hkVector4& to);
+    void hkQuaternionf_setFlippedRotation(const hkVector4& from);
+    void UpdateState_00cdb910(float t, const hkVector4& from, const hkVector4& to);
 };
 
 // @fnv 0x00cdb910
-void Quat_cdb910::FUN_00cdb910(float t, const hkVector4& from, const hkVector4& to)
+// src: GUESS 0x00cdb910 (confidence: low)
+void Quat_cdb910::UpdateState_00cdb910(float t, const hkVector4& from, const hkVector4& to)
 {
     float d = from.dot3scalar(to);
     float c = t * d + (1.0f - t);
     float v = (1.0f + c) * DAT_01011588;
     if (v <= 0.0f || d < DAT_010cb650)
     {
-        FUN_00cb2700(from);
+        hkQuaternionf_setFlippedRotation(from);
         return;
     }
     {

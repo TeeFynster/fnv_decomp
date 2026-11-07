@@ -5,7 +5,7 @@
 #include "../../../../include/hkMemoryRouter.h"
 #include "../../../../include/hkpVehicleInstance.h"
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 void __cdecl DestroyVehicleInstance();
 
 // Destroys the vehicle, optionally frees its allocation, and returns its address.
@@ -16,7 +16,7 @@ hkpVehicleInstance* __fastcall DeleteVehicleInstance(hkpVehicleInstance* pInstan
     reinterpret_cast<DestroyFunction>(&DestroyVehicleInstance)(pInstance);
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
         reinterpret_cast<FreeFunction>((*reinterpret_cast<void***>(pAllocator))[2])(pAllocator, pInstance, pInstance->m_usMemSizeAndFlags);

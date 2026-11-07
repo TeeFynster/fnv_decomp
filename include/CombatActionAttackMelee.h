@@ -9,6 +9,6 @@ class CombatActionAttackMelee : public CombatAction
 public:
     CombatActionAttackMelee(COMBAT_ACTION type);
 
-    void FUN_0097b410(CombatController* apCombatController, int aiActionValue);
-    float FUN_0097b4a0(CombatController* apCombatController, int aiActionValue);
+    void AddProcedureToController(CombatController* apCombatController, int aiActionValue);
+    float GetCost_0097b4a0(CombatController* apCombatController, int aiActionValue);
 };

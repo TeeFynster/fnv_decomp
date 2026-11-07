@@ -37,7 +37,7 @@ struct FUN_00ce4ab0Router
 };
 
 FUN_00ce4ab0Router* _D1A0E0GetMemoryRouter();
-void FUN_00ce29e0();
+void UpdateFields_00ce29e0();
 
 struct FUN_00ce4ab0Class
 {
@@ -48,7 +48,7 @@ struct FUN_00ce4ab0Class
 // @fnv 0x00ce4ab0
 FUN_00ce4ab0Class* FUN_00ce4ab0Class::Destroy(unsigned int flags)
 {
-    FUN_00ce29e0();
+    UpdateFields_00ce29e0();
 
     if (flags & 1)
     {
@@ -108,13 +108,13 @@ void ValidateRagdollMapping(hkaSkeletonMapperData* apMapperData)
                     int streamStorage[sizeof(hkOstream) / sizeof(int)];
                     ::new (streamStorage) hkOstream(static_cast<void*>(buf), sizeof(buf));
                     hkOstream& str = *reinterpret_cast<hkOstream*>(streamStorage);
-                    str.FUN_00cc01c0("Bones A:")
+                    str.ProcessAndReturnValue_00cc01c0("Bones A:")
                         .WriteName(boneA.m_name)
-                        .FUN_00cc01c0(" and B:")
+                        .ProcessAndReturnValue_00cc01c0(" and B:")
                         .WriteName(boneB.m_name)
-                        .FUN_00cc01c0(" are not fully aligned (error :")
+                        .ProcessAndReturnValue_00cc01c0(" are not fully aligned (error :")
                         .WriteFloat(len)
-                        .FUN_00cc01c0(").");
+                        .ProcessAndReturnValue_00cc01c0(").");
                     hkError::s_instance->message(1, 0xabbaefbf, (char*)buf, ".\\Mapper\\hkaSkeletonMapper.cpp", 499);
                     str.hkOstream::~hkOstream();
                 }
@@ -135,7 +135,7 @@ void ValidateRagdollMapping(hkaSkeletonMapperData* apMapperData)
         int streamStorage[sizeof(hkOstream) / sizeof(int)];
         ::new (streamStorage) hkOstream(static_cast<void*>(buf), sizeof(buf));
         hkOstream& str = *reinterpret_cast<hkOstream*>(streamStorage);
-        str.FUN_00cc01c0(
+        str.ProcessAndReturnValue_00cc01c0(
             "None of the bones in skeleton have translations locked - did you forget to lock translations ?.");
         hkError::s_instance->message(1, 0xabba77a5, (char*)buf, ".\\Mapper\\hkaSkeletonMapper.cpp", 521);
         str.hkOstream::~hkOstream();

@@ -25,11 +25,12 @@ struct Elem006fa0d0
 };
 struct Holder006fa090
 {
-    void FUN_006fa090(Elem006fa0d0*, unsigned int);
+    void ProcessEntries_006fa090(Elem006fa0d0*, unsigned int);
 };
 // Calls FUN_006fa0d0(0) on each of the n elements of the array pointed to by p.
 // @fnv 0x006fa090
-void Holder006fa090::FUN_006fa090(Elem006fa0d0* apElements, unsigned int n)
+// src: GUESS 0x006fa090 (confidence: low)
+void Holder006fa090::ProcessEntries_006fa090(Elem006fa0d0* apElements, unsigned int n)
 {
     for (unsigned int i = 0; i < n; ++i)
         apElements[i].FUN_006fa0d0(0);

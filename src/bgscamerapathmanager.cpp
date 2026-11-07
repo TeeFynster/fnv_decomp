@@ -68,13 +68,14 @@ void CameraPathManager::UpdateCameraPaths()
 
 struct FUN_0058b510_shell
 {
-    TESFile* FUN_0058b510(unsigned int a, unsigned int b);
+    TESFile* GetCameraPathToPlay(unsigned int a, unsigned int b);
 };
 // This flag-check entry point is not declared by the shared TESFile header.
 bool __fastcall IsTESFileFlag80Set(TESFile* file);
 bool __fastcall _ref_008256d0(const char* s);
 // @fnv 0x0058bb50
-TESFile* CameraPathManager::FUN_0058bb50(unsigned int arg1, unsigned int arg2)
+// src: COMMUNITY 0x0058bb50
+TESFile* CameraPathManager::BGSCameraPathManager_GetCameraPathToPlay(unsigned int arg1, unsigned int arg2)
 {
     TESFile* pFile = 0;
     if (arg1)
@@ -84,7 +85,7 @@ TESFile* CameraPathManager::FUN_0058bb50(unsigned int arg1, unsigned int arg2)
         {
             TESForm* form = m_kCameraPathArray.GetFormAt(i);
             if (form)
-                pFile = reinterpret_cast<FUN_0058b510_shell*>(form)->FUN_0058b510(arg1, arg2);
+                pFile = reinterpret_cast<FUN_0058b510_shell*>(form)->GetCameraPathToPlay(arg1, arg2);
             if (pFile)
                 break;
         }
@@ -110,7 +111,8 @@ struct FUN_0058bc00_obj
 };
 // Sets the object's vtbl to DAT_01032748 and deallocates its data array via NiTMallocInterface.
 // @fnv 0x0058bc00
-void __fastcall FUN_0058bc00(FUN_0058bc00_obj* self)
+// src: GUESS 0x0058bc00 (confidence: medium)
+void __fastcall Object_ReleaseStorage(FUN_0058bc00_obj* self)
 {
     self->vtbl = &DAT_01032748;
     NiTMallocInterface<ActorCombatGroup*>::Deallocate(self->data);
@@ -208,11 +210,11 @@ struct SceneNode
     SceneNode(unsigned short childCount);
     static void* operator new(unsigned int size);
     static void operator delete(void* p, unsigned int size);
-    SceneNode* FUN_009611e0();
-    void FUN_004f00e0(void* arg);
+    SceneNode* NiAVObject_GetParent();
+    void NiAVObject_SetWorldTranslate(void* arg);
 };
 
-void* __fastcall FUN_0045bb80(SceneNode* node);
+void* __fastcall NiAVObject_GetWorldTranslate(SceneNode* node);
 
 template <class T> struct NodePtr
 {
@@ -274,12 +276,12 @@ void FUN_0058ccf0_Class::SetSceneNode(SceneNode* node)
     else
     {
         node64 = new SceneNode(0);
-        ((SceneNode*)node64)->FUN_004f00e0(FUN_0045bb80(node));
+        ((SceneNode*)node64)->NiAVObject_SetWorldTranslate(NiAVObject_GetWorldTranslate(node));
     }
     SceneNode* root = node;
     while (root != 0 && root->IsRootCandidate() == 0)
     {
-        root = root->FUN_009611e0();
+        root = root->NiAVObject_GetParent();
     }
     if (root != 0)
     {

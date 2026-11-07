@@ -22,15 +22,15 @@ public:
     virtual bool IsEqual(NiObject* apObject) const;
     virtual void GetViewerStrings(NiViewerStringsArray* apStrings);
 
-    virtual unsigned char FUN_00c36240(int);
+    virtual unsigned char QPointWithin(int);
     virtual void v90(void*);
 
     BSMultiBoundShape* GetShape() const;
     void SetShape(BSMultiBoundShape* shape);
-    void FUN_00c35fe0(BSMultiBound*, int);
+    void CopyMembers_00c35fe0(BSMultiBound*, int);
     void v_8c();
-    void FUN_004addc0(void*);
-    void FUN_004addc0(Bound*);
+    void BSMultiBound_SetShape(void*);
+    void BSMultiBound_SetShape(Bound*);
     bool IsKindOfType(const NiRTTI* type);
 
 

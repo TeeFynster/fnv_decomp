@@ -28,9 +28,9 @@ public:
     virtual void SaveForm(void);
     virtual void SaveGame(BGSSaveFormBuffer* buffer);
     void CopyFromTESClass(TESForm* other);
-    void FUN_004851b0(TESForm* other);
+    void TESForm_CopyAllComponents(TESForm* other);
     bool CompareClass(TESForm* other);
-    bool FUN_00485270(TESForm* other);
+    bool TESForm_CompareAllComponents(TESForm* other);
     TESClassData* GetClassData() const;
 
     TESClassData data;

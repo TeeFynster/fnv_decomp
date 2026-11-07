@@ -52,7 +52,7 @@ BGSRepairItemList::~BGSRepairItemList()
     BGSRepairItemList::Free();
 }
 
-void __cdecl FUN_00485910(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
 // @fnv 0x0047b8a0
 void __fastcall SaveRepairItemList(BGSRepairItemList* component)
 {
@@ -60,7 +60,7 @@ void __fastcall SaveRepairItemList(BGSRepairItemList* component)
     if (component->pListForm != 0)
     {
         formID = component->pListForm->GetFormID();
-        FUN_00485910(0x4C504552, formID);
+        TESForm_AddChunk_00485910(0x4C504552, formID);
     }
 }
 

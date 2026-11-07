@@ -38,15 +38,15 @@ public:
     void ResetFormData();
     void FUN_0050c9e0(int);
     void SetSound(TESSound* sound);
-    bool FUN_0046f070();
+    bool GetCanCarry();
     bool InvokeAction(unsigned int, unsigned int, bool, unsigned int, unsigned int);
-    bool FUN_0050e4b0(unsigned int, unsigned int, bool, unsigned int, unsigned int);
+    bool Activate_0050e4b0(unsigned int, unsigned int, bool, unsigned int, unsigned int);
     NiNode* Create3DModel(TESObjectREFR* reference);
     NiLight* CreateLight(TESObjectREFR* reference, NiAVObject* object, bool flag);
     void* CreateLight(void* reference, void* object, bool flag);
     unsigned int GetColor();
     NiColor* GetLightColor();
-    bool FUN_0050dd90();
+    bool GetDynamic();
     float GetRadius();
     int FUN_0087eaa0();
 

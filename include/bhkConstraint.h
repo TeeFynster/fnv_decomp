@@ -18,7 +18,7 @@ public:
     virtual void vf53();
 
     void* DestroyConstraint(unsigned int);
-    void FUN_00c876a0();
+    void bhkSerializable_Kill();
 
     int m_iThirdValue;
 

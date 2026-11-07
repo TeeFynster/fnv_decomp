@@ -34,10 +34,10 @@ public:
     BGSDebris* GetAddonModels();
     void SetAddonModels(BGSDebris* models);
 
-    bool FUN_00507040(unsigned int);
-    float FUN_008d01e0();
-    float FUN_00644930();
-    float FUN_00567470();
+    bool IsFlagSet_00507040(unsigned int);
+    float NiAVObject_GetWorldScale();
+    float Explosion_GetRadius();
+    float TESEffectShader_GetAddOnScaleStart();
 
     TESTexture* GetFieldAt14C();
     TESTexture* GetFieldAt158();
@@ -45,7 +45,7 @@ public:
     void CopySettingsTo(ParticleShaderProperty*, NiSourceTexture*);
     ParticleShaderProperty* CreateParticleShaderProperty(
         NiAVObject*, NiAVObject*, NiSourceTexture*, float);
-    void FUN_00507810(NiAVObject*, ParticleShaderProperty*);
+    void StopParticleShader(NiAVObject*, ParticleShaderProperty*);
     BSShaderPPLightingProperty::TextureEffectData* CreateEffectData(
         NiAVObject*, NiSourceTexture*, NiSourceTexture*);
     void ApplyShaderToTree(NiAVObject*, BSShaderPPLightingProperty::TextureEffectData*);

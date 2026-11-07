@@ -16,21 +16,21 @@ struct ThreadState
     int unk0c;
     Allocator* allocator;
 };
-ThreadState* __cdecl FUN_00c85750();
+ThreadState* __cdecl hkMemoryRouter_getInstance();
 struct Object
 {
     void* vtable;
     unsigned short allocationSize;
-    void FUN_00e00000();
+    void ReleaseBothArrays();
     Object* FUN_00e00070(unsigned int flags);
 };
 // @fnv 0x00e00070
 Object* Object::FUN_00e00070(unsigned int flags)
 {
-    FUN_00e00000();
+    ReleaseBothArrays();
     if (flags & 1)
     {
-        ThreadState* state = FUN_00c85750();
+        ThreadState* state = hkMemoryRouter_getInstance();
         unsigned int size = allocationSize;
         state->allocator->freeBlock(this, size);
     }

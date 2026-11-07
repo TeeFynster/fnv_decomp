@@ -32,7 +32,7 @@ extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
 #include "../../../../../../include/hkpSpringAction.h"
 #include "../../../../../../include/hkpEntity.h"
 extern int g_unk01269168;
-int* __cdecl FUN_00cf4ef0();
+int* __cdecl hkpBinaryAction_getClassType();
 void* __cdecl _fnv_zlib_memset(void* pvDst, int iValue, unsigned int uiNumBytes);
 struct hkShape00D4F0
 {
@@ -170,7 +170,7 @@ struct __declspec(align(16)) SpringVector
     {
         q = v;
     }
-    void __thiscall FUN_00c7f640(const void* transform, const hkVector4* local);
+    void __thiscall setTransformedPos_00c7f640(const void* transform, const hkVector4* local);
 };
 struct SpringMotion
 {
@@ -200,7 +200,7 @@ struct SpringMotion
 };
 inline void hkpEntity::ApplyForceAtPoint(float dt, const hkVector4& force, const SpringVector& point)
 {
-    FUN_00c9c1d0();
+    activate_00c9c1d0();
     reinterpret_cast<SpringMotion*>(&m_pMotionState)->apply(dt, &force, &point);
 }
 struct SpringStep
@@ -209,7 +209,7 @@ struct SpringStep
 };
 struct SpringAction : hkpSpringAction
 {
-    void __thiscall FUN_00d4d530(const SpringStep& step);
+    void __thiscall hkpSpringAction_applyAction(const SpringStep& step);
 };
 static LocalM128 dot3(LocalM128 a, LocalM128 b)
 {
@@ -255,13 +255,14 @@ static LocalM128 broadcast(float v)
     return _mm_load_ps1(&v);
 }
 // @fnv 0x00d4d530
-void SpringAction::FUN_00d4d530(const SpringStep& step)
+// src: HAVOK_SRC 0x00d4d530
+void SpringAction::hkpSpringAction_applyAction(const SpringStep& step)
 {
     hkpEntity* a = m_pEntityA;
     hkpEntity* b = m_pEntityB;
     SpringVector pointA, pointB, direction, velocityA, velocityB;
-    pointA.FUN_00c7f640(&a->m_pMotionState.m_kMotionState.m_kMotionTransform, &m_kPositionA);
-    pointB.FUN_00c7f640(&b->m_pMotionState.m_kMotionState.m_kMotionTransform, &m_kPositionB);
+    pointA.setTransformedPos_00c7f640(&a->m_pMotionState.m_kMotionState.m_kMotionTransform, &m_kPositionA);
+    pointB.setTransformedPos_00c7f640(&b->m_pMotionState.m_kMotionState.m_kMotionTransform, &m_kPositionB);
     float tolerance = DAT_01017d00;
     LocalM128 displacement = _mm_sub_ps(pointB.get(), pointA.get());
     float length = SpringLength3(displacement);
@@ -272,8 +273,8 @@ void SpringAction::FUN_00d4d530(const SpringStep& step)
         return;
     if (!m_bElastic && length > m_fRestLength)
         return;
-    a->FUN_00ca0c40(&pointA, &velocityA);
-    b->FUN_00ca0c40(&pointB, &velocityB);
+    a->hkpRigidBody_getPointVelocity(&pointA, &velocityA);
+    b->hkpRigidBody_getPointVelocity(&pointB, &velocityB);
     float force = (length - m_fRestLength) * m_fSpringStrength +
                   m_fMotorDamping * SpringDot3(_mm_sub_ps(velocityB.get(), velocityA.get()), direction.get());
     _mm_store_ps(&m_kLastForce.x, _mm_mul_ps(SpringSplatRef(-force), direction.get()));

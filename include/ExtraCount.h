@@ -12,5 +12,5 @@ public:
 
     ExtraCount();
     ExtraCount(short aCount);
-    bool FUN_00431c50(BSExtraData* compare);
+    bool Compare_00431c50(BSExtraData* compare);
 };

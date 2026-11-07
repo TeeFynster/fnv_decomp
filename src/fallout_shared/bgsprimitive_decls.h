@@ -111,7 +111,7 @@ class NiAVObject : public NiMemObject
 class NiGeometry : public NiAVObject
 {
   public:
-    NiGeometryData* FUN_005495f0();
+    NiGeometryData* NiGeometry_GetModelData();
     void SetModelBound(const NiBound&);
     void SetAppCulled(bool);
 };

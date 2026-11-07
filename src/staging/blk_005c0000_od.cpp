@@ -8,11 +8,12 @@
 
 struct FUN_005c1ae0_class
 {
-    void FUN_005c1ae0();
+    void CombatController_ForceStopCombat();
 };
 
 // @fnv 0x005c1ae0
-void FUN_005c1ae0_class::FUN_005c1ae0()
+// src: XBOX_PDB 0x005c1ae0
+void FUN_005c1ae0_class::CombatController_ForceStopCombat()
 {
     *reinterpret_cast<char*>(this + 0x125) = 1;
 }
@@ -28,12 +29,13 @@ void* __cdecl CallWithZeroedArgs(void* apArg1, void* apArg2, void* apArg3, void*
 
 extern int g_TES;
 extern unsigned char DAT_011c7a64;
-unsigned char __cdecl FUN_005d2a40(void);
+unsigned char __cdecl TESWaterSystem_GetWaterEnabled(void);
 // @fnv 0x005d2a50
-unsigned char FUN_005d2a50()
+// src: EXE 0x005d2a50
+unsigned char Cmd_ToggleWaterRadius_Execute()
 {
     ((EffectSetting*)g_TES)->GetEffectID();
-    if (FUN_005d2a40())
+    if (TESWaterSystem_GetWaterEnabled())
         DAT_011c7a64 = 1;
     return 1;
 }
@@ -51,17 +53,19 @@ float __cdecl LogFloat(float value)
     return _logf(value);
 }
 
-float FUN_005dc460(float);
+float _logf_005dc460(float);
 // @fnv 0x005dc440
-float FUN_005dc440(float value)
+// src: COMMUNITY 0x005dc440
+float log_005dc440(float value)
 {
-    return FUN_005dc460(value);
+    return _logf_005dc460(value);
 }
 
 extern "C" double __cdecl FUN_00eca920(double);
 
 // @fnv 0x005dc460
-float FUN_005dc460(float value)
+// src: COMMUNITY 0x005dc460
+float _logf_005dc460(float value)
 {
     return static_cast<float>(FUN_00eca920(value));
 }
@@ -89,7 +93,8 @@ void FUN_005dd540_Class::SetByteAtOffsetE3(unsigned char value)
 }
 
 // @fnv 0x005de080
-bool BGSProjectile::FUN_005de080()
+// src: XBOX_PDB 0x005de080
+bool BGSProjectile::GetHasExplosionDetonates_005de080()
 {
     return GetFlag(0x400);
 }
@@ -373,10 +378,11 @@ struct Mid
 };
 struct Me
 {
-    void FUN_005d8a90(Src* p);
+    void MobDialogueFlagResetter_Operate(Src* p);
 };
 // @fnv 0x005d8a90
-void Me::FUN_005d8a90(Src* pSource)
+// src: COMMUNITY 0x005d8a90
+void Me::MobDialogueFlagResetter_Operate(Src* pSource)
 {
     if (pSource->Test())
     {

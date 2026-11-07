@@ -107,12 +107,13 @@ class hkpConstraintTemplateD4DC
     float m_kMinimumCorner;
     float m_kMaximumCorner;
 
-    FUN_00d4dbe0* FUN_00d4dc30(const hkpConstraintInputD4DC& kA, const hkpConstraintInputD4DC& kB);
+    FUN_00d4dbe0* hkpAngularDashpotAction_clone(const hkpConstraintInputD4DC& kA, const hkpConstraintInputD4DC& kB);
 };
 
 // Returns null unless kA.m_type is 2 and kB.m_type is 0; otherwise creates a FUN_00d4dbe0 from kA's entity pair and copies axis end points and min/max corners.
 // @fnv 0x00d4dc30
-FUN_00d4dbe0* hkpConstraintTemplateD4DC::FUN_00d4dc30(const hkpConstraintInputD4DC& kA,
+// src: HAVOK_SRC 0x00d4dc30
+FUN_00d4dbe0* hkpConstraintTemplateD4DC::hkpAngularDashpotAction_clone(const hkpConstraintInputD4DC& kA,
                                                       const hkpConstraintInputD4DC& kB)
 {
     if (kA.m_type != 2)

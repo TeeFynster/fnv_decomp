@@ -34,9 +34,9 @@ class NativeClassLookupMap
     {
         FreeBuffer();
     }
-    int FUN_00d87410() throw();
+    int hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_getIterator() throw();
     char* SetBoolFromThreshold(char* result, int it) throw();
-    hkDataClassNative* FUN_00d87440(int it) throw();
+    hkDataClassNative* hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_getValue(int it) throw();
     int FindNextUsedSlot(int it) throw();
     void FreeBuffer() throw();
 
@@ -60,11 +60,11 @@ class hkDataWorldNative : public hkReferencedObject
 hkDataWorldNative::~hkDataWorldNative()
 {
     char valid;
-    int it = m_kLookupMap.FUN_00d87410();
+    int it = m_kLookupMap.hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_getIterator();
     m_kLookupMap.SetBoolFromThreshold(&valid, it);
     while (valid)
     {
-        delete m_kLookupMap.FUN_00d87440(it);
+        delete m_kLookupMap.hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_getValue(it);
         it = m_kLookupMap.FindNextUsedSlot(it);
         m_kLookupMap.SetBoolFromThreshold(&valid, it);
     }

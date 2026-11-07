@@ -19,16 +19,16 @@
 
 extern int DAT_01269cd0;
 extern int DAT_01268ff0;
-void* __cdecl FUN_00d66770();
+void* __cdecl hkpPhantomDisplayViewer_create();
 struct HKProcessFactory
 {
     void* __thiscall RegisterProcess(const char* name, void* creator);
 };
-void* __cdecl FUN_00dd9380(void* factory, const char* name, void* creator);
+void* __cdecl hkProcessFactory_registerProcess(void* factory, const char* name, void* creator);
 // @fnv 0x00d66af0
 void* __cdecl RegisterPhantomsProcess()
 {
-    DAT_01268ff0 = (int)((HKProcessFactory*)DAT_01269cd0)->RegisterProcess("Phantoms", (void*)&FUN_00d66770);
+    DAT_01268ff0 = (int)((HKProcessFactory*)DAT_01269cd0)->RegisterProcess("Phantoms", (void*)&hkpPhantomDisplayViewer_create);
     return (void*)DAT_01268ff0;
 }
 
@@ -39,19 +39,20 @@ struct Container
 
 struct World
 {
-    void __thiscall FUN_00c917f0(void*);
+    void __thiscall hkpWorld_removePhantomListener(void*);
 };
 
 struct hkpPhantomDisplayViewer
 {
-    void FUN_00d66250(void*);
+    void removeWorld(void*);
 };
 
 // @fnv 0x00d66250
-void hkpPhantomDisplayViewer::FUN_00d66250(void* arg)
+// src: HAVOK_LIB 0x00d66250
+void hkpPhantomDisplayViewer::removeWorld(void* arg)
 {
     void* p1 = this ? (char*)this + 0x28 : 0;
-    ((World*)arg)->FUN_00c917f0(p1);
+    ((World*)arg)->hkpWorld_removePhantomListener(p1);
     void* p2 = this ? (char*)this + 0x2c : 0;
     ((Container*)arg)->ClearValue(p2);
     int i = 0;
@@ -71,7 +72,7 @@ void hkpPhantomDisplayViewer::FUN_00d66250(void* arg)
 
 struct FUN_00c93860_stub
 {
-    void FUN_00c93860(void* arg);
+    void hkpWorld_addPhantomListener(void* arg);
 };
 
 struct FUN_00d662c0_stub
@@ -89,13 +90,13 @@ void FUN_00d662c0_stub::AttachToIsland(void* pIsland)
     else
         p1 = 0;
     hkpWorld* edi = (hkpWorld*)pIsland;
-    ((FUN_00c93860_stub*)edi)->FUN_00c93860(p1);
+    ((FUN_00c93860_stub*)edi)->hkpWorld_addPhantomListener(p1);
     void* p2;
     if (pSelf)
         p2 = pSelf + 0x2c;
     else
         p2 = 0;
-    edi->FUN_00c93920(p2);
+    edi->hkpWorld_addWorldPostSimulationListener(p2);
     int i = 0;
     if (edi->m_kPhantoms.m_iElementCount > 0)
     {
@@ -168,16 +169,17 @@ void* hkpPhantomDisplayViewer::Destroy(int flags)
 
 struct FnvCpu_FUN_00d66370_CpuTarget
 {
-    void FUN_00d66250();
+    void removeWorld();
 };
 struct FnvCpu_FUN_00d66370_CpuOwner
 {
-    void FUN_00d66370();
+    void ProcessState_00d66370();
 };
 // @fnv 0x00d66370
-void FnvCpu_FUN_00d66370_CpuOwner::FUN_00d66370()
+// src: GUESS 0x00d66370 (confidence: low)
+void FnvCpu_FUN_00d66370_CpuOwner::ProcessState_00d66370()
 {
-    reinterpret_cast<FnvCpu_FUN_00d66370_CpuTarget*>(reinterpret_cast<char*>(this) + (-32))->FUN_00d66250();
+    reinterpret_cast<FnvCpu_FUN_00d66370_CpuTarget*>(reinterpret_cast<char*>(this) + (-32))->removeWorld();
 }
 
 // add ecx,-0x20; jmp AttachToIsland : override in Derived forwards to the primary base's virtual.
@@ -195,13 +197,13 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00d66380();
+    virtual void AttachToIsland_Thunk();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
-    virtual void FUN_00d66380();
+    virtual void AttachToIsland_Thunk();
 };
 
 Derived::Derived()
@@ -209,7 +211,8 @@ Derived::Derived()
 
 // Calls the base constructor AttachToIsland on this object.
 // @fnv 0x00d66380
-void Derived::FUN_00d66380()
+// src: GUESS 0x00d66380 (confidence: medium)
+void Derived::AttachToIsland_Thunk()
 {
     this->PrimaryBase::AttachToIsland();
 }
@@ -217,7 +220,8 @@ void Derived::FUN_00d66380()
 extern int DAT_01268ff0;
 
 // @fnv 0x00d66b10
-int __cdecl FUN_00d66b10()
+// src: GUESS 0x00d66b10 (confidence: low)
+int __cdecl Hkpphantomdisplayviewer_GetDAT01268ff0()
 {
     return DAT_01268ff0;
 }
@@ -232,10 +236,11 @@ struct FUN_00d66330_StandIn
     void* unk14;
     void* unk18;
     hkpPhysicsContext* m_pShapeCollection;
-    void FUN_00d66330();
+    void ProcessEntries_00d66330();
 };
 // @fnv 0x00d66330
-void FUN_00d66330_StandIn::FUN_00d66330()
+// src: GUESS 0x00d66330 (confidence: low)
+void FUN_00d66330_StandIn::ProcessEntries_00d66330()
 {
     if (m_pShapeCollection)
     {
@@ -319,7 +324,7 @@ void ViewerList::RemoveViewer(Viewer* pViewer)
     return;
 }
 
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00d66770_CpuBlock
 {
     unsigned int unk00;
@@ -327,9 +332,10 @@ struct FnvCpu_FUN_00d66770_CpuBlock
     FnvCpu_FUN_00d66770_CpuBlock* FUN_00d66430(unsigned int value);
 };
 // @fnv 0x00d66770
-void* __cdecl FUN_00d66770(unsigned int value)
+// src: XBOX_PDB 0x00d66770
+void* __cdecl hkpPhantomDisplayViewer_create(unsigned int value)
 {
-    hkMemoryRouter* pCpuHolder = static_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter* pCpuHolder = static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     FnvCpu_FUN_00d66770_CpuBlock* pCpuBlock =
         static_cast<FnvCpu_FUN_00d66770_CpuBlock*>(reinterpret_cast<hkMemoryAllocator*>(pCpuHolder->m_heap)->blockAlloc(60));
     pCpuBlock->size = 60;
@@ -340,7 +346,7 @@ void* __cdecl FUN_00d66770(unsigned int value)
 }
 
 namespace fnv_00e015d0 {
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 extern char DAT_0102e388;
 struct HavokArrayOwner : hkReferencedObject
 {
@@ -351,7 +357,7 @@ struct HavokArrayOwner : hkReferencedObject
 // @fnv 0x00e015d0
 HavokArrayOwner* HavokArrayOwner::DestroyHavokArrayOwner(unsigned int deletionFlags)
 {
-    hkMemoryRouter* router = FUN_00c85750();
+    hkMemoryRouter* router = hkMemoryRouter_getInstance();
     hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(router->m_heap);
     int previousCapacity = m_items.m_iCapacityState;
     m_items.m_iElementCount = 0;
@@ -364,7 +370,7 @@ HavokArrayOwner* HavokArrayOwner::DestroyHavokArrayOwner(unsigned int deletionFl
     *reinterpret_cast<void**>(this) = &DAT_0102e388;
     if (deletionFlags & 1)
     {
-        hkMemoryRouter* router2 = FUN_00c85750();
+        hkMemoryRouter* router2 = hkMemoryRouter_getInstance();
         reinterpret_cast<hkMemoryAllocator*>(router2->m_heap)->blockFree(this, m_usMemSizeAndFlags);
     }
     return this;
@@ -385,7 +391,7 @@ FUN_00d66430::FUN_00d66430(const void* contexts) : hkpWorldViewerBase(contexts)
 {}
 
 namespace phantomViewerMemory {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 
@@ -393,7 +399,7 @@ extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 inline void* hkReferencedObject::operator new(std::size_t nbytes)
 {
     hkReferencedObject* b = static_cast<hkReferencedObject*>(
-        reinterpret_cast<hkMemoryAllocator&>(phantomViewerMemory::FUN_00c85750().heap()).blockAlloc(nbytes));
+        reinterpret_cast<hkMemoryAllocator&>(phantomViewerMemory::hkMemoryRouter_getInstance().heap()).blockAlloc(nbytes));
     b->m_usMemSizeAndFlags = (unsigned short)nbytes;
     return b;
 }
@@ -415,7 +421,7 @@ hkReferencedObject* __cdecl CreateHkObject()
 
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return reinterpret_cast<hkMemoryAllocator&>(phantomViewerMemory::FUN_00c85750().heap());
+    return reinterpret_cast<hkMemoryAllocator&>(phantomViewerMemory::hkMemoryRouter_getInstance().heap());
 }
 
 template <typename T>
@@ -484,7 +490,7 @@ class hkpPhantomDisplayViewer : public hkpWorldViewerBase,
     virtual void PhantomAddedCallback(hkpPhantom* pkPhantom);
     virtual void postSimulationCallback(hkpWorld* pkWorld);
 
-    void FUN_00d66250(hkpWorld* pkWorld) throw();
+    void removeWorld(hkpWorld* pkWorld) throw();
 
     hkArray<int> m_kIds;
 };
@@ -496,7 +502,7 @@ hkpPhantomDisplayViewer::~hkpPhantomDisplayViewer()
     if (m_iValueAtOffset0C)
     {
         for (int i = 0; i < m_iValueAtOffset0C->m_numWorlds; i++)
-            FUN_00d66250(m_iValueAtOffset0C->m_ppWorlds[i]);
+            removeWorld(m_iValueAtOffset0C->m_ppWorlds[i]);
     }
 }
 }
@@ -557,12 +563,12 @@ static __forceinline void Monitor(const char* name, volatile unsigned int& slot)
         stream.m_end.m_storage = (char*)(cmd + 1);
     }
 }
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 static __forceinline hkMemoryRouter* S00d667b0_router()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
-extern "C" void __cdecl FUN_00c908c0(hkMemoryAllocator*, void*, int, int);
+extern "C" void __cdecl hkArrayUtil__reserve(hkMemoryAllocator*, void*, int, int);
 template <class T> struct LocalArray
 {
     T* data;
@@ -604,7 +610,7 @@ template <class T> struct LocalArray
             int newSize = cap * 2;
             if (n >= newSize)
                 newSize = n;
-            FUN_00c908c0(&a, this, newSize, sizeof(T));
+            hkArrayUtil__reserve(&a, this, newSize, sizeof(T));
         }
     }
     __forceinline void SetSizeAndGrow(int count)
@@ -654,7 +660,7 @@ struct FUN_00de1210 : DisplayGeometry
     Aabb bounds;
     FUN_00de1210();
     virtual ~FUN_00de1210();
-    void FUN_00de1170(const hkVector4&, const hkVector4&);
+    void hkDisplayAABB_setExtents(const hkVector4&, const hkVector4&);
 };
 struct Collidable
 {
@@ -732,7 +738,7 @@ void S00d667b0_Viewer::postSimulationCallback(hkpWorld* pkWorld)
         {
             Aabb bounds;
             reinterpret_cast<Phantom*>(phantoms.m_data[i])->getAabb(bounds);
-            boxes.data[i].FUN_00de1170(bounds.min, bounds.max);
+            boxes.data[i].hkDisplayAABB_setExtents(bounds.min, bounds.max);
             geometries.data[i] = boxes.data + i;
         }
         DisplayHandler* handler = displayHandler;
@@ -749,7 +755,7 @@ namespace fnv_00d66b20 {
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (0x20).
 struct PrimaryBase
 {
-    virtual void FUN_00d66b20();
+    virtual void AdjustThisAndForward_00d66b20();
     int unk04;
     int unk08;
     int unk0C;
@@ -761,14 +767,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00d66b20();
+    virtual void AdjustThisAndForward_00d66b20();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00d66b20
-    virtual void FUN_00d66b20();
+// src: GUESS 0x00d66b20 (confidence: low)
+    virtual void AdjustThisAndForward_00d66b20();
 };
 
 Derived::Derived()
@@ -805,7 +812,7 @@ namespace fnv_00d66b40 {
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (0x28).
 struct PrimaryBase
 {
-    virtual void FUN_00d66b40();
+    virtual void AdjustThisAndForward_00d66b40();
     int unk04;
     int unk08;
     int unk0C;
@@ -819,14 +826,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00d66b40();
+    virtual void AdjustThisAndForward_00d66b40();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00d66b40
-    virtual void FUN_00d66b40();
+// src: GUESS 0x00d66b40 (confidence: low)
+    virtual void AdjustThisAndForward_00d66b40();
 };
 
 Derived::Derived()
@@ -881,7 +889,7 @@ extern int DAT_01268ff4;
 extern const char str_010d196c[];
 extern const char str_010d1be8[];
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct Vw66530Entry
 {
@@ -952,7 +960,7 @@ struct Vw66530Str
     int unk04;
     int unk08;
     void FUN_00cb1600(char* buf, int size);
-    void FUN_00cc01c0(const char* s);
+    void ProcessAndReturnValue_00cc01c0(const char* s);
     void FUN_00cc00e0();
 };
 
@@ -960,7 +968,7 @@ struct Vw66530Obj
 {
     int unk00;
     int unk04;
-    void FUN_00ddfb70();
+    void hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment();
 };
 struct Vw66530Col
 {
@@ -969,8 +977,8 @@ struct Vw66530Col
     int unk08;
     int unk0C;
     int unk10;
-    void FUN_00ddfb80(Vw66530Obj* o);
-    void FUN_00de0f90(int root, hkArrayBase<Vw66530Entry*>* out);
+    void hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(Vw66530Obj* o);
+    void UpdateState_00de0f90(int root, hkArrayBase<Vw66530Entry*>* out);
 };
 
 struct Vw66530Disp
@@ -986,7 +994,7 @@ struct Vw66530Self
     int unk00;
     int unk04;
     hkArray<Vw66530Arg*> m_args;
-    void FUN_00d66530(Vw66530Arg* arg);
+    void hkpPhantomDisplayViewer_phantomAddedCallback(Vw66530Arg* arg);
 };
 
 struct Vw66530Outer
@@ -1000,7 +1008,8 @@ struct Vw66530Outer
 
 // For an allowed type and nonzero root, collects entries, drops and logs some, stores arg, then calls the dispatcher's add and update.
 // @fnv 0x00d66530
-void Vw66530Self::FUN_00d66530(Vw66530Arg* arg)
+// src: HAVOK_LIB 0x00d66530
+void Vw66530Self::hkpPhantomDisplayViewer_phantomAddedCallback(Vw66530Arg* arg)
 {
     int root = arg->m_info.unk00;
     Vw66530Info* info = &arg->m_info;
@@ -1015,16 +1024,16 @@ void Vw66530Self::FUN_00d66530(Vw66530Arg* arg)
         bValid = DAT_01268fec->m_types.indexOf(type) != -1;
     if (!bValid || root == 0)
         goto done;
-    o.FUN_00ddfb70();
-    col.FUN_00ddfb80(&o);
-    col.FUN_00de0f90(root, &entries);
+    o.hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment();
+    col.hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(&o);
+    col.UpdateState_00de0f90(root, &entries);
     for (int i = entries.m_iElementCount - 1; i >= 0; i--)
     {
         Vw66530Entry* pEntry = entries.m_data[i];
         if (pEntry->unk50 == 6 && pEntry->unk08 == 0)
         {
             str.FUN_00cb1600((char*)buf, 0x200);
-            str.FUN_00cc01c0(str_010d196c);
+            str.ProcessAndReturnValue_00cc01c0(str_010d196c);
             DAT_01268360->log(0, -1, (char*)buf, str_010d1be8, 0x91);
             str.FUN_00cc00e0();
             entries.removeAt(i);

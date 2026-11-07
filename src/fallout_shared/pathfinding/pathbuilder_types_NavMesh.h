@@ -41,8 +41,8 @@ FNV_STATIC_ASSERT(offsetof(NavMeshVertex, Location) == 0);
 class NavMeshTriangle
 {
   public:
-    bool FUN_006a5ec0();
-    bool FUN_00693b90();
+    bool NavMeshTriangle_IsWater();
+    bool IsNoLargeCreature();
     bool FUN_00691140(unsigned int);
     unsigned short Vertices[3];      // +0x0, 6 bytes
     unsigned short Triangles[3];     // +0x6, 6 bytes

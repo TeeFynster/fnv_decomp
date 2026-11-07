@@ -31,7 +31,7 @@
 // is materialised from a relocated address expression instead.  That keeps
 // the original six-byte "mov eax, <imm32> ; ret" shape byte for byte.
 extern int g_fnv_00e9ecc0_value_anchor;
-int FUN_00e9ecc0();
+int bhkCharacterStateFlying_Update();
 
 void NiFree(void* pvMem);
 extern MemoryManager g_kE9EE20MemoryManager;
@@ -64,7 +64,7 @@ class FUN_00e9ee20 : public E9EE20Base
 {
   public:
     virtual ~FUN_00e9ee20();
-    void FUN_00e9e860();
+    void NiUnionBV_RemoveAllBoundingVolumes();
 
     E9EE20Buffer m_kBuffer;
 };
@@ -72,5 +72,5 @@ class FUN_00e9ee20 : public E9EE20Base
 // @fnv 0x00e9ee20
 FUN_00e9ee20::~FUN_00e9ee20()
 {
-    FUN_00e9e860();
+    NiUnionBV_RemoveAllBoundingVolumes();
 }

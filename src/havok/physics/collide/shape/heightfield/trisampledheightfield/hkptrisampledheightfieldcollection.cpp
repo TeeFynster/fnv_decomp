@@ -31,12 +31,13 @@ struct FUN_00d263f0_t
     char pad20[0x20];
     char m_buf40[0x40];  // +0x40
 
-    int FUN_00d263f0(int a, int b);
+    int hkpTriSampledHeightFieldCollection_calcSizeForSpu(int a, int b);
 };
 
 // Calls a virtual function on m_obj with a and b-0x40, then maps the result to an offset in m_buf40 or stores it in m_field1c, returning -1 when out of range.
 // @fnv 0x00d263f0
-int FUN_00d263f0_t::FUN_00d263f0(int a, int aiLimit)
+// src: HAVOK_LIB 0x00d263f0
+int FUN_00d263f0_t::hkpTriSampledHeightFieldCollection_calcSizeForSpu(int a, int aiLimit)
 {
     int iAdjusted = aiLimit - 0x40;
     void* obj = m_obj;
@@ -76,12 +77,13 @@ FUN_00d26880_MemoryRouter* _D1A0E0GetMemoryRouter();
 
 struct FUN_00d26880_StandIn : public hkpTriSampledHeightFieldCollection
 {
-    hkpTriSampledHeightFieldCollection* FUN_00d26880(unsigned int flags);
+    hkpTriSampledHeightFieldCollection* hkpTriSampledHeightFieldCollection_Destroy(unsigned int flags);
 };
 
 // Runs FUN_00d26760 on this, then if flags bit 0 is set, frees this through the memory router's manager using the size at offset 4, and returns this.
 // @fnv 0x00d26880
-hkpTriSampledHeightFieldCollection* FUN_00d26880_StandIn::FUN_00d26880(unsigned int flags)
+// src: COMMUNITY 0x00d26880
+hkpTriSampledHeightFieldCollection* FUN_00d26880_StandIn::hkpTriSampledHeightFieldCollection_Destroy(unsigned int flags)
 {
     reinterpret_cast<FUN_00d26760_StandIn*>(this)->FUN_00d26760();
 
@@ -96,7 +98,8 @@ hkpTriSampledHeightFieldCollection* FUN_00d26880_StandIn::FUN_00d26880(unsigned 
 }
 
 // @fnv 0x00d26390
-int FUN_00d26390()
+// src: GUESS 0x00d26390 (confidence: high)
+int hkpTriSampledHeightFieldCollection_ReturnZero()
 {
     return 0;
 }
@@ -130,7 +133,8 @@ int __thiscall FUN_00d263a0_cls::GetNextKey(unsigned int key)
 }
 
 // @fnv 0x00d26440
-int __stdcall FUN_00d26440(int arg0)
+// src: GUESS 0x00d26440 (confidence: high)
+int __stdcall Object_ReturnZero_00d26440(int arg0)
 {
     return 0;
 }
@@ -144,30 +148,33 @@ struct FUN_00d26450_Obj
     int unk10;
     int unk14;
     void* unk18;
-    void* FUN_00d26450();
+    void* hkpTriSampledHeightFieldCollection_getHeightFieldShape();
 };
 // @fnv 0x00d26450
-void* FUN_00d26450_Obj::FUN_00d26450()
+// src: XBOX_PDB 0x00d26450
+void* FUN_00d26450_Obj::hkpTriSampledHeightFieldCollection_getHeightFieldShape()
 {
     return unk18;
 }
 
 struct S_d264d0_Coll : public hkpTriSampledHeightFieldCollection
 {
-    hkpSampledHeightFieldShape* FUN_00d26450();
-    void FUN_00d264d0(unsigned int key, unsigned short value);
+    hkpSampledHeightFieldShape* hkpTriSampledHeightFieldCollection_getHeightFieldShape();
+    void hkpTriSampledHeightFieldCollection_setWeldingInfo(unsigned int key, unsigned short value);
 };
 
-__declspec(noinline) hkpSampledHeightFieldShape* S_d264d0_Coll::FUN_00d26450()
+// src: XBOX_PDB 0x00d26450
+__declspec(noinline) hkpSampledHeightFieldShape* S_d264d0_Coll::hkpTriSampledHeightFieldCollection_getHeightFieldShape()
 {
     return m_pHeightFieldShape;
 }
 
 // Computes an index from key and count, then stores value in m_kWeldingInfo.m_data at that index.
 // @fnv 0x00d264d0
-void S_d264d0_Coll::FUN_00d264d0(unsigned int key, unsigned short value)
+// src: HAVOK_LIB 0x00d264d0
+void S_d264d0_Coll::hkpTriSampledHeightFieldCollection_setWeldingInfo(unsigned int key, unsigned short value)
 {
-    unsigned int count = FUN_00d26450()->m_iXResolution;
+    unsigned int count = hkpTriSampledHeightFieldCollection_getHeightFieldShape()->m_iXResolution;
     unsigned int idx = ((count - 1) * (key >> 16) + ((key >> 1) & 0x7fff)) * 2 | (key & 1);
     m_kWeldingInfo.m_data[idx] = value;
 }
@@ -219,13 +226,13 @@ FUN_00d26700::FUN_00d26700(void* p, float f)
 
 // hkMemoryRouter is the shared Havok memory router: 0x00c85750 returns it, heap at +0x10.
 namespace HavokHeap {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return HavokHeap::FUN_00c85750().heap();
+    return HavokHeap::hkMemoryRouter_getInstance().heap();
 }
 
 template <class T, class Allocator>
@@ -280,7 +287,7 @@ FUN_00d26760::~FUN_00d26760() throw()
 
 struct FUN_00d26450_S
 {
-    hkpSampledHeightFieldShape* FUN_00d26450();
+    hkpSampledHeightFieldShape* hkpTriSampledHeightFieldCollection_getHeightFieldShape();
 };
 
 struct FUN_00d267c0_Alloc
@@ -292,41 +299,42 @@ struct FUN_00d267c0_Alloc
     virtual void Free(void* data, int size);
 };
 
-void* FUN_00c85750(void);
-void FUN_00c908c0(int a1, int a2, int a3, int a4);
+void* hkMemoryRouter_getInstance(void);
+void hkArrayUtil__reserve(int a1, int a2, int a3, int a4);
 
 struct FUN_00d267c0_t : FUN_00d26450_S
 {
-    void FUN_00d267c0(int mode);
+    void hkpTriSampledHeightFieldCollection_initWeldingInfo(int mode);
 };
 
 // Resizes the internal buffer to the computed index when mode is not 6, otherwise frees the buffer and resets its state fields.
 // @fnv 0x00d267c0
-void FUN_00d267c0_t::FUN_00d267c0(int mode)
+// src: HAVOK_LIB 0x00d267c0
+void FUN_00d267c0_t::hkpTriSampledHeightFieldCollection_initWeldingInfo(int mode)
 {
     if (mode != 6)
     {
-        const hkpSampledHeightFieldShape* o = FUN_00d26450();
+        const hkpSampledHeightFieldShape* o = hkpTriSampledHeightFieldCollection_getHeightFieldShape();
         int idx = (2 * o->m_iZResolution - 2) * (o->m_iXResolution - 1);
         char* arr = (char*)this + 0x24;
-        char* cur = (char*)FUN_00c85750();
+        char* cur = (char*)hkMemoryRouter_getInstance();
         if ((*(int*)(arr + 8) & 0x3fffffff) < idx)
         {
-            FUN_00c908c0(*(int*)(cur + 0x10), (int)arr, idx, 2);
+            hkArrayUtil__reserve(*(int*)(cur + 0x10), (int)arr, idx, 2);
         }
-        cur = (char*)FUN_00c85750();
+        cur = (char*)hkMemoryRouter_getInstance();
         int alloc = *(int*)(cur + 0x10);
         int a = *(int*)(arr + 8) & 0x3fffffff;
         if (a < idx)
         {
             int m = a * 2;
-            FUN_00c908c0(alloc, (int)arr, idx < m ? m : idx, 2);
+            hkArrayUtil__reserve(alloc, (int)arr, idx < m ? m : idx, 2);
         }
         *(int*)(arr + 4) = idx;
     }
     else
     {
-        char* cur = (char*)FUN_00c85750();
+        char* cur = (char*)hkMemoryRouter_getInstance();
         FUN_00d267c0_Alloc* alloc = *(FUN_00d267c0_Alloc**)(cur + 0x10);
         int a = *(int*)((char*)this + 0x2c);
         *(int*)((char*)this + 0x28) = 0;
@@ -414,7 +422,7 @@ struct S00d26510_Tri : public S00d26510_Convex
 struct S00d26510_Container
 {
     virtual ~S00d26510_Container();
-    virtual const S00d26510_ShapeB* FUN_00d26510(unsigned int key, void* buffer) const;
+    virtual const S00d26510_ShapeB* AllocateStorage_00d26510(unsigned int key, void* buffer) const;
 };
 
 struct S00d26510_Coll : public S00d26510_Shape, public S00d26510_Container
@@ -429,7 +437,7 @@ struct S00d26510_Coll : public S00d26510_Shape, public S00d26510_Container
     LocalM128 m_kTriangleExtrusion;
 
     hkpSampledHeightFieldShape* getHF() const;
-    virtual const S00d26510_ShapeB* FUN_00d26510(unsigned int key, void* buffer) const;
+    virtual const S00d26510_ShapeB* AllocateStorage_00d26510(unsigned int key, void* buffer) const;
 };
 
 __declspec(noinline) hkpSampledHeightFieldShape* S00d26510_Coll::getHF() const
@@ -439,7 +447,8 @@ __declspec(noinline) hkpSampledHeightFieldShape* S00d26510_Coll::getHF() const
 
 // Constructs a triangle shape in the provided buffer from heightfield vertices, welding data, and extrusion vector.
 // @fnv 0x00d26510
-const S00d26510_ShapeB* S00d26510_Coll::FUN_00d26510(unsigned int key, void* buffer) const
+// src: GUESS 0x00d26510 (confidence: low)
+const S00d26510_ShapeB* S00d26510_Coll::AllocateStorage_00d26510(unsigned int key, void* buffer) const
 {
     const S00d26510_Coll* coll = this;
     const hkpSampledHeightFieldShape* hf = coll->getHF();

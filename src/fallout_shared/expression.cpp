@@ -7,13 +7,14 @@
 // @fnv 0x00593490
 ExpressionEvaluator::ExpressionEvaluator()
 {
-    reinterpret_cast<ExpressionCharStackInit*>(&m_kOperatorStack)->FUN_00594b60();
+    reinterpret_cast<ExpressionCharStackInit*>(&m_kOperatorStack)->Stack_enum_EXPRESSION_OPERATORS_64_Stack_enum_EXPRESSION_OPERATORS_64();
     reinterpret_cast<ExpressionOperandStackInit*>(&m_kOperandStack)->InitStack();
     m_eExpressionError = static_cast<EXPRESSION_ERROR>(0);
 }
 
 // @fnv 0x00594b60
-void* __fastcall FUN_00594b60(void* pThis)
+// src: XBOX_PDB 0x00594b60
+void* __fastcall Stack_enum_EXPRESSION_OPERATORS_64_Stack_enum_EXPRESSION_OPERATORS_64(void* pThis)
 {
     *(int*)((char*)pThis + 0x100) = -1;
     return pThis;
@@ -83,11 +84,12 @@ void Holder5934d0::SetError(int aiErrorCode)
 
 struct FUN_00594c00_shell
 {
-    int FUN_00594c00();
+    int Expression_Operands_IsEmpty();
 };
 
 // @fnv 0x00594c00
-int FUN_00594c00_shell::FUN_00594c00()
+// src: COMMUNITY 0x00594c00
+int FUN_00594c00_shell::Expression_Operands_IsEmpty()
 {
     return *(int*)((char*)this + 0x100) == -1;
 }
@@ -96,11 +98,12 @@ struct FUN_00594c20_shell
 {
     char pad[0x100];
     int m_100;
-    bool FUN_00594c20();
+    bool Expression_Operands_IsFull();
 };
 
 // @fnv 0x00594c20
-bool FUN_00594c20_shell::FUN_00594c20()
+// src: COMMUNITY 0x00594c20
+bool FUN_00594c20_shell::Expression_Operands_IsFull()
 {
     return m_100 + 1 == 0x40;
 }
@@ -110,12 +113,13 @@ struct S_00594bc0
     int unk00[64];
     int unk100;
 
-    int FUN_00594bc0();
+    int Expression_Operands_Pop();
 };
 
 // Returns the int at unk00 indexed by unk100, then decrements unk100.
 // @fnv 0x00594bc0
-int S_00594bc0::FUN_00594bc0()
+// src: COMMUNITY 0x00594bc0
+int S_00594bc0::Expression_Operands_Pop()
 {
     return unk00[unk100--];
 }

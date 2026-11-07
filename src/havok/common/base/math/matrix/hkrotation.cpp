@@ -20,16 +20,17 @@ struct __declspec(align(16)) CB2FC0Snapshot
 
 struct CB2FC0Object
 {
-    void FUN_00cb2d90(void* snapshot);
-    void FUN_00cb2fc0();
+    void hkRotation_set(void* snapshot);
+    void hkRotation_renormalize();
 };
 
 // Builds a CB2FC0Snapshot from this object and passes it to FUN_00cb2d90.
 // @fnv 0x00cb2fc0
-void CB2FC0Object::FUN_00cb2fc0()
+// src: HAVOK_LIB 0x00cb2fc0
+void CB2FC0Object::hkRotation_renormalize()
 {
     CB2FC0Snapshot snapshot(this);
-    FUN_00cb2d90(&snapshot);
+    hkRotation_set(&snapshot);
 }
 
 struct __declspec(align(16)) SpawnedSnap
@@ -53,7 +54,7 @@ class FUN_00cb2e30_cls
 void FUN_00cb2e30_cls::SpawnSnap(int value, float scale)
 {
     SpawnedSnap snap(value, scale);
-    ((CB2FC0Object*)this)->FUN_00cb2d90(&snap);
+    ((CB2FC0Object*)this)->hkRotation_set(&snap);
 }
 
 extern int DAT_012683c0;
@@ -224,7 +225,7 @@ class ProductHolder
 };
 struct RotationRows : FUN_00cd4d90_cls
 {
-    void* FUN_00cb2d90(void* snapshot);
+    void* hkRotation_set(void* snapshot);
 };
 static __forceinline void convertRotation(RotationRows& output, __m128 quaternion)
 {
@@ -254,7 +255,8 @@ static __forceinline void convertRotation(RotationRows& output, __m128 quaternio
 }
 // Converts a quaternion loaded from snapshot into a rotation matrix stored in this RotationRows object.
 // @fnv 0x00cb2d90
-void* RotationRows::FUN_00cb2d90(void* apQuaternion)
+// src: XBOX_PDB 0x00cb2d90
+void* RotationRows::hkRotation_set(void* apQuaternion)
 {
     convertRotation(*this, _mm_load_ps((const float*)apQuaternion));
     return apQuaternion;

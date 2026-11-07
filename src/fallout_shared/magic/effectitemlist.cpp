@@ -22,7 +22,8 @@ ActorPathHandler::PATH_HANDLER_RESULT CallNoPathUpdate(ActorPathHandler* pHandle
 }
 
 // @fnv 0x00405d80
-bool EffectItemList::FUN_00405d80()
+// src: XBOX_PDB 0x00405d80
+bool EffectItemList::IsHostile_00405d80()
 {
     return m_iEffectCount > 0;
 }
@@ -54,7 +55,8 @@ struct blob8
 typedef char _sizecheck_EffectItem[sizeof(EffectItem) == 36 ? 1 : -1];
 
 // @fnv 0x004065e0
-int __fastcall FUN_004065e0(EffectItemList* pthis)
+// src: XBOX_PDB 0x004065e0
+int __fastcall EffectItemList_GetAssociatedSkill(EffectItemList* pthis)
 {
     int eresult = -1;
     EffectItem* peffect = pthis->FindCostliestEffectItem(3, 0);
@@ -68,7 +70,8 @@ int __fastcall FUN_004065e0(EffectItemList* pthis)
 double __cdecl FUN_00ec6940(double);
 
 // @fnv 0x00406ce0
-float __cdecl FUN_00406ce0(float afValue)
+// src: XBOX_PDB 0x00406ce0
+float __cdecl floorf(float afValue)
 {
     return static_cast<float>(FUN_00ec6940(afValue));
 }
@@ -77,7 +80,8 @@ int __cdecl _vsprintf_s(char*, int, const char*, char*);
 
 // Calls _vsprintf_s to format the variadic arguments following apFormat into apString1 using aiSize as the buffer size.
 // @fnv 0x00406d00
-int __cdecl FUN_00406d00(char* apString1, int aiSize, const char* apFormat, ...)
+// src: XBOX_PDB 0x00406d00
+int __cdecl BSsprintf(char* apString1, int aiSize, const char* apFormat, ...)
 {
     char* vList = (char*)(&apFormat + 1);
     return _vsprintf_s(apString1, aiSize, apFormat, vList);
@@ -86,7 +90,8 @@ int __cdecl FUN_00406d00(char* apString1, int aiSize, const char* apFormat, ...)
 extern unsigned int* g_011d61c8[];
 
 // @fnv 0x00406d70
-bool __cdecl FUN_00406d70(int aiIndex, int aiFlag)
+// src: XBOX_PDB 0x00406d70
+bool __cdecl ActorValue_IsFlagSet(int aiIndex, int aiFlag)
 {
     return (g_011d61c8[aiIndex][0x11] & aiFlag) != 0;
 }
@@ -112,7 +117,8 @@ EffectItem* EffectItemList::GetEffectItemAtIndex(unsigned char aiIndex)
 int __cdecl FUN_00ec6cc4(char*, const char*, char*);
 
 // @fnv 0x00407000
-int __cdecl FUN_00407000(char* apString1, const char* apFormat, char* aList)
+// src: XBOX_PDB 0x00407000
+int __cdecl BSvsprintf(char* apString1, const char* apFormat, char* aList)
 {
     return FUN_00ec6cc4(apString1, apFormat, aList);
 }
@@ -167,7 +173,8 @@ bool EffectItemList::HasNonDetrimentalEffect()
 }
 
 // @fnv 0x00405da0
-bool EffectItemList::FUN_00405da0()
+// src: XBOX_PDB 0x00405da0
+bool EffectItemList::CanBePoison()
 {
     EffectItemList* pCurrentElementNext = this;
     if (pCurrentElementNext->IsEmpty())
@@ -188,7 +195,8 @@ struct EffectItemDeleter
 };
 
 // @fnv 0x00406340
-void EffectItemList::FUN_00406340()
+// src: COMMUNITY 0x00406340
+void EffectItemList::RemoveAllEffects()
 {
     EffectItemList* pCurrentElementNext = this;
     while (pCurrentElementNext)
@@ -226,14 +234,14 @@ struct FUN_00403ca0
     float m_fCost;
     PerkEntryConditionSet Conditions;
     FUN_00403ca0(EffectItem* other);
-    void FUN_00403be0(EffectSetting* setting);
+    void Initialize_00403be0(EffectSetting* setting);
     void CopyFrom(EffectItem* other);
 };
 
 // @fnv 0x00403ca0
 FUN_00403ca0::FUN_00403ca0(EffectItem* pEffectItem)
 {
-    FUN_00403be0(pEffectItem->GetEffectSetting());
+    Initialize_00403be0(pEffectItem->GetEffectSetting());
     m_pEffectSetting = 0;
     CopyFrom(pEffectItem);
 }
@@ -306,7 +314,7 @@ void* Fake406e40::FUN_00406e40(unsigned int flags)
     return this;
 }
 
-float __fastcall FUN_008a0c20(void*);
+float __fastcall Actor_GetMaxCarryWeight(void*);
 struct Mid93
 {
     virtual void f0();
@@ -323,12 +331,13 @@ struct Obj93
 // @fnv 0x0093abe0
 void __thiscall Obj93::GetTwoValues(float* pfValue, float* pfResult)
 {
-    *pfResult = FUN_008a0c20(this);
+    *pfResult = Actor_GetMaxCarryWeight(this);
     *pfValue = (float)m.f2(46);
 }
 
 // @fnv 0x00405fe0
-bool EffectItemList::FUN_00405fe0()
+// src: XBOX_PDB 0x00405fe0
+bool EffectItemList::HasTouchEffect()
 {
     EffectItemList* pCurrentElementNext = this;
     if (pCurrentElementNext->IsEmpty())
@@ -347,7 +356,8 @@ bool EffectItemList::FUN_00405fe0()
 }
 
 // @fnv 0x00406090
-bool EffectItemList::FUN_00406090()
+// src: XBOX_PDB 0x00406090
+bool EffectItemList::HasSelfEffect()
 {
     EffectItemList* pCurrentElementNext;
     bool bfound;
@@ -440,7 +450,7 @@ class B5B10ItemCopy
 // @fnv 0x00405b10
 void EffectItemListOperations::CopyItemsFromList(EffectItemList* pkList)
 {
-    FUN_00406340();
+    RemoveAllEffects();
     EffectItemList* pkNode = pkList;
     while (pkNode)
     {
@@ -493,7 +503,7 @@ EffectItem* EffectItemList::GetScriptEffect()
 }
 
 extern double DAT_01012060;
-float __cdecl FUN_00404040(float);
+float __cdecl FloatFloor(float);
 // @fnv 0x004063e0
 float EffectItemList::GetTotalCost(Actor* actor)
 {
@@ -509,7 +519,7 @@ float EffectItemList::GetTotalCost(Actor* actor)
             total += item->GetCost(actor);
         p5 = static_cast<EffectItemList*>(p5->GetNext());
     }
-    return total < DAT_01012060 ? 0.0f : FUN_00404040(total);
+    return total < DAT_01012060 ? 0.0f : FloatFloor(total);
 }
 
 // @fnv 0x00406e70
@@ -540,7 +550,7 @@ struct FaceGenStr
     ~FaceGenStr();
     operator const char*() const;
 };
-int __cdecl FUN_00406f60(FaceGenStr* apStr, const char* apFormat, ...);
+int __cdecl BSStringT_char_SPrintF(FaceGenStr* apStr, const char* apFormat, ...);
 void FNV_Warning(const char*);
 
 struct FaceGenModel
@@ -594,12 +604,13 @@ struct FaceGenCache
 {
     int unk00;
     FaceGenMap kMap;
-    void FUN_0064fe80(FaceGenLog* apLog);
+    void BSFaceGenModelMap_OutputModelMapContents(FaceGenLog* apLog);
 };
 
 // Iterates the cache map and logs each entry's ref count, key, texture size and data size, warning and optionally adding the line to apLog.
 // @fnv 0x0064fe80
-void FaceGenCache::FUN_0064fe80(FaceGenLog* apLog)
+// src: XBOX_PDB 0x0064fe80
+void FaceGenCache::BSFaceGenModelMap_OutputModelMapContents(FaceGenLog* apLog)
 {
     void* pPos3 = kMap.GetFirstPos();
     const char* pKey2;
@@ -610,7 +621,7 @@ void FaceGenCache::FUN_0064fe80(FaceGenLog* apLog)
         if (spEntry3)
         {
             FaceGenStr kLine;
-            FUN_00406f60(&kLine, "FACEGEN:\t%3d\t%s\t%iKB\t%iKB\r\n",
+            BSStringT_char_SPrintF(&kLine, "FACEGEN:\t%3d\t%s\t%iKB\t%iKB\r\n",
                          ((FaceGenModel*)((FaceGenEntry*)spEntry3)->m_pRenderedNodeEntry)->GetRefCount() - 1, pKey2,
                          ((FaceGenModel*)((FaceGenEntry*)spEntry3)->m_pRenderedNodeEntry)->GetTextureSize() >> 10,
                          ((FaceGenModel*)((FaceGenEntry*)spEntry3)->m_pRenderedNodeEntry)->GetDataSize() >> 10);
@@ -671,7 +682,7 @@ struct Player
 };
 extern Player* _g_thePlayer;
 void ApplyPerkModifiers(int, Player*, ...);
-bool FUN_00406d70(int, int);
+bool ActorValue_IsFlagSet(int, int);
 float floor(float);
 int TruncateFloatToInt(float);
 const char* ValueEffectName(int);
@@ -704,7 +715,7 @@ void Description::BuildDescription(char* acBuffer, unsigned int size)
             if (!(*nodeB->_ref_006815c0())->_ref_00409140() ||
                 (*nodeB->_ref_006815c0())->_ref_00409140()->_ref_00680c60(_g_thePlayer, 0, &s, 0))
             {
-                if ((*nodeB->_ref_006815c0())->_ref_00825c00()->FUN_00403e60(0x2000))
+                if ((*nodeB->_ref_006815c0())->_ref_00825c00()->IsFlagSet_00403e60(0x2000))
                 {
                     CopyText(bufferA, 128, (*nodeB->_ref_006815c0())->EffectName());
                     if (aA)
@@ -741,7 +752,7 @@ void Description::BuildDescription(char* acBuffer, unsigned int size)
                     pDuration2 /= 60.0;
                     hUnit4 = 'm';
                 }
-                if (FUN_00406d70(iValueVal, 0x200))
+                if (ActorValue_IsFlagSet(iValueVal, 0x200))
                     kAMagnitude = -kAMagnitude;
                 if (i)
                 {

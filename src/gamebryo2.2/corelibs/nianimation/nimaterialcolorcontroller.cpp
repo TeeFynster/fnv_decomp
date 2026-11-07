@@ -19,7 +19,8 @@
 extern "C" void* g_011f3f88;
 
 // @fnv 0x00a4b570
-void* __cdecl FUN_00a4b570()
+// src: COMMUNITY 0x00a4b570
+void* __cdecl NiMaterialColorController_GetRTTI()
 {
     return &g_011f3f88;
 }
@@ -30,7 +31,8 @@ extern int DAT_01098a14;
 
 // Allocates a 0x3c-byte BSFadeNode, runs its constructor, zeroes the field at offset 0x38, sets its vtable, and returns the object or null.
 // @fnv 0x00a4b790
-void* __cdecl FUN_00a4b790()
+// src: EXE 0x00a4b790
+void* __cdecl NiMaterialColorController_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x3c);
     if (p)
@@ -50,15 +52,16 @@ struct GlobalObjectO2_00a7b610
     char const* m_str;
 };
 extern GlobalObjectO2_00a7b610 g_011f3f88;
-void __stdcall FUN_00a57d10(StrArr*);
-char* __cdecl FUN_00a7d330(char const*);
+void __stdcall NiPoint3InterpController_GetViewerStrings(StrArr*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char const*);
 
 // Appends the controller name, growing the string array when needed.
 // @fnv 0x00a4b880
-void __stdcall FUN_00a4b880(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a4b880
+void __stdcall NiMaterialColorController_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00a57d10(pkStrings);
-    char* pStr = FUN_00a7d330(g_011f3f88.m_str);
+    NiPoint3InterpController_GetViewerStrings(pkStrings);
+    char* pStr = NiViewerStrings_NiGetViewerString_Title(g_011f3f88.m_str);
     unsigned int len = pkStrings->m_usSize;
     unsigned int cnt = pkStrings->m_usMaxSize;
     if (len >= cnt)
@@ -72,7 +75,8 @@ void __stdcall FUN_00a4b880(StrArr* pkStrings)
 extern "C" void* g_01201f74;
 
 // @fnv 0x00bc29d0
-void* __cdecl FUN_00bc29d0()
+// src: XBOX_PDB 0x00bc29d0
+void* __cdecl BSClearZNode_GetRTTI()
 {
     return &g_01201f74;
 }
@@ -240,7 +244,7 @@ void __fastcall UpdateMaterialColor(NiMaterialColorController* self, void*, NiUp
     {
         self->m_fControllerTime = DAT_01096324;
     }
-    else if (self->FUN_00a36250(kUpdateData.fTime) &&
+    else if (self->DontDoUpdate(kUpdateData.fTime) &&
              (!((NiPoint3Interpolator*)self->m_spControllerInterpolator.m_pObject) || !((NiPoint3Interpolator*)self->m_spControllerInterpolator.m_pObject)->AlwaysUpdate()))
     {
         return;
@@ -380,15 +384,16 @@ FUN_00bc2980::FUN_00bc2980() : NiNode(0)
     m_ac = 0;
 }
 
-void __cdecl FUN_00a5ea70();
+void __cdecl NiNode_GetViewerStrings();
 
 // @fnv 0x00bc29c0
-void __cdecl FUN_00bc29c0()
+// src: XBOX_PDB 0x00bc29c0
+void __cdecl BSClearZNode_GetViewerStrings()
 {
-    FUN_00a5ea70();
+    NiNode_GetViewerStrings();
 }
 
-extern void __fastcall FUN_00a5e930(NiMaterialColorController*);
+extern void __fastcall UpdateFields_00c5faa0(NiMaterialColorController*);
 extern "C" void __cdecl __Dummy_00b6fef0(NiMaterialColorController*, int);
 
 // Resets the node fields, runs base destruction, and optionally frees the object.
@@ -400,7 +405,7 @@ NiMaterialColorController* __thiscall NiMaterialColorController::Destroy(int aiF
     ((void**)this)[0] = &DAT_010ba608;
     ((unsigned char*)this)[0xad] = 0;
     ((unsigned char*)this)[0xac] = 0;
-    FUN_00a5e930(this);
+    UpdateFields_00c5faa0(this);
     if (aiFlags & 1)
         __Dummy_00b6fef0(this, 0xb8);
     return this;

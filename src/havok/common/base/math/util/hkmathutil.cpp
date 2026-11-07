@@ -19,12 +19,12 @@ struct S_c7a410_A
 };
 struct S_c7a410_B
 {
-    void FUN_00cb2d90(const void* p);
+    void hkRotation_set(const void* p);
     __m128 r[3];
 };
 struct S_c7a410_C
 {
-    void FUN_00c66320(const void* p, S_c7a410_A* a);
+    void setMul(const void* p, S_c7a410_A* a);
     int unk00;
     int unk04;
     int unk08;
@@ -32,8 +32,8 @@ struct S_c7a410_C
 };
 struct S_c7a410_D
 {
-    void FUN_00c74b70(S_c7a410_A* b, S_c7a410_C* c);
-    void FUN_00cb2ca0(const S_c7a410_Vec* v, const void* o, float* out);
+    void hkQuaternion_setInverseMul(S_c7a410_A* b, S_c7a410_C* c);
+    void hkQuaternion_decomposeRestAxis(const S_c7a410_Vec* v, const void* o, float* out);
     int unk00;
     int unk04;
     int unk08;
@@ -51,8 +51,8 @@ struct S_c7a410_Node
     virtual void v6();
     virtual void v7();
     virtual int GetType();
-    S_c7a410_Node* FUN_00cdf6c0();
-    void FUN_00cdf230(S_c7a410_B* t);
+    S_c7a410_Node* hkpMalleableConstraintData_getWrappedConstraintData();
+    void hkpRagdollConstraintData_setTarget(S_c7a410_B* t);
 };
 struct S_c7a410_Item
 {
@@ -90,7 +90,8 @@ struct S_c7a410_Obj
 
 // Iterates indexed items, dispatches on node type, and reads per-item data from arr at 0x10 plus 0x30-byte strides.
 // @fnv 0x00c7a410
-void FUN_00c7a410(S_c7a410_Obj* obj, char* apBuffer)
+// src: XBOX_PDB 0x00c7a410
+void bhkRagdollController_bhkRagdollPoweredConstraintController_driveToPose(S_c7a410_Obj* obj, char* apBuffer)
 {
     int iCount = obj->unk2c->unk1c;
     for (int iIndex = 0; iIndex < iCount; iIndex++)
@@ -103,13 +104,13 @@ void FUN_00c7a410(S_c7a410_Obj* obj, char* apBuffer)
             continue;
         S_c7a410_Node* p = pItem->unk0c;
         if (p->GetType() == 13)
-            p = p->FUN_00cdf6c0();
+            p = p->hkpMalleableConstraintData_getWrappedConstraintData();
         switch (p->GetType())
         {
         case 7: {
             S_c7a410_B tTransform;
-            tTransform.FUN_00cb2d90(apBuffer + 0x10 + iIndex * 0x30);
-            p->FUN_00cdf230(&tTransform);
+            tTransform.hkRotation_set(apBuffer + 0x10 + iIndex * 0x30);
+            p->hkpRagdollConstraintData_setTarget(&tTransform);
             break;
         }
         case 2: {
@@ -118,14 +119,14 @@ void FUN_00c7a410(S_c7a410_Obj* obj, char* apBuffer)
             S_c7a410_A b;
             b.FUN_00cb26e0((char*)p + 0x60);
             S_c7a410_C c;
-            c.FUN_00c66320(apBuffer + 0x10 + iIndex * 0x30, &a);
+            c.setMul(apBuffer + 0x10 + iIndex * 0x30, &a);
             S_c7a410_D d;
-            d.FUN_00c74b70(&b, &c);
+            d.hkQuaternion_setInverseMul(&b, &c);
             S_c7a410_Vec v;
             _mm_store_ps(&v.x, _mm_setr_ps(DAT_01012068, DAT_01011d78, DAT_01011d78, DAT_01011d78));
             float out;
             S_c7a410_A o;
-            d.FUN_00cb2ca0(&v, &o, &out);
+            d.hkQuaternion_decomposeRestAxis(&v, &o, &out);
             *(float*)((char*)p + 0xac) = out;
             break;
         }

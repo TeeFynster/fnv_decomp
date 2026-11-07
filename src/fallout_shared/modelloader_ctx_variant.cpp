@@ -6,11 +6,11 @@
 #include "../../include/NiNode.h"
 #include "../../include/NiPointer.h"
 #include "../../include/NiRenderer.h"
-NiRenderer* FUN_0043c4b0();
-const NiFixedString& FUN_00448a80();
+NiRenderer* NiXenonRenderer_GetRenderer();
+const NiFixedString& BSXFlags_Tag();
 
-NiRenderer* FUN_0043c4b0();
-const NiFixedString& FUN_00448a80();
+NiRenderer* NiXenonRenderer_GetRenderer();
+const NiFixedString& BSXFlags_Tag();
 
 class H_A100
 {
@@ -27,19 +27,19 @@ class FUN_0043c3b0_This
 class FUN_0043e480_shell
 {
   public:
-    void FUN_0043e480(bool);
+    void QueuedKF_SetAlreadyInKFMap(bool);
 };
 
 class FUN_0043c3d0_shell
 {
   public:
-    bool FUN_0043c3d0();
+    bool QueuedTexture_GetLoadDegraded();
 };
 
 class TextureNode
 {
   public:
-    int FUN_0043c430();
+    int NiTexture_GetTextureQualityLevel();
     virtual void vfn_00();
     virtual void vfn_04();
     virtual void vfn_08();
@@ -93,11 +93,11 @@ class MyFileEntry
 extern int DAT_011a9598;
 void GetNodePointer(NiNode*, NiPointer<NiNode>&);
 bool fnv_NiStreamGetTexture(const char*, NiPointer<NiNode>&);
-int FUN_0043c410();
-void FUN_0043c3f0(unsigned int);
+int NiTexture_GetLoadMethod();
+void NiTexture_SetLoadMethod(unsigned int);
 extern "C" char* strstr(const char*, const char*);
-NiNode* FUN_00a61040(const NiFixedString&, MyFileEntry*, NiRenderer*, void*);
-NiNode* FUN_00a5fe30(MyFileEntry*, const char*, void*, int);
+NiNode* NiSourceCubeMap_Create(const NiFixedString&, MyFileEntry*, NiRenderer*, void*);
+NiNode* NiSourceTexture_CreateTexture(MyFileEntry*, const char*, void*, int);
 void FNV_Warning(const char*, ...);
 
 class CQueuedTexture
@@ -122,11 +122,12 @@ class CQueuedTexture
     const char* GetFilePath();
     MyFileEntry* FUN_00c3cff0(int, int);
 
-    void FUN_0043c150();
+    void QueuedTexture_Run();
 };
 
 // @fnv 0x0043c150
-void CQueuedTexture::FUN_0043c150()
+// src: XBOX_PDB 0x0043c150
+void CQueuedTexture::QueuedTexture_Run()
 {
     AutoMemContext memContext(this->unk18, true,
                               "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\ModelLoader.cpp", 695);
@@ -142,9 +143,9 @@ void CQueuedTexture::FUN_0043c150()
 
     if (this->unk30)
     {
-        ((FUN_0043e480_shell*)(void*)this)->FUN_0043e480(true);
-        if (((TextureNode*)(void*)(NiNode*)this->unk30)->FUN_0043c430() == 3 &&
-            !((FUN_0043c3d0_shell*)(void*)this)->FUN_0043c3d0())
+        ((FUN_0043e480_shell*)(void*)this)->QueuedKF_SetAlreadyInKFMap(true);
+        if (((TextureNode*)(void*)(NiNode*)this->unk30)->NiTexture_GetTextureQualityLevel() == 3 &&
+            !((FUN_0043c3d0_shell*)(void*)this)->QueuedTexture_GetLoadDegraded())
         {
             ((TextureNode*)(void*)(NiNode*)this->unk30)->vfn_8c();
         }
@@ -156,20 +157,20 @@ void CQueuedTexture::FUN_0043c150()
     {
         int tlsVal;
         const char* path = fileEntry->vfn_18();
-        tlsVal = FUN_0043c410();
-        if (((FUN_0043c3d0_shell*)(void*)this)->FUN_0043c3d0())
+        tlsVal = NiTexture_GetLoadMethod();
+        if (((FUN_0043c3d0_shell*)(void*)this)->QueuedTexture_GetLoadDegraded())
         {
-            FUN_0043c3f0(1);
+            NiTexture_SetLoadMethod(1);
         }
         if (strstr(path, "_e.dd"))
         {
-            this->unk30 = FUN_00a61040(NiFixedString(path), fileEntry, FUN_0043c4b0(), &DAT_011a9598);
+            this->unk30 = NiSourceCubeMap_Create(NiFixedString(path), fileEntry, NiXenonRenderer_GetRenderer(), &DAT_011a9598);
         }
         else
         {
-            this->unk30 = FUN_00a5fe30(fileEntry, path, &DAT_011a9598, 1);
+            this->unk30 = NiSourceTexture_CreateTexture(fileEntry, path, &DAT_011a9598, 1);
         }
-        FUN_0043c3f0(tlsVal);
+        NiTexture_SetLoadMethod(tlsVal);
     }
     else if (this->GetArchiveFileEntry())
     {

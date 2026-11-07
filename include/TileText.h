@@ -18,7 +18,7 @@ class TileText : public Tile
     virtual Tile* SetTraitValue(int valueID, float floatValue, const char* strValue);
 
     TextNode* GetNiNode();
-    const char* FUN_00a0bbe0();
+    const char* GetTypeName_00a0bbe0();
 
     void SetPosition(const NiPoint3& p)
     {

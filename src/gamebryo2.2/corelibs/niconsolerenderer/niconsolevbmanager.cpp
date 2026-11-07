@@ -45,7 +45,8 @@ struct Outer
 
 // Calls func1c then func18 on a->m08; if func18 returns nonzero, stores it in a->m28[b] when b < a->m20 and returns true, else false.
 // @fnv 0x00e8bfa0
-bool __stdcall FUN_00e8bfa0(Outer* apOuter, unsigned int uiIndex)
+// src: COMMUNITY 0x00e8bfa0
+bool __stdcall NiDX9VertexBufferManager_AllocateBufferSpace(Outer* apOuter, unsigned int uiIndex)
 {
     Inner* p = apOuter->m08;
     p->func1c(apOuter, uiIndex);
@@ -102,7 +103,8 @@ bool S_00e8c0d0::CopyAndRelease(void* apObj)
 extern unsigned int DAT_011bf558;
 
 // @fnv 0x00e8c120
-void __stdcall FUN_00e8c120(NiGeometryData* p1, Outer* p2, unsigned int* flags, unsigned int* auiOffset, int* p5,
+// src: COMMUNITY 0x00e8c120
+void __stdcall NiDX9VertexBufferManager_GenerateVertexParameters(NiGeometryData* p1, Outer* p2, unsigned int* flags, unsigned int* auiOffset, int* p5,
                             unsigned int* p6, unsigned int* p7, unsigned int* p8, unsigned int* p9)
 {
     unsigned int cnt;
@@ -159,8 +161,8 @@ struct Holder_e8bff0 {
     virtual int __stdcall read(unsigned int type, unsigned int length, unsigned int* out, unsigned int flags) = 0;
 };
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
-void __cdecl FUN_00aa10f0(void* p);
-void* __cdecl FUN_00aa1070(unsigned int n);
+void __cdecl _NiFree_00aa10f0(void* p);
+void* __cdecl _NiMalloc_00aa1070(unsigned int n);
 void __cdecl FUN_00ec44d0(void* p, unsigned int out, unsigned int n);
 struct Owner_e8bff0 {
     void*& Data() { return *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x40); }
@@ -168,10 +170,11 @@ struct Owner_e8bff0 {
     unsigned int& Offset() { return *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x48); }
     unsigned int& Size() { return *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x4c); }
     void* CriticalSection() { return reinterpret_cast<char*>(this) + 0x80; }
-    void* FUN_00e8bff0(Holder_e8bff0* source, unsigned int type, unsigned int length, unsigned int flags);
+    void* NiDX9VertexBufferManager_LockVB(Holder_e8bff0* source, unsigned int type, unsigned int length, unsigned int flags);
 };
 // @fnv 0x00e8bff0
-void* Owner_e8bff0::FUN_00e8bff0(Holder_e8bff0* source, unsigned int type, unsigned int length, unsigned int flags) {
+// src: COMMUNITY 0x00e8bff0
+void* Owner_e8bff0::NiDX9VertexBufferManager_LockVB(Holder_e8bff0* source, unsigned int type, unsigned int length, unsigned int flags) {
     unsigned int out = 0;
     if (source->read(type, length, &out, flags) < 0)
         return 0;
@@ -179,8 +182,8 @@ void* Owner_e8bff0::FUN_00e8bff0(Holder_e8bff0* source, unsigned int type, unsig
     Offset() = out;
     Size() = length;
     if (Capacity() < length) {
-        FUN_00aa10f0(Data());
-        Data() = FUN_00aa1070(length);
+        _NiFree_00aa10f0(Data());
+        Data() = _NiMalloc_00aa1070(length);
         Capacity() = length;
     }
     if ((flags & 0x3000) == 0)
@@ -255,18 +258,20 @@ struct Renderer {
     unsigned int unk78;
     unsigned int unk7c;
     CriticalSection criticalSection;
-    void FUN_00e8c120(NiGeometryData*, void*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*);
-    bool FUN_00e8bfa0(C_00e8f010*, unsigned int);
-    char* FUN_00e8bff0(VertexBuffer*, unsigned int, unsigned int, unsigned int);
+    void NiDX9VertexBufferManager_GenerateVertexParameters(NiGeometryData*, void*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*);
+    bool NiDX9VertexBufferManager_AllocateBufferSpace(C_00e8f010*, unsigned int);
+    char* NiDX9VertexBufferManager_LockVB(VertexBuffer*, unsigned int, unsigned int, unsigned int);
     void CopyStridedElements(char*, char*, unsigned int, unsigned int, unsigned int);
-    VertexRecord* FUN_00e8c1e0(NiGeometryData*, Class87d40*, unsigned int, VertexRecord*, char*);
+    VertexRecord* NiDX9VertexBufferManager_PackUntransformedVB(NiGeometryData*, Class87d40*, unsigned int, VertexRecord*, char*);
 };
-__declspec(noinline) void Renderer::FUN_00e8c120(NiGeometryData* d, void* p, unsigned int* a, unsigned int* b, unsigned int* c, unsigned int* e, unsigned int* f, unsigned int* g, unsigned int* h)
+// src: COMMUNITY 0x00e8c120
+__declspec(noinline) void Renderer::NiDX9VertexBufferManager_GenerateVertexParameters(NiGeometryData* d, void* p, unsigned int* a, unsigned int* b, unsigned int* c, unsigned int* e, unsigned int* f, unsigned int* g, unsigned int* h)
 {
     *a = unk00; *b = unk04; *c = unk08; *e = unk0c; *f = unk10; *g = unk14; *h = unk18;
 }
 // @fnv 0x00e8c1e0
-VertexRecord* Renderer::FUN_00e8c1e0(NiGeometryData* data, Class87d40* transform, unsigned int dirty, VertexRecord* existing, char* destination)
+// src: COMMUNITY 0x00e8c1e0
+VertexRecord* Renderer::NiDX9VertexBufferManager_PackUntransformedVB(NiGeometryData* data, Class87d40* transform, unsigned int dirty, VertexRecord* existing, char* destination)
 {
     VertexRecord* record;
     unsigned short count = data->GetVertexCount();
@@ -279,7 +284,7 @@ VertexRecord* Renderer::FUN_00e8c1e0(NiGeometryData* data, Class87d40* transform
     if (textureCount > maxTextures) textureCount = maxTextures;
     unsigned int fvf = 0, stride = 0;
     unsigned int positionOffset, normalOffset, colorOffset, textureOffset, unusedOffset;
-    FUN_00e8c120(data, 0, &fvf, &stride, &positionOffset, &unusedOffset, &normalOffset, &colorOffset, &textureOffset);
+    NiDX9VertexBufferManager_GenerateVertexParameters(data, 0, &fvf, &stride, &positionOffset, &unusedOffset, &normalOffset, &colorOffset, &textureOffset);
     C_00e8f010* bufferData = static_cast<C_00e8f010*>(data->m_pkBuffData);
     bufferData->FUN_00e8f010(fvf);
     if (bufferData->count > 0) bufferData->strides[0] = stride;
@@ -294,7 +299,7 @@ VertexRecord* Renderer::FUN_00e8c1e0(NiGeometryData* data, Class87d40* transform
             (buf->GetDesc(&desc), desc.type == 100 && desc.fvf == fvf && desc.size >= (unsigned short)count * stride)) {
             record = existing;
         } else {
-            if (!FUN_00e8bfa0(bufferData, 0)) return 0;
+            if (!NiDX9VertexBufferManager_AllocateBufferSpace(bufferData, 0)) return 0;
             record = bufferData->count > 0 ? bufferData->records[0] : 0;
             dirty = 0xfff;
         }
@@ -302,7 +307,7 @@ VertexRecord* Renderer::FUN_00e8c1e0(NiGeometryData* data, Class87d40* transform
         unsigned int size = record->size;
         unsigned int offset = record->offset;
         VertexBuffer* buffer = record->buffer;
-        destination = FUN_00e8bff0(buffer, offset, size, flags);
+        destination = NiDX9VertexBufferManager_LockVB(buffer, offset, size, flags);
     }
     if (transform) {
         if (positions && (dirty & 1)) {
@@ -325,7 +330,7 @@ VertexRecord* Renderer::FUN_00e8c1e0(NiGeometryData* data, Class87d40* transform
     if (dirty & 8) {
         for (unsigned int i = 0; i < textureCount; ++i) {
             char* output = destination + textureOffset + i * 8;
-            NiPoint2* input = data->FUN_00a66960((unsigned short)i);
+            NiPoint2* input = data->NiGeometryData_GetTextureSet((unsigned short)i);
             char* vertex = output;
             for (unsigned int j = 0; j < (unsigned short)count; ++j) {
                 *(NiPoint2*)vertex = *input++;

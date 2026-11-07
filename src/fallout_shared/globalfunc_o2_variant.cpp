@@ -57,7 +57,8 @@ struct OutBa
     InBa* fC;
 };
 // @fnv 0x00ba6240
-void __stdcall FUN_00ba6240(OutBa* a1)
+// src: XBOX_PDB 0x00ba6240
+void __stdcall ParticleShader_SetupGeometryTextures(OutBa* a1)
 {
     InBa* p = a1->fC;
     int cond = 0;
@@ -123,18 +124,19 @@ struct S86870
     virtual void d43() = 0;
     virtual void d44() = 0;
     virtual void* GetLink(char* p) = 0;
-    void FUN_00c87670(NiStream* s);
-    void FUN_00c86870(NiStream* s);
+    void bhkSerializable_LinkObject(NiStream* s);
+    void bhkUnaryAction_LinkObject(NiStream* s);
 };
 // @fnv 0x00c86870
-void S86870::FUN_00c86870(NiStream* s)
+// src: XBOX_PDB 0x00c86870
+void S86870::bhkUnaryAction_LinkObject(NiStream* s)
 {
     char tmp;
     void* p = GetLink(&tmp);
     NiObject* o = s->GetLoadedObject();
     if (o)
         *(int*)((char*)p + 4) = *(int*)((char*)o + 8);
-    FUN_00c87670(s);
+    bhkSerializable_LinkObject(s);
 }
 
 #include "../../include/NiTMallocInterface.h"
@@ -152,11 +154,12 @@ template <class T, class A> struct NiTPrimitiveArrayWithAllocator
 };
 extern const char* const g_0126811c_arg1;
 char* __cdecl _FUN_00a7d330(const char*);
-void __stdcall FUN_00c878c0(NiTPrimitiveArrayWithAllocator<char*, NiTMallocInterface<char*> >*);
+void __stdcall bhkSerializable_GetViewerStrings(NiTPrimitiveArrayWithAllocator<char*, NiTMallocInterface<char*> >*);
 // @fnv 0x00c87be0
-void __stdcall FUN_00c87be0(NiTPrimitiveArrayWithAllocator<char*, NiTMallocInterface<char*> >* p)
+// src: XBOX_PDB 0x00c87be0
+void __stdcall bhkAction_GetViewerStrings(NiTPrimitiveArrayWithAllocator<char*, NiTMallocInterface<char*> >* p)
 {
-    FUN_00c878c0(p);
+    bhkSerializable_GetViewerStrings(p);
     char* v = _FUN_00a7d330(g_0126811c_arg1);
     unsigned int idx = p->m_kOutgoingTangent;
     if (idx >= p->m_8)
@@ -221,10 +224,11 @@ struct Holder
     virtual void v44();
     virtual RetVal* MyVirt(int*);
     void FUN_00c87650(NiStream*);
-    void FUN_00c86790(NiStream*);
+    void bhkUnaryAction_LoadBinary(NiStream*);
 };
 // @fnv 0x00c86790
-void Holder::FUN_00c86790(NiStream* stream)
+// src: XBOX_PDB 0x00c86790
+void Holder::bhkUnaryAction_LoadBinary(NiStream* stream)
 {
     stream->ResetStreamState();
     FUN_00c87650(stream);
@@ -274,10 +278,11 @@ struct FUN_00c75460_S
     ArmBones_S xRight;
     char pad21c[0x2a4 - 0x21c];
     SkelHolder_S* pHolder;
-    bool FUN_00c75460();
+    bool bhkRagdollController_InitGrabIK();
 };
 // @fnv 0x00c75460
-bool FUN_00c75460_S::FUN_00c75460()
+// src: XBOX_PDB 0x00c75460
+bool FUN_00c75460_S::bhkRagdollController_InitGrabIK()
 {
     bool bResult = bEnabled;
     if (bResult)
@@ -307,10 +312,11 @@ bool FUN_00c75460_S::FUN_00c75460()
     return bResult;
 }
 
-void __cdecl FUN_00b97e80(int, int);
+void __cdecl BSRenderState_SetZFunc(int, int);
 
 // @fnv 0x00ba5de0
-void __stdcall FUN_00ba5de0(OutBa* a1, int unused)
+// src: XBOX_PDB 0x00ba5de0
+void __stdcall ParticleShader_SetupGeometryRenderStates(OutBa* a1, int unused)
 {
     InBa* p = a1->fC;
     int c = 0;
@@ -330,21 +336,22 @@ void __stdcall FUN_00ba5de0(OutBa* a1, int unused)
     arr[6] = 6;
     arr[7] = 0;
     int idx = *(int*)((char*)sel + 0x114);
-    FUN_00b97e80(arr[idx - 1], 0);
+    BSRenderState_SetZFunc(arr[idx - 1], 0);
 }
 
 struct CallTarget_00ba5320
 {
-    int FUN_00ba5320();
+    int ParticleShader_UpdateFov();
 };
 struct SearchObject
 {
-    int FUN_00ba5ed0(unsigned int arg0);
+    int ParticleShader_SetupPassConstants(unsigned int arg0);
 };
 // @fnv 0x00ba5ed0
-int SearchObject::FUN_00ba5ed0(unsigned int arg0)
+// src: XBOX_PDB 0x00ba5ed0
+int SearchObject::ParticleShader_SetupPassConstants(unsigned int arg0)
 {
-    unsigned int callResult0 = (unsigned int)((CallTarget_00ba5320*)this)->FUN_00ba5320();
+    unsigned int callResult0 = (unsigned int)((CallTarget_00ba5320*)this)->ParticleShader_UpdateFov();
     return (int)callResult0;
 }
 
@@ -366,7 +373,8 @@ struct S_00c85ef0_Ret
     {}
 };
 // @fnv 0x00c85ef0
-S_00c85ef0_Ret FUN_00c85ef0(S_00c85ef0_Map* map, int key)
+// src: XBOX_PDB 0x00c85ef0
+S_00c85ef0_Ret bhkWorldObject_GetProperty(S_00c85ef0_Map* map, int key)
 {
     int r = 0;
     if (map)
@@ -421,14 +429,15 @@ class FUN_00c867d0_cls
     void* unk00;
     void* unk04;
     FUN_00c867d0_inner* unk08;
-    void* FUN_00c879e0(FUN_00c867d0_out* out);
-    void FUN_00c867d0(FUN_00c867d0_out* out);
+    void* bhkAction_CopyCinfo(FUN_00c867d0_out* out);
+    void bhkUnaryAction_CopyCinfo(FUN_00c867d0_out* out);
 };
 
 // @fnv 0x00c867d0
-void FUN_00c867d0_cls::FUN_00c867d0(FUN_00c867d0_out* out)
+// src: XBOX_PDB 0x00c867d0
+void FUN_00c867d0_cls::bhkUnaryAction_CopyCinfo(FUN_00c867d0_out* out)
 {
-    this->FUN_00c879e0(out);
+    this->bhkAction_CopyCinfo(out);
 
     void* value;
     if (this != 0 && this->unk08 != 0)
@@ -469,12 +478,13 @@ struct FUN_00c86800_Table
 
 struct FUN_00c86800_Class : S86870
 {
-    void FUN_00c86800(int a1, FUN_00c86800_Table* a2);
-    void FUN_00c87600(int a1, FUN_00c86800_Table* a2);
+    void bhkUnaryAction_CopyMembers(int a1, FUN_00c86800_Table* a2);
+    void bhkSerializable_CopyMembers(int a1, FUN_00c86800_Table* a2);
 };
 
 // @fnv 0x00c86800
-void FUN_00c86800_Class::FUN_00c86800(int a1, FUN_00c86800_Table* a2)
+// src: XBOX_PDB 0x00c86800
+void FUN_00c86800_Class::bhkUnaryAction_CopyMembers(int a1, FUN_00c86800_Table* a2)
 {
     char key;
     FUN_00c86800_Link* link = (FUN_00c86800_Link*)GetLink(&key);
@@ -490,7 +500,7 @@ void FUN_00c86800_Class::FUN_00c86800(int a1, FUN_00c86800_Table* a2)
             link->m04 = target ? target->m08 : 0;
         }
     }
-    FUN_00c87600(a1, table);
+    bhkSerializable_CopyMembers(a1, table);
 }
 
 struct FUN_00c868f0_inner
@@ -510,14 +520,15 @@ class FUN_00c868f0_cls
     int unk00;
     int unk04;
     FUN_00c868f0_inner* m_08;
-    bool FUN_00ba87d0(FUN_00c868f0_cls* other);
-    unsigned char FUN_00c868f0(FUN_00c868f0_cls* other);
+    bool BSAnimNotes_IsEqual(FUN_00c868f0_cls* other);
+    unsigned char bhkUnaryAction_IsEqual(FUN_00c868f0_cls* other);
 };
 
 // @fnv 0x00c868f0
-unsigned char FUN_00c868f0_cls::FUN_00c868f0(FUN_00c868f0_cls* other)
+// src: XBOX_PDB 0x00c868f0
+unsigned char FUN_00c868f0_cls::bhkUnaryAction_IsEqual(FUN_00c868f0_cls* other)
 {
-    unsigned char result = this->FUN_00ba87d0(other);
+    unsigned char result = this->BSAnimNotes_IsEqual(other);
     if (result)
     {
         FUN_00c868f0_inner* l = 0;
@@ -604,8 +615,8 @@ class ObjectCandidate
     virtual void Reset();
     int unk04;
     int activeObject;
-    bool FUN_00c86ab0(class Item* item);
-    void FUN_00c86940(Item*);
+    bool bhkUnaryAction_Add(class Item* item);
+    void ProcessEntity(Item*);
 };
 class Item
 {
@@ -613,10 +624,11 @@ class Item
     int unk00;
     int unk04;
     int matchingValue;
-    void FUN_00c6b3c0(int);
+    void bhkWorld_Add_00c6b3c0(int);
 };
 // @fnv 0x00c86ab0
-bool ObjectCandidate::FUN_00c86ab0(Item* item)
+// src: XBOX_PDB 0x00c86ab0
+bool ObjectCandidate::bhkUnaryAction_Add(Item* item)
 {
     ScopedAllocationMode guard;
     int current = this ? activeObject : 0;
@@ -628,8 +640,8 @@ bool ObjectCandidate::FUN_00c86ab0(Item* item)
             if (QueryValue() != item->matchingValue)
             {
                 Reset();
-                FUN_00c86940(item);
-                item->FUN_00c6b3c0(current);
+                ProcessEntity(item);
+                item->bhkWorld_Add_00c6b3c0(current);
                 result = true;
             }
         }
@@ -644,7 +656,7 @@ bool ObjectCandidate::FUN_00c86ab0(Item* item)
 extern __declspec(thread) int g_tlsHeapContext;
 
 int sprintf_s(char* buffer, unsigned int size, const char* format, ...);
-char* __cdecl FUN_00a7d5e0(const char* className, const char* name);
+char* __cdecl NiGetViewerString_00a7d5e0(const char* className, const char* name);
 
 struct HeapContextGuard
 {
@@ -688,15 +700,16 @@ struct Wrapper86b80
     int unk04;
     HkObject86b80* m_pObject;
 
-    void FUN_00c87be0(StringArray* arr);
-    void FUN_00c86b80(StringArray* arr);
+    void bhkAction_GetViewerStrings(StringArray* arr);
+    void bhkUnaryAction_GetViewerStrings(StringArray* arr);
 };
 
 // @fnv 0x00c86b80
-void Wrapper86b80::FUN_00c86b80(StringArray* arr)
+// src: XBOX_PDB 0x00c86b80
+void Wrapper86b80::bhkUnaryAction_GetViewerStrings(StringArray* arr)
 {
     HeapContextGuard guard(0x10);
-    FUN_00c87be0(arr);
+    bhkAction_GetViewerStrings(arr);
     char* s = _FUN_00a7d330(g_name86b80);
     AddString(arr, s);
     void* p;
@@ -706,7 +719,7 @@ void Wrapper86b80::FUN_00c86b80(StringArray* arr)
         p = 0;
     char buf[0x20];
     sprintf_s(buf, 0x20, "0x%08X", p);
-    s = FUN_00a7d5e0("hkpRigidBody", buf);
+    s = NiGetViewerString_00a7d5e0("hkpRigidBody", buf);
     AddString(arr, s);
 }
 
@@ -748,17 +761,18 @@ struct OutputData
     hkVector4 b20;
     float x30, y34, z38, w3c;
 };
-void __stdcall FUN_00c867d0(OutputData*);
+void __stdcall bhkUnaryAction_CopyCinfo(OutputData*);
 struct FUN_00c86d20_Class
 {
     int unk00, unk04;
     InnerData* inner;
-    void __thiscall FUN_00c86d20(OutputData* dest);
+    void __thiscall bhkMouseSpringAction_CopyCinfo(OutputData* dest);
 };
 // @fnv 0x00c86d20
-void FUN_00c86d20_Class::FUN_00c86d20(OutputData* dest)
+// src: XBOX_PDB 0x00c86d20
+void FUN_00c86d20_Class::bhkMouseSpringAction_CopyCinfo(OutputData* dest)
 {
-    FUN_00c867d0(dest);
+    bhkUnaryAction_CopyCinfo(dest);
     dest->x30 = (this && inner) ? inner->x40 : 0.0f;
     dest->y34 = (this && inner) ? inner->y44 : 0.0f;
     dest->w3c = (this && inner) ? inner->w4c : 0.0f;
@@ -767,8 +781,8 @@ void FUN_00c86d20_Class::FUN_00c86d20(OutputData* dest)
         InnerData* current = inner;
         if (current)
         {
-            dest->a10.FUN_004b4db0(&current->q20);
-            dest->b20.FUN_004b4db0(&current->q30);
+            dest->a10.SetQuaternionComponentsFromVector(&current->q20);
+            dest->b20.SetQuaternionComponentsFromVector(&current->q30);
             dest->z38 = current->z48;
             return;
         }
@@ -965,7 +979,7 @@ extern __declspec(thread) FUN_00c871c0_tls g_tls;
 
 struct FUN_00c871c0_pool
 {
-    void FUN_00aa4060(int);
+    void MemoryManager_Deallocate(int);
 };
 extern FUN_00c871c0_pool DAT_011f6238;
 
@@ -990,11 +1004,12 @@ class FUN_00c871c0_cls
     unsigned int unk04;
     unsigned int unk08;
     char* m_0c;
-    void FUN_00c871c0(bool flag);
+    void bhkBoxShape_KillCinfo(bool flag);
 };
 
 // @fnv 0x00c871c0
-void FUN_00c871c0_cls::FUN_00c871c0(bool flag)
+// src: XBOX_PDB 0x00c871c0
+void FUN_00c871c0_cls::bhkBoxShape_KillCinfo(bool flag)
 {
     TlsFlagGuard guard;
     if (flag)
@@ -1003,7 +1018,7 @@ void FUN_00c871c0_cls::FUN_00c871c0(bool flag)
         if (p != 0)
         {
             unsigned char len = (unsigned char)p[-1];
-            DAT_011f6238.FUN_00aa4060((int)(p - len));
+            DAT_011f6238.MemoryManager_Deallocate((int)(p - len));
         }
         m_0c = 0;
     }
@@ -1042,21 +1057,22 @@ typedef NiTArray<char*, NiTMallocInterface<char*> > BC878C0StringArray;
 
 extern const char* g_pcC878C0Name;
 
-char* __cdecl FUN_00a7d330(const char* pcString);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcString);
 
 class FUN_00c878c0_cls
 {
   public:
     void AddDebugStrings(BC878C0StringArray* pkArray);
-    void FUN_00c878c0(BC878C0StringArray* pkArray);
+    void bhkSerializable_GetViewerStrings(BC878C0StringArray* pkArray);
 };
 
 // @fnv 0x00c878c0
-void FUN_00c878c0_cls::FUN_00c878c0(BC878C0StringArray* pkArray)
+// src: XBOX_PDB 0x00c878c0
+void FUN_00c878c0_cls::bhkSerializable_GetViewerStrings(BC878C0StringArray* pkArray)
 {
     BC878C0AllocTagScope kScope(0x10);
     AddDebugStrings(pkArray);
-    char* pcName = FUN_00a7d330(g_pcC878C0Name);
+    char* pcName = NiViewerStrings_NiGetViewerString_Title(g_pcC878C0Name);
     pkArray->Add(pcName);
 }
 
@@ -1068,12 +1084,12 @@ struct FUN_00c877b0
 struct FUN_00c87970 : FUN_00c877b0
 {
     virtual ~FUN_00c87970();
-    void FUN_00c876a0();
+    void bhkSerializable_Kill();
 };
 // @fnv 0x00c87970
 FUN_00c87970::~FUN_00c87970()
 {
-    FUN_00c876a0();
+    bhkSerializable_Kill();
     --DAT_01268154;
 }
 
@@ -1094,7 +1110,8 @@ struct FadeNodeEntry
 };
 
 // @fnv 0x00ead0d0
-FadeNodeEntry* __stdcall FUN_00ead0d0(FadeNodeEntry* pHead)
+// src: XBOX_PDB 0x00ead0d0
+FadeNodeEntry* __stdcall NiCollisionData_FindAncestorWithCollisionData(FadeNodeEntry* pHead)
 {
     if (pHead == 0)
     {
@@ -1112,7 +1129,7 @@ FadeNodeEntry* __stdcall FUN_00ead0d0(FadeNodeEntry* pHead)
         return pNode;
     }
 
-    return FUN_00ead0d0(pNode);
+    return NiCollisionData_FindAncestorWithCollisionData(pNode);
 }
 
 struct InBaFull
@@ -1132,7 +1149,8 @@ void __cdecl DevCallbackMode(int, int);
 void __cdecl AddToTwoCounters(int, int, int);
 
 // @fnv 0x00ba5e60
-void __stdcall FUN_00ba5e60(OutBa* a1)
+// src: XBOX_PDB 0x00ba5e60
+void __stdcall ParticleShader_SetupGeometryAlphaBlending(OutBa* a1)
 {
     InBaFull* p = reinterpret_cast<InBaFull*>(a1->fC);
     int bMatch = 0;
@@ -1162,7 +1180,7 @@ struct CollisionObjectCountContext
     void* pAuxiliaryData;
     unsigned int uiFilterFlags;
 };
-void FUN_00c68900(NiAVObject*, CollisionObjectCountContext*,
+void bhkWorld_DoObjectRec(NiAVObject*, CollisionObjectCountContext*,
                   void (*)(NiCollisionObject*, CollisionObjectCountContext*));
 
 struct C69EE0Properties
@@ -1181,7 +1199,8 @@ static inline unsigned int C69EE0IsEnabled(NiAVObject* pkObject)
 extern void (*DAT_011afe8c)(NiCollisionObject*, CollisionObjectCountContext*);
 
 // @fnv 0x00c69ee0
-bool FUN_00c69ee0(NiAVObject* pkObject, bool bRecurse, bool bForce)
+// src: XBOX_PDB 0x00c69ee0
+bool bhkWorld_RemoveObjects(NiAVObject* pkObject, bool bRecurse, bool bForce)
 {
     bool bResult = false;
     if (pkObject && (bForce || C69EE0IsEnabled(pkObject)))
@@ -1192,7 +1211,7 @@ bool FUN_00c69ee0(NiAVObject* pkObject, bool bRecurse, bool bForce)
         kContext.bRecurse = bRecurse;
         kContext.uiTraversalFlags = 1;
         if (DAT_011afe8c)
-            FUN_00c68900(pkObject, &kContext, DAT_011afe8c);
+            bhkWorld_DoObjectRec(pkObject, &kContext, DAT_011afe8c);
     }
     return bResult;
 }
@@ -1372,11 +1391,12 @@ class BeamPassShader
     NiD3DPointer<NiD3DPixelShader> m_spPixelShaderObject;
     NiD3DPointer<NiD3DVertexShader> m_spVertexShaderObject;
 
-    void FUN_00ba59e0();
+    void UpdateFields_00ba59e0();
 };
 
 // @fnv 0x00ba59e0
-void BeamPassShader::FUN_00ba59e0()
+// src: GUESS 0x00ba59e0 (confidence: low)
+void BeamPassShader::UpdateFields_00ba59e0()
 {
     NiD3DPassPtr spRenderPass;
     StageReturnPtr spStage;
@@ -1425,7 +1445,7 @@ void* __cdecl FUN_00ec44d0(void*, const void*, unsigned int);
 // The original scratch vector is left uninitialized.
 struct Update
 {
-    void FUN_00e6fbb0(Transform*, int);
+    void NiDX9Renderer_SetModelTransform(Transform*, int);
 };
 struct Shader
 {
@@ -1683,7 +1703,7 @@ struct Obj
     Vec4 unkfc;
     Vec4 unk10c;
     Vec4 unk11c;
-    void FUN_00ba5ee0(Arg*);
+    void ParticleShader_SetupGeometryConstants(Arg*);
 };
 inline int isSource(Source* p)
 {
@@ -1692,10 +1712,11 @@ inline int isSource(Source* p)
     return p->unk1c == 17;
 }
 // @fnv 0x00ba5ee0
-void Obj::FUN_00ba5ee0(Arg* arg)
+// src: XBOX_PDB 0x00ba5ee0
+void Obj::ParticleShader_SetupGeometryConstants(Arg* arg)
 {
     Geom* geom = *DAT_011f91e0;
-    unk18->FUN_00e6fbb0(&geom->GetWorldTransform(), 0);
+    unk18->NiDX9Renderer_SetModelTransform(&geom->GetWorldTransform(), 0);
     Source* raw = arg->unk0c;
     Source* source = isSource(raw) ? raw : 0;
     if (source)
@@ -1714,7 +1735,7 @@ void Obj::FUN_00ba5ee0(Arg* arg)
             Transform& transform = *reinterpret_cast<Transform*>(transformStorage);
             geom->GetWorldTransform().FUN_004b4880(&transform);
             NiPoint3 result;
-            NiPoint3* __restrict moved = transform.FUN_00524c40(&result, &point);
+            NiPoint3* __restrict moved = transform.ComputeValue_00524c40(&result, &point);
             memcpy(&point, moved, sizeof(NiPoint3));
         }
         unkec.x = point.x;
@@ -1802,11 +1823,12 @@ class FUN_00c868b0_cls
     int unk00, unk04;
     C868_L2* m_08;
     void SaveSerializeData(C868_Iface* a1);
-    void FUN_00c868b0(C868_Iface* a1);
+    void bhkUnaryAction_SaveBinary(C868_Iface* a1);
 };
 
 // @fnv 0x00c868b0
-void FUN_00c868b0_cls::FUN_00c868b0(C868_Iface* a1)
+// src: XBOX_PDB 0x00c868b0
+void FUN_00c868b0_cls::bhkUnaryAction_SaveBinary(C868_Iface* a1)
 {
     C868_L3* l3;
     if (this != 0 && m_08 != 0)
@@ -1862,14 +1884,15 @@ class RefObjC86D : public TESObjectDoorController
 };
 
 // @fnv 0x00c86de0
-RefObjC86D* __cdecl FUN_00c86de0()
+// src: EXE 0x00c86de0
+RefObjC86D* __cdecl bhkMouseSpringAction_CreateObject()
 {
     return new RefObjC86D;
 }
 
-void FUN_00c876f0();
-void FUN_00c87700();
-void* __cdecl FUN_00aa13e0(unsigned int bytes);
+void bhkSerializable_CloneCritLock();
+void bhkSerializable_CloneCritUnlock();
+void* __cdecl Object_DispatchCommandFour(unsigned int bytes);
 extern int DAT_0102016c;
 extern int DAT_0102009c;
 extern int DAT_0101ffcc;
@@ -1884,13 +1907,13 @@ class AllocatedNode
 
     static void* operator new(unsigned int n)
     {
-        return FUN_00aa13e0(n);
+        return Object_DispatchCommandFour(n);
     }
-    void FUN_00c87c30();
+    void UpdateState_00c87c30();
 
     AllocatedNode()
     {
-        FUN_00c87c30();
+        UpdateState_00c87c30();
         vtable = &DAT_0102016c;
         unk0c = 0;
         ++DAT_01268154;
@@ -1904,17 +1927,18 @@ class AllocatedNode
 class FUN_00c87010_cls : public FUN_00c86800_Class
 {
   public:
-    AllocatedNode* FUN_00c87010(FUN_00c86800_Table* p);
+    AllocatedNode* bhkMouseSpringAction_CreateClone(FUN_00c86800_Table* p);
 };
 
 // @fnv 0x00c87010
-AllocatedNode* FUN_00c87010_cls::FUN_00c87010(FUN_00c86800_Table* p)
+// src: XBOX_PDB 0x00c87010
+AllocatedNode* FUN_00c87010_cls::bhkMouseSpringAction_CreateClone(FUN_00c86800_Table* p)
 {
     ScopedAllocationMode mode;
-    FUN_00c876f0();
+    bhkSerializable_CloneCritLock();
     AllocatedNode* node = new AllocatedNode();
-    FUN_00c86800((int)node, p);
-    FUN_00c87700();
+    bhkUnaryAction_CopyMembers((int)node, p);
+    bhkSerializable_CloneCritUnlock();
     return node;
 }
 
@@ -1998,7 +2022,8 @@ struct bhkWorldRefS
     hkWorldHolderS* m_pHkObject;
 };
 // @fnv 0x00c86940
-void bhkUnaryAction::FUN_00c86940(hkpUnaryAction* action)
+// src: XBOX_PDB 0x00c86940
+void bhkUnaryAction::ProcessEntity(hkpUnaryAction* action)
 {
     TlsFlagGuard mode;
     hkWorldHolderS* holder = this && m_pHavokObject ? reinterpret_cast<bhkWorldRefS*>(m_pHavokObject)->m_pHkObject : 0;
@@ -2075,7 +2100,7 @@ class __declspec(align(16)) Aligned7100
 class Owner7100
 {
   public:
-    Aligned7100* FUN_00c87100(bool* pbCreated);
+    Aligned7100* bhkMouseSpringAction_CreateCinfo(bool* pbCreated);
     void SetObject(Aligned7100* pkObject);
 
     int unk00;
@@ -2085,7 +2110,8 @@ class Owner7100
 };
 
 // @fnv 0x00c87100
-Aligned7100* Owner7100::FUN_00c87100(bool* pbCreated)
+// src: XBOX_PDB 0x00c87100
+Aligned7100* Owner7100::bhkMouseSpringAction_CreateCinfo(bool* pbCreated)
 {
     AutoMemContext kContext(0x10);
     bool bCreate = m_pPointer == 0;
@@ -2295,11 +2321,12 @@ struct TlsGuard_t
 
 struct S00c87a70_Obj : ObjectCandidate
 {
-    bool FUN_00c87a70(Item* arg);
+    bool bhkAction_Add(Item* arg);
 };
 
 // @fnv 0x00c87a70
-bool S00c87a70_Obj::FUN_00c87a70(Item* arg)
+// src: XBOX_PDB 0x00c87a70
+bool S00c87a70_Obj::bhkAction_Add(Item* arg)
 {
     TlsGuard_t guard;
     int active = this ? activeObject : 0;
@@ -2312,7 +2339,7 @@ bool S00c87a70_Obj::FUN_00c87a70(Item* arg)
             if (v != arg->matchingValue)
             {
                 Reset();
-                arg->FUN_00c6b3c0(active);
+                arg->bhkWorld_Add_00c6b3c0(active);
                 result = true;
             }
         }
@@ -2387,11 +2414,12 @@ class EntityOwner_c87b
         World_c87b* pkWorld = GetWorld();
         return pkWorld ? pkWorld->GetPhysWorld() : 0;
     }
-    bool FUN_00c87b40();
+    bool bhkAction_Remove();
 };
 
 // @fnv 0x00c87b40
-bool EntityOwner_c87b::FUN_00c87b40()
+// src: XBOX_PDB 0x00c87b40
+bool EntityOwner_c87b::bhkAction_Remove()
 {
     HeapContextGuard kContext(0x10);
     bool bResult = false;
@@ -2560,7 +2588,7 @@ class World6b3c0
     void Step1();                                // 0xc676e0
     void Step2();                                // 0xc6aac0
     void Step3();                                // 0xc67850
-    void FUN_00c6b3c0(Entry6b3c0* entry);
+    void bhkWorld_Add_00c6b3c0(Entry6b3c0* entry);
 };
 
 // Defined here (as in the original unit) so the compiler sees Insert never modifies its argument.
@@ -2578,7 +2606,8 @@ void RefSet6b3c0::Insert(const RefPtr6b3c0& ref)
 }
 
 // @fnv 0x00c6b3c0
-void World6b3c0::FUN_00c6b3c0(Entry6b3c0* entry)
+// src: XBOX_PDB 0x00c6b3c0
+void World6b3c0::bhkWorld_Add_00c6b3c0(Entry6b3c0* entry)
 {
     TlsFlagGuard guard;
     if (this != 0)
@@ -2644,7 +2673,7 @@ struct Block86
 };
 struct FUN_00c86790_t
 {
-    void FUN_00c86790(NiStream86* pkStream);
+    void bhkUnaryAction_LoadBinary(NiStream86* pkStream);
 };
 class FUN_00c86e80_t
 {
@@ -2695,12 +2724,13 @@ class FUN_00c86e80_t
     virtual void v43();
     virtual void v44();
     virtual Block86* GetBlock(int* piSize);
-    void FUN_00c86e80(NiStream86* pkStream);
+    void bhkMouseSpringAction_LoadBinary(NiStream86* pkStream);
 };
 // @fnv 0x00c86e80
-void FUN_00c86e80_t::FUN_00c86e80(NiStream86* pkStream)
+// src: XBOX_PDB 0x00c86e80
+void FUN_00c86e80_t::bhkMouseSpringAction_LoadBinary(NiStream86* pkStream)
 {
-    ((FUN_00c86790_t*)this)->FUN_00c86790(pkStream);
+    ((FUN_00c86790_t*)this)->bhkUnaryAction_LoadBinary(pkStream);
     if (pkStream->m_bSameEndian == 1)
         return;
     int iSize;
@@ -2894,12 +2924,13 @@ class FUN_00c86f10_cls
     virtual void v2B();
     virtual void v2C();
     virtual volatile unsigned int* vGet(unsigned char* out);
-    void FUN_00c868b0(FUN_00c86f10_arg* a);
-    void FUN_00c86f10(FUN_00c86f10_arg* a1);
+    void bhkUnaryAction_SaveBinary(FUN_00c86f10_arg* a);
+    void bhkMouseSpringAction_SaveBinary(FUN_00c86f10_arg* a1);
 };
 
 // @fnv 0x00c86f10
-void FUN_00c86f10_cls::FUN_00c86f10(FUN_00c86f10_arg* a1)
+// src: XBOX_PDB 0x00c86f10
+void FUN_00c86f10_cls::bhkMouseSpringAction_SaveBinary(FUN_00c86f10_arg* a1)
 {
     unsigned int tmp;
     volatile unsigned int* p = vGet((unsigned char*)&tmp + 3);
@@ -2918,7 +2949,7 @@ void FUN_00c86f10_cls::FUN_00c86f10(FUN_00c86f10_arg* a1)
         p[14] = _byteswap_ulong(p[14]);
         p[15] = _byteswap_ulong(p[15]);
     }
-    FUN_00c868b0(a1);
+    bhkUnaryAction_SaveBinary(a1);
     if (a1->m_1e4 != 1)
     {
         p[4] = _byteswap_ulong(p[4]);

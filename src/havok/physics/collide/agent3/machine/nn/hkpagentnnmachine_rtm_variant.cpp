@@ -129,7 +129,7 @@ typedef float hkReal;
 typedef unsigned char hkUchar;
 typedef LocalM128 hkQuadReal;
 
-void __cdecl FUN_00cf1510(const hkSweptTransform& st, hkReal t, hkTransform& out);
+void __cdecl hkSweptTransformUtil_lerp2(const hkSweptTransform& st, hkReal t, hkTransform& out);
 
 struct hkpProcessCollisionInput;
 struct hkpProcessCollisionOutput;
@@ -252,7 +252,7 @@ struct hkAgentNnMachineBodyTemp
     hkTransform m_kTransformB;
 };
 
-void* __cdecl FUN_00cfe1d0(void* h, void* a, void* b, unsigned int n, void* c);
+void* __cdecl hkAgentMachine_processTransformedShapes(void* h, void* a, void* b, unsigned int n, void* c);
 
 enum
 {
@@ -287,9 +287,9 @@ static __forceinline void calcTimInfoCFE3(const hkMotionState& ms0, const hkMoti
 static __forceinline void initInputAtTimeCFE3(hkpAgent3Input& in, hkAgentNnMachineBodyTemp& bodyTemp,
                                               hkpAgent3Input& out)
 {
-    FUN_00cf1510(in.m_pBodyA->GetMotionState()->getSweptTransform(), in.m_pRayCastInput->m_pStepInfo.m_uiStartTime,
+    hkSweptTransformUtil_lerp2(in.m_pBodyA->GetMotionState()->getSweptTransform(), in.m_pRayCastInput->m_pStepInfo.m_uiStartTime,
                  bodyTemp.m_kTransformA);
-    FUN_00cf1510(in.m_pBodyB->GetMotionState()->getSweptTransform(), in.m_pRayCastInput->m_pStepInfo.m_uiStartTime,
+    hkSweptTransformUtil_lerp2(in.m_pBodyB->GetMotionState()->getSweptTransform(), in.m_pRayCastInput->m_pStepInfo.m_uiStartTime,
                  bodyTemp.m_kTransformB);
 
     out.m_pBodyA = &bodyTemp.m_pBodyA;
@@ -302,13 +302,14 @@ static __forceinline void initInputAtTimeCFE3(hkpAgent3Input& in, hkAgentNnMachi
     ::new (&bodyTemp.m_pBodyA) hkpCdBody(in.m_pBodyA, &bodyTemp.m_kTransformA);
     ::new (&bodyTemp.m_pBodyB) hkpCdBody(in.m_pBodyB, &bodyTemp.m_kTransformB);
 
-    out.m_kTransform.FUN_00cb22f0(bodyTemp.m_kTransformA, bodyTemp.m_kTransformB);
+    out.m_kTransform.hkTransform_setMulInverseMul(bodyTemp.m_kTransformA, bodyTemp.m_kTransformB);
 }
 
 extern "C"
 {
 // @fnv 0x00cfe370
-    static __declspec(noinline) void __cdecl FUN_00cfe370(hkpAgentNnEntry* entry,
+// src: XBOX_PDB 0x00cfe370
+    static __declspec(noinline) void __cdecl hkAgentNnMachine_InlineProcessAgent(hkpAgentNnEntry* entry,
                                                           const hkpProcessCollisionInput& input, int& numTim,
                                                           hkpProcessCollisionOutput& output, hkpContactMgr* mgr)
     {
@@ -332,8 +333,8 @@ extern "C"
         case STREAM_CALL_WITH_TIM_WITH_TRANSFORM_CFE3:
         case STREAM_CALL_AGENT_WITH_TRANSFORM_CFE3: {
             hkUchar dummy;
-            cdBodyA = (const hkpCdBody*)FUN_00cfe1d0((void*)cdBodyA, cdBodiesA, motionStatesA, 4, &dummy);
-            cdBodyB = (const hkpCdBody*)FUN_00cfe1d0((void*)cdBodyB, cdBodiesB, motionStatesB, 4, &dummy);
+            cdBodyA = (const hkpCdBody*)hkAgentMachine_processTransformedShapes((void*)cdBodyA, cdBodiesA, motionStatesA, 4, &dummy);
+            cdBodyB = (const hkpCdBody*)hkAgentMachine_processTransformedShapes((void*)cdBodyB, cdBodiesB, motionStatesB, 4, &dummy);
             command = hkUchar(command) & hkUchar(~TRANSFORM_FLAG_CFE3);
             goto commandSwitch;
         }
@@ -356,7 +357,7 @@ extern "C"
             const hkMotionState* msA = in3.m_pBodyA->GetMotionState();
             const hkMotionState* msB = in3.m_pBodyB->GetMotionState();
             calcTimInfoCFE3(*msA, *msB, in3.m_pRayCastInput->m_pStepInfo.m_fTimeStep, in3.m_vSubtypePosition);
-            in3.m_kTransform.FUN_00cb22f0(msA->getTransform(), msB->getTransform());
+            in3.m_kTransform.hkTransform_setMulInverseMul(msA->getTransform(), msB->getTransform());
 
             void* agentData = e + 1;
             (reinterpret_cast<hkAgent3ProcessFunc>(input.m_pCollisionDispatcher->getAgent3ProcessFunc(entry->m_ucNnTrackType)))(in3, entry, agentData, 0,
@@ -412,7 +413,7 @@ extern "C"
             }
         PROCESS_AT_T1:
             in3.m_fSubtypeValue = dist;
-            in3.m_kTransform.FUN_00cb22f0(msA->getTransform(), msB->getTransform());
+            in3.m_kTransform.hkTransform_setMulInverseMul(msA->getTransform(), msB->getTransform());
             (reinterpret_cast<hkAgent3ProcessFunc>(input.m_pCollisionDispatcher->getAgent3ProcessFunc(entry->m_ucNnTrackType)))(in3, entry, agentData,
                                                                                        &e->m_vSeparatingNormal, output);
             break;
@@ -427,7 +428,7 @@ void hkAgentNnMachine_ProcessAgentCFE3(hkpAgentNnEntry* entry, const hkpProcessC
                                        hkpProcessCollisionOutput& output, hkpContactMgr* mgr)
 {
     int numTim = 0;
-    FUN_00cfe370(entry, input, numTim, output, mgr);
+    hkAgentNnMachine_InlineProcessAgent(entry, input, numTim, output, mgr);
 }
 
 extern "C"
@@ -471,9 +472,9 @@ struct PreviousBodies
 };
 static __forceinline void fillPrevious(const hkpAgent3Input& current, PreviousBodies& b, hkpAgent3Input& previous)
 {
-    FUN_00cf1510(current.m_pBodyA->GetMotionState()->getSweptTransform(),
+    hkSweptTransformUtil_lerp2(current.m_pBodyA->GetMotionState()->getSweptTransform(),
                  current.m_pRayCastInput->m_pStepInfo.m_uiStartTime, b.ta);
-    FUN_00cf1510(current.m_pBodyB->GetMotionState()->getSweptTransform(),
+    hkSweptTransformUtil_lerp2(current.m_pBodyB->GetMotionState()->getSweptTransform(),
                  current.m_pRayCastInput->m_pStepInfo.m_uiStartTime, b.tb);
     previous.m_pBodyA = &b.a;
     previous.m_pBodyB = &b.b;
@@ -483,7 +484,7 @@ static __forceinline void fillPrevious(const hkpAgent3Input& current, PreviousBo
     b.b.SetCollisionShapeAndKey(current.m_pBodyB->getShape(), current.m_pBodyB->getShapeKey());
     ::new (&b.a) hkpCdBody(current.m_pBodyA, &b.ta);
     ::new (&b.b) hkpCdBody(current.m_pBodyB, &b.tb);
-    previous.m_kTransform.FUN_00cb22f0(b.ta, b.tb);
+    previous.m_kTransform.hkTransform_setMulInverseMul(b.ta, b.tb);
 }
 static __forceinline void motionDelta(const hkMotionState& a, const hkMotionState& b, hkReal dt,
                                       hkVector4& out)
@@ -516,8 +517,8 @@ again:
     case 12:
     case 14: {
         hkPadSpu<hkUchar> transformed;
-        a = (const hkpCdBody*)FUN_00cfe1d0((void*)a, ba, ma, 4, &transformed);
-        b = (const hkpCdBody*)FUN_00cfe1d0((void*)b, bb, mb, 4, &transformed);
+        a = (const hkpCdBody*)hkAgentMachine_processTransformedShapes((void*)a, ba, ma, 4, &transformed);
+        b = (const hkpCdBody*)hkAgentMachine_processTransformedShapes((void*)b, bb, mb, 4, &transformed);
         cmd = hkUchar(cmd) & hkUchar(~8);
         goto again;
     }
@@ -536,7 +537,7 @@ again:
         const hkMotionState* am = query.m_pBodyA->GetMotionState();
         const hkMotionState* bm = query.m_pBodyB->GetMotionState();
         motionDelta(*am, *bm, query.m_pRayCastInput->m_pStepInfo.m_fTimeStep, query.m_vSubtypePosition);
-        query.m_kTransform.FUN_00cb22f0(am->getTransform(), bm->getTransform());
+        query.m_kTransform.hkTransform_setMulInverseMul(am->getTransform(), bm->getTransform());
         (reinterpret_cast<hkAgent3ProcessFunc>(context.m_pCollisionDispatcher->getAgent3ProcessFunc(e->m_ucNnTrackType)))(
             query, e, static_cast<hkpAgentNnMachinePaddedEntry*>(e) + 1, 0, out);
         break;
@@ -595,7 +596,7 @@ again:
         }
     collide:
         query.m_fSubtypeValue = distance;
-        query.m_kTransform.FUN_00cb22f0(am->getTransform(), bm->getTransform());
+        query.m_kTransform.hkTransform_setMulInverseMul(am->getTransform(), bm->getTransform());
         (reinterpret_cast<hkAgent3ProcessFunc>(context.m_pCollisionDispatcher->getAgent3ProcessFunc(e->m_ucNnTrackType)))(query, e, data,
                                                                                  &timed->m_vSeparatingNormal, out);
         break;
@@ -603,7 +604,8 @@ again:
     }
 }
 // @fnv 0x00cff3c0
-void __cdecl FUN_00cff3c0(hkpConstraintOwner* owner, hkpAgentNnTrack& track, const hkpProcessCollisionInput& context)
+// src: GUESS 0x00cff3c0 (confidence: low)
+void __cdecl hkpConstraintOwner_ProcessEntries_00cff3c0(hkpConstraintOwner* owner, hkpAgentNnTrack& track, const hkpProcessCollisionInput& context)
 {
     int skipped = 0;
     hkpProcessCollisionOutput result(owner);
@@ -673,9 +675,9 @@ static __forceinline void previousInputProcessAgentCFEDD0(hkpAgent3Input& curren
                                                           hkAgentNnMachineBodyTemp& state,
                                                           hkpAgent3Input& previous)
 {
-    ::FUN_00cf1510(current.m_pBodyA->GetMotionState()->getSweptTransform(),
+    ::hkSweptTransformUtil_lerp2(current.m_pBodyA->GetMotionState()->getSweptTransform(),
                  current.m_pRayCastInput->m_pStepInfo.m_uiStartTime, state.m_kTransformA);
-    ::FUN_00cf1510(current.m_pBodyB->GetMotionState()->getSweptTransform(),
+    ::hkSweptTransformUtil_lerp2(current.m_pBodyB->GetMotionState()->getSweptTransform(),
                  current.m_pRayCastInput->m_pStepInfo.m_uiStartTime, state.m_kTransformB);
     previous.m_pBodyA = &state.m_pBodyA;
     previous.m_pBodyB = &state.m_pBodyB;
@@ -685,11 +687,12 @@ static __forceinline void previousInputProcessAgentCFEDD0(hkpAgent3Input& curren
     state.m_pBodyB.SetCollisionShapeAndKey(current.m_pBodyB->getShape(), current.m_pBodyB->getShapeKey());
     ::new (&state.m_pBodyA) hkpCdBody(current.m_pBodyA, &state.m_kTransformA);
     ::new (&state.m_pBodyB) hkpCdBody(current.m_pBodyB, &state.m_kTransformB);
-    previous.m_kTransform.FUN_00cb22f0(state.m_kTransformA, state.m_kTransformB);
+    previous.m_kTransform.hkTransform_setMulInverseMul(state.m_kTransformA, state.m_kTransformB);
 }
 extern float DAT_0104e148;
 // @fnv 0x00cfedd0
-extern "C" void __cdecl FUN_00cfedd0(hkpAgentNnEntry* entry,
+// src: XBOX_PDB 0x00cfedd0
+extern "C" void __cdecl hkAgentNnMachine_ProcessAgent(hkpAgentNnEntry* entry,
                                      const hkpProcessCollisionInput& input,
                                      hkpProcessCollisionOutput& output)
 {
@@ -709,9 +712,9 @@ again:
     case 12:
     case 14: {
         hkUchar transformed;
-        a = (const hkpCdBody*)::FUN_00cfe1d0((void*)a, bodiesA, motionsA, 4,
+        a = (const hkpCdBody*)::hkAgentMachine_processTransformedShapes((void*)a, bodiesA, motionsA, 4,
                                                                                  &transformed);
-        b = (const hkpCdBody*)::FUN_00cfe1d0((void*)b, bodiesB, motionsB, 4,
+        b = (const hkpCdBody*)::hkAgentMachine_processTransformedShapes((void*)b, bodiesB, motionsB, 4,
                                                                                  &transformed);
         command = (hkUchar)command & 0xf7;
         goto again;
@@ -732,7 +735,7 @@ again:
         const hkMotionState* mb = process.m_pBodyB->GetMotionState();
         motionEstimateProcessAgentCFEDD0(*ma, *mb, process.m_pRayCastInput->m_pStepInfo.m_fTimeStep,
                                          process.m_vSubtypePosition);
-        process.m_kTransform.FUN_00cb22f0(ma->getTransform(), mb->getTransform());
+        process.m_kTransform.hkTransform_setMulInverseMul(ma->getTransform(), mb->getTransform());
         void* data = (hkpAgentNnMachinePaddedEntry*)entry + 1;
         (reinterpret_cast<hkAgent3ProcessFunc>(input.m_pCollisionDispatcher->getAgent3ProcessFunc(entry->m_ucNnTrackType)))(process, entry, data, 0, output);
         break;
@@ -782,7 +785,7 @@ again:
         }
     processAtEnd:
         process.m_fSubtypeValue = distance;
-        process.m_kTransform.FUN_00cb22f0(ma->getTransform(), mb->getTransform());
+        process.m_kTransform.hkTransform_setMulInverseMul(ma->getTransform(), mb->getTransform());
         (reinterpret_cast<hkAgent3ProcessFunc>(input.m_pCollisionDispatcher->getAgent3ProcessFunc(entry->m_ucNnTrackType)))(process, entry, data,
                                                                                    &timed->m_vSeparatingNormal, output);
         break;

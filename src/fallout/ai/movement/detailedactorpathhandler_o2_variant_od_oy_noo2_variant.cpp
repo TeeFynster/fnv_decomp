@@ -565,7 +565,8 @@ extern const float g_factor75;
 void __cdecl Collect75(void*, Request75*, int, const Point75*, Handler75*, List75*);
 
 // @fnv 0x009e71b0
-void __cdecl FUN_009e71b0(void* context, Request75* request, Handler75* handler)
+// src: XBOX_PDB 0x009e71b0
+void __cdecl DetailedActorPathHandler_UpdateAvoidNodesForPath(void* context, Request75* request, Handler75* handler)
 {
     if (handler && handler->state == 3)
         return;

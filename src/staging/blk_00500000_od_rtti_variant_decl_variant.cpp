@@ -30,31 +30,31 @@ struct FUN_00505c20_class
 struct NiNode;
 struct FUN_00507550_Class
 {
-    void FUN_00507550(void* p);
+    void ParticleShaderProperty_SetTexture0x118(void* p);
 };
 struct FUN_00507570_Class
 {
-    void FUN_00507570(float value);
+    void ParticleShaderProperty_SetLifetimeVar(float value);
 };
 struct FUN_005076c0Class
 {
-    void __thiscall FUN_005076c0(float value);
+    void __thiscall PathingRequestCoveredMove_SetAttackerHealth(float value);
 };
 struct FUN_005076e0_Class
 {
-    void FUN_005076e0(float value);
+    void SetFieldAtOffsetF4_005076e0(float value);
 };
 struct FUN_00507720_Class
 {
-    void __thiscall FUN_00507720(float value);
+    void __thiscall SetFieldAtOffset100_00507720(float value);
 };
 struct FUN_00507740_Class
 {
-    void FUN_00507740(int value);
+    void ParticleShaderProperty_SetBlendOp(int value);
 };
 struct FUN_00507760_Class
 {
-    void FUN_00507760(int value);
+    void ParticleShaderProperty_SetZTestFunc(int value);
 };
 struct FUN_00507780
 {
@@ -62,7 +62,7 @@ struct FUN_00507780
 };
 struct FUN_005077a0_Class
 {
-    void FUN_005077a0(float value);
+    void BoltShaderProperty_SetSegmentVariance(float value);
 };
 struct Flt
 {
@@ -70,17 +70,17 @@ struct Flt
 };
 struct FUN_00507d80_Class
 {
-    unsigned int FUN_00507d80();
+    unsigned int FOPipboyManager_Get3rdPersonPipboyRoot();
 };
 struct FUN_00508050_Class
 {
-    float FUN_00508050();
+    float GetFieldAtOffset44();
 };
 extern "C" void __cdecl _ref_006815c0();
 struct FUN_00509890_class
 {
     void __thiscall _ref_006815c0();
-    void* __thiscall FUN_00509890(bool);
+    void* __thiscall UpdateState_00509890(bool);
 };
 struct FUN_0050d1d0_class
 {
@@ -88,7 +88,7 @@ struct FUN_0050d1d0_class
 };
 struct FUN_0050d1f0_Class
 {
-    bool __thiscall FUN_0050d1f0() const;
+    bool __thiscall TESObjectLIGH_GetFlickerSlow() const;
 };
 struct FUN_0050d210_Class
 {
@@ -96,16 +96,16 @@ struct FUN_0050d210_Class
 };
 struct FUN_0050d230_class
 {
-    bool FUN_0050d230() const;
+    bool TESObjectLIGH_GetPulseSlow() const;
 };
 struct FUN_00510110_class
 {
-    void FUN_005102e0();
-    void FUN_00510110();
+    void ProcessEntries_005102e0();
+    void ForwardCall_00510110();
 };
 struct FUN_00510360_Class
 {
-    void* FUN_00510360(TESObject* p);
+    void* TESObjectList_lnk_GetNext(TESObject* p);
 };
 struct FUN_00510380_Class
 {
@@ -115,12 +115,12 @@ extern "C" int __cdecl _BSStringLength(const char*);
 struct FUN_005103a0_class
 {
     void __thiscall FindSubstring(const char* a, const char* b, int c);
-    void __thiscall FUN_005103a0(const char* a, const char* b);
+    void __thiscall ProcessState_005103a0(const char* a, const char* b);
 };
 extern "C" int __cdecl _memcmp(const void* s1, const void* s2, unsigned int n);
-void __cdecl FUN_005104b0(const void* s1, const void* s2, unsigned int n);
+void __cdecl std_char_traits_char_compare(const void* s1, const void* s2, unsigned int n);
 extern "C" void* __cdecl FUN_00eca2e0(void* p, int c, size_t n);
-void __cdecl FUN_005104d0(void* p, size_t n, char* c);
+void __cdecl std_char_traits_char_assign_005104d0(void* p, size_t n, char* c);
 // Exe 0x00515040: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
 struct BlkOffset08View
 {
@@ -137,23 +137,23 @@ struct FUN_008256d0_list
 };
 struct FUN_005194d0_shell_base
 {
-    bool FUN_005194d0();
+    bool IsRandomDoor();
 };
 extern "C" void* DAT_0102b3d0;
 struct FUN_00519b20_cls
 {
     void* m_p;
     void __thiscall ConstructArray(void* arg);
-    void* __thiscall FUN_00519b20(void* arg);
+    void* __thiscall InitializeFields_00519b20(void* arg);
 };
-extern "C" unsigned int __cdecl FUN_00a5e930(void*);
+extern "C" unsigned int __cdecl UpdateFields_00c5faa0(void*);
 struct Unk_00a5e930
 {
-    unsigned int __thiscall FUN_00a5e930();
+    unsigned int __thiscall UpdateFields_00c5faa0();
 };
 struct FUN_0051cfe0_Class
 {
-    unsigned int __thiscall FUN_0051cfe0();
+    unsigned int __thiscall ForwardCall_0051cfe0();
 };
 struct FUN_0051f4d0_class
 {
@@ -161,11 +161,11 @@ struct FUN_0051f4d0_class
 };
 struct FUN_0051f4f0_Class
 {
-    void FUN_0051f4f0(int value);
+    void UpdateState_0051f4f0(int value);
 };
 struct FUN_0051f530_class
 {
-    void __thiscall FUN_0051f530(int value);
+    void __thiscall TESObjectWEAP_SetVATSEffect(int value);
 };
 extern "C" void* __cdecl _NiFreeAlias(void*);
 extern void* DAT_0102b3f0;
@@ -175,7 +175,7 @@ struct FUN_00519c50_class
     int _0x4;
     void* _0x8;
     void __thiscall NiTPointerMap_RemoveAll();
-    void __thiscall FUN_00519c50();
+    void __thiscall ReleaseStorage_00519c50();
 };
 extern "C" void __cdecl _Deallocate(void*);
 void __cdecl FUN_005010f0();
@@ -186,7 +186,7 @@ struct FUN_005010c0_class
 };
 struct FUN_00507660_class
 {
-    void FUN_00507660(NiPoint4 p);
+    void ParticleShaderProperty_SetColor2(NiPoint4 p);
 };
 void __cdecl Deallocate(void*);
 struct FUN_00519b50_class
@@ -208,11 +208,11 @@ struct FUN_00501cd0_class
     void* m_0c;
     unsigned int m_10;
     void* m_14;
-    void* __thiscall FUN_00501cd0();
+    void* __thiscall DoorLock_DoorLock();
 };
 struct TESForm;
 TESForm* __cdecl GetFormByID(unsigned int id);
-TESForm* __cdecl FUN_00505000();
+TESForm* __cdecl TESCombatStyle_GetDefaultCombatStyle();
 struct FUN_00507590_Data
 {
     float a;
@@ -231,7 +231,7 @@ struct Vec12_5075c0
 };
 struct S5075c0
 {
-    void __thiscall FUN_005075c0(Vec12_5075c0 v);
+    void __thiscall ParticleShaderProperty_SetAcceleration(Vec12_5075c0 v);
 };
 struct FUN_00507630_Cls
 {
@@ -243,15 +243,15 @@ struct FUN_00507690_Class
 {
     char _pad[0xe4];
     NiPoint4 m_0xe4;
-    void __thiscall FUN_00507690(NiPoint4 v);
+    void __thiscall ParticleShaderProperty_SetColor3(NiPoint4 v);
 };
 struct FUN_00508100_shell
 {
-    float FUN_00508100();
+    float GetEndKeyTime_00508100();
 };
 struct FUN_00759450_shell
 {
-    float FUN_00759450();
+    float NiPSysSpawnModifier_GetLifeSpan();
 };
 struct FUN_005082b0_shell
 {
@@ -259,13 +259,13 @@ struct FUN_005082b0_shell
 };
 struct FUN_00508090_shell
 {
-    float FUN_009a9350() const;
+    float TESCombatStyle_GetWeaponMinRangeMult() const;
     float GetActorRadius();
-    float FUN_00508100();
-    float FUN_00508120();
-    float FUN_00759450();
+    float GetEndKeyTime_00508100();
+    float NiControllerSequence_GetLastTime();
+    float NiPSysSpawnModifier_GetLifeSpan();
     void UpdateEnvelope(float, float, float, unsigned char, float, float, float, float, float);
-    void FUN_00508090(float a, float b, float c, unsigned char d);
+    void TESEffectShader_AnimateFillEffectAlpha(float a, float b, float c, unsigned char d);
 };
 struct FUN_0050e640_Holder
 {
@@ -273,17 +273,17 @@ struct FUN_0050e640_Holder
     unsigned char _4;
     bool __thiscall MatchesValue(unsigned char v);
 };
-float __cdecl FUN_004579e0(float);
-float __fastcall FUN_0050ec80(short* p);
+float __cdecl NiSqrt_004579e0(float);
+float __fastcall NiNPShortPoint3_Length(short* p);
 struct AVH
 {
     static int __cdecl GetActorValueForSectionIndex(int, unsigned char);
 };
 struct FUN_00514fd0_class
 {
-    int __thiscall FUN_00514fd0();
+    int __thiscall TESObjectBOOK_GetTeaches();
 };
-bool __cdecl FUN_00519570(int);
+bool __cdecl TESObjectDOOR_CanBeRandomTeleport(int);
 struct LH
 {
     bool IsInList(int&);
@@ -393,11 +393,11 @@ struct TESObjectREFR_Flags
 };
 struct S_004ed780
 {
-    S_004ed780* FUN_004ed780(float value);
+    S_004ed780* ProcessAndReturnValue_004ed780(float value);
 };
 struct FUN_0050e620_S
 {
-    bool FUN_0050e620(unsigned char value);
+    bool IOTask_SetPriority_Thunk(unsigned char value);
 };
 struct GlobalObject_0045cf30 : FUN_0050e620_S
 {
@@ -431,12 +431,12 @@ struct FUN_00516cd0_class
     bool __thiscall CanUseLockedRef(TESObjectREFR* ref, Actor* actor, bool useLockpick);
 };
 int DAT_011c6200;
-int FUN_005039e0();
+int FixedStrings_GetArrowQuiver();
 struct FUN_00505b80_cls
 {
     unsigned char DispatchByType(int aType);
     unsigned char FUN_0073cb80();
-    unsigned char FUN_00505c00();
+    unsigned char TESCombatStyle_GetPowerAttackF();
     unsigned char GetByteAtOffset9A();
     unsigned char GetByteAtOffset9B();
     unsigned char FUN_009e8670();
@@ -563,24 +563,24 @@ class FUN_00507da0_cls
 {
   public:
     int unk00;
-    float FUN_008d01e0();
-    float FUN_00644930(float value);
-    float FUN_00507e10(float value);
+    float NiAVObject_GetWorldScale();
+    float Explosion_GetRadius(float value);
+    float BGSProjectile_GetMuzzleFlashDuration(float value);
     float GetField90Float(float value);
     float FUN_0051b8e0(float value);
     void UpdateEnvelope(float a, float b, float c, unsigned char flag, float value);
-    void FUN_00507da0(float a, float b, float c, unsigned char flag);
+    void TESEffectShader_BirthParticles(float a, float b, float c, unsigned char flag);
 };
 extern "C" double gModifierZero;
 extern float runtimeInitializationFloat2255;
-float FUN_004e44b0(float fValue);
+float sin_004e44b0(float fValue);
 class B5081D0Actor
 {
   public:
     float GetFloatAt64();
     float GetFloatAtOffset68() const;
 
-    float FUN_005081d0(float fTime);
+    float TESEffectShader_CalculateEdgeAlphaPulse(float fTime);
 };
 extern "C" double gModifierZero;
 extern float runtimeInitializationFloat2255;
@@ -591,13 +591,13 @@ class C508240Ref
     float GetScale();
     float GetHeight();
 
-    float FUN_00508240(float fDistance);
+    float TESEffectShader_CalculateFillAlphaPulse(float fDistance);
 };
 namespace std {
 float abs(float);
 }
-float FUN_00404010(float, float);
-float FUN_0040ebd0(float, float);
+float BSMAX_00404010(float, float);
+float BSMIN(float, float);
 unsigned int FUN_00ba52d0();
 struct Envelope
 {
@@ -779,10 +779,10 @@ class Obj50DDB0
     int unk0A4;
     unsigned int m_uiValue1;
 
-    void FUN_0050ddb0(bool bSet);
+    void TESObjectLIGH_SetDynamic(bool bSet);
 };
 extern int DAT_011c620c;
-int __cdecl FUN_0050de10();
+int __cdecl FixedStrings_GetAttachLight();
 struct S_0050de20_Obj
 {
     int unk00;
@@ -797,11 +797,11 @@ struct S_0050de20_A
 };
 struct S_0050de20_Class
 {
-    bool __thiscall FUN_0050de60(NiPointer<S_0050de20_Obj> p, int* q, int b);
-    bool __thiscall FUN_0050de20(S_0050de20_A* a, int b);
+    bool __thiscall TESObjectLIGH_Update_(NiPointer<S_0050de20_Obj> p, int* q, int b);
+    bool __thiscall TESObjectLIGH_Update(S_0050de20_A* a, int b);
 };
 extern int DAT_011f81dc;
-int FUN_0050f6e0();
+int FileFinder_GetSingleton();
 struct S_5102e0_Node
 {
     virtual void unk00();
@@ -822,7 +822,7 @@ struct S_5102e0_List
     int unk00;
     int unk04;
     S_5102e0_Node* head;
-    void FUN_005102e0();
+    void ProcessEntries_005102e0();
 };
 extern unsigned int g_010173f0;
 extern "C" unsigned int __cdecl FindNextMatch(void* p, unsigned int n, char* c);
@@ -963,8 +963,8 @@ struct FUN_0051cf00_NiBillboardNode : public NiBillboardBase
     unsigned short m_0ac;
     float m_0b0;
     virtual void vfunc_node();
-    void FUN_0051d000(int flags);
-    void FUN_0051d060(int flags);
+    void SetMode_0051d000(int flags);
+    void NiBillboardNode_SetUpdateControllers(int flags);
     FUN_0051cf00_NiBillboardNode();
     ~FUN_0051cf00_NiBillboardNode();
 };
@@ -1063,7 +1063,7 @@ struct Item
 };
 struct T
 {
-    void __thiscall FUN_004bc450(void* p);
+    void __thiscall NiMaterialProperty_SetEmittance(void* p);
 };
 extern void* DAT_011f4998;
 void __cdecl ProcessListItems(List* list);
@@ -1091,28 +1091,28 @@ extern double DAT_01016408;
 extern float DAT_0101e2bc;
 extern float DAT_010181bc;
 unsigned int __cdecl FUN_00487f50();
-float __cdecl FUN_004e44b0(float v);
-float __cdecl FUN_0040ebd0(float a, float b);
-float __cdecl FUN_00404010(float a, float b);
+float __cdecl sin_004e44b0(float v);
+float __cdecl BSMIN(float a, float b);
+float __cdecl BSMAX_00404010(float a, float b);
 float __cdecl FUN_00408840(float v);
 struct Obj
 {
-    float FUN_004e4600();
-    float FUN_006447d0();
-    float FUN_004e4620();
+    float Projectile_GetSpreadLooking();
+    float Sky_GetCurrentWeatherPct();
+    float TESObjectWEAP_GetSpeed();
     void FUN_0050c630(float v);
     void FUN_0050c660(float v);
     void FUN_0050c690(float v);
-    void FUN_004bc1f0(float a, float b, float c);
-    void FUN_00a59c60(NiUpdateData& u);
-    float FUN_00644a50();
-    void FUN_0050dd20(float v);
+    void NiAVObject_SetTranslate_004bc1f0(float a, float b, float c);
+    void NiAVObject_Update(NiUpdateData& u);
+    float TESCombatStyle_GetDodgeDuringAttackMult();
+    void NiLight_SetDimmer(float v);
 };
 struct Ptr
 {
     void* m_p;
     ~Ptr();
-    Obj* FUN_00559450();
+    Obj* Modelloader_GetReferencedThis();
 };
 struct TimeGlobal
 {
@@ -1122,10 +1122,10 @@ extern TimeGlobal DAT_011f6394;
 extern Setting DAT_011c8fcc;
 struct TQ
 {
-    void FUN_0087ad50();
+    void TaskQueueInterface_QueueObjectUpdate();
 };
 TQ* __stdcall FUN_004537b0(void* p);
-bool __cdecl FUN_008c7aa0();
+bool __cdecl AILinearTaskThreadManager_ShouldQueue3DTask();
 struct Host
 {
     int unk00;
@@ -1174,7 +1174,7 @@ struct Host
     int unkAC;
     int unkB0;
     float m_b4;
-    bool FUN_0050de60(Ptr p1, float* p2, NiPoint3* p3);
+    bool TESObjectLIGH_Update_(Ptr p1, float* p2, NiPoint3* p3);
 };
 struct Region
 {
@@ -1221,45 +1221,46 @@ extern Setting g_011d4ccc;
 extern Setting g_011d49c0;
 extern Setting g_011c9284;
 extern float DAT_010162c0;
-bool FUN_00702360();
+bool Interface_IsInMenuMode();
 bool QueueUIMessage(const char*, int, const char*, const char*, float, bool);
 void ApplyPerkModifiers(int, Actor*, ...);
 void FUN_004d5c60(int);
-int FUN_00406f60(StrMem*, const char*, ...);
+int BSStringT_char_SPrintF(StrMem*, const char*, ...);
 namespace ActorValue {
 bool IsSkill(Index);
 const char* GetActorValueName(Index);
 }
 struct SkillBookEffect552
 {
-    ActorValue::Index FUN_00514fd0();
-    bool FUN_00515040(TESObjectREFR* reference);
+    ActorValue::Index TESObjectBOOK_GetTeaches();
+    bool TESObjectBOOK_Read(TESObjectREFR* reference);
 };
 // @fnv 0x00515040
-bool SkillBookEffect552::FUN_00515040(TESObjectREFR* reference)
+// src: COMMUNITY 0x00515040
+bool SkillBookEffect552::TESObjectBOOK_Read(TESObjectREFR* reference)
 {
     bool applied = false;
     Actor* actor2 = dynamic_cast<Actor*>(reference);
     if (!actor2->IsPlayerRef())
         return applied;
-    if (actor2->FUN_00493bb0() && !FUN_00702360())
+    if (actor2->Actor_IsInCombat() && !Interface_IsInMenuMode())
     {
         QueueUIMessage(g_011d4ccc.FUN_00403df0(), 0, 0, 0, DAT_010162c0, false);
         return applied;
     }
-    ActorValue::Index skill2 = FUN_00514fd0();
+    ActorValue::Index skill2 = TESObjectBOOK_GetTeaches();
     if (ActorValue::IsSkill(skill2))
     {
         if (g_thePlayer->GetPermanentActorValue(skill2) < 200)
         {
-            float amount5 = *g_011c9284.FUN_00403e20();
+            float amount5 = *g_011c9284.Setting_Float_00403e20();
             StrMem message;
             ApplyPerkModifiers(11, g_thePlayer, &amount5);
             g_thePlayer->ForceActorValue(skill2, amount5, 0);
             FUN_004d5c60(15);
-            FUN_00406f60(&message, g_011d49c0.FUN_00403df0(), ActorValue::GetActorValueName(skill2),
+            BSStringT_char_SPrintF(&message, g_011d49c0.FUN_00403df0(), ActorValue::GetActorValueName(skill2),
                          static_cast<int>(amount5));
-            QueueUIMessage(message.FUN_00559450(), 1, 0, 0, DAT_010162c0, false);
+            QueueUIMessage(message.Modelloader_GetReferencedThis(), 1, 0, 0, DAT_010162c0, false);
             applied = true;
         }
     }

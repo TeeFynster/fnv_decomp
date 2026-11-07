@@ -51,14 +51,14 @@ public:
     bool Load(TESFile* file);
     void Destroy();
     void CopyBookData(TESForm* source);
-    BookData* FUN_00514f30();
-    bool FUN_00514f50(TESForm* other);
-    unsigned short FUN_00515220(unsigned int flags);
-    void FUN_00515290(unsigned int flags);
-    void FUN_005152e0(unsigned int flags, unsigned int currentFlags);
-    void FUN_00515340(BGSSaveFormBuffer* buffer);
-    void FUN_005153a0(BGSLoadFormBuffer* buffer);
-    bool FUN_00409700();
+    BookData* Sky_GetSunLightSpecularColor();
+    bool Compare_00514f50(TESForm* other);
+    unsigned short GetSaveSize_00515220(unsigned int flags);
+    void SaveGame_00515290(unsigned int flags);
+    void LoadGame_005152e0(unsigned int flags, unsigned int currentFlags);
+    void SaveGame_00515340(BGSSaveFormBuffer* buffer);
+    void LoadGame_005153a0(BGSLoadFormBuffer* buffer);
+    bool TESObjectBOOK_GetScroll();
 
     BookData Data;
     unsigned char layoutPaddingC2[2];

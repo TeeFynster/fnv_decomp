@@ -95,7 +95,8 @@ unsigned int DownloadableContentManager::MountDownloadableContent(unsigned int u
 
 // Zeroes the object's first three words and clears three list nodes at offsets 0xc, 0x14 and 0x1c, then returns self.
 // @fnv 0x00af27c0
-DownloadableContentManager* __fastcall FUN_00af27c0(DownloadableContentManager* self)
+// src: XBOX_PDB 0x00af27c0
+DownloadableContentManager* __fastcall BSDLCSystemUtility_BSDLCSystemUtility(DownloadableContentManager* self)
 {
     *(unsigned int*)((char*)self + 0) = 0;
     *(unsigned int*)((char*)self + 4) = 0;
@@ -125,7 +126,8 @@ struct FUN_00af2850
 extern FUN_00af2850* DAT_011f7244;
 // Deletes the global object pointed to by DAT_011f7244 and clears the pointer.
 // @fnv 0x00af2760
-void __cdecl FUN_00af2760()
+// src: GUESS 0x00af2760 (confidence: medium)
+void __cdecl Object_ClearGlobalObject()
 {
     if (DAT_011f7244)
     {
@@ -146,7 +148,8 @@ bool S::InvokeCallback(int aiUnused, void(__cdecl* b)(int, int, int), int aiValu
 }
 
 // @fnv 0x00af2c20
-void __fastcall FUN_00af2c20(int ecx)
+// src: COMMUNITY 0x00af2c20
+void __fastcall nullsub_(int ecx)
 {}
 
 namespace fnv_00af2850 {
@@ -357,12 +360,13 @@ struct SteamFriendsObj
 
 struct FUN_00af28f0_cls
 {
-    int FUN_00af28f0(int a1);
+    int BSDLCSystemUtility_ShowMarketplace(int a1);
 };
 
 // If both SteamFriends and SteamUtils are available, returns the friends interface's v22 called with the utils interface's v9 value.
 // @fnv 0x00af28f0
-int FUN_00af28f0_cls::FUN_00af28f0(int a1)
+// src: COMMUNITY 0x00af28f0
+int FUN_00af28f0_cls::BSDLCSystemUtility_ShowMarketplace(int a1)
 {
     if (SteamFriends() != 0)
     {
@@ -394,13 +398,13 @@ struct NodQ
 struct LstQ
 {
     NodQ kHead;
-    void FUN_00ae83e0();
+    void ProcessEntries_00ae83e0();
 };
 struct OwnQ
 {
     int unk00, unk04, unk08;
     LstQ kList;
-    void FUN_00af2c20();
+    void nullsub_();
     void ClearItems(bool bFlag);
 };
 // Optionally calls FUN_00af2c20 when bFlag is set, then deletes every item in kList and resets the list via FUN_00ae83e0.
@@ -408,12 +412,12 @@ struct OwnQ
 void OwnQ::ClearItems(bool bFlag)
 {
     if (bFlag)
-        FUN_00af2c20();
+        nullsub_();
     NodQ* pNode = &kList.kHead;
     while (pNode && !pNode->IsEmpty())
     {
         delete pNode->pItem;
         pNode = pNode->pNext;
     }
-    kList.FUN_00ae83e0();
+    kList.ProcessEntries_00ae83e0();
 }

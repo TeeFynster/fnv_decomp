@@ -23,13 +23,13 @@ class NiFloatsExtraData : public NiExtraData
     void SetValue(int index, float value);
 
     void CopyFloatsExtraData(NiFloatsExtraData* pDest, CloningProcess* pCloning);
-    using NiExtraData::FUN_00a7b330;
-    void FUN_00a7b330(NiFloatsExtraData* pDest, CloningProcess* pCloning);
+    using NiExtraData::CopyMembers_00a7b330;
+    void CopyMembers_00a7b330(NiFloatsExtraData* pDest, CloningProcess* pCloning);
     NiFloatsExtraData* CreateNiFloatsExtraData(CloningProcess* pCloning);
     void* DestroyNiFloatsExtraData(unsigned int flags);
-    bool FUN_00a890b0(const NiFloatsExtraData* pOther);
-    void FUN_00a89210(NiStream& stream);
-    void FUN_00a89280(NiFloatsViewerStringsArray* pkStrings);
+    bool IsEqual_00a890b0(const NiFloatsExtraData* pOther);
+    void SaveBinary_00a89210(NiStream& stream);
+    void GetViewerStrings_00a89280(NiFloatsViewerStringsArray* pkStrings);
 
     unsigned int m_uiSize;
     float* m_pfValue;

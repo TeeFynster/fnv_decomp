@@ -5,7 +5,7 @@ void* __cdecl _delete(void* p, unsigned int flags);
 
 struct FUN_00a8fdb0_shell
 {
-    void __thiscall FUN_00a8fdb0();
+    void __thiscall ProcessEntries_00a8fdb0();
 };
 
 struct FUN_00a8ff10_shell : FUN_00a8fdb0_shell
@@ -17,7 +17,7 @@ struct FUN_00a8ff10_shell : FUN_00a8fdb0_shell
 // @fnv 0x00a8ff10
 void* __thiscall FUN_00a8ff10_shell::FUN_00a8ff10(unsigned int flags)
 {
-    FUN_00a8fdb0();
+    ProcessEntries_00a8fdb0();
     if (flags & 1)
         _delete(this, 0xc);
     return this;

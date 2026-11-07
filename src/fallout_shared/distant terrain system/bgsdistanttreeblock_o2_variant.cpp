@@ -8,14 +8,15 @@
 #include "../../../include/NP.h"
 
 extern NP DAT_012007c4;
-void FUN_006f7a60(void* p);
+void BSDistantTreeShader_SetTextureAtlas(void* p);
 void* __cdecl _Deallocate(void*);
 
 extern int _fnv_particle_shader_renderer_level;
 extern unsigned int DAT_012007b8;
 
 // @fnv 0x00bb6030
-unsigned int __cdecl FUN_00bb6030()
+// src: XBOX_PDB 0x00bb6030
+unsigned int __cdecl BSDistantTreeShader_GetMaxInstances()
 {
     if (!DAT_012007b8)
         DAT_012007b8 = 40 + ((_fnv_particle_shader_renderer_level < 2) ? 0 : 74);

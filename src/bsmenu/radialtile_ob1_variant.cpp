@@ -74,11 +74,12 @@ inline bool BSString::Set(const char* text, unsigned int requested)
 
 extern float FUN_00706e40();
 extern Tile* FUN_00706cd0();
-extern int FUN_00406f60(BSString*, const char*, ...);
-extern void FUN_005b5e40(const char*);
+extern int BSStringT_char_SPrintF(BSString*, const char*, ...);
+extern void Warning_005b5e40(const char*);
 
 // @fnv 0x00a216b0
-bool Tile::FUN_00a216b0(float x, float y)
+// src: XBOX_PDB 0x00a216b0
+bool Tile::RadialTile_SpecialBoundsCheck(float x, float y)
 {
     float a = this->FUN_00a011b0(0x1004);
     float h = this->FUN_00a011b0(0x1005);
@@ -96,7 +97,7 @@ bool Tile::FUN_00a216b0(float x, float y)
     Tile* s = FUN_00706cd0();
     if (s)
     {
-        Tile::Value* t34 = (Tile::Value*)s->FUN_00a00f30(0xfb1);
+        Tile::Value* t34 = (Tile::Value*)s->Tile_GetValue(0xfb1);
         if (t34)
         {
             scale = t34->fValue / scale;
@@ -149,8 +150,8 @@ bool Tile::FUN_00a216b0(float x, float y)
         float mag5 = sqrt(x * x + y * y);
 
         BSString b(0);
-        FUN_00406f60(&b, "--- fx %f fy %f  --- Magnitude: %f ", x, y, mag5);
-        FUN_005b5e40(b.m_data);
+        BSStringT_char_SPrintF(&b, "--- fx %f fy %f  --- Magnitude: %f ", x, y, mag5);
+        Warning_005b5e40(b.m_data);
 
         if (f <= mag5 && mag5 <= p)
         {

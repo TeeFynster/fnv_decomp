@@ -154,42 +154,43 @@ struct Obj
     int unk18;
     int unk1c;
     int MaskWithField(int a);
-    Obj* FUN_004ae750();
+    Obj* Bipedanim_GetReferenceFlagsOrZero();
     Obj* FUN_0044ddc0();
-    unsigned int FUN_005be5c0(int a);
-    Obj* FUN_00968670(unsigned int i);
-    bool FUN_00444d00(int a);
+    unsigned int ProcessArray_GetProcessLevelTail(int a);
+    Obj* ProcessArray_GetItem(unsigned int i);
+    bool Projectile_IsFlagSet(int a);
     int FUN_00401170();
     Obj* GetNodeItem();
-    int FUN_00472380();
-    void FUN_009bc8f0();
+    int MissileProjectile_GetImpactResult();
+    void Projectile_Kill();
     Obj* FUN_00717e50();
 };
 
-Obj* FUN_004b5a80(int a);
-Obj* FUN_00653270(int* dat, Obj* o_tmp);
+Obj* bhkEntity_Getbhk(int a);
+Obj* NiObject_DynamicCast(int* dat, Obj* o_tmp);
 Obj* FUN_004b5a20(Obj* o_tmp);
-int FUN_0056f930(Obj* o_tmp);
+int TESObjectREFR_FindReferenceFor3D(Obj* o_tmp);
 
 struct FUN_0062a510_cls
 {
-    void FUN_0062a510(int a1);
+    void TESArrowTargetListener_entityRemovedCallback(int a1);
 };
 
 // @fnv 0x0062a510
-void FUN_0062a510_cls::FUN_0062a510(int a1)
+// src: XBOX_PDB 0x0062a510
+void FUN_0062a510_cls::TESArrowTargetListener_entityRemovedCallback(int a1)
 {
-    Obj* o_tmp = FUN_004b5a80(a1);
-    Obj* p = FUN_00653270(&DAT_012681c0, o_tmp);
+    Obj* o_tmp = bhkEntity_Getbhk(a1);
+    Obj* p = NiObject_DynamicCast(&DAT_012681c0, o_tmp);
     if (p != 0 && p->MaskWithField(0x100) != 0)
     {
-        Obj* m_tmp = FUN_004b5a20(p->FUN_004ae750());
+        Obj* m_tmp = FUN_004b5a20(p->Bipedanim_GetReferenceFlagsOrZero());
         Obj* r = (m_tmp != 0) ? m_tmp->FUN_0044ddc0() : 0;
-        int g_tmp = FUN_0056f930(r);
+        int g_tmp = TESObjectREFR_FindReferenceFor3D(r);
         Obj* t = DAT_011e0e80.FUN_00717e50();
-        for (unsigned int i = 0; i < t->FUN_005be5c0(0); ++i)
+        for (unsigned int i = 0; i < t->ProcessArray_GetProcessLevelTail(0); ++i)
         {
-            Obj* e = t->FUN_00968670(i);
+            Obj* e = t->ProcessArray_GetItem(i);
             if (e != 0)
             {
                 if (e->v224())
@@ -197,7 +198,7 @@ void FUN_0062a510_cls::FUN_0062a510(int a1)
                     Obj* u = e;
                     if (u != 0)
                     {
-                        if (u->FUN_00444d00(0x80))
+                        if (u->Projectile_IsFlagSet(0x80))
                         {
                             if (u->FUN_00401170() == 0x3d)
                             {
@@ -206,9 +207,9 @@ void FUN_0062a510_cls::FUN_0062a510(int a1)
                                     Obj* v = u->GetNodeItem();
                                     if (v->unk1c == a1)
                                     {
-                                        if (u->FUN_00472380() == 4)
+                                        if (u->MissileProjectile_GetImpactResult() == 4)
                                         {
-                                            u->FUN_009bc8f0();
+                                            u->Projectile_Kill();
                                         }
                                     }
                                 }
@@ -404,17 +405,17 @@ struct S_0062a690_Actor
     virtual void unk_136();
     virtual bool vfn_0224();
 
-    bool __thiscall FUN_00444d00(unsigned int flag);
+    bool __thiscall Projectile_IsFlagSet(unsigned int flag);
     unsigned int __thiscall FUN_00401170();
     S_0062a690_Extra* __thiscall GetNodeItem();
-    int __thiscall FUN_00472380();
-    void __thiscall FUN_009bc8f0();
+    int __thiscall MissileProjectile_GetImpactResult();
+    void __thiscall Projectile_Kill();
 };
 
 struct S_0062a690_ProcessArray
 {
-    unsigned int __thiscall FUN_005be5c0(int param);
-    S_0062a690_Actor* __thiscall FUN_00968670(unsigned int idx);
+    unsigned int __thiscall ProcessArray_GetProcessLevelTail(int param);
+    S_0062a690_Actor* __thiscall ProcessArray_GetItem(unsigned int idx);
 };
 
 struct S_0062a690_ProcessLists
@@ -428,7 +429,7 @@ extern int DAT_012681c0;
 struct S_0062a690_A
 {
     int __thiscall MaskWithField(unsigned int flag);
-    void* __thiscall FUN_004ae750();
+    void* __thiscall Bipedanim_GetReferenceFlagsOrZero();
 };
 
 struct S_0062a690_B
@@ -436,40 +437,41 @@ struct S_0062a690_B
     void* __thiscall FUN_0044ddc0();
 };
 
-void* __cdecl FUN_004b5a80(int id);
-S_0062a690_A* __cdecl FUN_00653270(void* rtti, void* obj);
+void* __cdecl bhkEntity_Getbhk(int id);
+S_0062a690_A* __cdecl NiObject_DynamicCast(void* rtti, void* obj);
 S_0062a690_B* __cdecl FUN_004b5a20(void* p);
-void* __cdecl FUN_0056f930(void* p);
+void* __cdecl TESObjectREFR_FindReferenceFor3D(void* p);
 
 struct S_0062a690_Class
 {
-    void FUN_0062a690(int arg0);
+    void TESArrowTargetListener_entityDeletedCallback(int arg0);
 };
 
 // @fnv 0x0062a690
-void S_0062a690_Class::FUN_0062a690(int arg0)
+// src: XBOX_PDB 0x0062a690
+void S_0062a690_Class::TESArrowTargetListener_entityDeletedCallback(int arg0)
 {
-    void* v_08 = FUN_004b5a80(arg0);
-    S_0062a690_A* v_04 = FUN_00653270(&DAT_012681c0, v_08);
+    void* v_08 = bhkEntity_Getbhk(arg0);
+    S_0062a690_A* v_04 = NiObject_DynamicCast(&DAT_012681c0, v_08);
     if (v_04 && v_04->MaskWithField(0x100))
     {
-        S_0062a690_B* v_18 = FUN_004b5a20(v_04->FUN_004ae750());
+        S_0062a690_B* v_18 = FUN_004b5a20(v_04->Bipedanim_GetReferenceFlagsOrZero());
         void* ptr = v_18 ? v_18->FUN_0044ddc0() : 0;
-        void* v_0c = FUN_0056f930(ptr);
+        void* v_0c = TESObjectREFR_FindReferenceFor3D(ptr);
         S_0062a690_ProcessArray* v_14 = DAT_011e0e80.FUN_00717e50();
 
-        for (unsigned int v_1c = 0; v_1c < v_14->FUN_005be5c0(0); v_1c++)
+        for (unsigned int v_1c = 0; v_1c < v_14->ProcessArray_GetProcessLevelTail(0); v_1c++)
         {
-            S_0062a690_Actor* v_20 = v_14->FUN_00968670(v_1c);
+            S_0062a690_Actor* v_20 = v_14->ProcessArray_GetItem(v_1c);
             if (v_20 && v_20->vfn_0224())
             {
                 S_0062a690_Actor* v_24 = v_20;
-                if (v_24 && v_24->FUN_00444d00(0x80) && v_24->FUN_00401170() == 0x3d)
+                if (v_24 && v_24->Projectile_IsFlagSet(0x80) && v_24->FUN_00401170() == 0x3d)
                 {
                     S_0062a690_Extra* v_28 = v_24->GetNodeItem();
-                    if (v_28->unk1c == arg0 && v_24->FUN_00472380() == 4)
+                    if (v_28->unk1c == arg0 && v_24->MissileProjectile_GetImpactResult() == 4)
                     {
-                        v_24->FUN_009bc8f0();
+                        v_24->Projectile_Kill();
                     }
                 }
             }

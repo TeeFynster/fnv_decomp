@@ -47,19 +47,21 @@ inline NiObject** NiObject::Children() const
 extern "C" void* g_01202538;
 
 // @fnv 0x00c21e10
-void* __cdecl FUN_00c21e10()
+// src: COMMUNITY 0x00c21e10
+void* __cdecl NiMeshParticleSystem_GetRTTI()
 {
     return &g_01202538;
 }
 
 extern int DAT_010bdd84;
 // @fnv 0x00c21e90
-void* __cdecl FUN_00c21e90()
+// src: XBOX_PDB 0x00c21e90
+void* __cdecl NiMeshParticleSystem_CreateObject()
 {
     void* p = NiParticleSystem::operator new(0x118);
     if (p)
     {
-        static_cast<NiParticleSystem*>(p)->FUN_00c1b5c0();
+        static_cast<NiParticleSystem*>(p)->NiParticleSystem_00c1b5c0();
         *(float*)((char*)p + 0x110) = 0.0f;
         *(void**)((char*)p + 0) = &DAT_010bdd84;
         *(char*)((char*)p + 0x114) = 1;
@@ -71,10 +73,11 @@ void* __cdecl FUN_00c21e90()
 struct NiMeshParticleSystem : NiParticleSystem
 {
     float m_f110;
-    void __thiscall FUN_00c21910(NiUpdateData&, unsigned int);
+    void __thiscall UpdateRigidDownwardPass_00c21910(NiUpdateData&, unsigned int);
 };
 // @fnv 0x00c21910
-void __thiscall NiMeshParticleSystem::FUN_00c21910(NiUpdateData& UpdateData, unsigned int uFlags)
+// src: XBOX_PDB 0x00c21910
+void __thiscall NiMeshParticleSystem::UpdateRigidDownwardPass_00c21910(NiUpdateData& UpdateData, unsigned int uFlags)
 {
     if (UpdateData.pad2)
     {
@@ -89,10 +92,11 @@ namespace fnv_00c21b60 {
 class NiMeshParticleSystem : public NiGeometry
 {
   public:
-    void __thiscall FUN_00c21b60(NiPropertyState* pkParentState);
+    void __thiscall UpdatePropertiesDownward(NiPropertyState* pkParentState);
 };
 // @fnv 0x00c21b60
-void __thiscall NiMeshParticleSystem::FUN_00c21b60(NiPropertyState* pkParentState)
+// src: XBOX_PDB 0x00c21b60
+void __thiscall NiMeshParticleSystem::UpdatePropertiesDownward(NiPropertyState* pkParentState)
 {
     NiGeometry::UpdatePropertiesDownwardPass(pkParentState);
     MeshNode(static_cast<NiMeshPSysData*>(m_spModelData.m_pObject))->UpdatePropertiesDownwardPass(&m_PropertyState);
@@ -146,14 +150,14 @@ struct NiMeshParticleSystem
 {
     char _pad[0xC8];
     NiTPointerListBase_00c21ed0 m_kNode;
-    void __thiscall FUN_00a80580();
+    void __thiscall UpdateFields_00a80580();
     void* __thiscall Destroy(unsigned int);
 };
 // @fnv 0x00c21ed0
 void* __thiscall NiMeshParticleSystem::Destroy(unsigned int flags)
 {
     m_kNode.RemoveAll();
-    this->FUN_00a80580();
+    this->UpdateFields_00a80580();
     if (flags & 1)
         _delete(this, 0x118);
     return this;
@@ -185,24 +189,25 @@ NiColorA* __thiscall NiMeshParticleSystem::GetParticleColor(unsigned short ausBl
 
 struct NiMeshParticleSystemClone : NiMeshParticleSystem
 {
-    NiMeshParticleSystemClone* __thiscall FUN_00c21e20(CloningProcess&);
+    NiMeshParticleSystemClone* __thiscall NiMeshParticleSystem_CreateClone(CloningProcess&);
     char _pad114[4];
 };
 // Allocates and constructs a NiMeshParticleSystemClone, copies m_f110 and the byte at offset 0x114 from this, and returns it.
 // @fnv 0x00c21e20
-NiMeshParticleSystemClone* __thiscall NiMeshParticleSystemClone::FUN_00c21e20(CloningProcess& process)
+// src: XBOX_PDB 0x00c21e20
+NiMeshParticleSystemClone* __thiscall NiMeshParticleSystemClone::NiMeshParticleSystem_CreateClone(CloningProcess& process)
 {
     NiMeshParticleSystemClone* result = static_cast<NiMeshParticleSystemClone*>(operator new(sizeof(NiMeshParticleSystemClone)));
     if (result)
     {
-        result->NiParticleSystem::FUN_00c1b5c0();
+        result->NiParticleSystem::NiParticleSystem_00c1b5c0();
         result->m_f110 = 0.0f;
         *(unsigned int*)result = (unsigned int)&DAT_010bdd84;
         *(unsigned char*)((char*)result + 0x114) = 1;
     }
     else
         result = 0;
-    FUN_00c1b6f0(result, process);
+    CopyMembers_00c1b6f0(result, process);
     result->m_f110 = m_f110;
     *(unsigned char*)((char*)result + 0x114) = *(unsigned char*)((char*)this + 0x114);
     return result;
@@ -448,7 +453,8 @@ struct NiObjectNode
     }
 };
 // @fnv 0x00c21cb0
-void __thiscall NiObject::FUN_00c21cb0(unsigned int value)
+// src: XBOX_PDB 0x00c21cb0
+void __thiscall NiObject::NiMeshParticleSystem_PurgeRendererData(unsigned int value)
 {
     FUN_00a809b0(value);
     NiObject* pLinkedObject = *(NiObject**)((char*)this + 0xb8);
@@ -512,7 +518,8 @@ extern const void* NiParticleSystemVtable;
 // Construct the original particle base explicitly: the shared default constructor
 // currently declares a different base-construction call.
 // @fnv 0x00c1b5c0
-NiParticleSystem* NiParticleSystem::FUN_00c1b5c0()
+// src: EXE 0x00c1b5c0
+NiParticleSystem* NiParticleSystem::NiParticleSystem_00c1b5c0()
 {
     // Keep the list and time writes in the original construction order.
     volatile NiParticleSystem* state = this;
@@ -718,11 +725,12 @@ struct FUN_00c21a80_cls
     unsigned int unk10C;
     float m_f110;
     char m_b114;
-    void __thiscall FUN_00c21a80(NiUpdateData&, unsigned int);
+    void __thiscall NiMeshParticleSystem_UpdateDownwardPass(NiUpdateData&, unsigned int);
 };
 // Runs update callbacks over the node and object lists, defers the found object's v37, then stores the update time and flag.
 // @fnv 0x00c21a80
-void FUN_00c21a80_cls::FUN_00c21a80(NiUpdateData& aUpdateData, unsigned int arg2)
+// src: XBOX_PDB 0x00c21a80
+void FUN_00c21a80_cls::NiMeshParticleSystem_UpdateDownwardPass(NiUpdateData& aUpdateData, unsigned int arg2)
 {
     if (aUpdateData.pad2)
     {
@@ -775,12 +783,13 @@ void FUN_00c21a80_cls::FUN_00c21a80(NiUpdateData& aUpdateData, unsigned int arg2
     m_b114 = aUpdateData.pad1;
 }
 
-extern "C" __declspec(noreturn) void __cdecl FUN_00c1ad80();
+extern "C" __declspec(noreturn) void __cdecl NiParticleSystem_SetModelData();
 
 // @fnv 0x00c21900
-__declspec(noreturn) void __cdecl FUN_00c21900()
+// src: XBOX_PDB 0x00c21900
+__declspec(noreturn) void __cdecl NiMeshParticleSystem_SetModelData()
 {
-    FUN_00c1ad80();
+    NiParticleSystem_SetModelData();
 }
 
 #include <math.h>

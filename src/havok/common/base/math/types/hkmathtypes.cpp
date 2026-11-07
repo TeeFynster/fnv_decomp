@@ -2,7 +2,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00cbfe20
-int __cdecl FUN_00cbfe20(float afValue)
+// src: HAVOK_LIB 0x00cbfe20
+int __cdecl hkMath_hkFloorToInt(float afValue)
 {
     union fiu
     {
@@ -54,7 +55,8 @@ int __cdecl FUN_00cbfe20(float afValue)
 
 // Converts a float to int via bit manipulation, handling exponent, sign, and fractional truncation.
 // @fnv 0x00cbfef0
-int __cdecl FUN_00cbfef0(float value)
+// src: HAVOK_LIB 0x00cbfef0
+int __cdecl hkMath_hkFloatToInt(float value)
 {
     union
     {

@@ -34,7 +34,7 @@ public:
     void ResetFormData();
     bool IsFormInitialized() const;
     void ReadTypedData(TESFile* file, void* data, unsigned short size);
-    void FUN_004fb0b0(unsigned int);
+    void SetImpactDataSet_004fb0b0(unsigned int);
     bool Load(TESFile* file);
 
     // Overrides of primary slots 8 and 34; all 96 slots are inherited.

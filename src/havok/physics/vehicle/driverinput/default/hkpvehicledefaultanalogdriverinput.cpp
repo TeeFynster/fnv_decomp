@@ -96,11 +96,12 @@ struct FUN_00e43540_Arg2
 class FUN_00e43540_cls : public hkpVehicleDefaultAnalogDriverInput
 {
   public:
-    float FUN_00e43540(int a0, FUN_00e43540_Arg1* a1, FUN_00e43540_Arg2* a2, int a3);
+    float hkpVehicleDefaultAnalogDriverInput_calcAcceleratorInput(int a0, FUN_00e43540_Arg1* a1, FUN_00e43540_Arg2* a2, int a3);
 };
 
 // @fnv 0x00e43540
-float FUN_00e43540_cls::FUN_00e43540(int aiUnused, FUN_00e43540_Arg1* a1, FUN_00e43540_Arg2* a2, int aiUnused2)
+// src: HAVOK_LIB 0x00e43540
+float FUN_00e43540_cls::hkpVehicleDefaultAnalogDriverInput_calcAcceleratorInput(int aiUnused, FUN_00e43540_Arg1* a1, FUN_00e43540_Arg2* a2, int aiUnused2)
 {
     float v;
     if (a1->unkcc != 0 && m_bAutoReverse != 0)
@@ -200,13 +201,14 @@ struct AnalogDriverInput
     char pad0[0x14];
     char m_bAutoReverse;
 
-    hkReal FUN_00e435a0(hkReal deltaTime, const VehicleReverseState* status,
+    hkReal hkpVehicleDefaultAnalogDriverInput_calcBrakeInput(hkReal deltaTime, const VehicleReverseState* status,
                         const hkpVehicleDriverInputFilteredInput* input, int wheel);
 };
 
 // Returns the input's filter value, negated if the status byte and m_bAutoReverse are both set, with negative results returned as 0.
 // @fnv 0x00e435a0
-hkReal AnalogDriverInput::FUN_00e435a0(hkReal deltaTime, const VehicleReverseState* status,
+// src: HAVOK_LIB 0x00e435a0
+hkReal AnalogDriverInput::hkpVehicleDefaultAnalogDriverInput_calcBrakeInput(hkReal deltaTime, const VehicleReverseState* status,
                                        const hkpVehicleDriverInputFilteredInput* input, int wheel)
 {
     char reversing = status->m_iGearCount;
@@ -231,12 +233,12 @@ hkReal AnalogDriverInput::FUN_00e435a0(hkReal deltaTime, const VehicleReverseSta
 #include "../../../../../../include/hkMemoryRouter.h"
 
 namespace hkRouterE43A {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 inline void* __cdecl hkReferencedObject::operator new(std::size_t nbytes)
 {
-    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkRouterE43A::FUN_00c85750().heap().blockAlloc(nbytes));
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkRouterE43A::hkMemoryRouter_getInstance().heap().blockAlloc(nbytes));
     b->m_usMemSizeAndFlags = (unsigned short)nbytes;
     return b;
 }
@@ -251,12 +253,13 @@ class hkpVehicleDriverInputAnalogStatus : public hkReferencedObject
     hkBool m_bReverseButtonPressed;
 
     virtual ~hkpVehicleDriverInputAnalogStatus();
-    hkpVehicleDriverInputAnalogStatus* FUN_00e43a60() const;
+    hkpVehicleDriverInputAnalogStatus* clone_00e43a60() const;
 };
 
 // Allocates a new hkpVehicleDriverInputAnalogStatus, copies the current object into it, and returns the pointer to the copy.
 // @fnv 0x00e43a60
-hkpVehicleDriverInputAnalogStatus* hkpVehicleDriverInputAnalogStatus::FUN_00e43a60() const
+// src: HAVOK_LIB 0x00e43a60
+hkpVehicleDriverInputAnalogStatus* hkpVehicleDriverInputAnalogStatus::clone_00e43a60() const
 {
     hkpVehicleDriverInputAnalogStatus* p = new hkpVehicleDriverInputAnalogStatus;
     *p = *this;
@@ -442,12 +445,13 @@ static __forceinline LocalM128 rotateDir(VehInst* veh, const HkVec& bodyPos)
 class Cls : public hkpVehicleDefaultAnalogDriverInput
 {
   public:
-    ButtonResult FUN_00e43780(int a1, StatusX* status, InputX* input, int a4);
+    ButtonResult hkpVehicleDefaultAnalogDriverInput_calcTryingToReverse(int a1, StatusX* status, InputX* input, int a4);
 };
 
 // Returns input->m_flag unless m_bAutoReverse is set, then picks a ButtonResult from the gear flag, filter value, a vector length and a normalized dot product.
 // @fnv 0x00e43780
-ButtonResult Cls::FUN_00e43780(int a1, StatusX* status, InputX* input, int a4)
+// src: HAVOK_SRC 0x00e43780
+ButtonResult Cls::hkpVehicleDefaultAnalogDriverInput_calcTryingToReverse(int a1, StatusX* status, InputX* input, int a4)
 {
     if (!m_bAutoReverse)
     {

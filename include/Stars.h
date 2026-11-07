@@ -11,7 +11,7 @@ public:
     void Initialize(NiNode* pRoot) override;
     void Update(Sky* pWeatherSky, float fSeconds) override;
 
-    void FUN_0063fdb0(const char* path);
+    void LoadGeometry(const char* path);
 
     NiPointer<NiNode> m_pStarsNode;
     float fAlpha;

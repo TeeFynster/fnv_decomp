@@ -19,12 +19,12 @@ public:
     // then these three.
     virtual PathingAvoidNode* AllocateBuffer(unsigned int);
     virtual void FreeBuffer(void*);
-    virtual void* __thiscall FUN_006e3c40(void*, unsigned int);
+    virtual void* __thiscall Reallocate_Thunk_006e3c40(void*, unsigned int);
 
 
     void FUN_006e3960();
     void FUN_006e39d0();
-    PathingAvoidNode* FUN_006a1400(unsigned int);
+    PathingAvoidNode* BSSimpleArray_PathingAvoidNode_1024_GetAt(unsigned int);
     void SetSize(unsigned int, bool);
     unsigned int AppendNode(const AvoidanceEntry&);
     void AppendNode(const AvoidanceVectorData&, float, float);

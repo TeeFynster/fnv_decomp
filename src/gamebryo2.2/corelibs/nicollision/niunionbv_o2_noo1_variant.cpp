@@ -14,9 +14,9 @@
 extern MemoryManager g_memoryManager;
 struct S
 {
-    S* FUN_00e9ee60(void*);
+    S* NiUnionBV_NiUnionBV(void*);
 };
-S* __fastcall FUN_00e9efb0(void* self);
+S* __fastcall NiUnionBV_Clone(void* self);
 // FUN_00e9ecc0 - 6-byte leaf stub of the retail binary.
 //
 // The original code is "mov eax, 4 ; ret": the function simply hands the
@@ -25,7 +25,7 @@ S* __fastcall FUN_00e9efb0(void* self);
 // is materialised from a relocated address expression instead.  That keeps
 // the original six-byte "mov eax, <imm32> ; ret" shape byte for byte.
 extern int g_fnv_00e9ecc0_value_anchor;
-int FUN_00e9ecc0();
+int bhkCharacterStateFlying_Update();
 
 extern void* DAT_010f1778[];
 extern void* DAT_010f17ac[];
@@ -37,7 +37,8 @@ struct SViewQ
 };
 
 // @fnv 0x00e9ee60
-S* S::FUN_00e9ee60(void* pkOtherRaw)
+// src: XBOX_PDB 0x00e9ee60
+S* S::NiUnionBV_NiUnionBV(void* pkOtherRaw)
 {
     SViewQ* pkOther = (SViewQ*)pkOtherRaw;
     SViewQ* pkSelf = (SViewQ*)this;

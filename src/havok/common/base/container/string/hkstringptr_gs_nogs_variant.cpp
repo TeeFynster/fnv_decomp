@@ -6,17 +6,17 @@
 
 // src/havok/common/base/container/string/hkstringptr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/container/string/hkstringptr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-int __cdecl FUN_00cb10d0(const char* s);
+int __cdecl hkString_strLen(const char* s);
 char* __cdecl AllocateWithHeader(void* alloc, int size);
-void __cdecl FUN_00cb1090(char* dst, const char* src);
-char* __cdecl FUN_00cb1160(const char* s, void* alloc);
+void __cdecl hkString_strCpy(char* dst, const char* src);
+char* __cdecl hkString_strDup(const char* s, void* alloc);
 extern void* g_01268358;
 struct FUN_00cb0a60
 {
     void* unk00;
     FUN_00cb0a60();
 };
-int __cdecl FUN_00c856c0(int, int);
+int __cdecl hkMemoryRouter_easyFree(int, int);
 int __cdecl CallSwappedArgs(unsigned int arg0, unsigned int arg1);
 
 typedef char* hk_va_list;
@@ -44,15 +44,15 @@ struct hkMemoryRouterq
     }
 };
 
-void* __cdecl FUN_00c85750() throw();
+void* __cdecl hkMemoryRouter_getInstance() throw();
 
 static __forceinline hkMemoryRouterq& hkGetMemoryRouter()
 {
-    return *(hkMemoryRouterq*)FUN_00c85750();
+    return *(hkMemoryRouterq*)hkMemoryRouter_getInstance();
 }
 
-int __cdecl FUN_00c908c0(hkMemoryAllocatorq& alloc, void* array, int numElements, int sizeElement) throw();
-int __cdecl FUN_00cb0f50(char* buf, int n, const char* fmt, hk_va_list args) throw();
+int __cdecl hkArrayUtil__reserve(hkMemoryAllocatorq& alloc, void* array, int numElements, int sizeElement) throw();
+int __cdecl hkString_vsnprintf(char* buf, int n, const char* fmt, hk_va_list args) throw();
 
 template <class T, int N> struct hkInplaceArrayq
 {
@@ -87,7 +87,7 @@ template <class T, int N> struct hkInplaceArrayq
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, sizeof(T));
+            hkArrayUtil__reserve(alloc, this, newSize, sizeof(T));
         }
     }
     __forceinline void reserve(int n)
@@ -98,14 +98,15 @@ template <class T, int N> struct hkInplaceArrayq
 
 
 // @fnv 0x00cb0c70
-void hkStringPtr::FUN_00cb0c70(const char* fmt, ...)
+// src: HAVOK_LIB 0x00cb0c70
+void hkStringPtr::printf_00cb0c70(const char* fmt, ...)
 {
     hkInplaceArrayq<char, 255> buf;
     hk_va_list args = (hk_va_list)&fmt + sizeof(fmt);
     while (1)
     {
         int size = buf.getCapacity();
-        int nchars = FUN_00cb0f50(buf.begin(), size, fmt, args);
+        int nchars = hkString_vsnprintf(buf.begin(), size, fmt, args);
         if (nchars >= 0 && nchars < size)
         {
             break;

@@ -27,9 +27,9 @@ public:
     virtual bool IsDeferred() const;
 
     void CopyMemberData(NiPSysModifier* destination, CloningProcess& process);
-    void FUN_00c467f0(NiStream& stream);
-    void __thiscall FUN_00c5fec0(NiPSysModifier* apDest, CloningProcess& apProcess);
-    void FUN_00c28b50(NiStream& stream);
+    void BSWindModifier_LinkObject(NiStream& stream);
+    void __thiscall BSPSysStripUpdateModifier_CopyMembers(NiPSysModifier* apDest, CloningProcess& apProcess);
+    void NiPSysPositionModifier_LoadBinary(NiStream& stream);
     void FUN_00c31950(NiStream& stream);
     const NiFixedString& GetName() const;
     void SetName(const NiFixedString& name);

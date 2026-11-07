@@ -36,7 +36,7 @@ public:
     unsigned int m_3c;
     unsigned int m_40;
 
-    void FUN_00e942d0();
+    void ClearAllData();
     void FreeVBBlock(unsigned int);
-    void* FUN_00e98660(unsigned int);
+    void* NiVBBlock_AllocateChip(unsigned int);
 };

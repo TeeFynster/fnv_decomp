@@ -69,7 +69,7 @@ struct CF5Output
     int unk1c;
     int m_keys[8];
     int m_iValueAtOffset04;
-    void FUN_00c7f700(const CF5Rot* rot, float* dir);
+    void hkVector4_setRotatedDir(const CF5Rot* rot, float* dir);
 };
 static __forceinline void xfInvPos(CF5Vec& dst, const CF5Transform& xf, const CF5Vec& v)
 {
@@ -122,7 +122,7 @@ hkBool hkpTransformShape::IntersectRayWithShape(const ShapeRayCastQuery& input, 
     if (hit.m_cBooleanValue)
     {
         CF5Vec n = out.m_vHitNormal;
-        out.FUN_00c7f700(&reinterpret_cast<const CF5Transform&>(m_kMotionTransform).rotation, &n.x);
+        out.hkVector4_setRotatedDir(&reinterpret_cast<const CF5Transform&>(m_kMotionTransform).rotation, &n.x);
         out.m_keys[out.m_iValueAtOffset04] = 0;
     }
     {

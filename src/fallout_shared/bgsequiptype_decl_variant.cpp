@@ -9,7 +9,7 @@
 #include "../../include/TESTexture.h"
 
 void* __cdecl operator new(unsigned int);
-unsigned int __cdecl FUN_0044a670(const char*);
+unsigned int __cdecl BSstrlen(const char*);
 int __cdecl FUN_00406d30(char*, unsigned int, const char*);
 int __cdecl FUN_00406d50(char*, unsigned int, const char*);
 TESForm* __cdecl LookupFormByID(unsigned int formID);
@@ -17,9 +17,10 @@ extern TESDataHandler* g_dataHandler;
 extern const char* g_iconNames[14];
 extern BGSMenuIcon* DAT_011c4b54[14];
 // @fnv 0x00479570
-void FUN_00479570()
+// src: XBOX_PDB 0x00479570
+void BGSEquipType_GenerateDefaultMenuIcons()
 {
-    static unsigned int prefixLength = FUN_0044a670("MenuIconEquipType");
+    static unsigned int prefixLength = BSstrlen("MenuIconEquipType");
     for (int i = 0; i < 14; ++i)
     {
         unsigned int formIDB = i + 0x258;

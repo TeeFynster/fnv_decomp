@@ -18,21 +18,21 @@ struct FnvCpu_FUN_00e4af10_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00e4af10_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00e4af10_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00e4af10_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00e4af10_CpuObject
 {
     unsigned int unk00;
     unsigned short size;
-    void FUN_00e4ae90();
+    void ProcessEntries_00e4ae90();
     FnvCpu_FUN_00e4af10_CpuObject* FUN_00e4af10(unsigned int flags);
 };
 // @fnv 0x00e4af10
 FnvCpu_FUN_00e4af10_CpuObject* FnvCpu_FUN_00e4af10_CpuObject::FUN_00e4af10(unsigned int flags)
 {
-    FUN_00e4ae90();
+    ProcessEntries_00e4ae90();
     if (flags & 1)
     {
-        FnvCpu_FUN_00e4af10_CpuAllocatorHolder* holder = FUN_00c85750();
+        FnvCpu_FUN_00e4af10_CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;

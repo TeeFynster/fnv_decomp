@@ -20,15 +20,16 @@ void InitializeCameraShake()
 
 struct ModelLoader_target
 {
-    void FUN_0045a5e0(const char*);
+    void ModelLoader_ReleaseFile(const char*);
 };
 // If DAT_011dfecc is set, passes its GetName() string to g_modelLoader's FUN_0045a5e0 and clears DAT_011dfecc.
 // @fnv 0x008d1920
-void FUN_008d1920()
+// src: GUESS 0x008d1920 (confidence: medium)
+void Object_ProcessAndClearModelPath()
 {
     if (DAT_011dfecc)
     {
-        ((ModelLoader_target*)g_modelLoader)->FUN_0045a5e0((const char*)DAT_011dfecc->GetName());
+        ((ModelLoader_target*)g_modelLoader)->ModelLoader_ReleaseFile((const char*)DAT_011dfecc->GetName());
         DAT_011dfecc = 0;
     }
 }
@@ -41,7 +42,7 @@ class SettingFloat
 
 struct Controls
 {
-    void FUN_00a255b0(float afLeft, float afRight, int aiDuration, int aiArg3, int aiArg4, int aiArg5, int aiArg6);
+    void Controls_Rumble(float afLeft, float afRight, int aiDuration, int aiArg3, int aiArg4, int aiArg5, int aiArg6);
 };
 
 // Exe 0x008d1960: unit-local CamerashakeInterfaceView view used by this matched implementation.
@@ -50,8 +51,8 @@ struct CamerashakeInterfaceView
     static bool IsSaveLoadActive();
 };
 
-NiNode* FUN_0045c670();
-NiAVObject* __fastcall FUN_00558310(NiNode* apNode);
+NiNode* Main_GetWorldSceneGraph();
+NiAVObject* __fastcall BSSceneGraph_GetCameraRoot(NiNode* apNode);
 
 extern SettingFloat originalRuntimeFloatSetting1063;
 extern SettingFloat originalRuntimeFloatSetting1065;
@@ -72,7 +73,7 @@ void UpdateDistanceFade(float afMult, const NiPoint3& arPos)
         float fdelta;
         float fFadeDelta;
         float fFadeStart;
-        NiPoint3 cameraPos = FUN_00558310(FUN_0045c670())->FUN_0043c490();
+        NiPoint3 cameraPos = BSSceneGraph_GetCameraRoot(Main_GetWorldSceneGraph())->GetTranslate_0043c490();
         fdelta = static_cast<const NiPoint3&>(cameraPos - arPos).Length();
         fFadeStart = *originalRuntimeFloatSetting1066.Float() * afMult;
         fFadeDelta = *originalRuntimeFloatSetting1067.Float() * afMult;
@@ -90,8 +91,8 @@ void UpdateDistanceFade(float afMult, const NiPoint3& arPos)
             DAT_011dfed8 = *originalRuntimeFloatSetting1063.Float();
             if (!CamerashakeInterfaceView::IsSaveLoadActive())
             {
-                Controls* pcontrols = reinterpret_cast<Controls*>(g_osGlobals->FUN_00877720());
-                pcontrols->FUN_00a255b0(DAT_011dfed4 * *g_011d0b3c.Float(), DAT_011dfed4 * *g_011d0b3c.Float(),
+                Controls* pcontrols = reinterpret_cast<Controls*>(g_osGlobals->Main_GetControls());
+                pcontrols->Controls_Rumble(DAT_011dfed4 * *g_011d0b3c.Float(), DAT_011dfed4 * *g_011d0b3c.Float(),
                                         (int)(DAT_011dfed8 * 1000.0 * *g_011d064c.Float()), 0, 0, 0, 0);
             }
         }
@@ -123,11 +124,11 @@ float UpdateCameraShake(float time, MatrixView* output)
         ControllerView* second = reinterpret_cast<ControllerView*>(DAT_011dfecc->GetControllers());
         float position = second->FUN_0047c860();
         NiUpdateData first(position, true, false);
-        DAT_011dfecc->FUN_00a59c60(first);
-        MatrixView controller = reinterpret_cast<MatrixView&>(DAT_011dfecc->FUN_006a9540());
+        DAT_011dfecc->NiAVObject_Update(first);
+        MatrixView controller = reinterpret_cast<MatrixView&>(DAT_011dfecc->NiAVObject_GetRotate_006a9540());
         NiUpdateData old(time, true, false);
-        DAT_011dfecc->FUN_00a59c60(old);
-        *output = controller.FUN_004b45b0().FUN_0043f8d0(reinterpret_cast<MatrixView&>(DAT_011dfecc->FUN_006a9540()));
+        DAT_011dfecc->NiAVObject_Update(old);
+        *output = controller.FUN_004b45b0().FUN_0043f8d0(reinterpret_cast<MatrixView&>(DAT_011dfecc->NiAVObject_GetRotate_006a9540()));
         DAT_011dfed8 -= DAT_011f6394.FUN_0084d030();
         if (DAT_011dfed8 < 0.0)
         {

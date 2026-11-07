@@ -84,18 +84,18 @@ public:
     };
 
     void SetTile(int id, Tile* tile);
-    int FUN_007c0800();
-    char FUN_007c1450();
+    int GetMenuID_007c0800();
+    char HasAllTenTiles();
     bool InitReels();
     bool LoadAssets();
     void InitPayoutMenu();
-    void* FUN_007c2180();
-    void FUN_007c2460(int, void*);
+    void* BlackJackMenu_SetupCamera();
+    void DoClick_007c2460(int, void*);
     void Update();
-    void FUN_007c40b0();
-    void FUN_007c4d70();
-    void FUN_007c56e0();
-    int FUN_007c5760();
+    void SwapBackfacingTextures();
+    void SwapFrontfacingTextures();
+    void SelectSpinResults();
+    int InterpretSpin();
     bool AdjustReels(int);
     void UpdateTileText();
     int GetMode();

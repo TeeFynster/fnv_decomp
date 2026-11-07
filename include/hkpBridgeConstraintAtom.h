@@ -9,7 +9,7 @@ class hkpBridgeConstraintAtom : public hkpConstraintAtom
 public:
     hkpBridgeConstraintAtom();
     hkpBridgeConstraintAtom(FinishingFlag flag);
-    void FUN_00d21ce0(void* constraintData) throw();
+    void hkpBridgeConstraintAtom_init(void* constraintData) throw();
 
     char pad2[0x2];
     void* m_pBridge;

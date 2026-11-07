@@ -9,7 +9,7 @@
 #include "../../../../include/NiRefObject.h"
 
 extern "C" void* g_01202580;
-void* __cdecl FUN_00c25870();
+void* __cdecl NiPSysUpdateTask_GetRTTI();
 extern int DAT_010be45c;
 extern int DAT_01069674;
 extern int(__stdcall* DAT_00fdf1c4)(void*);
@@ -85,7 +85,7 @@ struct PoolAlloc_00c25b30
 };
 extern PoolAlloc_00c25b30 DAT_011f6238;
 // Builds the array of 20-byte link records (lives in another unit of the game).
-void* __cdecl FUN_00c25990(unsigned int count);
+void* __cdecl NiTNewInterface_NiPSysUpdateTask_Allocate(unsigned int count);
 // The link-id set: { items, capacity, size, head }.
 struct LinkIDSet_00c25b30
 {
@@ -104,7 +104,7 @@ struct S_00e7ec00
 extern void(__stdcall* DAT_00fdf05c)(void*);
 extern void(__stdcall* DAT_00fdf100)(void*);
 void __cdecl operator delete(void* pv, int iSize);
-void __cdecl FUN_00aa1490(void* pv, unsigned int uiSize);
+void __cdecl NiMemObject_ReleaseStorage_00aa1490(void* pv, unsigned int uiSize);
 
 extern "C" void* __cdecl FUN_00aa1420(unsigned int size);
 // MSVC uses scalar allocation for the cookie of an empty polymorphic array.
@@ -121,7 +121,8 @@ inline void* NiPSysUpdateTask::operator new[](unsigned int size, unsigned int co
 }
 
 // @fnv 0x00c25990
-void* __cdecl FUN_00c25990(unsigned int count)
+// src: XBOX_PDB 0x00c25990
+void* __cdecl NiTNewInterface_NiPSysUpdateTask_Allocate(unsigned int count)
 {
     return new (count) NiPSysUpdateTask[count];
 }

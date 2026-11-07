@@ -9,18 +9,20 @@ class GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_01201f84;
 
 // @fnv 0x00bc2bc0
-GlobalObjectO2_00a7b610* __cdecl FUN_00bc2bc0()
+// src: XBOX_PDB 0x00bc2bc0
+GlobalObjectO2_00a7b610* __cdecl BSOrderedNode_GetRTTI()
 {
     return &g_01201f84;
 }
 
 struct FUN_00bc2b20_shell
 {
-    void __thiscall FUN_00bc2b20(int a, int b, int c);
+    void __thiscall BSFadeNodeCuller_Process(int a, int b, int c);
 };
 
 // @fnv 0x00bc2b20
-void __thiscall FUN_00bc2b20_shell::FUN_00bc2b20(int a, int b, int c)
+// src: XBOX_PDB 0x00bc2b20
+void __thiscall FUN_00bc2b20_shell::BSFadeNodeCuller_Process(int a, int b, int c)
 {
     *(int*)((char*)this + 0xc) = a;
 }
@@ -84,11 +86,12 @@ struct FUN_00bc2b30_cls
     int unk28;
     SpawnedPlane m_kPlaneArray[6];
 
-    void FUN_00bc2b30(SpawnedSource* apSource);
+    void BSFadeNodeCuller_Process_00bc2b30(SpawnedSource* apSource);
 };
 
 // @fnv 0x00bc2b30
-void FUN_00bc2b30_cls::FUN_00bc2b30(SpawnedSource* apSource)
+// src: XBOX_PDB 0x00bc2b30
+void FUN_00bc2b30_cls::BSFadeNodeCuller_Process_00bc2b30(SpawnedSource* apSource)
 {
     SpawnedObject* pTarget = apSource->GetTarget();
     if (pTarget == 0)

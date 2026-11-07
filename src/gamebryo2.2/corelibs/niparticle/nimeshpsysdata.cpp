@@ -154,7 +154,8 @@ extern "C"
 }
 
 // @fnv 0x00c30a80
-void* __cdecl FUN_00c30a80()
+// src: COMMUNITY 0x00c30a80
+void* __cdecl NiMeshPSysData_GetRTTI()
 {
     return &g_012027c0;
 }
@@ -173,7 +174,8 @@ void* __thiscall NiMeshPSysData::FUN_00c30bd0(unsigned int flags)
 
 // Removes meshes from the new active count up to the previous count.
 // @fnv 0x00c308d0
-void __thiscall NiMeshPSysData::FUN_00c308d0(unsigned short usStartIndex)
+// src: XBOX_PDB 0x00c308d0
+void __thiscall NiMeshPSysData::SetActiveVertexCount_00c308d0(unsigned short usStartIndex)
 {
     unsigned short us;
     for (us = usStartIndex; us < m_usActive; us++)
@@ -188,7 +190,8 @@ void __thiscall NiMeshPSysData::FUN_00c308d0(unsigned short usStartIndex)
 
 // Registers the particle data and its mesh node.
 // @fnv 0x00c30940
-bool NiMeshPSysData::FUN_00c30940(NiStream& kStream)
+// src: XBOX_PDB 0x00c30940
+bool NiMeshPSysData::RegisterStreamables_00c30940(NiStream& kStream)
 {
     if (!((NiPSysData*)this)->NiPSysData::RegisterStreamables(kStream))
         return false;
@@ -197,7 +200,8 @@ bool NiMeshPSysData::FUN_00c30940(NiStream& kStream)
 }
 
 // @fnv 0x00c30a90
-void __thiscall NiMeshPSysData::FUN_00c30a90()
+// src: XBOX_PDB 0x00c30a90
+void __thiscall NiMeshPSysData::ResolveAddedParticles_00c30a90()
 {
     unsigned short us;
     NiAVObject* pkMesh;
@@ -207,11 +211,12 @@ void __thiscall NiMeshPSysData::FUN_00c30a90()
         if (pkMesh)
             pkMesh->m_uFlags &= ~1;
     }
-    NiPSysData::FUN_00c24d20();
+    NiPSysData::ResolveAddedParticles();
 }
 
 // @fnv 0x00c30c50
-NiObject* __thiscall NiMeshPSysData::FUN_00c30c50(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00c30c50
+NiObject* __thiscall NiMeshPSysData::CreateClone_00c30c50(CloningProcess& kCloning)
 {
     NiMeshPSysData* pkObject;
     void* pMemory = BSFadeNode::operator new(0x98);
@@ -226,7 +231,8 @@ NiObject* __thiscall NiMeshPSysData::FUN_00c30c50(CloningProcess& kCloning)
 void __stdcall FUN_00c255b0(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 // @fnv 0x00c31210
-void __stdcall FUN_00c31210(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c31210
+void __stdcall NiMeshPSysData_GetViewerStrings(StrArr* pkStrings)
 {
     FUN_00c255b0(pkStrings);
     char* pszStr = _FUN_00a7d330((const char*)g_012027c0);
@@ -238,7 +244,8 @@ void __stdcall FUN_00c31210(StrArr* pkStrings)
 }
 
 // @fnv 0x00c30920
-void NiMeshPSysData::FUN_00c30920(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00c30920
+void NiMeshPSysData::ProcessClone_00c30920(CloningProcess& kCloning)
 {
     NiObject::ProcessClone(kCloning);
     m_pMeshNode.m_pObject->ProcessClone(kCloning);
@@ -282,7 +289,8 @@ struct Mesh308Compat
 };
 
 // @fnv 0x00c30970
-char __thiscall NiMeshPSysData::FUN_00c30970(NiMeshPSysData* other)
+// src: XBOX_PDB 0x00c30970
+char __thiscall NiMeshPSysData::IsEqual_00c30970(NiMeshPSysData* other)
 {
     if (!((NiPSysData*)this)->NiPSysData::IsEqual(other))
         return 0;
@@ -333,7 +341,8 @@ void NiMeshPSysData::CloneTo(NiMeshPSysData* pkDest, CloningProcess& kCloning)
 }
 
 // @fnv 0x00c30b70
-void __thiscall NiMeshPSysData::FUN_00c30b70(NiStream& kStream)
+// src: XBOX_PDB 0x00c30b70
+void __thiscall NiMeshPSysData::LinkObject_00c30b70(NiStream& kStream)
 {
     NiPSysData::LinkObject(kStream);
     NiObject* pkNode = kStream.GetLoadedObject();
@@ -479,7 +488,8 @@ struct NiParticleInfoSI
 };
 
 // @fnv 0x00c30e80
-void NiMeshPSysData::FUN_00c30e80(unsigned short usParticleIndex)
+// src: XBOX_PDB 0x00c30e80
+void NiMeshPSysData::RemoveParticle(unsigned short usParticleIndex)
 {
     unsigned short usLastParticle = m_usActive - 1;
     unsigned short usParticleGeneration = reinterpret_cast<NiParticleInfoSI*>(m_pkParticleInfo)[usParticleIndex].m_usFirstValue;
@@ -551,7 +561,8 @@ inline void AddPool(NiTObjectArray<NiMeshPSysDataPool>& kPools, unsigned int uiI
 
 // Loads base particle data, fills pools for older versions, and otherwise reads pool sizes and creates a pool for each nonzero size.
 // @fnv 0x00c31090
-void NiMeshPSysData::FUN_00c31090(NiStream& kStream)
+// src: XBOX_PDB 0x00c31090
+void NiMeshPSysData::LoadBinary_00c31090(NiStream& kStream)
 {
     unsigned int uiPoolSize;
     unsigned int uiNumGenerations;

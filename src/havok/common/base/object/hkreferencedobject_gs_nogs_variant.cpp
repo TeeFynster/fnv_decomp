@@ -14,11 +14,11 @@
 
 // The router returned by 0x00c85750 has its heap allocator at +0x10; no shared router header exists yet.
 #include "../../../../../include/hkMemoryRouter.h"
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 inline void* hkReferencedObject::operator new(std::size_t nbytes)
 {
-    hkReferencedObject* b = static_cast<hkReferencedObject*>(FUN_00c85750().heap().blockAlloc(nbytes));
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkMemoryRouter_getInstance().heap().blockAlloc(nbytes));
     b->m_usMemSizeAndFlags = (unsigned short)nbytes;
     return b;
 }
@@ -31,7 +31,8 @@ static inline void replaceInstance(hkReferencedObjectLock* p)
 }
 
 // @fnv 0x00c90420
-void __cdecl FUN_00c90420(int value)
+// src: HAVOK_LIB 0x00c90420
+void __cdecl hkReferencedObject_lockInit(int value)
 {
     if (!hkReferencedObjectLock::s_instance)
     {
@@ -65,10 +66,11 @@ struct FUN_00c90e60_cls
     float m_fRadiusOverHeight;
     float m_fHeightOverHalfRadius;
     float m_fHalfRadiusOverHeight;
-    void FUN_00c90e60(float fRadius, float m_fGlyphExtent);
+    void UpdateFields_00c90e60(float fRadius, float m_fGlyphExtent);
 };
 // @fnv 0x00c90e60
-void FUN_00c90e60_cls::FUN_00c90e60(float fRadius, float m_fGlyphExtent)
+// src: GUESS 0x00c90e60 (confidence: low)
+void FUN_00c90e60_cls::UpdateFields_00c90e60(float fRadius, float m_fGlyphExtent)
 {
     m_fBoundRadius = fRadius;
     float fHalfRadius = fRadius * 0.5;

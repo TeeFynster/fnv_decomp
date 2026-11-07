@@ -37,7 +37,8 @@ class hkpPoweredChainMapperTarget
 // The approved mapper header does not yet declare this variant's function.
 class hkpConstraintChainInstance;
 // @fnv 0x00e3a440
-void hkpPoweredChainMapper::FUN_00e3a440(int linkIndex, int motorIndex, hkpConstraintMotor* motor)
+// src: HAVOK_LIB 0x00e3a440
+void hkpPoweredChainMapper::setMotors(int linkIndex, int motorIndex, hkpConstraintMotor* motor)
 {
     hkpPoweredChainMapperLinkInfo* link = &m_ppLinks.m_data[linkIndex];
     for (int i = 0; i < link->targetCount; ++i)

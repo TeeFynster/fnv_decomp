@@ -8,33 +8,34 @@
 #include "../../../include/Tile.h"
 
 const char kMeshesFolder[] = "Meshes";
-unsigned int FUN_00702440();
-bool FUN_00705100();
-unsigned int FUN_00706f20();
-bool FUN_00707b50();
+unsigned int NiVertexColorProperty_GetType();
+bool DialogMenu_IsDialogActive();
+unsigned int HudMainMenu_GetMenuID();
+bool Renderer_GetWidescreen();
 
 struct MenuLookup704
 {
-    ::Menu* FUN_00a03c90();
+    ::Menu* Tile_GetMenu();
 };
 
 struct InterfaceGate704
 {
   public:
-    bool FUN_009373f0();
+    bool TESTextureList_GetTextureCount();
 };
-bool __cdecl FUN_00702680(int, int);
+bool __cdecl Interface_IsMenuIDVisible(int, int);
 
 // @fnv 0x00704e10
-void __cdecl FUN_00704e10(int id)
+// src: XBOX_PDB 0x00704e10
+void __cdecl Interface_UpdateActorValue(int id)
 {
-    if (FUN_004b7210() && ((InterfaceGate704*)FUN_004b7210())->FUN_009373f0())
+    if (InterfaceManager_GetSingleton() && ((InterfaceGate704*)InterfaceManager_GetSingleton())->TESTextureList_GetTextureCount())
     {
-        bool b = FUN_00702680(0x3eb, 0xb);
+        bool b = Interface_IsMenuIDVisible(0x3eb, 0xb);
         if (b)
         {
             ::Menu* menu = Tile::FindMenuById(0x3ebu);
-            ::StatsMenu* result = menu ? dynamic_cast< ::StatsMenu*>(((MenuLookup704*)menu)->FUN_00a03c90()) : 0;
+            ::StatsMenu* result = menu ? dynamic_cast< ::StatsMenu*>(((MenuLookup704*)menu)->Tile_GetMenu()) : 0;
             if (result)
             {
                 if (id == 0x4d)

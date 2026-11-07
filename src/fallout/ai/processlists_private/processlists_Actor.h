@@ -223,7 +223,7 @@ class Actor : public MobileObject,
     TESActorBase* GetActorBase();
     float GetFatiguePercentage();
     bool IsPlayerTeammate();
-    bool FUN_0096c950();
+    bool QUpdateLighting();
 };
 FNV_STATIC_ASSERT(sizeof(Actor) == 0x1B4);
 FNV_STATIC_ASSERT(offsetof(Actor, m_pRagdollController) == 0xAC);

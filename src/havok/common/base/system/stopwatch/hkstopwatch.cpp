@@ -13,7 +13,8 @@ struct FUN_00d60570_t
 };
 extern FUN_00d60570_t* DAT_01269cc0;
 // @fnv 0x00d60570
-void FUN_00d60570()
+// src: XBOX_PDB 0x00d60570
+void hkStopwatch_getTickCounter()
 {
     DAT_01269cc0->v3();
 }
@@ -41,7 +42,8 @@ struct FUN_00d60580_vt
 };
 extern FUN_00d60580_vt* DAT_01269cc0;
 // @fnv 0x00d60580
-void __cdecl FUN_00d60580()
+// src: XBOX_PDB 0x00d60580
+void __cdecl hkStopwatch_getTicksPerSecond()
 {
     DAT_01269cc0->v4();
 }

@@ -10,13 +10,14 @@ struct MediaLocation
     float m_fLayerTwoTriggerPercent;
     unsigned int pController;
     bool m_bUseControllerValues;
-    virtual bool FUN_005897c0(MediaLocation* apCompare);
+    virtual bool AudioMarkerData_Compare(MediaLocation* apCompare);
     virtual bool IsValid(MediaLocation* apCompare);
     virtual bool v3(MediaLocation* apCompare);
     virtual bool v4(MediaLocation* apCompare);
 };
 // @fnv 0x005897c0
-bool MediaLocation::FUN_005897c0(MediaLocation* apCompare)
+// src: XBOX_PDB 0x005897c0
+bool MediaLocation::AudioMarkerData_Compare(MediaLocation* apCompare)
 {
     if (v4(apCompare))
         return true;

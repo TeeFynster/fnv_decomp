@@ -45,7 +45,8 @@ void PathingRequest::SetActorRadius(float value)
 }
 
 // @fnv 0x00584150
-void TESWorldSpace::FUN_00584150(float value)
+// src: COMMUNITY 0x00584150
+void TESWorldSpace::SetWaterLODHeight(float value)
 {
     field7c = value;
 }

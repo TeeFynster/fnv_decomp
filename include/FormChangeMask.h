@@ -15,7 +15,7 @@ public:
     ~FormChangeMask() = default;
 #endif
 
-    unsigned int FUN_00559450();
+    unsigned int Modelloader_GetReferencedThis();
     bool ContainsAnyFlags(int flags);
     bool CheckFlagsExact(int flags);
     bool CheckFlagsExclusive(int flags);

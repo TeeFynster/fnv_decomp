@@ -10,7 +10,7 @@ public:
     ExtraMultiBoundRef();
 
     bool Compare(BSExtraData* apCompare) override;
-    bool FUN_00435540(BSExtraData* apCompare);
+    bool Compare_00435540(BSExtraData* apCompare);
 
     TESObjectREFR* m_pReference;
 };

@@ -29,12 +29,13 @@ struct PC7d
 };
 extern PC7d* g_thePlayer;
 // @fnv 0x0082a150
-bool SunDamageEffect::FUN_0082a150()
+// src: XBOX_PDB 0x0082a150
+bool SunDamageEffect::IsCausingDamage()
 {
     if ((unsigned int)FUN_0059bb30() ==
         (g_thePlayer ? (unsigned int)(reinterpret_cast<char*>(g_thePlayer) + 0x94) : 0))
     {
-        if (this->FUN_0082a1b0() > (double)0.01f)
+        if (this->GetDamageAmount() > (double)0.01f)
             return true;
     }
     return false;
@@ -45,7 +46,7 @@ void SunDamageEffect::SaveGame(Actor* apActor)
 {
     ActiveEffect::SaveGame(apActor);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x71)
-        g_TESSaveLoadGame->FUN_008579b0(&fValue, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&fValue, 4);
 }
 
 // @fnv 0x00829a70
@@ -74,14 +75,14 @@ struct S_00829bb0_Cell
 
 struct S_00829bb0_Val
 {
-    float FUN_004ed230(int a, float b, float c);
+    float TESWeather_GetWeatherData(int a, float b, float c);
 };
 
 struct S_00829bb0_Proc
 {
-    S_00829bb0_Val* FUN_0044edb0();
+    S_00829bb0_Val* TESMain_GetThread();
     S_00829bb0_Val* FUN_00825c00();
-    float FUN_006447d0();
+    float Sky_GetCurrentWeatherPct();
 };
 
 struct S_00829bb0_Actor
@@ -294,9 +295,9 @@ struct S_00829bb0_Actor
     virtual void v334();
     virtual void v338(float a, float b, int c);
     S_00829bb0_Cell* FUN_008d6f30();
-    bool FUN_00575d10();
+    bool TESObjectREFR_GetInterior();
     S_00829bb0_Proc* FUN_008d8520();
-    void FUN_008a7d50(int a, int b);
+    void Actor_TriggerPain(int a, int b);
 };
 
 struct S_00829bb0_Caster
@@ -307,7 +308,7 @@ struct S_00829bb0_Caster
 
 struct S_00829bb0_Setting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 
 extern S_00829bb0_Actor* DAT_011dea3c;
@@ -328,17 +329,17 @@ void SunDamageEffect::UpdateEffect(float arg)
     {
         S_00829bb0_Actor* actor = reinterpret_cast<S_00829bb0_Caster*>(FUN_0059bb30())->GetActor();
         S_00829bb0_Cell* cell = actor->FUN_008d6f30();
-        if (actor->FUN_00575d10() && (!cell || !cell->FUN_00454b10()))
+        if (actor->TESObjectREFR_GetInterior() && (!cell || !cell->FUN_00454b10()))
         {
-            FUN_00829e00(false);
+            UpdateHitEffect(false);
             if (actor == DAT_011dea3c)
-                DAT_011a14f8 = *DAT_011d1944.FUN_00403e20();
+                DAT_011a14f8 = *DAT_011d1944.Setting_Float_00403e20();
         }
         else
         {
             S_00829bb0_Proc* proc;
-            float f = FUN_0082a1b0();
-            FUN_00829e00(f > 0.01f);
+            float f = GetDamageAmount();
+            UpdateHitEffect(f > 0.01f);
             if (actor == DAT_011dea3c)
             {
                 if (f > 0.01f)
@@ -346,22 +347,22 @@ void SunDamageEffect::UpdateEffect(float arg)
                     DAT_011dea3c->v338(f * arg, 0.0f, 0);
                     if (DAT_011a14f8 < 0.0)
                     {
-                        DAT_011dea3c->FUN_008a7d50(1, 1);
-                        DAT_011a14f8 = *DAT_011d18d8.FUN_00403e20();
+                        DAT_011dea3c->Actor_TriggerPain(1, 1);
+                        DAT_011a14f8 = *DAT_011d18d8.Setting_Float_00403e20();
                     }
                     else if (DAT_011a14f8 == 3.4028234663852886e+38)
                     {
-                        DAT_011a14f8 = *DAT_011d1944.FUN_00403e20();
+                        DAT_011a14f8 = *DAT_011d1944.Setting_Float_00403e20();
                     }
                     DAT_011a14f8 = DAT_011a14f8 - arg;
                 }
                 proc = DAT_011dea10->FUN_008d8520();
-                float fValue = proc->FUN_0044edb0() ? proc->FUN_0044edb0()->FUN_004ed230(5, 1.0f, 0.0f) : 0.0f;
+                float fValue = proc->TESMain_GetThread() ? proc->TESMain_GetThread()->TESWeather_GetWeatherData(5, 1.0f, 0.0f) : 0.0f;
                 if (proc->FUN_00825c00())
                 {
-                    float w = proc->FUN_006447d0();
+                    float w = proc->Sky_GetCurrentWeatherPct();
                     fValue = fValue * w;
-                    fValue += (1.0 - w) * proc->FUN_00825c00()->FUN_004ed230(5, 1.0f, 0.0f);
+                    fValue += (1.0 - w) * proc->FUN_00825c00()->TESWeather_GetWeatherData(5, 1.0f, 0.0f);
                 }
             }
         }
@@ -378,7 +379,7 @@ struct S_00829e00_Caster
 
 struct S_00829e00_Setting
 {
-    void* FUN_00407820();
+    void* GetEffectShader_00407820();
 };
 
 // Hit effect applied to the target (0x6c bytes).
@@ -484,15 +485,16 @@ struct S_00829e00_List
 
 struct S_00829e00_Manager
 {
-    void FUN_00973fd0(S_00829e00_HitEffect* effect);
-    void FUN_00974a50(S_00829e00_Target* target, void* form);
+    void ProcessLists_AddTempEffect(S_00829e00_HitEffect* effect);
+    void ProcessLists_FinishMagicShaderHitEffect(S_00829e00_Target* target, void* form);
 };
 extern S_00829e00_Manager DAT_011e0e80;
 
 // @fnv 0x00829e00
-void SunDamageEffect::FUN_00829e00(bool abApply)
+// src: XBOX_PDB 0x00829e00
+void SunDamageEffect::UpdateHitEffect(bool abApply)
 {
-    void* form = reinterpret_cast<S_00829e00_Setting*>(FUN_007df1d0())->FUN_00407820();
+    void* form = reinterpret_cast<S_00829e00_Setting*>(FUN_007df1d0())->GetEffectShader_00407820();
     if (!form || !FUN_0059bb30() || FUN_0055b980() != 4)
         return;
     if (abApply)
@@ -508,7 +510,7 @@ void SunDamageEffect::FUN_00829e00(bool abApply)
             S_00829e00_Effect* effect = new S_00829e00_Effect(reinterpret_cast<S_00829e00_Caster*>(FUN_0059bb30())->GetTarget(), form, -1.0f);
             if (effect->vC4())
             {
-                DAT_011e0e80.FUN_00973fd0(effect);
+                DAT_011e0e80.ProcessLists_AddTempEffect(effect);
                 reinterpret_cast<S_00829e00_List*&>(pHitEffectList) = new S_00829e00_List(effect);
                 effect->FUN_00984f60(this);
             }
@@ -532,13 +534,14 @@ void SunDamageEffect::FUN_00829e00(bool abApply)
         reinterpret_cast<S_00829e00_List*&>(pHitEffectList)->FUN_00470470();
         delete reinterpret_cast<S_00829e00_List*&>(pHitEffectList);
         reinterpret_cast<S_00829e00_List*&>(pHitEffectList) = 0;
-        DAT_011e0e80.FUN_00974a50(reinterpret_cast<S_00829e00_Caster*>(FUN_0059bb30())->GetTarget(), form);
+        DAT_011e0e80.ProcessLists_FinishMagicShaderHitEffect(reinterpret_cast<S_00829e00_Caster*>(FUN_0059bb30())->GetTarget(), form);
     }
 }
 
 // Allocates and constructs a SunDamageEffect from the given caster, item and effect item.
 // @fnv 0x0082a0d0
-SunDamageEffect* FUN_0082a0d0(MagicCaster* apCaster, MagicItem* apItem, EffectItem* apEffect)
+// src: COMMUNITY 0x0082a0d0
+SunDamageEffect* SunDamageEffect_Create(MagicCaster* apCaster, MagicItem* apItem, EffectItem* apEffect)
 {
     return new SunDamageEffect(apCaster, apItem, apEffect);
 }
@@ -679,31 +682,32 @@ struct H_Calls
     virtual H_Fld* v125() = 0;
     H_Calls* FUN_0059bb30();
     H_Calls* FUN_008d6f30();
-    bool FUN_00575d10();
+    bool TESObjectREFR_GetInterior();
     bool FUN_00454b10();
     H_Calls* FUN_008d8520();
     float GetFieldEC();
-    float FUN_00595ea0();
-    float FUN_00596030();
-    H_Calls* FUN_0044edb0();
-    float FUN_004ed230(int, float, float);
+    float Sky_GetSunriseBegin();
+    float Sky_GetSunsetEnd();
+    H_Calls* TESMain_GetThread();
+    float TESWeather_GetWeatherData(int, float, float);
     H_Calls* FUN_00825c00();
-    float FUN_006447d0();
+    float Sky_GetCurrentWeatherPct();
     bool FUN_004518e0();
-    double FUN_0057b0a0();
+    double TESObjectREFR_GetRelevantWaterHeight();
     float GetFloatAtOffset1C();
 };
-float FUN_00649390(float, float, float, float, bool, float, bool);
+float MagicFormulas_CalcSunDamage(float, float, float, float, bool, float, bool);
 
 // Calls FUN_00649390 with values read from this, DAT_011dea10, and p; returns 0.0 when the guard fails.
 // @fnv 0x0082a1b0
-double SunDamageEffect::FUN_0082a1b0()
+// src: XBOX_PDB 0x0082a1b0
+double SunDamageEffect::GetDamageAmount()
 {
     H_Calls* p;
     H_Calls* aQ;
     p = ((H_Calls*)FUN_0059bb30()) ? ((H_Calls*)FUN_0059bb30())->v1() : 0;
     aQ = p ? p->FUN_008d6f30() : 0;
-    if (p && (!p->FUN_00575d10() || (aQ && aQ->FUN_00454b10())))
+    if (p && (!p->TESObjectREFR_GetInterior() || (aQ && aQ->FUN_00454b10())))
     {
         bool b9;
         float f4;
@@ -715,23 +719,23 @@ double SunDamageEffect::FUN_0082a1b0()
         float v_;
         obj = ((H_Calls*)DAT_011dea10)->FUN_008d8520();
         aF1c = obj->GetFieldEC();
-        f4 = obj->FUN_00595ea0();
-        f18 = obj->FUN_00596030();
+        f4 = obj->Sky_GetSunriseBegin();
+        f18 = obj->Sky_GetSunsetEnd();
         b9 = true;
-        vTmp = obj->FUN_0044edb0() ? obj->FUN_0044edb0()->FUN_004ed230(5, 1.0f, 0.0f) : 0.0f;
+        vTmp = obj->TESMain_GetThread() ? obj->TESMain_GetThread()->TESWeather_GetWeatherData(5, 1.0f, 0.0f) : 0.0f;
         if (obj->FUN_00825c00())
         {
-            v_ = obj->FUN_006447d0();
+            v_ = obj->Sky_GetCurrentWeatherPct();
             vTmp = vTmp * v_;
-            vTmp = (1.0 - v_) * obj->FUN_00825c00()->FUN_004ed230(5, 1.0f, 0.0f) + vTmp;
+            vTmp = (1.0 - v_) * obj->FUN_00825c00()->TESWeather_GetWeatherData(5, 1.0f, 0.0f) + vTmp;
         }
         b11 = false;
         if (p->FUN_008d6f30()->FUN_004518e0())
         {
-            if (p->FUN_0057b0a0() >= p->v125()->f8)
+            if (p->TESObjectREFR_GetRelevantWaterHeight() >= p->v125()->f8)
                 b11 = true;
         }
-        return FUN_00649390(GetFloatAtOffset1C(), aF1c, f4, f18, b9, vTmp, b11);
+        return MagicFormulas_CalcSunDamage(GetFloatAtOffset1C(), aF1c, f4, f18, b9, vTmp, b11);
     }
     return 0.0;
 }

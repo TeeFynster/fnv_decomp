@@ -12,10 +12,11 @@ struct S_00df6a30
     int unk0;
     int unk4;
     S_00df6a30_Inner* unk8;
-    float FUN_00df6a30();
+    float EvaluateValue_00df6a30();
 };
 // @fnv 0x00df6a30
-float S_00df6a30::FUN_00df6a30()
+// src: GUESS 0x00df6a30 (confidence: low)
+float S_00df6a30::EvaluateValue_00df6a30()
 {
     return unk8->unk4;
 }
@@ -69,11 +70,12 @@ class FUN_00df6a40_cls
     int m_04;
     FUN_00df6a40_inner* m_08;
 
-    bool* FUN_00df6a40(bool* out);
+    bool* hkCpuWorldGetClosestPointsCollector_hasHit(bool* out);
 };
 
 // @fnv 0x00df6a40
-bool* FUN_00df6a40_cls::FUN_00df6a40(bool* pbResult)
+// src: HAVOK_LIB 0x00df6a40
+bool* FUN_00df6a40_cls::hkCpuWorldGetClosestPointsCollector_hasHit(bool* pbResult)
 {
     *pbResult = m_08->m_14 > 0;
     return pbResult;
@@ -317,11 +319,12 @@ struct SiblingCls_df6a60
 
 struct FUN_00df6b30_cls
 {
-    unsigned char* FUN_00df6b30(unsigned char* out, int a);
+    unsigned char* hkCpuWorldGetClosestPointsCollector_addMidPhaseHit(unsigned char* out, int a);
 };
 
 // @fnv 0x00df6b30
-unsigned char* FUN_00df6b30_cls::FUN_00df6b30(unsigned char* out, int a)
+// src: HAVOK_LIB 0x00df6b30
+unsigned char* FUN_00df6b30_cls::hkCpuWorldGetClosestPointsCollector_addMidPhaseHit(unsigned char* out, int a)
 {
     ((SiblingCls_df6a60*)((char*)this - 8))->Call(a);
     *out = 0;
@@ -418,7 +421,8 @@ inline QueryPoint* allocateResults(PairCommand* command, const QueryCollector& c
 
 // Iterates over PairCommand entries, dispatches collision queries via the dispatcher, and copies resulting QueryPoints into each command's output buffer.
 // @fnv 0x00df6e00
-void FUN_00df6e00(const QueryJob* job, const QueryInput* source, PairCommand* commands, int count)
+// src: XBOX_PDB 0x00df6e00
+void hkCpuPairGetClosestPointsImplementation(const QueryJob* job, const QueryInput* source, PairCommand* commands, int count)
 {
     QueryPoint buffer[16];
     QueryCollector collector(buffer, 1);
@@ -511,14 +515,14 @@ Derived::Derived() : PrimaryBase(), SecondaryBase()
 struct DF6DC0Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00df6dc0();
+    virtual void AdjustThisAndForward_00df6dc0();
 
     int unk04;
 };
 
 struct DF6DC0Secondary
 {
-    virtual void FUN_00df6dc0();
+    virtual void AdjustThisAndForward_00df6dc0();
 };
 
 struct DF6DC0Object : DF6DC0Primary, DF6DC0Secondary
@@ -526,7 +530,8 @@ struct DF6DC0Object : DF6DC0Primary, DF6DC0Secondary
     DF6DC0Object();
 
 // @fnv 0x00df6dc0
-    virtual void FUN_00df6dc0();
+// src: GUESS 0x00df6dc0 (confidence: low)
+    virtual void AdjustThisAndForward_00df6dc0();
 };
 
 DF6DC0Object::DF6DC0Object()

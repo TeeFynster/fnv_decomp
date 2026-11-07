@@ -24,12 +24,13 @@
 
 struct FUN_008009d0_cls
 {
-    void FUN_008009d0();
+    void FOVATSEffectManager_DisableScan();
 };
 
 // If the byte at offset 0x2b4 is set, writes 1 to the byte at offset 0x2b5.
 // @fnv 0x008009d0
-void FUN_008009d0_cls::FUN_008009d0()
+// src: XBOX_PDB 0x008009d0
+void FUN_008009d0_cls::FOVATSEffectManager_DisableScan()
 {
     if (*(unsigned char*)((char*)this + 0x2b4))
         *(char*)((char*)this + 0x2b5) = 1;
@@ -59,11 +60,12 @@ struct FUN_00802b20_class
 {
     int* p;
     void __thiscall InitBuffer(int);
-    int __thiscall FUN_00802b20(int a);
+    int __thiscall NiTMap_unsigned_int_IDebugTextPage_NiTMap(int a);
 };
 // Calls InitBuffer with a, sets p to point at DAT_01079170, and returns this.
 // @fnv 0x00802b20
-int __thiscall FUN_00802b20_class::FUN_00802b20(int a)
+// src: EXE 0x00802b20
+int __thiscall FUN_00802b20_class::NiTMap_unsigned_int_IDebugTextPage_NiTMap(int a)
 {
     InitBuffer(a);
     p = &DAT_01079170;
@@ -72,11 +74,12 @@ int __thiscall FUN_00802b20_class::FUN_00802b20(int a)
 
 struct FUN_00807770_Class
 {
-    int __thiscall FUN_00807770(int);
+    int __thiscall EvaluateValue_00807770(int);
 };
 
 // @fnv 0x00807770
-int __thiscall FUN_00807770_Class::FUN_00807770(int aiIndex)
+// src: GUESS 0x00807770 (confidence: low)
+int __thiscall FUN_00807770_Class::EvaluateValue_00807770(int aiIndex)
 {
     return aiIndex * 0x70 + *(int*)this;
 }
@@ -84,31 +87,34 @@ int __thiscall FUN_00807770_Class::FUN_00807770(int aiIndex)
 extern float DAT_011dc778;
 
 // @fnv 0x0080fae0
-void FUN_0080fae0(float value)
+// src: XBOX_PDB 0x0080fae0
+void MagicProjectile_AddTrackedProjectile(float value)
 {
     DAT_011dc778 += value;
 }
 
-hkVector4& __cdecl FUN_004a3e00(hkVector4&, NiPoint3 const&);
+hkVector4& __cdecl NI2HK(hkVector4&, NiPoint3 const&);
 
 struct FUN_00810510_Class
 {
-    void __thiscall FUN_00810510(NiPoint3 const&);
+    void __thiscall bhkCharacterControllerCinfo_SetPosition(NiPoint3 const&);
 };
 
 // @fnv 0x00810510
-void __thiscall FUN_00810510_Class::FUN_00810510(NiPoint3 const& aPoint)
+// src: XBOX_PDB 0x00810510
+void __thiscall FUN_00810510_Class::bhkCharacterControllerCinfo_SetPosition(NiPoint3 const& aPoint)
 {
-    FUN_004a3e00(*(hkVector4*)this, aPoint);
+    NI2HK(*(hkVector4*)this, aPoint);
 }
 
 struct FUN_00810550_class
 {
-    void FUN_00810550(float value);
+    void bhkCharacterControllerCinfo_SetAcrobatics(float value);
 };
 
 // @fnv 0x00810550
-void FUN_00810550_class::FUN_00810550(float value)
+// src: XBOX_PDB 0x00810550
+void FUN_00810550_class::bhkCharacterControllerCinfo_SetAcrobatics(float value)
 {
     *(float*)((char*)this + 0x8c) = value;
 }
@@ -125,56 +131,60 @@ void FUN_008105c0_Class::SetPointer(void* apValue)
 
 struct Dummy629670
 {
-    void FUN_00629670(int, bool);
+    void bhkCharacterListener_SetFlag(int, bool);
 };
 struct FUN_008105e0_Class
 {
     char pad[0x410];
     Dummy629670 d;
-    void FUN_008105e0(bool b);
+    void bhkCharacterController_SetProjectile(bool b);
 };
 // @fnv 0x008105e0
-void FUN_008105e0_Class::FUN_008105e0(bool b)
+// src: XBOX_PDB 0x008105e0
+void FUN_008105e0_Class::bhkCharacterController_SetProjectile(bool b)
 {
-    d.FUN_00629670(0x80000, b);
+    d.bhkCharacterListener_SetFlag(0x80000, b);
 }
 
 namespace fnv_00810610 {
 struct Dummy629670
 {
-    void FUN_00629670(int a, bool b);
+    void bhkCharacterListener_SetFlag(int a, bool b);
 };
 
 struct FUN_00810610_Class
 {
-    void FUN_00810610(bool b);
+    void bhkCharacterController_SetQuickSimulate(bool b);
 };
 
 // @fnv 0x00810610
-void FUN_00810610_Class::FUN_00810610(bool b)
+// src: XBOX_PDB 0x00810610
+void FUN_00810610_Class::bhkCharacterController_SetQuickSimulate(bool b)
 {
-    ((Dummy629670*)((char*)this + 0x410))->FUN_00629670(0x100000, b);
+    ((Dummy629670*)((char*)this + 0x410))->bhkCharacterListener_SetFlag(0x100000, b);
 }
 }  // namespace fnv_00810610
 
 struct FUN_00810640_class
 {
-    void __thiscall FUN_00c6e050(int, int);
-    void __thiscall FUN_00810640(int a);
+    void __thiscall bhkCharacterController_SetBSReference(int, int);
+    void __thiscall bhkCharacterController_SetMOBObject(int a);
 };
 // @fnv 0x00810640
-void __thiscall FUN_00810640_class::FUN_00810640(int aiValue)
+// src: XBOX_PDB 0x00810640
+void __thiscall FUN_00810640_class::bhkCharacterController_SetMOBObject(int aiValue)
 {
-    FUN_00c6e050(1000, aiValue);
+    bhkCharacterController_SetBSReference(1000, aiValue);
 }
 
 struct FUN_008106b0_Class
 {
-    void FUN_008106b0(float value);
+    void bhkCharacterController_SetFallTime(float value);
 };
 
 // @fnv 0x008106b0
-void FUN_008106b0_Class::FUN_008106b0(float value)
+// src: COMMUNITY 0x008106b0
+void FUN_008106b0_Class::bhkCharacterController_SetFallTime(float value)
 {
     *(float*)((char*)this + 0x548) = value;
 }
@@ -192,11 +202,12 @@ float FUN_008133b0_class::GetFloatAt144()
 
 struct FUN_00819a70_class
 {
-    void FUN_00819a70(float value);
+    void NiPSysSpawnModifier_SetLifeSpan(float value);
 };
 
 // @fnv 0x00819a70
-void FUN_00819a70_class::FUN_00819a70(float value)
+// src: XBOX_PDB 0x00819a70
+void FUN_00819a70_class::NiPSysSpawnModifier_SetLifeSpan(float value)
 {
     *(float*)((char*)this + 0x2c) = value;
 }
@@ -223,11 +234,12 @@ void FUN_00802c50::Init()
 
 struct FUN_00800700_Class
 {
-    void __thiscall FUN_00800700();
+    void __thiscall FOVATSEffectManager_TriggerScan();
 };
 // If the byte at offset 0x2b4 is clear, sets it to 1 and initializes the floats at 0x2b8 to -1.0 and 0x2bc to 0.0.
 // @fnv 0x00800700
-void __thiscall FUN_00800700_Class::FUN_00800700()
+// src: COMMUNITY 0x00800700
+void __thiscall FUN_00800700_Class::FOVATSEffectManager_TriggerScan()
 {
     if (!((unsigned char*)this)[0x2b4])
     {
@@ -239,10 +251,11 @@ void __thiscall FUN_00800700_Class::FUN_00800700()
 
 struct FUN_00800740_Class
 {
-    void FUN_00800740(float f);
+    void FOVATSEffectManager_UpdateBurst(float f);
 };
 // @fnv 0x00800740
-void FUN_00800740_Class::FUN_00800740(float f)
+// src: COMMUNITY 0x00800740
+void FUN_00800740_Class::FOVATSEffectManager_UpdateBurst(float f)
 {
     float v = f - *(float*)((char*)this + 0x29c);
     float r;
@@ -333,12 +346,13 @@ void* __thiscall FUN_00802b80_t::InitBuffer(int aiCount)
 // These physics wrappers call bhkWorldObject's Havok-object accessor at 0x004ae750.
 struct FUN_008078b0_Class
 {
-    void __thiscall FUN_008078b0(void* listener);
+    void __thiscall bhkEntity_AddContactListener(void* listener);
 };
 // @fnv 0x008078b0
-void __thiscall FUN_008078b0_Class::FUN_008078b0(void* listener)
+// src: XBOX_PDB 0x008078b0
+void __thiscall FUN_008078b0_Class::bhkEntity_AddContactListener(void* listener)
 {
-    void* entity = ((bhkWorldObject*)this)->FUN_004ae750();
+    void* entity = ((bhkWorldObject*)this)->Bipedanim_GetReferenceFlagsOrZero();
     if (entity)
         ((hkpEntity*)entity)->AddContactListener(listener);
 }
@@ -365,18 +379,19 @@ void* __thiscall FUN_0080c490_Class::FUN_0080c490(unsigned int flags)
 namespace fnv_0080fb00 {
 struct FUN_00cac960_class
 {
-    void __thiscall FUN_00cac960(int a);
+    void __thiscall hkpCharacterProxy_setLinearVelocity(int a);
 };
 struct FUN_0080fb00_Class
 {
-    void __thiscall FUN_0080fb00(int a);
+    void __thiscall bhkCharacterProxy_SetLinearVelocity(int a);
 };
 // @fnv 0x0080fb00
-void __thiscall FUN_0080fb00_Class::FUN_0080fb00(int a)
+// src: XBOX_PDB 0x0080fb00
+void __thiscall FUN_0080fb00_Class::bhkCharacterProxy_SetLinearVelocity(int a)
 {
-    void* r = ((bhkWorldObject*)this)->FUN_004ae750();
+    void* r = ((bhkWorldObject*)this)->Bipedanim_GetReferenceFlagsOrZero();
     if (r)
-        ((FUN_00cac960_class*)r)->FUN_00cac960(a);
+        ((FUN_00cac960_class*)r)->hkpCharacterProxy_setLinearVelocity(a);
 }
 }  // namespace fnv_0080fb00
 
@@ -405,18 +420,19 @@ struct Flt
 };
 struct FUN_00c85c80_Class
 {
-    unsigned int FUN_00c85c80(int);
+    unsigned int bhkWorldObject_GetAVObject(int);
 };
 struct FUN_00810660_Class
 {
     char pad[0x594];
     Flt f;
-    unsigned int __thiscall FUN_00810660();
+    unsigned int __thiscall bhkCharacterController_GetNiObject();
 };
 // @fnv 0x00810660
-unsigned int FUN_00810660_Class::FUN_00810660()
+// src: XBOX_PDB 0x00810660
+unsigned int FUN_00810660_Class::bhkCharacterController_GetNiObject()
 {
-    return f ? reinterpret_cast<FUN_00c85c80_Class*>(f.operator unsigned int())->FUN_00c85c80(0) : 0;
+    return f ? reinterpret_cast<FUN_00c85c80_Class*>(f.operator unsigned int())->bhkWorldObject_GetAVObject(0) : 0;
 }
 
 struct FUN_00813370_class
@@ -426,11 +442,12 @@ struct FUN_00813370_class
     int f7c;
     unsigned char pad2[0x174 - 0x80];
     unsigned char f174;
-    char FUN_00813370();
+    char TestFlagAndFloatRange();
 };
 // Returns 1 when f174 is zero and f78 is greater than or equal to f7c, otherwise 0.
 // @fnv 0x00813370
-char FUN_00813370_class::FUN_00813370()
+// src: GUESS 0x00813370 (confidence: medium)
+char FUN_00813370_class::TestFlagAndFloatRange()
 {
     return !f174 && f78 >= f7c ? 1 : 0;
 }
@@ -462,11 +479,12 @@ struct FUN_00800e50_Class
     int f08;
     int f0c;
     int f10;
-    void __thiscall FUN_00800d50(int a);
-    void __thiscall FUN_00800e50(int a);
+    void __thiscall FOVATSEffectManager_SetMultiTarget(int a);
+    void __thiscall FOVATSEffectManager_SetSelectedMultiTarget(int a);
 };
 // @fnv 0x00800e50
-void __thiscall FUN_00800e50_Class::FUN_00800e50(int aiValue)
+// src: COMMUNITY 0x00800e50
+void __thiscall FUN_00800e50_Class::FOVATSEffectManager_SetSelectedMultiTarget(int aiValue)
 {
     int result = -1;
     for (int i = 0; i < f0c; i++)
@@ -479,7 +497,7 @@ void __thiscall FUN_00800e50_Class::FUN_00800e50(int aiValue)
     else if (f0c < 0x20)
     {
         f10 = f0c;
-        FUN_00800d50(aiValue);
+        FOVATSEffectManager_SetMultiTarget(aiValue);
     }
 }
 
@@ -503,7 +521,8 @@ struct FUN_0080d6b0_t
 };
 // Allocates a new FUN_0080d6b0_t object, forwarding the three arguments to its constructor, and returns the pointer.
 // @fnv 0x0080d880
-FUN_0080d6b0_t* __cdecl FUN_0080d880(int a, int b, int c)
+// src: GUESS 0x0080d880 (confidence: low)
+FUN_0080d6b0_t* __cdecl Object_ForwardCall_0080d880(int a, int b, int c)
 {
     return new FUN_0080d6b0_t(a, b, c);
 }
@@ -514,7 +533,7 @@ template <> NiPointer<AnimIdle>::~NiPointer();
 template <> NiPointer<AnimIdle>& NiPointer<AnimIdle>::operator=(AnimIdle* p);
 struct FUN_008133d0_shell
 {
-    void FUN_008133d0(int);
+    void MagicBoltProjectile_SetState(int);
 };
 struct P0_0081dbb0
 {
@@ -554,7 +573,7 @@ struct FUN_008117d0 : FUN_0081dbb0
 // @fnv 0x008117d0
 FUN_008117d0::FUN_008117d0() : spA8(0), spB4(0), spB8(0), spBC(0), spC0(0)
 {
-    ((FUN_008133d0_shell*)this)->FUN_008133d0(0);
+    ((FUN_008133d0_shell*)this)->MagicBoltProjectile_SetState(0);
     f88 = 4096.0f;
     iB0 = 0;
     iC4 = 0;
@@ -575,10 +594,11 @@ struct FUN_00800650_Class
     float fA;
     float fB;
     float fC;
-    void __thiscall FUN_00800650(float a, float b, float c);
+    void __thiscall FOVATSEffectManager_TriggerBurst(float a, float b, float c);
 };
 // @fnv 0x00800650
-void __thiscall FUN_00800650_Class::FUN_00800650(float a, float b, float c)
+// src: XBOX_PDB 0x00800650
+void __thiscall FUN_00800650_Class::FOVATSEffectManager_TriggerBurst(float a, float b, float c)
 {
     bFlag = true;
     fA = a;
@@ -595,11 +615,12 @@ struct FUN_008006b0_Class
     unsigned char f284;
     float f288;
     float f28c;
-    void FUN_008006b0();
+    void FOVATSEffectManager_TriggerDistort();
 };
 // Sets f284 to 1, stores the current time from g_timeGlobal into f288, and resets f28c to 0.0f.
 // @fnv 0x008006b0
-void FUN_008006b0_Class::FUN_008006b0()
+// src: COMMUNITY 0x008006b0
+void FUN_008006b0_Class::FOVATSEffectManager_TriggerDistort()
 {
     f284 = 1;
     f288 = g_timeGlobal.GetTime();
@@ -612,11 +633,12 @@ extern double DAT_01011588;
 float __cdecl FUN_004e44d0(float);
 struct FUN_00800820_Class
 {
-    void __thiscall FUN_00800820(float a);
+    void __thiscall FOVATSEffectManager_UpdateTargetPulse(float a);
 };
 // Computes (FUN_004e44d0(a * g_011db78c.Float()[0]) + 1.0) * DAT_01011588 and stores the result at this+0x2c0.
 // @fnv 0x00800820
-void __thiscall FUN_00800820_Class::FUN_00800820(float afValue)
+// src: COMMUNITY 0x00800820
+void __thiscall FUN_00800820_Class::FOVATSEffectManager_UpdateTargetPulse(float afValue)
 {
     float f = (FUN_004e44d0(afValue * g_011db78c.Float()[0]) + 1.0) * DAT_01011588;
     *(float*)((char*)this + 0x2c0) = f;
@@ -629,7 +651,8 @@ struct FUN_0080a900
 };
 // Allocates and constructs a new FUN_0080a900 object from the three arguments and returns it.
 // @fnv 0x0080ac70
-FUN_0080a900* FUN_0080ac70(void* apArg1, void* apArg2, void* apArg3)
+// src: COMMUNITY 0x0080ac70
+FUN_0080a900* CalmEffect_Create(void* apArg1, void* apArg2, void* apArg3)
 {
     return new FUN_0080a900(apArg1, apArg2, apArg3);
 }
@@ -657,7 +680,8 @@ struct FUN_0080cd30_t
 };
 // Allocates and constructs a FUN_0080cd30_t from three int arguments, returning the new object.
 // @fnv 0x0080d120
-FUN_0080cd30_t* __cdecl FUN_0080d120(int aiArg1, int aiArg2, int aiArg3)
+// src: COMMUNITY 0x0080d120
+FUN_0080cd30_t* __cdecl DetectLifeEffect_Create(int aiArg1, int aiArg2, int aiArg3)
 {
     return new FUN_0080cd30_t(aiArg1, aiArg2, aiArg3);
 }
@@ -738,7 +762,8 @@ struct S_0080b3a0_Obj
 
 // Allocates a new S_0080b3a0_Obj, forwarding the three integer arguments to its constructor, and returns the pointer.
 // @fnv 0x0080b4e0
-S_0080b3a0_Obj* FUN_0080b4e0(int aiArg1, int aiArg2, int aiArg3)
+// src: COMMUNITY 0x0080b4e0
+S_0080b3a0_Obj* CommandCreatureEffect_Create(int aiArg1, int aiArg2, int aiArg3)
 {
     return new S_0080b3a0_Obj(aiArg1, aiArg2, aiArg3);
 }
@@ -770,32 +795,37 @@ extern unsigned int _data_011c16bc;
 
 // Allocates and constructs an S_0080bac0_Obj with the three given int arguments, returning the new object.
 // @fnv 0x0080bbf0
-S_0080bac0_Obj* __cdecl FUN_0080bbf0(int aiArg1, int aiArg2, int aiArg3)
+// src: COMMUNITY 0x0080bbf0
+S_0080bac0_Obj* __cdecl CommandHumanoidEffect_Create(int aiArg1, int aiArg2, int aiArg3)
 {
     return new S_0080bac0_Obj(aiArg1, aiArg2, aiArg3);
 }
 
 // @fnv 0x0080c260
-FUN_0080c070* __cdecl FUN_0080c260(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
+// src: COMMUNITY 0x0080c260
+FUN_0080c070* __cdecl CureEffect_Create(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
 {
     return new FUN_0080c070(apCaster, apMagicItem, apEffectItem, 1);
 }
 
 // @fnv 0x0080c2e0
-FUN_0080c0b0* FUN_0080c2e0(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
+// src: COMMUNITY 0x0080c2e0
+FUN_0080c0b0* CureParalysis_Create(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
 {
     return new FUN_0080c0b0(apCaster, apMagicItem, apEffectItem, 0x18);
 }
 
 // @fnv 0x0080c360
-FUN_0080c070* __cdecl FUN_0080c360(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
+// src: COMMUNITY 0x0080c360
+FUN_0080c070* __cdecl CureAddition_Create(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
 {
     return new FUN_0080c070(apCaster, apMagicItem, apEffectItem, 10);
 }
 
 // Allocates and returns a new FUN_0080c070 constructed from the caster, magic item and effect item with a value of 5.
 // @fnv 0x0080c3e0
-FUN_0080c070* __cdecl FUN_0080c3e0(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
+// src: COMMUNITY 0x0080c3e0
+FUN_0080c070* __cdecl CurePoision_CurePoision(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
 {
     return new FUN_0080c070(apCaster, apMagicItem, apEffectItem, 5);
 }
@@ -820,11 +850,12 @@ struct FUN_00810590_Class
 {
     char pad[0x84];
     FUN_00622290_cls sub;
-    void FUN_00810590(int a, int b);
+    void bhkCharacterControllerCinfo_SetColFilter(int a, int b);
 };
 // Calls the sub-object's method with the two arguments and a zero third argument.
 // @fnv 0x00810590
-void FUN_00810590_Class::FUN_00810590(int aiArg1, int aiArg2)
+// src: XBOX_PDB 0x00810590
+void FUN_00810590_Class::bhkCharacterControllerCinfo_SetColFilter(int aiArg1, int aiArg2)
 {
     sub.SetPackedValue(aiArg1, aiArg2, 0);
 }
@@ -876,7 +907,7 @@ struct Calendar
 
 struct FUN_0050f5a0_struct
 {
-    void FUN_0050f5a0();
+    void NiAVObject_DetachParent();
 };
 
 extern char DAT_011a9448;
@@ -900,13 +931,13 @@ NiAVObject* LoadAndCloneModel(char const* path)
 
         if (scale)
         {
-            scale->FUN_00440490(1.0f);
+            scale->NiAVObject_SetScale(1.0f);
             scale->SetAppCulled(false);
             scale->SetLocalRotation(reinterpret_cast<NiMatrix3 const&>(DAT_011a9448));
-            scale->FUN_00440460(_NiPoint3_ZERO);
+            scale->NiAVObject_SetTranslate(_NiPoint3_ZERO);
 
             if (reinterpret_cast<Calendar*>(scale)->GetDaysPassed())
-                reinterpret_cast<FUN_0050f5a0_struct*>(scale)->FUN_0050f5a0();
+                reinterpret_cast<FUN_0050f5a0_struct*>(scale)->NiAVObject_DetachParent();
 
             scale->UpdateSceneObject();
         }
@@ -926,11 +957,12 @@ class FUN_00800170_cls
   public:
     int unk00;
     FUN_00800170_sub m_04;
-    FUN_00800170_cls* FUN_00800170();
+    FUN_00800170_cls* VATSEffectTarget_VATSEffectTarget();
 };
 
 // @fnv 0x00800170
-FUN_00800170_cls* FUN_00800170_cls::FUN_00800170()
+// src: COMMUNITY 0x00800170
+FUN_00800170_cls* FUN_00800170_cls::VATSEffectTarget_VATSEffectTarget()
 {
     m_04.Init(0);
     return this;
@@ -1228,11 +1260,12 @@ struct FUN_00800900_cls
     float m_f2B8;
     float m_f2BC;
     void Notify(float a, float b, int c);
-    void FUN_00800900(float value);
+    void FOVATSEffectManager_UpdateScan(float value);
 };
 
 // @fnv 0x00800900
-void FUN_00800900_cls::FUN_00800900(float value)
+// src: COMMUNITY 0x00800900
+void FUN_00800900_cls::FOVATSEffectManager_UpdateScan(float value)
 {
     if (this->m_f2B8 == b4225_kCompareConst)
         this->m_f2B8 = value;
@@ -1277,14 +1310,15 @@ bool FUN_00800a00_cls::GetRatioByIndex(unsigned int uiIndex, float* pfOut)
     }
 }
 
-void __cdecl FUN_005b5e40(const char* value);
-void __cdecl FUN_00ba91a0(void* value, int a, const void* b);
+void __cdecl Warning_005b5e40(const char* value);
+void __cdecl BSShaderProperty_SetFlagRecurse(void* value, int a, const void* b);
 typedef NiNode*(__thiscall* FUN_00800d50_getter)(NiNode*);
 extern char DAT_01078e78;
 
 // Clears a flag, returns if a is already in the list, else appends a and its getter result, sets f04 if empty, and calls FUN_00ba91a0.
 // @fnv 0x00800d50
-void FUN_00800e50_Class::FUN_00800d50(int pNode)
+// src: XBOX_PDB 0x00800d50
+void FUN_00800e50_Class::FOVATSEffectManager_SetMultiTarget(int pNode)
 {
     ((char*)this)[0x2b4] = 0;
     for (int i = 0; i < this->f0c; ++i)
@@ -1296,7 +1330,7 @@ void FUN_00800e50_Class::FUN_00800d50(int pNode)
     }
     if (this->f0c + 1 >= 0x20)
     {
-        FUN_005b5e40(&DAT_01078e78);
+        Warning_005b5e40(&DAT_01078e78);
         return;
     }
     *(int*)((char*)this + this->f0c * 8 + 0x14) = pNode;
@@ -1309,7 +1343,7 @@ void FUN_00800e50_Class::FUN_00800d50(int pNode)
         ((NiPointer<NiNode>*)((char*)this + 8))
             ->operator=(((FUN_00800d50_getter)(*(unsigned int*)(*(unsigned int*)pNode + 0x1d0)))((NiNode*)pNode));
     }
-    FUN_00ba91a0((NiNode*)*((NiPointer<NiNode>*)((char*)this + this->f0c * 8 + 0x18)), 0x31, 0);
+    BSShaderProperty_SetFlagRecurse((NiNode*)*((NiPointer<NiNode>*)((char*)this + this->f0c * 8 + 0x18)), 0x31, 0);
 }
 
 struct FnvBase
@@ -1360,7 +1394,8 @@ class B9277Node
 
 // Walks the node chain from a2, calls v30(a1) on each node's holder node, then calls FUN_00470470 on a2.
 // @fnv 0x00806ba0
-void FUN_00806ba0(void* a1, B9277Node* pNode)
+// src: XBOX_PDB 0x00806ba0
+void ActiveEffect_RevertActiveEffectList(void* a1, B9277Node* pNode)
 {
     B9277Node* cur = pNode;
     while (cur != 0)
@@ -1490,13 +1525,13 @@ struct FUN_0080fb30 : DestructorBase
 };
 extern Actor* g_thePlayer;
 extern GlobalObject_0044f440 g_011d1c28;
-void FUN_0080fc90(float);
+void _11DC778_Subtract(float);
 // @fnv 0x0080fb30
 FUN_0080fb30::~FUN_0080fb30()
 {
     Actor* actor = FUN_009185e0() ? FUN_009185e0()->f11() : 0;
     if (actor != g_thePlayer)
-        FUN_0080fc90(*g_011d1c28.Float());
+        _11DC778_Subtract(*g_011d1c28.Float());
     if (sound.FUN_00ad8ce0())
     {
         sound.FUN_00ad88f0();
@@ -1528,7 +1563,7 @@ struct Emitter
 
 extern Setting g_011d1b14;
 
-float FUN_004b5550(float, float);
+float NiATan2(float, float);
 
 struct EffectParams
 {
@@ -1553,11 +1588,12 @@ struct EffectBase
     int unkC8, unkCC, unkD0;
     float fD4;
     float GetTime();
-    void FUN_00812700(float a, EffectParams* p);
+    void MagicBoltProjectile_UpdateBranch(float a, EffectParams* p);
 };
 
 // @fnv 0x00812700
-void EffectBase::FUN_00812700(float a, EffectParams* pParams)
+// src: COMMUNITY 0x00812700
+void EffectBase::MagicBoltProjectile_UpdateBranch(float a, EffectParams* pParams)
 {
     SceneObj* node5 = pParams->m_pController;
     if (pParams->aspObstacleData)
@@ -1572,7 +1608,7 @@ void EffectBase::FUN_00812700(float a, EffectParams* pParams)
     float z4 = dir.z;
     dir.z = 0.0f;
     float len = dir.Length();
-    rot2.FromAngles(FUN_004b5550(dir.x, dir.y), 0.0f, -FUN_004b5550(z4, len));
+    rot2.FromAngles(NiATan2(dir.x, dir.y), 0.0f, -NiATan2(z4, len));
     node5->SetLocalRotation(rot2);
 }
 
@@ -1761,15 +1797,16 @@ struct VTableTarget116
 
 struct FUN_0081c4a0_cls
 {
-    void FUN_0081c4e0(int a);
-    void FUN_0081c4a0(VTableTarget116* p);
+    void MagicLight_Transfer_0081c4e0(int a);
+    void MagicLight_Transfer(VTableTarget116* p);
 };
 
 // @fnv 0x0081c4a0
-void FUN_0081c4a0_cls::FUN_0081c4a0(VTableTarget116* pTarget)
+// src: XBOX_PDB 0x0081c4a0
+void FUN_0081c4a0_cls::MagicLight_Transfer(VTableTarget116* pTarget)
 {
     if (pTarget->v116() != 0)
-        this->FUN_0081c4e0(pTarget->v116());
+        this->MagicLight_Transfer_0081c4e0(pTarget->v116());
 }
 
 struct FUN_0081c4e0_Helper
@@ -1845,12 +1882,13 @@ struct FUN_0081c4e0_cls
     FUN_0081c4e0_Sub m_08;
     void __thiscall FUN_0066b0d0(int a);
     FUN_0081c4e0_Helper* __thiscall GetHelper();
-    void __thiscall FUN_0081c4e0(int a1);
+    void __thiscall MagicLight_Transfer_0081c4e0(int a1);
 };
 
 // If m_04 is nonzero, calls FUN_0066b0d0 with a1 and then invokes v55 on the helper with the sub-helper and 1.
 // @fnv 0x0081c4e0
-void __thiscall FUN_0081c4e0_cls::FUN_0081c4e0(int a1)
+// src: XBOX_PDB 0x0081c4e0
+void __thiscall FUN_0081c4e0_cls::MagicLight_Transfer_0081c4e0(int a1)
 {
     if (m_04 != 0)
     {
@@ -1891,7 +1929,8 @@ struct FUN_0081e440_Object
 };
 
 // @fnv 0x0081e440
-void __cdecl FUN_0081e440(FUN_0081e440_Object* object)
+// src: XBOX_PDB 0x0081e440
+void __cdecl MagicProjectile_Clone3D(FUN_0081e440_Object* object)
 {
     LoadAndCloneModel(reinterpret_cast<const char*>(object->embedded.vf14()));
 }
@@ -1923,8 +1962,8 @@ struct FUN_0081f1e0_Virtual
 
 struct FUN_0081f1e0_Class
 {
-    void __thiscall FUN_00c9c1d0();
-    FUN_0081f1e0_Virtual* __thiscall FUN_009d9f40();
+    void __thiscall activate_00c9c1d0();
+    FUN_0081f1e0_Virtual* __thiscall CombatGroup_GetLastSearchAreaUpdateTimer();
     void __thiscall ApplyVirtualCall(int, int);
 };
 
@@ -1932,19 +1971,19 @@ struct FUN_0081f1e0_Class
 // @fnv 0x0081f1e0
 void FUN_0081f1e0_Class::ApplyVirtualCall(int arg1, int arg2)
 {
-    this->FUN_00c9c1d0();
-    this->FUN_009d9f40()->vf50(arg1, arg2);
+    this->activate_00c9c1d0();
+    this->CombatGroup_GetLastSearchAreaUpdateTimer()->vf50(arg1, arg2);
 }
 
 struct EquipObject;
 struct EquipGeometry
 {
-    void* FUN_0043fad0();
+    void* NiGeometry_GetSkinInstance();
 };
 struct EquipNode;
 struct EquipSlot
 {
-    const char* FUN_007fa950();
+    const char* SkyObject_GetNiNode();
 };
 struct EquipBase;
 struct EquipTable
@@ -2179,8 +2218,8 @@ struct EquipNode
     EquipObject* FUN_0043b4a0(unsigned int);
 };
 extern char DAT_011f49d8;
-bool __cdecl FUN_004910d0(EquipObject*);
-void* __cdecl FUN_00653270(const void*, const void*);
+bool __cdecl Animation_FindSkinnedNode(EquipObject*);
+void* __cdecl NiObject_DynamicCast(const void*, const void*);
 struct EquipVisibility
 {
     int unk00;
@@ -2329,8 +2368,8 @@ struct EquipVisibility
     int current;
     int extraCount;
     int extraSlots[15];
-    void FUN_00802220(void*, int, bool);
-    void FUN_00802260(EquipObject*, int, int);
+    void VATSEffect_SetBodyPartEnabled(void*, int, bool);
+    void FOVATSEffectManager_ShowBipedObjectOnActor(EquipObject*, int, int);
     void UpdateEquipmentVisibility();
 };
 // Toggles shader visibility for the owner's equipment slots based on the current slot, hiding non-selected slots and showing extras.
@@ -2349,7 +2388,7 @@ void EquipVisibility::UpdateEquipmentVisibility()
         EquipObject* object = root->FUN_0043b4a0(i);
         if (object)
         {
-            if (FUN_004910d0(object))
+            if (Animation_FindSkinnedNode(object))
             {
                 EquipNode* node9 = object->AsNode();
                 EquipGeometry* geometry = object->AsGeometry();
@@ -2361,17 +2400,17 @@ void EquipVisibility::UpdateEquipmentVisibility()
                         geometry = node9->FUN_0043b4a0(child) ? node9->FUN_0043b4a0(child)->AsGeometry() : 0;
                         child++;
                     }
-                    void* property = geometry ? geometry->FUN_0043fad0() : 0;
-                    void* shader1 = FUN_00653270(&DAT_011f49d8, property);
+                    void* property = geometry ? geometry->NiGeometry_GetSkinInstance() : 0;
+                    void* shader1 = NiObject_DynamicCast(&DAT_011f49d8, property);
                     if (shader1)
                     {
                         for (int slot = 0; slot < 15; slot++)
                         {
-                            FUN_00802220(shader1, slot, slot == current);
+                            VATSEffect_SetBodyPartEnabled(shader1, slot, slot == current);
                             for (int extra = 0; extra < extraCount; extra++)
                             {
                                 if (slot == extraSlots[extra])
-                                    FUN_00802220(shader1, slot, 1);
+                                    VATSEffect_SetBodyPartEnabled(shader1, slot, 1);
                             }
                         }
                     }
@@ -2392,7 +2431,7 @@ void EquipVisibility::UpdateEquipmentVisibility()
             EquipSlot* entry3 = table->GetValueByIndex(current);
             if (entry3)
             {
-                EquipObject* node9 = actor->GetRoot()->Find(NiFixedString(entry3->FUN_007fa950()));
+                EquipObject* node9 = actor->GetRoot()->Find(NiFixedString(entry3->SkyObject_GetNiNode()));
                 if (node9 && slotIndex == current)
                     node9->FUN_00450f90(0);
                 else if (node9)
@@ -2401,21 +2440,21 @@ void EquipVisibility::UpdateEquipmentVisibility()
         }
     }
     if (current != 3 && current != 4)
-        FUN_00802260(actor, 3, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 3, 0);
     if (current != 5 && current != 6)
-        FUN_00802260(actor, 4, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 4, 0);
     if (current != 1 && current != 2)
     {
-        FUN_00802260(actor, 10, 0);
-        FUN_00802260(actor, 11, 0);
-        FUN_00802260(actor, 12, 0);
-        FUN_00802260(actor, 13, 0);
-        FUN_00802260(actor, 9, 0);
-        FUN_00802260(actor, 14, 0);
-        FUN_00802260(actor, 15, 0);
-        FUN_00802260(actor, 16, 0);
-        FUN_00802260(actor, 1, 0);
-        FUN_00802260(actor, 0, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 10, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 11, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 12, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 13, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 9, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 14, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 15, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 16, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 1, 0);
+        FOVATSEffectManager_ShowBipedObjectOnActor(actor, 0, 0);
     }
 }
 
@@ -2424,8 +2463,8 @@ struct IntegerSetting;
 extern FloatSetting DAT_011db6e4;
 extern IntegerSetting DAT_011db75c;
 extern double DAT_01012070;
-extern "C" float* __fastcall FUN_00403e20(FloatSetting* setting);
-extern "C" int* __fastcall FUN_0043d4d0(IntegerSetting* setting);
+extern "C" float* __fastcall Setting_Float_00403e20(FloatSetting* setting);
+extern "C" int* __fastcall Setting_Int(IntegerSetting* setting);
 extern "C" int __cdecl FUN_00ecadb8();
 
 struct FUN_00800870_Class
@@ -2602,10 +2641,10 @@ void __thiscall FUN_00800870_Class::UpdateProgress(float value)
 {
     float delta = value - previous;
     progress = delta / duration;
-    if (*FUN_00403e20(&DAT_011db6e4) + DAT_01012070 < progress)
+    if (*Setting_Float_00403e20(&DAT_011db6e4) + DAT_01012070 < progress)
     {
         active = 0;
-        next = (float)(FUN_00ecadb8() % *FUN_0043d4d0(&DAT_011db75c)) + value;
+        next = (float)(FUN_00ecadb8() % *Setting_Int(&DAT_011db75c)) + value;
     }
 }
 

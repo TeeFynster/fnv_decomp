@@ -7,18 +7,19 @@ struct Node
 };
 struct ScriptPool
 {
-    void* FUN_0049fa80();
+    void* NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_NewItem();
 };
 struct ScriptList : ScriptPool
 {
-    void FUN_0076b660(unsigned int* element);
-    void FUN_0049fa20(Node*);
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddHead(unsigned int* element);
+    void NiTListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddNodeHead(Node*);
 };
 // Stores the value pointed to by element into the node obtained from FUN_0049fa80 at offset 8, then passes the node to FUN_0049fa20.
 // @fnv 0x0076b660
-void ScriptList::FUN_0076b660(unsigned int* puiElement)
+// src: XBOX_PDB 0x0076b660
+void ScriptList::NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddHead(unsigned int* puiElement)
 {
-    Node* node = static_cast<Node*>(this->FUN_0049fa80());
+    Node* node = static_cast<Node*>(this->NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_NewItem());
     *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(node) + 8) = *puiElement;
-    FUN_0049fa20(node);
+    NiTListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddNodeHead(node);
 }

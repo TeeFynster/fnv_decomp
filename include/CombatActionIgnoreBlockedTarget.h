@@ -11,5 +11,5 @@ public:
 
     virtual void vfn_0();
 
-    void FUN_0097ccf0(CombatController* apCombatController, int aiActionValue);
+    void Execute_0097ccf0(CombatController* apCombatController, int aiActionValue);
 };

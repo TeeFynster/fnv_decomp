@@ -137,9 +137,9 @@ const NiRTTI* __fastcall GetColliderRTTI(const NiPSysCollider*, void*)
 void __stdcall AppendCameraPathEntries(StrArr* arr);
 char* __cdecl _FUN_00a7d330(char const* value);
 char* __cdecl _FUN_00a7d370(char const* value, bool flag);
-char* __cdecl FUN_00a7d550(char const* value, float number);
-char* __cdecl FUN_00a7d5a0(char const* value, void* object);
-char* __cdecl FUN_00a7d5e0(char const* value, char const* name);
+char* __cdecl NiGetViewerString_00a7d550(char const* value, float number);
+char* __cdecl NiGetViewerString_00a7d5a0(char const* value, void* object);
+char* __cdecl NiGetViewerString_00a7d5e0(char const* value, char const* name);
 
 extern const char g_011d1f8c_arg1[];
 
@@ -161,7 +161,7 @@ void NiPSysCollider::GetViewerStrings(NiViewerStringsArray* strings)
         arr->SetSize(arr->m_usGrowBy + index);
     arr->SetAt(index, value);
 
-    value = FUN_00a7d550("Bounce", m_fBounceFactor);
+    value = NiGetViewerString_00a7d550("Bounce", m_fBounceFactor);
     index = arr->m_usSize;
     capacity = arr->m_usMaxSize;
     if (index >= capacity)
@@ -184,7 +184,7 @@ void NiPSysCollider::GetViewerStrings(NiViewerStringsArray* strings)
 
     {
         const char* name = m_pSpawnModifier ? m_pSpawnModifier->m_kName.m_kHandle : g_011d1f8c_arg1;
-        value = FUN_00a7d5e0("Spawn Modifier", name);
+        value = NiGetViewerString_00a7d5e0("Spawn Modifier", name);
     }
     index = arr->m_usSize;
     capacity = arr->m_usMaxSize;
@@ -192,7 +192,7 @@ void NiPSysCollider::GetViewerStrings(NiViewerStringsArray* strings)
         arr->SetSize(arr->m_usGrowBy + index);
     arr->SetAt(index, value);
 
-    value = FUN_00a7d5a0("Manager", m_pColliderManager);
+    value = NiGetViewerString_00a7d5a0("Manager", m_pColliderManager);
     index = arr->m_usSize;
     capacity = arr->m_usMaxSize;
     if (index >= capacity)

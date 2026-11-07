@@ -53,7 +53,8 @@ inline unsigned int StrArr::AddInline(char* pcElement)
 extern void* g_0126fab4;
 
 // @fnv 0x00eacd20
-void* __cdecl FUN_00eacd20()
+// src: COMMUNITY 0x00eacd20
+void* __cdecl NiCollisionData_GetRTTI()
 {
     return &g_0126fab4;
 }
@@ -64,7 +65,8 @@ int __cdecl NiSprintf(char*, unsigned int, const char*, ...);
 
 // Allocates a string sized from pcPrefix and formats it as "<pcPrefix> = <mode name>" based on eMode, returning the buffer.
 // @fnv 0x00eacef0
-char* __stdcall FUN_00eacef0(const char* pcPrefix, unsigned int eMode)
+// src: XBOX_PDB 0x00eacef0
+char* __stdcall NiCollisionData_GetViewerString(const char* pcPrefix, unsigned int eMode)
 {
     char* pString;
     unsigned int uiBufferSize;
@@ -100,7 +102,8 @@ extern unsigned char DAT_011f4270;
 extern unsigned char DAT_011f4274;
 
 // @fnv 0x00eacd30
-NiPoint3 NiCollisionData::FUN_00eacd30()
+// src: XBOX_PDB 0x00eacd30
+NiPoint3 NiCollisionData::GetVelocity()
 {
     NiPoint3 p;
     *(unsigned int*)&p.x = *(unsigned int*)&_NiPoint3_ZERO;
@@ -129,7 +132,7 @@ void NiCollisionData::SetBoundingVolume(NiBoundingVolume* pkBV)
     }
 }
 
-extern void* __cdecl FUN_00e9cab0(void*);
+extern void* __cdecl NiBoundingVolume_CreateFromStream(void*);
 
 // @fnv 0x00eaceb0
 void __fastcall AssignFromSource(NiCollisionData* self, void*, void* pSource)
@@ -138,7 +141,7 @@ void __fastcall AssignFromSource(NiCollisionData* self, void*, void* pSource)
     self->m_ePropagationMode = *(int*)((char*)pSource + 4);
     if (*(int*)((char*)pSource + 8))
     {
-        void* bv = FUN_00e9cab0(*(void**)((char*)pSource + 12));
+        void* bv = NiBoundingVolume_CreateFromStream(*(void**)((char*)pSource + 12));
         self->SetBoundingVolume((NiBoundingVolume*)bv);
     }
 }
@@ -148,7 +151,7 @@ void __cdecl _delete(void*, unsigned int);
 // @fnv 0x00ead0b0
 void* NiCollisionData::DestroyIfFlagged(unsigned int auiFlags)
 {
-    FUN_00eacde0();
+    UpdateFields_00eacde0();
     if (auiFlags & 1)
         _delete(this, 0x50);
     return this;
@@ -157,7 +160,7 @@ void* NiCollisionData::DestroyIfFlagged(unsigned int auiFlags)
 // @fnv 0x00ead610
 void NiCollisionData::CloneCollisionData(NiCollisionData* pkDest, CloningProcess& kCloning)
 {
-    FUN_00aa1000(pkDest, kCloning);
+    NiCollisionObject_CopyMembers(pkDest, kCloning);
     pkDest->m_ePropagationMode = m_ePropagationMode;
     pkDest->m_eCollisionMode = m_eCollisionMode;
     if (m_pkModelABV)
@@ -166,8 +169,8 @@ void NiCollisionData::CloneCollisionData(NiCollisionData* pkDest, CloningProcess
     {
         if (!pkDest->m_pWorldVertices)
         {
-            pkDest->FUN_00ead1e0();
-            pkDest->FUN_00ead250();
+            pkDest->CreateWorldVertices();
+            pkDest->UpdateWorldVertices();
         }
         pkDest->CreateTriData(1);
     }
@@ -180,7 +183,8 @@ struct Helper38
 };
 
 // @fnv 0x00ead330
-void NiCollisionData::FUN_00ead330(NiAVObject* pkSceneObject)
+// src: XBOX_PDB 0x00ead330
+void NiCollisionData::SetSceneGraphObject(NiAVObject* pkSceneObject)
 {
     NiCollisionObject::SetSceneObject(pkSceneObject);
     int iMode = m_eCollisionMode;
@@ -233,7 +237,8 @@ void __fastcall LinkCollisionData(NiCollisionData* self, void*, void* stream)
 char* __cdecl _FUN_00a7d330(const char*);
 
 // @fnv 0x00ead870
-void NiCollisionData::FUN_00ead870(StrArr* pkStrings)
+// src: XBOX_PDB 0x00ead870
+void NiCollisionData::GetViewerStrings_00ead870(StrArr* pkStrings)
 {
     FUN_00a81100(pkStrings);
     char* pszDup = _FUN_00a7d330((const char*)g_0126fab4);
@@ -262,7 +267,8 @@ void NiCollisionData::FUN_00ead870(StrArr* pkStrings)
 extern "C" unsigned char __stdcall MyColl_WriteToStream(void* pStream);
 
 // @fnv 0x00eacd00
-bool __stdcall FUN_00eacd00(void* pStream)
+// src: XBOX_PDB 0x00eacd00
+bool __stdcall NiCollisionData_RegisterStreamables(void* pStream)
 {
     return MyColl_WriteToStream(pStream);
 }
@@ -303,7 +309,7 @@ extern unsigned char DAT_011f6238;
 
 struct FUN_00aa4060_shell
 {
-    void __thiscall FUN_00aa4060(unsigned int);
+    void __thiscall MemoryManager_Deallocate(unsigned int);
 };
 
 void __fastcall DestroyCollisionObject(NiCollisionObject*);
@@ -316,12 +322,13 @@ struct SpawnedObj
 };
 
 // @fnv 0x00eacde0
-void NiCollisionData::FUN_00eacde0()
+// src: GUESS 0x00eacde0 (confidence: low)
+void NiCollisionData::UpdateFields_00eacde0()
 {
     unsigned int a = (unsigned int)m_pWorldVertices;
     *(void**)this = &DAT_010f18bc;
-    ((FUN_00aa4060_shell*)&DAT_011f6238)->FUN_00aa4060(a);
-    ((FUN_00aa4060_shell*)&DAT_011f6238)->FUN_00aa4060((unsigned int)unk44);
+    ((FUN_00aa4060_shell*)&DAT_011f6238)->MemoryManager_Deallocate(a);
+    ((FUN_00aa4060_shell*)&DAT_011f6238)->MemoryManager_Deallocate((unsigned int)unk44);
     if (m_pkModelABV != 0)
     {
         delete m_pkModelABV;
@@ -431,7 +438,8 @@ struct S_00ead250_Second
 
 // If unk08's m18() result is non-null and m_pWorldVertices and unk48 are set, calls g_011aa050 with the second object's unk20 and m90() and clears unk48.
 // @fnv 0x00ead250
-void NiCollisionData::FUN_00ead250()
+// src: XBOX_PDB 0x00ead250
+void NiCollisionData::UpdateWorldVertices()
 {
     NiAVObject* first = m_pkSceneObject;
 
@@ -731,8 +739,8 @@ void NiCollisionData::CreateTriData(int iParam)
             return;
         if (!m_pWorldVertices)
         {
-            FUN_00ead1e0();
-            FUN_00ead250();
+            CreateWorldVertices();
+            UpdateWorldVertices();
         }
         GeomObj* pkShape = (GeomObj*)m_pkSceneObject;
         m_pCollisionObject =
@@ -745,8 +753,8 @@ void NiCollisionData::CreateTriData(int iParam)
             return;
         if (!m_pWorldVertices)
         {
-            FUN_00ead1e0();
-            FUN_00ead250();
+            CreateWorldVertices();
+            UpdateWorldVertices();
         }
         GeomObj* pkStrips = (GeomObj*)m_pkSceneObject;
         unsigned int uiTriangleCount = 0;
@@ -964,13 +972,13 @@ void __fastcall SaveCollisionData(NiCollisionData* self, void*, void* target)
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 // @fnv 0x00eada20
 NiObject* NiCollisionData::MakeClone(CloningProcess& arg)
 {
     NiCollisionData* result;
-    void* mem = FUN_00aa13e0(0x50);
+    void* mem = Object_DispatchCommandFour(0x50);
     if (mem != 0)
     {
         result = ::new (mem) NiCollisionData();
@@ -1049,7 +1057,7 @@ void NiCollisionData::Unk_24(NiUpdateData& arData)
     unk49 = unk48 = true;
 }
 
-char* FUN_00a7d330(char* pcText);
+char* NiViewerStrings_NiGetViewerString_Title(char* pcText);
 char* __stdcall FormatName(const char* name, int mode);
 
 void __cdecl AddCollisionObjectViewerStrings();
@@ -1060,17 +1068,17 @@ void NiCollisionData::AddViewerStrings(NiViewerStringsArray* strings)
 {
     StrArr* pkStrings = (StrArr*)strings;
     ((void (__thiscall*)(NiCollisionData*, StrArr*))AddCollisionObjectViewerStrings)(this, pkStrings);
-    pkStrings->AddInline(FUN_00a7d330((char*)g_0126fab4));
+    pkStrings->AddInline(NiViewerStrings_NiGetViewerString_Title((char*)g_0126fab4));
     // The original callers also supply the collision owner in ECX to these
     // stateless formatters; preserve that calling convention.
     unsigned int propagationMode = m_ePropagationMode;
     pkStrings->AddInline(((char* (__thiscall*)(NiCollisionData*, const char*, unsigned int))FormatName)(this, "m_ePropagationMode", propagationMode));
     unsigned int collisionMode = m_eCollisionMode;
-    pkStrings->AddInline(((char* (__thiscall*)(NiCollisionData*, const char*, unsigned int))FUN_00eacef0)(this, "m_eCollisionMode", collisionMode));
+    pkStrings->AddInline(((char* (__thiscall*)(NiCollisionData*, const char*, unsigned int))NiCollisionData_GetViewerString)(this, "m_eCollisionMode", collisionMode));
     if (m_pkModelABV)
         m_pkModelABV->AddViewerStrings("m_pkModelABV->Type", (NiTPrimitiveArray<char*>*)pkStrings);
-    pkStrings->AddInline(m_kLocalVelocity.FUN_00a59af0("m_kLocalVelocity"));
-    pkStrings->AddInline(m_kWorldVelocity.FUN_00a59af0("m_kWorldVelocity"));
+    pkStrings->AddInline(m_kLocalVelocity.GetViewerString_00a59af0("m_kLocalVelocity"));
+    pkStrings->AddInline(m_kWorldVelocity.GetViewerString_00a59af0("m_kWorldVelocity"));
 }
 
 extern const char str_010f19fc[];
@@ -1080,7 +1088,7 @@ extern const char str_010f19b0[];
 extern const char str_0109b2ec[];
 
 extern "C" unsigned int __cdecl strlen(const char*);
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 void FUN_00a305b0(char* buf, unsigned int size, const char* fmt, const char* name);
 
 // Obtains a buffer sized from name length and formats name into it using the mode-selected format string.
@@ -1088,7 +1096,7 @@ void FUN_00a305b0(char* buf, unsigned int size, const char* fmt, const char* nam
 char* __stdcall FormatName(const char* name, int mode)
 {
     unsigned int len = strlen(name);
-    char* buf = (char*)FUN_00aa1070(len + 0x20);
+    char* buf = (char*)_NiMalloc_00aa1070(len + 0x20);
     switch (mode)
     {
     case 0:
@@ -1112,11 +1120,11 @@ char* __stdcall FormatName(const char* name, int mode)
 
 struct Allocator
 {
-    void* __thiscall FUN_00aa3e40(unsigned int bytes);
+    void* __thiscall Game_DoHeapAlloc(unsigned int bytes);
 };
 void* __cdecl operator new[](unsigned int n)
 {
-    return reinterpret_cast<Allocator&>(DAT_011f6238).FUN_00aa3e40(n);
+    return reinterpret_cast<Allocator&>(DAT_011f6238).Game_DoHeapAlloc(n);
 }
 struct GeometryData
 {
@@ -1191,7 +1199,8 @@ struct Geometry
 };
 
 // @fnv 0x00ead1e0
-void NiCollisionData::FUN_00ead1e0()
+// src: XBOX_PDB 0x00ead1e0
+void NiCollisionData::CreateWorldVertices()
 {
     if (m_pkSceneObject)
     {

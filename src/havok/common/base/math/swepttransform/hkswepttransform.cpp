@@ -43,7 +43,7 @@ struct hkRotationq
     hkVector4q m_kColumn1;
     hkVector4q m_kColumn2;
 
-    void FUN_00cb2d90(const hkQuaternionq& q);
+    void hkRotation_set(const hkQuaternionq& q);
     __forceinline const hkVector4q& getColumn(int i) const
     {
         return (&m_kColumn0)[i];
@@ -91,7 +91,7 @@ void hkSweptTransformq::Evaluate(float time, hkTransformq& transformOut) const
     hkQuaternionq q;
     q.m_vec.setInterpolate4(m_qRotation0.m_vec, m_qRotation1.m_vec, t4);
     q.normalize();
-    transformOut.m_rotation.FUN_00cb2d90(q);
+    transformOut.m_rotation.hkRotation_set(q);
 
     transformOut.m_vTranslation.setInterpolate4(m_vCenterOfMass0, m_vCenterOfMass1, t4);
     hkVector4q centerShift;
@@ -109,11 +109,11 @@ typedef union __declspec(intrin_type) __declspec(align(16)) {
 extern "C" LocalM128 _mm_setzero_ps(void);
 struct Swept_00cf2410_Sub
 {
-    void FUN_00cf2280(LocalM128 const* a, LocalM128 const* b);
+    void hkSweptTransform_initSweptTransform(LocalM128 const* a, LocalM128 const* b);
 };
 struct Swept_00cf2410_Cb
 {
-    void FUN_00cb2d90(void* p);
+    void hkRotation_set(void* p);
 };
 struct Swept_00cf2410
 {
@@ -152,14 +152,15 @@ struct Swept_00cf2410
     int unk8C;
     LocalM128 m_vVector;
     float m_inverseTime;
-    void FUN_00cf2410(LocalM128 const& position, LocalM128 const& rotation);
+    void hkMotionState_initMotionState(LocalM128 const& position, LocalM128 const& rotation);
 };
 // Passes position and rotation to one method, passes rotation to another, stores position, sets m_inverseTime to 1.0f, and zeroes m_vVector.
 // @fnv 0x00cf2410
-void Swept_00cf2410::FUN_00cf2410(LocalM128 const& position, LocalM128 const& rotation)
+// src: XBOX_PDB 0x00cf2410
+void Swept_00cf2410::hkMotionState_initMotionState(LocalM128 const& position, LocalM128 const& rotation)
 {
-    ((Swept_00cf2410_Sub*)((char*)this + 0x40))->FUN_00cf2280(&position, &rotation);
-    ((Swept_00cf2410_Cb*)this)->FUN_00cb2d90(const_cast<LocalM128*>(&rotation));
+    ((Swept_00cf2410_Sub*)((char*)this + 0x40))->hkSweptTransform_initSweptTransform(&position, &rotation);
+    ((Swept_00cf2410_Cb*)this)->hkRotation_set(const_cast<LocalM128*>(&rotation));
     m_vContactPosition = position;
     m_inverseTime = 1.0f;
     m_vVector = _mm_setzero_ps();

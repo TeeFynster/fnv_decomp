@@ -13,7 +13,7 @@ public:
 
     void FUN_0040f210();
     void* FUN_0040f1e0(unsigned int flags);
-    bool FUN_0040f2d0(BSExtraData* apCompare);
+    bool ExtraCellImpactSwap_Compare(BSExtraData* apCompare);
 
     CellImpactSwapValue* m_pCellImpactSwapValue;
 };

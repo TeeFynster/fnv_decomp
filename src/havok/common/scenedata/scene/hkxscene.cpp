@@ -21,7 +21,7 @@ struct Alloc
 struct FUN_00cb0c00_class
 {
     char* value;
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
 typedef FUN_00cb0c00_class String;
 extern int DAT_010e99d8, DAT_0102e388;
@@ -178,8 +178,8 @@ void Scene::ClearScene()
         unk18.m_iCapacityState = 0x80000000;
     }
     unk14.~Root();
-    unk0c.FUN_00cb0c00();
-    unk08.FUN_00cb0c00();
+    unk0c.Object_UpdateFields_00cb0c00();
+    unk08.Object_UpdateFields_00cb0c00();
     unk00 = &DAT_0102e388;
 }
 
@@ -262,7 +262,7 @@ struct Entry_e4a4
 struct Name_e4a4
 {
     int unk00;
-    void FUN_00cb0c00() throw();
+    void Object_UpdateFields_00cb0c00() throw();
 };
 
 struct Mesh_e4a4
@@ -273,18 +273,19 @@ struct Mesh_e4a4
     hkArray<short> m_ppIndices;
     hkArray<int> m_iSlotIds;
     Name_e4a4 m_name;
-    void FUN_00e4a460();
+    void ReleaseEntriesAndIndexArrays();
 };
 
 // Calls each entry destructor, invokes FUN_00cb0c00 on m_name, releases the slot ID, index, and entry arrays, then updates m_vtbl.
 // @fnv 0x00e4a460
-void Mesh_e4a4::FUN_00e4a460()
+// src: GUESS 0x00e4a460 (confidence: medium)
+void Mesh_e4a4::ReleaseEntriesAndIndexArrays()
 {
     m_vtbl = &DAT_010e929c;
     int n = m_entries.GetLogicalSize();
     for (int i = 0; i < n; i++)
         m_entries[i].~Entry_e4a4();
-    m_name.FUN_00cb0c00();
+    m_name.Object_UpdateFields_00cb0c00();
     ClearAndRelease(m_iSlotIds);
     ClearAndRelease(m_ppIndices);
     ClearAndRelease(m_entries);

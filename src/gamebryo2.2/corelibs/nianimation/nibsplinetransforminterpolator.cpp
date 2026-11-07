@@ -73,7 +73,8 @@ void NiBSplineTransformInterpolator::LoadBinary(NiStream& stream)
 
 // Maps channel 0 to 3, 1 to 4 and 2 to 1, returning 0 for any other channel.
 // @fnv 0x00a4fde0
-unsigned int __stdcall FUN_00a4fde0(unsigned short usChannel)
+// src: XBOX_PDB 0x00a4fde0
+unsigned int __stdcall NiBSplineTransformInterpolator_GetDimension(unsigned short usChannel)
 {
     switch (usChannel)
     {
@@ -89,7 +90,8 @@ unsigned int __stdcall FUN_00a4fde0(unsigned short usChannel)
 
 // Returns 3 for channels 0, 1 and 2, and 0 for any other channel value.
 // @fnv 0x00a4fe20
-unsigned int __stdcall FUN_00a4fe20(unsigned short usChannel)
+// src: XBOX_PDB 0x00a4fe20
+unsigned int __stdcall NiBSplineTransformInterpolator_GetDegree(unsigned short usChannel)
 {
     switch (usChannel)
     {
@@ -144,7 +146,8 @@ extern double _DAT_010241b0;
 
 // Returns true when the given channel has no control points and its stored value differs from _DAT_010241b0; false otherwise.
 // @fnv 0x00a50090
-bool __fastcall FUN_00a50090(NiBSplineTransformInterpolator* self, int, unsigned short usChannel)
+// src: XBOX_PDB 0x00a50090
+bool __fastcall NiBSplineTransformInterpolator_GetChannelPosed(NiBSplineTransformInterpolator* self, int, unsigned short usChannel)
 {
     switch (usChannel)
     {
@@ -169,7 +172,8 @@ bool __fastcall FUN_00a50090(NiBSplineTransformInterpolator* self, int, unsigned
 
 
 // @fnv 0x00a50110
-NiBSplineTransformInterpolator* __fastcall FUN_00a50110(NiBSplineTransformInterpolator* self, int, CloningProcess* kCloning)
+// src: XBOX_PDB 0x00a50110
+NiBSplineTransformInterpolator* __fastcall NiBSplineTransformInterpolator_CreateClone(NiBSplineTransformInterpolator* self, int, CloningProcess* kCloning)
 {
     NiBSplineTransformInterpolator* pkObject = ::new (BSFadeNode::operator new(sizeof(NiBSplineTransformInterpolator))) BSplineTransformConstruction(0, 0xffff, 0xffff, 0xffff, 0);
     reinterpret_cast<BSplineInterpolatorCalls*>(self)->CopyBSplineFields(pkObject, *kCloning);
@@ -182,7 +186,8 @@ NiBSplineTransformInterpolator* __fastcall FUN_00a50110(NiBSplineTransformInterp
 
 // Allocates and constructs a spline transform interpolator with invalid control-point handles.
 // @fnv 0x00a50180
-NiBSplineTransformInterpolator* FUN_00a50180()
+// src: EXE 0x00a50180
+NiBSplineTransformInterpolator* NiBSplineTransformInterpolator_CreateObject()
 {
     return ::new (BSFadeNode::operator new(sizeof(NiBSplineTransformInterpolator))) BSplineTransformConstruction(0, 0xffff, 0xffff, 0xffff, 0);
 }
@@ -191,7 +196,8 @@ NiBSplineTransformInterpolator* FUN_00a50180()
 
 // Returns true if the object passes FUN_00a57e90, its quaternion matches, and the trans, rot and scale CP handles all match the other object's.
 // @fnv 0x00a501b0
-bool __fastcall FUN_00a501b0(NiBSplineTransformInterpolator* self, int, NiBSplineTransformInterpolator* pkObject)
+// src: GAMEBRYO_LIB 0x00a501b0
+bool __fastcall NiBSplineTransformInterpolator_IsEqual(NiBSplineTransformInterpolator* self, int, NiBSplineTransformInterpolator* pkObject)
 {
     if (reinterpret_cast<BSplineInterpolatorCalls*>(self)->EqualBSplineFields(pkObject) && static_cast<QuatTransformCalls&>(self->m_kDefaultTransform).EqualQuatTransform(&pkObject->m_kDefaultTransform) &&
         pkObject->m_kTransCPHandle == self->m_kTransCPHandle && pkObject->m_kRotCPHandle == self->m_kRotCPHandle &&
@@ -305,8 +311,8 @@ extern unsigned int _DAT_011f3fe4;
 extern unsigned char _DAT_010996bc;
 extern unsigned char _DAT_010996ac;
 extern unsigned char _DAT_01099698;
-unsigned int __cdecl FUN_00a7d330(unsigned int);
-unsigned int __cdecl FUN_00a7d510(const unsigned char*, unsigned int);
+unsigned int __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int);
+unsigned int __cdecl NiGetViewerString_00a7d510(const unsigned char*, unsigned int);
 
 #include "../../../../include/NiTMallocInterface.h"
 #include "../../../../include/NiTPrimitiveArray.h"
@@ -316,26 +322,26 @@ void __fastcall GetBSplineTransformViewerStrings(NiBSplineTransformInterpolator*
 {
     reinterpret_cast<BSplineInterpolatorCalls*>(self)->AddBSplineViewerStrings(strings);
     NiViewerStringsArray& pos = *strings;
-    const char* value = (const char*)FUN_00a7d330(_DAT_011f3fe4);
+    const char* value = (const char*)NiViewerStrings_NiGetViewerString_Title(_DAT_011f3fe4);
     unsigned int index = pos.m_usSize;
     if (index >= pos.m_usMaxSize)
         pos.SetSize(index + pos.m_usGrowBy);
     pos.SetAt(index, value);
 
     self->m_kDefaultTransform.GetViewerStrings(strings);
-    value = (const char*)FUN_00a7d510(&_DAT_010996bc, self->m_kTransCPHandle);
+    value = (const char*)NiGetViewerString_00a7d510(&_DAT_010996bc, self->m_kTransCPHandle);
     index = pos.m_usSize;
     if (index >= pos.m_usMaxSize)
         pos.SetSize(index + pos.m_usGrowBy);
     pos.SetAt(index, value);
 
-    value = (const char*)FUN_00a7d510(&_DAT_010996ac, self->m_kRotCPHandle);
+    value = (const char*)NiGetViewerString_00a7d510(&_DAT_010996ac, self->m_kRotCPHandle);
     index = pos.m_usSize;
     if (index >= pos.m_usMaxSize)
         pos.SetSize(index + pos.m_usGrowBy);
     pos.SetAt(index, value);
 
-    value = (const char*)FUN_00a7d510(&_DAT_01099698, self->m_kScaleCPHandle);
+    value = (const char*)NiGetViewerString_00a7d510(&_DAT_01099698, self->m_kScaleCPHandle);
     index = pos.m_usSize;
     if (index >= pos.m_usMaxSize)
         pos.SetSize(index + pos.m_usGrowBy);

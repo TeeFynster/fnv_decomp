@@ -10,7 +10,8 @@
 extern NiRTTI g_011f5eac;
 
 // @fnv 0x00a93740
-NiRTTI* __cdecl FUN_00a93740()
+// src: COMMUNITY 0x00a93740
+NiRTTI* __cdecl NiSwitchStringExtraData_GetRTTI()
 {
     return &g_011f5eac;
 }
@@ -18,7 +19,8 @@ NiRTTI* __cdecl FUN_00a93740()
 extern int DAT_0109ff64;
 
 // @fnv 0x00a93870
-void* __cdecl FUN_00a93870()
+// src: EXE 0x00a93870
+void* __cdecl NiSwitchStringExtraData_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x18);
     if (p)
@@ -43,17 +45,18 @@ struct FUN_00a93750_shell
     NiFile* m_pFile;
     unsigned int m_nCount;
     void** m_pEntryData;
-    void FUN_00a93750();
+    void ProcessEntries_00a93750();
 };
 // @fnv 0x00a93750
-void FUN_00a93750_shell::FUN_00a93750()
+// src: GUESS 0x00a93750 (confidence: low)
+void FUN_00a93750_shell::ProcessEntries_00a93750()
 {
     m_pData = &DAT_0109ff64;
     for (unsigned int i = 0; i < m_nCount; ++i)
         NiFreeAlias(m_pEntryData[i]);
     NiFreeAlias(m_pEntryData);
     m_pEntryData = 0;
-    reinterpret_cast<NiExtraData*>(this)->FUN_00a7b300();
+    reinterpret_cast<NiExtraData*>(this)->DestroyFields_00a7b300();
 }
 
 void __cdecl _delete(void* p, unsigned int);
@@ -63,13 +66,13 @@ struct NiSwitchStringExtraData
     void* __thiscall FUN_00a938b0(unsigned int flags);
 };
 
-void __cdecl FUN_00a93750();
+void __cdecl ProcessEntries_00a93750();
 
 // Calls FUN_00a93750, then frees this with _delete when flags has bit 0 set, and returns this.
 // @fnv 0x00a938b0
 void* __thiscall NiSwitchStringExtraData::FUN_00a938b0(unsigned int flags)
 {
-    FUN_00a93750();
+    ProcessEntries_00a93750();
     if (flags & 1)
         _delete(this, 24);
     return this;
@@ -103,9 +106,9 @@ void* __thiscall S_00a918e0::FUN_00a918e0(unsigned int auiFlags)
 void __cdecl FUN_00a7b580();
 
 char* __cdecl _FUN_00a7d330(void* object);
-char* __cdecl FUN_00a7d510(char const* name, char const* value);
-char* __cdecl FUN_00a7d5e0(char const* name, char const* value);
-char* __cdecl FUN_00a7d4d0(char const* name, int value);
+char* __cdecl NiGetViewerString_00a7d510(char const* name, char const* value);
+char* __cdecl NiGetViewerString_00a7d5e0(char const* name, char const* value);
+char* __cdecl NiGetViewerString_00a7d4d0(char const* name, int value);
 
 struct FUN_00a93a60_shell
 {
@@ -116,12 +119,13 @@ struct FUN_00a93a60_shell
     char** m_ppcValue;
     int m_iIndex;
 
-    void FUN_00a93a60(StrArr* apViewerStrings);
+    void NiSwitchStringExtraData_GetViewerStrings(StrArr* apViewerStrings);
 };
 
 // Appends viewer strings for the base object, m_uiSize, each m_ppcValue[i] and m_iIndex to the given string array.
 // @fnv 0x00a93a60
-void FUN_00a93a60_shell::FUN_00a93a60(StrArr* apViewerStrings)
+// src: XBOX_PDB 0x00a93a60
+void FUN_00a93a60_shell::NiSwitchStringExtraData_GetViewerStrings(StrArr* apViewerStrings)
 {
     reinterpret_cast<void (__thiscall*)(NiExtraData*, StrArr*)>(FUN_00a7b580)(
         reinterpret_cast<NiExtraData*>(this), apViewerStrings);
@@ -135,7 +139,7 @@ void FUN_00a93a60_shell::FUN_00a93a60(StrArr* apViewerStrings)
         }
         apViewerStrings->SetAt(index, value);
 
-        value = FUN_00a7d510("m_uiSize", reinterpret_cast<char const*>(m_uiSize));
+        value = NiGetViewerString_00a7d510("m_uiSize", reinterpret_cast<char const*>(m_uiSize));
         index = apViewerStrings->m_usSize;
         if (index >= apViewerStrings->m_usMaxSize)
         {
@@ -145,7 +149,7 @@ void FUN_00a93a60_shell::FUN_00a93a60(StrArr* apViewerStrings)
 
         for (unsigned int i = 0; i < m_uiSize; ++i)
         {
-            value = FUN_00a7d5e0("m_ppcValue[i]", m_ppcValue[i]);
+            value = NiGetViewerString_00a7d5e0("m_ppcValue[i]", m_ppcValue[i]);
             index = apViewerStrings->m_usSize;
             if (index >= apViewerStrings->m_usMaxSize)
             {
@@ -182,7 +186,7 @@ void FUN_00a93a60_shell::FUN_00a93a60(StrArr* apViewerStrings)
     }
 
     {
-        char* value = FUN_00a7d4d0("m_iIndex", m_iIndex);
+        char* value = NiGetViewerString_00a7d4d0("m_iIndex", m_iIndex);
         unsigned int index = apViewerStrings->m_usSize;
         if (index >= apViewerStrings->m_usMaxSize)
         {
@@ -269,13 +273,13 @@ struct StrListObj
     void CopyStringList(StrListObj* dst, void* arg2);
 };
 
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 void __cdecl FUN_00ec65a6(void* dst, unsigned int size, void* src);
 
 // @fnv 0x00a937a0
 void StrListObj::CopyStringList(StrListObj* dst, void* arg2)
 {
-    reinterpret_cast<NiExtraData*>(this)->FUN_00a7b330(dst, arg2);
+    reinterpret_cast<NiExtraData*>(this)->CopyMembers_00a7b330(dst, arg2);
     if (m_ppStrings == 0 || m_uiCount <= 0)
     {
         dst->m_ppStrings = 0;
@@ -291,7 +295,7 @@ void StrListObj::CopyStringList(StrListObj* dst, void* arg2)
     {
         dst->m_iIndex = -1;
     }
-    dst->m_ppStrings = (char**)FUN_00aa1070(m_uiCount * 4);
+    dst->m_ppStrings = (char**)_NiMalloc_00aa1070(m_uiCount * 4);
     for (unsigned int i = 0; i < m_uiCount; i++)
     {
         if (m_ppStrings[i] != 0)
@@ -305,7 +309,7 @@ void StrListObj::CopyStringList(StrListObj* dst, void* arg2)
                 p++;
             } while (cChar != 0);
             unsigned int uiLen = (unsigned int)(p - base);
-            dst->m_ppStrings[i] = (char*)FUN_00aa1070(uiLen + 1);
+            dst->m_ppStrings[i] = (char*)_NiMalloc_00aa1070(uiLen + 1);
             FUN_00ec65a6(dst->m_ppStrings[i], uiLen + 1, m_ppStrings[i]);
         }
         else
@@ -411,12 +415,13 @@ class SwitchStringLoadState : public NiExtraData
     char** m_ppcStrings;
     unsigned int m_uiIndex;
 
-    void FUN_00a93930(NiStream& kStream);
+    void NiSwitchStringExtraData_LoadBinary(NiStream& kStream);
 };
 
 // Reads the count, allocates the string array and loads each string, then reads the index.
 // @fnv 0x00a93930
-void SwitchStringLoadState::FUN_00a93930(NiStream& kStream)
+// src: XBOX_PDB 0x00a93930
+void SwitchStringLoadState::NiSwitchStringExtraData_LoadBinary(NiStream& kStream)
 {
     NiExtraData::LoadBinary(kStream);
     NiBinaryStreamLoad(kStream.m_pkIstr, &m_uiCount, 1);

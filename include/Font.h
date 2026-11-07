@@ -117,21 +117,21 @@ public:
     void LoadFont();
     void ClearArray();
     void FUN_00a121e0();
-    void FUN_00a152d0();
-    NiTriShape* FUN_00a12460(float fX, float fY, float fZ, SStr* text, int* piX,
+    void Unload_00a152d0();
+    NiTriShape* Font_MakeString(float fX, float fY, float fZ, SStr* text, int* piX,
                             int iFlags, void* pUnk, bool bShift, bool bSkip);
-    NiTriShape* FUN_00a12460(float fX, float fY, float fZ, BSStringT<char>* text,
+    NiTriShape* Font_MakeString(float fX, float fY, float fZ, BSStringT<char>* text,
                             int* piX, int iFlags, void* pUnk, bool bShift, bool bSkip);
-    void FUN_00a12370(char* str, float* pSize, float* pOut, int iFlags, int iStart);
-    void FUN_00a12370(const char* text, float& x, float& y, int flags,
+    void Font_GetLineOffsets(char* str, float* pSize, float* pOut, int iFlags, int iStart);
+    void Font_GetLineOffsets(const char* text, float& x, float& y, int flags,
                       unsigned int start);
     NiTriShape* CreateTextShape(int count, void* p, bool b);
-    void FUN_00a12fb0(const char* input, Layout* layout);
-    void FUN_00a12fb0(const char* input, TextLayout::Layout* layout);
-    void FUN_00a12fb0(const char* input, TextMeasurement* layout);
-    void FUN_00a12880(TextString&, int*, int*, int, int, int, int,
+    void CheckForVariablesInText(const char* input, Layout* layout);
+    void CheckForVariablesInText(const char* input, TextLayout::Layout* layout);
+    void CheckForVariablesInText(const char* input, TextMeasurement* layout);
+    void Font_CreateText(TextString&, int*, int*, int, int, int, int,
                       const Color4*, TextNode**, TextNode**);
-    PageMeshes::Shape* FUN_00a14da0();
+    PageMeshes::Shape* MakeButton();
     PageMeshes::Shape* CreateTextShape(int, const PageMeshes::Color*, bool);
     void UpdateIconGeometry(int, PageMeshes::Shape*, NiPoint3&);
     void BuildGlyphQuad(PageMeshes::Letter*, int, PageMeshes::Shape*, NiPoint3&,

@@ -9,7 +9,8 @@
 
 
 // @fnv 0x00a74200
-void NiStringExtraData::FUN_00a74200(NiStream& stream)
+// src: GAMEBRYO_LIB 0x00a74200
+void NiStringExtraData::SaveBinary_00a74200(NiStream& stream)
 {
     NiExtraData::SaveBinary(stream);
     stream.SerializeString(m_kStringBuffer);
@@ -19,7 +20,8 @@ extern "C" void* DAT_011f4a38;
 
 // Returns the address of the global DAT_011f4a38.
 // @fnv 0x00a74220
-void* __cdecl FUN_00a74220()
+// src: COMMUNITY 0x00a74220
+void* __cdecl NiStringExtraData_GetRTTI()
 {
     return &DAT_011f4a38;
 }
@@ -27,7 +29,8 @@ void* __cdecl FUN_00a74220()
 extern "C" int EmptyFS;
 extern "C" void* DAT_0109d39c;
 // @fnv 0x00a74230
-void* __cdecl FUN_00a74230()
+// src: EXE 0x00a74230
+void* __cdecl NiStringExtraData_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x10);
     if (p)
@@ -107,7 +110,7 @@ NiStringExtraData* __fastcall NiStringExtraData_Destroy(NiStringExtraData* self,
     {
         FUN_00fdf1c4_import(pData - 8);
     }
-    self->FUN_00a7b300();
+    self->DestroyFields_00a7b300();
     if (acFlags & 1)
     {
         FUN_00aa1460(self, 0x10);
@@ -116,7 +119,7 @@ NiStringExtraData* __fastcall NiStringExtraData_Destroy(NiStringExtraData* self,
 }
 
 namespace fnv_00a74300 {
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern "C" char* DAT_0109b220;
 extern "C" void* DAT_0109d39c;
 extern "C" void(__stdcall* DAT_00fdf1c0)(void*);
@@ -125,7 +128,7 @@ extern "C" void(__stdcall* DAT_00fdf1c4)(void*);
 // @fnv 0x00a74300
 void* __fastcall NiStringExtraData_CreateCopy(NiStringExtraData* self, void*, int arg)
 {
-    NiStringExtraData* esi = (NiStringExtraData*)FUN_00aa13e0(0x10);
+    NiStringExtraData* esi = (NiStringExtraData*)Object_DispatchCommandFour(0x10);
     if (esi != 0)
     {
         esi->FUN_00a7b2e0();
@@ -136,7 +139,7 @@ void* __fastcall NiStringExtraData_CreateCopy(NiStringExtraData* self, void*, in
     {
         esi = 0;
     }
-    self->FUN_00a7b330(esi, reinterpret_cast<void*>(arg));
+    self->CopyMembers_00a7b330(esi, reinterpret_cast<void*>(arg));
     char* edi = self->m_p;
     if (esi->m_p != edi)
     {
@@ -175,8 +178,8 @@ struct NiStrTable
     }
 };
 
-extern "C" char* __cdecl FUN_00a7d330(char* s);
-extern "C" char* __cdecl FUN_00a7d5e0(const char* key, char* value);
+extern "C" char* __cdecl NiViewerStrings_NiGetViewerString_Title(char* s);
+extern "C" char* __cdecl NiGetViewerString_00a7d5e0(const char* key, char* value);
 
 extern "C" void FUN_00a7b580();
 
@@ -184,7 +187,7 @@ extern "C" void FUN_00a7b580();
 void __fastcall NiStringExtraData_GetViewerStrings(NiStringExtraData* self, void*, NiStream& stream)
 {
     reinterpret_cast<void (__thiscall*)(NiExtraData*, NiStream&)>(&FUN_00a7b580)(self, stream);
-    reinterpret_cast<NiStrTable&>(stream).Add(FUN_00a7d330((char*)DAT_011f4a38));
+    reinterpret_cast<NiStrTable&>(stream).Add(NiViewerStrings_NiGetViewerString_Title((char*)DAT_011f4a38));
     char* s = self->m_p;
-    reinterpret_cast<NiStrTable&>(stream).Add(FUN_00a7d5e0("m_kString", s));
+    reinterpret_cast<NiStrTable&>(stream).Add(NiGetViewerString_00a7d5e0("m_kString", s));
 }

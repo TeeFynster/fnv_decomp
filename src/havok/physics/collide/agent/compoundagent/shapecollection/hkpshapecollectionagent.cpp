@@ -47,11 +47,12 @@ struct hkpShapeCollectionAgent
     void* p1;
     void* p2;
     int count;
-    void FUN_00d436f0(int arg);
+    void cleanup_00d436f0(int arg);
 };
 
 // @fnv 0x00d436f0
-void hkpShapeCollectionAgent::FUN_00d436f0(int arg)
+// src: HAVOK_SRC 0x00d436f0
+void hkpShapeCollectionAgent::cleanup_00d436f0(int arg)
 {
     for (int i = 0; i < count; ++i)
     {
@@ -248,16 +249,18 @@ void __cdecl GetClosestPointsShapeCollection(const hkpCdBody* bodyA, const hkpCd
 extern "C" void __cdecl QueryClosestPoints();
 
 // @fnv 0x00d36920
-void __cdecl FUN_00d36920()
+// src: GUESS 0x00d36920 (confidence: medium)
+void __cdecl Object_QueryClosestPoints_Thunk()
 {
     QueryClosestPoints();
 }
 
-void FUN_00d34790();
+void hkCollectorD347_ProcessState_00d34790();
 // @fnv 0x00d36990
-void FUN_00d36990()
+// src: GUESS 0x00d36990 (confidence: low)
+void Hkpshapecollectionagent_ForwardCall_00d36990()
 {
-    FUN_00d34790();
+    hkCollectorD347_ProcessState_00d34790();
 }
 
 extern char DAT_010cf318[];
@@ -278,7 +281,7 @@ inline AgentS* getNewCollisionAgent(const hkpCollisionDispatcher* dispatcher, co
     return f(bodyA, bodyB, input, mgr);
 }
 
-void FUN_00c908c0(void* alloc, void* arr, int n, int size);
+void hkArrayUtil__reserve(void* alloc, void* arr, int n, int size);
 
 struct CollisionAgentMapRecord
 {
@@ -304,7 +307,7 @@ struct AgentArray
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, sizeof(CollisionAgentMapRecord));
+            hkArrayUtil__reserve(alloc, this, newSize, sizeof(CollisionAgentMapRecord));
         }
     }
     void reserve(int n)
@@ -508,13 +511,14 @@ class ShapeCollectionAgentA
         return -1;
     }
 
-    void FUN_00d43f10(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const CollisionAgentContext& input,
+    void hkpShapeCollectionAgent_updateShapeCollectionFilter(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const CollisionAgentContext& input,
                       ConstraintOwner& constraintOwner);
 };
 
 // Iterates shape keys in bodyA's container, creating or updating collision agents for enabled pairs and removing agents for disabled ones.
 // @fnv 0x00d43f10
-void ShapeCollectionAgentA::FUN_00d43f10(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const CollisionAgentContext& input,
+// src: HAVOK_LIB 0x00d43f10
+void ShapeCollectionAgentA::hkpShapeCollectionAgent_updateShapeCollectionFilter(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const CollisionAgentContext& input,
                                          ConstraintOwner& constraintOwner)
 {
     hkpCdBody newOperandA(&bodyA);
@@ -598,12 +602,13 @@ struct B512
 // Calling convention note: declared __thiscall as in the packet (this in ecx, callee pops 20 bytes).
 struct Agent : hkpShapeCollectionAgent
 {
-    void FUN_00d43aa0(hkpCdBody* holder, int a, int b, int c, int d);
+    void hkpShapeCollectionAgent_linearCast(hkpCdBody* holder, int a, int b, int c, int d);
 };
 
 // Records profiler markers, resolves each pair's shape key, and dispatches its child body to the handler.
 // @fnv 0x00d43aa0
-void Agent::FUN_00d43aa0(hkpCdBody* holder, int a, int b, int c, int d)
+// src: HAVOK_LIB 0x00d43aa0
+void Agent::hkpShapeCollectionAgent_linearCast(hkpCdBody* holder, int a, int b, int c, int d)
 {
     hkMonitorStream* pb = (hkMonitorStream*)TlsGetValue(g_tlsIndex);
     Rec* cur = (Rec*)pb->m_end.val();
@@ -795,7 +800,8 @@ typedef void(__cdecl* S_00d43dc0_GetPenetrationsFunc)(const hkpCdBody& bodyA, co
 
 // Iterates shapes in bodyA's container, calls the dispatcher's penetration query for each enabled shape, and stops early if the collector requests it.
 // @fnv 0x00d43dc0
-void __cdecl FUN_00d43dc0(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
+// src: HAVOK_LIB 0x00d43dc0
+void __cdecl hkpShapeCollectionAgent_staticGetPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                           const CollisionAgentContext& input, S_00d43dc0_CdBodyPairCollector& collector)
 {
     S_00d43dc0_Timer("TtShapeCollection");
@@ -865,12 +871,13 @@ class ShapeObject
 
 struct FUN_00d43880_cls : public hkpShapeCollectionAgent
 {
-    void FUN_00d43880(hkpCdBody* pHolder, DWORD a1, DWORD a2, DWORD a3);
+    void hkpShapeCollectionAgent_getClosestPoints(hkpCdBody* pHolder, DWORD a1, DWORD a2, DWORD a3);
 };
 
 // Between profiler records, resolves each key to a child body and passes it to the pair's object.
 // @fnv 0x00d43880
-void FUN_00d43880_cls::FUN_00d43880(hkpCdBody* pHolder, DWORD a1, DWORD a2, DWORD a3)
+// src: HAVOK_LIB 0x00d43880
+void FUN_00d43880_cls::hkpShapeCollectionAgent_getClosestPoints(hkpCdBody* pHolder, DWORD a1, DWORD a2, DWORD a3)
 {
     hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
     if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
@@ -929,7 +936,8 @@ typedef void(__cdecl* LinearCastFunc)(const hkpCdBody* local_body, const hkpCdBo
 
 // Iterates each shape in bodyA's collection, dispatches the linear-cast agent for enabled shapes against bodyB, and times the work.
 // @fnv 0x00d43b90
-void __cdecl FUN_00d43b90(const hkpCdBody* bodyA, const hkpCdBody* bodyB, const CollisionAgentContext* input, void* a4,
+// src: HAVOK_LIB 0x00d43b90
+void __cdecl hkpShapeCollectionAgent_staticLinearCast(const hkpCdBody* bodyA, const hkpCdBody* bodyB, const CollisionAgentContext* input, void* a4,
                           void* a5)
 {
     hkTimerBegin(str_010cf300);
@@ -990,12 +998,13 @@ struct CollectionProcessEntry
 
 struct CollectionProcessAgent : hkpShapeCollectionAgent
 {
-    void FUN_00d437a0(hkpCdBody* arg, unsigned int a0, unsigned int a1, unsigned int a2);
+    void hkpShapeCollectionAgent_processCollision(hkpCdBody* arg, unsigned int a0, unsigned int a1, unsigned int a2);
 };
 
 // Records profiler ticks around resolving child bodies and dispatching each through v18.
 // @fnv 0x00d437a0
-void CollectionProcessAgent::FUN_00d437a0(hkpCdBody* arg, unsigned int a0, unsigned int a1, unsigned int a2)
+// src: HAVOK_LIB 0x00d437a0
+void CollectionProcessAgent::hkpShapeCollectionAgent_processCollision(hkpCdBody* arg, unsigned int a0, unsigned int a1, unsigned int a2)
 {
     hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
     if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)

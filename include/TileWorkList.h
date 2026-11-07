@@ -14,7 +14,7 @@ public:
     void* First();
     TileWork* Next(Link*& pos);
     Tile_Set_Helper*& At(void*);
-    void FUN_004700d0(NiAVObject* const&);
-    unsigned int FUN_00453470();
-    SceneNode* FUN_0045bc00(unsigned int auiIndex);
+    void NiTPointerListBase_DFALL_NiTListItem_NiAVObject_NiAVObject_AddHead(NiAVObject* const&);
+    unsigned int NiNode_GetChildCount();
+    SceneNode* NiNode_GetAtChecked(unsigned int auiIndex);
 };

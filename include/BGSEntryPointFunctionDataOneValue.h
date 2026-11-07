@@ -12,11 +12,11 @@ public:
 
     float fValue;
 
-    float FUN_006b9130();
+    float CombatTimer_GetTargetTime();
     float GetValue() const { return fValue; }
-    BGSEntryPointFunctionDataOneValue* FUN_005e6670();
-    bool FUN_005e6700(BGSEntryPointFunctionData* apCompare);
-    void FUN_005e6760();
-    bool FUN_005e6790(TESFile* apFile);
+    BGSEntryPointFunctionDataOneValue* Duplicate_005e6670();
+    bool Compare_005e6700(BGSEntryPointFunctionData* apCompare);
+    void Save_005e6760();
+    bool Load_005e6790(TESFile* apFile);
     bool vf03(BGSEntryPointFunctionData* apCompare);
 };

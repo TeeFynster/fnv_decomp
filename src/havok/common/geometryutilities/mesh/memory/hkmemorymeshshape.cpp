@@ -66,7 +66,8 @@ class hkMemoryMeshShape : public hkMeshShape
 };
 
 // @fnv 0x00e4a020
-void __stdcall FUN_00e4a020(void* unused)
+// src: COMMUNITY 0x00e4a020
+void __stdcall nullsub_89(void* unused)
 {}
 
 // @fnv 0x00e4a030
@@ -75,7 +76,7 @@ int hkMemoryMeshShape::GetNumSections() const
     return m_sections.m_iElementCount;
 }
 
-int FUN_00d06f80(const void* pvData, int iSize) throw();
+int hkStatisticsCollector_getAllocatedSize(const void* pvData, int iSize) throw();
 
 template <typename T> inline void CollectArray(hkStatisticsCollector* pkCollector, const char* pcFieldName,
                                                const hkArray<T>& kArray)
@@ -83,7 +84,7 @@ template <typename T> inline void CollectArray(hkStatisticsCollector* pkCollecto
     if (!(kArray.m_iCapacityState & 0x80000000) || pkCollector->m_reportInplaceAllocations)
     {
         const T* pData = kArray.m_data;
-        int iAllocatedSize = FUN_00d06f80(pData, kArray.getCapacity() * sizeof(T));
+        int iAllocatedSize = hkStatisticsCollector_getAllocatedSize(pData, kArray.getCapacity() * sizeof(T));
         pkCollector->AddMemoryChunk(3, pcFieldName, kArray.m_data, kArray.m_iElementCount * sizeof(T), iAllocatedSize);
     }
 }
@@ -104,7 +105,7 @@ void hkMemoryMeshShape::calcContentStatistics(hkStatisticsCollector* pkCollector
     }
 }
 
-int __cdecl FUN_00e60cb0(PrimitiveType type, int numPrimitives);
+int __cdecl hkMeshPrimitiveUtil_calculateNumIndices(PrimitiveType type, int numPrimitives);
 
 // Copies the cinfo fields of the mesh section at sectionIndex into sectionOut, computing the index count and gating vertex/indices pointers by accessFlags.
 // @fnv 0x00e4a040
@@ -113,7 +114,7 @@ void hkMemoryMeshShape::GetSection(int sectionIndex, unsigned char accessFlags, 
     const hkMeshSectionCinfo& cinfo = m_sections.m_data[sectionIndex];
     sectionOut.m_ePrimitiveType = cinfo.m_ePrimitiveType;
     sectionOut.m_iNumPrimitives = cinfo.m_iNumPrimitives;
-    sectionOut.m_iIndexCount = FUN_00e60cb0(cinfo.m_ePrimitiveType, cinfo.m_iNumPrimitives);
+    sectionOut.m_iIndexCount = hkMeshPrimitiveUtil_calculateNumIndices(cinfo.m_ePrimitiveType, cinfo.m_iNumPrimitives);
     sectionOut.m_iIndexType = cinfo.m_iIndexType;
     sectionOut.m_hasIndices = cinfo.m_hasIndices;
     sectionOut.m_iSectionVertexCount = cinfo.m_iSectionVertexCount;
@@ -126,7 +127,7 @@ void hkMemoryMeshShape::GetSection(int sectionIndex, unsigned char accessFlags, 
 }
 
 void __cdecl EnterTlsGuard() throw();
-void __cdecl FUN_00c904e0() throw();
+void __cdecl hkReferencedObject_unlockAll() throw();
 
 class hkBoolC
 {
@@ -250,5 +251,5 @@ FUN_00cf3ea0::FUN_00cf3ea0(ConstraintEntity* entityA, ConstraintEntity* entityB,
         m_kActorEntries[1]->FUN_00c90510();
     }
     m_data->FUN_00c90510();
-    FUN_00c904e0();
+    hkReferencedObject_unlockAll();
 }

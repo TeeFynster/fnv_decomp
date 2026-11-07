@@ -12,7 +12,7 @@ struct FUN_0081aa80_shell
     void* m_kPointA;
     void* m_kPointB;
     void* m_iThirdValue;
-    FUN_0081aa80_shell* FUN_0081aa80(void* a, void* b, void* c);
+    FUN_0081aa80_shell* ComputeValue_0081aa80(void* a, void* b, void* c);
 };
 
 #include <xmmintrin.h>
@@ -1082,7 +1082,7 @@ class BallProjectilePhysicsView
     Controller80F* GetController();
     Middle80F* GetMiddle();
     Owner80F* GetOwner();
-    void FUN_0080feb0();
+    void MagicBallProjectile_InitHavok();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1119,16 +1119,17 @@ class Game80F
 extern Game80F* g_pkGame80F;
 extern const float g_fMaxFallDistance80F;
 
-CollisionObject80F* __cdecl FUN_004b5260(Node80F* pkNode);
-unsigned int __cdecl FUN_005dbe10();
-bool __cdecl FUN_00525420();
+CollisionObject80F* __cdecl FindFirstCollisionObject(Node80F* pkNode);
+unsigned int __cdecl bhkCollisionFilter_GetNewSystemGroup();
+bool __cdecl Main_GetSceneIsComplex();
 void __cdecl CopyBlock48(Node80F* pkNode, int iFlag);
-void __cdecl FUN_00c6a350(Node80F* pkNode, int iA, int iB, int iC, int iD);
-void __cdecl FUN_00c69ee0(Node80F* pkNode, int iA, int iB);
-void __cdecl FUN_00c69f50(Node80F* pkNode, int iA, int iB);
+void __cdecl bhkWorld_SetMotion(Node80F* pkNode, int iA, int iB, int iC, int iD);
+void __cdecl bhkWorld_RemoveObjects(Node80F* pkNode, int iA, int iB);
+void __cdecl bhkWorld_UpdatePosition(Node80F* pkNode, int iA, int iB);
 
 // @fnv 0x0080feb0
-void BallProjectilePhysicsView::FUN_0080feb0()
+// src: XBOX_PDB 0x0080feb0
+void BallProjectilePhysicsView::MagicBallProjectile_InitHavok()
 {
     if (!m_pkProcess || m_pkProcess->IsDead())
         return;
@@ -1158,16 +1159,16 @@ void BallProjectilePhysicsView::FUN_0080feb0()
                 }
                 else
                 {
-                    CollisionObject80F* pkCollision = FUN_004b5260(pkTarget->Get3D());
+                    CollisionObject80F* pkCollision = FindFirstCollisionObject(pkTarget->Get3D());
                     WorldObject80F* pkObject = pkCollision ? pkCollision->GetWorldObject() : 0;
-                    kInfo.SetFilter(7, pkObject ? pkObject->GetFilter().GetGroup() : FUN_005dbe10());
+                    kInfo.SetFilter(7, pkObject ? pkObject->GetFilter().GetGroup() : bhkCollisionFilter_GetNewSystemGroup());
                 }
             }
             else
             {
-                CollisionObject80F* pkCollision = FUN_004b5260(Get3D());
+                CollisionObject80F* pkCollision = FindFirstCollisionObject(Get3D());
                 WorldObject80F* pkObject = pkCollision ? pkCollision->GetWorldObject() : 0;
-                kInfo.SetFilter(7, pkObject ? pkObject->GetFilter().GetGroup() : FUN_005dbe10());
+                kInfo.SetFilter(7, pkObject ? pkObject->GetFilter().GetGroup() : bhkCollisionFilter_GetNewSystemGroup());
             }
         }
         else
@@ -1177,7 +1178,7 @@ void BallProjectilePhysicsView::FUN_0080feb0()
         kInfo.SetLayer(6);
         pkController = new Controller80F(kInfo, this);
         pkController->SetGravity(1.0f);
-        pkController->SetEnabled(FUN_00525420());
+        pkController->SetEnabled(Main_GetSceneIsComplex());
         pkController->SetMode(1);
         m_pkProcess->SetController(pkController);
         pkController->SetActor(this);
@@ -1201,14 +1202,14 @@ void BallProjectilePhysicsView::FUN_0080feb0()
                 pkController->SetState(0);
                 CopyBlock48(pkController->GetNode(), 1);
             }
-            FUN_00c6a350(pkNode, 4, 1, 0, 1);
+            bhkWorld_SetMotion(pkNode, 4, 1, 0, 1);
             bReset = true;
         }
         NiPoint3 kPos = *GetPos();
         if (pkOldWorld != pkWorld)
         {
             if (pkOldWorld)
-                FUN_00c69ee0(pkNode, 1, 0);
+                bhkWorld_RemoveObjects(pkNode, 1, 0);
             kPos.z += 8.0;
             bReset = true;
         }
@@ -1223,7 +1224,7 @@ void BallProjectilePhysicsView::FUN_0080feb0()
             }
             else
             {
-                FUN_00c69f50(pkNode, 1, 0);
+                bhkWorld_UpdatePosition(pkNode, 1, 0);
             }
         }
     }
@@ -2294,7 +2295,7 @@ class BoltProjectilePhysicsView
     Controller80F* GetController();
     Middle80F* GetMiddle();
     Owner80F* GetOwner();
-    void FUN_00813f30();
+    void MagicBoltProjectile_InitHavok();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -2331,16 +2332,17 @@ class Game80F
 extern Game80F* g_pkGame80F;
 extern const float g_fMaxFallDistance80F;
 
-CollisionObject80F* __cdecl FUN_004b5260(Node80F* pkNode);
-unsigned int __cdecl FUN_005dbe10();
-bool __cdecl FUN_00525420();
+CollisionObject80F* __cdecl FindFirstCollisionObject(Node80F* pkNode);
+unsigned int __cdecl bhkCollisionFilter_GetNewSystemGroup();
+bool __cdecl Main_GetSceneIsComplex();
 void __cdecl CopyBlock48(Node80F* pkNode, int iFlag);
-void __cdecl FUN_00c6a350(Node80F* pkNode, int iA, int iB, int iC, int iD);
-void __cdecl FUN_00c69ee0(Node80F* pkNode, int iA, int iB);
-void __cdecl FUN_00c69f50(Node80F* pkNode, int iA, int iB);
+void __cdecl bhkWorld_SetMotion(Node80F* pkNode, int iA, int iB, int iC, int iD);
+void __cdecl bhkWorld_RemoveObjects(Node80F* pkNode, int iA, int iB);
+void __cdecl bhkWorld_UpdatePosition(Node80F* pkNode, int iA, int iB);
 
 // @fnv 0x00813f30
-void BoltProjectilePhysicsView::FUN_00813f30()
+// src: XBOX_PDB 0x00813f30
+void BoltProjectilePhysicsView::MagicBoltProjectile_InitHavok()
 {
     if (!m_pkProcess || m_pkProcess->IsDead())
         return;
@@ -2370,16 +2372,16 @@ void BoltProjectilePhysicsView::FUN_00813f30()
                 }
                 else
                 {
-                    CollisionObject80F* pkCollision = FUN_004b5260(pkTarget->Get3D());
+                    CollisionObject80F* pkCollision = FindFirstCollisionObject(pkTarget->Get3D());
                     WorldObject80F* pkObject = pkCollision ? pkCollision->GetWorldObject() : 0;
-                    kInfo.SetFilter(7, pkObject ? pkObject->GetFilter().GetGroup() : FUN_005dbe10());
+                    kInfo.SetFilter(7, pkObject ? pkObject->GetFilter().GetGroup() : bhkCollisionFilter_GetNewSystemGroup());
                 }
             }
             else
             {
-                CollisionObject80F* pkCollision = FUN_004b5260(Get3D());
+                CollisionObject80F* pkCollision = FindFirstCollisionObject(Get3D());
                 WorldObject80F* pkObject = pkCollision ? pkCollision->GetWorldObject() : 0;
-                kInfo.SetFilter(7, pkObject ? pkObject->GetFilter().GetGroup() : FUN_005dbe10());
+                kInfo.SetFilter(7, pkObject ? pkObject->GetFilter().GetGroup() : bhkCollisionFilter_GetNewSystemGroup());
             }
         }
         else
@@ -2390,7 +2392,7 @@ void BoltProjectilePhysicsView::FUN_00813f30()
         pkController = new Controller80F(kInfo, this);
         pkController->SetGravity(1.0f);
         pkController->SetMode(1);
-        pkController->SetEnabled(FUN_00525420());
+        pkController->SetEnabled(Main_GetSceneIsComplex());
         m_pkProcess->SetController(pkController);
         pkController->SetActor(this);
     }
@@ -2413,14 +2415,14 @@ void BoltProjectilePhysicsView::FUN_00813f30()
                 pkController->SetState(0);
                 CopyBlock48(pkController->GetNode(), 1);
             }
-            FUN_00c6a350(pkNode, 4, 1, 0, 1);
+            bhkWorld_SetMotion(pkNode, 4, 1, 0, 1);
             bReset = true;
         }
         NiPoint3 kPos = *GetPos();
         if (pkOldWorld != pkWorld)
         {
             if (pkOldWorld)
-                FUN_00c69ee0(pkNode, 1, 0);
+                bhkWorld_RemoveObjects(pkNode, 1, 0);
             kPos.z += 8.0;
             bReset = true;
         }
@@ -2435,7 +2437,7 @@ void BoltProjectilePhysicsView::FUN_00813f30()
             }
             else
             {
-                FUN_00c69f50(pkNode, 1, 0);
+                bhkWorld_UpdatePosition(pkNode, 1, 0);
             }
         }
     }
@@ -2449,7 +2451,7 @@ struct Resource;
 struct Handle
 {
     void* p;
-    int FUN_004a3a20();
+    int CFilter_GetGroup();
 };
 struct NodeHandle
 {
@@ -2507,14 +2509,14 @@ struct __declspec(align(16)) FxState
     unsigned int unkBC;
     FxState(int);
     ~FxState();
-    void FUN_00810550(float);
+    void bhkCharacterControllerCinfo_SetAcrobatics(float);
     void SetWaterForm(void*);
-    void FUN_00810510(NiPoint3*);
+    void bhkCharacterControllerCinfo_SetPosition(NiPoint3*);
     void SetSound(Scene*);
-    void FUN_00407860(float);
+    void bhkCharacterControllerCinfo_SetGravity(float);
     void SetPointer(void*);
-    void FUN_00810530(int);
-    void FUN_00810590(int, int);
+    void bhkCharacterControllerCinfo_SetAvoidBox(int);
+    void bhkCharacterControllerCinfo_SetColFilter(int, int);
     void SetAssociatedActorValue(int);
 };
 struct ColorData
@@ -2648,8 +2650,8 @@ struct Resource
     virtual void slot1cc();
     virtual void* GetUnderlyingObject();
     Handle* FUN_00931ed0(Handle*);
-    Handle* FUN_0043b4f0(Handle*);
-    Resource* FUN_006fa820();
+    Handle* bhkWorldObject_GetCollisionFilter(Handle*);
+    Resource* bhkNiCollisionObject_GetWorldObject();
 };
 struct Scene
 {
@@ -2819,9 +2821,9 @@ struct Scene
     virtual void slot28c();
     virtual void add(NodeHandle);
     int FUN_0045cd60();
-    Scene* FUN_004543c0();
-    float FUN_005471e0();
-    bool FUN_004bae00();
+    Scene* TESObjectCELL_GetbhkWorld();
+    float TESObjectCELL_GetWaterHeight();
+    bool bhkWorld_QDebugDisplay();
 };
 struct Visual
 {
@@ -3288,17 +3290,17 @@ struct Visual
     Visual(FxState*, Actor*);
     static void* operator new(unsigned int);
     static void operator delete(void*);
-    void FUN_008106b0(float);
-    void FUN_00810610(bool);
-    void FUN_008105e0(int);
-    void FUN_00810640(Actor*);
-    void FUN_0057b1d0(float);
-    Scene* FUN_00621ad0();
-    void FUN_00c70c90(Scene*);
-    void* FUN_00810660();
-    void FUN_00c6d7a0(void*);
-    void FUN_005620e0(NiPoint3*);
-    Handle FUN_0070c440();
+    void bhkCharacterController_SetFallTime(float);
+    void bhkCharacterController_SetQuickSimulate(bool);
+    void bhkCharacterController_SetProjectile(int);
+    void bhkCharacterController_SetMOBObject(Actor*);
+    void bhkCharacterController_SetWaterHeight(float);
+    Scene* bhkCharacterController_GetWorld();
+    void bhkCharacterController_SetWorld(Scene*);
+    void* bhkCharacterController_GetNiObject();
+    void bhkCharacterController_SetNiObject(void*);
+    void SetPosition_005620e0(NiPoint3*);
+    Handle bhkCharacterController_GetCollisionFilter();
 };
 
 struct RenderGlobals
@@ -3310,39 +3312,40 @@ extern float DAT_01015f5c;
 extern double DAT_010240b0;
 extern void* __cdecl operator new(unsigned int);
 extern void __cdecl operator delete(void*);
-extern Resource* __cdecl FUN_004b5260(void*);
-extern int __cdecl FUN_005dbe10();
-extern bool __cdecl FUN_00525420();
+extern Resource* __cdecl FindFirstCollisionObject(void*);
+extern int __cdecl bhkCollisionFilter_GetNewSystemGroup();
+extern bool __cdecl Main_GetSceneIsComplex();
 extern void __cdecl CopyBlock48(void*, int);
-extern void __cdecl FUN_00c6a350(void*, int, int, int, int);
-extern void __cdecl FUN_00c69ee0(void*, int, int);
-extern void __cdecl FUN_00c69f50(void*, int, int);
+extern void __cdecl bhkWorld_SetMotion(void*, int, int, int, int);
+extern void __cdecl bhkWorld_RemoveObjects(void*, int, int);
+extern void __cdecl bhkWorld_UpdatePosition(void*, int, int);
 }  // namespace fnv_00819ca0
 
 // @fnv 0x00819ca0
-void Actor::FUN_00819ca0()
+// src: XBOX_PDB 0x00819ca0
+void Actor::MagicFogProjectile_InitHavok()
 {
     using namespace fnv_00819ca0;
     using fnv_00819ca0::Scene;
     using fnv_00819ca0::Handle;
-    using fnv_00819ca0::FUN_005dbe10;
-    using fnv_00819ca0::FUN_00525420;
+    using fnv_00819ca0::bhkCollisionFilter_GetNewSystemGroup;
+    using fnv_00819ca0::Main_GetSceneIsComplex;
     if (!m_pBaseProcess || reinterpret_cast<Scene*>(m_pBaseProcess)->FUN_0045cd60())
         return;
     Visual* active = reinterpret_cast<Visual*>(FUN_009306d0());
     Scene* parent = reinterpret_cast<Scene*>(FUN_008d6f30());
-    Scene* target = parent ? parent->FUN_004543c0() : 0;
+    Scene* target = parent ? parent->TESObjectCELL_GetbhkWorld() : 0;
     if (!active)
     {
         FxState state(1);
         // Unk_B9 is declared void in the shared header; this slot returns the float used here.
-        state.FUN_00810550(reinterpret_cast<float (__thiscall*)(Actor*)>((*reinterpret_cast<void***>(this))[0xB9])(this));
+        state.bhkCharacterControllerCinfo_SetAcrobatics(reinterpret_cast<float (__thiscall*)(Actor*)>((*reinterpret_cast<void***>(this))[0xB9])(this));
         state.SetWaterForm(GetNiNode());
-        state.FUN_00810510(reinterpret_cast<NiPoint3*>(static_cast<const Actor*>(this)->GetPos()));
+        state.bhkCharacterControllerCinfo_SetPosition(reinterpret_cast<NiPoint3*>(static_cast<const Actor*>(this)->GetPos()));
         state.SetSound(target);
-        state.FUN_00407860(0.0f);
+        state.bhkCharacterControllerCinfo_SetGravity(0.0f);
         state.SetPointer(new ColorData(1.0f, 1));
-        state.FUN_00810530(0);
+        state.bhkCharacterControllerCinfo_SetAvoidBox(0);
         Resource* texture = 0;
         if (FUN_009185e0())
         {
@@ -3356,77 +3359,77 @@ void Actor::FUN_00819ca0()
                 if (texture->check())
                 {
                     Handle temporary;
-                    state.FUN_00810590(7, texture->FUN_00931ed0(&temporary)->FUN_004a3a20());
+                    state.bhkCharacterControllerCinfo_SetColFilter(7, texture->FUN_00931ed0(&temporary)->CFilter_GetGroup());
                 }
                 else
                 {
-                    Resource* base = FUN_004b5260(texture->GetUnderlyingObject());
-                    Resource* material = base ? base->FUN_006fa820() : 0;
+                    Resource* base = FindFirstCollisionObject(texture->GetUnderlyingObject());
+                    Resource* material = base ? base->bhkNiCollisionObject_GetWorldObject() : 0;
                     Handle temporary;
-                    state.FUN_00810590(7,
-                                       material ? material->FUN_0043b4f0(&temporary)->FUN_004a3a20() : FUN_005dbe10());
+                    state.bhkCharacterControllerCinfo_SetColFilter(7,
+                                       material ? material->bhkWorldObject_GetCollisionFilter(&temporary)->CFilter_GetGroup() : bhkCollisionFilter_GetNewSystemGroup());
                 }
             }
             else
             {
-                Resource* base = FUN_004b5260(GetNiNode());
-                Resource* material = base ? base->FUN_006fa820() : 0;
+                Resource* base = FindFirstCollisionObject(GetNiNode());
+                Resource* material = base ? base->bhkNiCollisionObject_GetWorldObject() : 0;
                 Handle temporary;
-                state.FUN_00810590(7, material ? material->FUN_0043b4f0(&temporary)->FUN_004a3a20() : FUN_005dbe10());
+                state.bhkCharacterControllerCinfo_SetColFilter(7, material ? material->bhkWorldObject_GetCollisionFilter(&temporary)->CFilter_GetGroup() : bhkCollisionFilter_GetNewSystemGroup());
             }
         }
         else
-            state.FUN_00810590(7, 0);
+            state.bhkCharacterControllerCinfo_SetColFilter(7, 0);
         state.SetAssociatedActorValue(6);
         active = new Visual(&state, this);
-        active->FUN_008106b0(1.0f);
-        active->FUN_00810610(FUN_00525420());
-        active->FUN_008105e0(1);
+        active->bhkCharacterController_SetFallTime(1.0f);
+        active->bhkCharacterController_SetQuickSimulate(Main_GetSceneIsComplex());
+        active->bhkCharacterController_SetProjectile(1);
         reinterpret_cast<Scene*>(m_pBaseProcess)->add(active);
-        active->FUN_00810640(this);
+        active->bhkCharacterController_SetMOBObject(this);
     }
     if (active)
     {
         if (parent && target)
-            active->FUN_0057b1d0(parent->FUN_005471e0());
+            active->bhkCharacterController_SetWaterHeight(parent->TESObjectCELL_GetWaterHeight());
         else
-            active->FUN_0057b1d0(DAT_01015f5c);
-        Scene* initial = active->FUN_00621ad0();
-        active->FUN_00c70c90(target);
+            active->bhkCharacterController_SetWaterHeight(DAT_01015f5c);
+        Scene* initial = active->bhkCharacterController_GetWorld();
+        active->bhkCharacterController_SetWorld(target);
         void* expected = GetNiNode();
-        void* actual = active->FUN_00810660();
+        void* actual = active->bhkCharacterController_GetNiObject();
         bool dirty = true;
         if (actual != expected)
         {
-            active->FUN_00c6d7a0(expected);
-            if (target && target->FUN_004bae00())
+            active->bhkCharacterController_SetNiObject(expected);
+            if (target && target->bhkWorld_QDebugDisplay())
             {
                 active->updateSwitch(0);
-                CopyBlock48(active->FUN_00810660(), 1);
+                CopyBlock48(active->bhkCharacterController_GetNiObject(), 1);
                 Unk_C4();
             }
-            FUN_00c6a350(expected, 4, 1, 0, 1);
+            bhkWorld_SetMotion(expected, 4, 1, 0, 1);
             dirty = true;
         }
         NiPoint3 position = *reinterpret_cast<NiPoint3*>(static_cast<const Actor*>(this)->GetPos());
         if (initial != target)
         {
             if (initial)
-                FUN_00c69ee0(expected, 1, 0);
+                bhkWorld_RemoveObjects(expected, 1, 0);
             position.z += DAT_010240b0;
             dirty = true;
         }
         if (target)
         {
-            active->FUN_005620e0(&position);
+            active->SetPosition_005620e0(&position);
             if (dirty)
             {
-                Handle appearanceHandle = active->FUN_0070c440();
-                int appearance = appearanceHandle.FUN_004a3a20();
+                Handle appearanceHandle = active->bhkCharacterController_GetCollisionFilter();
+                int appearance = appearanceHandle.CFilter_GetGroup();
                 target->apply(expected, 1, 0, appearance, 0);
             }
             else
-                FUN_00c69f50(expected, 1, 0);
+                bhkWorld_UpdatePosition(expected, 1, 0);
         }
     }
 }

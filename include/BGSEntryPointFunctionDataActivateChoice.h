@@ -49,10 +49,10 @@ public:
 
     void InitializeComponent();
     void FUN_005e6c30();
-    void FUN_005e6c60(const char* text);
-    BGSEntryPointFunctionData* FUN_005e6cd0();
-    bool FUN_005e6d80(BGSEntryPointFunctionData* other);
-    void FUN_005e6e50();
+    void SetLabel(const char* text);
+    BGSEntryPointFunctionData* Duplicate_005e6cd0();
+    bool Compare_005e6d80(BGSEntryPointFunctionData* other);
+    void Save_005e6e50();
     void FUN_005e6600();
     void* FUN_005e65d0(unsigned int flags);
     EntryPointScriptOperations* FUN_00413f40();

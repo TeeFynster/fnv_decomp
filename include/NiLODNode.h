@@ -25,16 +25,16 @@ class NiLODNode : public NiSwitchNode
     virtual void UpdateWorldData(NiUpdateData& data);
     virtual void OnVisible(NiCullingProcess& culler);
 
-    bool __thiscall FUN_00a93c40(NiStream* stream);
-    bool __thiscall FUN_00a992e0(NiStream* stream);
+    bool __thiscall NiBSPNode_RegisterStreamables(NiStream* stream);
+    bool __thiscall RegisterStreamables_00a992e0(NiStream* stream);
     void __thiscall FUN_00a99470();
     NiLODNode* __thiscall FUN_00a99670(unsigned int flags);
-    void __thiscall FUN_00a99110(NiUpdateData& data);
-    void __thiscall FUN_00a99310(NiStream& stream);
-    void __thiscall FUN_00a99390(NiSwitchNode* destination, CloningProcess& process);
-    bool FUN_00a99400(Holder* other);
-    void __thiscall FUN_00a994d0(NiStream* stream);
-    void FUN_00a99760(NiViewerStringsArray* strings);
+    void __thiscall UpdateWorldData_00a99110(NiUpdateData& data);
+    void __thiscall SaveBinary_00a99310(NiStream& stream);
+    void __thiscall CopyMembers_00a99390(NiSwitchNode* destination, CloningProcess& process);
+    bool IsEqual_00a99400(Holder* other);
+    void __thiscall LoadBinary_00a994d0(NiStream* stream);
+    void GetViewerStrings_00a99760(NiViewerStringsArray* strings);
 
     void __thiscall UpdateChildrenWorldData();
     void UpdateTargetIndex(Arg99* argument);

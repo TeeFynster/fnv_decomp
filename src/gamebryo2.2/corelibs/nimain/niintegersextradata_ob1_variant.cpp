@@ -31,9 +31,9 @@ struct FUN_00c54b70_cls
     unsigned short m_0a;
     unsigned short unk0c;
     unsigned short m_0e;
-    void FUN_00c54850(unsigned int n);
+    void AllocateStorage_00c54850(unsigned int n);
     void FUN_00c54a30(unsigned int idx, NiIntegerStreamEntry& e);
-    unsigned int FUN_00c54b70(NiIntegerStreamEntry& e);
+    unsigned int NiTArray_FurnitureMark_NiTNewInterface_FurnitureMark_Add(NiIntegerStreamEntry& e);
 };
 struct FUN_00c54cc0_cls
 {
@@ -42,7 +42,7 @@ struct FUN_00c54cc0_cls
     float m_08;
     unsigned short m_0c;
     unsigned char m_0e;
-    bool __thiscall FUN_00c54cc0(FUN_00c54cc0_cls* other);
+    bool __thiscall HasEqualFields(FUN_00c54cc0_cls* other);
 };
 
 inline void NiFixedString::operator delete(void* pvMem)
@@ -51,7 +51,8 @@ inline void NiFixedString::operator delete(void* pvMem)
 }
 
 // @fnv 0x00c54760
-void FUN_00c54760()
+// src: GUESS 0x00c54760 (confidence: low)
+void Object_UpdateFields_00c54760()
 {
     delete DAT_012031c0;
     DAT_012031c0 = 0;
@@ -67,10 +68,10 @@ struct ElemZ
         m_usD = 0;
         m_ucE = 0;
     }
-    bool FUN_00c54cc0(const ElemZ& kOther) const;
+    bool HasEqualFields(const ElemZ& kOther) const;
     bool operator!=(const ElemZ& kOther) const
     {
-        return !FUN_00c54cc0(kOther);
+        return !HasEqualFields(kOther);
     }
 };
 struct FUN_00c54a30
@@ -94,7 +95,7 @@ void FUN_00c54a30::SetAt(unsigned int uiIndex, const ElemZ& kElem)
     }
     else if (kElem != s_kEmpty)
     {
-        if (m_pUserData[uiIndex].FUN_00c54cc0(s_kEmpty))
+        if (m_pUserData[uiIndex].HasEqualFields(s_kEmpty))
             m_usUsed++;
     }
     else
@@ -124,7 +125,8 @@ inline bool NiObject::IsKindOfType(const NiRTTI* pkRTTI) const
 }
 
 // @fnv 0x00c54400
-NiObject* __cdecl FUN_00c54400(NiAVObject* pkOwner)
+// src: XBOX_PDB 0x00c54400
+NiObject* __cdecl BSFurnitureMarker_Find(NiAVObject* pkOwner)
 {
     NiObject* pkResult = 0;
     if (pkOwner)
@@ -153,7 +155,7 @@ struct NiIntegerStreamEntryData
 
     bool operator==(const NiIntegerStreamEntryData& kOther) const
     {
-        return ((FUN_00c54cc0_cls*)this)->FUN_00c54cc0((FUN_00c54cc0_cls*)&kOther);
+        return ((FUN_00c54cc0_cls*)this)->HasEqualFields((FUN_00c54cc0_cls*)&kOther);
     }
     bool operator!=(const NiIntegerStreamEntryData& kOther) const
     {
@@ -216,11 +218,12 @@ class NiIntegerStreamExtraData : public NiExtraData
 {
   public:
     NiIntegerStreamEntryArray m_kEntries;
-    void FUN_00c54490(const NiIntegerStreamEntryData& kEntry);
+    void BSFurnitureMarker_Add(const NiIntegerStreamEntryData& kEntry);
 };
 
 // @fnv 0x00c54490
-void NiIntegerStreamExtraData::FUN_00c54490(const NiIntegerStreamEntryData& kEntry)
+// src: COMMUNITY 0x00c54490
+void NiIntegerStreamExtraData::BSFurnitureMarker_Add(const NiIntegerStreamEntryData& kEntry)
 {
     unsigned int uiSize = m_kEntries.GetEffectiveSize();
     unsigned int i;
@@ -271,7 +274,8 @@ struct StreamEntry
 };
 
 // @fnv 0x00c54bc0
-void* FUN_00c54bc0(unsigned int count)
+// src: GUESS 0x00c54bc0 (confidence: low)
+void* Object_GetIndexedValue_00c54bc0(unsigned int count)
 {
     return new StreamEntry[count];
 }
@@ -350,13 +354,13 @@ struct IntegersExtraData : ExtraDataBase
 
     IntegersExtraData();
     virtual ~IntegersExtraData();
-    void FUN_00c543e0();
+    void BSFurnitureMarker_SetName();
 };
 
 // @fnv 0x00c53f10
 IntegersExtraData::IntegersExtraData()
 {
-    FUN_00c543e0();
+    BSFurnitureMarker_SetName();
 }
 
 
@@ -368,7 +372,8 @@ __forceinline void* NiFixedString::operator new(size_t size)
 
 namespace fnv_00c546c0 {
 // @fnv 0x00c546c0
-void __cdecl FUN_00c546c0()
+// src: COMMUNITY 0x00c546c0
+void __cdecl BSFurnitureMarker_InitSDM()
 {
     DAT_012031c0 = new NiFixedString((const char*)"FRN");
 }
@@ -397,7 +402,7 @@ struct NiIntStreamEntryC
 
     bool operator!=(NiIntStreamEntryC& kOther)
     {
-        return !((FUN_00c54cc0_cls*)this)->FUN_00c54cc0((FUN_00c54cc0_cls*)&kOther);
+        return !((FUN_00c54cc0_cls*)this)->HasEqualFields((FUN_00c54cc0_cls*)&kOther);
     }
     static void* operator new[](unsigned int stSize)
     {
@@ -421,7 +426,8 @@ struct NiIntStreamAllocatorC
 };
 
 // @fnv 0x00c54850
-void FUN_00c54b70_cls::FUN_00c54850(unsigned int uiMaxSize)
+// src: GUESS 0x00c54850 (confidence: low)
+void FUN_00c54b70_cls::AllocateStorage_00c54850(unsigned int uiMaxSize)
 {
     if (uiMaxSize == m_08)
         return;

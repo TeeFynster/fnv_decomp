@@ -23,7 +23,7 @@ class StateNode
     void ResetCameraState();
 };
 class ImageSpaceModifierInstanceDOF;
-void FUN_005293f0(ImageSpaceModifierInstanceDOF*);
+void ImageSpaceModifierInstance_Stop(ImageSpaceModifierInstanceDOF*);
 struct CameraTargetResetFields
 {
     char pad[12];
@@ -44,7 +44,7 @@ struct CameraShotLegacyData
     int action, location, target;
     unsigned int flags;
     float playerMult, globalMult, maxTime, minTime;
-    void FUN_0058c2e0();
+    void ProcessState_0058c2e0();
 };
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 extern "C" void* __cdecl _alloca(unsigned int);

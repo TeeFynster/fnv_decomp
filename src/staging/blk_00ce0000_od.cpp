@@ -47,7 +47,8 @@ struct TimNode : Node
 }
 
 // @fnv 0x00cfdbe0
-void __cdecl FUN_00cfdbe0(InvalidateTimDetail::Node* node, const InvalidateTimDetail::Input& input)
+// src: XBOX_PDB 0x00cfdbe0
+void __cdecl hkAgentNnMachine_InvalidateTimInAgent(InvalidateTimDetail::Node* node, const InvalidateTimDetail::Input& input)
 {
     using namespace InvalidateTimDetail;
     switch (node->command)

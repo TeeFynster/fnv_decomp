@@ -4,34 +4,37 @@
 
 struct FUN_00d541f0_class
 {
-    void __thiscall FUN_00d541f0(int index);
+    void __thiscall hkpBallAndSocketConstraintData_setBodyToNotify(int index);
 };
 
 // @fnv 0x00d541f0
-void __thiscall FUN_00d541f0_class::FUN_00d541f0(int aiBitIndex)
+// src: HAVOK_LIB 0x00d541f0
+void __thiscall FUN_00d541f0_class::hkpBallAndSocketConstraintData_setBodyToNotify(int aiBitIndex)
 {
     *(reinterpret_cast<char*>(this) + 0x42) = 1 << aiBitIndex;
 }
 
-extern void* __cdecl FUN_00d21a60(void* a, int b, int c);
+extern void* __cdecl hkpConstraintData_getConstraintInfoUtil(void* a, int b, int c);
 struct hkpBallAndSocketConstraintData
 {
-    void* FUN_00d54210(int a);
+    void* hkpStiffSpringConstraintData_getConstraintInfo_00d54210(int a);
 };
 // @fnv 0x00d54210
-void* hkpBallAndSocketConstraintData::FUN_00d54210(int a)
+// src: HAVOK_LIB 0x00d54210
+void* hkpBallAndSocketConstraintData::hkpStiffSpringConstraintData_getConstraintInfo_00d54210(int a)
 {
-    return FUN_00d21a60((void*)((char*)this + 0x10), 0x38, a);
+    return hkpConstraintData_getConstraintInfoUtil((void*)((char*)this + 0x10), 0x38, a);
 }
 
 extern double DAT_0104e138;
 struct FUN_00d54230_class
 {
-    void __thiscall FUN_00d54230(char a, int* b);
+    void __thiscall hkpBallAndSocketConstraintData_getRuntimeInfo(char a, int* b);
 };
 // If a is zero and the float at offset 0x44 equals DAT_0104e138, writes 0 and 0 to b; otherwise writes 3 and 0x18.
 // @fnv 0x00d54230
-void __thiscall FUN_00d54230_class::FUN_00d54230(char abCondition, int* pOut)
+// src: HAVOK_LIB 0x00d54230
+void __thiscall FUN_00d54230_class::hkpBallAndSocketConstraintData_getRuntimeInfo(char abCondition, int* pOut)
 {
     if (!abCondition && *(float*)((char*)this + 0x44) == DAT_0104e138)
     {
@@ -65,21 +68,23 @@ struct FUN_00d541d0_class
     int unk3C;
     int unk40;
     float unk44;
-    void __thiscall FUN_00d541d0(float value);
+    void __thiscall hkpBallAndSocketConstraintData_setMaxLinearImpulse(float value);
 };
 
 // @fnv 0x00d541d0
-void FUN_00d541d0_class::FUN_00d541d0(float value)
+// src: HAVOK_LIB 0x00d541d0
+void FUN_00d541d0_class::hkpBallAndSocketConstraintData_setMaxLinearImpulse(float value)
 {
     unk44 = value;
 }
 
 struct FUN_00d54200_class
 {
-    unsigned char __thiscall FUN_00d54200();
+    unsigned char __thiscall hkpBallAndSocketConstraintData_getNotifiedBodyIndex();
 };
 // @fnv 0x00d54200
-unsigned char FUN_00d54200_class::FUN_00d54200()
+// src: XBOX_PDB 0x00d54200
+unsigned char FUN_00d54200_class::hkpBallAndSocketConstraintData_getNotifiedBodyIndex()
 {
     return *(unsigned char*)((char*)this + 0x42) >> 1;
 }
@@ -96,11 +101,12 @@ struct D54270Bool
 
 struct D54270Object
 {
-    virtual D54270Bool FUN_00d54270() const;
+    virtual D54270Bool hkpBallAndSocketConstraintData_isValid() const;
 };
 
 // @fnv 0x00d54270
-D54270Bool D54270Object::FUN_00d54270() const
+// src: XBOX_PDB 0x00d54270
+D54270Bool D54270Object::hkpBallAndSocketConstraintData_isValid() const
 {
     return true;
 }
@@ -126,17 +132,19 @@ struct FUN_00d541e0_class
     int unk40;
     float unk44;
 
-    float __thiscall FUN_00d541e0();
+    float __thiscall hkpBallAndSocketConstraintData_getMaxLinearImpulse();
 };
 
 // @fnv 0x00d541e0
-float __thiscall FUN_00d541e0_class::FUN_00d541e0()
+// src: XBOX_PDB 0x00d541e0
+float __thiscall FUN_00d541e0_class::hkpBallAndSocketConstraintData_getMaxLinearImpulse()
 {
     return unk44;
 }
 
 // @fnv 0x00d54280
-int __cdecl FUN_00d54280()
+// src: GUESS 0x00d54280 (confidence: high)
+int __cdecl Object_ReturnZero_00d54280()
 {
     return 0;
 }

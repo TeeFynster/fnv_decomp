@@ -31,11 +31,11 @@ public:
     NavMesh* GetPtr();
     NavMesh* GetPtr() const;
 
-    NavMeshPtr& FUN_0042fdc0(const NavMeshPtr& other);
-    void __thiscall FUN_0042fa40();
+    NavMeshPtr& AssignRetainedObject_0042fdc0(const NavMeshPtr& other);
+    void __thiscall Object_ForwardCall_0042fa40();
     void* __thiscall FUN_0042ffa0(unsigned int flags);
-    NavMesh* FUN_00458b50();
-    NavMesh* FUN_00559450();
-    Ret559* FUN_00559450(unsigned int, NiPoint3*, float*, float, float);
-    void* FUN_005e05b0(int index);
+    NavMesh* AnimatingText_GetFullText();
+    NavMesh* Modelloader_GetReferencedThis();
+    Ret559* Modelloader_GetReferencedThis(unsigned int, NiPoint3*, float*, float, float);
+    void* GetTextElementPointer512(int index);
 };

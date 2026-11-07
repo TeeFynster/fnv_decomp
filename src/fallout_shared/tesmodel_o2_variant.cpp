@@ -9,14 +9,14 @@
 typedef char _sizecheck_TESTextureList[sizeof(FileEntryList) == 8 ? 1 : -1];
 struct FUN_008c1be0_shell
 {
-    void FUN_008c1be0(int param_1);
+    void bhkTTNode_TESObjectREFR_GetFlags(int param_1);
 };
 struct FUN_004898c0_shell
 {
-    void FUN_004898c0(int param_1);
+    void BSArchive_GetFlag_(int param_1);
 };
 extern bool DAT_011acdf8;
-bool FUN_004898e0();
+bool ArchiveManager_ArchivesEnabled();
 struct FUN_004890e0_shell
 {
     void ForwardToMember();
@@ -28,7 +28,7 @@ struct FUN_00489860_shell
     unsigned char b2;
     unsigned char b3;
     int i4;
-    unsigned char* __thiscall FUN_00489860(unsigned char a, unsigned char b, unsigned char c, unsigned char d, int e);
+    unsigned char* __thiscall BSHash_BSHash_0(unsigned char a, unsigned char b, unsigned char c, unsigned char d, int e);
 };
 
 // sub ecx,0x30; jmp FUN_004029f0  ==  MSVC adjustor thunk (multiple inheritance,
@@ -36,7 +36,7 @@ struct FUN_00489860_shell
 // class only defines its constructor so the compiler emits the this-adjusting thunk).
 struct PrimaryBase
 {
-    virtual void FUN_00403a40();
+    virtual void AdjustThisAndForward_00403a40();
     int unk04;
     int unk08;
     int unk0C;
@@ -52,14 +52,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00403a40();
+    virtual void AdjustThisAndForward_00403a40();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00403a40
-    virtual void FUN_00403a40();
+// src: GUESS 0x00403a40 (confidence: low)
+    virtual void AdjustThisAndForward_00403a40();
 };
 
 Derived::Derived()

@@ -71,14 +71,14 @@ public:
     float GetX();
     float GetY();
 
-    bool FUN_004390c0(const LocalPoint& other) const;
-    LocalPoint FUN_00439ef0(const LocalPoint& other);
+    bool HasEqualComponents(const LocalPoint& other) const;
+    LocalPoint SubtractIntoVector(const LocalPoint& other);
     LocalPoint FUN_00439e90(const LocalPoint& other);
-    void FUN_004a0c10();
-    char* FUN_00a59af0(const char* text);
+    void Unitize_004a0c10();
+    char* GetViewerString_00a59af0(const char* text);
     float FUN_004a7290() const;
     float FUN_00435e00();
-    float FUN_006a7f50();
+    float AStarSearch_EvaluateValue_006a7f50();
 
     float& at(int index);
     float at(int index) const;
@@ -121,18 +121,20 @@ namespace loader
 
 
 // @fnv 0x009cafc0
-void CombatProcedureAttackGrenade::FUN_009cafc0()
+// src: XBOX_PDB 0x009cafc0
+void CombatProcedureAttackGrenade::Shutdown_009cafc0()
 {
     CombatProcedure::RunProcedure();
 }
 
 struct FUN_009cb440_shell
 {
-    void __thiscall FUN_009cb440(unsigned char b);
+    void __thiscall CombatState_SetTargetFlushed(unsigned char b);
 };
 
 // @fnv 0x009cb440
-void __thiscall FUN_009cb440_shell::FUN_009cb440(unsigned char b)
+// src: XBOX_PDB 0x009cb440
+void __thiscall FUN_009cb440_shell::CombatState_SetTargetFlushed(unsigned char b)
 {
     *reinterpret_cast<unsigned char*>(this + 0x73) = b;
 }
@@ -141,7 +143,7 @@ void __cdecl Deallocate(void*);
 
 struct FUN_009caeb0_shell
 {
-    void __thiscall FUN_009cafa0();
+    void __thiscall UpdateFields_009cafa0();
     void* __thiscall FUN_009caeb0(unsigned int flags);
 };
 
@@ -149,7 +151,7 @@ struct FUN_009caeb0_shell
 // @fnv 0x009caeb0
 void* __thiscall FUN_009caeb0_shell::FUN_009caeb0(unsigned int flags)
 {
-    FUN_009cafa0();
+    UpdateFields_009cafa0();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -158,23 +160,24 @@ void* __thiscall FUN_009caeb0_shell::FUN_009caeb0(unsigned int flags)
 extern int DAT_010909bc;
 struct FUN_009ca6c0_shell
 {
-    void FUN_009ca6c0();
+    void SetVirtualTable_009ca6c0();
 };
 struct FUN_009cafa0_shell
 {
-    void FUN_009cafa0();
+    void UpdateFields_009cafa0();
 };
 // @fnv 0x009cafa0
-void FUN_009cafa0_shell::FUN_009cafa0()
+// src: GUESS 0x009cafa0 (confidence: low)
+void FUN_009cafa0_shell::UpdateFields_009cafa0()
 {
     *reinterpret_cast<int**>(this) = &DAT_010909bc;
-    reinterpret_cast<FUN_009ca6c0_shell*>(this)->FUN_009ca6c0();
+    reinterpret_cast<FUN_009ca6c0_shell*>(this)->SetVirtualTable_009ca6c0();
 }
 
 extern Setting originalRuntimeFloatSetting375;
 struct IMH
 {
-    struct FUN_009cb440_shell* FUN_00586150();
+    struct FUN_009cb440_shell* CombatController_GetCombatState();
 };
 struct Helper_caae0
 {
@@ -182,19 +185,20 @@ struct Helper_caae0
 };
 struct FUN_009cb830_shell
 {
-    void __thiscall FUN_009cb830(Projectile* apProjectile);
+    void __thiscall CombatProcedureAttackGrenade_FiredProjectile(Projectile* apProjectile);
 };
 // @fnv 0x009cb830
-void __thiscall FUN_009cb830_shell::FUN_009cb830(Projectile* apProjectile)
+// src: XBOX_PDB 0x009cb830
+void __thiscall FUN_009cb830_shell::CombatProcedureAttackGrenade_FiredProjectile(Projectile* apProjectile)
 {
     if (*(bool*)((char*)this + 0x30))
     {
-        apProjectile->FUN_00966a00(*originalRuntimeFloatSetting375.Float());
+        apProjectile->Projectile_SetSpeedMult(*originalRuntimeFloatSetting375.Float());
     }
     *(bool*)((char*)this + 0x30) = 0;
     if (*(bool*)((char*)this + 0x14))
     {
-        (*(IMH**)((char*)this + 4))->FUN_00586150()->FUN_009cb440(1);
+        (*(IMH**)((char*)this + 4))->CombatController_GetCombatState()->CombatState_SetTargetFlushed(1);
         ((Helper_caae0*)this)->SetState();
     }
 }
@@ -209,10 +213,11 @@ struct CombatProcedureSaveGameShell
 };
 struct FUN_009cb9c0_shell
 {
-    void __thiscall FUN_009cb9c0(BGSSaveFormBuffer* p);
+    void __thiscall CombatProcedureAttackGrenade_SaveGame(BGSSaveFormBuffer* p);
 };
 // @fnv 0x009cb9c0
-void __thiscall FUN_009cb9c0_shell::FUN_009cb9c0(BGSSaveFormBuffer* pBuffer)
+// src: XBOX_PDB 0x009cb9c0
+void __thiscall FUN_009cb9c0_shell::CombatProcedureAttackGrenade_SaveGame(BGSSaveFormBuffer* pBuffer)
 {
     ((CombatProcedureSaveGameShell*)this)->SaveGame(pBuffer);
     pBuffer->SaveData((char*)this + 0x10, 4, 0);
@@ -281,10 +286,11 @@ struct FUN_009cba50_shell
     int m_ax;
     int m_ay;
     int m_az;
-    void __thiscall FUN_009cba50(BGSLoadFormBuffer* buffer);
+    void __thiscall CombatProcedureAttackGrenade_LoadGame(BGSLoadFormBuffer* buffer);
 };
 // @fnv 0x009cba50
-void __thiscall FUN_009cba50_shell::FUN_009cba50(BGSLoadFormBuffer* buffer)
+// src: XBOX_PDB 0x009cba50
+void __thiscall FUN_009cba50_shell::CombatProcedureAttackGrenade_LoadGame(BGSLoadFormBuffer* buffer)
 {
     ((CombatProcedure_LoadGame*)this)->LoadGame(buffer);
     buffer->ReadTypedData((char*)this + 0x10, 4);
@@ -295,14 +301,15 @@ void __thiscall FUN_009cba50_shell::FUN_009cba50(BGSLoadFormBuffer* buffer)
     ((TimeoutTimer*)((char*)this + 0x34))->LoadGame(buffer);
 }
 
-NiPoint3* __cdecl FUN_009a8050(NiPoint3* result, void* actor);
+NiPoint3* __cdecl CombatUtilities_GetAttackerFiringLocation(NiPoint3* result, void* actor);
 void __cdecl GetTargetLocationWithOffset(NiPoint3* result, void* target, int mode);
 NiPoint3 __cdecl GetTriple12(void* target);
-unsigned char __cdecl FUN_009a7670(void* actor, void* target, unsigned int flags, NiPoint3 origin, NiPoint3 direction,
+unsigned char __cdecl CombatUtilities_CheckProjectileArc_009a7670(void* actor, void* target, unsigned int flags, NiPoint3 origin, NiPoint3 direction,
                                    NiPoint3 offset, unsigned int mode, unsigned int category, float scale);
 
 // @fnv 0x009a7580
-unsigned char __cdecl FUN_009a7580(void* actor, void* target, unsigned int flags, NiPoint3* optionalOrigin,
+// src: XBOX_PDB 0x009a7580
+unsigned char __cdecl CombatUtilities_CheckProjectileArc(void* actor, void* target, unsigned int flags, NiPoint3* optionalOrigin,
                                    unsigned int mode, unsigned int category, float scale)
 {
     if (!actor || !target)
@@ -314,12 +321,12 @@ unsigned char __cdecl FUN_009a7580(void* actor, void* target, unsigned int flags
     else
     {
         float temp[3];
-        reinterpret_cast<NiPoint3&>(offset) = *FUN_009a8050(reinterpret_cast<NiPoint3*>(temp), actor);
+        reinterpret_cast<NiPoint3&>(offset) = *CombatUtilities_GetAttackerFiringLocation(reinterpret_cast<NiPoint3*>(temp), actor);
     }
     float origin[3];
     GetTargetLocationWithOffset(reinterpret_cast<NiPoint3*>(origin), target, 2);
     NiPoint3 direction = GetTriple12(target);
-    return FUN_009a7670(actor, target, flags, reinterpret_cast<NiPoint3&>(offset), reinterpret_cast<NiPoint3&>(origin), direction, mode, category, scale);
+    return CombatUtilities_CheckProjectileArc_009a7670(actor, target, flags, reinterpret_cast<NiPoint3&>(offset), reinterpret_cast<NiPoint3&>(origin), direction, mode, category, scale);
 }
 
 
@@ -431,7 +438,7 @@ class B9CB380Process
 {
   public:
     void SetTarget(B9CB380Form* pkForm);
-    void FUN_009cb440(bool bFlag);
+    void CombatState_SetTargetFlushed(bool bFlag);
 };
 
 class B9CB380Actor
@@ -450,7 +457,7 @@ class B9CB380World
 class B9CB380Timer
 {
   public:
-    bool FUN_0097fa50();
+    bool CombatTimer_IsSet();
     bool FUN_008d7f80();
     void FUN_008d7f40(float fTime);
 
@@ -481,23 +488,24 @@ class B9CB380Package
     B9CB380Timer m_kTimer;
 
     void SetState();
-    bool FUN_009cb380(B9CB380Form* pkForm, int iArg, float fArg);
+    bool CombatProcedureAttackGrenade_CheckExplosion(B9CB380Form* pkForm, int iArg, float fArg);
 };
 
 // @fnv 0x009cb380
-bool B9CB380Package::FUN_009cb380(B9CB380Form* pkForm, int iArg, float fArg)
+// src: XBOX_PDB 0x009cb380
+bool B9CB380Package::CombatProcedureAttackGrenade_CheckExplosion(B9CB380Form* pkForm, int iArg, float fArg)
 {
     B9CB380Mobile* pkMobile2 = m_pkActor->GetMobile();
     B9CB380Process* pkProcess = m_pkActor->GetProcess();
     if (!g_pkB9CB380World->IsThreatWithinLimits(pkMobile2, pkForm, iArg, fArg))
     {
-        if (!m_kTimer.FUN_0097fa50())
+        if (!m_kTimer.CombatTimer_IsSet())
             m_kTimer.FUN_008d7f40(*g_kB9CB380Setting.Float());
         else if (m_kTimer.FUN_008d7f80())
             pkProcess->SetTarget(pkForm);
         if (m_bFlag14)
         {
-            pkProcess->FUN_009cb440(true);
+            pkProcess->CombatState_SetTargetFlushed(true);
             SetState();
         }
         return false;
@@ -512,7 +520,7 @@ extern Setting originalRuntimeFloatSetting375;
 
 
 NiPoint3 __cdecl ComputeTrajectory(Actor* actor, void* target, int unused, PathingRequest* req, float dist, bool flag);
-NiPoint3 __cdecl FUN_009a8d80(Actor* actor, NiPoint3* point, int unused, PathingRequest* req, float dist, bool flag);
+NiPoint3 __cdecl TESObjectREFR_ForwardCall_009a8d80(Actor* actor, NiPoint3* point, int unused, PathingRequest* req, float dist, bool flag);
 
 struct CombatProcedureShell
 {
@@ -528,29 +536,29 @@ struct CombatProcedureShell
     int unk2C;
     bool b30;
 
-    Actor* FUN_00996de0();
-    void* FUN_00996e00();
+    Actor* CombatProcedure_GetAttacker();
+    void* GetTarget_00996e00();
     NiPoint3 GetPathingPoint();
 };
 
 // @fnv 0x009cb6e0
 NiPoint3 CombatProcedureShell::GetPathingPoint()
 {
-    if (!b14 && !FUN_00996e00())
+    if (!b14 && !GetTarget_00996e00())
     {
         return NiPoint3_ZERO;
     }
-    TESObjectREFR* ref = unk04->FUN_007031c0();
-    PathingRequest* req = ref->GetOrFallback(FUN_00996de0());
+    TESObjectREFR* ref = unk04->GetCurrentWeapon();
+    PathingRequest* req = ref->GetOrFallback(CombatProcedure_GetAttacker());
     float dist = req->GetFloatAtOffset68() * (b30 ? *originalRuntimeFloatSetting375.Float() : 1.0f);
     NiPoint3 point;
     if (!b14)
     {
-        point = ComputeTrajectory(FUN_00996de0(), FUN_00996e00(), 0, req, dist, b30);
+        point = ComputeTrajectory(CombatProcedure_GetAttacker(), GetTarget_00996e00(), 0, req, dist, b30);
     }
     else
     {
-        point = FUN_009a8d80(FUN_00996de0(), &pt18, 0, req, dist, b30);
+        point = TESObjectREFR_ForwardCall_009a8d80(CombatProcedure_GetAttacker(), &pt18, 0, req, dist, b30);
     }
     return point;
 }
@@ -586,7 +594,7 @@ struct Procedure
     TESObjectREFR* TargetGet();
     bool Validate(void*, LocalPoint*, float);
     void Reset();
-    bool FUN_009cb460(LocalPoint* output, LocalPoint* input);
+    bool CombatProcedureAttackGrenade_GetTargetedPoint(LocalPoint* output, LocalPoint* input);
 };
 extern LocalPoint zeroPoint;
 extern const float scaleValue;
@@ -594,7 +602,8 @@ unsigned char Arc(void*, TESObjectREFR*, Item*, LocalPoint, LocalPoint, LocalPoi
 unsigned char Direct(void*, TESObjectREFR*, Item*, LocalPoint*, unsigned char*, LocalPoint*, float);
 float Distance(Item*, LocalPoint, LocalPoint, unsigned char, float);
 // @fnv 0x009cb460
-bool Procedure::FUN_009cb460(LocalPoint* output, LocalPoint* input)
+// src: XBOX_PDB 0x009cb460
+bool Procedure::CombatProcedureAttackGrenade_GetTargetedPoint(LocalPoint* output, LocalPoint* input)
 {
     void* i;
     i = ActorGet();
@@ -930,8 +939,8 @@ struct ProcessObj
 };
 struct ActorObj
 {
-    bool FUN_00894900();
-    int FUN_008a7570();
+    bool Actor_IsAttacking();
+    int GetAnimAction_008a7570();
     ProcessObj* FUN_008d8520();
     bool TryAttack(int a);
     virtual void vfn_000();
@@ -1067,7 +1076,7 @@ struct SoundObj
 };
 struct MidObj
 {
-    SoundObj* FUN_004fd3c0();
+    SoundObj* BGSProjectile_GetExplosion();
 };
 struct Obj703
 {
@@ -1075,27 +1084,27 @@ struct Obj703
 };
 struct Obj586
 {
-    bool FUN_0097ee90();
-    bool FUN_008b3c10();
+    bool GetHasBufferedDetection_0097ee90();
+    bool CombatState_GetTargetSpaceDifferent();
     void FUN_00442a80(int a);
 };
 struct Sub04
 {
-    Obj586* FUN_00586150();
-    Obj703* FUN_007031c0();
+    Obj586* CombatController_GetCombatState();
+    Obj703* GetCurrentWeapon();
     bool FUN_00981970();
 };
 struct GlobalObj
 {
-    void FUN_00983970(void* a, int b, int c, int d);
+    void CombatDialogueManager_StartDialogue(void* a, int b, int c, int d);
 };
 extern GlobalObj* DAT_011f1708;
 struct Member34
 {
-    void FUN_00910b10();
+    void TESWeightForm_InitializeDataComponent();
 };
-void __cdecl FUN_009a9180(Sub04* a, Obj703* b, float* x, float* y, float* z);
-unsigned char __cdecl FUN_009a7580(ActorObj* a, ActorObj* b, MidObj* c, void* d, unsigned char* e, NiPoint3* f, float g);
+void __cdecl CombatUtilities_ComputeOptimalWeaponRanges(Sub04* a, Obj703* b, float* x, float* y, float* z);
+unsigned char __cdecl CombatUtilities_CheckProjectileArc(ActorObj* a, ActorObj* b, MidObj* c, void* d, unsigned char* e, NiPoint3* f, float g);
 bool __cdecl IsExplosionRadiusValid(SoundObj* a);
 
 struct Package
@@ -1115,13 +1124,13 @@ struct Package
     unsigned char m_32;
     unsigned char m_33;
     Member34 m_34;
-    ActorObj* FUN_00996de0();
-    ActorObj* FUN_00996e00();
-    void FUN_009caac0(const char* msg);
-    void FUN_00996ea0();
+    ActorObj* CombatProcedure_GetAttacker();
+    ActorObj* GetTarget_00996e00();
+    void CombatProcedure_SetFailed(const char* msg);
+    void ClearLookAtTarget_00996ea0();
     void SetLookAtPoint(NiPoint3* p, int a);
     NiPoint3* GetPathingPoint(NiPoint3* out);
-    bool FUN_009cb380(SoundObj* s, NiPoint3* p, float f);
+    bool CombatProcedureAttackGrenade_CheckExplosion(SoundObj* s, NiPoint3* p, float f);
     void UpdateWeaponFire();
 };
 
@@ -1129,25 +1138,25 @@ struct Package
 void Package::UpdateWeaponFire()
 {
     ActorObj* actor2;
-    actor2 = FUN_00996de0();
+    actor2 = CombatProcedure_GetAttacker();
     ActorObj* i;
-    i = FUN_00996e00();
+    i = GetTarget_00996e00();
     Obj586* n;
-    n = m_04->FUN_00586150();
+    n = m_04->CombatController_GetCombatState();
     Obj703* s;
-    s = m_04->FUN_007031c0();
+    s = m_04->GetCurrentWeapon();
     Obj70* aPObj;
     aPObj = actor2->vfn_1e4();
     if (!s || !aPObj || !s->GetOrFallback(actor2))
     {
-        FUN_009caac0("Missing either weapon, animation, or weapon projectile");
+        CombatProcedure_SetFailed("Missing either weapon, animation, or weapon projectile");
         return;
     }
-    if (actor2->FUN_00894900())
+    if (actor2->Actor_IsAttacking())
     {
         m_10 = 1;
     }
-    else if (actor2->FUN_008a7570() == -1)
+    else if (actor2->GetAnimAction_008a7570() == -1)
     {
         m_10 = 0;
     }
@@ -1155,28 +1164,28 @@ void Package::UpdateWeaponFire()
     {
         m_30 = 0;
     }
-    if (!n->FUN_0097ee90() || n->FUN_008b3c10())
+    if (!n->GetHasBufferedDetection_0097ee90() || n->CombatState_GetTargetSpaceDifferent())
     {
         if (m_10)
         {
-            FUN_00996ea0();
+            ClearLookAtTarget_00996ea0();
             m_10 = 0;
         }
         return;
     }
-    DAT_011f1708->FUN_00983970(m_04, 2, 0, 0);
+    DAT_011f1708->CombatDialogueManager_StartDialogue(m_04, 2, 0, 0);
     float AJ[3];
     m_24 = *GetPathingPoint(&reinterpret_cast<NiPoint3&>(AJ));
     float dir3[3];
     reinterpret_cast<NiPoint3&>(dir3).x = 0.0f;
     reinterpret_cast<NiPoint3&>(dir3).y = 0.0f;
     reinterpret_cast<NiPoint3&>(dir3).z = 0.0f;
-    FUN_009a9180(m_04, s, &reinterpret_cast<NiPoint3&>(dir3).x, &reinterpret_cast<NiPoint3&>(dir3).y, &reinterpret_cast<NiPoint3&>(dir3).z);
+    CombatUtilities_ComputeOptimalWeaponRanges(m_04, s, &reinterpret_cast<NiPoint3&>(dir3).x, &reinterpret_cast<NiPoint3&>(dir3).y, &reinterpret_cast<NiPoint3&>(dir3).z);
     float kIter[3];
-    m_24.FUN_00439ef0(&reinterpret_cast<NiPoint3&>(kIter), actor2->vfn_1f4());
+    m_24.SubtractIntoVector(&reinterpret_cast<NiPoint3&>(kIter), actor2->vfn_1f4());
     if (reinterpret_cast<NiPoint3&>(kIter).GetSquaredXYLength() > reinterpret_cast<NiPoint3&>(dir3).z * reinterpret_cast<NiPoint3&>(dir3).z)
     {
-        FUN_00996ea0();
+        ClearLookAtTarget_00996ea0();
         m_10 = 0;
         return;
     }
@@ -1184,7 +1193,7 @@ void Package::UpdateWeaponFire()
     {
         SetLookAtPoint(&m_24, 4);
     }
-    if (1 == m_10 && (actor2->FUN_008a7570() != 4 || aPObj->GetSlotValue(4) > 2))
+    if (1 == m_10 && (actor2->GetAnimAction_008a7570() != 4 || aPObj->GetSlotValue(4) > 2))
     {
         return;
     }
@@ -1193,14 +1202,14 @@ void Package::UpdateWeaponFire()
         return;
     }
     SoundObj* idx;
-    idx = s->GetOrFallback(actor2)->FUN_004fd3c0();
+    idx = s->GetOrFallback(actor2)->BGSProjectile_GetExplosion();
     NiPoint3* AP;
     float CTmp[3];
     if (idx)
     {
         AP = m_14 ? &m_18 : i->vfn_1f4();
         reinterpret_cast<NiPoint3&>(CTmp) = *AP;
-        if (!FUN_009cb380(idx, &reinterpret_cast<NiPoint3&>(CTmp), 0.0f))
+        if (!CombatProcedureAttackGrenade_CheckExplosion(idx, &reinterpret_cast<NiPoint3&>(CTmp), 0.0f))
         {
             return;
         }
@@ -1209,7 +1218,7 @@ void Package::UpdateWeaponFire()
     pForm = s->GetOrFallback(actor2);
     if (!m_14)
     {
-        if (!FUN_009a7580(actor2, i, pForm, 0, &m_30, &m_24, -1.0f))
+        if (!CombatUtilities_CheckProjectileArc(actor2, i, pForm, 0, &m_30, &m_24, -1.0f))
         {
             return;
         }
@@ -1217,14 +1226,14 @@ void Package::UpdateWeaponFire()
     if (idx)
     {
         n->FUN_00442a80(0);
-        m_34.FUN_00910b10();
+        m_34.TESWeightForm_InitializeDataComponent();
     }
     actor2->FUN_008d8520()->vfn_43c(1);
     actor2->TryAttack(0x72);
     m_10 = 1;
     if (idx && IsExplosionRadiusValid(idx))
     {
-        DAT_011f1708->FUN_00983970(m_04, 2, 4, 1);
+        DAT_011f1708->CombatDialogueManager_StartDialogue(m_04, 2, 4, 1);
     }
 }
 }  // namespace fnv_009cafe0
@@ -1237,7 +1246,7 @@ struct CTSHelper
 
 struct Modifier
 {
-    bool __thiscall FUN_0097fa50();
+    bool __thiscall CombatTimer_IsSet();
     float __thiscall GetValue();
 };
 
@@ -1270,7 +1279,7 @@ void FUN_009cb890_shell::WriteDebugText(IDebugText* debugText, int location, int
         debugText->Print(static_cast<DEBUGTEXT_LOCATION>(location), static_cast<DEBUGTEXT_JUSTIFY>(justify), "HIGH ARC");
     }
 
-    if (reinterpret_cast<Modifier*>(reinterpret_cast<unsigned char*>(this) + 0x34)->FUN_0097fa50())
+    if (reinterpret_cast<Modifier*>(reinterpret_cast<unsigned char*>(this) + 0x34)->CombatTimer_IsSet())
     {
         debugText->Print(static_cast<DEBUGTEXT_LOCATION>(location), static_cast<DEBUGTEXT_JUSTIFY>(justify), "Explosive Projectile Blocked Timer: %.02f/%.02f",
                          reinterpret_cast<CTSHelper*>(reinterpret_cast<unsigned char*>(this) + 0x34)->GetElapsedTime(),

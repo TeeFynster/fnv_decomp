@@ -45,8 +45,8 @@ struct ResultData
     char unk0A;
     unsigned char unk0B;
     int unk0C;
-    void __thiscall FUN_00dafe70(void* a, void* b, void* c);
-    void __thiscall FUN_00dafcd0(void* a, void* b, void* c);
+    void __thiscall hkpGskCache_initTriangle(void* a, void* b, void* c);
+    void __thiscall hkpGskCache_init(void* a, void* b, void* c);
 };
 void* __cdecl DispatchInputRecord(InputData* input, unsigned char* status, ResultData* result);
 // Stand-ins for the script handler functions whose addresses are stored in the
@@ -55,8 +55,8 @@ extern "C" void __cdecl RemoveEntryById(int a, int b, int c, int d);
 extern "C" void __cdecl InsertSlotId(int a, int b, int c, int d);
 extern "C" void __cdecl FindEntryByKey(int a, int b, int c, int d);
 extern "C" void __cdecl ConvertPairFlags(int a, int b, int c, int d);
-extern "C" void __cdecl FUN_00d41930(int a, int b, int c, int d);
-extern "C" void __cdecl FUN_00d40d80(int a, int b, int c, int d);
+extern "C" void __cdecl hkPredGskAgent3_sepNormal(int a, int b, int c, int d);
+extern "C" void __cdecl hkPredGskCylinderAgent3_process(int a, int b, int c, int d);
 // The handler table that is handed to CScript::RegisterHandler.  It is kept
 // 16 byte aligned, which is what makes the compiler emit the aligned frame
 // prologue of this function.
@@ -109,7 +109,7 @@ struct S_00d417b0_Obj
     int unk08;
     S_00d417b0_Sub m_sub;
 };
-void __cdecl FUN_00dae340(S_00d417b0_Sub* sub, int index);
+void __cdecl _hkGskManifold_removePoint(S_00d417b0_Sub* sub, int index);
 void __cdecl RemoveEntryById(int a, S_00d417b0_Obj* obj, short id);
 struct Slot
 {
@@ -164,7 +164,8 @@ int __cdecl FindEntryByKey(int unused, FUN_00d41830_table* table, unsigned short
 // still contains the required tag "FUN_00d41860".
 extern "C" void __cdecl ReleaseAllEntries(void* p, int obj, int data);
 // @fnv 0x00d41860
-extern "C" int __cdecl FUN_00d41860_impl(int a, int b, int c, int d)
+// src: GUESS 0x00d41860 (confidence: low)
+extern "C" int __cdecl Object_ProcessAndReturnValue_00d41860(int a, int b, int c, int d)
 {
     unsigned char* rec = (unsigned char*)b + 0x0C;
 
@@ -364,7 +365,8 @@ struct SeparatingNormal
 };
 
 // @fnv 0x00d41930
-void __cdecl FUN_00d41930(Input_s* input, int unused, hkpGskCache_s* cache, Output_s* output)
+// src: XBOX_PDB 0x00d41930
+void __cdecl hkPredGskAgent3_sepNormal(Input_s* input, int unused, hkpGskCache_s* cache, Output_s* output)
 {
     hkpConvexShape_s* shapeA = input->m_pBodyA->m_pCollisionShape;
     hkpConvexShape_s* shapeB = input->m_pBodyB->m_pCollisionShape;

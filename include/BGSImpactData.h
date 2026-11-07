@@ -38,10 +38,10 @@ public:
     bool Load(TESFile* file);
     BGSTextureSet* GetDecalTextureSet() const;
 
-    void FUN_0058dd10(int arg);
+    void Copy_0058dd10(int arg);
     bool IsDifferentFrom(TESForm* apCompare);
     bool IsFlagSet();
-    void FUN_0058e450();
+    void Save_0058e450();
     void CopyDecalData();
     int GetGlobalValue();
 };

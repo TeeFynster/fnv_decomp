@@ -5,7 +5,7 @@
 #include "../../../include/NiUpdateData.h"
 #include "../../../include/Precipitation.h"
 #include "precipitation_decls.h"
-int FUN_00404dc0(const char*, const char*);
+int BSstricmp(const char*, const char*);
 // @fnv 0x00636c40
 void Precipitation::Load(const char* path)
 {
@@ -21,19 +21,19 @@ void Precipitation::Load(const char* path)
         NiNode* model = g_modelLoader->LoadFile(path, ENUM_LOD_MULT_LOD_MULT_NONE, true, false, false, false);
         if (model)
         {
-            bool bIsSnow = FUN_00404dc0(path, DAT_0104ed9c) == 0;
+            bool bIsSnow = BSstricmp(path, DAT_0104ed9c) == 0;
             NiUpdateData kUpdateData(0.0f, false, false);
             model->UpdateDownwardPass(kUpdateData, 0);
             m_pPrecipitationNode = new NiSortAdjustNode(0);
             fEmissionRate = 0.0f;
-            for (unsigned int index = 0; index < model->FUN_00453470(); ++index)
+            for (unsigned int index = 0; index < model->NiNode_GetChildCount(); ++index)
             {
                 NiAVObject* m_pShaderGeometry = model->FUN_0043b4a0(index)->IsSceneNode();
                 SkyShaderProperty* pShaderProperty =
-                    m_pShaderGeometry ? FUN_00653270(&DAT_012024e0, m_pShaderGeometry->FUN_0045bc00(false)) : 0;
+                    m_pShaderGeometry ? NiObject_DynamicCast(&DAT_012024e0, m_pShaderGeometry->NiNode_GetAtChecked(false)) : 0;
                 if (!pShaderProperty)
                     continue;
-                NiAVObject* precipParticle = CreateParticleShape(pShaderProperty, pParent->FUN_00461130(bIsSnow));
+                NiAVObject* precipParticle = CreateParticleShape(pShaderProperty, pParent->NiAVObject_GetWorldRotate(bIsSnow));
                 if (precipParticle)
                     static_cast<NiNode*>(m_pPrecipitationNode)->AttachChildInAvailableSlot(precipParticle, true);
             }
@@ -43,12 +43,12 @@ void Precipitation::Load(const char* path)
     }
 }
 
-NiAVObject* __cdecl FUN_0054f4f0(void);
+NiAVObject* __cdecl TESMain_GetWeatherRoot(void);
 
 // @fnv 0x00636bb0
 void Precipitation::InitParent()
 {
-    pParent = static_cast<NiNode*>(FUN_0054f4f0());
+    pParent = static_cast<NiNode*>(TESMain_GetWeatherRoot());
 }
 
 // @fnv 0x00637800
@@ -91,7 +91,7 @@ struct PrecipQueuedObject
 
 struct PrecipManager
 {
-    void FUN_00444040(void* object);
+    void ModelLoader_QueueModel_00444040(void* object);
 };
 
 extern PrecipManager* DAT_011c3b3c;
@@ -104,7 +104,7 @@ void Precipitation::QueuePrecipitationObject(PrecipQueuedObject* object)
 
     if (object != 0 && object->FUN_0048cee0() != 0)
     {
-        DAT_011c3b3c->FUN_00444040(object->vfn_0014(0, 0, 0, 0, 0, 0));
+        DAT_011c3b3c->ModelLoader_QueueModel_00444040(object->vfn_0014(0, 0, 0, 0, 0, 0));
         m_pPrecipitationData = object;
     }
     else

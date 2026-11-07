@@ -9,8 +9,8 @@
 #include "../../../../../include/NiMatrix3.h"
 #include "../../../../../include/NiAVObject.h"
 
-void __cdecl FUN_004169a0(float, float&, float&);
-double __cdecl FUN_00408820(float);
+void __cdecl NiSinCos_004169a0(float, float&, float&);
+double __cdecl NiAbs_00408820(float);
 extern const double DAT_01017cf8;
 
 // Keep the console unit's remaining partial types separate from the complete

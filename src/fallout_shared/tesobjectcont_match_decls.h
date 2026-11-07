@@ -40,7 +40,7 @@ struct CNTOChunkData
 {
     unsigned int formID;
     unsigned int count;
-    void FUN_00462230();
+    void TwoValues_Endian();
 };
 
 extern "C" ContainerItemExtraOwner* DAT_011c9348;

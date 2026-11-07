@@ -19,14 +19,15 @@ struct S_00c90db0_Foo
     int unk00[12];
     __m128 unk30;
     __m128 unk40;
-    void __thiscall FUN_00c90db0(float f);
+    void __thiscall hkpWorldCinfo_setBroadPhaseWorldSize(float f);
 };
 static inline __m128 SplatC90(float x)
 {
     return _mm_set1_ps(x);
 }
 // @fnv 0x00c90db0
-void __thiscall S_00c90db0_Foo::FUN_00c90db0(float f)
+// src: XBOX_PDB 0x00c90db0
+void __thiscall S_00c90db0_Foo::hkpWorldCinfo_setBroadPhaseWorldSize(float f)
 {
     unk30 = SplatC90(f * -0.5);
     unk40 = SplatC90(f * 0.5);

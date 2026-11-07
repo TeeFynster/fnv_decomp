@@ -225,7 +225,7 @@ void TESReactionForm::LoadGame(BGSLoadFormBuffer* buffer)
     }
 }
 
-bool FUN_00401500();
+bool TESForm_QEndianSwapOnSave();
 void AppendChunk(unsigned int, void*, unsigned int);
 
 // @fnv 0x0048bb70
@@ -245,12 +245,12 @@ void TESReactionForm::Save()
             data.iReaction = *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(shot) + 4);
             data.iFightReaction = *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(shot) + 8);
 
-            if (FUN_00401500())
+            if (TESForm_QEndianSwapOnSave())
                 data.Endian();
 
             AppendChunk(0x4d414e58, &data, 0xc);
 
-            if (FUN_00401500())
+            if (TESForm_QEndianSwapOnSave())
                 data.Endian();
         }
 
@@ -404,7 +404,7 @@ extern void* DAT_011de45c;
 extern unsigned char DAT_011de4e8;
 struct Global_011de45c
 {
-    bool FUN_00862110();
+    bool TESSaveLoadGame_UseSaveGameBlocks();
     unsigned int* FUN_004fd3e0();
 };
 struct Global_011de4e8
@@ -413,7 +413,7 @@ struct Global_011de4e8
 };
 // The shared context has no declaration for the entry-count routine at this address.
 int __fastcall _ref_005ae380(ActorPackageContext* context);
-void __cdecl FUN_0040fbe0(const char*, ...);
+void __cdecl ProgramFlow(const char*, ...);
 }  // namespace fnv_0048c2e0
 
 // Computes the serialized size of the reaction data when flag bit 4 is set.
@@ -424,7 +424,7 @@ unsigned short TESReactionForm::GetSaveSize(unsigned int flags)
     if ((flags & 4) != 0)
     {
         unsigned short start = count;
-        if (((fnv_0048c2e0::Global_011de45c*)fnv_0048c2e0::DAT_011de45c)->FUN_00862110())
+        if (((fnv_0048c2e0::Global_011de45c*)fnv_0048c2e0::DAT_011de45c)->TESSaveLoadGame_UseSaveGameBlocks())
         {
             count += 4;
             count += 2;
@@ -438,12 +438,12 @@ unsigned short TESReactionForm::GetSaveSize(unsigned int flags)
             if (formID != 0)
             {
                 TESForm* form = TESForm::GetFormByID(*formID);
-                fnv_0048c2e0::FUN_0040fbe0(fnv_0048c2e0::str_01012cb0, count - start, *formID, form->GetName(),
+                fnv_0048c2e0::ProgramFlow(fnv_0048c2e0::str_01012cb0, count - start, *formID, form->GetName(),
                              *(unsigned int*)((unsigned char*)formID + 5), 0x557, fnv_0048c2e0::str_0101d4c8);
             }
             else
             {
-                fnv_0048c2e0::FUN_0040fbe0(fnv_0048c2e0::str_01012c78, count - start, 0x557, fnv_0048c2e0::str_0101d4c8);
+                fnv_0048c2e0::ProgramFlow(fnv_0048c2e0::str_01012c78, count - start, 0x557, fnv_0048c2e0::str_0101d4c8);
             }
         }
     }
@@ -459,9 +459,9 @@ struct ObjC400
 struct SaveC400
 {
     unsigned int FUN_00825c00();
-    bool FUN_00862110();
-    void FUN_008579b0(void*, int);
-    void FUN_00857a10(void*, int);
+    bool TESSaveLoadGame_UseSaveGameBlocks();
+    void TESSaveLoadGame_SaveGameDataOLD(void*, int);
+    void TESSaveLoadGame_SaveNumericID(void*, int);
     ObjC400* FUN_004fd3e0();
 };
 struct GlobalObject_0045cf30
@@ -474,8 +474,8 @@ extern const char str_0101d4c8[];
 extern const char str_010153a0[];
 extern const char str_0101536c[];
 extern const char str_01015318[];
-TESForm* __cdecl FUN_004839c0(unsigned int);
-void __cdecl FUN_0040fbe0(const char*, ...);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int);
+void __cdecl ProgramFlow(const char*, ...);
 int Warning(const char*, ...);
 
 // @fnv 0x0048c400
@@ -490,16 +490,16 @@ void TESReactionForm::SaveGame(unsigned int auiFlags)
         {
             startPos = DAT_011de45c->FUN_00825c00();
         }
-        if (DAT_011de45c->FUN_00862110())
+        if (DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
         {
             int tag = 0x424c4f4b;
-            DAT_011de45c->FUN_008579b0(&tag, 4);
+            DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&tag, 4);
             posSize4 = DAT_011de45c->FUN_00825c00();
-            DAT_011de45c->FUN_008579b0(&sizeWord, 2);
+            DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&sizeWord, 2);
         }
         unsigned short kCount = 0;
         unsigned int posCountC = DAT_011de45c->FUN_00825c00();
-        DAT_011de45c->FUN_008579b0(&kCount, 2);
+        DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&kCount, 2);
         BSSimpleList<GROUP_REACTION*>* node = reinterpret_cast<BSSimpleList<GROUP_REACTION*>*>(GetReactionList());
         while (node)
         {
@@ -507,8 +507,8 @@ void TESReactionForm::SaveGame(unsigned int auiFlags)
             if (item)
             {
                 unsigned int formID = item->pForm->GetFormID();
-                DAT_011de45c->FUN_00857a10(&formID, 4);
-                DAT_011de45c->FUN_008579b0(&item->iReaction, 4);
+                DAT_011de45c->TESSaveLoadGame_SaveNumericID(&formID, 4);
+                DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&item->iReaction, 4);
                 kCount++;
             }
             node = node->GetNext();
@@ -520,16 +520,16 @@ void TESReactionForm::SaveGame(unsigned int auiFlags)
             ObjC400* kObj = DAT_011de45c->FUN_004fd3e0();
             if (kObj)
             {
-                TESForm* form = FUN_004839c0(kObj->formID);
-                FUN_0040fbe0(str_010153a0, endPos2 - startPos, kObj->formID, form->GetName(),
+                TESForm* form = TESForm_GetFormByNumericID(kObj->formID);
+                ProgramFlow(str_010153a0, endPos2 - startPos, kObj->formID, form->GetName(),
                              *(int*)((char*)kObj + 5), 1403, str_0101d4c8);
             }
             else
             {
-                FUN_0040fbe0(str_0101536c, endPos2 - startPos, 1403, str_0101d4c8);
+                ProgramFlow(str_0101536c, endPos2 - startPos, 1403, str_0101d4c8);
             }
         }
-        if (DAT_011de45c->FUN_00862110())
+        if (DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned int endPos = DAT_011de45c->FUN_00825c00();
             unsigned int blockStart = posSize4;
@@ -555,7 +555,7 @@ struct SaveLoadFormInfo
 
 struct SaveLoadGameStub
 {
-    bool FUN_00862110();
+    bool TESSaveLoadGame_UseSaveGameBlocks();
     void ReadTypedData(void* apData, unsigned int auiSize);
     void ReadFormIdentifier(unsigned int* apID, int aiSize);
     SaveLoadFormInfo* GetCurrentFormInfo();
@@ -574,7 +574,7 @@ void TESReactionForm::LoadGame(unsigned int auiChangeFlags, unsigned int unused)
         unsigned short usLength = 0;
         unsigned int dwStart = 0;
         unsigned short usNum;
-        if (g_TESSaveLoadGame->FUN_00862110())
+        if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned int uiMarker;
             g_TESSaveLoadGame->ReadTypedData(&uiMarker, 4);
@@ -610,7 +610,7 @@ void TESReactionForm::LoadGame(unsigned int auiChangeFlags, unsigned int unused)
             g_TESSaveLoadGame->ReadTypedData(&iFactionReaction, 4);
             SetReactionValue(reinterpret_cast<TESForm*>(auiFormId), iFactionReaction);
         }
-        if (g_TESSaveLoadGame->FUN_00862110())
+        if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
         {
             unsigned int endPos = g_TESSaveLoadGame->GetBufferPosition();
             SaveLoadFormInfo* pEndInfo = g_TESSaveLoadGame->GetCurrentFormInfo();
@@ -705,10 +705,10 @@ struct FUN_0048c9d0_ChangeFlags
 struct FUN_0048c9d0_SaveBuffer
 {
     FUN_0048c9d0_ChangeFlags* FUN_00428110(int* value, int size);
-    unsigned int FUN_00865f20();
+    unsigned int StartVariableSizedValue();
     void FUN_00865df0(int value, int flag);
     void FUN_00865e50(void* data, unsigned int size, int flag);
-    void FUN_00865ff0(int count, unsigned int value);
+    void SaveVariableSizedValue_00865ff0(int count, unsigned int value);
 };
 
 // @fnv 0x0048c9d0
@@ -724,7 +724,7 @@ void TESReactionForm::SaveGame(BGSSaveFormBuffer* apBuffer)
         if (reinterpret_cast<FUN_0048c9d0_SaveBuffer*>(apBuffer)->FUN_00428110(&temp, 4)->FUN_004280f0())
         {
             count = 0;
-            value = reinterpret_cast<FUN_0048c9d0_SaveBuffer*>(apBuffer)->FUN_00865f20();
+            value = reinterpret_cast<FUN_0048c9d0_SaveBuffer*>(apBuffer)->StartVariableSizedValue();
             cursor = reinterpret_cast<BSSimpleList<GROUP_REACTION*>*>(&m_kReactionList);
             while (cursor != 0)
             {
@@ -738,7 +738,7 @@ void TESReactionForm::SaveGame(BGSSaveFormBuffer* apBuffer)
                 }
                 cursor = cursor->GetNext();
             }
-            reinterpret_cast<FUN_0048c9d0_SaveBuffer*>(apBuffer)->FUN_00865ff0(count, value);
+            reinterpret_cast<FUN_0048c9d0_SaveBuffer*>(apBuffer)->SaveVariableSizedValue_00865ff0(count, value);
         }
     }
 }

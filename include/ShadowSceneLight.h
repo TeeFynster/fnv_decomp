@@ -82,7 +82,7 @@ public:
     void AddShadowObject(NiAVObject* object);
     void AddGeometry(NiTriBasedGeom* geometry);
     bool TestSphereFrustum(NiPoint3* sphere);
-    bool FUN_00b9dae0(NiPoint3* sphere, NiLight* light, float scale);
+    bool BoundWithinLightRadius(NiPoint3* sphere, NiLight* light, float scale);
     bool TestSphereFrustum(const NiSphere& sphere);
     float ComputeLightAttenuation(NiPoint3 point, NiLight* light);
     float ComputeFade(int aiMemoryContext);

@@ -11,10 +11,11 @@
 struct V
 {
     __m128 v;
-    void FUN_00961190(const V& o);
+    void hkVector4_sub4(const V& o);
 };
 // @fnv 0x00961190
-void V::FUN_00961190(const V& o)
+// src: XBOX_PDB 0x00961190
+void V::hkVector4_sub4(const V& o)
 {
     v = _mm_sub_ps(v, o.v);
 }

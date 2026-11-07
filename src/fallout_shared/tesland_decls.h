@@ -6,5 +6,5 @@ class TESLandFlagsView
   public:
     char prefix[0x1c];
     unsigned int flags;
-    bool FUN_005394a0();
+    bool TESPackage_GetLockDoorsAtStart();
 };

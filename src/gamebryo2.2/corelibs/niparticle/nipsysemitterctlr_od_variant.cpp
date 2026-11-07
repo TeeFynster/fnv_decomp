@@ -10,7 +10,7 @@ struct GlobalObjectO2_00a7b610;
 // Emitter update 0x00c1c630 calls this lookup at 0x00639b60; the shared header lacks its declaration.
 struct EmitterRateLookup : NiPSysEmitterCtlr
 {
-    NiBoolInterpolator* FUN_00639b60();
+    NiBoolInterpolator* NiPSysEmitterCtlr_GetBirthRateInterpolator();
 };
 
 void* __cdecl _UseSaveGameBlocks(void* table, unsigned int key);
@@ -19,7 +19,8 @@ extern int g_011f3738;
 extern GlobalObjectO2_00a7b610 g_011f3e58;
 
 // @fnv 0x00639b60
-NiBoolInterpolator* EmitterRateLookup::FUN_00639b60()
+// src: XBOX_PDB 0x00639b60
+NiBoolInterpolator* EmitterRateLookup::NiPSysEmitterCtlr_GetBirthRateInterpolator()
 {
     NiBoolInterpolator* pkBoolInterp;
     NiBlendBoolInterpolator* pkBlendInterp;

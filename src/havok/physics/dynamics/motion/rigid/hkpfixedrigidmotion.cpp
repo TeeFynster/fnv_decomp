@@ -24,41 +24,45 @@ void* FUN_00d1e160_t::InitFixedRigidMotion(int a, int b)
 }
 
 // @fnv 0x00d1e130
-void __stdcall FUN_00d1e130(int, int)
+// src: COMMUNITY 0x00d1e130
+void __stdcall nullsub_51(int, int)
 {}
 
 // @fnv 0x00d1e140
-void __stdcall FUN_00d1e140(void* a)
+// src: COMMUNITY 0x00d1e140
+void __stdcall nullsub_49(void* a)
 {}
 
 // 0x00d1e150  /MT /O2 /GS /EHsc /Gy   target: C2 04 00  (ret 4, empty thiscall with one stack arg)
 struct C00d1e150
 {
     int unk00;
-    void FUN_00d1e150(int arg);
+    void nullsub_50(int arg);
 };
 
 // @fnv 0x00d1e150
-void C00d1e150::FUN_00d1e150(int arg)
+// src: COMMUNITY 0x00d1e150
+void C00d1e150::nullsub_50(int arg)
 {}
 
 #include <xmmintrin.h>
 struct FUN_00c86660_Obj
 {
-    void FUN_00c86660(int* a);
+    void hkMotionState_Copy(int* a);
 };
 
 struct FUN_00d1e190_Obj
 {
-    void FUN_00d1e190(int* motion);
+    void hkpFixedRigidMotion_getPositionAndVelocities(int* motion);
 };
 
 // Calls FUN_00c86660 on motion's sub-object at offset 0x10 with this+0x10, then zeroes two 16-byte vectors at float offsets 0x34 and 0x38 of motion.
 // @fnv 0x00d1e190
-void FUN_00d1e190_Obj::FUN_00d1e190(int* motion)
+// src: HAVOK_SRC 0x00d1e190
+void FUN_00d1e190_Obj::hkpFixedRigidMotion_getPositionAndVelocities(int* motion)
 {
     reinterpret_cast<FUN_00c86660_Obj*>(reinterpret_cast<char*>(motion) + 0x10)
-        ->FUN_00c86660(reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x10));
+        ->hkMotionState_Copy(reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x10));
 
     __m128 zero = _mm_setzero_ps();
     _mm_store_ps(reinterpret_cast<float*>(motion) + 0x34, zero);

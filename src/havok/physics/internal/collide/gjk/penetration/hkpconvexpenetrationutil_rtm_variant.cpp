@@ -24,7 +24,7 @@ struct Obj
     int m_iThirdValue;
     int m_auiShapeKeys[4];
     Entry m_usTrailingValue[4];
-    void FUN_00e2d440();
+    void ProcessEntries_00e2d440();
     void SetEntries(const hkVector4* a, const hkVector4* b, const hkVector4* c);
 };
 struct FUN_00df9c40_Obj
@@ -113,7 +113,7 @@ __forceinline void scalarDots(const S00cd7530_Vec& Q, const S00cd7530_Vec& R, fl
     _mm_store_ss(&RR, R.dot3(R).m_vValue);
     QR = R.dot3(Q);
 }
-void FUN_00cd7530(P pos, P t0, Mid t1, __int64 packedTail);
+void Hkpconvexpenetrationutil_ComputeTriangleBarycentricCoordinates(P pos, P t0, Mid t1, __int64 packedTail);
 extern "C" __m128 _mm_add_ps(__m128, __m128);
 extern const double DAT_01032980;
 extern const double DAT_010dbb40;
@@ -143,7 +143,7 @@ struct S00dfa940_Simplex
     void SetEntries(const hkVector4* a, const hkVector4* b, const hkVector4* c);
     int GetNearestEntry();
 };
-double FUN_00df9ae0();
+double rand01();
 struct S00dfa940_Solver
 {
     int unk00;
@@ -172,11 +172,11 @@ struct S00dfa940_Solver
     const hkVector4* m_68;
     int m_6c;
 
-    int FUN_00dfa940(int a1);
-    int FUN_00df9fe0(int a1, int* out);
-    void FUN_00df9b50(int idx, S00dfa940_Entry* e);
-    int FUN_00df9c90(S00dfa940_Simplex* o, int idx, S00dfa940_Entry* e, int* out);
-    void FUN_00df9d90(S00dfa940_Simplex* o, int idx, int a1);
+    int BuildSimplexWithRetries(int a1);
+    int ProcessAndReturnValue_00df9fe0(int a1, int* out);
+    void UpdateState_00df9b50(int idx, S00dfa940_Entry* e);
+    int ComputeValues_00df9c90(S00dfa940_Simplex* o, int idx, S00dfa940_Entry* e, int* out);
+    void ProcessEntries_00df9d90(S00dfa940_Simplex* o, int idx, int a1);
 };
 extern "C" void _ReadWriteBarrier(void);
 extern "C" unsigned __int64 __rdtsc(void);
@@ -223,7 +223,7 @@ struct __declspec(align(16)) S_00dfaac0_Penetration
 {
     int unk00;
     S_00dfaac0_Penetration(int a, int b, const hkTransform& t, float f, int c, int d, int e, int g);
-    int FUN_00dfa940(int out);
+    int BuildSimplexWithRetries(int out);
     int unk04;
     int unk08;
     int unk0C;
@@ -252,14 +252,14 @@ struct __declspec(align(16)) S_00dfaac0_Penetration
     int unk68;
     int unk6C;
 };
-int __cdecl FUN_00e2db70(int a, int b, const hkTransform& t, int c, int d, int out);
+int __cdecl Geometry_RefineClosestPointsByDirectionSampling(int a, int b, const hkTransform& t, int c, int d, int out);
 int __cdecl TestPenetration(int a, int b, const hkTransform& t, float f, int c, int d, int e, int g, int out);
 extern "C" void _mm_store_ps(float*, __m128);
 extern "C" __m128 _mm_load_ps(const float*);
 extern "C"
 {
-    void** FUN_00c85750();
-    void FUN_00e2d6c0(void*, void*, void*, void*, void*);
+    void** hkMemoryRouter_getInstance();
+    void Object_ProcessEntries_00e2d6c0(void*, void*, void*, void*, void*);
 
     __m128 _mm_mul_ps(__m128, __m128);
     __m128 _mm_add_ps(__m128, __m128);
@@ -349,10 +349,10 @@ struct Item
         m_unk6C = u6c;
     }
 
-    int FUN_00df9fe0(LocalStruct70* s, int* arr);
-    void FUN_00df9b50(int field2ff0, Entry* entry);
-    int FUN_00df9c90(const WorkObject& obj, int field2ff0, Entry* entry, int* arr);
-    void FUN_00df9d90(WorkObject* obj, int field2ff0, LocalStruct70* s);
+    int ProcessAndReturnValue_00df9fe0(LocalStruct70* s, int* arr);
+    void UpdateState_00df9b50(int field2ff0, Entry* entry);
+    int ComputeValues_00df9c90(const WorkObject& obj, int field2ff0, Entry* entry, int* arr);
+    void ProcessEntries_00df9d90(WorkObject* obj, int field2ff0, LocalStruct70* s);
 };
 struct WorkArray
 {
@@ -366,7 +366,7 @@ struct WorkArray
         return data;
     }
 };
-int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int count, const hkTransform* arg4,
+int hkTransform_ProcessEntries_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int count, const hkTransform* arg4,
                  OutItem** arg5);
 
 extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
@@ -431,10 +431,10 @@ struct S_00df9d90_OutP
 };
 struct S_00df9d90_Owner
 {
-    S_00df9d90_Src* FUN_00e2d550(S_00df9d90_Src* s);
+    S_00df9d90_Src* WalkAdjacentHullFaces(S_00df9d90_Src* s);
 };
 
-void FUN_00cd7530(const void* a, const __m128* b, const __m128* c, const __m128* d, float* out);
+void Hkpconvexpenetrationutil_ComputeTriangleBarycentricCoordinates(const void* a, const __m128* b, const __m128* c, const __m128* d, float* out);
 
 struct S_00df9d90_This
 {
@@ -448,11 +448,12 @@ struct S_00df9d90_This
     __m128* unk64;
     __m128* unk68;
     int unk6c;
-    S_00df9d90_Out* FUN_00df9d90(S_00df9d90_OwnerP owner, S_00df9d90_Src* s, S_00df9d90_OutP outp);
+    S_00df9d90_Out* ProcessEntries_00df9d90(S_00df9d90_OwnerP owner, S_00df9d90_Src* s, S_00df9d90_OutP outp);
 };
 
 // @fnv 0x00df9d90
-S_00df9d90_Out* S_00df9d90_This::FUN_00df9d90(S_00df9d90_OwnerP owner, S_00df9d90_Src* s, S_00df9d90_OutP outp)
+// src: GUESS 0x00df9d90 (confidence: low)
+S_00df9d90_Out* S_00df9d90_This::ProcessEntries_00df9d90(S_00df9d90_OwnerP owner, S_00df9d90_Src* s, S_00df9d90_OutP outp)
 {
     S_00df9d90_Bary bary;
     for (int i = 0; i < 10; i++)
@@ -460,10 +461,10 @@ S_00df9d90_Out* S_00df9d90_This::FUN_00df9d90(S_00df9d90_OwnerP owner, S_00df9d9
         unk68[0] = s->unk10[0];
         unk68[1] = s->unk20[0];
         unk68[2] = s->unk30[0];
-        FUN_00cd7530(&DAT_01267e30, &unk68[0], &unk68[1], &unk68[2], bary.v);
+        Hkpconvexpenetrationutil_ComputeTriangleBarycentricCoordinates(&DAT_01267e30, &unk68[0], &unk68[1], &unk68[2], bary.v);
         if (!(bary.v[0] < 0.0f || bary.v[1] < 0.0f || bary.v[2] < 0.0f))
             break;
-        s = owner.val()->FUN_00e2d550(s);
+        s = owner.val()->WalkAdjacentHullFaces(s);
     }
     __m128* p1 = s->unk10;
     unk60[0] = p1[1];

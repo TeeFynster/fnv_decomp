@@ -75,7 +75,7 @@ public:
     Point GetPoint() const;
     template <class Point>
     Point FUN_005c3420() const;
-    NiPoint3 FUN_006a6eb0();
+    NiPoint3 FastNavMeshTriLocation_GetLocation();
     TESObjectCELL* GetContainingCell();
     TESObjectCELL* FUN_006dd4f0() const;
     TESWorldSpace* GetParentWorldspace();
@@ -97,7 +97,7 @@ public:
     bool IsPathingLocationValid();
     bool HasPathingLocation();
     bool IsPathingLocationFlagSet();
-    bool FUN_006a9520();
+    bool PathingLocation_QUnused();
     bool FUN_006dd610(void*);
     bool FUN_006dd640(NavMeshPtr*, unsigned short*);
     bool FUN_006dd6a0();

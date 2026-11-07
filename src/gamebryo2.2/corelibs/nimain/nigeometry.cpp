@@ -270,13 +270,14 @@ void NiGeometry::UpdatePropertiesDownwardPass(NiPropertyState* state)
 }
 
 // @fnv 0x00a5ac90
-void NiAVObject::FUN_00a5ac90(NiAVObject* dest, CloningProcess& process)
+// src: XBOX_PDB 0x00a5ac90
+void NiAVObject::CopyMembers_00a5ac90(NiAVObject* dest, CloningProcess& process)
 {
     ((NiObjectNET*)this)->CopyMemberData((NiObjectNET*)dest, process);
     dest->m_uFlags = m_uFlags | 0x80000;
     dest->m_kLocal = m_kLocal;
     if (m_kPropertyList.m_kItemCount.m_uiCount)
-        FUN_00a5abe0(dest, &m_kPropertyList, process);
+        NiAVObject_CloneProperties(dest, &m_kPropertyList, process);
     if (m_spCollisionObject)
         dest->AssignCollisionObject((NiCollisionObject*)m_spCollisionObject->MakeClone(process));
 }
@@ -317,7 +318,7 @@ void NiGeometry::UpdateWorldBound()
         unsigned int savedFlags = flags;
         if ((unsigned char)(savedFlags >> 22) & 1)
         {
-            if (((NiBound*)m_kWorldBound)->FUN_00a92660(previous))
+            if (((NiBound*)m_kWorldBound)->Object_HasEqualFloatComponents(previous))
                 savedFlags |= 0x400000;
             else
                 savedFlags &= ~0x400000;
@@ -705,10 +706,10 @@ bool NiGeometry::IsEqual(NiObject* object) const
 }
 
 extern const char* DAT_011f4acc;
-char* FUN_00a7d330(const char*);
-char* FUN_00a7d5a0(const char*, const void*);
-char* FUN_00a7d5e0(const char*, const char*);
-char* FUN_00a7d510(const char*, unsigned int);
+char* NiViewerStrings_NiGetViewerString_Title(const char*);
+char* NiGetViewerString_00a7d5a0(const char*, const void*);
+char* NiGetViewerString_00a7d5e0(const char*, const char*);
+char* NiGetViewerString_00a7d510(const char*, unsigned int);
 struct ViewerStrings
 {
     void* vtable;
@@ -744,14 +745,14 @@ void NiGeometry::GetViewerStrings(NiViewerStringsArray* array)
 {
     ViewerStrings* strings = (ViewerStrings*)array;
     FUN_00a5ad00(strings);
-    strings->Add(FUN_00a7d330(DAT_011f4acc));
-    strings->Add(FUN_00a7d5a0("GeomData", static_cast<NiGeometryData*>(m_spModelData)));
+    strings->Add(NiViewerStrings_NiGetViewerString_Title(DAT_011f4acc));
+    strings->Add(NiGetViewerString_00a7d5a0("GeomData", static_cast<NiGeometryData*>(m_spModelData)));
     NiD3DShaderInterface* shader = (NiD3DShaderInterface*)m_spShader;
     if (shader)
-        strings->Add(FUN_00a7d5e0("shader", shader->GetRTTI()->GetName()));
+        strings->Add(NiGetViewerString_00a7d5e0("shader", shader->GetRTTI()->GetName()));
     SkinInstanceInfo* skin = reinterpret_cast<SkinInstanceInfo*>(m_spSkinInstance.m_pObject);
     if (skin && skin->partition)
-        strings->Add(FUN_00a7d510("skin partitions", skin->partition->GetCount()));
+        strings->Add(NiGetViewerString_00a7d510("skin partitions", skin->partition->GetCount()));
 }
 
 extern char* g_pcEmptyFixedString;
@@ -1037,14 +1038,15 @@ void NiGeometry::SaveBinary(NiStream& stream)
 class NiObjectNET_stub
 {
   public:
-    void FUN_00a5c6a0(int);
-    void FUN_00a7fdc0(int);
+    void NiObjectNET_PostLinkObject(int);
+    void NiGeometry_PostLinkObject(int);
 };
 
 // @fnv 0x00a7fdc0
-void NiObjectNET_stub::FUN_00a7fdc0(int a1)
+// src: XBOX_PDB 0x00a7fdc0
+void NiObjectNET_stub::NiGeometry_PostLinkObject(int a1)
 {
-    FUN_00a5c6a0(a1);
+    NiObjectNET_PostLinkObject(a1);
 }
 
 // @fnv 0x00a804e0

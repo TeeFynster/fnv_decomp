@@ -8,5 +8,5 @@ struct LitWaterRefList : public BSSimpleList<TESObjectREFR*>
 {
 public:
     int FUN_005ae380();
-    bool FUN_005f65d0(TESObjectREFR*& item);
+    bool BSSimpleList_TESLevSpell_IsInList(TESObjectREFR*& item);
 };

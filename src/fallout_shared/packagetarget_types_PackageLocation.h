@@ -24,16 +24,16 @@ class LocationDescriptor
     };
     PACK_LOC_TYPE GetLocType() const;
     void SetLocationType(PACK_LOC_TYPE type);
-    unsigned int FUN_0067f1c0();
+    unsigned int PackageLocation_GetRadius();
     void SetRadius(unsigned int radius);
     TESObjectREFR* GetLocationReference();
-    void FUN_0067f3c0(TESObjectREFR* reference);
+    void PackageLocation_SetLocReference(TESObjectREFR* reference);
     TESObjectCELL* GetLocationCellReference();
-    void FUN_0067f410(TESObjectCELL* cell);
+    void PackageLocation_SetLocCell(TESObjectCELL* cell);
     TESBoundObject* FUN_0067f430();
     void SetValue(TESForm* form);
     PACKAGE_OBJECT_TYPE GetObjectType();
-    void FUN_0067f4b0(PACKAGE_OBJECT_TYPE type);
+    void PackageLocation_SetLocObjectType(PACKAGE_OBJECT_TYPE type);
     void Copy(LocationDescriptor* source, bool copy);
     // LocationDescriptor
     // void __cdecl LocationDescriptor::*()

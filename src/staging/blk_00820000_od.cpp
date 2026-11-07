@@ -92,46 +92,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 #include "../../include/TESSound.h"
@@ -159,22 +159,24 @@ public:
 
 struct FUN_00821620_Class
 {
-    void __thiscall FUN_00821620(float value);
+    void __thiscall BoltShaderProperty_SetBoltsRadius(float value);
 };
 
 // @fnv 0x00821620
-void __thiscall FUN_00821620_Class::FUN_00821620(float value)
+// src: XBOX_PDB 0x00821620
+void __thiscall FUN_00821620_Class::BoltShaderProperty_SetBoltsRadius(float value)
 {
     *(float*)((char*)this + 0x130) = value;
 }
 
 struct FUN_00821680_Class
 {
-    float FUN_00821680() const;
+    float TESObjectWEAP_GetFiringRumbleRightMotorStrength() const;
 };
 
 // @fnv 0x00821680
-float FUN_00821680_Class::FUN_00821680() const
+// src: COMMUNITY 0x00821680
+float FUN_00821680_Class::TESObjectWEAP_GetFiringRumbleRightMotorStrength() const
 {
     return *(const float*)((const char*)this + 0x140);
 }
@@ -200,11 +202,12 @@ struct FUN_00827200_class
 {
     void __thiscall _ref_006815c0();
     void __thiscall FUN_00cb26e0(int);
-    FUN_00827200_class* __thiscall FUN_00827200(int a);
+    FUN_00827200_class* __thiscall hkQuaternion_hkQuaternion(int a);
 };
 // Calls _ref_006815c0, then FUN_00cb26e0 with a, and returns this.
 // @fnv 0x00827200
-FUN_00827200_class* __thiscall FUN_00827200_class::FUN_00827200(int a)
+// src: XBOX_PDB 0x00827200
+FUN_00827200_class* __thiscall FUN_00827200_class::hkQuaternion_hkQuaternion(int a)
 {
     _ref_006815c0();
     FUN_00cb26e0(a);
@@ -230,13 +233,15 @@ unsigned short __thiscall TESSound::GetShortAtOffset5A()
 }
 
 // @fnv 0x0082d700
-unsigned char TESSound::FUN_0082d700()
+// src: COMMUNITY 0x0082d700
+unsigned char TESSound::GetEndTime_0082d700()
 {
     return data.stopTime & 0xff;
 }
 
 // @fnv 0x0082d720
-unsigned int __thiscall TESSound::FUN_0082d720()
+// src: COMMUNITY 0x0082d720
+unsigned int __thiscall TESSound::GetPriority_0082d720()
 {
     return data.unk18 & 0xff;
 }
@@ -262,30 +267,33 @@ extern "C" void* DAT_0107cb6c;
 
 struct FUN_0082f140_class
 {
-    void FUN_0082f140();
+    void SetVirtualTable_0082f140();
 };
 
 // @fnv 0x0082f140
-void __thiscall FUN_0082f140_class::FUN_0082f140()
+// src: GUESS 0x0082f140 (confidence: low)
+void __thiscall FUN_0082f140_class::SetVirtualTable_0082f140()
 {
     *reinterpret_cast<void**>(this) = &DAT_0107cb6c;
 }
 
-void __fastcall FUN_0082f1b0(void*);
+void __fastcall NiCriticalSection_Lock(void*);
 
 struct FUN_0082f190_class
 {
-    void FUN_0082f190();
+    void CBSAStream_Lock();
 };
 
 // @fnv 0x0082f190
-void FUN_0082f190_class::FUN_0082f190()
+// src: COMMUNITY 0x0082f190
+void FUN_0082f190_class::CBSAStream_Lock()
 {
-    FUN_0082f1b0(reinterpret_cast<char*>(this) + 0x10c);
+    NiCriticalSection_Lock(reinterpret_cast<char*>(this) + 0x10c);
 }
 
 // @fnv 0x0082f1d0
-void CBSAStream::FUN_0082f1d0()
+// src: COMMUNITY 0x0082f1d0
+void CBSAStream::Unlock_0082f1d0()
 {
     reinterpret_cast<RecursiveLock*>(reinterpret_cast<char*>(this) + 0x10c)->Leave();
 }
@@ -306,20 +314,21 @@ FUN_0082f240_class::FUN_0082f240_class()
 }
 }  // namespace fnv_0082f240
 
-void __fastcall FUN_0082f1b0(void*);
+void __fastcall NiCriticalSection_Lock(void*);
 
 struct FUN_0082f520Class
 {
     void* p;
-    void* __thiscall FUN_0082f520(void* v);
+    void* __thiscall ProcessAndReturnValue_0082f520(void* v);
 };
 
 // Stores v into p, calls FUN_0082f1b0 on p, and returns this.
 // @fnv 0x0082f520
-void* __thiscall FUN_0082f520Class::FUN_0082f520(void* pValue)
+// src: GUESS 0x0082f520 (confidence: low)
+void* __thiscall FUN_0082f520Class::ProcessAndReturnValue_0082f520(void* pValue)
 {
     p = pValue;
-    FUN_0082f1b0(p);
+    NiCriticalSection_Lock(p);
     return this;
 }
 
@@ -347,11 +356,12 @@ extern "C" void __stdcall ReceiveConnection(int, int, int);
 
 struct FUN_00831f40_Class
 {
-    void FUN_00831f40(int a, int b);
+    void ReceiveConnection_Thunk(int a, int b);
 };
 
 // @fnv 0x00831f40
-void FUN_00831f40_Class::FUN_00831f40(int aiArg1, int aiArg2)
+// src: GUESS 0x00831f40 (confidence: medium)
+void FUN_00831f40_Class::ReceiveConnection_Thunk(int aiArg1, int aiArg2)
 {
     ReceiveConnection((int)this + 0x104, aiArg1, aiArg2);
 }
@@ -363,10 +373,11 @@ struct FUN_008321c0_Class
     int m_iThirdValue;
     int m_iFourthElementInteger;
     void FUN_00836030();
-    void FUN_008321c0();
+    void ForwardCall_008321c0();
 };
 // @fnv 0x008321c0
-void FUN_008321c0_Class::FUN_008321c0()
+// src: GUESS 0x008321c0 (confidence: low)
+void FUN_008321c0_Class::ForwardCall_008321c0()
 {
     ((FUN_008321c0_Class*)((char*)this + 4))->FUN_00836030();
 }
@@ -391,7 +402,8 @@ extern int DAT_011dd87c[];
 
 // Returns the entry at index from DAT_011dd87c if non-zero, otherwise the entry at index from DAT_011a1888.
 // @fnv 0x008374b0
-int __cdecl FUN_008374b0(int index)
+// src: XBOX_PDB 0x008374b0
+int __cdecl ImpactMixer_GetMaterialSoundName(int index)
 {
     if (DAT_011dd87c[index])
         return DAT_011dd87c[index];
@@ -412,7 +424,8 @@ extern "C" void __cdecl FalloutAudio_FUN_00839ab0();
 extern unsigned char DAT_011dd85c;
 
 // @fnv 0x00837500
-void FUN_00837500()
+// src: COMMUNITY 0x00837500
+void ResetFootstepSounds()
 {
     DAT_011dd85c = 0;
     FalloutAudio_FUN_00839ab0();
@@ -424,12 +437,13 @@ struct FUN_0083b5e0_class
 {
     void* m_ptr;
     void InitBuffer(int);
-    void* FUN_0083b5e0(int a);
+    void* NiTPointerMap_int_unsigned_int_NiTPointerMap(int a);
 };
 
 // Calls InitBuffer with the argument, sets m_ptr to DAT_0107d9c4, and returns this.
 // @fnv 0x0083b5e0
-void* FUN_0083b5e0_class::FUN_0083b5e0(int a)
+// src: EXE 0x0083b5e0
+void* FUN_0083b5e0_class::NiTPointerMap_int_unsigned_int_NiTPointerMap(int a)
 {
     InitBuffer(a);
     m_ptr = &DAT_0107d9c4;
@@ -442,10 +456,11 @@ struct S7010
 };
 struct FUN_0083dea0_class
 {
-    unsigned int FUN_0083dea0();
+    unsigned int TESTopic_HasDummyPrompt();
 };
 // @fnv 0x0083dea0
-unsigned int FUN_0083dea0_class::FUN_0083dea0()
+// src: XBOX_PDB 0x0083dea0
+unsigned int FUN_0083dea0_class::TESTopic_HasDummyPrompt()
 {
     return 0 < ((S7010*)((char*)this + 0x34))->Length();
 }
@@ -471,12 +486,13 @@ extern void* DAT_0107ca64;
 
 struct FUN_0082efb0
 {
-    void FUN_0082efb0_init();
+    void SetVtableAndProcessState_0082efb0();
 };
 
 // Sets the vtable pointer, clears the pointer map, and frees the pointer stored at offset 8.
 // @fnv 0x0082efb0
-void FUN_0082efb0::FUN_0082efb0_init()
+// src: GUESS 0x0082efb0 (confidence: low)
+void FUN_0082efb0::SetVtableAndProcessState_0082efb0()
 {
     *(void**)((char*)this + 0) = (void*)&DAT_0107ca64;
     ((NiTPointerMap<int, int>*)this)->RemoveAll();
@@ -489,11 +505,12 @@ extern void* DAT_0107d9e4;
 
 struct FUN_0083b710_cls : public NiTPointerMap<int, int>
 {
-    void FUN_0083b710();
+    void SetVtableAndProcessState_0083b710();
 };
 
 // @fnv 0x0083b710
-void FUN_0083b710_cls::FUN_0083b710()
+// src: GUESS 0x0083b710 (confidence: low)
+void FUN_0083b710_cls::SetVtableAndProcessState_0083b710()
 {
     *reinterpret_cast<void**>(this) = &DAT_0107d9e4;
     RemoveAll();
@@ -551,14 +568,14 @@ void* __thiscall FUN_0082eee0_class::InitArray(int aiCount)
 void __cdecl Deallocate(void*);
 struct FUN_00831f80_class
 {
-    void __thiscall FUN_00831fb0();
+    void __thiscall SetVtableAndProcessState_00831fb0();
     void* __thiscall FUN_00831f80(unsigned int flags);
 };
 // Calls FUN_00831fb0, then frees this with Deallocate if flags has bit 0 set, and returns this.
 // @fnv 0x00831f80
 void* __thiscall FUN_00831f80_class::FUN_00831f80(unsigned int flags)
 {
-    FUN_00831fb0();
+    SetVtableAndProcessState_00831fb0();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -575,11 +592,12 @@ struct FUN_00831fb0_class
     int b;
     int c;
     int d;
-    void __thiscall FUN_00831fb0();
+    void __thiscall SetVtableAndProcessState_00831fb0();
 };
 // Sets the object's vtbl and two fields to the given globals, then calls FUN_009fdc10 on this.
 // @fnv 0x00831fb0
-void __thiscall FUN_00831fb0_class::FUN_00831fb0()
+// src: GUESS 0x00831fb0 (confidence: low)
+void __thiscall FUN_00831fb0_class::SetVtableAndProcessState_00831fb0()
 {
     vtbl = &DAT_0107cdac;
     c = (int)&DAT_0107cd6c;
@@ -589,23 +607,25 @@ void __thiscall FUN_00831fb0_class::FUN_00831fb0()
 
 struct FUN_00836600_class
 {
-    void __thiscall FUN_00836600(BGSLoadFormBuffer* buffer);
-    void __thiscall FUN_00836110(BGSLoadFormBuffer* buffer);
+    void __thiscall RadioEntry_Save(BGSLoadFormBuffer* buffer);
+    void __thiscall RadioEntry_Data_Save(BGSLoadFormBuffer* buffer);
 };
 // @fnv 0x00836600
-void __thiscall FUN_00836600_class::FUN_00836600(BGSLoadFormBuffer* buffer)
+// src: COMMUNITY 0x00836600
+void __thiscall FUN_00836600_class::RadioEntry_Save(BGSLoadFormBuffer* buffer)
 {
     reinterpret_cast<BGSSaveFormBuffer*>(buffer)->SerializeFormData(
         reinterpret_cast<void*>(reinterpret_cast<int*>(this)[0]), 0);
-    reinterpret_cast<FUN_00836600_class*>(reinterpret_cast<char*>(this) + 4)->FUN_00836110(buffer);
+    reinterpret_cast<FUN_00836600_class*>(reinterpret_cast<char*>(this) + 4)->RadioEntry_Data_Save(buffer);
 }
 
 struct FUN_00837280_Class
 {
-    char FUN_00837280();
+    char RadioConvTask_GetFileIndex();
 };
 // @fnv 0x00837280
-char FUN_00837280_Class::FUN_00837280()
+// src: COMMUNITY 0x00837280
+char FUN_00837280_Class::RadioConvTask_GetFileIndex()
 {
     return 3;
 }
@@ -640,13 +660,13 @@ void __cdecl Deallocate(void*);
 struct FUN_0083b740_Class
 {
     void* __thiscall FUN_0083b740(unsigned int flags);
-    void __thiscall FUN_0083b710();
+    void __thiscall SetVtableAndProcessState_0083b710();
 };
 // Calls FUN_0083b710, then frees this with Deallocate when flags has bit 0 set, and returns this.
 // @fnv 0x0083b740
 void* __thiscall FUN_0083b740_Class::FUN_0083b740(unsigned int flags)
 {
-    FUN_0083b710();
+    SetVtableAndProcessState_0083b710();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -738,7 +758,8 @@ void __thiscall FUN_00824290_class::AddWeatherEntry(int aiFirst, int aiSecond, i
 
 // If self is non-null and its sound data has a non-zero a or b, writes a and b to outA and outB and returns true; otherwise returns false.
 // @fnv 0x0082d740
-bool FUN_0082d740(TESSound* self, int* outA, int* outB)
+// src: COMMUNITY 0x0082d740
+bool GetSoundLoopPoints(TESSound* self, int* outA, int* outB)
 {
     if (!self)
         return false;
@@ -830,7 +851,7 @@ struct FUN_0083d1e0
     unsigned int unk24;
     unsigned int unk28;
     FUN_0083d1e0();
-    void FUN_0083d740(BGSLoadFormBuffer* buffer);
+    void DialogueResponse_LoadGameBGS(BGSLoadFormBuffer* buffer);
 };
 struct DialogueResponseList
 {
@@ -860,7 +881,7 @@ void DialogueItem_shell::LoadDialogueItem(BGSLoadFormBuffer* buffer)
         for (unsigned int i = 0; i < count; ++i)
         {
             FUN_0083d1e0* response = new FUN_0083d1e0;
-            response->FUN_0083d740(buffer);
+            response->DialogueResponse_LoadGameBGS(buffer);
             responses.AddTail(response);
         }
     }
@@ -1062,7 +1083,7 @@ struct FUN_0082efb0_Ext : FUN_0082efb0
 // @fnv 0x0082efe0
 FUN_0082efb0* FUN_0082efb0_Ext::FUN_0082efe0(unsigned int flags)
 {
-    FUN_0082efb0_init();
+    SetVtableAndProcessState_0082efb0();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -1076,7 +1097,7 @@ struct FUN_0082f160_class : public FUN_0082f140_class
 // @fnv 0x0082f160
 void* __thiscall FUN_0082f160_class::FUN_0082f160(unsigned int flags)
 {
-    FUN_0082f140();
+    SetVirtualTable_0082f140();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -1113,7 +1134,8 @@ int FUN_00831de0_Class::ForwardToMember()
 typedef void(__stdcall* FUN_00831eb0_callback)(void*, int, int);
 
 // @fnv 0x00831eb0
-void __stdcall FUN_00831eb0(void* object, int aiArg1, int aiArg2)
+// src: GUESS 0x00831eb0 (confidence: low)
+void __stdcall BSSimpleList_UpdateState_00831eb0(void* object, int aiArg1, int aiArg2)
 {
     BSSimpleList<ContNode>* next =
         reinterpret_cast<BSSimpleList<ContNode>*>(reinterpret_cast<char*>(object) - 0x0C)->GetNext();
@@ -1130,7 +1152,8 @@ struct FUN_00831ee0_class
 
 // Retrieves the ContNode at p-0xc via FUN_00726070 and calls its first virtual method.
 // @fnv 0x00831ee0
-void __stdcall FUN_00831ee0(void* p)
+// src: GUESS 0x00831ee0 (confidence: low)
+void __stdcall Object_UpdateFields_00831ee0(void* p)
 {
     FUN_00831ee0_class* node = (FUN_00831ee0_class*)FUN_00726070((ContNode*)((char*)p - 0xc));
 
@@ -1179,11 +1202,12 @@ TESForm* __cdecl _ref_004839c0(unsigned int formID);
 
 struct FUN_0083d740_Class
 {
-    void __thiscall FUN_0083d740(BGSLoadGameBuffer* buffer);
+    void __thiscall DialogueResponse_LoadGameBGS(BGSLoadGameBuffer* buffer);
 };
 
 // @fnv 0x0083d740
-void __thiscall FUN_0083d740_Class::FUN_0083d740(BGSLoadGameBuffer* buffer)
+// src: COMMUNITY 0x0083d740
+void __thiscall FUN_0083d740_Class::DialogueResponse_LoadGameBGS(BGSLoadGameBuffer* buffer)
 {
     char text[1000];
 
@@ -1260,11 +1284,12 @@ extern void* _DAT_01183028;
 
 struct FUN_0083fbe0_Class
 {
-    void __thiscall FUN_0083fbe0(BGSLoadGameBuffer* buffer);
+    void __thiscall ExtraInfoGeneralTopic_Data_LoadGame(BGSLoadGameBuffer* buffer);
 };
 
 // @fnv 0x0083fbe0
-void __thiscall FUN_0083fbe0_Class::FUN_0083fbe0(BGSLoadGameBuffer* buffer)
+// src: COMMUNITY 0x0083fbe0
+void __thiscall FUN_0083fbe0_Class::ExtraInfoGeneralTopic_Data_LoadGame(BGSLoadGameBuffer* buffer)
 {
     char string[500];
 
@@ -1379,7 +1404,7 @@ struct SecondaryBase_b5774
 
 struct GlobalMgr_b5774
 {
-    bool FUN_004226e0();
+    bool TESDataHandler_GetClearingData();
 };
 
 extern GlobalMgr_b5774* DAT_011c3f2c;
@@ -1401,7 +1426,7 @@ class FUN_00825b60 : public PrimaryBase_b5774, public SecondaryBase_b5774
 // @fnv 0x00825b60
 FUN_00825b60::~FUN_00825b60()
 {
-    if (!DAT_011c3f2c->FUN_004226e0())
+    if (!DAT_011c3f2c->TESDataHandler_GetClearingData())
     {
         if (m_20 != 0)
         {
@@ -1459,9 +1484,9 @@ int CopySoundPath(char* dest, unsigned int size, const char* src);
 bool GetSoundPathAndFlags(unsigned int formID, char* path, unsigned int* flags, TESSound** outSound)
 {
     TESSound* sound = g_dataHandler->LookupSound(formID);
-    if (sound && sound->FUN_00511840() && path)
+    if (sound && sound->TESSound_GetFilename() && path)
     {
-        CopySoundPath(path, 0x104, sound->FUN_00511840());
+        CopySoundPath(path, 0x104, sound->TESSound_GetFilename());
     }
     else
     {
@@ -1512,7 +1537,7 @@ extern "C" void* __cdecl FUN_00afdf20(const char*, int, int, int);
 struct FNVHandle
 {
     virtual ~FNVHandle();
-    bool FUN_008905f0();
+    bool TESAnimGroup_GetDecal();
 };
 struct FUN_0082f240
 {
@@ -1549,7 +1574,7 @@ FUN_0082f010::FUN_0082f010(const char* pathName)
     counter = 0;
     FUN_00406d30(path, 0x104, pathName);
     handle = (FNVHandle*)FUN_00afdf20(path, 0, 0x4000, 8);
-    if (!handle || !handle->FUN_008905f0())
+    if (!handle || !handle->TESAnimGroup_GetDecal())
     {
         if (handle)
         {
@@ -1568,7 +1593,7 @@ struct ProbeTarget
     virtual void v0C();
     virtual void v10();
     virtual void v14(int a, int b);
-    bool FUN_008905f0();
+    bool TESAnimGroup_GetDecal();
 };
 class FUN_0082f310_cls
 {
@@ -1650,13 +1675,14 @@ class FUN_0082f310_cls
     __int64 m_130;
 
   public:
-    int FUN_0082f310(__int64 value);
+    int CBSAStream_Seek(__int64 value);
 };
 // Validates value against m_128 and the m_108 probe, then stores it in m_130 and calls m_108->v14(value, DAT_010a2480); returns 1 on failure, 0 on success.
 // @fnv 0x0082f310
-int FUN_0082f310_cls::FUN_0082f310(__int64 value)
+// src: COMMUNITY 0x0082f310
+int FUN_0082f310_cls::CBSAStream_Seek(__int64 value)
 {
-    if (value < 0 || value > this->m_128 || this->m_108 == 0 || this->m_108->FUN_008905f0() == 0)
+    if (value < 0 || value > this->m_128 || this->m_108 == 0 || this->m_108->TESAnimGroup_GetDecal() == 0)
     {
         return 1;
     }
@@ -1759,11 +1785,12 @@ struct ArchiveStream
     int unk124;
     __int64 size;
     __int64 pos;
-    int FUN_0082f3c0(void* buffer, unsigned int count, int unused, unsigned int* bytesRead);
+    int CBSAStream_Read(void* buffer, unsigned int count, int unused, unsigned int* bytesRead);
 };
 
 // @fnv 0x0082f3c0
-int ArchiveStream::FUN_0082f3c0(void* buffer, unsigned int count, int unused, unsigned int* bytesRead)
+// src: COMMUNITY 0x0082f3c0
+int ArchiveStream::CBSAStream_Read(void* buffer, unsigned int count, int unused, unsigned int* bytesRead)
 {
     StreamLock guard(&lock);
     if (!file || !file->IsValid())
@@ -1785,7 +1812,7 @@ int ArchiveStream::FUN_0082f3c0(void* buffer, unsigned int count, int unused, un
 
 extern "C" __declspec(dllimport) int __stdcall CloseHandle(void* hObject);
 
-void __cdecl FUN_0040fca0(int milliseconds);
+void __cdecl BSSleep(int milliseconds);
 
 struct FUN_00aa63c0
 {
@@ -1821,13 +1848,13 @@ FUN_0082f6c0::~FUN_0082f6c0()
     unk3C &= 0xFFFFFFFE;
     CopyAndSleep(&unk34);
     while (unk3C & 2)
-        FUN_0040fca0(10);
+        BSSleep(10);
     CloseHandle(unk30);
 }
 
 extern unsigned int DAT_011dd1f4;
 
-void __cdecl FormHeap_Free(unsigned int p);
+void __cdecl FormHeapFreeAndLog_00401030(unsigned int p);
 
 struct FUN_0082f9c0_obj
 {
@@ -1835,7 +1862,8 @@ struct FUN_0082f9c0_obj
 };
 
 // @fnv 0x0082f9c0
-void __cdecl FUN_0082f9c0()
+// src: COMMUNITY 0x0082f9c0
+void __cdecl FalloutAudioMedia_Shutdown()
 {
     unsigned int a = DAT_011dd1f4;
     unsigned int b_2 = a;
@@ -1850,7 +1878,7 @@ void __cdecl FUN_0082f9c0()
         }
         else
         {
-            FormHeap_Free(c7 - 4);
+            FormHeapFreeAndLog_00401030(c7 - 4);
             r_2 = 0;
         }
         s = r_2;
@@ -1864,7 +1892,8 @@ void __cdecl FUN_0082f9c0()
 
 // FUN_00831f70: stdcall stub taking one stack argument and returning 0.
 // @fnv 0x00831f70
-int __stdcall FUN_00831f70(int unused)
+// src: GUESS 0x00831f70 (confidence: high)
+int __stdcall Runtime_ReturnZero(int unused)
 {
     return 0;
 }
@@ -1881,7 +1910,7 @@ struct Entry
 };
 struct Weap
 {
-    TESSound* __thiscall FUN_005215a0(bool v);
+    TESSound* __thiscall TESObjectWEAP_GetAttackSound(bool v);
     void* __thiscall GetPointerByFlag(bool v);
     TESSound* __thiscall GetValueByFlag(bool v);
 };
@@ -2107,15 +2136,15 @@ struct Player
 };
 struct ListObj
 {
-    LocalVec3* __thiscall FUN_0045bb80();
+    LocalVec3* __thiscall NiAVObject_GetWorldTranslate();
 };
 struct SettingObj
 {
-    float* __thiscall FUN_00403e20();
+    float* __thiscall Setting_Float_00403e20();
 };
-bool __cdecl FUN_00839da0();
-bool __fastcall FUN_00524d10(void* p);
-unsigned int __cdecl FUN_00457fe0();
+bool __cdecl ImpactMixer_GetGunshotsInitialized();
+bool __fastcall PlayerCharacter_IsActually3rdPerson(void* p);
+unsigned int __cdecl Cmd_GetSessionTime_Execute();
 bool __cdecl FUN_0082eca0(void* snd, LocalVec3 pos, float v);
 extern Player* DAT_011dea3c;
 extern LocalVec3 DAT_011f426c;
@@ -2128,14 +2157,14 @@ extern Entry DAT_011dd9e8[20];
 // @fnv 0x0083ac30
 void __cdecl PlayWeaponSound(Weap* apWeapon, VObj1d0* apSource, ListObj* apListObj, bool a3)
 {
-    if (!FUN_00839da0())
+    if (!ImpactMixer_GetGunshotsInitialized())
         return;
     BSSoundHandle bobj24;
     BSSoundHandle iobj48;
     LocalVec3 jvec = DAT_011f426c;
     bool ib15 = false;
     int iflags = 0;
-    bool kb52 = !FUN_00524d10(DAT_011dea3c);
+    bool kb52 = !PlayerCharacter_IsActually3rdPerson(DAT_011dea3c);
     bool b83d = false;
     ::NiPoint3 cpt;
     float ef60 = DAT_01016970;
@@ -2158,10 +2187,10 @@ void __cdecl PlayWeaponSound(Weap* apWeapon, VObj1d0* apSource, ListObj* apListO
         {
             if (!DAT_011dea3c->FUN_008d6f30()->FUN_00454b10())
             {
-                cf38 = *DAT_011dd008.FUN_00403e20();
-                if68 = *DAT_011dd034.FUN_00403e20();
-                yf50 = *DAT_011dd0ac.FUN_00403e20();
-                cf4c = *DAT_011dcff4.FUN_00403e20();
+                cf38 = *DAT_011dd008.Setting_Float_00403e20();
+                if68 = *DAT_011dd034.Setting_Float_00403e20();
+                yf50 = *DAT_011dd0ac.Setting_Float_00403e20();
+                cf4c = *DAT_011dcff4.Setting_Float_00403e20();
             }
         }
     }
@@ -2205,14 +2234,14 @@ void __cdecl PlayWeaponSound(Weap* apWeapon, VObj1d0* apSource, ListObj* apListO
         if (!a3 && apListObj != 0)
         {
             // Use the shared point layout for the original trivial 12-byte copy.
-            reinterpret_cast<::NiPoint3&>(jvec) = reinterpret_cast<const ::NiPoint3&>(*apListObj->FUN_0045bb80());
+            reinterpret_cast<::NiPoint3&>(jvec) = reinterpret_cast<const ::NiPoint3&>(*apListObj->NiAVObject_GetWorldTranslate());
         }
         else if (apSource->VCall1d0() != 0)
         {
             reinterpret_cast<::NiPoint3&>(jvec) =
-                reinterpret_cast<const ::NiPoint3&>(*((ListObj*)apSource->VCall1d0())->FUN_0045bb80());
+                reinterpret_cast<const ::NiPoint3&>(*((ListObj*)apSource->VCall1d0())->NiAVObject_GetWorldTranslate());
         }
-        if (apWeapon->FUN_005215a0(b83d) != 0)
+        if (apWeapon->TESObjectWEAP_GetAttackSound(b83d) != 0)
         {
             TESSound* sndA = 0;
             TESSound* sndB = 0;
@@ -2222,7 +2251,7 @@ void __cdecl PlayWeaponSound(Weap* apWeapon, VObj1d0* apSource, ListObj* apListO
             }
             else
             {
-                sndA = apWeapon->FUN_005215a0(b83d);
+                sndA = apWeapon->TESObjectWEAP_GetAttackSound(b83d);
                 sndB = apWeapon->GetValueByFlag(b83d);
             }
             bool a86 = FUN_0082eca0(sndA, jvec, yf50);
@@ -2235,7 +2264,7 @@ void __cdecl PlayWeaponSound(Weap* apWeapon, VObj1d0* apSource, ListObj* apListO
                 sndB = 0;
             // The audio header still names the old point type; use the shared return layout.
             cpt = jvec -
-                  (BSAudio::FUN_00453a70()->*reinterpret_cast<::NiPoint3 (BSAudio::*)()>(&BSAudio::FUN_00ad78e0))();
+                  (BSAudio::BSAudio_QInstance()->*reinterpret_cast<::NiPoint3 (BSAudio::*)()>(&BSAudio::BSAudio_GetListenerPosition))();
             ef60 = cpt.x * cpt.x + cpt.y * cpt.y + cpt.z * cpt.z;
             int ai;
             for (ai = 0; ai < 20; ai++)
@@ -2271,20 +2300,20 @@ void __cdecl PlayWeaponSound(Weap* apWeapon, VObj1d0* apSource, ListObj* apListO
             {
                 aentry140 = mentry3c;
                 mentry3c->f18 = apSource;
-                mentry3c->f1c = FUN_00457fe0();
+                mentry3c->f1c = Cmd_GetSessionTime_Execute();
                 mentry3c->f20 = ef60;
             }
             else if (sentry58 != 0)
             {
                 aentry140 = sentry58;
-                sentry58->f1c = FUN_00457fe0();
+                sentry58->f1c = Cmd_GetSessionTime_Execute();
                 sentry58->f20 = ef60;
             }
             else if (tentry64 != 0)
             {
                 aentry140 = tentry64;
                 tentry64->f18 = apSource;
-                tentry64->f1c = FUN_00457fe0();
+                tentry64->f1c = Cmd_GetSessionTime_Execute();
                 tentry64->f20 = ef60;
             }
             if (aentry140 != 0)
@@ -2295,9 +2324,9 @@ void __cdecl PlayWeaponSound(Weap* apWeapon, VObj1d0* apSource, ListObj* apListO
                     aentry140->ch0.Stop();
                     // Adapt the legacy BSAudio return declaration to the shared 12-byte handle.
                     aentry140->ch0 =
-                        (BSAudio::FUN_00453a70()->*reinterpret_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int, unsigned int)>(
-                            static_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int, unsigned int)>(&BSAudio::FUN_00ad7480)))(
-                                sndA->FUN_00511840(), (unsigned int)iflags, (unsigned int)sndA);
+                        (BSAudio::BSAudio_QInstance()->*reinterpret_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int, unsigned int)>(
+                            static_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int, unsigned int)>(&BSAudio::BSAudio_GetSoundHandleByFilename)))(
+                                sndA->TESSound_GetFilename(), (unsigned int)iflags, (unsigned int)sndA);
                     gb31 = (unsigned char)sndA->GetByteAtOffset44();
                     cg59 = sndA->GetField45();
                 }
@@ -2306,9 +2335,9 @@ void __cdecl PlayWeaponSound(Weap* apWeapon, VObj1d0* apSource, ListObj* apListO
                     aentry140->ch1.SetVolume(0.0f);
                     aentry140->ch1.Stop();
                     aentry140->ch1 =
-                        (BSAudio::FUN_00453a70()->*reinterpret_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int, unsigned int)>(
-                            static_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int, unsigned int)>(&BSAudio::FUN_00ad7480)))(
-                                sndB->FUN_00511840(), (unsigned int)iflags, (unsigned int)sndB);
+                        (BSAudio::BSAudio_QInstance()->*reinterpret_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int, unsigned int)>(
+                            static_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int, unsigned int)>(&BSAudio::BSAudio_GetSoundHandleByFilename)))(
+                                sndB->TESSound_GetFilename(), (unsigned int)iflags, (unsigned int)sndB);
                     qb75 = (unsigned char)sndB->GetByteAtOffset44();
                     sb0d = sndB->GetField45();
                 }
@@ -2380,18 +2409,18 @@ FUN_0083b6b0::~FUN_0083b6b0()
 namespace fnv_0083d130 {
 struct S_0083d130_Str
 {
-    const char* __thiscall FUN_00559450();
+    const char* __thiscall Modelloader_GetReferencedThis();
 };
 struct S_0083d130_Obj
 {
     S_0083d130_Str* ref_006815c0();
-    S_0083d130_Str* __thiscall FUN_00460140();
+    S_0083d130_Str* __thiscall TESDataHandler_GetWorldSpaceList();
 };
 struct S_0083d130_Node
 {
     S_0083d130_Obj** ref_006815c0();
 };
-unsigned int __cdecl FUN_0044a670(const char* s);
+unsigned int __cdecl BSstrlen(const char* s);
 bool __fastcall FUN_008256d0(S_0083d130_Node*);
 S_0083d130_Node* __fastcall FUN_00726070(S_0083d130_Node*);
 
@@ -2406,11 +2435,11 @@ void S_0083d130_Class::ProcessNodeChain()
     S_0083d130_Node* node = this;
     while (node && !FUN_008256d0(node))
     {
-        if ((*node->ref_006815c0())->ref_006815c0()->FUN_00559450())
+        if ((*node->ref_006815c0())->ref_006815c0()->Modelloader_GetReferencedThis())
         {
-            if (FUN_0044a670((*node->ref_006815c0())->ref_006815c0()->FUN_00559450()) > 1)
+            if (BSstrlen((*node->ref_006815c0())->ref_006815c0()->Modelloader_GetReferencedThis()) > 1)
             {
-                BSAudio::FUN_00453a70()->FUN_00ad8100((unsigned int)(*node->ref_006815c0())->FUN_00460140()->FUN_00559450(), 0x20100001, 0);
+                BSAudio::BSAudio_QInstance()->Precache_00ad8100((unsigned int)(*node->ref_006815c0())->TESDataHandler_GetWorldSpaceList()->Modelloader_GetReferencedThis(), 0x20100001, 0);
             }
         }
         node = FUN_00726070(node);
@@ -2441,20 +2470,20 @@ struct EffectTime
 };
 struct EffectHandle
 {
-    EffectTime* FUN_00559450();
+    EffectTime* Modelloader_GetReferencedThis();
 };
 struct SpellTimes
 {
     float FUN_009a7c40();
-    float FUN_00759450();
+    float NiPSysSpawnModifier_GetLifeSpan();
 };
 struct EffectCollection
 {
     unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
     unsigned int FUN_0044ddc0();
-    EffectHandle* FUN_006a7ad0(unsigned int);
+    EffectHandle* BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
 };
-float FUN_00404010(float, float);
+float BSMAX_00404010(float, float);
 struct FUN_008216c0_shell
 {
     unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
@@ -2471,20 +2500,20 @@ struct FUN_008216c0_shell
 void FUN_008216c0_shell::UpdateEffectTimes()
 {
     float value = 0.0f;
-    if (active.FUN_00559450())
-        value = FUN_00404010(active.FUN_00559450()->time38, active.FUN_00559450()->time48);
+    if (active.Modelloader_GetReferencedThis())
+        value = BSMAX_00404010(active.Modelloader_GetReferencedThis()->time38, active.Modelloader_GetReferencedThis()->time48);
     if (reset)
     {
         value = 0.0f;
-        active.FUN_00559450()->time38 = 0.0f;
-        active.FUN_00559450()->time48 = 0.0f;
+        active.Modelloader_GetReferencedThis()->time38 = 0.0f;
+        active.Modelloader_GetReferencedThis()->time48 = 0.0f;
     }
     if (value < spell->FUN_009a7c40())
-        time = spell->FUN_00759450() * (value / spell->FUN_009a7c40());
+        time = spell->NiPSysSpawnModifier_GetLifeSpan() * (value / spell->FUN_009a7c40());
     else
-        time = spell->FUN_00759450();
+        time = spell->NiPSysSpawnModifier_GetLifeSpan();
     for (unsigned int i = 0; i < effects.FUN_0044ddc0(); ++i)
-        effects.FUN_006a7ad0(i)->FUN_00559450()->AdvanceParticleTimes(time);
+        effects.BSSimpleArray_NiAVObject_1024_GetAt(i)->Modelloader_GetReferencedThis()->AdvanceParticleTimes(time);
 }
 
 // Minimal declarations for the process list and its polymorphic entries.
@@ -2506,31 +2535,31 @@ struct CasterUpdate : BE, BCaster_S
 void CasterUpdate::UpdateCasters()
 {
     MobileObjectProcessArray* pProcessList = DAT_011e0e80.FUN_00717e50();
-    for (unsigned int i = 0; i < pProcessList->FUN_005be5c0(0); ++i)
+    for (unsigned int i = 0; i < pProcessList->ProcessArray_GetProcessLevelTail(0); ++i)
     {
         MagicProjectile* object;
-        MobileObject* pMobileObject = pProcessList->FUN_00968670(i);
+        MobileObject* pMobileObject = pProcessList->ProcessArray_GetItem(i);
         Actor* actor = pMobileObject && pMobileObject->IsActor() ? static_cast<Actor*>(pMobileObject) : 0;
         object =
             pMobileObject && pMobileObject->IsProjectile() ? dynamic_cast<MagicProjectile*>(pMobileObject) : 0;
         if (actor)
-            actor->FUN_008c4f10(this);
+            actor->Actor_CheckDeletedCaster(this);
         else if (object)
             object->UpdateCaster(this);
     }
-    for (unsigned int j = pProcessList->FUN_005de0f0(1); j < pProcessList->FUN_005be5c0(1); ++j)
+    for (unsigned int j = pProcessList->ProcessArray_GetProcessLevelHead(1); j < pProcessList->ProcessArray_GetProcessLevelTail(1); ++j)
     {
-        MobileObject* pMobileObject2 = pProcessList->FUN_00968670(j);
+        MobileObject* pMobileObject2 = pProcessList->ProcessArray_GetItem(j);
         Actor* actor2 = pMobileObject2 && pMobileObject2->IsActor() ? static_cast<Actor*>(pMobileObject2) : 0;
         MagicProjectile* pMagicProjectile2 =
             pMobileObject2 && pMobileObject2->IsProjectile() ? dynamic_cast<MagicProjectile*>(pMobileObject2) : 0;
         if (actor2)
-            actor2->FUN_008c4f10(this);
+            actor2->Actor_CheckDeletedCaster(this);
         else if (pMagicProjectile2)
             pMagicProjectile2->UpdateCaster(this);
     }
     if (g_thePlayer)
-        g_thePlayer->FUN_008c4f10(this);
+        g_thePlayer->Actor_CheckDeletedCaster(this);
 }
 
 namespace fnv_0082cf80 {
@@ -2565,13 +2594,13 @@ unsigned int __cdecl ApplySoundFormToGameSound(BSSoundHandle* apSound, void* apF
         uiMin = 0xe;
     if (!uiMax2)
         uiMax2 = 0x3c;
-    if (SoundAssetTmp->GetHighByteOfField4E() || SoundAssetTmp->FUN_0082d700())
-        apSound->SetTimeConstraints(SoundAssetTmp->GetHighByteOfField4E(), SoundAssetTmp->FUN_0082d700());
+    if (SoundAssetTmp->GetHighByteOfField4E() || SoundAssetTmp->GetEndTime_0082d700())
+        apSound->SetTimeConstraints(SoundAssetTmp->GetHighByteOfField4E(), SoundAssetTmp->GetEndTime_0082d700());
     apSound->SetMinMax(uiMin * 5.0, uiMax2 * 100.0);
     apSound->SetAttenuationCurve(SoundAssetTmp->GetShortAt(0), SoundAssetTmp->GetShortAt(1), SoundAssetTmp->GetShortAt(2), SoundAssetTmp->GetShortAt(3),
                           SoundAssetTmp->GetShortAt(4));
     apSound->SetReverbAttenuation(SoundAssetTmp->GetShortAtOffset5A());
-    apSound->SetPriority((unsigned char)SoundAssetTmp->FUN_0082d720());
+    apSound->SetPriority((unsigned char)SoundAssetTmp->GetPriority_0082d720());
     if (SoundAssetTmp->CopyBig().iFlags & 1)
     {
         uiFlags |= 0x40;
@@ -3495,12 +3524,13 @@ struct SoundTimer
     unsigned char m_flag11;
     int unk14;
     SoundListNode m_kNode;
-    void FUN_00836110(BGSSaveFormBuffer* buffer);
+    void RadioEntry_Data_Save(BGSSaveFormBuffer* buffer);
 };
 
 // Writes elapsed time, timer fields, and queued sound forms to the buffer, patches the count, then saves the queue if present.
 // @fnv 0x00836110
-void SoundTimer::FUN_00836110(BGSSaveFormBuffer* buffer)
+// src: COMMUNITY 0x00836110
+void SoundTimer::RadioEntry_Data_Save(BGSSaveFormBuffer* buffer)
 {
     int elapsed_2 = BSAudio::GetSingleton()->GetSynchTime() - m_uiStartTime;
     if (m_fAnimationDuration <= 0)
@@ -3523,7 +3553,7 @@ void SoundTimer::FUN_00836110(BGSSaveFormBuffer* buffer)
         }
         node3 = node3->Next();
     }
-    buffer->FUN_00865ff0(count, position);
+    buffer->SaveVariableSizedValue_00865ff0(count, position);
     bool hasQueue7 = (bool)(m_queue != 0);
     buffer->SaveData(&hasQueue7, 1u, 0);
     if (hasQueue7)
@@ -3588,7 +3618,7 @@ class FUN_00822920 : public FUN_0081dd00
   public:
     FUN_00822920(int iParam1, int iParam2, int iParam3, int iParam4, NiPoint3 kPoint1, NiPoint3 kPoint2);
     virtual ~FUN_00822920();
-    void FUN_00930c70();
+    void MobileObject_InitHavok();
 };
 
 // @fnv 0x00822920
@@ -3596,7 +3626,7 @@ FUN_00822920::FUN_00822920(int iParam1, int iParam2, int iParam3, int iParam4, N
                            NiPoint3 kPoint2)
     : FUN_0081dd00(iParam1, iParam2, iParam3, iParam4, kPoint1, kPoint2)
 {
-    FUN_00930c70();
+    MobileObject_InitHavok();
 }
 
 class List8321E0
@@ -3730,19 +3760,20 @@ FUN_0082f260_cls::~FUN_0082f260_cls()
 // the secondary base subobject sits at +4 inside Derived.
 struct PrimaryBase_00831fe0
 {
-    virtual void __cdecl FUN_00831fe0();
+    virtual void __cdecl AdjustThisAndForward_00831fe0();
 };
 
 struct SecondaryBase_00831fe0
 {
-    virtual void __cdecl FUN_00831fe0();
+    virtual void __cdecl AdjustThisAndForward_00831fe0();
 };
 
 struct Derived_00831fe0 : PrimaryBase_00831fe0, SecondaryBase_00831fe0
 {
     Derived_00831fe0();
 // @fnv 0x00831fe0
-    virtual void __cdecl FUN_00831fe0();
+// src: GUESS 0x00831fe0 (confidence: low)
+    virtual void __cdecl AdjustThisAndForward_00831fe0();
 };
 
 Derived_00831fe0::Derived_00831fe0()
@@ -3767,7 +3798,8 @@ namespace fnv_0082f1b0 {
 // Wrapper around the Win32 critical-section API: locks the section owned by
 // the object passed in the fastcall register (ecx).
 // @fnv 0x0082f1b0
-void __fastcall FUN_0082f1b0(void* apCriticalSection)
+// src: COMMUNITY 0x0082f1b0
+void __fastcall NiCriticalSection_Lock(void* apCriticalSection)
 {
     EnterCriticalSection((LPCRITICAL_SECTION)apCriticalSection);
 }

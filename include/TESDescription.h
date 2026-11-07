@@ -22,7 +22,7 @@ public:
     void BaseFormRecord(BaseFormComponent* component);
     bool IsEqualToBase(BaseFormComponent* component);
     void Save();
-    void FUN_00482cb0();
+    void Save_00482cb0();
     static void LoadDescriptionAtOffset(TESDescription* description, int offset);
     static void ReadDescriptionFromFile(TESDescription* description, TESFile* file);
     static unsigned int GetDescriptionLength(TESForm* form);

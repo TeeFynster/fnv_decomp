@@ -49,13 +49,13 @@ extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
 // src/havok/physics/collide/agent3/bvtree3/hkpbvtreeagent3.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent3/bvtree3/hkpbvtreeagent3.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 void* __cdecl InitAndReturnTail(void*, void*, void*);
-void __fastcall FUN_00d2d890(void* self, int, void*, int);
+void __fastcall hkBvTreeAgent3_process(void* self, int, void*, int);
 void __fastcall CallWithValueSource(void* self, int, int, int);
-void __fastcall FUN_00d2d430(void* self, int, int, int);
-void __fastcall FUN_00d2d480(void* self, int, int, int);
-void FUN_00d2d9d0(void* pObject);
-extern "C" void __cdecl FUN_00da35f0(void*, float, float, int);
-void __cdecl FUN_00d2d480(void*, void* target, float first, float second, int flags);
+void __fastcall hkBvTreeAgent3_ProcessState_00d2d430(void* self, int, int, int);
+void __fastcall Object__hkAgent1nMachine_WarpTime_Thunk(void* self, int, int, int);
+void hkBvTreeAgent3_process_UpdateState_00d2d9d0(void* pObject);
+extern "C" void __cdecl _hkAgent1nMachine_WarpTime(void*, float, float, int);
+void __cdecl Object__hkAgent1nMachine_WarpTime_Thunk(void*, void* target, float first, float second, int flags);
 // Exe 0x00d2da70: unit-local Interface view; declarations and layout are preserved.
 struct Hkpbvtreeagent3InterfaceView
 {
@@ -65,7 +65,7 @@ struct Hkpbvtreeagent3InterfaceView
     virtual void f3();
     virtual void f4();
 };
-void FUN_00d2d4b0(Hkpbvtreeagent3InterfaceView** a);
+void Hkpbvtreeagent3_ForwardCall_00d2d4b0(Hkpbvtreeagent3InterfaceView** a);
 struct LessU32
 {
     int pad;
@@ -127,7 +127,7 @@ struct CallBuf
     int unk18;
     int unk1c;
 };
-void __cdecl FUN_00da48e0(void* a, void* b);
+void __cdecl hkAgent1nMachine_UpdateShapeCollectionFilter(void* a, void* b);
 void __cdecl CallWithValueSource(void* apUnused, void* p2, int aiArg0, ValueSource** apValueSource, int aiArg1,
                                  int aiArg2, int aiArg3);
 struct SpawnedObject
@@ -162,12 +162,13 @@ struct Agent
     virtual void f6(const char* typeName);
     virtual void f7();
 };
-extern "C" void __cdecl FUN_00d97250(int, int, void*);
-extern "C" void __cdecl FUN_00da3510(int, int);
-void __cdecl FUN_00d2d430(int a1, int a2, int a3, Agent* p);
-void __cdecl FUN_00d2d460(int a, int b, int c)
+extern "C" void __cdecl hkpAgentMachineUtil_calc1nStatistics(int, int, void*);
+extern "C" void __cdecl hkpAgent1nSector_ProcessEntries_00da3510(int, int);
+void __cdecl hkBvTreeAgent3_ProcessState_00d2d430(int a1, int a2, int a3, Agent* p);
+// src: GUESS 0x00d2d460 (confidence: low)
+void __cdecl Object_ForwardCall_00d2d460(int a, int b, int c)
 {
-    FUN_00da3510(b, c);
+    hkpAgent1nSector_ProcessEntries_00da3510(b, c);
 }
 extern "C" void _ReadWriteBarrier(void);
 extern "C" unsigned __int64 __rdtsc(void);
@@ -335,13 +336,13 @@ struct S00d2d890_Obj
     int unk08;
     int unk0c;
 };
-char** FUN_00c85750();
-int FUN_00d2d4f0(int a, int b, hkTransform* l, void* c, int d, int e, char* f, int g);
-int FUN_00d2d4b0(int a, S00d2d890_Hits* h);
-int FUN_00da4aa0(int a, void* b, int c, char* d, int e);
-char* __cdecl FUN_00d2d890(char* self, int a1, char* child, int a3, int a4);
-__declspec(noinline) void FUN_00d2d9d0(void* pObject);
-void FUN_00d2da20(hkpCollisionDispatcher* target);
+char** hkMemoryRouter_getInstance();
+int hkpCdBody_UpdateState_00d2d4f0(int a, int b, hkTransform* l, void* c, int d, int e, char* f, int g);
+int Hkpbvtreeagent3_ForwardCall_00d2d4b0(int a, S00d2d890_Hits* h);
+int hkAgent1nMachine_Process(int a, void* b, int c, char* d, int e);
+char* __cdecl hkBvTreeAgent3_process(char* self, int a1, char* child, int a3, int a4);
+__declspec(noinline) void hkBvTreeAgent3_process_UpdateState_00d2d9d0(void* pObject);
+void hkBvTreeAgent3_registerAgent3(hkpCollisionDispatcher* target);
 
 typedef float hkReal;
 typedef unsigned char hkUchar;
@@ -707,7 +708,8 @@ template <typename T, typename L> void __cdecl quickSort(T* pArr, int iSize, L c
 }
 }
 // @fnv 0x00d2d4f0
-int __cdecl FUN_00d2d4f0(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const hkTransform& bTa,
+// src: GUESS 0x00d2d4f0 (confidence: low)
+int __cdecl hkpCdBody_UpdateState_00d2d4f0(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const hkTransform& bTa,
                          const hkVector4& linearTimInfo, const GskAgentInput& input, hkAabb* cachedAabb,
                          hkpShapeKey* hitListOut, int hitListCapacity)
 {

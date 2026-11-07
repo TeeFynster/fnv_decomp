@@ -49,13 +49,14 @@ const char* TESDescription::GetDescription(TESForm* form, CHUNK_ID chunk)
 extern "C" unsigned char DAT_011c54ba;
 
 // @fnv 0x00401500
-unsigned char FUN_00401500()
+// src: XBOX_PDB 0x00401500
+unsigned char TESForm_QEndianSwapOnSave()
 {
     return DAT_011c54ba;
 }
 
 extern "C" unsigned char DAT_011c54ba;
-unsigned char FUN_00401500();
+unsigned char TESForm_QEndianSwapOnSave();
 
 
 
@@ -73,12 +74,13 @@ void TESDescription::InitializeComponent()
 void __cdecl WriteDescChunk(void*, int);
 
 // @fnv 0x00482cb0
-void __thiscall TESDescription::FUN_00482cb0()
+// src: COMMUNITY 0x00482cb0
+void __thiscall TESDescription::Save_00482cb0()
 {
     WriteDescChunk(this, 0x43534544);
 }
 
-void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
+void __cdecl TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 // @fnv 0x00482cd0
 void __cdecl WriteDescChunk(void* apDesc, int aiChunk)
 {
@@ -87,13 +89,13 @@ void __cdecl WriteDescChunk(void* apDesc, int aiChunk)
     {
         if (((TESDescription*)apDesc)->GetDescriptionLength())
         {
-            FUN_004856f0(aiChunk, const_cast<char*>(((TESDescription*)apDesc)->GetDescription(0, (CHUNK_ID)0x43534544)),
+            TESForm_AddChunkArray(aiChunk, const_cast<char*>(((TESDescription*)apDesc)->GetDescription(0, (CHUNK_ID)0x43534544)),
                          ((TESDescription*)apDesc)->GetDescriptionLength() + 1);
         }
         else
         {
             empty = 0;
-            FUN_004856f0(aiChunk, &empty, 1);
+            TESForm_AddChunkArray(aiChunk, &empty, 1);
         }
     }
 }
@@ -170,7 +172,7 @@ bool __thiscall TESDescription::IsEqualToBase(BaseFormComponent* apComponent)
 extern PlayerCharacter* g_thePlayer;
 
 
-int FUN_00406f60(::BSStringT<char>* apStr, const char* apFmt, ...);
+int BSStringT_char_SPrintF(::BSStringT<char>* apStr, const char* apFmt, ...);
 
 struct SettingString
 {
@@ -184,10 +186,10 @@ const char* __cdecl GetActorValueName(Index aeIndex);
 }
 
 float __cdecl FUN_004bd510(float afValue, float afMult);
-void __cdecl FUN_00709470(int, TESObjectREFR*, int, int, int, int);
+void __cdecl Interface_QueueMenuCreate(int, TESObjectREFR*, int, int, int, int);
 bool __cdecl QueueUIMessage(const char* apMsg, int aeType, const char* apIcon, const char* apSound, float afTime,
                             bool abInstant);
-void __cdecl FUN_0047a560(TESObjectREFR* apRef, PlayerCharacter* apActor, int aiUnk);
+void __cdecl BGSOpenCloseForm_HandleActivate(TESObjectREFR* apRef, PlayerCharacter* apActor, int aiUnk);
 
 struct TermHackBase0
 {
@@ -223,17 +225,18 @@ struct TermHackBase0
 
 struct TermHackBase70
 {
-    virtual void FUN_005015f0(TESObjectREFR* apRef, PlayerCharacter* apActor);
+    virtual void BGSTerminal_HandleOpenFinish(TESObjectREFR* apRef, PlayerCharacter* apActor);
 };
 
 struct TermHack : TermHackBase0, TermHackBase70
 {
-    float FUN_005017a0(TESObjectREFR* apRef);
-    virtual void FUN_005015f0(TESObjectREFR* apRef, PlayerCharacter* apActor);
+    float BGSTerminal_GetMinSkillRequiredToHack(TESObjectREFR* apRef);
+    virtual void BGSTerminal_HandleOpenFinish(TESObjectREFR* apRef, PlayerCharacter* apActor);
 };
 
 // @fnv 0x005015f0
-void TermHack::FUN_005015f0(TESObjectREFR* apRef, PlayerCharacter* apActor)
+// src: XBOX_PDB 0x005015f0
+void TermHack::BGSTerminal_HandleOpenFinish(TESObjectREFR* apRef, PlayerCharacter* apActor)
 {
     if (apRef && apActor == g_thePlayer)
     {
@@ -241,21 +244,21 @@ void TermHack::FUN_005015f0(TESObjectREFR* apRef, PlayerCharacter* apActor)
         {
         case 0:
         case 1:
-            FUN_00709470(3, apRef, 0, 0, 1, 0);
+            Interface_QueueMenuCreate(3, apRef, 0, 0, 1, 0);
             break;
         case 2:
         case 3:
-            FUN_00709470(2, apRef, 0, 0, 1, 0);
+            Interface_QueueMenuCreate(2, apRef, 0, 0, 1, 0);
             break;
         case 4: {
             ::BSStringT<char> kMsg;
-            FUN_00406f60(&kMsg, g_011c8394.GetString(), ActorValue::GetActorValueName((ActorValue::Index)0x28),
-                         (int)FUN_004bd510(FUN_005017a0(apRef), 1.0f));
+            BSStringT_char_SPrintF(&kMsg, g_011c8394.GetString(), ActorValue::GetActorValueName((ActorValue::Index)0x28),
+                         (int)FUN_004bd510(BGSTerminal_GetMinSkillRequiredToHack(apRef), 1.0f));
             QueueUIMessage(kMsg, 0, "Interface\\Icons\\Message Icons\\glow_message_vaultboy_sad.dds", 0, 2.0f, false);
         }
         break;
         }
-        FUN_0047a560(apRef, apActor, 0);
+        BGSOpenCloseForm_HandleActivate(apRef, apActor, 0);
     }
 }
 

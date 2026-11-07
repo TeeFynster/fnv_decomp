@@ -2,12 +2,13 @@
 // src/havok/physics/collide/agent/convexagent/spheresphere/hkpspheresphereagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/spheresphere/hkpspheresphereagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern "C" void __cdecl FUN_00d3f6a0(void* a, void* b, void* c, void* d);
+extern "C" void __cdecl hkpSphereSphereAgent_staticGetPenetrations(void* a, void* b, void* c, void* d);
 
 // @fnv 0x00d3fcc0
-void __stdcall FUN_00d3fcc0(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
+// src: HAVOK_SRC 0x00d3fcc0
+void __stdcall hkpSphereSphereAgent_getPenetrations(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
 {
-    FUN_00d3f6a0(apArg1, apArg2, apArg3, apArg4);
+    hkpSphereSphereAgent_staticGetPenetrations(apArg1, apArg2, apArg3, apArg4);
 }
 
 struct S_00d3f660_Owner

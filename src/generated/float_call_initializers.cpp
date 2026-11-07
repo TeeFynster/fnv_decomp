@@ -5,5863 +5,5863 @@
 // @fnv 0x00f34ef0
 void InitializeRuntimeFloatCall1()
 {
-    fnvFloat_011c3190 = fnvFloat_01011444 / FUN_004019b0(fnvFloat_01011440);
+    fnvFloat_011c3190 = fnvFloat_01011444 / sqrt_004019b0(fnvFloat_01011440);
 }
 // @fnv 0x00f34f20
 void InitializeRuntimeFloatCall2()
 {
     fnvFloat_011c318c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01011440) * fnvFloat_01011440)) * fnvFloat_01011444;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01011440) * fnvFloat_01011440)) * fnvFloat_01011444;
 }
 // @fnv 0x00f34f90
 void InitializeRuntimeFloatCall3()
 {
-    fnvFloat_011c31a8 = fnvFloat_010115a8 / FUN_004019b0(fnvFloat_010115a4);
+    fnvFloat_011c31a8 = fnvFloat_010115a8 / sqrt_004019b0(fnvFloat_010115a4);
 }
 // @fnv 0x00f34fc0
 void InitializeRuntimeFloatCall4()
 {
     fnvFloat_011c31a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010115a4) * fnvFloat_010115a4)) * fnvFloat_010115a8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010115a4) * fnvFloat_010115a4)) * fnvFloat_010115a8;
 }
 // @fnv 0x00f35030
 void InitializeRuntimeFloatCall5()
 {
-    fnvFloat_011c31c0 = fnvFloat_010116f4 / FUN_004019b0(fnvFloat_010116f0);
+    fnvFloat_011c31c0 = fnvFloat_010116f4 / sqrt_004019b0(fnvFloat_010116f0);
 }
 // @fnv 0x00f35060
 void InitializeRuntimeFloatCall6()
 {
     fnvFloat_011c31bc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010116f0) * fnvFloat_010116f0)) * fnvFloat_010116f4;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010116f0) * fnvFloat_010116f0)) * fnvFloat_010116f4;
 }
 // @fnv 0x00f350d0
 void InitializeRuntimeFloatCall7()
 {
-    fnvFloat_011c31d0 = fnvFloat_0101183c / FUN_004019b0(fnvFloat_01011838);
+    fnvFloat_011c31d0 = fnvFloat_0101183c / sqrt_004019b0(fnvFloat_01011838);
 }
 // @fnv 0x00f35100
 void InitializeRuntimeFloatCall8()
 {
     fnvFloat_011c31cc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01011838) * fnvFloat_01011838)) * fnvFloat_0101183c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01011838) * fnvFloat_01011838)) * fnvFloat_0101183c;
 }
 // @fnv 0x00f35170
 void InitializeRuntimeFloatCall9()
 {
-    fnvFloat_011c31e0 = fnvFloat_01012008 / FUN_004019b0(fnvFloat_01012004);
+    fnvFloat_011c31e0 = fnvFloat_01012008 / sqrt_004019b0(fnvFloat_01012004);
 }
 // @fnv 0x00f351a0
 void InitializeRuntimeFloatCall10()
 {
     fnvFloat_011c31dc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01012004) * fnvFloat_01012004)) * fnvFloat_01012008;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01012004) * fnvFloat_01012004)) * fnvFloat_01012008;
 }
 // @fnv 0x00f35210
 void InitializeRuntimeFloatCall11()
 {
-    fnvFloat_011c3298 = fnvFloat_0101202c / FUN_004019b0(fnvFloat_01012028);
+    fnvFloat_011c3298 = fnvFloat_0101202c / sqrt_004019b0(fnvFloat_01012028);
 }
 // @fnv 0x00f35240
 void InitializeRuntimeFloatCall12()
 {
     fnvFloat_011c3218 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01012028) * fnvFloat_01012028)) * fnvFloat_0101202c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01012028) * fnvFloat_01012028)) * fnvFloat_0101202c;
 }
 // @fnv 0x00f357d0
 void InitializeRuntimeFloatCall13()
 {
-    fnvFloat_011c337c = fnvFloat_010124dc / FUN_004019b0(fnvFloat_010124d8);
+    fnvFloat_011c337c = fnvFloat_010124dc / sqrt_004019b0(fnvFloat_010124d8);
 }
 // @fnv 0x00f35800
 void InitializeRuntimeFloatCall14()
 {
     fnvFloat_011c3350 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010124d8) * fnvFloat_010124d8)) * fnvFloat_010124dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010124d8) * fnvFloat_010124d8)) * fnvFloat_010124dc;
 }
 // @fnv 0x00f35b20
 void InitializeRuntimeFloatCall15()
 {
-    fnvFloat_011c33ec = fnvFloat_010127b8 / FUN_004019b0(fnvFloat_010127b4);
+    fnvFloat_011c33ec = fnvFloat_010127b8 / sqrt_004019b0(fnvFloat_010127b4);
 }
 // @fnv 0x00f35b50
 void InitializeRuntimeFloatCall16()
 {
     fnvFloat_011c33e8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010127b4) * fnvFloat_010127b4)) * fnvFloat_010127b8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010127b4) * fnvFloat_010127b4)) * fnvFloat_010127b8;
 }
 // @fnv 0x00f35bc0
 void InitializeRuntimeFloatCall17()
 {
-    fnvFloat_011c3408 = fnvFloat_01012c74 / FUN_004019b0(fnvFloat_01012c70);
+    fnvFloat_011c3408 = fnvFloat_01012c74 / sqrt_004019b0(fnvFloat_01012c70);
 }
 // @fnv 0x00f35bf0
 void InitializeRuntimeFloatCall18()
 {
     fnvFloat_011c33fc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01012c70) * fnvFloat_01012c70)) * fnvFloat_01012c74;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01012c70) * fnvFloat_01012c70)) * fnvFloat_01012c74;
 }
 // @fnv 0x00f35c80
 void InitializeRuntimeFloatCall19()
 {
-    fnvFloat_011c341c = fnvFloat_01012e18 / FUN_004019b0(fnvFloat_01012e14);
+    fnvFloat_011c341c = fnvFloat_01012e18 / sqrt_004019b0(fnvFloat_01012e14);
 }
 // @fnv 0x00f35cb0
 void InitializeRuntimeFloatCall20()
 {
     fnvFloat_011c3418 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01012e14) * fnvFloat_01012e14)) * fnvFloat_01012e18;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01012e14) * fnvFloat_01012e14)) * fnvFloat_01012e18;
 }
 // @fnv 0x00f35d20
 void InitializeRuntimeFloatCall21()
 {
-    fnvFloat_011c342c = fnvFloat_01013188 / FUN_004019b0(fnvFloat_01013184);
+    fnvFloat_011c342c = fnvFloat_01013188 / sqrt_004019b0(fnvFloat_01013184);
 }
 // @fnv 0x00f35d50
 void InitializeRuntimeFloatCall22()
 {
     fnvFloat_011c3428 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01013184) * fnvFloat_01013184)) * fnvFloat_01013188;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01013184) * fnvFloat_01013184)) * fnvFloat_01013188;
 }
 // @fnv 0x00f35dc0
 void InitializeRuntimeFloatCall23()
 {
-    fnvFloat_011c34ac = fnvFloat_0101341c / FUN_004019b0(fnvFloat_01013418);
+    fnvFloat_011c34ac = fnvFloat_0101341c / sqrt_004019b0(fnvFloat_01013418);
 }
 // @fnv 0x00f35df0
 void InitializeRuntimeFloatCall24()
 {
     fnvFloat_011c3468 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01013418) * fnvFloat_01013418)) * fnvFloat_0101341c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01013418) * fnvFloat_01013418)) * fnvFloat_0101341c;
 }
 // @fnv 0x00f361a0
 void InitializeRuntimeFloatCall25()
 {
-    fnvFloat_011c3518 = fnvFloat_01013618 / FUN_004019b0(fnvFloat_01013614);
+    fnvFloat_011c3518 = fnvFloat_01013618 / sqrt_004019b0(fnvFloat_01013614);
 }
 // @fnv 0x00f361d0
 void InitializeRuntimeFloatCall26()
 {
     fnvFloat_011c3514 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01013614) * fnvFloat_01013614)) * fnvFloat_01013618;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01013614) * fnvFloat_01013614)) * fnvFloat_01013618;
 }
 // @fnv 0x00f36240
 void InitializeRuntimeFloatCall27()
 {
-    fnvFloat_011c3528 = fnvFloat_01013660 / FUN_004019b0(fnvFloat_0101365c);
+    fnvFloat_011c3528 = fnvFloat_01013660 / sqrt_004019b0(fnvFloat_0101365c);
 }
 // @fnv 0x00f36270
 void InitializeRuntimeFloatCall28()
 {
     fnvFloat_011c3524 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101365c) * fnvFloat_0101365c)) * fnvFloat_01013660;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101365c) * fnvFloat_0101365c)) * fnvFloat_01013660;
 }
 // @fnv 0x00f362e0
 void InitializeRuntimeFloatCall29()
 {
-    fnvFloat_011c36e4 = fnvFloat_0101367c / FUN_004019b0(fnvFloat_01013678);
+    fnvFloat_011c36e4 = fnvFloat_0101367c / sqrt_004019b0(fnvFloat_01013678);
 }
 // @fnv 0x00f36310
 void InitializeRuntimeFloatCall30()
 {
     fnvFloat_011c35f8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01013678) * fnvFloat_01013678)) * fnvFloat_0101367c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01013678) * fnvFloat_01013678)) * fnvFloat_0101367c;
 }
 // @fnv 0x00f36db0
 void InitializeRuntimeFloatCall31()
 {
-    fnvFloat_011c3858 = fnvFloat_01013efc / FUN_004019b0(fnvFloat_01013ef8);
+    fnvFloat_011c3858 = fnvFloat_01013efc / sqrt_004019b0(fnvFloat_01013ef8);
 }
 // @fnv 0x00f36de0
 void InitializeRuntimeFloatCall32()
 {
     fnvFloat_011c3838 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01013ef8) * fnvFloat_01013ef8)) * fnvFloat_01013efc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01013ef8) * fnvFloat_01013ef8)) * fnvFloat_01013efc;
 }
 // @fnv 0x00f37010
 void InitializeRuntimeFloatCall33()
 {
-    fnvFloat_011c38a0 = fnvFloat_010140d8 / FUN_004019b0(fnvFloat_010140d4);
+    fnvFloat_011c38a0 = fnvFloat_010140d8 / sqrt_004019b0(fnvFloat_010140d4);
 }
 // @fnv 0x00f37040
 void InitializeRuntimeFloatCall34()
 {
     fnvFloat_011c389c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010140d4) * fnvFloat_010140d4)) * fnvFloat_010140d8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010140d4) * fnvFloat_010140d4)) * fnvFloat_010140d8;
 }
 // @fnv 0x00f370b0
 void InitializeRuntimeFloatCall35()
 {
-    fnvFloat_011c38bc = fnvFloat_010141d8 / FUN_004019b0(fnvFloat_010141d4);
+    fnvFloat_011c38bc = fnvFloat_010141d8 / sqrt_004019b0(fnvFloat_010141d4);
 }
 // @fnv 0x00f370e0
 void InitializeRuntimeFloatCall36()
 {
     fnvFloat_011c38b0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010141d4) * fnvFloat_010141d4)) * fnvFloat_010141d8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010141d4) * fnvFloat_010141d4)) * fnvFloat_010141d8;
 }
 // @fnv 0x00f371b0
 void InitializeRuntimeFloatCall37()
 {
-    fnvFloat_011c391c = fnvFloat_010142cc / FUN_004019b0(fnvFloat_010142c8);
+    fnvFloat_011c391c = fnvFloat_010142cc / sqrt_004019b0(fnvFloat_010142c8);
 }
 // @fnv 0x00f371e0
 void InitializeRuntimeFloatCall38()
 {
     fnvFloat_011c38fc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010142c8) * fnvFloat_010142c8)) * fnvFloat_010142cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010142c8) * fnvFloat_010142c8)) * fnvFloat_010142cc;
 }
 // @fnv 0x00f37480
 void InitializeRuntimeFloatCall39()
 {
-    fnvFloat_011c3a20 = fnvFloat_01015afc / FUN_004019b0(fnvFloat_01015af8);
+    fnvFloat_011c3a20 = fnvFloat_01015afc / sqrt_004019b0(fnvFloat_01015af8);
 }
 // @fnv 0x00f374b0
 void InitializeRuntimeFloatCall40()
 {
     fnvFloat_011c39d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01015af8) * fnvFloat_01015af8)) * fnvFloat_01015afc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01015af8) * fnvFloat_01015af8)) * fnvFloat_01015afc;
 }
 // @fnv 0x00f37a10
 void InitializeRuntimeFloatCall41()
 {
-    fnvFloat_011c3ad4 = fnvFloat_01016288 / FUN_004019b0(fnvFloat_01016284);
+    fnvFloat_011c3ad4 = fnvFloat_01016288 / sqrt_004019b0(fnvFloat_01016284);
 }
 // @fnv 0x00f37a40
 void InitializeRuntimeFloatCall42()
 {
     fnvFloat_011c3ad0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01016284) * fnvFloat_01016284)) * fnvFloat_01016288;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01016284) * fnvFloat_01016284)) * fnvFloat_01016288;
 }
 // @fnv 0x00f37ab0
 void InitializeRuntimeFloatCall43()
 {
-    fnvFloat_011c3b0c = fnvFloat_01016298 / FUN_004019b0(fnvFloat_01016294);
+    fnvFloat_011c3b0c = fnvFloat_01016298 / sqrt_004019b0(fnvFloat_01016294);
 }
 // @fnv 0x00f37ae0
 void InitializeRuntimeFloatCall44()
 {
     fnvFloat_011c3af0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01016294) * fnvFloat_01016294)) * fnvFloat_01016298;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01016294) * fnvFloat_01016294)) * fnvFloat_01016298;
 }
 // @fnv 0x00f37c10
 void InitializeRuntimeFloatCall45()
 {
-    fnvFloat_011c3b2c = fnvFloat_01016428 / FUN_004019b0(fnvFloat_01016424);
+    fnvFloat_011c3b2c = fnvFloat_01016428 / sqrt_004019b0(fnvFloat_01016424);
 }
 // @fnv 0x00f37c40
 void InitializeRuntimeFloatCall46()
 {
     fnvFloat_011c3b20 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01016424) * fnvFloat_01016424)) * fnvFloat_01016428;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01016424) * fnvFloat_01016424)) * fnvFloat_01016428;
 }
 // @fnv 0x00f37d10
 void InitializeRuntimeFloatCall47()
 {
-    fnvFloat_011c3ba4 = fnvFloat_0101659c / FUN_004019b0(fnvFloat_01016598);
+    fnvFloat_011c3ba4 = fnvFloat_0101659c / sqrt_004019b0(fnvFloat_01016598);
 }
 // @fnv 0x00f37d40
 void InitializeRuntimeFloatCall48()
 {
     fnvFloat_011c3b54 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01016598) * fnvFloat_01016598)) * fnvFloat_0101659c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01016598) * fnvFloat_01016598)) * fnvFloat_0101659c;
 }
 // @fnv 0x00f38010
 void InitializeRuntimeFloatCall49()
 {
-    fnvFloat_011c3d58 = fnvFloat_010177fc / FUN_004019b0(fnvFloat_010177f8);
+    fnvFloat_011c3d58 = fnvFloat_010177fc / sqrt_004019b0(fnvFloat_010177f8);
 }
 // @fnv 0x00f38040
 void InitializeRuntimeFloatCall50()
 {
     fnvFloat_011c3c6c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010177f8) * fnvFloat_010177f8)) * fnvFloat_010177fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010177f8) * fnvFloat_010177f8)) * fnvFloat_010177fc;
 }
 // @fnv 0x00f38bf0
 void InitializeRuntimeFloatCall51()
 {
-    fnvFloat_011c3fb8 = fnvFloat_010185ac / FUN_004019b0(fnvFloat_010185a8);
+    fnvFloat_011c3fb8 = fnvFloat_010185ac / sqrt_004019b0(fnvFloat_010185a8);
 }
 // @fnv 0x00f38c20
 void InitializeRuntimeFloatCall52()
 {
     fnvFloat_011c3f68 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010185a8) * fnvFloat_010185a8)) * fnvFloat_010185ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010185a8) * fnvFloat_010185a8)) * fnvFloat_010185ac;
 }
 // @fnv 0x00f391c0
 void InitializeRuntimeFloatCall53()
 {
-    fnvFloat_011c40c0 = fnvFloat_01019d78 / FUN_004019b0(fnvFloat_01019d74);
+    fnvFloat_011c40c0 = fnvFloat_01019d78 / sqrt_004019b0(fnvFloat_01019d74);
 }
 // @fnv 0x00f391f0
 void InitializeRuntimeFloatCall54()
 {
     fnvFloat_011c40bc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01019d74) * fnvFloat_01019d74)) * fnvFloat_01019d78;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01019d74) * fnvFloat_01019d74)) * fnvFloat_01019d78;
 }
 // @fnv 0x00f39320
 void InitializeRuntimeFloatCall55()
 {
-    fnvFloat_011c4134 = fnvFloat_0101a66c / FUN_004019b0(fnvFloat_0101a668);
+    fnvFloat_011c4134 = fnvFloat_0101a66c / sqrt_004019b0(fnvFloat_0101a668);
 }
 // @fnv 0x00f39350
 void InitializeRuntimeFloatCall56()
 {
     fnvFloat_011c4114 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101a668) * fnvFloat_0101a668)) * fnvFloat_0101a66c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101a668) * fnvFloat_0101a668)) * fnvFloat_0101a66c;
 }
 // @fnv 0x00f39600
 void InitializeRuntimeFloatCall57()
 {
-    fnvFloat_011c4b94 = fnvFloat_0101a9e8 / FUN_004019b0(fnvFloat_0101a9e4);
+    fnvFloat_011c4b94 = fnvFloat_0101a9e8 / sqrt_004019b0(fnvFloat_0101a9e4);
 }
 // @fnv 0x00f39630
 void InitializeRuntimeFloatCall58()
 {
     fnvFloat_011c4b90 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101a9e4) * fnvFloat_0101a9e4)) * fnvFloat_0101a9e8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101a9e4) * fnvFloat_0101a9e4)) * fnvFloat_0101a9e8;
 }
 // @fnv 0x00f396a0
 void InitializeRuntimeFloatCall59()
 {
-    fnvFloat_011c4bdc = fnvFloat_0101aa6c / FUN_004019b0(fnvFloat_0101aa68);
+    fnvFloat_011c4bdc = fnvFloat_0101aa6c / sqrt_004019b0(fnvFloat_0101aa68);
 }
 // @fnv 0x00f396d0
 void InitializeRuntimeFloatCall60()
 {
     fnvFloat_011c4bbc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101aa68) * fnvFloat_0101aa68)) * fnvFloat_0101aa6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101aa68) * fnvFloat_0101aa68)) * fnvFloat_0101aa6c;
 }
 // @fnv 0x00f39900
 void InitializeRuntimeFloatCall61()
 {
-    fnvFloat_011c4c24 = fnvFloat_0101ab50 / FUN_004019b0(fnvFloat_0101ab4c);
+    fnvFloat_011c4c24 = fnvFloat_0101ab50 / sqrt_004019b0(fnvFloat_0101ab4c);
 }
 // @fnv 0x00f39930
 void InitializeRuntimeFloatCall62()
 {
     fnvFloat_011c4c20 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101ab4c) * fnvFloat_0101ab4c)) * fnvFloat_0101ab50;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101ab4c) * fnvFloat_0101ab4c)) * fnvFloat_0101ab50;
 }
 // @fnv 0x00f399a0
 void InitializeRuntimeFloatCall63()
 {
-    fnvFloat_011c4c70 = fnvFloat_0101ab7c / FUN_004019b0(fnvFloat_0101ab78);
+    fnvFloat_011c4c70 = fnvFloat_0101ab7c / sqrt_004019b0(fnvFloat_0101ab78);
 }
 // @fnv 0x00f399d0
 void InitializeRuntimeFloatCall64()
 {
     fnvFloat_011c4c44 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101ab78) * fnvFloat_0101ab78)) * fnvFloat_0101ab7c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101ab78) * fnvFloat_0101ab78)) * fnvFloat_0101ab7c;
 }
 // @fnv 0x00f39cd0
 void InitializeRuntimeFloatCall65()
 {
-    fnvFloat_011c4cfc = fnvFloat_0101adbc / FUN_004019b0(fnvFloat_0101adb8);
+    fnvFloat_011c4cfc = fnvFloat_0101adbc / sqrt_004019b0(fnvFloat_0101adb8);
 }
 // @fnv 0x00f39d00
 void InitializeRuntimeFloatCall66()
 {
     fnvFloat_011c4cdc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101adb8) * fnvFloat_0101adb8)) * fnvFloat_0101adbc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101adb8) * fnvFloat_0101adb8)) * fnvFloat_0101adbc;
 }
 // @fnv 0x00f39f70
 void InitializeRuntimeFloatCall67()
 {
-    fnvFloat_011c4d4c = fnvFloat_0101aee8 / FUN_004019b0(fnvFloat_0101aee4);
+    fnvFloat_011c4d4c = fnvFloat_0101aee8 / sqrt_004019b0(fnvFloat_0101aee4);
 }
 // @fnv 0x00f39fa0
 void InitializeRuntimeFloatCall68()
 {
     fnvFloat_011c4d48 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101aee4) * fnvFloat_0101aee4)) * fnvFloat_0101aee8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101aee4) * fnvFloat_0101aee4)) * fnvFloat_0101aee8;
 }
 // @fnv 0x00f3a070
 void InitializeRuntimeFloatCall69()
 {
-    fnvFloat_011c4fe0 = fnvFloat_0101b0ac / FUN_004019b0(fnvFloat_0101b0a8);
+    fnvFloat_011c4fe0 = fnvFloat_0101b0ac / sqrt_004019b0(fnvFloat_0101b0a8);
 }
 // @fnv 0x00f3a0a0
 void InitializeRuntimeFloatCall70()
 {
     fnvFloat_011c4e40 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101b0a8) * fnvFloat_0101b0a8)) * fnvFloat_0101b0ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101b0a8) * fnvFloat_0101b0a8)) * fnvFloat_0101b0ac;
 }
 // @fnv 0x00f3b590
 void InitializeRuntimeFloatCall71()
 {
-    fnvFloat_011c531c = fnvFloat_0101be6c / FUN_004019b0(fnvFloat_0101be68);
+    fnvFloat_011c531c = fnvFloat_0101be6c / sqrt_004019b0(fnvFloat_0101be68);
 }
 // @fnv 0x00f3b5c0
 void InitializeRuntimeFloatCall72()
 {
     fnvFloat_011c52d8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101be68) * fnvFloat_0101be68)) * fnvFloat_0101be6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101be68) * fnvFloat_0101be68)) * fnvFloat_0101be6c;
 }
 // @fnv 0x00f3b910
 void InitializeRuntimeFloatCall73()
 {
-    fnvFloat_011c5388 = fnvFloat_0101bf48 / FUN_004019b0(fnvFloat_0101bf44);
+    fnvFloat_011c5388 = fnvFloat_0101bf48 / sqrt_004019b0(fnvFloat_0101bf44);
 }
 // @fnv 0x00f3b940
 void InitializeRuntimeFloatCall74()
 {
     fnvFloat_011c5384 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101bf44) * fnvFloat_0101bf44)) * fnvFloat_0101bf48;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101bf44) * fnvFloat_0101bf44)) * fnvFloat_0101bf48;
 }
 // @fnv 0x00f3ba30
 void InitializeRuntimeFloatCall75()
 {
-    fnvFloat_011c53d8 = fnvFloat_0101bfac / FUN_004019b0(fnvFloat_0101bfa8);
+    fnvFloat_011c53d8 = fnvFloat_0101bfac / sqrt_004019b0(fnvFloat_0101bfa8);
 }
 // @fnv 0x00f3ba60
 void InitializeRuntimeFloatCall76()
 {
     fnvFloat_011c53b8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101bfa8) * fnvFloat_0101bfa8)) * fnvFloat_0101bfac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101bfa8) * fnvFloat_0101bfa8)) * fnvFloat_0101bfac;
 }
 // @fnv 0x00f3bc90
 void InitializeRuntimeFloatCall77()
 {
-    fnvFloat_011c5450 = fnvFloat_0101c01c / FUN_004019b0(fnvFloat_0101c018);
+    fnvFloat_011c5450 = fnvFloat_0101c01c / sqrt_004019b0(fnvFloat_0101c018);
 }
 // @fnv 0x00f3bcc0
 void InitializeRuntimeFloatCall78()
 {
     fnvFloat_011c5430 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101c018) * fnvFloat_0101c018)) * fnvFloat_0101c01c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101c018) * fnvFloat_0101c018)) * fnvFloat_0101c01c;
 }
 // @fnv 0x00f3bf50
 void InitializeRuntimeFloatCall79()
 {
-    fnvFloat_011c54ac = fnvFloat_0101c1a8 / FUN_004019b0(fnvFloat_0101c1a4);
+    fnvFloat_011c54ac = fnvFloat_0101c1a8 / sqrt_004019b0(fnvFloat_0101c1a4);
 }
 // @fnv 0x00f3bf80
 void InitializeRuntimeFloatCall80()
 {
     fnvFloat_011c54a8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101c1a4) * fnvFloat_0101c1a4)) * fnvFloat_0101c1a8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101c1a4) * fnvFloat_0101c1a4)) * fnvFloat_0101c1a8;
 }
 // @fnv 0x00f3bff0
 void InitializeRuntimeFloatCall81()
 {
-    fnvFloat_011c54e4 = fnvFloat_0101c678 / FUN_004019b0(fnvFloat_0101c674);
+    fnvFloat_011c54e4 = fnvFloat_0101c678 / sqrt_004019b0(fnvFloat_0101c674);
 }
 // @fnv 0x00f3c020
 void InitializeRuntimeFloatCall82()
 {
     fnvFloat_011c54d8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101c674) * fnvFloat_0101c674)) * fnvFloat_0101c678;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101c674) * fnvFloat_0101c674)) * fnvFloat_0101c678;
 }
 // @fnv 0x00f3c250
 void InitializeRuntimeFloatCall83()
 {
-    fnvFloat_011c5540 = fnvFloat_0101ccd8 / FUN_004019b0(fnvFloat_0101ccd4);
+    fnvFloat_011c5540 = fnvFloat_0101ccd8 / sqrt_004019b0(fnvFloat_0101ccd4);
 }
 // @fnv 0x00f3c280
 void InitializeRuntimeFloatCall84()
 {
     fnvFloat_011c5534 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101ccd4) * fnvFloat_0101ccd4)) * fnvFloat_0101ccd8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101ccd4) * fnvFloat_0101ccd4)) * fnvFloat_0101ccd8;
 }
 // @fnv 0x00f3c350
 void InitializeRuntimeFloatCall85()
 {
-    fnvFloat_011c556c = fnvFloat_0101cf18 / FUN_004019b0(fnvFloat_0101cf14);
+    fnvFloat_011c556c = fnvFloat_0101cf18 / sqrt_004019b0(fnvFloat_0101cf14);
 }
 // @fnv 0x00f3c380
 void InitializeRuntimeFloatCall86()
 {
     fnvFloat_011c5554 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101cf14) * fnvFloat_0101cf14)) * fnvFloat_0101cf18;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101cf14) * fnvFloat_0101cf14)) * fnvFloat_0101cf18;
 }
 // @fnv 0x00f3c4f0
 void InitializeRuntimeFloatCall87()
 {
-    fnvFloat_011c5598 = fnvFloat_0101d0cc / FUN_004019b0(fnvFloat_0101d0c8);
+    fnvFloat_011c5598 = fnvFloat_0101d0cc / sqrt_004019b0(fnvFloat_0101d0c8);
 }
 // @fnv 0x00f3c520
 void InitializeRuntimeFloatCall88()
 {
     fnvFloat_011c5594 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d0c8) * fnvFloat_0101d0c8)) * fnvFloat_0101d0cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d0c8) * fnvFloat_0101d0c8)) * fnvFloat_0101d0cc;
 }
 // @fnv 0x00f3c610
 void InitializeRuntimeFloatCall89()
 {
-    fnvFloat_011c55c4 = fnvFloat_0101d0f8 / FUN_004019b0(fnvFloat_0101d0f4);
+    fnvFloat_011c55c4 = fnvFloat_0101d0f8 / sqrt_004019b0(fnvFloat_0101d0f4);
 }
 // @fnv 0x00f3c640
 void InitializeRuntimeFloatCall90()
 {
     fnvFloat_011c55b8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d0f4) * fnvFloat_0101d0f4)) * fnvFloat_0101d0f8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d0f4) * fnvFloat_0101d0f4)) * fnvFloat_0101d0f8;
 }
 // @fnv 0x00f3c750
 void InitializeRuntimeFloatCall91()
 {
-    fnvFloat_011c55e0 = fnvFloat_0101d29c / FUN_004019b0(fnvFloat_0101d298);
+    fnvFloat_011c55e0 = fnvFloat_0101d29c / sqrt_004019b0(fnvFloat_0101d298);
 }
 // @fnv 0x00f3c780
 void InitializeRuntimeFloatCall92()
 {
     fnvFloat_011c55dc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d298) * fnvFloat_0101d298)) * fnvFloat_0101d29c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d298) * fnvFloat_0101d298)) * fnvFloat_0101d29c;
 }
 // @fnv 0x00f3c830
 void InitializeRuntimeFloatCall93()
 {
-    fnvFloat_011c55fc = fnvFloat_0101d390 / FUN_004019b0(fnvFloat_0101d38c);
+    fnvFloat_011c55fc = fnvFloat_0101d390 / sqrt_004019b0(fnvFloat_0101d38c);
 }
 // @fnv 0x00f3c860
 void InitializeRuntimeFloatCall94()
 {
     fnvFloat_011c55f8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d38c) * fnvFloat_0101d38c)) * fnvFloat_0101d390;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d38c) * fnvFloat_0101d38c)) * fnvFloat_0101d390;
 }
 // @fnv 0x00f3c990
 void InitializeRuntimeFloatCall95()
 {
-    fnvFloat_011c5654 = fnvFloat_0101d5fc / FUN_004019b0(fnvFloat_0101d5f8);
+    fnvFloat_011c5654 = fnvFloat_0101d5fc / sqrt_004019b0(fnvFloat_0101d5f8);
 }
 // @fnv 0x00f3c9c0
 void InitializeRuntimeFloatCall96()
 {
     fnvFloat_011c5634 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d5f8) * fnvFloat_0101d5f8)) * fnvFloat_0101d5fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d5f8) * fnvFloat_0101d5f8)) * fnvFloat_0101d5fc;
 }
 // @fnv 0x00f3cbf0
 void InitializeRuntimeFloatCall97()
 {
-    fnvFloat_011c56a8 = fnvFloat_0101d798 / FUN_004019b0(fnvFloat_0101d794);
+    fnvFloat_011c56a8 = fnvFloat_0101d798 / sqrt_004019b0(fnvFloat_0101d794);
 }
 // @fnv 0x00f3cc20
 void InitializeRuntimeFloatCall98()
 {
     fnvFloat_011c569c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d794) * fnvFloat_0101d794)) * fnvFloat_0101d798;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d794) * fnvFloat_0101d794)) * fnvFloat_0101d798;
 }
 // @fnv 0x00f3cd30
 void InitializeRuntimeFloatCall99()
 {
-    fnvFloat_011c56c4 = fnvFloat_0101d814 / FUN_004019b0(fnvFloat_0101d810);
+    fnvFloat_011c56c4 = fnvFloat_0101d814 / sqrt_004019b0(fnvFloat_0101d810);
 }
 // @fnv 0x00f3cd60
 void InitializeRuntimeFloatCall100()
 {
     fnvFloat_011c56c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d810) * fnvFloat_0101d810)) * fnvFloat_0101d814;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d810) * fnvFloat_0101d810)) * fnvFloat_0101d814;
 }
 // @fnv 0x00f3cdd0
 void InitializeRuntimeFloatCall101()
 {
-    fnvFloat_011c56d8 = fnvFloat_0101d848 / FUN_004019b0(fnvFloat_0101d844);
+    fnvFloat_011c56d8 = fnvFloat_0101d848 / sqrt_004019b0(fnvFloat_0101d844);
 }
 // @fnv 0x00f3ce00
 void InitializeRuntimeFloatCall102()
 {
     fnvFloat_011c56d4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d844) * fnvFloat_0101d844)) * fnvFloat_0101d848;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d844) * fnvFloat_0101d844)) * fnvFloat_0101d848;
 }
 // @fnv 0x00f3ce70
 void InitializeRuntimeFloatCall103()
 {
-    fnvFloat_011c575c = fnvFloat_0101d89c / FUN_004019b0(fnvFloat_0101d898);
+    fnvFloat_011c575c = fnvFloat_0101d89c / sqrt_004019b0(fnvFloat_0101d898);
 }
 // @fnv 0x00f3cea0
 void InitializeRuntimeFloatCall104()
 {
     fnvFloat_011c570c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101d898) * fnvFloat_0101d898)) * fnvFloat_0101d89c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101d898) * fnvFloat_0101d898)) * fnvFloat_0101d89c;
 }
 // @fnv 0x00f3d1f0
 void InitializeRuntimeFloatCall105()
 {
-    fnvFloat_011c57c4 = fnvFloat_0101dfe8 / FUN_004019b0(fnvFloat_0101dfe4);
+    fnvFloat_011c57c4 = fnvFloat_0101dfe8 / sqrt_004019b0(fnvFloat_0101dfe4);
 }
 // @fnv 0x00f3d220
 void InitializeRuntimeFloatCall106()
 {
     fnvFloat_011c57b8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101dfe4) * fnvFloat_0101dfe4)) * fnvFloat_0101dfe8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101dfe4) * fnvFloat_0101dfe4)) * fnvFloat_0101dfe8;
 }
 // @fnv 0x00f3d350
 void InitializeRuntimeFloatCall107()
 {
-    fnvFloat_011c58b4 = fnvFloat_0101e14c / FUN_004019b0(fnvFloat_0101e148);
+    fnvFloat_011c58b4 = fnvFloat_0101e14c / sqrt_004019b0(fnvFloat_0101e148);
 }
 // @fnv 0x00f3d380
 void InitializeRuntimeFloatCall108()
 {
     fnvFloat_011c5828 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101e148) * fnvFloat_0101e148)) * fnvFloat_0101e14c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101e148) * fnvFloat_0101e148)) * fnvFloat_0101e14c;
 }
 // @fnv 0x00f3d8a0
 void InitializeRuntimeFloatCall109()
 {
-    fnvFloat_011c5934 = fnvFloat_0101e724 / FUN_004019b0(fnvFloat_0101e720);
+    fnvFloat_011c5934 = fnvFloat_0101e724 / sqrt_004019b0(fnvFloat_0101e720);
 }
 // @fnv 0x00f3d8d0
 void InitializeRuntimeFloatCall110()
 {
     fnvFloat_011c5930 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101e720) * fnvFloat_0101e720)) * fnvFloat_0101e724;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101e720) * fnvFloat_0101e720)) * fnvFloat_0101e724;
 }
 // @fnv 0x00f3d940
 void InitializeRuntimeFloatCall111()
 {
-    fnvFloat_011c5b2c = fnvFloat_0101ec3c / FUN_004019b0(fnvFloat_0101ec38);
+    fnvFloat_011c5b2c = fnvFloat_0101ec3c / sqrt_004019b0(fnvFloat_0101ec38);
 }
 // @fnv 0x00f3d970
 void InitializeRuntimeFloatCall112()
 {
     fnvFloat_011c59c8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101ec38) * fnvFloat_0101ec38)) * fnvFloat_0101ec3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101ec38) * fnvFloat_0101ec38)) * fnvFloat_0101ec3c;
 }
 // @fnv 0x00f3e630
 void InitializeRuntimeFloatCall113()
 {
-    fnvFloat_011c5ca0 = fnvFloat_0101f4f8 / FUN_004019b0(fnvFloat_0101f4f4);
+    fnvFloat_011c5ca0 = fnvFloat_0101f4f8 / sqrt_004019b0(fnvFloat_0101f4f4);
 }
 // @fnv 0x00f3e660
 void InitializeRuntimeFloatCall114()
 {
     fnvFloat_011c5c94 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101f4f4) * fnvFloat_0101f4f4)) * fnvFloat_0101f4f8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101f4f4) * fnvFloat_0101f4f4)) * fnvFloat_0101f4f8;
 }
 // @fnv 0x00f3e730
 void InitializeRuntimeFloatCall115()
 {
-    fnvFloat_011c5efc = fnvFloat_0101f65c / FUN_004019b0(fnvFloat_0101f658);
+    fnvFloat_011c5efc = fnvFloat_0101f65c / sqrt_004019b0(fnvFloat_0101f658);
 }
 // @fnv 0x00f3e760
 void InitializeRuntimeFloatCall116()
 {
     fnvFloat_011c5cd8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101f658) * fnvFloat_0101f658)) * fnvFloat_0101f65c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101f658) * fnvFloat_0101f658)) * fnvFloat_0101f65c;
 }
 // @fnv 0x00f3ea40
 void InitializeRuntimeFloatCall117()
 {
-    fnvFloat_011c5f4c = fnvFloat_0101fc98 / FUN_004019b0(fnvFloat_0101fc94);
+    fnvFloat_011c5f4c = fnvFloat_0101fc98 / sqrt_004019b0(fnvFloat_0101fc94);
 }
 // @fnv 0x00f3ea70
 void InitializeRuntimeFloatCall118()
 {
     fnvFloat_011c5f48 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101fc94) * fnvFloat_0101fc94)) * fnvFloat_0101fc98;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101fc94) * fnvFloat_0101fc94)) * fnvFloat_0101fc98;
 }
 // @fnv 0x00f3eae0
 void InitializeRuntimeFloatCall119()
 {
-    fnvFloat_011c5f64 = fnvFloat_0101fcec / FUN_004019b0(fnvFloat_0101fce8);
+    fnvFloat_011c5f64 = fnvFloat_0101fcec / sqrt_004019b0(fnvFloat_0101fce8);
 }
 // @fnv 0x00f3eb10
 void InitializeRuntimeFloatCall120()
 {
     fnvFloat_011c5f60 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101fce8) * fnvFloat_0101fce8)) * fnvFloat_0101fcec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101fce8) * fnvFloat_0101fce8)) * fnvFloat_0101fcec;
 }
 // @fnv 0x00f3ebb0
 void InitializeRuntimeFloatCall121()
 {
-    fnvFloat_011c62d4 = fnvFloat_0101ff0c / FUN_004019b0(fnvFloat_0101ff08);
+    fnvFloat_011c62d4 = fnvFloat_0101ff0c / sqrt_004019b0(fnvFloat_0101ff08);
 }
 // @fnv 0x00f3ebe0
 void InitializeRuntimeFloatCall122()
 {
     fnvFloat_011c6290 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0101ff08) * fnvFloat_0101ff08)) * fnvFloat_0101ff0c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0101ff08) * fnvFloat_0101ff08)) * fnvFloat_0101ff0c;
 }
 // @fnv 0x00f3eed0
 void InitializeRuntimeFloatCall123()
 {
-    fnvFloat_011c63a0 = fnvFloat_0102062c / FUN_004019b0(fnvFloat_01020628);
+    fnvFloat_011c63a0 = fnvFloat_0102062c / sqrt_004019b0(fnvFloat_01020628);
 }
 // @fnv 0x00f3ef00
 void InitializeRuntimeFloatCall124()
 {
     fnvFloat_011c639c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01020628) * fnvFloat_01020628)) * fnvFloat_0102062c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01020628) * fnvFloat_01020628)) * fnvFloat_0102062c;
 }
 // @fnv 0x00f3ef70
 void InitializeRuntimeFloatCall125()
 {
-    fnvFloat_011c63ec = fnvFloat_0102066c / FUN_004019b0(fnvFloat_01020668);
+    fnvFloat_011c63ec = fnvFloat_0102066c / sqrt_004019b0(fnvFloat_01020668);
 }
 // @fnv 0x00f3efa0
 void InitializeRuntimeFloatCall126()
 {
     fnvFloat_011c63c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01020668) * fnvFloat_01020668)) * fnvFloat_0102066c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01020668) * fnvFloat_01020668)) * fnvFloat_0102066c;
 }
 // @fnv 0x00f3f200
 void InitializeRuntimeFloatCall127()
 {
-    fnvFloat_011c648c = fnvFloat_0102072c / FUN_004019b0(fnvFloat_01020728);
+    fnvFloat_011c648c = fnvFloat_0102072c / sqrt_004019b0(fnvFloat_01020728);
 }
 // @fnv 0x00f3f230
 void InitializeRuntimeFloatCall128()
 {
     fnvFloat_011c6460 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01020728) * fnvFloat_01020728)) * fnvFloat_0102072c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01020728) * fnvFloat_01020728)) * fnvFloat_0102072c;
 }
 // @fnv 0x00f3f4d0
 void InitializeRuntimeFloatCall129()
 {
-    fnvFloat_011c6540 = fnvFloat_01020990 / FUN_004019b0(fnvFloat_0102098c);
+    fnvFloat_011c6540 = fnvFloat_01020990 / sqrt_004019b0(fnvFloat_0102098c);
 }
 // @fnv 0x00f3f500
 void InitializeRuntimeFloatCall130()
 {
     fnvFloat_011c6518 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102098c) * fnvFloat_0102098c)) * fnvFloat_01020990;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102098c) * fnvFloat_0102098c)) * fnvFloat_01020990;
 }
 // @fnv 0x00f3f600
 void InitializeRuntimeFloatCall131()
 {
-    fnvFloat_011c6e08 = fnvFloat_01020d54 / FUN_004019b0(fnvFloat_01020d50);
+    fnvFloat_011c6e08 = fnvFloat_01020d54 / sqrt_004019b0(fnvFloat_01020d50);
 }
 // @fnv 0x00f3f630
 void InitializeRuntimeFloatCall132()
 {
     fnvFloat_011c6e00 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01020d50) * fnvFloat_01020d50)) * fnvFloat_01020d54;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01020d50) * fnvFloat_01020d50)) * fnvFloat_01020d54;
 }
 // @fnv 0x00f3f6c0
 void InitializeRuntimeFloatCall133()
 {
-    fnvFloat_011c6f50 = fnvFloat_01020e1c / FUN_004019b0(fnvFloat_01020e18);
+    fnvFloat_011c6f50 = fnvFloat_01020e1c / sqrt_004019b0(fnvFloat_01020e18);
 }
 // @fnv 0x00f3f6f0
 void InitializeRuntimeFloatCall134()
 {
     fnvFloat_011c6f30 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01020e18) * fnvFloat_01020e18)) * fnvFloat_01020e1c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01020e18) * fnvFloat_01020e18)) * fnvFloat_01020e1c;
 }
 // @fnv 0x00f3f920
 void InitializeRuntimeFloatCall135()
 {
-    fnvFloat_011c6fa4 = fnvFloat_01021038 / FUN_004019b0(fnvFloat_01021034);
+    fnvFloat_011c6fa4 = fnvFloat_01021038 / sqrt_004019b0(fnvFloat_01021034);
 }
 // @fnv 0x00f3f950
 void InitializeRuntimeFloatCall136()
 {
     fnvFloat_011c6f98 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01021034) * fnvFloat_01021034)) * fnvFloat_01021038;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01021034) * fnvFloat_01021034)) * fnvFloat_01021038;
 }
 // @fnv 0x00f3fa20
 void InitializeRuntimeFloatCall137()
 {
-    fnvFloat_011c74d0 = fnvFloat_0102109c / FUN_004019b0(fnvFloat_01021098);
+    fnvFloat_011c74d0 = fnvFloat_0102109c / sqrt_004019b0(fnvFloat_01021098);
 }
 // @fnv 0x00f3fa50
 void InitializeRuntimeFloatCall138()
 {
     fnvFloat_011c717c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01021098) * fnvFloat_01021098)) * fnvFloat_0102109c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01021098) * fnvFloat_01021098)) * fnvFloat_0102109c;
 }
 // @fnv 0x00f41640
 void InitializeRuntimeFloatCall139()
 {
-    fnvFloat_011c7814 = fnvFloat_01022894 / FUN_004019b0(fnvFloat_01022890);
+    fnvFloat_011c7814 = fnvFloat_01022894 / sqrt_004019b0(fnvFloat_01022890);
 }
 // @fnv 0x00f41670
 void InitializeRuntimeFloatCall140()
 {
     fnvFloat_011c7800 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01022890) * fnvFloat_01022890)) * fnvFloat_01022894;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01022890) * fnvFloat_01022890)) * fnvFloat_01022894;
 }
 // @fnv 0x00f417a0
 void InitializeRuntimeFloatCall141()
 {
-    fnvFloat_011c7858 = fnvFloat_01022a14 / FUN_004019b0(fnvFloat_01022a10);
+    fnvFloat_011c7858 = fnvFloat_01022a14 / sqrt_004019b0(fnvFloat_01022a10);
 }
 // @fnv 0x00f417d0
 void InitializeRuntimeFloatCall142()
 {
     fnvFloat_011c783c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01022a10) * fnvFloat_01022a10)) * fnvFloat_01022a14;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01022a10) * fnvFloat_01022a10)) * fnvFloat_01022a14;
 }
 // @fnv 0x00f42020
 void InitializeRuntimeFloatCall143()
 {
-    fnvFloat_011c7bc8 = fnvFloat_01022fec / FUN_004019b0(fnvFloat_01022fe8);
+    fnvFloat_011c7bc8 = fnvFloat_01022fec / sqrt_004019b0(fnvFloat_01022fe8);
 }
 // @fnv 0x00f42050
 void InitializeRuntimeFloatCall144()
 {
     fnvFloat_011c7ad8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01022fe8) * fnvFloat_01022fe8)) * fnvFloat_01022fec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01022fe8) * fnvFloat_01022fe8)) * fnvFloat_01022fec;
 }
 // @fnv 0x00f42b20
 void InitializeRuntimeFloatCall145()
 {
-    fnvFloat_011c7d30 = fnvFloat_0102372c / FUN_004019b0(fnvFloat_01023728);
+    fnvFloat_011c7d30 = fnvFloat_0102372c / sqrt_004019b0(fnvFloat_01023728);
 }
 // @fnv 0x00f42b50
 void InitializeRuntimeFloatCall146()
 {
     fnvFloat_011c7d2c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023728) * fnvFloat_01023728)) * fnvFloat_0102372c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023728) * fnvFloat_01023728)) * fnvFloat_0102372c;
 }
 // @fnv 0x00f42c00
 void InitializeRuntimeFloatCall147()
 {
-    fnvFloat_011c7d80 = fnvFloat_0102385c / FUN_004019b0(fnvFloat_01023858);
+    fnvFloat_011c7d80 = fnvFloat_0102385c / sqrt_004019b0(fnvFloat_01023858);
 }
 // @fnv 0x00f42c30
 void InitializeRuntimeFloatCall148()
 {
     fnvFloat_011c7d58 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023858) * fnvFloat_01023858)) * fnvFloat_0102385c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023858) * fnvFloat_01023858)) * fnvFloat_0102385c;
 }
 // @fnv 0x00f42e80
 void InitializeRuntimeFloatCall149()
 {
-    fnvFloat_011c7dd8 = fnvFloat_0102390c / FUN_004019b0(fnvFloat_01023908);
+    fnvFloat_011c7dd8 = fnvFloat_0102390c / sqrt_004019b0(fnvFloat_01023908);
 }
 // @fnv 0x00f42eb0
 void InitializeRuntimeFloatCall150()
 {
     fnvFloat_011c7dcc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023908) * fnvFloat_01023908)) * fnvFloat_0102390c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023908) * fnvFloat_01023908)) * fnvFloat_0102390c;
 }
 // @fnv 0x00f42f80
 void InitializeRuntimeFloatCall151()
 {
-    fnvFloat_011c7e1c = fnvFloat_0102394c / FUN_004019b0(fnvFloat_01023948);
+    fnvFloat_011c7e1c = fnvFloat_0102394c / sqrt_004019b0(fnvFloat_01023948);
 }
 // @fnv 0x00f42fb0
 void InitializeRuntimeFloatCall152()
 {
     fnvFloat_011c7dfc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023948) * fnvFloat_01023948)) * fnvFloat_0102394c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023948) * fnvFloat_01023948)) * fnvFloat_0102394c;
 }
 // @fnv 0x00f43260
 void InitializeRuntimeFloatCall153()
 {
-    fnvFloat_011c7ea8 = fnvFloat_01023b9c / FUN_004019b0(fnvFloat_01023b98);
+    fnvFloat_011c7ea8 = fnvFloat_01023b9c / sqrt_004019b0(fnvFloat_01023b98);
 }
 // @fnv 0x00f43290
 void InitializeRuntimeFloatCall154()
 {
     fnvFloat_011c7e88 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023b98) * fnvFloat_01023b98)) * fnvFloat_01023b9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023b98) * fnvFloat_01023b98)) * fnvFloat_01023b9c;
 }
 // @fnv 0x00f434c0
 void InitializeRuntimeFloatCall155()
 {
-    fnvFloat_011c7f00 = fnvFloat_01023c48 / FUN_004019b0(fnvFloat_01023c44);
+    fnvFloat_011c7f00 = fnvFloat_01023c48 / sqrt_004019b0(fnvFloat_01023c44);
 }
 // @fnv 0x00f434f0
 void InitializeRuntimeFloatCall156()
 {
     fnvFloat_011c7ef0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023c44) * fnvFloat_01023c44)) * fnvFloat_01023c48;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023c44) * fnvFloat_01023c44)) * fnvFloat_01023c48;
 }
 // @fnv 0x00f43680
 void InitializeRuntimeFloatCall157()
 {
-    fnvFloat_011c7f30 = fnvFloat_01023d68 / FUN_004019b0(fnvFloat_01023d64);
+    fnvFloat_011c7f30 = fnvFloat_01023d68 / sqrt_004019b0(fnvFloat_01023d64);
 }
 // @fnv 0x00f436b0
 void InitializeRuntimeFloatCall158()
 {
     fnvFloat_011c7f2c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023d64) * fnvFloat_01023d64)) * fnvFloat_01023d68;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023d64) * fnvFloat_01023d64)) * fnvFloat_01023d68;
 }
 // @fnv 0x00f43720
 void InitializeRuntimeFloatCall159()
 {
-    fnvFloat_011c7f40 = fnvFloat_01023d98 / FUN_004019b0(fnvFloat_01023d94);
+    fnvFloat_011c7f40 = fnvFloat_01023d98 / sqrt_004019b0(fnvFloat_01023d94);
 }
 // @fnv 0x00f43750
 void InitializeRuntimeFloatCall160()
 {
     fnvFloat_011c7f3c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023d94) * fnvFloat_01023d94)) * fnvFloat_01023d98;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023d94) * fnvFloat_01023d94)) * fnvFloat_01023d98;
 }
 // @fnv 0x00f43800
 void InitializeRuntimeFloatCall161()
 {
-    fnvFloat_011c7f64 = fnvFloat_01023e98 / FUN_004019b0(fnvFloat_01023e94);
+    fnvFloat_011c7f64 = fnvFloat_01023e98 / sqrt_004019b0(fnvFloat_01023e94);
 }
 // @fnv 0x00f43830
 void InitializeRuntimeFloatCall162()
 {
     fnvFloat_011c7f58 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01023e94) * fnvFloat_01023e94)) * fnvFloat_01023e98;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01023e94) * fnvFloat_01023e94)) * fnvFloat_01023e98;
 }
 // @fnv 0x00f43980
 void InitializeRuntimeFloatCall163()
 {
-    fnvFloat_011c7fdc = fnvFloat_010240ac / FUN_004019b0(fnvFloat_010240a8);
+    fnvFloat_011c7fdc = fnvFloat_010240ac / sqrt_004019b0(fnvFloat_010240a8);
 }
 // @fnv 0x00f439b0
 void InitializeRuntimeFloatCall164()
 {
     fnvFloat_011c7fd8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010240a8) * fnvFloat_010240a8)) * fnvFloat_010240ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010240a8) * fnvFloat_010240a8)) * fnvFloat_010240ac;
 }
 // @fnv 0x00f43a20
 void InitializeRuntimeFloatCall165()
 {
-    fnvFloat_011c7ff8 = fnvFloat_010240d8 / FUN_004019b0(fnvFloat_010240d4);
+    fnvFloat_011c7ff8 = fnvFloat_010240d8 / sqrt_004019b0(fnvFloat_010240d4);
 }
 // @fnv 0x00f43a50
 void InitializeRuntimeFloatCall166()
 {
     fnvFloat_011c7fec =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010240d4) * fnvFloat_010240d4)) * fnvFloat_010240d8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010240d4) * fnvFloat_010240d4)) * fnvFloat_010240d8;
 }
 // @fnv 0x00f43b20
 void InitializeRuntimeFloatCall167()
 {
-    fnvFloat_011c8010 = fnvFloat_01024118 / FUN_004019b0(fnvFloat_01024114);
+    fnvFloat_011c8010 = fnvFloat_01024118 / sqrt_004019b0(fnvFloat_01024114);
 }
 // @fnv 0x00f43b50
 void InitializeRuntimeFloatCall168()
 {
     fnvFloat_011c800c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01024114) * fnvFloat_01024114)) * fnvFloat_01024118;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01024114) * fnvFloat_01024114)) * fnvFloat_01024118;
 }
 // @fnv 0x00f43bc0
 void InitializeRuntimeFloatCall169()
 {
-    fnvFloat_011c8020 = fnvFloat_01024148 / FUN_004019b0(fnvFloat_01024144);
+    fnvFloat_011c8020 = fnvFloat_01024148 / sqrt_004019b0(fnvFloat_01024144);
 }
 // @fnv 0x00f43bf0
 void InitializeRuntimeFloatCall170()
 {
     fnvFloat_011c801c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01024144) * fnvFloat_01024144)) * fnvFloat_01024148;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01024144) * fnvFloat_01024144)) * fnvFloat_01024148;
 }
 // @fnv 0x00f43c60
 void InitializeRuntimeFloatCall171()
 {
-    fnvFloat_011c803c = fnvFloat_01024158 / FUN_004019b0(fnvFloat_01024154);
+    fnvFloat_011c803c = fnvFloat_01024158 / sqrt_004019b0(fnvFloat_01024154);
 }
 // @fnv 0x00f43c90
 void InitializeRuntimeFloatCall172()
 {
     fnvFloat_011c8030 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01024154) * fnvFloat_01024154)) * fnvFloat_01024158;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01024154) * fnvFloat_01024154)) * fnvFloat_01024158;
 }
 // @fnv 0x00f43da0
 void InitializeRuntimeFloatCall173()
 {
-    fnvFloat_011c8064 = fnvFloat_010241e8 / FUN_004019b0(fnvFloat_010241e4);
+    fnvFloat_011c8064 = fnvFloat_010241e8 / sqrt_004019b0(fnvFloat_010241e4);
 }
 // @fnv 0x00f43dd0
 void InitializeRuntimeFloatCall174()
 {
     fnvFloat_011c8060 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010241e4) * fnvFloat_010241e4)) * fnvFloat_010241e8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010241e4) * fnvFloat_010241e4)) * fnvFloat_010241e8;
 }
 // @fnv 0x00f43e60
 void InitializeRuntimeFloatCall175()
 {
-    fnvFloat_011c8088 = fnvFloat_01024498 / FUN_004019b0(fnvFloat_01024494);
+    fnvFloat_011c8088 = fnvFloat_01024498 / sqrt_004019b0(fnvFloat_01024494);
 }
 // @fnv 0x00f43e90
 void InitializeRuntimeFloatCall176()
 {
     fnvFloat_011c807c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01024494) * fnvFloat_01024494)) * fnvFloat_01024498;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01024494) * fnvFloat_01024494)) * fnvFloat_01024498;
 }
 // @fnv 0x00f43f60
 void InitializeRuntimeFloatCall177()
 {
-    fnvFloat_011c80cc = fnvFloat_010247ec / FUN_004019b0(fnvFloat_010247e8);
+    fnvFloat_011c80cc = fnvFloat_010247ec / sqrt_004019b0(fnvFloat_010247e8);
 }
 // @fnv 0x00f43f90
 void InitializeRuntimeFloatCall178()
 {
     fnvFloat_011c80ac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010247e8) * fnvFloat_010247e8)) * fnvFloat_010247ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010247e8) * fnvFloat_010247e8)) * fnvFloat_010247ec;
 }
 // @fnv 0x00f441c0
 void InitializeRuntimeFloatCall179()
 {
-    fnvFloat_011c8120 = fnvFloat_010249ec / FUN_004019b0(fnvFloat_010249e8);
+    fnvFloat_011c8120 = fnvFloat_010249ec / sqrt_004019b0(fnvFloat_010249e8);
 }
 // @fnv 0x00f441f0
 void InitializeRuntimeFloatCall180()
 {
     fnvFloat_011c8114 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010249e8) * fnvFloat_010249e8)) * fnvFloat_010249ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010249e8) * fnvFloat_010249e8)) * fnvFloat_010249ec;
 }
 // @fnv 0x00f44320
 void InitializeRuntimeFloatCall181()
 {
-    fnvFloat_011c8174 = fnvFloat_01024efc / FUN_004019b0(fnvFloat_01024ef8);
+    fnvFloat_011c8174 = fnvFloat_01024efc / sqrt_004019b0(fnvFloat_01024ef8);
 }
 // @fnv 0x00f44350
 void InitializeRuntimeFloatCall182()
 {
     fnvFloat_011c8154 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01024ef8) * fnvFloat_01024ef8)) * fnvFloat_01024efc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01024ef8) * fnvFloat_01024ef8)) * fnvFloat_01024efc;
 }
 // @fnv 0x00f44580
 void InitializeRuntimeFloatCall183()
 {
-    fnvFloat_011c81ec = fnvFloat_0102511c / FUN_004019b0(fnvFloat_01025118);
+    fnvFloat_011c81ec = fnvFloat_0102511c / sqrt_004019b0(fnvFloat_01025118);
 }
 // @fnv 0x00f445b0
 void InitializeRuntimeFloatCall184()
 {
     fnvFloat_011c81cc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01025118) * fnvFloat_01025118)) * fnvFloat_0102511c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01025118) * fnvFloat_01025118)) * fnvFloat_0102511c;
 }
 // @fnv 0x00f44820
 void InitializeRuntimeFloatCall185()
 {
-    fnvFloat_011c8274 = fnvFloat_010254ec / FUN_004019b0(fnvFloat_010254e8);
+    fnvFloat_011c8274 = fnvFloat_010254ec / sqrt_004019b0(fnvFloat_010254e8);
 }
 // @fnv 0x00f44850
 void InitializeRuntimeFloatCall186()
 {
     fnvFloat_011c824c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010254e8) * fnvFloat_010254e8)) * fnvFloat_010254ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010254e8) * fnvFloat_010254e8)) * fnvFloat_010254ec;
 }
 // @fnv 0x00f44b00
 void InitializeRuntimeFloatCall187()
 {
-    fnvFloat_011c8340 = fnvFloat_0102585c / FUN_004019b0(fnvFloat_01025858);
+    fnvFloat_011c8340 = fnvFloat_0102585c / sqrt_004019b0(fnvFloat_01025858);
 }
 // @fnv 0x00f44b30
 void InitializeRuntimeFloatCall188()
 {
     fnvFloat_011c82d8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01025858) * fnvFloat_01025858)) * fnvFloat_0102585c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01025858) * fnvFloat_01025858)) * fnvFloat_0102585c;
 }
 // @fnv 0x00f44fd0
 void InitializeRuntimeFloatCall189()
 {
-    fnvFloat_011c8410 = fnvFloat_01025f1c / FUN_004019b0(fnvFloat_01025f18);
+    fnvFloat_011c8410 = fnvFloat_01025f1c / sqrt_004019b0(fnvFloat_01025f18);
 }
 // @fnv 0x00f45000
 void InitializeRuntimeFloatCall190()
 {
     fnvFloat_011c83f0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01025f18) * fnvFloat_01025f18)) * fnvFloat_01025f1c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01025f18) * fnvFloat_01025f18)) * fnvFloat_01025f1c;
 }
 // @fnv 0x00f45230
 void InitializeRuntimeFloatCall191()
 {
-    fnvFloat_011c8464 = fnvFloat_01025f58 / FUN_004019b0(fnvFloat_01025f54);
+    fnvFloat_011c8464 = fnvFloat_01025f58 / sqrt_004019b0(fnvFloat_01025f54);
 }
 // @fnv 0x00f45260
 void InitializeRuntimeFloatCall192()
 {
     fnvFloat_011c8458 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01025f54) * fnvFloat_01025f54)) * fnvFloat_01025f58;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01025f54) * fnvFloat_01025f54)) * fnvFloat_01025f58;
 }
 // @fnv 0x00f45360
 void InitializeRuntimeFloatCall193()
 {
-    fnvFloat_011c8490 = fnvFloat_010262f8 / FUN_004019b0(fnvFloat_010262f4);
+    fnvFloat_011c8490 = fnvFloat_010262f8 / sqrt_004019b0(fnvFloat_010262f4);
 }
 // @fnv 0x00f45390
 void InitializeRuntimeFloatCall194()
 {
     fnvFloat_011c8484 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010262f4) * fnvFloat_010262f4)) * fnvFloat_010262f8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010262f4) * fnvFloat_010262f4)) * fnvFloat_010262f8;
 }
 // @fnv 0x00f45460
 void InitializeRuntimeFloatCall195()
 {
-    fnvFloat_011c84b0 = fnvFloat_010266b8 / FUN_004019b0(fnvFloat_010266b4);
+    fnvFloat_011c84b0 = fnvFloat_010266b8 / sqrt_004019b0(fnvFloat_010266b4);
 }
 // @fnv 0x00f45490
 void InitializeRuntimeFloatCall196()
 {
     fnvFloat_011c84a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010266b4) * fnvFloat_010266b4)) * fnvFloat_010266b8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010266b4) * fnvFloat_010266b4)) * fnvFloat_010266b8;
 }
 // @fnv 0x00f45560
 void InitializeRuntimeFloatCall197()
 {
-    fnvFloat_011c84f4 = fnvFloat_0102682c / FUN_004019b0(fnvFloat_01026828);
+    fnvFloat_011c84f4 = fnvFloat_0102682c / sqrt_004019b0(fnvFloat_01026828);
 }
 // @fnv 0x00f45590
 void InitializeRuntimeFloatCall198()
 {
     fnvFloat_011c84d4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01026828) * fnvFloat_01026828)) * fnvFloat_0102682c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01026828) * fnvFloat_01026828)) * fnvFloat_0102682c;
 }
 // @fnv 0x00f457c0
 void InitializeRuntimeFloatCall199()
 {
-    fnvFloat_011c8578 = fnvFloat_010269ac / FUN_004019b0(fnvFloat_010269a8);
+    fnvFloat_011c8578 = fnvFloat_010269ac / sqrt_004019b0(fnvFloat_010269a8);
 }
 // @fnv 0x00f457f0
 void InitializeRuntimeFloatCall200()
 {
     fnvFloat_011c854c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010269a8) * fnvFloat_010269a8)) * fnvFloat_010269ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010269a8) * fnvFloat_010269a8)) * fnvFloat_010269ac;
 }
 // @fnv 0x00f45a80
 void InitializeRuntimeFloatCall201()
 {
-    fnvFloat_011c89ec = fnvFloat_01026c6c / FUN_004019b0(fnvFloat_01026c68);
+    fnvFloat_011c89ec = fnvFloat_01026c6c / sqrt_004019b0(fnvFloat_01026c68);
 }
 // @fnv 0x00f45ab0
 void InitializeRuntimeFloatCall202()
 {
     fnvFloat_011c86c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01026c68) * fnvFloat_01026c68)) * fnvFloat_01026c6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01026c68) * fnvFloat_01026c68)) * fnvFloat_01026c6c;
 }
 // @fnv 0x00f47ae0
 void InitializeRuntimeFloatCall203()
 {
-    fnvFloat_011c8dc4 = fnvFloat_01028120 / FUN_004019b0(fnvFloat_0102811c);
+    fnvFloat_011c8dc4 = fnvFloat_01028120 / sqrt_004019b0(fnvFloat_0102811c);
 }
 // @fnv 0x00f47b10
 void InitializeRuntimeFloatCall204()
 {
     fnvFloat_011c8dc0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102811c) * fnvFloat_0102811c)) * fnvFloat_01028120;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102811c) * fnvFloat_0102811c)) * fnvFloat_01028120;
 }
 // @fnv 0x00f47bf0
 void InitializeRuntimeFloatCall205()
 {
-    fnvFloat_011c8e18 = fnvFloat_010285dc / FUN_004019b0(fnvFloat_010285d8);
+    fnvFloat_011c8e18 = fnvFloat_010285dc / sqrt_004019b0(fnvFloat_010285d8);
 }
 // @fnv 0x00f47c20
 void InitializeRuntimeFloatCall206()
 {
     fnvFloat_011c8df8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010285d8) * fnvFloat_010285d8)) * fnvFloat_010285dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010285d8) * fnvFloat_010285d8)) * fnvFloat_010285dc;
 }
 // @fnv 0x00f47e80
 void InitializeRuntimeFloatCall207()
 {
-    fnvFloat_011c8ea0 = fnvFloat_010287fc / FUN_004019b0(fnvFloat_010287f8);
+    fnvFloat_011c8ea0 = fnvFloat_010287fc / sqrt_004019b0(fnvFloat_010287f8);
 }
 // @fnv 0x00f47eb0
 void InitializeRuntimeFloatCall208()
 {
     fnvFloat_011c8e80 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010287f8) * fnvFloat_010287f8)) * fnvFloat_010287fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010287f8) * fnvFloat_010287f8)) * fnvFloat_010287fc;
 }
 // @fnv 0x00f48110
 void InitializeRuntimeFloatCall209()
 {
-    fnvFloat_011c8f10 = fnvFloat_01028a18 / FUN_004019b0(fnvFloat_01028a14);
+    fnvFloat_011c8f10 = fnvFloat_01028a18 / sqrt_004019b0(fnvFloat_01028a14);
 }
 // @fnv 0x00f48140
 void InitializeRuntimeFloatCall210()
 {
     fnvFloat_011c8ef8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01028a14) * fnvFloat_01028a14)) * fnvFloat_01028a18;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01028a14) * fnvFloat_01028a14)) * fnvFloat_01028a18;
 }
 // @fnv 0x00f48240
 void InitializeRuntimeFloatCall211()
 {
-    fnvFloat_011c8f58 = fnvFloat_01028c0c / FUN_004019b0(fnvFloat_01028c08);
+    fnvFloat_011c8f58 = fnvFloat_01028c0c / sqrt_004019b0(fnvFloat_01028c08);
 }
 // @fnv 0x00f48270
 void InitializeRuntimeFloatCall212()
 {
     fnvFloat_011c8f38 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01028c08) * fnvFloat_01028c08)) * fnvFloat_01028c0c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01028c08) * fnvFloat_01028c08)) * fnvFloat_01028c0c;
 }
 // @fnv 0x00f484a0
 void InitializeRuntimeFloatCall213()
 {
-    fnvFloat_011c9014 = fnvFloat_01028dec / FUN_004019b0(fnvFloat_01028de8);
+    fnvFloat_011c9014 = fnvFloat_01028dec / sqrt_004019b0(fnvFloat_01028de8);
 }
 // @fnv 0x00f484d0
 void InitializeRuntimeFloatCall214()
 {
     fnvFloat_011c8fdc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01028de8) * fnvFloat_01028de8)) * fnvFloat_01028dec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01028de8) * fnvFloat_01028de8)) * fnvFloat_01028dec;
 }
 // @fnv 0x00f48950
 void InitializeRuntimeFloatCall215()
 {
-    fnvFloat_011c90e4 = fnvFloat_010295dc / FUN_004019b0(fnvFloat_010295d8);
+    fnvFloat_011c90e4 = fnvFloat_010295dc / sqrt_004019b0(fnvFloat_010295d8);
 }
 // @fnv 0x00f48980
 void InitializeRuntimeFloatCall216()
 {
     fnvFloat_011c90c4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010295d8) * fnvFloat_010295d8)) * fnvFloat_010295dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010295d8) * fnvFloat_010295d8)) * fnvFloat_010295dc;
 }
 // @fnv 0x00f48bb0
 void InitializeRuntimeFloatCall217()
 {
-    fnvFloat_011c9168 = fnvFloat_01029cbc / FUN_004019b0(fnvFloat_01029cb8);
+    fnvFloat_011c9168 = fnvFloat_01029cbc / sqrt_004019b0(fnvFloat_01029cb8);
 }
 // @fnv 0x00f48be0
 void InitializeRuntimeFloatCall218()
 {
     fnvFloat_011c9148 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01029cb8) * fnvFloat_01029cb8)) * fnvFloat_01029cbc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01029cb8) * fnvFloat_01029cb8)) * fnvFloat_01029cbc;
 }
 // @fnv 0x00f48e90
 void InitializeRuntimeFloatCall219()
 {
-    fnvFloat_011c9228 = fnvFloat_0102a4f8 / FUN_004019b0(fnvFloat_0102a4f4);
+    fnvFloat_011c9228 = fnvFloat_0102a4f8 / sqrt_004019b0(fnvFloat_0102a4f4);
 }
 // @fnv 0x00f48ec0
 void InitializeRuntimeFloatCall220()
 {
     fnvFloat_011c91dc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102a4f4) * fnvFloat_0102a4f4)) * fnvFloat_0102a4f8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102a4f4) * fnvFloat_0102a4f4)) * fnvFloat_0102a4f8;
 }
 // @fnv 0x00f490e0
 void InitializeRuntimeFloatCall221()
 {
-    fnvFloat_011c9274 = fnvFloat_0102a88c / FUN_004019b0(fnvFloat_0102a888);
+    fnvFloat_011c9274 = fnvFloat_0102a88c / sqrt_004019b0(fnvFloat_0102a888);
 }
 // @fnv 0x00f49110
 void InitializeRuntimeFloatCall222()
 {
     fnvFloat_011c9254 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102a888) * fnvFloat_0102a888)) * fnvFloat_0102a88c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102a888) * fnvFloat_0102a888)) * fnvFloat_0102a88c;
 }
 // @fnv 0x00f493b0
 void InitializeRuntimeFloatCall223()
 {
-    fnvFloat_011c9308 = fnvFloat_0102adec / FUN_004019b0(fnvFloat_0102ade8);
+    fnvFloat_011c9308 = fnvFloat_0102adec / sqrt_004019b0(fnvFloat_0102ade8);
 }
 // @fnv 0x00f493e0
 void InitializeRuntimeFloatCall224()
 {
     fnvFloat_011c92e8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102ade8) * fnvFloat_0102ade8)) * fnvFloat_0102adec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102ade8) * fnvFloat_0102ade8)) * fnvFloat_0102adec;
 }
 // @fnv 0x00f49610
 void InitializeRuntimeFloatCall225()
 {
-    fnvFloat_011c93a4 = fnvFloat_0102b15c / FUN_004019b0(fnvFloat_0102b158);
+    fnvFloat_011c93a4 = fnvFloat_0102b15c / sqrt_004019b0(fnvFloat_0102b158);
 }
 // @fnv 0x00f49640
 void InitializeRuntimeFloatCall226()
 {
     fnvFloat_011c936c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102b158) * fnvFloat_0102b158)) * fnvFloat_0102b15c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102b158) * fnvFloat_0102b158)) * fnvFloat_0102b15c;
 }
 // @fnv 0x00f49900
 void InitializeRuntimeFloatCall227()
 {
-    fnvFloat_011c9400 = fnvFloat_0102b488 / FUN_004019b0(fnvFloat_0102b484);
+    fnvFloat_011c9400 = fnvFloat_0102b488 / sqrt_004019b0(fnvFloat_0102b484);
 }
 // @fnv 0x00f49930
 void InitializeRuntimeFloatCall228()
 {
     fnvFloat_011c93f4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102b484) * fnvFloat_0102b484)) * fnvFloat_0102b488;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102b484) * fnvFloat_0102b484)) * fnvFloat_0102b488;
 }
 // @fnv 0x00f49a00
 void InitializeRuntimeFloatCall229()
 {
-    fnvFloat_011c9420 = fnvFloat_0102b738 / FUN_004019b0(fnvFloat_0102b734);
+    fnvFloat_011c9420 = fnvFloat_0102b738 / sqrt_004019b0(fnvFloat_0102b734);
 }
 // @fnv 0x00f49a30
 void InitializeRuntimeFloatCall230()
 {
     fnvFloat_011c9414 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102b734) * fnvFloat_0102b734)) * fnvFloat_0102b738;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102b734) * fnvFloat_0102b734)) * fnvFloat_0102b738;
 }
 // @fnv 0x00f49b00
 void InitializeRuntimeFloatCall231()
 {
-    fnvFloat_011c9440 = fnvFloat_0102b9d8 / FUN_004019b0(fnvFloat_0102b9d4);
+    fnvFloat_011c9440 = fnvFloat_0102b9d8 / sqrt_004019b0(fnvFloat_0102b9d4);
 }
 // @fnv 0x00f49b30
 void InitializeRuntimeFloatCall232()
 {
     fnvFloat_011c9434 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102b9d4) * fnvFloat_0102b9d4)) * fnvFloat_0102b9d8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102b9d4) * fnvFloat_0102b9d4)) * fnvFloat_0102b9d8;
 }
 // @fnv 0x00f49c00
 void InitializeRuntimeFloatCall233()
 {
-    fnvFloat_011c9460 = fnvFloat_0102bc08 / FUN_004019b0(fnvFloat_0102bc04);
+    fnvFloat_011c9460 = fnvFloat_0102bc08 / sqrt_004019b0(fnvFloat_0102bc04);
 }
 // @fnv 0x00f49c30
 void InitializeRuntimeFloatCall234()
 {
     fnvFloat_011c9454 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102bc04) * fnvFloat_0102bc04)) * fnvFloat_0102bc08;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102bc04) * fnvFloat_0102bc04)) * fnvFloat_0102bc08;
 }
 // @fnv 0x00f49d00
 void InitializeRuntimeFloatCall235()
 {
-    fnvFloat_011c94bc = fnvFloat_0102c34c / FUN_004019b0(fnvFloat_0102c348);
+    fnvFloat_011c94bc = fnvFloat_0102c34c / sqrt_004019b0(fnvFloat_0102c348);
 }
 // @fnv 0x00f49d30
 void InitializeRuntimeFloatCall236()
 {
     fnvFloat_011c9484 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102c348) * fnvFloat_0102c348)) * fnvFloat_0102c34c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102c348) * fnvFloat_0102c348)) * fnvFloat_0102c34c;
 }
 // @fnv 0x00f49ff0
 void InitializeRuntimeFloatCall237()
 {
-    fnvFloat_011c9564 = fnvFloat_0102cb8c / FUN_004019b0(fnvFloat_0102cb88);
+    fnvFloat_011c9564 = fnvFloat_0102cb8c / sqrt_004019b0(fnvFloat_0102cb88);
 }
 // @fnv 0x00f4a020
 void InitializeRuntimeFloatCall238()
 {
     fnvFloat_011c9538 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102cb88) * fnvFloat_0102cb88)) * fnvFloat_0102cb8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102cb88) * fnvFloat_0102cb88)) * fnvFloat_0102cb8c;
 }
 // @fnv 0x00f4a280
 void InitializeRuntimeFloatCall239()
 {
-    fnvFloat_011c95b8 = fnvFloat_0102cd68 / FUN_004019b0(fnvFloat_0102cd64);
+    fnvFloat_011c95b8 = fnvFloat_0102cd68 / sqrt_004019b0(fnvFloat_0102cd64);
 }
 // @fnv 0x00f4a2b0
 void InitializeRuntimeFloatCall240()
 {
     fnvFloat_011c95ac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102cd64) * fnvFloat_0102cd64)) * fnvFloat_0102cd68;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102cd64) * fnvFloat_0102cd64)) * fnvFloat_0102cd68;
 }
 // @fnv 0x00f4a380
 void InitializeRuntimeFloatCall241()
 {
-    fnvFloat_011c95dc = fnvFloat_0102ced8 / FUN_004019b0(fnvFloat_0102ced4);
+    fnvFloat_011c95dc = fnvFloat_0102ced8 / sqrt_004019b0(fnvFloat_0102ced4);
 }
 // @fnv 0x00f4a3b0
 void InitializeRuntimeFloatCall242()
 {
     fnvFloat_011c95d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102ced4) * fnvFloat_0102ced4)) * fnvFloat_0102ced8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102ced4) * fnvFloat_0102ced4)) * fnvFloat_0102ced8;
 }
 // @fnv 0x00f4a4e0
 void InitializeRuntimeFloatCall243()
 {
-    fnvFloat_011c9608 = fnvFloat_0102cfc8 / FUN_004019b0(fnvFloat_0102cfc4);
+    fnvFloat_011c9608 = fnvFloat_0102cfc8 / sqrt_004019b0(fnvFloat_0102cfc4);
 }
 // @fnv 0x00f4a510
 void InitializeRuntimeFloatCall244()
 {
     fnvFloat_011c95fc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102cfc4) * fnvFloat_0102cfc4)) * fnvFloat_0102cfc8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102cfc4) * fnvFloat_0102cfc4)) * fnvFloat_0102cfc8;
 }
 // @fnv 0x00f4a5e0
 void InitializeRuntimeFloatCall245()
 {
-    fnvFloat_011c9650 = fnvFloat_0102cffc / FUN_004019b0(fnvFloat_0102cff8);
+    fnvFloat_011c9650 = fnvFloat_0102cffc / sqrt_004019b0(fnvFloat_0102cff8);
 }
 // @fnv 0x00f4a610
 void InitializeRuntimeFloatCall246()
 {
     fnvFloat_011c9630 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102cff8) * fnvFloat_0102cff8)) * fnvFloat_0102cffc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102cff8) * fnvFloat_0102cff8)) * fnvFloat_0102cffc;
 }
 // @fnv 0x00f4a890
 void InitializeRuntimeFloatCall247()
 {
-    fnvFloat_011c96b0 = fnvFloat_0102d0fc / FUN_004019b0(fnvFloat_0102d0f8);
+    fnvFloat_011c96b0 = fnvFloat_0102d0fc / sqrt_004019b0(fnvFloat_0102d0f8);
 }
 // @fnv 0x00f4a8c0
 void InitializeRuntimeFloatCall248()
 {
     fnvFloat_011c96a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102d0f8) * fnvFloat_0102d0f8)) * fnvFloat_0102d0fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102d0f8) * fnvFloat_0102d0f8)) * fnvFloat_0102d0fc;
 }
 // @fnv 0x00f4a990
 void InitializeRuntimeFloatCall249()
 {
-    fnvFloat_011c96d0 = fnvFloat_0102d5bc / FUN_004019b0(fnvFloat_0102d5b8);
+    fnvFloat_011c96d0 = fnvFloat_0102d5bc / sqrt_004019b0(fnvFloat_0102d5b8);
 }
 // @fnv 0x00f4a9c0
 void InitializeRuntimeFloatCall250()
 {
     fnvFloat_011c96cc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102d5b8) * fnvFloat_0102d5b8)) * fnvFloat_0102d5bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102d5b8) * fnvFloat_0102d5b8)) * fnvFloat_0102d5bc;
 }
 // @fnv 0x00f4aa50
 void InitializeRuntimeFloatCall251()
 {
-    fnvFloat_011c96ec = fnvFloat_0102d7ec / FUN_004019b0(fnvFloat_0102d7e8);
+    fnvFloat_011c96ec = fnvFloat_0102d7ec / sqrt_004019b0(fnvFloat_0102d7e8);
 }
 // @fnv 0x00f4aa80
 void InitializeRuntimeFloatCall252()
 {
     fnvFloat_011c96e8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102d7e8) * fnvFloat_0102d7e8)) * fnvFloat_0102d7ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102d7e8) * fnvFloat_0102d7e8)) * fnvFloat_0102d7ec;
 }
 // @fnv 0x00f4ab10
 void InitializeRuntimeFloatCall253()
 {
-    fnvFloat_011c9744 = fnvFloat_0102d94c / FUN_004019b0(fnvFloat_0102d948);
+    fnvFloat_011c9744 = fnvFloat_0102d94c / sqrt_004019b0(fnvFloat_0102d948);
 }
 // @fnv 0x00f4ab40
 void InitializeRuntimeFloatCall254()
 {
     fnvFloat_011c9724 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102d948) * fnvFloat_0102d948)) * fnvFloat_0102d94c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102d948) * fnvFloat_0102d948)) * fnvFloat_0102d94c;
 }
 // @fnv 0x00f4ad70
 void InitializeRuntimeFloatCall255()
 {
-    fnvFloat_011c9fa8 = fnvFloat_0102dc9c / FUN_004019b0(fnvFloat_0102dc98);
+    fnvFloat_011c9fa8 = fnvFloat_0102dc9c / sqrt_004019b0(fnvFloat_0102dc98);
 }
 // @fnv 0x00f4ada0
 void InitializeRuntimeFloatCall256()
 {
     fnvFloat_011c9f48 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102dc98) * fnvFloat_0102dc98)) * fnvFloat_0102dc9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102dc98) * fnvFloat_0102dc98)) * fnvFloat_0102dc9c;
 }
 // @fnv 0x00f4b2b0
 void InitializeRuntimeFloatCall257()
 {
-    fnvFloat_011ca048 = fnvFloat_0102e668 / FUN_004019b0(fnvFloat_0102e664);
+    fnvFloat_011ca048 = fnvFloat_0102e668 / sqrt_004019b0(fnvFloat_0102e664);
 }
 // @fnv 0x00f4b2e0
 void InitializeRuntimeFloatCall258()
 {
     fnvFloat_011ca03c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102e664) * fnvFloat_0102e664)) * fnvFloat_0102e668;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102e664) * fnvFloat_0102e664)) * fnvFloat_0102e668;
 }
 // @fnv 0x00f4b3b0
 void InitializeRuntimeFloatCall259()
 {
-    fnvFloat_011ca068 = fnvFloat_0102e698 / FUN_004019b0(fnvFloat_0102e694);
+    fnvFloat_011ca068 = fnvFloat_0102e698 / sqrt_004019b0(fnvFloat_0102e694);
 }
 // @fnv 0x00f4b3e0
 void InitializeRuntimeFloatCall260()
 {
     fnvFloat_011ca05c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102e694) * fnvFloat_0102e694)) * fnvFloat_0102e698;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102e694) * fnvFloat_0102e694)) * fnvFloat_0102e698;
 }
 // @fnv 0x00f4b4b0
 void InitializeRuntimeFloatCall261()
 {
-    fnvFloat_011ca104 = fnvFloat_0102e96c / FUN_004019b0(fnvFloat_0102e968);
+    fnvFloat_011ca104 = fnvFloat_0102e96c / sqrt_004019b0(fnvFloat_0102e968);
 }
 // @fnv 0x00f4b4e0
 void InitializeRuntimeFloatCall262()
 {
     fnvFloat_011ca0c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102e968) * fnvFloat_0102e968)) * fnvFloat_0102e96c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102e968) * fnvFloat_0102e968)) * fnvFloat_0102e96c;
 }
 // @fnv 0x00f4b930
 void InitializeRuntimeFloatCall263()
 {
-    fnvFloat_011ca338 = fnvFloat_0102f51c / FUN_004019b0(fnvFloat_0102f518);
+    fnvFloat_011ca338 = fnvFloat_0102f51c / sqrt_004019b0(fnvFloat_0102f518);
 }
 // @fnv 0x00f4b960
 void InitializeRuntimeFloatCall264()
 {
     fnvFloat_011ca2d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0102f518) * fnvFloat_0102f518)) * fnvFloat_0102f51c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0102f518) * fnvFloat_0102f518)) * fnvFloat_0102f51c;
 }
 // @fnv 0x00f4bfa0
 void InitializeRuntimeFloatCall265()
 {
-    fnvFloat_011ca4b8 = fnvFloat_010310ac / FUN_004019b0(fnvFloat_010310a8);
+    fnvFloat_011ca4b8 = fnvFloat_010310ac / sqrt_004019b0(fnvFloat_010310a8);
 }
 // @fnv 0x00f4bfd0
 void InitializeRuntimeFloatCall266()
 {
     fnvFloat_011ca468 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010310a8) * fnvFloat_010310a8)) * fnvFloat_010310ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010310a8) * fnvFloat_010310a8)) * fnvFloat_010310ac;
 }
 // @fnv 0x00f4c3f0
 void InitializeRuntimeFloatCall267()
 {
-    fnvFloat_011ca580 = fnvFloat_010313ac / FUN_004019b0(fnvFloat_010313a8);
+    fnvFloat_011ca580 = fnvFloat_010313ac / sqrt_004019b0(fnvFloat_010313a8);
 }
 // @fnv 0x00f4c420
 void InitializeRuntimeFloatCall268()
 {
     fnvFloat_011ca554 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010313a8) * fnvFloat_010313a8)) * fnvFloat_010313ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010313a8) * fnvFloat_010313a8)) * fnvFloat_010313ac;
 }
 // @fnv 0x00f4c680
 void InitializeRuntimeFloatCall269()
 {
-    fnvFloat_011ca5cc = fnvFloat_0103166c / FUN_004019b0(fnvFloat_01031668);
+    fnvFloat_011ca5cc = fnvFloat_0103166c / sqrt_004019b0(fnvFloat_01031668);
 }
 // @fnv 0x00f4c6b0
 void InitializeRuntimeFloatCall270()
 {
     fnvFloat_011ca5c8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01031668) * fnvFloat_01031668)) * fnvFloat_0103166c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01031668) * fnvFloat_01031668)) * fnvFloat_0103166c;
 }
 // @fnv 0x00f4c740
 void InitializeRuntimeFloatCall271()
 {
-    fnvFloat_011ca5e8 = fnvFloat_01031854 / FUN_004019b0(fnvFloat_01031850);
+    fnvFloat_011ca5e8 = fnvFloat_01031854 / sqrt_004019b0(fnvFloat_01031850);
 }
 // @fnv 0x00f4c770
 void InitializeRuntimeFloatCall272()
 {
     fnvFloat_011ca5e4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01031850) * fnvFloat_01031850)) * fnvFloat_01031854;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01031850) * fnvFloat_01031850)) * fnvFloat_01031854;
 }
 // @fnv 0x00f4c800
 void InitializeRuntimeFloatCall273()
 {
-    fnvFloat_011ca624 = fnvFloat_010318f8 / FUN_004019b0(fnvFloat_010318f4);
+    fnvFloat_011ca624 = fnvFloat_010318f8 / sqrt_004019b0(fnvFloat_010318f4);
 }
 // @fnv 0x00f4c830
 void InitializeRuntimeFloatCall274()
 {
     fnvFloat_011ca600 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010318f4) * fnvFloat_010318f4)) * fnvFloat_010318f8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010318f4) * fnvFloat_010318f4)) * fnvFloat_010318f8;
 }
 // @fnv 0x00f4c980
 void InitializeRuntimeFloatCall275()
 {
-    fnvFloat_011ca69c = fnvFloat_010320bc / FUN_004019b0(fnvFloat_010320b8);
+    fnvFloat_011ca69c = fnvFloat_010320bc / sqrt_004019b0(fnvFloat_010320b8);
 }
 // @fnv 0x00f4c9b0
 void InitializeRuntimeFloatCall276()
 {
     fnvFloat_011ca67c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010320b8) * fnvFloat_010320b8)) * fnvFloat_010320bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010320b8) * fnvFloat_010320b8)) * fnvFloat_010320bc;
 }
 // @fnv 0x00f4cbe0
 void InitializeRuntimeFloatCall277()
 {
-    fnvFloat_011ca6e4 = fnvFloat_010320f0 / FUN_004019b0(fnvFloat_010320ec);
+    fnvFloat_011ca6e4 = fnvFloat_010320f0 / sqrt_004019b0(fnvFloat_010320ec);
 }
 // @fnv 0x00f4cc10
 void InitializeRuntimeFloatCall278()
 {
     fnvFloat_011ca6e0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010320ec) * fnvFloat_010320ec)) * fnvFloat_010320f0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010320ec) * fnvFloat_010320ec)) * fnvFloat_010320f0;
 }
 // @fnv 0x00f4cc80
 void InitializeRuntimeFloatCall279()
 {
-    fnvFloat_011ca6f4 = fnvFloat_01032450 / FUN_004019b0(fnvFloat_0103244c);
+    fnvFloat_011ca6f4 = fnvFloat_01032450 / sqrt_004019b0(fnvFloat_0103244c);
 }
 // @fnv 0x00f4ccb0
 void InitializeRuntimeFloatCall280()
 {
     fnvFloat_011ca6f0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0103244c) * fnvFloat_0103244c)) * fnvFloat_01032450;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0103244c) * fnvFloat_0103244c)) * fnvFloat_01032450;
 }
 // @fnv 0x00f4cd20
 void InitializeRuntimeFloatCall281()
 {
-    fnvFloat_011ca718 = fnvFloat_01032708 / FUN_004019b0(fnvFloat_01032704);
+    fnvFloat_011ca718 = fnvFloat_01032708 / sqrt_004019b0(fnvFloat_01032704);
 }
 // @fnv 0x00f4cd50
 void InitializeRuntimeFloatCall282()
 {
     fnvFloat_011ca70c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01032704) * fnvFloat_01032704)) * fnvFloat_01032708;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01032704) * fnvFloat_01032704)) * fnvFloat_01032708;
 }
 // @fnv 0x00f4ce20
 void InitializeRuntimeFloatCall283()
 {
-    fnvFloat_011ca7b4 = fnvFloat_0103278c / FUN_004019b0(fnvFloat_01032788);
+    fnvFloat_011ca7b4 = fnvFloat_0103278c / sqrt_004019b0(fnvFloat_01032788);
 }
 // @fnv 0x00f4ce50
 void InitializeRuntimeFloatCall284()
 {
     fnvFloat_011ca758 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01032788) * fnvFloat_01032788)) * fnvFloat_0103278c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01032788) * fnvFloat_01032788)) * fnvFloat_0103278c;
 }
 // @fnv 0x00f4d210
 void InitializeRuntimeFloatCall285()
 {
-    fnvFloat_011ca824 = fnvFloat_01032f3c / FUN_004019b0(fnvFloat_01032f38);
+    fnvFloat_011ca824 = fnvFloat_01032f3c / sqrt_004019b0(fnvFloat_01032f38);
 }
 // @fnv 0x00f4d240
 void InitializeRuntimeFloatCall286()
 {
     fnvFloat_011ca820 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01032f38) * fnvFloat_01032f38)) * fnvFloat_01032f3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01032f38) * fnvFloat_01032f38)) * fnvFloat_01032f3c;
 }
 // @fnv 0x00f4d2b0
 void InitializeRuntimeFloatCall287()
 {
-    fnvFloat_011ca840 = fnvFloat_010331f8 / FUN_004019b0(fnvFloat_010331f4);
+    fnvFloat_011ca840 = fnvFloat_010331f8 / sqrt_004019b0(fnvFloat_010331f4);
 }
 // @fnv 0x00f4d2e0
 void InitializeRuntimeFloatCall288()
 {
     fnvFloat_011ca83c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010331f4) * fnvFloat_010331f4)) * fnvFloat_010331f8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010331f4) * fnvFloat_010331f4)) * fnvFloat_010331f8;
 }
 // @fnv 0x00f4d440
 void InitializeRuntimeFloatCall289()
 {
-    fnvFloat_011ca874 = fnvFloat_01033958 / FUN_004019b0(fnvFloat_01033954);
+    fnvFloat_011ca874 = fnvFloat_01033958 / sqrt_004019b0(fnvFloat_01033954);
 }
 // @fnv 0x00f4d470
 void InitializeRuntimeFloatCall290()
 {
     fnvFloat_011ca870 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01033954) * fnvFloat_01033954)) * fnvFloat_01033958;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01033954) * fnvFloat_01033954)) * fnvFloat_01033958;
 }
 // @fnv 0x00f4d4e0
 void InitializeRuntimeFloatCall291()
 {
-    fnvFloat_011ca88c = fnvFloat_01033b2c / FUN_004019b0(fnvFloat_01033b28);
+    fnvFloat_011ca88c = fnvFloat_01033b2c / sqrt_004019b0(fnvFloat_01033b28);
 }
 // @fnv 0x00f4d510
 void InitializeRuntimeFloatCall292()
 {
     fnvFloat_011ca888 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01033b28) * fnvFloat_01033b28)) * fnvFloat_01033b2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01033b28) * fnvFloat_01033b28)) * fnvFloat_01033b2c;
 }
 // @fnv 0x00f4d580
 void InitializeRuntimeFloatCall293()
 {
-    fnvFloat_011ca8a4 = fnvFloat_01033c74 / FUN_004019b0(fnvFloat_01033c70);
+    fnvFloat_011ca8a4 = fnvFloat_01033c74 / sqrt_004019b0(fnvFloat_01033c70);
 }
 // @fnv 0x00f4d5b0
 void InitializeRuntimeFloatCall294()
 {
     fnvFloat_011ca8a0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01033c70) * fnvFloat_01033c70)) * fnvFloat_01033c74;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01033c70) * fnvFloat_01033c70)) * fnvFloat_01033c74;
 }
 // @fnv 0x00f4d680
 void InitializeRuntimeFloatCall295()
 {
-    fnvFloat_011ca8ec = fnvFloat_01033fa8 / FUN_004019b0(fnvFloat_01033fa4);
+    fnvFloat_011ca8ec = fnvFloat_01033fa8 / sqrt_004019b0(fnvFloat_01033fa4);
 }
 // @fnv 0x00f4d6b0
 void InitializeRuntimeFloatCall296()
 {
     fnvFloat_011ca8e0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01033fa4) * fnvFloat_01033fa4)) * fnvFloat_01033fa8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01033fa4) * fnvFloat_01033fa4)) * fnvFloat_01033fa8;
 }
 // @fnv 0x00f4d780
 void InitializeRuntimeFloatCall297()
 {
-    fnvFloat_011ca930 = fnvFloat_0103401c / FUN_004019b0(fnvFloat_01034018);
+    fnvFloat_011ca930 = fnvFloat_0103401c / sqrt_004019b0(fnvFloat_01034018);
 }
 // @fnv 0x00f4d7b0
 void InitializeRuntimeFloatCall298()
 {
     fnvFloat_011ca910 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01034018) * fnvFloat_01034018)) * fnvFloat_0103401c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01034018) * fnvFloat_01034018)) * fnvFloat_0103401c;
 }
 // @fnv 0x00f4d9e0
 void InitializeRuntimeFloatCall299()
 {
-    fnvFloat_011ca9a8 = fnvFloat_0103407c / FUN_004019b0(fnvFloat_01034078);
+    fnvFloat_011ca9a8 = fnvFloat_0103407c / sqrt_004019b0(fnvFloat_01034078);
 }
 // @fnv 0x00f4da10
 void InitializeRuntimeFloatCall300()
 {
     fnvFloat_011ca988 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01034078) * fnvFloat_01034078)) * fnvFloat_0103407c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01034078) * fnvFloat_01034078)) * fnvFloat_0103407c;
 }
 // @fnv 0x00f4dc40
 void InitializeRuntimeFloatCall301()
 {
-    fnvFloat_011caa34 = fnvFloat_010342ac / FUN_004019b0(fnvFloat_010342a8);
+    fnvFloat_011caa34 = fnvFloat_010342ac / sqrt_004019b0(fnvFloat_010342a8);
 }
 // @fnv 0x00f4dc70
 void InitializeRuntimeFloatCall302()
 {
     fnvFloat_011caa14 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010342a8) * fnvFloat_010342a8)) * fnvFloat_010342ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010342a8) * fnvFloat_010342a8)) * fnvFloat_010342ac;
 }
 // @fnv 0x00f4e000
 void InitializeRuntimeFloatCall303()
 {
-    fnvFloat_011caad8 = fnvFloat_010346a8 / FUN_004019b0(fnvFloat_010346a4);
+    fnvFloat_011caad8 = fnvFloat_010346a8 / sqrt_004019b0(fnvFloat_010346a4);
 }
 // @fnv 0x00f4e030
 void InitializeRuntimeFloatCall304()
 {
     fnvFloat_011caacc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010346a4) * fnvFloat_010346a4)) * fnvFloat_010346a8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010346a4) * fnvFloat_010346a4)) * fnvFloat_010346a8;
 }
 // @fnv 0x00f4e100
 void InitializeRuntimeFloatCall305()
 {
-    fnvFloat_011cab5c = fnvFloat_01034cdc / FUN_004019b0(fnvFloat_01034cd8);
+    fnvFloat_011cab5c = fnvFloat_01034cdc / sqrt_004019b0(fnvFloat_01034cd8);
 }
 // @fnv 0x00f4e130
 void InitializeRuntimeFloatCall306()
 {
     fnvFloat_011cab3c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01034cd8) * fnvFloat_01034cd8)) * fnvFloat_01034cdc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01034cd8) * fnvFloat_01034cd8)) * fnvFloat_01034cdc;
 }
 // @fnv 0x00f4e440
 void InitializeRuntimeFloatCall307()
 {
-    fnvFloat_011cabcc = fnvFloat_01036668 / FUN_004019b0(fnvFloat_01036664);
+    fnvFloat_011cabcc = fnvFloat_01036668 / sqrt_004019b0(fnvFloat_01036664);
 }
 // @fnv 0x00f4e470
 void InitializeRuntimeFloatCall308()
 {
     fnvFloat_011cabc0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01036664) * fnvFloat_01036664)) * fnvFloat_01036668;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01036664) * fnvFloat_01036664)) * fnvFloat_01036668;
 }
 // @fnv 0x00f4e580
 void InitializeRuntimeFloatCall309()
 {
-    fnvFloat_011cac20 = fnvFloat_0103699c / FUN_004019b0(fnvFloat_01036998);
+    fnvFloat_011cac20 = fnvFloat_0103699c / sqrt_004019b0(fnvFloat_01036998);
 }
 // @fnv 0x00f4e5b0
 void InitializeRuntimeFloatCall310()
 {
     fnvFloat_011cac00 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01036998) * fnvFloat_01036998)) * fnvFloat_0103699c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01036998) * fnvFloat_01036998)) * fnvFloat_0103699c;
 }
 // @fnv 0x00f4e7e0
 void InitializeRuntimeFloatCall311()
 {
-    fnvFloat_011cacc0 = fnvFloat_01036d2c / FUN_004019b0(fnvFloat_01036d28);
+    fnvFloat_011cacc0 = fnvFloat_01036d2c / sqrt_004019b0(fnvFloat_01036d28);
 }
 // @fnv 0x00f4e810
 void InitializeRuntimeFloatCall312()
 {
     fnvFloat_011cac88 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01036d28) * fnvFloat_01036d28)) * fnvFloat_01036d2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01036d28) * fnvFloat_01036d28)) * fnvFloat_01036d2c;
 }
 // @fnv 0x00f4eb10
 void InitializeRuntimeFloatCall313()
 {
-    fnvFloat_011cad7c = fnvFloat_0103742c / FUN_004019b0(fnvFloat_01037428);
+    fnvFloat_011cad7c = fnvFloat_0103742c / sqrt_004019b0(fnvFloat_01037428);
 }
 // @fnv 0x00f4eb40
 void InitializeRuntimeFloatCall314()
 {
     fnvFloat_011cad5c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01037428) * fnvFloat_01037428)) * fnvFloat_0103742c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01037428) * fnvFloat_01037428)) * fnvFloat_0103742c;
 }
 // @fnv 0x00f4ed70
 void InitializeRuntimeFloatCall315()
 {
-    fnvFloat_011cadf8 = fnvFloat_0103931c / FUN_004019b0(fnvFloat_01039318);
+    fnvFloat_011cadf8 = fnvFloat_0103931c / sqrt_004019b0(fnvFloat_01039318);
 }
 // @fnv 0x00f4eda0
 void InitializeRuntimeFloatCall316()
 {
     fnvFloat_011cadd8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01039318) * fnvFloat_01039318)) * fnvFloat_0103931c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01039318) * fnvFloat_01039318)) * fnvFloat_0103931c;
 }
 // @fnv 0x00f4f030
 void InitializeRuntimeFloatCall317()
 {
-    fnvFloat_011cae88 = fnvFloat_0103d46c / FUN_004019b0(fnvFloat_0103d468);
+    fnvFloat_011cae88 = fnvFloat_0103d46c / sqrt_004019b0(fnvFloat_0103d468);
 }
 // @fnv 0x00f4f060
 void InitializeRuntimeFloatCall318()
 {
     fnvFloat_011cae68 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0103d468) * fnvFloat_0103d468)) * fnvFloat_0103d46c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0103d468) * fnvFloat_0103d468)) * fnvFloat_0103d46c;
 }
 // @fnv 0x00f4f290
 void InitializeRuntimeFloatCall319()
 {
-    fnvFloat_011caef4 = fnvFloat_01044f08 / FUN_004019b0(fnvFloat_01044f04);
+    fnvFloat_011caef4 = fnvFloat_01044f08 / sqrt_004019b0(fnvFloat_01044f04);
 }
 // @fnv 0x00f4f2c0
 void InitializeRuntimeFloatCall320()
 {
     fnvFloat_011caee8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01044f04) * fnvFloat_01044f04)) * fnvFloat_01044f08;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01044f04) * fnvFloat_01044f04)) * fnvFloat_01044f08;
 }
 // @fnv 0x00f4f390
 void InitializeRuntimeFloatCall321()
 {
-    fnvFloat_011caf90 = fnvFloat_01044f8c / FUN_004019b0(fnvFloat_01044f88);
+    fnvFloat_011caf90 = fnvFloat_01044f8c / sqrt_004019b0(fnvFloat_01044f88);
 }
 // @fnv 0x00f4f3c0
 void InitializeRuntimeFloatCall322()
 {
     fnvFloat_011caf58 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01044f88) * fnvFloat_01044f88)) * fnvFloat_01044f8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01044f88) * fnvFloat_01044f88)) * fnvFloat_01044f8c;
 }
 // @fnv 0x00f4f680
 void InitializeRuntimeFloatCall323()
 {
-    fnvFloat_011cafe0 = fnvFloat_010453d8 / FUN_004019b0(fnvFloat_010453d4);
+    fnvFloat_011cafe0 = fnvFloat_010453d8 / sqrt_004019b0(fnvFloat_010453d4);
 }
 // @fnv 0x00f4f6b0
 void InitializeRuntimeFloatCall324()
 {
     fnvFloat_011cafd4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010453d4) * fnvFloat_010453d4)) * fnvFloat_010453d8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010453d4) * fnvFloat_010453d4)) * fnvFloat_010453d8;
 }
 // @fnv 0x00f4f760
 void InitializeRuntimeFloatCall325()
 {
-    fnvFloat_011cb004 = fnvFloat_01045498 / FUN_004019b0(fnvFloat_01045494);
+    fnvFloat_011cb004 = fnvFloat_01045498 / sqrt_004019b0(fnvFloat_01045494);
 }
 // @fnv 0x00f4f790
 void InitializeRuntimeFloatCall326()
 {
     fnvFloat_011caff8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01045494) * fnvFloat_01045494)) * fnvFloat_01045498;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01045494) * fnvFloat_01045494)) * fnvFloat_01045498;
 }
 // @fnv 0x00f4f840
 void InitializeRuntimeFloatCall327()
 {
-    fnvFloat_011cb044 = fnvFloat_0104587c / FUN_004019b0(fnvFloat_01045878);
+    fnvFloat_011cb044 = fnvFloat_0104587c / sqrt_004019b0(fnvFloat_01045878);
 }
 // @fnv 0x00f4f870
 void InitializeRuntimeFloatCall328()
 {
     fnvFloat_011cb024 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01045878) * fnvFloat_01045878)) * fnvFloat_0104587c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01045878) * fnvFloat_01045878)) * fnvFloat_0104587c;
 }
 // @fnv 0x00f50620
 void InitializeRuntimeFloatCall329()
 {
-    fnvFloat_011cb0bc = fnvFloat_010460bc / FUN_004019b0(fnvFloat_010460b8);
+    fnvFloat_011cb0bc = fnvFloat_010460bc / sqrt_004019b0(fnvFloat_010460b8);
 }
 // @fnv 0x00f50650
 void InitializeRuntimeFloatCall330()
 {
     fnvFloat_011cb09c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010460b8) * fnvFloat_010460b8)) * fnvFloat_010460bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010460b8) * fnvFloat_010460b8)) * fnvFloat_010460bc;
 }
 // @fnv 0x00f508c0
 void InitializeRuntimeFloatCall331()
 {
-    fnvFloat_011cb110 = fnvFloat_01046630 / FUN_004019b0(fnvFloat_0104662c);
+    fnvFloat_011cb110 = fnvFloat_01046630 / sqrt_004019b0(fnvFloat_0104662c);
 }
 // @fnv 0x00f508f0
 void InitializeRuntimeFloatCall332()
 {
     fnvFloat_011cb10c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104662c) * fnvFloat_0104662c)) * fnvFloat_01046630;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104662c) * fnvFloat_0104662c)) * fnvFloat_01046630;
 }
 // @fnv 0x00f50960
 void InitializeRuntimeFloatCall333()
 {
-    fnvFloat_011cb150 = fnvFloat_010467dc / FUN_004019b0(fnvFloat_010467d8);
+    fnvFloat_011cb150 = fnvFloat_010467dc / sqrt_004019b0(fnvFloat_010467d8);
 }
 // @fnv 0x00f50990
 void InitializeRuntimeFloatCall334()
 {
     fnvFloat_011cb130 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010467d8) * fnvFloat_010467d8)) * fnvFloat_010467dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010467d8) * fnvFloat_010467d8)) * fnvFloat_010467dc;
 }
 // @fnv 0x00f50bc0
 void InitializeRuntimeFloatCall335()
 {
-    fnvFloat_011cb1c8 = fnvFloat_01046b1c / FUN_004019b0(fnvFloat_01046b18);
+    fnvFloat_011cb1c8 = fnvFloat_01046b1c / sqrt_004019b0(fnvFloat_01046b18);
 }
 // @fnv 0x00f50bf0
 void InitializeRuntimeFloatCall336()
 {
     fnvFloat_011cb1a8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01046b18) * fnvFloat_01046b18)) * fnvFloat_01046b1c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01046b18) * fnvFloat_01046b18)) * fnvFloat_01046b1c;
 }
 // @fnv 0x00f50e20
 void InitializeRuntimeFloatCall337()
 {
-    fnvFloat_011cb240 = fnvFloat_0104705c / FUN_004019b0(fnvFloat_01047058);
+    fnvFloat_011cb240 = fnvFloat_0104705c / sqrt_004019b0(fnvFloat_01047058);
 }
 // @fnv 0x00f50e50
 void InitializeRuntimeFloatCall338()
 {
     fnvFloat_011cb220 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01047058) * fnvFloat_01047058)) * fnvFloat_0104705c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01047058) * fnvFloat_01047058)) * fnvFloat_0104705c;
 }
 // @fnv 0x00f51080
 void InitializeRuntimeFloatCall339()
 {
-    fnvFloat_011cb290 = fnvFloat_01047098 / FUN_004019b0(fnvFloat_01047094);
+    fnvFloat_011cb290 = fnvFloat_01047098 / sqrt_004019b0(fnvFloat_01047094);
 }
 // @fnv 0x00f510b0
 void InitializeRuntimeFloatCall340()
 {
     fnvFloat_011cb284 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01047094) * fnvFloat_01047094)) * fnvFloat_01047098;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01047094) * fnvFloat_01047094)) * fnvFloat_01047098;
 }
 // @fnv 0x00f511a0
 void InitializeRuntimeFloatCall341()
 {
-    fnvFloat_011cb2b0 = fnvFloat_01047578 / FUN_004019b0(fnvFloat_01047574);
+    fnvFloat_011cb2b0 = fnvFloat_01047578 / sqrt_004019b0(fnvFloat_01047574);
 }
 // @fnv 0x00f511d0
 void InitializeRuntimeFloatCall342()
 {
     fnvFloat_011cb2ac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01047574) * fnvFloat_01047574)) * fnvFloat_01047578;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01047574) * fnvFloat_01047574)) * fnvFloat_01047578;
 }
 // @fnv 0x00f51240
 void InitializeRuntimeFloatCall343()
 {
-    fnvFloat_011cb2f0 = fnvFloat_010475fc / FUN_004019b0(fnvFloat_010475f8);
+    fnvFloat_011cb2f0 = fnvFloat_010475fc / sqrt_004019b0(fnvFloat_010475f8);
 }
 // @fnv 0x00f51270
 void InitializeRuntimeFloatCall344()
 {
     fnvFloat_011cb2d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010475f8) * fnvFloat_010475f8)) * fnvFloat_010475fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010475f8) * fnvFloat_010475f8)) * fnvFloat_010475fc;
 }
 // @fnv 0x00f514a0
 void InitializeRuntimeFloatCall345()
 {
-    fnvFloat_011cb368 = fnvFloat_010484bc / FUN_004019b0(fnvFloat_010484b8);
+    fnvFloat_011cb368 = fnvFloat_010484bc / sqrt_004019b0(fnvFloat_010484b8);
 }
 // @fnv 0x00f514d0
 void InitializeRuntimeFloatCall346()
 {
     fnvFloat_011cb348 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010484b8) * fnvFloat_010484b8)) * fnvFloat_010484bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010484b8) * fnvFloat_010484b8)) * fnvFloat_010484bc;
 }
 // @fnv 0x00f51740
 void InitializeRuntimeFloatCall347()
 {
-    fnvFloat_011cb4e0 = fnvFloat_0104887c / FUN_004019b0(fnvFloat_01048878);
+    fnvFloat_011cb4e0 = fnvFloat_0104887c / sqrt_004019b0(fnvFloat_01048878);
 }
 // @fnv 0x00f51770
 void InitializeRuntimeFloatCall348()
 {
     fnvFloat_011cb3c8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01048878) * fnvFloat_01048878)) * fnvFloat_0104887c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01048878) * fnvFloat_01048878)) * fnvFloat_0104887c;
 }
 // @fnv 0x00f51a90
 void InitializeRuntimeFloatCall349()
 {
-    fnvFloat_011cb540 = fnvFloat_01048b28 / FUN_004019b0(fnvFloat_01048b24);
+    fnvFloat_011cb540 = fnvFloat_01048b28 / sqrt_004019b0(fnvFloat_01048b24);
 }
 // @fnv 0x00f51ac0
 void InitializeRuntimeFloatCall350()
 {
     fnvFloat_011cb534 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01048b24) * fnvFloat_01048b24)) * fnvFloat_01048b28;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01048b24) * fnvFloat_01048b24)) * fnvFloat_01048b28;
 }
 // @fnv 0x00f51b90
 void InitializeRuntimeFloatCall351()
 {
-    fnvFloat_011cb5a0 = fnvFloat_01048d5c / FUN_004019b0(fnvFloat_01048d58);
+    fnvFloat_011cb5a0 = fnvFloat_01048d5c / sqrt_004019b0(fnvFloat_01048d58);
 }
 // @fnv 0x00f51bc0
 void InitializeRuntimeFloatCall352()
 {
     fnvFloat_011cb568 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01048d58) * fnvFloat_01048d58)) * fnvFloat_01048d5c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01048d58) * fnvFloat_01048d58)) * fnvFloat_01048d5c;
 }
 // @fnv 0x00f51eb0
 void InitializeRuntimeFloatCall353()
 {
-    fnvFloat_011cb60c = fnvFloat_010496d8 / FUN_004019b0(fnvFloat_010496d4);
+    fnvFloat_011cb60c = fnvFloat_010496d8 / sqrt_004019b0(fnvFloat_010496d4);
 }
 // @fnv 0x00f51ee0
 void InitializeRuntimeFloatCall354()
 {
     fnvFloat_011cb608 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010496d4) * fnvFloat_010496d4)) * fnvFloat_010496d8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010496d4) * fnvFloat_010496d4)) * fnvFloat_010496d8;
 }
 // @fnv 0x00f51f90
 void InitializeRuntimeFloatCall355()
 {
-    fnvFloat_011cb628 = fnvFloat_01049b18 / FUN_004019b0(fnvFloat_01049b14);
+    fnvFloat_011cb628 = fnvFloat_01049b18 / sqrt_004019b0(fnvFloat_01049b14);
 }
 // @fnv 0x00f51fc0
 void InitializeRuntimeFloatCall356()
 {
     fnvFloat_011cb624 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01049b14) * fnvFloat_01049b14)) * fnvFloat_01049b18;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01049b14) * fnvFloat_01049b14)) * fnvFloat_01049b18;
 }
 // @fnv 0x00f52030
 void InitializeRuntimeFloatCall357()
 {
-    fnvFloat_011cb660 = fnvFloat_01049ce0 / FUN_004019b0(fnvFloat_01049cdc);
+    fnvFloat_011cb660 = fnvFloat_01049ce0 / sqrt_004019b0(fnvFloat_01049cdc);
 }
 // @fnv 0x00f52060
 void InitializeRuntimeFloatCall358()
 {
     fnvFloat_011cb648 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01049cdc) * fnvFloat_01049cdc)) * fnvFloat_01049ce0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01049cdc) * fnvFloat_01049cdc)) * fnvFloat_01049ce0;
 }
 // @fnv 0x00f52230
 void InitializeRuntimeFloatCall359()
 {
-    fnvFloat_011cb6e0 = fnvFloat_01049fdc / FUN_004019b0(fnvFloat_01049fd8);
+    fnvFloat_011cb6e0 = fnvFloat_01049fdc / sqrt_004019b0(fnvFloat_01049fd8);
 }
 // @fnv 0x00f52260
 void InitializeRuntimeFloatCall360()
 {
     fnvFloat_011cb6c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01049fd8) * fnvFloat_01049fd8)) * fnvFloat_01049fdc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01049fd8) * fnvFloat_01049fd8)) * fnvFloat_01049fdc;
 }
 // @fnv 0x00f52490
 void InitializeRuntimeFloatCall361()
 {
-    fnvFloat_011cb774 = fnvFloat_0104a10c / FUN_004019b0(fnvFloat_0104a108);
+    fnvFloat_011cb774 = fnvFloat_0104a10c / sqrt_004019b0(fnvFloat_0104a108);
 }
 // @fnv 0x00f524c0
 void InitializeRuntimeFloatCall362()
 {
     fnvFloat_011cb740 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104a108) * fnvFloat_0104a108)) * fnvFloat_0104a10c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104a108) * fnvFloat_0104a108)) * fnvFloat_0104a10c;
 }
 // @fnv 0x00f527d0
 void InitializeRuntimeFloatCall363()
 {
-    fnvFloat_011cb828 = fnvFloat_0104abcc / FUN_004019b0(fnvFloat_0104abc8);
+    fnvFloat_011cb828 = fnvFloat_0104abcc / sqrt_004019b0(fnvFloat_0104abc8);
 }
 // @fnv 0x00f52800
 void InitializeRuntimeFloatCall364()
 {
     fnvFloat_011cb7fc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104abc8) * fnvFloat_0104abc8)) * fnvFloat_0104abcc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104abc8) * fnvFloat_0104abc8)) * fnvFloat_0104abcc;
 }
 // @fnv 0x00f52a60
 void InitializeRuntimeFloatCall365()
 {
-    fnvFloat_011cb8ac = fnvFloat_0104ae2c / FUN_004019b0(fnvFloat_0104ae28);
+    fnvFloat_011cb8ac = fnvFloat_0104ae2c / sqrt_004019b0(fnvFloat_0104ae28);
 }
 // @fnv 0x00f52a90
 void InitializeRuntimeFloatCall366()
 {
     fnvFloat_011cb884 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104ae28) * fnvFloat_0104ae28)) * fnvFloat_0104ae2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104ae28) * fnvFloat_0104ae28)) * fnvFloat_0104ae2c;
 }
 // @fnv 0x00f52ce0
 void InitializeRuntimeFloatCall367()
 {
-    fnvFloat_011cb928 = fnvFloat_0104af8c / FUN_004019b0(fnvFloat_0104af88);
+    fnvFloat_011cb928 = fnvFloat_0104af8c / sqrt_004019b0(fnvFloat_0104af88);
 }
 // @fnv 0x00f52d10
 void InitializeRuntimeFloatCall368()
 {
     fnvFloat_011cb908 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104af88) * fnvFloat_0104af88)) * fnvFloat_0104af8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104af88) * fnvFloat_0104af88)) * fnvFloat_0104af8c;
 }
 // @fnv 0x00f52f40
 void InitializeRuntimeFloatCall369()
 {
-    fnvFloat_011cb9bc = fnvFloat_0104b42c / FUN_004019b0(fnvFloat_0104b428);
+    fnvFloat_011cb9bc = fnvFloat_0104b42c / sqrt_004019b0(fnvFloat_0104b428);
 }
 // @fnv 0x00f52f70
 void InitializeRuntimeFloatCall370()
 {
     fnvFloat_011cb984 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104b428) * fnvFloat_0104b428)) * fnvFloat_0104b42c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104b428) * fnvFloat_0104b428)) * fnvFloat_0104b42c;
 }
 // @fnv 0x00f53210
 void InitializeRuntimeFloatCall371()
 {
-    fnvFloat_011cbc14 = fnvFloat_0104b9ac / FUN_004019b0(fnvFloat_0104b9a8);
+    fnvFloat_011cbc14 = fnvFloat_0104b9ac / sqrt_004019b0(fnvFloat_0104b9a8);
 }
 // @fnv 0x00f53240
 void InitializeRuntimeFloatCall372()
 {
     fnvFloat_011cbabc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104b9a8) * fnvFloat_0104b9a8)) * fnvFloat_0104b9ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104b9a8) * fnvFloat_0104b9a8)) * fnvFloat_0104b9ac;
 }
 // @fnv 0x00f54130
 void InitializeRuntimeFloatCall373()
 {
-    fnvFloat_011cbe00 = fnvFloat_0104c94c / FUN_004019b0(fnvFloat_0104c948);
+    fnvFloat_011cbe00 = fnvFloat_0104c94c / sqrt_004019b0(fnvFloat_0104c948);
 }
 // @fnv 0x00f54160
 void InitializeRuntimeFloatCall374()
 {
     fnvFloat_011cbdc8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104c948) * fnvFloat_0104c948)) * fnvFloat_0104c94c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104c948) * fnvFloat_0104c948)) * fnvFloat_0104c94c;
 }
 // @fnv 0x00f54480
 void InitializeRuntimeFloatCall375()
 {
-    fnvFloat_011cbe84 = fnvFloat_0104cba8 / FUN_004019b0(fnvFloat_0104cba4);
+    fnvFloat_011cbe84 = fnvFloat_0104cba8 / sqrt_004019b0(fnvFloat_0104cba4);
 }
 // @fnv 0x00f544b0
 void InitializeRuntimeFloatCall376()
 {
     fnvFloat_011cbe78 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104cba4) * fnvFloat_0104cba4)) * fnvFloat_0104cba8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104cba4) * fnvFloat_0104cba4)) * fnvFloat_0104cba8;
 }
 // @fnv 0x00f54640
 void InitializeRuntimeFloatCall377()
 {
-    fnvFloat_011cbee8 = fnvFloat_0104d15c / FUN_004019b0(fnvFloat_0104d158);
+    fnvFloat_011cbee8 = fnvFloat_0104d15c / sqrt_004019b0(fnvFloat_0104d158);
 }
 // @fnv 0x00f54670
 void InitializeRuntimeFloatCall378()
 {
     fnvFloat_011cbec8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104d158) * fnvFloat_0104d158)) * fnvFloat_0104d15c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104d158) * fnvFloat_0104d158)) * fnvFloat_0104d15c;
 }
 // @fnv 0x00f548e0
 void InitializeRuntimeFloatCall379()
 {
-    fnvFloat_011cc038 = fnvFloat_0104d47c / FUN_004019b0(fnvFloat_0104d478);
+    fnvFloat_011cc038 = fnvFloat_0104d47c / sqrt_004019b0(fnvFloat_0104d478);
 }
 // @fnv 0x00f54910
 void InitializeRuntimeFloatCall380()
 {
     fnvFloat_011cc00c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104d478) * fnvFloat_0104d478)) * fnvFloat_0104d47c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104d478) * fnvFloat_0104d478)) * fnvFloat_0104d47c;
 }
 // @fnv 0x00f54c80
 void InitializeRuntimeFloatCall381()
 {
-    fnvFloat_011cc0e0 = fnvFloat_0104d8dc / FUN_004019b0(fnvFloat_0104d8d8);
+    fnvFloat_011cc0e0 = fnvFloat_0104d8dc / sqrt_004019b0(fnvFloat_0104d8d8);
 }
 // @fnv 0x00f54cb0
 void InitializeRuntimeFloatCall382()
 {
     fnvFloat_011cc0c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104d8d8) * fnvFloat_0104d8d8)) * fnvFloat_0104d8dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104d8d8) * fnvFloat_0104d8d8)) * fnvFloat_0104d8dc;
 }
 // @fnv 0x00f54ee0
 void InitializeRuntimeFloatCall383()
 {
-    fnvFloat_011cc134 = fnvFloat_0104d998 / FUN_004019b0(fnvFloat_0104d994);
+    fnvFloat_011cc134 = fnvFloat_0104d998 / sqrt_004019b0(fnvFloat_0104d994);
 }
 // @fnv 0x00f54f10
 void InitializeRuntimeFloatCall384()
 {
     fnvFloat_011cc128 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104d994) * fnvFloat_0104d994)) * fnvFloat_0104d998;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104d994) * fnvFloat_0104d994)) * fnvFloat_0104d998;
 }
 // @fnv 0x00f54fe0
 void InitializeRuntimeFloatCall385()
 {
-    fnvFloat_011cc178 = fnvFloat_0104d9fc / FUN_004019b0(fnvFloat_0104d9f8);
+    fnvFloat_011cc178 = fnvFloat_0104d9fc / sqrt_004019b0(fnvFloat_0104d9f8);
 }
 // @fnv 0x00f55010
 void InitializeRuntimeFloatCall386()
 {
     fnvFloat_011cc158 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104d9f8) * fnvFloat_0104d9f8)) * fnvFloat_0104d9fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104d9f8) * fnvFloat_0104d9f8)) * fnvFloat_0104d9fc;
 }
 // @fnv 0x00f55270
 void InitializeRuntimeFloatCall387()
 {
-    fnvFloat_011cc1e8 = fnvFloat_0104daa8 / FUN_004019b0(fnvFloat_0104daa4);
+    fnvFloat_011cc1e8 = fnvFloat_0104daa8 / sqrt_004019b0(fnvFloat_0104daa4);
 }
 // @fnv 0x00f552a0
 void InitializeRuntimeFloatCall388()
 {
     fnvFloat_011cc1d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104daa4) * fnvFloat_0104daa4)) * fnvFloat_0104daa8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104daa4) * fnvFloat_0104daa4)) * fnvFloat_0104daa8;
 }
 // @fnv 0x00f553a0
 void InitializeRuntimeFloatCall389()
 {
-    fnvFloat_011cc214 = fnvFloat_0104dcc8 / FUN_004019b0(fnvFloat_0104dcc4);
+    fnvFloat_011cc214 = fnvFloat_0104dcc8 / sqrt_004019b0(fnvFloat_0104dcc4);
 }
 // @fnv 0x00f553d0
 void InitializeRuntimeFloatCall390()
 {
     fnvFloat_011cc208 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104dcc4) * fnvFloat_0104dcc4)) * fnvFloat_0104dcc8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104dcc4) * fnvFloat_0104dcc4)) * fnvFloat_0104dcc8;
 }
 // @fnv 0x00f554a0
 void InitializeRuntimeFloatCall391()
 {
-    fnvFloat_011cc25c = fnvFloat_0104dd2c / FUN_004019b0(fnvFloat_0104dd28);
+    fnvFloat_011cc25c = fnvFloat_0104dd2c / sqrt_004019b0(fnvFloat_0104dd28);
 }
 // @fnv 0x00f554d0
 void InitializeRuntimeFloatCall392()
 {
     fnvFloat_011cc23c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104dd28) * fnvFloat_0104dd28)) * fnvFloat_0104dd2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104dd28) * fnvFloat_0104dd28)) * fnvFloat_0104dd2c;
 }
 // @fnv 0x00f55730
 void InitializeRuntimeFloatCall393()
 {
-    fnvFloat_011cc2bc = fnvFloat_0104ddd8 / FUN_004019b0(fnvFloat_0104ddd4);
+    fnvFloat_011cc2bc = fnvFloat_0104ddd8 / sqrt_004019b0(fnvFloat_0104ddd4);
 }
 // @fnv 0x00f55760
 void InitializeRuntimeFloatCall394()
 {
     fnvFloat_011cc2b0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104ddd4) * fnvFloat_0104ddd4)) * fnvFloat_0104ddd8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104ddd4) * fnvFloat_0104ddd4)) * fnvFloat_0104ddd8;
 }
 // @fnv 0x00f55830
 void InitializeRuntimeFloatCall395()
 {
-    fnvFloat_011cc2dc = fnvFloat_0104de48 / FUN_004019b0(fnvFloat_0104de44);
+    fnvFloat_011cc2dc = fnvFloat_0104de48 / sqrt_004019b0(fnvFloat_0104de44);
 }
 // @fnv 0x00f55860
 void InitializeRuntimeFloatCall396()
 {
     fnvFloat_011cc2d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104de44) * fnvFloat_0104de44)) * fnvFloat_0104de48;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104de44) * fnvFloat_0104de44)) * fnvFloat_0104de48;
 }
 // @fnv 0x00f55960
 void InitializeRuntimeFloatCall397()
 {
-    fnvFloat_011cc31c = fnvFloat_0104e098 / FUN_004019b0(fnvFloat_0104e094);
+    fnvFloat_011cc31c = fnvFloat_0104e098 / sqrt_004019b0(fnvFloat_0104e094);
 }
 // @fnv 0x00f55990
 void InitializeRuntimeFloatCall398()
 {
     fnvFloat_011cc304 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e094) * fnvFloat_0104e094)) * fnvFloat_0104e098;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e094) * fnvFloat_0104e094)) * fnvFloat_0104e098;
 }
 // @fnv 0x00f55ac0
 void InitializeRuntimeFloatCall399()
 {
-    fnvFloat_011cc36c = fnvFloat_0104e0fc / FUN_004019b0(fnvFloat_0104e0f8);
+    fnvFloat_011cc36c = fnvFloat_0104e0fc / sqrt_004019b0(fnvFloat_0104e0f8);
 }
 // @fnv 0x00f55af0
 void InitializeRuntimeFloatCall400()
 {
     fnvFloat_011cc34c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e0f8) * fnvFloat_0104e0f8)) * fnvFloat_0104e0fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e0f8) * fnvFloat_0104e0f8)) * fnvFloat_0104e0fc;
 }
 // @fnv 0x00f55d80
 void InitializeRuntimeFloatCall401()
 {
-    fnvFloat_011cc3cc = fnvFloat_0104e1c8 / FUN_004019b0(fnvFloat_0104e1c4);
+    fnvFloat_011cc3cc = fnvFloat_0104e1c8 / sqrt_004019b0(fnvFloat_0104e1c4);
 }
 // @fnv 0x00f55db0
 void InitializeRuntimeFloatCall402()
 {
     fnvFloat_011cc3c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e1c4) * fnvFloat_0104e1c4)) * fnvFloat_0104e1c8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e1c4) * fnvFloat_0104e1c4)) * fnvFloat_0104e1c8;
 }
 // @fnv 0x00f55e80
 void InitializeRuntimeFloatCall403()
 {
-    fnvFloat_011cc418 = fnvFloat_0104e1fc / FUN_004019b0(fnvFloat_0104e1f8);
+    fnvFloat_011cc418 = fnvFloat_0104e1fc / sqrt_004019b0(fnvFloat_0104e1f8);
 }
 // @fnv 0x00f55eb0
 void InitializeRuntimeFloatCall404()
 {
     fnvFloat_011cc3f0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e1f8) * fnvFloat_0104e1f8)) * fnvFloat_0104e1fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e1f8) * fnvFloat_0104e1f8)) * fnvFloat_0104e1fc;
 }
 // @fnv 0x00f56100
 void InitializeRuntimeFloatCall405()
 {
-    fnvFloat_011cc490 = fnvFloat_0104e2ac / FUN_004019b0(fnvFloat_0104e2a8);
+    fnvFloat_011cc490 = fnvFloat_0104e2ac / sqrt_004019b0(fnvFloat_0104e2a8);
 }
 // @fnv 0x00f56130
 void InitializeRuntimeFloatCall406()
 {
     fnvFloat_011cc470 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e2a8) * fnvFloat_0104e2a8)) * fnvFloat_0104e2ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e2a8) * fnvFloat_0104e2a8)) * fnvFloat_0104e2ac;
 }
 // @fnv 0x00f56360
 void InitializeRuntimeFloatCall407()
 {
-    fnvFloat_011cc508 = fnvFloat_0104e2ec / FUN_004019b0(fnvFloat_0104e2e8);
+    fnvFloat_011cc508 = fnvFloat_0104e2ec / sqrt_004019b0(fnvFloat_0104e2e8);
 }
 // @fnv 0x00f56390
 void InitializeRuntimeFloatCall408()
 {
     fnvFloat_011cc4e8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e2e8) * fnvFloat_0104e2e8)) * fnvFloat_0104e2ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e2e8) * fnvFloat_0104e2e8)) * fnvFloat_0104e2ec;
 }
 // @fnv 0x00f565c0
 void InitializeRuntimeFloatCall409()
 {
-    fnvFloat_011cc594 = fnvFloat_0104e42c / FUN_004019b0(fnvFloat_0104e428);
+    fnvFloat_011cc594 = fnvFloat_0104e42c / sqrt_004019b0(fnvFloat_0104e428);
 }
 // @fnv 0x00f565f0
 void InitializeRuntimeFloatCall410()
 {
     fnvFloat_011cc564 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e428) * fnvFloat_0104e428)) * fnvFloat_0104e42c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e428) * fnvFloat_0104e428)) * fnvFloat_0104e42c;
 }
 // @fnv 0x00f56870
 void InitializeRuntimeFloatCall411()
 {
-    fnvFloat_011cc63c = fnvFloat_0104e55c / FUN_004019b0(fnvFloat_0104e558);
+    fnvFloat_011cc63c = fnvFloat_0104e55c / sqrt_004019b0(fnvFloat_0104e558);
 }
 // @fnv 0x00f568a0
 void InitializeRuntimeFloatCall412()
 {
     fnvFloat_011cc604 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e558) * fnvFloat_0104e558)) * fnvFloat_0104e55c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e558) * fnvFloat_0104e558)) * fnvFloat_0104e55c;
 }
 // @fnv 0x00f56b90
 void InitializeRuntimeFloatCall413()
 {
-    fnvFloat_011cc7d4 = fnvFloat_0104e698 / FUN_004019b0(fnvFloat_0104e694);
+    fnvFloat_011cc7d4 = fnvFloat_0104e698 / sqrt_004019b0(fnvFloat_0104e694);
 }
 // @fnv 0x00f56bc0
 void InitializeRuntimeFloatCall414()
 {
     fnvFloat_011cc6f0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104e694) * fnvFloat_0104e694)) * fnvFloat_0104e698;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104e694) * fnvFloat_0104e694)) * fnvFloat_0104e698;
 }
 // @fnv 0x00f577b0
 void InitializeRuntimeFloatCall415()
 {
-    fnvFloat_011cc9b8 = fnvFloat_0104eb3c / FUN_004019b0(fnvFloat_0104eb38);
+    fnvFloat_011cc9b8 = fnvFloat_0104eb3c / sqrt_004019b0(fnvFloat_0104eb38);
 }
 // @fnv 0x00f577e0
 void InitializeRuntimeFloatCall416()
 {
     fnvFloat_011cc998 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104eb38) * fnvFloat_0104eb38)) * fnvFloat_0104eb3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104eb38) * fnvFloat_0104eb38)) * fnvFloat_0104eb3c;
 }
 // @fnv 0x00f57a10
 void InitializeRuntimeFloatCall417()
 {
-    fnvFloat_011cca30 = fnvFloat_0104ebdc / FUN_004019b0(fnvFloat_0104ebd8);
+    fnvFloat_011cca30 = fnvFloat_0104ebdc / sqrt_004019b0(fnvFloat_0104ebd8);
 }
 // @fnv 0x00f57a40
 void InitializeRuntimeFloatCall418()
 {
     fnvFloat_011cca10 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104ebd8) * fnvFloat_0104ebd8)) * fnvFloat_0104ebdc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104ebd8) * fnvFloat_0104ebd8)) * fnvFloat_0104ebdc;
 }
 // @fnv 0x00f57ca0
 void InitializeRuntimeFloatCall419()
 {
-    fnvFloat_011ccab8 = fnvFloat_0104ec5c / FUN_004019b0(fnvFloat_0104ec58);
+    fnvFloat_011ccab8 = fnvFloat_0104ec5c / sqrt_004019b0(fnvFloat_0104ec58);
 }
 // @fnv 0x00f57cd0
 void InitializeRuntimeFloatCall420()
 {
     fnvFloat_011cca98 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104ec58) * fnvFloat_0104ec58)) * fnvFloat_0104ec5c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104ec58) * fnvFloat_0104ec58)) * fnvFloat_0104ec5c;
 }
 // @fnv 0x00f57f00
 void InitializeRuntimeFloatCall421()
 {
-    fnvFloat_011ccb30 = fnvFloat_0104ed6c / FUN_004019b0(fnvFloat_0104ed68);
+    fnvFloat_011ccb30 = fnvFloat_0104ed6c / sqrt_004019b0(fnvFloat_0104ed68);
 }
 // @fnv 0x00f57f30
 void InitializeRuntimeFloatCall422()
 {
     fnvFloat_011ccb10 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104ed68) * fnvFloat_0104ed68)) * fnvFloat_0104ed6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104ed68) * fnvFloat_0104ed68)) * fnvFloat_0104ed6c;
 }
 // @fnv 0x00f58160
 void InitializeRuntimeFloatCall423()
 {
-    fnvFloat_011ccc4c = fnvFloat_0104edbc / FUN_004019b0(fnvFloat_0104edb8);
+    fnvFloat_011ccc4c = fnvFloat_0104edbc / sqrt_004019b0(fnvFloat_0104edb8);
 }
 // @fnv 0x00f58190
 void InitializeRuntimeFloatCall424()
 {
     fnvFloat_011ccbb4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104edb8) * fnvFloat_0104edb8)) * fnvFloat_0104edbc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104edb8) * fnvFloat_0104edb8)) * fnvFloat_0104edbc;
 }
 // @fnv 0x00f58800
 void InitializeRuntimeFloatCall425()
 {
-    fnvFloat_011ccd40 = fnvFloat_0104f0cc / FUN_004019b0(fnvFloat_0104f0c8);
+    fnvFloat_011ccd40 = fnvFloat_0104f0cc / sqrt_004019b0(fnvFloat_0104f0c8);
 }
 // @fnv 0x00f58830
 void InitializeRuntimeFloatCall426()
 {
     fnvFloat_011ccd20 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104f0c8) * fnvFloat_0104f0c8)) * fnvFloat_0104f0cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104f0c8) * fnvFloat_0104f0c8)) * fnvFloat_0104f0cc;
 }
 // @fnv 0x00f58a60
 void InitializeRuntimeFloatCall427()
 {
-    fnvFloat_011ccd8c = fnvFloat_0104f110 / FUN_004019b0(fnvFloat_0104f10c);
+    fnvFloat_011ccd8c = fnvFloat_0104f110 / sqrt_004019b0(fnvFloat_0104f10c);
 }
 // @fnv 0x00f58a90
 void InitializeRuntimeFloatCall428()
 {
     fnvFloat_011ccd88 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104f10c) * fnvFloat_0104f10c)) * fnvFloat_0104f110;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104f10c) * fnvFloat_0104f10c)) * fnvFloat_0104f110;
 }
 // @fnv 0x00f58b00
 void InitializeRuntimeFloatCall429()
 {
-    fnvFloat_011ccdd8 = fnvFloat_0104f1ac / FUN_004019b0(fnvFloat_0104f1a8);
+    fnvFloat_011ccdd8 = fnvFloat_0104f1ac / sqrt_004019b0(fnvFloat_0104f1a8);
 }
 // @fnv 0x00f58b30
 void InitializeRuntimeFloatCall430()
 {
     fnvFloat_011ccdac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104f1a8) * fnvFloat_0104f1a8)) * fnvFloat_0104f1ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104f1a8) * fnvFloat_0104f1a8)) * fnvFloat_0104f1ac;
 }
 // @fnv 0x00f58e20
 void InitializeRuntimeFloatCall431()
 {
-    fnvFloat_011ccecc = fnvFloat_0104f26c / FUN_004019b0(fnvFloat_0104f268);
+    fnvFloat_011ccecc = fnvFloat_0104f26c / sqrt_004019b0(fnvFloat_0104f268);
 }
 // @fnv 0x00f58e50
 void InitializeRuntimeFloatCall432()
 {
     fnvFloat_011cce70 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104f268) * fnvFloat_0104f268)) * fnvFloat_0104f26c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104f268) * fnvFloat_0104f268)) * fnvFloat_0104f26c;
 }
 // @fnv 0x00f59200
 void InitializeRuntimeFloatCall433()
 {
-    fnvFloat_011cd7d4 = fnvFloat_0104f3bc / FUN_004019b0(fnvFloat_0104f3b8);
+    fnvFloat_011cd7d4 = fnvFloat_0104f3bc / sqrt_004019b0(fnvFloat_0104f3b8);
 }
 // @fnv 0x00f59230
 void InitializeRuntimeFloatCall434()
 {
     fnvFloat_011cd138 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0104f3b8) * fnvFloat_0104f3b8)) * fnvFloat_0104f3bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0104f3b8) * fnvFloat_0104f3b8)) * fnvFloat_0104f3bc;
 }
 // @fnv 0x00f5d620
 void InitializeRuntimeFloatCall435()
 {
-    fnvFloat_011cefc8 = fnvFloat_0105164c / FUN_004019b0(fnvFloat_01051648);
+    fnvFloat_011cefc8 = fnvFloat_0105164c / sqrt_004019b0(fnvFloat_01051648);
 }
 // @fnv 0x00f5d650
 void InitializeRuntimeFloatCall436()
 {
     fnvFloat_011ce420 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01051648) * fnvFloat_01051648)) * fnvFloat_0105164c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01051648) * fnvFloat_01051648)) * fnvFloat_0105164c;
 }
 // @fnv 0x00f65050
 void InitializeRuntimeFloatCall437()
 {
-    fnvFloat_011d0b20 = fnvFloat_01055f78 / FUN_004019b0(fnvFloat_01055f74);
+    fnvFloat_011d0b20 = fnvFloat_01055f78 / sqrt_004019b0(fnvFloat_01055f74);
 }
 // @fnv 0x00f65080
 void InitializeRuntimeFloatCall438()
 {
     fnvFloat_011d01d4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01055f74) * fnvFloat_01055f74)) * fnvFloat_01055f78;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01055f74) * fnvFloat_01055f74)) * fnvFloat_01055f78;
 }
 // @fnv 0x00f6abe0
 void InitializeRuntimeFloatCall439()
 {
-    fnvFloat_011d19a4 = fnvFloat_01058b78 / FUN_004019b0(fnvFloat_01058b74);
+    fnvFloat_011d19a4 = fnvFloat_01058b78 / sqrt_004019b0(fnvFloat_01058b74);
 }
 // @fnv 0x00f6ac10
 void InitializeRuntimeFloatCall440()
 {
     fnvFloat_011d1664 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01058b74) * fnvFloat_01058b74)) * fnvFloat_01058b78;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01058b74) * fnvFloat_01058b74)) * fnvFloat_01058b78;
 }
 // @fnv 0x00f80b70
 void InitializeRuntimeFloatCall441()
 {
-    fnvFloat_011d5880 = fnvFloat_01064dec / FUN_004019b0(fnvFloat_01064de8);
+    fnvFloat_011d5880 = fnvFloat_01064dec / sqrt_004019b0(fnvFloat_01064de8);
 }
 // @fnv 0x00f80ba0
 void InitializeRuntimeFloatCall442()
 {
     fnvFloat_011d57ac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01064de8) * fnvFloat_01064de8)) * fnvFloat_01064dec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01064de8) * fnvFloat_01064de8)) * fnvFloat_01064dec;
 }
 // @fnv 0x00f81540
 void InitializeRuntimeFloatCall443()
 {
-    fnvFloat_011d59bc = fnvFloat_01065398 / FUN_004019b0(fnvFloat_01065394);
+    fnvFloat_011d59bc = fnvFloat_01065398 / sqrt_004019b0(fnvFloat_01065394);
 }
 // @fnv 0x00f81570
 void InitializeRuntimeFloatCall444()
 {
     fnvFloat_011d59a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01065394) * fnvFloat_01065394)) * fnvFloat_01065398;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01065394) * fnvFloat_01065394)) * fnvFloat_01065398;
 }
 // @fnv 0x00f81670
 void InitializeRuntimeFloatCall445()
 {
-    fnvFloat_011d59d4 = fnvFloat_010653f0 / FUN_004019b0(fnvFloat_010653ec);
+    fnvFloat_011d59d4 = fnvFloat_010653f0 / sqrt_004019b0(fnvFloat_010653ec);
 }
 // @fnv 0x00f816a0
 void InitializeRuntimeFloatCall446()
 {
     fnvFloat_011d59d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010653ec) * fnvFloat_010653ec)) * fnvFloat_010653f0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010653ec) * fnvFloat_010653ec)) * fnvFloat_010653f0;
 }
 // @fnv 0x00f81710
 void InitializeRuntimeFloatCall447()
 {
-    fnvFloat_011d5ae8 = fnvFloat_0106564c / FUN_004019b0(fnvFloat_01065648);
+    fnvFloat_011d5ae8 = fnvFloat_0106564c / sqrt_004019b0(fnvFloat_01065648);
 }
 // @fnv 0x00f81740
 void InitializeRuntimeFloatCall448()
 {
     fnvFloat_011d5a20 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01065648) * fnvFloat_01065648)) * fnvFloat_0106564c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01065648) * fnvFloat_01065648)) * fnvFloat_0106564c;
 }
 // @fnv 0x00f81c70
 void InitializeRuntimeFloatCall449()
 {
-    fnvFloat_011d5b6c = fnvFloat_01065ac8 / FUN_004019b0(fnvFloat_01065ac4);
+    fnvFloat_011d5b6c = fnvFloat_01065ac8 / sqrt_004019b0(fnvFloat_01065ac4);
 }
 // @fnv 0x00f81ca0
 void InitializeRuntimeFloatCall450()
 {
     fnvFloat_011d5b60 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01065ac4) * fnvFloat_01065ac4)) * fnvFloat_01065ac8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01065ac4) * fnvFloat_01065ac4)) * fnvFloat_01065ac8;
 }
 // @fnv 0x00f81d90
 void InitializeRuntimeFloatCall451()
 {
-    fnvFloat_011d5b80 = fnvFloat_01065cb0 / FUN_004019b0(fnvFloat_01065cac);
+    fnvFloat_011d5b80 = fnvFloat_01065cb0 / sqrt_004019b0(fnvFloat_01065cac);
 }
 // @fnv 0x00f81dc0
 void InitializeRuntimeFloatCall452()
 {
     fnvFloat_011d5b7c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01065cac) * fnvFloat_01065cac)) * fnvFloat_01065cb0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01065cac) * fnvFloat_01065cac)) * fnvFloat_01065cb0;
 }
 // @fnv 0x00f81e30
 void InitializeRuntimeFloatCall453()
 {
-    fnvFloat_011d5bb0 = fnvFloat_01065ce4 / FUN_004019b0(fnvFloat_01065ce0);
+    fnvFloat_011d5bb0 = fnvFloat_01065ce4 / sqrt_004019b0(fnvFloat_01065ce0);
 }
 // @fnv 0x00f81e60
 void InitializeRuntimeFloatCall454()
 {
     fnvFloat_011d5b9c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01065ce0) * fnvFloat_01065ce0)) * fnvFloat_01065ce4;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01065ce0) * fnvFloat_01065ce0)) * fnvFloat_01065ce4;
 }
 // @fnv 0x00f81f50
 void InitializeRuntimeFloatCall455()
 {
-    fnvFloat_011d5c00 = fnvFloat_010660ac / FUN_004019b0(fnvFloat_010660a8);
+    fnvFloat_011d5c00 = fnvFloat_010660ac / sqrt_004019b0(fnvFloat_010660a8);
 }
 // @fnv 0x00f81f80
 void InitializeRuntimeFloatCall456()
 {
     fnvFloat_011d5bd8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010660a8) * fnvFloat_010660a8)) * fnvFloat_010660ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010660a8) * fnvFloat_010660a8)) * fnvFloat_010660ac;
 }
 // @fnv 0x00f821d0
 void InitializeRuntimeFloatCall457()
 {
-    fnvFloat_011d5cf8 = fnvFloat_0106636c / FUN_004019b0(fnvFloat_01066368);
+    fnvFloat_011d5cf8 = fnvFloat_0106636c / sqrt_004019b0(fnvFloat_01066368);
 }
 // @fnv 0x00f82200
 void InitializeRuntimeFloatCall458()
 {
     fnvFloat_011d5c90 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01066368) * fnvFloat_01066368)) * fnvFloat_0106636c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01066368) * fnvFloat_01066368)) * fnvFloat_0106636c;
 }
 // @fnv 0x00f82840
 void InitializeRuntimeFloatCall459()
 {
-    fnvFloat_011d5e24 = fnvFloat_01066738 / FUN_004019b0(fnvFloat_01066734);
+    fnvFloat_011d5e24 = fnvFloat_01066738 / sqrt_004019b0(fnvFloat_01066734);
 }
 // @fnv 0x00f82870
 void InitializeRuntimeFloatCall460()
 {
     fnvFloat_011d5e10 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01066734) * fnvFloat_01066734)) * fnvFloat_01066738;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01066734) * fnvFloat_01066734)) * fnvFloat_01066738;
 }
 // @fnv 0x00f829e0
 void InitializeRuntimeFloatCall461()
 {
-    fnvFloat_011d5e7c = fnvFloat_010668b8 / FUN_004019b0(fnvFloat_010668b4);
+    fnvFloat_011d5e7c = fnvFloat_010668b8 / sqrt_004019b0(fnvFloat_010668b4);
 }
 // @fnv 0x00f82a10
 void InitializeRuntimeFloatCall462()
 {
     fnvFloat_011d5e50 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010668b4) * fnvFloat_010668b4)) * fnvFloat_010668b8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010668b4) * fnvFloat_010668b4)) * fnvFloat_010668b8;
 }
 // @fnv 0x00f82c20
 void InitializeRuntimeFloatCall463()
 {
-    fnvFloat_011d5fc8 = fnvFloat_01066fac / FUN_004019b0(fnvFloat_01066fa8);
+    fnvFloat_011d5fc8 = fnvFloat_01066fac / sqrt_004019b0(fnvFloat_01066fa8);
 }
 // @fnv 0x00f82c50
 void InitializeRuntimeFloatCall464()
 {
     fnvFloat_011d5f18 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01066fa8) * fnvFloat_01066fa8)) * fnvFloat_01066fac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01066fa8) * fnvFloat_01066fa8)) * fnvFloat_01066fac;
 }
 // @fnv 0x00f83510
 void InitializeRuntimeFloatCall465()
 {
-    fnvFloat_011d6104 = fnvFloat_010673ac / FUN_004019b0(fnvFloat_010673a8);
+    fnvFloat_011d6104 = fnvFloat_010673ac / sqrt_004019b0(fnvFloat_010673a8);
 }
 // @fnv 0x00f83540
 void InitializeRuntimeFloatCall466()
 {
     fnvFloat_011d60e4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010673a8) * fnvFloat_010673a8)) * fnvFloat_010673ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010673a8) * fnvFloat_010673a8)) * fnvFloat_010673ac;
 }
 // @fnv 0x00f83790
 void InitializeRuntimeFloatCall467()
 {
-    fnvFloat_011d618c = fnvFloat_0106741c / FUN_004019b0(fnvFloat_01067418);
+    fnvFloat_011d618c = fnvFloat_0106741c / sqrt_004019b0(fnvFloat_01067418);
 }
 // @fnv 0x00f837c0
 void InitializeRuntimeFloatCall468()
 {
     fnvFloat_011d616c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01067418) * fnvFloat_01067418)) * fnvFloat_0106741c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01067418) * fnvFloat_01067418)) * fnvFloat_0106741c;
 }
 // @fnv 0x00f83a10
 void InitializeRuntimeFloatCall469()
 {
-    fnvFloat_011d6420 = fnvFloat_01067b78 / FUN_004019b0(fnvFloat_01067b74);
+    fnvFloat_011d6420 = fnvFloat_01067b78 / sqrt_004019b0(fnvFloat_01067b74);
 }
 // @fnv 0x00f83a40
 void InitializeRuntimeFloatCall470()
 {
     fnvFloat_011d6348 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01067b74) * fnvFloat_01067b74)) * fnvFloat_01067b78;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01067b74) * fnvFloat_01067b74)) * fnvFloat_01067b78;
 }
 // @fnv 0x00f844a0
 void InitializeRuntimeFloatCall471()
 {
-    fnvFloat_011d65e8 = fnvFloat_0106844c / FUN_004019b0(fnvFloat_01068448);
+    fnvFloat_011d65e8 = fnvFloat_0106844c / sqrt_004019b0(fnvFloat_01068448);
 }
 // @fnv 0x00f844d0
 void InitializeRuntimeFloatCall472()
 {
     fnvFloat_011d65bc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01068448) * fnvFloat_01068448)) * fnvFloat_0106844c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01068448) * fnvFloat_01068448)) * fnvFloat_0106844c;
 }
 // @fnv 0x00f84960
 void InitializeRuntimeFloatCall473()
 {
-    fnvFloat_011d6678 = fnvFloat_010689b8 / FUN_004019b0(fnvFloat_010689b4);
+    fnvFloat_011d6678 = fnvFloat_010689b8 / sqrt_004019b0(fnvFloat_010689b4);
 }
 // @fnv 0x00f84990
 void InitializeRuntimeFloatCall474()
 {
     fnvFloat_011d666c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010689b4) * fnvFloat_010689b4)) * fnvFloat_010689b8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010689b4) * fnvFloat_010689b4)) * fnvFloat_010689b8;
 }
 // @fnv 0x00f84aa0
 void InitializeRuntimeFloatCall475()
 {
-    fnvFloat_011d66a0 = fnvFloat_01068a38 / FUN_004019b0(fnvFloat_01068a34);
+    fnvFloat_011d66a0 = fnvFloat_01068a38 / sqrt_004019b0(fnvFloat_01068a34);
 }
 // @fnv 0x00f84ad0
 void InitializeRuntimeFloatCall476()
 {
     fnvFloat_011d6694 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01068a34) * fnvFloat_01068a34)) * fnvFloat_01068a38;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01068a34) * fnvFloat_01068a34)) * fnvFloat_01068a38;
 }
 // @fnv 0x00f84be0
 void InitializeRuntimeFloatCall477()
 {
-    fnvFloat_011d66f0 = fnvFloat_01068c6c / FUN_004019b0(fnvFloat_01068c68);
+    fnvFloat_011d66f0 = fnvFloat_01068c6c / sqrt_004019b0(fnvFloat_01068c68);
 }
 // @fnv 0x00f84c10
 void InitializeRuntimeFloatCall478()
 {
     fnvFloat_011d66d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01068c68) * fnvFloat_01068c68)) * fnvFloat_01068c6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01068c68) * fnvFloat_01068c68)) * fnvFloat_01068c6c;
 }
 // @fnv 0x00f84e40
 void InitializeRuntimeFloatCall479()
 {
-    fnvFloat_011d6768 = fnvFloat_01068d0c / FUN_004019b0(fnvFloat_01068d08);
+    fnvFloat_011d6768 = fnvFloat_01068d0c / sqrt_004019b0(fnvFloat_01068d08);
 }
 // @fnv 0x00f84e70
 void InitializeRuntimeFloatCall480()
 {
     fnvFloat_011d6748 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01068d08) * fnvFloat_01068d08)) * fnvFloat_01068d0c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01068d08) * fnvFloat_01068d08)) * fnvFloat_01068d0c;
 }
 // @fnv 0x00f850e0
 void InitializeRuntimeFloatCall481()
 {
-    fnvFloat_011d67c4 = fnvFloat_01068fd8 / FUN_004019b0(fnvFloat_01068fd4);
+    fnvFloat_011d67c4 = fnvFloat_01068fd8 / sqrt_004019b0(fnvFloat_01068fd4);
 }
 // @fnv 0x00f85110
 void InitializeRuntimeFloatCall482()
 {
     fnvFloat_011d67b8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01068fd4) * fnvFloat_01068fd4)) * fnvFloat_01068fd8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01068fd4) * fnvFloat_01068fd4)) * fnvFloat_01068fd8;
 }
 // @fnv 0x00f85390
 void InitializeRuntimeFloatCall483()
 {
-    fnvFloat_011d6874 = fnvFloat_010692ec / FUN_004019b0(fnvFloat_010692e8);
+    fnvFloat_011d6874 = fnvFloat_010692ec / sqrt_004019b0(fnvFloat_010692e8);
 }
 // @fnv 0x00f853c0
 void InitializeRuntimeFloatCall484()
 {
     fnvFloat_011d6854 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010692e8) * fnvFloat_010692e8)) * fnvFloat_010692ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010692e8) * fnvFloat_010692e8)) * fnvFloat_010692ec;
 }
 // @fnv 0x00f855f0
 void InitializeRuntimeFloatCall485()
 {
-    fnvFloat_011d68ec = fnvFloat_0106934c / FUN_004019b0(fnvFloat_01069348);
+    fnvFloat_011d68ec = fnvFloat_0106934c / sqrt_004019b0(fnvFloat_01069348);
 }
 // @fnv 0x00f85620
 void InitializeRuntimeFloatCall486()
 {
     fnvFloat_011d68cc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01069348) * fnvFloat_01069348)) * fnvFloat_0106934c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01069348) * fnvFloat_01069348)) * fnvFloat_0106934c;
 }
 // @fnv 0x00f85850
 void InitializeRuntimeFloatCall487()
 {
-    fnvFloat_011d6940 = fnvFloat_01069518 / FUN_004019b0(fnvFloat_01069514);
+    fnvFloat_011d6940 = fnvFloat_01069518 / sqrt_004019b0(fnvFloat_01069514);
 }
 // @fnv 0x00f85880
 void InitializeRuntimeFloatCall488()
 {
     fnvFloat_011d6934 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01069514) * fnvFloat_01069514)) * fnvFloat_01069518;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01069514) * fnvFloat_01069514)) * fnvFloat_01069518;
 }
 // @fnv 0x00f859b0
 void InitializeRuntimeFloatCall489()
 {
-    fnvFloat_011d6a3c = fnvFloat_01069728 / FUN_004019b0(fnvFloat_01069724);
+    fnvFloat_011d6a3c = fnvFloat_01069728 / sqrt_004019b0(fnvFloat_01069724);
 }
 // @fnv 0x00f859e0
 void InitializeRuntimeFloatCall490()
 {
     fnvFloat_011d6a28 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01069724) * fnvFloat_01069724)) * fnvFloat_01069728;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01069724) * fnvFloat_01069724)) * fnvFloat_01069728;
 }
 // @fnv 0x00f85af0
 void InitializeRuntimeFloatCall491()
 {
-    fnvFloat_011d6aa0 = fnvFloat_0106983c / FUN_004019b0(fnvFloat_01069838);
+    fnvFloat_011d6aa0 = fnvFloat_0106983c / sqrt_004019b0(fnvFloat_01069838);
 }
 // @fnv 0x00f85b20
 void InitializeRuntimeFloatCall492()
 {
     fnvFloat_011d6a68 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01069838) * fnvFloat_01069838)) * fnvFloat_0106983c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01069838) * fnvFloat_01069838)) * fnvFloat_0106983c;
 }
 // @fnv 0x00f85d90
 void InitializeRuntimeFloatCall493()
 {
-    fnvFloat_011d6b24 = fnvFloat_0106998c / FUN_004019b0(fnvFloat_01069988);
+    fnvFloat_011d6b24 = fnvFloat_0106998c / sqrt_004019b0(fnvFloat_01069988);
 }
 // @fnv 0x00f85dc0
 void InitializeRuntimeFloatCall494()
 {
     fnvFloat_011d6afc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01069988) * fnvFloat_01069988)) * fnvFloat_0106998c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01069988) * fnvFloat_01069988)) * fnvFloat_0106998c;
 }
 // @fnv 0x00f86010
 void InitializeRuntimeFloatCall495()
 {
-    fnvFloat_011d6ba0 = fnvFloat_01069c2c / FUN_004019b0(fnvFloat_01069c28);
+    fnvFloat_011d6ba0 = fnvFloat_01069c2c / sqrt_004019b0(fnvFloat_01069c28);
 }
 // @fnv 0x00f86040
 void InitializeRuntimeFloatCall496()
 {
     fnvFloat_011d6b78 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01069c28) * fnvFloat_01069c28)) * fnvFloat_01069c2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01069c28) * fnvFloat_01069c28)) * fnvFloat_01069c2c;
 }
 // @fnv 0x00f86290
 void InitializeRuntimeFloatCall497()
 {
-    fnvFloat_011d6c24 = fnvFloat_01069dac / FUN_004019b0(fnvFloat_01069da8);
+    fnvFloat_011d6c24 = fnvFloat_01069dac / sqrt_004019b0(fnvFloat_01069da8);
 }
 // @fnv 0x00f862c0
 void InitializeRuntimeFloatCall498()
 {
     fnvFloat_011d6c04 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01069da8) * fnvFloat_01069da8)) * fnvFloat_01069dac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01069da8) * fnvFloat_01069da8)) * fnvFloat_01069dac;
 }
 // @fnv 0x00f86590
 void InitializeRuntimeFloatCall499()
 {
-    fnvFloat_011d6c7c = fnvFloat_0106a090 / FUN_004019b0(fnvFloat_0106a06c);
+    fnvFloat_011d6c7c = fnvFloat_0106a090 / sqrt_004019b0(fnvFloat_0106a06c);
 }
 // @fnv 0x00f865c0
 void InitializeRuntimeFloatCall500()
 {
     fnvFloat_011d6c70 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106a06c) * fnvFloat_0106a06c)) * fnvFloat_0106a090;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106a06c) * fnvFloat_0106a06c)) * fnvFloat_0106a090;
 }
 // @fnv 0x00f866f0
 void InitializeRuntimeFloatCall501()
 {
-    fnvFloat_011d6cb4 = fnvFloat_0106acf0 / FUN_004019b0(fnvFloat_0106accc);
+    fnvFloat_011d6cb4 = fnvFloat_0106acf0 / sqrt_004019b0(fnvFloat_0106accc);
 }
 // @fnv 0x00f86720
 void InitializeRuntimeFloatCall502()
 {
     fnvFloat_011d6c9c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106accc) * fnvFloat_0106accc)) * fnvFloat_0106acf0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106accc) * fnvFloat_0106accc)) * fnvFloat_0106acf0;
 }
 // @fnv 0x00f86880
 void InitializeRuntimeFloatCall503()
 {
-    fnvFloat_011d6ce0 = fnvFloat_0106b150 / FUN_004019b0(fnvFloat_0106b12c);
+    fnvFloat_011d6ce0 = fnvFloat_0106b150 / sqrt_004019b0(fnvFloat_0106b12c);
 }
 // @fnv 0x00f868b0
 void InitializeRuntimeFloatCall504()
 {
     fnvFloat_011d6cd4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b12c) * fnvFloat_0106b12c)) * fnvFloat_0106b150;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b12c) * fnvFloat_0106b12c)) * fnvFloat_0106b150;
 }
 // @fnv 0x00f86980
 void InitializeRuntimeFloatCall505()
 {
-    fnvFloat_011d6d08 = fnvFloat_0106b218 / FUN_004019b0(fnvFloat_0106b214);
+    fnvFloat_011d6d08 = fnvFloat_0106b218 / sqrt_004019b0(fnvFloat_0106b214);
 }
 // @fnv 0x00f869b0
 void InitializeRuntimeFloatCall506()
 {
     fnvFloat_011d6cfc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b214) * fnvFloat_0106b214)) * fnvFloat_0106b218;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b214) * fnvFloat_0106b214)) * fnvFloat_0106b218;
 }
 // @fnv 0x00f86b20
 void InitializeRuntimeFloatCall507()
 {
-    fnvFloat_011d6d30 = fnvFloat_0106b280 / FUN_004019b0(fnvFloat_0106b25c);
+    fnvFloat_011d6d30 = fnvFloat_0106b280 / sqrt_004019b0(fnvFloat_0106b25c);
 }
 // @fnv 0x00f86b50
 void InitializeRuntimeFloatCall508()
 {
     fnvFloat_011d6d24 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b25c) * fnvFloat_0106b25c)) * fnvFloat_0106b280;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b25c) * fnvFloat_0106b25c)) * fnvFloat_0106b280;
 }
 // @fnv 0x00f86c00
 void InitializeRuntimeFloatCall509()
 {
-    fnvFloat_011d6d58 = fnvFloat_0106b2a8 / FUN_004019b0(fnvFloat_0106b2a4);
+    fnvFloat_011d6d58 = fnvFloat_0106b2a8 / sqrt_004019b0(fnvFloat_0106b2a4);
 }
 // @fnv 0x00f86c30
 void InitializeRuntimeFloatCall510()
 {
     fnvFloat_011d6d4c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b2a4) * fnvFloat_0106b2a4)) * fnvFloat_0106b2a8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b2a4) * fnvFloat_0106b2a4)) * fnvFloat_0106b2a8;
 }
 // @fnv 0x00f86d00
 void InitializeRuntimeFloatCall511()
 {
-    fnvFloat_011d6d6c = fnvFloat_0106b2d8 / FUN_004019b0(fnvFloat_0106b2d4);
+    fnvFloat_011d6d6c = fnvFloat_0106b2d8 / sqrt_004019b0(fnvFloat_0106b2d4);
 }
 // @fnv 0x00f86d30
 void InitializeRuntimeFloatCall512()
 {
     fnvFloat_011d6d68 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b2d4) * fnvFloat_0106b2d4)) * fnvFloat_0106b2d8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b2d4) * fnvFloat_0106b2d4)) * fnvFloat_0106b2d8;
 }
 // @fnv 0x00f86e00
 void InitializeRuntimeFloatCall513()
 {
-    fnvFloat_011d6d84 = fnvFloat_0106b310 / FUN_004019b0(fnvFloat_0106b2ec);
+    fnvFloat_011d6d84 = fnvFloat_0106b310 / sqrt_004019b0(fnvFloat_0106b2ec);
 }
 // @fnv 0x00f86e30
 void InitializeRuntimeFloatCall514()
 {
     fnvFloat_011d6d78 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b2ec) * fnvFloat_0106b2ec)) * fnvFloat_0106b310;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b2ec) * fnvFloat_0106b2ec)) * fnvFloat_0106b310;
 }
 // @fnv 0x00f86f00
 void InitializeRuntimeFloatCall515()
 {
-    fnvFloat_011d6db0 = fnvFloat_0106b328 / FUN_004019b0(fnvFloat_0106b324);
+    fnvFloat_011d6db0 = fnvFloat_0106b328 / sqrt_004019b0(fnvFloat_0106b324);
 }
 // @fnv 0x00f86f30
 void InitializeRuntimeFloatCall516()
 {
     fnvFloat_011d6da4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b324) * fnvFloat_0106b324)) * fnvFloat_0106b328;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b324) * fnvFloat_0106b324)) * fnvFloat_0106b328;
 }
 // @fnv 0x00f870c0
 void InitializeRuntimeFloatCall517()
 {
-    fnvFloat_011d6de4 = fnvFloat_0106b390 / FUN_004019b0(fnvFloat_0106b36c);
+    fnvFloat_011d6de4 = fnvFloat_0106b390 / sqrt_004019b0(fnvFloat_0106b36c);
 }
 // @fnv 0x00f870f0
 void InitializeRuntimeFloatCall518()
 {
     fnvFloat_011d6dd4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b36c) * fnvFloat_0106b36c)) * fnvFloat_0106b390;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b36c) * fnvFloat_0106b36c)) * fnvFloat_0106b390;
 }
 // @fnv 0x00f87240
 void InitializeRuntimeFloatCall519()
 {
-    fnvFloat_011d6e0c = fnvFloat_0106b4a0 / FUN_004019b0(fnvFloat_0106b47c);
+    fnvFloat_011d6e0c = fnvFloat_0106b4a0 / sqrt_004019b0(fnvFloat_0106b47c);
 }
 // @fnv 0x00f87270
 void InitializeRuntimeFloatCall520()
 {
     fnvFloat_011d6e00 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b47c) * fnvFloat_0106b47c)) * fnvFloat_0106b4a0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b47c) * fnvFloat_0106b47c)) * fnvFloat_0106b4a0;
 }
 // @fnv 0x00f87380
 void InitializeRuntimeFloatCall521()
 {
-    fnvFloat_011d6e74 = fnvFloat_0106b4e4 / FUN_004019b0(fnvFloat_0106b4e0);
+    fnvFloat_011d6e74 = fnvFloat_0106b4e4 / sqrt_004019b0(fnvFloat_0106b4e0);
 }
 // @fnv 0x00f873b0
 void InitializeRuntimeFloatCall522()
 {
     fnvFloat_011d6e50 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b4e0) * fnvFloat_0106b4e0)) * fnvFloat_0106b4e4;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b4e0) * fnvFloat_0106b4e0)) * fnvFloat_0106b4e4;
 }
 // @fnv 0x00f87690
 void InitializeRuntimeFloatCall523()
 {
-    fnvFloat_011d6ed8 = fnvFloat_0106b630 / FUN_004019b0(fnvFloat_0106b60c);
+    fnvFloat_011d6ed8 = fnvFloat_0106b630 / sqrt_004019b0(fnvFloat_0106b60c);
 }
 // @fnv 0x00f876c0
 void InitializeRuntimeFloatCall524()
 {
     fnvFloat_011d6ecc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b60c) * fnvFloat_0106b60c)) * fnvFloat_0106b630;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b60c) * fnvFloat_0106b60c)) * fnvFloat_0106b630;
 }
 // @fnv 0x00f87820
 void InitializeRuntimeFloatCall525()
 {
-    fnvFloat_011d6f10 = fnvFloat_0106b6f0 / FUN_004019b0(fnvFloat_0106b6cc);
+    fnvFloat_011d6f10 = fnvFloat_0106b6f0 / sqrt_004019b0(fnvFloat_0106b6cc);
 }
 // @fnv 0x00f87850
 void InitializeRuntimeFloatCall526()
 {
     fnvFloat_011d6f04 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b6cc) * fnvFloat_0106b6cc)) * fnvFloat_0106b6f0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b6cc) * fnvFloat_0106b6cc)) * fnvFloat_0106b6f0;
 }
 // @fnv 0x00f87980
 void InitializeRuntimeFloatCall527()
 {
-    fnvFloat_011d6f38 = fnvFloat_0106b740 / FUN_004019b0(fnvFloat_0106b71c);
+    fnvFloat_011d6f38 = fnvFloat_0106b740 / sqrt_004019b0(fnvFloat_0106b71c);
 }
 // @fnv 0x00f879b0
 void InitializeRuntimeFloatCall528()
 {
     fnvFloat_011d6f2c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b71c) * fnvFloat_0106b71c)) * fnvFloat_0106b740;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b71c) * fnvFloat_0106b71c)) * fnvFloat_0106b740;
 }
 // @fnv 0x00f87ac0
 void InitializeRuntimeFloatCall529()
 {
-    fnvFloat_011d6f60 = fnvFloat_0106b780 / FUN_004019b0(fnvFloat_0106b75c);
+    fnvFloat_011d6f60 = fnvFloat_0106b780 / sqrt_004019b0(fnvFloat_0106b75c);
 }
 // @fnv 0x00f87af0
 void InitializeRuntimeFloatCall530()
 {
     fnvFloat_011d6f54 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b75c) * fnvFloat_0106b75c)) * fnvFloat_0106b780;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b75c) * fnvFloat_0106b75c)) * fnvFloat_0106b780;
 }
 // @fnv 0x00f87c20
 void InitializeRuntimeFloatCall531()
 {
-    fnvFloat_011d6f8c = fnvFloat_0106b7d0 / FUN_004019b0(fnvFloat_0106b7ac);
+    fnvFloat_011d6f8c = fnvFloat_0106b7d0 / sqrt_004019b0(fnvFloat_0106b7ac);
 }
 // @fnv 0x00f87c50
 void InitializeRuntimeFloatCall532()
 {
     fnvFloat_011d6f80 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b7ac) * fnvFloat_0106b7ac)) * fnvFloat_0106b7d0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b7ac) * fnvFloat_0106b7ac)) * fnvFloat_0106b7d0;
 }
 // @fnv 0x00f87d80
 void InitializeRuntimeFloatCall533()
 {
-    fnvFloat_011d6fb8 = fnvFloat_0106b824 / FUN_004019b0(fnvFloat_0106b820);
+    fnvFloat_011d6fb8 = fnvFloat_0106b824 / sqrt_004019b0(fnvFloat_0106b820);
 }
 // @fnv 0x00f87db0
 void InitializeRuntimeFloatCall534()
 {
     fnvFloat_011d6fac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b820) * fnvFloat_0106b820)) * fnvFloat_0106b824;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b820) * fnvFloat_0106b820)) * fnvFloat_0106b824;
 }
 // @fnv 0x00f87ee0
 void InitializeRuntimeFloatCall535()
 {
-    fnvFloat_011d6fe4 = fnvFloat_0106b870 / FUN_004019b0(fnvFloat_0106b84c);
+    fnvFloat_011d6fe4 = fnvFloat_0106b870 / sqrt_004019b0(fnvFloat_0106b84c);
 }
 // @fnv 0x00f87f10
 void InitializeRuntimeFloatCall536()
 {
     fnvFloat_011d6fd8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b84c) * fnvFloat_0106b84c)) * fnvFloat_0106b870;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b84c) * fnvFloat_0106b84c)) * fnvFloat_0106b870;
 }
 // @fnv 0x00f88040
 void InitializeRuntimeFloatCall537()
 {
-    fnvFloat_011d700c = fnvFloat_0106b910 / FUN_004019b0(fnvFloat_0106b8ec);
+    fnvFloat_011d700c = fnvFloat_0106b910 / sqrt_004019b0(fnvFloat_0106b8ec);
 }
 // @fnv 0x00f88070
 void InitializeRuntimeFloatCall538()
 {
     fnvFloat_011d7000 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b8ec) * fnvFloat_0106b8ec)) * fnvFloat_0106b910;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b8ec) * fnvFloat_0106b8ec)) * fnvFloat_0106b910;
 }
 // @fnv 0x00f88180
 void InitializeRuntimeFloatCall539()
 {
-    fnvFloat_011d7030 = fnvFloat_0106b960 / FUN_004019b0(fnvFloat_0106b93c);
+    fnvFloat_011d7030 = fnvFloat_0106b960 / sqrt_004019b0(fnvFloat_0106b93c);
 }
 // @fnv 0x00f881b0
 void InitializeRuntimeFloatCall540()
 {
     fnvFloat_011d7024 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b93c) * fnvFloat_0106b93c)) * fnvFloat_0106b960;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b93c) * fnvFloat_0106b93c)) * fnvFloat_0106b960;
 }
 // @fnv 0x00f882e0
 void InitializeRuntimeFloatCall541()
 {
-    fnvFloat_011d7050 = fnvFloat_0106b988 / FUN_004019b0(fnvFloat_0106b984);
+    fnvFloat_011d7050 = fnvFloat_0106b988 / sqrt_004019b0(fnvFloat_0106b984);
 }
 // @fnv 0x00f88310
 void InitializeRuntimeFloatCall542()
 {
     fnvFloat_011d704c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b984) * fnvFloat_0106b984)) * fnvFloat_0106b988;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b984) * fnvFloat_0106b984)) * fnvFloat_0106b988;
 }
 // @fnv 0x00f88420
 void InitializeRuntimeFloatCall543()
 {
-    fnvFloat_011d7090 = fnvFloat_0106b9c0 / FUN_004019b0(fnvFloat_0106b99c);
+    fnvFloat_011d7090 = fnvFloat_0106b9c0 / sqrt_004019b0(fnvFloat_0106b99c);
 }
 // @fnv 0x00f88450
 void InitializeRuntimeFloatCall544()
 {
     fnvFloat_011d7074 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106b99c) * fnvFloat_0106b99c)) * fnvFloat_0106b9c0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106b99c) * fnvFloat_0106b99c)) * fnvFloat_0106b9c0;
 }
 // @fnv 0x00f885d0
 void InitializeRuntimeFloatCall545()
 {
-    fnvFloat_011d70bc = fnvFloat_0106bb00 / FUN_004019b0(fnvFloat_0106badc);
+    fnvFloat_011d70bc = fnvFloat_0106bb00 / sqrt_004019b0(fnvFloat_0106badc);
 }
 // @fnv 0x00f88600
 void InitializeRuntimeFloatCall546()
 {
     fnvFloat_011d70b0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106badc) * fnvFloat_0106badc)) * fnvFloat_0106bb00;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106badc) * fnvFloat_0106badc)) * fnvFloat_0106bb00;
 }
 // @fnv 0x00f886d0
 void InitializeRuntimeFloatCall547()
 {
-    fnvFloat_011d70e8 = fnvFloat_0106bb58 / FUN_004019b0(fnvFloat_0106bb54);
+    fnvFloat_011d70e8 = fnvFloat_0106bb58 / sqrt_004019b0(fnvFloat_0106bb54);
 }
 // @fnv 0x00f88700
 void InitializeRuntimeFloatCall548()
 {
     fnvFloat_011d70dc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106bb54) * fnvFloat_0106bb54)) * fnvFloat_0106bb58;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106bb54) * fnvFloat_0106bb54)) * fnvFloat_0106bb58;
 }
 // @fnv 0x00f88890
 void InitializeRuntimeFloatCall549()
 {
-    fnvFloat_011d7114 = fnvFloat_0106c220 / FUN_004019b0(fnvFloat_0106c1fc);
+    fnvFloat_011d7114 = fnvFloat_0106c220 / sqrt_004019b0(fnvFloat_0106c1fc);
 }
 // @fnv 0x00f888c0
 void InitializeRuntimeFloatCall550()
 {
     fnvFloat_011d7108 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106c1fc) * fnvFloat_0106c1fc)) * fnvFloat_0106c220;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106c1fc) * fnvFloat_0106c1fc)) * fnvFloat_0106c220;
 }
 // @fnv 0x00f889d0
 void InitializeRuntimeFloatCall551()
 {
-    fnvFloat_011d713c = fnvFloat_0106c284 / FUN_004019b0(fnvFloat_0106c280);
+    fnvFloat_011d713c = fnvFloat_0106c284 / sqrt_004019b0(fnvFloat_0106c280);
 }
 // @fnv 0x00f88a00
 void InitializeRuntimeFloatCall552()
 {
     fnvFloat_011d7138 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106c280) * fnvFloat_0106c280)) * fnvFloat_0106c284;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106c280) * fnvFloat_0106c280)) * fnvFloat_0106c284;
 }
 // @fnv 0x00f88ab0
 void InitializeRuntimeFloatCall553()
 {
-    fnvFloat_011d715c = fnvFloat_0106c298 / FUN_004019b0(fnvFloat_0106c294);
+    fnvFloat_011d715c = fnvFloat_0106c298 / sqrt_004019b0(fnvFloat_0106c294);
 }
 // @fnv 0x00f88ae0
 void InitializeRuntimeFloatCall554()
 {
     fnvFloat_011d7150 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106c294) * fnvFloat_0106c294)) * fnvFloat_0106c298;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106c294) * fnvFloat_0106c294)) * fnvFloat_0106c298;
 }
 // @fnv 0x00f88c90
 void InitializeRuntimeFloatCall555()
 {
-    fnvFloat_011d71bc = fnvFloat_0106c390 / FUN_004019b0(fnvFloat_0106c36c);
+    fnvFloat_011d71bc = fnvFloat_0106c390 / sqrt_004019b0(fnvFloat_0106c36c);
 }
 // @fnv 0x00f88cc0
 void InitializeRuntimeFloatCall556()
 {
     fnvFloat_011d7180 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106c36c) * fnvFloat_0106c36c)) * fnvFloat_0106c390;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106c36c) * fnvFloat_0106c36c)) * fnvFloat_0106c390;
 }
 // @fnv 0x00f88eb0
 void InitializeRuntimeFloatCall557()
 {
-    fnvFloat_011d73b4 = fnvFloat_0106c7e0 / FUN_004019b0(fnvFloat_0106c7bc);
+    fnvFloat_011d73b4 = fnvFloat_0106c7e0 / sqrt_004019b0(fnvFloat_0106c7bc);
 }
 // @fnv 0x00f88ee0
 void InitializeRuntimeFloatCall558()
 {
     fnvFloat_011d73a8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106c7bc) * fnvFloat_0106c7bc)) * fnvFloat_0106c7e0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106c7bc) * fnvFloat_0106c7bc)) * fnvFloat_0106c7e0;
 }
 // @fnv 0x00f89010
 void InitializeRuntimeFloatCall559()
 {
-    fnvFloat_011d7414 = fnvFloat_0106c920 / FUN_004019b0(fnvFloat_0106c8fc);
+    fnvFloat_011d7414 = fnvFloat_0106c920 / sqrt_004019b0(fnvFloat_0106c8fc);
 }
 // @fnv 0x00f89040
 void InitializeRuntimeFloatCall560()
 {
     fnvFloat_011d73fc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106c8fc) * fnvFloat_0106c8fc)) * fnvFloat_0106c920;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106c8fc) * fnvFloat_0106c8fc)) * fnvFloat_0106c920;
 }
 // @fnv 0x00f892f0
 void InitializeRuntimeFloatCall561()
 {
-    fnvFloat_011d7494 = fnvFloat_0106cb64 / FUN_004019b0(fnvFloat_0106cb60);
+    fnvFloat_011d7494 = fnvFloat_0106cb64 / sqrt_004019b0(fnvFloat_0106cb60);
 }
 // @fnv 0x00f89320
 void InitializeRuntimeFloatCall562()
 {
     fnvFloat_011d7474 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106cb60) * fnvFloat_0106cb60)) * fnvFloat_0106cb64;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106cb60) * fnvFloat_0106cb60)) * fnvFloat_0106cb64;
 }
 // @fnv 0x00f89620
 void InitializeRuntimeFloatCall563()
 {
-    fnvFloat_011d750c = fnvFloat_0106cd10 / FUN_004019b0(fnvFloat_0106ccec);
+    fnvFloat_011d750c = fnvFloat_0106cd10 / sqrt_004019b0(fnvFloat_0106ccec);
 }
 // @fnv 0x00f89650
 void InitializeRuntimeFloatCall564()
 {
     fnvFloat_011d7500 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106ccec) * fnvFloat_0106ccec)) * fnvFloat_0106cd10;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106ccec) * fnvFloat_0106ccec)) * fnvFloat_0106cd10;
 }
 // @fnv 0x00f89720
 void InitializeRuntimeFloatCall565()
 {
-    fnvFloat_011d755c = fnvFloat_0106cd2c / FUN_004019b0(fnvFloat_0106cd28);
+    fnvFloat_011d755c = fnvFloat_0106cd2c / sqrt_004019b0(fnvFloat_0106cd28);
 }
 // @fnv 0x00f89750
 void InitializeRuntimeFloatCall566()
 {
     fnvFloat_011d753c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106cd28) * fnvFloat_0106cd28)) * fnvFloat_0106cd2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106cd28) * fnvFloat_0106cd28)) * fnvFloat_0106cd2c;
 }
 // @fnv 0x00f89a40
 void InitializeRuntimeFloatCall567()
 {
-    fnvFloat_011d75bc = fnvFloat_0106cea0 / FUN_004019b0(fnvFloat_0106ce7c);
+    fnvFloat_011d75bc = fnvFloat_0106cea0 / sqrt_004019b0(fnvFloat_0106ce7c);
 }
 // @fnv 0x00f89a70
 void InitializeRuntimeFloatCall568()
 {
     fnvFloat_011d75b0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106ce7c) * fnvFloat_0106ce7c)) * fnvFloat_0106cea0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106ce7c) * fnvFloat_0106ce7c)) * fnvFloat_0106cea0;
 }
 // @fnv 0x00f89ba0
 void InitializeRuntimeFloatCall569()
 {
-    fnvFloat_011d75e8 = fnvFloat_0106cf50 / FUN_004019b0(fnvFloat_0106cf2c);
+    fnvFloat_011d75e8 = fnvFloat_0106cf50 / sqrt_004019b0(fnvFloat_0106cf2c);
 }
 // @fnv 0x00f89bd0
 void InitializeRuntimeFloatCall570()
 {
     fnvFloat_011d75dc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106cf2c) * fnvFloat_0106cf2c)) * fnvFloat_0106cf50;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106cf2c) * fnvFloat_0106cf2c)) * fnvFloat_0106cf50;
 }
 // @fnv 0x00f89ca0
 void InitializeRuntimeFloatCall571()
 {
-    fnvFloat_011d7614 = fnvFloat_0106cfb8 / FUN_004019b0(fnvFloat_0106cfb4);
+    fnvFloat_011d7614 = fnvFloat_0106cfb8 / sqrt_004019b0(fnvFloat_0106cfb4);
 }
 // @fnv 0x00f89cd0
 void InitializeRuntimeFloatCall572()
 {
     fnvFloat_011d7608 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106cfb4) * fnvFloat_0106cfb4)) * fnvFloat_0106cfb8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106cfb4) * fnvFloat_0106cfb4)) * fnvFloat_0106cfb8;
 }
 // @fnv 0x00f89e60
 void InitializeRuntimeFloatCall573()
 {
-    fnvFloat_011d7664 = fnvFloat_0106d024 / FUN_004019b0(fnvFloat_0106d020);
+    fnvFloat_011d7664 = fnvFloat_0106d024 / sqrt_004019b0(fnvFloat_0106d020);
 }
 // @fnv 0x00f89e90
 void InitializeRuntimeFloatCall574()
 {
     fnvFloat_011d7644 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d020) * fnvFloat_0106d020)) * fnvFloat_0106d024;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d020) * fnvFloat_0106d020)) * fnvFloat_0106d024;
 }
 // @fnv 0x00f8a100
 void InitializeRuntimeFloatCall575()
 {
-    fnvFloat_011d76cc = fnvFloat_0106d268 / FUN_004019b0(fnvFloat_0106d264);
+    fnvFloat_011d76cc = fnvFloat_0106d268 / sqrt_004019b0(fnvFloat_0106d264);
 }
 // @fnv 0x00f8a130
 void InitializeRuntimeFloatCall576()
 {
     fnvFloat_011d76c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d264) * fnvFloat_0106d264)) * fnvFloat_0106d268;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d264) * fnvFloat_0106d264)) * fnvFloat_0106d268;
 }
 // @fnv 0x00f8a260
 void InitializeRuntimeFloatCall577()
 {
-    fnvFloat_011d76ec = fnvFloat_0106d2cc / FUN_004019b0(fnvFloat_0106d2c8);
+    fnvFloat_011d76ec = fnvFloat_0106d2cc / sqrt_004019b0(fnvFloat_0106d2c8);
 }
 // @fnv 0x00f8a290
 void InitializeRuntimeFloatCall578()
 {
     fnvFloat_011d76e8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d2c8) * fnvFloat_0106d2c8)) * fnvFloat_0106d2cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d2c8) * fnvFloat_0106d2c8)) * fnvFloat_0106d2cc;
 }
 // @fnv 0x00f8a3e0
 void InitializeRuntimeFloatCall579()
 {
-    fnvFloat_011d7714 = fnvFloat_0106d380 / FUN_004019b0(fnvFloat_0106d35c);
+    fnvFloat_011d7714 = fnvFloat_0106d380 / sqrt_004019b0(fnvFloat_0106d35c);
 }
 // @fnv 0x00f8a410
 void InitializeRuntimeFloatCall580()
 {
     fnvFloat_011d7708 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d35c) * fnvFloat_0106d35c)) * fnvFloat_0106d380;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d35c) * fnvFloat_0106d35c)) * fnvFloat_0106d380;
 }
 // @fnv 0x00f8a520
 void InitializeRuntimeFloatCall581()
 {
-    fnvFloat_011d7748 = fnvFloat_0106d3e8 / FUN_004019b0(fnvFloat_0106d3e4);
+    fnvFloat_011d7748 = fnvFloat_0106d3e8 / sqrt_004019b0(fnvFloat_0106d3e4);
 }
 // @fnv 0x00f8a550
 void InitializeRuntimeFloatCall582()
 {
     fnvFloat_011d773c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d3e4) * fnvFloat_0106d3e4)) * fnvFloat_0106d3e8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d3e4) * fnvFloat_0106d3e4)) * fnvFloat_0106d3e8;
 }
 // @fnv 0x00f8a620
 void InitializeRuntimeFloatCall583()
 {
-    fnvFloat_011d776c = fnvFloat_0106d448 / FUN_004019b0(fnvFloat_0106d444);
+    fnvFloat_011d776c = fnvFloat_0106d448 / sqrt_004019b0(fnvFloat_0106d444);
 }
 // @fnv 0x00f8a650
 void InitializeRuntimeFloatCall584()
 {
     fnvFloat_011d775c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d444) * fnvFloat_0106d444)) * fnvFloat_0106d448;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d444) * fnvFloat_0106d444)) * fnvFloat_0106d448;
 }
 // @fnv 0x00f8a7a0
 void InitializeRuntimeFloatCall585()
 {
-    fnvFloat_011d7798 = fnvFloat_0106d488 / FUN_004019b0(fnvFloat_0106d484);
+    fnvFloat_011d7798 = fnvFloat_0106d488 / sqrt_004019b0(fnvFloat_0106d484);
 }
 // @fnv 0x00f8a7d0
 void InitializeRuntimeFloatCall586()
 {
     fnvFloat_011d778c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d484) * fnvFloat_0106d484)) * fnvFloat_0106d488;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d484) * fnvFloat_0106d484)) * fnvFloat_0106d488;
 }
 // @fnv 0x00f8a900
 void InitializeRuntimeFloatCall587()
 {
-    fnvFloat_011d77b8 = fnvFloat_0106d500 / FUN_004019b0(fnvFloat_0106d4fc);
+    fnvFloat_011d77b8 = fnvFloat_0106d500 / sqrt_004019b0(fnvFloat_0106d4fc);
 }
 // @fnv 0x00f8a930
 void InitializeRuntimeFloatCall588()
 {
     fnvFloat_011d77b4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d4fc) * fnvFloat_0106d4fc)) * fnvFloat_0106d500;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d4fc) * fnvFloat_0106d4fc)) * fnvFloat_0106d500;
 }
 // @fnv 0x00f8a9a0
 void InitializeRuntimeFloatCall589()
 {
-    fnvFloat_011d8410 = fnvFloat_0106d51c / FUN_004019b0(fnvFloat_0106d518);
+    fnvFloat_011d8410 = fnvFloat_0106d51c / sqrt_004019b0(fnvFloat_0106d518);
 }
 // @fnv 0x00f8a9d0
 void InitializeRuntimeFloatCall590()
 {
     fnvFloat_011d77e4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d518) * fnvFloat_0106d518)) * fnvFloat_0106d51c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d518) * fnvFloat_0106d518)) * fnvFloat_0106d51c;
 }
 // @fnv 0x00f8ad10
 void InitializeRuntimeFloatCall591()
 {
-    fnvFloat_011d847c = fnvFloat_0106d7e0 / FUN_004019b0(fnvFloat_0106d7bc);
+    fnvFloat_011d847c = fnvFloat_0106d7e0 / sqrt_004019b0(fnvFloat_0106d7bc);
 }
 // @fnv 0x00f8ad40
 void InitializeRuntimeFloatCall592()
 {
     fnvFloat_011d8464 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d7bc) * fnvFloat_0106d7bc)) * fnvFloat_0106d7e0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d7bc) * fnvFloat_0106d7bc)) * fnvFloat_0106d7e0;
 }
 // @fnv 0x00f8aea0
 void InitializeRuntimeFloatCall593()
 {
-    fnvFloat_011d84a8 = fnvFloat_0106d8f0 / FUN_004019b0(fnvFloat_0106d8cc);
+    fnvFloat_011d84a8 = fnvFloat_0106d8f0 / sqrt_004019b0(fnvFloat_0106d8cc);
 }
 // @fnv 0x00f8aed0
 void InitializeRuntimeFloatCall594()
 {
     fnvFloat_011d849c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d8cc) * fnvFloat_0106d8cc)) * fnvFloat_0106d8f0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d8cc) * fnvFloat_0106d8cc)) * fnvFloat_0106d8f0;
 }
 // @fnv 0x00f8afa0
 void InitializeRuntimeFloatCall595()
 {
-    fnvFloat_011d84d4 = fnvFloat_0106d948 / FUN_004019b0(fnvFloat_0106d944);
+    fnvFloat_011d84d4 = fnvFloat_0106d948 / sqrt_004019b0(fnvFloat_0106d944);
 }
 // @fnv 0x00f8afd0
 void InitializeRuntimeFloatCall596()
 {
     fnvFloat_011d84c8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d944) * fnvFloat_0106d944)) * fnvFloat_0106d948;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d944) * fnvFloat_0106d944)) * fnvFloat_0106d948;
 }
 // @fnv 0x00f8b100
 void InitializeRuntimeFloatCall597()
 {
-    fnvFloat_011d84f4 = fnvFloat_0106d9d0 / FUN_004019b0(fnvFloat_0106d9ac);
+    fnvFloat_011d84f4 = fnvFloat_0106d9d0 / sqrt_004019b0(fnvFloat_0106d9ac);
 }
 // @fnv 0x00f8b130
 void InitializeRuntimeFloatCall598()
 {
     fnvFloat_011d84e8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d9ac) * fnvFloat_0106d9ac)) * fnvFloat_0106d9d0;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d9ac) * fnvFloat_0106d9ac)) * fnvFloat_0106d9d0;
 }
 // @fnv 0x00f8b200
 void InitializeRuntimeFloatCall599()
 {
-    fnvFloat_011d8554 = fnvFloat_0106d9ec / FUN_004019b0(fnvFloat_0106d9e8);
+    fnvFloat_011d8554 = fnvFloat_0106d9ec / sqrt_004019b0(fnvFloat_0106d9e8);
 }
 // @fnv 0x00f8b230
 void InitializeRuntimeFloatCall600()
 {
     fnvFloat_011d8534 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106d9e8) * fnvFloat_0106d9e8)) * fnvFloat_0106d9ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106d9e8) * fnvFloat_0106d9e8)) * fnvFloat_0106d9ec;
 }
 // @fnv 0x00f8b480
 void InitializeRuntimeFloatCall601()
 {
-    fnvFloat_011d85c8 = fnvFloat_0106dd08 / FUN_004019b0(fnvFloat_0106dd04);
+    fnvFloat_011d85c8 = fnvFloat_0106dd08 / sqrt_004019b0(fnvFloat_0106dd04);
 }
 // @fnv 0x00f8b4b0
 void InitializeRuntimeFloatCall602()
 {
     fnvFloat_011d85b4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106dd04) * fnvFloat_0106dd04)) * fnvFloat_0106dd08;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106dd04) * fnvFloat_0106dd04)) * fnvFloat_0106dd08;
 }
 // @fnv 0x00f8b630
 void InitializeRuntimeFloatCall603()
 {
-    fnvFloat_011d862c = fnvFloat_0106e03c / FUN_004019b0(fnvFloat_0106e038);
+    fnvFloat_011d862c = fnvFloat_0106e03c / sqrt_004019b0(fnvFloat_0106e038);
 }
 // @fnv 0x00f8b660
 void InitializeRuntimeFloatCall604()
 {
     fnvFloat_011d8604 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106e038) * fnvFloat_0106e038)) * fnvFloat_0106e03c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106e038) * fnvFloat_0106e038)) * fnvFloat_0106e03c;
 }
 // @fnv 0x00f8b8b0
 void InitializeRuntimeFloatCall605()
 {
-    fnvFloat_011d8694 = fnvFloat_0106e2e8 / FUN_004019b0(fnvFloat_0106e2e4);
+    fnvFloat_011d8694 = fnvFloat_0106e2e8 / sqrt_004019b0(fnvFloat_0106e2e4);
 }
 // @fnv 0x00f8b8e0
 void InitializeRuntimeFloatCall606()
 {
     fnvFloat_011d8678 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106e2e4) * fnvFloat_0106e2e4)) * fnvFloat_0106e2e8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106e2e4) * fnvFloat_0106e2e4)) * fnvFloat_0106e2e8;
 }
 // @fnv 0x00f8baa0
 void InitializeRuntimeFloatCall607()
 {
-    fnvFloat_011d874c = fnvFloat_0106e418 / FUN_004019b0(fnvFloat_0106e414);
+    fnvFloat_011d874c = fnvFloat_0106e418 / sqrt_004019b0(fnvFloat_0106e414);
 }
 // @fnv 0x00f8bad0
 void InitializeRuntimeFloatCall608()
 {
     fnvFloat_011d8704 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106e414) * fnvFloat_0106e414)) * fnvFloat_0106e418;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106e414) * fnvFloat_0106e414)) * fnvFloat_0106e418;
 }
 // @fnv 0x00f8bf20
 void InitializeRuntimeFloatCall609()
 {
-    fnvFloat_011d87c8 = fnvFloat_0106e7e8 / FUN_004019b0(fnvFloat_0106e7e4);
+    fnvFloat_011d87c8 = fnvFloat_0106e7e8 / sqrt_004019b0(fnvFloat_0106e7e4);
 }
 // @fnv 0x00f8bf50
 void InitializeRuntimeFloatCall610()
 {
     fnvFloat_011d87c4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106e7e4) * fnvFloat_0106e7e4)) * fnvFloat_0106e7e8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106e7e4) * fnvFloat_0106e7e4)) * fnvFloat_0106e7e8;
 }
 // @fnv 0x00f8bfc0
 void InitializeRuntimeFloatCall611()
 {
-    fnvFloat_011d87e8 = fnvFloat_0106e7f4 / FUN_004019b0(fnvFloat_0106e7f0);
+    fnvFloat_011d87e8 = fnvFloat_0106e7f4 / sqrt_004019b0(fnvFloat_0106e7f0);
 }
 // @fnv 0x00f8bff0
 void InitializeRuntimeFloatCall612()
 {
     fnvFloat_011d87d8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106e7f0) * fnvFloat_0106e7f0)) * fnvFloat_0106e7f4;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106e7f0) * fnvFloat_0106e7f0)) * fnvFloat_0106e7f4;
 }
 // @fnv 0x00f8c0c0
 void InitializeRuntimeFloatCall613()
 {
-    fnvFloat_011d881c = fnvFloat_0106e938 / FUN_004019b0(fnvFloat_0106e934);
+    fnvFloat_011d881c = fnvFloat_0106e938 / sqrt_004019b0(fnvFloat_0106e934);
 }
 // @fnv 0x00f8c0f0
 void InitializeRuntimeFloatCall614()
 {
     fnvFloat_011d8810 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106e934) * fnvFloat_0106e934)) * fnvFloat_0106e938;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106e934) * fnvFloat_0106e934)) * fnvFloat_0106e938;
 }
 // @fnv 0x00f8c2c0
 void InitializeRuntimeFloatCall615()
 {
-    fnvFloat_011d88b4 = fnvFloat_0106ea4c / FUN_004019b0(fnvFloat_0106ea48);
+    fnvFloat_011d88b4 = fnvFloat_0106ea4c / sqrt_004019b0(fnvFloat_0106ea48);
 }
 // @fnv 0x00f8c2f0
 void InitializeRuntimeFloatCall616()
 {
     fnvFloat_011d8894 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106ea48) * fnvFloat_0106ea48)) * fnvFloat_0106ea4c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106ea48) * fnvFloat_0106ea48)) * fnvFloat_0106ea4c;
 }
 // @fnv 0x00f8c520
 void InitializeRuntimeFloatCall617()
 {
-    fnvFloat_011d89b8 = fnvFloat_0106eb4c / FUN_004019b0(fnvFloat_0106eb48);
+    fnvFloat_011d89b8 = fnvFloat_0106eb4c / sqrt_004019b0(fnvFloat_0106eb48);
 }
 // @fnv 0x00f8c550
 void InitializeRuntimeFloatCall618()
 {
     fnvFloat_011d8944 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106eb48) * fnvFloat_0106eb48)) * fnvFloat_0106eb4c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106eb48) * fnvFloat_0106eb48)) * fnvFloat_0106eb4c;
 }
 // @fnv 0x00f8c960
 void InitializeRuntimeFloatCall619()
 {
-    fnvFloat_011d8bac = fnvFloat_0106ef0c / FUN_004019b0(fnvFloat_0106ef08);
+    fnvFloat_011d8bac = fnvFloat_0106ef0c / sqrt_004019b0(fnvFloat_0106ef08);
 }
 // @fnv 0x00f8c990
 void InitializeRuntimeFloatCall620()
 {
     fnvFloat_011d8af0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106ef08) * fnvFloat_0106ef08)) * fnvFloat_0106ef0c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106ef08) * fnvFloat_0106ef08)) * fnvFloat_0106ef0c;
 }
 // @fnv 0x00f8d0f0
 void InitializeRuntimeFloatCall621()
 {
-    fnvFloat_011d8ca0 = fnvFloat_0106f808 / FUN_004019b0(fnvFloat_0106f804);
+    fnvFloat_011d8ca0 = fnvFloat_0106f808 / sqrt_004019b0(fnvFloat_0106f804);
 }
 // @fnv 0x00f8d120
 void InitializeRuntimeFloatCall622()
 {
     fnvFloat_011d8c94 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106f804) * fnvFloat_0106f804)) * fnvFloat_0106f808;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106f804) * fnvFloat_0106f804)) * fnvFloat_0106f808;
 }
 // @fnv 0x00f8d1f0
 void InitializeRuntimeFloatCall623()
 {
-    fnvFloat_011d8cc0 = fnvFloat_0106f838 / FUN_004019b0(fnvFloat_0106f834);
+    fnvFloat_011d8cc0 = fnvFloat_0106f838 / sqrt_004019b0(fnvFloat_0106f834);
 }
 // @fnv 0x00f8d220
 void InitializeRuntimeFloatCall624()
 {
     fnvFloat_011d8cb4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106f834) * fnvFloat_0106f834)) * fnvFloat_0106f838;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106f834) * fnvFloat_0106f834)) * fnvFloat_0106f838;
 }
 // @fnv 0x00f8d2f0
 void InitializeRuntimeFloatCall625()
 {
-    fnvFloat_011d8d2c = fnvFloat_0106f928 / FUN_004019b0(fnvFloat_0106f924);
+    fnvFloat_011d8d2c = fnvFloat_0106f928 / sqrt_004019b0(fnvFloat_0106f924);
 }
 // @fnv 0x00f8d320
 void InitializeRuntimeFloatCall626()
 {
     fnvFloat_011d8d14 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106f924) * fnvFloat_0106f924)) * fnvFloat_0106f928;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106f924) * fnvFloat_0106f924)) * fnvFloat_0106f928;
 }
 // @fnv 0x00f8d510
 void InitializeRuntimeFloatCall627()
 {
-    fnvFloat_011d8d8c = fnvFloat_0106ff3c / FUN_004019b0(fnvFloat_0106ff38);
+    fnvFloat_011d8d8c = fnvFloat_0106ff3c / sqrt_004019b0(fnvFloat_0106ff38);
 }
 // @fnv 0x00f8d540
 void InitializeRuntimeFloatCall628()
 {
     fnvFloat_011d8d6c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0106ff38) * fnvFloat_0106ff38)) * fnvFloat_0106ff3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0106ff38) * fnvFloat_0106ff38)) * fnvFloat_0106ff3c;
 }
 // @fnv 0x00f8d7b0
 void InitializeRuntimeFloatCall629()
 {
-    fnvFloat_011d8e84 = fnvFloat_0107043c / FUN_004019b0(fnvFloat_01070438);
+    fnvFloat_011d8e84 = fnvFloat_0107043c / sqrt_004019b0(fnvFloat_01070438);
 }
 // @fnv 0x00f8d7e0
 void InitializeRuntimeFloatCall630()
 {
     fnvFloat_011d8e80 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01070438) * fnvFloat_01070438)) * fnvFloat_0107043c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01070438) * fnvFloat_01070438)) * fnvFloat_0107043c;
 }
 // @fnv 0x00f8d850
 void InitializeRuntimeFloatCall631()
 {
-    fnvFloat_011d8ef4 = fnvFloat_0107044c / FUN_004019b0(fnvFloat_01070448);
+    fnvFloat_011d8ef4 = fnvFloat_0107044c / sqrt_004019b0(fnvFloat_01070448);
 }
 // @fnv 0x00f8d880
 void InitializeRuntimeFloatCall632()
 {
     fnvFloat_011d8ed4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01070448) * fnvFloat_01070448)) * fnvFloat_0107044c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01070448) * fnvFloat_01070448)) * fnvFloat_0107044c;
 }
 // @fnv 0x00f8dad0
 void InitializeRuntimeFloatCall633()
 {
-    fnvFloat_011d8ff8 = fnvFloat_0107067c / FUN_004019b0(fnvFloat_01070678);
+    fnvFloat_011d8ff8 = fnvFloat_0107067c / sqrt_004019b0(fnvFloat_01070678);
 }
 // @fnv 0x00f8db00
 void InitializeRuntimeFloatCall634()
 {
     fnvFloat_011d8fd8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01070678) * fnvFloat_01070678)) * fnvFloat_0107067c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01070678) * fnvFloat_01070678)) * fnvFloat_0107067c;
 }
 // @fnv 0x00f8dd30
 void InitializeRuntimeFloatCall635()
 {
-    fnvFloat_011d9090 = fnvFloat_010708cc / FUN_004019b0(fnvFloat_010708c8);
+    fnvFloat_011d9090 = fnvFloat_010708cc / sqrt_004019b0(fnvFloat_010708c8);
 }
 // @fnv 0x00f8dd60
 void InitializeRuntimeFloatCall636()
 {
     fnvFloat_011d9070 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010708c8) * fnvFloat_010708c8)) * fnvFloat_010708cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010708c8) * fnvFloat_010708c8)) * fnvFloat_010708cc;
 }
 // @fnv 0x00f8dfd0
 void InitializeRuntimeFloatCall637()
 {
-    fnvFloat_011d912c = fnvFloat_01070e9c / FUN_004019b0(fnvFloat_01070e98);
+    fnvFloat_011d912c = fnvFloat_01070e9c / sqrt_004019b0(fnvFloat_01070e98);
 }
 // @fnv 0x00f8e000
 void InitializeRuntimeFloatCall638()
 {
     fnvFloat_011d910c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01070e98) * fnvFloat_01070e98)) * fnvFloat_01070e9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01070e98) * fnvFloat_01070e98)) * fnvFloat_01070e9c;
 }
 // @fnv 0x00f8e230
 void InitializeRuntimeFloatCall639()
 {
-    fnvFloat_011d91c0 = fnvFloat_01070fdc / FUN_004019b0(fnvFloat_01070fd8);
+    fnvFloat_011d91c0 = fnvFloat_01070fdc / sqrt_004019b0(fnvFloat_01070fd8);
 }
 // @fnv 0x00f8e260
 void InitializeRuntimeFloatCall640()
 {
     fnvFloat_011d919c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01070fd8) * fnvFloat_01070fd8)) * fnvFloat_01070fdc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01070fd8) * fnvFloat_01070fd8)) * fnvFloat_01070fdc;
 }
 // @fnv 0x00f8e4d0
 void InitializeRuntimeFloatCall641()
 {
-    fnvFloat_011d9260 = fnvFloat_01071b3c / FUN_004019b0(fnvFloat_01071b38);
+    fnvFloat_011d9260 = fnvFloat_01071b3c / sqrt_004019b0(fnvFloat_01071b38);
 }
 // @fnv 0x00f8e500
 void InitializeRuntimeFloatCall642()
 {
     fnvFloat_011d9240 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01071b38) * fnvFloat_01071b38)) * fnvFloat_01071b3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01071b38) * fnvFloat_01071b38)) * fnvFloat_01071b3c;
 }
 // @fnv 0x00f8e730
 void InitializeRuntimeFloatCall643()
 {
-    fnvFloat_011d92f0 = fnvFloat_01071cdc / FUN_004019b0(fnvFloat_01071cd8);
+    fnvFloat_011d92f0 = fnvFloat_01071cdc / sqrt_004019b0(fnvFloat_01071cd8);
 }
 // @fnv 0x00f8e760
 void InitializeRuntimeFloatCall644()
 {
     fnvFloat_011d92d0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01071cd8) * fnvFloat_01071cd8)) * fnvFloat_01071cdc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01071cd8) * fnvFloat_01071cd8)) * fnvFloat_01071cdc;
 }
 // @fnv 0x00f8e990
 void InitializeRuntimeFloatCall645()
 {
-    fnvFloat_011d9380 = fnvFloat_01071f9c / FUN_004019b0(fnvFloat_01071f98);
+    fnvFloat_011d9380 = fnvFloat_01071f9c / sqrt_004019b0(fnvFloat_01071f98);
 }
 // @fnv 0x00f8e9c0
 void InitializeRuntimeFloatCall646()
 {
     fnvFloat_011d9360 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01071f98) * fnvFloat_01071f98)) * fnvFloat_01071f9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01071f98) * fnvFloat_01071f98)) * fnvFloat_01071f9c;
 }
 // @fnv 0x00f8ec20
 void InitializeRuntimeFloatCall647()
 {
-    fnvFloat_011d9434 = fnvFloat_0107217c / FUN_004019b0(fnvFloat_01072178);
+    fnvFloat_011d9434 = fnvFloat_0107217c / sqrt_004019b0(fnvFloat_01072178);
 }
 // @fnv 0x00f8ec50
 void InitializeRuntimeFloatCall648()
 {
     fnvFloat_011d9414 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01072178) * fnvFloat_01072178)) * fnvFloat_0107217c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01072178) * fnvFloat_01072178)) * fnvFloat_0107217c;
 }
 // @fnv 0x00f8ee80
 void InitializeRuntimeFloatCall649()
 {
-    fnvFloat_011d94b4 = fnvFloat_0107232c / FUN_004019b0(fnvFloat_01072328);
+    fnvFloat_011d94b4 = fnvFloat_0107232c / sqrt_004019b0(fnvFloat_01072328);
 }
 // @fnv 0x00f8eeb0
 void InitializeRuntimeFloatCall650()
 {
     fnvFloat_011d9494 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01072328) * fnvFloat_01072328)) * fnvFloat_0107232c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01072328) * fnvFloat_01072328)) * fnvFloat_0107232c;
 }
 // @fnv 0x00f8f110
 void InitializeRuntimeFloatCall651()
 {
-    fnvFloat_011d9554 = fnvFloat_0107254c / FUN_004019b0(fnvFloat_01072548);
+    fnvFloat_011d9554 = fnvFloat_0107254c / sqrt_004019b0(fnvFloat_01072548);
 }
 // @fnv 0x00f8f140
 void InitializeRuntimeFloatCall652()
 {
     fnvFloat_011d9534 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01072548) * fnvFloat_01072548)) * fnvFloat_0107254c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01072548) * fnvFloat_01072548)) * fnvFloat_0107254c;
 }
 // @fnv 0x00f8f370
 void InitializeRuntimeFloatCall653()
 {
-    fnvFloat_011d9614 = fnvFloat_0107289c / FUN_004019b0(fnvFloat_01072898);
+    fnvFloat_011d9614 = fnvFloat_0107289c / sqrt_004019b0(fnvFloat_01072898);
 }
 // @fnv 0x00f8f3a0
 void InitializeRuntimeFloatCall654()
 {
     fnvFloat_011d95e4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01072898) * fnvFloat_01072898)) * fnvFloat_0107289c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01072898) * fnvFloat_01072898)) * fnvFloat_0107289c;
 }
 // @fnv 0x00f8f710
 void InitializeRuntimeFloatCall655()
 {
-    fnvFloat_011d9758 = fnvFloat_01072c5c / FUN_004019b0(fnvFloat_01072c58);
+    fnvFloat_011d9758 = fnvFloat_01072c5c / sqrt_004019b0(fnvFloat_01072c58);
 }
 // @fnv 0x00f8f740
 void InitializeRuntimeFloatCall656()
 {
     fnvFloat_011d9714 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01072c58) * fnvFloat_01072c58)) * fnvFloat_01072c5c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01072c58) * fnvFloat_01072c58)) * fnvFloat_01072c5c;
 }
 // @fnv 0x00f8fae0
 void InitializeRuntimeFloatCall657()
 {
-    fnvFloat_011d9ef4 = fnvFloat_0107394c / FUN_004019b0(fnvFloat_01073948);
+    fnvFloat_011d9ef4 = fnvFloat_0107394c / sqrt_004019b0(fnvFloat_01073948);
 }
 // @fnv 0x00f8fb10
 void InitializeRuntimeFloatCall658()
 {
     fnvFloat_011d9ed4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01073948) * fnvFloat_01073948)) * fnvFloat_0107394c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01073948) * fnvFloat_01073948)) * fnvFloat_0107394c;
 }
 // @fnv 0x00f8fd40
 void InitializeRuntimeFloatCall659()
 {
-    fnvFloat_011d9f90 = fnvFloat_01073b3c / FUN_004019b0(fnvFloat_01073b38);
+    fnvFloat_011d9f90 = fnvFloat_01073b3c / sqrt_004019b0(fnvFloat_01073b38);
 }
 // @fnv 0x00f8fd70
 void InitializeRuntimeFloatCall660()
 {
     fnvFloat_011d9f70 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01073b38) * fnvFloat_01073b38)) * fnvFloat_01073b3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01073b38) * fnvFloat_01073b38)) * fnvFloat_01073b3c;
 }
 // @fnv 0x00f8ffa0
 void InitializeRuntimeFloatCall661()
 {
-    fnvFloat_011da040 = fnvFloat_01073c8c / FUN_004019b0(fnvFloat_01073c88);
+    fnvFloat_011da040 = fnvFloat_01073c8c / sqrt_004019b0(fnvFloat_01073c88);
 }
 // @fnv 0x00f8ffd0
 void InitializeRuntimeFloatCall662()
 {
     fnvFloat_011da014 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01073c88) * fnvFloat_01073c88)) * fnvFloat_01073c8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01073c88) * fnvFloat_01073c88)) * fnvFloat_01073c8c;
 }
 // @fnv 0x00f90250
 void InitializeRuntimeFloatCall663()
 {
-    fnvFloat_011da130 = fnvFloat_01073e8c / FUN_004019b0(fnvFloat_01073e88);
+    fnvFloat_011da130 = fnvFloat_01073e8c / sqrt_004019b0(fnvFloat_01073e88);
 }
 // @fnv 0x00f90280
 void InitializeRuntimeFloatCall664()
 {
     fnvFloat_011da0e0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01073e88) * fnvFloat_01073e88)) * fnvFloat_01073e8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01073e88) * fnvFloat_01073e88)) * fnvFloat_01073e8c;
 }
 // @fnv 0x00f90730
 void InitializeRuntimeFloatCall665()
 {
-    fnvFloat_011da248 = fnvFloat_0107436c / FUN_004019b0(fnvFloat_01074368);
+    fnvFloat_011da248 = fnvFloat_0107436c / sqrt_004019b0(fnvFloat_01074368);
 }
 // @fnv 0x00f90760
 void InitializeRuntimeFloatCall666()
 {
     fnvFloat_011da228 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01074368) * fnvFloat_01074368)) * fnvFloat_0107436c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01074368) * fnvFloat_01074368)) * fnvFloat_0107436c;
 }
 // @fnv 0x00f90a30
 void InitializeRuntimeFloatCall667()
 {
-    fnvFloat_011da304 = fnvFloat_0107466c / FUN_004019b0(fnvFloat_01074668);
+    fnvFloat_011da304 = fnvFloat_0107466c / sqrt_004019b0(fnvFloat_01074668);
 }
 // @fnv 0x00f90a60
 void InitializeRuntimeFloatCall668()
 {
     fnvFloat_011da2e0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01074668) * fnvFloat_01074668)) * fnvFloat_0107466c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01074668) * fnvFloat_01074668)) * fnvFloat_0107466c;
 }
 // @fnv 0x00f90cb0
 void InitializeRuntimeFloatCall669()
 {
-    fnvFloat_011da3a8 = fnvFloat_01074cfc / FUN_004019b0(fnvFloat_01074cf8);
+    fnvFloat_011da3a8 = fnvFloat_01074cfc / sqrt_004019b0(fnvFloat_01074cf8);
 }
 // @fnv 0x00f90ce0
 void InitializeRuntimeFloatCall670()
 {
     fnvFloat_011da388 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01074cf8) * fnvFloat_01074cf8)) * fnvFloat_01074cfc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01074cf8) * fnvFloat_01074cf8)) * fnvFloat_01074cfc;
 }
 // @fnv 0x00f90fa0
 void InitializeRuntimeFloatCall671()
 {
-    fnvFloat_011da54c = fnvFloat_0107563c / FUN_004019b0(fnvFloat_01075638);
+    fnvFloat_011da54c = fnvFloat_0107563c / sqrt_004019b0(fnvFloat_01075638);
 }
 // @fnv 0x00f90fd0
 void InitializeRuntimeFloatCall672()
 {
     fnvFloat_011da50c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01075638) * fnvFloat_01075638)) * fnvFloat_0107563c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01075638) * fnvFloat_01075638)) * fnvFloat_0107563c;
 }
 // @fnv 0x00f91240
 void InitializeRuntimeFloatCall673()
 {
-    fnvFloat_011da5d0 = fnvFloat_010757cc / FUN_004019b0(fnvFloat_010757c8);
+    fnvFloat_011da5d0 = fnvFloat_010757cc / sqrt_004019b0(fnvFloat_010757c8);
 }
 // @fnv 0x00f91270
 void InitializeRuntimeFloatCall674()
 {
     fnvFloat_011da5b0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010757c8) * fnvFloat_010757c8)) * fnvFloat_010757cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010757c8) * fnvFloat_010757c8)) * fnvFloat_010757cc;
 }
 // @fnv 0x00f914a0
 void InitializeRuntimeFloatCall675()
 {
-    fnvFloat_011da624 = fnvFloat_0107584c / FUN_004019b0(fnvFloat_01075848);
+    fnvFloat_011da624 = fnvFloat_0107584c / sqrt_004019b0(fnvFloat_01075848);
 }
 // @fnv 0x00f914d0
 void InitializeRuntimeFloatCall676()
 {
     fnvFloat_011da620 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01075848) * fnvFloat_01075848)) * fnvFloat_0107584c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01075848) * fnvFloat_01075848)) * fnvFloat_0107584c;
 }
 // @fnv 0x00f91540
 void InitializeRuntimeFloatCall677()
 {
-    fnvFloat_011da6d8 = fnvFloat_010758fc / FUN_004019b0(fnvFloat_010758f8);
+    fnvFloat_011da6d8 = fnvFloat_010758fc / sqrt_004019b0(fnvFloat_010758f8);
 }
 // @fnv 0x00f91570
 void InitializeRuntimeFloatCall678()
 {
     fnvFloat_011da6a0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010758f8) * fnvFloat_010758f8)) * fnvFloat_010758fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010758f8) * fnvFloat_010758f8)) * fnvFloat_010758fc;
 }
 // @fnv 0x00f91890
 void InitializeRuntimeFloatCall679()
 {
-    fnvFloat_011da798 = fnvFloat_01075c1c / FUN_004019b0(fnvFloat_01075c18);
+    fnvFloat_011da798 = fnvFloat_01075c1c / sqrt_004019b0(fnvFloat_01075c18);
 }
 // @fnv 0x00f918c0
 void InitializeRuntimeFloatCall680()
 {
     fnvFloat_011da778 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01075c18) * fnvFloat_01075c18)) * fnvFloat_01075c1c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01075c18) * fnvFloat_01075c18)) * fnvFloat_01075c1c;
 }
 // @fnv 0x00f91af0
 void InitializeRuntimeFloatCall681()
 {
-    fnvFloat_011da82c = fnvFloat_01075d6c / FUN_004019b0(fnvFloat_01075d68);
+    fnvFloat_011da82c = fnvFloat_01075d6c / sqrt_004019b0(fnvFloat_01075d68);
 }
 // @fnv 0x00f91b20
 void InitializeRuntimeFloatCall682()
 {
     fnvFloat_011da80c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01075d68) * fnvFloat_01075d68)) * fnvFloat_01075d6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01075d68) * fnvFloat_01075d68)) * fnvFloat_01075d6c;
 }
 // @fnv 0x00f91d50
 void InitializeRuntimeFloatCall683()
 {
-    fnvFloat_011da8bc = fnvFloat_01075f4c / FUN_004019b0(fnvFloat_01075f48);
+    fnvFloat_011da8bc = fnvFloat_01075f4c / sqrt_004019b0(fnvFloat_01075f48);
 }
 // @fnv 0x00f91d80
 void InitializeRuntimeFloatCall684()
 {
     fnvFloat_011da898 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01075f48) * fnvFloat_01075f48)) * fnvFloat_01075f4c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01075f48) * fnvFloat_01075f48)) * fnvFloat_01075f4c;
 }
 // @fnv 0x00f91ff0
 void InitializeRuntimeFloatCall685()
 {
-    fnvFloat_011da958 = fnvFloat_0107637c / FUN_004019b0(fnvFloat_01076378);
+    fnvFloat_011da958 = fnvFloat_0107637c / sqrt_004019b0(fnvFloat_01076378);
 }
 // @fnv 0x00f92020
 void InitializeRuntimeFloatCall686()
 {
     fnvFloat_011da938 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01076378) * fnvFloat_01076378)) * fnvFloat_0107637c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01076378) * fnvFloat_01076378)) * fnvFloat_0107637c;
 }
 // @fnv 0x00f92250
 void InitializeRuntimeFloatCall687()
 {
-    fnvFloat_011da9e8 = fnvFloat_010764ac / FUN_004019b0(fnvFloat_010764a8);
+    fnvFloat_011da9e8 = fnvFloat_010764ac / sqrt_004019b0(fnvFloat_010764a8);
 }
 // @fnv 0x00f92280
 void InitializeRuntimeFloatCall688()
 {
     fnvFloat_011da9c4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010764a8) * fnvFloat_010764a8)) * fnvFloat_010764ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010764a8) * fnvFloat_010764a8)) * fnvFloat_010764ac;
 }
 // @fnv 0x00f924f0
 void InitializeRuntimeFloatCall689()
 {
-    fnvFloat_011daa70 = fnvFloat_0107684c / FUN_004019b0(fnvFloat_01076848);
+    fnvFloat_011daa70 = fnvFloat_0107684c / sqrt_004019b0(fnvFloat_01076848);
 }
 // @fnv 0x00f92520
 void InitializeRuntimeFloatCall690()
 {
     fnvFloat_011daa50 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01076848) * fnvFloat_01076848)) * fnvFloat_0107684c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01076848) * fnvFloat_01076848)) * fnvFloat_0107684c;
 }
 // @fnv 0x00f92770
 void InitializeRuntimeFloatCall691()
 {
-    fnvFloat_011dabbc = fnvFloat_01076cec / FUN_004019b0(fnvFloat_01076ce8);
+    fnvFloat_011dabbc = fnvFloat_01076cec / sqrt_004019b0(fnvFloat_01076ce8);
 }
 // @fnv 0x00f927a0
 void InitializeRuntimeFloatCall692()
 {
     fnvFloat_011dab10 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01076ce8) * fnvFloat_01076ce8)) * fnvFloat_01076cec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01076ce8) * fnvFloat_01076ce8)) * fnvFloat_01076cec;
 }
 // @fnv 0x00f92e10
 void InitializeRuntimeFloatCall693()
 {
-    fnvFloat_011dad1c = fnvFloat_0107721c / FUN_004019b0(fnvFloat_01077218);
+    fnvFloat_011dad1c = fnvFloat_0107721c / sqrt_004019b0(fnvFloat_01077218);
 }
 // @fnv 0x00f92e40
 void InitializeRuntimeFloatCall694()
 {
     fnvFloat_011dacfc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077218) * fnvFloat_01077218)) * fnvFloat_0107721c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077218) * fnvFloat_01077218)) * fnvFloat_0107721c;
 }
 // @fnv 0x00f93070
 void InitializeRuntimeFloatCall695()
 {
-    fnvFloat_011dae14 = fnvFloat_0107762c / FUN_004019b0(fnvFloat_01077628);
+    fnvFloat_011dae14 = fnvFloat_0107762c / sqrt_004019b0(fnvFloat_01077628);
 }
 // @fnv 0x00f930a0
 void InitializeRuntimeFloatCall696()
 {
     fnvFloat_011dadcc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077628) * fnvFloat_01077628)) * fnvFloat_0107762c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077628) * fnvFloat_01077628)) * fnvFloat_0107762c;
 }
 // @fnv 0x00f934d0
 void InitializeRuntimeFloatCall697()
 {
-    fnvFloat_011daed0 = fnvFloat_0107790c / FUN_004019b0(fnvFloat_01077908);
+    fnvFloat_011daed0 = fnvFloat_0107790c / sqrt_004019b0(fnvFloat_01077908);
 }
 // @fnv 0x00f93500
 void InitializeRuntimeFloatCall698()
 {
     fnvFloat_011daecc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077908) * fnvFloat_01077908)) * fnvFloat_0107790c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077908) * fnvFloat_01077908)) * fnvFloat_0107790c;
 }
 // @fnv 0x00f93590
 void InitializeRuntimeFloatCall699()
 {
-    fnvFloat_011daf18 = fnvFloat_0107794c / FUN_004019b0(fnvFloat_01077948);
+    fnvFloat_011daf18 = fnvFloat_0107794c / sqrt_004019b0(fnvFloat_01077948);
 }
 // @fnv 0x00f935c0
 void InitializeRuntimeFloatCall700()
 {
     fnvFloat_011daef8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077948) * fnvFloat_01077948)) * fnvFloat_0107794c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077948) * fnvFloat_01077948)) * fnvFloat_0107794c;
 }
 // @fnv 0x00f937f0
 void InitializeRuntimeFloatCall701()
 {
-    fnvFloat_011dafb4 = fnvFloat_0107798c / FUN_004019b0(fnvFloat_01077988);
+    fnvFloat_011dafb4 = fnvFloat_0107798c / sqrt_004019b0(fnvFloat_01077988);
 }
 // @fnv 0x00f93820
 void InitializeRuntimeFloatCall702()
 {
     fnvFloat_011daf94 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077988) * fnvFloat_01077988)) * fnvFloat_0107798c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077988) * fnvFloat_01077988)) * fnvFloat_0107798c;
 }
 // @fnv 0x00f93a70
 void InitializeRuntimeFloatCall703()
 {
-    fnvFloat_011db044 = fnvFloat_01077a8c / FUN_004019b0(fnvFloat_01077a88);
+    fnvFloat_011db044 = fnvFloat_01077a8c / sqrt_004019b0(fnvFloat_01077a88);
 }
 // @fnv 0x00f93aa0
 void InitializeRuntimeFloatCall704()
 {
     fnvFloat_011db024 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077a88) * fnvFloat_01077a88)) * fnvFloat_01077a8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077a88) * fnvFloat_01077a88)) * fnvFloat_01077a8c;
 }
 // @fnv 0x00f93cd0
 void InitializeRuntimeFloatCall705()
 {
-    fnvFloat_011db0a0 = fnvFloat_01077b5c / FUN_004019b0(fnvFloat_01077b58);
+    fnvFloat_011db0a0 = fnvFloat_01077b5c / sqrt_004019b0(fnvFloat_01077b58);
 }
 // @fnv 0x00f93d00
 void InitializeRuntimeFloatCall706()
 {
     fnvFloat_011db090 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077b58) * fnvFloat_01077b58)) * fnvFloat_01077b5c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077b58) * fnvFloat_01077b58)) * fnvFloat_01077b5c;
 }
 // @fnv 0x00f93da0
 void InitializeRuntimeFloatCall707()
 {
-    fnvFloat_011db120 = fnvFloat_01077c3c / FUN_004019b0(fnvFloat_01077c38);
+    fnvFloat_011db120 = fnvFloat_01077c3c / sqrt_004019b0(fnvFloat_01077c38);
 }
 // @fnv 0x00f93dd0
 void InitializeRuntimeFloatCall708()
 {
     fnvFloat_011db0f4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077c38) * fnvFloat_01077c38)) * fnvFloat_01077c3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077c38) * fnvFloat_01077c38)) * fnvFloat_01077c3c;
 }
 // @fnv 0x00f940d0
 void InitializeRuntimeFloatCall709()
 {
-    fnvFloat_011db230 = fnvFloat_01077ed8 / FUN_004019b0(fnvFloat_01077ed4);
+    fnvFloat_011db230 = fnvFloat_01077ed8 / sqrt_004019b0(fnvFloat_01077ed4);
 }
 // @fnv 0x00f94100
 void InitializeRuntimeFloatCall710()
 {
     fnvFloat_011db1fc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01077ed4) * fnvFloat_01077ed4)) * fnvFloat_01077ed8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01077ed4) * fnvFloat_01077ed4)) * fnvFloat_01077ed8;
 }
 // @fnv 0x00f94380
 void InitializeRuntimeFloatCall711()
 {
-    fnvFloat_011db2e8 = fnvFloat_0107807c / FUN_004019b0(fnvFloat_01078078);
+    fnvFloat_011db2e8 = fnvFloat_0107807c / sqrt_004019b0(fnvFloat_01078078);
 }
 // @fnv 0x00f943b0
 void InitializeRuntimeFloatCall712()
 {
     fnvFloat_011db298 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01078078) * fnvFloat_01078078)) * fnvFloat_0107807c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01078078) * fnvFloat_01078078)) * fnvFloat_0107807c;
 }
 // @fnv 0x00f94820
 void InitializeRuntimeFloatCall713()
 {
-    fnvFloat_011db47c = fnvFloat_010783ec / FUN_004019b0(fnvFloat_010783e8);
+    fnvFloat_011db47c = fnvFloat_010783ec / sqrt_004019b0(fnvFloat_010783e8);
 }
 // @fnv 0x00f94850
 void InitializeRuntimeFloatCall714()
 {
     fnvFloat_011db3cc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010783e8) * fnvFloat_010783e8)) * fnvFloat_010783ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010783e8) * fnvFloat_010783e8)) * fnvFloat_010783ec;
 }
 // @fnv 0x00f94f90
 void InitializeRuntimeFloatCall715()
 {
-    fnvFloat_011db580 = fnvFloat_010789cc / FUN_004019b0(fnvFloat_010789c8);
+    fnvFloat_011db580 = fnvFloat_010789cc / sqrt_004019b0(fnvFloat_010789c8);
 }
 // @fnv 0x00f94fc0
 void InitializeRuntimeFloatCall716()
 {
     fnvFloat_011db554 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010789c8) * fnvFloat_010789c8)) * fnvFloat_010789cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010789c8) * fnvFloat_010789c8)) * fnvFloat_010789cc;
 }
 // @fnv 0x00f952e0
 void InitializeRuntimeFloatCall717()
 {
-    fnvFloat_011db638 = fnvFloat_01078bac / FUN_004019b0(fnvFloat_01078ba8);
+    fnvFloat_011db638 = fnvFloat_01078bac / sqrt_004019b0(fnvFloat_01078ba8);
 }
 // @fnv 0x00f95310
 void InitializeRuntimeFloatCall718()
 {
     fnvFloat_011db604 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01078ba8) * fnvFloat_01078ba8)) * fnvFloat_01078bac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01078ba8) * fnvFloat_01078ba8)) * fnvFloat_01078bac;
 }
 // @fnv 0x00f955b0
 void InitializeRuntimeFloatCall719()
 {
-    fnvFloat_011db70c = fnvFloat_01078dac / FUN_004019b0(fnvFloat_01078da8);
+    fnvFloat_011db70c = fnvFloat_01078dac / sqrt_004019b0(fnvFloat_01078da8);
 }
 // @fnv 0x00f955e0
 void InitializeRuntimeFloatCall720()
 {
     fnvFloat_011db6a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01078da8) * fnvFloat_01078da8)) * fnvFloat_01078dac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01078da8) * fnvFloat_01078da8)) * fnvFloat_01078dac;
 }
 // @fnv 0x00f95bd0
 void InitializeRuntimeFloatCall721()
 {
-    fnvFloat_011db7f8 = fnvFloat_01079158 / FUN_004019b0(fnvFloat_01079154);
+    fnvFloat_011db7f8 = fnvFloat_01079158 / sqrt_004019b0(fnvFloat_01079154);
 }
 // @fnv 0x00f95c00
 void InitializeRuntimeFloatCall722()
 {
     fnvFloat_011db7ec =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079154) * fnvFloat_01079154)) * fnvFloat_01079158;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079154) * fnvFloat_01079154)) * fnvFloat_01079158;
 }
 // @fnv 0x00f95cb0
 void InitializeRuntimeFloatCall723()
 {
-    fnvFloat_011db80c = fnvFloat_01079168 / FUN_004019b0(fnvFloat_01079164);
+    fnvFloat_011db80c = fnvFloat_01079168 / sqrt_004019b0(fnvFloat_01079164);
 }
 // @fnv 0x00f95ce0
 void InitializeRuntimeFloatCall724()
 {
     fnvFloat_011db808 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079164) * fnvFloat_01079164)) * fnvFloat_01079168;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079164) * fnvFloat_01079164)) * fnvFloat_01079168;
 }
 // @fnv 0x00f95d50
 void InitializeRuntimeFloatCall725()
 {
-    fnvFloat_011db84c = fnvFloat_010791bc / FUN_004019b0(fnvFloat_010791b8);
+    fnvFloat_011db84c = fnvFloat_010791bc / sqrt_004019b0(fnvFloat_010791b8);
 }
 // @fnv 0x00f95d80
 void InitializeRuntimeFloatCall726()
 {
     fnvFloat_011db82c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010791b8) * fnvFloat_010791b8)) * fnvFloat_010791bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010791b8) * fnvFloat_010791b8)) * fnvFloat_010791bc;
 }
 // @fnv 0x00f95fb0
 void InitializeRuntimeFloatCall727()
 {
-    fnvFloat_011db8c4 = fnvFloat_010791fc / FUN_004019b0(fnvFloat_010791f8);
+    fnvFloat_011db8c4 = fnvFloat_010791fc / sqrt_004019b0(fnvFloat_010791f8);
 }
 // @fnv 0x00f95fe0
 void InitializeRuntimeFloatCall728()
 {
     fnvFloat_011db8a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010791f8) * fnvFloat_010791f8)) * fnvFloat_010791fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010791f8) * fnvFloat_010791f8)) * fnvFloat_010791fc;
 }
 // @fnv 0x00f96210
 void InitializeRuntimeFloatCall729()
 {
-    fnvFloat_011db93c = fnvFloat_0107923c / FUN_004019b0(fnvFloat_01079238);
+    fnvFloat_011db93c = fnvFloat_0107923c / sqrt_004019b0(fnvFloat_01079238);
 }
 // @fnv 0x00f96240
 void InitializeRuntimeFloatCall730()
 {
     fnvFloat_011db91c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079238) * fnvFloat_01079238)) * fnvFloat_0107923c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079238) * fnvFloat_01079238)) * fnvFloat_0107923c;
 }
 // @fnv 0x00f96470
 void InitializeRuntimeFloatCall731()
 {
-    fnvFloat_011db9b4 = fnvFloat_0107927c / FUN_004019b0(fnvFloat_01079278);
+    fnvFloat_011db9b4 = fnvFloat_0107927c / sqrt_004019b0(fnvFloat_01079278);
 }
 // @fnv 0x00f964a0
 void InitializeRuntimeFloatCall732()
 {
     fnvFloat_011db994 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079278) * fnvFloat_01079278)) * fnvFloat_0107927c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079278) * fnvFloat_01079278)) * fnvFloat_0107927c;
 }
 // @fnv 0x00f966f0
 void InitializeRuntimeFloatCall733()
 {
-    fnvFloat_011dba30 = fnvFloat_0107932c / FUN_004019b0(fnvFloat_01079328);
+    fnvFloat_011dba30 = fnvFloat_0107932c / sqrt_004019b0(fnvFloat_01079328);
 }
 // @fnv 0x00f96720
 void InitializeRuntimeFloatCall734()
 {
     fnvFloat_011dba10 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079328) * fnvFloat_01079328)) * fnvFloat_0107932c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079328) * fnvFloat_01079328)) * fnvFloat_0107932c;
 }
 // @fnv 0x00f96950
 void InitializeRuntimeFloatCall735()
 {
-    fnvFloat_011dba78 = fnvFloat_01079514 / FUN_004019b0(fnvFloat_01079510);
+    fnvFloat_011dba78 = fnvFloat_01079514 / sqrt_004019b0(fnvFloat_01079510);
 }
 // @fnv 0x00f96980
 void InitializeRuntimeFloatCall736()
 {
     fnvFloat_011dba74 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079510) * fnvFloat_01079510)) * fnvFloat_01079514;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079510) * fnvFloat_01079510)) * fnvFloat_01079514;
 }
 // @fnv 0x00f969f0
 void InitializeRuntimeFloatCall737()
 {
-    fnvFloat_011dbac4 = fnvFloat_0107958c / FUN_004019b0(fnvFloat_01079588);
+    fnvFloat_011dbac4 = fnvFloat_0107958c / sqrt_004019b0(fnvFloat_01079588);
 }
 // @fnv 0x00f96a20
 void InitializeRuntimeFloatCall738()
 {
     fnvFloat_011dba98 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079588) * fnvFloat_01079588)) * fnvFloat_0107958c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079588) * fnvFloat_01079588)) * fnvFloat_0107958c;
 }
 // @fnv 0x00f96c80
 void InitializeRuntimeFloatCall739()
 {
-    fnvFloat_011dbb3c = fnvFloat_0107970c / FUN_004019b0(fnvFloat_01079708);
+    fnvFloat_011dbb3c = fnvFloat_0107970c / sqrt_004019b0(fnvFloat_01079708);
 }
 // @fnv 0x00f96cb0
 void InitializeRuntimeFloatCall740()
 {
     fnvFloat_011dbb1c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079708) * fnvFloat_01079708)) * fnvFloat_0107970c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079708) * fnvFloat_01079708)) * fnvFloat_0107970c;
 }
 // @fnv 0x00f96ee0
 void InitializeRuntimeFloatCall741()
 {
-    fnvFloat_011dbbb4 = fnvFloat_0107976c / FUN_004019b0(fnvFloat_01079768);
+    fnvFloat_011dbbb4 = fnvFloat_0107976c / sqrt_004019b0(fnvFloat_01079768);
 }
 // @fnv 0x00f96f10
 void InitializeRuntimeFloatCall742()
 {
     fnvFloat_011dbb94 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079768) * fnvFloat_01079768)) * fnvFloat_0107976c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079768) * fnvFloat_01079768)) * fnvFloat_0107976c;
 }
 // @fnv 0x00f97160
 void InitializeRuntimeFloatCall743()
 {
-    fnvFloat_011dbc2c = fnvFloat_0107986c / FUN_004019b0(fnvFloat_01079868);
+    fnvFloat_011dbc2c = fnvFloat_0107986c / sqrt_004019b0(fnvFloat_01079868);
 }
 // @fnv 0x00f97190
 void InitializeRuntimeFloatCall744()
 {
     fnvFloat_011dbc0c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079868) * fnvFloat_01079868)) * fnvFloat_0107986c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079868) * fnvFloat_01079868)) * fnvFloat_0107986c;
 }
 // @fnv 0x00f973e0
 void InitializeRuntimeFloatCall745()
 {
-    fnvFloat_011dbca8 = fnvFloat_0107991c / FUN_004019b0(fnvFloat_01079918);
+    fnvFloat_011dbca8 = fnvFloat_0107991c / sqrt_004019b0(fnvFloat_01079918);
 }
 // @fnv 0x00f97410
 void InitializeRuntimeFloatCall746()
 {
     fnvFloat_011dbc84 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079918) * fnvFloat_01079918)) * fnvFloat_0107991c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079918) * fnvFloat_01079918)) * fnvFloat_0107991c;
 }
 // @fnv 0x00f97660
 void InitializeRuntimeFloatCall747()
 {
-    fnvFloat_011dbd20 = fnvFloat_010799cc / FUN_004019b0(fnvFloat_010799c8);
+    fnvFloat_011dbd20 = fnvFloat_010799cc / sqrt_004019b0(fnvFloat_010799c8);
 }
 // @fnv 0x00f97690
 void InitializeRuntimeFloatCall748()
 {
     fnvFloat_011dbcfc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010799c8) * fnvFloat_010799c8)) * fnvFloat_010799cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010799c8) * fnvFloat_010799c8)) * fnvFloat_010799cc;
 }
 // @fnv 0x00f978e0
 void InitializeRuntimeFloatCall749()
 {
-    fnvFloat_011dbd94 = fnvFloat_01079a6c / FUN_004019b0(fnvFloat_01079a68);
+    fnvFloat_011dbd94 = fnvFloat_01079a6c / sqrt_004019b0(fnvFloat_01079a68);
 }
 // @fnv 0x00f97910
 void InitializeRuntimeFloatCall750()
 {
     fnvFloat_011dbd74 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079a68) * fnvFloat_01079a68)) * fnvFloat_01079a6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079a68) * fnvFloat_01079a68)) * fnvFloat_01079a6c;
 }
 // @fnv 0x00f97b40
 void InitializeRuntimeFloatCall751()
 {
-    fnvFloat_011dbe0c = fnvFloat_01079b0c / FUN_004019b0(fnvFloat_01079b08);
+    fnvFloat_011dbe0c = fnvFloat_01079b0c / sqrt_004019b0(fnvFloat_01079b08);
 }
 // @fnv 0x00f97b70
 void InitializeRuntimeFloatCall752()
 {
     fnvFloat_011dbdec =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079b08) * fnvFloat_01079b08)) * fnvFloat_01079b0c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079b08) * fnvFloat_01079b08)) * fnvFloat_01079b0c;
 }
 // @fnv 0x00f97dc0
 void InitializeRuntimeFloatCall753()
 {
-    fnvFloat_011dbe88 = fnvFloat_01079bac / FUN_004019b0(fnvFloat_01079ba8);
+    fnvFloat_011dbe88 = fnvFloat_01079bac / sqrt_004019b0(fnvFloat_01079ba8);
 }
 // @fnv 0x00f97df0
 void InitializeRuntimeFloatCall754()
 {
     fnvFloat_011dbe68 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079ba8) * fnvFloat_01079ba8)) * fnvFloat_01079bac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079ba8) * fnvFloat_01079ba8)) * fnvFloat_01079bac;
 }
 // @fnv 0x00f98040
 void InitializeRuntimeFloatCall755()
 {
-    fnvFloat_011dbf00 = fnvFloat_01079c5c / FUN_004019b0(fnvFloat_01079c58);
+    fnvFloat_011dbf00 = fnvFloat_01079c5c / sqrt_004019b0(fnvFloat_01079c58);
 }
 // @fnv 0x00f98070
 void InitializeRuntimeFloatCall756()
 {
     fnvFloat_011dbee0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079c58) * fnvFloat_01079c58)) * fnvFloat_01079c5c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079c58) * fnvFloat_01079c58)) * fnvFloat_01079c5c;
 }
 // @fnv 0x00f98320
 void InitializeRuntimeFloatCall757()
 {
-    fnvFloat_011dbf78 = fnvFloat_01079cfc / FUN_004019b0(fnvFloat_01079cf8);
+    fnvFloat_011dbf78 = fnvFloat_01079cfc / sqrt_004019b0(fnvFloat_01079cf8);
 }
 // @fnv 0x00f98350
 void InitializeRuntimeFloatCall758()
 {
     fnvFloat_011dbf58 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079cf8) * fnvFloat_01079cf8)) * fnvFloat_01079cfc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079cf8) * fnvFloat_01079cf8)) * fnvFloat_01079cfc;
 }
 // @fnv 0x00f985a0
 void InitializeRuntimeFloatCall759()
 {
-    fnvFloat_011dbff0 = fnvFloat_01079dac / FUN_004019b0(fnvFloat_01079da8);
+    fnvFloat_011dbff0 = fnvFloat_01079dac / sqrt_004019b0(fnvFloat_01079da8);
 }
 // @fnv 0x00f985d0
 void InitializeRuntimeFloatCall760()
 {
     fnvFloat_011dbfd0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079da8) * fnvFloat_01079da8)) * fnvFloat_01079dac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079da8) * fnvFloat_01079da8)) * fnvFloat_01079dac;
 }
 // @fnv 0x00f98820
 void InitializeRuntimeFloatCall761()
 {
-    fnvFloat_011dc06c = fnvFloat_01079e4c / FUN_004019b0(fnvFloat_01079e48);
+    fnvFloat_011dc06c = fnvFloat_01079e4c / sqrt_004019b0(fnvFloat_01079e48);
 }
 // @fnv 0x00f98850
 void InitializeRuntimeFloatCall762()
 {
     fnvFloat_011dc04c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079e48) * fnvFloat_01079e48)) * fnvFloat_01079e4c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079e48) * fnvFloat_01079e48)) * fnvFloat_01079e4c;
 }
 // @fnv 0x00f98aa0
 void InitializeRuntimeFloatCall763()
 {
-    fnvFloat_011dc0e0 = fnvFloat_01079efc / FUN_004019b0(fnvFloat_01079ef8);
+    fnvFloat_011dc0e0 = fnvFloat_01079efc / sqrt_004019b0(fnvFloat_01079ef8);
 }
 // @fnv 0x00f98ad0
 void InitializeRuntimeFloatCall764()
 {
     fnvFloat_011dc0c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079ef8) * fnvFloat_01079ef8)) * fnvFloat_01079efc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079ef8) * fnvFloat_01079ef8)) * fnvFloat_01079efc;
 }
 // @fnv 0x00f98d20
 void InitializeRuntimeFloatCall765()
 {
-    fnvFloat_011dc15c = fnvFloat_01079fcc / FUN_004019b0(fnvFloat_01079fc8);
+    fnvFloat_011dc15c = fnvFloat_01079fcc / sqrt_004019b0(fnvFloat_01079fc8);
 }
 // @fnv 0x00f98d50
 void InitializeRuntimeFloatCall766()
 {
     fnvFloat_011dc138 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01079fc8) * fnvFloat_01079fc8)) * fnvFloat_01079fcc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01079fc8) * fnvFloat_01079fc8)) * fnvFloat_01079fcc;
 }
 // @fnv 0x00f98fa0
 void InitializeRuntimeFloatCall767()
 {
-    fnvFloat_011dc1d0 = fnvFloat_0107a09c / FUN_004019b0(fnvFloat_0107a098);
+    fnvFloat_011dc1d0 = fnvFloat_0107a09c / sqrt_004019b0(fnvFloat_0107a098);
 }
 // @fnv 0x00f98fd0
 void InitializeRuntimeFloatCall768()
 {
     fnvFloat_011dc1b0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107a098) * fnvFloat_0107a098)) * fnvFloat_0107a09c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107a098) * fnvFloat_0107a098)) * fnvFloat_0107a09c;
 }
 // @fnv 0x00f99220
 void InitializeRuntimeFloatCall769()
 {
-    fnvFloat_011dc24c = fnvFloat_0107a13c / FUN_004019b0(fnvFloat_0107a138);
+    fnvFloat_011dc24c = fnvFloat_0107a13c / sqrt_004019b0(fnvFloat_0107a138);
 }
 // @fnv 0x00f99250
 void InitializeRuntimeFloatCall770()
 {
     fnvFloat_011dc22c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107a138) * fnvFloat_0107a138)) * fnvFloat_0107a13c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107a138) * fnvFloat_0107a138)) * fnvFloat_0107a13c;
 }
 // @fnv 0x00f994a0
 void InitializeRuntimeFloatCall771()
 {
-    fnvFloat_011dc2c0 = fnvFloat_0107a1ec / FUN_004019b0(fnvFloat_0107a1e8);
+    fnvFloat_011dc2c0 = fnvFloat_0107a1ec / sqrt_004019b0(fnvFloat_0107a1e8);
 }
 // @fnv 0x00f994d0
 void InitializeRuntimeFloatCall772()
 {
     fnvFloat_011dc2a0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107a1e8) * fnvFloat_0107a1e8)) * fnvFloat_0107a1ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107a1e8) * fnvFloat_0107a1e8)) * fnvFloat_0107a1ec;
 }
 // @fnv 0x00f99720
 void InitializeRuntimeFloatCall773()
 {
-    fnvFloat_011dc340 = fnvFloat_0107a29c / FUN_004019b0(fnvFloat_0107a298);
+    fnvFloat_011dc340 = fnvFloat_0107a29c / sqrt_004019b0(fnvFloat_0107a298);
 }
 // @fnv 0x00f99750
 void InitializeRuntimeFloatCall774()
 {
     fnvFloat_011dc31c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107a298) * fnvFloat_0107a298)) * fnvFloat_0107a29c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107a298) * fnvFloat_0107a298)) * fnvFloat_0107a29c;
 }
 // @fnv 0x00f999a0
 void InitializeRuntimeFloatCall775()
 {
-    fnvFloat_011dc3b4 = fnvFloat_0107a3cc / FUN_004019b0(fnvFloat_0107a3c8);
+    fnvFloat_011dc3b4 = fnvFloat_0107a3cc / sqrt_004019b0(fnvFloat_0107a3c8);
 }
 // @fnv 0x00f999d0
 void InitializeRuntimeFloatCall776()
 {
     fnvFloat_011dc394 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107a3c8) * fnvFloat_0107a3c8)) * fnvFloat_0107a3cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107a3c8) * fnvFloat_0107a3c8)) * fnvFloat_0107a3cc;
 }
 // @fnv 0x00f99c20
 void InitializeRuntimeFloatCall777()
 {
-    fnvFloat_011dc42c = fnvFloat_0107a47c / FUN_004019b0(fnvFloat_0107a478);
+    fnvFloat_011dc42c = fnvFloat_0107a47c / sqrt_004019b0(fnvFloat_0107a478);
 }
 // @fnv 0x00f99c50
 void InitializeRuntimeFloatCall778()
 {
     fnvFloat_011dc40c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107a478) * fnvFloat_0107a478)) * fnvFloat_0107a47c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107a478) * fnvFloat_0107a478)) * fnvFloat_0107a47c;
 }
 // @fnv 0x00f99ea0
 void InitializeRuntimeFloatCall779()
 {
-    fnvFloat_011dc4a4 = fnvFloat_0107a51c / FUN_004019b0(fnvFloat_0107a518);
+    fnvFloat_011dc4a4 = fnvFloat_0107a51c / sqrt_004019b0(fnvFloat_0107a518);
 }
 // @fnv 0x00f99ed0
 void InitializeRuntimeFloatCall780()
 {
     fnvFloat_011dc484 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107a518) * fnvFloat_0107a518)) * fnvFloat_0107a51c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107a518) * fnvFloat_0107a518)) * fnvFloat_0107a51c;
 }
 // @fnv 0x00f9a100
 void InitializeRuntimeFloatCall781()
 {
-    fnvFloat_011dc51c = fnvFloat_0107a8bc / FUN_004019b0(fnvFloat_0107a8b8);
+    fnvFloat_011dc51c = fnvFloat_0107a8bc / sqrt_004019b0(fnvFloat_0107a8b8);
 }
 // @fnv 0x00f9a130
 void InitializeRuntimeFloatCall782()
 {
     fnvFloat_011dc4fc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107a8b8) * fnvFloat_0107a8b8)) * fnvFloat_0107a8bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107a8b8) * fnvFloat_0107a8b8)) * fnvFloat_0107a8bc;
 }
 // @fnv 0x00f9a360
 void InitializeRuntimeFloatCall783()
 {
-    fnvFloat_011dc598 = fnvFloat_0107ac2c / FUN_004019b0(fnvFloat_0107ac28);
+    fnvFloat_011dc598 = fnvFloat_0107ac2c / sqrt_004019b0(fnvFloat_0107ac28);
 }
 // @fnv 0x00f9a390
 void InitializeRuntimeFloatCall784()
 {
     fnvFloat_011dc578 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107ac28) * fnvFloat_0107ac28)) * fnvFloat_0107ac2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107ac28) * fnvFloat_0107ac28)) * fnvFloat_0107ac2c;
 }
 // @fnv 0x00f9a5c0
 void InitializeRuntimeFloatCall785()
 {
-    fnvFloat_011dc614 = fnvFloat_0107ad4c / FUN_004019b0(fnvFloat_0107ad48);
+    fnvFloat_011dc614 = fnvFloat_0107ad4c / sqrt_004019b0(fnvFloat_0107ad48);
 }
 // @fnv 0x00f9a5f0
 void InitializeRuntimeFloatCall786()
 {
     fnvFloat_011dc5f0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107ad48) * fnvFloat_0107ad48)) * fnvFloat_0107ad4c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107ad48) * fnvFloat_0107ad48)) * fnvFloat_0107ad4c;
 }
 // @fnv 0x00f9a830
 void InitializeRuntimeFloatCall787()
 {
-    fnvFloat_011dc688 = fnvFloat_0107b0bc / FUN_004019b0(fnvFloat_0107b0b8);
+    fnvFloat_011dc688 = fnvFloat_0107b0bc / sqrt_004019b0(fnvFloat_0107b0b8);
 }
 // @fnv 0x00f9a860
 void InitializeRuntimeFloatCall788()
 {
     fnvFloat_011dc668 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107b0b8) * fnvFloat_0107b0b8)) * fnvFloat_0107b0bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107b0b8) * fnvFloat_0107b0b8)) * fnvFloat_0107b0bc;
 }
 // @fnv 0x00f9aab0
 void InitializeRuntimeFloatCall789()
 {
-    fnvFloat_011dc6e4 = fnvFloat_0107b1e8 / FUN_004019b0(fnvFloat_0107b1e4);
+    fnvFloat_011dc6e4 = fnvFloat_0107b1e8 / sqrt_004019b0(fnvFloat_0107b1e4);
 }
 // @fnv 0x00f9aae0
 void InitializeRuntimeFloatCall790()
 {
     fnvFloat_011dc6d8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107b1e4) * fnvFloat_0107b1e4)) * fnvFloat_0107b1e8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107b1e4) * fnvFloat_0107b1e4)) * fnvFloat_0107b1e8;
 }
 // @fnv 0x00f9abb0
 void InitializeRuntimeFloatCall791()
 {
-    fnvFloat_011dc730 = fnvFloat_0107b21c / FUN_004019b0(fnvFloat_0107b218);
+    fnvFloat_011dc730 = fnvFloat_0107b21c / sqrt_004019b0(fnvFloat_0107b218);
 }
 // @fnv 0x00f9abe0
 void InitializeRuntimeFloatCall792()
 {
     fnvFloat_011dc708 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107b218) * fnvFloat_0107b218)) * fnvFloat_0107b21c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107b218) * fnvFloat_0107b218)) * fnvFloat_0107b21c;
 }
 // @fnv 0x00f9ae30
 void InitializeRuntimeFloatCall793()
 {
-    fnvFloat_011dc7b0 = fnvFloat_0107b35c / FUN_004019b0(fnvFloat_0107b358);
+    fnvFloat_011dc7b0 = fnvFloat_0107b35c / sqrt_004019b0(fnvFloat_0107b358);
 }
 // @fnv 0x00f9ae60
 void InitializeRuntimeFloatCall794()
 {
     fnvFloat_011dc790 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107b358) * fnvFloat_0107b358)) * fnvFloat_0107b35c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107b358) * fnvFloat_0107b358)) * fnvFloat_0107b35c;
 }
 // @fnv 0x00f9b090
 void InitializeRuntimeFloatCall795()
 {
-    fnvFloat_011dc830 = fnvFloat_0107b6dc / FUN_004019b0(fnvFloat_0107b6d8);
+    fnvFloat_011dc830 = fnvFloat_0107b6dc / sqrt_004019b0(fnvFloat_0107b6d8);
 }
 // @fnv 0x00f9b0c0
 void InitializeRuntimeFloatCall796()
 {
     fnvFloat_011dc810 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107b6d8) * fnvFloat_0107b6d8)) * fnvFloat_0107b6dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107b6d8) * fnvFloat_0107b6d8)) * fnvFloat_0107b6dc;
 }
 // @fnv 0x00f9b310
 void InitializeRuntimeFloatCall797()
 {
-    fnvFloat_011dc8a8 = fnvFloat_0107b88c / FUN_004019b0(fnvFloat_0107b888);
+    fnvFloat_011dc8a8 = fnvFloat_0107b88c / sqrt_004019b0(fnvFloat_0107b888);
 }
 // @fnv 0x00f9b340
 void InitializeRuntimeFloatCall798()
 {
     fnvFloat_011dc888 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107b888) * fnvFloat_0107b888)) * fnvFloat_0107b88c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107b888) * fnvFloat_0107b888)) * fnvFloat_0107b88c;
 }
 // @fnv 0x00f9b570
 void InitializeRuntimeFloatCall799()
 {
-    fnvFloat_011dc920 = fnvFloat_0107bbfc / FUN_004019b0(fnvFloat_0107bbf8);
+    fnvFloat_011dc920 = fnvFloat_0107bbfc / sqrt_004019b0(fnvFloat_0107bbf8);
 }
 // @fnv 0x00f9b5a0
 void InitializeRuntimeFloatCall800()
 {
     fnvFloat_011dc900 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107bbf8) * fnvFloat_0107bbf8)) * fnvFloat_0107bbfc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107bbf8) * fnvFloat_0107bbf8)) * fnvFloat_0107bbfc;
 }
 // @fnv 0x00f9b7d0
 void InitializeRuntimeFloatCall801()
 {
-    fnvFloat_011dc99c = fnvFloat_0107bd4c / FUN_004019b0(fnvFloat_0107bd48);
+    fnvFloat_011dc99c = fnvFloat_0107bd4c / sqrt_004019b0(fnvFloat_0107bd48);
 }
 // @fnv 0x00f9b800
 void InitializeRuntimeFloatCall802()
 {
     fnvFloat_011dc978 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107bd48) * fnvFloat_0107bd48)) * fnvFloat_0107bd4c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107bd48) * fnvFloat_0107bd48)) * fnvFloat_0107bd4c;
 }
 // @fnv 0x00f9ba50
 void InitializeRuntimeFloatCall803()
 {
-    fnvFloat_011dca10 = fnvFloat_0107bdfc / FUN_004019b0(fnvFloat_0107bdf8);
+    fnvFloat_011dca10 = fnvFloat_0107bdfc / sqrt_004019b0(fnvFloat_0107bdf8);
 }
 // @fnv 0x00f9ba80
 void InitializeRuntimeFloatCall804()
 {
     fnvFloat_011dc9f0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107bdf8) * fnvFloat_0107bdf8)) * fnvFloat_0107bdfc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107bdf8) * fnvFloat_0107bdf8)) * fnvFloat_0107bdfc;
 }
 // @fnv 0x00f9bcb0
 void InitializeRuntimeFloatCall805()
 {
-    fnvFloat_011dca58 = fnvFloat_0107be90 / FUN_004019b0(fnvFloat_0107be8c);
+    fnvFloat_011dca58 = fnvFloat_0107be90 / sqrt_004019b0(fnvFloat_0107be8c);
 }
 // @fnv 0x00f9bce0
 void InitializeRuntimeFloatCall806()
 {
     fnvFloat_011dca54 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107be8c) * fnvFloat_0107be8c)) * fnvFloat_0107be90;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107be8c) * fnvFloat_0107be8c)) * fnvFloat_0107be90;
 }
 // @fnv 0x00f9bd50
 void InitializeRuntimeFloatCall807()
 {
-    fnvFloat_011dca98 = fnvFloat_0107beec / FUN_004019b0(fnvFloat_0107bee8);
+    fnvFloat_011dca98 = fnvFloat_0107beec / sqrt_004019b0(fnvFloat_0107bee8);
 }
 // @fnv 0x00f9bd80
 void InitializeRuntimeFloatCall808()
 {
     fnvFloat_011dca78 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107bee8) * fnvFloat_0107bee8)) * fnvFloat_0107beec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107bee8) * fnvFloat_0107bee8)) * fnvFloat_0107beec;
 }
 // @fnv 0x00f9bfd0
 void InitializeRuntimeFloatCall809()
 {
-    fnvFloat_011dcb14 = fnvFloat_0107bf8c / FUN_004019b0(fnvFloat_0107bf88);
+    fnvFloat_011dcb14 = fnvFloat_0107bf8c / sqrt_004019b0(fnvFloat_0107bf88);
 }
 // @fnv 0x00f9c000
 void InitializeRuntimeFloatCall810()
 {
     fnvFloat_011dcaf0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107bf88) * fnvFloat_0107bf88)) * fnvFloat_0107bf8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107bf88) * fnvFloat_0107bf88)) * fnvFloat_0107bf8c;
 }
 // @fnv 0x00f9c250
 void InitializeRuntimeFloatCall811()
 {
-    fnvFloat_011dcb8c = fnvFloat_0107c03c / FUN_004019b0(fnvFloat_0107c038);
+    fnvFloat_011dcb8c = fnvFloat_0107c03c / sqrt_004019b0(fnvFloat_0107c038);
 }
 // @fnv 0x00f9c280
 void InitializeRuntimeFloatCall812()
 {
     fnvFloat_011dcb68 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c038) * fnvFloat_0107c038)) * fnvFloat_0107c03c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c038) * fnvFloat_0107c038)) * fnvFloat_0107c03c;
 }
 // @fnv 0x00f9c4d0
 void InitializeRuntimeFloatCall813()
 {
-    fnvFloat_011dcbd4 = fnvFloat_0107c15c / FUN_004019b0(fnvFloat_0107c158);
+    fnvFloat_011dcbd4 = fnvFloat_0107c15c / sqrt_004019b0(fnvFloat_0107c158);
 }
 // @fnv 0x00f9c500
 void InitializeRuntimeFloatCall814()
 {
     fnvFloat_011dcbd0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c158) * fnvFloat_0107c158)) * fnvFloat_0107c15c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c158) * fnvFloat_0107c158)) * fnvFloat_0107c15c;
 }
 // @fnv 0x00f9c590
 void InitializeRuntimeFloatCall815()
 {
-    fnvFloat_011dcc14 = fnvFloat_0107c1cc / FUN_004019b0(fnvFloat_0107c1c8);
+    fnvFloat_011dcc14 = fnvFloat_0107c1cc / sqrt_004019b0(fnvFloat_0107c1c8);
 }
 // @fnv 0x00f9c5c0
 void InitializeRuntimeFloatCall816()
 {
     fnvFloat_011dcbf4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c1c8) * fnvFloat_0107c1c8)) * fnvFloat_0107c1cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c1c8) * fnvFloat_0107c1c8)) * fnvFloat_0107c1cc;
 }
 // @fnv 0x00f9c810
 void InitializeRuntimeFloatCall817()
 {
-    fnvFloat_011dcc90 = fnvFloat_0107c27c / FUN_004019b0(fnvFloat_0107c278);
+    fnvFloat_011dcc90 = fnvFloat_0107c27c / sqrt_004019b0(fnvFloat_0107c278);
 }
 // @fnv 0x00f9c840
 void InitializeRuntimeFloatCall818()
 {
     fnvFloat_011dcc70 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c278) * fnvFloat_0107c278)) * fnvFloat_0107c27c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c278) * fnvFloat_0107c278)) * fnvFloat_0107c27c;
 }
 // @fnv 0x00f9ca90
 void InitializeRuntimeFloatCall819()
 {
-    fnvFloat_011dcd0c = fnvFloat_0107c3bc / FUN_004019b0(fnvFloat_0107c3b8);
+    fnvFloat_011dcd0c = fnvFloat_0107c3bc / sqrt_004019b0(fnvFloat_0107c3b8);
 }
 // @fnv 0x00f9cac0
 void InitializeRuntimeFloatCall820()
 {
     fnvFloat_011dcce8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c3b8) * fnvFloat_0107c3b8)) * fnvFloat_0107c3bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c3b8) * fnvFloat_0107c3b8)) * fnvFloat_0107c3bc;
 }
 // @fnv 0x00f9cd10
 void InitializeRuntimeFloatCall821()
 {
-    fnvFloat_011dcd84 = fnvFloat_0107c45c / FUN_004019b0(fnvFloat_0107c458);
+    fnvFloat_011dcd84 = fnvFloat_0107c45c / sqrt_004019b0(fnvFloat_0107c458);
 }
 // @fnv 0x00f9cd40
 void InitializeRuntimeFloatCall822()
 {
     fnvFloat_011dcd60 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c458) * fnvFloat_0107c458)) * fnvFloat_0107c45c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c458) * fnvFloat_0107c458)) * fnvFloat_0107c45c;
 }
 // @fnv 0x00f9cf90
 void InitializeRuntimeFloatCall823()
 {
-    fnvFloat_011dcdf8 = fnvFloat_0107c50c / FUN_004019b0(fnvFloat_0107c508);
+    fnvFloat_011dcdf8 = fnvFloat_0107c50c / sqrt_004019b0(fnvFloat_0107c508);
 }
 // @fnv 0x00f9cfc0
 void InitializeRuntimeFloatCall824()
 {
     fnvFloat_011dcdd8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c508) * fnvFloat_0107c508)) * fnvFloat_0107c50c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c508) * fnvFloat_0107c508)) * fnvFloat_0107c50c;
 }
 // @fnv 0x00f9d210
 void InitializeRuntimeFloatCall825()
 {
-    fnvFloat_011dce74 = fnvFloat_0107c5ac / FUN_004019b0(fnvFloat_0107c5a8);
+    fnvFloat_011dce74 = fnvFloat_0107c5ac / sqrt_004019b0(fnvFloat_0107c5a8);
 }
 // @fnv 0x00f9d240
 void InitializeRuntimeFloatCall826()
 {
     fnvFloat_011dce54 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c5a8) * fnvFloat_0107c5a8)) * fnvFloat_0107c5ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c5a8) * fnvFloat_0107c5a8)) * fnvFloat_0107c5ac;
 }
 // @fnv 0x00f9d490
 void InitializeRuntimeFloatCall827()
 {
-    fnvFloat_011dceec = fnvFloat_0107c65c / FUN_004019b0(fnvFloat_0107c658);
+    fnvFloat_011dceec = fnvFloat_0107c65c / sqrt_004019b0(fnvFloat_0107c658);
 }
 // @fnv 0x00f9d4c0
 void InitializeRuntimeFloatCall828()
 {
     fnvFloat_011dcec8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c658) * fnvFloat_0107c658)) * fnvFloat_0107c65c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c658) * fnvFloat_0107c658)) * fnvFloat_0107c65c;
 }
 // @fnv 0x00f9d710
 void InitializeRuntimeFloatCall829()
 {
-    fnvFloat_011dcf60 = fnvFloat_0107c78c / FUN_004019b0(fnvFloat_0107c788);
+    fnvFloat_011dcf60 = fnvFloat_0107c78c / sqrt_004019b0(fnvFloat_0107c788);
 }
 // @fnv 0x00f9d740
 void InitializeRuntimeFloatCall830()
 {
     fnvFloat_011dcf40 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c788) * fnvFloat_0107c788)) * fnvFloat_0107c78c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c788) * fnvFloat_0107c788)) * fnvFloat_0107c78c;
 }
 // @fnv 0x00f9d990
 void InitializeRuntimeFloatCall831()
 {
-    fnvFloat_011dd05c = fnvFloat_0107c82c / FUN_004019b0(fnvFloat_0107c828);
+    fnvFloat_011dd05c = fnvFloat_0107c82c / sqrt_004019b0(fnvFloat_0107c828);
 }
 // @fnv 0x00f9d9c0
 void InitializeRuntimeFloatCall832()
 {
     fnvFloat_011dcff0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107c828) * fnvFloat_0107c828)) * fnvFloat_0107c82c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107c828) * fnvFloat_0107c828)) * fnvFloat_0107c82c;
 }
 // @fnv 0x00f9de90
 void InitializeRuntimeFloatCall833()
 {
-    fnvFloat_011dd3bc = fnvFloat_0107cb9c / FUN_004019b0(fnvFloat_0107cb98);
+    fnvFloat_011dd3bc = fnvFloat_0107cb9c / sqrt_004019b0(fnvFloat_0107cb98);
 }
 // @fnv 0x00f9dec0
 void InitializeRuntimeFloatCall834()
 {
     fnvFloat_011dd398 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107cb98) * fnvFloat_0107cb98)) * fnvFloat_0107cb9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107cb98) * fnvFloat_0107cb98)) * fnvFloat_0107cb9c;
 }
 // @fnv 0x00f9e140
 void InitializeRuntimeFloatCall835()
 {
-    fnvFloat_011dd5c8 = fnvFloat_0107cdec / FUN_004019b0(fnvFloat_0107cde8);
+    fnvFloat_011dd5c8 = fnvFloat_0107cdec / sqrt_004019b0(fnvFloat_0107cde8);
 }
 // @fnv 0x00f9e170
 void InitializeRuntimeFloatCall836()
 {
     fnvFloat_011dd568 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107cde8) * fnvFloat_0107cde8)) * fnvFloat_0107cdec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107cde8) * fnvFloat_0107cde8)) * fnvFloat_0107cdec;
 }
 // @fnv 0x00f9e580
 void InitializeRuntimeFloatCall837()
 {
-    fnvFloat_011dd978 = fnvFloat_0107d07c / FUN_004019b0(fnvFloat_0107d078);
+    fnvFloat_011dd978 = fnvFloat_0107d07c / sqrt_004019b0(fnvFloat_0107d078);
 }
 // @fnv 0x00f9e5b0
 void InitializeRuntimeFloatCall838()
 {
     fnvFloat_011dd8dc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107d078) * fnvFloat_0107d078)) * fnvFloat_0107d07c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107d078) * fnvFloat_0107d078)) * fnvFloat_0107d07c;
 }
 // @fnv 0x00f9ec90
 void InitializeRuntimeFloatCall839()
 {
-    fnvFloat_011ddd54 = fnvFloat_0107da08 / FUN_004019b0(fnvFloat_0107da04);
+    fnvFloat_011ddd54 = fnvFloat_0107da08 / sqrt_004019b0(fnvFloat_0107da04);
 }
 // @fnv 0x00f9ecc0
 void InitializeRuntimeFloatCall840()
 {
     fnvFloat_011ddd48 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107da04) * fnvFloat_0107da04)) * fnvFloat_0107da08;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107da04) * fnvFloat_0107da04)) * fnvFloat_0107da08;
 }
 // @fnv 0x00f9ed90
 void InitializeRuntimeFloatCall841()
 {
-    fnvFloat_011ddd98 = fnvFloat_0107db7c / FUN_004019b0(fnvFloat_0107db78);
+    fnvFloat_011ddd98 = fnvFloat_0107db7c / sqrt_004019b0(fnvFloat_0107db78);
 }
 // @fnv 0x00f9edc0
 void InitializeRuntimeFloatCall842()
 {
     fnvFloat_011ddd78 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107db78) * fnvFloat_0107db78)) * fnvFloat_0107db7c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107db78) * fnvFloat_0107db78)) * fnvFloat_0107db7c;
 }
 // @fnv 0x00f9f030
 void InitializeRuntimeFloatCall843()
 {
-    fnvFloat_011dde1c = fnvFloat_0107dcbc / FUN_004019b0(fnvFloat_0107dcb8);
+    fnvFloat_011dde1c = fnvFloat_0107dcbc / sqrt_004019b0(fnvFloat_0107dcb8);
 }
 // @fnv 0x00f9f060
 void InitializeRuntimeFloatCall844()
 {
     fnvFloat_011dddfc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107dcb8) * fnvFloat_0107dcb8)) * fnvFloat_0107dcbc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107dcb8) * fnvFloat_0107dcb8)) * fnvFloat_0107dcbc;
 }
 // @fnv 0x00f9f290
 void InitializeRuntimeFloatCall845()
 {
-    fnvFloat_011dde70 = fnvFloat_0107ddd8 / FUN_004019b0(fnvFloat_0107ddd4);
+    fnvFloat_011dde70 = fnvFloat_0107ddd8 / sqrt_004019b0(fnvFloat_0107ddd4);
 }
 // @fnv 0x00f9f2c0
 void InitializeRuntimeFloatCall846()
 {
     fnvFloat_011dde64 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107ddd4) * fnvFloat_0107ddd4)) * fnvFloat_0107ddd8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107ddd4) * fnvFloat_0107ddd4)) * fnvFloat_0107ddd8;
 }
 // @fnv 0x00f9f390
 void InitializeRuntimeFloatCall847()
 {
-    fnvFloat_011ddeb4 = fnvFloat_0107e8fc / FUN_004019b0(fnvFloat_0107e8f8);
+    fnvFloat_011ddeb4 = fnvFloat_0107e8fc / sqrt_004019b0(fnvFloat_0107e8f8);
 }
 // @fnv 0x00f9f3c0
 void InitializeRuntimeFloatCall848()
 {
     fnvFloat_011dde94 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107e8f8) * fnvFloat_0107e8f8)) * fnvFloat_0107e8fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107e8f8) * fnvFloat_0107e8f8)) * fnvFloat_0107e8fc;
 }
 // @fnv 0x00f9f690
 void InitializeRuntimeFloatCall849()
 {
-    fnvFloat_011ddf18 = fnvFloat_0107edd8 / FUN_004019b0(fnvFloat_0107edd4);
+    fnvFloat_011ddf18 = fnvFloat_0107edd8 / sqrt_004019b0(fnvFloat_0107edd4);
 }
 // @fnv 0x00f9f6c0
 void InitializeRuntimeFloatCall850()
 {
     fnvFloat_011ddf0c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107edd4) * fnvFloat_0107edd4)) * fnvFloat_0107edd8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107edd4) * fnvFloat_0107edd4)) * fnvFloat_0107edd8;
 }
 // @fnv 0x00f9f810
 void InitializeRuntimeFloatCall851()
 {
-    fnvFloat_011ddf70 = fnvFloat_0107ee9c / FUN_004019b0(fnvFloat_0107ee98);
+    fnvFloat_011ddf70 = fnvFloat_0107ee9c / sqrt_004019b0(fnvFloat_0107ee98);
 }
 // @fnv 0x00f9f840
 void InitializeRuntimeFloatCall852()
 {
     fnvFloat_011ddf50 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107ee98) * fnvFloat_0107ee98)) * fnvFloat_0107ee9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107ee98) * fnvFloat_0107ee98)) * fnvFloat_0107ee9c;
 }
 // @fnv 0x00f9fa70
 void InitializeRuntimeFloatCall853()
 {
-    fnvFloat_011ddfe8 = fnvFloat_0107f57c / FUN_004019b0(fnvFloat_0107f578);
+    fnvFloat_011ddfe8 = fnvFloat_0107f57c / sqrt_004019b0(fnvFloat_0107f578);
 }
 // @fnv 0x00f9faa0
 void InitializeRuntimeFloatCall854()
 {
     fnvFloat_011ddfc8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107f578) * fnvFloat_0107f578)) * fnvFloat_0107f57c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107f578) * fnvFloat_0107f578)) * fnvFloat_0107f57c;
 }
 // @fnv 0x00f9fcd0
 void InitializeRuntimeFloatCall855()
 {
-    fnvFloat_011de060 = fnvFloat_0107f76c / FUN_004019b0(fnvFloat_0107f768);
+    fnvFloat_011de060 = fnvFloat_0107f76c / sqrt_004019b0(fnvFloat_0107f768);
 }
 // @fnv 0x00f9fd00
 void InitializeRuntimeFloatCall856()
 {
     fnvFloat_011de040 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107f768) * fnvFloat_0107f768)) * fnvFloat_0107f76c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107f768) * fnvFloat_0107f768)) * fnvFloat_0107f76c;
 }
 // @fnv 0x00f9ffa0
 void InitializeRuntimeFloatCall857()
 {
-    fnvFloat_011de0ec = fnvFloat_0107f7ec / FUN_004019b0(fnvFloat_0107f7e8);
+    fnvFloat_011de0ec = fnvFloat_0107f7ec / sqrt_004019b0(fnvFloat_0107f7e8);
 }
 // @fnv 0x00f9ffd0
 void InitializeRuntimeFloatCall858()
 {
     fnvFloat_011de0cc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107f7e8) * fnvFloat_0107f7e8)) * fnvFloat_0107f7ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107f7e8) * fnvFloat_0107f7e8)) * fnvFloat_0107f7ec;
 }
 // @fnv 0x00fa0200
 void InitializeRuntimeFloatCall859()
 {
-    fnvFloat_011de2dc = fnvFloat_0107fa8c / FUN_004019b0(fnvFloat_0107fa88);
+    fnvFloat_011de2dc = fnvFloat_0107fa8c / sqrt_004019b0(fnvFloat_0107fa88);
 }
 // @fnv 0x00fa0230
 void InitializeRuntimeFloatCall860()
 {
     fnvFloat_011de274 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107fa88) * fnvFloat_0107fa88)) * fnvFloat_0107fa8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107fa88) * fnvFloat_0107fa88)) * fnvFloat_0107fa8c;
 }
 // @fnv 0x00fa06d0
 void InitializeRuntimeFloatCall861()
 {
-    fnvFloat_011de354 = fnvFloat_0107fec8 / FUN_004019b0(fnvFloat_0107fec4);
+    fnvFloat_011de354 = fnvFloat_0107fec8 / sqrt_004019b0(fnvFloat_0107fec4);
 }
 // @fnv 0x00fa0700
 void InitializeRuntimeFloatCall862()
 {
     fnvFloat_011de348 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0107fec4) * fnvFloat_0107fec4)) * fnvFloat_0107fec8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0107fec4) * fnvFloat_0107fec4)) * fnvFloat_0107fec8;
 }
 // @fnv 0x00fa07d0
 void InitializeRuntimeFloatCall863()
 {
-    fnvFloat_011de418 = fnvFloat_010800fc / FUN_004019b0(fnvFloat_010800f8);
+    fnvFloat_011de418 = fnvFloat_010800fc / sqrt_004019b0(fnvFloat_010800f8);
 }
 // @fnv 0x00fa0800
 void InitializeRuntimeFloatCall864()
 {
     fnvFloat_011de3f8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010800f8) * fnvFloat_010800f8)) * fnvFloat_010800fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010800f8) * fnvFloat_010800f8)) * fnvFloat_010800fc;
 }
 // @fnv 0x00fa0a30
 void InitializeRuntimeFloatCall865()
 {
-    fnvFloat_011de4b4 = fnvFloat_0108047c / FUN_004019b0(fnvFloat_01080478);
+    fnvFloat_011de4b4 = fnvFloat_0108047c / sqrt_004019b0(fnvFloat_01080478);
 }
 // @fnv 0x00fa0a60
 void InitializeRuntimeFloatCall866()
 {
     fnvFloat_011de47c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01080478) * fnvFloat_01080478)) * fnvFloat_0108047c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01080478) * fnvFloat_01080478)) * fnvFloat_0108047c;
 }
 // @fnv 0x00fa0ce0
 void InitializeRuntimeFloatCall867()
 {
-    fnvFloat_011de53c = fnvFloat_01081ffc / FUN_004019b0(fnvFloat_01081ff8);
+    fnvFloat_011de53c = fnvFloat_01081ffc / sqrt_004019b0(fnvFloat_01081ff8);
 }
 // @fnv 0x00fa0d10
 void InitializeRuntimeFloatCall868()
 {
     fnvFloat_011de51c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01081ff8) * fnvFloat_01081ff8)) * fnvFloat_01081ffc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01081ff8) * fnvFloat_01081ff8)) * fnvFloat_01081ffc;
 }
 // @fnv 0x00fa0f40
 void InitializeRuntimeFloatCall869()
 {
-    fnvFloat_011de584 = fnvFloat_01082040 / FUN_004019b0(fnvFloat_0108203c);
+    fnvFloat_011de584 = fnvFloat_01082040 / sqrt_004019b0(fnvFloat_0108203c);
 }
 // @fnv 0x00fa0f70
 void InitializeRuntimeFloatCall870()
 {
     fnvFloat_011de580 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108203c) * fnvFloat_0108203c)) * fnvFloat_01082040;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108203c) * fnvFloat_0108203c)) * fnvFloat_01082040;
 }
 // @fnv 0x00fa0fe0
 void InitializeRuntimeFloatCall871()
 {
-    fnvFloat_011de5c4 = fnvFloat_0108206c / FUN_004019b0(fnvFloat_01082068);
+    fnvFloat_011de5c4 = fnvFloat_0108206c / sqrt_004019b0(fnvFloat_01082068);
 }
 // @fnv 0x00fa1010
 void InitializeRuntimeFloatCall872()
 {
     fnvFloat_011de5a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01082068) * fnvFloat_01082068)) * fnvFloat_0108206c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01082068) * fnvFloat_01082068)) * fnvFloat_0108206c;
 }
 // @fnv 0x00fa1240
 void InitializeRuntimeFloatCall873()
 {
-    fnvFloat_011de63c = fnvFloat_010822dc / FUN_004019b0(fnvFloat_010822d8);
+    fnvFloat_011de63c = fnvFloat_010822dc / sqrt_004019b0(fnvFloat_010822d8);
 }
 // @fnv 0x00fa1270
 void InitializeRuntimeFloatCall874()
 {
     fnvFloat_011de61c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010822d8) * fnvFloat_010822d8)) * fnvFloat_010822dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010822d8) * fnvFloat_010822d8)) * fnvFloat_010822dc;
 }
 // @fnv 0x00fa14a0
 void InitializeRuntimeFloatCall875()
 {
-    fnvFloat_011de684 = fnvFloat_0108231c / FUN_004019b0(fnvFloat_01082318);
+    fnvFloat_011de684 = fnvFloat_0108231c / sqrt_004019b0(fnvFloat_01082318);
 }
 // @fnv 0x00fa14d0
 void InitializeRuntimeFloatCall876()
 {
     fnvFloat_011de680 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01082318) * fnvFloat_01082318)) * fnvFloat_0108231c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01082318) * fnvFloat_01082318)) * fnvFloat_0108231c;
 }
 // @fnv 0x00fa1580
 void InitializeRuntimeFloatCall877()
 {
-    fnvFloat_011de6cc = fnvFloat_0108234c / FUN_004019b0(fnvFloat_01082348);
+    fnvFloat_011de6cc = fnvFloat_0108234c / sqrt_004019b0(fnvFloat_01082348);
 }
 // @fnv 0x00fa15b0
 void InitializeRuntimeFloatCall878()
 {
     fnvFloat_011de6ac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01082348) * fnvFloat_01082348)) * fnvFloat_0108234c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01082348) * fnvFloat_01082348)) * fnvFloat_0108234c;
 }
 // @fnv 0x00fa17e0
 void InitializeRuntimeFloatCall879()
 {
-    fnvFloat_011de738 = fnvFloat_01082514 / FUN_004019b0(fnvFloat_01082510);
+    fnvFloat_011de738 = fnvFloat_01082514 / sqrt_004019b0(fnvFloat_01082510);
 }
 // @fnv 0x00fa1810
 void InitializeRuntimeFloatCall880()
 {
     fnvFloat_011de728 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01082510) * fnvFloat_01082510)) * fnvFloat_01082514;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01082510) * fnvFloat_01082510)) * fnvFloat_01082514;
 }
 // @fnv 0x00fa1910
 void InitializeRuntimeFloatCall881()
 {
-    fnvFloat_011de784 = fnvFloat_010825fc / FUN_004019b0(fnvFloat_010825f8);
+    fnvFloat_011de784 = fnvFloat_010825fc / sqrt_004019b0(fnvFloat_010825f8);
 }
 // @fnv 0x00fa1940
 void InitializeRuntimeFloatCall882()
 {
     fnvFloat_011de764 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010825f8) * fnvFloat_010825f8)) * fnvFloat_010825fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010825f8) * fnvFloat_010825f8)) * fnvFloat_010825fc;
 }
 // @fnv 0x00fa1b90
 void InitializeRuntimeFloatCall883()
 {
-    fnvFloat_011de8cc = fnvFloat_0108264c / FUN_004019b0(fnvFloat_01082648);
+    fnvFloat_011de8cc = fnvFloat_0108264c / sqrt_004019b0(fnvFloat_01082648);
 }
 // @fnv 0x00fa1bc0
 void InitializeRuntimeFloatCall884()
 {
     fnvFloat_011de86c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01082648) * fnvFloat_01082648)) * fnvFloat_0108264c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01082648) * fnvFloat_01082648)) * fnvFloat_0108264c;
 }
 // @fnv 0x00fa2050
 void InitializeRuntimeFloatCall885()
 {
-    fnvFloat_011decb8 = fnvFloat_0108288c / FUN_004019b0(fnvFloat_01082888);
+    fnvFloat_011decb8 = fnvFloat_0108288c / sqrt_004019b0(fnvFloat_01082888);
 }
 // @fnv 0x00fa2080
 void InitializeRuntimeFloatCall886()
 {
     fnvFloat_011deabc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01082888) * fnvFloat_01082888)) * fnvFloat_0108288c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01082888) * fnvFloat_01082888)) * fnvFloat_0108288c;
 }
 // @fnv 0x00fa3400
 void InitializeRuntimeFloatCall887()
 {
-    fnvFloat_011df028 = fnvFloat_01083a9c / FUN_004019b0(fnvFloat_01083a98);
+    fnvFloat_011df028 = fnvFloat_01083a9c / sqrt_004019b0(fnvFloat_01083a98);
 }
 // @fnv 0x00fa3430
 void InitializeRuntimeFloatCall888()
 {
     fnvFloat_011defd0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01083a98) * fnvFloat_01083a98)) * fnvFloat_01083a9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01083a98) * fnvFloat_01083a98)) * fnvFloat_01083a9c;
 }
 // @fnv 0x00fa36b0
 void InitializeRuntimeFloatCall889()
 {
-    fnvFloat_011df0a0 = fnvFloat_01083b2c / FUN_004019b0(fnvFloat_01083b28);
+    fnvFloat_011df0a0 = fnvFloat_01083b2c / sqrt_004019b0(fnvFloat_01083b28);
 }
 // @fnv 0x00fa36e0
 void InitializeRuntimeFloatCall890()
 {
     fnvFloat_011df080 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01083b28) * fnvFloat_01083b28)) * fnvFloat_01083b2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01083b28) * fnvFloat_01083b28)) * fnvFloat_01083b2c;
 }
 // @fnv 0x00fa3930
 void InitializeRuntimeFloatCall891()
 {
-    fnvFloat_011df138 = fnvFloat_01083c8c / FUN_004019b0(fnvFloat_01083c88);
+    fnvFloat_011df138 = fnvFloat_01083c8c / sqrt_004019b0(fnvFloat_01083c88);
 }
 // @fnv 0x00fa3960
 void InitializeRuntimeFloatCall892()
 {
     fnvFloat_011df10c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01083c88) * fnvFloat_01083c88)) * fnvFloat_01083c8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01083c88) * fnvFloat_01083c88)) * fnvFloat_01083c8c;
 }
 // @fnv 0x00fa3bf0
 void InitializeRuntimeFloatCall893()
 {
-    fnvFloat_011df18c = fnvFloat_01083f98 / FUN_004019b0(fnvFloat_01083f94);
+    fnvFloat_011df18c = fnvFloat_01083f98 / sqrt_004019b0(fnvFloat_01083f94);
 }
 // @fnv 0x00fa3c20
 void InitializeRuntimeFloatCall894()
 {
     fnvFloat_011df180 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01083f94) * fnvFloat_01083f94)) * fnvFloat_01083f98;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01083f94) * fnvFloat_01083f94)) * fnvFloat_01083f98;
 }
 // @fnv 0x00fa3d20
 void InitializeRuntimeFloatCall895()
 {
-    fnvFloat_011df1fc = fnvFloat_0108402c / FUN_004019b0(fnvFloat_01084028);
+    fnvFloat_011df1fc = fnvFloat_0108402c / sqrt_004019b0(fnvFloat_01084028);
 }
 // @fnv 0x00fa3d50
 void InitializeRuntimeFloatCall896()
 {
     fnvFloat_011df1dc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01084028) * fnvFloat_01084028)) * fnvFloat_0108402c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01084028) * fnvFloat_01084028)) * fnvFloat_0108402c;
 }
 // @fnv 0x00fa4080
 void InitializeRuntimeFloatCall897()
 {
-    fnvFloat_011df76c = fnvFloat_0108410c / FUN_004019b0(fnvFloat_01084108);
+    fnvFloat_011df76c = fnvFloat_0108410c / sqrt_004019b0(fnvFloat_01084108);
 }
 // @fnv 0x00fa40b0
 void InitializeRuntimeFloatCall898()
 {
     fnvFloat_011df6ac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01084108) * fnvFloat_01084108)) * fnvFloat_0108410c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01084108) * fnvFloat_01084108)) * fnvFloat_0108410c;
 }
 // @fnv 0x00fa48c0
 void InitializeRuntimeFloatCall899()
 {
-    fnvFloat_011df8bc = fnvFloat_0108535c / FUN_004019b0(fnvFloat_01085358);
+    fnvFloat_011df8bc = fnvFloat_0108535c / sqrt_004019b0(fnvFloat_01085358);
 }
 // @fnv 0x00fa48f0
 void InitializeRuntimeFloatCall900()
 {
     fnvFloat_011df89c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01085358) * fnvFloat_01085358)) * fnvFloat_0108535c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01085358) * fnvFloat_01085358)) * fnvFloat_0108535c;
 }
 // @fnv 0x00fa4b20
 void InitializeRuntimeFloatCall901()
 {
-    fnvFloat_011df934 = fnvFloat_010853fc / FUN_004019b0(fnvFloat_010853f8);
+    fnvFloat_011df934 = fnvFloat_010853fc / sqrt_004019b0(fnvFloat_010853f8);
 }
 // @fnv 0x00fa4b50
 void InitializeRuntimeFloatCall902()
 {
     fnvFloat_011df914 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010853f8) * fnvFloat_010853f8)) * fnvFloat_010853fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010853f8) * fnvFloat_010853f8)) * fnvFloat_010853fc;
 }
 // @fnv 0x00fa4db0
 void InitializeRuntimeFloatCall903()
 {
-    fnvFloat_011df9b8 = fnvFloat_0108542c / FUN_004019b0(fnvFloat_01085428);
+    fnvFloat_011df9b8 = fnvFloat_0108542c / sqrt_004019b0(fnvFloat_01085428);
 }
 // @fnv 0x00fa4de0
 void InitializeRuntimeFloatCall904()
 {
     fnvFloat_011df998 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01085428) * fnvFloat_01085428)) * fnvFloat_0108542c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01085428) * fnvFloat_01085428)) * fnvFloat_0108542c;
 }
 // @fnv 0x00fa50d0
 void InitializeRuntimeFloatCall905()
 {
-    fnvFloat_011dfae8 = fnvFloat_0108560c / FUN_004019b0(fnvFloat_01085608);
+    fnvFloat_011dfae8 = fnvFloat_0108560c / sqrt_004019b0(fnvFloat_01085608);
 }
 // @fnv 0x00fa5100
 void InitializeRuntimeFloatCall906()
 {
     fnvFloat_011dfa30 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01085608) * fnvFloat_01085608)) * fnvFloat_0108560c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01085608) * fnvFloat_01085608)) * fnvFloat_0108560c;
 }
 // @fnv 0x00fa5430
 void InitializeRuntimeFloatCall907()
 {
-    fnvFloat_011dfc20 = fnvFloat_010856fc / FUN_004019b0(fnvFloat_010856f8);
+    fnvFloat_011dfc20 = fnvFloat_010856fc / sqrt_004019b0(fnvFloat_010856f8);
 }
 // @fnv 0x00fa5460
 void InitializeRuntimeFloatCall908()
 {
     fnvFloat_011dfb7c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010856f8) * fnvFloat_010856f8)) * fnvFloat_010856fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010856f8) * fnvFloat_010856f8)) * fnvFloat_010856fc;
 }
 // @fnv 0x00fa57b0
 void InitializeRuntimeFloatCall909()
 {
-    fnvFloat_011dfcd4 = fnvFloat_0108591c / FUN_004019b0(fnvFloat_01085918);
+    fnvFloat_011dfcd4 = fnvFloat_0108591c / sqrt_004019b0(fnvFloat_01085918);
 }
 // @fnv 0x00fa57e0
 void InitializeRuntimeFloatCall910()
 {
     fnvFloat_011dfcb4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01085918) * fnvFloat_01085918)) * fnvFloat_0108591c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01085918) * fnvFloat_01085918)) * fnvFloat_0108591c;
 }
 // @fnv 0x00fa5a10
 void InitializeRuntimeFloatCall911()
 {
-    fnvFloat_011dfd4c = fnvFloat_01085dfc / FUN_004019b0(fnvFloat_01085df8);
+    fnvFloat_011dfd4c = fnvFloat_01085dfc / sqrt_004019b0(fnvFloat_01085df8);
 }
 // @fnv 0x00fa5a40
 void InitializeRuntimeFloatCall912()
 {
     fnvFloat_011dfd2c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01085df8) * fnvFloat_01085df8)) * fnvFloat_01085dfc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01085df8) * fnvFloat_01085df8)) * fnvFloat_01085dfc;
 }
 // @fnv 0x00fa5c70
 void InitializeRuntimeFloatCall913()
 {
-    fnvFloat_011dfdc4 = fnvFloat_0108662c / FUN_004019b0(fnvFloat_01086628);
+    fnvFloat_011dfdc4 = fnvFloat_0108662c / sqrt_004019b0(fnvFloat_01086628);
 }
 // @fnv 0x00fa5ca0
 void InitializeRuntimeFloatCall914()
 {
     fnvFloat_011dfda4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01086628) * fnvFloat_01086628)) * fnvFloat_0108662c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01086628) * fnvFloat_01086628)) * fnvFloat_0108662c;
 }
 // @fnv 0x00fa5ed0
 void InitializeRuntimeFloatCall915()
 {
-    fnvFloat_011dfe38 = fnvFloat_0108677c / FUN_004019b0(fnvFloat_01086778);
+    fnvFloat_011dfe38 = fnvFloat_0108677c / sqrt_004019b0(fnvFloat_01086778);
 }
 // @fnv 0x00fa5f00
 void InitializeRuntimeFloatCall916()
 {
     fnvFloat_011dfe0c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01086778) * fnvFloat_01086778)) * fnvFloat_0108677c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01086778) * fnvFloat_01086778)) * fnvFloat_0108677c;
 }
 // @fnv 0x00fa6030
 void InitializeRuntimeFloatCall917()
 {
-    fnvFloat_011dfe84 = fnvFloat_010867cc / FUN_004019b0(fnvFloat_010867c8);
+    fnvFloat_011dfe84 = fnvFloat_010867cc / sqrt_004019b0(fnvFloat_010867c8);
 }
 // @fnv 0x00fa6060
 void InitializeRuntimeFloatCall918()
 {
     fnvFloat_011dfe64 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010867c8) * fnvFloat_010867c8)) * fnvFloat_010867cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010867c8) * fnvFloat_010867c8)) * fnvFloat_010867cc;
 }
 // @fnv 0x00fa62b0
 void InitializeRuntimeFloatCall919()
 {
-    fnvFloat_011dfee4 = fnvFloat_010868d8 / FUN_004019b0(fnvFloat_010868d4);
+    fnvFloat_011dfee4 = fnvFloat_010868d8 / sqrt_004019b0(fnvFloat_010868d4);
 }
 // @fnv 0x00fa62e0
 void InitializeRuntimeFloatCall920()
 {
     fnvFloat_011dfee0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010868d4) * fnvFloat_010868d4)) * fnvFloat_010868d8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010868d4) * fnvFloat_010868d4)) * fnvFloat_010868d8;
 }
 // @fnv 0x00fa6350
 void InitializeRuntimeFloatCall921()
 {
-    fnvFloat_011dff24 = fnvFloat_0108692c / FUN_004019b0(fnvFloat_01086928);
+    fnvFloat_011dff24 = fnvFloat_0108692c / sqrt_004019b0(fnvFloat_01086928);
 }
 // @fnv 0x00fa6380
 void InitializeRuntimeFloatCall922()
 {
     fnvFloat_011dff04 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01086928) * fnvFloat_01086928)) * fnvFloat_0108692c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01086928) * fnvFloat_01086928)) * fnvFloat_0108692c;
 }
 // @fnv 0x00fa65f0
 void InitializeRuntimeFloatCall923()
 {
-    fnvFloat_011dffa4 = fnvFloat_01086f6c / FUN_004019b0(fnvFloat_01086f68);
+    fnvFloat_011dffa4 = fnvFloat_01086f6c / sqrt_004019b0(fnvFloat_01086f68);
 }
 // @fnv 0x00fa6620
 void InitializeRuntimeFloatCall924()
 {
     fnvFloat_011dff84 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01086f68) * fnvFloat_01086f68)) * fnvFloat_01086f6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01086f68) * fnvFloat_01086f68)) * fnvFloat_01086f6c;
 }
 // @fnv 0x00fa6850
 void InitializeRuntimeFloatCall925()
 {
-    fnvFloat_011e0020 = fnvFloat_0108759c / FUN_004019b0(fnvFloat_01087598);
+    fnvFloat_011e0020 = fnvFloat_0108759c / sqrt_004019b0(fnvFloat_01087598);
 }
 // @fnv 0x00fa6880
 void InitializeRuntimeFloatCall926()
 {
     fnvFloat_011e0000 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01087598) * fnvFloat_01087598)) * fnvFloat_0108759c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01087598) * fnvFloat_01087598)) * fnvFloat_0108759c;
 }
 // @fnv 0x00fa6ab0
 void InitializeRuntimeFloatCall927()
 {
-    fnvFloat_011e00a0 = fnvFloat_010875dc / FUN_004019b0(fnvFloat_010875d8);
+    fnvFloat_011e00a0 = fnvFloat_010875dc / sqrt_004019b0(fnvFloat_010875d8);
 }
 // @fnv 0x00fa6ae0
 void InitializeRuntimeFloatCall928()
 {
     fnvFloat_011e0078 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010875d8) * fnvFloat_010875d8)) * fnvFloat_010875dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010875d8) * fnvFloat_010875d8)) * fnvFloat_010875dc;
 }
 // @fnv 0x00fa6d30
 void InitializeRuntimeFloatCall929()
 {
-    fnvFloat_011e0154 = fnvFloat_01087698 / FUN_004019b0(fnvFloat_01087694);
+    fnvFloat_011e0154 = fnvFloat_01087698 / sqrt_004019b0(fnvFloat_01087694);
 }
 // @fnv 0x00fa6d60
 void InitializeRuntimeFloatCall930()
 {
     fnvFloat_011e0148 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01087694) * fnvFloat_01087694)) * fnvFloat_01087698;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01087694) * fnvFloat_01087694)) * fnvFloat_01087698;
 }
 // @fnv 0x00fa6e10
 void InitializeRuntimeFloatCall931()
 {
-    fnvFloat_011e0194 = fnvFloat_0108771c / FUN_004019b0(fnvFloat_01087718);
+    fnvFloat_011e0194 = fnvFloat_0108771c / sqrt_004019b0(fnvFloat_01087718);
 }
 // @fnv 0x00fa6e40
 void InitializeRuntimeFloatCall932()
 {
     fnvFloat_011e0174 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01087718) * fnvFloat_01087718)) * fnvFloat_0108771c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01087718) * fnvFloat_01087718)) * fnvFloat_0108771c;
 }
 // @fnv 0x00fa7070
 void InitializeRuntimeFloatCall933()
 {
-    fnvFloat_011e0258 = fnvFloat_0108782c / FUN_004019b0(fnvFloat_01087828);
+    fnvFloat_011e0258 = fnvFloat_0108782c / sqrt_004019b0(fnvFloat_01087828);
 }
 // @fnv 0x00fa70a0
 void InitializeRuntimeFloatCall934()
 {
     fnvFloat_011e0210 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01087828) * fnvFloat_01087828)) * fnvFloat_0108782c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01087828) * fnvFloat_01087828)) * fnvFloat_0108782c;
 }
 // @fnv 0x00fa7530
 void InitializeRuntimeFloatCall935()
 {
-    fnvFloat_011e030c = fnvFloat_0108858c / FUN_004019b0(fnvFloat_01088588);
+    fnvFloat_011e030c = fnvFloat_0108858c / sqrt_004019b0(fnvFloat_01088588);
 }
 // @fnv 0x00fa7560
 void InitializeRuntimeFloatCall936()
 {
     fnvFloat_011e02ec =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01088588) * fnvFloat_01088588)) * fnvFloat_0108858c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01088588) * fnvFloat_01088588)) * fnvFloat_0108858c;
 }
 // @fnv 0x00fa7790
 void InitializeRuntimeFloatCall937()
 {
-    fnvFloat_011e03c0 = fnvFloat_010886ac / FUN_004019b0(fnvFloat_010886a8);
+    fnvFloat_011e03c0 = fnvFloat_010886ac / sqrt_004019b0(fnvFloat_010886a8);
 }
 // @fnv 0x00fa77c0
 void InitializeRuntimeFloatCall938()
 {
     fnvFloat_011e0378 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010886a8) * fnvFloat_010886a8)) * fnvFloat_010886ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010886a8) * fnvFloat_010886a8)) * fnvFloat_010886ac;
 }
 // @fnv 0x00fa7ab0
 void InitializeRuntimeFloatCall939()
 {
-    fnvFloat_011e046c = fnvFloat_0108901c / FUN_004019b0(fnvFloat_01089018);
+    fnvFloat_011e046c = fnvFloat_0108901c / sqrt_004019b0(fnvFloat_01089018);
 }
 // @fnv 0x00fa7ae0
 void InitializeRuntimeFloatCall940()
 {
     fnvFloat_011e0430 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01089018) * fnvFloat_01089018)) * fnvFloat_0108901c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01089018) * fnvFloat_01089018)) * fnvFloat_0108901c;
 }
 // @fnv 0x00fa7e00
 void InitializeRuntimeFloatCall941()
 {
-    fnvFloat_011e0504 = fnvFloat_01089b9c / FUN_004019b0(fnvFloat_01089b98);
+    fnvFloat_011e0504 = fnvFloat_01089b9c / sqrt_004019b0(fnvFloat_01089b98);
 }
 // @fnv 0x00fa7e30
 void InitializeRuntimeFloatCall942()
 {
     fnvFloat_011e04e4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01089b98) * fnvFloat_01089b98)) * fnvFloat_01089b9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01089b98) * fnvFloat_01089b98)) * fnvFloat_01089b9c;
 }
 // @fnv 0x00fa8080
 void InitializeRuntimeFloatCall943()
 {
-    fnvFloat_011e0594 = fnvFloat_0108a45c / FUN_004019b0(fnvFloat_0108a458);
+    fnvFloat_011e0594 = fnvFloat_0108a45c / sqrt_004019b0(fnvFloat_0108a458);
 }
 // @fnv 0x00fa80b0
 void InitializeRuntimeFloatCall944()
 {
     fnvFloat_011e0568 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108a458) * fnvFloat_0108a458)) * fnvFloat_0108a45c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108a458) * fnvFloat_0108a458)) * fnvFloat_0108a45c;
 }
 // @fnv 0x00fa8460
 void InitializeRuntimeFloatCall945()
 {
-    fnvFloat_011e0a1c = fnvFloat_0108a8ac / FUN_004019b0(fnvFloat_0108a8a8);
+    fnvFloat_011e0a1c = fnvFloat_0108a8ac / sqrt_004019b0(fnvFloat_0108a8a8);
 }
 // @fnv 0x00fa8490
 void InitializeRuntimeFloatCall946()
 {
     fnvFloat_011e084c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108a8a8) * fnvFloat_0108a8a8)) * fnvFloat_0108a8ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108a8a8) * fnvFloat_0108a8a8)) * fnvFloat_0108a8ac;
 }
 // @fnv 0x00fa92c0
 void InitializeRuntimeFloatCall947()
 {
-    fnvFloat_011e0dc4 = fnvFloat_0108c09c / FUN_004019b0(fnvFloat_0108c098);
+    fnvFloat_011e0dc4 = fnvFloat_0108c09c / sqrt_004019b0(fnvFloat_0108c098);
 }
 // @fnv 0x00fa92f0
 void InitializeRuntimeFloatCall948()
 {
     fnvFloat_011e0da4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108c098) * fnvFloat_0108c098)) * fnvFloat_0108c09c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108c098) * fnvFloat_0108c098)) * fnvFloat_0108c09c;
 }
 // @fnv 0x00fa9520
 void InitializeRuntimeFloatCall949()
 {
-    fnvFloat_011f128c = fnvFloat_0108c0ec / FUN_004019b0(fnvFloat_0108c0e8);
+    fnvFloat_011f128c = fnvFloat_0108c0ec / sqrt_004019b0(fnvFloat_0108c0e8);
 }
 // @fnv 0x00fa9550
 void InitializeRuntimeFloatCall950()
 {
     fnvFloat_011e0e5c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108c0e8) * fnvFloat_0108c0e8)) * fnvFloat_0108c0ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108c0e8) * fnvFloat_0108c0e8)) * fnvFloat_0108c0ec;
 }
 // @fnv 0x00fa98f0
 void InitializeRuntimeFloatCall951()
 {
-    fnvFloat_011f1314 = fnvFloat_0108c34c / FUN_004019b0(fnvFloat_0108c348);
+    fnvFloat_011f1314 = fnvFloat_0108c34c / sqrt_004019b0(fnvFloat_0108c348);
 }
 // @fnv 0x00fa9920
 void InitializeRuntimeFloatCall952()
 {
     fnvFloat_011f12f4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108c348) * fnvFloat_0108c348)) * fnvFloat_0108c34c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108c348) * fnvFloat_0108c348)) * fnvFloat_0108c34c;
 }
 // @fnv 0x00fa9b50
 void InitializeRuntimeFloatCall953()
 {
-    fnvFloat_011f1390 = fnvFloat_0108c38c / FUN_004019b0(fnvFloat_0108c388);
+    fnvFloat_011f1390 = fnvFloat_0108c38c / sqrt_004019b0(fnvFloat_0108c388);
 }
 // @fnv 0x00fa9b80
 void InitializeRuntimeFloatCall954()
 {
     fnvFloat_011f136c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108c388) * fnvFloat_0108c388)) * fnvFloat_0108c38c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108c388) * fnvFloat_0108c388)) * fnvFloat_0108c38c;
 }
 // @fnv 0x00fa9dc0
 void InitializeRuntimeFloatCall955()
 {
-    fnvFloat_011f14c4 = fnvFloat_0108ca8c / FUN_004019b0(fnvFloat_0108ca88);
+    fnvFloat_011f14c4 = fnvFloat_0108ca8c / sqrt_004019b0(fnvFloat_0108ca88);
 }
 // @fnv 0x00fa9df0
 void InitializeRuntimeFloatCall956()
 {
     fnvFloat_011f14a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108ca88) * fnvFloat_0108ca88)) * fnvFloat_0108ca8c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108ca88) * fnvFloat_0108ca88)) * fnvFloat_0108ca8c;
 }
 // @fnv 0x00faa020
 void InitializeRuntimeFloatCall957()
 {
-    fnvFloat_011f153c = fnvFloat_0108cb1c / FUN_004019b0(fnvFloat_0108cb18);
+    fnvFloat_011f153c = fnvFloat_0108cb1c / sqrt_004019b0(fnvFloat_0108cb18);
 }
 // @fnv 0x00faa050
 void InitializeRuntimeFloatCall958()
 {
     fnvFloat_011f151c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108cb18) * fnvFloat_0108cb18)) * fnvFloat_0108cb1c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108cb18) * fnvFloat_0108cb18)) * fnvFloat_0108cb1c;
 }
 // @fnv 0x00faa2e0
 void InitializeRuntimeFloatCall959()
 {
-    fnvFloat_011f15fc = fnvFloat_0108ce3c / FUN_004019b0(fnvFloat_0108ce38);
+    fnvFloat_011f15fc = fnvFloat_0108ce3c / sqrt_004019b0(fnvFloat_0108ce38);
 }
 // @fnv 0x00faa310
 void InitializeRuntimeFloatCall960()
 {
     fnvFloat_011f15c0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108ce38) * fnvFloat_0108ce38)) * fnvFloat_0108ce3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108ce38) * fnvFloat_0108ce38)) * fnvFloat_0108ce3c;
 }
 // @fnv 0x00faa680
 void InitializeRuntimeFloatCall961()
 {
-    fnvFloat_011f16a0 = fnvFloat_0108d0ac / FUN_004019b0(fnvFloat_0108d0a8);
+    fnvFloat_011f16a0 = fnvFloat_0108d0ac / sqrt_004019b0(fnvFloat_0108d0a8);
 }
 // @fnv 0x00faa6b0
 void InitializeRuntimeFloatCall962()
 {
     fnvFloat_011f165c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108d0a8) * fnvFloat_0108d0a8)) * fnvFloat_0108d0ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108d0a8) * fnvFloat_0108d0a8)) * fnvFloat_0108d0ac;
 }
 // @fnv 0x00faaa30
 void InitializeRuntimeFloatCall963()
 {
-    fnvFloat_011f1744 = fnvFloat_0108d21c / FUN_004019b0(fnvFloat_0108d218);
+    fnvFloat_011f1744 = fnvFloat_0108d21c / sqrt_004019b0(fnvFloat_0108d218);
 }
 // @fnv 0x00faaa60
 void InitializeRuntimeFloatCall964()
 {
     fnvFloat_011f1724 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108d218) * fnvFloat_0108d218)) * fnvFloat_0108d21c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108d218) * fnvFloat_0108d218)) * fnvFloat_0108d21c;
 }
 // @fnv 0x00faad20
 void InitializeRuntimeFloatCall965()
 {
-    fnvFloat_011f17e8 = fnvFloat_0108d438 / FUN_004019b0(fnvFloat_0108d434);
+    fnvFloat_011f17e8 = fnvFloat_0108d438 / sqrt_004019b0(fnvFloat_0108d434);
 }
 // @fnv 0x00faad50
 void InitializeRuntimeFloatCall966()
 {
     fnvFloat_011f17e4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108d434) * fnvFloat_0108d434)) * fnvFloat_0108d438;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108d434) * fnvFloat_0108d434)) * fnvFloat_0108d438;
 }
 // @fnv 0x00faae20
 void InitializeRuntimeFloatCall967()
 {
-    fnvFloat_011f184c = fnvFloat_0108d574 / FUN_004019b0(fnvFloat_0108d570);
+    fnvFloat_011f184c = fnvFloat_0108d574 / sqrt_004019b0(fnvFloat_0108d570);
 }
 // @fnv 0x00faae50
 void InitializeRuntimeFloatCall968()
 {
     fnvFloat_011f1808 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108d570) * fnvFloat_0108d570)) * fnvFloat_0108d574;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108d570) * fnvFloat_0108d570)) * fnvFloat_0108d574;
 }
 // @fnv 0x00fab170
 void InitializeRuntimeFloatCall969()
 {
-    fnvFloat_011f1908 = fnvFloat_0108d8cc / FUN_004019b0(fnvFloat_0108d8c8);
+    fnvFloat_011f1908 = fnvFloat_0108d8cc / sqrt_004019b0(fnvFloat_0108d8c8);
 }
 // @fnv 0x00fab1a0
 void InitializeRuntimeFloatCall970()
 {
     fnvFloat_011f18e8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108d8c8) * fnvFloat_0108d8c8)) * fnvFloat_0108d8cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108d8c8) * fnvFloat_0108d8c8)) * fnvFloat_0108d8cc;
 }
 // @fnv 0x00fab460
 void InitializeRuntimeFloatCall971()
 {
-    fnvFloat_011f199c = fnvFloat_0108d9bc / FUN_004019b0(fnvFloat_0108d9b8);
+    fnvFloat_011f199c = fnvFloat_0108d9bc / sqrt_004019b0(fnvFloat_0108d9b8);
 }
 // @fnv 0x00fab490
 void InitializeRuntimeFloatCall972()
 {
     fnvFloat_011f1970 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108d9b8) * fnvFloat_0108d9b8)) * fnvFloat_0108d9bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108d9b8) * fnvFloat_0108d9b8)) * fnvFloat_0108d9bc;
 }
 // @fnv 0x00fab750
 void InitializeRuntimeFloatCall973()
 {
-    fnvFloat_011f19f0 = fnvFloat_0108dba4 / FUN_004019b0(fnvFloat_0108dba0);
+    fnvFloat_011f19f0 = fnvFloat_0108dba4 / sqrt_004019b0(fnvFloat_0108dba0);
 }
 // @fnv 0x00fab780
 void InitializeRuntimeFloatCall974()
 {
     fnvFloat_011f19ec =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108dba0) * fnvFloat_0108dba0)) * fnvFloat_0108dba4;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108dba0) * fnvFloat_0108dba0)) * fnvFloat_0108dba4;
 }
 // @fnv 0x00fab7f0
 void InitializeRuntimeFloatCall975()
 {
-    fnvFloat_011f1a00 = fnvFloat_0108dbfc / FUN_004019b0(fnvFloat_0108dbf8);
+    fnvFloat_011f1a00 = fnvFloat_0108dbfc / sqrt_004019b0(fnvFloat_0108dbf8);
 }
 // @fnv 0x00fab820
 void InitializeRuntimeFloatCall976()
 {
     fnvFloat_011f19fc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108dbf8) * fnvFloat_0108dbf8)) * fnvFloat_0108dbfc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108dbf8) * fnvFloat_0108dbf8)) * fnvFloat_0108dbfc;
 }
 // @fnv 0x00fab890
 void InitializeRuntimeFloatCall977()
 {
-    fnvFloat_011f1a10 = fnvFloat_0108dda8 / FUN_004019b0(fnvFloat_0108dda4);
+    fnvFloat_011f1a10 = fnvFloat_0108dda8 / sqrt_004019b0(fnvFloat_0108dda4);
 }
 // @fnv 0x00fab8c0
 void InitializeRuntimeFloatCall978()
 {
     fnvFloat_011f1a0c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108dda4) * fnvFloat_0108dda4)) * fnvFloat_0108dda8;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108dda4) * fnvFloat_0108dda4)) * fnvFloat_0108dda8;
 }
 // @fnv 0x00fab930
 void InitializeRuntimeFloatCall979()
 {
-    fnvFloat_011f1a84 = fnvFloat_0108df7c / FUN_004019b0(fnvFloat_0108df78);
+    fnvFloat_011f1a84 = fnvFloat_0108df7c / sqrt_004019b0(fnvFloat_0108df78);
 }
 // @fnv 0x00fab960
 void InitializeRuntimeFloatCall980()
 {
     fnvFloat_011f1a48 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108df78) * fnvFloat_0108df78)) * fnvFloat_0108df7c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108df78) * fnvFloat_0108df78)) * fnvFloat_0108df7c;
 }
 // @fnv 0x00fabd70
 void InitializeRuntimeFloatCall981()
 {
-    fnvFloat_011f1b20 = fnvFloat_0108e1bc / FUN_004019b0(fnvFloat_0108e1b8);
+    fnvFloat_011f1b20 = fnvFloat_0108e1bc / sqrt_004019b0(fnvFloat_0108e1b8);
 }
 // @fnv 0x00fabda0
 void InitializeRuntimeFloatCall982()
 {
     fnvFloat_011f1b00 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108e1b8) * fnvFloat_0108e1b8)) * fnvFloat_0108e1bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108e1b8) * fnvFloat_0108e1b8)) * fnvFloat_0108e1bc;
 }
 // @fnv 0x00fac000
 void InitializeRuntimeFloatCall983()
 {
-    fnvFloat_011f1bb0 = fnvFloat_0108e2bc / FUN_004019b0(fnvFloat_0108e2b8);
+    fnvFloat_011f1bb0 = fnvFloat_0108e2bc / sqrt_004019b0(fnvFloat_0108e2b8);
 }
 // @fnv 0x00fac030
 void InitializeRuntimeFloatCall984()
 {
     fnvFloat_011f1b84 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108e2b8) * fnvFloat_0108e2b8)) * fnvFloat_0108e2bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108e2b8) * fnvFloat_0108e2b8)) * fnvFloat_0108e2bc;
 }
 // @fnv 0x00fac2d0
 void InitializeRuntimeFloatCall985()
 {
-    fnvFloat_011f1c5c = fnvFloat_0108e37c / FUN_004019b0(fnvFloat_0108e378);
+    fnvFloat_011f1c5c = fnvFloat_0108e37c / sqrt_004019b0(fnvFloat_0108e378);
 }
 // @fnv 0x00fac300
 void InitializeRuntimeFloatCall986()
 {
     fnvFloat_011f1c18 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108e378) * fnvFloat_0108e378)) * fnvFloat_0108e37c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108e378) * fnvFloat_0108e378)) * fnvFloat_0108e37c;
 }
 // @fnv 0x00fac640
 void InitializeRuntimeFloatCall987()
 {
-    fnvFloat_011f1cec = fnvFloat_0108e98c / FUN_004019b0(fnvFloat_0108e988);
+    fnvFloat_011f1cec = fnvFloat_0108e98c / sqrt_004019b0(fnvFloat_0108e988);
 }
 // @fnv 0x00fac670
 void InitializeRuntimeFloatCall988()
 {
     fnvFloat_011f1ccc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108e988) * fnvFloat_0108e988)) * fnvFloat_0108e98c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108e988) * fnvFloat_0108e988)) * fnvFloat_0108e98c;
 }
 // @fnv 0x00fac900
 void InitializeRuntimeFloatCall989()
 {
-    fnvFloat_011f1d74 = fnvFloat_0108ea2c / FUN_004019b0(fnvFloat_0108ea28);
+    fnvFloat_011f1d74 = fnvFloat_0108ea2c / sqrt_004019b0(fnvFloat_0108ea28);
 }
 // @fnv 0x00fac930
 void InitializeRuntimeFloatCall990()
 {
     fnvFloat_011f1d50 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108ea28) * fnvFloat_0108ea28)) * fnvFloat_0108ea2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108ea28) * fnvFloat_0108ea28)) * fnvFloat_0108ea2c;
 }
 // @fnv 0x00facb70
 void InitializeRuntimeFloatCall991()
 {
-    fnvFloat_011f1df8 = fnvFloat_0108edcc / FUN_004019b0(fnvFloat_0108edc8);
+    fnvFloat_011f1df8 = fnvFloat_0108edcc / sqrt_004019b0(fnvFloat_0108edc8);
 }
 // @fnv 0x00facba0
 void InitializeRuntimeFloatCall992()
 {
     fnvFloat_011f1dd8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108edc8) * fnvFloat_0108edc8)) * fnvFloat_0108edcc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108edc8) * fnvFloat_0108edc8)) * fnvFloat_0108edcc;
 }
 // @fnv 0x00facdd0
 void InitializeRuntimeFloatCall993()
 {
-    fnvFloat_011f1e70 = fnvFloat_0108f2bc / FUN_004019b0(fnvFloat_0108f2b8);
+    fnvFloat_011f1e70 = fnvFloat_0108f2bc / sqrt_004019b0(fnvFloat_0108f2b8);
 }
 // @fnv 0x00face00
 void InitializeRuntimeFloatCall994()
 {
     fnvFloat_011f1e50 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108f2b8) * fnvFloat_0108f2b8)) * fnvFloat_0108f2bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108f2b8) * fnvFloat_0108f2b8)) * fnvFloat_0108f2bc;
 }
 // @fnv 0x00fad030
 void InitializeRuntimeFloatCall995()
 {
-    fnvFloat_011f1ee8 = fnvFloat_0108f63c / FUN_004019b0(fnvFloat_0108f638);
+    fnvFloat_011f1ee8 = fnvFloat_0108f63c / sqrt_004019b0(fnvFloat_0108f638);
 }
 // @fnv 0x00fad060
 void InitializeRuntimeFloatCall996()
 {
     fnvFloat_011f1ec8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108f638) * fnvFloat_0108f638)) * fnvFloat_0108f63c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108f638) * fnvFloat_0108f638)) * fnvFloat_0108f63c;
 }
 // @fnv 0x00fad290
 void InitializeRuntimeFloatCall997()
 {
-    fnvFloat_011f1f60 = fnvFloat_0108f9bc / FUN_004019b0(fnvFloat_0108f9b8);
+    fnvFloat_011f1f60 = fnvFloat_0108f9bc / sqrt_004019b0(fnvFloat_0108f9b8);
 }
 // @fnv 0x00fad2c0
 void InitializeRuntimeFloatCall998()
 {
     fnvFloat_011f1f40 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108f9b8) * fnvFloat_0108f9b8)) * fnvFloat_0108f9bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108f9b8) * fnvFloat_0108f9b8)) * fnvFloat_0108f9bc;
 }
 // @fnv 0x00fad4f0
 void InitializeRuntimeFloatCall999()
 {
-    fnvFloat_011f1fd8 = fnvFloat_0108fa0c / FUN_004019b0(fnvFloat_0108fa08);
+    fnvFloat_011f1fd8 = fnvFloat_0108fa0c / sqrt_004019b0(fnvFloat_0108fa08);
 }
 // @fnv 0x00fad520
 void InitializeRuntimeFloatCall1000()
 {
     fnvFloat_011f1fb8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108fa08) * fnvFloat_0108fa08)) * fnvFloat_0108fa0c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108fa08) * fnvFloat_0108fa08)) * fnvFloat_0108fa0c;
 }
 // @fnv 0x00fad750
 void InitializeRuntimeFloatCall1001()
 {
-    fnvFloat_011f2060 = fnvFloat_0108ffdc / FUN_004019b0(fnvFloat_0108ffd8);
+    fnvFloat_011f2060 = fnvFloat_0108ffdc / sqrt_004019b0(fnvFloat_0108ffd8);
 }
 // @fnv 0x00fad780
 void InitializeRuntimeFloatCall1002()
 {
     fnvFloat_011f2040 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_0108ffd8) * fnvFloat_0108ffd8)) * fnvFloat_0108ffdc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_0108ffd8) * fnvFloat_0108ffd8)) * fnvFloat_0108ffdc;
 }
 // @fnv 0x00fad9b0
 void InitializeRuntimeFloatCall1003()
 {
-    fnvFloat_011f20e8 = fnvFloat_0109005c / FUN_004019b0(fnvFloat_01090058);
+    fnvFloat_011f20e8 = fnvFloat_0109005c / sqrt_004019b0(fnvFloat_01090058);
 }
 // @fnv 0x00fad9e0
 void InitializeRuntimeFloatCall1004()
 {
     fnvFloat_011f20c8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01090058) * fnvFloat_01090058)) * fnvFloat_0109005c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01090058) * fnvFloat_01090058)) * fnvFloat_0109005c;
 }
 // @fnv 0x00fadca0
 void InitializeRuntimeFloatCall1005()
 {
-    fnvFloat_011f2174 = fnvFloat_0109053c / FUN_004019b0(fnvFloat_01090538);
+    fnvFloat_011f2174 = fnvFloat_0109053c / sqrt_004019b0(fnvFloat_01090538);
 }
 // @fnv 0x00fadcd0
 void InitializeRuntimeFloatCall1006()
 {
     fnvFloat_011f2154 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01090538) * fnvFloat_01090538)) * fnvFloat_0109053c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01090538) * fnvFloat_01090538)) * fnvFloat_0109053c;
 }
 // @fnv 0x00fadf00
 void InitializeRuntimeFloatCall1007()
 {
-    fnvFloat_011f22b8 = fnvFloat_0109067c / FUN_004019b0(fnvFloat_01090678);
+    fnvFloat_011f22b8 = fnvFloat_0109067c / sqrt_004019b0(fnvFloat_01090678);
 }
 // @fnv 0x00fadf30
 void InitializeRuntimeFloatCall1008()
 {
     fnvFloat_011f2238 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01090678) * fnvFloat_01090678)) * fnvFloat_0109067c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01090678) * fnvFloat_01090678)) * fnvFloat_0109067c;
 }
 // @fnv 0x00fae360
 void InitializeRuntimeFloatCall1009()
 {
-    fnvFloat_011f235c = fnvFloat_010907fc / FUN_004019b0(fnvFloat_010907f8);
+    fnvFloat_011f235c = fnvFloat_010907fc / sqrt_004019b0(fnvFloat_010907f8);
 }
 // @fnv 0x00fae390
 void InitializeRuntimeFloatCall1010()
 {
     fnvFloat_011f233c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010907f8) * fnvFloat_010907f8)) * fnvFloat_010907fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010907f8) * fnvFloat_010907f8)) * fnvFloat_010907fc;
 }
 // @fnv 0x00fae5c0
 void InitializeRuntimeFloatCall1011()
 {
-    fnvFloat_011f23d4 = fnvFloat_0109098c / FUN_004019b0(fnvFloat_01090988);
+    fnvFloat_011f23d4 = fnvFloat_0109098c / sqrt_004019b0(fnvFloat_01090988);
 }
 // @fnv 0x00fae5f0
 void InitializeRuntimeFloatCall1012()
 {
     fnvFloat_011f23b4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01090988) * fnvFloat_01090988)) * fnvFloat_0109098c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01090988) * fnvFloat_01090988)) * fnvFloat_0109098c;
 }
 // @fnv 0x00fae820
 void InitializeRuntimeFloatCall1013()
 {
-    fnvFloat_011f244c = fnvFloat_01090abc / FUN_004019b0(fnvFloat_01090ab8);
+    fnvFloat_011f244c = fnvFloat_01090abc / sqrt_004019b0(fnvFloat_01090ab8);
 }
 // @fnv 0x00fae850
 void InitializeRuntimeFloatCall1014()
 {
     fnvFloat_011f242c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01090ab8) * fnvFloat_01090ab8)) * fnvFloat_01090abc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01090ab8) * fnvFloat_01090ab8)) * fnvFloat_01090abc;
 }
 // @fnv 0x00faea80
 void InitializeRuntimeFloatCall1015()
 {
-    fnvFloat_011f24c4 = fnvFloat_01090bcc / FUN_004019b0(fnvFloat_01090bc8);
+    fnvFloat_011f24c4 = fnvFloat_01090bcc / sqrt_004019b0(fnvFloat_01090bc8);
 }
 // @fnv 0x00faeab0
 void InitializeRuntimeFloatCall1016()
 {
     fnvFloat_011f24a4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01090bc8) * fnvFloat_01090bc8)) * fnvFloat_01090bcc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01090bc8) * fnvFloat_01090bc8)) * fnvFloat_01090bcc;
 }
 // @fnv 0x00faed60
 void InitializeRuntimeFloatCall1017()
 {
-    fnvFloat_011f2548 = fnvFloat_01090e9c / FUN_004019b0(fnvFloat_01090e98);
+    fnvFloat_011f2548 = fnvFloat_01090e9c / sqrt_004019b0(fnvFloat_01090e98);
 }
 // @fnv 0x00faed90
 void InitializeRuntimeFloatCall1018()
 {
     fnvFloat_011f2528 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01090e98) * fnvFloat_01090e98)) * fnvFloat_01090e9c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01090e98) * fnvFloat_01090e98)) * fnvFloat_01090e9c;
 }
 // @fnv 0x00faf020
 void InitializeRuntimeFloatCall1019()
 {
-    fnvFloat_011f25cc = fnvFloat_010910bc / FUN_004019b0(fnvFloat_010910b8);
+    fnvFloat_011f25cc = fnvFloat_010910bc / sqrt_004019b0(fnvFloat_010910b8);
 }
 // @fnv 0x00faf050
 void InitializeRuntimeFloatCall1020()
 {
     fnvFloat_011f25ac =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010910b8) * fnvFloat_010910b8)) * fnvFloat_010910bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010910b8) * fnvFloat_010910b8)) * fnvFloat_010910bc;
 }
 // @fnv 0x00faf2e0
 void InitializeRuntimeFloatCall1021()
 {
-    fnvFloat_011f2650 = fnvFloat_010914dc / FUN_004019b0(fnvFloat_010914d8);
+    fnvFloat_011f2650 = fnvFloat_010914dc / sqrt_004019b0(fnvFloat_010914d8);
 }
 // @fnv 0x00faf310
 void InitializeRuntimeFloatCall1022()
 {
     fnvFloat_011f2630 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010914d8) * fnvFloat_010914d8)) * fnvFloat_010914dc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010914d8) * fnvFloat_010914d8)) * fnvFloat_010914dc;
 }
 // @fnv 0x00faf5a0
 void InitializeRuntimeFloatCall1023()
 {
-    fnvFloat_011f26d4 = fnvFloat_0109194c / FUN_004019b0(fnvFloat_01091948);
+    fnvFloat_011f26d4 = fnvFloat_0109194c / sqrt_004019b0(fnvFloat_01091948);
 }
 // @fnv 0x00faf5d0
 void InitializeRuntimeFloatCall1024()
 {
     fnvFloat_011f26b4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01091948) * fnvFloat_01091948)) * fnvFloat_0109194c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01091948) * fnvFloat_01091948)) * fnvFloat_0109194c;
 }
 // @fnv 0x00faf860
 void InitializeRuntimeFloatCall1025()
 {
-    fnvFloat_011f2758 = fnvFloat_01091a2c / FUN_004019b0(fnvFloat_01091a28);
+    fnvFloat_011f2758 = fnvFloat_01091a2c / sqrt_004019b0(fnvFloat_01091a28);
 }
 // @fnv 0x00faf890
 void InitializeRuntimeFloatCall1026()
 {
     fnvFloat_011f2738 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01091a28) * fnvFloat_01091a28)) * fnvFloat_01091a2c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01091a28) * fnvFloat_01091a28)) * fnvFloat_01091a2c;
 }
 // @fnv 0x00fafb20
 void InitializeRuntimeFloatCall1027()
 {
-    fnvFloat_011f27dc = fnvFloat_01091b7c / FUN_004019b0(fnvFloat_01091b78);
+    fnvFloat_011f27dc = fnvFloat_01091b7c / sqrt_004019b0(fnvFloat_01091b78);
 }
 // @fnv 0x00fafb50
 void InitializeRuntimeFloatCall1028()
 {
     fnvFloat_011f27bc =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01091b78) * fnvFloat_01091b78)) * fnvFloat_01091b7c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01091b78) * fnvFloat_01091b78)) * fnvFloat_01091b7c;
 }
 // @fnv 0x00fafe40
 void InitializeRuntimeFloatCall1029()
 {
-    fnvFloat_011f2860 = fnvFloat_01091da4 / FUN_004019b0(fnvFloat_01091da0);
+    fnvFloat_011f2860 = fnvFloat_01091da4 / sqrt_004019b0(fnvFloat_01091da0);
 }
 // @fnv 0x00fafe70
 void InitializeRuntimeFloatCall1030()
 {
     fnvFloat_011f2840 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01091da0) * fnvFloat_01091da0)) * fnvFloat_01091da4;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01091da0) * fnvFloat_01091da0)) * fnvFloat_01091da4;
 }
 // @fnv 0x00fb00a0
 void InitializeRuntimeFloatCall1031()
 {
-    fnvFloat_011f28e4 = fnvFloat_0109209c / FUN_004019b0(fnvFloat_01092098);
+    fnvFloat_011f28e4 = fnvFloat_0109209c / sqrt_004019b0(fnvFloat_01092098);
 }
 // @fnv 0x00fb00d0
 void InitializeRuntimeFloatCall1032()
 {
     fnvFloat_011f28c4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01092098) * fnvFloat_01092098)) * fnvFloat_0109209c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01092098) * fnvFloat_01092098)) * fnvFloat_0109209c;
 }
 // @fnv 0x00fb0300
 void InitializeRuntimeFloatCall1033()
 {
-    fnvFloat_011f295c = fnvFloat_0109211c / FUN_004019b0(fnvFloat_01092118);
+    fnvFloat_011f295c = fnvFloat_0109211c / sqrt_004019b0(fnvFloat_01092118);
 }
 // @fnv 0x00fb0330
 void InitializeRuntimeFloatCall1034()
 {
     fnvFloat_011f293c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01092118) * fnvFloat_01092118)) * fnvFloat_0109211c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01092118) * fnvFloat_01092118)) * fnvFloat_0109211c;
 }
 // @fnv 0x00fb0560
 void InitializeRuntimeFloatCall1035()
 {
-    fnvFloat_011f29d4 = fnvFloat_010921fc / FUN_004019b0(fnvFloat_010921f8);
+    fnvFloat_011f29d4 = fnvFloat_010921fc / sqrt_004019b0(fnvFloat_010921f8);
 }
 // @fnv 0x00fb0590
 void InitializeRuntimeFloatCall1036()
 {
     fnvFloat_011f29b4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010921f8) * fnvFloat_010921f8)) * fnvFloat_010921fc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010921f8) * fnvFloat_010921f8)) * fnvFloat_010921fc;
 }
 // @fnv 0x00fb0820
 void InitializeRuntimeFloatCall1037()
 {
-    fnvFloat_011f2a58 = fnvFloat_010922ec / FUN_004019b0(fnvFloat_010922e8);
+    fnvFloat_011f2a58 = fnvFloat_010922ec / sqrt_004019b0(fnvFloat_010922e8);
 }
 // @fnv 0x00fb0850
 void InitializeRuntimeFloatCall1038()
 {
     fnvFloat_011f2a38 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010922e8) * fnvFloat_010922e8)) * fnvFloat_010922ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010922e8) * fnvFloat_010922e8)) * fnvFloat_010922ec;
 }
 // @fnv 0x00fb0a80
 void InitializeRuntimeFloatCall1039()
 {
-    fnvFloat_011f2b48 = fnvFloat_010923ac / FUN_004019b0(fnvFloat_010923a8);
+    fnvFloat_011f2b48 = fnvFloat_010923ac / sqrt_004019b0(fnvFloat_010923a8);
 }
 // @fnv 0x00fb0ab0
 void InitializeRuntimeFloatCall1040()
 {
     fnvFloat_011f2ad4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010923a8) * fnvFloat_010923a8)) * fnvFloat_010923ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010923a8) * fnvFloat_010923a8)) * fnvFloat_010923ac;
 }
 // @fnv 0x00fb1120
 void InitializeRuntimeFloatCall1041()
 {
-    fnvFloat_011f2c60 = fnvFloat_0109294c / FUN_004019b0(fnvFloat_01092948);
+    fnvFloat_011f2c60 = fnvFloat_0109294c / sqrt_004019b0(fnvFloat_01092948);
 }
 // @fnv 0x00fb1150
 void InitializeRuntimeFloatCall1042()
 {
     fnvFloat_011f2c40 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01092948) * fnvFloat_01092948)) * fnvFloat_0109294c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01092948) * fnvFloat_01092948)) * fnvFloat_0109294c;
 }
 // @fnv 0x00fb1380
 void InitializeRuntimeFloatCall1043()
 {
-    fnvFloat_011f2cd8 = fnvFloat_010929cc / FUN_004019b0(fnvFloat_010929c8);
+    fnvFloat_011f2cd8 = fnvFloat_010929cc / sqrt_004019b0(fnvFloat_010929c8);
 }
 // @fnv 0x00fb13b0
 void InitializeRuntimeFloatCall1044()
 {
     fnvFloat_011f2cb8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010929c8) * fnvFloat_010929c8)) * fnvFloat_010929cc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010929c8) * fnvFloat_010929c8)) * fnvFloat_010929cc;
 }
 // @fnv 0x00fb15e0
 void InitializeRuntimeFloatCall1045()
 {
-    fnvFloat_011f2d5c = fnvFloat_01092b6c / FUN_004019b0(fnvFloat_01092b68);
+    fnvFloat_011f2d5c = fnvFloat_01092b6c / sqrt_004019b0(fnvFloat_01092b68);
 }
 // @fnv 0x00fb1610
 void InitializeRuntimeFloatCall1046()
 {
     fnvFloat_011f2d3c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01092b68) * fnvFloat_01092b68)) * fnvFloat_01092b6c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01092b68) * fnvFloat_01092b68)) * fnvFloat_01092b6c;
 }
 // @fnv 0x00fb1840
 void InitializeRuntimeFloatCall1047()
 {
-    fnvFloat_011f2dd4 = fnvFloat_01092d4c / FUN_004019b0(fnvFloat_01092d48);
+    fnvFloat_011f2dd4 = fnvFloat_01092d4c / sqrt_004019b0(fnvFloat_01092d48);
 }
 // @fnv 0x00fb1870
 void InitializeRuntimeFloatCall1048()
 {
     fnvFloat_011f2db4 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01092d48) * fnvFloat_01092d48)) * fnvFloat_01092d4c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01092d48) * fnvFloat_01092d48)) * fnvFloat_01092d4c;
 }
 // @fnv 0x00fb1b00
 void InitializeRuntimeFloatCall1049()
 {
-    fnvFloat_011f2e58 = fnvFloat_01092f3c / FUN_004019b0(fnvFloat_01092f38);
+    fnvFloat_011f2e58 = fnvFloat_01092f3c / sqrt_004019b0(fnvFloat_01092f38);
 }
 // @fnv 0x00fb1b30
 void InitializeRuntimeFloatCall1050()
 {
     fnvFloat_011f2e38 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01092f38) * fnvFloat_01092f38)) * fnvFloat_01092f3c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01092f38) * fnvFloat_01092f38)) * fnvFloat_01092f3c;
 }
 // @fnv 0x00fb1d60
 void InitializeRuntimeFloatCall1051()
 {
-    fnvFloat_011f2ed0 = fnvFloat_0109315c / FUN_004019b0(fnvFloat_01093158);
+    fnvFloat_011f2ed0 = fnvFloat_0109315c / sqrt_004019b0(fnvFloat_01093158);
 }
 // @fnv 0x00fb1d90
 void InitializeRuntimeFloatCall1052()
 {
     fnvFloat_011f2eb0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01093158) * fnvFloat_01093158)) * fnvFloat_0109315c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01093158) * fnvFloat_01093158)) * fnvFloat_0109315c;
 }
 // @fnv 0x00fb1fc0
 void InitializeRuntimeFloatCall1053()
 {
-    fnvFloat_011f2f54 = fnvFloat_010931ac / FUN_004019b0(fnvFloat_010931a8);
+    fnvFloat_011f2f54 = fnvFloat_010931ac / sqrt_004019b0(fnvFloat_010931a8);
 }
 // @fnv 0x00fb1ff0
 void InitializeRuntimeFloatCall1054()
 {
     fnvFloat_011f2f34 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010931a8) * fnvFloat_010931a8)) * fnvFloat_010931ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010931a8) * fnvFloat_010931a8)) * fnvFloat_010931ac;
 }
 // @fnv 0x00fb2280
 void InitializeRuntimeFloatCall1055()
 {
-    fnvFloat_011f2fd8 = fnvFloat_0109339c / FUN_004019b0(fnvFloat_01093398);
+    fnvFloat_011f2fd8 = fnvFloat_0109339c / sqrt_004019b0(fnvFloat_01093398);
 }
 // @fnv 0x00fb22b0
 void InitializeRuntimeFloatCall1056()
 {
     fnvFloat_011f2fb8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01093398) * fnvFloat_01093398)) * fnvFloat_0109339c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01093398) * fnvFloat_01093398)) * fnvFloat_0109339c;
 }
 // @fnv 0x00fb24e0
 void InitializeRuntimeFloatCall1057()
 {
-    fnvFloat_011f3050 = fnvFloat_010933ec / FUN_004019b0(fnvFloat_010933e8);
+    fnvFloat_011f3050 = fnvFloat_010933ec / sqrt_004019b0(fnvFloat_010933e8);
 }
 // @fnv 0x00fb2510
 void InitializeRuntimeFloatCall1058()
 {
     fnvFloat_011f3030 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010933e8) * fnvFloat_010933e8)) * fnvFloat_010933ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010933e8) * fnvFloat_010933e8)) * fnvFloat_010933ec;
 }
 // @fnv 0x00fb2740
 void InitializeRuntimeFloatCall1059()
 {
-    fnvFloat_011f30c8 = fnvFloat_010935ac / FUN_004019b0(fnvFloat_010935a8);
+    fnvFloat_011f30c8 = fnvFloat_010935ac / sqrt_004019b0(fnvFloat_010935a8);
 }
 // @fnv 0x00fb2770
 void InitializeRuntimeFloatCall1060()
 {
     fnvFloat_011f30a8 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010935a8) * fnvFloat_010935a8)) * fnvFloat_010935ac;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010935a8) * fnvFloat_010935a8)) * fnvFloat_010935ac;
 }
 // @fnv 0x00fb2a00
 void InitializeRuntimeFloatCall1061()
 {
-    fnvFloat_011f314c = fnvFloat_0109363c / FUN_004019b0(fnvFloat_01093638);
+    fnvFloat_011f314c = fnvFloat_0109363c / sqrt_004019b0(fnvFloat_01093638);
 }
 // @fnv 0x00fb2a30
 void InitializeRuntimeFloatCall1062()
 {
     fnvFloat_011f312c =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_01093638) * fnvFloat_01093638)) * fnvFloat_0109363c;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_01093638) * fnvFloat_01093638)) * fnvFloat_0109363c;
 }
 // @fnv 0x00fb2cc0
 void InitializeRuntimeFloatCall1063()
 {
-    fnvFloat_011f31dc = fnvFloat_010937ec / FUN_004019b0(fnvFloat_010937e8);
+    fnvFloat_011f31dc = fnvFloat_010937ec / sqrt_004019b0(fnvFloat_010937e8);
 }
 // @fnv 0x00fb2cf0
 void InitializeRuntimeFloatCall1064()
 {
     fnvFloat_011f31b0 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010937e8) * fnvFloat_010937e8)) * fnvFloat_010937ec;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010937e8) * fnvFloat_010937e8)) * fnvFloat_010937ec;
 }
 // @fnv 0x00fb2f50
 void InitializeRuntimeFloatCall1065()
 {
-    fnvFloat_011f3254 = fnvFloat_010939bc / FUN_004019b0(fnvFloat_010939b8);
+    fnvFloat_011f3254 = fnvFloat_010939bc / sqrt_004019b0(fnvFloat_010939b8);
 }
 // @fnv 0x00fb2f80
 void InitializeRuntimeFloatCall1066()
 {
     fnvFloat_011f3234 =
-        (fnvDouble_01011598 / (FUN_004019b0(fnvFloat_010939b8) * fnvFloat_010939b8)) * fnvFloat_010939bc;
+        (fnvDouble_01011598 / (sqrt_004019b0(fnvFloat_010939b8) * fnvFloat_010939b8)) * fnvFloat_010939bc;
 }

@@ -62,8 +62,8 @@ struct SweepState
     SweepVectorLocal_00db4e40 ob;  // 120
 };
 
-void __cdecl FUN_00db4b50(SweepObj* obj, float t, SweepState* st);
-float __cdecl FUN_00db4ca0(SweepObj* obj, float* p, SweepVectorLocal_00db4e40* v, float a, float b, float c, float d, float e,
+void __cdecl hkTransform_setMulInverseMul_UpdateState_00db4b50(SweepObj* obj, float t, SweepState* st);
+float __cdecl Object_ProcessEntries_00db4ca0(SweepObj* obj, float* p, SweepVectorLocal_00db4e40* v, float a, float b, float c, float d, float e,
                            SweepOut* out);
 
 static inline __m128 Cross(const __m128& a, const __m128& b)
@@ -89,7 +89,8 @@ static inline __m128 Dot4xyz1(const __m128& a, const __m128& b)
 }
 
 // @fnv 0x00db4e40
-void __cdecl FUN_00db4e40(SweepObj* obj, float* p, SweepOut* out)
+// src: GUESS 0x00db4e40 (confidence: low)
+void __cdecl Object_ProcessEntries_00db4e40(SweepObj* obj, float* p, SweepOut* out)
 {
     float tEnd = 1.0f;
     float tCur = obj->m_80;
@@ -100,7 +101,7 @@ void __cdecl FUN_00db4e40(SweepObj* obj, float* p, SweepOut* out)
     do
     {
         SweepState st;
-        FUN_00db4b50(obj, tCur, &st);
+        hkTransform_setMulInverseMul_UpdateState_00db4b50(obj, tCur, &st);
         int i = *(volatile int*)&num;
         SweepVectorLocal_00db4e40* it = obj->m_items;
         float dt = tEnd - tCur;
@@ -137,7 +138,7 @@ void __cdecl FUN_00db4e40(SweepObj* obj, float* p, SweepOut* out)
                 {
                     float w = it->w;
                     tEnd = w;
-                    tEnd = FUN_00db4ca0(obj, p, it, tPrev, tCur, w, dist, vel, out);
+                    tEnd = Object_ProcessEntries_00db4ca0(obj, p, it, tPrev, tCur, w, dist, vel, out);
                 }
             }
             else
@@ -193,7 +194,8 @@ extern const __m128 DAT_010ec7f0;
 extern const double DAT_010290f0;
 
 // @fnv 0x00db49b0
-static __declspec(noinline) float FUN_00db49b0(char* a, char* b, __m128* p, __m128* v0, __m128* v1, __m128* v2, float t)
+// src: GUESS 0x00db49b0 (confidence: low)
+static __declspec(noinline) float HkpcontinuousgskGsEhscNogsNoehsc_ComputeValues_00db49b0(char* a, char* b, __m128* p, __m128* v0, __m128* v1, __m128* v2, float t)
 {
     float tmp;
     float d1;
@@ -253,5 +255,5 @@ volatile float dbTime;
 volatile float dbResult;
 void evaluatePlaneDistance()
 {
-    dbResult = FUN_00db49b0(dbBodyA, dbBodyB, dbPlanes, dbPoint, dbDirection, dbVelocity, dbTime);
+    dbResult = HkpcontinuousgskGsEhscNogsNoehsc_ComputeValues_00db49b0(dbBodyA, dbBodyB, dbPlanes, dbPoint, dbDirection, dbVelocity, dbTime);
 }

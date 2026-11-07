@@ -4,7 +4,8 @@
 #include "havok/hkpDefaultConvexListFilter.h"
 
 // @fnv 0x00cf6dc0
-int __stdcall FUN_00cf6dc0(void* apUnused, void* a2, void* a3)
+// src: HAVOK_LIB 0x00cf6dc0
+int __stdcall hkpDefaultConvexListFilter_getConvexListCollisionType(void* apUnused, void* a2, void* a3)
 {
     int* p1 = *(int**)a2;
     int* p2 = *(int**)a3;

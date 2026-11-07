@@ -28,12 +28,13 @@ extern "C" LocalM128 _mm_setzero_ps(void);
 #include "../../../../../../../include/hkVector4.h"
 
 void ProcessEntryPair();
-void FUN_00da44d0(int, int, void*);
+void hkAgent1nMachine_VisitAllAgents(int, int, void*);
 
 // @fnv 0x00da48e0
-void FUN_00da48e0(int b, int a)
+// src: XBOX_PDB 0x00da48e0
+void hkAgent1nMachine_UpdateShapeCollectionFilter(int b, int a)
 {
-    FUN_00da44d0(b, a, (void*)&ProcessEntryPair);
+    hkAgent1nMachine_VisitAllAgents(b, a, (void*)&ProcessEntryPair);
 }
 
 typedef unsigned int BlockPoolsize_t;
@@ -58,8 +59,8 @@ struct BlockPoolMemoryRouter
     }
 };
 
-extern "C" BlockPoolMemoryRouter& __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(BlockPoolAllocator* alloc, void* array, int numElements, int sizeElem);
+extern "C" BlockPoolMemoryRouter& __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(BlockPoolAllocator* alloc, void* array, int numElements, int sizeElem);
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
 
 struct BlockPoolBlock
@@ -103,7 +104,7 @@ struct BlockPoolArrayLocalForm
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(BlockPoolBlock*));
+            hkArrayUtil__reserve(&alloc, this, newSize, sizeof(BlockPoolBlock*));
         }
     }
 
@@ -120,9 +121,9 @@ struct BlockPoolArrayLocalForm
 void __cdecl InitBlockPool(BlockPoolArrayLocalForm* blocks)
 {
     blocks->m_iElementCount = 0;
-    blocks->GrowArrayCapacity(FUN_00c85750().heap(), 4);
-    blocks->_expandOne(FUN_00c85750().heap());
-    BlockPoolBlock* block = new (FUN_00c85750().heap().AllocateMemoryBlock(0x200)) BlockPoolBlock();
+    blocks->GrowArrayCapacity(hkMemoryRouter_getInstance().heap(), 4);
+    blocks->_expandOne(hkMemoryRouter_getInstance().heap());
+    BlockPoolBlock* block = new (hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(0x200)) BlockPoolBlock();
     blocks->m_data[0] = block;
     block->unk13 = 0x10;
     block->unk10 = 1;
@@ -1790,7 +1791,7 @@ struct S_00da40e0_Input
     S_00da40e0_ConstraintOwner* m_pConstraintOwner;
 };
 
-const S_00da40e0_CdBody* __cdecl FUN_00cfe1d0(const S_00da40e0_CdBody* cdBody, S_00da40e0_CdBody* newCdBodies,
+const S_00da40e0_CdBody* __cdecl hkAgentMachine_processTransformedShapes(const S_00da40e0_CdBody* cdBody, S_00da40e0_CdBody* newCdBodies,
                                               S_00da40e0_MotionState* newMotionStates, int numSlots,
                                               unsigned char& changeCounter);
 
@@ -1829,8 +1830,8 @@ S_00da40e0_Entry* __cdecl ProcessCollisionEntry(const S_00da40e0_Input& aInput, 
             if (entry->m_ucAgentType & 8)
             {
                 unsigned char ucChangeCounter = 0;
-                pBodyB = FUN_00cfe1d0(pBodyB, newCdBodiesB, newMotionStatesB, 4, ucChangeCounter);
-                pBodyA = FUN_00cfe1d0(pBodyA, newCdBodiesA, newMotionStatesA, 4, ucChangeCounter);
+                pBodyB = hkAgentMachine_processTransformedShapes(pBodyB, newCdBodiesB, newMotionStatesB, 4, ucChangeCounter);
+                pBodyA = hkAgentMachine_processTransformedShapes(pBodyA, newCdBodiesA, newMotionStatesA, 4, ucChangeCounter);
             }
 
             unsigned char command = (unsigned char)(entry->m_ucAgentType & 7);
@@ -1898,7 +1899,7 @@ S_00da40e0_Entry* __cdecl ProcessEntryPair(const S_00da40e0_Input& in, S_00da40e
                 unsigned char changeCounter = 0;
                 S_00da40e0_MotionState motionStates[4];
                 S_00da40e0_CdBody cdBodies[4];
-                pBodyB = FUN_00cfe1d0(pBodyB, cdBodies, motionStates, 4, changeCounter);
+                pBodyB = hkAgentMachine_processTransformedShapes(pBodyB, cdBodies, motionStates, 4, changeCounter);
             }
             unsigned char command = entry->m_ucAgentType & 7;
             if (command == 3 || command == 5)
@@ -1965,7 +1966,8 @@ struct CollisionAgentContext
 
 // Walks the agent sectors, calling each entry's dispatcher function; for types 4, 5, 12 and 13 it first sets m_fFloatValue and zeroes the separating normal.
 // @fnv 0x00da3510
-void FUN_00da3510(AgentSectorPointerArray& agentTrack, CollisionAgentContext& input)
+// src: GUESS 0x00da3510 (confidence: low)
+void hkpAgent1nSector_ProcessEntries_00da3510(AgentSectorPointerArray& agentTrack, CollisionAgentContext& input)
 {
     hkpAgent1nSector* sector = agentTrack.m_kSectors.m_data[0];
     FourByteState* entry = sector->getBegin();
@@ -2026,7 +2028,8 @@ typedef void(__cdecl* Da35FuncPtr)(void* entry, void* payload, float fa, float f
 
 // Iterates through hkpAgent1nSector chunks, dispatching commands via function pointers and updating float fields based on fa and fb.
 // @fnv 0x00da35f0
-void __cdecl FUN_00da35f0(hkpAgent1nSector*** container, float fa, float fb, void** holder)
+// src: HAVOK_LIB 0x00da35f0
+void __cdecl _hkAgent1nMachine_WarpTime(hkpAgent1nSector*** container, float fa, float fb, void** holder)
 {
     hkpAgent1nSector* stream = **container;
     unsigned char* p = (unsigned char*)stream + 0x10;
@@ -2163,12 +2166,13 @@ struct BlockPoolHeap : BlockPoolAllocator
 
 __forceinline BlockPoolHeap& fullHeap()
 {
-    return static_cast<BlockPoolHeap&>(FUN_00c85750().heap());
+    return static_cast<BlockPoolHeap&>(hkMemoryRouter_getInstance().heap());
 }
 
 // Iterates over all agent entries in the block pool, dispatches their destroy functions, then releases the blocks and resets the array.
 // @fnv 0x00da42b0
-void FUN_00da42b0(BlockPoolArrayLocalForm* blocks, S_00da40e0_Dispatcher* dispatcher, S_00da40e0_ContactMgr* mgr,
+// src: XBOX_PDB 0x00da42b0
+void hkAgent1nMachine_Destroy(BlockPoolArrayLocalForm* blocks, S_00da40e0_Dispatcher* dispatcher, S_00da40e0_ContactMgr* mgr,
                   S_00da40e0_ConstraintOwner& owner)
 {
     BlockPoolBlock** sectors = blocks->m_data;
@@ -2272,17 +2276,18 @@ __forceinline static void streamCopy(void* dst, const void* src, int count)
         s += 4;
     } while (--count > 0);
 }
-void __cdecl FUN_00d2cc70(void*, const void*, unsigned int);
+void __cdecl hkMemUtil_memMove(void*, const void*, unsigned int);
 typedef unsigned char*(__cdecl* StreamTransform)(void*, unsigned char*, unsigned char*);
 // Walks records in the BlockPoolArrayLocalForm blocks, copies them into new 512-byte blocks, applies the callback to some record types, and replaces the array contents.
 // @fnv 0x00da44d0
-void FUN_00da44d0(int apBlocks, int apHeader, void* apTransform)
+// src: HAVOK_LIB 0x00da44d0
+void hkAgent1nMachine_VisitAllAgents(int apBlocks, int apHeader, void* apTransform)
 {
     BlockPoolArrayLocalForm* blocks = (BlockPoolArrayLocalForm*)apBlocks;
     int outIndex = 0;
     BlockPoolBlock* input = blocks->m_data[0];
     BlockPoolBlock* previous = 0;
-    BlockPoolBlock* output = new (FUN_00c85750().heap().AllocateMemoryBlock(512)) BlockPoolBlock;
+    BlockPoolBlock* output = new (hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(512)) BlockPoolBlock;
     unsigned char* cursor = (unsigned char*)input + 16;
     unsigned char* out = (unsigned char*)output + 16;
     int inIndex = 1;
@@ -2316,7 +2321,7 @@ process:
     if (cursor == end)
     {
         if (previous)
-            ((StreamAllocator*)&FUN_00c85750().heap())->ReleaseBlock(previous, 512);
+            ((StreamAllocator*)&hkMemoryRouter_getInstance().heap())->ReleaseBlock(previous, 512);
         previous = input;
         if (inIndex >= blocks->m_iElementCount)
             goto finish;
@@ -2350,12 +2355,12 @@ process:
     output->unk00 = used;
     if (outIndex >= inIndex)
     {
-        BlockPoolAllocator& alloc = FUN_00c85750().heap();
+        BlockPoolAllocator& alloc = hkMemoryRouter_getInstance().heap();
         int count = inIndex;
         inIndex = blocks->m_iElementCount + 1;
         int tail = -(count - blocks->m_iElementCount);
         blocks->GrowArrayCapacity(alloc, inIndex);
-        FUN_00d2cc70(&blocks->m_data[count + 1], &blocks->m_data[count], tail * sizeof(BlockPoolBlock*));
+        hkMemUtil_memMove(&blocks->m_data[count + 1], &blocks->m_data[count], tail * sizeof(BlockPoolBlock*));
         blocks->m_iElementCount = inIndex;
         inIndex = count + 1;
     }
@@ -2366,7 +2371,7 @@ process:
         previous = 0;
     }
     else
-        output = new (FUN_00c85750().heap().AllocateMemoryBlock(512)) BlockPoolBlock;
+        output = new (hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(512)) BlockPoolBlock;
     out = (unsigned char*)output + 16;
     limit = (unsigned char*)output + 512;
     if (staging)
@@ -2387,11 +2392,11 @@ finish:
     }
     output->unk00 = used;
     int newCount = outIndex + 1;
-    blocks->GrowArrayCapacity(FUN_00c85750().heap(), newCount);
+    blocks->GrowArrayCapacity(hkMemoryRouter_getInstance().heap(), newCount);
     blocks->m_iElementCount = newCount;
     blocks->m_data[outIndex] = output;
     if (previous)
-        ((StreamAllocator*)&FUN_00c85750().heap())->ReleaseBlock(previous, 512);
+        ((StreamAllocator*)&hkMemoryRouter_getInstance().heap())->ReleaseBlock(previous, 512);
 }
 
 extern "C"
@@ -2414,7 +2419,8 @@ struct __declspec(align(16)) TOIBody
 
 // Computes dot products from the two bodies' position difference and directions, then returns 0, 1 or 2 from threshold comparisons.
 // @fnv 0x00da37d0
-static __declspec(noinline) int FUN_00da37d0(const TOIBody* b, const TOIBody* a, float p0, const float* p1, float p2)
+// src: GUESS 0x00da37d0 (confidence: low)
+static __declspec(noinline) int Hkpagent1nmachine_ComputeValues_00da37d0(const TOIBody* b, const TOIBody* a, float p0, const float* p1, float p2)
 {
     LocalM128 d = _mm_sub_ps(a->m_pos, b->m_pos);
     LocalM128 m0 = _mm_mul_ps(b->m_dir, d);
@@ -2454,5 +2460,5 @@ volatile int g_toiP;
 volatile int g_toiOut;
 void CallTarget_da37d0()
 {
-    g_toiOut = FUN_00da37d0((const TOIBody*)g_toiB, (const TOIBody*)g_toiA, g_toiF, (const float*)g_toiP, g_toiF);
+    g_toiOut = Hkpagent1nmachine_ComputeValues_00da37d0((const TOIBody*)g_toiB, (const TOIBody*)g_toiA, g_toiF, (const float*)g_toiP, g_toiF);
 }

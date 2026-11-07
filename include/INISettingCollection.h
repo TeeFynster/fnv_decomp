@@ -22,7 +22,7 @@ public:
 
     unsigned char unk04[272];
 
-    void FUN_005e0200(const char*);
+    void j_ReadSettingsFromFile_SettingCollection_VSetting_QEAA_NPEBD_Z(const char*);
 
     struct Display
     {

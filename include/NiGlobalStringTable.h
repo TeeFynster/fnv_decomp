@@ -9,8 +9,8 @@ class NiGlobalStringTable
 {
   public:
     void AddString(); // exe: 0x004f31b0, increments +0x68
-    char* FUN_00a5b300(const char*, unsigned); // exe: 0x00a5b300
-    void FUN_00a5b5a0(char**, unsigned); // exe: 0x00a5b5a0
+    char* NiGlobalStringTable_FindString(const char*, unsigned); // exe: 0x00a5b300
+    void NiGlobalStringTable_InsertString(char**, unsigned); // exe: 0x00a5b5a0
     static GlobalStringHandle AddString(const char* pcString);
     static void IncRefCount(GlobalStringHandle& kHandle);
     static void DecRefCount(GlobalStringHandle& kHandle);

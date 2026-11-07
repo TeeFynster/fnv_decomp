@@ -20,13 +20,13 @@ public:
     hkpAabbPhantom* initialize(const hkAabb& aabb, unsigned int collisionFilterInfo);
     void setAabb(const hkAabbQ& aabb);
     void __thiscall castRay(void* input, void* output);
-    void FUN_00cf24a0(const hkAabbQ& aabb);
-    void __thiscall FUN_00cf24a0(const hkAabb& aabb);
+    void hkpAabbPhantom_setAabb(const hkAabbQ& aabb);
+    void __thiscall hkpAabbPhantom_setAabb(const hkAabb& aabb);
     hkpAabbPhantom* FUN_00cf2cb0(const hkAabb& aabb, unsigned int collisionFilterInfo);
-    void __thiscall FUN_00cf26b0(void* input, void* output);
-    void FUN_00cf26b0(const WorldRayCastInput& input, WorldRayCastOutput& output) const;
-    void FUN_00cf2880(const hkpCollidable* collA, const LinCastInputS& input, void* castCollector, void* startCollector);
-    void FUN_00cf2510(const WorldRayCastInput& input, hkpRayHitCollector& collector) const;
+    void __thiscall hkpAabbPhantom_castRay_00cf26b0(void* input, void* output);
+    void hkpAabbPhantom_castRay_00cf26b0(const WorldRayCastInput& input, WorldRayCastOutput& output) const;
+    void hkpAabbPhantom_linearCast(const hkpCollidable* collA, const LinCastInputS& input, void* castCollector, void* startCollector);
+    void hkpAabbPhantom_castRay(const WorldRayCastInput& input, hkpRayHitCollector& collector) const;
 
     char padA4[0xC];
     hkAabb m_kBounds;

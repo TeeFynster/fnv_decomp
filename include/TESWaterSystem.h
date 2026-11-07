@@ -22,8 +22,8 @@ class TESWaterSystem
 
     void UpdateWaterZone(TESObjectREFR*, TESObjectREFR*, float); // @ref 0x004e5df0 UpdateWaterZone@TESWaterSystem
     WaterSurface* GetWaterZone(TESObjectREFR*, TESObjectREFR*, float); // @ref 0x004e59f0
-    void FUN_004e1bc0(BSFaceGenAnimationData* data, ShadowSceneNode* scene);
-    static void FUN_00872930(int index);
+    void TESWaterSystem_UpdateWaterSystem(BSFaceGenAnimationData* data, ShadowSceneNode* scene);
+    static void TESWaterSystem_SetIsUnderWater(int index);
     void SetWaterHeight(TESObjectREFR*, TESObjectREFR*, float); // @ref 0x004e5c80 SetWaterHeight@TESWaterSystem
     void AddWaterRipple(NiPoint3, float); // @ref 0x004e8510 AddWaterRipple@TESWaterSystem
     void RemoveReferenceFromCell(TESObjectREFR*, WaterSurface*);

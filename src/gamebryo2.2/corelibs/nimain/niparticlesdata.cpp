@@ -32,7 +32,8 @@ void __cdecl _NiFreeAlias(void* p);
 
 // Clamps param_3 to 0x10, frees the pointer at this_ptr+0x68, stores the clamped byte at +0x6c and param_2 at +0x68.
 // @fnv 0x00a968e0
-void __fastcall FUN_00a968e0(char* this_ptr, int, void* param_2, unsigned char param_3)
+// src: COMMUNITY 0x00a968e0
+void __fastcall NiParticlesData_ReplaceSubTextureOffsets(char* this_ptr, int, void* param_2, unsigned char param_3)
 {
     if (param_3 >= 0x10)
     {
@@ -46,7 +47,8 @@ void __fastcall FUN_00a968e0(char* this_ptr, int, void* param_2, unsigned char p
 extern const char* const g_011f5f0c_arg1;
 
 // @fnv 0x00a967d0
-const char* const* __cdecl FUN_00a967d0()
+// src: COMMUNITY 0x00a967d0
+const char* const* __cdecl NiParticlesData_GetRTTI()
 {
     return &g_011f5f0c_arg1;
 }
@@ -70,7 +72,8 @@ void __fastcall FUN_00a67c00(void* object);
 extern char DAT_010a05e4[];
 
 // @fnv 0x00a96600
-void* FUN_00a96600()
+// src: EXE 0x00a96600
+void* NiParticlesData_CreateObject()
 {
     NiParticlesData* p = (NiParticlesData*)BSFadeNode::operator new(sizeof(NiParticlesData));
     if (p)
@@ -95,12 +98,12 @@ void* FUN_00a96600()
 }
 
 void __cdecl _delete(void*, unsigned int);
-void __cdecl FUN_00a96800();
+void __cdecl ReleaseStorage_00a96800();
 // Calls FUN_00a96800, then deletes this with size 0x70 if flags has bit 0 set, and returns this.
 // @fnv 0x00a96a10
 void* __thiscall ParticleDataMethods::Destroy(unsigned int flags)
 {
-    FUN_00a96800();
+    ReleaseStorage_00a96800();
     if (flags & 1)
         _delete(this, 0x70);
     return this;
@@ -170,11 +173,12 @@ inline void* operator new[](unsigned int bytes, MemoryManager& manager)
 }
 struct ParticleViewData : NiParticlesData
 {
-    void FUN_00a966c0(int, int);
-    void FUN_00a96910(ParticleViewFrame*);
+    void NiParticlesData_QuickSortParticles(int, int);
+    void NiParticlesData_SortParticles(ParticleViewFrame*);
 };
 // @fnv 0x00a96910
-void ParticleViewData::FUN_00a96910(ParticleViewFrame* pViewFrame)
+// src: XBOX_PDB 0x00a96910
+void ParticleViewData::NiParticlesData_SortParticles(ParticleViewFrame* pViewFrame)
 {
     if (!m_pusParticleIndices)
     {
@@ -194,11 +198,11 @@ void ParticleViewData::FUN_00a96910(ParticleViewFrame* pViewFrame)
             const NiPoint3& p = m_pkVertex[i];
             m_pfSortValues[i] = p.Dot(viewDirection);
         }
-        FUN_00a966c0(0, m_usActive - 1);
+        NiParticlesData_QuickSortParticles(0, m_usActive - 1);
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int uiSize);
+void* __cdecl Object_DispatchCommandFour(unsigned int uiSize);
 __forceinline NiParticlesData* InitializeParticleData(NiParticlesData* p) throw()
 {
     if (p)
@@ -227,7 +231,7 @@ __forceinline NiParticlesData* InitializeParticleData(NiParticlesData* p) throw(
 // @fnv 0x00a96660
 NiParticlesData* __cdecl CreateParticlesDataWithRadii()
 {
-    NiParticlesData* pkObj = InitializeParticleData((NiParticlesData*)FUN_00aa13e0(sizeof(NiParticlesData)));
+    NiParticlesData* pkObj = InitializeParticleData((NiParticlesData*)Object_DispatchCommandFour(sizeof(NiParticlesData)));
     pkObj->m_bHasRadii = true;
     return pkObj;
 }
@@ -247,7 +251,7 @@ inline bool EqualParticleOffset(const NiColorA& left, const NiColorA& right)
 }
 struct GeometryEquality : NiGeometryData
 {
-    bool FUN_00a67840(NiObject* other);
+    bool NiGeometryData_IsEqual(NiObject* other);
 };
 
 // The original equality entry is non-const; the shared declaration only exposes
@@ -260,7 +264,7 @@ struct ParticlesEquality : NiParticlesData
 // @fnv 0x00a96a30
 bool ParticlesEquality::IsParticleDataEqual(NiObject* apOther)
 {
-    if (!static_cast<GeometryEquality*>(static_cast<NiGeometryData*>(this))->FUN_00a67840(apOther))
+    if (!static_cast<GeometryEquality*>(static_cast<NiGeometryData*>(this))->NiGeometryData_IsEqual(apOther))
         return false;
     NiParticlesData* other = static_cast<NiParticlesData*>(apOther);
     if ((m_pfRadii && !other->m_pfRadii) || (!m_pfRadii && other->m_pfRadii))
@@ -443,11 +447,12 @@ void NiParticlesData::GetViewerStrings(NiViewerStringsArray* strings)
 class RenderOrderSorter : public NiParticlesData
 {
   public:
-    void FUN_00a966c0(int left, int right);
+    void NiParticlesData_QuickSortParticles(int left, int right);
 };
 // Partitions m_pusParticleIndices between left and right around a pivot value from m_pfSortValues, then recurses on both sub-ranges.
 // @fnv 0x00a966c0
-void RenderOrderSorter::FUN_00a966c0(int left, int right)
+// src: XBOX_PDB 0x00a966c0
+void RenderOrderSorter::NiParticlesData_QuickSortParticles(int left, int right)
 {
     int iLeft = left;
     int iRight = right;
@@ -475,9 +480,9 @@ void RenderOrderSorter::FUN_00a966c0(int left, int right)
     left = iLeft;
     right = iRight;
     if (left < pivot)
-        FUN_00a966c0(left, pivot - 1);
+        NiParticlesData_QuickSortParticles(left, pivot - 1);
     if (right > pivot)
-        FUN_00a966c0(pivot + 1, right);
+        NiParticlesData_QuickSortParticles(pivot + 1, right);
 }
 
 struct BinStream
@@ -493,20 +498,20 @@ struct BinStream
         return readBytes;
     }
 };
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 void __cdecl ReadElements(NiStream* stream, float* arr, unsigned int count);
 void __cdecl FUN_00ec61c0(void* p, int val, unsigned int n);
 struct AllocSvc
 {
-    void* __thiscall FUN_00aa3e40(unsigned int n);
-    void __thiscall FUN_00aa4060(void* p);
+    void* __thiscall Game_DoHeapAlloc(unsigned int n);
+    void __thiscall MemoryManager_Deallocate(void* p);
 };
 extern AllocSvc DAT_011f6238;
 struct ArrNew
 {
     static void* operator new[](unsigned int n)
     {
-        return DAT_011f6238.FUN_00aa3e40(n);
+        return DAT_011f6238.Game_DoHeapAlloc(n);
     }
 };
 extern float DAT_011a9ea4;
@@ -561,7 +566,7 @@ void NiParticlesData::LoadBinary(NiStream& input)
         BinStream* kReadStream = reinterpret_cast<BinStream*&>(stream->m_pkIstr);
         kReadStream->Read(&value.radius, 2, 2);
     }
-    m_pfRadii = (float*)FUN_00aa1070((unsigned int)m_usVertices * 4);
+    m_pfRadii = (float*)_NiMalloc_00aa1070((unsigned int)m_usVertices * 4);
     if (stream->m_uiNifFileVersion < 0xa00010d)
     {
         BinStream* kReadStream = reinterpret_cast<BinStream*&>(stream->m_pkIstr);
@@ -604,7 +609,7 @@ void NiParticlesData::LoadBinary(NiStream& input)
         BinStream* kReadStream = reinterpret_cast<BinStream*&>(stream->m_pkIstr);
         kReadStream->Read(&sizeFlag, 1, 1);
     }
-    m_pfSizes = (float*)FUN_00aa1070((unsigned int)m_usVertices * 4);
+    m_pfSizes = (float*)_NiMalloc_00aa1070((unsigned int)m_usVertices * 4);
     if (sizeFlag != 0 && stream->m_kHeader.m_uiVersion < 0x13)
     {
         BinStream* kReadStream = reinterpret_cast<BinStream*&>(stream->m_pkIstr);
@@ -673,7 +678,7 @@ void NiParticlesData::LoadBinary(NiStream& input)
                     }
                     pRttiChain = pRttiChain->base;
                 }
-                DAT_011f6238.FUN_00aa4060(m_pkRotations);
+                DAT_011f6238.MemoryManager_Deallocate(m_pkRotations);
                 m_pkRotations = 0;
             keepRot:;
             }
@@ -687,7 +692,7 @@ void NiParticlesData::LoadBinary(NiStream& input)
             kReadStream->Read(&flag, 1, 1);
             if (flag != 0)
             {
-                m_pfRotationAngles = (float*)FUN_00aa1070((unsigned int)m_usVertices * 4);
+                m_pfRotationAngles = (float*)_NiMalloc_00aa1070((unsigned int)m_usVertices * 4);
                 if (stream->m_kHeader.m_uiVersion < 0x13)
                 {
                     for (unsigned short i = 0; i < m_usVertices; i++)
@@ -720,14 +725,14 @@ void NiParticlesData::LoadBinary(NiStream& input)
         kReadStream->Read(&value.flag, 1, 1);
         if (value.flag != 0)
         {
-            m_pucTextureIndices = (unsigned char*)FUN_00aa1070((unsigned int)m_usVertices);
+            m_pucTextureIndices = (unsigned char*)_NiMalloc_00aa1070((unsigned int)m_usVertices);
             FUN_00ec61c0(m_pucTextureIndices, 0, (unsigned int)m_usVertices);
         }
         kReadStream = reinterpret_cast<BinStream*&>(stream->m_pkIstr);
         kReadStream->Read(&m_ucSubTextureOffsetCount, 1, 1);
         if (m_ucSubTextureOffsetCount > 0)
         {
-            m_pkSubTextureOffsets = (NiColorA*)FUN_00aa1070((unsigned int)m_ucSubTextureOffsetCount * 16);
+            m_pkSubTextureOffsets = (NiColorA*)_NiMalloc_00aa1070((unsigned int)m_ucSubTextureOffsetCount * 16);
             for (unsigned short i = 0; i < m_ucSubTextureOffsetCount; i++)
             {
                 m_pkSubTextureOffsets[i].LoadBinary(*stream);

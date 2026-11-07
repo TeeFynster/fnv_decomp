@@ -39,19 +39,19 @@ struct FUN_00d08350 {
     void* __thiscall Set(void* arg);
 };
 struct FUN_00d083a0_class {
-    void __thiscall FUN_00d083a0(int a);
+    void __thiscall hkpAabbTreeWorldManager_setWorkingBuffer(int a);
 };
 struct FUN_00d08ff0_t {
     int a;
     int b;
     int c;
     int d;
-    void FUN_00d08ac0(int);
-    void FUN_00d08b90(int);
+    void hkpAabbTreeWorldManager_gatherActiveCollidablesFromWorld(int);
+    void hkpAabbTreeWorldManager_gatherInactiveCollidablesFromWorld(int);
 };
-void FUN_00d08ac0(FUN_00d08ff0_t* self, int arg);
-void FUN_00d08b90(FUN_00d08ff0_t* self, int arg);
-void FUN_00d08ff0(FUN_00d08ff0_t* self, int arg);
+void hkpAabbTreeWorldManager_gatherActiveCollidablesFromWorld(FUN_00d08ff0_t* self, int arg);
+void hkpAabbTreeWorldManager_gatherInactiveCollidablesFromWorld(FUN_00d08ff0_t* self, int arg);
+void hkpAabbTreeWorldManager_gatherCollidablesFromWorld(FUN_00d08ff0_t* self, int arg);
 extern int DAT_010ccfac;
 void __cdecl Deallocate(void*);
 struct FUN_00d0a150 {
@@ -66,16 +66,16 @@ struct FUN_00d0a1a0 {
     int* b;
     int __thiscall Init(int p);
 };
-int __fastcall FUN_00d08390(void* self, int, int value);
+int __fastcall hkpAabbTreeWorldManager_calcWorkingBufferSize(void* self, int, int value);
 struct HashEntryTable { void clear(); };
 struct FUN_00d08550_Class {
-    void __thiscall FUN_00d08550();
+    void __thiscall hkpAabbTreeWorldManager_setTreeIsClean();
 };
 struct FUN_00d08560_class {
-    void __thiscall FUN_00d08560();
+    void __thiscall hkpAabbTreeWorldManager_reset();
 };
 struct FUN_00d08940_class {
-    void __thiscall FUN_00d08940(void* arg);
+    void __thiscall hkpAabbTreeWorldManager_queueActivated(void* arg);
 };
 struct FUN_00d08a40_class {
     char pad0[8];
@@ -86,26 +86,26 @@ struct FUN_00d08a40_class {
     void __thiscall ProcessFlaggedEntries(void* arg);
 };
 struct FUN_00cd2a00_class {
-    void __thiscall FUN_00cd2a00();
+    void __thiscall GetValue_00cd2a00();
 };
-void __stdcall FUN_00d083e0(void* arg);
+void __stdcall hkpAabbTreeWorldManager_getNodeIdx(void* arg);
 struct FUN_00d08a90_class {
-    void __thiscall FUN_00d08a90(void* arg);
+    void __thiscall hkpAabbTreeWorldManager_inactiveEntityMovedCallback(void* arg);
 };
 struct FUN_00d08fb0_Class {
     char pad[0x54];
     char m_54;
     char m_55;
-    void __thiscall FUN_00d08fb0(char* arg);
-    void __thiscall FUN_00d08c90(char* arg);
+    void __thiscall hkpAabbTreeWorldManager_entityAddedCallback(char* arg);
+    void __thiscall hkpAabbTreeWorldManager_pushBackToActiveList(char* arg);
 };
-void __cdecl FUN_00d08c90(void* self, int a);
+void __cdecl hkpAabbTreeWorldManager_pushBackToActiveList(void* self, int a);
 struct FUN_00d08fd0_class {
     char pad[0x50];
     char m_50;
     char m_51;
-    void __thiscall FUN_00d08fd0(int a);
-    void __thiscall FUN_00d08c90(int a);
+    void __thiscall hkpAabbTreeWorldManager_phantomAddedCallback(int a);
+    void __thiscall hkpAabbTreeWorldManager_pushBackToActiveList(int a);
 };
 void __cdecl Deallocate(void*);
 struct FUN_00d0a130 {
@@ -115,7 +115,7 @@ struct FUN_00d0a130 {
 // add ecx,-0x14; jmp FUN_00d08570 : override in Derived forwards to the primary base's virtual.
 struct PrimaryBase
 {
-    virtual void FUN_00d08570();
+    virtual void hkpAabbTreeWorldManager_removeObjectFromTree();
     int unk04;
     int unk08;
     int unk0C;
@@ -123,22 +123,22 @@ struct PrimaryBase
 };
 struct SecondaryBase
 {
-    virtual void FUN_00d089c0();
+    virtual void HkpAabbTreeWorldManager_removeObjectFromTree_Thunk();
 };
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
-    virtual void FUN_00d089c0();
+    virtual void HkpAabbTreeWorldManager_removeObjectFromTree_Thunk();
 };
 Derived::Derived()
 {
 }
 struct FUN_00d0a1f0_Class {
-    void __thiscall FUN_00d0a1f0(unsigned char value);
+    void __thiscall hkpAabbTreeWorldManager_setUpToDate(unsigned char value);
 };
-void __stdcall FUN_00d08380(int);
+void __stdcall nullsub_62(int);
 struct FUN_00cd29f0_cls {
-    void FUN_00cd29f0(int iValue);
+    void hkpWorldObject_setTreeData(int iValue);
 };
 void __cdecl DispatchToOffsetTarget(hkpCollidable* pkObject, unsigned short usValue);
 // Only pointer/reference declarations below need these ray-cast types; no local layout is required.
@@ -165,8 +165,8 @@ public:
 
     FUN_00d9a040() throw();
 };
-hkBool __cdecl FUN_00d98ca0(void* pkBroadPhase, const hkVector4& kFrom, const hkVector4& kTo, hkpWorldRayCaster* pkCaster) throw();
-void __cdecl FUN_00d1bd00(void* pkTree, const hkVector4& kFrom, const hkVector4& kTo, hkpTreeCastCallbackD084* pkCaster, float fEarlyOut) throw();
+hkBool __cdecl hkKdTreeUtils_castRayIterative(void* pkBroadPhase, const hkVector4& kFrom, const hkVector4& kTo, hkpWorldRayCaster* pkCaster) throw();
+void __cdecl hkAabbTreeQueryUtils_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_castRay(void* pkTree, const hkVector4& kFrom, const hkVector4& kTo, hkpTreeCastCallbackD084* pkCaster, float fEarlyOut) throw();
 class hkpRayCastQueryD084 {
 public:
     int m_00;
@@ -184,7 +184,7 @@ public:
 };
 class hkBroadPhaseD085 {
 public:
-    void FUN_00d9c7d0(unsigned short id);
+    void hkAabbTree_struct_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_remove(unsigned short id);
 };
 class hkHandlerD085 {
 public:
@@ -195,8 +195,8 @@ public:
     char unk25[0x1f];
     hkArray<hkpCollidable*> m_kCollidables;
 
-    unsigned short FUN_00d083e0(hkpCollidable* c);
-    void FUN_00d08570(hkpEntity* entity);
+    unsigned short hkpAabbTreeWorldManager_getNodeIdx(hkpCollidable* c);
+    void hkpAabbTreeWorldManager_removeObjectFromTree(hkpEntity* entity);
 };
 struct PlaceTagD088 {};
 inline void* operator new(unsigned int, void* p, PlaceTagD088) throw() { __assume(p != 0); return p; }
@@ -231,7 +231,7 @@ public:
         if (pkCollidable->m_kBroadPhaseHandle.m_type == 1) {
             hkpEntity* pkEntity = static_cast<hkpEntity*>(pkCollidable->getOwner());
             unsigned char active;
-            if (pkEntity && !*(pkEntity->FUN_00c9bff0(&active))) {
+            if (pkEntity && !*(pkEntity->isActive_00c9bff0(&active))) {
                 kInactive.pushBackUnchecked(m_kCollidables.m_data[i]);
                 m_kCollidables.removeAt(i);
             }
@@ -246,7 +246,7 @@ struct hkLoaderE02 {
 };
 hkMemoryRouter* __cdecl _FNV_e03300_arena();
 struct Sink {
-    void FUN_00cb1870(void*, int, int);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(void*, int, int);
 };
 struct FUN_00d08940_shell {
     unsigned int unk00;
@@ -270,7 +270,7 @@ struct FUN_00d08940_shell {
     unsigned int unk48;
     unsigned int unk4c;
     hkLoaderE02 loader;
-    void FUN_00d08940(char const* name);
+    void hkpAabbTreeWorldManager_queueActivated(char const* name);
 };
 struct FUN_00d9a4d0_class {
     void __thiscall GetEntryOffset(unsigned int value);
@@ -280,7 +280,7 @@ struct FUN_00d08c70_class {
     int unk04;
     int unk08;
     FUN_00d9a4d0_class* unk0C;
-    void __thiscall FUN_00d08c70(void* arg);
+    void __thiscall hkpAabbTreeWorldManager_getNode(void* arg);
 };
 void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
 class hkpEntityD08C;
@@ -306,7 +306,7 @@ public:
     int unk40;
     hkArray<hkpEntityD08C*> m_kActorEntries;
 
-    void FUN_00d08c90(hkpEntityD08C* pkEntity);
+    void hkpAabbTreeWorldManager_pushBackToActiveList(hkpEntityD08C* pkEntity);
 };
 class hkObjD099 {
 public:
@@ -330,8 +330,8 @@ public:
     int unk44;
     void* m_48;
 
-    void FUN_00d094a0(int* p, void* a, void* b, void* c, void* d);
-    void FUN_00d099a0(void* a, void* c, void* d);
+    void hkpAabbTreeWorldManager_buildKdTree(int* p, void* a, void* b, void* c, void* d);
+    void hkpAabbTreeWorldManager_buildActiveTree(void* a, void* c, void* d);
 };
 struct FUN_00d0a1e0_class {
     int unk00;
@@ -361,7 +361,7 @@ struct FUN_00d0a1e0_class {
     int unk60;
     int unk64;
     char unk68;
-    char __thiscall FUN_00d0a1e0();
+    char __thiscall GetUnk68_00d0a1e0();
 };
 extern int DAT_010ccfcc;
 extern int DAT_010ccfe0;
@@ -401,8 +401,8 @@ __declspec(align(16)) struct S00d08740_coll {
     int unk78;
     int unk7c;
     float m_80;
-    void FUN_00d984b0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7);
-    void FUN_00d9a2a0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7);
+    void ComputeValues_00d984b0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7);
+    void ProcessAndReturnValue_00d9a2a0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7);
 };
 struct S00d08740_cls {
     void* m_00;
@@ -428,7 +428,7 @@ public:
     int m_iPairCount;
 
     hkResult LookupBucketValue(unsigned int key, unsigned int* out) const;
-    int FUN_00cb1870(hkMemoryAllocatorD089& alloc, unsigned int key, unsigned int val);
+    int hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocatorD089& alloc, unsigned int key, unsigned int val);
 };
 class OwnerD089 {
 public:
@@ -454,7 +454,7 @@ public:
     int unk4C;
     hkMapBaseD089 m_map;
 
-    void FUN_00d08980(unsigned int key);
+    void hkpAabbTreeWorldManager_queueInactivated(unsigned int key);
 };
 class hkpPrimaryD08 {
 public:
@@ -469,7 +469,7 @@ public:
 class hkpIslandListenerD08 {
 public:
     virtual void islandAddedCallback(hkpSimulationIsland* island);
-    virtual void FUN_00d089f0(hkpSimulationIsland* island);
+    virtual void MarkAndProcessIslandCollidables(hkpSimulationIsland* island);
 };
 class TrackerD08 : public hkpPrimaryD08, public hkpIslandListenerD08 {
 public:
@@ -496,8 +496,8 @@ public:
     bool m_dirty;
     bool m_needsUpdate;
 
-    void FUN_00d08980(hkpCollidable* collidable);
-    virtual void FUN_00d089f0(hkpSimulationIsland* island);
+    void hkpAabbTreeWorldManager_queueInactivated(hkpCollidable* collidable);
+    virtual void MarkAndProcessIslandCollidables(hkpSimulationIsland* island);
 };
 extern int DAT_010ccfcc;
 extern float DAT_0104da4c;
@@ -538,7 +538,7 @@ __declspec(align(16)) struct S00d0a490_Obj {
     int m_84;
     int m_88;
     int m_8c;
-    int FUN_00d984b0(int, int, int, int, int, int, int, int);
+    int ComputeValues_00d984b0(int, int, int, int, int, int, int, int);
 };
 struct S00d0a490_cls {
     int m_00;
@@ -548,8 +548,8 @@ struct S00d0a490_cls {
     int m_10;
     int __thiscall CallSubroutine(int a0, int a1, int a2, int a3, int a4, int a5, int a6);
 };
-void __cdecl FUN_00d083c0();
-void __cdecl FUN_00d08b90(hkArray<int*>& out, hkpWorld* world);
+void __cdecl Object_DoNothing_00d083c0();
+void __cdecl hkpAabbTreeWorldManager_gatherInactiveCollidablesFromWorld(hkArray<int*>& out, hkpWorld* world);
 extern unsigned int DAT_0126835c;
 extern char DAT_010cd234[];
 extern char DAT_010c41f8[];
@@ -585,25 +585,26 @@ struct UpdateOwner {
     int unk60;
     int unk64;
     bool dirty;
-    void FUN_00d09df0(void*, void*);
-    void FUN_00d099d0(void*, void*);
-    void FUN_00d0a060(void*, void*);
+    void hkpAabbTreeWorldManager_fullBuild(void*, void*);
+    void hkpAabbTreeWorldManager_incrementalBuild(void*, void*);
+    void hkpAabbTreeWorldManager_updateFromWorld(void*, void*);
 };
 // FUN_00d0a200 : MSVC this-adjusting thunk  (sub ecx, 0x14 ; jmp <impl>)
 struct A1_00d0a200 {
     A1_00d0a200();
-    virtual void FUN_00d0a200();
+    virtual void AdjustThisAndForward_00d0a200();
     char pad[0x10];
 };
 struct A2_00d0a200 {
     A2_00d0a200();
-    virtual void FUN_00d0a200();
+    virtual void AdjustThisAndForward_00d0a200();
 };
 struct Own_00d0a200 : A1_00d0a200, A2_00d0a200 {
     Own_00d0a200();
     virtual void key_fn();
 // @fnv 0x00d0a200
-    void FUN_00d0a200();
+// src: GUESS 0x00d0a200 (confidence: low)
+    void AdjustThisAndForward_00d0a200();
 };
 Own_00d0a200::Own_00d0a200() { }
 void Own_00d0a200::key_fn() { }
@@ -707,12 +708,12 @@ struct __declspec(align(16)) S00d094a0_Desc {
     int m_uiItemCount; char m_04; char m_isMt; short m_06; int m_08; int m_0c;
     S00d094a0_Vec m_kMinimumCorner;
     S00d094a0_Vec m_kMaximumCorner;
-    void FUN_00d976d0();
+    void hkKdTreeCinfo_hkKdTreeCinfo();
 };
 struct S00d094a0_Tree {
     void* m_00; int m_04; int m_08; int m_0c; int m_10; int m_14; int m_18; void* m_1c;
     int total() const { return m_14 + m_18; }
-    void FUN_00d978d0(S00d094a0_Desc*);
+    void hkKdTree_reset(S00d094a0_Desc*);
     S00d094a0_Tree* Init(S00d094a0_Desc*);
 };
 struct S00d094a0_Shape {
@@ -732,12 +733,12 @@ struct S00d094a0_Ctx {
     void* m_78;
 };
 struct S00d094a0_Job;
-struct S00d094a0_Queue { void FUN_00d04b50(S00d094a0_Job*, int); void FUN_00d051b0(); };
+struct S00d094a0_Queue { void hkJobQueue_addJob(S00d094a0_Job*, int); void hkJobQueue_processAllJobs(); };
 struct S00d094a0_Sync {
     virtual void f00(); virtual void f04(); virtual void f08();
     virtual void signal(S00d094a0_Queue*, int); virtual void wait();
 };
-struct S00d094a0_Helper { int FUN_00d04380(); };
+struct S00d094a0_Helper { int hkSemaphore_acquire(); };
 struct S00d094a0_JobHead {
     __declspec(align(16)) char m_00;
     char m_01; char m_02;
@@ -777,9 +778,9 @@ struct __declspec(align(16)) S00d094a0_Build {
 struct S00d094a0_Fallback {
     int m_00; int m_04; int m_08;
     void InitWalker(S00d094a0_Input*, S00d094a0_Ctx*);
-    int FUN_00d9e000();
+    int hkpCollidableMediator_getNumPrimitives();
 };
-void __cdecl FUN_00d9d950(S00d094a0_Tree*, int, void*, void*);
+void __cdecl hkKdTreeBuildingUtils_completeDistributedBuild(S00d094a0_Tree*, int, void*, void*);
 void __cdecl FillAabbArray(S00d094a0_Fallback*, int, int, void*);
 void __cdecl DrawIfCountPositive(void**, S00d094a0_Tree*);
 struct S00d094a0_Owner {
@@ -789,7 +790,7 @@ struct S00d094a0_Owner {
     int u40; int u44; int u48; int u4c; int u50; int u54; int u58; int u5c;
     int u60; int u64; int u68;
     S00d094a0_Helper* m_6c;
-    void FUN_00d094a0(S00d094a0_Tree** tree, S00d094a0_Input* input, S00d094a0_Ctx* ctx, S00d094a0_Queue* queue, S00d094a0_Sync* sync);
+    void hkpAabbTreeWorldManager_buildKdTree(S00d094a0_Tree** tree, S00d094a0_Input* input, S00d094a0_Ctx* ctx, S00d094a0_Queue* queue, S00d094a0_Sync* sync);
 };
 inline void* operator new(unsigned int, void* location) { return location; }
 struct Target {
@@ -900,7 +901,7 @@ struct Container {
     int unk10C;
     hkArray<Item2*> m_array2;
 };
-void FUN_00d08ac0(hkArray<Target*>* out, int containerHandle);
+void hkpAabbTreeWorldManager_gatherActiveCollidablesFromWorld(hkArray<Target*>* out, int containerHandle);
 extern int DAT_00fdf044;
 extern unsigned int DAT_0126835c;
 extern char DAT_010cd224;
@@ -910,16 +911,16 @@ extern char DAT_010cd140;
 extern char DAT_010cd214;
 extern char DAT_01076f38;
 struct D9bed0Cls {
-    void __thiscall FUN_00d9bed0();
+    void __thiscall UpdateState_00d9bed0();
 };
 struct D09020Cls {
-    void __thiscall FUN_00d09020(int* p, void* a, void* b);
+    void __thiscall hkpAabbTreeWorldManager_buildInactiveTree(int* p, void* a, void* b);
 };
 struct ActiveTreeBuilder {
-    void __thiscall FUN_00d099a0(void* entries, void* queue, void* pool);
+    void __thiscall hkpAabbTreeWorldManager_buildActiveTree(void* entries, void* queue, void* pool);
 };
 struct TreeCleanMarker {
-    void __thiscall FUN_00d08550();
+    void __thiscall hkpAabbTreeWorldManager_setTreeIsClean();
 };
 struct AllocV {
     virtual void v0();
@@ -950,7 +951,7 @@ struct EntListSelf {
     int m_entSize;
     int m_entCap;
 
-    void __thiscall FUN_00d09df0(void* p1, void* p2);
+    void __thiscall hkpAabbTreeWorldManager_fullBuild(void* p1, void* p2);
 };
 static __forceinline void mark16(hkMonitorStream* buf, char* name, char* name2, volatile unsigned int* stampOut)
 {
@@ -1039,7 +1040,7 @@ struct CollectorState {
  __m128 m40,m50,m60,m70;
  float f80,f84;
  float* m_88;
- void __thiscall FUN_00d984b0(int arg1, Obj* arg2, Vertex* arg3, void* arg4, MatrixData* arg5, FloatPtr arg6, void* volatile arg7, void* volatile arg8);
+ void __thiscall ComputeValues_00d984b0(int arg1, Obj* arg2, Vertex* arg3, void* arg4, MatrixData* arg5, FloatPtr arg6, void* volatile arg7, void* volatile arg8);
 };
 extern "C" const __m128 DAT_010ec7f0={1,1,1,1};
 extern "C" const float DAT_01016248=0.5f;
@@ -1048,9 +1049,10 @@ inline void hkVector4::interpolate(const hkVector4& a,const hkVector4& b,const S
  __m128 opposite=_mm_sub_ps(DAT_010ec7f0,weight);
  value=_mm_add_ps(_mm_mul_ps(opposite,a.value),_mm_mul_ps(b.value,weight));
 }
-__declspec(noalias) void __cdecl FUN_00df2750(void* output, int arg1, Triple* mid, CollectorState* self, float f);
+__declspec(noalias) void __cdecl hkKdTreeAabbCastUtils_castAabb(void* output, int arg1, Triple* mid, CollectorState* self, float f);
 // @fnv 0x00d984b0
-void CollectorState::FUN_00d984b0(int arg1, Obj* arg2, Vertex* arg3, void* arg4, MatrixData* arg5, FloatPtr arg6, void* volatile arg7, void* volatile arg8)
+// src: GUESS 0x00d984b0 (confidence: low)
+void CollectorState::ComputeValues_00d984b0(int arg1, Obj* arg2, Vertex* arg3, void* arg4, MatrixData* arg5, FloatPtr arg6, void* volatile arg7, void* volatile arg8)
 {
     m_arg7=arg7;
     m_arg8=arg8;
@@ -1085,5 +1087,5 @@ void CollectorState::FUN_00d984b0(int arg1, Obj* arg2, Vertex* arg3, void* arg4,
     temp.half.scale(Scalar(DAT_01016248));
     f80=arg3->unk10;
     unsigned char result;
-    FUN_00df2750(&result,arg1,&temp,this,*arg6.p);
+    hkKdTreeAabbCastUtils_castAabb(&result,arg1,&temp,this,*arg6.p);
 }

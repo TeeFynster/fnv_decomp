@@ -42,11 +42,12 @@ struct FUN_00666f00_shell
 {
     int m_04;
     int m_08;
-    bool FUN_00666f00();
+    bool CombatProcedure_GetFinished();
 };
 
 // @fnv 0x00666f00
-bool FUN_00666f00_shell::FUN_00666f00()
+// src: XBOX_PDB 0x00666f00
+bool FUN_00666f00_shell::CombatProcedure_GetFinished()
 {
     return *(int*)(this + 1) == 2;
 }
@@ -54,7 +55,8 @@ bool FUN_00666f00_shell::FUN_00666f00()
 extern Setting g_011d5d14;
 
 // @fnv 0x00666f20
-float FUN_00666f20()
+// src: COMMUNITY 0x00666f20
+float SpeedTree_fTreeForceCS_Get()
 {
     return *g_011d5d14.Float();
 }
@@ -63,7 +65,8 @@ namespace fnv_00666f40 {
 extern Setting g_011d5db8;
 
 // @fnv 0x00666f40
-float FUN_00666f40()
+// src: COMMUNITY 0x00666f40
+float SpeedTree_fTreeForceBranchDimming_Get()
 {
     return *g_011d5db8.Float();
 }
@@ -73,7 +76,8 @@ namespace fnv_00666f60 {
 extern Setting g_011d5d24;
 
 // @fnv 0x00666f60
-float FUN_00666f60()
+// src: COMMUNITY 0x00666f60
+float SpeedTree_fTreeForceLeafDimming_Get()
 {
     return *g_011d5d24.Float();
 }
@@ -83,7 +87,8 @@ namespace fnv_00666f80 {
 extern Setting g_011d5c9c;
 
 // @fnv 0x00666f80
-float FUN_00666f80()
+// src: COMMUNITY 0x00666f80
+float SpeedTree_fTreeForceMinBudAngle_Get()
 {
     return g_011d5c9c.Float()[0];
 }
@@ -91,12 +96,13 @@ float FUN_00666f80()
 
 struct FUN_006684d0_shell
 {
-    void FUN_006684d0(int param1, unsigned short param2);
+    void SetFields08And0C(int param1, unsigned short param2);
 };
 
 // Stores param1 at offset 8 and param2 at offset 0xC of this object.
 // @fnv 0x006684d0
-void FUN_006684d0_shell::FUN_006684d0(int param1, unsigned short param2)
+// src: GUESS 0x006684d0 (confidence: medium)
+void FUN_006684d0_shell::SetFields08And0C(int param1, unsigned short param2)
 {
     *(int*)((char*)this + 8) = param1;
     *(unsigned short*)((char*)this + 0xC) = param2;
@@ -126,7 +132,8 @@ struct CSpeedTreeRT
 };
 
 // @fnv 0x00669990
-unsigned short BSTreeModel::FUN_00669990()
+// src: XBOX_PDB 0x00669990
+unsigned short BSTreeModel::GetNumBranchLODLevels()
 {
     return m_pTreeRuntime ? m_pTreeRuntime->GetLowWordAtOffset0x78() : 0;
 }
@@ -146,14 +153,14 @@ unsigned short FUN_006699d0_shell::GetUnsignedShort()
     return m_pTreeRuntime ? m_pTreeRuntime->GetUnsignedShortValue() : 0;
 }
 
-extern "C" void* __cdecl FUN_00664840(bool);
+extern "C" void* __cdecl BSTreeManager_GetInstance(bool);
 
 extern "C" unsigned char __cdecl GetByteAtOffset1B();
 
 // @fnv 0x00669fb0
 unsigned char __cdecl GetByteAtOffset1B()
 {
-    return ((unsigned char*)FUN_00664840(true))[0x1B];
+    return ((unsigned char*)BSTreeManager_GetInstance(true))[0x1B];
 }
 
 struct Flt
@@ -177,14 +184,15 @@ void FUN_0066a630_shell::ConvertFloatToUInt()
 extern Setting g_011d5c80;
 
 // @fnv 0x00666fa0
-float FUN_00666fa0()
+// src: COMMUNITY 0x00666fa0
+float SpeedTree_fTreeForceMaxBudAngle_Get()
 {
     return *g_011d5c80.Float();
 }
 
 struct S_00666910
 {
-    void FUN_00b03b30();
+    void ReleaseStorage_00b03b30();
     void* FUN_00666910(unsigned int);
 };
 void _Deallocate(void*);
@@ -192,7 +200,7 @@ void _Deallocate(void*);
 // @fnv 0x00666910
 void* S_00666910::FUN_00666910(unsigned int flags)
 {
-    FUN_00b03b30();
+    ReleaseStorage_00b03b30();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -200,13 +208,14 @@ void* S_00666910::FUN_00666910(unsigned int flags)
 
 // The shared unsized operator delete changes the constructor-failure unwind at 0x00f001c0.
 // @fnv 0x006698f0
-NiAlphaProperty* FUN_006698f0()
+// src: COMMUNITY 0x006698f0
+NiAlphaProperty* BSTreeModel_CreateAlphaProperty()
 {
     NiAlphaProperty* pAlphaProperty = new NiAlphaProperty;
-    pAlphaProperty->FUN_0049ed90(false);
+    pAlphaProperty->NiAlphaProperty_SetAlphaBlending(false);
     pAlphaProperty->SetFlag512(true);
     pAlphaProperty->SetFlags(4);
-    pAlphaProperty->FUN_0094db80(0x54);
+    pAlphaProperty->NiAlphaProperty_SetTestRef(0x54);
     return pAlphaProperty;
 }
 
@@ -266,7 +275,7 @@ struct LeafDataX : public MemObjX
 {
     char _pad[0x10];
     LeafDataX();
-    void FUN_006684d0(ColorAX* apColors, unsigned short ausCount);
+    void SetFields08And0C(ColorAX* apColors, unsigned short ausCount);
 };
 struct StripsDataX : public MemObjX
 {
@@ -316,9 +325,9 @@ struct GeometryX
 
 struct SpeedTreeX
 {
-    void FUN_00b0ab20(GeometryX& arGeometry, int a2, int a3, int a4, int a5);
-    void FUN_00b08750();
-    void FUN_00b08780();
+    void CSpeedTreeRT_GetGeometry(GeometryX& arGeometry, int a2, int a3, int a4, int a5);
+    void UpdateState_00b08750();
+    void ProcessState_00b08780();
 };
 
 struct UIntArrayX
@@ -351,14 +360,15 @@ struct TreeModelX
     char _pad18[0xc];
     PtrX<LeafShapeX>* pLeafShapes;
 
-    bool FUN_00666f00();
-    unsigned short FUN_00669990();
-    void FUN_00667470();
+    bool CombatProcedure_GetFinished();
+    unsigned short GetNumBranchLODLevels();
+    void BSTreeModel_CreateBranchGeometry();
 };
 
 // Rebuilds per-LOD leaf geometry and shapes from the SpeedTree geometry, remapping strip indices and copying vertex, normal, tangent, texcoord and color data.
 // @fnv 0x00667470
-void TreeModelX::FUN_00667470()
+// src: XBOX_PDB 0x00667470
+void TreeModelX::BSTreeModel_CreateBranchGeometry()
 {
     unsigned int qfTOqo;
     unsigned short qsSDDgz;
@@ -366,7 +376,7 @@ void TreeModelX::FUN_00667470()
     GeometryX qpqRa;
     unsigned short qSVM;
     unsigned short qdqWL;
-    if (!m_pTreeRuntime || FUN_00666f00())
+    if (!m_pTreeRuntime || CombatProcedure_GetFinished())
     {
         return;
     }
@@ -380,12 +390,12 @@ void TreeModelX::FUN_00667470()
         delete[] pLeafShapes;
         pLeafShapes = 0;
     }
-    qdqWL = FUN_00669990();
+    qdqWL = GetNumBranchLODLevels();
     if (qdqWL <= 0)
     {
         return;
     }
-    m_pTreeRuntime->FUN_00b0ab20(qpqRa, 1, -1, -1, -1);
+    m_pTreeRuntime->CSpeedTreeRT_GetGeometry(qpqRa, 1, -1, -1, -1);
     if (!qpqRa.pCoords || !qpqRa.pNormals || !qpqRa.pTexCoords || !qpqRa.pColors || !qpqRa.pLodFade ||
         !qpqRa.pWindIndices)
     {
@@ -417,7 +427,7 @@ void TreeModelX::FUN_00667470()
     }
     for (qsSDDgz = 0; qsSDDgz < qdqWL; qsSDDgz++)
     {
-        m_pTreeRuntime->FUN_00b0ab20(qpqRa, 1, qsSDDgz, -1, -1);
+        m_pTreeRuntime->CSpeedTreeRT_GetGeometry(qpqRa, 1, qsSDDgz, -1, -1);
         qSVM = qpqRa.usVertexCount;
         if (qSVM <= 0 || !qpqRa.pStripCount || !qpqRa.ppStrips)
         {
@@ -496,7 +506,7 @@ void TreeModelX::FUN_00667470()
             qXMUYT[qrEZrs] = ColorAX(qpqRa.pLodFade[qBLsiu], (float)(qpqRa.pWindIndices[qBLsiu] * 4), qYdAnhh, 0.0f);
         }
         PtrX<LeafDataX> qCFhl(new LeafDataX);
-        ((LeafDataX*)qCFhl)->FUN_006684d0(qXMUYT, qEMUOs.GetSize());
+        ((LeafDataX*)qCFhl)->SetFields08And0C(qXMUYT, qEMUOs.GetSize());
         pLeafGeometry[qsSDDgz] = new StripsDataX(qEMUOs.GetSize(), qArJcY, qIpA, 0, qYTC, 1, qdKdHaf ? 0x1000 : 0,
                                                  *qpqRa.pStripCount - 2, 1, qCihG, qDpUK);
         ((StripsDataX*)pLeafGeometry[qsSDDgz])->FUN_00a67050(0x4000);
@@ -504,9 +514,9 @@ void TreeModelX::FUN_00667470()
         ((StripsDataX*)pLeafGeometry[qsSDDgz])->SetCompressFlags(1);
         pLeafShapes[qsSDDgz] = new LeafShapeX(qCFhl);
     }
-    m_pTreeRuntime->FUN_00b08750();
+    m_pTreeRuntime->UpdateState_00b08750();
     qpqRa.pColors = 0;
-    m_pTreeRuntime->FUN_00b08780();
+    m_pTreeRuntime->ProcessState_00b08780();
     qpqRa.pLodFade = 0;
     qpqRa.pWindIndices = 0;
 }
@@ -514,11 +524,12 @@ void TreeModelX::FUN_00667470()
 struct ModelHolder_b5531
 {
     void FUN_00633c90(unsigned int flags);
-    void FUN_006694e0();
+    void NiPointer_Empty();
 };
 
 // @fnv 0x006694e0
-void ModelHolder_b5531::FUN_006694e0()
+// src: COMMUNITY 0x006694e0
+void ModelHolder_b5531::NiPointer_Empty()
 {
     FUN_00633c90(0);
 }
@@ -935,13 +946,14 @@ struct TreeModelX
     int unk2c;
     int unk30;
     ::BSStringT<char> name;
-    bool FUN_00666f00();
-    void FUN_00669500(LoaderX* loader);
+    bool CombatProcedure_GetFinished();
+    void BSTreeModel_CreateBillboardGeometry(LoaderX* loader);
 };
 
 // Loads a texture, builds a TexturingProp node with alpha and shader properties, updates it, and precaches its geometry if a valid TreeGeom is found.
 // @fnv 0x00669500
-void TreeModelX::FUN_00669500(LoaderX* loader)
+// src: XBOX_PDB 0x00669500
+void TreeModelX::BSTreeModel_CreateBillboardGeometry(LoaderX* loader)
 {
     LocalCamera camera;
     // These raw camera-state vectors must not run the shared point default constructor.
@@ -953,7 +965,7 @@ void TreeModelX::FUN_00669500(LoaderX* loader)
     dir5[0] = 0.0f;
     dir5[1] = -1.0f;
     dir5[2] = 0.0f;
-    if (!unk0c || FUN_00666f00() || !loader)
+    if (!unk0c || CombatProcedure_GetFinished() || !loader)
         return;
     SavedState saveA2;
     SavedState saveB;
@@ -990,7 +1002,7 @@ void TreeModelX::FUN_00669500(LoaderX* loader)
 
 struct GlobalObject_0044fae0
 {
-    void FUN_004538a0(int);
+    void BSCriticalSection_Enter(int);
     void WaitForTasksDuringRendering();
 };
 extern GlobalObject_0044fae0 g_011d5df8;
@@ -1015,7 +1027,7 @@ template <class T> struct TreeModelPointer
 };
 struct TreeRuntimeCopy
 {
-    TreeRuntimeCopy* FUN_00b05210();
+    TreeRuntimeCopy* CSpeedTreeRT_MakeInstance();
 };
 struct TreeCloneView
 {
@@ -1034,23 +1046,23 @@ struct TreeCloneView
     float unk3c;
     unsigned int unk40, unk44;
     float unk48, unk4c;
-    bool FUN_00666f00();
-    unsigned short FUN_00669990();
+    bool CombatProcedure_GetFinished();
+    unsigned short GetNumBranchLODLevels();
     unsigned short FUN_006699d0();
     bool CloneFromModel(TreeCloneView*);
 };
 // @fnv 0x0066a650
 bool TreeCloneView::CloneFromModel(TreeCloneView* model)
 {
-    g_011d5df8.FUN_004538a0(0);
+    g_011d5df8.BSCriticalSection_Enter(0);
     AutoMemContext context_2(
         31, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\SpeedTree\\BSTreeModel.cpp", 1041);
-    if (!model || !model->runtime || model->FUN_00666f00() || initialized)
+    if (!model || !model->runtime || model->CombatProcedure_GetFinished() || initialized)
     {
         g_011d5df8.WaitForTasksDuringRendering();
         return false;
     }
-    runtime = model->runtime->FUN_00b05210();
+    runtime = model->runtime->CSpeedTreeRT_MakeInstance();
     if (!runtime)
     {
         g_011d5df8.WaitForTasksDuringRendering();
@@ -1074,7 +1086,7 @@ bool TreeCloneView::CloneFromModel(TreeCloneView* model)
     else
         collision = 0;
     unsigned short index;
-    unsigned short count4 = FUN_00669990();
+    unsigned short count4 = GetNumBranchLODLevels();
     if (count4 > 0 && model->branchGeometry && model->branchNodes)
     {
         branchGeometry = new TreeModelPointer<NiNode>[count4];
@@ -1116,10 +1128,10 @@ namespace fnv_0066ac40 {
 extern const char treePrefix[];
 int CopyTreeString(char*, unsigned int, const char*);
 int AppendTreeString(char*, unsigned int, const char*);
-void FUN_005b5e40(const char*, ...);
-float FUN_0066b0b0();
-float FUN_006655c0();
-float FUN_00665570();
+void Warning_005b5e40(const char*, ...);
+float BSTreeManager_GetSizeConversion();
+float fTreeFarDistanceBase_Get();
+float fTreeNearDistance_Get();
 struct FUN_00b02e20
 {
     unsigned int unk00;
@@ -1173,30 +1185,30 @@ struct CSpeedTreeRT_Load
     CSpeedTreeRT_Load();
     static void* operator new(unsigned int);
     ~CSpeedTreeRT_Load();
-    bool FUN_00b05420(const char*);
-    void FUN_00b0d040(FUN_00b02e20*);
-    void FUN_00b071f0(int);
+    bool CSpeedTreeRT_LoadTree(const char*);
+    void GetTextures_00b0d040(FUN_00b02e20*);
+    void CSpeedTreeRT_SetLeafRockingState(int);
     void SetField14(bool);
-    void FUN_00b06260(float*, float*);
-    void FUN_00b06280(float, float);
-    float FUN_00b07b00(float, float, float);
-    void FUN_00b08050(int, int);
+    void CSpeedTreeRT_GetTreeSize(float*, float*);
+    void CSpeedTreeRT_SetTreeSize(float, float);
+    float CSpeedTreeRT_SetWindStrength(float, float, float);
+    void CSpeedTreeRT_SetLocalMatrices(int, int);
     void FUN_00984f60(bool);
-    void FUN_00b076e0(int);
-    void FUN_00b07900(int);
-    void FUN_00b07510(int);
-    void FUN_00b06660(int);
-    void FUN_00b069c0(int);
-    void FUN_00b06810(int);
-    void FUN_00b08500(float, float);
-    bool FUN_00b044a0(int, int, bool);
-    void FUN_00b087d0();
-    unsigned int FUN_00b06440();
-    float FUN_00b07440();
-    float FUN_00b073f0();
-    void FUN_00b053e0();
-    void FUN_00b088d0();
-    void FUN_00b0a7a0();
+    void CSpeedTreeRT_SetBranchWindMethod(int);
+    void CSpeedTreeRT_SetFrondWindMethod(int);
+    void CSpeedTreeRT_SetLeafWindMethod(int);
+    void CSpeedTreeRT_SetBranchLightingMethod(int);
+    void CSpeedTreeRT_SetFrondLightingMethod(int);
+    void CSpeedTreeRT_SetLeafLightingMethod(int);
+    void CSpeedTreeRT_SetNearFarDists(float, float);
+    bool CSpeedTreeRT_Compute(int, int, bool);
+    void ReleaseStorage_00b087d0();
+    unsigned int CSpeedTreeRT_GetSeed();
+    float GetNestedFloatOrZero_00b07440();
+    float GetNestedFloatOrZero();
+    void CSpeedTreeRT_DeleteTransientData();
+    void DeleteBranchGeometry();
+    void CSpeedTreeRT_DeleteFrondGeometry();
 };
 struct TreeName
 {
@@ -1239,10 +1251,11 @@ struct TreeModelLoader
     unsigned int unk40;
     unsigned int unk44;
     float unk48, unk4c;
-    bool FUN_0066ac40(TreeModelInput*, int);
+    bool BSTreeModel_InitFromBase(TreeModelInput*, int);
 };
 // @fnv 0x0066ac40
-bool TreeModelLoader::FUN_0066ac40(TreeModelInput* model, int seed)
+// src: COMMUNITY 0x0066ac40
+bool TreeModelLoader::BSTreeModel_InitFromBase(TreeModelInput* model, int seed)
 {
     if (model && model->name.Name() && *model->name.Name() && !initialized)
     {
@@ -1252,34 +1265,34 @@ bool TreeModelLoader::FUN_0066ac40(TreeModelInput* model, int seed)
         CopyTreeString(szPath, 260, treePrefix);
         AppendTreeString(szPath, 260, model->name.Name());
         CSpeedTreeRT_Load* pTree = new CSpeedTreeRT_Load;
-        if (pTree->FUN_00b05420(szPath))
+        if (pTree->CSpeedTreeRT_LoadTree(szPath))
         {
             FUN_00b02e20 treeInfo;
-            pTree->FUN_00b0d040(&treeInfo);
+            pTree->GetTextures_00b0d040(&treeInfo);
             if (treeInfo.leafMaps <= 3)
-                pTree->FUN_00b071f0(2);
+                pTree->CSpeedTreeRT_SetLeafRockingState(2);
             else
             {
-                pTree->FUN_00b071f0(1);
+                pTree->CSpeedTreeRT_SetLeafRockingState(1);
                 if (treeInfo.leafMaps > 6)
-                    FUN_005b5e40(
+                    Warning_005b5e40(
                         "MODELS: Tree %s has too many leaf maps (greater than six).  Leaves may not display properly.",
                         model->name.Name());
             }
             pTree->SetField14(true);
             float sizeB, variance;
-            pTree->FUN_00b06260(&sizeB, &variance);
-            pTree->FUN_00b06280(sizeB * FUN_0066b0b0(), variance * FUN_0066b0b0());
-            pTree->FUN_00b07b00(0.0f, -1.0f, -1.0f);
-            pTree->FUN_00b08050(0, 4);
+            pTree->CSpeedTreeRT_GetTreeSize(&sizeB, &variance);
+            pTree->CSpeedTreeRT_SetTreeSize(sizeB * BSTreeManager_GetSizeConversion(), variance * BSTreeManager_GetSizeConversion());
+            pTree->CSpeedTreeRT_SetWindStrength(0.0f, -1.0f, -1.0f);
+            pTree->CSpeedTreeRT_SetLocalMatrices(0, 4);
             pTree->FUN_00984f60(true);
-            pTree->FUN_00b076e0(0);
-            pTree->FUN_00b07900(0);
-            pTree->FUN_00b07510(0);
-            pTree->FUN_00b06660(0);
-            pTree->FUN_00b069c0(0);
-            pTree->FUN_00b06810(0);
-            pTree->FUN_00b08500(FUN_00665570(), FUN_006655c0());
+            pTree->CSpeedTreeRT_SetBranchWindMethod(0);
+            pTree->CSpeedTreeRT_SetFrondWindMethod(0);
+            pTree->CSpeedTreeRT_SetLeafWindMethod(0);
+            pTree->CSpeedTreeRT_SetBranchLightingMethod(0);
+            pTree->CSpeedTreeRT_SetFrondLightingMethod(0);
+            pTree->CSpeedTreeRT_SetLeafLightingMethod(0);
+            pTree->CSpeedTreeRT_SetNearFarDists(fTreeNearDistance_Get(), fTreeFarDistanceBase_Get());
         }
         else
         {
@@ -1289,16 +1302,16 @@ bool TreeModelLoader::FUN_0066ac40(TreeModelInput* model, int seed)
         initialized = 1;
         tree = pTree;
         Setup(model);
-        if (!pTree->FUN_00b044a0(0, seed, true))
+        if (!pTree->CSpeedTreeRT_Compute(0, seed, true))
             return false;
-        pTree->FUN_00b087d0();
-        unk40 = pTree->FUN_00b06440();
-        unk48 = pTree->FUN_00b07440();
-        unk4c = pTree->FUN_00b073f0();
+        pTree->ReleaseStorage_00b087d0();
+        unk40 = pTree->CSpeedTreeRT_GetSeed();
+        unk48 = pTree->GetNestedFloatOrZero_00b07440();
+        unk4c = pTree->GetNestedFloatOrZero();
         Finish(model);
-        pTree->FUN_00b053e0();
-        pTree->FUN_00b088d0();
-        pTree->FUN_00b0a7a0();
+        pTree->CSpeedTreeRT_DeleteTransientData();
+        pTree->DeleteBranchGeometry();
+        pTree->CSpeedTreeRT_DeleteFrondGeometry();
     }
     return true;
 }
@@ -1374,9 +1387,9 @@ extern const NiRTTI DAT_011f4280;
 NiAVObject* NiDynamicCast(const NiRTTI* apRTTI, NiAVObject* apObject);
 
 struct bhkWorldObject;
-bhkCollisionObject* FUN_004a8b00(NiNode* apNode);
+bhkCollisionObject* bhkNiCollisionObject_GetbhkNiCollisionObject(NiNode* apNode);
 
-NiNode* __cdecl FUN_00c81380(float afArg, float afArgCur);
+NiNode* __cdecl NiNode_ProcessAndReturnValue_00c81380(float afArg, float afArgCur);
 
 struct ModelName
 {
@@ -1385,9 +1398,9 @@ struct ModelName
 
 struct FUN_00667190_shell : public TreeCloneView
 {
-    void FUN_00667470();
-    void FUN_00668500(TESObjectTREE* apTree);
-    void FUN_00669500(TESObjectTREE* apTree);
+    void BSTreeModel_CreateBranchGeometry();
+    void BSTreeModel_CreateLeafGeometry(TESObjectTREE* apTree);
+    void BSTreeModel_CreateBillboardGeometry(TESObjectTREE* apTree);
     void LoadTreeCollision(TESObjectTREE* apTree);
 };
 
@@ -1395,13 +1408,13 @@ struct FUN_00667190_shell : public TreeCloneView
 // @fnv 0x00667190
 void FUN_00667190_shell::LoadTreeCollision(TESObjectTREE* apTree)
 {
-    if (!runtime || FUN_00666f00())
+    if (!runtime || CombatProcedure_GetFinished())
         return;
 
-    FUN_00667470();
-    FUN_00668500(apTree);
-    if (apTree->FUN_0051d250())
-        FUN_00669500(apTree);
+    BSTreeModel_CreateBranchGeometry();
+    BSTreeModel_CreateLeafGeometry(apTree);
+    if (apTree->TESObjectTREE_IsLargeEnoughForDistantLOD())
+        BSTreeModel_CreateBillboardGeometry(apTree);
 
     collision = 0;
 
@@ -1416,19 +1429,19 @@ void FUN_00667190_shell::LoadTreeCollision(TESObjectTREE* apTree)
     CopyTreeString(acPath, 0x104, "Data\\Meshes\\Trees");
     AppendTreeString(acPath, 0x104, kModelName.acName);
     AppendTreeString(acPath, 0x104, ".NIF");
-    if (FileFinder::Exist(acPath, 0, 6, 1) && kStream.FUN_00c3a8a0(acPath, false) && kStream.NiStream::GetRefAt21C() == 1)
+    if (FileFinder::Exist(acPath, 0, 6, 1) && kStream.BSStream_Load(acPath, false) && kStream.NiStream::GetRefAt21C() == 1)
     {
         NiAVObject* pObject = kStream.NiStream::GetStringAt(0);
         NiNode* kNode = (NiNode*)NiDynamicCast(&DAT_011f4280, pObject);
-        bhkCollisionObject* pCollisionObjectCur = FUN_004a8b00(kNode);
-        bhkWorldObject* pWorldObject = pCollisionObjectCur ? pCollisionObjectCur->FUN_006fa820() : 0;
+        bhkCollisionObject* pCollisionObjectCur = bhkNiCollisionObject_GetbhkNiCollisionObject(kNode);
+        bhkWorldObject* pWorldObject = pCollisionObjectCur ? pCollisionObjectCur->bhkNiCollisionObject_GetWorldObject() : 0;
         NiNode* pCollisionNode = (NiNode*)pWorldObject;
         if (pCollisionNode)
             collision = pCollisionNode;
     }
 
     if (!(NiNode*)collision && unk48 > 64.0)
-        collision = FUN_00c81380(unk48, unk4c / 2.0);
+        collision = NiNode_ProcessAndReturnValue_00c81380(unk48, unk4c / 2.0);
 }
 
 namespace TreeBuild {
@@ -1443,7 +1456,7 @@ template <class T> struct Handle
     T* object;
     Handle(T*);
     ~Handle();
-    T* FUN_00559450();
+    T* Modelloader_GetReferencedThis();
     void FUN_0066b0d0(T*);
 };
 struct Scope
@@ -1462,7 +1475,7 @@ struct UpdateData
 };
 struct ShaderState
 {
-    int FUN_004a8a90();
+    int NiTimeController_GetNext();
     int FUN_005f36f0();
 };
 struct Property
@@ -1522,11 +1535,11 @@ struct Property
     virtual void v52();
     virtual Shader* CreateShader(Geometry*);
     void FUN_004393c0(int);
-    void FUN_00baa000();
-    void FUN_00b66ad0(const char*, Object*);
+    void BSShaderProperty_FreeRenderPasses();
+    void BSShaderPPLightingProperty_LoadTextureSet(const char*, Object*);
 };
-Property* FUN_006698f0();
-void* FUN_00b55560(int);
+Property* BSTreeModel_CreateAlphaProperty();
+void* BSShaderManager_GetShader(int);
 struct Geometry
 {
     virtual void v0();
@@ -1581,9 +1594,9 @@ struct Geometry
     static void* operator new(unsigned int);
     static void operator delete(void*, unsigned int);
     Geometry(GeometryData*);
-    void FUN_00439410(Property*);
-    ShaderState* FUN_005495f0();
-    void FUN_00539ef0(Shader*);
+    void NiAVObject_AttachProperty(Property*);
+    ShaderState* NiGeometry_GetModelData();
+    void NiGeometry_SetAdditionalGeometryData(Shader*);
     void FUN_00874460(void*);
 };
 struct Leaves : Geometry
@@ -1653,7 +1666,7 @@ struct Renderer
     virtual void v58();
     virtual void Prepare(Geometry*, int, int, int);
 };
-Renderer* FUN_0043c4b0();
+Renderer* NiXenonRenderer_GetRenderer();
 void FUN_00b57e30(Geometry*, int, int);
 struct Tree
 {
@@ -1795,11 +1808,11 @@ struct Tree
     static void* operator new(unsigned int);
     static void operator delete(void*, unsigned int);
     Tree(Model*, Object*);
-    void FUN_00a5a040();
+    void UpdateProperties();
     void FUN_00a59c90(UpdateData*);
-    void FUN_0066cb40(void*, float);
+    void BSTreeNode_MakeHavokLeaves(void*, float);
 };
-Object* FUN_00c81380(float, float);
+Object* NiNode_ProcessAndReturnValue_00c81380(float, float);
 struct Model
 {
     int unk00, unk04, unk08;
@@ -1815,9 +1828,9 @@ struct Model
     int unk30, unk34, unk38, unk3c, unk40, unk44;
     float radius, height;
     Object* ConvertFloatToUInt();
-    unsigned short FUN_00669990();
+    unsigned short GetNumBranchLODLevels();
     unsigned short FUN_006699d0();
-    bool FUN_00666f00();
+    bool CombatProcedure_GetFinished();
     Tree* CreateTree(float);
 };
 // Builds a Tree from the model's branches and leaves, creating geometry and shaders for each, then applies the billboard, updates and returns it.
@@ -1835,11 +1848,11 @@ Tree* Model::CreateTree(float scale)
         if (scale == DAT_01012070)
             shape.FUN_0066b0d0(ConvertFloatToUInt());
         else
-            shape.FUN_0066b0d0(FUN_00c81380(scale * radius, scale * height / DAT_01011590));
+            shape.FUN_0066b0d0(NiNode_ProcessAndReturnValue_00c81380(scale * radius, scale * height / DAT_01011590));
     }
     else
         shape.FUN_0066b0d0(0);
-    tree5 = new Tree(this, shape.FUN_00559450());
+    tree5 = new Tree(this, shape.Modelloader_GetReferencedThis());
     unsigned short count3;
     unsigned short i;
     void* shader;
@@ -1847,78 +1860,78 @@ Tree* Model::CreateTree(float scale)
     Property* alpha;
     if (branches && branchProperties)
     {
-        count3 = FUN_00669990();
-        shader = FUN_00b55560(4);
+        count3 = GetNumBranchLODLevels();
+        shader = BSShaderManager_GetShader(4);
         unusedB = tree5->GetBranches();
         for (i = 0; i < count3; i++)
         {
-            if (!branches[i].FUN_00559450())
+            if (!branches[i].Modelloader_GetReferencedThis())
                 continue;
-            geometryX = new Geometry(branches[i].FUN_00559450());
-            alpha = FUN_006698f0();
+            geometryX = new Geometry(branches[i].Modelloader_GetReferencedThis());
+            alpha = BSTreeModel_CreateAlphaProperty();
             if (alpha)
             {
                 alpha->FUN_004393c0(0);
-                geometryX->FUN_00439410(alpha);
+                geometryX->NiAVObject_AttachProperty(alpha);
             }
-            if (branchProperties[i].FUN_00559450())
+            if (branchProperties[i].Modelloader_GetReferencedThis())
             {
-                branchProperties[i].FUN_00559450()->FUN_00baa000();
-                geometryX->FUN_00439410(branchProperties[i].FUN_00559450());
-                if (!geometryX->FUN_005495f0()->FUN_004a8a90())
+                branchProperties[i].Modelloader_GetReferencedThis()->BSShaderProperty_FreeRenderPasses();
+                geometryX->NiAVObject_AttachProperty(branchProperties[i].Modelloader_GetReferencedThis());
+                if (!geometryX->NiGeometry_GetModelData()->NiTimeController_GetNext())
                 {
-                    Shader* created = branchProperties[i].FUN_00559450()->CreateShader(geometryX);
-                    geometryX->FUN_00539ef0(created);
+                    Shader* created = branchProperties[i].Modelloader_GetReferencedThis()->CreateShader(geometryX);
+                    geometryX->NiGeometry_SetAdditionalGeometryData(created);
                 }
             }
-            if (FUN_00666f00())
+            if (CombatProcedure_GetFinished())
                 geometryX->FUN_00874460(shader);
             tree5->SetBranch(i, geometryX);
         }
-        if (!FUN_00666f00())
+        if (!CombatProcedure_GetFinished())
         {
             for (i = 0; i < count3; i++)
             {
                 geometryX = tree5->GetBranch(i);
                 if (!geometryX)
                     continue;
-                branchProperties[i].FUN_00559450()->FUN_00b66ad0(DAT_01066830, extra.FUN_00559450());
+                branchProperties[i].Modelloader_GetReferencedThis()->BSShaderPPLightingProperty_LoadTextureSet(DAT_01066830, extra.Modelloader_GetReferencedThis());
                 FUN_00b57e30(geometryX, 0, 0);
-                geometryX->FUN_00539ef0(branchProperties[i].FUN_00559450()->CreateShader(geometryX));
-                if (!geometryX->FUN_005495f0()->FUN_005f36f0())
-                    FUN_0043c4b0()->Prepare(geometryX, 0, 0, 0);
+                geometryX->NiGeometry_SetAdditionalGeometryData(branchProperties[i].Modelloader_GetReferencedThis()->CreateShader(geometryX));
+                if (!geometryX->NiGeometry_GetModelData()->FUN_005f36f0())
+                    NiXenonRenderer_GetRenderer()->Prepare(geometryX, 0, 0, 0);
             }
         }
     }
     if (leaves && leafProperties)
     {
         count3 = FUN_006699d0();
-        shader = FUN_00b55560(6);
+        shader = BSShaderManager_GetShader(6);
         for (i = 0; i < count3; i++)
         {
-            if (!leaves[i].FUN_00559450())
+            if (!leaves[i].Modelloader_GetReferencedThis())
                 continue;
-            geometryX = new Leaves(leaves[i].FUN_00559450());
-            alpha = FUN_006698f0();
+            geometryX = new Leaves(leaves[i].Modelloader_GetReferencedThis());
+            alpha = BSTreeModel_CreateAlphaProperty();
             if (alpha)
-                geometryX->FUN_00439410(alpha);
-            if (leafProperties[i].FUN_00559450())
+                geometryX->NiAVObject_AttachProperty(alpha);
+            if (leafProperties[i].Modelloader_GetReferencedThis())
             {
-                leafProperties[i].FUN_00559450()->FUN_00baa000();
-                geometryX->FUN_00439410(leafProperties[i].FUN_00559450());
+                leafProperties[i].Modelloader_GetReferencedThis()->BSShaderProperty_FreeRenderPasses();
+                geometryX->NiAVObject_AttachProperty(leafProperties[i].Modelloader_GetReferencedThis());
             }
             tree5->SetLeaf(i, geometryX);
             geometryX->FUN_00874460(shader);
-            FUN_0043c4b0()->Prepare(geometryX, 0, 0, 0);
+            NiXenonRenderer_GetRenderer()->Prepare(geometryX, 0, 0, 0);
         }
     }
     unusedB = tree5->GetLeaves();
-    if (billboard.FUN_00559450())
-        tree5->SetBillboardObject(billboard.FUN_00559450());
-    tree5->FUN_00a5a040();
+    if (billboard.Modelloader_GetReferencedThis())
+        tree5->SetBillboardObject(billboard.Modelloader_GetReferencedThis());
+    tree5->UpdateProperties();
     UpdateData update(0.0f, 0, 0);
     tree5->FUN_00a59c90(&update);
-    tree5->FUN_0066cb40(model, scale);
+    tree5->BSTreeNode_MakeHavokLeaves(model, scale);
     return tree5;
 }
 }
@@ -1937,18 +1950,18 @@ struct FUN_00b02e20
 struct TexturePtr
 {
     BSShaderTextureSet* object;
-    BSShaderTextureSet* FUN_00559450();
+    BSShaderTextureSet* Modelloader_GetReferencedThis();
     void FUN_0066b0d0(BSShaderTextureSet*);
 };
 struct SourcePtr
 {
     void* object;
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
 };
 struct FullNameComponent
 {
     unsigned int FUN_0048cee0();
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct TreeInput
 {
@@ -2088,7 +2101,7 @@ struct TreeRuntime
     void SetField98(float);
     void FUN_00b07490(float);
     void SetFieldD0(float);
-    void FUN_00b0d040(FUN_00b02e20*);
+    void GetTextures_00b0d040(FUN_00b02e20*);
 };
 struct TreeTarget
 {
@@ -2100,41 +2113,41 @@ struct TreeTarget
     TexturePtr billboards;
     int unk38;
     float scale;
-    bool FUN_00666f00();
+    bool CombatProcedure_GetFinished();
     void ApplyInput(TreeInput*);
 };
 
 extern TES* g_TES;
-float FUN_00666f40();
-float FUN_00666f60();
-float FUN_00666f80();
+float SpeedTree_fTreeForceBranchDimming_Get();
+float SpeedTree_fTreeForceLeafDimming_Get();
+float SpeedTree_fTreeForceMinBudAngle_Get();
 int CopyTreeString(char*, unsigned int, const char*);
 int AppendTreeString(char*, unsigned int, const char*);
-unsigned int FUN_0044a670(const char*);
+unsigned int BSstrlen(const char*);
 void FUN_00b4f5e0(char*, const char*, const char*, bool);
 // @fnv 0x00666940
 void TreeTarget::ApplyInput(TreeInput* input)
 {
     NP a(0);
-    if (!input || !runtime || FUN_00666f00())
+    if (!input || !runtime || CombatProcedure_GetFinished())
         return;
-    float valueHolder = FUN_00666f40();
+    float valueHolder = SpeedTree_fTreeForceBranchDimming_Get();
     if (valueHolder < 0.0 || valueHolder > 1.0)
         valueHolder = input->Get1ac();
     if (valueHolder >= 0.0 && valueHolder <= 1.0)
         runtime->SetField9C(valueHolder);
-    valueHolder = FUN_00666f60();
+    valueHolder = SpeedTree_fTreeForceLeafDimming_Get();
     if (valueHolder < 0.0 || valueHolder > 1.0)
         valueHolder = input->Get1b4();
     if (valueHolder >= 0.0 && valueHolder <= 1.0)
         runtime->SetField98(valueHolder);
-    valueHolder = FUN_00666f20();
+    valueHolder = SpeedTree_fTreeForceCS_Get();
     if (valueHolder < 0.0)
         valueHolder = input->Get194();
     if (valueHolder >= 0.0)
         scale = valueHolder;
-    float b = FUN_00666f80();
-    float c = FUN_00666fa0();
+    float b = SpeedTree_fTreeForceMinBudAngle_Get();
+    float c = SpeedTree_fTreeForceMaxBudAngle_Get();
     if (b < 0.0 || b > 90.0 || c < 0.0 || c > 90.0 || b > c)
     {
         b = input->Get19c();
@@ -2147,37 +2160,37 @@ void TreeTarget::ApplyInput(TreeInput* input)
     }
     AutoMemContext context(30, true,
                            "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\SpeedTree\\BSTreeModel.cpp", 145);
-    if (!branches.FUN_00559450())
+    if (!branches.Modelloader_GetReferencedThis())
     {
         FUN_00b02e20 mapBank5;
         char branchPath[260];
         char normalPathA[260];
         unsigned int length2 = 0;
-        runtime->FUN_00b0d040(&mapBank5);
+        runtime->GetTextures_00b0d040(&mapBank5);
         CopyTreeString(branchPath, 260, "Textures\\Trees\\Branches\\");
         AppendTreeString(branchPath, 260, mapBank5.branchMaps[0]);
-        length2 = FUN_0044a670(branchPath);
+        length2 = BSstrlen(branchPath);
         branchPath[length2 - 3] = 'd';
         branchPath[length2 - 2] = 'd';
         branchPath[length2 - 1] = 's';
         FUN_00b4f5e0(normalPathA, branchPath, "_n", true);
         branches.FUN_0066b0d0(new BSShaderTextureSet);
-        branches.FUN_00559450()->SetTexture(BSShaderProperty::TEXTYPE_DIFFUSE, branchPath);
-        branches.FUN_00559450()->SetTexture(BSShaderProperty::TEXTYPE_NORMAL, normalPathA);
+        branches.Modelloader_GetReferencedThis()->SetTexture(BSShaderProperty::TEXTYPE_DIFFUSE, branchPath);
+        branches.Modelloader_GetReferencedThis()->SetTexture(BSShaderProperty::TEXTYPE_NORMAL, normalPathA);
     }
-    if (!leaves.FUN_00559450() && input->leafName.FUN_0048cee0())
+    if (!leaves.Modelloader_GetReferencedThis() && input->leafName.FUN_0048cee0())
     {
         char leafPath[260];
         CopyTreeString(leafPath, 260, "Textures\\Trees\\Leaves\\");
-        AppendTreeString(leafPath, 260, input->leafName.FUN_00408da0());
+        AppendTreeString(leafPath, 260, input->leafName.TESModel_GetModel());
         g_TES->FUN_004568c0(leafPath, &leaves, true, false);
     }
-    if (!billboards.FUN_00559450())
+    if (!billboards.Modelloader_GetReferencedThis())
     {
         char billboardPath[260];
         input->BuildBillboardTexturePath(billboardPath);
         billboards.FUN_0066b0d0(new BSShaderTextureSet);
-        billboards.FUN_00559450()->SetTexture(BSShaderProperty::TEXTYPE_DIFFUSE, billboardPath);
+        billboards.Modelloader_GetReferencedThis()->SetTexture(BSShaderProperty::TEXTYPE_DIFFUSE, billboardPath);
     }
 }
 
@@ -2201,7 +2214,7 @@ struct Owner226
     Element226* array24;
     Element226* array28;
     Ref226 ref2c, ref30, ref34, ref38;
-    bool FUN_00666f00();
+    bool CombatProcedure_GetFinished();
     void ClearArrays();
 };
 // Deletes the object's array members and clears the reference members, resetting each pointer to null.
@@ -2210,7 +2223,7 @@ void Owner226::ClearArrays()
 {
     if (array14)
     {
-        if (FUN_00666f00())
+        if (CombatProcedure_GetFinished())
         {
         }
         delete[] array14;
@@ -2297,13 +2310,13 @@ struct FUN_00414430
     FUN_00414430(float fA, float fB, float fC, float fD);
 };
 void* NiMalloc(unsigned int uiSize);
-int FUN_00408b20(const char* pA, const char* pB);
-unsigned int __fastcall FUN_0044edb0(void* pTree);
-void __fastcall FUN_00804cb0(void* pObject, float fValue);
+int BSstrcmp(const char* pA, const char* pB);
+unsigned int __fastcall TESMain_GetThread(void* pTree);
+void __fastcall ActiveEffect_SetMagnitude(void* pObject, float fValue);
 
 struct FUN_00792760_shell
 {
-    float FUN_00792760();
+    float QueuedModel_GetOverriddenVisualDistance();
 };
 struct FUN_0063f790_shell
 {
@@ -2311,7 +2324,7 @@ struct FUN_0063f790_shell
 };
 struct FUN_00621b20_Class
 {
-    void FUN_00621b20(float fValue);
+    void NiTimeController_SetPhase(float fValue);
 };
 
 struct FUN_00b029f0
@@ -2345,10 +2358,10 @@ struct FUN_00b02e20
 };
 struct SpeedTreeRT
 {
-    float* FUN_00b0cb10();
-    void FUN_00b0d040(FUN_00b02e20* pTextures);
-    void FUN_00b0ab20(FUN_00b029f0* m_pShaderGeometry, unsigned int uiBits, short sBranch, short sFrond, short sLeaf);
-    void FUN_00b088b0();
+    float* CSpeedTreeRT_GetLeafLodSizeAdjustments();
+    void GetTextures_00b0d040(FUN_00b02e20* pTextures);
+    void CSpeedTreeRT_GetGeometry(FUN_00b029f0* m_pShaderGeometry, unsigned int uiBits, short sBranch, short sFrond, short sLeaf);
+    void FreeLeafLODDataArrays();
 };
 struct FUN_00bb3950 : public NiMemObject
 {
@@ -2508,12 +2521,13 @@ class TreeLeafModel
     int m_aiPad34[2];
     float m_fLeafScale;
     unsigned short FUN_006699d0();
-    void FUN_00668500(TreeLeafRef* pRef);
+    void BSTreeModel_CreateLeafGeometry(TreeLeafRef* pRef);
 };
 
 // Builds per-level leaf geometry, shaders and material from the SpeedTree data, allocating vertex, normal, UV and attribute arrays and triangle indices.
 // @fnv 0x00668500
-void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
+// src: XBOX_PDB 0x00668500
+void TreeLeafModel::BSTreeModel_CreateLeafGeometry(TreeLeafRef* pRef)
 {
     unsigned short usJ;
     FUN_00b029f0 kLeafGeom;
@@ -2542,7 +2556,7 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
     float fCorner;
     float fLightness;
 
-    if (!m_pLeafTreeRuntime || !m_pLeafTreeRuntime->FUN_00b0cb10() || ((FUN_00666f00_shell*)this)->FUN_00666f00())
+    if (!m_pLeafTreeRuntime || !m_pLeafTreeRuntime->CSpeedTreeRT_GetLeafLodSizeAdjustments() || ((FUN_00666f00_shell*)this)->CombatProcedure_GetFinished())
         return;
 
     if (m_pspLeafGeometry)
@@ -2560,7 +2574,7 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
     if (usLevels <= 0)
         return;
 
-    m_pLeafTreeRuntime->FUN_00b0d040(&kTexData);
+    m_pLeafTreeRuntime->GetTextures_00b0d040(&kTexData);
     usNumNames = kTexData.m_usValue;
     if (usNumNames <= 0)
         return;
@@ -2569,7 +2583,7 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
     {
         for (usJ = usTex + 1; usJ < usNumNames; usJ++)
         {
-            if (FUN_00408b20(kTexData.m_ppTextures[usTex], kTexData.m_ppTextures[usJ]))
+            if (BSstrcmp(kTexData.m_ppTextures[usTex], kTexData.m_ppTextures[usJ]))
                 bMultiTexture = true;
         }
     }
@@ -2584,22 +2598,22 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
 
     m_spLeafMaterial = (NiAVObject*)new FUN_00bb3950;
     ((FUN_0063f790_shell*)(NiAVObject*)m_spLeafMaterial)->FUN_0063f790(m_fLeafScale);
-    if (m_pLeafTreeRuntime && FUN_0044edb0(m_pLeafTreeRuntime))
+    if (m_pLeafTreeRuntime && TESMain_GetThread(m_pLeafTreeRuntime))
     {
         ((FUN_00621b20_Class*)(NiAVObject*)m_spLeafMaterial)
-            ->FUN_00621b20(((TESObjectREFR*)FUN_0044edb0(m_pLeafTreeRuntime))->GetScale());
+            ->NiTimeController_SetPhase(((TESObjectREFR*)TESMain_GetThread(m_pLeafTreeRuntime))->GetScale());
         ((FUN_006694c0_shell*)(NiAVObject*)m_spLeafMaterial)
-            ->SetPad5(((FUN_00792760_shell*)FUN_0044edb0(m_pLeafTreeRuntime))->FUN_00792760());
+            ->SetPad5(((FUN_00792760_shell*)TESMain_GetThread(m_pLeafTreeRuntime))->QueuedModel_GetOverriddenVisualDistance());
         if (pRef)
         {
-            ((BSMultiBoundSphere*)(NiAVObject*)m_spLeafMaterial)->FUN_00819a50(pRef->GetWidth());
-            FUN_00804cb0((NiAVObject*)m_spLeafMaterial, pRef->GetHeight());
+            ((BSMultiBoundSphere*)(NiAVObject*)m_spLeafMaterial)->CombatLocation_SetRadius(pRef->GetWidth());
+            ActiveEffect_SetMagnitude((NiAVObject*)m_spLeafMaterial, pRef->GetHeight());
         }
     }
 
     for (usI = 0; usI < usLevels; usI++)
     {
-        m_pLeafTreeRuntime->FUN_00b0ab20(&kLeafGeom, 4, -1, -1, usI);
+        m_pLeafTreeRuntime->CSpeedTreeRT_GetGeometry(&kLeafGeom, 4, -1, -1, usI);
         usLeafCount = kLeafGeom.m_usNumLeaves;
         usVertCount = usLeafCount * 4;
         if (usLeafCount <= 0)
@@ -2645,7 +2659,7 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
                 fCorner += fLightness;
                 pkAttributes[usBaseVert + usCornerIndex] =
                     FUN_00414430(kLeafGeom.m_pfWidths[usCard], kLeafGeom.m_pucSizes[usCard] * 4, fCorner,
-                                 m_pLeafTreeRuntime->FUN_00b0cb10()[usI]);
+                                 m_pLeafTreeRuntime->CSpeedTreeRT_GetLeafLodSizeAdjustments()[usI]);
             }
 
             pusIndex[usBaseIndex] = usBaseVert + 3;
@@ -2659,7 +2673,7 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
         m_pspLeafGeometry[usI] =
             (NiAVObject*)new FUN_00a7b630(usVertCount, pkVertex, pkNorm, 0, pkUVCoords, 1, 0, usLeafCount * 2, pusTris);
         spWindData = (NiAVObject*)new FUN_00bb33c0;
-        ((FUN_006684d0_shell*)(NiAVObject*)spWindData)->FUN_006684d0((int)pkAttributes, usVertCount);
+        ((FUN_006684d0_shell*)(NiAVObject*)spWindData)->SetFields08And0C((int)pkAttributes, usVertCount);
         m_pspLeafShaders[usI] = (NiAVObject*)new FUN_00bb3ba0(usI, spWindData, m_spLeafMaterial);
         ((LeafShaderProperty*)m_pspLeafShaders[usI].operator->())->SetMaterial(m_spLeafTexture);
         ((NiGPUProgramOwner*)(NiAVObject*)m_pspLeafGeometry[usI])->SetProgram(((LeafShaderProperty*)m_pspLeafShaders[usI].operator->())->GetProgram(0));
@@ -2668,7 +2682,7 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
         ((NiAVObject*)m_pspLeafGeometry[usI])->FUN_004410f0(1);
     }
 
-    m_pLeafTreeRuntime->FUN_00b088b0();
+    m_pLeafTreeRuntime->FreeLeafLODDataArrays();
 }
 }  // namespace fnv_00668500
 
@@ -2763,22 +2777,22 @@ struct TreeEval
 };
 struct RuntimeOps
 {
-    void FUN_00b065e0(float, float, float);
-    void FUN_00b08480(float);
-    void FUN_00b08200();
-    float FUN_00b08440();
+    void CSpeedTreeRT_SetTreePosition(float, float, float);
+    void CSpeedTreeRT_SetLodLevel(float);
+    void CSpeedTreeRT_ComputeLodLevel();
+    float CSpeedTreeRT_GetLodLevel();
     short GetIndexFromLevel(float);
-    void FUN_00b0ad00(TreeEval*, float);
-    RuntimeOps* FUN_00b051e0();
-    RuntimeOps* FUN_00b08af0(void*);
+    void CSpeedTreeRT_GetBSGeometryLODData(TreeEval*, float);
+    RuntimeOps* CSpeedTreeRT_InstanceOf();
+    RuntimeOps* CSpeedTreeRT_GetLeafBillboardTable(void*);
 };
 struct SceneNode
 {
-    void FUN_00bb39e0(void*, void*);
+    void UpdateFields_00bb39e0(void*, void*);
 };
 struct NodeHandle
 {
-    SceneNode* FUN_00559450();
+    SceneNode* Modelloader_GetReferencedThis();
 };
 struct TreeCallback
 {
@@ -2862,17 +2876,17 @@ struct TreeCallback
     virtual void SetLeafLod(unsigned short, unsigned char);
     virtual void SetBranchLod(unsigned short, unsigned char);
     virtual void SetTopAlpha(unsigned char);
-    NiPoint3* FUN_0045bb80();
+    NiPoint3* NiAVObject_GetWorldTranslate();
 };
-unsigned char __cdecl FUN_0054ee20();
-unsigned char __cdecl FUN_005b9790();
+unsigned char __cdecl BSTreeManager_GetTreesEnabled();
+unsigned char __cdecl BSTreeManager_AreLeavesVisible();
 struct TreeActor
 {
     int unk00, unk04, unk08;
     RuntimeOps* runtime;
     int unk10, unk14, unk18, unk1c;
     NodeHandle handle;
-    short FUN_00669990();
+    short GetNumBranchLODLevels();
     short FUN_006699d0();
     void UpdateTreeLod(TreeCallback*);
 };
@@ -2892,22 +2906,22 @@ void TreeActor::UpdateTreeLod(TreeCallback* pCallback)
             return;
         if (!runtime)
             return;
-        if (!FUN_0054ee20())
+        if (!BSTreeManager_GetTreesEnabled())
             return;
-        worldPos = *pCallback->FUN_0045bb80();
-        runtime->FUN_00b065e0(worldPos.x, worldPos.y, worldPos.z);
+        worldPos = *pCallback->NiAVObject_GetWorldTranslate();
+        runtime->CSpeedTreeRT_SetTreePosition(worldPos.x, worldPos.y, worldPos.z);
 
         if (GetByteAtOffset1B())
         {
-            runtime->FUN_00b08480(1.0f);
+            runtime->CSpeedTreeRT_SetLodLevel(1.0f);
             fade = 1.0f;
         }
         else
         {
-            runtime->FUN_00b08200();
-            fade = runtime->FUN_00b08440();
+            runtime->CSpeedTreeRT_ComputeLodLevel();
+            fade = runtime->CSpeedTreeRT_GetLodLevel();
         }
-        runtime->FUN_00b0ad00(&info, fade);
+        runtime->CSpeedTreeRT_GetBSGeometryLODData(&info, fade);
         visible = 0;
         if (info.opacityEnabled)
         {
@@ -2922,10 +2936,10 @@ void TreeActor::UpdateTreeLod(TreeCallback* pCallback)
             return;
         }
         visible = 0;
-        levelCount = FUN_00669990();
+        levelCount = GetNumBranchLODLevels();
         if (levelCount > 0)
         {
-            short preferred = runtime->GetIndexFromLevel(runtime->FUN_00b08440());
+            short preferred = runtime->GetIndexFromLevel(runtime->CSpeedTreeRT_GetLodLevel());
             for (leaf = 0; leaf < levelCount; ++leaf)
             {
                 if (preferred == leaf)
@@ -2940,7 +2954,7 @@ void TreeActor::UpdateTreeLod(TreeCallback* pCallback)
             }
         }
         pCallback->SetLeafEnabled(visible);
-        if (!FUN_005b9790())
+        if (!BSTreeManager_AreLeavesVisible())
         {
             pCallback->SetBranchEnabled(0);
             return;
@@ -2969,11 +2983,11 @@ void TreeActor::UpdateTreeLod(TreeCallback* pCallback)
                     }
                 }
             }
-            if (handle.FUN_00559450())
+            if (handle.Modelloader_GetReferencedThis())
             {
-                void* lightPtr = runtime->FUN_00b051e0() ? runtime->FUN_00b051e0()->FUN_00b08af0(&pNode)
-                                                         : runtime->FUN_00b08af0(&pNode);
-                handle.FUN_00559450()->FUN_00bb39e0(lightPtr, pNode);
+                void* lightPtr = runtime->CSpeedTreeRT_InstanceOf() ? runtime->CSpeedTreeRT_InstanceOf()->CSpeedTreeRT_GetLeafBillboardTable(&pNode)
+                                                         : runtime->CSpeedTreeRT_GetLeafBillboardTable(&pNode);
+                handle.Modelloader_GetReferencedThis()->UpdateFields_00bb39e0(lightPtr, pNode);
             }
         }
         pCallback->SetBranchEnabled(visible);

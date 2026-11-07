@@ -5,7 +5,7 @@ class MobileObject;
 class PathfindQueueStorage_magicprojectile
 {
 public:
-    void FUN_0096aaf0(MobileObject* apObject, int aeLevel);
+    void ProcessArray_RemoveActor_0096aaf0(MobileObject* apObject, int aeLevel);
 };
 
 class MobileObject;
@@ -19,12 +19,12 @@ public:
     PathfindQueueStorage_magicprojectile storage;
     unsigned char unk05[3];
 
-    void FUN_0096d470(MobileObject*, int);
-    void FUN_0096d470(ActorSV*, int);
-    void FUN_0096d470(ReferenceView*, int);
-    float FUN_0096d490();
-    void FUN_0096d450(MobileObject*, int, bool, bool, bool);
-    void FUN_0096d450(ActorSV*, int, bool, bool, ActorSV*);
+    void ProcessLists_RemoveReference(MobileObject*, int);
+    void ProcessLists_RemoveReference(ActorSV*, int);
+    void ProcessLists_RemoveReference(ReferenceView*, int);
+    float ProcessLists_GetSystemTimeClock();
+    void ProcessLists_AddReference(MobileObject*, int, bool, bool, bool);
+    void ProcessLists_AddReference(ActorSV*, int, bool, bool, ActorSV*);
 };
 #include "../../../include/MagicProjectile.h"
 #include "../../../include/TESSaveLoadGame.h"
@@ -47,12 +47,13 @@ struct FUN_0081aa80_shell
     void* m_kPointA;
     void* m_kPointB;
     void* m_iThirdValue;
-    FUN_0081aa80_shell* FUN_0081aa80(void* a, void* b, void* c);
+    FUN_0081aa80_shell* ComputeValue_0081aa80(void* a, void* b, void* c);
 };
 
 // Stores the three arguments into the object's fields and returns this.
 // @fnv 0x0081aa80
-FUN_0081aa80_shell* FUN_0081aa80_shell::FUN_0081aa80(void* pFirst, void* pSecond, void* pThird)
+// src: GUESS 0x0081aa80 (confidence: low)
+FUN_0081aa80_shell* FUN_0081aa80_shell::ComputeValue_0081aa80(void* pFirst, void* pSecond, void* pThird)
 {
     m_kPointA = pFirst;
     m_kPointB = pSecond;
@@ -86,7 +87,7 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct MobileSaveRecord
 {
-    unsigned int FUN_00931ff0(unsigned int);
+    unsigned int MobileObject_GetSaveSize(unsigned int);
 };
 
 // Computes a save record size: adds the result of FUN_00931ff0(a) plus 12, and 4 more each when the save version is at least 0x48 and 0x64.
@@ -94,7 +95,7 @@ struct MobileSaveRecord
 unsigned short MagicProjectile::GetSaveRecordSize(unsigned int a)
 {
     unsigned short usSize = 0;
-    usSize += (unsigned short)reinterpret_cast<MobileSaveRecord*>(this)->FUN_00931ff0(a);
+    usSize += (unsigned short)reinterpret_cast<MobileSaveRecord*>(this)->MobileObject_GetSaveSize(a);
     usSize += 4;
     usSize += 4;
     usSize += 4;
@@ -107,7 +108,7 @@ unsigned short MagicProjectile::GetSaveRecordSize(unsigned int a)
 
 struct PC7d
 {
-    void FUN_00484ce0(unsigned int, int);
+    void TESForm_SaveGameDataOLD(unsigned int, int);
 };
 struct FUN_00484d20_Class
 {
@@ -121,30 +122,31 @@ struct FUN_00932070_shell
 unsigned int __fastcall GetMagicItemID(MagicItem* item);
 
 // @fnv 0x0081e8c0
-void MagicProjectile::FUN_0081e8c0(unsigned int aiFlags)
+// src: XBOX_PDB 0x0081e8c0
+void MagicProjectile::SaveGame_0081e8c0(unsigned int aiFlags)
 {
     reinterpret_cast<FUN_00932070_shell*>(this)->SaveProcess(aiFlags);
     unsigned int icasterID = m_magicCaster->GetCasterHandle();
     reinterpret_cast<FUN_00484d20_Class*>(this)->ForwardToSaveLoadGame(reinterpret_cast<int>(&icasterID), 4);
     unsigned int ispellID = GetMagicItemID(m_magicItem);
     reinterpret_cast<FUN_00484d20_Class*>(this)->ForwardToSaveLoadGame(reinterpret_cast<int>(&ispellID), 4);
-    reinterpret_cast<PC7d*>(this)->FUN_00484ce0(
+    reinterpret_cast<PC7d*>(this)->TESForm_SaveGameDataOLD(
         reinterpret_cast<unsigned int>(&unkA4), 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x48)
-        reinterpret_cast<PC7d*>(this)->FUN_00484ce0(
+        reinterpret_cast<PC7d*>(this)->TESForm_SaveGameDataOLD(
             reinterpret_cast<unsigned int>(&unk90), 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x64)
-        reinterpret_cast<PC7d*>(this)->FUN_00484ce0(
+        reinterpret_cast<PC7d*>(this)->TESForm_SaveGameDataOLD(
             reinterpret_cast<unsigned int>(&unk8C), 4);
 }
 
 struct STR00
 {
-    void FUN_00484d00(void*, unsigned int);
+    void TESForm_LoadGameDataOLD(void*, unsigned int);
 };
 struct FUN_00484d40_Host
 {
-    void FUN_00484d40(unsigned int*, int);
+    void TESForm_LoadNumericID(unsigned int*, int);
 };
 
 struct MobileLoadRecord
@@ -153,20 +155,21 @@ struct MobileLoadRecord
 };
 
 // @fnv 0x0081e980
-void __thiscall MagicProjectile::FUN_0081e980(unsigned int a, unsigned int b)
+// src: XBOX_PDB 0x0081e980
+void __thiscall MagicProjectile::LoadGame_0081e980(unsigned int a, unsigned int b)
 {
     reinterpret_cast<MobileLoadRecord*>(this)->SetProcessLevel(a, b);
     unsigned int icasterID;
-    ((FUN_00484d40_Host*)this)->FUN_00484d40(&icasterID, 4);
+    ((FUN_00484d40_Host*)this)->TESForm_LoadNumericID(&icasterID, 4);
     m_magicCaster = reinterpret_cast<MagicCaster*>(icasterID);
     unsigned int ispellID;
-    ((FUN_00484d40_Host*)this)->FUN_00484d40(&ispellID, 4);
+    ((FUN_00484d40_Host*)this)->TESForm_LoadNumericID(&ispellID, 4);
     m_magicItem = reinterpret_cast<MagicItem*>(ispellID);
-    ((STR00*)this)->FUN_00484d00(&unkA4, 4);
+    ((STR00*)this)->TESForm_LoadGameDataOLD(&unkA4, 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x48)
-        ((STR00*)this)->FUN_00484d00(&unk90, 4);
+        ((STR00*)this)->TESForm_LoadGameDataOLD(&unk90, 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x64)
-        ((STR00*)this)->FUN_00484d00(&unk8C, 4);
+        ((STR00*)this)->TESForm_LoadGameDataOLD(&unk8C, 4);
 }
 
 struct Form
@@ -364,7 +367,8 @@ void AreaDisplayObject::v058(AreaDisplayObject*)
 
 // Gets the "MagicAreaDisplay" child node and, if its GetDaysPassed() returns a node, passes the child to that node's v058.
 // @fnv 0x0081e730
-void MagicProjectile::FUN_0081e730()
+// src: COMMUNITY 0x0081e730
+void MagicProjectile::KillAreaEffectGeometry()
 {
     AreaDisplayObject* pAreaDisplay = GetNiNode() ? reinterpret_cast<AreaDisplayObject*>(GetNiNode())->v039(NiFixedString("MagicAreaDisplay")) : 0;
 
@@ -408,10 +412,10 @@ void MagicProjectile::ResolveMagicReferences(unsigned int aiFlags, unsigned int 
 
     reinterpret_cast<MobileObject*>(this)->SetProcessFlags(aiFlags, aiOldFlags);
 
-    DAT_011e0e80.FUN_0096d470(reinterpret_cast<MobileObject*>(this),
+    DAT_011e0e80.ProcessLists_RemoveReference(reinterpret_cast<MobileObject*>(this),
                        static_cast<int>(reinterpret_cast<MobileObject*>(this)->GetCurrentProcessLevel()));
 
-    DAT_011e0e80.FUN_0096d450(reinterpret_cast<MobileObject*>(this),
+    DAT_011e0e80.ProcessLists_AddReference(reinterpret_cast<MobileObject*>(this),
                        static_cast<int>(reinterpret_cast<MobileObject*>(this)->GetCurrentProcessLevel()), false, false,
                        0);
 
@@ -459,7 +463,7 @@ struct Handler
     virtual void v17();
     virtual void SetValue(int);
     void FUN_00818af0(int, const char*);
-    bool FUN_00815480(Event*, int, bool);
+    bool MagicCaster_CastSpell(Event*, int, bool);
 };
 extern char DAT_0107acc8[];
 extern char DAT_0107acac[];
@@ -468,7 +472,8 @@ extern char DAT_01183060[];
 extern "C" void* __cdecl FUN_00ec43fb(Event*, int, const char*, const char*, int);
 // Checks evt->data, dispatches by evt->GetType() to Handle4/Handle1/Handle10, else logs errors and calls SetEvent/SetValue then HandleYes or HandleNo.
 // @fnv 0x00815480
-bool Handler::FUN_00815480(Event* pEvent, int value, bool flag)
+// src: XBOX_PDB 0x00815480
+bool Handler::MagicCaster_CastSpell(Event* pEvent, int value, bool flag)
 {
     if (pEvent->data.HasDetrimentalEffect())
     {
@@ -529,7 +534,7 @@ FUN_0081dbb0::FUN_0081dbb0()
     unk88 = 0.0f;
     unk8c = 0.0f;
     m_pBaseProcess = new HighProcess;
-    FUN_00575690(FUN_007af430());
+    TESObjectREFR_SetObjectReference(BGSSaveFormBuffer_GetForm());
 }
 
 struct MarkerErrorSub
@@ -593,7 +598,7 @@ struct FUN_00a75650 : NiMemObject
         unk40, unk44, unk48;
     FUN_00a75650();
     void FUN_004534f0(const float* pColor);
-    void FUN_004bc450(const NiPoint3& kPoint);
+    void NiMaterialProperty_SetEmittance(const NiPoint3& kPoint);
 };
 struct MADNode;
 struct MADObject
@@ -607,15 +612,15 @@ struct MADObject
     virtual MADObject* GetObjectByName(const MADName& kName);
     float GetFloatAt64();
     void AssignFixedString(const MADName& kName);
-    void FUN_00440460(const void* pData);
-    void FUN_00439410(FUN_00a75650* pProperty);
+    void NiAVObject_SetTranslate(const void* pData);
+    void NiAVObject_AttachProperty(FUN_00a75650* pProperty);
 };
 struct MADNode : MADObject
 {
     virtual void v40(), v41(), v42(), v43(), v44(), v45(), v46(), v47(), v48(), v49(), v50(), v51(), v52(), v53(),
         v54();
     virtual void AttachChildInAvailableSlot(MADObject* pChild, bool abFirstAvailableSlot);
-    void FUN_00a5a040();
+    void UpdateProperties();
 };
 struct MADCount
 {
@@ -623,7 +628,7 @@ struct MADCount
 };
 struct MADSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern MADSetting DAT_011d15e0;
 extern const char DAT_011f426c[];
@@ -633,7 +638,7 @@ struct MADHandle
     void* m_pObject;
     MADHandle& operator=(const MADHandle& kOther);
 };
-MADObject* __cdecl FUN_00c56680(float fRadius, int iSlices, int iStacks, int iUnk);
+MADObject* __cdecl BSTestObjects_CreateSphere(float fRadius, int iSlices, int iStacks, int iUnk);
 void __cdecl GetLayerColor(void* pObject, const NiPoint3& kPoint);
 struct MagicAreaOwner
 {
@@ -650,7 +655,7 @@ struct MagicAreaOwner
     virtual void v100(), v101(), v102(), v103(), v104(), v105(), v106(), v107(), v108(), v109();
     virtual void v110(), v111(), v112(), v113(), v114(), v115();
     virtual MADObject* Get3D();
-    MADCount* FUN_00586150();
+    MADCount* CombatController_GetCombatState();
     MADHandle FUN_00931ed0();
     void CreateMagicAreaDisplay();
 };
@@ -666,19 +671,19 @@ void MagicAreaOwner::CreateMagicAreaDisplay()
     MADNode* pNode2 = pRoot->IsSceneNode();
     if (pNode2)
     {
-        float fRadius3 = FUN_00586150()->FUN_00404420() * *DAT_011d15e0.FUN_00403e20() / pRoot->GetFloatAt64();
-        MADObject* pDisplaySphere = FUN_00c56680(fRadius3, 10, 10, 0);
+        float fRadius3 = CombatController_GetCombatState()->FUN_00404420() * *DAT_011d15e0.Setting_Float_00403e20() / pRoot->GetFloatAt64();
+        MADObject* pDisplaySphere = BSTestObjects_CreateSphere(fRadius3, 10, 10, 0);
         pDisplaySphere->AssignFixedString(MADName("MagicAreaDisplay"));
-        pDisplaySphere->FUN_00440460(DAT_011f426c);
+        pDisplaySphere->NiAVObject_SetTranslate(DAT_011f426c);
         NiPoint3 kZero_(0.0f, 0.0f, 0.0f);
         GetLayerColor(FUN_00931ed0().m_pObject, kZero_);
         FUN_00a75650* pMaterial = new FUN_00a75650;
         pMaterial->FUN_004534f0(DAT_011a9b7c);
         pMaterial->FUN_004534f0(DAT_011a9b7c);
-        pMaterial->FUN_004bc450(kZero_);
-        pDisplaySphere->FUN_00439410(pMaterial);
+        pMaterial->NiMaterialProperty_SetEmittance(kZero_);
+        pDisplaySphere->NiAVObject_AttachProperty(pMaterial);
         pNode2->AttachChildInAvailableSlot(pDisplaySphere, true);
-        pNode2->FUN_00a5a040();
+        pNode2->UpdateProperties();
     }
 }
 
@@ -698,7 +703,7 @@ extern const double DAT_010290d0;
 void MagicProjectile::Process(int param_1)
 {
     float dt3;
-    float time = DAT_011e0e80.FUN_0096d490();
+    float time = DAT_011e0e80.ProcessLists_GetSystemTimeClock();
     dt3 = time - reinterpret_cast<float*>(this)[0xA4 / sizeof(float)];
 
     if (reinterpret_cast<float*>(this)[0xA4 / sizeof(float)] > time || reinterpret_cast<float*>(this)[0xA4 / sizeof(float)] < 0.0)
@@ -768,7 +773,8 @@ FUN_00822920::FUN_00822920(void*, int, GameTimerRecord*, unsigned int, NiPoint3,
 
 // Constructs one of four class instances based on projectile->FUN_004086a0() and passes it to DAT_011e0e80.
 // @fnv 0x0081e040
-void __cdecl FUN_0081e040(void* a, unsigned int b, unsigned int c, int d, GameTimerRecord* timer, S86a0* projectile,
+// src: XBOX_PDB 0x0081e040
+void __cdecl MagicProjectile_Launch(void* a, unsigned int b, unsigned int c, int d, GameTimerRecord* timer, S86a0* projectile,
                           NiPoint3 first, NiPoint3 second)
 {
     void* result = 0;
@@ -796,6 +802,6 @@ void __cdecl FUN_0081e040(void* a, unsigned int b, unsigned int c, int d, GameTi
     }
 
     if (result)
-        DAT_011e0e80.FUN_0096d450(static_cast<MobileObject*>(result), 0, 0, 0, 0);
+        DAT_011e0e80.ProcessLists_AddReference(static_cast<MobileObject*>(result), 0, 0, 0, 0);
 }
 }  // namespace fnv_0081e040

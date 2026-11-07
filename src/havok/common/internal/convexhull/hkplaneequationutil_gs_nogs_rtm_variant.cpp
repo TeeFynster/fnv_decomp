@@ -18,7 +18,7 @@ struct B
     int f2;
     int f3;
 
-    void* FUN_00d74d40();
+    void* hkgpConvexHull_BuildConfig_BuildConfig();
 };
 struct A
 {
@@ -29,9 +29,9 @@ struct A
     int f4;
 
     void FUN_00d76ca0();
-    int FUN_00d774a0(void*, int, void*);
-    void FUN_00d76120(int, int);
-    void FUN_00d76940();
+    int ProcessEntries_00d774a0(void*, int, void*);
+    void ProcessState_00d76120(int, int);
+    void ReleaseStorage_00d76940();
 };
 int __cdecl ProcessArg(Arg* a, int second);
 
@@ -161,7 +161,8 @@ __forceinline LocalM128 Dd6380NegativeDistances(const float& x, const float& y, 
     }
 }
 // @fnv 0x00dd6380
-int FUN_00dd6380(S00dd6380_PlaneSet* set, int a, int b, int c, S00dd6380_PointResult* out)
+// src: GUESS 0x00dd6380 (confidence: low)
+int Object_ProcessAndReturnValue_00dd6380(S00dd6380_PlaneSet* set, int a, int b, int c, S00dd6380_PointResult* out)
 {
     const S00dd6380_hkVector4* planes = set->m_kPlaneArray;
     S00dd6380_hkMatrix3 m;

@@ -2,7 +2,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 void FUN_00e36b80();
-void* FUN_00c85750();
+void* hkMemoryRouter_getInstance();
 
 class PCls
 {
@@ -27,7 +27,7 @@ SELF* SELF::FUN_00dfbd80(unsigned char flag)
     FUN_00e36b80();
     if (flag & 1)
     {
-        void* gp = FUN_00c85750();
+        void* gp = hkMemoryRouter_getInstance();
         (*(PCls**)((char*)gp + 0x10))->PV2(this, (unsigned int)w);
     }
     return this;

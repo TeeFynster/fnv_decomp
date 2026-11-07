@@ -52,7 +52,8 @@ struct D892State
 };
 
 // @fnv 0x00d892f0
-static __declspec(noinline) void FUN_00d892f0(const D892Params* params, bool update, D892State* state,
+// src: GUESS 0x00d892f0 (confidence: low)
+static __declspec(noinline) void hkVector4_UpdateState_00d892f0(const D892Params* params, bool update, D892State* state,
                                               const hkVector4* vel, const hkVector4* damping)
 {
     LocalM128 dt = _mm_load_ss(&state->m_dt);
@@ -86,5 +87,5 @@ static __declspec(noinline) void FUN_00d892f0(const D892Params* params, bool upd
 
 void D892_Entry(const D892Params* params, bool update, D892State* state, const hkVector4* vel, const hkVector4* damping)
 {
-    FUN_00d892f0(params, update, state, vel, damping);
+    hkVector4_UpdateState_00d892f0(params, update, state, vel, damping);
 }

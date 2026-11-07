@@ -4,12 +4,12 @@
 
 #include "../../../../../../include/hkpPulleyConstraintData.h"
 
-void __cdecl FUN_00d21a60(void* a, int b, int c);
+void __cdecl hkpConstraintData_getConstraintInfoUtil(void* a, int b, int c);
 
 // @fnv 0x00deef40
 void hkpPulleyConstraintData::vf15(int a)
 {
-    FUN_00d21a60((char*)this + 0x10, 0x70, a);
+    hkpConstraintData_getConstraintInfoUtil((char*)this + 0x10, 0x70, a);
 }
 
 // Writes 1 and 8 into b[1] and b[0] when a is nonzero, otherwise writes 0 into both.

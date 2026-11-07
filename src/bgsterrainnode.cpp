@@ -161,7 +161,7 @@ BGSTerrainNode::BGSTerrainNode(BGSTerrainManager* pManagerArg, BGSTerrainNode* p
 
 struct FUN_00485b60
 {
-    unsigned int FUN_00485bc0();
+    unsigned int TESForm_GetFormIDWithoutIndex();
     TESFile* GetFile(int);
     unsigned int Go();
 };
@@ -172,10 +172,10 @@ unsigned int FUN_00485b60::Go()
     char flag;
     unsigned int result;
     TESFile* file;
-    result = FUN_00485bc0();
+    result = TESForm_GetFormIDWithoutIndex();
     flag = 0;
     file = GetFile(0);
-    if (!file->FUN_00464df0()->IsEmpty())
+    if (!file->GetMasterList_00464df0()->IsEmpty())
         flag = 1;
     result |= flag << 24;
     return result;
@@ -209,7 +209,8 @@ void FUN_006fd750::Unload()
 extern int DAT_011d8670;
 
 // @fnv 0x006fd8e0
-int __cdecl FUN_006fd8e0()
+// src: COMMUNITY 0x006fd8e0
+int __cdecl BGSTerrainManager_GetActive()
 {
     return DAT_011d8670;
 }
@@ -257,7 +258,7 @@ struct Mgr
 {
     FUN_006fd980_shell* _ref_00726070();
 };
-void FUN_006f83f0();
+void BGSDistantTreeBlock_DeallocateStaticData();
 struct FUN_006fd980_shell
 {
     Mgr* pManager;
@@ -269,24 +270,25 @@ struct FUN_006fd980_shell
     void* pBlock;
     int f18, f1c;
     FUN_006fd980_shell* pChildren[4];
-    void FUN_006fd7b0(int a);
-    void FUN_006fd980(int a);
+    void ClearSelectedParts(int a);
+    void BGSTerrainNode_UnloadDataRecurse(int a);
 };
 // @fnv 0x006fd980
-void FUN_006fd980_shell::FUN_006fd980(int aiFlags)
+// src: COMMUNITY 0x006fd980
+void FUN_006fd980_shell::BGSTerrainNode_UnloadDataRecurse(int aiFlags)
 {
     if (pChunk || pBlock)
-        FUN_006fd7b0(aiFlags);
+        ClearSelectedParts(aiFlags);
     for (int i = 0; i < 4; i++)
     {
         if (pChildren[i])
-            pChildren[i]->FUN_006fd980(aiFlags);
+            pChildren[i]->BGSTerrainNode_UnloadDataRecurse(aiFlags);
     }
     m_bNodeStateFlag = 0;
     if (aiFlags & 4)
     {
         if (this == pManager->_ref_00726070())
-            FUN_006f83f0();
+            BGSDistantTreeBlock_DeallocateStaticData();
     }
 }
 
@@ -326,11 +328,12 @@ struct FUN_006ff210_shell
 {
     char pad[0x58];
     int mode;
-    NiPoint2 FUN_006ff210();
+    NiPoint2 BGSTerrainNode_SetFloatPairForLinkID();
 };
 // Returns a NiPoint2 chosen from the mode field: (0.5,0), (0.5,0.5), (0,0) or (0,0.5), defaulting to (0,0).
 // @fnv 0x006ff210
-NiPoint2 FUN_006ff210_shell::FUN_006ff210()
+// src: COMMUNITY 0x006ff210
+NiPoint2 FUN_006ff210_shell::BGSTerrainNode_SetFloatPairForLinkID()
 {
     float x, y;
     switch (mode)
@@ -366,7 +369,7 @@ typedef void (__thiscall* TerrainSetBoolFunction)(NiNode*, int, int, int);
 namespace fnv_006ff2c0 {
 struct Chunk
 {
-    int FUN_006fabc0(int i);
+    int BGSTerrainChunk_GetTexture(int i);
 };
 struct Holder
 {
@@ -383,7 +386,7 @@ struct FUN_006ff2c0_shell
     char pad3[0x50 - 0x34];
     int section;
     bool flag;
-    NiPoint2 FUN_006ff210();
+    NiPoint2 BGSTerrainNode_SetFloatPairForLinkID();
     void UpdateTileFromChunk();
 };
 // @fnv 0x006ff2c0
@@ -392,16 +395,16 @@ void FUN_006ff2c0_shell::UpdateTileFromChunk()
     int c;
     NiNode* b;
     int a;
-    c = holder->chunk->FUN_006fabc0(0);
-    a = holder->chunk->FUN_006fabc0(1);
-    b = reinterpret_cast<NiNode*>(tile->FUN_0056c7f0());
+    c = holder->chunk->BGSTerrainChunk_GetTexture(0);
+    a = holder->chunk->BGSTerrainChunk_GetTexture(1);
+    b = reinterpret_cast<NiNode*>(tile->GetModel_0056c7f0());
     if (b)
     {
         SetTerrainNodeBool(b, 0, 1, c);
         SetTerrainNodeBool(b, 1, 1, a);
-        NiPoint2 pt = FUN_006ff210();
+        NiPoint2 pt = BGSTerrainNode_SetFloatPairForLinkID();
         section = g_timeGlobal.GetSection();
-        b->FUN_006fb940(pt.x, pt.y, 0.0f);
+        b->BSShaderPPLightingProperty_SetLODTexParams(pt.x, pt.y, 0.0f);
         flag = true;
     }
 }
@@ -413,17 +416,18 @@ struct FUN_006ff380_shell
     Tile* tile;
     int f14, f18, f1c, f20, f24, f28, f2c, f30, f34, f38, f3c, f40, f44, f48, f4c, f50;
     char flag;
-    void FUN_006ff380();
+    void BGSTerrainNode_EndFade();
 };
 // @fnv 0x006ff380
-void FUN_006ff380_shell::FUN_006ff380()
+// src: COMMUNITY 0x006ff380
+void FUN_006ff380_shell::BGSTerrainNode_EndFade()
 {
     NiNode* node;
     flag = 0;
-    node = tile->FUN_0056c7f0();
+    node = tile->GetModel_0056c7f0();
     if (node)
     {
-        node->FUN_006fb940(0.0f, 0.0f, 1.0f);
+        node->BSShaderPPLightingProperty_SetLODTexParams(0.0f, 0.0f, 1.0f);
         SetTerrainNodeBool(node, 0, 1, 0);
         SetTerrainNodeBool(node, 1, 1, 0);
     }
@@ -440,7 +444,7 @@ struct Mgr
 };
 struct Block
 {
-    void FUN_006f6270(unsigned int a, unsigned int b, unsigned short c, unsigned short d);
+    void BGSDistantObjectBlock_CreateApocalypseTask(unsigned int a, unsigned int b, unsigned short c, unsigned short d);
 };
 struct FUN_006ff4c0_shell
 {
@@ -461,7 +465,7 @@ void FUN_006ff4c0_shell::ProcessBlock()
 {
     if (_ref_00726070() == pManager->GetThreadID() && pBlock)
     {
-        pBlock->FUN_006f6270(Conv()->Conv(), iLevel, m_sX, m_sY);
+        pBlock->BGSDistantObjectBlock_CreateApocalypseTask(Conv()->Conv(), iLevel, m_sX, m_sY);
     }
     else if (_ref_00726070() > pManager->GetThreadID())
     {
@@ -483,11 +487,12 @@ struct FUN_006fda10_shell
     char pad30[0x2c];
     bool m_bPersistent;  // +0x5c
 
-    void FUN_006fda10();
+    void BGSTerrainNode_DestroyRecurse();
 };
 
 // @fnv 0x006fda10
-void FUN_006fda10_shell::FUN_006fda10()
+// src: COMMUNITY 0x006fda10
+void FUN_006fda10_shell::BGSTerrainNode_DestroyRecurse()
 {
     int i;
 
@@ -502,7 +507,7 @@ void FUN_006fda10_shell::FUN_006fda10()
     for (i = 0; i < 4; i++)
     {
         if (pChildren[i])
-            pChildren[i]->FUN_006fda10();
+            pChildren[i]->BGSTerrainNode_DestroyRecurse();
     }
 }
 
@@ -513,28 +518,29 @@ extern SettingT_GameSettingCollection_ g_011d8740;
 
 struct FUN_006ff3f0_shell : FUN_006ff380_shell
 {
-    void FUN_006ff3f0();
+    void BGSTerrainNode_UpdateFadeParameters();
 };
 
 // @fnv 0x006ff3f0
-void FUN_006ff3f0_shell::FUN_006ff3f0()
+// src: COMMUNITY 0x006ff3f0
+void FUN_006ff3f0_shell::BGSTerrainNode_UpdateFadeParameters()
 {
     unsigned int delta;
     unsigned int section = g_timeGlobal.GetSection();
     delta = section - f50;
 
-    if (!tile || !tile->FUN_0056c7f0())
+    if (!tile || !tile->GetModel_0056c7f0())
         return;
 
-    if (delta > (unsigned int)*g_011d8740.FUN_0043d4d0())
+    if (delta > (unsigned int)*g_011d8740.Setting_Int())
     {
-        FUN_006ff380();
+        BGSTerrainNode_EndFade();
     }
     else
     {
-        float f = (double)delta / (unsigned int)*g_011d8740.FUN_0043d4d0();
-        NiPoint2 pt = ((FUN_006ff210_shell*)this)->FUN_006ff210();
-        tile->FUN_0056c7f0()->FUN_006fb940(pt.x, pt.y, f);
+        float f = (double)delta / (unsigned int)*g_011d8740.Setting_Int();
+        NiPoint2 pt = ((FUN_006ff210_shell*)this)->BGSTerrainNode_SetFloatPairForLinkID();
+        tile->GetModel_0056c7f0()->BSShaderPPLightingProperty_SetLODTexParams(pt.x, pt.y, f);
     }
 }
 
@@ -557,7 +563,7 @@ struct ClearFlagHolder
     char cUnk0C;
     bool bActive;
 };
-int __cdecl FUN_006fd8e0();
+int __cdecl BGSTerrainManager_GetActive();
 
 struct FUN_006fd7b0_Owner
 {
@@ -586,16 +592,17 @@ struct FUN_006fd7b0_Owner
     int unk58;
     bool bCheckOwner;
 
-    void FUN_006fd7b0(unsigned int auiFlags);
+    void ClearSelectedParts(unsigned int auiFlags);
 };
 
 // Deletes pPartA/pPartB/pPartC according to auiFlags bits, conditionally keeping pPartA, and clears pFlagHolder->bActive.
 // @fnv 0x006fd7b0
-void FUN_006fd7b0_Owner::FUN_006fd7b0(unsigned int auiFlags)
+// src: GUESS 0x006fd7b0 (confidence: medium)
+void FUN_006fd7b0_Owner::ClearSelectedParts(unsigned int auiFlags)
 {
     if (bInitialized && pPartA && (auiFlags & 1))
     {
-        if (!bCheckOwner || m_uiClearFlags != FUN_006fd8e0() || auiFlags == 7)
+        if (!bCheckOwner || m_uiClearFlags != BGSTerrainManager_GetActive() || auiFlags == 7)
         {
             delete pPartA;
             pPartA = 0;
@@ -669,7 +676,7 @@ struct SceneUpdate
     virtual void v46() = 0;
     virtual void Refresh() = 0;
     void SetTaskFlag2000(bool);
-    void FUN_00507700(float);
+    void NiCamera_SetMaxFarNearRatio(float);
     void FUN_00450f90(bool);
 };
 struct TerrainMgrUpdate
@@ -680,12 +687,12 @@ struct ChunkUpdate
 {
     int f00, f04, f08, f0c, f10, f14, f18, f1c, f20, f24, f28, f2c;
     ChunkUpdate(TerrainUpdate*, unsigned int, short, short);
-    bool FUN_00759d80();
+    bool AnimatingText_IsDisplayFinished();
     bool GetInitialized();
-    void FUN_006facb0();
-    void FUN_006fb760();
+    void BGSTerrainChunk_Attach();
+    void BGSTerrainChunk_Show();
     SceneUpdate* GetRoot();
-    SceneUpdate* FUN_0056c7f0();
+    SceneUpdate* GetModel_0056c7f0();
     SceneUpdate* GetMenuRoot();
     SceneUpdate* GetObject3D();
 };
@@ -717,14 +724,14 @@ struct TerrainUpdate
     bool persistent, splitNode;
     unsigned char f5e, f5f;
     void UpdateTerrainNode(void*, bool);
-    bool FUN_006fe550(void*);
+    bool BGSTerrainNode_ShouldSplit(void*);
     bool GetByteAtOffset5C();
-    bool FUN_006fe920(bool);
+    bool BGSTerrainNode_CheckMeshSolidUnderMe(bool);
     void UpdateTileFromChunk();
-    void FUN_006fd7b0(int);
-    void FUN_006fd980(int);
+    void ClearSelectedParts(int);
+    void BGSTerrainNode_UnloadDataRecurse(int);
     WorldRefUpdate* Get();
-    bool FUN_006fede0();
+    bool BGSTerrainNode_CheckIntersectsLoadedRange();
     void UpdateVisibility(SceneUpdate*);
 };
 // Recursively updates a terrain node: decides split vs geometry state, creates or refreshes its chunk, and updates child nodes and scene objects.
@@ -733,9 +740,9 @@ void TerrainUpdate::UpdateTerrainNode(void* arg, bool update)
 {
     AutoMemContext context4((MEM_CONTEXT)35, true, kBGSTerrainNodeFileLabel, 284);
     bool below2 = manager->GetDaysPassed() < level;
-    bool splitNow2 = FUN_006fe550(arg);
-    if (splitNow2 && GetByteAtOffset5C() && chunk && !chunk->FUN_00759d80())
-        chunk->FUN_006facb0();
+    bool splitNow2 = BGSTerrainNode_ShouldSplit(arg);
+    if (splitNow2 && GetByteAtOffset5C() && chunk && !chunk->AnimatingText_IsDisplayFinished())
+        chunk->BGSTerrainChunk_Attach();
     if (below2 || splitNow2)
     {
         splitNode = true;
@@ -746,16 +753,16 @@ void TerrainUpdate::UpdateTerrainNode(void* arg, bool update)
             if (children[childIndex2])
                 children[childIndex2]->UpdateTerrainNode(arg, update);
         }
-        if (chunk && FUN_006fe920(true))
+        if (chunk && BGSTerrainNode_CheckMeshSolidUnderMe(true))
         {
             for (int loadedIndex2 = 0; loadedIndex2 < 4; loadedIndex2++)
             {
                 if (children[loadedIndex2]->chunk && children[loadedIndex2]->chunk->GetInitialized())
                     children[loadedIndex2]->UpdateTileFromChunk();
             }
-            FUN_006fd7b0(1);
+            ClearSelectedParts(1);
         }
-        if (FUN_006fe920(true))
+        if (BGSTerrainNode_CheckMeshSolidUnderMe(true))
             childrenLoaded = true;
     }
     else if (hasGeometry)
@@ -767,29 +774,29 @@ void TerrainUpdate::UpdateTerrainNode(void* arg, bool update)
         else
         {
             bool unusedState5 = false;
-            if (chunk->GetInitialized() && chunk->FUN_00759d80() && GetByteAtOffset5C())
-                chunk->FUN_006fb760();
-            if (chunk->GetInitialized() && !chunk->FUN_00759d80() && (!parent || parent->FUN_006fe920(true)))
+            if (chunk->GetInitialized() && chunk->AnimatingText_IsDisplayFinished() && GetByteAtOffset5C())
+                chunk->BGSTerrainChunk_Show();
+            if (chunk->GetInitialized() && !chunk->AnimatingText_IsDisplayFinished() && (!parent || parent->BGSTerrainNode_CheckMeshSolidUnderMe(true)))
             {
-                chunk->FUN_006facb0();
-                chunk->FUN_0056c7f0()->FUN_00507700((float)((level / 4.0) * g_011d86f8.Float()->f));
+                chunk->BGSTerrainChunk_Attach();
+                chunk->GetModel_0056c7f0()->NiCamera_SetMaxFarNearRatio((float)((level / 4.0) * g_011d86f8.Float()->f));
                 SceneUpdate* root7 = Get()->GetMenuRoot();
                 root7->SetTaskFlag2000(false);
                 root7->Refresh();
                 root7->SetTaskFlag2000(true);
             }
         }
-        if (chunk->FUN_00759d80() && childrenLoaded)
+        if (chunk->AnimatingText_IsDisplayFinished() && childrenLoaded)
         {
             for (int unloadIndex4 = 0; unloadIndex4 < 4; unloadIndex4++)
                 if (children[unloadIndex4])
-                    children[unloadIndex4]->FUN_006fd980(1);
+                    children[unloadIndex4]->BGSTerrainNode_UnloadDataRecurse(1);
             childrenLoaded = false;
         }
         if (oldRoot && Get()->Get() != g_TES->GetHitSound())
         {
             TESWorldSpace* worldVal = g_TES->GetHitSound();
-            if (worldVal->GetParentUseFlag(TESWorldSpace::PU_LOD) && !worldVal->GetParentUseFlag(TESWorldSpace::PU_LAND) && FUN_006fede0())
+            if (worldVal->GetParentUseFlag(TESWorldSpace::PU_LOD) && !worldVal->GetParentUseFlag(TESWorldSpace::PU_LAND) && BGSTerrainNode_CheckIntersectsLoadedRange())
                 oldRoot->FUN_00450f90(true);
         }
         if (update && chunk)
@@ -820,11 +827,12 @@ struct TerrainNodeX : BGSTerrainNode
     unsigned int GetLevel();
     TerrainSceneX* GetOwner();
     bool WantsTrees(int iArg);
-    void FUN_006fe330(int iArg);
+    void BGSTerrainNode_UpdateTrees(int iArg);
 };
 
 // @fnv 0x006fe330
-void TerrainNodeX::FUN_006fe330(int iArg)
+// src: COMMUNITY 0x006fe330
+void TerrainNodeX::BGSTerrainNode_UpdateTrees(int iArg)
 {
     AutoMemContext kMemContext((MEM_CONTEXT)0x25, true, kBGSTerrainNodeFileLabel, 0x1ed);
     if (GetLevel() == TerrainTreeLevelX())
@@ -860,7 +868,7 @@ void TerrainNodeX::FUN_006fe330(int iArg)
         {
             if (pChildren[i] != 0)
             {
-                ((TerrainNodeX*)pChildren[i])->FUN_006fe330(iArg);
+                ((TerrainNodeX*)pChildren[i])->BGSTerrainNode_UpdateTrees(iArg);
             }
         }
     }
@@ -934,7 +942,7 @@ struct Thread006f
 };
 struct Ret006f
 {
-    Ret006f* FUN_00559450();
+    Ret006f* Modelloader_GetReferencedThis();
 };
 struct Node006f;
 struct FUN_006f5160
@@ -944,12 +952,12 @@ struct FUN_006f5160
     ~FUN_006f5160();
     void* GetNiObj(bool);
     unsigned char FUN_00529ea0();
-    void FUN_006f5ca0();
+    void BGSDistantObjectBlock_Attach();
     unsigned char GetByteAtOffset35();
     void ResetAndCreateTask(Ret006f*, int, unsigned short, unsigned short);
-    void FUN_006f6540(Ret006f*, int, unsigned short, unsigned short);
+    void BGSDistantObjectBlock_SwitchToHigh(Ret006f*, int, unsigned short, unsigned short);
     unsigned char GetField24();
-    void FUN_006f5af0();
+    void BGSDistantObjectBlock_Detach();
     void* FUN_006fd920(unsigned);
 };
 struct Node006f
@@ -962,10 +970,10 @@ struct Node006f
     int f18, f1c;
     Node006f* children[4];
     unsigned FUN_00726070();
-    bool FUN_006fe620(int);
-    bool FUN_006fe6d0(int);
-    void FUN_006fee90(bool);
-    Ret006f* FUN_00559450();
+    bool BGSTerrainNode_ShouldLoadBlock(int);
+    bool BGSTerrainNode_ShouldLoadBlockLowPriority(int);
+    void BGSTerrainNode_UpdateBlockVisibility(bool);
+    Ret006f* Modelloader_GetReferencedThis();
     void UpdateBlock(int, bool);
 };
 // @fnv 0x006fdfc0
@@ -974,9 +982,9 @@ void Node006f::UpdateBlock(int a, bool abFlag)
     AutoMemContext guard((MEM_CONTEXT)0x24, true, &DAT_0106e4e0, 0x1ae);
     if (FUN_00726070() == thread->FUN_0059bb30())
     {
-        if (FUN_006fe620(a))
+        if (BGSTerrainNode_ShouldLoadBlock(a))
         {
-            bool flag = FUN_006fe6d0(a);
+            bool flag = BGSTerrainNode_ShouldLoadBlockLowPriority(a);
             if (!block)
             {
                 block = new FUN_006f5160(this, f4, f8, fa, flag);
@@ -984,19 +992,19 @@ void Node006f::UpdateBlock(int a, bool abFlag)
             else if (block && block->GetNiObj(false))
             {
                 if (block->FUN_00529ea0())
-                    block->FUN_006f5ca0();
+                    block->BGSDistantObjectBlock_Attach();
                 if (abFlag)
-                    FUN_006fee90(false);
+                    BGSTerrainNode_UpdateBlockVisibility(false);
             }
             if (block)
             {
                 if (block->GetByteAtOffset35() && flag)
-                    block->ResetAndCreateTask(FUN_00559450()->FUN_00559450(), f4, f8, fa);
+                    block->ResetAndCreateTask(Modelloader_GetReferencedThis()->Modelloader_GetReferencedThis(), f4, f8, fa);
                 else if (!block->GetByteAtOffset35() && !flag)
-                    block->FUN_006f6540(FUN_00559450()->FUN_00559450(), f4, f8, fa);
+                    block->BGSDistantObjectBlock_SwitchToHigh(Modelloader_GetReferencedThis()->Modelloader_GetReferencedThis(), f4, f8, fa);
             }
             if (block->GetField24())
-                block->FUN_006f5af0();
+                block->BGSDistantObjectBlock_Detach();
         }
         else if (block)
         {
@@ -1016,7 +1024,7 @@ void Node006f::UpdateBlock(int a, bool abFlag)
 
 struct NodeObj
 {
-    bool FUN_00557d30();
+    bool PathingRequestCover_GetSortDistanceFromTarget();
 };
 struct GridObj
 {
@@ -1061,11 +1069,12 @@ struct FeeNode
     short f0E;
     void* pChunk;
     BlockObj* pBlock;
-    bool FUN_006fede0();
-    void FUN_006fee90(int a);
+    bool BGSTerrainNode_CheckIntersectsLoadedRange();
+    void BGSTerrainNode_UpdateBlockVisibility(int a);
 };
 // @fnv 0x006fee90
-void FeeNode::FUN_006fee90(int a)
+// src: COMMUNITY 0x006fee90
+void FeeNode::BGSTerrainNode_UpdateBlockVisibility(int a)
 {
     TESWorldSpace* getter5 = DAT_011dea10->GetParentWorldSpace();
     GridObj* grid;
@@ -1074,7 +1083,7 @@ void FeeNode::FUN_006fee90(int a)
         if (pBlock->GetNiObj(0))
         {
             grid = pBlock->GetNiObj(0)->v10();
-            if (FUN_006fede0())
+            if (BGSTerrainNode_CheckIntersectsLoadedRange())
             {
                 if (grid)
                 {
@@ -1091,7 +1100,7 @@ void FeeNode::FUN_006fee90(int a)
                                 int idx4 = count * i + j_;
                                 NodeObj* node = reinterpret_cast<NodeObj*>(getter5->GetCellAtGridPosition(x4, y3));
                                 if (!grid->FUN_006ff0a0(idx4) && DAT_011dea10->FUN_004511e0(reinterpret_cast<TESObjectCELL*>(node), 1) &&
-                                    node->FUN_00557d30())
+                                    node->PathingRequestCover_GetSortDistanceFromTarget())
                                 {
                                     grid->DisableEntry(idx4);
                                 }
@@ -1118,7 +1127,7 @@ void FeeNode::FUN_006fee90(int a)
     {
         if (pBlock->GetSelectedValue(1))
         {
-            if (FUN_006fede0())
+            if (BGSTerrainNode_CheckIntersectsLoadedRange())
             {
                 pBlock->UpdateLodVisibility(
                     pBlock->GetSelectedValue(1, count, (unsigned short)baseX, (unsigned short)baseY));

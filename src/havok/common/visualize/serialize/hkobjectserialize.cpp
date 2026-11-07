@@ -15,7 +15,7 @@ inline hkMemoryAllocator& GetAudioAllocator(hkMemoryRouter& holder)
     return *reinterpret_cast<hkMemoryAllocator*>(holder.m_heap);
 }
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
 
 struct C68E30PrimaryBase
@@ -56,7 +56,7 @@ struct C68E30Pair
 typedef hkArray<C68E30Pair> C68E30PairArray;
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-return reinterpret_cast<hkMemoryAllocator&>(GetAudioAllocator(FUN_00c85750()));
+return reinterpret_cast<hkMemoryAllocator&>(GetAudioAllocator(hkMemoryRouter_getInstance()));
 }
 template<> __forceinline void hkArrayBase<C68E30Pair>::_pushBack(hkMemoryAllocator& sharedAlloc, C68E30Pair const& pair)
 {
@@ -105,11 +105,12 @@ struct C68E30Owner
     int unk78;
     C68E30PairArray m_kListeners;
 
-    void FUN_00c68e30(C68E30Holder* holder, int value);
+    void bhkWorld_SetDebugObjectColor(C68E30Holder* holder, int value);
 };
 
 // @fnv 0x00c68e30
-void C68E30Owner::FUN_00c68e30(C68E30Holder* holder, int value)
+// src: XBOX_PDB 0x00c68e30
+void C68E30Owner::bhkWorld_SetDebugObjectColor(C68E30Holder* holder, int value)
 {
     C68E30Pair pair;
     pair.m_uiFilterValue = value;
@@ -121,9 +122,9 @@ void C68E30Owner::FUN_00c68e30(C68E30Holder* holder, int value)
 }
 
 namespace fnvc_adapt {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 }
-void __cdecl FUN_00c908c0(void* apOwner, void* apArray, int aiSize, int aiAlign);
+void __cdecl hkArrayUtil__reserve(void* apOwner, void* apArray, int aiSize, int aiAlign);
 
 extern int DAT_01268fd0;
 
@@ -185,13 +186,13 @@ void FUN_00d641f0_cls::ClearSweptEntry(int aiIndex)
     }
 
     SweptItemArray* pArray = &pEntry->m_04;
-    hkMemoryRouter* pAudioHolder = fnvc_adapt::FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = fnvc_adapt::hkMemoryRouter_getInstance();
     // Preserve the original volatile allocator read.
     void* pAllocator = *reinterpret_cast<hkMemoryAllocator* volatile*>(&pAudioHolder->m_heap);
     int iCapacity = (int)(pArray->m_08 & 0x3fffffffu);
     if (iCapacity < 0)
     {
-        FUN_00c908c0(pAllocator, pArray, (iCapacity * 2) > 0 ? iCapacity * 2 : 0, 4);
+        hkArrayUtil__reserve(pAllocator, pArray, (iCapacity * 2) > 0 ? iCapacity * 2 : 0, 4);
     }
     pArray->m_04 = 0;
 }
@@ -234,16 +235,17 @@ struct Buffer
     unsigned short state, references;
     Sink* stream;
     bool byteSwap;
-    void FUN_00d60830(Sink*, ByteSwap) throw();
-    void FUN_00d609a0(unsigned int, unsigned int) throw();
+    void hkOArchive_InitializeWriterWithByteSwap(Sink*, ByteSwap) throw();
+    void hkOArchive_WriteBinaryData_Thunk_00d609e0(unsigned int, unsigned int) throw();
     void WriteInt(unsigned int) throw();
-    void FUN_00d60960(unsigned int) throw();
-    void FUN_00d60590() throw();
+    void hkOArchive_write32u(unsigned int) throw();
+    void ReleaseReference_00d60590() throw();
 };
 
 // Serializes a1-a4, data pairs/triples, and payload into sink via buffer, returning total bytes written or -1 on failure.
 // @fnv 0x00e0b850
-static __declspec(noinline) int FUN_00e0b850(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4,
+// src: HAVOK_LIB 0x00e0b850
+static __declspec(noinline) int _writeData(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4,
                                              const void* payload, unsigned int payloadBytes, ByteSwap byteSwap,
                                              FixupLists* data, Sink* sink)
 {
@@ -251,21 +253,21 @@ static __declspec(noinline) int FUN_00e0b850(unsigned int a1, unsigned int a2, u
     unsigned int bytes;
     unsigned int count;
     Buffer buffer;
-    buffer.FUN_00d60830(sink, byteSwap);
-    buffer.FUN_00d609a0(a1, a2);
+    buffer.hkOArchive_InitializeWriterWithByteSwap(sink, byteSwap);
+    buffer.hkOArchive_WriteBinaryData_Thunk_00d609e0(a1, a2);
     if (!*sink->Get(&status))
     {
-        buffer.FUN_00d60590();
+        buffer.ReleaseReference_00d60590();
         return -1;
     }
-    buffer.FUN_00d609a0(a3, a4);
+    buffer.hkOArchive_WriteBinaryData_Thunk_00d609e0(a3, a4);
     if (!*sink->Get(&status))
     {
-        buffer.FUN_00d60590();
+        buffer.ReleaseReference_00d60590();
         return -1;
     }
     count = data->pairCount;
-    buffer.FUN_00d60960(count);
+    buffer.hkOArchive_write32u(count);
     bytes = 0x14;
     for (unsigned int i = 0; i < count; ++i)
     {
@@ -273,51 +275,51 @@ static __declspec(noinline) int FUN_00e0b850(unsigned int a1, unsigned int a2, u
         buffer.WriteInt(data->pairs[i].second);
         if (!*sink->Get(&status))
         {
-            buffer.FUN_00d60590();
+            buffer.ReleaseReference_00d60590();
             return -1;
         }
         bytes += 8;
     }
     count = data->tripleCount;
-    buffer.FUN_00d60960(count);
+    buffer.hkOArchive_write32u(count);
     bytes += 4;
     for (unsigned int i = 0; i < count; ++i)
     {
         buffer.WriteInt(data->triples[i].first);
-        buffer.FUN_00d609a0(data->triples[i].second, 0);
-        buffer.FUN_00d609a0(data->triples[i].third, 0);
+        buffer.hkOArchive_WriteBinaryData_Thunk_00d609e0(data->triples[i].second, 0);
+        buffer.hkOArchive_WriteBinaryData_Thunk_00d609e0(data->triples[i].third, 0);
         if (!*sink->Get(&status))
         {
-            buffer.FUN_00d60590();
+            buffer.ReleaseReference_00d60590();
             return -1;
         }
         bytes += 20;
     }
-    buffer.FUN_00d60960(payloadBytes);
+    buffer.hkOArchive_write32u(payloadBytes);
     if (!*sink->Get(&status))
     {
-        buffer.FUN_00d60590();
+        buffer.ReleaseReference_00d60590();
         return -1;
     }
     sink->Put(payload, payloadBytes);
     if (!*sink->Get(&status))
     {
-        buffer.FUN_00d60590();
+        buffer.ReleaseReference_00d60590();
         return -1;
     }
-    buffer.FUN_00d60590();
+    buffer.ReleaseReference_00d60590();
     return bytes + payloadBytes + 4;
 }
 
 int SerializeData(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4, const void* payload,
                   unsigned int payloadBytes, ByteSwap byteSwap, FixupLists* data, Sink* sink)
 {
-    return FUN_00e0b850(a1, a2, a3, a4, payload, payloadBytes, byteSwap, data, sink);
+    return _writeData(a1, a2, a3, a4, payload, payloadBytes, byteSwap, data, sink);
 }
 
-void __cdecl FUN_00c908c0(void* alloc, void* array, int numElements, int sizeElem);
+void __cdecl hkArrayUtil__reserve(void* alloc, void* array, int numElements, int sizeElem);
 void* __cdecl AllocateWithHeader(void* alloc, int size);
-void __cdecl FUN_00c856c0(void* alloc, void* p);
+void __cdecl hkMemoryRouter_easyFree(void* alloc, void* p);
 
 struct hkStreamReader
 {
@@ -362,7 +364,7 @@ template <typename T> static __forceinline void SetSizeAndGrow(hkArrayBase<T>& a
         int newCap = cap + cap;
         if (size >= newCap)
             newCap = size;
-        FUN_00c908c0(&alloc, &a, newCap, sizeof(T));
+        hkArrayUtil__reserve(&alloc, &a, newCap, sizeof(T));
     }
     a.m_iElementCount = size;
 }
@@ -389,12 +391,12 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
     stream->read(&numRelocs, 4);
     if (!stream->IsStreamValid())
     {
-        ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
+        ClearAndRelease(relocs, GetAudioAllocator(hkMemoryRouter_getInstance()));
         return 0;
     }
 
     int count = numRelocs;
-    SetSizeAndGrow(relocs, GetAudioAllocator(FUN_00c85750()), count);
+    SetSizeAndGrow(relocs, GetAudioAllocator(hkMemoryRouter_getInstance()), count);
     for (i = 0; i < (unsigned int)numRelocs; ++i)
     {
         Reloc& r = relocs[i];
@@ -402,7 +404,7 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
         stream->read(&r.toOffset, 4);
         if (!stream->IsStreamValid())
         {
-            ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
+            ClearAndRelease(relocs, GetAudioAllocator(hkMemoryRouter_getInstance()));
             return 0;
         }
     }
@@ -410,12 +412,12 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
     stream->read(&numItems, 4);
     if (!stream->IsStreamValid())
     {
-        ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
+        ClearAndRelease(relocs, GetAudioAllocator(hkMemoryRouter_getInstance()));
         return 0;
     }
 
     count = numItems;
-    SetSizeAndGrow(outItems, GetAudioAllocator(FUN_00c85750()), count);
+    SetSizeAndGrow(outItems, GetAudioAllocator(hkMemoryRouter_getInstance()), count);
     for (i = 0; i < (unsigned int)numItems; ++i)
     {
         char* item = (char*)&outItems[i];
@@ -424,7 +426,7 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
         stream->read(item + 16, 8);
         if (!stream->IsStreamValid())
         {
-            ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
+            ClearAndRelease(relocs, GetAudioAllocator(hkMemoryRouter_getInstance()));
             return 0;
         }
     }
@@ -432,17 +434,17 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
     stream->read(outAllocSize, 4);
     if (!stream->IsStreamValid())
     {
-        ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
+        ClearAndRelease(relocs, GetAudioAllocator(hkMemoryRouter_getInstance()));
         return 0;
     }
 
     int iAllocationSize = *outAllocSize;
-    char* buffer = (char*)AllocateWithHeader(&GetAudioAllocator(FUN_00c85750()), iAllocationSize);
+    char* buffer = (char*)AllocateWithHeader(&GetAudioAllocator(hkMemoryRouter_getInstance()), iAllocationSize);
     stream->read(buffer, *outAllocSize);
     if (!stream->IsStreamValid())
     {
-        FUN_00c856c0(&GetAudioAllocator(FUN_00c85750()), buffer);
-        ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
+        hkMemoryRouter_easyFree(&GetAudioAllocator(hkMemoryRouter_getInstance()), buffer);
+        ClearAndRelease(relocs, GetAudioAllocator(hkMemoryRouter_getInstance()));
         return 0;
     }
 
@@ -457,7 +459,7 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
 
     *outBuffer = buffer;
     unsigned __int64 ret = header;
-    ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
+    ClearAndRelease(relocs, GetAudioAllocator(hkMemoryRouter_getInstance()));
     return ret;
 }
 
@@ -474,7 +476,8 @@ struct ObjectWriteFlag
     }
 };
 
-static __declspec(noinline) int FUN_00e0b850(FixupLists* fixups, Sink* output, unsigned int idLow, unsigned int idHigh,
+// src: HAVOK_LIB 0x00e0b850
+static __declspec(noinline) int _writeData(FixupLists* fixups, Sink* output, unsigned int idLow, unsigned int idHigh,
                                              unsigned int classLow, unsigned int classHigh, const void* payload,
                                              unsigned int payloadSize, ObjectWriteFlag swap)
 {
@@ -484,21 +487,21 @@ static __declspec(noinline) int FUN_00e0b850(FixupLists* fixups, Sink* output, u
     Buffer archive;
     ByteSwap endian;
     endian.value = swap;
-    archive.FUN_00d60830(output, endian);
-    archive.FUN_00d609a0(idLow, idHigh);
+    archive.hkOArchive_InitializeWriterWithByteSwap(output, endian);
+    archive.hkOArchive_WriteBinaryData_Thunk_00d609e0(idLow, idHigh);
     if (!*output->Get(&ok))
     {
-        archive.FUN_00d60590();
+        archive.ReleaseReference_00d60590();
         return -1;
     }
-    archive.FUN_00d609a0(classLow, classHigh);
+    archive.hkOArchive_WriteBinaryData_Thunk_00d609e0(classLow, classHigh);
     if (!*output->Get(&ok))
     {
-        archive.FUN_00d60590();
+        archive.ReleaseReference_00d60590();
         return -1;
     }
     count = fixups->pairCount;
-    archive.FUN_00d60960(count);
+    archive.hkOArchive_write32u(count);
     total = 20;
     for (unsigned int j = 0; j < count; ++j)
     {
@@ -506,39 +509,39 @@ static __declspec(noinline) int FUN_00e0b850(FixupLists* fixups, Sink* output, u
         archive.WriteInt(fixups->pairs[j].second);
         if (!*output->Get(&ok))
         {
-            archive.FUN_00d60590();
+            archive.ReleaseReference_00d60590();
             return -1;
         }
         total += 8;
     }
     count = fixups->tripleCount;
-    archive.FUN_00d60960(count);
+    archive.hkOArchive_write32u(count);
     total += 4;
     for (unsigned int j = 0; j < count; ++j)
     {
         archive.WriteInt(fixups->triples[j].first);
-        archive.FUN_00d609a0(fixups->triples[j].second, 0);
-        archive.FUN_00d609a0(fixups->triples[j].third, 0);
+        archive.hkOArchive_WriteBinaryData_Thunk_00d609e0(fixups->triples[j].second, 0);
+        archive.hkOArchive_WriteBinaryData_Thunk_00d609e0(fixups->triples[j].third, 0);
         if (!*output->Get(&ok))
         {
-            archive.FUN_00d60590();
+            archive.ReleaseReference_00d60590();
             return -1;
         }
         total += 20;
     }
-    archive.FUN_00d60960(payloadSize);
+    archive.hkOArchive_write32u(payloadSize);
     if (!*output->Get(&ok))
     {
-        archive.FUN_00d60590();
+        archive.ReleaseReference_00d60590();
         return -1;
     }
     output->Put(payload, payloadSize);
     if (!*output->Get(&ok))
     {
-        archive.FUN_00d60590();
+        archive.ReleaseReference_00d60590();
         return -1;
     }
-    archive.FUN_00d60590();
+    archive.ReleaseReference_00d60590();
     return total + payloadSize + 4;
 }
 
@@ -621,8 +624,8 @@ struct ObjectWriteX
     int unk04;
     int unk08;
     int unk0c;
-    void FUN_00e02bb0(ObjectWriteInfo* info);
-    void FUN_00e02a80(ObjectWriteZ* z, int a, int b, ObjectWriteW* w);
+    void hkPlatformObjectWriter_hkPlatformObjectWriter(ObjectWriteInfo* info);
+    void hkPlatformObjectWriter_writeObject(ObjectWriteZ* z, int a, int b, ObjectWriteW* w);
     void FUN_00e02c70();
 };
 
@@ -630,11 +633,12 @@ extern char DAT_011b7b89;
 
 // Writes an object record to a sink by serializing its fixups and payload via FUN_00e0b850, returning the total bytes written.
 // @fnv 0x00e0bd40
-int __cdecl FUN_00e0bd40(Sink* p1, ObjectWriteInfo* p2, unsigned int aiIdLow, unsigned int aiIdHigh, int p5,
+// src: HAVOK_LIB 0x00e0bd40
+int __cdecl hkObjectSerialize_writeObject(Sink* p1, ObjectWriteInfo* p2, unsigned int aiIdLow, unsigned int aiIdHigh, int p5,
                          unsigned int p6, ObjectWriteArrItem* out)
 {
     ObjectWriteX x;
-    x.FUN_00e02bb0(p2);
+    x.hkPlatformObjectWriter_hkPlatformObjectWriter(p2);
     ObjectWriteArrByte y;
     y.m_data = 0;
     y.m_iElementCount = 0;
@@ -655,18 +659,18 @@ int __cdecl FUN_00e0bd40(Sink* p1, ObjectWriteInfo* p2, unsigned int aiIdLow, un
     w.m_a3.m_iElementCount = 0;
     w.m_a3.m_cap = 0x80000000;
     w.m_30 = 0;
-    x.FUN_00e02a80(&z, p5, p6, &w);
+    x.hkPlatformObjectWriter_writeObject(&z, p5, p6, &w);
 
     int need = out->m_iElementCount + w.m_a1.m_iElementCount;
-    hkMemoryAllocator& alloc = GetAudioAllocator(FUN_00c85750());
+    hkMemoryAllocator& alloc = GetAudioAllocator(hkMemoryRouter_getInstance());
     if ((out->m_cap & 0x3fffffff) < need)
     {
         int iDoubled = (out->m_cap & 0x3fffffff) * 2;
-        FUN_00c908c0(&alloc, out, need < iDoubled ? iDoubled : need, 0x18);
+        hkArrayUtil__reserve(&alloc, out, need < iDoubled ? iDoubled : need, 0x18);
     }
     for (int i = 0; i < w.m_a1.m_iElementCount; i++)
     {
-        hkMemoryRouter* router = &FUN_00c85750();
+        hkMemoryRouter* router = &hkMemoryRouter_getInstance();
         if (out->m_iElementCount == (out->m_cap & 0x3fffffff))
             ResizeAudioStream(router->m_heap, out, 0x18);
         ObjectWriteItem* p = out->m_data + out->m_iElementCount;
@@ -677,11 +681,11 @@ int __cdecl FUN_00e0bd40(Sink* p1, ObjectWriteInfo* p2, unsigned int aiIdLow, un
         p->m_10 = w.m_a1.m_data[i].c;
         p->m_14 = 0;
     }
-    int r = FUN_00e0b850((FixupLists*)&w, p1, aiIdLow, aiIdHigh, p6, 0, y.m_data, y.m_iElementCount,
+    int r = _writeData((FixupLists*)&w, p1, aiIdLow, aiIdHigh, p6, 0, y.m_data, y.m_iElementCount,
                          ObjectWriteFlag(p2->m_01 != DAT_011b7b89));
     w.FUN_00e028e0();
     z.FUN_00cc0780();
-    hkMemoryAllocator& allocY = GetAudioAllocator(FUN_00c85750());
+    hkMemoryAllocator& allocY = GetAudioAllocator(hkMemoryRouter_getInstance());
     y.m_iElementCount = 0;
     if ((y.m_cap & 0x80000000) == 0)
         allocY.bufFree(y.m_data, y.m_cap & 0x3fffffff);

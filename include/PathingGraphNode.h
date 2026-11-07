@@ -39,10 +39,10 @@ class PathingGraphNode
     void LoadGame(BGSLoadFormBuffer* buffer);
 
     const NiPoint3& FUN_005d8a70();                  // 0x005d8a70 folded: returns this+0x2C (Tangent)
-    void FUN_006b0570(const NiPoint3& tangent);      // 0x006b0570 folded NiPoint3 store at +0x2C (SetTangent)
+    void FORenderedMenu_SetScreenLightColor(const NiPoint3& tangent);      // 0x006b0570 folded NiPoint3 store at +0x2C (SetTangent)
     void SetDirection(const NiPoint3& tangent);      // 0x006b0570
-    bool FUN_006e2330();                             // 0x006e2330 (iFlags & 3) == 3
-    bool FUN_006e2330() const;
+    bool PathingNode_IsTeleportDoorNode();                             // 0x006e2330 (iFlags & 3) == 3
+    bool PathingNode_IsTeleportDoorNode() const;
     PathingLocation& FUN_00717e50();                 // 0x00717e50 folded: returns this+4 (Location)
     const PathingLocation& FUN_00717e50() const;
     PathingLocation* GetLocationPointer();           // 0x00717e50

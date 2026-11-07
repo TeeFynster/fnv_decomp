@@ -20,7 +20,7 @@ public:
     virtual void Finish();
 
     bool __thiscall IsTargetCharacter(MagicTarget* apTarget);
-    void FUN_00808a30();
+    void DoSummon();
 
     InventoryStackRecord* m_pkWeaponEntry;
     InventoryStackRecord* m_apArmorEntries[20];

@@ -21,16 +21,16 @@ struct FUN_00dee620
     void* m_pVTable;
     __thiscall FUN_00dee620(int testFlag);
 };
-extern "C" void __cdecl FUN_00dedf10(void*, void*, void*, void*, int, int);
-void __cdecl FUN_00dee5f0(void* first, void* second, void* third, void* fourth);
+extern "C" void __cdecl hkVector4_ProcessEntries_00dedf10(void*, void*, void*, void*, int, int);
+void __cdecl hkGeometryProcessing_generateRandomDistribution(void* first, void* second, void* third, void* fourth);
 struct FUN_00dee6b0_Class
 {
     int unk00;
     float unk04;
-    float FUN_00dee6b0(int testFlag);
+    float GetUnk04(int testFlag);
 };
 extern int DAT_010cd664;
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
@@ -40,7 +40,7 @@ struct FUN_00dee6c0_cls
 #include <xmmintrin.h>
 #include <math.h>
 double __cdecl Atan2(float y, float x);
-void FUN_00de98c0(const NiPoint3* v, __m128* out);
+void NiPoint3_UpdateFields_00de98c0(const NiPoint3* v, __m128* out);
 __forceinline hkSimdReal::hkSimdReal()
 {}
 __forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
@@ -113,7 +113,7 @@ static __forceinline void calcEdgeAxis(const hkVector4& a0, const hkVector4& a1,
     eb.setSub4(b1, b0);
     axis.setCross(ea, eb);
 }
-int __cdecl FUN_00deab10(const hkVector4* triA, const hkVector4* triB);
+int __cdecl hkGeometryProcessing_checkTrianglesIntersection(const hkVector4* triA, const hkVector4* triB);
 struct Point4;
 extern Point4 DAT_01267e30;
 struct __declspec(align(16)) Point4
@@ -147,8 +147,8 @@ struct FourPointArray
     int size;
     int capacity;
 };
-void __cdecl FUN_00c908c0(hkMemoryAllocator*, void*, int, int);
-void __cdecl FUN_00dedcf0(const VertexArray& vertices, FourPointArray& output);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator*, void*, int, int);
+void __cdecl hkGeometryProcessing_buildTransposedArray(const VertexArray& vertices, FourPointArray& output);
 
 #include <math.h>
 #include <xmmintrin.h>
@@ -305,16 +305,17 @@ struct S_Self
     int unk00;
     int unk04;
     S_Body* body;
-    void FUN_00d76d80(float* diag, S_Rot* rot);
+    void ForwardCall_00d76d80(float* diag, S_Rot* rot);
 };
 
 struct AxisOwner : S_Self
 {
-    hkVector4 FUN_00d76d90();
+    hkVector4 UpdateState_00d76d90();
 };
 
 // @fnv 0x00d76d90
-hkVector4 AxisOwner::FUN_00d76d90()
+// src: GUESS 0x00d76d90 (confidence: low)
+hkVector4 AxisOwner::UpdateState_00d76d90()
 {
     hkVector4 out;
     _mm_store_ps(&out.x, _mm_setzero_ps());
@@ -333,7 +334,7 @@ hkVector4 AxisOwner::FUN_00d76d90()
     case 3: {
         float d[4];
         S_Rot rot;
-        FUN_00d76d80(d, &rot);
+        ForwardCall_00d76d80(d, &rot);
         int idx;
         if (d[0] < d[1])
             idx = (d[2] > d[0]) ? 0 : 2;
@@ -342,7 +343,7 @@ hkVector4 AxisOwner::FUN_00d76d90()
         hkVector4 v;
         v = zero;
         ((float*)&v)[idx] = 1.0f;
-        out.FUN_00c7f700(reinterpret_cast<const hkRotation*>(&rot), &v);
+        out.hkVector4_setRotatedDir(reinterpret_cast<const hkRotation*>(&rot), &v);
         break;
     }
     }

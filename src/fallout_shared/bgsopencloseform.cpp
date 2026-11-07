@@ -21,7 +21,7 @@
 // Private declarations for the remaining animation and event interfaces.
 class NiProperty;
 class SkyShaderProperty;
-SkyShaderProperty* FUN_00653270(const NiRTTI*, NiProperty*);
+SkyShaderProperty* NiObject_DynamicCast(const NiRTTI*, NiProperty*);
 extern NiRTTI DAT_011f36ac;
 #include "../../include/OBJECT_ACTION.h"
 class AIThreadManager
@@ -34,7 +34,7 @@ class TaskQueueInterface
 {
   public:
     static TaskQueueInterface* GetSingleton();
-    void FUN_0087b600(TESObjectREFR*, bool, bool);
+    void TaskQueueInterface_QueueSetOpenState(TESObjectREFR*, bool, bool);
 };
 
 class GlobalObject_0045cf30
@@ -44,7 +44,7 @@ extern GlobalObject_0045cf30 g_011d7188;
 extern const char DAT_01011f30[];
 extern const char g_011d22b0_arg1[];
 extern float DAT_0101ab70;
-void FUN_00c6bd00(NiNode*, bool);
+void bhkNiCollisionObject_ResetSim(NiNode*, bool);
 
 // @fnv 0x0047a490
 bool BGSOpenCloseForm::HasOpenCloseComponent(TESForm* apForm)
@@ -88,7 +88,7 @@ int BGSOpenCloseForm::GetOpenState(TESObjectREFR* ref)
         NiNode* pController = ref->GetNiNode();                                   // Reference scene node.
         NiTimeController* pNode = pController ? pController->NiObjectNET::GetControllers() : 0;  // Controller chain.
         // Runtime RTTI cast to the controller manager.
-        NiControllerManager* bOpen = (NiControllerManager*)FUN_00653270(&DAT_011f36ac, (NiProperty*)pNode);
+        NiControllerManager* bOpen = (NiControllerManager*)NiObject_DynamicCast(&DAT_011f36ac, (NiProperty*)pNode);
         if (bOpen)
         {
             NiControllerSequence* pOpenSequence = bOpen->FindSequenceByName(*TESObjectDOOR::GetOpenSequenceName());
@@ -114,7 +114,7 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
     {
         if (IsConditionMet() && ref != AIThreadManager::IsConditionMet())
         {
-            TaskQueueInterface::GetSingleton()->FUN_0087b600(ref, open, immediate);
+            TaskQueueInterface::GetSingleton()->TaskQueueInterface_QueueSetOpenState(ref, open, immediate);
             return true;
         }
         if (open)
@@ -124,7 +124,7 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
         NiNode* node = ref->GetNiNode();
         NiTimeController* manager = node ? node->NiObjectNET::GetControllers() : 0;  // Controller chain.
         // Runtime RTTI cast to the controller manager.
-        NiControllerManager* controller = (NiControllerManager*)FUN_00653270(&DAT_011f36ac, (NiProperty*)manager);
+        NiControllerManager* controller = (NiControllerManager*)NiObject_DynamicCast(&DAT_011f36ac, (NiProperty*)manager);
         if (controller)
         {
             NiControllerSequence* active = 0;
@@ -149,19 +149,19 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
                     ref->GetExtraData()->CallExtraDataListMethod36(0);
                     controller->StopSequence(active, 0.0f);
                     controller->ActivateControllerSequence(inactive, 0, false, 1.0f, 0.0f, static_cast<NiControllerSequence*>(0));
-                    inactive->FUN_0098adb0(-DAT_0101ab70);
-                    NiUpdateData data(inactive->FUN_00759450(), true, false);
+                    inactive->PathingLOSGridMap_SetSightRadius(-DAT_0101ab70);
+                    NiUpdateData data(inactive->NiPSysSpawnModifier_GetLifeSpan(), true, false);
                     ref->GetNiNode()->Update(static_cast<const NiUpdateData&>(data));
                     controller->StopSequence(inactive, 0.0f);
-                    ref->FUN_00578a30(static_cast<const NiControllerSequence*>(active)->GetName());
-                    FUN_00c6bd00(ref->GetNiNode(), true);
+                    ref->TESObjectREFR_SetLastFinishedSequence(static_cast<const NiControllerSequence*>(active)->GetName());
+                    bhkNiCollisionObject_ResetSim(ref->GetNiNode(), true);
                 }
                 else
                 {
                     controller->StopSequence(inactive, 0.0f);
                     controller->ActivateControllerSequence(active, 0, false, 1.0f, 0.0f, static_cast<NiControllerSequence*>(0));
-                    active->FUN_0098adb0(-DAT_0101ab70);
-                    NiUpdateData data(active->FUN_00759450(), true, false);
+                    active->PathingLOSGridMap_SetSightRadius(-DAT_0101ab70);
+                    NiUpdateData data(active->NiPSysSpawnModifier_GetLifeSpan(), true, false);
                     ref->GetNiNode()->Update(static_cast<const NiUpdateData&>(data));
                 }
                 result = true;
@@ -170,9 +170,9 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
         else
         {
             if (open)
-                ref->FUN_00578a30(DAT_01011f30);
+                ref->TESObjectREFR_SetLastFinishedSequence(DAT_01011f30);
             else
-                ref->FUN_00578a30(g_011d22b0_arg1);
+                ref->TESObjectREFR_SetLastFinishedSequence(g_011d22b0_arg1);
         }
         if (immediate && *((Setting*)&g_011d7188)->FUN_00408d60() &&
             static_cast<const TESForm*>(ref->GetObjectReference())->GetFormType() == ENUM_FORM_ID_DOOR_ID && ref->GetNiNode() &&
@@ -188,13 +188,15 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
 }
 
 // @fnv 0x00759450
-float NiControllerSequence::FUN_00759450()
+// src: XBOX_PDB 0x00759450
+float NiControllerSequence::NiPSysSpawnModifier_GetLifeSpan()
 {
     return m_fFirstKeyTime;
 }
 
 // @fnv 0x0098adb0
-void NiControllerSequence::FUN_0098adb0(float afValue)
+// src: XBOX_PDB 0x0098adb0
+void NiControllerSequence::PathingLOSGridMap_SetSightRadius(float afValue)
 {
     m_fSequenceOffset = afValue;
 }
@@ -202,7 +204,8 @@ void NiControllerSequence::FUN_0098adb0(float afValue)
 extern NiFixedString* DAT_011c61c4;
 
 // @fnv 0x005c1490
-NiFixedString* __cdecl FUN_005c1490()
+// src: XBOX_PDB 0x005c1490
+NiFixedString* __cdecl FixedStrings_QSpecialIdle_AreaEffect()
 {
     return DAT_011c61c4;
 }

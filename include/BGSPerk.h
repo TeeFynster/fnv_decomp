@@ -30,12 +30,12 @@ public:
     bool Load(TESFile* file);
     void ApplyPerkEntries(Actor* actor, unsigned char rank, bool alternate);
     bool IsPerkHidden() const;
-    unsigned char FUN_005d4ee0();
+    unsigned char BGSPerk_GetNumRanks();
     signed char Level();
     signed char GetByteAt39();
     bool GetByteAtOffset56();
-    bool FUN_005eba00(PlayerCharacter* player);
+    bool IsPerkAttainable(PlayerCharacter* player);
     bool CheckPlayerConditions();
-    bool FUN_00785150(PlayerCharacter* player);
+    bool BGSPerk_IsPerkAvailable(PlayerCharacter* player);
     void GetDescription(char* buffer, unsigned int size);
 };

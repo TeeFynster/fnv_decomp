@@ -99,10 +99,11 @@ struct SpawnOwner
     virtual void v45();
     virtual void v46();
     virtual void v47(SpawnSource*);
-    void FUN_00ca0190(SpawnSource*);
+    void bhkBoxShape_Init_00ca0190(SpawnSource*);
 };
 // @fnv 0x00ca0190
-void SpawnOwner::FUN_00ca0190(SpawnSource* pSource)
+// src: XBOX_PDB 0x00ca0190
+void SpawnOwner::bhkBoxShape_Init_00ca0190(SpawnSource* pSource)
 {
     ThreadStateGuard kGuard;
     // Keep the SIMD temporary: VC9 /GS omits the original cookie for a shared hkVector4 temporary.

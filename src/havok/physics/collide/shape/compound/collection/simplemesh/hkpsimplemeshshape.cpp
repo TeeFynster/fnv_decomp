@@ -30,17 +30,17 @@ inline hkpShapeContainer::~hkpShapeContainer()
 // include/ has no hkMemoryRouter header yet; the heap pointer is at offset 0x10.
 #include "../../../../../../../../include/hkMemoryRouter.h"
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 inline void hkReferencedObject::operator delete(void* p)
 {
     hkReferencedObject* object = static_cast<hkReferencedObject*>(p);
-    FUN_00c85750().heap().blockFree(object, object->m_usMemSizeAndFlags);
+    hkMemoryRouter_getInstance().heap().blockFree(object, object->m_usMemSizeAndFlags);
 }
 
 inline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return FUN_00c85750().heap();
+    return hkMemoryRouter_getInstance().heap();
 }
 
 template <class T, class Allocator> inline hkArray<T, Allocator>::~hkArray() throw()
@@ -158,7 +158,7 @@ hkpShapeKey hkpSimpleMeshShape::GetFirstKey() const
     return -1;
 }
 
-int __cdecl FUN_00d06f80(const void* p, int bytes);
+int __cdecl hkStatisticsCollector_getAllocatedSize(const void* p, int bytes);
 extern char DAT_01269198;
 
 template <class T> inline void CollectArray(hkStatisticsCollector* collector, const char* name, int type, const hkArray<T>& a)
@@ -166,7 +166,7 @@ template <class T> inline void CollectArray(hkStatisticsCollector* collector, co
     if ((a.m_iCapacityState & 0x80000000) == 0 || collector->m_reportInplaceAllocations)
     {
         const T* data = a.m_data;
-        int allocated = FUN_00d06f80(data, a.getCapacity() * (int)sizeof(T));
+        int allocated = hkStatisticsCollector_getAllocatedSize(data, a.getCapacity() * (int)sizeof(T));
         collector->AddMemoryChunk(type, name, a.m_data, a.m_iElementCount * (int)sizeof(T), allocated);
     }
 }

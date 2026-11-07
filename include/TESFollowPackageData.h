@@ -24,6 +24,6 @@ public:
     void* DestroyIfFlagged(unsigned int flags);
     void SaveFloatRecord();
     void FUN_0067c080();
-    void FUN_0067c110(TESPackageData* other);
-    bool FUN_0067c220(TESPackageData* arg);
+    void Copy_0067c110(TESPackageData* other);
+    bool Compare_0067c220(TESPackageData* arg);
 };

@@ -64,7 +64,7 @@ class BSShaderLightingProperty : public BSShaderProperty
     void RemoveItemsAfterPos(void* geometry);
     void SetLightListChanged(bool changed);
 
-    void FUN_00b718b0();
+    void BSShaderLightingProperty_FenceAllLights();
 
     unsigned char lLightList[12];
     float fForcedDarkness;

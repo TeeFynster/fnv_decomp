@@ -53,12 +53,13 @@ class NormVec_cls
 {
   public:
     __m128 m_v;
-    __m128* FUN_00c74c90(__m128* out);
+    __m128* hkQuaternion_getAxis(__m128* out);
 };
 
 // Computes the normalized version of m_v using an approximate reciprocal square root and one Newton-Raphson refinement, storing the result in out.
 // @fnv 0x00c74c90
-__m128* NormVec_cls::FUN_00c74c90(__m128* out)
+// src: COMMUNITY 0x00c74c90
+__m128* NormVec_cls::hkQuaternion_getAxis(__m128* out)
 {
     __m128 vVec = m_v;
     __m128 vSq = _mm_mul_ps(vVec, vVec);

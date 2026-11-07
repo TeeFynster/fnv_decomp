@@ -15,7 +15,8 @@ extern P03MM g_memoryManager;
 NiGlobalStringTable* __fastcall FUN_00a5b530(NiGlobalStringTable* allocatedTable);
 
 // @fnv 0x00a5b630
-void FUN_00a5b630()
+// src: COMMUNITY 0x00a5b630
+void NiGlobalStringTable__SDMInit()
 {
     NiGlobalStringTable* allocatedTable = static_cast<NiGlobalStringTable*>(g_memoryManager.Allocate(0x2100));
     if (allocatedTable)

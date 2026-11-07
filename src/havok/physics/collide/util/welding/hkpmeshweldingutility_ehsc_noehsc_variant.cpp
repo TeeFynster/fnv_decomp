@@ -56,7 +56,8 @@ struct ComparisonResult
         return value;
     }
 };
-__declspec(noinline) ComparisonResult FUN_00ddcda0(const Record& left, const Record& right)
+// src: GUESS 0x00ddcda0 (confidence: low)
+__declspec(noinline) ComparisonResult Object_CompareField08_00ddcda0(const Record& left, const Record& right)
 {
     return ComparisonResult(left.key > right.key);
 }
@@ -66,11 +67,11 @@ inline void SwapRecords(Record& first, Record& second)
     second = first;
     first = temp;
 }
-void FUN_00ddeb70(Record* records, int left, int right, int comparator);
+void hkAlgorithm_quickSortRecursive_struct_hkEntry_class_hkAlgorithm_less_struct_hkEntry(Record* records, int left, int right, int comparator);
 // Exe 0x00dddcd0: unit-local DynamicArray view; declarations and layout are preserved.
 struct HkpmeshweldingutilityDynamicArrayView
 {
-    void FUN_00ddecb0(int a, int b, int c, int d);
+    void SpliceElements_Thunk(int a, int b, int c, int d);
 };
 struct S_00ddecf0_Key
 {
@@ -91,12 +92,12 @@ struct S_00ddecf0_Router
         return *m_pStreamAllocator;
     }
 };
-S_00ddecf0_Router* FUN_00c85750();
+S_00ddecf0_Router* hkMemoryRouter_getInstance();
 struct S_00ddecf0_Array
 {
     S_00ddecf0_Key* m_data;
     int m_iElementCount;
-    void FUN_00ddecd0(S_00ddecf0_Heap& heap, int index, const S_00ddecf0_Key& key);
+    void ForwardCall_00ddecd0(S_00ddecf0_Heap& heap, int index, const S_00ddecf0_Key& key);
 };
 struct S_00ddecf0
 {
@@ -106,7 +107,7 @@ struct S_00ddecf0
 };
 extern double DAT_010cd5a8;
 extern double DAT_0101ff40;
-float FUN_00ddd7e0(int a1, int* pOut, float* pF);
+float Object_ComputeDihedralSinCos(int a1, int* pOut, float* pF);
 int GetIndexForValue(int aiArg);
 struct Iface
 {
@@ -266,10 +267,10 @@ __declspec(align(16)) struct QueryBuffer
     unsigned int unk1F8;
     unsigned int unk1FC;
 };
-int FUN_00dde4c0(Iface* self, void* a, void* b, int idx, int zero, int* out);
+int hkpMeshWeldingUtility_calcBitcodeForTriangleEdge(Iface* self, void* a, void* b, int idx, int zero, int* out);
 bool* CheckSubQueries(bool* result, void* key, Iface* self);
-void* FUN_00c908c0(void* alloc, void* arr, int numElems, int elemSize);
-void FUN_00d2cc70(void* dst, const void* src, int numBytes);
+void* hkArrayUtil__reserve(void* alloc, void* arr, int numElems, int elemSize);
+void hkMemUtil_memMove(void* dst, const void* src, int numBytes);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
@@ -289,13 +290,13 @@ static __forceinline void S_00ddeab0_GrowArrayCapacity(hkArrayBase<S_00ddeab0_El
         {
             int cap2 = cap + cap;
             int newcap = (numElems < cap2) ? cap2 : numElems;
-            FUN_00c908c0(alloc, (&self), newcap, 12);
+            hkArrayUtil__reserve(alloc, (&self), newcap, 12);
         }
     }
 struct S_00ddecd0
 {
-    void FUN_00ddecb0(int a, int b, int c, int flag);
-    void FUN_00ddecd0(int a, int b, int c);
+    void SpliceElements_Thunk(int a, int b, int c, int flag);
+    void ForwardCall_00ddecd0(int a, int b, int c);
 };
 struct ObjInner
 {
@@ -320,7 +321,7 @@ struct LocalBuffer
 };
 char* IsDegenerateTriangle(char* out, const hkVector4* v0, const hkVector4* v1, const hkVector4* v2,
                            float eps);
-int FUN_00dde4c0(ObjOuter* p2, Transform* trans, void* p1, int i, void* p3, int* outLocal);
+int hkpMeshWeldingUtility_calcBitcodeForTriangleEdge(ObjOuter* p2, Transform* trans, void* p1, int i, void* p3, int* outLocal);
 int __cdecl CheckTransformAndProcess(void* p1, ObjOuter* pOuter, void* p3, short* outWord);
 extern const float DAT_01017d00;
 extern const LocalM128 DAT_01017d10;
@@ -333,7 +334,7 @@ struct hkTransformHolderDDCE
 };
 struct hkUtilDDCE
 {
-    static hkBool FUN_00ddced0(const hkTransformHolderDDCE& kA, const hkTransformHolderDDCE& kB);
+    static hkBool ForwardCall_00ddced0(const hkTransformHolderDDCE& kA, const hkTransformHolderDDCE& kB);
 };
 struct FUN_00ddea00_src
 {
@@ -384,7 +385,7 @@ __declspec(align(16)) struct FUN_00ddea00_cls
 
     FUN_00ddea00_cls* CopyFromSource(const FUN_00ddea00_src* src);
 };
-int __cdecl FUN_00ddd6f0(const LocalM128* a, const LocalM128* b, int index, LocalM128* out, int* result);
+int __cdecl Hkpmeshweldingutility_MergeTriangleVectors(const LocalM128* a, const LocalM128* b, int index, LocalM128* out, int* result);
 extern const float DAT_01011d78;
 extern const float DAT_01017718;
 extern const float DAT_01016248;
@@ -433,7 +434,7 @@ struct NormalVector
         q = _mm_mul_ps(inverseLength().broadcast(), q);
     }
 };
-void FUN_00ddd620(const NormalVector* a, const NormalVector* b, const NormalVector* c, NormalVector* out);
+void hkpMeshWeldingUtility_calcAntiClockwiseTriangleNormal(const NormalVector* a, const NormalVector* b, const NormalVector* c, NormalVector* out);
 struct S_00ddecf0_Heap
 {
     virtual void unk00();
@@ -447,16 +448,16 @@ struct S_00ddecf0_Heap
     }
 };
 extern const double DAT_010290b8;
-__declspec(nothrow) S_00ddecf0_Router* FUN_00c85750();
+__declspec(nothrow) S_00ddecf0_Router* hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* heap, void* arr, int elemSize) throw();
 struct KeyLess
 {
 };
-void __cdecl FUN_00ddeb70(S_00ddecf0_Key* keys, int left, int right, KeyLess cmp) throw();
+void __cdecl hkAlgorithm_quickSortRecursive_struct_hkEntry_class_hkAlgorithm_less_struct_hkEntry(S_00ddecf0_Key* keys, int left, int right, KeyLess cmp) throw();
 template <typename T, typename L> inline void quickSort(T* pArr, int size, L cmpLess)
 {
     if (size > 1)
-        FUN_00ddeb70(pArr, 0, size - 1, cmpLess);
+        hkAlgorithm_quickSortRecursive_struct_hkEntry_class_hkAlgorithm_less_struct_hkEntry(pArr, 0, size - 1, cmpLess);
 }
 extern "C" double __cdecl fabs(double);
 __declspec(noinline) ComparisonResult __cdecl AreZDiffering(const S_00ddecf0_Key& a, const S_00ddecf0_Key& b) throw()
@@ -469,7 +470,7 @@ __declspec(noinline) ComparisonResult __cdecl AreZDiffering(const S_00ddecf0_Key
 // hkArray bodies (allocator = the memory router's heap).
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap());
+    return reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance()->heap());
 }
 template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
@@ -501,7 +502,7 @@ static inline float clamp(float x, float lo, float hi)
 }
 struct Track : public S_00ddecf0
 {
-    float FUN_00dded60();
+    float hkHistogram_evaluate();
 };
 
 extern "C"
@@ -702,7 +703,7 @@ struct hkInplaceArrayW
     }
     inline ~hkInplaceArrayW()
     {
-        S_00ddecf0_Heap& alloc = FUN_00c85750()->heap();
+        S_00ddecf0_Heap& alloc = hkMemoryRouter_getInstance()->heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(unsigned int));
@@ -739,14 +740,14 @@ struct hkHistogramW
     }
     inline ~hkHistogramW()
     {
-        S_00ddecf0_Heap& alloc = FUN_00c85750()->heap();
+        S_00ddecf0_Heap& alloc = hkMemoryRouter_getInstance()->heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(hkEntryW));
         m_data = 0;
         m_iCapacityState = 0x80000000;
     }
-    float FUN_00dded60();
+    float hkHistogram_evaluate();
     void InsertKey(float t0, float t1, float angle);
 };
 
@@ -836,7 +837,7 @@ struct TextFormat
     int size;
     int capacityFlags;
     void FUN_00cb1600(char*, int);
-    TextFormat* FUN_00cc01c0(const char*);
+    TextFormat* ProcessAndReturnValue_00cc01c0(const char*);
     void FUN_00cc00e0();
 };
 
@@ -849,7 +850,8 @@ struct ErrorManager
 };
 
 // hkpMeshWeldingUtility::calcAntiClockwiseTriangleNormal
-__declspec(noinline) void __cdecl FUN_00ddd620(const hkVector4& v0, const hkVector4& v1, const hkVector4& v2,
+// src: COMMUNITY 0x00ddd620
+__declspec(noinline) void __cdecl hkpMeshWeldingUtility_calcAntiClockwiseTriangleNormal(const hkVector4& v0, const hkVector4& v1, const hkVector4& v2,
                                                hkVector4& normal)
 {
     hkVector4 e0;
@@ -859,13 +861,13 @@ __declspec(noinline) void __cdecl FUN_00ddd620(const hkVector4& v0, const hkVect
     normal.setCross(e0, e1);
     normal.normalize3();
 }
-hkBool __cdecl FUN_00ddcf60(const hkVector4& v0, const hkVector4& v1, const hkpTriangleShapeW* triangle);
-float __cdecl FUN_00ddd5a0(const hkVector4& normal, const hkVector4& perp, const hkVector4& otherNormal);
+hkBool __cdecl Object_TestTriangleVertexProximity(const hkVector4& v0, const hkVector4& v1, const hkpTriangleShapeW* triangle);
+float __cdecl hkpMeshWeldingUtility_calcAngleForEdge(const hkVector4& normal, const hkVector4& perp, const hkVector4& otherNormal);
 void __cdecl GenerateTrianglePlanes(hkVector4* planes, const hkpTriangleShapeW* triangle, float tolerance);
-hkBool __cdecl FUN_00ddd0b0(const hkVector4& a, const hkVector4& b, int numPlanes, const hkVector4* planes,
+hkBool __cdecl hkClipEdgeAgainstPlanes(const hkVector4& a, const hkVector4& b, int numPlanes, const hkVector4* planes,
                              float& tmin, float& tmax);
 int __cdecl FindAngleIndex(float angle);
-unsigned int __cdecl FUN_00ddcdd0(unsigned int combined, int edgeIndex, unsigned int code);
+unsigned int __cdecl hkpMeshWeldingUtility_modifyCombinedEdgesBitcode(unsigned int combined, int edgeIndex, unsigned int code);
 
 // hkIsEdgeInTrianglePlane
 __declspec(noinline) hkBool __cdecl IsDotProductBelowThreshold(const hkVector4& edge, const hkVector4& normal)
@@ -880,7 +882,8 @@ __declspec(noinline) hkBool __cdecl IsDotProductBelowThreshold(const hkVector4& 
 }
 
 // @fnv 0x00dddcd0
-void __cdecl FUN_00dddcd0(const Transform& transform, hkpShapeCollectionW* collection, int weldingType,
+// src: XBOX_PDB 0x00dddcd0
+void __cdecl hkpMeshWeldingUtility_computeWeldingInfoMultiShape(const Transform& transform, hkpShapeCollectionW* collection, int weldingType,
                           hkShapeInfoArrayW& allShapes, bool weldOpenEdges)
 {
     if (collection->m_eCollectionType != COLLECTION_LIST_W &&
@@ -893,7 +896,7 @@ void __cdecl FUN_00dddcd0(const Transform& transform, hkpShapeCollectionW* colle
         char* message = reinterpret_cast<char*>(&messageStorage);
         TextFormat formatted;
         formatted.FUN_00cb1600(message, 512);
-        formatted.FUN_00cc01c0(&DAT_010d7f80);
+        formatted.ProcessAndReturnValue_00cc01c0(&DAT_010d7f80);
         ((ErrorManager*)DAT_01268360)->Report(1, 0x3f508c6a, message, &DAT_010d7f50, 271);
         formatted.FUN_00cc00e0();
         return;
@@ -913,7 +916,7 @@ void __cdecl FUN_00dddcd0(const Transform& transform, hkpShapeCollectionW* colle
 
         unsigned int weldingInfo = 0;
         hkVector4 triangleNormal;
-        FUN_00ddd620(triangle->getVertex(0), triangle->getVertex(1), triangle->getVertex(2), triangleNormal);
+        hkpMeshWeldingUtility_calcAntiClockwiseTriangleNormal(triangle->getVertex(0), triangle->getVertex(1), triangle->getVertex(2), triangleNormal);
 
         for (int edgeIndex = 0; edgeIndex < 3; edgeIndex++)
         {
@@ -927,7 +930,7 @@ void __cdecl FUN_00dddcd0(const Transform& transform, hkpShapeCollectionW* colle
                 const hkShapeInfoW& info = allShapes[shapeIndex];
                 const hkpBvTreeShapeW* bvTree = allShapes[shapeIndex].m_pCollisionShape;
                 __declspec(align(16)) Transform t;
-                t.FUN_00cb22f0(info.m_kMotionTransform, transform);
+                t.hkTransform_setMulInverseMul(info.m_kMotionTransform, transform);
 
                 hkVector4 normal;
                 normal._setRotatedDir(*reinterpret_cast<const hkRotation*>(t.r), triangleNormal);
@@ -953,30 +956,30 @@ void __cdecl FUN_00dddcd0(const Transform& transform, hkpShapeCollectionW* colle
                     if (other->getType() != HK_SHAPE_TRIANGLE_W)
                         continue;
 
-                    if (hkUtilDDCE::FUN_00ddced0(*(const hkTransformHolderDDCE*)triangle,
+                    if (hkUtilDDCE::ForwardCall_00ddced0(*(const hkTransformHolderDDCE*)triangle,
                                                  *(const hkTransformHolderDDCE*)other)
                             .m_cBooleanValue ||
-                        FUN_00ddcf60(b, c, other) || FUN_00ddcf60(c, a, other))
+                        Object_TestTriangleVertexProximity(b, c, other) || Object_TestTriangleVertexProximity(c, a, other))
                         continue;
 
                     hkVector4 otherNormal;
-                    FUN_00ddd620(other->getVertex(0), other->getVertex(1), other->getVertex(2), otherNormal);
+                    hkpMeshWeldingUtility_calcAntiClockwiseTriangleNormal(other->getVertex(0), other->getVertex(1), other->getVertex(2), otherNormal);
                     if (!IsDotProductBelowThreshold(edge, otherNormal))
                         continue;
 
                     hkVector4 perp;
                     perp.setCross(edge, normal);
                     perp.normalize3();
-                    float angle = FUN_00ddd5a0(normal, perp, otherNormal);
+                    float angle = hkpMeshWeldingUtility_calcAngleForEdge(normal, perp, otherNormal);
 
                     hkVector4 planes[5];
                     GenerateTrianglePlanes(planes, other, 0.05f);
                     float tmin, tmax;
-                    if (FUN_00ddd0b0(a, b, 5, planes, tmin, tmax))
+                    if (hkClipEdgeAgainstPlanes(a, b, 5, planes, tmin, tmax))
                         histogram.InsertKey(tmin, tmax, angle);
                 }
             }
-            weldingInfo = (unsigned short)FUN_00ddcdd0(weldingInfo, edgeIndex, FindAngleIndex(histogram.FUN_00dded60()));
+            weldingInfo = (unsigned short)hkpMeshWeldingUtility_modifyCombinedEdgesBitcode(weldingInfo, edgeIndex, FindAngleIndex(histogram.hkHistogram_evaluate()));
         }
         collection->SetWeldingInfo(key, weldingInfo);
     }

@@ -39,5 +39,5 @@ public:
     void Disable();
     void Init(unsigned int);
     int GetSection();
-    void FUN_00aa50a0();
+    void BSTimer_Disable();
 };

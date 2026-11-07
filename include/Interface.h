@@ -32,7 +32,7 @@ public:
     static bool IsConsoleActive(); // exe 0x00703d50
     static bool IsPipBoyOpen(); // exe 0x00704ad0, menu 1002 visibility
     static bool IsPipboyMenuOpen(); // exe 0x007079b0
-    bool FUN_007014a0(bool); // exe 0x007014a0
+    bool FaderManager_IsFaderActive(bool); // exe 0x007014a0
     static void PrintDebugMessage(BGSLoadGameBuffer*); // exe 0x0040fbe0
 
     static void SetHUDVisible(bool); // exe 0x00709c40

@@ -121,9 +121,9 @@ public:
     virtual void vf113();
     virtual void vf114();
 
-    unsigned int __thiscall FUN_00e695e0();
-    bool FUN_00e72c20(void* geometry, int flag);
-    bool FUN_00e72c20(void* geometry, void* shader);
+    unsigned int __thiscall NiDX9Renderer_GetMaxBuffersPerRenderTargetGroup();
+    bool NiDX9Renderer_IsHardwareSkinned(void* geometry, int flag);
+    bool NiDX9Renderer_IsHardwareSkinned(void* geometry, void* shader);
     void DrawStrip(void* geometry, unsigned int geometryData, unsigned int skinInstance,
                    void* transform, void* bound);
     void DrawStrip(Geometry* geometry, Flags* flags, Shape* shape, void* context, Color* color);

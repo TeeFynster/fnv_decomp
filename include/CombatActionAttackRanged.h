@@ -9,5 +9,5 @@ class CombatActionAttackRanged : public CombatAction
 public:
     CombatActionAttackRanged(COMBAT_ACTION type);
 
-    float FUN_0097ae00(CombatController* apCombatController, int aiActionValue);
+    float GetCost_0097ae00(CombatController* apCombatController, int aiActionValue);
 };

@@ -9,14 +9,14 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include "havok/hkpTriangleShape.h"
 extern char const* const g_01268970_arg1;
-void __cdecl FUN_00c90360(char const*, char const* const*);
-void __cdecl FUN_00d1fee0(char const* arg1, char const* const* arg2);
+void __cdecl hkReferencedObject_calcContentStatistics(char const*, char const* const*);
+void __cdecl hkpTriangleShape_calcContentStatistics(char const* arg1, char const* const* arg2);
 class FUN_00d1ff10_cls : public hkpTriangleShape
 {
   public:
     int FUN_00d1ff10();
 };
-static int __cdecl FUN_00d1fef0(unsigned short weldingInfo, int edge);
+static int __cdecl getSingleEdgeBitcode(unsigned short weldingInfo, int edge);
 int __cdecl ExtractEdge(unsigned short weldingInfo, int edge);
 
 #include <xmmintrin.h>
@@ -33,11 +33,12 @@ struct FUN_00d20370_Triangle
     __m128 vertexC;
     __m128 extrusion;
 
-    void __thiscall FUN_00d20370(const unsigned short* indexes, int count, __m128* output);
+    void __thiscall hkpTriangleShape_convertVertexIdsToVerticesImpl(const unsigned short* indexes, int count, __m128* output);
 };
 
 // @fnv 0x00d20370
-void __thiscall FUN_00d20370_Triangle::FUN_00d20370(const unsigned short* indexes, int count, __m128* output)
+// src: XBOX_PDB 0x00d20370
+void __thiscall FUN_00d20370_Triangle::hkpTriangleShape_convertVertexIdsToVerticesImpl(const unsigned short* indexes, int count, __m128* output)
 {
     for (int remaining = count - 1; remaining >= 0; --remaining)
     {

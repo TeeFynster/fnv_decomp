@@ -83,7 +83,7 @@ FNV_STATIC_ASSERT(offsetof(NiPoint4, m_afExtents) == 0);
 class NiMatrix3_Xbox360
 {
   public:
-    void FUN_00439f50(int column, NiPoint3& out) const;  // declared for the original code (decl_variants.py)
+    void NiMatrix3_GetCol(int column, NiPoint3& out) const;  // declared for the original code (decl_variants.py)
 
   public:
     NiPoint4 m_afEntries[3];  // +0x0, 48 bytes
@@ -296,7 +296,7 @@ FNV_STATIC_ASSERT(offsetof(Projectile, ObjectPointerFlagFloatData) == 356);
 class GrenadeProjectile : public Projectile
 {
   public:
-    bool FUN_009b4740();  // declared for the original code (decl_variants.py)
+    bool Object_ProcessAndReturnValue_009b4740();  // declared for the original code (decl_variants.py)
 
   public:
     // PC vtable 0x0108F674 slot 198 contains covered target 0x009BDF80.

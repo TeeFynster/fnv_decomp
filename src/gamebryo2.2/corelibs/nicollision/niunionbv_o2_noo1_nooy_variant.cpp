@@ -34,7 +34,7 @@ struct P03MM
 };
 typedef P03MM MemoryManager;
 extern MemoryManager g_memoryManager;
-NiUnionBV* __fastcall FUN_00e9efb0(void* self);
+NiUnionBV* __fastcall NiUnionBV_Clone(void* self);
 // FUN_00e9ecc0 - 6-byte leaf stub of the retail binary.
 //
 // The original code is "mov eax, 4 ; ret": the function simply hands the
@@ -43,7 +43,7 @@ NiUnionBV* __fastcall FUN_00e9efb0(void* self);
 // is materialised from a relocated address expression instead.  That keeps
 // the original six-byte "mov eax, <imm32> ; ret" shape byte for byte.
 extern int g_fnv_00e9ecc0_value_anchor;
-int FUN_00e9ecc0();
+int bhkCharacterStateFlying_Update();
 
 class A64330Obj
 {
@@ -58,11 +58,12 @@ class A64330Obj
     void SetSize(unsigned int size);
     void SetAt(unsigned int index, int* const& value);
 
-    unsigned int FUN_00a64330(int* const& value);
+    unsigned int NiTArray_void_cdecl_NiStream_NiObject_NiTMallocInterface_void_cdecl_NiStream_NiObject_AddFirstEmpty(int* const& value);
 };
 
 // @fnv 0x00a64330
-unsigned int A64330Obj::FUN_00a64330(int* const& value)
+// src: XBOX_PDB 0x00a64330
+unsigned int A64330Obj::NiTArray_void_cdecl_NiStream_NiObject_NiTMallocInterface_void_cdecl_NiStream_NiObject_AddFirstEmpty(int* const& value)
 {
     int* element = value;
 
@@ -94,7 +95,8 @@ inline void* operator new(unsigned int, void* p) throw()
 }
 
 // @fnv 0x00e9efe0
-NiUnionBV* __cdecl FUN_00e9efe0(unsigned int a1)
+// src: XBOX_PDB 0x00e9efe0
+NiUnionBV* __cdecl NiUnionBV_CreateFromStream(unsigned int a1)
 {
     NiUnionBV* p = new (g_memoryManager.Allocate(sizeof(NiUnionBV))) NiUnionBV;
     p->LoadBinary(*(NiStream*)a1);
@@ -103,19 +105,20 @@ NiUnionBV* __cdecl FUN_00e9efe0(unsigned int a1)
 
 struct Items
 {
-    void FUN_00a64330(unsigned int*);
+    void NiTArray_void_cdecl_NiStream_NiObject_NiTMallocInterface_void_cdecl_NiStream_NiObject_AddFirstEmpty(unsigned int*);
 };
 struct UnionLoadBase
 {
-    void FUN_00a89af0(void* stream);
+    void nullsub_3(void* stream);
 };
-unsigned int FUN_00e9cab0(void*);
+unsigned int NiBoundingVolume_CreateFromStream(void*);
 // @fnv 0x00e9f020
 // This loading helper is not declared by the shared class.
-void __fastcall FUN_00e9f020(NiUnionBV* self, void*, char* stream)
+// src: GAMEBRYO_SRC 0x00e9f020
+void __fastcall NiUnionBV_LoadBinary(NiUnionBV* self, void*, char* stream)
 {
     unsigned int num;
-    ((UnionLoadBase*)self)->FUN_00a89af0(stream);
+    ((UnionLoadBase*)self)->nullsub_3(stream);
     NiBinaryStream* in = *(NiBinaryStream**)(stream + 0x24c);
     {
         unsigned int sz = 4;
@@ -124,7 +127,7 @@ void __fastcall FUN_00e9f020(NiUnionBV* self, void*, char* stream)
     }
     for (unsigned int i = 0; i < num; ++i)
     {
-        unsigned int item = FUN_00e9cab0(stream);
+        unsigned int item = NiBoundingVolume_CreateFromStream(stream);
         if (item)
         {
             unsigned int max = self->m_kBoundingVolumes.m_usSize;
@@ -133,7 +136,7 @@ void __fastcall FUN_00e9f020(NiUnionBV* self, void*, char* stream)
                 if (item == (unsigned int)self->m_kBoundingVolumes.m_pBase[j])
                     goto found;
             }
-            ((Items*)&self->m_kBoundingVolumes)->FUN_00a64330(&item);
+            ((Items*)&self->m_kBoundingVolumes)->NiTArray_void_cdecl_NiStream_NiObject_NiTMallocInterface_void_cdecl_NiStream_NiObject_AddFirstEmpty(&item);
         found:;
         }
     }
@@ -162,7 +165,8 @@ inline E9E8C0Item*& GetComparisonItem(NiUnionBV* volume, unsigned int index)
 // The shared header has no bool comparison overload for this entry point.
 // Keep its calling convention in a free helper, using the shared object layout.
 // @fnv 0x00e9e8c0
-bool __fastcall FUN_00e9e8c0(NiUnionBV* self, void*, NiUnionBV* pkOther)
+// src: GUESS 0x00e9e8c0 (confidence: low)
+bool __fastcall NiUnionBV_ProcessEntries_00e9e8c0(NiUnionBV* self, void*, NiUnionBV* pkOther)
 {
     if (pkOther->F3() != 4)
         return false;
@@ -224,7 +228,7 @@ typedef unsigned int u32;
 typedef unsigned short u16;
 
 extern "C" unsigned int __cdecl strlen(const char* s);
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 int __cdecl FUN_00a305b0(char* buf, unsigned int count, const char* fmt, ...);
 
 // The shared array declares its storage and transfers; this unit supplies
@@ -244,16 +248,17 @@ inline NiBoundingVolume* GetBoundingVolume(const NiTPrimitiveArray<NiBoundingVol
 }
 
 // @fnv 0x00e9f0b0
-void NiUnionBV::FUN_00e9f0b0(char* pcPrefix, NiTPrimitiveArray<char*>* pkStrings)
+// src: GAMEBRYO_SRC 0x00e9f0b0
+void NiUnionBV::AddViewerStrings_00e9f0b0(char* pcPrefix, NiTPrimitiveArray<char*>* pkStrings)
 {
     u32 uiLen = strlen(pcPrefix) + 12;
-    char* pcString = (char*)FUN_00aa1070(uiLen);
+    char* pcString = (char*)_NiMalloc_00aa1070(uiLen);
     FUN_00a305b0(pcString, uiLen, "%s = UNION_BV", pcPrefix);
     AddPrimitive(*pkStrings, pcString);
 
     for (u32 i = 0; i < m_kBoundingVolumes.m_usSize; i++)
     {
-        char* pcChild = (char*)FUN_00aa1070(13);
+        char* pcChild = (char*)_NiMalloc_00aa1070(13);
         FUN_00a305b0(pcChild, 13, "   child %i", i);
         GetBoundingVolume(m_kBoundingVolumes, i)->AddViewerStrings(pcChild, pkStrings);
     }
@@ -272,7 +277,7 @@ inline NiTArray<T, A>::NiTArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
     m_usSize = 0;
     m_usESize = 0;
     if (m_usMaxSize > 0)
-        m_pBase = (T*)FUN_00aa1070(sizeof(T) * m_usMaxSize);
+        m_pBase = (T*)_NiMalloc_00aa1070(sizeof(T) * m_usMaxSize);
     else
         m_pBase = 0;
 }

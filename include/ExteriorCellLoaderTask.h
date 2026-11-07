@@ -14,5 +14,5 @@ public:
     virtual void GenerateKey();
     virtual void ChangePriority(IO_TASK_PRIORITY priority);
 
-    void FUN_00527ce0();
+    void Finish_00527ce0();
 };

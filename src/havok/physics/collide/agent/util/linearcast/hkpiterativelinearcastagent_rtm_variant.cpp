@@ -136,7 +136,8 @@ __declspec(nothrow) __forceinline void copyMotionState(void* storage, const void
 }
 
 // @fnv 0x00daf540
-void hkpIterativeLinearCastAgent::FUN_00daf540(const hkpCdBody* bodyA, const hkpCdBody* bodyB,
+// src: GUESS 0x00daf540 (confidence: low)
+void hkpIterativeLinearCastAgent::ProcessEntries_00daf540(const hkpCdBody* bodyA, const hkpCdBody* bodyB,
                                                const ShapeSweepParameters* input, hkpCdPointCollector* castCollector,
                                                hkpCdPointCollector* startCollector)
 {

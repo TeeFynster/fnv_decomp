@@ -12,7 +12,7 @@
 
 struct Context
 {
-    void FUN_00c93920(void* value);
+    void hkpWorld_addWorldPostSimulationListener(void* value);
 };
 
 // @fnv 0x00de2950
@@ -24,7 +24,7 @@ void hkpPhysicsContextWorldListener::WorldAddedCallback(hkpWorld* world)
         value = reinterpret_cast<char*>(this) + sizeof(hkpPhysicsContextWorldListener) + sizeof(ContactArray*);
     else
         value = 0;
-    reinterpret_cast<Context*>(world)->FUN_00c93920(value);
+    reinterpret_cast<Context*>(world)->hkpWorld_addWorldPostSimulationListener(value);
 }
 
 struct S_00de2980_World
@@ -33,7 +33,8 @@ struct S_00de2980_World
 };
 
 // @fnv 0x00de2980
-__declspec(noinline) void hkpPhysicsContextWorldListener::FUN_00de2980(void* world) throw()
+// src: GUESS 0x00de2980 (confidence: low)
+__declspec(noinline) void hkpPhysicsContextWorldListener::UpdateFields_00de2980(void* world) throw()
 {
     hkpContactPointViewer* owner = reinterpret_cast<hkpContactPointViewer*>(reinterpret_cast<char*>(this) - sizeof(hkReferencedObject) - sizeof(hkProcess));
     hkpWorldPostSimulationListener* listener;
@@ -88,7 +89,7 @@ __forceinline hkpWorldPostSimulationListener::~hkpWorldPostSimulationListener() 
 __forceinline hkpContactPointViewer::~hkpContactPointViewer() throw()
 {
     for (int i = 0; this->contacts && i < this->contacts->size; ++i)
-        this->hkpPhysicsContextWorldListener::FUN_00de2980(this->contacts->data[i]);
+        this->hkpPhysicsContextWorldListener::UpdateFields_00de2980(this->contacts->data[i]);
 }
 // @fnv 0x00de2a40
 void hkpContactPointViewer::DestroyContactPointViewer() throw()
@@ -156,7 +157,7 @@ struct S_00de2fa0_Listener
 struct S_00de2fa0 : S_00de2fa0_Base0, S_00de2fa0_Listener
 {
     virtual void PostSimulationCallback(S_00de2fa0_Arg* a);
-    void FUN_00de2da0(void* elem);
+    void drawAllContactPointsInIsland_00de2da0(void* elem);
 };
 
 // Writes profiler markers to the TLS stream, then iterates the array returned by vfn_0c and calls FUN_00de2da0 on each element.
@@ -177,7 +178,7 @@ void S_00de2fa0::PostSimulationCallback(S_00de2fa0_Arg* apArg)
     S_00de2fa0_Array* arr = vfn_0c(apArg);
     for (int i = 0; i < arr->m_iElementCount; ++i)
     {
-        FUN_00de2da0(arr->m_data[i]);
+        drawAllContactPointsInIsland_00de2da0(arr->m_data[i]);
     }
 
     hkMonitorStream* stream2 = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -229,7 +230,7 @@ struct HkDisplayConvexObj
     HkDisplayConvexObj* FUN_00de1d20(HkArrayPairBlock* a1);
 };
 
-HkAllocHolder* __cdecl FUN_00c85750() throw();
+HkAllocHolder* __cdecl hkMemoryRouter_getInstance() throw();
 void __cdecl ResizeAudioStream(HkAllocator* a1, HkArrayRaw* a2, int a3);
 
 struct FUN_00de4340_cls
@@ -250,7 +251,7 @@ HkDisplayConvexObj* FUN_00de4340_cls::GetOrCreateConvex(HkArrayRaw* a1)
     if (m_pConvex == (HkDisplayConvexObj*)zero)
     {
         HkArrayPairBlock* pPairBlock = (HkArrayPairBlock*)zero;
-        HkAllocHolder* h = FUN_00c85750();
+        HkAllocHolder* h = hkMemoryRouter_getInstance();
         void* pMemory = h->m_pAllocator->Alloc(0x18);
         if (pMemory != (void*)zero)
         {
@@ -265,12 +266,12 @@ HkDisplayConvexObj* FUN_00de4340_cls::GetOrCreateConvex(HkArrayRaw* a1)
             pPairBlock = p;
         }
 
-        h = FUN_00c85750();
+        h = hkMemoryRouter_getInstance();
         pMemory = h->m_pAllocator->Alloc(0x60);
         ((HkDisplayConvexObj*)pMemory)->m_u04 = 0x60;
         m_pConvex = ((HkDisplayConvexObj*)pMemory)->FUN_00de1d20(pPairBlock);
 
-        h = FUN_00c85750();
+        h = hkMemoryRouter_getInstance();
         if (a1->m_iArrayLength == (int)(a1->m_uCapFlags & 0x3fffffffu))
         {
             ResizeAudioStream(h->m_pAllocator, a1, 4);
@@ -327,7 +328,7 @@ struct StackHeap
 
 inline StackHeap* GetStackHeap67()
 {
-    return (StackHeap*)FUN_00c85750();
+    return (StackHeap*)hkMemoryRouter_getInstance();
 }
 
 struct Vec67
@@ -364,7 +365,8 @@ extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
 extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
 extern "C" float _mm_cvtss_f32(LocalM128);
 extern "C" void _mm_store_ps(float*, LocalM128);
-static __declspec(noinline) void FUN_00de2aa0(Target* context, Contact67* volatile contact, const Vec67* normal,
+// src: XBOX_PDB 0x00de2aa0
+static __declspec(noinline) void hkContactPointViewer_displayArrow(Target* context, Contact67* volatile contact, const Vec67* normal,
                                               int color, void* body, int tag)
 {
     LocalM128 n = _mm_load_ps(&normal->x);
@@ -566,7 +568,8 @@ struct Cont
 
 // Iterates contact records in c, and for each unskipped object whose float value is at least unk2c, draws a point via FUN_00de2aa0.
 // @fnv 0x00de2da0
-void hkpContactPointViewer::FUN_00de2da0(Cont* apCont)
+// src: EXE 0x00de2da0
+void hkpContactPointViewer::drawAllContactPointsInIsland_00de2da0(Cont* apCont)
 
 {
 
@@ -665,7 +668,7 @@ void hkpContactPointViewer::FUN_00de2da0(Cont* apCont)
                                                 int h = GetOperationType();
 
                                                 int color = reinterpret_cast<int>(m_ulUserData);
-                                                FUN_00de2aa0(reinterpret_cast<Target*>(hkProcess::unk10), y, &y->normal, color, &v->value10, h);
+                                                hkContactPointViewer_displayArrow(reinterpret_cast<Target*>(hkProcess::unk10), y, &y->normal, color, &v->value10, h);
                                             }
                                         }
                                     }

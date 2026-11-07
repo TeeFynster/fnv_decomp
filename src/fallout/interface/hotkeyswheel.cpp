@@ -50,19 +50,20 @@ void HotkeyWheelDisplay::Initialize(Tile* parent)
 }
 
 // @fnv 0x00a24660
-int InputManager::FUN_00a24660(int key, int state)
+// src: XBOX_PDB 0x00a24660
+int InputManager::Controls_GetUserAction(int key, int state)
 {
     if (key < 28)
     {
         int result = 0;
         if (DAT_011f35c8)
-            result = FUN_00a24560(3, controller[key], state);
+            result = Controls_GetButtonState(3, controller[key], state);
         else
         {
             for (int device = 0; device < 2; ++device)
             {
                 if (keyboard[device][key] != 255)
-                    result += FUN_00a24560(device, keyboard[device][key], state);
+                    result += Controls_GetButtonState(device, keyboard[device][key], state);
             }
         }
         if (key == 14 && result > 0)
@@ -89,7 +90,7 @@ int InputManager::FUN_00a24660(int key, int state)
         switch (key)
         {
         case 28:
-            if (HandleHotkeyInput(1, 1) || FUN_00a23e10(6, 1))
+            if (HandleHotkeyInput(1, 1) || Controls_GetControllerButton(6, 1))
                 return 1;
             break;
         case 29:
@@ -101,7 +102,7 @@ int InputManager::FUN_00a24660(int key, int state)
     }
     else if (key == 28)
     {
-        if (FUN_00a23e10(6, 1))
+        if (Controls_GetControllerButton(6, 1))
             return 1;
     }
     return 0;
@@ -119,16 +120,17 @@ struct S_00701e00_Class
     int unk2c;
     int unk30;
 
-    void FUN_00701e00(int index);
+    void HotKeysWheel_HighlightHotkey(int index);
 };
 
 // Updates the owner with unk2c and a per-index item pointer (or a default), then stores index in unk28 and sets unk24 to 1 when index is non-negative.
 // @fnv 0x00701e00
-void S_00701e00_Class::FUN_00701e00(int index)
+// src: XBOX_PDB 0x00701e00
+void S_00701e00_Class::HotKeysWheel_HighlightHotkey(int index)
 {
     unk00->FUN_00700320(unk2c, index);
 
-    unk00->FUN_00a01350(unk30, (index >= 0 && index != 1) ? unk04[index]->FUN_00a011f0(0xfc4) : &DAT_01011584,
+    unk00->Tile_Set_00a01350(unk30, (index >= 0 && index != 1) ? unk04[index]->Tile_GetString(0xfc4) : &DAT_01011584,
                         1);
 
     if (index >= 0)
@@ -143,7 +145,8 @@ int __cdecl HotkeyWheelProbeB(int, int);
 
 // Returns 1 if HotkeyWheelProbeA succeeds and any of HotkeyWheelProbeB(2/1/4/3, 0) is not -1, otherwise 0.
 // @fnv 0x00702140
-unsigned char FUN_00702140()
+// src: XBOX_PDB 0x00702140
+unsigned char HotKeysWheel_IsDPadPressed()
 {
     int result;
     if (HotkeyWheelProbeA() && (HotkeyWheelProbeB(2, 0) != -1 || HotkeyWheelProbeB(1, 0) != -1 ||
@@ -157,7 +160,7 @@ unsigned char FUN_00702140()
 struct Form
 {
     int FUN_00401170();
-    bool FUN_004c0bf0();
+    bool TESObjectWEAP_IsThrownWeapon();
 };
 // InventoryChanges EntryData::extendData list (BSSimpleList<ExtraDataList*>): FUN_00559450 returns field 0, FUN_006815c0 = GetItem
 struct EntryExtendList
@@ -166,10 +169,10 @@ struct EntryExtendList
 };
 struct Entry
 {
-    EntryExtendList* FUN_00559450();
+    EntryExtendList* Modelloader_GetReferencedThis();
     Form* FUN_0044ddc0();
     int FUN_00726070();
-    bool FUN_004bddd0(bool);
+    bool ItemChange_GetWorn(bool);
     Entry* FUN_004459e0(bool);
 };
 struct Inventory
@@ -776,10 +779,10 @@ struct Player
     virtual void v3bc();
     virtual void v3c0();
     virtual void v3c4();
-    int FUN_008a7570();
-    void EquipItem(Form*, int, void*, int, int, int);
-    void UnequipItem(Form*, int, void*, int, int, int);
-    void FUN_00950030();
+    int GetAnimAction_008a7570();
+    void Actor_QueueEquipObject(Form*, int, void*, int, int, int);
+    void QueueUnEquipObject(Form*, int, void*, int, int, int);
+    void PlayerCharacter_UpdatePlayer3d();
     Process* FUN_008d8520();
 };
 extern Player* DAT_011dea3c;
@@ -791,21 +794,22 @@ bool __cdecl DispatchMessageToSink(const char*, int, const char*, const char*, f
 
 struct Wheel
 {
-    void FUN_00701e80();
+    void HotKeysWheel_UseHotkeyItem();
 };
 // @fnv 0x00701e80
-void Wheel::FUN_00701e80()
+// src: XBOX_PDB 0x00701e80
+void Wheel::HotKeysWheel_UseHotkeyItem()
 {
     Inventory* inv3 = FUN_004bf220(DAT_011dea3c);
     Entry* entry5 = inv3 ? inv3->FindEntryWithExtraListType(*(int*)((char*)this + 0x28)) : 0;
-    void* extra = entry5 && entry5->FUN_00559450() ? *entry5->FUN_00559450()->FUN_006815c0() : 0;
+    void* extra = entry5 && entry5->Modelloader_GetReferencedThis() ? *entry5->Modelloader_GetReferencedThis()->FUN_006815c0() : 0;
     bool ammo4 =
-        (entry5 && entry5->FUN_0044ddc0()->FUN_00401170() == 0x28 && entry5->FUN_0044ddc0()->FUN_004c0bf0()) ? 1 : 0;
+        (entry5 && entry5->FUN_0044ddc0()->FUN_00401170() == 0x28 && entry5->FUN_0044ddc0()->TESObjectWEAP_IsThrownWeapon()) ? 1 : 0;
     if (!*((unsigned char*)this + 0x24) || !inv3 || !entry5)
         return;
-    if (DAT_011dea3c->FUN_008a7570() != -1 && entry5->FUN_0044ddc0()->FUN_00401170() == 0x18)
+    if (DAT_011dea3c->GetAnimAction_008a7570() != -1 && entry5->FUN_0044ddc0()->FUN_00401170() == 0x18)
         return;
-    if (DAT_011dea3c->FUN_008a7570() != -1 && entry5->FUN_0044ddc0()->FUN_00401170() == 0x28)
+    if (DAT_011dea3c->GetAnimAction_008a7570() != -1 && entry5->FUN_0044ddc0()->FUN_00401170() == 0x28)
         return;
     if (entry5->FUN_0044ddc0() == FUN_0058db10(0) && ((ActorValueOwner*)((char*)DAT_011dea3c + 0xa4))->GetActorValue((ActorValue::Index)0x10) ==
                                                          ((ActorValueOwner*)((char*)DAT_011dea3c + 0xa4))->GetPermanentActorValue((ActorValue::Index)0x10))
@@ -815,12 +819,12 @@ void Wheel::FUN_00701e80()
     }
     else
     {
-        if (!entry5->FUN_004bddd0(false))
-            DAT_011dea3c->EquipItem(entry5->FUN_0044ddc0(), ammo4 ? entry5->FUN_00726070() : 1, extra, 0, 0, 1);
+        if (!entry5->ItemChange_GetWorn(false))
+            DAT_011dea3c->Actor_QueueEquipObject(entry5->FUN_0044ddc0(), ammo4 ? entry5->FUN_00726070() : 1, extra, 0, 0, 1);
         else
-            DAT_011dea3c->UnequipItem(entry5->FUN_0044ddc0(), ammo4 ? entry5->FUN_00726070() : 1, extra, 0, 0, 1);
+            DAT_011dea3c->QueueUnEquipObject(entry5->FUN_0044ddc0(), ammo4 ? entry5->FUN_00726070() : 1, extra, 0, 0, 1);
     }
-    DAT_011dea3c->FUN_00950030();
+    DAT_011dea3c->PlayerCharacter_UpdatePlayer3d();
     DAT_011dea3c->FUN_008d8520()->v580(1, 0, 0);
     DAT_011dea3c->v3c4();
     Entry* cleanup4 = entry5;
@@ -845,7 +849,7 @@ extern TESObjectREFR* _g_thePlayer;
 #include "../../../include/BGSEquipType.h"
 
 const char* GetMenuIconName(int);
-int FUN_00a01860(const char*);
+int Tile_TextToTrait(const char*);
 
 static const char str_InterfaceIcons[] = "Interface\\Icons\\";
 static const char str_HotKeyIcon[] = "_HotKeyIcon";
@@ -854,12 +858,13 @@ static const char str_FormatCount[] = "%s (%d)";
 
 struct HotkeyWheelUpdate : HotkeyWheelDisplay
 {
-    void FUN_007017b0();
+    void HotKeysWheel_UpdateHotkeyList();
 };
 
 // Updates hotkey slot tiles with item icons, assigned state, and count labels from the player's inventory changes.
 // @fnv 0x007017b0
-void HotkeyWheelUpdate::FUN_007017b0()
+// src: XBOX_PDB 0x007017b0
+void HotkeyWheelUpdate::HotKeysWheel_UpdateHotkeyList()
 {
     InventoryChanges* invChanges2 = InventoryChanges::GetOrAddInventoryChanges(_g_thePlayer);
     BSStringT<char> str3;
@@ -875,8 +880,8 @@ void HotkeyWheelUpdate::FUN_007017b0()
             {
                 str3 = str_InterfaceIcons;
                 str3 += GetMenuIconName(BGSEquipType::GetEquipType(item3->GetObject()));
-                this->m_ppHotkeySlotTiles[i]->Set(FUN_00a01860(str_HotKeyIcon), str3.String(), true);
-                this->m_ppHotkeySlotTiles[i]->Set(FUN_00a01860(str_HotKeyAssigned), 1);
+                this->m_ppHotkeySlotTiles[i]->Set(Tile_TextToTrait(str_HotKeyIcon), str3.String(), true);
+                this->m_ppHotkeySlotTiles[i]->Set(Tile_TextToTrait(str_HotKeyAssigned), 1);
                 if (item3->FUN_00726070() > 1)
                 {
                     str3.PrintfString(str_FormatCount, item3->GetTargetFullName(), item3->FUN_00726070());
@@ -889,7 +894,7 @@ void HotkeyWheelUpdate::FUN_007017b0()
             }
             else
             {
-                this->m_ppHotkeySlotTiles[i]->Set(FUN_00a01860(str_HotKeyAssigned), 0);
+                this->m_ppHotkeySlotTiles[i]->Set(Tile_TextToTrait(str_HotKeyAssigned), 0);
                 this->m_ppHotkeySlotTiles[i]->Set(0xfc4, "", true);
             }
         }
@@ -910,10 +915,10 @@ struct TimeGlobal
 
 struct HWShell : HotkeyWheelDisplay
 {
-    int FUN_00701bd0(int index);
+    int HotKeysWheel_MoveHighlight(int index);
 };
 
-bool __cdecl FUN_004b71d0();
+bool __cdecl InterfaceManager_Has360Controller();
 
 extern TimeGlobal g_timeGlobal;
 extern float DAT_0101b268;
@@ -922,16 +927,17 @@ extern "C" unsigned int DAT_011d88f4;
 
 // Determines the active hotkey wheel slot from probe states or a direct index, updates the stored selection and timestamp, and triggers a tile change when needed.
 // @fnv 0x00701bd0
-int HWShell::FUN_00701bd0(int index)
+// src: XBOX_PDB 0x00701bd0
+int HWShell::HotKeysWheel_MoveHighlight(int index)
 {
     int result5 = -1;
     if (index == 1)
         return -1;
-    if (!FUN_004b71d0())
+    if (!InterfaceManager_Has360Controller())
     {
         if (index >= 0)
             result5 = index;
-        ((S_00701e00_Class*)this)->FUN_00701e00(result5);
+        ((S_00701e00_Class*)this)->HotKeysWheel_HighlightHotkey(result5);
     }
     else
     {
@@ -975,7 +981,7 @@ int HWShell::FUN_00701bd0(int index)
                 DAT_011d88f4 = g_timeGlobal.GetTimeStamp();
             }
             if (g_timeGlobal.GetTimeStamp() - DAT_011d88f4 > DAT_0101b268 || result5 == -1 || cur == -1)
-                ((S_00701e00_Class*)this)->FUN_00701e00(result5);
+                ((S_00701e00_Class*)this)->HotKeysWheel_HighlightHotkey(result5);
         }
     }
     return result5;

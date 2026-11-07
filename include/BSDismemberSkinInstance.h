@@ -25,7 +25,7 @@ public:
     virtual void LinkObject(NiStream& stream);
 
     void* __thiscall FUN_006885e0(unsigned int);
-    void __thiscall FUN_00688610();
+    void __thiscall SetVtableAndProcessState_00688610();
     void* __thiscall FUN_006884c0(int, int, int);
     void* __thiscall ConstructShell(int, int, int, int, int);
     Partition* GetField38();

@@ -10,32 +10,33 @@
 // thiscall (ret 4), one int arg: fetch the cached menu for that class, delete
 // it, then build the class's menu through an if/else-if chain over the ids.
 
-Tile* FUN_00a09030(int menuClass);
+Tile* Tile_GetMenuByClass(int menuClass);
 bool IsStartMenuFlag1Set();
-int FUN_00720df0();
-int FUN_0070ede0();
-Tile* FUN_00704140();
-Tile* FUN_00704490();
-Tile* FUN_007046c0();
+int MapMenu_GetClassStatic();
+int StartMenu_GetClassStatic();
+Tile* Interface_CreateMapMenu();
+Tile* Interface_CreateRepairMenu();
+Tile* Interface_CreateItemModMenu();
 Tile* CreateInventoryMenuIfModifierKey();
-Tile* FUN_00704be0();
-Tile* FUN_0076bfe0();
-Tile* ShowLevelUpMenu();
-void FUN_007164c0(Tile* menu, float value);
+Tile* Interface_CreateStatsMenu();
+Tile* HUDMainMenu_Create();
+Tile* LevelUpMenu_Create();
+void InterfaceManager_NewTimer(Tile* menu, float value);
 bool FUN_0070cb7d0(bool flag, bool other);
 Tile* CreateLoadingMenuTile(void* form, bool a, bool b);
-Tile* FUN_0075b310(void* form, int flag);
-Tile* FUN_0073ad50(void* book, char* data);
+Tile* ContainerMenu_Create(void* form, int flag);
+Tile* BookMenu_Create(void* book, char* data);
 
 struct Mgr20
 {
-    void* FUN_00720aa0(int menuClass);
+    void* MenuManager_ReloadMenu(int menuClass);
 };
 
 // @fnv 0x00720aa0
-void* Mgr20::FUN_00720aa0(int menuClass)
+// src: XBOX_PDB 0x00720aa0
+void* Mgr20::MenuManager_ReloadMenu(int menuClass)
 {
-    Tile* pMenu = FUN_00a09030(menuClass);
+    Tile* pMenu = Tile_GetMenuByClass(menuClass);
     bool bFlag = IsStartMenuFlag1Set();
     if (pMenu)
     {
@@ -43,43 +44,43 @@ void* Mgr20::FUN_00720aa0(int menuClass)
     }
     pMenu = 0;
 
-    if (FUN_00720df0() == menuClass)
+    if (MapMenu_GetClassStatic() == menuClass)
     {
-        pMenu = FUN_00704140();
-        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
-        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
+        pMenu = Interface_CreateMapMenu();
+        InterfaceManager_NewTimer(((Tile*)pMenu->Tile_GetMenu()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->Tile_GetMenu())->FUN_007037c0(8);
     }
     else if (menuClass == 0x40b)
     {
-        pMenu = FUN_00704490();
-        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
-        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
+        pMenu = Interface_CreateRepairMenu();
+        InterfaceManager_NewTimer(((Tile*)pMenu->Tile_GetMenu()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->Tile_GetMenu())->FUN_007037c0(8);
     }
     else if (menuClass == 0x425)
     {
-        pMenu = FUN_007046c0();
-        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
-        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
+        pMenu = Interface_CreateItemModMenu();
+        InterfaceManager_NewTimer(((Tile*)pMenu->Tile_GetMenu()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->Tile_GetMenu())->FUN_007037c0(8);
     }
     else if (menuClass == 0x3ea)
     {
         pMenu = CreateInventoryMenuIfModifierKey();
-        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
-        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
+        InterfaceManager_NewTimer(((Tile*)pMenu->Tile_GetMenu()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->Tile_GetMenu())->FUN_007037c0(8);
     }
     else if (menuClass == 0x3eb)
     {
-        pMenu = FUN_00704be0();
-        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
-        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
+        pMenu = Interface_CreateStatsMenu();
+        InterfaceManager_NewTimer(((Tile*)pMenu->Tile_GetMenu()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->Tile_GetMenu())->FUN_007037c0(8);
     }
     else if (menuClass == 0x3ec)
     {
-        pMenu = FUN_0076bfe0();
+        pMenu = HUDMainMenu_Create();
     }
-    else if (FUN_0070ede0() == menuClass && FUN_0070cb7d0(bFlag, false))
+    else if (StartMenu_GetClassStatic() == menuClass && FUN_0070cb7d0(bFlag, false))
     {
-        pMenu = FUN_00a09030(menuClass);
+        pMenu = Tile_GetMenuByClass(menuClass);
     }
     else if (menuClass == 0x3ef)
     {
@@ -87,25 +88,25 @@ void* Mgr20::FUN_00720aa0(int menuClass)
     }
     else if (menuClass == 0x403)
     {
-        pMenu = ShowLevelUpMenu();
+        pMenu = LevelUpMenu_Create();
     }
     else if (menuClass == 0x3f0)
     {
-        ContainerMenu* pContainer = dynamic_cast<ContainerMenu*>(FUN_00a09030(0x3f0));
+        ContainerMenu* pContainer = dynamic_cast<ContainerMenu*>(Tile_GetMenuByClass(0x3f0));
         if (pContainer)
         {
-            pMenu = FUN_0075b310(((Tile*)pContainer)->FUN_004fd3a0(), 1);
+            pMenu = ContainerMenu_Create(((Tile*)pContainer)->TESChallenge_GetFormOne(), 1);
         }
     }
     else if (menuClass == 0x402)
     {
-        BookMenu* pBookMenu = dynamic_cast<BookMenu*>(FUN_00a09030(0x3f0));
+        BookMenu* pBookMenu = dynamic_cast<BookMenu*>(Tile_GetMenuByClass(0x3f0));
         if (pBookMenu)
         {
             char* data = ((Tile*)pBookMenu)->FUN_00671d10();
-            TESObjectBOOK* pBookForm = dynamic_cast<TESObjectBOOK*>(((TESBoundObject*)data)->FUN_007af430());
+            TESObjectBOOK* pBookForm = dynamic_cast<TESObjectBOOK*>(((TESBoundObject*)data)->BGSSaveFormBuffer_GetForm());
             delete (Tile*)pBookMenu;
-            pMenu = FUN_0073ad50(pBookForm, data);
+            pMenu = BookMenu_Create(pBookForm, data);
         }
     }
 

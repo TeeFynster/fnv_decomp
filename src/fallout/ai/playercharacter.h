@@ -22,7 +22,7 @@ void PlayerCharacter::SetActionGroupFlags(unsigned short group, ACTION_FLAGS fla
     if (DAT_011977dc[selection.type].availableInThirdPerson)
     {
         Animation* thirdPerson = GetAnimation(false);
-        BSAnimGroupSequence* sequence = thirdPerson->FUN_00491040(DAT_011977dc[selection.type].section);
+        BSAnimGroupSequence* sequence = thirdPerson->Animation_GetCurrentSequence(DAT_011977dc[selection.type].section);
         copied = static_cast<bool>(selection.animation->GetSequenceForKey(sequence, group));
     }
     if (!copied)
@@ -47,7 +47,7 @@ void PlayerCharacter::ResetActorValueModifiers()
 {
     for (int i = 0; i < 77; ++i)
     {
-        if (ActorValueModifierData[i] != 0.0 && !FUN_00822f70(static_cast<ActorValue::Index>(i)))
+        if (ActorValueModifierData[i] != 0.0 && !HasRecoverableActorValueEffect(static_cast<ActorValue::Index>(i)))
             ActorValueModifierData[i] = 0.0f;
     }
 }

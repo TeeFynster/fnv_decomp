@@ -12,7 +12,7 @@
 // src/havok/physics/utilities/charactercontrol/characterproxy/hkpcharacterproxy.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/charactercontrol/characterproxy/hkpcharacterproxy.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00cad480_Class {
-    void __thiscall FUN_00cad480(void* arg);
+    void __thiscall hkpCharacterProxy_fireContactAdded(void* arg);
 };
 struct S_00cad440;
 struct S_00cad440_Listener {
@@ -54,7 +54,7 @@ struct S_00cad440 {
     int unk7C;
     S_00cad440_Listener** unk80;
     int unk84;
-    void FUN_00cad440(void* a, void* b);
+    void hkpCharacterProxy_fireConstraintsProcessed(void* a, void* b);
 };
 struct CAD4C0Owner;
 struct CAD4C0Listener {
@@ -99,7 +99,7 @@ struct CAD4C0Owner {
     CAD4C0Listener** m_kListeners;
     int m_numListeners;
 
-    void FUN_00cad4c0(void* data);
+    void hkpCharacterProxy_fireContactRemoved(void* data);
 };
 struct FUN_00cad6f0_class
 {
@@ -113,11 +113,11 @@ struct FUN_00cad6f0_class
 };
 struct FUN_00cade20_Class
 {
-    void __thiscall FUN_00cade20(int, int, int, int, int, int);
+    void __thiscall hkpCharacterProxy_integrateImplementation(int, int, int, int, int, int);
 };
 struct FUN_00cafbd0_Class
 {
-    void __thiscall FUN_00cafbd0(int first, int second, int third, int fourth);
+    void __thiscall hkpCharacterProxy_integrateWithCollectors(int first, int second, int third, int fourth);
 };
 struct FNVAllocator {
     virtual void Release();
@@ -128,7 +128,7 @@ struct FNVMemoryManager {
         return *reinterpret_cast<FNVAllocator**>(reinterpret_cast<char*>(this) + 0x10);
     }
 };
-FNVMemoryManager* __cdecl FUN_00c85750();
+FNVMemoryManager* __cdecl hkMemoryRouter_getInstance();
 struct FNVArray {
     int* values;
     unsigned short size;
@@ -139,15 +139,15 @@ struct FNVBuffers {
     FNVArray spare;
     FNVArray elements;
     static void* operator new(unsigned int bytes) {
-        return FUN_00c85750()->GetAllocator()->Allocate(bytes);
+        return hkMemoryRouter_getInstance()->GetAllocator()->Allocate(bytes);
     }
 };
-void __cdecl FUN_00d06cb0(FNVArray*, unsigned int);
+void __cdecl hkSmallArrayUtil__reserveMore(FNVArray*, unsigned int);
 struct FNVOwner {
     FNVBuffers*& Buffers() {
         return *reinterpret_cast<FNVBuffers**>(reinterpret_cast<char*>(this) + 0x214);
     }
-    void FUN_00c9c5b0(int value);
+    void hkpEntity_addEntityListener(int value);
 };
 extern __declspec(thread) int g_tlsMemContext;
 struct S_00cac150_Scope {
@@ -161,7 +161,7 @@ struct S_00cac150_Scope {
     }
 };
 struct S_00cac150_Item1 {
-    void FUN_00c9c670(void* arg);
+    void removeEntityListener_00c9c670(void* arg);
 };
 struct S_00cac150_Item2 {
     void RemoveListener(void* arg);
@@ -233,7 +233,7 @@ struct CpuObject {
     unsigned int unk28;
     unsigned int unk2c;
     CpuScalar* value;
-    unsigned int FUN_00cac910();
+    unsigned int hkpCharacterProxy_getPosition();
 };
 extern float DAT_0101e2bc;
 struct FUN_00cacf10_cls {
@@ -248,8 +248,8 @@ struct FUN_00cacf10_cls {
     int m_74;
     int m_78;
 
-    float FUN_00cafd90(void* a, void* b);
-    int FUN_00cacf10(void* arg);
+    float hkpCharacterProxy_surfaceDistance(void* a, void* b);
+    int hkpCharacterProxy_findSurface(void* arg);
 };
 struct ArgminState {
     volatile float best;
@@ -290,7 +290,7 @@ struct BhkElem {
     __int64 q68;
 };
 struct BhkTarget {
-    void FUN_00c9c670(void* v);
+    void removeEntityListener_00c9c670(void* v);
 };
 struct BhkProxy {
     int unk00;
@@ -343,7 +343,7 @@ struct FUN_00cad900_arg {
     unsigned int unk0c;
     unsigned char flag10;
 };
-extern "C" int __cdecl FUN_00d06f80(int ptr, int size);
+extern "C" int __cdecl hkStatisticsCollector_getAllocatedSize(int ptr, int size);
 extern "C" char str_010c8444[];
 extern "C" char str_010c8450[];
 extern "C" char str_010c8460[];
@@ -390,7 +390,7 @@ struct FUN_00cad900_cls {
     int m9c;
     int ma0;
 
-    void FUN_00cad900(FUN_00cad900_arg* a1, int a2);
+    void hkpCharacterProxy_calcContentStatistics(FUN_00cad900_arg* a1, int a2);
 };
 extern char str_0102f13c[];
 extern char DAT_0104e3d0[];
@@ -399,7 +399,7 @@ extern char DAT_010c8488[];
 extern char DAT_010c8470[];
 struct FUN_00cad500_Class
 {
-    void __thiscall FUN_00cad500(void* arg);
+    void __thiscall hkpCharacterProxy_updateFromCinfo(void* arg);
 };
 struct FUN_00cada70_cls
 {
@@ -450,7 +450,7 @@ struct FUN_00cada70_cls
 };
 extern float DAT_0104da48;
 struct Query289 {
- __declspec(nothrow) void FUN_00cade20(void*,void*,hkpCdPointCollector*,hkpCdPointCollector*,unsigned,unsigned) throw();
+ __declspec(nothrow) void hkpCharacterProxy_integrateImplementation(void*,void*,hkpCdPointCollector*,hkpCdPointCollector*,unsigned,unsigned) throw();
  void CollectAllContactPoints(void*,void*);
 };
 // Exe 0x00cade20 FUN_00cade20: retain this LocalM128 view; the CRT type does not preserve this unit.
@@ -503,7 +503,7 @@ struct S00cacaa0_World {
     S00cacaa0_Src* m_src;
     unsigned int unk7c;
     S00cacaa0_Disp* m_disp;
-    void FUN_00c92430(S00cacaa0_Coll* a, float* b, void* c, void* d);
+    void hkpWorld_linearCast(S00cacaa0_Coll* a, float* b, void* c, void* d);
 };
 struct S00cacaa0_Agent {
     virtual void v00();
@@ -539,10 +539,10 @@ struct S00cacaa0_cls {
     unsigned int unk00; unsigned int unk04; unsigned int unk08; unsigned int unk0c; unsigned int unk10; unsigned int unk14; unsigned int unk18; unsigned int unk1c;
     S00cacaa0_Vec m_v20;
     S00cacaa0_Phantom* m_pPhantom;
-    void FUN_00cacaa0(bool flag, float* a2, void* a3, void* a4);
+    void hkpCharacterProxy_linearCast(bool flag, float* a2, void* a3, void* a4);
 };
 struct HkEntity289 {
-    void FUN_00c9c670(void* listener) throw();
+    void removeEntityListener_00c9c670(void* listener) throw();
 };
 struct HkPhantom289 {
     void RemoveListener(void* listener) throw();
@@ -552,7 +552,7 @@ struct HkWorldLock289 {
     int unk04;
 };
 struct HkWorld289 {
-    void FUN_00cd2a50(HkWorldLock289* apOut, unsigned int auiFlags) throw();
+    void hkpWorldObject_removeProperty(HkWorldLock289* apOut, unsigned int auiFlags) throw();
     void FUN_00c905b0() throw();
 };
 template <class T> struct HkArray289 {
@@ -618,8 +618,8 @@ struct FUN_00cadb00 : HkReferencedObject289, HkEntityListener289, HkPhantomListe
 };
 extern float DAT_0104da48;
 struct S00cafbf0_Obj {
-    void FUN_00cade20(int, int, hkpAllCdPointCollector*, hkpAllCdPointCollector*, int, int) throw();
-    void FUN_00cafbf0(int a, int b, int c, int d) throw();
+    void hkpCharacterProxy_integrateImplementation(int, int, hkpAllCdPointCollector*, hkpAllCdPointCollector*, int, int) throw();
+    void hkpCharacterProxy_integrateMultithreaded(int a, int b, int c, int d) throw();
 };
 // fires added/removed notifications and keeps entity/phantom listeners attached to the touched objects.
 struct S_00caf4d0_Heap {
@@ -648,7 +648,7 @@ struct S_00caf4d0_Router {
     S_00caf4d0_Stack& stack() throw() { return m_aiEntries; }
     S_00caf4d0_Heap& heap() throw() { return *m_pStreamAllocator; }
 };
-static __forceinline S_00caf4d0_Router* GetRouter37() throw() { return reinterpret_cast<S_00caf4d0_Router*>(FUN_00c85750()); }
+static __forceinline S_00caf4d0_Router* GetRouter37() throw() { return reinterpret_cast<S_00caf4d0_Router*>(hkMemoryRouter_getInstance()); }
 void ResizeAudioStream(S_00caf4d0_Heap& alloc, void* array, int elemSize) throw();
 inline void* __cdecl operator new(unsigned int, void* where) throw() { return where; }
 struct __declspec(align(16)) S_00caf4d0_Vector4 {
@@ -755,8 +755,8 @@ struct S_00caf4d0_EntityListener { virtual void elUnk00(); };
 struct S_00caf4d0_PhantomListener { virtual void plUnk00(); };
 struct S_00caf4d0_TrackerBase { virtual void tbUnk00(); int unk04; };
 struct S_00caf4d0_Entity {
-    void FUN_00c9c5b0(S_00caf4d0_EntityListener* l) throw();
-    void FUN_00c9c670(S_00caf4d0_EntityListener* l) throw();
+    void hkpEntity_addEntityListener(S_00caf4d0_EntityListener* l) throw();
+    void removeEntityListener_00c9c670(S_00caf4d0_EntityListener* l) throw();
 };
 struct S_00caf4d0_Phantom {
     void AddItem(S_00caf4d0_PhantomListener* l) throw();
@@ -807,16 +807,16 @@ struct S_00caf4d0_Tracker : S_00caf4d0_TrackerBase, S_00caf4d0_EntityListener, S
     S_00caf4d0_Array<S_00caf4d0_Entity*> m_kActorEntries;  // 0x8c
     S_00caf4d0_Array<S_00caf4d0_Phantom*> m_kPhantoms; // 0x98
 
-    float FUN_00cafd90(const S_00caf4d0_Point* a, const S_00caf4d0_Point* b) throw();
-    void FUN_00cad4c0(const S_00caf4d0_Point* p) throw();
-    void FUN_00cad480(const S_00caf4d0_Point* p) throw();
-    int FUN_00cacf10(const S_00caf4d0_Point* p) throw();
+    float hkpCharacterProxy_surfaceDistance(const S_00caf4d0_Point* a, const S_00caf4d0_Point* b) throw();
+    void hkpCharacterProxy_fireContactRemoved(const S_00caf4d0_Point* p) throw();
+    void hkpCharacterProxy_fireContactAdded(const S_00caf4d0_Point* p) throw();
+    int hkpCharacterProxy_findSurface(const S_00caf4d0_Point* p) throw();
 
-    void FUN_00caf4d0(const hkpAllCdPointCollector* input, const hkpAllCdPointCollector* extra, bool keepListeners) throw();
+    void hkpCharacterProxy_updateManifold(const hkpAllCdPointCollector* input, const hkpAllCdPointCollector* extra, bool keepListeners) throw();
 };
 struct ContactQuery {
-    void FUN_00cae900(void*, unsigned, hkpAllCdPointCollector*) throw();
-    void FUN_00cafd00(void*, unsigned);
+    void ahkpCharacterProxy_checkSupportWithCollector(void*, unsigned, hkpAllCdPointCollector*) throw();
+    void ahkpCharacterProxy_checkSupport(void*, unsigned);
 };
 struct CadColl {
     int unk00;
@@ -849,7 +849,7 @@ struct CadPoint {
 };
 struct CadPhantomListener {
     virtual void plUnk00();
-    virtual void FUN_00cad820(struct CadPhantom* p) throw();
+    virtual void hkpPhantomListener_phantomRemovedCallback(struct CadPhantom* p) throw();
 };
 struct CadPhantom {
     void RemoveListener(CadPhantomListener* l) throw();
@@ -886,7 +886,7 @@ struct Cad820Cls : S_00caf4d0_TrackerBase, S_00caf4d0_EntityListener, CadPhantom
     S_00caf4d0_Array<S_00caf4d0_Entity*> m_kActorEntries;
     hkArrayBase<CadPhantom*> m_kPhantoms;
 
-    void FUN_00cad820(CadPhantom* phantom) throw();
+    void hkpPhantomListener_phantomRemovedCallback(CadPhantom* phantom) throw();
 };
 extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
 extern "C" LocalM128 _mm_setzero_ps(void);
@@ -907,7 +907,7 @@ struct S00cafd90_Info {
 };
 struct S00cafd90_Body;
 struct S00cafd90_Conv {
-    __declspec(noalias) void FUN_00ca0c40(S00cafd90_Body* body, LocalM128* out);
+    __declspec(noalias) void hkpRigidBody_getPointVelocity(S00cafd90_Body* body, LocalM128* out);
 };
 struct S00cafd90_Body {
     int unk00;
@@ -941,7 +941,7 @@ static __forceinline S00cafd90_Vec S00cafd90_Pos(S00cafd90_Body* b)
     S00cafd90_Vec r;
     r.m_vComponents = _mm_setzero_ps();
     if (S00cafd90_Conv* c = S00cafd90_ConvOf(b))
-        c->FUN_00ca0c40(b, &r.m_vComponents);
+        c->hkpRigidBody_getPointVelocity(b, &r.m_vComponents);
     return r;
 }
 static __forceinline float S00cafd90_Dot3(LocalM128 a, LocalM128 b)
@@ -980,7 +980,7 @@ int _mm_movemask_ps(LocalM128);
 extern unsigned DAT_0126835c;
 extern char str_010c8508[],str_010c8500[],str_010c84f0[],str_010c84dc[],str_010c84d0[],str_010c84c4[],str_010c84b8[],str_01076f38[];
 extern LocalM128 DAT_01017d10;
-__declspec(nothrow) FNVMemoryManager* __cdecl FUN_00c85750();
+__declspec(nothrow) FNVMemoryManager* __cdecl hkMemoryRouter_getInstance();
 template<class T> class PStorage {
     T value;
 public:
@@ -1042,9 +1042,9 @@ struct PStack {PStorage<void*> cursor,start,end;int peak;
     __forceinline void deallocate(void* p) throw(){cursor=p;}
 };
 struct PRouter {PStack stack;PAllocator* allocator;__forceinline PAllocator& heap() throw(){return *allocator;}__forceinline PStack& local() throw(){return stack;}};
-__forceinline PRouter* route() throw(){return reinterpret_cast<PRouter*>(FUN_00c85750());}
+__forceinline PRouter* route() throw(){return reinterpret_cast<PRouter*>(hkMemoryRouter_getInstance());}
 void ResizeAudioStream(PAllocator&,void*,int) throw();
-void FUN_00c908c0(PAllocator&,void*,int,int) throw();
+void hkArrayUtil__reserve(PAllocator&,void*,int,int) throw();
 struct PContainerAllocator {__forceinline PAllocator& get(const void*) const throw(){return route()->heap();}};
 struct ClassCopy{};struct ScalarCopy{};
 template<class T> struct CopyKind{typedef ClassCopy type;};
@@ -1064,7 +1064,7 @@ template<class T> struct PArrayBase {
     __forceinline void clear() throw(){size=0;}
     __forceinline void clearDeallocate(PAllocator& a) throw(){clear();if(!(capacity&0x80000000))a.freeBuffer<T>(data,room());data=0;capacity=0x80000000;}
     __forceinline void resizeUnchecked(int n) throw(){size=n;}
-    __forceinline void reserveWith(PAllocator& a,int n) throw(){const int c=room();if(c<n){int twice=2*c;int want=n<twice?twice:n;FUN_00c908c0(a,this,want,sizeof(T));}}
+    __forceinline void reserveWith(PAllocator& a,int n) throw(){const int c=room();if(c<n){int twice=2*c;int want=n<twice?twice:n;hkArrayUtil__reserve(a,this,want,sizeof(T));}}
     __forceinline T& expandWith(PAllocator& a) throw(){if(size==room())ResizeAudioStream(a,this,sizeof(T));new (data+size) T;return data[size++];}
     __forceinline void pushWith(PAllocator& a,const T& x) throw(){if(size==room())ResizeAudioStream(a,this,sizeof(T));copyElements(data+size,1,x,typename CopyKind<T>::type());++size;}
     __forceinline int indexOf(const T& x,int first=0,int last=-1) const throw(){if(last<0)last=size;for(int i=first;i<last;++i)if(data[i]==x)return i;return -1;}
@@ -1090,25 +1090,25 @@ struct PResult {PVec position,velocity;float time;PInteraction* interactions;};
 struct PPad {float value;__forceinline operator float() const throw(){return value;}};
 struct PStep {__declspec(align(16)) PStorage<float> start;PStorage<float> end,delta,inverse;};
 struct PPose {PVec axis0,axis1,axis2,position;void SetWorldPosition(const PVec& v) throw(){position=v;}};
-struct PPhantom {virtual void f0();virtual void f1();virtual void f2();virtual void f3();virtual PPose* pose();virtual void f5();virtual void f6();virtual void f7();virtual void f8();virtual void f9();virtual void fa();virtual void fb();virtual void fc();virtual void fd();virtual void cast(const PVec&,const PCast&,hkpAllCdPointCollector&,hkpAllCdPointCollector*) throw();void FUN_00c9e990(const PVec&,float) throw();};
-struct PBody {void FUN_00c9c5b0(void*) throw();};
+struct PPhantom {virtual void f0();virtual void f1();virtual void f2();virtual void f3();virtual PPose* pose();virtual void f5();virtual void f6();virtual void f7();virtual void f8();virtual void f9();virtual void fa();virtual void fb();virtual void fc();virtual void fd();virtual void cast(const PVec&,const PCast&,hkpAllCdPointCollector&,hkpAllCdPointCollector*) throw();void hkpShapePhantom_setPosition(const PVec&,float) throw();};
+struct PBody {void hkpEntity_addEntityListener(void*) throw();};
 struct POther {void AddItem(void*) throw();};
-void FUN_00d24360(const PSolver&,PResult&) throw();
+void hkSimplexSolverSolve(const PSolver&,PResult&) throw();
 struct PBase {virtual void f0();virtual void f1();virtual void f2();unsigned short memoryFlags;short references;};
 struct PEntityListener {virtual void callback();};
 struct PPhantomListener {virtual void callback();};
 struct POwner:PBase,PEntityListener,PPhantomListener {
     virtual void update(hkpAllCdPointCollector&,hkpAllCdPointCollector&,PBool) throw();virtual void convert(const PContact&,PPlane&,float) const throw();
     PVec velocity,oldDisplacement;PPhantom* phantom;float friction,staticFriction;int m3c;PVec up;float extraUp,extraDown,keepDistance,keepTolerance,angle;int userPlanes;float maxSpeed,strength,mass;PArray<PContact> manifold;PArray<void*> listeners;PArray<PBody*> bodies;PArray<POther*> phantoms;float slope,recovery;int maxIterations;bool refresh;
-    const PVec& FUN_00cac910() const throw();
-    void FUN_00cacaa0(PBool,const PCast&,hkpAllCdPointCollector&,hkpAllCdPointCollector*) throw();
-    void FUN_00cac890(const PContact*,int,const PVec&) const throw();
-    void FUN_00cad440(const PArray<PContact>&,PSolver&) const throw();
-    void FUN_00cacf80(const PStep&,const PVec&,void*,int) throw();
-    int FUN_00cacf10(const PContact&) const throw();
-    void FUN_00cad480(const PContact&) const throw();
-    float FUN_00cacc50(const PResult&,const hkpAllCdPointCollector&,const PCast&,PVec&) throw();
-    void FUN_00cade20(const PStep&,const PVec&,hkpAllCdPointCollector&,hkpAllCdPointCollector&,void*,int) throw();
+    const PVec& hkpCharacterProxy_getPosition() const throw();
+    void hkpCharacterProxy_linearCast(PBool,const PCast&,hkpAllCdPointCollector&,hkpAllCdPointCollector*) throw();
+    void hkpCharacterProxy_convertFractionToDistance(const PContact*,int,const PVec&) const throw();
+    void hkpCharacterProxy_fireConstraintsProcessed(const PArray<PContact>&,PSolver&) const throw();
+    void ahkpCharacterProxy_ResolveContacts(const PStep&,const PVec&,void*,int) throw();
+    int hkpCharacterProxy_findSurface(const PContact&) const throw();
+    void hkpCharacterProxy_fireContactAdded(const PContact&) const throw();
+    float hkpCharacterProxy_moveToLinearCastHitPosition(const PResult&,const hkpAllCdPointCollector&,const PCast&,PVec&) throw();
+    void hkpCharacterProxy_integrateImplementation(const PStep&,const PVec&,hkpAllCdPointCollector&,hkpAllCdPointCollector&,void*,int) throw();
 };
 struct PTimer {const char* tag;unsigned time,time1;__forceinline void stamp() throw(){
 unsigned int ticks;
@@ -1128,7 +1128,8 @@ struct PStream {
 };
 __forceinline void timerPart(const char* tag) throw(){PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimer* p=reinterpret_cast<PTimer*>(s.GetStreamEnd());p->tag=tag;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
 __forceinline void timerBegin() throw(){PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimerList* p=reinterpret_cast<PTimerList*>(s.GetStreamEnd());p->tag=str_010c8508;p->first=str_010c8500;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
-static __declspec(noinline) bool FUN_00cadca0(int index,PArray<PPlane>& planes,float limit,const PVec& up) throw(){float d=planes[index].normal.dot(up);if(d>0.01f && d<limit){PPlane& out=planes.expand();out=planes[index];PVec correction;correction.mul(-d,up);out.normal.add(correction);out.normal.normalize();return true;}return false;}
+// src: XBOX_PDB 0x00cadca0
+static __declspec(noinline) bool addMaxSlopePlane(int index,PArray<PPlane>& planes,float limit,const PVec& up) throw(){float d=planes[index].normal.dot(up);if(d>0.01f && d<limit){PPlane& out=planes.expand();out=planes[index];PVec correction;correction.mul(-d,up);out.normal.add(correction);out.normal.normalize();return true;}return false;}
 
 __forceinline PBody* getBody(BhkShape* s) throw(){return s->unk18==1?reinterpret_cast<PBody*>(reinterpret_cast<char*>(s)+s->unk10):0;}
 __forceinline POther* getOther(BhkShape* s) throw(){return s->unk18==2?reinterpret_cast<POther*>(reinterpret_cast<char*>(s)+s->unk10):0;}
@@ -1141,10 +1142,11 @@ __forceinline void removeFirst(hkpAllCdPointCollector& c) throw(){
     copyByteRange(c.contacts.data,c.contacts.data+1,c.contacts.count*sizeof(RootContact289));
 }
 // @fnv 0x00cade20
-void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,hkpAllCdPointCollector& cast,hkpAllCdPointCollector& start,void* command,int maxInteractions) throw() {
+// src: XBOX_PDB 0x00cade20
+void POwner::hkpCharacterProxy_integrateImplementation(const PStep& step,const PVec& gravity,hkpAllCdPointCollector& cast,hkpAllCdPointCollector& start,void* command,int maxInteractions) throw() {
     {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimerList* p=reinterpret_cast<PTimerList*>(s.GetStreamEnd());p->tag=str_010c8508;p->first=str_010c8500;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
     PBool threaded=command!=0;
-    PVec position=FUN_00cac910();
+    PVec position=hkpCharacterProxy_getPosition();
     float remaining=step.delta;
     PCast query;
     PResult solved;
@@ -1156,11 +1158,11 @@ void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,hkpAllCdPointCol
         cast.reset();start.reset();
         if(threaded) {
             phantom->pose()->SetWorldPosition(position);
-            FUN_00cacaa0(iter!=0,query,cast,&start);
+            hkpCharacterProxy_linearCast(iter!=0,query,cast,&start);
         } else phantom->cast(position,query,cast,&start);
         if(collectorHit(cast)) {
             cast.sortHits();
-            FUN_00cac890(collectorBegin(cast),collectorCount(cast),oldDisplacement);
+            hkpCharacterProxy_convertFractionToDistance(collectorBegin(cast),collectorCount(cast),oldDisplacement);
         }
         {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimer* p=reinterpret_cast<PTimer*>(s.GetStreamEnd());p->tag=str_010c84dc;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
         update(start,cast,threaded);
@@ -1168,7 +1170,7 @@ void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,hkpAllCdPointCol
         planes.resizeUnchecked(manifold.count());
         for(int i=0;i<manifold.count();++i) {
             convert(manifold[i],planes[i],step.delta-remaining);
-            FUN_00cadca0(i,planes,slope,up);
+            addMaxSlopePlane(i,planes,slope,up);
         }
         int used=planes.count();int extra=userPlanes;if(planes.room()-used<extra) planes.reserve(used+extra);
         {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimer* p=reinterpret_cast<PTimer*>(s.GetStreamEnd());p->tag=str_010c84d0;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
@@ -1184,11 +1186,11 @@ void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,hkpAllCdPointCol
         input.position.zero();
         input.up=up;
         input.maxVelocity.all(maxSpeed);
-        FUN_00cad440(manifold,input);
+        hkpCharacterProxy_fireConstraintsProcessed(manifold,input);
         solved.interactions=interactions.begin();
-        FUN_00d24360(input,solved);
+        hkSimplexSolverSolve(input,solved);
         {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimer* p=reinterpret_cast<PTimer*>(s.GetStreamEnd());p->tag=str_010c84c4;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
-        FUN_00cacf80(step,gravity,command,maxInteractions);
+        ahkpCharacterProxy_ResolveContacts(step,gravity,command,maxInteractions);
         {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimer* p=reinterpret_cast<PTimer*>(s.GetStreamEnd());p->tag=str_010c84b8;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
         int ok=oldDisplacement.equal(solved.position,0.001f);
         if(!ok) {
@@ -1196,23 +1198,23 @@ void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,hkpAllCdPointCol
             cast.reset();
             if(threaded) {
                 phantom->pose()->SetWorldPosition(position);
-                FUN_00cacaa0(true,query,cast,0);
+                hkpCharacterProxy_linearCast(true,query,cast,0);
             } else phantom->cast(position,query,cast,0);
             if(collectorHit(cast)) {
                 cast.sortHits();
-                FUN_00cac890(collectorBegin(cast),collectorCount(cast),solved.position);
-                while(FUN_00cacf10(collectorContact(cast,0))!=-1) {
+                hkpCharacterProxy_convertFractionToDistance(collectorBegin(cast),collectorCount(cast),solved.position);
+                while(hkpCharacterProxy_findSurface(collectorContact(cast,0))!=-1) {
                     removeFirst(cast);
                     if(!collectorHit(cast)) {ok=1;break;}
                 }
                 if(collectorCount(cast)>0) {
                     const PContact& hit=collectorContact(cast,0);
-                    FUN_00cad480(hit);
+                    hkpCharacterProxy_fireContactAdded(hit);
                     manifold.push(hit);
                     if(!refresh) {
                         PBody* body=getBody(hit.rootB);
                         if(body && bodies.indexOf(body)==-1) {
-                            if(!threaded) body->FUN_00c9c5b0(static_cast<PEntityListener*>(this));
+                            if(!threaded) body->hkpEntity_addEntityListener(static_cast<PEntityListener*>(this));
                             bodies.push(body);
                         }
                         POther* phantom=getOther(hit.rootB);
@@ -1227,12 +1229,12 @@ void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,hkpAllCdPointCol
         if(ok) {
             position.add(solved.position);
             remaining-=solved.time;
-        } else remaining-=FUN_00cacc50(solved,cast,query,position);
+        } else remaining-=hkpCharacterProxy_moveToLinearCastHitPosition(solved,cast,query,position);
         oldDisplacement=solved.position;
     }
     velocity=solved.velocity;
     if(threaded) phantom->pose()->SetWorldPosition(position);
-    else phantom->FUN_00c9e990(position,query.tolerance);
+    else phantom->hkpShapePhantom_setPosition(position,query.tolerance);
     {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimer* p=reinterpret_cast<PTimer*>(s.GetStreamEnd());p->tag=str_01076f38;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
 }
 

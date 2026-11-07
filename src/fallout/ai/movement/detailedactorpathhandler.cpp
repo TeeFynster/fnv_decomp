@@ -213,7 +213,7 @@ DetailedActorPathHandler::~DetailedActorPathHandler()
     ActorAvoidEntryList.RemoveAll();
 }
 
-void __cdecl FUN_00639730(float, float*, float*);
+void __cdecl NiSinCosQ(float, float*, float*);
 
 // 0x009e1640 builds a Z rotation like NiMatrix3::MakeZRotation (0x004a0c90) but through the game's own sin/cos
 // (0x00639730): a game helper, not the Gamebryo inline.
@@ -234,7 +234,7 @@ void FUN_009e1640_ZRotation::SetRotationMatrix(float afAngle)
 {
     float fSin;
     float fCos;
-    FUN_00639730(afAngle, &fSin, &fCos);
+    NiSinCosQ(afAngle, &fSin, &fCos);
 
     m_pEntry[0][0] = fCos;
     m_pEntry[0][1] = fSin;
@@ -250,14 +250,15 @@ void FUN_009e1640_ZRotation::SetRotationMatrix(float afAngle)
 namespace fnv_009e27e0 {
 struct FUN_009e27e0_shell : public DetailedActorPathHandler
 {
-    bool FUN_009e27e0();
+    bool DetailedActorPathHandler_ComputeMinTetherDistance();
 };
 
 
 extern double DAT_01011588;
 
 // @fnv 0x009e27e0
-bool FUN_009e27e0_shell::FUN_009e27e0()
+// src: XBOX_PDB 0x009e27e0
+bool FUN_009e27e0_shell::DetailedActorPathHandler_ComputeMinTetherDistance()
 {
     *(float*)((char*)this + 0x14) = 10.0f;
     *(float*)((char*)this + 0x18) = 20.0f;
@@ -616,7 +617,8 @@ struct FakeProcess
 
 // Resolves the current process's package; if its type is 6 and the target reference is an actor, returns that actor as the follow leader, otherwise null.
 // @fnv 0x009e55e0
-Actor* __cdecl FUN_009e55e0(TES* apActor)
+// src: XBOX_PDB 0x009e55e0
+Actor* __cdecl DetailedActorPathHandler_GetFollowLeader(TES* apActor)
 {
     FakeProcess* pprocess;
     Actor* pfollowLeader = 0;
@@ -646,9 +648,9 @@ struct FUN_009e7610_shell : public DetailedActorPathHandler
 };
 
 float __cdecl fmod(float, float);
-float __cdecl FUN_004b15e0(float, float, float*);
+float __cdecl GetAngleDelta(float, float, float*);
 void __cdecl WrapValueToRange(float&, float, float);
-bool __fastcall FUN_0087eeb0(void*);
+bool __fastcall GetTurretBehavior(void*);
 
 namespace std {
 float __cdecl abs(float);
@@ -866,7 +868,7 @@ bool FUN_009e7610_shell::TurnTowardGoalAngle(float afGoalAngle, bool abForceTurn
     else if (afGoalAngle >= 6.2831854820251465)
         afGoalAngle = fmod(afGoalAngle, 6.2831854820251465f);
 
-    fangledelta = FUN_004b15e0((*reinterpret_cast<VCallHelper_2bc**>(reinterpret_cast<char*>(this) + 4))->v175(0),
+    fangledelta = GetAngleDelta((*reinterpret_cast<VCallHelper_2bc**>(reinterpret_cast<char*>(this) + 4))->v175(0),
                                afGoalAngle, &fdir);
     fabsoluteDelta = std::abs(fangledelta);
     fepsilon = DAT_010923dc;
@@ -893,7 +895,7 @@ bool FUN_009e7610_shell::TurnTowardGoalAngle(float afGoalAngle, bool abForceTurn
         WrapValueToRange(*reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x68), -3.1415927410125732f,
                          3.1415927410125732f);
 
-        if (!FUN_0087eeb0(*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 4)))
+        if (!GetTurretBehavior(*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 4)))
             *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x94) =
                 *reinterpret_cast<float*>(originalRuntimeFloatSetting220.Float());
 
@@ -1038,12 +1040,13 @@ typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
 struct FUN_009e9390_shell : public DetailedActorPathHandler
 {
-    void FUN_009e9390(BGSLoadFormBuffer*);
+    void DetailedActorPathHandler_LoadGame(BGSLoadFormBuffer*);
 };
 
 
 // @fnv 0x009e9390
-void FUN_009e9390_shell::FUN_009e9390(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009e9390
+void FUN_009e9390_shell::DetailedActorPathHandler_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     apLoadGameBuffer->ReadTypedData((char*)this + 0x1c, 0xc);
     apLoadGameBuffer->ReadTypedData((char*)this + 0x28, 0xc);
@@ -1130,7 +1133,7 @@ void* DelStandIn::FUN_009e0160(unsigned int flags)
 }
 
 namespace fnv_009e0470 {
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMAX_00404010(float, float);
 float __cdecl GetDirectionAngle(const NiPoint3&);
 extern float DAT_01092470;
 extern const float g_011e0994_arg1;
@@ -1146,7 +1149,7 @@ float __cdecl abs(float);
 struct PathTravelUpdate : public DetailedActorPathHandler
 {
     void ResetMoveState();
-    void FUN_009e27e0();
+    void DetailedActorPathHandler_ComputeMinTetherDistance();
     void UpdatePathTether(float afPercentTraveled);
     int UpdatePathingGoal();
     int UpdatePathTravel(float afPercentTraveled, float afDeltaT);
@@ -1193,22 +1196,22 @@ int PathTravelUpdate::UpdatePathTravel(float afPercentTraveled, float afDeltaT)
         return 5;
     }
 
-    if (((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05d0())
+    if (((NiPointer<PathingSolution>&)pCurrentPathingSolution)->IsIncomplete())
     {
         m_fPathValue14 = g_011e0994_arg1;
     }
     else
     {
-        m_fPathValue14 = FUN_00404010(((NiPointer<PathingRequest>&)m_pPathingRequest)->GetCenterRadius() *
+        m_fPathValue14 = BSMAX_00404010(((NiPointer<PathingRequest>&)m_pPathingRequest)->GetCenterRadius() *
                                           ((NiPointer<PathingRequest>&)m_pPathingRequest)->GetCenterRadius(),
                                       0.1f);
-        if (((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0())->FUN_006e2330())
+        if (((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->PathingSolution_GetLastNode())->PathingNode_IsTeleportDoorNode())
             m_fPathValue14 = DAT_01092470;
     }
-    if (((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0())->IsTransitionNode())
+    if (((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->PathingSolution_GetLastNode())->IsTransitionNode())
         m_bPathFlag4 = true;
 
-    FUN_009e27e0();
+    DetailedActorPathHandler_ComputeMinTetherDistance();
     bool bpathTransition = m_bPathFlag5;
     UpdatePathTether(afPercentTraveled);
     m_bHasPathingSolution = false;
@@ -1254,7 +1257,7 @@ int PathTravelUpdate::UpdatePathTravel(float afPercentTraveled, float afDeltaT)
 namespace fnv_009e16e0 {
 struct FUN_009e16e0_shell : public DetailedActorPathHandler
 {
-    int FUN_009e16e0(float);
+    int DetailedActorPathHandler_NoPathUpdate(float);
 };
 
 
@@ -1282,7 +1285,7 @@ struct FUN_009e4c60_shell
 };
 struct FUN_009e7d70_shell
 {
-    float FUN_009e7d70(float);
+    float DetailedActorPathHandler_UpdateRotation(float);
 };
 
 namespace std {
@@ -1291,15 +1294,15 @@ float __cdecl abs(float);
 float __cdecl WrapAngle(float);
 struct FUN_005f0c80_shell
 {
-    bool FUN_005f0c80();
+    bool IsImmobile();
 };
 bool __fastcall GetByteAtOffset70(void*);
-bool __fastcall FUN_0097fb20(CombatState*);
-NiPoint3 __cdecl FUN_009a8050(Actor*);
-NiPoint3 __cdecl FUN_009a88e0(Actor*, NiPoint3);
+bool __fastcall CombatState_GetHasTarget360LineOfSight(CombatState*);
+NiPoint3 __cdecl CombatUtilities_GetAttackerFiringLocation(Actor*);
+NiPoint3 __cdecl CombatUtilities_GetAngleToProjectedPoint(Actor*, NiPoint3);
 extern double g_d100;
-bool __fastcall FUN_0087eeb0(void*);
-float __cdecl FUN_004b15e0(float, float, float*);
+bool __fastcall GetTurretBehavior(void*);
+float __cdecl GetAngleDelta(float, float, float*);
 extern double _gModifierZero;
 extern float DAT_010923dc;
 extern Setting originalRuntimeFloatSetting220;
@@ -1312,12 +1315,13 @@ extern Setting g_011f2c10;
 
 // Runs the actor path handler's state machine, turning the actor toward its look-at target and updating move mode and timers.
 // @fnv 0x009e16e0
-int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
+// src: XBOX_PDB 0x009e16e0
+int FUN_009e16e0_shell::DetailedActorPathHandler_NoPathUpdate(float afDeltaT)
 {
     int eresult = -1;
-    bool bimmobile = ((FUN_005f0c80_shell*)((Actor*)*(Actor**)((char*)this + 4))->GetActorBase())->FUN_005f0c80();
-    if (!fnv_009e16e0::FUN_0087eeb0(*(Actor**)((char*)this + 4)) && !GetByteAtOffset70(*(void**)((char*)this + 8)) &&
-        !FUN_0097fb20(*(CombatState**)((char*)this + 8)))
+    bool bimmobile = ((FUN_005f0c80_shell*)((Actor*)*(Actor**)((char*)this + 4))->GetActorBase())->IsImmobile();
+    if (!fnv_009e16e0::GetTurretBehavior(*(Actor**)((char*)this + 4)) && !GetByteAtOffset70(*(void**)((char*)this + 8)) &&
+        !CombatState_GetHasTarget360LineOfSight(*(CombatState**)((char*)this + 8)))
     {
         switch (*(unsigned int*)((char*)this + 0xc8))
         {
@@ -1331,7 +1335,7 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
             eresult = 5;
             break;
         case 6:
-            (*(Actor**)((char*)this + 4))->SetFurnitureHeading(((FUN_009e7d70_shell*)this)->FUN_009e7d70(afDeltaT));
+            (*(Actor**)((char*)this + 4))->SetFurnitureHeading(((FUN_009e7d70_shell*)this)->DetailedActorPathHandler_UpdateRotation(afDeltaT));
             *(NiPoint3*)((char*)this + 0x1c) = NiPoint3::ZERO;
             *(float*)((char*)this + 0x9c) = 0.0f;
             *(NiPoint3*)((char*)this + 0xa0) = NiPoint3::ZERO;
@@ -1373,7 +1377,7 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
                 !((MobileObject*)*(Actor**)((char*)this + 4))->IsInDialogueWithPlayer())
             {
                 float fCurrentAngle = WrapAngle((*(Actor**)((char*)this + 4))->GetCurrentTargetDistance(0));
-                NiPoint3 firingLocation = FUN_009a8050(*(Actor**)((char*)this + 4));
+                NiPoint3 firingLocation = CombatUtilities_GetAttackerFiringLocation(*(Actor**)((char*)this + 4));
                 if (((NiPoint3*)&(firingLocation - lookatPoint))->GetSquaredXYLength() <
                     (*(Actor**)((char*)this + 4))->FUN_008be1b0() *
                         (*(Actor**)((char*)this + 4))->FUN_008be1b0() * 0.25)
@@ -1381,7 +1385,7 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
                 if (eresult == -1)
                 {
                     float fdir;
-                    NiPoint3 rot = FUN_009a88e0(*(Actor**)((char*)this + 4), lookatPoint);
+                    NiPoint3 rot = CombatUtilities_GetAngleToProjectedPoint(*(Actor**)((char*)this + 4), lookatPoint);
                     float fgoalAngle = WrapAngle(rot.z);
                     float fgoalLookAngle = rot.x;
                     float fangleDelta;
@@ -1389,11 +1393,11 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
                     {
                         NiPoint3 delta = lookatPoint - *((const Actor*)*(Actor**)((char*)this + 4))->GetPos();
                         delta.z = 0.0f;
-                        fangleDelta = std::abs(FUN_004b15e0(fCurrentAngle, p07::GetDirectionAngle((const NiPoint3&)delta), &fdir));
+                        fangleDelta = std::abs(GetAngleDelta(fCurrentAngle, p07::GetDirectionAngle((const NiPoint3&)delta), &fdir));
                     }
                     else
                     {
-                        fangleDelta = std::abs(FUN_004b15e0(fCurrentAngle, fgoalAngle, &fdir));
+                        fangleDelta = std::abs(GetAngleDelta(fCurrentAngle, fgoalAngle, &fdir));
                     }
                     float frotateMax = (*(Actor**)((char*)this + 4))->GetMaxRotationSpeed() * DAT_01023128 * afDeltaT;
                     if (!(*(Actor**)((char*)this + 4))->IsCreature())
@@ -1431,7 +1435,7 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
                         inewMoveMode = (*(ActorMover**)((char*)this + 8))->GetPreferredMoveModeType();
                         fCurrentAngle += fclampedAngleDelta * fdir;
                     }
-                    if (!FUN_0097fb20(*(CombatState**)((char*)this + 8)))
+                    if (!CombatState_GetHasTarget360LineOfSight(*(CombatState**)((char*)this + 8)))
                         *(unsigned int*)((char*)this + 0x60) = inewMoveMode;
                     if (!bimmobile || std::abs(fgoalLookAngle) <= DAT_01092478)
                         (*(Actor**)((char*)this + 4))->SetFurnitureHeading(fCurrentAngle);
@@ -1486,24 +1490,25 @@ float abs(float f);
 }
 double _fabs(double d);
 float __cdecl WrapAngle(float fAngleDifference);
-float __cdecl FUN_004b15e0(float, float, float*);
+float __cdecl GetAngleDelta(float, float, float*);
 float __cdecl GetDirectionAngle(const NiPoint3& kPt);
 NiPoint3 __cdecl GetPitchYaw(NiPoint3 kFrom, NiPoint3 kTo);
 
 struct FUN_009e2aa0_shell
 {
-    bool FUN_009e2aa0(float fTimeDelta);
+    bool DetailedActorPathHandler_ComputeMoveMode(float fTimeDelta);
 };
 
 // Updates the actor's movement flags from look-at/pathing heading, animation state and a timed state machine, writing them to offset 0x60 and returning true.
 // @fnv 0x009e2aa0
-bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
+// src: XBOX_PDB 0x009e2aa0
+bool FUN_009e2aa0_shell::DetailedActorPathHandler_ComputeMoveMode(float fTimeDelta)
 {
     unsigned int uiMoveMode3;
     unsigned int uiMoveFlags3;
     unsigned int uiOldFlagsVal;
 
-    if ((*(Actor**)((char*)this + 4))->FUN_00437bf0() || (*(Actor**)((char*)this + 4))->FUN_00437bd0())
+    if ((*(Actor**)((char*)this + 4))->Actor_IsRestrained() || (*(Actor**)((char*)this + 4))->Actor_IsUnConscious())
     {
         *(unsigned int*)((char*)this + 0x60) = 0;
         return true;
@@ -1520,7 +1525,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
     }
     uiMoveMode3 = (*(ActorMover**)((char*)this + 8))->GetPreferredMoveModeType();
     uiMoveFlags3 = *(unsigned int*)((char*)this + 0x60) & 0x3f;
-    if ((*(Actor**)((char*)this + 4))->FUN_005a2030() && (*(Actor**)((char*)this + 4))->IsCreature())
+    if ((*(Actor**)((char*)this + 4))->IsSwimming_005a2030() && (*(Actor**)((char*)this + 4))->IsCreature())
     {
         *(unsigned int*)((char*)this + 0x60) = uiMoveMode3 | 1;
         return true;
@@ -1557,14 +1562,14 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
             fDesiredHeading_2 = (*(Actor**)((char*)this + 4))->GetCurrentTargetDistance(false);
         }
         NiPoint3 kAngles = GetPitchYaw(*(const NiPoint3*)((const MobileObject*)*(Actor**)((char*)this + 4))->GetPos(), *(NiPoint3*)((char*)this + 0x34));
-        if ((*(Actor**)((char*)this + 4))->FUN_005a2030() &&
+        if ((*(Actor**)((char*)this + 4))->IsSwimming_005a2030() &&
             _fabs(std::abs(kAngles.x) - 1.5707963267948966) < 0.2617993950843811)
             fDesiredHeadingAngle = fDesiredHeading_2;
         else
             fDesiredHeadingAngle = kAngles.z;
         fDirection = 1.0f;
         fDesiredHeadingAngle = WrapAngle(fDesiredHeadingAngle);
-        fDesiredHeading = FUN_004b15e0(fDesiredHeadingAngle, fDesiredHeading_2, &fDirection);
+        fDesiredHeading = GetAngleDelta(fDesiredHeadingAngle, fDesiredHeading_2, &fDirection);
         if (*(float*)((char*)this + 0x8c) > 0.25)
         {
             if (std::abs(fDesiredHeading) > 0.01745329238474369)
@@ -1572,7 +1577,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
                 float fDegrees2 = fDesiredHeading * 57.2957763671875;
                 if (std::abs(fDegrees2) > 135.0 && ((Animation*)(*(Actor**)((char*)this + 4))->GetAnimData())->IsGroupQueued(4) &&
                     (_fabs(std::abs(kAngles.x) - 1.5707963267948966) >= 0.2617993950843811 ||
-                     !(*(Actor**)((char*)this + 4))->FUN_005a2030()))
+                     !(*(Actor**)((char*)this + 4))->IsSwimming_005a2030()))
                 {
                     uiMoveFlags3 = 2;
                 }
@@ -1621,7 +1626,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
         if ((uiMoveMode3 & 0x200) && (!(uiOldFlagsVal & 0x200) || ((uiOldFlagsVal & 0x30) && !(uiMoveFlags3 & 0x30))))
         {
             *(int*)((char*)this + 0xcc) = 1;
-            *(float*)((char*)this + 0x90) = (*(Actor**)((char*)this + 4))->FUN_00897b50(3) * 0.5;
+            *(float*)((char*)this + 0x90) = (*(Actor**)((char*)this + 4))->Actor_GetAnimGroupDuration(3) * 0.5;
         }
         else
             break;
@@ -1681,7 +1686,7 @@ struct TopicH
 struct HighProcessVector
 {
     void Subtract(NiPoint3*);
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
 };
 
 struct NiPoint3b
@@ -1692,9 +1697,9 @@ struct NiPoint3b
 
 
 float __cdecl GetDirectionAngle(NiPoint3 const&);
-NiPoint3b __cdecl FUN_004b3ae0(NiPoint3 const&, float const*);
+NiPoint3b __cdecl NiPoint3_TransformByMatrix3(NiPoint3 const&, float const*);
 float __cdecl FUN_004f6e40(float);
-void __cdecl FUN_005330e0(float&, float, float);
+void __cdecl BSClamp_float(float&, float, float);
 
 extern double DAT_01011588;
 extern double _gModifierZero;
@@ -1706,7 +1711,7 @@ extern double const DAT_01064f50;
 // @fnv 0x009e3560
 void FUN_009e3560_shell::UpdatePathRotation(float afDeltaT)
 {
-    if (((MobileObject*)pActor)->FUN_005a2030())
+    if (((MobileObject*)pActor)->IsSwimming_005a2030())
     {
         NiPoint3 deltaToTargetPoint = ((DetailedActorPathHandler*)this)->m_kPathVector3;
         float fwaterHeight = ((MobileObject*)pActor)->GetRelevantWaterHeight();
@@ -1736,8 +1741,8 @@ void FUN_009e3560_shell::UpdatePathRotation(float afDeltaT)
             deltaToTargetPoint.z = 0.0f;
         }
         NiMatrix3 rot;
-        ((HighProcessVector*)&deltaToTargetPoint)->FUN_004a0c10();
-        FUN_005330e0(deltaToTargetPoint.z, -1.0f, 1.0f);
+        ((HighProcessVector*)&deltaToTargetPoint)->Unitize_004a0c10();
+        BSClamp_float(deltaToTargetPoint.z, -1.0f, 1.0f);
         float fangle;
         if (deltaToTargetPoint.z >= _gModifierZero)
         {
@@ -1759,7 +1764,7 @@ void FUN_009e3560_shell::UpdatePathRotation(float afDeltaT)
             rot.MakeXRotation(fangle);
         }
         *(NiPoint3b*)&((DetailedActorPathHandler*)this)->m_kPathVector1 =
-            FUN_004b3ae0(((DetailedActorPathHandler*)this)->m_kPathVector1, (const float*)&rot);
+            NiPoint3_TransformByMatrix3(((DetailedActorPathHandler*)this)->m_kPathVector1, (const float*)&rot);
         return;
     }
     NiPoint3 deltaToTargetPoint = ((DetailedActorPathHandler*)this)->m_bPathFlag3
@@ -1798,7 +1803,7 @@ void FUN_009e3560_shell::UpdatePathRotation(float afDeltaT)
 }  // namespace fnv_009e3560
 
 namespace fnv_009e3d50 {
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMAX_00404010(float, float);
 extern double _gModifierZero;
 
 
@@ -1818,7 +1823,7 @@ void PathSplineUpdate::UpdatePathing(float afDeltaT)
         m_uiPathPointIndex + 1 >= ((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags())
     {
         m_kPathVector3 =
-            ((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0())->GetLocation().GetPoint<NiPoint3>();
+            ((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->PathingSolution_GetLastNode())->GetLocation().GetPoint<NiPoint3>();
         return;
     }
     if ((ByteAndFlagState & 1) && m_kPathVector1.y < _gModifierZero)
@@ -1844,7 +1849,7 @@ void PathSplineUpdate::UpdatePathing(float afDeltaT)
     float fAheadDot = ((const NiPoint3&)kAhead).Dot(kToTarget);
     float fSqDist = kToTarget.SqrXYLength();
     float fTargetDistSqr = ((const NiPoint3&)m_kPathVector1).FUN_004a7290() * 4.0;
-    fTargetDistSqr = FUN_00404010(fTargetDistSqr, *(float*)((char*)this + 0x14) * *(float*)((char*)this + 0x14));
+    fTargetDistSqr = BSMAX_00404010(fTargetDistSqr, *(float*)((char*)this + 0x14) * *(float*)((char*)this + 0x14));
 
     if (fDot < _gModifierZero || fAheadDot < _gModifierZero || fSqDist < fTargetDistSqr)
     {
@@ -1857,7 +1862,7 @@ void PathSplineUpdate::UpdatePathing(float afDeltaT)
                 (float)(((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1);
             m_uiPathPointIndex = (int)m_fSplineParameter;
             m_kPathVector3 =
-                ((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0())->GetLocation().GetPoint<NiPoint3>();
+                ((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->PathingSolution_GetLastNode())->GetLocation().GetPoint<NiPoint3>();
             return;
         }
         float fLastDot = fDot;
@@ -1916,7 +1921,7 @@ float __cdecl abs(float);
 
 float __cdecl GetDirectionAngle(const NiPoint3&);
 void __cdecl WrapValueToRange(float&, float, float);
-void __cdecl FUN_005330e0(float&, float, float);
+void __cdecl BSClamp_float(float&, float, float);
 
 extern const double DAT_01023128;
 extern float DAT_010313d4;
@@ -1943,11 +1948,12 @@ struct DetailedActorPathHandlerRot : public DetailedActorPathHandler
 {
     void GetPathAngles(float*, float*);
     void UpdateLookingAngle(float, float);
-    float FUN_009e4800(float, float*);
+    float DetailedActorPathHandler_UpdateHeading(float, float*);
 };
 
 // @fnv 0x009e4800
-float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateMult)
+// src: COMMUNITY 0x009e4800
+float DetailedActorPathHandlerRot::DetailedActorPathHandler_UpdateHeading(float afDeltaT, float* pfRotateMult)
 {
     float fPathHeading = 0.0f;
     float fSpeed = 0.0f;
@@ -1970,15 +1976,15 @@ float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateM
             float fTargetAngle;
             float fFacingAngle;
             fDist = (((const NiPoint3_sub&)m_kPathVector3) - *(*(const Actor**)((char*)this + 4))->GetPos()).Length();
-            fMinRadius = (ByteAndFlagState & 0x200) ? (*(Actor**)((char*)this + 4))->FUN_00884eb0()
-                                            : (*(Actor**)((char*)this + 4))->FUN_00884dc0();
+            fMinRadius = (ByteAndFlagState & 0x200) ? (*(Actor**)((char*)this + 4))->GetRunSpeed()
+                                            : (*(Actor**)((char*)this + 4))->GetWalkSpeed();
             fLookAheadDist = fMinRadius;
             NiPoint3 kGoal = m_kPathVector3;
             if (fDist < fLookAheadDist)
             {
                 int iNode;
                 ((PathingSolution*)(unsigned int)*(Flt*)&pCurrentPathingSolution)
-                    ->FUN_006e7e70(m_fSplineParameter, fLookAheadDist - fDist, 1, &iNode, &kGoal);
+                    ->FindPointOnPath(m_fSplineParameter, fLookAheadDist - fDist, 1, &iNode, &kGoal);
             }
             fFacingAngle = (*(Actor**)((char*)this + 4))->GetCurrentTargetDistance(0);
             NiPoint3_sub toTarget = ((const NiPoint3_sub&)kGoal) - *(*(const Actor**)((char*)this + 4))->GetPos();
@@ -1986,7 +1992,7 @@ float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateM
             fAngleToTarget = fTargetAngle - fFacingAngle;
             WrapValueToRange(fAngleToTarget, -3.1415927f, 3.1415927f);
             fScale = std::abs(fAngleToTarget) / DAT_01064f50;
-            FUN_005330e0(fScale, DAT_010313d4, 1.0f);
+            BSClamp_float(fScale, DAT_010313d4, 1.0f);
         }
         float fMaxTurn = (*(Actor**)((char*)this + 4))->GetMaxRotationSpeed() * DAT_01023128 * afDeltaT * 3.0 * fScale;
         if (std::abs(fTimeSinceScaleStart) > fMaxTurn)
@@ -2001,7 +2007,7 @@ float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateM
             {
                 if ((*(*(const Actor**)((char*)this + 4))->GetPos() -
                      ((PathingGraphNode*)((PathingSolution*)(unsigned int)*(Flt*)&pCurrentPathingSolution)
-                         ->FUN_006b05a0())
+                         ->PathingSolution_GetLastNode())
                          ->FUN_00717e50()
                          .FUN_005c3420<NiPoint3>())
                         .GetSquaredXYLength() <
@@ -2009,7 +2015,7 @@ float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateM
                     *pfRotateMult = 0.5f;
             }
         }
-        FUN_005330e0(fTimeSinceScaleStart, -fMaxTurn, fMaxTurn);
+        BSClamp_float(fTimeSinceScaleStart, -fMaxTurn, fMaxTurn);
         fPathHeading = fCurrentHeading + fTimeSinceScaleStart;
     }
     m_fPathValue18 = std::abs(fTimeSinceScaleStart);
@@ -2036,9 +2042,9 @@ struct Twin_0084d030
 };
 
 
-Actor* __cdecl FUN_009e55e0(Actor* apActor);
+Actor* __cdecl DetailedActorPathHandler_GetFollowLeader(Actor* apActor);
 void __cdecl UpdateAliveActorList();
-bool __cdecl FUN_009e6900(Actor* apActor, void* apData, Actor* apOther, NiPoint3* apPos, NiPoint3* apDir,
+bool __cdecl DetailedActorPathHandler_CheckDetection(Actor* apActor, void* apData, Actor* apOther, NiPoint3* apPos, NiPoint3* apDir,
                           float afDist, float afCosAngle, float* apResult, bool abFlag);
 
 extern double _gModifierZero;
@@ -2084,7 +2090,7 @@ void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int a
     fDistance = 0.0f;
     fCosThreshold = DAT_011a5cf4;
     afValueAfterThirdFloat = fRadius + fAheadDist;
-    pTargetActor = FUN_009e55e0(apActor);
+    pTargetActor = DetailedActorPathHandler_GetFollowLeader(apActor);
     if (auiFlags & 0x200)
         fCosThreshold = DAT_011a5cfc;
 
@@ -2112,11 +2118,11 @@ void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int a
                 float fTimeToTarget;
                 float fOtherDist;
                 ((NiPoint3&)kRelOffset) = kIntersectionOffset;
-                if (pAvoidActor->FUN_004938e0())
+                if (pAvoidActor->IsMoving_004938e0())
                 {
                     NiMatrix3 kOtherRot;
                     ((FUN_009e1640_ZRotation&)kOtherRot).SetRotationMatrix(pAvoidActor->GetCurrentTargetDistance(false));
-                    NiPoint3 kOtherOffset = (const FUN_004b4500_ExtView&)kOtherRot * (const NiPoint3&)pAvoidActor->FUN_008b3d50();
+                    NiPoint3 kOtherOffset = (const FUN_004b4500_ExtView&)kOtherRot * (const NiPoint3&)pAvoidActor->GetCachedMoveDelta();
                     ((NiPoint3&)kRelOffset).Subtract(kOtherOffset);
                 }
                 fOffsetLength = ((NiPoint3&)kRelOffset).GetLengthSquared();
@@ -2134,14 +2140,14 @@ void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int a
                 fAvoidDist = fRadius + fOtherDist;
                 if (fAvoidDist < *g_011f2b8c.Float())
                     fAvoidDist = *g_011f2b8c.Float();
-                if (FUN_009e6900(apActor, apData, pAvoidActor, &((NiPoint3&)akStart), &((NiPoint3&)kRelOffset), fAvoidDist, fCosThreshold,
+                if (DetailedActorPathHandler_CheckDetection(apActor, apData, pAvoidActor, &((NiPoint3&)akStart), &((NiPoint3&)kRelOffset), fAvoidDist, fCosThreshold,
                                  &fDistance, false))
                     apList->AppendElement(ActorAvoidanceData(pAvoidActor, fDistance));
             }
         }
     }
 
-    if (FUN_009e6900(apActor, apData, g_thePlayer, &((NiPoint3&)akStart), &kIntersectionOffset, fAheadDist, fCosThreshold,
+    if (DetailedActorPathHandler_CheckDetection(apActor, apData, g_thePlayer, &((NiPoint3&)akStart), &kIntersectionOffset, fAheadDist, fCosThreshold,
                      &fDistance, false))
         apList->AppendElement(ActorAvoidanceData(g_thePlayer, fDistance));
 }
@@ -2179,15 +2185,15 @@ void FUN_009e77d0_cls::UpdatePathTether(float afPercentTraveled)
             m_uiPathPointIndex = ((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)->GetObjectFlags() - 1;
             m_fSplineParameter = (float)m_uiPathPointIndex;
             m_kPathVector3 =
-                ((PathingGraphNode*)((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)->FUN_006b05a0())->FUN_00717e50().FUN_005c3420<NiPoint3>();
+                ((PathingGraphNode*)((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)->PathingSolution_GetLastNode())->FUN_00717e50().FUN_005c3420<NiPoint3>();
             m_kPathVector4 = *((const TESObjectREFR*)*(TESObjectREFR**)((char*)this + 4))->GetPos();
             m_bPathFlag5 = false;
             return;
         }
-        NiPoint3 oldDirVec = ((const NiPoint3&)m_kPathVector3).FUN_00439ef0(m_kPathVector4);
+        NiPoint3 oldDirVec = ((const NiPoint3&)m_kPathVector3).SubtractIntoVector(m_kPathVector4);
         oldDirVec.z = 0;
         NiPoint3 actorLoc = *((const TESObjectREFR*)*(TESObjectREFR**)((char*)this + 4))->GetPos();
-        NiPoint3 actorDirVec = ((const NiPoint3&)m_kPathVector3).FUN_00439ef0(actorLoc);
+        NiPoint3 actorDirVec = ((const NiPoint3&)m_kPathVector3).SubtractIntoVector(actorLoc);
         float factDotCheck = actorDirVec.Dot((const NiPoint3&)oldDirVec);
         bool bpastGoal = factDotCheck < _gModifierZero;
         float fcheck5 = DAT_01020998 / m_fPathValue2;
@@ -2209,7 +2215,7 @@ void FUN_009e77d0_cls::UpdatePathTether(float afPercentTraveled)
                     ->FindSegmentAtFraction(afPercentTraveled + fcheck5 + i * fcheck20, m_fPathValue2, &itempNode);
             ((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)
                 ->GetLocationAtSplineParameter(ftempSplineT, (NiPoint3*)&newTetherLoc);
-            actorToTetherDir = newTetherLoc.FUN_00439ef0(actorLoc);
+            actorToTetherDir = newTetherLoc.SubtractIntoVector(actorLoc);
             actorToTetherDir.z = 0;
             fdot = actorToTetherDir.Dot((const NiPoint3&)oldDirVec);
             fsqrDist = actorToTetherDir.GetSquaredXYLength();
@@ -2258,7 +2264,7 @@ void FUN_009e77d0_cls::UpdatePathTether(float afPercentTraveled)
             GetNavMeshHeight(&tetherNavMeshLoc, &snapLocation.z);
             float fheading = (*(MobileObject**)((char*)this + 4))->GetCurrentTargetDistance(false);
             (*(TESObjectREFR**)((char*)this + 4))
-                ->FUN_008ad1c0(snapLocation, fheading, (*(TESObjectREFR**)((char*)this + 4))->GetParentCell(),
+                ->Actor_MoveActorAndFollowers(snapLocation, fheading, (*(TESObjectREFR**)((char*)this + 4))->GetParentCell(),
                                (*(TESObjectREFR**)((char*)this + 4))->GetParentWorldSpace(), 1, 1);
         }
         ((FUN_009e3c00_cls*)this)->AdvanceAlongPath(0.0f);
@@ -2279,7 +2285,7 @@ struct Flt
 namespace std {
 float abs(float);
 }
-float FUN_0040ebd0(float, float);
+float BSMIN(float, float);
 unsigned int __fastcall GetObjectFlags(char*);
 int ConstructAndCallMethod(unsigned int, unsigned int, unsigned int, const NiPoint3&);
 bool __fastcall FUN_009e8670(unsigned int);
@@ -2314,7 +2320,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
                 GetObjectFlags((char*)(unsigned int)*(Flt*)((char*)this + 0xc)))
                 (NiPoint3&)diff =
                     ((LocS*)&((TeleportableReference*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))
-                                  ->FUN_006e7970(*(unsigned int*)((char*)this + 0x64)))
+                                  ->GetNode_006e7970(*(unsigned int*)((char*)this + 0x64)))
                          ->GetPosition())
                         ->GetLocation() -
                     *(const NiPoint3*)((const MobileObject*)*(MobileObject**)((char*)this + 4))->GetPos();
@@ -2333,7 +2339,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
                 case 2:
                 case 3:
                     *(bool*)((char*)this + 0xdf) =
-                        ((PathingGraphNode*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->FUN_006b05a0())->IsTransitionNode();
+                        ((PathingGraphNode*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->PathingSolution_GetLastNode())->IsTransitionNode();
                     *(unsigned short*)(*(char**)((char*)this + 8) + 0x42) =
                         ((BGSTerrainManager*)(unsigned int)*(Flt*)((char*)this + 0xc))->GetMinLevel();
                     return 0;
@@ -2356,7 +2362,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
         NiPoint3 diff;
         float fdistanceSqr = 3.402823466e+38f;
         float fgoalRadiusTestSqr;
-        if (!((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->FUN_006b05d0() &&
+        if (!((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->IsIncomplete() &&
             ((BGSTerrainManager*)(unsigned int)*(Flt*)((char*)this + 0xc))->GetMinLevel() ==
                 ((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->GetVirtualNodeCount() - 1)
             goal =
@@ -2368,7 +2374,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
         else
             goal =
                 ((LocS*)&(
-                     (TeleportableReference*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->FUN_006b05a0())
+                     (TeleportableReference*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->PathingSolution_GetLastNode())
                      ->GetPosition())
                     ->GetLocation();
         (NiPoint3&)diff = goal - *(const NiPoint3*)((const MobileObject*)*(MobileObject**)((char*)this + 4))->GetPos();
@@ -2393,7 +2399,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
             }
             if (bvalidCheck)
             {
-                if (!(*(MobileObject**)((char*)this + 4))->FUN_005a2030())
+                if (!(*(MobileObject**)((char*)this + 4))->IsSwimming_005a2030())
                 {
                     if (std::abs(diff.z) <=
                         ((PathingRequest*)(unsigned int)*(Flt*)((char*)this + 0x10))->GetSmoothingRandomness())
@@ -2402,7 +2408,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
                     }
                     else if (*(unsigned int*)((char*)this + 0x64) + 1 >=
                                  GetObjectFlags((char*)(unsigned int)*(Flt*)((char*)this + 0xc)) &&
-                             !(*(MobileObject**)((char*)this + 4))->FUN_005a2030())
+                             !(*(MobileObject**)((char*)this + 4))->IsSwimming_005a2030())
                     {
                         Warning("PATHFINDING: Actor %s failed pathing due to goal Z difference %f, being too large",
                                 ((BGSCameraPath*)*(MobileObject**)((char*)this + 4))->HasNameForWarning()
@@ -2414,7 +2420,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
                 }
                 else
                 {
-                    float fzdeltaThresold = FUN_0040ebd0(
+                    float fzdeltaThresold = BSMIN(
                         ((PathingRequest*)(unsigned int)*(Flt*)((char*)this + 0x10))->GetSmoothingRandomness(),
                         ((Actor*)*(MobileObject**)((char*)this + 4))->GetActorHeight());
                     if (std::abs(diff.z) <= fzdeltaThresold)
@@ -2427,12 +2433,13 @@ int FUN_009e8000_shell::UpdatePathingGoal()
 }
 }  // namespace fnv_009e8000
 
-extern "C" bool __cdecl FUN_004b71d0(void);
+extern "C" bool __cdecl InterfaceManager_Has360Controller(void);
 
 // @fnv 0x00709d40
-bool __cdecl FUN_00709d40()
+// src: COMMUNITY 0x00709d40
+bool __cdecl Interface_Has360Controller()
 {
-    return FUN_004b71d0();
+    return InterfaceManager_Has360Controller();
 }
 
 unsigned int __cdecl FUN_0042f5a0(unsigned int, unsigned int);
@@ -2455,16 +2462,16 @@ namespace fnv_009a86e0 {
 
 extern double DAT_0101ff58;
 
-NiPoint3 FUN_009a8050(TESObjectREFR* apAttacker);
-NiPoint3 FUN_009a87f0(NiPoint3 aFiringLocation, TESObjectREFR* apTarget, float afParam1, float afParam2,
+NiPoint3 CombatUtilities_GetAttackerFiringLocation(TESObjectREFR* apAttacker);
+NiPoint3 CombatUtilities_GetAngleToProjectedTarget(NiPoint3 aFiringLocation, TESObjectREFR* apTarget, float afParam1, float afParam2,
                         int aiParam3);
 
 // @fnv 0x009a86e0
 NiPoint3 ComputeRelativeFiringAngle(TESObjectREFR* apAttacker, TESObjectREFR* apTarget, float afParam1,
                                       float afParam2, int aiParam3)
 {
-    NiPoint3 firingPos = FUN_009a8050(apAttacker);
-    NiPoint3 kResult = FUN_009a87f0(firingPos, apTarget, afParam1, afParam2, aiParam3);
+    NiPoint3 firingPos = CombatUtilities_GetAttackerFiringLocation(apAttacker);
+    NiPoint3 kResult = CombatUtilities_GetAngleToProjectedTarget(firingPos, apTarget, afParam1, afParam2, aiParam3);
     kResult = kResult - apAttacker->GetAngleOnReference();
     kResult.y = 0;
     if (kResult.x <= DAT_0101ff58)
@@ -2562,7 +2569,7 @@ bool FUN_009e3110_t::IsPathReachableToPlayer() const
     TESObjectCELL* pplayerCell;
 
     if (!(unsigned int)*(const Flt*)&pCurrentPathingSolution ||
-        !((PathingSolution*)(unsigned int)*(const Flt*)&pCurrentPathingSolution)->FUN_009dc530())
+        !((PathingSolution*)(unsigned int)*(const Flt*)&pCurrentPathingSolution)->PathingSolution_IsValid())
         return false;
 
     inumNodes = ((PathingSolution*)(unsigned int)*(const Flt*)&pCurrentPathingSolution)->GetObjectFlags();
@@ -2588,7 +2595,7 @@ bool FUN_009e3110_t::IsPathReachableToPlayer() const
         const PathingGraphNode* pnode;
         const PathingLocation* ploc;
 
-        pnode = (const PathingGraphNode*)((PathingSolution*)(unsigned int)*(const Flt*)&pCurrentPathingSolution)->FUN_006e7970(iscanNodes);
+        pnode = (const PathingGraphNode*)((PathingSolution*)(unsigned int)*(const Flt*)&pCurrentPathingSolution)->GetNode_006e7970(iscanNodes);
         if (!pnode)
             continue;
         ploc = &pnode->FUN_00717e50();
@@ -2601,7 +2608,7 @@ bool FUN_009e3110_t::IsPathReachableToPlayer() const
         {
             return true;
         }
-        if (pnode->FUN_006e2330())
+        if (pnode->PathingNode_IsTeleportDoorNode())
         {
             TeleportableReference* ptel;
             TESObjectREFR* plinkedDoor;
@@ -2662,7 +2669,7 @@ namespace std {
 float __cdecl abs(float);
 }
 
-float __cdecl FUN_004b15e0(float, float, float*);
+float __cdecl GetAngleDelta(float, float, float*);
 extern double DAT_010924a0;
 
 struct MobileObjectLookingHelper
@@ -2691,7 +2698,7 @@ void FUN_009e4c60_t::UpdateLookingAngle(float afDeltaT, float afLookingAngle)
     fcurrentLooking = (*(MobileObjectLookingHelper**)((char*)this + 4))->GetLooking();
     frotateMax = afDeltaT * DAT_010924a0;
     fdir = 0;
-    fangleDelta = std::abs(FUN_004b15e0(fcurrentLooking, afLookingAngle, &fdir));
+    fangleDelta = std::abs(GetAngleDelta(fcurrentLooking, afLookingAngle, &fdir));
     fclampedAngleDelta = fangleDelta;
     if (fclampedAngleDelta > frotateMax)
         fclampedAngleDelta = frotateMax;
@@ -2852,31 +2859,33 @@ char DetailedPathFlagQueries::GetMethod()
 
 struct NiRTTI;
 
-void* __cdecl FUN_00458b20();
+void* __cdecl hkVector4_getZero();
 int __fastcall GetReferenceFlags(void*);
 struct FUN_00cac910_shell
 {
-    void* FUN_00cac910();
+    void* hkpCharacterProxy_getPosition();
 };
 // Calls GetReferenceFlags on this, then FUN_00458b20; if the returned code is nonzero, invokes FUN_00cac910 on it and returns that result.
 // @fnv 0x00621a40
-void* NiObject::FUN_00621a40()
+// src: XBOX_PDB 0x00621a40
+void* NiObject::bhkCharacterProxy_GethkPosition()
 {
     int code;
     void* result;
     code = GetReferenceFlags(this);
-    result = FUN_00458b20();
+    result = hkVector4_getZero();
     if (code != 0)
     {
         NiObject::GetStreamableRTTI();
-        result = ((FUN_00cac910_shell*)code)->FUN_00cac910();
+        result = ((FUN_00cac910_shell*)code)->hkpCharacterProxy_getPosition();
         NiObject::GetStreamableRTTI();
     }
     return result;
 }
 
 // @fnv 0x008b3d50
-const NiPoint3& Actor::FUN_008b3d50()
+// src: XBOX_PDB 0x008b3d50
+const NiPoint3& Actor::GetCachedMoveDelta()
 {
     return *(const NiPoint3*)((TESForm*)m_pActorMover)->GetSourceFiles();
 }
@@ -2904,44 +2913,47 @@ FUN_009e2690::FUN_009e2690(int aiValue)
     f10 = 1;
 }
 
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMAX_00404010(float, float);
 struct DetailedPathRemainingDistanceQueries : DetailedActorPathHandler
 {
-    float FUN_009e2860();
+    float DetailedActorPathHandler_GetDistanceRemaining();
 };
 // @fnv 0x009e2860
-float DetailedPathRemainingDistanceQueries::FUN_009e2860()
+// src: XBOX_PDB 0x009e2860
+float DetailedPathRemainingDistanceQueries::DetailedActorPathHandler_GetDistanceRemaining()
 {
     float flength;
     flength = m_fPathValue2 - vfn_18();
-    flength = FUN_00404010(flength, 0.0f);
+    flength = BSMAX_00404010(flength, 0.0f);
     return flength;
 }
 
 extern double _gModifierZero;
-void __cdecl FUN_005330e0(float&, float, float);
+void __cdecl BSClamp_float(float&, float, float);
 struct DetailedPathProgressQueries : DetailedActorPathHandler
 {
-    float FUN_009e28a0();
+    float DetailedActorPathHandler_GetPercentTraveled();
 };
 // @fnv 0x009e28a0
-float DetailedPathProgressQueries::FUN_009e28a0()
+// src: XBOX_PDB 0x009e28a0
+float DetailedPathProgressQueries::DetailedActorPathHandler_GetPercentTraveled()
 {
     float fRatio;
     if (m_fPathValue2 <= _gModifierZero)
         return 1.0f;
     fRatio = vfn_18() / m_fPathValue2;
-    FUN_005330e0(fRatio, 0.0f, 1.0f);
+    BSClamp_float(fRatio, 0.0f, 1.0f);
     return fRatio;
 }
 
 struct DetailedPathModeQueries : DetailedActorPathHandler
 {
-    bool FUN_009e2a80();
+    bool DetailedActorPathHandler_IsWaitingForAvoidance();
 };
 
 // @fnv 0x009e2a80
-bool DetailedPathModeQueries::FUN_009e2a80()
+// src: XBOX_PDB 0x009e2a80
+bool DetailedPathModeQueries::DetailedActorPathHandler_IsWaitingForAvoidance()
 {
     return m_iPathParameter2 == 2;
 }
@@ -2959,11 +2971,12 @@ void DetailedPathMoveModeQueries::SetMode(unsigned int mode)
 
 struct DetailedPathMovementQueries : DetailedActorPathHandler
 {
-    bool FUN_009e3be0();
+    bool DetailedActorPathHandler_IsMovementBlocked();
 };
 
 // @fnv 0x009e3be0
-bool DetailedPathMovementQueries::FUN_009e3be0()
+// src: XBOX_PDB 0x009e3be0
+bool DetailedPathMovementQueries::DetailedActorPathHandler_IsMovementBlocked()
 {
     return m_bPathFlag3;
 }
@@ -3055,9 +3068,9 @@ NiPoint3 FUN_009e2900_t::GetPathingPosition(float afDeltaT) const
             float fdistance;
             float fspeed;
             if (((Ref_009e2900*)pRef)->GetFlags() & 0x200)
-                fspeed = ((Actor*)pActor)->FUN_00884eb0();
+                fspeed = ((Actor*)pActor)->GetRunSpeed();
             else
-                fspeed = ((Actor*)pActor)->FUN_00884dc0();
+                fspeed = ((Actor*)pActor)->GetWalkSpeed();
             fdistance = fspeed * afDeltaT;
             return ((PathingSolution*)(unsigned int)pPathingSolution)
                 ->GetPointAtDistance(m_fSplineParameter, fdistance);
@@ -3108,11 +3121,11 @@ void FUN_009e3c00_shell::AdvanceAlongPath(float afDist)
     float fnewSplineT;
     if (afDist >= gModifierZero)
         ((PathingSolution*)pCurrentPathingSolution)
-            ->FUN_006e7e70(this->m_fSplineParameter, afDist, 1, (int*)&fnewSplineT,
+            ->FindPointOnPath(this->m_fSplineParameter, afDist, 1, (int*)&fnewSplineT,
                            (NiPoint3*)&newPoint);
     else
         ((PathingSolution*)pCurrentPathingSolution)
-            ->FUN_006e7e70(this->m_fSplineParameter, -afDist, 0, (int*)&fnewSplineT,
+            ->FindPointOnPath(this->m_fSplineParameter, -afDist, 0, (int*)&fnewSplineT,
                            (NiPoint3*)&newPoint);
     this->m_fSplineParameter = fnewSplineT;
     this->m_kPathVector3 = (const NiPoint3&)newPoint;
@@ -3131,14 +3144,14 @@ struct BSSimpleListTESRaceSize
 };
 struct FUN_007ff8e0_shell
 {
-    bool FUN_007ff8e0();
+    bool NiAVObject_QFadedIn();
 };
 
 // The approved controller lacks this query. Extend its declaration locally
 // without repeating its layout or virtual table.
 struct CharacterControllerQueries : public bhkCharacterController
 {
-    float FUN_008a3b50() const;
+    float bhkCharacterController_QLODDistance() const;
 };
 
 struct FUN_009e54a0_ref
@@ -3175,10 +3188,10 @@ bool UpdateAliveActorList()
             NiNode* node = actor->GetNiNode();
             if (!node)
                 continue;
-            if (!((FUN_007ff8e0_shell*)node)->FUN_007ff8e0())
+            if (!((FUN_007ff8e0_shell*)node)->NiAVObject_QFadedIn())
                 continue;
-            if (actor->GetPhysicsCharacterController() && ((BSFadeNode*)node)->FUN_00552470() &&
-                ((CharacterControllerQueries*)actor->GetPhysicsCharacterController())->FUN_008a3b50() >
+            if (actor->GetPhysicsCharacterController() && ((BSFadeNode*)node)->NiNode_QNotVisible() &&
+                ((CharacterControllerQueries*)actor->GetPhysicsCharacterController())->bhkCharacterController_QLODDistance() >
                     *((Setting*)&g_011f2bd0)->Float())
                 continue;
             DAT_011f2aa0++;
@@ -3402,7 +3415,7 @@ struct PathHandlerOps : public ActorPathHandler
 };
 
 float __cdecl GetDirectionAngle(const NiPoint3& dir);
-bool __cdecl FUN_006ba9e0(const NiPoint3* start, const NiPoint3* end, const NiPoint3* avoidPos, float avoidRadius);
+bool __cdecl NavMeshMath_SegmentCircleIntersection(const NiPoint3* start, const NiPoint3* end, const NiPoint3* avoidPos, float avoidRadius);
 
 extern PlayerOps_9e6ba0* g_thePlayer;
 extern Setting g_011f2b68;
@@ -3506,7 +3519,7 @@ void FUN_009e6ba0_shell::UpdatePathingOrigin(PathingRequest* apRequest)
             {
                 Actor* pavoidActor = pCurrentElementNext->GetItem();
                 pCurrentElementNext = pCurrentElementNext->GetNext();
-                if (FUN_006ba9e0((*(const TESObjectREFR**)((char*)this + 4))->GetPos(),
+                if (NavMeshMath_SegmentCircleIntersection((*(const TESObjectREFR**)((char*)this + 4))->GetPos(),
                                  &((DetailedActorPathHandler*)this)->m_kPathVector3, ((const Actor*)pavoidActor)->GetPos(),
                                  pavoidActor->FUN_008be1b0()))
                 {
@@ -3648,7 +3661,7 @@ typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
 struct FUN_009e9760_shell : public DetailedActorPathHandler
 {
-    void FUN_009e9760(BGSLoadFormBuffer*);
+    void DetailedActorPathHandler_InitLoadGame(BGSLoadFormBuffer*);
 };
 
 
@@ -3667,7 +3680,8 @@ struct AvoidActorListNode
 ::TESForm* _ref_004839c0(unsigned int);
 
 // @fnv 0x009e9760
-void FUN_009e9760_shell::FUN_009e9760(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009e9760
+void FUN_009e9760_shell::DetailedActorPathHandler_InitLoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     AvoidActorListNode* pCurrentElementNext;
     AvoidActorListNode* plastList;
@@ -3715,7 +3729,7 @@ void FUN_009e9760_shell::FUN_009e9760(BGSLoadFormBuffer* apLoadGameBuffer)
         }
     }
     if (m_pPathTargetReference)
-        ((TESObjectREFR*)m_pPathTargetReference)->FUN_00564db0(true);
+        ((TESObjectREFR*)m_pPathTargetReference)->TESObjectREFR_SetTargeted(true);
 }
 }  // namespace fnv_009e9760
 
@@ -3824,7 +3838,7 @@ void PathSerializationData::Serialize(BGSSaveFormBuffer* archive)
     archive->FUN_00865e50(&m_fPathValue18, 4, 0);
     archive->FUN_00865df0(m_pPathTargetReference, 0);
     unsigned int count = 0;
-    unsigned int token = archive->FUN_00865f20();
+    unsigned int token = archive->StartVariableSizedValue();
     BSSimpleList<TESTopicInfo*>* node = &ActorAvoidEntryList;
     while (node != 0)
     {
@@ -3836,7 +3850,7 @@ void PathSerializationData::Serialize(BGSSaveFormBuffer* archive)
         }
         node = node->GetNext();
     }
-    archive->FUN_00865ff0(count, token);
+    archive->SaveVariableSizedValue_00865ff0(count, token);
 }
 
 
@@ -4468,7 +4482,7 @@ int UpdateHandler::UpdateMovementState(float afDeltaTime)
                     ((UpdateRequest*)newRequest)->Prepare();
                     avoidState = 3;
 
-                    mover->FUN_009db090((const PathingRequest*)(UpdateRequest*)newRequest);
+                    mover->BackGroundBuildPath((const PathingRequest*)(UpdateRequest*)newRequest);
 
                     if (mover->eState == 6)
                     {
@@ -4590,14 +4604,14 @@ int DoorHandler::UpdateDoorState()
                 switch (status)
                 {
                 case 3:
-                    if (!((RequestView*)((NiPointer<RequestView>&)m_pPathingRequest))->Ready() && CanOpen(door->FUN_0084e3a0()))
+                    if (!((RequestView*)((NiPointer<RequestView>&)m_pPathingRequest))->Ready() && CanOpen(door->GetHavokWorldObjectCountInSceneGraph_0084e3a0()))
                     {
                         if (!door->Activate(pActor, false, (TESBoundObject*)0, 1))
                             m_iPathValue2 = 2;
                         else
                         {
                             ((TESObjectREFR*&)m_pPathTargetReference) = door;
-                            ((TESObjectREFR*&)m_pPathTargetReference)->FUN_00564db0(true);
+                            ((TESObjectREFR*&)m_pPathTargetReference)->TESObjectREFR_SetTargeted(true);
                             m_iPathValue2 = 1;
                         }
                     }
@@ -4664,11 +4678,12 @@ struct FUN_006e7a10_Class
 
 struct FUN_009e22d0_shell : public DetailedActorPathHandler
 {
-    bool FUN_009e22d0(unsigned int auiFlags);
+    bool DetailedActorPathHandler_IsDoorInPath(unsigned int auiFlags);
 };
 
 // @fnv 0x009e22d0
-bool FUN_009e22d0_shell::FUN_009e22d0(unsigned int auiFlags)
+// src: XBOX_PDB 0x009e22d0
+bool FUN_009e22d0_shell::DetailedActorPathHandler_IsDoorInPath(unsigned int auiFlags)
 {
     if (!(PathingSolution*)pCurrentPathingSolution)
     {
@@ -4738,10 +4753,10 @@ bool FUN_009e22d0_shell::FUN_009e22d0(unsigned int auiFlags)
 struct PathAngleActor : Actor
 {
     float FUN_008be1b0();
-    bool FUN_005a2030() const;
+    bool IsSwimming_005a2030() const;
 };
-NiPoint3 __cdecl FUN_009a8050(Actor*);
-NiPoint3 __cdecl FUN_009a88e0(Actor*, NiPoint3);
+NiPoint3 __cdecl CombatUtilities_GetAttackerFiringLocation(Actor*);
+NiPoint3 __cdecl CombatUtilities_GetAngleToProjectedPoint(Actor*, NiPoint3);
 float __cdecl GetDirectionAngle(const NiPoint3&);
 struct PathAngles : DetailedActorPathHandler
 {
@@ -4768,7 +4783,7 @@ void PathAngles::GetPathAngles(float& headingOut, float& lookingOut)
             NiPoint3 target;
             ((PathingSolution*)(PathingSolution*)pCurrentPathingSolution)
                 ->GetLocationAtSplineParameter(m_fElapsedTime, (NiPoint3&)target);
-            NiPoint3 delta = target.FUN_00439ef0(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
+            NiPoint3 delta = target.SubtractIntoVector(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
             delta.z = 0.0f;
             angle = GetDirectionAngle((const NiPoint3&)delta);
         }
@@ -4781,20 +4796,20 @@ void PathAngles::GetPathAngles(float& headingOut, float& lookingOut)
     {
         NiPoint3 target;
         ((ActorMover*)m_pActorMover)->GetLookAtTargetPosition((NiPoint3&)target);
-        NiPoint3 position = FUN_009a8050(pActor);
-        if (position.FUN_00439ef0(target).GetSquaredXYLength() <
+        NiPoint3 position = CombatUtilities_GetAttackerFiringLocation(pActor);
+        if (position.SubtractIntoVector(target).GetSquaredXYLength() <
             ((PathAngleActor*)pActor)->FUN_008be1b0() * ((PathAngleActor*)pActor)->FUN_008be1b0() * 0.25)
         {
             angle = pActor->GetCurrentTargetDistance(false);
         }
         else
         {
-            NiPoint3 angles = FUN_009a88e0(pActor, target);
-            if (!((PathAngleActor*)pActor)->FUN_005a2030())
+            NiPoint3 angles = CombatUtilities_GetAngleToProjectedPoint(pActor, target);
+            if (!((PathAngleActor*)pActor)->IsSwimming_005a2030())
                 looking = angles.x;
             if (((PathAngleActor*)pActor)->FUN_008be1b0() >= 100.0)
             {
-                NiPoint3 delta = target.FUN_00439ef0(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
+                NiPoint3 delta = target.SubtractIntoVector(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
                 delta.z = 0.0f;
                 angle = GetDirectionAngle((const NiPoint3&)delta);
             }
@@ -4816,8 +4831,8 @@ void PathAngles::GetPathAngles(float& headingOut, float& lookingOut)
         {
             (NiPoint3&)destination = m_kPathVector3;
         }
-        NiPoint3 direction = destination.FUN_00439ef0(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
-        if (((PathAngleActor*)pActor)->FUN_005a2030() &&
+        NiPoint3 direction = destination.SubtractIntoVector(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
+        if (((PathAngleActor*)pActor)->IsSwimming_005a2030() &&
             direction.FUN_00457990() * 0.949999988079071 <= std::abs(direction.z))
         {
             angle = pActor->GetCurrentTargetDistance(false);
@@ -4826,7 +4841,7 @@ void PathAngles::GetPathAngles(float& headingOut, float& lookingOut)
         {
             angle = GetDirectionAngle((const NiPoint3&)direction);
         }
-        if (((PathAngleActor*)pActor)->FUN_005a2030())
+        if (((PathAngleActor*)pActor)->IsSwimming_005a2030())
             looking = 0.0f;
     }
     headingOut = angle;
@@ -4914,13 +4929,13 @@ struct CollisionObjectView
 };
 struct CollidableView
 {
-    void* FUN_00810660();
+    void* bhkCharacterController_GetNiObject();
 };
 struct ControllerView
 {
-    CollidableView* FUN_00c6fd60();
+    CollidableView* bhkCharacterController_GetBumpedCharacterController();
 };
-CollisionObjectView* __cdecl FUN_0056f930(void*);
+CollisionObjectView* __cdecl TESObjectREFR_FindReferenceFor3D(void*);
 struct MotionActor
 {
     virtual void v000();
@@ -5049,9 +5064,9 @@ struct MotionActor
     virtual void v1ec();
     virtual void v1f0();
     virtual const MotionVec& GetPosition();
-    bool FUN_005a2030();
+    bool IsSwimming_005a2030();
     ControllerView* FUN_009306d0();
-    TESWorldSpace* FUN_00575d70();
+    TESWorldSpace* TESObjectREFR_GetWorldSpace();
     TESObjectCELL* FUN_008d6f30();
 };
 struct RequestView
@@ -5067,8 +5082,8 @@ struct AvoidSphereView
     MotionVec& FUN_006815c0();
     float FUN_004a7bd0();
     float GetFloatAtOffset1C();
-    void FUN_00819a50(float);
-    void FUN_00804cb0(float);
+    void CombatLocation_SetRadius(float);
+    void ActiveEffect_SetMagnitude(float);
 };
 struct MeshView
 {
@@ -5159,7 +5174,7 @@ bool MotionTarget::UpdateMotion(float afDeltaTime)
     MotionVec f = eb - lastPosition;
     bool a = false;
     bool s = false;
-    if (!actor->FUN_005a2030())
+    if (!actor->IsSwimming_005a2030())
     {
         float cf = 20.0f;
         float q = i.Horizontal();
@@ -5173,9 +5188,9 @@ bool MotionTarget::UpdateMotion(float afDeltaTime)
             if (k)
             {
                 CollisionObjectView* j = 0;
-                CollidableView* c = k->FUN_00c6fd60();
-                void* e = c ? c->FUN_00810660() : 0;
-                CollisionObjectView* l = FUN_0056f930(e);
+                CollidableView* c = k->bhkCharacterController_GetBumpedCharacterController();
+                void* e = c ? c->bhkCharacterController_GetNiObject() : 0;
+                CollisionObjectView* l = TESObjectREFR_FindReferenceFor3D(e);
                 j = l && l->IsObstacle() ? l : 0;
                 if (j)
                     s = true;
@@ -5197,9 +5212,9 @@ bool MotionTarget::UpdateMotion(float afDeltaTime)
             if (k)
             {
                 CollisionObjectView* j = 0;
-                CollidableView* c = k->FUN_00c6fd60();
-                void* e = c ? c->FUN_00810660() : 0;
-                CollisionObjectView* l = FUN_0056f930(e);
+                CollidableView* c = k->bhkCharacterController_GetBumpedCharacterController();
+                void* e = c ? c->bhkCharacterController_GetNiObject() : 0;
+                CollisionObjectView* l = TESObjectREFR_FindReferenceFor3D(e);
                 j = l && l->IsObstacle() ? l : 0;
                 if (j)
                     s = true;
@@ -5232,7 +5247,7 @@ bool MotionTarget::UpdateMotion(float afDeltaTime)
         p = true;
         if (mode == 0 || mode == 1 || mode == 5)
         {
-            LocationView location(target, actor->FUN_008d6f30(), actor->FUN_00575d70());
+            LocationView location(target, actor->FUN_008d6f30(), actor->TESObjectREFR_GetWorldSpace());
             if (location.FUN_006dd6f0(0))
             {
                 MeshPtrView h;
@@ -5242,7 +5257,7 @@ bool MotionTarget::UpdateMotion(float afDeltaTime)
                     BSSimpleArray<NavMeshStaticAvoidNode*, 1024> f;
                     h->FUN_00691660(p, f);
                     bool eb = true;
-                    if (!f.FUN_0076b610())
+                    if (!f.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
                     {
                         for (unsigned a = 0; a < f.GetSize(); ++a)
                         {
@@ -5250,9 +5265,9 @@ bool MotionTarget::UpdateMotion(float afDeltaTime)
                             if ((i->FUN_006815c0() - target).Squared() < i->FUN_004a7bd0() * i->FUN_004a7bd0())
                             {
                                 if (i->FUN_004a7bd0() < 128.0)
-                                    i->FUN_00819a50(i->FUN_004a7bd0() * 2.0f);
+                                    i->CombatLocation_SetRadius(i->FUN_004a7bd0() * 2.0f);
                                 else
-                                    i->FUN_00804cb0(i->GetFloatAtOffset1C() * 10.0);
+                                    i->ActiveEffect_SetMagnitude(i->GetFloatAtOffset1C() * 10.0);
                                 eb = false;
                             }
                         }
@@ -5276,7 +5291,7 @@ struct AvoidPoint
     AvoidPoint(float, float, float);
     AvoidPoint operator-(const AvoidPoint&) const;
     AvoidPoint operator+(const AvoidPoint&) const;
-    AvoidPoint FUN_0053d280(float) const;
+    AvoidPoint ProcessAndReturnValue_0053d280(float) const;
     float Length() const;
     float FUN_004a7290() const;
     float GetSquaredXYLength() const;
@@ -5296,12 +5311,12 @@ struct AvoidanceVectorData
 };
 struct AvoidPath
 {
-    AvoidanceVectorData* FUN_006b05a0();
+    AvoidanceVectorData* PathingSolution_GetLastNode();
 };
 struct AvoidArray;
 struct AvoidRequest
 {
-    bool FUN_00632ce0();
+    bool bhkPickData_GetPickFailed();
     void SetUseSoft(bool);
     float GetFloatAtOffset68();
     void AssignPathingLocation(const AvoidLocation*);
@@ -5575,8 +5590,8 @@ struct AvoidController
     unsigned int unk408;
     unsigned int unk40c;
     AvoidFlags flags;
-    float FUN_008a3b50() const;
-    void* FUN_00621a40();
+    float bhkCharacterController_QLODDistance() const;
+    void* bhkCharacterProxy_GethkPosition();
 };
 struct AvoidActor
 {
@@ -5756,16 +5771,16 @@ struct AvoidActor
     virtual void v173();
     virtual void v174();
     virtual float v175(int);
-    bool FUN_007ff8e0();
-    bool FUN_00552470() const;
+    bool NiAVObject_QFadedIn();
+    bool NiNode_QNotVisible() const;
     AvoidController* FUN_009306d0();
     float FUN_008be1b0();
-    bool FUN_004938e0();
+    bool IsMoving_004938e0();
     bool DispatchToReceiver();
-    bool FUN_008b3860(AvoidLocation*);
+    bool Actor_GetCurrentPathfindingGoal_008b3860(AvoidLocation*);
     unsigned int GetVtbl20Result();
     bool FUN_008bc7d0(AvoidActor*);
-    const AvoidPoint* FUN_008b3d50();
+    const AvoidPoint* GetCachedMoveDelta();
 };
 struct AvoidRefPath
 {
@@ -5806,7 +5821,7 @@ struct AvoidArray
 };
 struct AvoidSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern AvoidSetting g_011f2bd0, g_011f2b1c, g_011f2b74, g_011f2b2c, g_011f2b3c, g_011f2bc4, g_011f2b5c;
 struct AvoidPlayer : AvoidActor
@@ -5860,14 +5875,14 @@ void __cdecl EvaluateAvoidance(AvoidActor*, AvoidRequest*, unsigned int, const A
 int AvoidHandler::UpdateAvoidance(float deltaTime)
 {
     AvoidActor* target = actor->v116();
-    if (!target || !target->FUN_007ff8e0() ||
-        (target->FUN_00552470() && actor->FUN_009306d0()->FUN_008a3b50() > *g_011f2bd0.FUN_00403e20()))
+    if (!target || !target->NiAVObject_QFadedIn() ||
+        (target->NiNode_QNotVisible() && actor->FUN_009306d0()->bhkCharacterController_QLODDistance() > *g_011f2bd0.Setting_Float_00403e20()))
         return 0;
     if (avoidState != 2 && moveDelta.GetSquaredXYLength() < 0.25)
         return 0;
     if (avoidState != 4 && avoidState != 3)
         actors.FUN_00470470();
-    AvoidActor* destination = (AvoidActor*)FUN_009e55e0((TES*)actor);
+    AvoidActor* destination = (AvoidActor*)DetailedActorPathHandler_GetFollowLeader((TES*)actor);
     BSSimpleArray<ActorAvoidanceData, 1024> contacts;
     AvoidPoint direction = moveDelta;
     if (avoidState == 2)
@@ -5886,10 +5901,10 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
             {
                 if ((AvoidPath*)path)
                 {
-                    AvoidLocation end(*((AvoidPath*)path)->FUN_006b05a0()->FUN_00717e50());
+                    AvoidLocation end(*((AvoidPath*)path)->PathingSolution_GetLastNode()->FUN_00717e50());
                     if (end.IsWithinDistanceOfSameLocation(&AvoidLocation(g_thePlayer, g_thePlayer->FUN_008be1b0())))
                     {
-                        if (((AvoidRequest*)request)->FUN_00632ce0())
+                        if (((AvoidRequest*)request)->bhkPickData_GetPickFailed())
                             return 3;
                         else
                             ((AvoidRequest*)request)->SetUseSoft(false);
@@ -5903,10 +5918,10 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
         else
         {
             bool moving = false;
-            if (obstacle->FUN_004938e0() && !obstacle->DispatchToReceiver())
+            if (obstacle->IsMoving_004938e0() && !obstacle->DispatchToReceiver())
                 moving = true;
             AvoidLocation location;
-            if (obstacle->FUN_008b3860(&location))
+            if (obstacle->Actor_GetCurrentPathfindingGoal_008b3860(&location))
             {
                 if (location.IsWithinDistanceOfSameLocation(
                         &AvoidLocation(actor, ((AvoidRequest*)request)->GetFloatAtOffset68())))
@@ -5927,7 +5942,7 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
                 else if (!actor->FUN_008bc7d0(obstacle))
                 {
                     blocked = true;
-                    if (detectionValue >= *g_011f2b1c.FUN_00403e20())
+                    if (detectionValue >= *g_011f2b1c.Setting_Float_00403e20())
                         break;
                 }
             }
@@ -5940,10 +5955,10 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
                     blocked = true;
                 if ((AvoidPath*)path)
                 {
-                    AvoidLocation end(*((AvoidPath*)path)->FUN_006b05a0()->FUN_00717e50());
+                    AvoidLocation end(*((AvoidPath*)path)->PathingSolution_GetLastNode()->FUN_00717e50());
                     if (end.IsWithinDistanceOfSameLocation(&AvoidLocation(obstacle, obstacle->FUN_008be1b0())))
                     {
-                        if (((AvoidRequest*)request)->FUN_00632ce0())
+                        if (((AvoidRequest*)request)->bhkPickData_GetPickFailed())
                             return 3;
                         else
                             ((AvoidRequest*)request)->SetUseSoft(false);
@@ -5957,21 +5972,21 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
         return 0;
     if (detectionValue == 0.0)
         return 0;
-    if (detectionValue >= *g_011f2b1c.FUN_00403e20())
+    if (detectionValue >= *g_011f2b1c.Setting_Float_00403e20())
     {
         if (blocked)
         {
-            waitTime = *g_011f2b74.FUN_00403e20();
-            avoidTimer = *g_011f2b2c.FUN_00403e20();
+            waitTime = *g_011f2b74.Setting_Float_00403e20();
+            avoidTimer = *g_011f2b2c.Setting_Float_00403e20();
             mover->FUN_00483710();
             return 1;
         }
-        if (!nearbyActors.FUN_0076b610())
+        if (!nearbyActors.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
         {
             if (avoidState != 4 && !includesPlayer && !(moveMode & 0x200))
-                avoidTimer = *g_011f2b3c.FUN_00403e20();
+                avoidTimer = *g_011f2b3c.Setting_Float_00403e20();
             else
-                avoidTimer = FUN_00404010(avoidTimer, *g_011f2bc4.FUN_00403e20());
+                avoidTimer = BSMAX_00404010(avoidTimer, *g_011f2bc4.Setting_Float_00403e20());
             AvoidArray* avoidNodes = new AvoidArray;
             unsigned int count = nearbyActors.GetSize();
             for (unsigned int j = 0; j < count; ++j)
@@ -6002,8 +6017,8 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
                 }
                 AvoidRotation rotation;
                 rotation.SetRotationMatrix(current->v175(0));
-                AvoidPoint velocity = rotation.FUN_004b4500(current->FUN_008b3d50());
-                AvoidPoint delta = velocity.FUN_0053d280(g_timeGlobal.FUN_0084d030());
+                AvoidPoint velocity = rotation.FUN_004b4500(current->GetCachedMoveDelta());
+                AvoidPoint delta = velocity.ProcessAndReturnValue_0053d280(g_timeGlobal.FUN_0084d030());
                 if (delta.FUN_004a7290() > current->FUN_008be1b0())
                     avoidNodes->AppendNode(&AvoidElement(current->v125() + delta, avoidRadius, 2.0f, mode));
                 AvoidPoint position = current->v125();
@@ -6011,13 +6026,13 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
                 if (controller && !controller->flags.FUN_00621270(0x8000000))
                 {
                     AvoidQuaternion rotationValue;
-                    rotationValue.FUN_004a3c90(controller->FUN_00621a40());
+                    rotationValue.FUN_004a3c90(controller->bhkCharacterProxy_GethkPosition());
                     AvoidPoint offset;
                     FUN_00458620(&offset, &rotationValue);
                     position.x = offset.x;
                     position.y = offset.y;
                 }
-                avoidNodes->AppendNode(&AvoidElement(position, avoidRadius, *g_011f2b5c.FUN_00403e20(), mode));
+                avoidNodes->AppendNode(&AvoidElement(position, avoidRadius, *g_011f2b5c.Setting_Float_00403e20(), mode));
             }
             ((AvoidRequest*)request)->AssignPathingLocation(&AvoidLocation(actor));
             ((AvoidRequest*)request)->FUN_006d61e0(avoidNodes);
@@ -6025,7 +6040,7 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
             return 2;
         }
     }
-    if (!blocked && nearbyActors.FUN_0076b610())
+    if (!blocked && nearbyActors.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
     {
         detectionValue -= deltaTime;
         if (detectionValue < 0.0)
@@ -6049,12 +6064,12 @@ extern GlobalObject_0044f440 g_011f2c10;
 
 struct FUN_008843a0_shell
 {
-    bool FUN_008843a0();
+    bool Actor_CanMove();
 };
 
 struct FUN_00493bb0_shell
 {
-    bool FUN_00493bb0();
+    bool Actor_IsInCombat();
 };
 
 
@@ -6102,14 +6117,15 @@ struct VCallHelper_354 : public VCallHelper_2bc
 
 struct FUN_009e7d70_shell : public DetailedActorPathHandler
 {
-    float FUN_009e7d70(float a2);
+    float DetailedActorPathHandler_UpdateRotation(float a2);
 };
 
 // @fnv 0x009e7d70
-float FUN_009e7d70_shell::FUN_009e7d70(float afDeltaTime)
+// src: XBOX_PDB 0x009e7d70
+float FUN_009e7d70_shell::DetailedActorPathHandler_UpdateRotation(float afDeltaTime)
 {
     float var_8 = ((VCallHelper_2bc*)this->pActor)->v175(0);
-    if (!((FUN_008843a0_shell*)this->pActor)->FUN_008843a0())
+    if (!((FUN_008843a0_shell*)this->pActor)->Actor_CanMove())
     {
         this->ByteAndFlagState = this->m_pActorMover->GetPreferredMoveModeType();
         return var_8;
@@ -6123,11 +6139,11 @@ float FUN_009e7d70_shell::FUN_009e7d70(float afDeltaTime)
         float var_10 = ((VCallHelper_354*)this->pActor)->v213() * DAT_01023128 * afDeltaTime;
         if (!this->pActor->IsCreature())
         {
-            var_10 *= ((FUN_00493bb0_shell*)this->pActor)->FUN_00493bb0() ? *g_011f2ac4.Float() : *g_011f2ad8.Float();
+            var_10 *= ((FUN_00493bb0_shell*)this->pActor)->Actor_IsInCombat() ? *g_011f2ac4.Float() : *g_011f2ad8.Float();
         }
         else
         {
-            var_10 *= ((FUN_00493bb0_shell*)this->pActor)->FUN_00493bb0() ? *g_011f2b10.Float() : *g_011f2c10.Float();
+            var_10 *= ((FUN_00493bb0_shell*)this->pActor)->Actor_IsInCombat() ? *g_011f2b10.Float() : *g_011f2c10.Float();
         }
         if (var_10 > std::abs(var4))
         {
@@ -6168,14 +6184,14 @@ float FUN_009e7d70_shell::FUN_009e7d70(float afDeltaTime)
 struct PosX
 {
     float x, y, z;
-    PosX FUN_00439ef0(const PosX& r) const;
-    float FUN_00589850() const;
+    PosX SubtractIntoVector(const PosX& r) const;
+    float NiPoint3_XYLength() const;
 };
 
 // The original calls 0x008BE350 with an x87 double result; Actor.h lacks that declaration.
 struct PathClearanceQuery : Actor
 {
-    double FUN_008be350();
+    double Actor_GetLength();
 };
 
 struct LocX
@@ -6188,14 +6204,14 @@ struct CellX
 };
 struct ProcX
 {
-    bool FUN_006b05d0();
+    bool IsIncomplete();
     unsigned GetObjectFlags();
-    CellX* FUN_006b05a0();
+    CellX* PathingSolution_GetLastNode();
 };
 struct ProcPtr
 {
     ProcX* p;
-    ProcX* FUN_00559450();
+    ProcX* Modelloader_GetReferencedThis();
 };
 struct TgtX
 {
@@ -6204,7 +6220,7 @@ struct TgtX
 struct TgtPtr
 {
     TgtX* p;
-    TgtX* FUN_00559450();
+    TgtX* Modelloader_GetReferencedThis();
 };
 struct DoorX
 {
@@ -6219,7 +6235,7 @@ struct NodePtr
     NodeX* p;
     NodePtr();
     ~NodePtr();
-    NodeX* FUN_00559450();
+    NodeX* Modelloader_GetReferencedThis();
 };
 struct ResultX
 {
@@ -6239,7 +6255,7 @@ struct WalkX
 void __cdecl FUN_006d7490(WalkX* w, PosX* p, int i, ResultX* r);
 struct PlanX
 {
-    void FUN_009df010(PosX* p);
+    void MoveActorToLocation(PosX* p);
 };
 struct PkgX
 {
@@ -6257,23 +6273,23 @@ struct PkgX
 // @fnv 0x009e8800
 bool PkgX::IsPathClear()
 {
-    if (m10.FUN_00559450() && m10.FUN_00559450()->GetFloatAtOffset68() > 100.0)
+    if (m10.Modelloader_GetReferencedThis() && m10.Modelloader_GetReferencedThis()->GetFloatAtOffset68() > 100.0)
         return false;
     float fNear_u = 64.0f;
     float fNearSq_chdcf = fNear_u * fNear_u;
     float fFar_nezo = 128.0f;
     float fFarSq_abpnoy = fFar_nezo * fFar_nezo;
-    float fDistTmp = m34.FUN_00439ef0(*(PosX*)((const Actor*)m4)->GetPos()).FUN_00589850();
+    float fDistTmp = m34.SubtractIntoVector(*(PosX*)((const Actor*)m4)->GetPos()).NiPoint3_XYLength();
     float fMin_knckj = 0.0f;
-    if (mc.FUN_00559450()->FUN_006b05d0())
-        fMin_knckj = ((PathClearanceQuery*)m4)->FUN_008be350() * 0.6f;
-    if (mc.FUN_00559450()->GetObjectFlags() > 0)
+    if (mc.Modelloader_GetReferencedThis()->IsIncomplete())
+        fMin_knckj = ((PathClearanceQuery*)m4)->Actor_GetLength() * 0.6f;
+    if (mc.Modelloader_GetReferencedThis()->GetObjectFlags() > 0)
     {
         if (fDistTmp < fFar_nezo)
             AdvanceAlongPath(fFar_nezo - fDistTmp);
-        fDistTmp = m34.FUN_00439ef0(*(PosX*)((const Actor*)m4)->GetPos()).FUN_00589850();
+        fDistTmp = m34.SubtractIntoVector(*(PosX*)((const Actor*)m4)->GetPos()).NiPoint3_XYLength();
         float fCell_kdfu =
-            mc.FUN_00559450()->FUN_006b05a0()->FUN_00717e50()->FUN_005c3420().FUN_00439ef0(m34).FUN_00589850();
+            mc.Modelloader_GetReferencedThis()->PathingSolution_GetLastNode()->FUN_00717e50()->FUN_005c3420().SubtractIntoVector(m34).NiPoint3_XYLength();
         if (fDistTmp < fNear_u || fCell_kdfu < fMin_knckj)
         {
             return false;
@@ -6287,7 +6303,7 @@ bool PkgX::IsPathClear()
             unsigned short usIdx;
             if (kWalk.FUN_006dd640(&aSpNode, &usIdx))
             {
-                DoorX* pkDoor3 = aSpNode.FUN_00559450()->FUN_005582f0(usIdx);
+                DoorX* pkDoor3 = aSpNode.Modelloader_GetReferencedThis()->FUN_005582f0(usIdx);
                 if (!pkDoor3)
                 {
                 }
@@ -6303,7 +6319,7 @@ bool PkgX::IsPathClear()
             }
             else
             {
-                m8->FUN_009df010(&m34);
+                m8->MoveActorToLocation(&m34);
                 return true;
             }
         }
@@ -6456,7 +6472,7 @@ struct Ctx
 };
 void __cdecl FUN_00406d30(char* d, int n, const char* s);
 void __cdecl FUN_00406d50(char* d, int n, const char* s);
-void __cdecl FUN_00406d00(char* d, int n, const char* s, ...);
+void __cdecl BSsprintf(char* d, int n, const char* s, ...);
 struct PFThis
 {
     int f00;
@@ -6475,11 +6491,12 @@ struct PFThis
     bool bDD;
     bool bDE;
     bool bDF;
-    void FUN_009e8b50(Ctx* pOutput, int a2, int a3);
+    void DetailedActorPathHandler_PrintCurrentStatus(Ctx* pOutput, int a2, int a3);
 };
 // Writes the actor's position, pathing state, and avoidance state to pOutput using formatted strings.
 // @fnv 0x009e8b50
-void PFThis::FUN_009e8b50(Ctx* pOutput, int a2, int a3)
+// src: XBOX_PDB 0x009e8b50
+void PFThis::DetailedActorPathHandler_PrintCurrentStatus(Ctx* pOutput, int a2, int a3)
 {
     char acDetailText[0x104];
     char acStateText[0x104];
@@ -6533,7 +6550,7 @@ void PFThis::FUN_009e8b50(Ctx* pOutput, int a2, int a3)
         FUN_00406d50(acStateText, 0x104, "OK");
         if (f78 > 0.0)
         {
-            FUN_00406d00(acDetailText, 0x104, " :detect %f", (double)f78);
+            BSsprintf(acDetailText, 0x104, " :detect %f", (double)f78);
             FUN_00406d50(acStateText, 0x104, acDetailText);
         }
         break;
@@ -6547,7 +6564,7 @@ void PFThis::FUN_009e8b50(Ctx* pOutput, int a2, int a3)
         FUN_00406d50(acStateText, 0x104, "Repath ignore");
         if (f78 > 0.0)
         {
-            FUN_00406d00(acDetailText, 0x104, " :detect %f", (double)f78);
+            BSsprintf(acDetailText, 0x104, " :detect %f", (double)f78);
             FUN_00406d50(acStateText, 0x104, acDetailText);
         }
         break;
@@ -6608,8 +6625,8 @@ namespace std {
 float __cdecl abs(float);
 }
 
-float __cdecl FUN_00404010(float, float);
-void __cdecl FUN_005330e0(float&, float, float);
+float __cdecl BSMAX_00404010(float, float);
+void __cdecl BSClamp_float(float&, float, float);
 
 struct SettingVal
 {
@@ -7069,9 +7086,9 @@ struct Ref
     virtual void v265();
     virtual void v266();
     virtual Ref* GetCombatTarget();
-    float FUN_008be420();
+    float Actor_GetForwardLength();
     float FUN_008be1b0();
-    bool FUN_00493bb0();
+    bool Actor_IsInCombat();
     Proc* GetCurrentProcess();
 };
 
@@ -7139,7 +7156,8 @@ struct Group
 
 // Checks target range, vertical separation, package and direction conditions, and may write a computed value to apResult.
 // @fnv 0x009e6900
-bool __cdecl FUN_009e6900(Ref* apActor, Group* apGroup, Ref* apTarget, const NiPoint3& arPos, const NiPoint3& arDir,
+// src: COMMUNITY 0x009e6900
+bool __cdecl DetailedActorPathHandler_CheckDetection(Ref* apActor, Group* apGroup, Ref* apTarget, const NiPoint3& arPos, const NiPoint3& arDir,
                           float afExtra, float afMinDot, float* apResult, bool abCheckOnly)
 {
     NiPoint3 kDelta;
@@ -7148,14 +7166,14 @@ bool __cdecl FUN_009e6900(Ref* apActor, Group* apGroup, Ref* apTarget, const NiP
         return false;
 
     kDelta = *apTarget->GetPos() - arPos;
-    float fRadius3 = apActor->FUN_008be420();
+    float fRadius3 = apActor->Actor_GetForwardLength();
     float fRange5 = apTarget->FUN_008be1b0() + afExtra + fRadius3;
     float fRangeSqr6 = fRange5 * fRange5;
     if (((const NiPoint3&)kDelta).GetSquaredXYLength() < fRangeSqr6)
     {
         if (std::abs(kDelta.z) < 180.0)
         {
-            if (!apActor->FUN_00493bb0() || apTarget != apActor->GetCombatTarget())
+            if (!apActor->Actor_IsInCombat() || apTarget != apActor->GetCombatTarget())
             {
                 Target* pTarget = apActor->GetCurrentProcess() ? apActor->GetCurrentProcess()->GetTarget() : 0;
                 if (pTarget && pTarget->GetOwner() == apTarget)
@@ -7175,14 +7193,14 @@ bool __cdecl FUN_009e6900(Ref* apActor, Group* apGroup, Ref* apTarget, const NiP
                 if (fDist < *g_011f2b8c.Float())
                     bClose4 = true;
                 fDist = fDist - fRadius3;
-                fDist = FUN_00404010(fDist, 0.0f);
+                fDist = BSMAX_00404010(fDist, 0.0f);
                 float fDot_ = kDelta.Dot(arDir);
                 if (fDot_ >= afMinDot || bClose4)
                 {
                     if (abCheckOnly)
                         return true;
                     float fRatio5 = fDist / fRange5;
-                    FUN_005330e0(fRatio5, 0.0f, 1.0f);
+                    BSClamp_float(fRatio5, 0.0f, 1.0f);
                     int iPower5 = (int)(fRatio5 * 4.0);
                     float fValue3 = fDot_;
                     switch (iPower5)
@@ -7239,7 +7257,7 @@ struct DetailedPathGoalUpdate : DetailedActorPathHandler
     void ResetPathState();
     void FUN_009e68c0();
     void ResetMoveState();
-    int FUN_009e1d50(int);
+    int DetailedActorPathHandler_UpdateWhilePlayerWaits(int);
 };
 
 
@@ -7247,7 +7265,8 @@ struct DetailedPathGoalUpdate : DetailedActorPathHandler
 
 // @fnv 0x009e1d50
 
-int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
+// src: XBOX_PDB 0x009e1d50
+int DetailedPathGoalUpdate::DetailedActorPathHandler_UpdateWhilePlayerWaits(int iUnused)
 
 {
 
@@ -7296,7 +7315,7 @@ int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
 
     fElapsed9 = m_fPathValue2 - vfn_18();
 
-    pvRef4 = (PathingGraphNode*)((PathingSolution*)pCurrentPathingSolution)->FUN_006b05a0();
+    pvRef4 = (PathingGraphNode*)((PathingSolution*)pCurrentPathingSolution)->PathingSolution_GetLastNode();
 
     pkLocation8 = &pvRef4->FUN_00717e50();
 
@@ -7312,7 +7331,7 @@ int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
 
     fSpeedB = pActor->GetCurrentMovementSpeed() * fRateVal;
 
-    bAtEnd = (m_pActorMover->lastNode + 1) == ((PathingSolution*)pCurrentPathingSolution)->FUN_005a4320();
+    bAtEnd = (m_pActorMover->lastNode + 1) == ((PathingSolution*)pCurrentPathingSolution)->PathingSolution_GetVirtualNodeCount();
 
     if (((Actor*)pActor)->GetSitSleepState() == 4 && ((Actor*)pActor)->GetSitSleepState() == 9)
 
@@ -7324,11 +7343,11 @@ int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
 
     {
 
-        if (((NiPointer<PathingRequestQueries>&)m_pPathingRequest) && ((PathingRequestQueries*)((NiPointer<PathingRequestQueries>&)m_pPathingRequest))->FUN_00505c00() && bAtEnd)
+        if (((NiPointer<PathingRequestQueries>&)m_pPathingRequest) && ((PathingRequestQueries*)((NiPointer<PathingRequestQueries>&)m_pPathingRequest))->TESCombatStyle_GetPowerAttackF() && bAtEnd)
 
         {
 
-            fHeading9 = ((PathingRequestQueries*)((NiPointer<PathingRequestQueries>&)m_pPathingRequest))->FUN_00507e10();
+            fHeading9 = ((PathingRequestQueries*)((NiPointer<PathingRequestQueries>&)m_pPathingRequest))->BGSProjectile_GetMuzzleFlashDuration();
 
         }
 
@@ -7340,7 +7359,7 @@ int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
 
             m_pActorMover->GetLookAtTargetPosition((NiPoint3&)kTarget);
 
-            NiPoint3 kTargetPt = FUN_009a88e0(((Actor*)pActor), kTarget);
+            NiPoint3 kTargetPt = CombatUtilities_GetAngleToProjectedPoint(((Actor*)pActor), kTarget);
 
             fHeading9 = WrapAngle(kTargetPt.z);
 
@@ -7358,7 +7377,7 @@ int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
 
                 NiPoint3 kPrevTmp = ((PathingGraphNode*)((PathingSolution*)pCurrentPathingSolution)
 
-                                        ->FUN_006e7970(ItemUpdateArray - 2))
+                                        ->GetNode_006e7970(ItemUpdateArray - 2))
 
                                         ->FUN_00717e50()
 
@@ -7366,13 +7385,13 @@ int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
 
                 NiPoint3 kLastX = ((PathingGraphNode*)((PathingSolution*)pCurrentPathingSolution)
 
-                                      ->FUN_006e7970(ItemUpdateArray - 1))
+                                      ->GetNode_006e7970(ItemUpdateArray - 1))
 
                                       ->FUN_00717e50()
 
                                       .FUN_005c3420<NiPoint3>();
 
-                NiPoint3 kDiff = ((NiPoint3&)kLastX).FUN_00439ef0(kPrevTmp);
+                NiPoint3 kDiff = ((NiPoint3&)kLastX).SubtractIntoVector(kPrevTmp);
 
                 fHeading9 = (GetDirectionAngle)(kDiff);
 
@@ -7390,7 +7409,7 @@ int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
 
     }
 
-    pActor->FUN_008ad1c0(kPos2, fHeading9, (int)uiCell6, (int)uiWorld3, 1, 0);
+    pActor->Actor_MoveActorAndFollowers(kPos2, fHeading9, (int)uiCell6, (int)uiWorld3, 1, 0);
 
     iResultY2 = 5;
 
@@ -7411,28 +7430,29 @@ struct EndRotateHandler : DetailedActorPathHandler
 
 {
 
-    bool FUN_009e7550();
+    bool DetailedActorPathHandler_CheckForEndRotate();
 
 };
 
 
 // @fnv 0x009e7550
 
-bool EndRotateHandler::FUN_009e7550()
+// src: XBOX_PDB 0x009e7550
+bool EndRotateHandler::DetailedActorPathHandler_CheckForEndRotate()
 
 {
 
-    if (((PathingRequestQueries*)((NiPointer<PathingRequest>&)m_pPathingRequest).operator->())->FUN_00505c00() &&
+    if (((PathingRequestQueries*)((NiPointer<PathingRequest>&)m_pPathingRequest).operator->())->TESCombatStyle_GetPowerAttackF() &&
 
         ((ActorMover*)m_pActorMover)->lastNode + 1 ==
 
-            ((PathingSolution*)((NiPointer<PathingSolution>&)pCurrentPathingSolution).operator->())->FUN_005a4320() &&
+            ((PathingSolution*)((NiPointer<PathingSolution>&)pCurrentPathingSolution).operator->())->PathingSolution_GetVirtualNodeCount() &&
 
         pActor->GetSitSleepState() != 4 && pActor->GetSitSleepState() != 9)
 
     {
 
-        StartTurningToAngle(((PathingRequestQueries*)((NiPointer<PathingRequest>&)m_pPathingRequest).operator->())->FUN_00507e10(), false, false);
+        StartTurningToAngle(((PathingRequestQueries*)((NiPointer<PathingRequest>&)m_pPathingRequest).operator->())->BGSProjectile_GetMuzzleFlashDuration(), false, false);
 
         return m_bPathFlag1;
 

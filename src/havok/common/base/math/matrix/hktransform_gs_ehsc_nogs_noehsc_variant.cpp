@@ -8,7 +8,8 @@
 #include "../../../../../../include/Transform.h"
 
 // @fnv 0x00cb2240
-void Transform::FUN_00cb2240(const Transform* __restrict a, const Transform* __restrict b)
+// src: XBOX_PDB 0x00cb2240
+void Transform::hkTransform_setMul(const Transform* __restrict a, const Transform* __restrict b)
 {
     const __m128& c1 = a->r[1];
     const __m128& c0 = a->r[0];

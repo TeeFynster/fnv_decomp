@@ -20,8 +20,8 @@ public:
     int FUN_0043a320();
     void FUN_0043a210(TESObjectREFR* apRef, bool abFlag);
     void FUN_00430ca0();
-    bool FUN_0042dff0();
-    void FUN_0042e010(int);
+    bool MenuTopic_GetResponseListEmpty();
+    void MenuTopic_FillResponseList(int);
 
     LockExtraData* pLock;
 };

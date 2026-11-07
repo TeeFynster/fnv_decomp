@@ -42,11 +42,11 @@ public:
     void CopyAIDataFromAIDATA(PackedRecordData* data);
     void SetAIData(PackedRecordData* data);
     void FUN_0047f0b0(PackedRecordData* data);
-    void FUN_0047f500(unsigned int package);
-    void FUN_0047ef50(int value, bool addChange);
-    void FUN_0047ee00(int value, bool addChange);
-    void FUN_0047eed0(int value, bool addChange);
-    void FUN_0047ef00(int value, bool addChange);
+    void TESAIForm_AddPackage(unsigned int package);
+    void TESAIForm_SetResponsibility(int value, bool addChange);
+    void TESAIForm_SetAggression(int value, bool addChange);
+    void TESAIForm_SetConfidence(int value, bool addChange);
+    void TESAIForm_SetEnergy(int value, bool addChange);
 
     unsigned char GetAggression();
     void SetAggression(unsigned char value, bool addChange);
@@ -55,14 +55,14 @@ public:
     static float GetConfidenceLevel(unsigned char confidence);
     float GetConfidenceLevel();
     unsigned char GetConfidence();
-    unsigned char FUN_004f6de0();
+    unsigned char _GetByte05();
     void SetConfidence(unsigned char value, bool addChange);
     unsigned char GetEnergy();
     void SetEnergy(unsigned char value, bool addChange);
     unsigned char GetResponsibility();
     void SetResponsibility(unsigned char value, bool addChange);
     unsigned char GetMood();
-    unsigned char FUN_0062f2f0();
+    unsigned char MenuTopic_GetTopicIsChoice();
     void SetAIMood(unsigned char value);
     unsigned int GetServiceFlags();
     void SetServiceFlags(unsigned int flags, bool addChange);
@@ -93,7 +93,7 @@ public:
     void DispatchToOuter(int flags);
     void SaveGame(BGSSaveFormBuffer* buffer);
     void LoadGame(BGSLoadFormBuffer* buffer);
-    void FUN_0047f980(BGSLoadFormBuffer* buffer);
+    void TESAIForm_LoadGame_0047f980(BGSLoadFormBuffer* buffer);
     unsigned int GetSaveSizeTES(unsigned int flags);
     void SaveGameTES(unsigned int flags);
     void LoadGameTES(unsigned int flags);

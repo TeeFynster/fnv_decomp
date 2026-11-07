@@ -172,7 +172,8 @@ void __cdecl ReleaseObjectArray(Obj00a47600** apObjects)
 }
 
 // @fnv 0x00e902f0
-void NiDX9DynamicTextureData::FUN_00e902f0(bool v)
+// src: COMMUNITY 0x00e902f0
+void NiDX9DynamicTextureData::SetTextureLocked(bool v)
 {
     unk70 = v;
 }
@@ -180,21 +181,23 @@ void NiDX9DynamicTextureData::FUN_00e902f0(bool v)
 struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_0126f9f0;
 // @fnv 0x00e90550
-GlobalObjectO2_00a7b610* FUN_00e90550()
+// src: COMMUNITY 0x00e90550
+GlobalObjectO2_00a7b610* NiDX9ErrorShader_GetRTTI()
 {
     return &g_0126f9f0;
 }
 
-extern "C" void __cdecl FUN_00e87a50();
+extern "C" void __cdecl NiD3DRenderState_InitShaderState();
 
 struct FUN_00e90d80_shell
 {
-    void FUN_00e90d80();
+    void NiDX9RenderState_InitShaderState();
 };
 
 // Zeroes the byte at this+0x1100 and initialises the following dwords to 0,1,0,1, then calls FUN_00e87a50.
 // @fnv 0x00e90d80
-void FUN_00e90d80_shell::FUN_00e90d80()
+// src: COMMUNITY 0x00e90d80
+void FUN_00e90d80_shell::NiDX9RenderState_InitShaderState()
 {
     unsigned char* p = (unsigned char*)this + 0x1100;
     unsigned int v = 0;
@@ -204,7 +207,7 @@ void FUN_00e90d80_shell::FUN_00e90d80()
     *(unsigned int*)(p + 8) = one;
     *(unsigned int*)(p + 12) = v;
     *(unsigned int*)(p + 16) = one;
-    FUN_00e87a50();
+    NiD3DRenderState_InitShaderState();
 }
 
 struct FUN_00e90db0_shell
@@ -223,7 +226,8 @@ void FUN_00e90db0_shell::CopyFieldValues()
 }
 
 // @fnv 0x00e90df0
-bool __fastcall FUN_00e90df0(char* self, int)
+// src: COMMUNITY 0x00e90df0
+bool __fastcall NiDX9RenderState_GetSoftwareVertexProcessing(char* self, int)
 {
     return *reinterpret_cast<bool*>(self + 0x1114);
 }
@@ -253,7 +257,8 @@ int __fastcall CallVtableSlot39WithField1108(char* self, int)
 }
 
 // @fnv 0x00e91020
-void* __fastcall FUN_00e91020(char* self, int)
+// src: COMMUNITY 0x00e91020
+void* __fastcall NiDX9RenderState_GetDeclaration(char* self, int)
 {
     if (self[0x1100])
         return *reinterpret_cast<void**>(self + 0x110c);
@@ -268,28 +273,31 @@ int __fastcall CallVirtualSlot43(char* self, int)
         self, *reinterpret_cast<int*>(self + 0x1110), 0);
 }
 
-char __stdcall FUN_00a98170(int);
+char __stdcall RegisterStreamables_00a98170(int);
 // @fnv 0x00e91710
-char __stdcall FUN_00e91710(int a)
+// src: XBOX_PDB 0x00e91710
+char __stdcall NiDX9PersistentSrcTextureRendererData_RegisterStreamables(int a)
 {
-    return FUN_00a98170(a) != 0;
+    return RegisterStreamables_00a98170(a) != 0;
 }
 
 struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_0126f9f8;
 // @fnv 0x00e91740
-GlobalObjectO2_00a7b610* FUN_00e91740()
+// src: COMMUNITY 0x00e91740
+GlobalObjectO2_00a7b610* NiDX9PersistentSrcTextureRendererData_GetRTTI()
 {
     return &g_0126f9f8;
 }
 
 struct FUN_00e90e40_Class
 {
-    int __thiscall FUN_00e90e40();
+    int __thiscall NiDX9RenderState_GetVertexShader();
 };
 
 // @fnv 0x00e90e40
-int __thiscall FUN_00e90e40_Class::FUN_00e90e40()
+// src: COMMUNITY 0x00e90e40
+int __thiscall FUN_00e90e40_Class::NiDX9RenderState_GetVertexShader()
 {
     return *reinterpret_cast<int*>(reinterpret_cast<unsigned char*>(this) + 0x10e0);
 }
@@ -340,12 +348,13 @@ void* __thiscall FUN_00e90560_shell::FUN_00e90560(int aiFlags)
 
 struct FUN_00e91060_shell
 {
-    void FUN_00e91060(int arg);
+    void NiDX9RenderState_ClearDeclaration(int arg);
 };
 
 // If arg is non-zero and the byte at offset 0x1100 is set, clears the int fields at 0x110c and 0x1110 when they equal arg.
 // @fnv 0x00e91060
-void FUN_00e91060_shell::FUN_00e91060(int arg)
+// src: COMMUNITY 0x00e91060
+void FUN_00e91060_shell::NiDX9RenderState_ClearDeclaration(int arg)
 {
     if (arg && (*(unsigned char*)((char*)this + 0x1100)))
     {
@@ -374,7 +383,8 @@ struct BooleanKey
     }
 };
 // @fnv 0x00a2cdc0
-BooleanKey* __cdecl FUN_00a2cdc0(NiStream& kStream, unsigned int uiElementCount)
+// src: GUESS 0x00a2cdc0 (confidence: low)
+BooleanKey* __cdecl NiStream_ProcessEntries_00a2cdc0(NiStream& kStream, unsigned int uiElementCount)
 {
     BooleanKey* p = new BooleanKey[uiElementCount];
     for (unsigned int i = 0; i < uiElementCount; ++i)
@@ -442,11 +452,12 @@ void* FUN_00e8fd60_shell::InitWithArgs(int aiArg1, int aiArg2, int aiArg3)
 extern int DAT_010f02fc;
 struct S_00e8fd80
 {
-    void FUN_00e8a2b0();
-    __declspec(noinline) void FUN_00e8fd80();
+    void SetVtableAndProcessState_00e8a2b0();
+    __declspec(noinline) void ProcessAndReturnValue_00e8fd80();
 };
 // @fnv 0x00e8fd80
-void S_00e8fd80::FUN_00e8fd80()
+// src: GUESS 0x00e8fd80 (confidence: low)
+void S_00e8fd80::ProcessAndReturnValue_00e8fd80()
 {
     void* v0 = *(void**)((char*)this + 0x60);
     int v1 = *(int*)((char*)this + 8);
@@ -458,7 +469,7 @@ void S_00e8fd80::FUN_00e8fd80()
         ((unsigned long(__stdcall*)(void*))(*(void***)v2)[2])(v2);
         *(void**)((char*)this + 0x6c) = 0;
     }
-    return FUN_00e8a2b0();
+    return SetVtableAndProcessState_00e8a2b0();
 }
 
 extern int DAT_010f049c;
@@ -471,7 +482,7 @@ void* __fastcall DestroyRenderedCubeMapData(NiDX9RenderedCubeMapData* data, int,
     int a = data->unk08;
     *(void**)data = (void*)&DAT_010f049c;
     ((void(__thiscall*)(void*, int))(*(void***)p)[86])(p, a);
-    reinterpret_cast<S_00e8fd80*>(data)->FUN_00e8fd80();
+    reinterpret_cast<S_00e8fd80*>(data)->ProcessAndReturnValue_00e8fd80();
     if (flags & 1)
         _delete(data, 0x70);
     return data;
@@ -481,7 +492,7 @@ extern int DAT_010f05ec;
 void __cdecl _delete(void*, unsigned int);
 struct TextureDataTeardown
 {
-    void __thiscall FUN_00e8a2b0();
+    void __thiscall SetVtableAndProcessState_00e8a2b0();
 };
 typedef void(__thiscall* Fn00e90300)(void*, int);
 
@@ -492,13 +503,13 @@ void* __fastcall DestroyDynamicTextureData(NiDX9DynamicTextureData* data, int, u
     int a = data->unk08;
     *(void**)data = (void*)&DAT_010f05ec;
     (*(Fn00e90300**)o)[0x58](o, a);
-    ((TextureDataTeardown*)data)->FUN_00e8a2b0();
+    ((TextureDataTeardown*)data)->SetVtableAndProcessState_00e8a2b0();
     if (auiFlags & 1)
         _delete(data, 0x74);
     return data;
 }
 
-void __fastcall FUN_00e90970(void*);
+void __fastcall NiDX9ErrorShader_CreateShaderDeclaration(void*);
 
 // If the byte at offset 0x10 is zero, calls NiD3DShader::Initialize and then FUN_00e90970(this) on success; returns false on failure, otherwise true.
 // @fnv 0x00e90a50
@@ -508,7 +519,7 @@ bool NiDX9ErrorShader::Initialize()
     {
         if (NiD3DShader::Initialize())
         {
-            FUN_00e90970(this);
+            NiDX9ErrorShader_CreateShaderDeclaration(this);
         }
         else
         {
@@ -531,10 +542,11 @@ struct S00e90a80
     long f4;
     void* f8;
     void* fc;
-    void* FUN_00e90a80(void*);
+    void* NiDX9TextureManager_NiDX9TextureManager(void*);
 };
 // @fnv 0x00e90a80
-void* S00e90a80::FUN_00e90a80(void* p)
+// src: COMMUNITY 0x00e90a80
+void* S00e90a80::NiDX9TextureManager_NiDX9TextureManager(void* p)
 {
     f0 = &kVtbl_NiRefObject;
     f4 = 0;
@@ -636,11 +648,12 @@ struct FUN_00e90d20_shell
 {
     char _pad[12];
     Target* m_pk;
-    int FUN_00e90d20(NiObject*);
+    int NiDX9TextureManager_GetFormatFromTexture(NiObject*);
 };
 // Returns the value at offset 0x24 of the object at pkObj+0x24, or 0x16 if absent or the cast fails the Check.
 // @fnv 0x00e90d20
-int FUN_00e90d20_shell::FUN_00e90d20(NiObject* pkObj)
+// src: GAMEBRYO_SRC 0x00e90d20
+int FUN_00e90d20_shell::NiDX9TextureManager_GetFormatFromTexture(NiObject* pkObj)
 {
     int* pk = *(int**)((char*)pkObj + 0x24);
     if (pk)
@@ -707,11 +720,12 @@ struct S
     char _2[3];
     void* cur;
     void* prev;
-    void FUN_00e90ec0(void* a, bool b);
+    void NiDX9RenderState_SetFVF(void* a, bool b);
 };
 // Sets cur to a when a is non-null and differs from cur (or flag is set), optionally saving cur into prev, then calls p->Foo(a).
 // @fnv 0x00e90ec0
-void S::FUN_00e90ec0(void* pNew, bool bSavePrev)
+// src: COMMUNITY 0x00e90ec0
+void S::NiDX9RenderState_SetFVF(void* pNew, bool bSavePrev)
 {
     if (!pNew)
         return;
@@ -727,10 +741,11 @@ void S::FUN_00e90ec0(void* pNew, bool bSavePrev)
 struct FUN_00e90f60_Holder
 {
     char _pad[0x110C];
-    void FUN_00e90f60(void*);
+    void NiDX9RenderState_ClearFVF(void*);
 };
 // @fnv 0x00e90f60
-void FUN_00e90f60_Holder::FUN_00e90f60(void* pTarget)
+// src: COMMUNITY 0x00e90f60
+void FUN_00e90f60_Holder::NiDX9RenderState_ClearFVF(void* pTarget)
 {
     if (!pTarget)
         return;
@@ -847,10 +862,11 @@ struct S
     char _2[11];
     void* m_cur;
     void* m_pSecondNode;
-    void FUN_00e90fc0(void* a, bool b);
+    void NiDX9RenderState_SetDeclaration(void* a, bool b);
 };
 // @fnv 0x00e90fc0
-void S::FUN_00e90fc0(void* apTarget, bool abSavePrevious)
+// src: COMMUNITY 0x00e90fc0
+void S::NiDX9RenderState_SetDeclaration(void* apTarget, bool abSavePrevious)
 {
     if (!apTarget)
         return;
@@ -867,10 +883,11 @@ void S::FUN_00e90fc0(void* apTarget, bool abSavePrevious)
 extern unsigned short DAT_0126f92c[];
 struct FUN_00e910a0_shell
 {
-    void FUN_00e910a0(int, int, int, int);
+    void NiDX9RenderState_SetSamplerState(int, int, int, int);
 };
 // @fnv 0x00e910a0
-void FUN_00e910a0_shell::FUN_00e910a0(int a1, int aiIndex, int aiValue, int aiUnused)
+// src: COMMUNITY 0x00e910a0
+void FUN_00e910a0_shell::NiDX9RenderState_SetSamplerState(int a1, int aiIndex, int aiValue, int aiUnused)
 {
     unsigned short v = DAT_0126f92c[aiIndex];
     if (v >= 5)
@@ -889,10 +906,11 @@ void FUN_00e910a0_shell::FUN_00e910a0(int a1, int aiIndex, int aiValue, int aiUn
 extern unsigned short DAT_0126f92c[];
 struct FUN_00e91120_shell
 {
-    void FUN_00e91120(int, int);
+    void NiDX9RenderState_RestoreSamplerState(int, int);
 };
 // @fnv 0x00e91120
-void FUN_00e91120_shell::FUN_00e91120(int a1, int a2)
+// src: COMMUNITY 0x00e91120
+void FUN_00e91120_shell::NiDX9RenderState_RestoreSamplerState(int a1, int a2)
 {
     unsigned short idx = DAT_0126f92c[a2];
     if (idx >= 5)
@@ -904,7 +922,7 @@ void FUN_00e91120_shell::FUN_00e91120(int a1, int a2)
 namespace fnv_00e91160 {
 extern "C" void __cdecl _delete(void*, int);
 extern int DAT_010f088c;
-void __cdecl FUN_00e88b00();
+void __cdecl UpdateFields_00e88b00();
 
 struct FUN_00e91160_shell
 {
@@ -916,7 +934,7 @@ struct FUN_00e91160_shell
 void* __thiscall FUN_00e91160_shell::FUN_00e91160(int aiFlags)
 {
     m_p = &DAT_010f088c;
-    FUN_00e88b00();
+    UpdateFields_00e88b00();
     if (aiFlags & 1)
         _delete(this, 0x1248);
     return this;
@@ -947,7 +965,8 @@ namespace fnv_00e916d0 {
 extern int DAT_010f099c;
 
 // @fnv 0x00e916d0
-void* FUN_00e916d0()
+// src: EXE 0x00e916d0
+void* NiPersistentSrcTextureRendererData_CreateObject_00e916d0()
 {
     BSFadeNode* p = (BSFadeNode*)BSFadeNode::operator new(0x94);
     if (p)
@@ -961,7 +980,7 @@ void* FUN_00e916d0()
 }  // namespace fnv_00e916d0
 
 extern int DAT_010f099c;
-void __cdecl FUN_00a98240();
+void __cdecl UpdateFields_00a98240();
 void __cdecl _delete(void*, int);
 struct FUN_00e91750_shell
 {
@@ -973,7 +992,7 @@ struct FUN_00e91750_shell
 void* __thiscall FUN_00e91750_shell::FUN_00e91750(int flags)
 {
     m_pvt = &DAT_010f099c;
-    FUN_00a98240();
+    UpdateFields_00a98240();
     if (flags & 1)
         _delete(this, 0x94);
     return this;
@@ -1004,14 +1023,15 @@ struct Base_E91790
 };
 struct Holder_E91790 : Base_E91790
 {
-    unsigned char FUN_00a982f0(Base_E91790* pk);
-    bool FUN_00e91790(Base_E91790* pk);
+    unsigned char IsEqual_00a982f0(Base_E91790* pk);
+    bool NiDX9PersistentSrcTextureRendererData_IsEqual(Base_E91790* pk);
 };
 // @fnv 0x00e91790
-bool Holder_E91790::FUN_00e91790(Base_E91790* pk)
+// src: XBOX_PDB 0x00e91790
+bool Holder_E91790::NiDX9PersistentSrcTextureRendererData_IsEqual(Base_E91790* pk)
 {
     if (pk && pk->IsKindOfType(&g_0126f9f8))
-        return FUN_00a982f0(pk);
+        return IsEqual_00a982f0(pk);
     return false;
 }
 
@@ -1022,7 +1042,8 @@ char* __cdecl _FUN_00a7d330(const char*);
 extern const char* g_0126f9f8;
 // Calls AppendToStrings, gets a string via _FUN_00a7d330, grows the array if full, then stores the string at the current size index.
 // @fnv 0x00e91a90
-void __stdcall FUN_00e91a90(StrArr* pkStrings)
+// src: XBOX_PDB 0x00e91a90
+void __stdcall NiDX9PersistentSrcTextureRendererData_GetViewerStrings(StrArr* pkStrings)
 {
     AppendToStrings(pkStrings);
     char* psz = _FUN_00a7d330(g_0126f9f8);
@@ -1108,10 +1129,11 @@ struct Rnd00
 };
 struct S_00e8a2b0 : NiRefObject
 {
-    void FUN_00e8a2b0();
+    void SetVtableAndProcessState_00e8a2b0();
 };
 // @fnv 0x00e8a2b0
-void S_00e8a2b0::FUN_00e8a2b0()
+// src: GUESS 0x00e8a2b0 (confidence: low)
+void S_00e8a2b0::SetVtableAndProcessState_00e8a2b0()
 {
     Tex00* a = *(Tex00**)((char*)this + 0x64);
     *(void**)this = (void*)&DAT_010efb7c;
@@ -1226,7 +1248,7 @@ struct T
 };
 struct BaseUnk
 {
-    void __thiscall FUN_00e8a2b0();
+    void __thiscall SetVtableAndProcessState_00e8a2b0();
 };
 struct Host00
 {
@@ -1249,7 +1271,7 @@ void* __thiscall Host00::FUN_00e8fdc0(unsigned int auiFlags)
         _6c->u2();
         _6c = 0;
     }
-    ((BaseUnk*)this)->FUN_00e8a2b0();
+    ((BaseUnk*)this)->SetVtableAndProcessState_00e8a2b0();
     if (auiFlags & 1)
         _delete(this, 0x70);
     return this;
@@ -1303,11 +1325,12 @@ struct FUN_00e90dd0_shell
     virtual void vfn_43();
     virtual void vfn_44();
     virtual void vfn_45();
-    void FUN_00e90dd0();
+    void NiDX9RenderState_RestoreShaderState();
 };
 
 // @fnv 0x00e90dd0
-void FUN_00e90dd0_shell::FUN_00e90dd0()
+// src: COMMUNITY 0x00e90dd0
+void FUN_00e90dd0_shell::NiDX9RenderState_RestoreShaderState()
 {
     vfn_41();
     vfn_45();
@@ -1434,14 +1457,14 @@ struct RTD_Tex
     virtual unsigned long __stdcall AddRef();
     virtual unsigned long __stdcall Release();
 };
-int __cdecl FUN_00e7d250(RTD_Tex*, void**, unsigned int, unsigned int);
+int __cdecl Create_00e7d250(RTD_Tex*, void**, unsigned int, unsigned int);
 struct RTD_Obj : FUN_00e8a260
 {
     RTD_Obj(unsigned int a, unsigned int b) throw() : FUN_00e8a260(a, b)
     {
         *(void**)this = &DAT_010f02fc;
     }
-    int FUN_00e8fe10(unsigned int, unsigned int);
+    int NiDX9RenderedTextureData_CreateSurf(unsigned int, unsigned int);
 };
 typedef void(__thiscall* RTD_DelFn)(void*, unsigned int);
 typedef RTD_Tex*(__thiscall* RTD_TexFn)(void*);
@@ -1452,7 +1475,7 @@ typedef void*(__thiscall* RTD_BufFn)(void*);
 void* __cdecl CreateRenderedTextureData(unsigned int a1, unsigned int a2, unsigned int a3)
 {
     RTD_Obj* p = new RTD_Obj(a1, a2);
-    if (!p->FUN_00e8fe10(a1, a3))
+    if (!p->NiDX9RenderedTextureData_CreateSurf(a1, a3))
     {
         if (p)
             (*(RTD_DelFn**)p)[0](p, 1);
@@ -1470,7 +1493,7 @@ void* __cdecl CreateRenderedTextureData(unsigned int a1, unsigned int a2, unsign
         (*(RTD_DelFn**)p)[0](p, 1);
         return 0;
     }
-    int bCreated = FUN_00e7d250(pD3DTexture, &pBuffer, a3, *(unsigned int*)((char*)p + 0x6c));
+    int bCreated = Create_00e7d250(pD3DTexture, &pBuffer, a3, *(unsigned int*)((char*)p + 0x6c));
     if (pD3DTexture)
         pD3DTexture->Release();
     if (!bCreated)
@@ -1487,11 +1510,12 @@ void* __cdecl CreateRenderedTextureData(unsigned int a1, unsigned int a2, unsign
 struct NiD3DVertexDeclaration
 {
     static NiD3DVertexDeclaration* __cdecl Create(NiRenderer*, unsigned int, unsigned int);
-    bool FUN_00e90970();
+    bool NiDX9ErrorShader_CreateShaderDeclaration();
 };
 
 // @fnv 0x00e90970
-bool NiD3DVertexDeclaration::FUN_00e90970()
+// src: COMMUNITY 0x00e90970
+bool NiD3DVertexDeclaration::NiDX9ErrorShader_CreateShaderDeclaration()
 {
     NiD3DVertexDeclaration* pNew = NiD3DVertexDeclaration::Create(*(NiRenderer**)((char*)this + 0x18), 1, 1);
 
@@ -1528,7 +1552,7 @@ struct NiShaderData
 
 struct ShaderRenderStateForwarder
 {
-    void __thiscall FUN_00a8f3e0(unsigned int, unsigned int, unsigned int, unsigned int,
+    void __thiscall NiD3DShader_UpdatePipeline(unsigned int, unsigned int, unsigned int, unsigned int,
                               unsigned int, unsigned int, unsigned int);
 };
 
@@ -1617,7 +1641,7 @@ void NiShader::SetRandomColorRenderStates(unsigned int arg1, unsigned int arg2, 
         data->renderStateGroup->SetRenderState(0x34, 0, true);
     }
 
-    reinterpret_cast<ShaderRenderStateForwarder*>(this)->FUN_00a8f3e0(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    reinterpret_cast<ShaderRenderStateForwarder*>(this)->NiD3DShader_UpdatePipeline(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
 struct CachedResource
@@ -1641,7 +1665,7 @@ struct CacheRing
     unsigned char cursor;
     CacheEntry* entries[5];
 };
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 struct ResourceCache
 {
     int unk00, unk04;
@@ -1678,7 +1702,7 @@ CachedResource* ResourceCache::AcquireCachedResource(unsigned int size, unsigned
         }
         else
         {
-            entry = (CacheEntry*)FUN_00aa13e0(sizeof(CacheEntry));
+            entry = (CacheEntry*)Object_DispatchCommandFour(sizeof(CacheEntry));
             if (entry)
                 entry->Reset();
             else
@@ -1709,7 +1733,7 @@ CachedResource* ResourceCache::AcquireCachedResource(unsigned int size, unsigned
 struct BeamTextureState
 {
     void SetStageValue(unsigned int a, unsigned int b, bool c);
-    void FUN_00e890c0(unsigned int a, unsigned int b, unsigned int c, bool d);
+    void NiD3DTextureStageGroup_SetSamplerState(unsigned int a, unsigned int b, unsigned int c, bool d);
 };
 
 struct StageReturn
@@ -1830,11 +1854,11 @@ bool ErrorShaderStandIn::InitErrorShaderPass()
     s->unk10->SetStageValue(4, 2, false);
     s->unk10->SetStageValue(5, 3, false);
     s->unk10->SetStageValue(0xb, 0, false);
-    s->unk10->FUN_00e890c0(1, 3, 0, false);
-    s->unk10->FUN_00e890c0(2, 3, 0, false);
-    s->unk10->FUN_00e890c0(5, 2, 0, false);
-    s->unk10->FUN_00e890c0(6, 2, 0, false);
-    s->unk10->FUN_00e890c0(7, 0, 0, false);
+    s->unk10->NiD3DTextureStageGroup_SetSamplerState(1, 3, 0, false);
+    s->unk10->NiD3DTextureStageGroup_SetSamplerState(2, 3, 0, false);
+    s->unk10->NiD3DTextureStageGroup_SetSamplerState(5, 2, 0, false);
+    s->unk10->NiD3DTextureStageGroup_SetSamplerState(6, 2, 0, false);
+    s->unk10->NiD3DTextureStageGroup_SetSamplerState(7, 0, 0, false);
     s->unk5e = 0;
     s->unk10->SetStageValue(0x18, 0, false);
     pass->SetStage(pass->unk14, s);
@@ -1980,7 +2004,7 @@ struct TexOwner
 struct TexRecord
 {
     void** m_ppVirtualMethodTable;
-    int FUN_00e90340(TexOwner* owner, unsigned int flag);
+    int CreateSurf_00e90340(TexOwner* owner, unsigned int flag);
     unsigned int _04;
     TexHolder* m_08;
     char _0c[0x60];
@@ -1993,8 +2017,8 @@ inline void* operator new(unsigned int, void* p)
     return p;
 }
 
-void __cdecl FUN_00a29680(const char* msg);
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void __cdecl Object_DoNothing(const char* msg);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern TexDeviceState* DAT_011f4748;
 
 // Rejects tiled owners, allocates and constructs a TexRecord, checks it against the device flag, and on failure destroys it and returns 0.
@@ -2003,12 +2027,12 @@ TexRecord* __cdecl CreateDynamicTexture(TexOwner* owner)
 {
     if (owner->m_38 != 0)
     {
-        FUN_00a29680("NiDX9DynamicTextureData Failed> Can not create a tiled dynamic texture.\n");
+        Object_DoNothing("NiDX9DynamicTextureData Failed> Can not create a tiled dynamic texture.\n");
         return 0;
     }
 
     TexDeviceState* dev = DAT_011f4748;
-    TexRecord* pRecord = (TexRecord*)FUN_00aa13e0(0x74);
+    TexRecord* pRecord = (TexRecord*)Object_DispatchCommandFour(0x74);
     if (pRecord != 0)
     {
         new (pRecord) FUN_00e8a260((unsigned int)owner, (unsigned int)dev);
@@ -2023,7 +2047,7 @@ TexRecord* __cdecl CreateDynamicTexture(TexOwner* owner)
 
     volatile unsigned char ucDeviceFlag = dev->m_6f5;
 
-    if (pRecord->FUN_00e90340(owner, *(volatile unsigned int*)&ucDeviceFlag) == 0)
+    if (pRecord->CreateSurf_00e90340(owner, *(volatile unsigned int*)&ucDeviceFlag) == 0)
     {
         if (pRecord != 0)
         {
@@ -2063,7 +2087,7 @@ struct FUN_00e909e0_cls
     void FUN_00e818a0();
     void InitErrorShaderPass();
     void AssignFixedString(void** out);
-    FUN_00e909e0_cls* FUN_00e909e0();
+    FUN_00e909e0_cls* NiDX9ErrorShader_NiDX9ErrorShader();
 };
 
 extern int DAT_0109b220;
@@ -2071,7 +2095,8 @@ extern int DAT_010f0764;
 extern void* __cdecl FUN_00a5b690(const char* s);
 
 // @fnv 0x00e909e0
-FUN_00e909e0_cls* FUN_00e909e0_cls::FUN_00e909e0()
+// src: EXE 0x00e909e0
+FUN_00e909e0_cls* FUN_00e909e0_cls::NiDX9ErrorShader_NiDX9ErrorShader()
 {
     FUN_00e818a0();
     m_24 = 0;
@@ -2176,7 +2201,7 @@ struct Texture : NiObject
     bool m_bIsStatic;
 };
 
-int FUN_00e68ef0(void* tex, void* renderer);
+int NiDX9SourceTextureData_Create(void* tex, void* renderer);
 
 extern NiRenderer* DAT_011f4748;
 
@@ -2213,7 +2238,7 @@ void* FUN_00e90b10_shell::GetTextureData(Texture* pkTexture, bool* pbChanged, bo
         NiObject* pkSrc = pkTexture->DynamicCast(&DAT_011f444c);
         if (pkSrc)
         {
-            pkData = (TexData*)FUN_00e68ef0(pkSrc, m_pOwnerShader);
+            pkData = (TexData*)NiDX9SourceTextureData_Create(pkSrc, m_pOwnerShader);
             *pbChanged = true;
         }
         else
@@ -2376,7 +2401,7 @@ struct CreateDesc
     int unk12c;
 };
 
-RefObj* __cdecl FUN_00e978a0(int adapter, CreateDesc* desc);
+RefObj* __cdecl NiDX9ShaderConstantManager_Create(int adapter, CreateDesc* desc);
 
 // Constructor target 0x00e881a0 and initialization slot 65 describe render-state storage, not NiRenderer (35 inherited slots, size 0x280).
 struct RenderStateStorage
@@ -3573,7 +3598,7 @@ RenderStateCache* __cdecl CreateRenderer(int adapter, CreateDesc* desc, bool zen
     }
     if (zenable)
         r->m_flags08 |= 2;
-    r->m_sp10f0 = FUN_00e978a0(adapter, desc);
+    r->m_sp10f0 = NiDX9ShaderConstantManager_Create(adapter, desc);
     return r;
 }
 }  // namespace fnv_00e91590
@@ -3775,7 +3800,7 @@ struct FnvRenderGlobal
 
 extern FnvRenderGlobal* g_pFnvRenderGlobal;
 extern FnvRTTI g_kFnvDataRTTI;
-int FUN_00e68ef0(void* a, void* b);
+int NiDX9SourceTextureData_Create(void* a, void* b);
 
 struct FnvRendererOwner
 {
@@ -3798,7 +3823,7 @@ bool FnvRendererOwner::IsObjectStatic(FnvObject* obj, void* arg2, void* arg3)
     {
         FnvObject* found = obj->DynamicCast(&g_kFnvDataRTTI);
         if (found)
-            data = (FnvData*)FUN_00e68ef0(found, m_pBinaryStream);
+            data = (FnvData*)NiDX9SourceTextureData_Create(found, m_pBinaryStream);
         else
         {
             pRenderGlobal->m_kCriticalSection.Leave();
@@ -4231,20 +4256,23 @@ int __cdecl SelectFormatTileValue(Pair* p, Counts* pCounts)
 }
 
 // @fnv 0x00e902d0
-int NiDX9DynamicTextureData::FUN_00e902d0()
+// src: COMMUNITY 0x00e902d0
+int NiDX9DynamicTextureData::GetTexture_00e902d0()
 {
     return reinterpret_cast<int>(m_pkSysMemTexture);
 }
 
 // @fnv 0x00e902e0
-char NiDX9DynamicTextureData::FUN_00e902e0()
+// src: COMMUNITY 0x00e902e0
+char NiDX9DynamicTextureData::IsTextureLocked()
 {
     return *reinterpret_cast<char*>(&unk70);
 }
 
 void __cdecl LinkPalette();
 // @fnv 0x00e91700
-void __cdecl FUN_00e91700()
+// src: XBOX_PDB 0x00e91700
+void __cdecl NiDX9PersistentSrcTextureRendererData_LinkObject()
 {
     LinkPalette();
 }
@@ -4252,10 +4280,11 @@ void __cdecl FUN_00e91700()
 struct NiPersistentSrcTextureRendererData_s
 {
     void FUN_00a984b0(NiStream&);
-    void FUN_00e91730(NiStream& stream);
+    void NiDX9PersistentSrcTextureRendererData_SaveBinary(NiStream& stream);
 };
 // @fnv 0x00e91730
-void NiPersistentSrcTextureRendererData_s::FUN_00e91730(NiStream& stream)
+// src: XBOX_PDB 0x00e91730
+void NiPersistentSrcTextureRendererData_s::NiDX9PersistentSrcTextureRendererData_SaveBinary(NiStream& stream)
 {
     FUN_00a984b0(stream);
 }
@@ -4270,11 +4299,12 @@ struct Parameters807
 struct Emitter807
 {
     void FUN_00e807d0(void*, int, int, void*, void*, void*, const NiTransform*, const Parameters807*);
-    void FUN_00e90760(void*, void*, void*, void*, void*, void*, const NiTransform*, const Parameters807*);
+    void NiDX9ErrorShader_SetupTransformations(void*, void*, void*, void*, void*, void*, const NiTransform*, const Parameters807*);
 };
 // Adds random offsets to the input transform's x, y, and z using params->spread, then calls FUN_00e807d0.
 // @fnv 0x00e90760
-void Emitter807::FUN_00e90760(void* a1, void* apUnused1, void* apUnused2, void* a4, void* a5, void* a6,
+// src: COMMUNITY 0x00e90760
+void Emitter807::NiDX9ErrorShader_SetupTransformations(void* a1, void* apUnused1, void* apUnused2, void* a4, void* a5, void* a6,
                               const NiTransform* apTransform, const Parameters807* params)
 {
     // Preserve the original POD copy without calling NiTransform's identity constructor.
@@ -4901,7 +4931,7 @@ class Texture
 };
 PixelFormat* __cdecl SelectFormatTileValue(TextureFormatPreferences*, FormatCache*);
 const char* __cdecl GetHResultName(int);
-void __cdecl FUN_00a29680(const char*, const char*);
+void __cdecl Object_DoNothing(const char*, const char*);
 class CubeData
 {
   public:
@@ -4934,7 +4964,7 @@ PixelFormat* CubeData::CreateSurface(Texture* texture)
     int hr = dev->CreateCubeTexture(width, 1, 1, format, 0, &out, 0);
     if (hr < 0)
     {
-        FUN_00a29680("NiDX9RenderedCubeMapData::CreateSurf> Failed CreateImageSurface - %s", GetHResultName(hr));
+        Object_DoNothing("NiDX9RenderedCubeMapData::CreateSurf> Failed CreateImageSurface - %s", GetHResultName(hr));
         surface = 0;
         return 0;
     }
@@ -5493,9 +5523,9 @@ struct TextureProxy
     D3DFORMAT format;
 };
 PixelProxy* SelectFormatTileValue(const Preferences&, void*);
-D3DMULTISAMPLE_TYPE FUN_00e7ccf0(int);
+D3DMULTISAMPLE_TYPE Runtime_GetIndexMask(int);
 const char* GetHResultName(HRESULT);
-void FUN_00a29680(const char*, ...);
+void Object_DoNothing(const char*, ...);
 extern bool DAT_0126f0d0;
 struct OwnerProxy
 {
@@ -5507,11 +5537,12 @@ struct OwnerProxy
     IDirect3DTexture9* texture;
     int unk68;
     IDirect3DSurface9* surface;
-    PixelProxy* FUN_00e8fe10(TextureProxy*, int);
+    PixelProxy* NiDX9RenderedTextureData_CreateSurf(TextureProxy*, int);
 };
 // Creates a D3D texture and optional render target from source dimensions and format, storing the result in texture and surface.
 // @fnv 0x00e8fe10
-PixelProxy* OwnerProxy::FUN_00e8fe10(TextureProxy* source, int multisample)
+// src: EXE 0x00e8fe10
+PixelProxy* OwnerProxy::NiDX9RenderedTextureData_CreateSurf(TextureProxy* source, int multisample)
 {
     if (!source)
         return 0;
@@ -5538,11 +5569,11 @@ PixelProxy* OwnerProxy::FUN_00e8fe10(TextureProxy* source, int multisample)
     IDirect3DTexture9* result = 0;
     HRESULT hr = 0;
     if (multisample)
-        hr = device->CreateRenderTarget(width, height, eFormat, FUN_00e7ccf0(multisample), 0, 0, &surface, 0);
+        hr = device->CreateRenderTarget(width, height, eFormat, Runtime_GetIndexMask(multisample), 0, 0, &surface, 0);
     hr |= device->CreateTexture(width, height, 1, usage, eFormat, pool, &result, 0);
     if (hr < 0)
     {
-        FUN_00a29680("NiDX9RenderedTextureData::CreateSurf> Failed CreateImageSurface - %s", GetHResultName(hr));
+        Object_DoNothing("NiDX9RenderedTextureData::CreateSurf> Failed CreateImageSurface - %s", GetHResultName(hr));
         texture = 0;
         surface = 0;
         return 0;
@@ -5658,7 +5689,8 @@ const char* __cdecl GetD3DErrorString(long hr);
 void __cdecl NiOutputDebugStringStandIn(const char* pcFormat, ...);
 
 // @fnv 0x00e90340
-const NiPixelFormatStandIn* NiDX9DynamicTextureData::FUN_00e90340(DynamicTextureStandIn* pkTexture, bool bDynamic)
+// src: EXE 0x00e90340
+const NiPixelFormatStandIn* NiDX9DynamicTextureData::CreateSurf_00e90340(DynamicTextureStandIn* pkTexture, bool bDynamic)
 {
     if (!pkTexture)
         return 0;
@@ -5846,7 +5878,7 @@ extern "C" unsigned char DAT_011f4508;
 extern "C" unsigned char DAT_011f4448;
 
 extern "C" FnvD3dDevice* DAT_0126f0d8;
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 struct SourcePixelFormat
 {
@@ -5870,10 +5902,10 @@ struct SourcePixelFormat
 };
 
 struct FnvOutput;
-FnvOutput* __cdecl FUN_00e8abf0(FnvSource*, FnvDevice*);
+FnvOutput* __cdecl NiDX9SourceCubeMapData_Create(FnvSource*, FnvDevice*);
 FnvResourceManager* __cdecl FUN_00a76640();
 FnvResource* __cdecl DispatchIfHighBitSet(FnvSource*, unsigned, int);
-void __cdecl FUN_00a29680(void*, int);
+void __cdecl Object_DoNothing(void*, int);
 int __cdecl FUN_00e7bd20(const SourcePixelFormat*);
 
 struct SourceFields
@@ -6845,11 +6877,11 @@ struct FnvOutput : SourceTextureConstruction::FUN_00e8a260
         m_sampler = 0;
     }
     bool LoadFromFilename(int kind, FnvDevice*, const SourcePixelFormat*, unsigned);
-    void* FUN_00e8a300(const SourcePixelFormat*, const SourcePixelFormat*, void*);
+    void* NiDX9TextureData_FindMatchingPixelFormat(const SourcePixelFormat*, const SourcePixelFormat*, void*);
     void CreateTextureFromInput(FnvResource*, int);
-    void FUN_00e68920(FnvResource*);
-    void FUN_00e68010(FnvResource*);
-    void FUN_00e68870(FnvResource*);
+    void NiDX9SourceTextureData_CopyRendererDataToSurface(FnvResource*);
+    void CreateSurf(FnvResource*);
+    void NiDX9SourceTextureData_CopyDataToSurface(FnvResource*);
 };
 static bool FnvIsPowerOfTwo(unsigned value)
 {
@@ -6860,18 +6892,19 @@ static bool FnvIsPowerOfTwo(unsigned value)
 
 // Creates an FnvOutput for a source and device, resolving pixel data and texture resources while handling failures and reference counting.
 // @fnv 0x00e68ef0
-FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
+// src: COMMUNITY 0x00e68ef0
+FnvOutput* __cdecl NiDX9SourceTextureData_Create(FnvSource* source, FnvDevice* device)
 {
     if (source)
     {
         for (FnvRttiNode* type = source->GetRTTI(); type; type = type->base)
         {
             if (type == (FnvRttiNode*)&DAT_011f4454)
-                return FUN_00e8abf0(source, device);
+                return NiDX9SourceCubeMapData_Create(source, device);
         }
     }
     void** deviceState = reinterpret_cast<DeviceFields*>(device)->formats;
-    void* storage = FUN_00aa13e0(sizeof(FnvOutput));
+    void* storage = Object_DispatchCommandFour(sizeof(FnvOutput));
     FnvOutput* output = storage ? new (storage) FnvOutput(source, device) : 0;
     const SourcePixelFormat& format = reinterpret_cast<FnvSourceFmt*>(source)->fmt;
     FnvResource* existing = reinterpret_cast<SourceFields*>(source)->existing;
@@ -6905,7 +6938,7 @@ FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
     if (!existing && !cached)
     {
         cached = DispatchIfHighBitSet(source, 0x80000005, 1);
-        FUN_00a29680(&DAT_010ed4dc, reinterpret_cast<SourceFields*>(source)->kind);
+        Object_DoNothing(&DAT_010ed4dc, reinterpret_cast<SourceFields*>(source)->kind);
         output->m_failure = 1;
     }
     else if (existing)
@@ -6917,7 +6950,7 @@ FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
         {
             if (device->GetCapabilities() & 4)
             {
-                pixelData = output->FUN_00e8a300(&srcFormat, &format, deviceState);
+                pixelData = output->NiDX9TextureData_FindMatchingPixelFormat(&srcFormat, &format, deviceState);
                 if (!pixelData)
                 {
                     cached = DispatchIfHighBitSet(source, 0x80000004, 1);
@@ -6932,7 +6965,7 @@ FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
         }
         else
         {
-            pixelData = output->FUN_00e8a300(&srcFormat, &format, deviceState);
+            pixelData = output->NiDX9TextureData_FindMatchingPixelFormat(&srcFormat, &format, deviceState);
             if (!pixelData)
             {
                 cached = DispatchIfHighBitSet(source, 0x80000004, 1);
@@ -6969,12 +7002,12 @@ FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
                 {
                     S68ef0_Small adjustedPrefs = *reinterpret_cast<const S68ef0_Small*>(&format);
                     adjustedPrefs.a = 2;
-                    pixelData = output->FUN_00e8a300(
+                    pixelData = output->NiDX9TextureData_FindMatchingPixelFormat(
                         &dstFormat, reinterpret_cast<const SourcePixelFormat*>(&adjustedPrefs), deviceState);
                 }
                 else
                 {
-                    pixelData = output->FUN_00e8a300(&dstFormat, &format, deviceState);
+                    pixelData = output->NiDX9TextureData_FindMatchingPixelFormat(&dstFormat, &format, deviceState);
                 }
                 if (!pixelData)
                 {
@@ -6990,7 +7023,7 @@ FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
         }
         else
         {
-            pixelData = output->FUN_00e8a300(&dstFormat, &format, deviceState);
+            pixelData = output->NiDX9TextureData_FindMatchingPixelFormat(&dstFormat, &format, deviceState);
             if (!pixelData)
             {
                 cached = DispatchIfHighBitSet(source, 0x80000004, 1);
@@ -7021,7 +7054,7 @@ FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
         if (!output->m_64)
             output->CreateTextureFromInput(existing, texture);
         if (output->m_64)
-            output->FUN_00e68920(existing);
+            output->NiDX9SourceTextureData_CopyRendererDataToSurface(existing);
     }
     else
     {
@@ -7041,9 +7074,9 @@ FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
         else
             chosen = FUN_00a76640()->Convert(cached, pixelData, cached, output->m_hasMipmaps);
         if (!output->m_64)
-            output->FUN_00e68010(chosen);
+            output->CreateSurf(chosen);
         if (output->m_64)
-            output->FUN_00e68870(chosen);
+            output->NiDX9SourceTextureData_CopyDataToSurface(chosen);
         output->m_68 = reinterpret_cast<CachedFields*>(chosen)->mipLevels;
         FnvResource* secondary = reinterpret_cast<CachedFields*>(cached)->secondary;
         if (secondary)
@@ -7071,7 +7104,7 @@ FnvOutput* __cdecl FUN_00e68ef0(FnvSource* source, FnvDevice* device)
 
 
 void* __cdecl CreateDepthBufferData(void*, unsigned int, void*, int, void**);
-void __cdecl FUN_00a29680(const char*, const char*);
+void __cdecl Object_DoNothing(const char*, const char*);
 extern unsigned int DAT_0126f9e0;
 extern unsigned int DAT_0126f9e4;
 struct CubeMapBaseInit
@@ -7083,7 +7116,8 @@ extern int DAT_010f049c;
 
 // Allocates a NiDX9RenderedCubeMapData, creates six D3D cube faces, and accumulates texture memory usage into global counters.
 // @fnv 0x00e901a0
-NiDX9RenderedCubeMapData* __cdecl FUN_00e901a0(NiRenderedCubeMap* pkTexture, NiDX9Renderer* pkRenderer)
+// src: COMMUNITY 0x00e901a0
+NiDX9RenderedCubeMapData* __cdecl NiDX9RenderedCubeMapData_Create(NiRenderedCubeMap* pkTexture, NiDX9Renderer* pkRenderer)
 {
     CubeMapBaseInit* pkShell = (CubeMapBaseInit*)::BSFadeNode::operator new(0x70);
     if (pkShell)
@@ -7113,7 +7147,7 @@ NiDX9RenderedCubeMapData* __cdecl FUN_00e901a0(NiRenderedCubeMap* pkTexture, NiD
         void* pkData = CreateDepthBufferData(pkThis->GetD3DTexture(), i, pkCurrentObject, iAdapter, &pkFace);
         if (!pkData)
         {
-            FUN_00a29680("NiDX9RenderedCubeMapData::Create> NiDX9TextureBufferData::CreateCubeFace - %s", "");
+            Object_DoNothing("NiDX9RenderedCubeMapData::Create> NiDX9TextureBufferData::CreateCubeFace - %s", "");
             reinterpret_cast<void(__thiscall**)(NiDX9RenderedCubeMapData*, int)>(*reinterpret_cast<void***>(pkThis))[0](pkThis, 1);
             return 0;
         }

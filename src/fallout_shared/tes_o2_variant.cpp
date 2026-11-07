@@ -32,11 +32,11 @@ struct FUN_004512a0_shell
     void SetState(unsigned char ucState);
 };
 extern char DAT_01189184;
-void FUN_00451520(unsigned char value);
+void GridCellArray_SetRecreateCanopyShadowMaskTexture(unsigned char value);
 extern NP DAT_011f95e8;
-void FUN_00451570(void* arg);
+void BSShaderManager_SetProjectedShadowMaskTexture(void* arg);
 extern unsigned char DAT_011ad86c;
-void FUN_00451590(unsigned char value);
+void TallGrassShaderProperty_SetUseBackgroundLoading(unsigned char value);
 struct AlchemyItem;
 struct BGSAddonNode;
 struct BGSDebris;
@@ -113,7 +113,7 @@ struct blob4
 typedef char _sizecheck_BGSSaveLoadGame[sizeof(BGSSaveLoadGame) == 588 ? 1 : -1];
 struct FUN_004523c0_shell : public BGSSaveLoadGame
 {
-    bool FUN_004523c0();
+    bool TESObjectCELL_GetAttaching();
 };
 int __fastcall GetByteAtOffset38(void*);
 struct FUN_00452420_shell
@@ -127,18 +127,18 @@ struct FUN_00452420_shell
 };
 struct FUN_00452440_shell
 {
-    bool __thiscall FUN_00452440();
+    bool __thiscall BGSPlaceableWater_IsAutomaticWater();
 };
 struct FUN_004e32c0_shell
 {
     bool __thiscall HasFlags(int arg);
 };
 extern unsigned char DAT_0119b8c8;
-unsigned char FUN_00452480();
-int __fastcall FUN_009938b0(void*);
+unsigned char BSTreeManager_GetUseCanopyShadows();
+int __fastcall NiTArray_char_NiTMallocInterface_char_GetEffectiveSize(void*);
 struct FUN_00453470_shell
 {
-    int __thiscall FUN_00453470(void);
+    int __thiscall NiNode_GetChildCount(void);
 };
 struct FUN_004534f0_shell
 {
@@ -146,28 +146,28 @@ struct FUN_004534f0_shell
 };
 struct FUN_00453500_shell
 {
-    void FUN_00453500(bool set);
+    void BGSSaveLoadGame_SetDeferInitForms(bool set);
 };
 struct BSAudio;
 BSAudio* DAT_011f6d98;
-BSAudio* FUN_00453a70();
+BSAudio* BSAudio_QInstance();
 extern unsigned char DAT_011f9427;
-void FUN_00454440(unsigned char value);
+void BSShaderManager_SetInterior(unsigned char value);
 struct FNStub
 {
     char const* GetFullName() const;
 };
 struct FUN_00454b50_shell
 {
-    char const* FUN_00454b50() const;
+    char const* TESWorldSpace_GetWaterNoiseTextureName() const;
 };
 struct TESFaction_RankDataView
 {
     unsigned char* GetRankDataList(void);
-    bool FUN_00455620(void);
+    bool TESQuest_GetEnabled(void);
 };
 extern int DAT_011c56e8;
-void FUN_00455680();
+void ClearAnimationCloneCount();
 struct FUN_004565f0_shell
 {
     float m_f;
@@ -176,13 +176,13 @@ struct FUN_004565f0_shell
 extern const void* const g_01202e00;
 struct FUN_00458f20_shell
 {
-    const void* const* FUN_00458f20() const;
+    const void* const* BSTempNode_GetRTTI() const;
 };
-extern "C" void __fastcall FUN_00a5e930(void*);
+extern "C" void __fastcall UpdateFields_00c5faa0(void*);
 extern int DAT_01017d24;
 struct FUN_00458f70_shell
 {
-    void __thiscall FUN_00458f70();
+    void __thiscall SetVtableAndProcessState_00458f70();
 };
 struct AnimIdle;
 struct Animation;
@@ -329,33 +329,33 @@ struct ModelLoader
 typedef char _sizecheck_ModelLoader[sizeof(ModelLoader) == 48 ? 1 : -1];
 struct FUN_0045a5e0_shell : public ModelLoader
 {
-    void FUN_0045a5e0(char*);
+    void ModelLoader_ReleaseFile(char*);
 };
 void __cdecl CreateCSDFadeNode(void);
 void __cdecl CreateSpdFadeNode(void);
-void __cdecl FUN_004f92e0(void);
-void __cdecl FUN_00649e40(void);
-void __cdecl FUN_0065c570(void);
-void __cdecl FUN_00662760(void);
-void __cdecl FUN_0045b020(void);
+void __cdecl BGSAddonNodeSoundHandleExtra_InitTag(void);
+void __cdecl BSFaceGenAnimationData_InitTag(void);
+void __cdecl BSFaceGenModelExtraData_InitTag(void);
+void __cdecl BSFaceGenBaseMorphExtraData_InitTag(void);
+void __cdecl TES_InitSDM(void);
 struct FUN_0045c650_shell
 {
-    void* FUN_0045c650();
+    void* hkpMotion_getLinearVelocity();
 };
 struct Flt
 {
     operator unsigned int(void) const;
 };
 extern Flt g_011deb7c;
-unsigned int FUN_0045c670();
+unsigned int Main_GetWorldSceneGraph();
 struct TESObjectREFR;
-void FUN_00578060(TESObjectREFR* self);
-void FUN_00578170(TESObjectREFR* self);
-void FUN_0045c680(TESObjectREFR* arg, bool flag);
+void TESObjectREFR_AddMasterParticleAddonNodes(TESObjectREFR* self);
+void TESObjectREFR_RemoveMasterParticleAddonNodes(TESObjectREFR* self);
+void TES_RangedNodeVisibilityChangedCB(TESObjectREFR* arg, bool flag);
 extern "C" double _gModifierZero;
 struct FUN_00451cd0_shell
 {
-    unsigned char FUN_00451cd0();
+    unsigned char TESClimate_GetVolatilityIndex();
 };
 struct TESObjectCELL_AddToInteriorBuffer
 {
@@ -371,18 +371,18 @@ struct FUN_00454b90_shell
 };
 struct FUN_00458f30_shell
 {
-    void FUN_00458f70();
+    void SetVtableAndProcessState_00458f70();
     void* DestroyIfFlagged(unsigned int flags);
 };
 void _delete(void* obj, unsigned int size);
 struct FUN_00459840_shell
 {
-    void FUN_00458f90();
-    void FUN_00459840(unsigned int a);
+    void TES_ClearDeadCountList();
+    void TES_Revert(unsigned int a);
 };
 struct FUN_0045a730_shell
 {
-    char* FUN_0045a730();
+    char* TESDataHandler_GetWaterForms();
 };
 extern "C" void __cdecl _Deallocate(void*);
 struct FUN_0045ae20_shell
@@ -404,7 +404,8 @@ struct TallGrassShaderProperty
     static GrassCacheMap* __cdecl GetCacheDataMap();
 };
 // @fnv 0x00b617b0
-bool __cdecl FUN_00b617b0(char const* a, char const* b)
+// src: COMMUNITY 0x00b617b0
+bool __cdecl _TallGrassShaderProperty_ContainsChunk(char const* a, char const* b)
 {
     ShaderBufferRecord* pn = 0;
     if (!TallGrassShaderProperty::GetCacheDataMap()->GetAt(reinterpret_cast<unsigned long>(a), pn))
@@ -442,11 +443,12 @@ class C6B540Manager
     void UpdateA();
     void UpdateB();
     void UpdateC();
-    void FUN_00c6b540(bool bProcess);
+    void bhkWorld_StopBatchingAdds(bool bProcess);
 };
 
 // @fnv 0x00c6b540
-void C6B540Manager::FUN_00c6b540(bool bProcess)
+// src: XBOX_PDB 0x00c6b540
+void C6B540Manager::bhkWorld_StopBatchingAdds(bool bProcess)
 {
     if (m_uiLockCount > 0)
     {
@@ -483,10 +485,10 @@ void C6B540Manager::FUN_00c6b540(bool bProcess)
 
 struct QueryStub
 {
-    unsigned char FUN_00c4edf0(unsigned int* state, int flags);
+    unsigned char BSOcclusionQuery_GetResult(unsigned int* state, int flags);
 };
 
-void __fastcall FUN_00c4ed40(void* p);
+void __fastcall ProcessState_00c4ed40(void* p);
 
 
 extern MemoryManager DAT_011f6238;
@@ -605,11 +607,12 @@ struct FUN_00b631d0_cls
     void* m_kNode;
     int unk144;
     int m_listCount;
-    void FUN_00b631d0();
+    void BSShaderAccumulator_ClearAllQueries();
 };
 
 // @fnv 0x00b631d0
-void FUN_00b631d0_cls::FUN_00b631d0()
+// src: XBOX_PDB 0x00b631d0
+void FUN_00b631d0_cls::BSShaderAccumulator_ClearAllQueries()
 {
     unsigned int state;
     int i = 0;
@@ -617,12 +620,12 @@ void FUN_00b631d0_cls::FUN_00b631d0()
     {
         if (m_ppData[i] != 0)
         {
-            ((QueryStub*)m_ppData[i])->FUN_00c4edf0(&state, 1);
+            ((QueryStub*)m_ppData[i])->BSOcclusionQuery_GetResult(&state, 1);
 
             void* item = m_ppData[i];
             if (item != 0)
             {
-                FUN_00c4ed40(item);
+                ProcessState_00c4ed40(item);
                 DAT_011f6238.Deallocate(item);
             }
 
@@ -637,11 +640,11 @@ void FUN_00b631d0_cls::FUN_00b631d0()
     {
         if (entry->item != 0)
         {
-            ((QueryStub*)entry->item)->FUN_00c4edf0(&state, 1);
+            ((QueryStub*)entry->item)->BSOcclusionQuery_GetResult(&state, 1);
             void* item = entry->item;
             if (item != 0)
             {
-                FUN_00c4ed40(item);
+                ProcessState_00c4ed40(item);
                 DAT_011f6238.Deallocate(item);
             }
             entry->item = 0;
@@ -658,11 +661,11 @@ void FUN_00b631d0_cls::FUN_00b631d0()
         Holder* holder = (Holder*)NextHolder(node);
         if (holder != 0 && holder->item != 0)
         {
-            ((QueryStub*)holder->item)->FUN_00c4edf0(&state, 1);
+            ((QueryStub*)holder->item)->BSOcclusionQuery_GetResult(&state, 1);
             void* item = holder->item;
             if (item != 0)
             {
-                FUN_00c4ed40(item);
+                ProcessState_00c4ed40(item);
                 DAT_011f6238.Deallocate(item);
             }
             holder->item = 0;
@@ -713,7 +716,7 @@ struct Node
 };
 struct S00b6da10_Other
 {
-    __declspec(noalias) void* FUN_00b58570(Item** const&);
+    __declspec(noalias) void* NiTPointerListBase_AddTail(Item** const&);
 };
 struct Pending
 {
@@ -750,7 +753,7 @@ struct Manager
     int o4;
     int o8;
     Pending pending;
-    void FUN_00b6da10(Item* item);
+    void BSTextureManager_ReturnRenderedTexture(Item* item);
     template <int N> static __forceinline void ProcT(List& l, List& d, Item* p)
     {
         {
@@ -767,7 +770,7 @@ struct Manager
         pending.Find(item, pos, found);
         if (found)
         {
-            other.FUN_00b58570(found);
+            other.NiTPointerListBase_AddTail(found);
             pending.FUN_00e7d7f0(pos);
         }
     }
@@ -784,7 +787,8 @@ struct Manager
     }
 };
 // @fnv 0x00b6da10
-void Manager::FUN_00b6da10(Item* item)
+// src: XBOX_PDB 0x00b6da10
+void Manager::BSTextureManager_ReturnRenderedTexture(Item* item)
 {
     if (item)
     {
@@ -856,7 +860,7 @@ void Manager::FUN_00b6da10(Item* item)
             pending.Find(item, pos, found);
             if (found)
             {
-                other.FUN_00b58570(found);
+                other.NiTPointerListBase_AddTail(found);
                 pending.FUN_00e7d7f0(pos);
             }
         }

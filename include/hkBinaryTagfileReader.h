@@ -13,7 +13,7 @@ public:
     virtual ~hkBinaryTagfileReader();
     virtual const hkClass* getClassType() const;
     virtual void calcContentStatistics(hkStatisticsCollector* collector, const hkClass* cls) const;
-    virtual unsigned int __stdcall FUN_00dc5d50(unsigned int a, unsigned int b, unsigned int c);
+    virtual unsigned int __stdcall hkBinaryTagfileReader_load(unsigned int a, unsigned int b, unsigned int c);
 
     int unk04;
     int unk08;
@@ -25,15 +25,15 @@ public:
     int unk20;
     hkArray<char*> m_pStringFunctions;
 
-    int FUN_00dc5bd0() throw();
+    int ReadSignedVarInt32() throw();
     __int64 ReadVarInt();
-    void FUN_00dd8fe0(void* pvBuf, int iElemSize, int iNumElems) throw();
+    void hkIArchive_readArrayGeneric(void* pvBuf, int iElemSize, int iNumElems) throw();
     void ReadBits(int iNumBits, hkArray<char>& kBitsOut) throw();
-    void FUN_00dd90d0(void* pvBuf, int iNumBytes) throw();
+    void ForwardCall_00dd90d0(void* pvBuf, int iNumBytes) throw();
     char* ReadString();
     void ReadByteArray(void* buf, int size, int count);
     int ReadTag();
     int readMetadata();
     DataObjectImplReference readObjectTopLevel(int tag);
-    DataObjectImplReference FUN_00dc6e50();
+    DataObjectImplReference ProcessEntries_00dc6e50();
 };

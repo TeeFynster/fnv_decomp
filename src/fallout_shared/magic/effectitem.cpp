@@ -219,7 +219,8 @@ bool __cdecl HasEffectArchetypeFlag(int aiIndex, unsigned int aiFlag)
 void* __cdecl _fnv_zlib_memset(void* apDest, int aiValue, unsigned int aCount);
 
 // @fnv 0x00403d30
-void __cdecl FUN_00403d30(void* apDest, int aiValue, unsigned int aCount)
+// src: COMMUNITY 0x00403d30
+void __cdecl ourMemset(void* apDest, int aiValue, unsigned int aCount)
 {
     _fnv_zlib_memset(apDest, aiValue, aCount);
 }
@@ -235,7 +236,8 @@ void EffectItem::InitItem(TESForm* apForm)
 }
 
 // @fnv 0x00403e60
-bool EffectSetting::FUN_00403e60(unsigned int auiFlag)
+// src: XBOX_PDB 0x00403e60
+bool EffectSetting::IsFlagSet_00403e60(unsigned int auiFlag)
 {
     return GetFlag(auiFlag);
 }
@@ -247,7 +249,8 @@ bool EffectSetting::HasAssociatedActorValue()
 }
 
 // @fnv 0x00403ee0
-bool EffectItem::FUN_00403ee0()
+// src: XBOX_PDB 0x00403ee0
+bool EffectItem::IsActorValueUsed()
 {
     return m_pEffectSetting->IsAssociatedActorValueUsed();
 }
@@ -286,8 +289,8 @@ typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
 typedef char _sizecheck_CachedValuesOwner[sizeof(CachedValuesOwner) == 4 ? 1 : -1];
 float __cdecl ScaleBySettingBlend(float, int, int);
-float __cdecl FUN_00404040(float);
-float __cdecl FUN_00404010(float, float);
+float __cdecl FloatFloor(float);
+float __cdecl BSMAX_00404010(float, float);
 
 // @fnv 0x00403f80
 float EffectItem::GetCost(Actor* apActor)
@@ -299,13 +302,14 @@ float EffectItem::GetCost(Actor* apActor)
                                     ((ActorValueOwner*)((char*)apActor + 0xa4))->GetActorValueAsInteger(GetEffectID()),
                                     ((ActorValueOwner*)((char*)apActor + 0xa4))->GetActorValueAsInteger(0xb));
     }
-    fcost = FUN_00404040(fcost);
-    return FUN_00404010(fcost, 1.0f);
+    fcost = FloatFloor(fcost);
+    return BSMAX_00404010(fcost, 1.0f);
 }
 
 // Returns the larger of the two float arguments.
 // @fnv 0x00404010
-float __cdecl FUN_00404010(float fA, float fB)
+// src: XBOX_PDB 0x00404010
+float __cdecl BSMAX_00404010(float fA, float fB)
 {
     return (fA > fB) ? fA : fB;
 }
@@ -314,7 +318,8 @@ float __cdecl TruncateToInt(float);
 extern const double _gModifierZero;
 
 // @fnv 0x00404040
-float __cdecl FUN_00404040(float aIn)
+// src: XBOX_PDB 0x00404040
+float __cdecl FloatFloor(float aIn)
 {
     float droundToZero = TruncateToInt(aIn);
     return (aIn - droundToZero >= _gModifierZero) ? droundToZero : (droundToZero - 1.0);
@@ -398,7 +403,8 @@ void* EffectItem::GetScript()
 char* __cdecl _strcpy(char*, const char*);
 
 // @fnv 0x004046f0
-void __cdecl FUN_004046f0(char* apStrDest, const char* apStrSource)
+// src: XBOX_PDB 0x004046f0
+void __cdecl ourStrcpy(char* apStrDest, const char* apStrSource)
 {
     _strcpy(apStrDest, apStrSource);
 }
@@ -411,25 +417,26 @@ AutoMemContext::AutoMemContext(int m, bool o, const char* f, int l)
 }
 
 int __cdecl GetTlsField();
-void __cdecl FUN_00404f30(int);
+void __cdecl SetMemContext_00404f30(int);
 
 // @fnv 0x00404f00
 void AutoMemContext::Enter(int memContext, bool overridable, char* apFile, int aiLine)
 {
     m_eMemoryContext = static_cast<MEM_CONTEXT>(GetTlsField());
-    FUN_00404f30(memContext);
+    SetMemContext_00404f30(memContext);
 }
 
 // @fnv 0x00404f70
 void AutoMemContext::Leave()
 {
-    FUN_00404f30(m_eMemoryContext);
+    SetMemContext_00404f30(m_eMemoryContext);
 }
 
 unsigned int __cdecl _strlen(const char*);
 
 // @fnv 0x0044a670
-unsigned int __cdecl FUN_0044a670(const char* apString)
+// src: XBOX_PDB 0x0044a670
+unsigned int __cdecl BSstrlen(const char* apString)
 {
     return _strlen(apString);
 }
@@ -443,7 +450,8 @@ TESForm* __fastcall GetEffectAssociatedForm(EffectSetting* effect)
 
 // Returns the larger of the two integer arguments.
 // @fnv 0x00647b70
-int __cdecl FUN_00647b70(int iA, int iB)
+// src: XBOX_PDB 0x00647b70
+int __cdecl BSMAX_00647b70(int iA, int iB)
 {
     return iA > iB ? iA : iB;
 }
@@ -465,23 +473,24 @@ MagicCaster* __fastcall GetActiveEffectCaster(ActiveEffect* effect)
     return effect->m_pEffectInstance;
 }
 
-extern "C" bool __cdecl FUN_00401500();
+extern "C" bool __cdecl TESForm_QEndianSwapOnSave();
 extern "C" void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 
 // @fnv 0x004040b0
 void EffectItem::Save()
 {
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         reinterpret_cast<BGSImpactData__IMPACT_DATA_DATA*>(this)->Endian();
     AppendChunk(0x54494645, this, 0x14);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         reinterpret_cast<BGSImpactData__IMPACT_DATA_DATA*>(this)->Endian();
     if (GetConditions())
         reinterpret_cast<TESConditionSave_effectitem*>(GetConditions())->ProcessItems();
 }
 
 // @fnv 0x00404470
-bool EffectItem::FUN_00404470(int range)
+// src: COMMUNITY 0x00404470
+bool EffectItem::SetArea_00404470(int range)
 {
     bool result = false;
     if (!m_pEffectSetting->IsFlagSet(0x200))
@@ -502,7 +511,8 @@ extern "C" unsigned int __tls_index;
 __declspec(thread) int tlsVar[0x2b4 / 4 + 1];
 
 // @fnv 0x00404f30
-void __cdecl FUN_00404f30(int aiValue)
+// src: XBOX_PDB 0x00404f30
+void __cdecl SetMemContext_00404f30(int aiValue)
 {
     tlsVar[0x2b4 / 4] = aiValue;
 }
@@ -515,7 +525,8 @@ EffectItem::~EffectItem()
 }
 
 // @fnv 0x004043d0
-bool EffectItem::FUN_004043d0(int a)
+// src: COMMUNITY 0x004043d0
+bool EffectItem::SetMagnitude_004043d0(int a)
 {
     bool result = false;
     if (!m_pEffectSetting->IsFlagSet(0x100))
@@ -532,7 +543,8 @@ bool EffectItem::FUN_004043d0(int a)
 
 // Sets a non-negative duration and invalidates the cached cost when the effect permits a duration.
 // @fnv 0x00404510
-bool EffectItem::FUN_00404510(int aiValue)
+// src: COMMUNITY 0x00404510
+bool EffectItem::SetDuration_00404510(int aiValue)
 {
     bool b = false;
     if (!m_pEffectSetting->IsFlagSet(0x80) && aiValue >= 0)
@@ -614,7 +626,8 @@ int _data_011c16bc;
 
 // Iterates the map at offset 0x10c, calls FUN_00c33280 on each non-null Setting with apStringsA, and returns the count processed.
 // @fnv 0x00404fd0
-template <> unsigned int SettingCollectionMap<Setting>::FUN_00404fd0(NiTPrimitiveArray<char*>* apStringsA)
+// src: XBOX_PDB 0x00404fd0
+template <> unsigned int SettingCollectionMap<Setting>::GetViewerStrings_00404fd0(NiTPrimitiveArray<char*>* apStringsA)
 {
     unsigned int I;
     unsigned int cpkey;
@@ -631,7 +644,7 @@ template <> unsigned int SettingCollectionMap<Setting>::FUN_00404fd0(NiTPrimitiv
 
         if (pval != 0)
         {
-            pval->FUN_00c33280(apStringsA);
+            pval->Setting_GetViewerStrings(apStringsA);
             ++I;
         }
     }
@@ -650,7 +663,8 @@ extern float DAT_01012054;
 
 // Stores the effect setting, resets the fields, and selects its associated actor value or -1.
 // @fnv 0x00403be0
-void EffectItem::FUN_00403be0(EffectSetting* manager)
+// src: COMMUNITY 0x00403be0
+void EffectItem::Initialize_00403be0(EffectSetting* manager)
 {
     m_pEffectSetting = manager;
     data.m_iArea = 0;
@@ -708,12 +722,13 @@ extern const float DAT_01012054;
 }  // namespace fnv_00404560
 
 // @fnv 0x00404560
-bool __thiscall EffectItem::FUN_00404560(unsigned int value)
+// src: COMMUNITY 0x00404560
+bool __thiscall EffectItem::SetRange_00404560(unsigned int value)
 {
     bool result = false;
 
-    if ((value == 1 && m_pEffectSetting->FUN_00403e60(0x20)) || (value == 2 && m_pEffectSetting->FUN_00403e60(0x40)) ||
-        (value == 0 && m_pEffectSetting->FUN_00403e60(0x10)))
+    if ((value == 1 && m_pEffectSetting->IsFlagSet_00403e60(0x20)) || (value == 2 && m_pEffectSetting->IsFlagSet_00403e60(0x40)) ||
+        (value == 0 && m_pEffectSetting->IsFlagSet_00403e60(0x10)))
     {
         data.m_eRange = value;
         m_fCost = fnv_00404560::DAT_01012054;
@@ -737,11 +752,12 @@ struct SettingRegistry
     virtual void Slot3();
     virtual void Slot4();
     virtual bool HandleSetting(int);
-    bool FUN_00405120();
+    bool SettingCollectionMap_Setting_ReadSettings();
 };
 extern "C" bool __fastcall FUN_00404d30(SettingRegistry*);
 // @fnv 0x00405120
-bool SettingRegistry::FUN_00405120()
+// src: XBOX_PDB 0x00405120
+bool SettingRegistry::SettingCollectionMap_Setting_ReadSettings()
 {
     int key;
     AutoMemContext memoryGuard(9, true, str_01012220, 0x278);
@@ -761,7 +777,7 @@ bool SettingRegistry::FUN_00405120()
 }
 
 char* __cdecl FormHeap_Allocate(unsigned int aSize);
-const char* __cdecl FUN_00464f30(const char* apString, int aFlag);
+const char* __cdecl ConvertFromUni(const char* apString, int aFlag);
 
 struct FUN_004d61b0_sub
 {
@@ -786,8 +802,8 @@ class FUN_004d61b0
     char* m2c;
 
     void CreateTreeWindows(int a5, int a6, int a7, int a8);
-    void FUN_004d6490();
-    void FUN_004d64c0(int aValue, int aFlag);
+    void NiTreeCtrl_SetImageList();
+    void NiTreeCtrl_CreateTree(int aValue, int aFlag);
     FUN_004d61b0(int a1, int a2, int a3, const char* a4, int a5, int a6, int a7, int a8);
 };
 
@@ -797,14 +813,14 @@ FUN_004d61b0::FUN_004d61b0(int a1, int a2, int a3, const char* apName, int a5, i
     m00 = a1;
     m04 = a2;
     m28 = a3;
-    char* pNameBuffer = FormHeap_Allocate(FUN_0044a670(apName) + 1);
+    char* pNameBuffer = FormHeap_Allocate(BSstrlen(apName) + 1);
     m2c = pNameBuffer;
-    FUN_004046f0(m2c, FUN_00464f30(apName, 0));
+    ourStrcpy(m2c, ConvertFromUni(apName, 0));
     CreateTreeWindows(a5, a6, a7, a8);
-    FUN_004d6490();
+    NiTreeCtrl_SetImageList();
     if (a3 != 0)
     {
-        FUN_004d64c0(a3, 0);
+        NiTreeCtrl_CreateTree(a3, 0);
     }
 }
 

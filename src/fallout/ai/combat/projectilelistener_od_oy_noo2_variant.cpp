@@ -524,18 +524,18 @@ extern NiRTTI g_kRTTI9C64;
 
 Ref9C64* __cdecl GetReferenceFromObject(void* pvObject);
 NiPoint3& __cdecl FUN_00458620(NiPoint3& kOut, const hkVector4& kIn);
-NiPoint3& __cdecl FUN_004a3970(NiPoint3& kOut, const hkVector4& kIn);
-void* __cdecl FUN_004b5950(const void* pvObject);
-WorldObject9C64* __cdecl FUN_004b5a80(void* pvEntry);
-bool __cdecl MarkBaseExtraListScriptEvent(void* pvForm, ExtraList9C64* pkExtra, unsigned int uiFlag);
-bool __cdecl FUN_0043b300(NiRTTI* pkRTTI, WorldObject9C64* pkObject);
-CollisionObject9C64* __cdecl FUN_004b5260(Node9C64* pkNode);
-bool __cdecl FUN_009c5ba0(PickData9C64* pkPick, Node9C64* pkNode, bool bCheckMotion, bool bUpdate);
+NiPoint3& __cdecl HK2NINS(NiPoint3& kOut, const hkVector4& kIn);
+void* __cdecl hkpGetPhantom(const void* pvObject);
+WorldObject9C64* __cdecl bhkEntity_Getbhk(void* pvEntry);
+bool __cdecl Script_SetActionFlag(void* pvForm, ExtraList9C64* pkExtra, unsigned int uiFlag);
+bool __cdecl NiObject_IsKindOf(NiRTTI* pkRTTI, WorldObject9C64* pkObject);
+CollisionObject9C64* __cdecl FindFirstCollisionObject(Node9C64* pkNode);
+bool __cdecl Projectile_PickSceneGraph(PickData9C64* pkPick, Node9C64* pkNode, bool bCheckMotion, bool bUpdate);
 
 class Listener9C64
 {
   public:
-    void FUN_009c6490(void* pvUnused, Event9C64* pkEvent);
+    void ProjectileListener_contactPointAddedCallback(void* pvUnused, Event9C64* pkEvent);
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -686,7 +686,8 @@ class Listener9C64
 // Preserve the original /GS stack protection with the shared vector union.
 #pragma strict_gs_check(push, on)
 // @fnv 0x009c6490
-void Listener9C64::FUN_009c6490(void* pvUnused, Event9C64* pkEvent)
+// src: COMMUNITY 0x009c6490
+void Listener9C64::ProjectileListener_contactPointAddedCallback(void* pvUnused, Event9C64* pkEvent)
 {
     Owner9C64* pkOwner = m_pkOwnerManager;
     if (!pkOwner)
@@ -695,25 +696,25 @@ void Listener9C64::FUN_009c6490(void* pvUnused, Event9C64* pkEvent)
     NiPoint3 kPoint;
     FUN_00458620(kPoint, pkEvent->GetPosition());
     NiPoint3 kNormal;
-    FUN_004a3970(kNormal, pkEvent->GetPlaneNormal());
+    HK2NINS(kNormal, pkEvent->GetPlaneNormal());
     void* pvObject = pkEvent->m_pvObject;
     unsigned int uiData = pkEvent->m_uiData;
-    void* pvEntry = FUN_004b5950(pvObject);
-    WorldObject9C64* pkWorldObject = pvEntry ? FUN_004b5a80(pvEntry) : 0;
+    void* pvEntry = hkpGetPhantom(pvObject);
+    WorldObject9C64* pkWorldObject = pvEntry ? bhkEntity_Getbhk(pvEntry) : 0;
     if (pkRef && pkWorldObject &&
         (pkWorldObject->GetFilter().GetLayer() == 0x17 || pkWorldObject->GetFilter().GetLayer() == 0x18))
     {
-        MarkBaseExtraListScriptEvent(pkOwner, pkRef->GetExtraData(), 0x80);
+        Script_SetActionFlag(pkOwner, pkRef->GetExtraData(), 0x80);
         if (pkOwner->GetForm())
-            MarkBaseExtraListScriptEvent(pkOwner->GetForm(), pkRef->GetExtraData(), 0x100);
+            Script_SetActionFlag(pkOwner->GetForm(), pkRef->GetExtraData(), 0x100);
         return;
     }
     bool bBlocked = false;
-    if (pkWorldObject && (FUN_0043b300(&g_kRTTI9C64, pkWorldObject) || pkWorldObject->GetFilter().GetLayer() == 0x1e))
+    if (pkWorldObject && (NiObject_IsKindOf(&g_kRTTI9C64, pkWorldObject) || pkWorldObject->GetFilter().GetLayer() == 0x1e))
     {
         bBlocked = true;
         Node9C64* pkNode = pkRef ? pkRef->Get3D() : 0;
-        CollisionObject9C64* pkCollision = FUN_004b5260(pkNode);
+        CollisionObject9C64* pkCollision = FindFirstCollisionObject(pkNode);
         WorldObject9C64* pkRefObject = pkCollision ? pkCollision->GetWorldObject() : 0;
         if (pkRefObject && (pkRefObject->GetFilter().IsFlagSet() || !pkRefObject->IsFixed()))
         {
@@ -734,14 +735,14 @@ void Listener9C64::FUN_009c6490(void* pvUnused, Event9C64* pkEvent)
             kPick.SetTo(kRay);
             AllRayHits9C64 kHits;
             kPick.SetCollector(&kHits);
-            bool bHitDetected = FUN_009c5ba0(&kPick, pkNode, false, true);
+            bool bHitDetected = Projectile_PickSceneGraph(&kPick, pkNode, false, true);
             if (bHitDetected && kPick.GetCollector()->GetHits()->GetSize() > 0)
             {
                 bBlocked = false;
                 RayHit9C64 kHit(kPick.GetCollector()->GetHits()->GetAt(0));
                 NiPoint3 kIntersectionOffset = kRay * kHit.m_fHitFraction;
                 kPoint = kFrom + kIntersectionOffset;
-                FUN_004a3970(kNormal, kHit.m_kPlaneNormal);
+                HK2NINS(kNormal, kHit.m_kPlaneNormal);
                 pvObject = kHit.m_pvRootCollidable;
                 int iShapeKey = -1;
                 for (int i = 0; i < 8 && kHit.m_aiShapeKeys[i] != -1; i++)

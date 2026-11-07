@@ -20,11 +20,11 @@ struct FUN_005ff190_shell
 {
     char pad[0x38];
     unsigned char m_0x38;
-    void FUN_005ff190(bool set);
+    void TESIdleForm_SetIdleAnimGroupSection(bool set);
 };
 struct FUN_005ff1d0_shell : public TESIdleForm
 {
-    bool FUN_005ff1d0();
+    bool TESIdleForm_GetAllowNoFile();
 };
 struct FUN_005ff200_shell
 {
@@ -38,11 +38,11 @@ struct FUN_005ff220_shell
 struct FUN_005ff260_shell
 {
     unsigned char m_3e;
-    bool FUN_005ff260();
+    bool TESIdleForm_GetNoAttacking();
 };
 struct FUN_005ff4a0_shell : public TESIdleForm
 {
-    unsigned int FUN_005ff4a0();
+    unsigned int TESIdleForm_GetChildCount();
 };
 struct FUN_005ff160_shell : public TESIdleForm
 {
@@ -54,7 +54,7 @@ struct FUN_00600d90_shell
 };
 struct FUN_00600d70_shell
 {
-    void FUN_00600d70();
+    void ForwardCall_00600d70();
 };
 
 // FUN_005ff880 : 8-byte MSVC this-adjusting (virtual) thunk.
@@ -72,7 +72,7 @@ struct FUN_00600d70_shell
 // adjusting thunk.
 struct IdlePrimaryBase
 {
-    virtual void FUN_005ff880();
+    virtual void AdjustThisAndForward_005ff880();
     int m_04;
     int m_08;
     int m_0c;
@@ -82,14 +82,15 @@ struct IdlePrimaryBase
 
 struct IdleSecondaryBase
 {
-    virtual void FUN_005ff880();
+    virtual void AdjustThisAndForward_005ff880();
 };
 
 struct IdleDerived : IdlePrimaryBase, IdleSecondaryBase
 {
     IdleDerived();
 // @fnv 0x005ff880
-    virtual void FUN_005ff880();
+// src: GUESS 0x005ff880 (confidence: low)
+    virtual void AdjustThisAndForward_005ff880();
 };
 
 IdleDerived::IdleDerived()

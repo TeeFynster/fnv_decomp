@@ -46,7 +46,8 @@ void NiBSplineCompPoint3Interpolator::LoadBinary(NiStream& stream)
 extern "C" void* g_011f4014;
 
 // @fnv 0x00a51270
-void* __cdecl FUN_00a51270()
+// src: COMMUNITY 0x00a51270
+void* __cdecl NiBSplineCompPoint3Interpolator_GetRTTI()
 {
     return &g_011f4014;
 }
@@ -71,7 +72,8 @@ void __stdcall FUN_00a50960(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 // Grows the string array if it is full, then appends the string returned by _FUN_00a7d330(g_011f4014) at the current size index.
 // @fnv 0x00a51480
-void __stdcall FUN_00a51480(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a51480
+void __stdcall NiBSplineCompPoint3Interpolator_GetViewerStrings(StrArr* pkStrings)
 {
     FUN_00a50960(pkStrings);
     char* pszStr = _FUN_00a7d330((const char*)g_011f4014);
@@ -149,14 +151,14 @@ NiBSplineCompPoint3Interpolator* __fastcall NiBSplineCompPoint3Interpolator_Clon
     return pNew;
 }
 
-extern void* FUN_00aa13e0(unsigned int bytes) throw();
+extern void* Object_DispatchCommandFour(unsigned int bytes) throw();
 
 // Allocates and initializes a compressed point3 interpolator.
 // @fnv 0x00a513c0
 void* __cdecl NiBSplineCompPoint3Interpolator_Create()
 {
     NiBSplineCompPoint3Interpolator* result =
-        (NiBSplineCompPoint3Interpolator*)FUN_00aa13e0(sizeof(NiBSplineCompPoint3Interpolator));
+        (NiBSplineCompPoint3Interpolator*)Object_DispatchCommandFour(sizeof(NiBSplineCompPoint3Interpolator));
     if (result)
     {
         reinterpret_cast<BSplinePoint3Operations*>(result)->Construct(0, 0xffff, 0);

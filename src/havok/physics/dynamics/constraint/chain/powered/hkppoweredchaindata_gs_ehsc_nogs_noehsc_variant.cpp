@@ -24,7 +24,7 @@ struct FUN_00e3b720_s
     int m_iElementCount;  // +0xc
     int pad1[3];
     int m_uiItemCount;  // +0x1c
-    void FUN_00e3b720(int* info) const;
+    void getConstraintInfo_00e3b720(int* info) const;
 };
 struct FUN_00e3b7d0_first
 {
@@ -43,8 +43,8 @@ struct FUN_00e3b7d0_object
     int pad1[8];
     FUN_00e3b7d0_second* second;
 };
-void FUN_00e3b7d0(FUN_00e3b7d0_object* object, int index, int bit);
-int __cdecl FUN_00e3b670();
+void hkpPoweredChainData_disableMotor(FUN_00e3b7d0_object* object, int index, int bit);
+int __cdecl ReturnConstant_102();
 class hkRefObjE3B8
 {
   public:
@@ -74,7 +74,7 @@ struct FUN_00d21ce0_cls
     {
         m_type = 1;
     }
-    void FUN_00d21ce0(void* owner) throw();
+    void hkpBridgeConstraintAtom_init(void* owner) throw();
 };
 class FUN_00e3b8f0 : public hkBaseE3B8
 {
@@ -124,7 +124,8 @@ class hkObje3c210 : public FUN_00e3b9a0
 __declspec(align(16)) extern const float DAT_010c44d0[4];
 
 // @fnv 0x00e3b680
-static __declspec(noinline) void FUN_00e3b680(const Vec4& b, const Vec4& a, Vec4& r)
+// src: GUESS 0x00e3b680 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00e3b680(const Vec4& b, const Vec4& a, Vec4& r)
 {
     {
         __m128 v1 = reinterpret_cast<const __m128&>(a);
@@ -154,7 +155,7 @@ static __declspec(noinline) void FUN_00e3b680(const Vec4& b, const Vec4& a, Vec4
 volatile int g_a, g_b, g_r;
 void caller_e3b680()
 {
-    FUN_00e3b680(*(Vec4*)g_b, *(Vec4*)g_a, *(Vec4*)g_r);
+    Object_UpdateFields_00e3b680(*(Vec4*)g_b, *(Vec4*)g_a, *(Vec4*)g_r);
 }
 
 inline void* operator new(unsigned int, void* p)
@@ -165,7 +166,7 @@ extern const __m128 DAT_010c4c00;
 struct Rotation
 {
     hkVector4 col[3];
-    void FUN_00cb2d90(const hkVector4*);
+    void hkRotation_set(const hkVector4*);
 };
 struct Entity;
 struct ConstraintRuntime
@@ -257,15 +258,15 @@ struct MemoryAllocator
     virtual void f3();
     virtual void freeBlock(void*, int);
 };
-void __cdecl FUN_00c908c0(MemoryAllocator*, void*, int, int);
+void __cdecl hkArrayUtil__reserve(MemoryAllocator*, void*, int, int);
 void __cdecl ResizeAudioStream(void*, void*, int);
 extern "C" void __cdecl AppendEventRecord(const QueryInput*, QueryOutput*, char*, int);
-char* __cdecl FUN_00dd13d0(char*);
-char* __cdecl FUN_00dd13e0(char*, int);
-void __cdecl FUN_00dcee70(QueryInput*);
-void __cdecl FUN_00dcfc00(hkVector4*, hkVector4*, float, QueryInput*, char*);
-void __cdecl FUN_00d6cd70(hkVector4*, QueryInput*, char*, float*);
-void __cdecl FUN_00dcfff0(void*, MotorInput*, MotorOutput*);
+char* __cdecl _tolower_00dd13d0(char*);
+char* __cdecl Object_GetElementAddress_00dd13e0(char*, int);
+void __cdecl hkLoadVelocityAccumulators(QueryInput*);
+void __cdecl hkStabilizedBallSocketConstraintBuildJacobian_noSchema(hkVector4*, hkVector4*, float, QueryInput*, char*);
+void __cdecl Hkpbuildjacobianfromatoms_ComputeJacobianInverseEffectiveMass(hkVector4*, QueryInput*, char*, float*);
+void __cdecl _hkCalcMotorData(void*, MotorInput*, MotorOutput*);
 void __cdecl WriteInputHeader(BuildInfo*, const QueryInput*, QueryOutput*);
 struct Entity
 {
@@ -360,7 +361,7 @@ template <class T, int N> struct InplaceArray
             int next = c * 2;
             if (n >= next)
                 next = n;
-            FUN_00c908c0(heap, this, next, sizeof(T));
+            hkArrayUtil__reserve(heap, this, next, sizeof(T));
         }
         for (int j = n; j < size; ++j)
             data[j].~T();
@@ -398,7 +399,7 @@ __forceinline char* angularAndKeep(char* lin, QueryOutput& out, int n, char*& ke
 {
     char* p = out.jacobian;
     keep = lin;
-    return FUN_00dd13e0(p, n);
+    return Object_GetElementAddress_00dd13e0(p, n);
 }
 static __forceinline ConstraintInfo& getInfo(hkpPoweredChainData& chain, int i)
 {
@@ -412,7 +413,8 @@ static __forceinline void* motorStep(hkpPoweredChainData* chain, char* solverRes
     return reinterpret_cast<RuntimeAccessor>((*reinterpret_cast<void***>(chain))[10])(chain, solverResults);
 }
 // @fnv 0x00e3ba40
-void hkpPoweredChainData::FUN_00e3ba40(const QueryInput& input, QueryOutput& output)
+// src: XBOX_PDB 0x00e3ba40
+void hkpPoweredChainData::buildJacobian_00e3ba40(const QueryInput& input, QueryOutput& output)
 {
     AppendEventRecord(&input, &output, input.runtime, 8);
     QueryInput query = input;
@@ -432,7 +434,7 @@ void hkpPoweredChainData::FUN_00e3ba40(const QueryInput& input, QueryOutput& out
     query.transformB = &first->transform;
     char* schema = output.jacobian;
     char* jacobian;
-    char* states = angularAndKeep(FUN_00dd13d0(schema), output, count, jacobian);
+    char* states = angularAndKeep(_tolower_00dd13d0(schema), output, count, jacobian);
     for (int i = 0; i < count; ++i)
     {
         query.offsetA = query.offsetB;
@@ -446,8 +448,8 @@ void hkpPoweredChainData::FUN_00e3ba40(const QueryInput& input, QueryOutput& out
             hkVector4 pivotA, pivotB;
             transformPoint(pivotA, *query.transformA, getInfo(*this, i).pivotA);
             transformPoint(pivotB, *query.transformB, getInfo(*this, i).pivotB);
-            FUN_00dcee70(&query);
-            FUN_00dcfc00(&pivotA, &pivotB, m_fMaximumAngularImpulse, &query, jacobian);
+            hkLoadVelocityAccumulators(&query);
+            hkStabilizedBallSocketConstraintBuildJacobian_noSchema(&pivotA, &pivotB, m_fMaximumAngularImpulse, &query, jacobian);
             jacobian += 0x90;
         }
         hkVector4 rotationA, rotationB;
@@ -462,7 +464,7 @@ void hkpPoweredChainData::FUN_00e3ba40(const QueryInput& input, QueryOutput& out
         }
         {
             hkVector4 product;
-            product.FUN_00c66320(&rotationB, &getInfo(*this, i).targetB);
+            product.setMul(&rotationB, &getInfo(*this, i).targetB);
             rotationB.m_vComponents = product.m_vComponents;
         }
         hkVector4& target = getInfo(*this, i).target;
@@ -478,16 +480,16 @@ void hkpPoweredChainData::FUN_00e3ba40(const QueryInput& input, QueryOutput& out
         if (squaredLength == 0.0f)
             previousTarget.m_vComponents = target.m_vComponents;
         hkVector4 targetWorld, oldTargetWorld;
-        targetWorld.FUN_00c66320(&rotationA, &target);
-        oldTargetWorld.FUN_00c66320(&rotationA, &previousTarget);
+        targetWorld.setMul(&rotationA, &target);
+        oldTargetWorld.setMul(&rotationA, &previousTarget);
         previous->x = target.x;
         previous->y = target.y;
         previous->z = target.z;
         previous->w = target.w;
         hkVector4 error, oldError;
-        FUN_00e3b680(reinterpret_cast<const Vec4&>(rotationB), reinterpret_cast<const Vec4&>(targetWorld),
+        Object_UpdateFields_00e3b680(reinterpret_cast<const Vec4&>(rotationB), reinterpret_cast<const Vec4&>(targetWorld),
                      reinterpret_cast<Vec4&>(error));
-        FUN_00e3b680(reinterpret_cast<const Vec4&>(rotationB), reinterpret_cast<const Vec4&>(oldTargetWorld),
+        Object_UpdateFields_00e3b680(reinterpret_cast<const Vec4&>(rotationB), reinterpret_cast<const Vec4&>(oldTargetWorld),
                      reinterpret_cast<Vec4&>(oldError));
         error.m_vComponents = _mm_sub_ps(error.m_vComponents, oldError.m_vComponents);
         if (getInfo(*this, i).switched)
@@ -496,7 +498,7 @@ void hkpPoweredChainData::FUN_00e3ba40(const QueryInput& input, QueryOutput& out
             oldError.m_vComponents = _mm_xor_ps(oldError.m_vComponents, DAT_010c4c00);
         }
         Rotation axes;
-        axes.FUN_00cb2d90(&rotationB);
+        axes.hkRotation_set(&rotationB);
         for (int axis = 0; axis < 3; ++axis)
         {
             hkVector4 direction;
@@ -506,13 +508,13 @@ void hkpPoweredChainData::FUN_00e3ba40(const QueryInput& input, QueryOutput& out
             MotorState* __restrict motorStates = static_cast<MotorState*>(motorStep(this, solverResults));
             motorInput.state.unk00 = 0.0f;
             motorInput.state.unk04 = 0.0f;
-            FUN_00d6cd70(&direction, &query, states, &motorInput.currentVelocity);
+            Hkpbuildjacobianfromatoms_ComputeJacobianInverseEffectiveMass(&direction, &query, states, &motorInput.currentVelocity);
             motorInput.positionError = reinterpret_cast<float*>(&error)[axis];
             motorInput.deltaTarget = reinterpret_cast<float*>(&oldError)[axis];
             motorInput.step = &query;
             motorInput.state = motorStates[i * 6 + axis + 3];
             MotorOutput motorOutput;
-            FUN_00dcfff0(getInfo(*this, i).motors[axis], &motorInput, &motorOutput);
+            _hkCalcMotorData(getInfo(*this, i).motors[axis], &motorInput, &motorOutput);
             float* dst = matrices.data[i].values + axis * 5;
             dst[0] = motorOutput.c * query.unk04;
             dst[1] = motorOutput.d * query.unk04;

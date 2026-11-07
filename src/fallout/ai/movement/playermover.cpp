@@ -69,10 +69,10 @@ void PlayerMover::Update(float fTimeSinceScaleStart)
 {
     NiPoint3 delta = NiPoint3::ZERO;
     Animation* animation = g_thePlayer->GetAnimation(false);
-    if (!g_thePlayer->FUN_004eaf60())
+    if (!g_thePlayer->PlayerCharacter_Is3rdPerson())
     {
         Animation* firstPerson = g_thePlayer->GetAnimation(true);
-        if (!animation || firstPerson->FUN_004301b0(1) == animation->FUN_004301b0(1))
+        if (!animation || firstPerson->Animation_GetGroup(1) == animation->Animation_GetGroup(1))
             animation = firstPerson;
     }
     if (!g_thePlayer->PlaceAtPosition(delta))
@@ -91,7 +91,7 @@ void PlayerMover::Update(float fTimeSinceScaleStart)
         } character;
         character.controller = g_thePlayer->GetPhysicsCharacterController();
         character.state = character.controller ? &character.controller->state : 0;
-        if (character.state && character.state->FUN_008b7320())
+        if (character.state && character.state->bhkCharacterListener_StuckToSomeone())
             delta = NiPoint3::ZERO;
         if ((ByteAndFlagState & 0xF) && !g_thePlayer->GetIsDying() && !g_thePlayer->FUN_0050d4a0())
         {
@@ -177,7 +177,7 @@ void PlayerMover::SetMoverMode(unsigned int auMode)
         m_uiMode = auMode & 0x30;
     }
     ByteAndFlagState = auMode;
-    if (changed && TESAnimGroup::IsAimAnimation(g_thePlayer->GetAnimation(false)->FUN_004301b0(4)))
+    if (changed && TESAnimGroup::IsAimAnimation(g_thePlayer->GetAnimation(false)->Animation_GetGroup(4)))
     {
         struct AimAnimationState
         {
@@ -191,13 +191,13 @@ void PlayerMover::SetMoverMode(unsigned int auMode)
         aimState.sequence = aimState.animation->GetControllerSequence(4);
         aimState.groupID = g_thePlayer->GetAnimGroup(aimState.group, 0, false, aimState.animation);
         if (!aimState.sequence ||
-            aimState.groupID != aimState.sequence->GetAnimGroup()->FUN_0047d3b0())
+            aimState.groupID != aimState.sequence->GetAnimGroup()->GetAnimGroupType_0047d3b0())
             aimState.animation->BlendOut(4, false);
         aimState.animation = g_thePlayer->GetAnimation(true);
         aimState.sequence = aimState.animation->GetControllerSequence(4);
         aimState.groupID = g_thePlayer->GetAnimGroup(aimState.group, 0, false, aimState.animation);
         if (!aimState.sequence ||
-            aimState.groupID != aimState.sequence->GetAnimGroup()->FUN_0047d3b0())
+            aimState.groupID != aimState.sequence->GetAnimGroup()->GetAnimGroupType_0047d3b0())
             aimState.animation->BlendOut(4, false);
     }
 }
@@ -225,19 +225,22 @@ void PlayerMover::ClearMode(unsigned int auMode)
 }
 
 // @fnv 0x009e9de0
-void PlayerMover::FUN_009e9de0(unsigned int auMode)
+// src: XBOX_PDB 0x009e9de0
+void PlayerMover::ClearMoveModePreference(unsigned int auMode)
 {
     ClearMode(auMode);
 }
 
 // @fnv 0x009e9dc0
-void PlayerMover::FUN_009e9dc0(unsigned int auMode)
+// src: XBOX_PDB 0x009e9dc0
+void PlayerMover::SetMoveModePreference(unsigned int auMode)
 {
     UpdatePlayerStatus(auMode, true);
 }
 
 // @fnv 0x009e9e30
-void PlayerMover::FUN_009e9e30()
+// src: GUESS 0x009e9e30 (confidence: medium)
+void PlayerMover::ResetVtableAndDestroyActorMover()
 {
     *reinterpret_cast<int*>(this) = 0x0109297c;
     ActorMover::~ActorMover();
@@ -248,16 +251,17 @@ void __cdecl _Deallocate(void*);
 // @fnv 0x009e9e00
 void* PlayerMover::FUN_009e9e00(unsigned int auFlags)
 {
-    FUN_009e9e30();
+    ResetVtableAndDestroyActorMover();
     if (auFlags & 1)
         _Deallocate(this);
     return this;
 }
 
 // @fnv 0x009ea5a0
-void PlayerMover::FUN_009ea5a0(BGSSaveFormBuffer* apBuffer)
+// src: XBOX_PDB 0x009ea5a0
+void PlayerMover::SaveGame_009ea5a0(BGSSaveFormBuffer* apBuffer)
 {
-    ActorMover::FUN_009df100(apBuffer);
+    ActorMover::SaveGame_009df100(apBuffer);
     apBuffer->SaveData(&m_kSideVec, 0xC, 0);
     apBuffer->SaveData(&ByteAndFlagState, 4, 0);
     apBuffer->SaveData(&m_uiMode, 4, 0);

@@ -132,11 +132,12 @@ struct FUN_00b6dd00_Owner
 {
     char m_acPad[0x78];
     TextureResourceList m_kList;
-    void FUN_00b6dd00(int iArg1, bool bArg2);
+    void BSTextureManager_Update(int iArg1, bool bArg2);
 };
 
 // @fnv 0x00b6dd00
-void FUN_00b6dd00_Owner::FUN_00b6dd00(int iArg1, bool bArg2)
+// src: COMMUNITY 0x00b6dd00
+void FUN_00b6dd00_Owner::BSTextureManager_Update(int iArg1, bool bArg2)
 {
     void* pvPos = *(void**)((char*)this + 0x78);
     while (pvPos)
@@ -698,7 +699,7 @@ typedef NiTListItem<NiPointer<BSMultiBound> > MultiBoundListItem;
 struct MultiBoundPool
 {
     unsigned int m_uiCount;
-    MultiBoundListItem* FUN_0043a010();
+    MultiBoundListItem* NiGeometry_AddProperty();
 };
 struct MultiBoundList
 {
@@ -749,11 +750,12 @@ struct MultiBoundOwner
     int unk8c;
     MultiBoundList m_kInactiveList;
     MultiBoundList m_kActiveList;
-    void FUN_00b6d4c0(BSMultiBound* pkBound);
+    void BSTextureManager_ReturnFrustumShadowTexture(BSMultiBound* pkBound);
 };
 
 // @fnv 0x00b6d4c0
-void MultiBoundOwner::FUN_00b6d4c0(BSMultiBound* pkBound)
+// src: XBOX_PDB 0x00b6d4c0
+void MultiBoundOwner::BSTextureManager_ReturnFrustumShadowTexture(BSMultiBound* pkBound)
 {
     if (!pkBound)
         return;
@@ -784,7 +786,7 @@ void MultiBoundOwner::FUN_00b6d4c0(BSMultiBound* pkBound)
 
 void MultiBoundList::AddTail(const NiPointer<BSMultiBound>& element)
 {
-    MultiBoundListItem* item = m_pThreadAllocator.FUN_0043a010();
+    MultiBoundListItem* item = m_pThreadAllocator.NiGeometry_AddProperty();
     item->m_element = element;
     item->m_pkNext = 0;
     item->m_pkPrev = m_pkTail;
@@ -1057,12 +1059,13 @@ class RenderTargetManager
 
     RenderTexture* CreateRenderTarget(NiRenderer* pkRenderer, unsigned int uiWidth, unsigned int uiHeight, int eFormat,
                                       int iUsage, unsigned int uiFlags, int a7, int a8, int a9, int a10);
-    RenderTexture* FUN_00b6d5e0(NiRenderer* pkRenderer, unsigned int uiWidth, unsigned int uiHeight,
+    RenderTexture* BSTextureManager_BorrowRenderedTexture_0(NiRenderer* pkRenderer, unsigned int uiWidth, unsigned int uiHeight,
                                 unsigned int uiFlags, int eFormat, int iUsage, int a7, int a8, int a9, int a10);
 };
 
 // @fnv 0x00b6d5e0
-RenderTexture* RenderTargetManager::FUN_00b6d5e0(NiRenderer* pkRenderer, unsigned int uiWidth, unsigned int uiHeight,
+// src: COMMUNITY 0x00b6d5e0
+RenderTexture* RenderTargetManager::BSTextureManager_BorrowRenderedTexture_0(NiRenderer* pkRenderer, unsigned int uiWidth, unsigned int uiHeight,
                                                  unsigned int uiFlags, int eFormat, int iUsage, int a7, int a8, int a9,
                                                  int a10)
 {

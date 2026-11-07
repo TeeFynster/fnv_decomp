@@ -26,7 +26,7 @@ struct S00e5cb40_Os
     int unk04;
     int unk08;
     void FUN_00cb1600(char* buf, int size);
-    S00e5cb40_Os& FUN_00cc01c0(const char* s);
+    S00e5cb40_Os& ProcessAndReturnValue_00cc01c0(const char* s);
     S00e5cb40_Os& WriteName(const hkStringPtr& s);
     void FUN_00cc00e0();
 };
@@ -43,14 +43,15 @@ extern "C" S00e5cb40_Err* DAT_01268360;
 
 struct S00e5cb40_Grp : hkxAttributeGroup
 {
-    AttributeObj* FUN_00e5c670(const char* name);
-    int FUN_00e5cb40(const char* name, bool warnIfNotFound, hkQuaternion* out);
+    AttributeObj* Runtime_ForwardCall_00e5c670(const char* name);
+    int ProcessAndReturnValue_00e5cb40(const char* name, bool warnIfNotFound, hkQuaternion* out);
 };
 
 // @fnv 0x00e5cb40
-int S00e5cb40_Grp::FUN_00e5cb40(const char* name, bool warnIfNotFound, hkQuaternion* out)
+// src: GUESS 0x00e5cb40 (confidence: low)
+int S00e5cb40_Grp::ProcessAndReturnValue_00e5cb40(const char* name, bool warnIfNotFound, hkQuaternion* out)
 {
-    AttributeObj* attr = FUN_00e5c670(name);
+    AttributeObj* attr = Runtime_ForwardCall_00e5c670(name);
     if (attr)
     {
         *(LocalM128*)out = *(LocalM128*)attr->m_quaternion;
@@ -61,11 +62,11 @@ int S00e5cb40_Grp::FUN_00e5cb40(const char* name, bool warnIfNotFound, hkQuatern
         char buf[512];
         S00e5cb40_Os os;
         os.FUN_00cb1600(buf, sizeof(buf));
-        os.FUN_00cc01c0("Quaternion attribute ")
-            .FUN_00cc01c0(name)
-            .FUN_00cc01c0(" not found in ")
+        os.ProcessAndReturnValue_00cc01c0("Quaternion attribute ")
+            .ProcessAndReturnValue_00cc01c0(name)
+            .ProcessAndReturnValue_00cc01c0(" not found in ")
             .WriteName(m_name)
-            .FUN_00cc01c0(" attribute group");
+            .ProcessAndReturnValue_00cc01c0(" attribute group");
         DAT_01268360->report(1, 0xabbaab81, buf, ".\\Attributes\\hkxAttributeGroup.cpp", 0xb3);
         os.FUN_00cc00e0();
     }

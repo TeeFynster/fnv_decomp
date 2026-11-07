@@ -33,8 +33,8 @@ class NiCullingProcess
     virtual void Append(NiGeometry* geometry);
 
     const NiCamera* GetCamera() const;
-    void FUN_00a694a0(void* p);
-    void FUN_00c4f070(NiNodeX* a, NiAVObject* b, int c);
+    void NiCullingProcess_SetFrustum(void* p);
+    void BSCullingProcess_Process_00c4f070(NiNodeX* a, NiAVObject* b, int c);
 
     // Gamebryo's members (allocations of the derived cullers: 0x90 bytes up to BSCullingProcess's own at +0x90).
     const bool m_bUseVirtualAppend;  // +0x04

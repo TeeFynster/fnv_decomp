@@ -91,12 +91,13 @@ struct GridCell {
     void* m30;
     int m34;
 
-    void FUN_00dd1da0(GridSource* a1, GridBounds* a2, int a3);
+    void hkpMoppObbVirtualMachine_queryAabb(GridSource* a1, GridBounds* a2, int a3);
     void Execute(GridScratch* s, unsigned char* p, int z);
 };
 
 // @fnv 0x00dd1da0
-void GridCell::FUN_00dd1da0(GridSource* a1, GridBounds* a2, int a3) {
+// src: HAVOK_LIB 0x00dd1da0
+void GridCell::hkpMoppObbVirtualMachine_queryAabb(GridSource* a1, GridBounds* a2, int a3) {
     m30 = a1;
     m00 = a3;
     float s = a1->f1c;
@@ -145,11 +146,11 @@ struct CodeData {
  union {unsigned char* code;unsigned char* p20;};
 };
 struct AllocatorContext { int field00, field04, field08, field0c; void* allocator; };
-extern AllocatorContext* __cdecl FUN_00c85750();
+extern AllocatorContext* __cdecl hkMemoryRouter_getInstance();
 extern void __cdecl ResizeAudioStream(void*, void*, int);
 extern unsigned char DAT_01269cbc;
 extern void __cdecl ValidateHavokKeyCode(unsigned char*);
-struct ErrorText { char* data; int length; int capacity; void FUN_00cb1600(char*,int); void FUN_00cc01c0(const char*); void FUN_00cc00e0(); };
+struct ErrorText { char* data; int length; int capacity; void FUN_00cb1600(char*,int); void ProcessAndReturnValue_00cc01c0(const char*); void FUN_00cc00e0(); };
 struct ErrorReporter { virtual void ReportDiagnostic(); virtual void unused1(); virtual void unused2(); virtual int report(int,unsigned,const char*,const char*,int); };
 extern ErrorReporter* DAT_01268360;
 struct VirtualMachine {
@@ -170,7 +171,7 @@ struct VirtualMachine {
  union {int primitiveMask;int m34;};
  void Execute(const QueryState*,unsigned char*,int);
  __forceinline void AddHit(int value) {
-  HitArray* out=hits;AllocatorContext* context=FUN_00c85750();
+  HitArray* out=hits;AllocatorContext* context=hkMemoryRouter_getInstance();
   if(out->size==(out->capacity&0x3fffffff)) ResizeAudioStream(context->allocator,out,4);
   int* destination=&reinterpret_cast<int*>(out->data)[out->size]; ++out->size; *destination=value; }
 };
@@ -287,7 +288,7 @@ void VirtualMachine::Execute(const QueryState* apQueryState,unsigned char* __res
         default:
         badCommand:
             {unsigned int errorBuffer[128];ErrorText errorText;errorText.FUN_00cb1600(reinterpret_cast<char*>(errorBuffer),512);
-            errorText.FUN_00cc01c0("Unknown command - This mopp data has been corrupted (check for memory trashing), or an hkpMoppBvTreeShape has been pointed at invalid mopp data.\n");
+            errorText.ProcessAndReturnValue_00cc01c0("Unknown command - This mopp data has been corrupted (check for memory trashing), or an hkpMoppBvTreeShape has been pointed at invalid mopp data.\n");
             if(DAT_01268360->report(3,0x1298fedd,reinterpret_cast<char*>(errorBuffer),".\\Collide\\Mopp\\Machine\\hkpMoppObbVirtualMachine.cpp",459)) __debugbreak();
             errorText.FUN_00cc00e0();}break;
         emit:

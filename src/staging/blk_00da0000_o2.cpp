@@ -19,21 +19,22 @@
 #include "../../include/hkBool.h"
 #include "../../include/hkMemoryAllocator.h"
 
-extern "C" void __cdecl FUN_00cb0a70(void*);
+extern "C" void __cdecl ReturnSelf(void*);
 extern int DAT_010d461c;
 
 struct FUN_00da07b0_class
 {
-    void __thiscall FUN_00cb0a70(void*);
+    void __thiscall ReturnSelf(void*);
 };
 
 // @fnv 0x00da07b0
-void __cdecl FUN_00da07b0(void* apObject, void* b)
+// src: HAVOK_LIB 0x00da07b0
+void __cdecl finishLoadedObjecthkSimpleLocalFrame(void* apObject, void* b)
 {
     if (apObject)
     {
         *(int*)apObject = (int)&DAT_010d461c;
-        ((FUN_00da07b0_class*)((char*)apObject + 0x64))->FUN_00cb0a70(b);
+        ((FUN_00da07b0_class*)((char*)apObject + 0x64))->ReturnSelf(b);
     }
 }
 
@@ -53,7 +54,8 @@ void* __cdecl InitAndReturnTail(void* apUnused1, void* apUnused2, void* apStruct
 }
 
 // @fnv 0x00da08c0
-void __cdecl FUN_00da08c0(void** a)
+// src: GUESS 0x00da08c0 (confidence: low)
+void __cdecl Object_InvokeVirtualMethod_00da08c0(void** a)
 {
     (**(void(__thiscall**)(void*, int))(*a))(a, 0);
 }
@@ -63,7 +65,8 @@ extern int DAT_010c6bec;
 
 // If a is non-null, sets its vtable pointer to DAT_010c59f4, optionally writes a 16-bit value at offset 0x11e, then sets the vtable to DAT_010c6bec.
 // @fnv 0x00da08e0
-void __cdecl FUN_00da08e0(void* pObject, int bSetField)
+// src: GUESS 0x00da08e0 (confidence: low)
+void __cdecl Object_UpdateFields_00da08e0(void* pObject, int bSetField)
 {
     if (pObject)
     {
@@ -80,7 +83,8 @@ void __cdecl FUN_00da08e0(void* pObject, int bSetField)
 
 extern int DAT_010c6fd0;
 // @fnv 0x00da0b10
-void __cdecl FUN_00da0b10(int* p)
+// src: GUESS 0x00da0b10 (confidence: low)
+void __cdecl Runtime_UpdateState_00da0b10(int* p)
 {
     if (p)
         *p = (int)&DAT_010c6fd0;
@@ -90,11 +94,12 @@ extern int DAT_010d6014;
 
 struct FUN_00db7ab0_class
 {
-    void* __thiscall FUN_00db7ab0(void* a, void* b, void* c);
+    void* __thiscall SetVtableAndProcessState_00db7ab0(void* a, void* b, void* c);
 };
 
 // @fnv 0x00db7ab0
-void* __thiscall FUN_00db7ab0_class::FUN_00db7ab0(void* a, void* b, void* c)
+// src: GUESS 0x00db7ab0 (confidence: low)
+void* __thiscall FUN_00db7ab0_class::SetVtableAndProcessState_00db7ab0(void* a, void* b, void* c)
 {
     *(short*)((char*)this + 6) = 1;
     *(int*)((char*)this + 12) = (int)a;
@@ -143,17 +148,18 @@ int __cdecl Crc32ShiftRight8(unsigned int uiValue)
     return uiValue;
 }
 
-void __cdecl FUN_00da6dc0(void*);
-void __cdecl FUN_00da6de0(void*);
-void __cdecl FUN_00da6e30(void*);
-void __cdecl FUN_00da6e60(void*);
+void __cdecl Object_HkAgent1nMachine_Destroy_Thunk(void*);
+void __cdecl hkListAgent3_ProcessAndReturnValue_00da6de0(void*);
+void __cdecl Hkplistagent3_HkAgent1nMachine_WarpTime_Thunk(void*);
+void __cdecl Object_UpdateFields_00da6e60(void*);
 void __cdecl BuildEventIndex(void);
 void* __cdecl InitAndReturnTail(void* a, void* b, void* c);
-void* __cdecl FUN_00da6e10(void* a, void* b, void* c);
+void* __cdecl Runtime_ForwardCall_00da6e10(void* a, void* b, void* c);
 
 // Fills the object at p with function pointers at fixed offsets, zeroes several pointer slots and sets the byte at offset 0x30 to 1.
 // @fnv 0x00da6fd0
-void __cdecl FUN_00da6fd0(void* apObject)
+// src: GUESS 0x00da6fd0 (confidence: medium)
+void __cdecl Object_InitializeDispatchFunctionTable(void* apObject)
 {
     char* b = (char*)apObject;
     *(void**)(b + 0) = &InitAndReturnTail;
@@ -163,16 +169,17 @@ void __cdecl FUN_00da6fd0(void* apObject)
     *(void**)(b + 0xc) = 0;
     *(void**)(b + 0x10) = 0;
     *(void**)(b + 0x14) = 0;
-    *(void**)(b + 0x18) = &FUN_00da6e60;
-    *(void**)(b + 0x1c) = &FUN_00da6de0;
-    *(void**)(b + 0x20) = &FUN_00da6e10;
-    *(void**)(b + 0x24) = &FUN_00da6e30;
-    *(void**)(b + 0x4) = &FUN_00da6dc0;
+    *(void**)(b + 0x18) = &Object_UpdateFields_00da6e60;
+    *(void**)(b + 0x1c) = &hkListAgent3_ProcessAndReturnValue_00da6de0;
+    *(void**)(b + 0x20) = &Runtime_ForwardCall_00da6e10;
+    *(void**)(b + 0x24) = &Hkplistagent3_HkAgent1nMachine_WarpTime_Thunk;
+    *(void**)(b + 0x4) = &Object_HkAgent1nMachine_Destroy_Thunk;
     *(unsigned char*)(b + 0x30) = 1;
 }
 
 // @fnv 0x00da0680
-void __cdecl FUN_00da0680(char* pObject, int bReset)
+// src: HAVOK_LIB 0x00da0680
+void __cdecl finishLoadedObjecthkpLinkedCollidable(char* pObject, int bReset)
 {
     if (pObject != 0)
     {
@@ -198,31 +205,34 @@ struct FUN_00da0740_vt
     virtual void v0(int);
 };
 // @fnv 0x00da0740
-void __cdecl FUN_00da0740(FUN_00da0740_vt* p)
+// src: GUESS 0x00da0740 (confidence: low)
+void __cdecl Object_InvokeVirtualMethod_00da0740(FUN_00da0740_vt* p)
 {
     p->v0(0);
 }
 
 struct FUN_00cb0a70_class
 {
-    void __thiscall FUN_00cb0a70(int);
+    void __thiscall ReturnSelf(int);
 };
 // @fnv 0x00da0760
-void __cdecl FUN_00da0760(void* pObject, void* b)
+// src: GUESS 0x00da0760 (confidence: low)
+void __cdecl Object_UpdateFields_00da0760(void* pObject, void* b)
 {
     if (pObject)
     {
         *(void**)((char*)pObject + 0) = (void*)0x010d460c;
-        ((FUN_00cb0a70_class*)((char*)pObject + 8))->FUN_00cb0a70((int)b);
+        ((FUN_00cb0a70_class*)((char*)pObject + 8))->ReturnSelf((int)b);
     }
 }
 
 struct FUN_00db7cf0_class
 {
-    int __thiscall FUN_00db7cf0(int a, int b);
+    int __thiscall hkVersionPatchManager_UidFromClassVersion_getName(int a, int b);
 };
 // @fnv 0x00db7cf0
-int __thiscall FUN_00db7cf0_class::FUN_00db7cf0(int a, int b)
+// src: HAVOK_LIB 0x00db7cf0
+int __thiscall FUN_00db7cf0_class::hkVersionPatchManager_UidFromClassVersion_getName(int a, int b)
 {
     return ((int*)(*(int**)(this + 0x10)))[a];
 }
@@ -230,7 +240,8 @@ int __thiscall FUN_00db7cf0_class::FUN_00db7cf0(int a, int b)
 extern int g_unk0126958c;
 
 // @fnv 0x00da0610
-void* __cdecl FUN_00da0610()
+// src: GUESS 0x00da0610 (confidence: low)
+void* __cdecl Runtime_GetUnk0126958cAddress()
 {
     return &g_unk0126958c;
 }
@@ -238,7 +249,8 @@ void* __cdecl FUN_00da0610()
 extern char DAT_012695bc;
 
 // @fnv 0x00da0630
-char* __cdecl FUN_00da0630(void)
+// src: GUESS 0x00da0630 (confidence: low)
+char* __cdecl Runtime_GetDAT012695bcAddress(void)
 {
     return &DAT_012695bc;
 }
@@ -246,7 +258,8 @@ char* __cdecl FUN_00da0630(void)
 extern int DAT_012695ec;
 
 // @fnv 0x00da0660
-int* __cdecl FUN_00da0660(void)
+// src: GUESS 0x00da0660 (confidence: low)
+int* __cdecl Object_GetGlobalObjectAddress_00da0660(void)
 {
     return &DAT_012695ec;
 }
@@ -254,7 +267,8 @@ int* __cdecl FUN_00da0660(void)
 extern int g_unk0126961c;
 
 // @fnv 0x00da0670
-int* __cdecl FUN_00da0670()
+// src: GUESS 0x00da0670 (confidence: low)
+int* __cdecl Runtime_GetUnk0126961cAddress()
 {
     return &g_unk0126961c;
 }
@@ -265,7 +279,8 @@ struct FUN_00da0720_Class
 };
 
 // @fnv 0x00da0720
-void __cdecl FUN_00da0720(FUN_00da0720_Class* param_1)
+// src: GUESS 0x00da0720 (confidence: low)
+void __cdecl Object_InvokeVirtualMethod_00da0720(FUN_00da0720_Class* param_1)
 {
     param_1->vf00(0);
 }
@@ -273,7 +288,8 @@ void __cdecl FUN_00da0720(FUN_00da0720_Class* param_1)
 struct CpuOpaque;
 extern CpuOpaque DAT_0126967c;
 // @fnv 0x00da0730
-CpuOpaque* __cdecl FUN_00da0730()
+// src: GUESS 0x00da0730 (confidence: low)
+CpuOpaque* __cdecl Runtime_GetDAT0126967cAddress()
 {
     return &DAT_0126967c;
 }
@@ -281,7 +297,8 @@ CpuOpaque* __cdecl FUN_00da0730()
 extern int DAT_012696c4;
 
 // @fnv 0x00da0750
-int* __cdecl FUN_00da0750()
+// src: GUESS 0x00da0750 (confidence: low)
+int* __cdecl Runtime_GetDAT012696c4Address()
 {
     return &DAT_012696c4;
 }
@@ -301,7 +318,8 @@ struct FUN_00da08a0_cls
 };
 
 // @fnv 0x00da08a0
-int __cdecl FUN_00da08a0(FUN_00da08a0_cls* pObj)
+// src: GUESS 0x00da08a0 (confidence: low)
+int __cdecl Object_InvokeVirtualMethod_00da08a0(FUN_00da08a0_cls* pObj)
 {
     return pObj->v00(0);
 }
@@ -309,7 +327,8 @@ int __cdecl FUN_00da08a0(FUN_00da08a0_cls* pObj)
 extern int DAT_0126970c;
 
 // @fnv 0x00da08b0
-int* __cdecl FUN_00da08b0()
+// src: GUESS 0x00da08b0 (confidence: low)
+int* __cdecl Runtime_GetDAT0126970cAddress()
 {
     return &DAT_0126970c;
 }
@@ -317,7 +336,8 @@ int* __cdecl FUN_00da08b0()
 extern int DAT_01269754;
 
 // @fnv 0x00da08d0
-void* __cdecl FUN_00da08d0(void)
+// src: GUESS 0x00da08d0 (confidence: low)
+void* __cdecl Runtime_GetDAT01269754Address(void)
 {
     return &DAT_01269754;
 }
@@ -325,7 +345,8 @@ void* __cdecl FUN_00da08d0(void)
 extern int DAT_010c6bec;
 
 // @fnv 0x00da0910
-void* __cdecl FUN_00da0910(void)
+// src: GUESS 0x00da0910 (confidence: low)
+void* __cdecl Runtime_GetDAT010c6becAddress(void)
 {
     return &DAT_010c6bec;
 }
@@ -529,7 +550,8 @@ void ConstructDA0920Object(void* apMemory, int finishing)
 extern int g_unk010c6c64;
 
 // @fnv 0x00da0950
-void* __cdecl FUN_00da0950()
+// src: GUESS 0x00da0950 (confidence: low)
+void* __cdecl Runtime_GetUnk010c6c64Address()
 {
     return &g_unk010c6c64;
 }
@@ -537,7 +559,8 @@ void* __cdecl FUN_00da0950()
 extern int DAT_0126979c;
 
 // @fnv 0x00da0970
-void* __cdecl FUN_00da0970()
+// src: GUESS 0x00da0970 (confidence: low)
+void* __cdecl Runtime_GetDAT0126979cAddress()
 {
     return &DAT_0126979c;
 }
@@ -545,7 +568,8 @@ void* __cdecl FUN_00da0970()
 extern void* DAT_012697cc;
 
 // @fnv 0x00da09a0
-void* FUN_00da09a0()
+// src: GUESS 0x00da09a0 (confidence: low)
+void* Object_GetGlobalObjectAddress_00da09a0()
 {
     return &DAT_012697cc;
 }
@@ -553,7 +577,8 @@ void* FUN_00da09a0()
 struct CpuOpaque;
 extern CpuOpaque DAT_012697fc;
 // @fnv 0x00da09c0
-CpuOpaque* __cdecl FUN_00da09c0()
+// src: GUESS 0x00da09c0 (confidence: low)
+CpuOpaque* __cdecl Object_GetGlobalObjectAddress_00da09c0()
 {
     return &DAT_012697fc;
 }
@@ -561,7 +586,8 @@ CpuOpaque* __cdecl FUN_00da09c0()
 extern int DAT_0126982c;
 
 // @fnv 0x00da09e0
-void* __cdecl FUN_00da09e0()
+// src: GUESS 0x00da09e0 (confidence: low)
+void* __cdecl Object_GetGlobalObjectAddress_00da09e0()
 {
     return &DAT_0126982c;
 }
@@ -569,7 +595,8 @@ void* __cdecl FUN_00da09e0()
 struct CpuOpaque;
 extern CpuOpaque DAT_0126985c;
 // @fnv 0x00da0a00
-CpuOpaque* __cdecl FUN_00da0a00()
+// src: GUESS 0x00da0a00 (confidence: low)
+CpuOpaque* __cdecl Object_GetGlobalObjectAddress_00da0a00()
 {
     return &DAT_0126985c;
 }
@@ -577,7 +604,8 @@ CpuOpaque* __cdecl FUN_00da0a00()
 extern int DAT_0126988c;
 
 // @fnv 0x00da0a20
-void* __cdecl FUN_00da0a20()
+// src: GUESS 0x00da0a20 (confidence: low)
+void* __cdecl Object_GetGlobalObjectAddress_00da0a20()
 {
     return &DAT_0126988c;
 }
@@ -585,7 +613,8 @@ void* __cdecl FUN_00da0a20()
 // FUN_00da0a40 : a one-line function - getter
 extern int g_target_00da0a40;
 // @fnv 0x00da0a40
-void* FUN_00da0a40()
+// src: GUESS 0x00da0a40 (confidence: low)
+void* Object_GetGlobalObjectAddress_00da0a40()
 {
     return &g_target_00da0a40;
 }
@@ -593,7 +622,8 @@ void* FUN_00da0a40()
 extern int DAT_012698ec;
 
 // @fnv 0x00da0a60
-void* __cdecl FUN_00da0a60()
+// src: GUESS 0x00da0a60 (confidence: low)
+void* __cdecl Object_GetGlobalObjectAddress_00da0a60()
 {
     return &DAT_012698ec;
 }
@@ -602,7 +632,8 @@ void* __cdecl FUN_00da0a60()
 extern int DAT_0126991c;
 
 // @fnv 0x00da0a80
-int* __cdecl FUN_00da0a80(void)
+// src: GUESS 0x00da0a80 (confidence: low)
+int* __cdecl Object_GetGlobalObjectAddress_00da0a80(void)
 {
     return &DAT_0126991c;
 }
@@ -610,7 +641,8 @@ int* __cdecl FUN_00da0a80(void)
 extern int DAT_0126994c;
 
 // @fnv 0x00da0aa0
-int __cdecl FUN_00da0aa0()
+// src: GUESS 0x00da0aa0 (confidence: low)
+int __cdecl Object_ComputeValue_00da0aa0()
 {
     return reinterpret_cast<int>(&DAT_0126994c);
 }
@@ -618,7 +650,8 @@ int __cdecl FUN_00da0aa0()
 struct CpuOpaque;
 extern CpuOpaque DAT_0126997c;
 // @fnv 0x00da0ac0
-CpuOpaque* __cdecl FUN_00da0ac0()
+// src: GUESS 0x00da0ac0 (confidence: low)
+CpuOpaque* __cdecl Object_GetGlobalObjectAddress_00da0ac0()
 {
     return &DAT_0126997c;
 }
@@ -626,7 +659,8 @@ CpuOpaque* __cdecl FUN_00da0ac0()
 extern int DAT_012699ac;
 
 // @fnv 0x00da0ae0
-int* __cdecl FUN_00da0ae0(void)
+// src: GUESS 0x00da0ae0 (confidence: low)
+int* __cdecl Object_GetGlobalObjectAddress_00da0ae0(void)
 {
     return &DAT_012699ac;
 }
@@ -637,7 +671,8 @@ struct FUN_00da0af0_Class
 };
 
 // @fnv 0x00da0af0
-void __cdecl FUN_00da0af0(FUN_00da0af0_Class* param_1)
+// src: GUESS 0x00da0af0 (confidence: low)
+void __cdecl Runtime_ForwardCall_00da0af0(FUN_00da0af0_Class* param_1)
 {
     param_1->vf00(0);
 }
@@ -645,7 +680,8 @@ void __cdecl FUN_00da0af0(FUN_00da0af0_Class* param_1)
 extern int DAT_01269a0c;
 
 // @fnv 0x00da0b00
-void* __cdecl FUN_00da0b00()
+// src: GUESS 0x00da0b00 (confidence: low)
+void* __cdecl Object_GetGlobalObjectAddress_00da0b00()
 {
     return &DAT_01269a0c;
 }
@@ -653,7 +689,8 @@ void* __cdecl FUN_00da0b00()
 extern int DAT_010c6fd0;
 
 // @fnv 0x00da0b20
-void* __cdecl FUN_00da0b20()
+// src: GUESS 0x00da0b20 (confidence: low)
+void* __cdecl Object_GetGlobalObjectAddress_00da0b20()
 {
     return &DAT_010c6fd0;
 }
@@ -685,11 +722,12 @@ struct FUN_00db0060_class
     int unk14;
     int unk18;
 
-    void __thiscall FUN_00db0060(int* param_2, int param_3);
+    void __thiscall hk1AxisSweep_AabbInt_set(int* param_2, int param_3);
 };
 
 // @fnv 0x00db0060
-void __thiscall FUN_00db0060_class::FUN_00db0060(int* aiValues, int param_3)
+// src: HAVOK_LIB 0x00db0060
+void __thiscall FUN_00db0060_class::hk1AxisSweep_AabbInt_set(int* aiValues, int param_3)
 {
     int value;
 
@@ -760,11 +798,12 @@ struct FUN_00db75b0_class
     FUN_00db75b0_entry* unk04;
     int unk08;
 
-    unsigned int __thiscall FUN_00db75b0(int a1, unsigned int* a2);
+    unsigned int __thiscall hkClassEnum_getValueOfName(int a1, unsigned int* a2);
 };
 
 // @fnv 0x00db75b0
-unsigned int __thiscall FUN_00db75b0_class::FUN_00db75b0(int a1, unsigned int* a2)
+// src: HAVOK_LIB 0x00db75b0
+unsigned int __thiscall FUN_00db75b0_class::hkClassEnum_getValueOfName(int a1, unsigned int* a2)
 {
     for (int index = 0; index < unk08; ++index)
     {
@@ -794,11 +833,12 @@ class FUN_00db78a0_cls
     virtual void vSlot04();
     virtual void vSlot08();
     virtual void vSlot0c(void* field, void* item);
-    void FUN_00db78a0(FUN_00db78a0_item** a, void** b);
+    void hkVtableClassRegistry_registerList(FUN_00db78a0_item** a, void** b);
 };
 
 // @fnv 0x00db78a0
-void FUN_00db78a0_cls::FUN_00db78a0(FUN_00db78a0_item** apItems, void** apValues)
+// src: HAVOK_LIB 0x00db78a0
+void FUN_00db78a0_cls::hkVtableClassRegistry_registerList(FUN_00db78a0_item** apItems, void** apValues)
 {
     FUN_00db78a0_item** p = apItems;
     if (*p == 0)
@@ -815,10 +855,10 @@ void FUN_00db78a0_cls::FUN_00db78a0(FUN_00db78a0_item** apItems, void** apValues
     } while (*p != 0);
 }
 
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* audio()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 
 struct MapPair
@@ -866,7 +906,7 @@ struct HashEntryTable
         return m_kPrimitiveElement[it].val;
     }
 
-    void FUN_00cb1870(hkMemoryAllocator& alloc, unsigned int key, unsigned int val);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocator& alloc, unsigned int key, unsigned int val);
 };
 
 struct MapHolder
@@ -882,11 +922,11 @@ struct MapHolder
 void MapHolder::CopyMapEntries(const MapHolder& other)
 {
     for (int it = other.m_map.GetFirstIterator(); other.m_map.isValid(it); it = other.m_map.getNext(it))
-        m_map.FUN_00cb1870(audio()->heap(), other.m_map.GetIteratorKey(it), other.m_map.getValue(it));
+        m_map.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(audio()->heap(), other.m_map.GetIteratorKey(it), other.m_map.getValue(it));
 }
 
 namespace fnv_00db7960 {
-extern "C" void* __cdecl FUN_00c85750();
+extern "C" void* __cdecl hkMemoryRouter_getInstance();
 extern int DAT_010cf844;
 
 struct FUN_00db7960_Data
@@ -908,7 +948,7 @@ struct FUN_00db7960_Result
 // @fnv 0x00db7960
 void* __cdecl CreateAudioResult()
 {
-    hkMemoryRouter* audio = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter* audio = reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     hkMemoryAllocator* target = audio->m_heap;
 
     void* allocated = target->blockAlloc(0x14);
@@ -923,7 +963,7 @@ void* __cdecl CreateAudioResult()
     data[1] = 0;
     data[2] = -1;
 
-    hkMemoryRouter* audio2 = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter* audio2 = reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     void* target2 = audio2->m_heap;
 
     FUN_00db7960_Data* dataObject = reinterpret_cast<FUN_00db7960_Data*>(reinterpret_cast<char*>(allocated) + 8);
@@ -935,7 +975,7 @@ void* __cdecl CreateAudioResult()
 
 namespace fnv_00db7a20 {
 
-__declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
+__declspec(nothrow) BSAudio* __cdecl hkMemoryRouter_getInstance();
 
 // This constructor takes the original one-word POD hkBool argument. The shared
 // hkBool has a user-declared copy constructor, so pass the legacy ABI slot directly.
@@ -959,7 +999,7 @@ class RefObj
 
     static void* operator new(unsigned int nbytes)
     {
-        RefObj* b = (RefObj*)((hkMemoryRouter*)FUN_00c85750())->heap().blockAlloc(nbytes);
+        RefObj* b = (RefObj*)((hkMemoryRouter*)hkMemoryRouter_getInstance())->heap().blockAlloc(nbytes);
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -995,7 +1035,7 @@ Thing* __cdecl CreateThing()
 // ForwardToInner: forwards a 64-bit value to a member function held at this->m_08.
 struct SpawnedInner
 {
-    void FUN_00db7c70(__int64 v);
+    void GetB(__int64 v);
 };
 
 struct SpawnedOuter
@@ -1010,7 +1050,7 @@ struct SpawnedOuter
 // @fnv 0x00db7c90
 void SpawnedOuter::ForwardToInner(__int64 v)
 {
-    m_08->FUN_00db7c70(v);
+    m_08->GetB(v);
 }
 
 struct CallTarget_00dba270
@@ -1019,10 +1059,11 @@ struct CallTarget_00dba270
 };
 struct SearchObject
 {
-    int FUN_00dba320(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
+    int ProcessAndReturnValue_00dba320(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
 };
 // @fnv 0x00dba320
-int SearchObject::FUN_00dba320(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3)
+// src: GUESS 0x00dba320 (confidence: low)
+int SearchObject::ProcessAndReturnValue_00dba320(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3)
 {
     unsigned int callResult0 =
         (unsigned int)((CallTarget_00dba270*)this)->Splice((int)arg0, (int)arg1, (int)0u, (int)arg2, (int)arg3);
@@ -1032,19 +1073,20 @@ int SearchObject::FUN_00dba320(unsigned int arg0, unsigned int arg1, unsigned in
 class DBA340Object
 {
   public:
-    int FUN_00dba320(void* pvA, void* pvB, void* pvC, int iFlag);
-    int FUN_00dba340(void* pvA, void* pvB, void* pvC);
+    int ProcessAndReturnValue_00dba320(void* pvA, void* pvB, void* pvC, int iFlag);
+    int ForwardCall_00dba340(void* pvA, void* pvB, void* pvC);
 };
 
 // @fnv 0x00dba340
-int DBA340Object::FUN_00dba340(void* pvA, void* pvB, void* pvC)
+// src: GUESS 0x00dba340 (confidence: low)
+int DBA340Object::ForwardCall_00dba340(void* pvA, void* pvB, void* pvC)
 {
-    return FUN_00dba320(pvA, pvB, pvC, 1);
+    return ProcessAndReturnValue_00dba320(pvA, pvB, pvC, 1);
 }
 
 namespace fnv_00dba3d0 {
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 struct DBA3D0Pair
 {
@@ -1055,7 +1097,7 @@ struct DBA3D0Pair
 template <class T>
 static __forceinline void DBA3D0Array_destroy(hkArrayBase<T>& self) throw()
 {
-        hkMemoryAllocator& alloc = FUN_00c85750().heap();
+        hkMemoryAllocator& alloc = hkMemoryRouter_getInstance().heap();
         self.m_iElementCount = 0;
         if ((self.m_iCapacityState & 0x80000000) == 0)
             alloc.bufFree(self.m_data, self.getCapacity() * sizeof(T));
@@ -1085,7 +1127,7 @@ class DBA3D0Map : public DBA3D0MapBase
   public:
     ~DBA3D0Map() throw()
     {
-        ClearAndRelease(FUN_00c85750().heap());
+        ClearAndRelease(hkMemoryRouter_getInstance().heap());
     }
 };
 
@@ -1128,7 +1170,8 @@ struct DBB100Writer
 };
 
 // @fnv 0x00dbb100
-static __declspec(noinline) void FUN_00dbb100(const DBB100Registry* registry, const void* object, DBB100Writer* writer)
+// src: GUESS 0x00dbb100 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00dbb100(const DBB100Registry* registry, const void* object, DBB100Writer* writer)
 {
     const DBB100Class* pClass = registry->getClassByObject(object);
     if (pClass)
@@ -1138,8 +1181,8 @@ static __declspec(noinline) void FUN_00dbb100(const DBB100Registry* registry, co
 // Caller so the file-static helper is emitted with its register calling convention.
 void DBB100WriteClassNames(const DBB100Registry* registry, const void** objects, DBB100Writer* writer)
 {
-    FUN_00dbb100(registry, objects[0], writer);
-    FUN_00dbb100(registry, objects[1], writer);
+    Object_UpdateFields_00dbb100(registry, objects[0], writer);
+    Object_UpdateFields_00dbb100(registry, objects[1], writer);
 }
 
 hkMemoryRouter* __cdecl da06d0_getRouter();
@@ -1175,7 +1218,8 @@ struct Buffer
     int m_pRayCursor;
 };
 // @fnv 0x00da06d0
-void __cdecl FUN_00da06d0(Buffer* self)
+// src: HAVOK_LIB 0x00da06d0
+void __cdecl cleanupLoadedObjecthkpLinkedCollidable(Buffer* self)
 {
     int* pSize = &self->m_iElementCount;
     int* piCapacity = &self->m_pRayCursor;
@@ -1286,9 +1330,9 @@ struct DBA430Owner
 void DBA430Owner::Reset()
 {
     DBA430Inner* p = &m_0C;
-    p->Sync(reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->pListener));
+    p->Sync(reinterpret_cast<hkMemoryAllocator*>(hkMemoryRouter_getInstance()->pListener));
     p->Mark();
-    BSAudio* audio = FUN_00c85750();
+    BSAudio* audio = hkMemoryRouter_getInstance();
     hkMemoryAllocator* listener = reinterpret_cast<hkMemoryAllocator*>(audio->pListener);
     m_04 = 0;
     if (!(m_08 & (int)0x80000000))
@@ -1392,71 +1436,88 @@ void __stdcall CheckFeatureCacheCoverage(FeatureCache* cache, int firstFlags, in
 }
 
 // @fnv 0x00da0600
-void __cdecl FUN_00da0600()
+// src: COMMUNITY 0x00da0600
+void __cdecl nullsub_104()
 {}
 
 // @fnv 0x00da0620
-void __cdecl FUN_00da0620(void)
+// src: COMMUNITY 0x00da0620
+void __cdecl nullsub_106(void)
 {}
 
 // @fnv 0x00da0640
-void FUN_00da0640()
+// src: COMMUNITY 0x00da0640
+void nullsub_105()
 {}
 
 // @fnv 0x00da0650
-void FUN_00da0650()
+// src: COMMUNITY 0x00da0650
+void nullsub_107()
 {}
 
 // @fnv 0x00da0960
-void __cdecl FUN_00da0960()
+// src: COMMUNITY 0x00da0960
+void __cdecl nullsub_109()
 {}
 
 // @fnv 0x00da0980
-void __cdecl FUN_00da0980()
+// src: COMMUNITY 0x00da0980
+void __cdecl nullsub_108()
 {}
 
 // @fnv 0x00da0990
-void __cdecl FUN_00da0990()
+// src: COMMUNITY 0x00da0990
+void __cdecl nullsub_110()
 {}
 
 // @fnv 0x00da09b0
-void __cdecl FUN_00da09b0()
+// src: COMMUNITY 0x00da09b0
+void __cdecl nullsub_111()
 {}
 
 // @fnv 0x00da09d0
-void __cdecl FUN_00da09d0()
+// src: COMMUNITY 0x00da09d0
+void __cdecl nullsub_112()
 {}
 
 // @fnv 0x00da09f0
-void __cdecl FUN_00da09f0()
+// src: COMMUNITY 0x00da09f0
+void __cdecl nullsub_113()
 {}
 
 // @fnv 0x00da0a10
-void FUN_00da0a10()
+// src: COMMUNITY 0x00da0a10
+void nullsub_114()
 {}
 
 // @fnv 0x00da0a30
-void __cdecl FUN_00da0a30()
+// src: COMMUNITY 0x00da0a30
+void __cdecl nullsub_115()
 {}
 
 // @fnv 0x00da0a50
-void __cdecl FUN_00da0a50()
+// src: COMMUNITY 0x00da0a50
+void __cdecl nullsub_116()
 {}
 
 // @fnv 0x00da0a70
-void __cdecl FUN_00da0a70()
+// src: COMMUNITY 0x00da0a70
+void __cdecl nullsub_117()
 {}
 
 // @fnv 0x00da0a90
-void __cdecl FUN_00da0a90()
+// src: COMMUNITY 0x00da0a90
+void __cdecl nullsub_118()
 {}
 
 // @fnv 0x00da0ab0
-void __cdecl FUN_00da0ab0()
+// src: COMMUNITY 0x00da0ab0
+void __cdecl nullsub_119()
 {}
 
 // @fnv 0x00da0ad0
-void __cdecl FUN_00da0ad0()
+// src: COMMUNITY 0x00da0ad0
+void __cdecl nullsub_120()
 {}
 
 struct CallbackHolder
@@ -1493,7 +1554,7 @@ extern int DAT_01269a9c;
 
 struct FUN_00da2840_Obj
 {
-    void __thiscall FUN_00da2840();
+    void __thiscall hkStackTracerWin32Data_init();
 };
 
 struct FUN_00da2b90_Obj
@@ -1514,7 +1575,7 @@ unsigned int* __thiscall FUN_00da2b90_Obj::Initialize()
     unk00 = reinterpret_cast<int>(&DAT_010d4de4);
     unk08 = &DAT_01269a9c;
 
-    reinterpret_cast<FUN_00da2840_Obj*>(&DAT_01269a9c)->FUN_00da2840();
+    reinterpret_cast<FUN_00da2840_Obj*>(&DAT_01269a9c)->hkStackTracerWin32Data_init();
 
     return reinterpret_cast<unsigned int*>(this);
 }
@@ -1524,18 +1585,18 @@ struct DA2D70Object
     int unk00;
     unsigned short unk04;
 
-    void __thiscall FUN_00da2930();
+    void __thiscall ReleaseStackTraceModule();
     void* __thiscall NotifyAudioListener(int flags);
 };
 
 // @fnv 0x00da2d70
 void* DA2D70Object::NotifyAudioListener(int flags)
 {
-    FUN_00da2930();
+    ReleaseStackTraceModule();
 
     if (flags & 1)
     {
-        BSAudio* audio = FUN_00c85750();
+        BSAudio* audio = hkMemoryRouter_getInstance();
         hkMemoryAllocator* listener = reinterpret_cast<hkMemoryAllocator*>(audio->pListener);
         listener->blockFree(this, static_cast<int>(unk04));
     }
@@ -1544,23 +1605,26 @@ void* DA2D70Object::NotifyAudioListener(int flags)
 }
 
 // @fnv 0x00da2da0
-void __cdecl FUN_00da2da0()
+// src: COMMUNITY 0x00da2da0
+void __cdecl nullsub_21()
 {}
 
-void __cdecl FUN_00da44d0(int a, int b, void* pvCallback);
+void __cdecl hkAgent1nMachine_VisitAllAgents(int a, int b, void* pvCallback);
 void __cdecl ProcessCollisionEntry();
 
 // @fnv 0x00da4900
-void __cdecl FUN_00da4900(int a, int b)
+// src: GUESS 0x00da4900 (confidence: medium)
+void __cdecl Object_HkAgent1nMachine_VisitAllAgents_Thunk(int a, int b)
 {
-    FUN_00da44d0(a, b, reinterpret_cast<void*>(&ProcessCollisionEntry));
+    hkAgent1nMachine_VisitAllAgents(a, b, reinterpret_cast<void*>(&ProcessCollisionEntry));
 }
 
-void* __cdecl FUN_00da3510(void*, void*);
+void* __cdecl hkpAgent1nSector_ProcessEntries_00da3510(void*, void*);
 // @fnv 0x00da6e10
-void* __cdecl FUN_00da6e10(void* apUnused, void* b, void* c)
+// src: GUESS 0x00da6e10 (confidence: low)
+void* __cdecl Runtime_ForwardCall_00da6e10(void* apUnused, void* b, void* c)
 {
-    return FUN_00da3510(b, c);
+    return hkpAgent1nSector_ProcessEntries_00da3510(b, c);
 }
 
 extern int DAT_010cf7d4;
@@ -1606,9 +1670,10 @@ struct CreatedObject
 
 // Allocates a 0x20-byte object from the manager's heap, initializes it, and returns it.
 // @fnv 0x00db79c0
-void* __cdecl FUN_00db79c0()
+// src: HAVOK_LIB 0x00db79c0
+void* __cdecl hkDefaultClassNameRegistrycreate()
 {
-    hkMemoryRouter* manager = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* manager = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     CreatedObject* object = (CreatedObject*)manager->heap().blockAlloc(0x20);
     object->Init();
     return object;
@@ -1620,7 +1685,8 @@ struct FUN_00db7c00_obj
 };
 
 // @fnv 0x00db7c00
-void __cdecl FUN_00db7c00(FUN_00db7c00_obj* p)
+// src: GUESS 0x00db7c00 (confidence: medium)
+void __cdecl Object_Vslot00_Thunk(FUN_00db7c00_obj* p)
 {
     p->vslot00(0);
 }
@@ -1629,7 +1695,8 @@ void __cdecl FUN_00db7c00(FUN_00db7c00_obj* p)
 extern int DAT_01269b28;
 
 // @fnv 0x00db7c10
-int* FUN_00db7c10()
+// src: GUESS 0x00db7c10 (confidence: low)
+int* Runtime_GetDAT01269b28Address()
 {
     return &DAT_01269b28;
 }
@@ -1662,7 +1729,7 @@ void __cdecl InitLoadedObject(void* pvObject, int iFinishing)
     {
         hkLoadedObjectDB7C* pkObject = static_cast<hkLoadedObjectDB7C*>(pvObject);
         pkObject->m_ppVirtualMethodTable = &DAT_010cce28;
-        pkObject->m_name.FUN_00cb0a70(iFinishing);
+        pkObject->m_name.ReturnSelf(iFinishing);
     }
 }
 
@@ -1673,7 +1740,8 @@ extern void* DAT_01269b78;
 extern void* FUN_00fde2a0;
 extern unsigned short DAT_01269b7e;
 // @fnv 0x00dba610
-void* __cdecl FUN_00dba610()
+// src: HAVOK_LIB 0x00dba610
+void* __cdecl hkLogger_nullLogger()
 {
     int iInitFlag = 1;
     if (!(DAT_01269b80 & iInitFlag))
@@ -1689,14 +1757,14 @@ void* __cdecl FUN_00dba610()
 typedef void(__cdecl* FuncDA34)();
 
 void __cdecl ExecuteMoppAabbQuery();
-void __cdecl FUN_00df6f80();
-void __cdecl FUN_00df6b50();
-void __cdecl FUN_00df79d0();
-void __cdecl FUN_00df7340();
+void __cdecl hkCpuPairGetClosestPointsJob();
+void __cdecl hkCpuWorldGetClosestPointsJob();
+void __cdecl hkCpuPairLinearCastJob();
+void __cdecl hkCpuWorldLinearCastJob();
 void __cdecl ProcessWorkQueue();
 void __cdecl ProcessAabbTree();
 void __cdecl SplitJob();
-void __cdecl FUN_00df7a90();
+void __cdecl hkpCollisionQueryJobQueueUtils_finishCollisionJob();
 
 struct FuncTableDA34
 {
@@ -1727,34 +1795,35 @@ class DispatcherDA34
 
 // Populates the DAT_01269af0 function table with seven handlers and registers it with dispatcher type 2 via SetEntry.
 // @fnv 0x00da3400
-void __cdecl FUN_00da3400(DispatcherDA34* dispatcher)
+// src: HAVOK_LIB 0x00da3400
+void __cdecl hkpCollisionQueryJobQueueUtils_registerWithJobQueue(DispatcherDA34* dispatcher)
 {
-    DAT_01269af0.m_func3 = FUN_00df79d0;
-    DAT_01269af0.m_func4 = FUN_00df7340;
+    DAT_01269af0.m_func3 = hkCpuPairLinearCastJob;
+    DAT_01269af0.m_func4 = hkCpuWorldLinearCastJob;
     DAT_01269af0.m_func0 = ExecuteMoppAabbQuery;
-    DAT_01269af0.m_func1 = FUN_00df6f80;
-    DAT_01269af0.m_func2 = FUN_00df6b50;
+    DAT_01269af0.m_func1 = hkCpuPairGetClosestPointsJob;
+    DAT_01269af0.m_func2 = hkCpuWorldGetClosestPointsJob;
     DAT_01269af0.m_func5 = ProcessWorkQueue;
     DAT_01269af0.m_func6 = ProcessAabbTree;
     RegisterInfoDA34 info;
     info.m_funcA = SplitJob;
-    info.m_funcB = FUN_00df7a90;
+    info.m_funcB = hkpCollisionQueryJobQueueUtils_finishCollisionJob;
     info.m_table = &DAT_01269af0;
     info.m_numFuncs = 7;
     dispatcher->SetEntry(2, info);
 }
 
 namespace fnv_00da3480 {
-void __cdecl FUN_00df94b0();
-void __cdecl FUN_00df8df0();
+void __cdecl hkCpuShapeRayCastJob();
+void __cdecl hkCpuWorldRayCastJob();
 void __cdecl FinishJobWithPair();
 void __cdecl BuildKdTreeDistributed();
-void __cdecl FUN_00df8440();
-void __cdecl FUN_00df8800();
-void __cdecl FUN_00df8570();
+void __cdecl hkCpuKdTreeBuildFastDistributedSubJob();
+void __cdecl hkCpuKdTreeBuildSetupJob();
+void __cdecl hkCpuKdTreeBuildCoordinatorJob();
 void __cdecl ExecuteJob();
 void __cdecl CopyAndAdvance();
-void __cdecl FUN_00df9920();
+void __cdecl hkpRayCastQueryJobQueueUtils_finishRayCastQueryJob();
 
 typedef void(__cdecl* AgentFuncDA34)();
 
@@ -1780,27 +1849,29 @@ struct DispatcherDA34
 
 // Populates DAT_01269ad0 with eight agent functions, builds kInfo, and registers it with pkDispatcher->SetEntry(3, kInfo).
 // @fnv 0x00da3480
-void __cdecl FUN_00da3480(DispatcherDA34* pkDispatcher)
+// src: HAVOK_LIB 0x00da3480
+void __cdecl hkpRayCastQueryJobQueueUtils_registerWithJobQueue(DispatcherDA34* pkDispatcher)
 {
     AgentInfoDA34 kInfo;
     kInfo.m_pfnCreate = CopyAndAdvance;
-    kInfo.m_pfnDestroy = FUN_00df9920;
+    kInfo.m_pfnDestroy = hkpRayCastQueryJobQueueUtils_finishRayCastQueryJob;
     kInfo.m_pkTable = &DAT_01269ad0;
     kInfo.m_iNumFuncs = 8;
-    DAT_01269ad0.m_apfnFuncs[0] = FUN_00df94b0;
-    DAT_01269ad0.m_apfnFuncs[1] = FUN_00df8df0;
+    DAT_01269ad0.m_apfnFuncs[0] = hkCpuShapeRayCastJob;
+    DAT_01269ad0.m_apfnFuncs[1] = hkCpuWorldRayCastJob;
     DAT_01269ad0.m_apfnFuncs[2] = FinishJobWithPair;
     DAT_01269ad0.m_apfnFuncs[3] = BuildKdTreeDistributed;
-    DAT_01269ad0.m_apfnFuncs[4] = FUN_00df8440;
-    DAT_01269ad0.m_apfnFuncs[5] = FUN_00df8800;
-    DAT_01269ad0.m_apfnFuncs[6] = FUN_00df8570;
+    DAT_01269ad0.m_apfnFuncs[4] = hkCpuKdTreeBuildFastDistributedSubJob;
+    DAT_01269ad0.m_apfnFuncs[5] = hkCpuKdTreeBuildSetupJob;
+    DAT_01269ad0.m_apfnFuncs[6] = hkCpuKdTreeBuildCoordinatorJob;
     DAT_01269ad0.m_apfnFuncs[7] = ExecuteJob;
     pkDispatcher->SetEntry(3, kInfo);
 }
 }  // namespace fnv_00da3480
 
 // @fnv 0x00da82d0
-void FUN_00da82d0()
+// src: GUESS 0x00da82d0 (confidence: high)
+void Runtime_DoNothing_00da82d0()
 {}
 
 inline unsigned int mySeparatedYZ(const SweepBounds& a, const SweepBounds& b)
@@ -1933,7 +2004,8 @@ int __cdecl CollideSweepBounds(const SweepBounds* apBoundsA, int aiCountA, const
 }
 
 // @fnv 0x00db09f0
-static __declspec(noinline) float FUN_00db09f0(unsigned short arg)
+// src: HAVOK_LIB 0x00db09f0
+static __declspec(noinline) float getNormalSignFromFeatureBitSet(unsigned short arg)
 {
     union
     {
@@ -1950,21 +2022,22 @@ float volatile g_out_db09f0;
 
 void drive_db09f0(void)
 {
-    g_out_db09f0 = FUN_00db09f0(g_in_db09f0);
+    g_out_db09f0 = getNormalSignFromFeatureBitSet(g_in_db09f0);
 }
 
 extern int DAT_010d52d0;
 extern "C" unsigned int stub_val(void);
 
 // @fnv 0x00db0db0
-static __declspec(noinline) int* FUN_00db0db0(unsigned int a)
+// src: GUESS 0x00db0db0 (confidence: low)
+static __declspec(noinline) int* Runtime_GetMaskedValue_00db0db0(unsigned int a)
 {
     return (int*)((a & 0x70) + (unsigned int)&DAT_010d52d0);
 }
 
 int stub_caller(void)
 {
-    return (int)FUN_00db0db0(stub_val());
+    return (int)Runtime_GetMaskedValue_00db0db0(stub_val());
 }
 
 struct FUN_00db7c80_class
@@ -1973,11 +2046,12 @@ struct FUN_00db7c80_class
     int unk04;
     int unk08;
     int m_0c;
-    int* FUN_00db7c80();
+    int* Get0cAddress_00db7c80();
 };
 
 // @fnv 0x00db7c80
-int* FUN_00db7c80_class::FUN_00db7c80()
+// src: GUESS 0x00db7c80 (confidence: low)
+int* FUN_00db7c80_class::Get0cAddress_00db7c80()
 {
     return &m_0c;
 }
@@ -2206,7 +2280,8 @@ struct TriIndexSet_b4046
 };
 
 // @fnv 0x00da0c30
-float __cdecl FUN_00da0c30(TriIndexSet_b4046* self)
+// src: GUESS 0x00da0c30 (confidence: low)
+float __cdecl Object_ProcessEntries_00da0c30(TriIndexSet_b4046* self)
 {
     float sum = 0.0f;
     int count = self->m_10;
@@ -2248,16 +2323,17 @@ float __cdecl FUN_00da0c30(TriIndexSet_b4046* self)
 
 struct ArgObj
 {
-    int FUN_00da2b20(int* buffer, int size);
+    int hkStackTracer_getStackTrace(int* buffer, int size);
 };
 
 struct Holder
 {
     int FindOrAddCallTrace(int* buffer, int count);
-    int FUN_00da2d20(ArgObj* param);
+    int hkStackTracer_CallTree_insertCallStack(ArgObj* param);
 };
 
-__declspec(noinline) int ArgObj::FUN_00da2b20(int* buffer, int size)
+// src: XBOX_PDB 0x00da2b20
+__declspec(noinline) int ArgObj::hkStackTracer_getStackTrace(int* buffer, int size)
 {
     return 0;
 }
@@ -2269,10 +2345,11 @@ __declspec(noinline) int Holder::FindOrAddCallTrace(int* buffer, int count)
 
 // Fills a 0x40-word buffer via param->FUN_00da2b20 and, if it returned a positive count, forwards buffer+1 and count-1 to FindOrAddCallTrace.
 // @fnv 0x00da2d20
-int Holder::FUN_00da2d20(ArgObj* param)
+// src: HAVOK_LIB 0x00da2d20
+int Holder::hkStackTracer_CallTree_insertCallStack(ArgObj* param)
 {
     int buffer[0x40];
-    int count = param->FUN_00da2b20(buffer, 0x40);
+    int count = param->hkStackTracer_getStackTrace(buffer, 0x40);
     if (count > 0)
         return FindOrAddCallTrace(buffer + 1, count - 1);
     return 0;
@@ -2354,17 +2431,19 @@ Record* FindRecordByKey(Block*** pppBlocks, int iKey1, int iKey2, void** ppvData
 
 }
 
-void __cdecl FUN_00da42b0(void* a, void* b, void* c, void* d);
+void __cdecl hkAgent1nMachine_Destroy(void* a, void* b, void* c, void* d);
 
 // Calls FUN_00da42b0 with arg2, arg5, arg3 and arg4; arg1 is unused.
 // @fnv 0x00da6dc0
-void __cdecl FUN_00da6dc0(void* aUnused, void* arg2, void* arg3, void* arg4, void* arg5)
+// src: GUESS 0x00da6dc0 (confidence: medium)
+void __cdecl Object_HkAgent1nMachine_Destroy_Thunk(void* aUnused, void* arg2, void* arg3, void* arg4, void* arg5)
 {
-    FUN_00da42b0(arg2, arg5, arg3, arg4);
+    hkAgent1nMachine_Destroy(arg2, arg5, arg3, arg4);
 }
 
 // @fnv 0x00da82c0
-void __cdecl FUN_00da82c0()
+// src: GUESS 0x00da82c0 (confidence: high)
+void __cdecl Object_DoNothing_00da82c0()
 {}
 
 template <class T> __forceinline T* hkMemoryAllocator::_bufAlloc(int& num)
@@ -2376,7 +2455,7 @@ template <class T> __forceinline T* hkMemoryAllocator::_bufAlloc(int& num)
 }
 inline hkMemoryRouter* s06c0_mgr()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 struct S06c0_Key
 {
@@ -2525,7 +2604,8 @@ static __forceinline void db0aa0_addCell(int& mask, int cell)
 
 // Decodes a packed axis and bit flags from value and sets the corresponding cell bit in mask via db0aa0_addCell.
 // @fnv 0x00db0aa0
-static __declspec(noinline) void FUN_00db0aa0(int& mask, int packedValue)
+// src: GUESS 0x00db0aa0 (confidence: medium)
+static __declspec(noinline) void Object_SetPackedCellMaskBit(int& mask, int packedValue)
 {
     int axis = packedValue & 15;
     unsigned int bits = packedValue >> 4;
@@ -2542,7 +2622,7 @@ static __declspec(noinline) void FUN_00db0aa0(int& mask, int packedValue)
 
 extern "C" void __cdecl S00db0aa0_Entry(void)
 {
-    FUN_00db0aa0(g_00db0aa0_maskvar, stub_val());
+    Object_SetPackedCellMaskBit(g_00db0aa0_maskvar, stub_val());
 }
 
 namespace fnv_00db0e50 {
@@ -2614,17 +2694,19 @@ void CallTarget_a()
 struct S_00db7c70_class
 {
     int unk0c;
-    int __thiscall FUN_00db7c70(int a, int b);
-    int __thiscall FUN_00db7c80();
+    int __thiscall GetB(int a, int b);
+    int __thiscall Get0cAddress_00db7c80();
 };
 
 // @fnv 0x00db7c70
-int __thiscall S_00db7c70_class::FUN_00db7c70(int a, int b)
+// src: GUESS 0x00db7c70 (confidence: low)
+int __thiscall S_00db7c70_class::GetB(int a, int b)
 {
     return b;
 }
 
-int __thiscall S_00db7c70_class::FUN_00db7c80()
+// src: GUESS 0x00db7c80 (confidence: low)
+int __thiscall S_00db7c70_class::Get0cAddress_00db7c80()
 {
     return unk0c;
 }
@@ -2642,11 +2724,12 @@ struct DBBCBC0Target
     int unk20;
     int unk24;
 
-    int FUN_00dbbc00();
+    int NiRenderTargetGroup_GetRendererData();
 };
 
 // @fnv 0x00dbbc00
-int DBBCBC0Target::FUN_00dbbc00()
+// src: COMMUNITY 0x00dbbc00
+int DBBCBC0Target::NiRenderTargetGroup_GetRendererData()
 {
     return unk24;
 }
@@ -2699,11 +2782,12 @@ struct DA2840Object
     DA2840_SymGetLineFromAddr64 m_symGetLineFromAddr64;
     DA2840_SymCleanup m_symCleanup;
 
-    void FUN_00da2840();
+    void hkStackTracerWin32Data_init();
 };
 
 // @fnv 0x00da2840
-void DA2840Object::FUN_00da2840()
+// src: HAVOK_LIB 0x00da2840
+void DA2840Object::hkStackTracerWin32Data_init()
 {
     HMODULE module = (HMODULE)DAT_00fdf0b0(DAT_011b76d0);
     DA2840_OutputDebugString outputDebugString = DAT_00fdf16c;
@@ -2806,7 +2890,7 @@ extern char str_010c41f8[];
 extern "C" void _ReadWriteBarrier(void);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 
-void __cdecl FUN_00da4aa0(void* a, void* b, S00da6eb0_Sub* c, unsigned int* d, void* e);
+void __cdecl hkAgent1nMachine_Process(void* a, void* b, S00da6eb0_Sub* c, unsigned int* d, void* e);
 
 inline void S00da6eb0_TimerMark(const char* pName)
 {
@@ -2838,7 +2922,7 @@ void* __cdecl BuildEventIndex(void* apCtx, void* apUnused, void* apOut, void* ap
     S00da6eb0_List* pList = static_cast<S00da6eb0_Ctx*>(apCtx)->m_pRouter->m_pEntries;
     int iSize = pList->m_uiSize;
 
-    hkMemoryRouter* pAlloc = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter* pAlloc = reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     unsigned int* pEventIndex = reinterpret_cast<unsigned int*>(pAlloc->m_stack.m_next.m_storage);
 
     pAlloc->m_stack.m_next.m_storage = (char*)pAlloc->m_stack.m_next.m_storage + ((iSize * 4 + 0x83) & 0xffffff80);
@@ -2858,11 +2942,11 @@ void* __cdecl BuildEventIndex(void* apCtx, void* apUnused, void* apOut, void* ap
 
     pEventIndex[iIndexCount] = 0xffffffff;
 
-    FUN_00da4aa0(apOut, apCtx, pList, pEventIndex, a5);
+    hkAgent1nMachine_Process(apOut, apCtx, pList, pEventIndex, a5);
 
     S00da6eb0_TimerMark(str_010c41f8);
 
-    reinterpret_cast<hkMemoryRouter*>(FUN_00c85750())->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(pEventIndex));
+    reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(pEventIndex));
 
     return reinterpret_cast<char*>(apOut) + 0x10;
 }
@@ -2971,7 +3055,8 @@ inline __forceinline void fourDots(const hkVector4& n, const hkVector4& a, const
 }
 // Builds out origin, direction and normal from four vertices at idx offsets in base, negating the normal if the fourth dot is negative; returns ~mask & 7.
 // @fnv 0x00dad110
-static __declspec(noinline) int FUN_00dad110(const Indices* idx, const char* apVertexBlock, Output* out)
+// src: GUESS 0x00dad110 (confidence: low)
+static __declspec(noinline) int hkVector4_UpdateState_00dad110(const Indices* idx, const char* apVertexBlock, Output* out)
 {
     const hkVector4* pVertexB = (const hkVector4*)(apVertexBlock + idx->b);
     const hkVector4* pVertexC = (const hkVector4*)(apVertexBlock + idx->c);
@@ -3010,13 +3095,14 @@ Output* volatile inputOutput;
 volatile int g_iFunctionResult;
 void caller_dad110()
 {
-    g_iFunctionResult = FUN_00dad110(inputIndices, inputBase, inputOutput);
+    g_iFunctionResult = hkVector4_UpdateState_00dad110(inputIndices, inputBase, inputOutput);
 }
 }
 
 
 // @fnv 0x00da8340
-void __cdecl FUN_00da8340()
+// src: GUESS 0x00da8340 (confidence: high)
+void __cdecl Object_DoNothing_00da8340()
 {}
 
 namespace N {
@@ -3144,7 +3230,8 @@ static __forceinline __m128 fourDots(const GskVector4& a, const GskVector4& b, c
 }
 }
 // @fnv 0x00dacf10
-static __declspec(noinline) int FUN_00dacf10(const N::Rows* rows, const N::Desc* desc, N::Out* out)
+// src: GUESS 0x00dacf10 (confidence: low)
+static __declspec(noinline) int Runtime_UpdateState_00dacf10(const N::Rows* rows, const N::Desc* desc, N::Out* out)
 {
     const N::GskVector4& a = N::vertex(rows, desc->offsets[0]);
     const N::GskVector4& b = N::vertex(rows, desc->offsets[1]);
@@ -3178,7 +3265,7 @@ N::Out* g_output;
 volatile int g_sink;
 void callPlane()
 {
-    g_sink = FUN_00dacf10(g_rows, g_desc, g_output);
+    g_sink = Runtime_UpdateState_00dacf10(g_rows, g_desc, g_output);
 }
 
 #include <xmmintrin.h>
@@ -3285,7 +3372,8 @@ struct S00db47a0_Cls
 };
 // Computes weighted cross product lengths of pr->b and pr->d with self->a, stores their sum in out1 and the dot product of self->a with q in out2.
 // @fnv 0x00db47a0
-static __declspec(noinline) void FUN_00db47a0(S00db47a0_Cls* self, S00db47a0_Pair* apPair, S00db47a0_Obj* apObjA,
+// src: GUESS 0x00db47a0 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00db47a0(S00db47a0_Cls* self, S00db47a0_Pair* apPair, S00db47a0_Obj* apObjA,
                                               S00db47a0_Obj* apObjB, const SmallVec* apVec, float* apOutDot,
                                               float* apOutSum)
 {
@@ -3307,7 +3395,7 @@ float* volatile g_out2;
 float* volatile g_out1;
 void drive()
 {
-    FUN_00db47a0(g_self, pair_input(), g_o, g_p, g_q, g_out2, g_out1);
+    Object_UpdateFields_00db47a0(g_self, pair_input(), g_o, g_p, g_q, g_out2, g_out1);
 }
 }  // namespace fnv_00db47a0
 
@@ -3421,7 +3509,8 @@ struct W_c
 
 // Returns dot(b, cross(pv-LA, pe[0]) - c - cross(pv-LC, pe[1])), where LA and LC interpolate a's and q's v40/v50 at times derived from d.
 // @fnv 0x00db48a0
-static __declspec(noinline) float FUN_00db48a0(const VecHolder* pv, const VecHolder* pe, const SlabObj* q, W_a a, W_b b,
+// src: GUESS 0x00db48a0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00db48a0(const VecHolder* pv, const VecHolder* pe, const SlabObj* q, W_a a, W_b b,
                                                W_c c, float d)
 {
     float t0 = (d - a.p->v40.f[3]) * a.p->v50.f[3];
@@ -3465,7 +3554,7 @@ float volatile in_d;
 float volatile result;
 void drive_slab()
 {
-    result = FUN_00db48a0(in_v, in_e, in_q, W_a(in_a), W_b(in_b), W_c(in_c), in_d);
+    result = Object_ProcessAndReturnValue_00db48a0(in_v, in_e, in_q, W_a(in_a), W_b(in_b), W_c(in_c), in_d);
 }
 }  // namespace fnv_00db48a0
 
@@ -3492,12 +3581,13 @@ struct StackTraceOwner
 
     StackTraceModule* loader;
 
-    void FUN_00da2930();
+    void ReleaseStackTraceModule();
 };
 
 // Sets the vtable and, if loader->hModule is set, calls releaseProcess(GetCurrentProcess()), zeroes the loader fields, frees the library and clears hModule.
 // @fnv 0x00da2930
-void StackTraceOwner::FUN_00da2930()
+// src: GUESS 0x00da2930 (confidence: medium)
+void StackTraceOwner::ReleaseStackTraceModule()
 {
 
     StackTraceModule* p = loader;

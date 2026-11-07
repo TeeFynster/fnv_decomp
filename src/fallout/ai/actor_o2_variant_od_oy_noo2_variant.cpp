@@ -21,7 +21,7 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volati
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern MemoryManager g_memoryManager;
 extern "C" void* g_012685f8;
-void* __cdecl FUN_00c7fa60();
+void* __cdecl bhkStiffSpringConstraint_GetRTTI();
 extern "C" void __cdecl _delete(void*, int);
 void __cdecl FUN_00cc58c0();
 struct FUN_00c7fa70_Class
@@ -32,22 +32,22 @@ extern "C" void __cdecl FUN_0062d4b0();
 extern int DAT_01084e54;
 struct FUN_00cb9900_cls
 {
-    void __thiscall FUN_00cb9900();
+    void __thiscall UpdateFields_00cb9900();
 };
-void __cdecl FUN_00cda340();
+void __cdecl hkaPose_syncModelSpace();
 void __cdecl FUN_00cd9fe0();
 struct FUN_00cda4b0_cls
 {
-    void __thiscall FUN_00cda4b0();
+    void __thiscall hkaPose_accessSyncedPoseModelSpace();
 };
 struct FUN_00cda8d0_class
 {
-    void FUN_00cda340();
-    void* FUN_00cda8d0();
+    void hkaPose_syncModelSpace();
+    void* hkaPose_getSyncedPoseModelSpace();
 };
 struct FUN_00cdb290
 {
-    void __thiscall FUN_00cda690();
+    void __thiscall syncLocalSpace();
     void* __thiscall GetPlus4();
 };
 struct VObj
@@ -82,7 +82,7 @@ struct MyNode
     char _pad2[2];
     unsigned short count;
 };
-MyNode* __cdecl FUN_00c802d0(MyNode* p);
+MyNode* __cdecl bhkUtilFunctions_FindNextCollisionObject(MyNode* p);
 struct MyRef
 {
     virtual ~MyRef();
@@ -169,8 +169,8 @@ struct Target
 };
 struct FUN_00c6ffc0_Class
 {
-    Target* FUN_00c6e0b0();
-    void FUN_00c6ffc0();
+    Target* bhkCharacterController_GetCollisionDebugNode();
+    void bhkCharacterController_RemoveCollisionDebug();
 };
 extern char* EmptyFS;
 struct FixedStr
@@ -236,16 +236,16 @@ struct RArr
     void ConstructElementArray(RElem*, int);
 };
 struct RCtx;
-RObj* __cdecl FUN_00c4b470(RCtx*, RKey*, int);
-void __cdecl FUN_00c7bcb0(RCtx* ctx, RObj* obj, RArr* arr);
+RObj* __cdecl BSUtilities_GetObjectByName_00c4b470(RCtx*, RKey*, int);
+void __cdecl CopyPoseFunctor(RCtx* ctx, RObj* obj, RArr* arr);
 void __cdecl SetFlagRecursive(int, void*);
-void __cdecl FUN_00c7bcb0(void*, void*, void*);
+void __cdecl CopyPoseFunctor(void*, void*, void*);
 inline unsigned char GetFlag6(unsigned short w)
 {
     return (unsigned char)(w >> 6) & 1;
 }
-void __cdecl FUN_00c7d3b0(NiNode* param_1, void* param_2, void* param_3, char* param_4, unsigned int* param_5);
-void FUN_00c74dd0(void*, NiTransform*);
+void __cdecl bhkRagdollController_CopyPoseTo3D(NiNode* param_1, void* param_2, void* param_3, char* param_4, unsigned int* param_5);
+void NI2HK_00c74dd0(void*, NiTransform*);
 extern bool DAT_01267c28;
 extern bool DAT_01267c34;
 extern bool DAT_01267c40;
@@ -307,20 +307,20 @@ struct FUN_00c7d630_t
     RagNode* m_pkNode;
     char pad5c[4];
     NiMatrix3 m_kRot;
-    void FUN_00c7d630(float);
-    void FUN_00c79680();
-    void FUN_00c7cb50(int);
-    void FUN_00c76350(void*);
-    void FUN_00c751f0(void*);
-    void FUN_00c7aa60(void*);
-    void FUN_00c7ba50(void*, void*, bool*);
-    void FUN_00c7d030(void*);
-    void FUN_00c7c870();
-    void FUN_00c79a50();
+    void bhkRagdollController_DoRagdollAnim(float);
+    void bhkRagdollController_GetSGPoseLocalSpace();
+    void bhkRagdollController_UpdateDebugLines(int);
+    void bhkRagdollController_DoFootIK(void*);
+    void bhkRagdollController_DoGrabIK(void*);
+    void bhkRagdollController_DoLookAtIK(void*);
+    void bhkRagdollController_DoPoseMatching(void*, void*, bool*);
+    void bhkRagdollController_UpdateRagdollRigidBodies(void*);
+    void bhkRagdollController_DoRagdollFeedback();
+    void bhkRagdollController_SetSGPoseLocalSpace();
 };
 struct FUN_00cb0c00_class
 {
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
 struct VObjExt : VObj
 {
@@ -332,15 +332,15 @@ struct FUN_00c7d890_cls
     void* _0;
     int _4;
     unsigned int _8;
-    void FUN_00c7d890();
+    void ProcessEntries_00c7d890();
 };
 void* __cdecl FUN_00ec7230(char*, char const*, unsigned int);
-void __stdcall FUN_00c7f900(char* dst, char* src, unsigned int count);
-void __cdecl FUN_00d6b4b0(void*, unsigned int);
+void __stdcall BSSimpleArray_bhkUtilFunctions_AVLevel_1024_CopyItems(char* dst, char* src, unsigned int count);
+void __cdecl hkaKeyFrameHierarchyUtility_initialize(void*, unsigned int);
 struct FUN_00cdb3e0_cls
 {
     char pad[0x2c];
-    void FUN_00cdb3e0();
+    void hkaRagdollRigidBodyController_reinitialize();
 };
 struct S_c6a200_Info
 {
@@ -356,12 +356,12 @@ struct S_c6a200_Ev
 };
 extern void* DAT_011afecc;
 S_c6a200_Info* __cdecl GetExtraDataChecked(void* obj);
-void __cdecl FUN_00c68900(void* obj, S_c6a200_Ev* ev, void* extra);
-bool __cdecl FUN_00c6a200(void* obj, unsigned char a1, unsigned char a2, unsigned char a3);
+void __cdecl bhkWorld_DoObjectRec(void* obj, S_c6a200_Ev* ev, void* extra);
+bool __cdecl bhkWorld_SetDisabled(void* obj, unsigned char a1, unsigned char a2, unsigned char a3);
 struct FlagController
 {
-    void FUN_00c7b6a0(int);
-    void FUN_00c7ba10(bool);
+    void bhkRagdollController_SetRagdollFeedbackActive(int);
+    void bhkRagdollController_EnableRagdollFeedback(bool);
 };
 struct HkAllocator
 {
@@ -442,7 +442,7 @@ struct FUN_00c7d480_cls
     unsigned int m_04;
     unsigned int m_08;
     unsigned int m_0c;
-    void FUN_00c7d480();
+    void UpdateFields_00c7d480();
 };
 struct ScopeGuard
 {
@@ -464,7 +464,8 @@ struct ScopeGuard
         owner->m_00 = 0;
     }
 };
-void FUN_00c7d480_cls::FUN_00c7d480()
+// src: GUESS 0x00c7d480 (confidence: low)
+void FUN_00c7d480_cls::UpdateFields_00c7d480()
 {
     ScopeGuard guard(this);
     unsigned int count = m_0c;
@@ -475,7 +476,7 @@ void FUN_00c7d480_cls::FUN_00c7d480()
     }
     *(unsigned int*)_FUN_00c85750() = count;
 }
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct FUN_00c7d5c0_elem
 {
     int unk00;
@@ -487,7 +488,7 @@ struct FUN_00c7d5c0_cls
     int m_iArrayLength;
     unsigned int m_uCap;
 
-    void FUN_00c7d5c0();
+    void ProcessEntries_00c7d5c0();
 };
 extern unsigned int g_01268188;
 extern unsigned int g_012685f4;
@@ -548,7 +549,7 @@ class BCB9810Registry
 {
   public:
     void AppendTailPair(void* pvOwner, BCB9810Node* pkNode);
-    void FUN_00cb9810(void* pvOwner, BCB9810Node* pkNode);
+    void bhkFilteredCdBodyCollector_addCdBodyPair(void* pvOwner, BCB9810Node* pkNode);
 
     int unk00;
     int unk04;
@@ -595,9 +596,9 @@ struct CE4360Context
     int unk70;
     int m_iMode;
 };
-void __cdecl FUN_00ce3a00(CE4360Context* pkContext, int a, int b, int c, int d);
-void __cdecl FUN_00ce4330(CE4360Context* pkContext, int a, int b, int c);
-void __cdecl FUN_00ce4360(CE4360Context* pkContext, CE4360Iter* pkFrom, CE4360Iter* pkTo, int iValue);
+void __cdecl mapPose(CE4360Context* pkContext, int a, int b, int c, int d);
+void __cdecl hkaSkeletonMapper_mapPoseLocalSpace_00ce4330(CE4360Context* pkContext, int a, int b, int c);
+void __cdecl hkaSkeletonMapper_mapPose(CE4360Context* pkContext, CE4360Iter* pkFrom, CE4360Iter* pkTo, int iValue);
 struct RTTI_c9b
 {
     const char* m_pcName;
@@ -667,8 +668,8 @@ struct S
     virtual void v37();
     virtual void v38();
     virtual void SetMode(int iMode);
-    void FUN_00561690(int);
-    void FUN_005617c0(float* pf);
+    void bhkRigidBody_SetLinearVelocity_00561690(int);
+    void bhkRigidBody_SetAngularVelocity_005617c0(float* pf);
 };
 struct Cast_c9b
 {
@@ -704,8 +705,8 @@ __forceinline bool IsNode_c9b(Obj_c9b* pkObj)
     }
     return false;
 }
-void __cdecl FUN_00c9bdf0(Obj_c9b* pkObj, float f);
-void __stdcall FUN_00c7f900(char* dst, char* src, unsigned int count);
+void __cdecl bhkBlendController_DoGetUp(Obj_c9b* pkObj, float f);
+void __stdcall BSSimpleArray_bhkUtilFunctions_AVLevel_1024_CopyItems(char* dst, char* src, unsigned int count);
 class FUN_00c7f970_cls
 {
   public:
@@ -717,7 +718,7 @@ class FUN_00c7f970_cls
     char* m_pData;
     void* unk;
     unsigned int m_uiSize;
-    void FUN_00c7f970(unsigned int uiNew, unsigned int uiOld);
+    void BSSimpleArray_bhkUtilFunctions_AVLevel_1024_ReallocateBuffer(unsigned int uiNew, unsigned int uiOld);
 };
 
 #include <xmmintrin.h>
@@ -788,11 +789,12 @@ struct QueryOwner
     virtual void vfn_d0();
     virtual int vfn_d4(ScratchVec* out);
 
-    int FUN_00560bc0(int param);
+    int bhkRigidBody_GetPosition(int param);
 };
 
 // @fnv 0x00560bc0
-int QueryOwner::FUN_00560bc0(int param)
+// src: XBOX_PDB 0x00560bc0
+int QueryOwner::bhkRigidBody_GetPosition(int param)
 {
     ScratchVec v;
     return FUN_00458620(param, vfn_d4(&v));
@@ -833,11 +835,11 @@ class hkVector4T8
     void AddMul4(const hkSimdRealT8& kScale, const hkVector4T8& kWorldPosition);
     __m128 m_vComponents;
 };
-void __cdecl FUN_004a3e00(hkVector4T8& kOut, const NiPoint3T8& kIn);
+void __cdecl NI2HK(hkVector4T8& kOut, const NiPoint3T8& kIn);
 NiPoint3T8& __cdecl FUN_00458620(NiPoint3T8& kOut, const hkVector4T8& kIn);
-hkVector4T8 __cdecl FUN_00891060(const hkVector4T8& kVec, const hkSimdRealT8& kScale);
-float __cdecl FUN_004a3e90(float fValue);
-float __cdecl FUN_0040ebd0(float fA, float fB);
+hkVector4T8 __cdecl Object_ProcessAndReturnValue_00891060(const hkVector4T8& kVec, const hkSimdRealT8& kScale);
+float __cdecl NI2HK_004a3e90(float fValue);
+float __cdecl BSMIN(float fA, float fB);
 
 class ScriptVarsT8
 {
@@ -903,8 +905,8 @@ class BodyT8
     const void* GetLinearVelocityVector();
     const void* GetNavMeshData();
 };
-BodyT8* __cdecl FUN_004b59f0(ObjT8* pkObj);
-int __cdecl FUN_004b5a80(BodyT8* pkBody);
+BodyT8* __cdecl hkpGetRigidBody(ObjT8* pkObj);
+int __cdecl bhkEntity_Getbhk(BodyT8* pkBody);
 
 class WeapT8
 {
@@ -957,9 +959,9 @@ class EventT8
     int m_i1c;
     int m_iFirstValue;
 };
-void __cdecl FUN_00837550(EventT8* pkEvent);
-void __cdecl FUN_00c6a350(void* pvTarget, int iMode, int iA, int iB, int iC);
-void __cdecl FUN_00cb9650(void* pvTarget);
+void __cdecl ImpactMixer_PlayCollisionSound(EventT8* pkEvent);
+void __cdecl bhkWorld_SetMotion(void* pvTarget, int iMode, int iA, int iB, int iC);
+void __cdecl bhkForceController_RemoveForce(void* pvTarget);
 void __cdecl SetCollisionScale(void* pvNode, hkVector4T8* pkVelocity, float fScale, int iFlags);
 
 class AVOwnerT8
@@ -1190,13 +1192,14 @@ class RefT8
     RefT8* GetPlayerTarget();
     char m_acPad[0xa4 - 4];
     AVOwnerT8 m_kAVOwner;
-    void FUN_00890610(HitT8* pkHit, WeapT8* pkWeap);
+    void Actor_DoTrap(HitT8* pkHit, WeapT8* pkWeap);
 };
 extern RefT8* g_pkPlayerT8;
 extern const double g_dMaxDeathPushBackT8;
 
 // @fnv 0x00890610
-void RefT8::FUN_00890610(HitT8* pkHit, WeapT8* pkWeap)
+// src: XBOX_PDB 0x00890610
+void RefT8::Actor_DoTrap(HitT8* pkHit, WeapT8* pkWeap)
 {
     float afDamageAmount = 0.0f;
     float fPushBack = 0.0f;
@@ -1230,7 +1233,7 @@ void RefT8::FUN_00890610(HitT8* pkHit, WeapT8* pkWeap)
                 if (fMinVelocity < 0.0)
                     fMinVelocity = 0.0f;
                 else
-                    fMinVelocity = FUN_004a3e90(fMinVelocity);
+                    fMinVelocity = NI2HK_004a3e90(fMinVelocity);
             }
             unsigned int uiContinuous;
             if (pkVars->GetVariable("bTrapContinuous", &uiContinuous))
@@ -1245,7 +1248,7 @@ void RefT8::FUN_00890610(HitT8* pkHit, WeapT8* pkWeap)
     if (bContinuous || !pkWeap->IsStatic())
     {
         ProjT8* pkProj = GetProjectileData();
-        BodyT8* pkBody = FUN_004b59f0(pkHit->m_kSub.GetObj());
+        BodyT8* pkBody = hkpGetRigidBody(pkHit->m_kSub.GetObj());
         hkVector4T8 kMotionVelocity;
         hkVector4T8 kSource;
         if (pkBody)
@@ -1289,23 +1292,23 @@ void RefT8::FUN_00890610(HitT8* pkHit, WeapT8* pkWeap)
                 ObjT8* pkObj = pkHit->m_kSub.GetObj()->GetObj();
                 kSource.SetFrom(pkObj->GetPos());
             }
-            FUN_004a3e00(kMotionVelocity, *GetPos());
+            NI2HK(kMotionVelocity, *GetPos());
             kMotionVelocity.Sub(kSource);
             float& rfZ = kMotionVelocity(2);
-            rfZ += FUN_004a3e90(GetHeight() / 2.0);
+            rfZ += NI2HK_004a3e90(GetHeight() / 2.0);
         }
         bool bWasAlive = !IsDead(0);
         TrapFlagsT8 kFlags(pkHit->m_kSub.GetObj()->GetFlagsValue());
         if (kFlags.GetType() == 0x10)
         {
             float fResist = m_kAVOwner.GetActorValue(0x13) / 100.0;
-            fResist = 1.0f - FUN_0040ebd0(fResist, 1.0f);
+            fResist = 1.0f - BSMIN(fResist, 1.0f);
             afDamageAmount *= fResist;
         }
         else
         {
             float fResist = 0.0f;
-            fResist = 1.0f - FUN_0040ebd0(fResist, 1.0f);
+            fResist = 1.0f - BSMIN(fResist, 1.0f);
             afDamageAmount *= fResist;
         }
         if (afDamageAmount > 0.0)
@@ -1328,7 +1331,7 @@ void RefT8::FUN_00890610(HitT8* pkHit, WeapT8* pkWeap)
                 if (!bContinuous && pkBody && pkWeap->GetFormType() != 0x24)
                 {
                     NiPoint3T8 kPos = FUN_00458620(kPos, kSource);
-                    int iOffset = FUN_004b5a80(pkBody);
+                    int iOffset = bhkEntity_Getbhk(pkBody);
                     EventT8 kEvent;
                     kEvent.m_fScale = 0.5f;
                     kEvent.m_i1c = 0;
@@ -1336,9 +1339,9 @@ void RefT8::FUN_00890610(HitT8* pkHit, WeapT8* pkWeap)
                     kEvent.m_ucType = 0x24;
                     kEvent.m_ucForm = pkWeap->GetFormType();
                     kEvent.m_kPos = kPos;
-                    kEvent.m_fAngleZ = FUN_00891060(kMotionVelocity.Copy(), hkSimdRealT8(3.0f)).Length3();
+                    kEvent.m_fAngleZ = Object_ProcessAndReturnValue_00891060(kMotionVelocity.Copy(), hkSimdRealT8(3.0f)).Length3();
                     kEvent.m_pvTarget = (char*)this + iOffset;
-                    FUN_00837550(&kEvent);
+                    ImpactMixer_PlayCollisionSound(&kEvent);
                 }
             }
             UpdateHit(1, 1);
@@ -1349,8 +1352,8 @@ void RefT8::FUN_00890610(HitT8* pkHit, WeapT8* pkWeap)
                     fDeathPushBack = 200.0f;
                 if (bKilled && this != g_pkPlayerT8)
                 {
-                    FUN_00c6a350(Get3D(), 1, 1, 0, 1);
-                    FUN_00cb9650(Get3D());
+                    bhkWorld_SetMotion(Get3D(), 1, 1, 0, 1);
+                    bhkForceController_RemoveForce(Get3D());
                     kMotionVelocity.Normalize3();
                     hkSimdRealT8 kScale(1024.0f);
                     kSource.AddMul4(kScale, kMotionVelocity);
@@ -1406,7 +1409,7 @@ struct SettingString
     const char* GetString();
 };
 extern SettingString DAT_011cc83c;
-NiAVObject* __cdecl FUN_004aae30(NiAVObject* a, NiFixedString* b);
+NiAVObject* __cdecl BSUtilities_GetObjectByName(NiAVObject* a, NiFixedString* b);
 struct GetterObj
 {
     float FUN_00450410();
@@ -1418,18 +1421,18 @@ extern GetterObj DAT_011cc7dc;
 extern Actor* DAT_011dea3c;
 struct NormObj
 {
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
 };
 struct NodeObj
 {
     struct ImpactPositionView_00461130;
-    ImpactPositionView_00461130 FUN_00461130(int arg);
+    ImpactPositionView_00461130 NiAVObject_GetWorldRotate(int arg);
 };
 // 0x00461130 returns three float coordinates (12 bytes); shared Pair is an 8-byte integer/reference pair.
 struct NodeObj::ImpactPositionView_00461130
 {
     float x, y, z;
-    ImpactPoint* FUN_00524c40();
+    ImpactPoint* ComputeValue_00524c40();
 };
 struct ParamObj
 {
@@ -1657,9 +1660,9 @@ struct SubObjSrc
 };
 struct Sub410
 {
-    bool FUN_008a5170();
+    bool bhkCharacterListener_QQuadruped();
 };
-void __cdecl FUN_00c9b250(void* mgr, float z, bool flag);
+void __cdecl bhkBlendController_DoHit(void* mgr, float z, bool flag);
 struct GlobalCount
 {
     int FUN_004503f0();
@@ -1731,22 +1734,23 @@ struct ImpactNode
 };
 struct HostShell : Actor
 {
-    void FUN_008a4af0(ParamObj* source, float strength, float secondary, int start, int end);
+    void Actor_HitMeAlt(ParamObj* source, float strength, float secondary, int start, int end);
 };
 // @fnv 0x008a4af0
-void HostShell::FUN_008a4af0(ParamObj* source, float strength, float secondary, int start, int end)
+// src: COMMUNITY 0x008a4af0
+void HostShell::Actor_HitMeAlt(ParamObj* source, float strength, float secondary, int start, int end)
 {
     void* scene = ((ImpactNode*)this)->GetScene();
     if (((ImpactNode*)this)->IsGhost())
         return;
-    void* manager = FUN_004aae30((NiAVObject*)scene, (NiFixedString*)DAT_011cc83c.GetString());
+    void* manager = BSUtilities_GetObjectByName((NiAVObject*)scene, (NiFixedString*)DAT_011cc83c.GetString());
     ImpactPoint origin;
     ImpactPoint target;
     NodeObj* node = (NodeObj*)source->GetNode116();
     if (node)
     {
-        origin = *node->FUN_00461130(start).FUN_00524c40();
-        target = *node->FUN_00461130(end).FUN_00524c40();
+        origin = *node->NiAVObject_GetWorldRotate(start).ComputeValue_00524c40();
+        target = *node->NiAVObject_GetWorldRotate(end).ComputeValue_00524c40();
     }
     ImpactPoint direction;
     direction = target - origin;
@@ -1772,8 +1776,8 @@ void HostShell::FUN_008a4af0(ParamObj* source, float strength, float secondary, 
                 bool special = false;
                 void* sub = ((SubObjSrc*)this)->FUN_009306d0();
                 if (sub)
-                    special = ((Sub410*)((char*)sub + 0x410))->FUN_008a5170();
-                FUN_00c9b250(manager, 0.0f, special);
+                    special = ((Sub410*)((char*)sub + 0x410))->bhkCharacterListener_QQuadruped();
+                bhkBlendController_DoHit(manager, 0.0f, special);
             }
             if (primary != 0.0)
             {
@@ -1806,7 +1810,7 @@ void HostShell::FUN_008a4af0(ParamObj* source, float strength, float secondary, 
                             part = identity->GetIndex();
                     }
                     if (!part)
-                        part = (int)FUN_004aae30((NiAVObject*)scene,
+                        part = (int)BSUtilities_GetObjectByName((NiAVObject*)scene,
                                                  (NiFixedString*)((SettingString*)&DAT_011cc8cc)->GetString());
                     if (part)
                     {
@@ -1834,10 +1838,11 @@ void HostShell::FUN_008a4af0(ParamObj* source, float strength, float secondary, 
 struct VectorXYZ
 {
     __m128 vector;
-    void FUN_008a5110(const __m128*);
+    void hkVector4_setXYZ(const __m128*);
 };
 // @fnv 0x008a5110
-void VectorXYZ::FUN_008a5110(const __m128* source)
+// src: XBOX_PDB 0x008a5110
+void VectorXYZ::hkVector4_setXYZ(const __m128* source)
 {
 
     vector = _mm_shuffle_ps(*source, _mm_unpackhi_ps(*source, vector), 0xc4);
@@ -2455,10 +2460,10 @@ class HitDataH
 };
 
 float __cdecl RemapValueBySettings(float fForce, bool bActor);
-float __cdecl FUN_00404010(float a, float b);
-void __cdecl FUN_00cb9650(HavokObjectH* pkObject);
-void __cdecl FUN_00c6a350(HavokObjectH* pkObject, int a, int b, int c, int d);
-void __cdecl FUN_004a3e00(hkVector4H* pkOut, const NiPoint3H* pkIn);
+float __cdecl BSMAX_00404010(float a, float b);
+void __cdecl bhkForceController_RemoveForce(HavokObjectH* pkObject);
+void __cdecl bhkWorld_SetMotion(HavokObjectH* pkObject, int a, int b, int c, int d);
+void __cdecl NI2HK(hkVector4H* pkOut, const NiPoint3H* pkIn);
 void __cdecl SetCollisionScale(HavokObjectH* pkObject, hkVector4H* pkImpulse, float fImpulse, HitDataH* pkHit);
 
 class ActorH
@@ -2584,11 +2589,12 @@ class ActorH
     ProcessH* GetProcess();
     BSFixedStringH GetTorsoNodeName(int iFlag);
 
-    void FUN_008ae000(HitDataH* pkHit);
+    void Actor_DoWeaponKillForce(HitDataH* pkHit);
 };
 
 // @fnv 0x008ae000
-void ActorH::FUN_008ae000(HitDataH* pkHit)
+// src: XBOX_PDB 0x008ae000
+void ActorH::Actor_DoWeaponKillForce(HitDataH* pkHit)
 {
     TESObjectREFRH* pkTarget = pkHit->m_pkTarget;
     float fForce = pkHit->m_fForce;
@@ -2646,18 +2652,18 @@ void ActorH::FUN_008ae000(HitDataH* pkHit)
                             else
                             {
                                 float fScale = (2.0 * fImpulseRadiusSquared - fDistSq) / fImpulseRadiusSquared * (double)0.9f + (double)0.1f;
-                                fScale = FUN_00404010(fScale, 0.1f);
+                                fScale = BSMAX_00404010(fScale, 0.1f);
                                 fImpulse = fImpulse * fScale;
                             }
                         }
                     }
                 }
-                FUN_00cb9650(pkObject);
-                FUN_00c6a350(pkObject, 1, 1, 0, 1);
+                bhkForceController_RemoveForce(pkObject);
+                bhkWorld_SetMotion(pkObject, 1, 1, 0, 1);
                 TargetInfoH kInfo(0.0f, 0, 0);
                 pkObject->SetTargetInfo(&kInfo);
                 hkVector4H kImpulse;
-                FUN_004a3e00(&kImpulse, &kWorldPosition);
+                NI2HK(&kImpulse, &kWorldPosition);
                 SetCollisionScale(pkObject, &kImpulse, fImpulse, pkHit);
             }
         }
@@ -2669,19 +2675,19 @@ struct xP3
     xP3();
     float x, y, z;
     xP3 operator+(const xP3&) const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
 };
 struct xMat
 {
     xMat();
     float m[9];
     void FUN_004a0c90(float);
-    void FUN_00439f50(unsigned int, xP3&);
+    void NiMatrix3_GetCol(unsigned int, xP3&);
 };
 xP3 xFUN_004a3760(float, const xP3&);
 struct xFltSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern xFltSetting xg_11d1200;
 struct xBoolSetting
@@ -2693,9 +2699,9 @@ extern float xg_1022958;
 struct xFilter
 {
     xFilter(int);
-    void FUN_004a39f0(int);
-    void FUN_0059ce80(unsigned int);
-    int FUN_004a3a20();
+    void CFilter_SetLayer(int);
+    void CFilter_SetGroup(unsigned int);
+    int CFilter_GetGroup();
     unsigned int m_uiFilterValue;
 };
 struct xAllHits
@@ -2720,16 +2726,16 @@ struct xHitList
 };
 struct xHitOwner
 {
-    xHitList* FUN_00460140();
+    xHitList* TESDataHandler_GetWorldSpaceList();
 };
 struct __declspec(align(16)) xPick
 {
     xPick();
-    void FUN_004a3da0(xP3*);
-    void FUN_004a3eb0(const xP3&);
-    void FUN_004a3f70(xFilter);
-    void FUN_004a3fb0(xAllHits*);
-    xHitOwner* FUN_008cdd90();
+    void bhkPickData_SetFrom(xP3*);
+    void bhkPickData_SetTo(const xP3&);
+    void bhkPickData_SetFilter(xFilter);
+    void bhkPickData_SetAllCollector(xAllHits*);
+    xHitOwner* DialoguePackage_GetCurrentDialogItem();
     char m_buf[0xb0];
 };
 struct xWorld
@@ -2988,37 +2994,38 @@ struct xActor
     virtual void v174();
     virtual float FUN_2bc(int);
     xFilter FUN_00931ed0();
-    float FUN_008bd830(int aiUnused, float afHeight);
+    float Actor_GetVATSAreaFree(int aiUnused, float afHeight);
 };
 
 // @fnv 0x008bd830
-float xActor::FUN_008bd830(int aiUnused, float afHeight)
+// src: XBOX_PDB 0x008bd830
+float xActor::Actor_GetVATSAreaFree(int aiUnused, float afHeight)
 {
     xP3 POS = *FUN_1f4();
-    POS.z = POS.z + *xg_11d1200.FUN_00403e20();
+    POS.z = POS.z + *xg_11d1200.Setting_Float_00403e20();
     xP3 DIR;
     xMat MAT;
     MAT.FUN_004a0c90(FUN_2bc(0) + afHeight);
-    MAT.FUN_00439f50(1, DIR);
-    DIR.FUN_004a0c10();
+    MAT.NiMatrix3_GetCol(1, DIR);
+    DIR.Unitize_004a0c10();
     float DIST = xg_1022958;
     xP3 END = POS + xFUN_004a3760(DIST, DIR);
     bool HIT = false;
     float BEST = 3.402823466e+38F;
     xPick PICK;
-    PICK.FUN_004a3da0(&POS);
-    PICK.FUN_004a3eb0(END);
+    PICK.bhkPickData_SetFrom(&POS);
+    PICK.bhkPickData_SetTo(END);
     xFilter FILTER(0);
-    FILTER.FUN_004a39f0(0x23);
-    FILTER.FUN_0059ce80(FUN_00931ed0().FUN_004a3a20());
-    PICK.FUN_004a3f70(FILTER);
+    FILTER.CFilter_SetLayer(0x23);
+    FILTER.CFilter_SetGroup(FUN_00931ed0().CFilter_GetGroup());
+    PICK.bhkPickData_SetFilter(FILTER);
     xAllHits HITS;
-    PICK.FUN_004a3fb0(&HITS);
+    PICK.bhkPickData_SetAllCollector(&HITS);
     xWorld* WORLD = xFUN_004543c0(xg_player_11dea3c->FUN_008d6f30());
     WORLD->FUN_c8(&PICK);
-    for (int I = 0; !HIT && I < PICK.FUN_008cdd90()->FUN_00460140()->FUN_00726070(); I++)
+    for (int I = 0; !HIT && I < PICK.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->FUN_00726070(); I++)
     {
-        xHitInfo INFO(PICK.FUN_008cdd90()->FUN_00460140()->GetEntryAt(I));
+        xHitInfo INFO(PICK.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(I));
         void* OBJ = xFUN_004b5820(INFO.m_50);
         xActor* ACTOR = xFUN_0056f930(OBJ);
         void* OTHER = xFUN_004b59f0(INFO.m_50);
@@ -3046,19 +3053,19 @@ struct xP3
     xP3 operator-(const xP3&) const;
     float FUN_00457990() const;
     xP3* FUN_006815c0();
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
 };
 struct xMat
 {
     xMat();
     float m[9];
     void FUN_004a0c90(float);
-    void FUN_00439f50(unsigned int, xP3&);
+    void NiMatrix3_GetCol(unsigned int, xP3&);
 };
 xP3 xFUN_004a3760(float, const xP3&);
 struct xFltSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern xFltSetting xg_11d1200;
 struct xBoolSetting
@@ -3075,14 +3082,14 @@ struct xBound
 };
 struct xAVObj
 {
-    xBound* FUN_0043d450();
+    xBound* NiAVObject_GetWorldBound();
 };
 struct xFilter
 {
     xFilter(int);
-    void FUN_004a39f0(int);
-    void FUN_0059ce80(unsigned int);
-    int FUN_004a3a20();
+    void CFilter_SetLayer(int);
+    void CFilter_SetGroup(unsigned int);
+    int CFilter_GetGroup();
     unsigned int m_uiFilterValue;
 };
 struct __declspec(align(16)) xAllHits
@@ -3107,16 +3114,16 @@ struct xHitList
 };
 struct xHitOwner
 {
-    xHitList* FUN_00460140();
+    xHitList* TESDataHandler_GetWorldSpaceList();
 };
 struct __declspec(align(16)) xPick
 {
     xPick();
-    void FUN_004a3da0(xP3*);
-    void FUN_004a3eb0(const xP3&);
-    void FUN_004a3f70(xFilter);
-    void FUN_004a3fb0(xAllHits*);
-    xHitOwner* FUN_008cdd90();
+    void bhkPickData_SetFrom(xP3*);
+    void bhkPickData_SetTo(const xP3&);
+    void bhkPickData_SetFilter(xFilter);
+    void bhkPickData_SetAllCollector(xAllHits*);
+    xHitOwner* DialoguePackage_GetCurrentDialogItem();
     char m_buf[0xb0];
 };
 struct xWorld
@@ -3375,37 +3382,38 @@ struct xActor
     virtual void v174();
     virtual float FUN_2bc(int);
     xFilter FUN_00931ed0();
-    float FUN_008bdbd0(xActor* apTarget, float afHeight);
+    float Actor_GetVATSTargetVisible(xActor* apTarget, float afHeight);
 };
 
 // @fnv 0x008bdbd0
-float xActor::FUN_008bdbd0(xActor* apTarget, float afHeight)
+// src: XBOX_PDB 0x008bdbd0
+float xActor::Actor_GetVATSTargetVisible(xActor* apTarget, float afHeight)
 {
     if (!apTarget || !apTarget->FUN_1d0())
         return 0.0f;
     xP3 POS = *FUN_1f4();
-    POS.z = POS.z + *xg_11d1200.FUN_00403e20();
+    POS.z = POS.z + *xg_11d1200.Setting_Float_00403e20();
     xP3 DIR;
     xMat MAT;
     MAT.FUN_004a0c90(FUN_2bc(0) + afHeight);
-    MAT.FUN_00439f50(1, DIR);
-    DIR.FUN_004a0c10();
-    xP3 TPOS = *apTarget->FUN_1d0()->FUN_0043d450()->FUN_006815c0();
+    MAT.NiMatrix3_GetCol(1, DIR);
+    DIR.Unitize_004a0c10();
+    xP3 TPOS = *apTarget->FUN_1d0()->NiAVObject_GetWorldBound()->FUN_006815c0();
     bool DONE = false;
     float RESULT = 0.0f;
-    for (int I = 0; !DONE && I < *xg_11d0850.FUN_00403e20(); I++)
+    for (int I = 0; !DONE && I < *xg_11d0850.Setting_Float_00403e20(); I++)
     {
-        float DIST = (I + 1) * *xg_11d09e8.FUN_00403e20();
+        float DIST = (I + 1) * *xg_11d09e8.Setting_Float_00403e20();
         xP3 START = POS + xFUN_004a3760(DIST, DIR);
         xPick PICK;
-        PICK.FUN_004a3da0(&START);
-        PICK.FUN_004a3eb0(TPOS);
+        PICK.bhkPickData_SetFrom(&START);
+        PICK.bhkPickData_SetTo(TPOS);
         xFilter FILTER(0);
-        FILTER.FUN_004a39f0(0x23);
-        FILTER.FUN_0059ce80(FUN_00931ed0().FUN_004a3a20());
-        PICK.FUN_004a3f70(FILTER);
+        FILTER.CFilter_SetLayer(0x23);
+        FILTER.CFilter_SetGroup(FUN_00931ed0().CFilter_GetGroup());
+        PICK.bhkPickData_SetFilter(FILTER);
         xAllHits HITS;
-        PICK.FUN_004a3fb0(&HITS);
+        PICK.bhkPickData_SetAllCollector(&HITS);
         if (*xg_11df868.FUN_00408d60())
         {
             xISParam COLOR(1.0f, 1.0f, 0.0f, 1.0f);
@@ -3414,9 +3422,9 @@ float xActor::FUN_008bdbd0(xActor* apTarget, float afHeight)
         }
         xWorld* WORLD = xFUN_004543c0(xg_player_11dea3c->FUN_008d6f30());
         WORLD->FUN_c8(&PICK);
-        for (int J = 0; !DONE && J < PICK.FUN_008cdd90()->FUN_00460140()->FUN_00726070(); J++)
+        for (int J = 0; !DONE && J < PICK.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->FUN_00726070(); J++)
         {
-            xHitInfo INFO(PICK.FUN_008cdd90()->FUN_00460140()->GetEntryAt(J));
+            xHitInfo INFO(PICK.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(J));
             void* OBJ = xFUN_004b5820(INFO.m_50);
             xActor* ACTOR = xFUN_0056f930(OBJ);
             void* OTHER = xFUN_004b59f0(INFO.m_50);
@@ -3434,7 +3442,7 @@ float xActor::FUN_008bdbd0(xActor* apTarget, float afHeight)
             }
         }
         if (!DONE)
-            RESULT = (I + 1) * *xg_11d09e8.FUN_00403e20();
+            RESULT = (I + 1) * *xg_11d09e8.Setting_Float_00403e20();
     }
     return RESULT;
 }
@@ -3459,7 +3467,7 @@ class NameC7
     const char* m_pcName;
 };
 extern const char* g_apcNamesC7[];
-bool __cdecl FUN_009a3830(const char* pcA, const NameC7& kB);
+bool __cdecl Actor_AreReferencedValuesEqual(const char* pcA, const NameC7& kB);
 
 class ModelC7
 {
@@ -3474,7 +3482,7 @@ class ClipC7
     unsigned int GetCount();
     void* GetAt(unsigned int uiIndex);
 };
-void __cdecl FUN_00c6a200(void* pvItem, int iA, int iB, int iC);
+void __cdecl bhkWorld_SetDisabled(void* pvItem, int iA, int iB, int iC);
 
 struct SlotC7
 {
@@ -4065,11 +4073,11 @@ class ProjC7
     BitsC7 m_kBits;
     char m_acPad2[0x650 - 0x411];
 };
-void __cdecl FUN_00c6a350(void* pvTarget, int iMode, int iA, int iB, int iC);
+void __cdecl bhkWorld_SetMotion(void* pvTarget, int iMode, int iA, int iB, int iC);
 void __cdecl CopyBlock48(void* pvTarget, int iValue);
-void __cdecl FUN_0062b8d0(void* pvTarget, NiPoint3C7& kPoint, int iValue);
+void __cdecl TESHavokUtilities_AddVelocity(void* pvTarget, NiPoint3C7& kPoint, int iValue);
 void __cdecl PropagateNameToHavokEntity(void* pvTarget);
-bool __cdecl FUN_00525420();
+bool __cdecl Main_GetSceneIsComplex();
 
 class WorldC7
 {
@@ -4319,7 +4327,7 @@ class RefC7
     OwnerC7* GetOwner();
     char m_acPad[0x68 - 4];
     ProcessC7* m_pkProcess;
-    void FUN_00930c70();
+    void MobileObject_InitHavok();
 };
 
 class ActorC7 : public RefC7
@@ -4338,7 +4346,8 @@ class ActorC7 : public RefC7
 extern RefC7* g_pkPlayerC7;
 
 // @fnv 0x00930c70
-void RefC7::FUN_00930c70()
+// src: XBOX_PDB 0x00930c70
+void RefC7::MobileObject_InitHavok()
 {
     PreUpdate(0);
     if (!m_pkProcess || (m_pkProcess->GetLevel() && m_pkProcess->GetLevel() != 1))
@@ -4375,13 +4384,13 @@ void RefC7::FUN_00930c70()
             ClipC7* pkClip = m_pkProcess->GetClip(pkSlot->m_ucValue);
             ModelC7* pkModel = pkClip->GetModelFilePath();
             NameC7 kName(g_apcNamesC7[pkSlot->m_ucValue]);
-            if (pkModel && FUN_009a3830(pkModel->GetName(), kName))
+            if (pkModel && Actor_AreReferencedValuesEqual(pkModel->GetName(), kName))
                 continue;
             for (unsigned int j = 0; j < pkClip->GetCount(); j++)
             {
                 void* pvItem = pkClip->GetAt(j);
                 if (pvItem)
-                    FUN_00c6a200(pvItem, 1, 1, 1);
+                    bhkWorld_SetDisabled(pvItem, 1, 1, 1);
             }
         }
     }
@@ -4409,7 +4418,7 @@ void RefC7::FUN_00930c70()
         m_pkProcess->SetProjectile(pkProj);
         pkProj->SetSource(this);
         pkProj->SetSpeed(GetAnimationSpeed());
-        pkProj->SetFlag(FUN_00525420());
+        pkProj->SetFlag(Main_GetSceneIsComplex());
         pkProj->m_kBits.SetBit(0x200000, true);
         if (pkProcess)
         {
@@ -4443,7 +4452,7 @@ void RefC7::FUN_00930c70()
             pkProj->Reset(0);
             CopyBlock48(pkProj->GetTarget(), 1);
         }
-        FUN_00c6a350(pvTarget, bCombat ? 1 : 4, 1, 0, 0);
+        bhkWorld_SetMotion(pvTarget, bCombat ? 1 : 4, 1, 0, 0);
         if (pkActor && !pkActor->IsDead(0))
         {
             pkActor->StartCombat(pvTarget, 1, 1, 0);
@@ -4465,7 +4474,7 @@ void RefC7::FUN_00930c70()
     if (bCombat && !GetLink()->GetSkeletonA() && !GetLink()->GetSkeletonB())
     {
         NiPoint3C7 kWorldPosition(0.0f, 0.0f, -1.0f);
-        FUN_0062b8d0(pvTarget, kWorldPosition, 1);
+        TESHavokUtilities_AddVelocity(pvTarget, kWorldPosition, 1);
     }
 }
 
@@ -4495,7 +4504,7 @@ struct kP4
     __m128 v;
     kP4();
 };
-void __cdecl FUN_004a3e00(kP4* a, kP3* b);
+void __cdecl NI2HK(kP4* a, kP3* b);
 
 struct kP2
 {
@@ -4519,30 +4528,30 @@ struct kE
     virtual void v028();
     virtual int v2c();
     virtual int v30();
-    bool FUN_004f1540();
-    unsigned char FUN_005bb4d0();
+    bool TESRegionData_GetOverride();
+    unsigned char TESRegionData_GetPriority();
     kNodeT<kRef>* GetOffsetC();
-    void FUN_004f2480(int a, int b);
+    void TESRegionDataImposter_SetImpostersVisible(int a, int b);
     kNodeT<kRef>* FUN_00413f40();
 };
 
 struct kExt
 {
-    kE* FUN_004f35b0();
+    kE* TESRegionDataList_Find();
 };
 
 struct kRef
 {
     bool FUN_00440d80();
-    void* FUN_007af430();
+    void* BGSSaveFormBuffer_GetForm();
     kNodeT<kShape>* FUN_00441110();
-    kExt* FUN_009611e0(int k);
-    bool FUN_00549580();
+    kExt* NiAVObject_GetParent(int k);
+    bool TESForm_GetHasSpokenFlag();
 };
 
 struct kShape
 {
-    bool FUN_004f8360(kP2* p);
+    bool TESRegionPointList_IsInsideRegion(kP2* p);
     bool FUN_008256d0();
 };
 
@@ -4554,7 +4563,7 @@ struct kRefList
 
 struct kPA2
 {
-    void FUN_004893c0(int a);
+    void SetFlags_004893c0(int a);
 };
 struct kPA
 {
@@ -4566,7 +4575,7 @@ struct kU2
 };
 struct kU
 {
-    kU2* FUN_00547680();
+    kU2* TESObjectCELL_GetUsableImageSpace();
 };
 struct kCell
 {
@@ -4577,17 +4586,17 @@ struct kProc
     void FUN_0063c8f0();
 };
 kProc* __stdcall FUN_0046dd00(void* p);
-void __cdecl FUN_00b4f430(int a);
+void __cdecl BSShaderManager_SetImageSpaceParameters(int a);
 
 struct kActor
 {
     bool FUN_004518e0();
-    float FUN_005471e0();
+    float TESObjectCELL_GetWaterHeight();
     bool FUN_00425fd0();
-    int FUN_005474b0(int a);
-    kPA* FUN_004543c0();
-    void* FUN_005475b0(int a);
-    kU2* FUN_00547680();
+    int TESObjectCELL_GetMusicType(int a);
+    kPA* TESObjectCELL_GetbhkWorld();
+    void* TESObjectCELL_GetClimate(int a);
+    kU2* TESObjectCELL_GetUsableImageSpace();
     kCell* FUN_0054ddd0();
     int FUN_00544c30();
     int FUN_00544c60();
@@ -4595,24 +4604,24 @@ struct kActor
     void FUN_00548230(kRef* r, int a);
 };
 
-bool __cdecl FUN_0094dba0();
-void __cdecl FUN_0062f8f0(float f);
-void __cdecl FUN_005743f0();
+bool __cdecl TESWaterSystem_GetCameraInPlaceableWater();
+void __cdecl TESWaterSystem_SetCameraRelevantWaterHeight(float f);
+void __cdecl FalloutRadio_NewCellEntered();
 struct kQ2
 {
-    void FUN_006231a0(kPA* a);
+    void DecalCaster_Add(kPA* a);
 };
 kQ2* __cdecl FUN_00622a70(float f, int a);
-float __cdecl FUN_00622bb0();
-float __cdecl FUN_00622ba0();
-void __cdecl FUN_004f24e0(kRef* r, int a, int b);
+float __cdecl DecalCaster_GetMaxDecalWidthLarge();
+float __cdecl DecalCaster_GetMaxDecalWidthSmall();
+void __cdecl TESRegionDataImposter_SetImposterVisible(kRef* r, int a, int b);
 
 struct kZ
 {
     int unk0, unk4, unk8, unkC, unk10;
     static void* operator new(unsigned int n);
     kZ();
-    void FUN_0056ea00(float f);
+    void bhkSphereShape_Init(float f);
 };
 
 struct __declspec(align(16)) kH
@@ -4675,8 +4684,8 @@ struct __declspec(align(16)) kH
     int unkdc;
     kH();
     ~kH();
-    void FUN_0056f110(kZ* z);
-    void FUN_0056f0f0(int f);
+    void bhkRigidBodyCinfo_SetShape(kZ* z);
+    void bhkRigidBodyCinfo_SetCollisionFilter(int f);
 };
 
 struct kW
@@ -4746,20 +4755,20 @@ struct kVV
     virtual void v0dc();
     virtual void v0e0();
     virtual void ve4(int a);
-    void FUN_00561580(int a);
-    void FUN_005610f0(kP3* p);
-    struct kVV3* FUN_004ae700();
+    void bhkRigidBody_SetActive(int a);
+    void bhkRigidBody_SetNiPosition(kP3* p);
+    struct kVV3* bhkWorldObject_GetCollidableRw();
 };
 struct kVV3
 {
-    void FUN_0094db80(int a);
+    void NiAlphaProperty_SetTestRef(int a);
 };
 
 struct kDec
 {
     bool FUN_00822510(int a);
     void FUN_0066b0d0(kW* w);
-    kVV* FUN_00559450();
+    kVV* Modelloader_GetReferencedThis();
 };
 
 struct kG1
@@ -4774,7 +4783,7 @@ struct kG2
 extern kG2 DAT_011e08e0;
 struct kG3
 {
-    bool FUN_00451530();
+    bool TES_CellTestRunning();
 };
 extern kG3* DAT_011dea10;
 extern kE* DAT_011dd380;
@@ -4788,7 +4797,7 @@ struct kO
     virtual ~kO();
     int unk4, unk8, unkC;
     kO(int a, int b);
-    void FUN_005e03d0();
+    void NiTArray_char_NiTMallocInterface_char_RemoveAll();
     void FUN_0096a610(kRef** r);
 };
 
@@ -4811,8 +4820,8 @@ struct kRList2
     kRList2();
     ~kRList2();
     void FUN_005ae3d0(kRef** r);
-    bool FUN_005f65d0(kRef** r);
-    void FUN_00905330(kRef** r);
+    bool BSSimpleList_TESLevSpell_IsInList(kRef** r);
+    void RemoveMatchingItem(kRef** r);
     void FUN_00470470();
     bool FUN_008256d0();
 };
@@ -4831,7 +4840,7 @@ struct kS8
     kS8(const kS8& o);
     ~kS8();
 };
-void __cdecl FUN_00705420(kRef* r, kS8 s, int a);
+void __cdecl Interface_SetRegionText(kRef* r, kS8 s, int a);
 void __cdecl FUN_0082d7c0();
 
 struct kArea
@@ -6029,79 +6038,80 @@ struct kSelf
 
     kActor* FUN_008d6f30();
     void SetParentCellAndUpdateController(kActor* p);
-    void FUN_0093a7a0(kRef* r);
+    void PlayerCharacter_SetOccupiedRegion(kRef* r);
     struct X5
     {
-        void FUN_00421e40();
+        void ExtraDataList_SetMultiBoundRef();
     };
-    X5* FUN_005d43c0(int a);
-    bool FUN_00437bd0();
-    bool FUN_005a1e50();
+    X5* BSFile_GetDevice(int a);
+    bool Actor_IsUnConscious();
+    bool PlayerCharacter_IsSleeping();
     kArea* FUN_00891170();
-    void* FUN_00575d70();
-    void FUN_00947d80();
-    void FUN_009480c0();
-    void FUN_0094cae0(kActor* p);
+    void* TESObjectREFR_GetWorldSpace();
+    void PlayerCharacter_ResetAudioMarkerList();
+    void PlayerCharacter_ResetMapMarkerStructList();
+    void PlayerCharacter_SetParentCell(kActor* p);
 };
 
 // @fnv 0x0094cae0
-void kSelf::FUN_0094cae0(kActor* p)
+// src: COMMUNITY 0x0094cae0
+void kSelf::PlayerCharacter_SetParentCell(kActor* p)
 {
     if (p == FUN_008d6f30())
         return;
-    if (!FUN_0094dba0())
-        FUN_0062f8f0((p && p->FUN_004518e0()) ? p->FUN_005471e0() : DAT_01015f5c);
-    FUN_005d43c0(0)->FUN_00421e40();
+    if (!TESWaterSystem_GetCameraInPlaceableWater())
+        TESWaterSystem_SetCameraRelevantWaterHeight((p && p->FUN_004518e0()) ? p->TESObjectCELL_GetWaterHeight() : DAT_01015f5c);
+    BSFile_GetDevice(0)->ExtraDataList_SetMultiBoundRef();
     SetParentCellAndUpdateController(p);
     if (p)
     {
         if (!p->FUN_00425fd0())
-            FUN_0093a7a0(0);
-        FUN_005743f0();
-        m7b4 = p->FUN_005474b0(0);
-        kPA* pa = p->FUN_004543c0();
+            PlayerCharacter_SetOccupiedRegion(0);
+        FalloutRadio_NewCellEntered();
+        m7b4 = p->TESObjectCELL_GetMusicType(0);
+        kPA* pa = p->TESObjectCELL_GetbhkWorld();
         if (pa)
         {
             kPA2* pa2 = pa->FUN_0045cd60();
-            pa2->FUN_004893c0(1);
+            pa2->SetFlags_004893c0(1);
         }
         v1fc(0);
-        if (FUN_008d6f30() && FUN_008d6f30()->FUN_004543c0() && FUN_00622a70(FUN_00622bb0(), 0))
-            FUN_00622a70(FUN_00622bb0(), 1)->FUN_006231a0(FUN_008d6f30()->FUN_004543c0());
-        if (FUN_008d6f30() && FUN_008d6f30()->FUN_004543c0() && FUN_00622a70(FUN_00622ba0(), 0))
-            FUN_00622a70(FUN_00622ba0(), 1)->FUN_006231a0(FUN_008d6f30()->FUN_004543c0());
+        if (FUN_008d6f30() && FUN_008d6f30()->TESObjectCELL_GetbhkWorld() && FUN_00622a70(DecalCaster_GetMaxDecalWidthLarge(), 0))
+            FUN_00622a70(DecalCaster_GetMaxDecalWidthLarge(), 1)->DecalCaster_Add(FUN_008d6f30()->TESObjectCELL_GetbhkWorld());
+        if (FUN_008d6f30() && FUN_008d6f30()->TESObjectCELL_GetbhkWorld() && FUN_00622a70(DecalCaster_GetMaxDecalWidthSmall(), 0))
+            FUN_00622a70(DecalCaster_GetMaxDecalWidthSmall(), 1)->DecalCaster_Add(FUN_008d6f30()->TESObjectCELL_GetbhkWorld());
         if (mdec.FUN_00822510(0))
         {
             kZ* z = new kZ;
-            z->FUN_0056ea00(DAT_01017d00);
+            z->bhkSphereShape_Init(DAT_01017d00);
             kH h;
-            h.FUN_0056f110(z);
+            h.bhkRigidBodyCinfo_SetShape(z);
             int flags = 0x30000;
             flags |= 0x21;
-            h.FUN_0056f0f0(flags);
+            h.bhkRigidBodyCinfo_SetCollisionFilter(flags);
             mdec.FUN_0066b0d0(new kW(&h));
-            mdec.FUN_00559450()->FUN_00561580(1);
-            mdec.FUN_00559450()->ve4(4);
-            mdec.FUN_00559450()->FUN_004ae700()->FUN_0094db80(9);
+            mdec.Modelloader_GetReferencedThis()->bhkRigidBody_SetActive(1);
+            mdec.Modelloader_GetReferencedThis()->ve4(4);
+            mdec.Modelloader_GetReferencedThis()->bhkWorldObject_GetCollidableRw()->NiAlphaProperty_SetTestRef(9);
             kP4 q;
             kP3 r = *v1f4();
-            FUN_004a3e00(&q, &r);
-            mdec.FUN_00559450()->FUN_005610f0(&r);
+            NI2HK(&q, &r);
+            mdec.Modelloader_GetReferencedThis()->bhkRigidBody_SetNiPosition(&r);
         }
-        mdec.FUN_00559450()->v9c(FUN_008d6f30()->FUN_004543c0());
-        bool busy = FUN_00437bd0() || v22c(0) || v2e8() || v230();
-        bool idle = !busy && !FUN_005a1e50();
+        mdec.Modelloader_GetReferencedThis()->v9c(FUN_008d6f30()->TESObjectCELL_GetbhkWorld());
+        bool busy = Actor_IsUnConscious() || v22c(0) || v2e8() || v230();
+        bool idle = !busy && !PlayerCharacter_IsSleeping();
         if (idle)
             v494();
         DAT_011c3b3c->UpdateRelationStates(0);
-        FUN_0046dd00(p->FUN_005475b0(0))->FUN_0063c8f0();
-        FUN_00b4f430(p->FUN_00547680()->FUN_00500940());
+        FUN_0046dd00(p->TESObjectCELL_GetClimate(0))->FUN_0063c8f0();
+        BSShaderManager_SetImageSpaceParameters(p->TESObjectCELL_GetUsableImageSpace()->FUN_00500940());
         kCell* cell = p->FUN_0054ddd0();
         bool found = false;
         m79c = 0;
         if (m7b0)
         {
-            m7b0->FUN_005e03d0();
+            m7b0->NiTArray_char_NiTMallocInterface_char_RemoveAll();
             delete m7b0;
             m7b0 = 0;
         }
@@ -6134,22 +6144,22 @@ void kSelf::FUN_0094cae0(kActor* p)
         {
             kP2 pos(&FUN_00891170()->pos);
             kNodeT<kRef>* sub = 0;
-            if (ref->FUN_00440d80() || (ref->FUN_007af430() && ref->FUN_007af430() != FUN_00575d70()) ||
+            if (ref->FUN_00440d80() || (ref->BGSSaveFormBuffer_GetForm() && ref->BGSSaveFormBuffer_GetForm() != TESObjectREFR_GetWorldSpace()) ||
                 !ref->FUN_00441110() || ref->FUN_00441110()->FUN_008256d0())
                 continue;
             bool done = false;
             kShape* sh;
             for (kNodeT<kShape>* m = ref->FUN_00441110(); !done && m && (sh = *m->Get()) != 0; m = m->Next())
             {
-                if (sh->FUN_004f8360(&pos))
+                if (sh->TESRegionPointList_IsInsideRegion(&pos))
                 {
                     m764.AddRegion(ref);
-                    if (list.FUN_005f65d0(&ref))
-                        list.FUN_00905330(&ref);
-                    kE* e = ref->FUN_009611e0(7)->FUN_004f35b0();
+                    if (list.BSSimpleList_TESLevSpell_IsInList(&ref))
+                        list.RemoveMatchingItem(&ref);
+                    kE* e = ref->NiAVObject_GetParent(7)->TESRegionDataList_Find();
                     if (e)
                     {
-                        if (e->FUN_004f1540() && (!best || (best != e && best->FUN_005bb4d0() < e->FUN_005bb4d0())))
+                        if (e->TESRegionData_GetOverride() && (!best || (best != e && best->TESRegionData_GetPriority() < e->TESRegionData_GetPriority())))
                         {
                             m774.FUN_00470470();
                             best = e;
@@ -6166,36 +6176,36 @@ void kSelf::FUN_0094cae0(kActor* p)
                                 DAT_011dd380 = e;
                         }
                     }
-                    if (ref->FUN_00549580())
+                    if (ref->TESForm_GetHasSpokenFlag())
                     {
                         found = true;
-                        if (sh->FUN_004f8360(&c0) && sh->FUN_004f8360(&c1) && sh->FUN_004f8360(&c2) &&
-                            sh->FUN_004f8360(&c3))
+                        if (sh->TESRegionPointList_IsInsideRegion(&c0) && sh->TESRegionPointList_IsInsideRegion(&c1) && sh->TESRegionPointList_IsInsideRegion(&c2) &&
+                            sh->TESRegionPointList_IsInsideRegion(&c3))
                             m79c = 1;
                     }
                     if (m760)
                     {
-                        kE* a = m760->FUN_009611e0(3)->FUN_004f35b0();
-                        kE* b = ref->FUN_009611e0(3)->FUN_004f35b0();
-                        if (b && (!a || (b->FUN_004f1540() && !a->FUN_004f1540()) ||
-                                  (b->FUN_004f1540() == a->FUN_004f1540() && b->FUN_005bb4d0() > a->FUN_005bb4d0())))
-                            FUN_0093a7a0(ref);
+                        kE* a = m760->NiAVObject_GetParent(3)->TESRegionDataList_Find();
+                        kE* b = ref->NiAVObject_GetParent(3)->TESRegionDataList_Find();
+                        if (b && (!a || (b->TESRegionData_GetOverride() && !a->TESRegionData_GetOverride()) ||
+                                  (b->TESRegionData_GetOverride() == a->TESRegionData_GetOverride() && b->TESRegionData_GetPriority() > a->TESRegionData_GetPriority())))
+                            PlayerCharacter_SetOccupiedRegion(ref);
                     }
                     else
                     {
-                        FUN_0093a7a0(ref);
+                        PlayerCharacter_SetOccupiedRegion(ref);
                     }
                     done = true;
                 }
             }
-            if (ref->FUN_00549580())
+            if (ref->TESForm_GetHasSpokenFlag())
             {
                 if (!m7b0)
                     m7b0 = new kO(1, 1);
                 m7b0->FUN_0096a610(&ref);
             }
         }
-        if (*DAT_011e08e0.FUN_00408d60() && cell && cell->IsFlag8Set() && !DAT_011dea10->FUN_00451530() && !found)
+        if (*DAT_011e08e0.FUN_00408d60() && cell && cell->IsFlag8Set() && !DAT_011dea10->TES_CellTestRunning() && !found)
         {
             kTyped* t39 = 0;
             kTyped* t41 = 0;
@@ -6223,21 +6233,21 @@ void kSelf::FUN_0094cae0(kActor* p)
                     m79d = 1;
             }
         }
-        kE* e4 = m760 ? m760->FUN_009611e0(4)->FUN_004f35b0() : 0;
-        FUN_00705420(m760, e4 ? e4->v2c() : 0, 1);
-        FUN_00947d80();
-        FUN_009480c0();
+        kE* e4 = m760 ? m760->NiAVObject_GetParent(4)->TESRegionDataList_Find() : 0;
+        Interface_SetRegionText(m760, e4 ? e4->v2c() : 0, 1);
+        PlayerCharacter_ResetAudioMarkerList();
+        PlayerCharacter_ResetMapMarkerStructList();
         kNodeT<kRef>* n2 = &list.head;
         while (n2 && *n2->Get())
         {
             kRef* x = *n2->Get();
             if (x)
             {
-                kE* e = x->FUN_009611e0(8)->FUN_004f35b0();
+                kE* e = x->NiAVObject_GetParent(8)->TESRegionDataList_Find();
                 if (e)
                 {
                     kE* e2 = e;
-                    e2->FUN_004f2480(0, 0);
+                    e2->TESRegionDataImposter_SetImpostersVisible(0, 0);
                 }
             }
             n2 = n2->Next();
@@ -6248,7 +6258,7 @@ void kSelf::FUN_0094cae0(kActor* p)
             kRef* x = *n2->Get();
             if (x)
             {
-                kE* e = x->FUN_009611e0(8)->FUN_004f35b0();
+                kE* e = x->NiAVObject_GetParent(8)->TESRegionDataList_Find();
                 if (e)
                 {
                     kE* e2 = e;
@@ -6258,7 +6268,7 @@ void kSelf::FUN_0094cae0(kActor* p)
                         if (*k->Get())
                         {
                             FUN_008d6f30()->FUN_00548230(*k->Get(), 0);
-                            FUN_004f24e0(*k->Get(), 1, 0);
+                            TESRegionDataImposter_SetImposterVisible(*k->Get(), 1, 0);
                         }
                         k = k->Next();
                     }

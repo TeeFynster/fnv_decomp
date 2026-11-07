@@ -16,9 +16,9 @@ public:
     void Lock();
     void Unlock();
     void PushFront(BSTFreeListElem<T>*&);
-    void FUN_006ecb10(BSTFreeListElem<T>*&);
+    void PrepareNodeAndPushFront(BSTFreeListElem<T>*&);
     void Elem(BSTFreeListElem<T>*&);
-    bool FUN_00905aa0(BSTFreeListElem<T>*&, const T&);
+    bool BSTFreeList_Allocate_0(BSTFreeListElem<T>*&, const T&);
 
 protected:
     void Init(unsigned int auiCount, BSTFreeListElem<T>* apElements);

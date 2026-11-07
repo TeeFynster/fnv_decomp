@@ -118,11 +118,12 @@ struct SkeletonPoseData
     int m_boneFlagsCapacity;
     bool m_bPoseFlag;
 
-    void FUN_00cda340();
+    void hkaPose_syncModelSpace();
 };
 
 // @fnv 0x00cda340
-void SkeletonPoseData::FUN_00cda340()
+// src: COMMUNITY 0x00cda340
+void SkeletonPoseData::hkaPose_syncModelSpace()
 {
     if (m_bPoseFlag)
         return;

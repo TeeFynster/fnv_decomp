@@ -6,25 +6,29 @@
 #include "../../../include/BSAudioListener.h"
 
 // @fnv 0x00aeaad0
-NiPoint3& BSAudioListener::FUN_00aeaad0()
+// src: XBOX_PDB 0x00aeaad0
+NiPoint3& BSAudioListener::GetPosition_00aeaad0()
 {
     return m_kListenerPosition;
 }
 
 // @fnv 0x00aeaaf0
-NiPoint3* BSAudioListener::FUN_00aeaaf0()
+// src: XBOX_PDB 0x00aeaaf0
+NiPoint3* BSAudioListener::GetFrontOrientation()
 {
     return &m_kListenerVelocity;
 }
 
 // @fnv 0x00aeab10
-NiPoint3& BSAudioListener::FUN_00aeab10()
+// src: XBOX_PDB 0x00aeab10
+NiPoint3& BSAudioListener::GetTopOrientation()
 {
     return m_kForward;
 }
 
 // @fnv 0x00aeab30
-void BSAudioListener::FUN_00aeab30(float afGain)
+// src: XBOX_PDB 0x00aeab30
+void BSAudioListener::SetGain(float afGain)
 {
     m_fDistanceScale = afGain;
 }

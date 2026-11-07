@@ -21,7 +21,8 @@ struct PixelShaderArgument
 };
 
 // @fnv 0x00c3cf40
-void __fastcall FUN_00c3cf40(NiD3DPixelShader* shader, PixelShaderArgument argument)
+// src: XBOX_PDB 0x00c3cf40
+void __fastcall QueuedFileEntry_SetFileEntry(NiD3DPixelShader* shader, PixelShaderArgument argument)
 {
     shader->m_pD3DPixelShader = argument.pixelShader;
 }

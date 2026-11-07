@@ -12,12 +12,12 @@ void NiD3DPixelShader::SetD3DPixelShader(GeometryRelatedType* const pixelShader)
     m_pD3DPixelShader = pixelShader;
 }
 
-void __cdecl FUN_00e92f30(NiD3DPixelShader*);
+void __cdecl NiD3DShaderProgramFactory_RecreatePixelShader(NiD3DPixelShader*);
 
 // @fnv 0x00e898d0
 void __thiscall NiD3DPixelShader::BuildVertexShader()
 {
-    FUN_00e92f30(this);
+    NiD3DShaderProgramFactory_RecreatePixelShader(this);
 }
 
 // ---- stand-ins for identities not defined in this unit ----

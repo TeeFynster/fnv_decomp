@@ -18,7 +18,7 @@ struct S006e6ae0_Point3
     float x, y, z;
 };
 
-const S006e6ae0_Vector* __cdecl FUN_004a3e00(S006e6ae0_Vector* pOut, const S006e6ae0_Point3* pPoint);
+const S006e6ae0_Vector* __cdecl NI2HK(S006e6ae0_Vector* pOut, const S006e6ae0_Point3* pPoint);
 
 class S006e6ae0_Aabb
 {
@@ -76,7 +76,7 @@ class S006e6ae0_World
 class S006e6ae0_Owner2
 {
   public:
-    S006e6ae0_World* FUN_004543c0();
+    S006e6ae0_World* TESObjectCELL_GetbhkWorld();
 };
 
 class S006e6ae0_Owner1
@@ -91,12 +91,12 @@ class S006e6ae0_Node
     S006e6ae0_Owner1* GetOffsetC();
 };
 
-int __cdecl FUN_006e7620(int iValue, int iFlags);
+int __cdecl hkAllocateStack_char(int iValue, int iFlags);
 
 class S006e6ae0_Object
 {
   public:
-    void FUN_006e6ae0();
+    void PathingSearchRayCast_CreateCache();
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -127,16 +127,17 @@ class S006e6ae0_Object
 };
 
 // @fnv 0x006e6ae0
-void S006e6ae0_Object::FUN_006e6ae0()
+// src: COMMUNITY 0x006e6ae0
+void S006e6ae0_Object::PathingSearchRayCast_CreateCache()
 {
     S006e6ae0_Aabb kAabb;
-    FUN_004a3e00(&kAabb.m_kMinimumCorner, &m_kMin);
-    FUN_004a3e00(&kAabb.m_kMaximumCorner, &m_kMax);
-    S006e6ae0_World* pkWorld = m_pkNode->GetOffsetC()->FUN_006dd4f0()->FUN_004543c0();
+    NI2HK(&kAabb.m_kMinimumCorner, &m_kMin);
+    NI2HK(&kAabb.m_kMaximumCorner, &m_kMax);
+    S006e6ae0_World* pkWorld = m_pkNode->GetOffsetC()->FUN_006dd4f0()->TESObjectCELL_GetbhkWorld();
     pkWorld->FUN_005533c0();
     S006e6ae0_Shape* pkShape = pkWorld->FUN_00541c80()->FUN_006286d0();
     int iValue = pkShape->vf60();
-    m_iHandle = FUN_006e7620(iValue, 0);
+    m_iHandle = hkAllocateStack_char(iValue, 0);
     S006e6ae0_Shape* pkShape2 = pkWorld->FUN_00541c80()->FUN_006286d0();
     pkShape2->vf68(&kAabb, m_iHandle);
     pkWorld->FUN_005533c0();

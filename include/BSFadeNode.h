@@ -63,19 +63,19 @@ class BSFadeNode : public NiNode
     void DecRefCount();
     bool IsVisible();
 
-    void FUN_0049ee60(bool enabled);
-    using NiNode::FUN_00440460;
-    void FUN_00440460(const NiPoint3& position);
-    using NiNode::FUN_00a59c60;
-    void FUN_00a59c60(UpdData* data);
+    void SetIgnoreFade(bool enabled);
+    using NiNode::NiAVObject_SetTranslate;
+    void NiAVObject_SetTranslate(const NiPoint3& position);
+    using NiNode::NiAVObject_Update;
+    void NiAVObject_Update(UpdData* data);
     void* FUN_0043b1b0();
     void FUN_004381b0();
-    bool FUN_00552470() const;
-    unsigned int FUN_009ad610();
+    bool NiNode_QNotVisible() const;
+    unsigned int QUserData();
     int FUN_004b9900(int flags);
     void* FUN_00a4bcf0(unsigned int a, unsigned int b, unsigned int c);
     void FUN_00c31af0();
-    BSFadeNode* FUN_00c1b5c0();
+    BSFadeNode* NiParticleSystem_00c1b5c0();
     void* FUN_00a94ce0();
     void* FUN_00c32d80();
     void FUN_00a744a0();

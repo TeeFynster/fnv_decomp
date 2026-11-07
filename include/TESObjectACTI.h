@@ -49,11 +49,11 @@ public:
     void SetActivateSound(TESSound* sound);
     StringX GetActivateText();
 
-    TESSound* FUN_004fd3a0();
+    TESSound* TESChallenge_GetFormOne();
     void* FUN_005105f0(unsigned int flags);
-    void FUN_00510770();
-    void FUN_00510ea0(BSStringT<char> prompt);
-    bool FUN_005111e0(TESForm* form);
+    void TESObjectACTI_InitItem();
+    void TESObjectACTI_SetActivationPrompt(BSStringT<char> prompt);
+    bool TESObjectACTI_Compare(TESForm* form);
 
     TESSound* m_pSoundEffect;                 // 0x74
     TESSound* m_pLoopSound;                   // 0x78

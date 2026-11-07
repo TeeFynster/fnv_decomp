@@ -10,8 +10,8 @@ public:
     float m_fTimeout;
 
     TimeoutTimer();
-    void FUN_00910b10();
-    float FUN_006b9130();
+    void TESWeightForm_InitializeDataComponent();
+    float CombatTimer_GetTargetTime();
     bool CheckTimer() const;
     void __thiscall LoadGame(BGSLoadFormBuffer* buffer);
     void SaveGame(BGSSaveFormBuffer* buffer);

@@ -35,14 +35,15 @@ struct FUN_00692290_class
     virtual void v0();
     virtual int Write(unsigned int);
     void FUN_005ef650(int, unsigned int);
-    void FUN_00692290(unsigned int requested, unsigned int savedSize);
+    void BSSimpleArray_unsigned_short_1024_InitialSetup(unsigned int requested, unsigned int savedSize);
     int iSize;
     int iPosition;
     int iDataLength;
 };
 
 // @fnv 0x00692290
-void FUN_00692290_class::FUN_00692290(unsigned int requested, unsigned int savedSize)
+// src: XBOX_PDB 0x00692290
+void FUN_00692290_class::BSSimpleArray_unsigned_short_1024_InitialSetup(unsigned int requested, unsigned int savedSize)
 {
     iSize = 0;
     iPosition = 0;
@@ -65,7 +66,8 @@ void FUN_00692290_class::FUN_00692290(unsigned int requested, unsigned int saved
 
 
 // @fnv 0x00680170
-void PackageTargetRecord::FUN_00680170(void* reference)
+// src: GUESS 0x00680170 (confidence: low)
+void PackageTargetRecord::UpdateState_00680170(void* reference)
 {
     if (GetTargetKind() == 2)
         *(int*)((char*)this + 4) = (int)reference;
@@ -86,11 +88,12 @@ struct FUN_00682530_class
 
 struct FUN_00682510_class
 {
-    int FUN_00682510(int);
+    int NiTPrimitivePool_NiTPrimitivePool(int);
 };
 
 // @fnv 0x00682510
-int FUN_00682510_class::FUN_00682510(int arg)
+// src: COMMUNITY 0x00682510
+int FUN_00682510_class::NiTPrimitivePool_NiTPrimitivePool(int arg)
 {
     ((FUN_00682530_class*)this)->InitWithValue(arg);
     return (int)this;
@@ -98,25 +101,27 @@ int FUN_00682510_class::FUN_00682510(int arg)
 
 struct FUN_00682570_class
 {
-    void FUN_00682590(int);
-    int __thiscall FUN_00682570(int a);
+    void NiTSet_NiTSet(int);
+    int __thiscall NiTObjectSet_NiTObjectSet(int a);
 };
 
 // @fnv 0x00682570
-int __thiscall FUN_00682570_class::FUN_00682570(int a)
+// src: COMMUNITY 0x00682570
+int __thiscall FUN_00682570_class::NiTObjectSet_NiTObjectSet(int a)
 {
-    FUN_00682590(a);
+    NiTSet_NiTSet(a);
     return (int)this;
 }
 
 struct FUN_006825e0_class
 {
     void FUN_00682600();
-    void FUN_006825e0();
+    void ForwardCall_006825e0();
 };
 
 // @fnv 0x006825e0
-void FUN_006825e0_class::FUN_006825e0()
+// src: GUESS 0x006825e0 (confidence: low)
+void FUN_006825e0_class::ForwardCall_006825e0()
 {
     FUN_00682600();
 }
@@ -124,11 +129,12 @@ void FUN_006825e0_class::FUN_006825e0()
 struct FUN_00682680_class
 {
     void FreeBuffer();
-    void FUN_00682680();
+    void FreeBuffer_Thunk();
 };
 
 // @fnv 0x00682680
-void FUN_00682680_class::FUN_00682680()
+// src: GUESS 0x00682680 (confidence: medium)
+void FUN_00682680_class::FreeBuffer_Thunk()
 {
     FreeBuffer();
 }
@@ -139,11 +145,12 @@ struct FUN_006836f0_class
 {
     virtual void v0();
     void FUN_00683760();
-    FUN_006836f0_class* FUN_006836f0();
+    FUN_006836f0_class* BSList_BSTempEffectDebris_BSList();
 };
 
 // @fnv 0x006836f0
-FUN_006836f0_class* __thiscall FUN_006836f0_class::FUN_006836f0()
+// src: EXE 0x006836f0
+FUN_006836f0_class* __thiscall FUN_006836f0_class::BSList_BSTempEffectDebris_BSList()
 {
     FUN_00683760();
     *reinterpret_cast<int**>(this) = &DAT_01069948;
@@ -153,11 +160,12 @@ FUN_006836f0_class* __thiscall FUN_006836f0_class::FUN_006836f0()
 struct FUN_00683740_class
 {
     void FUN_006837f0();
-    void FUN_00683740();
+    void BSList_BSTempEffectDebris_Free();
 };
 
 // @fnv 0x00683740
-void FUN_00683740_class::FUN_00683740()
+// src: COMMUNITY 0x00683740
+void FUN_00683740_class::BSList_BSTempEffectDebris_Free()
 {
     FUN_006837f0();
 }
@@ -190,27 +198,29 @@ struct FUN_0068ab80_class
 {
     ActorCombatGroup** p;
     ActorCombatGroup** q;
-    void FUN_0068ab80();
+    void ReleaseStorage_0068ab80();
 };
 // Points p at DAT_01069d7c and frees the allocation held by q via NiTMallocInterface<ActorCombatGroup*>::Deallocate.
 // @fnv 0x0068ab80
-void FUN_0068ab80_class::FUN_0068ab80()
+// src: GUESS 0x0068ab80 (confidence: medium)
+void FUN_0068ab80_class::ReleaseStorage_0068ab80()
 {
     p = (ActorCombatGroup**)&DAT_01069d7c;
     NiTMallocInterface<ActorCombatGroup*>::Deallocate(q);
 }
 
-extern "C" void __cdecl FUN_004a4650(void*);
+extern "C" void __cdecl NiTPointerListBase_NiTPointerAllocator_unsigned_int_NiPointer_BSMultiBoundRoom_RemoveAll(void*);
 
 struct FUN_0068e740_class
 {
-    void FUN_0068e740();
+    void NiAVObject_DetachAllProperties();
 };
 
 // @fnv 0x0068e740
-void FUN_0068e740_class::FUN_0068e740()
+// src: XBOX_PDB 0x0068e740
+void FUN_0068e740_class::NiAVObject_DetachAllProperties()
 {
-    ((void(__thiscall*)(void*))FUN_004a4650)((char*)this + 0x24);
+    ((void(__thiscall*)(void*))NiTPointerListBase_NiTPointerAllocator_unsigned_int_NiPointer_BSMultiBoundRoom_RemoveAll)((char*)this + 0x24);
 }
 
 extern int DAT_0106a038;
@@ -249,11 +259,12 @@ void* __cdecl Reallocate(void* p, unsigned int size);
 
 struct FUN_006918a0_class
 {
-    void __thiscall FUN_006918a0(void* p, int n);
+    void __thiscall BSSimpleArray_short_1024_Reallocate(void* p, int n);
 };
 
 // @fnv 0x006918a0
-void __thiscall FUN_006918a0_class::FUN_006918a0(void* p, int aiSize)
+// src: COMMUNITY 0x006918a0
+void __thiscall FUN_006918a0_class::BSSimpleArray_short_1024_Reallocate(void* p, int aiSize)
 {
     Reallocate(p, aiSize << 1);
 }
@@ -261,15 +272,16 @@ void __thiscall FUN_006918a0_class::FUN_006918a0(void* p, int aiSize)
 struct FUN_00691a30_class
 {
     GO m0;
-    void FUN_00659080(int);
-    void FUN_00691a30(int a);
+    void UpdateFields_00659080(int);
+    void ClearEntryPointerAndForward(int a);
 };
 // Clears the pointer at offset 8 of the passed object and forwards it to FUN_00659080 on this+0xc.
 // @fnv 0x00691a30
-void FUN_00691a30_class::FUN_00691a30(int pObject)
+// src: GUESS 0x00691a30 (confidence: medium)
+void FUN_00691a30_class::ClearEntryPointerAndForward(int pObject)
 {
     ((GO*)((char*)pObject + 8))->operator=(0);
-    ((FUN_00691a30_class*)((char*)this + 0xc))->FUN_00659080(pObject);
+    ((FUN_00691a30_class*)((char*)this + 0xc))->UpdateFields_00659080(pObject);
 }
 
 namespace fnv_00691bf0 {
@@ -279,14 +291,15 @@ struct GlobalObject_00869f00
 {
     void* p;
     void Clear(bool);
-    void FUN_00691bf0();
+    void UpdateState_00691bf0();
 };
 
 void GlobalObject_00869f00::Clear(bool)
 {}
 
 // @fnv 0x00691bf0
-void GlobalObject_00869f00::FUN_00691bf0()
+// src: GUESS 0x00691bf0 (confidence: low)
+void GlobalObject_00869f00::UpdateState_00691bf0()
 {
     p = &DAT_0106ac40;
     Clear(true);
@@ -297,11 +310,12 @@ void* __cdecl Reallocate(void* base, unsigned int size);
 
 struct FUN_00691d20_class
 {
-    void* __thiscall FUN_00691d20(void* a, int b);
+    void* __thiscall BSSimpleArray_NavMeshSearchLink_1024_Reallocate(void* a, int b);
 };
 
 // @fnv 0x00691d20
-void* __thiscall FUN_00691d20_class::FUN_00691d20(void* apBase, int aiCount)
+// src: COMMUNITY 0x00691d20
+void* __thiscall FUN_00691d20_class::BSSimpleArray_NavMeshSearchLink_1024_Reallocate(void* apBase, int aiCount)
 {
     return Reallocate(apBase, aiCount * 0xc);
 }
@@ -317,11 +331,12 @@ struct GlobalObject_00869f00
 struct FUN_00691fe0_class
 {
     void* p;
-    void FUN_00691fe0();
+    void ResetVirtualTableAndClear_00691fe0();
 };
 
 // @fnv 0x00691fe0
-void FUN_00691fe0_class::FUN_00691fe0()
+// src: GUESS 0x00691fe0 (confidence: medium)
+void FUN_00691fe0_class::ResetVirtualTableAndClear_00691fe0()
 {
     p = &DAT_0106acb0;
     ((GlobalObject_00869f00*)this)->Clear(true);
@@ -330,18 +345,19 @@ void FUN_00691fe0_class::FUN_00691fe0()
 
 struct PositionRotation
 {
-    void* __fastcall FUN_00692710();
+    void* __fastcall PathingAvoidNode_PathingAvoidNode();
     unsigned short wFlags;
 };
 struct FUN_006926e0_class
 {
-    PositionRotation* __thiscall FUN_006926e0();
+    PositionRotation* __thiscall NavMeshStaticAvoidNode_NavMeshStaticAvoidNode();
 };
 // Calls FUN_00692710 on this object, sets the unsigned short at offset 0x24 to 0xffff, and returns this.
 // @fnv 0x006926e0
-PositionRotation* __thiscall FUN_006926e0_class::FUN_006926e0()
+// src: COMMUNITY 0x006926e0
+PositionRotation* __thiscall FUN_006926e0_class::NavMeshStaticAvoidNode_NavMeshStaticAvoidNode()
 {
-    ((PositionRotation*)this)->FUN_00692710();
+    ((PositionRotation*)this)->PathingAvoidNode_PathingAvoidNode();
     *(unsigned short*)((char*)this + 0x24) = 0xffff;
     return (PositionRotation*)this;
 }
@@ -355,10 +371,11 @@ struct FUN_00693bb0_class
     int e;
     int f;
     int g;
-    void FUN_00693bb0();
+    void NavMeshTriangle_ToggleLargeActor();
 };
 // @fnv 0x00693bb0
-void FUN_00693bb0_class::FUN_00693bb0()
+// src: COMMUNITY 0x00693bb0
+void FUN_00693bb0_class::NavMeshTriangle_ToggleLargeActor()
 {
     d ^= 0x10;
 }
@@ -381,11 +398,12 @@ struct FUN_00693d10_class
 {
     int a;
     void GetSix();
-    void FUN_00693d10();
+    void EdgeExtraInfo_GetSizeOfV5();
 };
 
 // @fnv 0x00693d10
-void FUN_00693d10_class::FUN_00693d10()
+// src: COMMUNITY 0x00693d10
+void FUN_00693d10_class::EdgeExtraInfo_GetSizeOfV5()
 {
     ((FUN_00693d10_class*)((char*)this + 4))->GetSix();
 }
@@ -436,7 +454,7 @@ void __cdecl FUN_00ec6f20(int, int, int, int);
 
 struct FUN_0069aeb0_class
 {
-    void __thiscall FUN_0069aeb0(int a);
+    void __thiscall ForwardCall_0069aeb0(int a);
     int f0;
     int f4;
     int f8;
@@ -444,7 +462,8 @@ struct FUN_0069aeb0_class
 
 // Calls FUN_00ec6f20 with f4, f8, 2 and a.
 // @fnv 0x0069aeb0
-void __thiscall FUN_0069aeb0_class::FUN_0069aeb0(int a)
+// src: GUESS 0x0069aeb0 (confidence: low)
+void __thiscall FUN_0069aeb0_class::ForwardCall_0069aeb0(int a)
 {
     FUN_00ec6f20(f4, f8, 2, a);
 }
@@ -464,10 +483,11 @@ struct GlobalObject_00869f00
 struct FUN_0069b1d0_class
 {
     int m_pData;
-    void FUN_0069b1d0();
+    void UpdateState_0069b1d0();
 };
 // @fnv 0x0069b1d0
-void FUN_0069b1d0_class::FUN_0069b1d0()
+// src: GUESS 0x0069b1d0 (confidence: low)
+void FUN_0069b1d0_class::UpdateState_0069b1d0()
 {
     m_pData = (int)&DAT_0106b1cc;
     ((GlobalObject_00869f00*)this)->Clear(true);
@@ -491,18 +511,20 @@ extern "C" void* __cdecl Reallocate(void*, unsigned int);
 
 struct FUN_0069b220_class
 {
-    void* __thiscall FUN_0069b220(void* arg, unsigned int size);
+    void* __thiscall Reallocate_Thunk(void* arg, unsigned int size);
 };
 
 // @fnv 0x0069b220
-void* __thiscall FUN_0069b220_class::FUN_0069b220(void* arg, unsigned int size)
+// src: GUESS 0x0069b220 (confidence: medium)
+void* __thiscall FUN_0069b220_class::Reallocate_Thunk(void* arg, unsigned int size)
 {
     return Reallocate(arg, size);
 }
 }  // namespace fnv_0069b220
 
 // @fnv 0x0069b2a0
-int __cdecl FUN_0069b2a0(const unsigned short* ausLeft, const unsigned short* ausRight)
+// src: GUESS 0x0069b2a0 (confidence: low)
+int __cdecl Object_ComputeValue_0069b2a0(const unsigned short* ausLeft, const unsigned short* ausRight)
 {
     return *ausLeft == *reinterpret_cast<const int*>(ausRight);
 }
@@ -512,11 +534,12 @@ extern int DAT_0106b1e0;
 struct Dummy_0069af30
 {
     void ResetAndWrite(int, int);
-    int* FUN_0069b2c0();
+    int* BSSimpleArray_FastNavMeshEdgeHandle_1024_BSSimpleArray_FastNavMeshEdgeHandle_1024();
 };
 
 // @fnv 0x0069b2c0
-int* Dummy_0069af30::FUN_0069b2c0()
+// src: COMMUNITY 0x0069b2c0
+int* Dummy_0069af30::BSSimpleArray_FastNavMeshEdgeHandle_1024_BSSimpleArray_FastNavMeshEdgeHandle_1024()
 {
     *(int*)this = (int)&DAT_0106b1e0;
     ResetAndWrite(0, 0);
@@ -532,10 +555,11 @@ struct GlobalObject_00869f00
 struct FUN_0069b2f0_class
 {
     void* p;
-    void FUN_0069b2f0();
+    void UpdateState_0069b2f0();
 };
 // @fnv 0x0069b2f0
-void FUN_0069b2f0_class::FUN_0069b2f0()
+// src: GUESS 0x0069b2f0 (confidence: low)
+void FUN_0069b2f0_class::UpdateState_0069b2f0()
 {
     p = &DAT_0106b1e0;
     ((GlobalObject_00869f00*)this)->Clear(true);
@@ -549,11 +573,12 @@ struct FUN_0069b8a0_class
 
 struct FUN_0069b760_class
 {
-    void FUN_0069b760();
+    void InvokeVirtualMethod_0069b760();
 };
 
 // @fnv 0x0069b760
-void FUN_0069b760_class::FUN_0069b760()
+// src: GUESS 0x0069b760 (confidence: low)
+void FUN_0069b760_class::InvokeVirtualMethod_0069b760()
 {
     ((FUN_0069b8a0_class*)((char*)this + 0xc))->CreateObj();
 }
@@ -567,11 +592,12 @@ struct FUN_0069b780_class
     int a;
     int b;
     int c;
-    void FUN_0069b780(void* p);
+    void ReleaseStorage_0069b780(void* p);
 };
 // Clears the int at offset 0xc of p, then calls FreeMemory on this+0xc with p.
 // @fnv 0x0069b780
-void FUN_0069b780_class::FUN_0069b780(void* p)
+// src: GUESS 0x0069b780 (confidence: medium)
+void FUN_0069b780_class::ReleaseStorage_0069b780(void* p)
 {
     *(int*)((char*)p + 0xc) = 0;
     ((Unk6b*)((char*)this + 0xc))->FreeMemory(p);
@@ -584,10 +610,11 @@ struct FUN_006d5320_mem
 struct FUN_0069b920_class
 {
     int __thiscall FUN_006d5320();
-    int __thiscall FUN_0069b920();
+    int __thiscall ProcessAndReturnValue_0069b920();
 };
 // @fnv 0x0069b920
-int __thiscall FUN_0069b920_class::FUN_0069b920()
+// src: GUESS 0x0069b920 (confidence: low)
+int __thiscall FUN_0069b920_class::ProcessAndReturnValue_0069b920()
 {
     ((FUN_006d5320_mem*)this)->FUN_006d5320();
     return (int)this;
@@ -627,11 +654,12 @@ struct FUN_0069d790_class
     float m_fc;
     float m_f10;
     float m_f14;
-    NiPoint3* FUN_0069d790(NiPoint3* result, unsigned int a, unsigned int b);
+    NiPoint3* NavMeshGrid_GetGridPosition(NiPoint3* result, unsigned int a, unsigned int b);
 };
 
 // @fnv 0x0069d790
-NiPoint3* FUN_0069d790_class::FUN_0069d790(NiPoint3* result, unsigned int a, unsigned int b)
+// src: COMMUNITY 0x0069d790
+NiPoint3* FUN_0069d790_class::NavMeshGrid_GetGridPosition(NiPoint3* result, unsigned int a, unsigned int b)
 {
     result->Set((float)a * m_f4 + m_fc, (float)b * m_f8 + m_f10, m_f14);
     return result;
@@ -644,11 +672,12 @@ struct DA00694f80
 
 struct FUN_0069dec0_class
 {
-    unsigned short& FUN_0069dec0(int index);
+    unsigned short& BSSimpleArray_unsigned_short_1024_GetAt(int index);
 };
 
 // @fnv 0x0069dec0
-unsigned short& FUN_0069dec0_class::FUN_0069dec0(int index)
+// src: XBOX_PDB 0x0069dec0
+unsigned short& FUN_0069dec0_class::BSSimpleArray_unsigned_short_1024_GetAt(int index)
 {
     return ((DA00694f80*)this)->GetAt(index);
 }
@@ -683,11 +712,12 @@ bool FUN_0069dfb0_class::HasNonZeroAtOffset54() const
 
 struct FUN_00691a00_class : public NiTPointerMap<int, int>
 {
-    void FUN_00691a00();
+    void ReleaseStorage_00691a00();
 };
 void NiFreeAlias(void*);
 // @fnv 0x00691a00
-void FUN_00691a00_class::FUN_00691a00()
+// src: GUESS 0x00691a00 (confidence: medium)
+void FUN_00691a00_class::ReleaseStorage_00691a00()
 {
     *reinterpret_cast<const char**>(this) = "P i";
     RemoveAll();
@@ -703,12 +733,13 @@ struct FUN_0069b730_class
     void* pvt;
     void* unused;
     void* pMem;
-    void FUN_0069b730();
+    void UpdateState_0069b730();
 };
 
 // Resets the vtable pointer, clears the pointer map, and frees the allocated memory block.
 // @fnv 0x0069b730
-void FUN_0069b730_class::FUN_0069b730()
+// src: GUESS 0x0069b730 (confidence: low)
+void FUN_0069b730_class::UpdateState_0069b730()
 {
     pvt = &DAT_0106b1f4;
     ((NiTPointerMap<int, int>*)this)->RemoveAll();
@@ -740,7 +771,7 @@ struct S682530
 // @fnv 0x00682530
 int __thiscall S682530::InitWithValue(int aiValue)
 {
-    ((FUN_00682570_class*)this)->FUN_00682570(0);
+    ((FUN_00682570_class*)this)->NiTObjectSet_NiTObjectSet(0);
     *(int*)((char*)this + 0xc) = 0;
     *(int*)((char*)this + 0x10) = aiValue;
     *(int*)((char*)this + 0x14) = aiValue;
@@ -804,7 +835,7 @@ Fake683760* Fake683760::Init()
 struct FUN_0062e290_shell
 {
     void ClearList();
-    void FUN_00683850();
+    void UpdateState_00683850();
     virtual ~FUN_0062e290_shell();
 };
 struct FUN_006837f0_t : public FUN_0062e290_shell
@@ -820,13 +851,13 @@ FUN_006837f0_t::~FUN_006837f0_t()
 void __cdecl _Deallocate(void*);
 struct FUN_00683870_class
 {
-    void FUN_00683850();
+    void UpdateState_00683850();
     void* __thiscall FUN_00683870(unsigned int);
 };
 // @fnv 0x00683870
 void* __thiscall FUN_00683870_class::FUN_00683870(unsigned int flags)
 {
-    FUN_00683850();
+    UpdateState_00683850();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -841,7 +872,7 @@ bool BSSoundHandle::SetPosition(const NiPoint3& position)
 
 struct BaseForAbb0
 {
-    void __thiscall FUN_0068ac40(int a, int b);
+    void __thiscall NiTArray_NiAVObject_NiTMallocInterface_NiAVObject_NiTArray_NiAVObject_NiTMallocInterface_NiAVObject(int a, int b);
 };
 extern int DAT_01069d84;
 struct FUN_0068abb0 : BaseForAbb0
@@ -852,20 +883,20 @@ struct FUN_0068abb0 : BaseForAbb0
 // @fnv 0x0068abb0
 FUN_0068abb0::FUN_0068abb0(int a, int b)
 {
-    FUN_0068ac40(a, b);
+    NiTArray_NiAVObject_NiTMallocInterface_NiAVObject_NiTArray_NiAVObject_NiTMallocInterface_NiAVObject(a, b);
     *(int*)this = (int)&DAT_01069d84;
 }
 
 struct FUN_0068ab60_shell
 {
-    void FUN_0068ab80();
+    void ReleaseStorage_0068ab80();
     void* __thiscall FUN_0068abe0(unsigned int flags);
 };
 // Calls FUN_0068ab80, then deletes this if flags has bit 0 set, and returns this.
 // @fnv 0x0068abe0
 void* __thiscall FUN_0068ab60_shell::FUN_0068abe0(unsigned int flags)
 {
-    FUN_0068ab80();
+    ReleaseStorage_0068ab80();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -874,13 +905,13 @@ void* __thiscall FUN_0068ab60_shell::FUN_0068abe0(unsigned int flags)
 namespace fnv_0068ac10 {
 struct FUN_0068ab60_shell
 {
-    void FUN_0068ab60();
+    void ForwardCall_0068ab60();
     void* FUN_0068ac10(unsigned int flags);
 };
 // @fnv 0x0068ac10
 void* FUN_0068ab60_shell::FUN_0068ac10(unsigned int flags)
 {
-    FUN_0068ab60();
+    ForwardCall_0068ab60();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -890,14 +921,15 @@ void* FUN_0068ab60_shell::FUN_0068ac10(unsigned int flags)
 struct AX
 {
     int* vtable;
-    void FUN_006b3eb0(unsigned int, unsigned int);
-    AX* FUN_0068eb00();
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
+    AX* BSSimpleArray_DecalVertex_1024_BSSimpleArray();
 };
 // @fnv 0x0068eb00
-AX* AX::FUN_0068eb00()
+// src: EXE 0x0068eb00
+AX* AX::BSSimpleArray_DecalVertex_1024_BSSimpleArray()
 {
     vtable = &DAT_0106a038;
-    FUN_006b3eb0(0, 0);
+    BSSimpleArray_float_1024_InitialSetup(0, 0);
     return this;
 }
 
@@ -992,7 +1024,7 @@ struct S00692050 : FUN_00691a00_class
 // @fnv 0x00692050
 void* __thiscall S00692050::FUN_00692050(unsigned int flags)
 {
-    FUN_00691a00();
+    ReleaseStorage_00691a00();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -1042,17 +1074,17 @@ void* FUN_00691b40_class::FUN_006920b0(unsigned int flags)
 }
 
 void __cdecl operator delete(void*);
-void FUN_00691bf0();
+void UpdateState_00691bf0();
 struct FUN_006920e0_class
 {
-    void FUN_00691bf0();
+    void UpdateState_00691bf0();
     void* __thiscall FUN_006920e0(unsigned int flags);
 };
 // Calls FUN_00691bf0, frees this with operator delete when flags has bit 0 set, and returns this.
 // @fnv 0x006920e0
 void* __thiscall FUN_006920e0_class::FUN_006920e0(unsigned int flags)
 {
-    FUN_00691bf0();
+    UpdateState_00691bf0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -1119,14 +1151,14 @@ void* Arr3520::FUN_006921a0(unsigned int flags)
 
 struct FUN_00691fe0_class
 {
-    void FUN_00691fe0();
+    void ResetVirtualTableAndClear_00691fe0();
     void* FUN_006921d0(unsigned int flags);
 };
 
 // @fnv 0x006921d0
 void* FUN_00691fe0_class::FUN_006921d0(unsigned int flags)
 {
-    FUN_00691fe0();
+    ResetVirtualTableAndClear_00691fe0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -1140,13 +1172,14 @@ struct FUN_006923f0_class
 {
     virtual void v0();
     virtual int Write(unsigned int);
-    void FUN_006923f0(unsigned int requested, unsigned int savedSize);
+    void BSSimpleArray_EdgeExtraInfo_1024_InitialSetup(unsigned int requested, unsigned int savedSize);
     int iSize;
     int iPosition;
     int iDataLength;
 };
 // @fnv 0x006923f0
-void FUN_006923f0_class::FUN_006923f0(unsigned int uiRequestedSize, unsigned int savedSize)
+// src: COMMUNITY 0x006923f0
+void FUN_006923f0_class::BSSimpleArray_EdgeExtraInfo_1024_InitialSetup(unsigned int uiRequestedSize, unsigned int savedSize)
 {
     iSize = 0;
     iPosition = 0;
@@ -1170,13 +1203,14 @@ struct FUN_00692740_class
     virtual void v0();
     virtual int Write(unsigned int);
     void ConstructItems(int, unsigned int);
-    void FUN_00692740(unsigned int requested, unsigned int savedSize);
+    void BSSimpleArray_NavMeshStaticAvoidNode_1024_InitialSetup(unsigned int requested, unsigned int savedSize);
     int iSize;
     int iPosition;
     int iDataLength;
 };
 // @fnv 0x00692740
-void FUN_00692740_class::FUN_00692740(unsigned int requested, unsigned int savedSize)
+// src: XBOX_PDB 0x00692740
+void FUN_00692740_class::BSSimpleArray_NavMeshStaticAvoidNode_1024_InitialSetup(unsigned int requested, unsigned int savedSize)
 {
     iSize = 0;
     iPosition = 0;
@@ -1205,11 +1239,12 @@ struct FUN_00693bd0_class
     int c;
     int d;
     int e;
-    void FUN_00693bd0(unsigned short v);
+    void NavMeshTriangle_SetObjectCount(unsigned short v);
 };
 // Calls ClampUnsignedShort on a local copy of v with 0 and 7, then stores bits 13-15 of the result into d.
 // @fnv 0x00693bd0
-void FUN_00693bd0_class::FUN_00693bd0(unsigned short ausValue)
+// src: COMMUNITY 0x00693bd0
+void FUN_00693bd0_class::NavMeshTriangle_SetObjectCount(unsigned short ausValue)
 {
     ClampUnsignedShort(&ausValue, 0, 7);
     d = (d & 0xffff1fff) | (ausValue << 0xd);
@@ -1218,14 +1253,15 @@ void FUN_00693bd0_class::FUN_00693bd0(unsigned short ausValue)
 extern int DAT_0106abe4;
 struct FUN_0069ada0_class : FUN_00692290_class
 {
-    FUN_0069ada0_class* FUN_0069ada0(unsigned int a, unsigned int b);
+    FUN_0069ada0_class* BSSimpleArray_unsigned_short_1024_BSSimpleArray_0069ada0(unsigned int a, unsigned int b);
 };
 // Sets the vtable pointer to DAT_0106abe4, calls the base constructor with a and b, and returns this.
 // @fnv 0x0069ada0
-FUN_0069ada0_class* FUN_0069ada0_class::FUN_0069ada0(unsigned int a, unsigned int b)
+// src: EXE 0x0069ada0
+FUN_0069ada0_class* FUN_0069ada0_class::BSSimpleArray_unsigned_short_1024_BSSimpleArray_0069ada0(unsigned int a, unsigned int b)
 {
     *(void**)this = (void*)&DAT_0106abe4;
-    FUN_00692290(a, b);
+    BSSimpleArray_unsigned_short_1024_InitialSetup(a, b);
     return this;
 }
 
@@ -1263,7 +1299,7 @@ void __thiscall FUN_0069b6a0_class::SetEntryValues(Entry0069b6a0* apEntry, TwoIn
 }
 }  // namespace fnv_0069b6a0
 
-void __fastcall FUN_0069af60(struct GlobalObject_00869f00*);
+void __fastcall Object_ResetVirtualTableAndClear_0069af60(struct GlobalObject_00869f00*);
 void __cdecl _Deallocate(void*);
 struct H69
 {
@@ -1273,7 +1309,7 @@ struct H69
 // @fnv 0x0069b7e0
 void* __thiscall H69::FUN_0069b7e0(unsigned int flags)
 {
-    FUN_0069af60((struct GlobalObject_00869f00*)this);
+    Object_ResetVirtualTableAndClear_0069af60((struct GlobalObject_00869f00*)this);
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -1281,14 +1317,14 @@ void* __thiscall H69::FUN_0069b7e0(unsigned int flags)
 
 struct FUN_0069b1d0_class
 {
-    void FUN_0069b1d0();
+    void UpdateState_0069b1d0();
     void* FUN_0069b810(unsigned int flags);
 };
 // Calls FUN_0069b1d0, then frees this with operator delete when flags has bit 0 set, and returns this.
 // @fnv 0x0069b810
 void* FUN_0069b1d0_class::FUN_0069b810(unsigned int flags)
 {
-    FUN_0069b1d0();
+    UpdateState_0069b1d0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -1296,13 +1332,13 @@ void* FUN_0069b1d0_class::FUN_0069b810(unsigned int flags)
 
 struct FUN_0069b730_class
 {
-    void FUN_0069b730();
+    void UpdateState_0069b730();
     void* FUN_0069b870(unsigned int flags);
 };
 // @fnv 0x0069b870
 void* FUN_0069b730_class::FUN_0069b870(unsigned int flags)
 {
-    FUN_0069b730();
+    UpdateState_0069b730();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -1310,7 +1346,7 @@ void* FUN_0069b730_class::FUN_0069b870(unsigned int flags)
 
 struct FUN_0042f830_struct
 {
-    void FUN_0042f9c0(unsigned char);
+    void BSSimpleArray_NavMeshPtr_1024_Clear(unsigned char);
 };
 #include "../../include/NavMeshTriangleReference.h"
 struct AStarConnectionArray
@@ -1321,17 +1357,18 @@ struct AStarConnectionArray
 void AddNavMeshToGarbageCollector(NavMeshPtr&);
 struct FUN_0069bca0_class : public FUN_0042f830_struct
 {
-    void FUN_0069bca0();
-    AStarConnectionArray* FUN_0069b2c0(int);
+    void NavMeshArray_AddToGarbageCollector();
+    AStarConnectionArray* BSSimpleArray_FastNavMeshEdgeHandle_1024_BSSimpleArray_FastNavMeshEdgeHandle_1024(int);
     unsigned int GetFlags();
 };
 // @fnv 0x0069bca0
-void FUN_0069bca0_class::FUN_0069bca0()
+// src: COMMUNITY 0x0069bca0
+void FUN_0069bca0_class::NavMeshArray_AddToGarbageCollector()
 {
     unsigned int i = 0;
     for (; i < GetFlags(); ++i)
-        AddNavMeshToGarbageCollector(*(NavMeshPtr*)FUN_0069b2c0(i));
-    FUN_0042f9c0(1);
+        AddNavMeshToGarbageCollector(*(NavMeshPtr*)BSSimpleArray_FastNavMeshEdgeHandle_1024_BSSimpleArray_FastNavMeshEdgeHandle_1024(i));
+    BSSimpleArray_NavMeshPtr_1024_Clear(1);
 }
 
 extern int DAT_0106b28c;
@@ -1339,10 +1376,11 @@ struct FUN_0069cd10_class
 {
     int m_iWordAt00;
     void __thiscall InitializeBuffer(int a, int b);
-    FUN_0069cd10_class* __thiscall FUN_0069cd10();
+    FUN_0069cd10_class* __thiscall UpdateState_0069cd10();
 };
 // @fnv 0x0069cd10
-FUN_0069cd10_class* __thiscall FUN_0069cd10_class::FUN_0069cd10()
+// src: GUESS 0x0069cd10 (confidence: low)
+FUN_0069cd10_class* __thiscall FUN_0069cd10_class::UpdateState_0069cd10()
 {
     m_iWordAt00 = (int)&DAT_0106b28c;
     InitializeBuffer(0, 0);
@@ -1409,11 +1447,12 @@ struct FUN_0069da10_C
 {
     int _pad[9];
     char* _p;
-    bool __thiscall FUN_0069da10(unsigned short v, int idx);
+    bool __thiscall NavMeshGrid_IsTriangleInGridCell_0(unsigned short v, int idx);
 };
 // Indexes into the array at _p by idx and forwards v to the element's Contains, returning its result.
 // @fnv 0x0069da10
-bool __thiscall FUN_0069da10_C::FUN_0069da10(unsigned short ausValue, int aiIndex)
+// src: COMMUNITY 0x0069da10
+bool __thiscall FUN_0069da10_C::NavMeshGrid_IsTriangleInGridCell_0(unsigned short ausValue, int aiIndex)
 {
     FUN_0069dee0_class* e = (FUN_0069dee0_class*)(_p + (aiIndex << 4));
     return e->Contains(ausValue);
@@ -1434,7 +1473,7 @@ struct FUN_0069df10
 FUN_0069df10::FUN_0069df10(NavMeshTriangleEdgeReference* pParam)
 {
     ((Dummy006815c0*)this)->_ref_006815c0();
-    m0 = const_cast<NavMeshInfo*>(pParam->m_pLocationNavMesh->FUN_0068efb0());
+    m0 = const_cast<NavMeshInfo*>(pParam->m_pLocationNavMesh->GetNavMeshInfo_0068efb0());
     m4 = pParam->m_usTriangleIdentifier;
     m8 = pParam->m_iEdgeIndex;
 }
@@ -1467,11 +1506,12 @@ struct FUN_0069e090_class
 {
     int f0;
     unsigned short f4;
-    bool FUN_0069e090();
+    bool NavMeshTriangleEdgePortal_IsValid();
 };
 // Returns false when f0 is zero or f4 equals 0xffff, otherwise returns true.
 // @fnv 0x0069e090
-bool FUN_0069e090_class::FUN_0069e090()
+// src: XBOX_PDB 0x0069e090
+bool FUN_0069e090_class::NavMeshTriangleEdgePortal_IsValid()
 {
     if (!f0)
         return false;
@@ -1545,9 +1585,9 @@ struct FUN_006925b0_class
     void* p;
     int iCount;
     int iSize;
-    bool FUN_00438b90();
-    unsigned int FUN_009a3910();
-    void FUN_005efa80(unsigned int, int);
+    bool BSSimpleArray_NavMeshInfo_1024_ShouldGrow();
+    unsigned int BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
+    void BSSimpleArray_PathingLocation_1024_ReallocateBuffer(unsigned int, int);
     int AppendSlot();
 };
 
@@ -1555,7 +1595,7 @@ struct FUN_006925b0_class
 // @fnv 0x006925b0
 int FUN_006925b0_class::AppendSlot()
 {
-    if (FUN_00438b90())
+    if (BSSimpleArray_NavMeshInfo_1024_ShouldGrow())
     {
         if (iSize == 0)
         {
@@ -1565,8 +1605,8 @@ int FUN_006925b0_class::AppendSlot()
         }
         else
         {
-            unsigned int n = FUN_009a3910();
-            FUN_005efa80(n, iCount);
+            unsigned int n = BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
+            BSSimpleArray_PathingLocation_1024_ReallocateBuffer(n, iCount);
             iSize = n;
         }
     }
@@ -1577,11 +1617,12 @@ int FUN_006925b0_class::AppendSlot()
 void* __cdecl FUN_00ec7230(char* dst, const char* src, unsigned int size);
 struct FUN_006928a0_class
 {
-    void FUN_006928a0(char* a, char* b, unsigned int c);
+    void BSSimpleArray_PathingLocation_1024_MoveItems(char* a, char* b, unsigned int c);
 };
 // Copies c elements of 0x28 bytes from src to dst, iterating forward when dst < src and backward otherwise.
 // @fnv 0x006928a0
-void FUN_006928a0_class::FUN_006928a0(char* pDst, char* pSrc, unsigned int c)
+// src: COMMUNITY 0x006928a0
+void FUN_006928a0_class::BSSimpleArray_PathingLocation_1024_MoveItems(char* pDst, char* pSrc, unsigned int c)
 {
     if (c <= 0)
         return;
@@ -1599,7 +1640,8 @@ void FUN_006928a0_class::FUN_006928a0(char* pDst, char* pSrc, unsigned int c)
 
 // Compares the two unsigned shorts pointed to by a and b, returning 1 if the first is greater, -1 if smaller, else 0.
 // @fnv 0x0069ae60
-int FUN_0069ae60(const unsigned short* a, const unsigned short* b)
+// src: GUESS 0x0069ae60 (confidence: high)
+int UInt16_CompareValues(const unsigned short* a, const unsigned short* b)
 {
     const unsigned short* pLeft = a;
     const unsigned short* pRight = b;
@@ -1613,21 +1655,22 @@ int FUN_0069ae60(const unsigned short* a, const unsigned short* b)
 
 struct FUN_006e1280_Class
 {
-    void FUN_006e1280(char*, unsigned int);
+    void VisitPlacementAddresses(char*, unsigned int);
 };
 
 struct FUN_0069b940_class
 {
     virtual void v0();
     virtual int Write(unsigned int);
-    void FUN_0069b940(unsigned int requested, unsigned int savedSize);
+    void BSSimpleArray_char_1024_InitialSetup(unsigned int requested, unsigned int savedSize);
     int iSize;
     int iPosition;
     int iDataLength;
 };
 
 // @fnv 0x0069b940
-void FUN_0069b940_class::FUN_0069b940(unsigned int auiRequestedSize, unsigned int savedSize)
+// src: COMMUNITY 0x0069b940
+void FUN_0069b940_class::BSSimpleArray_char_1024_InitialSetup(unsigned int auiRequestedSize, unsigned int savedSize)
 {
     iSize = 0;
     iPosition = 0;
@@ -1641,7 +1684,7 @@ void FUN_0069b940_class::FUN_0069b940(unsigned int auiRequestedSize, unsigned in
     }
     if (savedSize > 0)
     {
-        ((FUN_006e1280_Class*)this)->FUN_006e1280((char*)iSize, savedSize);
+        ((FUN_006e1280_Class*)this)->VisitPlacementAddresses((char*)iSize, savedSize);
         iPosition = savedSize;
     }
 }
@@ -1716,12 +1759,13 @@ struct FUN_00682590_class
     void* p;
     int iSize;
     int iPosition;
-    FUN_00682590_class* __thiscall FUN_00682590(unsigned int requested);
+    FUN_00682590_class* __thiscall NiTSet_NiTSet(unsigned int requested);
 };
 
 // Allocates requested bytes into p (or null when requested is 0), sets iSize to requested and iPosition to 0, then returns this.
 // @fnv 0x00682590
-FUN_00682590_class* __thiscall FUN_00682590_class::FUN_00682590(unsigned int requested)
+// src: COMMUNITY 0x00682590
+FUN_00682590_class* __thiscall FUN_00682590_class::NiTSet_NiTSet(unsigned int requested)
 {
     if (requested > 0)
         p = NiTMallocInterface<ActorCombatGroup*>::Allocate(requested);
@@ -1741,11 +1785,12 @@ struct FUN_0068ac40_class
     unsigned short m_usElementCount;
     unsigned short m_usUnknown2;
     unsigned short m_usUnknown;
-    void* FUN_0068ac40(unsigned short usSize, unsigned short m_usPassCountLocal);
+    void* NiTArray_NiAVObject_NiTMallocInterface_NiAVObject_NiTArray_NiAVObject_NiTMallocInterface_NiAVObject(unsigned short usSize, unsigned short m_usPassCountLocal);
 };
 
 // @fnv 0x0068ac40
-void* FUN_0068ac40_class::FUN_0068ac40(unsigned short usSize, unsigned short ausUnknown)
+// src: COMMUNITY 0x0068ac40
+void* FUN_0068ac40_class::NiTArray_NiAVObject_NiTMallocInterface_NiAVObject_NiTArray_NiAVObject_NiTMallocInterface_NiAVObject(unsigned short usSize, unsigned short ausUnknown)
 {
     m_pData = &DAT_01069d7c;
     m_usSize = usSize;
@@ -1764,8 +1809,8 @@ struct S5460
 {
     virtual void v0();
     virtual void* v1(int);
-    bool FUN_00438b90();
-    unsigned int FUN_009a3910();
+    bool BSSimpleArray_NavMeshInfo_1024_ShouldGrow();
+    unsigned int BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
     void SetOrReplace(unsigned int, int);
     void* pData;
     int iPosition;
@@ -1775,7 +1820,7 @@ struct S5460
 // @fnv 0x00692200
 int S5460::GetNextPosition()
 {
-    if (FUN_00438b90())
+    if (BSSimpleArray_NavMeshInfo_1024_ShouldGrow())
     {
         if (iDataLength == 0)
         {
@@ -1785,7 +1830,7 @@ int S5460::GetNextPosition()
         }
         else
         {
-            unsigned int newSize = FUN_009a3910();
+            unsigned int newSize = BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
             SetOrReplace(newSize, iPosition);
             iDataLength = newSize;
         }
@@ -1840,10 +1885,11 @@ void FUN_006826d0_shell::FreeBuffer()
 extern int $SG6833;
 struct FUN_00683850_class
 {
-    void FUN_00683850();
+    void UpdateState_00683850();
 };
 // @fnv 0x00683850
-void FUN_00683850_class::FUN_00683850()
+// src: GUESS 0x00683850 (confidence: low)
+void FUN_00683850_class::UpdateState_00683850()
 {
     *reinterpret_cast<int*>(this) = (int)&$SG6833;
 }
@@ -1852,10 +1898,11 @@ struct FUN_00693cd0_class
 {
     int a;
     FUN_00693cf0_class b;
-    int FUN_00693cd0();
+    int EdgeExtraInfo_GetSizeOfV9();
 };
 // @fnv 0x00693cd0
-int FUN_00693cd0_class::FUN_00693cd0()
+// src: COMMUNITY 0x00693cd0
+int FUN_00693cd0_class::EdgeExtraInfo_GetSizeOfV9()
 {
     return b.GetSix() + 4;
 }
@@ -1881,7 +1928,7 @@ struct FUN_005efdd0_class
     virtual void v0();
     char* pData;
     unsigned int iCount;
-    void FUN_005efdd0(char*, char*, unsigned int);
+    void BSSimpleArray_MoveItems_0(char*, char*, unsigned int);
 };
 
 struct FUN_0072ba80_shell : public FUN_005efdd0_class
@@ -1891,19 +1938,20 @@ struct FUN_0072ba80_shell : public FUN_005efdd0_class
 
 struct FUN_0069add0_class : public FUN_0072ba80_shell
 {
-    void __thiscall FUN_0069add0(unsigned int, unsigned int);
+    void __thiscall BSSimpleArray_RemoveFast_1(unsigned int, unsigned int);
 };
 
 unsigned int FUN_0042f5a0(unsigned int, unsigned int);
 
 // @fnv 0x0069add0
-void FUN_0069add0_class::FUN_0069add0(unsigned int uiStartIndex, unsigned int second)
+// src: COMMUNITY 0x0069add0
+void FUN_0069add0_class::BSSimpleArray_RemoveFast_1(unsigned int uiStartIndex, unsigned int second)
 {
     unsigned int result = FUN_0042f5a0(this->iCount - uiStartIndex - second, second);
 
     this->FUN_0072ba80(this->pData + uiStartIndex * 2, second);
 
-    this->FUN_005efdd0(this->pData + uiStartIndex * 2, this->pData + this->iCount * 2 - result * 2, result);
+    this->BSSimpleArray_MoveItems_0(this->pData + uiStartIndex * 2, this->pData + this->iCount * 2 - result * 2, result);
 
     this->iCount = this->iCount - second;
 }
@@ -2029,11 +2077,12 @@ void C81110Header::ClearFields()
 struct Foo
 {
     char m0;
-    void FUN_00681530(int value);
+    void TESConditionItem_SetComparisonCondition(int value);
 };
 
 // @fnv 0x00681530
-void Foo::FUN_00681530(int value)
+// src: COMMUNITY 0x00681530
+void Foo::TESConditionItem_SetComparisonCondition(int value)
 {
     int temp = value;
     if (value < 0 || value >= 6)
@@ -2071,7 +2120,8 @@ extern B82380Command DAT_01190900[];
 unsigned int __cdecl FUN_00682270(unsigned short* pusCommand);
 
 // @fnv 0x00682380
-bool __cdecl FUN_00682380(unsigned short* pusCommand, unsigned int uiParam)
+// src: XBOX_PDB 0x00682380
+bool __cdecl TESParameters_GetParamIsScriptVariable(unsigned short* pusCommand, unsigned int uiParam)
 {
     bool bResult = false;
     if (pusCommand && uiParam < FUN_00682270(pusCommand))
@@ -2108,7 +2158,7 @@ class SpawnedObject
     virtual int vDel(int flags);
 };
 
-void __cdecl FormHeap_Free(void* p);
+void __cdecl FormHeapFreeAndLog_00401030(void* p);
 
 // @fnv 0x00682740
 void __cdecl ReleaseSpawnedObject(SpawnedObject* apObject)
@@ -2126,7 +2176,7 @@ void __cdecl ReleaseSpawnedObject(SpawnedObject* apObject)
         }
         else
         {
-            FormHeap_Free((char*)kObj - 4);
+            FormHeapFreeAndLog_00401030((char*)kObj - 4);
             iResult = 0;
         }
         iResult2 = iResult;
@@ -2197,16 +2247,16 @@ float __cdecl PowFloat(float base, int exponent)
 
 struct SoundObject
 {
-    float* FUN_0045bb80();
+    float* NiAVObject_GetWorldTranslate();
 };
 struct SoundObjectRef
 {
     SoundObject* object;
-    SoundObject* FUN_00559450();
+    SoundObject* Modelloader_GetReferencedThis();
 };
 struct SoundRecord
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct SoundPair
 {
@@ -2226,9 +2276,9 @@ struct ManagedSound
 };
 struct AudioManager
 {
-    ManagedSound FUN_00ad73b0(unsigned int, unsigned int);
+    ManagedSound GetSoundHandleByFormID_00ad73b0(unsigned int, unsigned int);
 };
-AudioManager* FUN_00453a70();
+AudioManager* BSAudio_QInstance();
 struct LoopSoundState
 {
     unsigned int unk00;
@@ -2263,22 +2313,22 @@ struct LoopSoundState
 void LoopSoundState::InitLoopSounds()
 {
     StopSounds();
-    if (object.FUN_00559450() && sounds)
+    if (object.Modelloader_GetReferencedThis() && sounds)
     {
         if (sounds->GetField4C())
         {
-            unsigned int firstId = sounds->GetField4C()->FUN_0084e3a0();
-            first = FUN_00453a70()->FUN_00ad73b0(firstId, 0x102);
-            first.SetPositionFromArray(object.FUN_00559450()->FUN_0045bb80());
-            first.FUN_00ad8f20(object.FUN_00559450());
+            unsigned int firstId = sounds->GetField4C()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            first = BSAudio_QInstance()->GetSoundHandleByFormID_00ad73b0(firstId, 0x102);
+            first.SetPositionFromArray(object.Modelloader_GetReferencedThis()->NiAVObject_GetWorldTranslate());
+            first.FUN_00ad8f20(object.Modelloader_GetReferencedThis());
             first.FUN_00ad8830(false);
         }
         if (sounds->GetGrass())
         {
-            unsigned int secondId = sounds->GetGrass()->FUN_0084e3a0();
-            second = FUN_00453a70()->FUN_00ad73b0(secondId, 0x102);
-            second.SetPositionFromArray(object.FUN_00559450()->FUN_0045bb80());
-            second.FUN_00ad8f20(object.FUN_00559450());
+            unsigned int secondId = sounds->GetGrass()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            second = BSAudio_QInstance()->GetSoundHandleByFormID_00ad73b0(secondId, 0x102);
+            second.SetPositionFromArray(object.Modelloader_GetReferencedThis()->NiAVObject_GetWorldTranslate());
+            second.FUN_00ad8f20(object.Modelloader_GetReferencedThis());
             second.FUN_00ad8830(false);
         }
     }
@@ -2290,13 +2340,13 @@ extern "C" void __cdecl FUN_006815c0();
 extern "C" void __cdecl FUN_0043f8d0();
 struct NavMeshChain_0068aa50
 {
-    NavMeshChain_0068aa50* FUN_00461130();
+    NavMeshChain_0068aa50* NiAVObject_GetWorldRotate();
     void FUN_004b45b0();
 };
 struct NavMeshNode_0068aa50
 {
-    NavMeshChain_0068aa50* FUN_009611e0(NiMatrix3*);
-    void FUN_0043fa80(NiMatrix3*);
+    NavMeshChain_0068aa50* NiAVObject_GetParent(NiMatrix3*);
+    void SetRotate_0043fa80(NiMatrix3*);
 };
 struct NavMeshSearchList_0068aa50
 {
@@ -2313,10 +2363,11 @@ extern float DAT_0102b3c8;
 struct FUN_0068aa50_shell
 {
     void CollectUniqueChildValues(void*, NavMeshSearchList_0068aa50*, unsigned int*);
-    void FUN_0068aa50(void*);
+    void BSTempEffectParticle_ResetGravity(void*);
 };
 // @fnv 0x0068aa50
-void FUN_0068aa50_shell::FUN_0068aa50(void* searchArg)
+// src: XBOX_PDB 0x0068aa50
+void FUN_0068aa50_shell::BSTempEffectParticle_ResetGravity(void* searchArg)
 {
     NavMeshSearchList_0068aa50 items(10, 1);
     {
@@ -2329,12 +2380,12 @@ void FUN_0068aa50_shell::FUN_0068aa50(void* searchArg)
             {
                 // These matrices are uninitialized in the original; only b calls the empty constructor.
                 float a[sizeof(NiMatrix3) / sizeof(float)];
-                node->FUN_009611e0(reinterpret_cast<NiMatrix3*>(a))->FUN_00461130()->FUN_004b45b0();
+                node->NiAVObject_GetParent(reinterpret_cast<NiMatrix3*>(a))->NiAVObject_GetWorldRotate()->FUN_004b45b0();
                 float b[sizeof(NiMatrix3) / sizeof(float)];
                 ((void (__thiscall*)(NiMatrix3*))FUN_006815c0)(reinterpret_cast<NiMatrix3*>(b));
                 reinterpret_cast<NiMatrix3*>(b)->MakeYRotation(DAT_0102b3c8);
                 float c[sizeof(NiMatrix3) / sizeof(float)];
-                node->FUN_0043fa80(((NiMatrix3* (__thiscall*)(NiMatrix3*, NiMatrix3*, const NiMatrix3*))FUN_0043f8d0)(reinterpret_cast<NiMatrix3*>(a), reinterpret_cast<NiMatrix3*>(c), reinterpret_cast<const NiMatrix3*>(b)));
+                node->SetRotate_0043fa80(((NiMatrix3* (__thiscall*)(NiMatrix3*, NiMatrix3*, const NiMatrix3*))FUN_0043f8d0)(reinterpret_cast<NiMatrix3*>(a), reinterpret_cast<NiMatrix3*>(c), reinterpret_cast<const NiMatrix3*>(b)));
             }
         }
     }
@@ -2365,7 +2416,7 @@ struct CleanupMap : FUN_00691a00_class
 {
     virtual ~CleanupMap()
     {
-        FUN_00691a00();
+        ReleaseStorage_00691a00();
     }
 };
 struct FUN_006919a0 : CleanupMap
@@ -2384,15 +2435,16 @@ struct FUN_00691c10_class
     virtual void v0();
     void* m4;
 
-    int FUN_00978bc0();
+    int BSSimpleArray_NiPoint3_1024_AddUninitialized();
     void ConstructEntries(int, int);
-    int FUN_00691c10(S00691c60 const&);
+    int BSSimpleArray_EdgeExtraInfo_1024_Add(S00691c60 const&);
 };
 
 // @fnv 0x00691c10
-int __thiscall FUN_00691c10_class::FUN_00691c10(S00691c60 const& aEntry)
+// src: COMMUNITY 0x00691c10
+int __thiscall FUN_00691c10_class::BSSimpleArray_EdgeExtraInfo_1024_Add(S00691c60 const& aEntry)
 {
-    int count = FUN_00978bc0();
+    int count = BSSimpleArray_NiPoint3_1024_AddUninitialized();
 
     ConstructEntries(count * 12 + reinterpret_cast<int>(m4), 1);
 
@@ -2514,8 +2566,8 @@ void FUN_006927d0_cls::ConstructPairCells(PairCell* cells, unsigned int count)
     }
 }
 
-void FUN_00401080(void* p, bool flag);
-void FUN_00407a90(void* p, bool flag);
+void BSEndian_00401080(void* p, bool flag);
+void BSEndian_00407a90(void* p, bool flag);
 
 struct SpawnedFlag
 {
@@ -2525,30 +2577,32 @@ struct SpawnedFlag
 class FUN_00693c10_cls
 {
   public:
-    void FUN_00693c10();
+    void NavMeshTriangle_endianSwap();
 };
 
 // @fnv 0x00693c10
-void FUN_00693c10_cls::FUN_00693c10()
+// src: COMMUNITY 0x00693c10
+void FUN_00693c10_cls::NavMeshTriangle_endianSwap()
 {
     SpawnedFlag f0 = {};
-    FUN_00401080((char*)this + 0xc, f0.m_bValue);
+    BSEndian_00401080((char*)this + 0xc, f0.m_bValue);
     SpawnedFlag f8 = {};
-    FUN_00407a90((char*)this + 0, f8.m_bValue);
+    BSEndian_00407a90((char*)this + 0, f8.m_bValue);
     SpawnedFlag f2 = {};
-    FUN_00407a90((char*)this + 2, f2.m_bValue);
+    BSEndian_00407a90((char*)this + 2, f2.m_bValue);
     SpawnedFlag fX = {};
-    FUN_00407a90((char*)this + 4, fX.m_bValue);
+    BSEndian_00407a90((char*)this + 4, fX.m_bValue);
     SpawnedFlag f9 = {};
-    FUN_00407a90((char*)this + 6, f9.m_bValue);
+    BSEndian_00407a90((char*)this + 6, f9.m_bValue);
     SpawnedFlag f5 = {};
-    FUN_00407a90((char*)this + 8, f5.m_bValue);
+    BSEndian_00407a90((char*)this + 8, f5.m_bValue);
     SpawnedFlag f7 = {};
-    FUN_00407a90((char*)this + 0xa, f7.m_bValue);
+    BSEndian_00407a90((char*)this + 0xa, f7.m_bValue);
 }
 
 // @fnv 0x00693db0
-int __cdecl FUN_00693db0()
+// src: COMMUNITY 0x00693db0
+int __cdecl EdgeExtraInfo_GetSizeOfV0()
 {
     return (int)46u;
 }
@@ -2569,11 +2623,12 @@ class B120Array
 
     void Destruct(Elem4* pkElems, unsigned int ItemUpdateArray);
     void Copy(void* pvDst, void* pvSrc, unsigned int ItemUpdateArray);
-    void FUN_0069b120(int iIndex, int iCount);
+    void RemoveArrayRange(int iIndex, int iCount);
 };
 
 // @fnv 0x0069b120
-void B120Array::FUN_0069b120(int iIndex, int iCount)
+// src: GUESS 0x0069b120 (confidence: medium)
+void B120Array::RemoveArrayRange(int iIndex, int iCount)
 {
     unsigned int uiTailCount = FUN_0042f5a0(m_uiLogicalSize - iIndex - iCount, iCount);
     Destruct(m_pData + iIndex, iCount);
@@ -2609,11 +2664,12 @@ struct KeyStruct
 
 struct FUN_0069b680_cls
 {
-    void FUN_0069b680(KeyStruct k1, KeyStruct k2);
+    void Equals_Thunk(KeyStruct k1, KeyStruct k2);
 };
 
 // @fnv 0x0069b680
-void FUN_0069b680_cls::FUN_0069b680(KeyStruct aKey1, KeyStruct aKey2)
+// src: GUESS 0x0069b680 (confidence: medium)
+void FUN_0069b680_cls::Equals_Thunk(KeyStruct aKey1, KeyStruct aKey2)
 {
     aKey1.Equals(&aKey2);
 }
@@ -2771,7 +2827,7 @@ struct S_0069d9a0_cls
 
 extern "C" void __stdcall FUN_00ec5fce(void* object, int elementSize, int count, void (S_0069d9a0_cls::*callback)());
 
-extern "C" void __cdecl FormHeap_Free(void* apMemory);
+extern "C" void __cdecl FormHeapFreeAndLog_00401030(void* apMemory);
 
 // @fnv 0x0069d9a0
 void* S_0069d9a0_cls::FUN_0069d9a0(unsigned int flags)
@@ -2782,7 +2838,7 @@ void* S_0069d9a0_cls::FUN_0069d9a0(unsigned int flags)
 
         if (flags & 1)
         {
-            FormHeap_Free(reinterpret_cast<char*>(this) - 4);
+            FormHeapFreeAndLog_00401030(reinterpret_cast<char*>(this) - 4);
         }
 
         return reinterpret_cast<char*>(this) - 4;
@@ -2792,7 +2848,7 @@ void* S_0069d9a0_cls::FUN_0069d9a0(unsigned int flags)
 
     if (flags & 1)
     {
-        FormHeap_Free(this);
+        FormHeapFreeAndLog_00401030(this);
     }
 
     return this;
@@ -2835,14 +2891,14 @@ FUN_00682600::~FUN_00682600()
 
 struct P03MMHeap
 {
-    void FUN_00aa5610(void*);
+    void ScrapHeap_Deallocate(void*);
 };
 struct P03MM
 {
     P03MMHeap* FUN_00aa42e0();
 };
-P03MM* FUN_00401020();
-void* FUN_00aa1070(unsigned int);
+P03MM* MemoryManager_Instance();
+void* _NiMalloc_00aa1070(unsigned int);
 struct FUN_004a7800
 {
     float x, y, z, w;
@@ -2921,26 +2977,26 @@ struct ResizeMesh
 // @fnv 0x0068e760
 void ResizeMesh::ResizeMeshBuffers()
 {
-    P03MMHeap* heap = FUN_00401020()->FUN_00aa42e0();
+    P03MMHeap* heap = MemoryManager_Instance()->FUN_00aa42e0();
     positions = new NiPoint3[vertexCount];
     __memcpy(positions, oldPositions, vertexCount * sizeof(NiPoint3));
-    heap->FUN_00aa5610(oldPositions);
+    heap->ScrapHeap_Deallocate(oldPositions);
     oldPositions = 0;
     normals = new NiPoint3[vertexCount];
     __memcpy(normals, oldNormals, vertexCount * sizeof(NiPoint3));
-    heap->FUN_00aa5610(oldNormals);
+    heap->ScrapHeap_Deallocate(oldNormals);
     oldNormals = 0;
     coordinates = new NiPoint2[vertexCount];
     __memcpy(coordinates, oldCoordinates, vertexCount * sizeof(NiPoint2));
-    heap->FUN_00aa5610(oldCoordinates);
+    heap->ScrapHeap_Deallocate(oldCoordinates);
     oldCoordinates = 0;
     colors = new FUN_004a7800[vertexCount];
     __memcpy(colors, oldColors, vertexCount * sizeof(FUN_004a7800));
-    heap->FUN_00aa5610(oldColors);
+    heap->ScrapHeap_Deallocate(oldColors);
     oldColors = 0;
-    triangles = (Triangle6*)FUN_00aa1070((triangleCount * 3) * sizeof(unsigned short));
+    triangles = (Triangle6*)_NiMalloc_00aa1070((triangleCount * 3) * sizeof(unsigned short));
     __memcpy(triangles, oldTriangles, triangleCount * sizeof(Triangle6));
-    heap->FUN_00aa5610(oldTriangles);
+    heap->ScrapHeap_Deallocate(oldTriangles);
     oldTriangles = 0;
 }
 
@@ -2995,7 +3051,7 @@ class PathInfos69B
 class PathBounds69B
 {
   public:
-    void FUN_0069be00();
+    void NavMeshBounds_NavMeshBounds_0();
 
     NiPoint3 m_kMax;
     NiPoint3 m_kMin;
@@ -3005,7 +3061,8 @@ class PathBounds69B
 
 // Initialises the max point to negative infinity, the min point to positive infinity, and clears both path info blocks.
 // @fnv 0x0069be00
-void PathBounds69B::FUN_0069be00()
+// src: COMMUNITY 0x0069be00
+void PathBounds69B::NavMeshBounds_NavMeshBounds_0()
 {
     m_kMax = NiPoint3(NEG_INFINITY_69B, NEG_INFINITY_69B, NEG_INFINITY_69B);
     m_kMin = NiPoint3(NI_INFINITY_69B, NI_INFINITY_69B, NI_INFINITY_69B);
@@ -3015,15 +3072,16 @@ void PathBounds69B::FUN_0069be00()
 
 namespace bounds_detail {
 extern const NiPoint3 pathingrequestZero;
-bool __cdecl FUN_006b9cf0(const NiPoint3&, const NiPoint3&, const NiPoint3&, const NiPoint3&, float&, float, float);
+bool __cdecl NavMeshMath_IsPointInsideTriangle(const NiPoint3&, const NiPoint3&, const NiPoint3&, const NiPoint3&, float&, float, float);
 NiPoint3 __cdecl GetClosestPointOnSegment(const NiPoint3&, const NiPoint3&, const NiPoint3&);
 
 }  // namespace bounds_detail
 
 // @fnv 0x0069c070
-NiPoint3 NavMeshBounds::FUN_0069c070(const NiPoint3& point)
+// src: COMMUNITY 0x0069c070
+NiPoint3 NavMeshBounds::DistanceFromPointToBounds(const NiPoint3& point)
 {
-    if (!vertices.FUN_0076b610())
+    if (!vertices.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
     {
         float fPointHeight = 3.402823466e38f;
         NiPoint3 kClosest;
@@ -3033,11 +3091,11 @@ NiPoint3 NavMeshBounds::FUN_0069c070(const NiPoint3& point)
             float fZ;
             {
                 NiPoint3 kTriangle[3];
-                kTriangle[0] = vertices.FUN_006a1440(triangles.GetAt((int)i).a);
-                kTriangle[1] = vertices.FUN_006a1440(triangles.GetAt((int)i).b);
-                kTriangle[2] = vertices.FUN_006a1440(triangles.GetAt((int)i).c);
+                kTriangle[0] = vertices.Object_GetIndexedValue_006a1440(triangles.GetAt((int)i).a);
+                kTriangle[1] = vertices.Object_GetIndexedValue_006a1440(triangles.GetAt((int)i).b);
+                kTriangle[2] = vertices.Object_GetIndexedValue_006a1440(triangles.GetAt((int)i).c);
                 m_fGlyphExtent = max.z - min.z;
-                if (bounds_detail::FUN_006b9cf0(kTriangle[0], kTriangle[1], kTriangle[2], point, fZ, m_fGlyphExtent, m_fGlyphExtent))
+                if (bounds_detail::NavMeshMath_IsPointInsideTriangle(kTriangle[0], kTriangle[1], kTriangle[2], point, fZ, m_fGlyphExtent, m_fGlyphExtent))
                     return NiPoint3(0.0f, 0.0f, fZ);
                 for (int j = 0; j < 3; j++)
                 {
@@ -3216,7 +3274,7 @@ void LDMesh::ReadFromBuffer(char* apData, LDFile* apFile, int aiUnused)
     }
 }
 
-float FUN_00406ce0(float);
+float floorf(float);
 void ClampInt(int* value, int lo, int hi);
 struct Pt_0069d4b0
 {
@@ -3226,16 +3284,16 @@ struct Pt_0069d4b0
 struct Tris_0069d4b0
 {
     unsigned int FUN_0044ddc0();
-    unsigned short& FUN_0069dec0(int index);
+    unsigned short& BSSimpleArray_unsigned_short_1024_GetAt(int index);
 };
 struct Out_0069d4b0
 {
     unsigned int FUN_0044ddc0();
-    unsigned short& FUN_0069dec0(int index);
+    unsigned short& BSSimpleArray_unsigned_short_1024_GetAt(int index);
     unsigned int Append(const unsigned short* tri);
-    bool FUN_0076b610();
-    void FUN_0069aeb0(int (*cmp)(const unsigned short*, const unsigned short*));
-    void FUN_0069add0(unsigned int index, unsigned int count);
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
+    void ForwardCall_0069aeb0(int (*cmp)(const unsigned short*, const unsigned short*));
+    void BSSimpleArray_RemoveFast_1(unsigned int index, unsigned int count);
 };
 struct Dups_0069d4b0
 {
@@ -3245,7 +3303,7 @@ struct Dups_0069d4b0
     int unk0c;
     Dups_0069d4b0();
     ~Dups_0069d4b0();
-    bool FUN_0076b610();
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
     unsigned int FUN_0044ddc0();
     unsigned int FUN_007cb2e0(const unsigned int& index);
     unsigned int& FUN_00877a30(unsigned int index);
@@ -3257,55 +3315,56 @@ struct Sub0069d4b0
     float m_cellH;
     float m_originX;
     float m_originY;
-    Tris_0069d4b0* FUN_006967c0(int x, int y);
-    void FUN_0069d4b0(Pt_0069d4b0* a1, Pt_0069d4b0* a2, Out_0069d4b0* a3);
+    Tris_0069d4b0* NavMeshGrid_GetTriangleArray(int x, int y);
+    void NavMeshGrid_GetTriangleDataForAABB(Pt_0069d4b0* a1, Pt_0069d4b0* a2, Out_0069d4b0* a3);
 };
 // @fnv 0x0069d4b0
-void Sub0069d4b0::FUN_0069d4b0(Pt_0069d4b0* a1, Pt_0069d4b0* a2, Out_0069d4b0* apOut)
+// src: COMMUNITY 0x0069d4b0
+void Sub0069d4b0::NavMeshGrid_GetTriangleDataForAABB(Pt_0069d4b0* a1, Pt_0069d4b0* a2, Out_0069d4b0* apOut)
 {
     float dx9 = a1->x - m_originX;
     float dy2 = a1->y - m_originY;
     float fx = dx9 / m_cellW;
     float fy4 = dy2 / m_cellH;
-    int x9 = (int)FUN_00406ce0(fx);
-    int y0 = (int)FUN_00406ce0(fy4);
+    int x9 = (int)floorf(fx);
+    int y0 = (int)floorf(fy4);
     ClampInt(&y0, 0, m_uiItemCount - 1);
     ClampInt(&x9, 0, m_uiItemCount - 1);
     dx9 = a1->x - m_originX;
     dy2 = a1->y - m_originY;
     fx = dx9 / m_cellW;
     fy4 = dy2 / m_cellH;
-    int x5 = (int)FUN_00406ce0(fx);
-    int y8 = (int)FUN_00406ce0(fy4);
+    int x5 = (int)floorf(fx);
+    int y8 = (int)floorf(fy4);
     ClampInt(&y8, 0, m_uiItemCount - 1);
     ClampInt(&x5, 0, m_uiItemCount - 1);
     for (int y7 = y0; y7 <= y8; y7++)
     {
         for (int x7 = x9; x7 <= x5; x7++)
         {
-            Tris_0069d4b0* tris = FUN_006967c0(x7, y7);
+            Tris_0069d4b0* tris = NavMeshGrid_GetTriangleArray(x7, y7);
             for (unsigned int i = 0; i < tris->FUN_0044ddc0(); i++)
             {
-                apOut->Append(&tris->FUN_0069dec0(i));
+                apOut->Append(&tris->BSSimpleArray_unsigned_short_1024_GetAt(i));
             }
         }
     }
-    if (apOut->FUN_0076b610())
+    if (apOut->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
         return;
-    apOut->FUN_0069aeb0(FUN_0069ae60);
+    apOut->ForwardCall_0069aeb0(UInt16_CompareValues);
     Dups_0069d4b0 dups_;
     for (unsigned int i = 0; i < apOut->FUN_0044ddc0() - 1; i++)
     {
-        if (apOut->FUN_0069dec0(i + 1) == apOut->FUN_0069dec0(i))
+        if (apOut->BSSimpleArray_unsigned_short_1024_GetAt(i + 1) == apOut->BSSimpleArray_unsigned_short_1024_GetAt(i))
         {
             dups_.FUN_007cb2e0(i + 1);
         }
     }
-    if (dups_.FUN_0076b610())
+    if (dups_.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
         return;
     for (int j = dups_.FUN_0044ddc0() - 1; j >= 0; j--)
     {
-        apOut->FUN_0069add0(dups_.FUN_00877a30(j), 1);
+        apOut->BSSimpleArray_RemoveFast_1(dups_.FUN_00877a30(j), 1);
     }
 }
 
@@ -3319,7 +3378,7 @@ extern "C" void __cdecl FUN_0042f8a0();
 // @fnv 0x0069bc50
 void NavMeshCollection::RemoveAndCollect(unsigned int index)
 {
-    ((void (__thiscall*)(NavMesh*, unsigned int))FUN_007037c0)(FUN_00877a30(index).FUN_00559450(), 0);
+    ((void (__thiscall*)(NavMesh*, unsigned int))FUN_007037c0)(FUN_00877a30(index).Modelloader_GetReferencedThis(), 0);
     AddNavMeshToGarbageCollector(FUN_00877a30(index));
     ((void (__thiscall*)(NavMeshCollection*, unsigned int, bool))FUN_0042f8a0)(this, index, true);
 }
@@ -3380,10 +3439,10 @@ extern double DAT_0101de30;
 extern int DAT_011f426c;
 
 void* operator new(unsigned int n);
-void* __cdecl FUN_00aa13e0(unsigned int n);
+void* __cdecl Object_DispatchCommandFour(unsigned int n);
 void* __cdecl FormHeap_Allocate(unsigned int n);
 void* __stdcall GetPathManager(void* p, int a);
-void* __cdecl FUN_00c56680(float f, int a, int b, void* p);
+void* __cdecl BSTestObjects_CreateSphere(float f, int a, int b, void* p);
 void __cdecl AttachLightingPropertyRecursive(void* p);
 void __cdecl FUN_00b57e30(void* p, int a, int b);
 
@@ -3462,7 +3521,7 @@ struct ArrObj
     int d2;
     int d3;
     unsigned int FUN_0044ddc0();
-    void* FUN_00558dd0(unsigned int i);
+    void* GetElementAddress16(unsigned int i);
     void** FUN_00877a30(unsigned int i);
     LinkT* GetFirst();
 };
@@ -3599,21 +3658,21 @@ struct ResObj
     virtual void vf53();
     virtual void vf54();
     virtual void vtarget(void* p, int a);
-    void FUN_00440460(void* p);
-    void FUN_00439410(void* p);
-    void FUN_00a5a040();
-    void FUN_00a59c60(void* p);
+    void NiAVObject_SetTranslate(void* p);
+    void NiAVObject_AttachProperty(void* p);
+    void UpdateProperties();
+    void NiAVObject_Update(void* p);
 };
 struct AuxObj
 {
-    void FUN_0049ed90(int a);
+    void NiAlphaProperty_SetAlphaBlending(int a);
 };
 struct ObjB
 {
     int m_00;
     ObjB(void* p);
     ~ObjB();
-    ResObj* FUN_00559450();
+    ResObj* Modelloader_GetReferencedThis();
 };
 struct ObjA
 {
@@ -3651,7 +3710,7 @@ struct DelObj
 };
 struct NavLike
 {
-    void* FUN_0068efb0();
+    void* GetNavMeshInfo_0068efb0();
 };
 
 struct VRes
@@ -3712,19 +3771,19 @@ struct VRes
     virtual void vf53();
     virtual void vf54();
     virtual void vtarget(void* p, int a);
-    void FUN_00a5a040();
-    void FUN_00a59c60(void* p);
+    void UpdateProperties();
+    void NiAVObject_Update(void* p);
 };
 struct GObj
 {
     bool FUN_0052aa80(int a);
     void FUN_0066b0d0(void* p);
-    ResObj* FUN_00559450();
+    ResObj* Modelloader_GetReferencedThis();
 };
 extern GObj DAT_011d6ddc;
 struct A4Obj
 {
-    void FUN_0069f920(StrObj* s, void* p);
+    void PathingSolution_AddPathingNode(StrObj* s, void* p);
 };
 struct HdrS
 {
@@ -5816,15 +5875,16 @@ struct ThisCls
     Obj20d8 m_20d8;
     ArrE m_20e8;
     void BuildGroups(void* a, void* p);
-    void* FUN_0069f900(Node* n, int a, void* hdr, float f);
+    void* GetKeyForNode(Node* n, int a, void* hdr, float f);
     void InsertNode(void* p);
     bool ProcessSearchNode(Obj20d8* a, ArrE* b, int flags);
-    bool FUN_0069f010(Vec3Obj* a0, Vec3Obj* a1, void* a2, int a3, A4Obj* a4);
+    bool NavMeshPOVSearch_BuildPath(Vec3Obj* a0, Vec3Obj* a1, void* a2, int a3, A4Obj* a4);
 };
 
 // Sets up start and end nodes from a0 and a1, runs ProcessSearchNode, passes each result entry's strings to a4->FUN_0069f920, and returns the search result.
 // @fnv 0x0069f010
-bool ThisCls::FUN_0069f010(Vec3Obj* apStart, Vec3Obj* apEnd, void* a2, int a3, A4Obj* apResult)
+// src: COMMUNITY 0x0069f010
+bool ThisCls::NavMeshPOVSearch_BuildPath(Vec3Obj* apStart, Vec3Obj* apEnd, void* a2, int a3, A4Obj* apResult)
 {
     HdrS raw2;
     {
@@ -5846,26 +5906,26 @@ bool ThisCls::FUN_0069f010(Vec3Obj* apStart, Vec3Obj* apEnd, void* a2, int a3, A
             for (i = 0; i < m_2068.FUN_0044ddc0(); i++)
             {
                 unsigned int j;
-                for (j = 0; j < ((ArrObj*)m_2068.FUN_00558dd0(i))->FUN_0044ddc0(); j++)
+                for (j = 0; j < ((ArrObj*)m_2068.GetElementAddress16(i))->FUN_0044ddc0(); j++)
                 {
                     AuxObj* auxPtr;
                     ObjA objA(0.0f, (float)(1.0 - (double)i / (double)m_2068.FUN_0044ddc0()),
                               (float)((double)i / (double)m_2068.FUN_0044ddc0()), DAT_01030ff4);
                     {
                         ObjB objB2(
-                            FUN_00c56680(*(float*)((char*)*(((ArrObj*)m_2068.FUN_00558dd0(i))->FUN_00877a30(j)) + 0x10),
+                            BSTestObjects_CreateSphere(*(float*)((char*)*(((ArrObj*)m_2068.GetElementAddress16(i))->FUN_00877a30(j)) + 0x10),
                                          10, 10, &objA));
-                        objB2.FUN_00559450()->FUN_00440460(
-                            (char*)*(((ArrObj*)m_2068.FUN_00558dd0(i))->FUN_00877a30(j)) + 4);
+                        objB2.Modelloader_GetReferencedThis()->NiAVObject_SetTranslate(
+                            (char*)*(((ArrObj*)m_2068.GetElementAddress16(i))->FUN_00877a30(j)) + 4);
                         auxPtr = (AuxObj*)new ObjY();
-                        auxPtr->FUN_0049ed90(1);
-                        objB2.FUN_00559450()->FUN_00439410(auxPtr);
-                        AttachLightingPropertyRecursive(objB2.FUN_00559450());
-                        FUN_00b57e30(objB2.FUN_00559450(), 0, 0);
-                        objB2.FUN_00559450()->FUN_00a5a040();
+                        auxPtr->NiAlphaProperty_SetAlphaBlending(1);
+                        objB2.Modelloader_GetReferencedThis()->NiAVObject_AttachProperty(auxPtr);
+                        AttachLightingPropertyRecursive(objB2.Modelloader_GetReferencedThis());
+                        FUN_00b57e30(objB2.Modelloader_GetReferencedThis(), 0, 0);
+                        objB2.Modelloader_GetReferencedThis()->UpdateProperties();
                         VecObj vobjL(0.0f, 0, 0);
-                        objB2.FUN_00559450()->FUN_00a59c60(&vobjL);
-                        DAT_011d6ddc.FUN_00559450()->vtarget(objB2.FUN_00559450(), 1);
+                        objB2.Modelloader_GetReferencedThis()->NiAVObject_Update(&vobjL);
+                        DAT_011d6ddc.Modelloader_GetReferencedThis()->vtarget(objB2.Modelloader_GetReferencedThis(), 1);
                     }
                 }
             }
@@ -5890,16 +5950,16 @@ bool ThisCls::FUN_0069f010(Vec3Obj* apStart, Vec3Obj* apEnd, void* a2, int a3, A
             reinterpret_cast<NiPoint3&>(m_207c->m_v4) = reinterpret_cast<const NiPoint3&>(apEnd->FUN_005c3420());
             m_207c->m_10 = 0.0f;
             m_207c->m_34 = 0xffff;
-            ((LinkT*)m_2068.FUN_00558dd0(m_2068.FUN_0044ddc0() - 2))->FUN_007cb2e0(&m_207c);
+            ((LinkT*)m_2068.GetElementAddress16(m_2068.FUN_0044ddc0() - 2))->FUN_007cb2e0(&m_207c);
         }
         {
             raw2.p = m_2078;
             raw2.a = 0;
             raw2.b = 0;
-            InsertNode(FUN_0069f900(m_2078, 0, &raw2,
+            InsertNode(GetKeyForNode(m_2078, 0, &raw2,
                                     (float)(((Vec3Obj*)&m_20b0)
                                                 ->FUN_005c3420()
-                                                .FUN_00439ef0(((Vec3Obj*)&m_2088)->FUN_005c3420())
+                                                .SubtractIntoVector(((Vec3Obj*)&m_2088)->FUN_005c3420())
                                                 .FUN_00457990() *
                                             DAT_0101de30)));
             ok = ProcessSearchNode(&m_20d8, &m_20e8, 1);
@@ -5909,18 +5969,18 @@ bool ThisCls::FUN_0069f010(Vec3Obj* apStart, Vec3Obj* apEnd, void* a2, int a3, A
             for (k = 0; k < m_20e8.FUN_0044ddc0(); k++)
             {
                 StrObj str1((char*)m_20e8.GetBufferElementAddress(k) + 0x1c,
-                            ((NavLike*)m_20e8.GetBufferElementAddress(k)->m_10)->FUN_0068efb0());
-                apResult->FUN_0069f920(&str1, &DAT_011f426c);
+                            ((NavLike*)m_20e8.GetBufferElementAddress(k)->m_10)->GetNavMeshInfo_0068efb0());
+                apResult->PathingSolution_AddPathingNode(&str1, &DAT_011f426c);
                 StrObj str2((char*)m_20e8.GetBufferElementAddress(k) + 0x34,
-                            ((NavLike*)m_20e8.GetBufferElementAddress(k)->m_28)->FUN_0068efb0());
-                apResult->FUN_0069f920(&str2, &DAT_011f426c);
+                            ((NavLike*)m_20e8.GetBufferElementAddress(k)->m_28)->GetNavMeshInfo_0068efb0());
+                apResult->PathingSolution_AddPathingNode(&str2, &DAT_011f426c);
             }
         }
         if (DAT_011d6dcc)
         {
-            DAT_011d6ddc.FUN_00559450()->FUN_00a5a040();
+            DAT_011d6ddc.Modelloader_GetReferencedThis()->UpdateProperties();
             VecObj vobj(0.0f, 0, 0);
-            DAT_011d6ddc.FUN_00559450()->FUN_00a59c60(&vobj);
+            DAT_011d6ddc.Modelloader_GetReferencedThis()->NiAVObject_Update(&vobj);
             ((GRes2*)GetPathManager(&DAT_011d6ddc, 1))->ForwardToHost();
         }
         {
@@ -5969,7 +6029,8 @@ BSSimpleArray<unsigned short, 1024>::~BSSimpleArray()
 
 // Copies scalar and block fields from this NavMeshGrid into apGrid, allocates a matching BSSimpleArray, and copies each element via FUN_00694f80.
 // @fnv 0x0069dd50
-void NavMeshGrid::FUN_0069d2d0()
+// src: COMMUNITY 0x0069d2d0
+void NavMeshGrid::Clear_0069d2d0()
 
 {}
 
@@ -5979,11 +6040,12 @@ void NavMeshGrid::FUN_0069d2d0()
 
 // @fnv 0x0069dd50
 
-void NavMeshGrid::FUN_0069dd50(NavMeshGrid* apGrid) const
+// src: COMMUNITY 0x0069dd50
+void NavMeshGrid::CopyTo_0069dd50(NavMeshGrid* apGrid) const
 
 {
 
-    apGrid->FUN_0069d2d0();
+    apGrid->Clear_0069d2d0();
 
 
 
@@ -6025,10 +6087,11 @@ struct ScriptParamDataView
 };
 
 
-Script* __cdecl FUN_004826d0(TESForm* formID);
+Script* __cdecl TESScriptableForm_GetFormScript(TESForm* formID);
 
 // @fnv 0x006823d0
-Script* FUN_006823d0(unsigned int index, FunctionData const* data)
+// src: XBOX_PDB 0x006823d0
+Script* TESParameters_GetScriptFromParam(unsigned int index, FunctionData const* data)
 {
     Script* result = 0;
 
@@ -6051,8 +6114,8 @@ Script* FUN_006823d0(unsigned int index, FunctionData const* data)
 
                 if (object)
                 {
-                    formID = reinterpret_cast<TESForm*>(object->FUN_007af430());
-                    result = FUN_004826d0(formID);
+                    formID = reinterpret_cast<TESForm*>(object->BGSSaveFormBuffer_GetForm());
+                    result = TESScriptableForm_GetFormScript(formID);
                 }
             }
         }

@@ -49,7 +49,8 @@ TESObjectCELL* LocationDescriptor::GetLocationCellReference()
 }
 
 // @fnv 0x0067f3c0
-void LocationDescriptor::FUN_0067f3c0(TESObjectREFR* reference)
+// src: XBOX_PDB 0x0067f3c0
+void LocationDescriptor::PackageLocation_SetLocReference(TESObjectREFR* reference)
 {
     m_ucLocationType = PLT_REFERENCE;
     pRef = reference;
@@ -69,7 +70,7 @@ void LocationDescriptor::InitItem(TESForm* owner)
     case PLT_CELL: {
         TESObjectCELL* cell = dynamic_cast<TESObjectCELL*>(TESForm::GetFormByID(formID));
         if (cell)
-            FUN_0067f410(cell);
+            PackageLocation_SetLocCell(cell);
         else
         {
             if (static_cast<BGSCameraPath*>(owner)->HasNameForWarning())
@@ -78,7 +79,7 @@ void LocationDescriptor::InitItem(TESForm* owner)
             else
                 Warning("MASTERFILE: Unable to find Package Location Cell (%08X) on owner object (%08X).", formID,
                         owner->GetFormID());
-            FUN_0067f410(0);
+            PackageLocation_SetLocCell(0);
         }
     }
     break;
@@ -101,7 +102,7 @@ void LocationDescriptor::InitItem(TESForm* owner)
     case PLT_REFERENCE: {
         TESObjectREFR* reference = dynamic_cast<TESObjectREFR*>(TESForm::GetFormByID(formID));
         if (reference)
-            FUN_0067f3c0(reference);
+            PackageLocation_SetLocReference(reference);
         else
         {
             if (static_cast<BGSCameraPath*>(owner)->HasNameForWarning())
@@ -110,7 +111,7 @@ void LocationDescriptor::InitItem(TESForm* owner)
             else
                 Warning("MASTERFILE: Unable to find Package Location Reference (%08X) on owner object (%08X).", formID,
                         owner->GetFormID());
-            FUN_0067f3c0(0);
+            PackageLocation_SetLocReference(0);
         }
     }
     break;
@@ -185,7 +186,8 @@ unsigned int BGSMessageInitAccess::GetIconFormID()
 
 // Sets the first byte of the object to 3 and zeroes the two 32-bit fields at offsets 4 and 8, then returns the object.
 // @fnv 0x0067f030
-LocationDescriptor* __fastcall FUN_0067f030(LocationDescriptor* pObject)
+// src: GUESS 0x0067f030 (confidence: low)
+LocationDescriptor* __fastcall Packagelocation_UpdateState_0067f030(LocationDescriptor* pObject)
 {
     *(char*)pObject = 3;
     *(unsigned int*)((char*)pObject + 4) = 0;
@@ -195,11 +197,12 @@ LocationDescriptor* __fastcall FUN_0067f030(LocationDescriptor* pObject)
 
 struct FUN_0067f110_shell : public LocationDescriptor
 {
-    void FUN_0067f110();
+    void InitializeFields_0067f110();
 };
 
 // @fnv 0x0067f110
-void FUN_0067f110_shell::FUN_0067f110()
+// src: GUESS 0x0067f110 (confidence: low)
+void FUN_0067f110_shell::InitializeFields_0067f110()
 {
     m_ucLocationType = -1;
     m_pLocationData = 0;
@@ -208,11 +211,12 @@ void FUN_0067f110_shell::FUN_0067f110()
 
 struct FUN_0067f140_shell : public LocationDescriptor
 {
-    void FUN_0067f140(int);
+    void PackageLocation_SetLocType(int);
 };
 
 // @fnv 0x0067f140
-void FUN_0067f140_shell::FUN_0067f140(int aeLoctype)
+// src: XBOX_PDB 0x0067f140
+void FUN_0067f140_shell::PackageLocation_SetLocType(int aeLoctype)
 {
     if (aeLoctype != m_ucLocationType)
     {
@@ -237,11 +241,12 @@ void FUN_0067f140_shell::FUN_0067f140(int aeLoctype)
 
 struct FUN_0067f1c0_shell : public LocationDescriptor
 {
-    unsigned int FUN_0067f1c0();
+    unsigned int PackageLocation_GetRadius();
 };
 
 // @fnv 0x0067f1c0
-unsigned int FUN_0067f1c0_shell::FUN_0067f1c0()
+// src: XBOX_PDB 0x0067f1c0
+unsigned int FUN_0067f1c0_shell::PackageLocation_GetRadius()
 {
     switch (m_ucLocationType)
     {
@@ -255,12 +260,13 @@ unsigned int FUN_0067f1c0_shell::FUN_0067f1c0()
 
 struct FUN_0067f1f0_shell : public LocationDescriptor
 {
-    void FUN_0067f1f0(unsigned int);
+    void PackageLocation_SetRadius(unsigned int);
 };
 
 // Stores aiRad at offset 4 unless the byte at offset 0 is -1 or 1.
 // @fnv 0x0067f1f0
-void FUN_0067f1f0_shell::FUN_0067f1f0(unsigned int aiRad)
+// src: XBOX_PDB 0x0067f1f0
+void FUN_0067f1f0_shell::PackageLocation_SetRadius(unsigned int aiRad)
 {
     switch (*reinterpret_cast<char*>(this))
     {
@@ -275,11 +281,12 @@ void FUN_0067f1f0_shell::FUN_0067f1f0(unsigned int aiRad)
 
 struct FUN_0067f410_shell : public LocationDescriptor
 {
-    void FUN_0067f410(TESObjectCELL*);
+    void PackageLocation_SetLocCell(TESObjectCELL*);
 };
 
 // @fnv 0x0067f410
-void FUN_0067f410_shell::FUN_0067f410(TESObjectCELL* apCell)
+// src: XBOX_PDB 0x0067f410
+void FUN_0067f410_shell::PackageLocation_SetLocCell(TESObjectCELL* apCell)
 {
     m_ucLocationType = 1;
     pCell = apCell;
@@ -287,11 +294,12 @@ void FUN_0067f410_shell::FUN_0067f410(TESObjectCELL* apCell)
 
 struct FUN_0067f970_shell : public LocationDescriptor
 {
-    bool FUN_0067f970();
+    bool PackageLocation_IsLocationGeneric();
 };
 
 // @fnv 0x0067f970
-bool FUN_0067f970_shell::FUN_0067f970()
+// src: COMMUNITY 0x0067f970
+bool FUN_0067f970_shell::PackageLocation_IsLocationGeneric()
 {
     if (GetLocType() > PLT_EDITORLOC)
         return true;
@@ -310,16 +318,16 @@ class Animation
   public:
     BSAnimGroupSequence* PlayGroup(unsigned short, ACTION_FLAGS, int, ANIM_GROUP_SECTION);
 };
-float __cdecl FUN_0040ebd0(float, float);
-float __cdecl FUN_004a3e90(float);
-float __cdecl FUN_004b5550(float, float);
-void __cdecl FUN_00561500(void*, const NiQuaternion*);
-void __cdecl FUN_00c9bdf0(NiAVObject*, float);
+float __cdecl BSMIN(float, float);
+float __cdecl NI2HK_004a3e90(float);
+float __cdecl NiATan2(float, float);
+void __cdecl NI2HK_00561500(void*, const NiQuaternion*);
+void __cdecl bhkBlendController_DoGetUp(NiAVObject*, float);
 extern const double DAT_01020998;
 extern float runtimeInitializationFloat3452;
 extern TESEyes* DAT_011cb600;
 
-hkVector4& __cdecl FUN_004a3e00(hkVector4&, const NiPoint3&);
+hkVector4& __cdecl NI2HK(hkVector4&, const NiPoint3&);
 hkRotation& __cdecl VisitAndFetchThree(hkRotation&, const NiMatrix3&);
 // The shared quaternion has no rotation constructor; retain its external
 // construction entry point through a layout-identical derived quaternion.
@@ -346,16 +354,17 @@ class P01ObjA
 };
 #include "../../include/TESResponse.h"
 void __cdecl StartHostilityAndCombat(Actor*, Actor*);
-void __cdecl FUN_0080b8f0(Actor*, Actor*);
+void __cdecl CommandEffect_UpdateCommandedActor(Actor*, Actor*);
 struct FUN_00826be0_shell : public ActiveEffect
 {
-    void FUN_00826be0(float);
+    void ReanimateEffect_Update(float);
 };
 
 // Preserve the original stack cookie now that the shared matrix uses named entries.
 #pragma strict_gs_check(push, on)
 // @fnv 0x00826be0
-void FUN_00826be0_shell::FUN_00826be0(float afSecondsElapsed)
+// src: XBOX_PDB 0x00826be0
+void FUN_00826be0_shell::ReanimateEffect_Update(float afSecondsElapsed)
 {
     Actor* ptarget =
         ((BSThread*)this)->GetThreadID() ? ((MagicTarget*)((BSThread*)this)->GetThreadID())->GetOwnerActor() : 0;
@@ -384,19 +393,19 @@ void FUN_00826be0_shell::FUN_00826be0(float afSecondsElapsed)
                 pprocess->SetIdleStateFlag(true);
             if (*(float*)((char*)this + 4) - *(float*)((char*)this + 0x50) > DAT_01020998)
                 *(int*)((char*)this + 0x4c) = 20;
-            float fLerp = FUN_0040ebd0(1.0f, (*(float*)((char*)this + 4) - *(float*)((char*)this + 0x50)) / 4.0);
+            float fLerp = BSMIN(1.0f, (*(float*)((char*)this + 4) - *(float*)((char*)this + 0x50)) / 4.0);
             hkVector4 endPos;
             hkVector4 startPos;
-            FUN_004a3e00(endPos, *(NiPoint3*)((char*)this + 0x54));
-            FUN_004a3e00(startPos, *(NiPoint3*)((char*)this + 0x54));
-            ((bhkCharacterController*)&endPos)->GetVectorElement(2) += FUN_004a3e90(100.0f);
+            NI2HK(endPos, *(NiPoint3*)((char*)this + 0x54));
+            NI2HK(startPos, *(NiPoint3*)((char*)this + 0x54));
+            ((bhkCharacterController*)&endPos)->GetVectorElement(2) += NI2HK_004a3e90(100.0f);
             hkVector4 hkpos;
             hkpos.setInterpolate4(startPos, endPos, fLerp);
             B006815c0 currentPos;
-            (*(bhkRigidBody**)((char*)this + 0x48))->FUN_00560bc0(currentPos);
+            (*(bhkRigidBody**)((char*)this + 0x48))->bhkRigidBody_GetPosition(currentPos);
             NiPoint3 dirToCaster = *(const NiPoint3_sub*)static_cast<const Actor*>(pcaster)->GetPos() - currentPos;
             dirToCaster.z = 0.0f;
-            float fx = -FUN_004b5550(dirToCaster.y, dirToCaster.x);
+            float fx = -NiATan2(dirToCaster.y, dirToCaster.x);
             float afDepth = runtimeInitializationFloat3452;
             float fy = 0.5f;
             NiMatrix3 matrix;
@@ -404,11 +413,11 @@ void FUN_00826be0_shell::FUN_00826be0(float afSecondsElapsed)
             hkRotation kHkRotation;
             VisitAndFetchThree(kHkRotation, matrix);
             __declspec(align(16)) hkQuaternion startRot;
-            FUN_00561500(&startRot, (const NiQuaternion*)((char*)this + 0x60));
+            NI2HK_00561500(&startRot, (const NiQuaternion*)((char*)this + 0x60));
             RotationQuaternion endRot(kHkRotation);
             __declspec(align(16)) hkQuaternion hkquat;
-            hkquat.FUN_00cb2850(startRot, endRot, fLerp);
-            (*(bhkRigidBody**)((char*)this + 0x48))->FUN_00c8de20(hkpos, hkquat, 1.0f / afSecondsElapsed, 1.0f);
+            hkquat.D3D_ComputeClearColor(startRot, endRot, fLerp);
+            (*(bhkRigidBody**)((char*)this + 0x48))->bhkRigidBody_ApplyKeyframe(hkpos, hkquat, 1.0f / afSecondsElapsed, 1.0f);
             // The shared slot B0 declaration omits the reference argument used here.
             reinterpret_cast<void (__thiscall*)(Actor*, TESObjectREFR*)>(
                 (*reinterpret_cast<void***>(ptarget))[0xB0])(
@@ -423,7 +432,7 @@ void FUN_00826be0_shell::FUN_00826be0(float afSecondsElapsed)
                 *(int*)((char*)this + 0x4c) = 30;
                 ptarget->SetReloadState(true);
                 panim->PlayGroup(0, (ACTION_FLAGS)0, -1, (ANIM_GROUP_SECTION)-1);
-                FUN_00c9bdf0(pNode, 0.0f);
+                bhkBlendController_DoGetUp(pNode, 0.0f);
                 BaseProcess* pprocess = static_cast<MobileObject*>(ptarget)->FUN_008d8520();
                 if (!pprocess->FUN_0045cd60())
                     pprocess->SetIdleStateFlag(false);
@@ -442,7 +451,7 @@ void FUN_00826be0_shell::FUN_00826be0(float afSecondsElapsed)
                     Creature::SetNodeFlagsRecursive(pNode, 4, true, false, true);
                 TESNPC* pnpc = dynamic_cast<TESNPC*>((TESBoundObject*)((P01ObjA*)ptarget)->GetNext());
                 if (pnpc)
-                    pnpc->FUN_0060a950(DAT_011cb600);
+                    pnpc->SwapEyes(DAT_011cb600);
                 BSFaceGenAnimationData* pFaceGenAnimData = ptarget->GetActorFaceGenData();
                 if (pFaceGenAnimData)
                     pFaceGenAnimData->SetStateFlags(false, false);
@@ -454,14 +463,14 @@ void FUN_00826be0_shell::FUN_00826be0(float afSecondsElapsed)
             {
                 *(int*)((char*)this + 0x4c) = 50;
                 ptarget->SetAnimationGroupAction(4);
-                ptarget->FUN_008acf10(false);
+                ptarget->Actor_SetGhost(false);
                 StartHostilityAndCombat(ptarget, pcaster);
             }
         }
         else if (*(int*)((char*)this + 0x4c) == 50)
         {
             static_cast<MobileObject*>(ptarget)->FUN_008d8520()->ClearCachedTargetReferences(false);
-            FUN_0080b8f0(ptarget, pcaster);
+            CommandEffect_UpdateCommandedActor(ptarget, pcaster);
         }
     }
 }
@@ -510,7 +519,7 @@ struct FUN_0067f430_shell : public LocationDescriptor
 struct FUN_0067f600_shell : public LocationDescriptor
 {
     bool IsDifferentFrom(LocationDescriptor* other);
-    unsigned int FUN_0067f1c0();
+    unsigned int PackageLocation_GetRadius();
     int GetObjectType();
 };
 
@@ -521,7 +530,7 @@ bool FUN_0067f600_shell::IsDifferentFrom(LocationDescriptor* other)
         return true;
     if (GetLocType() != other->GetLocType())
         return true;
-    if (FUN_0067f1c0() != reinterpret_cast<FUN_0067f600_shell*>(other)->FUN_0067f1c0())
+    if (PackageLocation_GetRadius() != reinterpret_cast<FUN_0067f600_shell*>(other)->PackageLocation_GetRadius())
         return true;
     if (GetLocationReference() != other->GetLocationReference())
         return true;
@@ -563,7 +572,7 @@ struct FUN_0067eff0_Class
     unsigned int m_pLocationData;
     unsigned int m_iSearchRadius;
 
-    void FUN_0067eff0();
+    void PACK_LOC_FILE_Endian();
 };
 
 typedef FUN_0067eff0_Class ChunkPayloadHandler;
@@ -575,7 +584,7 @@ struct FUN_0067f480_shell
 
 struct FUN_0067f1c0_shell
 {
-    unsigned int FUN_0067f1c0();
+    unsigned int PackageLocation_GetRadius();
 };
 
 void* __cdecl memset(void* buffer, int value, unsigned int count);
@@ -584,11 +593,12 @@ void __cdecl _FUN_00485990(unsigned int chunkId, ChunkPayloadHandler* location, 
 
 struct FUN_0067f6c0_shell : public LocationDescriptor
 {
-    void FUN_0067f6c0(unsigned int chunkId);
+    void PackageLocation_Save(unsigned int chunkId);
 };
 
 // @fnv 0x0067f6c0
-void FUN_0067f6c0_shell::FUN_0067f6c0(unsigned int chunkId)
+// src: XBOX_PDB 0x0067f6c0
+void FUN_0067f6c0_shell::PackageLocation_Save(unsigned int chunkId)
 {
     ChunkPayloadHandler locStruct;
     memset(&locStruct, 0, sizeof(locStruct));
@@ -600,15 +610,15 @@ void FUN_0067f6c0_shell::FUN_0067f6c0(unsigned int chunkId)
     else if (pObject != 0)
         locStruct.m_pLocationData = pObject->GetFormID();
 
-    locStruct.m_iSearchRadius = reinterpret_cast<FUN_0067f1c0_shell*>(this)->FUN_0067f1c0();
+    locStruct.m_iSearchRadius = reinterpret_cast<FUN_0067f1c0_shell*>(this)->PackageLocation_GetRadius();
 
     if (_FUN_00401500())
-        locStruct.FUN_0067eff0();
+        locStruct.PACK_LOC_FILE_Endian();
 
     _FUN_00485990(chunkId, &locStruct, 0xc);
 
     if (_FUN_00401500())
-        locStruct.FUN_0067eff0();
+        locStruct.PACK_LOC_FILE_Endian();
 }
 }  // namespace fnv_0067f6c0
 
@@ -717,14 +727,15 @@ bool FUN_0067f220_cls::LookupAndStore(int a1, int a2, unsigned char* pucOut)
 extern TESSaveLoadGame* DAT_011de45c;
 struct FUN_0067fa00_shell : public LocationDescriptor
 {
-    void FUN_0067fa00();
+    void SaveTargetReference();
 };
 // Serializes a form ID and object reference through the save/load game, writing the object's form ID for cases 0-4 and the pointer for case 5.
 // @fnv 0x0067fa00
-void FUN_0067fa00_shell::FUN_0067fa00()
+// src: GUESS 0x0067fa00 (confidence: medium)
+void FUN_0067fa00_shell::SaveTargetReference()
 {
-    DAT_011de45c->FUN_008579b0(this, 1);
-    DAT_011de45c->FUN_008579b0(&m_pLocationData, 4);
+    DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(this, 1);
+    DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&m_pLocationData, 4);
     switch (m_ucLocationType)
     {
         break;
@@ -736,16 +747,16 @@ void FUN_0067fa00_shell::FUN_0067fa00()
         unsigned int id = 0;
         if (pObject)
             id = pObject->GetFormID();
-        DAT_011de45c->FUN_00857a10((int)&id, 4);
+        DAT_011de45c->TESSaveLoadGame_SaveNumericID((int)&id, 4);
         break;
     }
     case 5:
-        DAT_011de45c->FUN_008579b0(&pObject, 4);
+        DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&pObject, 4);
         break;
     }
 }
 
-int __cdecl FUN_004839c0(int value);
+int __cdecl TESForm_GetFormByNumericID(int value);
 
 struct FUN_0067fb20_holder
 {
@@ -769,7 +780,7 @@ void FUN_0067fb20_holder::UpdateStoredValue()
     case 3:
     case 4: {
         int originalValue = storedValue;
-        storedValue = FUN_004839c0(originalValue);
+        storedValue = TESForm_GetFormByNumericID(originalValue);
         break;
     }
     default:
@@ -786,11 +797,12 @@ struct LocationInputStream
 };
 struct FUN_0067fb60_shell : LocationDescriptor
 {
-    void FUN_0067fb60(LocationInputStream* input);
+    void PackageLocation_SaveGame(LocationInputStream* input);
 };
 // Reads a one-byte type tag and a 4-byte value from the stream, then loads pObject as a form reference or a raw 4-byte value depending on the tag.
 // @fnv 0x0067fb60
-void FUN_0067fb60_shell::FUN_0067fb60(LocationInputStream* pStream)
+// src: XBOX_PDB 0x0067fb60
+void FUN_0067fb60_shell::PackageLocation_SaveGame(LocationInputStream* pStream)
 {
     pStream->FUN_00865e50(&m_ucLocationType, 1, 0);
     pStream->FUN_00865e50(&m_pLocationData, 4, 0);
@@ -821,12 +833,13 @@ class PackageLoadStream
 class FUN_0067fbe0_cls : public LocationDescriptor
 {
   public:
-    void FUN_0067fbe0(PackageLoadStream* apStream);
+    void PackageLocation_LoadGame_0067fbe0(PackageLoadStream* apStream);
 };
 
 // Reads a type byte and a 4-byte value from the stream, then reads pObject as a pointer for types 0-4 or as 4 raw bytes for type 5.
 // @fnv 0x0067fbe0
-void FUN_0067fbe0_cls::FUN_0067fbe0(PackageLoadStream* apStream)
+// src: XBOX_PDB 0x0067fbe0
+void FUN_0067fbe0_cls::PackageLocation_LoadGame_0067fbe0(PackageLoadStream* apStream)
 {
     apStream->ReadBytes(&m_ucLocationType, 1);
     apStream->ReadBytes(&m_pLocationData, 4);
@@ -851,12 +864,13 @@ class FUN_0067f990_C
   public:
     char m_eRequestType;
 
-    unsigned short FUN_0067f990();
+    unsigned short PackageLocation_GetSaveSize();
 };
 
 // Returns 5 plus 4 when m_eRequestType is between 0 and 5 inclusive.
 // @fnv 0x0067f990
-unsigned short FUN_0067f990_C::FUN_0067f990()
+// src: COMMUNITY 0x0067f990
+unsigned short FUN_0067f990_C::PackageLocation_GetSaveSize()
 {
     unsigned short usSize = 0;
     usSize += 1;
@@ -881,7 +895,7 @@ unsigned short FUN_0067f990_C::FUN_0067f990()
 namespace fnv_0067faa0 {
 struct FileQ
 {
-    void FUN_008579e0(void* p, int n);
+    void TESSaveLoadGame_LoadGameDataOLD(void* p, int n);
     void FUN_00857aa0(void* p, int n);
 };
 extern FileQ* DAT_011de45c;
@@ -891,14 +905,15 @@ struct OwnQ
     char pad[3];
     int iVal;
     int iData;
-    void FUN_0067faa0();
+    void PackageLocation_LoadGame();
 };
 // @fnv 0x0067faa0
-void OwnQ::FUN_0067faa0()
+// src: XBOX_PDB 0x0067faa0
+void OwnQ::PackageLocation_LoadGame()
 {
     int iTmp;
-    DAT_011de45c->FUN_008579e0(this, 1);
-    DAT_011de45c->FUN_008579e0(&iVal, 4);
+    DAT_011de45c->TESSaveLoadGame_LoadGameDataOLD(this, 1);
+    DAT_011de45c->TESSaveLoadGame_LoadGameDataOLD(&iVal, 4);
     switch (cType)
     {
         break;
@@ -911,13 +926,13 @@ void OwnQ::FUN_0067faa0()
         iData = iTmp;
         break;
     case 5:
-        DAT_011de45c->FUN_008579e0(&iData, 4);
+        DAT_011de45c->TESSaveLoadGame_LoadGameDataOLD(&iData, 4);
         break;
     }
 }
 }  // namespace fnv_0067faa0
 
-TESForm* FUN_004839c0(unsigned int formID);
+TESForm* TESForm_GetFormByNumericID(unsigned int formID);
 
 struct FUN_0067fc50_shell : LocationDescriptor
 {
@@ -935,6 +950,6 @@ void FUN_0067fc50_shell::ResolveObject(int unused)
     case PLT_CURRLOC:
     case PLT_EDITORLOC:
     case PLT_OBJECT:
-        pObject = pObject ? FUN_004839c0(reinterpret_cast<unsigned int>(pObject)) : 0;
+        pObject = pObject ? TESForm_GetFormByNumericID(reinterpret_cast<unsigned int>(pObject)) : 0;
     }
 }

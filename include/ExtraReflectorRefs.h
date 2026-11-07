@@ -36,7 +36,7 @@ public:
     void Copy(BSExtraData* apExtra);
 
     Item* FUN_00434410(unsigned int key);
-    bool FUN_00434bb0(BSExtraData* apCompare);
+    bool Compare_00434bb0(BSExtraData* apCompare);
     void* __thiscall FUN_00434af0();
     void* __thiscall FUN_00411c50(unsigned int flags);
 

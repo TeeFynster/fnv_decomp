@@ -270,11 +270,12 @@ SpeedTreeLeafShader* CreateSpeedTreeLeafShader()
 
 struct FUN_00bb2be0_shell : LeafV
 {
-    void FUN_00bb2be0();
+    void SpeedTreeLeafShader_ReloadShaders();
 };
 
 // @fnv 0x00bb2be0
-void FUN_00bb2be0_shell::FUN_00bb2be0()
+// src: XBOX_PDB 0x00bb2be0
+void FUN_00bb2be0_shell::SpeedTreeLeafShader_ReloadShaders()
 {
     this->Init79();
     reinterpret_cast<FUN_00bb1d40_t*>(this)->CreatePasses();

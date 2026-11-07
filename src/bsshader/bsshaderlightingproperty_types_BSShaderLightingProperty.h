@@ -17,7 +17,7 @@ class CloningProcess;
 class bsshaderlightingproperty_NodePool
 {
   public:
-    void* FUN_0043a010();
+    void* NiGeometry_AddProperty();
 };
 // The light list at BSShaderLightingProperty+0x60 (NiTPointerList<ShadowSceneLight*>): the constructor (0x00b71720)
 // calls 0x00b71300 on it with ecx = this+0x60, so 0x00b71300/0x00b713c0 are list operations.

@@ -28,7 +28,7 @@ struct Body
 };
 struct Sub
 {
-    void FUN_00e10a10(void* a);
+    void hkpPrimitiveDrawer_setDisplayHandler(void* a);
 };
 struct Listener
 {
@@ -50,9 +50,9 @@ struct Obj
     hkVector4 m50;
     char pad2[0x60];
     Sub mC0;
-    void FUN_00de47e0(Body* b, hkTransform* t, hkTransform* r);
-    void FUN_00de44c0(int a, int b);
-    void FUN_00de4530(int a, int b);
+    void hkpConstraintDrawer_updateCommonParameters(Body* b, hkTransform* t, hkTransform* r);
+    void hkpConstraintDrawer_drawPivots(int a, int b);
+    void hkpConstraintDrawer_drawBodyFrames(int a, int b);
     void FireMotionEvent(Body* b, Listener* l, int a, int c);
 };
 
@@ -61,20 +61,20 @@ struct Obj
 void Obj::FireMotionEvent(Body* apBody, Listener* apListener, int aiArg, int aiArg2)
 {
     Motion* pMotion = &apBody->shape->motion;
-    mC0.FUN_00e10a10(apListener);
+    mC0.hkpPrimitiveDrawer_setDisplayHandler(apListener);
     // Preserve uninitialized aligned storage; pointer arrays avoid adding a /GS cookie.
     __declspec(align(16)) void* rStorage[sizeof(hkTransform) / sizeof(void*)];
     __declspec(align(16)) void* tStorage[sizeof(hkTransform) / sizeof(void*)];
     hkTransform& r = *reinterpret_cast<hkTransform*>(rStorage);
     hkTransform& t = *reinterpret_cast<hkTransform*>(tStorage);
-    FUN_00de47e0(apBody, &t, &r);
+    hkpConstraintDrawer_updateCommonParameters(apBody, &t, &r);
     hkVector4* pVec40;
     hkVector4* pVec50;
     pVec50 = &m50;
-    pVec50->FUN_00c7f640(t, pMotion->v20);   // 0x00c7f640 = hkVector4::_setTransformedPos
+    pVec50->setTransformedPos_00c7f640(t, pMotion->v20);   // 0x00c7f640 = hkVector4::_setTransformedPos
     pVec40 = &m40;
-    pVec40->FUN_00c7f640(r, pMotion->v10);
-    FUN_00de44c0(aiArg, aiArg2);
-    FUN_00de4530(aiArg, aiArg2);
+    pVec40->setTransformedPos_00c7f640(r, pMotion->v10);
+    hkpConstraintDrawer_drawPivots(aiArg, aiArg2);
+    hkpConstraintDrawer_drawBodyFrames(aiArg, aiArg2);
     apListener->Fire(pVec40, pVec50, 0xffff0000, aiArg, aiArg2);
 }

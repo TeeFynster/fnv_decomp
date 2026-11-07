@@ -12,7 +12,7 @@ struct StaticHelper
 {
     static void HandleObjectEvent(void* a, void* b, float c, void* d, void* e, void* f, void* g);
 };
-void __stdcall FUN_00d22db0(int, int);
+void __stdcall nullsub_74(int, int);
 
 #include <xmmintrin.h>
 extern float DAT_0104ffb8;
@@ -24,7 +24,8 @@ struct Plane
 };
 
 // @fnv 0x00d23480
-static __declspec(noinline) hkBool* FUN_00d23480(hkBool* out, const __m128* p, const Plane* pl)
+// src: GUESS 0x00d23480 (confidence: low)
+static __declspec(noinline) hkBool* hkBool_ProcessAndReturnValue_00d23480(hkBool* out, const __m128* p, const Plane* pl)
 {
     __m128 m = _mm_mul_ps(_mm_sub_ps(*p, pl->m_kPoint), pl->m_vHitNormal);
     __m128 s = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m));
@@ -39,5 +40,5 @@ static __declspec(noinline) hkBool* FUN_00d23480(hkBool* out, const __m128* p, c
 
 hkBool* caller_d23480(hkBool* o, const __m128* v, const Plane* q)
 {
-    return FUN_00d23480(o, v, q);
+    return hkBool_ProcessAndReturnValue_00d23480(o, v, q);
 }

@@ -27,7 +27,8 @@ TESForm* LookupForm(unsigned int formID);
 void FNV_Warning(const char* fmt, ...);
 
 // @fnv 0x004fbb70
-void TESObjectSTAT::FUN_004fbb70()
+// src: XBOX_PDB 0x004fbb70
+void TESObjectSTAT::BGSMovableStatic_InitItem()
 {
     if (GetInitialized())
         return;

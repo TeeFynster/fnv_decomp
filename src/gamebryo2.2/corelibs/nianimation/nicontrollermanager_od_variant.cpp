@@ -7,18 +7,19 @@
 
 struct DATST
 {
-    void __thiscall FUN_00972840(Actor* a, int b);
+    void __thiscall ProcessLists_StopCombatandAlarmonActor(Actor* a, int b);
 };
 extern DATST DAT_011e0e80;
 // @fnv 0x005c1b00
-bool FUN_005c1b00(int a, int b, TESObjectREFR* c)
+// src: EXE 0x005c1b00
+bool Cmd_StopCombatAlarmOnActor_Execute(int a, int b, TESObjectREFR* c)
 {
     if (c)
     {
         Actor* pkObject = dynamic_cast<Actor*>(c);
         if (pkObject)
         {
-            DAT_011e0e80.FUN_00972840(pkObject, 0);
+            DAT_011e0e80.ProcessLists_StopCombatandAlarmonActor(pkObject, 0);
             pkObject->Unk_10D(0);
         }
     }

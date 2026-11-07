@@ -59,7 +59,7 @@ struct FUN_00d5a630_ctxB
     void InitB();
 };
 extern float DAT_0106ea1c;
-void __cdecl FUN_00d5a630(void* a1, int a2, int a3);
+void __cdecl hkGeometryUtility_createConvexGeometry(void* a1, int a2, int a3);
 struct S_00d5a6b0_Elem
 {
     float x;
@@ -94,7 +94,7 @@ struct D5C110MemoryRouter
         return *m_pStreamAllocator;
     }
 };
-extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D5C110MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 struct D5C110Vector4
 {
     float m_uiX;
@@ -114,7 +114,7 @@ struct D5C110VertexArray
 
     void ClearAndRelease()
     {
-        D5C110Allocator& alloc = FUN_00c85750().heap();
+        D5C110Allocator& alloc = hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(D5C110Vector4));
@@ -139,7 +139,7 @@ void __cdecl InitAndSetB(const D5C110StridedVertices& vertices, D5C110Geometry& 
 void __cdecl BuildGeometryFromShape(const void* shape, D5C110Geometry& out);
 struct D5C110VertexArray;
 void __cdecl ProcessArg(const void* shape, D5C110VertexArray& vertices);
-void __cdecl FUN_00d5a6a0(const void* shape, D5C110VertexArray& vertices);
+void __cdecl hkGeometryUtility_createVerticesFromPlaneEquations(const void* shape, D5C110VertexArray& vertices);
 #include <xmmintrin.h>
 struct S_00d5ac50_R
 {
@@ -164,7 +164,7 @@ struct S_00d5ac50_P
     }
 };
 extern __m128 DAT_010c44d0;
-S_00d5ac50_R FUN_00d5a6e0(S_00d5ac50_M& m, int iters);
+S_00d5ac50_R Object_ProcessEntries_00d5a6e0(S_00d5ac50_M& m, int iters);
 static __forceinline __m128& S_q(S_00d5ac50_V& v)
 {
     return reinterpret_cast<__m128&>(v);
@@ -177,7 +177,7 @@ static __forceinline float S_dot3(__m128 x)
 {
     return _mm_cvtss_f32(_mm_add_ss(_mm_shuffle_ps(x, x, 0xaa), _mm_add_ss(_mm_shuffle_ps(x, x, 0x55), x)));
 }
-S_00d5ac50_R FUN_00d5ac50(S_00d5ac50_M& m, S_00d5ac50_V* p0, S_00d5ac50_V* p1, S_00d5ac50_V* p2);
+S_00d5ac50_R HkgeometryutilityGsEhscNogsNoehsc_ComputeValues_00d5ac50(S_00d5ac50_M& m, S_00d5ac50_V* p0, S_00d5ac50_V* p1, S_00d5ac50_V* p2);
 
 struct S00d5bb80_hkSimdReal
 {
@@ -254,8 +254,9 @@ struct S00d5bb80_hkSphere
 };
 
 // @fnv 0x00d5bb80
+// src: GUESS 0x00d5bb80 (confidence: low)
 static __declspec(noinline) S00d5bb80_hkSphere
-    FUN_00d5bb80(const S00d5bb80_hkVector4& a, const S00d5bb80_hkVector4& b, const S00d5bb80_hkVector4& c, float radius)
+    Object_ProcessAndReturnValue_00d5bb80(const S00d5bb80_hkVector4& a, const S00d5bb80_hkVector4& b, const S00d5bb80_hkVector4& c, float radius)
 {
     S00d5bb80_hkVector4 ab;
     ab.setSub4(b, a);
@@ -288,6 +289,6 @@ volatile float g_r;
 S00d5bb80_hkSphere g_out;
 void CallTarget_d5bb80()
 {
-    g_out = FUN_00d5bb80(*g_a, *g_b, *g_c, g_r);
-    g_out = FUN_00d5bb80(*g_a, *g_b, *g_c, g_r);
+    g_out = Object_ProcessAndReturnValue_00d5bb80(*g_a, *g_b, *g_c, g_r);
+    g_out = Object_ProcessAndReturnValue_00d5bb80(*g_a, *g_b, *g_c, g_r);
 }

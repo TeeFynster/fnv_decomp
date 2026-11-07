@@ -198,7 +198,7 @@ struct AtlasFile
     virtual void S12();
     virtual unsigned int ReadLine(char*, unsigned int, int);
 };
-AtlasFile* FUN_00afdf00(const char*, int, unsigned int);
+AtlasFile* FileFinder_GetFile_(const char*, int, unsigned int);
 
 void* __cdecl operator new(size_t);
 void __cdecl operator delete(void*);
@@ -389,7 +389,8 @@ class basic_string : public _String_val<_Elem, _Ax>
         }
         return (*this);
     }
-    _Myt& FUN_00a0c430(const _Elem* _Ptr, size_type _Count)
+// src: COMMUNITY 0x00a0c430
+    _Myt& std_string_append(const _Elem* _Ptr, size_type _Count)
     {
         if (_Inside(_Ptr))
             return (append(*this, _Ptr - _Myptr(), _Count));
@@ -406,7 +407,7 @@ class basic_string : public _String_val<_Elem, _Ax>
     _Myt& append(const _Elem* _Ptr)
     {
         ;
-        return (FUN_00a0c430(_Ptr, _Traits::length(_Ptr)));
+        return (std_string_append(_Ptr, _Traits::length(_Ptr)));
     }
     _Myt& assign(const _Myt& _Right)
     {
@@ -472,7 +473,8 @@ class basic_string : public _String_val<_Elem, _Ax>
         size_type _Num = _Mybase::_Alval.max_size();
         return (_Num <= 1 ? 1 : _Num - 1);
     }
-    size_type FUN_00a0c300(const _Elem* _Ptr, size_type _Off, size_type _Count) const
+// src: COMMUNITY 0x00a0c300
+    size_type std_string_rfind(const _Elem* _Ptr, size_type _Off, size_type _Count) const
     {
         if (_Count == 0)
             return (_Off < _Mysize ? _Off : _Mysize);
@@ -489,7 +491,7 @@ class basic_string : public _String_val<_Elem, _Ax>
     }
     size_type find_last_of(_Elem _Ch, size_type _Off = npos) const
     {
-        return (FUN_00a0c300((const _Elem*)&_Ch, _Off, 1));
+        return (std_string_rfind((const _Elem*)&_Ch, _Off, 1));
     }
     _Myt Substr(size_type _Off = 0, size_type _Count = npos) const
     {
@@ -602,7 +604,8 @@ typedef basic_string<char> string;
 }
 typedef std::string AtlasPath;
 // @fnv 0x00a06dd0
-void FUN_00a06dd0(const char* definition, const char* image, AtlasString* texture, float* bounds)
+// src: COMMUNITY 0x00a06dd0
+void Tile_GetTextureAtlasInfo(const char* definition, const char* image, AtlasString* texture, float* bounds)
 {
     char line5[1024];
     char filename9[260];
@@ -638,7 +641,7 @@ void FUN_00a06dd0(const char* definition, const char* image, AtlasString* textur
         }
         else
         {
-            fileA = FUN_00afdf00(filename9, 0, 0x4000);
+            fileA = FileFinder_GetFile_(filename9, 0, 0x4000);
             if (fileA && fileA->Seek(0, 0))
             {
                 while (fileA->ReadLine(line5, 1024, 10))

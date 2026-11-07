@@ -16,7 +16,7 @@ hkMemoryRouter* getMemoryRouter();
 
 
 // 0x00cb10d0 is the free C-string length routine declared by hkstring.cpp; no string object is passed.
-int __cdecl FUN_00cb10d0(const char* str);
+int __cdecl hkString_strLen(const char* str);
 
 class InlineStorageString
 {
@@ -62,17 +62,18 @@ extern const hkxEnvironmentTransition s_transitionTable[32];
 struct hkxEnvironmentParser : public hkxEnvironment
 {
     void AddVariable(const char* name, const char* value);
-    int FUN_00e3f520(const char* str);
+    int hkxEnvironment_interpretString(const char* str);
 };
 
 // @fnv 0x00e3f520
-int hkxEnvironmentParser::FUN_00e3f520(const char* str)
+// src: XBOX_PDB 0x00e3f520
+int hkxEnvironmentParser::hkxEnvironment_interpretString(const char* str)
 {
     int state = 0;
     int pos = 0;
     InlineStorageString name;
     InlineStorageString value;
-    const int length = FUN_00cb10d0(str);
+    const int length = hkString_strLen(str);
 
     do
     {

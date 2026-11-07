@@ -17,7 +17,7 @@ class TileShader : public BSShader
     void UpdateMaterial(const NiPropertyState* state);
     void SetupMaterial(const NiPropertyState* state);
     void RebuildPrograms();
-    void FUN_00be08b0();
+    void NiDX9FragmentShader_RecreateRendererData();
 
     NiD3DPass* m_pTilePass;
     NiD3DVertexShader* m_apVertexShaders[3];

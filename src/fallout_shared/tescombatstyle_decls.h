@@ -8,7 +8,7 @@
 #include "../../include/UnsignedIntArray16.h"
 extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 extern "C" void* __cdecl memset(void*, int, unsigned int);
-TESCombatStyle* FUN_00505000();
+TESCombatStyle* TESCombatStyle_GetDefaultCombatStyle();
 StatsChunkData& __fastcall GetCombatStyleData(TESCombatStyle* style);
 HungerStageData* __fastcall GetHungerStageData(BGSHungerStage* stage);
 UInt32ChunkData* __fastcall GetCombatStyleAdvancedData(TESCombatStyle* style);

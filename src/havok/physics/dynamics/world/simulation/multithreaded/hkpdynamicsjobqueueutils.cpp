@@ -21,7 +21,7 @@ struct S_00d96530_Router
     }
 };
 
-S_00d96530_Router* FUN_00c85750();
+S_00d96530_Router* hkMemoryRouter_getInstance();
 
 struct S_00d96530_RelArray
 {
@@ -65,7 +65,7 @@ struct S_00d96530_Header
 S_00d96530_Header* AllocateBlockHeader(int numBlocks, int numElems)
 {
     S_00d96530_Header* pHeader =
-        (S_00d96530_Header*)FUN_00c85750()->heap()->AllocateMemoryBlock((short)numBlocks * 4 + 0xc);
+        (S_00d96530_Header*)hkMemoryRouter_getInstance()->heap()->AllocateMemoryBlock((short)numBlocks * 4 + 0xc);
     int iBlockBytes = numElems << 4;
     pHeader->m_maxBlocks = numBlocks;
     pHeader->m_iBlockCount = numBlocks;
@@ -73,7 +73,7 @@ S_00d96530_Header* AllocateBlockHeader(int numBlocks, int numElems)
     S_00d96530_Block** blocks = pHeader->m_kBlocks;
     for (int i = 0; i < numBlocks; i++)
     {
-        void* p = FUN_00c85750()->heap()->AllocateMemoryBlock(iBlockBytes + 0x20);
+        void* p = hkMemoryRouter_getInstance()->heap()->AllocateMemoryBlock(iBlockBytes + 0x20);
         blocks[i] = (S_00d96530_Block*)p;
         new (p) S_00d96530_Block(iBlockBytes);
     }
@@ -100,7 +100,7 @@ struct S_Tls
 };
 inline void S_Call(const void* a, int b)
 {
-    ((S_Tls*)FUN_00c85750())->holder().v2(a, b);
+    ((S_Tls*)hkMemoryRouter_getInstance())->holder().v2(a, b);
 }
 struct S_Item;
 struct S_C
@@ -109,11 +109,12 @@ struct S_C
     int unk04;
     int unk08;
     S_Item* arr[8];
-    void FUN_00d965b0();
+    void hkpAgentSectorHeader_deallocate();
 };
 // Calls S_Call on each of the count items in arr with unk08, then calls S_Call on this with count*4+0xc.
 // @fnv 0x00d965b0
-void S_C::FUN_00d965b0()
+// src: HAVOK_LIB 0x00d965b0
+void S_C::hkpAgentSectorHeader_deallocate()
 {
     S_Item* const* p = arr;
     for (int i = 0; i < count; i++)

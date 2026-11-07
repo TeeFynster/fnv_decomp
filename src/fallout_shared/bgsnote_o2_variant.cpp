@@ -10,20 +10,21 @@
 // to the implementation.
 struct NotePrimaryBase
 {
-    virtual void FUN_005e9520();
+    virtual void AdjustThisAndForward_005e9520();
     char unk04[0x2c];
 };
 
 struct NoteSecondaryBase
 {
-    virtual void FUN_005e9520();
+    virtual void AdjustThisAndForward_005e9520();
 };
 
 struct NoteDerived : NotePrimaryBase, NoteSecondaryBase
 {
     NoteDerived();
 // @fnv 0x005e9520
-    virtual void FUN_005e9520();
+// src: GUESS 0x005e9520 (confidence: low)
+    virtual void AdjustThisAndForward_005e9520();
 };
 
 NoteDerived::NoteDerived()

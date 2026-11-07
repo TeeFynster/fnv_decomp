@@ -7,25 +7,27 @@
 
 struct FUN_00a37ec0_tgt
 {
-    void FUN_00a37ec0(NiStream& kStream);
+    void NiBlendInterpolator_SaveBinary(NiStream& kStream);
 };
 
 // @fnv 0x00a56040
-void NiBlendColorInterpolator::FUN_00a56040(NiStream& kStream)
+// src: XBOX_PDB 0x00a56040
+void NiBlendColorInterpolator::SaveBinary_00a56040(NiStream& kStream)
 {
-    ((FUN_00a37ec0_tgt*)this)->FUN_00a37ec0(kStream);
+    ((FUN_00a37ec0_tgt*)this)->NiBlendInterpolator_SaveBinary(kStream);
     m_kColorValue.SaveBinary(kStream);
 }
 
 extern "C" void* g_011f4074;
 
 // @fnv 0x00a56060
-void* __cdecl FUN_00a56060()
+// src: COMMUNITY 0x00a56060
+void* __cdecl NiBlendColorInterpolator_GetRTTI()
 {
     return &g_011f4074;
 }
 
-void __fastcall FUN_00a36890(void*);
+void __fastcall NiBlendInterpolator_NiBlendInterpolator(void*);
 extern NiColorA const DAT_011a9430;
 extern int DAT_011a9434;
 extern int DAT_011a9438;
@@ -38,7 +40,7 @@ NiBlendColorInterpolator* __cdecl CreateBlendColorInterpolator()
     NiBlendColorInterpolator* pInterpolator = (NiBlendColorInterpolator*)BSFadeNode::operator new(0x44);
     if (pInterpolator)
     {
-        FUN_00a36890(pInterpolator);
+        NiBlendInterpolator_NiBlendInterpolator(pInterpolator);
         *(int*)pInterpolator = (int)&DAT_0109a58c;
         *(int*)((char*)pInterpolator + 0x30) = *(int*)&DAT_011a9430;
         *(int*)((char*)pInterpolator + 0x34) = DAT_011a9434;
@@ -73,7 +75,8 @@ void* NiBlendColorInterpolator::FUN_00a56070(unsigned int flags)
 }
 
 // @fnv 0x00a56460
-void NiBlendColorInterpolator::FUN_00a56460(NiStream& kStream)
+// src: GAMEBRYO_LIB 0x00a56460
+void NiBlendColorInterpolator::LoadBinary_00a56460(NiStream& kStream)
 {
     NiBlendInterpolator::LoadBinary(kStream);
     m_kColorValue.LoadBinary(kStream);
@@ -83,7 +86,8 @@ void NiBlendColorInterpolator::FUN_00a56460(NiStream& kStream)
 
 // Tests whether the interpolator supports color values.
 // @fnv 0x00a55fd0
-bool __stdcall FUN_00a55fd0(NiInterpolator* pkInterpolator)
+// src: XBOX_PDB 0x00a55fd0
+bool __stdcall NiBlendColorInterpolator_InterpolatorIsCorrectType(NiInterpolator* pkInterpolator)
 {
     return pkInterpolator->IsColorAValueSupported();
 }
@@ -94,16 +98,17 @@ struct CloningProcess
 };
 struct CloneOwner
 {
-    void FUN_00a37510(void*, void*);
+    void NiBlendInterpolator_CopyMembers(void*, void*);
 };
 // Allocates a NiBlendColorInterpolator, initialises it from DAT_011a9430, copies color fields from this, and returns the clone.
 // @fnv 0x00a56090
-void* NiBlendColorInterpolator::FUN_00a56090(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a56090
+void* NiBlendColorInterpolator::CreateClone_00a56090(CloningProcess& kCloning)
 {
     NiBlendColorInterpolator* pkObject = (NiBlendColorInterpolator*)BSFadeNode::operator new(0x44);
     if (pkObject)
     {
-        FUN_00a36890(pkObject);
+        NiBlendInterpolator_NiBlendInterpolator(pkObject);
         *(void**)pkObject = &DAT_0109a58c;
         *(int*)((char*)pkObject + 0x30) = *(int*)&DAT_011a9430;
         *(int*)((char*)pkObject + 0x34) = DAT_011a9434;
@@ -115,7 +120,7 @@ void* NiBlendColorInterpolator::FUN_00a56090(CloningProcess& kCloning)
     {
         pkObject = 0;
     }
-    ((CloneOwner*)this)->FUN_00a37510(pkObject, &kCloning);
+    ((CloneOwner*)this)->NiBlendInterpolator_CopyMembers(pkObject, &kCloning);
     {
         char* pDest = (char*)pkObject;
         char* pSrc = (char*)this;
@@ -173,12 +178,13 @@ bool NiBlendColorInterpolator::GetColorAtTime(float fTime, NiObjectNET* pkTarget
     return false;
 }
 
-bool __stdcall FUN_00a36fd0(void* pkObject);
+bool __stdcall NiBlendInterpolator_IsEqual(void* pkObject);
 
 // @fnv 0x00a564a0
-bool NiBlendColorInterpolator::FUN_00a564a0(void* pkOther)
+// src: XBOX_PDB 0x00a564a0
+bool NiBlendColorInterpolator::IsEqual_00a564a0(void* pkOther)
 {
-    if (!FUN_00a36fd0(pkOther))
+    if (!NiBlendInterpolator_IsEqual(pkOther))
     {
         return false;
     }
@@ -189,7 +195,7 @@ bool NiBlendColorInterpolator::FUN_00a564a0(void* pkOther)
 
 extern "C" void* g_011f4074;
 extern int DAT_01096f1c;
-void* __cdecl FUN_00a7d330(void*);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
 
 struct ArraySource
 {
@@ -215,7 +221,7 @@ struct AssignmentMember
 void NiBlendColorInterpolator::AppendTwoEntries(ArraySource* pArraySource)
 {
     reinterpret_cast<BlendViewerStrings*>(this)->AppendInterpolatorStrings(pArraySource);
-    void* result = FUN_00a7d330(g_011f4074);
+    void* result = NiViewerStrings_NiGetViewerString_Title(g_011f4074);
     unsigned int index = pArraySource->m_usSize;
     if (index >= pArraySource->m_usMaxSize)
         pArraySource->FUN_0096ad30(index + pArraySource->m_usGrowBy);

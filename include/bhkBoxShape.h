@@ -11,7 +11,7 @@ public:
     virtual const NiRTTI* GetRTTI() const;
 
     void Init(const hkVector4& halfExtents);
-    void FUN_00c84e50(bool b);
+    void bhkShape_Link(bool b);
 
     static NiObject* __cdecl CreateObject();
     static const NiRTTI ms_kRTTI;

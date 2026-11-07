@@ -31,11 +31,11 @@ public:
 
     void Destructor();
     void* FUN_00a45200(unsigned int flags);
-    void FUN_00a45220(TimedAnimationKey* keys, unsigned int numKeys, unsigned int type);
-    void FUN_00a45280(void* keys, unsigned int count, int type);
-    void FUN_00a452e0(void* keys, unsigned int count, unsigned int type);
-    void FUN_00a45340(void* keys, unsigned int count, unsigned int type);
-    bool FUN_00a45090(NiUVData* pkOther);
+    void ReplaceUOffsetAnim(TimedAnimationKey* keys, unsigned int numKeys, unsigned int type);
+    void ReplaceVOffsetAnim(void* keys, unsigned int count, int type);
+    void ReplaceUTilingAnim(void* keys, unsigned int count, unsigned int type);
+    void ReplaceVTilingAnim(void* keys, unsigned int count, unsigned int type);
+    bool IsEqual_00a45090(NiUVData* pkOther);
     void FUN_00a453a0(NiUVStream& kStream);
     void FUN_00a45610(NiStreamX& kStream);
     void AppendKeyNames(StrArr* apViewerStrings);

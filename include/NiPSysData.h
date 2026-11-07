@@ -32,7 +32,7 @@ public:
     float* GetRotationSpeeds();
     void SetParticleCount(unsigned int uiIndex);
     void CopyMemberData(NiPSysData* pkDest, CloningProcess& kCloning);
-    void FUN_00c24d20();
+    void ResolveAddedParticles();
     NiPSysData& operator=(const NiPSysData&);
 
     Point3ParameterData* m_pkParticleInfo;

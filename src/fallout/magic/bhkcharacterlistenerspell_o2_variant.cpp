@@ -9,12 +9,12 @@
 extern const NiRTTI g_01268344;
 struct FUN_00806f10_shell
 {
-    unsigned int FUN_00806f10();
+    unsigned int bhkCharacterController_GetCinfoSize();
 };
 
 struct FUN_00cbe8d0_class
 {
-    void __thiscall FUN_00cbe8d0();
+    void __thiscall bhkCollisionBox_Update();
 };
 struct FUN_00c6d4a0_class
 {
@@ -377,11 +377,12 @@ struct FUN_00c6d4a0_class
     int unk590;
     int unk594;
     FUN_00cbe8d0_class* unk598;
-    void __thiscall FUN_00c6d4a0();
+    void __thiscall bhkCharacterController_UpdateCollisionBox();
 };
 // @fnv 0x00c6d4a0
-void FUN_00c6d4a0_class::FUN_00c6d4a0()
+// src: COMMUNITY 0x00c6d4a0
+void FUN_00c6d4a0_class::bhkCharacterController_UpdateCollisionBox()
 {
     if (unk598)
-        unk598->FUN_00cbe8d0();
+        unk598->bhkCollisionBox_Update();
 }

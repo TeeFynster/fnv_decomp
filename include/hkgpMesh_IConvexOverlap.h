@@ -63,5 +63,5 @@ public:
     int unkE0;
     hkgpConvexHull* pConvexHull;
 
-    hkgpConvexHull* FUN_00e114a0();
+    hkgpConvexHull* GetConvexHull();
 };

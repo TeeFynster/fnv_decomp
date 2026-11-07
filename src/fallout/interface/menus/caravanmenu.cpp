@@ -81,7 +81,8 @@ void CaravanMenu::ClearField()
 
 
 // @fnv 0x0073bb30
-int CaravanMenu::FUN_0073bb30()
+// src: COMMUNITY 0x0073bb30
+int CaravanMenu::GetClass_0073bb30()
 {
     return 0x43b;
 }
@@ -119,7 +120,8 @@ unsigned int __thiscall FUN_0073cbc0_shell::GetField618()
 }
 
 // @fnv 0x0073cbe0
-int __cdecl FUN_0073cbe0()
+// src: XBOX_PDB 0x0073cbe0
+int __cdecl CaravanMenu_GetClassStatic()
 {
     return 0x43b;
 }
@@ -160,11 +162,12 @@ unsigned int FUN_00740e50_class::GetMember62C()
 
 struct FUN_00740e90_shell
 {
-    void FUN_00740e90(int value);
+    void PlayerCharacter_SetCaravanCapLosses(int value);
 };
 
 // @fnv 0x00740e90
-void FUN_00740e90_shell::FUN_00740e90(int value)
+// src: XBOX_PDB 0x00740e90
+void FUN_00740e90_shell::PlayerCharacter_SetCaravanCapLosses(int value)
 {
     *(int*)((char*)this + 0x620) = value;
 }
@@ -193,30 +196,32 @@ void FUN_00740ed0_shell::SetField628(int value)
 
 struct FUN_00740ef0_shell
 {
-    void __thiscall FUN_00740ef0(int value);
+    void __thiscall PlayerCharacter_SetCaravanLargestWinning(int value);
 };
 
 // @fnv 0x00740ef0
-void __thiscall FUN_00740ef0_shell::FUN_00740ef0(int value)
+// src: XBOX_PDB 0x00740ef0
+void __thiscall FUN_00740ef0_shell::PlayerCharacter_SetCaravanLargestWinning(int value)
 {
     ((int*)((char*)this + 0x62c))[0] = value;
 }
 
 struct FUN_00a253d0_shell
 {
-    void __thiscall FUN_00a253d0(void);
+    void __thiscall Controls_ClearUserActions(void);
 };
 extern OSGlobals* g_osGlobals;
 extern CaravanMenu* DAT_011d917c;
 char __cdecl ConsumeByteAtE4(void);
 
 // @fnv 0x0074a270
-void __cdecl FUN_0074a270()
+// src: COMMUNITY 0x0074a270
+void __cdecl CaravanMenu_ExitCallback()
 {
     if (!ConsumeByteAtE4())
     {
         DAT_011d917c->SetFlag(0x20000, 1);
-        reinterpret_cast<FUN_00a253d0_shell*>(g_osGlobals->FUN_00877720())->FUN_00a253d0();
+        reinterpret_cast<FUN_00a253d0_shell*>(g_osGlobals->Main_GetControls())->Controls_ClearUserActions();
     }
     else
     {
@@ -226,11 +231,12 @@ void __cdecl FUN_0074a270()
 
 struct FUN_00740e70_shell
 {
-    void __thiscall FUN_00740e70(int value);
+    void __thiscall PlayerCharacter_SetCaravanCapWinnings(int value);
 };
 
 // @fnv 0x00740e70
-void __thiscall FUN_00740e70_shell::FUN_00740e70(int value)
+// src: XBOX_PDB 0x00740e70
+void __thiscall FUN_00740e70_shell::PlayerCharacter_SetCaravanCapWinnings(int value)
 {
     *(unsigned int*)((char*)this + 0x61c) = value;
 }
@@ -266,18 +272,20 @@ char __thiscall CaravanMenu::HasAllTiles()
 
 
 // @fnv 0x00740f10
-bool CaravanMenu::FUN_00740f10(unsigned int aFlag)
+// src: XBOX_PDB 0x00740f10
+bool CaravanMenu::IsFlagSet_00740f10(unsigned int aFlag)
 {
     return (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0xe74) & aFlag) != 0;
 }
 
 int __cdecl MinInt(int, int);
-int __cdecl FUN_00647b70(int, int);
+int __cdecl BSMAX_00647b70(int, int);
 extern int DAT_011d9174;
 extern char* _g_thePlayer;
 
 // @fnv 0x0074a090
-void __cdecl FUN_0074a090(int aiAmount)
+// src: COMMUNITY 0x0074a090
+void __cdecl CaravanMenu_QuantityMenuCallback(int aiAmount)
 {
     int iDelta = aiAmount - (*(int*)((char*)DAT_011d917c + 0xadc));
     (*(int*)((char*)DAT_011d917c + 0xadc)) = (*(int*)((char*)DAT_011d917c + 0xadc)) + aiAmount;
@@ -297,9 +305,9 @@ void __cdecl FUN_0074a090(int aiAmount)
             ->Set(DAT_011d9174, (*(int*)((char*)DAT_011d917c + 0xae0)));
     }
     iDelta +=
-        FUN_00647b70(MinInt((*(int*)((char*)DAT_011d917c + 0xadc)), iMax) - (*(int*)((char*)DAT_011d917c + 0xae0)), 0);
+        BSMAX_00647b70(MinInt((*(int*)((char*)DAT_011d917c + 0xadc)), iMax) - (*(int*)((char*)DAT_011d917c + 0xae0)), 0);
     ((CaravanMenu*)DAT_011d917c)->UpdateControls();
-    ((CaravanMenu*)DAT_011d917c)->FUN_00749a40(-1);
+    ((CaravanMenu*)DAT_011d917c)->UpdateTileAlpha(-1);
     ((CaravanMenu*)DAT_011d917c)->PlaceBillsAndCoins(iMax, iDelta);
 }
 
@@ -341,10 +349,11 @@ struct NPCHandArrayInfo
     int m_0x14;
     int m_0x18;
 
-    void __thiscall FUN_0073b730(NPCHandArray* pNPCHandArray);
+    void __thiscall CaravanAIPackage_Print_WhatIsHeThinking(NPCHandArray* pNPCHandArray);
 };
 
-void __thiscall NPCHandArrayInfo::FUN_0073b730(NPCHandArray* pNPCHandArray)
+// src: COMMUNITY 0x0073b730
+void __thiscall NPCHandArrayInfo::CaravanAIPackage_Print_WhatIsHeThinking(NPCHandArray* pNPCHandArray)
 {
     if (pNPCHandArray)
     {
@@ -365,14 +374,14 @@ struct S148c0;
 struct MiddleLowProcess;
 struct Mgr_00733500;
 
-S148c0* __cdecl FUN_0043c4b0();
-unsigned int __cdecl FUN_0045c670();
+S148c0* __cdecl NiXenonRenderer_GetRenderer();
+unsigned int __cdecl Main_GetWorldSceneGraph();
 void __cdecl UpdateCameraFrustum(AnimIdle* animation, float value);
-void __cdecl FUN_00b6bee0(AnimIdle* animation, void* data, Accum_00733500* package);
+void __cdecl BSShaderUtil_AccumulateScene(AnimIdle* animation, void* data, Accum_00733500* package);
 
 struct S148c0
 {
-    void FUN_007148c0(int a, int b);
+    void RendererClearBufferHook(int a, int b);
 };
 
 
@@ -381,14 +390,14 @@ struct S148c0
 
 struct Accum_00733500
 {
-    void FUN_00c4f270(int value);
-    void FUN_004a0fd0(AnimIdle* animation);
-    void FUN_00c4f2d0();
+    void BSCullingProcess_PushCullMode(int value);
+    void BSCullingProcess_SetAccumulator(AnimIdle* animation);
+    void BSCullingProcess_PopCullMode();
 };
 
 struct Mgr_00733500
 {
-    AnimIdle* FUN_007fd640();
+    AnimIdle* RaceSexMenu_GetProjectorFile();
 };
 
 Mgr_00733500* __cdecl _FUN_004b7210();
@@ -426,34 +435,35 @@ GO::~GO()
 
 
 // @fnv 0x00740f30
-void __cdecl FUN_00740f30()
+// src: COMMUNITY 0x00740f30
+void __cdecl CaravanMenu_DrawScene()
 {
     void* pBase;
     Accum_00733500* uiGlobal;
     unsigned int pPackage;
     AnimIdle* pSelected;
 
-    FUN_0043c4b0()->FUN_007148c0(0, 4);
+    NiXenonRenderer_GetRenderer()->RendererClearBufferHook(0, 4);
 
-    pBase = (void*)FUN_0045c670();
+    pBase = (void*)Main_GetWorldSceneGraph();
     uiGlobal = (Accum_00733500*)((MiddleLowProcess*)pBase)->MiddleLowProcess::GetProcessInteger();
-    uiGlobal->FUN_00c4f270(1);
+    uiGlobal->BSCullingProcess_PushCullMode(1);
 
     pPackage = g_011d91a8.operator unsigned int();
     UpdateCameraFrustum((AnimIdle*)pPackage, g_011db5ec_arg1);
 
-    GO animation((int)_FUN_004b7210()->FUN_007fd640());
+    GO animation((int)_FUN_004b7210()->RaceSexMenu_GetProjectorFile());
 
-    uiGlobal->FUN_004a0fd0((AnimIdle*)animation.operator unsigned int());
+    uiGlobal->BSCullingProcess_SetAccumulator((AnimIdle*)animation.operator unsigned int());
 
     pSelected = pPackage ? (AnimIdle*)pPackage : (AnimIdle*)((BSFaceGenNiNode*)pBase)->BSFaceGenNiNode::GetAnimationData();
 
-    FUN_00b6bee0(pSelected, NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1), uiGlobal);
+    BSShaderUtil_AccumulateScene(pSelected, NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1), uiGlobal);
     BSShaderRenderUtility_caravanmenu::SetRenderCamera(pSelected, (AnimIdle*)animation.operator unsigned int(), false);
 
-    uiGlobal->FUN_004a0fd0(0);
+    uiGlobal->BSCullingProcess_SetAccumulator(0);
     animation.operator=(0);
-    uiGlobal->FUN_00c4f2d0();
+    uiGlobal->BSCullingProcess_PopCullMode();
 }
 
 
@@ -464,7 +474,8 @@ void __cdecl FUN_00740f30()
 
 
 // @fnv 0x0074f600
-int __thiscall CaravanMenu::FUN_0074f600(int index1, int index2)
+// src: COMMUNITY 0x0074f600
+int __thiscall CaravanMenu::GetRowValue(int index1, int index2)
 {
     int evaluateHour = 0;
     int flags;
@@ -515,10 +526,10 @@ struct FUN_006e2b50_shell
 
 struct FUN_00729970_shell
 {
-    void __thiscall FUN_00729970(void(__cdecl* callback)(void));
+    void __thiscall BSSimpleArray_Sort(void(__cdecl* callback)(void));
 };
 
-void __cdecl FUN_0059ae10();
+void __cdecl TESCaravanCard_Compare_0();
 
 
 // @fnv 0x0073ced0
@@ -562,7 +573,7 @@ bool CaravanMenu::RebuildCardLists()
         }
     }
 
-    reinterpret_cast<FUN_00729970_shell*>(reinterpret_cast<char*>(this) + 0xa6c)->FUN_00729970(FUN_0059ae10);
+    reinterpret_cast<FUN_00729970_shell*>(reinterpret_cast<char*>(this) + 0xa6c)->BSSimpleArray_Sort(TESCaravanCard_Compare_0);
 
     *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xaf4) =
         (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0xaf0) / 10 > 10)
@@ -580,7 +591,7 @@ struct CardArray
 {
     void FUN_00470470();
     unsigned int FUN_0044ddc0();
-    Card*& FUN_006a7ad0(unsigned int index);
+    Card*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int index);
     void FUN_005ae3d0(Card* const& card);
 };
 struct Manager
@@ -589,8 +600,8 @@ struct Manager
     CardArray* GetField614();
 };
 extern Manager* DAT_011dea3c;
-int FUN_0073cbe0();
-void* FUN_00a09030(int value);
+int CaravanMenu_GetClassStatic();
+void* Tile_GetMenuByClass(int value);
 // If the menu exists, sets its selection to 23 and, when state is 1, splits its cards into two arrays by FUN_0073cb80's result.
 // @fnv 0x0073ca50
 void __cdecl UpdateCardSelection()
@@ -598,7 +609,7 @@ void __cdecl UpdateCardSelection()
     if (DAT_011d917c)
     {
         (*(unsigned int*)((char*)DAT_011d917c + 0x2c)) = 23;
-        void* owner = FUN_00a09030(FUN_0073cbe0());
+        void* owner = Tile_GetMenuByClass(CaravanMenu_GetClassStatic());
         if (!owner)
             return;
         switch ((*(unsigned int*)((char*)DAT_011d917c + 0x28)))
@@ -613,10 +624,10 @@ void __cdecl UpdateCardSelection()
             first->FUN_00470470();
             for (unsigned int index = 0; index < (*(CardArray*)((char*)DAT_011d917c + 0xa6c)).FUN_0044ddc0(); ++index)
             {
-                if ((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).FUN_006a7ad0(index)->FUN_0073cb80())
-                    second->FUN_005ae3d0((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).FUN_006a7ad0(index));
+                if ((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).BSSimpleArray_NiAVObject_1024_GetAt(index)->FUN_0073cb80())
+                    second->FUN_005ae3d0((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).BSSimpleArray_NiAVObject_1024_GetAt(index));
                 else
-                    first->FUN_005ae3d0((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).FUN_006a7ad0(index));
+                    first->FUN_005ae3d0((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).BSSimpleArray_NiAVObject_1024_GetAt(index));
             }
             second = 0;
             first = 0;
@@ -629,13 +640,13 @@ struct FNV_74A000_Item;
 
 struct FNV_74A000_Action
 {
-    void __thiscall FUN_00a012d0();
+    void __thiscall Tile_Set();
 };
 
 struct FNV_74A000_List
 {
-    FNV_74A000_Item* __thiscall FUN_00559450();
-    int* __thiscall FUN_0073ac90();
+    FNV_74A000_Item* __thiscall Modelloader_GetReferencedThis();
+    int* __thiscall NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead();
     FNV_74A000_Action** __thiscall AddEight(FNV_74A000_Item* item, int type, float amount, int flag);
     FNV_74A000_Item* __thiscall DereferenceIfNotNull(FNV_74A000_Item* item);
 };
@@ -649,14 +660,15 @@ struct FNV_74A000_Slot
 
 
 // @fnv 0x0074a000
-void CaravanMenu::FUN_0074a000(int slot, float amount)
+// src: XBOX_PDB 0x0074a000
+void CaravanMenu::SetTileTextAlpha(int slot, float amount)
 {
-    FNV_74A000_Item* item = reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(DAT_011d917c) + 0x30)[slot]->list.FUN_00559450();
+    FNV_74A000_Item* item = reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(DAT_011d917c) + 0x30)[slot]->list.Modelloader_GetReferencedThis();
     FNV_74A000_List* list = &reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(DAT_011d917c) + 0x30)[slot]->list;
 
-    while (item && list && *list->FUN_0073ac90())
+    while (item && list && *list->NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())
     {
-        (*list->AddEight(item, 0xfa9, amount, 1))->FUN_00a012d0();
+        (*list->AddEight(item, 0xfa9, amount, 1))->Tile_Set();
         item = list->DereferenceIfNotNull(item);
     }
 }
@@ -728,17 +740,17 @@ struct UIWidget
 
 struct UIAssetName
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct UIAssetSource
 {
     bool FUN_0073cb80();
     UIAssetName* FUN_0050d100();
-    UIAssetName* FUN_00503650();
+    UIAssetName* GetBackTexture();
 };
 struct UIAssetChain
 {
-    UIAssetSource** FUN_006a7ad0(int);
+    UIAssetSource** BSSimpleArray_NiAVObject_1024_GetAt(int);
 };
 struct UIMenuManager
 {
@@ -751,7 +763,7 @@ struct UIOptions
 extern "C" UIMenuManager* DAT_011dea10;
 extern char UNK_0101996c, UNK_0101d7fc;
 extern "C" int __cdecl FUN_00ec62c0();
-extern "C" void __cdecl FUN_00406d00(char*, unsigned int, const char*, const char*, const char*);
+extern "C" void __cdecl BSsprintf(char*, unsigned int, const char*, const char*, const char*);
 extern "C" void __cdecl FUN_004b7240(char*, char*, unsigned int);
 struct HudGlyphMenu
 {
@@ -767,13 +779,13 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
         int imageKey = FUN_00ec62c0();
         char generatedPath[260];
         char resolvedPath[260];
-        if ((*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_0073cb80())
+        if ((*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->FUN_0073cb80())
         {
             GO currentIcon(0);
 
-            FUN_00406d00(
+            BSsprintf(
                 generatedPath, 260, &UNK_0101996c, &UNK_0101d7fc,
-                (*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_0050d100()->FUN_00408da0());
+                (*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->FUN_0050d100()->TESModel_GetModel());
             FUN_004b7240(generatedPath, resolvedPath, 260);
             DAT_011dea10->FUN_004568c0(resolvedPath, &currentIcon, 0, 0);
             if ((unsigned int)currentIcon != 0)
@@ -782,9 +794,9 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
                     ->SetResource(0, 0, (unsigned int)currentIcon);
             }
 
-            FUN_00406d00(
+            BSsprintf(
                 generatedPath, 260, &UNK_0101996c, &UNK_0101d7fc,
-                (*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_00503650()->FUN_00408da0());
+                (*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->GetBackTexture()->TESModel_GetModel());
             FUN_004b7240(generatedPath, resolvedPath, 260);
             DAT_011dea10->FUN_004568c0(resolvedPath, &currentIcon, 0, 0);
             if ((unsigned int)currentIcon != 0)
@@ -793,9 +805,9 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
                     ->SetResource(0, 0, (unsigned int)currentIcon);
             }
 
-            FUN_00406d00(
+            BSsprintf(
                 generatedPath, 260, &UNK_0101996c, &UNK_0101d7fc,
-                (*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_00503650()->FUN_00408da0());
+                (*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->GetBackTexture()->TESModel_GetModel());
             FUN_004b7240(generatedPath, resolvedPath, 260);
             DAT_011dea10->FUN_004568c0(resolvedPath, &currentIcon, 0, 0);
             if ((unsigned int)currentIcon != 0)
@@ -804,9 +816,9 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
                     ->SetResource(0, 0, (unsigned int)currentIcon);
             }
 
-            FUN_00406d00(
+            BSsprintf(
                 generatedPath, 260, &UNK_0101996c, &UNK_0101d7fc,
-                (*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_0050d100()->FUN_00408da0());
+                (*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->FUN_0050d100()->TESModel_GetModel());
             FUN_004b7240(generatedPath, resolvedPath, 260);
             DAT_011dea10->FUN_004568c0(resolvedPath, &currentIcon, 0, 0);
             if ((unsigned int)currentIcon != 0)
@@ -815,13 +827,13 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
                     ->SetResource(0, 0, (unsigned int)currentIcon);
             }
         }
-        else if ((*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_0050d100())
+        else if ((*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->FUN_0050d100())
         {
             GO alternativeIcon(0);
 
-            FUN_00406d00(
+            BSsprintf(
                 generatedPath, 260, &UNK_0101996c, &UNK_0101d7fc,
-                (*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_0050d100()->FUN_00408da0());
+                (*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->FUN_0050d100()->TESModel_GetModel());
             FUN_004b7240(generatedPath, resolvedPath, 260);
             DAT_011dea10->FUN_004568c0(resolvedPath, &alternativeIcon, 0, 0);
             if ((unsigned int)alternativeIcon != 0)
@@ -830,9 +842,9 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
                     ->SetResource(0, 0, (unsigned int)alternativeIcon);
             }
 
-            FUN_00406d00(
+            BSsprintf(
                 generatedPath, 260, &UNK_0101996c, &UNK_0101d7fc,
-                (*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_00503650()->FUN_00408da0());
+                (*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->GetBackTexture()->TESModel_GetModel());
             FUN_004b7240(generatedPath, resolvedPath, 260);
             DAT_011dea10->FUN_004568c0(resolvedPath, &alternativeIcon, 0, 0);
             if ((unsigned int)alternativeIcon != 0)
@@ -841,9 +853,9 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
                     ->SetResource(0, 0, (unsigned int)alternativeIcon);
             }
 
-            FUN_00406d00(
+            BSsprintf(
                 generatedPath, 260, &UNK_0101996c, &UNK_0101d7fc,
-                (*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_00503650()->FUN_00408da0());
+                (*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->GetBackTexture()->TESModel_GetModel());
             FUN_004b7240(generatedPath, resolvedPath, 260);
             DAT_011dea10->FUN_004568c0(resolvedPath, &alternativeIcon, 0, 0);
             if ((unsigned int)alternativeIcon != 0)
@@ -852,9 +864,9 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
                     ->SetResource(0, 0, (unsigned int)alternativeIcon);
             }
 
-            FUN_00406d00(
+            BSsprintf(
                 generatedPath, 260, &UNK_0101996c, &UNK_0101d7fc,
-                (*((UIAssetChain*)((char*)this + 0xa6c))->FUN_006a7ad0(imageKey))->FUN_0050d100()->FUN_00408da0());
+                (*((UIAssetChain*)((char*)this + 0xa6c))->BSSimpleArray_NiAVObject_1024_GetAt(imageKey))->FUN_0050d100()->TESModel_GetModel());
             FUN_004b7240(generatedPath, resolvedPath, 260);
             DAT_011dea10->FUN_004568c0(resolvedPath, &alternativeIcon, 0, 0);
             if ((unsigned int)alternativeIcon != 0)
@@ -877,11 +889,12 @@ struct Entry_0074ecb0
 
 // For each of the 7 slots in entry a1, calls FUN_004bc1f0 with zeroed values and DAT_01017718, then FUN_00a59c60 with the result of FUN_0043d410.
 // @fnv 0x0074ecb0
-void CaravanMenu::FUN_0074ecb0(int aiEntryIndex)
+// src: XBOX_PDB 0x0074ecb0
+void CaravanMenu::SelectWholeTrack(int aiEntryIndex)
 {
     for (int i = 0; i < 7; i++)
     {
-        ((NiAVObject*)(*reinterpret_cast<Entry_0074ecb0 (*)[8]>((reinterpret_cast<char*>(this) + 0x198)))[aiEntryIndex].m_slots[i])->FUN_004bc1f0(0.0f, 0.0f, DAT_01017718);
+        ((NiAVObject*)(*reinterpret_cast<Entry_0074ecb0 (*)[8]>((reinterpret_cast<char*>(this) + 0x198)))[aiEntryIndex].m_slots[i])->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, DAT_01017718);
         ((NiAVObject*)(*reinterpret_cast<Entry_0074ecb0 (*)[8]>((reinterpret_cast<char*>(this) + 0x198)))[aiEntryIndex].m_slots[i])->Update(NiUpdateData(0.0f, 0, 0));
     }
 }
@@ -900,11 +913,12 @@ NiUpdateData::NiUpdateData(float t, bool x, bool y)
 
 // For each of the 7 objects in m_rows[index], calls FUN_004bc1f0 with zero coordinates and Update with a zero-time NiUpdateData.
 // @fnv 0x0074ed40
-void __thiscall CaravanMenu::FUN_0074ed40(int aiRowIndex)
+// src: XBOX_PDB 0x0074ed40
+void __thiscall CaravanMenu::DeselectWholeTrack(int aiRowIndex)
 {
     for (int i = 0; i < 7; i++)
     {
-        (*reinterpret_cast<NiAVObject* (*)[16][7]>((reinterpret_cast<char*>(this) + 0x198)))[aiRowIndex][i]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        (*reinterpret_cast<NiAVObject* (*)[16][7]>((reinterpret_cast<char*>(this) + 0x198)))[aiRowIndex][i]->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, 0.0f);
         (*reinterpret_cast<NiAVObject* (*)[16][7]>((reinterpret_cast<char*>(this) + 0x198)))[aiRowIndex][i]->Update(NiUpdateData(0.0f, false, false));
     }
 }
@@ -918,21 +932,22 @@ struct Vec3Temp
 };
 struct CaravanObj
 {
-    void FUN_004bc1f0(float, float, float);
-    void FUN_00a59c60(Vec3Temp*);
+    void NiAVObject_SetTranslate_004bc1f0(float, float, float);
+    void NiAVObject_Update(Vec3Temp*);
 };
 
 extern float DAT_01024100;
 
 // @fnv 0x0074edd0
-void CaravanMenu::FUN_0074edd0()
+// src: XBOX_PDB 0x0074edd0
+void CaravanMenu::DeselectTrackCard()
 {
     Vec3Temp a;
     Vec3Temp b;
-    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_004bc1f0(0.0f, 0.0f, DAT_01024100);
-    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_004bc1f0(0.0f, 0.0f, DAT_01024100);
-    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_00a59c60(a.FUN_0043d410(0.0f, 0, 0));
-    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_00a59c60(b.FUN_0043d410(0.0f, 0, 0));
+    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe6c)))->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, DAT_01024100);
+    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe70)))->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, DAT_01024100);
+    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe6c)))->NiAVObject_Update(a.FUN_0043d410(0.0f, 0, 0));
+    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe70)))->NiAVObject_Update(b.FUN_0043d410(0.0f, 0, 0));
 }
 
 namespace fnv_0074fc00 {
@@ -1123,7 +1138,7 @@ void CaravanCardMenu::PlayCardPlacement(int aiIndex)
         if (pController4)
         {
             NiControllerManager* pManager5 = pController4;
-            pSequenceTmp = pManager5->FUN_0047a520(NiFixedString("Top_Place"));
+            pSequenceTmp = pManager5->NiControllerManager_GetSequenceByName(NiFixedString("Top_Place"));
             pManager5->FUN_0047aab0(pSequenceTmp, 0, 0, 1.0f, 0.0f, (NiControllerSequence*)0);
             UpdateNodeTransforms(pNode);
         }
@@ -1132,7 +1147,7 @@ void CaravanCardMenu::PlayCardPlacement(int aiIndex)
         if (pController4)
         {
             NiControllerManager* pMgr4 = pController4;
-            pSequenceTmp = pMgr4->FUN_0047a520(NiFixedString("Bottom_Place"));
+            pSequenceTmp = pMgr4->NiControllerManager_GetSequenceByName(NiFixedString("Bottom_Place"));
             pMgr4->FUN_0047aab0(pSequenceTmp, 0, 0, 1.0f, 0.0f, (NiControllerSequence*)0);
             UpdateNodeTransforms(pNode);
         }
@@ -1147,8 +1162,8 @@ void CaravanCardMenu::PlayCardPlacement(int aiIndex)
 struct GameList
 {
     unsigned int __thiscall FUN_0044ddc0();
-    int* __thiscall FUN_006a7ad0(unsigned int index);
-    void __thiscall FUN_009a4320(unsigned int index, int removeFlag);
+    int* __thiscall BSSimpleArray_NiAVObject_1024_GetAt(unsigned int index);
+    void __thiscall BSSimpleArray_Actor_1024_RemoveFast(unsigned int index, int removeFlag);
     ~GameList();
 };
 struct GroupRegistry
@@ -1166,7 +1181,7 @@ void __thiscall GroupRegistry::RemoveValueFromGroup(void* key, int value)
     {
         for (unsigned int index = 0; index < entries->FUN_0044ddc0(); ++index)
         {
-            if (*entries->FUN_006a7ad0(index) == value)
+            if (*entries->BSSimpleArray_NiAVObject_1024_GetAt(index) == value)
             {
                 if (entries->FUN_0044ddc0() == 1)
                 {
@@ -1175,7 +1190,7 @@ void __thiscall GroupRegistry::RemoveValueFromGroup(void* key, int value)
                 }
                 else
                 {
-                    entries->FUN_009a4320(index, 1);
+                    entries->BSSimpleArray_Actor_1024_RemoveFast(index, 1);
                 }
                 break;
             }
@@ -2310,11 +2325,11 @@ struct CurrencyReference;
 struct CurrencyHandler
 {
     void UpdateInventoryForReference(CurrencyReference* reference);
-    CurrencyList* FUN_00740960();
+    CurrencyList* TESDataHandler_GetBarterContainer();
 };
 extern CurrencyHandler* g_011c3f2c;
 extern CurrencyReference* g_011dea3c;
-int FUN_0048e8a0(CurrencyForm* form);
+int TESValueForm_GetFormValue(CurrencyForm* form);
 struct CurrencyQuery
 {
     unsigned int unk000;
@@ -3023,7 +3038,7 @@ void CurrencyQuery::ComputePlayerAndTargetTotals()
 {
     playerTotal = 0;
     g_011c3f2c->UpdateInventoryForReference(g_011dea3c);
-    CurrencyList* list = g_011c3f2c->FUN_00740960();
+    CurrencyList* list = g_011c3f2c->TESDataHandler_GetBarterContainer();
     playerTotal = list->GetCountableItemCount();
     CurrencyLink* link5 = list->head;
     CurrencyForm* form = 0;
@@ -3036,7 +3051,7 @@ void CurrencyQuery::ComputePlayerAndTargetTotals()
             if ((*link5->FUN_006815c0())->FUN_00726070() > 0)
             {
                 count = (*link5->FUN_006815c0())->FUN_00726070();
-                playerTotal += FUN_0048e8a0(form) * count;
+                playerTotal += TESValueForm_GetFormValue(form) * count;
             }
         }
         else
@@ -3045,7 +3060,7 @@ void CurrencyQuery::ComputePlayerAndTargetTotals()
     }
     targetTotal = 0;
     g_011c3f2c->UpdateInventoryForReference(target);
-    list = g_011c3f2c->FUN_00740960();
+    list = g_011c3f2c->TESDataHandler_GetBarterContainer();
     targetTotal = list->GetCountableItemCount();
     link5 = list->head;
     form = 0;
@@ -3058,7 +3073,7 @@ void CurrencyQuery::ComputePlayerAndTargetTotals()
             if ((*link5->FUN_006815c0())->FUN_00726070() > 0)
             {
                 count = (*link5->FUN_006815c0())->FUN_00726070();
-                targetTotal += FUN_0048e8a0(form) * count;
+                targetTotal += TESValueForm_GetFormValue(form) * count;
             }
         }
         else
@@ -3142,20 +3157,20 @@ struct Node
     virtual void slot35();
     virtual void slot36();
     virtual void Attach(Node*, bool);
-    void FUN_00a59c60(const UpdateData&);
-    Node* FUN_00a5c570(void*);
-    Node* FUN_0047a520(const FixedString&);
+    void NiAVObject_Update(const UpdateData&);
+    Node* NiObjectNET_GetController(void*);
+    Node* NiControllerManager_GetSequenceByName(const FixedString&);
     void FUN_0048fef0(float);
     Property* FUN_00a59d30(int);
 };
 struct Loader
 {
-    Node* LoadModel(const char*, int, bool, int, int, int);
+    Node* ModelLoader_LoadFile(const char*, int, bool, int, int, int);
 };
 extern Loader* DAT_011c3b3c;
 struct Scene
 {
-    Node* FUN_00559450();
+    Node* Modelloader_GetReferencedThis();
 };
 extern Scene DAT_011d91e4;
 extern unsigned int DAT_011f36ac;
@@ -3208,50 +3223,50 @@ extern const char DAT_010633a0[];
 extern const char DAT_01071358[];
 extern int DAT_011d9174;
 int MinInt(int, int);
-void FUN_00a6d2d0(Node*);
-void FUN_00406d00(char*, unsigned int, const char*, ...);
-Node* FUN_004aae30(Node*, const char*);
-bool FUN_004b71d0();
-int FUN_00a01860(const char*);
+void NiTimeController_StartAnimations(Node*);
+void BSsprintf(char*, unsigned int, const char*, ...);
+Node* BSUtilities_GetObjectByName(Node*, const char*);
+bool InterfaceManager_Has360Controller();
+int Tile_TextToTrait(const char*);
 // @fnv 0x0073d850
 }
 
 void CaravanMenu::InitMenu()
 {
     using namespace CaravanSetup;
-    (*(Node**)((char*)this + 0x18c)) = DAT_011c3b3c->LoadModel(DAT_0107121c, 0, true, 0, 0, 0);
-    (*(Node**)((char*)this + 0x188)) = DAT_011c3b3c->LoadModel(DAT_010711e4, 0, true, 0, 0, 0);
-    DAT_011d91e4.FUN_00559450()->Attach((*(Node**)((char*)this + 0x188)), true);
-    DAT_011d91e4.FUN_00559450()->Attach((*(Node**)((char*)this + 0x18c)), true);
+    (*(Node**)((char*)this + 0x18c)) = DAT_011c3b3c->ModelLoader_LoadFile(DAT_0107121c, 0, true, 0, 0, 0);
+    (*(Node**)((char*)this + 0x188)) = DAT_011c3b3c->ModelLoader_LoadFile(DAT_010711e4, 0, true, 0, 0, 0);
+    DAT_011d91e4.Modelloader_GetReferencedThis()->Attach((*(Node**)((char*)this + 0x188)), true);
+    DAT_011d91e4.Modelloader_GetReferencedThis()->Attach((*(Node**)((char*)this + 0x18c)), true);
     (*(Array*)((char*)this + 0x164)).FUN_008454f0(true);
     (*(Array*)((char*)this + 0x174)).FUN_008454f0(true);
-    DAT_011d91e4.FUN_00559450()->FUN_00a59c60(UpdateData(0, 0, 0));
+    DAT_011d91e4.Modelloader_GetReferencedThis()->NiAVObject_Update(UpdateData(0, 0, 0));
     (*(int*)((char*)this + 0xae8)) = CaravanSetup::MinInt((*(int*)((char*)this + 0xadc)), (*(int*)((char*)this + 0xae0)));
-    Node* pNode = (*(Node**)((char*)this + 0x18c))->FUN_00a5c570(&DAT_011f36ac);
+    Node* pNode = (*(Node**)((char*)this + 0x18c))->NiObjectNET_GetController(&DAT_011f36ac);
     if (pNode)
     {
         (*(Node**)((char*)this + 0x270)) = pNode;
-        (*(Node**)((char*)this + 0x274)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_010714c8));
-        (*(Node**)((char*)this + 0x278)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_010714b4));
-        (*(Node**)((char*)this + 0x27c)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_010714a8));
-        (*(Node**)((char*)this + 0x280)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_01071494));
-        (*(Node**)((char*)this + 0x284)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_01071480));
-        (*(Node**)((char*)this + 0x288)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_01071474));
+        (*(Node**)((char*)this + 0x274)) = (*(Node**)((char*)this + 0x270))->NiControllerManager_GetSequenceByName(FixedString(DAT_010714c8));
+        (*(Node**)((char*)this + 0x278)) = (*(Node**)((char*)this + 0x270))->NiControllerManager_GetSequenceByName(FixedString(DAT_010714b4));
+        (*(Node**)((char*)this + 0x27c)) = (*(Node**)((char*)this + 0x270))->NiControllerManager_GetSequenceByName(FixedString(DAT_010714a8));
+        (*(Node**)((char*)this + 0x280)) = (*(Node**)((char*)this + 0x270))->NiControllerManager_GetSequenceByName(FixedString(DAT_01071494));
+        (*(Node**)((char*)this + 0x284)) = (*(Node**)((char*)this + 0x270))->NiControllerManager_GetSequenceByName(FixedString(DAT_01071480));
+        (*(Node**)((char*)this + 0x288)) = (*(Node**)((char*)this + 0x270))->NiControllerManager_GetSequenceByName(FixedString(DAT_01071474));
         (*(Node**)((char*)this + 0x270))->FUN_0048fef0(0);
-        FUN_00a6d2d0((*(Node**)((char*)this + 0x18c)));
+        NiTimeController_StartAnimations((*(Node**)((char*)this + 0x18c)));
     }
-    pNode = (*(Node**)((char*)this + 0x188))->FUN_00a5c570(&DAT_011f36ac);
+    pNode = (*(Node**)((char*)this + 0x188))->NiObjectNET_GetController(&DAT_011f36ac);
     if (pNode)
     {
         (*(Node**)((char*)this + 0x254)) = pNode;
-        (*(Node**)((char*)this + 0x258)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_0107145c));
-        (*(Node**)((char*)this + 0x25c)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_01071444));
-        (*(Node**)((char*)this + 0x260)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_01071430));
-        (*(Node**)((char*)this + 0x264)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_01071418));
-        (*(Node**)((char*)this + 0x268)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_01071400));
-        (*(Node**)((char*)this + 0x26c)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_010713f0));
+        (*(Node**)((char*)this + 0x258)) = (*(Node**)((char*)this + 0x254))->NiControllerManager_GetSequenceByName(FixedString(DAT_0107145c));
+        (*(Node**)((char*)this + 0x25c)) = (*(Node**)((char*)this + 0x254))->NiControllerManager_GetSequenceByName(FixedString(DAT_01071444));
+        (*(Node**)((char*)this + 0x260)) = (*(Node**)((char*)this + 0x254))->NiControllerManager_GetSequenceByName(FixedString(DAT_01071430));
+        (*(Node**)((char*)this + 0x264)) = (*(Node**)((char*)this + 0x254))->NiControllerManager_GetSequenceByName(FixedString(DAT_01071418));
+        (*(Node**)((char*)this + 0x268)) = (*(Node**)((char*)this + 0x254))->NiControllerManager_GetSequenceByName(FixedString(DAT_01071400));
+        (*(Node**)((char*)this + 0x26c)) = (*(Node**)((char*)this + 0x254))->NiControllerManager_GetSequenceByName(FixedString(DAT_010713f0));
         (*(Node**)((char*)this + 0x254))->FUN_0048fef0(0);
-        FUN_00a6d2d0((*(Node**)((char*)this + 0x188)));
+        NiTimeController_StartAnimations((*(Node**)((char*)this + 0x188)));
     }
     for (int iClearIndex = 0; iClearIndex < 96; ++iClearIndex)
         ((Property**)((char*)this + 0x8ec))[iClearIndex] = 0;
@@ -3261,30 +3276,30 @@ void CaravanMenu::InitMenu()
         {
             char cardNames[4][25];
 
-            FUN_00406d00(cardNames[0], 25, DAT_010713e4, index + 1, index);
-            FUN_00406d00(cardNames[1], 25, DAT_010713d4, index + 1);
-            FUN_00406d00(cardNames[2], 25, DAT_010713c0, index + 1, index);
-            FUN_00406d00(cardNames[3], 25, DAT_010713a8, index + 1);
+            BSsprintf(cardNames[0], 25, DAT_010713e4, index + 1, index);
+            BSsprintf(cardNames[1], 25, DAT_010713d4, index + 1);
+            BSsprintf(cardNames[2], 25, DAT_010713c0, index + 1, index);
+            BSsprintf(cardNames[3], 25, DAT_010713a8, index + 1);
             Node* pCardNode = 0;
-            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x18c)), cardNames[0]);
+            pCardNode = BSUtilities_GetObjectByName((*(Node**)((char*)this + 0x18c)), cardNames[0]);
             ((Property**)((char*)this + 0x8ec))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                               : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                                  pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                      ? pCardNode->FUN_00a59d30(3)
                                      : 0;
-            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x18c)), cardNames[1]);
+            pCardNode = BSUtilities_GetObjectByName((*(Node**)((char*)this + 0x18c)), cardNames[1]);
             ((Property**)((char*)this + 0x94c))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                               : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                                  pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                      ? pCardNode->FUN_00a59d30(3)
                                      : 0;
-            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x188)), cardNames[2]);
+            pCardNode = BSUtilities_GetObjectByName((*(Node**)((char*)this + 0x188)), cardNames[2]);
             ((Property**)((char*)this + 0x9ac))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                            : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                               pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                   ? pCardNode->FUN_00a59d30(3)
                                   : 0;
-            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x188)), cardNames[3]);
+            pCardNode = BSUtilities_GetObjectByName((*(Node**)((char*)this + 0x188)), cardNames[3]);
             ((Property**)((char*)this + 0xa0c))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                            : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                               pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
@@ -3295,30 +3310,30 @@ void CaravanMenu::InitMenu()
         {
             char cardNames[4][25];
 
-            FUN_00406d00(cardNames[0], 25, DAT_0107139c, index + 1, index);
-            FUN_00406d00(cardNames[1], 25, DAT_0107138c, index + 1);
-            FUN_00406d00(cardNames[2], 25, DAT_0107137c, index + 1, index);
-            FUN_00406d00(cardNames[3], 25, DAT_01071368, index + 1);
+            BSsprintf(cardNames[0], 25, DAT_0107139c, index + 1, index);
+            BSsprintf(cardNames[1], 25, DAT_0107138c, index + 1);
+            BSsprintf(cardNames[2], 25, DAT_0107137c, index + 1, index);
+            BSsprintf(cardNames[3], 25, DAT_01071368, index + 1);
             Node* pCardNode = 0;
-            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x18c)), cardNames[0]);
+            pCardNode = BSUtilities_GetObjectByName((*(Node**)((char*)this + 0x18c)), cardNames[0]);
             ((Property**)((char*)this + 0x8ec))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                               : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                                  pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                      ? pCardNode->FUN_00a59d30(3)
                                      : 0;
-            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x18c)), cardNames[1]);
+            pCardNode = BSUtilities_GetObjectByName((*(Node**)((char*)this + 0x18c)), cardNames[1]);
             ((Property**)((char*)this + 0x94c))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                               : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                                  pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                      ? pCardNode->FUN_00a59d30(3)
                                      : 0;
-            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x188)), cardNames[2]);
+            pCardNode = BSUtilities_GetObjectByName((*(Node**)((char*)this + 0x188)), cardNames[2]);
             ((Property**)((char*)this + 0x9ac))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                            : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                               pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                   ? pCardNode->FUN_00a59d30(3)
                                   : 0;
-            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x188)), cardNames[3]);
+            pCardNode = BSUtilities_GetObjectByName((*(Node**)((char*)this + 0x188)), cardNames[3]);
             ((Property**)((char*)this + 0xa0c))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                            : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                               pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
@@ -3334,46 +3349,46 @@ void CaravanMenu::InitMenu()
     (*(Tile**)((char*)this + 0x50))->SetTraitFloat(CaravanSetup::DAT_011d9174, 1.0f);
     (*(Tile**)((char*)this + 0x50))->Set(CaravanSetup::DAT_011d9174, (unsigned int)CaravanSetup::DAT_011dea3c->GetField618()->FUN_005ae380());
     char labelText[260];
-    FUN_00406d00(labelText, 260, DAT_01012058, DAT_011d3d48.FUN_00403df0(), DAT_011d2e68.FUN_00403df0());
-    (*(Tile**)((char*)this + 0x58))->FUN_00a01350(4036, labelText, true);
-    (*(Tile**)((char*)this + 0x58))->FUN_00a012d0(4001, reinterpret_cast<float (__thiscall*)(Tile*, int, bool)>(ReadTileTraitWithPropagation)((*(Tile**)((char*)this + 0x58)), 4001, true) - 150.0);
-    (*(Tile**)((char*)this + 0x58))->SetChangeFlag(1);
-    if (!FUN_004b71d0())
-        (*(Tile**)((char*)this + 0x58))->FUN_00a01350(FUN_00a01860(DAT_01071358), DAT_010633a0, true);
-    (*(Tile**)((char*)this + 0x5c))->FUN_00a012d0(4001, reinterpret_cast<float (__thiscall*)(Tile*, int, bool)>(ReadTileTraitWithPropagation)((*(Tile**)((char*)this + 0x5c)), 4001, true) - 150.0);
-    (*(Tile**)((char*)this + 0x5c))->SetChangeFlag(1);
+    BSsprintf(labelText, 260, DAT_01012058, DAT_011d3d48.FUN_00403df0(), DAT_011d2e68.FUN_00403df0());
+    (*(Tile**)((char*)this + 0x58))->Tile_Set_00a01350(4036, labelText, true);
+    (*(Tile**)((char*)this + 0x58))->Tile_Set(4001, reinterpret_cast<float (__thiscall*)(Tile*, int, bool)>(ReadTileTraitWithPropagation)((*(Tile**)((char*)this + 0x58)), 4001, true) - 150.0);
+    (*(Tile**)((char*)this + 0x58))->Tile_SetChangeFlag(1);
+    if (!InterfaceManager_Has360Controller())
+        (*(Tile**)((char*)this + 0x58))->Tile_Set_00a01350(Tile_TextToTrait(DAT_01071358), DAT_010633a0, true);
+    (*(Tile**)((char*)this + 0x5c))->Tile_Set(4001, reinterpret_cast<float (__thiscall*)(Tile*, int, bool)>(ReadTileTraitWithPropagation)((*(Tile**)((char*)this + 0x5c)), 4001, true) - 150.0);
+    (*(Tile**)((char*)this + 0x5c))->Tile_SetChangeFlag(1);
     (*(Tile**)((char*)this + 0x30))->FUN_00700320(4003, false);
     (*(Tile**)((char*)this + 0x34))->FUN_00700320(4003, true);
     (*(Tile**)((char*)this + 0x38))->FUN_00700320(4003, false);
     (*(Tile**)((char*)this + 0x3c))->FUN_00700320(4003, false);
-    (*(Tile**)((char*)this + 0xd8))->FUN_00a01350(4036, DAT_011d2e68.FUN_00403df0(), true);
-    (*(Tile**)((char*)this + 0xdc))->FUN_00a01350(4036, DAT_011d2f70.FUN_00403df0(), true);
-    (*(Tile**)((char*)this + 0x5c))->FUN_00a01350(4036, DAT_011d2160.FUN_00403df0(), true);
-    (*(Tile**)((char*)this + 0xcc))->FUN_00a01350(4036, DAT_011d2ec8.FUN_00403df0(), true);
-    (*(Tile**)((char*)this + 0x60))->FUN_00a01350(4036, DAT_011d3ea4.FUN_00403df0(), true);
-    (*(Tile**)((char*)this + 0x64))->FUN_00a01350(4036, DAT_011d354c.FUN_00403df0(), true);
-    (*(Tile**)((char*)this + 0x68))->FUN_00a01350(4036, DAT_011d2784.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0xd8))->Tile_Set_00a01350(4036, DAT_011d2e68.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0xdc))->Tile_Set_00a01350(4036, DAT_011d2f70.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0x5c))->Tile_Set_00a01350(4036, DAT_011d2160.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0xcc))->Tile_Set_00a01350(4036, DAT_011d2ec8.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0x60))->Tile_Set_00a01350(4036, DAT_011d3ea4.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0x64))->Tile_Set_00a01350(4036, DAT_011d354c.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0x68))->Tile_Set_00a01350(4036, DAT_011d2784.FUN_00403df0(), true);
     (*(Tile**)((char*)this + 0xcc))->FUN_00700320(4003, false);
-    (*(Tile**)((char*)this + 0xcc))->SetChangeFlag(4);
+    (*(Tile**)((char*)this + 0xcc))->Tile_SetChangeFlag(4);
     UpdateControls();
 }
 
 struct TileNode
 {
 
-    TileNode* FUN_00a03da0(const char*);
+    TileNode* Tile_GetChildByName(const char*);
 
     double FUN_00a011b0(unsigned int, int);
 
-    void FUN_00a012d0(unsigned int, float);
+    void Tile_Set(unsigned int, float);
 
-    void SetChangeFlag(unsigned int);
+    void Tile_SetChangeFlag(unsigned int);
 
     void SetTraitAndReset(int, float);
 
     void FUN_00715c60(int, unsigned int);
 
-    void FUN_00a01350(int, unsigned int, int);
+    void Tile_Set_00a01350(int, unsigned int, int);
 
     void FUN_00700320(int, int);
 };
@@ -3395,17 +3410,17 @@ struct CaravanState
 
     unsigned int GetRegionDataManager(unsigned int);
 
-    unsigned int FUN_00740960();
+    unsigned int TESDataHandler_GetBarterContainer();
 
-    void FUN_00740e70(unsigned int);
+    void PlayerCharacter_SetCaravanCapWinnings(unsigned int);
 
     void SetField624(unsigned int);
 
     unsigned int GetMember62C();
 
-    void FUN_00740ef0(unsigned int);
+    void PlayerCharacter_SetCaravanLargestWinning(unsigned int);
 
-    void FUN_00740e90(unsigned int);
+    void PlayerCharacter_SetCaravanCapLosses(unsigned int);
 
     void SetField628(unsigned int);
 };
@@ -3438,11 +3453,11 @@ void __cdecl FUN_004d5c60(int);
 
 struct SoundManager
 {
-    BSSoundHandle FUN_00ad7550(const char*, int);
+    BSSoundHandle BSAudio_GetSoundHandleByEditorName(const char*, int);
 };
-SoundManager* __cdecl FUN_00453a70();
+SoundManager* __cdecl BSAudio_QInstance();
 
-void __cdecl FUN_00406d00(char*, int, const char*, ...);
+void __cdecl BSsprintf(char*, int, const char*, ...);
 
 
 
@@ -3453,48 +3468,48 @@ void CaravanMenu::UpdateCaravanMenu()
 
     (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0x2c))) = 3;
 
-    if (FUN_00740f10(0x400))
+    if (IsFlagSet_00740f10(0x400))
     {
 
-        ((CaravanState*)DAT_011dea3c)->FUN_00740e70(((CaravanState*)DAT_011dea3c)->GetFieldAtOffset61C() + (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
+        ((CaravanState*)DAT_011dea3c)->PlayerCharacter_SetCaravanCapWinnings(((CaravanState*)DAT_011dea3c)->GetFieldAtOffset61C() + (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
 
         ((CaravanState*)DAT_011dea3c)->SetField624(((CaravanState*)DAT_011dea3c)->GetRegionDataManager() + 1);
 
         if ((*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))) > ((CaravanState*)DAT_011dea3c)->GetMember62C())
 
-            ((CaravanState*)DAT_011dea3c)->FUN_00740ef0((*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
+            ((CaravanState*)DAT_011dea3c)->PlayerCharacter_SetCaravanLargestWinning((*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
 
         FUN_004d5c60(0x25);
 
-        FUN_00453a70()->FUN_00ad7550(str_010716a4, 0x121).Play(false);
+        BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(str_010716a4, 0x121).Play(false);
     }
     else
     {
 
-        ((CaravanState*)DAT_011dea3c)->FUN_00740e90(((CaravanState*)DAT_011dea3c)->GetField620() + (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
+        ((CaravanState*)DAT_011dea3c)->PlayerCharacter_SetCaravanCapLosses(((CaravanState*)DAT_011dea3c)->GetField620() + (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
 
-        ((CaravanState*)DAT_011dea3c)->SetField628(((CaravanState*)DAT_011dea3c)->FUN_00740960() + 1);
+        ((CaravanState*)DAT_011dea3c)->SetField628(((CaravanState*)DAT_011dea3c)->TESDataHandler_GetBarterContainer() + 1);
 
         FUN_004d5c60(0x26);
 
-        FUN_00453a70()->FUN_00ad7550(str_01071694, 0x121).Play(false);
+        BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(str_01071694, 0x121).Play(false);
     }
 
     char buffer[0x104];
     {
-        TileNode* pGainTile = (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x3c)))->FUN_00a03da0(UNK_01071684);
+        TileNode* pGainTile = (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x3c)))->Tile_GetChildByName(UNK_01071684);
 
         if (pGainTile != 0)
         {
 
-            pGainTile->FUN_00a012d0(0xfb1, (float)(pGainTile->FUN_00a011b0(0xfb1, 1) + DAT_0106c948));
+            pGainTile->Tile_Set(0xfb1, (float)(pGainTile->FUN_00a011b0(0xfb1, 1) + DAT_0106c948));
 
-            pGainTile->SetChangeFlag(0x10);
+            pGainTile->Tile_SetChangeFlag(0x10);
         }
     }
 
-    FUN_00406d00(buffer, 0x104, UNK_010714ec, ((CaravanState*)DAT_011dea3c)->GetRegionDataManager(),
-                 ((CaravanState*)DAT_011dea3c)->FUN_00740960());
+    BSsprintf(buffer, 0x104, UNK_010714ec, ((CaravanState*)DAT_011dea3c)->GetRegionDataManager(),
+                 ((CaravanState*)DAT_011dea3c)->TESDataHandler_GetBarterContainer());
 
     (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xac)))->SetTraitAndReset(DAT_011d9174, 1.0f);
 
@@ -3506,13 +3521,13 @@ void CaravanMenu::UpdateCaravanMenu()
 
     (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb4)))->SetTraitAndReset(DAT_011d9174, 1.0f);
 
-    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb4)))->FUN_00a01350(DAT_011d9174, (unsigned int)buffer, 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb4)))->Tile_Set_00a01350(DAT_011d9174, (unsigned int)buffer, 1);
 
     (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb8)))->SetTraitAndReset(DAT_011d9174, 1.0f);
 
     (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb8)))->FUN_00715c60(DAT_011d9174, ((CaravanState*)DAT_011dea3c)->GetMember62C());
 
-    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xbc)))->FUN_00a01350(0xfc4, FUN_00740f10(0x400) ? DAT_011d4b58.FUN_00403df0() : DAT_011d1e6c.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xbc)))->Tile_Set_00a01350(0xfc4, IsFlagSet_00740f10(0x400) ? DAT_011d4b58.FUN_00403df0() : DAT_011d1e6c.FUN_00403df0(), 1);
 
     (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x30)))->FUN_00700320(0xfa3, 0);
 
@@ -3522,15 +3537,15 @@ void CaravanMenu::UpdateCaravanMenu()
 
     (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x3c)))->FUN_00700320(0xfa3, 1);
 
-    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xec)))->FUN_00a01350(0xfc4, DAT_011d309c.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xec)))->Tile_Set_00a01350(0xfc4, DAT_011d309c.FUN_00403df0(), 1);
 
-    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf0)))->FUN_00a01350(0xfc4, DAT_011d4f3c.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf0)))->Tile_Set_00a01350(0xfc4, DAT_011d4f3c.FUN_00403df0(), 1);
 
-    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf4)))->FUN_00a01350(0xfc4, DAT_011d2ab4.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf4)))->Tile_Set_00a01350(0xfc4, DAT_011d2ab4.FUN_00403df0(), 1);
 
-    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf8)))->FUN_00a01350(0xfc4, DAT_011d3360.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf8)))->Tile_Set_00a01350(0xfc4, DAT_011d3360.FUN_00403df0(), 1);
 
-    TransferBarterItems((unsigned int)FUN_00740f10(0x400));
+    TransferBarterItems((unsigned int)IsFlagSet_00740f10(0x400));
 }
 
 extern char DAT_01018dec[];
@@ -3561,8 +3576,8 @@ struct IFace
 
 struct Obj6c
 {
-    int FUN_00a012d0(int id, float v, int z);
-    static int FUN_00a01860(const char* s);
+    int Tile_Set(int id, float v, int z);
+    static int Tile_TextToTrait(const char* s);
 };
 
 struct Obj917c
@@ -4514,7 +4529,7 @@ struct Obj917c
 
     void RebuildCardLists();
     void InitCaravanTable();
-    void FUN_0073d020();
+    void SetupCurrency();
 
     int FUN_00726070();
     void FUN_00a1dc70(void* p, int z);
@@ -4525,18 +4540,18 @@ struct Mid2
 {
     double FUN_00a011b0(int id);
     static float FUN_00a01530();
-    int FUN_00a012d0(int id, float v, bool b);
-    void* FUN_00a03c90();
+    int Tile_Set(int id, float v, bool b);
+    void* Tile_GetMenu();
 };
 
 struct Mid1
 {
-    Mid2* FUN_00a01b00();
+    Mid2* Tile_ReadFile();
 };
 
 struct MgrX
 {
-    Mid1* FUN_00586150(const char* s);
+    Mid1* CombatController_GetCombatState(const char* s);
 };
 
 struct SysObj
@@ -4566,16 +4581,16 @@ struct GlobalF8
 
 struct SubObj
 {
-    unsigned char FUN_00718840(int a);
+    unsigned char InterfaceManager_TutorialManager_HasBeenShown(int a);
     void SetFlag2(int a);
 };
 
 struct CdeclFns
 {
-    static IFace* FUN_00a09030(int a);
-    static int FUN_00406d00(char* buf, int n, const char* s);
+    static IFace* Tile_GetMenuByClass(int a);
+    static int BSsprintf(char* buf, int n, const char* s);
     static bool DispatchMessageToSink(char* buf, int a, const char* s, const char* t, float f, bool b);
-    static int FUN_005b5e40(const char* s);
+    static int Warning_005b5e40(const char* s);
     static TESForm* __cdecl FUN_00483a00(const char* a);
     static int FUN_00ec43fb(int a, int z, const char* source, const char* target, int ref);
     static int InitTutorialMenu(BGSMessage* a, int z);
@@ -4585,9 +4600,10 @@ extern GlobalF8 g_011d47f8;
 extern char DAT_011d9184;
 
 // @fnv 0x00741060
-int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
+// src: COMMUNITY 0x00741060
+int __cdecl CaravanMenu_Create(int a0, int a1, int a2, float a3, char a4)
 {
-    IFace* p4 = CdeclFns::FUN_00a09030(0x43b);
+    IFace* p4 = CdeclFns::Tile_GetMenuByClass(0x43b);
     Mid2* mid5;
     DAT_011d9180 = (InterfaceManager*)_FUN_004b7210();
     int sum4 = ((Handle*)(size_t)((SysObj*)DAT_011dea3c)->GetField614())->FUN_005ae380() +
@@ -4595,10 +4611,10 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
     if (sum4 < 0x1e)
     {
         char buf[0x104];
-        CdeclFns::FUN_00406d00(buf, 0x104, g_011d47f8.FUN_004c69f0());
+        CdeclFns::BSsprintf(buf, 0x104, g_011d47f8.FUN_004c69f0());
         CdeclFns::DispatchMessageToSink(buf, 0, DAT_01049638, 0, 2.0f, false);
         {
-            BSAudio::FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).Play(false);
+            BSAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(DAT_01025cc4, 0x121).Play(false);
         }
         return 0;
     }
@@ -4607,9 +4623,9 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
     {
         delete p4;
     }
-    mid5 = ((MgrX*)DAT_011d9180)->FUN_00586150(DAT_0107170c)->FUN_00a01b00();
-    DAT_011d917c = (CaravanMenu*)mid5->FUN_00a03c90();
-    if (DAT_011d917c && ((Obj917c*)DAT_011d917c)->V13() == FUN_0073cbe0())
+    mid5 = ((MgrX*)DAT_011d9180)->CombatController_GetCombatState(DAT_0107170c)->Tile_ReadFile();
+    DAT_011d917c = (CaravanMenu*)mid5->Tile_GetMenu();
+    if (DAT_011d917c && ((Obj917c*)DAT_011d917c)->V13() == CaravanMenu_GetClassStatic())
     {
         ((Obj917c*)DAT_011d917c)->m_100 = a0;
         ((Obj917c*)DAT_011d917c)->m_104 = ((OtherObj*)(size_t)a1)->FUN_0059bb30();
@@ -4618,25 +4634,25 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
         ((Obj917c*)DAT_011d917c)->FUN_00a1dc70(mid5, 0);
         if (!(unsigned char)((CaravanMenu*)DAT_011d917c)->HasAllTiles())
         {
-            CdeclFns::FUN_005b5e40(DAT_010716b8);
+            CdeclFns::Warning_005b5e40(DAT_010716b8);
             UpdateCardSelection();
             return 0;
         }
         if (mid5->FUN_00a011b0(0xfa7) == 6006.0 || mid5->FUN_00a011b0(0xfa7) == 102.0)
         {
-            mid5->FUN_00a012d0(0xfad, (float)mid5->FUN_00a01530(), true);
+            mid5->Tile_Set(0xfad, (float)mid5->FUN_00a01530(), true);
         }
         ((Obj917c*)DAT_011d917c)->RebuildCardLists();
-        ((Obj917c*)DAT_011d917c)->m_6c->FUN_00a012d0(0x1004, (float)((Obj917c*)DAT_011d917c)->m_af0, 0);
-        ((Obj917c*)DAT_011d917c)->m_6c->FUN_00a012d0(DAT_011d9170, 12.0f, 0);
+        ((Obj917c*)DAT_011d917c)->m_6c->Tile_Set(0x1004, (float)((Obj917c*)DAT_011d917c)->m_af0, 0);
+        ((Obj917c*)DAT_011d917c)->m_6c->Tile_Set(DAT_011d9170, 12.0f, 0);
         ((Tile*)((Obj917c*)DAT_011d917c)->m_6c)
-            ->SetTraitFloat(((Obj917c*)DAT_011d917c)->m_6c->FUN_00a01860(DAT_01070250), 1.0f);
+            ->SetTraitFloat(((Obj917c*)DAT_011d917c)->m_6c->Tile_TextToTrait(DAT_01070250), 1.0f);
         DAT_011d9184 = a4;
         ((Obj917c*)DAT_011d917c)->InitCaravanTable();
-        ((Obj917c*)DAT_011d917c)->FUN_0073d020();
+        ((Obj917c*)DAT_011d917c)->SetupCurrency();
         DAT_011d917c->SetFlag(1, 0);
         ((Obj917c*)DAT_011d917c)->FUN_00a1dc20(0);
-        if (!((SubObj*)((char*)_FUN_004b7210() + 0x4d4))->FUN_00718840(0x1e))
+        if (!((SubObj*)((char*)_FUN_004b7210() + 0x4d4))->InterfaceManager_TutorialManager_HasBeenShown(0x1e))
         {
             BGSMessage* r = dynamic_cast<BGSMessage*>(CdeclFns::FUN_00483a00(DAT_01018dec));
             if (r)
@@ -4658,7 +4674,7 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
     return 0;
 }
 
-bool __cdecl FUN_004b71d0();
+bool __cdecl InterfaceManager_Has360Controller();
 bool __cdecl Check_00702450(int v);
 void __cdecl UpdateCardSelection();
 
@@ -5631,7 +5647,7 @@ bool CaravanInput::HandleKey(int key)
 {
     pendingKey = 0;
     bool bHandled = false;
-    if (!FUN_004b71d0())
+    if (!InterfaceManager_Has360Controller())
     {
         if (unk28 == 3 && Check_00702450(GetValue()))
         {
@@ -5714,14 +5730,14 @@ struct ActionDispatch
     unsigned int unk24;
     unsigned int unk28;
     void* blocked;
-    bool FUN_00740f10(unsigned int flag);
+    bool IsFlagSet_00740f10(unsigned int flag);
     void HandleEvent(unsigned int event, unsigned int unused);
 };
 // If not blocked and FUN_00740f10(1) is false, maps event codes to SetPrimary/SetSecondary calls with a zero value.
 // @fnv 0x00749560
 void ActionDispatch::HandleEvent(unsigned int event, unsigned int unused)
 {
-    if (!blocked && !FUN_00740f10(1))
+    if (!blocked && !IsFlagSet_00740f10(1))
     {
         switch (event)
         {
@@ -5768,7 +5784,7 @@ void ActionDispatch::HandleEvent(unsigned int event, unsigned int unused)
 struct ControlTile
 {
     float GetFloat(int);
-    void FUN_00a012d0(int, float, bool);
+    void Tile_Set(int, float, bool);
 };
 struct SelectedCard
 {
@@ -6745,12 +6761,12 @@ void CaravanControls::UpdateControls()
         if (cardCount < 30)
         {
             Enable(2, 1);
-            button->FUN_00a012d0(4009, 128.0f, true);
+            button->Tile_Set(4009, 128.0f, true);
         }
         else
         {
             Enable(2, 0);
-            button->FUN_00a012d0(4009, 255.0f, true);
+            button->Tile_Set(4009, 255.0f, true);
         }
         if (cardCount < 1)
             Enable(16, 1);
@@ -6793,15 +6809,15 @@ struct MatchMatrix
 };
 struct MatchNode
 {
-    MatchVector& FUN_0043d450();
-    MatchMatrix& FUN_006a9540();
-    void FUN_0043fa80(const MatchMatrix*);
-    void FUN_004bc1f0(float, float, float);
+    MatchVector& NiAVObject_GetWorldBound();
+    MatchMatrix& NiAVObject_GetRotate_006a9540();
+    void SetRotate_0043fa80(const MatchMatrix*);
+    void NiAVObject_SetTranslate_004bc1f0(float, float, float);
     void Update(const NiUpdateData&);
 };
 struct MatchPointer
 {
-    MatchNode* FUN_00559450();
+    MatchNode* Modelloader_GetReferencedThis();
 };
 extern MatchPointer DAT_011d91e4;
 struct MatchScene
@@ -6814,10 +6830,10 @@ struct MatchArray
 {
     int data, size, capacity, grow;
     unsigned int FUN_0044ddc0();
-    int& FUN_006a7ad0(unsigned int);
-    void FUN_009a4320(unsigned int, int);
+    int& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
+    void BSSimpleArray_Actor_1024_RemoveFast(unsigned int, int);
 };
-MatchNode* __cdecl FUN_004aae30(void*, const char*);
+MatchNode* __cdecl BSUtilities_GetObjectByName(void*, const char*);
 struct MatchMenu
 {
     int unk000;
@@ -7045,40 +7061,40 @@ void MatchMenu::PlaceBillsAndCoins(int skill, int amount)
                 if (!array164.FUN_0044ddc0())
                     break;
                 int value = GetRandomNumberInRange(0, array164.FUN_0044ddc0());
-                int rotation = array164.FUN_006a7ad0(value);
-                array164.FUN_009a4320(value, 1);
+                int rotation = array164.BSSimpleArray_NiAVObject_1024_GetAt(value);
+                array164.BSSimpleArray_Actor_1024_RemoveFast(value, 1);
                 FUN_00406d00_format(name, 260, "Bill-Placement_0%i:0", rotation + 1);
-                MatchNode* selected = FUN_004aae30((void*)unk114, name);
-                MatchVector placement = selected->FUN_0043d450();
-                MatchMatrix position = selected->FUN_006a9540();
-                ((MatchNode*)array14c.FUN_006a7ad0(i))->FUN_0043fa80(&position);
-                ((MatchNode*)array14c.FUN_006a7ad0(i))->FUN_004bc1f0(placement.x, placement.y, placement.z);
-                ((MatchNode*)array14c.FUN_006a7ad0(i))->Update(NiUpdateData(0.0f, false, false));
+                MatchNode* selected = BSUtilities_GetObjectByName((void*)unk114, name);
+                MatchVector placement = selected->NiAVObject_GetWorldBound();
+                MatchMatrix position = selected->NiAVObject_GetRotate_006a9540();
+                ((MatchNode*)array14c.BSSimpleArray_NiAVObject_1024_GetAt(i))->SetRotate_0043fa80(&position);
+                ((MatchNode*)array14c.BSSimpleArray_NiAVObject_1024_GetAt(i))->NiAVObject_SetTranslate_004bc1f0(placement.x, placement.y, placement.z);
+                ((MatchNode*)array14c.BSSimpleArray_NiAVObject_1024_GetAt(i))->Update(NiUpdateData(0.0f, false, false));
             }
             for (unsigned int i = unk148; i < array134.FUN_0044ddc0(); i++)
             {
                 if (!array174.FUN_0044ddc0())
                     break;
                 int value = GetRandomNumberInRange(0, array174.FUN_0044ddc0());
-                int rotation = array174.FUN_006a7ad0(value);
-                array174.FUN_009a4320(value, 1);
+                int rotation = array174.BSSimpleArray_NiAVObject_1024_GetAt(value);
+                array174.BSSimpleArray_Actor_1024_RemoveFast(value, 1);
                 if (rotation + 1 < 10)
                     FUN_00406d00_format(name, 260, "Coin-Placement_0%i:0", rotation + 1);
                 else
                     FUN_00406d00_format(name, 260, "Coin-Placement_%i:0", rotation + 1);
-                MatchNode* selected = FUN_004aae30((void*)unk118, name);
-                MatchVector placement = selected->FUN_0043d450();
-                MatchMatrix position = selected->FUN_006a9540();
-                ((MatchNode*)array134.FUN_006a7ad0(i))->FUN_0043fa80(&position);
-                ((MatchNode*)array134.FUN_006a7ad0(i))->FUN_004bc1f0(placement.x, placement.y, placement.z);
-                ((MatchNode*)array134.FUN_006a7ad0(i))->Update(NiUpdateData(0.0f, false, false));
+                MatchNode* selected = BSUtilities_GetObjectByName((void*)unk118, name);
+                MatchVector placement = selected->NiAVObject_GetWorldBound();
+                MatchMatrix position = selected->NiAVObject_GetRotate_006a9540();
+                ((MatchNode*)array134.BSSimpleArray_NiAVObject_1024_GetAt(i))->SetRotate_0043fa80(&position);
+                ((MatchNode*)array134.BSSimpleArray_NiAVObject_1024_GetAt(i))->NiAVObject_SetTranslate_004bc1f0(placement.x, placement.y, placement.z);
+                ((MatchNode*)array134.BSSimpleArray_NiAVObject_1024_GetAt(i))->Update(NiUpdateData(0.0f, false, false));
             }
-            if (FUN_00647b70(countCoins, bills) > 0)
+            if (BSMAX_00647b70(countCoins, bills) > 0)
                 unk02c = 4;
             zero.FUN_0043d410(0.0f, false, false);
-            DAT_011d91e4.FUN_00559450()->Update(*(NiUpdateData*)&zero);
-            FUN_00450b80(1)->FUN_00b5ca70(DAT_011d91e4.FUN_00559450(),
-                                          (float)(DAT_011d91e4.FUN_00559450()->FUN_0043d450().FUN_0084d030() * 2.5));
+            DAT_011d91e4.Modelloader_GetReferencedThis()->Update(*(NiUpdateData*)&zero);
+            FUN_00450b80(1)->FUN_00b5ca70(DAT_011d91e4.Modelloader_GetReferencedThis(),
+                                          (float)(DAT_011d91e4.Modelloader_GetReferencedThis()->NiAVObject_GetWorldBound().FUN_0084d030() * 2.5));
         }
     }
 }
@@ -8048,7 +8064,7 @@ struct FullNameComponent
 struct CardTexture
 {
     FullNameComponent* FUN_0050d100();
-    FullNameComponent* FUN_00503650();
+    FullNameComponent* GetBackTexture();
 };
 struct DeckArray
 {
@@ -8057,7 +8073,7 @@ struct DeckArray
     unsigned int capacity;
     unsigned int grow;
     unsigned int FUN_0044ddc0();
-    CardTexture*& FUN_006a7ad0(unsigned int);
+    CardTexture*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
 };
 struct ShaderProperty
 {
@@ -9070,10 +9086,10 @@ void CardMenuTexture::UpdateDeckTextures(bool player)
     {
         if (player)
             FormatPath(path2, 260, textureLiteral1, textureLiteral2,
-                       playerCards.FUN_006a7ad0(4)->FUN_0050d100()->GetFullName());
+                       playerCards.BSSimpleArray_NiAVObject_1024_GetAt(4)->FUN_0050d100()->GetFullName());
         else
             FormatPath(path2, 260, textureLiteral1, textureLiteral2,
-                       opponentCards.FUN_006a7ad0(4)->FUN_00503650()->GetFullName());
+                       opponentCards.BSSimpleArray_NiAVObject_1024_GetAt(4)->GetBackTexture()->GetFullName());
         NormalizePath(path2, normalized3, 260);
         g_TES->CreateTextureImage(normalized3, texture, false, false);
         if (texture)
@@ -9091,10 +9107,10 @@ void CardMenuTexture::UpdateDeckTextures(bool player)
     {
         if (player)
             FormatPath(path2, 260, textureLiteral5,
-                       playerBack.FUN_006a7ad0(m_uiPlayerIndex)->FUN_00503650()->GetFullName());
+                       playerBack.BSSimpleArray_NiAVObject_1024_GetAt(m_uiPlayerIndex)->GetBackTexture()->GetFullName());
         else
             FormatPath(path2, 260, textureLiteral5,
-                       opponentBack.FUN_006a7ad0(opponentIndex)->FUN_00503650()->GetFullName());
+                       opponentBack.BSSimpleArray_NiAVObject_1024_GetAt(opponentIndex)->GetBackTexture()->GetFullName());
         NormalizePath(path2, normalized3, 260);
         g_TES->CreateTextureImage(normalized3, texture, false, false);
         if (texture)
@@ -9111,18 +9127,18 @@ void CardMenuTexture::UpdateDeckTextures(bool player)
 namespace fnv_0074d730 {
 struct TexName
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct CardTex
 {
     TexName* FUN_0050d100();
-    TexName* FUN_00503650();
+    TexName* GetBackTexture();
 };
 struct TexArray
 {
     unsigned int u00, u04, u08, u0c;
     unsigned int FUN_0044ddc0();
-    CardTex*& FUN_006a7ad0(int);
+    CardTex*& BSSimpleArray_NiAVObject_1024_GetAt(int);
 };
 struct Texture
 {
@@ -9211,7 +9227,7 @@ struct Scene
     void FUN_00450f90(bool);
     void update(const UpdateInfo&);
 };
-Scene* __cdecl FUN_004aae30(Scene*, const char*);
+Scene* __cdecl BSUtilities_GetObjectByName(Scene*, const char*);
 int __cdecl formatDeck(char*, unsigned int, const char*, ...);
 int __cdecl CopyCaravanString(char*, unsigned int, const char*);
 void __cdecl normalizeDeck(char*, char*, unsigned int);
@@ -10125,7 +10141,7 @@ struct DeckMenu
     unsigned int unk0e3c;
     int playerSelection;
     int opponentSelection;
-    bool FUN_00740f10(unsigned int);
+    bool IsFlagSet_00740f10(unsigned int);
     void UpdateDeckCardNodes(bool, int);
 };
 
@@ -10147,7 +10163,7 @@ void DeckMenu::UpdateDeckCardNodes(bool player, int unused)
                     formatDeck(nodeName, 260, "Player-Deck_0%i:%i", j + 1, j);
                 else
                     formatDeck(nodeName, 260, "Opponent-Deck_0%i:%i", j + 1, j);
-                node = FUN_004aae30(c, nodeName);
+                node = BSUtilities_GetObjectByName(c, nodeName);
                 if (j < e)
                 {
                     l = (!node->GetProperty(3) ? 0
@@ -10160,20 +10176,20 @@ void DeckMenu::UpdateDeckCardNodes(bool player, int unused)
                     {
                         if (player)
                             formatDeck(nodeName, 260, "Textures\\%s",
-                                       playerDeck.FUN_006a7ad0(j)->FUN_0050d100()->FUN_00408da0());
+                                       playerDeck.BSSimpleArray_NiAVObject_1024_GetAt(j)->FUN_0050d100()->TESModel_GetModel());
                         else if (DAT_011d9184)
                             formatDeck(nodeName, 260, "Textures\\%s",
-                                       opponentDeck.FUN_006a7ad0(j)->FUN_0050d100()->FUN_00408da0());
+                                       opponentDeck.BSSimpleArray_NiAVObject_1024_GetAt(j)->FUN_0050d100()->TESModel_GetModel());
                         else
                             formatDeck(nodeName, 260, "Textures\\%s",
-                                       opponentDeck.FUN_006a7ad0(j)->FUN_00503650()->FUN_00408da0());
+                                       opponentDeck.BSSimpleArray_NiAVObject_1024_GetAt(j)->GetBackTexture()->TESModel_GetModel());
                         normalizeDeck(nodeName, texturePath, 260);
                         g_TES->load(texturePath, texture, false, false);
                         if (texture)
                             l->setTexture(0, 0, texture);
                     }
                 }
-                else if (FUN_00740f10(0x800) && j != 5)
+                else if (IsFlagSet_00740f10(0x800) && j != 5)
                 {
                     node->FUN_00450f90(true);
                     UpdateInfo ba(0.0f, false, false);
@@ -10182,12 +10198,12 @@ void DeckMenu::UpdateDeckCardNodes(bool player, int unused)
                         formatDeck(nodeName, 260, "Player-Deck_0%i_Shadow:0", j + 1);
                     else
                         formatDeck(nodeName, 260, "Opponent-Deck_0%i_Shadow:0", j + 1);
-                    node = FUN_004aae30(c, nodeName);
+                    node = BSUtilities_GetObjectByName(c, nodeName);
                     node->FUN_00450f90(true);
                     UpdateInfo b(0.0f, false, false);
                     node->update(b);
                 }
-                else if (!FUN_00740f10(0x800) && e < 5)
+                else if (!IsFlagSet_00740f10(0x800) && e < 5)
                 {
                     node->FUN_00450f90(true);
                     UpdateInfo ba(0.0f, false, false);
@@ -10196,16 +10212,16 @@ void DeckMenu::UpdateDeckCardNodes(bool player, int unused)
                         formatDeck(nodeName, 260, "Player-Deck_0%i_Shadow:0", j + 1);
                     else
                         formatDeck(nodeName, 260, "Opponent-Deck_0%i_Shadow:0", j + 1);
-                    node = FUN_004aae30(c, nodeName);
+                    node = BSUtilities_GetObjectByName(c, nodeName);
                     node->FUN_00450f90(true);
                     UpdateInfo b(0.0f, false, false);
                     node->update(b);
                 }
             }
-            if (!FUN_00740f10(0x800))
+            if (!IsFlagSet_00740f10(0x800))
             {
                 player ? CopyCaravanString(nodeName, 260, "Player-Deck_06:5") : CopyCaravanString(nodeName, 260, "Opponent-Deck_06:5");
-                node = FUN_004aae30(c, nodeName);
+                node = BSUtilities_GetObjectByName(c, nodeName);
                 l = (!node->GetProperty(3)
                          ? 0
                          : (node->GetProperty(3)->FUN_00441110() >= 8 && node->GetProperty(3)->FUN_00441110() <= 12))
@@ -10218,10 +10234,10 @@ void DeckMenu::UpdateDeckCardNodes(bool player, int unused)
                     {
                         if (player)
                             formatDeck(nodeName, 260, "Textures\\%s",
-                                       playerCards.FUN_006a7ad0(playerSelection)->FUN_00503650()->FUN_00408da0());
+                                       playerCards.BSSimpleArray_NiAVObject_1024_GetAt(playerSelection)->GetBackTexture()->TESModel_GetModel());
                         else
                             formatDeck(nodeName, 260, "Textures\\%s",
-                                       opponentCards.FUN_006a7ad0(opponentSelection)->FUN_00503650()->FUN_00408da0());
+                                       opponentCards.BSSimpleArray_NiAVObject_1024_GetAt(opponentSelection)->GetBackTexture()->TESModel_GetModel());
                         normalizeDeck(nodeName, texturePath, 260);
                         g_TES->load(texturePath, texture2, false, false);
                         if (texture2)
@@ -10243,7 +10259,7 @@ struct CardNode
 {
     CardShader* FUN_00a59d30(int type);
 };
-CardNode* __cdecl FUN_004aae30(NiAVObject* root, const char* name);
+CardNode* __cdecl BSUtilities_GetObjectByName(NiAVObject* root, const char* name);
 int __cdecl _sprintf_s(char* buffer, unsigned int size, const char* format, ...);
 struct CardAssetArray
 {
@@ -10251,11 +10267,12 @@ struct CardAssetArray
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
-    UIAssetSource** FUN_006a7ad0(int index);
+    UIAssetSource** BSSimpleArray_NiAVObject_1024_GetAt(int index);
 };
 
 // @fnv 0x0074e220
-void CaravanMenu::FUN_0074e220(int track, int row, int card)
+// src: COMMUNITY 0x0074e220
+void CaravanMenu::UpdateTrackCardTexture(int track, int row, int card)
 {
     // Local names preserve the original MSVC9 stack layout.
     NiAVObject* f = (*reinterpret_cast<NiAVObject* (*)[16][7]>((reinterpret_cast<char*>(this) + 0x198)))[track][row];
@@ -10265,7 +10282,7 @@ void CaravanMenu::FUN_0074e220(int track, int row, int card)
         _sprintf_s(h, 260, &UNK_01071a6c, 4 - card, card);
     else
         _sprintf_s(h, 260, &UNK_01071a6c, card + 1, card);
-    CardNode* i = FUN_004aae30(f, h);
+    CardNode* i = BSUtilities_GetObjectByName(f, h);
     CardShader* s =
         (!i->FUN_00a59d30(3) ? false
                              : (i->FUN_00a59d30(3)->FUN_00441110() >= 8 && i->FUN_00a59d30(3)->FUN_00441110() <= 12))
@@ -10275,7 +10292,7 @@ void CaravanMenu::FUN_0074e220(int track, int row, int card)
     if (s)
     {
         _sprintf_s(h, 260, &UNK_0101996c, &UNK_0101d7fc,
-                   (*(*reinterpret_cast<CardAssetArray (*)[8][7]>((reinterpret_cast<char*>(this) + 0xb44)))[track][row].FUN_006a7ad0(card))->FUN_0050d100()->FUN_00408da0());
+                   (*(*reinterpret_cast<CardAssetArray (*)[8][7]>((reinterpret_cast<char*>(this) + 0xb44)))[track][row].BSSimpleArray_NiAVObject_1024_GetAt(card))->FUN_0050d100()->TESModel_GetModel());
         FUN_004b7240(h, a, 260);
         DAT_011dea10->FUN_004568c0(a, (GO*)&p, 0, 0);
         if (p)
@@ -10290,13 +10307,13 @@ struct Position
 };
 struct SceneObject
 {
-    Position& FUN_0043c490();
-    void FUN_004bc1f0(float, float, float);
+    Position& GetTranslate_0043c490();
+    void NiAVObject_SetTranslate_004bc1f0(float, float, float);
     void Update(const NiUpdateData&);
 };
 struct SelectionArray
 {
-    unsigned int& FUN_006a7ad0(unsigned int);
+    unsigned int& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
 };
 int __cdecl formatName(char*, unsigned int, const char*, ...);
 SceneObject* __cdecl GetSelectionItem(void*, const char*);
@@ -11225,11 +11242,11 @@ struct SelectionMenu
 // @fnv 0x0074e480
 void SelectionMenu::UpdateSelection(bool skip)
 {
-    if (first && first->FUN_0043c490().z > 0.0)
+    if (first && first->GetTranslate_0043c490().z > 0.0)
     {
-        first->FUN_004bc1f0(0.0f, first->FUN_0043c490().y, 0.0f);
+        first->NiAVObject_SetTranslate_004bc1f0(0.0f, first->GetTranslate_0043c490().y, 0.0f);
         first->Update(NiUpdateData(0.0f, false, false));
-        second->FUN_004bc1f0(0.0f, first->FUN_0043c490().y, 0.0f);
+        second->NiAVObject_SetTranslate_004bc1f0(0.0f, first->GetTranslate_0043c490().y, 0.0f);
         second->Update(NiUpdateData(0.0f, false, false));
     }
     if (skip)
@@ -11239,10 +11256,10 @@ void SelectionMenu::UpdateSelection(bool skip)
     first = GetSelectionItem(root, name);
     formatName(name, 30, "Player-Deck_0%i_Shadow:0", selection + 1);
     second = GetSelectionItem(root, name);
-    selectedCard = cards.FUN_006a7ad0(selection);
-    first->FUN_004bc1f0(0.0f, first->FUN_0043c490().y, 1.0f);
+    selectedCard = cards.BSSimpleArray_NiAVObject_1024_GetAt(selection);
+    first->NiAVObject_SetTranslate_004bc1f0(0.0f, first->GetTranslate_0043c490().y, 1.0f);
     first->Update(NiUpdateData(0.0f, false, false));
-    second->FUN_004bc1f0(0.0f, first->FUN_0043c490().y, 1.0f);
+    second->NiAVObject_SetTranslate_004bc1f0(0.0f, first->GetTranslate_0043c490().y, 1.0f);
     second->Update(NiUpdateData(0.0f, false, false));
 }
 }  // namespace fnv_0074e480
@@ -12195,7 +12212,7 @@ class CaravanMenuGrid
     void SelectCard(int aiRow, int aiCol);
     bool CanPlaceCard(int aiRow, int aiCol, int aiHandIndex, int aiUnk);
     void SetFlag(int aiID, int aiValue);
-    void FUN_00749a40(int aiValue);
+    void UpdateTileAlpha(int aiValue);
     void MoveSelection(int aiDeltaRow, int aiDeltaCol);
 };
 
@@ -12211,12 +12228,12 @@ void CaravanMenuGrid::MoveSelection(int aiDeltaRow, int aiDeltaCol)
         if (iPrevRow < 3)
         {
             iRow += aiDeltaRow;
-            iRow = MinInt(FUN_00647b70(0, iRow), 2);
+            iRow = MinInt(BSMAX_00647b70(0, iRow), 2);
         }
         else
         {
             iRow -= aiDeltaRow;
-            iRow = MinInt(FUN_00647b70(3, iRow), 5);
+            iRow = MinInt(BSMAX_00647b70(3, iRow), 5);
         }
     }
     if (aiDeltaCol && iPrevCol == iCol)
@@ -12242,7 +12259,7 @@ void CaravanMenuGrid::MoveSelection(int aiDeltaRow, int aiDeltaCol)
         SetFlag(4, 0);
     else
         SetFlag(4, 1);
-    FUN_00749a40(-1);
+    UpdateTileAlpha(-1);
 }
 
 struct PlacementCard
@@ -13048,17 +13065,17 @@ struct RTTIObj
 extern RTTIObj DAT_011f36ac;
 struct Ctrl
 {
-    void* FUN_0047a520(const NiFixedString& name);
+    void* NiControllerManager_GetSequenceByName(const NiFixedString& name);
     void FUN_0047aab0(void* res, int a, int b, float c, float d, int e);
 };
 struct Elem
 {
     Elem* FUN_00a5d680();
-    Ctrl* FUN_00a5c570(RTTIObj* rtti);
+    Ctrl* NiObjectNET_GetController(RTTIObj* rtti);
 };
 int __cdecl MinInt(int a, int b);
 unsigned int __cdecl GetRandomNumberInRange(int a, int b);
-void __cdecl FUN_00a6d2d0(Elem* p);
+void __cdecl NiTimeController_StartAnimations(Elem* p);
 struct AddObj
 {
     int tag;
@@ -13131,7 +13148,7 @@ struct VObj
 struct MgrObj
 {
     int tag;
-    VObj* FUN_00559450();
+    VObj* Modelloader_GetReferencedThis();
 };
 extern MgrObj DAT_011d91e4;
 struct Owner
@@ -13229,40 +13246,40 @@ void Owner::PlaceRandomItem(int aiIndex)
     aiIndex = MinInt(aiIndex, 2);
     cloned6 = m_items[aiIndex]->FUN_00a5d680();
     v6 = GetRandomNumberInRange(0, 3);
-    ctrl4 = cloned6->FUN_00a5c570(&DAT_011f36ac);
+    ctrl4 = cloned6->NiObjectNET_GetController(&DAT_011f36ac);
     switch (v6)
     {
     case 0:
         if (ctrl4)
         {
             Ctrl* p0 = ctrl4;
-            aRes = p0->FUN_0047a520(NiFixedString("Top_Place"));
+            aRes = p0->NiControllerManager_GetSequenceByName(NiFixedString("Top_Place"));
             p0->FUN_0047aab0(aRes, 0, 0, 1.0f, 0.0f, 0);
-            FUN_00a6d2d0(cloned6);
+            NiTimeController_StartAnimations(cloned6);
         }
         break;
     case 1:
         if (ctrl4)
         {
             Ctrl* p1 = ctrl4;
-            aRes = p1->FUN_0047a520(NiFixedString("Bottom_Place"));
+            aRes = p1->NiControllerManager_GetSequenceByName(NiFixedString("Bottom_Place"));
             p1->FUN_0047aab0(aRes, 0, 0, 1.0f, 0.0f, 0);
-            FUN_00a6d2d0(cloned6);
+            NiTimeController_StartAnimations(cloned6);
         }
         break;
     case 2:
         if (ctrl4)
         {
             Ctrl* p5 = ctrl4;
-            aRes = p5->FUN_0047a520(NiFixedString("Alt_Place"));
+            aRes = p5->NiControllerManager_GetSequenceByName(NiFixedString("Alt_Place"));
             p5->FUN_0047aab0(aRes, 0, 0, 1.0f, 0.0f, 0);
-            FUN_00a6d2d0(cloned6);
+            NiTimeController_StartAnimations(cloned6);
         }
         break;
     }
     m_add.FUN_007cb2e0(&cloned6);
     m_ed->FUN_005ae3d0(&aRes);
-    DAT_011d91e4.FUN_00559450()->f55(cloned6, 1);
+    DAT_011d91e4.Modelloader_GetReferencedThis()->f55(cloned6, 1);
 }
 }  // namespace fnv_0074f9b0
 
@@ -14319,7 +14336,7 @@ struct CardItemX
 {
     bool FUN_0073cb80();
     CardNameX* FUN_0050d100();
-    CardNameX* FUN_00503650();
+    CardNameX* GetBackTexture();
 };
 struct CardArrayX
 {
@@ -14495,7 +14512,7 @@ void CaravanMenu::UpdateCardSlots(int aiFirstCard, bool abFlat)
                         (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x8ec)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->GetBackTexture()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
@@ -14503,7 +14520,7 @@ void CaravanMenu::UpdateCardSlots(int aiFirstCard, bool abFlat)
                         (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x94c)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->GetBackTexture()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
@@ -14531,7 +14548,7 @@ void CaravanMenu::UpdateCardSlots(int aiFirstCard, bool abFlat)
                         (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x9ac)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->GetBackTexture()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
@@ -14539,7 +14556,7 @@ void CaravanMenu::UpdateCardSlots(int aiFirstCard, bool abFlat)
                         (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0xa0c)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->GetBackTexture()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
@@ -14559,7 +14576,7 @@ void CaravanMenu::UpdateCardSlots(int aiFirstCard, bool abFlat)
                 {
                     TexturePtrX spTexture(0);
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->GetBackTexture()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
@@ -14587,7 +14604,7 @@ struct ArrA
     int a3;
     unsigned int FUN_0044ddc0();
     unsigned int* FUN_006f2270();
-    void FUN_00753140();
+    void RemoveLastArrayElement();
     ~ArrA();
 };
 struct ObjB
@@ -14617,8 +14634,8 @@ struct ListObj
 };
 struct NodeFromGO
 {
-    int FUN_00453470();
-    void FUN_00572160();
+    int NiNode_GetChildCount();
+    void DetachAllChildren_00572160();
 };
 struct GlobalPtr
 {
@@ -14626,7 +14643,7 @@ struct GlobalPtr
 };
 struct ModelLoader
 {
-    void FUN_0045a5e0(const char* m26);
+    void ModelLoader_ReleaseFile(const char* m26);
 };
 struct DataHandler
 {
@@ -14853,14 +14870,14 @@ FUN_0073bba0::~FUN_0073bba0()
     int v11;
     char v5[260];
     DAT_011d91a8 = 0;
-    DAT_011c3b3c->FUN_0045a5e0("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Table.NIF");
-    ((NiNode*)(ShadowSceneNode*)FUN_00450b80(1))->RemoveObject((NiAVObject*)DAT_011d91e4.FUN_00559450());
-    ((ShadowSceneNode*)FUN_00450b80(1))->FUN_00b5d180();
-    if ((NodeFromGO*)DAT_011d91e4.FUN_00559450())
+    DAT_011c3b3c->ModelLoader_ReleaseFile("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Table.NIF");
+    ((NiNode*)(ShadowSceneNode*)FUN_00450b80(1))->RemoveObject((NiAVObject*)DAT_011d91e4.Modelloader_GetReferencedThis());
+    ((ShadowSceneNode*)FUN_00450b80(1))->RemoveAllLights();
+    if ((NodeFromGO*)DAT_011d91e4.Modelloader_GetReferencedThis())
     {
-        if (((NodeFromGO*)DAT_011d91e4.FUN_00559450())->FUN_00453470())
+        if (((NodeFromGO*)DAT_011d91e4.Modelloader_GetReferencedThis())->NiNode_GetChildCount())
         {
-            ((NodeFromGO*)DAT_011d91e4.FUN_00559450())->FUN_00572160();
+            ((NodeFromGO*)DAT_011d91e4.Modelloader_GetReferencedThis())->DetachAllChildren_00572160();
         }
     }
     m_184 = 0;
@@ -14872,30 +14889,30 @@ FUN_0073bba0::~FUN_0073bba0()
     m_100 = 0;
     m_104 = 0;
     sprintf_s(v5, 260, "%sCurrency-Bill_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-    DAT_011c3b3c->FUN_0045a5e0(v5);
+    DAT_011c3b3c->ModelLoader_ReleaseFile(v5);
     sprintf_s(v5, 260, "%sCurrency-Coin_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-    DAT_011c3b3c->FUN_0045a5e0(v5);
+    DAT_011c3b3c->ModelLoader_ReleaseFile(v5);
     m_114 = 0;
     m_118 = 0;
     for (v21 = 0; v21 < 3; v21++)
     {
         sprintf_s(v5, 260, "%sCurrency-Bill_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", v21 + 1);
-        DAT_011c3b3c->FUN_0045a5e0(v5);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(v5);
         sprintf_s(v5, 260, "%sCurrency-Coin_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", v21 + 1);
-        DAT_011c3b3c->FUN_0045a5e0(v5);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(v5);
         m_128[v21] = 0;
         m_11c[v21] = 0;
     }
     while (m_134.FUN_0044ddc0() > 0)
     {
         v26 = *m_134.FUN_006f2270();
-        m_134.FUN_00753140();
+        m_134.RemoveLastArrayElement();
         v26 = 0;
     }
     while (m_14c.FUN_0044ddc0() > 0)
     {
         v28 = *m_14c.FUN_006f2270();
-        m_14c.FUN_00753140();
+        m_14c.RemoveLastArrayElement();
         v28 = 0;
     }
     while (m_15c != 0 && *m_15c->FUN_006815c0() != 0)
@@ -14923,8 +14940,8 @@ FUN_0073bba0::~FUN_0073bba0()
     case 0:
         break;
     case 1: {
-        DAT_011c3b3c->FUN_0045a5e0("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Deck.NIF");
-        DAT_011c3b3c->FUN_0045a5e0("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Available.NIF");
+        DAT_011c3b3c->ModelLoader_ReleaseFile("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Deck.NIF");
+        DAT_011c3b3c->ModelLoader_ReleaseFile("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Available.NIF");
         m_188 = 0;
         m_18c = 0;
         m_270 = 0;
@@ -14992,31 +15009,31 @@ FUN_0073bba0::~FUN_0073bba0()
             }
         }
         CopyCaravanString(n29, 260, "PlayerGrid_1.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         CopyCaravanString(n29, 260, "PlayerGrid_2.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         CopyCaravanString(n29, 260, "PlayerGrid_3.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         CopyCaravanString(n29, 260, "OppGrid_1.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         CopyCaravanString(n29, 260, "OppGrid_2.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         CopyCaravanString(n29, 260, "OppGrid_3.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         CopyCaravanString(n29, 260, "Select_Add.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         CopyCaravanString(n29, 260, "Select_Remove.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         m_e6c = 0;
         m_e70 = 0;
         sprintf_s(n29, 260, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Player_Deck-Start.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         sprintf_s(n29, 260, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Opponent_Deck-Start.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         sprintf_s(n29, 260, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Player_Deck.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         sprintf_s(n29, 260, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Opponent_Deck.NIF");
-        DAT_011c3b3c->FUN_0045a5e0(n29);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
         m_190 = 0;
         m_194 = 0;
         for (q32 = 0; q32 < 6; q32++)
@@ -15026,10 +15043,10 @@ FUN_0073bba0::~FUN_0073bba0()
             for (z8 = 0; z8 < 7; z8++)
             {
                 sprintf_s(n29, 260, "%sPlayer_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", q47 + 1, z8 + 1);
-                DAT_011c3b3c->FUN_0045a5e0(n29);
+                DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
                 m_198.c1[q47].vals[z8] = 0;
                 sprintf_s(n29, 260, "%sOpponent_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", q47 + 1, z8 + 1);
-                DAT_011c3b3c->FUN_0045a5e0(n29);
+                DAT_011c3b3c->ModelLoader_ReleaseFile(n29);
                 m_198.c2[q47 + 3].vals[z8] = 0;
             }
         }
@@ -15043,9 +15060,9 @@ extern SettingT_GameSettingCollection_ g_011d34f8;
 extern SettingT_GameSettingCollection_ g_011d43b4;
 bool __cdecl Check_00702450(int v);
 void __cdecl UpdateCardSelection();
-void __cdecl FUN_0074a270();
+void __cdecl CaravanMenu_ExitCallback();
 void __cdecl FUN_00717de0(int v);
-void __cdecl ShowMessageBox(const char* a1, int a2, int a3, void(__cdecl* a4)(), int a5, int a6, float a7, float a8,
+void __cdecl Interface_CreateMessageMenu(const char* a1, int a2, int a3, void(__cdecl* a4)(), int a5, int a6, float a7, float a8,
                           const char* a9, const char* a10, int a11);
 struct Target7490
 {
@@ -15971,19 +15988,20 @@ struct Target7490
     int unkE28;
     int unkE2C;
     int unkE30;
-    bool FUN_00740f10(unsigned int flag);
-    void FUN_0074ed40(int index);
-    void FUN_0074edd0();
+    bool IsFlagSet_00740f10(unsigned int flag);
+    void DeselectWholeTrack(int index);
+    void DeselectTrackCard();
     void SetFlag(int a, int b);
-    void FUN_00749a40(int v);
-    bool FUN_007490e0(int aiType, int aiUnused);
+    void UpdateTileAlpha(int v);
+    bool CaravanMenu_DoGamepadUpEvent(int aiType, int aiUnused);
 };
 // Returns false when flag 1 is set or type differs from 10; otherwise branches on unk28 and returns true.
 // @fnv 0x007490e0
-bool Target7490::FUN_007490e0(int aiType, int aiUnused)
+// src: XBOX_PDB 0x007490e0
+bool Target7490::CaravanMenu_DoGamepadUpEvent(int aiType, int aiUnused)
 {
     bool bResult = false;
-    if (FUN_00740f10(1) || aiType != 10)
+    if (IsFlagSet_00740f10(1) || aiType != 10)
         return bResult;
     if (unk28 == 3)
     {
@@ -15996,33 +16014,33 @@ bool Target7490::FUN_007490e0(int aiType, int aiUnused)
         bResult = true;
         if (Check_00702450(V13()))
             UpdateCardSelection();
-        ((FUN_00a253d0_shell*)g_osGlobals->FUN_00877720())->FUN_00a253d0();
+        ((FUN_00a253d0_shell*)g_osGlobals->Main_GetControls())->Controls_ClearUserActions();
     }
     else if (unk28 == 1)
     {
         bResult = true;
         if (Check_00702450(V13()))
             UpdateCardSelection();
-        ((FUN_00a253d0_shell*)g_osGlobals->FUN_00877720())->FUN_00a253d0();
+        ((FUN_00a253d0_shell*)g_osGlobals->Main_GetControls())->Controls_ClearUserActions();
     }
     else if (unk28 == 2)
     {
         bResult = true;
-        if (FUN_00740f10(0x1000))
+        if (IsFlagSet_00740f10(0x1000))
         {
-            if (FUN_00740f10(0x2000))
-                FUN_0074ed40(unkE30);
+            if (IsFlagSet_00740f10(0x2000))
+                DeselectWholeTrack(unkE30);
             else
-                FUN_0074edd0();
+                DeselectTrackCard();
             SetFlag(0x2000, 0);
             SetFlag(0x1000, 0);
             SetFlag(4, 0);
             SetFlag(0x10, 1);
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
         }
         else if (Check_00702450(V13()))
         {
-            ShowMessageBox(g_011d43b4.FUN_00403df0(), 0, 0, FUN_0074a270, 0, 0x17, 0.0f, 0.0f, g_011d34f8.FUN_00403df0(),
+            Interface_CreateMessageMenu(g_011d43b4.FUN_00403df0(), 0, 0, CaravanMenu_ExitCallback, 0, 0x17, 0.0f, 0.0f, g_011d34f8.FUN_00403df0(),
                          g_011d3684.FUN_00403df0(), 0);
             SetFlag(1, 1);
             bResult = true;
@@ -16037,19 +16055,19 @@ namespace fnv_0073d020 {
 struct MenuTile
 {
     void FUN_00700320(int, int);
-    void FUN_00a01350(int, const char*, bool);
+    void Tile_Set_00a01350(int, const char*, bool);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void Tile_Set(int, float, bool);
     void SetTraitAndReset(int, float);
-    MenuTile* FUN_00a03da0(const char*);
-    void SetChangeFlag(int);
+    MenuTile* Tile_GetChildByName(const char*);
+    void Tile_SetChangeFlag(int);
 };
 struct ModelNode
 {
 };
 struct Loader
 {
-    ModelNode* LoadModel(const char*, int, bool, bool, bool, bool);
+    ModelNode* ModelLoader_LoadFile(const char*, int, bool, bool, bool, bool);
 };
 extern Loader* DAT_011c3b3c;
 struct SettingText
@@ -16059,11 +16077,11 @@ struct SettingText
 extern SettingText DAT_011d2a60, DAT_011d4954, DAT_011d4168, DAT_011d2034, DAT_011d44ec, DAT_011d33fc;
 struct NameView
 {
-    const char* FUN_0055d520();
+    const char* TESObjectREFR_GetFullName();
 };
-int __cdecl FUN_00406d00(char*, int, const char*, ...);
-unsigned __cdecl FUN_0044a670(const char*);
-MenuTile* __cdecl FUN_00a08b20(MenuTile*, const char*);
+int __cdecl BSsprintf(char*, int, const char*, ...);
+unsigned __cdecl BSstrlen(const char*);
+MenuTile* __cdecl Tile_GetTileByName(MenuTile*, const char*);
 struct IntArray
 {
     int unk0, unk4, unk8, unkC;
@@ -16075,11 +16093,12 @@ extern Actor* DAT_011dea3c;
 // @fnv 0x0073d020
 }  // namespace fnv_0073d020
 
-void CaravanMenu::FUN_0073d020()
+// src: COMMUNITY 0x0073d020
+void CaravanMenu::SetupCurrency()
 {
-    using fnv_0073d020::FUN_0044a670;
-    using fnv_0073d020::FUN_00406d00;
-    using fnv_0073d020::FUN_00a08b20;
+    using fnv_0073d020::BSstrlen;
+    using fnv_0073d020::BSsprintf;
+    using fnv_0073d020::Tile_GetTileByName;
     using fnv_0073d020::DAT_011c3b3c;
     using fnv_0073d020::DAT_011d2034;
     using fnv_0073d020::DAT_011d2a60;
@@ -16098,16 +16117,16 @@ void CaravanMenu::FUN_0073d020()
     int amount;
     char path[260];
     {
-        FUN_00406d00(path, 260, "%sCurrency-Bill_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-        (*reinterpret_cast<ModelNode**>((reinterpret_cast<char*>(this) + 0x114))) = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
-        FUN_00406d00(path, 260, "%sCurrency-Coin_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-        (*reinterpret_cast<ModelNode**>((reinterpret_cast<char*>(this) + 0x118))) = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
+        BSsprintf(path, 260, "%sCurrency-Bill_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
+        (*reinterpret_cast<ModelNode**>((reinterpret_cast<char*>(this) + 0x114))) = DAT_011c3b3c->ModelLoader_LoadFile(path, 0, true, false, false, false);
+        BSsprintf(path, 260, "%sCurrency-Coin_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
+        (*reinterpret_cast<ModelNode**>((reinterpret_cast<char*>(this) + 0x118))) = DAT_011c3b3c->ModelLoader_LoadFile(path, 0, true, false, false, false);
         for (int i = 0; i < 3; i++)
         {
-            FUN_00406d00(path, 260, "%sCurrency-Bill_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", i + 1);
-            (*reinterpret_cast<ModelNode* (*)[3]>((reinterpret_cast<char*>(this) + 0x128)))[i] = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
-            FUN_00406d00(path, 260, "%sCurrency-Coin_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", i + 1);
-            (*reinterpret_cast<ModelNode* (*)[3]>((reinterpret_cast<char*>(this) + 0x11c)))[i] = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
+            BSsprintf(path, 260, "%sCurrency-Bill_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", i + 1);
+            (*reinterpret_cast<ModelNode* (*)[3]>((reinterpret_cast<char*>(this) + 0x128)))[i] = DAT_011c3b3c->ModelLoader_LoadFile(path, 0, true, false, false, false);
+            BSsprintf(path, 260, "%sCurrency-Coin_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", i + 1);
+            (*reinterpret_cast<ModelNode* (*)[3]>((reinterpret_cast<char*>(this) + 0x11c)))[i] = DAT_011c3b3c->ModelLoader_LoadFile(path, 0, true, false, false, false);
         }
         (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x28))) = 0;
         (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x2c))) = 0;
@@ -16117,28 +16136,28 @@ void CaravanMenu::FUN_0073d020()
         (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x34)))->FUN_00700320(0xfa3, 0);
         (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x38)))->FUN_00700320(0xfa3, 0);
         (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x3c)))->FUN_00700320(0xfa3, 0);
-        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xd0)))->FUN_00a01350(0xfc4, DAT_011d2a60.FUN_00403df0(), true);
-        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xd4)))->FUN_00a01350(0xfc4, DAT_011d4954.FUN_00403df0(), true);
-        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc4)))->FUN_00a01350(0xfc4, DAT_011d4168.FUN_00403df0(), true);
-        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc0)))->FUN_00a01350(0xfc4, DAT_011d2034.FUN_00403df0(), true);
-        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x4c)))->FUN_00a01350(0xfc4, DAT_011d44ec.FUN_00403df0(), true);
-        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc8)))->FUN_00a01350(0xfc4, DAT_011d33fc.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xd0)))->Tile_Set_00a01350(0xfc4, DAT_011d2a60.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xd4)))->Tile_Set_00a01350(0xfc4, DAT_011d4954.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc4)))->Tile_Set_00a01350(0xfc4, DAT_011d4168.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc0)))->Tile_Set_00a01350(0xfc4, DAT_011d2034.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x4c)))->Tile_Set_00a01350(0xfc4, DAT_011d44ec.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc8)))->Tile_Set_00a01350(0xfc4, DAT_011d33fc.FUN_00403df0(), true);
         ComputePlayerAndTargetTotals();
         (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae0))) = (int)((*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x110))) * (*reinterpret_cast<float*>((reinterpret_cast<char*>(this) + 0x10c))));
-        if (FUN_0044a670((*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->FUN_0055d520()) > 17)
+        if (BSstrlen((*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->TESObjectREFR_GetFullName()) > 17)
         {
-            int value = FUN_0044a670((*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->FUN_0055d520()) - 17;
+            int value = BSstrlen((*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->TESObjectREFR_GetFullName()) - 17;
             value *= 15;
-            MenuTile* extra = FUN_00a08b20((*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40))), "CBM_NPCBetValue");
-            extra->FUN_00a012d0(0xfa1, extra->FUN_00a011b0(0xfa1) + value, true);
+            MenuTile* extra = Tile_GetTileByName((*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40))), "CBM_NPCBetValue");
+            extra->Tile_Set(0xfa1, extra->FUN_00a011b0(0xfa1) + value, true);
         }
-        MenuTile* info = (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x30)))->FUN_00a03da0("CBM_InfoRect");
+        MenuTile* info = (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x30)))->Tile_GetChildByName("CBM_InfoRect");
         if (info)
         {
-            info->FUN_00a012d0(0xfb1, info->FUN_00a011b0(0xfb1) + 150.0, true);
-            info->SetChangeFlag(16);
+            info->Tile_Set(0xfb1, info->FUN_00a011b0(0xfb1) + 150.0, true);
+            info->Tile_SetChangeFlag(16);
         }
-        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40)))->FUN_00a01350(0xfc4, (*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->FUN_0055d520(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40)))->Tile_Set_00a01350(0xfc4, (*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->TESObjectREFR_GetFullName(), true);
         (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40)))->SetTraitAndReset(DAT_011d9174, 1.0f);
         (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40)))->FUN_00700320(DAT_011d9174, (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae0))));
         (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x44)))->SetTraitAndReset(DAT_011d9174, 1.0f);
@@ -16146,7 +16165,7 @@ void CaravanMenu::FUN_0073d020()
         (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x48)))->SetTraitAndReset(DAT_011d9174, 1.0f);
         (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x48)))->FUN_00700320(DAT_011d9174, (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae4))));
         UpdateControls();
-        FUN_00749a40(0);
+        UpdateTileAlpha(0);
         for (int rank = 0; rank < 9; rank++)
             (*reinterpret_cast<IntArray*>((reinterpret_cast<char*>(this) + 0x164))).FUN_007cb2e0(rank);
         for (int card = 0; card < 42; card++)
@@ -16168,8 +16187,8 @@ struct CMUpdateData
 };
 struct CMAVObject
 {
-    void FUN_00a59c60(const CMUpdateData& data);
-    struct A_Point* FUN_0045bb80();
+    void NiAVObject_Update(const CMUpdateData& data);
+    struct A_Point* NiAVObject_GetWorldTranslate();
     void FUN_00450f90(bool show);
 };
 struct CMNode : CMAVObject
@@ -16179,25 +16198,25 @@ struct CMNode : CMAVObject
 };
 struct CMNodePtr
 {
-    CMNode* FUN_00559450();
+    CMNode* Modelloader_GetReferencedThis();
 };
 struct CMAudio
 {
-    static CMAudio* __cdecl FUN_00453a70();
-    BSSoundHandle FUN_00ad7550(const char* editorID, unsigned int flags);
+    static CMAudio* __cdecl BSAudio_QInstance();
+    BSSoundHandle BSAudio_GetSoundHandleByEditorName(const char* editorID, unsigned int flags);
 };
 struct CMTile
 {
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void Tile_Set(int trait, float value, bool propagate);
     void FUN_00700320(int trait, int value);
     float FUN_00a011b0(int trait);
-    void FUN_00a01350(int trait, const char* value, bool propagate);
+    void Tile_Set_00a01350(int trait, const char* value, bool propagate);
     void SetTraitAndReset(int trait, float value);
     void FUN_00715c60(int trait, unsigned int value);
 };
 struct CMGate
 {
-    bool FUN_00718840(int id);
+    bool InterfaceManager_TutorialManager_HasBeenShown(int id);
     void SetFlag2(int id);
 };
 struct CMIntfMgr
@@ -16223,7 +16242,7 @@ struct CMIntfMgr
     int u480, u484, u488, u48c, u490, u494, u498, u49c, u4a0, u4a4, u4a8, u4ac, u4b0, u4b4, u4b8, u4bc;
     int u4c0, u4c4, u4c8, u4cc, u4d0;
     CMGate gate;
-    static bool __cdecl FUN_004b71d0();
+    static bool __cdecl InterfaceManager_Has360Controller();
     CMTile* FUN_0045cd60();
 };
 struct CMInput
@@ -16232,7 +16251,7 @@ struct CMInput
 };
 struct CMOSGlobals
 {
-    CMInput* FUN_00877720();
+    CMInput* Main_GetControls();
 };
 struct CMTime
 {
@@ -16240,9 +16259,9 @@ struct CMTime
 };
 struct CMFn
 {
-    static CMIntfMgr* __cdecl FUN_004b7210();
-    static bool __cdecl FUN_00702450(unsigned int menuID);
-    static float __cdecl FUN_00408820(float v);
+    static CMIntfMgr* __cdecl InterfaceManager_GetSingleton();
+    static bool __cdecl Interface_IsTopMenuID(unsigned int menuID);
+    static float __cdecl NiAbs_00408820(float v);
 };
 extern float DAT_011d9208;
 extern unsigned int DAT_011d9204;
@@ -16257,7 +16276,7 @@ struct A_NodeList
     CMAVObject** data;
     unsigned int size, capacity, grow;
     unsigned int FUN_0044ddc0();
-    CMAVObject*& FUN_006a7ad0(unsigned int index);
+    CMAVObject*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int index);
 };
 struct A_Point
 {
@@ -16265,8 +16284,8 @@ struct A_Point
 };
 struct A_Fn
 {
-    static CMTile* __cdecl FUN_00a08b20(CMTile* tile, const char* name);
-    static CMAVObject* __cdecl FUN_004aae30(CMAVObject* root, const char* name);
+    static CMTile* __cdecl Tile_GetTileByName(CMTile* tile, const char* name);
+    static CMAVObject* __cdecl BSUtilities_GetObjectByName(CMAVObject* root, const char* name);
     static bool __cdecl InitTutorialMenu(BGSMessage* msg, int a);
 };
 struct A_Setting
@@ -16276,7 +16295,7 @@ struct A_Setting
 extern A_Setting g_011d372c;
 struct B_Seq
 {
-    float FUN_00508100();
+    float GetEndKeyTime_00508100();
 };
 struct B_CtrlMgr
 {
@@ -16292,11 +16311,11 @@ struct B_Fn
 struct C_Card
 {
     int FUN_008d80e0();
-    unsigned int FUN_004036b0();
+    unsigned int TES_QPlaceableWaterCount();
 };
 struct D_Seq
 {
-    float FUN_00508100();
+    float GetEndKeyTime_00508100();
 };
 struct D_SeqPair
 {
@@ -16314,22 +16333,22 @@ struct D_Array
     int* data;
     unsigned int size, capacity;
     unsigned int FUN_0044ddc0();
-    int& FUN_006a7ad0(int index);
+    int& BSSimpleArray_NiAVObject_1024_GetAt(int index);
     unsigned int FUN_007cb2e0(int& item);
     void FUN_008454f0(bool freeMem);
-    void FUN_006bf8f0(unsigned int index, bool shift);
+    void BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned int index, bool shift);
 };
 extern const float DAT_01012054 = -1.0f;
 struct E_Move
 {
     int u00, u04, kind, lane, slot, card, priority;
     int FUN_0044ddc0();
-    int FUN_0084e3a0();
-    int FUN_0044edb0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    int TESMain_GetThread();
     int FUN_00825c00();
     void FUN_0041fd00(int lane);
     void FUN_00437730(int slot);
-    void FUN_0073b730(D_Array* list);
+    void CaravanAIPackage_Print_WhatIsHeThinking(D_Array* list);
 };
 struct E_Marker
 {
@@ -16337,23 +16356,23 @@ struct E_Marker
 };
 struct E_Wager
 {
-    float FUN_00639aa0();
+    float TESCombatStyle_GetTargetingFOV();
     int GetPickCursorX();
 };
 struct E_Input
 {
-    int FUN_00a23a50(int device, int button);
+    int Controls_GetMouseButton(int device, int button);
 };
 struct E_OSGlobals
 {
-    E_Input* FUN_00877720();
+    E_Input* Main_GetControls();
 };
 struct E_Fn
 {
-    static CMAVObject* __cdecl FUN_004aae30(CMAVObject* root, const char* name);
+    static CMAVObject* __cdecl BSUtilities_GetObjectByName(CMAVObject* root, const char* name);
     static unsigned int __cdecl FUN_00944460(int lo, int hi);
     static int __cdecl FUN_00ec7d40(int v);
-    static int __cdecl FUN_00a01860(const char* name);
+    static int __cdecl Tile_TextToTrait(const char* name);
     static float __cdecl FUN_00715d40();
     static float __cdecl FUN_00408840(float v);
 };
@@ -16470,42 +16489,43 @@ struct CaravanGame
     bool deckChanged;
     char ue87;
     void SetFlag(int flags, int set);
-    bool FUN_00740f10(unsigned int flag);
-    void FUN_00749a40(int index);
+    bool IsFlagSet_00740f10(unsigned int flag);
+    void UpdateTileAlpha(int index);
     void UpdateControls();
     CMTile* FUN_00726070();
     void FUN_00a1d910();
-    void FUN_00a1d9e0();
+    void InstantFadeOut();
     int FUN_0059bb30();
     void ClearField();
     void UpdateCardSlots(int value, bool flag);
     void UpdateIconResources(int value);
-    void FUN_0073ea90();
+    void PrepareGameMenu();
     void UpdateCardTexture();
     void UpdateSelection(int a);
     void UpdateDeckCardNodes(bool player, bool flag);
     void UpdateHandStats(int lane);
-    void FUN_0074e220(int lane, int col, int index);
+    void UpdateTrackCardTexture(int lane, int col, int index);
     bool CheckCaravanResult();
-    void FUN_0074fdc0(E_Move* move);
+    void CaravanMenu_ProcessAI(E_Move* move);
     void UpdateDeckTextures(int a);
     void UpdateCaravanMenu();
-    void FUN_0074ed40(int lane);
-    void FUN_0074ecb0(int lane);
+    void DeselectWholeTrack(int lane);
+    void SelectWholeTrack(int lane);
     void MoveSelection(int dx, int dy);
     virtual bool HandleSpecialKeyInput(int code, float value);
-    void FUN_00741500();
+    void CaravanMenu_DoIdle();
 };
 // Advances the CaravanGame state machine, driving animation sequences, input handling, and card movement based on the current state and mode.
 // @fnv 0x00741500
-void CaravanGame::FUN_00741500()
+// src: XBOX_PDB 0x00741500
+void CaravanGame::CaravanMenu_DoIdle()
 {
     int dt = 0;
     float scale = 1.0f;
-    bool active = CMFn::FUN_00702450(GetID());
+    bool active = CMFn::Interface_IsTopMenuID(GetID());
     if (helpPending)
     {
-        if (active && CMFn::FUN_004b7210()->gate.FUN_00718840(helpMessage))
+        if (active && CMFn::InterfaceManager_GetSingleton()->gate.InterfaceManager_TutorialManager_HasBeenShown(helpMessage))
             helpPending = false;
         else
             return;
@@ -16536,22 +16556,22 @@ void CaravanGame::FUN_00741500()
     int minIndex = 0x7fff;
     float mx = 0.0f;
     float my = 0.0f;
-    if (CMFn::FUN_004b7210()->FUN_004b71d0())
+    if (CMFn::InterfaceManager_GetSingleton()->InterfaceManager_Has360Controller())
     {
-        padX = ((CMOSGlobals*)g_osGlobals)->FUN_00877720()->GetAxisState(0, 7);
-        padY = ((CMOSGlobals*)g_osGlobals)->FUN_00877720()->GetAxisState(0, 8);
-        if (CMFn::FUN_00408820((float)padX) <= DAT_010718f0)
+        padX = ((CMOSGlobals*)g_osGlobals)->Main_GetControls()->GetAxisState(0, 7);
+        padY = ((CMOSGlobals*)g_osGlobals)->Main_GetControls()->GetAxisState(0, 8);
+        if (CMFn::NiAbs_00408820((float)padX) <= DAT_010718f0)
             padX = 0;
         mx = padX / DAT_01029790;
-        if (CMFn::FUN_00408820((float)padY) <= DAT_010718f0)
+        if (CMFn::NiAbs_00408820((float)padY) <= DAT_010718f0)
             padY = 0;
         my = -padY / DAT_01029790;
     }
     startTime = DAT_011f6394.FUN_00825c00();
     DAT_011d9204 = state;
     if (!active || mode == 1)
-        CMFn::FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
-    if (FUN_00740f10(0x20000))
+        CMFn::InterfaceManager_GetSingleton()->FUN_0045cd60()->Tile_Set(0xfa9, 255.0f, true);
+    if (IsFlagSet_00740f10(0x20000))
     {
         if (active)
         {
@@ -16568,12 +16588,12 @@ void CaravanGame::FUN_00741500()
     case 23:
         if (FUN_0059bb30() != 2)
         {
-            CMFn::FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
+            CMFn::InterfaceManager_GetSingleton()->FUN_0045cd60()->Tile_Set(0xfa9, 255.0f, true);
             FUN_00726070()->FUN_00700320(0x1772, 1);
             FUN_00a1d910();
             DAT_011d917c = 0;
             if (DAT_011d9200)
-                FUN_00a1d9e0();
+                InstantFadeOut();
             DAT_011d9200 = true;
         }
         break;
@@ -16585,26 +16605,26 @@ void CaravanGame::FUN_00741500()
         {
             menuMgr->FUN_0047aab0(deckBuildSeq, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
         }
         if (true)
         {
             CMUpdateData ud(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(ud);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(ud);
         }
-        if (DAT_011d9208 >= deckBuildSeq->FUN_00508100())
+        if (DAT_011d9208 >= deckBuildSeq->GetEndKeyTime_00508100())
         {
             state = 0;
             menuMgr->FUN_0047b220(deckBuildSeq, 0.0f);
             SetFlag(1, 0);
-            FUN_00749a40(-1);
-            if (!CMFn::FUN_004b7210()->gate.FUN_00718840(0x1f))
+            UpdateTileAlpha(-1);
+            if (!CMFn::InterfaceManager_GetSingleton()->gate.InterfaceManager_TutorialManager_HasBeenShown(0x1f))
             {
                 BGSMessage* msg = dynamic_cast<BGSMessage*>(CdeclFns::FUN_00483a00("HelpCaravanDeckBuilding"));
                 if (msg)
                 {
                     helpPending = A_Fn::InitTutorialMenu(msg, 0);
-                    CMFn::FUN_004b7210()->gate.SetFlag2(0x1f);
+                    CMFn::InterfaceManager_GetSingleton()->gate.SetFlag2(0x1f);
                     helpMessage = 0x1f;
                 }
             }
@@ -16623,20 +16643,20 @@ void CaravanGame::FUN_00741500()
             sideMgr[0]->FUN_0047aab0(sideSeq[0][0], 0, false, 1.0f, 0.0f, 0);
             sideMgr[1]->FUN_0047aab0(sideSeq[1][0], 0, false, 1.0f, 0.0f, 0);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanStartMatch", 0x121).Play(false);
-            FUN_00749a40(-1);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanStartMatch", 0x121).Play(false);
+            UpdateTileAlpha(-1);
         }
         if (true)
         {
             CMUpdateData udWorld(DAT_011d9208, true, false);
             CMUpdateData udA(DAT_011d9208, true, false);
             CMUpdateData udB(DAT_011d9208, true, false);
-            sideNode[0]->FUN_00a59c60(udA);
-            sideNode[1]->FUN_00a59c60(udB);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udWorld);
+            sideNode[0]->NiAVObject_Update(udA);
+            sideNode[1]->NiAVObject_Update(udB);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udWorld);
         }
-        if (DAT_011d9208 >= startSeq->FUN_00508100() && DAT_011d9208 >= sideSeq[0][0]->FUN_00508100() &&
-            DAT_011d9208 >= sideSeq[1][0]->FUN_00508100())
+        if (DAT_011d9208 >= startSeq->GetEndKeyTime_00508100() && DAT_011d9208 >= sideSeq[0][0]->GetEndKeyTime_00508100() &&
+            DAT_011d9208 >= sideSeq[1][0]->GetEndKeyTime_00508100())
         {
             menuMgr->FUN_0047b220(startSeq, 0.0f);
             sideMgr[0]->FUN_0047b220(sideSeq[0][0], 0.0f);
@@ -16645,29 +16665,29 @@ void CaravanGame::FUN_00741500()
             float x = 0.0f;
             float y = 0.0f;
             int tileWidth = (int)mainTile->FUN_00a011b0(0xfb1);
-            CMAVObject* sel = A_Fn::FUN_004aae30(sceneRoot, "Select1_01:0");
-            ((CMNodePtr*)&g_011d91a8)->FUN_00559450()->ProjectToScreen(sel->FUN_0045bb80(), &x, &y, 1e-05f);
+            CMAVObject* sel = A_Fn::BSUtilities_GetObjectByName(sceneRoot, "Select1_01:0");
+            ((CMNodePtr*)&g_011d91a8)->Modelloader_GetReferencedThis()->ProjectToScreen(sel->NiAVObject_GetWorldTranslate(), &x, &y, 1e-05f);
             x = tileWidth * x - DAT_010718b8;
-            laneTile0->FUN_00a012d0(0xfa1, x, true);
-            laneTile5->FUN_00a012d0(0xfa1, x, true);
+            laneTile0->Tile_Set(0xfa1, x, true);
+            laneTile5->Tile_Set(0xfa1, x, true);
             x += DAT_010718b0;
-            laneTile1->FUN_00a012d0(0xfa1, x, true);
-            laneTile4->FUN_00a012d0(0xfa1, x, true);
+            laneTile1->Tile_Set(0xfa1, x, true);
+            laneTile4->Tile_Set(0xfa1, x, true);
             x += DAT_010718b0;
-            laneTile2->FUN_00a012d0(0xfa1, x, true);
-            laneTile3->FUN_00a012d0(0xfa1, x, true);
-            A_Fn::FUN_00a08b20(mainTile, "CGM_NPCTrackRect")->FUN_00700320(0xfa3, 1);
-            A_Fn::FUN_00a08b20(mainTile, "CGM_PlayerTrackRect")->FUN_00700320(0xfa3, 1);
+            laneTile2->Tile_Set(0xfa1, x, true);
+            laneTile3->Tile_Set(0xfa1, x, true);
+            A_Fn::Tile_GetTileByName(mainTile, "CGM_NPCTrackRect")->FUN_00700320(0xfa3, 1);
+            A_Fn::Tile_GetTileByName(mainTile, "CGM_PlayerTrackRect")->FUN_00700320(0xfa3, 1);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             state = 0x15;
-            if (!CMFn::FUN_004b7210()->gate.FUN_00718840(0x20))
+            if (!CMFn::InterfaceManager_GetSingleton()->gate.InterfaceManager_TutorialManager_HasBeenShown(0x20))
             {
                 BGSMessage* msg = dynamic_cast<BGSMessage*>(CdeclFns::FUN_00483a00("HelpCaravanStartingCaravans"));
                 if (msg)
                 {
                     helpPending = A_Fn::InitTutorialMenu(msg, 0);
-                    CMFn::FUN_004b7210()->gate.SetFlag2(0x20);
+                    CMFn::InterfaceManager_GetSingleton()->gate.SetFlag2(0x20);
                     helpMessage = 0x20;
                 }
             }
@@ -16682,22 +16702,22 @@ void CaravanGame::FUN_00741500()
         {
             menuMgr->FUN_0047aab0(setupDoneSeq, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
         }
         if (true)
         {
             CMUpdateData ud(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(ud);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(ud);
         }
-        if (DAT_011d9208 >= setupDoneSeq->FUN_00508100())
+        if (DAT_011d9208 >= setupDoneSeq->GetEndKeyTime_00508100())
         {
             state = 0;
             mode = 3;
             menuMgr->FUN_0047b220(setupDoneSeq, 0.0f);
             SetFlag(0x4000, 0);
-            infoTile->FUN_00a01350(0xfc4, g_011d372c.FUN_00403df0(), true);
+            infoTile->Tile_Set_00a01350(0xfc4, g_011d372c.FUN_00403df0(), true);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
         }
         break;
     }
@@ -16706,14 +16726,14 @@ void CaravanGame::FUN_00741500()
         if (DAT_011d9208 == DAT_01012060)
         {
             SetFlag(1, 1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanFundsDrop", 0x121).Play(false);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanFundsDrop", 0x121).Play(false);
         }
         if (true)
         {
             for (unsigned int i = chipsBShown; i < chipsB.FUN_0044ddc0(); i++)
-                chipsB.FUN_006a7ad0(i)->FUN_00a59c60(CMUpdateData(DAT_011d9208, true, false));
+                chipsB.BSSimpleArray_NiAVObject_1024_GetAt(i)->NiAVObject_Update(CMUpdateData(DAT_011d9208, true, false));
             for (unsigned int j = chipsAShown; j < chipsA.FUN_0044ddc0(); j++)
-                chipsA.FUN_006a7ad0(j)->FUN_00a59c60(CMUpdateData(DAT_011d9208, true, false));
+                chipsA.BSSimpleArray_NiAVObject_1024_GetAt(j)->NiAVObject_Update(CMUpdateData(DAT_011d9208, true, false));
         }
         if (DAT_011d9208 > 1.0)
         {
@@ -16733,28 +16753,28 @@ void CaravanGame::FUN_00741500()
             boardMgrB->FUN_0047aab0(scrollUpSeqB, 0, false, 1.0f, 0.0f, 0);
             boardMgrA->FUN_0047aab0(scrollUpSeqA, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             scrollPos--;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanNavigate", 0x121).Play(false);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanNavigate", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData udSceneRoot(DAT_011d9208, true, false);
             CMUpdateData udBoardB(DAT_011d9208, true, false);
             CMUpdateData udBoardA(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
         }
-        if (DAT_011d9208 >= scrollUpSeqB->FUN_00508100())
+        if (DAT_011d9208 >= scrollUpSeqB->GetEndKeyTime_00508100())
         {
             UpdateCardSlots(rootTile->FUN_00a011b0(DAT_011d9170) - scrollPos, false);
             CMUpdateData udSceneRoot(0.0f, true, false);
             CMUpdateData udBoardB(0.0f, true, false);
             CMUpdateData udBoardA(0.0f, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
             if (scrollPos <= 0)
             {
                 state = 0;
@@ -16762,7 +16782,7 @@ void CaravanGame::FUN_00741500()
                 boardMgrA->FUN_0047b220(scrollUpSeqA, 0.0f);
                 SetFlag(1, 0);
                 UpdateControls();
-                FUN_00749a40(-1);
+                UpdateTileAlpha(-1);
             }
             else
             {
@@ -16782,21 +16802,21 @@ void CaravanGame::FUN_00741500()
             boardMgrB->FUN_0047aab0(scrollDownSeqB, 0, false, 1.0f, 0.0f, 0);
             boardMgrA->FUN_0047aab0(scrollDownSeqA, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             scrollPos--;
             UpdateCardSlots(rootTile->FUN_00a011b0(DAT_011d9170) + scrollPos, false);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanNavigate", 0x121).Play(false);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanNavigate", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData udSceneRoot(DAT_011d9208, true, false);
             CMUpdateData udBoardB(DAT_011d9208, true, false);
             CMUpdateData udBoardA(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
         }
-        if (DAT_011d9208 >= scrollDownSeqB->FUN_00508100())
+        if (DAT_011d9208 >= scrollDownSeqB->GetEndKeyTime_00508100())
         {
             if (scrollPos <= 0)
             {
@@ -16805,7 +16825,7 @@ void CaravanGame::FUN_00741500()
                 boardMgrA->FUN_0047b220(scrollDownSeqA, 0.0f);
                 SetFlag(1, 0);
                 UpdateControls();
-                FUN_00749a40(-1);
+                UpdateTileAlpha(-1);
             }
             else
             {
@@ -16817,7 +16837,7 @@ void CaravanGame::FUN_00741500()
                     boardMgrA->FUN_0047b220(scrollUpSeqA, 0.0f);
                     SetFlag(1, 0);
                     UpdateControls();
-                    FUN_00749a40(-1);
+                    UpdateTileAlpha(-1);
                 }
                 else
                 {
@@ -16839,26 +16859,26 @@ void CaravanGame::FUN_00741500()
             boardMgrB->FUN_0047aab0(changeDeckSeqB0, 0, false, 1.0f, 0.0f, 0);
             boardMgrA->FUN_0047aab0(changeDeckSeqA0, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
-            FUN_00749a40(-1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).Play(false);
+            UpdateTileAlpha(-1);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanChangeDeck", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData udSceneRoot(DAT_011d9208, true, false);
             CMUpdateData udBoardB(DAT_011d9208, true, false);
             CMUpdateData udBoardA(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
         }
-        if (DAT_011d9208 >= changeDeckSeqB0->FUN_00508100())
+        if (DAT_011d9208 >= changeDeckSeqB0->GetEndKeyTime_00508100())
         {
             state = 0;
             boardMgrB->FUN_0047b220(changeDeckSeqB0, 0.0f);
             boardMgrA->FUN_0047b220(changeDeckSeqA0, 0.0f);
             SetFlag(1, 0);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             pendingAction = 0;
         }
         break;
@@ -16872,19 +16892,19 @@ void CaravanGame::FUN_00741500()
             boardMgrB->FUN_0047aab0(changeDeckSeqB, 0, false, 1.0f, 0.0f, 0);
             boardMgrA->FUN_0047aab0(changeDeckSeqA, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
-            FUN_00749a40(-1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).Play(false);
+            UpdateTileAlpha(-1);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanChangeDeck", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData udSceneRoot(DAT_011d9208, true, false);
             CMUpdateData udBoardB(DAT_011d9208, true, false);
             CMUpdateData udBoardA(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
         }
-        if (DAT_011d9208 >= changeDeckSeqB->FUN_00508100())
+        if (DAT_011d9208 >= changeDeckSeqB->GetEndKeyTime_00508100())
         {
             state = 0;
             UpdateCardSlots(rootTile->FUN_00a011b0(DAT_011d9170), false);
@@ -16892,7 +16912,7 @@ void CaravanGame::FUN_00741500()
             boardMgrA->FUN_0047b220(changeDeckSeqA, 0.0f);
             SetFlag(1, 0);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             pendingAction = 0;
         }
         break;
@@ -16906,33 +16926,33 @@ void CaravanGame::FUN_00741500()
             boardMgrB->FUN_0047aab0(addRemoveSeqB, 0, false, 1.0f, 0.0f, 0);
             boardMgrA->FUN_0047aab0(addRemoveSeqA, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
-            FUN_00749a40(-1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddRemove", 0x121).Play(false);
+            UpdateTileAlpha(-1);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanAddRemove", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData udSceneRoot(DAT_011d9208, true, false);
             CMUpdateData udBoardB(DAT_011d9208, true, false);
             CMUpdateData udBoardA(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
         }
-        if (DAT_011d9208 >= addRemoveSeqB->FUN_00508100())
+        if (DAT_011d9208 >= addRemoveSeqB->GetEndKeyTime_00508100())
         {
             state = 0;
             UpdateIconResources(0xb);
             CMUpdateData udSceneRoot(0.0f, true, false);
             CMUpdateData udBoardB(0.0f, true, false);
             CMUpdateData udBoardA(0.0f, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
             boardMgrB->FUN_0047b220(addRemoveSeqB, 0.0f);
             boardMgrA->FUN_0047b220(addRemoveSeqA, 0.0f);
             SetFlag(1, 0);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
         }
         break;
     }
@@ -16945,41 +16965,41 @@ void CaravanGame::FUN_00741500()
             boardMgrB->FUN_0047aab0(deckDoneSeqB, 0, false, 1.0f, 0.0f, 0);
             boardMgrA->FUN_0047aab0(deckDoneSeqA, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
-            FUN_00749a40(-1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).Play(false);
+            UpdateTileAlpha(-1);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanChangeDeck", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData udSceneRoot(DAT_011d9208, true, false);
             CMUpdateData udBoardB(DAT_011d9208, true, false);
             CMUpdateData udBoardA(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
         }
-        if (DAT_011d9208 >= deckDoneSeqB->FUN_00508100())
+        if (DAT_011d9208 >= deckDoneSeqB->GetEndKeyTime_00508100())
         {
             state = 0;
             UpdateIconResources(0xb);
             CMUpdateData udSceneRoot(DAT_011d9208, true, false);
             CMUpdateData udBoardB(DAT_011d9208, true, false);
             CMUpdateData udBoardA(DAT_011d9208, true, false);
-            g_011d91e4.FUN_00559450()->FUN_0043b4a0(0)->FUN_00a59c60(udSceneRoot);
-            boardNodeB->FUN_00a59c60(udBoardB);
-            boardNodeA->FUN_00a59c60(udBoardA);
+            g_011d91e4.Modelloader_GetReferencedThis()->FUN_0043b4a0(0)->NiAVObject_Update(udSceneRoot);
+            boardNodeB->NiAVObject_Update(udBoardB);
+            boardNodeA->NiAVObject_Update(udBoardA);
             boardMgrB->FUN_0047b220(deckDoneSeqB, 0.0f);
             boardMgrA->FUN_0047b220(deckDoneSeqA, 0.0f);
             deckChanged = true;
             SetFlag(0x4000, 1);
             UpdateControls();
-            FUN_00749a40(-1);
-            FUN_0073ea90();
+            UpdateTileAlpha(-1);
+            PrepareGameMenu();
         }
         break;
     }
     // group B
     case 11: {
-        int side = FUN_00740f10(0x4000);
+        int side = IsFlagSet_00740f10(0x4000);
         if (!removeSeq[side][handIndex] || !cardSeq[curLane][curCol][animStep].in)
             break;
         if (DAT_011d9208 == DAT_01012060)
@@ -16991,38 +17011,38 @@ void CaravanGame::FUN_00741500()
                 UpdateSelection(1);
             SetFlag(1, 1);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanConfirmAddtoDeck", 0x121).Play(false);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanConfirmAddtoDeck", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData udSide(DAT_011d9208, true, false);
-            sideNode[side]->FUN_00a59c60(udSide);
+            sideNode[side]->NiAVObject_Update(udSide);
             CMUpdateData udCardSlot(DAT_011d9208, true, false);
-            cardNode[curLane][curCol]->FUN_00a59c60(udCardSlot);
+            cardNode[curLane][curCol]->NiAVObject_Update(udCardSlot);
         }
-        if (DAT_011d9208 >= removeSeq[side][handIndex]->FUN_00508100() &&
-            DAT_011d9208 >= cardSeq[curLane][curCol][animStep].in->FUN_00508100())
+        if (DAT_011d9208 >= removeSeq[side][handIndex]->GetEndKeyTime_00508100() &&
+            DAT_011d9208 >= cardSeq[curLane][curCol][animStep].in->GetEndKeyTime_00508100())
         {
             sideMgr[side]->FUN_0047b220(removeSeq[side][handIndex], 0.0f);
             cardCtrl[curLane][curCol]->FUN_0047b220(cardSeq[curLane][curCol][animStep].in, 0.0f);
-            if ((cardList[2][0].FUN_0044ddc0() && !FUN_00740f10(0x4000)) ||
-                (cardList[3][0].FUN_0044ddc0() && FUN_00740f10(0x4000)))
+            if ((cardList[2][0].FUN_0044ddc0() && !IsFlagSet_00740f10(0x4000)) ||
+                (cardList[3][0].FUN_0044ddc0() && IsFlagSet_00740f10(0x4000)))
             {
-                UpdateDeckCardNodes(!FUN_00740f10(0x4000), FUN_00740f10(0x800));
+                UpdateDeckCardNodes(!IsFlagSet_00740f10(0x4000), IsFlagSet_00740f10(0x800));
                 sideMgr[side]->FUN_0047aab0(sideSeq[side][1], 0, false, 1.0f, 0.0f, 0);
                 CMUpdateData udWar(0.0f, true, false);
-                sideNode[side]->FUN_00a59c60(udWar);
+                sideNode[side]->NiAVObject_Update(udWar);
                 sideMgr[side]->FUN_0047b220(sideSeq[side][1], 0.0f);
-                if (!FUN_00740f10(0x4000) && cardList[2][0].FUN_0044ddc0() && cardList[3][0].FUN_0044ddc0())
+                if (!IsFlagSet_00740f10(0x4000) && cardList[2][0].FUN_0044ddc0() && cardList[3][0].FUN_0044ddc0())
                 {
                     SetFlag(0x800, 0);
-                    if (!CMFn::FUN_004b7210()->gate.FUN_00718840(0x21))
+                    if (!CMFn::InterfaceManager_GetSingleton()->gate.InterfaceManager_TutorialManager_HasBeenShown(0x21))
                     {
                         BGSMessage* msg = dynamic_cast<BGSMessage*>(B_Fn::FUN_00483a00("HelpCaravanContractWar"));
                         if (msg)
                         {
                             helpPending = B_Fn::InitTutorialMenu(msg, 0);
-                            CMFn::FUN_004b7210()->gate.SetFlag2(0x21);
+                            CMFn::InterfaceManager_GetSingleton()->gate.SetFlag2(0x21);
                             helpMessage = 0x21;
                         }
                     }
@@ -17030,10 +17050,10 @@ void CaravanGame::FUN_00741500()
             }
             else
             {
-                UpdateDeckCardNodes(!FUN_00740f10(0x4000), true);
+                UpdateDeckCardNodes(!IsFlagSet_00740f10(0x4000), true);
                 sideMgr[side]->FUN_0047aab0(removeSeq[side][0], 0, false, 1.0f, 0.0f, 0);
                 CMUpdateData udDeck(0.0f, true, false);
-                sideNode[side]->FUN_00a59c60(udDeck);
+                sideNode[side]->NiAVObject_Update(udDeck);
                 sideMgr[side]->FUN_0047b220(removeSeq[side][0], 0.0f);
             }
             sideMgr[side]->FUN_0048fef0(0.0f);
@@ -17041,20 +17061,20 @@ void CaravanGame::FUN_00741500()
             {
                 handIndex = hand.FUN_0044ddc0() - 1;
                 UpdateSelection(0);
-                if (FUN_00740f10(0x800) && ((C_Card*)hand.FUN_006a7ad0(handIndex))->FUN_008d80e0() > 10)
+                if (IsFlagSet_00740f10(0x800) && ((C_Card*)hand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex))->FUN_008d80e0() > 10)
                     SetFlag(4, 1);
             }
             sideTile[side]->SetTraitAndReset(DAT_011d9174, 1.0f);
             sideTile[side]->FUN_00715c60(DAT_011d9174, side == 0 ? deck[0].FUN_0044ddc0() : deck[1].FUN_0044ddc0());
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             state = 0x15;
         }
         break;
     }
     // group C
     case 12: {
-        int side = FUN_00740f10(0x4000);
+        int side = IsFlagSet_00740f10(0x4000);
         if (!removeSeq[side][handIndex])
             break;
         if (DAT_011d9208 == DAT_01012060)
@@ -17064,31 +17084,31 @@ void CaravanGame::FUN_00741500()
                 UpdateSelection(true);
             SetFlag(1, 1);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).Play(false);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanRemoveCard", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData ud(DAT_011d9208, true, false);
-            sideNode[side]->FUN_00a59c60(ud);
+            sideNode[side]->NiAVObject_Update(ud);
         }
-        if (DAT_011d9208 >= removeSeq[side][handIndex]->FUN_00508100())
+        if (DAT_011d9208 >= removeSeq[side][handIndex]->GetEndKeyTime_00508100())
         {
             sideMgr[side]->FUN_0047b220(removeSeq[side][handIndex], 0.0f);
-            if ((cardList[2][0].FUN_0044ddc0() && !FUN_00740f10(0x4000)) ||
-                (cardList[3][0].FUN_0044ddc0() && FUN_00740f10(0x4000)))
+            if ((cardList[2][0].FUN_0044ddc0() && !IsFlagSet_00740f10(0x4000)) ||
+                (cardList[3][0].FUN_0044ddc0() && IsFlagSet_00740f10(0x4000)))
             {
-                UpdateDeckCardNodes(!FUN_00740f10(0x4000), FUN_00740f10(0x800));
+                UpdateDeckCardNodes(!IsFlagSet_00740f10(0x4000), IsFlagSet_00740f10(0x800));
                 sideMgr[side]->FUN_0047aab0(sideSeq[side][1], 0, false, 1.0f, 0.0f, 0);
                 CMUpdateData ud(0.0f, true, false);
-                sideNode[side]->FUN_00a59c60(ud);
+                sideNode[side]->NiAVObject_Update(ud);
                 sideMgr[side]->FUN_0047b220(sideSeq[side][1], 0.0f);
             }
             else
             {
-                UpdateDeckCardNodes(!FUN_00740f10(0x4000), true);
+                UpdateDeckCardNodes(!IsFlagSet_00740f10(0x4000), true);
                 sideMgr[side]->FUN_0047aab0(removeSeq[side][0], 0, false, 1.0f, 0.0f, 0);
                 CMUpdateData ud(0.0f, true, false);
-                sideNode[side]->FUN_00a59c60(ud);
+                sideNode[side]->NiAVObject_Update(ud);
                 sideMgr[side]->FUN_0047b220(removeSeq[side][0], 0.0f);
             }
             sideMgr[side]->FUN_0048fef0(0.0f);
@@ -17096,14 +17116,14 @@ void CaravanGame::FUN_00741500()
             {
                 handIndex = hand.FUN_0044ddc0() - 1;
                 UpdateSelection(false);
-                if (FUN_00740f10(0x800) && ((C_Card*)hand.FUN_006a7ad0(handIndex))->FUN_008d80e0() > 10)
+                if (IsFlagSet_00740f10(0x800) && ((C_Card*)hand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex))->FUN_008d80e0() > 10)
                     SetFlag(4, 1);
             }
             sideTile[side]->SetTraitAndReset(DAT_011d9174, 1.0f);
             sideTile[side]->FUN_00715c60(DAT_011d9174, side == 0 ? deck[0].FUN_0044ddc0() : deck[1].FUN_0044ddc0());
             UpdateControls();
-            FUN_00749a40(-1);
-            if (FUN_00740f10(0x4000))
+            UpdateTileAlpha(-1);
+            if (IsFlagSet_00740f10(0x4000))
             {
                 state = 0x15;
             }
@@ -17117,7 +17137,7 @@ void CaravanGame::FUN_00741500()
     }
     // group C
     case 13: {
-        int side = FUN_00740f10(0x4000);
+        int side = IsFlagSet_00740f10(0x4000);
         if (!sideSeq[side][handIndex + 1] || !cardSeq[curLane][curCol][animStep].in)
             break;
         if (DAT_011d9208 == DAT_01012060)
@@ -17132,30 +17152,30 @@ void CaravanGame::FUN_00741500()
                 UpdateSelection(true);
             SetFlag(1, 1);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanConfirmAddToTrack", 0x121).Play(false);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanConfirmAddToTrack", 0x121).Play(false);
         }
         if (true)
         {
             CMUpdateData ud(DAT_011d9208, true, false);
-            sideNode[side]->FUN_00a59c60(ud);
+            sideNode[side]->NiAVObject_Update(ud);
             CMUpdateData cardUd(DAT_011d9208, true, false);
-            cardNode[curLane][curCol]->FUN_00a59c60(cardUd);
+            cardNode[curLane][curCol]->NiAVObject_Update(cardUd);
         }
-        if (DAT_011d9208 >= sideSeq[side][handIndex]->FUN_00508100() &&
-            DAT_011d9208 >= cardSeq[curLane][curCol][animStep].in->FUN_00508100())
+        if (DAT_011d9208 >= sideSeq[side][handIndex]->GetEndKeyTime_00508100() &&
+            DAT_011d9208 >= cardSeq[curLane][curCol][animStep].in->GetEndKeyTime_00508100())
         {
             sideMgr[side]->FUN_0047b220(sideSeq[side][handIndex + 1], 0.0f);
             cardCtrl[curLane][curCol]->FUN_0047b220(cardSeq[curLane][curCol][animStep].in, 0.0f);
-            UpdateDeckCardNodes(!FUN_00740f10(0x4000), FUN_00740f10(0x800));
+            UpdateDeckCardNodes(!IsFlagSet_00740f10(0x4000), IsFlagSet_00740f10(0x800));
             sideMgr[side]->FUN_0047aab0(sideSeq[side][1], 0, false, 1.0f, 0.0f, 0);
             CMUpdateData ud(0.0f, true, false);
-            sideNode[side]->FUN_00a59c60(ud);
+            sideNode[side]->NiAVObject_Update(ud);
             sideMgr[side]->FUN_0047b220(sideSeq[side][1], 0.0f);
             if (side == 1 && playedCard->FUN_008d80e0() != 12 && playedCard->FUN_008d80e0() != 15)
             {
                 handIndex = hand.FUN_0044ddc0() - 1;
                 UpdateSelection(false);
-                if (FUN_00740f10(0x800) && ((C_Card*)hand.FUN_006a7ad0(handIndex))->FUN_008d80e0() > 10)
+                if (IsFlagSet_00740f10(0x800) && ((C_Card*)hand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex))->FUN_008d80e0() > 10)
                     SetFlag(4, 1);
             }
             else if (playedCard->FUN_008d80e0() == 12 || playedCard->FUN_008d80e0() == 15)
@@ -17165,8 +17185,8 @@ void CaravanGame::FUN_00741500()
                 state = playedCard->FUN_008d80e0() != 12 ? 0x13 : 0x11;
                 if (state == 0x13)
                 {
-                    int value = ((C_Card*)cardList[curLane][curCol].FUN_006a7ad0(0))->FUN_008d80e0();
-                    unsigned int suitType = ((C_Card*)cardList[curLane][curCol].FUN_006a7ad0(0))->FUN_004036b0();
+                    int value = ((C_Card*)cardList[curLane][curCol].BSSimpleArray_NiAVObject_1024_GetAt(0))->FUN_008d80e0();
+                    unsigned int suitType = ((C_Card*)cardList[curLane][curCol].BSSimpleArray_NiAVObject_1024_GetAt(0))->TES_QPlaceableWaterCount();
                     for (int i = 0; i < 6; i++)
                     {
                         for (int j = 0; j < 7; j++)
@@ -17175,13 +17195,13 @@ void CaravanGame::FUN_00741500()
                                 break;
                             if (value != 1)
                             {
-                                if (((C_Card*)cardList[i][j].FUN_006a7ad0(0))->FUN_008d80e0() == value &&
+                                if (((C_Card*)cardList[i][j].BSSimpleArray_NiAVObject_1024_GetAt(0))->FUN_008d80e0() == value &&
                                     (i != curLane || j != curCol))
                                     laneQueue[i].FUN_007cb2e0(j);
                             }
                             else
                             {
-                                if (((C_Card*)cardList[i][j].FUN_006a7ad0(0))->FUN_004036b0() == suitType &&
+                                if (((C_Card*)cardList[i][j].BSSimpleArray_NiAVObject_1024_GetAt(0))->TES_QPlaceableWaterCount() == suitType &&
                                     (i != curLane || j != curCol))
                                     laneQueue[i].FUN_007cb2e0(j);
                             }
@@ -17194,14 +17214,14 @@ void CaravanGame::FUN_00741500()
             sideTile[side]->SetTraitAndReset(DAT_011d9174, 1.0f);
             sideTile[side]->FUN_00715c60(DAT_011d9174, side == 0 ? deck[0].FUN_0044ddc0() : deck[1].FUN_0044ddc0());
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             state = 0x15;
         }
         break;
     }
     // group C
     case 14: {
-        int side = FUN_00740f10(0x4000);
+        int side = IsFlagSet_00740f10(0x4000);
         if (!sideSeq[side][handIndex + 1])
             break;
         if (DAT_011d9208 == DAT_01012060)
@@ -17209,12 +17229,12 @@ void CaravanGame::FUN_00741500()
             if ((side == 0 ? pickPlayer : pickOpponent) == -1)
             {
                 sideMgr[side]->FUN_0047aab0(removeSeq[side][handIndex], 0, false, 1.0f, 0.0f, 0);
-                CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).Play(false);
+                CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanRemoveCard", 0x121).Play(false);
             }
             else
             {
                 sideMgr[side]->FUN_0047aab0(sideSeq[side][handIndex + 1], 0, false, 1.0f, 0.0f, 0);
-                CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddRemoveCard", 0x121).Play(false);
+                CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanAddRemoveCard", 0x121).Play(false);
             }
             if (side == 0)
                 UpdateSelection(true);
@@ -17224,25 +17244,25 @@ void CaravanGame::FUN_00741500()
         if (true)
         {
             CMUpdateData ud(DAT_011d9208, true, false);
-            sideNode[side]->FUN_00a59c60(ud);
+            sideNode[side]->NiAVObject_Update(ud);
         }
-        if (DAT_011d9208 >= sideSeq[side][handIndex]->FUN_00508100())
+        if (DAT_011d9208 >= sideSeq[side][handIndex]->GetEndKeyTime_00508100())
         {
             UpdateDeckCardNodes(side == 0, false);
             sideMgr[side]->FUN_0047b220(sideSeq[side][handIndex + 1], 0.0f);
             sideMgr[side]->FUN_0047aab0(sideSeq[side][1], 0, false, 1.0f, 0.0f, 0);
             CMUpdateData ud(0.0f, true, false);
-            sideNode[side]->FUN_00a59c60(ud);
+            sideNode[side]->NiAVObject_Update(ud);
             sideMgr[side]->FUN_0047b220(sideSeq[side][1], 0.0f);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             sideTile[side]->SetTraitAndReset(DAT_011d9174, 1.0f);
             sideTile[side]->FUN_00715c60(DAT_011d9174, side == 0 ? deck[0].FUN_0044ddc0() : deck[1].FUN_0044ddc0());
             state = 0x15;
             handIndex = hand.FUN_0044ddc0() - 1;
-            if (FUN_00740f10(0x800) && ((C_Card*)hand.FUN_006a7ad0(handIndex))->FUN_008d80e0() > 10)
+            if (IsFlagSet_00740f10(0x800) && ((C_Card*)hand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex))->FUN_008d80e0() > 10)
                 SetFlag(4, 1);
-            if ((side == 1 && !FUN_00740f10(0x800)) || (side == 0 && FUN_00740f10(0x800)))
+            if ((side == 1 && !IsFlagSet_00740f10(0x800)) || (side == 0 && IsFlagSet_00740f10(0x800)))
                 UpdateSelection(false);
         }
         break;
@@ -17270,15 +17290,15 @@ void CaravanGame::FUN_00741500()
             }
             SetFlag(1, 1);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).Play(false);
+            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanRemoveCard", 0x121).Play(false);
         }
         for (int i = 0; i < 7; i++)
         {
             if (!cardList[curLane][i].FUN_0044ddc0())
                 break;
-            cardNode[curLane][i]->FUN_00a59c60(CMUpdateData(DAT_011d9208, true, false));
+            cardNode[curLane][i]->NiAVObject_Update(CMUpdateData(DAT_011d9208, true, false));
         }
-        if (DAT_011d9208 > cardSeq[curLane][0][animStep].out->FUN_00508100())
+        if (DAT_011d9208 > cardSeq[curLane][0][animStep].out->GetEndKeyTime_00508100())
         {
             for (int i = 0; i < 7; i++)
                 cardCtrl[curLane][i]->FUN_0047b220(cardSeq[curLane][i][animStep].out, 0.0f);
@@ -17302,7 +17322,7 @@ void CaravanGame::FUN_00741500()
                 for (int i = 0; i < 7; i++)
                     cardList[curLane][i].FUN_008454f0(true);
                 state = 0x15;
-                if (FUN_00740f10(0x4000))
+                if (IsFlagSet_00740f10(0x4000))
                 {
                     handIndex = hand.FUN_0044ddc0() - 1;
                     UpdateSelection(0);
@@ -17343,10 +17363,10 @@ void CaravanGame::FUN_00741500()
             {
                 if (!cardList[curLane][i].FUN_0044ddc0())
                     break;
-                cardNode[curLane][i]->FUN_00a59c60(CMUpdateData(DAT_011d9208, true, false));
+                cardNode[curLane][i]->NiAVObject_Update(CMUpdateData(DAT_011d9208, true, false));
             }
         }
-        if (DAT_011d9208 > cardSeq[curLane][curCol][animStep].out->FUN_00508100())
+        if (DAT_011d9208 > cardSeq[curLane][curCol][animStep].out->GetEndKeyTime_00508100())
         {
             for (int i = curCol; i < 7; i++)
                 cardCtrl[curLane][i]->FUN_0047b220(cardSeq[curLane][i][animStep].out, 0.0f);
@@ -17367,7 +17387,7 @@ void CaravanGame::FUN_00741500()
                 DAT_011d9208 = 0.0f;
             else
             {
-                if (!FUN_00740f10(0x8000))
+                if (!IsFlagSet_00740f10(0x8000))
                 {
                     for (int i = curCol; i < 6; i++)
                     {
@@ -17375,8 +17395,8 @@ void CaravanGame::FUN_00741500()
                         D_Array* next = &cardList[curLane][i + 1];
                         for (unsigned int j = 0; j < next->FUN_0044ddc0(); j++)
                         {
-                            cardList[curLane][i].FUN_007cb2e0(next->FUN_006a7ad0(j));
-                            FUN_0074e220(curLane, i, j);
+                            cardList[curLane][i].FUN_007cb2e0(next->BSSimpleArray_NiAVObject_1024_GetAt(j));
+                            UpdateTrackCardTexture(curLane, i, j);
                         }
                     }
                     cardList[curLane][6].FUN_008454f0(true);
@@ -17393,15 +17413,15 @@ void CaravanGame::FUN_00741500()
                             D_Array* next = &cardList[curLane][i + 1];
                             for (unsigned int j = 0; j < next->FUN_0044ddc0(); j++)
                             {
-                                cardList[curLane][i].FUN_007cb2e0(next->FUN_006a7ad0(j));
-                                FUN_0074e220(curLane, i, j);
+                                cardList[curLane][i].FUN_007cb2e0(next->BSSimpleArray_NiAVObject_1024_GetAt(j));
+                                UpdateTrackCardTexture(curLane, i, j);
                             }
                         }
-                        laneQueue[curLane].FUN_006bf8f0(0, true);
+                        laneQueue[curLane].BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(0, true);
                         if (laneQueue[curLane].FUN_0044ddc0() > 0)
                         {
                             int prev = colStart;
-                            colStart = laneQueue[curLane].FUN_006a7ad0(0);
+                            colStart = laneQueue[curLane].BSSimpleArray_NiAVObject_1024_GetAt(0);
                             if (colStart > prev)
                                 colStart--;
                         }
@@ -17446,10 +17466,10 @@ void CaravanGame::FUN_00741500()
             {
                 if (!cardList[curLane][i].FUN_0044ddc0())
                     break;
-                cardNode[curLane][i]->FUN_00a59c60(CMUpdateData(DAT_011d9208, true, false));
+                cardNode[curLane][i]->NiAVObject_Update(CMUpdateData(DAT_011d9208, true, false));
             }
         }
-        if (none || DAT_011d9208 > cardSeq[curLane][curCol][animStep].in->FUN_00508100())
+        if (none || DAT_011d9208 > cardSeq[curLane][curCol][animStep].in->GetEndKeyTime_00508100())
         {
             if (!none)
             {
@@ -17475,7 +17495,7 @@ void CaravanGame::FUN_00741500()
             else
             {
                 UpdateHandStats(curLane);
-                if (FUN_00740f10(0x8000))
+                if (IsFlagSet_00740f10(0x8000))
                     state = 0x13;
                 else
                     state = 0x15;
@@ -17496,7 +17516,7 @@ void CaravanGame::FUN_00741500()
         }
         else
         {
-            curCol = laneQueue[curLane].FUN_006a7ad0(0);
+            curCol = laneQueue[curLane].BSSimpleArray_NiAVObject_1024_GetAt(0);
             state = 0x11;
         }
         break;
@@ -17520,24 +17540,24 @@ void CaravanGame::FUN_00741500()
             state = 0;
             SetFlag(1, 0);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             SetFlag(0x4000, 0);
             break;
         }
         deckChanged = false;
         E_Move move;
-        FUN_0074fdc0(&move);
-        if (FUN_00740f10(0x800))
+        CaravanMenu_ProcessAI(&move);
+        if (IsFlagSet_00740f10(0x800))
         {
             if (move.FUN_0044ddc0() == 6)
             {
                 handIndex = move.FUN_00825c00();
-                playedCard = (C_Card*)oppHand.FUN_006a7ad0(handIndex);
-                int drawn = deck[1].FUN_006a7ad0(pickOpponent);
-                int old = oppHand.FUN_006a7ad0(handIndex);
-                oppHand.FUN_006bf8f0(handIndex, true);
+                playedCard = (C_Card*)oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                int drawn = deck[1].BSSimpleArray_NiAVObject_1024_GetAt(pickOpponent);
+                int old = oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                oppHand.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(handIndex, true);
                 oppHand.FUN_007cb2e0(drawn);
-                deck[1].FUN_006bf8f0(pickOpponent, true);
+                deck[1].BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(pickOpponent, true);
                 pickOpponent = E_Fn::FUN_00944460(0, deck[1].FUN_0044ddc0());
                 UpdateDeckTextures(0);
                 deckChanged = true;
@@ -17556,13 +17576,13 @@ void CaravanGame::FUN_00741500()
                 handIndex = move.FUN_00825c00();
                 curCol = 0;
                 animStep = cardList[i][curCol].FUN_0044ddc0();
-                playedCard = (C_Card*)oppHand.FUN_006a7ad0(handIndex);
+                playedCard = (C_Card*)oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
                 move.FUN_0041fd00(i);
                 move.FUN_00437730(0);
                 if ((unsigned char)DAT_011d9184)
-                    move.FUN_0073b730(&oppHand);
-                int cardId = oppHand.FUN_006a7ad0(handIndex);
-                oppHand.FUN_006bf8f0(handIndex, true);
+                    move.CaravanAIPackage_Print_WhatIsHeThinking(&oppHand);
+                int cardId = oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                oppHand.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(handIndex, true);
                 cardList[i][curCol].FUN_007cb2e0(cardId);
                 state = 0xb;
             }
@@ -17572,11 +17592,11 @@ void CaravanGame::FUN_00741500()
             if (pickOpponent != -1)
             {
                 handIndex = move.FUN_00825c00();
-                int drawn = deck[1].FUN_006a7ad0(pickOpponent);
-                int old = oppHand.FUN_006a7ad0(handIndex);
-                oppHand.FUN_006bf8f0(handIndex, true);
+                int drawn = deck[1].BSSimpleArray_NiAVObject_1024_GetAt(pickOpponent);
+                int old = oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                oppHand.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(handIndex, true);
                 oppHand.FUN_007cb2e0(drawn);
-                deck[1].FUN_006bf8f0(pickOpponent, true);
+                deck[1].BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(pickOpponent, true);
                 if (!deck[1].FUN_0044ddc0())
                     pickOpponent = -1;
                 else
@@ -17586,15 +17606,15 @@ void CaravanGame::FUN_00741500()
             else
             {
                 handIndex = move.FUN_00825c00();
-                int old = oppHand.FUN_006a7ad0(handIndex);
-                oppHand.FUN_006bf8f0(handIndex, true);
+                int old = oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                oppHand.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(handIndex, true);
                 UpdateDeckTextures(0);
             }
             state = 0xe;
         }
         else if (move.FUN_0044ddc0() == 5)
         {
-            curLane = move.FUN_0084e3a0();
+            curLane = move.GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             laneMark[curLane].value = 0;
             state = 0xf;
         }
@@ -17602,18 +17622,18 @@ void CaravanGame::FUN_00741500()
         {
             if (pickOpponent != -1)
             {
-                curLane = move.FUN_0084e3a0();
-                curCol = move.FUN_0044edb0();
+                curLane = move.GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+                curCol = move.TESMain_GetThread();
                 animStep = cardList[curLane][curCol].FUN_0044ddc0();
                 handIndex = move.FUN_00825c00();
-                playedCard = (C_Card*)oppHand.FUN_006a7ad0(handIndex);
-                int drawn = deck[1].FUN_006a7ad0(pickOpponent);
-                int cardId = oppHand.FUN_006a7ad0(handIndex);
-                oppHand.FUN_006bf8f0(handIndex, true);
+                playedCard = (C_Card*)oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                int drawn = deck[1].BSSimpleArray_NiAVObject_1024_GetAt(pickOpponent);
+                int cardId = oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                oppHand.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(handIndex, true);
                 oppHand.FUN_007cb2e0(drawn);
                 if ((unsigned char)DAT_011d9184)
-                    move.FUN_0073b730(&oppHand);
-                deck[1].FUN_006bf8f0(pickOpponent, true);
+                    move.CaravanAIPackage_Print_WhatIsHeThinking(&oppHand);
+                deck[1].BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(pickOpponent, true);
                 if (!deck[1].FUN_0044ddc0())
                     pickOpponent = -1;
                 else
@@ -17623,43 +17643,43 @@ void CaravanGame::FUN_00741500()
             }
             else
             {
-                CMAVObject* deckNode = E_Fn::FUN_004aae30(sideNode[1], "Opponent-Deck_06:5");
+                CMAVObject* deckNode = E_Fn::BSUtilities_GetObjectByName(sideNode[1], "Opponent-Deck_06:5");
                 if (deckNode)
                 {
                     deckNode->FUN_00450f90(true);
                     CMUpdateData ud(0.0f, false, false);
-                    deckNode->FUN_00a59c60(ud);
+                    deckNode->NiAVObject_Update(ud);
                 }
-                deckNode = E_Fn::FUN_004aae30(sideNode[1], "Opponent-Deck_Back:0");
+                deckNode = E_Fn::BSUtilities_GetObjectByName(sideNode[1], "Opponent-Deck_Back:0");
                 if (deckNode)
                 {
                     deckNode->FUN_00450f90(true);
                     CMUpdateData ud(0.0f, false, false);
-                    deckNode->FUN_00a59c60(ud);
+                    deckNode->NiAVObject_Update(ud);
                 }
-                deckNode = E_Fn::FUN_004aae30(sideNode[1], "Opponent-Deck_06_Shadow:0");
+                deckNode = E_Fn::BSUtilities_GetObjectByName(sideNode[1], "Opponent-Deck_06_Shadow:0");
                 if (deckNode)
                 {
                     deckNode->FUN_00450f90(true);
                     CMUpdateData ud(0.0f, false, false);
-                    deckNode->FUN_00a59c60(ud);
+                    deckNode->NiAVObject_Update(ud);
                 }
-                deckNode = E_Fn::FUN_004aae30(sideNode[1], "Opponent-Deck_Back_Shadow:0");
+                deckNode = E_Fn::BSUtilities_GetObjectByName(sideNode[1], "Opponent-Deck_Back_Shadow:0");
                 if (deckNode)
                 {
                     deckNode->FUN_00450f90(true);
                     CMUpdateData ud(0.0f, false, false);
-                    deckNode->FUN_00a59c60(ud);
+                    deckNode->NiAVObject_Update(ud);
                 }
-                curLane = move.FUN_0084e3a0();
-                curCol = move.FUN_0044edb0();
+                curLane = move.GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+                curCol = move.TESMain_GetThread();
                 animStep = cardList[curLane][curCol].FUN_0044ddc0();
                 handIndex = move.FUN_00825c00();
-                playedCard = (C_Card*)oppHand.FUN_006a7ad0(handIndex);
-                int cardId = oppHand.FUN_006a7ad0(handIndex);
-                oppHand.FUN_006bf8f0(handIndex, true);
+                playedCard = (C_Card*)oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                int cardId = oppHand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex);
+                oppHand.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(handIndex, true);
                 if ((unsigned char)DAT_011d9184)
-                    move.FUN_0073b730(&oppHand);
+                    move.CaravanAIPackage_Print_WhatIsHeThinking(&oppHand);
                 cardList[curLane][curCol].FUN_007cb2e0(cardId);
             }
             state = 0xd;
@@ -17683,14 +17703,14 @@ void CaravanGame::FUN_00741500()
                 if (pos >= 0 && pos < wagerMax)
                 {
                     scrollPos = 1;
-                    rootTile->FUN_00a012d0(DAT_011d9170, (float)pos, false);
-                    rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
+                    rootTile->Tile_Set(DAT_011d9170, (float)pos, false);
+                    rootTile->SetTraitAndReset(E_Fn::Tile_TextToTrait("_SetInCode"), 1.0f);
                     state = mx > DAT_01012060 ? 5 : 6;
                 }
             }
-            if (!CMIntfMgr::FUN_004b71d0())
+            if (!CMIntfMgr::InterfaceManager_Has360Controller())
             {
-                if (((E_Wager*)DAT_011d9180)->FUN_00639aa0() == DAT_01012060 && wagerHeld && mode == 1)
+                if (((E_Wager*)DAT_011d9180)->TESCombatStyle_GetTargetingFOV() == DAT_01012060 && wagerHeld && mode == 1)
                 {
                     scrollPos = 0;
                     wagerHeld = false;
@@ -17704,9 +17724,9 @@ void CaravanGame::FUN_00741500()
                         diff = diff / -step;
                         if (diff)
                         {
-                            rootTile->FUN_00a012d0(DAT_011d9170,
-                                                   (float)MinInt(FUN_00647b70(wagerValue + diff, 0), wagerMax), false);
-                            rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
+                            rootTile->Tile_Set(DAT_011d9170,
+                                                   (float)MinInt(BSMAX_00647b70(wagerValue + diff, 0), wagerMax), false);
+                            rootTile->SetTraitAndReset(E_Fn::Tile_TextToTrait("_SetInCode"), 1.0f);
                             if (E_Fn::FUN_00ec7d40(diff) < 5)
                             {
                                 scrollPos = E_Fn::FUN_00ec7d40(diff);
@@ -17738,7 +17758,7 @@ void CaravanGame::FUN_00741500()
                     }
                     wagerValue = cur;
                 }
-                else if (!wagerHeld && ((E_Wager*)DAT_011d9180)->FUN_00639aa0() > DAT_01012060)
+                else if (!wagerHeld && ((E_Wager*)DAT_011d9180)->TESCombatStyle_GetTargetingFOV() > DAT_01012060)
                 {
                     wagerValue = (int)rootTile->FUN_00a011b0(DAT_011d9170);
                     wagerHeld = true;
@@ -17776,8 +17796,8 @@ void CaravanGame::FUN_00741500()
                                 int pos = (int)(rootTile->FUN_00a011b0(DAT_011d9170) + padX);
                                 if (pos >= 0 && pos < wagerMax)
                                 {
-                                    rootTile->FUN_00a012d0(DAT_011d9170, (float)pos, false);
-                                    rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
+                                    rootTile->Tile_Set(DAT_011d9170, (float)pos, false);
+                                    rootTile->SetTraitAndReset(E_Fn::Tile_TextToTrait("_SetInCode"), 1.0f);
                                     state = padX > 0 ? 5 : 6;
                                     scrollPos = 1;
                                 }
@@ -17821,7 +17841,7 @@ void CaravanGame::FUN_00741500()
                 if (DAT_011d9208 - stateTimer > 0.25)
                 {
                     stateTimer = DAT_011d9208;
-                    if (!FUN_00740f10(0x1000))
+                    if (!IsFlagSet_00740f10(0x1000))
                     {
                         handIndex = (int)(mx / E_Fn::FUN_00408840(mx) + handIndex);
                         int count = hand.FUN_0044ddc0();
@@ -17829,25 +17849,25 @@ void CaravanGame::FUN_00741500()
                             handIndex = 0;
                         else if (handIndex < 0)
                             handIndex = count - 1;
-                        CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanSwitchCard", 0x121).Play(false);
+                        CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanSwitchCard", 0x121).Play(false);
                         UpdateSelection(0);
-                        if (FUN_00740f10(0x800) && ((C_Card*)hand.FUN_006a7ad0(handIndex))->FUN_008d80e0() > 10)
+                        if (IsFlagSet_00740f10(0x800) && ((C_Card*)hand.BSSimpleArray_NiAVObject_1024_GetAt(handIndex))->FUN_008d80e0() > 10)
                             SetFlag(4, 1);
                         else
                             SetFlag(4, 0);
-                        FUN_00749a40(-1);
+                        UpdateTileAlpha(-1);
                     }
-                    else if (!FUN_00740f10(0x800))
+                    else if (!IsFlagSet_00740f10(0x800))
                     {
                         int stepX = (int)(E_Fn::FUN_00408840(mx) < 1.1 ? 0.0 : mx / E_Fn::FUN_00408840(mx));
                         int stepY = (int)(E_Fn::FUN_00408840(my) < 1.1 ? 0.0 : my / E_Fn::FUN_00408840(my));
-                        if (FUN_00740f10(0x2000))
+                        if (IsFlagSet_00740f10(0x2000))
                         {
-                            FUN_0074ed40(curLane);
+                            DeselectWholeTrack(curLane);
                             curLane = curLane + stepX;
-                            curLane = MinInt(FUN_00647b70(0, curLane), 2);
-                            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanToggleTrack", 0x121).Play(false);
-                            FUN_0074ecb0(curLane);
+                            curLane = MinInt(BSMAX_00647b70(0, curLane), 2);
+                            CMAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanToggleTrack", 0x121).Play(false);
+                            SelectWholeTrack(curLane);
                         }
                         else
                             MoveSelection(stepX, stepY);
@@ -17857,12 +17877,12 @@ void CaravanGame::FUN_00741500()
         }
         else if (mode == 3)
         {
-            if (((E_OSGlobals*)g_osGlobals)->FUN_00877720()->FUN_00a23a50(0, 1) ||
-                ((E_OSGlobals*)g_osGlobals)->FUN_00877720()->FUN_00a23a50(1, 1))
+            if (((E_OSGlobals*)g_osGlobals)->Main_GetControls()->Controls_GetMouseButton(0, 1) ||
+                ((E_OSGlobals*)g_osGlobals)->Main_GetControls()->Controls_GetMouseButton(1, 1))
                 HandleSpecialKeyInput(9, 0.0f);
         }
         UpdateControls();
-        FUN_00749a40(-1);
+        UpdateTileAlpha(-1);
     }
     }
 }
@@ -17876,7 +17896,7 @@ struct xUpdateData
 struct xNode
 {
     void FUN_00450f90(bool);
-    void FUN_00a59c60(const xUpdateData&);
+    void NiAVObject_Update(const xUpdateData&);
 };
 xNode* xFUN_004aae30(xNode*, const char*);
 struct xTile
@@ -17896,16 +17916,16 @@ template <class T> struct xArr
     xArr();
     ~xArr();
     unsigned int FUN_0044ddc0();
-    T& FUN_006a7ad0(unsigned int);
-    void FUN_006bf8f0(unsigned int, bool);
+    T& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
+    void BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned int, bool);
     unsigned int FUN_007cb2e0(T&);
     void FUN_008454f0(bool);
     int m_iWordAt00, m_iWordAt04, m_8, m_iThirdValue;
 };
 struct xAudio
 {
-    static xAudio* FUN_00453a70();
-    BSSoundHandle FUN_00ad7550(const char*, unsigned int);
+    static xAudio* BSAudio_QInstance();
+    BSSoundHandle BSAudio_GetSoundHandleByEditorName(const char*, unsigned int);
 };
 struct xAVOwner
 {
@@ -17984,21 +18004,21 @@ struct xCaravan
     unsigned char m_e78;
     int m_10c_dummy;
 
-    bool FUN_00740f10(unsigned int);
+    bool IsFlagSet_00740f10(unsigned int);
     void SetFlag(int, int);
     void PlaceBillsAndCoins(int, int);
     void UpdateControls();
-    void FUN_00749a40(int);
+    void UpdateTileAlpha(int);
     void SelectCard(int, int);
     void UpdateSelection(bool);
     void MoveSelection(int, int);
-    void FUN_0074ed40(int);
-    void FUN_0074edd0();
+    void DeselectWholeTrack(int);
+    void DeselectTrackCard();
     void UpdateDeckTextures(bool);
     void InitMenu();
     void UpdateCardSlots(int, bool);
-    void FUN_0074ecb0(int);
-    bool FUN_00747d30(int aiKey, int aiUnused);
+    void SelectWholeTrack(int);
+    bool CaravanMenu_DoGamepad(int aiKey, int aiUnused);
 };
 struct xGameState
 {
@@ -18010,18 +18030,19 @@ extern xGameState* xg_11d917c;
 
 // Processes a key press for the caravan card game, updating bets, dealing cards, and managing deck and hand state based on the current game phase.
 // @fnv 0x00747d30
-bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
+// src: XBOX_PDB 0x00747d30
+bool xCaravan::CaravanMenu_DoGamepad(int aiKey, int aiUnused)
 {
     bool handled = false;
-    if (FUN_00740f10(1) || m_e78 || !FUN_00740f10(0x10000))
+    if (IsFlagSet_00740f10(1) || m_e78 || !IsFlagSet_00740f10(0x10000))
         return m_2c == 3;
-    if (FUN_00740f10(0x4000) || m_2c != 0)
+    if (IsFlagSet_00740f10(0x4000) || m_2c != 0)
         return false;
 
     switch (aiKey)
     {
     case 9:
-        if (FUN_00740f10(4))
+        if (IsFlagSet_00740f10(4))
             return false;
         if (m_28 == 3)
         {
@@ -18041,7 +18062,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
                       xg_11d917c->m_110 * xg_11d917c->m_10c * (xg_player_11dea3c->m_av.FUN_0066ef50(0x20) / 100.0));
             PlaceBillsAndCoins(CAPS, m_adc - OLDBET);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
         }
         else if (m_28 == 1)
         {
@@ -18049,13 +18070,13 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             m_50->SetTraitAndReset(xg_11d9174, 1.0f);
             m_50->FUN_00715c60(xg_11d9174, m_aec);
             int IDX = (int)m_6c->FUN_00a011b0(xg_11d9170);
-            m_a6c.FUN_006a7ad0(IDX)->SetCantOpenDoors(true);
+            m_a6c.BSSimpleArray_NiAVObject_1024_GetAt(IDX)->SetCantOpenDoors(true);
             handled = true;
             m_2c = 7;
         }
         else if (m_28 == 2)
         {
-            if (FUN_00740f10(0x800) && !FUN_00740f10(0x1000))
+            if (IsFlagSet_00740f10(0x800) && !IsFlagSet_00740f10(0x1000))
             {
                 m_e30 = 0;
                 m_e34 = 0;
@@ -18065,14 +18086,14 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
                 if (m_e30 < 3)
                     SelectCard(m_e30, m_e34);
                 UpdateSelection(true);
-                xAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddToTrack", 0x121).Play(false);
-                FUN_00749a40(-1);
+                xAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanAddToTrack", 0x121).Play(false);
+                UpdateTileAlpha(-1);
                 SetFlag(0x1000, 1);
                 handled = true;
             }
-            else if (!FUN_00740f10(0x1000))
+            else if (!IsFlagSet_00740f10(0x1000))
             {
-                xAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddToTrack", 0x121).Play(false);
+                xAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMECaravanAddToTrack", 0x121).Play(false);
                 SetFlag(0x1000, 1);
                 m_e30 = 0;
                 m_e34 = 0;
@@ -18082,28 +18103,28 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             }
             else
             {
-                if (FUN_00740f10(0x2000))
+                if (IsFlagSet_00740f10(0x2000))
                 {
-                    FUN_0074ed40(m_e30);
+                    DeselectWholeTrack(m_e30);
                     m_dec[m_e30].m_iWordAt00 = 0;
                     m_2c = 15;
                     return true;
                 }
-                if (FUN_00740f10(0x1000))
+                if (IsFlagSet_00740f10(0x1000))
                 {
-                    if (FUN_00740f10(0x800))
+                    if (IsFlagSet_00740f10(0x800))
                     {
                         SetFlag(0x1000, 0);
-                        FUN_0074edd0();
+                        DeselectTrackCard();
                         m_2c = 11;
-                        xCard* CARD1 = m_b24.FUN_006a7ad0(m_e2c);
-                        m_b24.FUN_006bf8f0(m_e2c, true);
+                        xCard* CARD1 = m_b24.BSSimpleArray_NiAVObject_1024_GetAt(m_e2c);
+                        m_b24.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(m_e2c, true);
                         m_b44[m_e30][m_e34].FUN_007cb2e0(CARD1);
                     }
                     else
                     {
                         SetFlag(0x1000, 0);
-                        FUN_0074edd0();
+                        DeselectTrackCard();
                         m_2c = 13;
                         if (m_e40 == -1)
                         {
@@ -18112,44 +18133,44 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
                             {
                                 NODE->FUN_00450f90(true);
                                 xUpdateData UD1(0.0f, false, false);
-                                NODE->FUN_00a59c60(UD1);
+                                NODE->NiAVObject_Update(UD1);
                             }
                             NODE = xFUN_004aae30(m_190, "Player-Deck_06:5");
                             if (NODE)
                             {
                                 NODE->FUN_00450f90(true);
                                 xUpdateData UD2(0.0f, false, false);
-                                NODE->FUN_00a59c60(UD2);
+                                NODE->NiAVObject_Update(UD2);
                             }
                             NODE = xFUN_004aae30(m_190, "Player-Deck_06:5");
                             if (NODE)
                             {
                                 NODE->FUN_00450f90(true);
                                 xUpdateData UD3(0.0f, false, false);
-                                NODE->FUN_00a59c60(UD3);
+                                NODE->NiAVObject_Update(UD3);
                             }
                             NODE = xFUN_004aae30(m_190, "Player-Deck_Back:0");
                             if (NODE)
                             {
                                 NODE->FUN_00450f90(true);
                                 xUpdateData UD4(0.0f, false, false);
-                                NODE->FUN_00a59c60(UD4);
+                                NODE->NiAVObject_Update(UD4);
                             }
                             NODE = xFUN_004aae30(m_190, "Player-Deck_Back_Shadow:0");
                             if (NODE)
                             {
                                 NODE->FUN_00450f90(true);
                                 xUpdateData UD5(0.0f, false, false);
-                                NODE->FUN_00a59c60(UD5);
+                                NODE->NiAVObject_Update(UD5);
                             }
                         }
                         if (m_e40 != -1)
                         {
-                            xCard* qsSDDgz = m_b04.FUN_006a7ad0(m_e40);
-                            xCard* qfTOqo = m_b24.FUN_006a7ad0(m_e2c);
-                            m_b24.FUN_006bf8f0(m_e2c, true);
+                            xCard* qsSDDgz = m_b04.BSSimpleArray_NiAVObject_1024_GetAt(m_e40);
+                            xCard* qfTOqo = m_b24.BSSimpleArray_NiAVObject_1024_GetAt(m_e2c);
+                            m_b24.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(m_e2c, true);
                             m_b24.FUN_007cb2e0(qsSDDgz);
-                            m_b04.FUN_006bf8f0(m_e40, true);
+                            m_b04.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(m_e40, true);
                             m_b44[m_e30][m_e34].FUN_007cb2e0(qfTOqo);
                             if (!m_b04.FUN_0044ddc0())
                                 m_e40 = -1;
@@ -18159,8 +18180,8 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
                         }
                         else
                         {
-                            xCard* CARD2 = m_b24.FUN_006a7ad0(m_e2c);
-                            m_b24.FUN_006bf8f0(m_e2c, true);
+                            xCard* CARD2 = m_b24.BSSimpleArray_NiAVObject_1024_GetAt(m_e2c);
+                            m_b24.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(m_e2c, true);
                             m_b44[m_e30][m_e34].FUN_007cb2e0(CARD2);
                         }
                     }
@@ -18170,7 +18191,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
         }
         break;
     case 11:
-        if (FUN_00740f10(0x10))
+        if (IsFlagSet_00740f10(0x10))
             return false;
         if (m_28 == 3)
         {
@@ -18182,7 +18203,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
         {
             SetFlag(1, 1);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             if (m_ae4 - m_adc > 0)
                 xFUN_007aba00(m_ae4 - m_adc, xFUN_0074a090, 0x7fffffff);
             handled = true;
@@ -18192,7 +18213,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             m_aec = m_aec - 1;
             m_50->SetTraitAndReset(xg_11d9174, 1.0f);
             m_50->FUN_00715c60(xg_11d9174, m_aec);
-            m_a6c.FUN_006a7ad0((int)m_6c->FUN_00a011b0(xg_11d9170))->SetCantOpenDoors(false);
+            m_a6c.BSSimpleArray_NiAVObject_1024_GetAt((int)m_6c->FUN_00a011b0(xg_11d9170))->SetCantOpenDoors(false);
             handled = true;
             m_2c = 7;
         }
@@ -18201,7 +18222,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
         if (1)
         {
         }
-        if (FUN_00740f10(2))
+        if (IsFlagSet_00740f10(2))
             return false;
         if (m_28 == 3)
         {
@@ -18214,7 +18235,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             if (m_adc > 0 || m_ae0 == 0)
             {
                 InitMenu();
-                xAudio::FUN_00453a70()->FUN_00ad7550("UIMenuOK", 0x121).Play(false);
+                xAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("UIMenuOK", 0x121).Play(false);
             }
             handled = true;
         }
@@ -18235,7 +18256,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             if (xFUN_00702450(v13()))
                 xFUN_0073ca50();
         }
-        if (FUN_00740f10(0x20))
+        if (IsFlagSet_00740f10(0x20))
             return false;
         if (m_28 == 0)
         {
@@ -18255,7 +18276,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             if (xFUN_00702450(v13()))
                 xFUN_0073ca50();
         }
-        if (FUN_00740f10(0x40))
+        if (IsFlagSet_00740f10(0x40))
             return false;
         if (m_28 == 0)
         {
@@ -18267,26 +18288,26 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             for (int I = 0; I < qArxcFu; I++)
             {
                 qxQHW.FUN_007cb2e0(I);
-                m_a6c.FUN_006a7ad0(I)->SetCantOpenDoors(false);
+                m_a6c.BSSimpleArray_NiAVObject_1024_GetAt(I)->SetCantOpenDoors(false);
                 m_aec = 0;
             }
             int qAhbO = qArxcFu > 30 ? xFUN_00944460(30, qArxcFu) : 30;
             for (int J = 0; J < qAhbO; J++)
             {
                 int PICK = xFUN_00944460(0, qxQHW.FUN_0044ddc0());
-                int CARDIDX = qxQHW.FUN_006a7ad0(PICK);
-                qxQHW.FUN_006bf8f0(PICK, true);
-                if (!m_a6c.FUN_006a7ad0(CARDIDX)->FUN_0073cb80())
+                int CARDIDX = qxQHW.BSSimpleArray_NiAVObject_1024_GetAt(PICK);
+                qxQHW.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(PICK, true);
+                if (!m_a6c.BSSimpleArray_NiAVObject_1024_GetAt(CARDIDX)->FUN_0073cb80())
                 {
                     m_aec = m_aec + 1;
-                    m_a6c.FUN_006a7ad0(CARDIDX)->SetCantOpenDoors(true);
+                    m_a6c.BSSimpleArray_NiAVObject_1024_GetAt(CARDIDX)->SetCantOpenDoors(true);
                 }
             }
             qxQHW.FUN_008454f0(true);
             m_50->SetTraitAndReset(xg_11d9174, 1.0f);
             m_50->FUN_00715c60(xg_11d9174, m_aec);
             UpdateControls();
-            FUN_00749a40(-1);
+            UpdateTileAlpha(-1);
             UpdateCardSlots((int)m_6c->FUN_00a011b0(xg_11d9170), false);
             handled = true;
         }
@@ -18301,7 +18322,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             if (xFUN_00702450(v13()))
                 xFUN_0073ca50();
         }
-        if (FUN_00740f10(0x80))
+        if (IsFlagSet_00740f10(0x80))
             return false;
         if (m_28 == 0)
         {
@@ -18311,16 +18332,16 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
         }
         else if (m_28 == 2)
         {
-            if (!FUN_00740f10(0x1000) && m_b04.FUN_0044ddc0() > 0)
+            if (!IsFlagSet_00740f10(0x1000) && m_b04.FUN_0044ddc0() > 0)
             {
-                m_2c = FUN_00740f10(0x800) ? 12 : 14;
+                m_2c = IsFlagSet_00740f10(0x800) ? 12 : 14;
                 if (m_e40 != -1)
                 {
-                    xCard* DECKCARD2 = m_b04.FUN_006a7ad0(m_e40);
-                    xCard* HANDCARD2 = m_b24.FUN_006a7ad0(m_e2c);
-                    m_b24.FUN_006bf8f0(m_e2c, true);
+                    xCard* DECKCARD2 = m_b04.BSSimpleArray_NiAVObject_1024_GetAt(m_e40);
+                    xCard* HANDCARD2 = m_b24.BSSimpleArray_NiAVObject_1024_GetAt(m_e2c);
+                    m_b24.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(m_e2c, true);
                     m_b24.FUN_007cb2e0(DECKCARD2);
-                    m_b04.FUN_006bf8f0(m_e40, true);
+                    m_b04.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(m_e40, true);
                     if (!m_b04.FUN_0044ddc0())
                         m_e40 = -1;
                     else
@@ -18329,8 +18350,8 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
                 }
                 else
                 {
-                    xCard* CARD3 = m_b24.FUN_006a7ad0(m_e2c);
-                    m_b24.FUN_006bf8f0(m_e2c, true);
+                    xCard* CARD3 = m_b24.BSSimpleArray_NiAVObject_1024_GetAt(m_e2c);
+                    m_b24.BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(m_e2c, true);
                 }
             }
         }
@@ -18342,7 +18363,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             if (xFUN_00702450(v13()))
                 xFUN_0073ca50();
         }
-        if (FUN_00740f10(0x100))
+        if (IsFlagSet_00740f10(0x100))
             return false;
         if (m_28 == 0)
         {
@@ -18352,12 +18373,12 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
         }
         else if (m_28 == 2)
         {
-            if (!FUN_00740f10(0x1000) && !FUN_00740f10(0x800))
+            if (!IsFlagSet_00740f10(0x1000) && !IsFlagSet_00740f10(0x800))
             {
                 SetFlag(0x2000, 1);
                 SetFlag(0x1000, 1);
                 m_e30 = 0;
-                FUN_0074ecb0(m_e30);
+                SelectWholeTrack(m_e30);
             }
         }
         break;
@@ -18373,13 +18394,13 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
         }
         break;
     }
-    FUN_00749a40(-1);
+    UpdateTileAlpha(-1);
     return handled;
 }
 
 struct List_749a40
 {
-    FNV_74A000_Action** FUN_0073ac90(int, float, int);
+    FNV_74A000_Action** NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead(int, float, int);
 };
 struct Slot_749a40
 {
@@ -18389,31 +18410,32 @@ struct Slot_749a40
 
 // Updates slots with 128.0f or 255.0f according to flag checks, recursively processing grouped slots.
 // @fnv 0x00749a40
-void CaravanMenu::FUN_00749a40(int slot)
+// src: XBOX_PDB 0x00749a40
+void CaravanMenu::UpdateTileAlpha(int slot)
 {
     if (slot == -1)
         slot = (*(unsigned int*)((char*)this + 0x28));
     switch (slot)
     {
     case 0:
-        FUN_00749a40(7);
-        FUN_00749a40(37);
-        FUN_00749a40(36);
+        UpdateTileAlpha(7);
+        UpdateTileAlpha(37);
+        UpdateTileAlpha(36);
         break;
     case 1:
-        FUN_00749a40(8);
-        FUN_00749a40(9);
-        FUN_00749a40(11);
-        FUN_00749a40(10);
-        FUN_00749a40(12);
-        FUN_00749a40(13);
-        FUN_00749a40(14);
+        UpdateTileAlpha(8);
+        UpdateTileAlpha(9);
+        UpdateTileAlpha(11);
+        UpdateTileAlpha(10);
+        UpdateTileAlpha(12);
+        UpdateTileAlpha(13);
+        UpdateTileAlpha(14);
         break;
     case 2:
-        FUN_00749a40(20);
-        FUN_00749a40(21);
-        FUN_00749a40(19);
-        FUN_00749a40(22);
+        UpdateTileAlpha(20);
+        UpdateTileAlpha(21);
+        UpdateTileAlpha(19);
+        UpdateTileAlpha(22);
         break;
     case 3:
     case 4:
@@ -18421,90 +18443,90 @@ void CaravanMenu::FUN_00749a40(int slot)
     case 6:
         break;
     case 7:
-        if (((CaravanMenu*)this)->FUN_00740f10(2) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(2) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 37:
-        if (((CaravanMenu*)this)->FUN_00740f10(4) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(4) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 36:
-        if (((CaravanMenu*)this)->FUN_00740f10(16) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(16) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 8:
-        if (((CaravanMenu*)this)->FUN_00740f10(2))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(2))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
         {
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
             if ((*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xaec))) < 30)
-                (*((Slot_749a40*)reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(this) + 0x30)[slot])->list.FUN_0073ac90(4009, 128.0f, 1))
-                    ->FUN_00a012d0();
+                (*((Slot_749a40*)reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(this) + 0x30)[slot])->list.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead(4009, 128.0f, 1))
+                    ->Tile_Set();
             else
-                (*((Slot_749a40*)reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(this) + 0x30)[slot])->list.FUN_0073ac90(4009, 255.0f, 1))
-                    ->FUN_00a012d0();
+                (*((Slot_749a40*)reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(this) + 0x30)[slot])->list.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead(4009, 255.0f, 1))
+                    ->Tile_Set();
         }
         break;
     case 9:
-        ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+        ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 10:
-        if (((CaravanMenu*)this)->FUN_00740f10(64))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(64))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 11:
-        ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+        ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 12:
-        if (((CaravanMenu*)this)->FUN_00740f10(4) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(4) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 13:
-        if (((CaravanMenu*)this)->FUN_00740f10(16) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(16) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 14:
-        if (((CaravanMenu*)this)->FUN_00740f10(2) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(2) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 20:
-        if (((CaravanMenu*)this)->FUN_00740f10(128) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(128) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 21:
-        if (((CaravanMenu*)this)->FUN_00740f10(256) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(256) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 19:
-        if (((CaravanMenu*)this)->FUN_00740f10(4) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(4) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     case 22:
-        if (((CaravanMenu*)this)->FUN_00740f10(8) || ((CaravanMenu*)this)->FUN_00740f10(1))
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->IsFlagSet_00740f10(8) || ((CaravanMenu*)this)->IsFlagSet_00740f10(1))
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 128.0f);
         else
-            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->SetTileTextAlpha(slot, 255.0f);
         break;
     }
 }
@@ -18539,16 +18561,16 @@ struct CardArray
     int m_iArrayLength;
     int m_iGrow;
     unsigned int FUN_0044ddc0();
-    Card*& FUN_006a7ad0(unsigned int index);
+    Card*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int index);
     void FUN_007cb2e0(Card* const& card);
-    void FUN_009a4320(int index, int count);
+    void BSSimpleArray_Actor_1024_RemoveFast(int index, int count);
     void FUN_008454f0(int flag);
 };
 struct CaravanGame
 {
     CardList* GetField618();
     CardList* GetField614();
-    int FUN_00740960();
+    int TESDataHandler_GetBarterContainer();
     int GetRegionDataManager();
     int GetFieldAtOffset61C();
     int GetField620();
@@ -18561,11 +18583,11 @@ struct FixedStr
 };
 struct AnimSeq
 {
-    void FUN_007408d0(int state);
+    void NiControllerSequence_SetCycleType(int state);
 };
 struct AnimCtrl
 {
-    AnimSeq* FUN_0047a520(const FixedStr& name);
+    AnimSeq* NiControllerManager_GetSequenceByName(const FixedStr& name);
     void FUN_0048fef0(float time);
 };
 struct SceneNode
@@ -18632,30 +18654,30 @@ struct SceneNode
     virtual void v59();
     virtual void RemoveChildAt(int index);
     void FUN_00450f90(int visible);
-    void FUN_00a59c60(const NiUpdateData& pos);
-    void FUN_004bc1f0(float x, float y, float z);
-    AnimCtrl* FUN_00a5c570(void* rtti);
-    int FUN_00453470();
+    void NiAVObject_Update(const NiUpdateData& pos);
+    void NiAVObject_SetTranslate_004bc1f0(float x, float y, float z);
+    AnimCtrl* NiObjectNET_GetController(void* rtti);
+    int NiNode_GetChildCount();
 };
 struct SceneRoot
 {
-    SceneNode* FUN_00559450();
+    SceneNode* Modelloader_GetReferencedThis();
 };
 struct ModelLoader
 {
-    void FUN_0045a5e0(const char* path);
-    SceneNode* LoadModel(const char* path, int a, int b, int c, int d, int e);
+    void ModelLoader_ReleaseFile(const char* path);
+    SceneNode* ModelLoader_LoadFile(const char* path, int a, int b, int c, int d, int e);
 };
 struct UiTile
 {
     void SetTraitAndReset(int id, float value);
     void FUN_00700320(int id, int value);
-    void FUN_00a01350(int id, const char* value, int propagate);
+    void Tile_Set_00a01350(int id, const char* value, int propagate);
     void FUN_00715c60(int id, int value);
-    UiTile* FUN_00a03da0(const char* name);
+    UiTile* Tile_GetChildByName(const char* name);
     float FUN_00a011b0(int id, int flag);
-    void FUN_00a012d0(int id, float value);
-    void SetChangeFlag(int value);
+    void Tile_Set(int id, float value);
+    void Tile_SetChangeFlag(int value);
 };
 struct GameSetting
 {
@@ -18692,8 +18714,8 @@ extern GameSetting DAT_011d4d80;
 extern GameSetting DAT_011d4198;
 extern GameSetting DAT_011d29f4;
 int __cdecl FUN_00944460(int lo, int hi);
-int __cdecl FUN_00406d00(char* buf, int size, const char* fmt, ...);
-void __cdecl FUN_00a6d2d0(SceneNode* node);
+int __cdecl BSsprintf(char* buf, int size, const char* fmt, ...);
+void __cdecl NiTimeController_StartAnimations(SceneNode* node);
 
 
 
@@ -18701,7 +18723,8 @@ void __cdecl FUN_00a6d2d0(SceneNode* node);
 // @fnv 0x0073ea90
 }  // namespace fnv_0073ea90
 
-void CaravanMenu::FUN_0073ea90()
+// src: XBOX_PDB 0x0073ea90
+void CaravanMenu::PrepareGameMenu()
 {
     using fnv_0073ea90::AnimCtrl;
     using fnv_0073ea90::AnimPair;
@@ -18728,9 +18751,9 @@ void CaravanMenu::FUN_0073ea90()
     using fnv_0073ea90::DAT_011d91e4;
     using fnv_0073ea90::DAT_011dea3c;
     using fnv_0073ea90::DAT_011f36ac;
-    using fnv_0073ea90::FUN_00406d00;
+    using fnv_0073ea90::BSsprintf;
     using fnv_0073ea90::FUN_00944460;
-    using fnv_0073ea90::FUN_00a6d2d0;
+    using fnv_0073ea90::NiTimeController_StartAnimations;
     using fnv_0073ea90::FixedStr;
     using fnv_0073ea90::GameSetting;
     using fnv_0073ea90::ModelLoader;
@@ -18745,14 +18768,14 @@ void CaravanMenu::FUN_0073ea90()
 
     for (unsigned int i = 0; i < (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_0044ddc0(); i++)
     {
-        if ((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_006a7ad0(i)->FUN_0073cb80())
+        if ((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).BSSimpleArray_NiAVObject_1024_GetAt(i)->FUN_0073cb80())
         {
-            pPlayerList->FUN_005ae3d0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_006a7ad0(i));
-            (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_006a7ad0(i));
+            pPlayerList->FUN_005ae3d0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).BSSimpleArray_NiAVObject_1024_GetAt(i));
+            (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).BSSimpleArray_NiAVObject_1024_GetAt(i));
         }
         else
         {
-            pOpponent->FUN_005ae3d0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_006a7ad0(i));
+            pOpponent->FUN_005ae3d0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).BSSimpleArray_NiAVObject_1024_GetAt(i));
         }
     }
 
@@ -18765,11 +18788,11 @@ void CaravanMenu::FUN_0073ea90()
     for (int iDraw = 0; iDraw < 8; iDraw++)
     {
         int iPick = FUN_00944460(0, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_0044ddc0());
-        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb24))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_006a7ad0(iPick));
-        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_009a4320(iPick, 1);
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb24))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).BSSimpleArray_NiAVObject_1024_GetAt(iPick));
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).BSSimpleArray_Actor_1024_RemoveFast(iPick, 1);
         iPick = FUN_00944460(0, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_0044ddc0());
-        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb34))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_006a7ad0(iPick));
-        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_009a4320(iPick, 1);
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb34))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).BSSimpleArray_NiAVObject_1024_GetAt(iPick));
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).BSSimpleArray_Actor_1024_RemoveFast(iPick, 1);
     }
 
     (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xe40))) = FUN_00944460(0, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_0044ddc0());
@@ -18799,10 +18822,10 @@ void CaravanMenu::FUN_0073ea90()
         (*reinterpret_cast<int (*)[0x60]>((reinterpret_cast<char*>(this) + 0x8ec)))[iClear2] = 0;
     }
 
-    DAT_011d91e4.FUN_00559450()->RemoveChildAt(DAT_011d91e4.FUN_00559450()->FUN_00453470() - 1);
-    DAT_011d91e4.FUN_00559450()->RemoveChildAt(DAT_011d91e4.FUN_00559450()->FUN_00453470() - 1);
-    DAT_011c3b3c->FUN_0045a5e0("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Deck.NIF");
-    DAT_011c3b3c->FUN_0045a5e0("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Available.NIF");
+    DAT_011d91e4.Modelloader_GetReferencedThis()->RemoveChildAt(DAT_011d91e4.Modelloader_GetReferencedThis()->NiNode_GetChildCount() - 1);
+    DAT_011d91e4.Modelloader_GetReferencedThis()->RemoveChildAt(DAT_011d91e4.Modelloader_GetReferencedThis()->NiNode_GetChildCount() - 1);
+    DAT_011c3b3c->ModelLoader_ReleaseFile("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Deck.NIF");
+    DAT_011c3b3c->ModelLoader_ReleaseFile("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Available.NIF");
     (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x188))) = 0;
     (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x18c))) = 0;
 
@@ -18811,74 +18834,74 @@ void CaravanMenu::FUN_0073ea90()
     {
         for (int iCard = 0; iCard < 7; iCard++)
         {
-            FUN_00406d00(szModel, 0x104, "%sPlayer_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iSide + 1,
+            BSsprintf(szModel, 0x104, "%sPlayer_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iSide + 1,
                          iCard + 1);
-            (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide][iCard] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-            DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide][iCard], 1);
-            FUN_00406d00(szModel, 0x104, "%sOpponent_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iSide + 1,
+            (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide][iCard] = DAT_011c3b3c->ModelLoader_LoadFile(szModel, 0, 1, 0, 0, 0);
+            DAT_011d91e4.Modelloader_GetReferencedThis()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide][iCard], 1);
+            BSsprintf(szModel, 0x104, "%sOpponent_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iSide + 1,
                          iCard + 1);
-            (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide + 3][iCard] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-            DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide + 3][iCard], 1);
+            (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide + 3][iCard] = DAT_011c3b3c->ModelLoader_LoadFile(szModel, 0, 1, 0, 0, 0);
+            DAT_011d91e4.Modelloader_GetReferencedThis()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide + 3][iCard], 1);
         }
     }
 
     for (int iGrid = 0; iGrid < 3; iGrid++)
     {
-        FUN_00406d00(szModel, 0x104, "%sPlayerGrid_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iGrid + 1);
-        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe54)))[iGrid] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-        FUN_00406d00(szModel, 0x104, "%sOppGrid_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iGrid + 1);
-        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe60)))[iGrid] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+        BSsprintf(szModel, 0x104, "%sPlayerGrid_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iGrid + 1);
+        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe54)))[iGrid] = DAT_011c3b3c->ModelLoader_LoadFile(szModel, 0, 1, 0, 0, 0);
+        BSsprintf(szModel, 0x104, "%sOppGrid_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iGrid + 1);
+        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe60)))[iGrid] = DAT_011c3b3c->ModelLoader_LoadFile(szModel, 0, 1, 0, 0, 0);
     }
 
-    FUN_00406d00(szModel, 0x104, "%sSelect_Add.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c))) = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c))), 1);
-    FUN_00406d00(szModel, 0x104, "%sSelect_Remove.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70))) = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70))), 1);
+    BSsprintf(szModel, 0x104, "%sSelect_Add.NIF", "Meshes\\Terminals\\NV_Caravan\\");
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c))) = DAT_011c3b3c->ModelLoader_LoadFile(szModel, 0, 1, 0, 0, 0);
+    DAT_011d91e4.Modelloader_GetReferencedThis()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c))), 1);
+    BSsprintf(szModel, 0x104, "%sSelect_Remove.NIF", "Meshes\\Terminals\\NV_Caravan\\");
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70))) = DAT_011c3b3c->ModelLoader_LoadFile(szModel, 0, 1, 0, 0, 0);
+    DAT_011d91e4.Modelloader_GetReferencedThis()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70))), 1);
 
-    FUN_00406d00(szModel, 0x104, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Player_Deck.NIF");
-    (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[0] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-    FUN_00406d00(szModel, 0x104, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Opponent_Deck.NIF");
-    (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[1] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[0], 1);
-    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[1], 1);
+    BSsprintf(szModel, 0x104, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Player_Deck.NIF");
+    (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[0] = DAT_011c3b3c->ModelLoader_LoadFile(szModel, 0, 1, 0, 0, 0);
+    BSsprintf(szModel, 0x104, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Opponent_Deck.NIF");
+    (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[1] = DAT_011c3b3c->ModelLoader_LoadFile(szModel, 0, 1, 0, 0, 0);
+    DAT_011d91e4.Modelloader_GetReferencedThis()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[0], 1);
+    DAT_011d91e4.Modelloader_GetReferencedThis()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[1], 1);
 
     for (int iGridPos = 0; iGridPos < 6; iGridPos++)
     {
         (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe54)))[iGridPos]->FUN_00450f90(1);
-        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe54)))[iGridPos]->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
+        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe54)))[iGridPos]->NiAVObject_Update(NiUpdateData(0.0f, 0, 0));
     }
-    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
-    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
-    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_004bc1f0(0.0f, 0.0f, DAT_0102caf8);
-    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_004bc1f0(0.0f, 0.0f, DAT_0102caf8);
-    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
-    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->NiAVObject_Update(NiUpdateData(0.0f, 0, 0));
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->NiAVObject_Update(NiUpdateData(0.0f, 0, 0));
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, DAT_0102caf8);
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, DAT_0102caf8);
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->NiAVObject_Update(NiUpdateData(0.0f, 0, 0));
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->NiAVObject_Update(NiUpdateData(0.0f, 0, 0));
 
     AnimCtrl* pCtrl;
     for (int iDeck = 0; iDeck < 2; iDeck++)
     {
-        pCtrl = (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[iDeck]->FUN_00a5c570(&DAT_011f36ac);
+        pCtrl = (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[iDeck]->NiObjectNET_GetController(&DAT_011f36ac);
         if (pCtrl != 0)
         {
             (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck] = pCtrl;
-            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][0] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Cards_In"));
-            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][1] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card1_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][2] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card2_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][3] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card3_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][4] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card4_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][5] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card5_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][0] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card1_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][1] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card2_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][2] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card3_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][3] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card4_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][4] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card5_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][5] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card6_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][6] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card7_Out"));
-            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][7] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card8_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][0] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck-Cards_In"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][1] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck-Card1_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][2] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck-Card2_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][3] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck-Card3_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][4] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck-Card4_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][5] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck-Card5_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][0] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck8-Card1_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][1] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck8-Card2_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][2] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck8-Card3_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][3] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck8-Card4_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][4] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck8-Card5_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][5] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck8-Card6_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][6] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck8-Card7_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][7] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->NiControllerManager_GetSequenceByName(FixedStr("Deck8-Card8_Out"));
             (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0048fef0(0.0f);
-            FUN_00a6d2d0((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[iDeck]);
+            NiTimeController_StartAnimations((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[iDeck]);
         }
     }
 
@@ -18886,31 +18909,31 @@ void CaravanMenu::FUN_0073ea90()
     {
         for (int iCol = 0; iCol < 7; iCol++)
         {
-            pCtrl = (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iRow][iCol]->FUN_00a5c570(&DAT_011f36ac);
+            pCtrl = (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iRow][iCol]->NiObjectNET_GetController(&DAT_011f36ac);
             if (pCtrl != 0)
             {
                 (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol] = pCtrl;
-                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[0].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card1_In"));
-                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[1].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card2_In"));
-                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[2].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card3_In"));
-                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[3].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card4_In"));
-                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[0].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card1_Out"));
-                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[1].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card2_Out"));
-                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[2].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card3_Out"));
-                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[3].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card4_Out"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[0].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->NiControllerManager_GetSequenceByName(FixedStr("Card1_In"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[1].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->NiControllerManager_GetSequenceByName(FixedStr("Card2_In"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[2].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->NiControllerManager_GetSequenceByName(FixedStr("Card3_In"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[3].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->NiControllerManager_GetSequenceByName(FixedStr("Card4_In"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[0].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->NiControllerManager_GetSequenceByName(FixedStr("Card1_Out"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[1].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->NiControllerManager_GetSequenceByName(FixedStr("Card2_Out"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[2].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->NiControllerManager_GetSequenceByName(FixedStr("Card3_Out"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[3].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->NiControllerManager_GetSequenceByName(FixedStr("Card4_Out"));
                 (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0048fef0(0.0f);
                 for (int iAnim = 0; iAnim < 4; iAnim++)
                 {
-                    (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[iAnim].pIn->FUN_007408d0(2);
-                    (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[iAnim].pOut->FUN_007408d0(2);
+                    (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[iAnim].pIn->NiControllerSequence_SetCycleType(2);
+                    (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[iAnim].pOut->NiControllerSequence_SetCycleType(2);
                 }
-                FUN_00a6d2d0((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iRow][iCol]);
+                NiTimeController_StartAnimations((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iRow][iCol]);
                 (*reinterpret_cast<CardArray (*)[6][7]>((reinterpret_cast<char*>(this) + 0xb44)))[iRow][iCol].FUN_008454f0(1);
             }
         }
     }
 
-    DAT_011d91e4.FUN_00559450()->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
+    DAT_011d91e4.Modelloader_GetReferencedThis()->NiAVObject_Update(NiUpdateData(0.0f, 0, 0));
 
     for (int iSlot = 0; iSlot < 6; iSlot++)
     {
@@ -18931,14 +18954,14 @@ void CaravanMenu::FUN_0073ea90()
     SetFlag(1, 1);
 
     char szCountBuf[0x104];
-    FUN_00406d00(szCountBuf, 0x104, "%i/%i", DAT_011dea3c->GetRegionDataManager(), DAT_011dea3c->FUN_00740960());
+    BSsprintf(szCountBuf, 0x104, "%i/%i", DAT_011dea3c->GetRegionDataManager(), DAT_011dea3c->TESDataHandler_GetBarterContainer());
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x70)))->SetTraitAndReset(DAT_011d9174, 1.0f);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x70)))->FUN_00700320(DAT_011d9174, (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae8))) * 2);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x74)))->SetTraitAndReset(DAT_011d9174, 1.0f);
     int nLeft = DAT_011dea3c->GetFieldAtOffset61C() - DAT_011dea3c->GetField620();
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x74)))->FUN_00700320(DAT_011d9174, nLeft);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x78)))->SetTraitAndReset(DAT_011d9174, 1.0f);
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x78)))->FUN_00a01350(DAT_011d9174, szCountBuf, 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x78)))->Tile_Set_00a01350(DAT_011d9174, szCountBuf, 1);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x98)))->SetTraitAndReset(DAT_011d9174, 1.0f);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x98)))->FUN_00700320(DAT_011d9174, 0);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x9c)))->SetTraitAndReset(DAT_011d9174, 1.0f);
@@ -18958,26 +18981,26 @@ void CaravanMenu::FUN_0073ea90()
     (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x28))) = 2;
     (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x2c))) = 2;
 
-    UiTile* pInfoRect = (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x38)))->FUN_00a03da0("CGM_InfoRect");
+    UiTile* pInfoRect = (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x38)))->Tile_GetChildByName("CGM_InfoRect");
     if (pInfoRect != 0)
     {
-        pInfoRect->FUN_00a012d0(0xfb1, pInfoRect->FUN_00a011b0(0xfb1, 1) + DAT_0106c948);
-        pInfoRect->FUN_00a012d0(0xfa1, pInfoRect->FUN_00a011b0(0xfa1, 1) - DAT_0106c948);
-        pInfoRect->SetChangeFlag(0x11);
+        pInfoRect->Tile_Set(0xfb1, pInfoRect->FUN_00a011b0(0xfb1, 1) + DAT_0106c948);
+        pInfoRect->Tile_Set(0xfa1, pInfoRect->FUN_00a011b0(0xfa1, 1) - DAT_0106c948);
+        pInfoRect->Tile_SetChangeFlag(0x11);
     }
 
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x88)))->FUN_00a01350(0xfc4, DAT_011d1fec.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x88)))->Tile_Set_00a01350(0xfc4, DAT_011d1fec.FUN_00403df0(), 1);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x30)))->FUN_00700320(0xfa3, 0);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x34)))->FUN_00700320(0xfa3, 0);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x38)))->FUN_00700320(0xfa3, 1);
     (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x3c)))->FUN_00700320(0xfa3, 0);
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe0)))->FUN_00a01350(0xfc4, DAT_011d2964.FUN_00403df0(), 1);
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe4)))->FUN_00a01350(0xfc4, DAT_011d24b4.FUN_00403df0(), 1);
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe8)))->FUN_00a01350(0xfc4, DAT_011d41f8.FUN_00403df0(), 1);
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x7c)))->FUN_00a01350(0xfc4, DAT_011d4204.FUN_00403df0(), 1);
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x80)))->FUN_00a01350(0xfc4, DAT_011d4d80.FUN_00403df0(), 1);
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x84)))->FUN_00a01350(0xfc4, DAT_011d4198.FUN_00403df0(), 1);
-    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x88)))->FUN_00a01350(0xfc4, DAT_011d29f4.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe0)))->Tile_Set_00a01350(0xfc4, DAT_011d2964.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe4)))->Tile_Set_00a01350(0xfc4, DAT_011d24b4.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe8)))->Tile_Set_00a01350(0xfc4, DAT_011d41f8.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x7c)))->Tile_Set_00a01350(0xfc4, DAT_011d4204.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x80)))->Tile_Set_00a01350(0xfc4, DAT_011d4d80.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x84)))->Tile_Set_00a01350(0xfc4, DAT_011d4198.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x88)))->Tile_Set_00a01350(0xfc4, DAT_011d29f4.FUN_00403df0(), 1);
     UpdateControls();
 }
 
@@ -18995,7 +19018,7 @@ void CaravanGame::UpdateCardTexture()
     {
         _sprintf_s(_buf, 260u, "Card_0%i:%i", animStep + 1, animStep);
     }
-    CardNode* objFoundX = FUN_004aae30((NiAVObject*)tableVal, _buf);
+    CardNode* objFoundX = BSUtilities_GetObjectByName((NiAVObject*)tableVal, _buf);
     CardShader* prop6 = (!objFoundX->FUN_00a59d30(3) ? 0
                                                      : (objFoundX->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                         objFoundX->FUN_00a59d30(3)->FUN_00441110() <= 12))
@@ -19005,7 +19028,7 @@ void CaravanGame::UpdateCardTexture()
     NiPointer<NiSourceTexture> objTmp(0);
     if (prop6)
     {
-        _sprintf_s(_buf, 260u, "%s%s", "Textures\\", ((UIAssetSource*)playedCard)->FUN_0050d100()->FUN_00408da0());
+        _sprintf_s(_buf, 260u, "%s%s", "Textures\\", ((UIAssetSource*)playedCard)->FUN_0050d100()->TESModel_GetModel());
         FUN_004b7240(_buf, buf2, 260);
         g_TES->CreateTextureImage(buf2, (TextureRef&)objTmp, false, false);
         if ((unsigned int)(NiSourceTexture*)objTmp)
@@ -19041,17 +19064,17 @@ struct R74CardSlot
 };
 struct R74Positioner
 {
-    void FUN_004bc1f0(float, float, float);
+    void NiAVObject_SetTranslate_004bc1f0(float, float, float);
 };
 struct R74Animator
 {
-    void FUN_0043fa80(R74Matrix*);
-    void FUN_00440460(R74Point*);
+    void SetRotate_0043fa80(R74Matrix*);
+    void NiAVObject_SetTranslate(R74Point*);
 };
 struct R74TextureNode
 {
-    R74Matrix* FUN_006a9540();
-    R74Point* FUN_0043d450();
+    R74Matrix* NiAVObject_GetRotate_006a9540();
+    R74Point* NiAVObject_GetWorldBound();
     void Update(const NiUpdateData&);
 };
 struct R74Node
@@ -19064,7 +19087,7 @@ struct R74ExternalRef
 };
 struct R74Str
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct R74SelectableV
 {
@@ -19912,42 +19935,42 @@ void R74Menu::SelectCard(int row, int column)
     if (modeValue > 3)
         modeValue = 3;
     char aBuf1[260];
-    FUN_00406d00(aBuf1, 0x104u, DAT_01071aac, reinterpret_cast<const char*>(column + 1),
+    BSsprintf(aBuf1, 0x104u, DAT_01071aac, reinterpret_cast<const char*>(column + 1),
                  reinterpret_cast<const char*>(modeValue + 1));
-    R74TextureNode* card4 = reinterpret_cast<R74TextureNode*>(FUN_004aae30(cards[row], aBuf1));
+    R74TextureNode* card4 = reinterpret_cast<R74TextureNode*>(BSUtilities_GetObjectByName(cards[row], aBuf1));
     if (card4)
     {
         if (sideTmp)
         {
-            reinterpret_cast<R74Resource*>(FUN_00453a70())->GetSoundByEditorID(DAT_01071728, 0x121).Play(false);
+            reinterpret_cast<R74Resource*>(BSAudio_QInstance())->GetSoundByEditorID(DAT_01071728, 0x121).Play(false);
             sel = left;
-            reinterpret_cast<R74Positioner*>(right)->FUN_004bc1f0(0.0f, 0.0f, DAT_0104f7c4);
+            reinterpret_cast<R74Positioner*>(right)->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, DAT_0104f7c4);
             reinterpret_cast<R74TextureNode*>(right)->Update(NiUpdateData(0.0f, false, false));
             R74Matrix scale;
             scale.FUN_004a0c90(DAT_0101ff38);
-            orientation = *card4->FUN_006a9540();
+            orientation = *card4->NiAVObject_GetRotate_006a9540();
             orientation = orientation.FUN_0043f8d0(scale);
-            pos3 = *card4->FUN_0043d450()->Center();
-            reinterpret_cast<R74Animator*>(sel)->FUN_0043fa80(&orientation);
-            reinterpret_cast<R74Animator*>(sel)->FUN_00440460(&pos3);
+            pos3 = *card4->NiAVObject_GetWorldBound()->Center();
+            reinterpret_cast<R74Animator*>(sel)->SetRotate_0043fa80(&orientation);
+            reinterpret_cast<R74Animator*>(sel)->NiAVObject_SetTranslate(&pos3);
             reinterpret_cast<R74TextureNode*>(sel)->Update(NiUpdateData(0.0f, false, false));
-            sel = FUN_004aae30(sel, DAT_01071aa4);
+            sel = BSUtilities_GetObjectByName(sel, DAT_01071aa4);
         }
         else
         {
-            reinterpret_cast<R74Resource*>(FUN_00453a70())->GetSoundByEditorID(DAT_01071a84, 0x121).Play(false);
+            reinterpret_cast<R74Resource*>(BSAudio_QInstance())->GetSoundByEditorID(DAT_01071a84, 0x121).Play(false);
             sel = right;
-            reinterpret_cast<R74Positioner*>(left)->FUN_004bc1f0(0.0f, 0.0f, DAT_0104f7c4);
+            reinterpret_cast<R74Positioner*>(left)->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, DAT_0104f7c4);
             reinterpret_cast<R74TextureNode*>(left)->Update(NiUpdateData(0.0f, false, false));
             R74Matrix scale;
             scale.FUN_004a0c90(DAT_0101ff38);
-            orientation = *card4->FUN_006a9540();
+            orientation = *card4->NiAVObject_GetRotate_006a9540();
             orientation = orientation.FUN_0043f8d0(scale);
-            pos3 = *card4->FUN_0043d450()->Center();
-            reinterpret_cast<R74Animator*>(sel)->FUN_0043fa80(&orientation);
-            reinterpret_cast<R74Animator*>(sel)->FUN_00440460(&pos3);
+            pos3 = *card4->NiAVObject_GetWorldBound()->Center();
+            reinterpret_cast<R74Animator*>(sel)->SetRotate_0043fa80(&orientation);
+            reinterpret_cast<R74Animator*>(sel)->NiAVObject_SetTranslate(&pos3);
             reinterpret_cast<R74TextureNode*>(sel)->Update(NiUpdateData(0.0f, false, false));
-            sel = FUN_004aae30(sel, DAT_01071a78);
+            sel = BSUtilities_GetObjectByName(sel, DAT_01071a78);
         }
         R74SelectableV* selectable = (reinterpret_cast<R74Node*>(sel)->FUN_00a59d30(3) == 0
                                           ? 0
@@ -19958,8 +19981,8 @@ void R74Menu::SelectCard(int row, int column)
         GO uiReq_(0);
         if (selectable != 0)
         {
-            FUN_00406d00(aBuf1, 0x104u, DAT_0101996c, DAT_0101d7fc,
-                         reinterpret_cast<R74ExternalRef*>(external)->FUN_0050d100()->FUN_00408da0());
+            BSsprintf(aBuf1, 0x104u, DAT_0101996c, DAT_0101d7fc,
+                         reinterpret_cast<R74ExternalRef*>(external)->FUN_0050d100()->TESModel_GetModel());
             FUN_004b7240(aBuf1, buf2, 0x104);
             DAT_011dea10->FUN_004568c0(buf2, &uiReq_, 0, 0);
             if ((unsigned int)uiReq_ != 0)

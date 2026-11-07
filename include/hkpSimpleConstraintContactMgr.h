@@ -29,8 +29,8 @@ class hkpSimpleConstraintContactMgr : public hkpDynamicsContactMgr
 public:
     virtual void vf00();
     virtual void vf04();
-    virtual void FUN_00cfd5e0(hkStatisticsCollector* pkCollector, const hkClass* pkClass) const throw();
-    virtual hkUint16 FUN_00cfcf80(const hkCdBodyStub& a, const hkCdBodyStub& b,
+    virtual void calcContentStatistics_00cfd5e0(hkStatisticsCollector* pkCollector, const hkClass* pkClass) const throw();
+    virtual hkUint16 addContactPointImpl(const hkCdBodyStub& a, const hkCdBodyStub& b,
                                const hkProcessCollisionInputStub& input,
                                hkProcessCollisionOutputStub& output,
                                const hkGskCacheStub* contactCache, hkContactPt& cp);
@@ -62,9 +62,9 @@ public:
     unsigned int processContactPoint(const hkpCdBody& a, const hkpCdBody& b,
                                     const GskAgentInput& input, WorldOperationEntry& output,
                                     const ConvexFeaturePairCache* contactCache, hkContactPoint& cp);
-    hkRigidBodyStub* FUN_00cfd800(const hkCdBodyStub& a, const hkCdBodyStub& b,
+    hkRigidBodyStub* setContactPointProperties(const hkCdBodyStub& a, const hkCdBodyStub& b,
                                 int maxImpulse, hkCPProperties* cpi);
-    void FUN_00cfd320(hkUint16 cpId, hkpConstraintOwner& kOwner) throw();
+    void removeContactPointImpl_00cfd320(hkUint16 cpId, hkpConstraintOwner& kOwner) throw();
 
     int unk04;
     union

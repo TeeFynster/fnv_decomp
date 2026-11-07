@@ -9,7 +9,7 @@
 extern unsigned int DAT_011c16bc;
 void FUN_00a47350();
 void FUN_00a5b690();
-bool __cdecl FUN_00aa1a30(const char*, int);
+bool __cdecl NiFile_Access(const char*, int);
 extern "C" void __fastcall __security_check_cookie(unsigned int);
 
 #define FNV_NIMEMOBJECT_H
@@ -20,18 +20,18 @@ extern bool DAT_011f4448;
 extern bool DAT_011a9594;
 extern bool DAT_011f4780;
 
-void FUN_00a57500(NiFixedString*);
-void FUN_00a76960(void*, void*);
+void NiStandardizeFilePath(NiFixedString*);
+void NiImageConverter_ConvertFilenameToPlatformSpecific_(void*, void*);
 void FUN_00a47350();
-void FUN_00a64ea0();
+void NiStream_LoadCStringAsFixedString();
 void FUN_00a64700();
 void FUN_00a5b690();
-void FUN_00a645b0();
+void ReadLinkID();
 void FUN_00a636f0();
 void FUN_00a636b0();
 void FUN_00a633d0();
 void FUN_00a2e750();
-void FUN_00a633b0();
+void NiTexture_SetTexture();
 
 class NiFixedStringCallShim
 {

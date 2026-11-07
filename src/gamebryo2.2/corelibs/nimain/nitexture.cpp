@@ -46,7 +46,8 @@ extern int DAT_010983bc;
 
 // Allocates a 0x18-byte NiProperty, runs its constructor, installs the vtable at DAT_010983bc, and returns it (or null on allocation failure).
 // @fnv 0x00a47380
-void* __cdecl FUN_00a47380()
+// src: EXE 0x00a47380
+void* __cdecl NiSequenceStreamHelper_CreateObject()
 {
     NiProperty* p = (NiProperty*)NiRefObject::operator new(0x18);
     if (p)
@@ -69,7 +70,8 @@ extern Pool00a91290* DAT_011f5e50;
 
 // Allocates a Pool00a91290, zeroes its first four fields, sets the last two to 8, and stores it in DAT_011f5e50 (or null on failure).
 // @fnv 0x00a91290
-void __cdecl FUN_00a91290()
+// src: COMMUNITY 0x00a91290
+void __cdecl NiScreenGeometryData__SDMInit()
 {
     Pool00a91290* p = (Pool00a91290*)g_memoryManager.Allocate(sizeof(Pool00a91290));
     if (p)
@@ -90,7 +92,8 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f3f38;
 // Returns a pointer to the global object g_011f3f38, ignoring both arguments.
 // @fnv 0x00a47370
-GlobalObjectO2_00a7b610* __fastcall FUN_00a47370(void*, int)
+// src: COMMUNITY 0x00a47370
+GlobalObjectO2_00a7b610* __fastcall NiSequenceStreamHelper_GetRTTI(void*, int)
 {
     return &g_011f3f38;
 }
@@ -121,20 +124,21 @@ template <class T, class A> struct ViewerFieldArray
 typedef ViewerFieldArray<ActorCombatGroup*, NiTMallocInterface<ActorCombatGroup*> > CGArray;
 extern const char* const g_011f444c_arg1;
 // NiObjectNET's viewer routine is not yet declared by the shared header.
-void __fastcall FUN_00a5ca80(NiObjectNET*, int, CGArray*);
-ActorCombatGroup* __cdecl FUN_00a7d330(const char*);
-ActorCombatGroup* __cdecl FUN_00a7d4d0(const char*, unsigned int);
+void __fastcall NiObjectNET_GetViewerStrings(NiObjectNET*, int, CGArray*);
+ActorCombatGroup* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+ActorCombatGroup* __cdecl NiGetViewerString_00a7d4d0(const char*, unsigned int);
 // @fnv 0x00a62a40
-void __fastcall FUN_00a62a40(NiTexture* self, int unused, CGArray* apArray)
+// src: XBOX_PDB 0x00a62a40
+void __fastcall NiTexture_GetViewerStrings(NiTexture* self, int unused, CGArray* apArray)
 {
-    FUN_00a5ca80(self, unused, apArray);
-    ActorCombatGroup* pEntry = FUN_00a7d330(g_011f444c_arg1);
+    NiObjectNET_GetViewerStrings(self, unused, apArray);
+    ActorCombatGroup* pEntry = NiViewerStrings_NiGetViewerString_Title(g_011f444c_arg1);
     unsigned int n = apArray->m_usESize;
     if (n >= apArray->m_usMaxSize)
         apArray->SetSize(n + apArray->m_usGrowBy);
     apArray->SetAt(n, pEntry);
     unsigned char* st = reinterpret_cast<unsigned char*>(self->m_pkRendererData);
-    pEntry = FUN_00a7d4d0("State", st ? st[0x5b] : 0);
+    pEntry = NiGetViewerString_00a7d4d0("State", st ? st[0x5b] : 0);
     n = apArray->m_usESize;
     if (n >= apArray->m_usMaxSize)
         apArray->SetSize(n + apArray->m_usGrowBy);
@@ -155,7 +159,8 @@ struct TexInfo
 
 // @fnv 0x00a62670
 // The shared NiTexture header does not yet declare this renderer-data query.
-int __fastcall FUN_00a62670(NiTexture* self)
+// src: XBOX_PDB 0x00a62670
+int __fastcall NiTexture_GetMemorySize(NiTexture* self)
 {
     unsigned int result = 0;
     if (self->m_pkRendererData != 0)
@@ -264,13 +269,15 @@ int GetTextureForType(int unused, int type)
 
 extern "C" void __cdecl FUN_00a5c0e0();
 // @fnv 0x00a47360
-extern "C" void __cdecl FUN_00a47360()
+// src: XBOX_PDB 0x00a47360
+extern "C" void __cdecl NiSequenceStreamHelper_LinkObject()
 {
     FUN_00a5c0e0();
 }
 
 // @fnv 0x00a62660
-const ExtraName& NiTexture::FUN_00a62660()
+// src: XBOX_PDB 0x00a62660
+const ExtraName& NiTexture::GetFilename_00a62660()
 {
     return reinterpret_cast<const ExtraName&>(m_kName);
 }
@@ -302,9 +309,9 @@ template <class T> class ViewerArray
 typedef ViewerArray<char*> ViewerStrings;
 
 extern const char* DAT_011f5e54;
-char* FUN_00a7d330(const char* pcClassName);
-char* FUN_00a7d370(const char* pcPrefix, bool bValue);
-char* FUN_00a7d510(const char* pcPrefix, unsigned int uiValue);
+char* NiViewerStrings_NiGetViewerString_Title(const char* pcClassName);
+char* NiGetViewerString(const char* pcPrefix, bool bValue);
+char* NiGetViewerString_00a7d510(const char* pcPrefix, unsigned int uiValue);
 
 class ElementsBase
 {
@@ -347,18 +354,19 @@ class Elements : public ElementsBase
     int unk068;
     unsigned short m_usNumElements;
 
-    void FUN_00a912d0(ViewerStrings* pkStrings);
+    void NiScreenGeometryData_GetViewerStrings(ViewerStrings* pkStrings);
 };
 
 // Calls base RegisterFields, then adds class name, m_bPixelAccurate, and m_usNumElements to pkStrings.
 // @fnv 0x00a912d0
-void Elements::FUN_00a912d0(ViewerStrings* pkStrings)
+// src: XBOX_PDB 0x00a912d0
+void Elements::NiScreenGeometryData_GetViewerStrings(ViewerStrings* pkStrings)
 {
     ElementsBase::RegisterFields(pkStrings);
-    pkStrings->Add(FUN_00a7d330(DAT_011f5e54));
-    pkStrings->Add(FUN_00a7d370("m_bPixelAccurate", m_bPixelAccurate));
+    pkStrings->Add(NiViewerStrings_NiGetViewerString_Title(DAT_011f5e54));
+    pkStrings->Add(NiGetViewerString("m_bPixelAccurate", m_bPixelAccurate));
     unsigned int n = m_usNumElements;
-    pkStrings->Add(FUN_00a7d510("Num Elements", n));
+    pkStrings->Add(NiGetViewerString_00a7d510("Num Elements", n));
 }
 
 }

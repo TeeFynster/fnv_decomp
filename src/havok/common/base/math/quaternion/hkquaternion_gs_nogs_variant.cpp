@@ -41,7 +41,8 @@ inline float fabs(float f)
 }
 
 // @fnv 0x00cb2a50
-void hkQuaternion::FUN_00cb2a50(const hkVector4& v)
+// src: COMMUNITY 0x00cb2a50
+void hkQuaternion::removeAxisComponent(const hkVector4& v)
 {
     __m128 q_w = _mm_shuffle_ps((*reinterpret_cast<__m128*>(&unk00)), (*reinterpret_cast<__m128*>(&unk00)), 0xff);
 
@@ -111,7 +112,7 @@ void hkQuaternion::FUN_00cb2a50(const hkVector4& v)
         axis(i1) = v(i2);
         axis(i2) = -v(i1);
 
-        FUN_00cb2450(axis, DAT_0102b3c8);
+        hkQuaternion_setAxisAngle(axis, DAT_0102b3c8);
         return;
     }
 
@@ -137,5 +138,5 @@ void hkQuaternion::FUN_00cb2a50(const hkVector4& v)
 
     axis.m_vComponents = _mm_mul_ps(inv_len_bcast, cross2);
 
-    FUN_00cb2450(axis, ClampedAcos(dot));
+    hkQuaternion_setAxisAngle(axis, ClampedAcos(dot));
 }

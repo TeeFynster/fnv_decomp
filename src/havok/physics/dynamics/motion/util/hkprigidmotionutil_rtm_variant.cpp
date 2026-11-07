@@ -97,7 +97,8 @@ struct TargetItem
 };
 
 // @fnv 0x00d29830
-TargetItem* __cdecl FUN_00d29830(hkStepInfo* a0, hkpMotion** a1, int a2, int a3, TargetItem* a4)
+// src: COMMUNITY 0x00d29830
+TargetItem* __cdecl hkRigidMotionUtilApplyForcesAndBuildAccumulators(hkStepInfo* a0, hkpMotion** a1, int a2, int a3, TargetItem* a4)
 {
     int count = a2 - 1;
     if (count >= 0)
@@ -359,7 +360,7 @@ __forceinline void hkQuaternion::operator=(const hkQuaternion& q)
 
 __forceinline void hkQuaternion::normalize()
 {
-    (*reinterpret_cast<hkVector4*>(this)).FUN_005611c0();
+    (*reinterpret_cast<hkVector4*>(this)).normalize_005611c0();
 }
 
 __forceinline hkRotation& hkTransform::getRotation()
@@ -374,7 +375,7 @@ __forceinline const hkRotation& hkTransform::getRotation() const
 
 __forceinline void hkTransform::SetBodyOrientation(const hkQuaternion& quatRotation)
 {
-    (*reinterpret_cast<hkRotation*>(&m_row0)).FUN_00cb2d90(quatRotation);
+    (*reinterpret_cast<hkRotation*>(&m_row0)).hkRotation_set(quatRotation);
 }
 
 __forceinline hkVector4& hkTransform::getTranslation()
@@ -754,7 +755,7 @@ __forceinline void _stepMotionState(const hkStepInfo& info, hkVector4& linearVel
             (*reinterpret_cast<hkVector4*>(&dq))(3) = w;
         }
 
-        newRotation.FUN_00c66320(dq, newRotation);
+        newRotation.setMul(dq, newRotation);
         newRotation.normalize();
 
         motionState.m_kDeltaAngle.setAdd4((*reinterpret_cast<hkVector4*>(&dq)), (*reinterpret_cast<hkVector4*>(&dq)));
@@ -862,7 +863,8 @@ static __forceinline void setReciprocal4(hkVector4& result, const hkVector4& vec
 }
 
 // @fnv 0x00d29bf0
-extern "C" int __cdecl FUN_00d29bf0(const ConstraintSolverInfo& solverInfo, const hkStepInfo& info,
+// src: COMMUNITY 0x00d29bf0
+extern "C" int __cdecl hkRigidMotionUtilApplyAccumulators(const ConstraintSolverInfo& solverInfo, const hkStepInfo& info,
                                     const QuantizedBoundsData* accumulators, hkpMotion* const* motions, int numMotions,
                                     int motionOffset)
 {
@@ -886,13 +888,13 @@ extern "C" int __cdecl FUN_00d29bf0(const ConstraintSolverInfo& solverInfo, cons
             hkVector4 in;
             setReciprocal4(in, tbm->m_kInertiaAndMassInv);
             angVelLocalSpace.mul4(in);
-            angularMomentum.FUN_00c7f700(tbm->getTransform().getRotation(), angVelLocalSpace);
+            angularMomentum.hkVector4_setRotatedDir(tbm->getTransform().getRotation(), angVelLocalSpace);
         }
         case hkpMotion::MOTION_BOX_INERTIA: {
             motion->m_kTranslationalVelocity = accu->m_vLinearVelocity;
             motion->m_kAngularVelocity._setRotatedDir(motion->getTransform().getRotation(), accu->m_vAngularVelocity);
             integrationLinearVelocity = accu->getSumLinearVel();
-            integrationAngularVelocity.FUN_00c7f700(motion->getTransform().getRotation(), accu->getSumAngularVel());
+            integrationAngularVelocity.hkVector4_setRotatedDir(motion->getTransform().getRotation(), accu->getSumAngularVel());
             goto sphereInertia;
         }
         case hkpMotion::MOTION_KEYFRAMED: {
@@ -923,7 +925,7 @@ extern "C" int __cdecl FUN_00d29bf0(const ConstraintSolverInfo& solverInfo, cons
             hkVector4 h;
             h.setRotatedInverseDir(tbm->getTransform().getRotation(), angularMomentum);
             h.mul4(tbm->m_kInertiaAndMassInv);
-            tbm->m_kAngularVelocity.FUN_00c7f700(tbm->getTransform().getRotation(), h);
+            tbm->m_kAngularVelocity.hkVector4_setRotatedDir(tbm->getTransform().getRotation(), h);
         }
         MotionUtilities::_clipVelocities(motion->m_kMotionState, motion->m_kTranslationalVelocity,
                                          motion->m_kAngularVelocity);
@@ -1043,7 +1045,7 @@ static __forceinline float minf(float a, float b)
 }
 static __forceinline void updateTransform(const hkSweptTransform& history, hkTransform& world)
 {
-    reinterpret_cast<hkRotation*>(&world.m_row0)->FUN_00cb2d90(history.m_qRotation1);
+    reinterpret_cast<hkRotation*>(&world.m_row0)->hkRotation_set(history.m_qRotation1);
     LocalM128 local = history.m_vCenterOfMassLocal.m_vComponents;
     LocalM128 y = _mm_mul_ps(_mm_shuffle_ps(local, local, 0x55), world.m_row1);
     LocalM128 x = _mm_mul_ps(_mm_shuffle_ps(local, local, 0), world.m_row0);
@@ -1099,8 +1101,8 @@ static __forceinline void integrateMotion(hkpMotion* motion, const hkStepInfo* s
         float fourth = h * h;
         angle.w = (float)((1.0 - ((double)0.822948f) * h - DAT_010ce4a0 * fourth) - (h * DAT_010ce498) * fourth);
     }
-    rotation.FUN_00c66320(*reinterpret_cast<const hkQuaternion*>(&angle), rotation);
-    reinterpret_cast<hkVector4*>(&rotation)->FUN_005611c0();
+    rotation.setMul(*reinterpret_cast<const hkQuaternion*>(&angle), rotation);
+    reinterpret_cast<hkVector4*>(&rotation)->normalize_005611c0();
     s->m_kDeltaAngle.m_vComponents = _mm_add_ps(angle.q(), angle.q());
     ((float*)&s->m_kDeltaAngle)[3] = (float)((float)sqrt(halfSquare) * 3.1415927410125732);
     (*reinterpret_cast<LocalM128*>(&s->m_kSweptTransform.m_qRotation1)) = (*reinterpret_cast<LocalM128*>(&rotation));
@@ -1170,7 +1172,8 @@ struct MotionList
 };
 
 // @fnv 0x00d28a30
-extern "C" int __cdecl FUN_00d28a30(Ref<const SolverInfo> info, const hkStepInfo* step, Ref<const hkVector4> gravity,
+// src: XBOX_PDB 0x00d28a30
+extern "C" int __cdecl hkRigidMotionUtilApplyForcesAndStep(Ref<const SolverInfo> info, const hkStepInfo* step, Ref<const hkVector4> gravity,
                                     MotionList motions, int count, int offset)
 {
     int minimum = 0x7fffffff;
@@ -1185,19 +1188,19 @@ extern "C" int __cdecl FUN_00d28a30(Ref<const SolverInfo> info, const hkStepInfo
             applyGravity(motion, gravity, gravityFactor);
             applyDamping(motion, step);
             hkVector4 localAngular;
-            localAngular.FUN_004b4ab0(*reinterpret_cast<const hkRotation*>(&motion->m_kMotionState.m_kMotionTransform), motion->m_kAngularVelocity);
+            localAngular.hkVector4_setRotatedInverseDir(*reinterpret_cast<const hkRotation*>(&motion->m_kMotionState.m_kMotionTransform), motion->m_kAngularVelocity);
             LocalM128 inertia = motion->m_kInertiaAndMassInv.m_vComponents;
             LocalM128 reciprocal = _mm_rcp_ps(inertia);
             reciprocal =
                 _mm_sub_ps(_mm_add_ps(reciprocal, reciprocal), _mm_mul_ps(_mm_mul_ps(reciprocal, inertia), reciprocal));
             localAngular.q() = _mm_mul_ps(reciprocal, localAngular.q());
             hkVector4 momentum;
-            momentum.FUN_00c7f700(*reinterpret_cast<const hkRotation*>(&motion->m_kMotionState.m_kMotionTransform), localAngular);
+            momentum.hkVector4_setRotatedDir(*reinterpret_cast<const hkRotation*>(&motion->m_kMotionState.m_kMotionTransform), localAngular);
             integrateMotion(motion, step);
             hkVector4 transformed;
-            transformed.FUN_004b4ab0(*reinterpret_cast<const hkRotation*>(&motion->m_kMotionState.m_kMotionTransform), momentum);
+            transformed.hkVector4_setRotatedInverseDir(*reinterpret_cast<const hkRotation*>(&motion->m_kMotionState.m_kMotionTransform), momentum);
             transformed.q() = _mm_mul_ps(transformed.q(), motion->m_kInertiaAndMassInv.m_vComponents);
-            motion->m_kAngularVelocity.FUN_00c7f700(*reinterpret_cast<const hkRotation*>(&motion->m_kMotionState.m_kMotionTransform), transformed);
+            motion->m_kAngularVelocity.hkVector4_setRotatedDir(*reinterpret_cast<const hkRotation*>(&motion->m_kMotionState.m_kMotionTransform), transformed);
             clampVelocities(motion);
             break;
         }

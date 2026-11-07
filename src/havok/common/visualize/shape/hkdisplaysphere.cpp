@@ -43,7 +43,7 @@ struct FUN_008cd6a0_Class
         d[10] = 1.0f;
         m_vTranslation.setZero4();
     }
-    void FUN_00cb2d90(void* p) throw();
+    void hkRotation_set(void* p) throw();
 };
 
 // Preserve the inlined base construction used by this unit.
@@ -82,10 +82,11 @@ FUN_00e0af50::FUN_00e0af50(const hkVector4& aVec, int a, int b)
     m_kPointA = a;
     m_kPointB = b;
     FUN_008cd6a0_Class& t = m_kMotionTransform;
-    t.FUN_00cb2d90(&DAT_012683b0);
+    t.hkRotation_set(&DAT_012683b0);
     t.m_vTranslation = aVec;
 }
 
 // @fnv 0x00e0af40
-void __stdcall FUN_00e0af40(int a, int b)
+// src: COMMUNITY 0x00e0af40
+void __stdcall nullsub_91(int a, int b)
 {}

@@ -23,7 +23,8 @@ NiAlphaAccumulator* __fastcall InitializeAlphaAccumulator(NiAlphaAccumulator* se
 extern char const* const g_011f4454_arg1;
 
 // @fnv 0x00a5fc80
-char const* const* __cdecl FUN_00a5fc80()
+// src: COMMUNITY 0x00a5fc80
+char const* const* __cdecl NiSourceTexture_GetRTTI()
 {
     return &g_011f4454_arg1;
 }
@@ -31,20 +32,22 @@ char const* const* __cdecl FUN_00a5fc80()
 extern "C" void* g_011f5ecc;
 
 // @fnv 0x00a950d0
-void* __cdecl FUN_00a950d0()
+// src: COMMUNITY 0x00a950d0
+void* __cdecl NiSpecularProperty_GetRTTI()
 {
     return &g_011f5ecc;
 }
 
 // @fnv 0x00a950e0
-int __cdecl FUN_00a950e0()
+// src: COMMUNITY 0x00a950e0
+int __cdecl NiSpecularProperty_GetType()
 {
     return 9;
 }
 
 struct FUN_00a62140_shell
 {
-    bool FUN_00a62140(void* other);
+    bool NiSequenceStreamHelper_IsEqual(void* other);
 };
 
 struct FUN_00a5f480_cls
@@ -55,7 +58,7 @@ struct FUN_00a5f480_cls
 // @fnv 0x00a5f480
 bool FUN_00a5f480_cls::IsEquivalent(void* other)
 {
-    if (!reinterpret_cast<FUN_00a62140_shell*>(this)->FUN_00a62140(other))
+    if (!reinterpret_cast<FUN_00a62140_shell*>(this)->NiSequenceStreamHelper_IsEqual(other))
     {
         goto fail;
     }
@@ -121,13 +124,14 @@ class A5F510FlagProperty : public A5F510Property
     }
     virtual void vfunc00();
 
-    A5F510Property* FUN_00a5f510(CloningProcess& kCloning);
+    A5F510Property* NiZBufferProperty_CreateClone(CloningProcess& kCloning);
 
     unsigned short m_usFlags;
 };
 
 // @fnv 0x00a5f510
-A5F510Property* A5F510FlagProperty::FUN_00a5f510(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a5f510
+A5F510Property* A5F510FlagProperty::NiZBufferProperty_CreateClone(CloningProcess& kCloning)
 {
     if (m_pkClonedTarget)
     {
@@ -212,12 +216,13 @@ class AlphaPropInit_cls
     volatile unsigned char m_43;
     volatile int m_44;
     void FUN_00a5c200();
-    void FUN_00a5f7b0();
-    AlphaPropInit_cls* FUN_00a5fc10();
+    void NiTexture_AddTextureToList();
+    AlphaPropInit_cls* NiSourceTexture_NiSourceTexture();
 };
 
 // @fnv 0x00a5fc10
-AlphaPropInit_cls* AlphaPropInit_cls::FUN_00a5fc10()
+// src: EXE 0x00a5fc10
+AlphaPropInit_cls* AlphaPropInit_cls::NiSourceTexture_NiSourceTexture()
 {
     FUN_00a5c200();
     m_pVtbl = &kVtbl_0109b944;
@@ -227,7 +232,7 @@ AlphaPropInit_cls* AlphaPropInit_cls::FUN_00a5fc10()
     int zero = 0;
     int* p24 = (int*)&m_24;
     *p24 = zero;
-    FUN_00a5f7b0();
+    NiTexture_AddTextureToList();
     m_pVtbl = &kVtbl_0109b9ec;
     m_30 = g_0109b220;
     m_34 = g_0109b220;
@@ -279,9 +284,9 @@ struct Property284
     int unk00, unk04, unk08, unk0c, unk10, unk14;
     void AppendString(S_00a5f640_Arr* a);
 };
-char* __cdecl FUN_00a7d330(char* s);
-char* __cdecl FUN_00a7d370(const char* fmt, S_00a5f640_B v);
-char* __cdecl FUN_00a7d5e0(const char* fmt, const char* v);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char* s);
+char* __cdecl NiGetViewerString(const char* fmt, S_00a5f640_B v);
+char* __cdecl NiGetViewerString_00a7d5e0(const char* fmt, const char* v);
 struct S_00a5f640_Obj : Property284
 {
     S_00a5f640_Flags f;
@@ -292,29 +297,31 @@ struct S_00a5f640_Obj : Property284
 void S_00a5f640_Obj::AppendRenderStateProperties(S_00a5f640_Arr* arr)
 {
     AppendString(arr);
-    arr->Add(FUN_00a7d330(DAT_011f443c));
-    arr->Add(FUN_00a7d370("m_bZTest", S_00a5f640_B(f.a)));
-    arr->Add(FUN_00a7d370("m_bZWrite", S_00a5f640_B(f.b)));
+    arr->Add(NiViewerStrings_NiGetViewerString_Title(DAT_011f443c));
+    arr->Add(NiGetViewerString("m_bZTest", S_00a5f640_B(f.a)));
+    arr->Add(NiGetViewerString("m_bZWrite", S_00a5f640_B(f.b)));
     unsigned uiTestFunc = f.c;
     const char* names[8] = {"TEST_ALWAYS",  "TEST_LESS",     "TEST_EQUAL",        "TEST_LESSEQUAL",
                             "TEST_GREATER", "TEST_NOTEQUAL", "TEST_GREATEREQUAL", "TEST_NEVER"};
-    arr->Add(FUN_00a7d5e0("Test Function", names[uiTestFunc]));
+    arr->Add(NiGetViewerString_00a7d5e0("Test Function", names[uiTestFunc]));
 }
 
 struct FnvCpu_FUN_00a5fc90_CpuObject
 {
-    char* FUN_00a5fc90();
+    char* NiSourceTexture_GetFilename();
 };
 // @fnv 0x00a5fc90
-char* FnvCpu_FUN_00a5fc90_CpuObject::FUN_00a5fc90()
+// src: XBOX_PDB 0x00a5fc90
+char* FnvCpu_FUN_00a5fc90_CpuObject::NiSourceTexture_GetFilename()
 {
     return reinterpret_cast<char*>(this) + 48;
 }
 
-extern void FUN_00a47360();
+extern void NiSequenceStreamHelper_LinkObject();
 
 // @fnv 0x00a950c0
-void FUN_00a950c0()
+// src: XBOX_PDB 0x00a950c0
+void NiAlphaProperty_LinkObject()
 {
-    FUN_00a47360();
+    NiSequenceStreamHelper_LinkObject();
 }

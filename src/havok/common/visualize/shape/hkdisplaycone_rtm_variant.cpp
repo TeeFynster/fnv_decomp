@@ -37,15 +37,15 @@ struct GlobalContext
     int unk00, unk04, unk08, unk0c;
     Allocator* allocator;
 };
-extern "C" GlobalContext* __cdecl FUN_00c85750();
+extern "C" GlobalContext* __cdecl hkMemoryRouter_getInstance();
 extern "C" void __cdecl ResizeAudioStream(Allocator*, hkArray<Vertex>*, int);
-extern "C" void __cdecl FUN_00c908c0(Allocator*, hkArray<Edge>*, int, int);
+extern "C" void __cdecl hkArrayUtil__reserve(Allocator*, hkArray<Edge>*, int, int);
 struct ForwardArg
 {
     GeometryBuffers* value;
 };
 struct MeshBuilder;
-extern "C" void __fastcall FUN_00de54b0(MeshBuilder*, ForwardArg);
+extern "C" void __fastcall hkDisplayCone_generateConeVertices(MeshBuilder*, ForwardArg);
 struct MeshBuilder
 {
     int unk00;
@@ -115,7 +115,7 @@ struct __declspec(align(16)) Q
     {
         return quad;
     }
-    void FUN_00cb2450(const Q* axis, float angle);
+    void hkQuaternion_setAxisAngle(const Q* axis, float angle);
     void SetRotatedDirection(const Q& quaternion, const Q& vector);
     __forceinline void addMul(float scale, const Q& direction)
     {
@@ -161,7 +161,7 @@ struct Cls
     int m_uiItemCount;
     float m_fConeAngle;
     float m_step;
-    void __thiscall FUN_00de54b0(ArrayRef output);
+    void __thiscall hkDisplayCone_generateConeVertices(ArrayRef output);
 };
 static __forceinline ::__m128 rot(const Q& quaternion, const Q& vector)
 {
@@ -201,10 +201,11 @@ __forceinline void Q::SetRotatedDirection(const Q& quaternion, const Q& vector)
     quad = rot(quaternion, vector);
 }
 // @fnv 0x00de54b0
-void __thiscall Cls::FUN_00de54b0(ArrayRef output)
+// src: XBOX_PDB 0x00de54b0
+void __thiscall Cls::hkDisplayCone_generateConeVertices(ArrayRef output)
 {
     int count = m_uiItemCount;
-    ::GlobalContext* context = ::FUN_00c85750();
+    ::GlobalContext* context = ::hkMemoryRouter_getInstance();
     ::Allocator* ctx = context->allocator;
     _ReadWriteBarrier();
     HArr* arr = output.value;
@@ -214,7 +215,7 @@ void __thiscall Cls::FUN_00de54b0(ArrayRef output)
         int grow = capacity * 2;
         if (count >= grow)
             grow = count;
-        ::FUN_00c908c0(ctx, (::hkArray< ::Edge>*)arr, grow, 16);
+        ::hkArrayUtil__reserve(ctx, (::hkArray< ::Edge>*)arr, grow, 16);
     }
     arr->m_iElementCount = count;
 
@@ -258,9 +259,9 @@ void __thiscall Cls::FUN_00de54b0(ArrayRef output)
     inv = ::_mm_andnot_ps(::_mm_cmpeq_ss(t, ::_mm_set_ss(0.0f)), inv);
     ls.quad = ::_mm_mul_ps(::_mm_shuffle_ps(inv, inv, 0), pv);
     Q q1, q2;
-    q1.FUN_00cb2450(&ls, m_fConeAngle);
+    q1.hkQuaternion_setAxisAngle(&ls, m_fConeAngle);
     scratch.v1 = 2.0f * 3.14159265f / (float)m_uiItemCount;
-    q2.FUN_00cb2450(axis, scratch.v1);
+    q2.hkQuaternion_setAxisAngle(axis, scratch.v1);
     Q d;
     d.SetRotatedDirection(q1, *axis);
     for (int k = 0; k < m_uiItemCount; k++)

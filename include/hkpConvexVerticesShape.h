@@ -45,14 +45,14 @@ public:
     void AssignReference(hkpConvexVerticesConnectivity* connectivity, bool update);
     void AssignReference(RefObj* connectivity, bool update);
 
-    void FUN_00d58ee0(const MatchVector& direction, MatchVector& supportingVertexOut) const;
-    hkBoolRet FUN_00d592a0(const RayInput& input, RayOutput& output);
+    void hkpConvexVerticesShape_getSupportingVertexImpl(const MatchVector& direction, MatchVector& supportingVertexOut) const;
+    hkBoolRet hkpConvexVerticesShape_castRayImpl(const RayInput& input, RayOutput& output);
     void FUN_00d59200(hkArray<hkVector4>& vertices) const;
     void FUN_00d59200(hkArrayq<hkVector4q>& vertices) const throw();
     void FUN_00d59870();
-    void FUN_00d59900(const float* vertices, int byteStriding, int numVertices);
-    void FUN_00d59900(int vertices, int byteStriding, int numVertices);
-    void FUN_00d59f40();
+    void hkpConvexVerticesShape_copyVertexData(const float* vertices, int byteStriding, int numVertices);
+    void hkpConvexVerticesShape_copyVertexData(int vertices, int byteStriding, int numVertices);
+    void ProcessEntries_00d59f40();
     hkpConvexVerticesShape* FUN_00d5a4e0(unsigned char deleting);
 
     int unk14;

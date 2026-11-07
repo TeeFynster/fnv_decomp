@@ -11,14 +11,14 @@
 bool Renderer::SetBackgroundColor(NiColor& color)
 {
     DAT_011c74b8 = color;
-    if (FUN_004bc3f0())
+    if (Renderer_GetNIRenderer())
     {
         NiColorA background(0.0f, 0.0f, 0.0f, 0.0f);
         background.r = DAT_011c74b8.r;
         background.g = DAT_011c74b8.g;
         background.b = DAT_011c74b8.b;
         background.a = 0.0f;
-        FUN_004bc3f0()->SetBackgroundColor(reinterpret_cast<NiVector4*>(&background)); // slot 43 (+0xac)
+        Renderer_GetNIRenderer()->SetBackgroundColor(reinterpret_cast<NiVector4*>(&background)); // slot 43 (+0xac)
         return true;
     }
     return false;
@@ -28,14 +28,15 @@ bool Renderer::SetBackgroundColor(NiColor& color)
 // @fnv 0x00452540
 bool Renderer::CanRender()
 {
-    return !DAT_011c70e9 || FUN_005d4a40();
+    return !DAT_011c70e9 || Cmd_Default_Execute();
 }
 
 double __cdecl FUN_00ec9ac0(double, double);
 
 // Returns the result of FUN_00ec9ac0(_X, _Y) cast to float.
 // @fnv 0x004dd150
-float __cdecl FUN_004dd150(float _X, float _Y)
+// src: XBOX_PDB 0x004dd150
+float __cdecl powf_004dd150(float _X, float _Y)
 {
     return (float)FUN_00ec9ac0(_X, _Y);
 }
@@ -44,11 +45,12 @@ float __cdecl FUN_004dd150(float _X, float _Y)
 struct RendererSetting : public Setting
 {
     void SetValue(float);
-    RendererSetting* FUN_004ed780(float f);
-    void FUN_004de2d0(int);
+    RendererSetting* ProcessAndReturnValue_004ed780(float f);
+    void Setting_SetValueB(int);
 };
 // @fnv 0x004ed780
-RendererSetting* RendererSetting::FUN_004ed780(float f)
+// src: GUESS 0x004ed780 (confidence: low)
+RendererSetting* RendererSetting::ProcessAndReturnValue_004ed780(float f)
 {
     SetValue(f);
     return this;
@@ -65,24 +67,26 @@ void* FUN_004da650_shell::GetFieldAt204()
     return reinterpret_cast<char*>(this) + 0x204;
 }
 
-extern "C" void* __cdecl FUN_00e69a60(void);
+extern "C" void* __cdecl NiDX9SystemDesc_Get(void);
 extern "C" void* DAT_011c70dc;
 
 // @fnv 0x004dce30
-void* __cdecl FUN_004dce30()
+// src: COMMUNITY 0x004dce30
+void* __cdecl TESRenderer_GetSystemDesc()
 {
     if (DAT_011c70dc == 0)
-        DAT_011c70dc = FUN_00e69a60();
+        DAT_011c70dc = NiDX9SystemDesc_Get();
     return DAT_011c70dc;
 }
 
 namespace fnv_004dd130 {
-extern "C" float __cdecl FUN_004dd150(float, float);
+extern "C" float __cdecl powf_004dd150(float, float);
 
 // @fnv 0x004dd130
-float FUN_004dd130(float a, float b)
+// src: XBOX_PDB 0x004dd130
+float pow_004dd130(float a, float b)
 {
-    return FUN_004dd150(a, b);
+    return powf_004dd150(a, b);
 }
 }  // namespace fnv_004dd130
 
@@ -90,17 +94,17 @@ namespace fnv_004dcdb0 {
 struct Flt
 {
     operator unsigned int();
-    unsigned int FUN_004dcdf0(unsigned int);
+    unsigned int GetElementOrZero(unsigned int);
 };
-void* __cdecl FUN_004dce30();
+void* __cdecl TESRenderer_GetSystemDesc();
 extern Flt* DAT_011c70dc;
 // Returns the value at index a1 from DAT_011c70dc when FUN_004dce30() succeeds and a1 is in range, otherwise 0.
 // @fnv 0x004dcdb0
 unsigned int __cdecl GetFltValueAt(unsigned int auiIndex)
 {
     unsigned int uiValue;
-    if (FUN_004dce30() && auiIndex < (unsigned int)*DAT_011c70dc)
-        uiValue = DAT_011c70dc->FUN_004dcdf0(auiIndex);
+    if (TESRenderer_GetSystemDesc() && auiIndex < (unsigned int)*DAT_011c70dc)
+        uiValue = DAT_011c70dc->GetElementOrZero(auiIndex);
     else
         uiValue = 0;
     return uiValue;
@@ -114,21 +118,22 @@ struct ShaderReference
 
 GO g_011c73b4;
 
-void __cdecl FUN_00b54630(bool);
-void __cdecl FUN_00461300();
+void __cdecl BSShaderManager_Free(bool);
+void __cdecl MessageHandler_ForceNextWarningToDisplay();
 void __cdecl _FNV_Warning(const char*, ...);
 
 // Calls FUN_00b54630, and on final kill releases the renderer via FUN_00461300, warning if smart pointers remain, then clears g_011c73b4.
 // @fnv 0x004da4d0
-void __cdecl FUN_004da4d0(bool abFinalKill)
+// src: XBOX_PDB 0x004da4d0
+void __cdecl Renderer_Kill(bool abFinalKill)
 {
-    FUN_00b54630(abFinalKill);
+    BSShaderManager_Free(abFinalKill);
 
     if (abFinalKill)
     {
         if (g_011c73b4.operator unsigned int() && reinterpret_cast<ShaderReference*>(g_011c73b4.operator unsigned int())->_ref_00726070() != 1)
         {
-            FUN_00461300();
+            MessageHandler_ForceNextWarningToDisplay();
 
             if (reinterpret_cast<ShaderReference*>(g_011c73b4.operator unsigned int())->_ref_00726070() == 2)
             {
@@ -161,18 +166,19 @@ struct TgtOps : public FUN_004da650_shell
 extern Setting g_011c72c0;
 extern char DAT_01021184[];
 
-void* __cdecl FUN_004dce30();
+void* __cdecl TESRenderer_GetSystemDesc();
 TgtOps* __cdecl GetFltValueAt(int);
 char* __cdecl ___insecure_strcpy(char*, char const*);
 char* __cdecl FUN_00ec6380(char*, char const*);
 int __cdecl __stricmp(char const*, char const*);
 
 // @fnv 0x004da570
-bool __cdecl FUN_004da570()
+// src: COMMUNITY 0x004da570
+bool __cdecl ProcessCustomINI()
 {
     char buffer[260];
 
-    if (FUN_004dce30())
+    if (TESRenderer_GetSystemDesc())
     {
         TgtOps* target = GetFltValueAt(0);
         if (target)
@@ -190,7 +196,7 @@ bool __cdecl FUN_004da570()
     ___insecure_strcpy(buffer, DAT_01021184);
     FUN_00ec6380(buffer, g_011c72c0.String());
     FUN_00ec6380(buffer, DAT_01021184);
-    g_011c72c0.FUN_005e0190(buffer);
+    g_011c72c0.AssignStringValue(buffer);
     return false;
 }
 }  // namespace fnv_004da570
@@ -253,7 +259,7 @@ void __cdecl ApplyGammaRamp()
     unsigned short i;
 
     g_bGRGammaDirty = false;
-    g_kGRGammaSetting.FUN_004ed780(g_fGRGamma);
+    g_kGRGammaSetting.ProcessAndReturnValue_004ed780(g_fGRGamma);
     for (i = 0; i < 256; i++)
     {
         kRamp4.red[i] = (unsigned short)(GRApplyGamma((float)(i / 255.0), g_fGRGamma) * 65535.0 + 0.5);
@@ -273,7 +279,8 @@ extern P03MM _g_memoryManager;
 
 // Copies apString to the string value; if pKey exists, copies it into a new buffer, changes its first byte to 'S', and frees old pKey only when it starts with 'S'.
 // @fnv 0x00c33170
-Setting& Setting::FUN_00c33170(const char* apString)
+// src: GUESS 0x00c33170 (confidence: medium)
+Setting& Setting::SetStringAndPromoteKeyOwnership(const char* apString)
 {
     if (this)
     {
@@ -347,28 +354,28 @@ struct Rect4
     int c;
     int d;
 };
-char* __cdecl FUN_004dc110();
+char* __cdecl BSUtilities_GetPersonalPath();
 int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 void* __cdecl FUN_00ec9a47(const char*, const char*);
 extern "C" int __cdecl _fclose(void*);
-bool __cdecl FUN_004de070();
-float __cdecl FUN_004de0c0();
-float __cdecl FUN_004de0d0();
+bool __cdecl is_bEyeFinity();
+float __cdecl Get_1280();
+float __cdecl Get_720();
 void __cdecl InitEyefinityDisplayInfo();
-bool __cdecl FUN_004dc710(int);
-int __cdecl FUN_004dc1f0();
-int __cdecl FUN_004dc200();
-int __cdecl FUN_004dc1e0();
-int __cdecl FUN_004dc210();
-int __cdecl FUN_004dc220();
-int __cdecl FUN_004dc230();
-int __cdecl FUN_004dc240();
-int __cdecl FUN_004dc250();
-int __cdecl FUN_004dc260();
-int __cdecl FUN_004dc270();
-int __cdecl FUN_004dc280();
-int __cdecl FUN_004dc290();
-int __cdecl FUN_004dc2a0();
+bool __cdecl TESRenderer_ValidateSettings(int);
+int __cdecl Renderer_GetScreenWidth();
+int __cdecl Renderer_GetScreenHeight();
+int __cdecl TESRenderer_GetHWND();
+int __cdecl TESRenderer_GetAdapterIndex();
+int __cdecl TESRenderer_GetFlags();
+int __cdecl TESRenderer_GetDeviceType();
+int __cdecl TESRenderer_GetSwapEffect();
+int __cdecl TESRenderer_GetBackBufferCount();
+int __cdecl TESRenderer_GetRefreshRate();
+int __cdecl TESRenderer_GetFrameBufferFormat();
+int __cdecl TESRenderer_GetDepthStencilFormat();
+int __cdecl TESRenderer_GetFrameBufferMode();
+int __cdecl TESRenderer_GetPresentInterval();
 bool __cdecl DispatchFormValue(int, int);
 int __cdecl FUN_00b4f4a0();
 int __cdecl FUN_00ec9774(void*, const char*, ...);
@@ -501,8 +508,8 @@ struct RendObj
     virtual void vfn_134();
     virtual void vfn_138();
     virtual int __stdcall vfn_13c(float);
-    RendObj* FUN_004dc020();
-    static DevObj* FUN_004dc040();
+    RendObj* NiXenonRenderer_GetD3DDevice();
+    static DevObj* NiDX9Renderer_GetDirect3D();
 };
 struct ShaderInitializer
 {
@@ -1228,17 +1235,17 @@ struct DbcObj
 {
     void* GetFieldAt204();
     void* FUN_00717e50();
-    Sub130* FUN_004dc120(int);
+    Sub130* NiXAdapaterDesc_GetDeviceCaps_004dc120(int);
 };
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 void __cdecl AssignImageConverter(void*);
-void __cdecl FUN_004dc050(bool);
-int __cdecl FUN_004dc010(int);
+void __cdecl NiSourceTexture_SetUsePreloading(bool);
+int __cdecl NiTexture_SetMipmapByDefault(int);
 DbcObj* __cdecl GetFltValueAt(int);
-int __cdecl FUN_004dc2c0();
-int __cdecl FUN_004dc2b0();
+int __cdecl BSShaderManager_kBackgroundColor_Get();
+int __cdecl TESRenderer_GetNPatchSegments();
 void __cdecl CopyStringToGlobal(const char*);
-void __stdcall FUN_009f9968(int);
+void __stdcall D3DPERF_SetOptions_009f9968(int);
 extern char DAT_010214e4;
 extern char DAT_010214c8;
 extern char DAT_0102149c;
@@ -1288,18 +1295,18 @@ extern NiColorA DAT_011ad840;
 extern NiColorA DAT_011f961c;
 int __cdecl DetectGpuVendor(int, int, int, void*, void*, int);
 int __cdecl FUN_004dc060(int);
-int __cdecl FUN_004dc0b0();
-void __cdecl FUN_004dc100(int);
-int __cdecl FUN_00647b70(int, int);
-void __cdecl FUN_004dc090(int);
-bool __cdecl FUN_004dc310();
+int __cdecl BSRenderState_GetGPUVendor();
+void __cdecl BSShaderManager_SetMaxShadowMaps(int);
+int __cdecl BSMAX_00647b70(int, int);
+void __cdecl BSShaderManager_EnableUseRefractionShader(int);
+bool __cdecl TESRenderer_GetMultiSampleEnabled();
 int __cdecl FUN_009fea2a();
-int __cdecl FUN_009fead0(int, int*);
+int __cdecl Runtime_ForwardCall_009fead0(int, int*);
 int __cdecl FUN_009fead6(int, int*);
 int __cdecl FUN_009feae8(int*, unsigned int*);
-int __cdecl FUN_009feae2(int*, unsigned int*);
+int __cdecl Object_ForwardCall_009feae2(int*, unsigned int*);
 int __cdecl FUN_009febd8(void*, int*);
-void* __cdecl FUN_0043c4b0();
+void* __cdecl NiXenonRenderer_GetRenderer();
 extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
 struct DriverVersion
 {
@@ -1527,8 +1534,8 @@ extern Setting DAT_011c7b6c;
 extern Setting DAT_011c7ac4;
 extern Setting DAT_011c7b48;
 extern SettingT_GameSettingCollection_ DAT_011c3ea4;
-bool __cdecl FUN_004dc0a0();
-int __cdecl FUN_00b7faf0();
+bool __cdecl BSShaderManager_GetUseRefractionShader();
+int __cdecl ShaderBuffer_GetCurrentBufferType();
 void __cdecl FUN_00ec9907(void*);
 extern int DAT_011ad830;
 extern SettingT_GameSettingCollection_ DAT_011c752c;
@@ -1592,38 +1599,39 @@ extern Setting DAT_011c75f8;
 void __cdecl SetBSStringCapacity(int);
 
 extern Setting DAT_011c71ac;
-void __cdecl FUN_004dc2d0(float);
+void __cdecl Renderer_SetGamma(float);
 int __cdecl FUN_00b4f3e0();
 int __cdecl FUN_00b4f380(int);
 
 // Initializes the renderer device, queries GPU capabilities, writes RendererInfo.txt, and caches float/bool settings into globals.
 // @fnv 0x004da670
-int __cdecl FUN_004da670(int aiWidth, int aiHeight)
+// src: EXE 0x004da670
+int __cdecl NiXAdapaterDesc_GetDeviceCaps(int aiWidth, int aiHeight)
 {
     S4eb0 tracker10(4, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Renderer.cpp", 377);
     DAT_011c6fc0 = aiWidth;
     DAT_011c6fc4 = aiHeight;
     char buf21[260];
-    _sprintf_s(buf21, 260, "%sRendererInfo.txt", FUN_004dc110());
+    _sprintf_s(buf21, 260, "%sRendererInfo.txt", BSUtilities_GetPersonalPath());
     void* file32 = FUN_00ec9a47(buf21, (const char*)&DAT_0102156c);
     if (file32 != 0)
     {
         _fclose(file32);
     }
-    DAT_011c6fb0 = *DAT_011c7628.FUN_0043d4d0();
+    DAT_011c6fb0 = *DAT_011c7628.Setting_Int();
     DAT_0118947c = DAT_011c73dc.GetUInt();
     DAT_01189480 = DAT_011c718c.GetUInt();
     if (DAT_011c771c.GetBoolValue())
     {
         InitEyefinityDisplayInfo();
     }
-    if (FUN_004de070())
+    if (is_bEyeFinity())
     {
-        DAT_0118947c = (unsigned int)FUN_004de0c0();
-        DAT_01189480 = (unsigned int)FUN_004de0d0();
-        DAT_011c73f4.FUN_0045ce80((*DAT_011c73f4.Int() < 2) ? *DAT_011c73f4.Int() : 2);
+        DAT_0118947c = (unsigned int)Get_1280();
+        DAT_01189480 = (unsigned int)Get_720();
+        DAT_011c73f4.ProcessAndReturnValue_0045ce80((*DAT_011c73f4.Int() < 2) ? *DAT_011c73f4.Int() : 2);
     }
-    if (FUN_004dc710(1))
+    if (TESRenderer_ValidateSettings(1))
     {
         if (DAT_011c77b4.GetBoolValue())
         {
@@ -1632,13 +1640,13 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         }
         else
         {
-            DAT_011c6fbc = IMP_fdf2b8(0, DAT_011a2fe8, 0, 0x50000000, 0, 0, FUN_004dc1f0(), FUN_004dc200(),
+            DAT_011c6fbc = IMP_fdf2b8(0, DAT_011a2fe8, 0, 0x50000000, 0, 0, Renderer_GetScreenWidth(), Renderer_GetScreenHeight(),
                                       DAT_011c6fc0, 0, DAT_011c6fc4, 0);
             Rect4 rect13;
             rect13.a = 0;
             rect13.b = 0;
-            rect13.c = FUN_004dc1f0();
-            rect13.d = FUN_004dc200();
+            rect13.c = Renderer_GetScreenWidth();
+            rect13.d = Renderer_GetScreenHeight();
             IMP_fdf310(&rect13, IMP_fdf2e8(DAT_011c6fc0, -16, IMP_fdf2ec(DAT_011c6fbc, -8)));
             int w3 = rect13.c - rect13.a;
             int h11 = rect13.d - rect13.b;
@@ -1659,20 +1667,20 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
             {
                 int t113 = IMP_fdf2b0(1);
                 int t212 = IMP_fdf2b0(0);
-                if (t113 != FUN_004dc200())
+                if (t113 != Renderer_GetScreenHeight())
                 {
                     flag2 = true;
                 }
-                else if (t212 != FUN_004dc1f0())
+                else if (t212 != Renderer_GetScreenWidth())
                 {
                     flag2 = true;
                 }
             }
         }
-        DAT_011c73b4.operator=(reinterpret_cast<void*>(FUN_00e76210(FUN_004dc1f0(), FUN_004dc200(), FUN_004dc220(), FUN_004dc1e0(),
-                                               FUN_004dc1e0(), FUN_004dc210(), FUN_004dc230(), FUN_004dc270(),
-                                               FUN_004dc280(), FUN_004dc2a0(), FUN_004dc240(), FUN_004dc290(),
-                                               FUN_004dc250(), FUN_004dc260(), flag2)));
+        DAT_011c73b4.operator=(reinterpret_cast<void*>(FUN_00e76210(Renderer_GetScreenWidth(), Renderer_GetScreenHeight(), TESRenderer_GetFlags(), TESRenderer_GetHWND(),
+                                               TESRenderer_GetHWND(), TESRenderer_GetAdapterIndex(), TESRenderer_GetDeviceType(), TESRenderer_GetFrameBufferFormat(),
+                                               TESRenderer_GetDepthStencilFormat(), TESRenderer_GetPresentInterval(), TESRenderer_GetSwapEffect(), TESRenderer_GetFrameBufferMode(),
+                                               TESRenderer_GetBackBufferCount(), TESRenderer_GetRefreshRate(), flag2)));
     }
     else
     {
@@ -1703,25 +1711,25 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         {
             int ft = FUN_00b4f4a0();
             (void)ft;
-            _sprintf_s(buf21, 260, "%sRendererInfo.txt", FUN_004dc110());
+            _sprintf_s(buf21, 260, "%sRendererInfo.txt", BSUtilities_GetPersonalPath());
             file32 = FUN_00ec9a47(buf21, (const char*)&DAT_01021568);
             if (file32 != 0)
             {
                 FUN_00ec9774(file32, (const char*)&DAT_01021518, *DAT_011c73f4.Int());
             }
-            DAT_011c7790.FUN_004de2d0(0);
+            DAT_011c7790.Setting_SetValueB(0);
             DAT_011f9421 = 0;
         }
     }
     if (reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int()) != 0)
     {
-        reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->vfn_b0(FUN_004dc2c0());
+        reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->vfn_b0(BSShaderManager_kBackgroundColor_Get());
         if (DAT_011c6fba != 0)
         {
-            RendObj* sub = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc020();
+            RendObj* sub = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->NiXenonRenderer_GetD3DDevice();
             if (sub != 0)
             {
-                sub->vfn_13c((float)FUN_004dc2b0());
+                sub->vfn_13c((float)TESRenderer_GetNPatchSegments());
             }
         }
     }
@@ -1731,9 +1739,9 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         return 0;
     }
     AssignImageConverter(new ShaderInitializer);
-    FUN_004dc050(true);
-    FUN_004dc010(0);
-    DbcObj* dbc15 = GetFltValueAt(FUN_004dc210());
+    NiSourceTexture_SetUsePreloading(true);
+    NiTexture_SetMipmapByDefault(0);
+    DbcObj* dbc15 = GetFltValueAt(TESRenderer_GetAdapterIndex());
     void* spells117 = dbc15->GetFieldAt204();
     void* spells218 = dbc15->FUN_00717e50();
     (void)spells117;
@@ -1743,8 +1751,8 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         CopyStringToGlobal((const char*)&DAT_010214c8);
         return 0;
     }
-    FUN_009f9968(1);
-    Sub130* sub13013 = dbc15->FUN_004dc120(1);
+    D3DPERF_SetOptions_009f9968(1);
+    Sub130* sub13013 = dbc15->NiXAdapaterDesc_GetDeviceCaps_004dc120(1);
     if (sub13013 == 0)
     {
         CopyStringToGlobal((const char*)&DAT_0102149c);
@@ -1766,19 +1774,19 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
             wval40 = 0x60;
         }
     }
-    int hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040()->vfn_28(0, 1, 0x16, 0x80000, 3, 0x71);
+    int hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->NiDX9Renderer_GetDirect3D()->vfn_28(0, 1, 0x16, 0x80000, 3, 0x71);
     DAT_011c70ea = (int)(hr62 >= 0);
-    hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040()->vfn_28(0, 1, 0x16, 0x20000, 3, 0x71);
+    hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->NiDX9Renderer_GetDirect3D()->vfn_28(0, 1, 0x16, 0x20000, 3, 0x71);
     DAT_011f941f = (int)(hr62 >= 0);
-    DAT_011ad810 = *DAT_011c7284.FUN_0043d4d0();
-    DAT_011ad814 = *DAT_011c7784.FUN_0043d4d0();
-    DAT_011ad818 = *DAT_011c7680.FUN_0043d4d0();
+    DAT_011ad810 = *DAT_011c7284.Setting_Int();
+    DAT_011ad814 = *DAT_011c7784.Setting_Int();
+    DAT_011ad818 = *DAT_011c7680.Setting_Int();
     DAT_011f9420 = ((sub13013->f40 & 0x400) != 0);
     bool b12;
     b12 = ((sub13013->f3c & 2) != 0 && (sub13013->f3c & 0x100) == 0) ? 0 : 1;
     DAT_011f9183 = (b12 && !*DAT_011c7538.FUN_00408d60()) ? 1 : 0;
-    DAT_0126efc4 = *DAT_011c779c.FUN_0043d4d0();
-    DAT_0126efc8 = *DAT_011c7254.FUN_0043d4d0();
+    DAT_0126efc4 = *DAT_011c779c.Setting_Int();
+    DAT_0126efc8 = *DAT_011c7254.Setting_Int();
     DAT_011f9426 = DAT_011c70ec;
     if (DAT_011c70ec != 0)
     {
@@ -1796,18 +1804,18 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
     DetectGpuVendor(DAT_01189468, DAT_0118946c, *DAT_011c74e0.FUN_00408d60(), spells117, spells218, wval40);
     if (FUN_004dc060(0) < 5)
     {
-        DAT_011c71dc.FUN_004de2d0(0);
+        DAT_011c71dc.Setting_SetValueB(0);
     }
-    *(short*)&DAT_011ad830 = *reinterpret_cast<short*>(DAT_011c7520.FUN_0043d4d0());
-    if (FUN_004dc0b0() == 1)
+    *(short*)&DAT_011ad830 = *reinterpret_cast<short*>(DAT_011c7520.Setting_Int());
+    if (BSRenderState_GetGPUVendor() == 1)
     {
-        hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040()->vfn_28(0, 1, 0x16, 0, 1, 0x434f5441);
+        hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->NiDX9Renderer_GetDirect3D()->vfn_28(0, 1, 0x16, 0, 1, 0x434f5441);
     }
-    else if (FUN_004dc0b0() == 2)
+    else if (BSRenderState_GetGPUVendor() == 2)
     {
         hr62 = 0;
     }
-    else if (FUN_004dc0b0() == 3)
+    else if (BSRenderState_GetGPUVendor() == 3)
     {
         hr62 = (int)0x88760866;
     }
@@ -1816,9 +1824,9 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         hr62 = (int)0x88760866;
     }
     DAT_011f9421 = (hr62 >= 0 && *DAT_011c7790.Bool() && *DAT_011c73f4.Int() > 1) ? 1 : 0;
-    FUN_004dc100(FUN_00647b70(*DAT_011c72e4.FUN_0043d4d0(), *DAT_011c72d8.FUN_0043d4d0()));
+    BSShaderManager_SetMaxShadowMaps(BSMAX_00647b70(*DAT_011c72e4.Setting_Int(), *DAT_011c72d8.Setting_Int()));
     bool flag27 = true;
-    if (FUN_004dc0b0() == 2)
+    if (BSRenderState_GetGPUVendor() == 2)
     {
         void* hmod = IMP_fdf0b0((const char*)&DAT_0102148c);
         if (hmod != 0)
@@ -1836,7 +1844,7 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
             IMP_fdf0a8(hmod);
         }
     }
-    else if (FUN_004dc0b0() == 1)
+    else if (BSRenderState_GetGPUVendor() == 1)
     {
         DriverVersion driverVersionV52;
         int queryStatusV22;
@@ -1852,7 +1860,7 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
             driverVersionV52.version = 0;
             fnv_zlib_memset(&driverVersionV52.unk04, 0, 0x88);
             driverVersionV52.version = 0x1008c;
-            queryStatusV22 = FUN_009fead0(0, &driverVersionV52.version);
+            queryStatusV22 = Runtime_ForwardCall_009fead0(0, &driverVersionV52.version);
             if (queryStatusV22 != 0)
                 goto gpuQueryDone;
             cnt57V6 = 0;
@@ -1866,12 +1874,12 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
             queryStatusV22 = FUN_009feae8(&dinfo2V19.unk000, &countA23V9);
             if (queryStatusV22 != 0)
                 goto gpuQueryDone;
-            queryStatusV22 = FUN_009feae2(&unk48c33V3.f0, &countB2V25);
+            queryStatusV22 = Object_ForwardCall_009feae2(&unk48c33V3.f0, &countB2V25);
             if (queryStatusV22 != 0)
                 goto gpuQueryDone;
             Ver654 ver654;
             ver654.f0 = 0x1001c;
-            queryStatusV22 = FUN_009febd8(((RendObj*)FUN_0043c4b0())->FUN_004dc040(), &ver654.f0);
+            queryStatusV22 = FUN_009febd8(((RendObj*)NiXenonRenderer_GetRenderer())->NiDX9Renderer_GetDirect3D(), &ver654.f0);
             if (queryStatusV22 != 0)
             {
                 if (countA23V9 < countB2V25)
@@ -1891,27 +1899,27 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         gpuQueryDone:;
         }
     }
-    else if (FUN_004dc0b0() == 3)
+    else if (BSRenderState_GetGPUVendor() == 3)
     {
-        if (FUN_004dc310())
+        if (TESRenderer_GetMultiSampleEnabled())
         {
         }
     }
     else
     {
-        if (FUN_004dc310())
+        if (TESRenderer_GetMultiSampleEnabled())
         {
         }
     }
     if (flag27 && *DAT_011c7504.FUN_00408d60())
     {
-        FUN_004dc090(1);
+        BSShaderManager_EnableUseRefractionShader(1);
     }
     else
     {
-        FUN_004dc090(0);
+        BSShaderManager_EnableUseRefractionShader(0);
     }
-    if ((double)FUN_004dc200() / (double)FUN_004dc1f0() == 0.75)
+    if ((double)Renderer_GetScreenHeight() / (double)Renderer_GetScreenWidth() == 0.75)
     {
         DAT_011c70eb = 0;
     }
@@ -1979,7 +1987,7 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
                 fmt33 = 0;
                 break;
             }
-            dev413 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040();
+            dev413 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->NiDX9Renderer_GetDirect3D();
             rr1 = dev413->vfn_28(0, 1, 0x16, 0, 3, fmt33);
             if (rr1 >= 0)
             {
@@ -1990,13 +1998,13 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
                 DAT_011f9194[li10] = 0;
             }
         }
-        dev53 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040();
+        dev53 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->NiDX9Renderer_GetDirect3D();
         r510 = dev53->vfn_28(0, 1, 0x16, 0x80000, 3, 0x24);
         DAT_011ad832 = (int)(r510 >= 0);
     }
-    FUN_004dc2d0(*DAT_011c71ac.Float());
+    Renderer_SetGamma(*DAT_011c71ac.Float());
     int t1404 = FUN_00b4f4a0();
-    _sprintf_s(buf21, 260, "%sRendererInfo.txt", FUN_004dc110());
+    _sprintf_s(buf21, 260, "%sRendererInfo.txt", BSUtilities_GetPersonalPath());
     file32 = FUN_00ec9a47(buf21, (const char*)&DAT_01021568);
     if (file32 != 0)
     {
@@ -2022,7 +2030,7 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         FUN_00ec9774(file32, (const char*)&DAT_010212c0,
                      DAT_011f9422 ? (const char*)&DAT_01021388 : (const char*)&DAT_01021384);
         FUN_00ec9774(file32, (const char*)&DAT_010212a4,
-                     FUN_004dc0a0() ? (const char*)&DAT_01021388 : (const char*)&DAT_01021384);
+                     BSShaderManager_GetUseRefractionShader() ? (const char*)&DAT_01021388 : (const char*)&DAT_01021384);
         FUN_00ec9774(file32, (const char*)&DAT_01021284,
                      DAT_011f91a3 ? (const char*)&DAT_01021388 : (const char*)&DAT_01021384);
         FUN_00ec9774(file32, (const char*)&DAT_01021268,
@@ -2038,8 +2046,8 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         FUN_00ec9774(file32, (const char*)&DAT_010211dc, DAT_011c70cc);
         FUN_00ec9774(file32, (const char*)&DAT_010211c0,
                      DAT_011f9421 ? (const char*)&DAT_01021388 : (const char*)&DAT_01021384);
-        FUN_00ec9774(file32, (const char*)&DAT_010211a4, FUN_00b7faf0());
-        FUN_00ec9774(file32, (const char*)&DAT_01021188, *DAT_011c3ea4.FUN_0043d4d0());
+        FUN_00ec9774(file32, (const char*)&DAT_010211a4, ShaderBuffer_GetCurrentBufferType());
+        FUN_00ec9774(file32, (const char*)&DAT_01021188, *DAT_011c3ea4.Setting_Int());
         FUN_00ec9907(file32);
     }
     DAT_011f9190 = *DAT_011c76c0.FUN_00408d60() ? *DAT_011c7488.Float() : *DAT_011c7170.Float();
@@ -2066,11 +2074,11 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
     DAT_011f9425 = *DAT_011c7774.FUN_00408d60();
     DAT_011f9428 = *DAT_011c7464.Float();
     DAT_011ad838 = *DAT_011c75e0.Float();
-    DAT_011f91b0 = (*DAT_011c752c.FUN_0043d4d0() >= 0 && *DAT_011c752c.FUN_0043d4d0() <= 3) ? *DAT_011c752c.FUN_0043d4d0() : 3;
+    DAT_011f91b0 = (*DAT_011c752c.Setting_Int() >= 0 && *DAT_011c752c.Setting_Int() <= 3) ? *DAT_011c752c.Setting_Int() : 3;
     DAT_011f9490 = DAT_011c70cc;
     DAT_011f961c =
         NiColorA(*DAT_011c75f8.Float(), *DAT_011c77cc.Float(), *DAT_011c73d0.Float(), 1.0f);
-    SetBSStringCapacity(*DAT_011c76cc.FUN_0043d4d0());
+    SetBSStringCapacity(*DAT_011c76cc.Setting_Int());
     DAT_011f948a = *DAT_011c7308.FUN_00408d60();
     return (int)reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int());
 }

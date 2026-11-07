@@ -41,7 +41,7 @@ struct S_00878f60_RendererData
 
 struct S_00878f60_Texture
 {
-    S_00878f60_RendererData* FUN_004bc320(int i);
+    S_00878f60_RendererData* BSRenderedTexture_GetTexture(int i);
 };
 
 struct S_00878f60_TexPtr
@@ -58,39 +58,39 @@ struct S_00878f60_RenderedTexture;
 
 struct S_00878f60_MTRender
 {
-    void FUN_00ba2f30();
-    void FUN_00ba30f0(int a, int b);
-    void FUN_00ba3130(int a, int b);
-    void FUN_00ba2fa0();
+    void MTRenderingSystem_StartThreads();
+    void MTRenderingSystem_SetThreadStage(int a, int b);
+    void MTRenderingSystem_WaitOnThreadStage(int a, int b);
+    void MTRenderingSystem_WaitForThreads();
 };
 
 struct S_00878f60_ImageSpaceManager
 {
-    static S_00878f60_ImageSpaceManager* FUN_004e3270();
-    void FUN_00879860(float a, float b, float c, float d);
-    void FUN_008798a0();
+    static S_00878f60_ImageSpaceManager* BSShaderManager_GetImageSpaceManager();
+    void ImageSpaceManager_SetCustomViewPort(float a, float b, float c, float d);
+    void ImageSpaceManager_ResetViewport();
 };
 
 struct S_00878f60_Player
 {
-    void FUN_0094ae40(bool a, bool b);
-    void FUN_009466d0(float f, int b);
+    void PlayerCharacter_UpdateCamera(bool a, bool b);
+    void PlayerCharacter_UpdateFlyCamera(float f, int b);
 };
 
 struct S_00878f60_Mgr
 {
-    void FUN_008706b0(S_00878f60_Texture* tex, int a, int b);
-    bool FUN_005bb4d0();
+    void Main_DrawWorld(S_00878f60_Texture* tex, int a, int b);
+    bool TESRegionData_GetPriority();
 };
 
 S_00878f60_Texture* FUN_00b6b610(const S_00878f60_FixedString& name, unsigned int w, unsigned int h,
                                  S_00878f60_FormatPrefs* prefs, int a, int b, int c, int d, int e);
 S_00878f60_MTRender* FUN_004ea970();
-int FUN_004dc200();
-int FUN_004dc1f0();
-void FUN_005b5e40(const char* fmt, ...);
-unsigned int FUN_0044a670(const char* s);
-int FUN_00aff0b0(const char* path);
+int Renderer_GetScreenHeight();
+int Renderer_GetScreenWidth();
+void Warning_005b5e40(const char* fmt, ...);
+unsigned int BSstrlen(const char* s);
+int BSSystemFile_DeleteFileA(const char* path);
 
 extern S_00878f60_Player* DAT_011dea3c;
 extern S_00878f60_Mgr* DAT_011dea0c;
@@ -178,7 +178,7 @@ struct S_00878f60_Renderer
     virtual void vfCC();
     virtual void vfD0();
     virtual S_00878f60_RendererObj* vfD4();
-    IDirect3DDevice9* FUN_004dc020();
+    IDirect3DDevice9* NiXenonRenderer_GetD3DDevice();
 };
 
 struct S_00878f60_TexData
@@ -324,7 +324,7 @@ struct S_00878f60_File
     int unk150;
     int unk154;
     S_00878f60_File(const char* name, int mode, unsigned int bufSize, bool b);
-    void FUN_00473180(const void* data, unsigned int size);
+    void NiBinaryStream_Write(const void* data, unsigned int size);
 };
 
 struct S_00878f60_PixelData
@@ -362,21 +362,22 @@ struct S_00878f60_PixelData
                          unsigned int faces);
     static void* operator new(unsigned int size);
     static void operator delete(void* p);
-    unsigned char* FUN_0064dac0(int mip, int face);
-    int FUN_0070ec90();
+    unsigned char* NiPixelData_GetPixels(int mip, int face);
+    int DetailedActorPathHandler_GetCurrentNodeIndex();
 };
 
-S_00878f60_Renderer* FUN_004bc3f0();
+S_00878f60_Renderer* Renderer_GetNIRenderer();
 
 // Captures the current render target to a pixel buffer, optionally writes a BMP file, and returns the pixel data.
 // @fnv 0x00878f60
-S_00878f60_PixelData* FUN_00878f60(int* pWidth, int* pHeight, const char* filename)
+// src: XBOX_PDB 0x00878f60
+S_00878f60_PixelData* ScreenShot_TakeSaveGameScreenShot(int* pWidth, int* pHeight, const char* filename)
 {
     S_00878f60_AutoMem theMemContext(0x11, true,
                                      "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Misc\\ScreenShot.cpp", 0x139);
-    S_00878f60_Renderer* r = FUN_004bc3f0();
-    FUN_004ea970()->FUN_00ba2f30();
-    IDirect3DDevice9* pDevice = r->FUN_004dc020();
+    S_00878f60_Renderer* r = Renderer_GetNIRenderer();
+    FUN_004ea970()->MTRenderingSystem_StartThreads();
+    IDirect3DDevice9* pDevice = r->NiXenonRenderer_GetD3DDevice();
     S_00878f60_Cam frustum = *r->vfD4()->FUN_00878f20();
     S_00878f60_FormatPrefs prefs2;
     prefs2.m_eMipFlag = 0;
@@ -385,23 +386,23 @@ S_00878f60_PixelData* FUN_00878f60(int* pWidth, int* pHeight, const char* filena
         FUN_00b6b610(S_00878f60_FixedString("Screenshot RT"), *pWidth, *pHeight, &prefs2, 0, 1, 0, 0, 0));
     if (!eTex)
     {
-        FUN_005b5e40("DEFAULT: (ScreenShot) Unable to create render texture.");
+        Warning_005b5e40("DEFAULT: (ScreenShot) Unable to create render texture.");
         return 0;
     }
 
-    float aspect = (double)FUN_004dc200() / FUN_004dc1f0();
+    float aspect = (double)Renderer_GetScreenHeight() / Renderer_GetScreenWidth();
     int outHeight = (int)(*pHeight * aspect);
-    DAT_011dea3c->FUN_0094ae40(false, false);
-    S_00878f60_ImageSpaceManager::FUN_004e3270()->FUN_00879860(0.0f, 1.0f, 1.0f, 1.0f - aspect);
-    DAT_011dea0c->FUN_008706b0(eTex, 0, 0);
-    S_00878f60_ImageSpaceManager::FUN_004e3270()->FUN_008798a0();
-    if (DAT_011dea0c->FUN_005bb4d0())
-        DAT_011dea3c->FUN_009466d0(0.0f, 1);
-    FUN_004ea970()->FUN_00ba30f0(0, 0x17);
-    FUN_004ea970()->FUN_00ba3130(1, 0x17);
-    FUN_004ea970()->FUN_00ba2fa0();
+    DAT_011dea3c->PlayerCharacter_UpdateCamera(false, false);
+    S_00878f60_ImageSpaceManager::BSShaderManager_GetImageSpaceManager()->ImageSpaceManager_SetCustomViewPort(0.0f, 1.0f, 1.0f, 1.0f - aspect);
+    DAT_011dea0c->Main_DrawWorld(eTex, 0, 0);
+    S_00878f60_ImageSpaceManager::BSShaderManager_GetImageSpaceManager()->ImageSpaceManager_ResetViewport();
+    if (DAT_011dea0c->TESRegionData_GetPriority())
+        DAT_011dea3c->PlayerCharacter_UpdateFlyCamera(0.0f, 1);
+    FUN_004ea970()->MTRenderingSystem_SetThreadStage(0, 0x17);
+    FUN_004ea970()->MTRenderingSystem_WaitOnThreadStage(1, 0x17);
+    FUN_004ea970()->MTRenderingSystem_WaitForThreads();
 
-    S_00878f60_TexData* localTexData = eTex->FUN_004bc320(0)->FUN_0059bb30();
+    S_00878f60_TexData* localTexData = eTex->BSRenderedTexture_GetTexture(0)->FUN_0059bb30();
     localTexData = localTexData->vfA4();
     IDirect3DTexture9* d3dTexture = localTexData->vf9C();
     D3DSURFACE_DESC d3dDesc;
@@ -411,7 +412,7 @@ S_00878f60_PixelData* FUN_00878f60(int* pWidth, int* pHeight, const char* filena
     IDirect3DSurface9* destSurface;
     if (pDevice->CreateOffscreenPlainSurface(*pHeight, *pWidth, d3dDesc.Format, D3DPOOL_SYSTEMMEM, &destSurface, 0))
     {
-        FUN_005b5e40("DEFAULT: (ScreenShot) Unable to create image surface.");
+        Warning_005b5e40("DEFAULT: (ScreenShot) Unable to create image surface.");
         return 0;
     }
     pDevice->GetRenderTargetData(rtSurface, destSurface);
@@ -422,7 +423,7 @@ S_00878f60_PixelData* FUN_00878f60(int* pWidth, int* pHeight, const char* filena
     *pHeight = outHeight;
     S_00878f60_PixelData* thePixelData = new S_00878f60_PixelData(*pWidth, *pHeight, *pFormat, 1, 1);
     unsigned char* in = (unsigned char*)locked.pBits;
-    unsigned char* dst_ = thePixelData->FUN_0064dac0(0, 0);
+    unsigned char* dst_ = thePixelData->NiPixelData_GetPixels(0, 0);
     int jVal = 0;
     for (int i = 0; i < *pWidth * *pHeight * 4; i += 4)
     {
@@ -437,16 +438,16 @@ S_00878f60_PixelData* FUN_00878f60(int* pWidth, int* pHeight, const char* filena
     destSurface->Release();
     eTex = 0;
 
-    if (filename && FUN_0044a670(filename))
+    if (filename && BSstrlen(filename))
     {
-        FUN_00aff0b0(filename);
+        BSSystemFile_DeleteFileA(filename);
         S_00878f60_File* file = new S_00878f60_File(filename, 1, 0x4000, false);
         if (file->vf20(0, 0))
         {
             unsigned int width = *pWidth;
             unsigned int height = *pHeight;
-            int bpp = thePixelData->FUN_0070ec90();
-            unsigned char* pix = thePixelData->FUN_0064dac0(0, 0);
+            int bpp = thePixelData->DetailedActorPathHandler_GetCurrentNodeIndex();
+            unsigned char* pix = thePixelData->NiPixelData_GetPixels(0, 0);
             unsigned char* buffer = (unsigned char*)operator new(width * height * 3);
             int idx = 0;
             for (int y = height - 1; y >= 0; y--)
@@ -479,13 +480,13 @@ S_00878f60_PixelData* FUN_00878f60(int* pWidth, int* pHeight, const char* filena
             ((BITMAPINFOHEADER*)((char*)bmpHeader + sizeof(BITMAPFILEHEADER)))->biYPelsPerMeter = 0;
             ((BITMAPINFOHEADER*)((char*)bmpHeader + sizeof(BITMAPFILEHEADER)))->biClrUsed = 0;
             ((BITMAPINFOHEADER*)((char*)bmpHeader + sizeof(BITMAPFILEHEADER)))->biClrImportant = 0;
-            file->FUN_00473180(bmpHeader, 0x36);
-            file->FUN_00473180(buffer, width * height * bpp);
+            file->NiBinaryStream_Write(bmpHeader, 0x36);
+            file->NiBinaryStream_Write(buffer, width * height * bpp);
             operator delete(buffer);
         }
         else
         {
-            FUN_005b5e40("SAVELOAD: (ScreenShot) Unable to create file '%s'.", filename);
+            Warning_005b5e40("SAVELOAD: (ScreenShot) Unable to create file '%s'.", filename);
         }
         delete file;
     }

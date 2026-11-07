@@ -55,14 +55,14 @@ public:
     TelekinesisEffect(MagicCaster* caster, MagicItem* item, EffectItem* effect);
 
     void FUN_0082a540();
-    unsigned short __thiscall FUN_0082b190(Actor* apActor);
+    unsigned short __thiscall GetSaveSize_0082b190(Actor* apActor);
     void LoadFromSave(Actor* apActor);
     void SaveLoad(Actor* apActor);
     ActiveEffect* CreateCopy();
     void UpdateGrabEffect(float delta);
     void __thiscall StartTelekinesisEffect();
-    void __thiscall FUN_0082a670();
-    void __thiscall FUN_0082af60();
-    void FUN_0082b300(Actor* apActor);
-    void __thiscall FUN_0082afa0();
+    void __thiscall Start_0082a670();
+    void __thiscall Finish_0082af60();
+    void FinishInitLoadGame_0082b300(Actor* apActor);
+    void __thiscall RemoveSpring();
 };

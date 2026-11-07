@@ -13,12 +13,12 @@ public:
     virtual void Destroy();
     virtual void vf01();
     virtual void vf02();
-    virtual void FUN_00d36d20(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
+    virtual void ProcessSwappedCollisionBodies(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                             const CollisionAgentContext& input,
                             hkpCdBodyPairCollector& collector);
     virtual void vf04();
     virtual void vf05();
-    virtual void FUN_00d434e0(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
+    virtual void ProcessEntries_00d434e0(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                             const GskAgentInput& input, Output& output);
     virtual void vf07();
     virtual void vf08();

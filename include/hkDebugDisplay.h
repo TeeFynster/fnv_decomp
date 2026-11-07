@@ -73,7 +73,7 @@ public:
     void displayFrame(const hkQsTransform_S& kFrame, hkReal_S fSize, int iId, int iTag);
 
     // skeleton poses (defaults as the callers pass them)
-    void FUN_00c998b0(int iBones, const hkInt16_S* psParents, const hkQsTransform_S* pkModelPose, const hkQsTransform_S& kModelToWorld,
+    void displayModelSpacePose(int iBones, const hkInt16_S* psParents, const hkQsTransform_S* pkModelPose, const hkQsTransform_S& kModelToWorld,
         int iId, int iTag, int iRgba = 0x7fffffff, hkReal_S fAxisSize = 0.25f, hkBool_S bRootTranslation = false);
     void displayLocalSpacePose(int iBones, const hkInt16_S* psParents, const hkQsTransform_S* pkLocalPose, const hkQsTransform_S& kModelToWorld,
         int iId, int iTag, int iRgba = 0x7fffffff, hkReal_S fAxisSize = 0.25f, hkBool_S bRootTranslation = false);

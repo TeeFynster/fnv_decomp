@@ -36,39 +36,39 @@ bool BSFaceGenModel::ApplyTextureCoordinate(FaceGenCoordinates* coord, NiPointer
         coord = BSFaceGenManager::GetFaceGenCoordinates();
     if (!coord)
         return false;
-    FUN_00652140();
-    if (!FUN_00652040(this)) {
+    BSFaceGenManager_LockFaceGenAccess();
+    if (!BSFaceGenManager_LoadEGTData(this)) {
         if (!m_kTextureSlots->m_pTextureData) {
             if (!m_kTextureSlots->GetCharacterSex()) {
-                FUN_00652190();
+                BSFaceGenManager_UnlockFaceGenAccess();
                 return false;
             }
-            m_kTextureSlots->m_pTextureData = FUN_00659780(m_kTextureSlots->m_kEGTFileName.String());
+            m_kTextureSlots->m_pTextureData = BSFaceGenModel_EGTData_Create(m_kTextureSlots->m_kEGTFileName.String());
         }
         if (!m_kTextureSlots->m_pTextureData) {
-            FUN_00652190();
+            BSFaceGenManager_UnlockFaceGenAccess();
             return false;
         }
     }
     if (!m_kTextureSlots->m_pTextureData) {
-        FUN_00652190();
+        BSFaceGenManager_UnlockFaceGenAccess();
         return false;
     }
     unsigned int kColor = 0; // texture width
     unsigned int uiHeight = 0;
-    if (m_kTextureSlots->m_pTextureData->basis[0].FUN_0065cea0()) {
-        kColor = m_kTextureSlots->m_pTextureData->basis[0].FUN_0065cec0(0)->width;
-        uiHeight = m_kTextureSlots->m_pTextureData->basis[0].FUN_0065cec0(0)->height;
+    if (m_kTextureSlots->m_pTextureData->basis[0].GetPointerSpanCount_0065cea0()) {
+        kColor = m_kTextureSlots->m_pTextureData->basis[0].ProcessEntries_0065cec0(0)->width;
+        uiHeight = m_kTextureSlots->m_pTextureData->basis[0].ProcessEntries_0065cec0(0)->height;
     }
     if (!kColor || !uiHeight) {
-        FUN_00652190();
+        BSFaceGenManager_UnlockFaceGenAccess();
         return false;
     }
     unsigned int uiBasis;
     for (uiBasis = 0; uiBasis < 2; ++uiBasis) {
-        if (reinterpret_cast<unsigned int>(reinterpret_cast<NiAVObject*>(&reinterpret_cast<FaceGenCoordinateBasis*>(coord->data + 64)[uiBasis])->GetParent()) < m_kTextureSlots->m_pTextureData->basis[uiBasis].FUN_0065cea0()) {
+        if (reinterpret_cast<unsigned int>(reinterpret_cast<NiAVObject*>(&reinterpret_cast<FaceGenCoordinateBasis*>(coord->data + 64)[uiBasis])->GetParent()) < m_kTextureSlots->m_pTextureData->basis[uiBasis].GetPointerSpanCount_0065cea0()) {
             Warning("MODELS: FaceGen - Tried to apply a coordinate that did not match the EGT basis.");
-            FUN_00652190();
+            BSFaceGenManager_UnlockFaceGenAccess();
             return false;
         }
     }
@@ -82,7 +82,7 @@ bool BSFaceGenModel::ApplyTextureCoordinate(FaceGenCoordinates* coord, NiPointer
     // These scalar accessors were linker-folded with the canonical TESRecipe
     // setters. Their established decorated bindings must be retained.
     FaceGenImage* uiOutHeight = reinterpret_cast<FaceGenImage*>(static_cast<NiTexture*>(spTexture))->GetOrConvertImage();
-    uiOutHeight->FUN_0064db50(kColor * uiHeight, &kView);
+    uiOutHeight->ApplyToCopy_Thunk(kColor * uiHeight, &kView);
     unsigned int uiRenderPassIndex = kColor; // output width
     unsigned int piAccum = uiHeight; // output height
     int* uiOutWidth = new int[kColor * uiHeight * 3]; // RGB accumulation buffer
@@ -91,25 +91,25 @@ bool BSFaceGenModel::ApplyTextureCoordinate(FaceGenCoordinates* coord, NiPointer
     unsigned int ItemUpdateArray;
     if (uiLimit) {
         ItemUpdateArray = uiLimit;
-        if (ItemUpdateArray > m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cea0())
-            ItemUpdateArray = m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cea0();
+        if (ItemUpdateArray > m_kTextureSlots->m_pTextureData->basis[uiWidth].GetPointerSpanCount_0065cea0())
+            ItemUpdateArray = m_kTextureSlots->m_pTextureData->basis[uiWidth].GetPointerSpanCount_0065cea0();
     } else {
-        ItemUpdateArray = m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cea0();
+        ItemUpdateArray = m_kTextureSlots->m_pTextureData->basis[uiWidth].GetPointerSpanCount_0065cea0();
     }
     for (unsigned int mode = 0; mode < ItemUpdateArray; ++mode) {
-        if (m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->width == uiRenderPassIndex) {}
+        if (m_kTextureSlots->m_pTextureData->basis[uiWidth].ProcessEntries_0065cec0(mode)->width == uiRenderPassIndex) {}
         else ReportAssertionViolation("D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\FaceGen\\BSFaceGenModel.cpp", 1162);
-        if (m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->height == piAccum) {}
+        if (m_kTextureSlots->m_pTextureData->basis[uiWidth].ProcessEntries_0065cec0(mode)->height == piAccum) {}
         else ReportAssertionViolation("D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\FaceGen\\BSFaceGenModel.cpp", 1163);
         FaceGenModeParameters modeData;
-        modeData.weight = static_cast<int>(*reinterpret_cast<FaceGenCoordinateBasis*>(coord->data + 64)[uiWidth].FUN_0060b370(mode, 0).FUN_00629ab0() * DAT_010231d8);
+        modeData.weight = static_cast<int>(*reinterpret_cast<FaceGenCoordinateBasis*>(coord->data + 64)[uiWidth].ForwardCall_0060b370(mode, 0).NiTSet_NiControllerSequence_NiTMallocInterface_NiControllerSequence_GetAt() * DAT_010231d8);
         if (!modeData.weight)
             continue;
-        modeData.stride = m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->width + m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->rowPadding;
+        modeData.stride = m_kTextureSlots->m_pTextureData->basis[uiWidth].ProcessEntries_0065cec0(mode)->width + m_kTextureSlots->m_pTextureData->basis[uiWidth].ProcessEntries_0065cec0(mode)->rowPadding;
         for (unsigned int channel = 0; channel < 3; ++channel) {
             FaceGenChannelData channelData;
-            channelData.scale = static_cast<int>(m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->scale * DAT_010231d8) * modeData.weight;
-            channelData.row = m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->rows[channel].FUN_0065cc70(0);
+            channelData.scale = static_cast<int>(m_kTextureSlots->m_pTextureData->basis[uiWidth].ProcessEntries_0065cec0(mode)->scale * DAT_010231d8) * modeData.weight;
+            channelData.row = m_kTextureSlots->m_pTextureData->basis[uiWidth].ProcessEntries_0065cec0(mode)->rows[channel].GetElementChecked_0065cc70(0);
             for (unsigned int y = 0; y < piAccum; ++y) {
                 for (unsigned int x = 0; x < uiRenderPassIndex; ++x)
                     uiOutWidth[(y * uiRenderPassIndex + x) * 3 + channel] += channelData.row[x] * channelData.scale;
@@ -121,15 +121,15 @@ bool BSFaceGenModel::ApplyTextureCoordinate(FaceGenCoordinates* coord, NiPointer
         FaceGenOutputData outputData;
         outputData.multiplier = DAT_01065b9c;
         pkImage = uiOutHeight->_Doraise();
-        outputData.output = pkImage.FUN_0064dbd0();
+        outputData.output = pkImage.ForwardCall_0064dbd0();
         for (unsigned int y = 0; y < piAccum; ++y) {
             for (unsigned int x = 0; x < uiRenderPassIndex; ++x)
                 outputData.output[(y * uiRenderPassIndex + x) * 4 + channel] = uiOutWidth[(y * uiRenderPassIndex + x) * 3 + channel] * outputData.multiplier;
         }
     }
     delete[] uiOutWidth;
-    texture = static_cast<NiTexture*>(spTexture)->FUN_0064ceb0(DAT_01065b98, 255.0f, 0.5f, &gNiPoint3StartupSrc);
-    FUN_00652190();
+    texture = static_cast<NiTexture*>(spTexture)->BSFaceGenImage_GetCompressedImage(DAT_01065b98, 255.0f, 0.5f, &gNiPoint3StartupSrc);
+    BSFaceGenManager_UnlockFaceGenAccess();
     return true;
 }
 

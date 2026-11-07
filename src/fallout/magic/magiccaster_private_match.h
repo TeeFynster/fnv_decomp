@@ -146,8 +146,8 @@ class Actor : public MobileObject,
 class NiNode
 {
   public:
-    int FUN_00453470();
-    void FUN_004def90();
+    int NiNode_GetChildCount();
+    void NiNode_RemoveAllChildren();
 };
 class MagicEffectCollection
 {

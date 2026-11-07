@@ -137,7 +137,7 @@ NiTPointerMap<int, TESObjectCELL*>::NiTPointerMap(unsigned int size)
 // @fnv 0x004701d0
 FUN_004701d0_TESFormLargeArray::FUN_004701d0_TESFormLargeArray(unsigned int size, unsigned int flags)
 {
- FUN_004705e0(size,flags);
+ NiTLargeArray_TESForm_NiTMallocInterface_TESForm_NiTLargeArray(size,flags);
  vtable = DAT_01019a3c;
 }
 
@@ -148,13 +148,14 @@ TESFullName::TESFullName() {}
 // @fnv 0x00845690
 FUN_00845690_Owner* FUN_00845690_Owner::Destructor(unsigned int flags)
 {
- FUN_008456c0();
+ Object_ForwardCall_008456c0();
  if (flags & 1) operator delete(this);
  return this;
 }
 
 // @fnv 0x006b7b30
-unsigned int FUN_006b7b30(NavMeshInfo* info)
+// src: COMMUNITY 0x006b7b30
+unsigned int NavMeshInfo_GetCellOrCoords(NavMeshInfo* info)
 {
  TESObjectCELL* cell = info->GetInteriorCell();
  if (cell)

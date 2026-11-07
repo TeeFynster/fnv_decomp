@@ -460,7 +460,7 @@ static void __cdecl registerHeightFieldFunctions();
 virtual hkBoolR IntersectRayWithShape(const ShapeRayCastQuery&input,ShapeRayCastOutput&output)const;
 virtual void CastRayWithCollector(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkpRayHitCollector&collector)const;
 public:
-void FUN_00d24b50(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkBoolR reportPenetratingStartPosition,hkReal maxExtraPenetration,hkpRayHitCollector&collector)const;
+void hkpSampledHeightFieldShape_castRayInternal(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkBoolR reportPenetratingStartPosition,hkReal maxExtraPenetration,hkpRayHitCollector&collector)const;
 __forceinline void _getHeightAndNormalAt(int xPos,int zPos,hkReal subX,hkReal subZ,hkVector4_&normalOut,hkReal&heightOut,int&triangleIndexOut)const;
 public:
 void GetHeightAndNormalAt(int xPos,int zPos,hkReal subX,hkReal subZ,hkVector4_&normalOut,hkReal&heightOut,int&triangleIndexOut)const;
@@ -547,7 +547,8 @@ triangleIndexOut=0;
 }
 }
 // @fnv 0x00d24b50
-void SampledHeightRayCastView::FUN_00d24b50(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkBoolR reportPenetratingStartPosition,hkReal maxExtraPenetration,hkpRayHitCollector&collector)const
+// src: XBOX_PDB 0x00d24b50
+void SampledHeightRayCastView::hkpSampledHeightFieldShape_castRayInternal(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkBoolR reportPenetratingStartPosition,hkReal maxExtraPenetration,hkpRayHitCollector&collector)const
 {
 {hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "rcHeightFild";h->setTime();mStream.setEnd((char*)(h+1));}};
 hkIntUnion64 intFrom;

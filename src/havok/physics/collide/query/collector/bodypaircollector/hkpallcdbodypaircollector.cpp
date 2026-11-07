@@ -3,7 +3,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 struct HkHolder;
-HkHolder* FUN_00c85750();
+HkHolder* hkMemoryRouter_getInstance();
 void ResizeAudioStream(void* allocator, void* list, unsigned int elemSize);
 
 struct HkHolder
@@ -53,7 +53,7 @@ struct FUN_00cb7550_cls
 void FUN_00cb7550_cls::AppendTailPair(HkpallcdbodypaircollectorListNodeView* a, HkpallcdbodypaircollectorListNodeView* b)
 {
     TailPairArray* list = &m_08;
-    HkHolder* holder = reinterpret_cast<HkHolder*>(FUN_00c85750());
+    HkHolder* holder = reinterpret_cast<HkHolder*>(hkMemoryRouter_getInstance());
     if (list->m_iArrayLength == (int)(list->m_uCapFlags & 0x3fffffffu))
     {
         ResizeAudioStream(holder->m_pAllocator, list, 0x10);

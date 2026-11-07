@@ -19,7 +19,7 @@ struct VecList
     unsigned int m_uCapBits;
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* allocator, VecList* list, unsigned int elemSize);
 
 struct FUN_00e3afb0_cls
@@ -40,7 +40,7 @@ struct FUN_00e3afb0_cls
 void FUN_00e3afb0_cls::Push(const __m128* apFirst, const __m128* apSecond, float afValue)
 {
     VecList* list = &m_kNode;
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     if (list->m_iArrayLength == (int)(list->m_uCapBits & 0x3fffffffu))
     {
         ResizeAudioStream(holder->m_heap, list, sizeof(VecElem));
@@ -61,7 +61,7 @@ struct DFBFF0Allocator
     virtual void ReleaseBlock(void* p, int numBytes);
 };
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 inline DFBFF0Allocator& heap(hkMemoryRouter& holder)
 {
@@ -79,7 +79,7 @@ struct FUN_00dfbff0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dfbff0* b = static_cast<FUN_00dfbff0*>(p);
-        heap(FUN_00c85750()).ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        heap(hkMemoryRouter_getInstance()).ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 

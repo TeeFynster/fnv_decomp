@@ -37,11 +37,11 @@ struct FUN_004600f0_class
 };
 struct FUN_00460fb0_class
 {
-    void* FUN_00460fb0();
+    void* InterfaceManager_GetHUDEffects();
 };
 struct FUN_00460fd0_class
 {
-    void* FUN_00460fd0();
+    void* TESDataHandler_GetDebrisList();
 };
 struct FUN_004610f0_Class
 {
@@ -53,8 +53,8 @@ struct FUN_00462e60_Class
 };
 struct FUN_00464f40_class
 {
-    void __thiscall FUN_00470110();
-    void __thiscall FUN_00464f40();
+    void __thiscall SetVtableAndProcessState_00470110();
+    void __thiscall ForwardCall_00464f40();
 };
 struct FUN_0046dcc0_class
 {
@@ -62,17 +62,17 @@ struct FUN_0046dcc0_class
 };
 struct FUN_0046dce0_class
 {
-    void FUN_0046dce0(float value);
+    void TESGlobal_SetValue(float value);
 };
 void __cdecl FUN_00ec825b(char* p, unsigned int a, char const* b, char const* c, char const* d, char const* e);
-void __cdecl FUN_0046e850(char* p, unsigned int a, char const* b, char const* c, char const* d, char const* e);
+void __cdecl makepath(char* p, unsigned int a, char const* b, char const* c, char const* d, char const* e);
 struct FUN_0046e880_Class
 {
     void __thiscall SetByteField(int value);
 };
 struct FUN_0046e8c0_class
 {
-    bool FUN_0046e8c0();
+    bool TESObjectWEAP_IsEmbeddedWeapon();
 };
 struct Arr
 {
@@ -108,10 +108,10 @@ struct FUN_004700a0
     void __thiscall FUN_00470550(int a, int b);
     FUN_004700a0(int a, int b);
 };
-void* __fastcall FUN_006f99e0(void*);
+void* __fastcall ImpactImpactMap_NewItem(void*);
 struct FUN_004705c0_cls
 {
-    void* __fastcall FUN_004705c0();
+    void* __fastcall NiTPointerListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_NewItem();
 };
 struct FUN_00471110_Class
 {
@@ -119,20 +119,20 @@ struct FUN_00471110_Class
 };
 struct FUN_00471de0_class
 {
-    bool FUN_00471de0();
+    bool TESFile_IsEndianSwapped();
 };
 struct P03MM
 {
     void* Allocate(unsigned int);
 };
-P03MM* __cdecl FUN_00401020();
+P03MM* __cdecl MemoryManager_Instance();
 void* __cdecl AllocateProduct(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 struct ActorCombatGroup;
 struct FUN_00474760_This
 {
     const char* p;
     ActorCombatGroup* q;
-    void __thiscall FUN_00474760();
+    void __thiscall ReleaseStorage_00474760();
 };
 extern "C" void* DAT_0101a3b8;
 struct BFC_s
@@ -154,7 +154,7 @@ struct FUN_00475a90_cls
 };
 struct FUN_00476a00_cls
 {
-    bool FUN_00476a00();
+    bool DestructibleObjectStage_GetCapDamage();
 };
 struct FUN_00476a20_Class
 {
@@ -163,7 +163,7 @@ struct FUN_00476a20_Class
 struct FUN_00476ae0_class
 {
     void SetTaskFlag(bool a);
-    void FUN_00476ae0(bool a);
+    void BSFadeNode_SetFadingFlag(bool a);
 };
 struct TaskQueueInterface
 {
@@ -176,15 +176,15 @@ struct MersenneTwister
 };
 struct FUN_00476be0_Class
 {
-    unsigned int FUN_00476be0();
+    unsigned int BSRandom_UnsignedInt();
 };
 struct FUN_00476c70_Class
 {
-    void FUN_00476c70(int value);
+    void Explosion_SetSourceWeapon(int value);
 };
 struct FUN_00476c90_Class
 {
-    unsigned int __thiscall FUN_00476c90();
+    unsigned int __thiscall Sky_GetMode();
 };
 struct FUN_004791f0_holder
 {
@@ -198,27 +198,27 @@ struct FUN_00479190_holder
 };
 struct FUN_00573eb0_Class
 {
-    int FUN_0047b4d0(int);
-    int FUN_0047b4b0();
+    int NiPathInterpolator_GetBit(int);
+    int bhkNiCollisionObject_IsReset();
 };
 struct FUN_0047b4d0_Class
 {
-    bool __thiscall FUN_0047b4d0(unsigned short flags);
+    bool __thiscall NiPathInterpolator_GetBit(unsigned short flags);
 };
 struct S47
 {
     void __thiscall FUN_0047e2a0(int);
-    void __thiscall FUN_0047dea0(short);
+    void __thiscall TESActorBaseData_SetBaseDisposition(short);
 };
 struct FUN_0047ebb0_Class
 {
     void FUN_005fc970(int, char);
-    void FUN_0047ebb0(int value);
+    void TESFaction_SetPCMurder(int value);
 };
 struct FUN_0047ebd0_Class
 {
     void __thiscall FUN_005fc970(int b, int a);
-    void __thiscall FUN_0047ebd0(bool value);
+    void __thiscall TESFaction_SetPCAttack(bool value);
 };
 struct FUN_0047ff50_class
 {
@@ -234,16 +234,16 @@ extern "C" void __cdecl _NiFreeAlias(void*);
 extern int DAT_0101a91c;
 struct FUN_004792c0_Class : NiTPointerMap<int, int>
 {
-    void __thiscall FUN_004792c0();
+    void __thiscall ReleaseStorage_004792c0();
 };
 struct FUN_0045d930_class
 {
-    void __thiscall FUN_0046ffd0();
+    void __thiscall SetVtableAndProcessState_0046ffd0();
     void* __thiscall FUN_00470320(unsigned int flags);
 };
 struct FUN_0045d950_Class
 {
-    void __thiscall FUN_00470070();
+    void __thiscall SetVtableAndProcessState_00470070();
     void* __thiscall FUN_00470380(unsigned int flags);
 };
 struct FUN_004703e0_class : public FUN_00464f40_class
@@ -268,10 +268,10 @@ struct FUN_004747c0_Class : public FUN_00474630
     void* __thiscall FUN_004747c0(unsigned int flags);
 };
 void __cdecl Deallocate(void*);
-void FUN_00474730();
+void UpdateState_00474730();
 struct FUN_004747f0_class
 {
-    void FUN_00474730();
+    void UpdateState_00474730();
     void* FUN_004747f0(unsigned int flags);
 };
 struct FUN_00473f00_class
@@ -286,7 +286,7 @@ struct FUN_00474850_class : public FUN_00473f00_class
 struct FUN_004752e0_Class
 {
     void* __thiscall FUN_004752e0(unsigned int flags);
-    void __thiscall FUN_00475310();
+    void __thiscall UpdateState_00475310();
 };
 void __cdecl Deallocate(void*);
 struct FUN_00479140_class
@@ -302,8 +302,8 @@ struct FUN_004792f0_Class : FUN_004792c0_Class
     void* __thiscall FUN_004792f0(unsigned int flags);
 };
 BGSImpactDataSet* BGSImpactDataSet::ms_pImpactDataSet;
-void FUN_00460160();
-void __cdecl FUN_00460190();
+void BGSImpactDataSet_ClearDefaultImpactDataSet();
+void __cdecl BGSEncounterZone_ClearNoZone();
 template <int N> struct EndianSizeTag
 {
 };
@@ -311,7 +311,7 @@ void __cdecl BSEndian(unsigned char*, EndianSizeTag<0>);
 void __cdecl BSEndian(unsigned int*, EndianSizeTag<3>);
 struct S_00462230
 {
-    void __thiscall FUN_00462230();
+    void __thiscall TwoValues_Endian();
 };
 struct TlsBlock462480
 {
@@ -322,12 +322,12 @@ __declspec(thread) TlsBlock462480 g_tls462480;
 extern int __tls_index;
 struct FUN_00462480_Class
 {
-    unsigned char __thiscall FUN_00462480();
+    unsigned char __thiscall BGSSaveLoadGame_GetThreadAllowChanges();
 };
 __declspec(thread) unsigned int TLS_PAD[166];
 struct S69570
 {
-    unsigned char FUN_00469570();
+    unsigned char BGSSaveLoadGame_GetLoadingMovedRefs();
 };
 struct KFModel
 {
@@ -337,26 +337,27 @@ void* __cdecl DynamicCastByRTTI(void const*, void*);
 extern char const g_011f4454_arg1[];
 struct FUN_0046e8e0_This
 {
-    void __thiscall FUN_0046e8e0(KFModel* a, int b, int c, int d, int e);
+    void __thiscall TESDataHandler_PrintTextureInfo(KFModel* a, int b, int c, int d, int e);
 };
 extern int DAT_01019a14;
 // @fnv 0x0046ffd0
 #include "../../include/NiTMallocInterface.h"
-void __thiscall FUN_0045d930_class::FUN_0046ffd0()
+// src: GUESS 0x0046ffd0 (confidence: low)
+void __thiscall FUN_0045d930_class::SetVtableAndProcessState_0046ffd0()
 {
     *(void**)this = (void*)&DAT_01019a14;
     NiTMallocInterface<void*>::Deallocate(*(void***)((char*)this + 4));
 }
 struct FUN_004700d0_class : FUN_004705c0_cls
 {
-    void __thiscall FUN_0049fa20(void* p);
-    void __thiscall FUN_004700d0(int* p);
+    void __thiscall NiTListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddNodeHead(void* p);
+    void __thiscall NiTPointerListBase_DFALL_NiTListItem_NiAVObject_NiAVObject_AddHead(int* p);
 };
 struct FUN_00471d90_class
 {
     char m_auiShapeKeys[0x3e8];
     int m_flags;
-    void __thiscall FUN_00471d90(bool enabled);
+    void __thiscall TESFile_SetActive(bool enabled);
 };
 struct FUN_00471e10_class
 {
@@ -375,7 +376,7 @@ struct Twin_008d0360
 {
     bool GetBooleanValue();
 };
-Twin_008d0360* FUN_00471f70();
+Twin_008d0360* NiSystemDesc_GetSystemDesc();
 struct FUN_00471e60_shell
 {
     char _pad0[0x10];
@@ -411,7 +412,7 @@ struct FUN_00474880_Helper
 struct FUN_00474790_Class
 {
     const char* m0;
-    FUN_00474790_Class* __thiscall FUN_00474790(unsigned int a, unsigned int b);
+    FUN_00474790_Class* __thiscall NiTPrimitiveArray_unsigned_int_NiTPrimitiveArray(unsigned int a, unsigned int b);
 };
 void __cdecl _Deallocate(void*);
 struct FUN_00474820_Class
@@ -444,7 +445,7 @@ struct FUN_004781b0_This
     int field0;
     unsigned char field4;
     unsigned char field5;
-    FUN_004781b0_This* __thiscall FUN_004781b0();
+    FUN_004781b0_This* __thiscall ClearFields_004781b0();
 };
 struct FUN_00478f70_s
 {
@@ -456,11 +457,11 @@ struct FUN_00478f70_s
     unsigned int dc;
     unsigned int d10;
     unsigned int d14;
-    FUN_00478f70_s* FUN_00478f70();
+    FUN_00478f70_s* DestructibleObjectStage_DestructibleObjectStage();
 };
 struct AX
 {
-    void __thiscall FUN_006b3eb0(unsigned int, unsigned int);
+    void __thiscall BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 };
 extern int vftable__ShadowSceneArray;
 struct S
@@ -476,7 +477,7 @@ struct FUN_004791f0_holder2
 };
 struct FUN_0047b470_This
 {
-    bool __thiscall FUN_0047b470();
+    bool __thiscall bhkCollisionObject_GetUseVelocity();
 };
 struct Actor;
 struct LH
@@ -491,7 +492,7 @@ struct FUN_0047ba80_This
 };
 struct FUN_0046fe10_Class
 {
-    int FUN_0046fe10();
+    int GetNumDLCs();
 };
 struct BSSimpleListTESRaceSize
 {
@@ -513,15 +514,15 @@ struct FUN_00474920_shell
 struct GlobalObject_00a7b610;
 struct FUN_00476ec0_Class
 {
-    void FUN_00c455a0(unsigned char);
+    void BSRangeNode_SetCurrent(unsigned char);
 };
-bool __cdecl FUN_0043b300(GlobalObject_00a7b610*, NiAVObject*);
+bool __cdecl NiObject_IsKindOf(GlobalObject_00a7b610*, NiAVObject*);
 extern GlobalObject_00a7b610 g_01202e8c;
-void __cdecl FUN_00476ec0(NiAVObject*, int);
-void __cdecl FUN_00476ec0(NiAVObject* object, int flag);
+void __cdecl BGSDestructibleObjectForm_UpdateDamageStageNodes(NiAVObject*, int);
+void __cdecl BGSDestructibleObjectForm_UpdateDamageStageNodes(NiAVObject* object, int flag);
 struct FUN_00478130_class
 {
-    void __thiscall FUN_00478130();
+    void __thiscall SAVE_DESTRUCTIBLE_OBJECT_STAGE_Endian();
 };
 struct FUN_00462e10_Class
 {
@@ -567,7 +568,7 @@ struct FUN_0046eb20_Class
 };
 struct FUN_0046ebd0_Class
 {
-    unsigned int FUN_0046ebd0();
+    unsigned int NiTexturingProperty_GetDecalMapCount();
 };
 struct FUN_0046fdd0_Class
 {
@@ -593,7 +594,7 @@ struct FUN_0047bcf0_class
 struct FUN_0047eb90_Class
 {
     void FUN_005fc970(int, char);
-    void FUN_0047eb90(int value);
+    void ForwardCall_0047eb90(int value);
 };
 class FUN_00462dc0_cls
 {
@@ -603,7 +604,7 @@ class FUN_00462dc0_cls
     int(__cdecl* m_08)(FUN_00462dc0_cls* self, int a, int b, int c, int d);
     int InvokeAndAccumulate(int a1, int a2, int a3, int a4);
 };
-int __cdecl FUN_00464f30(int a);
+int __cdecl ConvertFromUni(int a);
 extern int DAT_01019a34;
 extern void* __cdecl FUN_0096afc0(unsigned int count);
 struct ResourceDescriptor
@@ -615,10 +616,10 @@ struct ResourceDescriptor
     void* manager;
     unsigned int options;
 
-    ResourceDescriptor* __thiscall FUN_004705e0(unsigned int initialCount, unsigned int initialOptions);
+    ResourceDescriptor* __thiscall NiTLargeArray_TESForm_NiTMallocInterface_TESForm_NiTLargeArray(unsigned int initialCount, unsigned int initialOptions);
 };
 extern Twin_008d0360* g_011f6078;
-Twin_008d0360* __cdecl FUN_00471f70();
+Twin_008d0360* __cdecl NiSystemDesc_GetSystemDesc();
 class Base_b9207
 {
   public:
@@ -664,7 +665,7 @@ class FUN_00475310_cls
     int unk10;
     FUN_00475310_obj* m_14;
 
-    void FUN_00475310();
+    void UpdateState_00475310();
 };
 struct InstanceData36
 {
@@ -685,9 +686,9 @@ struct CollectionItem
     virtual void Unused1();
     virtual void Unused2();
     virtual ChildRange* GetChildren();
-    bool FUN_00c455a0(unsigned char);
-    InstanceData36* FUN_00461130();
-    InstanceData12* FUN_0045bb80();
+    bool BSRangeNode_SetCurrent(unsigned char);
+    InstanceData36* NiAVObject_GetWorldRotate();
+    InstanceData12* NiAVObject_GetWorldTranslate();
 };
 struct ChildRange
 {
@@ -695,7 +696,7 @@ struct ChildRange
     CollectionItem* FUN_0043b4a0(unsigned int);
 };
 extern unsigned char DAT_01202e7c;
-bool __cdecl FUN_0043b300(const void*, CollectionItem*);
+bool __cdecl NiObject_IsKindOf(const void*, CollectionItem*);
 void __cdecl CreateProjectileRef(int, OutputRenderer*, OutputRenderer*, unsigned int, InstanceData12, InstanceData36);
 struct ActorProcessor
 {
@@ -709,8 +710,8 @@ struct Node
     virtual void Unknown1();
     virtual void Unknown2();
     virtual NodeChildren* GetChildren();
-    unsigned char FUN_00c455a0(unsigned char mode);
-    int FUN_0045bb80(void* extra, float value);
+    unsigned char BSRangeNode_SetCurrent(unsigned char mode);
+    int NiAVObject_GetWorldTranslate(void* extra, float value);
 };
 struct NodeChildren
 {
@@ -719,14 +720,14 @@ struct NodeChildren
 };
 struct Context
 {
-    float FUN_00567400();
+    float TESObjectREFR_GetScale_00567400();
     int FUN_008d6f30(int value);
 };
 struct Receiver
 {
     void FUN_004fa6f0(int value);
 };
-extern unsigned char __cdecl FUN_0043b300(const void* descriptor, Node* node);
+extern unsigned char __cdecl NiObject_IsKindOf(const void* descriptor, Node* node);
 struct Walk
 {
     int WalkTree(Node* node, Receiver* receiver, unsigned int mode, Context* context, void* extra);
@@ -905,12 +906,12 @@ struct FUN_00477230_node
 };
 struct FUN_00477230_cls
 {
-    void FUN_00477230(FUN_00477230_node* node, FUN_00477230_arg* arg);
+    void BGSDestructibleObjectForm_FindModelSwapNodes(FUN_00477230_node* node, FUN_00477230_arg* arg);
 };
 FUN_00477230_owner* SceneHelperA();
 bool __cdecl SceneHelperB(FUN_00477230_owner* a, FUN_00477230_owner* b);
 extern "C" NiFixedString* DAT_011c61d8;
-NiFixedString* __cdecl FUN_004772e0();
+NiFixedString* __cdecl get_g_ModelSwapNode();
 extern const double kFnvListDivisor;
 extern const float kFnvListDefault;
 class FnvShapeObject
@@ -999,7 +1000,7 @@ struct EffectData
     int count0c;
     int count10;
     FUN_0048a3d0* effect14;
-    void FUN_00478fd0(const EffectData* source);
+    void DestructibleObjectStage_Copy(const EffectData* source);
 };
 class B479260MapBase
 {
@@ -1022,10 +1023,10 @@ struct FUN_0047ead0_cls
     FUN_0047ead0_cls* FUN_004181e0(FUN_0047ead0_cls* a, int b);
     int GetFactionRank();
     FUN_0047ead0_cls* FUN_00726070();
-    void FUN_0047ebd0(int v);
-    void FUN_0047ebb0(int v);
-    void FUN_0047eb90(int v);
-    void FUN_0047ead0(int mode);
+    void TESFaction_SetPCAttack(int v);
+    void TESFaction_SetPCMurder(int v);
+    void ForwardCall_0047eb90(int v);
+    void TESActorBaseData_SetPCFactionFlags(int mode);
 };
 extern FUN_0047ead0_cls* DAT_011dea3c;
 struct FUN_0047fe80_class : BaseFormComponent
@@ -1063,7 +1064,7 @@ struct NamedObject_47ab40
 };
 extern Setting g_011c4c64;
 int FUN_00ec6da0(const char*, const char*);
-bool FUN_008c7aa0();
+bool AILinearTaskThreadManager_ShouldQueue3DTask();
 struct World_47ab40
 {
     virtual void v00();
@@ -1121,7 +1122,7 @@ struct World_47ab40
     virtual void AddObject(NiNode* node, bool a, bool b, int c, int d);
 };
 struct Cell_47ab40;
-World_47ab40* __fastcall FUN_004543c0(Cell_47ab40* cell);
+World_47ab40* __fastcall TESObjectCELL_GetbhkWorld(Cell_47ab40* cell);
 struct TaskQueue_47ab40
 {
     static TaskQueue_47ab40* GetInstance();
@@ -1248,8 +1249,8 @@ struct Ref_47ab40
     virtual NiNode* Get3D();
     Cell_47ab40* GetParentCell();
 };
-bool FUN_0047ab40(Ref_47ab40* ref, NamedObject_47ab40* obj);
-FUN_0047b470_This* __cdecl FUN_00c802d0(NiNode*);
+bool BGSOpenCloseForm_HandleAnimEndHavok(Ref_47ab40* ref, NamedObject_47ab40* obj);
+FUN_0047b470_This* __cdecl bhkUtilFunctions_FindNextCollisionObject(NiNode*);
 void __cdecl SetFlagRecursive(int, void*);
 struct RefWithGetNiNode
 {
@@ -1371,7 +1372,7 @@ struct RefWithGetNiNode
     virtual void v73();
     virtual NiNode* GetNiNode();
 };
-void __cdecl FUN_0047b360(RefWithGetNiNode* apRef);
+void __cdecl BGSOpenCloseForm_SnapHavokTo3D(RefWithGetNiNode* apRef);
 struct ItemForm
 {
     unsigned int FNV_GetFormType();
@@ -1551,7 +1552,7 @@ struct XCLC
     unsigned int y;
     unsigned char z;
     XCLC();
-    void FUN_00462230();
+    void TwoValues_Endian();
 };
 
 
@@ -1575,10 +1576,10 @@ struct FUN_00585940_shell
 };
 
 
-TESForm* FUN_004839c0(unsigned int);
+TESForm* TESForm_GetFormByNumericID(unsigned int);
 int FindFormEnumIndex(unsigned int);
-int __cdecl FUN_00404dc0(const char*, const char*);
-void __cdecl FormHeap_Free(void*);
+int __cdecl BSstricmp(const char*, const char*);
+void __cdecl FormHeapFreeAndLog_00401030(void*);
 
 extern "C" char DAT_010186b8[];
 extern DialogueResponse* DAT_011c3f2c;
@@ -1591,11 +1592,12 @@ struct TESFileArray
     char pad[0x218];
     unsigned int mCount;
     TESFile* mFiles[1];
-    int FUN_00461cf0(char*, int*, int*);
+    int TESDataHandler_GetExtCellDataFromFileByEditorID(char*, int*, int*);
 };
 
 // @fnv 0x00461cf0
-int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
+// src: XBOX_PDB 0x00461cf0
+int TESFileArray::TESDataHandler_GetExtCellDataFromFileByEditorID(char* name, int* out1, int* out2)
 {
     AutoMemContext ctx(0x16, true, (char*)DAT_010186b8, 0x1041);
     int result = 0;
@@ -1643,7 +1645,7 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                             if (hdr->fC == 0 && hdr->f8 == (unsigned int)DAT_01187314)
                             {
                                 got = true;
-                                read = f->FUN_00472150(true);
+                                read = f->NextForm_00472150(true);
                             }
                             else
                             {
@@ -1652,7 +1654,7 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                         }
                         else
                         {
-                            read = f->FUN_00472150(true);
+                            read = f->NextForm_00472150(true);
                         }
                         if (read)
                             hdr = f->GetRecordHeader();
@@ -1675,19 +1677,19 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                                     w = f;
                                 id &= 0xffffff;
                                 id |= (unsigned int)(unsigned char)w->FUN_00473250() << 24;
-                                result = (int)dynamic_cast<TESWorldSpace*>(FUN_004839c0(id));
-                                read2 = f->FUN_00472150(true);
+                                result = (int)dynamic_cast<TESWorldSpace*>(TESForm_GetFormByNumericID(id));
+                                read2 = f->NextForm_00472150(true);
                             }
                             else if (hdr->type == (unsigned int)DAT_011872b4)
                             {
-                                int chunk = f->FUN_004726b0();
+                                int chunk = f->TESFile_GetTESChunk();
                                 if (chunk == 0x44494445)
                                 {
                                     unsigned int len = f->GetField25C() + 1;
                                     char* ptr = (char*)operator new(len);
                                     memset(ptr, 0, len);
                                     f->FUN_00472890(ptr, 0);
-                                    if (FUN_00404dc0(ptr, name) == 0)
+                                    if (BSstricmp(ptr, name) == 0)
                                     {
                                         got = true;
                                         while (chunk)
@@ -1698,14 +1700,14 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                                                 memset(&v, 0, sizeof(v));
                                                 f->FUN_00472890(&v, sizeof(v));
                                                 if (f->IsEndianConversionRequired())
-                                                    v.FUN_00462230();
+                                                    v.TwoValues_Endian();
                                                 *out1 = v.x;
                                                 *out2 = v.y;
                                                 chunk = 0;
                                             }
                                             else if (f->FUN_004726f0())
                                             {
-                                                chunk = f->FUN_004726b0();
+                                                chunk = f->TESFile_GetTESChunk();
                                             }
                                             else
                                             {
@@ -1713,9 +1715,9 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                                             }
                                         }
                                     }
-                                    FormHeap_Free(ptr);
+                                    FormHeapFreeAndLog_00401030(ptr);
                                 }
-                                read2 = f->FUN_00472150(true);
+                                read2 = f->NextForm_00472150(true);
                             }
                             else
                             {
@@ -1727,7 +1729,7 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                                     case 0:
                                         if (hdr->f8 == (unsigned int)DAT_01187314)
                                         {
-                                            read2 = f->FUN_00472150(true);
+                                            read2 = f->NextForm_00472150(true);
                                             flag = true;
                                         }
                                         else
@@ -1743,7 +1745,7 @@ int TESFileArray::FUN_00461cf0(char* name, int* out1, int* out2)
                                     case 1:
                                     case 4:
                                     case 5:
-                                        read2 = f->FUN_00472150(true);
+                                        read2 = f->NextForm_00472150(true);
                                         flag = true;
                                         break;
                                     case 6:

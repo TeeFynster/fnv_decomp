@@ -65,7 +65,7 @@ class LockExtraData
 class TeleportableReference
 {
   public:
-    TESObjectCELL* FUN_0043a2b0();
+    TESObjectCELL* DoorTeleportData_GetTeleportCell();
     TESWorldSpace* GetTeleportWorldspace();
     NiPoint3* GetPosition();
     NiPoint3* GetRotation();
@@ -82,11 +82,11 @@ extern TESBoundObject* g_pLockpickItem;
 extern TESObjectREFR* DAT_011c9350;
 extern Setting DAT_011c9384, DAT_011d276c, DAT_011d5110;
 extern const float DAT_010162c0;
-void FUN_00519810(TESObjectREFR*, TESObjectREFR*);
-void FUN_00600900(TESBoundObject*);
-void FUN_00600920(int);
-void FUN_00600940(bool);
-void FUN_00705830(TESObjectREFR*, int, int);
+void TESObjectDOOR_LinkRandomTeleportDoors(TESObjectREFR*, TESObjectREFR*);
+void TESIdleManager_SetUsedItem(TESBoundObject*);
+void TESIdleManager_SetUsedItemLevel(int);
+void TESIdleManager_SetUsedItemActivate(bool);
+void Interface_CreateLockPickMenu(TESObjectREFR*, int, int);
 void ApplyPerkModifiers(int, Actor*, float*);
 int Warning(const char*, ...);
 extern "C" void* _alloca(unsigned int);

@@ -19,16 +19,16 @@
 #include "../../../../include/Setting.h"
 #include "../../../../include/BSSoundHandle.h"
 extern Actor* g_thePlayer;
-bool FUN_00754d90(Actor* a);
-int __cdecl FUN_00755260();
+bool CompanionWheelMenu_GetShouldCompanionWheelOpen(Actor* a);
+int __cdecl return_1075();
 extern "C" float __cdecl LogFloat(float);
-float FUN_00755660(float value);
+float NiATan(float value);
 extern "C" void __cdecl CloseMenuAndRefresh(int);
-void __fastcall FUN_00756960(int thisPtr);
+void __fastcall CompanionWheelMenu_Do_Talk(int thisPtr);
 extern bool __cdecl _FUN_004b71d0();
 struct FUN_00755680_shell
 {
-    bool __thiscall FUN_00755680();
+    bool __thiscall InterfaceManager_GetMouseVisible();
 };
 void __cdecl _Deallocate(void*);
 struct FUN_008a7760_holder
@@ -37,9 +37,9 @@ struct FUN_008a7760_holder
 };
 MagicCaster* __cdecl _FUN_004b7210();
 extern int DAT_011d92b8;
-void __cdecl FUN_00717280(int);
+void __cdecl InterfaceManager_PlayMenuSound(int);
 unsigned int __cdecl gm_GetTickCount(void);
-float __cdecl FUN_00755660(float value);
+float __cdecl NiATan(float value);
 int __cdecl _FUN_00ec7d40(int value);
 extern char $SG3295[];
 extern double _DAT_01012060;
@@ -52,13 +52,13 @@ extern short DAT_011d8a5e;
 extern short DAT_011d8a74;
 struct MenuFactory
 {
-    Menu* FUN_00a03c90();
+    Menu* Tile_GetMenu();
 };
-MenuFactory* __cdecl FUN_00a09030(int id);
+MenuFactory* __cdecl Tile_GetMenuByClass(int id);
 int __cdecl OpenCompanionMenu(int value);
 bool __cdecl DestroyCompanionWheelMenu(int value);
-extern "C" bool __cdecl FUN_00702450(int);
-bool __cdecl FUN_00702450(int);
+extern "C" bool __cdecl Interface_IsTopMenuID(int);
+bool __cdecl Interface_IsTopMenuID(int);
 struct PackageNode
 {
     PackageNode* FUN_00726070();
@@ -71,11 +71,11 @@ struct ActorLevelInfo
 };
 struct DialoguePolicy
 {
-    bool FUN_00619df0();
+    bool TESTopic_IsRemappedRumors();
 };
 struct DialogueManager
 {
-    DialogueItem* FUN_0061b320(Actor*, Actor*, int, int, int);
+    DialogueItem* TESTopic_CreateDialogueItem(Actor*, Actor*, int, int, int);
 };
 DialogueManager* GetTopicSubTypeName(int, int);
 struct ActorPosition
@@ -93,16 +93,16 @@ struct ActorLock
 extern Actor* interactionPlayer;
 struct DialogueDisplay
 {
-    void FUN_009c8950(int, int);
+    void QuitVATSPlayback(int, int);
 };
 extern DialogueDisplay dialogueDisplay;
-void FUN_00709470(int, Actor*, unsigned int, int, int, int);
+void Interface_QueueMenuCreate(int, Actor*, unsigned int, int, int, int);
 struct InputState
 {
     void FUN_00ad8780();
 };
-InputState* __stdcall FUN_00453a70(int);
-int FUN_00702640();
+InputState* __stdcall BSAudio_QInstance(int);
+int Interface_GetMenuModeType();
 struct MessageSetting
 {
     const char* FUN_00403df0();
@@ -142,9 +142,9 @@ struct CStringArg_757690
     unsigned data;
     unsigned length;
     ~CStringArg_757690();
-    unsigned __thiscall FUN_004048e0();
-    int __thiscall FUN_00559450();
-    int __thiscall FUN_00559450(int);
+    unsigned __thiscall BSStringT_char_Length();
+    int __thiscall Modelloader_GetReferencedThis();
+    int __thiscall Modelloader_GetReferencedThis(int);
 };
 struct CValueArg_757690
 {
@@ -160,14 +160,14 @@ struct CInterface_757690
 };
 struct CRandom_757690
 {
-    float* __thiscall FUN_00403e20();
+    float* __thiscall Setting_Float_00403e20();
 };
 extern CInterface_757690 DAT_011d8928;
 extern CRandom_757690 DAT_011d2178;
 extern double DAT_01012060;
 extern double DAT_01017b70;
 unsigned __cdecl FUN_00ec6130(int);
-unsigned __cdecl FUN_00457fe0();
+unsigned __cdecl Cmd_GetSessionTime_Execute();
 namespace ScriptAnimation {
 struct Reference;
 struct Idle;
@@ -179,10 +179,10 @@ struct ResultList
     ~ResultList();
     void FUN_00ad8e60(void (*)(unsigned int), unsigned int);
 };
-void FUN_005790f0(unsigned int);
+void TESObjectREFR_SayToCallBack(unsigned int);
 struct Sequence
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     void FUN_0083c7b0();
     int FUN_0083c820();
     void FUN_0083c850(int);
@@ -190,7 +190,7 @@ struct Sequence
 };
 struct Idle
 {
-    Sequence* FUN_0061b320(Reference*, int, int, int, int);
+    Sequence* TESTopic_CreateDialogueItem(Reference*, int, int, int, int);
 };
 struct Reference
 {
@@ -453,13 +453,13 @@ struct Reference
     virtual void v256();
     virtual void v257();
     virtual ResultList PlayActor(Idle*, Actor*, bool, bool, int, int);
-    void FUN_0057ad20(Idle*);
-    unsigned int FUN_0084e3a0();
-    void FUN_0057ace0(unsigned int);
+    void TESObjectREFR_SetSayToTopic(Idle*);
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    void TESObjectREFR_SetSayToTopicInfo(unsigned int);
     Reference* FUN_005e3fa0();
     void FUN_00484490();
-    void FUN_00575690(void*);
-    void FUN_00575830(void*);
+    void TESObjectREFR_SetObjectReference(void*);
+    void TESObjectREFR_SetLocationOnReference(void*);
 };
 struct Process
 {
@@ -886,11 +886,12 @@ extern const char DAT_011846d4, DAT_011841cc;
 Actor* FUN_00ec43fb(Reference*, int, const void*, const void*, int);
 // 0x004f8960: no arguments on the stack; ECX carries the Actor.
 int __fastcall GetActorAnimationAction(Actor*);
-void MarkBaseExtraListScriptEvent(Idle*, void*, int);
-Reference* FUN_00564480(int, int);
-bool FUN_005accb0(void*, void*, void*, Reference*, void*, void*, void*, Idle**, int*, void**, int*, int*);
+void Script_SetActionFlag(Idle*, void*, int);
+Reference* TESObjectREFR_CreateReference(int, int);
+bool Script_ParseParameters(void*, void*, void*, Reference*, void*, void*, void*, Idle**, int*, void**, int*, int*);
 // @fnv 0x005c8a50
-bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* containing, void* script, void* locals,
+// src: EXE 0x005c8a50
+bool Cmd_Say_Execute(void* paramInfo, void* scriptData, Reference* source, void* containing, void* script, void* locals,
                   double* result, void* offset)
 {
     *result = 0.0;
@@ -899,7 +900,7 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
     void* object4 = 0;
     int immediateA = 0;
     int _usePriority = 0;
-    if (!FUN_005accb0(paramInfo, scriptData, offset, source, containing, script, locals, &idleVal, &force, &object4,
+    if (!Script_ParseParameters(paramInfo, scriptData, offset, source, containing, script, locals, &idleVal, &force, &object4,
                       &immediateA, &_usePriority))
         return false;
     bool forceFlag4 = false;
@@ -912,8 +913,8 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
     if (_usePriority > 0)
         priorityFlag = true;
     Actor* actor = FUN_00ec43fb(source, 0, &DAT_011841cc, &DAT_011846d4, 0);
-    int previous = *DAT_011cd378.FUN_0043d4d0();
-    DAT_011cd378.FUN_0045ce80(0x7fffffff);
+    int previous = *DAT_011cd378.Setting_Int();
+    DAT_011cd378.ProcessAndReturnValue_0045ce80(0x7fffffff);
     if (idleVal)
     {
         if (actor)
@@ -932,25 +933,25 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
                 }
                 else if (immediateA)
                 {
-                    reinterpret_cast<Reference*>(actor)->FUN_0057ad20(idleVal);
-                    Sequence* chosen = idleVal->FUN_0061b320(reinterpret_cast<Reference*>(actor), 0, 0, 0, 0);
+                    reinterpret_cast<Reference*>(actor)->TESObjectREFR_SetSayToTopic(idleVal);
+                    Sequence* chosen = idleVal->TESTopic_CreateDialogueItem(reinterpret_cast<Reference*>(actor), 0, 0, 0, 0);
                     if (chosen)
-                        source->FUN_0057ace0(chosen->FUN_0084e3a0());
+                        source->TESObjectREFR_SetSayToTopicInfo(chosen->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                     ResultList events = reinterpret_cast<Reference*>(actor)->PlayActor(idleVal, actor, immediateFlag4, priorityFlag, 0, 0);
-                    events.FUN_00ad8e60(FUN_005790f0, source->FUN_0084e3a0());
+                    events.FUN_00ad8e60(TESObjectREFR_SayToCallBack, source->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                     return true;
                 }
                 if (DAT_011dea3c->FUN_0094df60() || reinterpret_cast<Process*>(actor->FUN_008d8520())->FUN_0045cd60() != 0 ||
-                    (actor->FUN_0087f3d0() && GetActorAnimationAction(actor) == 6))
+                    (actor->GetEssential() && GetActorAnimationAction(actor) == 6))
                 {
-                    Sequence* selected = idleVal->FUN_0061b320(reinterpret_cast<Reference*>(actor), 0, 0, 0, 1);
+                    Sequence* selected = idleVal->TESTopic_CreateDialogueItem(reinterpret_cast<Reference*>(actor), 0, 0, 0, 1);
                     if (selected)
                     {
                         selected->FUN_0083c7b0();
                         int unused = selected->FUN_0083c820();
                         selected->FUN_0083c850(0);
                         selected->FUN_0083c850(1);
-                        MarkBaseExtraListScriptEvent(idleVal, actor->FUN_005d43c0(), 0x40000);
+                        Script_SetActionFlag(idleVal, actor->BSFile_GetDevice(), 0x40000);
                         delete selected;
                     }
                 }
@@ -959,35 +960,35 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
             }
             else if (reinterpret_cast<Process*>(actor->FUN_008d8520()))
             {
-                MarkBaseExtraListScriptEvent(idleVal, actor->FUN_005d43c0(), 0x40000);
+                Script_SetActionFlag(idleVal, actor->BSFile_GetDevice(), 0x40000);
                 reinterpret_cast<Process*>(actor->FUN_008d8520())->Clear(0);
             }
         }
         else if (source && object4)
         {
-            Reference* created = FUN_00564480(59, 0);
+            Reference* created = TESObjectREFR_CreateReference(59, 0);
             created->FUN_00484490();
-            created->FUN_00575690(object4);
-            created->FUN_00575830(source->GetParent());
-            source->FUN_0057ad20(idleVal);
-            Sequence* chosen2 = idleVal->FUN_0061b320(created, 0, 0, 0, 0);
+            created->TESObjectREFR_SetObjectReference(object4);
+            created->TESObjectREFR_SetLocationOnReference(source->GetParent());
+            source->TESObjectREFR_SetSayToTopic(idleVal);
+            Sequence* chosen2 = idleVal->TESTopic_CreateDialogueItem(created, 0, 0, 0, 0);
             if (chosen2)
-                source->FUN_0057ace0(chosen2->FUN_0084e3a0());
+                source->TESObjectREFR_SetSayToTopicInfo(chosen2->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
             ResultList events7 = created->Play(idleVal, created, immediateFlag4, priorityFlag, 0, 0, forceFlag4);
-            events7.FUN_00ad8e60(FUN_005790f0, source->FUN_0084e3a0());
+            events7.FUN_00ad8e60(TESObjectREFR_SayToCallBack, source->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
             delete created;
         }
         else if (source->GetNode() || (source->IsSpecial() && source->FUN_005e3fa0()->GetNode()))
         {
-            source->FUN_0057ad20(idleVal);
-            Sequence* chosen3 = idleVal->FUN_0061b320(source, 0, 0, 0, 0);
+            source->TESObjectREFR_SetSayToTopic(idleVal);
+            Sequence* chosen3 = idleVal->TESTopic_CreateDialogueItem(source, 0, 0, 0, 0);
             if (chosen3)
-                source->FUN_0057ace0(chosen3->FUN_0084e3a0());
+                source->TESObjectREFR_SetSayToTopicInfo(chosen3->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
             ResultList events3 = source->Play(idleVal, 0, immediateFlag4, priorityFlag, 0, 0, forceFlag4);
-            events3.FUN_00ad8e60(FUN_005790f0, source->FUN_0084e3a0());
+            events3.FUN_00ad8e60(TESObjectREFR_SayToCallBack, source->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
         }
     }
-    DAT_011cd378.FUN_0045ce80(previous);
+    DAT_011cd378.ProcessAndReturnValue_0045ce80(previous);
     return true;
 }
 }
@@ -1050,7 +1051,7 @@ struct HealingExtraList
 };
 struct HealingInventoryEntry
 {
-    HealingExtraList* FUN_00559450();
+    HealingExtraList* Modelloader_GetReferencedThis();
     TESBoundObject* FUN_0044ddc0();
     void* FUN_004459e0(unsigned int);
 };
@@ -1061,11 +1062,12 @@ extern float DAT_01013974;
 TESForm* FUN_0058db10(int);
 void* FUN_00ec43fb(void*, int, void*, void*, int);
 float FUN_00646800(ActorValueOwner*, int, int);
-void* FUN_008d5910(int);
+void* FollowerBarks_GetBarkTopicByType(int);
 
 
 // @fnv 0x00755c50
-void CompanionWheelMenu::FUN_00755c50(float angle)
+// src: XBOX_PDB 0x00755c50
+void CompanionWheelMenu::SetButtonAsHighlighted(float angle)
 {
     if (angle >= 0.0 && angle < 0.5235980153083801)
         angle = 0.55f;

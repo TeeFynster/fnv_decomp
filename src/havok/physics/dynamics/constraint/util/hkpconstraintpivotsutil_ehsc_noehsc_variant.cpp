@@ -397,7 +397,8 @@ struct hkpWorldq
 };
 
 // @fnv 0x00d85160
-unsigned int FUN_00d85160(hkpWorldq* world, const hkpShapeq* shape, const hkVector4q& position)
+// src: GUESS 0x00d85160 (confidence: low)
+unsigned int hkpWorldq_ProcessAndReturnValue_00d85160(hkpWorldq* world, const hkpShapeq* shape, const hkVector4q& position)
 {
     hkpSphereShapeq sphere(0.01f);
 

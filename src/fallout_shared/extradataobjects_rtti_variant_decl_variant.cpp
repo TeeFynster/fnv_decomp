@@ -78,16 +78,17 @@ struct ReflectReference554
     unsigned int flags;
 };
 void ResolveFormID(unsigned int*, TESFile*);
-TESForm* FUN_004839c0(unsigned int);
-void FUN_005b5e40(const char*, ...);
+TESForm* TESForm_GetFormByNumericID(unsigned int);
+void Warning_005b5e40(const char*, ...);
 void __cdecl operator delete(void*);
 struct ReflectReferences554 : BSExtraData
 {
     BSSimpleList<ReflectReference554*> references;
-    void FUN_00433ed0(TESForm* form);
+    void ExtraReflectorRefs_InitItem(TESForm* form);
 };
 // @fnv 0x00433ed0
-void ReflectReferences554::FUN_00433ed0(TESForm* form)
+// src: XBOX_PDB 0x00433ed0
+void ReflectReferences554::ExtraReflectorRefs_InitItem(TESForm* form)
 {
     BSSimpleList<ReflectReference554*>* position = &references;
     BSSimpleList<ReflectReference554*>* previous = 0;
@@ -97,13 +98,13 @@ void ReflectReferences554::FUN_00433ed0(TESForm* form)
         ReflectReference554* item3 = position->GetItem();
         unsigned int formID5 = reinterpret_cast<unsigned int>(item3->m_pWorldReferenceInfo);
         ResolveFormID(&formID5, form->FUN_00484e60(-1));
-        TESObjectREFR* reference_2 = dynamic_cast<TESObjectREFR*>(FUN_004839c0(formID5));
-        if (!reference_2 || !reference_2->FUN_005653d0())
+        TESObjectREFR* reference_2 = dynamic_cast<TESObjectREFR*>(TESForm_GetFormByNumericID(formID5));
+        if (!reference_2 || !reference_2->TESObjectREFR_GetRefPersists_005653d0())
         {
             if (!reference_2)
-                FUN_005b5e40("MASTERFILE: Unable to find water reflector reference %08X.", formID5);
+                Warning_005b5e40("MASTERFILE: Unable to find water reflector reference %08X.", formID5);
             else
-                FUN_005b5e40(
+                Warning_005b5e40(
                     "MASTERFILE: Reference %08X is not persistent so cannot reflect or refract other references.",
                     formID5);
             if (previous)
@@ -122,9 +123,9 @@ void ReflectReferences554::FUN_00433ed0(TESForm* form)
         else
         {
             if (item3->flags & 1)
-                reference_2->FUN_005d43c0()->FUN_0041f4c0(form, true);
+                reference_2->BSFile_GetDevice()->ExtraDataList_SetReflectsRef(form, true);
             if (item3->flags & 2)
-                reference_2->FUN_005d43c0()->FUN_0041f650(form, true);
+                reference_2->BSFile_GetDevice()->ExtraDataList_SetRefractsRef(form, true);
             item3->m_pWorldReferenceInfo = reference_2;
         }
         if (!removed)

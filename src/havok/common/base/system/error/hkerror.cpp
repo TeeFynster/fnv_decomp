@@ -15,7 +15,7 @@ struct FUN_00cb1600_class
 };
 struct FUN_00cc01c0_class
 {
-    FUN_00cc01c0_class* FUN_00cc01c0(const char* text);
+    FUN_00cc01c0_class* ProcessAndReturnValue_00cc01c0(const char* text);
     FUN_00cc01c0_class* FUN_00cc0120(const void* value);
     FUN_00cc01c0_class* WriteInt(int value);
 };
@@ -40,19 +40,19 @@ void __cdecl ReportReferenceCountError(const void* object, const char* context)
     ((FUN_00cb1600_class*)&message)->FUN_00cb1600((char*)storage, 0x200);
     int referenceCount = *(const short*)((const char*)object + 6);
     ((FUN_00cc01c0_class*)&message)
-        ->FUN_00cc01c0("Reference count error on object ")
+        ->ProcessAndReturnValue_00cc01c0("Reference count error on object ")
         ->FUN_00cc0120(object)
-        ->FUN_00cc01c0(" with ref count of ")
+        ->ProcessAndReturnValue_00cc01c0(" with ref count of ")
         ->WriteInt(referenceCount)
-        ->FUN_00cc01c0(" in ")
-        ->FUN_00cc01c0(context)
-        ->FUN_00cc01c0(".\n")
-        ->FUN_00cc01c0(" * Are you calling delete instead of removeReference?\n")
-        ->FUN_00cc01c0(" * Have you called removeReference too many times?\n")
-        ->FUN_00cc01c0(
+        ->ProcessAndReturnValue_00cc01c0(" in ")
+        ->ProcessAndReturnValue_00cc01c0(context)
+        ->ProcessAndReturnValue_00cc01c0(".\n")
+        ->ProcessAndReturnValue_00cc01c0(" * Are you calling delete instead of removeReference?\n")
+        ->ProcessAndReturnValue_00cc01c0(" * Have you called removeReference too many times?\n")
+        ->ProcessAndReturnValue_00cc01c0(
             " * In a multithreaded environment, what is the hkReferencedObject lock mode you use (see setLockMode())?\n")
-        ->FUN_00cc01c0(" * Is this a valid object?\n")
-        ->FUN_00cc01c0(" * Do you have more than 32768 references? (unlikely)\n");
+        ->ProcessAndReturnValue_00cc01c0(" * Is this a valid object?\n")
+        ->ProcessAndReturnValue_00cc01c0(" * Do you have more than 32768 references? (unlikely)\n");
     if (DAT_01268360->Report(3, 0x2c66f2d8, (char*)storage, ".\\System\\Error\\hkError.cpp", 0x21))
         __debugbreak();
     ((FUN_00cc00e0_class*)&message)->FUN_00cc00e0();
@@ -143,7 +143,7 @@ struct S_00cb17b0_Router
         return *m_pStreamAllocator;
     }
 };
-S_00cb17b0_Router* FUN_00c85750();
+S_00cb17b0_Router* hkMemoryRouter_getInstance();
 struct S_00cb17b0_RefObj
 {
     virtual ~S_00cb17b0_RefObj();
@@ -152,7 +152,7 @@ struct S_00cb17b0_RefObj
     void operator delete(void* p)
     {
         S_00cb17b0_RefObj* b = static_cast<S_00cb17b0_RefObj*>(p);
-        FUN_00c85750()->heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance()->heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 struct FUN_00cb17b0 : S_00cb17b0_RefObj
@@ -171,7 +171,7 @@ struct DiagBuffer
     unsigned int m_08;
     unsigned int m_buf[128];
     void FUN_00cb1600(unsigned int* buf, unsigned int size) throw();
-    void FUN_00cc01c0(const char* s) throw();
+    void ProcessAndReturnValue_00cc01c0(const char* s) throw();
     void FUN_00cc00e0() throw();
 };
 
@@ -186,11 +186,12 @@ struct DiagLogger
 extern const char str_010c85ac[];
 
 // @fnv 0x00cb1750
-void FUN_00cb1750(const char* apMsg)
+// src: HAVOK_LIB 0x00cb1750
+void _hkErrorMessage(const char* apMsg)
 {
     DiagBuffer buf;
     buf.FUN_00cb1600(buf.m_buf, 0x200);
-    buf.FUN_00cc01c0(apMsg);
+    buf.ProcessAndReturnValue_00cc01c0(apMsg);
     if (((DiagLogger*)DAT_01268360)->Report(3, 0x2636fe25, (const char*)buf.m_buf, str_010c85ac, 0x28) != 0)
     {
         __debugbreak();

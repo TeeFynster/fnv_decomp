@@ -5,5 +5,5 @@
 // @fnv 0x00439090
 bool NiPlane::operator==(const NiPlane& other)
 {
-    return !FUN_004390c0(other);
+    return !HasEqualComponents(other);
 }

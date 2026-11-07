@@ -13,7 +13,7 @@ class QuestStage
     ~QuestStage();
     unsigned char GetIndex();
     void MarkDone(bool done);
-    bool FUN_0060fd70();
+    bool TESQuestStageItem_GetEndQuest();
     bool IsFlag2Set();
     Script* GetOffsetC();
     unsigned char m_done;
@@ -46,7 +46,7 @@ class RegionObjectEntry
 class ScriptContext
 {
   public:
-    void* FUN_00418830();
+    void* ExtraDataList_GetScriptLocals();
 };
 
 class PlayerQuestData
@@ -71,7 +71,7 @@ class PlayerQuestData
 class Calendar
 {
   public:
-    unsigned int FUN_00867c60();
+    unsigned int Calendar_GetYear();
     CALENDAR_MONTH GetCurrentMonth();
     signed char GetGameHour();
 };

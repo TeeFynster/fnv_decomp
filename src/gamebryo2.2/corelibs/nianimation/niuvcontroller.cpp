@@ -32,7 +32,8 @@ int __thiscall NiUVController::GetSomeValues(int* piValue1, int* piValue2, char*
 extern int g_011f3f18;
 
 // @fnv 0x00a45b30
-int* __cdecl FUN_00a45b30()
+// src: COMMUNITY 0x00a45b30
+int* __cdecl NiUVController_GetRTTI()
 {
     return &g_011f3f18;
 }
@@ -106,7 +107,7 @@ void __cdecl _delete(void* p, unsigned int flags);
 // @fnv 0x00a46000
 void* __thiscall NiUVController::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_00a45b60();
+    ProcessAndReturnValue_00a45b60();
     if (flags & 1)
         _delete(this, 0x50);
     return this;
@@ -169,7 +170,8 @@ struct BaseCall
 char* _FUN_00a7d330(const char*);
 
 // @fnv 0x00a46150
-void NiUVController::FUN_00a46150(StrArr* pStrArr)
+// src: XBOX_PDB 0x00a46150
+void NiUVController::GetViewerStrings_00a46150(StrArr* pStrArr)
 {
     ((BaseCall*)this)->FUN_00a6d830(pStrArr);
     char* s = _FUN_00a7d330((const char*)g_011f3f18);
@@ -184,7 +186,8 @@ void NiUVController::FUN_00a46150(StrArr* pStrArr)
 }
 
 // @fnv 0x00a45970
-bool __thiscall NiUVController::FUN_00a45970(void* stream)
+// src: XBOX_PDB 0x00a45970
+bool __thiscall NiUVController::RegisterStreamables_00a45970(void* stream)
 {
     NiStream& kStream = *(NiStream*)stream;
     if (!((Base44*)this)->RegisterStreamables(stream))
@@ -196,7 +199,8 @@ bool __thiscall NiUVController::FUN_00a45970(void* stream)
 }
 
 // @fnv 0x00a45cf0
-void NiUVController::FUN_00a45cf0(NiUpdateData& UpdateData)
+// src: XBOX_PDB 0x00a45cf0
+void NiUVController::Update_00a45cf0(NiUpdateData& UpdateData)
 {
     if (!AdvanceController(UpdateData.fTime))
         m_bUpdateEnabled = 1;
@@ -225,7 +229,7 @@ void __thiscall NiUVController::AssignRefObj(NiUVData* apRefObj)
     m_uiLastIdx2 = 0;
     m_uiLastIdx1 = 0;
     m_uiLastIdx3 = 0;
-    FUN_00a45bc0();
+    ResetKeyTimeExtrema();
 }
 
 // Links the controller to the stream, replacing its UV data pointer with the stream's object and updating reference counts.
@@ -299,7 +303,8 @@ extern "C" void _ReadWriteBarrier();
 #pragma intrinsic(_ReadWriteBarrier)
 
 // @fnv 0x00a45b60
-int __thiscall NiUVController::FUN_00a45b60()
+// src: GUESS 0x00a45b60 (confidence: low)
+int __thiscall NiUVController::ProcessAndReturnValue_00a45b60()
 {
     *(void**)this = &DAT_01098064;
     SharedRef* owner = (SharedRef*)&m_pData;
@@ -310,7 +315,7 @@ int __thiscall NiUVController::FUN_00a45b60()
     return ((BaseCall*)this)->Destroy();
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size) throw();
+void* __cdecl Object_DispatchCommandFour(unsigned int size) throw();
 
 // The construction adapter initializes this member after installing the vtable.
 template <> inline NiPointer<NiUVData>::NiPointer()
@@ -323,7 +328,7 @@ struct UVControllerConstruction : NiUVController
 {
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 
     UVControllerConstruction() throw()
@@ -341,7 +346,8 @@ struct UVControllerConstruction : NiUVController
 };
 
 // @fnv 0x00a45f50
-NiUVController* __cdecl FUN_00a45f50() throw()
+// src: EXE 0x00a45f50
+NiUVController* __cdecl NiUVController_CreateObject() throw()
 {
     NiUVController* p = new UVControllerConstruction;
     return p;
@@ -362,7 +368,7 @@ struct OutputWriter
 };
 struct MyStreamWriter : MyStream
 {
-    void FUN_00a645b0();
+    void ReadLinkID();
     OutputWriter* Output()
     {
         return *reinterpret_cast<OutputWriter**>(&_004[0x248]);
@@ -375,7 +381,7 @@ void NiUVController::WriteToStream(MyStreamWriter* stream)
 {
     ((Base44*)this)->FUN_00a6d5e0(stream);
     stream->Output()->Write(&m_usValue, sizeof(m_usValue));
-    stream->FUN_00a645b0();
+    stream->ReadLinkID();
 }
 
 // IsEqual: base comparison, then the type value and the (optional) child object must match.
@@ -447,7 +453,8 @@ extern float DAT_01015f5c;
 
 // Computes the time bounds from the first and last keys of each UV channel.
 // @fnv 0x00a45bc0
-void __thiscall NiUVController::FUN_00a45bc0()
+// src: XBOX_PDB 0x00a45bc0
+void __thiscall NiUVController::ResetKeyTimeExtrema()
 {
     m_fLoKeyTime = DAT_01016970;
     m_fHiKeyTime = DAT_01015f5c;
@@ -527,7 +534,7 @@ struct UVGeomData
     unsigned short m_usVertices;
     unsigned short unk0a;
     unsigned short m_usTrianglePoints;
-    UVPoint* __thiscall FUN_00a66960(unsigned short usSet);
+    UVPoint* __thiscall NiGeometryData_GetTextureSet(unsigned short usSet);
     void __thiscall FUN_00a67090(unsigned short usFlags);
     unsigned short GetTextureSets()
     {
@@ -631,7 +638,7 @@ void NiUVController::UpdateUVTransform()
     float fScaleV = fAnimTilingV / (*(float*)&m_pData.m_pObject->unk44);
     float fPrevOffsetV = (*(float*)&m_pData.m_pObject->unk3C);
 
-    UVPoint* pkTex = pkData->FUN_00a66960(m_usValue);
+    UVPoint* pkTex = pkData->NiGeometryData_GetTextureSet(m_usValue);
 
     float fDeltaU = fAnimOffsetU - fPrevOffsetU * fScaleU;
     float fDeltaV = fAnimOffsetV - fPrevOffsetV * fScaleV;

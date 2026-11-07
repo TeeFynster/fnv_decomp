@@ -14,7 +14,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00978ed0
-void Projectile::FUN_00978ed0(ActorCause* apCause)
+// src: COMMUNITY 0x00978ed0
+void Projectile::SetActorCause_00978ed0(ActorCause* apCause)
 {
     m_pActorCause.operator=(apCause);
 }
@@ -26,34 +27,39 @@ float Projectile::GetFirstLightParameter()
 }
 
 // @fnv 0x009795c0
-void BeamProjectile::FUN_009795c0(float value)
+// src: XBOX_PDB 0x009795c0
+void BeamProjectile::Projectile_SetRange(float value)
 {
     fImpulseRadiusSquared = value;
 }
 
 // @fnv 0x009abf10
-void BeamProjectile::FUN_009abf10(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: COMMUNITY 0x009abf10
+void BeamProjectile::RevertBGS_009abf10(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    Projectile::FUN_009c58e0(apLoadGameBuffer);
+    Projectile::RevertBGS_009c58e0(apLoadGameBuffer);
 }
 
 void BeamProjectile::LoadProjectile(BGSLoadFormBuffer* apLoadGameBuffer)
 {}
 
 // @fnv 0x009b4cf0
-void BeamProjectile::FUN_009b4cf0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009b4cf0
+void BeamProjectile::LoadGame_009b4cf0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     LoadProjectile(apLoadGameBuffer);
 }
 
 // @fnv 0x009bab00
-void BeamProjectile::FUN_009bab00(BGSLoadFormBuffer* apBuffer)
+// src: COMMUNITY 0x009bab00
+void BeamProjectile::InitLoadGame_009bab00(BGSLoadFormBuffer* apBuffer)
 {
     Projectile::InitLoadGame(apBuffer);
 }
 
 // @fnv 0x00979bb0
-void BeamProjectile::FUN_00979bb0(BGSSaveFormBuffer* apSaveGameBuffer)
+// src: XBOX_PDB 0x00979bb0
+void BeamProjectile::SaveGame_00979bb0(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     SaveProjectile(apSaveGameBuffer);
 }
@@ -61,22 +67,23 @@ void BeamProjectile::FUN_00979bb0(BGSSaveFormBuffer* apSaveGameBuffer)
 // Projectile.h lacks FUN_009c5870; this load helper still needs its local declaration.
 struct S5870_Holder
 {
-    void FUN_009c5870(BGSLoadFormBuffer*);
+    void Projectile_FinishLoadGame(BGSLoadFormBuffer*);
 };
 // @fnv 0x009abef0
-void BeamProjectile::FUN_009abef0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009abef0
+void BeamProjectile::FinishLoadGame_009abef0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    ((S5870_Holder*)this)->FUN_009c5870(apLoadGameBuffer);
+    ((S5870_Holder*)this)->Projectile_FinishLoadGame(apLoadGameBuffer);
 }
 
-bool __cdecl FUN_0043b300(NiRTTI const*, NiAVObject*);
+bool __cdecl NiObject_IsKindOf(NiRTTI const*, NiAVObject*);
 extern const NiRTTI g_01202680_arg1;
 extern const NiRTTI g_01202538_arg1;
 extern const NiRTTI g_01202508;
 extern NiPoint3 NiPoint3_ZERO;
 struct FUN_004d7d50_StandIn
 {
-    unsigned int FUN_004d7d50();
+    unsigned int NiParticleSystem_GetModifierCount();
     NiAVObject* GetByIndex(unsigned int i);
 };
 struct CtlV
@@ -133,7 +140,7 @@ struct GeometryVertexBuffer
 {
     int a, b, c;
     GeometryVertexBuffer();
-    void FUN_00534570(unsigned int, NiPoint3&);
+    void NiGeometryDataIteratorNiPoint3_Get(unsigned int, NiPoint3&);
     void SetVertex(unsigned int, NiPoint3 const&);
 };
 struct FUN_0047d370_shell
@@ -146,27 +153,28 @@ struct BeamPair
 };
 // Scales a NiAVObject's bound radius and center by scale, then scales child effect or geometry vertex data depending on the object's type.
 // @fnv 0x009795e0
-void BeamProjectile::FUN_009795e0(NiAVObject* apObject, float scale)
+// src: COMMUNITY 0x009795e0
+void BeamProjectile::ScaleBeamGeometryLength(NiAVObject* apObject, float scale)
 {
     if (apObject)
     {
         ((NiTriShape*)apObject)->GetSourceFilesFromForm()->m_fRadius *= scale;
-        ((NiTriShape*)apObject)->GetSourceFilesFromForm()->m_kCenter.FUN_00439180(scale);
+        ((NiTriShape*)apObject)->GetSourceFilesFromForm()->m_kCenter.ScaleComponents(scale);
         NiGeometryData* data = ((NiGeometry*)apObject)->GetModelData();
         if (data)
         {
-            if (FUN_0043b300(&g_01202680_arg1, (NiAVObject*)data))
+            if (NiObject_IsKindOf(&g_01202680_arg1, (NiAVObject*)data))
             {
-                if (FUN_0043b300(&g_01202538_arg1, apObject))
+                if (NiObject_IsKindOf(&g_01202538_arg1, apObject))
                 {
                     FUN_004d7d50_StandIn* node = (FUN_004d7d50_StandIn*)apObject;
-                    for (unsigned int i = 0; i < node->FUN_004d7d50(); i++)
+                    for (unsigned int i = 0; i < node->NiParticleSystem_GetModifierCount(); i++)
                     {
                         NiAVObject* child = node->GetByIndex(i);
-                        if (FUN_0043b300(&g_01202508, child))
+                        if (NiObject_IsKindOf(&g_01202508, child))
                         {
                             TESGrass* effect = (TESGrass*)child;
-                            ((EffectSetting*)effect)->FUN_004ee4b0(effect->TESGrass::GetLowestAllowedSlope() * scale);
+                            ((EffectSetting*)effect)->BSShaderProperty_SetDepthBias(effect->TESGrass::GetLowestAllowedSlope() * scale);
                         }
                     }
                 }
@@ -178,15 +186,15 @@ void BeamProjectile::FUN_009795e0(NiAVObject* apObject, float scale)
                     FUN_0047d370_shell* ctl = (FUN_0047d370_shell*)((CtlV*)data)->GetNext();
                     if (data->IsGeometryDataStreamable(true))
                     {
-                        data->FUN_00a67410(vertexMap);
+                        data->NiGeometryData_GetVerticesIterator(vertexMap);
                         for (int iVertex = 0; iVertex < ctl->FUN_0047d370(); iVertex++)
                         {
                             BeamVertex vertex = *(const BeamVertex*)&NiPoint3_ZERO;
-                            vertexMap.FUN_00534570(iVertex, (NiPoint3&)vertex);
+                            vertexMap.NiGeometryDataIteratorNiPoint3_Get(iVertex, (NiPoint3&)vertex);
                             vertex.y *= scale;
                             vertexMap.SetVertex(iVertex, (const NiPoint3&)vertex);
                         }
-                        data->FUN_00a673d0();
+                        data->NiGeometryData_UnlockPackedVertexData();
                     }
                 }
             }
@@ -204,15 +212,15 @@ void BeamProjectile::FUN_009795e0(NiAVObject* apObject, float scale)
 
 struct FUN_005de0a0_shell
 {
-    void FUN_005de0a0(int, int);
+    void Projectile_SetFlag(int, int);
 };
 struct FUN_009bda10_shell : FUN_005de0a0_shell
 {
-    void FUN_009bda10();
+    void Projectile_Initialize();
 };
 struct FUN_005bfbd0_Class
 {
-    void FUN_005bfbd0(float);
+    void FOHUDEffectManager_SetBlurIntensityHUD(float);
 };
 struct TargetObject : FUN_005bfbd0_Class
 {
@@ -222,20 +230,21 @@ struct HandleField
     operator TargetObject*();
 };
 // @fnv 0x00979280
-void __thiscall BeamProjectile::FUN_00979280()
+// src: XBOX_PDB 0x00979280
+void __thiscall BeamProjectile::Initialize_00979280()
 {
-    ((FUN_005de0a0_shell*)this)->FUN_005de0a0(0x10, 0);
-    ((FUN_005de0a0_shell*)this)->FUN_005de0a0(1, 1);
-    ((FUN_005de0a0_shell*)this)->FUN_005de0a0(2, 0);
-    ((FUN_005de0a0_shell*)this)->FUN_005de0a0(8, 1);
-    ((FUN_005de0a0_shell*)this)->FUN_005de0a0(0x20, 1);
-    ((FUN_005de0a0_shell*)this)->FUN_005de0a0(0x100, 1);
-    ((FUN_005de0a0_shell*)this)->FUN_005de0a0(0x80, 1);
-    ((FUN_005de0a0_shell*)this)->FUN_005de0a0(0x2000, 1);
-    ((FUN_009bda10_shell*)this)->FUN_009bda10();
+    ((FUN_005de0a0_shell*)this)->Projectile_SetFlag(0x10, 0);
+    ((FUN_005de0a0_shell*)this)->Projectile_SetFlag(1, 1);
+    ((FUN_005de0a0_shell*)this)->Projectile_SetFlag(2, 0);
+    ((FUN_005de0a0_shell*)this)->Projectile_SetFlag(8, 1);
+    ((FUN_005de0a0_shell*)this)->Projectile_SetFlag(0x20, 1);
+    ((FUN_005de0a0_shell*)this)->Projectile_SetFlag(0x100, 1);
+    ((FUN_005de0a0_shell*)this)->Projectile_SetFlag(0x80, 1);
+    ((FUN_005de0a0_shell*)this)->Projectile_SetFlag(0x2000, 1);
+    ((FUN_009bda10_shell*)this)->Projectile_Initialize();
     if (*(HandleField*)((char*)this + 0x150))
     {
-        ((TargetObject*)*(HandleField*)((char*)this + 0x150))->FUN_005bfbd0(GetFirstLightParameter());
+        ((TargetObject*)*(HandleField*)((char*)this + 0x150))->FOHUDEffectManager_SetBlurIntensityHUD(GetFirstLightParameter());
     }
 }
 
@@ -248,18 +257,18 @@ struct Form
 };
 struct Reference
 {
-    Descriptor* FUN_00511840(int);
+    Descriptor* TESSound_GetFilename(int);
 };
 struct Base
 {
-    bool FUN_004fdf20();
-    Reference* FUN_00586150();
+    bool GetCanTurnOff();
+    Reference* CombatController_GetCombatState();
 };
 struct SoundManager
 {
-    BSSoundHandle FUN_00ad7480(Descriptor*, Reference*);
+    BSSoundHandle BSAudio_GetSoundHandleByFilename(Descriptor*, Reference*);
 };
-SoundManager* FUN_00453a70();
+SoundManager* BSAudio_QInstance();
 struct Controller
 {
     virtual void method0();
@@ -745,31 +754,32 @@ struct BeamEffect
     int unkE8, unkEC, unkF0, unkF4, unkF8;
     Actor* actor;
     Base* FUN_004181e0();
-    bool FUN_00444d00(int);
+    bool Projectile_IsFlagSet(int);
     void StopSound();
-    void FUN_005de0a0(int, bool);
-    Form* FUN_00567790();
+    void Projectile_SetFlag(int, bool);
+    Form* TESObjectREFR_GetOwner();
     bool IsFightReactionAllowed(int, Actor*, Form*);
-    bool FUN_009c43e0(int, bool);
+    bool Projectile_DisarmPlacedExplosives(int, bool);
 };
 // @fnv 0x009c43e0
-bool BeamEffect::FUN_009c43e0(int value, bool silent)
+// src: COMMUNITY 0x009c43e0
+bool BeamEffect::Projectile_DisarmPlacedExplosives(int value, bool silent)
 {
     bool result = false;
-    if (FUN_004181e0()->FUN_004fdf20() && !FUN_00444d00(0x200))
+    if (FUN_004181e0()->GetCanTurnOff() && !Projectile_IsFlagSet(0x200))
     {
         StopSound();
         if (!silent)
         {
-            Reference* owner = FUN_004181e0()->FUN_00586150();
+            Reference* owner = FUN_004181e0()->CombatController_GetCombatState();
             if (owner)
             {
-                BSSoundHandle sound = FUN_00453a70()->FUN_00ad7480(owner->FUN_00511840(0x4102), owner);
+                BSSoundHandle sound = BSAudio_QInstance()->BSAudio_GetSoundHandleByFilename(owner->TESSound_GetFilename(0x4102), owner);
                 sound.SetPosition(GetScene());
                 sound.Play(false);
             }
         }
-        FUN_005de0a0(0x200, true);
+        Projectile_SetFlag(0x200, true);
         {
             Form* container;
             {
@@ -779,7 +789,7 @@ bool BeamEffect::FUN_009c43e0(int value, bool silent)
                     shooter = actor;
                 else
                 {
-                    Form* parent = FUN_00567790();
+                    Form* parent = TESObjectREFR_GetOwner();
                     if (parent)
                     {
                         int iParentType = parent->FUN_00401170();
@@ -791,8 +801,8 @@ bool BeamEffect::FUN_009c43e0(int value, bool silent)
                     (lifetime != 3.4028234663852886e+38 || IsFightReactionAllowed(value, shooter, container)))
                 {
                     FUN_004d5c60(11);
-                    if (*DAT_011cecdc.FUN_0043d4d0() > 0)
-                        DAT_011dea3c->Action(*DAT_011cecdc.FUN_0043d4d0());
+                    if (*DAT_011cecdc.Setting_Int() > 0)
+                        DAT_011dea3c->Action(*DAT_011cecdc.Setting_Int());
                 }
             }
         }
@@ -876,7 +886,7 @@ struct S_00979140_Node
     virtual void vf0b0();
     virtual void vf0b4();
     virtual void vfb8(S_00979140_UpdateData* data);
-    const S_00979140_Mat3& FUN_00461130() const;
+    const S_00979140_Mat3& NiAVObject_GetWorldRotate() const;
 };
 
 struct S_00979140_Holder
@@ -1017,17 +1027,18 @@ struct S_00979140_Holder
 
 
 // @fnv 0x00979140
-void BeamProjectile::FUN_00979140()
+// src: COMMUNITY 0x00979140
+void BeamProjectile::Process3D()
 {
     S_00979140_Node* node2 = (S_00979140_Node*)GetNiNode();
     if (node2)
     {
-        S_00979140_Node* other = ((Actor*)this)->FUN_00874480() ? ((S_00979140_Holder*)((Actor*)this)->FUN_00874480())->vf20c() : 0;
+        S_00979140_Node* other = ((Actor*)this)->Projectile_GetShooter() ? ((S_00979140_Holder*)((Actor*)this)->Projectile_GetShooter())->vf20c() : 0;
         if (other)
         {
             S_00979140_UpdateData data(0.0f, false, false);
             node2->vfb8(&data);
-            *(S_00979140_Mat3*)&m_kImpactTransform = ((S_00979140_Node*)GetNiNode())->FUN_00461130().FUN_0043f8d0(other->FUN_00461130().FUN_004b45b0());
+            *(S_00979140_Mat3*)&m_kImpactTransform = ((S_00979140_Node*)GetNiNode())->NiAVObject_GetWorldRotate().FUN_0043f8d0(other->NiAVObject_GetWorldRotate().FUN_004b45b0());
         }
         float t2 = GetFirstLightParameter();
         if (t2 < 1.0)
@@ -1047,7 +1058,7 @@ struct FUN_00979510_sub88
 };
 struct FUN_00979510_obj
 {
-    void* FUN_00439ef0(float* out, void* x);
+    void* SubtractIntoVector(float* out, void* x);
 };
 struct FUN_00979510_res
 {
@@ -1056,7 +1067,8 @@ struct FUN_00979510_res
 unsigned char CanProjectileHit(void* a1, void* a4, void* self, void* r);
 
 // @fnv 0x00979510
-unsigned char BeamProjectile::FUN_00979510(void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
+// src: XBOX_PDB 0x00979510
+unsigned char BeamProjectile::AddImpact(void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
 {
     unsigned int unk04;
     unsigned int unk08;
@@ -1067,7 +1079,7 @@ unsigned char BeamProjectile::FUN_00979510(void* a1, void* a2, void* a3, void* a
         {
             if (((BeamHitHandler*)this)->ProcessHit(a1, a2, a3, a4, a5, a6))
             {
-                FUN_009795c0(((FUN_00979510_res*)((FUN_00979510_obj*)a2)->FUN_00439ef0(&fOut, ((const BeamProjectile*)this)->GetPos()))
+                Projectile_SetRange(((FUN_00979510_res*)((FUN_00979510_obj*)a2)->SubtractIntoVector(&fOut, ((const BeamProjectile*)this)->GetPos()))
                                        ->FUN_00457990());
                 return 1;
             }
@@ -1081,8 +1093,8 @@ struct Cursor
     float m_00;
     float m_04;
     float m_08;
-    void FUN_00534550();
-    void FUN_00534570(int index, BeamVertex* out);
+    void NiTConvertingStrideIterator_NiTConvertingStrideIterator();
+    void NiGeometryDataIteratorNiPoint3_Get(int index, BeamVertex* out);
 };
 
 struct Holder
@@ -1131,25 +1143,26 @@ extern char DAT_012024e0;
 extern char DAT_01202508;
 extern BeamVertex DAT_011f426c;
 
-unsigned char __cdecl FUN_0043b300(const void* typeDesc, const void* obj);
+unsigned char __cdecl NiObject_IsKindOf(const void* typeDesc, const void* obj);
 
 
 // @fnv 0x00979840
-float BeamProjectile::FUN_00979840(NiGeometry* arg)
+// src: COMMUNITY 0x00979840
+float BeamProjectile::FindBeamGeometryLength(NiGeometry* arg)
 {
     NiGeometryData* actor = arg->GetModelData();
     float best = 0.0f;
     if (actor != 0)
     {
-        if (FUN_0043b300(&DAT_01202558, actor))
+        if (NiObject_IsKindOf(&DAT_01202558, actor))
         {
-            if (FUN_0043b300(&DAT_012024e0, arg))
+            if (NiObject_IsKindOf(&DAT_012024e0, arg))
             {
                 FUN_004d7d50_StandIn* owner = (FUN_004d7d50_StandIn*)arg;
-                for (unsigned int i = 0; best == 0.0f && i < owner->FUN_004d7d50(); ++i)
+                for (unsigned int i = 0; best == 0.0f && i < owner->NiParticleSystem_GetModifierCount(); ++i)
                 {
                     NiAVObject* item = owner->GetByIndex(i);
-                    if (FUN_0043b300(&DAT_01202508, item))
+                    if (NiObject_IsKindOf(&DAT_01202508, item))
                     {
                         TESGrass* p = (TESGrass*)item;
                         best = p->TESGrass::GetLowestAllowedSlope();
@@ -1163,21 +1176,21 @@ float BeamProjectile::FUN_00979840(NiGeometry* arg)
             {
                 {
                     Cursor c;
-                    c.FUN_00534550();
+                    c.NiTConvertingStrideIterator_NiTConvertingStrideIterator();
                     Holder* bag = ((Holder*)((CtlV*)actor)->GetNext());
                     if (actor->IsGeometryDataStreamable(true))
                     {
                         for (int i = 0; i < bag->FUN_0047d370(); ++i)
                         {
                             BeamVertex vecTmp = DAT_011f426c;
-                            actor->FUN_00a67410((GeometryVertexBuffer&)c);
-                            c.FUN_00534570(i, &vecTmp);
+                            actor->NiGeometryData_GetVerticesIterator((GeometryVertexBuffer&)c);
+                            c.NiGeometryDataIteratorNiPoint3_Get(i, &vecTmp);
                             if (best < vecTmp.y)
                             {
                                 best = vecTmp.y;
                             }
                         }
-                        actor->FUN_00a673d0();
+                        actor->NiGeometryData_UnlockPackedVertexData();
                     }
                 }
             }
@@ -1202,7 +1215,7 @@ done:
 struct S_00979a70_Vec3
 {
     float x, y, z;
-    void FUN_00439180(float s);
+    void ScaleComponents(float s);
 };
 
 struct S_00979a70_Obj;
@@ -1219,13 +1232,13 @@ struct S_00979a70_Obj
     virtual void v1();
     virtual void v2();
     virtual S_00979a70_Group* v3();
-    S_00979a70_Vec3* FUN_0043c490();
-    void FUN_00440460(S_00979a70_Vec3* v);
+    S_00979a70_Vec3* GetTranslate_0043c490();
+    void NiAVObject_SetTranslate(S_00979a70_Vec3* v);
 };
 
 extern int DAT_011f4acc;
 extern const double DAT_01012060;
-bool __cdecl FUN_0043b300(const void* rtti, S_00979a70_Obj* obj);
+bool __cdecl NiObject_IsKindOf(const void* rtti, S_00979a70_Obj* obj);
 
 
 // Scales node's vector by a/b when b exceeds DAT_01012060, then scales the node or recurses into its children.
@@ -1237,18 +1250,18 @@ void BeamProjectile::ScaleNode(NiAVObject* node, float fScale, float fDivisor)
         if (fDivisor > DAT_01012060)
         {
             float s = fScale / fDivisor;
-            S_00979a70_Vec3 v = *((S_00979a70_Obj*)node)->FUN_0043c490();
-            v.FUN_00439180(s);
-            ((S_00979a70_Obj*)node)->FUN_00440460(&v);
+            S_00979a70_Vec3 v = *((S_00979a70_Obj*)node)->GetTranslate_0043c490();
+            v.ScaleComponents(s);
+            ((S_00979a70_Obj*)node)->NiAVObject_SetTranslate(&v);
         }
-        if (FUN_0043b300(&DAT_011f4acc, (S_00979a70_Obj*)node))
+        if (NiObject_IsKindOf(&DAT_011f4acc, (S_00979a70_Obj*)node))
         {
             S_00979a70_Obj* p = (S_00979a70_Obj*)node;
-            float den = (fDivisor > DAT_01012060) ? fDivisor : FUN_00979840((NiAVObject*)p);
+            float den = (fDivisor > DAT_01012060) ? fDivisor : FindBeamGeometryLength((NiAVObject*)p);
             if (den != DAT_01012060)
             {
                 float r = fScale / den;
-                FUN_009795e0((NiAVObject*)p, r);
+                ScaleBeamGeometryLength((NiAVObject*)p, r);
             }
         }
         else
@@ -1280,8 +1293,8 @@ struct S9b8b10_Sub88
 struct S9b8b10_Manager
 {
     void* FUN_00441110();
-    void* FUN_007af430();
-    void FUN_009c8b90(int);
+    void* BGSSaveFormBuffer_GetForm();
+    void VATS_SetFirstProjectile(int);
     void SetValue(int);
 };
 extern S9b8b10_Manager DAT_011f2250;
@@ -1295,30 +1308,31 @@ struct FUN_009b8b10_cls
     unsigned char unk91[0x150 - 0x91];
     int m_i150;
 
-    bool FUN_009b8b10();
-    bool FUN_00444d00(int);
+    bool MissileProjectile_ProcessImpacts();
+    bool Projectile_IsFlagSet(int);
     float GetFirstLightParameter();
-    double FUN_009669c0();
+    double Projectile_GetSpeed();
     double GetE0();
-    float FUN_00508070();
+    float Projectile_GetDistanceMoved();
     bool ProcessHits();
-    void FUN_009bc8f0();
+    void Projectile_Kill();
     void HandleContactResponse();
-    void FUN_009b90b0();
+    void ProcessImpale();
     void HandleMissileImpact();
 };
 
 // @fnv 0x009b8b10
-bool FUN_009b8b10_cls::FUN_009b8b10()
+// src: XBOX_PDB 0x009b8b10
+bool FUN_009b8b10_cls::MissileProjectile_ProcessImpacts()
 {
     bool bResult = false;
     if (!m_b90 && !m_k88.FUN_008256d0())
     {
         bool bConditionMet = true;
-        if (FUN_00444d00(1))
+        if (Projectile_IsFlagSet(1))
         {
-            float fDiff = GetFirstLightParameter() - std::abs(FUN_009669c0() * DAT_0108fdd0);
-            bConditionMet = GetE0() <= DAT_01012060 || fDiff < FUN_00508070();
+            float fDiff = GetFirstLightParameter() - std::abs(Projectile_GetSpeed() * DAT_0108fdd0);
+            bConditionMet = GetE0() <= DAT_01012060 || fDiff < Projectile_GetDistanceMoved();
         }
         if (bConditionMet)
             bResult = ProcessHits();
@@ -1326,19 +1340,19 @@ bool FUN_009b8b10_cls::FUN_009b8b10()
     if (bResult)
     {
         if (DAT_011f2250.FUN_00441110() == this)
-            DAT_011f2250.FUN_009c8b90(0);
-        if (DAT_011f2250.FUN_007af430() == this)
+            DAT_011f2250.VATS_SetFirstProjectile(0);
+        if (DAT_011f2250.BGSSaveFormBuffer_GetForm() == this)
             DAT_011f2250.SetValue(0);
         switch (m_i150)
         {
         case 1:
-            FUN_009bc8f0();
+            Projectile_Kill();
             break;
         case 2:
             HandleContactResponse();
             break;
         case 3:
-            FUN_009b90b0();
+            ProcessImpale();
             break;
         case 4:
             HandleMissileImpact();

@@ -48,7 +48,7 @@ struct RefH
 
 struct FUN_008bc860_class
 {
-    bool FUN_008bc860(Actor*);
+    bool Actor_CouldBeFollowing(Actor*);
 };
 
 struct FUN_0055d3b0_class
@@ -66,7 +66,8 @@ extern void** __fastcall _ref_006815c0(void*);
 extern void* __fastcall _ref_00726070(void*);
 
 // @fnv 0x009f0a80
-int EscortActorPackageData::FUN_009f0a80(Actor* apEscorter, void* apType)
+// src: COMMUNITY 0x009f0a80
+int EscortActorPackageData::GetNumEscortedActorsOfType(Actor* apEscorter, void* apType)
 {
     void* pNode;
     int iCount;
@@ -78,7 +79,7 @@ int EscortActorPackageData::FUN_009f0a80(Actor* apEscorter, void* apType)
         pNode = _ref_00726070(pNode);
         if (pactor)
         {
-            if (((RefH*)pactor)->IsDeleted() || !((FUN_008bc860_class*)pactor)->FUN_008bc860(apEscorter))
+            if (((RefH*)pactor)->IsDeleted() || !((FUN_008bc860_class*)pactor)->Actor_CouldBeFollowing(apEscorter))
             {
                 ((ListStandin*)&m_kActorList)->_ref_00905330(pactor);
                 if (!((ListStandin*)&m_kActorList)->_ref_008256d0())
@@ -113,7 +114,7 @@ void EscortActorPackageData::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
     apSaveGameBuffer->SerializeFormData(pPackage, 0);
 
     unsigned int isaveGameCount = 0;
-    unsigned int isaveGameBufferPos = apSaveGameBuffer->FUN_00865f20();
+    unsigned int isaveGameBufferPos = apSaveGameBuffer->StartVariableSizedValue();
     void* pCurrentElementNext = (void*)&m_kActorList;
     while (pCurrentElementNext)
     {
@@ -125,7 +126,7 @@ void EscortActorPackageData::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
         }
         pCurrentElementNext = _ref_00726070(pCurrentElementNext);
     }
-    apSaveGameBuffer->FUN_00865ff0(isaveGameCount, isaveGameBufferPos);
+    apSaveGameBuffer->SaveVariableSizedValue_00865ff0(isaveGameCount, isaveGameBufferPos);
 }
 
 

@@ -17,8 +17,8 @@ public:
 
     void SetChildren(hkpConvexShape** children, int numChildren) throw();
     void UpdateCachedAabb(bool useCachedAabb) throw();
-    void FUN_00c90360(hkStatisticsCollector* collector, int* cls);
-    void FUN_00d5e480(hkStatisticsCollector* collector, int cls);
+    void hkReferencedObject_calcContentStatistics(hkStatisticsCollector* collector, int* cls);
+    void calcContentStatistics_00d5e480(hkStatisticsCollector* collector, int cls);
 
     union
     {

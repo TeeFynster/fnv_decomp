@@ -69,8 +69,8 @@ struct NiTimeControllerViewerStrings : NiTimeController
     void WriteControllerStrings(StrArr*);
 };
 extern const char* g_011f36bc_arg1;
-extern char* __cdecl FUN_00a7d330(const char*);
-extern "C" char* __cdecl FUN_00a7d370(const char*, int);
+extern char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+extern "C" char* __cdecl NiGetViewerString(const char*, int);
 struct NiInterpControllerViewerStrings : NiTimeControllerViewerStrings
 {
     void WriteManagerControlledFlag(StrArr*);
@@ -80,7 +80,7 @@ struct NiInterpControllerViewerStrings : NiTimeControllerViewerStrings
 void NiInterpControllerViewerStrings::WriteManagerControlledFlag(StrArr* stream)
 {
     WriteControllerStrings(stream);
-    char* value = FUN_00a7d330(g_011f36bc_arg1);
+    char* value = NiViewerStrings_NiGetViewerString_Title(g_011f36bc_arg1);
     unsigned int index = stream->m_usSize;
     if (index >= stream->m_usMaxSize)
     {
@@ -88,7 +88,7 @@ void NiInterpControllerViewerStrings::WriteManagerControlledFlag(StrArr* stream)
     }
     stream->SetAt(index, &value);
     *(unsigned char*)&value = (m_uiObjectFlags >> 5) & 1;
-    value = FUN_00a7d370("IsManagerControlled", *(int*)&value);
+    value = NiGetViewerString("IsManagerControlled", *(int*)&value);
     index = stream->m_usSize;
     if (index >= stream->m_usMaxSize)
     {

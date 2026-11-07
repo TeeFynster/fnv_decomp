@@ -44,7 +44,8 @@ inline NiTransform::NiTransform() {}
 extern void* g_011ff8d8;
 
 // @fnv 0x00b887b0
-void* __cdecl FUN_00b887b0()
+// src: COMMUNITY 0x00b887b0
+void* __cdecl SkyShader_GetRTTI()
 {
     return &g_011ff8d8;
 }
@@ -54,7 +55,8 @@ extern void __cdecl _FUN_00b98070(int, int);
 
 
 // @fnv 0x00b8a1a0
-void __stdcall FUN_00b8a1a0(const NiPropertyState* apState)
+// src: COMMUNITY 0x00b8a1a0
+void __stdcall SkyShader_PostGeometry(const NiPropertyState* apState)
 {
     void* pkSkyProp = apState->m_aspProps[3];
     int val = *(int*)((char*)pkSkyProp + 0x8c);
@@ -387,7 +389,8 @@ struct Holder_Stand
 };
 
 // @fnv 0x00b89cc0
-void __stdcall FUN_00b89cc0(Holder_Stand* apHolder)
+// src: COMMUNITY 0x00b89cc0
+void __stdcall SkyShader_SetupGeometryTextures(Holder_Stand* apHolder)
 {
     Mgr_Stand* mgr = DAT_0126f74c;
     Node_Stand* esi = apHolder->m_0c;
@@ -506,8 +509,8 @@ FUN_00b8a1f0::FUN_00b8a1f0()
 }  // namespace fnv_00b8a1f0
 
 extern void* g_011f9508;
-void* __cdecl FUN_00e76700(void*, int, int);
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl NiDX9ShaderDeclaration_Create(void*, int, int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 struct SpawnedMgr
 {
@@ -564,7 +567,7 @@ struct SpawnedObject
     SpawnedObject();
     void* operator new(unsigned int sz)
     {
-        return FUN_00aa13e0(sz);
+        return Object_DispatchCommandFour(sz);
     }
     void operator delete(void*)
     {}
@@ -646,9 +649,10 @@ struct SpawnedObject
 };
 
 // @fnv 0x00b8a390
-SpawnedObject* __cdecl FUN_00b8a390()
+// src: COMMUNITY 0x00b8a390
+SpawnedObject* __cdecl SkyShader_CreateShader()
 {
-    SpawnedMgr* mgr = (SpawnedMgr*)FUN_00e76700(g_011f9508, 3, 1);
+    SpawnedMgr* mgr = (SpawnedMgr*)NiDX9ShaderDeclaration_Create(g_011f9508, 3, 1);
     mgr->v35(0, 0, 0, 2, 0);
     mgr->v35(1, 5, 4, 3, 0);
     mgr->v35(2, 7, 5, 1, 0);
@@ -928,7 +932,7 @@ struct ClusterObj
                 m_44->IncRefCount();
         }
     }
-    void __thiscall FUN_00e802b0(int idx, StageReturn* s);
+    void __thiscall NiD3DPass_SetStage(int idx, StageReturn* s);
 };
 
 struct PassSlot
@@ -1108,7 +1112,7 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        pPass6c->FUN_00e802b0(pPass6c->m_14, stage.m_pObject);
+        pPass6c->NiD3DPass_SetStage(pPass6c->m_14, stage.m_pObject);
 
         AddProp(pPass6c, 0x1b, 1);
 
@@ -1135,7 +1139,7 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        pPass8c->FUN_00e802b0(pPass8c->m_14, stage.m_pObject);
+        pPass8c->NiD3DPass_SetStage(pPass8c->m_14, stage.m_pObject);
 
         AddProp(pPass8c, 0xf, 0);
 
@@ -1166,7 +1170,7 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        pPass90->FUN_00e802b0(pPass90->m_14, stage.m_pObject);
+        pPass90->NiD3DPass_SetStage(pPass90->m_14, stage.m_pObject);
 
         AddProp(pPass90, 0x1b, 1);
 
@@ -1199,12 +1203,12 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        pPass94->FUN_00e802b0(pPass94->m_14, stage.m_pObject);
+        pPass94->NiD3DPass_SetStage(pPass94->m_14, stage.m_pObject);
 
         AssignStageFromPool(stage.m_pObject);
         ConfigureBeamStage(stage.m_pObject, 1, 3, 2, 1);
 
-        pPass94->FUN_00e802b0(pPass94->m_14, stage.m_pObject);
+        pPass94->NiD3DPass_SetStage(pPass94->m_14, stage.m_pObject);
 
         AddProp(pPass94, 0xf, 0);
 
@@ -1237,12 +1241,12 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        pPass70->FUN_00e802b0(pPass70->m_14, stage.m_pObject);
+        pPass70->NiD3DPass_SetStage(pPass70->m_14, stage.m_pObject);
 
         AssignStageFromPool(stage.m_pObject);
         ConfigureBeamStage(stage.m_pObject, 1, 3, 2, 1);
 
-        pPass70->FUN_00e802b0(pPass70->m_14, stage.m_pObject);
+        pPass70->NiD3DPass_SetStage(pPass70->m_14, stage.m_pObject);
 
         AddProp(pPass70, 7, 0);
 
@@ -1275,7 +1279,7 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        pPass78->FUN_00e802b0(pPass78->m_14, stage.m_pObject);
+        pPass78->NiD3DPass_SetStage(pPass78->m_14, stage.m_pObject);
 
         AddProp(pPass78, 0xe, 0);
 
@@ -1302,12 +1306,12 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        pPass7c->FUN_00e802b0(pPass7c->m_14, stage.m_pObject);
+        pPass7c->NiD3DPass_SetStage(pPass7c->m_14, stage.m_pObject);
 
         AssignStageFromPool(stage.m_pObject);
         ConfigureBeamStage(stage.m_pObject, 1, 3, 2, 1);
 
-        pPass7c->FUN_00e802b0(pPass7c->m_14, stage.m_pObject);
+        pPass7c->NiD3DPass_SetStage(pPass7c->m_14, stage.m_pObject);
 
         AddProp(pPass7c, 0xe, 0);
 
@@ -1333,12 +1337,12 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        c->FUN_00e802b0(c->m_14, stage.m_pObject);
+        c->NiD3DPass_SetStage(c->m_14, stage.m_pObject);
 
         AssignStageFromPool(stage.m_pObject);
         ConfigureBeamStage(stage.m_pObject, 1, 3, 2, 1);
 
-        c->FUN_00e802b0(c->m_14, stage.m_pObject);
+        c->NiD3DPass_SetStage(c->m_14, stage.m_pObject);
 
         AddProp(c, 0xe, 0);
 
@@ -1364,12 +1368,12 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        pPass84->FUN_00e802b0(pPass84->m_14, stage.m_pObject);
+        pPass84->NiD3DPass_SetStage(pPass84->m_14, stage.m_pObject);
 
         AssignStageFromPool(stage.m_pObject);
         ConfigureBeamStage(stage.m_pObject, 1, 3, 2, 1);
 
-        pPass84->FUN_00e802b0(pPass84->m_14, stage.m_pObject);
+        pPass84->NiD3DPass_SetStage(pPass84->m_14, stage.m_pObject);
 
         AddProp(pPass84, 0xe, 0);
 
@@ -1395,12 +1399,12 @@ bool ShaderPassBuilder::InitPasses()
 
         ConfigureBeamStage(stage.m_pObject, 0, 3, 2, 1);
 
-        val->FUN_00e802b0(val->m_14, stage.m_pObject);
+        val->NiD3DPass_SetStage(val->m_14, stage.m_pObject);
 
         AssignStageFromPool(stage.m_pObject);
         ConfigureBeamStage(stage.m_pObject, 1, 3, 2, 1);
 
-        val->FUN_00e802b0(val->m_14, stage.m_pObject);
+        val->NiD3DPass_SetStage(val->m_14, stage.m_pObject);
 
         AddProp(val, 0xf, 1);
 
@@ -1552,13 +1556,13 @@ void ConstantMapOwner::CreateShaderConstantMaps()
 
 struct Pool_b899a0
 {
-    void* __thiscall FUN_00aa3e40(unsigned int size);
+    void* __thiscall Game_DoHeapAlloc(unsigned int size);
     void __thiscall FUN_00aa3e90(void* p);
 };
 extern Pool_b899a0 DAT_011f6238;
 inline void* operator new[](unsigned int size, Pool_b899a0& pool)
 {
-    return pool.FUN_00aa3e40(size);
+    return pool.Game_DoHeapAlloc(size);
 }
 inline void operator delete[](void* p, Pool_b899a0& pool)
 {
@@ -1599,7 +1603,7 @@ struct Shape_b899a0 : NiRefObject
                  unsigned int a7, unsigned short a8, unsigned short* indices);
     void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     void operator delete(void*)
     {}
@@ -1736,14 +1740,15 @@ struct Shell_b899a0
 };
 // Allocates a 4-vertex quad shape with two triangles, sets its bound to origin with radius 1000, and stores it in rspOut.
 // @fnv 0x00b899a0
-void __cdecl FUN_00b899a0(ShapePtr_b899a0& rspOut)
+// src: COMMUNITY 0x00b899a0
+void __cdecl SkyShader_CreateSkyQuad(ShapePtr_b899a0& rspOut)
 {
-    Pt3_b899a0* pkVerts = (Pt3_b899a0*)DAT_011f6238.FUN_00aa3e40(0x30);
+    Pt3_b899a0* pkVerts = (Pt3_b899a0*)DAT_011f6238.Game_DoHeapAlloc(0x30);
     pkVerts[0] = Pt3_b899a0(-1.0f, -1.0f, 0.999999f);
     pkVerts[1] = Pt3_b899a0(1.0f, -1.0f, 0.999999f);
     pkVerts[2] = Pt3_b899a0(1.0f, 1.0f, 0.999999f);
     pkVerts[3] = Pt3_b899a0(-1.0f, 1.0f, 0.999999f);
-    unsigned short* pusTris = (unsigned short*)DAT_011f6238.FUN_00aa3e40(0xc);
+    unsigned short* pusTris = (unsigned short*)DAT_011f6238.Game_DoHeapAlloc(0xc);
     pusTris[0] = 0;
     pusTris[1] = 1;
     pusTris[2] = 2;
@@ -1770,14 +1775,15 @@ void __cdecl FUN_00b899a0(ShapePtr_b899a0& rspOut)
 
 struct Shader447
 {
-    void FUN_00b874f0();
+    void LoadShaders();
     bool InitPasses();
-    bool FUN_00b89960();
+    bool SkyShader_ReloadShaders();
 };
 // @fnv 0x00b89960
-bool Shader447::FUN_00b89960()
+// src: COMMUNITY 0x00b89960
+bool Shader447::SkyShader_ReloadShaders()
 {
-    FUN_00b874f0();
+    LoadShaders();
     return InitPasses();
 }
 
@@ -1970,7 +1976,7 @@ struct Context
     int unk160;
     bool relative;
 };
-Context* __cdecl FUN_00b4f5d0();
+Context* __cdecl BSShaderManager_GetCurrentAccumulator();
 struct Property
 {
     int unk00;
@@ -2027,7 +2033,7 @@ struct RenderArg
 };
 struct Device
 {
-    void FUN_00e6fbb0(NiTransform*, int);
+    void NiDX9Renderer_SetModelTransform(NiTransform*, int);
 };
 struct Pass
 {
@@ -2177,11 +2183,12 @@ struct Shader
     float sVertexIndex;
     float strength;
     float setting;
-    void FUN_00b89d80(float);
+    void SkyShader_SetupGeometryConstants(float);
 };
 // Sets up transform and shader uniforms from a RenderArg, then dispatches the geometry to the first and second render passes and signals the end device.
 // @fnv 0x00b89d80
-void Shader::FUN_00b89d80(float apRenderArg)
+// src: COMMUNITY 0x00b89d80
+void Shader::SkyShader_SetupGeometryConstants(float apRenderArg)
 {
     Vec4& out8c8 = *(Vec4*)&DAT_011ff8c8;
     Vec4& out910 = *(Vec4*)&DAT_011ff910;
@@ -2195,7 +2202,7 @@ void Shader::FUN_00b89d80(float apRenderArg)
     RenderArg* pRenderArg = *(RenderArg**)&apRenderArg;
     void* skin = geometry->skin;
     Property* property = pRenderArg->property;
-    if (FUN_00b4f5d0()->relative)
+    if (BSShaderManager_GetCurrentAccumulator()->relative)
     {
         NiTransform tTransform;
         tTransform = *world;
@@ -2203,7 +2210,7 @@ void Shader::FUN_00b89d80(float apRenderArg)
         position.x -= DAT_011f95d8->position.x;
         position.y -= DAT_011f95d8->position.y;
         position.z -= DAT_011f95d8->position.z;
-        Camera* camera = FUN_00b4f5d0()->camera;
+        Camera* camera = BSShaderManager_GetCurrentAccumulator()->camera;
         if (camera)
         {
             position.x += camera->position.x;
@@ -2211,10 +2218,10 @@ void Shader::FUN_00b89d80(float apRenderArg)
             position.z += camera->position.z;
         }
         *reinterpret_cast<NiPoint3*>(&tTransform.m_Translate) = position;
-        device->FUN_00e6fbb0(&tTransform, 0);
+        device->NiDX9Renderer_SetModelTransform(&tTransform, 0);
     }
     else
-        device->FUN_00e6fbb0(world, 0);
+        device->NiDX9Renderer_SetModelTransform(world, 0);
     Vec4 value = DAT_011fa2a0;
     NiPoint3 tDelta;
     tDelta.x = value.x - DAT_011f474c.x;
@@ -2287,7 +2294,7 @@ void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 void __cdecl FUN_00be0c00(const char*, char*);
-int __cdecl FUN_00406d00(char*, int, const char*, ...);
+int __cdecl BSsprintf(char*, int, const char*, ...);
 extern float DAT_011ff8ac;
 extern float DAT_011ff8b0;
 struct SkyShader
@@ -2351,11 +2358,12 @@ struct SkyShader
     NiRefObject* m_e0;
     NiRefObject* FUN_00be0fe0(const char*, const char**, const char*, const char*);
     NiRefObject* FUN_00be1750(const char*, const char**, const char*, const char*);
-    void FUN_00b874f0();
+    void LoadShaders();
 };
 // Requests vertex and pixel shader objects for sky shader variants and stores the returned pointers in member fields.
 // @fnv 0x00b874f0
-void SkyShader::FUN_00b874f0()
+// src: XBOX_PDB 0x00b874f0
+void SkyShader::LoadShaders()
 {
     char compiledName[260];
     char sourceName[260];
@@ -2368,7 +2376,7 @@ void SkyShader::FUN_00b874f0()
     shader0[2] = 0;
     fnv_zlib_memset(shader0 + 3, 0, 64);
     FUN_00be0c00(shader0[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKY.vso");
+    BSsprintf(compiledName, 260, "SKY.vso");
     NiRefObject* next0 =
         FUN_00be0fe0(sourceName, shader0 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_98 != next0)
@@ -2387,7 +2395,7 @@ void SkyShader::FUN_00b874f0()
     shader1[4] = 0;
     fnv_zlib_memset(shader1 + 5, 0, 56);
     FUN_00be0c00(shader1[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYT.vso");
+    BSsprintf(compiledName, 260, "SKYT.vso");
     NiRefObject* next1 =
         FUN_00be0fe0(sourceName, shader1 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_9c != next1)
@@ -2408,7 +2416,7 @@ void SkyShader::FUN_00b874f0()
     shader2[6] = 0;
     fnv_zlib_memset(shader2 + 7, 0, 48);
     FUN_00be0c00(shader2[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYMM.vso");
+    BSsprintf(compiledName, 260, "SKYMM.vso");
     NiRefObject* next2 =
         FUN_00be0fe0(sourceName, shader2 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_a0 != next2)
@@ -2428,7 +2436,7 @@ void SkyShader::FUN_00b874f0()
     shader16[6] = 0;
     fnv_zlib_memset(shader16 + 7, 0, 48);
     FUN_00be0c00(shader16[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYSTARS.vso");
+    BSsprintf(compiledName, 260, "SKYSTARS.vso");
     NiRefObject* next3 =
         FUN_00be0fe0(sourceName, shader16 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_a8 != next3)
@@ -2447,7 +2455,7 @@ void SkyShader::FUN_00b874f0()
     shader4[4] = 0;
     fnv_zlib_memset(shader4 + 5, 0, 56);
     FUN_00be0c00(shader4[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYOCC.vso");
+    BSsprintf(compiledName, 260, "SKYOCC.vso");
     NiRefObject* next4 =
         FUN_00be0fe0(sourceName, shader4 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_ac != next4)
@@ -2468,7 +2476,7 @@ void SkyShader::FUN_00b874f0()
     shader5[6] = 0;
     fnv_zlib_memset(shader5 + 7, 0, 48);
     FUN_00be0c00(shader5[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYCLOUDS.vso");
+    BSsprintf(compiledName, 260, "SKYCLOUDS.vso");
     NiRefObject* next5 =
         FUN_00be0fe0(sourceName, shader5 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_b0 != next5)
@@ -2481,7 +2489,7 @@ void SkyShader::FUN_00b874f0()
     }
     const char* shader13[19] = {"sky\\v\\sky.v.hlsl", "HORIZFADE", 0, "TEX", 0, "CLOUDS", 0, 0, 0};
     FUN_00be0c00(shader5[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYCLOUDSFADE.vso");
+    BSsprintf(compiledName, 260, "SKYCLOUDSFADE.vso");
     NiRefObject* next6 =
         FUN_00be0fe0(sourceName, shader13 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_b4 != next6)
@@ -2498,7 +2506,7 @@ void SkyShader::FUN_00b874f0()
     shader7[2] = 0;
     fnv_zlib_memset(shader7 + 3, 0, 64);
     FUN_00be0c00(shader7[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKY.pso");
+    BSsprintf(compiledName, 260, "SKY.pso");
     NiRefObject* next7 =
         FUN_00be1750(sourceName, shader7 + 1, NiD3DGPUProgramCache::GetPixelShaderProfile(false), compiledName);
     if (m_c4 != next7)
@@ -2517,7 +2525,7 @@ void SkyShader::FUN_00b874f0()
     shader8[4] = 0;
     fnv_zlib_memset(shader8 + 5, 0, 56);
     FUN_00be0c00(shader8[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYTEX.pso");
+    BSsprintf(compiledName, 260, "SKYTEX.pso");
     NiRefObject* next8 =
         FUN_00be1750(sourceName, shader8 + 1, NiD3DGPUProgramCache::GetPixelShaderProfile(false), compiledName);
     if (m_c8 != next8)
@@ -2538,7 +2546,7 @@ void SkyShader::FUN_00b874f0()
     shader9[6] = 0;
     fnv_zlib_memset(shader9 + 7, 0, 48);
     FUN_00be0c00(shader8[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYTEXFADE.pso");
+    BSsprintf(compiledName, 260, "SKYTEXFADE.pso");
     NiRefObject* next9 =
         FUN_00be1750(sourceName, shader9 + 1, NiD3DGPUProgramCache::GetPixelShaderProfile(false), compiledName);
     if (m_cc != next9)
@@ -2558,7 +2566,7 @@ void SkyShader::FUN_00b874f0()
     shader10[4] = 0;
     fnv_zlib_memset(shader10 + 5, 0, 56);
     FUN_00be0c00(shader10[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYSUNOCCL.pso");
+    BSsprintf(compiledName, 260, "SKYSUNOCCL.pso");
     NiRefObject* next10 =
         FUN_00be1750(sourceName, shader10 + 1, NiD3DGPUProgramCache::GetPixelShaderProfile(false), compiledName);
     if (m_d0 != next10)
@@ -2577,7 +2585,7 @@ void SkyShader::FUN_00b874f0()
     shader11[4] = 0;
     fnv_zlib_memset(shader11 + 5, 0, 56);
     FUN_00be0c00(shader11[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYSHORIZFADE.pso");
+    BSsprintf(compiledName, 260, "SKYSHORIZFADE.pso");
     NiRefObject* next11 =
         FUN_00be1750(sourceName, shader11 + 1, NiD3DGPUProgramCache::GetPixelShaderProfile(false), compiledName);
     if (m_d4 != next11)
@@ -2598,7 +2606,7 @@ void SkyShader::FUN_00b874f0()
     shader12[6] = 0;
     fnv_zlib_memset(shader12 + 7, 0, 48);
     FUN_00be0c00(shader12[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYFAR.vso");
+    BSsprintf(compiledName, 260, "SKYFAR.vso");
     NiRefObject* next12 =
         FUN_00be0fe0(sourceName, shader12 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_b8 != next12)
@@ -2611,7 +2619,7 @@ void SkyShader::FUN_00b874f0()
     }
     const char* shader6[19] = {"sky\\v\\sky.v.hlsl", "DEPTH_VALUE", "0.999999", "SI", 0, "SI_CLOUDS", "", 0, 0};
     FUN_00be0c00(shader6[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYCLOUDSI.vso");
+    BSsprintf(compiledName, 260, "SKYCLOUDSI.vso");
     NiRefObject* next13 =
         FUN_00be0fe0(sourceName, shader6 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_bc != next13)
@@ -2630,7 +2638,7 @@ void SkyShader::FUN_00b874f0()
     shader14[4] = 0;
     fnv_zlib_memset(shader14 + 5, 0, 56);
     FUN_00be0c00(shader14[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYQUADSI.vso");
+    BSsprintf(compiledName, 260, "SKYQUADSI.vso");
     NiRefObject* next14 =
         FUN_00be0fe0(sourceName, shader14 + 1, NiD3DGPUProgramCache::GetVertexShaderProfile(), compiledName);
     if (m_c0 != next14)
@@ -2650,7 +2658,7 @@ void SkyShader::FUN_00b874f0()
     shader15[4] = 0;
     fnv_zlib_memset(shader15 + 5, 0, 56);
     FUN_00be0c00(shader15[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYSI.pso");
+    BSsprintf(compiledName, 260, "SKYSI.pso");
     NiRefObject* next15 =
         FUN_00be1750(sourceName, shader15 + 1, NiD3DGPUProgramCache::GetPixelShaderProfile(false), compiledName);
     if (m_e0 != next15)
@@ -2671,7 +2679,7 @@ void SkyShader::FUN_00b874f0()
     shader3[6] = 0;
     fnv_zlib_memset(shader3 + 7, 0, 48);
     FUN_00be0c00(shader3[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYSISUN.pso");
+    BSsprintf(compiledName, 260, "SKYSISUN.pso");
     NiRefObject* next16 =
         FUN_00be1750(sourceName, shader3 + 1, NiD3DGPUProgramCache::GetPixelShaderProfile(false), compiledName);
     if (m_d8 != next16)
@@ -2692,7 +2700,7 @@ void SkyShader::FUN_00b874f0()
     shader17[6] = 0;
     fnv_zlib_memset(shader17 + 7, 0, 48);
     FUN_00be0c00(shader17[0], sourceName);
-    FUN_00406d00(compiledName, 260, "SKYSICLOUDS.pso");
+    BSsprintf(compiledName, 260, "SKYSICLOUDS.pso");
     NiRefObject* next17 =
         FUN_00be1750(sourceName, shader17 + 1, NiD3DGPUProgramCache::GetPixelShaderProfile(false), compiledName);
     if (m_dc != next17)

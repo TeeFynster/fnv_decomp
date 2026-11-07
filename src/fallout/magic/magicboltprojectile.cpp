@@ -36,18 +36,20 @@ bool FUN_00811930_shell::IsNotDeleted() const
 extern int DAT_011ae61c;
 
 // @fnv 0x00811e00
-void FUN_00811e00(int value)
+// src: XBOX_PDB 0x00811e00
+void BoltShader_SetSubSegmentCount(int value)
 {
     DAT_011ae61c = value;
 }
 
 struct FUN_008133d0_shell
 {
-    void FUN_008133d0(int value);
+    void MagicBoltProjectile_SetState(int value);
 };
 
 // @fnv 0x008133d0
-void FUN_008133d0_shell::FUN_008133d0(int value)
+// src: XBOX_PDB 0x008133d0
+void FUN_008133d0_shell::MagicBoltProjectile_SetState(int value)
 {
     *(int*)((char*)this + 0xac) = value;
 }
@@ -369,7 +371,7 @@ struct ThisObj : SaveBaseObj
 void ThisObj::SaveAreaBoltData(int arg)
 {
     SaveBase(arg);
-    g_TESSaveLoadGame->FUN_008579b0(&unkAC, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&unkAC, 4);
     WriteData(&unk88, 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x30)
     {
@@ -377,7 +379,7 @@ void ThisObj::SaveAreaBoltData(int arg)
         WriteData(&pos4, 12);
         NiQuaternion rot;
         GetNode3D()->GetRot(&rot);
-        g_TESSaveLoadGame->FUN_008579b0(&rot, 16);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&rot, 16);
         float smooth5 = 0.0f;
         if (pathing)
             smooth5 = ((PathReq*)pathing)->GetSmoothingRandomness();
@@ -503,8 +505,8 @@ struct HUDEntry
     ~HUDEntry();
 };
 
-void __cdecl FUN_00bc1470(HUDNode* apRoot, HUDNode* apNode);
-void __cdecl FUN_0080fc90(float afValue);
+void __cdecl BoltShader_Stop(HUDNode* apRoot, HUDNode* apNode);
+void __cdecl _11DC778_Subtract(float afValue);
 
 struct HUDSetting
 {
@@ -605,13 +607,13 @@ struct FUN_00811e10 : HUDBase
 FUN_00811e10::~FUN_00811e10()
 {
     if (GetTarget() != g_pHUDPlayer)
-        FUN_0080fc90(*g_kHUDSetting.Float());
+        _11DC778_Subtract(*g_kHUDSetting.Float());
 
     HUDList* pList = g_kHUDProcessLists.GetOffset70Ptr();
     if (pList)
         pList->Remove(this);
 
-    FUN_00bc1470(spB4, spA8);
+    BoltShader_Stop(spB4, spA8);
     spA8 = 0;
     if (spB4)
     {
@@ -627,7 +629,7 @@ FUN_00811e10::~FUN_00811e10()
     while (pEntries)
     {
         HUDEntry* pNext = pEntries->pNext;
-        FUN_00bc1470(pEntries->m_pRootNode, pEntries->m_pController);
+        BoltShader_Stop(pEntries->m_pRootNode, pEntries->m_pController);
         pEntries->m_pController = 0;
         if (pEntries->m_pRootNode)
         {
@@ -664,7 +666,7 @@ struct BoltColor
     float r, g, b, a;
     BoltColor(float, float, float, float);
 };
-void* FUN_00aa13e0(unsigned int);
+void* Object_DispatchCommandFour(unsigned int);
 void FUN_00aa13f0(void*);
 struct BoltProperty
 {
@@ -672,7 +674,7 @@ struct BoltProperty
     BoltProperty();
     static void* operator new(unsigned int);
     static void operator delete(void*);
-    void FUN_00519230(bool, bool);
+    void BSXFlags_SetFlags(bool, bool);
 };
 struct BoltNode
 {
@@ -722,15 +724,15 @@ struct BoltNode
     BoltNode(int);
     static void* operator new(unsigned int);
     static void operator delete(void*);
-    void FUN_004f00e0(const BoltPoint&);
-    void FUN_00440460(const BoltPoint&);
+    void NiAVObject_SetWorldTranslate(const BoltPoint&);
+    void NiAVObject_SetTranslate(const BoltPoint&);
     BoltProperty* FUN_00a5bdd0(const char*);
     void FUN_00a5bc40(const char*, BoltProperty*);
-    void FUN_0043fa80(const BoltMatrix&);
+    void SetRotate_0043fa80(const BoltMatrix&);
 };
 __forceinline void* BoltNode::operator new(unsigned int n)
 {
-    return FUN_00aa13e0(n);
+    return Object_DispatchCommandFour(n);
 }
 __forceinline void BoltNode::operator delete(void* p)
 {
@@ -738,7 +740,7 @@ __forceinline void BoltNode::operator delete(void* p)
 }
 __forceinline void* BoltProperty::operator new(unsigned int n)
 {
-    return FUN_00aa13e0(n);
+    return Object_DispatchCommandFour(n);
 }
 __forceinline void BoltProperty::operator delete(void* p)
 {
@@ -746,41 +748,41 @@ __forceinline void BoltProperty::operator delete(void* p)
 }
 struct BoltFx
 {
-    void FUN_00803a70(int);
-    void FUN_00821620(float);
+    void BoltShaderProperty_SetNumBolts(int);
+    void BoltShaderProperty_SetBoltsRadius(float);
     void FUN_00507780(float);
     void SetBoltSmallWidth(float);
     void SetBoltGrowWidth(float);
     void SetArg(BoltColor);
     void SetData(BoltColor);
-    void FUN_00803b30(float);
+    void BoltShaderProperty_SetSegmentLength(float);
     void SetWhich(int);
-    void FUN_005077a0(float);
-    void FUN_00803b50(float);
-    void FUN_00803a50(bool);
-    void FUN_00bc2360();
+    void BoltShaderProperty_SetSegmentVariance(float);
+    void BoltShaderProperty_SetSubSegmentVariance(float);
+    void BoltShaderProperty_SetStartFromPoint(bool);
+    void BoltShaderProperty_InitSegmentData();
 };
 struct BoltNodePtr
 {
     BoltNode* ptr;
     void FUN_0066b0d0(BoltNode*);
-    BoltNode* FUN_00559450();
+    BoltNode* Modelloader_GetReferencedThis();
 };
 struct BoltFxPtr
 {
     BoltFx* ptr;
     void FUN_0066b0d0(BoltFx*);
-    BoltFx* FUN_00559450();
+    BoltFx* Modelloader_GetReferencedThis();
 };
 struct BoltSetting
 {
-    int* FUN_0043d4d0();
-    float* FUN_00403e20();
+    int* Setting_Int();
+    float* Setting_Float_00403e20();
 };
 extern BoltSetting DAT_011d186c, DAT_011d1628, DAT_011d1bec, DAT_011d1610, DAT_011d1b2c, DAT_011d18f0, DAT_011d1908,
     DAT_011d1be0, DAT_011d1cdc, DAT_011d19d8, DAT_011d1c4c, DAT_011d174c, DAT_011d1800, DAT_011d16c8, DAT_011d17c4;
-const char* FUN_00448a80();
-BoltFx* FUN_00bc18d0(BoltNode*, bool);
+const char* BSXFlags_Tag();
+BoltFx* BoltShader_Start(BoltNode*, bool);
 struct Bolt
 {
     virtual void v0();
@@ -963,39 +965,39 @@ struct Bolt
 void Bolt::InitEffect()
 {
     root.FUN_0066b0d0(new BoltNode(0));
-    root.FUN_00559450()->FUN_004f00e0(Position());
+    root.Modelloader_GetReferencedThis()->NiAVObject_SetWorldTranslate(Position());
     emitter.FUN_0066b0d0(new BoltNode(0));
-    emitter.FUN_00559450()->FUN_00440460(Position());
-    BoltProperty* property = emitter.FUN_00559450()->FUN_00a5bdd0(FUN_00448a80());
+    emitter.Modelloader_GetReferencedThis()->NiAVObject_SetTranslate(Position());
+    BoltProperty* property = emitter.Modelloader_GetReferencedThis()->FUN_00a5bdd0(BSXFlags_Tag());
     if (!property)
     {
         property = new BoltProperty;
-        emitter.FUN_00559450()->FUN_00a5bc40(FUN_00448a80(), property);
+        emitter.Modelloader_GetReferencedThis()->FUN_00a5bc40(BSXFlags_Tag(), property);
     }
-    property->FUN_00519230(true, true);
+    property->BSXFlags_SetFlags(true, true);
     effect.FUN_0066b0d0(0);
     BoltPoint rotation = FUN_00430830();
     BoltMatrix matrix2;
     matrix2.FUN_00a59660(rotation.z, rotation.x, rotation.y);
-    emitter.FUN_00559450()->FUN_0043fa80(matrix2);
-    effect.FUN_0066b0d0(FUN_00bc18d0(emitter.FUN_00559450(), true));
-    if (effect.FUN_00559450())
+    emitter.Modelloader_GetReferencedThis()->SetRotate_0043fa80(matrix2);
+    effect.FUN_0066b0d0(BoltShader_Start(emitter.Modelloader_GetReferencedThis(), true));
+    if (effect.Modelloader_GetReferencedThis())
     {
-        effect.FUN_00559450()->FUN_00803a70(*DAT_011d186c.FUN_0043d4d0());
-        effect.FUN_00559450()->FUN_00821620(*DAT_011d1628.FUN_00403e20());
-        effect.FUN_00559450()->FUN_00507780(*DAT_011d1bec.FUN_00403e20());
-        effect.FUN_00559450()->SetBoltSmallWidth(*DAT_011d1610.FUN_00403e20());
-        effect.FUN_00559450()->SetBoltGrowWidth(*DAT_011d1b2c.FUN_00403e20());
-        effect.FUN_00559450()->SetArg(
-            BoltColor(*DAT_011d1be0.FUN_00403e20(), *DAT_011d1908.FUN_00403e20(), *DAT_011d18f0.FUN_00403e20(), 1.0f));
-        effect.FUN_00559450()->SetData(
-            BoltColor(*DAT_011d1c4c.FUN_00403e20(), *DAT_011d19d8.FUN_00403e20(), *DAT_011d1cdc.FUN_00403e20(), 1.0f));
-        effect.FUN_00559450()->FUN_00803b30(*DAT_011d174c.FUN_00403e20());
-        effect.FUN_00559450()->SetWhich(*DAT_011d1800.FUN_0043d4d0());
-        effect.FUN_00559450()->FUN_005077a0(*DAT_011d16c8.FUN_00403e20());
-        effect.FUN_00559450()->FUN_00803b50(*DAT_011d17c4.FUN_00403e20());
-        effect.FUN_00559450()->FUN_00803a50(true);
-        effect.FUN_00559450()->FUN_00bc2360();
+        effect.Modelloader_GetReferencedThis()->BoltShaderProperty_SetNumBolts(*DAT_011d186c.Setting_Int());
+        effect.Modelloader_GetReferencedThis()->BoltShaderProperty_SetBoltsRadius(*DAT_011d1628.Setting_Float_00403e20());
+        effect.Modelloader_GetReferencedThis()->FUN_00507780(*DAT_011d1bec.Setting_Float_00403e20());
+        effect.Modelloader_GetReferencedThis()->SetBoltSmallWidth(*DAT_011d1610.Setting_Float_00403e20());
+        effect.Modelloader_GetReferencedThis()->SetBoltGrowWidth(*DAT_011d1b2c.Setting_Float_00403e20());
+        effect.Modelloader_GetReferencedThis()->SetArg(
+            BoltColor(*DAT_011d1be0.Setting_Float_00403e20(), *DAT_011d1908.Setting_Float_00403e20(), *DAT_011d18f0.Setting_Float_00403e20(), 1.0f));
+        effect.Modelloader_GetReferencedThis()->SetData(
+            BoltColor(*DAT_011d1c4c.Setting_Float_00403e20(), *DAT_011d19d8.Setting_Float_00403e20(), *DAT_011d1cdc.Setting_Float_00403e20(), 1.0f));
+        effect.Modelloader_GetReferencedThis()->BoltShaderProperty_SetSegmentLength(*DAT_011d174c.Setting_Float_00403e20());
+        effect.Modelloader_GetReferencedThis()->SetWhich(*DAT_011d1800.Setting_Int());
+        effect.Modelloader_GetReferencedThis()->BoltShaderProperty_SetSegmentVariance(*DAT_011d16c8.Setting_Float_00403e20());
+        effect.Modelloader_GetReferencedThis()->BoltShaderProperty_SetSubSegmentVariance(*DAT_011d17c4.Setting_Float_00403e20());
+        effect.Modelloader_GetReferencedThis()->BoltShaderProperty_SetStartFromPoint(true);
+        effect.Modelloader_GetReferencedThis()->BoltShaderProperty_InitSegmentData();
     }
 }
 
@@ -1274,7 +1276,7 @@ bool AimProjectile::UpdateProjectileAimNode()
 
     if (pSource && aPTarget && (AimNode*)m_pController)
     {
-        if (GetField90Float() < 0.5 && pActor2 == reinterpret_cast<AimFullActor*>(g_pAimPlayer) && !g_pAimPlayer->FUN_004eaf60())
+        if (GetField90Float() < 0.5 && pActor2 == reinterpret_cast<AimFullActor*>(g_pAimPlayer) && !g_pAimPlayer->PlayerCharacter_Is3rdPerson())
         {
             AimPoint3 kPos = *pSource->GetWorldTranslate();
             ((AimNode*)m_pController)->SetLocalTranslate(kPos);
@@ -1302,31 +1304,31 @@ bool AimProjectile::UpdateProjectileAimNode()
 void* __cdecl operator new(unsigned int);
 struct Helper009f8770
 {
-    void FUN_00484d00(void*, int);
+    void TESForm_LoadGameDataOLD(void*, int);
 };
 struct FUN_00484d40_Host
 {
-    void FUN_00484d40(unsigned int*, int);
+    void TESForm_LoadNumericID(unsigned int*, int);
 };
 extern PlayerCharacter* pPlayer;
 struct LoadObject : ThisObj
 {
-    void FUN_0081e980(int, int);
+    void LoadGame_0081e980(int, int);
     void LoadObjectData(int, int);
 };
 // @fnv 0x00814870
 void LoadObject::LoadObjectData(int arg1, int arg2)
 {
     v71();
-    FUN_0081e980(arg1, arg2);
-    g_TESSaveLoadGame->FUN_008579e0(&unkAC, 4);
-    reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(&unk88, 4);
+    LoadGame_0081e980(arg1, arg2);
+    g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&unkAC, 4);
+    reinterpret_cast<Helper009f8770*>(this)->TESForm_LoadGameDataOLD(&unk88, 4);
     FUN_00814aa0* formID = new FUN_00814aa0;
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x30)
     {
-        reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(&formID->m0, 12);
-        g_TESSaveLoadGame->FUN_008579e0(&formID->m1, 16);
-        reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(reinterpret_cast<NiQuaternion*>(&formID->m1) + 1, 4);
+        reinterpret_cast<Helper009f8770*>(this)->TESForm_LoadGameDataOLD(&formID->m0, 12);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&formID->m1, 16);
+        reinterpret_cast<Helper009f8770*>(this)->TESForm_LoadGameDataOLD(reinterpret_cast<NiQuaternion*>(&formID->m1) + 1, 4);
     }
     if (g_TESSaveLoadGame->FUN_008df040() < 0x30)
     {
@@ -1334,20 +1336,20 @@ void LoadObject::LoadObjectData(int arg1, int arg2)
         memcpy(&formID->m1, &NiQuaternion::IDENTITY, sizeof(NiQuaternion));
     }
     unsigned int count;
-    reinterpret_cast<FUN_00484d40_Host*>(this)->FUN_00484d40(&count, 4);
+    reinterpret_cast<FUN_00484d40_Host*>(this)->TESForm_LoadNumericID(&count, 4);
     pForm = reinterpret_cast<TESForm*>(count);
     unsigned short state;
-    reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(&state, 2);
+    reinterpret_cast<Helper009f8770*>(this)->TESForm_LoadGameDataOLD(&state, 2);
     if (state)
     {
         formID->f20 = reinterpret_cast<int>(new unsigned int[state + 1]);
         *reinterpret_cast<unsigned int*>(formID->f20) = state;
-        reinterpret_cast<FUN_00484d40_Host*>(this)->FUN_00484d40(reinterpret_cast<unsigned int*>(formID->f20) + 1,
+        reinterpret_cast<FUN_00484d40_Host*>(this)->TESForm_LoadNumericID(reinterpret_cast<unsigned int*>(formID->f20) + 1,
                                                                  state * 4);
     }
     m_pListNode = reinterpret_cast<AreaBoltNode*>(formID);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x71)
-        reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(&unkD4, 4);
+        reinterpret_cast<Helper009f8770*>(this)->TESForm_LoadGameDataOLD(&unkD4, 4);
 }
 
 struct SceneNode
@@ -1405,7 +1407,7 @@ struct ProjectileCell
 {
     void AddReference(TESObjectREFR*, bool);
 };
-TESForm* FUN_004839c0(unsigned int id);
+TESForm* TESForm_GetFormByNumericID(unsigned int id);
 // @fnv 0x00814ad0
 void MagicProjectile::InitializeProjectile(int arg1, int arg2)
 {
@@ -1413,7 +1415,7 @@ void MagicProjectile::InitializeProjectile(int arg1, int arg2)
     unsigned int referenceID = reinterpret_cast<unsigned int>(sourceReference);
     if (referenceID)
     {
-        sourceReference = dynamic_cast<TESObjectREFR*>(FUN_004839c0(referenceID));
+        sourceReference = dynamic_cast<TESObjectREFR*>(TESForm_GetFormByNumericID(referenceID));
         if (sourceReference)
         {
             SceneNode* node = reinterpret_cast<SceneNode*>(sourceReference->GetNiNode());
@@ -1424,11 +1426,11 @@ void MagicProjectile::InitializeProjectile(int arg1, int arg2)
         }
     }
     InitEffect();
-    FUN_00570f70(nodeB4);
+    TESObjectREFR_Set3DSimple(nodeB4);
     GetParentCell()->AddReference(this, false);
-    if (reinterpret_cast<ProjectileEffect*>(FUN_004fd400())->GetBoltSound())
+    if (reinterpret_cast<ProjectileEffect*>(GetAVEffect())->GetBoltSound())
     {
-        unsigned int soundID = reinterpret_cast<ProjectileEffect*>(FUN_004fd400())->GetBoltSound()->GetFormID();
+        unsigned int soundID = reinterpret_cast<ProjectileEffect*>(GetAVEffect())->GetBoltSound()->GetFormID();
         if (reinterpret_cast<BSSoundHandle&>(sound).IsValid())
             reinterpret_cast<BSSoundHandle&>(sound).Release();
         if (GetNiNode())
@@ -1447,7 +1449,7 @@ struct OutHandle
 {
     int value;
     OutHandle(const OutHandle&);
-    int FUN_004a3a20();
+    int CFilter_GetGroup();
 };
 
 struct GameObject
@@ -1845,38 +1847,38 @@ struct GameObject
 
     OutHandle FUN_00931ed0();
 
-    OutHandle FUN_0043b4f0();
+    OutHandle bhkWorldObject_GetCollisionFilter();
 
-    GameObject* FUN_006fa820();
+    GameObject* bhkNiCollisionObject_GetWorldObject();
 
-    int FUN_004a3a20();
+    int CFilter_GetGroup();
 
     float FUN_00457990();
 
-    GameObject* FUN_0045bb80(NiPoint3*, void*);
+    GameObject* NiAVObject_GetWorldTranslate(NiPoint3*, void*);
 
-    GameObject* FUN_00439ef0();
+    GameObject* SubtractIntoVector();
 
-    void FUN_00440460(void*);
+    void NiAVObject_SetTranslate(void*);
 
-    void FUN_004f0160(void*);
+    void NiNode_SetRotate(void*);
 
-    void FUN_0043fa80(void*);
+    void SetRotate_0043fa80(void*);
 
     void DispatchFloatPair(float, float, float, bool);
 
-    bool FUN_00ee8990();
+    bool NiObject_StreamCanSkip();
 };
 
 struct Holder
 {
-    GameObject* FUN_00559450();
+    GameObject* Modelloader_GetReferencedThis();
 };
 
 struct Pending
 {
 
-    NiPoint3 FUN_00439ef0(NiPoint3*);
+    NiPoint3 SubtractIntoVector(NiPoint3*);
 
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
 
@@ -1897,9 +1899,9 @@ struct LocalStore
 
     void* value;
 
-    void FUN_004a39f0(int);
+    void CFilter_SetLayer(int);
 
-    void FUN_0059ce80(int);
+    void CFilter_SetGroup(int);
 
     void SetFlag4000(int);
 };
@@ -1907,9 +1909,9 @@ struct LocalStore
 struct Control
 {
 
-    void FUN_0070c440(LocalStore*);
+    void bhkCharacterController_GetCollisionFilter(LocalStore*);
 
-    void FUN_00810ff0(void*);
+    void bhkCharacterController_SetCollisionFilter(void*);
 };
 
 struct Matrix
@@ -1924,24 +1926,24 @@ struct Matrix
 
 struct Clock
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 
 extern Clock DAT_011d1758;
 
 extern GameObject* DAT_011dea3c;
 
-extern GameObject* __cdecl FUN_004b5260(int);
+extern GameObject* __cdecl FindFirstCollisionObject(int);
 
-extern int __cdecl FUN_005dbe10();
+extern int __cdecl bhkCollisionFilter_GetNewSystemGroup();
 
-extern void __cdecl FUN_0080fae0(float);
+extern void __cdecl MagicProjectile_AddTrackedProjectile(float);
 
 extern GameObject* __cdecl FUN_00825550(int);
 
 extern void __cdecl Deallocate(void*);
 
-extern float __cdecl FUN_004b5550(float, float);
+extern float __cdecl NiATan2(float, float);
 
 struct Root : GameObject
 {
@@ -2046,7 +2048,7 @@ struct Root : GameObject
 
     GameObject* FUN_009185e0();
 
-    void FUN_008133d0(int);
+    void MagicBoltProjectile_SetState(int);
 
     void UpdatePending(int, int);
 };
@@ -2077,35 +2079,35 @@ void Root::UpdatePending(int arg1, int arg2)
             if (current)
             {
 
-                selected = current->FUN_00931ed0().FUN_004a3a20();
+                selected = current->FUN_00931ed0().CFilter_GetGroup();
             }
             else
             {
 
-                GameObject* form = FUN_004b5260(special->formID());
+                GameObject* form = FindFirstCollisionObject(special->formID());
 
-                GameObject* item = form ? form->FUN_006fa820() : 0;
+                GameObject* item = form ? form->bhkNiCollisionObject_GetWorldObject() : 0;
 
-                selected = item ? item->FUN_0043b4f0().FUN_004a3a20() : FUN_005dbe10();
+                selected = item ? item->bhkWorldObject_GetCollisionFilter().CFilter_GetGroup() : bhkCollisionFilter_GetNewSystemGroup();
             }
         }
         else
         {
 
-            GameObject* form = FUN_004b5260(formID());
+            GameObject* form = FindFirstCollisionObject(formID());
 
-            GameObject* item = form ? form->FUN_006fa820() : 0;
+            GameObject* item = form ? form->bhkNiCollisionObject_GetWorldObject() : 0;
 
-            selected = item ? item->FUN_0043b4f0().FUN_004a3a20() : FUN_005dbe10();
+            selected = item ? item->bhkWorldObject_GetCollisionFilter().CFilter_GetGroup() : bhkCollisionFilter_GetNewSystemGroup();
         }
 
-        a->FUN_0070c440(&handle);
+        a->bhkCharacterController_GetCollisionFilter(&handle);
 
-        handle.FUN_004a39f0(7);
+        handle.CFilter_SetLayer(7);
 
-        handle.FUN_0059ce80(selected);
+        handle.CFilter_SetGroup(selected);
 
-        a->FUN_00810ff0(handle.value);
+        a->bhkCharacterController_SetCollisionFilter(handle.value);
     }
 
     GameObject* candidate = FUN_009185e0() ? FUN_009185e0()->child() : 0;
@@ -2113,7 +2115,7 @@ void Root::UpdatePending(int arg1, int arg2)
     if (candidate != DAT_011dea3c)
     {
 
-        FUN_0080fae0(*DAT_011d1758.FUN_00403e20());
+        MagicProjectile_AddTrackedProjectile(*DAT_011d1758.Setting_Float_00403e20());
     }
 
     Pending* pending = active0b0;
@@ -2121,23 +2123,23 @@ void Root::UpdatePending(int arg1, int arg2)
     if (pending)
     {
 
-        if (m0b4.FUN_00559450())
+        if (m0b4.Modelloader_GetReferencedThis())
         {
 
-            m0b4.FUN_00559450()->FUN_00440460(pending);
+            m0b4.Modelloader_GetReferencedThis()->NiAVObject_SetTranslate(pending);
 
-            m0b4.FUN_00559450()->FUN_004f0160(&pending->unk0c);
+            m0b4.Modelloader_GetReferencedThis()->NiNode_SetRotate(&pending->unk0c);
 
             bool force = state0ac != 0;
 
-            if (m0bc.FUN_00559450())
+            if (m0bc.Modelloader_GetReferencedThis())
             {
 
                 union { float components[3]; } position3d;
 
-                m0bc.FUN_00559450()->FUN_0045bb80(reinterpret_cast<NiPoint3*>(&position3d), pending)->FUN_00439ef0();
+                m0bc.Modelloader_GetReferencedThis()->NiAVObject_GetWorldTranslate(reinterpret_cast<NiPoint3*>(&position3d), pending)->SubtractIntoVector();
 
-                m0a8.FUN_00559450()->DispatchFloatPair(pending->value1c, reinterpret_cast<NiPoint3*>(&position3d)->FUN_00457990(), f088, force);
+                m0a8.Modelloader_GetReferencedThis()->DispatchFloatPair(pending->value1c, reinterpret_cast<NiPoint3*>(&position3d)->FUN_00457990(), f088, force);
 
                 Matrix rot;
 
@@ -2149,31 +2151,31 @@ void Root::UpdatePending(int arg1, int arg2)
 
                 float azimuth = reinterpret_cast<NiPoint3*>(&position3d)->FUN_00457990();
 
-                rot.FUN_00a59780(FUN_004b5550(reinterpret_cast<NiPoint3*>(&position3d)->x, reinterpret_cast<NiPoint3*>(&position3d)->y), 0.0f, -FUN_004b5550(angle, azimuth));
+                rot.FUN_00a59780(NiATan2(reinterpret_cast<NiPoint3*>(&position3d)->x, reinterpret_cast<NiPoint3*>(&position3d)->y), 0.0f, -NiATan2(angle, azimuth));
 
-                m0b4.FUN_00559450()->FUN_0043fa80(&rot);
+                m0b4.Modelloader_GetReferencedThis()->SetRotate_0043fa80(&rot);
             }
             else
             {
 
                 NiPoint3 position3d = *this->position();
 
-                float direction = pending->FUN_00439ef0(&position3d).FUN_00457990();
+                float direction = pending->SubtractIntoVector(&position3d).FUN_00457990();
 
-                m0a8.FUN_00559450()->DispatchFloatPair(pending->value1c, direction, f088, force);
+                m0a8.Modelloader_GetReferencedThis()->DispatchFloatPair(pending->value1c, direction, f088, force);
 
-                if (m0a8.FUN_00559450()->FUN_00ee8990() || state0ac == 2)
+                if (m0a8.Modelloader_GetReferencedThis()->NiObject_StreamCanSkip() || state0ac == 2)
                 {
 
-                    FUN_008133d0(2);
+                    MagicBoltProjectile_SetState(2);
 
                     LocalStore handle;
 
-                    FUN_009306d0()->FUN_0070c440(&handle);
+                    FUN_009306d0()->bhkCharacterController_GetCollisionFilter(&handle);
 
                     handle.SetFlag4000(1);
 
-                    FUN_009306d0()->FUN_00810ff0(handle.value);
+                    FUN_009306d0()->bhkCharacterController_SetCollisionFilter(handle.value);
                 }
             }
         }
@@ -2206,7 +2208,7 @@ void Root::UpdatePending(int arg1, int arg2)
 struct AEPoint3
 {
     float x, y, z;
-    AEPoint3 FUN_00439ef0(const AEPoint3& kOther) const;  // operator-
+    AEPoint3 SubtractIntoVector(const AEPoint3& kOther) const;  // operator-
     float FUN_00457990() const;                           // Length
 };
 
@@ -2260,9 +2262,9 @@ class AENode
     virtual void v38();
     virtual AENode* FindNode(const NiFixedString& kName);
 
-    const AEPoint3& FUN_0043c490();  // world translate
-    AEPointResult FUN_00461130(const AEPoint3& kPoint, int iIndex);
-    AEPointResult FUN_006a9540(const AEPoint3& kPoint);
+    const AEPoint3& GetTranslate_0043c490();  // world translate
+    AEPointResult NiAVObject_GetWorldRotate(const AEPoint3& kPoint, int iIndex);
+    AEPointResult NiAVObject_GetRotate_006a9540(const AEPoint3& kPoint);
 };
 
 struct AENodePtr
@@ -2280,7 +2282,7 @@ class AEController
 struct AEControllerPtr
 {
     AEController* m_pObject;
-    AEController* FUN_00559450() const;  // operator T*
+    AEController* Modelloader_GetReferencedThis() const;  // operator T*
 };
 
 class AERefr
@@ -2488,7 +2490,7 @@ class AERefr
 class AEActor : public AERefr
 {
   public:
-    bool FUN_008ace90();
+    bool GetGhost_008ace90();
 };
 
 
@@ -2510,8 +2512,8 @@ class AEProcess
   public:
     char pad000[0x410];
     AEFlags m_kFlags;
-    void FUN_0070c440(AEHandle* pkOut);
-    void FUN_00810ff0(void* pvValue);
+    void bhkCharacterController_GetCollisionFilter(AEHandle* pkOut);
+    void bhkCharacterController_SetCollisionFilter(void* pvValue);
 };
 
 struct AEArea
@@ -2526,7 +2528,7 @@ struct AEArea
 
 struct AESound
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 class AEEffect
@@ -2544,7 +2546,7 @@ struct AEEffectItem
 
 struct AESetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern AESetting DAT_011d1bbc;
 extern AESetting DAT_011d1acc;
@@ -2562,9 +2564,9 @@ class AEExplosion
 class AEIdle
 {
   public:
-    void FUN_00689920(const char* pcName);
+    void PlaySequence(const char* pcName);
 };
-AEIdle* FUN_006890b0(void* pvCell, float fRadius, int iAreaType, AEPoint3 akStart, AEPoint3 kTo, float fScale,
+AEIdle* BSTempEffectParticle_Spawn(void* pvCell, float fRadius, int iAreaType, AEPoint3 akStart, AEPoint3 kTo, float fScale,
                      int iType, int iFlags);
 
 
@@ -2585,13 +2587,13 @@ class AEProjectile : public AERefr
 
     float GetUnka4();
     AEProcess* FUN_009306d0();
-    void FUN_008133d0(int iValue);
-    void FUN_0081f000(AEPoint3 akStart, AEPoint3 kTo);
+    void MagicBoltProjectile_SetState(int iValue);
+    void MagicProjectile_ApplyCollisionForce(AEPoint3 akStart, AEPoint3 kTo);
     void* FUN_008d6f30();  // GetParentCell
     int FUN_00810fd0();
     AEExplosion* FUN_009185e0(int iType);
-    AEEffectItem* FUN_00586150();
-    AEEffect* FUN_004fd400();
+    AEEffectItem* CombatController_GetCombatState();
+    AEEffect* GetAVEffect();
 
     void Impact(AEPoint3 kPos, int iIndex, AERefr* pkTarget, bool bSilent);
 };
@@ -2601,7 +2603,7 @@ class AEProjectile : public AERefr
 void AEProjectile::Impact(AEPoint3 kPos, int iIndex, AERefr* pkTarget, bool bSilent)
 {
     AEActor* pkHitActor = (pkTarget && pkTarget->IsActor()) ? (AEActor*)pkTarget : 0;
-    if (pkHitActor && pkHitActor->FUN_008ace90())
+    if (pkHitActor && pkHitActor->GetGhost_008ace90())
         return;
 
     m_fd4 = GetUnka4();
@@ -2610,19 +2612,19 @@ void AEProjectile::Impact(AEPoint3 kPos, int iIndex, AERefr* pkTarget, bool bSil
         if (FUN_009306d0()->m_kFlags.FUN_00621270(0x8000))
             v196();
         AEHandle kHandle;
-        FUN_009306d0()->FUN_0070c440(&kHandle);
+        FUN_009306d0()->bhkCharacterController_GetCollisionFilter(&kHandle);
         kHandle.SetFlag4000(true);
-        FUN_009306d0()->FUN_00810ff0(kHandle.m_pIntegerData);
+        FUN_009306d0()->bhkCharacterController_SetCollisionFilter(kHandle.m_pIntegerData);
     }
-    FUN_008133d0(1);
+    MagicBoltProjectile_SetState(1);
 
     AENode* pkNode = GetNode3D();
     if (pkNode)
-        FUN_0081f000(kPos, pkNode->FUN_00461130(DAT_011a9478, iIndex).FUN_004b4500());
+        MagicProjectile_ApplyCollisionForce(kPos, pkNode->NiAVObject_GetWorldRotate(DAT_011a9478, iIndex).FUN_004b4500());
 
     if (pkTarget)
     {
-        if (pkTarget != reinterpret_cast<AERefr*>(g_thePlayer) || g_thePlayer->FUN_004eaf60())
+        if (pkTarget != reinterpret_cast<AERefr*>(g_thePlayer) || g_thePlayer->PlayerCharacter_Is3rdPerson())
         {
             m_pkSource = pkTarget;
             AENode* pkTargetNode = m_pkSource->GetNode3D();
@@ -2632,31 +2634,31 @@ void AEProjectile::Impact(AEPoint3 kPos, int iIndex, AERefr* pkTarget, bool bSil
     }
 
     {
-        AEPoint3 kWorldPos = GetNode3D()->FUN_0043c490();
-        float fDist = kWorldPos.FUN_00439ef0(kPos).FUN_00457990();
-        m_spController.FUN_00559450()->DispatchFloatPair(0.01f, fDist, m_f88, false);
+        AEPoint3 kWorldPos = GetNode3D()->GetTranslate_0043c490();
+        float fDist = kWorldPos.SubtractIntoVector(kPos).FUN_00457990();
+        m_spController.Modelloader_GetReferencedThis()->DispatchFloatPair(0.01f, fDist, m_f88, false);
     }
 
     if (!bSilent)
         FUN_009185e0(FUN_00810fd0())->ApplySpellEffects(FUN_008d6f30(), GetPosition(), this, pkTarget, 0, 1.0f, 1.0f);
 
     m_pkSource = 0;
-    if (FUN_004fd400()->m_kArea.GetValue())
+    if (GetAVEffect()->m_kArea.GetValue())
     {
-        float fScale = FUN_00586150()->FUN_00404420() * *DAT_011d1bbc.FUN_00403e20();
-        if (fScale > *DAT_011d1acc.FUN_00403e20())
-            fScale = *DAT_011d1acc.FUN_00403e20();
-        else if (fScale < *DAT_011d15a4.FUN_00403e20())
-            fScale = *DAT_011d15a4.FUN_00403e20();
-        int iAreaType = FUN_004fd400()->m_kArea.GetValue();
-        AEPoint3 akStart = GetNode3D() ? GetNode3D()->FUN_006a9540(DAT_011a9478).FUN_004b4500() : DAT_011a9478;
-        AEIdle* pkAreaIdle = FUN_006890b0(FUN_008d6f30(), 5.0f, iAreaType, akStart, kPos, 1.0f, 7, 0);
-        pkAreaIdle->FUN_00689920("SpecialIdle_AreaEffect");
+        float fScale = CombatController_GetCombatState()->FUN_00404420() * *DAT_011d1bbc.Setting_Float_00403e20();
+        if (fScale > *DAT_011d1acc.Setting_Float_00403e20())
+            fScale = *DAT_011d1acc.Setting_Float_00403e20();
+        else if (fScale < *DAT_011d15a4.Setting_Float_00403e20())
+            fScale = *DAT_011d15a4.Setting_Float_00403e20();
+        int iAreaType = GetAVEffect()->m_kArea.GetValue();
+        AEPoint3 akStart = GetNode3D() ? GetNode3D()->NiAVObject_GetRotate_006a9540(DAT_011a9478).FUN_004b4500() : DAT_011a9478;
+        AEIdle* pkAreaIdle = BSTempEffectParticle_Spawn(FUN_008d6f30(), 5.0f, iAreaType, akStart, kPos, 1.0f, 7, 0);
+        pkAreaIdle->PlaySequence("SpecialIdle_AreaEffect");
     }
 
-    if (FUN_004fd400()->FUN_008ce390() && !bSilent)
+    if (GetAVEffect()->FUN_008ce390() && !bSilent)
     {
-        unsigned int auiFormId = FUN_004fd400()->FUN_008ce390()->FUN_0084e3a0();
+        unsigned int auiFormId = GetAVEffect()->FUN_008ce390()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         BSSoundHandle kSound = static_cast<MagicBoltAudio*>(BSAudio::GetSingleton())->GetSoundHandleByFormID(auiFormId, 0x102u);
         AEPoint3 kSoundLoc = GetPosition();
         kSound.SetPosition(kSoundLoc.x, kSoundLoc.y, kSoundLoc.z);
@@ -2861,7 +2863,7 @@ struct F139Cell
 };
 struct F139Result
 {
-    void FUN_00812b00(F139Vec*);
+    void bhkCharacterController_GetPosition(F139Vec*);
 };
 struct F139Color
 {
@@ -2870,24 +2872,24 @@ struct F139Color
 };
 struct F139Fx
 {
-    void FUN_00803a70(int);
-    void FUN_00821620(float);
+    void BoltShaderProperty_SetNumBolts(int);
+    void BoltShaderProperty_SetBoltsRadius(float);
     void FUN_00507780(float);
     void SetBoltSmallWidth(float);
     void SetBoltGrowWidth(float);
     void SetArg(F139Color);
     void SetData(F139Color);
-    void FUN_00803b30(float);
+    void BoltShaderProperty_SetSegmentLength(float);
     void SetWhich(int);
-    void FUN_005077a0(float);
-    void FUN_00803b50(float);
-    void FUN_00803a50(bool);
-    void FUN_00bc2360();
+    void BoltShaderProperty_SetSegmentVariance(float);
+    void BoltShaderProperty_SetSubSegmentVariance(float);
+    void BoltShaderProperty_SetStartFromPoint(bool);
+    void BoltShaderProperty_InitSegmentData();
 };
 struct F139Setting
 {
-    int* FUN_0043d4d0();
-    float* FUN_00403e20();
+    int* Setting_Int();
+    float* Setting_Float_00403e20();
 };
 extern "C" char DAT_011d1a48, DAT_011d168c, DAT_011d17a0, DAT_011d16b0, DAT_011d1b50, DAT_011d18c0, DAT_011d1974;
 struct F139Ptr
@@ -2912,16 +2914,16 @@ struct F139NewNode : F139Node
 };
 __forceinline void* F139NewNode::operator new(unsigned int n)
 {
-    return FUN_00aa13e0(n);
+    return Object_DispatchCommandFour(n);
 }
 __forceinline void F139NewNode::operator delete(void* p)
 {
     FUN_00aa13f0(p);
 }
-F139Fx* __cdecl FUN_00bc18d0(F139NewNode*, int);
+F139Fx* __cdecl BoltShader_Start(F139NewNode*, int);
 struct F139Arg
 {
-    F139Ref* FUN_0084e3a0();
+    F139Ref* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct F139This
 {
@@ -2929,44 +2931,44 @@ struct F139This
     F139Entry* entries;
     char pad2[0x10];
     F139Ref* ref;
-    F139Ref* FUN_00586150();
+    F139Ref* CombatController_GetCombatState();
     F139Cell* FUN_008d6f30();
     F139Result* FUN_009306d0();
-    void FUN_00812700(float, F139Entry*);
+    void MagicBoltProjectile_UpdateBranch(float, F139Entry*);
     void AttachEffectToSpine(F139Owner*, F139Arg*);
 };
 // @fnv 0x008139f0
 void F139This::AttachEffectToSpine(F139Owner* owner, F139Arg* arg)
 {
-    if (arg && (arg->FUN_0084e3a0() != FUN_00586150() || ref == owner->v1()))
+    if (arg && (arg->GetHavokWorldObjectCountInSceneGraph_0084e3a0() != CombatController_GetCombatState() || ref == owner->v1()))
         return;
     F139NewNode* s = new F139NewNode(0);
     F139Node* a = FUN_008d6f30()->FUN_005497a0();
     a->attach(s, true);
-    F139Fx* h = FUN_00bc18d0(s, 0);
+    F139Fx* h = BoltShader_Start(s, 0);
     if (h)
     {
-        h->FUN_00803a70(*((F139Setting*)&DAT_011d1a48)->FUN_0043d4d0());
-        h->FUN_00821620(*((F139Setting*)&DAT_011d168c)->FUN_00403e20());
-        h->FUN_00507780(*((F139Setting*)&DAT_011d17a0)->FUN_00403e20());
-        h->SetBoltSmallWidth(*((F139Setting*)&DAT_011d1610)->FUN_00403e20());
-        h->SetBoltGrowWidth(*((F139Setting*)&DAT_011d1b2c)->FUN_00403e20());
-        h->SetArg(F139Color(*((F139Setting*)&DAT_011d1be0)->FUN_00403e20(),
-                            *((F139Setting*)&DAT_011d1908)->FUN_00403e20(),
-                            *((F139Setting*)&DAT_011d18f0)->FUN_00403e20(), 1.0f));
-        h->SetData(F139Color(*((F139Setting*)&DAT_011d1c4c)->FUN_00403e20(),
-                             *((F139Setting*)&DAT_011d19d8)->FUN_00403e20(),
-                             *((F139Setting*)&DAT_011d1cdc)->FUN_00403e20(), 1.0f));
-        h->FUN_00803b30(*((F139Setting*)&DAT_011d16b0)->FUN_00403e20());
-        h->SetWhich(*((F139Setting*)&DAT_011d1b50)->FUN_0043d4d0());
-        h->FUN_005077a0(*((F139Setting*)&DAT_011d18c0)->FUN_00403e20());
-        h->FUN_00803b50(*((F139Setting*)&DAT_011d1974)->FUN_00403e20());
-        h->FUN_00803a50(false);
-        h->FUN_00bc2360();
+        h->BoltShaderProperty_SetNumBolts(*((F139Setting*)&DAT_011d1a48)->Setting_Int());
+        h->BoltShaderProperty_SetBoltsRadius(*((F139Setting*)&DAT_011d168c)->Setting_Float_00403e20());
+        h->FUN_00507780(*((F139Setting*)&DAT_011d17a0)->Setting_Float_00403e20());
+        h->SetBoltSmallWidth(*((F139Setting*)&DAT_011d1610)->Setting_Float_00403e20());
+        h->SetBoltGrowWidth(*((F139Setting*)&DAT_011d1b2c)->Setting_Float_00403e20());
+        h->SetArg(F139Color(*((F139Setting*)&DAT_011d1be0)->Setting_Float_00403e20(),
+                            *((F139Setting*)&DAT_011d1908)->Setting_Float_00403e20(),
+                            *((F139Setting*)&DAT_011d18f0)->Setting_Float_00403e20(), 1.0f));
+        h->SetData(F139Color(*((F139Setting*)&DAT_011d1c4c)->Setting_Float_00403e20(),
+                             *((F139Setting*)&DAT_011d19d8)->Setting_Float_00403e20(),
+                             *((F139Setting*)&DAT_011d1cdc)->Setting_Float_00403e20(), 1.0f));
+        h->BoltShaderProperty_SetSegmentLength(*((F139Setting*)&DAT_011d16b0)->Setting_Float_00403e20());
+        h->SetWhich(*((F139Setting*)&DAT_011d1b50)->Setting_Int());
+        h->BoltShaderProperty_SetSegmentVariance(*((F139Setting*)&DAT_011d18c0)->Setting_Float_00403e20());
+        h->BoltShaderProperty_SetSubSegmentVariance(*((F139Setting*)&DAT_011d1974)->Setting_Float_00403e20());
+        h->BoltShaderProperty_SetStartFromPoint(false);
+        h->BoltShaderProperty_InitSegmentData();
     }
     F139Vec i;
     i.FUN_006815c0();
-    FUN_009306d0()->FUN_00812b00(&i);
+    FUN_009306d0()->bhkCharacterController_GetPosition(&i);
     F139Node* p = 0;
     F139Node* f = ref ? ref->node() : 0;
     if (f)
@@ -2988,7 +2990,7 @@ void F139This::AttachEffectToSpine(F139Owner* owner, F139Arg* arg)
     cf->target.FUN_0066b0d0(eb);
     cf->pos = i;
     cf->next = entries;
-    FUN_00812700(0.0f, cf);
+    MagicBoltProjectile_UpdateBranch(0.0f, cf);
     entries = cf;
 }
 

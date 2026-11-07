@@ -28,8 +28,8 @@ public:
     void* DestroyIfFlagged(unsigned int flags);
     const SearchNode* GetFieldAt2050();
     void SetNodeFleeCost(SearchNode* apNode, NavMesh* apNavMesh, unsigned short aiTriangle);
-    unsigned int FUN_006a94f0(NavMesh*, unsigned short);
-    unsigned int FUN_006a94f0();
+    unsigned int GetKeyForNode_006a94f0(NavMesh*, unsigned short);
+    unsigned int GetKeyForNode_006a94f0();
     SearchNode* FUN_006a7c90(unsigned int, const FleeStartNode*, float);
     bool FUN_006a7d60(FleePath*, unsigned int, bool);
     SearchResult FUN_006a7e00(unsigned int, NavMesh*, unsigned short, float, Node**);

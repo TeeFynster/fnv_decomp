@@ -18,7 +18,7 @@ public:
     BSCustomSplatterExtraData(SplatterWordsView* source);
     virtual const NiRTTI* GetRTTI() const override;
 
-    void FUN_004deb10();
+    void ForwardCall_004deb10();
     void* DestroyIfFlagged(unsigned int flags);
     OpacityFadeState* GetOffsetC();
     void* GetList();

@@ -9,9 +9,9 @@
 
 extern "C" void* g_011f5ed8;
 extern int DAT_010a0384;
-void __fastcall FUN_00a5e930(void*);
+void __fastcall UpdateFields_00c5faa0(void*);
 void __cdecl __Dummy_00b6fef0(void*, unsigned int);
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 inline void* __cdecl operator new(unsigned int, void* p) throw()
 {
@@ -95,7 +95,8 @@ inline NiSortAdjustNode* ConstructSortAdjustNode(void* storage) throw()
 // ECX object argument and stack arguments without another class definition.
 
 // @fnv 0x00a95310
-void* __cdecl FUN_00a95310()
+// src: COMMUNITY 0x00a95310
+void* __cdecl NiSortAdjustNode_GetRTTI()
 {
     return &g_011f5ed8;
 }
@@ -104,14 +105,15 @@ void* __cdecl FUN_00a95310()
 void* __thiscall NiSortAdjustNode::Destructor(unsigned int flags)
 {
     *(void**)this = &DAT_010a0384;
-    FUN_00a5e930(this);
+    UpdateFields_00c5faa0(this);
     if (flags & 1)
         __Dummy_00b6fef0(this, 0xb0);
     return this;
 }
 
 // @fnv 0x00a952a0
-void* __cdecl FUN_00a952a0()
+// src: EXE 0x00a952a0
+void* __cdecl NiSortAdjustNode_CreateObject()
 {
     void* p = BSFadeNode::operator new(0xB0);
     if (p)
@@ -151,7 +153,7 @@ unsigned char __fastcall IsSortAdjustNodeEqual(NiSortAdjustNode* self, void*, Ni
 // @fnv 0x00a953b0
 NiNode* __fastcall CloneSortAdjustNode(NiSortAdjustNode* self, void*, void* process)
 {
-    void* storage = FUN_00aa13e0(0xb0);
+    void* storage = Object_DispatchCommandFour(0xb0);
     NiSortAdjustNode* p = storage ? ConstructSortAdjustNode(storage) : 0;
     self->NiNode::CopyMemberData(p, *(CloningProcess*)process);
     SortAdjustMode(p) = SortAdjustMode(self);
@@ -168,7 +170,7 @@ void __fastcall LoadSortAdjustNode(NiSortAdjustNode* self, void*, NiStream& stre
     if (SortAdjustMode(self) >= 2)
         SortAdjustMode(self) = 0;
     if (stream.GetFileVersion() < 0x14000004)
-        stream.FUN_00a645b0();
+        stream.ReadLinkID();
 }
 
 // @fnv 0x00a95350
@@ -195,9 +197,10 @@ void __fastcall CullSortAdjustNode(NiSortAdjustNode* self, void*, SortAdjustCull
     }
 }
 
-void __cdecl FUN_00a5dce0();
+void __cdecl NiNode_ProcessClone();
 // @fnv 0x00a95290
-void __cdecl FUN_00a95290()
+// src: XBOX_PDB 0x00a95290
+void __cdecl NiSortAdjustNode_ProcessClone()
 {
-    FUN_00a5dce0();
+    NiNode_ProcessClone();
 }

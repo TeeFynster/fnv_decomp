@@ -5,8 +5,8 @@
 
 // src/havok/physics/collide/agent/convexagent/spheresphere/hkpspheresphereagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/spheresphere/hkpspheresphereagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-extern "C" void __cdecl FUN_00d3f6a0(void* a, void* b, void* c, void* d);
-void __stdcall FUN_00d3fcc0(void* a, void* c, void* b, void* d);
+extern "C" void __cdecl hkpSphereSphereAgent_staticGetPenetrations(void* a, void* b, void* c, void* d);
+void __stdcall hkpSphereSphereAgent_getPenetrations(void* a, void* c, void* b, void* d);
 struct S_00d3f660_Owner
 {
     virtual void v0();
@@ -100,7 +100,8 @@ struct SListener
     virtual void v04(SProxy* a, SProxy* b) = 0;
 };
 // @fnv 0x00d3f6a0
-extern "C" void __cdecl FUN_00d3f6a0(void* a, void* b, void* c, void* d)
+// src: XBOX_PDB 0x00d3f6a0
+extern "C" void __cdecl hkpSphereSphereAgent_staticGetPenetrations(void* a, void* b, void* c, void* d)
 {
     STraceBuf* pBuf = (STraceBuf*)TlsGetValue(DAT_0126835c);
     if (pBuf->unk04 < pBuf->unk0C)

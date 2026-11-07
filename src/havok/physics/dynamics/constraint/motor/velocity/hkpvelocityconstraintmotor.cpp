@@ -46,12 +46,13 @@ class hkpVelocityConstraintMotor : public hkpLimitedForceConstraintMotor
           m_bUseVelocityTarget(o.m_bUseVelocityTarget)
     {}
 
-    hkpVelocityConstraintMotor* FUN_00d861c0() const;
+    hkpVelocityConstraintMotor* clone_00d861c0() const;
 };
 
 // Allocates a chunk from the thread memory router and constructs a copy of this motor in it.
 // @fnv 0x00d861c0
-hkpVelocityConstraintMotor* hkpVelocityConstraintMotor::FUN_00d861c0() const
+// src: HAVOK_LIB 0x00d861c0
+hkpVelocityConstraintMotor* hkpVelocityConstraintMotor::clone_00d861c0() const
 {
     return new hkpVelocityConstraintMotor(*this);
 }

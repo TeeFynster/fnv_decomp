@@ -7,7 +7,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00dd8e00
-unsigned __int64 __cdecl FUN_00dd8e00() {
+// src: HAVOK_LIB 0x00dd8e00
+unsigned __int64 __cdecl hkWindowsSystemClock_getTickCounter() {
     unsigned __int64 ticks;
     fnv_ReadTicks64(ticks);
     return ticks;

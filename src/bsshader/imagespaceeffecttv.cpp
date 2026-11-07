@@ -77,15 +77,15 @@ struct PipboyPass
     }
     static void* operator new(unsigned int uiSize)
     {
-        return g_memoryManager_011f6238.FUN_00aa3e40(uiSize);
+        return g_memoryManager_011f6238.Game_DoHeapAlloc(uiSize);
     }
     static void operator delete(void* pvMem)
     {
         PipboyFree(pvMem);
     }
-    void FUN_00ba37f0(NiTexture* pkTexture);
-    void FUN_00ba3760(int iValue);
-    PipboySourceTexture* FUN_00ba3780();
+    void ImageSpaceTexture_SetTexture_00ba37f0(NiTexture* pkTexture);
+    void NiShader_SetImplementation(int iValue);
+    PipboySourceTexture* ImageSpaceTexture_GetTexture();
 };
 
 struct PipboyConstantsBase
@@ -135,7 +135,7 @@ struct PipboyConstants : PipboyConstantsBase
     PipboyConstants();
     static void* operator new(unsigned int uiSize)
     {
-        return g_memoryManager_011f6238.FUN_00aa3e40(uiSize);
+        return g_memoryManager_011f6238.Game_DoHeapAlloc(uiSize);
     }
     static void operator delete(void* pvMem)
     {
@@ -295,20 +295,20 @@ void PipboyShader2::SetupPipboyPasses(PipboyGeometry* pkGeometry, int iUnused)
     NiTexture* pkDistort = g_pkDistortMap_01200840;
 
     m_kPasses.FUN_00ba3aa0(1, new PipboyPass);
-    m_kPasses.GetAt(1)->FUN_00ba3760(0);
-    m_kPasses.GetAt(1)->FUN_00ba37f0(0);
+    m_kPasses.GetAt(1)->NiShader_SetImplementation(0);
+    m_kPasses.GetAt(1)->ImageSpaceTexture_SetTexture_00ba37f0(0);
     m_kPasses.FUN_00ba3aa0(2, new PipboyPass);
-    m_kPasses.GetAt(2)->FUN_00ba3760(0);
-    m_kPasses.GetAt(2)->FUN_00ba37f0(pkDistort);
+    m_kPasses.GetAt(2)->NiShader_SetImplementation(0);
+    m_kPasses.GetAt(2)->ImageSpaceTexture_SetTexture_00ba37f0(pkDistort);
     m_kPasses.FUN_00ba3aa0(3, new PipboyPass);
-    m_kPasses.GetAt(3)->FUN_00ba3760(3);
-    m_kPasses.GetAt(3)->FUN_00ba37f0(pkScanlines);
+    m_kPasses.GetAt(3)->NiShader_SetImplementation(3);
+    m_kPasses.GetAt(3)->ImageSpaceTexture_SetTexture_00ba37f0(pkScanlines);
 
     float fTexelX = 0;
     float fTexelY = 0;
     if (m_kPasses.GetAt(0))
     {
-        PipboySourceTexture* pkSource = m_kPasses.GetAt(0)->FUN_00ba3780();
+        PipboySourceTexture* pkSource = m_kPasses.GetAt(0)->ImageSpaceTexture_GetTexture();
         fTexelX = 1.0f / (float)pkSource->GetWidth();
         fTexelY = 1.0f / (float)pkSource->GetHeight();
     }

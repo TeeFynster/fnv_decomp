@@ -55,7 +55,7 @@ FileFinder::FILE_LOCATION FileFinder::GetFileLocation(char* fileName, char* file
     else
         strcpy_s(path, 260, fileName);
 
-    result = (FILE_LOCATION)FUN_00afe220(path, flags, archiveType);
+    result = (FILE_LOCATION)FileFinder_LookForFile(path, flags, archiveType);
     if (result == NOTFOUND)
     {
         if (filePath)
@@ -109,10 +109,10 @@ NiFile* FileFinder::GetFile(const char* name, NiFile::OpenMode mode, unsigned in
 
 struct FUN_00afe220_shell : public FileFinder
 {
-    int FUN_00afe220(char*, unsigned int, unsigned int);
+    int FileFinder_LookForFile(char*, unsigned int, unsigned int);
 };
 
-bool __cdecl FUN_00af6320(int, int);
+bool __cdecl ArchiveManager_FindFile(int, int);
 int __cdecl FUN_00ecbf05(const char*, int);
 unsigned int __cdecl _strlen(const char*);
 int __cdecl __strnicmp(const char*, const char*, unsigned int);
@@ -143,10 +143,11 @@ struct FinderCalls_S
 };
 
 // @fnv 0x00afe220
-int FUN_00afe220_shell::FUN_00afe220(char* apFilePath, unsigned int aiFlags, unsigned int aiArchiveType)
+// src: COMMUNITY 0x00afe220
+int FUN_00afe220_shell::FileFinder_LookForFile(char* apFilePath, unsigned int aiFlags, unsigned int aiArchiveType)
 {
     char acFullPath[260];
-    if (!(aiFlags & 1) && FUN_00af6320((int)apFilePath, aiArchiveType))
+    if (!(aiFlags & 1) && ArchiveManager_FindFile((int)apFilePath, aiArchiveType))
         return 2;
     if (!DAT_011acdf8 || DAT_011acdf9)
         aiFlags = 0;
@@ -176,7 +177,7 @@ int FUN_00afe220_shell::FUN_00afe220(char* apFilePath, unsigned int aiFlags, uns
 
 int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 __declspec(dllimport) int __stdcall SetWindowTextA(void*, const char*);
-bool __cdecl FUN_00446e10();
+bool __cdecl TESRenderer_GetFullScreen();
 // The shared classes lack these out-of-line accessors; a single fastcall argument preserves their ECX-only ABI.
 // IOManager's 0x18 getter and 0x64 queue call bind to 0x004491f0 and 0x00446da0; OSGlobals' window getter is 0x0044ddc0.
 int __fastcall GetBackgroundLoadingCount(IOManager* manager);
@@ -189,17 +190,17 @@ extern bool DAT_011c3bfc;
 struct Loader_S
 {
     int CallVirtual17();
-    int FUN_00446dc0();
+    int ModelLoader_GetBackgroundCloningCount();
     void UpdateLoadingStatus();
 };
 
 // @fnv 0x00446cb0
 void Loader_S::UpdateLoadingStatus()
 {
-    if (!FUN_00446e10())
+    if (!TESRenderer_GetFullScreen())
     {
         int iPost = CallVirtual17();
-        int iRefs = FUN_00446dc0();
+        int iRefs = ModelLoader_GetBackgroundCloningCount();
         int iBackground = GetBackgroundLoadingCount(DAT_01202d98);
         int iTasks = GetPendingLoadingTaskCount(DAT_01202d98);
         if (iBackground || iRefs || iPost || iTasks)
@@ -226,23 +227,25 @@ struct FUN_00afe1f0_shell : public FileFinder
 // @fnv 0x00afe1f0
 unsigned int FUN_00afe1f0_shell::FindFile(char* pcPath, unsigned int uiFlags)
 {
-    return this->FUN_00afe220(pcPath, uiFlags, 0xffff);
+    return this->FileFinder_LookForFile(pcPath, uiFlags, 0xffff);
 }
 
-int __cdecl FUN_00afe420(int a1, int a2, int a3, int a4);
+int __cdecl FileFinder_BuildFileList(int a1, int a2, int a3, int a4);
 
 // @fnv 0x00afe400
-int __cdecl FUN_00afe400(int a2, int a1)
+// src: COMMUNITY 0x00afe400
+int __cdecl FileFinder_BuildFileList_(int a2, int a1)
 {
-    return FUN_00afe420(a2, a1, 0xffff, 0);
+    return FileFinder_BuildFileList(a2, a1, 0xffff, 0);
 }
 
-int __cdecl FUN_00afe420(int, int, unsigned int, int);
+int __cdecl FileFinder_BuildFileList(int, int, unsigned int, int);
 
 // @fnv 0x00afe590
-int __cdecl FUN_00afe590(int a1, int a2, int a3)
+// src: COMMUNITY 0x00afe590
+int __cdecl FileFinder_BuildSingleFileList_1(int a1, int a2, int a3)
 {
-    return FUN_00afe420(a1, a2, 0xffffu, a3);
+    return FileFinder_BuildFileList(a1, a2, 0xffffu, a3);
 }
 
 struct _FILETIME
@@ -255,7 +258,8 @@ struct FileFinderHack
     static bool __cdecl GetFileTime(char const*, _FILETIME&, unsigned int);
 };
 // @fnv 0x00afe7b0
-bool __cdecl FUN_00afe7b0(char const* a, _FILETIME& b)
+// src: GUESS 0x00afe7b0 (confidence: medium)
+bool __cdecl FileFinder_GetFileTime_Thunk(char const* a, _FILETIME& b)
 {
     return FileFinderHack::GetFileTime(a, b, 0xffff);
 }
@@ -278,15 +282,16 @@ struct FileEntryTmp
     virtual const char* f6();
 };
 FileEntryTmp* __cdecl FindArchiveForFile(const char*, unsigned int);
-bool __cdecl FUN_00b01b60(const char*, _FILETIME*);
+bool __cdecl File_GetLastWriteTime(const char*, _FILETIME*);
 // @fnv 0x00afe7d0
-bool __cdecl FUN_00afe7d0(const char* apFileName, _FILETIME& arFileTime, unsigned int aiMode)
+// src: COMMUNITY 0x00afe7d0
+bool __cdecl ArchiveManager_GetLastWriteTimeForFile(const char* apFileName, _FILETIME& arFileTime, unsigned int aiMode)
 {
     _fnv_zlib_memset(&arFileTime, 0, 8);
     FileEntryTmp* pkEntry = FindArchiveForFile(apFileName, aiMode);
     if (pkEntry)
         apFileName = pkEntry->f6();
-    return FUN_00b01b60(apFileName, &arFileTime);
+    return File_GetLastWriteTime(apFileName, &arFileTime);
 }
 }  // namespace fnv_00afe7d0
 
@@ -295,7 +300,7 @@ inline void DeadQ6()
     int a[6];
 }
 class Actor;
-bool __cdecl FUN_00b01af0(const char*);
+bool __cdecl FileFinder_PlatformFindSingleFile(const char*);
 unsigned int __cdecl strlen(const char*);
 const char* __cdecl strrchr(const char*, int);
 void* __cdecl _memmove(void*, const void*, unsigned int);
@@ -320,16 +325,17 @@ inline void CatQ(char* d, unsigned int n, const char* s)
 }
 // Validates a path and name, builds a combined string, adds it to a BSSimpleList, and returns the list or null if empty.
 // @fnv 0x00afe5b0
-BSSimpleList<Actor*>* __cdecl FUN_00afe5b0(const char* path, const char* name, int x, BSSimpleList<Actor*>* apList)
+// src: COMMUNITY 0x00afe5b0
+BSSimpleList<Actor*>* __cdecl FileFinder_BuildSingleFileList(const char* path, const char* name, int x, BSSimpleList<Actor*>* apList)
 {
     BSSimpleList<Actor*>* list7 = apList;
     if (!list7)
         list7 = new BSSimpleList<Actor*>;
     bool ok = false;
     if (!DAT_011acdf8 || DAT_011acdf9)
-        ok = FUN_00b01af0(path);
+        ok = FileFinder_PlatformFindSingleFile(path);
     if (!ok)
-        ok = FUN_00af6320((int)path, x);
+        ok = ArchiveManager_FindFile((int)path, x);
     if (ok)
     {
         unsigned int len5 = strlen(name);
@@ -393,23 +399,24 @@ struct FileMatchList
         g_memoryManager.Deallocate(object);
     }
 };
-FileMatchList* FUN_00afe5b0(const char*, const char*, unsigned int, FileMatchList*);
+FileMatchList* FileFinder_BuildSingleFileList(const char*, const char*, unsigned int, FileMatchList*);
 void CollectDirectoryEntries(const char*, const char*, FileMatchList*);
-void FUN_00af6ba0(FileMatchList*, const char*, const char*, unsigned int);
+void ArchiveManager_AddToFileList(FileMatchList*, const char*, const char*, unsigned int);
 // Finds files matching a pattern in a directory, using wildcards or exact match, and returns a list of matches.
 // @fnv 0x00afe420
-FileMatchList* FUN_00afe420(const char* pattern, const char* directory, unsigned int flags, FileMatchList* existing)
+// src: COMMUNITY 0x00afe420
+FileMatchList* FileFinder_BuildFileList(const char* pattern, const char* directory, unsigned int flags, FileMatchList* existing)
 {
     if (!pattern || !directory)
         return 0;
     if (!strstr(pattern, "*") && !strstr(pattern, "?"))
-        return FUN_00afe5b0(pattern, directory, flags, existing);
+        return FileFinder_BuildSingleFileList(pattern, directory, flags, existing);
     FileMatchList* matches = existing;
     if (!matches)
         matches = new FileMatchList;
     if (!DAT_011acdf8 || DAT_011acdf9)
         CollectDirectoryEntries(pattern, directory, matches);
-    FUN_00af6ba0(matches, pattern, directory, flags);
+    ArchiveManager_AddToFileList(matches, pattern, directory, flags);
     if (matches->IsEmpty())
     {
         delete matches;

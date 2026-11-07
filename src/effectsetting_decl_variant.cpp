@@ -25,16 +25,17 @@ enum
     CHUNK_DATA = 0x41544144,
     CHUNK_ESCE = 0x45435345
 };
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
-void __cdecl FUN_00485910(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
 
 // @fnv 0x00407300
-void EffectSetting::FUN_00407300()
+// src: COMMUNITY 0x00407300
+void EffectSetting::SaveAlt()
 {
-    FUN_004855a0();
-    TESFullName::FUN_00487010();
-    TESDescription::FUN_00482cb0();
+    BeginFormRecord();
+    TESFullName::Save_00487010();
+    TESDescription::Save_00482cb0();
     TESIcon::Save(CHUNK_ICON);
     TESModel::WriteToBuffer(CHUNK_MODL, CHUNK_MODT);
 
@@ -56,10 +57,10 @@ void EffectSetting::FUN_00407300()
     TESForm* savedPAssociatedItemOriginal = data.m_pAssociatedForm;
     data.m_pAssociatedForm = (TESForm*)(data.m_pAssociatedForm ? static_cast<const TESForm*>(data.m_pAssociatedForm)->GetFormID() : 0);
 
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         data.Endian();
     AppendChunk(CHUNK_DATA, &data, sizeof(data));
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         data.Endian();
 
     data.m_pCastSound = pkCastSound;
@@ -74,7 +75,7 @@ void EffectSetting::FUN_00407300()
     EffectSetting* savedPkEffect;
     for (BSSimpleList<EffectSetting*>* pkIter = &counterEffects; pkIter && (savedPkEffect = pkIter->GetItem()) != 0;
          pkIter = pkIter->GetNext())
-        FUN_00485910(CHUNK_ESCE, static_cast<const TESForm*>(savedPkEffect)->GetFormID());
+        TESForm_AddChunk_00485910(CHUNK_ESCE, static_cast<const TESForm*>(savedPkEffect)->GetFormID());
 
-    FUN_00485680();
+    FinishFormRecord();
 }

@@ -8,7 +8,8 @@
 extern "C" const char* const g_011f444c_arg1;
 
 // @fnv 0x00a5fc00
-const char* const* __cdecl FUN_00a5fc00()
+// src: COMMUNITY 0x00a5fc00
+const char* const* __cdecl NiTexture_GetRTTI()
 {
     return &g_011f444c_arg1;
 }
@@ -28,7 +29,7 @@ bool __cdecl CompareHelpers(Helper const* apLeft, Helper const* apRight)
     return apLeft->_4.operator==(apRight->_4);
 }
 
-void __fastcall FUN_00a5f800(void*);
+void __fastcall NiTexture_RemoveTextureFromList(void*);
 void __fastcall DestroyFogProperty(void*);
 void __cdecl _delete(void*, unsigned int);
 extern int DAT_0109b944;
@@ -37,7 +38,7 @@ void* NiTexture::Destroy(unsigned int flags)
 {
     *(void**)this = (void*)&DAT_0109b944;
     delete m_pkRendererData;
-    FUN_00a5f800(this);
+    NiTexture_RemoveTextureFromList(this);
     DestroyFogProperty(this);
     if (flags & 1)
         _delete(this, 0x30);

@@ -5,13 +5,14 @@
 class FUN_00d87920_cls
 {
   public:
-    void FUN_00d87920();
+    void hkThread_stopThread();
 
     HANDLE m_hHandle;
 };
 
 // @fnv 0x00d87920
-void FUN_00d87920_cls::FUN_00d87920()
+// src: HAVOK_LIB 0x00d87920
+void FUN_00d87920_cls::hkThread_stopThread()
 {
     if (m_hHandle != 0)
     {

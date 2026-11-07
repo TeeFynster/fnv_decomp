@@ -56,12 +56,12 @@ template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer&
     return *this;
 }
 // The base copy helper has no declaration in the shared NiInterpolator header.
-extern "C" void FUN_00aa0ab0();
+extern "C" void NiKeyBasedInterpolator_CopyMembers();
 
 // @fnv 0x00a43690
 void BSTreadTransfInterpolator::CopyMembers(BSTreadTransfInterpolator* destination, void* context)
 {
-    reinterpret_cast<void (__thiscall *)(NiInterpolator*, NiInterpolator*, void*)>(FUN_00aa0ab0)(this, destination, context);
+    reinterpret_cast<void (__thiscall *)(NiInterpolator*, NiInterpolator*, void*)>(NiKeyBasedInterpolator_CopyMembers)(this, destination, context);
     delete[] destination->entries;
     destination->count = count;
     destination->entries = new TreadTransformEntry[count];

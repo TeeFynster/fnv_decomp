@@ -18,7 +18,7 @@ struct PickTarget
 struct FUN_00c6fd20_class
 {
     void* m_60c;
-    int FUN_00c6fd20();
+    int bhkCharacterController_GetSupportBody();
 };
 
 #include <xmmintrin.h>
@@ -26,9 +26,9 @@ struct GrabVector
 {
     __m128 value;
     GrabVector& FUN_006815c0();
-    void FUN_00553f70(const GrabVector*);
-    void FUN_00961190(void*);
-    void FUN_004b4ab0(const GrabVector*);
+    void hkVector4_add4(const GrabVector*);
+    void hkVector4_sub4(void*);
+    void hkVector4_setRotatedInverseDir(const GrabVector*);
 };
 struct GrabPoint
 {
@@ -47,7 +47,7 @@ struct GrabPosition
 {
     GrabVector value;
     void SetFromScaledVector3(const GrabPoint&);
-    void FUN_004b4db0(const GrabVector*);
+    void SetQuaternionComponentsFromVector(const GrabVector*);
     GrabVector* ApplyToAction(GrabVector*);
 };
 struct GrabBody;
@@ -71,19 +71,19 @@ struct GrabRay
     int unk80, unk84, unk88, unk8c, unk90, unk94, unk98, unk9c;
     int unka0, unka4, unka8, unkac;
     void FUN_004a3c20();
-    void FUN_004a3f70(int);
-    void FUN_004a3da0(const GrabPoint*);
-    void FUN_007f68a0(const GrabPoint*);
-    GrabBody* FUN_00c66fd0();
+    void bhkPickData_SetFilter(int);
+    void bhkPickData_SetFrom(const GrabPoint*);
+    void bhkPickData_SetLength(const GrabPoint*);
+    GrabBody* bhkPickData_GethkRigidBody();
 };
 struct GrabFilter
 {
     int bits;
     GrabFilter(int);
-    void FUN_004a39f0(int);
-    void FUN_0059ce80(unsigned);
-    int FUN_004a3a20();
-    int FUN_0043b4d0();
+    void CFilter_SetLayer(int);
+    void CFilter_SetGroup(unsigned);
+    int CFilter_GetGroup();
+    int CFilter_GetLayer();
 };
 struct GrabController
 {
@@ -94,20 +94,20 @@ struct GrabRef;
 struct GrabShape;
 struct GrabItem
 {
-    GrabShape* FUN_0084e3a0();
+    GrabShape* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct GrabItems
 {
     int GetShortAtOffset4();
-    GrabItem** FUN_0096a370(int);
+    GrabItem** GetElementAddress_0096a370(int);
 };
 struct GrabBody
 {
     void* FUN_0044ddc0();
-    int FUN_00517670();
-    GrabItems* FUN_009604f0();
-    void* FUN_004b4ec0();
-    GrabVector* FUN_004b4f00(const GrabVector*);
+    int hkpRigidBody_getMotionType();
+    GrabItems* GetRefList_009604f0();
+    void* hkpRigidBody_getPosition();
+    GrabVector* hkpRigidBody_getTransform(const GrabVector*);
 };
 struct GrabWorld
 {
@@ -239,8 +239,8 @@ struct GrabPhysics
     virtual void v0e8();
     virtual void v0ec();
     virtual void GetNavMeshData(GrabVector*);
-    GrabBody* FUN_004ae750();
-    GrabFilter FUN_0043b4f0();
+    GrabBody* Bipedanim_GetReferenceFlagsOrZero();
+    GrabFilter bhkWorldObject_GetCollisionFilter();
 };
 struct GrabRef
 {
@@ -444,19 +444,19 @@ struct GrabRef
     virtual void v314();
     virtual bool IsStateValid();
 
-    bool FUN_00444d00(int);
+    bool Projectile_IsFlagSet(int);
     GrabCell* FUN_008d6f30();
-    void* FUN_005d43c0();
+    void* BSFile_GetDevice();
     GrabRef* FUN_0044ddc0();
-    GrabMatrix* FUN_00461130();
+    GrabMatrix* NiAVObject_GetWorldRotate();
 };
 struct GrabCell
 {
-    GrabWorld* FUN_004543c0();
+    GrabWorld* TESObjectCELL_GetbhkWorld();
 };
 struct GrabSave
 {
-    bool FUN_0042ce10();
+    bool BGSSaveLoadGame_GetSaveGameLoading();
 };
 struct GrabConstraint
 {
@@ -509,7 +509,7 @@ struct GrabPointer
 {
     GrabConstraint* ptr;
     GrabPointer& FUN_0066b0d0(GrabConstraint*);
-    GrabConstraint* FUN_00559450();
+    GrabConstraint* Modelloader_GetReferencedThis();
 };
 struct GrabHost
 {
@@ -919,9 +919,9 @@ struct GrabHost
     void GetCameraPosAndDir(GrabPoint*, GrabPoint*, bool);
     GrabFilter* FUN_00931ed0(int*);
     void SetEffectValue(int, float, GrabRef*);
-    void FUN_00961280();
+    void PlayerCharacter_DestroyMouseSpring();
     GrabController* FUN_009306d0();
-    void FUN_0095f930(GrabRef*, int, float);
+    void PlayerCharacter_CreateMouseSpring(GrabRef*, int, float);
 };
 extern Setting DAT_011e0b1c;
 extern Setting DAT_011d18a8, DAT_011d183c, DAT_011d1728, DAT_011d1604;
@@ -932,26 +932,27 @@ extern GrabSave* DAT_011ddf38;
 extern const GrabPoint DAT_011a9484;
 extern const float DAT_01017868;
 extern const double DAT_01020998, DAT_0101ffa0, DAT_01018a90, DAT_01011588;
-GrabPhysics* FUN_004b52f0(GrabRef*);
+GrabPhysics* bhkRigidBody_FindHeaviestRigidBody(GrabRef*);
 int GetBSXFlags(GrabRef*, int);
-bool MarkBaseExtraListScriptEvent(int, void*, unsigned);
+bool Script_SetActionFlag(int, void*, unsigned);
 void GetScalarAndVector(GrabRef*, GrabVector*, float*);
-bool FUN_00703430();
-GrabPhysics* FUN_00960510();
+bool Interface_IsActivatePickFuzzy();
+GrabPhysics* ViewCaster_GetFuzzyBody();
 GrabRef* FUN_004b5a20(GrabBody*);
-GrabRef* FUN_0056f930(GrabRef*);
-GrabPhysics* FUN_004b5a80(GrabBody*);
-void FUN_007033d0(GrabPoint*);
+GrabRef* TESObjectREFR_FindReferenceFor3D(GrabRef*);
+GrabPhysics* bhkEntity_Getbhk(GrabBody*);
+void Interface_GetActivatePickLocation(GrabPoint*);
 void FUN_00553fc0(GrabVector*, const GrabPoint*);
 void FUN_00458620(GrabPoint*, const GrabVector*);
-float FUN_004587d0(float);
-float FUN_00404010(float, float);
-float FUN_0040ebd0(float, float);
-float FUN_0062c300(GrabRef*);
+float HK2NI(float);
+float BSMAX_00404010(float, float);
+float BSMIN(float, float);
+float TESHavokUtilities_GetSceneGraphMass(GrabRef*);
 float LinearInterpolate(float, float, float, float, float);
 
 // @fnv 0x0095f930
-void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
+// src: COMMUNITY 0x0095f930
+void GrabHost::PlayerCharacter_CreateMouseSpring(GrabRef* ref, int newMode, float range)
 {
     if (!*DAT_011e0b1c.FUN_00408d60() && ref->IsDead() && !ref->AllowGrab(0))
         return;
@@ -961,19 +962,19 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
         if (actor->GetState() == 3)
         {
             GrabRef* actor2 = actor;
-            if (actor2->IsStateValid() && !actor2->FUN_00444d00(0x200))
+            if (actor2->IsStateValid() && !actor2->Projectile_IsFlagSet(0x200))
                 return;
         }
     }
     if (ref && ref->FUN_008d6f30())
     {
         GrabRef* root = ref->Get3D();
-        GrabPhysics* physics = FUN_004b52f0(root);
+        GrabPhysics* physics = bhkRigidBody_FindHeaviestRigidBody(root);
         if (physics)
         {
             bool character = GetBSXFlags(root, 8) || ref->IsDead();
             target = ref;
-            MarkBaseExtraListScriptEvent(0, target->FUN_005d43c0(), 0x80000);
+            Script_SetActionFlag(0, target->BSFile_GetDevice(), 0x80000);
             mode = newMode;
             distance = range;
             GrabConstraintData data;
@@ -991,31 +992,31 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
             origin.FUN_006815c0();
             GetCameraPosAndDir(&origin, &direction, true);
             bool selected = false;
-            GrabWorld* world = ref->FUN_008d6f30()->FUN_004543c0();
-            if (mode == 1 && world && !DAT_011ddf38->FUN_0042ce10())
+            GrabWorld* world = ref->FUN_008d6f30()->TESObjectCELL_GetbhkWorld();
+            if (mode == 1 && world && !DAT_011ddf38->BGSSaveLoadGame_GetSaveGameLoading())
             {
-                if (!FUN_00703430() || !FUN_00960510())
+                if (!Interface_IsActivatePickFuzzy() || !ViewCaster_GetFuzzyBody())
                 {
                     GrabRay ray;
                     ray.FUN_004a3c20();
                     GrabFilter filter(0);
-                    filter.FUN_004a39f0(0x24);
+                    filter.CFilter_SetLayer(0x24);
                     int filterTemp;
-                    filter.FUN_0059ce80(FUN_00931ed0(&filterTemp)->FUN_004a3a20());
-                    ray.FUN_004a3f70(filter.bits);
-                    ray.FUN_004a3da0(&origin);
-                    ray.FUN_007f68a0(&(direction * distance));
+                    filter.CFilter_SetGroup(FUN_00931ed0(&filterTemp)->CFilter_GetGroup());
+                    ray.bhkPickData_SetFilter(filter.bits);
+                    ray.bhkPickData_SetFrom(&origin);
+                    ray.bhkPickData_SetLength(&(direction * distance));
                     if (world->Cast(&ray))
                     {
-                        GrabBody* hit = ray.FUN_00c66fd0();
+                        GrabBody* hit = ray.bhkPickData_GethkRigidBody();
                         GrabRef* hitRef = FUN_004b5a20(hit);
                         GrabRef* hitNode = hitRef ? hitRef->FUN_0044ddc0() : 0;
-                        GrabRef* resolved = FUN_0056f930(hitNode);
+                        GrabRef* resolved = TESObjectREFR_FindReferenceFor3D(hitNode);
                         if (hit && resolved == ref)
                         {
                             if (!character)
                             {
-                                GrabPhysics* hitPhysics = FUN_004b5a80(hit);
+                                GrabPhysics* hitPhysics = bhkEntity_Getbhk(hit);
                                 hitPhysics->GetNavMeshData(&center);
                             }
                             selected = true;
@@ -1029,18 +1030,18 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
                 else
                 {
                     GrabPoint picked;
-                    FUN_007033d0(&picked);
-                    if (!DAT_011ddf38->FUN_0042ce10())
+                    Interface_GetActivatePickLocation(&picked);
+                    if (!DAT_011ddf38->BGSSaveLoadGame_GetSaveGameLoading())
                         distance = (picked - origin).FUN_00457990();
                     data.position.SetFromScaledVector3(picked);
-                    GrabPhysics* pickedPhysics = FUN_00960510();
-                    data.body = pickedPhysics->FUN_004ae750();
+                    GrabPhysics* pickedPhysics = ViewCaster_GetFuzzyBody();
+                    data.body = pickedPhysics->Bipedanim_GetReferenceFlagsOrZero();
                     selected = true;
                 }
             }
             if (!selected)
             {
-                data.position.FUN_004b4db0(&center);
+                data.position.SetQuaternionComponentsFromVector(&center);
                 GrabVector position;
                 position.FUN_006815c0();
                 if (character)
@@ -1049,32 +1050,32 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
                     scratch.FUN_006815c0();
                     GrabVector rotated;
                     rotated.FUN_006815c0();
-                    FUN_00553fc0(&rotated, &(root->FUN_00461130()->FUN_004b4500(&DAT_011a9484)));
+                    FUN_00553fc0(&rotated, &(root->NiAVObject_GetWorldRotate()->FUN_004b4500(&DAT_011a9484)));
                     data.position.ApplyToAction(&position);
-                    position.FUN_00553f70(&rotated);
-                    data.position.FUN_004b4db0(&position);
+                    position.hkVector4_add4(&rotated);
+                    data.position.SetQuaternionComponentsFromVector(&position);
                 }
-                if (!DAT_011ddf38->FUN_0042ce10())
+                if (!DAT_011ddf38->BGSSaveLoadGame_GetSaveGameLoading())
                 {
                     GrabPoint point;
                     point.FUN_006815c0();
                     FUN_00458620(&point, data.position.ApplyToAction(&position));
                     distance = (point - origin).FUN_00457990();
                 }
-                data.body = physics->FUN_004ae750();
+                data.body = physics->Bipedanim_GetReferenceFlagsOrZero();
             }
             if (mode == 1)
                 SetEffectValue(5, DAT_01017868, ref);
             GrabBody* body = data.body;
-            if (!body->FUN_0044ddc0() || body->FUN_00517670() == 5 || body->FUN_00517670() == 4)
+            if (!body->FUN_0044ddc0() || body->hkpRigidBody_getMotionType() == 5 || body->hkpRigidBody_getMotionType() == 4)
             {
-                FUN_00961280();
+                PlayerCharacter_DestroyMouseSpring();
                 return;
             }
             GrabController* controller = FUN_009306d0();
             if (controller)
             {
-                float minDistance = FUN_004587d0(controller->GetSettingFloat()) + DAT_01020998;
+                float minDistance = HK2NI(controller->GetSettingFloat()) + DAT_01020998;
                 if (distance < minDistance)
                     distance = minDistance;
             }
@@ -1082,17 +1083,17 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
             {
                 if (character)
                 {
-                    data.f30 = *DAT_011d18a8.FUN_00403e20();
-                    data.f34 = *DAT_011d183c.FUN_00403e20();
-                    data.f3c = *DAT_011d1728.FUN_00403e20();
-                    data.f38 = *DAT_011d1604.FUN_00403e20();
+                    data.f30 = *DAT_011d18a8.Setting_Float_00403e20();
+                    data.f34 = *DAT_011d183c.Setting_Float_00403e20();
+                    data.f3c = *DAT_011d1728.Setting_Float_00403e20();
+                    data.f38 = *DAT_011d1604.Setting_Float_00403e20();
                 }
                 else
                 {
-                    data.f30 = *DAT_011d1a08.FUN_00403e20();
-                    data.f34 = *DAT_011d1c7c.FUN_00403e20();
-                    data.f3c = *DAT_011d1b44.FUN_00403e20();
-                    data.f38 = *DAT_011d177c.FUN_00403e20();
+                    data.f30 = *DAT_011d1a08.Setting_Float_00403e20();
+                    data.f34 = *DAT_011d1c7c.Setting_Float_00403e20();
+                    data.f3c = *DAT_011d1b44.Setting_Float_00403e20();
+                    data.f38 = *DAT_011d177c.Setting_Float_00403e20();
                 }
             }
             else
@@ -1101,16 +1102,16 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
                 float linearScale = 1.0f;
                 if (target->IsDead())
                 {
-                    float upper = *DAT_011d1260.FUN_00403e20();
-                    float lower = *DAT_011d0048.FUN_00403e20();
-                    float minScale = *DAT_011d0220.FUN_00403e20();
-                    float maxScale = *DAT_011d0e4c.FUN_00403e20();
-                    float clamped = FUN_0040ebd0(lower, FUN_00404010(upper, FUN_0062c300(root)));
+                    float upper = *DAT_011d1260.Setting_Float_00403e20();
+                    float lower = *DAT_011d0048.Setting_Float_00403e20();
+                    float minScale = *DAT_011d0220.Setting_Float_00403e20();
+                    float maxScale = *DAT_011d0e4c.Setting_Float_00403e20();
+                    float clamped = BSMIN(lower, BSMAX_00404010(upper, TESHavokUtilities_GetSceneGraphMass(root)));
                     angularScale *= LinearInterpolate(maxScale, minScale, lower, upper, clamped);
                     bool allCharacter = true;
-                    for (int i = 0; i < body->FUN_009604f0()->GetShortAtOffset4() && allCharacter; ++i)
+                    for (int i = 0; i < body->GetRefList_009604f0()->GetShortAtOffset4() && allCharacter; ++i)
                     {
-                        GrabShape* shape = (*body->FUN_009604f0()->FUN_0096a370(i))->FUN_0084e3a0();
+                        GrabShape* shape = (*body->GetRefList_009604f0()->GetElementAddress_0096a370(i))->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
                         allCharacter = shape->GetType() == 0xb;
                     }
                     if (allCharacter)
@@ -1119,36 +1120,36 @@ void GrabHost::FUN_0095f930(GrabRef* ref, int newMode, float range)
                         angularScale *= DAT_01018a90;
                     }
                 }
-                else if (physics->FUN_0043b4f0().FUN_0043b4d0() == 0xe)
+                else if (physics->bhkWorldObject_GetCollisionFilter().CFilter_GetLayer() == 0xe)
                 {
                     linearScale *= DAT_0101ffa0;
                     angularScale *= DAT_01011588;
                 }
-                data.f30 = *DAT_011d0358.FUN_00403e20();
-                data.f34 = *DAT_011cfeec.FUN_00403e20() * linearScale;
-                data.f3c = *DAT_011d08c8.FUN_00403e20();
-                data.f38 = *DAT_011d0ffc.FUN_00403e20() * angularScale;
+                data.f30 = *DAT_011d0358.Setting_Float_00403e20();
+                data.f34 = *DAT_011cfeec.Setting_Float_00403e20() * linearScale;
+                data.f3c = *DAT_011d08c8.Setting_Float_00403e20();
+                data.f38 = *DAT_011d0ffc.Setting_Float_00403e20() * angularScale;
             }
             GrabVector localPosition;
             localPosition.FUN_006815c0();
             GrabVector localRotation;
             localRotation.FUN_006815c0();
             data.position.ApplyToAction(&localPosition);
-            localPosition.FUN_00961190(body->FUN_004b4ec0());
+            localPosition.hkVector4_sub4(body->hkpRigidBody_getPosition());
             data.angular.ApplyToAction(&localRotation)
-                ->FUN_004b4ab0(&body->FUN_004b4f00(&localPosition)->FUN_006815c0());
-            data.angular.FUN_004b4db0(&localRotation);
-            target->FUN_008d6f30()->FUN_004543c0()->FUN_005533c0();
+                ->hkVector4_setRotatedInverseDir(&body->hkpRigidBody_getTransform(&localPosition)->FUN_006815c0());
+            data.angular.SetQuaternionComponentsFromVector(&localRotation);
+            target->FUN_008d6f30()->TESObjectCELL_GetbhkWorld()->FUN_005533c0();
             constraint.FUN_0066b0d0(new GrabConstraint(&data));
-            GrabConstraint* created = constraint.FUN_00559450();
-            created->SetWorld(target->FUN_008d6f30()->FUN_004543c0());
-            target->FUN_008d6f30()->FUN_004543c0()->FUN_005533c0();
-            mass = FUN_0062c300(ref->Get3D());
+            GrabConstraint* created = constraint.Modelloader_GetReferencedThis();
+            created->SetWorld(target->FUN_008d6f30()->TESObjectCELL_GetbhkWorld());
+            target->FUN_008d6f30()->TESObjectCELL_GetbhkWorld()->FUN_005533c0();
+            mass = TESHavokUtilities_GetSceneGraphMass(ref->Get3D());
         }
         else if (newMode == 2)
         {
             target = ref;
-            MarkBaseExtraListScriptEvent(0, target->FUN_005d43c0(), 0x80000);
+            Script_SetActionFlag(0, target->BSFile_GetDevice(), 0x80000);
             mode = 2;
             distance = range;
         }
@@ -1434,7 +1435,8 @@ void ApplyImpulse(VObj* p, NiPoint3* v, int flag);
 // Legacy grab state referenced by this reconstruction lies beyond Projectile.
 // Keep its original offsets until the function's owning type is identified.
 // @fnv 0x00960520
-void Projectile::FUN_00960520(int a)
+// src: XBOX_PDB 0x00960520
+void Projectile::PlayerCharacter_UpdateMouseSpring(int a)
 {
     using namespace fnv_00960520;
     if ((*reinterpret_cast<VObj**>(reinterpret_cast<char*>(this) + 0x638)) == 0 || (*reinterpret_cast<RefHandle*>(reinterpret_cast<char*>(this) + 0x634)).Get() == 0 || (*reinterpret_cast<RefHandle*>(reinterpret_cast<char*>(this) + 0x634)).Get()->GetRace() == 0)
@@ -1542,7 +1544,7 @@ void Projectile::FUN_00960520(int a)
         }
     }
     float ratio = best / weapon->GetRadius();
-    if (len > *DAT_011d0664.FUN_00403e20() && ratio > *DAT_011cffc4.FUN_00403e20())
+    if (len > *DAT_011d0664.Setting_Float_00403e20() && ratio > *DAT_011cffc4.Setting_Float_00403e20())
     {
         Explode();
         return;
@@ -1569,11 +1571,11 @@ void Projectile::FUN_00960520(int a)
             node = node->GetNext();
         }
     }
-    if (target != 0 && flagA && len > *DAT_011d1308.FUN_00403e20())
+    if (target != 0 && flagA && len > *DAT_011d1308.Setting_Float_00403e20())
     {
-        float force = *DAT_011d0808.FUN_00403e20() * (len - *DAT_011d1308.FUN_00403e20()) / len;
-        float fScaledValue = *DAT_011d04d8.FUN_00403e20();
-        float fMin = *DAT_011d037c.FUN_00403e20();
+        float force = *DAT_011d0808.Setting_Float_00403e20() * (len - *DAT_011d1308.Setting_Float_00403e20()) / len;
+        float fScaledValue = *DAT_011d04d8.Setting_Float_00403e20();
+        float fMin = *DAT_011d037c.Setting_Float_00403e20();
         float scale = MinF(fMin, MaxF(fScaledValue, fnv_00960520::GetScale(target)));
         float t = Lerp(0.0f, 1.0f, fMin, fScaledValue, scale);
         HkVec mul(force * DAT_0101a6b0 * t);

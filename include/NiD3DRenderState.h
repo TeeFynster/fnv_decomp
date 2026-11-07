@@ -11,7 +11,7 @@ public:
     virtual void vf03();
     virtual void vf04();
     virtual void vf05();
-    virtual void FUN_00e87980(void*);
+    virtual void ApplyMaterial(void*);
     virtual void vf07();
     virtual void vf08();
     virtual void vf09();

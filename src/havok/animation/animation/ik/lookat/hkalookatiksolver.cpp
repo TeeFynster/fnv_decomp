@@ -4,14 +4,15 @@
 
 #include <xmmintrin.h>
 float __cdecl ClampAsin(float value);
-float __cdecl FUN_00ce00f0(float a, float b);
+float __cdecl Hkaskeletonutils_ForwardCall_00ce00f0(float a, float b);
 
 extern "C" const double DAT_01032980;  // 1.0e-4, the length epsilon
 static const float kZero = 0.0f;       // the game's DAT_01011d78
 
 // Computes the three-component length; if it is not below the threshold, stores that length, a function of x and y, and a clamped asin of z over the length.
 // @fnv 0x00ce01c0
-void __cdecl FUN_00ce01c0(__m128* vec)
+// src: GUESS 0x00ce01c0 (confidence: low)
+void __cdecl Object_ProcessAndReturnValue_00ce01c0(__m128* vec)
 {
     const float* pFloats = (const float*)vec;
 
@@ -40,7 +41,7 @@ void __cdecl FUN_00ce01c0(__m128* vec)
     point.y = pFloats[1];
     float phi = ClampAsin(pFloats[2] / point.radius);
     // The saved Cartesian y is no longer needed after computing the heading.
-    point.y = FUN_00ce00f0(point.y, point.x);
+    point.y = Hkaskeletonutils_ForwardCall_00ce00f0(point.y, point.x);
 
     *vec = _mm_setr_ps(point.radius, point.y, phi, kZero);
 }

@@ -194,7 +194,7 @@ struct S_00cfaed0_This
     float f80;
     float f84;
     int p6;
-    void FUN_00cfaed0(S_00cfaed0_Iface* p1, S_00cfaed0_P2* a2, S_00cfaed0_P3* a3, int a4, S_00cfaed0_P5* a5, int a6,
+    void ComputeValues_00cfaed0(S_00cfaed0_Iface* p1, S_00cfaed0_P2* a2, S_00cfaed0_P3* a3, int a4, S_00cfaed0_P5* a5, int a6,
                       int a7, int a8, int a9);
 };
 
@@ -232,7 +232,8 @@ struct S_00cfaed0_Vec
     }
 };
 // @fnv 0x00cfaed0
-void S_00cfaed0_This::FUN_00cfaed0(S_00cfaed0_Iface* p1, S_00cfaed0_P2* a2, S_00cfaed0_P3* a3, int a4,
+// src: GUESS 0x00cfaed0 (confidence: low)
+void S_00cfaed0_This::ComputeValues_00cfaed0(S_00cfaed0_Iface* p1, S_00cfaed0_P2* a2, S_00cfaed0_P3* a3, int a4,
                                    S_00cfaed0_P5* a5, int a6, int a7, int a8, int a9)
 {
     *(volatile int*)&p8 = a8;

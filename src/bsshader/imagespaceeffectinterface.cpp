@@ -66,11 +66,11 @@ struct PipboyPass : PipboyParamBase
         PipboyFree(pvMem);
     }
 
-    void FUN_00ba37f0(NiTexture* pkTexture);
+    void ImageSpaceTexture_SetTexture_00ba37f0(NiTexture* pkTexture);
 
-    void FUN_00ba3760(int iValue);
+    void NiShader_SetImplementation(int iValue);
 
-    NiTexture* FUN_00ba3780();
+    NiTexture* ImageSpaceTexture_GetTexture();
 };
 
 struct PipboyConstantsBase : PipboyParamBase
@@ -354,9 +354,9 @@ void PipboyShader::SetupScanlineDistortion(PipboyGeometry* pkGeometry, int iUnus
         m_kPasses.FUN_00ba3aa0(3, pPass);
     }
 
-    static_cast<PipboyPass*>(m_kPasses.GetAt(3))->FUN_00ba37f0(pkScanlines);
+    static_cast<PipboyPass*>(m_kPasses.GetAt(3))->ImageSpaceTexture_SetTexture_00ba37f0(pkScanlines);
 
-    static_cast<PipboyPass*>(m_kPasses.GetAt(3))->FUN_00ba3760(3);
+    static_cast<PipboyPass*>(m_kPasses.GetAt(3))->NiShader_SetImplementation(3);
 
     {
         PipboyParamBase* pPass = new PipboyPass;
@@ -364,18 +364,18 @@ void PipboyShader::SetupScanlineDistortion(PipboyGeometry* pkGeometry, int iUnus
     }
 
     NiTexture* pkDistort = distortion.pointer;
-    static_cast<PipboyPass*>(m_kPasses.m_pBase[4])->FUN_00ba37f0(pkDistort);
+    static_cast<PipboyPass*>(m_kPasses.m_pBase[4])->ImageSpaceTexture_SetTexture_00ba37f0(pkDistort);
 
-    static_cast<PipboyPass*>(m_kPasses.GetAt(4))->FUN_00ba3760(0);
+    static_cast<PipboyPass*>(m_kPasses.GetAt(4))->NiShader_SetImplementation(0);
 
     {
         PipboyParamBase* pPass = new PipboyPass;
         m_kPasses.FUN_00ba3aa0(2, pPass);
     }
 
-    static_cast<PipboyPass*>(m_kPasses.GetAt(2))->FUN_00ba3760(0);
+    static_cast<PipboyPass*>(m_kPasses.GetAt(2))->NiShader_SetImplementation(0);
 
-    static_cast<PipboyPass*>(m_kPasses.GetAt(2))->FUN_00ba37f0(0);
+    static_cast<PipboyPass*>(m_kPasses.GetAt(2))->ImageSpaceTexture_SetTexture_00ba37f0(0);
 
     if (g_spPipboyTexture_01200818)
     {
@@ -392,7 +392,7 @@ void PipboyShader::SetupScanlineDistortion(PipboyGeometry* pkGeometry, int iUnus
     if (m_kPasses.m_pBase[0])
     {
 
-        NiTexture* pkSource = static_cast<PipboyPass*>(m_kPasses.m_pBase[0])->FUN_00ba3780();
+        NiTexture* pkSource = static_cast<PipboyPass*>(m_kPasses.m_pBase[0])->ImageSpaceTexture_GetTexture();
 
         fTexelX = 1.0f / (float)pkSource->GetWidth() * g_f011ae5e8;
 

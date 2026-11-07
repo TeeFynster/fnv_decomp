@@ -4,6 +4,6 @@
 class TESRegionPointList_CellExtraList
 {
   public:
-    TESRegionList* FUN_0041bce0();
+    TESRegionList* ExtraDataList_GetRegionList();
     void SetRegionList(TESRegionList*);
 };

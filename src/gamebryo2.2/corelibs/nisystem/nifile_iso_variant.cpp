@@ -6,9 +6,9 @@
 // The dispatch helper retains the original unoptimized request construction.
 
 void __cdecl ReadFileData();
-void __cdecl FUN_00aa19c0();
-void __cdecl FUN_00aa19e0();
-void __cdecl FUN_00aa1ad0();
+void __cdecl NiFile_WriteNoSwap();
+void __cdecl NiFile_ReadAndSwap();
+void __cdecl NiFile_WriteAndSwap();
 
 struct FileTransferCallbacks
 {
@@ -16,27 +16,28 @@ struct FileTransferCallbacks
     unsigned int bytesProcessed;
     void(__cdecl* readFunction)();
     void(__cdecl* writeFunction)();
-    void FUN_00aa1b30(bool enableSwap);
+    void NiFile_SetEndianSwap(bool enableSwap);
 };
 
 // @fnv 0x00aa1b30
-void FileTransferCallbacks::FUN_00aa1b30(bool enableSwap)
+// src: XBOX_PDB 0x00aa1b30
+void FileTransferCallbacks::NiFile_SetEndianSwap(bool enableSwap)
 {
     if (enableSwap)
     {
-        readFunction = FUN_00aa19e0;
-        writeFunction = FUN_00aa1ad0;
+        readFunction = NiFile_ReadAndSwap;
+        writeFunction = NiFile_WriteAndSwap;
     }
     else
     {
         readFunction = ReadFileData;
-        writeFunction = FUN_00aa19c0;
+        writeFunction = NiFile_WriteNoSwap;
     }
 }
 
 struct FileAllocator
 {
-    void* FUN_00aa3e40(unsigned int);
+    void* Game_DoHeapAlloc(unsigned int);
 };
 extern "C" FileAllocator DAT_011f6238;
 
@@ -46,27 +47,29 @@ struct FileConstructor
 };
 
 // @fnv 0x00aa1b60
-extern "C" NiFile* __cdecl FUN_00aa1b60(const char* filename, NiFile::OpenMode mode, unsigned int bufferSize)
+// src: COMMUNITY 0x00aa1b60
+extern "C" NiFile* __cdecl NiFile_DefaultFileCreateFunc(const char* filename, NiFile::OpenMode mode, unsigned int bufferSize)
 {
-    void* storage = DAT_011f6238.FUN_00aa3e40(0x30);
+    void* storage = DAT_011f6238.Game_DoHeapAlloc(0x30);
     if (storage)
         return static_cast<FileConstructor*>(storage)->FUN_00aa14d0(filename, mode, bufferSize);
     return 0;
 }
 
-::NiFile* __cdecl FUN_00aa1b60(const char*, ::NiFile::OpenMode, unsigned int);
+::NiFile* __cdecl NiFile_DefaultFileCreateFunc(const char*, ::NiFile::OpenMode, unsigned int);
 
 // @fnv 0x00aa1b90
-void __cdecl FUN_00aa1b90(::NiFile*(__cdecl* replacement)(const char*, ::NiFile::OpenMode, unsigned int))
+// src: COMMUNITY 0x00aa1b90
+void __cdecl NiFile_SetFileCreateFunc(::NiFile*(__cdecl* replacement)(const char*, ::NiFile::OpenMode, unsigned int))
 {
-    ::DAT_011ac224 = &FUN_00aa1b60;
+    ::DAT_011ac224 = &NiFile_DefaultFileCreateFunc;
     if (replacement)
         ::DAT_011ac224 = replacement;
 }
 
 extern int EmptyFS;
-bool __cdecl FUN_00aa1ab0(const char*);
-bool __cdecl FUN_00aa1bb0(const char*);
+bool __cdecl NiFile_DirectoryExists(const char*);
+bool __cdecl NiFile_CreateDirectoryRecursive(const char*);
 
 struct ProgramCacheDirectoryState
 {
@@ -81,14 +84,15 @@ struct ProgramCacheDirectoryState
 };
 
 // @fnv 0x00ee8d20
-extern "C" bool __fastcall FUN_00ee8d20(ProgramCacheDirectoryState* cache, int)
+// src: XBOX_PDB 0x00ee8d20
+extern "C" bool __fastcall NiGPUProgramCache_ValidateDirectory(ProgramCacheDirectoryState* cache, int)
 {
     if (cache->workingDirectory != reinterpret_cast<const char*>(EmptyFS))
     {
-        if (FUN_00aa1ab0(cache->workingDirectory))
+        if (NiFile_DirectoryExists(cache->workingDirectory))
             return true;
         const char* directory = cache->workingDirectory;
-        bool created = FUN_00aa1bb0(directory);
+        bool created = NiFile_CreateDirectoryRecursive(directory);
         return created;
     }
     return false;
@@ -113,19 +117,21 @@ struct FileAccessObject
     bool good;
 };
 // @fnv 0x00aa1a40
-extern "C" bool __cdecl FUN_00aa1a40(const char* name, NiFile::OpenMode mode)
+// src: COMMUNITY 0x00aa1a40
+extern "C" bool __cdecl NiFile_DefaultFileAccessFunc(const char* name, NiFile::OpenMode mode)
 {
     FileAccessObject file(name, mode, 0);
     return file.good;
 }
 
 extern bool(__cdecl* DAT_011ac228)(const char*, ::NiFile::OpenMode);
-bool __cdecl FUN_00aa1a40(const char*, ::NiFile::OpenMode);
+bool __cdecl NiFile_DefaultFileAccessFunc(const char*, ::NiFile::OpenMode);
 
 // @fnv 0x00aa1a70
-extern "C" void __cdecl FUN_00aa1a70(bool(__cdecl* handler)(const char*, ::NiFile::OpenMode))
+// src: COMMUNITY 0x00aa1a70
+extern "C" void __cdecl NiFile_SetFileAccessFunc(bool(__cdecl* handler)(const char*, ::NiFile::OpenMode))
 {
-    DAT_011ac228 = FUN_00aa1a40;
+    DAT_011ac228 = NiFile_DefaultFileAccessFunc;
     if (handler != 0)
     {
         DAT_011ac228 = handler;
@@ -138,11 +144,12 @@ namespace RelativeFileSeekDetail {
 class RelativeSeekFile : public NiFile
 {
   public:
-    void FUN_00aa1a90(int distance);
+    void NiFile_Seek_00aa1a90(int distance);
 };
 
 // @fnv 0x00aa1a90
-void RelativeSeekFile::FUN_00aa1a90(int distance)
+// src: GAMEBRYO_LIB 0x00aa1a90
+void RelativeSeekFile::NiFile_Seek_00aa1a90(int distance)
 {
     Seek(distance, DAT_010a2484);  // NiFile::Seek(int, int), vtable slot 5 (+0x14)
 }
@@ -156,7 +163,8 @@ extern bool(__cdecl* DAT_011ac22c)(const char*);
 void __cdecl fnv_StandardizeFilePath(char*);
 
 // @fnv 0x00aa1bb0
-bool __cdecl FUN_00aa1bb0(const char* pcPath)
+// src: COMMUNITY 0x00aa1bb0
+bool __cdecl NiFile_CreateDirectoryRecursive(const char* pcPath)
 {
     if (DAT_011ac230(pcPath))
         return true;
@@ -198,7 +206,8 @@ bool __cdecl FUN_00aa1bb0(const char* pcPath)
 namespace fnv_00aa1a30 {
 extern void(__cdecl* DAT_011ac228)(const char*, NiFile::OpenMode);
 // @fnv 0x00aa1a30
-void __cdecl FUN_00aa1a30(const char* name, NiFile::OpenMode mode)
+// src: XBOX_PDB 0x00aa1a30
+void __cdecl NiFile_Access(const char* name, NiFile::OpenMode mode)
 {
     DAT_011ac228(name, mode);
 }

@@ -32,9 +32,9 @@ class NiShadeProperty : public NiProperty
     int GetShaderType();
     int GetShaderPropertyType();
     int FUN_00441110();
-    NiObject* FUN_00a81480(CloningProcess& cloning);
-    void FUN_00a95190(NiStream& stream);
-    bool FUN_00a9a5b0(NiObject* object);
+    NiObject* CreateClone_00a81480(CloningProcess& cloning);
+    void NiDitherProperty_LoadBinary(NiStream& stream);
+    bool NiCullingProperty_IsEqual(NiObject* object);
     void SaveToStream(NiStream& stream);
     void* Destroy(unsigned int flags);
     void SetTexture(int slot, int index, void* texture);

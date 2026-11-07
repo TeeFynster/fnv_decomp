@@ -92,46 +92,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 
@@ -147,7 +147,8 @@ __forceinline LocalVec3::LocalVec3()
 }
 __forceinline LocalVec3::LocalVec3(float a, float b, float c) : x(a), y(b), z(c)
 {}
-inline void LocalVec3::FUN_00b12790()
+// src: COMMUNITY 0x00b12790
+inline void LocalVec3::Normalize_00b12790()
 {
     float lengthSquared = x * x + y * y + z * z;
     float length = (float)FUN_00ec6054(lengthSquared);
@@ -170,7 +171,8 @@ inline LocalVec3 LocalVec3::ScaleSwizzled(float value)
 {
     return LocalVec3(x * value, y * value, z * value);
 }
-inline LocalVec3& LocalVec3::FUN_00b2a1c0(void* ptr)
+// src: GUESS 0x00b2a1c0 (confidence: medium)
+inline LocalVec3& LocalVec3::AddComponents(void* ptr)
 {
     const LocalVec3& rhs = *(const LocalVec3*)ptr;
     x += rhs.x;
@@ -178,7 +180,8 @@ inline LocalVec3& LocalVec3::FUN_00b2a1c0(void* ptr)
     z += rhs.z;
     return *this;
 }
-inline float LocalVec3::FUN_00b04d40(LocalVec3* rhs)
+// src: COMMUNITY 0x00b04d40
+inline float LocalVec3::CVec3_Distance(LocalVec3* rhs)
 {
     float squared = (rhs->z - z) * (rhs->z - z) + (rhs->y - y) * (rhs->y - y) + (rhs->x - x) * (rhs->x - x);
     int bits = *(int*)&squared;
@@ -211,16 +214,17 @@ struct GameContext
     unsigned int packed14;
     unsigned char alpha18, unk19, unk1a, unk1b;
     LocalVec3 location;
-    void FUN_00b40430(float*);
-    void FUN_00b404c0(const Color& values, bool adjust)
+    void CBillboardLeaf_GetColor(float*);
+// src: COMMUNITY 0x00b404c0
+    void CBillboardLeaf_SetColor(const Color& values, bool adjust)
     {
         unsigned int packed = PackChannel(values.r, adjust, alpha18);
         packed += PackChannel(values.g, adjust, alpha18) << 8;
         packed += PackChannel(values.b, adjust, alpha18) << 16;
         packed14 = packed - 0x1000000;
     }
-    void FUN_00b40210(int, LocalVec3*, float);
-    float FUN_00b04d40(LocalVec3*);
+    void CBillboardLeaf_AdjustStaticLighting(int, LocalVec3*, float);
+    float CVec3_Distance(LocalVec3*);
 };
 struct Record;
 struct Iterator
@@ -231,16 +235,16 @@ struct Iterator
     {
         FUN_00b42980(value, owner);
     }
-    bool FUN_00b2ac30(Iterator*);
-    GameContext*& FUN_00b2ab50();
-    void FUN_00b2abc0();
+    bool EvaluateValue_00b2ac30(Iterator*);
+    GameContext*& EvaluateValue_00b2ab50();
+    void ProcessAndReturnValue_00b2abc0();
     __forceinline bool operator!=(Iterator const& rhs)
     {
-        return !FUN_00b2ac30((Iterator*)&rhs);
+        return !EvaluateValue_00b2ac30((Iterator*)&rhs);
     }
     __forceinline GameContext*& operator->()
     {
-        return FUN_00b2ab50();
+        return EvaluateValue_00b2ab50();
     }
 };
 struct Record
@@ -299,22 +303,23 @@ struct Scene
     {
         return blend70;
     }
-    void FUN_00b2a210(int output, Record* records, int count);
+    void CLightingEngine_ComputeLeafStaticLighting(int output, Record* records, int count);
 };
 // @fnv 0x00b2a210
-void Scene::FUN_00b2a210(int output, Record* records, int count)
+// src: COMMUNITY 0x00b2a210
+void Scene::CLightingEngine_ComputeLeafStaticLighting(int output, Record* records, int count)
 {
     if (state38 == 1 && flags74 != 0)
     {
         for (int i = 0; i < count; ++i)
         {
             Iterator it = records[i].begin();
-            for (; it != records[i].end(); it.FUN_00b2abc0())
+            for (; it != records[i].end(); it.ProcessAndReturnValue_00b2abc0())
             {
                 void* location = &it->location;
                 void* rotationW = &it->rotation;
                 Color origin20;
-                it->FUN_00b40430(&origin20.r);
+                it->CBillboardLeaf_GetColor(&origin20.r);
                 LocalVec3 best;
                 float maximumW2 = DAT_01012054;
                 LocalVec3 result5;
@@ -324,8 +329,8 @@ void Scene::FUN_00b2a210(int output, Record* records, int count)
                     {
                         LocalVec3 dir(DAT_011ad168[j].position.x, DAT_011ad168[j].position.y, DAT_011ad168[j].position.z);
                         LocalVec3 normal_29 =
-                            DAT_011ad168[j].transformMode == DAT_01012060 ? dir : dir.FUN_00b13040(rotationW);
-                        normal_29.FUN_00b12790();
+                            DAT_011ad168[j].transformMode == DAT_01012060 ? dir : dir.Diff_00b13040(rotationW);
+                        normal_29.Normalize_00b12790();
                         float weight = normal_29.FUN_00b2a180(location);
                         if (weight >= maximumW2)
                         {
@@ -345,7 +350,7 @@ void Scene::FUN_00b2a210(int output, Record* records, int count)
                             float falloff = 1.0f;
                             if (DAT_011ad168[j].transformMode != DAT_01012060)
                             {
-                                float dist8 = ((LocalVec3*)rotationW)->FUN_00b04d40(&dir);
+                                float dist8 = ((LocalVec3*)rotationW)->CVec3_Distance(&dir);
                                 float polynomial = DAT_011ad168[j].constant + DAT_011ad168[j].linear * dist8 +
                                                    DAT_011ad168[j].quadratic * dist8 * dist8;
                                 if (polynomial != DAT_01012060)
@@ -354,7 +359,7 @@ void Scene::FUN_00b2a210(int output, Record* records, int count)
                             LocalVec3 attenuation((weight * DAT_011ad168[j].scale.x) * origin20[0],
                                              (weight * DAT_011ad168[j].scale.y) * origin20[1],
                                              (weight * DAT_011ad168[j].scale.z) * origin20[2]);
-                            result5.FUN_00b2a1c0(
+                            result5.AddComponents(
                                 &pos29.AddVector(combined5.AddVector(attenuation).ScaleSwizzled(falloff)));
                         }
                     }
@@ -367,11 +372,11 @@ void Scene::FUN_00b2a210(int output, Record* records, int count)
                                                                                       : result5[2] = result5[2];
                 if ((flags74 & 1) != 0)
                 {
-                    it->FUN_00b404c0((Color&)result5, 0);
+                    it->CBillboardLeaf_SetColor((Color&)result5, 0);
                 }
                 if ((flags74 & 2) != 0)
                 {
-                    it->FUN_00b40210(output, &best, blend70);
+                    it->CBillboardLeaf_AdjustStaticLighting(output, &best, blend70);
                 }
             }
         }
@@ -388,9 +393,9 @@ struct FUN_0044a4c0
     FUN_0044a4c0(const FUN_0044a4c0& r);
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
 };
 struct FUN_00b096a0
 {
@@ -416,7 +421,7 @@ struct Parser
     unsigned uiPos;
     ByteVec kData;
     int GetNextElement();
-    float FUN_00b3ed20();
+    float CTreeFileAccess_ParseFloat();
 };
 inline void DeadTop()
 {
@@ -433,10 +438,11 @@ struct LightQ
     int iX;
     int iY;
     float afC[13];
-    void FUN_00b2a940(Parser* p);
+    void CLightingEngine_Parse(Parser* p);
 };
 // @fnv 0x00b2a940
-void LightQ::FUN_00b2a940(Parser* p)
+// src: COMMUNITY 0x00b2a940
+void LightQ::CLightingEngine_Parse(Parser* p)
 {
     DeadTop();
     int iToken = p->GetNextElement();
@@ -449,17 +455,17 @@ void LightQ::FUN_00b2a940(Parser* p)
             break;
         case 0x1f43:
             for (int i = 0; i < 13; i++)
-                afA[i] = p->FUN_00b3ed20();
+                afA[i] = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x1f44:
             iCount = p->GetNextElement();
             break;
         case 0x1f45:
             for (int j = 0; j < 13; j++)
-                afB[j] = p->FUN_00b3ed20();
+                afB[j] = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x1f46:
-            fScale = p->FUN_00b3ed20();
+            fScale = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x1f47:
             iX = p->GetNextElement();
@@ -469,7 +475,7 @@ void LightQ::FUN_00b2a940(Parser* p)
             break;
         case 0x1f49:
             for (int k = 0; k < 13; k++)
-                afC[k] = p->FUN_00b3ed20();
+                afC[k] = p->CTreeFileAccess_ParseFloat();
             break;
         default:
             throw FUN_00b09480("malformed lighting information", false);

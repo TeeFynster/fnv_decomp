@@ -92,11 +92,11 @@ class ShadowSceneNode : public NiNode
     void SetFogPropertyForIndex(BSFogProperty* property);
     ShadowSceneLight* GetShadowSceneLight(NiLight* light, bool flag);
     void SetCreatureType(unsigned char type);
-    unsigned char FUN_005f9ad0();
-    void FUN_00b5b1c0(NiAVObject* object);
-    void FUN_00b5b1c0(SceneObject* object);
+    unsigned char ShadowSceneNode_GetDisableLightUpdate();
+    void RemoveObject_00b5b1c0(NiAVObject* object);
+    void RemoveObject_00b5b1c0(SceneObject* object);
     void FUN_00b5ca70(NiNode* node, float radius);
     void FUN_00b5ca70(NiNodeW7* node, float radius);
-    void FUN_00b5d180();
-    void FUN_00b5eed0(NiNode* node);
+    void RemoveAllLights();
+    void ShadowSceneNode_RemoveLight(NiNode* node);
 };

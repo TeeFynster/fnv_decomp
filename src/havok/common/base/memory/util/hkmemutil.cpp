@@ -2,11 +2,12 @@
 // src/havok/common/base/memory/util/hkmemutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/memory/util/hkmemutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-void __cdecl FUN_00d2caa0(void*, void*, unsigned int);
+void __cdecl hkMemUtil_memCpy_00d2caa0(void*, void*, unsigned int);
 void __cdecl CopyMemoryBackward(void*, void*, unsigned int);
 
 // @fnv 0x00d2cc70
-void __cdecl FUN_00d2cc70(void* dst, void* src, unsigned int size)
+// src: HAVOK_LIB 0x00d2cc70
+void __cdecl hkMemUtil_memMove(void* dst, void* src, unsigned int size)
 {
     if (dst > src)
     {
@@ -14,7 +15,7 @@ void __cdecl FUN_00d2cc70(void* dst, void* src, unsigned int size)
     }
     else if (dst < src)
     {
-        FUN_00d2caa0(dst, src, size);
+        hkMemUtil_memCpy_00d2caa0(dst, src, size);
     }
 }
 
@@ -103,7 +104,8 @@ namespace fnv_00d2caa0 {
 void* __cdecl _memmove(void* dst, const void* src, unsigned int count);
 
 // @fnv 0x00d2caa0
-void __cdecl FUN_00d2caa0(void* dst, void* src, unsigned int size)
+// src: XBOX_PDB 0x00d2caa0
+void __cdecl hkMemUtil_memCpy_00d2caa0(void* dst, void* src, unsigned int size)
 {
     _memmove(dst, src, size);
 }
@@ -111,7 +113,8 @@ void __cdecl FUN_00d2caa0(void* dst, void* src, unsigned int size)
 
 void __cdecl FUN_00ec61c0();
 // @fnv 0x00d2cab0
-void __cdecl FUN_00d2cab0()
+// src: XBOX_PDB 0x00d2cab0
+void __cdecl hkMemUtil_memSet()
 {
     FUN_00ec61c0();
 }
@@ -144,7 +147,8 @@ void D2CAC0Caller(void* dst, const void* src, unsigned int nbytes)
 
 // Copies complete 4-byte chunks from src to dst in reverse order when size is at least 4.
 // @fnv 0x00d2caf0
-static __declspec(noinline) void FUN_00d2caf0(void* dst, void* src, unsigned int size)
+// src: HAVOK_LIB 0x00d2caf0
+static __declspec(noinline) void memCopyBackwards_4(void* dst, void* src, unsigned int size)
 {
     unsigned int n = size >> 2;
 
@@ -164,11 +168,12 @@ static __declspec(noinline) void FUN_00d2caf0(void* dst, void* src, unsigned int
 
 void q_call_d2caf0(void* dst, void* src, unsigned int size)
 {
-    FUN_00d2caf0(dst, src, size);
+    memCopyBackwards_4(dst, src, size);
 }
 
 // @fnv 0x00d2cb20
-static __declspec(noinline) void FUN_00d2cb20(void* dst, void* src, unsigned int count)
+// src: HAVOK_LIB 0x00d2cb20
+static __declspec(noinline) void memCopyBackwards_2(void* dst, void* src, unsigned int count)
 {
     unsigned int words = count >> 1;
     if (count >= 2)
@@ -186,11 +191,12 @@ static __declspec(noinline) void FUN_00d2cb20(void* dst, void* src, unsigned int
 
 void q_call_d2cb20(void* a, void* b, unsigned int c)
 {
-    FUN_00d2cb20(a, b, c);
+    memCopyBackwards_2(a, b, c);
 }
 
 // @fnv 0x00d2cb50
-static __declspec(noinline) void FUN_00d2cb50(unsigned int count, unsigned char* dst, const unsigned char* src)
+// src: HAVOK_LIB 0x00d2cb50
+static __declspec(noinline) void memCopyBackwards_1(unsigned int count, unsigned char* dst, const unsigned char* src)
 {
     for (unsigned int i = count; i >= 1; --i)
     {
@@ -200,5 +206,5 @@ static __declspec(noinline) void FUN_00d2cb50(unsigned int count, unsigned char*
 
 void copy_backward(unsigned char* dst, const unsigned char* src, unsigned int count)
 {
-    FUN_00d2cb50(count, dst, src);
+    memCopyBackwards_1(count, dst, src);
 }

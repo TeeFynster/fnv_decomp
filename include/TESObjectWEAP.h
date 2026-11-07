@@ -87,7 +87,7 @@ public:
     int GetWeaponType() const;
     int GetWeaponType();
     int GetCombatWeaponType();
-    int FUN_00522c80();
+    int TESObjectWEAP_GetCombatWeaponType();
     int GetReloadAnim(bool modded);
     int GetFlaggedValue(unsigned char value);
     int GetField19C();
@@ -133,24 +133,24 @@ public:
     float GetWeightForForm(bool modded);
 
     int FUN_00446390();
-    TESBoundObject* FUN_00525980(PlayerCharacter* pc);
-    void* FUN_00525980(int value);
+    TESBoundObject* TESObjectWEAP_GetCurrentAmmo(PlayerCharacter* pc);
+    void* TESObjectWEAP_GetCurrentAmmo(int value);
     int FUN_0051e2a0(unsigned char value);
-    float FUN_00646020(bool modded);
-    float FUN_00709430(bool modded);
-    float FUN_00709430(int value);
+    float GetAttackSpeed(bool modded);
+    float GetAmmoRegenRate(bool modded);
+    float GetAmmoRegenRate(int value);
     int FUN_00525b20(int first, int second, int third);
-    TESModel* FUN_00504e60();
+    TESModel* TESCasino_GetData();
     bool FUN_004c94d0();
-    bool FUN_00646cb0();
-    bool FUN_004c0bf0();
+    bool IsTwoHandedWeapon();
+    bool TESObjectWEAP_IsThrownWeapon();
     bool FUN_004ad030();
-    bool FUN_0046e8c0();
-    void FUN_0051f4b0(BGSProjectile* projectile);
-    void FUN_0051f4f0(SpellItem* effect);
-    void FUN_0051f530(SpellItem* effect);
-    void FUN_00521580(unsigned char value);
-    void FUN_00521650(TESSound* sound);
+    bool TESObjectWEAP_IsEmbeddedWeapon();
+    void TESCreature_SetMaterialType(BGSProjectile* projectile);
+    void UpdateState_0051f4f0(SpellItem* effect);
+    void TESObjectWEAP_SetVATSEffect(SpellItem* effect);
+    void TESObjectWEAP_SetNumProjectiles(unsigned char value);
+    void TESObjectWEAP_SetAttackLoop(TESSound* sound);
 
     WeaponProperties data;
     WeaponCriticalData m_kCriticalData;

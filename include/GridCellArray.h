@@ -41,17 +41,17 @@ public:
     bool SetGridCellPosition(int x, int y);
     void SetFrom(unsigned int, unsigned int, unsigned int, unsigned int);
     void SwapCells(unsigned int, unsigned int, unsigned int, unsigned int);
-    void FUN_004ba600();
-    void FUN_004ba7d0();
-    void FUN_004ba960(NiNode* root, unsigned int gridX, unsigned int gridY);
-    void FUN_004baab0();
-    void FUN_004baba0();
-    void FUN_004bac20();
-    void FUN_004baca0(bool show);
-    void FUN_004bad40();
-    void FUN_004bae20(bool detach);
-    void FUN_004baec0();
-    void FUN_004baf10();
+    void KillAll();
+    void AttachAllLand3D();
+    void AttachToWorld(NiNode* root, unsigned int gridX, unsigned int gridY);
+    void UpdateManagedNodeTransforms();
+    void RunAnimations_004baba0();
+    void UpdateRefSounds_004bac20();
+    void ShowLandBorders(bool show);
+    void ToggleCollisionGeometry_004bad40();
+    void TogglePrimitives_004bae20(bool detach);
+    void ClearCanopyShadowMaskTexture();
+    void RecreateCanopyShadowMaskTexture();
 
     GridCell* m_pGridCells;
     float fX;

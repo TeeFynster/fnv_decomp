@@ -24,7 +24,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00622430_shell
 {
-    unsigned int __thiscall FUN_00622430();
+    unsigned int __thiscall bhkTransformShape_GetCInfoSize();
 };
 struct NiRTTI;
 extern NiRTTI g_011d5e70;
@@ -34,10 +34,10 @@ struct FUN_0066b5b0_shell
 };
 struct NiAVObject;
 struct NiCullingProcess;
-extern "C" unsigned char __cdecl FUN_0054ee20();
+extern "C" unsigned char __cdecl BSTreeManager_GetTreesEnabled();
 struct DummyNode
 {
-    void __thiscall FUN_00a5dbe0(NiCullingProcess* arCuller);
+    void __thiscall NiNode_OnVisible(NiCullingProcess* arCuller);
     void __thiscall FUN_0066bf50(NiCullingProcess* arCuller);
 };
 struct FUN_00c6c290_holder
@@ -46,7 +46,7 @@ struct FUN_00c6c290_holder
 };
 struct FUN_0066d410_shell : public FUN_00c6c290_holder
 {
-    void FUN_0066d410();
+    void ForwardCall_0066d410();
 };
 extern const NiRTTI g_012683d0;
 struct FUN_0066d430_shell
@@ -56,17 +56,17 @@ struct FUN_0066d430_shell
 void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 struct FUN_0066d440_shell
 {
-    void FUN_0066d470();
+    void ForwardCall_0066d470();
     void* FUN_0066d440(unsigned int flags);
 };
 struct FUN_0066d470_shell
 {
-    void FUN_0066d410();
-    void FUN_0066d470();
+    void ForwardCall_0066d410();
+    void ForwardCall_0066d470();
 };
 struct FUN_0066d510_shell
 {
-    const void* FUN_0066d510();
+    const void* bhkMultiSphereShape_GetRTTI();
 };
 extern const void* g_012683e0;
 struct FUN_0066d520_shell
@@ -110,7 +110,7 @@ struct FUN_0066d400_shell
 struct NiStream;
 struct HC1Base
 {
-    bool FUN_00aa0ad0(NiStream*);
+    bool BSPackedAdditionalGeometryData_RegisterStreamables(NiStream*);
 };
 struct VirtCls
 {
@@ -151,7 +151,7 @@ struct S_00c8c390
 {
     char _0[8];
     Mid14* p8;
-    bool FUN_00c8c390(NiStream*);
+    bool bhkTransformShape_RegisterStreamables(NiStream*);
 };
 struct S_00c8c810_A
 {
@@ -172,9 +172,9 @@ struct H_00c8c810
 {
     char _p[8];
     S_00c8c810_C* p;
-    void __thiscall FUN_00c84e50(bool);
-    void __thiscall FUN_00c8c770();
-    void __thiscall FUN_00c8c810(bool);
+    void __thiscall bhkShape_Link(bool);
+    void __thiscall bhkTransformShape_RembhkShapeRef();
+    void __thiscall bhkTransformShape_Link(bool);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 struct Buf00cb7750
@@ -198,7 +198,7 @@ struct Inner00cb7750
     int _00;
     int _04;
     int m_08;
-    void __thiscall FUN_00c9ec60(Buf00cb7750*);
+    void __thiscall bhkShapePhantom_GetTransform_00c9ec60(Buf00cb7750*);
 };
 struct S00cb7750
 {
@@ -300,11 +300,11 @@ struct S00cb7750
     int _08;
     int _0C;
     Inner00cb7750* m_10;
-    void __thiscall FUN_00cb7750();
+    void __thiscall bhkSPCollisionObject_hktoNiTransform();
 };
-void* __fastcall FUN_00c6b910(void*);
+void* __fastcall NiRTTI_UpdateState_00c6b910(void*);
 extern int DAT_01066b94;
-BSFadeNode* FUN_00c87fc0();
+BSFadeNode* bhkPCollisionObject_CreateObject();
 struct Middle
 {
     int unk00;
@@ -316,12 +316,12 @@ struct This
     int unk00;
     int unk04;
     Middle* middle;
-    void FUN_00c84e20(unsigned int* output);
+    void bhkShape_CopyCinfo(unsigned int* output);
 };
 struct LegacyLinker : NiCollisionObject
 {
     void FUN_00c6bb70(NiStream*);
-    void FUN_00c87f80(NiStream*);
+    void bhkPCollisionObject_LinkObject(NiStream*);
 };
 struct C8C330Source
 {
@@ -387,8 +387,8 @@ struct C8C330Owner
     virtual void vfunc0B0();
     virtual C8C330Child* GetOrCreateChild(bool* pbCreated);
 
-    void FUN_00c84cc0(C8C330Node* pkNode);
-    void FUN_00c8c330(C8C330Node* pkNode);
+    void bhkShape_LinkObject(C8C330Node* pkNode);
+    void bhkTransformShape_LinkObject(C8C330Node* pkNode);
 };
 typedef unsigned int C8CA60size_t;
 struct C8CA60MemoryManager
@@ -435,18 +435,18 @@ struct C8CA60Owner
     void* m_pParentNode;
     C8CA60Child* m_pkChild;
 
-    void FUN_00c8c410(C8CA60Child* pkChild);
-    C8CA60Child* FUN_00c8ca60(bool* pbCreated);
+    void bhkTransformShape_CopyCinfo(C8CA60Child* pkChild);
+    C8CA60Child* bhkTransformShape_CreateCinfo(bool* pbCreated);
 };
 struct NativeTransform
 {
     float rotation[12];
     float translation[4];
 };
-void __cdecl FUN_00624b10(NiTransform*, NiPoint3*);
+void __cdecl HK2NI_00624b10(NiTransform*, NiPoint3*);
 void __cdecl FUN_00458620(NiPoint3*, const float*);
 extern NativeTransform DAT_01268370;
-char* __cdecl FUN_00a7d330(void*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
 extern unsigned int DAT_0126fd98;
 extern __declspec(thread) unsigned int currentTask;
 struct Component
@@ -493,8 +493,8 @@ struct Object
 {
     unsigned int unk00, unk04;
     State* state;
-    void FUN_00c851c0(StrArr*);
-    void FUN_00c8cb20(StrArr*);
+    void bhkShape_GetViewerStrings(StrArr*);
+    void bhkTransformShape_GetViewerStrings(StrArr*);
     Component* getComponent()
     {
         if (this)
@@ -535,7 +535,7 @@ template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(co
 }
 
 typedef NiTArray<char*, NiTMallocInterface<char*> > CB7800StringArray;
-extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
+extern "C" char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcText);
 extern __declspec(thread) int g_CB7800AllocTag;
 struct CB7800AllocTagScope
 {
@@ -559,7 +559,7 @@ struct CB7800Object : CB7800Base
 {
     static CB7800RTTI ms_kRTTI;
 
-    void FUN_00cb7800(CB7800StringArray* pkStrings);
+    void bhkSPCollisionObject_AddViewerStrings(CB7800StringArray* pkStrings);
 };
 struct S_00cb78b0_Base
 {
@@ -568,11 +568,11 @@ struct S_00cb78b0_Base
 struct FUN_00cb78b0 : S_00cb78b0_Base
 {
     static int ms_count;
-    void FUN_00c876a0();
+    void bhkSerializable_Kill();
     virtual ~FUN_00cb78b0();
 };
-void FUN_00c876f0();
-void FUN_00c87700();
+void bhkSerializable_CloneCritLock();
+void bhkSerializable_CloneCritUnlock();
 extern int DAT_012680f8;
 extern int DAT_01268274;
 extern int DAT_012683dc;
@@ -665,10 +665,10 @@ struct S_00cb79d0
     virtual void v047();
     virtual void v048();
     virtual void v049(S_00cb79d0_Base* obj, int arg);
-    S_00cb79d0_C* FUN_00cb79d0(int arg);
+    S_00cb79d0_C* bhkMultiSphereShape_CreateClone(int arg);
 };
 void SwapByteQuadWords(void* buffer, int words);
-void __cdecl FUN_00cf0930(void* buffer, int bytes, NiPoint3* vector);
+void __cdecl bhkStream_SwapHKArray(void* buffer, int bytes, NiPoint3* vector);
 struct TlsBlock_t
 {
     int unk000;
@@ -864,8 +864,8 @@ struct TlsGuard_t
 };
 struct FUN_00c88210_cls
 {
-    void __thiscall FUN_00c6ba30(BSFadeNode* node, unsigned int flags);
-    BSFadeNode* FUN_00c88210(unsigned int flags);
+    void __thiscall bhkNiCollisionObject_CopyMembers(BSFadeNode* node, unsigned int flags);
+    BSFadeNode* bhkPCollisionObject_CreateClone(unsigned int flags);
 };
 extern __declspec(thread) int g_iC882C0AllocTag;
 struct BC882C0AllocTagScope
@@ -884,12 +884,12 @@ struct BC882C0AllocTagScope
 };
 typedef NiTArray<char*, NiTMallocInterface<char*> > BC882C0StringArray;
 extern const char* g_pcC882C0Name;
-char* __cdecl FUN_00a7d330(const char* pcString);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcString);
 class FUN_00c882c0_cls
 {
   public:
     void C882C0BaseGetViewerStrings(BC882C0StringArray* pkArray);
-    void FUN_00c882c0(BC882C0StringArray* pkArray);
+    void bhkPCollisionObject_AddViewerStrings(BC882C0StringArray* pkArray);
 };
 struct ScaleMatrix
 {
@@ -962,8 +962,8 @@ struct FUN_00caaea0_shell
     virtual void v43() = 0;
     virtual void v44() = 0;
     virtual ScaleMatrix* getMatrix(bool* outFlag) = 0;
-    void FUN_00c84df0(void* context, SourceObject* source);
-    void FUN_00caaea0(void* context, SourceObject* source);
+    void bhkShape_CopyMembers(void* context, SourceObject* source);
+    void bhkCapsuleShape_CopyMembers(void* context, SourceObject* source);
 };
 struct S_00caaf40_Tls
 {
@@ -1156,8 +1156,8 @@ struct S_00caaf40_Ctx
         DAT_tls.ctx = saved;
     }
 };
-void FUN_00c876f0();
-void FUN_00c87700();
+void bhkSerializable_CloneCritLock();
+void bhkSerializable_CloneCritUnlock();
 struct S_00caaf40_Obj
 {
     int unk00;
@@ -1221,7 +1221,7 @@ struct S_00caaf40
     virtual void vfn_bc();
     virtual void vfn_c0();
     virtual void vfn_c4(S_00caaf40_Obj* o, int a);
-    S_00caaf40_Obj* FUN_00caaf40(int a);
+    S_00caaf40_Obj* bhkCapsuleShape_CreateClone(int a);
 };
 struct AudioTlsState
 {
@@ -1262,7 +1262,7 @@ struct Heap
         return unk10->Alloc(size);
     }
 };
-Heap* FUN_00c85750();
+Heap* hkMemoryRouter_getInstance();
 struct FUN_00d22590
 {
     int unk00;
@@ -1286,7 +1286,7 @@ struct FUN_00d22590
     void FUN_00c905b0();
     static void* operator new(unsigned int size)
     {
-        FUN_00d22590* p = (FUN_00d22590*)FUN_00c85750()->Alloc(size);
+        FUN_00d22590* p = (FUN_00d22590*)hkMemoryRouter_getInstance()->Alloc(size);
         p->unk04 = (short)size;
         return p;
     }
@@ -1330,7 +1330,7 @@ struct Owner
     virtual void f33();
     virtual void f34();
     virtual void AddElement(FUN_00d22590* e);
-    void FUN_00cab0e0(int a, int b, float c);
+    void bhkCapsuleShape_Init(int a, int b, float c);
 };
 struct FUN_00cb7790_node
 {
@@ -1368,13 +1368,13 @@ struct FUN_00cb7790_receiver
     unsigned int unk00;
     unsigned int unk04;
     void* object;
-    void __thiscall FUN_0056df20(Buf00cb7750*);
+    void __thiscall bhkShapePhantom_SetTransform(Buf00cb7750*);
 };
 struct FUN_00cb7790_state
 {
     unsigned int owner;
     unsigned int depth;
-    void __thiscall FUN_0040fbf0(int);
+    void __thiscall BSSpinLock_Lock(int);
 };
 extern FUN_00cb7790_state DAT_01267b80;
 struct FUN_00cb7790_class
@@ -1384,7 +1384,7 @@ struct FUN_00cb7790_class
     FUN_00cb7790_node* node;
     unsigned int unk0C;
     FUN_00cb7790_receiver* receiver;
-    void __thiscall FUN_00cb7790();
+    void __thiscall bhkSPCollisionObject_NitohkTransform();
 };
 // FUN_00cb7920 - factory for a bhkMultiSphereShape.
 //
@@ -1429,7 +1429,7 @@ struct Guard
 };
 void* __cdecl opnew(unsigned int);
 void __cdecl opdelete(void*);
-Node* FUN_00cb7920();
+Node* bhkMultiSphereShape_CreateObject();
 struct Shader
 {
     virtual void f00();
@@ -1478,16 +1478,16 @@ struct Shader
     virtual void f43();
     virtual void f44();
     virtual int* f45(struct Pass** pass);
-    void FUN_00c84d00(struct Pass* pass);
-    void FUN_00cb7b20(struct Pass* pass);
+    void bhkShape_LoadBinary(struct Pass* pass);
+    void bhkMultiSphereShape_LoadBinary(struct Pass* pass);
 };
 struct Pass
 {
     int unk000;
     char unk004;
 };
-void FUN_00cf0930(int* a, int b, int* c);
-void FUN_00cf0f40(Pass* pass, int* b);
+void bhkStream_SwapHKArray(int* a, int b, int* c);
+void bhkStream_LoadBinary(Pass* pass, int* b);
 struct A1Owner
 {
     unsigned int unk00;
@@ -1624,8 +1624,8 @@ struct OwnerB
     unsigned int unk00;
     Triple m04;
 };
-void __cdecl FUN_00cf0930(void* a, void* b, void* c);
-void __cdecl FUN_00cf0cf0(void* a, void* b);
+void __cdecl bhkStream_SwapHKArray(void* a, void* b, void* c);
+void __cdecl bhkStream_SaveBinary(void* a, void* b);
 struct TmpGuard
 {
     unsigned int m0;
@@ -1640,7 +1640,7 @@ struct TmpGuard
     }
     ~TmpGuard()
     {
-        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         m1 = 0;
         if ((m2 & 0x80000000u) == 0)
@@ -1698,8 +1698,8 @@ struct FUN_00cb8010_cls
     virtual void vB0();
     virtual OwnerB* v45(unsigned char* pFlag);
 
-    void __thiscall FUN_00c84d50(A1Owner* a1);
-    void __thiscall FUN_00cb8010(A1Owner* a1);
+    void __thiscall bhkShape_SaveBinary(A1Owner* a1);
+    void __thiscall bhkMultiSphereShape_SaveBinary(A1Owner* a1);
 };
 
 
@@ -1873,9 +1873,9 @@ class Havok66C
 };
 extern Havok66C g_kHavok66C;
 
-float __cdecl FUN_0066b0b0();
-float __cdecl FUN_004a3e90(float fValue);
-void __cdecl FUN_005b5e40(const char* pcMessage);
+float __cdecl BSTreeManager_GetSizeConversion();
+float __cdecl NI2HK_004a3e90(float fValue);
+void __cdecl Warning_005b5e40(const char* pcMessage);
 
 class Tree66C
 {
@@ -1947,18 +1947,19 @@ class Tree66C
     virtual void v100();
     virtual void v104();
     virtual void* GetOwner();
-    void FUN_0066cb40(SpeedTreeCollisionVolumes* pkBounds, float fScale);
+    void BSTreeNode_MakeHavokLeaves(SpeedTreeCollisionVolumes* pkBounds, float fScale);
 };
 
 // @fnv 0x0066cb40
-void Tree66C::FUN_0066cb40(SpeedTreeCollisionVolumes* pkBounds, float fScale)
+// src: XBOX_PDB 0x0066cb40
+void Tree66C::BSTreeNode_MakeHavokLeaves(SpeedTreeCollisionVolumes* pkBounds, float fScale)
 {
     if (g_kHavok66C.IsEnabled(1))
     {
         unsigned int ItemUpdateArray = pkBounds->GetCount();
         if (!ItemUpdateArray)
             return;
-        float fHavokScale = FUN_0066b0b0() * fScale;
+        float fHavokScale = BSTreeManager_GetSizeConversion() * fScale;
         void* pvOwner = GetOwner();
         BodyCinfo66C kInfo;
         if (ItemUpdateArray == 1)
@@ -1967,12 +1968,12 @@ void Tree66C::FUN_0066cb40(SpeedTreeCollisionVolumes* pkBounds, float fScale)
             float afCenter[3];
             int iType;
             pkBounds->GetBound(0, &iType, afCenter, afSize);
-            afCenter[0] = FUN_004a3e90(afCenter[0]) * fHavokScale;
-            afCenter[1] = FUN_004a3e90(afCenter[1]) * fHavokScale;
-            afCenter[2] = FUN_004a3e90(afCenter[2]) * fHavokScale;
-            afSize[0] = FUN_004a3e90(afSize[0]) * fHavokScale;
-            afSize[1] = FUN_004a3e90(afSize[1]) * fHavokScale;
-            afSize[2] = FUN_004a3e90(afSize[2]) * fHavokScale;
+            afCenter[0] = NI2HK_004a3e90(afCenter[0]) * fHavokScale;
+            afCenter[1] = NI2HK_004a3e90(afCenter[1]) * fHavokScale;
+            afCenter[2] = NI2HK_004a3e90(afCenter[2]) * fHavokScale;
+            afSize[0] = NI2HK_004a3e90(afSize[0]) * fHavokScale;
+            afSize[1] = NI2HK_004a3e90(afSize[1]) * fHavokScale;
+            afSize[2] = NI2HK_004a3e90(afSize[2]) * fHavokScale;
             switch (iType)
             {
             case 0: {
@@ -2020,16 +2021,16 @@ void Tree66C::FUN_0066cb40(SpeedTreeCollisionVolumes* pkBounds, float fScale)
                 pkBounds->GetBound(i, &iType, afCenter, afSize);
                 if (iType == 0)
                 {
-                    afCenter[0] = FUN_004a3e90(afCenter[0]) * fHavokScale;
-                    afCenter[1] = FUN_004a3e90(afCenter[1]) * fHavokScale;
-                    afCenter[2] = FUN_004a3e90(afCenter[2]) * fHavokScale;
-                    afSize[0] = FUN_004a3e90(afSize[0]) * fHavokScale;
+                    afCenter[0] = NI2HK_004a3e90(afCenter[0]) * fHavokScale;
+                    afCenter[1] = NI2HK_004a3e90(afCenter[1]) * fHavokScale;
+                    afCenter[2] = NI2HK_004a3e90(afCenter[2]) * fHavokScale;
+                    afSize[0] = NI2HK_004a3e90(afSize[0]) * fHavokScale;
                     hkVector4 kSphere(afCenter[0], afCenter[1], afCenter[2], afSize[0]);
                     kSpheres.m_kSpheres.PushBack(kSphere);
                 }
                 else
                 {
-                    FUN_005b5e40("HAVOK: Multiple bounding volumes around a tree must all be spheres.");
+                    Warning_005b5e40("HAVOK: Multiple bounding volumes around a tree must all be spheres.");
                 }
             }
             MultiSphereShape66C* pkShape = new MultiSphereShape66C(kSpheres);
@@ -2049,11 +2050,11 @@ struct __declspec(align(16)) xVec4
     float m_q[4];
     xVec4(float, float, float, float);
     xVec4(const xVec4&);
-    void FUN_0066c930();
-    void FUN_00627920(const struct xL&);
-    xVec4 FUN_00630100() const;
+    void hkVector4_fastNormalize3();
+    void hkVector4_mul4(const struct xL&);
+    xVec4 hkVector4_lengthSquared3() const;
     xVec4 FUN_00630b40() const;
-    float FUN_004586d0() const;
+    float EvaluateValue_004586d0() const;
 };
 struct __declspec(align(16)) xL
 {
@@ -2081,7 +2082,7 @@ struct xBound
 struct xEvent
 {
     xEvent();
-    void FUN_0066c9c0(xVec4&, xVec4&, float);
+    void hkContactPoint_set(xVec4&, xVec4&, float);
     int m_iWordAt00[8];
     int m_20;
     int m_24;
@@ -2098,12 +2099,12 @@ struct xForm
 struct xNode
 {
     void* FUN_0044ddc0();
-    unsigned int FUN_00559450();
+    unsigned int Modelloader_GetReferencedThis();
 };
 struct xArr
 {
     int FUN_00726070();
-    xForm* FUN_0062e150(int);
+    xForm* GetElementPointer16(int);
 };
 struct __declspec(align(16)) xList
 {
@@ -2128,7 +2129,7 @@ struct xTarget
 {
     char m_auiShapeKeys[0x410];
     xSink m_410;
-    void FUN_0066ca00(xP3*);
+    void bhkCharacterProxy_GetLinearVelocity(xP3*);
 };
 struct xCreated
 {
@@ -2138,9 +2139,9 @@ xCreated* xFUN_00c6dec0(int, void*);
 void* xFUN_004b5950(void*);
 struct xB
 {
-    xVec4* FUN_00560e50();
+    xVec4* hkpRigidBody_getAngularVelocity();
     void OnTrigger(xVec4*);
-    void FUN_00561800(xVec4*);
+    void hkpRigidBody_setAngularVelocity(xVec4*);
 };
 xB* xFUN_004b59f0(void*);
 xVec4* __fastcall xFUN_00560dc0(xB*);
@@ -2155,16 +2156,16 @@ float xFUN_004587d0(float);
 void* xFUN_004a3a40(unsigned int);
 struct xShapeX
 {
-    int FUN_006205a0();
+    int bhkShape_QMaterial();
 };
 const char* xFUN_00ec7750(const char*, const char*);
 struct xIntSetting
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 struct xFltSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern xIntSetting xg_11d5ea0;
 extern xIntSetting xg_11d5e94;
@@ -2180,12 +2181,12 @@ struct xObj3D
     virtual void v0();
     virtual void v1();
     virtual void FUN_08(void*);
-    StringProvider* FUN_0084e3a0();
+    StringProvider* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 struct xObjPtr
 {
-    unsigned int FUN_00559450();
+    unsigned int Modelloader_GetReferencedThis();
     xObj3D* operator->();
 };
 struct xRef
@@ -2228,7 +2229,7 @@ struct xRef
     virtual void v35();
     virtual void v36();
     virtual int FUN_94();
-    void FUN_00623150(xList*);
+    void bhkShapePhantom_GetPenetrations(xList*);
     int GetSourceFilesFromObject();
 };
 
@@ -2236,34 +2237,35 @@ struct xEffect
 {
     char m_auiShapeKeys[0xe4];
     xObjPtr m_e4;
-    bool FUN_0066ca50(float);
+    bool BSTreeNode_CheckForCollision(float);
     xRef* FUN_0066d7c0();
-    void FUN_0066c160(float afTime);
+    void BSTreeNode_UpdateBSTreeNode(float afTime);
 };
 // @fnv 0x0066c160
-void xEffect::FUN_0066c160(float afTime)
+// src: XBOX_PDB 0x0066c160
+void xEffect::BSTreeNode_UpdateBSTreeNode(float afTime)
 {
-    if (m_e4.FUN_00559450())
+    if (m_e4.Modelloader_GetReferencedThis())
         m_e4->FUN_08(this);
-    if (!FUN_0066ca50(afTime))
+    if (!BSTreeNode_CheckForCollision(afTime))
         return;
     xRef* PREF = FUN_0066d7c0();
     if (!PREF || !PREF->FUN_94())
         return;
-    const char* PTAG = xFUN_00ec7750(m_e4->FUN_0084e3a0()->GetUnk68(), "~CF");
+    const char* PTAG = xFUN_00ec7750(m_e4->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->GetUnk68(), "~CF");
     int LEVEL;
     if (PTAG)
         LEVEL = PTAG[3] - '0';
     else
-        LEVEL = *xg_11d5ea0.FUN_0043d4d0();
-    float CHANCE = LEVEL * *xg_11d5e64.FUN_00403e20() * 100.0;
+        LEVEL = *xg_11d5ea0.Setting_Int();
+    float CHANCE = LEVEL * *xg_11d5e64.Setting_Float_00403e20() * 100.0;
     xList LIST;
-    PREF->FUN_00623150(&LIST);
+    PREF->bhkShapePhantom_GetPenetrations(&LIST);
     xArr* ARR = LIST.FUN_00413f40();
     for (int I = 0; I < ARR->FUN_00726070(); I++)
     {
-        void* PA = xFUN_004b5950(ARR->FUN_0062e150(I)->m_8);
-        xB* PB = xFUN_004b59f0(ARR->FUN_0062e150(I)->m_8);
+        void* PA = xFUN_004b5950(ARR->GetElementPointer16(I)->m_8);
+        xB* PB = xFUN_004b59f0(ARR->GetElementPointer16(I)->m_8);
         if (PA)
         {
             xCreated* PC = xFUN_00c6dec0(0x3e8, PA);
@@ -2274,11 +2276,11 @@ void xEffect::FUN_0066c160(float afTime)
                 {
                     xEvent EV;
                     xVec4 DIR(xFUN_005c5420(), xFUN_005c5420(), xFUN_005c5420(), 0.0f);
-                    DIR.FUN_0066c930();
-                    xVec4 POS(*((xHasPos*)ARR->FUN_0062e150(I)->m_8->FUN_0044ddc0())->FUN_00436aa0());
-                    EV.FUN_0066c9c0(POS, DIR, 0.0f);
+                    DIR.hkVector4_fastNormalize3();
+                    xVec4 POS(*((xHasPos*)ARR->GetElementPointer16(I)->m_8->FUN_0044ddc0())->FUN_00436aa0());
+                    EV.hkContactPoint_set(POS, DIR, 0.0f);
                     EV.m_20 = PREF->GetSourceFilesFromObject();
-                    EV.m_48 = ARR->FUN_0062e150(I)->m_8;
+                    EV.m_48 = ARR->GetElementPointer16(I)->m_8;
                     EV.m_24 = EV.m_4c = 0;
                     PD->m_410.FUN_08(0, &EV);
                     xBound BND;
@@ -2286,7 +2288,7 @@ void xEffect::FUN_0066c160(float afTime)
                     BND.m_14 = 4;
                     BND.m_15 = 7;
                     BND.m_10 = 1.0f;
-                    PD->FUN_0066ca00(&PT);
+                    PD->bhkCharacterProxy_GetLinearVelocity(&PT);
                     BND.m_iThirdValue = PT.FUN_00457990();
                     BND.m_18 = (int)PA + (int)PREF;
                     BND.m_pos = *xFUN_00458620(&PT, &POS);
@@ -2301,39 +2303,39 @@ void xEffect::FUN_0066c160(float afTime)
             if (xFUN_00944460(0, 100) <= CHANCE)
             {
                 xVec4 V1(*xFUN_00560dc0(PB));
-                xVec4 V2(*PB->FUN_00560e50());
-                if (V1.FUN_00630100().FUN_004586d0() > 1.0)
+                xVec4 V2(*PB->hkpRigidBody_getAngularVelocity());
+                if (V1.hkVector4_lengthSquared3().EvaluateValue_004586d0() > 1.0)
                 {
-                    float SPEED = V1.FUN_00630b40().FUN_004586d0() *
-                                  (1.0 - xFUN_00944460(*xg_11d5e58.FUN_0043d4d0(), *xg_11d5e94.FUN_0043d4d0()) / 100.0);
+                    float SPEED = V1.FUN_00630b40().EvaluateValue_004586d0() *
+                                  (1.0 - xFUN_00944460(*xg_11d5e58.Setting_Int(), *xg_11d5e94.Setting_Int()) / 100.0);
                     float R1 = xFUN_004dfea0();
                     float R2 = xFUN_004dfea0();
                     float R3 = xFUN_004dfea0() - 0.25;
                     xVec4 D1(R1, R2, R3, 0.0f);
-                    D1.FUN_0066c930();
+                    D1.hkVector4_fastNormalize3();
                     xL L1(SPEED);
-                    D1.FUN_00627920(L1);
+                    D1.hkVector4_mul4(L1);
                     PB->OnTrigger(&D1);
                 }
-                if (V2.FUN_00630100().FUN_004586d0() > 1.0)
+                if (V2.hkVector4_lengthSquared3().EvaluateValue_004586d0() > 1.0)
                 {
-                    float SPEED2 = V2.FUN_00630b40().FUN_004586d0() * (xFUN_00944460(0, 20) / 100.0 + 90.0);
+                    float SPEED2 = V2.FUN_00630b40().EvaluateValue_004586d0() * (xFUN_00944460(0, 20) / 100.0 + 90.0);
                     float R4 = xFUN_004dfea0();
                     float R5 = xFUN_004dfea0();
                     float R6 = xFUN_004dfea0() - 0.25;
                     xVec4 D2(R4, R5, R6, 0.0f);
-                    D2.FUN_0066c930();
+                    D2.hkVector4_fastNormalize3();
                     xL L2(SPEED2);
-                    D2.FUN_00627920(L2);
-                    PB->FUN_00561800(&D2);
+                    D2.hkVector4_mul4(L2);
+                    PB->hkpRigidBody_setAngularVelocity(&D2);
                 }
                 xBound BND2;
                 xP3 PT2;
-                xShapeX* PS = (xShapeX*)xFUN_004a3a40(ARR->FUN_0062e150(I)->m_8->FUN_00559450());
+                xShapeX* PS = (xShapeX*)xFUN_004a3a40(ARR->GetElementPointer16(I)->m_8->Modelloader_GetReferencedThis());
                 BND2.m_14 = 4;
-                BND2.m_15 = (unsigned char)(PS ? PS->FUN_006205a0() : 0);
+                BND2.m_15 = (unsigned char)(PS ? PS->bhkShape_QMaterial() : 0);
                 BND2.m_10 = 1.0f;
-                BND2.m_iThirdValue = xFUN_004587d0(V1.FUN_00630b40().FUN_004586d0());
+                BND2.m_iThirdValue = xFUN_004587d0(V1.FUN_00630b40().EvaluateValue_004586d0());
                 BND2.m_18 = (int)PB + (int)PREF;
                 BND2.m_pos = *xFUN_00458620(&PT2, ((xHasPos*)xFUN_004b4f00(PB))->FUN_00436aa0());
                 BND2.m_1c = (int)xFUN_004b5a80(PB);

@@ -9,16 +9,16 @@
 struct FUN_00e428f0_class
 {
     void Remove(void*);
-    void FUN_00e428f0(void* p);
+    void hkpVehicleCastBatchingManager_removeVehicle(void* p);
 };
-int __cdecl FUN_00e42940(int p);
+int __cdecl hkpVehicleCastBatchingManager_getStandardFilterSize(int p);
 extern "C" void __cdecl FUN_00cb0a60();
 struct FUN_00e4e400_class
 {
-    FUN_00e4e400_class* __thiscall FUN_00e4e400();
+    FUN_00e4e400_class* __thiscall hkaAnnotationTrack_hkaAnnotationTrack();
 };
-void FUN_00e52860(const float* src, float* dst);
-void FUN_00e52ef0(const float* src, float* dst);
+void Object_UpdateFields_00e52860(const float* src, float* dst);
+void Runtime_UpdateState_00e52ef0(const float* src, float* dst);
 struct FUN_00e58780_Class
 {
     int* GetElementPtr(int a, int b);
@@ -37,12 +37,12 @@ struct GlobalObjectO2_00d472a0
     int x;
 };
 GlobalObjectO2_00d472a0 g_0126e600;
-void __stdcall FUN_00e5c540(int, GlobalObjectO2_00d472a0*);
-void __stdcall FUN_00e5c5b0(int a);
-extern "C" void __stdcall FUN_00e5c540(int, int);
+void __stdcall FindResourceWithExpectedName(int, GlobalObjectO2_00d472a0*);
+void __stdcall Runtime_ForwardCall_00e5c5b0(int a);
+extern "C" void __stdcall FindResourceWithExpectedName(int, int);
 struct GlobalObjectO2_00d472a0;
 extern GlobalObjectO2_00d472a0 g_0126c5f0;
-void __stdcall FUN_00e5c5f0(int a);
+void __stdcall Runtime_ForwardCall_00e5c5f0(int a);
 struct FUN_00e459c0_class
 {
     void SetBitMaskFlags(int a, int b);
@@ -53,11 +53,11 @@ struct FUN_00e45a10_class
 };
 struct FUN_00e587b0_Class
 {
-    int* __thiscall FUN_00e587b0(int idx);
+    int* __thiscall GetElementAddress_00e587b0(int idx);
 };
 struct FUN_00e58880_Class
 {
-    float FUN_00e58880(int offset);
+    float GetIndexedValue_00e58880(int offset);
 };
 int __cdecl Factorial(int count);
 extern const float runtimeFloatSettingDefault132;
@@ -102,7 +102,7 @@ struct FUN_00e426f0_class
 };
 struct FUN_00e61480_class
 {
-    void FUN_00e61480(int);
+    void hkxMeshSection_collectVertexPositions(int);
 };
 struct FUN_00e4ab50_class
 {
@@ -129,19 +129,19 @@ struct FUN_00e4af80
 struct FUN_00e58b10_class
 {
     void FillWithValue(float* out);
-    void FUN_00e58a20(int a, int b, int c);
-    void FUN_00e58b10(int a, int b, int c);
+    void hkaSparseLSQMatrix_float_MultiplyAdd(int a, int b, int c);
+    void hkaSparseLSQMatrix_float_Multiply(int a, int b, int c);
 };
 extern const char* const g_0126c5f0_arg1;
-void __stdcall FUN_00e5c540(int, int);
-void __stdcall FUN_00e5c5d0(int a);
+void __stdcall FindResourceWithExpectedName(int, int);
+void __stdcall Runtime_ForwardCall_00e5c5d0(int a);
 struct GlobalObjectO2_00d472a0;
 extern GlobalObjectO2_00d472a0 g_0126eb10;
-void __stdcall FUN_00e5c540(int a, GlobalObjectO2_00d472a0* b);
-void __stdcall FUN_00e5c630(int a);
+void __stdcall FindResourceWithExpectedName(int a, GlobalObjectO2_00d472a0* b);
+void __stdcall Runtime_ForwardCall_00e5c630(int a);
 struct GlobalObjectO2_00d472a0;
 extern GlobalObjectO2_00d472a0 g_0126eac8;
-void __stdcall FUN_00e5c540(int, GlobalObjectO2_00d472a0*);
+void __stdcall FindResourceWithExpectedName(int, GlobalObjectO2_00d472a0*);
 void __stdcall CallWithGlobalObject(int a);
 struct FUN_00e406d0_cls
 {
@@ -176,7 +176,7 @@ struct HolderStub
     int unk0c;
     void* m_pAllocator;
 };
-HolderStub* __cdecl FUN_00c85750();
+HolderStub* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* pAllocator, void* pArray, unsigned int auiNewSize);
 struct ValueArray
 {
@@ -239,7 +239,7 @@ struct FUN_00e42650_cls
     EventListener** m_08;
     int m_0c;
 
-    void FUN_00e42650(int a);
+    void hkpVehicleManager_addToWorld(int a);
 };
 struct FUN_00e42680_Item
 {
@@ -421,8 +421,8 @@ struct FUN_00e49fe0 : FUN_00cbfba0
     virtual void d14();
 };
 struct E4AAA0Allocator;
-void __cdecl FUN_00c908c0(E4AAA0Allocator* alloc, void* array, int numElements, int sizeElem);
-void __cdecl FUN_00d2cc70(void* dst, const void* src, unsigned int nbytes);
+void __cdecl hkArrayUtil__reserve(E4AAA0Allocator* alloc, void* array, int numElements, int sizeElem);
+void __cdecl hkMemUtil_memMove(void* dst, const void* src, unsigned int nbytes);
 struct E4AAA0Element
 {
     int m_kPointA;
@@ -448,7 +448,7 @@ struct E4AAA0Array
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(E4AAA0Element));
+            hkArrayUtil__reserve(&alloc, this, newSize, sizeof(E4AAA0Element));
         }
     }
 
@@ -511,7 +511,7 @@ struct FUN_00e4ae80_class
 // before the tail jump to the secondary base's implementation.
 struct ThunkPrimary
 {
-    virtual void FUN_00e4af50();
+    virtual void ForwardCall_00e4af50();
     int unk04;
     int unk08;
     int unk0C;
@@ -519,12 +519,12 @@ struct ThunkPrimary
 };
 struct ThunkSecondary
 {
-    virtual void FUN_00cb0c10();
+    virtual void UpdateState_00cb0c10();
 };
 struct ThunkDerived : ThunkPrimary, ThunkSecondary
 {
     ThunkDerived();
-    virtual void FUN_00e4af50();
+    virtual void ForwardCall_00e4af50();
 };
 ThunkDerived::ThunkDerived()
 {}
@@ -542,7 +542,7 @@ struct S_00e4af60_class
     int unk10;
     S_00e4af60_helper unk14;
 
-    S_00e4af60_class* FUN_00e4af60();
+    S_00e4af60_class* InitializeFields_00e4af60();
 };
 extern int DAT_010ec1fc;
 void __cdecl AccumulateNeighborSum(float k, const float* src, float* dst, int n);
@@ -550,8 +550,8 @@ extern float DAT_0102295c;
 extern float DAT_0101622c;
 void __cdecl DeinterleaveFloats(float* a, float* b, unsigned int n);
 void __cdecl AccumulateNeighborSum(float c, float* a, float* b, unsigned int n);
-void __cdecl FUN_00e50e50(float c, float* a, float* b, unsigned int n);
-void __cdecl FUN_00e51330(float* base, unsigned int n);
+void __cdecl hkUpdateReflect(float c, float* a, float* b, unsigned int n);
+void __cdecl _hkWaveletTransform(float* base, unsigned int n);
 struct PackedFormat
 {
     unsigned char bits;
@@ -560,20 +560,20 @@ struct PackedFormat
     float range;
     float minimum;
 };
-void FUN_00e51f60(const float* src, unsigned int count, const PackedFormat* format, unsigned char* dst);
+void _hkQuantizeReal(const float* src, unsigned int count, const PackedFormat* format, unsigned char* dst);
 void __cdecl PackFourFloatsToNibbles(const float* src, unsigned char* dst);
 extern const float g_x;
-float __cdecl FUN_00e52f40();
+float __cdecl Object_GetGlobalValue_00e52f40();
 extern const float g_010ec960;
-float __cdecl FUN_00e52f50();
+float __cdecl Runtime_GetField010ec960();
 extern const float g_010af2f0;
-float __cdecl FUN_00e52f60();
+float __cdecl Object_GetGlobalValue_00e52f60();
 extern const float g_010ec964;
-float __cdecl FUN_00e52f70();
+float __cdecl Runtime_GetField010ec964();
 extern const float DAT_010ec968;
-float __cdecl FUN_00e52f80();
+float __cdecl Object_GetDAT_010ec968_00e52f80();
 extern float DAT_0104da4c;
-float __cdecl FUN_00e52f90(void);
+float __cdecl Runtime_GetDAT0104da4c(void);
 void __cdecl SwapBytes(void* arg);
 inline void SwapByte(unsigned char& left, unsigned char& right)
 {
@@ -581,9 +581,9 @@ inline void SwapByte(unsigned char& left, unsigned char& right)
     left = right;
     right = temporary;
 }
-void __cdecl FUN_00e53000(unsigned char* bytes);
+void __cdecl _handleEndianSignedQuaternion48(unsigned char* bytes);
 extern "C" void _ReadWriteBarrier(void);
-void __cdecl FUN_00e53030(unsigned char* p);
+void __cdecl _handleEndianSignedQuaternion128(unsigned char* p);
 class FUN_00e53160
 {
   public:
@@ -609,7 +609,7 @@ struct FUN_00e531a0_struct
     float m_08;
     float m_0c;
 
-    FUN_00e531a0_struct* FUN_00e531a0(const FUN_00e531a0_struct* other);
+    FUN_00e531a0_struct* ComputeValue_00e531a0(const FUN_00e531a0_struct* other);
 };
 // FUN_00e531d0: thiscall member of a 4-float vector; subtracts a vector
 // (given by pointer/reference) from itself, in place, and returns itself.
@@ -619,7 +619,7 @@ struct FUN_00e531d0_cls
     float m_04;
     float m_08;
     float m_0c;
-    FUN_00e531d0_cls* FUN_00e531d0(const float* pOther);
+    FUN_00e531d0_cls* SubtractFourComponents(const float* pOther);
 };
 struct FUN_00e53200_cls
 {
@@ -645,8 +645,8 @@ struct FourFloatVector
     float z;
     float w;
 
-    FourFloatVector& FUN_00e531a0(int parameter);
-    FourFloatVector FUN_00e53260(int parameter);
+    FourFloatVector& ComputeValue_00e531a0(int parameter);
+    FourFloatVector ProcessAndReturnValue_00e53260(int parameter);
 };
 struct S_e53300_Vec;
 struct S_e53300_Vec
@@ -675,7 +675,7 @@ struct SpawnedObject
 {
     void Method(float* pOut, float f);
 };
-float* __cdecl FUN_00e533a0(float* pOut, float f, SpawnedObject* pObj);
+float* __cdecl Object_ScaleCopy_Thunk(float* pOut, float f, SpawnedObject* pObj);
 // Thin cdecl wrapper: forwards its first argument and a float to a
 // thiscall method of the object given as the third argument, then hands
 // the first argument back to the caller.
@@ -689,17 +689,17 @@ struct FourComponentVector
 {
     float x, y, z, w;
     __declspec(noinline) FourComponentVector(float a, float b, float c, float d);
-    FourComponentVector FUN_00e53440() const;
+    FourComponentVector hkaNURBS_Point_floor() const;
 };
 FourComponentVector::FourComponentVector(float a, float b, float c, float d) : x(a), y(b), z(c), w(d)
 {}
 struct FUN_00e53580_cls
 {
-    float FUN_00e53580(int idx);
+    float GetIndexedValue_00e53580(int idx);
 };
 struct S_00e53590_Foo
 {
-    int* __thiscall FUN_00e53590(int index);
+    int* __thiscall GetElementAddress_00e53590(int index);
 };
 struct Vec4f
 {
@@ -726,18 +726,18 @@ __declspec(noinline) float& Vec4f::operator[](int i)
 {
     return (&x)[i];
 }
-Vec4f FUN_00e53720(const Vec4f& a, const Vec4f& b);
+Vec4f hkaNURBS_Point_Min(const Vec4f& a, const Vec4f& b);
 int __cdecl FindFloatInterval(int a, int b, float value, float** pp);
 void __cdecl ComputeBasisFunctions(int span, float u, int degree, float** knots, float* basis);
 int __cdecl FindInsertIndex(float value, float** table, int count);
 int __cdecl CountRuns(float** param_1, int param_2);
 bool* __cdecl IsSampleBoundary(bool* result, int index, float** samples, int endIndex);
-int __cdecl FUN_00e54930(float** array, int count);
-float __cdecl FUN_00e535a0(const void* a, const void* b);
+int __cdecl hkaNURBS_MinIndex(float** array, int count);
+float __cdecl hkaNURBS_Point_Dot(const void* a, const void* b);
 struct FUN_00e54ad0_cls
 {
     int unk00;
-    void FUN_00e54ad0();
+    void EvaluateSelfDotProduct();
 };
 // The two callees below are unnamed in the binary's symbol table; they bind by position.
 extern void __cdecl helper_before();
@@ -748,7 +748,7 @@ class FUN_00e54b00_cls
   public:
     float GetHelperValueAsFloat();
     void EvalCopy(int a, float b);
-    int FUN_00e54b00(int p);
+    int hkaNURBS_Point_normalize(int p);
 };
 struct FUN_00e54b20_out
 {
@@ -784,9 +784,9 @@ struct FUN_00e54ae0_class
 };
 struct FUN_00e532b0_class
 {
-    FUN_00e54ae0_class* __thiscall FUN_00e532b0(void* buffer, void* value);
+    FUN_00e54ae0_class* __thiscall UpdateState_00e532b0(void* buffer, void* value);
 };
-void __cdecl FUN_00e54ba0(void* value, FUN_00e532b0_class* object);
+void __cdecl hkaNURBS_Distance3D(void* value, FUN_00e532b0_class* object);
 char* __cdecl IsSampleBoundary(int* base, int idx, int b, int c);
 int __cdecl FindFirstNonZero(int a, int b, int c);
 struct E54C50IntArray
@@ -807,12 +807,12 @@ struct Float4
     float x, y, z, w;
 };
 extern const double DAT_01016978;
-void __cdecl FUN_00e54630(Float4* out, int a, int b, int c, int d, float input);
+void __cdecl hkaNURBS_CurvePoint(Float4* out, int a, int b, int c, int d, float input);
 float __cdecl LookupAndConsume(const Float4* left, const Float4* right);
 unsigned char* __cdecl CheckVerticesAboveThresholds(unsigned char* result, int a, int b, int c, int d, int last,
                                                     Float4** verticesPtr, float** valuesPtr, float** thresholdsPtr);
-extern void __cdecl FUN_00e58440(int, int, int, int, float, int, int, int, int);
-void __cdecl FUN_00e58740(int i1, int i2, int i3, int i4, float f5, int i6, int i7, int i8, int i9);
+extern void __cdecl hkaNURBS_ApproximateCurve(int, int, int, int, float, int, int, int, int);
+void __cdecl _ApproximateNURBSCurve(int i1, int i2, int i3, int i4, float f5, int i6, int i7, int i8, int i9);
 struct FUN_00e58820_cls
 {
     float* m_data;
@@ -829,7 +829,7 @@ struct FUN_00e58890_Class
     int m_08;
     int m_0c;
     int m_10;
-    int FUN_00e58890();
+    int EvaluateValue_00e58890();
 };
 struct SpawnArray
 {
@@ -930,7 +930,7 @@ struct CharBuffer
     char* destination;
     unsigned capacity, length;
     void FUN_00cb1600(char*, unsigned);
-    CharBuffer* FUN_00cc01c0(const char*);
+    CharBuffer* ProcessAndReturnValue_00cc01c0(const char*);
     CharBuffer* WriteName(const void*);
     void FUN_00cc00e0();
 };
@@ -945,9 +945,9 @@ extern DiagnosticLogger* DAT_01268360;
 extern const char str_010ecd20[], str_010eccfc[], str_010ecd0c[], str_010eccc8[];
 struct ConfigTable
 {
-    ConfigValue* FUN_00e5c5d0(const char*);
-    ConfigValue* FUN_00e5c5b0(const char*);
-    ConfigValue* FUN_00e5c5f0(const char*);
+    ConfigValue* Runtime_ForwardCall_00e5c5d0(const char*);
+    ConfigValue* Runtime_ForwardCall_00e5c5b0(const char*);
+    ConfigValue* Runtime_ForwardCall_00e5c5f0(const char*);
     int GetUnsignedValue(const char*, bool, unsigned*);
 };
 struct FUN_00e5c8b0_Node
@@ -988,8 +988,8 @@ struct FUN_00e5c8b0_cls
     int unk04;
     int unk08;
     int unk0C;
-    FUN_00e5c8b0_Rec* FUN_00e5c610(int a);
-    FUN_00e5c8b0_Rec* FUN_00e5c5f0(int a);
+    FUN_00e5c8b0_Rec* Runtime_ForwardCall_00e5c610(int a);
+    FUN_00e5c8b0_Rec* Runtime_ForwardCall_00e5c5f0(int a);
     int GetAttributeValue(int a, bool flag, unsigned int* out);
 };
 struct FUN_00e5c8b0_Logger
@@ -1170,7 +1170,7 @@ class FUN_00e5c9b0_cls
 struct FUN_00e5cdb0_class
 {
     void __thiscall SpliceArray(int a, int b, int c, int d, int e);
-    void __thiscall FUN_00e5cec0(int a, int b, int c, int d);
+    void __thiscall SpliceArray_Thunk(int a, int b, int c, int d);
 };
 struct S_00e5cfb0_Object
 {
@@ -1191,9 +1191,9 @@ struct S_00e65ee0_Class
     int unk08;
     int unk0c;
 
-    void __thiscall FUN_00e65ee0(int* buffer, int value);
+    void __thiscall queryOnTree(int* buffer, int value);
 };
-void __cdecl FUN_00e5cfb0(S_00e5cfb0_Object* object, int value);
+void __cdecl _hkMoppFindAllVirtualMachine_getAllKeys(S_00e5cfb0_Object* object, int value);
 extern float DAT_0104e148;
 struct FloatArray_e404b0
 {
@@ -1204,7 +1204,7 @@ template <class T> inline T MaxOf(T a, T b)
 {
     return a > b ? a : b;
 }
-float __cdecl FUN_00e404b0(FloatArray_e404b0* arr);
+float __cdecl hkaFootstepAnalysisInfo_getMax(FloatArray_e404b0* arr);
 extern float _DAT_0104da48;
 float __cdecl FindMinFloat(int* param_1);
 extern int DAT_010e60c4;
@@ -1362,7 +1362,7 @@ struct ExtendedListeners
 
     static void* operator new(size_t sz)
     {
-        HolderStub* mgr = FUN_00c85750();
+        HolderStub* mgr = hkMemoryRouter_getInstance();
         return ((AllocationHeap*)mgr->m_pAllocator)->Allocate(sz);
     }
 };
@@ -1512,7 +1512,7 @@ struct ActorEntry
         return m_pExtendedListeners;
     }
 
-    void __thiscall FUN_00c9c670(CListener* el);
+    void __thiscall removeEntityListener_00c9c670(CListener* el);
 };
 template <typename T> struct HkArray
 {
@@ -1522,7 +1522,7 @@ template <typename T> struct HkArray
 
     void ClearAndRelease()
     {
-        HolderStub* mgr = FUN_00c85750();
+        HolderStub* mgr = hkMemoryRouter_getInstance();
         AllocationHeap* heap = (AllocationHeap*)mgr->m_pAllocator;
         int cap = m_iCapacityState;
         m_iElementCount = 0;
@@ -1581,7 +1581,7 @@ struct Ref
 {
     void FUN_00c90510();
 };
-int FUN_00e60cb0(unsigned char, int);
+int hkMeshPrimitiveUtil_calculateNumIndices(unsigned char, int);
 struct Entry
 {
     Ref* name;
@@ -1599,7 +1599,7 @@ struct Entry
     int length() const
     {
         int t = type;
-        return FUN_00e60cb0(t, count);
+        return hkMeshPrimitiveUtil_calculateNumIndices(t, count);
     }
 };
 struct Allocator
@@ -1607,9 +1607,9 @@ struct Allocator
 };
 #include "../../include/hkMemoryRouter.h"
 hkMemoryRouter* getRouter();
-int FUN_00e60cb0(unsigned char type, int count);
-extern "C" void FUN_00c908c0(Allocator*, void*, int, int);
-void FUN_00cb1260(void*, const void*, int);
+int hkMeshPrimitiveUtil_calculateNumIndices(unsigned char type, int count);
+extern "C" void hkArrayUtil__reserve(Allocator*, void*, int, int);
+void hkString_memCpy(void*, const void*, int);
 struct String
 {
     void* value;
@@ -1631,7 +1631,7 @@ struct ArrayBase
     {
         int cap = a->getCapacity();
         if (cap < n)
-            FUN_00c908c0(&heap, a, n < 2 * cap ? 2 * cap : n, stride);
+            hkArrayUtil__reserve(&heap, a, n < 2 * cap ? 2 * cap : n, stride);
     }
     void reserve(Allocator& heap, int n, int stride)
     {
@@ -1733,7 +1733,7 @@ struct L
     int* m_00;
     int m_04;
 };
-void __cdecl FUN_00e54c10(int idx, L* list);
+void __cdecl hkaNURBS_Remove(int idx, L* list);
 struct HolderView
 {
     int unk00;
@@ -1748,10 +1748,10 @@ struct FloatArrayRef
     int size;
     unsigned int capacity;
 };
-int __cdecl FUN_00e57210(FloatArrayRef* array, int count);
+int __cdecl hkaNURBS_DegreeElevateKnotVector(FloatArrayRef* array, int count);
 struct ArrayAllocator;
 struct FloatArray;
-void FUN_00c908c0(ArrayAllocator* alloc, FloatArray* arr, int newCap, int elemSize);
+void hkArrayUtil__reserve(ArrayAllocator* alloc, FloatArray* arr, int newCap, int elemSize);
 struct FloatArray
 {
     float* m_data;
@@ -1767,7 +1767,7 @@ struct FloatArray
         if (cap < n)
         {
             int c = 2 * cap;
-            FUN_00c908c0(&alloc, this, n < c ? c : n, 4);
+            hkArrayUtil__reserve(&alloc, this, n < c ? c : n, 4);
         }
     }
 };
@@ -1787,7 +1787,7 @@ class E87E0Matrix
     {
         return m_pfData[i];
     }
-    E87E0Matrix& FUN_00e587e0(const E87E0Matrix& kOther);
+    E87E0Matrix& SubtractMatrixElements(const E87E0Matrix& kOther);
 };
 class CE588A0Vector
 {

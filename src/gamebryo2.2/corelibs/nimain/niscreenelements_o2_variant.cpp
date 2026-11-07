@@ -8,7 +8,8 @@
 extern "C" void* g_011f5b48;
 
 // @fnv 0x00a87800
-void* __cdecl FUN_00a87800()
+// src: COMMUNITY 0x00a87800
+void* __cdecl NiScreenElements_GetRTTI()
 {
     return &g_011f5b48;
 }

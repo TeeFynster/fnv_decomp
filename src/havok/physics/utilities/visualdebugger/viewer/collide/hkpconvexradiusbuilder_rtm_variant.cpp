@@ -35,21 +35,22 @@ struct Holder
     int unk00, unk04, unk08, unk0c;
     Allocator* allocator;
 };
-extern Holder* FUN_00c85750();
-extern void __cdecl FUN_00c908c0(Allocator*, void*, int, int);
+extern Holder* hkMemoryRouter_getInstance();
+extern void __cdecl hkArrayUtil__reserve(Allocator*, void*, int, int);
 struct PlaneArray
 {
     __m128* data;
     int size, capacity;
 };
 // @fnv 0x00de3200
-static __declspec(noinline) void FUN_00de3200(Shape* shape, PlaneArray* planes, float radius)
+// src: XBOX_PDB 0x00de3200
+static __declspec(noinline) void _addBoundingPlanes(Shape* shape, PlaneArray* planes, float radius)
 {
     // getBounds fills uninitialized output storage; do not invoke hkAabb::hkAabb().
     __m128 boundsStorage[sizeof(hkAabb) / sizeof(__m128)];
     hkAabb& bounds = *reinterpret_cast<hkAabb*>(boundsStorage);
     shape->getBounds(&DAT_01268370, radius, &bounds);
-    Holder* holder = FUN_00c85750();
+    Holder* holder = hkMemoryRouter_getInstance();
     Allocator* allocationHeap = holder->allocator;
     int wanted = planes->size + 6;
     int capacity = planes->capacity & 0x3fffffff;
@@ -58,7 +59,7 @@ static __declspec(noinline) void FUN_00de3200(Shape* shape, PlaneArray* planes, 
         int doubled = capacity + capacity;
         if (wanted < doubled)
             wanted = doubled;
-        FUN_00c908c0(allocationHeap, planes, wanted, 16);
+        hkArrayUtil__reserve(allocationHeap, planes, wanted, 16);
     }
     planes->size += 6;
     int start = planes->size;
@@ -71,7 +72,7 @@ static __declspec(noinline) void FUN_00de3200(Shape* shape, PlaneArray* planes, 
 }
 extern "C" void planeBuilderWitness(Shape* shape, PlaneArray* planes, float radius)
 {
-    FUN_00de3200(shape, planes, radius);
+    _addBoundingPlanes(shape, planes, radius);
 }
 
 }

@@ -117,8 +117,8 @@ extern int xpCurrentLevel, xpNextLevel;
 extern XPSetting xpLabel, xpLevelLabel, xpMaxLevel;
 extern XPClock xpClock;
 extern int LookupXPTrait(const char*, int);
-extern bool FUN_00702360();
-extern int FUN_007023c0();
+extern bool Interface_IsInMenuMode();
+extern int Interface_GetTopMenuID();
 extern int LevelXP(int);
 extern float LinearInterpolate(float, float, float, float, float);
 extern float XPClampLow(float, float);
@@ -126,21 +126,22 @@ extern float XPClampHigh(float, float);
 extern int XPMax(int, int);
 extern int XPMin(int, int);
 extern int XPSprintf(char*, unsigned int, const char*, ...);
-extern void FUN_00717280(int);
+extern void InterfaceManager_PlayMenuSound(int);
 struct XPMenu : HUDMainMenu
 {
-    void FUN_0077c4e0();
+    void HUDMainMenu_UpdateXPMeter();
 };
 
 // @fnv 0x0077c4e0
-void XPMenu::FUN_0077c4e0()
+// src: XBOX_PDB 0x0077c4e0
+void XPMenu::HUDMainMenu_UpdateXPMeter()
 {
     static int minTrait = LookupXPTrait("_x_min", -1);
     static int maxTrait = LookupXPTrait("_x_max", -1);
     bool hasPendingLevel18 = _g_thePlayer->PendingLevels() > 0;
     bool canLevelUp13 = _g_thePlayer->State()->Ready();
-    if ((FUN_00702360() && FUN_007023c0() != 1008 && FUN_007023c0() != 1055 && FUN_007023c0() != 1057 &&
-         FUN_007023c0() != 1009) ||
+    if ((Interface_IsInMenuMode() && Interface_GetTopMenuID() != 1008 && Interface_GetTopMenuID() != 1055 && Interface_GetTopMenuID() != 1057 &&
+         Interface_GetTopMenuID() != 1009) ||
         xpVats.Flags() == 4 || ((XPGate*)&m_kMenuData)->Active())
     {
         HUDMainMenu_pme->m_pTiles[44]->Set(4003, 0);
@@ -287,7 +288,7 @@ void XPMenu::FUN_0077c4e0()
                     int levelEndXP11 = LevelXP(xpNextLevel);
                     if (canLevelUp13 && meterMax4 == m_pTiles[47]->Read(4001) && !_g_thePlayer->IsBusy() &&
                         !hasPendingLevel18)
-                        FUN_00717280(21);
+                        InterfaceManager_PlayMenuSound(21);
                     if (currentXP15 > levelEndXP11 && xpNextLevel < *xpMaxLevel.Int() && !hasPendingLevel18)
                     {
                         ++xpCurrentLevel;

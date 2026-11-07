@@ -27,7 +27,7 @@ struct ContactBody
     char unk100[0x10c - 0x100];
     float m_limitC;
 };
-bool FUN_00d28560(void* unused, char** items, int count, int offset);
+bool Object_ProcessEntries_00d28560(void* unused, char** items, int count, int offset);
 inline void* operator new(unsigned int, void* p) throw()
 {
     return p;
@@ -61,14 +61,15 @@ class S00d2c8a0_Derived : public S00d2c8a0_Base
     virtual void vf04();
     __m128 m_kScaleFactors;
 };
-const void* __cdecl FUN_00d2c8a0();
+const void* __cdecl Object_GetConstructedVirtualTable();
 struct SortPair
 {
     unsigned int key;
     unsigned int val;
 };
 // @fnv 0x00d36520
-extern "C" void FUN_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
+// src: GUESS 0x00d36520 (confidence: low)
+extern "C" void Object_ProcessEntries_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
 {
     int i;
     int j;
@@ -105,7 +106,7 @@ extern "C" void FUN_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
         } while (i <= j);
         if (lo < j)
         {
-            FUN_00d36520(arr, lo, j, extra);
+            Object_ProcessEntries_00d36520(arr, lo, j, extra);
         }
         if (i >= hi)
         {
@@ -114,17 +115,17 @@ extern "C" void FUN_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
         lo = i;
     }
 }
-void __cdecl FUN_00d367b0(hkpCollisionDispatcher::Agent3FunctionTable& kFuncs);
-void __cdecl FUN_00d367d0(hkpCollisionDispatcher* pkDispatcher);
+void __cdecl hkpCollectionAgent3_initAgentFunc(hkpCollisionDispatcher::Agent3FunctionTable& kFuncs);
+void __cdecl hkpCollectionAgent3_registerAgent3(hkpCollisionDispatcher* pkDispatcher);
 void InitOutputDefaults();
-void FUN_00d39130();
+void Runtime_ReleaseHandles_Thunk();
 void ReleaseHandles();
 void RemoveKeyFromTable();
 void InsertIntoSlotArray();
-void FUN_00d39090();
-void FUN_00d39150();
-void FUN_00d39390();
-void __cdecl FUN_00d39840(hkpCollisionDispatcher* pkDispatcher);
+void nullsub_15();
+void hkCollideCapsuleUtilCapsVsTri_ProcessEntries_00d39150();
+void hkCapsuleTriangleAgent3_process();
+void __cdecl hkCapsuleTriangleAgent3_registerAgent3(hkpCollisionDispatcher* pkDispatcher);
 extern "C"
 {
     __m128 _mm_set_ps1(float a);
@@ -149,7 +150,7 @@ static __forceinline void Dot3(float& result, __m128 u, __m128 v)
     __m128 z = _mm_shuffle_ps(m, m, 0xaa);
     _mm_store_ss(&result, _mm_add_ss(z, _mm_add_ss(y, m)));
 }
-int FUN_00d231b0(const __m128* pa, const __m128* pb, const __m128* pc, const __m128* pd, ClosestPointResult* out);
+int hkLineSegmentUtil_closestPointInfLineInfLine(const __m128* pa, const __m128* pb, const __m128* pc, const __m128* pd, ClosestPointResult* out);
 
 namespace MoppSimd {
 // Exe 0x00d2f0d0 FUN_00d2f0d0: retain this LocalM128 view; the CRT type does not preserve this unit.
@@ -199,7 +200,7 @@ struct MoppCastProfBuf
 struct MoppCastMatrix
 {
     hkVector4 col0, col1, col2, translation;
-    void FUN_00cb22f0(const MoppCastMatrix*, const MoppCastMatrix*);
+    void hkTransform_setMulInverseMul(const MoppCastMatrix*, const MoppCastMatrix*);
 };
 struct MoppCastBounds
 {
@@ -253,7 +254,7 @@ struct MoppCastCollector
     int d, e;
     MoppCastQuery* query;
     int unk30;
-    void FUN_00da8180(MoppCastQuery*, int, int);
+    void ProcessAndReturnValue_00da8180(MoppCastQuery*, int, int);
 };
 static void ProfMark(const char* name)
 {
@@ -280,17 +281,18 @@ struct MoppCastCastGeometry
     MoppCastMatrix relative;
 };
 // @fnv 0x00d2f0d0
-void __cdecl FUN_00d2f0d0(MoppCastBody* a, MoppCastBody* b, MoppCastInput* c, int d, int e)
+// src: GUESS 0x00d2f0d0 (confidence: low)
+void __cdecl hkTransform_setMulInverseMul_ComputeValues_00d2f0d0(MoppCastBody* a, MoppCastBody* b, MoppCastInput* c, int d, int e)
 {
     ProfMark(DAT_010ce8e8);
     // Preserve uninitialized scratch storage without vector constructors or a GS buffer.
     __declspec(align(16)) void* geometryStorage[sizeof(MoppCastCastGeometry) / sizeof(void*)];
     MoppCastCastGeometry& ls = *(MoppCastCastGeometry*)geometryStorage;
-    ls.relative.FUN_00cb22f0(b->transform, a->transform);
+    ls.relative.hkTransform_setMulInverseMul(b->transform, a->transform);
 
     a->shape->Eval(&ls.relative, c->tolerance, &ls.bounds);
 
-    ls.direction.FUN_004b4ab0(*(const hkRotation*)b->transform, c->direction);
+    ls.direction.hkVector4_setRotatedInverseDir(*(const hkRotation*)b->transform, c->direction);
 
     float tolerance = c->tolerance;
     MoppSimd::LocalM128 scalarHalf = MoppSimd::_mm_load_ss(&DAT_01016248);
@@ -308,6 +310,6 @@ void __cdecl FUN_00d2f0d0(MoppCastBody* a, MoppCastBody* b, MoppCastInput* c, in
     ls.query.b = b;
     (MoppSimd::LocalM128&)ls.query.radius = radius;
     ls.query.input = c;
-    ls.collector.FUN_00da8180(&ls.query, d, e);
+    ls.collector.ProcessAndReturnValue_00da8180(&ls.query, d, e);
     ProfMark(DAT_010c41f8);
 }

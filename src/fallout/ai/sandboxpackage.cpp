@@ -488,8 +488,8 @@ bool SandboxPackageOperations::IsObjectWithinLocationRadius(MobileObject* object
                 m_uiLastProcedureCheckDay = g_timeGlobal.GetTimeStamp() + (unsigned int)(state.patrol->GetX() * 1000.0);
             if (eProcedure > -1 && eProcedure < 6)
             {
-                state.helper = static_cast<SandboxActorEnergySource*>(state.actor)->FUN_0087f990();
-                m_fProcedureTime = FUN_006435c0(state.helper, eProcedure);
+                state.helper = static_cast<SandboxActorEnergySource*>(state.actor)->Actor_GetActorBaseEnergyLevel();
+                m_fProcedureTime = AiFormulas_ComputeRandomSandboxSubProcessDuration(state.helper, eProcedure);
             }
         }
         return true;
@@ -512,9 +512,9 @@ extern SettingT<GameSettingCollection> originalRuntimeFloatSetting256;
 extern int g_011cdb3c;
 extern int g_011cd0a4;
 extern int g_011cdf60;
-int& __fastcall FUN_0043d4d0(int*);
+int& __fastcall Setting_Int(int*);
 unsigned int GetRandomNumberInRange(int, int);
-int FUN_00647b70(int, int);
+int BSMAX_00647b70(int, int);
 int GetRandomNumber();
 
 struct DurationData
@@ -524,12 +524,12 @@ struct DurationData
 struct SandBoxChoiceListItem_ext : public SandboxProcedureData
 {
     void FUN_0041fd00(int);
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     unsigned int FUN_0044ddc0();
 };
 struct FUN_005682c0_caller
 {
-    int FUN_005682c0(bool);
+    int TESObjectREFR_GetFirstFreeMarkerIndex(bool);
 };
 
 }  // namespace fnv_009f4700
@@ -558,14 +558,14 @@ void SandboxPackageOperations::SelectSandboxActivity(Actor* apActor, TESPackage*
     SelectActivity();
     if (m_fNextProcedureCheckHour == 0.0)
     {
-        if (apOriginalPackage && apOriginalPackage->FUN_0041d8a0())
-            m_fNextProcedureCheckHour = (float)reinterpret_cast<fnv_009f4700::DurationData*>(apOriginalPackage->FUN_0041d8a0())->FUN_00726070();
+        if (apOriginalPackage && apOriginalPackage->TESPackage_GetPackageSchedule())
+            m_fNextProcedureCheckHour = (float)reinterpret_cast<fnv_009f4700::DurationData*>(apOriginalPackage->TESPackage_GetPackageSchedule())->FUN_00726070();
         if (m_fNextProcedureCheckHour == 0.0)
             m_fNextProcedureCheckHour = 24.0f;
     }
     if (m_pCurrentTarget && m_pCurrentFurniture != m_pCurrentTarget)
     {
-        m_uiActivityStartDay = g_timeGlobal.GetTimeStamp() + FUN_0043d4d0(&g_011cdb3c) * 1000;
+        m_uiActivityStartDay = g_timeGlobal.GetTimeStamp() + Setting_Int(&g_011cdb3c) * 1000;
         m_pCurrentFurniture = m_pCurrentTarget;
     }
     if (m_pCurrentFurniture && g_timeGlobal.GetTimeStamp() > m_uiActivityStartDay)
@@ -581,7 +581,7 @@ void SandboxPackageOperations::SelectSandboxActivity(Actor* apActor, TESPackage*
         ResetReference();
         ScanSandboxTargets(apActor);
         m_uiProcedureIndex = g_timeGlobal.GetTimeStamp() +
-                             GetRandomNumberInRange(FUN_0043d4d0(&g_011cd0a4) * 1000, FUN_0043d4d0(&g_011cdf60) * 1000);
+                             GetRandomNumberInRange(Setting_Int(&g_011cd0a4) * 1000, Setting_Int(&g_011cdf60) * 1000);
     }
     bcanPerformActivity = IsActivityTime() && IsActivityProcedure();
     if (bcanPerformActivity)
@@ -636,7 +636,7 @@ void SandboxPackageOperations::SelectSandboxActivity(Actor* apActor, TESPackage*
         TESPackage* ppack;
         item = static_cast<SandBoxChoiceListItem_ext*>(&m_kProcedureList.GetAt(i));
         score = item->FUN_0044ddc0() * isandboxProceduresProbabilities[item->GetProcedure()];
-        score = FUN_00647b70(score, 0);
+        score = BSMAX_00647b70(score, 0);
         ppack = reinterpret_cast<TESPackage*>(apActor->GetCurrentPackage());
         ptargObject = item->GetTarget();
         if (ptargObject)
@@ -715,16 +715,16 @@ void SandboxPackageOperations::SelectSandboxActivity(Actor* apActor, TESPackage*
         for (i = 0; i < inumTargets; i++)
         {
             SandBoxChoiceListItem_ext* item = static_cast<SandBoxChoiceListItem_ext*>(&m_kProcedureList.GetAt(i));
-            if ((irandom -= item->FUN_0084e3a0()) < 0)
+            if ((irandom -= item->GetHavokWorldObjectCountInSceneGraph_0084e3a0()) < 0)
                 break;
         }
         ritem = m_kProcedureList.GetAt(i);
         eProcedure = ritem.GetProcedure();
         m_pCurrentTarget = ritem.GetTarget();
-        iIndex = m_pCurrentTarget ? reinterpret_cast<FUN_005682c0_caller*>(m_pCurrentTarget)->FUN_005682c0(false) : -1;
+        iIndex = m_pCurrentTarget ? reinterpret_cast<FUN_005682c0_caller*>(m_pCurrentTarget)->TESObjectREFR_GetFirstFreeMarkerIndex(false) : -1;
         m_ucProcedureIndex = iIndex < 0 ? 0 : (unsigned char)iIndex;
-        iactorEnergy = reinterpret_cast<int>(static_cast<SandboxActorEnergySource*>(apActor)->FUN_0087f990());
-        m_fProcedureTime = FUN_006435c0((void*)iactorEnergy, eProcedure);
+        iactorEnergy = reinterpret_cast<int>(static_cast<SandboxActorEnergySource*>(apActor)->Actor_GetActorBaseEnergyLevel());
+        m_fProcedureTime = AiFormulas_ComputeRandomSandboxSubProcessDuration((void*)iactorEnergy, eProcedure);
         for (i = 0; i < 6; i++)
         {
             unsigned char cweight = m_ucProcedureFlags[i];
@@ -769,13 +769,13 @@ void __cdecl _Deallocate(void*);
 
 struct DH
 {
-    bool FUN_004226e0();
+    bool TESDataHandler_GetClearingData();
 };
 extern DH* g_dataHandler;
 // @fnv 0x009f4060
 void SandboxPackageOperations::ResetReference()
 {
-    if (g_dataHandler == 0 || !g_dataHandler->FUN_004226e0())
+    if (g_dataHandler == 0 || !g_dataHandler->TESDataHandler_GetClearingData())
     {
         if (m_pCurrentTarget != 0)
         {
@@ -805,7 +805,7 @@ int __thiscall FUN_009f4640_holder::GetFlagsMappedValue()
 
 struct Arr16
 {
-    unsigned int FUN_006f31f0();
+    unsigned int BSSimpleArray_TeleportLink_1024_AddUninitialized();
 };
 struct Elem9f6340
 {
@@ -818,14 +818,14 @@ struct Host9f6340
 {
     int f00;
     Elem9f6340* f04;
-    void __thiscall FUN_009f6460(Elem9f6340* p, int v);
+    void __thiscall BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(Elem9f6340* p, int v);
     unsigned int __thiscall AppendElement(Elem9f6340* p);
 };
 // @fnv 0x009f6340
 unsigned int __thiscall Host9f6340::AppendElement(Elem9f6340* apElement)
 {
-    unsigned int uiIndex = ((Arr16*)this)->FUN_006f31f0();
-    FUN_009f6460(f04 + uiIndex, 1);
+    unsigned int uiIndex = ((Arr16*)this)->BSSimpleArray_TeleportLink_1024_AddUninitialized();
+    BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(f04 + uiIndex, 1);
     f04[uiIndex] = *apElement;
     return uiIndex;
 }
@@ -871,17 +871,18 @@ struct S006949d0
 };
 struct FUN_009f6190_shell : S006949d0
 {
-    void* __thiscall FUN_009f6190(int a);
+    void* __thiscall BSSimpleArray_SandBoxChoiceListItem_1024_GetAt(int a);
 };
 // @fnv 0x009f6190
-void* __thiscall FUN_009f6190_shell::FUN_009f6190(int aiIndex)
+// src: XBOX_PDB 0x009f6190
+void* __thiscall FUN_009f6190_shell::BSSimpleArray_SandBoxChoiceListItem_1024_GetAt(int aiIndex)
 {
     return GetAt(aiIndex);
 }
 
 struct EdgeArr
 {
-    char* FUN_006a1440(unsigned int);
+    char* Object_GetIndexedValue_006a1440(unsigned int);
 };
 
 struct FUN_00693d30_shell
@@ -894,7 +895,7 @@ struct FUN_00693d30_shell
 // @fnv 0x00693d30
 char* FUN_00693d30_shell::GetEdge(unsigned short index)
 {
-    return m_kEdges.FUN_006a1440(index);
+    return m_kEdges.Object_GetIndexedValue_006a1440(index);
 }
 
 // @fnv 0x009f3e20
@@ -922,27 +923,28 @@ struct FUN_0072ba80_shell
 };
 struct FUN_006c8bd0_Class
 {
-    void __thiscall FUN_006c8bd0(const char*, const char*, unsigned int);
+    void __thiscall BSSimpleArray_NiColorA_1024_CopyItems(const char*, const char*, unsigned int);
 };
 struct FUN_009f63a0_shell
 {
     char* f00;
     char* f04;
     unsigned int f08;
-    void __thiscall FUN_009f63a0(char* apSrcAddr, unsigned int aiCount);
+    void __thiscall BSSimpleArray_SandBoxChoiceListItem_1024_RemoveFast(char* apSrcAddr, unsigned int aiCount);
 };
 // @fnv 0x009f63a0
-void __thiscall FUN_009f63a0_shell::FUN_009f63a0(char* apSrcAddr, unsigned int aiCount)
+// src: XBOX_PDB 0x009f63a0
+void __thiscall FUN_009f63a0_shell::BSSimpleArray_SandBoxChoiceListItem_1024_RemoveFast(char* apSrcAddr, unsigned int aiCount)
 {
     unsigned int i = FUN_0042f5a0(f08 - (unsigned int)apSrcAddr - aiCount, aiCount);
     ((FUN_0072ba80_shell*)this)->FUN_0072ba80(f04 + (unsigned int)apSrcAddr * 16, aiCount);
-    ((FUN_006c8bd0_Class*)this)->FUN_006c8bd0(f04 + (unsigned int)apSrcAddr * 16, f04 + f08 * 16 - i * 16, i);
+    ((FUN_006c8bd0_Class*)this)->BSSimpleArray_NiColorA_1024_CopyItems(f04 + (unsigned int)apSrcAddr * 16, f04 + f08 * 16 - i * 16, i);
     f08 -= aiCount;
 }
 
 struct FUN_009f3850_shell
 {
-    void __thiscall FUN_009f3850(BGSSaveFormBuffer*);
+    void __thiscall SandBoxChoiceListItem_SaveGame(BGSSaveFormBuffer*);
 };
 
 // Serializes sandbox state, target references and procedure entries into the save buffer.
@@ -988,12 +990,12 @@ void __thiscall SandBoxActorPackageData::SaveGame(BGSSaveFormBuffer* apSaveGameB
             ? m_kProcedureList.GetSize()
             : 0;
 
-    static_cast<BGSSaveGameBuffer*>(apSaveGameBuffer)->FUN_00865f60(isaveGameCount_2);
+    static_cast<BGSSaveGameBuffer*>(apSaveGameBuffer)->SaveVariableSizedValue(isaveGameCount_2);
 
     for (i = 0; i < isaveGameCount_2; ++i)
     {
         potentialTarget = &m_kProcedureList.GetAt(i);
-        reinterpret_cast<FUN_009f3850_shell*>(potentialTarget)->FUN_009f3850(apSaveGameBuffer);
+        reinterpret_cast<FUN_009f3850_shell*>(potentialTarget)->SandBoxChoiceListItem_SaveGame(apSaveGameBuffer);
     }
 }
 
@@ -1014,24 +1016,24 @@ struct Object
 };
 struct ElevationProvider
 {
-    bool __thiscall FUN_005547c0(NiPoint3*, float*);
+    bool __thiscall TESObjectCELL_GetLandHeight(NiPoint3*, float*);
 };
-extern bool __cdecl FUN_006d34d0(Object*, NiPoint3*);
-extern float __cdecl FUN_004a4240();
+extern bool __cdecl Pathing_FindClosePointViaNavMesh(Object*, NiPoint3*);
+extern float __cdecl RandomFloatTwoPi();
 extern float __cdecl FUN_00476b70(float, float);
 extern float __cdecl FUN_004e44d0(float);
-extern float __cdecl FUN_004e4490(float);
+extern float __cdecl cosf_004e4490(float);
 // Computes a position from the object's parts and elevation provider, writing it into result and overriding z with the provider's height.
 // @fnv 0x006d33c0
 void __cdecl GetObjectPosition(Object* object, NiPoint3* result)
 {
-    if (FUN_006d34d0(object, result))
+    if (Pathing_FindClosePointViaNavMesh(object, result))
         return;
-    float a = FUN_004a4240();
+    float a = RandomFloatTwoPi();
     float g;
     float b = FUN_00476b70(object->GetFloatAtOffsetB0(), object->GetFieldB4Float());
     float f[sizeof(NiPoint3) / sizeof(float)];
-    reinterpret_cast<NiPoint3*>(f)->FUN_00416870(FUN_004e4490(a) * b, FUN_004e44d0(a) * b, 0.0f);
+    reinterpret_cast<NiPoint3*>(f)->SetComponents(cosf_004e4490(a) * b, FUN_004e44d0(a) * b, 0.0f);
     float c[sizeof(NiPoint3) / sizeof(float)];
     float e[sizeof(NiPoint3) / sizeof(float)];
     memcpy(result, object->GetOffsetC()->FUN_005c3420(reinterpret_cast<NiPoint3*>(c), reinterpret_cast<NiPoint3*>(e),
@@ -1039,7 +1041,7 @@ void __cdecl GetObjectPosition(Object* object, NiPoint3* result)
     ElevationProvider* d = static_cast<ElevationProvider*>(object->GetOffsetC()->FUN_006dd4f0());
     if (!d)
         return;
-    if (!d->FUN_005547c0(result, &g))
+    if (!d->TESObjectCELL_GetLandHeight(result, &g))
         return;
     result->z = g;
 }
@@ -1080,7 +1082,7 @@ struct FalloffController
 };
 
 float __cdecl FUN_004e44d0(float value);
-void __cdecl FUN_007f7a50(float first, float second);
+void __cdecl ImageSpaceShaderMenuUnpack_SetOffset(float first, float second);
 
 // @fnv 0x007f7970
 void __thiscall FalloffController::UpdateFalloff(float currentTime)
@@ -1089,7 +1091,7 @@ void __thiscall FalloffController::UpdateFalloff(float currentTime)
     if (elapsed > firstDuration && elapsed > secondDuration)
     {
         active = false;
-        FUN_007f7a50(0.0f, 0.0f);
+        ImageSpaceShaderMenuUnpack_SetOffset(0.0f, 0.0f);
     }
     else
     {
@@ -1480,20 +1482,20 @@ struct ChoiceTargetRef
     virtual void slot1cc();
     virtual void* GetFurnitureSlot();
     bool FUN_00440d80();
-    bool FUN_004077c0();
+    bool TESForm_GetTemporary();
     bool FUN_00440da0();
-    bool FUN_008859e0(ChoiceTargetRef*);
-    bool FUN_0057b500();
-    ChoiceBaseForm* FUN_007af430();
+    bool Actor_CanChildUseObject(ChoiceTargetRef*);
+    bool TESObjectREFR_GetIgnoredBySandbox();
+    ChoiceBaseForm* BGSSaveFormBuffer_GetForm();
     TESPackage* FUN_009344a0();
-    void* FUN_00567790();
-    bool FUN_005785e0(ChoiceTargetRef*, int);
+    void* TESObjectREFR_GetOwner();
+    bool TESObjectREFR_IsAnOwner(ChoiceTargetRef*, int);
 };
 struct ChoiceMarkerData
 {
     unsigned GetByte5();
     unsigned FUN_00479e80();
-    bool FUN_00479fb0(ChoiceTargetRef*, ChoiceTargetRef*);
+    bool BGSIdleCollection_HasIdleForActor(ChoiceTargetRef*, ChoiceTargetRef*);
 };
 struct ChoiceBaseForm
 {
@@ -1516,9 +1518,9 @@ struct ChoiceBaseForm
 };
 struct ChoiceFurniture
 {
-    void* FUN_00509490();
+    void* BSFurnitureMarker_QNumMarks();
 };
-ChoiceFurniture* __cdecl FUN_00c54400(void*);
+ChoiceFurniture* __cdecl BSFurnitureMarker_Find(void*);
 struct ChoiceCollection
 {
     unsigned AppendElement(const FUN_009f3800&);
@@ -1526,7 +1528,7 @@ struct ChoiceCollection
 struct ChoiceContext
 {
     SandboxPackageOperations* FUN_00726070();
-    ChoiceTargetRef* FUN_00559450();
+    ChoiceTargetRef* Modelloader_GetReferencedThis();
 };
 extern ChoiceTargetRef* DAT_011dea3c;
 // Validates the target and actor, then adds a planner choice based on the target's form type and permission checks; always returns false.
@@ -1535,29 +1537,29 @@ bool __cdecl AddActivationChoice(ChoiceTargetRef* target, ChoiceContext* pContex
 {
     ChoiceContext* context = pContext;
     SandboxPackageOperations* planner = context->FUN_00726070();
-    ChoiceTargetRef* actor = context->FUN_00559450();
+    ChoiceTargetRef* actor = context->Modelloader_GetReferencedThis();
     if (!planner)
         return false;
-    if (!actor || !actor->FUN_007af430())
+    if (!actor || !actor->BGSSaveFormBuffer_GetForm())
         return false;
-    if (!target || target->FUN_00440d80() || target->FUN_004077c0() || target->FUN_00440da0() ||
-        (actor->CanActivateSlot(0) && !actor->FUN_008859e0(target)))
+    if (!target || target->FUN_00440d80() || target->TESForm_GetTemporary() || target->FUN_00440da0() ||
+        (actor->CanActivateSlot(0) && !actor->Actor_CanChildUseObject(target)))
         return false;
     TESPackage* permissions = actor->FUN_009344a0();
     if (!permissions)
         return false;
-    if (target->FUN_0057b500())
+    if (target->TESObjectREFR_GetIgnoredBySandbox())
         return false;
-    switch (target->FUN_007af430()->FUN_00401170())
+    switch (target->BGSSaveFormBuffer_GetForm()->FUN_00401170())
     {
     case 48:
-        if (IsSandboxFlag8Clear(permissions) && (!target->FUN_00567790() || target->FUN_005785e0(actor, 1)))
+        if (IsSandboxFlag8Clear(permissions) && (!target->TESObjectREFR_GetOwner() || target->TESObjectREFR_IsAnOwner(actor, 1)))
         {
-            ChoiceBaseForm* markerBase = target->FUN_007af430();
+            ChoiceBaseForm* markerBase = target->BGSSaveFormBuffer_GetForm();
             unsigned markerCount2 = markerBase->markers.GetByte5();
             unsigned markerFlags = markerBase->markers.FUN_00479e80();
             bool markerUsed = false;
-            if (markerBase->markers.FUN_00479fb0(actor, target))
+            if (markerBase->markers.BGSIdleCollection_HasIdleForActor(actor, target))
                 reinterpret_cast<ChoiceCollection*>(&planner->m_kProcedureList)->AppendElement(FUN_009f3800(reinterpret_cast<TESObjectREFRHelper*>(target), 4, 1));
         }
         break;
@@ -1570,27 +1572,27 @@ bool __cdecl AddActivationChoice(ChoiceTargetRef* target, ChoiceContext* pContex
         void* object8 = target->GetFurnitureSlot();
         if (!object8)
             return false;
-        ChoiceFurniture* furniture = FUN_00c54400(object8);
+        ChoiceFurniture* furniture = BSFurnitureMarker_Find(object8);
         if (!furniture)
             return false;
-        void* data = furniture->FUN_00509490();
+        void* data = furniture->BSFurnitureMarker_QNumMarks();
         if (!data)
             return false;
-        ChoiceBaseForm* furnitureBase2 = target->FUN_007af430();
+        ChoiceBaseForm* furnitureBase2 = target->BGSSaveFormBuffer_GetForm();
         if (IsSandboxFlag2Clear(permissions) && furnitureBase2->FUN_00509420() &&
-            (!target->FUN_00567790() || target->FUN_005785e0(actor, 1)))
+            (!target->TESObjectREFR_GetOwner() || target->TESObjectREFR_IsAnOwner(actor, 1)))
         {
             reinterpret_cast<ChoiceCollection*>(&planner->m_kProcedureList)->AppendElement(FUN_009f3800(reinterpret_cast<TESObjectREFRHelper*>(target), 1, 1));
             planner->m_bHasBedMarker = true;
         }
         else if (IsSandboxFlag10Clear(permissions) && furnitureBase2->FUN_005093f0() &&
-                 (!target->FUN_00567790() || target->FUN_005785e0(actor, 1)))
+                 (!target->TESObjectREFR_GetOwner() || target->TESObjectREFR_IsAnOwner(actor, 1)))
         {
             reinterpret_cast<ChoiceCollection*>(&planner->m_kProcedureList)->AppendElement(FUN_009f3800(reinterpret_cast<TESObjectREFRHelper*>(target), 0, 1));
             planner->m_bHasChairMarker = true;
         }
         else if (IsSandboxFlag10Clear(permissions) && !furnitureBase2->FUN_005093f0() && !furnitureBase2->FUN_00509420() &&
-                 (!target->FUN_00567790() || target->FUN_005785e0(actor, 1)))
+                 (!target->TESObjectREFR_GetOwner() || target->TESObjectREFR_IsAnOwner(actor, 1)))
         {
             reinterpret_cast<ChoiceCollection*>(&planner->m_kProcedureList)->AppendElement(FUN_009f3800(reinterpret_cast<TESObjectREFRHelper*>(target), 0, 1));
             planner->m_bHasChairMarker = true;
@@ -1599,7 +1601,7 @@ bool __cdecl AddActivationChoice(ChoiceTargetRef* target, ChoiceContext* pContex
     }
     case 29:
     case 47:
-        if (IsSandboxFlag1Clear(permissions) && (!target->FUN_00567790() || target->FUN_005785e0(actor, 1)))
+        if (IsSandboxFlag1Clear(permissions) && (!target->TESObjectREFR_GetOwner() || target->TESObjectREFR_IsAnOwner(actor, 1)))
         {
             reinterpret_cast<ChoiceCollection*>(&planner->m_kProcedureList)->AppendElement(FUN_009f3800(reinterpret_cast<TESObjectREFRHelper*>(target), 2, 1));
             planner->m_bHasFoodMarker = true;

@@ -16,7 +16,7 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
@@ -31,7 +31,7 @@ CpuObject* CpuObject::FUN_00dfe940(unsigned int flags)
     ReleaseAllBucketsAndReset();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
+        CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;
@@ -79,7 +79,7 @@ struct CpuVtableHolder
 
 __forceinline static void ReleaseBucket(CpuBucket& b)
 {
-    CpuAllocatorSlots* alloc = reinterpret_cast<CpuAllocatorSlots*>(FUN_00c85750()->allocator);
+    CpuAllocatorSlots* alloc = reinterpret_cast<CpuAllocatorSlots*>(hkMemoryRouter_getInstance()->allocator);
     CpuItem** items = b.items;
     int n = b.count;
     for (int i = 0; i < n; ++i)

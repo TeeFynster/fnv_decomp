@@ -53,7 +53,7 @@ public:
     void Revert(BGSLoadFormBuffer*);
     void Revert();
     static void ProcessPendingTasks();
-    FormFlagRecord* FUN_005a90b0(ScriptLocals* locals, bool create);
-    bool FUN_005a8e20(TESForm* form, unsigned int flag);
+    FormFlagRecord* ScriptLocals_GetActionObject(ScriptLocals* locals, bool create);
+    bool SetActionFlag(TESForm* form, unsigned int flag);
     void FUN_005a85c0();
 };

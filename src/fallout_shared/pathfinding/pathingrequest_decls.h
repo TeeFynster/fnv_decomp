@@ -56,7 +56,7 @@ class PathingAvoidNodeArrayStorage
     static void* operator new(unsigned int);
     static void operator delete(void*, unsigned int);
     void SetSize(unsigned int, bool);
-    PathingAvoidNode* FUN_006a1400(unsigned int);
+    PathingAvoidNode* BSSimpleArray_PathingAvoidNode_1024_GetAt(unsigned int);
 };
 
 class PathingAvoidNodeArrayDestructionView

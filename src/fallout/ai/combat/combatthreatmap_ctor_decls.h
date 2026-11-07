@@ -19,7 +19,7 @@ public:
     ~CombatThreatRecord_combatthreatmap_ctor_decls();
     bool IsXLessThan(float);
     void LoadGame(BGSLoadGameBuffer*);
-    void __thiscall FUN_009a5e50();
+    void __thiscall SetVtableAndProcessState_009a5e50();
 };
 class TESForm;
 class ReadWriteLock

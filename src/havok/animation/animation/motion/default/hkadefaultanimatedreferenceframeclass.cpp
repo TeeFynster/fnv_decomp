@@ -5,7 +5,7 @@
 #include "../../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../../include/hkMemoryRouter.h"
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 extern int DAT_0102e388;
 
 struct FUN_00dfe520_cls
@@ -34,7 +34,7 @@ struct FUN_00dfe520_cls
 // @fnv 0x00dfe520
 FUN_00dfe520_cls* FUN_00dfe520_cls::Destroy(unsigned char acFlags)
 {
-    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     unsigned int uCapacityFlags = m_uCapBits;
     m_iArrayLength = 0;
@@ -47,7 +47,7 @@ FUN_00dfe520_cls* FUN_00dfe520_cls::Destroy(unsigned char acFlags)
     m_vptr00 = (int)&DAT_0102e388;
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder2 = FUN_00c85750();
+        hkMemoryRouter* pHolder2 = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
         (*reinterpret_cast<void (__thiscall***)(hkMemoryAllocator*, void*, unsigned int)>(pAllocator2))[2](pAllocator2, this, m_uSize);
     }

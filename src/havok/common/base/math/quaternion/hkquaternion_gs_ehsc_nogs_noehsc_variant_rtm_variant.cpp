@@ -14,12 +14,13 @@
 class FUN_005611c0_t
 {
   public:
-    void FUN_005611c0();
-    void FUN_00cb2830(float* pts);
+    void normalize_005611c0();
+    void hkQuaternion_setAndNormalize(float* pts);
 };
 static float g_sink2550;
 extern "C" double cb2550_clobber(double x);
-static __declspec(noinline) void FUN_00cb2550(FUN_005611c0_t* obj, float* pts)
+// src: COMMUNITY 0x00cb2550
+static __declspec(noinline) void quaternionFromRotatation(FUN_005611c0_t* obj, float* pts)
 {
     float s = pts[0] * pts[1];
     s = (float)cb2550_clobber(s);
@@ -33,7 +34,7 @@ static __declspec(noinline) void FUN_00cb2550(FUN_005611c0_t* obj, float* pts)
 struct FUN_00cb24c0_cls
 {
     __m128 m_00;
-    void FUN_00c7f500(unsigned char* flag);
+    void hkVector4_isOk4(unsigned char* flag);
     unsigned char* IsNormalized(unsigned char* flag);
 };
 struct Block64
@@ -87,7 +88,7 @@ struct S00cb2550_Quat
 {
     S00cb2550_V4 q;
 };
-static void FUN_00cb2550(S00cb2550_Quat* self, const S00cb2550_Rot& r);
+static void quaternionFromRotatation(S00cb2550_Quat* self, const S00cb2550_Rot& r);
 void S00cb2550_caller(S00cb2550_Quat* q, const S00cb2550_Rot& r);
 #include <xmmintrin.h>
 #include <math.h>
@@ -108,10 +109,11 @@ class Rotation
 {
   public:
     __m128 m_v;
-    void FUN_00cb2850(const __m128* a, const __m128* b, float t);
+    void D3D_ComputeClearColor(const __m128* a, const __m128* b, float t);
 };
 // @fnv 0x00cb2850
-void Rotation::FUN_00cb2850(const __m128* a, const __m128* b, float t)
+// src: XBOX_PDB 0x00cb2850
+void Rotation::D3D_ComputeClearColor(const __m128* a, const __m128* b, float t)
 {
     __m128 va = *a;
     __m128 vb = *b;

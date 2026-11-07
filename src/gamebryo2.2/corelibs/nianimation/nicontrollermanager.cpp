@@ -96,26 +96,27 @@ extern void* DAT_011f395c;
 extern void* DAT_011f38cc;
 
 void __cdecl CreateVertexRecords();
-void __cdecl FUN_00a2d470();
-void __cdecl FUN_00a2a7b0();
+void __cdecl Runtime_ApplyAnimationsToTarget();
+void __cdecl Runtime_UpdateState_00a2a7b0();
 void __cdecl AllocateTempArray();
-void __cdecl FUN_00a2a600();
-void __cdecl FUN_00a2d5b0(int, int);
+void __cdecl NiStepPosKey_DeleteArray();
+void __cdecl NiStepPosKey_InterpolateD1_RegisterSevenKeyHandlers(int, int);
 
 // If not already initialized, marks it initialized, stores five function pointers into globals, sets a byte to 0x10, calls FUN_00a2d5b0(1, 5), and returns 1.
 // @fnv 0x00a2d610
-int __cdecl FUN_00a2d610()
+// src: GAMEBRYO_LIB 0x00a2d610
+int __cdecl NiStepPosKey_RegisterLoader()
 {
     if (DAT_011f369b)
         return 0;
     DAT_011f369b = true;
     DAT_011f3ddc = (void*)&CreateVertexRecords;
-    DAT_011f3a7c = (void*)&FUN_00a2d470;
-    DAT_011f39ec = (void*)&FUN_00a2a7b0;
+    DAT_011f3a7c = (void*)&Runtime_ApplyAnimationsToTarget;
+    DAT_011f39ec = (void*)&Runtime_UpdateState_00a2a7b0;
     DAT_011f395c = (void*)&AllocateTempArray;
-    DAT_011f38cc = (void*)&FUN_00a2a600;
+    DAT_011f38cc = (void*)&NiStepPosKey_DeleteArray;
     DAT_011f3763 = 0x10;
-    FUN_00a2d5b0(1, 5);
+    NiStepPosKey_InterpolateD1_RegisterSevenKeyHandlers(1, 5);
     return 1;
 }
 
@@ -140,7 +141,8 @@ __forceinline void init_map(int* map, int size)
 }
 
 // @fnv 0x00a2ed80
-int* __fastcall FUN_00a2ed80(int* this_ptr, int, int arg1, int arg2)
+// src: EXE 0x00a2ed80
+int* __fastcall NiDefaultAVObjectPalette_NiDefaultAVObjectPalette(int* this_ptr, int, int arg1, int arg2)
 {
     _Call_a5d3a0(this_ptr);
     this_ptr[0] = reinterpret_cast<int>(&DAT_01096284);
@@ -166,7 +168,8 @@ struct HashObj
 
 // Looks up a key in the hash table by key modulo hash size, walking the bucket chain and returning the matching item's value or 0.
 // @fnv 0x00a2ee00
-void* __fastcall FUN_00a2ee00(HashObj* pThis, int, const unsigned int* pKey)
+// src: XBOX_PDB 0x00a2ee00
+void* __fastcall NiDefaultAVObjectPalette_GetAVObject(HashObj* pThis, int, const unsigned int* pKey)
 {
     unsigned int key = *pKey;
     if (key)
@@ -215,13 +218,13 @@ void* __fastcall FUN_00a2ee70(int* pThis, int, unsigned int flags)
     return pThis;
 }
 
-void __fastcall FUN_00a2ebb0(void* pThis);
+void __fastcall NiTObjectArray_UpdateReferenceState_00a2ebb0(void* pThis);
 void __cdecl FUN_00aa1460(void* p, size_t size);
 
 // @fnv 0x00a2ef80
 void* __fastcall FUN_00a2ef80(void* pThis, int, unsigned int flags)
 {
-    FUN_00a2ebb0(pThis);
+    NiTObjectArray_UpdateReferenceState_00a2ebb0(pThis);
     if (flags & 1)
     {
         FUN_00aa1460(pThis, 0x7c);
@@ -308,14 +311,16 @@ void NiControllerManager::CloneControllerManager(NiControllerManager* pkDest, Cl
 
 extern const char g_011f4a04_arg1[];
 // @fnv 0x00a2e1e0
-const char* __cdecl FUN_00a2e1e0()
+// src: COMMUNITY 0x00a2e1e0
+const char* __cdecl NiAVObjectPalette_GetRTTI()
 {
     return g_011f4a04_arg1;
 }
 
 
 // @fnv 0x00a2e420
-unsigned char __fastcall FUN_00a2e420(NiControllerManager* self, int, float f)
+// src: XBOX_PDB 0x00a2e420
+unsigned char __fastcall NiControllerManager_StopTransSourceSequence(NiControllerManager* self, int, float f)
 {
     unsigned int i = 0;
     while (i < *(unsigned int*)((char*)self + 0x4c))
@@ -417,7 +422,8 @@ struct S290
 };
 
 // @fnv 0x00a2ebb0
-void __fastcall FUN_00a2ebb0(char* self)
+// src: GUESS 0x00a2ebb0 (confidence: low)
+void __fastcall NiTObjectArray_UpdateReferenceState_00a2ebb0(char* self)
 {
     char* b = self + 0x34;
     *(void**)self = &DAT_0109619c;
@@ -444,7 +450,8 @@ void __fastcall FUN_00a2ebb0(char* self)
 
 extern NiRTTI DAT_011f36ac;
 // @fnv 0x00a2ec40
-const NiRTTI* __cdecl FUN_00a2ec40()
+// src: COMMUNITY 0x00a2ec40
+const NiRTTI* __cdecl NiControllerManager_GetRTTI()
 {
     return &DAT_011f36ac;
 }
@@ -455,29 +462,32 @@ struct GlobalObjectO2_00a7b610
 };
 extern GlobalObjectO2_00a7b610 g_011f4a04;
 // @fnv 0x00a2ede0
-GlobalObjectO2_00a7b610* __cdecl FUN_00a2ede0()
+// src: COMMUNITY 0x00a2ede0
+GlobalObjectO2_00a7b610* __cdecl NiDefaultAVObjectPalette_GetRTTI()
 {
     return &g_011f4a04;
 }
 
 // @fnv 0x00a2edf0
-void __fastcall FUN_00a2edf0(char* self, int edx, void* scene)
+// src: XBOX_PDB 0x00a2edf0
+void __fastcall NiDefaultAVObjectPalette_SetScene(char* self, int edx, void* scene)
 {
     *(void**)(self + 0x18) = scene;
 }
 
 struct Stub
 {
-    void FUN_00aa0250(NiFixedString&);
+    void NiTStringPointerMap_NiAVObject_RemoveAt(NiFixedString&);
 };
 typedef NiTFixedStringMapBase<DFALL<NiTMapItem<NiFixedString, const char*> >, const char*> Map;
 
 // @fnv 0x00a2ee40
-void __fastcall FUN_00a2ee40(char* self, int edx, NiFixedString& name, const char* obj)
+// src: GAMEBRYO_LIB 0x00a2ee40
+void __fastcall NiDefaultAVObjectPalette_SetAVObject(char* self, int edx, NiFixedString& name, const char* obj)
 {
     if (!obj)
     {
-        ((Stub*)(self + 8))->FUN_00aa0250(name);
+        ((Stub*)(self + 8))->NiTStringPointerMap_NiAVObject_RemoveAt(name);
         return;
     }
     ((Map*)(self + 8))->SetAt(name, obj);
@@ -541,7 +551,8 @@ typedef char _sizecheck_NiCloningProcess[sizeof(CloningProcess) == 16 ? 1 : -1];
 
 
 // @fnv 0x00a2f850
-NiObject* __fastcall FUN_00a2f850(NiControllerManager* self, int, CloningProcess* kCloning)
+// src: XBOX_PDB 0x00a2f850
+NiObject* __fastcall NiControllerManager_CreateClone(NiControllerManager* self, int, CloningProcess* kCloning)
 {
     BSFadeNode* mem = (BSFadeNode*)BSFadeNode::operator new(0x7c);
     NiObject* pkObject;
@@ -561,7 +572,8 @@ NiObject* __fastcall FUN_00a2f850(NiControllerManager* self, int, CloningProcess
 namespace fnv_00a2e2e0 {
 
 // @fnv 0x00a2e2e0
-void __fastcall FUN_00a2e2e0(NiControllerManager* self, int, NiStream* kStream)
+// src: XBOX_PDB 0x00a2e2e0
+void __fastcall NiControllerManager_PostLinkObject(NiControllerManager* self, int, NiStream* kStream)
 {
     ((void (__thiscall*)(NiTimeController*, ::NiStream&))&PostLinkTimeController)(self, *kStream);
     NiAVObject* pkRoot;
@@ -578,7 +590,8 @@ void __fastcall FUN_00a2e2e0(NiControllerManager* self, int, NiStream* kStream)
 }  // namespace fnv_00a2e2e0
 
 // @fnv 0x00a2f6c0
-void* __cdecl FUN_00a2f6c0()
+// src: EXE 0x00a2f6c0
+void* __cdecl NiControllerManager_CreateObject()
 {
     BSFadeNode* p = (BSFadeNode*)BSFadeNode::operator new(0x7c);
     if (p)
@@ -626,7 +639,7 @@ struct CtrlRefObj
     virtual void v0();
     virtual void DeleteThis();
     long m_uiRefCount;
-    CtrlRefObj* FUN_00a2ed80(NiObjectNET*, int);
+    CtrlRefObj* NiDefaultAVObjectPalette_NiDefaultAVObjectPalette(NiObjectNET*, int);
     void IncRefCount()
     {
         InterlockedIncrement(&m_uiRefCount);
@@ -693,7 +706,8 @@ struct NiListStandin
 };
 
 // @fnv 0x00a2efa0
-NiControllerManager* __fastcall FUN_00a2efa0(NiControllerManager* self, int, NiObjectNET* pkTarget, bool bCumulative)
+// src: EXE 0x00a2efa0
+NiControllerManager* __fastcall NiControllerManager_NiControllerManager(NiControllerManager* self, int, NiObjectNET* pkTarget, bool bCumulative)
 {
     FUN_00a6d220(self);
     *(void***)self = (void**)&DAT_0109619c;
@@ -707,7 +721,7 @@ NiControllerManager* __fastcall FUN_00a2efa0(NiControllerManager* self, int, NiO
     self->m_spControllerManager.m_pObject = 0;
     self->NiTimeController::SetTarget(pkTarget);
     void* pControllerMem = BSFadeNode::operator new(0x1c);
-    *(CtrlPtr*)&self->m_spControllerManager = pControllerMem ? ((CtrlRefObj*)pControllerMem)->FUN_00a2ed80(pkTarget, 0x4f) : 0;
+    *(CtrlPtr*)&self->m_spControllerManager = pControllerMem ? ((CtrlRefObj*)pControllerMem)->NiDefaultAVObjectPalette_NiDefaultAVObjectPalette(pkTarget, 0x4f) : 0;
     void* pLookupMem = g_memoryManager.Allocate(0x10);
     self->m_pAudioListener = (BSAnimNoteListener*)(pLookupMem ? ConstructListenerArray((NiTPrimitiveArray<BSAnimNoteListener*>*)pLookupMem) : 0);
     return self;
@@ -743,7 +757,8 @@ struct CtrlHelper543
     void LinkObject(NiStream&);
 };
 // @fnv 0x00a2f6e0
-void __fastcall FUN_00a2f6e0(NiControllerManager* self, int, NiStream* kStream)
+// src: XBOX_PDB 0x00a2f6e0
+void __fastcall NiControllerManager_LinkObject(NiControllerManager* self, int, NiStream* kStream)
 {
     NiControllerManager* pkThis = (NiControllerManager*)self;
     ((CtrlHelper543*)self)->LinkObject(*kStream);
@@ -773,8 +788,8 @@ extern int DAT_01096164;
 extern int DAT_01096144;
 extern int DAT_01096124;
 
-void __cdecl FUN_00aa10f0(void* p);
-void __fastcall FUN_00b601a0(void* self);
+void __cdecl _NiFree_00aa10f0(void* p);
+void __fastcall NiTPointerMap_RemoveAll_00b601a0(void* self);
 
 struct ItemBinding
 {
@@ -861,7 +876,8 @@ extern "C" void SaveTimeController();
 
 // Calls FUN_00a6d730, writes m_bFlag and m_usArraySize, saves link IDs for each non-null m_ppArray entry and for m_pkLast.
 // @fnv 0x00a2e9f0
-void __fastcall FUN_00a2e9f0(NiControllerManager* self, int, NiStream& stream)
+// src: XBOX_PDB 0x00a2e9f0
+void __fastcall NiControllerManager_SaveBinary(NiControllerManager* self, int, NiStream& stream)
 {
     ((void (__thiscall*)(NiTimeController*, NiStream&))&SaveTimeController)(self, stream);
     bool bFlag = self->m_bUseCumulativeAnimation;
@@ -885,7 +901,8 @@ struct SequenceNotifier
     int(__cdecl* m_pfnNotify)(SequenceNotifier*, unsigned char*, int, int*, int);
 };
 // @fnv 0x00a2eaa0
-void __fastcall FUN_00a2eaa0(NiControllerManager* self, int, NiAVObject* source)
+// src: XBOX_PDB 0x00a2eaa0
+void __fastcall NiControllerManager_LoadBinary(NiControllerManager* self, int, NiAVObject* source)
 {
     FUN_00a6d5e0(source);
     SequenceNotifier* notifier = *reinterpret_cast<SequenceNotifier**>(reinterpret_cast<char*>(source) + 0x24c);
@@ -895,7 +912,7 @@ void __fastcall FUN_00a2eaa0(NiControllerManager* self, int, NiAVObject* source)
         notifier->m_uiPending += notifier->m_pfnNotify(notifier, &firstOutput, 1, &isActive, 1);
         self->m_bUseCumulativeAnimation = firstOutput != 0;
     }
-    source->FUN_00a64670();
+    source->NiStream_ReadMultipleLinkIDs();
     if (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(source) + 0xd8) >= 0x0a010068u)
     {
         NiAVObjectPalette* replacement = source->FUN_00a64620();
@@ -939,21 +956,22 @@ struct NiCtrlVt
 
 struct FnvStandInA
 {
-    bool FUN_00a6d0f0(int arg);
+    bool NiTimeController_RegisterStreamables(int arg);
 };
 
 struct FnvStandInB
 {
-    int* FUN_00a2ed80(int arg1, int arg2);
+    int* NiDefaultAVObjectPalette_NiDefaultAVObjectPalette(int arg1, int arg2);
 };
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 
 // @fnv 0x00a2f610
-bool __fastcall FUN_00a2f610(NiControllerManager* self, int, int arg)
+// src: XBOX_PDB 0x00a2f610
+bool __fastcall NiControllerManager_RegisterStreamables(NiControllerManager* self, int, int arg)
 {
-    if (!((FnvStandInA*)self)->FUN_00a6d0f0(arg))
+    if (!((FnvStandInA*)self)->NiTimeController_RegisterStreamables(arg))
     {
         return false;
     }
@@ -973,11 +991,11 @@ bool __fastcall FUN_00a2f610(NiControllerManager* self, int, int arg)
     }
 
     NiRefObject* pNewPalette;
-    void* mem = FUN_00aa13e0(0x1c);
+    void* mem = Object_DispatchCommandFour(0x1c);
     if (mem != 0)
     {
         int owner = (int)self->m_pkTarget;
-        pNewPalette = (NiRefObject*)((FnvStandInB*)mem)->FUN_00a2ed80(owner, 0x25);
+        pNewPalette = (NiRefObject*)((FnvStandInB*)mem)->NiDefaultAVObjectPalette_NiDefaultAVObjectPalette(owner, 0x25);
     }
     else
     {
@@ -1061,19 +1079,20 @@ struct FNV_Comparable
     virtual void v20();
     virtual void v21();
     virtual void v22();
-    virtual bool FUN_00a6cc80(FNV_Comparable* rhs);
+    virtual bool NiTimeController_IsEqual(FNV_Comparable* rhs);
 };
 struct FNV_EqualBase
 {
-    bool FUN_00a6cc80(FNV_EqualBase* rhs);
+    bool NiTimeController_IsEqual(FNV_EqualBase* rhs);
 };
 
 // Compares this controller manager with rhs: base equality, map entries by key, then each object pointer pair, returning false on any mismatch.
 // @fnv 0x00a2e320
-bool __fastcall FUN_00a2e320(NiControllerManager* self, int, NiControllerManager* apOther)
+// src: XBOX_PDB 0x00a2e320
+bool __fastcall NiControllerManager_IsEqual(NiControllerManager* self, int, NiControllerManager* apOther)
 {
     NiControllerManager* other = apOther;
-    if (!reinterpret_cast<FNV_EqualBase*>(self)->FUN_00a6cc80(reinterpret_cast<FNV_EqualBase*>(other)))
+    if (!reinterpret_cast<FNV_EqualBase*>(self)->NiTimeController_IsEqual(reinterpret_cast<FNV_EqualBase*>(other)))
         return false;
     if (self->m_kSequences.m_usSize != other->m_kSequences.m_usSize)
         return false;
@@ -1089,7 +1108,7 @@ bool __fastcall FUN_00a2e320(NiControllerManager* self, int, NiControllerManager
         map->GetNext(position, key, reinterpret_cast<NiControllerSequence*&>(item));
         if (!otherMap->GetAt(key, reinterpret_cast<NiControllerSequence*&>(matchedItem)))
             return false;
-        if (!item->FUN_00a6cc80(matchedItem))
+        if (!item->NiTimeController_IsEqual(matchedItem))
             return false;
     }
 
@@ -1099,7 +1118,7 @@ bool __fastcall FUN_00a2e320(NiControllerManager* self, int, NiControllerManager
         FNV_Comparable* right = reinterpret_cast<FNV_Comparable*>(other->m_kSequences.m_pBase[j].m_pObject);
         if (left != 0 && right != 0)
         {
-            if (!left->FUN_00a6cc80(right))
+            if (!left->NiTimeController_IsEqual(right))
                 return false;
         }
         else if (left != right)
@@ -1238,7 +1257,8 @@ struct CloneProc
 
 
 // @fnv 0x00a2f420
-void __fastcall FUN_00a2f420(NiControllerManager* self, int, CloneProc& kCloning)
+// src: XBOX_PDB 0x00a2f420
+void __fastcall NiControllerManager_ProcessClone(NiControllerManager* self, int, CloneProc& kCloning)
 {
     self->NiTimeController::ProcessClone(*(CloningProcess*)&kCloning);
     for (unsigned int ui = 0; ui < self->m_kSequences.m_usSize; ui++)
@@ -1275,7 +1295,7 @@ void __fastcall FUN_00a2f420(NiControllerManager* self, int, CloneProc& kCloning
 
 struct CtrlSeqOwner
 {
-    void FUN_00a2e7d0(NiRefObject* pkObject, NiRefObject** ppkOut);
+    void NiControllerManager_RemoveSequence(NiRefObject* pkObject, NiRefObject** ppkOut);
     void ReleaseObject(NiRefObject* pkObject);
 };
 
@@ -1284,7 +1304,7 @@ struct CtrlSeqOwner
 void CtrlSeqOwner::ReleaseObject(NiRefObject* pkObject)
 {
     NiRefObject* pkFound = 0;
-    FUN_00a2e7d0(pkObject, &pkFound);
+    NiControllerManager_RemoveSequence(pkObject, &pkFound);
     NiRefObject* pkRef = *(NiRefObject* volatile*)&pkFound;
     if (pkRef)
     {
@@ -1299,7 +1319,8 @@ extern "C" void StartSequenceWithIntegerArguments();
 
 // Deactivates pkSource and starts pkDest with the given arguments when pkSource is active and pkDest is not.
 // @fnv 0x00a2e280
-bool __stdcall FUN_00a2e280(NiControllerSequence* pkSource, NiControllerSequence* pkDest, float fTime, int iArg0, int iArg1, float fDuration,
+// src: XBOX_PDB 0x00a2e280
+bool __stdcall NiControllerManager_CrossFade(NiControllerSequence* pkSource, NiControllerSequence* pkDest, float fTime, int iArg0, int iArg1, float fDuration,
                             int iArg2)
 {
     if (!pkSource->m_eAnimationState || pkDest->m_eAnimationState)
@@ -1581,7 +1602,7 @@ NiControllerSequence* NiControllerManager::GetTempBlendSequence(NiControllerSequ
         *(S00a2f170_FS*)&sequence->m_kAccumulationRootName = *(S00a2f170_FS*)&m_pkTarget->m_kName;
         reused = true;
     }
-    apSourceSequence->FUN_00a32fa0(sequence, arraySize, option, reused);
+    apSourceSequence->PopulatePoseSequence(sequence, arraySize, option, reused);
     return sequence;
 }
 
@@ -1591,14 +1612,15 @@ NiControllerSequence* __stdcall GetTempBlendSequence(NiControllerSequence* seq, 
 
 // If the sequence is inactive, look up the target by key and call its FUN_00a350d0 with the given parameters, returning the result.
 // @fnv 0x00a2f800
-bool __stdcall FUN_00a2f800(NiControllerSequence* seq, float a, float b, int c, int key)
+// src: XBOX_PDB 0x00a2f800
+bool __stdcall NiControllerManager_BlendFromPose(NiControllerSequence* seq, float a, float b, int c, int key)
 {
     if (seq->m_eAnimationState != NiControllerSequence::INACTIVE)
     {
         return false;
     }
     NiControllerSequence* pTarget = GetTempBlendSequence(seq, key);
-    return pTarget->FUN_00a350d0(seq, b, a, c, 1.0f, 1.0f, 0);
+    return pTarget->StartBlend(seq, b, a, c, 1.0f, 1.0f, 0);
 }
 
 struct FUN_00a2e1f0 : NiRefObject
@@ -1623,7 +1645,7 @@ inline NiTArray<T, TAlloc>::~NiTArray()
 template class NiTArray<NiPointer<NiControllerSequence>, NiTNewInterface<NiPointer<NiControllerSequence> > >;
 
 extern "C" void _ReadWriteBarrier(void);
-void* __cdecl FUN_00aa1070(unsigned int size) throw();
+void* __cdecl _NiMalloc_00aa1070(unsigned int size) throw();
 void* __cdecl FUN_00ec61c0(void* p, int value, unsigned int size) throw();
 
 struct MgrPoolStub
@@ -1663,7 +1685,7 @@ inline void InitializeSequenceMap(NiTStringPointerMap<NiControllerSequence*>* ma
 {
     map->m_uiHashSize = 0x25;
     map->m_kItemCount.m_uiCount = 0;
-    map->m_ppkHashTable = (SequenceMapBase::EntryType**)FUN_00aa1070(map->m_uiHashSize * 4);
+    map->m_ppkHashTable = (SequenceMapBase::EntryType**)_NiMalloc_00aa1070(map->m_uiHashSize * 4);
     FUN_00ec61c0(map->m_ppkHashTable, 0, map->m_uiHashSize * 4);
     map->m_bCopy = false;
 }

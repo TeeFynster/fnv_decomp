@@ -80,11 +80,12 @@ struct D51Writer
     short unk14;
     bool m_bValueAt0C;
 
-    int FUN_00d51c30(const D51Input& input);
+    int UpdateState_00d51c30(const D51Input& input);
 };
 
 // @fnv 0x00d51c30
-int D51Writer::FUN_00d51c30(const D51Input& input)
+// src: GUESS 0x00d51c30 (confidence: low)
+int D51Writer::UpdateState_00d51c30(const D51Input& input)
 {
     D51Array_AddBack(m_stream->m_commands, 8);
     int index = m_stream->m_kShapeVectorData.GetLogicalSize();
@@ -144,11 +145,12 @@ struct FUN_00d52640_c
 {
     int unk00;
     S00d52640_Writer* m_pStreamWriter;
-    int FUN_00d52640(bool flag, const hkReferencedObject* object);
+    int ProcessAndReturnValue_00d52640(bool flag, const hkReferencedObject* object);
 };
 
 // @fnv 0x00d52640
-int FUN_00d52640_c::FUN_00d52640(bool flag, const hkReferencedObject* object)
+// src: GUESS 0x00d52640 (confidence: low)
+int FUN_00d52640_c::ProcessAndReturnValue_00d52640(bool flag, const hkReferencedObject* object)
 {
     // A leading assembly label suppresses MSVC /GS parameter copies for the shared vector's union.
     // It emits no instructions and preserves the original stack layout.
@@ -192,11 +194,12 @@ struct FUN_00d56470_cls
     hkQuaternion m_rotation;
     hkVector4 m_vTranslation;
 
-    FUN_00d56470_cls* FUN_00d56470(int bCompute);
+    FUN_00d56470_cls* hkpExtendedMeshShape_ShapesSubpart_ShapesSubpart(int bCompute);
 };
 
 // @fnv 0x00d56470
-FUN_00d56470_cls* FUN_00d56470_cls::FUN_00d56470(int bCompute)
+// src: XBOX_PDB 0x00d56470
+FUN_00d56470_cls* FUN_00d56470_cls::hkpExtendedMeshShape_ShapesSubpart_ShapesSubpart(int bCompute)
 {
     if (bCompute)
     {
@@ -221,13 +224,14 @@ inline hkpCollisionDispatcher::Agent3FunctionTable::Agent3FunctionTable()
     m_pAgentFunction7 = 0;
 }
 
-void __cdecl FUN_00d400f0(void* buf);
+void __cdecl hkBoxBoxAgent3_initAgentFunc(void* buf);
 
 // @fnv 0x00d40130
-void __cdecl FUN_00d40130(hkpCollisionDispatcher* self)
+// src: HAVOK_LIB 0x00d40130
+void __cdecl hkBoxBoxAgent3_registerAgent3(hkpCollisionDispatcher* self)
 {
     hkpCollisionDispatcher::Agent3FunctionTable kFuncs;
-    FUN_00d400f0(&kFuncs);
+    hkBoxBoxAgent3_initAgentFunc(&kFuncs);
     self->AddEntry(&kFuncs, 4, 4);
 }
 
@@ -377,7 +381,8 @@ struct __declspec(align(16)) FUN_00c9ce00
 };
 extern int DAT_010c7888;
 // @fnv 0x00d49550
-int* __cdecl FUN_00d49550()
+// src: HAVOK_LIB 0x00d49550
+int* __cdecl getVtablehkpRigidBody()
 {
     Handle_d49550 kHandle = {0};
     FUN_00c9ce00 kObject(kHandle);
@@ -420,7 +425,8 @@ class __declspec(align(16)) S00d4b1a0_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00d4b1a0
-const void* __cdecl FUN_00d4b1a0()
+// src: GUESS 0x00d4b1a0 (confidence: medium)
+const void* __cdecl Object_GetConstructedVirtualTable_00d4b1a0()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -448,14 +454,15 @@ struct __declspec(align(16)) S_00d49c40
     int unk28;
     int unk2C;
 
-    void FUN_00d49c40(W_00d49c40 w);
+    void SetVirtualTable_00d49c40(W_00d49c40 w);
 };
 
 // @fnv 0x00d4b200
-int FUN_00d4b200()
+// src: GUESS 0x00d4b200 (confidence: low)
+int Object_ProcessAndReturnValue_00d4b200()
 {
     S_00d49c40 obj;
-    obj.FUN_00d49c40(W_00d49c40());
+    obj.SetVirtualTable_00d49c40(W_00d49c40());
     return obj.unk00;
 }
 
@@ -479,7 +486,8 @@ struct __declspec(align(16)) SpawnedObject
 };
 
 // @fnv 0x00d4b260
-int FUN_00d4b260()
+// src: HAVOK_LIB 0x00d4b260
+int getVtablehkpStorageExtendedMeshShape()
 {
     SpawnedObject obj;
     obj.FUN_00d4a180(W_d4a180());
@@ -558,7 +566,8 @@ struct __declspec(align(16)) HolderD4B
 };
 
 // @fnv 0x00d4b330
-int FUN_00d4b330()
+// src: GUESS 0x00d4b330 (confidence: low)
+int Runtime_UpdateState_00d4b330()
 {
     HolderD4B holder;
     ZeroD4B z = {0};
@@ -576,7 +585,8 @@ class __declspec(align(16)) S00d4be60_Object
 };
 
 // @fnv 0x00d4be60
-const void* __cdecl FUN_00d4be60()
+// src: GUESS 0x00d4be60 (confidence: low)
+const void* __cdecl Object_ProcessAndReturnValue_00d4be60()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -622,7 +632,8 @@ class __declspec(align(16)) S00d4bec0_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00d4bec0
-const void* __cdecl FUN_00d4bec0()
+// src: GUESS 0x00d4bec0 (confidence: medium)
+const void* __cdecl Object_GetConstructedVirtualTable_00d4bec0()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -664,7 +675,8 @@ class __declspec(align(16)) S00d4bf40_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00d4bf40
-const void* __cdecl FUN_00d4bf40()
+// src: GUESS 0x00d4bf40 (confidence: medium)
+const void* __cdecl Object_GetConstructedVirtualTable_00d4bf40()
 {
     FinishingFlag flag;
     flag.m_bFinishing = 0;
@@ -692,10 +704,11 @@ struct FnvCpu_FUN_00d4f7f0_CpuObject
     __m128 field20;
     __m128 field30;
     __m128 field40;
-    void FUN_00d4f7f0(FnvCpu_FUN_00d4f7f0_CpuData0* input0);
+    void UpdateState_00d4f7f0(FnvCpu_FUN_00d4f7f0_CpuData0* input0);
 };
 // @fnv 0x00d4f7f0
-void FnvCpu_FUN_00d4f7f0_CpuObject::FUN_00d4f7f0(FnvCpu_FUN_00d4f7f0_CpuData0* input0)
+// src: GUESS 0x00d4f7f0 (confidence: low)
+void FnvCpu_FUN_00d4f7f0_CpuObject::UpdateState_00d4f7f0(FnvCpu_FUN_00d4f7f0_CpuData0* input0)
 {
     input0->field00 = this->field20;
     input0->field10 = this->field30;
@@ -733,10 +746,11 @@ struct FnvCpu_FUN_00d4f820_CpuObject
     __m128 field50;
     __m128 field60;
     __m128 field70;
-    void FUN_00d4f820(FnvCpu_FUN_00d4f820_CpuData0* input0);
+    void UpdateFields_00d4f820(FnvCpu_FUN_00d4f820_CpuData0* input0);
 };
 // @fnv 0x00d4f820
-void FnvCpu_FUN_00d4f820_CpuObject::FUN_00d4f820(FnvCpu_FUN_00d4f820_CpuData0* input0)
+// src: GUESS 0x00d4f820 (confidence: low)
+void FnvCpu_FUN_00d4f820_CpuObject::UpdateFields_00d4f820(FnvCpu_FUN_00d4f820_CpuData0* input0)
 {
     input0->field00 = this->field50;
     input0->field10 = this->field60;
@@ -783,11 +797,12 @@ struct HkOwnerD51
     int unk0C;
     unsigned char m_flags[4];
 
-    int FUN_00d51890(const hkVector4& v, int index);
+    int UpdateState_00d51890(const hkVector4& v, int index);
 };
 
 // @fnv 0x00d51890
-int HkOwnerD51::FUN_00d51890(const hkVector4& v, int index)
+// src: GUESS 0x00d51890 (confidence: low)
+int HkOwnerD51::UpdateState_00d51890(const hkVector4& v, int index)
 {
     HkArrD51_AddBack(m_core->m_auiHeaderValues, 3);
     HkArrD51_AddBack(m_core->m_auiHeaderValues, index);
@@ -838,10 +853,11 @@ struct GeometryBuilder
     unsigned char status15;
     unsigned char status16;
     bool updated;
-    unsigned int FUN_00d51d40(const __m128* vectors);
+    unsigned int ProcessAndReturnValue_00d51d40(const __m128* vectors);
 };
 // @fnv 0x00d51d40
-unsigned int GeometryBuilder::FUN_00d51d40(const __m128* vectors)
+// src: GUESS 0x00d51d40 (confidence: low)
+unsigned int GeometryBuilder::ProcessAndReturnValue_00d51d40(const __m128* vectors)
 {
     IndexArray* indexBuffer = &arrays->indices;
     hkThreadMemory* heap = hkThreadMemory::GetMonitorStream();
@@ -909,10 +925,11 @@ struct D52Class
     OwnerD52* m_pOwnerObject;
     int unk08, unk0c, unk10, unk14;
     bool m_dirty;
-    int FUN_00d52000(const hkVector4& v);
+    int ProcessAndReturnValue_00d52000(const hkVector4& v);
 };
 // @fnv 0x00d52000
-int D52Class::FUN_00d52000(const hkVector4& v)
+// src: GUESS 0x00d52000 (confidence: low)
+int D52Class::ProcessAndReturnValue_00d52000(const hkVector4& v)
 {
     ArrayD52_AddBack(m_pOwnerObject->m_auiHeaderValues, 1);
     int index = m_pOwnerObject->m_vecs.GetLogicalSize();
@@ -953,10 +970,11 @@ struct D529E0_Builder
 {
     int unk00;
     D529E0_Batch* m_batch;
-    int FUN_00d529e0(unsigned char a1, float a2);
+    int ProcessAndReturnValue_00d529e0(unsigned char a1, float a2);
 };
 // @fnv 0x00d529e0
-int D529E0_Builder::FUN_00d529e0(unsigned char a1, float a2)
+// src: GUESS 0x00d529e0 (confidence: low)
+int D529E0_Builder::ProcessAndReturnValue_00d529e0(unsigned char a1, float a2)
 {
     D51Array_AddBack(m_batch->m_commands, 0x15);
     D529E0_Array_AddBack<int>(m_batch->m_commands, a1);
@@ -1007,10 +1025,11 @@ struct BasisPair
     hkVector4 axisC;
     hkVector4 axisD;
     hkVector4 normalB;
-    const hkVector4* FUN_00d52ce0(const hkVector4* a, const hkVector4* c, const hkVector4* b, const hkVector4* d);
+    const hkVector4* ProcessAndReturnValue_00d52ce0(const hkVector4* a, const hkVector4* c, const hkVector4* b, const hkVector4* d);
 };
 // @fnv 0x00d52ce0
-const hkVector4* BasisPair::FUN_00d52ce0(const hkVector4* a, const hkVector4* c, const hkVector4* b, const hkVector4* d)
+// src: GUESS 0x00d52ce0 (confidence: low)
+const hkVector4* BasisPair::ProcessAndReturnValue_00d52ce0(const hkVector4* a, const hkVector4* c, const hkVector4* b, const hkVector4* d)
 {
     axisA = *a;
     axisA.normalize3();
@@ -1033,13 +1052,13 @@ extern "C"
 struct Row172
 {
     float x, y, z, w;
-    void FUN_004b4ab0(int index, const hkVector4* value);
+    void hkVector4_setRotatedInverseDir(int index, const hkVector4* value);
 };
 struct Frame172
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     Row172 row20, row30, row40, row50, row60, row70;
-    void FUN_00d53060(int first, int second, const hkVector4* direction);
+    void UpdateFields_00d53060(int first, int second, const hkVector4* direction);
 };
 static __forceinline float Absolute172(float value)
 {
@@ -1060,7 +1079,8 @@ static __forceinline __m128 Normalize172(__m128 vector)
     return _mm_mul_ps(_mm_shuffle_ps(inverse, inverse, 0), vector);
 }
 // @fnv 0x00d53060
-void Frame172::FUN_00d53060(int first, int second, const hkVector4* direction)
+// src: GUESS 0x00d53060 (confidence: low)
+void Frame172::UpdateFields_00d53060(int first, int second, const hkVector4* direction)
 {
     float ax = Absolute172(direction->m_f[0]);
     float ay = Absolute172(direction->m_f[1]);
@@ -1086,12 +1106,12 @@ void Frame172::FUN_00d53060(int first, int second, const hkVector4* direction)
     __m128 left = _mm_mul_ps(_mm_shuffle_ps(d, d, 0xc9), _mm_shuffle_ps(p, p, 0xd2));
     __m128 right = _mm_mul_ps(_mm_shuffle_ps(d, d, 0xd2), _mm_shuffle_ps(p, p, 0xc9));
     cross.quad = _mm_sub_ps(left, right);
-    row20.FUN_004b4ab0(first, direction);
-    row30.FUN_004b4ab0(first, &perpendicular);
-    row40.FUN_004b4ab0(first, &cross);
-    row50.FUN_004b4ab0(second, direction);
-    row60.FUN_004b4ab0(second, &perpendicular);
-    row70.FUN_004b4ab0(second, &cross);
+    row20.hkVector4_setRotatedInverseDir(first, direction);
+    row30.hkVector4_setRotatedInverseDir(first, &perpendicular);
+    row40.hkVector4_setRotatedInverseDir(first, &cross);
+    row50.hkVector4_setRotatedInverseDir(second, direction);
+    row60.hkVector4_setRotatedInverseDir(second, &perpendicular);
+    row70.hkVector4_setRotatedInverseDir(second, &cross);
 }
 
 __forceinline __m128 normalize3(const __m128& v)
@@ -1120,10 +1140,11 @@ __forceinline __m128 cross3(const __m128& a, const __m128& b)
 // Reuse the current source's vector layout and basis storage without redefining either.
 struct BasisPairSetup : BasisPair
 {
-    const __m128& FUN_00d4f5d0(const __m128&, const __m128&, const __m128&, const __m128&);
+    const __m128& UpdateState_00d4f5d0(const __m128&, const __m128&, const __m128&, const __m128&);
 };
 // @fnv 0x00d4f5d0
-const __m128& BasisPairSetup::FUN_00d4f5d0(const __m128& referenceA, const __m128& referenceB, const __m128& inputAxisA,
+// src: GUESS 0x00d4f5d0 (confidence: low)
+const __m128& BasisPairSetup::UpdateState_00d4f5d0(const __m128& referenceA, const __m128& referenceB, const __m128& inputAxisA,
                                            const __m128& inputAxisB)
 {
     axisA.quad = normalize3(inputAxisA);
@@ -1147,11 +1168,12 @@ struct Writer
     unsigned char m_specifiedA[3];
     unsigned char m_specifiedB[3];
 
-    int FUN_00d51a50(const hkVector4& direction, int axis);
+    int UpdateState_00d51a50(const hkVector4& direction, int axis);
 };
 
 // @fnv 0x00d51a50
-int Writer::FUN_00d51a50(const hkVector4& direction, int axis)
+// src: GUESS 0x00d51a50 (confidence: low)
+int Writer::UpdateState_00d51a50(const hkVector4& direction, int axis)
 {
     D51Array_AddBack(m_stream->m_commands, 5);
     D51Array_AddBack(m_stream->m_commands, axis);
@@ -1172,11 +1194,12 @@ struct PivotBWriter
     unsigned char m_pivotASet;
     bool m_pivotBSet;
 
-    int FUN_00d520a0(const hkVector4& pivot);
+    int ProcessAndReturnValue_00d520a0(const hkVector4& pivot);
 };
 
 // @fnv 0x00d520a0
-int PivotBWriter::FUN_00d520a0(const hkVector4& pivot)
+// src: GUESS 0x00d520a0 (confidence: low)
+int PivotBWriter::ProcessAndReturnValue_00d520a0(const hkVector4& pivot)
 {
     D51Array_AddBack(m_stream->m_commands, 2);
     int index = m_stream->m_kShapeVectorData.GetLogicalSize();

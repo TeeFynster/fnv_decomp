@@ -38,10 +38,10 @@ public:
     void WriteToBuffer(unsigned int chunk, unsigned int texChunk);
     void WriteToStream();
     void LoadTextureSwapList(void* buffer, unsigned int size, unsigned int version);
-    unsigned int FUN_004abf80();
-    bool FUN_004ae8f0();
+    unsigned int TESModel_GetSkinFlags();
+    bool TESModel_QHasFacegenData();
     void* FUN_00489010(unsigned int flags);
-    void FUN_004893c0(unsigned char flags);
+    void SetFlags_004893c0(unsigned char flags);
 
     static void LoadModelData(TESModel* model, TESFile* file);
     static void LoadTextureSwapData(TESModel* model, TESFile* file);

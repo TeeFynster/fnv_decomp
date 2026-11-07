@@ -22,12 +22,13 @@ public:
 struct FUN_007832e0_class
 {
     void UpdateCurrentValueTile(int a);
-    void FUN_007832e0(float a, float b);
+    void ListBox_ItemChange_SetListState(float a, float b);
 };
 
 // Stores two floats at offsets 9 and 10 of this object, then calls UpdateCurrentValueTile with 1.
 // @fnv 0x007832e0
-void FUN_007832e0_class::FUN_007832e0(float afFirst, float afSecond)
+// src: XBOX_PDB 0x007832e0
+void FUN_007832e0_class::ListBox_ItemChange_SetListState(float afFirst, float afSecond)
 {
     ((float*)this)[9] = afFirst;
     ((float*)this)[10] = afSecond;
@@ -87,7 +88,7 @@ void* __thiscall GlobalObject_00788300::Destroy(unsigned int flags)
 
 struct FUN_0078d8d0_Class
 {
-    void __thiscall FUN_0078d8b0();
+    void __thiscall LoadingMenu_UpdateState_0078d8b0();
     void* __thiscall FUN_0078d8d0(unsigned int flags);
 };
 
@@ -97,7 +98,7 @@ void __cdecl Deallocate(void*);
 // @fnv 0x0078d8d0
 void* __thiscall FUN_0078d8d0_Class::FUN_0078d8d0(unsigned int flags)
 {
-    FUN_0078d8b0();
+    LoadingMenu_UpdateState_0078d8b0();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -105,12 +106,13 @@ void* __thiscall FUN_0078d8d0_Class::FUN_0078d8d0(unsigned int flags)
 
 struct FUN_0078e090_class
 {
-    char __thiscall FUN_0078e090();
+    char __thiscall LockPickMenu_HasTiles();
 };
 
 // Checks the 16 int slots at offset 0x2c and returns 1 only if every one is non-zero, otherwise 0.
 // @fnv 0x0078e090
-char __thiscall FUN_0078e090_class::FUN_0078e090()
+// src: COMMUNITY 0x0078e090
+char __thiscall FUN_0078e090_class::LockPickMenu_HasTiles()
 {
     for (int i = 0; i < 16; ++i)
     {
@@ -123,7 +125,8 @@ char __thiscall FUN_0078e090_class::FUN_0078e090()
 extern "C" void __cdecl CreateLoveTesterMenu(int a);
 
 // @fnv 0x007915e0
-void __cdecl FUN_007915e0()
+// src: GUESS 0x007915e0 (confidence: medium)
+void __cdecl Object_CreateLoveTesterMenu_Thunk()
 {
     CreateLoveTesterMenu(0x23);
 }
@@ -133,7 +136,7 @@ struct PropHelper
 {
     void* GetProperty(unsigned int id);
 };
-int __cdecl FUN_00438220(void);
+int __cdecl NiShadeProperty_GetType(void);
 struct FUN_0078cf10_Class
 {
     void __thiscall SetAlphaRecursive(NiAVObject* object, float alpha);
@@ -149,7 +152,7 @@ void __thiscall FUN_0078cf10_Class::SetAlphaRecursive(NiAVObject* object, float 
         SetAlphaRecursive(node->GetAt(i), alpha);
     if (((int(__thiscall*)(void*))(*(void***)object)[6])(object))
     {
-        TileShaderProperty* pShaderProp = (TileShaderProperty*)((PropHelper*)object)->GetProperty(FUN_00438220());
+        TileShaderProperty* pShaderProp = (TileShaderProperty*)((PropHelper*)object)->GetProperty(NiShadeProperty_GetType());
         if (pShaderProp)
             pShaderProp->SetAlpha(alpha);
     }
@@ -159,9 +162,9 @@ struct S5460
 {
     virtual void v0();
     virtual unsigned int v1(unsigned int a);
-    bool FUN_00438b90();
-    unsigned int FUN_009a3910();
-    unsigned int FUN_007881d0();
+    bool BSSimpleArray_NavMeshInfo_1024_ShouldGrow();
+    unsigned int BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
+    unsigned int BSSimpleArray_CombatMember_1024_AddUninitialized();
 };
 struct FUN_0098f040_shell
 {
@@ -169,9 +172,10 @@ struct FUN_0098f040_shell
 };
 // If FUN_00438b90 succeeds, initializes or advances the id at offset 0xc, then increments the counter at offset 8 and returns its previous value.
 // @fnv 0x007881d0
-unsigned int S5460::FUN_007881d0()
+// src: XBOX_PDB 0x007881d0
+unsigned int S5460::BSSimpleArray_CombatMember_1024_AddUninitialized()
 {
-    if (FUN_00438b90())
+    if (BSSimpleArray_NavMeshInfo_1024_ShouldGrow())
     {
         if (!*(unsigned int*)((char*)this + 0xc))
         {
@@ -181,7 +185,7 @@ unsigned int S5460::FUN_007881d0()
         }
         else
         {
-            unsigned int id = FUN_009a3910();
+            unsigned int id = BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
             ((FUN_0098f040_shell*)this)->UpdateThreat(id, *(unsigned int*)((char*)this + 8));
             *(unsigned int*)((char*)this + 0xc) = id;
         }
@@ -265,18 +269,19 @@ struct BlkOffset08View
 
 struct FUN_004bddd0_t : public BlkOffset08View
 {
-    bool FUN_004bddd0(bool a);
+    bool ItemChange_GetWorn(bool a);
 };
 
 struct FUN_007832a0_class
 {
-    void __cdecl FUN_007832a0(FUN_004bddd0_t* a);
+    void __cdecl InventoryMenu_AddToChangedItemsListIfWorn(FUN_004bddd0_t* a);
 };
 
 // @fnv 0x007832a0
-void __cdecl FUN_007832a0_class::FUN_007832a0(FUN_004bddd0_t* a)
+// src: COMMUNITY 0x007832a0
+void __cdecl FUN_007832a0_class::InventoryMenu_AddToChangedItemsListIfWorn(FUN_004bddd0_t* a)
 {
-    if (a != 0 && a->FUN_004bddd0(false))
+    if (a != 0 && a->ItemChange_GetWorn(false))
     {
         TESBoundObject* flags = reinterpret_cast<TESBoundObject*>(a->GetFlags());
         InventoryMenu::ms_pInventoryMenu->m_kHotkeyObjects.AddHead(flags);
@@ -309,7 +314,7 @@ FUN_0078e0f0::~FUN_0078e0f0()
     g_011da224.operator=(0);
     DAT_011da204 = 0;
 
-    NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1)->FUN_00b5d180();
+    NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1)->RemoveAllLights();
 }
 
 void* operator new(unsigned int size, void* place);
@@ -384,7 +389,8 @@ void __cdecl CreateLoveTesterMenu(int aiValue)
 }
 
 // @fnv 0x00791740
-int FUN_00791740()
+// src: XBOX_PDB 0x00791740
+int LoveTesterMenu_GetClassStatic()
 {
     return 0x432;
 }
@@ -848,12 +854,13 @@ extern C1540OSGlobals* g_pkC1540OSGlobals;
 class C1540Menu
 {
   public:
-    bool FUN_00791540(int iControl);
+    bool LockPickMenu_IsTurningLock(int iControl);
 };
 
 // Returns true if the input manager reports control state for device 2, 3, 0 or 1 for the given control.
 // @fnv 0x00791540
-bool C1540Menu::FUN_00791540(int iControl)
+// src: XBOX_PDB 0x00791540
+bool C1540Menu::LockPickMenu_IsTurningLock(int iControl)
 {
     return g_pkC1540OSGlobals->GetInputManager()->GetControlState(2, iControl) ||
            g_pkC1540OSGlobals->GetInputManager()->GetControlState(3, iControl) ||
@@ -866,11 +873,12 @@ extern int(__stdcall* DAT_00fdf1b0)(void*);
 class CriticalSectionEntry
 {
   public:
-    void FUN_0078d1d0();
+    void NiCriticalSection_TryEnterCriticalSection();
 };
 
 // @fnv 0x0078d1d0
-void CriticalSectionEntry::FUN_0078d1d0()
+// src: COMMUNITY 0x0078d1d0
+void CriticalSectionEntry::NiCriticalSection_TryEnterCriticalSection()
 {
     DAT_00fdf1b0(this);
 }

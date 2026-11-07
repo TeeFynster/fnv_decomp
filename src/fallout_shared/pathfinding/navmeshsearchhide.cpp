@@ -20,13 +20,13 @@ void* _Deallocate(void*);
 // @fnv 0x006a9d30
 void* NavMeshSearchHide::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_006a9d60();
+    UpdateFields_006a9d60();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-void __cdecl FUN_005330e0(float* pfValue, float fMin, float fScaledValue);
+void __cdecl BSClamp_float(float* pfValue, float fMin, float fScaledValue);
 
 struct A9F60Entry
 {
@@ -51,7 +51,7 @@ void NavMeshSearchHide::InitEntry(SearchNode* pkEntry, NavMesh* pkMesh, unsigned
     reinterpret_cast<A9F60Entry*>(pkEntry)->m_fScalarPart = kPos4.z;
     NiPoint3 kDiff = kPos4 - m_kStartPoint;
     float fScore6 = m_fFirstLightParameter - kDiff.Length();
-    FUN_005330e0(&fScore6, 0.0f, m_fFirstLightParameter);
+    BSClamp_float(&fScore6, 0.0f, m_fFirstLightParameter);
     reinterpret_cast<A9F60Entry*>(pkEntry)->m_fScore = fScore6;
 }
 
@@ -59,7 +59,7 @@ struct NavMeshTriRef
 {
     NavMesh* m_pMesh;
     unsigned short m_usTri;
-    NiPoint3 FUN_006a6eb0();
+    NiPoint3 FastNavMeshTriLocation_GetLocation();
 };
 
 struct NavSearchNodeInfo
@@ -85,11 +85,11 @@ struct NavSearchNodeList
 
 struct FloatSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern FloatSetting g_setting_011d6ef0;
 
-extern "C" TESForm* __cdecl FUN_004839c0(unsigned int auiFormId);
+extern "C" TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int auiFormId);
 
 struct DoorCheck
 {
@@ -99,12 +99,12 @@ struct DoorCheck
     bool FUN_00502450(void* pkSource, TESForm* pkForm, bool* pbResult);
 };
 
-float __cdecl FUN_00404010(float fA, float fB);
+float __cdecl BSMAX_00404010(float fA, float fB);
 
 // @fnv 0x006aa000
 bool NavMeshSearchHide::ExpandNeighbors(NavSearchNodeInfo* pkInfo, NavSearchNodeList* pkList)
 {
-    NiPoint3 kPosX = pkInfo->FUN_0045cd60() ? pkInfo->m_kRef.FUN_006a6eb0() : reinterpret_cast<PathingRequest*>(m_pActor)->GetOffsetC().FUN_005c3420();
+    NiPoint3 kPosX = pkInfo->FUN_0045cd60() ? pkInfo->m_kRef.FastNavMeshTriLocation_GetLocation() : reinterpret_cast<PathingRequest*>(m_pActor)->GetOffsetC().FUN_005c3420();
     for (int i9 = 0; i9 < 3; i9++)
     {
         NavMesh* pMesh5;
@@ -112,7 +112,7 @@ bool NavMeshSearchHide::ExpandNeighbors(NavSearchNodeInfo* pkInfo, NavSearchNode
         int iUnkZ;
         if (pkInfo->m_kRef.m_pMesh->FindAdjacentEdge(pkInfo->m_kRef.m_usTri, i9, &pMesh5, &usTriZ, &iUnkZ))
         {
-            int* pEdgeWork = reinterpret_cast<int*>(pkInfo->m_kRef.m_pMesh->FUN_0068f230(pkInfo->m_kRef.m_usTri, i9));
+            int* pEdgeWork = reinterpret_cast<int*>(pkInfo->m_kRef.m_pMesh->GetEdgeExtraInfo(pkInfo->m_kRef.m_usTri, i9));
             if (pEdgeWork && *pEdgeWork == 1)
                 continue;
             float fMultY = 1.0f;
@@ -123,11 +123,11 @@ bool NavMeshSearchHide::ExpandNeighbors(NavSearchNodeInfo* pkInfo, NavSearchNode
                 else
                 {
                     unsigned int uiFormIDOut = *pMesh5->FUN_00699af0(usTriZ);
-                    TESForm* pForm2 = FUN_004839c0(uiFormIDOut);
+                    TESForm* pForm2 = TESForm_GetFormByNumericID(uiFormIDOut);
                     if (pForm2)
                     {
                         DoorCheck kCheck_2(pForm2);
-                        void* pSource_2 = reinterpret_cast<PathingRequest*>(unk2058)->FUN_006c9900();
+                        void* pSource_2 = reinterpret_cast<PathingRequest*>(unk2058)->GetActorLockData();
                         bool bResultZ;
                         if (!kCheck_2.FUN_00502450(pSource_2, pForm2, &bResultZ))
                             continue;
@@ -136,19 +136,19 @@ bool NavMeshSearchHide::ExpandNeighbors(NavSearchNodeInfo* pkInfo, NavSearchNode
                     }
                 }
             }
-            if (reinterpret_cast<PathingRequest*>(m_pActor)->GetFloatAtOffset68() > *g_setting_011d6ef0.FUN_00403e20() &&
+            if (reinterpret_cast<PathingRequest*>(m_pActor)->GetFloatAtOffset68() > *g_setting_011d6ef0.Setting_Float_00403e20() &&
                 pMesh5->FUN_005582f0(usTriZ)->FUN_00691140(0x10))
                 continue;
             NiPoint3 kCenterTmp = pMesh5->FUN_00558220(usTriZ);
-            NiPoint3 kDeltaW = kCenterTmp.FUN_00439ef0(kPosX);
-            float fCost_ = kDeltaW.FUN_00589850() * fMultY + pkInfo->m_fCost;
+            NiPoint3 kDeltaW = kCenterTmp.SubtractIntoVector(kPosX);
+            float fCost_ = kDeltaW.NiPoint3_XYLength() * fMultY + pkInfo->m_fCost;
             float fExtraZ = 0.0f;
             if (reinterpret_cast<const PathingRequest*>(m_pActor)->GetString())
                 fExtraZ = reinterpret_cast<const PathingRequest*>(m_pActor)->GetString()->GetAvoidanceAtPoint(kCenterTmp);
-            float fDist6 = kCenterTmp.FUN_00439ef0(m_kTargetPos).FUN_00589850();
+            float fDist6 = kCenterTmp.SubtractIntoVector(m_kTargetPos).NiPoint3_XYLength();
             float fNearOut = 1.0f - fDist6 / 512.0;
-            fExtraZ += FUN_00404010(fNearOut, 0.0f);
-            NiPoint3 kToTargetWork = m_kTargetPos.FUN_00439ef0(kPosX);
+            fExtraZ += BSMAX_00404010(fNearOut, 0.0f);
+            NiPoint3 kToTargetWork = m_kTargetPos.SubtractIntoVector(kPosX);
             float fDot_2 = kToTargetWork.DotProduct(kDeltaW);
             float fLenA_2 = kToTargetWork.FUN_00457990();
             float fLenBY = kDeltaW.FUN_00457990();
@@ -156,10 +156,10 @@ bool NavMeshSearchHide::ExpandNeighbors(NavSearchNodeInfo* pkInfo, NavSearchNode
                 fDot_2 = 0.0f;
             else
                 fDot_2 = fDot_2 / (fLenA_2 * fLenBY);
-            fExtraZ += FUN_00404010(fDot_2, 0.0f);
+            fExtraZ += BSMAX_00404010(fDot_2, 0.0f);
             fCost_ = (1.0f + fExtraZ) * fCost_;
             NavSearchNode* pNode;
-            switch (FUN_006a7e00(FUN_006a94f0(reinterpret_cast<NavMeshStandIn*>(pMesh5), usTriZ, fCost_, &pNode)))
+            switch (FUN_006a7e00(GetKeyForNode_006a94f0(reinterpret_cast<NavMeshStandIn*>(pMesh5), usTriZ, fCost_, &pNode)))
             {
             case 0:
                 InitEntry(reinterpret_cast<SearchNode*>(pNode), pMesh5, usTriZ);
@@ -178,7 +178,7 @@ bool NavMeshSearchHide::ExpandNeighbors(NavSearchNodeInfo* pkInfo, NavSearchNode
 // PathingRequestHide accessors missing from its shared header: 0x00984230 returns this+0xB0; 0x00885BD0 reads +0xD8.
 struct HideRequestTargetAccess
 {
-    PathingLocation* FUN_00984230();
+    PathingLocation* hkpAabbPhantom_getAabb();
     float FUN_00885bd0();
 };
 
@@ -191,12 +191,12 @@ struct InfoF
     float m_fVectorZ;
     float m_fScalarPart;
 
-    NiPoint3* FUN_006a6eb0(NiPoint3* pOut);
+    NiPoint3* FastNavMeshTriLocation_GetLocation(NiPoint3* pOut);
 };
 
 struct ParamX
 {
-    bool FUN_0076b610();
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
 };
 
 extern NiPoint3 DAT_011f426c;
@@ -226,34 +226,34 @@ int NavMeshSearchHide::SetupActorTarget(ActorX* pkActor, TriRef20* pkInfo, Param
 
     // This output buffer is populated by FUN_006a6eb0 without default construction.
     float kTriPt2[3];
-    NiPoint3 kDiff = kInfo3.FUN_006a6eb0(reinterpret_cast<NiPoint3*>(kTriPt2))->FUN_00439ef0(m_kStartPoint);
+    NiPoint3 kDiff = kInfo3.FastNavMeshTriLocation_GetLocation(reinterpret_cast<NiPoint3*>(kTriPt2))->SubtractIntoVector(m_kStartPoint);
     float fVal6 = m_fFirstLightParameter - kDiff.FUN_00457990();
-    FUN_005330e0(&fVal6, 0.0f, m_fFirstLightParameter);
+    BSClamp_float(&fVal6, 0.0f, m_fFirstLightParameter);
 
-    FUN_006a7c90(FUN_006a94f0(reinterpret_cast<MeshX*>(kInfo3.m_pMesh), kInfo3.m_usTri), &kInfo3, fVal6);
+    FUN_006a7c90(GetKeyForNode_006a94f0(reinterpret_cast<MeshX*>(kInfo3.m_pMesh), kInfo3.m_usTri), &kInfo3, fVal6);
 
-    m_kTargetPos = reinterpret_cast<HideRequestTargetAccess*>(m_pActor)->FUN_00984230()->FUN_005c3420();
+    m_kTargetPos = reinterpret_cast<HideRequestTargetAccess*>(m_pActor)->hkpAabbPhantom_getAabb()->FUN_005c3420();
 
     FUN_006a7d60(pkObj, iArg, 1);
-    return !pkObj->FUN_0076b610();
+    return !pkObj->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
 }
 
 extern const double DAT_01012060;
 
-bool __cdecl FUN_006b9790(const NiPoint3& kA, const NiPoint3& kB, const NiPoint3& kC, const NiPoint3& kPoint,
+bool __cdecl NavMeshMath_Get2DBaryCentricCoord(const NiPoint3& kA, const NiPoint3& kB, const NiPoint3& kC, const NiPoint3& kPoint,
                           NiPoint3* pkOut);
 
 struct NavInfo6aa4
 {
     bool HasFlags();
     void GetTripleShorts(unsigned short* pusA, unsigned short* pusB, unsigned short* pusC);
-    unsigned short FUN_00698030(unsigned short usSide);
+    unsigned short NavMeshTriangle_GetEdgeCover(unsigned short usSide);
 };
 
 struct NavList6aa4
 {
     NavMesh* m_pkMesh;
-    NavInfo6aa4* FUN_006a78d0();
+    NavInfo6aa4* NavMeshSearchNode_GetTriangle();
 };
 
 struct NavData6aa4
@@ -265,15 +265,16 @@ struct NavData6aa4
 };
 
 // @fnv 0x006aa470
-bool NavMeshSearchHide::FUN_006aa470(NavData6aa4* pkData)
+// src: XBOX_PDB 0x006aa470
+bool NavMeshSearchHide::IsGoalNode(NavData6aa4* pkData)
 {
     NavList6aa4* pkList = pkData->FUN_00413f40();
-    NavInfo6aa4* pkInfo7 = pkList->FUN_006a78d0();
+    NavInfo6aa4* pkInfo7 = pkList->NavMeshSearchNode_GetTriangle();
     if (!pkInfo7->HasFlags())
         return false;
 
-    NiPoint3 kPos = pkData->m_kRef.FUN_006a6eb0();
-    float aFLength = m_kTargetPos.FUN_00439ef0(kPos).FUN_00589850();
+    NiPoint3 kPos = pkData->m_kRef.FastNavMeshTriLocation_GetLocation();
+    float aFLength = m_kTargetPos.SubtractIntoVector(kPos).NiPoint3_XYLength();
     if (aFLength < reinterpret_cast<HideRequestTargetAccess*>(m_pkActor)->FUN_00885bd0())
         return false;
 
@@ -284,11 +285,11 @@ bool NavMeshSearchHide::FUN_006aa470(NavData6aa4* pkData)
     float kOut3[3];
     reinterpret_cast<NiPoint3*>(kOut3)->FUN_006815c0();
     bool bFound8 = false;
-    FUN_006b9790(pkMesh6->FUN_0068f0a0(usA5), pkMesh6->FUN_0068f0a0(usB), pkMesh6->FUN_0068f0a0(usC), m_kTargetPos,
+    NavMeshMath_Get2DBaryCentricCoord(pkMesh6->GetVertex_0068f0a0(usA5), pkMesh6->GetVertex_0068f0a0(usB), pkMesh6->GetVertex_0068f0a0(usC), m_kTargetPos,
                  reinterpret_cast<NiPoint3*>(kOut3));
-    if (kOut3[0] < DAT_01012060 && pkInfo7->FUN_00698030(1) > 0)
+    if (kOut3[0] < DAT_01012060 && pkInfo7->NavMeshTriangle_GetEdgeCover(1) > 0)
         bFound8 = true;
-    else if (kOut3[2] < DAT_01012060 && pkInfo7->FUN_00698030(0) > 0)
+    else if (kOut3[2] < DAT_01012060 && pkInfo7->NavMeshTriangle_GetEdgeCover(0) > 0)
         bFound8 = true;
     if (!bFound8)
         return false;
@@ -302,7 +303,8 @@ bool NavMeshSearchHide::FUN_006aa470(NavData6aa4* pkData)
 extern int DAT_0106b7dc;
 
 // @fnv 0x006a9d60
-void NavMeshSearchHide::FUN_006a9d60()
+// src: GUESS 0x006a9d60 (confidence: low)
+void NavMeshSearchHide::UpdateFields_006a9d60()
 {
     *reinterpret_cast<void**>(this) = &DAT_0106b7dc;
     NavMeshSearch::FUN_006a6b00();

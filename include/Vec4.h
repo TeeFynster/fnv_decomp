@@ -140,13 +140,13 @@ public:
     void rotInvDir(const Rot& rotation, const Vec4& value);
     void xformPos(const Xform& transform, const Vec4& value);
     void convert(Matrix* matrix);
-    void __thiscall FUN_00c7f640(const Buf40*, const void*);
-    void __thiscall FUN_00c7f700(const RotationColumns& rotation, const Vec4& value);
-    void FUN_00c7f700(const Rot& rotation, const Vec4& value);
-    void FUN_00c7f700(const void* rotation, const Vec4& value);
-    void FUN_004b4ab0(const Rot& rotation, const Vec4& value);
-    void FUN_00c7f750(const void* matrix, const Vec4& value);
-    void FUN_0066c930();
+    void __thiscall setTransformedPos_00c7f640(const Buf40*, const void*);
+    void __thiscall hkVector4_setRotatedDir(const RotationColumns& rotation, const Vec4& value);
+    void hkVector4_setRotatedDir(const Rot& rotation, const Vec4& value);
+    void hkVector4_setRotatedDir(const void* rotation, const Vec4& value);
+    void hkVector4_setRotatedInverseDir(const Rot& rotation, const Vec4& value);
+    void hkVector4_setMul3(const void* matrix, const Vec4& value);
+    void hkVector4_fastNormalize3();
 
     void difference(const Vec4& left, const Vec4& right);
     void sum(const Vec4& left, const Vec4& right);

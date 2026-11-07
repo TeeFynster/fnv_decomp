@@ -31,7 +31,7 @@ public:
         unsigned char vecData[16];
     };
 
-    void FUN_004b4db0(const float*);
+    void SetQuaternionComponentsFromVector(const float*);
 };
 #include "../../../include/bhkShape.h"
 #include "../../../include/bhkSphereRepShape.h"
@@ -89,14 +89,15 @@ struct MyObj
 {
     unsigned char unk00[8];
     Inner* m8;
-    void __thiscall FUN_00c84e20(void*);
-    void __thiscall FUN_00c8c410(void*);
+    void __thiscall bhkShape_CopyCinfo(void*);
+    void __thiscall bhkTransformShape_CopyCinfo(void*);
 };
 
 // @fnv 0x00c8c410
-void __thiscall MyObj::FUN_00c8c410(void* pArg)
+// src: XBOX_PDB 0x00c8c410
+void __thiscall MyObj::bhkTransformShape_CopyCinfo(void* pArg)
 {
-    this->FUN_00c84e20(pArg);
+    this->bhkShape_CopyCinfo(pArg);
     Param* p = (Param*)pArg;
     p->m4 = (this && this->m8) ? this->m8->m14 : 0;
     const __m128* src = (this && this->m8) ? (const __m128*)((char*)this->m8 + 0x30) : g_01268370;
@@ -106,10 +107,10 @@ void __thiscall MyObj::FUN_00c8c410(void* pArg)
     tmp[2] = src[2];
     tmp[3] = src[3];
     bhkLimitedHingeVector_bstreenode_o2_nood_variant* pv = p->vecs;
-    pv[0].FUN_004b4db0((float*)tmp);
-    pv[1].FUN_004b4db0((float*)&tmp[1]);
-    pv[2].FUN_004b4db0((float*)&tmp[2]);
-    pv[3].FUN_004b4db0((float*)&tmp[3]);
+    pv[0].SetQuaternionComponentsFromVector((float*)tmp);
+    pv[1].SetQuaternionComponentsFromVector((float*)&tmp[1]);
+    pv[2].SetQuaternionComponentsFromVector((float*)&tmp[2]);
+    pv[3].SetQuaternionComponentsFromVector((float*)&tmp[3]);
 }
 
 namespace fnv_00c8c5b0 {
@@ -124,7 +125,7 @@ struct AllocObj
 {
     AllocVt* vt;
 };
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00cf5990
 {
@@ -134,7 +135,7 @@ struct FUN_00cf5990
     void FUN_00c905b0();
     static void* operator new(unsigned int)
     {
-        hkMemoryRouter* h = FUN_00c85750();
+        hkMemoryRouter* h = hkMemoryRouter_getInstance();
         AllocObj* al = reinterpret_cast<AllocObj*>(h->m_heap);
         FUN_00cf5990* p = (FUN_00cf5990*)al->vt->Alloc(al, 0x70);
         p->w4 = 0x70;
@@ -196,11 +197,12 @@ struct TargetHolder
     Top* m8;
     unsigned int unk0C;
     unsigned int m10;
-    void FUN_00c8c5b0(Src* apSrc);
+    void bhkTransformShape_Init(Src* apSrc);
 };
 
 // @fnv 0x00c8c5b0
-void TargetHolder::FUN_00c8c5b0(Src* apSrc)
+// src: XBOX_PDB 0x00c8c5b0
+void TargetHolder::bhkTransformShape_Init(Src* apSrc)
 {
     Guard g0;
     // Keep the original alignment and /GS buffer treatment of the temporary.
@@ -527,16 +529,16 @@ struct Obj
     virtual void Call(void*, void*, void*, const char*);
     int unk04;
     Data8* unk08;
-    void FUN_00c9fb70(Output*);
-    void FUN_00cab1b0(void*, void*);
+    void bhkConvexShape_CopyCinfo(Output*);
+    void bhkCapsuleShape_BuildDisplayGeometry(void*, void*);
 };
 extern unsigned int DAT_0126fd98;
 extern float DAT_010c72bc;
 extern float DAT_01267e30[];
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 void* FUN_00d22dc0::operator new(unsigned int n)
 {
-    hkMemoryRouter* h = FUN_00c85750();
+    hkMemoryRouter* h = hkMemoryRouter_getInstance();
     Alloc* allocator = reinterpret_cast<Alloc*>(h->m_heap);
     void* p = allocator->Alloc_(n);
     *(short*)((char*)p + 4) = (short)n;
@@ -558,7 +560,8 @@ struct TlsRestore
     }
 };
 // @fnv 0x00cab1b0
-void Obj::FUN_00cab1b0(void* a1, void* a2)
+// src: XBOX_PDB 0x00cab1b0
+void Obj::bhkCapsuleShape_BuildDisplayGeometry(void* a1, void* a2)
 {
     TlsRestore guard;
     Output out;
@@ -572,9 +575,9 @@ void Obj::FUN_00cab1b0(void* a1, void* a2)
     out.unk20.y = 0;
     out.unk20.z = 0;
     out.unk2c = 0;
-    FUN_00c9fb70(&out);
-    out.unk10.FUN_004b4db0(this && unk08 ? unk08->unk20 : DAT_01267e30);
-    out.unk20.FUN_004b4db0(this && unk08 ? unk08->unk30 : DAT_01267e30);
+    bhkConvexShape_CopyCinfo(&out);
+    out.unk10.SetQuaternionComponentsFromVector(this && unk08 ? unk08->unk20 : DAT_01267e30);
+    out.unk20.SetQuaternionComponentsFromVector(this && unk08 ? unk08->unk30 : DAT_01267e30);
     FUN_00d22dc0* sub =
         new FUN_00d22dc0(_mm_setr_ps(out.unk10.x, out.unk10.y, out.unk10.z, out.unk1c),
                          _mm_setr_ps(out.unk20.x, out.unk20.y, out.unk20.z, out.unk2c), out.unk04, 6, 1);
@@ -651,16 +654,17 @@ struct SpawnedSourceOwner
     virtual void vB8();
     virtual void Apply(SpawnedSource* apSource);
 
-    void FUN_00cab0e0(__m128* apA, __m128* apB, float afT);
-    void FUN_00cab820(SpawnedSource* apSource);
+    void bhkCapsuleShape_Init(__m128* apA, __m128* apB, float afT);
+    void bhkCapsuleShape_Init_00cab820(SpawnedSource* apSource);
 };
 
 // @fnv 0x00cab820
-void SpawnedSourceOwner::FUN_00cab820(SpawnedSource* apSource)
+// src: XBOX_PDB 0x00cab820
+void SpawnedSourceOwner::bhkCapsuleShape_Init_00cab820(SpawnedSource* apSource)
 {
     __m128 vA = _mm_setr_ps(apSource->m_f20, apSource->m_f24, apSource->m_f28, apSource->m_f2C);
     __m128 vB = _mm_setr_ps(apSource->m_f10, apSource->m_f14, apSource->m_f18, apSource->m_f1C);
-    FUN_00cab0e0(&vB, &vA, apSource->m_f04);
+    bhkCapsuleShape_Init(&vB, &vA, apSource->m_f04);
     Apply(apSource);
 }
 
@@ -695,8 +699,8 @@ struct HeapContextScope
 
 
 struct hkMemAllocator;
-hkMemoryRouter* FUN_00c85750();
-void __cdecl FUN_00c908c0(hkMemAllocator& alloc, void* array, int numElem, int sizeElem);
+hkMemoryRouter* hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(hkMemAllocator& alloc, void* array, int numElem, int sizeElem);
 
 struct VecArrayLocalForm
 { // local form of hkArray: 0x00cb7c60 needs the original inline/out-of-line helper split; shared replacement changes bytes.
@@ -717,7 +721,7 @@ struct VecArrayLocalForm
         {
             int cap2 = 2 * getCapacity();
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(a, this, newSize, sizeof(hkVector4));
+            hkArrayUtil__reserve(a, this, newSize, sizeof(hkVector4));
         }
     }
     void _setSize(hkMemAllocator& a, int n)
@@ -727,7 +731,7 @@ struct VecArrayLocalForm
     }
     void SetSizeAndGrow(int n)
     {
-        _setSize(*reinterpret_cast<hkMemAllocator*>((&FUN_00c85750()->heap())), n);
+        _setSize(*reinterpret_cast<hkMemAllocator*>((&hkMemoryRouter_getInstance()->heap())), n);
     }
     void setSizeCleared(int n)
     {
@@ -760,7 +764,7 @@ struct VertsSource
     int unk00;
     int unk04;
     VertsData* unk08;
-    void FUN_00c84e20(VertsOut* out);
+    void bhkShape_CopyCinfo(VertsOut* out);
     int getNumVerts() const
     {
         return (this && unk08) ? unk08->unk10 : 0;
@@ -769,14 +773,15 @@ struct VertsSource
     {
         return (this && unk08) ? &unk08->unk20 : 0;
     }
-    void FUN_00cb7c60(VertsOut* out);
+    void bhkMultiSphereShape_CopyCinfo(VertsOut* out);
 };
 
 // @fnv 0x00cb7c60
-void VertsSource::FUN_00cb7c60(VertsOut* out)
+// src: XBOX_PDB 0x00cb7c60
+void VertsSource::bhkMultiSphereShape_CopyCinfo(VertsOut* out)
 {
     HeapContextScope scope;
-    FUN_00c84e20(out);
+    bhkShape_CopyCinfo(out);
     int n = getNumVerts();
     out->unk04.clear();
     out->unk04.SetSizeAndGrow(n);
@@ -816,7 +821,7 @@ class bhkCapsuleShapeCtor : public bhkConvexShape
 {
   public:
     bhkCapsuleShapeCtor(const NiPoint3& kPoint1, const NiPoint3& kPoint2, float fRadius);
-    void FUN_00cab0e0(const hkVector4& kA, const hkVector4& kB, float fRadius);
+    void bhkCapsuleShape_Init(const hkVector4& kA, const hkVector4& kB, float fRadius);
 };
 
 // @fnv 0x00cab710
@@ -829,7 +834,7 @@ bhkCapsuleShapeCtor::bhkCapsuleShapeCtor(const NiPoint3& kPoint1, const NiPoint3
     __declspec(align(16)) char storageB[sizeof(hkVector4)];
     hkVector4& kB = *reinterpret_cast<hkVector4*>(storageB);
     kB.set(kPoint2.x * DAT_01268328, kPoint2.y * DAT_01268328, kPoint2.z * DAT_01268328, 0.0f);
-    FUN_00cab0e0(kA, kB, fRadius * DAT_01268328);
+    bhkCapsuleShape_Init(kA, kB, fRadius * DAT_01268328);
 }
 }  // namespace fnv_00cab710
 
@@ -1036,9 +1041,9 @@ extern char str_010c8900[];
 extern char str_010c88f8[];
 extern char str_010c88ec[];
 
-char* __cdecl FUN_00a7d330(unsigned int v);
-char* __cdecl FUN_00a7d4d0(const char* fmt, int v);
-void __cdecl FUN_00406d00(char* buf, unsigned int size, const char* fmt, unsigned int idx);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int v);
+char* __cdecl NiGetViewerString_00a7d4d0(const char* fmt, int v);
+void __cdecl BSsprintf(char* buf, unsigned int size, const char* fmt, unsigned int idx);
 
 struct NiStrArr
 {
@@ -1086,9 +1091,9 @@ struct RecordCollection
     unsigned int unk04;
     StrNode* m_08;
 
-    void FUN_00ca05b0(NiStrArr* a);
+    void bhkSphereRepShape_GetViewerStrings(NiStrArr* a);
 
-    void FUN_00cb7d80(NiStrArr* a1);
+    void bhkMultiSphereShape_GetViewerStrings(NiStrArr* a1);
 };
 
 inline float getX(__m128 v)
@@ -1122,16 +1127,17 @@ inline NiPoint3 scale(__m128 v, float k)
     r.z = getZ(v) * k;
     return r;
 }
-char* __cdecl FUN_00a7d550(const char* buf, float f);
+char* __cdecl NiGetViewerString_00a7d550(const char* buf, float f);
 
 // @fnv 0x00cb7d80
-void RecordCollection::FUN_00cb7d80(NiStrArr* a1)
+// src: XBOX_PDB 0x00cb7d80
+void RecordCollection::bhkMultiSphereShape_GetViewerStrings(NiStrArr* a1)
 {
     TlsGuard_t guard(0x10);
-    FUN_00ca05b0(a1);
+    bhkSphereRepShape_GetViewerStrings(a1);
     int n;
     {
-        char* text = FUN_00a7d330(DAT_012683e0);
+        char* text = NiViewerStrings_NiGetViewerString_Title(DAT_012683e0);
         a1->append(text);
 
         if (this != 0 && m_08 != 0)
@@ -1142,7 +1148,7 @@ void RecordCollection::FUN_00cb7d80(NiStrArr* a1)
         {
             n = 0;
         }
-        text = FUN_00a7d4d0(str_010c8900, n);
+        text = NiGetViewerString_00a7d4d0(str_010c8900, n);
 
         a1->append(text);
     }
@@ -1161,13 +1167,13 @@ void RecordCollection::FUN_00cb7d80(NiStrArr* a1)
                     scalar.value = rec->w;
                     NiPoint3 pt = scale(cur, DAT_011b1cd4);
                     char buf[0x20];
-                    FUN_00406d00(buf, 0x20, str_010c88f8, i);
+                    BSsprintf(buf, 0x20, str_010c88f8, i);
                     {
-                        char* t2 = pt.FUN_00a59af0(buf);
+                        char* t2 = pt.GetViewerString_00a59af0(buf);
                         a1->append(t2);
                     }
-                    FUN_00406d00(buf, 0x20, str_010c88ec, i);
-                    scalar.text = FUN_00a7d550(buf, scalar.value);
+                    BSsprintf(buf, 0x20, str_010c88ec, i);
+                    scalar.text = NiGetViewerString_00a7d550(buf, scalar.value);
                     a1->append(scalar.text);
                     ++rec;
                 }

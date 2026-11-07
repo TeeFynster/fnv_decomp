@@ -13,8 +13,8 @@ public:
     int unk1c;
     int unk20;
 
-    void FUN_00716aa0(int maxLength);
+    void EditableTextField_SetMaxSize(int maxLength);
     void SetBothStrings(const char* text);
-    void FUN_00717010(bool enabled);
+    void TextEditMenu_Data_SetIsActive(bool enabled);
     void FUN_007e6580(bool foreground);
 };

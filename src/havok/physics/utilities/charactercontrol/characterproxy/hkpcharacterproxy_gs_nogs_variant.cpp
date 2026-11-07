@@ -11,7 +11,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00cad480_Class
 {
-    void __thiscall FUN_00cad480(void* arg);
+    void __thiscall hkpCharacterProxy_fireContactAdded(void* arg);
 };
 struct S_00cad440;
 struct S_00cad440_Listener
@@ -55,7 +55,7 @@ struct S_00cad440
     int unk7C;
     S_00cad440_Listener** unk80;
     int unk84;
-    void FUN_00cad440(void* a, void* b);
+    void hkpCharacterProxy_fireConstraintsProcessed(void* a, void* b);
 };
 struct CAD4C0Owner;
 struct CAD4C0Listener
@@ -102,7 +102,7 @@ struct CAD4C0Owner
     CAD4C0Listener** m_kListeners;
     int m_numListeners;
 
-    void FUN_00cad4c0(void* data);
+    void hkpCharacterProxy_fireContactRemoved(void* data);
 };
 struct FUN_00cad6f0_class
 {
@@ -144,11 +144,11 @@ struct FUN_00cad6f0_class
 };
 struct FUN_00cade20_Class
 {
-    void __thiscall FUN_00cade20(int, int, int, int, int, int);
+    void __thiscall hkpCharacterProxy_integrateImplementation(int, int, int, int, int, int);
 };
 struct FUN_00cafbd0_Class
 {
-    void __thiscall FUN_00cafbd0(int first, int second, int third, int fourth);
+    void __thiscall hkpCharacterProxy_integrateWithCollectors(int first, int second, int third, int fourth);
 };
 struct FNVAllocator
 {
@@ -162,7 +162,7 @@ struct FNVMemoryManager
         return *reinterpret_cast<FNVAllocator**>(reinterpret_cast<char*>(this) + 0x10);
     }
 };
-FNVMemoryManager* __cdecl FUN_00c85750();
+FNVMemoryManager* __cdecl hkMemoryRouter_getInstance();
 struct FNVArray
 {
     int* values;
@@ -177,17 +177,17 @@ struct FNVBuffers
     FNVArray elements;
     static void* operator new(unsigned int bytes)
     {
-        return FUN_00c85750()->GetAllocator()->Allocate(bytes);
+        return hkMemoryRouter_getInstance()->GetAllocator()->Allocate(bytes);
     }
 };
-void __cdecl FUN_00d06cb0(FNVArray*, unsigned int);
+void __cdecl hkSmallArrayUtil__reserveMore(FNVArray*, unsigned int);
 struct FNVOwner
 {
     FNVBuffers*& Buffers()
     {
         return *reinterpret_cast<FNVBuffers**>(reinterpret_cast<char*>(this) + 0x214);
     }
-    void FUN_00c9c5b0(int value);
+    void hkpEntity_addEntityListener(int value);
 };
 extern __declspec(thread) int g_tlsMemContext;
 struct S_00cac150_Scope
@@ -205,7 +205,7 @@ struct S_00cac150_Scope
 };
 struct S_00cac150_Item1
 {
-    void FUN_00c9c670(void* arg);
+    void removeEntityListener_00c9c670(void* arg);
 };
 struct S_00cac150_Item2
 {
@@ -281,7 +281,7 @@ struct CpuObject
     unsigned int unk28;
     unsigned int unk2c;
     CpuScalar* value;
-    unsigned int FUN_00cac910();
+    unsigned int hkpCharacterProxy_getPosition();
 };
 extern float DAT_0101e2bc;
 struct FUN_00cacf10_cls
@@ -318,8 +318,8 @@ struct FUN_00cacf10_cls
     int m_74;
     int m_78;
 
-    float FUN_00cafd90(void* a, void* b);
-    int FUN_00cacf10(void* arg);
+    float hkpCharacterProxy_surfaceDistance(void* a, void* b);
+    int hkpCharacterProxy_findSurface(void* arg);
 };
 struct ArgminState
 {
@@ -364,7 +364,7 @@ struct BhkElem
 };
 struct BhkTarget
 {
-    void FUN_00c9c670(void* v);
+    void removeEntityListener_00c9c670(void* v);
 };
 struct BhkProxy
 {
@@ -419,7 +419,7 @@ struct FUN_00cad900_arg
     unsigned int unk0c;
     unsigned char flag10;
 };
-extern "C" int __cdecl FUN_00d06f80(int ptr, int size);
+extern "C" int __cdecl hkStatisticsCollector_getAllocatedSize(int ptr, int size);
 extern "C" char str_010c8444[];
 extern "C" char str_010c8450[];
 extern "C" char str_010c8460[];
@@ -467,7 +467,7 @@ struct FUN_00cad900_cls
     int m9c;
     int ma0;
 
-    void FUN_00cad900(FUN_00cad900_arg* a1, int a2);
+    void hkpCharacterProxy_calcContentStatistics(FUN_00cad900_arg* a1, int a2);
 };
 extern char str_0102f13c[];
 extern char DAT_0104e3d0[];
@@ -476,7 +476,7 @@ extern char DAT_010c8488[];
 extern char DAT_010c8470[];
 struct FUN_00cad500_Class
 {
-    void __thiscall FUN_00cad500(void* arg);
+    void __thiscall hkpCharacterProxy_updateFromCinfo(void* arg);
 };
 struct FUN_00cada70_cls
 {
@@ -527,7 +527,7 @@ struct FUN_00cada70_cls
 };
 struct Query289
 {
-    __declspec(nothrow) void FUN_00cade20(void*, void*, hkpCdPointCollector*, hkpCdPointCollector*, unsigned,
+    __declspec(nothrow) void hkpCharacterProxy_integrateImplementation(void*, void*, hkpCdPointCollector*, hkpCdPointCollector*, unsigned,
                                           unsigned) throw();
     void CollectAllContactPoints(void*, void*);
 };
@@ -558,7 +558,7 @@ __declspec(nothrow) inline ContactArray289::ContactArray289()
 
 __declspec(nothrow) __forceinline ContactArray289::~ContactArray289()
 {
-    FNVMemoryManager* manager = FUN_00c85750();
+    FNVMemoryManager* manager = hkMemoryRouter_getInstance();
     unsigned int flags = capacity;
     Allocator197* heap = reinterpret_cast<Allocator197*>(manager->GetAllocator());
     count = 0;
@@ -683,10 +683,11 @@ struct Controller197
     int unk50;
     int unk54;
     float margin58, margin5c;
-    void FUN_00cae7f0(Context197* context);
+    void AllocateStorage_00cae7f0(Context197* context);
 };
 // @fnv 0x00cae7f0
-void Controller197::FUN_00cae7f0(Context197* context)
+// src: GUESS 0x00cae7f0 (confidence: low)
+void Controller197::AllocateStorage_00cae7f0(Context197* context)
 {
     context->Begin();
     Query197 query = *provider->owner->query;

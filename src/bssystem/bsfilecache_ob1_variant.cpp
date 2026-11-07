@@ -21,11 +21,12 @@ inline bool IsCachePaused(BSFileCache* m_pAabbCache)
 struct Cls00b01220
 {
     unsigned char unk00;
-    Cls00b01220* __thiscall FUN_00b01220(int unused);
+    Cls00b01220* __thiscall AutoPauseFileCaching_AutoPauseFileCaching(int unused);
 };
 
 // @fnv 0x00b01220
-Cls00b01220* __thiscall Cls00b01220::FUN_00b01220(int unused)
+// src: COMMUNITY 0x00b01220
+Cls00b01220* __thiscall Cls00b01220::AutoPauseFileCaching_AutoPauseFileCaching(int unused)
 {
     BSFileCache* pCache1 = FUN_00aff100();
     if (!IsCacheFinished(pCache1))
@@ -48,10 +49,11 @@ class FUN_00b012a0_cls
 {
   public:
     unsigned char m_00;
-    void FUN_00b012a0();
+    void UpdateFields_00b012a0();
 };
 // @fnv 0x00b012a0
-void FUN_00b012a0_cls::FUN_00b012a0()
+// src: GUESS 0x00b012a0 (confidence: low)
+void FUN_00b012a0_cls::UpdateFields_00b012a0()
 {
     BSFileCache* cache = FUN_00aff100();
     if (!IsCacheFinished(cache) && m_00 == 0)

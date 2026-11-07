@@ -101,7 +101,8 @@ template <class T> inline T* NiPointer<T>::operator->() const
 extern ImageSpaceManager* DAT_011f91ac;
 
 // @fnv 0x00b4f430
-void __cdecl FUN_00b4f430(int arg)
+// src: COMMUNITY 0x00b4f430
+void __cdecl BSShaderManager_SetImageSpaceParameters(int arg)
 {
     DAT_011f91ac->SetValue(arg);
 }
@@ -111,7 +112,8 @@ extern BSRenderedTexture* DAT_011f949c;
 
 // If the global rendered texture is set, passes it to the texture manager and clears the global pointer.
 // @fnv 0x00b4f510
-void FUN_00b4f510()
+// src: COMMUNITY 0x00b4f510
+void BSShaderManager_ReturnVelocityBuffers()
 {
     if (DAT_011f949c)
     {
@@ -124,7 +126,8 @@ void FUN_00b4f510()
 extern ImageSpaceManager* DAT_011f91ac;
 
 // @fnv 0x00b540b0
-void FUN_00b540b0()
+// src: COMMUNITY 0x00b540b0
+void BSShaderManager_ReturnSceneDepthTexture()
 {
     ((ImageSpaceTexture*)DAT_011f91ac->DepthTexture)->AddRenderedTexture();
 }
@@ -134,7 +137,8 @@ extern int DAT_011ffa10;
 void __cdecl AddToCounterIfIdle(unsigned int, unsigned int);
 
 // @fnv 0x00b540d0
-void __cdecl FUN_00b540d0()
+// src: COMMUNITY 0x00b540d0
+void __cdecl BSShaderManager_DisableFullScreenScissor()
 {
     DAT_011ffa10 -= 1;
     DAT_011ffa0c -= 1;
@@ -199,11 +203,12 @@ extern char DAT_011f968c;
 
 struct FUN_00b5a3f0_Class
 {
-    int __thiscall FUN_00b5a3f0();
+    int __thiscall ImageSpaceEffectDepthRadialBlur_IsActive();
 };
 
 // @fnv 0x00b5a3f0
-int __thiscall FUN_00b5a3f0_Class::FUN_00b5a3f0()
+// src: COMMUNITY 0x00b5a3f0
+int __thiscall FUN_00b5a3f0_Class::ImageSpaceEffectDepthRadialBlur_IsActive()
 {
     if (*(float*)((char*)this + 0x6c) > 0.0f && DAT_011f968c)
         return 1;
@@ -228,7 +233,8 @@ void* FUN_00b5a480_Class::FUN_00b5a480(unsigned char flag)
 }  // namespace fnv_00b5a480
 
 // @fnv 0x00b5a980
-int __cdecl FUN_00b5a980(int* piLeft, int* piRight)
+// src: GUESS 0x00b5a980 (confidence: low)
+int __cdecl Object_ComputeValue_00b5a980(int* piLeft, int* piRight)
 {
     return *piLeft == *piRight;
 }
@@ -268,10 +274,11 @@ void* __thiscall FUN_00b5f980_class::FUN_00b5f980(bool abDelete)
 
 struct FUN_00b57fe0_class
 {
-    void __thiscall FUN_00b57fe0(int value);
+    void __thiscall DistantLODShaderProperty_SetClampNI(int value);
 };
 // @fnv 0x00b57fe0
-void __thiscall FUN_00b57fe0_class::FUN_00b57fe0(int value)
+// src: XBOX_PDB 0x00b57fe0
+void __thiscall FUN_00b57fe0_class::DistantLODShaderProperty_SetClampNI(int value)
 {
     *(int*)((char*)this + 0x84) = value;
 }
@@ -282,11 +289,12 @@ struct NodePoolView
 };
 struct FUN_00b58570_Class
 {
-    void* __thiscall FUN_00b58570(void* source);
+    void* __thiscall NiTPointerListBase_AddTail(void* source);
 };
 // Allocates a node from the pool at this+8, links it after the current tail (this+4) or as the first node, and returns it.
 // @fnv 0x00b58570
-void* __thiscall FUN_00b58570_Class::FUN_00b58570(void* source)
+// src: COMMUNITY 0x00b58570
+void* __thiscall FUN_00b58570_Class::NiTPointerListBase_AddTail(void* source)
 {
     void* node = ((NodePoolView*)((char*)this + 8))->AddHead();
     *(void**)((char*)node + 8) = *(void**)source;
@@ -333,12 +341,13 @@ struct FUN_00b584e0_Class
     void* pHead;
     FUN_00b584e0_Node* pTail;
     unsigned int ItemUpdateArray;
-    FUN_00b584e0_Node* FUN_00b584e0(void* pData);
+    FUN_00b584e0_Node* AllocateStorage_00b584e0(void* pData);
 };
 
 // Allocates a 12-byte node, stores the value pointed to by pData, links it before pTail, and updates pHead/pTail and the count.
 // @fnv 0x00b584e0
-FUN_00b584e0_Node* FUN_00b584e0_Class::FUN_00b584e0(void* pData)
+// src: GUESS 0x00b584e0 (confidence: medium)
+FUN_00b584e0_Node* FUN_00b584e0_Class::AllocateStorage_00b584e0(void* pData)
 {
     FUN_00b584e0_Node* pNewNode =
         static_cast<FUN_00b584e0_Node*>(reinterpret_cast<P03MM*>(&g_memoryManager)->Allocate(0xc));
@@ -416,11 +425,12 @@ void __thiscall FUN_00b5a8d0_List::MoveBefore(FUN_00b5a8d0_Node* pNodeToMove, FU
 
 struct FUN_00b5a3a0_Class
 {
-    void FUN_00b5a3a0();
+    void ImageSpaceEffectDepthRadialBlur_ReturnTextures();
 };
 
 // @fnv 0x00b5a3a0
-void FUN_00b5a3a0_Class::FUN_00b5a3a0()
+// src: COMMUNITY 0x00b5a3a0
+void FUN_00b5a3a0_Class::ImageSpaceEffectDepthRadialBlur_ReturnTextures()
 {
     int iZero;
     ImageSpaceTexture* tex = *(ImageSpaceTexture**)((char*)this + 0x2c);
@@ -437,14 +447,16 @@ void __cdecl AccumulateAndDispatch(unsigned int, unsigned int, unsigned int, uns
 
 // Calls AccumulateAndDispatch with the four arguments and 1, then calls AddToCounterIfIdle with 1 and 1.
 // @fnv 0x00b4f540
-void __cdecl FUN_00b4f540(unsigned int a, unsigned int b, unsigned int c, unsigned int d)
+// src: COMMUNITY 0x00b4f540
+void __cdecl BSShaderManager_EnableFullScreenScissor(unsigned int a, unsigned int b, unsigned int c, unsigned int d)
 {
     AccumulateAndDispatch(a, b, c, d, 1);
     AddToCounterIfIdle(1, 1);
 }
 
 // @fnv 0x00b59d10
-int __fastcall FUN_00b59d10(char* p, int)
+// src: COMMUNITY 0x00b59d10
+int __fastcall ImageSpaceEffectRadialBlur_IsActive(char* p, int)
 {
     if (*(float*)(p + 0x58) > 0.0f && DAT_011f968c)
         return 1;
@@ -455,10 +467,10 @@ struct S_00b4e1e0_Item
 {
     int unk0;
     int unk4;
-    void FUN_00b4df30();
+    void BSFadeNode_FreeLinkedNodesRecursively();
     ~S_00b4e1e0_Item()
     {
-        FUN_00b4df30();
+        BSFadeNode_FreeLinkedNodesRecursively();
     }
 };
 struct S_00b4e1e0_Base
@@ -528,14 +540,15 @@ struct FUN_00b4e1e0 : S_00b4e1e0_Base
 // @fnv 0x00b4e1e0
 FUN_00b4e1e0::~FUN_00b4e1e0()
 {
-    unk212.FUN_00b4df30();
-    unk220.FUN_00b4df30();
+    unk212.BSFadeNode_FreeLinkedNodesRecursively();
+    unk220.BSFadeNode_FreeLinkedNodesRecursively();
 }
 
 extern int DAT_011f9168;
 
 // @fnv 0x00b4f570
-void __cdecl FUN_00b4f570()
+// src: COMMUNITY 0x00b4f570
+void __cdecl BSShaderManager_ResetNextAvailableShadowMapAccumulator()
 {
     DAT_011f9168 = 0;
 }
@@ -543,7 +556,8 @@ void __cdecl FUN_00b4f570()
 extern int DAT_011f95ec;
 
 // @fnv 0x00b4f5c0
-int FUN_00b4f5c0()
+// src: XBOX_PDB 0x00b4f5c0
+int BSShaderManager_GetAccumulator()
 {
     return DAT_011f95ec;
 }
@@ -551,11 +565,12 @@ int FUN_00b4f5c0()
 struct FUN_00b54620_This
 {
     int unk00;
-    void __thiscall FUN_00b54620();
+    void __thiscall NiPointer_NiRefObject_NiPointer_NiRefObject();
 };
 
 // @fnv 0x00b54620
-void FUN_00b54620_This::FUN_00b54620()
+// src: COMMUNITY 0x00b54620
+void FUN_00b54620_This::NiPointer_NiRefObject_NiPointer_NiRefObject()
 {
     this->unk00 = 0;
 }
@@ -688,11 +703,12 @@ struct S_00b57e70_Class
     int unk04;
     int unk08;
 
-    S_00b57e70_Class* __thiscall FUN_00b57e70();
+    S_00b57e70_Class* __thiscall DistantLODShaderProperty_DistantLODParam_DistantLODParam();
 };
 
 // @fnv 0x00b57e70
-S_00b57e70_Class* __thiscall S_00b57e70_Class::FUN_00b57e70()
+// src: XBOX_PDB 0x00b57e70
+S_00b57e70_Class* __thiscall S_00b57e70_Class::DistantLODShaderProperty_DistantLODParam_DistantLODParam()
 {
     unk08 = 0;
     unk04 = 0;
@@ -736,11 +752,12 @@ struct FUN_00b57e80_cls
     int unk7C;
     int unk80;
     int m_84;
-    void FUN_00b57e80(int value);
+    void DistantLODShaderProperty_SetClampD3D(int value);
 };
 
 // @fnv 0x00b57e80
-void FUN_00b57e80_cls::FUN_00b57e80(int value)
+// src: XBOX_PDB 0x00b57e80
+void FUN_00b57e80_cls::DistantLODShaderProperty_SetClampD3D(int value)
 {
     m_84 = (value != 3) ? 3 : 0;
 }
@@ -871,7 +888,8 @@ FUN_00b57f90::FUN_00b57f90() : FUN_00b7c000_Base()
 // FUN_00b57fd0 : a one-line function - getter
 extern int g_target_00b57fd0;
 // @fnv 0x00b57fd0
-void* FUN_00b57fd0()
+// src: XBOX_PDB 0x00b57fd0
+void* DistantLODShaderProperty_GetRTTI()
 {
     return &g_target_00b57fd0;
 }
@@ -1004,10 +1022,11 @@ struct CpuObject
     unsigned int unk78;
     unsigned int unk7c;
     int value;
-    int FUN_00b58090();
+    int SpeedTreeShaderLightingProperty_GetClampNI();
 };
 // @fnv 0x00b58090
-int CpuObject::FUN_00b58090()
+// src: XBOX_PDB 0x00b58090
+int CpuObject::SpeedTreeShaderLightingProperty_GetClampNI()
 {
     return value;
 }
@@ -1068,14 +1087,14 @@ struct FUN_00b58140_Class
     NiRefObject* reference80;
     unsigned int copiedValue84;
     unsigned int copiedValue88;
-    void __thiscall FUN_00b702b0(FUN_00b58140_Class* destination, unsigned int flags);
+    void __thiscall BSShaderLightingProperty_CopyMembers(FUN_00b58140_Class* destination, unsigned int flags);
     void __thiscall CopyTo(FUN_00b58140_Class* destination, unsigned int flags);
 };
 
 // @fnv 0x00b58140
 void FUN_00b58140_Class::CopyTo(FUN_00b58140_Class* destination, unsigned int flags)
 {
-    FUN_00b702b0(destination, flags);
+    BSShaderLightingProperty_CopyMembers(destination, flags);
     if (destination->reference80 != reference80)
     {
         if (destination->reference80)
@@ -1115,7 +1134,7 @@ template <> void NamedObjectMapBase::SetAt(const char* key, NiPointer<NiRefObjec
     ++m_kItemCount.m_uiCount;
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct BlobBase
 {
@@ -1169,7 +1188,7 @@ struct BlobObj : public BlobBase
 
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     static void operator delete(void* p) throw()
     {}
@@ -1210,12 +1229,13 @@ struct FUN_00b58530_cls
     unsigned int m_04;
     unsigned int m_08;
 
-    void FUN_00b58530();
+    void ProcessEntries_00b58530();
 };
 
 // Walks the linked list from m_00, clearing each node's m_08 and freeing it, then resets m_00, m_04 and m_08.
 // @fnv 0x00b58530
-void FUN_00b58530_cls::FUN_00b58530()
+// src: GUESS 0x00b58530 (confidence: low)
+void FUN_00b58530_cls::ProcessEntries_00b58530()
 {
     ListNode_b4009* cur = m_00;
     if (cur != 0)
@@ -1470,7 +1490,7 @@ bool Effect::UpdateShaderParams(int)
 
 struct FUN_00ba3840_Class
 {
-    void __thiscall FUN_00ba3840(int value);
+    void __thiscall ImageSpaceTexture_BorrowRenderedTexture(int value);
 };
 struct FUN_00ba3aa0_Class
 {
@@ -1478,7 +1498,7 @@ struct FUN_00ba3aa0_Class
 };
 struct FUN_00ba37f0_Class
 {
-    void __thiscall FUN_00ba37f0(int value);
+    void __thiscall ImageSpaceTexture_SetTexture_00ba37f0(int value);
 };
 int __cdecl GetImageSpaceTexture();
 struct FUN_00b5a340_Class
@@ -1491,11 +1511,11 @@ void FUN_00b5a340_Class::InitSubObjects(int arg)
     char* value;
     FUN_00ba37f0_Class* object;
     value = (char*)this + 0xb4;
-    ((FUN_00ba3840_Class*)value)->FUN_00ba3840(0x28);
+    ((FUN_00ba3840_Class*)value)->ImageSpaceTexture_BorrowRenderedTexture(0x28);
     ((FUN_00ba3aa0_Class*)((char*)this + 0x28))->FUN_00ba3aa0(2, &value);
     object = (FUN_00ba37f0_Class*)((char*)this + 0xc4);
     value = (char*)object;
-    object->FUN_00ba37f0(GetImageSpaceTexture());
+    object->ImageSpaceTexture_SetTexture_00ba37f0(GetImageSpaceTexture());
     ((FUN_00ba3aa0_Class*)((char*)this + 0x28))->FUN_00ba3aa0(3, &value);
 }
 
@@ -1635,11 +1655,12 @@ struct FnvLookupOwner
     int unk0b0;
     FnvLookupNode* head;
     void FUN_00b5d270(FnvLookupRecord* record);
-    void FUN_00b5f080(int lookupKey);
+    void ShadowSceneNode_UpdateLight_0(int lookupKey);
 };
 // Walks the linked list from head and, for the first node whose record matches lookupKey, calls FUN_00b5d270 on that record and returns.
 // @fnv 0x00b5f080
-void FnvLookupOwner::FUN_00b5f080(int lookupKey)
+// src: COMMUNITY 0x00b5f080
+void FnvLookupOwner::ShadowSceneNode_UpdateLight_0(int lookupKey)
 {
     FnvLookupNode* node = head;
     if (node == 0)
@@ -1746,7 +1767,7 @@ class BB5F0C0Node : public BB5F0C0Object
 class BB5F0C0Visitor
 {
   public:
-    void FUN_00b5eed0(BB5F0C0Object* pkGeometry);
+    void ShadowSceneNode_RemoveLight(BB5F0C0Object* pkGeometry);
     void FUN_00b5c940(BB5F0C0Object* pkGeometry, bool bFlag);
     void VisitNodeChildren(BB5F0C0Node* pkNode, bool bAttach);
 };
@@ -1763,7 +1784,7 @@ void BB5F0C0Visitor::VisitNodeChildren(BB5F0C0Node* pkNode, bool bAttach)
             if (BB5F0C0IsKindOf(&g_kB5F0C0GeometryRTTI, pkChild))
             {
                 if (bAttach)
-                    FUN_00b5eed0(pkChild);
+                    ShadowSceneNode_RemoveLight(pkChild);
                 else
                     FUN_00b5c940(pkChild, true);
             }
@@ -1787,11 +1808,12 @@ void __stdcall VisitNodeChildren(void* pTarget, int flag);
 
 struct FunSceneManager
 {
-    void FUN_00b5f150(void* pTarget, int flag);
+    void ShadowSceneNode_FindAndCullLight(void* pTarget, int flag);
 };
 
 // @fnv 0x00b5f150
-void FunSceneManager::FUN_00b5f150(void* pTarget, int flag)
+// src: COMMUNITY 0x00b5f150
+void FunSceneManager::ShadowSceneNode_FindAndCullLight(void* pTarget, int flag)
 {
     if (pTarget != 0)
         VisitNodeChildren(pTarget, flag);
@@ -1800,7 +1822,8 @@ void FunSceneManager::FUN_00b5f150(void* pTarget, int flag)
 extern int DAT_011f95f0;
 
 // @fnv 0x00b4f5d0
-int FUN_00b4f5d0()
+// src: COMMUNITY 0x00b4f5d0
+int BSShaderManager_GetCurrentAccumulator()
 {
     return DAT_011f95f0;
 }
@@ -1841,7 +1864,7 @@ extern float DAT_011f9190;
 extern float DAT_011f918c;
 extern float DAT_011f9188;
 extern float DAT_011f9184;
-void __cdecl FUN_00b4f2e0();
+void __cdecl BSShaderManager_DefaultFileCreateFunc();
 extern void(__cdecl* DAT_011f91f8)();
 void __cdecl FUN_00b54000(float);
 extern NiPointer<NiRefObject> DAT_011f9548[35];
@@ -1873,7 +1896,7 @@ FUN_00b54280::FUN_00b54280()
     DAT_011f91de = true;
     DAT_011f91dd = false;
     DAT_011f91d8 = 47;
-    DAT_011f91f8 = FUN_00b4f2e0;
+    DAT_011f91f8 = BSShaderManager_DefaultFileCreateFunc;
     DAT_011f91f0 = 0;
     DAT_011f91ec = 0;
     DAT_011f91c7 = true;
@@ -2081,7 +2104,8 @@ struct Rend
 };
 }
 // @fnv 0x00b55ac0
-void __cdecl FUN_00b55ac0(int a, int b, int c)
+// src: COMMUNITY 0x00b55ac0
+void __cdecl BSShaderManager_RenderImageSpaceEffects(int a, int b, int c)
 {
     DAT_011f91ac->RenderEndOfFrameEffects((GraphicsRenderer*)a, (BSRenderedTexture**)&b, (BSRenderedTexture**)&c);
     for (int i = 0; i < 8; i++)
@@ -2117,25 +2141,27 @@ class __declspec(novtable) FUN_00b581c0_cls : public SpawnedBase_b581c0
 FUN_00b581c0_cls::~FUN_00b581c0_cls()
 {}
 
-void FUN_00b4df30();
+void BSFadeNode_FreeLinkedNodesRecursively();
 // @fnv 0x00b4e140
-void FUN_00b4e140()
+// src: GUESS 0x00b4e140 (confidence: low)
+void Object_ForwardCall_00b4e140()
 {
-    FUN_00b4df30();
+    BSFadeNode_FreeLinkedNodesRecursively();
 }
 
 struct FUN_00b58530_Obj
 {
-    void FUN_00b58530();
+    void ProcessEntries_00b58530();
 };
 struct FUN_00b595a0_cls
 {
-    void FUN_00b595a0();
+    void j_au_re_GameHeapFree_33();
 };
 // @fnv 0x00b595a0
-void FUN_00b595a0_cls::FUN_00b595a0()
+// src: COMMUNITY 0x00b595a0
+void FUN_00b595a0_cls::j_au_re_GameHeapFree_33()
 {
-    reinterpret_cast<FUN_00b58530_Obj*>(this)->FUN_00b58530();
+    reinterpret_cast<FUN_00b58530_Obj*>(this)->ProcessEntries_00b58530();
 }
 
 void* __cdecl B59890GetMap();
@@ -2211,7 +2237,8 @@ FUN_00b5a410::FUN_00b5a410()
 }
 
 // @fnv 0x00b5a8c0
-void __stdcall FUN_00b5a8c0(int, int, int, int, int, int)
+// src: COMMUNITY 0x00b5a8c0
+void __stdcall ShadowSceneNode_EnableTestLight(int, int, int, int, int, int)
 {}
 
 struct FUN_00b59c20 : FUN_00ba3d30
@@ -2556,12 +2583,13 @@ struct TextureOwner
     int unk1E0;
 
     void RemoveLightFromNode(const RefPtr_b9fcc0& value, TextureNode** pos);
-    void FUN_00b5ef90(const RefPtr_b9fcc0& value);
+    void ShadowSceneNode_RemoveQueuedLight(const RefPtr_b9fcc0& value);
 };
 
 // If value.ptr->unk240 differs from unk1E0 adds value to m_c0 or m_b4, otherwise finds it there and calls RemoveLightFromNode; unkEC picks the list.
 // @fnv 0x00b5ef90
-void TextureOwner::FUN_00b5ef90(const RefPtr_b9fcc0& value)
+// src: COMMUNITY 0x00b5ef90
+void TextureOwner::ShadowSceneNode_RemoveQueuedLight(const RefPtr_b9fcc0& value)
 {
     if (value.ptr->unk240 != unk1E0)
     {
@@ -2583,7 +2611,7 @@ void TextureOwner::FUN_00b5ef90(const RefPtr_b9fcc0& value)
 }
 
 extern void* __cdecl FUN_00ec61c0(void* dest, int value, unsigned int count);
-extern void* __cdecl FUN_00aa1070(unsigned int size);
+extern void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 
 void* __cdecl NiMallocB58(unsigned int uiSize);
 extern "C" void* __cdecl MemSetB58(void* pvDest, int iValue, unsigned int uiSize);
@@ -2605,7 +2633,8 @@ inline NiTPointerMap<TKEY, TVAL>::NiTPointerMap(unsigned int uiHashSize)
 
 // Returns the static render-item cache, creating it on first call.
 // @fnv 0x00b585c0
-RenderItemMap* __cdecl FUN_00b585c0()
+// src: GUESS 0x00b585c0 (confidence: medium)
+RenderItemMap* __cdecl Object_GetOrCreateRenderItemCache()
 {
     static RenderItemMap map(37);
     return &map;
@@ -2637,7 +2666,7 @@ struct PoolLock
 extern PoolLock g_011c5f80;
 extern unsigned int DAT_011c5f84;
 extern Link* DAT_011c5f58;
-void FUN_0043a080();
+void NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();
 struct LinkAllocator
 {
     unsigned count;
@@ -2673,7 +2702,7 @@ struct Pending
             n = DAT_011c5f58;
             if (!n)
             {
-                FUN_0043a080();
+                NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();
                 n = DAT_011c5f58;
             }
             DAT_011c5f58 = n->next;
@@ -2722,7 +2751,7 @@ __declspec(noinline) Link* LinkAllocator::AddHead()
 {
     g_011c5f80.Lock(0);
     if (!DAT_011c5f58)
-        FUN_0043a080();
+        NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();
     Link* n = DAT_011c5f58;
     DAT_011c5f58 = DAT_011c5f58->next;
     n->data = 0;
@@ -2850,15 +2879,15 @@ struct Frustum
         return _g_memoryManager.Allocate(size);
     }
     void InitFromArg(View*);
-    void FUN_00c47a00();
-    void FUN_00c47ae0();
-    void FUN_00c47d20(Portal*);
-    void FUN_00c49850();
+    void BSCompoundFrustum_StartGroupIntersection();
+    void BSCompoundFrustum_EndGroup();
+    void BSCompoundFrustum_AddOcclusionPlane(Portal*);
+    void BSCompoundFrustum_PrethreadOpList();
     bool EvaluateQuery(Portal*);
-    void FUN_00c48b90();
-    void FUN_00c48800(Frustum*);
+    void BSCompoundFrustum_MakeIntoUnion();
+    void BSCompoundFrustum_AddCompoundFrustum(Frustum*);
     void UpdateRecords(Portal*, int);
-    void FUN_00c48db0(Frustum*, Portal*);
+    void BSCompoundFrustum_BuildForPortal(Frustum*, Portal*);
 };
 struct RenderState
 {
@@ -3008,7 +3037,7 @@ struct Portal
     int unk0f8;
     Region* first;
     Region* second;
-    bool FUN_00c344c0(int, Position*);
+    bool BSOcclusionPlane_WithinFrustumDistFirst(int, Position*);
     int GetPackedZeroFlags();
 };
 struct LinkedChain
@@ -3025,7 +3054,7 @@ struct World
     Link* head;
     int unk018;
     int unk01c;
-    void FUN_00b5c6e0(Region*);
+    void BSPortalGraph_AddRoomToAccumList(Region*);
 };
 struct Traversal
 {
@@ -3135,19 +3164,19 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
             {
                 Portal* portal = (Portal*)Next(pos);
                 if (portal && (portal->state == 1   ? true
-                               : portal->state == 0 ? portal->FUN_00c344c0(arg, &position)
+                               : portal->state == 0 ? portal->BSOcclusionPlane_WithinFrustumDistFirst(arg, &position)
                                                     : false))
                 {
                     if (!begun)
                     {
-                        frustum.FUN_00c47a00();
+                        frustum.BSCompoundFrustum_StartGroupIntersection();
                         begun = true;
                     }
-                    frustum.FUN_00c47d20(portal);
+                    frustum.BSCompoundFrustum_AddOcclusionPlane(portal);
                 }
             }
             if (begun)
-                frustum.FUN_00c47ae0();
+                frustum.BSCompoundFrustum_EndGroup();
         }
         {
             Link* n = pending.alloc.AddHead();
@@ -3167,18 +3196,18 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
         for (Link* pos = start->portals; pos;)
         {
             Portal* portal = (Portal*)Next(pos);
-            if (portal && (portal->state == 1 || (portal->state == 0 && portal->FUN_00c344c0(arg, &position))))
+            if (portal && (portal->state == 1 || (portal->state == 0 && portal->BSOcclusionPlane_WithinFrustumDistFirst(arg, &position))))
             {
                 if (!begun)
                 {
-                    f->FUN_00c47a00();
+                    f->BSCompoundFrustum_StartGroupIntersection();
                     begun = true;
                 }
-                f->FUN_00c47d20(portal);
+                f->BSCompoundFrustum_AddOcclusionPlane(portal);
             }
         }
         if (begun)
-            f->FUN_00c47ae0();
+            f->BSCompoundFrustum_EndGroup();
         start->SetFieldCC(f);
         {
             Link* n = pending.alloc.AddHead();
@@ -3193,7 +3222,7 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
     do
     {
         Region* current = pending.pop();
-        world->FUN_00b5c6e0(current);
+        world->BSPortalGraph_AddRoomToAccumList(current);
         Frustum* active;
         Link** source;
         if (current)
@@ -3215,7 +3244,7 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
             source = &world->head;
             active = &frustum;
         }
-        active->FUN_00c49850();
+        active->BSCompoundFrustum_PrethreadOpList();
         for (Link* pos = *source; pos;)
         {
             Portal* portal = (Portal*)Next(pos);
@@ -3236,23 +3265,23 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
                     if (dest->frustum && dest->frustum->count)
                     {
                         Frustum* pTargetFrustum = dest->frustum;
-                        pTargetFrustum->FUN_00c48b90();
+                        pTargetFrustum->BSCompoundFrustum_MakeIntoUnion();
                         if ((active && active->count) || dest->count)
                         {
-                            pTargetFrustum->FUN_00c47a00();
+                            pTargetFrustum->BSCompoundFrustum_StartGroupIntersection();
                             if (active && active->count)
-                                pTargetFrustum->FUN_00c48800(active);
+                                pTargetFrustum->BSCompoundFrustum_AddCompoundFrustum(active);
                         }
                         pTargetFrustum->UpdateRecords(portal, 0);
                         for (Link* it = dest->portals; it;)
                         {
                             Portal* other = (Portal*)Next(it);
                             if (other && active->EvaluateQuery(other))
-                                pTargetFrustum->FUN_00c47d20(other);
+                                pTargetFrustum->BSCompoundFrustum_AddOcclusionPlane(other);
                         }
-                        pTargetFrustum->FUN_00c47ae0();
+                        pTargetFrustum->BSCompoundFrustum_EndGroup();
                         if ((active && active->count) || dest->count)
-                            pTargetFrustum->FUN_00c47ae0();
+                            pTargetFrustum->BSCompoundFrustum_EndGroup();
                     }
                     else
                     {
@@ -3265,12 +3294,12 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
                             active = 0;
                         if ((active && active->count) || dest->count)
                         {
-                            pTargetFrustum->FUN_00c47a00();
+                            pTargetFrustum->BSCompoundFrustum_StartGroupIntersection();
                             if (active && active->count)
                             {
                                 Frustum temp;
-                                temp.FUN_00c48db0(active, portal);
-                                pTargetFrustum->FUN_00c48800(&temp);
+                                temp.BSCompoundFrustum_BuildForPortal(active, portal);
+                                pTargetFrustum->BSCompoundFrustum_AddCompoundFrustum(&temp);
                             }
                         }
                         pTargetFrustum->UpdateRecords(portal, 0);
@@ -3279,14 +3308,14 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
                             Portal* other;
                             other = (Portal*)Next(it);
                             if (other && (!active || active->EvaluateQuery(other)))
-                                pTargetFrustum->FUN_00c47d20(other);
+                                pTargetFrustum->BSCompoundFrustum_AddOcclusionPlane(other);
                         }
                         if ((active && active->count) || dest->count)
                         {
                             if (pTargetFrustum->count == 1)
                                 pTargetFrustum->InitFromArg(view);
                             else
-                                pTargetFrustum->FUN_00c47ae0();
+                                pTargetFrustum->BSCompoundFrustum_EndGroup();
                         }
                         if (!active || active->special || (!active->count && portal->GetPackedZeroFlags() == 15))
                             pTargetFrustum->special = true;
@@ -3302,12 +3331,12 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
                     {
                         if ((active && active->count) || portals->count)
                         {
-                            frustum.FUN_00c47a00();
+                            frustum.BSCompoundFrustum_StartGroupIntersection();
                             if (active && active->count)
                             {
                                 Frustum temp2;
-                                temp2.FUN_00c48db0(active, portal);
-                                frustum.FUN_00c48800(&temp2);
+                                temp2.BSCompoundFrustum_BuildForPortal(active, portal);
+                                frustum.BSCompoundFrustum_AddCompoundFrustum(&temp2);
                             }
                         }
                         frustum.UpdateRecords(portal, 0);
@@ -3315,32 +3344,32 @@ void Traversal::UpdateVisibility(Region* start, View* view, int arg, bool reset)
                         {
                             Portal* other = (Portal*)Next(it);
                             if (other && active->EvaluateQuery(other))
-                                frustum.FUN_00c47d20(other);
+                                frustum.BSCompoundFrustum_AddOcclusionPlane(other);
                         }
                         if ((active && active->count) || portals->count)
-                            frustum.FUN_00c47ae0();
+                            frustum.BSCompoundFrustum_EndGroup();
                         if (!active || (!active->count && portal->GetPackedZeroFlags() == 15))
                             frustum.special = true;
                     }
                     else
                     {
-                        frustum.FUN_00c48b90();
+                        frustum.BSCompoundFrustum_MakeIntoUnion();
                         if ((active && active->count) || portals->count)
                         {
-                            frustum.FUN_00c47a00();
+                            frustum.BSCompoundFrustum_StartGroupIntersection();
                             if (active && active->count)
-                                frustum.FUN_00c48800(active);
+                                frustum.BSCompoundFrustum_AddCompoundFrustum(active);
                         }
                         frustum.UpdateRecords(portal, 0);
                         for (Link* it = portals->head; it;)
                         {
                             Portal* other = (Portal*)Next(it);
                             if (other && active->EvaluateQuery(other))
-                                frustum.FUN_00c47d20(other);
+                                frustum.BSCompoundFrustum_AddOcclusionPlane(other);
                         }
-                        frustum.FUN_00c47ae0();
+                        frustum.BSCompoundFrustum_EndGroup();
                         if ((active && active->count) || portals->count)
-                            frustum.FUN_00c47ae0();
+                            frustum.BSCompoundFrustum_EndGroup();
                     }
                 }
             }
@@ -3457,7 +3486,7 @@ struct RTEntry
     }
 };
 
-extern "C" RTTexture* __cdecl FUN_00b587c0(RTKey* key);
+extern "C" RTTexture* __cdecl DistantLODShaderProperty_GetCachedGeometry(RTKey* key);
 
 struct RTRenderer
 {
@@ -3525,7 +3554,7 @@ extern int DAT_011f963c;
 static __forceinline bool Lookup(int k, RTEntry*& found)
 {
     found = 0;
-    return FUN_00b585c0()->GetAt((unsigned int)k, found);
+    return Object_GetOrCreateRenderItemCache()->GetAt((unsigned int)k, found);
 }
 
 // Finds or creates an RTItem for key using a snapped position value, stores it in *out and returns usTotal minus usUsed.
@@ -3549,19 +3578,19 @@ int __cdecl GetOrCreateItem(RTKey* key, unsigned int pos, RTItem** ppItem)
         snap |= hi;
     }
     *ppItem = 0;
-    RTTexture* tex = FUN_00b587c0(key);
+    RTTexture* tex = DistantLODShaderProperty_GetCachedGeometry(key);
     if (!tex)
         return 0;
     RTEntry* entry;
     {
         RTEntry* found;
         found = 0;
-        if (!FUN_00b585c0()->GetAt((unsigned int)key->unk08, found))
+        if (!Object_GetOrCreateRenderItemCache()->GetAt((unsigned int)key->unk08, found))
         {
             entry = new RTEntry;
             entry->tex = tex;
             entry->key = *key;
-            FUN_00b585c0()->SetAt((unsigned int)key->unk08, entry);
+            Object_GetOrCreateRenderItemCache()->SetAt((unsigned int)key->unk08, entry);
         }
         else
         {

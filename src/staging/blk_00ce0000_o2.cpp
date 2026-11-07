@@ -92,11 +92,12 @@ struct FUN_00cf4ca0_class
     int m_auiShapeKeys[6];
     hkReferencedObject* m_kPointA;
     hkReferencedObject* m_kPointB;
-    void FUN_00cf4ca0();
+    void hkpBinaryAction__referenceBodies();
 };
 
 // @fnv 0x00cf4ca0
-void FUN_00cf4ca0_class::FUN_00cf4ca0()
+// src: HAVOK_LIB 0x00cf4ca0
+void FUN_00cf4ca0_class::hkpBinaryAction__referenceBodies()
 {
     if (m_kPointA)
         m_kPointA->addReference();
@@ -108,15 +109,16 @@ struct FUN_00d06d50_cls
 {
     int __thiscall FindClass(int);
 };
-extern "C" void __cdecl FUN_00cf6920(int, int, int);
+extern "C" void __cdecl hkStatisticsCollectorUtil_addClassContentsAll(int, int, int);
 
 // Calls FindClass on b with a; if it returns nonzero, passes a, the result and b to FUN_00cf6920.
 // @fnv 0x00cf6950
-void __cdecl FUN_00cf6950(int a, int apObject)
+// src: HAVOK_LIB 0x00cf6950
+void __cdecl hkStatisticsCollectorUtil_addClassContentsAll_00cf6950(int a, int apObject)
 {
     int c = ((FUN_00d06d50_cls*)apObject)->FindClass(a);
     if (c)
-        FUN_00cf6920(a, c, apObject);
+        hkStatisticsCollectorUtil_addClassContentsAll(a, c, apObject);
 }
 
 struct FUN_00cf86f0_class
@@ -133,7 +135,8 @@ int FUN_00cf86f0_class::IsFieldEqual()
 }
 
 // @fnv 0x00cfcb80
-unsigned short FUN_00cfcb80(unsigned short a, unsigned short b)
+// src: HAVOK_LIB 0x00cfcb80
+unsigned short hkMath_min2_unsigned_short(unsigned short a, unsigned short b)
 {
     unsigned short r = a;
     if (a < b)
@@ -146,8 +149,8 @@ unsigned short FUN_00cfcb80(unsigned short a, unsigned short b)
 extern int DAT_010cb864;
 struct FUN_00ce4ae0_cls
 {
-    int __thiscall FUN_00ce4ae0(int);
-    void __thiscall FUN_00ce5310();
+    int __thiscall AssignFields_00ce4ae0(int);
+    void __thiscall hkaSkeletonMapperData_hkaSkeletonMapperData();
 };
 struct FUN_00ce4a20_cls
 {
@@ -155,21 +158,23 @@ struct FUN_00ce4a20_cls
     short m_kPointB;
     short m_iThirdValue;
     int m_iFourthElementInteger;
-    int __thiscall FUN_00ce4a20(int a);
+    int __thiscall ProcessAndReturnValue_00ce4a20(int a);
 };
 // @fnv 0x00ce4a20
-int __thiscall FUN_00ce4a20_cls::FUN_00ce4a20(int a)
+// src: GUESS 0x00ce4a20 (confidence: low)
+int __thiscall FUN_00ce4a20_cls::ProcessAndReturnValue_00ce4a20(int a)
 {
     m_iThirdValue = 1;
     m_kPointA = (int)&DAT_010cb864;
-    ((FUN_00ce4ae0_cls*)((char*)this + 0x10))->FUN_00ce5310();
-    ((FUN_00ce4ae0_cls*)((char*)this + 0x10))->FUN_00ce4ae0(a);
+    ((FUN_00ce4ae0_cls*)((char*)this + 0x10))->hkaSkeletonMapperData_hkaSkeletonMapperData();
+    ((FUN_00ce4ae0_cls*)((char*)this + 0x10))->AssignFields_00ce4ae0(a);
     return (int)this;
 }
 
 extern int DAT_0102e378;
 // @fnv 0x00cf69a0
-void __cdecl FUN_00cf69a0(int* a)
+// src: GUESS 0x00cf69a0 (confidence: low)
+void __cdecl Object_UpdateFields_00cf69a0(int* a)
 {
     if (a)
         *a = (int)&DAT_0102e378;
@@ -180,18 +185,19 @@ struct FUN_00cf69c0_class
     int m_kPointA;
     int m_auiShapeKeys;
     int m_kPointB;
-    int __thiscall FUN_00cf69c0(int a);
+    int __thiscall hkSingletonInitNode_findByName(int a);
 };
 
-int __cdecl FUN_00cb0fa0(int a, int b);
+int __cdecl hkString_strCmp(int a, int b);
 
 // @fnv 0x00cf69c0
-int __thiscall FUN_00cf69c0_class::FUN_00cf69c0(int a)
+// src: HAVOK_LIB 0x00cf69c0
+int __thiscall FUN_00cf69c0_class::hkSingletonInitNode_findByName(int a)
 {
     FUN_00cf69c0_class* self = this;
     for (;;)
     {
-        if (self->m_kPointA && !FUN_00cb0fa0(a, self->m_kPointA))
+        if (self->m_kPointA && !hkString_strCmp(a, self->m_kPointA))
             return (int)self;
         if (!self->m_kPointB)
             return 0;
@@ -201,10 +207,11 @@ int __thiscall FUN_00cf69c0_class::FUN_00cf69c0(int a)
 
 struct FUN_00cf86e0_class
 {
-    void FUN_00cf86e0(float f);
+    void hkpSimulation_setFrameTimeMarker(float f);
 };
 // @fnv 0x00cf86e0
-void FUN_00cf86e0_class::FUN_00cf86e0(float f)
+// src: COMMUNITY 0x00cf86e0
+void FUN_00cf86e0_class::hkpSimulation_setFrameTimeMarker(float f)
 {
     *(float*)((char*)this + 0x20) = *(float*)((char*)this + 0x14) + f;
 }
@@ -235,11 +242,12 @@ extern int DAT_0102e388;
 
 struct FUN_00cf86d0_cls
 {
-    void FUN_00cf86d0();
+    void SetVtableAndProcessState_00cf86d0();
 };
 
 // @fnv 0x00cf86d0
-void FUN_00cf86d0_cls::FUN_00cf86d0()
+// src: GUESS 0x00cf86d0 (confidence: low)
+void FUN_00cf86d0_cls::SetVtableAndProcessState_00cf86d0()
 {
     *(int*)this = (int)&DAT_0102e388;
 }
@@ -254,7 +262,7 @@ extern int DAT_0102e388;
 // Sub-object at +0x10; FUN_00ce5370 is the game's constructor for it.
 struct FUN_00ce5370_cls
 {
-    void FUN_00ce5370();
+    void UpdateState_00ce5370();
 };
 
 struct FUN_00ce29e0_cls
@@ -264,14 +272,15 @@ struct FUN_00ce29e0_cls
     int unk08;               // +0x08
     int unk0C;               // +0x0C
     FUN_00ce5370_cls m_sub;  // +0x10
-    void FUN_00ce29e0();
+    void UpdateFields_00ce29e0();
 };
 
 // @fnv 0x00ce29e0
-void FUN_00ce29e0_cls::FUN_00ce29e0()
+// src: GUESS 0x00ce29e0 (confidence: low)
+void FUN_00ce29e0_cls::UpdateFields_00ce29e0()
 {
     m_pVTable = &DAT_010cb864;
-    m_sub.FUN_00ce5370();
+    m_sub.UpdateState_00ce5370();
     m_pVTable = &DAT_0102e388;
 }
 
@@ -300,7 +309,8 @@ struct FnvSpawnedObject
 
 // Returns false if the first probe's Match or the object's Check fails, otherwise returns the result of the second probe's Check.
 // @fnv 0x00ce2a00
-bool __cdecl FUN_00ce2a00(int unused, FnvSpawnedObject* obj)
+// src: HAVOK_LIB 0x00ce2a00
+bool __cdecl hkaSkeletonMapper_checkTransform(int unused, FnvSpawnedObject* obj)
 {
     FnvSpawnedObject* self = obj;
     if (*self->m_10.Match(&obj) == 0)
@@ -314,28 +324,30 @@ bool __cdecl FUN_00ce2a00(int unused, FnvSpawnedObject* obj)
     return *self->m_20.Check(&obj) ? true : false;
 }
 
-void __cdecl FUN_00ce2ca0(int a1, int a2, int* a3, int a4);
+void __cdecl Object_UpdateFields_00ce2ca0(int a1, int a2, int* a3, int a4);
 
 // @fnv 0x00ce2cf0
-void __cdecl FUN_00ce2cf0(int pObject, int param_2, int param_3)
+// src: HAVOK_LIB 0x00ce2cf0
+void __cdecl hkaSkeletonMapper_mapExtractedMotion(int pObject, int param_2, int param_3)
 {
-    FUN_00ce2ca0(*reinterpret_cast<int*>(reinterpret_cast<char*>(pObject) + 0x74), param_3,
+    Object_UpdateFields_00ce2ca0(*reinterpret_cast<int*>(reinterpret_cast<char*>(pObject) + 0x74), param_3,
                  reinterpret_cast<int*>(reinterpret_cast<char*>(pObject) + 0x40), param_2);
 }
 
-void __cdecl FUN_00ce3090(int a1, int a2, int a3, int a4, int a5, int a6);
+void __cdecl hkaSkeletonMapper_mapPoseLocalSpace(int a1, int a2, int a3, int a4, int a5, int a6);
 
 // Calls FUN_00ce3090 with a1, a2, a3, two zero arguments, and a4.
 // @fnv 0x00ce4330
-void __cdecl FUN_00ce4330(int a1, int a2, int a3, int a4)
+// src: HAVOK_LIB 0x00ce4330
+void __cdecl hkaSkeletonMapper_mapPoseLocalSpace_00ce4330(int a1, int a2, int a3, int a4)
 {
-    FUN_00ce3090(a1, a2, a3, 0, 0, a4);
+    hkaSkeletonMapper_mapPoseLocalSpace(a1, a2, a3, 0, 0, a4);
 }
 
 namespace fnv_00ce5370 {
 extern "C" void _ReadWriteBarrier(void);
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct AudioObjectRef
 {
@@ -356,14 +368,15 @@ struct FUN_00ce5370_cls
     int m_iCountA;
     unsigned int m_uCapA;
 
-    void FUN_00ce5370();
+    void UpdateState_00ce5370();
 };
 
 // Frees the three arrays through the audio allocator, resets their counts, pointers and capacities, then releases and clears both object references.
 // @fnv 0x00ce5370
-void FUN_00ce5370_cls::FUN_00ce5370()
+// src: GUESS 0x00ce5370 (confidence: low)
+void FUN_00ce5370_cls::UpdateState_00ce5370()
 {
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uCapA = m_uCapA;
     m_iCountA = 0;
@@ -374,7 +387,7 @@ void FUN_00ce5370_cls::FUN_00ce5370()
     m_pDataA = 0;
     m_uCapA = 0x80000000u;
 
-    hkMemoryRouter* pHolder2 = FUN_00c85750();
+    hkMemoryRouter* pHolder2 = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
     unsigned int uCapB = m_uCapB;
     m_iCountB = 0;
@@ -385,7 +398,7 @@ void FUN_00ce5370_cls::FUN_00ce5370()
     m_pDataB = 0;
     m_uCapB = 0x80000000u;
 
-    hkMemoryRouter* pHolder3 = FUN_00c85750();
+    hkMemoryRouter* pHolder3 = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator3 = reinterpret_cast<hkMemoryAllocator*>(pHolder3->m_heap);
     unsigned int uCapC = m_uCapC;
     m_iCountC = 0;
@@ -454,7 +467,7 @@ void* __cdecl FindKeyRecord(unsigned short aKey, FUN_00ce5480_cls* pKeyBox)
     return 0;
 }
 
-void __cdecl FUN_00d86160(void* stream, void* self);
+void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(void* stream, void* self);
 
 struct FUN_00cf4490_cls
 {
@@ -462,14 +475,15 @@ struct FUN_00cf4490_cls
     unsigned int m_14;
     unsigned int m_18;
     unsigned char m_1c;
-    void FUN_00cf4490(void* stream);
+    void bhkVelocityConstraintMotor_SaveBinary(void* stream);
 };
 
 // Writes three fields to NiStream::m_pkOstr after calling FUN_00d86160.
 // @fnv 0x00cf4490
-void FUN_00cf4490_cls::FUN_00cf4490(void* stream)
+// src: XBOX_PDB 0x00cf4490
+void FUN_00cf4490_cls::bhkVelocityConstraintMotor_SaveBinary(void* stream)
 {
-    FUN_00d86160(stream, this);
+    bhkLimitedForceConstraintMotor_SaveBinary(stream, this);
     NiStream* s = reinterpret_cast<NiStream*>(stream);
     SaveStreamValue(*s->m_pkOstr, m_14);
     SaveStreamValue(*s->m_pkOstr, m_18);
@@ -479,7 +493,8 @@ void FUN_00cf4490_cls::FUN_00cf4490(void* stream)
 struct CpuOpaque;
 extern CpuOpaque DAT_01268740;
 // @fnv 0x00cf45f0
-CpuOpaque* __cdecl FUN_00cf45f0()
+// src: COMMUNITY 0x00cf45f0
+CpuOpaque* __cdecl bhkSpringDamperConstraintMotor_GetRTTI()
 {
     return &DAT_01268740;
 }
@@ -489,13 +504,13 @@ struct SerializedObject
     int base00, base04, base08, base0C, base10, word14, word18;
     void __thiscall SerializeToStream(int source);
 };
-extern "C" void __cdecl FUN_00d86160(int, SerializedObject*);
+extern "C" void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(int, SerializedObject*);
 // Writes word14 and word18 to the stream at source+0x250, accumulating bytesWritten, after calling FUN_00d86160.
 // @fnv 0x00cf4670
 void SerializedObject::SerializeToStream(int source)
 {
     int saved = source;
-    FUN_00d86160(saved, this);
+    bhkLimitedForceConstraintMotor_SaveBinary(saved, this);
     NiBinaryStream* __restrict stream = reinterpret_cast<NiStream*>(saved)->m_pkOstr;
     source = 4;
     stream->m_uiAbsoluteCurrentPos += stream->m_pfnWrite(stream, &word14, 4, (unsigned int*)&source, 1);
@@ -563,7 +578,8 @@ class CF4BC0Saver
 CF4BC0Saver* __cdecl CF4BC0CreateSaver(unsigned int uiType);
 
 // @fnv 0x00cf4bc0
-void __cdecl FUN_00cf4bc0(NiStream& kStream, CF4BC0Object* pkObject)
+// src: XBOX_PDB 0x00cf4bc0
+void __cdecl bhkConstraintManager_SaveBinary(NiStream& kStream, CF4BC0Object* pkObject)
 {
     CF4BC0AllocTagScope kScope(0x10);
     unsigned int uiType = pkObject->GetSaveType();
@@ -577,7 +593,7 @@ void __cdecl FUN_00cf4bc0(NiStream& kStream, CF4BC0Object* pkObject)
 extern int DAT_010cc2fc;
 extern int DAT_0102e388;
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct SubObject_b3813
 {
@@ -606,7 +622,7 @@ FUN_00cf4eb0_cls* FUN_00cf4eb0_cls::Destroy(unsigned char acFlags)
     m_vptr = (int)&DAT_0102e388;
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }
@@ -754,25 +770,28 @@ void FUN_00cf4f70_cls::InitFromSource(FUN_00cf4f70_src* pSource)
 
 struct FUN_00cf6980_class
 {
-    virtual void FUN_00cf6980(int);
+    virtual void Object_ForwardCall_00cf6980(int);
 };
 
 // @fnv 0x00cf6980
-void __cdecl FUN_00cf6980(FUN_00cf6980_class* object)
+// src: GUESS 0x00cf6980 (confidence: low)
+void __cdecl Object_ForwardCall_00cf6980(FUN_00cf6980_class* object)
 {
-    object->FUN_00cf6980(0);
+    object->Object_ForwardCall_00cf6980(0);
 }
 
 extern int DAT_01268748;
 // @fnv 0x00cf6990
-int* __cdecl FUN_00cf6990()
+// src: GUESS 0x00cf6990 (confidence: low)
+int* __cdecl Runtime_GetDAT01268748Address()
 {
     return &DAT_01268748;
 }
 
 extern int DAT_0102e378;
 // @fnv 0x00cf69b0
-int* __cdecl FUN_00cf69b0()
+// src: GUESS 0x00cf69b0 (confidence: low)
+int* __cdecl Runtime_GetDAT0102e378Address()
 {
     return &DAT_0102e378;
 }
@@ -780,7 +799,7 @@ int* __cdecl FUN_00cf69b0()
 namespace fnv_00cf6b10 {
 extern "C" void* DAT_01268794;
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct SpawnedObject
 {
@@ -795,9 +814,10 @@ struct SpawnedObject
 
 // Allocates a 0x18-byte SpawnedObject via the holder's allocator, initializes it with count 0x3e8, and stores the result in DAT_01268794.
 // @fnv 0x00cf6b10
-void __cdecl FUN_00cf6b10()
+// src: HAVOK_LIB 0x00cf6b10
+void __cdecl hkMultiThreadCheck_staticInit()
 {
-    hkMemoryRouter* pAllocHolder = FUN_00c85750();
+    hkMemoryRouter* pAllocHolder = hkMemoryRouter_getInstance();
     Allocator* alloc = reinterpret_cast<Allocator*>(pAllocHolder->m_heap);
     SpawnedObject* obj = (SpawnedObject*)alloc->Alloc(0x18);
     if (obj != 0)
@@ -857,11 +877,12 @@ struct FUN_00cf6d50_cls
     int m_00;
     unsigned short m_04;
     unsigned short m_06;
-    void FUN_00cf6d50();
+    void UpdateState_00cf6d50();
 };
 
 // @fnv 0x00cf6d50
-void FUN_00cf6d50_cls::FUN_00cf6d50()
+// src: GUESS 0x00cf6d50 (confidence: low)
+void FUN_00cf6d50_cls::UpdateState_00cf6d50()
 {
     m_04 &= 0x7fff;
 }
@@ -870,11 +891,12 @@ struct FUN_00cf6f80_cls
 {
     unsigned int m_ucLowNibble;
     unsigned int m_ucHighNibble;
-    unsigned __int64 FUN_00cf6f80();
+    unsigned __int64 ComputeValue_00cf6f80();
 };
 
 // @fnv 0x00cf6f80
-unsigned __int64 FUN_00cf6f80_cls::FUN_00cf6f80()
+// src: GUESS 0x00cf6f80 (confidence: low)
+unsigned __int64 FUN_00cf6f80_cls::ComputeValue_00cf6f80()
 {
     return *(unsigned __int64*)&m_ucLowNibble;
 }
@@ -905,11 +927,12 @@ struct FUN_00cf8710_cls
     float m_14;
     float m_18;
 
-    bool FUN_00cf8710();
+    bool hkpSimulation_isSimulationAtPsi();
 };
 
 // @fnv 0x00cf8710
-bool FUN_00cf8710_cls::FUN_00cf8710()
+// src: HAVOK_LIB 0x00cf8710
+bool FUN_00cf8710_cls::hkpSimulation_isSimulationAtPsi()
 {
     return m_18 == m_14;
 }
@@ -1077,11 +1100,12 @@ F4A30Result* CreateF4A30Result(F4A30Node* pkNode, void* pvContext)
     return 0;
 }
 
-void __cdecl FUN_00ce51f0();
+void __cdecl BuildMatrixFromRotationScaleAndPosition();
 // @fnv 0x00ce5300
-void __cdecl FUN_00ce5300()
+// src: GUESS 0x00ce5300 (confidence: low)
+void __cdecl Object_ForwardCall_00ce5300()
 {
-    FUN_00ce51f0();
+    BuildMatrixFromRotationScaleAndPosition();
 }
 
 class FUN_00ce5360_This
@@ -1090,10 +1114,11 @@ class FUN_00ce5360_This
 // @fnv 0x00ce5360
     virtual ~FUN_00ce5360_This()
     {}
-    unsigned int FUN_00ce5360(unsigned int arg);
+    unsigned int ComputeValue_00ce5360(unsigned int arg);
 };
 
-unsigned int FUN_00ce5360_This::FUN_00ce5360(unsigned int arg)
+// src: GUESS 0x00ce5360 (confidence: low)
+unsigned int FUN_00ce5360_This::ComputeValue_00ce5360(unsigned int arg)
 {
     return reinterpret_cast<unsigned int>(this);
 }
@@ -1146,7 +1171,8 @@ static inline void WriteData(NiBinaryStream* s, void* data, int size)
 
 // Writes each 4-byte field of the Record to the owner's stream via WriteData, skipping unk0C.
 // @fnv 0x00cf09a0
-void FUN_00cf09a0(NiStream* owner, Record* rec)
+// src: XBOX_PDB 0x00cf09a0
+void bhkPoseArray_bhkPose_SaveBinary(NiStream* owner, Record* rec)
 {
     WriteData(owner->m_pkOstr, &rec->unk00, 4);
     WriteData(owner->m_pkOstr, &rec->unk04, 4);
@@ -1214,24 +1240,26 @@ FUN_00cf4190::FUN_00cf4190() : FUN_00cdf560(0.0f)
 extern int DAT_01268730;
 
 // @fnv 0x00cf41b0
-int* FUN_00cf41b0()
+// src: COMMUNITY 0x00cf41b0
+int* bhkPositionConstraintMotor_GetRTTI()
 {
     return &DAT_01268730;
 }
 
-extern "C" void __cdecl FUN_00d86100(void* view, void* object);
+extern "C" void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(void* view, void* object);
 
 struct SerializedRecord
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10;
     unsigned int m_14, m_18, m_1c, m_20;
-    void FUN_00cf41c0(NiStream* view);
+    void bhkPositionConstraintMotor_LoadBinary(NiStream* view);
 };
 // Calls FUN_00d86100 with the view and this record, then loads m_14, m_18, m_1c and m_20 from the view's stream.
 // @fnv 0x00cf41c0
-void SerializedRecord::FUN_00cf41c0(NiStream* view)
+// src: XBOX_PDB 0x00cf41c0
+void SerializedRecord::bhkPositionConstraintMotor_LoadBinary(NiStream* view)
 {
-    FUN_00d86100(view, this);
+    bhkLimitedForceConstraintMotor_LoadBinary(view, this);
     LoadStreamValue(*view->m_pkIstr, m_14);
     LoadStreamValue(*view->m_pkIstr, m_18);
     LoadStreamValue(*view->m_pkIstr, m_1c);
@@ -1241,12 +1269,13 @@ void SerializedRecord::FUN_00cf41c0(NiStream* view)
 struct CpuOpaque;
 extern CpuOpaque DAT_01268738;
 // @fnv 0x00cf43f0
-CpuOpaque* __cdecl FUN_00cf43f0()
+// src: COMMUNITY 0x00cf43f0
+CpuOpaque* __cdecl bhkVelocityConstraintMotor_GetRTTI()
 {
     return &DAT_01268738;
 }
 
-void __cdecl FUN_00d86100(NiStream* ar, void* obj);
+void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(NiStream* ar, void* obj);
 
 class hkObjCF46
 {
@@ -1265,12 +1294,12 @@ class hkObjCF46
 // @fnv 0x00cf4600
 void hkObjCF46::LoadFromArchive(NiStream* ar)
 {
-    FUN_00d86100(ar, this);
+    bhkLimitedForceConstraintMotor_LoadBinary(ar, this);
     LoadStreamValue(*ar->m_pkIstr, m_kPointA);
     LoadStreamValue(*ar->m_pkIstr, m_kPointB);
 }
 
-unsigned int __cdecl FUN_00d87a40() throw();
+unsigned int __cdecl Object_ForwardCall_00d87a40() throw();
 
 inline hkCriticalSectionLock::hkCriticalSectionLock(void* section)
 {
@@ -1296,7 +1325,7 @@ void __fastcall ThreadCheckMarkForRead(hkMultiThreadCheck* self)
     if (ThreadCheckIsEnabled(*self))
     {
         hkCriticalSectionLock lock((void*)DAT_01268794);
-        unsigned int threadId = FUN_00d87a40();
+        unsigned int threadId = Object_ForwardCall_00d87a40();
         self->m_usMarkedForWrite++;
         self->m_usMarkCount = (self->m_usMarkCount << 1) | 1;
         if (self->m_uiThreadId == 0xfffffff1)
@@ -1313,7 +1342,7 @@ bool __fastcall ThreadCheckIsCurrentThreadOwner(hkMultiThreadCheck* self)
     if (!ThreadCheckIsEnabled(*self))
         return true;
     hkCriticalSectionLock lock((void*)DAT_01268794);
-    if (self->m_uiThreadId == FUN_00d87a40())
+    if (self->m_uiThreadId == Object_ForwardCall_00d87a40())
         return true;
     return false;
 }
@@ -1363,18 +1392,20 @@ struct CC9F10Shape
 
 struct FUN_00cf7490_class
 {
-    void FUN_00cf7490();
+    void j_hkReferencedObject_addReference();
 };
 
 // @fnv 0x00cf7490
-void FUN_00cf7490_class::FUN_00cf7490()
+// src: COMMUNITY 0x00cf7490
+void FUN_00cf7490_class::j_hkReferencedObject_addReference()
 {
     ((CC9F10Shape*)this)->FUN_00c90510();
 }
 
 void __cdecl FUN_00c905b0(void);
 // @fnv 0x00cf74a0
-void __cdecl FUN_00cf74a0(void)
+// src: COMMUNITY 0x00cf74a0
+void __cdecl j_hkReferencedObject_removeReference(void)
 {
     FUN_00c905b0();
 }
@@ -1399,7 +1430,8 @@ struct hkOwnerCF74
 };
 
 // @fnv 0x00cf74b0
-int __cdecl FUN_00cf74b0(const OwnerSubindexEntry& aEntryA, const OwnerSubindexEntry& aEntryB)
+// src: HAVOK_LIB 0x00cf74b0
+int __cdecl hkpWorldBodyOperationQueueSortCmp(const OwnerSubindexEntry& aEntryA, const OwnerSubindexEntry& aEntryB)
 {
     if (aEntryA.m_pOwnerObject == aEntryB.m_pOwnerObject)
         return aEntryA.m_08 > aEntryB.m_08;
@@ -1492,24 +1524,28 @@ hkBool __cdecl LessThanPairPriority(const hkPairCF74& aPairA, const hkPairCF74& 
 }
 
 // @fnv 0x00cfb050
-void* __cdecl FUN_00cfb050(void* pvUnused, bool* pbOut, void* pvResult)
+// src: GUESS 0x00cfb050 (confidence: low)
+void* __cdecl Runtime_UpdateState_00cfb050(void* pvUnused, bool* pbOut, void* pvResult)
 {
     *pbOut = false;
     return pvResult;
 }
 
 // @fnv 0x00cfb060
-void FUN_00cfb060()
+// src: COMMUNITY 0x00cfb060
+void nullsub_7()
 {}
 
 // @fnv 0x00cfb070
-int __cdecl FUN_00cfb070(int a, int b, int c)
+// src: GUESS 0x00cfb070 (confidence: low)
+int __cdecl Runtime_GetC(int a, int b, int c)
 {
     return c;
 }
 
 // @fnv 0x00cfc580
-void __stdcall FUN_00cfc580(int, int, int, int, int)
+// src: COMMUNITY 0x00cfc580
+void __stdcall nullsub_59(int, int, int, int, int)
 {}
 
 extern int DAT_0102e388;
@@ -1518,11 +1554,12 @@ struct FUN_00cfc590_class
 {
     int* vtable;
 
-    void __thiscall FUN_00cfc590();
+    void __thiscall SetVtable();
 };
 
 // @fnv 0x00cfc590
-void __thiscall FUN_00cfc590_class::FUN_00cfc590()
+// src: GUESS 0x00cfc590 (confidence: low)
+void __thiscall FUN_00cfc590_class::SetVtable()
 {
     vtable = &DAT_0102e388;
 }
@@ -1608,7 +1645,8 @@ FUN_00cfc5a0::FUN_00cfc5a0(int aiValue, S_00cfc5a0* apFirst, S_00cfc5a0* apSecon
 }
 
 // @fnv 0x00cfdb40
-void FUN_00cfdb40()
+// src: GUESS 0x00cfdb40 (confidence: high)
+void Object_DoNothing_00cfdb40()
 {}
 
 // Per-thread profiler ring: TlsGetValue(index) -> buffer with head@+4 / end@+0xc,
@@ -1703,14 +1741,14 @@ class CE0020Subject
     virtual void EnableConstraints();
 };
 
-void __cdecl FUN_00d27690(CE0020Target* pTarget, CE0020Subject* pSubject, int iType);
+void __cdecl hkpWorldConstraintUtil_removeAndDeleteModifier(CE0020Target* pTarget, CE0020Subject* pSubject, int iType);
 
 // @fnv 0x00ce0020
 void __cdecl EnableConstraintsAndZeroArrays(CE0020Target* pTarget, CE0020Subject* pSubject)
 {
     pSubject->EnableConstraints();
     CE0020TimerMark(DAT_010cb81c);
-    FUN_00d27690(pTarget, pSubject, 0x1b);
+    hkpWorldConstraintUtil_removeAndDeleteModifier(pTarget, pSubject, 0x1b);
     float* pFloats = pTarget->m_pArrayData->m_pFloats;
     if (pFloats)
     {
@@ -1728,16 +1766,17 @@ void __cdecl EnableConstraintsAndZeroArrays(CE0020Target* pTarget, CE0020Subject
     CE0020TimerMark(DAT_010c41f8);
 }
 
-void __cdecl FUN_00ce2d10();
+void __cdecl Runtime_ProcessEntries_00ce2d10();
 
 // @fnv 0x00ce2f30
-void __cdecl FUN_00ce2f30()
+// src: GUESS 0x00ce2f30 (confidence: low)
+void __cdecl Runtime_ForwardCall_00ce2f30()
 {
-    FUN_00ce2d10();
+    Runtime_ProcessEntries_00ce2d10();
 }
 
 class SerializableCF42;
-void __cdecl FUN_00d86160(NiStream& kStream, SerializableCF42* pkObject);
+void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(NiStream& kStream, SerializableCF42* pkObject);
 
 class SerializableCF42
 {
@@ -1748,14 +1787,15 @@ class SerializableCF42
     unsigned int m_uiValue1C;
     unsigned int m_uiValue20;
 
-    void FUN_00cf4260(NiStream& kStream);
+    void bhkPositionConstraintMotor_SaveBinary(NiStream& kStream);
 };
 
 // Calls FUN_00d86160 then writes four unsigned int fields to NiStream::m_pkOstr.
 // @fnv 0x00cf4260
-void SerializableCF42::FUN_00cf4260(NiStream& kStream)
+// src: XBOX_PDB 0x00cf4260
+void SerializableCF42::bhkPositionConstraintMotor_SaveBinary(NiStream& kStream)
 {
-    FUN_00d86160(kStream, this);
+    bhkLimitedForceConstraintMotor_SaveBinary(kStream, this);
     SaveStreamValue(*kStream.m_pkOstr, m_uiValue14);
     SaveStreamValue(*kStream.m_pkOstr, m_uiValue18);
     SaveStreamValue(*kStream.m_pkOstr, m_uiValue1C);
@@ -1806,7 +1846,7 @@ FUN_00cf43b0::FUN_00cf43b0()
 }
 
 class SerializableCF44;
-void __cdecl FUN_00d86100(NiStream& kStream, SerializableCF44* pkObject);
+void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(NiStream& kStream, SerializableCF44* pkObject);
 
 class SerializableCF44
 {
@@ -1816,14 +1856,15 @@ class SerializableCF44
     unsigned int m_uiValue18;
     unsigned char m_ucValue1C;
 
-    void FUN_00cf4400(NiStream& kStream);
+    void bhkVelocityConstraintMotor_LoadBinary(NiStream& kStream);
 };
 
 // Calls FUN_00d86100, then reads m_uiValue14, m_uiValue18, and m_ucValue1C from the stream via LoadStreamValue.
 // @fnv 0x00cf4400
-void SerializableCF44::FUN_00cf4400(NiStream& kStream)
+// src: XBOX_PDB 0x00cf4400
+void SerializableCF44::bhkVelocityConstraintMotor_LoadBinary(NiStream& kStream)
 {
-    FUN_00d86100(kStream, this);
+    bhkLimitedForceConstraintMotor_LoadBinary(kStream, this);
     LoadStreamValue(*kStream.m_pkIstr, m_uiValue14);
     LoadStreamValue(*kStream.m_pkIstr, m_uiValue18);
     LoadStreamValue(*kStream.m_pkIstr, m_ucValue1C);
@@ -1863,7 +1904,8 @@ struct AllocScope
 };
 // Reads a type ID from the stream, creates a saver, loads its binary data, and returns the retained object pointer.
 // @fnv 0x00cf4af0
-hkReferencedObject* __cdecl FUN_00cf4af0(NiStream& kStream)
+// src: XBOX_PDB 0x00cf4af0
+hkReferencedObject* __cdecl bhkConstraintManager_LoadBinary(NiStream& kStream)
 {
     AllocScope kAllocTag(GetTag(16));
     NiBinaryStream* pIstr = kStream.m_pkIstr;
@@ -1883,7 +1925,8 @@ hkReferencedObject* __cdecl FUN_00cf4af0(NiStream& kStream)
 }
 
 // @fnv 0x00cf6d10
-__declspec(noinline) void FUN_00cf6d10()
+// src: GUESS 0x00cf6d10 (confidence: high)
+__declspec(noinline) void Runtime_DoNothing_00cf6d10()
 {}
 
 class ListenerCF70 : public hkReferencedObject, public hkpBroadPhaseListener
@@ -2034,7 +2077,8 @@ struct FUN_00cf08c0_VectorArray
 };
 // Returns true when both arrays have the same count and every component differs by at most the tolerance DAT_01017d00.
 // @fnv 0x00cf08c0
-bool __cdecl FUN_00cf08c0(const FUN_00cf08c0_VectorArray* left, const FUN_00cf08c0_VectorArray* right)
+// src: XBOX_PDB 0x00cf08c0
+bool __cdecl bhkStream_IsEqual(const FUN_00cf08c0_VectorArray* left, const FUN_00cf08c0_VectorArray* right)
 {
     bool equal = left->count == right->count;
     if (equal)
@@ -2062,7 +2106,8 @@ bool __cdecl FUN_00cf08c0(const FUN_00cf08c0_VectorArray* left, const FUN_00cf08
 
 // Reads 10 floats from the view's stream into pkDest's columns: x,y,z for columns 0 and 2 (w set to 0) and x,y,z,w for column 1.
 // @fnv 0x00cf0b00
-void __cdecl FUN_00cf0b00(NiStream* pkView, hkMatrix3* pkDest)
+// src: GUESS 0x00cf0b00 (confidence: medium)
+void __cdecl NiStream_ReadTransformColumns(NiStream* pkView, hkMatrix3* pkDest)
 {
     float x, y, z, w;
     LoadStreamValue(*pkView->m_pkIstr, x);
@@ -2094,7 +2139,8 @@ static unsigned int S00cf0cf0_SaveRaw(NiBinaryStream* s, const void* p, unsigned
 
 // Writes arr's count and then each 16-byte element to the binary stream, and returns count * 16.
 // @fnv 0x00cf0cf0
-int __cdecl FUN_00cf0cf0(NiStream* self, S00cf0cf0_Arr* arr)
+// src: XBOX_PDB 0x00cf0cf0
+int __cdecl bhkStream_SaveBinary(NiStream* self, S00cf0cf0_Arr* arr)
 {
     S00cf0cf0_Arr* a = arr;
     int count = a->count;
@@ -2125,7 +2171,8 @@ struct TargetType
 
 // Writes obj->unk24, obj->unk10 and the buffer at obj->unk20 to the stream, returning the buffer size.
 // @fnv 0x00cf0dc0
-unsigned int FUN_00cf0dc0(NiStream& stream, TargetType* obj)
+// src: GUESS 0x00cf0dc0 (confidence: medium)
+unsigned int NiStream_WriteObjectBuffer(NiStream& stream, TargetType* obj)
 {
     unsigned int size = 0;
     if (obj)
@@ -2177,7 +2224,8 @@ const char* __cdecl GetConstraintTypeName(int eType)
 }
 
 // @fnv 0x00cf6d00
-void __stdcall FUN_00cf6d00(int)
+// src: GUESS 0x00cf6d00 (confidence: high)
+void __stdcall Object_DoNothing_00cf6d00(int)
 
 {}
 
@@ -2231,7 +2279,8 @@ FUN_00cf6f90::FUN_00cf6f90()
 }
 
 // @fnv 0x00cf8810
-void __stdcall FUN_00cf8810(int a)
+// src: GUESS 0x00cf8810 (confidence: high)
+void __stdcall Runtime_DoNothing_00cf8810(int a)
 {}
 
 extern char DAT_010cc688[];
@@ -2306,11 +2355,12 @@ struct SelfCFAD
     void* unk2C;
     void* unk30;
     void* context;
-    void FUN_00cfad60(TargetCFAD*, InputCFAD*, void*, ContextCFAD*, unsigned int, unsigned int);
+    void UpdateFields_00cfad60(TargetCFAD*, InputCFAD*, void*, ContextCFAD*, unsigned int, unsigned int);
 };
 // Stores input, output flags, extra and context, builds a DescCFAD from the input and flagsIn, then calls target->unk5C, timed by CE0020TimerMark.
 // @fnv 0x00cfad60
-void SelfCFAD::FUN_00cfad60(TargetCFAD* target, InputCFAD* apInput, void* data, ContextCFAD* apContext,
+// src: GUESS 0x00cfad60 (confidence: low)
+void SelfCFAD::UpdateFields_00cfad60(TargetCFAD* target, InputCFAD* apInput, void* data, ContextCFAD* apContext,
                             unsigned int flagsIn, unsigned int flagsOut)
 {
     CE0020TimerMark(DAT_010cc688);
@@ -2339,7 +2389,8 @@ struct Cfd50Range
 };
 
 // @fnv 0x00cfdb50
-static __declspec(noinline) int FUN_00cfdb50(Cfd50Range* apRange)
+// src: HAVOK_LIB 0x00cfdb50
+static __declspec(noinline) int hkAgentNnMachine_getLastEntry(Cfd50Range* apRange)
 {
     return apRange->m_00 + apRange->m_04[apRange->m_08 - 1] - 0x80;
 }
@@ -2349,13 +2400,13 @@ extern "C" int Cfd50Sink(int);
 
 void Cfd50Caller(void)
 {
-    volatile int r = FUN_00cfdb50(Cfd50Get());
+    volatile int r = hkAgentNnMachine_getLastEntry(Cfd50Get());
     Cfd50Sink(r);
 }
 
 struct CE1700World
 {
-    void FUN_00c97e80(char* result, void* object);
+    void hkpWorld_removeConstraint(char* result, void* object);
     void RemoveEntities(void* owner, int flags);
 };
 struct CE1700Node
@@ -2373,11 +2424,12 @@ struct CE1700Owner
     int unk10;
     void** objects;
     int count;
-    int FUN_00ce1700();
+    int ProcessEntries_00ce1700();
 };
 // Returns 1 if the owner's node has no world; otherwise calls world->FUN_00c97e80 per object, then world->RemoveEntities(owner, flags), and returns 0.
 // @fnv 0x00ce1700
-int CE1700Owner::FUN_00ce1700()
+// src: GUESS 0x00ce1700 (confidence: low)
+int CE1700Owner::ProcessEntries_00ce1700()
 {
     CE1700Node* node = *owner;
     CE1700World* world = 0;
@@ -2388,7 +2440,7 @@ int CE1700Owner::FUN_00ce1700()
     for (int i = 0; i < count; ++i)
     {
         char result;
-        world->FUN_00c97e80(&result, objects[i]);
+        world->hkpWorld_removeConstraint(&result, objects[i]);
     }
     world->RemoveEntities(owner, flags);
     return 0;
@@ -2469,9 +2521,9 @@ bool __cdecl IsAddressInBlock(const BlockList_cfd* list, unsigned addr)
 
 inline hkMemoryAllocator& heap_cfde()
 {
-    return *reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->m_heap);
+    return *reinterpret_cast<hkMemoryAllocator*>(hkMemoryRouter_getInstance()->m_heap);
 }
-extern "C" void __cdecl FUN_00c909d0(hkMemoryAllocator* alloc, void* array, int elemSize, void* storage, int capacity);
+extern "C" void __cdecl hkArrayUtil__reduce(hkMemoryAllocator* alloc, void* array, int elemSize, void* storage, int capacity);
 
 struct BlockArr_cfde
 {
@@ -2505,13 +2557,13 @@ struct BlockArr_cfde
             int newCap = c + 1;
             if (newCap < 1)
             {
-                hkMemoryRouter* h = FUN_00c85750();
-                FUN_00c909d0(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), this, sizeof(char*), m_kStorage, 1);
+                hkMemoryRouter* h = hkMemoryRouter_getInstance();
+                hkArrayUtil__reduce(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), this, sizeof(char*), m_kStorage, 1);
             }
             else if (newCap < getCapacity())
             {
                 hkMemoryAllocator& a = heap_cfde();
-                FUN_00c909d0(&a, this, sizeof(char*), 0, newCap);
+                hkArrayUtil__reduce(&a, this, sizeof(char*), 0, newCap);
             }
         }
     }
@@ -2525,14 +2577,15 @@ struct BlockStack_cfde
 
 // Subtracts 0x80 from m_uiBufferCapacity; at zero frees the last block, pops it and resets capacity to 0x200; then calls OptimizeCapacity(4).
 // @fnv 0x00cfdeb0
-static __declspec(noinline) void FUN_00cfdeb0(BlockStack_cfde* s)
+// src: GUESS 0x00cfdeb0 (confidence: low)
+static __declspec(noinline) void hkMemoryRouter_UpdateState_00cfdeb0(BlockStack_cfde* s)
 {
     s->m_uiBufferCapacity -= 0x80;
     if (s->m_uiBufferCapacity == 0)
     {
         char* block = s->m_kBlocks.back();
         s->m_kBlocks.popBack();
-        hkMemoryRouter* h = FUN_00c85750();
+        hkMemoryRouter* h = hkMemoryRouter_getInstance();
         reinterpret_cast<hkMemoryAllocator*>(h->m_heap)->blockFree(block, 0x200);
         s->m_uiBufferCapacity = 0x200;
     }
@@ -2541,7 +2594,7 @@ static __declspec(noinline) void FUN_00cfdeb0(BlockStack_cfde* s)
 
 void zz_probe_cfdeb0(BlockStack_cfde* s)
 {
-    FUN_00cfdeb0(s);
+    hkMemoryRouter_UpdateState_00cfdeb0(s);
 }
 
 // Havok: build index maps for a selection and propagate it through records and links (hkArray<hkInt16> maps).
@@ -2751,12 +2804,13 @@ struct FUN_00ce0ca0_Quaternion
 {
     __m128 value;
 
-    void __thiscall FUN_00ce0ca0(const FUN_00ce0ca0_Quaternion& rhs);
+    void __thiscall SetQuaternionProduct(const FUN_00ce0ca0_Quaternion& rhs);
 };
 
 // Computes the Hamilton product of two quaternions using SSE intrinsics and stores the result in value.
 // @fnv 0x00ce0ca0
-void FUN_00ce0ca0_Quaternion::FUN_00ce0ca0(const FUN_00ce0ca0_Quaternion& rhs)
+// src: GUESS 0x00ce0ca0 (confidence: medium)
+void FUN_00ce0ca0_Quaternion::SetQuaternionProduct(const FUN_00ce0ca0_Quaternion& rhs)
 {
     __m128 b = rhs.value;
     __m128 a = value;
@@ -2846,12 +2900,13 @@ struct ShapeCollection
     int unk20, unk24, unk28, unk2c;
     BoundsVector halfExtent;
     BoundsVector center;
-    void FUN_00cf4fb0(hkAabb* bounds);
+    void ProcessEntries_00cf4fb0(hkAabb* bounds);
 };
 
 // Computes the combined bounding box of all shapes in the collection, then derives center and halfExtent from the min/max bounds.
 // @fnv 0x00cf4fb0
-void ShapeCollection::FUN_00cf4fb0(hkAabb* bounds)
+// src: GUESS 0x00cf4fb0 (confidence: low)
+void ShapeCollection::ProcessEntries_00cf4fb0(hkAabb* bounds)
 {
     entries[0].shape->getBounds(&DAT_01268370, 0.0f, bounds);
     for (int i = 1; i < count; ++i)
@@ -2877,25 +2932,26 @@ void ShapeCollection::FUN_00cf4fb0(hkAabb* bounds)
 namespace fnv_00cf6d60 {
 #include <windows.h>
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 extern CRITICAL_SECTION* DAT_01268794;
 // Deletes the global critical section and frees its memory through the audio holder's allocator.
 // @fnv 0x00cf6d60
-void FUN_00cf6d60()
+// src: HAVOK_LIB 0x00cf6d60
+void hkMultiThreadCheck_staticQuit()
 {
     if (DAT_01268794 != 0)
     {
         CRITICAL_SECTION* p = DAT_01268794;
         DeleteCriticalSection(DAT_01268794);
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap)->blockFree(p, 0x18);
         DAT_01268794 = 0;
     }
 }
 }  // namespace fnv_00cf6d60
 
-extern "C" bool __cdecl FUN_00ce2a00(int mappingType, const FnvSpawnedObject* transform);
+extern "C" bool __cdecl hkaSkeletonMapper_checkTransform(int mappingType, const FnvSpawnedObject* transform);
 
 struct FUN_00cb1600
 {
@@ -2904,7 +2960,7 @@ struct FUN_00cb1600
     int flags;
     FUN_00cb1600(char*, int) throw();
     void __thiscall FUN_00cc00e0() throw();
-    FUN_00cb1600& __thiscall FUN_00cc01c0(const char*) throw();
+    FUN_00cb1600& __thiscall ProcessAndReturnValue_00cc01c0(const char*) throw();
     FUN_00cb1600& __thiscall WriteName(const void*) throw();
 };
 struct CEError
@@ -2970,10 +3026,11 @@ struct CECountArray
 
 // Validates a CEMap by checking single and range bone mappings, counting target bone usage, and reporting errors via CEError.
 // @fnv 0x00ce43e0
-void __cdecl FUN_00ce43e0(CEMap* map)
+// src: HAVOK_LIB 0x00ce43e0
+void __cdecl hkaSkeletonMapper_checkMappingLocalSpace(CEMap* map)
 {
     int count = map->b->count;
-    hkMemoryRouter* scratch = FUN_00c85750();
+    hkMemoryRouter* scratch = hkMemoryRouter_getInstance();
     CECountArray counts;
     counts.m_data = reinterpret_cast<int*>(scratch->m_stack.m_next.m_storage);
     scratch->m_stack.m_next.m_storage = (char*)scratch->m_stack.m_next.m_storage + ((count * 4 + 127) & -128);
@@ -2988,25 +3045,25 @@ void __cdecl FUN_00ce43e0(CEMap* map)
     {
         CESingle* single = &map->singles[i];
         int checkerS = map->checker;
-        if (!FUN_00ce2a00(checkerS, static_cast<const FnvSpawnedObject*>(&single->transform)))
+        if (!hkaSkeletonMapper_checkTransform(checkerS, static_cast<const FnvSpawnedObject*>(&single->transform)))
         {
             char* bufPtr = (char*)buffer;
             FUN_00cb1600 s1(bufPtr, 512);
-            s1.FUN_00cc01c0(&DAT_010cba14);
+            s1.ProcessAndReturnValue_00cc01c0(&DAT_010cba14);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabbabac1, (char*)buffer, &DAT_010cb8d0, 0x227);
             s1.FUN_00cc00e0();
         }
         if (single->source < 0 || single->source >= map->a->count)
         {
             FUN_00cb1600 s2((char*)buffer, 512);
-            s2.FUN_00cc01c0(&DAT_010cb9f8);
+            s2.ProcessAndReturnValue_00cc01c0(&DAT_010cb9f8);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabba3f01, (char*)buffer, &DAT_010cb8d0, 0x22c);
             s2.FUN_00cc00e0();
         }
         if (single->target < 0 || single->target >= map->b->count)
         {
             FUN_00cb1600 s3((char*)buffer, 512);
-            s3.FUN_00cc01c0(&DAT_010cb9f8);
+            s3.ProcessAndReturnValue_00cc01c0(&DAT_010cb9f8);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabbaeab2, (char*)buffer, &DAT_010cb8d0, 0x231);
             s3.FUN_00cc00e0();
         }
@@ -3014,7 +3071,7 @@ void __cdecl FUN_00ce43e0(CEMap* map)
         if (data[single->target] > 1)
         {
             FUN_00cb1600 s4((char*)buffer, 512);
-            s4.FUN_00cc01c0(&DAT_010cb9d8);
+            s4.ProcessAndReturnValue_00cc01c0(&DAT_010cb9d8);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabba819f, (char*)buffer, &DAT_010cb8d0, 0x239);
             s4.FUN_00cc00e0();
         }
@@ -3023,60 +3080,60 @@ void __cdecl FUN_00ce43e0(CEMap* map)
     {
         CERange* range = &map->ranges[j];
         int checkerA = map->checker;
-        if (!FUN_00ce2a00(checkerA, static_cast<const FnvSpawnedObject*>(&range->transformA)))
+        if (!hkaSkeletonMapper_checkTransform(checkerA, static_cast<const FnvSpawnedObject*>(&range->transformA)))
         {
             FUN_00cb1600 s5((char*)buffer, 512);
-            s5.FUN_00cc01c0(&DAT_010cba14);
+            s5.ProcessAndReturnValue_00cc01c0(&DAT_010cba14);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabbabac1, (char*)buffer, &DAT_010cb8d0, 0x246);
             s5.FUN_00cc00e0();
         }
         int checkerB = map->checker;
-        if (!FUN_00ce2a00(checkerB, static_cast<const FnvSpawnedObject*>(&range->transformB)))
+        if (!hkaSkeletonMapper_checkTransform(checkerB, static_cast<const FnvSpawnedObject*>(&range->transformB)))
         {
             FUN_00cb1600 s6((char*)buffer, 512);
-            s6.FUN_00cc01c0(&DAT_010cba14);
+            s6.ProcessAndReturnValue_00cc01c0(&DAT_010cba14);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabbabac1, (char*)buffer, &DAT_010cb8d0, 0x24b);
             s6.FUN_00cc00e0();
         }
         if (range->endA <= range->startA)
         {
             FUN_00cb1600 s7((char*)buffer, 512);
-            s7.FUN_00cc01c0(&DAT_010cb9c4);
+            s7.ProcessAndReturnValue_00cc01c0(&DAT_010cb9c4);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabba819f, (char*)buffer, &DAT_010cb8d0, 0x250);
             s7.FUN_00cc00e0();
         }
         if (range->endB <= range->startB)
         {
             FUN_00cb1600 s8((char*)buffer, 512);
-            s8.FUN_00cc01c0(&DAT_010cb9c4);
+            s8.ProcessAndReturnValue_00cc01c0(&DAT_010cb9c4);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabba819f, (char*)buffer, &DAT_010cb8d0, 0x255);
             s8.FUN_00cc00e0();
         }
         if (range->endA < 0 || range->endA >= map->a->count)
         {
             FUN_00cb1600 s9((char*)buffer, 512);
-            s9.FUN_00cc01c0(&DAT_010cb9b0);
+            s9.ProcessAndReturnValue_00cc01c0(&DAT_010cb9b0);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0x17626ee1, (char*)buffer, &DAT_010cb8d0, 0x25a);
             s9.FUN_00cc00e0();
         }
         if (range->startA < 0 || range->startA >= map->a->count)
         {
             FUN_00cb1600 s10((char*)buffer, 512);
-            s10.FUN_00cc01c0(&DAT_010cb9b0);
+            s10.ProcessAndReturnValue_00cc01c0(&DAT_010cb9b0);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0x06073fdc, (char*)buffer, &DAT_010cb8d0, 0x25f);
             s10.FUN_00cc00e0();
         }
         if (range->endB < 0 || range->endB >= map->b->count)
         {
             FUN_00cb1600 s11((char*)buffer, 512);
-            s11.FUN_00cc01c0(&DAT_010cb9b0);
+            s11.ProcessAndReturnValue_00cc01c0(&DAT_010cb9b0);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0x19a18bfd, (char*)buffer, &DAT_010cb8d0, 0x264);
             s11.FUN_00cc00e0();
         }
         if (range->startB < 0 || range->startB >= map->b->count)
         {
             FUN_00cb1600 s12((char*)buffer, 512);
-            s12.FUN_00cc01c0(&DAT_010cb9b0);
+            s12.ProcessAndReturnValue_00cc01c0(&DAT_010cb9b0);
             reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0x0fb695b1, (char*)buffer, &DAT_010cb8d0, 0x269);
             s12.FUN_00cc00e0();
         }
@@ -3087,14 +3144,14 @@ void __cdecl FUN_00ce43e0(CEMap* map)
             {
                 FUN_00cb1600 s13((char*)buffer, 512);
                 CEBoneName* boneName = &map->b->names[bone];
-                s13.FUN_00cc01c0(&DAT_010cb964).WriteName(boneName).FUN_00cc01c0(&DAT_010cb98c);
+                s13.ProcessAndReturnValue_00cc01c0(&DAT_010cb964).WriteName(boneName).ProcessAndReturnValue_00cc01c0(&DAT_010cb98c);
                 reinterpret_cast<CEError*>(DAT_01268360)->report(1, 0xabba819f, (char*)buffer, &DAT_010cb8d0, 0x275);
                 s13.FUN_00cc00e0();
             }
         }
     }
-    FUN_00c85750()->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(data));
-    hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->m_heap);
+    hkMemoryRouter_getInstance()->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(data));
+    hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(hkMemoryRouter_getInstance()->m_heap);
     if ((counts.m_iCapacityState & (int)0x80000000) == 0)
         allocator->bufFree(data, (unsigned int)(counts.m_iCapacityState & 0x3fffffff) * 4);
 }
@@ -3129,11 +3186,12 @@ struct MapperInitialization
     int unk58;
     int unk5C;
     unsigned char unk60;
-    void __thiscall FUN_00ce5310();
+    void __thiscall hkaSkeletonMapperData_hkaSkeletonMapperData();
 };
 
 // @fnv 0x00ce5310
-void MapperInitialization::FUN_00ce5310()
+// src: COMMUNITY 0x00ce5310
+void MapperInitialization::hkaSkeletonMapperData_hkaSkeletonMapperData()
 {
     MapperInitialization* data = reinterpret_cast<MapperInitialization*>(this);
 

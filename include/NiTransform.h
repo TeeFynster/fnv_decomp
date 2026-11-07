@@ -32,13 +32,13 @@ public:
     char* ToString(const char* prefix);
 
     NiMatrix3 FUN_004768c0();
-    NiTransform* FUN_00476a80();
+    NiTransform* NiTransform_NiTransform();
     NiPoint3 FUN_004b4500(NiPoint3* point);
     void FUN_004b4880(NiTransform& result) const;
     void FUN_004b4880(NiTransform* result) const;
-    void FUN_00524c40(NiPoint3* centre, const NiSphere* sphere);
-    NiPoint3* FUN_00524c40(NiPoint3* result, const NiPoint3& point) const;
-    NiPoint3 FUN_00524c40(const NiPoint3& point) const;
+    void ComputeValue_00524c40(NiPoint3* centre, const NiSphere* sphere);
+    NiPoint3* ComputeValue_00524c40(NiPoint3* result, const NiPoint3& point) const;
+    NiPoint3 ComputeValue_00524c40(const NiPoint3& point) const;
     NiTransform FUN_0062c250(NiTransform* other);
     NiTransform FUN_0062c250(const NiTransform& other) const;
     NiTransform* FUN_0062c250(NiTransform* result, const NiTransform& other) const;

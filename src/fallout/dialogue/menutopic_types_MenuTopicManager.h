@@ -42,13 +42,13 @@ class TopicMenuController
     // TESObjectREFR* __cdecl TopicMenuController::*()
     // TopicMenuController& __cdecl TopicMenuController::*(const TopicMenuController&)
     // void* __cdecl TopicMenuController::*(unsigned int)
-    BSSimpleList<MenuTopic*>* FUN_0083f260();
+    BSSimpleList<MenuTopic*>* MenuTopicManager_GetCurrentTopicList();
     bool SelectTopic(bool advance);
     bool AdvanceTopic();
     MenuTopic* GetSelectedTopic();
     MenuTopic* GetFirstTopic();
     static void IncrementMiscStat(int id);
-    void FUN_0083e230();
+    void MenuTopicManager_ClearData();
     bool Initialize(MobileObject*, TESTopic*);
     void BuildTopicList(BSSimpleList<TESTopic*>*, bool, bool, TESTopic*);
     TopicMenuController();

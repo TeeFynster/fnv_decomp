@@ -240,17 +240,17 @@ public:
     static TESFile* GetTempIDOwnerFile(unsigned int);
     void ClearTempIDOwner();
 
-    bool FUN_004734d0(TESForm*);
-    unsigned int FUN_00471ad0();
-    const char* FUN_00471a60(unsigned int);
-    BSSimpleList<TESFile*>* FUN_00464df0();
-    TESForm* FUN_0044edb0();
+    bool FindForm(TESForm*);
+    unsigned int GetIndexCount();
+    const char* GetIndexName(unsigned int);
+    BSSimpleList<TESFile*>* GetMasterList_00464df0();
+    TESForm* TESMain_GetThread();
     void FUN_004720d0();
     bool FUN_00470c70(int, int);
-    bool FUN_00472150(bool);
+    bool NextForm_00472150(bool);
     bool FUN_00473660();
     unsigned char FUN_00473250();
-    int FUN_004726b0();
+    int TESFile_GetTESChunk();
     bool FUN_00472890(void*, unsigned int);
     bool FUN_004726f0();
     void FUN_00471130();

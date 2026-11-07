@@ -63,9 +63,9 @@ class Tile
 
         __forceinline float GetFloat() { return fValue; }
         void SetBooleanValue(bool value);
-        void FUN_00a09130(int trait, Tile* tile, int sourceTrait);
-        void FUN_00a09130(int trait, void* source, int sourceTrait);
-        void FUN_00a09410(int value);
+        void Tile_Value_AddRefValueAction(int trait, Tile* tile, int sourceTrait);
+        void Tile_Value_AddRefValueAction(int trait, void* source, int sourceTrait);
+        void Tile_Value_SetFloat(int value);
     };
 
     class Extra : public NiExtraData
@@ -189,40 +189,40 @@ class Tile
     void Float(int trait, float value, bool propagate);
     void Refresh(bool force);
 
-    const char* FUN_00700300();
+    const char* GetName_00700300();
     void FUN_00700320(int trait, int value);
     void FUN_00700320(int trait, bool value);
     void FUN_007037c0(int value);
-    void FUN_0071aa60(bool value);
-    bool FUN_0078a1f0();
-    NodeObj* FUN_007d5280();
+    void SetSpeechChallengeFailure_0071aa60(bool value);
+    bool Tile3D_IsPlaying();
+    NodeObj* TileImage_GetShaderProp();
     void FUN_0097cd10(unsigned char value);
-    bool FUN_0099ac20();
-    void* FUN_004fd3a0();
+    bool FindCombatLocation_0099ac20();
+    void* TESChallenge_GetFormOne();
     Tile* FUN_0045cd60();
-    NiNode* FUN_0056c7f0();
+    NiNode* GetModel_0056c7f0();
     char* FUN_00671d10();
-    void* FUN_00a00f30(int trait);
+    void* Tile_GetValue(int trait);
     float FUN_00a011b0();
     float FUN_00a011b0(int trait);
     float FUN_00a011b0(unsigned int trait);
-    const char* FUN_00a011f0(int trait);
-    const char* FUN_00a011f0(unsigned int trait);
-    void FUN_00a012d0(int trait, float value);
-    void FUN_00a012d0(int trait, float value, bool propagate);
-    void FUN_00a012d0(int trait, float value, int propagate);
-    void FUN_00a01350(int trait, const char* text, bool propagate);
-    void FUN_00a01350(int trait, int value, bool propagate);
-    Tile* FUN_00a01b00();
-    Tile* FUN_00a01b00(const char* path);
-    Menu* FUN_00a03c90();
-    Tile* FUN_00a03eb0(int trait);
-    void FUN_00a04640(bool enabled);
-    void SetChangeFlag(int trait);
-    bool FUN_00a07ed0(int trait);
-    bool FUN_00a07fc0(int trait);
-    void FUN_00a0b110(int trait);
-    bool FUN_00a216b0(float x, float y);
+    const char* Tile_GetString(int trait);
+    const char* Tile_GetString(unsigned int trait);
+    void Tile_Set(int trait, float value);
+    void Tile_Set(int trait, float value, bool propagate);
+    void Tile_Set(int trait, float value, int propagate);
+    void Tile_Set_00a01350(int trait, const char* text, bool propagate);
+    void Tile_Set_00a01350(int trait, int value, bool propagate);
+    Tile* Tile_ReadFile();
+    Tile* Tile_ReadFile(const char* path);
+    Menu* Tile_GetMenu();
+    Tile* Tile_GetChildByID(int trait);
+    void Tile_UpdateTile(bool enabled);
+    void Tile_SetChangeFlag(int trait);
+    bool Tile_HasFadeControl(int trait);
+    bool Tile_GetFadeFinished(int trait);
+    void Tile_PlayTileSound(int trait);
+    bool RadialTile_SpecialBoundsCheck(float x, float y);
 
     NiTPointerList_Tile___ m_kChildTileList;
     BSSimpleArray<Tile__Value*, 8> m_kValues;

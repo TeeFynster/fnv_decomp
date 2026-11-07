@@ -13,7 +13,7 @@ struct PlayerCharacter;
 extern PlayerCharacter* DAT_011f21f0;
 struct FUN_00498910_shell
 {
-    void FUN_00498910(bool, bool);
+    void Animation_SpecialIdleFree(bool, bool);
 };
 struct Node
 {
@@ -27,7 +27,7 @@ struct StandIn
 extern float DAT_011afe74;
 extern float DAT_011afe78;
 extern unsigned char DAT_012677cc;
-float __cdecl FUN_009c8ef0();
+float __cdecl bhkWorld_GetMaxPickTime();
 struct SoundListEntry;
 struct SoundListView
 {
@@ -38,18 +38,18 @@ struct ListHolder
 {
     bool _ref_008256d0();
     void* _ref_006815c0();
-    void* FUN_009c71c0();
+    void* VATS_GetCurrentAction();
 };
 struct MyList
 {
     bool _ref_008256d0();
     MyList* _ref_00726070();
     VATSCommand** _ref_006815c0();
-    VATSCommand* FUN_009c71f0();
+    VATSCommand* VATS_GetLastAction();
 };
-float __cdecl FUN_009c8ef0();
+float __cdecl bhkWorld_GetMaxPickTime();
 extern float DAT_012677c4;
-bool __cdecl FUN_009c8ea0();
+bool __cdecl bhkWorld_GetPickTimeOverMax();
 struct FUN_009c9900_shell
 {
     void SetByteAt76(unsigned char param_2);
@@ -333,18 +333,19 @@ class PackageL8
 };
 
 void __cdecl FUN_00c82870(int iLayer, unsigned __int64 ulMask);
-void* __cdecl FUN_005dbe10();
-void* __cdecl FUN_004b5820(void* pvCollidable);
-RefL8* __cdecl FUN_0056f930(void* pvCollidable);
+void* __cdecl bhkCollisionFilter_GetNewSystemGroup();
+void* __cdecl GetAVObjectForCollidable(void* pvCollidable);
+RefL8* __cdecl TESObjectREFR_FindReferenceFor3D(void* pvCollidable);
 
 class CheckerL8
 {
   public:
-    bool FUN_009c8f20(PackageL8* pkPackage);
+    bool VATS_GetLineOfSight(PackageL8* pkPackage);
 };
 
 // @fnv 0x009c8f20
-bool CheckerL8::FUN_009c8f20(PackageL8* pkPackage)
+// src: COMMUNITY 0x009c8f20
+bool CheckerL8::VATS_GetLineOfSight(PackageL8* pkPackage)
 {
     RefL8* pkTarget = 0;
     if (pkPackage->m_pkTarget->IsActor())
@@ -367,7 +368,7 @@ bool CheckerL8::FUN_009c8f20(PackageL8* pkPackage)
     if (pkActor && pkActor->GetProjectileData())
         kFlags.SetTarget(pkActor->GetProjectileData()->GetTarget());
     else
-        kFlags.SetTarget(FUN_005dbe10());
+        kFlags.SetTarget(bhkCollisionFilter_GetNewSystemGroup());
     kQuery.SetFlags(kFlags);
     kQuery.SetOrigin(kFrom);
     kQuery.SetEnd(kTo);
@@ -378,8 +379,8 @@ bool CheckerL8::FUN_009c8f20(PackageL8* pkPackage)
     for (int i = 0; !bPickResultFound && i < kQuery.GetHits()->GetList()->GetCount(); i++)
     {
         HitL8 kHit(kQuery.GetHits()->GetList()->GetAt(i));
-        void* pvCollidable = FUN_004b5820(kHit.m_pvCollidable);
-        RefL8* pkRef = FUN_0056f930(pvCollidable);
+        void* pvCollidable = GetAVObjectForCollidable(kHit.m_pvCollidable);
+        RefL8* pkRef = TESObjectREFR_FindReferenceFor3D(pvCollidable);
         if (pvCollidable)
         {
             if (pkRef == pkTarget || pkRef == g_pkPlayerL8)

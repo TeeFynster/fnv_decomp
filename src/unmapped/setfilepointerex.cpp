@@ -8,12 +8,13 @@ class O
     char m_auiShapeKeys[12];
     bool m_bFlag;
     HANDLE m_hFile;
-    int FUN_00afeef0(__int64 dist, DWORD method, LARGE_INTEGER* newPosPtr);
+    int BSSystemFile_DoSeek(__int64 dist, DWORD method, LARGE_INTEGER* newPosPtr);
 };
 
 // Calls SetFilePointerEx on m_hFile and stores the new position; returns 0 on success, a mapped error code on failure, or 4 without seeking if m_bFlag is set.
 // @fnv 0x00afeef0
-int O::FUN_00afeef0(__int64 llOffset, DWORD method, LARGE_INTEGER* pNewPos)
+// src: XBOX_PDB 0x00afeef0
+int O::BSSystemFile_DoSeek(__int64 llOffset, DWORD method, LARGE_INTEGER* pNewPos)
 {
     DWORD dwMethod = method;
     LARGE_INTEGER newPos;

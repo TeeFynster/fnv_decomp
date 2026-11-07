@@ -295,7 +295,8 @@ __forceinline IterativeSweep_hkpLinearCastFunc IterativeSweep_getLinearCastFunc(
 }
 
 // @fnv 0x00daf8e0
-void FUN_00daf8e0(const IterativeSweep_hkpCdBody* bodyA, const IterativeSweep_hkpCdBody* bodyB,
+// src: GUESS 0x00daf8e0 (confidence: low)
+void Object_ProcessEntries_00daf8e0(const IterativeSweep_hkpCdBody* bodyA, const IterativeSweep_hkpCdBody* bodyB,
                   const IterativeSweep_hkpLinearCastCollisionInput* input,
                   IterativeSweep_hkpCdPointCollector* castCollector, IterativeSweep_hkpCdPointCollector* startCollector)
 {

@@ -6,7 +6,7 @@
 // src/havok/physics/collide/shape/hkpshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/hkpshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include "havok/hkpShape.h"
-int __stdcall FUN_00c9e3f0(void* p, int size);
+int __stdcall hkpConvexTransformShapeBase_calcSizeForSpu(void* p, int size);
 
 #include <xmmintrin.h>
 struct hkSimdVector4
@@ -68,7 +68,7 @@ class hkpShapeBase : public hkpShape
     virtual void vf18();
     virtual void vf1c();
     virtual hkBoolRet RayCast(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
-    Vector4Comparison FUN_00c9e400(const ShapeRayBundleCastInput& input, ShapeRayCastOutputArray& results,
+    Vector4Comparison hkpBoxShape_castRayBundleImpl(const ShapeRayBundleCastInput& input, ShapeRayCastOutputArray& results,
                                    const Vector4Comparison& mask) const;
 };
 
@@ -86,7 +86,8 @@ static inline void extractPoints(const hkFourTransposedPoints& p, __m128* out)
 }
 
 // @fnv 0x00c9e400
-Vector4Comparison hkpShapeBase::FUN_00c9e400(const ShapeRayBundleCastInput& input, ShapeRayCastOutputArray& results,
+// src: HAVOK_SRC 0x00c9e400
+Vector4Comparison hkpShapeBase::hkpBoxShape_castRayBundleImpl(const ShapeRayBundleCastInput& input, ShapeRayCastOutputArray& results,
                                              const Vector4Comparison& mask) const
 {
     __m128 from[4];

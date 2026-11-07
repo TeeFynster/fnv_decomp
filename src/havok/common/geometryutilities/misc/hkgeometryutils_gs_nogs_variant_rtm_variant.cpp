@@ -23,13 +23,13 @@ struct hkMemory
     virtual void* allocateChunk(int* inoutSize) throw();
     virtual void deallocate(void* p, int size) throw();
 };
-void* __cdecl FUN_00c85750() throw();
+void* __cdecl hkMemoryRouter_getInstance() throw();
 __forceinline hkThreadMemory* getThreadMemory() throw()
 {
-    return (hkThreadMemory*)FUN_00c85750();
+    return (hkThreadMemory*)hkMemoryRouter_getInstance();
 }
 void __cdecl FUN_00c90940(void* mem, void* array, int elemSize) throw();
-void __cdecl FUN_00c908c0(void* mem, void* array, int reqCapacity, int elemSize) throw();
+void __cdecl hkArrayUtil__reserve(void* mem, void* array, int reqCapacity, int elemSize) throw();
 extern const float DAT_01016248;
 extern const float DAT_01017718;
 extern const float DAT_01011d78;
@@ -78,7 +78,7 @@ __forceinline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b,
 }
 __forceinline void hkVector4::SetTransformedPoint(const hkTransform& t, const hkVector4& v)
 {
-    FUN_00c7f640(t, v);
+    setTransformedPos_00c7f640(t, v);
 }
 static __forceinline void capsuleMul4(hkVector4& vector, float s) throw()
 {
@@ -128,7 +128,7 @@ __forceinline void hkVector4::setCross(const hkVector4& a, const hkVector4& b)
 struct __declspec(align(16)) GeometryQuaternionLocal_00da16d0
 {
     hkVector4 m_vec;
-    void FUN_00cb2450(const hkVector4& axis, float angle) throw();
+    void hkQuaternion_setAxisAngle(const hkVector4& axis, float angle) throw();
 };
 __forceinline void hkVector4::SetRotatedDirection(const GeometryQuaternionLocal_00da16d0& q, const hkVector4& v)
 {
@@ -204,7 +204,7 @@ template <typename T> static __forceinline void reserveArray(CapsuleArrayView<T>
 {
     hkThreadMemory* memory = getThreadMemory();
     if ((array.m_iCapacityState & 0x3fffffff) < n)
-        FUN_00c908c0(memory->m_pMemoryAllocator, &array, n, sizeof(T));
+        hkArrayUtil__reserve(memory->m_pMemoryAllocator, &array, n, sizeof(T));
 }
 template <typename T> static __forceinline void fillOne(T* dst, int n, const T& val)
 {
@@ -280,7 +280,8 @@ static __forceinline void appendCapsuleEnd(hkGeometry* geom, int numSides, int s
     }
 }
 // @fnv 0x00da16d0
-void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float radius, int numHeightSegments,
+// src: XBOX_PDB 0x00da16d0
+void __cdecl hkGeometryUtils_createCapsuleGeometry(const hkVector4& top, const hkVector4& bottom, float radius, int numHeightSegments,
                           int numSides, const hkTransform& transform, hkGeometry*& outGeom) throw()
 {
     const int halfSides = numSides >> 1;
@@ -355,7 +356,7 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
     {
         float angle = (float)((float)i / (float)halfSides * 3.1415927410125732421875 * 0.5);
         GeometryQuaternionLocal_00da16d0 qY;
-        qY.FUN_00cb2450(negUnitY, angle);
+        qY.hkQuaternion_setAxisAngle(negUnitY, angle);
         hkVector4 v3;
         v3.SetRotatedDirection(qY, unitX);
 
@@ -370,7 +371,7 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
             {
                 float sideAngle = (float)((float)j / (float)numSides * 3.1415927410125732421875 * 2.0);
                 GeometryQuaternionLocal_00da16d0 sideRotation;
-                sideRotation.FUN_00cb2450(unitZ, sideAngle);
+                sideRotation.hkQuaternion_setAxisAngle(unitZ, sideAngle);
                 hkVector4 radial;
                 radial.setRotatedCached(sideRotation, v3, yz, zx);
 
@@ -389,7 +390,7 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
         {
             float sideAngle = (float)((float)i / (float)numSides * 3.1415927410125732421875 * 2.0);
             GeometryQuaternionLocal_00da16d0 sideRotation;
-            sideRotation.FUN_00cb2450(unitZ, sideAngle);
+            sideRotation.hkQuaternion_setAxisAngle(unitZ, sideAngle);
             hkVector4 radial;
             radial.SetRotatedDirection(sideRotation, cylinderAxis);
 
@@ -407,14 +408,14 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
     {
         float angle = (float)(-(float)i / (float)halfSides * 3.1415927410125732421875 * 0.5);
         GeometryQuaternionLocal_00da16d0 qY;
-        qY.FUN_00cb2450(negUnitY, angle);
+        qY.hkQuaternion_setAxisAngle(negUnitY, angle);
         hkVector4 v3;
         v3.SetRotatedDirection(qY, unitX);
         for (j = 0; j < numSides; ++j)
         {
             float sideAngle = (float)((float)j / (float)numSides * 3.1415927410125732421875 * 2.0);
             GeometryQuaternionLocal_00da16d0 sideRotation;
-            sideRotation.FUN_00cb2450(unitZ, sideAngle);
+            sideRotation.hkQuaternion_setAxisAngle(unitZ, sideAngle);
             hkVector4 radial;
             radial.SetRotatedDirection(sideRotation, v3);
 

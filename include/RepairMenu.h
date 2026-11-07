@@ -20,7 +20,7 @@ public:
     virtual int GetClass();
 
     void UpdateRepairList();
-    bool FUN_007b5730();
+    bool IsWellFormedMenu_007b5730();
     void ApplyRepair(void*);
     void RefreshRepairMenu();
     void HandleRepairAction(int id, RepairTile* tile);

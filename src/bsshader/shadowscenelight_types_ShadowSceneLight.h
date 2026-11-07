@@ -321,7 +321,7 @@ class ShadowSceneLight : public NiRefObject
     void AddShadowObject(NiAVObject*);
     void AddGeometry(NiTriBasedGeom*);
     bool TestSphereFrustum(NiPoint3*);
-    bool FUN_00b9dae0(NiPoint3*, NiLight*, float);
+    bool BoundWithinLightRadius(NiPoint3*, NiLight*, float);
     // base NiRefObject at +0x0, size 8
     int m_iShadowLightState;                                       // +0x8, 4 bytes
     float m_fShadowParameter3;                                     // +0xC, 4 bytes

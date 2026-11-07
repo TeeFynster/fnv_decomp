@@ -123,7 +123,8 @@ struct Outer
     Inner* q;
 };
 // @fnv 0x00795780
-void FUN_00795780(Outer* pOuter)
+// src: GUESS 0x00795780 (confidence: low)
+void Object_InvokeVirtualMethod_00795780(Outer* pOuter)
 {
     pOuter->q->Target(0, 0, (unsigned int)(NiSourceTexture*)DAT_011da2c8->tex[17]);
 }
@@ -232,7 +233,8 @@ struct Param00795390
 };
 // Calls m7 on the player's inner object with p->unk14, then invokes f60 on p->unk4 using the indexed arr entry from DAT_011da2c8.
 // @fnv 0x00795390
-void FUN_00795390(Param00795390* pParam)
+// src: GUESS 0x00795390 (confidence: low)
+void NiSourceTexture_UpdateState_00795390(Param00795390* pParam)
 {
     int t = g_thePlayer->inner.m7(pParam->unk14);
     pParam->unk4->f60(0, 0, (unsigned int)(NiSourceTexture*)DAT_011da2c8->tex[t]);
@@ -244,12 +246,13 @@ extern LoveTesterMenu* DAT_011da2c8;
 
 // If the LoveTesterMenu singleton exists and its flag is set, calls StepPosition with 1 and then FUN_00795e20 on it.
 // @fnv 0x00795c60
-void FUN_00795c60()
+// src: GUESS 0x00795c60 (confidence: medium)
+void Object_StepLoveTesterPositionWithOne()
 {
     if (DAT_011da2c8 && DAT_011da2c8->m_bState54)
     {
         DAT_011da2c8->StepPosition(1);
-        DAT_011da2c8->FUN_00795e20();
+        DAT_011da2c8->RefreshPage();
     }
 }
 }  // namespace fnv_00795c60
@@ -258,12 +261,13 @@ namespace fnv_00795ca0 {
 extern LoveTesterMenu* DAT_011da2c8;
 
 // @fnv 0x00795ca0
-void __cdecl FUN_00795ca0()
+// src: GUESS 0x00795ca0 (confidence: medium)
+void __cdecl Object_StepLoveTesterPositionWithZero()
 {
     if (DAT_011da2c8 && DAT_011da2c8->m_bState54)
     {
         DAT_011da2c8->StepPosition(0);
-        DAT_011da2c8->FUN_00795e20();
+        DAT_011da2c8->RefreshPage();
     }
 }
 }  // namespace fnv_00795ca0
@@ -295,8 +299,8 @@ bool LoveTesterMenu::HandleKeyInput(int aiKey)
     case '+':
     case '=':
     case 0x80000003: {
-        int iIndex = this->FUN_00794d30();
-        if (iIndex != -1 && FUN_00794d80() < m_iEntryCount && g_thePlayer->avOwner.GetValue(iIndex) < 10)
+        int iIndex = this->LoveTesterMenu_GetCurrentStatesActorValue();
+        if (iIndex != -1 && SPECIALBookMenu_GetTotalPointsUsed() < m_iEntryCount && g_thePlayer->avOwner.GetValue(iIndex) < 10)
         {
             HandleSelection(2, 0);
             return true;
@@ -306,7 +310,7 @@ bool LoveTesterMenu::HandleKeyInput(int aiKey)
     case '-':
     case '_':
     case 0x80000004: {
-        int iIndex2 = this->FUN_00794d30();
+        int iIndex2 = this->LoveTesterMenu_GetCurrentStatesActorValue();
         if (iIndex2 != -1 && g_thePlayer->avOwner.GetValue(iIndex2) > 1)
         {
             HandleSelection(3, 0);
@@ -324,7 +328,8 @@ bool LoveTesterMenu::HandleKeyInput(int aiKey)
 
 // Sums the player's avOwner values for indices 5 through 11 and returns the total.
 // @fnv 0x00794d80
-int LoveTesterMenu::FUN_00794d80()
+// src: XBOX_PDB 0x00794d80
+int LoveTesterMenu::SPECIALBookMenu_GetTotalPointsUsed()
 {
     return g_thePlayer->avOwner.GetValue(5) + g_thePlayer->avOwner.GetValue(6) + g_thePlayer->avOwner.GetValue(7) +
            g_thePlayer->avOwner.GetValue(8) + g_thePlayer->avOwner.GetValue(9) + g_thePlayer->avOwner.GetValue(10) +
@@ -335,7 +340,7 @@ int LoveTesterMenu::FUN_00794d80()
 void SetTargetFromGlobalState(Outer* apOuter)
 {
     if (DAT_011da2c8->mode == 8 &&
-        DAT_011da2c8->FUN_00794d80() < DAT_011da2c8->m_iEntryCount)
+        DAT_011da2c8->SPECIALBookMenu_GetTotalPointsUsed() < DAT_011da2c8->m_iEntryCount)
         apOuter->q->Target(0, 0, (unsigned int)(NiSourceTexture*)DAT_011da2c8->tex[15]);
     else
         apOuter->q->Target(0, 0, (unsigned int)(NiSourceTexture*)DAT_011da2c8->tex[16]);
@@ -351,16 +356,17 @@ struct Date
 
 
 
-void __cdecl FUN_007917a0(void);
+void __cdecl LoveTesterMenu_Close(void);
 extern int _data_011c16bc;
 
 // @fnv 0x00795ce0
-void __cdecl FUN_00795ce0(void* apButton)
+// src: GUESS 0x00795ce0 (confidence: low)
+void __cdecl Object_ProcessState_00795ce0(void* apButton)
 {
-    if (DAT_011da2c8 && DAT_011da2c8->FUN_00794d80() == DAT_011da2c8->m_iEntryCount)
+    if (DAT_011da2c8 && DAT_011da2c8->SPECIALBookMenu_GetTotalPointsUsed() == DAT_011da2c8->m_iEntryCount)
     {
         ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialNumberFinished", 0x121).Play(false);
-        FUN_007917a0();
+        LoveTesterMenu_Close();
     }
     else
     {
@@ -370,47 +376,48 @@ void __cdecl FUN_00795ce0(void* apButton)
 
 struct RendererHelper
 {
-    void FUN_007148c0(int, int);
+    void RendererClearBufferHook(int, int);
 };
-RendererHelper* FUN_0043c4b0();
+RendererHelper* NiXenonRenderer_GetRenderer();
 struct CameraHelper
 {
-    void FUN_00c4f270(bool);
-    void FUN_004a0fd0(int);
-    void FUN_00c4f2d0();
+    void BSCullingProcess_PushCullMode(bool);
+    void BSCullingProcess_SetAccumulator(int);
+    void BSCullingProcess_PopCullMode();
 };
 struct ManagerHelper
 {
     CameraHelper* FUN_008d80e0();
 };
-ManagerHelper* FUN_0045c670();
+ManagerHelper* Main_GetWorldSceneGraph();
 struct InterfaceHelper
 {
-    int FUN_007fd640();
+    int RaceSexMenu_GetProjectorFile();
 };
-InterfaceHelper* FUN_004b7210();
+InterfaceHelper* InterfaceManager_GetSingleton();
 extern Flt DAT_011da2f4;
 void UpdateCameraFrustum(unsigned int, float);
 void* FUN_00450b80(int);
-void FUN_00b6bee0(unsigned int, void*, CameraHelper*);
+void BSShaderUtil_AccumulateScene(unsigned int, void*, CameraHelper*);
 void FUN_00b6c0d0(unsigned int, int, int);
 // @fnv 0x007948d0
-void FUN_007948d0()
+// src: COMMUNITY 0x007948d0
+void LoveTesterMenu_Draw3DElements()
 {
     if (!DAT_011da2c8 || !(unsigned int)DAT_011da2f4)
         return;
-    FUN_0043c4b0()->FUN_007148c0(0, 4);
-    ManagerHelper* manager = FUN_0045c670();
+    NiXenonRenderer_GetRenderer()->RendererClearBufferHook(0, 4);
+    ManagerHelper* manager = Main_GetWorldSceneGraph();
     CameraHelper* camera = manager->FUN_008d80e0();
-    camera->FUN_00c4f270(true);
+    camera->BSCullingProcess_PushCullMode(true);
     unsigned int localNode = (unsigned int)DAT_011da2f4;
     UpdateCameraFrustum(localNode, 0.65f);
-    NP node(FUN_004b7210()->FUN_007fd640());
-    camera->FUN_004a0fd0((int)node);
-    FUN_00b6bee0(localNode, FUN_00450b80(1), camera);
+    NP node(InterfaceManager_GetSingleton()->RaceSexMenu_GetProjectorFile());
+    camera->BSCullingProcess_SetAccumulator((int)node);
+    BSShaderUtil_AccumulateScene(localNode, FUN_00450b80(1), camera);
     FUN_00b6c0d0(localNode, (int)node, 0);
-    camera->FUN_004a0fd0(0);
-    camera->FUN_00c4f2d0();
+    camera->BSCullingProcess_SetAccumulator(0);
+    camera->BSCullingProcess_PopCullMode();
 }
 
 
@@ -500,7 +507,7 @@ void __cdecl UpdateDigitDisplay(DigitView* view)
 {
     if (!view->tens || !view->ones)
         return;
-    int ones = DAT_011da2c8->m_iEntryCount - DAT_011da2c8->FUN_00794d80();
+    int ones = DAT_011da2c8->m_iEntryCount - DAT_011da2c8->SPECIALBookMenu_GetTotalPointsUsed();
     int value = (ones / 10 < 9 ? ones / 10 : 9) > 0 ? (ones / 10 < 9 ? ones / 10 : 9) : 0;
     int tens = ones % 10 < 0 ? 0 : ones % 10;
     if (value > 0)
@@ -523,7 +530,7 @@ struct Entry_00795580
 };
 struct List_00795580
 {
-    Entry_00795580* FUN_00559450(int flag);
+    Entry_00795580* Modelloader_GetReferencedThis(int flag);
 };
 // Adjustment-button callback state: +0x08 retains its scene object and +0x24 is an actor-value index; Menu has a vtable and a fade state at +0x24.
 struct AdjustmentButtonState
@@ -534,7 +541,7 @@ struct AdjustmentButtonState
     int m24;
 };
 
-unsigned char FUN_004b71d0();
+unsigned char InterfaceManager_Has360Controller();
 
 // @fnv 0x00795580
 void __cdecl UpdateMenuEntryState(AdjustmentButtonState* pMenu)
@@ -543,20 +550,20 @@ void __cdecl UpdateMenuEntryState(AdjustmentButtonState* pMenu)
     if (iVar1 != -1)
     {
         if (g_thePlayer->avOwner.GetValue(iVar1) > 1)
-            pMenu->m8.FUN_00559450(0)->FUN_00450f90();
+            pMenu->m8.Modelloader_GetReferencedThis(0)->FUN_00450f90();
         else
-            pMenu->m8.FUN_00559450(1)->FUN_00450f90();
-        if (FUN_004b71d0() && DAT_011da2c8->mode == 8 &&
+            pMenu->m8.Modelloader_GetReferencedThis(1)->FUN_00450f90();
+        if (InterfaceManager_Has360Controller() && DAT_011da2c8->mode == 8 &&
             iVar1 != DAT_011da2c8->special + 4)
-            pMenu->m8.FUN_00559450(1)->FUN_00450f90();
+            pMenu->m8.Modelloader_GetReferencedThis(1)->FUN_00450f90();
     }
 }
 
 extern const char DAT_010747c4[];
-int __cdecl FUN_00647b70(int, int);
+int __cdecl BSMAX_00647b70(int, int);
 struct PlayerSetter
 {
-    void FUN_0093a7c0(int, int);
+    void PlayerCharacter_SetActorBaseValue(int, int);
 };
 struct CallbackInput
 {
@@ -564,7 +571,8 @@ struct CallbackInput
     int actorValue;
 };
 // @fnv 0x007957c0
-void __cdecl FUN_007957c0(CallbackInput* input)
+// src: GUESS 0x007957c0 (confidence: medium)
+void __cdecl Object_DecreaseLoveTesterActorValue(CallbackInput* input)
 {
     if (!DAT_011da2c8)
         return;
@@ -578,23 +586,24 @@ void __cdecl FUN_007957c0(CallbackInput* input)
             sound = ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID(DAT_010747c4, 0x121);
             sound.Play(false);
         }
-        ((PlayerSetter*)g_thePlayer)->FUN_0093a7c0(value, FUN_00647b70(count - 1, 1));
+        ((PlayerSetter*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(value, BSMAX_00647b70(count - 1, 1));
     }
-    DAT_011da2c8->FUN_00795e20();
+    DAT_011da2c8->RefreshPage();
 }
 
 namespace fnv_007958e0 {
 struct PlayerOps
 {
-    void FUN_0093a7c0(int, int);
+    void PlayerCharacter_SetActorBaseValue(int, int);
 };
-int FUN_00647b70(int, int);
+int BSMAX_00647b70(int, int);
 // @fnv 0x007958e0
-void FUN_007958e0()
+// src: GUESS 0x007958e0 (confidence: medium)
+void Object_DecreaseCurrentLoveTesterActorValue()
 {
     if (!DAT_011da2c8)
         return;
-    int index = DAT_011da2c8->FUN_00794d30();
+    int index = DAT_011da2c8->LoveTesterMenu_GetCurrentStatesActorValue();
     if (index != -1)
     {
         int value = g_thePlayer->avOwner.GetValue(index);
@@ -604,9 +613,9 @@ void FUN_007958e0()
             sound = ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialNumberDown", 0x121);
             sound.Play(false);
         }
-        ((PlayerOps*)g_thePlayer)->FUN_0093a7c0(index, FUN_00647b70(value - 1, 1));
+        ((PlayerOps*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(index, BSMAX_00647b70(value - 1, 1));
     }
-    ((Menu*)DAT_011da2c8)->FUN_00795e20();
+    ((Menu*)DAT_011da2c8)->RefreshPage();
 }
 }  // namespace fnv_007958e0
 
@@ -615,7 +624,7 @@ extern TES* g_TES;
 int __cdecl _sprintf_s(char* aBuf, int aSize, const char* aFmt, ...);
 int __cdecl strcpy_s(char* aDst, unsigned int aSize, const char* aSrc);
 void __cdecl FUN_004b7240(char* aDst, char* aSrc, unsigned int aSize);
-bool __cdecl FUN_00709d40();
+bool __cdecl Interface_Has360Controller();
 extern const char str_0101996c[];
 extern const char str_01074cc0[];
 extern const char str_01074c9c[];
@@ -642,7 +651,8 @@ extern const char str_01074bb8[];
 // @fnv 0x00796100
 }  // namespace fnv_00796100
 
-void LoveTesterMenu::FUN_00796100()
+// src: COMMUNITY 0x00796100
+void LoveTesterMenu::VigorTester_InitTextures()
 {
     using namespace fnv_00796100;
     char bufB[0x104];
@@ -668,7 +678,7 @@ void LoveTesterMenu::FUN_00796100()
         FUN_004b7240(bufA5, bufB, 0x104);
         g_TES->CreateTextureImage(static_cast<const char*>(bufB), tex[j + 10], false, false);
     }
-    if (FUN_00709d40())
+    if (Interface_Has360Controller())
     {
         strcpy_s(plat, 5, str_0101fd1c);
     }
@@ -710,13 +720,13 @@ void LoveTesterMenu::FUN_00796100()
 
 struct ResetResourceManager
 {
-    void FUN_0045a5e0(const char*);
+    void ModelLoader_ReleaseFile(const char*);
 };
 extern ResetResourceManager* DAT_011c3b3c;
 struct ResetPlayer
 {
-    void FUN_004def90();
-    void FUN_00b5d180();
+    void NiNode_RemoveAllChildren();
+    void RemoveAllLights();
 };
 struct ResetString
 {
@@ -726,20 +736,21 @@ struct IntegerBooleanHandler
 {
     void FUN_00700320(int, bool);
 };
-void* FUN_00791740();
-IntegerBooleanHandler* FUN_00a09030(void*);
+void* LoveTesterMenu_GetClassStatic();
+IntegerBooleanHandler* Tile_GetMenuByClass(void*);
 // @fnv 0x007917a0
-void __cdecl FUN_007917a0()
+// src: XBOX_PDB 0x007917a0
+void __cdecl LoveTesterMenu_Close()
 {
     int menu;
     unsigned int m, j, k, l;
-    IntegerBooleanHandler* i = FUN_00a09030(FUN_00791740());
+    IntegerBooleanHandler* i = Tile_GetMenuByClass(LoveTesterMenu_GetClassStatic());
     if (!i)
         return;
-    DAT_011c3b3c->FUN_0045a5e0("Meshes\\architecture\\Goodsprings\\NV_VitoMaticVigorTester_Activate.NIF");
-    DAT_011c3b3c->FUN_0045a5e0("Meshes\\architecture\\Goodsprings\\NV_VitoMaticVigorTester_Cabinet.NIF");
-    ((ResetPlayer*)FUN_00450b80(1))->FUN_004def90();
-    ((ResetPlayer*)FUN_00450b80(1))->FUN_00b5d180();
+    DAT_011c3b3c->ModelLoader_ReleaseFile("Meshes\\architecture\\Goodsprings\\NV_VitoMaticVigorTester_Activate.NIF");
+    DAT_011c3b3c->ModelLoader_ReleaseFile("Meshes\\architecture\\Goodsprings\\NV_VitoMaticVigorTester_Cabinet.NIF");
+    ((ResetPlayer*)FUN_00450b80(1))->NiNode_RemoveAllChildren();
+    ((ResetPlayer*)FUN_00450b80(1))->RemoveAllLights();
     DAT_011da2c8->counter5c = 0;
     DAT_011da2c8->counter60 = 0;
     ((ResetString*)&DAT_011da2f4)->FUN_0066b0d0(0);
@@ -747,13 +758,13 @@ void __cdecl FUN_007917a0()
     {
         for (k = 0; k < DAT_011da2c8->groups[menu].objects.FUN_0044ddc0(); k++)
         {
-            FUN_00791a80_shell* object = (FUN_00791a80_shell*)*DAT_011da2c8->groups[menu].objects.FUN_006a7ad0(k);
+            FUN_00791a80_shell* object = (FUN_00791a80_shell*)*DAT_011da2c8->groups[menu].objects.BSSimpleArray_NiAVObject_1024_GetAt(k);
             FUN_00791a80_shell* doomed = object;
             doomed ? doomed->FUN_00791a80(1) : 0;
         }
         for (l = 0; l < DAT_011da2c8->groups[menu].allocations.FUN_0044ddc0(); l++)
         {
-            FUN_00791a80_shell* allocation = (FUN_00791a80_shell*)*DAT_011da2c8->groups[menu].allocations.FUN_006a7ad0(l);
+            FUN_00791a80_shell* allocation = (FUN_00791a80_shell*)*DAT_011da2c8->groups[menu].allocations.BSSimpleArray_NiAVObject_1024_GetAt(l);
             Deallocate(allocation);
         }
         DAT_011da2c8->groups[menu].objects.FUN_008454f0(1);
@@ -761,13 +772,13 @@ void __cdecl FUN_007917a0()
     }
     for (j = 0; j < DAT_011da2c8->list1a4.FUN_0044ddc0(); j++)
     {
-        FUN_00791a80_shell* object = (FUN_00791a80_shell*)*DAT_011da2c8->list1a4.FUN_006a7ad0(j);
+        FUN_00791a80_shell* object = (FUN_00791a80_shell*)*DAT_011da2c8->list1a4.BSSimpleArray_NiAVObject_1024_GetAt(j);
         FUN_00791a80_shell* doomed = object;
         doomed ? doomed->FUN_00791a80(1) : 0;
     }
     for (m = 0; m < DAT_011da2c8->list1b4.FUN_0044ddc0(); m++)
     {
-        FUN_00791a80_shell* allocation = (FUN_00791a80_shell*)*DAT_011da2c8->list1b4.FUN_006a7ad0(m);
+        FUN_00791a80_shell* allocation = (FUN_00791a80_shell*)*DAT_011da2c8->list1b4.BSSimpleArray_NiAVObject_1024_GetAt(m);
         Deallocate(allocation);
     }
     DAT_011da2c8->list1a4.FUN_008454f0(1);
@@ -784,7 +795,7 @@ void __cdecl FUN_007917a0()
 class InputManager
 {
 public:
-    int FUN_00a24180(int, int);
+    int Controls_GetKeyboardButton(int, int);
 };
 extern OSGlobals* g_osGlobals;
 struct InventoryMenuSetting
@@ -792,16 +803,16 @@ struct InventoryMenuSetting
     const char* FUN_00403df0();
 };
 extern InventoryMenuSetting DAT_011c3cb4;
-bool FUN_00702450(int);
-int FUN_00408b20(const char*, const char*);
+bool Interface_IsTopMenuID(int);
+int BSstrcmp(const char*, const char*);
 extern const char DAT_0101fd00[];
 struct ModelOps
 {
     NiTimeController* GetObject3D();
-    void FUN_00a59c60(const NiUpdateData&);
+    void NiAVObject_Update(const NiUpdateData&);
 };
 extern const NiRTTI DAT_011f36bc;
-NiTimeController* FUN_00653270(const NiRTTI*, NiTimeController*);
+NiTimeController* NiObject_DynamicCast(const NiRTTI*, NiTimeController*);
 union AnimationNames
 {
     bool enabled;
@@ -817,13 +828,13 @@ extern TimeGlobal g_timeGlobal;
 // @fnv 0x00791ab0
 void LoveTesterMenu::UpdateAnimation()
 {
-    if (!FUN_00702450(0x432))
+    if (!Interface_IsTopMenuID(0x432))
         return;
-    InputManager* current = g_osGlobals->FUN_00877720();
+    InputManager* current = g_osGlobals->Main_GetControls();
     int input = 30;
-    if (!FUN_00408b20(DAT_011c3cb4.FUN_00403df0(), DAT_0101fd00))
+    if (!BSstrcmp(DAT_011c3cb4.FUN_00403df0(), DAT_0101fd00))
         input = 16;
-    if (current->FUN_00a24180(input, 1))
+    if (current->Controls_GetKeyboardButton(input, 1))
     {
         HandleSelection(4, 0);
         return;
@@ -834,13 +845,13 @@ void LoveTesterMenu::UpdateAnimation()
         NiTimeController* manager = iter;
         NiControllerSequence* sequence = 0;
         if (!DAT_011a039c.enabled || animationIndex > 0)
-            sequence = manager->FUN_0047a520(NiFixedString(DAT_011a039c.enabled ? DAT_011a039c.names[animationIndex]
+            sequence = manager->NiControllerManager_GetSequenceByName(NiFixedString(DAT_011a039c.enabled ? DAT_011a039c.names[animationIndex]
                                                                                 : DAT_011a03c0[animationIndex]));
         elapsed += g_timeGlobal.FUN_0084d030();
         if (sequence)
         {
             sequence->Update(elapsed, true);
-            if (sequence->FUN_00508120() < sequence->FUN_00508100() && animationIndex > 0)
+            if (sequence->NiControllerSequence_GetLastTime() < sequence->GetEndKeyTime_00508100() && animationIndex > 0)
                 finished = false;
             else
                 finished = true;
@@ -849,7 +860,7 @@ void LoveTesterMenu::UpdateAnimation()
             finished = true;
         for (; iter; iter = iter->GetNext())
         {
-            NiTimeController* transform = FUN_00653270(&DAT_011f36bc, iter);
+            NiTimeController* transform = NiObject_DynamicCast(&DAT_011f36bc, iter);
             if (transform)
             {
                 NiUpdateData updateData(elapsed, false, false);
@@ -859,7 +870,7 @@ void LoveTesterMenu::UpdateAnimation()
         }
     }
     NiUpdateData updateData(0.0f, false, false);
-    model->FUN_00a59c60(updateData);
+    model->NiAVObject_Update(updateData);
 }
 
 bool __cdecl SKIsMenuMode(int aiMenuID);
@@ -1110,17 +1121,17 @@ struct FUN_00a712f0
     static void operator delete(void*, unsigned int);
     FUN_00a712f0();
     void FUN_00712e60(const NiColorA&);
-    void FUN_00507700(float);
+    void NiCamera_SetMaxFarNearRatio(float);
     void FUN_00a6faf0(const NiFrustum&);
-    void FUN_004bc1f0(float, float, float);
-    void FUN_00a59c60(NiUpdateData&);
+    void NiAVObject_SetTranslate_004bc1f0(float, float, float);
+    void NiAVObject_Update(NiUpdateData&);
     void SetLookAt(const NiPoint3&, const NiPoint3&);
-    void FUN_00733fd0(float);
+    void NiCamera_SetMinNearPlaneDist(float);
     void AssignFixedString(const NiFixedString&);
 };
-int FUN_004dc200();
-int FUN_004dc1f0();
-float FUN_0057dd70(float);
+int Renderer_GetScreenHeight();
+int Renderer_GetScreenWidth();
+float tan_0057dd70(float);
 struct SurgeryCameraMenu
 {
     FUN_00a712f0* CreateSurgeryCamera();
@@ -1136,23 +1147,23 @@ FUN_00a712f0* SurgeryCameraMenu::CreateSurgeryCamera()
     k->FUN_00712e60(ba);
     NiFrustum c;
     c.Init(false);
-    c.farPlane = ((CameraRenderer*)FUN_0045c670())->GetAspectRatio();
+    c.farPlane = ((CameraRenderer*)Main_GetWorldSceneGraph())->GetAspectRatio();
     c.nearPlane = *DAT_01203144.Float();
-    k->FUN_00507700(c.farPlane / c.nearPlane);
-    float l = double(DAT_011f9426 ? DAT_011f9434 : FUN_004dc200()) / FUN_004dc1f0();
+    k->NiCamera_SetMaxFarNearRatio(c.farPlane / c.nearPlane);
+    float l = double(DAT_011f9426 ? DAT_011f9434 : Renderer_GetScreenHeight()) / Renderer_GetScreenWidth();
     float e = 0.75f;
     float j = *DAT_01203150.Float() * 0.01745329238474369 * 0.6499999761581421;
-    c.left = -FUN_0057dd70(j) * e;
-    c.right = FUN_0057dd70(j) * e;
-    c.bottom = -FUN_0057dd70(j) * l * e;
-    c.top = FUN_0057dd70(j) * l * e;
+    c.left = -tan_0057dd70(j) * e;
+    c.right = tan_0057dd70(j) * e;
+    c.bottom = -tan_0057dd70(j) * l * e;
+    c.top = tan_0057dd70(j) * l * e;
     c.ortho = false;
     k->FUN_00a6faf0(c);
-    k->FUN_004bc1f0(0.0f, 0.0f, 1.0f);
+    k->NiAVObject_SetTranslate_004bc1f0(0.0f, 0.0f, 1.0f);
     NiUpdateData b(0.0f, false, false);
-    k->FUN_00a59c60(b);
+    k->NiAVObject_Update(b);
     k->SetLookAt(NiPoint3(0.0f, 0.0f, 0.0f), NiPoint3(0.0f, 1.0f, 0.0f));
-    k->FUN_00733fd0(1.0f);
+    k->NiCamera_SetMinNearPlaneDist(1.0f);
     k->AssignFixedString(NiFixedString("Surgery3DCamera"));
     return k;
 }
@@ -1163,7 +1174,7 @@ void __fastcall SetSequenceNegatedGlobal(NiControllerSequence* sequence);
 
 struct Controller170
 {
-    NiControllerSequence* FUN_0047a520(const NiFixedString&);
+    NiControllerSequence* NiControllerManager_GetSequenceByName(const NiFixedString&);
     void FUN_0048fef0(float);
     void FUN_0047aab0(NiControllerSequence*, int, int, float, float, int);
     void FUN_0047aa40(bool);
@@ -1191,10 +1202,10 @@ bool LoveTesterMenu::StepPosition(bool increase)
         }
         else
         {
-            if (FUN_00794d80() == available)
+            if (SPECIALBookMenu_GetTotalPointsUsed() == available)
             {
                 ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialNumberFinished", 0x121).Play(false);
-                FUN_007917a0();
+                LoveTesterMenu_Close();
             }
             else
             {
@@ -1221,7 +1232,7 @@ bool LoveTesterMenu::StepPosition(bool increase)
     }
     if (changed)
     {
-        Controller170* object = (Controller170*)((NiNode*)scene170->root)->FUN_00a5c570((NiRTTI*)&rtti170);
+        Controller170* object = (Controller170*)((NiNode*)scene170->root)->NiObjectNET_GetController((NiRTTI*)&rtti170);
         if (object)
         {
             Controller170* manager = object;
@@ -1229,7 +1240,7 @@ bool LoveTesterMenu::StepPosition(bool increase)
             if (!increasing170 || position > 0)
             {
                 sequence =
-                    manager->FUN_0047a520(NiFixedString(increasing170 ? upNames170[position] : downNames170[position]));
+                    manager->NiControllerManager_GetSequenceByName(NiFixedString(increasing170 ? upNames170[position] : downNames170[position]));
             }
             if (sequence)
             {
@@ -1260,25 +1271,26 @@ struct MenuParam_00795630
 };
 
 // @fnv 0x00795630
-void __cdecl FUN_00795630(MenuParam_00795630* pMenuParam)
+// src: GUESS 0x00795630 (confidence: low)
+void __cdecl LoveTesterMenu_UpdateState_00795630(MenuParam_00795630* pMenuParam)
 {
     int value = pMenuParam->unk24;
     if (value != -1)
     {
         if (DAT_011dea3c->avOwner.GetValue(value) < 10 &&
-            (DAT_011da2c8 == 0 || DAT_011da2c8->FUN_00794d80() < DAT_011da2c8->m_iEntryCount))
+            (DAT_011da2c8 == 0 || DAT_011da2c8->SPECIALBookMenu_GetTotalPointsUsed() < DAT_011da2c8->m_iEntryCount))
         {
-            pMenuParam->unk08.FUN_00559450(0)->FUN_00450f90();
+            pMenuParam->unk08.Modelloader_GetReferencedThis(0)->FUN_00450f90();
         }
         else
         {
-            pMenuParam->unk08.FUN_00559450(1)->FUN_00450f90();
+            pMenuParam->unk08.Modelloader_GetReferencedThis(1)->FUN_00450f90();
         }
 
-        if (FUN_004b71d0() && DAT_011da2c8->mode == 8 &&
+        if (InterfaceManager_Has360Controller() && DAT_011da2c8->mode == 8 &&
             value != DAT_011da2c8->special + 4)
         {
-            pMenuParam->unk08.FUN_00559450(1)->FUN_00450f90();
+            pMenuParam->unk08.Modelloader_GetReferencedThis(1)->FUN_00450f90();
         }
     }
 }
@@ -1297,14 +1309,15 @@ struct WorkerButton
     int value;
 };
 extern const char DAT_010747ac[];
-AudioView* __cdecl FUN_00453a70();
+AudioView* __cdecl BSAudio_QInstance();
 int __cdecl MinInt(int, int);
 struct WorkerActor
 {
-    void FUN_0093a7c0(int, int);
+    void PlayerCharacter_SetActorBaseValue(int, int);
 };
 // @fnv 0x00795a00
-void FUN_00795a00(WorkerButton* button)
+// src: GUESS 0x00795a00 (confidence: medium)
+void Object_IncreaseLoveTesterActorValue(WorkerButton* button)
 {
     if (!DAT_011da2c8)
         return;
@@ -1315,56 +1328,57 @@ void FUN_00795a00(WorkerButton* button)
         if (value < 10)
         {
             BSSoundHandle sound;
-            sound = FUN_00453a70()->GetSoundHandleByEditorID(DAT_010747ac, 0x121);
+            sound = BSAudio_QInstance()->GetSoundHandleByEditorID(DAT_010747ac, 0x121);
             sound.Play(false);
         }
-        if (DAT_011da2c8->FUN_00794d80() < DAT_011da2c8->available)
-            ((WorkerActor*)g_thePlayer)->FUN_0093a7c0(index, MinInt(value + 1, 10));
+        if (DAT_011da2c8->SPECIALBookMenu_GetTotalPointsUsed() < DAT_011da2c8->available)
+            ((WorkerActor*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(index, MinInt(value + 1, 10));
     }
-    DAT_011da2c8->FUN_00795e20();
+    DAT_011da2c8->RefreshPage();
 }
 
-RendererHelper* FUN_0043c4b0();
+RendererHelper* NiXenonRenderer_GetRenderer();
 
-ManagerHelper* FUN_0045c670();
+ManagerHelper* Main_GetWorldSceneGraph();
 
-InterfaceHelper* FUN_004b7210();
+InterfaceHelper* InterfaceManager_GetSingleton();
 
 extern int* DAT_011daa38;
 extern Flt DAT_011daa9c;
 void UpdateCameraFrustum(unsigned int, float);
 void* FUN_00450b80(int);
-void FUN_00b6bee0(unsigned int, void*, CameraHelper*);
+void BSShaderUtil_AccumulateScene(unsigned int, void*, CameraHelper*);
 void FUN_00b6c0d0(unsigned int, int, int);
 
 // If DAT_011daa38 and DAT_011daa9c are set, configures the camera for scene DAT_011daa9c with a node from FUN_007fd640 and calls FUN_00b6bee0/FUN_00b6c0d0.
 // @fnv 0x007c9ca0
-void __cdecl FUN_007c9ca0()
+// src: COMMUNITY 0x007c9ca0
+void __cdecl SPECIALBookMenu_Draw3DElements()
 {
     if (!DAT_011daa38 || !DAT_011daa9c)
         return;
     {
-        FUN_0043c4b0()->FUN_007148c0(0, 4);
-        ManagerHelper* mgr = FUN_0045c670();
+        NiXenonRenderer_GetRenderer()->RendererClearBufferHook(0, 4);
+        ManagerHelper* mgr = Main_GetWorldSceneGraph();
         CameraHelper* cam = mgr->FUN_008d80e0();
-        cam->FUN_00c4f270(true);
+        cam->BSCullingProcess_PushCullMode(true);
         unsigned int scene = DAT_011daa9c;
         UpdateCameraFrustum(scene, 0.15f);
-        NP node(FUN_004b7210()->FUN_007fd640());
-        cam->FUN_004a0fd0(node);
-        FUN_00b6bee0(scene, FUN_00450b80(1), cam);
+        NP node(InterfaceManager_GetSingleton()->RaceSexMenu_GetProjectorFile());
+        cam->BSCullingProcess_SetAccumulator(node);
+        BSShaderUtil_AccumulateScene(scene, FUN_00450b80(1), cam);
         FUN_00b6c0d0(scene, node, 0);
-        cam->FUN_004a0fd0(0);
-        cam->FUN_00c4f2d0();
+        cam->BSCullingProcess_SetAccumulator(0);
+        cam->BSCullingProcess_PopCullMode();
     }
 }
 
 namespace fnv_007caa80 {
-AudioView* __cdecl FUN_00453a70();
+AudioView* __cdecl BSAudio_QInstance();
 extern SPECIALBookMenu* DAT_011daa38;
 struct Player_7caa80
 {
-    void FUN_0093a7c0(int, int);
+    void PlayerCharacter_SetActorBaseValue(int, int);
 };
 int __cdecl MinInt(int, int);
 struct Button_7caa80
@@ -1392,12 +1406,12 @@ void __cdecl PlaySpecialBookSoundAndSetStat(Button_7caa80* button)
         if (value < 10)
         {
             BSSoundHandle sound;
-            sound = FUN_00453a70()->GetSoundHandleByEditorID("OBJBookSpecialNumber", 0x121);
+            sound = BSAudio_QInstance()->GetSoundHandleByEditorID("OBJBookSpecialNumber", 0x121);
             sound.Play(false);
         }
-        if (DAT_011daa38->FUN_00794d80() < DAT_011daa38->limit)
+        if (DAT_011daa38->SPECIALBookMenu_GetTotalPointsUsed() < DAT_011daa38->limit)
         {
-            ((Player_7caa80*)g_thePlayer)->FUN_0093a7c0(key, MinInt(value + 1, 10));
+            ((Player_7caa80*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(key, MinInt(value + 1, 10));
         }
     }
     DAT_011daa38->InvokeCallbacksForSlot();
@@ -1411,7 +1425,7 @@ void __cdecl UpdateLoveTester()
 {
     if (!DAT_011da2c8)
         return;
-    int key = DAT_011da2c8->FUN_00794d30();
+    int key = DAT_011da2c8->LoveTesterMenu_GetCurrentStatesActorValue();
     if (key != -1)
     {
         int value = g_thePlayer->avOwner.GetValue(key);
@@ -1421,10 +1435,10 @@ void __cdecl UpdateLoveTester()
             sound = ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialNumber", 0x121);
             sound.Play(false);
         }
-        if (DAT_011da2c8->FUN_00794d80() < DAT_011da2c8->m_iEntryCount)
-            ((PlayerSetter*)g_thePlayer)->FUN_0093a7c0(key, MinInt(value + 1, 10));
+        if (DAT_011da2c8->SPECIALBookMenu_GetTotalPointsUsed() < DAT_011da2c8->m_iEntryCount)
+            ((PlayerSetter*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(key, MinInt(value + 1, 10));
     }
-    DAT_011da2c8->FUN_00795e20();
+    DAT_011da2c8->RefreshPage();
 }
 
 namespace fnv_007928e0 {
@@ -1452,11 +1466,11 @@ struct Color109
 extern TimeGlobal DAT_011f6394;
 struct Controller109
 {
-    NiControllerSequence* FUN_0047a520(const NiFixedString&);
+    NiControllerSequence* NiControllerManager_GetSequenceByName(const NiFixedString&);
     void FUN_0048fef0(float);
     void FUN_0047aab0(NiControllerSequence*, int, int, float, float, int);
     void FUN_0047aa40(bool);
-    Controller109* FUN_004a8a90();
+    Controller109* NiTimeController_GetNext();
 };
 }  // namespace fnv_007928e0
 
@@ -1518,18 +1532,18 @@ struct Scene109
     virtual void v0d4();
     virtual void v0d8();
     virtual void v0dc(Scene109*, bool);
-    void FUN_00440490(float);
-    void FUN_004bc1f0(float, float, float);
-    void FUN_0043fa80(const fnv_007928e0::Matrix109&);
-    void FUN_00a59c60(const fnv_007928e0::Update109&);
-    fnv_007928e0::Controller109* FUN_00a5c570(const void*);
-    Bound* FUN_0043d450();
+    void NiAVObject_SetScale(float);
+    void NiAVObject_SetTranslate_004bc1f0(float, float, float);
+    void SetRotate_0043fa80(const fnv_007928e0::Matrix109&);
+    void NiAVObject_Update(const fnv_007928e0::Update109&);
+    fnv_007928e0::Controller109* NiObjectNET_GetController(const void*);
+    Bound* NiAVObject_GetWorldBound();
     Scene109* FUN_00b5ca70(Scene109*, float);
     void FUN_00b5c940(Scene109*, int);
-    void FUN_00440460(const fnv_007928e0::Color109&);
+    void NiAVObject_SetTranslate(const fnv_007928e0::Color109&);
     void SetEffectColor(const fnv_007928e0::Color109&);
     void FUN_0050dd50(const fnv_007928e0::Color109&);
-    void FUN_0050dd20(float);
+    void NiLight_SetDimmer(float);
 };
 
 namespace fnv_007928e0 {
@@ -1603,13 +1617,13 @@ struct Light109 : Scene109
 };
 struct Loader109
 {
-    Scene109* LoadModel(const char*, int, int, int, int, int);
+    Scene109* ModelLoader_LoadFile(const char*, int, int, int, int, int);
 };
 extern Loader109* DAT_011c3b3c;
 void __cdecl FUN_004b7660(Scene109*);
-void __cdecl FUN_00a6d2d0(Scene109*);
-double __cdecl FUN_00706e50();
-void* __cdecl FUN_00653270(const void*, Controller109*);
+void __cdecl NiTimeController_StartAnimations(Scene109*);
+double __cdecl InterfaceManager_GetRealScreenWidth();
+void* __cdecl NiObject_DynamicCast(const void*, Controller109*);
 extern int DAT_011f36ac, DAT_011f36bc;
 }  // namespace fnv_007928e0
 
@@ -1644,14 +1658,14 @@ struct Digit109
 };
 
 namespace fnv_007928e0 {
-void __cdecl FUN_007958e0(void*);
+void __cdecl Object_DecreaseCurrentLoveTesterActorValue(void*);
 void __cdecl UpdateLoveTester(void*);
-void __cdecl FUN_00795630(void*);
-void __cdecl FUN_00795c60(void*);
-void __cdecl FUN_00795ca0(void*);
-void __cdecl FUN_00795390(void*);
-void __cdecl FUN_00795a00(void*);
-int __cdecl FUN_00406d00(char*, unsigned int, const char*, ...);
+void __cdecl LoveTesterMenu_UpdateState_00795630(void*);
+void __cdecl Object_StepLoveTesterPositionWithOne(void*);
+void __cdecl Object_StepLoveTesterPositionWithZero(void*);
+void __cdecl NiSourceTexture_UpdateState_00795390(void*);
+void __cdecl Object_IncreaseLoveTesterActorValue(void*);
+int __cdecl BSsprintf(char*, unsigned int, const char*, ...);
 // Loads the front and cabinet NIF scenes, positions them, adds lights and creates the digit, value, adjustment and button widgets for the menu.
 // @fnv 0x007928e0
 }  // namespace fnv_007928e0
@@ -1659,10 +1673,10 @@ int __cdecl FUN_00406d00(char*, unsigned int, const char*, ...);
 void LoveTesterMenu::Init()
 {
     using namespace fnv_007928e0;
-    DAT_011da2c8->front = fnv_007928e0::DAT_011c3b3c->LoadModel(
+    DAT_011da2c8->front = fnv_007928e0::DAT_011c3b3c->ModelLoader_LoadFile(
         "Meshes\\architecture\\Goodsprings\\NV_VitoMaticVigorTester_Activate.NIF", 0, 1, 0, 0, 0);
     FUN_004b7660(DAT_011da2c8->front);
-    DAT_011da2c8->cabinet = fnv_007928e0::DAT_011c3b3c->LoadModel(
+    DAT_011da2c8->cabinet = fnv_007928e0::DAT_011c3b3c->ModelLoader_LoadFile(
         "Meshes\\architecture\\Goodsprings\\NV_VitoMaticVigorTester_Cabinet.NIF", 0, 1, 0, 0, 0);
     FUN_004b7660(DAT_011da2c8->cabinet);
     Matrix109 rotation5, turn1;
@@ -1671,34 +1685,34 @@ void LoveTesterMenu::Init()
     rotation5 = rotation5.FUN_0043f8d0(turn1);
     turn1.FUN_00524ac0(0.125663713f);
     rotation5 = rotation5.FUN_0043f8d0(turn1);
-    bool narrow3 = FUN_00706e50() <= 640.0;
+    bool narrow3 = InterfaceManager_GetRealScreenWidth() <= 640.0;
     if (narrow3)
     {
-        DAT_011da2c8->front->FUN_00440490(1.0f);
-        DAT_011da2c8->front->FUN_004bc1f0(0.0f, -85.0f, -75.0f);
-        DAT_011da2c8->front->FUN_0043fa80(rotation5);
-        DAT_011da2c8->cabinet->FUN_00440490(1.0f);
-        DAT_011da2c8->cabinet->FUN_004bc1f0(0.0f, -85.0f, -75.0f);
-        DAT_011da2c8->cabinet->FUN_0043fa80(rotation5);
+        DAT_011da2c8->front->NiAVObject_SetScale(1.0f);
+        DAT_011da2c8->front->NiAVObject_SetTranslate_004bc1f0(0.0f, -85.0f, -75.0f);
+        DAT_011da2c8->front->SetRotate_0043fa80(rotation5);
+        DAT_011da2c8->cabinet->NiAVObject_SetScale(1.0f);
+        DAT_011da2c8->cabinet->NiAVObject_SetTranslate_004bc1f0(0.0f, -85.0f, -75.0f);
+        DAT_011da2c8->cabinet->SetRotate_0043fa80(rotation5);
     }
     else
     {
-        DAT_011da2c8->front->FUN_00440490(1.0f);
-        DAT_011da2c8->front->FUN_004bc1f0(0.0f, -85.0f, -85.0f);
-        DAT_011da2c8->front->FUN_0043fa80(rotation5);
-        DAT_011da2c8->cabinet->FUN_00440490(1.0f);
-        DAT_011da2c8->cabinet->FUN_004bc1f0(0.0f, -85.0f, -85.0f);
-        DAT_011da2c8->cabinet->FUN_0043fa80(rotation5);
+        DAT_011da2c8->front->NiAVObject_SetScale(1.0f);
+        DAT_011da2c8->front->NiAVObject_SetTranslate_004bc1f0(0.0f, -85.0f, -85.0f);
+        DAT_011da2c8->front->SetRotate_0043fa80(rotation5);
+        DAT_011da2c8->cabinet->NiAVObject_SetScale(1.0f);
+        DAT_011da2c8->cabinet->NiAVObject_SetTranslate_004bc1f0(0.0f, -85.0f, -85.0f);
+        DAT_011da2c8->cabinet->SetRotate_0043fa80(rotation5);
     }
     Update109 update13(0.0f, false, false), update259(0.0f, false, false);
-    DAT_011da2c8->front->FUN_00a59c60(update13);
-    DAT_011da2c8->cabinet->FUN_00a59c60(update259);
+    DAT_011da2c8->front->NiAVObject_Update(update13);
+    DAT_011da2c8->cabinet->NiAVObject_Update(update259);
     DAT_011da2c8->time += DAT_011f6394.FUN_0084d030();
-    Controller109* controller7 = DAT_011da2c8->front->FUN_00a5c570(&DAT_011f36ac);
+    Controller109* controller7 = DAT_011da2c8->front->NiObjectNET_GetController(&DAT_011f36ac);
     if (controller7)
     {
         Controller109* animationController20 = controller7;
-        NiControllerSequence* animation7 = animationController20->FUN_0047a520(NiFixedString("Forward"));
+        NiControllerSequence* animation7 = animationController20->NiControllerManager_GetSequenceByName(NiFixedString("Forward"));
         if (animation7)
         {
             animationController20->FUN_0048fef0(0.0f);
@@ -1707,10 +1721,10 @@ void LoveTesterMenu::Init()
             SetSequenceNegatedGlobal(animation7);
         }
     }
-    FUN_00a6d2d0(front);
-    for (; controller7; controller7 = controller7->FUN_004a8a90())
+    NiTimeController_StartAnimations(front);
+    for (; controller7; controller7 = controller7->NiTimeController_GetNext())
     {
-        void* special = fnv_007928e0::FUN_00653270(&fnv_007928e0::DAT_011f36bc, controller7);
+        void* special = fnv_007928e0::NiObject_DynamicCast(&fnv_007928e0::DAT_011f36bc, controller7);
         if (special)
         {
             Update109 controllerUpdate(0.0f, false, false);
@@ -1719,18 +1733,18 @@ void LoveTesterMenu::Init()
         }
     }
     Update109 update31(0.0f, false, false);
-    front->FUN_00a59c60(update31);
-    float radius41 = DAT_011da2c8->front->FUN_0043d450()->FUN_0084d030() * 20.0;
+    front->NiAVObject_Update(update31);
+    float radius41 = DAT_011da2c8->front->NiAVObject_GetWorldBound()->FUN_0084d030() * 20.0;
     Scene109* ambient16 = ((Scene109*)FUN_00450b80(1))->FUN_00b5ca70(DAT_011da2c8->front->v00c(), radius41);
     if (!ambient16)
     {
         Light109* light52 = new Light109;
-        light52->FUN_00440460(Color109(0.0f, 0.0f, 0.0f));
+        light52->NiAVObject_SetTranslate(Color109(0.0f, 0.0f, 0.0f));
         light52->SetEffectColor(Color109(0.85f, 0.85f, 0.85f));
         light52->FUN_0050dd50(Color109(radius41, 0.0f, 0.0f));
-        light52->FUN_0050dd20(1.0f);
+        light52->NiLight_SetDimmer(1.0f);
         Update109 lightUpdate10(0.0f, false, false);
-        light52->FUN_00a59c60(lightUpdate10);
+        light52->NiAVObject_Update(lightUpdate10);
         ((Scene109*)FUN_00450b80(1))->v0dc(light52, true);
         ((Scene109*)FUN_00450b80(1))->FUN_00b5c940(light52, 0);
     }
@@ -1741,27 +1755,27 @@ void LoveTesterMenu::Init()
     Adjust109* increase7;
     Button109* button12;
     Label109* value4;
-    decrease27 = new Adjust109((void*)fnv_007928e0::FUN_007958e0, (void*)UpdateMenuEntryState, "P1_Decrease_Btn:0", -1, 0);
+    decrease27 = new Adjust109((void*)fnv_007928e0::Object_DecreaseCurrentLoveTesterActorValue, (void*)UpdateMenuEntryState, "P1_Decrease_Btn:0", -1, 0);
     DAT_011da2c8->controls.FUN_007cb2e0(decrease27);
-    decrease27 = new Adjust109((void*)fnv_007928e0::UpdateLoveTester, (void*)fnv_007928e0::FUN_00795630, "P1_Increase_Btn:0", -1, 0);
+    decrease27 = new Adjust109((void*)fnv_007928e0::UpdateLoveTester, (void*)fnv_007928e0::LoveTesterMenu_UpdateState_00795630, "P1_Increase_Btn:0", -1, 0);
     DAT_011da2c8->controls.FUN_007cb2e0(decrease27);
-    button12 = new Button109((void*)fnv_007928e0::FUN_00795c60, (void*)SetTargetFromGlobalState, "P1_RT_Btn:0");
+    button12 = new Button109((void*)fnv_007928e0::Object_StepLoveTesterPositionWithOne, (void*)SetTargetFromGlobalState, "P1_RT_Btn:0");
     DAT_011da2c8->controls.FUN_007cb2e0(button12);
-    button12 = new Button109((void*)fnv_007928e0::FUN_00795ca0, (void*)FUN_00795780, "P1_LT_Btn:0");
+    button12 = new Button109((void*)fnv_007928e0::Object_StepLoveTesterPositionWithZero, (void*)Object_InvokeVirtualMethod_00795780, "P1_LT_Btn:0");
     DAT_011da2c8->controls.FUN_007cb2e0(button12);
     for (int row = 1; row < 10; ++row)
     {
         char name[30];
         for (int digit = 0; digit < 10; ++digit)
         {
-            FUN_00406d00(name, 30, "P1_PointVal_0%i_GLOW:%i", row, digit);
+            BSsprintf(name, 30, "P1_PointVal_0%i_GLOW:%i", row, digit);
             if (DAT_011da2c8->cabinet->v09c(NiFixedString(static_cast<const char*>(name))))
             {
                 Digit109* entry = new Digit109(DAT_011da2c8->cabinet->v09c(NiFixedString(static_cast<const char*>(name))), row);
                 DAT_011da2c8->digits.FUN_007cb2e0(entry);
             }
         }
-        FUN_00406d00(name, 30, "P1_PointVal_0%i_GLOW", row);
+        BSsprintf(name, 30, "P1_PointVal_0%i_GLOW", row);
         if (DAT_011da2c8->cabinet->v09c(NiFixedString(static_cast<const char*>(name))))
         {
             Digit109* entry2 = new Digit109(DAT_011da2c8->cabinet->v09c(NiFixedString(static_cast<const char*>(name))), row);
@@ -1772,14 +1786,14 @@ void LoveTesterMenu::Init()
         char name10[30];
         for (int digit10 = 0; digit10 < 10; ++digit10)
         {
-            FUN_00406d00(name10, 30, "P1_PointVal_10_GLOW:%i", digit10);
+            BSsprintf(name10, 30, "P1_PointVal_10_GLOW:%i", digit10);
             if (DAT_011da2c8->cabinet->v09c(NiFixedString(static_cast<const char*>(name10))))
             {
                 Digit109* entry10 = new Digit109(DAT_011da2c8->cabinet->v09c(NiFixedString(static_cast<const char*>(name10))), 10);
                 DAT_011da2c8->digits.FUN_007cb2e0(entry10);
             }
         }
-        FUN_00406d00(name10, 30, "P1_PointVal_10_GLOW");
+        BSsprintf(name10, 30, "P1_PointVal_10_GLOW");
         if (DAT_011da2c8->cabinet->v09c(NiFixedString(static_cast<const char*>(name10))))
         {
             Digit109* entryLast = new Digit109(DAT_011da2c8->cabinet->v09c(NiFixedString(static_cast<const char*>(name10))), 10);
@@ -1788,69 +1802,69 @@ void LoveTesterMenu::Init()
     }
     total28 = new Label109((void*)UpdateDigitDisplay, "P1_PointsRemainDigit1:0", "P1_PointsRemainDigit2:0", -1, 1, 0);
     totals.FUN_007cb2e0(total28);
-    button12 = new Button109((void*)fnv_007928e0::FUN_00795c60, (void*)SetTargetFromGlobalState, "LookInside_Btn:0");
+    button12 = new Button109((void*)fnv_007928e0::Object_StepLoveTesterPositionWithOne, (void*)SetTargetFromGlobalState, "LookInside_Btn:0");
     misc.FUN_007cb2e0(button12);
-    value4 = new Label109((void*)fnv_007928e0::FUN_00795390, "Index_StrengthPointVal:0", 0, 5, 1, 0);
+    value4 = new Label109((void*)fnv_007928e0::NiSourceTexture_UpdateState_00795390, "Index_StrengthPointVal:0", 0, 5, 1, 0);
     values.FUN_007cb2e0(value4);
-    decrease27 = new Adjust109((void*)FUN_007957c0, (void*)UpdateMenuEntryState, "Index_StrengthDecrease_Btn:0", 5, 2,
+    decrease27 = new Adjust109((void*)Object_DecreaseLoveTesterActorValue, (void*)UpdateMenuEntryState, "Index_StrengthDecrease_Btn:0", 5, 2,
                                value4, total28);
     adjustments.FUN_007cb2e0(decrease27);
     increase7 =
-        new Adjust109((void*)fnv_007928e0::FUN_00795a00, (void*)fnv_007928e0::FUN_00795630, "Index_StrengthIncrease_Btn:0", 5, 2, value4, total28);
+        new Adjust109((void*)fnv_007928e0::Object_IncreaseLoveTesterActorValue, (void*)fnv_007928e0::LoveTesterMenu_UpdateState_00795630, "Index_StrengthIncrease_Btn:0", 5, 2, value4, total28);
     adjustments.FUN_007cb2e0(increase7);
-    value4 = new Label109((void*)fnv_007928e0::FUN_00795390, "Index_PerceptionPointVal:0", 0, 6, 1, 0);
+    value4 = new Label109((void*)fnv_007928e0::NiSourceTexture_UpdateState_00795390, "Index_PerceptionPointVal:0", 0, 6, 1, 0);
     values.FUN_007cb2e0(value4);
-    decrease27 = new Adjust109((void*)FUN_007957c0, (void*)UpdateMenuEntryState, "Index_PerceptionDecrease_Btn:0", 6, 2,
+    decrease27 = new Adjust109((void*)Object_DecreaseLoveTesterActorValue, (void*)UpdateMenuEntryState, "Index_PerceptionDecrease_Btn:0", 6, 2,
                                value4, total28);
     adjustments.FUN_007cb2e0(decrease27);
-    increase7 = new Adjust109((void*)fnv_007928e0::FUN_00795a00, (void*)fnv_007928e0::FUN_00795630, "Index_PerceptionIncrease_Btn:0", 6, 2, value4,
+    increase7 = new Adjust109((void*)fnv_007928e0::Object_IncreaseLoveTesterActorValue, (void*)fnv_007928e0::LoveTesterMenu_UpdateState_00795630, "Index_PerceptionIncrease_Btn:0", 6, 2, value4,
                               total28);
     adjustments.FUN_007cb2e0(increase7);
-    value4 = new Label109((void*)fnv_007928e0::FUN_00795390, "Index_EndurancePointVal:0", 0, 7, 1, 0);
+    value4 = new Label109((void*)fnv_007928e0::NiSourceTexture_UpdateState_00795390, "Index_EndurancePointVal:0", 0, 7, 1, 0);
     values.FUN_007cb2e0(value4);
-    decrease27 = new Adjust109((void*)FUN_007957c0, (void*)UpdateMenuEntryState, "Index_EnduranceDecrease_Btn:0", 7, 2,
+    decrease27 = new Adjust109((void*)Object_DecreaseLoveTesterActorValue, (void*)UpdateMenuEntryState, "Index_EnduranceDecrease_Btn:0", 7, 2,
                                value4, total28);
     adjustments.FUN_007cb2e0(decrease27);
     increase7 =
-        new Adjust109((void*)fnv_007928e0::FUN_00795a00, (void*)fnv_007928e0::FUN_00795630, "Index_EnduranceIncrease_Btn:0", 7, 2, value4, total28);
+        new Adjust109((void*)fnv_007928e0::Object_IncreaseLoveTesterActorValue, (void*)fnv_007928e0::LoveTesterMenu_UpdateState_00795630, "Index_EnduranceIncrease_Btn:0", 7, 2, value4, total28);
     adjustments.FUN_007cb2e0(increase7);
-    value4 = new Label109((void*)fnv_007928e0::FUN_00795390, "Index_CharismaPointVal:0", 0, 8, 1, 0);
+    value4 = new Label109((void*)fnv_007928e0::NiSourceTexture_UpdateState_00795390, "Index_CharismaPointVal:0", 0, 8, 1, 0);
     values.FUN_007cb2e0(value4);
-    decrease27 = new Adjust109((void*)FUN_007957c0, (void*)UpdateMenuEntryState, "Index_CharismaDecrease_Btn:0", 8, 2,
+    decrease27 = new Adjust109((void*)Object_DecreaseLoveTesterActorValue, (void*)UpdateMenuEntryState, "Index_CharismaDecrease_Btn:0", 8, 2,
                                value4, total28);
     adjustments.FUN_007cb2e0(decrease27);
     increase7 =
-        new Adjust109((void*)fnv_007928e0::FUN_00795a00, (void*)fnv_007928e0::FUN_00795630, "Index_CharismaIncrease_Btn:0", 8, 2, value4, total28);
+        new Adjust109((void*)fnv_007928e0::Object_IncreaseLoveTesterActorValue, (void*)fnv_007928e0::LoveTesterMenu_UpdateState_00795630, "Index_CharismaIncrease_Btn:0", 8, 2, value4, total28);
     adjustments.FUN_007cb2e0(increase7);
-    value4 = new Label109((void*)fnv_007928e0::FUN_00795390, "Index_IntelligencePointVal:0", 0, 9, 1, 0);
+    value4 = new Label109((void*)fnv_007928e0::NiSourceTexture_UpdateState_00795390, "Index_IntelligencePointVal:0", 0, 9, 1, 0);
     values.FUN_007cb2e0(value4);
-    decrease27 = new Adjust109((void*)FUN_007957c0, (void*)UpdateMenuEntryState, "Index_IntelligenceDecrease_Btn:0", 9,
+    decrease27 = new Adjust109((void*)Object_DecreaseLoveTesterActorValue, (void*)UpdateMenuEntryState, "Index_IntelligenceDecrease_Btn:0", 9,
                                2, value4, total28);
     adjustments.FUN_007cb2e0(decrease27);
-    increase7 = new Adjust109((void*)fnv_007928e0::FUN_00795a00, (void*)fnv_007928e0::FUN_00795630, "Index_IntelligenceIncrease_Btn:0", 9, 2,
+    increase7 = new Adjust109((void*)fnv_007928e0::Object_IncreaseLoveTesterActorValue, (void*)fnv_007928e0::LoveTesterMenu_UpdateState_00795630, "Index_IntelligenceIncrease_Btn:0", 9, 2,
                               value4, total28);
     adjustments.FUN_007cb2e0(increase7);
-    value4 = new Label109((void*)fnv_007928e0::FUN_00795390, "Index_AgilityPointVal:0", 0, 10, 1, 0);
+    value4 = new Label109((void*)fnv_007928e0::NiSourceTexture_UpdateState_00795390, "Index_AgilityPointVal:0", 0, 10, 1, 0);
     values.FUN_007cb2e0(value4);
-    decrease27 = new Adjust109((void*)FUN_007957c0, (void*)UpdateMenuEntryState, "Index_AgilityDecrease_Btn:0", 10, 2,
+    decrease27 = new Adjust109((void*)Object_DecreaseLoveTesterActorValue, (void*)UpdateMenuEntryState, "Index_AgilityDecrease_Btn:0", 10, 2,
                                value4, total28);
     adjustments.FUN_007cb2e0(decrease27);
     increase7 =
-        new Adjust109((void*)fnv_007928e0::FUN_00795a00, (void*)fnv_007928e0::FUN_00795630, "Index_AgilityIncrease_Btn:0", 10, 2, value4, total28);
+        new Adjust109((void*)fnv_007928e0::Object_IncreaseLoveTesterActorValue, (void*)fnv_007928e0::LoveTesterMenu_UpdateState_00795630, "Index_AgilityIncrease_Btn:0", 10, 2, value4, total28);
     adjustments.FUN_007cb2e0(increase7);
-    value4 = new Label109((void*)fnv_007928e0::FUN_00795390, "Index_LuckPointVal:0", 0, 11, 1, 0);
+    value4 = new Label109((void*)fnv_007928e0::NiSourceTexture_UpdateState_00795390, "Index_LuckPointVal:0", 0, 11, 1, 0);
     values.FUN_007cb2e0(value4);
-    decrease27 = new Adjust109((void*)FUN_007957c0, (void*)UpdateMenuEntryState, "Index_LuckDecrease_Btn:0", 11, 2,
+    decrease27 = new Adjust109((void*)Object_DecreaseLoveTesterActorValue, (void*)UpdateMenuEntryState, "Index_LuckDecrease_Btn:0", 11, 2,
                                value4, total28);
     adjustments.FUN_007cb2e0(decrease27);
     increase7 =
-        new Adjust109((void*)fnv_007928e0::FUN_00795a00, (void*)fnv_007928e0::FUN_00795630, "Index_LuckIncrease_Btn:0", 11, 2, value4, total28);
+        new Adjust109((void*)fnv_007928e0::Object_IncreaseLoveTesterActorValue, (void*)fnv_007928e0::LoveTesterMenu_UpdateState_00795630, "Index_LuckIncrease_Btn:0", 11, 2, value4, total28);
     adjustments.FUN_007cb2e0(increase7);
-    button12 = new Button109((void*)FUN_00795ce0, (void*)SetTargetFromGlobalState, "AllDone_Btn:0");
+    button12 = new Button109((void*)Object_ProcessState_00795ce0, (void*)SetTargetFromGlobalState, "AllDone_Btn:0");
     adjustments.FUN_007cb2e0(button12);
-    FUN_00796100();
-    DAT_011da2c8->FUN_00795e20();
-    fnv_007928e0::FUN_00795c60(0);
+    VigorTester_InitTextures();
+    DAT_011da2c8->RefreshPage();
+    fnv_007928e0::Object_StepLoveTesterPositionWithOne(0);
 }
 
 struct Cb_WM
@@ -1866,40 +1880,41 @@ struct Lvl_WM
 };
 // When idx is at most 8, processes level entries and invokes pfn0 or pfn4 across the selected callback arrays.
 // @fnv 0x00795e20
-void LoveTesterMenu::FUN_00795e20()
+// src: XBOX_PDB 0x00795e20
+void LoveTesterMenu::RefreshPage()
 {
     int iLevel;
     if (idx <= 8)
     {
         if (DAT_011da2c8)
         {
-            int a = DAT_011da2c8->FUN_00794d30();
+            int a = DAT_011da2c8->LoveTesterMenu_GetCurrentStatesActorValue();
             iLevel = 0;
             if (a != -1)
-                iLevel = DAT_011dea3c->avOwner.GetValue(DAT_011da2c8->FUN_00794d30());
+                iLevel = DAT_011dea3c->avOwner.GetValue(DAT_011da2c8->LoveTesterMenu_GetCurrentStatesActorValue());
             for (unsigned int i = 0; i < DAT_011da2c8->arr64.FUN_0044ddc0(); i++)
             {
-                int x = DAT_011da2c8->arr64.FUN_006a7ad0(i)->u18;
-                DAT_011da2c8->arr64.FUN_006a7ad0(i);
+                int x = DAT_011da2c8->arr64.BSSimpleArray_NiAVObject_1024_GetAt(i)->u18;
+                DAT_011da2c8->arr64.BSSimpleArray_NiAVObject_1024_GetAt(i);
             }
             if (0)
             {
             }
             for (unsigned int j = 0; j < DAT_011da2c8->arr74.FUN_0044ddc0(); j++)
             {
-                int iRequiredLevel = DAT_011da2c8->arr74.FUN_006a7ad0(j)->level;
-                if (DAT_011da2c8->arr74.FUN_006a7ad0(j)->obj)
-                    DAT_011da2c8->arr74.FUN_006a7ad0(j)->obj->FUN_00450f90(iLevel < iRequiredLevel);
+                int iRequiredLevel = DAT_011da2c8->arr74.BSSimpleArray_NiAVObject_1024_GetAt(j)->level;
+                if (DAT_011da2c8->arr74.BSSimpleArray_NiAVObject_1024_GetAt(j)->obj)
+                    DAT_011da2c8->arr74.BSSimpleArray_NiAVObject_1024_GetAt(j)->obj->FUN_00450f90(iLevel < iRequiredLevel);
             }
         }
         for (unsigned int iIndex = 0; iIndex < pairs[idx].b.FUN_0044ddc0(); iIndex++)
-            pairs[idx].b.FUN_006a7ad0(iIndex)->pfn0(pairs[idx].b.FUN_006a7ad0(iIndex));
+            pairs[idx].b.BSSimpleArray_NiAVObject_1024_GetAt(iIndex)->pfn0(pairs[idx].b.BSSimpleArray_NiAVObject_1024_GetAt(iIndex));
         for (unsigned int k1 = 0; k1 < pairs[idx].a.FUN_0044ddc0(); k1++)
-            pairs[idx].a.FUN_006a7ad0(k1)->pfn4(pairs[idx].a.FUN_006a7ad0(k1));
+            pairs[idx].a.BSSimpleArray_NiAVObject_1024_GetAt(k1)->pfn4(pairs[idx].a.BSSimpleArray_NiAVObject_1024_GetAt(k1));
         for (unsigned int k2 = 0; k2 < arr1b4.FUN_0044ddc0(); k2++)
-            arr1b4.FUN_006a7ad0(k2)->pfn0(arr1b4.FUN_006a7ad0(k2));
+            arr1b4.BSSimpleArray_NiAVObject_1024_GetAt(k2)->pfn0(arr1b4.BSSimpleArray_NiAVObject_1024_GetAt(k2));
         for (unsigned int k3 = 0; k3 < arr1a4.FUN_0044ddc0(); k3++)
-            arr1a4.FUN_006a7ad0(k3)->pfn4(arr1a4.FUN_006a7ad0(k3));
+            arr1a4.BSSimpleArray_NiAVObject_1024_GetAt(k3)->pfn4(arr1a4.BSSimpleArray_NiAVObject_1024_GetAt(k3));
     }
 }
 
@@ -1961,7 +1976,7 @@ struct InputPlayer
 };
 struct Hit
 {
-    void* FUN_00968670();
+    void* ProcessArray_GetItem();
 };
 
 struct ClickNode
@@ -1972,12 +1987,12 @@ struct ClickNode
 };
 struct Cursor
 {
-    float FUN_009a9350();
-    float FUN_00792760();
+    float TESCombatStyle_GetWeaponMinRangeMult();
+    float QueuedModel_GetOverriddenVisualDistance();
 };
 struct Buffer
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct Render
 {
@@ -2051,10 +2066,10 @@ void LoveTesterMenu::HandleButton(int button, int unused)
     switch (button)
     {
     case 4:
-        if (FUN_00794d80() == available)
+        if (SPECIALBookMenu_GetTotalPointsUsed() == available)
         {
             ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialNumberFinished", 0x121).Play(false);
-            FUN_007917a0();
+            LoveTesterMenu_Close();
         }
         else
         {
@@ -2069,41 +2084,41 @@ void LoveTesterMenu::HandleButton(int button, int unused)
                 local720986 = StepPosition(true);
             else
                 local720986 = StepPosition(false);
-            FUN_00795e20();
+            RefreshPage();
         }
         break;
     case 2:
     case 3: {
         int local972322 = 0;
         int local421248 = 0;
-        if (this->FUN_00794d30() != -1)
+        if (this->LoveTesterMenu_GetCurrentStatesActorValue() != -1)
         {
-            local972322 = ((InputPlayer*)g_thePlayer)->owner.GetBase(this->FUN_00794d30());
+            local972322 = ((InputPlayer*)g_thePlayer)->owner.GetBase(this->LoveTesterMenu_GetCurrentStatesActorValue());
             if (button == 2)
             {
-                if (FUN_00794d80() < available)
+                if (SPECIALBookMenu_GetTotalPointsUsed() < available)
                     ((PlayerSetter*)g_thePlayer)
-                        ->FUN_0093a7c0(this->FUN_00794d30(), MinInt(local972322 + 1, 10));
+                        ->PlayerCharacter_SetActorBaseValue(this->LoveTesterMenu_GetCurrentStatesActorValue(), MinInt(local972322 + 1, 10));
             }
             else
             {
                 ((PlayerSetter*)g_thePlayer)
-                    ->FUN_0093a7c0(this->FUN_00794d30(), FUN_00647b70(local972322 - 1, 1));
+                    ->PlayerCharacter_SetActorBaseValue(this->LoveTesterMenu_GetCurrentStatesActorValue(), BSMAX_00647b70(local972322 - 1, 1));
             }
-            local421248 = ((InputPlayer*)g_thePlayer)->owner.GetCurrent(this->FUN_00794d30());
+            local421248 = ((InputPlayer*)g_thePlayer)->owner.GetCurrent(this->LoveTesterMenu_GetCurrentStatesActorValue());
         }
-        else if (FUN_004b71d0() && mode == 8)
+        else if (InterfaceManager_Has360Controller() && mode == 8)
         {
             int local294918 = special + 4;
             local972322 = ((InputPlayer*)g_thePlayer)->owner.GetBase(local294918);
             if (button == 2)
             {
-                if (FUN_00794d80() < available)
-                    ((PlayerSetter*)g_thePlayer)->FUN_0093a7c0(local294918, MinInt(local972322 + 1, 10));
+                if (SPECIALBookMenu_GetTotalPointsUsed() < available)
+                    ((PlayerSetter*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(local294918, MinInt(local972322 + 1, 10));
             }
             else
             {
-                ((PlayerSetter*)g_thePlayer)->FUN_0093a7c0(local294918, FUN_00647b70(local972322 - 1, 1));
+                ((PlayerSetter*)g_thePlayer)->PlayerCharacter_SetActorBaseValue(local294918, BSMAX_00647b70(local972322 - 1, 1));
             }
             local421248 = ((InputPlayer*)g_thePlayer)->owner.GetCurrent(local294918);
         }
@@ -2111,27 +2126,27 @@ void LoveTesterMenu::HandleButton(int button, int unused)
             ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialNumberDown", 0x121).Play(false);
         if (local972322 < local421248)
             ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialNumber", 0x121).Play(false);
-        FUN_00795e20();
+        RefreshPage();
     }
     break;
     case 5:
         if (mode <= 8)
         {
             int local879956;
-            Cursor* local97635 = (Cursor*)FUN_004b7210();
-            local879956 = (int)local97635->FUN_009a9350();
-            int local866269 = (int)local97635->FUN_00792760();
+            Cursor* local97635 = (Cursor*)InterfaceManager_GetSingleton();
+            local879956 = (int)local97635->TESCombatStyle_GetWeaponMinRangeMult();
+            int local866269 = (int)local97635->QueuedModel_GetOverriddenVisualDistance();
             if (DAT_011f9426)
                 local866269 = (int)(local866269 * (DAT_011ad848 - DAT_011ad84c) +
-                                    ((Render*)FUN_0043c4b0())->GetBuffer()->FUN_0084e3a0() * (double)DAT_011ad84c);
+                                    ((Render*)NiXenonRenderer_GetRenderer())->GetBuffer()->GetHavokWorldObjectCountInSceneGraph_0084e3a0() * (double)DAT_011ad84c);
             for (unsigned int local610845 = 0; local610845 < groups[mode].objects.FUN_0044ddc0(); local610845++)
             {
                 NiPoint3 local960365;
                 NiPoint3 local282417;
                 NiPick local38019(0, 8);
                 local38019.SetByteAtOffset17(true);
-                local38019.FUN_00705fc0(
-                    (void*)(*groups[mode].objects.FUN_006a7ad0(local610845))->object.operator unsigned int());
+                local38019.SetTarget_00705fc0(
+                    (void*)(*groups[mode].objects.BSSimpleArray_NiAVObject_1024_GetAt(local610845))->object.operator unsigned int());
                 local38019.FUN_006ecd40(0);
                 local38019.SetByteAtOffset30(true);
                 ((CameraRay*)DAT_011da2f4.operator unsigned int())
@@ -2139,11 +2154,11 @@ void LoveTesterMenu::HandleButton(int button, int unused)
                 if (local38019.FUN_00e98e20(local960365, local282417, false))
                 {
                     unsigned int local919856 = 0;
-                    void* local799449 = ((Hit*)local38019.FUN_00500940(local919856))->FUN_00968670();
+                    void* local799449 = ((Hit*)local38019.FUN_00500940(local919856))->ProcessArray_GetItem();
                     if (local799449)
                     {
-                        (*groups[mode].objects.FUN_006a7ad0(local610845))
-                            ->click(*groups[mode].objects.FUN_006a7ad0(local610845));
+                        (*groups[mode].objects.BSSimpleArray_NiAVObject_1024_GetAt(local610845))
+                            ->click(*groups[mode].objects.BSSimpleArray_NiAVObject_1024_GetAt(local610845));
                         break;
                     }
                 }
@@ -2154,7 +2169,7 @@ void LoveTesterMenu::HandleButton(int button, int unused)
                 NiPoint3 local282417;
                 NiPick local38019(0, 8);
                 local38019.SetByteAtOffset17(true);
-                local38019.FUN_00705fc0((void*)(*list1a4.FUN_006a7ad0(local966572))->object.operator unsigned int());
+                local38019.SetTarget_00705fc0((void*)(*list1a4.BSSimpleArray_NiAVObject_1024_GetAt(local966572))->object.operator unsigned int());
                 local38019.FUN_006ecd40(0);
                 local38019.SetByteAtOffset30(true);
                 ((CameraRay*)DAT_011da2f4.operator unsigned int())
@@ -2162,10 +2177,10 @@ void LoveTesterMenu::HandleButton(int button, int unused)
                 if (local38019.FUN_00e98e20(local960365, local282417, false))
                 {
                     unsigned int local919856 = 0;
-                    void* local799449 = ((Hit*)local38019.FUN_00500940(local919856))->FUN_00968670();
+                    void* local799449 = ((Hit*)local38019.FUN_00500940(local919856))->ProcessArray_GetItem();
                     if (local799449)
                     {
-                        (*list1a4.FUN_006a7ad0(local966572))->click(*list1a4.FUN_006a7ad0(local966572));
+                        (*list1a4.BSSimpleArray_NiAVObject_1024_GetAt(local966572))->click(*list1a4.BSSimpleArray_NiAVObject_1024_GetAt(local966572));
                         break;
                     }
                 }
@@ -2178,7 +2193,7 @@ void LoveTesterMenu::HandleButton(int button, int unused)
             special--;
             ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialFocus", 0x121).Play(false);
         }
-        FUN_00795e20();
+        RefreshPage();
         break;
     case 7:
         if (mode == 8 && special < 7)
@@ -2186,7 +2201,7 @@ void LoveTesterMenu::HandleButton(int button, int unused)
             special++;
             ((AudioView*)BSAudio::GetSingleton())->GetSoundHandleByEditorID("OBJBookSpecialFocus", 0x121).Play(false);
         }
-        FUN_00795e20();
+        RefreshPage();
         break;
     }
 }

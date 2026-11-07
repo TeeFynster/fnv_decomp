@@ -37,10 +37,11 @@ struct Group00e7ef40
 {
     char _pad0[16];
     Entry00e7ef40* m_pkSaved;
-    unsigned int FUN_00e7ef40();
+    unsigned int NiD3DRenderStateGroup_RestoreRenderStates();
 };
 // @fnv 0x00e7ef40
-unsigned int Group00e7ef40::FUN_00e7ef40()
+// src: XBOX_PDB 0x00e7ef40
+unsigned int Group00e7ef40::NiD3DRenderStateGroup_RestoreRenderStates()
 {
     Entry00e7ef40* pkRSEntry = m_pkSaved;
     while (pkRSEntry)
@@ -98,12 +99,13 @@ struct Owner00b8d460
     char _pad0[0x5c];
     Sub00b8d460* m_pSub;
 
-    void FUN_00b8d460();
+    void ImageSpaceShaderVolumetricFog_SetState();
 };
 
 // Ensures m_pSub->m_pHelper exists, then initialises it three times with (0x34,1,1), (0x38,3,1) and (0x39,1,1).
 // @fnv 0x00b8d460
-void Owner00b8d460::FUN_00b8d460()
+// src: COMMUNITY 0x00b8d460
+void Owner00b8d460::ImageSpaceShaderVolumetricFog_SetState()
 {
     Sub00b8d460* pSub = m_pSub;
     if (pSub->m_pHelper == 0)
@@ -251,8 +253,8 @@ struct StateGroup
     unsigned int countB;
     StateNode* tailB;
     StateNode* FindNodeByKey(unsigned int, bool&);
-    void FUN_00e7efc0(StateNode*);
-    void FUN_00e7ef80(StateNode*);
+    void NiD3DRenderStateGroup_RemoveRSEntryFromSavedList(StateNode*);
+    void NiD3DRenderStateGroup_RemoveRSEntryFromNoSaveList(StateNode*);
     void AddA(StateNode* node)
     {
         if (tailA)
@@ -290,12 +292,12 @@ void StateGroup::SetNodeValue(unsigned int key, unsigned int value, bool target)
         {
             if (currentType)
             {
-                FUN_00e7efc0(node);
+                NiD3DRenderStateGroup_RemoveRSEntryFromSavedList(node);
                 AddA(node);
             }
             else
             {
-                FUN_00e7ef80(node);
+                NiD3DRenderStateGroup_RemoveRSEntryFromNoSaveList(node);
                 AddB(node);
             }
         }
@@ -419,12 +421,13 @@ void StateGroupE7F5::RemoveNodeByKey(unsigned int uiKey)
 
 struct RenderPassB71 : GroupState
 {
-    void FUN_00b71a10(unsigned int stateKey, unsigned int value, int);
+    void NiD3DPass_SetRenderState(unsigned int stateKey, unsigned int value, int);
 };
 
 // Ensures state is initialized via FUN_00e7f5d0, then calls SetNodeValue on state with stateKey, value, and true.
 // @fnv 0x00b71a10
-void RenderPassB71::FUN_00b71a10(unsigned int stateKey, unsigned int value, int)
+// src: COMMUNITY 0x00b71a10
+void RenderPassB71::NiD3DPass_SetRenderState(unsigned int stateKey, unsigned int value, int)
 {
     if (!state)
         state = FUN_00e7f5d0();
@@ -438,12 +441,13 @@ struct RenderStateCallB8F160
 
 struct RenderOwnerEntryB8F160 : RenderOwner
 {
-    void FUN_00b8f160();
+    void ImageSpaceShaderCopyRenderTarget1_Func_84();
 };
 
 // Ensures the group's state object exists, then sets render states 0xA8 to 0 and 0xBE to 0xF with save enabled.
 // @fnv 0x00b8f160
-void RenderOwnerEntryB8F160::FUN_00b8f160()
+// src: COMMUNITY 0x00b8f160
+void RenderOwnerEntryB8F160::ImageSpaceShaderCopyRenderTarget1_Func_84()
 {
     GroupState* pass = group;
     if (!pass->state)
@@ -460,7 +464,8 @@ extern int DAT_011ae680;
 
 // Ensures the owner's group state exists and sets node values 0x34, 0x38, and 0x39 to 1, 4, and DAT_011ae680 respectively.
 // @fnv 0x00b8f2f0
-void __fastcall FUN_00b8f2f0(RenderOwner* owner)
+// src: GUESS 0x00b8f2f0 (confidence: medium)
+void __fastcall Nid3drenderstategroup_SetGroupNodeValues34And38And39(RenderOwner* owner)
 {
     GroupState* group = owner->group;
     if (!group->state)
@@ -481,7 +486,8 @@ void __fastcall FUN_00b8f2f0(RenderOwner* owner)
 
 // If owner->group->state is null, assigns FUN_00e7f5d0() to it, then sets node values 14, 52, and 56.
 // @fnv 0x00b8f4b0
-void __fastcall FUN_00b8f4b0(RenderOwner* owner)
+// src: GUESS 0x00b8f4b0 (confidence: medium)
+void __fastcall Nid3drenderstategroup_SetGroupNodeValues14And52And56(RenderOwner* owner)
 {
     GroupState* group = owner->group;
     if (!group->state)

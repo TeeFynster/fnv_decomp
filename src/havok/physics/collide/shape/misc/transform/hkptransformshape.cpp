@@ -102,7 +102,7 @@ void hkpTransformShape::CalculateAabb(const hkTransform& localToWorld, float tol
         float a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p;
     } storage;
     hkTransform& transformed = reinterpret_cast<hkTransform&>(storage);
-    transformed.FUN_00cb2240(localToWorld, m_kMotionTransform);
+    transformed.hkTransform_setMul(localToWorld, m_kMotionTransform);
     m_pContainedShape.m_pContainedShape->CalculateAabb(transformed, tolerance, out);
 }
 

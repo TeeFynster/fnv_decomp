@@ -17,7 +17,7 @@
 struct CpuObject
 {
     int value;
-    void FUN_00e10a10(int value);
+    void hkpPrimitiveDrawer_setDisplayHandler(int value);
 };
 
 
@@ -45,11 +45,12 @@ class AxisDisplayOwner
 {
   public:
     hkDebugDisplayHandler* m_handler;
-    void FUN_00e10bf0(const hkVector4& pos, const hkMatrix3& rot, hkReal size, int color, int id, int tag);
+    void UpdateState_00e10bf0(const hkVector4& pos, const hkMatrix3& rot, hkReal size, int color, int id, int tag);
 };
 
 // @fnv 0x00e10bf0
-void AxisDisplayOwner::FUN_00e10bf0(const hkVector4& pos, const hkMatrix3& rot, hkReal size, int color, int id, int tag)
+// src: GUESS 0x00e10bf0 (confidence: low)
+void AxisDisplayOwner::UpdateState_00e10bf0(const hkVector4& pos, const hkMatrix3& rot, hkReal size, int color, int id, int tag)
 {
     hkVector4 x = rot.m_kColumn0;
     hkVector4 y = rot.m_kColumn1;
@@ -70,7 +71,7 @@ void AxisDisplayOwner::FUN_00e10bf0(const hkVector4& pos, const hkMatrix3& rot, 
 extern "C" void _ReadWriteBarrier();
 
 char* __cdecl FUN_00c85690(hkMemory* alloc, int size);
-void __cdecl FUN_00c856c0(hkMemory* owner, char* data);
+void __cdecl hkMemoryRouter_easyFree(hkMemory* owner, char* data);
 
 extern __declspec(align(16)) float DAT_010c71e0[4];
 extern double DAT_0101ff48;
@@ -89,7 +90,7 @@ struct VectorArg
 struct CircleDrawer
 {
     hkDebugDisplayHandler* drawer;
-    void FUN_00e10f60(float angle, __m128* base, __m128* a10, VectorArg a14, int count, int a1c, float a20, int a24,
+    void ProcessEntries_00e10f60(float angle, __m128* base, __m128* a10, VectorArg a14, int count, int a1c, float a20, int a24,
                       int a28);
 };
 
@@ -132,7 +133,8 @@ static __forceinline __m128 Rotate(const hkQuaternion& quat, const __m128& vecto
 }
 
 // @fnv 0x00e10f60
-void CircleDrawer::FUN_00e10f60(float angle, __m128* base, __m128* a10, VectorArg a14, int count, int a1c, float a20,
+// src: GUESS 0x00e10f60 (confidence: low)
+void CircleDrawer::ProcessEntries_00e10f60(float angle, __m128* base, __m128* a10, VectorArg a14, int count, int a1c, float a20,
                                 int a24, int a28)
 {
     hkThreadMemory* h = hkThreadMemory::GetMonitorStream();
@@ -140,11 +142,11 @@ void CircleDrawer::FUN_00e10f60(float angle, __m128* base, __m128* a10, VectorAr
     char* buf = FUN_00c85690(allocator, count * 16);
     float r = a20 / angle;
     __declspec(align(16)) hkQuaternion q1;
-    q1.FUN_00cb2450((void*)(__m128*)a14, angle);
+    q1.hkQuaternion_setAxisAngle((void*)(__m128*)a14, angle);
     __declspec(align(16)) hkQuaternion q2;
     float ang2 = (float)(DAT_0101ff48 / (double)count);
     __m128* direction = a10;
-    q2.FUN_00cb2450(direction, ang2);
+    q2.hkQuaternion_setAxisAngle(direction, ang2);
     __m128 v = RotateInitial(q1, *direction);
     __m128* center = base;
     __m128* out = (__m128*)buf;
@@ -161,7 +163,7 @@ void CircleDrawer::FUN_00e10f60(float angle, __m128* base, __m128* a10, VectorAr
         drawer->DisplayLine(*(hkVector4*)(buf + i * 16), *(hkVector4*)(buf + (((i + 1) % count) * 16)), a1c, a24, a28);
     }
     h = hkThreadMemory::GetMonitorStream();
-    FUN_00c856c0(h->m_pMemoryAllocator, buf);
+    hkMemoryRouter_easyFree(h->m_pMemoryAllocator, buf);
 }
 
 namespace fnv_00e11180 {
@@ -206,12 +208,13 @@ static __forceinline __m128 PlaneDrawRotate(__m128 q, __m128 p)
 
 struct PlaneDrawObject : CpuObject
 {
-    void FUN_00e11180(const hkVector4* p1, int p2, const hkVector4* p3, int p4, float p5, int p6, int p7);
-    void FUN_00e10d50(const hkVector4* p1, int p2, const hkVector4* v, int p4, float p5, int p6, int p7);
+    void ProcessEntries_00e11180(const hkVector4* p1, int p2, const hkVector4* p3, int p4, float p5, int p6, int p7);
+    void ComputeValues_00e10d50(const hkVector4* p1, int p2, const hkVector4* v, int p4, float p5, int p6, int p7);
 };
 
 // @fnv 0x00e11180
-void PlaneDrawObject::FUN_00e11180(const hkVector4* p1, int p2, const hkVector4* p3, int p4, float p5,
+// src: GUESS 0x00e11180 (confidence: low)
+void PlaneDrawObject::ProcessEntries_00e11180(const hkVector4* p1, int p2, const hkVector4* p3, int p4, float p5,
                                    int p6, int p7)
 {
     float s = (float)((double)p5 * DAT_010eacc0);
@@ -221,9 +224,9 @@ void PlaneDrawObject::FUN_00e11180(const hkVector4* p1, int p2, const hkVector4*
     __m128 splat = _mm_shuffle_ps(t, t, 0);
     *(__m128*)&L = _mm_mul_ps(splat, *(const __m128*)p3);
     hkQuaternion D1;
-    D1.FUN_00cb2450((void*)p2, DAT_0101ff38);
+    D1.hkQuaternion_setAxisAngle((void*)p2, DAT_0101ff38);
     hkQuaternion D2;
-    D2.FUN_00cb2450((void*)p2, DAT_01064f60);
+    D2.hkQuaternion_setAxisAngle((void*)p2, DAT_01064f60);
 
     L.m_vComponents = PlaneDrawRotate(*(__m128*)&D2, L.m_vComponents);
     P1v.m_vComponents = p1->m_vComponents;
@@ -275,6 +278,6 @@ void PlaneDrawObject::FUN_00e11180(const hkVector4* p1, int p2, const hkVector4*
     spl = _mm_shuffle_ps(spl, sel, 0);
     *(__m128*)&L = _mm_mul_ps(spl, ll);
 
-    this->FUN_00e10d50(p1, p2, &L, p4, p5, p6, p7);
+    this->ComputeValues_00e10d50(p1, p2, &L, p4, p5, p6, p7);
 }
 }  // namespace fnv_00e11180

@@ -3,7 +3,8 @@
 
 // Returns value multiplied or offset by a small factor depending on mode, or 0 for unknown modes.
 // @fnv 0x00e60cb0
-int __cdecl FUN_00e60cb0(int mode, int value)
+// src: XBOX_PDB 0x00e60cb0
+int __cdecl hkMeshPrimitiveUtil_calculateNumIndices(int mode, int value)
 {
     switch (mode)
     {

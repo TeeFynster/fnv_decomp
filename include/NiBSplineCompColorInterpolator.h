@@ -22,8 +22,8 @@ public:
     void SaveToStream(NiStream& stream);
     void LoadFromStream(NiStream& stream);
     void* Destroy(unsigned int flags);
-    void FUN_00a519b0(NiTPrimitiveArray<char*>* strings);
-    NiBSplineCompColorInterpolator* FUN_00a51890(CloningProcess& cloning);
+    void GetViewerStrings_00a519b0(NiTPrimitiveArray<char*>* strings);
+    NiBSplineCompColorInterpolator* CreateClone_00a51890(CloningProcess& cloning);
     char EvaluateColor(float time, void* unused, NiColorA* output);
 
     union

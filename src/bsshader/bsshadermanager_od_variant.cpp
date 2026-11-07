@@ -101,13 +101,13 @@ extern ShadowSceneNode* DAT_011f91c8[4];
 // The shipped setter was built without optimization.
 #pragma optimize("", off)
 #pragma optimize("", on)
-void __cdecl FUN_00b4f2f0(int idx, ShadowSceneNode* p);
+void __cdecl BSShaderManager_SetShadowSceneNode(int idx, ShadowSceneNode* p);
 
 extern ImageSpaceManager* DAT_011f91ac;
 NiTexture* GetImageSpaceTexture();
 extern "C" NiTexture* DAT_011f95ec;
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
-void __cdecl FUN_00b54ac0(NiTexture* pkTexture);
+void __cdecl BSShaderManager_SetAccumulator(NiTexture* pkTexture);
 struct PropHelper
 {
     virtual void vfn_0();
@@ -125,9 +125,9 @@ struct PropHelper
 };
 void __cdecl ProcessPropertyTree(PropHelper*, int);
 void __cdecl ProcessPropertyTree(PropHelper* obj, int param2);
-BSFogProperty* __cdecl FUN_00b55520(int aiShadowSceneNode);
+BSFogProperty* __cdecl BSShaderManager_GetFogProperty(int aiShadowSceneNode);
 void ProcessPropertyTree(NiAVObject*, unsigned int);
-void FUN_00b55b80(NiAVObject* obj);
+void BSShaderManager_SetObjectType(NiAVObject* obj);
 struct tagRECT
 {
     long left;
@@ -190,11 +190,12 @@ TGTexturingProperty* __cdecl TGDynamicCast(const TGRTTI* apRTTI, TGProperty* apP
 struct TGGatherer
 {
     void AddTexture(TGTextureInfo* apInfo);
-    void FUN_0046e910(TGAVObject* apObject, int aiArg);
+    void TESDataHandler_CheckTexturesRecurse(TGAVObject* apObject, int aiArg);
 };
 
 // @fnv 0x0046e910
-void TGGatherer::FUN_0046e910(TGAVObject* apObject, int aiArg)
+// src: COMMUNITY 0x0046e910
+void TGGatherer::TESDataHandler_CheckTexturesRecurse(TGAVObject* apObject, int aiArg)
 {
     if (apObject)
     {
@@ -222,7 +223,7 @@ void TGGatherer::FUN_0046e910(TGAVObject* apObject, int aiArg)
             {
                 TGAVObject* pChild2 = pNode->GetAt(j2);
                 if (pChild2)
-                    FUN_0046e910(pChild2, aiArg);
+                    TESDataHandler_CheckTexturesRecurse(pChild2, aiArg);
             }
         }
     }

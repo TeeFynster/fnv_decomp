@@ -18,7 +18,8 @@ struct TimedAnimationKey : FloatKeyPrefixView
 bool __cdecl AreRecordsEqual(const FloatKeyPrefixView&, const FloatKeyPrefixView&);
 // Returns false if AreRecordsEqual rejects the keys, otherwise compares the two float fields of the keys for equality.
 // @fnv 0x00a26f30
-bool FUN_00a26f30(const FloatKeyPrefixView& key0, const FloatKeyPrefixView& key1)
+// src: GAMEBRYO_LIB 0x00a26f30
+bool NiBezFloatKey_Equal(const FloatKeyPrefixView& key0, const FloatKeyPrefixView& key1)
 {
     const TimedAnimationKey* pKey1Floats = (const TimedAnimationKey*)&key1;
     const TimedAnimationKey* pKey0Floats = (const TimedAnimationKey*)&key0;
@@ -52,7 +53,8 @@ inline NiBinaryStream* NiStream::GetBinaryStream()
 }
 // Reads 4 bytes from the stream's input into pValue and advances the input position by the bytes read.
 // @fnv 0x00a26df0
-void FUN_00a26df0(NiStream* pkStream, void* pValue)
+// src: XBOX_PDB 0x00a26df0
+void NiStreamLoadBinary_float(NiStream* pkStream, void* pValue)
 {
     pkStream->GetBinaryStream()->Read(pValue);
 }
@@ -65,11 +67,12 @@ struct Base_00a26eb0
 struct Holder_00a26eb0 : Base_00a26eb0
 {
     float m;
-    void FUN_00a26eb0(NiStream&);
+    void LoadBaseAndMemberValue(NiStream&);
 };
 // Calls the base stream reader, then reads 4 bytes from the input stream into m and advances the stream position by the bytes read.
 // @fnv 0x00a26eb0
-void Holder_00a26eb0::FUN_00a26eb0(NiStream& stream)
+// src: GUESS 0x00a26eb0 (confidence: medium)
+void Holder_00a26eb0::LoadBaseAndMemberValue(NiStream& stream)
 {
     Base_00a26eb0::AccumulateAnimSink(stream);
     stream.GetBinaryStream()->Read(static_cast<void*>(&m));

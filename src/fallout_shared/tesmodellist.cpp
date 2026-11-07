@@ -72,13 +72,14 @@ unsigned int TESModelList::BaseFormRecord(unsigned int type)
 
 struct FUN_00478690_shell
 {
-    void FUN_00478690();
+    void BGSDestructibleObjectForm_RemoveData();
 };
 
 
 // Releases the object stored at offset 4 by calling its virtual method with 1, then sets that pointer to null.
 // @fnv 0x00478690
-void FUN_00478690_shell::FUN_00478690()
+// src: XBOX_PDB 0x00478690
+void FUN_00478690_shell::BGSDestructibleObjectForm_RemoveData()
 {
     delete *(FileEntryListCollection**)((char*)this + 4);
     *(void**)((char*)this + 4) = 0;
@@ -90,12 +91,13 @@ extern SettingT<GameSettingCollection> originalRuntimeFloatSetting43;
 
 // Returns the byte at pThis+0x12d, adding the scaled level from the actor base data when it matches the PC level.
 // @fnv 0x005f8f70
-unsigned char __fastcall FUN_005f8f70(char* pThis)
+// src: COMMUNITY 0x005f8f70
+unsigned char __fastcall TESCreature_GetCombatSkill(char* pThis)
 {
     unsigned char ucLevel = static_cast<unsigned char>(pThis[0x12d]);
     if (reinterpret_cast<TESActorBaseData*>(pThis + 0x30)->GetMatchesPCLevel())
     {
-        short slevel = reinterpret_cast<TESActorBaseData*>(pThis + 0x30)->FUN_0047ded0();
+        short slevel = reinterpret_cast<TESActorBaseData*>(pThis + 0x30)->TESActorBaseData_GetLevel();
         if (slevel < 1)
             slevel = 1;
         ucLevel =
@@ -109,10 +111,11 @@ unsigned char __fastcall FUN_005f8f70(char* pThis)
 struct FUN_005fa180_cls : public ActorValueOwner
 {
     char pad[0xc - 4];
-    int FUN_005fa180(ActorValue::Index aeIndex);
+    int TESCreature_GetActorValueI(ActorValue::Index aeIndex);
 };
 // @fnv 0x005fa180
-int FUN_005fa180_cls::FUN_005fa180(ActorValue::Index aeIndex)
+// src: COMMUNITY 0x005fa180
+int FUN_005fa180_cls::TESCreature_GetActorValueI(ActorValue::Index aeIndex)
 {
     int result = 0;
     if (ActorValue::GetFlag(aeIndex, 0x400))
@@ -159,7 +162,7 @@ void TESModelList::LoadStringChunk(TESModelList* p1, TESFile* apFile)
             apFile->GetChunkData(pChunkBuffer, 0);
             while (*pString)
             {
-                FUN_00489fa0(pString);
+                AddModel_00489fa0(pString);
                 pString += BSStringLength(pString) + 1;
             }
         }
@@ -189,7 +192,7 @@ void FileEntryListCollection::ClearAndDeleteArray()
 
 struct FUN_0048a2c0_shell
 {
-    void FUN_0048a2c0(PathingLocation*);
+    void TESTextureListArray_Copy(PathingLocation*);
 };
 // Casts component to TESModelList, copies each filename via FUN_00489fa0, then copies the origin pathing location.
 // @fnv 0x00489db0
@@ -204,10 +207,10 @@ void TESModelList::BaseFormRecord(BaseFormComponent* component)
     {
         const char* filename = list->GetItem();
         if (filename)
-            FUN_00489fa0(filename);
+            AddModel_00489fa0(filename);
         list = list->GetNext();
     }
-    ((FUN_0048a2c0_shell*)((char*)this + 0xc))->FUN_0048a2c0(((PathingRequest*)source)->GetOrigin());
+    ((FUN_0048a2c0_shell*)((char*)this + 0xc))->TESTextureListArray_Copy(((PathingRequest*)source)->GetOrigin());
 }
 
 struct TaskQueueInterface
@@ -220,7 +223,8 @@ struct SoundListView
 };
 // If the string is not already present, allocates a copy of it, copies the text into it, and appends it to the list at this+4.
 // @fnv 0x00489fa0
-void TESModelList::FUN_00489fa0(const char* apString)
+// src: COMMUNITY 0x00489fa0
+void TESModelList::AddModel_00489fa0(const char* apString)
 {
     if (!ContainsFile(apString))
     {
@@ -242,7 +246,7 @@ extern char DAT_01183040;
 extern char DAT_01186b14;
 
 void* __cdecl FUN_00ec43fb(unsigned int a, unsigned int b, void* c, void* d, unsigned int e);
-int __cdecl FUN_00404dc0(int a, int b);
+int __cdecl BSstricmp(int a, int b);
 
 // Looks up a record via FUN_00ec43fb and walks both node lists, returning true if any pair of entries differs or the lists have different lengths.
 // @fnv 0x00489e40
@@ -267,7 +271,7 @@ bool TESModelList::CompareWithBase(BaseFormComponent* arg)
         }
         else
         {
-            if (x3 != 0 && y4 != 0 && FUN_00404dc0(x3, y4) != 0)
+            if (x3 != 0 && y4 != 0 && BSstricmp(x3, y4) != 0)
             {
                 return true;
             }
@@ -282,7 +286,7 @@ bool TESModelList::CompareWithBase(BaseFormComponent* arg)
     return false;
 }
 
-int __cdecl FUN_00404dc0(const char* lhs, const char* rhs);
+int __cdecl BSstricmp(const char* lhs, const char* rhs);
 
 // Returns true if filename is non-null and matches an entry in the model list, otherwise false.
 // @fnv 0x00489f20
@@ -295,7 +299,7 @@ bool TESModelList::ContainsFile(const char* filename)
     while (entry != 0)
     {
         const char* value = entry->GetItem();
-        if (value && FUN_00404dc0(value, filename) == 0)
+        if (value && BSstricmp(value, filename) == 0)
             return true;
         entry = entry->GetNext();
     }
@@ -303,9 +307,9 @@ bool TESModelList::ContainsFile(const char* filename)
     return false;
 }
 
-unsigned int __cdecl FUN_0044a670(const char* text);
+unsigned int __cdecl BSstrlen(const char* text);
 void __cdecl FUN_00406d30(char* destination, unsigned int capacity, const char* source);
-void __cdecl FUN_004856f0(void* destination, char* source, unsigned int length);
+void __cdecl TESForm_AddChunkArray(void* destination, char* source, unsigned int length);
 
 // If the model list is non-empty, concatenates its strings into a new buffer, copies it to destination, frees it, then clears the list data.
 // @fnv 0x00489ba0
@@ -328,7 +332,7 @@ void TESModelList::CopyModelListToBuffer(void* destination, unsigned int flags)
         {
             piVar4 = iStack7->GetItem();
             if (piVar4 != 0)
-                iStack_8 = iStack_8 + FUN_0044a670(piVar4) + 1;
+                iStack_8 = iStack_8 + BSstrlen(piVar4) + 1;
             iStack7 = iStack7->GetNext();
         }
 
@@ -343,14 +347,14 @@ void TESModelList::CopyModelListToBuffer(void* destination, unsigned int flags)
             if (iVarTmp != 0)
             {
                 FUN_00406d30(puStack_18, iStack_c, iVarTmp);
-                count9 = FUN_0044a670(iVarTmp) + 1;
+                count9 = BSstrlen(iVarTmp) + 1;
                 puStack_18 = puStack_18 + count9;
                 iStack_c = iStack_c - count9;
             }
             iStack7 = iStack7->GetNext();
         }
         *puStack_18 = 0;
-        FUN_004856f0(destination, puVar4, iStack_8);
+        TESForm_AddChunkArray(destination, puVar4, iStack_8);
         freeBuffer_ = puVar4;
         ::operator delete(freeBuffer_);
     }

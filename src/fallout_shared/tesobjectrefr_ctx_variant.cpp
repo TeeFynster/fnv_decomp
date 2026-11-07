@@ -8,13 +8,13 @@
 #include "../../include/ExtraScript.h"
 #include "../../include/InventoryChanges.h"
 #include "../../include/Script.h"
-GarbageCollectorUpdateState* FUN_00446ef0();
-void* FUN_0056a8c0();
-void FUN_005743f0();
-void FUN_00575c90(unsigned char value);
-float FUN_005790b0();
-float FUN_005790d0();
-void FUN_0057acc0(unsigned int index);
+GarbageCollectorUpdateState* MemoryLevelManager_GetSingleton();
+void* DecalData_GetDefaultDecalData();
+void FalloutRadio_NewCellEntered();
+void TESWaterSystem_SetPlayerForceUnderwater(unsigned char value);
+float BSAudio_GetMinDialogDist();
+float BSAudio_GetMaxDialogDist();
+void CheckWithinMultiBoundTask_CancelAttachment(unsigned int index);
 
 struct BGSLoadFormBuffer;
 struct BGSSaveFormBuffer;
@@ -60,7 +60,7 @@ struct blob12
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
 struct FUN_00565730_shell : public TESObjectREFR
 {
-    void FUN_00565730();
+    void TESObjectREFR_InitScript();
 };
 
 struct ShellH;
@@ -74,15 +74,15 @@ struct RefH
 };
 struct FUN_00419ed0_shell
 {
-    void FUN_00419ed0(Script*);
+    void ExtraDataList_SetScript(Script*);
 };
 struct FUN_00419f80_shell
 {
-    void FUN_00419f80(ScriptLocals*);
+    void ExtraDataList_SetScriptLocals(ScriptLocals*);
 };
-TESContainer* __fastcall GetContainer(TESObjectREFR*);
+TESContainer* __fastcall TESObjectREFR_HasContainer(TESObjectREFR*);
 TESBoundObject* __fastcall _FNV_GetObjectReference(TESObjectREFR*);
-Script* FUN_004826d0(TESBoundObject*);
+Script* TESScriptableForm_GetFormScript(TESBoundObject*);
 struct VRefStandin
 {
     virtual void v0();
@@ -194,7 +194,8 @@ struct VRefStandin
 };
 
 // @fnv 0x00565730
-void FUN_00565730_shell::FUN_00565730()
+// src: XBOX_PDB 0x00565730
+void FUN_00565730_shell::TESObjectREFR_InitScript()
 {
     TESBoundObject* pObj;
     ExtraScript* pExtra;
@@ -211,16 +212,16 @@ void FUN_00565730_shell::FUN_00565730()
     pObj = ((VRefStandin*)this)->GetBaseObj();
     if (!pObj)
         pObj = _FNV_GetObjectReference(this);
-    pScript = FUN_004826d0(pObj);
+    pScript = TESScriptableForm_GetFormScript(pObj);
     if (pScript)
     {
-        ((FUN_00419ed0_shell*)((XActor*)this)->GetExtra())->FUN_00419ed0(pScript);
-        ((FUN_00419f80_shell*)((XActor*)this)->GetExtra())->FUN_00419f80(pScript->GetOrCreateScriptLocals());
+        ((FUN_00419ed0_shell*)((XActor*)this)->GetExtra())->ExtraDataList_SetScript(pScript);
+        ((FUN_00419f80_shell*)((XActor*)this)->GetExtra())->ExtraDataList_SetScriptLocals(pScript->GetOrCreateScriptLocals());
     }
-    pCont = GetContainer(this);
+    pCont = TESObjectREFR_HasContainer(this);
     if (pCont)
     {
         pinventory = InventoryChanges::CreateForReference(this);
-        pinventory->FUN_004d1960();
+        pinventory->InventoryChanges_InitScripts();
     }
 }

@@ -21,8 +21,8 @@ public:
     virtual void LoadGame(BGSLoadFormBuffer* apBuffer);
     virtual void vf16();
 
-    void FUN_009d1dc0(Actor* apOpponent);
-    void FUN_009caac0(const char* str);
+    void Disarmed_009d1dc0(Actor* apOpponent);
+    void CombatProcedure_SetFailed(const char* str);
 
     unsigned int m_10;
     NiPoint3 m_14;

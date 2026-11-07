@@ -25,9 +25,9 @@ public:
 
     void LinkUVData(NiStream& stream);
     void LinkUVData(void* stream);
-    bool __thiscall FUN_00a45970(void* stream);
-    void FUN_00a45cf0(NiUpdateData& update);
-    void FUN_00a46150(StrArr* strings);
+    bool __thiscall RegisterStreamables_00a45970(void* stream);
+    void Update_00a45cf0(NiUpdateData& update);
+    void GetViewerStrings_00a46150(StrArr* strings);
     void vf24(StrArr* strings);
 
     int __thiscall GetDataFromMember(int* count, int* type, char* size);
@@ -41,8 +41,8 @@ public:
     void UpdateUVTransform();
     void ResetRefObject();
     void __thiscall AssignRefObj(NiUVData* data);
-    void __thiscall FUN_00a45bc0();
-    int __thiscall FUN_00a45b60();
+    void __thiscall ResetKeyTimeExtrema();
+    int __thiscall ProcessAndReturnValue_00a45b60();
     void* __thiscall DestroyIfFlagged(unsigned int flags);
     unsigned int* __thiscall CloneUVData(unsigned int flags);
     void WriteToStream(MyStreamWriter* stream);

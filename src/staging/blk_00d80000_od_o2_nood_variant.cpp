@@ -103,11 +103,12 @@ struct ObjD85 : BaseD85
     int unk124;
     int unk128;
     int unk12c;
-    ObjD85& FUN_00d85ba0(const ObjD85& o);
+    ObjD85& ProcessAndReturnValue_00d85ba0(const ObjD85& o);
 };
 
 // @fnv 0x00d85ba0
-ObjD85& ObjD85::FUN_00d85ba0(const ObjD85& o)
+// src: GUESS 0x00d85ba0 (confidence: low)
+ObjD85& ObjD85::ProcessAndReturnValue_00d85ba0(const ObjD85& o)
 {
     Assign(o);
     unk90 = o.unk90;
@@ -154,11 +155,12 @@ struct __declspec(align(16)) StandinClass
     __m128 value60;
     __m128 value70;
     __m128 value80;
-    StandinClass& FUN_00d85300(const StandinClass* source);
+    StandinClass& ComputeValue_00d85300(const StandinClass* source);
 };
 
 // @fnv 0x00d85300
-StandinClass& StandinClass::FUN_00d85300(const StandinClass* source)
+// src: GUESS 0x00d85300 (confidence: low)
+StandinClass& StandinClass::ComputeValue_00d85300(const StandinClass* source)
 {
     unk00 = source->unk00;
     value10 = source->value10;
@@ -219,7 +221,8 @@ __forceinline void memCpy4(void* dst, const void* src, int numWords)
 }
 
 // @fnv 0x00d925b0
-void FUN_00d925b0(hkpSimpleContactConstraintAtom* dst, const hkpSimpleContactConstraintAtom* src)
+// src: GUESS 0x00d925b0 (confidence: low)
+void hkpSimpleContactConstraintAtom_ProcessEntries_00d925b0(hkpSimpleContactConstraintAtom* dst, const hkpSimpleContactConstraintAtom* src)
 {
     *(hkpSimpleContactConstraintDataInfo*)&dst->m_infoFlags =
         *(const hkpSimpleContactConstraintDataInfo*)&src->m_infoFlags;
@@ -270,7 +273,7 @@ struct ShapeStub
     int unk10;
     int unk14;
     ShapeStub* unk18;
-    ShapeStub* FUN_00cdf6d0();
+    ShapeStub* GetFieldC();
 };
 
 struct ShapeWithVectors : ShapeStub
@@ -286,7 +289,8 @@ struct ShapeWithTransforms : ShapeStub
 };
 
 // @fnv 0x00d84ee0
-void FUN_00d84ee0(ShapeStub* shape, int key, hkTransform* out)
+// src: GUESS 0x00d84ee0 (confidence: low)
+void hkTransform_ProcessEntries_00d84ee0(ShapeStub* shape, int key, hkTransform* out)
 {
     for (;;)
     {
@@ -297,7 +301,7 @@ void FUN_00d84ee0(ShapeStub* shape, int key, hkTransform* out)
             shape = shape->unk18;
             break;
         case 13:
-            shape = shape->FUN_00cdf6d0();
+            shape = shape->GetFieldC();
             break;
         case 1:
             *out = ((ShapeWithTransforms*)shape)->m_kTransforms[key];

@@ -13,12 +13,12 @@
 #include "../../../../../../../include/hkpShapeCollection.h"
 #include "../../../../../../../include/hkpShapeContainer.h"
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return FUN_00c85750().heap();
+    return hkMemoryRouter_getInstance().heap();
 }
 
 // Allocator-backed hkArray bodies are unit-defined, as declared in hkArray.h.
@@ -43,7 +43,7 @@ template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
 
 template <typename T, typename A> __forceinline hkArray<T, A>& hkArray<T, A>::operator=(const hkArray& a)
 {
-    hkMemoryAllocator& kHeap = FUN_00c85750().heap();
+    hkMemoryAllocator& kHeap = hkMemoryRouter_getInstance().heap();
     if (getCapacity() < a.m_iElementCount)
     {
         if ((m_iCapacityState & 0x80000000) == 0)
@@ -101,7 +101,7 @@ class FUN_00dcd310 : public hkpShapeCollection
     int unk58;
     int unk5C;
 
-    void FUN_00d4b480(const hkpMeshShapeSubpartD4B& kSubpart) throw();
+    void hkpStorageMeshShape_addSubpart(const hkpMeshShapeSubpartD4B& kSubpart) throw();
 };
 
 class FUN_00d4bab0 : public FUN_00dcd310
@@ -121,7 +121,7 @@ FUN_00d4bab0::FUN_00d4bab0(const FUN_00dcd310& kOther) throw()
     m_ulUserData = kOther.m_ulUserData;
     m_bDisableWelding.m_cBooleanValue = kOther.m_bDisableWelding.m_cBooleanValue;
     for (int i = 0; i < kOther.m_kSubparts.GetLogicalSize(); i++)
-        FUN_00d4b480(kOther.m_kSubparts[i]);
+        hkpStorageMeshShape_addSubpart(kOther.m_kSubparts[i]);
     m_kWeldingInfo = kOther.m_kWeldingInfo;
     m_eWeldingType = kOther.m_eWeldingType;
 }
@@ -156,7 +156,7 @@ class FUN_00d4bc00 : public hkReferencedObject
 
     static void operator delete(void* p) throw()
     {
-        FUN_00c85750().heap().blockFree(p, static_cast<FUN_00d4bc00*>(p)->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance().heap().blockFree(p, static_cast<FUN_00d4bc00*>(p)->m_usMemSizeAndFlags);
     }
 
     FUN_00d4bc00* DestroyAndFree(unsigned int uiFlags) throw();
@@ -192,7 +192,7 @@ FUN_00d4be00_cls* FUN_00d4be00_cls::FUN_00d4be00(int flags)
     ((FUN_00d4b400_Obj*)this)->FUN_00d4b400();
     if (flags & 1)
     {
-        hkMemoryRouter* mem = &FUN_00c85750();
+        hkMemoryRouter* mem = &hkMemoryRouter_getInstance();
         hkMemoryAllocator* alloc = mem->m_heap;
         alloc->blockFree(this, m_usMemSizeAndFlags);
     }
@@ -259,7 +259,7 @@ Derived::Derived() : hkpShape(HK_SHAPE_INVALID)
 {}
 
 void __cdecl ResizeAudioStream(void* heap, void* arr, int elemSize);
-void __cdecl FUN_00c908c0(void* heap, void* arr, int newCap, int elemSize);
+void __cdecl hkArrayUtil__reserve(void* heap, void* arr, int newCap, int elemSize);
 extern float DAT_01267e30;
 struct SubpartFlags480
 {
@@ -268,7 +268,8 @@ struct SubpartFlags480
     unsigned short flags;
 };
 
-static __declspec(noinline) int __cdecl FUN_00d4b390(int a, int n)
+// src: HAVOK_LIB 0x00d4b390
+static __declspec(noinline) int __cdecl storageMeshShape_numIndices(int a, int n)
 {
     switch (a)
     {
@@ -297,7 +298,7 @@ template <class T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemory
     {
         int doubled = 2 * capacity;
         int result = needed < doubled ? doubled : needed;
-        FUN_00c908c0(&heap, this, result, sizeof(T));
+        hkArrayUtil__reserve(&heap, this, result, sizeof(T));
     }
 }
 
@@ -320,7 +321,7 @@ template <class T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocato
 
 template <class Arr> __forceinline void GrowIfFull480(Arr& arr, int elemSize)
 {
-    hkMemoryRouter& router = FUN_00c85750();
+    hkMemoryRouter& router = hkMemoryRouter_getInstance();
     if (arr.m_iElementCount == (arr.m_iCapacityState & 0x3fffffff))
         ResizeAudioStream(router.m_heap, &arr, elemSize);
 }
@@ -355,11 +356,12 @@ struct Storage480 : hkReferencedObject
 
 // Copies a mesh subpart's vertex, index, material, and extra data into owned storage arrays and updates the subpart's pointers and strides.
 // @fnv 0x00d4b480
-void FUN_00dcd310::FUN_00d4b480(const hkpMeshShapeSubpartD4B& kSubpart) throw()
+// src: HAVOK_LIB 0x00d4b480
+void FUN_00dcd310::hkpStorageMeshShape_addSubpart(const hkpMeshShapeSubpartD4B& kSubpart) throw()
 {
     hkpMeshShapeSubpartD4B* pSubpart = ExpandInit480(m_kSubparts);
 
-    Storage480* storage = (Storage480*)FUN_00c85750().heap().blockAlloc(0x50);
+    Storage480* storage = (Storage480*)hkMemoryRouter_getInstance().heap().blockAlloc(0x50);
     storage->m_usMemSizeAndFlags = 0x50;
     storage = storage->FUN_00d4bbb0();
 
@@ -393,7 +395,7 @@ void FUN_00dcd310::FUN_00d4b480(const hkpMeshShapeSubpartD4B& kSubpart) throw()
         if (iClamped > 2)
             iClamped = 3;
         pSubpart->unk14 = iClamped + iClamped;
-        int numIndices = FUN_00d4b390(a, kSubpart.unk1C);
+        int numIndices = storageMeshShape_numIndices(a, kSubpart.unk1C);
         hkArray<unsigned short>& arr = storage->idx16;
         unsigned short* dst = arr.expandBy(numIndices);
         idxDst = (int)dst;
@@ -414,7 +416,7 @@ void FUN_00dcd310::FUN_00d4b480(const hkpMeshShapeSubpartD4B& kSubpart) throw()
         if (iClamped > 2)
             iClamped = 3;
         pSubpart->unk14 = (iClamped << 2);
-        int numIndices = FUN_00d4b390(a, kSubpart.unk1C);
+        int numIndices = storageMeshShape_numIndices(a, kSubpart.unk1C);
         hkArray<int>& arr = storage->idx32;
         int* dst = arr.expandBy(numIndices);
         idxDst = (int)dst;
@@ -685,14 +687,15 @@ struct FUN_00dcebd0_Class : hkpShapeCollection
     int m_iCapacityState;
 
     void FUN_00d06290(const FUN_00dcebd0_Class& source);
-    void FUN_00dcebd0(const FUN_00dcebd0_Class& source);
+    void hkpPhysicsSystemWithContacts_copy(const FUN_00dcebd0_Class& source);
 };
 // Calls FUN_00d06290(source), then copies source's int array into this, reallocating through the thread allocator when capacity is smaller.
 // @fnv 0x00dcebd0
-void FUN_00dcebd0_Class::FUN_00dcebd0(const FUN_00dcebd0_Class& source)
+// src: HAVOK_LIB 0x00dcebd0
+void FUN_00dcebd0_Class::hkpPhysicsSystemWithContacts_copy(const FUN_00dcebd0_Class& source)
 {
     FUN_00d06290(source);
-    hkMemoryAllocator* allocator = FUN_00c85750().m_heap;
+    hkMemoryAllocator* allocator = hkMemoryRouter_getInstance().m_heap;
     int capacity = m_iCapacityState & 0x3fffffff;
     if (capacity < source.m_iElementCount)
     {

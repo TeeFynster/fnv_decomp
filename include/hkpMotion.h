@@ -62,7 +62,7 @@ public:
     virtual void vf58(float fTimestep, const hkVector4& kForce, const hkVector4& kPoint);
     virtual void vf5c(float fTimestep, const hkVector4& kForce);
     virtual void StepMotion(float fTimestep, const hkVector4& kTorque);
-    virtual void FUN_00c86610(hkpMotion* pDestination);
+    virtual void getMotionStateAndVelocitiesAndDeactivationType(hkpMotion* pDestination);
 
     MotionType getType() const;
     const hkTransform& getTransform() const;

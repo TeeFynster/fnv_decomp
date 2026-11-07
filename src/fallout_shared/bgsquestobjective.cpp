@@ -63,7 +63,7 @@ BGSQuestObjective::BGSQuestObjective()
 // @fnv 0x005ec330
 const char* BGSQuestObjective::GetDisplayText()
 {
-    return (reinterpret_cast<const StrMem*>(&m_kDisplayText)->FUN_00559450() ? reinterpret_cast<const StrMem*>(&m_kDisplayText)->FUN_00559450()
+    return (reinterpret_cast<const StrMem*>(&m_kDisplayText)->Modelloader_GetReferencedThis() ? reinterpret_cast<const StrMem*>(&m_kDisplayText)->Modelloader_GetReferencedThis()
                                                           : g_emptyTopicInfoPrompt);
 }
 
@@ -150,7 +150,7 @@ void BGSQuestObjective::AddMatchingTargetsToList(void* apListToFill)
 // @fnv 0x005ec310
 unsigned int QuestObjectiveLocalMethods::GetDisplayTextLength()
 {
-    return reinterpret_cast<StrMem*>(&m_kDisplayText)->FUN_004048e0();
+    return reinterpret_cast<StrMem*>(&m_kDisplayText)->BSStringT_char_Length();
 }
 
 struct StandIn
@@ -184,11 +184,11 @@ void QuestObjectiveLocalMethods::SetDisplayText(const char* name)
 namespace fnv_005ec280 {
 struct FUN_00485910_shell
 {
-    static void __cdecl FUN_00485910(int, void*);
+    static void __cdecl TESForm_AddChunk_00485910(int, void*);
 };
 struct FUN_004856f0_shell
 {
-    static void __cdecl FUN_004856f0(int, const char*, unsigned int);
+    static void __cdecl TESForm_AddChunkArray(int, const char*, unsigned int);
 };
 struct Date
 {
@@ -199,8 +199,8 @@ struct Date
 // @fnv 0x005ec280
 void QuestObjectiveLocalMethods::Save()
 {
-    fnv_005ec280::FUN_00485910_shell::FUN_00485910(0x4a424f51, ((BSSimpleList<RegionObjectEntry*>*)this)->GetNext());
-    fnv_005ec280::FUN_004856f0_shell::FUN_004856f0(0x4d414e4e, GetDisplayText(),
+    fnv_005ec280::FUN_00485910_shell::TESForm_AddChunk_00485910(0x4a424f51, ((BSSimpleList<RegionObjectEntry*>*)this)->GetNext());
+    fnv_005ec280::FUN_004856f0_shell::TESForm_AddChunkArray(0x4d414e4e, GetDisplayText(),
                                      GetDisplayTextLength() + 1);
     BSSimpleList<RegionObjectEntry*>* list = GetTargetList();
     while (list && !list->IsEmpty())
@@ -220,8 +220,8 @@ struct QuestObjectiveFlags : TESQuest
 
 extern PlayerCharacter* _g_thePlayer;
 
-void __cdecl FUN_0077a480(void*);
-void __cdecl FUN_0077a5b0(char const*, int, int);
+void __cdecl HUDMainMenu_ShowQuestName(void*);
+void __cdecl HUDMainMenu_ShowQuestObjective(char const*, int, int);
 
 }  // namespace fnv_005ec5d0
 
@@ -229,7 +229,7 @@ void __cdecl FUN_0077a5b0(char const*, int, int);
 void BGSQuestObjective::SetState(QUEST_OBJECTIVE_STATE aeNewState)
 {
     using namespace fnv_005ec5d0;
-    TESQuest* powner = FUN_0044edb0();
+    TESQuest* powner = TESMain_GetThread();
 
     powner->MarkAsModified(0x20000000);
 
@@ -240,17 +240,17 @@ void BGSQuestObjective::SetState(QUEST_OBJECTIVE_STATE aeNewState)
             if (!powner->GetCompleted())
             {
                 powner->SetEnabled(true);
-                if (!_g_thePlayer->FUN_005cbb50())
+                if (!_g_thePlayer->PlayerCharacter_GetActiveQuest())
                 {
-                    _g_thePlayer->FUN_009529d0(powner);
+                    _g_thePlayer->SetActiveQuest(powner);
                 }
             }
 
-            FUN_0077a5b0(GetDisplayText(), 0, 0);
+            HUDMainMenu_ShowQuestObjective(GetDisplayText(), 0, 0);
 
             if (!static_cast<QuestObjectiveFlags*>(powner)->HasFlag20())
             {
-                FUN_0077a480(powner);
+                HUDMainMenu_ShowQuestName(powner);
                 static_cast<QuestObjectiveFlags*>(powner)->SetFlag20(true);
             }
         }
@@ -260,7 +260,7 @@ void BGSQuestObjective::SetState(QUEST_OBJECTIVE_STATE aeNewState)
 
     if (aeNewState == QOS_COMPLETED_DISPLAYED && eState == QOS_DISPLAYED && !powner->GetCompleted())
     {
-        FUN_0077a5b0(GetDisplayText(), 1, 0);
+        HUDMainMenu_ShowQuestObjective(GetDisplayText(), 1, 0);
     }
 
     eState = aeNewState;

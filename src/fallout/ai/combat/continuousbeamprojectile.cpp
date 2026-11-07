@@ -17,9 +17,10 @@ int ContinuousBeamProjectile::Initialize()
 bool __cdecl CanProjectileHit(void*, void*, void*, void*);
 
 // @fnv 0x009ab9c0
-bool ContinuousBeamProjectile::FUN_009ab9c0(void* arg1, NiPoint3* arg2, void* arg3, void* arg4, void* arg5, void* arg6)
+// src: XBOX_PDB 0x009ab9c0
+bool ContinuousBeamProjectile::AddImpact_009ab9c0(void* arg1, NiPoint3* arg2, void* arg3, void* arg4, void* arg5, void* arg6)
 {
-    if (CanProjectileHit(arg1, arg4, this, GetActorBase()) && !FUN_00444d00(0x20) &&
+    if (CanProjectileHit(arg1, arg4, this, GetActorBase()) && !Projectile_IsFlagSet(0x20) &&
         ProcessHit(arg1, arg2, arg3, arg4, arg5, arg6))
     {
         if (m_bHasImpactData)
@@ -27,13 +28,13 @@ bool ContinuousBeamProjectile::FUN_009ab9c0(void* arg1, NiPoint3* arg2, void* ar
             kImpacts.RemoveAll();
         }
         m_bHasImpactData = 0;
-        FUN_009795c0((*arg2 - *static_cast<const ContinuousBeamProjectile*>(this)->GetPos()).Length());
+        Projectile_SetRange((*arg2 - *static_cast<const ContinuousBeamProjectile*>(this)->GetPos()).Length());
         return true;
     }
     return false;
 }
 
-bool __cdecl FUN_0043b300(NiRTTI const*, NiAVObject*);
+bool __cdecl NiObject_IsKindOf(NiRTTI const*, NiAVObject*);
 extern char const* const g_011f4a48_arg1;
 
 // Recursively walks a NiAVObject tree; for NiGeometry objects it marks their geometry data mutable, otherwise recurses into child nodes.
@@ -42,7 +43,7 @@ void ContinuousBeamProjectile::MarkGeometryDataMutable(NiAVObject* ap3D)
 {
     if (ap3D)
     {
-        if (FUN_0043b300((const NiRTTI*)&g_011f4a48_arg1, ap3D))
+        if (NiObject_IsKindOf((const NiRTTI*)&g_011f4a48_arg1, ap3D))
         {
             NiGeometry* pgeom = (NiGeometry*)ap3D;
             NiGeometryData* pdata = pgeom->GetModelData();
@@ -68,12 +69,12 @@ void ContinuousBeamProjectile::MarkGeometryDataMutable(NiAVObject* ap3D)
 
 struct S_009ab280_Target
 {
-    void FUN_005bfbd0(float f);
+    void FOHUDEffectManager_SetBlurIntensityHUD(float f);
 };
 struct S_009ab280_Sub
 {
     int unk00;
-    S_009ab280_Target* FUN_00559450();
+    S_009ab280_Target* Modelloader_GetReferencedThis();
 };
 struct S_009ab280_Owner
 {
@@ -183,40 +184,40 @@ struct S_009ab280_Owner
     int unk19c;
     ContinuousBeamProjectile* unk1a0;
 };
-void __cdecl FUN_005b5e40(const char* msg);
+void __cdecl Warning_005b5e40(const char* msg);
 
 // Sets several flags via FUN_005de0a0, clears unk154, updates m150, and registers this as the owner's unk1a0 or logs an error and calls FUN_009bc8f0.
 // @fnv 0x009ab280
 void ContinuousBeamProjectile::InitContinuousBeam()
 {
-    FUN_005de0a0(0x10, 0);
-    FUN_005de0a0(1, 1);
-    FUN_005de0a0(2, 0);
-    FUN_005de0a0(8, 1);
-    FUN_005de0a0(0x20, 0);
-    FUN_005de0a0(0x100, 1);
-    FUN_005de0a0(0x80, 1);
-    FUN_005de0a0(0x2000, 1);
+    Projectile_SetFlag(0x10, 0);
+    Projectile_SetFlag(1, 1);
+    Projectile_SetFlag(2, 0);
+    Projectile_SetFlag(8, 1);
+    Projectile_SetFlag(0x20, 0);
+    Projectile_SetFlag(0x100, 1);
+    Projectile_SetFlag(0x80, 1);
+    Projectile_SetFlag(0x2000, 1);
     // The shared class does not yet name the trailing state at +0x154.
     *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x154) = 0;
-    FUN_009bda10();
-    if (reinterpret_cast<S_009ab280_Sub*>(&m_spUnk150)->FUN_00559450())
+    Projectile_Initialize();
+    if (reinterpret_cast<S_009ab280_Sub*>(&m_spUnk150)->Modelloader_GetReferencedThis())
     {
-        reinterpret_cast<S_009ab280_Sub*>(&m_spUnk150)->FUN_00559450()->FUN_005bfbd0(GetFirstLightParameter());
+        reinterpret_cast<S_009ab280_Sub*>(&m_spUnk150)->Modelloader_GetReferencedThis()->FOHUDEffectManager_SetBlurIntensityHUD(GetFirstLightParameter());
     }
-    S_009ab280_Owner* owner = reinterpret_cast<S_009ab280_Owner*>(FUN_00874480());
+    S_009ab280_Owner* owner = reinterpret_cast<S_009ab280_Owner*>(Projectile_GetShooter());
     if (owner)
     {
         if (owner->unk1a0)
         {
-            owner->unk1a0->FUN_009bc8f0();
+            owner->unk1a0->Projectile_Kill();
         }
         owner->unk1a0 = this;
     }
     else
     {
-        FUN_005b5e40("Continuous Beam created without Shooter!");
-        FUN_009bc8f0();
+        Warning_005b5e40("Continuous Beam created without Shooter!");
+        Projectile_Kill();
     }
 }
 
@@ -241,7 +242,7 @@ struct ScTransform
 {
     char pad00[0xc];
     float m_fScale;
-    void FUN_00439180(float fScale);
+    void ScaleComponents(float fScale);
 };
 struct ScData
 {
@@ -290,24 +291,24 @@ struct ScGeomData
 struct ScAccess
 {
     ScAccess();
-    void FUN_00534570(int iIndex, ScPoint3* pkPt);
+    void NiGeometryDataIteratorNiPoint3_Get(int iIndex, ScPoint3* pkPt);
     void FUN_0065b390(int iIndex, ScPoint3* pkPt);
     int pad[3];
 };
 struct ScGeom
 {
-    ScGeomData* FUN_004a8a90();
+    ScGeomData* NiTimeController_GetNext();
     bool FUN_00a67360(int i);
-    void FUN_00a67410(ScAccess* pkAccess);
-    void FUN_00a673d0();
-    ScPoint3* FUN_007af430();
+    void NiGeometryData_GetVerticesIterator(ScAccess* pkAccess);
+    void NiGeometryData_UnlockPackedVertexData();
+    ScPoint3* BGSSaveFormBuffer_GetForm();
     unsigned short FUN_004a8ae0();
     ScPoint2* FUN_0055b980();
 };
 struct ScChild
 {
     float FUN_00639b20();
-    void FUN_004ee4b0(float fValue);
+    void BSShaderProperty_SetDepthBias(float fValue);
 };
 struct ScAVObject
 {
@@ -367,12 +368,12 @@ struct ScAVObject
     virtual void v35();
     virtual void FUN_vd8(void* pkArg);
     ScTransform* GetSourceFilesFromForm();
-    ScGeom* FUN_005495f0();
-    unsigned int FUN_004d7d50();
+    ScGeom* NiGeometry_GetModelData();
+    unsigned int NiParticleSystem_GetModifierCount();
     ScAVObject* GetByIndex(unsigned int uiIndex);
 };
-bool __cdecl FUN_0043b300(ScRTTI* pkRTTI, void* pkObject);
-void* __cdecl FUN_0043c4b0();
+bool __cdecl NiObject_IsKindOf(ScRTTI* pkRTTI, void* pkObject);
+void* __cdecl NiXenonRenderer_GetRenderer();
 
 // Scales pkObject's transform by fScale and scales its geometry vertices or child objects depending on the geometry type.
 // @fnv 0x009aba90
@@ -381,51 +382,51 @@ void ContinuousBeamProjectile::ScaleObject(NiAVObject* pkObject, float fScale)
     if (pkObject)
     {
         reinterpret_cast<ScAVObject*>(pkObject)->GetSourceFilesFromForm()->m_fScale *= fScale;
-        reinterpret_cast<ScAVObject*>(pkObject)->GetSourceFilesFromForm()->FUN_00439180(fScale);
-        ScGeom* pkGeom = reinterpret_cast<ScAVObject*>(pkObject)->FUN_005495f0();
+        reinterpret_cast<ScAVObject*>(pkObject)->GetSourceFilesFromForm()->ScaleComponents(fScale);
+        ScGeom* pkGeom = reinterpret_cast<ScAVObject*>(pkObject)->NiGeometry_GetModelData();
         if (pkGeom)
         {
-            if (FUN_0043b300(&g_kRTTI_01202558, pkGeom))
+            if (NiObject_IsKindOf(&g_kRTTI_01202558, pkGeom))
             {
-                if (FUN_0043b300(&g_kRTTI_012024e0, pkObject))
+                if (NiObject_IsKindOf(&g_kRTTI_012024e0, pkObject))
                 {
                     ScAVObject* pkNode = reinterpret_cast<ScAVObject*>(pkObject);
-                    for (unsigned int i = 0; i < pkNode->FUN_004d7d50(); i++)
+                    for (unsigned int i = 0; i < pkNode->NiParticleSystem_GetModifierCount(); i++)
                     {
                         ScAVObject* pkChild = pkNode->GetByIndex(i);
-                        if (FUN_0043b300(&g_kRTTI_01202508, pkChild))
+                        if (NiObject_IsKindOf(&g_kRTTI_01202508, pkChild))
                         {
                             ScChild* pkTarget = (ScChild*)pkChild;
-                            pkTarget->FUN_004ee4b0(pkTarget->FUN_00639b20() * fScale);
+                            pkTarget->BSShaderProperty_SetDepthBias(pkTarget->FUN_00639b20() * fScale);
                         }
                     }
                 }
             }
-            else if (pkGeom->FUN_004a8a90() && pkGeom->FUN_004a8a90()->FUN_v8c())
+            else if (pkGeom->NiTimeController_GetNext() && pkGeom->NiTimeController_GetNext()->FUN_v8c())
             {
                 ScAccess kAccess;
-                ScGeomData* pkData = pkGeom->FUN_004a8a90();
+                ScGeomData* pkData = pkGeom->NiTimeController_GetNext();
                 if (pkGeom->FUN_00a67360(1))
                 {
-                    pkGeom->FUN_00a67410(&kAccess);
+                    pkGeom->NiGeometryData_GetVerticesIterator(&kAccess);
                     for (int j = 0; j < ((ScData*)pkData)->FUN_0047d370(); j++)
                     {
                         ScPoint3 kPt = g_kZero_011f426c;
-                        kAccess.FUN_00534570(j, &kPt);
+                        kAccess.NiGeometryDataIteratorNiPoint3_Get(j, &kPt);
                         kPt.y *= fScale;
                         kAccess.FUN_0065b390(j, &kPt);
                     }
-                    pkGeom->FUN_00a673d0();
+                    pkGeom->NiGeometryData_UnlockPackedVertexData();
                 }
             }
-            else if (pkGeom->FUN_007af430())
+            else if (pkGeom->BGSSaveFormBuffer_GetForm())
             {
                 for (int k = 0; k < pkGeom->FUN_004a8ae0(); k++)
                 {
-                    pkGeom->FUN_007af430()[k].y *= fScale;
+                    pkGeom->BGSSaveFormBuffer_GetForm()[k].y *= fScale;
                     pkGeom->FUN_0055b980()[k].y *= fScale;
                 }
-                reinterpret_cast<ScAVObject*>(pkObject)->FUN_vd8(FUN_0043c4b0());
+                reinterpret_cast<ScAVObject*>(pkObject)->FUN_vd8(NiXenonRenderer_GetRenderer());
             }
         }
     }
@@ -489,7 +490,7 @@ class AlignSceneObject
     virtual void Unk_02C();
     virtual void Unk_02D();
     virtual void UpdateWorldData(NiUpdateData& kData);  // +0xb8
-    AlignMatrix& FUN_00461130();                        // rotation
+    AlignMatrix& NiAVObject_GetWorldRotate();                        // rotation
 };
 
 class AlignTargetSource
@@ -639,13 +640,13 @@ void ContinuousBeamProjectile::UpdateAlignment()
         float fScale = GetFirstLightParameter();
         if (fScale < 1.0)
             fScale = 1.0f;
-        FUN_009abd00(reinterpret_cast<NiAVObject*>(pkObject2), fScale, 0.0f);
-        AlignSceneObject* pkTarget2 = FUN_00874480() ? reinterpret_cast<AlignTargetSource*>(FUN_00874480())->GetTargetNode() : 0;
+        fn_9ABD00_Recurse(reinterpret_cast<NiAVObject*>(pkObject2), fScale, 0.0f);
+        AlignSceneObject* pkTarget2 = Projectile_GetShooter() ? reinterpret_cast<AlignTargetSource*>(Projectile_GetShooter())->GetTargetNode() : 0;
         if (pkTarget2)
         {
             NiUpdateData kData2(0.0f, false, false);
             pkObject2->UpdateWorldData(kData2);
-            reinterpret_cast<AlignMatrix&>(m_kImpactTransform.m_Rotate) = reinterpret_cast<AlignSceneObject*>(GetNiNode())->FUN_00461130().FUN_0043f8d0(pkTarget2->FUN_00461130().FUN_004b45b0());
+            reinterpret_cast<AlignMatrix&>(m_kImpactTransform.m_Rotate) = reinterpret_cast<AlignSceneObject*>(GetNiNode())->NiAVObject_GetWorldRotate().FUN_0043f8d0(pkTarget2->NiAVObject_GetWorldRotate().FUN_004b45b0());
         }
     }
 }
@@ -654,22 +655,23 @@ extern NiRTTI DAT_011f4acc;
 
 // If obj is non-null, scales its point when f2 > 0, then scales it or recursively processes its child nodes.
 // @fnv 0x009abd00
-void ContinuousBeamProjectile::FUN_009abd00(NiAVObject* apObject, float f1, float f2)
+// src: COMMUNITY 0x009abd00
+void ContinuousBeamProjectile::fn_9ABD00_Recurse(NiAVObject* apObject, float f1, float f2)
 {
     if (apObject)
     {
         if (f2 > 0.0f)
         {
             float scale = f1 / f2;
-            NiPoint3 translate8 = apObject->FUN_0043c490();
+            NiPoint3 translate8 = apObject->GetTranslate_0043c490();
             translate8 *= scale;
-            apObject->FUN_00440460(translate8);
+            apObject->NiAVObject_SetTranslate(translate8);
         }
 
-        if (FUN_0043b300(&DAT_011f4acc, apObject))
+        if (NiObject_IsKindOf(&DAT_011f4acc, apObject))
         {
             NiAVObject* target2 = apObject;
-            float val3 = (f2 > 0.0f) ? f2 : this->FUN_00979840(target2);
+            float val3 = (f2 > 0.0f) ? f2 : this->FindBeamGeometryLength(target2);
             if (val3 != 0.0f)
             {
                 float fRatio = f1 / val3;
@@ -684,7 +686,7 @@ void ContinuousBeamProjectile::FUN_009abd00(NiAVObject* apObject, float f1, floa
                 for (unsigned int iIndex = 0; iIndex < pNode->FUN_0043b480(); ++iIndex)
                 {
                     NiAVObject* pChild = pNode->FUN_0043b4a0(iIndex);
-                    this->FUN_009abd00(pChild, f1, f2);
+                    this->fn_9ABD00_Recurse(pChild, f1, f2);
                 }
             }
         }

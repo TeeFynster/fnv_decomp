@@ -43,11 +43,11 @@ __forceinline void hkVector4::setMax4(const hkVector4& a, const hkVector4& b)
 }
 
 // hkArray.h identifies hkMemoryRouter as the shared hkMemoryRouter layout.
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return FUN_00c85750().heap();
+    return hkMemoryRouter_getInstance().heap();
 }
 template <typename T> __forceinline void hkMemoryAllocator::_bufFree(void* p, int n)
 {
@@ -108,7 +108,7 @@ struct PackedTerminalRemoveInfo
 void hkpRemoveTerminalsMoppModifier::addTerminalRemoveInfo(int relativeMoppAddress) throw()
 {
     hkArray<hkUint32>* arr = &m_kRemovedTerminalIds;
-    hkMemoryRouter& router = FUN_00c85750();
+    hkMemoryRouter& router = hkMemoryRouter_getInstance();
     if (arr->m_iElementCount == (int)(arr->m_iCapacityState & 0x3fffffff))
     {
         hkArrayUtil::_reserveMore(router.heap(), arr, 4);
@@ -169,12 +169,12 @@ hkpRemoveTerminalsMoppModifier::~hkpRemoveTerminalsMoppModifier() throw()
 struct __declspec(align(16)) FUN_00e67230_Obj
 {
     int storage[20];
-    void FUN_00e67230(int a1, int a2, int a3);
+    void hkpMoppModifyVirtualMachine_queryAabb(int a1, int a2, int a3);
 };
 
 // @fnv 0x00e5d040
 void __cdecl ConstructTemporaryObject(int a1, int a2, int a3)
 {
     FUN_00e67230_Obj tmp;
-    tmp.FUN_00e67230(a1, a2, a3);
+    tmp.hkpMoppModifyVirtualMachine_queryAabb(a1, a2, a3);
 }

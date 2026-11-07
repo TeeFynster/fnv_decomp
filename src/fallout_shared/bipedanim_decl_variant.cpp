@@ -6,7 +6,8 @@
 #include "bipedanim_decls_decl_bipedanim.h"
 
 // @fnv 0x004abd30
-void BipedAnim::FUN_004abd30(IO_TASK_PRIORITY priority, NiPointer<QueuedHelmet>& queuedHelmet, QueuedFile* file)
+// src: XBOX_PDB 0x004abd30
+void BipedAnim::QueueBipedParts(IO_TASK_PRIORITY priority, NiPointer<QueuedHelmet>& queuedHelmet, QueuedFile* file)
 {
     unsigned int modelFlags;
     TESNPC* npc;
@@ -20,8 +21,8 @@ void BipedAnim::FUN_004abd30(IO_TASK_PRIORITY priority, NiPointer<QueuedHelmet>&
         {
             if (object[i].m_pModel && object[i].m_pModel != (TESModel*)-1)
             {
-                modelFlags |= object[i].m_pModel->FUN_004abf80();
-                if (IsSlotHidden((BIPED_OBJECT)i) && *DAT_011c5ef0.Bool() && FUN_0043faf0() &&
+                modelFlags |= object[i].m_pModel->TESModel_GetSkinFlags();
+                if (IsSlotHidden((BIPED_OBJECT)i) && *DAT_011c5ef0.Bool() && BSFaceGenManager_GetUseFaceGenHeads() &&
                     CanLoadHiddenBipedObjects())
                 {
                     RequestModelLoad(priority, file, pHelmetQueueEntry, (BIPED_OBJECT)i);
@@ -38,7 +39,7 @@ void BipedAnim::FUN_004abd30(IO_TASK_PRIORITY priority, NiPointer<QueuedHelmet>&
                     TESBipedModelForm* biped = TESBipedModelForm::GetFormAsBipedModel(object[i].pParent);
                     if (biped)
                     {
-                        const char* path = reinterpret_cast<const char*>(biped->FUN_00480ce0());
+                        const char* path = reinterpret_cast<const char*>(biped->GetBipedConstraint());
                         if (*path)
                             g_modelLoader->QueueFile(path, priority, file, 3, true, false, false);
                     }

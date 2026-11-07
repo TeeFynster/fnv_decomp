@@ -46,7 +46,7 @@ void SkyTask::Run()
 SkyTask::SkyTask(NiPointer<NiTexture>* texture, const char* name) : QueuedFileEntry(3)
 {
     apTextureOutput = texture;
-    FUN_00c3cee0(name);
+    SetFileName_00c3cee0(name);
     LookupFileEntryByArchive(1);
 }
 

@@ -23,25 +23,25 @@ public:
 
         SptFilename(const SptFilename& rhs);
         ~SptFilename();
-        void FUN_0044a730(bool built, unsigned int n);
+        void fopen_0044a730(bool built, unsigned int n);
         SptFilename& AssignFromString(const SptFilename& rhs);
-        SptFilename& FUN_00b2b910(const SptFilename& rhs);
+        SptFilename& EvaluateValue_00b2b910(const SptFilename& rhs);
         void operator=(const SptFilename& rhs);
     };
 
     struct Sub94
     {
-        void FUN_00b3d1b0(ElementIterator* a);
+        void SIdvLeafInfo_Parse(ElementIterator* a);
     };
 
     struct SubA4
     {
-        void FUN_00b2db10(SubA4* a);
+        void CTreeEngine_SetLeafTextures(SubA4* a);
     };
 
     struct Sub10c
     {
-        void FUN_00b408b0(ElementIterator* a);
+        void SIdvWindInfo_Parse(ElementIterator* a);
     };
 
     float* m_pfTreeSize;
@@ -106,20 +106,20 @@ public:
     CTreeEngine(int param);
     virtual ~CTreeEngine();
 
-    void FUN_00b2bc70(float v);
-    void FUN_00b2bcf0(float* a, float* b);
-    void FUN_00b2bd20(float fSize, float fVariance);
+    void SetWind(float v);
+    void CTreeEngine_GetSize(float* a, float* b);
+    void SetSize_00b2bd20(float fSize, float fVariance);
     float GetNormalizedValue();
-    void FUN_00b2bdc0(float a, float b);
+    void UpdateFields_00b2bdc0(float a, float b);
     void InitSeed(unsigned int seed);
     void InitSeed(int seed);
-    bool FUN_00b2b550(CTreeFileAccessImpl* file);
-    void FUN_00b2bde0(ElementIterator* a);
-    void FUN_00b2cbc0(ElementIterator* a);
-    void FUN_00b2daf0(ElementIterator* a);
-    void FUN_00b2ceb0(ElementIterator* a);
-    void FUN_00b2c790(ElementIterator* a);
-    void FUN_00b2c130();
-    void FUN_00b2d090(TreeFileAccess* file);
-    void FUN_00b2d2e0(Reader* a);
+    bool Parse_00b2b550(CTreeFileAccessImpl* file);
+    void ParseTreeInfo(ElementIterator* a);
+    void ParseLeafCluster(ElementIterator* a);
+    void CTreeEngine_ParseFlareSeed(ElementIterator* a);
+    void ParseLodInfo(ElementIterator* a);
+    void ProcessEntries_00b2c790(ElementIterator* a);
+    void BuildBranchLods();
+    void ParseTextureControls(TreeFileAccess* file);
+    void ParseFlareInfo(Reader* a);
 };

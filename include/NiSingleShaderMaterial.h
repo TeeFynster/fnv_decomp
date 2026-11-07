@@ -13,7 +13,7 @@ class NiSingleShaderMaterial : public NiMaterial
 {
 public:
     virtual ~NiSingleShaderMaterial();
-    virtual void* FUN_00aa06e0();
+    virtual void* GetGlobalObjectAddress_00aa06e0();
     virtual void vf03();
     virtual void vf04();
     virtual void vf05();
@@ -34,11 +34,11 @@ public:
                                                  const NiPropertyState* pkPropertyState,
                                                  const NiDynamicEffectState* pkDynamicEffectState,
                                                  unsigned int uiMaterialExtraData);
-    virtual NiShader* FUN_00aa07a0(int a, int b, int c, int d, int key);
+    virtual NiShader* GetCurrentShader(int a, int b, int c, int d, int key);
     virtual void ReleaseShader();
     virtual void vf21();
 
-    NiSingleShaderMaterial* FUN_00aa06f0(void* name, const char* filename, bool createShader);
+    NiSingleShaderMaterial* NiSingleShaderMaterial_00aa06f0(void* name, const char* filename, bool createShader);
     NiSingleShaderMaterial* Destroy(unsigned char flags);
     void BaseCleanup();
 

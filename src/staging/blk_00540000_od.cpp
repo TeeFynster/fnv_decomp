@@ -25,23 +25,25 @@
 
 struct FUN_00540700_Class
 {
-    int FUN_00540780(int);
-    int FUN_00540700();
+    int NiTPointerMap_unsigned_int_TESGrassAreaParam_NiTPointerMap(int);
+    int GrassAreaParamsMap_GrassAreaParamsMap();
 };
 
 // @fnv 0x00540700
-int FUN_00540700_Class::FUN_00540700()
+// src: COMMUNITY 0x00540700
+int FUN_00540700_Class::GrassAreaParamsMap_GrassAreaParamsMap()
 {
-    return FUN_00540780(0x25);
+    return NiTPointerMap_unsigned_int_TESGrassAreaParam_NiTPointerMap(0x25);
 }
 
 struct FUN_005407b0_Class
 {
-    void __thiscall FUN_005407b0(char a);
+    void __thiscall UpdateState_005407b0(char a);
 };
 
 // @fnv 0x005407b0
-void __thiscall FUN_005407b0_Class::FUN_005407b0(char acValue)
+// src: GUESS 0x005407b0 (confidence: low)
+void __thiscall FUN_005407b0_Class::UpdateState_005407b0(char acValue)
 {
     *reinterpret_cast<char*>(this) = acValue;
 }
@@ -50,12 +52,13 @@ struct FUN_00540830_class
 {
     const char* vtbl;
     void FUN_00540b00(int a, int b);
-    FUN_00540830_class* FUN_00540830(int a, int b);
+    FUN_00540830_class* SetVtableAndProcessState_00540830(int a, int b);
 };
 
 // Calls FUN_00540b00 with the two arguments, sets vtbl to "p\nT", and returns this.
 // @fnv 0x00540830
-FUN_00540830_class* FUN_00540830_class::FUN_00540830(int aiArg1, int aiArg2)
+// src: GUESS 0x00540830 (confidence: low)
+FUN_00540830_class* FUN_00540830_class::SetVtableAndProcessState_00540830(int aiArg1, int aiArg2)
 {
     FUN_00540b00(aiArg1, aiArg2);
     vtbl = "p\nT";
@@ -77,34 +80,37 @@ void TaskQueueInterface::SetTaskFlag(bool enabled)
 
 struct FUN_00549610_Class
 {
-    void FUN_00549610(void* arg);
+    void BSPortal_SetSharedGeometryNode(void* arg);
 };
 
 // @fnv 0x00549610
-void FUN_00549610_Class::FUN_00549610(void* arg)
+// src: XBOX_PDB 0x00549610
+void FUN_00549610_Class::BSPortal_SetSharedGeometryNode(void* arg)
 {
     *(GO*)((char*)this + 0x104) = arg;
 }
 
-void __cdecl FUN_00553320(unsigned int a, unsigned int b);
+void __cdecl ourMemalign(unsigned int a, unsigned int b);
 
 // @fnv 0x00553300
-void __cdecl FUN_00553300(unsigned int blocksize)
+// src: GUESS 0x00553300 (confidence: medium)
+void __cdecl Object_OurMemalign_Thunk(unsigned int blocksize)
 {
-    FUN_00553320(16, blocksize);
+    ourMemalign(16, blocksize);
 }
 
 struct FUN_00554590_Class
 {
     void* vtbl;
     void __thiscall FUN_00c74760();
-    void* __thiscall FUN_00554590();
+    void* __thiscall SetVtableAndProcessState_00554590();
 };
 
 extern int DAT_0102f10c;
 
 // @fnv 0x00554590
-void* __thiscall FUN_00554590_Class::FUN_00554590()
+// src: GUESS 0x00554590 (confidence: low)
+void* __thiscall FUN_00554590_Class::SetVtableAndProcessState_00554590()
 {
     FUN_00c74760();
     vtbl = &DAT_0102f10c;
@@ -113,34 +119,36 @@ void* __thiscall FUN_00554590_Class::FUN_00554590()
 
 struct FUN_005545b0
 {
-    void FUN_005545d0();
+    void ForwardCall_005545d0();
     void Call();
 };
 // @fnv 0x005545b0
 void FUN_005545b0::Call()
 {
-    FUN_005545d0();
+    ForwardCall_005545d0();
 }
 
 struct FUN_005545d0_Class
 {
     void FUN_005545f0();
-    void FUN_005545d0();
+    void ForwardCall_005545d0();
 };
 
 // @fnv 0x005545d0
-void FUN_005545d0_Class::FUN_005545d0()
+// src: GUESS 0x005545d0 (confidence: low)
+void FUN_005545d0_Class::ForwardCall_005545d0()
 {
     FUN_005545f0();
 }
 
 struct FUN_00554650_Class
 {
-    void __thiscall FUN_00554650();
+    void __thiscall UpdateState_00554650();
 };
 
 // @fnv 0x00554650
-void __thiscall FUN_00554650_Class::FUN_00554650()
+// src: GUESS 0x00554650 (confidence: low)
+void __thiscall FUN_00554650_Class::UpdateState_00554650()
 {
     *(char**)((char*)this) = "pFU";
 }
@@ -148,7 +156,8 @@ void __thiscall FUN_00554650_Class::FUN_00554650()
 void __cdecl WriteRenderStatsFile(int);
 
 // @fnv 0x005586c0
-void __cdecl FUN_005586c0(int a)
+// src: COMMUNITY 0x005586c0
+void __cdecl TESObjectCELL_DefaultRenderTestCallback(int a)
 {
     WriteRenderStatsFile(a);
 }
@@ -171,19 +180,20 @@ FUN_00559e50_Class* __thiscall FUN_00559e50_Class::InitializeWithGlobal(int arg)
 
 struct FUN_0055a020_Class
 {
-    void __thiscall FUN_0055a020();
+    void __thiscall CreateRuntimeWorkItem_Thunk();
     void __thiscall CreateRuntimeWorkItem();
 };
 
 // @fnv 0x0055a020
-void __thiscall FUN_0055a020_Class::FUN_0055a020()
+// src: GUESS 0x0055a020 (confidence: medium)
+void __thiscall FUN_0055a020_Class::CreateRuntimeWorkItem_Thunk()
 {
     ((FUN_0055a020_Class*)((char*)this + 0xc))->CreateRuntimeWorkItem();
 }
 
 struct FUN_0055a220_class
 {
-    void FUN_0055a270();
+    void EvaluateValue_0055a270();
 };
 
 struct FUN_0055a220 : FUN_0055a220_class
@@ -194,19 +204,20 @@ struct FUN_0055a220 : FUN_0055a220_class
 // @fnv 0x0055a220
 FUN_0055a220::FUN_0055a220()
 {
-    FUN_0055a270();
+    EvaluateValue_0055a270();
 }
 
 struct FUN_0055a290_Class
 {
-    void FUN_0055a2b0();
-    void FUN_0055a290();
+    void ForwardCall_0055a2b0();
+    void ForwardCall_0055a290();
 };
 
 // @fnv 0x0055a290
-void FUN_0055a290_Class::FUN_0055a290()
+// src: GUESS 0x0055a290 (confidence: low)
+void FUN_0055a290_Class::ForwardCall_0055a290()
 {
-    FUN_0055a2b0();
+    ForwardCall_0055a2b0();
 }
 
 struct FUN_0055a2b0_Class
@@ -214,11 +225,12 @@ struct FUN_0055a2b0_Class
     void* m0;
     void* m1;
     void FUN_006208d0();
-    void FUN_0055a2b0();
+    void ForwardCall_0055a2b0();
 };
 
 // @fnv 0x0055a2b0
-void FUN_0055a2b0_Class::FUN_0055a2b0()
+// src: GUESS 0x0055a2b0 (confidence: low)
+void FUN_0055a2b0_Class::ForwardCall_0055a2b0()
 {
     ((FUN_0055a2b0_Class*)((char*)this + 8))->FUN_006208d0();
 }
@@ -240,11 +252,12 @@ extern void __cdecl _NiFreeAlias(void*);
 struct FUN_00540a10_cls : public NiTPointerMap<int, int>
 {
     void* b;
-    void FUN_00540a10();
+    void SetVtableAndProcessState_00540a10();
 };
 
 // @fnv 0x00540a10
-void FUN_00540a10_cls::FUN_00540a10()
+// src: GUESS 0x00540a10 (confidence: low)
+void FUN_00540a10_cls::SetVtableAndProcessState_00540a10()
 {
     *(void**)this = &DAT_0102e47c;
     NiTPointerMap::RemoveAll();
@@ -260,10 +273,11 @@ struct FUN_00559230_class
     void* m_auiShapeKeys;
     void* pAudioItems;
     void RemoveAll();
-    void FUN_00559230();
+    void ReleaseStorage_00559230();
 };
 // @fnv 0x00559230
-void FUN_00559230_class::FUN_00559230()
+// src: GUESS 0x00559230 (confidence: low)
+void FUN_00559230_class::ReleaseStorage_00559230()
 {
     m_vft = &DAT_0102f398;
     RemoveAll();
@@ -300,12 +314,13 @@ struct FUN_00559ff0_class
     void* vtbl;
     int unused;
     void* data;
-    void __thiscall FUN_00559ff0();
+    void __thiscall SetVtableAndProcessState_00559ff0();
 };
 
 // Resets the vtable pointer, clears the pointer map contents, and frees the data pointer.
 // @fnv 0x00559ff0
-void __thiscall FUN_00559ff0_class::FUN_00559ff0()
+// src: GUESS 0x00559ff0 (confidence: low)
+void __thiscall FUN_00559ff0_class::SetVtableAndProcessState_00559ff0()
 {
     vtbl = &DAT_0102f468;
     ((NiTPointerMap<int, int>*)this)->RemoveAll();
@@ -331,7 +346,7 @@ void* __thiscall FUN_005407d0_Class::FUN_005407d0(unsigned int flags)
 
 struct FUN_00540800_Class
 {
-    void __thiscall FUN_00540800();
+    void __thiscall UpdateFields_00540800();
 };
 struct FUN_00540a40_Class : public FUN_00540800_Class
 {
@@ -341,7 +356,7 @@ struct FUN_00540a40_Class : public FUN_00540800_Class
 // @fnv 0x00540a40
 void* __thiscall FUN_00540a40_Class::FUN_00540a40(unsigned int flags)
 {
-    FUN_00540800_Class::FUN_00540800();
+    FUN_00540800_Class::UpdateFields_00540800();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -350,7 +365,7 @@ void* __thiscall FUN_00540a40_Class::FUN_00540a40(unsigned int flags)
 namespace fnv_00540a70 {
 struct FUN_00540800_Class
 {
-    void __thiscall FUN_00537ce0();
+    void __thiscall ForwardCall_00537ce0();
 };
 struct FUN_00540a70_Class : public FUN_00540800_Class
 {
@@ -360,7 +375,7 @@ struct FUN_00540a70_Class : public FUN_00540800_Class
 // @fnv 0x00540a70
 FUN_00540a70_Class* __thiscall FUN_00540a70_Class::FUN_00540a70(unsigned int flags)
 {
-    FUN_00537ce0();
+    ForwardCall_00537ce0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -378,7 +393,7 @@ struct FUN_00540aa0_Class : public FUN_00540a10_cls
 // @fnv 0x00540aa0
 void* FUN_00540aa0_Class::FUN_00540aa0(unsigned int flags)
 {
-    FUN_00540a10();
+    SetVtableAndProcessState_00540a10();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -395,7 +410,7 @@ struct FUN_00554670_Class : public FUN_00554650_Class
 // @fnv 0x00554670
 void* FUN_00554670_Class::FUN_00554670(unsigned int flags)
 {
-    FUN_00554650();
+    UpdateState_00554650();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -437,14 +452,14 @@ void* __thiscall FUN_005598a0_Class::FUN_005598a0(unsigned int flags)
 void __cdecl Deallocate(void*);
 struct FUN_005598d0_Class
 {
-    void __thiscall FUN_00559230();
+    void __thiscall ReleaseStorage_00559230();
     void* __thiscall FUN_005598d0(unsigned int flags);
 };
 // Calls FUN_00559230, then frees this with Deallocate when flags has bit 0 set, and returns this.
 // @fnv 0x005598d0
 void* __thiscall FUN_005598d0_Class::FUN_005598d0(unsigned int flags)
 {
-    FUN_00559230();
+    ReleaseStorage_00559230();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -452,13 +467,13 @@ void* __thiscall FUN_005598d0_Class::FUN_005598d0(unsigned int flags)
 
 struct FUN_005422b0Class
 {
-    void __thiscall FUN_00559460();
+    void __thiscall UpdateFields_00559460();
     void* __thiscall FUN_00559940(unsigned int flags);
 };
 // @fnv 0x00559940
 void* __thiscall FUN_005422b0Class::FUN_00559940(unsigned int flags)
 {
-    FUN_00559460();
+    UpdateFields_00559460();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -467,14 +482,14 @@ void* __thiscall FUN_005422b0Class::FUN_00559940(unsigned int flags)
 namespace fnv_00559970 {
 struct FUN_005422b0Class
 {
-    void FUN_005422b0();
+    void ForwardCall_005422b0();
     void* FUN_00559970(unsigned int flags);
 };
 void __cdecl operator delete(void*);
 // @fnv 0x00559970
 void* __thiscall FUN_005422b0Class::FUN_00559970(unsigned int flags)
 {
-    FUN_005422b0();
+    ForwardCall_005422b0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -496,11 +511,11 @@ void* __thiscall GlobalObject_00559cc0::FUN_00559cf0(unsigned int flags)
 }
 
 void __cdecl Deallocate(void*);
-void FUN_00559ff0();
+void SetVtableAndProcessState_00559ff0();
 
 struct FUN_0055a130_Class
 {
-    void FUN_00559ff0();
+    void SetVtableAndProcessState_00559ff0();
     void* FUN_0055a130(unsigned int flags);
 };
 
@@ -508,7 +523,7 @@ struct FUN_0055a130_Class
 // @fnv 0x0055a130
 void* FUN_0055a130_Class::FUN_0055a130(unsigned int flags)
 {
-    FUN_00559ff0();
+    SetVtableAndProcessState_00559ff0();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -556,7 +571,8 @@ struct FUN_00540940_Standin
     void __thiscall InitBuffer(int);
 };
 // @fnv 0x00540780
-int FUN_00540700_Class::FUN_00540780(int a)
+// src: EXE 0x00540780
+int FUN_00540700_Class::NiTPointerMap_unsigned_int_TESGrassAreaParam_NiTPointerMap(int a)
 {
     ((FUN_00540940_Standin*)this)->InitBuffer(a);
     *(void**)this = (void*)&DAT_0102e44c;
@@ -566,7 +582,8 @@ int FUN_00540700_Class::FUN_00540780(int a)
 void __cdecl MyDeallocate(void**);
 // Assigns the string literal "@\nT" to the object and deallocates the pointer stored at offset 4.
 // @fnv 0x00540800
-void __thiscall FUN_00540800_Class::FUN_00540800()
+// src: GUESS 0x00540800 (confidence: low)
+void __thiscall FUN_00540800_Class::UpdateFields_00540800()
 {
     *(const char**)this = "@\nT";
     MyDeallocate(*(void***)((char*)this + 4));
@@ -574,7 +591,7 @@ void __thiscall FUN_00540800_Class::FUN_00540800()
 
 struct Date
 {
-    void FUN_00540ad0();
+    void hkArray_unsigned_char_hkContainerHeapAllocator_clearAndDeallocate();
     ~Date();
 };
 struct FUN_005408e0 : Date
@@ -584,7 +601,7 @@ struct FUN_005408e0 : Date
 // @fnv 0x005408e0
 FUN_005408e0::~FUN_005408e0()
 {
-    FUN_00540ad0();
+    hkArray_unsigned_char_hkContainerHeapAllocator_clearAndDeallocate();
 }
 
 void* __cdecl NiMalloc(unsigned int);
@@ -622,10 +639,11 @@ struct FUN_00540b70_Class
     unsigned int pad;
     unsigned int m1;
     void __thiscall DestroyRange();
-    void __thiscall FUN_00540b70(void* a);
+    void __thiscall hkArrayBase_unsigned_char_clearAndDeallocate(void* a);
 };
 // @fnv 0x00540b70
-void __thiscall FUN_00540b70_Class::FUN_00540b70(void* a)
+// src: XBOX_PDB 0x00540b70
+void __thiscall FUN_00540b70_Class::hkArrayBase_unsigned_char_clearAndDeallocate(void* a)
 {
     DestroyRange();
     if (!(m1 & 0x80000000))
@@ -660,33 +678,35 @@ void __thiscall FUN_00540c20_Holder::CallVirtualWithArgs(int aiArg1, int aiArg2)
 
 extern int DAT_011cc54c;
 // @fnv 0x00541cd0
-void FUN_00541cd0()
+// src: XBOX_PDB 0x00541cd0
+void TESWaterListener_ClearExteriorListener()
 {
     DAT_011cc54c = 0;
 }
 
-bool __cdecl FUN_0040eb10(float a, float b, float c);
+bool __cdecl FloatEQ(float a, float b, float c);
 struct DoorH
 {
     Sky* GetParentWorldSpace();
 };
 struct FUN_00547440_Class
 {
-    void FUN_00547440(float f);
+    void TESObjectCELL_SetWaterHeight(float f);
 };
 // @fnv 0x00547440
-void FUN_00547440_Class::FUN_00547440(float afValue)
+// src: COMMUNITY 0x00547440
+void FUN_00547440_Class::TESObjectCELL_SetWaterHeight(float afValue)
 {
     Sky* p = ((DoorH*)this)->GetParentWorldSpace();
-    if (p && FUN_0040eb10(p->GetFieldCC(), afValue, 0.001f))
+    if (p && FloatEQ(p->GetFieldCC(), afValue, 0.001f))
         *(float*)((char*)this + 0x50) = 3.402823466e+38f;
     else
         *(float*)((char*)this + 0x50) = afValue;
 }
 
 extern int DAT_011ca080;
-int __cdecl FUN_005510f0();
-void __cdecl FUN_00551100(int a);
+int __cdecl TESObjectCELL_GetLastWaterCell();
+void __cdecl TESObjectCELL_SetLastWaterCell(int a);
 // If a is nonzero, clears DAT_011ca080 when it equals a, and calls FUN_00551100(0) when FUN_005510f0() returns a.
 // @fnv 0x005510b0
 void __cdecl ClearGlobalIfMatches(int aiValue)
@@ -695,14 +715,15 @@ void __cdecl ClearGlobalIfMatches(int aiValue)
     {
         if (aiValue == DAT_011ca080)
             DAT_011ca080 = 0;
-        if (FUN_005510f0() == aiValue)
-            FUN_00551100(0);
+        if (TESObjectCELL_GetLastWaterCell() == aiValue)
+            TESObjectCELL_SetLastWaterCell(0);
     }
 }
 
 extern int DAT_011c7a60;
 // @fnv 0x00551100
-void FUN_00551100(int v)
+// src: COMMUNITY 0x00551100
+void TESObjectCELL_SetLastWaterCell(int v)
 {
     DAT_011c7a60 = v;
 }
@@ -723,17 +744,18 @@ void FUN_005516f0_Class::SetFlag400(bool set)
     ((TESObjectREFR*)this)->SetFlags(flags);
 }
 
-MemoryManager* __cdecl FUN_00401020(void);
+MemoryManager* __cdecl MemoryManager_Instance(void);
 // If a is non-null, backs up by the size byte stored before it and deallocates the resulting block through the memory manager.
 // @fnv 0x00553380
-void __cdecl FUN_00553380(void* apBlock)
+// src: COMMUNITY 0x00553380
+void __cdecl ourMemalignFree(void* apBlock)
 {
     unsigned char* p;
     if (apBlock != 0)
     {
         p = (unsigned char*)apBlock;
         p -= p[-1];
-        FUN_00401020()->Deallocate(p);
+        MemoryManager_Instance()->Deallocate(p);
     }
 }
 
@@ -808,17 +830,18 @@ void __cdecl CallIfPresent()
 }
 }  // namespace fnv_00554780
 
-bool __fastcall FUN_004bae00(char const*);
+bool __fastcall bhkWorld_QDebugDisplay(char const*);
 // @fnv 0x00554910
-bool __thiscall ExtraDataList::FUN_00554910()
+// src: COMMUNITY 0x00554910
+bool __thiscall ExtraDataList::TESObjectCELL_ToggleCollisionGeometry()
 {
     bool result = false;
     {
         void* master = GetRoomId();
         if (master)
         {
-            result = !FUN_004bae00((char const*)master);
-            FUN_00554960(result);
+            result = !bhkWorld_QDebugDisplay((char const*)master);
+            TESObjectCELL_SetCollisionGeometryDisplay(result);
         }
     }
     return result;
@@ -831,11 +854,12 @@ struct FUN_00421a40_class
 struct TESObjectCELL_Ext : public TESObjectCELL
 {
     bool IsInterior();
-    float FUN_00555ad0();
+    float TESObjectCELL_GetNorthRotation();
 };
 // Returns 0.0f for exterior cells, otherwise the value from GetPrompt()->GetExtraFloatValue() when the cell is interior.
 // @fnv 0x00555ad0
-float TESObjectCELL_Ext::FUN_00555ad0()
+// src: XBOX_PDB 0x00555ad0
+float TESObjectCELL_Ext::TESObjectCELL_GetNorthRotation()
 {
     float result = 0.0f;
     if (IsInterior())
@@ -932,11 +956,12 @@ struct FUN_00559a70_Class
     void* head;
     void* tail;
     int count;
-    void __thiscall FUN_00559a70(void* block);
+    void __thiscall NiTListBase_NiTPointerAllocator_unsigned_int_BSFaceGenKeyframe_AddNodeTail(void* block);
 };
 // Links block into the list after tail, updating head when the list was empty, then increments count.
 // @fnv 0x00559a70
-void __thiscall FUN_00559a70_Class::FUN_00559a70(void* block)
+// src: XBOX_PDB 0x00559a70
+void __thiscall FUN_00559a70_Class::NiTListBase_NiTPointerAllocator_unsigned_int_BSFaceGenKeyframe_AddNodeTail(void* block)
 {
     ((void**)block)[0] = 0;
     ((void**)block)[1] = tail;
@@ -956,11 +981,12 @@ struct FUN_00559c90_Class
 {
     char _0[8];
     Unk6b unk8;
-    void __thiscall FUN_00559c90(void*);
+    void __thiscall NiTPointerListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_DeleteItem(void*);
 };
 // Sets the int at offset 8 of a1 to 0, then calls unk8.FreeMemory(a1).
 // @fnv 0x00559c90
-void __thiscall FUN_00559c90_Class::FUN_00559c90(void* a1)
+// src: XBOX_PDB 0x00559c90
+void __thiscall FUN_00559c90_Class::NiTPointerListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_DeleteItem(void* a1)
 {
     *reinterpret_cast<int*>(reinterpret_cast<char*>(a1) + 8) = 0;
     unk8.FreeMemory(a1);
@@ -1028,11 +1054,12 @@ struct FUN_0055a240_Obj
 };
 struct FUN_0055a1e0_Class
 {
-    void __thiscall FUN_0055a1e0(FUN_0055a240_Obj*);
+    void __thiscall UpdateFields_0055a1e0(FUN_0055a240_Obj*);
 };
 // If the passed object pointer is non-null, calls its FUN_0055a240 method with 1.
 // @fnv 0x0055a1e0
-void __thiscall FUN_0055a1e0_Class::FUN_0055a1e0(FUN_0055a240_Obj* pObj)
+// src: GUESS 0x0055a1e0 (confidence: low)
+void __thiscall FUN_0055a1e0_Class::UpdateFields_0055a1e0(FUN_0055a240_Obj* pObj)
 {
     FUN_0055a240_Obj* m = pObj;
     FUN_0055a240_Obj* n = m;
@@ -1041,7 +1068,8 @@ void __thiscall FUN_0055a1e0_Class::FUN_0055a1e0(FUN_0055a240_Obj* pObj)
 
 // Returns true for the listed type codes (0x3a-0x40, 0x42, 0x43, 0x69) and false otherwise.
 // @fnv 0x005548a0
-bool __cdecl FUN_005548a0(unsigned char type)
+// src: COMMUNITY 0x005548a0
+bool __cdecl TESObjectCELL_IsFormTypeCellChild(unsigned char type)
 {
     switch (type)
     {
@@ -1075,13 +1103,14 @@ extern int DAT_011f9ff0;
 
 struct FUN_00558600_Class
 {
-    void __thiscall FUN_00558600(int* a, int* b, int* c, int* d, int* e, int* f, int* g, int* h, int* i, int* j,
+    void __thiscall BSShaderAccumulator_GetDebugStats(int* a, int* b, int* c, int* d, int* e, int* f, int* g, int* h, int* i, int* j,
                                  int* k);
 };
 
 // Writes eleven global values from DAT_011f9fc8 through DAT_011f9ff0 into the eleven output pointers.
 // @fnv 0x00558600
-void __thiscall FUN_00558600_Class::FUN_00558600(int* a, int* b, int* c, int* d, int* e, int* f, int* g, int* h, int* i,
+// src: COMMUNITY 0x00558600
+void __thiscall FUN_00558600_Class::BSShaderAccumulator_GetDebugStats(int* a, int* b, int* c, int* d, int* e, int* f, int* g, int* h, int* i,
                                                  int* j, int* k)
 {
     *a = DAT_011f9fc8;
@@ -1132,17 +1161,18 @@ struct FUN_0055a040_Class
     void* m0;
     void* m1;
     FUN_0055a2b0_Class m2;
-    void __thiscall FUN_0055a040(FUN_0055a240_Obj* a);
+    void __thiscall ProcessState_0055a040(FUN_0055a240_Obj* a);
 };
 // Constructs a temporary FUN_0055a0c0 with 0, passes it to a's AssignFrom at offset 8, then calls FUN_0055a1e0 on this+12 with a.
 // @fnv 0x0055a040
-void __thiscall FUN_0055a040_Class::FUN_0055a040(FUN_0055a240_Obj* a)
+// src: GUESS 0x0055a040 (confidence: low)
+void __thiscall FUN_0055a040_Class::ProcessState_0055a040(FUN_0055a240_Obj* a)
 {
     {
         FUN_0055a0c0 t(0);
         ((FUN_00559900_Struct*)((char*)a + 8))->AssignFrom(*(FUN_00559900_Struct*)&t);
     }
-    ((FUN_0055a1e0_Class*)((char*)this + 12))->FUN_0055a1e0(a);
+    ((FUN_0055a1e0_Class*)((char*)this + 12))->UpdateFields_0055a1e0(a);
 }
 
 struct ActorCombatGroup;
@@ -1177,15 +1207,16 @@ struct TESObjectCONT;
 extern TESObjectCONT* DAT_011c3f40;
 struct FUN_00551110_Cell : public TESObjectCELL
 {
-    BGSPerkEntry* FUN_00551110();
+    BGSPerkEntry* TESObjectCELL_GetLootBag();
 };
 // Locks cell refs, walks the list from FUN_009604f0 and returns the first entry whose GetNext equals DAT_011c3f40, then unlocks.
 // @fnv 0x00551110
-BGSPerkEntry* FUN_00551110_Cell::FUN_00551110()
+// src: COMMUNITY 0x00551110
+BGSPerkEntry* FUN_00551110_Cell::TESObjectCELL_GetLootBag()
 {
     BGSPerkEntry* result2 = 0;
     CellRefLockEnter();
-    BSSimpleList<BGSPerkEntry*>* list = FUN_009604f0();
+    BSSimpleList<BGSPerkEntry*>* list = GetRefList_009604f0();
     while (list)
     {
         BGSPerkEntry* entry = list->GetItem();
@@ -1205,9 +1236,10 @@ struct P03MM
     void* Allocate(unsigned int);
 };
 // @fnv 0x00553320
-char* __cdecl FUN_00553320(unsigned char count, unsigned int size)
+// src: XBOX_PDB 0x00553320
+char* __cdecl ourMemalign(unsigned char count, unsigned int size)
 {
-    char* ptr = (char*)((P03MM*)FUN_00401020())->Allocate(count + size);
+    char* ptr = (char*)((P03MM*)MemoryManager_Instance())->Allocate(count + size);
     unsigned char len = (unsigned char)((count - 1) & (unsigned int)ptr);
     len = count - len;
     ptr += len;
@@ -1246,7 +1278,8 @@ FUN_00559ad0_Class::FUN_00559ad0_Class(unsigned short ausCount, unsigned short b
 __declspec(thread) char g_tls_00551680[0x25e];
 
 // @fnv 0x00551680
-char __cdecl FUN_00551680()
+// src: COMMUNITY 0x00551680
+char __cdecl TESObjectCELL_GetLoadingTempData()
 {
     return g_tls_00551680[0x25d];
 }
@@ -1254,7 +1287,8 @@ char __cdecl FUN_00551680()
 __declspec(thread) bool g_tlsValue;
 
 // @fnv 0x005516a0
-void __cdecl FUN_005516a0(bool value)
+// src: COMMUNITY 0x005516a0
+void __cdecl TESObjectCELL_SetLoadingTempData(bool value)
 {
     g_tlsValue = value;
 }
@@ -1278,10 +1312,11 @@ struct FUN_0055a270_Class
     void* m0;
     void* m1;
     FUN_0054acf0_Class inner;
-    void* __thiscall FUN_0055a270();
+    void* __thiscall EvaluateValue_0055a270();
 };
 // @fnv 0x0055a270
-void* __thiscall FUN_0055a270_Class::FUN_0055a270()
+// src: GUESS 0x0055a270 (confidence: low)
+void* __thiscall FUN_0055a270_Class::EvaluateValue_0055a270()
 {
     inner.FUN_0054acf0();
     return this;
@@ -1357,7 +1392,7 @@ FUN_005405a0::FUN_005405a0() : spObject14(0), spObject94(0)
 struct __declspec(align(1)) FUN_004a4840_Class
 {
     char value;
-    int __thiscall FUN_004a4840(int arg);
+    int __thiscall hkContainerHeapAllocator_get(int arg);
 };
 
 struct FUN_00540860_Class
@@ -1367,14 +1402,15 @@ struct FUN_00540860_Class
 
 struct FUN_00540750_Class : public FUN_00540860_Class
 {
-    void __thiscall FUN_00540750(int arg);
+    void __thiscall UpdateState_00540750(int arg);
 };
 
 // @fnv 0x00540750
-void __thiscall FUN_00540750_Class::FUN_00540750(int aiValue)
+// src: GUESS 0x00540750 (confidence: low)
+void __thiscall FUN_00540750_Class::UpdateState_00540750(int aiValue)
 {
     FUN_004a4840_Class local = {};
-    this->SetSize(local.FUN_004a4840((int)this), aiValue);
+    this->SetSize(local.hkContainerHeapAllocator_get((int)this), aiValue);
 }
 
 struct B40AD0Helper
@@ -1386,12 +1422,13 @@ class B40AD0Owner
 {
   public:
     void Apply(void* pvData);
-    void FUN_00540ad0();
+    void hkArray_unsigned_char_hkContainerHeapAllocator_clearAndDeallocate();
 };
 
 // Calls Apply with the pointer returned by B40AD0Helper::Get for this object.
 // @fnv 0x00540ad0
-void B40AD0Owner::FUN_00540ad0()
+// src: XBOX_PDB 0x00540ad0
+void B40AD0Owner::hkArray_unsigned_char_hkContainerHeapAllocator_clearAndDeallocate()
 {
     Apply(B40AD0Helper().Get(this));
 }
@@ -1426,18 +1463,20 @@ void C540BC0Array::ReserveCapacity(C540BC0Allocator& kAlloc, int aiMinElements)
     }
 }
 
-unsigned char* __cdecl FUN_00664840(bool enabled);
+unsigned char* __cdecl BSTreeManager_GetInstance(bool enabled);
 
 // @fnv 0x0054ee60
-void __cdecl FUN_0054ee60(char value)
+// src: COMMUNITY 0x0054ee60
+void __cdecl BSTreeManager_SetTreesEnabled(char value)
 {
-    FUN_00664840(true)[0x18] = value;
+    BSTreeManager_GetInstance(true)[0x18] = value;
 }
 
 extern int DAT_011c7a60;
 
 // @fnv 0x005510f0
-int __cdecl FUN_005510f0()
+// src: COMMUNITY 0x005510f0
+int __cdecl TESObjectCELL_GetLastWaterCell()
 {
     return DAT_011c7a60;
 }
@@ -1526,10 +1565,10 @@ struct VObj
     virtual void VCall(void* a, bool flag);
 };
 
-void* __fastcall FUN_004543c0(void* cell);
+void* __fastcall TESObjectCELL_GetbhkWorld(void* cell);
 struct CellStandin
 {
-    void* __thiscall FUN_00545cb0();
+    void* __thiscall Get3D_00545cb0();
 };
 struct ExtraStandin
 {
@@ -1538,10 +1577,11 @@ struct ExtraStandin
 void __cdecl EnsureLightingProperty(void* p);
 
 // @fnv 0x00554960
-void __thiscall ExtraDataList::FUN_00554960(bool flag)
+// src: COMMUNITY 0x00554960
+void __thiscall ExtraDataList::TESObjectCELL_SetCollisionGeometryDisplay(bool flag)
 {
-    void* world = FUN_004543c0(this);
-    void* a = ((CellStandin*)this)->FUN_00545cb0();
+    void* world = TESObjectCELL_GetbhkWorld(this);
+    void* a = ((CellStandin*)this)->Get3D_00545cb0();
     if (world && a)
     {
         ((VObj*)world)->VCall(a, flag);
@@ -1554,7 +1594,7 @@ struct ObjB68;
 struct Cell68
 {
     bool __thiscall FUN_00425fd0();
-    Cell68* __thiscall FUN_00556ef0(int a, int b, int c);
+    Cell68* __thiscall TESObjectCELL_GetIntSeenSection(int a, int b, int c);
     ObjB68* __thiscall FUN_0054ddd0();
     bool __thiscall IsValueSeen(int a, int b);
     Cell68* __thiscall FUN_00555bc0();
@@ -1569,12 +1609,13 @@ struct Player68
     Cell68* __thiscall FUN_008d6f30();
 };
 extern Player68* DAT_011dea3c;
-int __cdecl FUN_00406d90(float f);
+int __cdecl FloatToInt(float f);
 void __cdecl WorldToCellOffset(float* pos, int a, int* outY, int* outX);
 
 // Counts how many of the four neighbouring cells around a position pass a cell check, using the player's current cell and grid offsets.
 // @fnv 0x00556870
-int __cdecl FUN_00556870(float* afPosition)
+// src: XBOX_PDB 0x00556870
+int __cdecl TESObjectCELL_GetSeenValue(float* afPosition)
 {
     unsigned int outX2;
     outX2 = 0;
@@ -1585,16 +1626,16 @@ int __cdecl FUN_00556870(float* afPosition)
         if (n->FUN_00425fd0())
         {
             int s;
-            s = (FUN_00406d90(afPosition[0]) - 0x800) >> 12;
+            s = (FloatToInt(afPosition[0]) - 0x800) >> 12;
             long cy;
             int flagX;
-            cy = (FUN_00406d90(afPosition[1]) - 0x800) >> 12;
+            cy = (FloatToInt(afPosition[1]) - 0x800) >> 12;
             flagX = 0;
             int cellF;
             cellF = 0;
             WorldToCellOffset(afPosition, 1, &flagX, &cellF);
             Cell68* a;
-            a = n->FUN_00556ef0(s, cy, 0);
+            a = n->TESObjectCELL_GetIntSeenSection(s, cy, 0);
             if (a && a->IsValueSeen(flagX, cellF))
                 outX2++;
             Cell68* flagY;
@@ -1603,7 +1644,7 @@ int __cdecl FUN_00556870(float* afPosition)
             if (cellF == 15)
             {
                 res = true;
-                flagY = n->FUN_00556ef0(s, cy + 1, 0);
+                flagY = n->TESObjectCELL_GetIntSeenSection(s, cy + 1, 0);
                 if (flagY && flagY->IsValueSeen(flagX, 0))
                     outX2 += 1;
             }
@@ -1618,7 +1659,7 @@ int __cdecl FUN_00556870(float* afPosition)
             if (flagX == 15)
             {
                 cnt = true;
-                cellY = n->FUN_00556ef0(s + 1, cy, 0);
+                cellY = n->TESObjectCELL_GetIntSeenSection(s + 1, cy, 0);
                 if (cellY && cellY->IsValueSeen(0, cellF))
                     ++outX2;
             }
@@ -1630,7 +1671,7 @@ int __cdecl FUN_00556870(float* afPosition)
             if (res && cnt)
             {
                 Cell68* outY;
-                outY = n->FUN_00556ef0(1 + s, cy + 1, 0);
+                outY = n->TESObjectCELL_GetIntSeenSection(1 + s, cy + 1, 0);
                 if (outY && outY->IsValueSeen(0, 0))
                     outX2 += 1;
             }
@@ -1657,9 +1698,9 @@ int __cdecl FUN_00556870(float* afPosition)
             if (cellC)
             {
                 int cellD;
-                cellD = FUN_00406d90(afPosition[0]) >> 12;
+                cellD = FloatToInt(afPosition[0]) >> 12;
                 long cy2;
-                cy2 = FUN_00406d90(afPosition[1]) >> 12;
+                cy2 = FloatToInt(afPosition[1]) >> 12;
                 int diag;
                 diag = 0;
                 int j;
@@ -1762,11 +1803,12 @@ class FUN_005593a0_cls
     virtual int unk1(int v);
     unsigned int m_uiItemCount;
     ItemNode** m_data;
-    void FUN_005593a0(ItemNode** a1, int* a2, FUN_00559900_Struct* a3);
+    void NiTMap_NiAVObject_TESObjectCELL_QUEUED_ATTACH_GetNext(ItemNode** a1, int* a2, FUN_00559900_Struct* a3);
 };
 
 // @fnv 0x005593a0
-void FUN_005593a0_cls::FUN_005593a0(ItemNode** apNode, int* piValue, FUN_00559900_Struct* apStruct)
+// src: COMMUNITY 0x005593a0
+void FUN_005593a0_cls::NiTMap_NiAVObject_TESObjectCELL_QUEUED_ATTACH_GetNext(ItemNode** apNode, int* piValue, FUN_00559900_Struct* apStruct)
 {
     ItemNode* node = *apNode;
     *piValue = node->m4;
@@ -1790,14 +1832,15 @@ void FUN_005593a0_cls::FUN_005593a0(ItemNode** apNode, int* piValue, FUN_0055990
 }
 
 extern int DAT_0102f3b8;
-void __cdecl FUN_004ede70(int);
+void __cdecl NiTMallocInterface_unsigned_int_Deallocate(int);
 
 // Sets the object's vtable pointer to DAT_0102f3b8 and calls FUN_004ede70 on the int at offset 4.
 // @fnv 0x00559460
-void FUN_005422b0Class::FUN_00559460()
+// src: GUESS 0x00559460 (confidence: low)
+void FUN_005422b0Class::UpdateFields_00559460()
 {
     *(int*)this = (int)&DAT_0102f3b8;
-    FUN_004ede70(*(int*)((char*)this + 4));
+    NiTMallocInterface_unsigned_int_Deallocate(*(int*)((char*)this + 4));
 }
 
 struct FUN_00559bc0_node
@@ -1818,12 +1861,13 @@ class FUN_00559bc0_cls
     FUN_00559bc0_node** m_08;
     unsigned int m_0c;
 
-    void FUN_00559bc0();
+    void BSScrapMap_TESObjectREFR_bool_ClearAll();
 };
 
 // Calls v10 on every node in each of the m_04 buckets of m_08, then resets m_0c to 0.
 // @fnv 0x00559bc0
-void FUN_00559bc0_cls::FUN_00559bc0()
+// src: COMMUNITY 0x00559bc0
+void FUN_00559bc0_cls::BSScrapMap_TESObjectREFR_bool_ClearAll()
 {
     for (unsigned int i = 0; i < m_04; i++)
     {
@@ -1901,11 +1945,12 @@ struct FUN_0055a2d0_Class
     void* unk00;
     void* m_pSecondPointer;
 
-    void __thiscall FUN_0055a2d0();
+    void __thiscall ForwardCall_0055a2d0();
 };
 
 // @fnv 0x0055a2d0
-void FUN_0055a2d0_Class::FUN_0055a2d0()
+// src: GUESS 0x0055a2d0 (confidence: low)
+void FUN_0055a2d0_Class::ForwardCall_0055a2d0()
 {
     DAT_00fdf07c(this->m_pSecondPointer);
 }
@@ -1913,20 +1958,20 @@ void FUN_0055a2d0_Class::FUN_0055a2d0()
 struct ContainerType
 {
     unsigned char FUN_00401170();
-    bool FUN_0046f070();
+    bool GetCanCarry();
 };
 struct ExtraListType
 {
-    short FUN_00418770();
+    short ExtraDataList_GetCount();
 };
 struct ItemRef
 {
-    ContainerType* FUN_007af430();
+    ContainerType* BGSSaveFormBuffer_GetForm();
     bool FUN_00440d80();
     bool FUN_00440da0();
-    ExtraListType* FUN_005d43c0();
-    void FUN_00572230();
-    void FUN_00574b30(ItemRef*, int, int, int);
+    ExtraListType* BSFile_GetDevice();
+    void TESObjectREFR_MarkAsPickedUp();
+    void TESObjectREFR_AddReferenceItem(ItemRef*, int, int, int);
 };
 struct ItemList
 {
@@ -1937,29 +1982,30 @@ bool FUN_00481f30(unsigned char);
 struct FUN_005512f0_shell
 {
     void FUN_00541ac0();
-    void FUN_00541ae0();
-    ItemList* FUN_009604f0();
-    void FUN_005512f0(ItemRef*);
+    void TESObjectCELL_CellRefLockLeave();
+    ItemList* GetRefList_009604f0();
+    void TESObjectCELL_FillLootBag(ItemRef*);
 };
 // @fnv 0x005512f0
-void FUN_005512f0_shell::FUN_005512f0(ItemRef* dest)
+// src: COMMUNITY 0x005512f0
+void FUN_005512f0_shell::TESObjectCELL_FillLootBag(ItemRef* dest)
 {
-    if (dest && dest->FUN_007af430() == (ContainerType*)DAT_011c3f40)
+    if (dest && dest->BGSSaveFormBuffer_GetForm() == (ContainerType*)DAT_011c3f40)
     {
         FUN_00541ac0();
-        ItemList* list = FUN_009604f0();
+        ItemList* list = GetRefList_009604f0();
         while (list)
         {
             ItemRef* item = *list->FUN_006815c0();
             if (item && !item->FUN_00440d80() && !item->FUN_00440da0())
             {
                 bool allowed = false;
-                unsigned char type = item->FUN_007af430()->FUN_00401170();
+                unsigned char type = item->BGSSaveFormBuffer_GetForm()->FUN_00401170();
                 switch (type)
                 {
                 case 30: {
-                    ContainerType* container = item->FUN_007af430();
-                    if (container->FUN_0046f070())
+                    ContainerType* container = item->BGSSaveFormBuffer_GetForm();
+                    if (container->GetCanCarry())
                         allowed = true;
                     break;
                 }
@@ -1969,13 +2015,13 @@ void FUN_005512f0_shell::FUN_005512f0(ItemRef* dest)
                 }
                 if (allowed)
                 {
-                    dest->FUN_00574b30(item, item->FUN_005d43c0()->FUN_00418770(), 0, 0);
-                    item->FUN_00572230();
+                    dest->TESObjectREFR_AddReferenceItem(item, item->BSFile_GetDevice()->ExtraDataList_GetCount(), 0, 0);
+                    item->TESObjectREFR_MarkAsPickedUp();
                 }
             }
             list = list->FUN_00726070();
         }
-        FUN_00541ae0();
+        TESObjectCELL_CellRefLockLeave();
     }
 }
 
@@ -1985,8 +2031,8 @@ struct Vec2
     float x, y;
     Vec2(float, float);
 };
-void* FUN_00403d30(void*, int, unsigned int);
-int FUN_00406d90(float);
+void* ourMemset(void*, int, unsigned int);
+int FloatToInt(float);
 extern Setting DAT_011ca094;
 struct LightData
 {
@@ -2005,7 +2051,7 @@ struct LightData
 };
 struct Extras
 {
-    void FUN_00421940(LightData*);
+    void ExtraDataList_SetSeenData(LightData*);
 };
 struct Cell
 {
@@ -2029,16 +2075,16 @@ struct Cell
     virtual void v17();
     virtual void MarkChanged(unsigned int);
     bool FUN_00425fd0();
-    float FUN_00555ad0();
-    void FUN_00555b10(const NiPoint3*, NiPoint3*, bool);
-    LightData* FUN_00556ef0(int, int, bool);
+    float TESObjectCELL_GetNorthRotation();
+    void AdjustCoordForNorthRotation(const NiPoint3*, NiPoint3*, bool);
+    LightData* TESObjectCELL_GetIntSeenSection(int, int, bool);
     bool IsFlagSet();
     LightData* FUN_00555bc0();
     Extras* GetExtraDataList();
     int FUN_00544c60();
     int FUN_00544c30();
-    void FUN_00555be0();
-    void FUN_00544440(bool);
+    void TESObjectCELL_ClearSeenData();
+    void TESObjectCELL_SetFullySeen(bool);
     void UpdateLightingAtPoint(const NiPoint3*);
 };
 // @fnv 0x00555f60
@@ -2048,21 +2094,21 @@ void Cell::UpdateLightingAtPoint(const NiPoint3* apPoint)
     if (FUN_00425fd0())
     {
         NiPoint3 point = *apPoint;
-        if (FUN_00555ad0() != 0.0)
+        if (TESObjectCELL_GetNorthRotation() != 0.0)
         {
-            FUN_00555b10(apPoint, &point, true);
+            AdjustCoordForNorthRotation(apPoint, &point, true);
             NiPoint3 centers3[9];
             LightData* lights[9];
-            FUN_00403d30(lights, 0, 36);
-            FUN_00403d30(centers3, 0, 108);
-            int x = (FUN_00406d90(point.x) - 2048) >> 12;
-            int y = (FUN_00406d90(point.y) - 2048) >> 12;
+            ourMemset(lights, 0, 36);
+            ourMemset(centers3, 0, 108);
+            int x = (FloatToInt(point.x) - 2048) >> 12;
+            int y = (FloatToInt(point.y) - 2048) >> 12;
             int count3 = 0;
             for (int dx = -1; dx <= 1; dx++)
             {
                 for (int dy = -1; dy <= 1; dy++)
                 {
-                    lights[count3] = FUN_00556ef0(x + dx, y + dy, true);
+                    lights[count3] = TESObjectCELL_GetIntSeenSection(x + dx, y + dy, true);
                     reinterpret_cast<NiPoint3&>(centers3[count3]) = (const NiPoint3&)NiPoint3(((x + dx) << 12) + 2048, ((y + dy) << 12) + 2048, point.z);
                     count3++;
                 }
@@ -2079,41 +2125,41 @@ void Cell::UpdateLightingAtPoint(const NiPoint3* apPoint)
         {
             NiPoint3 centers2[4];
             LightData* lights2[4];
-            FUN_00403d30(lights2, 0, 16);
-            FUN_00403d30(centers2, 0, 48);
-            int x2 = (FUN_00406d90(point.x) - 2048) >> 12;
-            int y2 = (FUN_00406d90(point.y) - 2048) >> 12;
-            lights2[0] = FUN_00556ef0(x2, y2, true);
+            ourMemset(lights2, 0, 16);
+            ourMemset(centers2, 0, 48);
+            int x2 = (FloatToInt(point.x) - 2048) >> 12;
+            int y2 = (FloatToInt(point.y) - 2048) >> 12;
+            lights2[0] = TESObjectCELL_GetIntSeenSection(x2, y2, true);
             reinterpret_cast<NiPoint3&>(centers2[0]) = (const NiPoint3&)NiPoint3((x2 << 12) + 2048, (y2 << 12) + 2048, point.z);
             Vec2 lowerA((x2 << 12) + 2048, (y2 << 12) + 2048);
             Vec2 upper2(((x2 + 4096) << 12) + 2048, ((y2 + 4096) << 12) + 2048);
             int dx2 = 0;
             int dy2 = 0;
-            if (lowerA.x >= point.x - *DAT_011ca094.FUN_00403e20())
+            if (lowerA.x >= point.x - *DAT_011ca094.Setting_Float_00403e20())
                 dx2 = -1;
-            else if (upper2.x <= point.x + *DAT_011ca094.FUN_00403e20())
+            else if (upper2.x <= point.x + *DAT_011ca094.Setting_Float_00403e20())
                 dx2 = 1;
-            if (lowerA.y >= point.y - *DAT_011ca094.FUN_00403e20())
+            if (lowerA.y >= point.y - *DAT_011ca094.Setting_Float_00403e20())
                 dy2 = -1;
-            else if (upper2.y <= point.y + *DAT_011ca094.FUN_00403e20())
+            else if (upper2.y <= point.y + *DAT_011ca094.Setting_Float_00403e20())
                 dy2 = 1;
             int count9 = 1;
             if (dx2)
             {
                 reinterpret_cast<NiPoint3&>(centers2[count9]) = (const NiPoint3&)NiPoint3(((x2 + dx2) << 12) + 2048, (y2 << 12) + 2048, point.z);
-                lights2[count9] = FUN_00556ef0(x2 + dx2, y2, true);
+                lights2[count9] = TESObjectCELL_GetIntSeenSection(x2 + dx2, y2, true);
                 count9++;
             }
             if (dy2)
             {
                 reinterpret_cast<NiPoint3&>(centers2[count9]) = (const NiPoint3&)NiPoint3((x2 << 12) + 2048, ((y2 + dy2) << 12) + 2048, point.z);
-                lights2[count9] = FUN_00556ef0(x2, y2 + dy2, true);
+                lights2[count9] = TESObjectCELL_GetIntSeenSection(x2, y2 + dy2, true);
                 count9++;
             }
             if (dx2 && dy2)
             {
                 reinterpret_cast<NiPoint3&>(centers2[count9]) = (const NiPoint3&)NiPoint3(((x2 + dx2) << 12) + 2048, ((y2 + dy2) << 12) + 2048, point.z);
-                lights2[count9] = FUN_00556ef0(x2 + dx2, y2 + dy2, true);
+                lights2[count9] = TESObjectCELL_GetIntSeenSection(x2 + dx2, y2 + dy2, true);
                 count9++;
             }
             for (int j = 0; j < 4; j++)
@@ -2133,15 +2179,15 @@ void Cell::UpdateLightingAtPoint(const NiPoint3* apPoint)
         if (!light)
         {
             light = new LightData();
-            GetExtraDataList()->FUN_00421940(light);
+            GetExtraDataList()->ExtraDataList_SetSeenData(light);
             MarkChanged(0x80000000);
         }
         NiPoint3 center2(FUN_00544c30() << 12, FUN_00544c60() << 12, apPoint->z);
         bool changed = light->HasEnoughSeenPoints(apPoint, &center2);
         if (changed)
         {
-            FUN_00555be0();
-            FUN_00544440(true);
+            TESObjectCELL_ClearSeenData();
+            TESObjectCELL_SetFullySeen(true);
         }
     }
 }
@@ -2151,7 +2197,7 @@ void* __cdecl operator new(unsigned int);
 void __cdecl operator delete(void*);
 struct Result556ef0
 {
-    void FUN_00421940(IntSeenData*);
+    void ExtraDataList_SetSeenData(IntSeenData*);
 };
 struct Target556ef0
 {
@@ -2177,11 +2223,12 @@ struct Target556ef0
     bool FUN_00425fd0();
     SeenData* FUN_00555bc0();
     Result556ef0* GetExtraDataList();
-    IntSeenData* __thiscall FUN_00556ef0(int a, int b, bool create);
+    IntSeenData* __thiscall TESObjectCELL_GetIntSeenSection(int a, int b, bool create);
 };
 // Searches the linked list from FUN_00555bc0 for a node matching a and b, appending a new IntSeenData when create is set and none matches.
 // @fnv 0x00556ef0
-IntSeenData* Target556ef0::FUN_00556ef0(int a, int b, bool create)
+// src: XBOX_PDB 0x00556ef0
+IntSeenData* Target556ef0::TESObjectCELL_GetIntSeenSection(int a, int b, bool create)
 {
     IntSeenData* node = 0;
     if (FUN_00425fd0())
@@ -2205,7 +2252,7 @@ IntSeenData* Target556ef0::FUN_00556ef0(int a, int b, bool create)
             else
             {
                 node = new IntSeenData((unsigned char)a, (unsigned char)b);
-                GetExtraDataList()->FUN_00421940(node);
+                GetExtraDataList()->ExtraDataList_SetSeenData(node);
                 v48(0x80000000);
             }
         }
@@ -2219,13 +2266,13 @@ struct CleanupBase559810
 };
 struct FUN_00559810 : CleanupBase559810
 {
-    void FUN_00559c30();
+    void NiTPointerListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_RemoveAll();
     ~FUN_00559810();
 };
 // @fnv 0x00559810
 FUN_00559810::~FUN_00559810()
 {
-    FUN_00559c30();
+    NiTPointerListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_RemoveAll();
 }
 
 extern int DAT_0102f468;
@@ -2254,7 +2301,7 @@ extern GlobalObject_00a7b610 g_01202828;
 
 struct FUN_0054a050_shell
 {
-    NiNode* FUN_0054a050();
+    NiNode* GetActorNode();
 };
 
 struct FUN_00456fc0_cls
@@ -2262,12 +2309,12 @@ struct FUN_00456fc0_cls
     NiNode* FUN_00456fc0(int kind);
 };
 
-bool __cdecl FUN_0045bad0(GlobalObject_00a7b610* g, NiAVObject* p);
+bool __cdecl NiObject_IsExactKindOf(GlobalObject_00a7b610* g, NiAVObject* p);
 
 // @fnv 0x00554a20
 void ExtraStandin::SetFlagOnChildren(bool flag)
 {
-    NiNode* node7 = reinterpret_cast<FUN_0054a050_shell*>(this)->FUN_0054a050();
+    NiNode* node7 = reinterpret_cast<FUN_0054a050_shell*>(this)->GetActorNode();
     unsigned int count = node7->FUN_0043b480();
     while (count--)
     {
@@ -2285,7 +2332,7 @@ void ExtraStandin::SetFlagOnChildren(bool flag)
         NiAVObject* itemB = list3->FUN_0043b4a0(i3);
         if (itemB != 0)
         {
-            if (!(itemB->IsMultiBoundNode() || FUN_0045bad0(&g_01202828, itemB)))
+            if (!(itemB->IsMultiBoundNode() || NiObject_IsExactKindOf(&g_01202828, itemB)))
             {
                 continue;
             }
@@ -2357,8 +2404,8 @@ struct RefQ
         v5e(), v5f(), v60(), v61(), v62(), v63(), v64(), v65(), v66(), v67(), v68(), v69(), v6a(), v6b(), v6c(), v6d(),
         v6e(), v6f(), v70(), v71(), v72(), v73();
     virtual ObjQ* Get3DQ();
-    bool FUN_005651e0();
-    BaseFQ* FUN_007af430();
+    bool TESObjectREFR_HasTemp3D();
+    BaseFQ* BGSSaveFormBuffer_GetForm();
 };
 struct LstQ
 {
@@ -2368,27 +2415,28 @@ struct LstQ
 struct CellQ
 {
     void FUN_00541ac0();
-    LstQ* FUN_009604f0();
-    void FUN_00541ae0();
-    void FUN_005570d0();
+    LstQ* GetRefList_009604f0();
+    void TESObjectCELL_CellRefLockLeave();
+    void TESObjectCELL_UpdateTrees();
 };
 // For each list entry with FUN_005651e0 false, FUN_00401170 equal to 0x25 and a Get3DQ() object, calls that object's GetHandlerQ()->Handle(obj).
 // @fnv 0x005570d0
-void CellQ::FUN_005570d0()
+// src: COMMUNITY 0x005570d0
+void CellQ::TESObjectCELL_UpdateTrees()
 {
     FUN_00541ac0();
-    LstQ* pIter = FUN_009604f0();
+    LstQ* pIter = GetRefList_009604f0();
     while (pIter)
     {
         RefQ* pRef = *pIter->FUN_006815c0();
-        if (pRef && !pRef->FUN_005651e0() && pRef->FUN_007af430()->FUN_00401170() == 0x25 && pRef->Get3DQ())
+        if (pRef && !pRef->TESObjectREFR_HasTemp3D() && pRef->BGSSaveFormBuffer_GetForm()->FUN_00401170() == 0x25 && pRef->Get3DQ())
         {
             ObjQ* pObj = pRef->Get3DQ();
             pObj->GetHandlerQ()->Handle(pObj);
         }
         pIter = pIter->FUN_00726070();
     }
-    FUN_00541ae0();
+    TESObjectCELL_CellRefLockLeave();
 }
 
 class MapBase559F90
@@ -2423,15 +2471,15 @@ struct Sweep540
 struct Tag540
 {
 };
-void __cdecl FUN_0040fbe0(int a, int b, Tag540 c);
+void __cdecl ProgramFlow(int a, int b, Tag540 c);
 
 // Calls ReserveCapacity(a, b), runs FUN_0040fbe0 on the ranges between m4 and b, then sets m4 to b.
 // @fnv 0x00540860
 void Sweep540::SetSize(int a, int b)
 {
     ReserveCapacity(a, b);
-    FUN_0040fbe0(m0 + b, m4 - b, Tag540());
-    FUN_0040fbe0(m0 + m4, b - m4, Tag540());
+    ProgramFlow(m0 + b, m4 - b, Tag540());
+    ProgramFlow(m0 + m4, b - m4, Tag540());
     m4 = b;
 }
 
@@ -2456,7 +2504,7 @@ struct FUN_0055a240_Class : public FUN_0055a290_Class
 // @fnv 0x0055a240
 void* __thiscall FUN_0055a240_Class::FUN_0055a240(unsigned int flags)
 {
-    FUN_0055a290();
+    ForwardCall_0055a290();
     if (flags & 1)
         Deallocate(this);
     return this;

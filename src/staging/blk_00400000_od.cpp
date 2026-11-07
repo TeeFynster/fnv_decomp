@@ -23,11 +23,12 @@ extern int $SG3295;
 
 struct FUN_00401280_Class
 {
-    int* __thiscall FUN_00401280();
+    int* __thiscall retn_empty_string();
 };
 
 // @fnv 0x00401280
-int* __thiscall FUN_00401280_Class::FUN_00401280()
+// src: COMMUNITY 0x00401280
+int* __thiscall FUN_00401280_Class::retn_empty_string()
 {
     return &$SG3295;
 }
@@ -45,11 +46,12 @@ unsigned int __thiscall FUN_00401660_Class::GetField25C()
 
 struct FUN_004036b0_Class
 {
-    unsigned int __thiscall FUN_004036b0();
+    unsigned int __thiscall TES_QPlaceableWaterCount();
 };
 
 // @fnv 0x004036b0
-unsigned int __thiscall FUN_004036b0_Class::FUN_004036b0()
+// src: XBOX_PDB 0x004036b0
+unsigned int __thiscall FUN_004036b0_Class::TES_QPlaceableWaterCount()
 {
     return *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0xb8);
 }
@@ -61,11 +63,12 @@ struct Dummy
 
 struct FUN_00404b70 : Dummy
 {
-    void FUN_00404b71();
+    void ForwardCall_00404b70();
 };
 
 // @fnv 0x00404b70
-void FUN_00404b70::FUN_00404b71()
+// src: GUESS 0x00404b70 (confidence: low)
+void FUN_00404b70::ForwardCall_00404b70()
 {
     FUN_00404c00();
 }
@@ -75,11 +78,12 @@ extern "C" void* DAT_01012188;
 struct Twin_008d0360
 {
     bool GetBooleanValue();
-    void FUN_00404c80();
+    void UpdateFields_00404c80();
 };
 
 // @fnv 0x00404c80
-void Twin_008d0360::FUN_00404c80()
+// src: GUESS 0x00404c80 (confidence: low)
+void Twin_008d0360::UpdateFields_00404c80()
 {
     *reinterpret_cast<void**>(this) = &DAT_01012188;
     GetBooleanValue();
@@ -108,11 +112,12 @@ void* __thiscall FUN_00404d50_class::ConstructWithVTable(int aiArg, char acArg)
 struct FUN_00405230_Class
 {
     void __thiscall FUN_00405250();
-    void __thiscall FUN_00405230();
+    void __thiscall ForwardCall_00405230();
 };
 
 // @fnv 0x00405230
-void __thiscall FUN_00405230_Class::FUN_00405230()
+// src: GUESS 0x00405230 (confidence: low)
+void __thiscall FUN_00405230_Class::ForwardCall_00405230()
 {
     FUN_00405250();
 }
@@ -141,12 +146,13 @@ extern int DAT_01012258;
 struct FUN_00405600_class
 {
     void __thiscall Init(int);
-    void* __thiscall FUN_00405600(int param_2);
+    void* __thiscall NiTMap_char_const_Setting_NiTMap(int param_2);
 };
 
 // Calls Init with param_2, stores the address of DAT_01012258 into this, and returns this.
 // @fnv 0x00405600
-void* __thiscall FUN_00405600_class::FUN_00405600(int param_2)
+// src: EXE 0x00405600
+void* __thiscall FUN_00405600_class::NiTMap_char_const_Setting_NiTMap(int param_2)
 {
     Init(param_2);
     *(int*)this = (int)&DAT_01012258;
@@ -154,29 +160,32 @@ void* __thiscall FUN_00405600_class::FUN_00405600(int param_2)
 }
 
 // @fnv 0x00405e60
-void __fastcall FUN_00405e60(EffectSetting* effect)
+// src: XBOX_PDB 0x00405e60
+void __fastcall EffectSetting_IsDisabled(EffectSetting* effect)
 {
     effect->IsFlagSet(0x400000);
 }
 
 struct FUN_00407860_class
 {
-    void FUN_00407860(float value);
+    void bhkCharacterControllerCinfo_SetGravity(float value);
 };
 
 // @fnv 0x00407860
-void FUN_00407860_class::FUN_00407860(float value)
+// src: XBOX_PDB 0x00407860
+void FUN_00407860_class::bhkCharacterControllerCinfo_SetGravity(float value)
 {
     *(float*)((char*)this + 0x90) = value;
 }
 
 struct FUN_00407880_Class
 {
-    void FUN_00407880(float value);
+    void Explosion_SetOuterRadius(float value);
 };
 
 // @fnv 0x00407880
-void FUN_00407880_Class::FUN_00407880(float value)
+// src: COMMUNITY 0x00407880
+void FUN_00407880_Class::Explosion_SetOuterRadius(float value)
 {
     *(float*)((char*)this + 0x94) = value;
 }
@@ -191,22 +200,24 @@ void* __cdecl GetEntryByIndex(int index)
 
 struct FUN_00409130_Class
 {
-    int __thiscall FUN_00409130();
+    int __thiscall EnchantmentItem_GetChunkID();
 };
 
 // @fnv 0x00409130
-int __thiscall FUN_00409130_Class::FUN_00409130()
+// src: COMMUNITY 0x00409130
+int __thiscall FUN_00409130_Class::EnchantmentItem_GetChunkID()
 {
     return 0x54494e45;
 }
 
 struct FUN_00409700_Class
 {
-    bool FUN_00409700();
+    bool TESObjectBOOK_GetScroll();
 };
 
 // @fnv 0x00409700
-bool FUN_00409700_Class::FUN_00409700()
+// src: XBOX_PDB 0x00409700
+bool FUN_00409700_Class::TESObjectBOOK_GetScroll()
 {
     return (((const unsigned char*)this)[0xc0] & 1) ? true : false;
 }
@@ -218,11 +229,12 @@ struct ContainerItemExtraFileData
 
 struct FUN_004098d0_class
 {
-    void FUN_004098d0();
+    void EnchantmentItem_Endian_0();
 };
 
 // @fnv 0x004098d0
-void FUN_004098d0_class::FUN_004098d0()
+// src: COMMUNITY 0x004098d0
+void FUN_004098d0_class::EnchantmentItem_Endian_0()
 {
     ((ContainerItemExtraFileData*)((char*)this + 0x34))->Endian();
 }
@@ -231,11 +243,12 @@ int __cdecl FinishScriptRunLock(void*);
 
 struct FUN_0040c130_Class
 {
-    int FUN_0040c130();
+    int Model_DecRefCount();
 };
 
 // @fnv 0x0040c130
-int FUN_0040c130_Class::FUN_0040c130()
+// src: XBOX_PDB 0x0040c130
+int FUN_0040c130_Class::Model_DecRefCount()
 {
     return FinishScriptRunLock((char*)this + 4);
 }
@@ -255,7 +268,8 @@ int __cdecl GetSix()
 }
 
 // @fnv 0x0040ebd0
-float FUN_0040ebd0(float a, float b)
+// src: XBOX_PDB 0x0040ebd0
+float BSMIN(float a, float b)
 {
     float result;
     if (a < b)
@@ -282,11 +296,12 @@ int __cdecl InitScriptRunLock(void*);
 
 struct FUN_0040f6e0_class
 {
-    int __thiscall FUN_0040f6e0();
+    int __thiscall NiRefObject_IncRefCount();
 };
 
 // @fnv 0x0040f6e0
-int __thiscall FUN_0040f6e0_class::FUN_0040f6e0()
+// src: XBOX_PDB 0x0040f6e0
+int __thiscall FUN_0040f6e0_class::NiRefObject_IncRefCount()
 {
     return InitScriptRunLock((char*)this + 4);
 }
@@ -316,14 +331,16 @@ void __thiscall FUN_004181c0_class::SetIndexedValue(int index, int value)
 }
 
 // @fnv 0x00418200
-BSExtraData* __fastcall FUN_00418200(BaseExtraList* extras)
+// src: COMMUNITY 0x00418200
+BSExtraData* __fastcall ExtraDataList_GetAnimSave(BaseExtraList* extras)
 {
     BSExtraData* result = extras->GetExtraData(0x2d);
     return result;
 }
 
 // @fnv 0x0041af30
-void __fastcall FUN_0041af30(BaseExtraList* extras)
+// src: COMMUNITY 0x0041af30
+void __fastcall ExtraDataList_RemovePoison(BaseExtraList* extras)
 {
     extras->RemoveExtra(static_cast<unsigned char>(0x3f));
 }
@@ -362,7 +379,7 @@ void __cdecl Deallocate(void*);
 
 struct FUN_00405370_Class
 {
-    void __thiscall FUN_00405370();
+    void __thiscall SetVtableAndProcessState_00405370();
     void* __thiscall FUN_004053a0(unsigned int flags);
 };
 
@@ -370,7 +387,7 @@ struct FUN_00405370_Class
 // @fnv 0x004053a0
 void* __thiscall FUN_00405370_Class::FUN_004053a0(unsigned int flags)
 {
-    FUN_00405370();
+    SetVtableAndProcessState_00405370();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -404,20 +421,22 @@ void* BSExtraData::FUN_0040ecd0(unsigned int flags)
 
 struct FUN_00401270_Class
 {
-    bool __thiscall FUN_00401270(int, int, int, int, int);
+    bool __thiscall TESForm_ActivateRef(int, int, int, int, int);
 };
 // @fnv 0x00401270
-bool __thiscall FUN_00401270_Class::FUN_00401270(int a, int b, int c, int d, int e)
+// src: COMMUNITY 0x00401270
+bool __thiscall FUN_00401270_Class::TESForm_ActivateRef(int a, int b, int c, int d, int e)
 {
     return 0;
 }
 
 struct FUN_00401290_Class
 {
-    char __thiscall FUN_00401290(int);
+    char __thiscall retn1_(int);
 };
 // @fnv 0x00401290
-char __thiscall FUN_00401290_Class::FUN_00401290(int)
+// src: COMMUNITY 0x00401290
+char __thiscall FUN_00401290_Class::retn1_(int)
 {
     return 1;
 }
@@ -450,19 +469,21 @@ extern int _DAT_011c31b0;
 extern void* _DAT_011c31b4;
 // Returns the element at index from the array at _DAT_011c31b4 if index is within the count _DAT_011c31b0, otherwise returns null.
 // @fnv 0x004027e0
-void* __cdecl FUN_004027e0(unsigned int index)
+// src: GUESS 0x004027e0 (confidence: medium)
+void* __cdecl Object_GetGlobalArrayElement(unsigned int index)
 {
     return index >= 0 && index < (unsigned int)_DAT_011c31b0 ? ((void**)_DAT_011c31b4)[index] : 0;
 }
 
 struct FUN_00402a20_class
 {
-    void __thiscall FUN_00402a20(unsigned int flags, bool set);
+    void __thiscall AlchemyItem_SetFlag(unsigned int flags, bool set);
 };
 
 // Sets or clears the given flag bits in the byte at offset 0xbc of this object.
 // @fnv 0x00402a20
-void __thiscall FUN_00402a20_class::FUN_00402a20(unsigned int flags, bool set)
+// src: COMMUNITY 0x00402a20
+void __thiscall FUN_00402a20_class::AlchemyItem_SetFlag(unsigned int flags, bool set)
 {
     set ? ((unsigned char*)(this))[0xbc] |= flags : ((unsigned char*)(this))[0xbc] &= ~flags;
 }
@@ -489,7 +510,7 @@ struct FUN_004055a0_Class
 // @fnv 0x004055a0
 void* __thiscall FUN_004055a0_Class::FUN_004055a0(unsigned int flags)
 {
-    ((FUN_00405230_Class*)this)->FUN_00405230();
+    ((FUN_00405230_Class*)this)->ForwardCall_00405230();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -504,7 +525,7 @@ struct FUN_004055d0 : public FUN_00405600_class
 // @fnv 0x004055d0
 FUN_004055d0::FUN_004055d0(int a, char b)
 {
-    FUN_00405600(a);
+    NiTMap_char_const_Setting_NiTMap(a);
     *(int**)this = &DAT_01012238;
     *(char*)((char*)this + 0x10) = b;
 }
@@ -560,11 +581,12 @@ struct Flt
 };
 struct FUN_00408da0_Class
 {
-    int* __thiscall FUN_00408da0();
+    int* __thiscall TESModel_GetModel();
 };
 // Returns the unsigned int conversion of the Flt at offset 4, or a pointer to $SG3295 when that conversion is zero.
 // @fnv 0x00408da0
-int* __thiscall FUN_00408da0_Class::FUN_00408da0()
+// src: XBOX_PDB 0x00408da0
+int* __thiscall FUN_00408da0_Class::TESModel_GetModel()
 {
     return ((Flt*)((char*)this + 4))->operator unsigned int() ? (int*)((Flt*)((char*)this + 4))->operator unsigned int()
                                                               : (int*)&$SG3295;
@@ -572,17 +594,18 @@ int* __thiscall FUN_00408da0_Class::FUN_00408da0()
 
 struct Inner0040e230
 {
-    void __thiscall FUN_0040e230(int, bool);
+    void __thiscall SpellItem_SetFlag(int, bool);
 };
 struct Outer00409100
 {
-    void __thiscall FUN_00409100(bool);
+    void __thiscall EnchantmentItem_SetAutoCalc(bool);
 };
 // Calls FUN_0040e230 on the inner object at this-0x18 with 1 and the inverse of b.
 // @fnv 0x00409100
-void __thiscall Outer00409100::FUN_00409100(bool b)
+// src: COMMUNITY 0x00409100
+void __thiscall Outer00409100::EnchantmentItem_SetAutoCalc(bool b)
 {
-    ((Inner0040e230*)((char*)this - 0x18))->FUN_0040e230(1, !b);
+    ((Inner0040e230*)((char*)this - 0x18))->SpellItem_SetFlag(1, !b);
 }
 
 struct TESSound;
@@ -620,12 +643,13 @@ struct SettingBase_01012120
     float _04;
     const char* _08;
     virtual ~SettingBase_01012120();
-    SettingBase_01012120* __thiscall FUN_0040e130(const char* a, float b);
+    SettingBase_01012120* __thiscall InitializeFloatSetting(const char* a, float b);
 };
 extern int vftable_SettingBase_01012120;
 // Sets the vtable pointer, stores the string in _08 and the float in _04, then returns this.
 // @fnv 0x0040e130
-SettingBase_01012120* __thiscall SettingBase_01012120::FUN_0040e130(const char* a, float afValue)
+// src: GUESS 0x0040e130 (confidence: medium)
+SettingBase_01012120* __thiscall SettingBase_01012120::InitializeFloatSetting(const char* a, float afValue)
 {
     *(void**)this = (void*)&vftable_SettingBase_01012120;
     _08 = a;
@@ -636,12 +660,13 @@ SettingBase_01012120* __thiscall SettingBase_01012120::FUN_0040e130(const char* 
 struct FUN_0040e230_Class
 {
     unsigned char bFlags;
-    void __thiscall FUN_0040e230(unsigned int flags, bool set);
+    void __thiscall SpellItem_SetFlag(unsigned int flags, bool set);
 };
 
 // Sets or clears the given flag bits in the byte at offset 0x40 of this object.
 // @fnv 0x0040e230
-void __thiscall FUN_0040e230_Class::FUN_0040e230(unsigned int flags, bool set)
+// src: COMMUNITY 0x0040e230
+void __thiscall FUN_0040e230_Class::SpellItem_SetFlag(unsigned int flags, bool set)
 {
     set ? ((unsigned char*)this)[0x40] |= flags : ((unsigned char*)this)[0x40] &= ~flags;
 }
@@ -671,7 +696,8 @@ struct BlkInterfaceView
     static void __cdecl PrintDebugMessage();
 };
 // @fnv 0x0040fba0
-void __thiscall RecursiveSpinLock::Leave()
+// src: XBOX_PDB 0x0040fba0
+void __thiscall RecursiveSpinLock::BSSpinLock_Unlock()
 {
     BlkInterfaceView::PrintDebugMessage();
     --m_uiRecursionCount;
@@ -704,10 +730,11 @@ void __cdecl BSEndian(unsigned char*, EndianSizeTag<0>);
 void __cdecl BSEndian(unsigned char*, EndianSizeTag<10>);
 struct FUN_004141e0_class
 {
-    void __thiscall FUN_004141e0();
+    void __thiscall CHUNK_Endian();
 };
 // @fnv 0x004141e0
-void __thiscall FUN_004141e0_class::FUN_004141e0()
+// src: XBOX_PDB 0x004141e0
+void __thiscall FUN_004141e0_class::CHUNK_Endian()
 {
     BSEndian((unsigned char*)this, EndianSizeTag<0>());
     BSEndian((unsigned char*)this + 4, EndianSizeTag<10>());
@@ -730,7 +757,8 @@ extern BGSDehydrationStage** _DAT_011c3184;
 
 // Inserts apNewStage into the global stage array ordered by header value, reallocating the array and updating the global count and pointer.
 // @fnv 0x004016a0
-void FUN_004016a0(BGSDehydrationStage* apNewStage)
+// src: XBOX_PDB 0x004016a0
+void BGSDehydrationStage_AddStage(BGSDehydrationStage* apNewStage)
 {
     unsigned char newCount;
     BGSDehydrationStage** newStages5;
@@ -796,7 +824,8 @@ FUN_00411ea0::~FUN_00411ea0()
 }  // namespace fnv_00411ea0
 
 // @fnv 0x0041af50
-void __fastcall FUN_0041af50(BaseExtraList* extras)
+// src: COMMUNITY 0x0041af50
+void __fastcall ExtraDataList_RemoveScript(BaseExtraList* extras)
 {
     extras->RemoveExtra(static_cast<unsigned char>(0xd));
 }
@@ -804,19 +833,21 @@ void __fastcall FUN_0041af50(BaseExtraList* extras)
 // FUN_00408b50 : a one-line function - globalvalue
 extern int g_value_00408b50;
 // @fnv 0x00408b50
-int FUN_00408b50()
+// src: XBOX_PDB 0x00408b50
+int EffectSettingCollection_GetUsageMonitorEffectSetting()
 {
     return g_value_00408b50;
 }
 
 // @fnv 0x0040df90
-int __cdecl FUN_0040df90()
+// src: XBOX_PDB 0x0040df90
+int __cdecl MagicSystem_CheckEffectFlares()
 {
     return 0;
 }
 
 extern int DAT_01012238;
-void __cdecl FUN_00aa10f0(void* p);
+void __cdecl _NiFree_00aa10f0(void* p);
 
 struct C405250Node
 {
@@ -847,7 +878,7 @@ FUN_00405250::~FUN_00405250()
             {
                 C405250Node* current = node;
                 node = node->next;
-                FUN_00aa10f0(current->payload);
+                _NiFree_00aa10f0(current->payload);
             }
         }
     }
@@ -876,7 +907,7 @@ float EffectListMagnitudeQuery::GetTotalMagnitude(int iArchetype, int m_eRange, 
             {
                 float m_fElapsedTime =
                     pkItem->GetMagnitude() * (pkItem->GetDuration() > 0 ? pkItem->GetDuration() : 1);
-                if (!pkSetting->FUN_00403e60(4))
+                if (!pkSetting->IsFlagSet_00403e60(4))
                     fTotal += m_fElapsedTime;
                 else
                     fTotal -= m_fElapsedTime;
@@ -992,7 +1023,7 @@ struct EffectSaveOperation : EffectItem
     void Save();
 };
 
-void __cdecl FUN_00485910(unsigned int uiType, unsigned int auiFormId);
+void __cdecl TESForm_AddChunk_00485910(unsigned int uiType, unsigned int auiFormId);
 
 // Save (0x004056d0) is absent from the shared header; no local layout or vtable copy.
 struct EffectListSaveOperation : EffectItemList
@@ -1009,8 +1040,8 @@ void EffectListSaveOperation::Save()
         EffectItem* pkItem = pkList->GetItem();
         if (pkItem)
         {
-            unsigned int auiFormId = pkItem->GetEffectSetting()->FUN_0084e3a0();
-            FUN_00485910(0x44494645, auiFormId);
+            unsigned int auiFormId = pkItem->GetEffectSetting()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            TESForm_AddChunk_00485910(0x44494645, auiFormId);
             static_cast<EffectSaveOperation*>(pkItem)->Save();
         }
         pkList = static_cast<EffectListSaveOperation*>(pkList->GetNext());
@@ -1081,11 +1112,12 @@ class TESFormV
 };
 struct ItemExtraList
 {
-    bool FUN_00418b10();
+    bool ExtraDataList_GetCanNotWear();
 };
 // Returns false if object or effect is null; otherwise checks object form type, effect flag bits and extra list; true for form type 43.
 // @fnv 0x00409720
-bool __cdecl FUN_00409720(TESBoundObject* object, ItemExtraList* extra, EffectSetting* effect)
+// src: COMMUNITY 0x00409720
+bool __cdecl EnchantmentItem_IsValidEffectForEnchantment(TESBoundObject* object, ItemExtraList* extra, EffectSetting* effect)
 {
     if (!object || !effect)
         return false;
@@ -1099,7 +1131,7 @@ bool __cdecl FUN_00409720(TESBoundObject* object, ItemExtraList* extra, EffectSe
     case 41:
         if (!effect->IsFlagSet(0x20))
             return false;
-        if (extra && extra->FUN_00418b10())
+        if (extra && extra->ExtraDataList_GetCanNotWear())
             return false;
         break;
     case 24:
@@ -1112,7 +1144,7 @@ bool __cdecl FUN_00409720(TESBoundObject* object, ItemExtraList* extra, EffectSe
             return false;
         if (effect->IsFlagSet(0x100))
             return false;
-        if (extra && extra->FUN_00418b10())
+        if (extra && extra->ExtraDataList_GetCanNotWear())
             return false;
         {
             TESBipedModelForm* biped = dynamic_cast<TESBipedModelForm*>(object);
@@ -1128,11 +1160,12 @@ bool __cdecl FUN_00409720(TESBoundObject* object, ItemExtraList* extra, EffectSe
 
 // Stores &DAT_01012278 in a field of the map, calls RemoveAll, then calls FUN_00aa10f0 on m_ppkHashTable.
 // @fnv 0x00405370
-void __thiscall FUN_00405370_Class::FUN_00405370()
+// src: GUESS 0x00405370 (confidence: low)
+void __thiscall FUN_00405370_Class::SetVtableAndProcessState_00405370()
 {
     *reinterpret_cast<void**>(this) = &DAT_01012278;  // the vftable pointer
     reinterpret_cast<NiTPointerMap<const char*, Setting*>*>(this)->RemoveAll();
-    FUN_00aa10f0(reinterpret_cast<NiTPointerMap<const char*, Setting*>*>(this)->m_ppkHashTable);
+    _NiFree_00aa10f0(reinterpret_cast<NiTPointerMap<const char*, Setting*>*>(this)->m_ppkHashTable);
 }
 
 struct StringMapDeletingEntry : FUN_00405230_Class
@@ -1158,12 +1191,13 @@ struct FUN_00480ad0_shell
 };
 
 // @fnv 0x0040dfa0
-bool __cdecl FUN_0040dfa0(EffectItem* timer1, EffectItem* timer2)
+// src: COMMUNITY 0x0040dfa0
+bool __cdecl MagicSystem_CheckBoundItemEffects(EffectItem* timer1, EffectItem* timer2)
 {
     if (timer1 == 0 || timer2 == 0)
         return false;
 
-    if (timer1->GetEffectSetting()->FUN_00403e60(0x20000) && timer2->GetEffectSetting()->FUN_00403e60(0x20000))
+    if (timer1->GetEffectSetting()->IsFlagSet_00403e60(0x20000) && timer2->GetEffectSetting()->IsFlagSet_00403e60(0x20000))
     {
         TESForm* interval1 = GetEffectAssociatedForm(timer1->GetEffectSetting());
         TESForm* interval2 = GetEffectAssociatedForm(timer2->GetEffectSetting());
@@ -1178,7 +1212,7 @@ bool __cdecl FUN_0040dfa0(EffectItem* timer1, EffectItem* timer2)
         }
     }
 
-    if (timer1->GetEffectSetting()->FUN_00403e60(0x10000) && timer2->GetEffectSetting()->FUN_00403e60(0x10000))
+    if (timer1->GetEffectSetting()->IsFlagSet_00403e60(0x10000) && timer2->GetEffectSetting()->IsFlagSet_00403e60(0x10000))
         return true;
 
     return false;

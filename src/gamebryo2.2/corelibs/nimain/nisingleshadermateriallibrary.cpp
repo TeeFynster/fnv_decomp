@@ -19,7 +19,8 @@ NiMaterial* NiSingleShaderMaterialLibrary::vf02(const NiFixedString* kName)
 extern NiMaterial* DAT_011f5e40;
 
 // @fnv 0x00a8fcc0
-void __cdecl FUN_00a8fcc0()
+// src: XBOX_PDB 0x00a8fcc0
+void __cdecl NiSingleShaderMaterialLibrary__SDMShutdown()
 {
     NiMaterial* material = DAT_011f5e40;
     if (material)
@@ -31,8 +32,8 @@ void __cdecl FUN_00a8fcc0()
 class NiShaderLibraryDesc
 {
 public:
-    unsigned int FUN_00a9ffd0();
-    void* FUN_00a9ffe0(int);
+    unsigned int NiShaderLibraryDesc_GetShaderCount();
+    void* NiShaderLibraryDesc_GetShaderDesc(int);
 };
 struct RefCountedNamedObject
 {
@@ -59,7 +60,7 @@ unsigned int NiSingleShaderMaterialLibrary::vf04()
     {
         NiShaderLibraryDesc* pkDesc = pkLib->w5();
         if (pkDesc)
-            uiTotalMaterials += pkDesc->FUN_00a9ffd0();
+            uiTotalMaterials += pkDesc->NiShaderLibraryDesc_GetShaderCount();
         pkLib = pkFactory->v15();
     }
     return uiTotalMaterials;
@@ -97,7 +98,7 @@ void* NiSingleShaderMaterialLibrary::vf05()
     if (library)
     {
         NiShaderLibraryDesc* desc = library->w5();
-        while (!desc->FUN_00a9ffd0())
+        while (!desc->NiShaderLibraryDesc_GetShaderCount())
         {
             _c = (int)pkFactory->v15();
             _d = 0;
@@ -105,8 +106,8 @@ void* NiSingleShaderMaterialLibrary::vf05()
         }
         if (desc)
         {
-            if (desc->FUN_00a9ffd0())
-                return desc->FUN_00a9ffe0(_d);
+            if (desc->NiShaderLibraryDesc_GetShaderCount())
+                return desc->NiShaderLibraryDesc_GetShaderDesc(_d);
         }
     }
     return 0;
@@ -139,13 +140,13 @@ const char* NiSingleShaderMaterialLibrary::GetShaderNameByIndex(unsigned int uiS
             pkDesc = pkLib->w5();
             if (pkDesc)
             {
-                if (pkDesc->FUN_00a9ffd0() + uiBaseIndex > uiShaderIndex)
+                if (pkDesc->NiShaderLibraryDesc_GetShaderCount() + uiBaseIndex > uiShaderIndex)
                 {
                     pkShaderDesc =
-                        (NameProvider*)pkDesc->FUN_00a9ffe0(uiShaderIndex - uiBaseIndex);
+                        (NameProvider*)pkDesc->NiShaderLibraryDesc_GetShaderDesc(uiShaderIndex - uiBaseIndex);
                     return pkShaderDesc->GetName();
                 }
-                uiBaseIndex += pkDesc->FUN_00a9ffd0();
+                uiBaseIndex += pkDesc->NiShaderLibraryDesc_GetShaderCount();
             }
             pkLib = pkFactory->v15();
         } while (pkLib);
@@ -175,7 +176,7 @@ L_0035:
     desc = lib->w5();
     if (desc != 0)
     {
-        if (desc->FUN_00a9ffd0() > _d)
+        if (desc->NiShaderLibraryDesc_GetShaderCount() > _d)
         {
             goto L_0067;
         }
@@ -198,9 +199,9 @@ L_0067:
     }
     {
         unsigned int idx = _d;
-        if (desc->FUN_00a9ffd0() > idx)
+        if (desc->NiShaderLibraryDesc_GetShaderCount() > idx)
         {
-            return desc->FUN_00a9ffe0(idx);
+            return desc->NiShaderLibraryDesc_GetShaderDesc(idx);
         }
     }
 L_008b:

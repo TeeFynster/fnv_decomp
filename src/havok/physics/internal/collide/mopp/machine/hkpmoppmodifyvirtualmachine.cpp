@@ -73,7 +73,7 @@ struct MessageStream {
 
     void FUN_00cb1600(char*, int);
 
-    void FUN_00cc01c0(const char*);
+    void ProcessAndReturnValue_00cc01c0(const char*);
 
     void FUN_00cc00e0();
 
@@ -98,7 +98,7 @@ struct Interpreter {
     int mask;
     __forceinline void evaluate(int id, const int* props) { active = visitor->terminal(id, props); }
 
-    __declspec(noalias) BoolResult* FUN_00e66950(BoolResult* result, const VMState* state, const Byte* code, int codeOffset);
+    __declspec(noalias) BoolResult* hkpMoppModifyVirtualMachine_queryModicationPointsRecursive(BoolResult* result, const VMState* state, const Byte* code, int codeOffset);
 
 };
 
@@ -109,7 +109,8 @@ __forceinline int read24(const Byte* p) { return (int(p[0])*256+p[1])*256+p[2]; 
 __forceinline int read32(const Byte* p) { return ((int(p[0])*256+p[1])*256+p[2])*256+p[3]; }
 
 // @fnv 0x00e66950
-BoolResult* Interpreter::FUN_00e66950(BoolResult* result, const VMState* state, const Byte* code, int codeOffset)
+// src: HAVOK_LIB 0x00e66950
+BoolResult* Interpreter::hkpMoppModifyVirtualMachine_queryModicationPointsRecursive(BoolResult* result, const VMState* state, const Byte* code, int codeOffset)
 
 {
 
@@ -233,7 +234,7 @@ BranchWork work;
 
                 message.FUN_00cb1600((char*)buffer, 512);
 
-                message.FUN_00cc01c0("Unknown command - This mopp data has been corrupted (check for memory trashing), or an hkpMoppBvTreeShape has been pointed at invalid mopp data.\n");
+                message.ProcessAndReturnValue_00cc01c0("Unknown command - This mopp data has been corrupted (check for memory trashing), or an hkpMoppBvTreeShape has been pointed at invalid mopp data.\n");
 
                 if (DAT_01268360->report(3, 0x1298fedd, (char*)buffer, ".\\Collide\\Mopp\\Machine\\hkpMoppModifyVirtualMachine.cpp", 0x125)) __debugbreak();
 
@@ -282,13 +283,13 @@ BranchWork work;
                 BoolResult a(false), b(false); int notifiedLeft;
                 if (boundLow <= splitHigh) {
                     if (boundHigh < splitLow) {
-                        {BoolResult* __restrict out1=&work.c1;notifiedLeft=work.leftJump; a = *FUN_00e66950(out1, state, code+notifiedLeft, codeOffset);}
+                        {BoolResult* __restrict out1=&work.c1;notifiedLeft=work.leftJump; a = *hkpMoppModifyVirtualMachine_queryModicationPointsRecursive(out1, state, code+notifiedLeft, codeOffset);}
                     } else { reject: result->value = 0; return result; }
                 } else if (boundHigh >= splitLow) {
-                    {BoolResult* __restrict out2=&work.c2; b=*FUN_00e66950(out2,state,code+work.rightJump,codeOffset);} notifiedLeft=work.leftJump;
+                    {BoolResult* __restrict out2=&work.c2; b=*hkpMoppModifyVirtualMachine_queryModicationPointsRecursive(out2,state,code+work.rightJump,codeOffset);} notifiedLeft=work.leftJump;
                 } else {
-                    {BoolResult* __restrict out3=&work.c3;a = *FUN_00e66950(out3, state, code+work.leftJump, codeOffset);}
-                    b = *FUN_00e66950(&work.c4, state, code+work.rightJump, codeOffset); notifiedLeft=work.leftJump;
+                    {BoolResult* __restrict out3=&work.c3;a = *hkpMoppModifyVirtualMachine_queryModicationPointsRecursive(out3, state, code+work.leftJump, codeOffset);}
+                    b = *hkpMoppModifyVirtualMachine_queryModicationPointsRecursive(&work.c4, state, code+work.rightJump, codeOffset); notifiedLeft=work.leftJump;
                 }
                 if ((int)(a.value != 0) & (int)(b.value == 0)) visitor->branch(int(code + notifiedLeft - store->data));
                 if ((int)(a.value == 0) & (int)(b.value != 0)) visitor->branch(int(code+work.rightJump-store->data));
@@ -408,7 +409,7 @@ struct S00e67230_Machine {
     Visitor* modifier;
     int mask;
 
-    BoolResult FUN_00e66950(const VMState* state, const Byte* base, int offset);
+    BoolResult hkpMoppModifyVirtualMachine_queryModicationPointsRecursive(const VMState* state, const Byte* base, int offset);
 
     __forceinline void generateQueryFromAabb(const S00e67230_Aabb& aabb, VMState& query)
     {
@@ -437,11 +438,12 @@ struct S00e67230_Machine {
         query.properties[0] = 0;
     }
 
-    void FUN_00e67230(const S00e67230_Code* codeIn, const S00e67230_Aabb& aabb, Visitor* modifierOut);
+    void hkpMoppModifyVirtualMachine_queryAabb(const S00e67230_Code* codeIn, const S00e67230_Aabb& aabb, Visitor* modifierOut);
 };
 
 // @fnv 0x00e67230
-void S00e67230_Machine::FUN_00e67230(const S00e67230_Code* codeIn, const S00e67230_Aabb& aabb, Visitor* modifierOut)
+// src: HAVOK_LIB 0x00e67230
+void S00e67230_Machine::hkpMoppModifyVirtualMachine_queryAabb(const S00e67230_Code* codeIn, const S00e67230_Aabb& aabb, Visitor* modifierOut)
 {
     if (!DAT_0126efbc) {
         FUN_00df22f0(&DAT_0126efbc);
@@ -460,7 +462,7 @@ void S00e67230_Machine::FUN_00e67230(const S00e67230_Code* codeIn, const S00e672
     mask = (*base != 13) - 1;
 
 
-    BoolResult hit = FUN_00e66950(&query, base, 0);
+    BoolResult hit = hkpMoppModifyVirtualMachine_queryModicationPointsRecursive(&query, base, 0);
     if (hit) {
         modifierOut->branch(code->data[0] == 13 ? 5 : 0);
     }

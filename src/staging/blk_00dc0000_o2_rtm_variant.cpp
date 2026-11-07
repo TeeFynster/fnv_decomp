@@ -63,7 +63,7 @@ struct FUN_00ddf050_cls
 {
     void ClearContainer();
 };
-extern "C" void __cdecl FUN_00d51760(int* p1, int* p2);
+extern "C" void __cdecl hkpConstraintConstructionKit_computeConstraintInfo(int* p1, int* p2);
 struct FUN_00dd0420_Class
 {
     int m_00;
@@ -74,11 +74,11 @@ struct FUN_00dd0420_Class
     int m_14;
     int m_18;
     int m_1c;
-    FUN_00dd0420_Class* __thiscall FUN_00dd0420(int arg);
+    FUN_00dd0420_Class* __thiscall hkpGenericConstraintDataScheme_hkpGenericConstraintDataScheme(int arg);
 };
 struct FUN_00dd4b70_class
 {
-    void __thiscall FUN_00dd4b70(unsigned char value);
+    void __thiscall hkpMoppCompiler_enableInterleavedBuilding(unsigned char value);
 };
 extern int DAT_0102e388;
 struct FUN_00dd51d0_class
@@ -86,13 +86,13 @@ struct FUN_00dd51d0_class
     int m_00;
     int m_04;
     int m_08;
-    void FUN_00dd51d0();
+    void InitializeFields_00dd51d0();
 };
 struct FUN_00ddfb70_cls
 {
     int m_00;
     int m_04;
-    FUN_00ddfb70_cls* FUN_00ddfb70();
+    FUN_00ddfb70_cls* hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment();
 };
 struct FUN_00dccb70_Class
 {
@@ -115,7 +115,7 @@ struct FUN_00dc9e70_Class
     int m_10;
     int m_14;
     int m_18;
-    FUN_00dc9e70_Class* FUN_00dc9e70();
+    FUN_00dc9e70_Class* InitializeFields_00dc9e70();
 };
 struct FUN_00dcc5a0_vt
 {
@@ -130,18 +130,18 @@ struct FUN_00dcc5a0_class
     int m_00;
     int m_04;
     FUN_00dcc5a0_vt* m_08;
-    FUN_00dcc5a0_class* FUN_00dcc5a0(int arg);
+    FUN_00dcc5a0_class* ProcessAndReturnValue_00dcc5a0(int arg);
 };
 struct FUN_00cb0a70
 {
     void __thiscall m(int);
 };
-void __cdecl FUN_00dccae0(void* a, void* iValue);
+void __cdecl Object_ProcessState_00dccae0(void* a, void* iValue);
 struct S_00d49310_Lock
 {
     ~S_00d49310_Lock();
 };
-void __cdecl FUN_00dccb10(char* p);
+void __cdecl Runtime_UpdateState_00dccb10(char* p);
 extern int DAT_010d77b4[];
 extern void __cdecl _Deallocate(void* p);
 struct FUN_00dcd4b0_Class
@@ -163,7 +163,7 @@ struct D2B3D0Map
 };
 struct FUN_00ddf030_Class
 {
-    void __thiscall FUN_00ddf030(int arg);
+    void __thiscall Clear_Thunk(int arg);
 };
 extern int DAT_010d8094;
 struct FUN_00ddfb80_s
@@ -176,16 +176,16 @@ struct FUN_00ddfb80_s
     void* m_0c;
     void* m_10;
 };
-FUN_00ddfb80_s* __fastcall FUN_00ddfb80(FUN_00ddfb80_s* self, int, const void* src);
-int __stdcall FUN_00dc1660(int a1);
+FUN_00ddfb80_s* __fastcall hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(FUN_00ddfb80_s* self, int, const void* src);
+int __stdcall Object_ReturnArgument_00dc1660(int a1);
 extern int DAT_011b7b88;
 struct FUN_00dc1670_cls
 {
     int m_00;
-    FUN_00dc1670_cls* FUN_00dc1670();
+    FUN_00dc1670_cls* hkStructureLayout_hkStructureLayout();
 };
-void __stdcall FUN_00dd8fe0(float* out, int a, int b);
-float FUN_00dc5bb0();
+void __stdcall hkIArchive_readArrayGeneric(float* out, int a, int b);
+float hkIArchive_readFloat32();
 struct ArrayBlock
 {
     unsigned int* values;
@@ -201,8 +201,8 @@ struct AllocatorState
         return pool;
     }
 };
-extern "C" AllocatorState* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00c908c0(void*, ArrayBlock*, int, int);
+extern "C" AllocatorState* __cdecl hkMemoryRouter_getInstance();
+extern "C" void __cdecl hkArrayUtil__reserve(void*, ArrayBlock*, int, int);
 struct ArrayHost
 {
     int unk00, unk04, unk08;
@@ -222,7 +222,7 @@ struct FUN_00dcc180_Class
     int unk04;
     FUN_00dcc180_Interface* unk08;
 
-    unsigned char* __thiscall FUN_00dcc180(unsigned char* value);
+    unsigned char* __thiscall hkIstream_isOk(unsigned char* value);
 };
 struct Target
 {
@@ -237,7 +237,7 @@ struct FUN_00dcc660_cls
     int unk00;
     int unk04;
     Target* m_pFlagTarget;
-    void FUN_00dcc660(int a);
+    void InvokeVirtualMethod_00dcc660(int a);
 };
 struct FUN_00dcc670_Manager
 {
@@ -258,21 +258,21 @@ struct FUN_00dcc670_Class
 extern int DAT_010d7540;
 extern FUN_00dcc670_Manager* DAT_01268364;
 extern int g_unk01269bb4;
-int* __cdecl FUN_00dccb00();
+int* __cdecl Object_GetGlobalObjectAddress_00dccb00();
 extern int DAT_01269be4;
-int* __cdecl FUN_00dccb30();
+int* __cdecl Runtime_GetDAT01269be4Address();
 struct FUN_00dced30_cls
 {
     virtual void m_v00(int arg);
 };
-void __cdecl FUN_00dced30(FUN_00dced30_cls* pObject);
+void __cdecl Object_ForwardCall_00dced30(FUN_00dced30_cls* pObject);
 extern int DAT_01269c44;
-int __cdecl FUN_00dced40();
+int __cdecl Object_ComputeValue_00dced40();
 struct FUN_00d4dfc0_class
 {
     void __thiscall FUN_00d4dfc0(unsigned int value);
 };
-void __cdecl FUN_00dced50(FUN_00d4dfc0_class* object, unsigned int value);
+void __cdecl Runtime_ProcessState_00dced50(FUN_00d4dfc0_class* object, unsigned int value);
 struct S_00dd4bb0_Class
 {
     unsigned char unk00;
@@ -293,7 +293,7 @@ struct FUN_00dd50f0_cls
     int m_0c;
     int m_10;
     unsigned char m_14;
-    FUN_00dd50f0_cls* FUN_00dd50f0(int mode);
+    FUN_00dd50f0_cls* hkpMoppSplitter_hkpMoppSplitParams_hkpMoppSplitParams(int mode);
 };
 // FUN_00dd5150: initialises six float members of the object: five of them to
 // 1.0 and the last one to the global float constant DAT_01016248; returns the
@@ -307,12 +307,12 @@ struct FUN_00dd5150_cls
     float m_f0c;
     float m_f10;
     float m_f14;
-    void* FUN_00dd5150(int arg);
+    void* hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(int arg);
 };
 extern void* DAT_010d7ba8;
 struct FUN_00dd5150_component
 {
-    void FUN_00dd5150(int value);
+    void hkpMoppCostFunction_hkpMoppSplitCostParams_hkpMoppSplitCostParams(int value);
 };
 struct FUN_00dd51a0
 {
@@ -403,7 +403,7 @@ struct FUN_00dd8bc0_cls
     int unk9C;
     int unkA0;
     FUN_00dd8bc0_Node m_kNode;
-    void FUN_00dd83a0();
+    void _makeTopValid();
     unsigned int GetUsedMemory();
 };
 struct S_00dd8cf0_Ret
@@ -471,10 +471,11 @@ struct SpawnedObject
     int m_b8;
     int m_bc;
     int m_c0;
-    void FUN_00dd7f10();
+    void _init_00dd7f10();
     SpawnedObject* Construct(int value);
 };
-void SpawnedObject::FUN_00dd7f10()
+// src: HAVOK_LIB 0x00dd7f10
+void SpawnedObject::_init_00dd7f10()
 {
     m_c0 = 0;
     m_bc = 0;
@@ -526,7 +527,7 @@ struct FUN_00ddfbb0_cls
     int unk08;
     int unk0C;
     int m_10;
-    void FUN_00ddfbb0();
+    void ClearField10();
 };
 void __cdecl FUN_00c90510();
 struct FUN_00dcc130_Class
@@ -535,7 +536,7 @@ struct FUN_00dcc130_Class
     unsigned short unk04;
     unsigned short enabled06;
     int unk08;
-    int* __thiscall FUN_00dcc130(int* value);
+    int* __thiscall hkIstream_hkIstream(int* value);
 };
 struct S_00dcc740_Cls
 {
@@ -549,7 +550,8 @@ struct IniTokenStream
     void* m_vt;
 };
 extern "C" void ReadIniLine(void);
-static __declspec(noinline) unsigned short FUN_00dcc240(IniTokenStream* stream, unsigned char* negative)
+// src: HAVOK_LIB 0x00dcc240
+static __declspec(noinline) unsigned short readInteger64(IniTokenStream* stream, unsigned char* negative)
 {
     *negative = 0;
     ReadIniLine();
@@ -568,7 +570,7 @@ struct Lock_dd9
     int* m_pkCriticalSection;
     int FindEntry(int iKey);
     int InvokeRecord(int iIndex, int iArg);
-    int FUN_00dd9330(int iKey, int iArg);
+    int hkProcessFactory_createProcess(int iKey, int iArg);
 };
 extern int DAT_010d7db8;
 struct Bool1
@@ -601,7 +603,7 @@ struct S_00dcc790_Class
     S_00dcc790_Class* __thiscall ReadSignedValue(unsigned short* result);
 };
 extern "C" void __cdecl SkipWhitespace(void);
-static unsigned short FUN_00dcc240(unsigned char* ok, S_00dcc240_Reader* reader);
+static unsigned short readInteger64(unsigned char* ok, S_00dcc240_Reader* reader);
 typedef __int64 FNVInt64;
 struct S_00dcc8a0_Reader
 {
@@ -686,9 +688,9 @@ struct S_00dcc600_Class
 
     int __thiscall ReadUntilValue(unsigned char* buffer, int length, signed char value);
 };
-void __cdecl FUN_00dccb20();
-void __cdecl FUN_00dccb40();
-void __cdecl FUN_00dd4b00();
+void __cdecl nullsub_121();
+void __cdecl nullsub_122();
+void __cdecl Object_DoNothing_00dd4b00();
 struct Bool388
 {
     unsigned char value;
@@ -711,17 +713,17 @@ struct Allocator388
     Block388* lower;
     Bool388 ValidateBlock(Block388* block);
 };
-static void FUN_00dd8fd0(unsigned char* a, unsigned char* b);
+static void Runtime_UpdateState_00dd8fd0(unsigned char* a, unsigned char* b);
 extern "C" unsigned char* GetPtr();
 void Caller(unsigned char* a);
 // The c85750 router exposes its heap at +0x10, as in the shared hkMemoryRouter.
 namespace hkRouterDDFB {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 inline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return *hkRouterDDFB::FUN_00c85750().m_heap;
+    return *hkRouterDDFB::hkMemoryRouter_getInstance().m_heap;
 }
 struct hkPairDDFB
 {
@@ -779,7 +781,7 @@ static stub_cls* volatile g_stub_self;
 static int volatile g_stub_v;
 static int volatile g_stub_out;
 extern "C" int stub_val(void);
-static float FUN_00dcc3b0(int arg);
+static float readFloat(int arg);
 float stub_caller(void);
 class FUN_00dcc5c0_cls
 {
@@ -798,7 +800,8 @@ struct S_00dcc7e0_Stream
     void* m_vt;
 };
 extern "C" void ReadIniLine(void);
-static __declspec(noinline) int FUN_00dcc240(S_00dcc7e0_Stream* stream, unsigned char* negative)
+// src: HAVOK_LIB 0x00dcc240
+static __declspec(noinline) int readInteger64(S_00dcc7e0_Stream* stream, unsigned char* negative)
 {
     *negative = 0;
     ReadIniLine();
@@ -867,7 +870,7 @@ struct S00dcd1b0_Obj
     int unk3C;
     ArrayBlock m_40;
     unsigned char m_4c;
-    void FUN_00dcd1b0(int value);
+    void hkpMeshShape_initWeldingInfo(int value);
 };
 struct S00dcd270_Rec
 {
@@ -916,8 +919,8 @@ struct S00dcd270_cls
 };
 // The original 0x00dd8c40 chunk validator belongs to hkLargeBlockAllocator;
 // its unused local declaration and partial Chunk copy are unnecessary in this RTM unit.
-extern "C" int FUN_00d86940();
-int FUN_00dc1be0();
+extern "C" int getCstyleArraySize();
+int Object_ProcessAndReturnValue_00dc1be0();
 struct S_00dc6fc0_Target
 {
     virtual void v00();
@@ -930,7 +933,7 @@ struct S_00dc6fc0_Class
     int unk08;
     S_00dc6fc0_Target* m_0c;
 
-    int __thiscall FUN_00dc6fc0();
+    int __thiscall ProcessAndTransformResult_00dc6fc0();
 };
 struct TokenReader
 {
@@ -949,7 +952,7 @@ extern TokenReader* volatile inputStream;
 void MatchCaller();
 struct CpuOpaque;
 extern CpuOpaque DAT_01269c14;
-CpuOpaque* __cdecl FUN_00dccb50();
+CpuOpaque* __cdecl Runtime_GetDAT01269c14Address();
 struct RefObj
 {
     void __thiscall FUN_00c905b0();
@@ -1035,7 +1038,7 @@ __forceinline float Clamp(const float& value, const float& hi, const float& lo)
 {
     return value < lo ? lo : (hi < value ? hi : value);
 }
-void __cdecl FUN_00dcfff0(ObjA* a, ObjB* b, float* out);
+void __cdecl _hkCalcMotorData(ObjA* a, ObjB* b, float* out);
 #ifndef _INCLUDED_MM2
 // Exe 0x00dcfec0 FUN_00dcfec0: retain this LocalM128 view; the CRT type does not preserve this unit.
 // VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
@@ -1078,7 +1081,7 @@ struct OW
     OW(const LocalM128* q) : p(q)
     {}
 };
-static int FUN_00dd3120(const LocalM128* self, OW other, const LocalM128* a);
+static int hkpProcessFlyingColors(const LocalM128* self, OW other, const LocalM128* a);
 volatile int g_s, g_a, g_o, g_r;
 void mask_test_caller();
 static void CopyFloatsFromBytes(float* dst, const unsigned char* src);
@@ -1130,7 +1133,7 @@ struct Table
 {
     int a, b, c;
     Entry* entries;
-    unsigned int FUN_00dcb2b0(unsigned int);
+    unsigned int StructArrayImplementation__find(unsigned int);
     DispatchTarget* entryAt(unsigned int i)
     {
         return entries[i].target;
@@ -1141,11 +1144,12 @@ struct Owner
     int a, b, c;
     Table* table;
     int context;
-    void FUN_00dcb460(unsigned int);
+    void StructArrayImplementation_Object_asObject(unsigned int);
 };
-void Owner::FUN_00dcb460(unsigned int i)
+// src: XBOX_PDB 0x00dcb460
+void Owner::StructArrayImplementation_Object_asObject(unsigned int i)
 {
-    table->entryAt(table->FUN_00dcb2b0(i))->forward(context);
+    table->entryAt(table->StructArrayImplementation__find(i))->forward(context);
 }
 #include <stdlib.h>
 // Text reader: read the next number as a double.
@@ -1214,9 +1218,9 @@ class FUN_00dd9240_cls
     int m_unk14;
     CRITICAL_SECTION* m_pCrit;
 
-    int FUN_00dd9240(int index);
+    int hkProcessFactory_getProcessName(int index);
 };
-int __cdecl FUN_00cb0fa0(unsigned int entry, unsigned int flag);
+int __cdecl hkString_strCmp(unsigned int entry, unsigned int flag);
 // Stand-in for the class owning this function.
 //   +0x0c : int*   array of 12-byte records (first dword = flagged pointer)
 //   +0x10 : int    record count
@@ -1258,9 +1262,9 @@ class FUN_00dd92f0_cls
     int InvokeRecord(int index, int arg);
 };
 double FUN_00ecdf2d(const char* s, char** end);
-static float FUN_00dcc3b0(TokenReader* stream);
+static float readFloat(TokenReader* stream);
 float MatchCaller(TokenReader* s);
-void __stdcall FUN_00dccb60(int value);
+void __stdcall Object_DoNothing_00dccb60(int value);
 extern "C"
 {
     LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
@@ -1437,7 +1441,7 @@ struct S_00dd1180_Hdr
     float f08;
     float f0c;
 };
-void FUN_00dd1180(int n, float a, float b, float c, char** src, int stride, int u1, int u2, char** pp);
+void hkStiffSpringChainBuildJacobian(int n, float a, float b, float c, char** src, int stride, int u1, int u2, char** pp);
 typedef LocalM128* V;
 struct Wrap
 {
@@ -1445,7 +1449,7 @@ struct Wrap
     Wrap(V q) : p(q)
     {}
 };
-static V FUN_00dd3020(V B, V A, V C, V O, Wrap E, V D, V M1, V M2);
+static V Object_ProcessAndReturnValue_00dd3020(V B, V A, V C, V O, Wrap E, V D, V M1, V M2);
 void call_interleave(V B, V A, V C, V O, Wrap E, V D, V M1, V M2);
 
 namespace S00dcfec0_Intrinsics {
@@ -1554,7 +1558,8 @@ struct S00dcfec0_Basis
     }
 };
 // @fnv 0x00dcfec0
-void __cdecl FUN_00dcfec0(const S00dcfec0_V& a, const S00dcfec0_V& b, const S00dcfec0_V& c, const S00dcfec0_V& d,
+// src: GUESS 0x00dcfec0 (confidence: low)
+void __cdecl Object_UpdateFields_00dcfec0(const S00dcfec0_V& a, const S00dcfec0_V& b, const S00dcfec0_V& c, const S00dcfec0_V& d,
                           S00dcfec0_V& out, float& outAngle)
 {
     S00dcfec0_V axis;
@@ -1635,14 +1640,15 @@ struct AllocatorStatisticsDD8D
     int m_b8;
     int m_bc;
     int m_c0;
-    void __thiscall FUN_00dd8d70(unsigned int* out);
+    void __thiscall hkLargeBlockAllocator_calculateStatistics(unsigned int* out);
 };
 // @fnv 0x00dd8d70
-void __thiscall AllocatorStatisticsDD8D::FUN_00dd8d70(unsigned int* out)
+// src: HAVOK_LIB 0x00dd8d70
+void __thiscall AllocatorStatisticsDD8D::hkLargeBlockAllocator_calculateStatistics(unsigned int* out)
 {
     out[0] = ((FUN_00dd8c20_class*)this)->SumListValues();
     out[1] = (unsigned int)m_c0;
     out[3] = out[0] - (unsigned int)m_c0;
-    out[5] = (unsigned int)((hkLargeBlockAllocator*)this)->FUN_00dd8350();
+    out[5] = (unsigned int)((hkLargeBlockAllocator*)this)->findLargestBlockSize();
     out[4] = 0;
 }

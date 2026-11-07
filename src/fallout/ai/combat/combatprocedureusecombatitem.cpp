@@ -43,7 +43,8 @@ CombatProcedureUseCombatItem::CombatProcedureUseCombatItem(TESBoundObject* apIte
 
 TESForm* __cdecl _ref_004839c0(unsigned int aiID);
 // @fnv 0x009dac80
-void CombatProcedureUseCombatItem::FUN_009dac80(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009dac80
+void CombatProcedureUseCombatItem::LoadGame_009dac80(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     CombatProcedure::LoadGame(apLoadGameBuffer);
     pItem = dynamic_cast<TESBoundObject*>(_ref_004839c0(apLoadGameBuffer->ReadFormIdentifier()));
@@ -53,7 +54,7 @@ void CombatProcedureUseCombatItem::FUN_009dac80(BGSLoadFormBuffer* apLoadGameBuf
 typedef void(__cdecl* FnPrint4)(void*, unsigned int, unsigned int, const char*);
 typedef void(__cdecl* FnPrint6)(void*, unsigned int, unsigned int, const char*, const char*, unsigned int);
 
-const char* __cdecl FUN_00482720(TESForm* p);
+const char* __cdecl TESFullName_GetFullName(TESForm* p);
 
 struct CombatItemDebugOutput
 {
@@ -76,8 +77,8 @@ void CombatProcedureUseCombatItem::PrintDebugInfo(CombatItemDebugOutput* pPrinte
     if (this->pItem != 0)
     {
         pPrinter->v05(a2, a3, "Item: '%s' (%08X)",
-                      (this->pItem->FUN_00474cb0() != 0) ? this->pItem->GetName() : FUN_00482720(this->pItem),
-                      this->pItem->FUN_0084e3a0());
+                      (this->pItem->GetFormEditorIDLength() != 0) ? this->pItem->GetName() : TESFullName_GetFullName(this->pItem),
+                      this->pItem->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
     }
 }
 
@@ -87,11 +88,11 @@ struct UCIWeapon : TESBoundObject
 struct UCICombatProcess
 {
     int FUN_0045cd60();
-    void FUN_008ff0b0(struct UCIActor* apActor, TESBoundObject* apItem, int aiUnk);
+    void FindSpecialIdletoPlay(struct UCIActor* apActor, TESBoundObject* apItem, int aiUnk);
 };
 struct UCIAmmo
 {
-    bool FUN_004985f0();
+    bool Animation_SpecialIdleDonePlaying();
     bool HasIdleForm(int aiUnk);
 };
 struct UCIActor
@@ -223,12 +224,12 @@ struct UCIActor
 };
 struct UCICombatState
 {
-    void FUN_0099a840(TESBoundObject* apItem);
+    void CombatState_UsedCombatItem(TESBoundObject* apItem);
     void SetAttacker(int aiFlag);
 };
 struct UCIController
 {
-    UCICombatState* FUN_00586150();
+    UCICombatState* CombatController_GetCombatState();
 };
 void __cdecl FNV_Warning(const char* apFormat, ...);
 
@@ -240,23 +241,23 @@ void CombatProcedureUseCombatItem::UpdateCombatItemUse()
     UCICombatState* pState2;
     UCIAmmo* pAmmo;
 
-    pActor2 = FUN_00996de0();
-    pState2 = reinterpret_cast<UCIController*>(m_pCombatController)->FUN_00586150();
+    pActor2 = CombatProcedure_GetAttacker();
+    pState2 = reinterpret_cast<UCIController*>(m_pCombatController)->CombatController_GetCombatState();
     if (!pActor2->FUN_008d8520()->FUN_0045cd60())
     {
         pAmmo = pActor2->GetAmmo();
-        if (pAmmo && (!pAmmo->FUN_004985f0() || pAmmo->HasIdleForm(0)))
+        if (pAmmo && (!pAmmo->Animation_SpecialIdleDonePlaying() || pAmmo->HasIdleForm(0)))
             return;
         if (!m_bItemFlag)
         {
             UCICombatProcess* pProcess = pActor2->FUN_008d8520();
-            pProcess->FUN_008ff0b0(pActor2, pItem, 0);
+            pProcess->FindSpecialIdletoPlay(pActor2, pItem, 0);
             m_bItemFlag = true;
             return;
         }
     }
 
-    pState2->FUN_0099a840(pItem);
+    pState2->CombatState_UsedCombatItem(pItem);
     switch (pItem->TESForm::FUN_00401170())
     {
     case 0x2f: {
@@ -266,7 +267,7 @@ void CombatProcedureUseCombatItem::UpdateCombatItemUse()
         break;
     }
     default:
-        FNV_Warning("COMBAT: Unhandled form type %s in CombatProcedureUseCombatItem::Update()", pItem->FUN_00440e30());
+        FNV_Warning("COMBAT: Unhandled form type %s in CombatProcedureUseCombatItem::Update()", pItem->TESForm_GetFormTypeString());
     }
     SetState();
 }

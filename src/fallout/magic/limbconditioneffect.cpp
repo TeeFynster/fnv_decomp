@@ -31,7 +31,8 @@ extern "C" void ConstructValueModifierEffect();
 
 // Constructs the value-modifier base, installs the game vtable and initializes the limb actor value.
 // @fnv 0x0080f060
-LimbConditionEffect* LimbConditionEffect::FUN_0080f060(void* a, void* b, void* c)
+// src: EXE 0x0080f060
+LimbConditionEffect* LimbConditionEffect::LimbConditionEffect_0080f060(void* a, void* b, void* c)
 {
     typedef ValueModifierEffect* (__thiscall* BaseConstructor)(ValueModifierEffect*, void*, void*, void*);
     ((BaseConstructor)&ConstructValueModifierEffect)(this, a, b, c);
@@ -81,10 +82,11 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 }  // namespace fnv_0082ba30
 
 // @fnv 0x0082ba30
-void ValueModifierEffect::FUN_0082ba30(Actor* apActor)
+// src: XBOX_PDB 0x0082ba30
+void ValueModifierEffect::LimbConditionEffect_SaveGame(Actor* apActor)
 {
     FUN_00802db0(apActor);
-    fnv_0082ba30::g_TESSaveLoadGame->FUN_008579b0((int*)((char*)this + 0x4C), 4);
+    fnv_0082ba30::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((int*)((char*)this + 0x4C), 4);
 }
 
 using ::SettingT;
@@ -109,7 +111,8 @@ void __thiscall LimbConditionEffect::ApplyActorValueModifier(Actor* apActor, flo
 
 // Allocates and constructs a limb-condition effect from three arguments.
 // @fnv 0x0080f1a0
-LimbConditionEffect* FUN_0080f1a0(void* ap1, void* ap2, void* ap3)
+// src: COMMUNITY 0x0080f1a0
+LimbConditionEffect* LimbConditionEffect_Create(void* ap1, void* ap2, void* ap3)
 {
     return new LimbConditionEffect(ap1, ap2, ap3);
 }

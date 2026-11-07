@@ -11,7 +11,7 @@ public:
     static void* operator new(unsigned int uiSize);
     static void operator delete(void* pvMem);
     InvisibilityEffect* CreateEffect();
-    void __thiscall FUN_0082cd10(Actor* actor);
+    void __thiscall ValueModifierEffect_FinishInitLoadGame(Actor* actor);
     void __thiscall ApplyInvisibility(Actor* actor);
     void RevertInvisibility(Actor* apActor);
 };

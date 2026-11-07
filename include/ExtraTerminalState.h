@@ -6,7 +6,7 @@ class ExtraTerminalState : public BSExtraData
 {
 public:
     ExtraTerminalState();
-    bool __thiscall FUN_0041bf20();
+    bool __thiscall IsLockedState();
 
     unsigned char padC;
     char m_cTerminalState;

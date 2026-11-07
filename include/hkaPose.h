@@ -23,10 +23,10 @@ public:
     hkBool m_bPoseFlag;
     hkBool m_bPoseInitialized;
 
-    const hkQsTransform& FUN_00cda180(int boneIdx);
+    const hkQsTransform& hkaPose_calculateBoneModelSpace(int boneIdx);
     const hkQsTransform& GetBoneModelSpace(int boneIdx);
-    void FUN_00cda690();
-    hkQsTransform& FUN_00cdad80(int boneIdx, int propagate);
+    void syncLocalSpace();
+    hkQsTransform& accessBoneModelSpace(int boneIdx, int propagate);
 
     void makeFirstChildrenModelSpace(int boneIdx);
     const hkQsTransform& calculateBoneLocalSpace(int boneIdx);

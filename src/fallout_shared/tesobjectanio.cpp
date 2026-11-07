@@ -128,11 +128,12 @@ unsigned int __cdecl _FUN_00485910(unsigned int, unsigned int);
 
 struct FUN_00511d10_shell
 {
-    void __thiscall FUN_00511d10();
+    void __thiscall TESObjectANIO_Save();
 };
 
 // @fnv 0x00511d10
-void __thiscall FUN_00511d10_shell::FUN_00511d10()
+// src: XBOX_PDB 0x00511d10
+void __thiscall FUN_00511d10_shell::TESObjectANIO_Save()
 {
     ((FUN_004855a0*)this)->M();
     ((S_0048a520*)((char*)this + 0x18))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);

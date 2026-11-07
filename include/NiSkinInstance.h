@@ -25,15 +25,15 @@ class NiSkinInstance : public NiObject
 
     bool IsCloneable(CloningProcess& kCloning);
     void CopyMemberData(NiSkinInstance* pkDest, CloningProcess& kCloning);
-    NiSkinInstance* FUN_00a86830(CloningProcess& kCloning);
+    NiSkinInstance* CreateClone_00a86830(CloningProcess& kCloning);
 
     NiSkinData* GetSkinData();
     NiSkinData* GetData();
     NiAVObject** GetBones();
     NiSkinPartition* GetSkinPartition();
-    NiSkinPartition* FUN_0043b230();
-    void FUN_004addc0(NiSkinPartition* pPartition);
-    void FUN_004addc0(NiSkinInstance*);
+    NiSkinPartition* NiObjectNET_GetControllers();
+    void BSMultiBound_SetShape(NiSkinPartition* pPartition);
+    void BSMultiBound_SetShape(NiSkinInstance*);
     FaceObject** FUN_00825c00();
     void __thiscall FUN_00a85580();
     void* __thiscall FUN_006885a0(unsigned int flags);

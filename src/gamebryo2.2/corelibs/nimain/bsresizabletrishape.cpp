@@ -10,7 +10,8 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f5b34;
 
 // @fnv 0x00a86d20
-GlobalObjectO2_00a7b610* __cdecl FUN_00a86d20()
+// src: COMMUNITY 0x00a86d20
+GlobalObjectO2_00a7b610* __cdecl BSResizableTriShape_GetRTTI()
 {
     return &g_011f5b34;
 }
@@ -74,7 +75,7 @@ BSResizableTriShape* __fastcall ConstructResizableTriShape(BSResizableTriShape* 
 
 struct FUN_00a744c0_holder
 {
-    void __thiscall FUN_00a744c0(BSResizableTriShape* pkClone, CloningProcess& kCloning);
+    void __thiscall NiTriShape_CopyMembers(BSResizableTriShape* pkClone, CloningProcess& kCloning);
 };
 // @fnv 0x00a86e80
 NiObject* BSResizableTriShape::MakeClone(CloningProcess& kCloning)
@@ -90,7 +91,7 @@ NiObject* BSResizableTriShape::MakeClone(CloningProcess& kCloning)
     {
         pkObject = 0;
     }
-    ((FUN_00a744c0_holder*)this)->FUN_00a744c0(pkObject, kCloning);
+    ((FUN_00a744c0_holder*)this)->NiTriShape_CopyMembers(pkObject, kCloning);
     *(unsigned int*)((char*)pkObject + 0xC4) = *(unsigned int*)((char*)this + 0xC4);
     return (NiObject*)pkObject;
 }
@@ -99,12 +100,12 @@ NiObject* BSResizableTriShape::MakeClone(CloningProcess& kCloning)
 // Keep the original pointer ABI for these stream entry points without a local stream definition.
 struct FUN_00a71d10_shell
 {
-    void __thiscall FUN_00a71d10(void*);
+    void __thiscall NiParticleMeshes_SaveBinary(void*);
 };
 // @fnv 0x00a86ed0
 void __fastcall SaveResizableTriShape(BSResizableTriShape* self, void*, void* stream)
 {
-    ((FUN_00a71d10_shell*)self)->FUN_00a71d10(stream);
+    ((FUN_00a71d10_shell*)self)->NiParticleMeshes_SaveBinary(stream);
     NiBinaryStream* __restrict input = *(NiBinaryStream**)((char*)stream + 0x250);
     unsigned int size = 4;
     *(unsigned int*)((char*)input + 4) +=
@@ -113,13 +114,13 @@ void __fastcall SaveResizableTriShape(BSResizableTriShape* self, void*, void* st
 
 struct BaseX86f10
 {
-    void __thiscall FUN_00a98ea0(void*);
+    void __thiscall NiParticleMeshes_LoadBinary(void*);
 };
 // Calls FUN_00a98ea0, then reads 4 bytes into this+0xc4 and advances the binary stream position.
 // @fnv 0x00a86f10
 void __fastcall LoadResizableTriShape(BSResizableTriShape* self, void*, void* stream)
 {
-    ((BaseX86f10*)self)->FUN_00a98ea0(stream);
+    ((BaseX86f10*)self)->NiParticleMeshes_LoadBinary(stream);
     NiBinaryStream* __restrict input = *(NiBinaryStream**)((char*)stream + 0x24c);
     unsigned int size = 4;
     *(unsigned int*)((char*)input + 4) +=
@@ -201,7 +202,7 @@ struct Caller74690
 };
 
 char* __cdecl _FUN_00a7d330(char* value);
-char* __cdecl FUN_00a7d510(char const* text, char const* value);
+char* __cdecl NiGetViewerString_00a7d510(char const* text, char const* value);
 
 extern char str_0109e800[];
 
@@ -224,7 +225,7 @@ void BSResizableTriShape::GetViewerStrings(NiViewerStringsArray* array)
 
     strings->SetAt(index, value);
 
-    value = FUN_00a7d510(str_0109e800, *(char**)((char*)this + 0xc4));
+    value = NiGetViewerString_00a7d510(str_0109e800, *(char**)((char*)this + 0xc4));
     index = strings->m_usSize;
     count = strings->m_usMaxSize;
 
@@ -254,30 +255,32 @@ void __fastcall RenderResizableTriShape(BSResizableTriShape* self, void*)
     ((TriShapeImmediateRenderer*)self)->FUN_00a745c0();
 }
 
-void __cdecl FUN_00a98eb0();
+void __cdecl NiParticleMeshes_LinkObject();
 // @fnv 0x00a86d40
-void __cdecl FUN_00a86d40()
+// src: XBOX_PDB 0x00a86d40
+void __cdecl BSResizableTriShape_LinkObject()
 {
-    FUN_00a98eb0();
+    NiParticleMeshes_LinkObject();
 }
 
-void __cdecl FUN_00a74510();
+void __cdecl NiParticleMeshes_IsEqual();
 
 // @fnv 0x00a877f0
-void __cdecl FUN_00a877f0()
+// src: XBOX_PDB 0x00a877f0
+void __cdecl BSResizableTriShape_IsEqual()
 {
-    FUN_00a74510();
+    NiParticleMeshes_IsEqual();
 }
 
 struct TriShapePrimitiveSetter
 {
-    void FUN_00a74500(unsigned int value);
+    void NiParticleMeshes_RegisterStreamables(unsigned int value);
 };
 
 // @fnv 0x00a87190
 void BSResizableTriShape::SetNumPrimitives(unsigned int value)
 {
-    ((TriShapePrimitiveSetter*)this)->FUN_00a74500(value);
+    ((TriShapePrimitiveSetter*)this)->NiParticleMeshes_RegisterStreamables(value);
 }
 
 struct BoundRadiusValue

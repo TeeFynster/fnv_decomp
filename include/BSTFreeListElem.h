@@ -13,6 +13,6 @@ public:
     void ConstructElem(const T& arItem);
     void DestructElem();
     T& Elem();
-    void FUN_006ecce0();
-    void FUN_00905ae0();
+    void ForwardCall_006ecce0();
+    void Destroy_Thunk();
 };

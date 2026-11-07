@@ -50,18 +50,18 @@ void TESLoadScreenType::CopyFrom(const TESForm* apCopy)
     TESForm::CopyFrom(apCopy);
 }
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 // Saves the form data, converting its byte order before and after writing when required.
 // @fnv 0x005a7630
 void TESLoadScreenType::SaveForm()
 {
-    FUN_004855a0();
-    if (FUN_00401500())
+    BeginFormRecord();
+    if (TESForm_QEndianSwapOnSave())
         ((LoadScreenTypeData*)formData)->Endian();
-    FUN_00485e20(formData, 0x58);
-    if (FUN_00401500())
+    TESForm___SaveData(formData, 0x58);
+    if (TESForm_QEndianSwapOnSave())
         ((LoadScreenTypeData*)formData)->Endian();
-    FUN_00485680();
+    FinishFormRecord();
 }
 
 int __cdecl _memcmp(const void*, const void*, unsigned int);
@@ -86,7 +86,7 @@ TESLoadScreenType::~TESLoadScreenType()
 struct EndianTag
 {
 };
-void __cdecl FUN_00401080(int* apValue, EndianTag aTag);
+void __cdecl BSEndian_00401080(int* apValue, EndianTag aTag);
 struct LoadScreenTypeData_FUN
 {
     int unk00;
@@ -117,26 +117,26 @@ struct LoadScreenTypeData_FUN
 // @fnv 0x005a7400
 void LoadScreenTypeData_FUN::SwapEndianFields()
 {
-    FUN_00401080(&unk28, EndianTag());
-    FUN_00401080(&unk10, EndianTag());
-    FUN_00401080(&unk04, EndianTag());
-    FUN_00401080(&unk08, EndianTag());
-    FUN_00401080(&unk14, EndianTag());
-    FUN_00401080(&unk0C, EndianTag());
-    FUN_00401080(&unk1C, EndianTag());
-    FUN_00401080(&unk20, EndianTag());
-    FUN_00401080(&unk24, EndianTag());
-    FUN_00401080(&unk38, EndianTag());
-    FUN_00401080(&unk2C, EndianTag());
-    FUN_00401080(&unk30, EndianTag());
-    FUN_00401080(&unk3C, EndianTag());
-    FUN_00401080(&unk34, EndianTag());
-    FUN_00401080(&unk44, EndianTag());
-    FUN_00401080(&unk48, EndianTag());
-    FUN_00401080(&unk4C, EndianTag());
-    FUN_00401080(&unk50, EndianTag());
-    FUN_00401080(&unk00, EndianTag());
-    FUN_00401080(&unk18, EndianTag());
-    FUN_00401080(&unk40, EndianTag());
-    FUN_00401080(&unk54, EndianTag());
+    BSEndian_00401080(&unk28, EndianTag());
+    BSEndian_00401080(&unk10, EndianTag());
+    BSEndian_00401080(&unk04, EndianTag());
+    BSEndian_00401080(&unk08, EndianTag());
+    BSEndian_00401080(&unk14, EndianTag());
+    BSEndian_00401080(&unk0C, EndianTag());
+    BSEndian_00401080(&unk1C, EndianTag());
+    BSEndian_00401080(&unk20, EndianTag());
+    BSEndian_00401080(&unk24, EndianTag());
+    BSEndian_00401080(&unk38, EndianTag());
+    BSEndian_00401080(&unk2C, EndianTag());
+    BSEndian_00401080(&unk30, EndianTag());
+    BSEndian_00401080(&unk3C, EndianTag());
+    BSEndian_00401080(&unk34, EndianTag());
+    BSEndian_00401080(&unk44, EndianTag());
+    BSEndian_00401080(&unk48, EndianTag());
+    BSEndian_00401080(&unk4C, EndianTag());
+    BSEndian_00401080(&unk50, EndianTag());
+    BSEndian_00401080(&unk00, EndianTag());
+    BSEndian_00401080(&unk18, EndianTag());
+    BSEndian_00401080(&unk40, EndianTag());
+    BSEndian_00401080(&unk54, EndianTag());
 }

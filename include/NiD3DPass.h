@@ -34,8 +34,8 @@ public:
 
     void DestroyPass();
     void FUN_00e80190();
-    void FUN_00b79950(NiD3DPixelShader* shader);
-    void FUN_00b80600(NiD3DVertexShader* shader);
+    void NiD3DPass_SetVertexShader(NiD3DPixelShader* shader);
+    void NiD3DPass_SetPixelShader(NiD3DVertexShader* shader);
     void DeleteThis();
     void Release();
     void IncRefCount();
@@ -48,7 +48,7 @@ public:
     D3DRenderStateGroup* GetRenderStateGroup();
     unsigned int GetStageCount() const;
     void AppendStage(BeamStage* stage);
-    void FUN_00e802b0(unsigned int stageNum, BeamStage* stage);
+    void NiD3DPass_SetStage(unsigned int stageNum, BeamStage* stage);
     void SetRenderState(unsigned int state, unsigned int value, bool save);
     template <class Result>
     Result SetRenderState(unsigned int state, unsigned int value, bool save);

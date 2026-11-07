@@ -20,7 +20,7 @@ class GeometryVertexBuffer
 
     void SetVertex(unsigned int, const NiPoint3&);
     GeometryVertexBuffer();
-    void FUN_00534570(unsigned int, NiPoint3&);
+    void NiGeometryDataIteratorNiPoint3_Get(unsigned int, NiPoint3&);
     void CopyV3(NiPoint3&);
     void SetPoint(const NiPoint3&);
     void AddToA();

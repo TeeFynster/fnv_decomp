@@ -12,7 +12,8 @@ class hkpSerializedAgentNnEntry;
 
 // Returns 0.
 // @fnv 0x00dceb80
-int FUN_00dceb80()
+// src: GUESS 0x00dceb80 (confidence: high)
+int Object_ReturnZero_00dceb80()
 {
     return 0;
 }

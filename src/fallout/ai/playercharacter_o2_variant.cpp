@@ -7,10 +7,11 @@
 struct FUN_00c6fd20_class
 {
     void* m_60c;
-    int FUN_00c6fd20();
+    int bhkCharacterController_GetSupportBody();
 };
 // @fnv 0x00c6fd20
-int FUN_00c6fd20_class::FUN_00c6fd20()
+// src: XBOX_PDB 0x00c6fd20
+int FUN_00c6fd20_class::bhkCharacterController_GetSupportBody()
 {
     if (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x60c))
         return *reinterpret_cast<int*>(

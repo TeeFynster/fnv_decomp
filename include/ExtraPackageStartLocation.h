@@ -21,7 +21,7 @@ public:
     ExtraPackageStartLocation(unsigned char aEtype);
     ExtraPackageStartLocation(TESWorldSpace* apWorld, TESObjectCELL* apIntCell,
                               const NiPoint3* aPt, float afzrotation);
-    bool FUN_00432770(BSExtraData* apCompare);
+    bool Compare_00432770(BSExtraData* apCompare);
 
     extra_save::SForm* loc;
     float pos[3];

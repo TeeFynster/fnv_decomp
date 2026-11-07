@@ -27,7 +27,7 @@ struct SettingStr
 
 struct Controls
 {
-    int FUN_00711e00();
+    int Controls_IsMouseInBackground();
     void RecreateDevice(int v);
 };
 
@@ -40,15 +40,16 @@ extern SettingStr DAT_011d06f4;
 extern OSGlobals* DAT_011dea0c;
 extern unsigned char DAT_011a3015;
 
-unsigned char __cdecl FUN_00446e10();
-int __cdecl FUN_004dc1e0();
-void __cdecl FUN_0086a530();
-int __cdecl FUN_0086a820();
-unsigned char __cdecl ShowMessageBox(const char* a1, int a2, int a3, void* a4, int a5, int a6, float a7, float a8,
+unsigned char __cdecl TESRenderer_GetFullScreen();
+int __cdecl TESRenderer_GetHWND();
+void __cdecl MessageMenuCallback();
+int __cdecl MessageHandler_GetWarningContext();
+unsigned char __cdecl Interface_CreateMessageMenu(const char* a1, int a2, int a3, void* a4, int a5, int a6, float a7, float a8,
                                    const char* a9, const char* a10, const char* a11, int a12);
 
 // @fnv 0x0086a580
-int FUN_0086a580(const char* text, const char* caption, unsigned int flags)
+// src: COMMUNITY 0x0086a580
+int MessageBoxA_0(const char* text, const char* caption, unsigned int flags)
 {
     int result = 6;
     {
@@ -94,12 +95,12 @@ int FUN_0086a580(const char* text, const char* caption, unsigned int flags)
             }
 
             if (mode == 2 || mode == 0 ||
-                !ShowMessageBox(text, 0, 0, (void*)FUN_0086a530, a, FUN_0086a820(), 0.0f, 0.0f, c, d, b, 0))
+                !Interface_CreateMessageMenu(text, 0, 0, (void*)MessageMenuCallback, a, MessageHandler_GetWarningContext(), 0.0f, 0.0f, c, d, b, 0))
             {
-                if (!FUN_00446e10() || !FUN_004dc1e0())
+                if (!TESRenderer_GetFullScreen() || !TESRenderer_GetHWND())
                 {
                     if (DAT_011dea0c && GetCurrentThreadId() != DAT_011dea0c->GetThreadId() &&
-                        DAT_011dea0c->GetInputControls() && !DAT_011dea0c->GetInputControls()->FUN_00711e00())
+                        DAT_011dea0c->GetInputControls() && !DAT_011dea0c->GetInputControls()->Controls_IsMouseInBackground())
                     {
                         DAT_011dea0c->GetInputControls()->RecreateDevice(1);
                     }
@@ -123,10 +124,10 @@ int FUN_0086a580(const char* text, const char* caption, unsigned int flags)
         }
         else
         {
-            if (!FUN_00446e10() || !FUN_004dc1e0())
+            if (!TESRenderer_GetFullScreen() || !TESRenderer_GetHWND())
             {
                 if (DAT_011dea0c && GetCurrentThreadId() != DAT_011dea0c->GetThreadId() &&
-                    DAT_011dea0c->GetInputControls() && !DAT_011dea0c->GetInputControls()->FUN_00711e00())
+                    DAT_011dea0c->GetInputControls() && !DAT_011dea0c->GetInputControls()->Controls_IsMouseInBackground())
                 {
                     DAT_011dea0c->GetInputControls()->RecreateDevice(1);
                 }
@@ -144,7 +145,8 @@ extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount();
 
 // When m_ucFirstTimerByte is zero before incrementing, subtracts both stored values from GetTickCount() and stores the results.
 // @fnv 0x00aa50a0
-void GameTimerRecord::FUN_00aa50a0()
+// src: COMMUNITY 0x00aa50a0
+void GameTimerRecord::BSTimer_Disable()
 {
     if (m_ucFirstTimerByte++ == 0)
     {

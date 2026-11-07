@@ -5,20 +5,20 @@
 #include "tesobjectrefr_decls.h"
 #include "../../include/BSExtraData.h"
 #include "../../include/NonActorMagicTarget.h"
-GarbageCollectorUpdateState* FUN_00446ef0();
-void* FUN_0056a8c0();
-void FUN_005743f0();
-void FUN_00575c90(unsigned char value);
-float FUN_005790b0();
-float FUN_005790d0();
-void FUN_0057acc0(unsigned int index);
+GarbageCollectorUpdateState* MemoryLevelManager_GetSingleton();
+void* DecalData_GetDefaultDecalData();
+void FalloutRadio_NewCellEntered();
+void TESWaterSystem_SetPlayerForceUnderwater(unsigned char value);
+float BSAudio_GetMinDialogDist();
+float BSAudio_GetMaxDialogDist();
+void CheckWithinMultiBoundTask_CancelAttachment(unsigned int index);
 
 struct ExtraList
 {
-    BSExtraData* FUN_00410220(int type);
-    void AddExtraData(BSExtraData* p);
+    BSExtraData* BaseExtraList_GetExtraData(int type);
+    void BaseExtraList_AddExtra(BSExtraData* p);
 };
-bool __cdecl FUN_00576040(int x);
+bool __cdecl TESMagicTargetForm_CanBeMagicTarget(int x);
 class Owner
 {
   public:
@@ -41,21 +41,22 @@ class Owner
     virtual void v16();
     virtual void v17();
     virtual void v18(unsigned int flag);
-    int FUN_007af430();
-    ExtraList* FUN_005d43c0();
-    MagicTarget* FUN_00575f30();
+    int BGSSaveFormBuffer_GetForm();
+    ExtraList* BSFile_GetDevice();
+    MagicTarget* TESObjectREFR_GetMagicTarget();
 };
 // @fnv 0x00575f30
-MagicTarget* Owner::FUN_00575f30()
+// src: COMMUNITY 0x00575f30
+MagicTarget* Owner::TESObjectREFR_GetMagicTarget()
 {
     NonActorMagicTarget* p = 0;
-    if (FUN_00576040(FUN_007af430()))
+    if (TESMagicTargetForm_CanBeMagicTarget(BGSSaveFormBuffer_GetForm()))
     {
-        p = dynamic_cast<NonActorMagicTarget*>(FUN_005d43c0()->FUN_00410220(0x33));
+        p = dynamic_cast<NonActorMagicTarget*>(BSFile_GetDevice()->BaseExtraList_GetExtraData(0x33));
         if (!p)
         {
             p = new NonActorMagicTarget(this);
-            FUN_005d43c0()->AddExtraData(p);
+            BSFile_GetDevice()->BaseExtraList_AddExtra(p);
             v18(0x80000000);
         }
     }

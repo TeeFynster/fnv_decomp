@@ -68,7 +68,8 @@ struct GlobalObjectO2_00a7b618
 extern GlobalObjectO2_00a7b618 g_01202518;
 
 // @fnv 0x00c201c0
-GlobalObjectO2_00a7b618* __cdecl FUN_00c201c0()
+// src: COMMUNITY 0x00c201c0
+GlobalObjectO2_00a7b618* __cdecl NiPSysBoxEmitter_GetRTTI()
 {
     return &g_01202518;
 }
@@ -76,7 +77,8 @@ GlobalObjectO2_00a7b618* __cdecl FUN_00c201c0()
 extern int DAT_010bda2c;
 // Allocates a 100-byte BSFadeNode, runs its constructor, zeroes the floats at offsets 0x58-0x60, sets its vtable, and returns it (or null).
 // @fnv 0x00c20350
-BSFadeNode* __cdecl FUN_00c20350()
+// src: EXE 0x00c20350
+BSFadeNode* __cdecl NiPSysBoxEmitter_CreateObject()
 {
     BSFadeNode* node = (BSFadeNode*)BSFadeNode::operator new(100);
     if (node)
@@ -190,44 +192,47 @@ extern const char* DAT_01202518;
 extern const char DAT_0109dc8c[];
 extern const char DAT_0109dc84[];
 extern const char DAT_010a0eb4[];
-char* __cdecl FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d550(const char*, float);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
 struct VolumeViewer : NiPSysVolumeEmitter
 {
     void FUN_00c31db0(StrArr*);
 };
 struct BoxViewer : NiPSysBoxEmitter
 {
-    void FUN_00c204d0(StrArr*);
+    void NiPSysBoxEmitter_GetViewerStrings(StrArr*);
 };
 // Appends the base volume emitter's debug strings, then the box emitter's width, height and depth values to the string array.
 // @fnv 0x00c204d0
-void BoxViewer::FUN_00c204d0(StrArr* strings)
+// src: XBOX_PDB 0x00c204d0
+void BoxViewer::NiPSysBoxEmitter_GetViewerStrings(StrArr* strings)
 {
     ((VolumeViewer*)this)->FUN_00c31db0(strings);
-    strings->AppendInline(FUN_00a7d330(DAT_01202518));
-    strings->AppendInline(FUN_00a7d550(DAT_0109dc8c, width));
-    strings->AppendInline(FUN_00a7d550(DAT_0109dc84, height));
-    strings->AppendInline(FUN_00a7d550(DAT_010a0eb4, depth));
+    strings->AppendInline(NiViewerStrings_NiGetViewerString_Title(DAT_01202518));
+    strings->AppendInline(NiGetViewerString_00a7d550(DAT_0109dc8c, width));
+    strings->AppendInline(NiGetViewerString_00a7d550(DAT_0109dc84, height));
+    strings->AppendInline(NiGetViewerString_00a7d550(DAT_010a0eb4, depth));
 }
 
 struct FUN_00c61f60_class
 {
-    void FUN_00c2f4f0(int);
+    void NiPSysAirFieldModifier_RegisterStreamables(int);
 };
 struct FUN_00c1fdd0
 {
-    void FUN_00c2f4f0(int);
+    void NiPSysAirFieldModifier_RegisterStreamables(int);
 };
 // @fnv 0x00c1fdd0
-void FUN_00c1fdd0::FUN_00c2f4f0(int a)
+// src: XBOX_PDB 0x00c2f4f0
+void FUN_00c1fdd0::NiPSysAirFieldModifier_RegisterStreamables(int a)
 {
-    ((FUN_00c61f60_class*)this)->FUN_00c2f4f0(a);
+    ((FUN_00c61f60_class*)this)->NiPSysAirFieldModifier_RegisterStreamables(a);
 }
 
 void __cdecl FUN_00c31c90();
 // @fnv 0x00c20150
-void __cdecl FUN_00c20150()
+// src: XBOX_PDB 0x00c20150
+void __cdecl NiPSysBoxEmitter_ProcessClone()
 {
     FUN_00c31c90();
 }
@@ -235,7 +240,8 @@ void __cdecl FUN_00c20150()
 extern void __cdecl FUN_00c31b40();
 
 // @fnv 0x00c20160
-void __cdecl FUN_00c20160()
+// src: XBOX_PDB 0x00c20160
+void __cdecl NiPSysBoxEmitter_LinkObject()
 {
     FUN_00c31b40();
 }
@@ -246,19 +252,20 @@ extern double DAT_01029790;
 
 struct BoxEmitterInit : NiPSysBoxEmitter
 {
-    void FUN_00c201d0(const NiTransform& kTransform, NiPoint3& kPos, NiPoint3& kWorldPosition);
+    void NiPSysBoxEmitter_ComputeVolumeInitialPositionAndVelocity(const NiTransform& kTransform, NiPoint3& kPos, NiPoint3& kWorldPosition);
 };
 
 // Generates a random point from the box dimensions, transforms it, and rotates kWorldPosition.
 // @fnv 0x00c201d0
-void BoxEmitterInit::FUN_00c201d0(const NiTransform& kTransform, NiPoint3& kPos, NiPoint3& kWorldPosition)
+// src: XBOX_PDB 0x00c201d0
+void BoxEmitterInit::NiPSysBoxEmitter_ComputeVolumeInitialPositionAndVelocity(const NiTransform& kTransform, NiPoint3& kPos, NiPoint3& kWorldPosition)
 {
     const NiMatrix3& kRot = kTransform.m_Rotate;
     float fX = rand() / DAT_01029790;
     float fY = rand() / DAT_01029790;
     float fZ = rand() / DAT_01029790;
     kPos = NiPoint3((fZ - 0.5f) * width, (fY - 0.5f) * height, (fX - 0.5f) * depth);
-    kPos = kTransform.FUN_00524c40(kPos);
+    kPos = kTransform.ComputeValue_00524c40(kPos);
     kWorldPosition = NiPoint3(reinterpret_cast<const NiPoint3*>(&kRot.m_pEntry[0][0])->Dot(kWorldPosition),
                               kRot.m_pEntry[1][0] * kWorldPosition.x + kRot.m_pEntry[1][1] * kWorldPosition.y +
                                   kRot.m_pEntry[1][2] * kWorldPosition.z,

@@ -41,7 +41,8 @@ void NiFloatInterpolator::LoadBinary(NiStream& kStream)
 }
 
 // @fnv 0x00a3c3c0
-int __fastcall FUN_00a3c3c0(void* thisPtr, int, unsigned short)
+// src: COMMUNITY 0x00a3c3c0
+int __fastcall NiFloatInterpolator_GetKeyType(void* thisPtr, int, unsigned short)
 {
     void* pData = *(void**)((char*)thisPtr + 0x10);
     if (!pData)
@@ -50,7 +51,8 @@ int __fastcall FUN_00a3c3c0(void* thisPtr, int, unsigned short)
 }
 
 // @fnv 0x00a3c3d0
-unsigned char __fastcall FUN_00a3c3d0(const void* self, int, unsigned short)
+// src: COMMUNITY 0x00a3c3d0
+unsigned char __fastcall NiFloatInterpolator_GetKeyStride(const void* self, int, unsigned short)
 {
     const char* p = *(const char**)((const char*)self + 0x10);
     if (!p)
@@ -65,7 +67,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_011f3738;
 
 // @fnv 0x00a3c380
-const GlobalObjectO2_00a7b610* __cdecl FUN_00a3c380()
+// src: COMMUNITY 0x00a3c380
+const GlobalObjectO2_00a7b610* __cdecl NiFloatInterpolator_GetRTTI()
 {
     return &g_011f3738;
 }
@@ -82,7 +85,8 @@ struct FloatInterpView
 
 // If m_spFloatData is set, forwards the two float arguments to its FUN_00a3cc40 method.
 // @fnv 0x00a3c540
-void __fastcall FUN_00a3c540(FloatInterpView* self, int edx, float m_fStartTime, float m_fMaximumDistance)
+// src: XBOX_PDB 0x00a3c540
+void __fastcall NiFloatInterpolator_GuaranteeTimeRange(FloatInterpView* self, int edx, float m_fStartTime, float m_fMaximumDistance)
 {
     if (self->m_spFloatData)
         self->m_spFloatData->FUN_00a3cc40(m_fStartTime, m_fMaximumDistance);
@@ -163,12 +167,13 @@ extern const volatile float DAT_0109a918;
 
 struct NiFloatInterpolatorShell_00a3c3f0 : NiFloatInterpolator
 {
-    unsigned char FUN_00a3c3f0(unsigned int unused) const;
+    unsigned char NiFloatInterpolator_GetChannelPosed(unsigned int unused) const;
 };
 
 // Returns 0 if m_spFloatData.m_pObject is set or m_fFloatValue equals DAT_0109a918, otherwise returns 1.
 // @fnv 0x00a3c3f0
-unsigned char NiFloatInterpolatorShell_00a3c3f0::FUN_00a3c3f0(unsigned int unused) const
+// src: GAMEBRYO_LIB 0x00a3c3f0
+unsigned char NiFloatInterpolatorShell_00a3c3f0::NiFloatInterpolator_GetChannelPosed(unsigned int unused) const
 {
     if (data.m_pObject)
         return 0;
@@ -181,16 +186,17 @@ unsigned char NiFloatInterpolatorShell_00a3c3f0::FUN_00a3c3f0(unsigned int unuse
 // Base equality operation absent from the shared key-based declaration.
 struct KeyBasedInterpolatorEqualityOps : NiKeyBasedInterpolator
 {
-    unsigned char FUN_00c85800(const NiObject* other);
+    unsigned char bhkCharacterProxy_IsEqual(const NiObject* other);
 };
 struct NiFloatInterpolatorEquality : NiFloatInterpolator
 {
-    bool FUN_00a3c5e0(const NiObject* otherObject);
+    bool NiFloatInterpolator_IsEqual(const NiObject* otherObject);
 };
 // @fnv 0x00a3c5e0
-bool NiFloatInterpolatorEquality::FUN_00a3c5e0(const NiObject* otherObject)
+// src: XBOX_PDB 0x00a3c5e0
+bool NiFloatInterpolatorEquality::NiFloatInterpolator_IsEqual(const NiObject* otherObject)
 {
-    if (!reinterpret_cast<KeyBasedInterpolatorEqualityOps*>(this)->FUN_00c85800(otherObject))
+    if (!reinterpret_cast<KeyBasedInterpolatorEqualityOps*>(this)->bhkCharacterProxy_IsEqual(otherObject))
         return false;
     const NiFloatInterpolator* other = static_cast<const NiFloatInterpolator*>(otherObject);
     if (value != other->value)
@@ -225,16 +231,17 @@ class A3C640Interpolator
     FloatDataRangeOps* m_spFloatData;
     unsigned int m_uiLastKeyIndex;
 
-    A3C640Interpolator* FUN_00a57050(float m_fStartTime, float m_fMaximumDistance) const throw();
+    A3C640Interpolator* NiInterpolator_GetSequenceInterpolator(float m_fStartTime, float m_fMaximumDistance) const throw();
     void SetFloatData(NiFloatData* pkFloatData) throw();
 
-    A3C640Interpolator* FUN_00a3c640(float m_fStartTime, float m_fMaximumDistance) const;
+    A3C640Interpolator* NiFloatInterpolator_GetSequenceInterpolator(float m_fStartTime, float m_fMaximumDistance) const;
 };
 
 // @fnv 0x00a3c640
-A3C640Interpolator* A3C640Interpolator::FUN_00a3c640(float m_fStartTime, float m_fMaximumDistance) const
+// src: XBOX_PDB 0x00a3c640
+A3C640Interpolator* A3C640Interpolator::NiFloatInterpolator_GetSequenceInterpolator(float m_fStartTime, float m_fMaximumDistance) const
 {
-    A3C640Interpolator* pkSeqInterp = FUN_00a57050(m_fStartTime, m_fMaximumDistance);
+    A3C640Interpolator* pkSeqInterp = NiInterpolator_GetSequenceInterpolator(m_fStartTime, m_fMaximumDistance);
     if (m_spFloatData && pkSeqInterp)
     {
         NiPointer<NiFloatData> spNewFloatData;
@@ -313,11 +320,12 @@ bool BA3C6D0Interpolator::EvaluateFloatAtTime(float fTime, void* pkInterpTarget,
 struct FUN_00a3c780_cls : NiFloatInterpolator
 {
     void CopyBase(NiFloatInterpolator* dst, unsigned int uiArg);
-    void FUN_00a3c780(NiFloatInterpolator* dst, unsigned int uiArg);
+    void NiFloatInterpolator_CopyMembers(NiFloatInterpolator* dst, unsigned int uiArg);
 };
 
 // @fnv 0x00a3c780
-void FUN_00a3c780_cls::FUN_00a3c780(NiFloatInterpolator* dst, unsigned int uiArg)
+// src: GAMEBRYO_LIB 0x00a3c780
+void FUN_00a3c780_cls::NiFloatInterpolator_CopyMembers(NiFloatInterpolator* dst, unsigned int uiArg)
 {
     CopyBase(dst, uiArg);
     *(volatile float*)&dst->value = value;
@@ -394,12 +402,13 @@ class C940FloatInterpolator
     C940Pointer<NiFloatData> m_spFloatData;
 
     void BaseGetViewerStrings(C940StringArray* pkStrings);
-    void FUN_00a3c940(C940StringArray* pkStrings);
+    void NiFloatInterpolator_GetViewerStrings(C940StringArray* pkStrings);
 };
 
 // Appends the base viewer strings plus the class name, m_fFloatValue and m_spFloatData entries to pkStrings.
 // @fnv 0x00a3c940
-void C940FloatInterpolator::FUN_00a3c940(C940StringArray* pkStrings)
+// src: XBOX_PDB 0x00a3c940
+void C940FloatInterpolator::NiFloatInterpolator_GetViewerStrings(C940StringArray* pkStrings)
 {
     BaseGetViewerStrings(pkStrings);
     pkStrings->Add(C940GetViewerString(g_pcC940ClassName));
@@ -514,7 +523,7 @@ void FUN_00a3c420_cls::CollapseConstantKeys()
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern float DAT_0109a918;
 class A3C8D0_Object : public NiKeyBasedInterpolator
 {
@@ -525,7 +534,7 @@ class A3C8D0_Object : public NiKeyBasedInterpolator
 
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     A3C8D0_Object() : m_0C(DAT_0109a918), m_10(0)
     {}
@@ -540,7 +549,7 @@ class A3C8D0_Object : public NiKeyBasedInterpolator
 };
 struct A3C8D0_Owner
 {
-    void FUN_00a3c780(A3C8D0_Object* object, int arg);
+    void NiFloatInterpolator_CopyMembers(A3C8D0_Object* object, int arg);
     A3C8D0_Object* CreateObject(int arg);
 };
 // Allocates an A3C8D0_Object, calls FUN_00a3c780 with the object and arg, and returns the object.
@@ -548,6 +557,6 @@ struct A3C8D0_Owner
 A3C8D0_Object* A3C8D0_Owner::CreateObject(int arg)
 {
     A3C8D0_Object* object = new A3C8D0_Object;
-    FUN_00a3c780(object, arg);
+    NiFloatInterpolator_CopyMembers(object, arg);
     return object;
 }

@@ -46,7 +46,7 @@ struct FUN_00b40070_Class
     int unk48;
 
     void FUN_00b3f030();
-    FUN_00b40070_Class* __thiscall FUN_00b40070(NiPoint3* position, unsigned char value18, unsigned char value10,
+    FUN_00b40070_Class* __thiscall UpdateState_00b40070(NiPoint3* position, unsigned char value18, unsigned char value10,
                                                 float value, int result);
 };
 extern float DAT_01016248;
@@ -80,7 +80,7 @@ class FUN_00b40a60_cls
     unsigned int m_30;
 
     void InitBase(int a, int b);
-    FUN_00b40a60_cls* FUN_00b40a60();
+    FUN_00b40a60_cls* InitializeFields_00b40a60();
 };
 struct FUN_00b40a60_loc
 {
@@ -201,16 +201,16 @@ struct FnvScratch
     unsigned int unk8c;
 };
 // The allocator the original calls with (count, 0); it hands out count * 8 bytes.
-void* FUN_00b42df0(unsigned int count, void* allocator);
+void* Runtime_UpdateState_00b42df0(unsigned int count, void* allocator);
 // The out-of-range reporter the original calls when the count is too large.
-void FUN_00b0fb80();
+void BxLengthError_Thunk();
 struct FUN_00b42be0_cls
 {
     unsigned int* m_00;
     unsigned int m_04;
     unsigned int m_08;
 
-    FUN_00b42be0_cls* FUN_00b42be0(FUN_00b42be0_cls* src);
+    FUN_00b42be0_cls* InitializeFields_00b42be0(FUN_00b42be0_cls* src);
 };
 class FUN_00b420a0_cls
 {
@@ -229,7 +229,7 @@ struct FnvThrowObj
 
     void FUN_00ec78f1(int* value);
 };
-void* __cdecl FUN_00b42df0(unsigned int count, void* allocator);
+void* __cdecl Runtime_UpdateState_00b42df0(unsigned int count, void* allocator);
 
 struct Elem8StandIn
 {
@@ -264,10 +264,11 @@ struct VecIter8StandIn
     {
         return m_aux ? m_aux->Getcont() : 0;
     }
-    VecIter8StandIn& FUN_00b42ce0(int off);
+    VecIter8StandIn& ProcessAndReturnValue_00b42ce0(int off);
 };
 // @fnv 0x00b42ce0
-VecIter8StandIn& VecIter8StandIn::FUN_00b42ce0(int off)
+// src: GUESS 0x00b42ce0 (confidence: low)
+VecIter8StandIn& VecIter8StandIn::ProcessAndReturnValue_00b42ce0(int off)
 {
     {
         if (!(Has_container()))
@@ -296,7 +297,7 @@ struct Tag1
 struct Tag2
 {
 };
-extern "C" void FUN_00b42f40(E8* p, unsigned n, const E8& v, void* al, Tag1 c, Tag2 r);
+extern "C" void Object_CopyElementRange_00b42f40(E8* p, unsigned n, const E8& v, void* al, Tag1 c, Tag2 r);
 inline Tag1 Ptr_cat(E8*&, E8*&)
 {
     Tag1 c;
@@ -304,7 +305,7 @@ inline Tag1 Ptr_cat(E8*&, E8*&)
 }
 inline void ufn(E8* f, unsigned n, const E8& v, char (&al)[4])
 {
-    FUN_00b42f40(f, n, v, &al, Ptr_cat(f, f), Tag2());
+    Object_CopyElementRange_00b42f40(f, n, v, &al, Ptr_cat(f, f), Tag2());
 }
 struct CIt8
 {
@@ -340,8 +341,8 @@ struct V8
     {
         return It8(last, this);
     }
-    CIt8 FUN_00b41b50(CIt8 w, const E8& v);
-    void FUN_00b417b0(const E8& v);
+    CIt8 UpdateState_00b41b50(CIt8 w, const E8& v);
+    void UpdateState_00b417b0(const E8& v);
 };
 inline void Pad()
 {
@@ -356,13 +357,14 @@ inline It8::It8(E8* p, V8* v)
     ptr = p;
 }
 // @fnv 0x00b417b0
-void V8::FUN_00b417b0(const E8& v)
+// src: GUESS 0x00b417b0 (confidence: low)
+void V8::UpdateState_00b417b0(const E8& v)
 {
     if (size() < capacity())
         last = _Ufill(last, 1, v);
     else
     {
-        FUN_00b41b50(end(), v);
+        UpdateState_00b41b50(end(), v);
         Pad();
     }
 }
@@ -403,11 +405,12 @@ struct FUN_00b40000_class
     int unk68;
     int unk6C;
     Sub_b40000* m_pSub;
-    void FUN_00b40000(Sub_b40000* apSub);
+    void UpdateFields_00b40000(Sub_b40000* apSub);
 };
 
 // @fnv 0x00b40000
-void FUN_00b40000_class::FUN_00b40000(Sub_b40000* apSub)
+// src: GUESS 0x00b40000 (confidence: low)
+void FUN_00b40000_class::UpdateFields_00b40000(Sub_b40000* apSub)
 {
     if (m_pSub != apSub)
     {
@@ -1149,7 +1152,7 @@ struct MatchPoint
     float x;
     float y;
     float z;
-    float FUN_00b04d40(const MatchPoint& other) const;
+    float CVec3_Distance(const MatchPoint& other) const;
 };
 
 struct MatchNode
@@ -1185,11 +1188,12 @@ struct Matcher
 {
     stl::vector<MatchPair> m_pairs;
     float limit;
-    void FUN_00b41110(stl::vector<MatchNode*> nodes);
+    void ProcessEntries_00b41110(stl::vector<MatchNode*> nodes);
 };
 
 // @fnv 0x00b41110
-void Matcher::FUN_00b41110(stl::vector<MatchNode*> nodes)
+// src: GUESS 0x00b41110 (confidence: low)
+void Matcher::ProcessEntries_00b41110(stl::vector<MatchNode*> nodes)
 {
     stl::vector<bool> used2(nodes.size(), false);
     stl::fill(used2.begin(), used2.end(), false);
@@ -1203,7 +1207,7 @@ void Matcher::FUN_00b41110(stl::vector<MatchNode*> nodes)
         {
             if (!used2[idx])
             {
-                float d = (*i)->GetPosition().FUN_00b04d40((*j2)->GetPosition());
+                float d = (*i)->GetPosition().CVec3_Distance((*j2)->GetPosition());
                 if (d < limit && d < best4)
                 {
                     best4 = d;
@@ -1312,7 +1316,8 @@ struct VbWords : VbVal<unsigned int, VbAlloc<unsigned int> >
     {
         DestroyRange(a, b, this->alval);
     }
-    void FUN_00b17f50()
+// src: GUESS 0x00b17f50 (confidence: low)
+    void UpdateState_00b17f50()
     {
         if (first != 0)
         {
@@ -1323,7 +1328,7 @@ struct VbWords : VbVal<unsigned int, VbAlloc<unsigned int> >
     }
     ~VbWords()
     {
-        FUN_00b17f50();
+        UpdateState_00b17f50();
     }
 };
 
@@ -1359,11 +1364,11 @@ inline CatQ_aceeb0 PtrCat_aceeb0(ElQ_aceeb0*&, ElQ_aceeb0*&)
     CatQ_aceeb0 c;
     return c;
 }
-void __cdecl FUN_00ac20d0(ElQ_aceeb0* _First, unsigned int _Count, const ElQ_aceeb0& _Val, AlQ_aceeb0& _Al, CatQ_aceeb0,
+void __cdecl Runtime_ProcessEntries_00ac20d0(ElQ_aceeb0* _First, unsigned int _Count, const ElQ_aceeb0& _Val, AlQ_aceeb0& _Al, CatQ_aceeb0,
                           TagQ_aceeb0);
 inline void UFillN_aceeb0(ElQ_aceeb0* _First, unsigned int _Count, const ElQ_aceeb0& _Val, AlQ_aceeb0& _Al)
 {
-    FUN_00ac20d0(_First, _Count, _Val, _Al, PtrCat_aceeb0(_First, _First), TagQ_aceeb0());
+    Runtime_ProcessEntries_00ac20d0(_First, _Count, _Val, _Al, PtrCat_aceeb0(_First, _First), TagQ_aceeb0());
 }
 struct VecQ_aceeb0;
 inline void Dead2_q()
@@ -1385,7 +1390,7 @@ struct CItQ_aceeb0
     {
         return _Myaux == r._Myaux;
     }
-    CItQ_aceeb0& FUN_00b42ce0(int _Off);
+    CItQ_aceeb0& ProcessAndReturnValue_00b42ce0(int _Off);
     int operator-(const CItQ_aceeb0& _Right) const
     {
         if (!(_Has() && _Same(_Right)))
@@ -1401,7 +1406,7 @@ struct ItQ_aceeb0 : CItQ_aceeb0
     {}
     ItQ_aceeb0& operator+=(int _Off)
     {
-        FUN_00b42ce0(_Off);
+        ProcessAndReturnValue_00b42ce0(_Off);
         return *this;
     }
     ItQ_aceeb0 operator+(int _Off) const
@@ -1432,7 +1437,7 @@ struct VecQ_aceeb0
     {
         return ItQ_aceeb0(_Myfirst, this);
     }
-    void FUN_00b42180(CItQ_aceeb0 _Where, unsigned int _Count, const ElQ_aceeb0& _Val);
+    void InsertFilledElements_00b42180(CItQ_aceeb0 _Where, unsigned int _Count, const ElQ_aceeb0& _Val);
     ItQ_aceeb0 end()
     {
         return ItQ_aceeb0(_Mylast, this);
@@ -1442,7 +1447,7 @@ struct VecQ_aceeb0
         UFillN_aceeb0(_Ptr, _Count, _Val, _Alval);
         return _Ptr + _Count;
     }
-    ItQ_aceeb0 FUN_00b41b50(CItQ_aceeb0 _Where, const ElQ_aceeb0& _Val);
+    ItQ_aceeb0 UpdateState_00b41b50(CItQ_aceeb0 _Where, const ElQ_aceeb0& _Val);
 };
 inline CItQ_aceeb0::CItQ_aceeb0(ElQ_aceeb0* _Ptr, const VecQ_aceeb0* _Pvector) : _Myaux(0)
 {
@@ -1452,10 +1457,11 @@ inline CItQ_aceeb0::CItQ_aceeb0(ElQ_aceeb0* _Ptr, const VecQ_aceeb0* _Pvector) :
     _Myptr = _Ptr;
 }
 // @fnv 0x00b41b50
-ItQ_aceeb0 VecQ_aceeb0::FUN_00b41b50(CItQ_aceeb0 _Where, const ElQ_aceeb0& _Val)
+// src: GUESS 0x00b41b50 (confidence: low)
+ItQ_aceeb0 VecQ_aceeb0::UpdateState_00b41b50(CItQ_aceeb0 _Where, const ElQ_aceeb0& _Val)
 {
     unsigned int _Off = size() == 0 ? 0 : _Where - begin();
-    FUN_00b42180(_Where, 1, _Val);
+    InsertFilledElements_00b42180(_Where, 1, _Val);
     return begin() + _Off;
 }
 
@@ -1502,12 +1508,13 @@ struct VectorX41D40 : public ContainerBaseAuxX41D40
 class FUN_00b41d40_It : public IteratorBaseAuxX41D40
 {
   public:
-    FUN_00b41d40_It& FUN_00b41d40();
+    FUN_00b41d40_It& ProcessAndReturnValue_00b41d40();
     ElemX41D40* _Myptr;
 };
 
 // @fnv 0x00b41d40
-FUN_00b41d40_It& FUN_00b41d40_It::FUN_00b41d40()
+// src: GUESS 0x00b41d40 (confidence: low)
+FUN_00b41d40_It& FUN_00b41d40_It::ProcessAndReturnValue_00b41d40()
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoX41D40();
@@ -1547,14 +1554,14 @@ inline Base::Base(Alloc)
 
 struct FUN_00b42030 : Base
 {
-    void FUN_00b32600(unsigned int count, const E& val);
+    void UpdateFields_00b32600(unsigned int count, const E& val);
     FUN_00b42030(unsigned int count, const E& val);
 };
 
 // @fnv 0x00b42030
 FUN_00b42030::FUN_00b42030(unsigned int count, const E& val) : Base()
 {
-    FUN_00b32600(count, val);
+    UpdateFields_00b32600(count, val);
 }
 
 struct input_iterator_tagS
@@ -1861,11 +1868,12 @@ class vector_boolS : public _Container_base_aux_alloc_realS<allocatorS<unsigned 
 class FUN_00b420f0_Reference : public _Vb_iter_baseS<vector_boolS>
 {
   public:
-    unsigned int* FUN_00b420f0() const;
+    unsigned int* EvaluateValue_00b420f0() const;
 };
 
 // @fnv 0x00b420f0
-unsigned int* FUN_00b420f0_Reference::FUN_00b420f0() const
+// src: GUESS 0x00b420f0 (confidence: low)
+unsigned int* FUN_00b420f0_Reference::EvaluateValue_00b420f0() const
 {
     if (!(this->_Has_container() && this->_Myptr != 0))
         InvalidParameterNoInfoS();
@@ -1899,7 +1907,8 @@ struct VectorLengthError : ExceptionBase
     VectorLengthError(const MessageString& _Message) : text(_Message)
     {}
 };
-inline void FUN_00b0fb80()
+// src: GUESS 0x00b0fb80 (confidence: medium)
+inline void BxLengthError_Thunk()
 {
     throw VectorLengthError(MessageString("vector<T> too long"));
 }
@@ -1907,7 +1916,8 @@ struct AllocationError : ExceptionBase
 {
     AllocationError(const char*);
 };
-inline void* FUN_00b42df0(unsigned _Count, void*)
+// src: GUESS 0x00b42df0 (confidence: low)
+inline void* Runtime_UpdateState_00b42df0(unsigned _Count, void*)
 {
     if (_Count <= 0)
         _Count = 0;
@@ -1934,10 +1944,10 @@ template <class I> inline I checked_base(I& _It)
     return checked_base2(_It, _Base_tag);
 }
 // VC-style vector insertion, with scalar record destruction and exception rollback.
-void __cdecl FormHeap_Free(void*);
-FUN_00b42980* __cdecl FUN_00b431e0(const FUN_00b42980*, const FUN_00b42980*, FUN_00b42980*, void*);
-void __cdecl FUN_00b42f40(FUN_00b42980*, unsigned, const FUN_00b42980*, void*, ValueTag, RangeTag);
-FUN_00b42980* __cdecl FUN_00b43010(const FUN_00b42980*, const FUN_00b42980*, FUN_00b42980*, void*);
+void __cdecl FormHeapFreeAndLog_00401030(void*);
+FUN_00b42980* __cdecl Object_ProcessAndReturnValue_00b431e0(const FUN_00b42980*, const FUN_00b42980*, FUN_00b42980*, void*);
+void __cdecl Object_CopyElementRange_00b42f40(FUN_00b42980*, unsigned, const FUN_00b42980*, void*, ValueTag, RangeTag);
+FUN_00b42980* __cdecl RobertdaviesRandom_MoveRangeToUninitializedStorage(const FUN_00b42980*, const FUN_00b42980*, FUN_00b42980*, void*);
 
 template <class T, class U> inline ValueTag value_tag(const T&, const U&)
 {
@@ -1951,7 +1961,7 @@ template <class T> inline MoveTag move_tag(const T&)
 }
 template <class I, class D, class A> inline D uninit_move(I _First, I _Last, D _Dest, A& _Al, MoveTag, RangeTag)
 {
-    return FUN_00b431e0(_First, _Last, _Dest, &_Al);
+    return Object_ProcessAndReturnValue_00b431e0(_First, _Last, _Dest, &_Al);
 }
 template <class I, class A> inline I unchecked_move(I _First, I _Last, I _Dest, A& _Al)
 {
@@ -1959,7 +1969,7 @@ template <class I, class A> inline I unchecked_move(I _First, I _Last, I _Dest, 
 }
 template <class I, class A> inline void unchecked_fill(I _First, unsigned _Count, const FUN_00b42980& _Val, A& _Al)
 {
-    FUN_00b42f40(_First, _Count, &_Val, &_Al, value_tag(_First, _First), RangeTag());
+    Object_CopyElementRange_00b42f40(_First, _Count, &_Val, &_Al, value_tag(_First, _First), RangeTag());
 }
 
 struct RecordAllocator
@@ -1971,7 +1981,7 @@ struct RecordAllocator
     }
     inline void deallocate(FUN_00b42980* _Ptr, unsigned)
     {
-        FormHeap_Free(_Ptr);
+        FormHeapFreeAndLog_00401030(_Ptr);
     }
 };
 template <class A> inline void destroy_range(FUN_00b42980* _First, FUN_00b42980* _Last, A& _Al, ValueTag)
@@ -1993,22 +2003,24 @@ template <class I> inline void fill_outer(I _First, I _Last, const FUN_00b42980&
     fill_range(checked_base(_First), checked_base(_Last), _Val);
 }
 
-FUN_00b42980* __cdecl FUN_00b43230(const FUN_00b42980*, const FUN_00b42980*, FUN_00b42980*, void*, ValueTag, RangeTag);
-__declspec(noinline) inline FUN_00b42980* __cdecl FUN_00b431e0(const FUN_00b42980* _First, const FUN_00b42980* _Last,
+FUN_00b42980* __cdecl RobertdaviesRandom_ProcessEntries_00b43230(const FUN_00b42980*, const FUN_00b42980*, FUN_00b42980*, void*, ValueTag, RangeTag);
+// src: GUESS 0x00b431e0 (confidence: low)
+__declspec(noinline) inline FUN_00b42980* __cdecl Object_ProcessAndReturnValue_00b431e0(const FUN_00b42980* _First, const FUN_00b42980* _Last,
                                                                FUN_00b42980* _Dest, void* _Al)
 {
-    return FUN_00b43230(checked_base(_First), checked_base(_Last), _Dest, _Al, value_tag(_First, _Dest), RangeTag());
+    return RobertdaviesRandom_ProcessEntries_00b43230(checked_base(_First), checked_base(_Last), _Dest, _Al, value_tag(_First, _Dest), RangeTag());
 }
 
 template <class I, class D, class A> inline D copy_tail(I _First, I _Last, D _Dest, A& _Al)
 {
-    return FUN_00b43230(checked_base(_First), checked_base(_Last), _Dest, &_Al, value_tag(_First, _Dest), RangeTag());
+    return RobertdaviesRandom_ProcessEntries_00b43230(checked_base(_First), checked_base(_Last), _Dest, &_Al, value_tag(_First, _Dest), RangeTag());
 }
 template <class I, class D, class A> inline D uninit_tail(I _First, I _Last, D _Dest, A& _Al, MoveTag, RangeTag)
 {
     return copy_tail(_First, _Last, _Dest, _Al);
 }
-inline FUN_00b42980* FUN_00b43010(const FUN_00b42980* _First, const FUN_00b42980* _Last, FUN_00b42980* _Dest, void* _Al)
+// src: GUESS 0x00b43010 (confidence: medium)
+inline FUN_00b42980* RobertdaviesRandom_MoveRangeToUninitializedStorage(const FUN_00b42980* _First, const FUN_00b42980* _Last, FUN_00b42980* _Dest, void* _Al)
 {
     return uninit_tail(checked_base(_First), checked_base(_Last), _Dest, *static_cast<RecordAllocator*>(_Al),
                        move_tag(_Dest), RangeTag());
@@ -2047,7 +2059,8 @@ template <class I> inline I MoveBackwardOpt(I _First, I _Last, I _Dest, RandomTa
                        RangeTag());
     return _Result;
 }
-template <class I> inline I __cdecl FUN_00b42da0(I _First, I _Last, I _Dest)
+// src: GUESS 0x00b42da0 (confidence: low)
+template <class I> inline I __cdecl Object_ProcessAndReturnValue_00b42da0(I _First, I _Last, I _Dest)
 {
     return MoveBackwardOpt(checked_base(_First), checked_base(_Last), _Dest, random_tag(_First, _Dest), move_tag(_Dest),
                            RangeTag());
@@ -2084,7 +2097,7 @@ struct RecordVector
     }
     inline FUN_00b42980* move_tail(FUN_00b42980* _First, FUN_00b42980* _Last, FUN_00b42980* _Ptr)
     {
-        return FUN_00b43010(_First, _Last, _Ptr, &allocator);
+        return RobertdaviesRandom_MoveRangeToUninitializedStorage(_First, _Last, _Ptr, &allocator);
     }
     inline void destroy(FUN_00b42980* _First, FUN_00b42980* _Last)
     {
@@ -2094,22 +2107,23 @@ struct RecordVector
     {
         fill_outer(_First, _Last, _Val);
     }
-    void FUN_00b42180(void* iteratorState, FUN_00b42980* _Where, unsigned _Count, const FUN_00b42980& _Val);
+    void InsertFilledElements_00b42180(void* iteratorState, FUN_00b42980* _Where, unsigned _Count, const FUN_00b42980& _Val);
 };
 // @fnv 0x00b42180
-void RecordVector::FUN_00b42180(void* iteratorState, FUN_00b42980* _Where, unsigned _Count, const FUN_00b42980& _Val)
+// src: GUESS 0x00b42180 (confidence: medium)
+void RecordVector::InsertFilledElements_00b42180(void* iteratorState, FUN_00b42980* _Where, unsigned _Count, const FUN_00b42980& _Val)
 {
     unsigned _Capacity = capacity();
     if (_Count == 0)
         ;
     else if (max_size() - size() < _Count)
-        FUN_00b0fb80();
+        BxLengthError_Thunk();
     else if (_Capacity < size() + _Count)
     {
         _Capacity = max_size() - _Capacity / 2 < _Capacity ? 0 : _Capacity + _Capacity / 2;
         if (_Capacity < size() + _Count)
             _Capacity = size() + _Count;
-        FUN_00b42980* _Newvec = (FUN_00b42980*)FUN_00b42df0(_Capacity, 0);
+        FUN_00b42980* _Newvec = (FUN_00b42980*)Runtime_UpdateState_00b42df0(_Capacity, 0);
         FUN_00b42980* _Ptr = _Newvec;
         try
         {
@@ -2121,7 +2135,7 @@ void RecordVector::FUN_00b42180(void* iteratorState, FUN_00b42980* _Where, unsig
         catch (...)
         {
             destroy(_Newvec, _Ptr);
-            FormHeap_Free(_Newvec);
+            FormHeapFreeAndLog_00401030(_Newvec);
             throw;
         }
         _Count += size();
@@ -2155,7 +2169,7 @@ void RecordVector::FUN_00b42180(void* iteratorState, FUN_00b42980* _Where, unsig
         FUN_00b42980 _Tmp = _Val;
         FUN_00b42980* _Oldend = _Mylast;
         _Mylast = move_tail(_Oldend - _Count, _Oldend, _Mylast);
-        FUN_00b42da0(_Where, _Oldend - _Count, _Oldend);
+        Object_ProcessAndReturnValue_00b42da0(_Where, _Oldend - _Count, _Oldend);
         fill_outer(_Where, _Where + _Count, _Tmp);
     }
 }
@@ -2275,11 +2289,12 @@ class length_error : public logic_error
 
 struct VbXlen
 {
-    void FUN_00b429d0() const;
+    void ThrowLengthError() const;
 };
 
 // @fnv 0x00b429d0
-void VbXlen::FUN_00b429d0() const
+// src: GUESS 0x00b429d0 (confidence: high)
+void VbXlen::ThrowLengthError() const
 {
     throw std::length_error(str_010a5950);
 }
@@ -2358,13 +2373,14 @@ class BoolIteratorB42 : public IteratorBaseAuxB42
     {
         return ((BoolVectorB42*)this->_Getmycont())->_Myvec.begin()._Myptr;
     }
-    BoolIteratorB42& FUN_00b42a60(int _Off);
+    BoolIteratorB42& ProcessAndReturnValue_00b42a60(int _Off);
     unsigned int* _Myptr;
     unsigned int _Myoff;
 };
 
 // @fnv 0x00b42a60
-BoolIteratorB42& BoolIteratorB42::FUN_00b42a60(int _Off)
+// src: GUESS 0x00b42a60 (confidence: low)
+BoolIteratorB42& BoolIteratorB42::ProcessAndReturnValue_00b42a60(int _Off)
 {
     if (_Off == 0)
         return *this;
@@ -2399,7 +2415,7 @@ void operator delete(void*) throw();
 void* operator new(unsigned int);
 inline void operator delete(void*, void*) throw()
 {}
-void* __cdecl FUN_0044d670(unsigned int count, void* hint);
+void* __cdecl std_allocator_SIdvLeafTexture_allocator_SIdvLeafTexture(unsigned int count, void* hint);
 struct VecAux
 {
     const void* container;
@@ -2430,7 +2446,7 @@ template <class T> struct VecAlloc
     {}
     T* allocate(unsigned int count)
     {
-        return (T*)FUN_0044d670(count, (T*)0);
+        return (T*)std_allocator_SIdvLeafTexture_allocator_SIdvLeafTexture(count, (T*)0);
     }
     void deallocate(T* ptr, unsigned int)
     {
@@ -3011,7 +3027,8 @@ struct EUMB
     int unk14;
 };
 // @fnv 0x00b42da0
-EUMB* __cdecl FUN_00b42da0(EUMB* _First, EUMB* _Last, EUMB* _Dest)
+// src: GUESS 0x00b42da0 (confidence: low)
+EUMB* __cdecl Object_ProcessAndReturnValue_00b42da0(EUMB* _First, EUMB* _Last, EUMB* _Dest)
 {
     return (_Move_backward_optS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Iter_randomS(_First, _Dest),
                                 _Move_catS(_Dest), _Range_checked_iterator_tagS()));
@@ -3272,10 +3289,11 @@ struct CameraVectorOps
 {
     void Prep(FnvVec);
     FnvVec Fetch();
-    FnvVec FUN_00b40b30(FnvVec);
+    FnvVec UpdateState_00b40b30(FnvVec);
 };
 // @fnv 0x00b40b30
-FnvVec CameraVectorOps::FUN_00b40b30(FnvVec v)
+// src: GUESS 0x00b40b30 (confidence: low)
+FnvVec CameraVectorOps::UpdateState_00b40b30(FnvVec v)
 {
     FnvVec tmp;
     Prep(v);
@@ -3773,8 +3791,8 @@ struct P133Camera
     {
         return kind / 2;
     }
-    NiPoint3 FUN_00b40430();
-    void FUN_00b404c0(NiPoint3 const&, bool);
+    NiPoint3 CBillboardLeaf_GetColor();
+    void CBillboardLeaf_SetColor(NiPoint3 const&, bool);
     void SetPos(NiPoint3 const& p)
     {
         position = p;
@@ -3810,16 +3828,16 @@ struct P133ConstIter : IteratorBaseAuxB42
     {
         FUN_00b42980(p, v);
     }
-    P133ConstIter& FUN_00b41d40();
-    bool FUN_00b2ac30(P133ConstIter const&) const;
-    P133Pair const& FUN_00b2ab50() const;
+    P133ConstIter& ProcessAndReturnValue_00b41d40();
+    bool EvaluateValue_00b2ac30(P133ConstIter const&) const;
+    P133Pair const& EvaluateValue_00b2ab50() const;
     P133Pair const& operator*() const
     {
-        return FUN_00b2ab50();
+        return EvaluateValue_00b2ab50();
     }
     bool operator!=(P133ConstIter const& rhs) const
     {
-        return !FUN_00b2ac30(rhs);
+        return !EvaluateValue_00b2ac30(rhs);
     }
 };
 struct P133Iter : P133ConstIter
@@ -3836,7 +3854,7 @@ struct P133Iter : P133ConstIter
     }
     P133Iter& operator++()
     {
-        FUN_00b41d40();
+        ProcessAndReturnValue_00b41d40();
         return *this;
     }
 };
@@ -3857,7 +3875,8 @@ struct P133Pairs
         return iterator(last, this);
     }
 };
-inline P133Pair const& P133ConstIter::FUN_00b2ab50() const
+// src: GUESS 0x00b2ab50 (confidence: low)
+inline P133Pair const& P133ConstIter::EvaluateValue_00b2ab50() const
 {
     if (!(this->_Has_container()))
     {
@@ -3901,13 +3920,14 @@ struct P133List : stl::_Container_base_aux_alloc_real<stl::allocator<P133Camera*
     bool _Buy(unsigned int);
     ~P133List()
     {
-        FUN_00b17f50();
+        UpdateState_00b17f50();
     }
     void _Destroy(P133Camera** a, P133Camera** b)
     {
         p133_destroy(a, b, alval);
     }
-    void FUN_00b17f50()
+// src: GUESS 0x00b17f50 (confidence: low)
+    void UpdateState_00b17f50()
     {
         if (first != 0)
         {
@@ -3940,7 +3960,8 @@ struct P133List : stl::_Container_base_aux_alloc_real<stl::allocator<P133Camera*
         return OutIter(last, this);
     }
     void InsertAt(OutIter, P133Camera* const&);
-    void FUN_00b15390(P133Camera* const& val)
+// src: GUESS 0x00b15390 (confidence: low)
+    void UpdateState_00b15390(P133Camera* const& val)
     {
         if (size() < capacity())
             last = _Ufill(last, 1, val);
@@ -3954,10 +3975,11 @@ struct P133Owner
     float unk18, probability;
     P133Scene* scene;
     float scale;
-    P133List FUN_00b40c80();
+    P133List ProcessEntries_00b40c80();
 };
 // @fnv 0x00b40c80
-P133List P133Owner::FUN_00b40c80()
+// src: GUESS 0x00b40c80 (confidence: low)
+P133List P133Owner::ProcessEntries_00b40c80()
 {
     static FUN_00b3f100 DAT_011f8f04;
     P133List output9;
@@ -3971,8 +3993,8 @@ P133List P133Owner::FUN_00b40c80()
             float offset = (frameTmp->height - 0.5) * (scale * frameTmp->scale * 0.5);
             position3[2] += offset;
             camera->SetPos(position3);
-            camera->FUN_00b404c0((iter->first->FUN_00b40430() + iter->second->FUN_00b40430()) * 0.5f, false);
-            output9.FUN_00b15390(camera);
+            camera->CBillboardLeaf_SetColor((iter->first->CBillboardLeaf_GetColor() + iter->second->CBillboardLeaf_GetColor()) * 0.5f, false);
+            output9.UpdateState_00b15390(camera);
         }
     }
     return output9;

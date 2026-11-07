@@ -11,7 +11,7 @@ public:
 
     QuantityMenu();
     bool HandleButton(int aiButton, float afValue);
-    int FUN_00720a30();
+    int GetMenuID_00720a30();
     void* FUN_00720a40(unsigned int flags);
-    void FUN_00720a70();
+    void ClearGlobalAndDestroyMenu();
 };

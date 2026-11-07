@@ -17,7 +17,7 @@ struct __declspec(align(16)) S00b7c750_Matrix
     float m[4][4];
 };
 
-extern "C" S00b7c750_Matrix* __stdcall FUN_00ee6dfe(S00b7c750_Matrix* pOut, const S00b7c750_Matrix* pM1,
+extern "C" S00b7c750_Matrix* __stdcall D3DXMatrixMultiplyTranspose_00ee6dfe(S00b7c750_Matrix* pOut, const S00b7c750_Matrix* pM1,
                                                     const S00b7c750_Matrix* pM2);  // D3DXMatrixMultiply
 
 class S00b7c750_Device
@@ -165,7 +165,7 @@ extern S00b7c750_Globals* DAT_0126f74c;
 class S00b7c750_Camera
 {
   public:
-    void FUN_00e6fbb0(unsigned int auiCameraValue, unsigned int uiFlags);
+    void NiDX9Renderer_SetModelTransform(unsigned int auiCameraValue, unsigned int uiFlags);
     unsigned int unk000;
     unsigned int unk004;
     unsigned int unk008;
@@ -805,15 +805,16 @@ class FUN_00b7c750_cls
     unsigned int unk14;
     S00b7c750_Camera* m_pkAccumulationCamera;
 
-    long FUN_00b7c750(unsigned int uiUnused, unsigned int auiCameraValue);
+    long ShadowLightShader_SetupGeometryOpt_WorldViewProj(unsigned int uiUnused, unsigned int auiCameraValue);
 };
 
 // @fnv 0x00b7c750
-long FUN_00b7c750_cls::FUN_00b7c750(unsigned int uiUnused, unsigned int auiCameraValue)
+// src: COMMUNITY 0x00b7c750
+long FUN_00b7c750_cls::ShadowLightShader_SetupGeometryOpt_WorldViewProj(unsigned int uiUnused, unsigned int auiCameraValue)
 {
-    m_pkAccumulationCamera->FUN_00e6fbb0(auiCameraValue, 0);
+    m_pkAccumulationCamera->NiDX9Renderer_SetModelTransform(auiCameraValue, 0);
     S00b7c750_Matrix kViewProj;
-    FUN_00ee6dfe(&kViewProj, &m_pkAccumulationCamera->m_kView, &m_pkAccumulationCamera->m_kProj);
+    D3DXMatrixMultiplyTranspose_00ee6dfe(&kViewProj, &m_pkAccumulationCamera->m_kView, &m_pkAccumulationCamera->m_kProj);
     S00b7c750_Renderer* pkRenderer = DAT_0126f74c->m_pOwnerShader;
     return pkRenderer->m_pkDevice->SetVertexShaderConstantF(0, &kViewProj.m[0][0], 4);
 }

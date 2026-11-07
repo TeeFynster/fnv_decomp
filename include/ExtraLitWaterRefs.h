@@ -14,8 +14,8 @@ public:
 
     ExtraLitWaterRefs();
     void Copy(BSExtraDataEx* apSource);
-    void FUN_00434050(TESForm* apOwner);
-    bool FUN_00434e30(BSExtraData* apCompare);
+    void InitItem_00434050(TESForm* apOwner);
+    bool Compare_00434e30(BSExtraData* apCompare);
     void* FUN_00411d90(unsigned int flags);
     void FUN_00434dc0();
 

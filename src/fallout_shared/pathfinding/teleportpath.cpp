@@ -34,14 +34,14 @@ struct Arr16
     Elem16* _4;
     int _8;
     int _12;
-    unsigned int FUN_006f31f0();
+    unsigned int BSSimpleArray_TeleportLink_1024_AddUninitialized();
     void ConstructBounds(void*, int);
     unsigned int AppendElement(const Elem16* aPath);
 };
 // @fnv 0x006f2d20
 unsigned int Arr16::AppendElement(const Elem16* aPath)
 {
-    unsigned int idx = FUN_006f31f0();
+    unsigned int idx = BSSimpleArray_TeleportLink_1024_AddUninitialized();
     ConstructBounds(&_4[idx], 1);
     _4[idx] = *aPath;
     return idx;
@@ -97,7 +97,8 @@ FUN_006f48b0::FUN_006f48b0() : first(), second(), third(), fourth()
 
 #include <windows.h>
 // @fnv 0x0040b460
-void FUN_0040b460(unsigned int* aui32Value)
+// src: COMMUNITY 0x0040b460
+void NiAtomicIncrement_0040b460(unsigned int* aui32Value)
 {
     InterlockedIncrement((volatile LONG*)aui32Value);
 }

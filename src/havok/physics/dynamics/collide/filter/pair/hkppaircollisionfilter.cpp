@@ -38,11 +38,11 @@ inline hkMemoryAllocator& GetStreamAllocator(hkMemoryRouter& stream)
 // src/havok/physics/dynamics/collide/filter/pair/hkppaircollisionfilter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/collide/filter/pair/hkppaircollisionfilter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern hkMemoryRouter* FUN_00c85750();
+extern hkMemoryRouter* hkMemoryRouter_getInstance();
 
 struct HashCls
 {
-    __int64 FUN_00cb1cb0(unsigned __int64 key, int a2, int a3);
+    __int64 hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_getWithDefault(unsigned __int64 key, int a2, int a3);
     void InsertKeyValue(hkMemoryAllocator& f0, __int64 m, __int64 n);
 
     int InsertPair(int p1, int p2);
@@ -59,14 +59,14 @@ int HashCls::InsertPair(int aiFirst, int aiSecond)
         m = (__int64)aiSecond * 4294967296LL + (__int64)aiFirst;
 
     HashCls* pHash = (HashCls*)((char*)this + 0x30);
-    __int64 n = pHash->FUN_00cb1cb0(m, 0, 0) + 1;
-    hkMemoryAllocator& f0 = *FUN_00c85750()->m_heap;
+    __int64 n = pHash->hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_getWithDefault(m, 0, 0) + 1;
+    hkMemoryAllocator& f0 = *hkMemoryRouter_getInstance()->m_heap;
     pHash->InsertKeyValue(f0, m, n);
     return (int)n;
 }
 
 namespace fnv_00def350 {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 struct DEF350PointerMap
 {
@@ -76,7 +76,7 @@ struct DEF350PointerMap
 
     DEF350PointerMap() : m_kPrimitiveElement(0), m_iCapacityFlags(0), m_iPairCount(-1)
     {
-        reserve(GetStreamAllocator(FUN_00c85750()), 0);
+        reserve(GetStreamAllocator(hkMemoryRouter_getInstance()), 0);
     }
 
     void reserve(hkMemoryAllocator& alloc, int numElements);
@@ -147,7 +147,7 @@ struct Inner
 {
     unsigned char unk00[8];
     int threshold;
-    int FUN_00cb1c60(unsigned __int64 value);
+    int hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_findKey(unsigned __int64 value);
 };
 
 struct Owner
@@ -176,7 +176,7 @@ volatile unsigned char* Owner::CheckPairAgainstThreshold(volatile unsigned char*
         value = ullSecond * 0x100000000LL + ullFirst;
 
     Inner* pInner = &inner;
-    int actual = pInner->FUN_00cb1c60(value);
+    int actual = pInner->hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_findKey(value);
     if (actual > pInner->threshold)
     {
         *result = 1;
@@ -303,12 +303,13 @@ struct FUN_00def070_cls
     int unk2c;
     CheckHolder070* m_pHolder;
 
-    HolderCheckResult FUN_00def070(int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+    HolderCheckResult hkpPairCollisionFilter_isCollisionEnabled_00def070(int a2, int a3, int a4, int a5, int a6, int a7, int a8);
 };
 
 // Returns true if m_pHolder is null or its sub-object's Check returns a nonzero value.
 // @fnv 0x00def070
-HolderCheckResult FUN_00def070_cls::FUN_00def070(int aiArg2, int aiArg3, int aiArg4, int aiArg5, int aiArg6, int aiArg7,
+// src: HAVOK_LIB 0x00def070
+HolderCheckResult FUN_00def070_cls::hkpPairCollisionFilter_isCollisionEnabled_00def070(int aiArg2, int aiArg3, int aiArg4, int aiArg5, int aiArg6, int aiArg7,
                                                  int aiArg8)
 {
     return HolderCheckResult(!m_pHolder ||
@@ -409,17 +410,18 @@ class DEF120Wrapper
     int unk24;
     DEF120Owner* m_pkOwnerManager;
 
-    DEF120Bool FUN_00def120(const void* pvA, const void* pvB) const;
+    DEF120Bool hkpPairCollisionFilter_isCollisionEnabled_00def120(const void* pvA, const void* pvB) const;
 };
 
 // @fnv 0x00def120
-DEF120Bool DEF120Wrapper::FUN_00def120(const void* pvA, const void* pvB) const
+// src: HAVOK_LIB 0x00def120
+DEF120Bool DEF120Wrapper::hkpPairCollisionFilter_isCollisionEnabled_00def120(const void* pvA, const void* pvB) const
 {
     return !m_pkOwnerManager || m_pkOwnerManager->m_kFilter.IsCollisionEnabled(pvA, pvB);
 }
 
 namespace fnvc_adapt {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 }
 
 typedef unsigned __int64 DEF1E0Uint64;
@@ -467,7 +469,7 @@ int DEF1E0PairCounter::DecrementPairCount(int idA, int idB)
         return 0;
     count--;
     if (count > 0)
-        map.insert(GetStreamAllocator(fnvc_adapt::FUN_00c85750()), key, count);
+        map.insert(GetStreamAllocator(fnvc_adapt::hkMemoryRouter_getInstance()), key, count);
     else
         map.remove(key);
     return (int)count;
@@ -499,12 +501,13 @@ class hkListDEF0
     int unk00[12];
     hkFilterImplDEF0* m_iFilter;
 
-    hkBool FUN_00def020(const void* a, const void* b, const void* c, const void* d, const void* e) const;
+    hkBool hkpPairCollisionFilter_isCollisionEnabled(const void* a, const void* b, const void* c, const void* d, const void* e) const;
 };
 
 // Returns true if m_iFilter is null or if m_iFilter->IsCollisionEnabled returns true for the given arguments.
 // @fnv 0x00def020
-hkBool hkListDEF0::FUN_00def020(const void* a, const void* b, const void* c, const void* d, const void* e) const
+// src: HAVOK_LIB 0x00def020
+hkBool hkListDEF0::hkpPairCollisionFilter_isCollisionEnabled(const void* a, const void* b, const void* c, const void* d, const void* e) const
 {
     return !m_iFilter || m_iFilter->IsCollisionEnabled(a, b, c, d, e);
 }
@@ -513,20 +516,21 @@ hkBool hkListDEF0::FUN_00def020(const void* a, const void* b, const void* c, con
 // through its second base. PrimaryBase is vptr + one int (8 bytes).
 struct PrimaryBase
 {
-    virtual void FUN_00def4c0();
+    virtual void AdjustThisAndForward_00def4c0();
     int unk04;
 };
 
 struct SecondaryBase
 {
-    virtual void FUN_00def4c0();
+    virtual void AdjustThisAndForward_00def4c0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00def4c0
-    virtual void FUN_00def4c0();
+// src: GUESS 0x00def4c0 (confidence: low)
+    virtual void AdjustThisAndForward_00def4c0();
 };
 
 Derived::Derived()
@@ -560,7 +564,7 @@ DEF4D0Object::DEF4D0Object()
 struct DEF4E0Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00def4e0();
+    virtual void AdjustThisAndForward_00def4e0();
 
     int unk04;
     int unk08;
@@ -569,7 +573,7 @@ struct DEF4E0Primary
 
 struct DEF4E0Secondary
 {
-    virtual void FUN_00def4e0();
+    virtual void AdjustThisAndForward_00def4e0();
 };
 
 struct DEF4E0Object : DEF4E0Primary, DEF4E0Secondary
@@ -577,7 +581,8 @@ struct DEF4E0Object : DEF4E0Primary, DEF4E0Secondary
     DEF4E0Object();
 
 // @fnv 0x00def4e0
-    virtual void FUN_00def4e0();
+// src: GUESS 0x00def4e0 (confidence: low)
+    virtual void AdjustThisAndForward_00def4e0();
 };
 
 DEF4E0Object::DEF4E0Object()
@@ -624,7 +629,7 @@ extern int DAT_010c3b80;
 extern int DAT_0102e388;
 
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00def160_Sub
 {
@@ -632,8 +637,8 @@ struct FUN_00def160_Sub
     int unk04;
     int unk08;
 
-    void FUN_00cb1e40(void* pAllocator);
-    void FUN_00a29680();
+    void hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_clearAndDeallocate(void* pAllocator);
+    void Object_DoNothing();
 };
 
 class FUN_00def160_cls
@@ -654,11 +659,12 @@ class FUN_00def160_cls
     FUN_00def160_Sub m_sub;
     hkReferencedObject* m_pReference;
 
-    void FUN_00def160();
+    void UpdateFields_00def160();
 };
 
 // @fnv 0x00def160
-void FUN_00def160_cls::FUN_00def160()
+// src: GUESS 0x00def160 (confidence: low)
+void FUN_00def160_cls::UpdateFields_00def160()
 {
     hkMemoryRouter* pHolder;
     FUN_00def160_Sub* pSub;
@@ -675,9 +681,9 @@ void FUN_00def160_cls::FUN_00def160()
     }
 
     pSub = &m_sub;
-    pHolder = FUN_00c85750();
-    pSub->FUN_00cb1e40(pHolder->m_heap);
-    pSub->FUN_00a29680();
+    pHolder = hkMemoryRouter_getInstance();
+    pSub->hkMapBase_unsigned_int64_unsigned_int64_hkMapOperations_unsigned_int64_clearAndDeallocate(pHolder->m_heap);
+    pSub->Object_DoNothing();
 
     m_vp14 = (void*)&DAT_010c3b8c;
     m_vp10 = (void*)&DAT_010c3bac;
@@ -688,22 +694,23 @@ void FUN_00def160_cls::FUN_00def160()
 }  // namespace fnv_00def160
 
 namespace fnv_00def500 {
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
     unsigned short size;
-    void FUN_00def160();
-    CpuObject* FUN_00def500(unsigned int flags);
+    void UpdateFields_00def160();
+    CpuObject* hkpPairCollisionFilter_Destroy(unsigned int flags);
 };
 // Calls FUN_00def160, and if the low bit of flags is set, releases this through the memory router allocator, then returns this.
 // @fnv 0x00def500
-CpuObject* CpuObject::FUN_00def500(unsigned int flags)
+// src: COMMUNITY 0x00def500
+CpuObject* CpuObject::hkpPairCollisionFilter_Destroy(unsigned int flags)
 {
-    FUN_00def160();
+    UpdateFields_00def160();
     if (flags & 1)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         holder->m_heap->blockFree(this, size);
     }
     return this;
@@ -1546,7 +1553,8 @@ __forceinline static void hkSolverExportWriteResult128(hkReal impulseApplied0, h
 }
 // Iterates solver schemas to integrate constraint right-hand sides and write impulse results to solver output buffers.
 // @fnv 0x00def570
-void FUN_00def570(const ConstraintSolverInfo& info, const FloatRecord* solverInputs, const SolverSchemaHeader* schemas,
+// src: GUESS 0x00def570 (confidence: medium)
+void hkReal_IntegrateConstraintSchemas(const ConstraintSolverInfo& info, const FloatRecord* solverInputs, const SolverSchemaHeader* schemas,
                   const QuantizedBoundsData* accums)
 {
     const FloatRecord* solverIn = solverInputs;

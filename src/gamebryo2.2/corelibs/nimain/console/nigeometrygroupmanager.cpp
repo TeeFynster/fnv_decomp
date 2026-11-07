@@ -17,7 +17,8 @@ void* NiGeometryGroupManager::vf00(unsigned int auiFlags)
 }
 
 // @fnv 0x00aa00c0
-bool __stdcall FUN_00aa00c0(int a, int b)
+// src: GUESS 0x00aa00c0 (confidence: high)
+bool __stdcall Object_ReturnFalse(int a, int b)
 {
     return false;
 }

@@ -26,8 +26,8 @@ public:
 
     bool Load(TESFile* file);
     void UpdateLoadingStatusCallback();
-    bool FUN_00830050();
-    float FUN_00830080();
+    bool GetLooping();
+    float GetAttenuation();
     const char* GetRandomEntry();
-    void FUN_005913b0(); // exe 0x005913b0: clear the track list
+    void BGSMusicType_ClearData(); // exe 0x005913b0: clear the track list
 };

@@ -23,7 +23,7 @@ bool BSTCommonLLMessageQueue<QueuedMessage>::EnqueueMessage(const QueuedMessage&
 {
     BSTFreeListElem<QueuedMessage>* pElem;
     bool bResult;
-    if (pSizeClassFreeList && pSizeClassFreeList->FUN_00905aa0(pElem, input))
+    if (pSizeClassFreeList && pSizeClassFreeList->BSTFreeList_Allocate_0(pElem, input))
     {
         if (!pHead)
             m_ppTailLink = &pHead;

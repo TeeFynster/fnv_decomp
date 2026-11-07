@@ -19,30 +19,30 @@ public:
                       const hkaSkeleton* skeleton,
                       const hkArray<hkInt32>& boneToRigidBodyMap) throw();
     virtual ~hkaRagdollInstance() throw();
-    virtual hkaRagdollInstance* FUN_00ce2730(int cloneMode) const throw();
+    virtual hkaRagdollInstance* hkaRagdollInstance_clone(int cloneMode) const throw();
 
-    void FUN_00ce1560(const hkQsTransform* pose);
-    int FUN_00ce1680(void* world, unsigned char flag);
-    void FUN_00ce1760(hkQsTransform* poseOut, const hkQsTransform& root,
+    void ApplyPoseAndClearVelocities(const hkQsTransform* pose);
+    int addToWorld(void* world, unsigned char flag);
+    void hkaRagdollInstance_getPoseWorldSpace(hkQsTransform* poseOut, const hkQsTransform& root,
                       const hkQsTransform* localPose);
-    void FUN_00ce18d0(hkQsTransform* poseOut);
+    void hkaRagdollInstance_getPoseWorldSpace_00ce18d0(hkQsTransform* poseOut);
     void getWorldPose(hkQsTransform* poseOut);
-    void FUN_00ce18f0(hkQsTransform* poseOut, const hkQsTransform& worldFromModel);
-    void FUN_00ce1ad0(const hkQsTransform* pose, const hkQsTransform& worldFromModel);
-    void FUN_00ce1ca0(const hkQsTransform* poseA, const hkQsTransform& worldFromModelA,
+    void hkaRagdollInstance_getPoseModelSpace(hkQsTransform* poseOut, const hkQsTransform& worldFromModel);
+    void hkaRagdollInstance_setPoseWorldSpace(const hkQsTransform* pose, const hkQsTransform& worldFromModel);
+    void ProcessEntries_00ce1ca0(const hkQsTransform* poseA, const hkQsTransform& worldFromModelA,
                       const hkQsTransform* poseB, const hkQsTransform& worldFromModelB,
                       float deltaTime);
-    void FUN_00ce2000(int bone, hkQsTransform& out);
-    void FUN_00ce2150(int bone, float time, hkQsTransform& out);
-    void FUN_00ce2150(int bone, float time, void* out);
-    void FUN_00ce22c0(const hkArray<hkpRigidBody*>& rigidBodies,
+    void ProcessAndReturnValue_00ce2000(int bone, hkQsTransform& out);
+    void hkaRagdollInstance_getApproxWorldFromBoneTransformAt(int bone, float time, hkQsTransform& out);
+    void hkaRagdollInstance_getApproxWorldFromBoneTransformAt(int bone, float time, void* out);
+    void hkaRagdollInstance_commonInit(const hkArray<hkpRigidBody*>& rigidBodies,
                       const hkArray<hkpConstraintInstance*>& constraints,
                       hkaSkeleton* skeleton);
     void ApplyValueToTransforms(float value, hkQsTransform* transforms);
-    hkaRagdollInstance* FUN_00ce2470(const hkArray<hkpRigidBody*>& rigidBodies,
+    hkaRagdollInstance* hkaRagdollInstance_hkaRagdollInstance(const hkArray<hkpRigidBody*>& rigidBodies,
                                     const hkArray<hkpConstraintInstance*>& constraints,
                                     hkaSkeleton* skeleton);
-    void FUN_00ce26f0(hkQsTransform* transforms);
+    void hkaRagdollInstance_getApproxCurrentPoseWorldSpace(hkQsTransform* transforms);
 
     const hkaSkeleton* getSkeleton() const { return m_pSkeleton; }
     hkpRigidBody* getRigidBodyOfBone(int bone) const

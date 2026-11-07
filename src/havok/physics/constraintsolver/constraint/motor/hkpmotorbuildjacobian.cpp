@@ -30,7 +30,8 @@ struct Buffer
 };
 // Computes a->x*b->z into out->value, advances buffer->cursor by 0x50, and writes scaled and copied components of a into the cursor's preceding slots.
 // @fnv 0x00dd03c0
-void __cdecl FUN_00dd03c0(VectorA* pVectorA, VectorB* pVectorB, Result* pResult, Buffer* buffer)
+// src: HAVOK_LIB 0x00dd03c0
+void __cdecl _hk1dLinearVelocityMotorCommitJacobian(VectorA* pVectorA, VectorB* pVectorB, Result* pResult, Buffer* buffer)
 {
     pResult->value = pVectorA->x * pVectorB->z;
     float* cursor = buffer->cursor;

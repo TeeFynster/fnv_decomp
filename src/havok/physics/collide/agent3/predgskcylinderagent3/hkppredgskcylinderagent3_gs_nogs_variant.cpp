@@ -49,8 +49,8 @@ struct Manager
     int unk0c;
     Allocator* allocator;
 };
-extern "C" Manager* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00d41930(void*, void*, void*, void*);
+extern "C" Manager* __cdecl hkMemoryRouter_getInstance();
+extern "C" void __cdecl hkPredGskAgent3_sepNormal(void*, void*, void*, void*);
 extern double DAT_010cf218;
 struct Node
 {
@@ -137,10 +137,10 @@ struct D40AF0Mask
     int m_pHeadNode;
     int m_iSecondInteger;
 };
-static void FUN_00d40af0(D40AF0State* s, D40AF0Mask* m);
+static void convertCylinderCacheToCapsuleCache(D40AF0State* s, D40AF0Mask* m);
 void D40AF0Caller(D40AF0State* s, D40AF0Mask* m);
 void __fastcall FUN_00c905b0(void* selfVal);
-static void FUN_00d409d0(void** vals, void** slots);
+static void restoreOriginalShapesInCdBodies(void** vals, void** slots);
 void** volatile g_d409d0_vals;
 void** volatile g_d409d0_slots;
 void d409d0_probe_caller(void);
@@ -202,7 +202,7 @@ struct D40A10Entry
         m_data = data;
     }
 };
-static void FUN_00d40a10(int* a, FNVTypeRecord** b, FNVObject** objs, D40A10Entry* out);
+static void replaceCylindersWithCapsulesInCdBodies(int* a, FNVTypeRecord** b, FNVObject** objs, D40A10Entry* out);
 void D40A10Caller(int* a, FNVTypeRecord** b, FNVObject** objs, D40A10Entry* out);
 
 extern "C" unsigned __int64 __rdtsc(void);
@@ -3498,7 +3498,7 @@ Memory* memory();
 
 __forceinline Shape* makeShape(Shape* shape)
 {
-    Shape* p = (Shape*)FUN_00c85750()->allocator->allocate(64);
+    Shape* p = (Shape*)hkMemoryRouter_getInstance()->allocator->allocate(64);
     p->allocationSize = 64;
     float radius = shape->radius;
     float inflated = (float)(shape->FUN_00d571a0() + radius + 0.0020000000949949026);
@@ -3523,12 +3523,12 @@ struct Frame
 
 struct VectorOps
 {
-    void FUN_00c7f700(Transform*, CylAgentVector4*);
+    void hkVector4_setRotatedDir(Transform*, CylAgentVector4*);
 };
 
 void ReleaseAllEntries(void*, void*, void*);
 
-void FUN_00db60c0(Agent3ProcessInput*, float, float, float, Cache*, CylAgentVector4*, Output*);
+void hk4dGskCollideCalcToi(Agent3ProcessInput*, float, float, float, Cache*, CylAgentVector4*, Output*);
 
 struct VertexData
 {
@@ -3537,7 +3537,7 @@ struct VertexData
     float radiusA, radiusB, tolerance, radiusSquared;
 };
 
-void FUN_00dae3a0(unsigned char*, VertexData*, int, Output*, void*);
+void hkGskManifold_verifyAndGetPoints(unsigned char*, VertexData*, int, Output*, void*);
 
 void ProcessCollision(Agent3ProcessInput*, State*, Cache*, Feature*, unsigned char*, CylAgentVector4*, Output*);
 
@@ -3582,7 +3582,8 @@ struct VecArg
     }
 };
 // @fnv 0x00d40d80
-Cache* __cdecl FUN_00d40d80(Agent3ProcessInput* pair, State* state, Cache* cache, VecArg normal, Output* output)
+// src: COMMUNITY 0x00d40d80
+Cache* __cdecl hkPredGskCylinderAgent3_process(Agent3ProcessInput* pair, State* state, Cache* cache, VecArg normal, Output* output)
 {
     Trace* stampTrace;
     volatile unsigned int* stampCursor;
@@ -3663,7 +3664,7 @@ Cache* __cdecl FUN_00d40d80(Agent3ProcessInput* pair, State* state, Cache* cache
 
     CylAgentVector4 direction;
 
-    FUN_00d41930(pair, state, cache, &direction);
+    hkPredGskAgent3_sepNormal(pair, state, cache, &direction);
 
     ContactData* contact = &cache->contactData;
     for (int i = 0; i < 2; ++i)
@@ -3686,7 +3687,7 @@ Cache* __cdecl FUN_00d40d80(Agent3ProcessInput* pair, State* state, Cache* cache
 
             sharedAxis.axisWorld.value = _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), axis);
 
-            ((VectorOps*)&sharedAxis.axisWorld)->FUN_00c7f700((*bodies[i])->transform, &sharedAxis.axisWorld);
+            ((VectorOps*)&sharedAxis.axisWorld)->hkVector4_setRotatedDir((*bodies[i])->transform, &sharedAxis.axisWorld);
 
             __m128 dot = _mm_mul_ps(direction.value, sharedAxis.axisWorld.value);
 
@@ -3751,7 +3752,7 @@ Cache* __cdecl FUN_00d40d80(Agent3ProcessInput* pair, State* state, Cache* cache
             scalarScratch.minArg = settings->otherOffset * radius + depth;
             float other = smaller(leftMin, scalarScratch.minArg);
 
-            FUN_00db60c0(pair, radius, len, other, cache, normal, output);
+            hk4dGskCollideCalcToi(pair, radius, len, other, cache, normal, output);
             goto distant;
         }
     }
@@ -3772,7 +3773,7 @@ Cache* __cdecl FUN_00d40d80(Agent3ProcessInput* pair, State* state, Cache* cache
 
                 Body** slot = refBodies[j];
                 ExtendedRecord* record = (ExtendedRecord*)(*slot)->shape;
-                Manager* mgr = FUN_00c85750();
+                Manager* mgr = hkMemoryRouter_getInstance();
                 scalarScratch.node = mgr->allocator->allocate(0x40);
                 scalarScratch.node->unk04 = 0x40;
                 float v = record->unk10;
@@ -3874,7 +3875,7 @@ Cache* __cdecl FUN_00d40d80(Agent3ProcessInput* pair, State* state, Cache* cache
                 }
             }
 
-            FUN_00dae3a0(&contact->numA, &tracker, 0, output, pair->manager);
+            hkGskManifold_verifyAndGetPoints(&contact->numA, &tracker, 0, output, pair->manager);
 
             if (contact->numContacts)
             {
@@ -3902,7 +3903,7 @@ distant:
             {
                 Body** slot = bodies[k];
                 ExtendedRecord* record = (ExtendedRecord*)(*slot)->shape;
-                Manager* mgr = FUN_00c85750();
+                Manager* mgr = hkMemoryRouter_getInstance();
                 Node* node = mgr->allocator->allocate(64);
                 node->unk04 = 64;
                 lateScratch.radius = record->unk10;

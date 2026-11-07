@@ -29,7 +29,8 @@ FNV_STATIC_ASSERT(offsetof(DoorAccessData, m_pLockLevelGlobal) == 20);
 extern Actor* g_thePlayer;
 
 // @fnv 0x005021c0
-bool DoorAccessData::FUN_005021c0(Actor* ref, bool b)
+// src: XBOX_PDB 0x005021c0
+bool DoorAccessData::DoorLock_IsAnOwner(Actor* ref, bool b)
 {
     bool r7 = false;
     if (m_pKeyForm && ref)
@@ -37,7 +38,7 @@ bool DoorAccessData::FUN_005021c0(Actor* ref, bool b)
         r7 = true;
         TESForm* obj5 = reinterpret_cast<TESForm*>(ref->GetActorUnk0148());
         if (!obj5)
-            obj5 = ref->TESObjectREFR::FUN_007af430();
+            obj5 = ref->TESObjectREFR::BGSSaveFormBuffer_GetForm();
         TESActorBase* base = 0;
         switch (obj5->GetFormType())
         {

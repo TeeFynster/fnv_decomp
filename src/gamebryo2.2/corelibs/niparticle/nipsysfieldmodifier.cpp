@@ -10,7 +10,8 @@
 extern char const* const g_01202688_arg1;
 
 // @fnv 0x00c320f0
-char const* const* __cdecl FUN_00c320f0()
+// src: COMMUNITY 0x00c320f0
+char const* const* __cdecl NiPSysFieldModifier_GetRTTI()
 {
     return &g_01202688_arg1;
 }
@@ -84,7 +85,7 @@ void NiPSysFieldModifier::LoadBinary(NiStream& stream)
 {
     NiStream* apOwner = &stream;
     NiPSysModifier::LoadBinary(*apOwner);
-    apOwner->FUN_00a645b0();
+    apOwner->ReadLinkID();
     NiBinaryStream* s = &apOwner->Istr();
     {
         unsigned int n = 4;
@@ -151,10 +152,10 @@ struct FieldModifierViewerBase
     void GetViewerStrings(S_00c322b0_Arr* a);
 };
 extern const char* DAT_012027e0;
-char* __cdecl FUN_00a7d330(const char* s);
-char* __cdecl FUN_00a7d370(const char* fmt, ...);
-char* __cdecl FUN_00a7d550(const char* name, float value);
-char* __cdecl FUN_00a7d5e0(const char* name, const char* value);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* s);
+char* __cdecl NiGetViewerString(const char* fmt, ...);
+char* __cdecl NiGetViewerString_00a7d550(const char* name, float value);
+char* __cdecl NiGetViewerString_00a7d5e0(const char* name, const char* value);
 __forceinline void S_00c322b0_Add(S_00c322b0_Arr* a, char* s)
 {
     unsigned int i = a->esize;
@@ -168,10 +169,10 @@ __forceinline void S_00c322b0_Add(S_00c322b0_Arr* a, char* s)
 void __fastcall GetFieldModifierViewerStrings(NiPSysFieldModifier* self, void*, S_00c322b0_Arr* a)
 {
     reinterpret_cast<FieldModifierViewerBase*>(self)->GetViewerStrings(a);
-    S_00c322b0_Add(a, FUN_00a7d330(DAT_012027e0));
-    S_00c322b0_Add(a, FUN_00a7d5e0("Field Object", self->m_spFieldObject ? self->m_spFieldObject->m_kName.m_kHandle : "None"));
-    S_00c322b0_Add(a, FUN_00a7d550("Magnitude", self->m_fInfluence));
-    S_00c322b0_Add(a, FUN_00a7d550("Attenuation", self->m_fFieldAttenuation));
-    S_00c322b0_Add(a, FUN_00a7d370("Use Max Distance", self->m_bEnableMaxDistance));
-    S_00c322b0_Add(a, FUN_00a7d550("Max Distance", self->m_fDistanceLimit));
+    S_00c322b0_Add(a, NiViewerStrings_NiGetViewerString_Title(DAT_012027e0));
+    S_00c322b0_Add(a, NiGetViewerString_00a7d5e0("Field Object", self->m_spFieldObject ? self->m_spFieldObject->m_kName.m_kHandle : "None"));
+    S_00c322b0_Add(a, NiGetViewerString_00a7d550("Magnitude", self->m_fInfluence));
+    S_00c322b0_Add(a, NiGetViewerString_00a7d550("Attenuation", self->m_fFieldAttenuation));
+    S_00c322b0_Add(a, NiGetViewerString("Use Max Distance", self->m_bEnableMaxDistance));
+    S_00c322b0_Add(a, NiGetViewerString_00a7d550("Max Distance", self->m_fDistanceLimit));
 }

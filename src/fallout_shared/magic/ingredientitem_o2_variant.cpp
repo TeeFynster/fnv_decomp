@@ -5,7 +5,7 @@
 #include "ingredientitem.h"
 struct FUN_00409a30_shell
 {
-    bool FUN_00409a30(unsigned int aFlag);
+    bool IngredientItem_GetFlag(unsigned int aFlag);
 };
 struct BipedModelForm
 {
@@ -20,7 +20,7 @@ struct FUN_0040a0f0_shell : BipedModelForm
 // PrimaryBase is vptr + 11 ints = 0x30 bytes. The shared virtual is named after the claim.
 struct PrimaryBase
 {
-    virtual void FUN_0040a120();
+    virtual void AdjustThisAndForward_0040a120();
     int unk04;
     int unk08;
     int unk0C;
@@ -36,14 +36,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_0040a120();
+    virtual void AdjustThisAndForward_0040a120();
 };
 
 struct AdjustedDerived : PrimaryBase, SecondaryBase
 {
     AdjustedDerived();
 // @fnv 0x0040a120
-    virtual void FUN_0040a120();
+// src: GUESS 0x0040a120 (confidence: low)
+    virtual void AdjustThisAndForward_0040a120();
 };
 
 AdjustedDerived::AdjustedDerived()

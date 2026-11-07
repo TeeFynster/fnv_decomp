@@ -176,7 +176,8 @@ inline float dot3(__m128 a, __m128 b)
 }
 
 // @fnv 0x00e36510
-void __stdcall FUN_00e36510(VehicleInstanceStandIn* vehicle, unsigned char wheelIndex, HitStandIn* hit,
+// src: HAVOK_SRC 0x00e36510
+void __stdcall hkpVehicleLinearCastWheelCollide_getCollisionOutputFromCastResult(VehicleInstanceStandIn* vehicle, unsigned char wheelIndex, HitStandIn* hit,
                             WheelCollideOutputStandIn* out)
 {
     float velChassis = vehicle->m_pSuspension->m_wheelData[wheelIndex].m_fRestLength;
@@ -208,8 +209,8 @@ void __stdcall FUN_00e36510(VehicleInstanceStandIn* vehicle, unsigned char wheel
     {
         float z[4];
         float len[4];
-        vehicle->m_pChassisCollidable->FUN_00ca0c40(reinterpret_cast<const SpringVector*>(&out->m_vContactPoint.m_vContactPosition), reinterpret_cast<SpringVector*>(len));
-        out->m_pUserData->FUN_00ca0c40(reinterpret_cast<const SpringVector*>(&out->m_vContactPoint.m_vContactPosition), reinterpret_cast<SpringVector*>(z));
+        vehicle->m_pChassisCollidable->hkpRigidBody_getPointVelocity(reinterpret_cast<const SpringVector*>(&out->m_vContactPoint.m_vContactPosition), reinterpret_cast<SpringVector*>(len));
+        out->m_pUserData->hkpRigidBody_getPointVelocity(reinterpret_cast<const SpringVector*>(&out->m_vContactPoint.m_vContactPosition), reinterpret_cast<SpringVector*>(z));
         __m128 idx;
         idx = _mm_load_ps(z);
         __m128 wheelState;

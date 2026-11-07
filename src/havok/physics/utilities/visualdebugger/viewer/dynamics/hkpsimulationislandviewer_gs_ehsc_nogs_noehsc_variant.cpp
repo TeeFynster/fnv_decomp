@@ -16,7 +16,7 @@ struct Base0
 struct Base2;
 struct Target
 {
-    void FUN_00c93920(Base2* p);
+    void hkpWorld_addWorldPostSimulationListener(Base2* p);
 };
 struct Base1
 {
@@ -47,7 +47,7 @@ struct S_00d65180_Router
         return *m_pStreamAllocator;
     }
 };
-S_00d65180_Router* FUN_00c85750();
+S_00d65180_Router* hkMemoryRouter_getInstance();
 struct S_00d65180_RefObj
 {
     unsigned short m_usMemSizeAndFlags;
@@ -56,7 +56,7 @@ struct S_00d65180_RefObj
     {}
     void* operator new(unsigned int nbytes)
     {
-        S_00d65180_RefObj* b = static_cast<S_00d65180_RefObj*>(FUN_00c85750()->heap().AllocateMemoryBlock(nbytes));
+        S_00d65180_RefObj* b = static_cast<S_00d65180_RefObj*>(hkMemoryRouter_getInstance()->heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -86,9 +86,9 @@ struct S_00d65180_Obj : S_00d65180_RefObj, S_00d65180_Base2
     int unk44;
     S_00d65180_Obj(void* arg) throw();
 };
-S_00d65180_Base2* FUN_00d65180(void* arg);
+S_00d65180_Base2* hkpSimulationIslandViewer_create(void* arg);
 extern int g_D651E0Value;
-int __cdecl FUN_00d651e0();
+int __cdecl Object_GetG_D651E0Value_00d651e0();
 struct S_Elem2
 {
     void ClearValue(void* d) throw();
@@ -212,7 +212,7 @@ struct S_Arr
     int m_cap;
     __forceinline void clear() throw()
     {
-        S_Heap* heap = ((S_Holder*)FUN_00c85750())->m10;
+        S_Heap* heap = ((S_Holder*)hkMemoryRouter_getInstance())->m10;
         int n = m_iElementCount;
         S_Elem* d = m_data;
         for (int i = 0; i < n; i++)
@@ -239,7 +239,7 @@ extern RegistryOwner* DAT_01269cd0;
 extern void* DAT_01268fdc;
 extern const char str_010d19d0[];
 extern void RegisterCallback();
-void FUN_00d651c0();
+void hkpSimulationIslandViewer_registerViewer();
 class hkListenerD64A
 {
   public:
@@ -248,7 +248,7 @@ class hkListenerD64A
 class hkEntityD64A
 {
   public:
-    void FUN_00c93920(hkListenerD64A* pkListener) throw();
+    void hkpWorld_addWorldPostSimulationListener(hkListenerD64A* pkListener) throw();
 };
 class hkWorldD64A
 {
@@ -324,18 +324,19 @@ static ThunkOwner g_thunk;
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (8).
 struct PrimaryBase
 {
-    virtual void FUN_00d65200();
+    virtual void AdjustThisAndForward_00d65200();
     int unk04;
 };
 struct SecondaryBase
 {
-    virtual void FUN_00d65200();
+    virtual void AdjustThisAndForward_00d65200();
 };
 struct AdjustedDerived : PrimaryBase, SecondaryBase
 {
     AdjustedDerived();
 // @fnv 0x00d65200
-    virtual void FUN_00d65200();
+// src: GUESS 0x00d65200 (confidence: low)
+    virtual void AdjustThisAndForward_00d65200();
 };
 AdjustedDerived::AdjustedDerived()
 {}
@@ -421,7 +422,7 @@ struct DeallocCtx
     virtual void v2();
     virtual void v3();
     virtual void v4(void* pData, int iSize);
-    void __cdecl FUN_00c908c0(void*, int, int);
+    void __cdecl hkArrayUtil__reserve(void*, int, int);
     __forceinline void Grow(hkArrayHeader* v, int need, int elemSize);
 };
 
@@ -452,19 +453,19 @@ __forceinline void DeallocCtx::Grow(hkArrayHeader* v, int need, int elemSize)
         int g = cap + cap;
         if (need >= g)
             g = need;
-        FUN_00c908c0(v, g, elemSize);
+        hkArrayUtil__reserve(v, g, elemSize);
     }
 }
 inline void GrowVec10(hkArrayHeader* v, int need, int elemSize)
 {
-    Singleton* router = (Singleton*)FUN_00c85750();
+    Singleton* router = (Singleton*)hkMemoryRouter_getInstance();
     DeallocCtx* ctx = router->m_10;
     _ReadWriteBarrier();
     ctx->Grow(v, need, elemSize);
 }
 inline void GrowVec0c(hkArrayHeader* v, int need, int elemSize)
 {
-    Singleton* router = (Singleton*)FUN_00c85750();
+    Singleton* router = (Singleton*)hkMemoryRouter_getInstance();
     DeallocCtx* ctx = router->m_0c;
     _ReadWriteBarrier();
     ctx->Grow(v, need, elemSize);
@@ -474,7 +475,7 @@ struct FUN_00de1210
 {
     virtual ~FUN_00de1210();
     FUN_00de1210();
-    void FUN_00de1170(Vec4* pLo, Vec4* pHi);
+    void hkDisplayAABB_setExtents(Vec4* pLo, Vec4* pHi);
     int unk04;
     int unk08;
     int unk0c;
@@ -726,7 +727,7 @@ struct ThisCls
     unsigned short unk06;
     Cont m_contB;
     Cont m_contA;
-    void FUN_00d64c00(Param* pParam);
+    void hkpSimulationIslandViewer_postSimulationCallback(Param* pParam);
 };
 
 struct ParentObject : Parent, ThisCls
@@ -734,7 +735,8 @@ struct ParentObject : Parent, ThisCls
 };
 
 // @fnv 0x00d64c00
-void ThisCls::FUN_00d64c00(Param* pParam)
+// src: XBOX_PDB 0x00d64c00
+void ThisCls::hkpSimulationIslandViewer_postSimulationCallback(Param* pParam)
 {
     TraceBuffer* pForm = (TraceBuffer*)TlsGetValue(DAT_0126835c);
     if (pForm->m_pCurrent < pForm->m_pRecordEnd)
@@ -796,7 +798,7 @@ void ThisCls::FUN_00d64c00(Param* pParam)
                     currentLo.v = _mm_min_ps(currentLo.v, out.m_ucLowNibble.v);
                 }
                 Elem* a = m_contA.m_pData + eo;
-                a->FUN_00de1170(&currentLo, &currentHi);
+                a->hkDisplayAABB_setExtents(&currentLo, &currentHi);
                 offsets.m_pData[z] = (int)(m_contA.m_pData + eo);
                 eo += 1;
                 off++;
@@ -805,7 +807,7 @@ void ThisCls::FUN_00d64c00(Param* pParam)
         EmitObj* i = static_cast<ParentObject*>(this)->Parent::m_00;
         i->v14(&offsets, (int)0xff0000ff, 0, (int)DAT_01268fdc);
         Singleton* freeBoundsRouter;
-        freeBoundsRouter = (Singleton*)FUN_00c85750();
+        freeBoundsRouter = (Singleton*)hkMemoryRouter_getInstance();
         DeallocCtx* need = freeBoundsRouter->m_0c;
         item.m_iArrayLength = 0;
         if ((item.m_iCapacity & 0x80000000) == 0)
@@ -814,7 +816,7 @@ void ThisCls::FUN_00d64c00(Param* pParam)
         }
         item.m_pData = 0;
         item.m_iCapacity = (int)0x80000000;
-        Singleton* offsetCount = (Singleton*)FUN_00c85750();
+        Singleton* offsetCount = (Singleton*)hkMemoryRouter_getInstance();
         DeallocCtx* val = offsetCount->m_0c;
         offsets.m_iArrayLength = 0;
         if ((offsets.m_iCapacity & 0x80000000) == 0)
@@ -856,14 +858,14 @@ void ThisCls::FUN_00d64c00(Param* pParam)
                     currentHi.v = _mm_min_ps(currentHi.v, out.m_ucLowNibble.v);
                 }
                 Elem* a = m_contB.m_pData + eo;
-                a->FUN_00de1170(&currentHi, &currentLo);
+                a->hkDisplayAABB_setExtents(&currentHi, &currentLo);
                 offsets.m_pData[z] = (int)(m_contB.m_pData + eo);
                 ++eo;
             } while (++z < islandsB.size());
         }
         EmitObj* i = static_cast<ParentObject*>(this)->Parent::m_00;
         i->v14(&offsets, (int)0xff008000, 0, (int)DAT_01268fdc);
-        Singleton* offsetCount = (Singleton*)FUN_00c85750();
+        Singleton* offsetCount = (Singleton*)hkMemoryRouter_getInstance();
         DeallocCtx* val = offsetCount->m_10;
         offsets.m_iArrayLength = 0;
         if ((offsets.m_iCapacity & 0x80000000) == 0)

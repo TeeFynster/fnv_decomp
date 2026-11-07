@@ -1226,12 +1226,13 @@ struct FakeShaderConstants
     int unk10F4;
     FakeD3DDevice9* m_pD3DDevice;
 
-    bool FUN_00e89940(unsigned int uiStartRegister, const int* piConstantData, unsigned int uiVector4iCount,
+    bool NiDX9RenderState_SetPixelShaderConstantI(unsigned int uiStartRegister, const int* piConstantData, unsigned int uiVector4iCount,
                       int iUnused);
 };
 
 // @fnv 0x00e89940
-bool FakeShaderConstants::FUN_00e89940(unsigned int uiStartRegister, const int* piConstantData,
+// src: COMMUNITY 0x00e89940
+bool FakeShaderConstants::NiDX9RenderState_SetPixelShaderConstantI(unsigned int uiStartRegister, const int* piConstantData,
                                        unsigned int uiVector4iCount, int iUnused)
 {
     return m_pD3DDevice->SetPixelShaderConstantI(uiStartRegister, piConstantData, uiVector4iCount) >= 0;
@@ -1359,7 +1360,7 @@ class S00e898e0_Device
 class S00e898e0_Renderer
 {
   public:
-    bool FUN_00e898e0(int a1, int a2, int a3, int iUnused);
+    bool NiDX9RenderState_SetPixelShaderConstantB(int a1, int a2, int a3, int iUnused);
     unsigned int unk0000;
     unsigned int unk0004;
     unsigned int unk0008;
@@ -2450,7 +2451,8 @@ class S00e898e0_Renderer
 };
 
 // @fnv 0x00e898e0
-bool S00e898e0_Renderer::FUN_00e898e0(int a1, int a2, int a3, int iUnused)
+// src: COMMUNITY 0x00e898e0
+bool S00e898e0_Renderer::NiDX9RenderState_SetPixelShaderConstantB(int a1, int a2, int a3, int iUnused)
 {
     return m_pkDevice->vf1C4(a1, a2, a3) >= 0;
 }
@@ -2573,7 +2575,7 @@ class S00e89910_Device
 class S00e89910_Renderer
 {
   public:
-    bool FUN_00e89910(int a1, int a2, int a3, int iUnused);
+    bool NiDX9RenderState_SetPixelShaderConstantF(int a1, int a2, int a3, int iUnused);
     unsigned int unk0000;
     unsigned int unk0004;
     unsigned int unk0008;
@@ -3664,7 +3666,8 @@ class S00e89910_Renderer
 };
 
 // @fnv 0x00e89910
-bool S00e89910_Renderer::FUN_00e89910(int a1, int a2, int a3, int iUnused)
+// src: COMMUNITY 0x00e89910
+bool S00e89910_Renderer::NiDX9RenderState_SetPixelShaderConstantF(int a1, int a2, int a3, int iUnused)
 {
     return m_pkDevice->vf1B4(a1, a2, a3) >= 0;
 }

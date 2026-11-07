@@ -26,11 +26,12 @@ __forceinline hkTransform::hkTransform() {}
 
 // src/havok/physics/collide/agent/convexagent/boxbox/hkpboxboxagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/boxbox/hkpboxboxagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-extern "C" void __cdecl FUN_00d40470(void* a, void* b, void* c, void* d);
+extern "C" void __cdecl hkpBoxBoxAgent_staticGetClosestPoints(void* a, void* b, void* c, void* d);
 // @fnv 0x00d406a0
-extern "C" void __stdcall FUN_00d406a0(void* a, void* b, void* c, void* d)
+// src: HAVOK_SRC 0x00d406a0
+extern "C" void __stdcall hkpBoxBoxAgent_getClosestPoints(void* a, void* b, void* c, void* d)
 {
-    FUN_00d40470(a, b, c, d);
+    hkpBoxBoxAgent_staticGetClosestPoints(a, b, c, d);
 }
 
 __forceinline void setRotatedInverseDir_d409(hkVector4& out, const hkRotation& r, const hkVector4& v)
@@ -67,11 +68,12 @@ struct RotatedDir_d409
     hkVector4 m_dirCopy;
     hkVector4 m_localDir;
 
-    void FUN_00d40940();
+    void UpdateFields_00d40940();
 };
 
 // @fnv 0x00d40940
-void RotatedDir_d409::FUN_00d40940()
+// src: GUESS 0x00d40940 (confidence: low)
+void RotatedDir_d409::UpdateFields_00d40940()
 {
     m_dirCopy.m_vComponents = m_dir.m_vComponents;
     setRotatedInverseDir_d409(m_localDir, m_rotation, m_dirCopy);
@@ -106,7 +108,7 @@ struct Job
     int unkBC;
     hkVector4 translationC0, translationD0, translationE0, translationF0;
     hkVector4 axis100, axis110, axis120;
-    void FUN_00db2960(hkpCdBodyPairCollector* callback);
+    void hkpBoxBoxCollisionDetection_calcManifold(hkpCdBodyPairCollector* callback);
 };
 class Manager
 {
@@ -116,7 +118,7 @@ class Manager
     void* data08;
     void* unk0C;
     hkpCdBodyPairCollector callback10;
-    void FUN_00d40280(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, void* p4);
+    void hkpBoxBoxAgent_processCollision(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, void* p4);
 };
 inline void timer(const char* tag)
 {
@@ -136,7 +138,8 @@ inline __m128 splat(float v)
     return _mm_set1_ps(v);
 }
 // @fnv 0x00d40280
-void Manager::FUN_00d40280(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, void* p4)
+// src: HAVOK_SRC 0x00d40280
+void Manager::hkpBoxBoxAgent_processCollision(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, void* p4)
 {
     timer("TtBoxBox");
     const hkpBoxShape* kIter;
@@ -155,7 +158,7 @@ void Manager::FUN_00d40280(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, v
     _mm_store_ps(&minB->x, _mm_add_ps(splat(tolerance->getRadius()), tolerance->m_vHalfExtents.m_vComponents));
     hkTransform* __restrict t = &w.t;
     Job* __restrict job = &w.job;
-    t->FUN_00cb22f0(a->m_pMotionState, b->m_pMotionState);
+    t->hkTransform_setMulInverseMul(a->m_pMotionState, b->m_pMotionState);
     const float shapeB = parameters->offset08;
     job->toleranceB0 = shapeB;
     job->epsilonB4 = 0.01f;
@@ -175,7 +178,7 @@ void Manager::FUN_00d40280(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, v
     job->tolerance80.m_vComponents = splat(shapeB);
     job->expandedA90.m_vComponents = _mm_add_ps(splat(shapeB), minA->m);
     job->expandedBA0.m_vComponents = _mm_add_ps(splat(shapeB), minB->m);
-    job->FUN_00db2960(&callback10);
+    job->hkpBoxBoxCollisionDetection_calcManifold(&callback10);
     timer("Et");
 }
 
@@ -199,8 +202,8 @@ struct Query
     int unkB8;
     int unkBC;
     hkVector4 translationC0, translationD0, separationE0, separationF0, axis100, axis110, axis120;
-    void FUN_00d40940();
-    int FUN_00db0ec0(hkVector4*);
+    void UpdateFields_00d40940();
+    int ProcessAndReturnValue_00db0ec0(hkVector4*);
     __forceinline void init(hkpCdBody* a, hkpCdBody* b, const hkTransform& t, const V4& minA, const V4& minB, float tolerance,
                             float epsilon)
     {
@@ -225,7 +228,8 @@ struct Query
     }
 };
 // @fnv 0x00d406c0
-void __cdecl FUN_00d406c0(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, hkpCdBodyPairCollector* callback)
+// src: XBOX_PDB 0x00d406c0
+void __cdecl hkpBoxBoxAgent_staticGetPenetrations(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, hkpCdBodyPairCollector* callback)
 {
     timer("TtBoxBox");
     const hkpBoxShape* shapeA = static_cast<const hkpBoxShape*>(a->m_pCollisionShape);
@@ -243,10 +247,10 @@ void __cdecl FUN_00d406c0(hkpCdBody* a, hkpCdBody* b, Parameters* parameters, hk
     _mm_store_ps(&minB->x, _mm_add_ps(splat(shapeB->getRadius()), shapeB->m_vHalfExtents.m_vComponents));
     hkTransform* __restrict transform = &work.relative;
     Query* __restrict query = &work.query;
-    transform->FUN_00cb22f0(a->m_pMotionState, b->m_pMotionState);
+    transform->hkTransform_setMulInverseMul(a->m_pMotionState, b->m_pMotionState);
     query->init(a, b, *transform, *minA, *minB, parameters->offset08, 0.01f);
-    query->FUN_00d40940();
-    if (!query->FUN_00db0ec0(&query->tolerance80))
+    query->UpdateFields_00d40940();
+    if (!query->ProcessAndReturnValue_00db0ec0(&query->tolerance80))
         callback->AddCdBodyPair(*a, *b);
     timer("Et");
 }

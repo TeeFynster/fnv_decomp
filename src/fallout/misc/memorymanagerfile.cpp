@@ -10,11 +10,12 @@ extern int DAT_01083b00;
 struct FUN_00878430_shell
 {
     int* m_ptr;
-    void FUN_00878430();
+    void SetPtr();
 };
 
 // @fnv 0x00878430
-void FUN_00878430_shell::FUN_00878430()
+// src: GUESS 0x00878430 (confidence: low)
+void FUN_00878430_shell::SetPtr()
 {
     m_ptr = &DAT_01083b00;
 }
@@ -59,7 +60,7 @@ struct FUN_00878450_shell : FUN_00878430_shell
 // @fnv 0x00878450
 void* __thiscall FUN_00878450_shell::FUN_00878450(unsigned int flags)
 {
-    FUN_00878430();
+    SetPtr();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -112,18 +113,19 @@ int MemoryManagerFile::Write(const void* apData, unsigned int aSize)
 namespace fnv_00878590 {
 struct FileSizeInfo
 {
-    int __thiscall FUN_0065c290(unsigned __int64&);
+    int __thiscall BSSystemFile_GetSize(unsigned __int64&);
 };
 // Retained until MemoryManagerFile declares the size method at 0x00878590.
 struct FUN_00878590_shell : FileSizeInfo
 {
-    int __thiscall FUN_00878590();
+    int __thiscall MemoryManagerFile_Size();
 };
 // @fnv 0x00878590
-int __thiscall FUN_00878590_shell::FUN_00878590()
+// src: XBOX_PDB 0x00878590
+int __thiscall FUN_00878590_shell::MemoryManagerFile_Size()
 {
     unsigned __int64 size;
-    ((FileSizeInfo*)((char*)this + 4))->FUN_0065c290(size);
+    ((FileSizeInfo*)((char*)this + 4))->BSSystemFile_GetSize(size);
     return (int)size;
 }
 }  // namespace fnv_00878590

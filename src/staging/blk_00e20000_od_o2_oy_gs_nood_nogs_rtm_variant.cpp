@@ -74,10 +74,11 @@ struct Invert6Matrix
         block[1][1].column[1].quad = source.block[1][1].column[1].quad;
         block[1][1].column[2].quad = source.block[1][1].column[2].quad;
     }
-    void FUN_00e29620(const Invert6Matrix& source);
+    void ProcessEntries_00e29620(const Invert6Matrix& source);
 };
 // @fnv 0x00e29620
-void Invert6Matrix::FUN_00e29620(const Invert6Matrix& source)
+// src: GUESS 0x00e29620 (confidence: low)
+void Invert6Matrix::ProcessEntries_00e29620(const Invert6Matrix& source)
 {
     Invert6Matrix temporary = source;
     block[0][0].setIdentity();

@@ -22,37 +22,40 @@ typedef union __declspec(intrin_type) __declspec(align(16)) {
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00cdd3f0
-void FUN_00cdd3f0(hkaSkeleton* pEntries)
+// src: HAVOK_LIB 0x00cdd3f0
+void hkaSkeletonUtils_unlockTranslations(hkaSkeleton* pEntries)
 {
     int n = pEntries->m_kBones.m_iElementCount;
     for (int i = 0; i < n; ++i)
         pEntries->m_kBones.m_data[i].m_bLockTranslation.m_cBooleanValue = 0;
 }
 
-extern "C" void __cdecl FUN_00cddad0(int, int, int*, int, int);
+extern "C" void __cdecl hkaSkeletonUtils_transformLocalPoseToWorldPose(int, int, int*, int, int);
 extern int DAT_01268700;
 
 // Calls FUN_00cddad0 with a, b, the address of DAT_01268700, c and d.
 // @fnv 0x00cddcf0
 void __cdecl CallWithGlobal(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
 {
-    FUN_00cddad0(aiArg1, aiArg2, &DAT_01268700, aiArg3, aiArg4);
+    hkaSkeletonUtils_transformLocalPoseToWorldPose(aiArg1, aiArg2, &DAT_01268700, aiArg3, aiArg4);
 }
 
-extern "C" void __cdecl FUN_00cddd20(void* a, void* b, void* c, void* d, void* e);
+extern "C" void __cdecl Object_ToLocal_Thunk(void* a, void* b, void* c, void* d, void* e);
 extern int DAT_01268700;
 
 // Calls FUN_00cddd20 with a, b, the address of DAT_01268700, c and d.
 // @fnv 0x00cddef0
-void FUN_00cddef0(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
+// src: COMMUNITY 0x00cddef0
+void hkaSkeletonUtils_transformModelPoseToLocalPose(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
 {
-    FUN_00cddd20(apArg1, apArg2, &DAT_01268700, apArg3, apArg4);
+    Object_ToLocal_Thunk(apArg1, apArg2, &DAT_01268700, apArg3, apArg4);
 }
 
 extern "C" void __cdecl Atan2(float, float);
 
 // @fnv 0x00ce00f0
-void __cdecl FUN_00ce00f0(float afFirst, float afSecond)
+// src: GUESS 0x00ce00f0 (confidence: low)
+void __cdecl Hkaskeletonutils_ForwardCall_00ce00f0(float afFirst, float afSecond)
 {
     Atan2(afFirst, afSecond);
 }
@@ -247,10 +250,10 @@ struct HolderRec
 
 struct ScanObj
 {
-    void FUN_00cde940(int a, int b, void* c);
+    void ForwardCall_00cde940(int a, int b, void* c);
 };
 
-HolderRec* FUN_00c85750();
+HolderRec* hkMemoryRouter_getInstance();
 
 // @fnv 0x00cde3d0
 unsigned char* WalkChainUntilLimit(unsigned char* pabResult, hkaSkeleton* rec, short asLimit, short asStart, ScanObj* obj)
@@ -265,16 +268,16 @@ unsigned char* WalkChainUntilLimit(unsigned char* pabResult, hkaSkeleton* rec, s
         {
             if ((short)idx == sLimit)
                 break;
-            HolderRec* h = FUN_00c85750();
-            obj->FUN_00cde940(h->m_10, 0, &iCurrent);
+            HolderRec* h = hkMemoryRouter_getInstance();
+            obj->ForwardCall_00cde940(h->m_10, 0, &iCurrent);
             idx = ((const unsigned short*)rec->m_kParentIndices.m_data)[(short)idx];
             iCurrent = idx;
         } while ((short)idx > 0);
     }
     {
         int out;
-        HolderRec* h = FUN_00c85750();
-        obj->FUN_00cde940(h->m_10, 0, &out);
+        HolderRec* h = hkMemoryRouter_getInstance();
+        obj->ForwardCall_00cde940(h->m_10, 0, &out);
     }
     *pabResult = ((short)idx >= 0);
     return pabResult;
@@ -303,12 +306,12 @@ struct S_00cde450_Router
     }
 };
 
-S_00cde450_Router* __cdecl FUN_00c85750();
+S_00cde450_Router* __cdecl hkMemoryRouter_getInstance();
 
 struct S_00cde450_ByteArr;
 struct S_00cde450_UShortArr;
 void __cdecl FUN_00ec61c0(void* dst, int value, int size);
-void __cdecl FUN_00c908c0(S_00cde450_Heap& h, S_00cde450_ByteArr* a, int n, int elemSize);
+void __cdecl hkArrayUtil__reserve(S_00cde450_Heap& h, S_00cde450_ByteArr* a, int n, int elemSize);
 void __cdecl ResizeAudioStream(S_00cde450_Heap& h, S_00cde450_UShortArr* a, int elemSize);
 
 struct S_00cde450_UShortArr
@@ -319,7 +322,7 @@ struct S_00cde450_UShortArr
 
     void AddBack(unsigned short v)
     {
-        S_00cde450_Heap& h = FUN_00c85750()->heap();
+        S_00cde450_Heap& h = hkMemoryRouter_getInstance()->heap();
         if (m_iElementCount == (m_cap & 0x3fffffff))
             ResizeAudioStream(h, this, 2);
         unsigned short* p = m_data + m_iElementCount;
@@ -360,7 +363,7 @@ void __cdecl CollectReachableNodes(hkaSkeleton* g, short asStartIndex, S_00cde45
     bits.m_iElementCount = 0;
     bits.m_cap = 0x80000000;
     {
-        S_00cde450_Router* r = FUN_00c85750();
+        S_00cde450_Router* r = hkMemoryRouter_getInstance();
         char* top = r->m_fMinimumV;
         r->m_fMinimumV = top + ((iNodeCount + 0x7f) & ~0x7f);
         bits.m_cap = iNodeCount | 0x80000000;
@@ -369,10 +372,10 @@ void __cdecl CollectReachableNodes(hkaSkeleton* g, short asStartIndex, S_00cde45
     }
     int n = g->m_kBones.m_iElementCount;
     {
-        S_00cde450_Heap& h = FUN_00c85750()->heap();
+        S_00cde450_Heap& h = hkMemoryRouter_getInstance()->heap();
         int c = bits.m_cap & 0x3fffffff;
         if (c < n)
-            FUN_00c908c0(h, &bits, (n < c * 2) ? c * 2 : n, 1);
+            hkArrayUtil__reserve(h, &bits, (n < c * 2) ? c * 2 : n, 1);
     }
     S_00cde450_SetSize(bits, n);
 
@@ -393,8 +396,8 @@ void __cdecl CollectReachableNodes(hkaSkeleton* g, short asStartIndex, S_00cde45
     char* pAllocBase = bits.m_pTrailingData;
     if (pAllocBase == bits.m_data)
         bits.m_iElementCount = 0;
-    FUN_00c85750()->m_fMinimumV = pAllocBase;
-    S_00cde450_Heap& h2 = FUN_00c85750()->heap();
+    hkMemoryRouter_getInstance()->m_fMinimumV = pAllocBase;
+    S_00cde450_Heap& h2 = hkMemoryRouter_getInstance()->heap();
     bits.m_iElementCount = 0;
     if ((bits.m_cap & 0x80000000) == 0)
         h2.ReturnMemory(bits.m_data, bits.m_cap & 0x3fffffff);
@@ -403,17 +406,18 @@ void __cdecl CollectReachableNodes(hkaSkeleton* g, short asStartIndex, S_00cde45
 
 extern "C" LocalM128 _mm_load_ss(const float* p);
 __forceinline V4::V4() {}
-extern "C" void __cdecl FUN_00cde740(void* a, void* b, V4* v, void* c);
+extern "C" void __cdecl hkQsTransform_UpdateFields_00cde740(void* a, void* b, V4* v, void* c);
 // For each of count entries, calls FUN_00cde740 on 0x30-byte slots at idx[i]*0x30 offsets in b1, b2, b3, passing w as a float vector.
 // @fnv 0x00cdd550
-void __cdecl FUN_00cdd550(unsigned int count, const short* idx, char* b1, char* b2, float w, char* b3)
+// src: GUESS 0x00cdd550 (confidence: low)
+void __cdecl Hkaskeletonutils_ProcessIndexedTransformSlots(unsigned int count, const short* idx, char* b1, char* b2, float w, char* b3)
 {
     V4 v;
     v.q = _mm_load_ss(&w);
     for (unsigned int i = 0; i < count; i++)
     {
         int off = idx[i] * 0x30;
-        FUN_00cde740(b1 + off, b2 + off, &v, b3 + off);
+        hkQsTransform_UpdateFields_00cde740(b1 + off, b2 + off, &v, b3 + off);
     }
 }
 
@@ -500,7 +504,8 @@ static __forceinline hkQsTransform* GetReferencePose(const hkaSkeleton* skeleton
 
 // For each bone with m_bLockTranslation, sets poseModel translation from the reference pose, rotated and offset by the parent's transform when a parent exists.
 // @fnv 0x00cde1d0
-void __cdecl FUN_00cde1d0(const hkaSkeleton* skeleton, hkQsTransform* poseModel)
+// src: GUESS 0x00cde1d0 (confidence: high)
+void __cdecl hkaSkeleton_RestoreLockedBoneTranslations(const hkaSkeleton* skeleton, hkQsTransform* poseModel)
 {
     const int numBones = skeleton->m_kBones.m_iElementCount;
     for (int i = 0; i < numBones; i++)
@@ -622,7 +627,7 @@ struct Property
     LocalM128 vector;
     static void* operator new(unsigned int bytes)
     {
-        AllocationService* service = reinterpret_cast<AllocationService*>(FUN_00c85750());
+        AllocationService* service = reinterpret_cast<AllocationService*>(hkMemoryRouter_getInstance());
         return service->allocator->Allocate(bytes);
     }
     Property()
@@ -632,7 +637,7 @@ struct Property
     }
 };
 extern "C" Property* __cdecl FindModifierConstraintAtom(HkEntity*, int);
-extern "C" void __cdecl FUN_00d27960(HkEntity*, HkObj*, Property*);
+extern "C" void __cdecl hkpWorldConstraintUtil_addModifier(HkEntity*, HkObj*, Property*);
 
 // Stores a Vec4 into a Property's vector field on an HkEntity, XORing it with DAT_010c44d0 when the entity's owner matches the given owner.
 // @fnv 0x00cdfcd0
@@ -658,7 +663,7 @@ void SetModifierConstraint(HkWorld* apWorld, int owner, HkObj* apObj, Vec4* apVe
         {
             p = new Property;
             p->vector = t.quad;
-            FUN_00d27960(e, apObj, p);
+            hkpWorldConstraintUtil_addModifier(e, apObj, p);
         }
         timer(DAT_010c41f8);
     }
@@ -744,7 +749,8 @@ struct Item
 
 // Normalizes the rot vectors of up to count Item entries in batches of four using SIMD, then handles any remaining items individually.
 // @fnv 0x00cdd660
-void FUN_00cdd660(Item* items, int count)
+// src: GUESS 0x00cdd660 (confidence: medium)
+void Object_NormalizeRotationVectors(Item* items, int count)
 {
     int blocks = count / 4;
     if ((unsigned int)blocks > 0)
@@ -1132,7 +1138,8 @@ __forceinline void toLocal(int count, const short* parents, const QsXform& root,
 
 // Converts world-space QsXform transforms to local-space by calling toLocal with the given count, parents, root, world, and localOut arguments.
 // @fnv 0x00cddd20
-extern "C" void __cdecl FUN_00cddd20(void* aiCount, void* apParents, void* apRoot, void* apWorld, void* apLocalOut)
+// src: GUESS 0x00cddd20 (confidence: medium)
+extern "C" void __cdecl Object_ToLocal_Thunk(void* aiCount, void* apParents, void* apRoot, void* apWorld, void* apLocalOut)
 {
     toLocal((int)aiCount, (const short*)apParents, *(const QsXform*)apRoot, (const QsXform*)apWorld,
             (QsXform*)apLocalOut);

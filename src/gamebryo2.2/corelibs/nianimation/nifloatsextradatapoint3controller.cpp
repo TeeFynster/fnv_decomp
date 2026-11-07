@@ -15,7 +15,8 @@ extern "C" int DAT_0109917c;
 extern int EmptyFS;
 
 // @fnv 0x00a4ecd0
-int* __cdecl FUN_00a4ecd0()
+// src: EXE 0x00a4ecd0
+int* __cdecl NiFloatsExtraDataPoint3Controller_CreateObject()
 {
     int* p = (int*)BSFadeNode::operator new(0x48);
     if (p)
@@ -66,7 +67,7 @@ struct Vec12 {
     float x, y, z;
 };
 struct Holder00 {
-    void FUN_00a494b0(Vec12);
+    void SetPoseValue(Vec12);
 };
 
 // @fnv 0x00a4ed50
@@ -85,13 +86,13 @@ void __fastcall SetInterpolatorPoint3(NiFloatsExtraDataPoint3Controller* self, i
     kPt.x = pkFloatsED->GetValueAt(self->m_iFloatsExtraDataIndex);
     kPt.y = pkFloatsED->GetValueAt(self->m_iFloatsExtraDataIndex + 1);
     kPt.z = pkFloatsED->GetValueAt(self->m_iFloatsExtraDataIndex + 2);
-    ((Holder00*)pkFloatInterp)->FUN_00a494b0(kPt);
+    ((Holder00*)pkFloatInterp)->SetPoseValue(kPt);
 }
 
 void __stdcall AddExtraDataViewerStrings(StrArr* strings);
 extern void* g_011f3fc4;
 char* __cdecl _FUN_00a7d330(void* value);
-char* __cdecl FUN_00a7d4d0(char const* name, int value);
+char* __cdecl NiGetViewerString_00a7d4d0(char const* name, int value);
 
 // @fnv 0x00a4eed0
 void __fastcall GetPoint3ControllerViewerStrings(NiFloatsExtraDataPoint3Controller* self, int, StrArr* strings)
@@ -108,7 +109,7 @@ void __fastcall GetPoint3ControllerViewerStrings(NiFloatsExtraDataPoint3Controll
     }
 
     {
-        char* value = FUN_00a7d4d0("m_iFloatsExtraDataIndex",
+        char* value = NiGetViewerString_00a7d4d0("m_iFloatsExtraDataIndex",
                                     self->m_iFloatsExtraDataIndex);
         unsigned int index = strings->m_usSize;
         unsigned int capacity = strings->m_usMaxSize;
@@ -118,7 +119,7 @@ void __fastcall GetPoint3ControllerViewerStrings(NiFloatsExtraDataPoint3Controll
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 struct Vec12Sink {
     int FUN_00a49650(Vec12 v);
 };
@@ -131,7 +132,7 @@ int __fastcall BuildAndDispatchVec12(NiFloatsExtraDataPoint3Controller* self, in
     v.x = stub->GetValueAt(self->m_iFloatsExtraDataIndex);
     v.y = stub->GetValueAt(self->m_iFloatsExtraDataIndex + 1);
     v.z = stub->GetValueAt(self->m_iFloatsExtraDataIndex + 2);
-    Vec12Sink* p = (Vec12Sink*)FUN_00aa13e0(0x20);
+    Vec12Sink* p = (Vec12Sink*)Object_DispatchCommandFour(0x20);
     if (p != 0) {
         return p->FUN_00a49650(v);
     }
@@ -193,7 +194,7 @@ void __fastcall UpdateController(NiFloatsExtraDataPoint3Controller* self, int, c
 {
     if (GetManagerControlledFlag(self))
         self->m_fControllerTime = DAT_01096324;
-    else if (self->FUN_00a36250(fTime)
+    else if (self->DontDoUpdate(fTime)
         && (!self->m_spControllerInterpolator.m_pObject ||
             !((Interp4edd*)self->m_spControllerInterpolator.m_pObject)->AlwaysUpdate()))
         return;
@@ -256,7 +257,7 @@ struct VertexSource {
     NiPoint3* GetPositions() const { return positions; }
     NiPoint3* GetNormals() const { return normals; }
     Color4* GetColors() const { return colors; }
-    TwoComponentVector* FUN_00a66960(unsigned index);
+    TwoComponentVector* NiGeometryData_GetTextureSet(unsigned index);
 };
 
 struct VertexData {
@@ -300,14 +301,15 @@ struct VertexRenderer {
     unsigned unk70, unk74, unk78, unk7c;
     CRITICAL_SECTION lock;
 
-    __declspec(noalias) void FUN_00e8c120(VertexSource*, VertexData*, unsigned*, unsigned*, unsigned*, unsigned*, unsigned*, unsigned*, unsigned*);
-    bool FUN_00e8bfa0(RenderBuffer*, unsigned);
-    void* FUN_00e8bff0(unsigned, unsigned, unsigned, IDirect3DVertexBuffer9*);
-    VertexBufferLockInfo* FUN_00e8c820(VertexSource*, unsigned, VertexData*, unsigned, VertexBufferLockInfo*, char*);
+    __declspec(noalias) void NiDX9VertexBufferManager_GenerateVertexParameters(VertexSource*, VertexData*, unsigned*, unsigned*, unsigned*, unsigned*, unsigned*, unsigned*, unsigned*);
+    bool NiDX9VertexBufferManager_AllocateBufferSpace(RenderBuffer*, unsigned);
+    void* NiDX9VertexBufferManager_LockVB(unsigned, unsigned, unsigned, IDirect3DVertexBuffer9*);
+    VertexBufferLockInfo* NiDX9VertexBufferManager_PackSkinnedVB(VertexSource*, unsigned, VertexData*, unsigned, VertexBufferLockInfo*, char*);
 };
 
 // @fnv 0x00e8c820
-VertexBufferLockInfo* VertexRenderer::FUN_00e8c820(VertexSource* source, unsigned unused, VertexData* data, unsigned flags, VertexBufferLockInfo* existing, char* option)
+// src: COMMUNITY 0x00e8c820
+VertexBufferLockInfo* VertexRenderer::NiDX9VertexBufferManager_PackSkinnedVB(VertexSource* source, unsigned unused, VertexData* data, unsigned flags, VertexBufferLockInfo* existing, char* option)
 {
     unsigned vertexCount;
     unsigned dataFlags;
@@ -328,7 +330,7 @@ VertexBufferLockInfo* VertexRenderer::FUN_00e8c820(VertexSource* source, unsigne
     unsigned short* indices = data->indices;
     vertexCount = 0;
     stride = 0;
-    FUN_00e8c120(source, data, &vertexCount, &stride, &positionOffset, &attributeOffset,
+    NiDX9VertexBufferManager_GenerateVertexParameters(source, data, &vertexCount, &stride, &positionOffset, &attributeOffset,
                   &normalOffset, &dataFlags, &texOffset);
 
     RenderBuffer* buffer = data->buffer;
@@ -354,7 +356,7 @@ VertexBufferLockInfo* VertexRenderer::FUN_00e8c820(VertexSource* source, unsigne
             }
         }
         if (!valid) {
-            if (!FUN_00e8bfa0(buffer, 0))
+            if (!NiDX9VertexBufferManager_AllocateBufferSpace(buffer, 0))
                 return 0;
             if (buffer->count > 0)
                 resource = *(VertexBufferLockInfo**)buffer->entries;
@@ -362,7 +364,7 @@ VertexBufferLockInfo* VertexRenderer::FUN_00e8c820(VertexSource* source, unsigne
                 resource = 0;
             flags = 0xfff;
         }
-        option = (char*)FUN_00e8bff0(resource->GetBuffer(), resource->GetOffset(),
+        option = (char*)NiDX9VertexBufferManager_LockVB(resource->GetBuffer(), resource->GetOffset(),
                                         resource->GetFlags(), resource->GetSize());
     }
 
@@ -422,7 +424,7 @@ VertexBufferLockInfo* VertexRenderer::FUN_00e8c820(VertexSource* source, unsigne
         TwoComponentVector* dest = (TwoComponentVector*)(option + texOffset);
         do {
             TwoComponentVector* out = dest;
-            TwoComponentVector* uv = source->FUN_00a66960(i);
+            TwoComponentVector* uv = source->NiGeometryData_GetTextureSet(i);
             for (unsigned j = 0; j < (unsigned short)numVertices; ++j) {
                 unsigned k = indices[j];
                 *out = uv[k];

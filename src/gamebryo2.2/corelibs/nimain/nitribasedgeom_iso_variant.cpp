@@ -9,20 +9,21 @@ class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f4a48;
 
 // @fnv 0x00a74790
-const GlobalObjectO2_00a7b610* FUN_00a74790()
+// src: COMMUNITY 0x00a74790
+const GlobalObjectO2_00a7b610* NiLines_GetRTTI()
 {
     return &g_011f4a48;
 }
 
 extern "C" unsigned int DAT_0109ed94;
-extern "C" void __fastcall FUN_00a80580(::NiGeometry*);
+extern "C" void __fastcall UpdateFields_00a80580(::NiGeometry*);
 extern "C" void __cdecl FUN_00aa1460(void*, unsigned int);
 
 // @fnv 0x00a89790
 extern "C" ::NiGeometry* __fastcall FUN_00a89790(::NiGeometry* geometry, void*, unsigned int flags)
 {
     *reinterpret_cast<void**>(geometry) = &DAT_0109ed94;
-    FUN_00a80580(geometry);
+    UpdateFields_00a80580(geometry);
     if (flags & 1u)
         FUN_00aa1460(geometry, sizeof(*geometry));
     return geometry;
@@ -81,10 +82,11 @@ struct ParticleDownwardPassReceiver
     virtual void slot44();
     virtual void slot45();
     virtual void dispatch(void* data);
-    void __thiscall FUN_00c1ad90(void* data, unsigned int value);
+    void __thiscall NiParticleSystem_UpdateDownwardPass(void* data, unsigned int value);
 };
 // @fnv 0x00c1ad90
-void ParticleDownwardPassReceiver::FUN_00c1ad90(void* data, unsigned int value)
+// src: XBOX_PDB 0x00c1ad90
+void ParticleDownwardPassReceiver::NiParticleSystem_UpdateDownwardPass(void* data, unsigned int value)
 {
     NiUpdateData* update = (NiUpdateData*)data;
     if (update->pad2 != 0)
@@ -102,19 +104,21 @@ class ParticleLinkEndpoint : public NiGeometry
   public:
     void FUN_00a80b50(NiStream&);
 // @fnv 0x00a74780
-    void FUN_00a74780(NiStream& input)
+// src: XBOX_PDB 0x00a74780
+    void NiLines_LinkObject(NiStream& input)
     {
         FUN_00a80b50(input);
     }
 };
 
-void (ParticleLinkEndpoint::*linkEndpoint)(NiStream&) = &ParticleLinkEndpoint::FUN_00a74780;
+void (ParticleLinkEndpoint::*linkEndpoint)(NiStream&) = &ParticleLinkEndpoint::NiLines_LinkObject;
 
 class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f5b70;
 
 // @fnv 0x00a89780
-extern "C" GlobalObjectO2_00a7b610* __cdecl FUN_00a89780()
+// src: COMMUNITY 0x00a89780
+extern "C" GlobalObjectO2_00a7b610* __cdecl NiTriBasedGeom_GetRTTI()
 {
     return &g_011f5b70;
 }
@@ -144,14 +148,15 @@ struct EntryArray
 
 extern const char* const g_011f4a20_arg1;
 void __stdcall FUN_00a80e70(EntryArray*);
-char* __cdecl FUN_00a7d330(const char*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
 }
 
 // @fnv 0x00a897c0
-void __stdcall FUN_00a897c0(TriGeomViewerDetail::EntryArray* entries)
+// src: XBOX_PDB 0x00a897c0
+void __stdcall NiTriBasedGeom_GetViewerStrings(TriGeomViewerDetail::EntryArray* entries)
 {
     TriGeomViewerDetail::FUN_00a80e70(entries);
-    char* label = TriGeomViewerDetail::FUN_00a7d330(TriGeomViewerDetail::g_011f4a20_arg1);
+    char* label = TriGeomViewerDetail::NiViewerStrings_NiGetViewerString_Title(TriGeomViewerDetail::g_011f4a20_arg1);
     entries->Append(label);
 }
 
@@ -161,11 +166,12 @@ class LineReceiver : public ::NiGeometry
 {
   public:
     void FUN_00a80bf0(BinaryDataRecord& stream);
-    void FUN_00a9b180(BinaryDataRecord& stream);
+    void NiLines_LoadBinary(BinaryDataRecord& stream);
 };
 
 // @fnv 0x00a9b180
-void LineReceiver::FUN_00a9b180(BinaryDataRecord& stream)
+// src: XBOX_PDB 0x00a9b180
+void LineReceiver::NiLines_LoadBinary(BinaryDataRecord& stream)
 {
     FUN_00a80bf0(stream);
 }
@@ -177,11 +183,12 @@ class ParticleDataEndpoint : public ::NiGeometry
 {
   public:
     void FUN_00a80680(NiGeometryData*);
-    virtual void FUN_00c1ad80(NiGeometryData*);
+    virtual void NiParticleSystem_SetModelData(NiGeometryData*);
 };
 
 // @fnv 0x00c1ad80
-void ParticleDataEndpoint::FUN_00c1ad80(NiGeometryData* replacement)
+// src: XBOX_PDB 0x00c1ad80
+void ParticleDataEndpoint::NiParticleSystem_SetModelData(NiGeometryData* replacement)
 {
     FUN_00a80680(replacement);
 }

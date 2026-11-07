@@ -175,12 +175,12 @@ public:
     TESActorBaseData& operator=(const TESActorBaseData& other);
 
     bool FUN_00461580(unsigned int flag);
-    unsigned short FUN_0047d390();
-    unsigned short FUN_0047d3b0();
-    unsigned short FUN_0047ded0();
-    void FUN_0047ea70(BGSLoadFormBuffer* buffer);
+    unsigned short GetCalcLevelMin_0047d390();
+    unsigned short GetAnimGroupType_0047d3b0();
+    unsigned short TESActorBaseData_GetLevel();
+    void LoadGame_0047ea70(BGSLoadFormBuffer* buffer);
     void FUN_0050f9a0(TESLevItem* item);
-    void FUN_005f9010(bool value);
+    void TESCreature_SetNoBloodSpray(bool value);
 
     bool GetVATSmeleeDisabled();
     bool GetNoVATSranged();

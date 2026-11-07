@@ -46,18 +46,19 @@ struct FUN_00484d20_Class
 // @fnv 0x00484d20
 void __thiscall FUN_00484d20_Class::ForwardToSaveLoadGame(int a, int b)
 {
-    g_TESSaveLoadGame->FUN_00857a10(a, b);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(a, b);
 }
 
 extern int DAT_00ffffff;
 
 struct FUN_00485bc0_class
 {
-    int __thiscall FUN_00485bc0();
+    int __thiscall TESForm_GetFormIDWithoutIndex();
 };
 
 // @fnv 0x00485bc0
-int __thiscall FUN_00485bc0_class::FUN_00485bc0()
+// src: XBOX_PDB 0x00485bc0
+int __thiscall FUN_00485bc0_class::TESForm_GetFormIDWithoutIndex()
 {
     return ((int*)this)[3] & (int)&DAT_00ffffff;
 }
@@ -80,24 +81,25 @@ extern int $SG4908;
 struct FUN_00486c60_t
 {
     int* vtbl;
-    void FUN_00486c80();
+    void ForwardCall_00486c80();
     ~FUN_00486c60_t();
 };
 // @fnv 0x00486c60
 FUN_00486c60_t::~FUN_00486c60_t()
 {
     vtbl = (int*)&$SG4908;
-    FUN_00486c80();
+    ForwardCall_00486c80();
 }
 
 struct FUN_00486c80_class
 {
     void FUN_00486ca0();
-    void FUN_00486c80();
+    void ForwardCall_00486c80();
 };
 
 // @fnv 0x00486c80
-void FUN_00486c80_class::FUN_00486c80()
+// src: GUESS 0x00486c80 (confidence: low)
+void FUN_00486c80_class::ForwardCall_00486c80()
 {
     FUN_00486ca0();
 }
@@ -178,7 +180,8 @@ FUN_00487620::~FUN_00487620()
 }
 
 // @fnv 0x004893c0
-void TESModel::FUN_004893c0(unsigned char acFlags)
+// src: COMMUNITY 0x004893c0
+void TESModel::SetFlags_004893c0(unsigned char acFlags)
 {
     cFlags = acFlags;
 }
@@ -287,11 +290,12 @@ struct GlobalObject_00869f00
 {
     int* p;
     void Clear(bool);
-    void FUN_0049f1f0();
+    void UpdateState_0049f1f0();
 };
 
 // @fnv 0x0049f1f0
-void GlobalObject_00869f00::FUN_0049f1f0()
+// src: GUESS 0x0049f1f0 (confidence: low)
+void GlobalObject_00869f00::UpdateState_0049f1f0()
 {
     p = &DAT_010159d4;
     Clear(true);
@@ -301,15 +305,16 @@ extern void* DAT_0101e128;
 struct FUN_0049f640_class
 {
     void* vtable;
-    void FUN_0049fbf0(int, int);
-    FUN_0049f640_class* FUN_0049f640();
+    void UpdateState_0049fbf0(int, int);
+    FUN_0049f640_class* SetVirtualTableAndProcessState_0049f640();
 };
 // Sets the vtable to DAT_0101e128, calls FUN_0049fbf0(0, 0), and returns this.
 // @fnv 0x0049f640
-FUN_0049f640_class* FUN_0049f640_class::FUN_0049f640()
+// src: GUESS 0x0049f640 (confidence: low)
+FUN_0049f640_class* FUN_0049f640_class::SetVirtualTableAndProcessState_0049f640()
 {
     vtable = &DAT_0101e128;
-    FUN_0049fbf0(0, 0);
+    UpdateState_0049fbf0(0, 0);
     return this;
 }
 
@@ -320,11 +325,12 @@ extern int DAT_0101e128;
 struct FUN_0049f670_Class
 {
     int* p;
-    void FUN_0049f670();
+    void UpdateState_0049f670();
 };
 
 // @fnv 0x0049f670
-void FUN_0049f670_Class::FUN_0049f670()
+// src: GUESS 0x0049f670 (confidence: low)
+void FUN_0049f670_Class::UpdateState_0049f670()
 {
     p = &DAT_0101e128;
     ((void(__thiscall*)(void*, int))FUN_0049faf0)(this, 1);
@@ -332,9 +338,10 @@ void FUN_0049f670_Class::FUN_0049f670()
 }  // namespace fnv_0049f670
 
 // @fnv 0x0049f830
-bool FUN_0049f830(NiPlane* self, const NiPlane& other)
+// src: COMMUNITY 0x0049f830
+bool BSSimpleArray_NiPoint3_1024_CompareFunc(NiPlane* self, const NiPlane& other)
 {
-    return self->FUN_004390c0(other);
+    return self->HasEqualComponents(other);
 }
 
 struct NodePoolView
@@ -347,11 +354,12 @@ struct ScriptPool
     int pad0;
     int pad1;
     NodePoolView pool;
-    void* FUN_0049fa80();
+    void* NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_NewItem();
 };
 
 // @fnv 0x0049fa80
-void* ScriptPool::FUN_0049fa80()
+// src: XBOX_PDB 0x0049fa80
+void* ScriptPool::NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_NewItem()
 {
     return pool.AddHead();
 }
@@ -359,11 +367,12 @@ void* ScriptPool::FUN_0049fa80()
 struct FUN_0049fe00_class
 {
     void FUN_004a44a0();
-    void FUN_0049fe00();
+    void ForwardCall_0049fe00();
 };
 
 // @fnv 0x0049fe00
-void FUN_0049fe00_class::FUN_0049fe00()
+// src: GUESS 0x0049fe00 (confidence: low)
+void FUN_0049fe00_class::ForwardCall_0049fe00()
 {
     FUN_004a44a0();
 }
@@ -375,12 +384,13 @@ struct FUN_00486dc0_Class
     const char* m_p;
     void* m_auiShapeKeys;
     void* m_data;
-    void FUN_00486dc0();
+    void ReleaseStorage_00486dc0();
 };
 
 // Sets m_p to "PnH", clears the pointer map contents, and frees m_data.
 // @fnv 0x00486dc0
-void FUN_00486dc0_Class::FUN_00486dc0()
+// src: GUESS 0x00486dc0 (confidence: medium)
+void FUN_00486dc0_Class::ReleaseStorage_00486dc0()
 {
     m_p = "PnH";
     ((NiTPointerMap<int, int>*)this)->RemoveAll();
@@ -444,7 +454,7 @@ struct FUN_00486e50_Class : FUN_00486dc0_Class
 // @fnv 0x00486e50
 void* FUN_00486e50_Class::FUN_00486e50(unsigned int flags)
 {
-    FUN_00486dc0();
+    ReleaseStorage_00486dc0();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -458,7 +468,7 @@ struct FUN_00486f10_Class
 // @fnv 0x00486f10
 void* __thiscall FUN_00486f10_Class::FUN_00486f10(unsigned int flags)
 {
-    ((FUN_00486c60_t*)this)->FUN_00486c80();
+    ((FUN_00486c60_t*)this)->ForwardCall_00486c80();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -510,14 +520,14 @@ void* __thiscall FUN_0049e3e0_Class::FUN_0049e3e0(unsigned int flags)
 
 struct FUN_0049f670_Class
 {
-    void __thiscall FUN_0049f670();
+    void __thiscall UpdateState_0049f670();
     void* __thiscall FUN_0049f880(unsigned int flags);
 };
 
 // @fnv 0x0049f880
 void* FUN_0049f670_Class::FUN_0049f880(unsigned int flags)
 {
-    FUN_0049f670();
+    UpdateState_0049f670();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -542,12 +552,13 @@ template <int N> struct EndianSizeTag
 {
 };
 void __cdecl BSEndian(unsigned short*, EndianSizeTag<2>);
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(void*, void*, unsigned int);
 // @fnv 0x00485950
-void __cdecl FUN_00485950(void* apDest, unsigned short ausValue)
+// src: XBOX_PDB 0x00485950
+void __cdecl TESForm_AddChunk_00485950(void* apDest, unsigned short ausValue)
 {
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         BSEndian((unsigned short*)&ausValue, EndianSizeTag<2>());
     AppendChunk(apDest, &ausValue, 2);
 }
@@ -570,11 +581,12 @@ void* __thiscall S_486eb0::FUN_00486eb0(unsigned int flags)
 extern int DAT_0101cad8;
 struct S486f40 : FUN_00486f70_class
 {
-    void* __thiscall FUN_00486f40(int a, bool b);
+    void* __thiscall InitializeFields_00486f40(int a, bool b);
 };
 // Calls the base constructor, installs DAT_0101cad8 as the vtable pointer, stores b at offset 0x10, and returns this.
 // @fnv 0x00486f40
-void* __thiscall S486f40::FUN_00486f40(int aiArg, bool abFlag)
+// src: GUESS 0x00486f40 (confidence: low)
+void* __thiscall S486f40::InitializeFields_00486f40(int aiArg, bool abFlag)
 {
     InitializeWithGlobal(aiArg);
     *(void**)this = (void*)&DAT_0101cad8;
@@ -584,25 +596,27 @@ void* __thiscall S486f40::FUN_00486f40(int aiArg, bool abFlag)
 
 struct IdleAnimationManager
 {
-    bool __thiscall FUN_00843150();
+    bool __thiscall InterfaceManager_GetMagicPageNumber();
 };
-void __cdecl FUN_004858f0(unsigned int, unsigned char);
+void __cdecl TESForm_AddChunk_3(unsigned int, unsigned char);
 struct FUN_00489240_Class
 {
-    void __thiscall FUN_00489240(unsigned a);
+    void __thiscall TESModel_SaveFlags(unsigned a);
 };
 // Calls FUN_00843150 on this; if it returns a nonzero signed char, passes a and that value to FUN_004858f0.
 // @fnv 0x00489240
-void __thiscall FUN_00489240_Class::FUN_00489240(unsigned a)
+// src: XBOX_PDB 0x00489240
+void __thiscall FUN_00489240_Class::TESModel_SaveFlags(unsigned a)
 {
-    signed char b = reinterpret_cast<IdleAnimationManager*>(this)->FUN_00843150();
+    signed char b = reinterpret_cast<IdleAnimationManager*>(this)->InterfaceManager_GetMagicPageNumber();
     if (b)
-        FUN_004858f0(a, b);
+        TESForm_AddChunk_3(a, b);
 }
 
 // Returns true if the chunk ID is one of the four MOD-related chunk tags, otherwise false.
 // @fnv 0x00489280
-bool FUN_00489280(int chunk)
+// src: XBOX_PDB 0x00489280
+bool TESModel_IsModelChunk(int chunk)
 {
     switch (chunk)
     {
@@ -654,7 +668,7 @@ FUN_0048b560::FUN_0048b560() : BFC_s()
     ((FUN_0048b590_shell*)this)->ClearFields();
 }
 
-extern "C" void __cdecl FUN_00485910(int a, int b);
+extern "C" void __cdecl TESForm_AddChunk_00485910(int a, int b);
 struct FUN_0048b830_Class
 {
     void* m_p;
@@ -667,34 +681,35 @@ void __thiscall FUN_0048b830_Class::ReleaseSound()
     if (m_auiShapeKeys)
     {
         unsigned int result = ((TESSound*)m_auiShapeKeys)->Deallocate();
-        FUN_00485910(0x4d414e52, result);
+        TESForm_AddChunk_00485910(0x4d414e52, result);
     }
 }
 
-void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
+void __cdecl TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 // @fnv 0x0048cea0
 void __thiscall TESFullName::Save()
 {
     if (static_cast<const TESFullName*>(this)->GetModelLength())
-        FUN_004856f0(0x4d414e46, GetFullName(), static_cast<const TESFullName*>(this)->GetModelLength() + 1);
+        TESForm_AddChunkArray(0x4d414e46, GetFullName(), static_cast<const TESFullName*>(this)->GetModelLength() + 1);
 }
 
 struct FUN_00508100_shell
 {
-    float FUN_00508100();
+    float GetEndKeyTime_00508100();
 };
 struct FUN_00759450_shell
 {
-    float FUN_00759450();
+    float NiPSysSpawnModifier_GetLifeSpan();
 };
 // Returns 0 if the sequence is null, otherwise the difference between the two values returned by the sequence's FUN_00508100 and FUN_00759450 calls.
 // @fnv 0x00491090
-float __cdecl FUN_00491090(NiControllerSequence* apSequence)
+// src: COMMUNITY 0x00491090
+float __cdecl Animation_GetDuration_0(NiControllerSequence* apSequence)
 {
     if (!apSequence)
         return 0.0f;
-    float f = ((FUN_00759450_shell*)apSequence)->FUN_00759450();
-    float g = ((FUN_00508100_shell*)apSequence)->FUN_00508100();
+    float f = ((FUN_00759450_shell*)apSequence)->NiPSysSpawnModifier_GetLifeSpan();
+    float g = ((FUN_00508100_shell*)apSequence)->GetEndKeyTime_00508100();
     return g - f;
 }
 
@@ -703,12 +718,13 @@ struct S00496440
     int m0;
     int m1;
     int m2;
-    void __thiscall FUN_004963b0(const S00496440&);
+    void __thiscall NiQuatTransform_SetTranslate(const S00496440&);
     void __thiscall FUN_00496440(bool);
 };
 // Copies p into this object and then calls FUN_00496440 with true.
 // @fnv 0x004963b0
-void __thiscall S00496440::FUN_004963b0(const S00496440& aSource)
+// src: COMMUNITY 0x004963b0
+void __thiscall S00496440::NiQuatTransform_SetTranslate(const S00496440& aSource)
 {
     *this = aSource;
     FUN_00496440(true);
@@ -741,11 +757,12 @@ void __thiscall S_004963e0::SetFromFourInts(FourInts* apValues)
 
 struct FUN_00497bc0_Class
 {
-    void FUN_00497bc0(BGSSaveFormBuffer* buffer, int a);
+    void SaveFields_00497bc0(BGSSaveFormBuffer* buffer, int a);
 };
 // Saves three 4-byte fields at offsets 8, 0xc and 0x14 of this object into the given BGSSaveFormBuffer.
 // @fnv 0x00497bc0
-void FUN_00497bc0_Class::FUN_00497bc0(BGSSaveFormBuffer* buffer, int aiUnused)
+// src: GUESS 0x00497bc0 (confidence: medium)
+void FUN_00497bc0_Class::SaveFields_00497bc0(BGSSaveFormBuffer* buffer, int aiUnused)
 {
     buffer->SaveData(this + 8, 4, 0);
     buffer->SaveData(this + 0xc, 4, 0);
@@ -782,10 +799,11 @@ struct FUN_0049db00_Class
     void* m20;
     void* m24;
     void* m28;
-    float FUN_0049db00();
+    float TESObjectLAND_GetBaseHeight();
 };
 // @fnv 0x0049db00
-float FUN_0049db00_Class::FUN_0049db00()
+// src: COMMUNITY 0x0049db00
+float FUN_0049db00_Class::TESObjectLAND_GetBaseHeight()
 {
     return m28 ? ((float*)m28)[0x28] : 0.0f;
 }
@@ -821,7 +839,7 @@ struct FUN_0049f190_Class
 // @fnv 0x0049f190
 bool __thiscall FUN_0049f190_Class::ContainsPlane(const NiPlane& aPlane)
 {
-    return FindIndexIf(aPlane, 0, FUN_0049f830) != -1;
+    return FindIndexIf(aPlane, 0, BSSimpleArray_NiPoint3_1024_CompareFunc) != -1;
 }
 
 struct S_0049f850
@@ -832,7 +850,7 @@ struct S_0049f850
 // @fnv 0x0049f850
 void* __thiscall S_0049f850::FUN_0049f850(unsigned int flags)
 {
-    ((GlobalObject_00869f00*)this)->FUN_0049f1f0();
+    ((GlobalObject_00869f00*)this)->UpdateState_0049f1f0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -844,12 +862,13 @@ struct PlaneElem
     int b;
     int c;
     int d;
-    PlaneElem& FUN_0049f8b0(const PlaneElem& other);
+    PlaneElem& BSSimpleArray_Copy(const PlaneElem& other);
 };
 
 // Copies the vector words while preserving the array record's first word.
 // @fnv 0x0049f8b0
-PlaneElem& PlaneElem::FUN_0049f8b0(const PlaneElem& other)
+// src: COMMUNITY 0x0049f8b0
+PlaneElem& PlaneElem::BSSimpleArray_Copy(const PlaneElem& other)
 {
     b = other.b;
     c = other.c;
@@ -896,7 +915,8 @@ struct bsrandom_singleton
 };
 // Calls FUN_0049ffc0(1) on the singleton at DAT_011c57f8 if it exists, then clears DAT_011c57f8.
 // @fnv 0x0049ff80
-void FUN_0049ff80()
+// src: COMMUNITY 0x0049ff80
+void DecalManager_Destroy_()
 {
     FUN_0049fe20_class* _b;
     FUN_0049fe20_class* _c;
@@ -958,10 +978,11 @@ struct Animation
 {
     void AssignControllerManager(GO&);
     void SpecialIdleFree(bool, bool);
-    void __thiscall FUN_0048ff50();
+    void __thiscall FreeAllIdles();
 };
 // @fnv 0x0048ff50
-void __thiscall Animation::FUN_0048ff50()
+// src: COMMUNITY 0x0048ff50
+void __thiscall Animation::FreeAllIdles()
 {
     ((char*)this)[0xcd] = 1;
     SpecialIdleFree(true, true);
@@ -982,7 +1003,7 @@ struct KFModel
 };
 struct FUN_00496280_shell
 {
-    void FUN_00496280();
+    void Animation_ZeroGlobalTransform();
 };
 struct Animation
 {
@@ -990,23 +1011,24 @@ struct Animation
 };
 struct H00499240
 {
-    void FUN_00499240(bool);
+    void Animation_ReloadTargets(bool);
 };
 struct H00499080
 {
-    void FUN_00499080();
+    void Animation_ClearBlendInterps();
 };
-void __cdecl FUN_00499160(void*);
+void __cdecl Animation_ClearControllersInterpolators(void*);
 struct FUN_0049a920_s
 {
-    void FUN_00496080(unsigned int, float);
-    void __thiscall FUN_0049a920(unsigned int a);
+    void Animation_ClearGroup(unsigned int, float);
+    void __thiscall Animation_RevertTES(unsigned int a);
 };
 // @fnv 0x0049a920
-void __thiscall FUN_0049a920_s::FUN_0049a920(unsigned int a)
+// src: COMMUNITY 0x0049a920
+void __thiscall FUN_0049a920_s::Animation_RevertTES(unsigned int a)
 {
-    FUN_00496080(0x14, 0.0f);
-    ((FUN_00496280_shell*)this)->FUN_00496280();
+    Animation_ClearGroup(0x14, 0.0f);
+    ((FUN_00496280_shell*)this)->Animation_ZeroGlobalTransform();
     if (*(Flt*)((char*)this + 0x124))
         ((Animation*)this)->AssignControllerManager((Flt*)((char*)this + 0x124));
     *(GO*)((char*)this + 0x124) = 0;
@@ -1014,12 +1036,12 @@ void __thiscall FUN_0049a920_s::FUN_0049a920(unsigned int a)
         ((Animation*)this)->AssignControllerManager((Flt*)((char*)this + 0x128));
     *(GO*)((char*)this + 0x128) = 0;
     *(int*)((char*)this + 0xfc) = 0;
-    FUN_00496080(7, 0.0f);
+    Animation_ClearGroup(7, 0.0f);
     if (*(Flt*)((char*)this + 0xd8))
         ((NiControllerManager*)(unsigned int)*(Flt*)((char*)this + 0xd8))->DeactivateAllSequences(0.0f);
-    FUN_00499160(((KFModel*)this)->GetControllerSequence());
-    ((H00499080*)this)->FUN_00499080();
-    ((H00499240*)this)->FUN_00499240(true);
+    Animation_ClearControllersInterpolators(((KFModel*)this)->GetControllerSequence());
+    ((H00499080*)this)->Animation_ClearBlendInterps();
+    ((H00499240*)this)->Animation_ReloadTargets(true);
 }
 }  // namespace fnv_0049a920
 
@@ -1034,10 +1056,11 @@ struct FUN_0049f990_class : FUN_0049f8f0_class
     int m4;
     int m8;
     int mc;
-    void __thiscall FUN_0049f990(unsigned int requested, unsigned int saved);
+    void __thiscall BSSimpleArray_NiPoint3_1024_InitialSetup(unsigned int requested, unsigned int saved);
 };
 // @fnv 0x0049f990
-void __thiscall FUN_0049f990_class::FUN_0049f990(unsigned int requested, unsigned int saved)
+// src: XBOX_PDB 0x0049f990
+void __thiscall FUN_0049f990_class::BSSimpleArray_NiPoint3_1024_InitialSetup(unsigned int requested, unsigned int saved)
 {
     m4 = 0;
     m8 = 0;
@@ -1081,7 +1104,8 @@ FUN_00486fa0_Class::FUN_00486fa0_Class(int count)
 
 // Compares the first float of two pointers, returning 1 if the first is greater, -1 if the second is greater, otherwise 0.
 // @fnv 0x0049c7b0
-int __cdecl FUN_0049c7b0(const float* a, const float* b)
+// src: GUESS 0x0049c7b0 (confidence: high)
+int __cdecl Runtime_CompareFirstFloats(const float* a, const float* b)
 {
     const float* pValueA = a;
     const float* pValueB = b;
@@ -1108,11 +1132,12 @@ struct FUN_0049f510
     int m0;
     ActorAvoidanceEntry* m1;
     unsigned int m2;
-    void FUN_0049f510_m();
+    void RemoveLastEntry();
 };
 // If m2 is nonzero, calls FUN_0072ba80 on the last element of the m1 array and decrements m2.
 // @fnv 0x0049f510
-void FUN_0049f510::FUN_0049f510_m()
+// src: GUESS 0x0049f510 (confidence: medium)
+void FUN_0049f510::RemoveLastEntry()
 {
     if (!m2)
         return;
@@ -1130,11 +1155,12 @@ struct FUN_0049fa20_List
     FUN_0049fa20_Node* m_pHead;
     FUN_0049fa20_Node* m_pTail;
     unsigned int m_uiCount;
-    void FUN_0049fa20(FUN_0049fa20_Node* p);
+    void NiTListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddNodeHead(FUN_0049fa20_Node* p);
 };
 // Inserts a node at the head of the list, linking it to the previous head and updating the tail and count.
 // @fnv 0x0049fa20
-void FUN_0049fa20_List::FUN_0049fa20(FUN_0049fa20_Node* pNode)
+// src: XBOX_PDB 0x0049fa20
+void FUN_0049fa20_List::NiTListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddNodeHead(FUN_0049fa20_Node* pNode)
 {
     pNode->m_pListObject = 0;
     pNode->m_pNext = m_pHead;
@@ -1148,7 +1174,7 @@ void FUN_0049fa20_List::FUN_0049fa20(FUN_0049fa20_Node* pNode)
 
 struct Arr16
 {
-    unsigned int FUN_006f31f0();
+    unsigned int BSSimpleArray_TeleportLink_1024_AddUninitialized();
 };
 struct FUN_0049faa0_Class
 {
@@ -1160,9 +1186,9 @@ struct FUN_0049faa0_Class
 // @fnv 0x0049faa0
 unsigned int FUN_0049faa0_Class::AppendPlane(const PlaneElem& aPlane)
 {
-    unsigned int i = ((Arr16*)this)->FUN_006f31f0();
+    unsigned int i = ((Arr16*)this)->BSSimpleArray_TeleportLink_1024_AddUninitialized();
     ConstructElements(m4 + (i << 4), 1);
-    ((PlaneElem*)(m4 + (i << 4)))->FUN_0049f8b0(aPlane);
+    ((PlaneElem*)(m4 + (i << 4)))->BSSimpleArray_Copy(aPlane);
     return i;
 }
 
@@ -1177,10 +1203,11 @@ struct FUN_0049fbf0_class : FUN_0049fbf0_vt
     int m8;
     int mc;
     void ConstructElements(void*, unsigned int);
-    void FUN_0049fbf0(unsigned int a, unsigned int b);
+    void UpdateState_0049fbf0(unsigned int a, unsigned int b);
 };
 // @fnv 0x0049fbf0
-void FUN_0049fbf0_class::FUN_0049fbf0(unsigned int a, unsigned int b)
+// src: GUESS 0x0049fbf0 (confidence: low)
+void FUN_0049fbf0_class::UpdateState_0049fbf0(unsigned int a, unsigned int b)
 {
     m4 = 0;
     m8 = 0;
@@ -1205,7 +1232,8 @@ void __cdecl _FUN_00485990(void* destination, void* source, unsigned int size);
 void __cdecl BSEndian(unsigned char* data, EndianSizeTag<8> type);
 
 // @fnv 0x00485820
-void __cdecl FUN_00485820(void* destination, void* source, unsigned int count)
+// src: COMMUNITY 0x00485820
+void __cdecl TESForm_AddChunkArray16(void* destination, void* source, unsigned int count)
 {
     unsigned int size = count << 1;
 
@@ -1229,7 +1257,8 @@ void __cdecl FUN_00485820(void* destination, void* source, unsigned int count)
 }
 
 // @fnv 0x004858f0
-void __cdecl FUN_004858f0(unsigned int a, unsigned char ucValue)
+// src: COMMUNITY 0x004858f0
+void __cdecl TESForm_AddChunk_3(unsigned int a, unsigned char ucValue)
 {
     AppendChunk((void*)a, &ucValue, 1);
 }
@@ -1293,17 +1322,17 @@ struct FUN_006c8a30_Class
 
 struct FUN_006dc6e0_Class
 {
-    void FUN_006dc6e0(char*, char*, unsigned int);
+    void BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(char*, char*, unsigned int);
 };
 
 struct FUN_006f3170_Class
 {
-    bool FUN_006f3170();
+    bool BSSimpleArray_HasSufficientCapacity();
 };
 
 struct FUN_00869600_Class
 {
-    unsigned int FUN_00869600();
+    unsigned int BSSimpleArray_GetOptimalCapacity();
 };
 
 // Retained until BSSimpleArray exposes the three-argument removal overload.
@@ -1316,12 +1345,13 @@ struct FUN_0049f3c0_Class
     unsigned int m8;
     unsigned int mc;
 
-    void FUN_0049f3c0(unsigned int, unsigned int, bool);
+    void BSSimpleArray_NiPoint3_1024_RemoveRange(unsigned int, unsigned int, bool);
 };
 
 // Removes arg2 elements starting at index arg1 from the array, optionally reallocating via virtual2 when arg3 is set and FUN_006f3170 succeeds, then shrinks m8.
 // @fnv 0x0049f3c0
-void FUN_0049f3c0_Class::FUN_0049f3c0(unsigned int uiStart, unsigned int arg2, bool abReallocate)
+// src: COMMUNITY 0x0049f3c0
+void FUN_0049f3c0_Class::BSSimpleArray_NiPoint3_1024_RemoveRange(unsigned int uiStart, unsigned int arg2, bool abReallocate)
 {
     if (arg2 >= this->m8)
     {
@@ -1329,18 +1359,18 @@ void FUN_0049f3c0_Class::FUN_0049f3c0(unsigned int uiStart, unsigned int arg2, b
     }
     else
     {
-        if (abReallocate && reinterpret_cast<FUN_006f3170_Class*>(this)->FUN_006f3170())
+        if (abReallocate && reinterpret_cast<FUN_006f3170_Class*>(this)->BSSimpleArray_HasSufficientCapacity())
         {
-            unsigned int value = reinterpret_cast<FUN_00869600_Class*>(this)->FUN_00869600();
+            unsigned int value = reinterpret_cast<FUN_00869600_Class*>(this)->BSSimpleArray_GetOptimalCapacity();
 
             ActorAvoidanceEntry* p = this->FUN_0049f3c0_virtual2(value);
 
-            reinterpret_cast<FUN_006dc6e0_Class*>(this)->FUN_006dc6e0(reinterpret_cast<char*>(p),
+            reinterpret_cast<FUN_006dc6e0_Class*>(this)->BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(reinterpret_cast<char*>(p),
                                                                       reinterpret_cast<char*>(this->m4), uiStart);
 
             reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(this->m4 + uiStart, arg2);
 
-            reinterpret_cast<FUN_006dc6e0_Class*>(this)->FUN_006dc6e0(
+            reinterpret_cast<FUN_006dc6e0_Class*>(this)->BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(
                 reinterpret_cast<char*>(p) + uiStart * 12, reinterpret_cast<char*>(this->m4 + uiStart + arg2),
                 this->m8 - arg2);
 
@@ -1353,7 +1383,7 @@ void FUN_0049f3c0_Class::FUN_0049f3c0(unsigned int uiStart, unsigned int arg2, b
         {
             reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(this->m4 + uiStart, arg2);
 
-            reinterpret_cast<FUN_006dc6e0_Class*>(this)->FUN_006dc6e0(
+            reinterpret_cast<FUN_006dc6e0_Class*>(this)->BSSimpleArray_BSCompoundFrustum_FunctionOp_1024_MoveItems(
                 reinterpret_cast<char*>(this->m4 + uiStart), reinterpret_cast<char*>(this->m4 + uiStart + arg2),
                 this->m8 - uiStart - arg2);
         }
@@ -1393,7 +1423,7 @@ struct FormEntry
     unsigned int unk44;
     unsigned int unk48;
     ModelData model;
-    unsigned int FUN_00481190(unsigned int);
+    unsigned int _TESBipedModelForm_GetWorldModel(unsigned int);
 };
 struct ExtraData
 {
@@ -1402,27 +1432,28 @@ struct ExtraData
 };
 struct Reference
 {
-    ExtraData* FUN_00567790();
+    ExtraData* TESObjectREFR_GetOwner();
 };
 extern "C" unsigned char DAT_01183028;
 extern "C" unsigned char DAT_01183978;
 extern "C" FormEntry* __cdecl func_0x00ec43fb(void*, unsigned int, void*, void*, unsigned int);
 // Looks up a FormEntry from source, then returns its model value or a value computed from reference's extra data via FUN_00481190.
 // @fnv 0x00480e60
-unsigned int __cdecl FUN_00480e60(void* source, Reference* reference)
+// src: COMMUNITY 0x00480e60
+unsigned int __cdecl TESBipedModelForm_GetWorldModel(void* source, Reference* reference)
 {
     FormEntry* form4 = func_0x00ec43fb(source, 0, &DAT_01183028, &DAT_01183978, 0);
     if (form4 == 0)
         return 0;
     if (reference == 0)
         return form4->model.GetValue();
-    ExtraData* extra = reference->FUN_00567790();
+    ExtraData* extra = reference->TESObjectREFR_GetOwner();
     unsigned int value = 0;
     if (extra != 0 && extra->FUN_00401170() == 42)
     {
         value = extra->FUN_005f0cc0();
     }
-    return form4->FUN_00481190(value);
+    return form4->_TESBipedModelForm_GetWorldModel(value);
 }
 
 class FUN_00486d60_base
@@ -1474,13 +1505,14 @@ struct FUN_004899f0_cls
     unsigned int* m_pData;
 
     void Reset();
-    void FUN_004899f0(const FUN_004899f0_cls* src);
+    void TESTextureList_Copy(const FUN_004899f0_cls* src);
 };
 
 void* __cdecl CopyMemory_Thunk(void* dst, const void* src, unsigned int size);
 
 // @fnv 0x004899f0
-void FUN_004899f0_cls::FUN_004899f0(const FUN_004899f0_cls* apSource)
+// src: COMMUNITY 0x004899f0
+void FUN_004899f0_cls::TESTextureList_Copy(const FUN_004899f0_cls* apSource)
 {
     Reset();
     m_uiItemCount = apSource->m_uiItemCount;
@@ -1501,12 +1533,13 @@ struct List_48a2c0
     unsigned int count;
     Elem_48a2c0** items;
     void Clear();
-    void FUN_0048a2c0(List_48a2c0* other);
+    void TESTextureListArray_Copy(List_48a2c0* other);
 };
 
 // Clears this list, then deep-copies other's count and items, allocating a new array and copying each element.
 // @fnv 0x0048a2c0
-void List_48a2c0::FUN_0048a2c0(List_48a2c0* other)
+// src: COMMUNITY 0x0048a2c0
+void List_48a2c0::TESTextureListArray_Copy(List_48a2c0* other)
 {
     Clear();
     if (other->count)
@@ -1546,19 +1579,20 @@ class FormListPair
     FormNode0048<TESForm*> listA;
     FormNode0048<TESForm*> listB;
 
-    void FUN_0048e040(BGSSaveFormBuffer* buffer);
+    void TESSpellList_SaveGameBGS(BGSSaveFormBuffer* buffer);
 };
 
 // If the buffer's change flags include 0x10, writes each non-null form of listA and listB to the buffer and records the counts at their saved positions.
 // @fnv 0x0048e040
-void FormListPair::FUN_0048e040(BGSSaveFormBuffer* buffer)
+// src: COMMUNITY 0x0048e040
+void FormListPair::TESSpellList_SaveGameBGS(BGSSaveFormBuffer* buffer)
 {
     if ((buffer->*reinterpret_cast<SaveChangeFlags (BGSSaveFormBuffer::*)(unsigned int)>(
             static_cast<FormChangeMask (BGSSaveFormBuffer::*)(unsigned int)>(&BGSSaveFormBuffer::GetChangeFlags)))(0x10))
     {
         {
             int i = 0;
-            unsigned int off = buffer->FUN_00865f20();
+            unsigned int off = buffer->StartVariableSizedValue();
             FormNode0048<TESForm*>* pCurrent = &listA;
             while (pCurrent)
             {
@@ -1570,11 +1604,11 @@ void FormListPair::FUN_0048e040(BGSSaveFormBuffer* buffer)
                 }
                 pCurrent = pCurrent->FUN_00726070();
             }
-            buffer->FUN_00865ff0(i, off);
+            buffer->SaveVariableSizedValue_00865ff0(i, off);
         }
         {
             int cnt = 0;
-            unsigned int iPos = buffer->FUN_00865f20();
+            unsigned int iPos = buffer->StartVariableSizedValue();
             FormNode0048<TESForm*>* list = &listB;
             while (list)
             {
@@ -1586,7 +1620,7 @@ void FormListPair::FUN_0048e040(BGSSaveFormBuffer* buffer)
                 }
                 list = list->FUN_00726070();
             }
-            buffer->FUN_00865ff0(cnt, iPos);
+            buffer->SaveVariableSizedValue_00865ff0(cnt, iPos);
         }
     }
 }
@@ -1749,7 +1783,8 @@ struct FloatKeyedRecord
 
 // Compares two FloatKeyedRecord objects by their m_key04 values, returning 1, -1 or 0.
 // @fnv 0x0049c800
-int __cdecl FUN_0049c800(FloatKeyedRecord* apLeft, FloatKeyedRecord* apRight)
+// src: GUESS 0x0049c800 (confidence: medium)
+int __cdecl FloatKeyedRecord_CompareKeys(FloatKeyedRecord* apLeft, FloatKeyedRecord* apRight)
 {
     FloatKeyedRecord* pa = apLeft;
     FloatKeyedRecord* pb = apRight;
@@ -1785,44 +1820,45 @@ struct PlaneArray
     unsigned int size;
     unsigned int capacity;
 
-    bool FUN_00438b90();
-    unsigned int FUN_009a3910();
-    void FUN_006c8bd0(PlaneElem* dst, PlaneElem* src, unsigned int count);
+    bool BSSimpleArray_NavMeshInfo_1024_ShouldGrow();
+    unsigned int BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
+    void BSSimpleArray_NiColorA_1024_CopyItems(PlaneElem* dst, PlaneElem* src, unsigned int count);
     void ConstructElements(PlaneElem* p, unsigned int count);
     void FUN_006a8500();
     unsigned int AppendPlane(const PlaneElem& elem);
-    void FUN_0049f690(unsigned int index, const PlaneElem& elem);
+    void InsertPlaneWithGrowth(unsigned int index, const PlaneElem& elem);
 };
 
 // Inserts elem at index, growing the buffer if needed, shifting existing elements right and incrementing size.
 // @fnv 0x0049f690
-void PlaneArray::FUN_0049f690(unsigned int index, const PlaneElem& elem)
+// src: GUESS 0x0049f690 (confidence: high)
+void PlaneArray::InsertPlaneWithGrowth(unsigned int index, const PlaneElem& elem)
 {
     if (index == size)
     {
         AppendPlane(elem);
         return;
     }
-    if (FUN_00438b90())
+    if (BSSimpleArray_NavMeshInfo_1024_ShouldGrow())
     {
         PlaneElem* pNewBuffer2;
         unsigned int uiNewSize;
-        uiNewSize = FUN_009a3910();
+        uiNewSize = BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
         pNewBuffer2 = Allocate(uiNewSize);
-        FUN_006c8bd0(pNewBuffer2, data, index);
+        BSSimpleArray_NiColorA_1024_CopyItems(pNewBuffer2, data, index);
         ConstructElements(pNewBuffer2 + index, 1);
-        FUN_006c8bd0(pNewBuffer2 + index + 1, data + index, size - index);
+        BSSimpleArray_NiColorA_1024_CopyItems(pNewBuffer2 + index + 1, data + index, size - index);
         FUN_006a8500();
         data = pNewBuffer2;
         capacity = uiNewSize;
     }
     else
     {
-        FUN_006c8bd0(data + index + 1, data + index, size - index);
+        BSSimpleArray_NiColorA_1024_CopyItems(data + index + 1, data + index, size - index);
         ConstructElements(data + index, 1);
     }
     size++;
-    data[index].FUN_0049f8b0(elem);
+    data[index].BSSimpleArray_Copy(elem);
 }
 
 struct FUN_0049f7d0_elem
@@ -2005,12 +2041,12 @@ struct VObj
     virtual void Mid1();
     virtual void Mid2();
     virtual int Call3();
-    void FUN_00a5c480(void*);
+    void NiObjectNET_RemoveController(void*);
 };
 struct AVObj
 {
-    void* FUN_00a5c570(void*);
-    void FUN_00a5c480(void*);
+    void* NiObjectNET_GetController(void*);
+    void NiObjectNET_RemoveController(void*);
     void FUN_0048fef0(float);
     void ClearEntries();
     VObj* FUN_0055b980();
@@ -2033,7 +2069,7 @@ struct MapObj
 };
 struct Loader
 {
-    void FUN_00445430(void*);
+    void ModelLoader_CancelReplacementKFList(void*);
 };
 struct ItemObj
 {
@@ -2042,7 +2078,7 @@ struct ItemObj
 extern Loader* DAT_011c3b3c;
 extern int DAT_011f36bc;
 extern int DAT_011f36e4;
-void __cdecl FormHeap_Free(void*);
+void __cdecl FormHeapFreeAndLog_00401030(void*);
 struct FUN_0048fb50
 {
     void* f00;
@@ -2122,7 +2158,7 @@ struct FUN_0048fb50
     NP m128;
     NP m12c[2];
     ListX m134;
-    void FUN_0048ff50();
+    void FreeAllIdles();
     ~FUN_0048fb50();
 };
 // @fnv 0x0048fb50
@@ -2144,25 +2180,25 @@ FUN_0048fb50::~FUN_0048fb50()
     void* ctrlA_b;
     ListX* nodeA5;
     void* pos5;
-    FUN_0048ff50();
-    DAT_011c3b3c->FUN_00445430(this);
-    if (mD8.FUN_00559450())
+    FreeAllIdles();
+    DAT_011c3b3c->ModelLoader_CancelReplacementKFList(this);
+    if (mD8.Modelloader_GetReferencedThis())
     {
-        ctrlA_b = m8.FUN_00559450() ? m8.FUN_00559450()->FUN_00a5c570((void*)&DAT_011f36bc) : 0;
-        ctlB0 = m8.FUN_00559450() ? m8.FUN_00559450()->FUN_00a5c570((void*)&DAT_011f36e4) : 0;
+        ctrlA_b = m8.Modelloader_GetReferencedThis() ? m8.Modelloader_GetReferencedThis()->NiObjectNET_GetController((void*)&DAT_011f36bc) : 0;
+        ctlB0 = m8.Modelloader_GetReferencedThis() ? m8.Modelloader_GetReferencedThis()->NiObjectNET_GetController((void*)&DAT_011f36e4) : 0;
         if (ctrlA_b)
-            m8.FUN_00559450()->FUN_00a5c480(ctrlA_b);
+            m8.Modelloader_GetReferencedThis()->NiObjectNET_RemoveController(ctrlA_b);
         if (ctlB0)
-            m8.FUN_00559450()->FUN_00a5c480(ctlB0);
-        mD8.FUN_00559450()->FUN_0048fef0(0.0f);
-        mD8.FUN_00559450()->ClearEntries();
-        objP_c = mD8.FUN_00559450()->FUN_0055b980();
+            m8.Modelloader_GetReferencedThis()->NiObjectNET_RemoveController(ctlB0);
+        mD8.Modelloader_GetReferencedThis()->FUN_0048fef0(0.0f);
+        mD8.Modelloader_GetReferencedThis()->ClearEntries();
+        objP_c = mD8.Modelloader_GetReferencedThis()->FUN_0055b980();
         if (objP_c)
         {
             if (objP_c->Call3())
             {
                 acopyP = objP_c;
-                acopyP->FUN_00a5c480(mD8.FUN_00559450());
+                acopyP->NiObjectNET_RemoveController(mD8.Modelloader_GetReferencedThis());
             }
         }
         mD8.FUN_0066b0d0(0);
@@ -2200,7 +2236,7 @@ FUN_0048fb50::~FUN_0048fb50()
         {
             itemValB2 = *nodeBq->FUN_006815c0();
             itemCopy2 = itemValB2;
-            FormHeap_Free(itemCopy2);
+            FormHeapFreeAndLog_00401030(itemCopy2);
             nodeBq = nodeBq->FUN_00726070();
         }
         m134.FUN_00470470();
@@ -2237,7 +2273,7 @@ struct IdleAnimationConstruction : NiMemObject
 struct PtrBox
 {
     void* p;
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
 };
 struct FUN_004f0040_shell
 {
@@ -2259,23 +2295,23 @@ extern "C" unsigned int __cdecl FUN_0044ddc0();
 
 struct FUN_0047b470_This
 {
-    bool FUN_0047b470();
+    bool bhkCollisionObject_GetUseVelocity();
 };
 struct ThisStub
 {
-    void FUN_00493bd0();
+    void Animation_UpdateSceneGraphNoController();
 };
 struct FUN_00639aa0_shell
 {
-    float FUN_00639aa0();
+    float TESCombatStyle_GetTargetingFOV();
 };
 struct FUN_0098adb0_shell
 {
-    void FUN_0098adb0(float a);
+    void PathingLOSGridMap_SetSightRadius(float a);
 };
 struct HX
 {
-    void FUN_004efd10(BGSLoadFormBuffer* a, float b);
+    void LoadGameBGS_004efd10(BGSLoadFormBuffer* a, float b);
 };
 struct FUN_004eeb00
 {
@@ -2325,11 +2361,11 @@ struct FUN_005ae3d0_S
     void FUN_005ae3d0(ExtraDataList** a);
 };
 extern PlayerCharacter* g_thePlayer;
-TESForm* __cdecl FUN_004839c0(unsigned int a);
-MyNode* __cdecl FUN_00c802d0(MyNode* a);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int a);
+MyNode* __cdecl bhkUtilFunctions_FindNextCollisionObject(MyNode* a);
 void __cdecl SetFlagRecursive(int a, void* b);
 void __fastcall FinishScriptRunLockIfActive(void* a);
-void __fastcall FUN_00498290(Animation* a);
+void __fastcall SpecialIdlePlay_0(Animation* a);
 void* __cdecl operator new(unsigned int);
 struct AnimPosition
 {
@@ -2391,11 +2427,11 @@ struct AnimSelf
     int m_130;
     FUN_005ae3d0_S m_134;
     bool AddAnimation(KFModel* a, bool b);
-    void FUN_004955c0(int a, int b, int c, float d, int e);
-    void FUN_004974a0();
-    void FUN_00496080(int a, float b);
-    void FUN_00496280();
-    void FUN_0049bca0(float a, void* b, int c);
+    void Animation_ForceSection(int a, int b, int c, float d, int e);
+    void Animation_SkipNextBlend();
+    void Animation_ClearGroup(int a, float b);
+    void Animation_ZeroGlobalTransform();
+    void Animation_UpdateBipOnly(float a, void* b, int c);
     void __thiscall Load(BGSLoadFormBuffer* buf);
 };
 
@@ -2403,7 +2439,7 @@ struct AnimSelf
 // @fnv 0x0049b050
 void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
 {
-    if (m_08.FUN_00559450() == 0)
+    if (m_08.Modelloader_GetReferencedThis() == 0)
         return;
     bool actor2;
     short groupA5;
@@ -2419,16 +2455,16 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
     }
     owner6->GetProcess()->AssignAnimation(owner6, (Animation*)this);
     if (owner6->HasHealth(0) || owner6->GetIsDying())
-        FUN_004955c0(0x14, 0xe0, -1, 0.0f, -1);
+        Animation_ForceSection(0x14, 0xe0, -1, 0.0f, -1);
     {
         actor2 = owner6->GetProcess()->IsAdditionalActorFlagSet();
-        FUN_004974a0();
+        Animation_SkipNextBlend();
         if (owner6 == (Actor*)g_thePlayer)
         {
             if ((Animation*)this == g_thePlayer->GetAnimation(1))
-                owner6->GetProcess()->PlayAnimation(actor2, (BipedAnim*)g_thePlayer->FUN_00950b00(1), (Animation*)this, g_thePlayer);
+                owner6->GetProcess()->PlayAnimation(actor2, (BipedAnim*)g_thePlayer->GetBiped(1), (Animation*)this, g_thePlayer);
             else
-                g_thePlayer->GetProcess()->PlayAnimation(actor2, (BipedAnim*)g_thePlayer->FUN_00950b00(0), (Animation*)this, g_thePlayer);
+                g_thePlayer->GetProcess()->PlayAnimation(actor2, (BipedAnim*)g_thePlayer->GetBiped(0), (Animation*)this, g_thePlayer);
         }
         else
         {
@@ -2444,40 +2480,40 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
         {
             if (m_e0[bProc] != 0)
             {
-                float ftmp = ((FUN_00639aa0_shell*)m_e0[bProc])->FUN_00639aa0();
+                float ftmp = ((FUN_00639aa0_shell*)m_e0[bProc])->TESCombatStyle_GetTargetingFOV();
                 ((FUN_0098adb0_shell*)m_e0[bProc])
-                    ->FUN_0098adb0(((FUN_00508100_shell*)m_e0[bProc])->FUN_00508100() + ftmp);
+                    ->PathingLOSGridMap_SetSightRadius(((FUN_00508100_shell*)m_e0[bProc])->GetEndKeyTime_00508100() + ftmp);
             }
         }
     }
-    FUN_0049bca0(m_d0, &m_1c, 1);
-    ((FUN_004f0040_shell*)m_08.FUN_00559450())->UpdateControls(m_d0);
-    MyNode* node9 = FUN_00c802d0((MyNode*)m_08.FUN_00559450());
-    unsigned char valid6 = node9 != 0 ? ((FUN_0047b470_This*)node9)->FUN_0047b470() : false;
+    Animation_UpdateBipOnly(m_d0, &m_1c, 1);
+    ((FUN_004f0040_shell*)m_08.Modelloader_GetReferencedThis())->UpdateControls(m_d0);
+    MyNode* node9 = bhkUtilFunctions_FindNextCollisionObject((MyNode*)m_08.Modelloader_GetReferencedThis());
+    unsigned char valid6 = node9 != 0 ? ((FUN_0047b470_This*)node9)->bhkCollisionObject_GetUseVelocity() : false;
     if (valid6)
-        SetFlagRecursive(0, m_08.FUN_00559450());
-    ((ThisStub*)this)->FUN_00493bd0();
+        SetFlagRecursive(0, m_08.Modelloader_GetReferencedThis());
+    ((ThisStub*)this)->Animation_UpdateSceneGraphNoController();
     if (valid6)
-        SetFlagRecursive(valid6, m_08.FUN_00559450());
-    FUN_00496080(0x14, 0.0f);
-    FUN_00496280();
-    if (m_d8.FUN_00559450() != 0)
-        ((F48fef0*)m_d8.FUN_00559450())->FUN_0048fef0(0.0f);
-    apBuffer->FUN_00864980(&m_10c, 4);
-    apBuffer->FUN_00864980(&m_110, 4);
-    apBuffer->FUN_00864980(&m_10, 0xc);
-    apBuffer->FUN_00864980(&m_48, 4);
-    apBuffer->FUN_00864980(&m_cc, 1);
-    apBuffer->FUN_00864980(&m_d4, 4);
-    apBuffer->FUN_00864980(&m_122, 2);
+        SetFlagRecursive(valid6, m_08.Modelloader_GetReferencedThis());
+    Animation_ClearGroup(0x14, 0.0f);
+    Animation_ZeroGlobalTransform();
+    if (m_d8.Modelloader_GetReferencedThis() != 0)
+        ((F48fef0*)m_d8.Modelloader_GetReferencedThis())->FUN_0048fef0(0.0f);
+    apBuffer->LoadData(&m_10c, 4);
+    apBuffer->LoadData(&m_110, 4);
+    apBuffer->LoadData(&m_10, 0xc);
+    apBuffer->LoadData(&m_48, 4);
+    apBuffer->LoadData(&m_cc, 1);
+    apBuffer->LoadData(&m_d4, 4);
+    apBuffer->LoadData(&m_122, 2);
     {
         int count = apBuffer->FUN_00864a60();
         unsigned int j;
         for (j = 0; j < (unsigned int)count; j++)
         {
             LoadedIdle* rawNew = new LoadedIdle;
-            rawNew->idle = dynamic_cast<TESIdleForm*>(FUN_004839c0(apBuffer->FUN_008648a0()));
-            apBuffer->FUN_00864980(&rawNew->value, 4);
+            rawNew->idle = dynamic_cast<TESIdleForm*>(TESForm_GetFormByNumericID(apBuffer->FUN_008648a0()));
+            apBuffer->LoadData(&rawNew->value, 4);
             m_134.FUN_005ae3d0((ExtraDataList**)&rawNew);
         }
     }
@@ -2490,7 +2526,7 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
     }
     else if (formA5 != 0)
     {
-        formA5 = formA5 != 0 ? (int)dynamic_cast<TESIdleForm*>(FUN_004839c0((unsigned int)formA5)) : 0;
+        formA5 = formA5 != 0 ? (int)dynamic_cast<TESIdleForm*>(TESForm_GetFormByNumericID((unsigned int)formA5)) : 0;
         if (formA5 == 0)
         {
             apBuffer->AddToOffset(apBuffer->FUN_00864a60());
@@ -2499,70 +2535,70 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
         {
             apBuffer->FUN_00864a60();
             m_124 = new IdleAnimationConstruction((TESIdleForm*)formA5, 7, 1, owner6, 1, (Animation*)0);
-            ((F497c10*)((PtrBox*)&m_124)->FUN_00559450())->LoadAnimationData(apBuffer, this);
+            ((F497c10*)((PtrBox*)&m_124)->Modelloader_GetReferencedThis())->LoadAnimationData(apBuffer, this);
         }
     }
     char maskTmp;
     maskTmp = 0;
-    apBuffer->FUN_00864980(&maskTmp, 1);
+    apBuffer->LoadData(&maskTmp, 1);
     {
         unsigned int k;
         for (k = 0; k < 8; k++)
         {
             if (maskTmp & (1 << k))
             {
-                apBuffer->FUN_00864980(&m_4c[k], 2);
-                apBuffer->FUN_00864980(&m_5c[k], 4);
-                apBuffer->FUN_00864980(&m_9c[k], 2);
-                apBuffer->FUN_00864980(&m_7c[k], 4);
-                apBuffer->FUN_00864980(&m_ac[k], 4);
+                apBuffer->LoadData(&m_4c[k], 2);
+                apBuffer->LoadData(&m_5c[k], 4);
+                apBuffer->LoadData(&m_9c[k], 2);
+                apBuffer->LoadData(&m_7c[k], 4);
+                apBuffer->LoadData(&m_ac[k], 4);
                 m_e0[k] = 0;
                 char b49;
                 b49 = -1;
-                apBuffer->FUN_00864980(&b49, 1);
+                apBuffer->LoadData(&b49, 1);
                 if (b49 != -2)
                 {
-                    FUN_004974a0();
-                    FUN_004955c0(k, m_4c[k], m_5c[k], m_d0, (unsigned char)b49);
+                    Animation_SkipNextBlend();
+                    Animation_ForceSection(k, m_4c[k], m_5c[k], m_d0, (unsigned char)b49);
                     if (m_e0[k] != 0)
                     {
-                        m_e0[k]->FUN_004efd10(apBuffer, m_d0);
+                        m_e0[k]->LoadGameBGS_004efd10(apBuffer, m_d0);
                     }
                     else
                     {
                         FUN_004eeb00 obj;
-                        ((HX*)&obj)->FUN_004efd10(apBuffer, m_d0);
-                        FUN_00496080(k, 0.0f);
+                        ((HX*)&obj)->LoadGameBGS_004efd10(apBuffer, m_d0);
+                        Animation_ClearGroup(k, 0.0f);
                     }
                 }
             }
         }
     }
-    apBuffer->FUN_00864980(&m_120, 1);
+    apBuffer->LoadData(&m_120, 1);
     {
         groupA5 = -1;
         slotX = -1;
-        apBuffer->FUN_00864980(&groupA5, 2);
-        apBuffer->FUN_00864980(&slotX, 1);
+        apBuffer->LoadData(&groupA5, 2);
+        apBuffer->LoadData(&slotX, 1);
         if (slotX != -1 && m_e0[slotX] != 0)
             owner6->GetProcess()->SetAnimAction((ProcessAnimationAction)groupA5, (BSAnimGroupSequence*)m_e0[slotX]);
     }
     {
         slot7 = -1;
-        apBuffer->FUN_00864980(&slot7, 1);
-        if (((PtrBox*)&m_124)->FUN_00559450() != 0)
+        apBuffer->LoadData(&slot7, 1);
+        if (((PtrBox*)&m_124)->Modelloader_GetReferencedThis() != 0)
         {
             if (slot7 != -1)
-                ((FUN_004970e0_shell*)((PtrBox*)&m_124)->FUN_00559450())->AssignGO(m_e0[slot7]);
-            if (((unsigned int (__thiscall*)(void*))FUN_0044ddc0)(((PtrBox*)&m_124)->FUN_00559450()) == 1)
+                ((FUN_004970e0_shell*)((PtrBox*)&m_124)->Modelloader_GetReferencedThis())->AssignGO(m_e0[slot7]);
+            if (((unsigned int (__thiscall*)(void*))FUN_0044ddc0)(((PtrBox*)&m_124)->Modelloader_GetReferencedThis()) == 1)
             {
-                FUN_004974a0();
-                FUN_00498290((Animation*)this);
+                Animation_SkipNextBlend();
+                SpecialIdlePlay_0((Animation*)this);
             }
         }
     }
-    FUN_0049bca0(m_d0, &m_1c, 1);
-    ((FUN_004f0040_shell*)m_08.FUN_00559450())->UpdateControls(m_d0);
+    Animation_UpdateBipOnly(m_d0, &m_1c, 1);
+    ((FUN_004f0040_shell*)m_08.Modelloader_GetReferencedThis())->UpdateControls(m_d0);
 }
 
 struct ArrElem12
@@ -2588,12 +2624,13 @@ struct ArrElem12Array
     void FreeData();
     void Append(const ArrElem12& item);
 
-    void FUN_0049f270(unsigned int index, const ArrElem12& item);
+    void InsertItemWithGrowth(unsigned int index, const ArrElem12& item);
 };
 
 // Inserts item at index, growing the array if full and shifting existing elements right; appends when index equals the count.
 // @fnv 0x0049f270
-void ArrElem12Array::FUN_0049f270(unsigned int index, const ArrElem12& item)
+// src: GUESS 0x0049f270 (confidence: high)
+void ArrElem12Array::InsertItemWithGrowth(unsigned int index, const ArrElem12& item)
 {
     if (index == m_iElementCount)
     {
@@ -2622,7 +2659,7 @@ void ArrElem12Array::FUN_0049f270(unsigned int index, const ArrElem12& item)
 
 struct FUN_00659210_Class
 {
-    int FUN_00659210(char c, int h);
+    int NiTStringTemplateMap_NiTMap_char_const_TESForm_TESForm_HashChar(char c, int h);
 };
 struct FUN_00486df0_Map : FUN_00659210_Class
 {
@@ -2636,7 +2673,7 @@ unsigned int FUN_00486df0_Map::HashString(const char* pcString)
 {
     unsigned int h = 0;
     while (*pcString)
-        h = FUN_00659210(*pcString++, h);
+        h = NiTStringTemplateMap_NiTMap_char_const_TESForm_TESForm_HashChar(*pcString++, h);
     return h % m_uiSize;
 }
 
@@ -2732,7 +2769,7 @@ void AnimDataN::SaveAnimData(BGSSaveFormBuffer* pBuffer)
     pBuffer->SaveData(&m_us122, 2, 0);
 
     int iCountTmp = 0;
-    unsigned int uiCountPos_ = pBuffer->FUN_00865f20();
+    unsigned int uiCountPos_ = pBuffer->StartVariableSizedValue();
     ListN* pIter = &m_kList;
     while (pIter)
     {
@@ -2745,17 +2782,17 @@ void AnimDataN::SaveAnimData(BGSSaveFormBuffer* pBuffer)
         }
         pIter = pIter->GetNext();
     }
-    pBuffer->FUN_00865ff0(iCountTmp, uiCountPos_);
+    pBuffer->SaveVariableSizedValue_00865ff0(iCountTmp, uiCountPos_);
 
     SeqN* pSequence = m_spSeq128 ? m_spSeq128 : m_spSeq124;
     pBuffer->SerializeFormData(pSequence ? pSequence->GetIdle() : 0, 0);
     if (pSequence && pSequence->GetIdle())
     {
-        unsigned int uiPosition = pBuffer->FUN_00865f20();
-        unsigned int uiStartSize = pBuffer->FUN_0084e3a0();
+        unsigned int uiPosition = pBuffer->StartVariableSizedValue();
+        unsigned int uiStartSize = pBuffer->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         pSequence->SaveSequence(pBuffer, this);
-        unsigned int uiEnd = pBuffer->FUN_0084e3a0();
-        pBuffer->FUN_00865ff0(uiEnd - uiStartSize, uiPosition);
+        unsigned int uiEnd = pBuffer->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        pBuffer->SaveVariableSizedValue_00865ff0(uiEnd - uiStartSize, uiPosition);
     }
 
     GroupSeqN* pBlend = 0;
@@ -2815,12 +2852,13 @@ struct ActorAnimDataAA8
     void WriteToStream(Actor* pkActor);
 };
 // @fnv 0x0049aa80
-void __cdecl FUN_0049aa80(Actor* pkActor, ActorAnimDataAA8* pkAnimData)
+// src: COMMUNITY 0x0049aa80
+void __cdecl Animation_SaveAnimation(Actor* pkActor, ActorAnimDataAA8* pkAnimData)
 {
     unsigned short usAnimValue = 0;
     if (pkAnimData && !pkActor->HasHealth(0))
         usAnimValue = pkAnimData->GetSerializedSize(pkActor);
-    g_TESSaveLoadGame->FUN_008579b0(&usAnimValue, 2u);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&usAnimValue, 2u);
     if (pkAnimData && !pkActor->HasHealth(0))
         pkAnimData->WriteToStream(pkActor);
 }
@@ -2861,12 +2899,12 @@ class FUN_0049ec80 : public FUN_00439260
     unsigned int m_uiCount;
     int m_iIndex;
     FUN_0049ec80();
-    void FUN_0049ed90(int a);
-    void FUN_0049edb0(int a);
-    void FUN_00533fb0(int a);
-    void FUN_0049ee10(int a);
+    void NiAlphaProperty_SetAlphaBlending(int a);
+    void NiStencilProperty_SetStencilFunction(int a);
+    void NiStencilProperty_SetStencilFailAction(int a);
+    void NiStencilProperty_SetStencilPassZFailAction(int a);
     void FUN_0049ede0(int a);
-    void FUN_0049ee30(int a);
+    void NiStencilProperty_SetDrawMode(int a);
 };
 // Constructor that sets the vtable, initialises m_usFlags, m_uiCount and m_iIndex, then calls the member initialisers.
 // @fnv 0x0049ec80
@@ -2876,12 +2914,12 @@ FUN_0049ec80::FUN_0049ec80()
     m_usFlags = 0;
     m_uiCount = 0;
     m_iIndex = -1;
-    FUN_0049ed90(0);
-    FUN_0049edb0(4);
-    FUN_00533fb0(0);
-    FUN_0049ee10(0);
+    NiAlphaProperty_SetAlphaBlending(0);
+    NiStencilProperty_SetStencilFunction(4);
+    NiStencilProperty_SetStencilFailAction(0);
+    NiStencilProperty_SetStencilPassZFailAction(0);
     FUN_0049ede0(3);
-    FUN_0049ee30(0);
+    NiStencilProperty_SetDrawMode(0);
 }
 
 #include "../../include/MEM_CONTEXT.h"
@@ -2895,22 +2933,22 @@ struct PointChain
     unsigned int size;
     unsigned int capacity;
     unsigned int FUN_0044ddc0();
-    NiPoint3& FUN_006a7af0(int);
-    NiPoint3& FUN_006ced70();
+    NiPoint3& BSSimpleArray_NiPoint3_1024_GetAt(int);
+    NiPoint3& BSSimpleArray_NiPoint3_1024_GetFirst();
     NiPoint3& GetLastEdge();
     void AddItem(const NiPoint3&);
-    void FUN_0049f270(unsigned int, const NiPoint3&);
-    void FUN_0049f3c0(unsigned int, unsigned int, bool);
+    void InsertItemWithGrowth(unsigned int, const NiPoint3&);
+    void BSSimpleArray_NiPoint3_1024_RemoveRange(unsigned int, unsigned int, bool);
 };
 extern PointChain* DAT_011c57ac;
 struct LandView
 {
-    NiPoint3 FUN_00535b30(int);
+    NiPoint3 TESObjectLAND_GetWorldOffsetForBlock(int);
 };
 struct CellView
 {
-    float FUN_005471e0();
-    LandView* FUN_00546fb0();
+    float TESObjectCELL_GetWaterHeight();
+    LandView* TESObjectCELL_GetLand();
 };
 struct FUN_00c4cba0
 {
@@ -2918,8 +2956,8 @@ struct FUN_00c4cba0
     int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     FUN_00c4cba0(PointChain*);
     int FUN_0059bb30();
-    void FUN_00c4cf00();
-    void FUN_00c4cf80();
+    void BSPolygon2D_RemoveZ();
+    void BSPolygon2D_Triangulate();
 };
 class FUN_0049e3e0
 {
@@ -2932,8 +2970,8 @@ struct FUN_0048f200
     void* tail;
     unsigned int count;
     FUN_0048f200();
-    void FUN_0076b660(FUN_00c4cba0**);
-    void* FUN_00559450();
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddHead(FUN_00c4cba0**);
+    void* Modelloader_GetReferencedThis();
     void* DereferenceIfNotNull(void*);
     FUN_00c4cba0*& AddEight(void*);
     FUN_00c4cba0* FUN_0049f590(void*&);
@@ -2950,9 +2988,9 @@ void __cdecl BuildWaterSurfaces(CellView* cell)
     while (DAT_011c57ac->FUN_0044ddc0() > 0)
     {
         PointChain* chainX = (PointChain*)new FUN_0049f1c0;
-        chainX->AddItem(DAT_011c57ac->FUN_006a7af0(0));
-        chainX->AddItem(DAT_011c57ac->FUN_006a7af0(1));
-        DAT_011c57ac->FUN_0049f3c0(0, 2, true);
+        chainX->AddItem(DAT_011c57ac->BSSimpleArray_NiPoint3_1024_GetAt(0));
+        chainX->AddItem(DAT_011c57ac->BSSimpleArray_NiPoint3_1024_GetAt(1));
+        DAT_011c57ac->BSSimpleArray_NiPoint3_1024_RemoveRange(0, 2, true);
         bool changed3 = true;
         bool closed2 = false;
         while (changed3)
@@ -2962,47 +3000,47 @@ void __cdecl BuildWaterSurfaces(CellView* cell)
             while (i3 < (int)DAT_011c57ac->FUN_0044ddc0())
             {
                 // Copy the point representation without invoking the shared copy constructor.
-                Point3N b = *reinterpret_cast<Point3N*>(&DAT_011c57ac->FUN_006a7af0(i3));
-                Point3N a = *reinterpret_cast<Point3N*>(&DAT_011c57ac->FUN_006a7af0(i3 + 1));
+                Point3N b = *reinterpret_cast<Point3N*>(&DAT_011c57ac->BSSimpleArray_NiPoint3_1024_GetAt(i3));
+                Point3N a = *reinterpret_cast<Point3N*>(&DAT_011c57ac->BSSimpleArray_NiPoint3_1024_GetAt(i3 + 1));
                 if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->GetLastEdge(), DAT_01013ea4) &&
-                    !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006ced70(), DAT_01013ea4) &&
-                    !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006a7af0(chainX->FUN_0044ddc0() - 2), DAT_01013ea4))
+                    !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->BSSimpleArray_NiPoint3_1024_GetFirst(), DAT_01013ea4) &&
+                    !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->BSSimpleArray_NiPoint3_1024_GetAt(chainX->FUN_0044ddc0() - 2), DAT_01013ea4))
                 {
                     chainX->AddItem(reinterpret_cast<const NiPoint3&>(a));
-                    DAT_011c57ac->FUN_0049f3c0(i3, 2, true);
+                    DAT_011c57ac->BSSimpleArray_NiPoint3_1024_RemoveRange(i3, 2, true);
                     changed3 = true;
                     break;
                 }
                 else if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->GetLastEdge(), DAT_01013ea4) &&
-                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006ced70(), DAT_01013ea4) &&
-                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006a7af0(chainX->FUN_0044ddc0() - 2), DAT_01013ea4))
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->BSSimpleArray_NiPoint3_1024_GetFirst(), DAT_01013ea4) &&
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->BSSimpleArray_NiPoint3_1024_GetAt(chainX->FUN_0044ddc0() - 2), DAT_01013ea4))
                 {
                     chainX->AddItem(reinterpret_cast<const NiPoint3&>(b));
-                    DAT_011c57ac->FUN_0049f3c0(i3, 2, true);
+                    DAT_011c57ac->BSSimpleArray_NiPoint3_1024_RemoveRange(i3, 2, true);
                     changed3 = true;
                     break;
                 }
-                else if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006ced70(), DAT_01013ea4) &&
+                else if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->BSSimpleArray_NiPoint3_1024_GetFirst(), DAT_01013ea4) &&
                          !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->GetLastEdge(), DAT_01013ea4) &&
-                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006a7af0(1), DAT_01013ea4))
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->BSSimpleArray_NiPoint3_1024_GetAt(1), DAT_01013ea4))
                 {
-                    chainX->FUN_0049f270(0, reinterpret_cast<const NiPoint3&>(a));
-                    DAT_011c57ac->FUN_0049f3c0(i3, 2, true);
+                    chainX->InsertItemWithGrowth(0, reinterpret_cast<const NiPoint3&>(a));
+                    DAT_011c57ac->BSSimpleArray_NiPoint3_1024_RemoveRange(i3, 2, true);
                     changed3 = true;
                     break;
                 }
-                else if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006ced70(), DAT_01013ea4) &&
+                else if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->BSSimpleArray_NiPoint3_1024_GetFirst(), DAT_01013ea4) &&
                          !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->GetLastEdge(), DAT_01013ea4) &&
-                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006a7af0(1), DAT_01013ea4))
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->BSSimpleArray_NiPoint3_1024_GetAt(1), DAT_01013ea4))
                 {
-                    chainX->FUN_0049f270(0, reinterpret_cast<const NiPoint3&>(b));
-                    DAT_011c57ac->FUN_0049f3c0(i3, 2, true);
+                    chainX->InsertItemWithGrowth(0, reinterpret_cast<const NiPoint3&>(b));
+                    DAT_011c57ac->BSSimpleArray_NiPoint3_1024_RemoveRange(i3, 2, true);
                     changed3 = true;
                     break;
                 }
                 else if ((AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->GetLastEdge(), DAT_01013ea4) &&
-                          AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006ced70(), DAT_01013ea4)) ||
-                         (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006ced70(), DAT_01013ea4) &&
+                          AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->BSSimpleArray_NiPoint3_1024_GetFirst(), DAT_01013ea4)) ||
+                         (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->BSSimpleArray_NiPoint3_1024_GetFirst(), DAT_01013ea4) &&
                           AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->GetLastEdge(), DAT_01013ea4)))
                 {
                     closed2 = true;
@@ -3015,18 +3053,18 @@ void __cdecl BuildWaterSurfaces(CellView* cell)
             }
         }
         const int level3 = 0;
-        NiPoint3 originX(cell->FUN_00546fb0()->FUN_00535b30(level3).x, cell->FUN_00546fb0()->FUN_00535b30(level3).y,
-                         cell->FUN_005471e0());
+        NiPoint3 originX(cell->TESObjectCELL_GetLand()->TESObjectLAND_GetWorldOffsetForBlock(level3).x, cell->TESObjectCELL_GetLand()->TESObjectLAND_GetWorldOffsetForBlock(level3).y,
+                         cell->TESObjectCELL_GetWaterHeight());
         if (closed2)
         {
             FUN_00c4cba0* surface2 = new FUN_00c4cba0(chainX);
             if (surface2->FUN_0059bb30() > 2)
             {
-                surface2->FUN_00c4cf00();
-                surface2->FUN_00c4cf80();
+                surface2->BSPolygon2D_RemoveZ();
+                surface2->BSPolygon2D_Triangulate();
                 if (!DAT_011c57b0)
                     DAT_011c57b0 = new FUN_0048f200;
-                DAT_011c57b0->FUN_0076b660(&surface2);
+                DAT_011c57b0->NiTPointerListBase_NiTPointerAllocator_unsigned_int_unsigned_int_AddHead(&surface2);
             }
             else
             {
@@ -3040,7 +3078,7 @@ void __cdecl BuildWaterSurfaces(CellView* cell)
     }
     if (DAT_011c57b0)
     {
-        void* pos3 = DAT_011c57b0->FUN_00559450();
+        void* pos3 = DAT_011c57b0->Modelloader_GetReferencedThis();
         void* next3 = 0;
         while (pos3)
         {
@@ -3048,7 +3086,7 @@ void __cdecl BuildWaterSurfaces(CellView* cell)
             if (pos3)
             {
                 FUN_00c4cba0* other3 = DAT_011c57b0->AddEight(pos3);
-                void* otherNextX = DAT_011c57b0->FUN_00559450();
+                void* otherNextX = DAT_011c57b0->Modelloader_GetReferencedThis();
                 void* a = 0;
                 while (otherNextX)
                 {
@@ -3191,7 +3229,7 @@ struct FNV_Member08
     int unk00;
     int unk04;
     int unk08;
-    void FUN_004a4650();
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_NiPointer_BSMultiBoundRoom_RemoveAll();
     ~FNV_Member08();
 };
 
@@ -3215,15 +3253,15 @@ struct FUN_0049fe20_Object : FNV_Handle
 };
 
 extern FNV_Handle g_011c58e0;
-void __cdecl FUN_00622bc0();
+void __cdecl DecalCaster_ClearInstance();
 
 // Calls FUN_00622bc0, sets g_011c58e0 to 0, calls FUN_004a4650 on m_08 and FUN_004ed900 on m_14, then sets m_20 and m_24 to 0.
 // @fnv 0x0049fe20
 FUN_0049fe20_Object::~FUN_0049fe20_Object()
 {
-    FUN_00622bc0();
+    DecalCaster_ClearInstance();
     g_011c58e0 = 0;
-    m_08.FUN_004a4650();
+    m_08.NiTPointerListBase_NiTPointerAllocator_unsigned_int_NiPointer_BSMultiBoundRoom_RemoveAll();
     m_14.FUN_004ed900();
     m_20 = 0;
     m_24 = 0;
@@ -3272,7 +3310,8 @@ extern "C" const char* __cdecl FUN_00481280();
 
 // Returns the message icon string for a biped model form, optionally selecting the variant matching the sex of the given reference's owner.
 // @fnv 0x00480f80
-const char* __cdecl FUN_00480f80(TESForm* form, TESObjectREFR* ref)
+// src: COMMUNITY 0x00480f80
+const char* __cdecl TESBipedModelForm_GetMessageIcon_0(TESForm* form, TESObjectREFR* ref)
 {
     TESBipedModelForm* pOwner = dynamic_cast<TESBipedModelForm*>(form);
 

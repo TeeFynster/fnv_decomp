@@ -16,7 +16,7 @@ struct Global
     int unk0c;
     Allocator* allocator;
 };
-extern "C" Global* __cdecl FUN_00c85750();
+extern "C" Global* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00dfe4b0_Class
 {
     int vtable;
@@ -34,7 +34,7 @@ void* FUN_00dfe4b0_Class::DestroyOrReturnSelf(unsigned char flags)
     ClearItems();
     if (flags & 1)
     {
-        Global* global = FUN_00c85750();
+        Global* global = hkMemoryRouter_getInstance();
         global->allocator->deallocate(this, size);
     }
     return this;

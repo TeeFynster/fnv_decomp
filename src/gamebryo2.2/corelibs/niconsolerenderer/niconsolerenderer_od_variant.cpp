@@ -141,32 +141,32 @@ extern const char DAT_010eec18[];
 extern const char DAT_010eec28[];
 extern const char DAT_010eec38[];
 extern "C" void* g_011f4430;
-void* __cdecl FUN_00a5f200();
+void* __cdecl NiVertexColorProperty_GetRTTI();
 extern "C" int g_011f443c;
-int __cdecl FUN_00a5f4f0();
-int __cdecl FUN_00a5f500();
-int __cdecl FUN_00dc9e60();
+int __cdecl NiZBufferProperty_GetRTTI();
+int __cdecl NiZBufferProperty_GetType_0();
+int __cdecl Object_ComputeValue_00dc9e60();
 struct NiDX9Renderer
 {
     unsigned int pad[0x228];
     unsigned int m_8a0;
-    unsigned int __thiscall FUN_00e695e0();
+    unsigned int __thiscall NiDX9Renderer_GetMaxBuffersPerRenderTargetGroup();
 };
 struct FUN_00e695f0_shell
 {
     char pad[0x8a4];
     unsigned char flag;
-    unsigned char FUN_00e695f0();
+    unsigned char NiDX9Renderer_GetIndependentBufferBitDepths();
 };
 struct FUN_00e69600_shell
 {
-    unsigned int __thiscall FUN_00e69600();
+    unsigned int __thiscall NiDX9Renderer_GetDefaultRenderTargetGroup();
 };
 struct FUN_00e69900_shell
 {
     void SetTwoValues(unsigned int a, unsigned int b);
 };
-void FUN_00e69ad0(const char* path);
+void NiDX9Renderer_SetLastErrorString(const char* path);
 struct FUN_00e69b40_shell
 {
     unsigned int pad[8];
@@ -194,9 +194,9 @@ struct NiWorldToSkin
 void __cdecl BuildWorldToSkinTransform(NiWorldToSkin* out, const NiTransform* kWorldToRootParent,
                                        const NiPoint3* kIntersectionOffset, float fScale);
 extern int DAT_0126efc0;
-bool __stdcall FUN_00e6c760(int value);
-void __cdecl FUN_00aa1110(void*);
-void __stdcall FUN_00e6d740(void* a1);
+bool __stdcall NiDX9Renderer_SetMipmapSkipLevel(int value);
+void __cdecl _NiAlignedFree(void*);
+void __stdcall NiDX9Renderer_PurgeSkinInstance(void* a1);
 extern RecursiveSpinLock g_011c5f80;
 extern unsigned int DAT_011c5f84;
 struct LinkedListEntry
@@ -205,7 +205,7 @@ struct LinkedListEntry
     LinkedListEntry* prev;
     char* data;
 };
-void __stdcall FUN_00e6e8a0(LinkedListEntry* a);
+void __stdcall NiTPointerListBase_DeleteItem(LinkedListEntry* a);
 struct NiTMapBase_StandIn
 {
     void RemoveAll();
@@ -233,11 +233,11 @@ struct FUN_00e72e50_shell
     void* __thiscall FUN_00e72e50();
 };
 extern "C" void* g_0126f0f0;
-void* __cdecl FUN_00e757b0();
+void* __cdecl NiDX9Renderer_GetRTTI();
 struct FUN_00e757c0_shell
 {
     unsigned char* data;
-    unsigned char FUN_00e757c0();
+    unsigned char NiDX9Renderer_IsVerticalDisplay();
 };
 struct FUN_00e75830_shell : GraphicsRenderer
 {
@@ -247,13 +247,13 @@ struct FUN_00e75840_shell
 {
     unsigned int pad[0x5e0 / 4];
     unsigned int color;
-    void FUN_00e75840(float* param);
+    void NiDX9Renderer_SetBackgroundColor(float* param);
 };
 extern "C" void* g_01270900;
-void* __cdecl FUN_00e766f0();
+void* __cdecl NiShaderDeclaration_GetRTTI();
 struct FUN_00e758f0_shell
 {
     void PackColorToUInt(float* floats);
 };
 extern int DAT_0126f580[];
-void __cdecl FUN_00e7cc50(int* param1, int param2);
+void __cdecl NiDX92DBufferData_ClearRenderTarget(int* param1, int param2);

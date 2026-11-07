@@ -38,16 +38,16 @@ public:
     hkpStorageExtendedMeshShape(const hkpExtendedMeshShape* mesh) throw();
     virtual ~hkpStorageExtendedMeshShape() throw();
 
-    virtual void FUN_00d4a2b0(SourceArg sourceArg);
-    virtual int FUN_00d49dc0(const TrianglesSubpart& partIn);
+    virtual void addTrianglesSubpart(SourceArg sourceArg);
+    virtual int addShapesSubpart(const TrianglesSubpart& partIn);
 
-    Subpart* FUN_00d562f0();
+    Subpart* hkpExtendedMeshShape_expandOneTriangleSubparts();
     TrianglesSubpart* AppendElement();
-    void FUN_00d55950();
+    void hkpExtendedMeshShape_recalcAabbExtents();
     int Vec4(Subpart* part, int index);
-    int FUN_00d55520(TrianglesSubpart& part);
-    void FUN_00d4a2b0(const Subpart& part) throw();
-    void FUN_00d49dc0(const ShapesSubpart& part) throw();
+    int hkpExtendedMeshShape__getNumChildShapesInShapesSubpart(TrianglesSubpart& part);
+    void addTrianglesSubpart(const Subpart& part) throw();
+    void addShapesSubpart(const ShapesSubpart& part) throw();
 
     unsigned char unk18[0x68];
     hkVector4 m_kAabbHalfExtents;

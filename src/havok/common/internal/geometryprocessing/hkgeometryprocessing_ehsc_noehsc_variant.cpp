@@ -12,18 +12,18 @@ struct FUN_00dee620
     void* m_pVTable;
     __thiscall FUN_00dee620(int testFlag);
 };
-extern "C" void __cdecl FUN_00dedf10(void*, void*, void*, void*, int, int);
-void __cdecl FUN_00dee5f0(void* first, void* second, void* third, void* fourth);
+extern "C" void __cdecl hkVector4_ProcessEntries_00dedf10(void*, void*, void*, void*, int, int);
+void __cdecl hkGeometryProcessing_generateRandomDistribution(void* first, void* second, void* third, void* fourth);
 struct FUN_00dee6b0_Class
 {
     int unk00;
     float unk04;
-    float FUN_00dee6b0(int testFlag);
+    float GetUnk04(int testFlag);
 };
 extern int DAT_010cd664;
 #include "../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../include/hkMemoryRouter.h"
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
@@ -96,7 +96,7 @@ struct hkVector4
     }
 };
 extern const hkVector4 DAT_010c7160;
-float __cdecl FUN_00de94b0(const hkVector4& a, const hkVector4& b, const hkVector4& c, float* out);
+float __cdecl hkVector4_GetPointSegmentSquaredDistance(const hkVector4& a, const hkVector4& b, const hkVector4& c, float* out);
 extern __m128 DAT_010c71d0;
 struct FUN_00dee640_cls
 {
@@ -201,7 +201,7 @@ struct Sub08_cls
 };
 struct Sub20_cls
 {
-    Triangle* FUN_00e241a0(Triangle* node);
+    Triangle* UpdateFields_00e241a0(Triangle* node);
 };
 struct FUN_00e19200_cls
 {
@@ -209,7 +209,7 @@ struct FUN_00e19200_cls
     unsigned int unk04;
     Sub08_cls m_08;
     Sub20_cls m_20;
-    void FUN_00e19200(Triangle* a, const __m128* b, int c);
+    void SplitTriangleWithNewVertex(Triangle* a, const __m128* b, int c);
 };
 extern "C"
 {
@@ -262,12 +262,12 @@ struct CubeBox
         dst.scale(DAT_010c71d0);
     }
 };
-void __cdecl FUN_00de9590(CubeBox* box);
+void __cdecl Hkgeometryprocessing_GetCubeBoundsFromLargestExtent(CubeBox* box);
 #include <math.h>
 extern const float DAT_0104da4c = 1.1920928955078125e-7f;
 extern float DAT_0104da48;
 extern "C" __m128 _mm_sqrt_ss(__m128);
 extern "C" __m128 _mm_set_ps1(float);
 extern "C" __m128 _mm_load_ss(const float*);
-float __cdecl FUN_00dea450(const hkVector4& firstStart, const hkVector4& firstEnd, const hkVector4& secondStart,
+float __cdecl hkVector4_GetClosestSegmentParameters(const hkVector4& firstStart, const hkVector4& firstEnd, const hkVector4& secondStart,
                            const hkVector4& secondEnd, float* firstParameter, float* secondParameter);

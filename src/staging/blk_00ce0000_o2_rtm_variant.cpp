@@ -30,24 +30,24 @@ struct FUN_00cf4ca0_class
     int m_auiShapeKeys[6];
     hkReferencedObject* m_kPointA;
     hkReferencedObject* m_kPointB;
-    void FUN_00cf4ca0();
+    void hkpBinaryAction__referenceBodies();
 };
 struct FUN_00d06d50_cls
 {
     int __thiscall FindClass(int);
 };
-extern "C" void __cdecl FUN_00cf6920(int, int, int);
-void __cdecl FUN_00cf6950(int a, int apObject);
+extern "C" void __cdecl hkStatisticsCollectorUtil_addClassContentsAll(int, int, int);
+void __cdecl hkStatisticsCollectorUtil_addClassContentsAll_00cf6950(int a, int apObject);
 struct FUN_00cf86f0_class
 {
     int IsFieldEqual();
 };
-unsigned short FUN_00cfcb80(unsigned short a, unsigned short b);
+unsigned short hkMath_min2_unsigned_short(unsigned short a, unsigned short b);
 extern int DAT_010cb864;
 struct FUN_00ce4ae0_cls
 {
-    int __thiscall FUN_00ce4ae0(int);
-    void __thiscall FUN_00ce5310();
+    int __thiscall AssignFields_00ce4ae0(int);
+    void __thiscall hkaSkeletonMapperData_hkaSkeletonMapperData();
 };
 struct FUN_00ce4a20_cls
 {
@@ -55,21 +55,21 @@ struct FUN_00ce4a20_cls
     short m_kPointB;
     short m_iThirdValue;
     int m_iFourthElementInteger;
-    int __thiscall FUN_00ce4a20(int a);
+    int __thiscall ProcessAndReturnValue_00ce4a20(int a);
 };
 extern int DAT_0102e378;
-void __cdecl FUN_00cf69a0(int* a);
+void __cdecl Object_UpdateFields_00cf69a0(int* a);
 struct FUN_00cf69c0_class
 {
     int m_kPointA;
     int m_auiShapeKeys;
     int m_kPointB;
-    int __thiscall FUN_00cf69c0(int a);
+    int __thiscall hkSingletonInitNode_findByName(int a);
 };
-int __cdecl FUN_00cb0fa0(int a, int b);
+int __cdecl hkString_strCmp(int a, int b);
 struct FUN_00cf86e0_class
 {
-    void FUN_00cf86e0(float f);
+    void hkpSimulation_setFrameTimeMarker(float f);
 };
 extern int DAT_010cc2e0;
 struct FUN_00cf4820_class
@@ -84,7 +84,7 @@ struct FUN_00cf4820_class
 extern int DAT_0102e388;
 struct FUN_00cf86d0_cls
 {
-    void FUN_00cf86d0();
+    void SetVtableAndProcessState_00cf86d0();
 };
 // FUN_00ce29e0: member function that (re)initialises the object.
 //   - installs the base vtable pointer at [this],
@@ -95,7 +95,7 @@ extern int DAT_0102e388;
 // Sub-object at +0x10; FUN_00ce5370 is the game's constructor for it.
 struct FUN_00ce5370_cls
 {
-    void FUN_00ce5370();
+    void UpdateState_00ce5370();
 };
 struct FUN_00ce29e0_cls
 {
@@ -104,7 +104,7 @@ struct FUN_00ce29e0_cls
     int unk08;               // +0x08
     int unk0C;               // +0x0C
     FUN_00ce5370_cls m_sub;  // +0x10
-    void FUN_00ce29e0();
+    void UpdateFields_00ce29e0();
 };
 struct FnvSpawnedObject;
 struct FnvProbe
@@ -126,11 +126,11 @@ struct FnvSpawnedObject
     FnvProbe m_20;
     unsigned char* Check(FnvSpawnedObject** ref);
 };
-bool __cdecl FUN_00ce2a00(int unused, FnvSpawnedObject* obj);
-void __cdecl FUN_00ce2ca0(int a1, int a2, int* a3, int a4);
-void __cdecl FUN_00ce2cf0(int pObject, int param_2, int param_3);
-void __cdecl FUN_00ce3090(int a1, int a2, int a3, int a4, int a5, int a6);
-void __cdecl FUN_00ce4330(int a1, int a2, int a3, int a4);
+bool __cdecl hkaSkeletonMapper_checkTransform(int unused, FnvSpawnedObject* obj);
+void __cdecl Object_UpdateFields_00ce2ca0(int a1, int a2, int* a3, int a4);
+void __cdecl hkaSkeletonMapper_mapExtractedMotion(int pObject, int param_2, int param_3);
+void __cdecl hkaSkeletonMapper_mapPoseLocalSpace(int a1, int a2, int a3, int a4, int a5, int a6);
+void __cdecl hkaSkeletonMapper_mapPoseLocalSpace_00ce4330(int a1, int a2, int a3, int a4);
 struct FnvKeyRec
 {
     unsigned short m_iOwnerObjectOffset;
@@ -158,24 +158,24 @@ struct FUN_00ce5480_cls
     int m_uiItemCount;
 };
 void* __cdecl FindKeyRecord(unsigned short aKey, FUN_00ce5480_cls* pKeyBox);
-void __cdecl FUN_00d86160(void* stream, void* self);
+void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(void* stream, void* self);
 struct FUN_00cf4490_cls
 {
     char unk00[0x14];
     unsigned int m_14;
     unsigned int m_18;
     unsigned char m_1c;
-    void FUN_00cf4490(void* stream);
+    void bhkVelocityConstraintMotor_SaveBinary(void* stream);
 };
 struct CpuOpaque;
 extern CpuOpaque DAT_01268740;
-CpuOpaque* __cdecl FUN_00cf45f0();
+CpuOpaque* __cdecl bhkSpringDamperConstraintMotor_GetRTTI();
 struct SerializedObject
 {
     int base00, base04, base08, base0C, base10, word14, word18;
     void __thiscall SerializeToStream(int source);
 };
-extern "C" void __cdecl FUN_00d86160(int, SerializedObject*);
+extern "C" void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(int, SerializedObject*);
 // Save a Havok-wrapped object: write its type id, then let a type-specific saver write the rest.
 extern __declspec(thread) int g_iCF4BC0AllocTag;
 struct CF4BC0AllocTagScope
@@ -233,10 +233,10 @@ class CF4BC0Saver
     void SetObject(CF4BC0Object* pkObject);
 };
 CF4BC0Saver* __cdecl CF4BC0CreateSaver(unsigned int uiType);
-void __cdecl FUN_00cf4bc0(NiStream& kStream, CF4BC0Object* pkObject);
+void __cdecl bhkConstraintManager_SaveBinary(NiStream& kStream, CF4BC0Object* pkObject);
 extern int DAT_010cc2fc;
 extern int DAT_0102e388;
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct SubObject_b3813
 {
     int unk00;
@@ -342,13 +342,13 @@ class FUN_00cf4f70_cls
 };
 struct FUN_00cf6980_class
 {
-    virtual void FUN_00cf6980(int);
+    virtual void Object_ForwardCall_00cf6980(int);
 };
-void __cdecl FUN_00cf6980(FUN_00cf6980_class* object);
+void __cdecl Object_ForwardCall_00cf6980(FUN_00cf6980_class* object);
 extern int DAT_01268748;
-int* __cdecl FUN_00cf6990();
+int* __cdecl Runtime_GetDAT01268748Address();
 extern int DAT_0102e378;
-int* __cdecl FUN_00cf69b0();
+int* __cdecl Runtime_GetDAT0102e378Address();
 extern int DAT_01268794;
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf05c(int value);
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf100(int value);
@@ -365,13 +365,13 @@ struct FUN_00cf6d50_cls
     int m_00;
     unsigned short m_04;
     unsigned short m_06;
-    void FUN_00cf6d50();
+    void UpdateState_00cf6d50();
 };
 struct FUN_00cf6f80_cls
 {
     unsigned int m_ucLowNibble;
     unsigned int m_ucHighNibble;
-    unsigned __int64 FUN_00cf6f80();
+    unsigned __int64 ComputeValue_00cf6f80();
 };
 // FUN_00cf8710 : thiscall member returning a bool.
 //
@@ -398,7 +398,7 @@ struct FUN_00cf8710_cls
     float m_14;
     float m_18;
 
-    bool FUN_00cf8710();
+    bool hkpSimulation_isSimulationAtPsi();
 };
 extern MemoryManager _g_memoryManager;
 class CF4840Saver
@@ -505,17 +505,18 @@ class F4A30Creator
 };
 F4A30Creator* __cdecl F4A30FindCreator(int iTypeID);
 F4A30Result* CreateF4A30Result(F4A30Node* pkNode, void* pvContext);
-void __cdecl FUN_00ce51f0();
-void __cdecl FUN_00ce5300();
+void __cdecl BuildMatrixFromRotationScaleAndPosition();
+void __cdecl Object_ForwardCall_00ce5300();
 class FUN_00ce5360_This
 {
   public:
 // @fnv 0x00ce5360
     virtual ~FUN_00ce5360_This()
     {}
-    unsigned int FUN_00ce5360(unsigned int arg);
+    unsigned int ComputeValue_00ce5360(unsigned int arg);
 };
-unsigned int FUN_00ce5360_This::FUN_00ce5360(unsigned int arg)
+// src: GUESS 0x00ce5360 (confidence: low)
+unsigned int FUN_00ce5360_This::ComputeValue_00ce5360(unsigned int arg)
 {
     return reinterpret_cast<unsigned int>(this);
 }
@@ -545,7 +546,7 @@ struct Record
     int unk24;
     int unk28;
 };
-void FUN_00cf09a0(NiStream* owner, Record* rec);
+void bhkPoseArray_bhkPose_SaveBinary(NiStream* owner, Record* rec);
 extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long);
 struct ArrayData
 {
@@ -589,18 +590,18 @@ struct FUN_00cf4190 : FUN_00cdf560
     FUN_00cf4190();
 };
 extern int DAT_01268730;
-int* FUN_00cf41b0();
-extern "C" void __cdecl FUN_00d86100(void* view, void* object);
+int* bhkPositionConstraintMotor_GetRTTI();
+extern "C" void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(void* view, void* object);
 struct SerializedRecord
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10;
     unsigned int m_14, m_18, m_1c, m_20;
-    void FUN_00cf41c0(NiStream* view);
+    void bhkPositionConstraintMotor_LoadBinary(NiStream* view);
 };
 struct CpuOpaque;
 extern CpuOpaque DAT_01268738;
-CpuOpaque* __cdecl FUN_00cf43f0();
-void __cdecl FUN_00d86100(NiStream* ar, void* obj);
+CpuOpaque* __cdecl bhkVelocityConstraintMotor_GetRTTI();
+void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(NiStream* ar, void* obj);
 class hkObjCF46
 {
   public:
@@ -616,10 +617,10 @@ class hkObjCF46
 };
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs) throw();
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* cs) throw();
-unsigned int __cdecl FUN_00d87a40() throw();
+unsigned int __cdecl Object_ForwardCall_00d87a40() throw();
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs) throw();
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* cs) throw();
-unsigned int __cdecl FUN_00d87a40() throw();
+unsigned int __cdecl Object_ForwardCall_00d87a40() throw();
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs) throw();
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* cs) throw();
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs) throw();
@@ -630,10 +631,10 @@ struct CC9F10Shape
 };
 struct FUN_00cf7490_class
 {
-    void FUN_00cf7490();
+    void j_hkReferencedObject_addReference();
 };
 void __cdecl FUN_00c905b0(void);
-void __cdecl FUN_00cf74a0(void);
+void __cdecl j_hkReferencedObject_removeReference(void);
 struct hkOwnerCF74;
 // 0x00cf74b0 orders these records by owner at +0, owner key at +0xD4, and subindex at +8.
 struct OwnerSubindexEntry
@@ -650,7 +651,7 @@ struct hkOwnerCF74
     int unk9C, unkA0, unkA4, unkA8, unkAC, unkB0, unkB4, unkB8, unkBC, unkC0, unkC4, unkC8, unkCC, unkD0;
     unsigned int m_d4;
 };
-int __cdecl FUN_00cf74b0(const OwnerSubindexEntry& aEntryA, const OwnerSubindexEntry& aEntryB);
+int __cdecl hkpWorldBodyOperationQueueSortCmp(const OwnerSubindexEntry& aEntryA, const OwnerSubindexEntry& aEntryB);
 struct hkQualityCF74
 {
     int unk00;
@@ -725,16 +726,16 @@ struct hkPairCF74
     hkEntityCF74* m_kPointB;
 };
 hkBool __cdecl LessThanPairPriority(const hkPairCF74& aPairA, const hkPairCF74& aPairB);
-void* __cdecl FUN_00cfb050(void* pvUnused, bool* pbOut, void* pvResult);
-void FUN_00cfb060();
-int __cdecl FUN_00cfb070(int a, int b, int c);
-void __stdcall FUN_00cfc580(int, int, int, int, int);
+void* __cdecl Runtime_UpdateState_00cfb050(void* pvUnused, bool* pbOut, void* pvResult);
+void nullsub_7();
+int __cdecl Runtime_GetC(int a, int b, int c);
+void __stdcall nullsub_59(int, int, int, int, int);
 extern int DAT_0102e388;
 struct FUN_00cfc590_class
 {
     int* vtable;
 
-    void __thiscall FUN_00cfc590();
+    void __thiscall SetVtable();
 };
 extern int DAT_010cc86c;
 struct S_00cfc5a0
@@ -797,7 +798,7 @@ struct FUN_00cfc5a0
 
     FUN_00cfc5a0(int a1, S_00cfc5a0* a2, S_00cfc5a0* a3);
 };
-void FUN_00cfdb40();
+void Object_DoNothing_00cfdb40();
 // Per-thread profiler ring: TlsGetValue(index) -> buffer with head@+4 / end@+0xc,
 // 0xc-byte events {tag, timestamp, pad}.
 struct CE0020Event
@@ -886,12 +887,12 @@ class CE0020Subject
     virtual void Unk05();
     virtual void EnableConstraints();
 };
-void __cdecl FUN_00d27690(CE0020Target* pTarget, CE0020Subject* pSubject, int iType);
+void __cdecl hkpWorldConstraintUtil_removeAndDeleteModifier(CE0020Target* pTarget, CE0020Subject* pSubject, int iType);
 void __cdecl EnableConstraintsAndZeroArrays(CE0020Target* pTarget, CE0020Subject* pSubject);
-void __cdecl FUN_00ce2d10();
-void __cdecl FUN_00ce2f30();
+void __cdecl Runtime_ProcessEntries_00ce2d10();
+void __cdecl Runtime_ForwardCall_00ce2f30();
 class SerializableCF42;
-void __cdecl FUN_00d86160(NiStream& kStream, SerializableCF42* pkObject);
+void __cdecl bhkLimitedForceConstraintMotor_SaveBinary(NiStream& kStream, SerializableCF42* pkObject);
 class SerializableCF42
 {
   public:
@@ -901,7 +902,7 @@ class SerializableCF42
     unsigned int m_uiValue1C;
     unsigned int m_uiValue20;
 
-    void FUN_00cf4260(NiStream& kStream);
+    void bhkPositionConstraintMotor_SaveBinary(NiStream& kStream);
 };
 // bhkVelocityConstraintMotor ctor (hkpVelocityConstraintMotor chain):
 // vptr(0), memSizeAndFlags(4), referenceCount(6), motor type(8), min/max force, tau, damping, velocity-clamp bool.
@@ -926,7 +927,7 @@ class FUN_00cf43b0
     FUN_00cf43b0();
 };
 class SerializableCF44;
-void __cdecl FUN_00d86100(NiStream& kStream, SerializableCF44* pkObject);
+void __cdecl bhkLimitedForceConstraintMotor_LoadBinary(NiStream& kStream, SerializableCF44* pkObject);
 class SerializableCF44
 {
   public:
@@ -935,7 +936,7 @@ class SerializableCF44
     unsigned int m_uiValue18;
     unsigned char m_ucValue1C;
 
-    void FUN_00cf4400(NiStream& kStream);
+    void bhkVelocityConstraintMotor_LoadBinary(NiStream& kStream);
 };
 class CF4BC0SaverLoader
 {
@@ -968,8 +969,8 @@ struct AllocScope
         g_iCF4BC0AllocTag = saved;
     }
 };
-hkReferencedObject* __cdecl FUN_00cf4af0(NiStream& kStream);
-void FUN_00cf6d10();
+hkReferencedObject* __cdecl bhkConstraintManager_LoadBinary(NiStream& kStream);
+void Runtime_DoNothing_00cf6d10();
 class hkRefObjCF70 : public hkBaseObject
 {
   public:
@@ -1076,14 +1077,14 @@ struct FUN_00cf08c0_VectorArray
     float* values;
     int count;
 };
-bool __cdecl FUN_00cf08c0(const FUN_00cf08c0_VectorArray* left, const FUN_00cf08c0_VectorArray* right);
+bool __cdecl bhkStream_IsEqual(const FUN_00cf08c0_VectorArray* left, const FUN_00cf08c0_VectorArray* right);
 struct hkMatrixCF0
 {
     hkVector4 m_kColumn0;
     hkVector4 m_kColumn1;
     hkVector4 m_kColumn2;
 };
-void __cdecl FUN_00cf0b00(NiStream* pkView, hkMatrixCF0* pkDest);
+void __cdecl NiStream_ReadTransformColumns(NiStream* pkView, hkMatrixCF0* pkDest);
 struct S00cf0cf0_Arr
 {
     __m128* data;
@@ -1094,7 +1095,7 @@ static unsigned int S00cf0cf0_SaveRaw(NiBinaryStream* s, const void* p, unsigned
     unsigned int uiSize = elemSize;
     return s->m_pfnWrite(s, p, n * elemSize, &uiSize, 1);
 }
-int __cdecl FUN_00cf0cf0(NiStream* self, S00cf0cf0_Arr* arr);
+int __cdecl bhkStream_SaveBinary(NiStream* self, S00cf0cf0_Arr* arr);
 struct TargetType
 {
     int unk00;
@@ -1105,9 +1106,9 @@ struct TargetType
     void* unk20;
     unsigned int unk24;
 };
-unsigned int FUN_00cf0dc0(NiStream& stream, TargetType* obj);
+unsigned int NiStream_WriteObjectBuffer(NiStream& stream, TargetType* obj);
 const char* __cdecl GetConstraintTypeName(int eType);
-void __stdcall FUN_00cf6d00(int);
+void __stdcall Object_DoNothing_00cf6d00(int);
 extern void* DAT_010c63bc;
 extern void* DAT_010cc4e0;
 extern void* DAT_010cc4d0;
@@ -1143,7 +1144,7 @@ struct FUN_00cf6f90
     NodeObj m_kDefault;
     FUN_00cf6f90();
 };
-void __stdcall FUN_00cf8810(int a);
+void __stdcall Runtime_DoNothing_00cf8810(int a);
 extern char DAT_010cc688[];
 struct VecCFAD
 {
@@ -1216,7 +1217,7 @@ struct SelfCFAD
     void* unk2C;
     void* unk30;
     void* context;
-    void FUN_00cfad60(TargetCFAD*, InputCFAD*, void*, ContextCFAD*, unsigned int, unsigned int);
+    void UpdateFields_00cfad60(TargetCFAD*, InputCFAD*, void*, ContextCFAD*, unsigned int, unsigned int);
 };
 struct Cfd50Range
 {
@@ -1224,13 +1225,13 @@ struct Cfd50Range
     int* m_04;
     int m_08;
 };
-static int FUN_00cfdb50(Cfd50Range* a);
+static int hkAgentNnMachine_getLastEntry(Cfd50Range* a);
 extern "C" Cfd50Range* Cfd50Get(void);
 extern "C" int Cfd50Sink(int);
 void Cfd50Caller(void);
 struct CE1700World
 {
-    void FUN_00c97e80(char* result, void* object);
+    void hkpWorld_removeConstraint(char* result, void* object);
     void RemoveEntities(void* owner, int flags);
 };
 struct CE1700Node
@@ -1248,7 +1249,7 @@ struct CE1700Owner
     int unk10;
     void** objects;
     int count;
-    int FUN_00ce1700();
+    int ProcessEntries_00ce1700();
 };
 struct Slot_cfdb70
 {
@@ -1297,9 +1298,9 @@ struct BlockList_cfd
 bool __cdecl IsAddressInBlock(const BlockList_cfd* list, unsigned addr);
 inline hkMemoryAllocator& heap_cfde()
 {
-    return *reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->m_heap);
+    return *reinterpret_cast<hkMemoryAllocator*>(hkMemoryRouter_getInstance()->m_heap);
 }
-extern "C" void __cdecl FUN_00c909d0(hkMemoryAllocator* alloc, void* array, int elemSize, void* storage, int capacity);
+extern "C" void __cdecl hkArrayUtil__reduce(hkMemoryAllocator* alloc, void* array, int elemSize, void* storage, int capacity);
 struct BlockArr_cfde
 {
     char*& back()
@@ -1332,13 +1333,13 @@ struct BlockArr_cfde
             int newCap = c + 1;
             if (newCap < 1)
             {
-                hkMemoryRouter* h = FUN_00c85750();
-                FUN_00c909d0(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), this, sizeof(char*), m_kStorage, 1);
+                hkMemoryRouter* h = hkMemoryRouter_getInstance();
+                hkArrayUtil__reduce(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), this, sizeof(char*), m_kStorage, 1);
             }
             else if (newCap < getCapacity())
             {
                 hkMemoryAllocator& a = heap_cfde();
-                FUN_00c909d0(&a, this, sizeof(char*), 0, newCap);
+                hkArrayUtil__reduce(&a, this, sizeof(char*), 0, newCap);
             }
         }
     }
@@ -1348,7 +1349,7 @@ struct BlockStack_cfde
     int m_uiBufferCapacity;
     BlockArr_cfde m_kBlocks;
 };
-static void FUN_00cfdeb0(BlockStack_cfde* s);
+static void hkMemoryRouter_UpdateState_00cfdeb0(BlockStack_cfde* s);
 void zz_probe_cfdeb0(BlockStack_cfde* s);
 // Havok: build index maps for a selection and propagate it through records and links (hkArray<hkInt16> maps).
 typedef short hkInt16;
@@ -1395,7 +1396,7 @@ struct SelectionMapper
 };
 #include <xmmintrin.h>
 #include <xmmintrin.h>
-extern "C" bool __cdecl FUN_00ce2a00(int mappingType, const FnvSpawnedObject* transform);
+extern "C" bool __cdecl hkaSkeletonMapper_checkTransform(int mappingType, const FnvSpawnedObject* transform);
 struct FUN_00cb1600
 {
     void* vtable;
@@ -1403,7 +1404,7 @@ struct FUN_00cb1600
     int flags;
     FUN_00cb1600(char*, int) throw();
     void __thiscall FUN_00cc00e0() throw();
-    FUN_00cb1600& __thiscall FUN_00cc01c0(const char*) throw();
+    FUN_00cb1600& __thiscall ProcessAndReturnValue_00cc01c0(const char*) throw();
     FUN_00cb1600& __thiscall WriteName(const void*) throw();
 };
 struct CEError
@@ -1473,7 +1474,7 @@ struct CECountArray
     int m_iCapacityState;
     int* m_pStackAllocation;
 };
-void __cdecl FUN_00ce43e0(CEMap* map);
+void __cdecl hkaSkeletonMapper_checkMappingLocalSpace(CEMap* map);
 extern __m128 DAT_010c71b0;
 extern float DAT_01012068;
 struct MapperInitialization
@@ -1503,7 +1504,7 @@ struct MapperInitialization
     int unk58;
     int unk5C;
     unsigned char unk60;
-    void __thiscall FUN_00ce5310();
+    void __thiscall hkaSkeletonMapperData_hkaSkeletonMapperData();
 };
 
 #include <xmmintrin.h>
@@ -1566,7 +1567,8 @@ struct ScaleObj
 };
 
 // @fnv 0x00ce54c0
-void __cdecl FUN_00ce54c0(ScaleObj* obj, float scale)
+// src: GUESS 0x00ce54c0 (confidence: low)
+void __cdecl Object_ProcessEntries_00ce54c0(ScaleObj* obj, float scale)
 {
     for (int i = 0; i < obj->m_nCallbackId; i++)
     {
@@ -1662,7 +1664,8 @@ static __forceinline void Normalize4(QsTransform* p)
 }
 
 // @fnv 0x00ce4e20
-void __cdecl FUN_00ce4e20(QsTransform* xforms, const float* volatile weights, unsigned int count)
+// src: GUESS 0x00ce4e20 (confidence: low)
+void __cdecl Object_ProcessEntries_00ce4e20(QsTransform* xforms, const float* volatile weights, unsigned int count)
 {
     unsigned int i = 0;
     if (count > 0)

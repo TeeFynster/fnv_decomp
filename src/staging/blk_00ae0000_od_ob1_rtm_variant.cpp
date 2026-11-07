@@ -20,14 +20,14 @@ struct FUN_00af30a0_Class
     int m_iValueAt90;
     char m_cValueAt94;
     char m_cValueAt95;
-    void* FUN_00af30a0();
+    void* BSSystemUtility_BSSystemUtility();
 };
 struct FUN_00ae8dc0_Class
 {
     bool IsEqual(int a, int b);
 };
 extern "C" long __cdecl _fseek(void* stream, long offset, int whence);
-long __cdecl FUN_00aea180(void* stream, long offset, int whence, int iWhenceArg);
+long __cdecl Object_SeekStreamIfPresent(void* stream, long offset, int whence, int iWhenceArg);
 extern int DAT_010a39d8;
 struct FUN_00ad7000_stub
 {
@@ -36,14 +36,14 @@ struct FUN_00ad7000_stub
 struct FUN_00aea210_Class
 {
     void* vtbl;
-    void FUN_00aea210();
+    void SetVtableAndProcessState_00aea210();
 };
 struct FUN_00aea890_Class
 {
     void* vtbl;
     int m_kPointA;
     int m_kPointB;
-    int* FUN_00aea890();
+    int* BSWin32AudioListener_GetPosition();
 };
 extern int DAT_010a3bb4;
 struct FUN_00aeaab0_Class
@@ -54,37 +54,37 @@ struct FUN_00aeaab0_Class
     void* m_pObjectAt88;
     char bVisible;
     int m_iValueAt90;
-    void FUN_00aeaab0();
+    void SetVtableAndProcessState_00aeaab0();
 };
 extern "C" long __cdecl _fseek(void* stream, long offset, int whence);
-long __cdecl FUN_00af1cf0(void* stream, long offset, int whence, int iWhenceArg);
+long __cdecl Runtime_SeekStreamOrFail_00af1cf0(void* stream, long offset, int whence, int iWhenceArg);
 extern int DAT_010a4288;
 struct FUN_00af2f20_Class
 {
-    void __thiscall FUN_00af2f20();
+    void __thiscall SetVirtualTable_00af2f20();
 };
 struct FUN_00af3120_Class
 {
-    void __thiscall FUN_00af3120();
+    void __thiscall SetVirtualTable_00af3120();
 };
 extern int DAT_010a42cc;
 struct FUN_00af33f0_Class
 {
     void* vtbl;
     int x;
-    void* FUN_00af33f0();
+    void* SetVtableAndProcessState_00af33f0();
 };
 extern int DAT_010a42cc;
 struct FUN_00af3420_Class
 {
     void* vtbl;
-    void __thiscall FUN_00af3420();
+    void __thiscall SetVirtualTable_00af3420();
 };
 extern int DAT_010a42dc;
 struct FUN_00af35c0_Class
 {
     void* vtbl;
-    void FUN_00af35c0();
+    void SetVirtualTable_00af35c0();
 };
 extern int DAT_010a42ec;
 struct FUN_00af38d0_Class
@@ -92,13 +92,13 @@ struct FUN_00af38d0_Class
     void* vtbl;
     char bVisible;
     void* m_pObjectAt84;
-    void* FUN_00af38d0();
+    void* BSCacheDriveSystemUtility_BSCacheDriveSystemUtility();
 };
 extern int DAT_010a42fc;
 struct FUN_00af39c0_Class
 {
     void* vtbl;
-    void FUN_00af39c0();
+    void SetVirtualTable_00af39c0();
 };
 extern int DAT_010a4318;
 struct FUN_00af3a80_Class
@@ -111,7 +111,7 @@ struct FUN_00af3b20_Class
 {
     void* vtbl;
     int i;
-    void* __thiscall FUN_00af3b20();
+    void* __thiscall BSSysInfoSystemUtility_BSSysInfoSystemUtility();
 };
 extern int DAT_010a4328;
 struct FUN_00af3b50_Class
@@ -123,13 +123,13 @@ struct FUN_00afd960_Class
 {
     void* vtbl;
     int iField;
-    void FUN_00afd960();
+    void ProcessState_00afd960();
 };
 struct FileFinder
 {
     static NiFile* __cdecl GetFile(const char*, int, unsigned int, unsigned int);
 };
-void __cdecl FUN_00afdf00(const char* apPath, int b, unsigned int c);
+void __cdecl FileFinder_GetFile_(const char* apPath, int b, unsigned int c);
 extern int DAT_010a39d8;
 struct FUN_00ad6f40_Class
 {
@@ -148,7 +148,7 @@ struct FUN_00aea730_Class
     void* vtbl;
     int m_kPointA;
     int m_kPointB;
-    FUN_00aea730_Class* FUN_00aea730(int v);
+    FUN_00aea730_Class* BSWin32AudioListener_BSWin32AudioListener(int v);
 };
 extern MemoryManager g_memoryManager;
 struct FUN_00aeaa80_Class
@@ -159,35 +159,35 @@ struct FUN_00aeaa80_Class
 struct FUN_00aefcf0_Class
 {
     void* vtbl;
-    void __thiscall FUN_00aefcf0(float a, float b, float c);
+    void __thiscall BSWin32GameSound_SetEmitterPosition_00aefcf0(float a, float b, float c);
 };
 struct FUN_00af1d20_Class
 {
-    void* FUN_00af1d20();
+    void* BSWin32GameSound_OggVorbisFile_OggVorbisFile();
 };
 int __cdecl CloseAndDeleteFile(BSFile* apFile);
 struct DownloadableContentManager
 {
     static void __cdecl GetRandomGenerator();
 };
-char __cdecl FUN_00af2750();
+char __cdecl Runtime_EvaluateValue_00af2750();
 struct FUN_00af2c50_Class
 {
-    bool FUN_00af2c50(int a, int b);
+    bool return_0_5(int a, int b);
 };
 extern int DAT_010a42dc;
 struct FUN_00af3570_Class
 {
     void* vtbl;
     int a[8];
-    void* __thiscall FUN_00af3570();
+    void* __thiscall BSSystemUtilitiesStrings_BSSystemUtilitiesStrings();
 };
 void __cdecl _sprintf_s(char* dst, unsigned int size, const char* fmt, ...);
 struct FUN_00afd860_Class
 {
     unsigned char m_acCharacterBuffer[4];
     int iValue;
-    void __thiscall FUN_00afd860(char* dst);
+    void __thiscall BSHash_MakeHashString(char* dst);
 };
 struct FUN_00afdbc0_Class
 {
@@ -238,7 +238,7 @@ struct FUN_00afd8b0_Class
     unsigned int uiHash;
     unsigned int uiCRC;
     unsigned short m_usPassCountLocal;
-    void* __thiscall FUN_00afd8b0();
+    void* __thiscall BSArchiveHeader_BSArchiveHeader();
 };
 extern BSAudio* DAT_011f6d98;
 struct FUN_00af1ba0_Class
@@ -254,15 +254,15 @@ struct S00a0d390
     void* p;
 
     void __thiscall ClearAll();
-    void __thiscall FUN_00ae8c30();
+    void __thiscall SetVtableAndProcessState_00ae8c30();
 };
 void __cdecl _NiFree(void* p);
-long FUN_00aeabf0(void* stream, long offset, int whence, int iOrigin);
+long Runtime_SeekStreamOrFail(void* stream, long offset, int whence, int iOrigin);
 struct FUN_00aefd90_Class
 {
-    void __thiscall FUN_00aefd90(int a, int b, int c);
+    void __thiscall BSWin32GameSound_SetEmitterFront(int a, int b, int c);
 };
-int __cdecl FUN_00af2290(int apObject);
+int __cdecl tell_func_00af2290(int apObject);
 struct FUN_00af2ed0_Class
 {
     void* vtbl;
@@ -273,12 +273,12 @@ struct FUN_00af2ed0_Class
     int i2;
     char pad2[0x14];
     int i3;
-    FUN_00af2ed0_Class* FUN_00af2ed0();
+    FUN_00af2ed0_Class* BSSaveDataSystemUtility_BSSaveDataSystemUtility();
 };
 extern int DAT_010a42ec;
 struct FUN_00af3900_Class
 {
-    void __thiscall FUN_00af3900();
+    void __thiscall SetVirtualTable_00af3900();
 };
 struct FUN_00af3980_Class
 {
@@ -326,7 +326,7 @@ struct FUN_00ae78a0_cls
     int unk3C;
     void* m_h40;
     void FUN_00aa63c0();
-    void FUN_00ae78a0();
+    void CloseAudioManagerHandles();
 };
 struct FUN_00ae8010_node
 {
@@ -579,9 +579,10 @@ struct S_00ae9290_Class
 {
     void* p;
 
-    void __thiscall FUN_00ae9290();
+    void __thiscall UpdateState_00ae9290();
 };
-void __thiscall S_00ae9290_Class::FUN_00ae9290()
+// src: GUESS 0x00ae9290 (confidence: low)
+void __thiscall S_00ae9290_Class::UpdateState_00ae9290()
 {
     if (this->p != 0)
     {
@@ -611,7 +612,7 @@ struct FUN_00aea0d0_Class
 struct FUN_00aea800_cls
 {
     int unk00;
-    void FUN_00aea800();
+    void BSWin32AudioListener_Init();
 };
 extern "C" const double DAT_010a3be8;
 struct FNVRenderInterface_00aea8b0
@@ -786,7 +787,7 @@ struct S_00aeaa10_Cls
     int unk40;
     int unk44;
     S_00aeaa10_Obj* obj;
-    void FUN_00aeaa10(const S_00aeaa10_P3* p);
+    void BSWin32AudioListener_SetVelocity(const S_00aeaa10_P3* p);
 };
 void* __cdecl _fnv_zlib_memset(void* p, int c, int n);
 struct MMStub
@@ -1107,7 +1108,7 @@ class FUN_00aec530_cls
     bool IsLooping();
     void UpdateFlags();
     void UpdateDistance();
-    void FUN_00aec530();
+    void BSWin32GameSound_Prepare();
 
     int unk04;
     unsigned int m_uiValue1;
@@ -1299,7 +1300,7 @@ class FUN_00aed420_cls
     S_Subsys* m_198;
     S_Subsys* m_19c;
     S_Subsys* m_1a0;
-    bool FUN_00aed420();
+    bool BSWin32GameSound_Pause();
 };
 struct IDSBufStub
 {
@@ -1466,7 +1467,7 @@ struct AudioSoundStub
     int unk224;
     int* pStatus;
 
-    bool FUN_00aed4c0();
+    bool BSWin32GameSound_Stop();
 };
 struct S_00af01e0_Snd
 {
@@ -1596,10 +1597,10 @@ struct S_00af01e0_Cls
     int unk194;
     int unk198;
     S_00af01e0_Snd* unk19c;
-    int FUN_00af01e0(float f);
+    int BSWin32GameSound_SetFrequency(float f);
 };
 extern "C" void* fnv_zlib_memset(void* dst, int c, int n);
-void FUN_005b5e40(const char* pcFormat, ...);
+void Warning_005b5e40(const char* pcFormat, ...);
 struct AF0320WaveFormat
 {
     unsigned short wFormatTag;
@@ -1869,7 +1870,7 @@ struct FUN_00af1af0_cls
     unsigned int unk1d0;
     unsigned int unk1d4;
     void* m_1d8;
-    void FUN_00af1af0();
+    void BSWin32GameSound_RemoveEffects();
 };
 struct NiStdObject
 {
@@ -2024,13 +2025,13 @@ struct S_00af1c00_cls
     int unk194;
     int unk198;
     S_00af1c00_Obj* m_19c;
-    bool FUN_00af1c00(int a1, unsigned int a2, unsigned int a3, char* a4);
+    bool BSWin32GameSound_Write(int a1, unsigned int a2, unsigned int a3, char* a4);
 };
 struct FUN_00af1d80_tgt
 {
     virtual int Tick(int flag);
 };
-void __cdecl FUN_00ee81e6(void* self);
+void __cdecl ov_clear_00ee81e6(void* self);
 struct FUN_00af1d80_cls
 {
     int unk000;
@@ -2221,9 +2222,9 @@ struct FUN_00af1d80_cls
 };
 struct FUN_00af2100_cls
 {
-    unsigned int FUN_00af2100(unsigned char* p, unsigned int n);
+    unsigned int BSWin32GameSound_OggVorbisFile_Read(unsigned char* p, unsigned int n);
 };
-unsigned int __cdecl FUN_00ee8204(FUN_00af2100_cls* self, unsigned char* p, unsigned int n, unsigned int a,
+unsigned int __cdecl ov_read_00ee8204(FUN_00af2100_cls* self, unsigned char* p, unsigned int n, unsigned int a,
                                   unsigned int b, unsigned int c, unsigned int* out);
 typedef int(__cdecl* FUN_00af2180_ProcFn)(void* self, void* arg0, int product, int* out, int one);
 struct FUN_00af2180_cls
@@ -2256,12 +2257,12 @@ int DispatchHandlerEvent(void* pvHandler, void* pvEvent, void* pvUnused, void* p
 struct FUN_00af2c30_cls
 {
     int unk00;
-    void FUN_00af2c30();
+    void nullsub_324();
 };
 struct FUN_00af2c60_cls
 {
     void* vtbl;
-    void __thiscall FUN_00af2c60();
+    void __thiscall nullsub_325();
 };
 // FUN_00af2c70 - an empty __thiscall member function in an /Od module.
 //
@@ -2283,7 +2284,7 @@ struct FUN_00af2c60_cls
 // once, in the mangled name of the member function itself.
 struct FnvEmptyThiscall70_Class
 {
-    void FUN_00af2c70();
+    void nullsub_326();
 };
 // FUN_00af2c80 - an empty __thiscall member function in an /Od module.
 //
@@ -2302,7 +2303,7 @@ struct FnvEmptyThiscall70_Class
 // instead of a bare `pop ebp; ret`.
 struct FnvEmptyThiscall_Class
 {
-    void FUN_00af2c80();
+    void DoNothing_00af2c80();
 };
 extern "C" __declspec(dllimport) bool __cdecl SteamAPI_IsSteamRunning();
 extern "C" __declspec(dllimport) unsigned int __cdecl SteamUser();
@@ -2347,7 +2348,7 @@ struct FUN_00afdb80_cls
     char pad00[8];
     unsigned int* m_08;
 
-    void FUN_00afdb80();
+    void UpdateFields_00afdb80();
 };
 unsigned int* __cdecl FUN_00ec3bad(unsigned int* value);
 struct FUN_00afdc00_Item
@@ -2371,7 +2372,7 @@ class FUN_00afdc00_cls
     unsigned int unk1C;
     unsigned int unk20;
     FUN_00afdc00_Item* m_pItems;
-    bool FUN_00afdc00(int a1);
+    bool BSArchive_IsFileEntryInArchive(int a1);
 };
 struct S_00aff060_Class
 {
@@ -2381,7 +2382,7 @@ struct S_00aff060_Class
     void* unk0c;
     void* unk10;
 
-    int __thiscall FUN_00aff060();
+    int __thiscall BSSystemFile_DoFlush();
 };
 extern int(__stdcall* DAT_00fdf138)(void*);
 extern "C" __declspec(dllimport) int __stdcall CopyFileA(const char* lpExistingFileName, const char* lpNewFileName,
@@ -2611,7 +2612,7 @@ struct SoundObj
     bool is3D;
 
     bool IsPlaying();
-    void FUN_00aefda0(float maxDist, float minDist);
+    void BSWin32GameSound_SetMinMax(float maxDist, float minDist);
 };
 extern const double DAT_010a3e68;
 extern const double DAT_010a3e60;
@@ -3017,7 +3018,7 @@ struct S_008785e0
     unsigned char m_unk0f;
     void* m_unk10;
 
-    int FUN_00afeef0(int a1, int a2, int a3, int a4);
+    int BSSystemFile_DoSeek(int a1, int a2, int a3, int a4);
     int OpenFile(const char* lpFileName);
 };
 extern "C" __declspec(dllimport) int __stdcall ReadFile(void* hFile, void* lpBuffer, unsigned long nNumberOfBytesToRead,
@@ -3151,7 +3152,7 @@ struct FUN_00aea150_Class
     unsigned int unk04;
     int unk08;
 
-    void FUN_00aea150();
+    void BSAudioSynchTimer_Restart();
 };
 struct xFlags
 {
@@ -3296,7 +3297,7 @@ struct xGameSound
     bool Finish(bool bSuccess);
     bool TryStream();
     void ResetFile(bool b);
-    bool FUN_00aeb270();
+    bool BSWin32GameSound_Open();
 };
 int __cdecl FUN_00ec3bad(int value);
 struct Marker
@@ -3309,16 +3310,16 @@ struct FUN_00afdb20_Class
     int unk04;
     int m_08;
     int m_0c;
-    void FUN_00afdb20();
+    void UpdateFields_00afdb20();
 };
 extern "C" int DAT_010472d0;
 struct FUN_009b7940_shell
 {
-    void FUN_006b3eb0(unsigned int a, unsigned int b);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int a, unsigned int b);
 };
 struct FUN_00afe9f0_Class : public FUN_009b7940_shell
 {
-    void* FUN_00afe9f0(unsigned int a);
+    void* SetVtableAndProcessState_00afe9f0(unsigned int a);
 };
 struct FUN_00ae8090_Node
 {
@@ -3329,7 +3330,7 @@ struct FUN_00ae8090_Node
 struct FUN_00ae8090_Allocator
 {
     unsigned int count;
-    void FUN_0045cee0(FUN_00ae8090_Node* node);
+    void NiTPointerAllocator_unsigned_int_Deallocate(FUN_00ae8090_Node* node);
 };
 struct FUN_00ae8090_Locals
 {
@@ -3356,7 +3357,7 @@ class FUN_00ae8090_Class
 
     unsigned int FUN_00ae7f90();
     unsigned int PopFront();
-    unsigned int FUN_00ae8090(FUN_00ae8090_Node** position);
+    unsigned int NiTPointerListBase_RemovePos_0(FUN_00ae8090_Node** position);
 };
 struct ObjC
 {
@@ -3528,9 +3529,9 @@ struct AED080_Cls
     int unk220;
     int unk224;
     ObjC* m_228;
-    bool FUN_00af1c00(int a1, unsigned int a2, unsigned int a3, char* a4);
+    bool BSWin32GameSound_Write(int a1, unsigned int a2, unsigned int a3, char* a4);
     void ClearCallback();
-    bool FUN_00aed080(bool p);
+    bool BSWin32GameSound_Play(bool p);
 };
 // DirectSound buffer copy and auxiliary stream-state duplication.
 typedef unsigned int U32;
@@ -3659,7 +3660,7 @@ struct AudioConfig
 };
 struct AudioMemory
 {
-    void* __thiscall FUN_00aa3e40(U32 size);
+    void* __thiscall Game_DoHeapAlloc(U32 size);
 };
 struct AudioOptionsSource
 {
@@ -3998,7 +3999,7 @@ class AudioBuffer
     {
         return (m_flags & 0x4000000) || (m_flags & 0x2000000);
     }
-    void __thiscall FUN_00af0630(AudioBuffer*, bool);
+    void __thiscall BSWin32GameSound_Copy(AudioBuffer*, bool);
 };
 struct FUN_00aea020_cls
 {
@@ -4007,7 +4008,7 @@ struct FUN_00aea020_cls
     ~FUN_00aea020_cls();
 };
 extern BSAudio* DAT_011f6d98;
-void __cdecl FUN_00aea020();
+void __cdecl BSWin32Audio_Create();
 struct FUN_00af33f0
 {
     void* vtbl;
@@ -4015,7 +4016,7 @@ struct FUN_00af33f0
     FUN_00af33f0();
     ~FUN_00af33f0();
 };
-void* __cdecl FUN_00af3020();
+void* __cdecl BSMsgDialogSystemUtility_QInstance();
 namespace Worker114 {
 struct FUN_00ae9360_Base
 {
@@ -4063,7 +4064,7 @@ struct FUN_00ae9360_Base
 }
 struct Allocate114
 {
-    void* FUN_00aa3e40(unsigned int);
+    void* Game_DoHeapAlloc(unsigned int);
 };
 struct FUN_00aeac20 : Worker114::FUN_00ae9360_Base
 {
@@ -4114,11 +4115,11 @@ extern "C" int __cdecl _splitpath_s(const char* source, char* drive, unsigned in
 extern "C" int __cdecl _makepath_s(char* result, unsigned int resultSize, const char* drive, const char* directory,
                                    const char* filename, const char* extension);
 extern unsigned int DAT_011f804c;
-void __cdecl FUN_00af4070(char* result, const char* source);
+void __cdecl WildCard_MakeString(char* result, const char* source);
 extern "C" __declspec(dllimport) int __stdcall WriteFile(void*, const void*, unsigned long, unsigned long*, void*);
 struct SystemFileWriter : Win32ReadFile
 {
-    int FUN_00afede0(void* buf, DWORD len, int unused, unsigned __int64* outRead);
+    int BSSystemFile_DoWrite(void* buf, DWORD len, int unused, unsigned __int64* outRead);
 };
 
 namespace ListenerDestruction {

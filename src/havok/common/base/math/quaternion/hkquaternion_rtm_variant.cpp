@@ -11,12 +11,13 @@
 class FUN_005611c0_t
 {
   public:
-    void FUN_005611c0();
-    void FUN_00cb2830(float* pts);
+    void normalize_005611c0();
+    void hkQuaternion_setAndNormalize(float* pts);
 };
 static float g_sink2550;
 extern "C" double cb2550_clobber(double x);
-static __declspec(noinline) void FUN_00cb2550(FUN_005611c0_t* obj, float* pts)
+// src: COMMUNITY 0x00cb2550
+static __declspec(noinline) void quaternionFromRotatation(FUN_005611c0_t* obj, float* pts)
 {
     float s = pts[0] * pts[1];
     s = (float)cb2550_clobber(s);
@@ -30,7 +31,7 @@ static __declspec(noinline) void FUN_00cb2550(FUN_005611c0_t* obj, float* pts)
 struct FUN_00cb24c0_cls
 {
     __m128 m_00;
-    void FUN_00c7f500(unsigned char* flag);
+    void hkVector4_isOk4(unsigned char* flag);
     unsigned char* IsNormalized(unsigned char* flag);
 };
 struct Block64
@@ -84,13 +85,13 @@ struct S00cb2550_Quat
 {
     S00cb2550_V4 q;
 };
-static void FUN_00cb2550(S00cb2550_Quat* self, const S00cb2550_Rot& r);
+static void quaternionFromRotatation(S00cb2550_Quat* self, const S00cb2550_Rot& r);
 void S00cb2550_caller(S00cb2550_Quat* q, const S00cb2550_Rot& r);
 
 __declspec(align(16)) struct FUN_00cb2450_cls
 {
     __m128 m_00;
-    void FUN_00cb2450(__m128* v, float a1);
+    void hkQuaternion_setAxisAngle(__m128* v, float a1);
 };
 struct LFrame
 {
@@ -99,7 +100,8 @@ struct LFrame
     volatile float s;
 };
 // @fnv 0x00cb2450
-void FUN_00cb2450_cls::FUN_00cb2450(__m128* v, float a1)
+// src: XBOX_PDB 0x00cb2450
+void FUN_00cb2450_cls::hkQuaternion_setAxisAngle(__m128* v, float a1)
 {
     LFrame f;
     f.x = (float)(a1 * 0.5);

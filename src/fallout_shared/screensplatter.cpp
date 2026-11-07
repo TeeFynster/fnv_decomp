@@ -17,20 +17,20 @@ public:
 
     int FUN_00418520();
     bool FUN_00418750();
-    short FUN_00418770();
-    bool FUN_004127e0(ExtraShell_screensplatter*);
-    void FUN_00419ad0(int);
-    void FUN_00411ec0(ExtraShell_screensplatter*);
+    short ExtraDataList_GetCount();
+    bool ExtraDataList_CompareList(ExtraShell_screensplatter*);
+    void ExtraDataList_SetCount(int);
+    void ExtraDataList_CopyList(ExtraShell_screensplatter*);
     signed char GetExtraByteValue();
-    void FUN_0042dec0();
+    void ExtraDataList_RemoveHotkey();
     OpacityFadeState* GetOffsetC();
     void FUN_0041aeb0();
-    void FUN_0041af50();
-    void* FUN_0042e250();
-    RefNode* FUN_0041df90();
-    void FUN_0041dfd0();
-    void FUN_0041de40(int a);
-    RefrShell* FUN_0041e310();
+    void ExtraDataList_RemoveScript();
+    void* ExtraDataList_GetModelSwap();
+    RefNode* ExtraDataList_GetDroppedItemList();
+    void ExtraDataList_RemoveDroppedItemList();
+    void ExtraDataList_SetItemDropper(int a);
+    RefrShell* ExtraDataList_GetAshPileRef();
 };
 #include "../../include/SkyTextureManager.h"
 #include "../../include/BSFadeNode.h"
@@ -62,9 +62,9 @@ class FUN_00622c80
     FUN_00622c80(float value, unsigned int id);
 };
 
-unsigned int FUN_005dbe10();
-float FUN_00622ba0();
-float FUN_00622bb0();
+unsigned int bhkCollisionFilter_GetNewSystemGroup();
+float DecalCaster_GetMaxDecalWidthSmall();
+float DecalCaster_GetMaxDecalWidthLarge();
 
 extern unsigned char DAT_011c7834;
 extern unsigned int DAT_011c7828;
@@ -86,7 +86,7 @@ class GraphicsRenderer
     unsigned int GetRenderTargetHeight();
 };
 class NiRenderer;
-NiRenderer* FUN_0043c4b0();
+NiRenderer* NiXenonRenderer_GetRenderer();
 
 #include "../../include/NiMemObject.h"
 
@@ -154,13 +154,13 @@ void ScreenSplatter::Init()
     if (DAT_011c7834)
     {
         ScreenSplatterInitLocals initLocals;
-        initLocals.renderer = reinterpret_cast<GraphicsRenderer*>(FUN_0043c4b0());
+        initLocals.renderer = reinterpret_cast<GraphicsRenderer*>(NiXenonRenderer_GetRenderer());
         initLocals.aspect = static_cast<float>(static_cast<double>(initLocals.renderer->GetRenderTargetWidth()) /
                                                initLocals.renderer->GetRenderTargetHeight());
 
         DAT_011c7840 = reinterpret_cast<NiAVObject*>(new NiCamera());
 
-        reinterpret_cast<NiAVObject*>(DAT_011c7840.operator->())->FUN_00440460(NiPoint3(0.0f, 0.0f, DAT_01022960));
+        reinterpret_cast<NiAVObject*>(DAT_011c7840.operator->())->NiAVObject_SetTranslate(NiPoint3(0.0f, 0.0f, DAT_01022960));
 
         reinterpret_cast<NiUpdateData*>(&initLocals.firstData)->NiUpdateData::NiUpdateData(0.0f, 0, 0);
         reinterpret_cast<NiNode*>(DAT_011c7840.operator->())
@@ -206,7 +206,7 @@ void ScreenSplatter::Clear()
 {
     if (DAT_011c7834)
     {
-        reinterpret_cast<NiNode*>(DAT_011c786c.operator->())->FUN_004def90();
+        reinterpret_cast<NiNode*>(DAT_011c786c.operator->())->NiNode_RemoveAllChildren();
         DAT_011c7828 = 0;
     }
 }
@@ -214,16 +214,16 @@ void ScreenSplatter::Clear()
 // @fnv 0x00622a70
 FUN_00622c80* ScreenSplatter::Activate(float time, bool enabled)
 {
-    if (time > FUN_00622ba0())
+    if (time > DecalCaster_GetMaxDecalWidthSmall())
     {
         if (!DAT_011cc200 && enabled)
-            DAT_011cc200 = new FUN_00622c80(FUN_00622bb0(), FUN_005dbe10());
+            DAT_011cc200 = new FUN_00622c80(DecalCaster_GetMaxDecalWidthLarge(), bhkCollisionFilter_GetNewSystemGroup());
         return DAT_011cc200;
     }
     else
     {
         if (!DAT_011cc1fc && enabled)
-            DAT_011cc1fc = new FUN_00622c80(FUN_00622ba0(), FUN_005dbe10());
+            DAT_011cc1fc = new FUN_00622c80(DecalCaster_GetMaxDecalWidthSmall(), bhkCollisionFilter_GetNewSystemGroup());
         return DAT_011cc1fc;
     }
 }
@@ -240,7 +240,8 @@ void CreateSpdFadeNode()
 }
 
 // @fnv 0x004e0320
-NiFixedString* FUN_004e0320()
+// src: XBOX_PDB 0x004e0320
+NiFixedString* BSSplatterExtraData_Tag()
 {
     return DAT_011c7830;
 }
@@ -260,7 +261,8 @@ GlobalObject_00a7b610* __thiscall FUN_004e0530_shell::GetGlobalObject()
 }
 
 // @fnv 0x00622ba0
-float FUN_00622ba0()
+// src: XBOX_PDB 0x00622ba0
+float DecalCaster_GetMaxDecalWidthSmall()
 {
     return 32.0f;
 }
@@ -268,14 +270,16 @@ float FUN_00622ba0()
 extern "C" const float runtimeFloatSettingDefault38;
 
 // @fnv 0x00622bb0
-float FUN_00622bb0()
+// src: XBOX_PDB 0x00622bb0
+float DecalCaster_GetMaxDecalWidthLarge()
 {
     return runtimeFloatSettingDefault38;
 }
 
 // Calls FUN_004b9900(1) on DAT_011c7830 if non-null, then sets DAT_011c7830 to null.
 // @fnv 0x004e00d0
-void FUN_004e00d0()
+// src: GUESS 0x004e00d0 (confidence: low)
+void NiFixedString_UpdateState_004e00d0()
 {
     NiFixedString* b;
     {
@@ -287,11 +291,12 @@ void FUN_004e00d0()
 }
 
 // @fnv 0x004e0800
-void FUN_004e0800()
+// src: GUESS 0x004e0800 (confidence: low)
+void Object_ProcessEntries_004e0800()
 {
     if (DAT_011c7834)
     {
-        ((NiNode*)((GO*)&DAT_011c786c)->operator unsigned int())->FUN_004def90();
+        ((NiNode*)((GO*)&DAT_011c786c)->operator unsigned int())->NiNode_RemoveAllChildren();
         ((GO*)&DAT_011c786c)->operator=(0);
         ((GO*)&DAT_011c7840)->operator=(0);
     }
@@ -318,11 +323,11 @@ void* Dummy00622c50::FUN_00622c50(unsigned int flags)
 
 struct IntSetting
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 struct FloatSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern IntSetting DAT_011cf2b8;
 extern FloatSetting DAT_011cfd4c;
@@ -344,7 +349,7 @@ struct ObjectProxy
     void AssignFixedString(const NiFixedString&);
 };
 ObjectProxy* CreateScatterShapes(unsigned int);
-void FUN_00b81420(ObjectProxy*, unsigned int);
+void BSShaderBloodSplatterProperty_SetFadeSourceRecurse(ObjectProxy*, unsigned int);
 struct RootProxy
 {
     virtual void unk00();
@@ -403,15 +408,16 @@ struct RootProxy
     virtual void unkd4();
     virtual void unkd8();
     virtual void Attach(ObjectProxy*, bool);
-    void FUN_00a59c60(const NiUpdateData&);
+    void NiAVObject_Update(const NiUpdateData&);
 };
 // If screen splatter is enabled, allocates a splatter proxy for the requested amount, attaches it to the root, and updates it.
 // @fnv 0x004e0330
-void FUN_004e0330(unsigned int requested, float time)
+// src: XBOX_PDB 0x004e0330
+void ScreenSplatter_Activate(unsigned int requested, float time)
 {
     if (DAT_011c7834)
     {
-        unsigned int p = FUN_0042f5a0(requested, *DAT_011cf2b8.FUN_0043d4d0() - DAT_011c7828);
+        unsigned int p = FUN_0042f5a0(requested, *DAT_011cf2b8.Setting_Int() - DAT_011c7828);
         if (p > 0)
         {
             ObjectProxy* a = CreateScatterShapes(p);
@@ -422,15 +428,15 @@ void FUN_004e0330(unsigned int requested, float time)
             if (time > 0.0)
                 s.b = time;
             else
-                s.b = *DAT_011cfd4c.FUN_00403e20();
+                s.b = *DAT_011cfd4c.Setting_Float_00403e20();
             s.d = p;
             FUN_004e04e0* h = new FUN_004e04e0(s);
             a->SetExtraDataName(h);
             a->AssignFixedString(NiFixedString("ScreenSplatterRoot"));
             ((RootProxy*)DAT_011c786c.operator->())->Attach(a, true);
-            FUN_00b81420(a, h->FUN_007d6bb0());
+            BSShaderBloodSplatterProperty_SetFadeSourceRecurse(a, h->FUN_007d6bb0());
             NiUpdateData i(0.0f, false, false);
-            ((RootProxy*)DAT_011c786c.operator->())->FUN_00a59c60(i);
+            ((RootProxy*)DAT_011c786c.operator->())->NiAVObject_Update(i);
         }
     }
 }
@@ -445,7 +451,7 @@ struct OpacityFadeState
 struct ObjShell
 {
     ExtraShell_screensplatter* FUN_00a5bdd0(NiFixedString*);
-    void FUN_00a59c60(const NiUpdateData&);
+    void NiAVObject_Update(const NiUpdateData&);
 };
 struct RootCalls
 {
@@ -467,22 +473,23 @@ struct TimeGlobal
 extern TimeGlobal g_timeGlobal;
 struct SettingF
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern SettingF DAT_011ceeb4;
 extern SettingF DAT_011cf6a8;
 extern SettingF DAT_011cfc2c;
 extern unsigned int DAT_011c7828;
 float __cdecl LinearInterpolate(float, float, float, float, float);
-float __cdecl FUN_0040ebd0(float, float);
-void __cdecl FUN_004de8a0(float);
-void __cdecl FUN_004de8b0(float);
-void __cdecl FUN_004de8c0(float);
-float __cdecl FUN_004de8d0();
+float __cdecl BSMIN(float, float);
+void __cdecl BSShaderBloodSplatter_SetFlareOffsetScale(float);
+void __cdecl BSShaderBloodSplatter_SetFlareMult(float);
+void __cdecl BSShaderBloodSplatter_SetGlobalAlpha(float);
+float __cdecl BSShaderBloodSplatter_GetGlobalAlpha();
 
 // Advances each splatter child's age by elapsed time, detaches expired ones and decrements DAT_011c7828, fades alpha, updates nodes, and ramps splash5 toward 1.
 // @fnv 0x004e0110
-void FUN_004e0110()
+// src: COMMUNITY 0x004e0110
+void ScreenSplatter_Update()
 {
     if (DAT_011c7834)
     {
@@ -496,7 +503,7 @@ void FUN_004e0110()
             NiAVObject* child4 = ((RootCalls*)DAT_011c786c.operator->())->FUN_0043b4a0(i5);
             if (child4)
             {
-                ExtraShell_screensplatter* extra4 = ((ObjShell*)child4)->FUN_00a5bdd0(FUN_004e0320());
+                ExtraShell_screensplatter* extra4 = ((ObjShell*)child4)->FUN_00a5bdd0(BSSplatterExtraData_Tag());
                 OpacityFadeState* data = extra4->GetOffsetC();
                 data->age += elapsed_2;
                 if (data->age >= data->life)
@@ -506,22 +513,22 @@ void FUN_004e0110()
                 }
                 else
                 {
-                    if (data->age / data->life >= *DAT_011cfc2c.FUN_00403e20())
-                        data->alpha = 1.0f - LinearInterpolate(0.0f, 1.0f, *DAT_011cfc2c.FUN_00403e20() * data->life,
+                    if (data->age / data->life >= *DAT_011cfc2c.Setting_Float_00403e20())
+                        data->alpha = 1.0f - LinearInterpolate(0.0f, 1.0f, *DAT_011cfc2c.Setting_Float_00403e20() * data->life,
                                                                data->life, data->age);
                     NiUpdateData updateDataA(data->age, true, false);
-                    ((ObjShell*)child4)->FUN_00a59c60(updateDataA);
+                    ((ObjShell*)child4)->NiAVObject_Update(updateDataA);
                 }
             }
         }
-        FUN_004de8a0(*DAT_011ceeb4.FUN_00403e20());
-        FUN_004de8b0(*DAT_011cf6a8.FUN_00403e20());
-        splash5 = FUN_004de8d0();
+        BSShaderBloodSplatter_SetFlareOffsetScale(*DAT_011ceeb4.Setting_Float_00403e20());
+        BSShaderBloodSplatter_SetFlareMult(*DAT_011cf6a8.Setting_Float_00403e20());
+        splash5 = BSShaderBloodSplatter_GetGlobalAlpha();
         if (splash5 < 1.0)
         {
             splash5 += elapsed_2 / 0.4;
-            splash5 = FUN_0040ebd0(1.0f, splash5);
-            FUN_004de8c0(splash5);
+            splash5 = BSMIN(1.0f, splash5);
+            BSShaderBloodSplatter_SetGlobalAlpha(splash5);
         }
     }
 }
@@ -549,14 +556,15 @@ struct FUN_004e04e0_cls : FUN_004e04e0_base
     unsigned int m_08;
     FUN_004e04e0_quad m_0c;
 
-    FUN_004e04e0_cls* FUN_004e04e0(const FUN_004e04e0_quad* value);
+    FUN_004e04e0_cls* InitializeFields_004e04e0(const FUN_004e04e0_quad* value);
 };
 
 // Sets the vtable, copies the given quad into m_0c, and returns this after calling FUN_00a7b440 on FUN_004e0320().
 // @fnv 0x004e04e0
-FUN_004e04e0_cls* FUN_004e04e0_cls::FUN_004e04e0(const FUN_004e04e0_quad* pQuad)
+// src: GUESS 0x004e04e0 (confidence: low)
+FUN_004e04e0_cls* FUN_004e04e0_cls::InitializeFields_004e04e0(const FUN_004e04e0_quad* pQuad)
 {
-    FUN_00a7b440(FUN_004e0320());
+    FUN_00a7b440(BSSplatterExtraData_Tag());
     m_pVTable = (void*)DAT_01022a24;
     m_0c = *pQuad;
     return this;
@@ -564,7 +572,8 @@ FUN_004e04e0_cls* FUN_004e04e0_cls::FUN_004e04e0(const FUN_004e04e0_quad* pQuad)
 
 // If DAT_011cc200 and DAT_011cc1fc are set, calls FUN_00622c50(1) on each, then clears both globals.
 // @fnv 0x00622bc0
-void FUN_00622bc0()
+// src: COMMUNITY 0x00622bc0
+void DecalCaster_ClearInstance()
 {
     if (DAT_011cc200)
     {
@@ -611,7 +620,7 @@ class FUN_00622c80 : public FUN_00620ff0
   public:
     FUN_00622c80(float value, unsigned int id);
 
-    void FUN_00622d60(float value, unsigned int id);
+    void DecalCaster_Init(float value, unsigned int id);
 
     int unk000, unk004, unk008, unk00C, unk010, unk014, unk018, unk01C, unk020, unk024, unk028, unk02C;
     int unk030, unk034, unk038, unk03C, unk040, unk044, unk048, unk04C, unk050, unk054, unk058, unk05C;
@@ -640,6 +649,6 @@ class FUN_00622c80 : public FUN_00620ff0
 // @fnv 0x00622c80
 FUN_00622c80::FUN_00622c80(float value, unsigned int id) : m_kSplatters(0)
 {
-    FUN_00622d60(value, id);
+    DecalCaster_Init(value, id);
 }
 }

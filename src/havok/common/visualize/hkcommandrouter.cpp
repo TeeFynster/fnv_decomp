@@ -12,18 +12,19 @@ struct FUN_00cb18f0_t
 {
     int unk00;
     int unk04;
-    int FUN_00cb1fb0(int value);
+    int hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(int value);
 };
 struct FUN_00dd95b0_Outer
 {
     int unk00;
     int unk04;
     FUN_00cb18f0_t output;
-    void FUN_00dd95b0(FUN_00dd95b0_Source* source);
+    void hkCommandRouter_unregisterProcess(FUN_00dd95b0_Source* source);
 };
 // Gets a byte buffer and count from source and feeds each byte to output.FUN_00cb1fb0.
 // @fnv 0x00dd95b0
-void FUN_00dd95b0_Outer::FUN_00dd95b0(FUN_00dd95b0_Source* source)
+// src: HAVOK_LIB 0x00dd95b0
+void FUN_00dd95b0_Outer::hkCommandRouter_unregisterProcess(FUN_00dd95b0_Source* source)
 {
     int count;
     const char* bytes;
@@ -31,7 +32,7 @@ void FUN_00dd95b0_Outer::FUN_00dd95b0(FUN_00dd95b0_Source* source)
     count = 0;
     source->GetBytes(&bytes, &count);
     for (int i = 0; i < count; ++i)
-        output.FUN_00cb1fb0((unsigned char)bytes[i]);
+        output.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove((unsigned char)bytes[i]);
 }
 
 struct InputProvider
@@ -48,10 +49,10 @@ struct MessageContext
     void* unk0c;
     void* active;
 };
-MessageContext* __cdecl FUN_00c85750();
+MessageContext* __cdecl hkMemoryRouter_getInstance();
 struct MessageSink
 {
-    void __thiscall FUN_00cb1870(void* active, unsigned int value, InputProvider* source);
+    void __thiscall hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(void* active, unsigned int value, InputProvider* source);
 };
 struct MessageProcessor
 {
@@ -70,8 +71,8 @@ void MessageProcessor::ProcessInputData(InputProvider* source)
     for (int i = 0; i < length; ++i)
     {
         unsigned char value = bytes[i];
-        MessageContext* context = FUN_00c85750();
-        sink.FUN_00cb1870(context->active, value, source);
+        MessageContext* context = hkMemoryRouter_getInstance();
+        sink.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(context->active, value, source);
     }
 }
 
@@ -124,7 +125,7 @@ struct S_00dd9660_Router
     }
 };
 
-int __cdecl FUN_00c908c0(S_00dd9660_Heap& alloc, void* arr, int reqCapacity, int elemSize) throw();
+int __cdecl hkArrayUtil__reserve(S_00dd9660_Heap& alloc, void* arr, int reqCapacity, int elemSize) throw();
 
 struct S_00dd9660_CharArrayLocalForm
 { // local form of hkArray: 0x00dd9660 needs the original inline/out-of-line helper split; shared replacement changes bytes.
@@ -143,7 +144,7 @@ struct S_00dd9660_CharArrayLocalForm
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, sizeof(char));
+            hkArrayUtil__reserve(alloc, this, newSize, sizeof(char));
         }
     }
     __forceinline void _setSize(S_00dd9660_Heap& alloc, int n) throw()
@@ -201,7 +202,7 @@ struct S_00dd9660_StringBuf
     {
         m_kStringBuffer[0] = 0;
     }
-    void FUN_00d61d00(const char* fmt, ...) throw();
+    void hkStringBuf_printf(const char* fmt, ...) throw();
 };
 
 struct S_00dd9660_StreamReader;
@@ -213,20 +214,20 @@ struct S_00dd9660_IArchive
     S_00dd9660_StreamReader* m_pStreamReader;
     char m_bStreamResult;
 
-    void FUN_00dd8fe0(void* buf, int elemSize, int nelem);
-    void FUN_00ddac60(S_00dd9660_Vector4& v);
+    void hkIArchive_readArrayGeneric(void* buf, int elemSize, int nelem);
+    void readQuadVector4(S_00dd9660_Vector4& v);
     S_00dd9660_Bool GetStreamResult();
 
     __forceinline hkUint8 read8u()
     {
         hkUint8 c;
-        FUN_00dd8fe0(&c, 1, 1);
+        hkIArchive_readArrayGeneric(&c, 1, 1);
         return c;
     }
     __forceinline hkUint64 read64u()
     {
         hkUint64 c;
-        FUN_00dd8fe0(&c, 8, 1);
+        hkIArchive_readArrayGeneric(&c, 8, 1);
         return c;
     }
 };
@@ -272,16 +273,16 @@ S_00dd9660_Bool S_00dd9660_Handler::ReadCommands(S_00dd9660_IArchive* stream)
                 S_00dd9660_Vector4 v;
                 if (command == 0xb0)
                 {
-                    stream->FUN_00ddac60(v);
+                    stream->readQuadVector4(v);
                     hkUint64 id = stream->read64u();
                 }
                 else if (command == 0xb1)
                 {
-                    stream->FUN_00ddac60(v);
+                    stream->readQuadVector4(v);
                 }
                 S_00dd9660_StringBuf buf;
                 buf.clear();
-                buf.FUN_00d61d00("VDB: Found a command (%x) with no handler. Could corrupt the stream.", command);
+                buf.hkStringBuf_printf("VDB: Found a command (%x) with no handler. Could corrupt the stream.", command);
             }
         }
     } while (stream->GetStreamResult() && command != 0xf0);

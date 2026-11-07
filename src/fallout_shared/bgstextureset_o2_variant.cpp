@@ -7,8 +7,8 @@
 
 // Fallout: New Vegas decompilation: fallout_shared/bgstextureset.cpp.
 class BGSTextureSet;
-void FUN_00593210();
-BGSTextureSet* __cdecl FUN_00593220();
+void BGSTextureSet_ClearNullTextureSet();
+BGSTextureSet* __cdecl BGSTextureSet_GetNullTextureSet();
 void __cdecl _Deallocate(void*);
 struct S591140
 {
@@ -35,7 +35,7 @@ struct Holder00592cc0
     void SetFullNameByType(int, char const*);
 };
 
-float __cdecl FUN_0040ebd0(float, float);
+float __cdecl BSMIN(float, float);
 extern float DAT_011f945c;
 extern float DAT_011f9460;
 extern float DAT_011f9464;
@@ -47,10 +47,11 @@ struct FUN_00b66c40_t
     unsigned int uiFlags2;
     char pad28[0xc];
     float fTime;
-    float FUN_00b66c40();
+    float BSShaderPPLightingProperty_GetEnvMapLODFade();
 };
 // @fnv 0x00b66c40
-float FUN_00b66c40_t::FUN_00b66c40()
+// src: XBOX_PDB 0x00b66c40
+float FUN_00b66c40_t::BSShaderPPLightingProperty_GetEnvMapLODFade()
 {
     bool bFadeInActive = (uiFlags & 0x80) > 0 && !((uiFlags2 & 0x800000) > 0) && DAT_011f9460 > 0.0f;
     bool bFadeOut = (uiFlags & 0x20000) > 0 && !((uiFlags2 & 0x800000) > 0) && DAT_011f9468 > 0.0f;
@@ -76,7 +77,7 @@ float FUN_00b66c40_t::FUN_00b66c40()
         else
         {
             fResult = (fTime - DAT_011f945c) / (DAT_011f9460 - DAT_011f945c);
-            fResult = 1.0f - FUN_0040ebd0(1.0f, fResult);
+            fResult = 1.0f - BSMIN(1.0f, fResult);
         }
     }
     return fResult;
@@ -148,11 +149,12 @@ struct FUN_00b66db0_Object
     virtual void v59();
     virtual void v60();
     virtual void* v61(int, int);
-    void FUN_00b66db0();
+    void BSShaderPPLightingProperty_PrecacheTextures();
 };
 
 // @fnv 0x00b66db0
-void FUN_00b66db0_Object::FUN_00b66db0()
+// src: XBOX_PDB 0x00b66db0
+void FUN_00b66db0_Object::BSShaderPPLightingProperty_PrecacheTextures()
 {
     NiRenderer* pkRenderer = NiRenderer::ms_pRenderer;
     for (int i = 0; i < 6; ++i)
@@ -195,11 +197,12 @@ class FUN_00b66b80_cls
     unsigned int unk30;
     float m_34;
 
-    float FUN_00b66b80();
+    float BSShaderPPLightingProperty_GetSpecularLODFade();
 };
 
 // @fnv 0x00b66b80
-float FUN_00b66b80_cls::FUN_00b66b80()
+// src: XBOX_PDB 0x00b66b80
+float FUN_00b66b80_cls::BSShaderPPLightingProperty_GetSpecularLODFade()
 {
     bool ok = (m_20 & 1u) > 0 && !((m_24 & 0x800000u) > 0) && DAT_011f9458 > 0.0f;
     float result = 1.0f;
@@ -352,11 +355,12 @@ struct FUN_00b66ad0_cls
     int unkA8;
     FnvRefObj** m_ac[6];  // +0xac
 
-    void FUN_00b66ad0(int a1, FnvTarget* target);
+    void BSShaderPPLightingProperty_LoadTextureSet(int a1, FnvTarget* target);
 };
 
 // @fnv 0x00b66ad0
-void FUN_00b66ad0_cls::FUN_00b66ad0(int a1, FnvTarget* target)
+// src: COMMUNITY 0x00b66ad0
+void FUN_00b66ad0_cls::BSShaderPPLightingProperty_LoadTextureSet(int a1, FnvTarget* target)
 {
     if (target == 0)
     {

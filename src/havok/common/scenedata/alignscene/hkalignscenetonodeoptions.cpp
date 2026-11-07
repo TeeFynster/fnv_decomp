@@ -18,28 +18,29 @@ struct FUN_00e4a540_cls
     int unk0C;
     int unk10;
     Inner* m_14;
-    void FUN_00e4a540();
+    void InvokeVirtualMethod_00e4a540();
 };
 
 // @fnv 0x00e4a540
-void FUN_00e4a540_cls::FUN_00e4a540()
+// src: GUESS 0x00e4a540 (confidence: low)
+void FUN_00e4a540_cls::InvokeVirtualMethod_00e4a540()
 {
     m_14->Run();
 }
 
 // The TLS accessor at 0x00c85750 supplies the heap at +0x10; no include/hkMemoryRouter.h exists yet.
 #include "../../../../../include/hkMemoryRouter.h"
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 class FUN_00cb0c00_class
 {
   public:
     const char* m_pcText;
 
-    void FUN_00cb0c00() throw();
+    void Object_UpdateFields_00cb0c00() throw();
     ~FUN_00cb0c00_class()
     {
-        FUN_00cb0c00();
+        Object_UpdateFields_00cb0c00();
     }
 };
 
@@ -47,7 +48,7 @@ class FUN_00cb0c00_class
 
 inline void hkReferencedObject::operator delete(void* p)
 {
-    FUN_00c85750().heap().blockFree(p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
+    hkMemoryRouter_getInstance().heap().blockFree(p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
 }
 
 // The reflected layout is 0x18 bytes; no include/ header exists for these options yet.
@@ -118,7 +119,7 @@ struct Matrix4E4
         m_kColumn2(2) = 1.0f;
         m_kColumn3(3) = 1.0f;
     }
-    void FUN_00de8e50(const Matrix4E4& m) throw();
+    void MultiplyInPlace(const Matrix4E4& m) throw();
 };
 struct MatArrE4
 {
@@ -153,7 +154,7 @@ template <class T, int N> struct InplaceArrE4
     }
     __forceinline void release() throw()
     {
-        hkMemoryAllocator& h = FUN_00c85750().heap();
+        hkMemoryAllocator& h = hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if (!(m_iCapacityState & 0x80000000))
             h.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
@@ -165,16 +166,17 @@ template <class T, int N> struct InplaceArrE4
 };
 struct NodeOpsE4
 {
-    int FUN_00e4a540(void* pSrc, InplaceArrE4<PoseE4*, 32>& arr) throw();
-    int FUN_00e4a5a0(void* volatile pSrc, Matrix4E4* pOut, int iIndex);
+    int InvokeVirtualMethod_00e4a540(void* pSrc, InplaceArrE4<PoseE4*, 32>& arr) throw();
+    int ProcessEntries_00e4a5a0(void* volatile pSrc, Matrix4E4* pOut, int iIndex);
 };
 // Initializes pOut, then passes one indexed matrix from each gathered pose to FUN_00de8e50; returns 1 when gathering returns nonzero.
 // @fnv 0x00e4a5a0
-int NodeOpsE4::FUN_00e4a5a0(void* volatile pSrc, Matrix4E4* pOut, int iIndex)
+// src: GUESS 0x00e4a5a0 (confidence: low)
+int NodeOpsE4::ProcessEntries_00e4a5a0(void* volatile pSrc, Matrix4E4* pOut, int iIndex)
 {
     InplaceArrE4<PoseE4*, 32> arr;
     void* source = pSrc;
-    if (FUN_00e4a540(source, arr))
+    if (InvokeVirtualMethod_00e4a540(source, arr))
         return 1;
     pOut->setIdentity();
     for (int i = 0; i < arr.GetLogicalSize(); i++)
@@ -182,7 +184,7 @@ int NodeOpsE4::FUN_00e4a5a0(void* volatile pSrc, Matrix4E4* pOut, int iIndex)
         PoseE4* p = arr[i];
         int n = p->m_mats.m_iElementCount;
         int idx = (iIndex < n) ? iIndex : n - 1;
-        pOut->FUN_00de8e50(p->m_mats.m_data[idx]);
+        pOut->MultiplyInPlace(p->m_mats.m_data[idx]);
     }
     return 0;
 }

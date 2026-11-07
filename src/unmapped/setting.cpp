@@ -27,7 +27,7 @@ void* __thiscall FUN_0044f600_class::InitializeVtbl()
 extern "C" void __cdecl Deallocate(void*);
 struct FUN_00877a10_Class
 {
-    void __thiscall FUN_00877a10();
+    void __thiscall ForwardCall_00877a10();
 };
 struct FUN_0044f620_class
 {
@@ -37,7 +37,7 @@ struct FUN_0044f620_class
 // @fnv 0x0044f620
 void* __thiscall FUN_0044f620_class::FUN_0044f620(unsigned int flags)
 {
-    ((FUN_00877a10_Class*)this)->FUN_00877a10();
+    ((FUN_00877a10_Class*)this)->ForwardCall_00877a10();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -125,7 +125,7 @@ struct TESGlobalMap
     void __thiscall SetAt(char const*, TESGlobal*);
 };
 
-void __cdecl FUN_00c335a0(char const*, ...);
+void __cdecl Object_ProcessAndReturnValue_00c335a0(char const*, ...);
 
 
 // @fnv 0x00404de0
@@ -140,7 +140,7 @@ void __thiscall SettingCollectionMap<Setting>::AddSetting(Setting* apSetting)
         if (reinterpret_cast<DummyPointerMap*>(reinterpret_cast<char*>(this) + 0x10c)
                 ->GetAt(reinterpret_cast<SettingOffset08View*>(apSetting)->GetFlags(), key))
         {
-            FUN_00c335a0(str_010121d0, reinterpret_cast<SettingOffset08View*>(apSetting)->GetFlags());
+            Object_ProcessAndReturnValue_00c335a0(str_010121d0, reinterpret_cast<SettingOffset08View*>(apSetting)->GetFlags());
         }
         else
         {
@@ -157,7 +157,8 @@ namespace fnv_00c335a0 {
 int C335A0Report(int iLevel, const char* pcFormat, va_list args);
 
 // @fnv 0x00c335a0
-int FUN_00c335a0(const char* pcFormat, ...)
+// src: GUESS 0x00c335a0 (confidence: low)
+int Object_ProcessAndReturnValue_00c335a0(const char* pcFormat, ...)
 {
     va_list args;
     va_start(args, pcFormat);
@@ -181,7 +182,7 @@ struct SettingStore : SettingNode
     bool FUN_008256d0();
     void FUN_005ae3d0(SettingName**);
 };
-int __cdecl FUN_00404dc0(const char*, const char*);
+int __cdecl BSstricmp(const char*, const char*);
 extern const char str_0101608c[];
 struct Registry
 {
@@ -197,9 +198,9 @@ void Registry::AddSettingKey(SettingName* key)
         while (position)
         {
             SettingName* entry = *position->FUN_006815c0();
-            if (FUN_00404dc0((const char*)entry->FUN_0044ddc0(), (const char*)key->FUN_0044ddc0()) == 0)
+            if (BSstricmp((const char*)entry->FUN_0044ddc0(), (const char*)key->FUN_0044ddc0()) == 0)
             {
-                FUN_00c335a0("DEFAULT: Setting key '%s' already used in list.\nSetting keys must be unique.\n",
+                Object_ProcessAndReturnValue_00c335a0("DEFAULT: Setting key '%s' already used in list.\nSetting keys must be unique.\n",
                              (const char*)key->FUN_0044ddc0());
                 return;
             }
@@ -224,25 +225,26 @@ struct EntryEnumerator
     virtual void v10();
     virtual bool v14(int data);
     bool FUN_00404d30();
-    DataListEntry* FUN_0044faa0();
-    DataListEntry* FUN_0044fac0(DataListEntry* current);
-    bool FUN_0044f9c0();
+    DataListEntry* SettingCollectionList_Setting_Head();
+    DataListEntry* SettingCollectionList_Setting_Next(DataListEntry* current);
+    bool SettingCollectionList_Setting_ReadSettings();
 };
 // @fnv 0x0044f9c0
-bool EntryEnumerator::FUN_0044f9c0()
+// src: XBOX_PDB 0x0044f9c0
+bool EntryEnumerator::SettingCollectionList_Setting_ReadSettings()
 {
     AutoMemHelper guard(9, true, str_0101608c, 0x357);
     bool succeeded = FUN_00404d30();
     if (succeeded)
     {
-        DataListEntry* current = FUN_0044faa0();
+        DataListEntry* current = SettingCollectionList_Setting_Head();
         while (current != 0)
         {
             if (*current->FUN_006815c0() != 0)
             {
                 succeeded = succeeded & v14(*current->FUN_006815c0());
             }
-            current = FUN_0044fac0(current);
+            current = SettingCollectionList_Setting_Next(current);
         }
     }
     return succeeded;

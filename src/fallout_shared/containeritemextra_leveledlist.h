@@ -16,7 +16,7 @@ class TESLeveledList : public BaseFormComponent
     unsigned char layoutPaddingE[2];
     TESGlobal* m_pLevelGlobal;
     BSSimpleList<LeveledObject*> m_kLeveledObjects;
-    void FUN_0042e680(unsigned char chance);
+    void ExtraWeaponModFlags_SetWeaponModFlags(unsigned char chance);
 };
 #pragma pack(pop)
 FNV_STATIC_ASSERT(offsetof(TESLeveledList, m_pChanceGlobal) == 12);

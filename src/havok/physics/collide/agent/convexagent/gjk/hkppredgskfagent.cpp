@@ -22,7 +22,7 @@ struct __declspec(align(16)) FUN_00d41f00_Local
     unsigned char unk33;
 };
 
-void __cdecl FUN_00d41ec0(FUN_00d41f00_Local* p);
+void __cdecl hkPredGskAgent3_initAgentFunc(FUN_00d41f00_Local* p);
 
 class SpawnedObject
 {
@@ -31,7 +31,8 @@ class SpawnedObject
 };
 
 // @fnv 0x00d41f00
-void __cdecl FUN_00d41f00(SpawnedObject* self, int aiArg1, int aiArg2)
+// src: HAVOK_LIB 0x00d41f00
+void __cdecl hkPredGskAgent3_registerAgent3(SpawnedObject* self, int aiArg1, int aiArg2)
 {
     FUN_00d41f00_Local local;
     local.unk30 = 0;
@@ -42,6 +43,6 @@ void __cdecl FUN_00d41f00(SpawnedObject* self, int aiArg1, int aiArg2)
     local.unk20 = 0;
     local.unk24 = 0;
     local.unk28 = 0;
-    FUN_00d41ec0(&local);
+    hkPredGskAgent3_initAgentFunc(&local);
     self->AddEntry(&local, aiArg1, aiArg2);
 }

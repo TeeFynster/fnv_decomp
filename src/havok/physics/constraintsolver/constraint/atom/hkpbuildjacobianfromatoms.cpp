@@ -77,12 +77,12 @@ public:
     PacketCallLocal_00d6d450(float x, float y, float z, float w);
     PacketCallLocal_00d6d450(const __m128& vector);
 
-    PacketCallLocal_00d6d450* FUN_005532a0(float x, float y, float z, float w);
-    void FUN_004a3f10(PacketCallLocal_00d6d450* vector);
-    void __thiscall FUN_004b4db0(const PacketCallLocal_00d6d450* vector);
-    PacketCallLocal_00d6d450& FUN_00e531a0(int parameter);
-    PacketCallLocal_00d6d450 FUN_00e53260(int parameter);
-    void FUN_005611c0();
+    PacketCallLocal_00d6d450* hkVector4_hkVector4(float x, float y, float z, float w);
+    void SetValue(PacketCallLocal_00d6d450* vector);
+    void __thiscall SetQuaternionComponentsFromVector(const PacketCallLocal_00d6d450* vector);
+    PacketCallLocal_00d6d450& ComputeValue_00e531a0(int parameter);
+    PacketCallLocal_00d6d450 ProcessAndReturnValue_00e53260(int parameter);
+    void normalize_005611c0();
 
     void operator=(const PacketCallLocal_00d6d450& vector);
     float& operator()(int index);
@@ -198,7 +198,8 @@ struct FUN_00d6ce70_Cursor
 };
 
 // @fnv 0x00d6ce70
-void FUN_00d6ce70(FUN_00d6ce70_Vector* v, FUN_00d6ce70_Scale* s, FUN_00d6ce70_Dest* dest, FUN_00d6ce70_Cursor* cursor)
+// src: GUESS 0x00d6ce70 (confidence: low)
+void Hkpbuildjacobianfromatoms_UpdateState_00d6ce70(FUN_00d6ce70_Vector* v, FUN_00d6ce70_Scale* s, FUN_00d6ce70_Dest* dest, FUN_00d6ce70_Cursor* cursor)
 {
     dest->f1c = s->f08 * v->f00;
 
@@ -387,7 +388,8 @@ void S00d6d990_Sink(S00d6d990_Tmp* t, WriterContext* obj, S00d6d990_Rec** cur);
 
 // Writes a float record to the writer context, either via S00d6d990_Sink when m02 and m08 are set, or by appending a record with type 3 and an adjusted value.
 // @fnv 0x00d6d990
-static __declspec(noinline) void FUN_00d6d990(S00d6d990_Src* src, S00d6d990_Rec** cur, WriterContext* obj, int a1)
+// src: GUESS 0x00d6d990 (confidence: medium)
+static __declspec(noinline) void Hkpbuildjacobianfromatoms_WriteFloatSolverRecord(S00d6d990_Src* src, S00d6d990_Rec** cur, WriterContext* obj, int a1)
 {
     if (src->m02 != 0 && src->m08 != 0.0f)
     {
@@ -410,13 +412,14 @@ static __declspec(noinline) void FUN_00d6d990(S00d6d990_Src* src, S00d6d990_Rec*
 
 void S00d6d990_Caller(S00d6d990_Src* s, S00d6d990_Rec** c, WriterContext* o, int a)
 {
-    FUN_00d6d990(s, c, o, a);
+    Hkpbuildjacobianfromatoms_WriteFloatSolverRecord(s, c, o, a);
 }
 
 extern double _DAT_010c9300;
 // Writes a WriterRecord with type 1, storing whole, high, low, value, and flag fields, then advances the cursor past the record.
 // @fnv 0x00d6ea30
-static void __declspec(noinline) FUN_00d6ea30(WriterContext* apWriter, float** cursor, WriterArgs args)
+// src: GUESS 0x00d6ea30 (confidence: medium)
+static void __declspec(noinline) Hkpbuildjacobianfromatoms_WriteTypeOneRecordAndAdvance(WriterContext* apWriter, float** cursor, WriterArgs args)
 {
     float* record = *cursor;
     float old = *record;
@@ -438,7 +441,7 @@ static void __declspec(noinline) FUN_00d6ea30(WriterContext* apWriter, float** c
 }
 void RecordWriteAlt_use(WriterContext* object, float** cursor, WriterArgs args)
 {
-    FUN_00d6ea30(object, cursor, args);
+    Hkpbuildjacobianfromatoms_WriteTypeOneRecordAndAdvance(object, cursor, args);
 }
 
 struct Ea70Src
@@ -507,8 +510,8 @@ struct Ea70Flag
     unsigned char v;
 };
 
-void FUN_00d72190(Ea70Obj* a, Ea70Src* b, Ea70Flag c, int* d);
-void FUN_00d6f460(Ea70Obj* a, int b, Ea70Src* c, int* d);
+void hkSimpleContactConstraintDataBuildJacobian(Ea70Obj* a, Ea70Src* b, Ea70Flag c, int* d);
+void hkSolverBuildJacobianFromAtomsNotContact(Ea70Obj* a, int b, Ea70Src* c, int* d);
 
 static inline void Ea70Step(const float* x, float* y, const Ea70Obj* self, const Ea70Src* src, float& a)
 {
@@ -519,7 +522,8 @@ static inline void Ea70Step(const float* x, float* y, const Ea70Obj* self, const
 }
 
 // @fnv 0x00d6ea70
-static __declspec(noinline) void FUN_00d6ea70(Ea70Src* src, Ea70Obj* self, int* alloc)
+// src: GUESS 0x00d6ea70 (confidence: low)
+static __declspec(noinline) void hkSimpleContactConstraintDataBuildJacobian_ProcessEntries_00d6ea70(Ea70Src* src, Ea70Obj* self, int* alloc)
 {
     float a;
     *alloc -= 16;
@@ -549,17 +553,17 @@ static __declspec(noinline) void FUN_00d6ea70(Ea70Src* src, Ea70Obj* self, int* 
     {
         Ea70Flag flag;
         flag.v = 1;
-        FUN_00d72190(next, &L, flag, alloc);
+        hkSimpleContactConstraintDataBuildJacobian(next, &L, flag, alloc);
     }
     else
     {
-        FUN_00d6f460(next, w12, &L, alloc);
+        hkSolverBuildJacobianFromAtomsNotContact(next, w12, &L, alloc);
     }
 }
 
 void Ea70_caller(Ea70Src* s, Ea70Obj* o, int* a)
 {
-    FUN_00d6ea70(s, o, a);
+    hkSimpleContactConstraintDataBuildJacobian_ProcessEntries_00d6ea70(s, o, a);
 }
 
 extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
@@ -578,8 +582,8 @@ struct S6edf0_Vec
 struct S6edf0_Quat
 {
     S6edf0_Vec v;
-    void FUN_00c7f700(unsigned int a, const S6edf0_Vec* b);
-    void FUN_00c7f750(const hkMatrix3* a, S6edf0_Vec* b);
+    void hkVector4_setRotatedDir(unsigned int a, const S6edf0_Vec* b);
+    void hkVector4_setMul3(const hkMatrix3* a, S6edf0_Vec* b);
 };
 
 struct S6edf0_Motion
@@ -590,7 +594,7 @@ struct S6edf0_Motion
     S6edf0_Vec m30;
     S6edf0_Vec m40;
     hkMatrix3 m50;
-    void FUN_00d71f90(unsigned int a);
+    void CopySelectedFields(unsigned int a);
 };
 
 struct S6edf0_Blob
@@ -669,12 +673,13 @@ union S6edf0_Tag
 };
 
 void WriteVector(hkMatrix3* a, hkMatrix3* b, unsigned int c);
-void FUN_00d72190(unsigned short* p, S6edf0_Blob* b, S6edf0_Tag t, unsigned int c);
-void FUN_00d6f460(unsigned short* p, S6edf0_Tag t, S6edf0_Blob* b, unsigned int c);
+void hkSimpleContactConstraintDataBuildJacobian(unsigned short* p, S6edf0_Blob* b, S6edf0_Tag t, unsigned int c);
+void hkSolverBuildJacobianFromAtomsNotContact(unsigned short* p, S6edf0_Tag t, S6edf0_Blob* b, unsigned int c);
 
 // Builds motion data from src and ctx, then calls FUN_00d72190 if *ctx->m14 is 0x16 or FUN_00d6f460 otherwise, bracketed by two WriteVector calls.
 // @fnv 0x00d6edf0
-void FUN_00d6edf0(S6edf0_Ctx* ctx, S6edf0_Blob* src, unsigned int arg3)
+// src: GUESS 0x00d6edf0 (confidence: low)
+void hkMatrix3_UpdateState_00d6edf0(S6edf0_Ctx* ctx, S6edf0_Blob* src, unsigned int arg3)
 {
     S6edf0_Tag tag;
     __declspec(align(16)) PacketCallLocal_00d6d450 neg;
@@ -688,10 +693,10 @@ void FUN_00d6edf0(S6edf0_Ctx* ctx, S6edf0_Blob* src, unsigned int arg3)
     tag.i = ctx->m12;
     unsigned short* p = ctx->m14;
 
-    frames.qa.FUN_00c7f700(src->u38, &ctx->m20);
-    frames.qb.FUN_00c7f700(src->u3c, &ctx->m30);
-    ma.FUN_00d71f90(src->u30);
-    mb.FUN_00d71f90(src->u34);
+    frames.qa.hkVector4_setRotatedDir(src->u38, &ctx->m20);
+    frames.qb.hkVector4_setRotatedDir(src->u3c, &ctx->m30);
+    ma.CopySelectedFields(src->u30);
+    mb.CopySelectedFields(src->u34);
 
     ma.m40.add4(frames.qa.v);
     mb.m40.add4(frames.qb.v);
@@ -721,8 +726,8 @@ void FUN_00d6edf0(S6edf0_Ctx* ctx, S6edf0_Blob* src, unsigned int arg3)
     _mm_store_ps(&neg.x, _mm_load_ss(&DAT_01012054));
     gr.gb.Multiply(reinterpret_cast<const hkSimdReal&>(neg));
 
-    gr.ia.FUN_00c7f750(&gr.ga, &ma.m20);
-    gr.ib.FUN_00c7f750(&gr.gb, &mb.m20);
+    gr.ia.hkVector4_setMul3(&gr.ga, &ma.m20);
+    gr.ib.hkVector4_setMul3(&gr.gb, &mb.m20);
     ma.m10.add4(gr.ia.v);
     mb.m10.add4(gr.ib.v);
 
@@ -730,11 +735,11 @@ void FUN_00d6edf0(S6edf0_Ctx* ctx, S6edf0_Blob* src, unsigned int arg3)
     if (*p == 0x16)
     {
         tag.b = 1;
-        FUN_00d72190(p, &blob, tag, arg3);
+        hkSimpleContactConstraintDataBuildJacobian(p, &blob, tag, arg3);
     }
     else
     {
-        FUN_00d6f460(p, tag, &blob, arg3);
+        hkSolverBuildJacobianFromAtomsNotContact(p, tag, &blob, arg3);
     }
     WriteVector(&frames.ra, &frames.rb, arg3);
 }
@@ -768,12 +773,13 @@ __declspec(align(16)) struct FUN_00d71f90_cls
     __m128 m_v60;
     __m128 m_v70;
 
-    FUN_00d71f90_cls* FUN_00d71f90(const FUN_00d71f90_cls* src);
+    FUN_00d71f90_cls* CopySelectedFields(const FUN_00d71f90_cls* src);
 };
 
 // Copies the named fields (not unk01 to unk03 or unk0C) from src into this and returns this.
 // @fnv 0x00d71f90
-FUN_00d71f90_cls* FUN_00d71f90_cls::FUN_00d71f90(const FUN_00d71f90_cls* src)
+// src: GUESS 0x00d71f90 (confidence: medium)
+FUN_00d71f90_cls* FUN_00d71f90_cls::CopySelectedFields(const FUN_00d71f90_cls* src)
 {
     FUN_00d71f90_cls* dst = this;
     dst->m_b00 = src->m_b00;
@@ -807,7 +813,8 @@ extern double DAT_010c9300;
 
 // Copies *a and *b into two 16-byte slots at *out, adds DAT_010c9300 to the first float, sets the first byte to 0x19, and advances *out by 0x20.
 // @fnv 0x00dced90
-void __cdecl FUN_00dced90(const __m128* a, const __m128* b, char** ppCursor)
+// src: GUESS 0x00dced90 (confidence: medium)
+void __cdecl Hkpbuildjacobianfromatoms_WriteVectorPairRecordAndAdvance(const __m128* a, const __m128* b, char** ppCursor)
 {
     char* p = *ppCursor;
     _ReadWriteBarrier();
@@ -840,7 +847,8 @@ struct __declspec(align(16)) FUN_00dcedd0_Record
 };
 // Stores value, object, and type 0x1a into the record at cursor, adds a small epsilon to x, and advances cursor.
 // @fnv 0x00dcedd0
-void __cdecl FUN_00dcedd0(const __m128* value, void* object, FUN_00dcedd0_Record** cursor)
+// src: GUESS 0x00dcedd0 (confidence: high)
+void __cdecl Hkpbuildjacobianfromatoms_WriteType1ARecordAndAdvance(const __m128* value, void* object, FUN_00dcedd0_Record** cursor)
 {
     FUN_00dcedd0_Record* record = *cursor;
     record->value = *value;
@@ -883,7 +891,8 @@ extern "C" unsigned int stub_a3(void);
 
 // Stores p30->grid[3], self->grid[3], self->grid[aux->idx] and aux's two floats in a local buffer, then calls ComputeAngularJacobian with a1 and a3.
 // @fnv 0x00d6d220
-static __declspec(noinline) void FUN_00d6d220(Aux* aux, Self* self, unsigned int a1, const Self* p30, unsigned int a3)
+// src: GUESS 0x00d6d220 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00d6d220(Aux* aux, Self* self, unsigned int a1, const Self* p30, unsigned int a3)
 {
     __declspec(align(16)) Buf b;
     _mm_store_ps(b.g0, p30->grid[3]);
@@ -896,10 +905,10 @@ static __declspec(noinline) void FUN_00d6d220(Aux* aux, Self* self, unsigned int
 
 void stub_caller(void)
 {
-    FUN_00d6d220(stub_aux(), stub_self(), stub_a1(), stub_p30(), stub_a3());
+    Object_UpdateFields_00d6d220(stub_aux(), stub_self(), stub_a1(), stub_p30(), stub_a3());
 }
 
-extern "C" void __cdecl FUN_00dcfa30(void* out, unsigned int a1, unsigned int a3);
+extern "C" void __cdecl hk1dLinearLimitBuildJacobian(void* out, unsigned int a1, unsigned int a3);
 
 struct F4
 {
@@ -908,7 +917,8 @@ struct F4
 
 // Builds a local buffer of three vectors and two floats from b, d and a2, then calls FUN_00dcfa30 with it, a1 and a3.
 // @fnv 0x00d6d280
-static __declspec(noinline) void FUN_00d6d280(char* b, char* d, unsigned int a1, char* a2, unsigned int a3)
+// src: GUESS 0x00d6d280 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00d6d280(char* b, char* d, unsigned int a1, char* a2, unsigned int a3)
 {
     __declspec(align(16)) struct Buf
     {
@@ -925,12 +935,12 @@ static __declspec(noinline) void FUN_00d6d280(char* b, char* d, unsigned int a1,
     _mm_store_ps(&buf.m_v1.x, *(const __m128*)((const char*)b + 0x30));
     _mm_store_ps(&buf.m_v2.x, *(const __m128*)(b + ((unsigned int)(unsigned char)d[2] << 4)));
 
-    FUN_00dcfa30((void*)&buf, a1, a3);
+    hk1dLinearLimitBuildJacobian((void*)&buf, a1, a3);
 }
 
 void S00d6d280_Entry(char* d, char* b, unsigned int a1, char* a2, unsigned int a3)
 {
-    FUN_00d6d280(b, d, a1, a2, a3);
+    Object_UpdateFields_00d6d280(b, d, a1, a2, a3);
 }
 
 extern "C" void _ReadWriteBarrier(void);
@@ -1056,7 +1066,8 @@ struct ConstraintEntry
 
 // Fills three ConstraintEntry slots in out from pivot pair pv and segment context c, computing cross terms, diagonal mass, and dot products.
 // @fnv 0x00d6c970
-void __cdecl FUN_00d6c970(PivotPair pv, SegCtx* apSegCtx, __m128* out)
+// src: GUESS 0x00d6c970 (confidence: medium)
+void __cdecl Hkpbuildjacobianfromatoms_BuildThreeConstraintRows(PivotPair pv, SegCtx* apSegCtx, __m128* out)
 {
     ConstraintMotion* pMotionA = apSegCtx->m_p30;
     ConstraintMotion* pMotionB = apSegCtx->m_p34;
@@ -1146,7 +1157,8 @@ struct Jacobian409
 // Adapted from another contributor's previously checked near-match.
 // Computes Jacobian rows for a pair of bodies from a vector, sums their inertia-weighted squares, and stores the reciprocal in outRecip.
 // @fnv 0x00d6cd70
-void FUN_00d6cd70(const __m128& in, const ConstraintBodyPairContext& xf, Jacobian409& out, float& outRecip)
+// src: GUESS 0x00d6cd70 (confidence: medium)
+void Hkpbuildjacobianfromatoms_ComputeJacobianInverseEffectiveMass(const __m128& in, const ConstraintBodyPairContext& xf, Jacobian409& out, float& outRecip)
 {
     const Body409* Q = xf.second;
     __m128 vNeg = _mm_xor_ps(in, DAT_010c44d0);
@@ -1328,7 +1340,8 @@ __forceinline void hkInternalConstraintUtils_inlineCalcRelativeAngle(
 
 // Computes twist axis, current angle, and tau factor for a twist limit constraint atom, storing results into info.
 // @fnv 0x00d6d450
-static __declspec(noinline) int FUN_00d6d450(const SixteenWordFloatRecord* in, const hkRotation* apBaseB,
+// src: GUESS 0x00d6d450 (confidence: medium)
+static __declspec(noinline) int hkRotation_ComputeTwistLimitInfo(const SixteenWordFloatRecord* in, const hkRotation* apBaseB,
                                              Vector4AndFourScalars* info, const hkpTwistLimitConstraintAtom* atom,
                                              const hkRotation* baseA)
 {
@@ -1354,7 +1367,7 @@ static __declspec(noinline) int FUN_00d6d450(const SixteenWordFloatRecord* in, c
 int TwistLimit_Entry(const SixteenWordFloatRecord* in, const hkRotation* baseB, const hkpTwistLimitConstraintAtom* atom,
                      Vector4AndFourScalars* info, const hkRotation* baseA)
 {
-    return FUN_00d6d450(in, baseB, info, atom, baseA);
+    return hkRotation_ComputeTwistLimitInfo(in, baseB, info, atom, baseA);
 }
 
 extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
@@ -1435,7 +1448,7 @@ struct S6f0c0_Link
     int unk74;
     int unk78;
     int unk7c;
-    void FUN_00d72030(S6f0c0_Link* prev);
+    void InitializeFields_00d72030(S6f0c0_Link* prev);
 };
 struct S6f0c0_Blob
 {
@@ -1524,12 +1537,13 @@ inline void S6f0c0_Emit(S6f0c0_Blob* source, S6f0c0_Rec** cursor, void* data, un
     *cursor = record + 1;
 }
 
-void __cdecl FUN_00d72190(S6f0c0_Bone* bone, S6f0c0_Blob* blob, S6f0c0_Tag tag, S6f0c0_Rec** cursor);
-void __cdecl FUN_00dcedd0(const __m128* value, unsigned int flag, S6f0c0_Rec** cursor);
+void __cdecl hkSimpleContactConstraintDataBuildJacobian(S6f0c0_Bone* bone, S6f0c0_Blob* blob, S6f0c0_Tag tag, S6f0c0_Rec** cursor);
+void __cdecl Hkpbuildjacobianfromatoms_WriteType1ARecordAndAdvance(const __m128* value, unsigned int flag, S6f0c0_Rec** cursor);
 
 // Writes a bone record to the cursor, computes a direction vector from the bone axis and context dir, and emits two vector records.
 // @fnv 0x00d6f0c0
-static __declspec(noinline) void FUN_00d6f0c0(S6f0c0_Ctx* ctx, S6f0c0_Blob* src, S6f0c0_Rec** cursor)
+// src: GUESS 0x00d6f0c0 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00d6f0c0(S6f0c0_Ctx* ctx, S6f0c0_Blob* src, S6f0c0_Rec** cursor)
 {
     __m128 v;
     PacketCallLocal_00d6d450 dir = ctx->dir;
@@ -1544,13 +1558,13 @@ static __declspec(noinline) void FUN_00d6f0c0(S6f0c0_Ctx* ctx, S6f0c0_Blob* src,
     const __m128& localDirection = *(__m128*)&dir;
     if (!neg)
     {
-        lp->FUN_00d72030(src->link30);
+        lp->InitializeFields_00d72030(src->link30);
         vDir = localDirection;
         src->link30 = lp;
     }
     else
     {
-        lp->FUN_00d72030(src->link34);
+        lp->InitializeFields_00d72030(src->link34);
         vDir = localDirection;
         src->link34 = lp;
         vDir = _mm_xor_ps(vDir, DAT_010c4c00);
@@ -1562,18 +1576,18 @@ static __declspec(noinline) void FUN_00d6f0c0(S6f0c0_Ctx* ctx, S6f0c0_Blob* src,
     d = _mm_add_ss(_mm_shuffle_ps(d, d, 0xaa), t);
     v = _mm_xor_ps(_mm_sub_ps(vDir, _mm_mul_ps(_mm_shuffle_ps(d, d, 0), axis)), DAT_010c44d0);
     unsigned int flag = neg != 0;
-    FUN_00dcedd0(&v, flag, cursor);
+    Hkpbuildjacobianfromatoms_WriteType1ARecordAndAdvance(&v, flag, cursor);
     link.vel = _mm_add_ps(link.vel, v);
     S6f0c0_Tag tag;
     tag.b = 0;
-    FUN_00d72190(bone, &blobCopy, tag, cursor);
+    hkSimpleContactConstraintDataBuildJacobian(bone, &blobCopy, tag, cursor);
     v = _mm_xor_ps(v, DAT_010c44d0);
-    FUN_00dcedd0(&v, flag, cursor);
+    Hkpbuildjacobianfromatoms_WriteType1ARecordAndAdvance(&v, flag, cursor);
 }
 
 void S6f0c0_Caller(S6f0c0_Ctx* ctx, S6f0c0_Blob* src, S6f0c0_Rec** cursor)
 {
-    FUN_00d6f0c0(ctx, src, cursor);
+    Object_UpdateFields_00d6f0c0(ctx, src, cursor);
 }
 
 #include <math.h>
@@ -1622,7 +1636,8 @@ struct VecArg
 };
 // Returns 1 if the squared cross product of two indexed vectors is below a threshold, else fills out with a scaled axis and an angle and returns 0.
 // @fnv 0x00d6d5d0
-static __declspec(noinline) int __cdecl FUN_00d6d5d0(float* a1, VecArg a2, VecArg a3, Ctx* self, Out* out)
+// src: GUESS 0x00d6d5d0 (confidence: medium)
+static __declspec(noinline) int __cdecl Hkpbuildjacobianfromatoms_ComputeAxisAngleOrReportParallel(float* a1, VecArg a2, VecArg a3, Ctx* self, Out* out)
 {
     float threshold = DAT_0104da4c;
     const __m128& A = a2.p[self->m03];
@@ -1661,7 +1676,7 @@ volatile int result;
 void AngleCaller(float* a1, __m128* a2, __m128* a3, Ctx* self, Out* out)
 {
     VecArg x = {a2}, y = {a3};
-    result = FUN_00d6d5d0(a1, x, y, self, out);
+    result = Hkpbuildjacobianfromatoms_ComputeAxisAngleOrReportParallel(a1, x, y, self, out);
 }
 
 template <class T> class FieldValue
@@ -1945,8 +1960,8 @@ struct EvalOutput
 {
     FieldValue<float> f00, f04, f08, f0c, f10, f14;
 };
-extern "C" void __cdecl FUN_00cd5530(Basis*, const Basis*, const Basis*);
-extern "C" void __cdecl FUN_00dcfff0(void*, const EvalInput*, EvalOutput*);
+extern "C" void __cdecl hkMatrix3_MultiplyMatrixColumns(Basis*, const Basis*, const Basis*);
+extern "C" void __cdecl _hkCalcMotorData(void*, const EvalInput*, EvalOutput*);
 
 static __forceinline __m128 rotate(FnvSubObject* o, __m128 v)
 {
@@ -1967,7 +1982,8 @@ static __forceinline void emptyRecord(StreamRecord** cursor, unsigned char flag)
 }
 // For an active record, writes one stream record per axis (type 15 with mass and solver outputs, or an empty record) and updates cached previous angles.
 // @fnv 0x00d6dd60
-static __declspec(noinline) void FUN_00d6dd60(FnvPacket* context, AxisRecord* record, const Basis* a, const Basis* b,
+// src: GUESS 0x00d6dd60 (confidence: medium)
+static __declspec(noinline) void Object_WriteAxisRecordsAndCacheAngles(FnvPacket* context, AxisRecord* record, const Basis* a, const Basis* b,
                                               StreamRecord** cursor)
 {
     unsigned char* initialized = context->cache + record->initializedOffset;
@@ -1975,7 +1991,7 @@ static __declspec(noinline) void FUN_00d6dd60(FnvPacket* context, AxisRecord* re
     if (record->active)
     {
         Basis transformed;
-        FUN_00cd5530(&transformed, context->unk3c, &record->basis);
+        hkMatrix3_MultiplyMatrixColumns(&transformed, context->unk3c, &record->basis);
         EvalInput input;
         input.property.b = input.property.a = 0.0f;
         input.context = context;
@@ -2018,7 +2034,7 @@ static __declspec(noinline) void FUN_00d6dd60(FnvPacket* context, AxisRecord* re
                 input.deltaNew = newAngle - previous[i];
                 input.deltaOld = previous[i] - oldAngle;
                 EvalOutput result;
-                FUN_00dcfff0(current, &input, &result);
+                _hkCalcMotorData(current, &input, &result);
                 reinterpret_cast<PacketCallLocal_00d6d450&>(out->second.vec).w = context->scale2 * result.f00;
                 StreamRecord* __restrict emit = *cursor;
                 emit->stamp += 1.1920928955078125e-7;
@@ -2050,7 +2066,7 @@ const Basis* volatile sourceB;
 StreamRecord** volatile sourceCursor;
 void TargetCaller()
 {
-    FUN_00d6dd60(sourcePacket, sourceRecord, sourceA, sourceB, sourceCursor);
+    Object_WriteAxisRecordsAndCacheAngles(sourcePacket, sourceRecord, sourceA, sourceB, sourceCursor);
 }
 
 extern "C"
@@ -2184,8 +2200,9 @@ static __forceinline float EffectiveMass(const V4& angularA, const V4& inertiaA,
 }
 // Fills three Record entries for a constraint, computing angular terms and effective mass, and appends a notification if the speed limit is exceeded.
 // @fnv 0x00d6ced0
+// src: GUESS 0x00d6ced0 (confidence: medium)
 static void __declspec(noinline)
-    FUN_00d6ced0(Input* input, Constraint* apConstraint, AtomTransform* apPointA, AtomTransform* apPointB, Record** cursor)
+    hkVector4_BuildConstraintRowsAndCheckSpeedLimit(Input* input, Constraint* apConstraint, AtomTransform* apPointA, AtomTransform* apPointB, Record** cursor)
 {
     Body* bodyA = apConstraint->bodyA;
     Body* bodyB = apConstraint->bodyB;
@@ -2203,8 +2220,8 @@ static void __declspec(noinline)
     V4 rb;
     rb.m = _mm_sub_ps(pb.m, bodyB->center.m);
     hkVector4 wa, wb;
-    wa.FUN_004b4ab0(reinterpret_cast<const hkRotation&>(bodyA->rot), reinterpret_cast<const hkVector4&>(bodyA->linear));
-    wb.FUN_004b4ab0(reinterpret_cast<const hkRotation&>(bodyB->rot), reinterpret_cast<const hkVector4&>(bodyB->linear));
+    wa.hkVector4_setRotatedInverseDir(reinterpret_cast<const hkRotation&>(bodyA->rot), reinterpret_cast<const hkVector4&>(bodyA->linear));
+    wb.hkVector4_setRotatedInverseDir(reinterpret_cast<const hkRotation&>(bodyB->rot), reinterpret_cast<const hkVector4&>(bodyB->linear));
     __m128 scale = _mm_shuffle_ps(inverseV.m, inverseV.m, 0);
     V4 velocity;
     velocity.m =
@@ -2273,7 +2290,7 @@ extern AtomTransform* volatile callB;
 extern Record** volatile callCursor;
 void ConstraintWrite_use()
 {
-    FUN_00d6ced0(callInput, callObject, callA, callB, callCursor);
+    hkVector4_BuildConstraintRowsAndCheckSpeedLimit(callInput, callObject, callA, callB, callCursor);
 }
 
 extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
@@ -2383,7 +2400,8 @@ struct AngularAxes
 };
 // Writes an angular constraint row to the solver, computing the angle from axis vectors and evaluating the solver if enabled.
 // @fnv 0x00d6da00
-static __declspec(noinline) void FUN_00d6da00(WriterContext* apContext, AngularRecord* record, AngularAxes aa,
+// src: GUESS 0x00d6da00 (confidence: medium)
+static __declspec(noinline) void Object_WriteAngularConstraintRow(WriterContext* apContext, AngularRecord* record, AngularAxes aa,
                                               AngularAxes ab, RowCursor& cur)
 {
     AngularData* data = (AngularData*)apContext->unk64;
@@ -2434,7 +2452,7 @@ static __declspec(noinline) void FUN_00d6da00(WriterContext* apContext, AngularR
         input.error = record->limit - *previous;
         input.delta = ScalarValue(*previous) - angle;
         AngularOutput output;
-        FUN_00dcfff0(solver, (const EvalInput*)&input, (EvalOutput*)&output);
+        _hkCalcMotorData(solver, (const EvalInput*)&input, (EvalOutput*)&output);
         AngularRow** cursor = CursorValue((&cur.row));
         row->angularB.m128_f32[3] = ((float&)apContext->unk08) * output.p0;
         AngularRow* current = *cursor + 1;
@@ -2466,7 +2484,7 @@ static __declspec(noinline) void FUN_00d6da00(WriterContext* apContext, AngularR
 void AngularWrite_use(AngularRecord* record, WriterContext* object, __m128* axesA, __m128* axesB, AngularRow** cursor)
 {
     AngularAxes aa(axesA), ab(axesB);
-    FUN_00d6da00(object, record, aa, ab, *(RowCursor*)cursor);
+    Object_WriteAngularConstraintRow(object, record, aa, ab, *(RowCursor*)cursor);
 }
 
 extern "C" __m128 _mm_sub_ss(__m128, __m128);
@@ -2561,7 +2579,8 @@ static __forceinline __m128 transform3(__m128 v, SolverBody* b)
 }
 // Computes pulley constraint linear/angular errors, effective mass, and bias for two bodies, storing results into the SolverRecord at *cursor.
 // @fnv 0x00d6e6b0
-static __declspec(noinline) void FUN_00d6e6b0(SolverGeometry* geometry, SolverBody* anchorA, SolverSettings* settings,
+// src: GUESS 0x00d6e6b0 (confidence: medium)
+static __declspec(noinline) void Hkpbuildjacobianfromatoms_BuildPulleySolverRecord(SolverGeometry* geometry, SolverBody* anchorA, SolverSettings* settings,
                                               SolverBody* anchorB, SolverRecord** cursor)
 {
     PulleyWork kIter;
@@ -2641,7 +2660,7 @@ extern SolverBody* getAnchorB();
 extern SolverRecord** getCursor();
 void SolverWrite_use()
 {
-    FUN_00d6e6b0(getGeometry(), getAnchorA(), getSettings(), getAnchorB(), getCursor());
+    Hkpbuildjacobianfromatoms_BuildPulleySolverRecord(getGeometry(), getAnchorA(), getSettings(), getAnchorB(), getCursor());
 }
 
 extern "C" void _ReadWriteBarrier();
@@ -2691,7 +2710,8 @@ struct VectorInput
 };
 // Computes axis-angle rotation from two vectors, applies mode scaling and optional limit clamping, returning 1 if vectors are parallel.
 // @fnv 0x00d6d720
-static __declspec(noinline) int FUN_00d6d720(ConstraintSource* apSource, ConstraintDest* out,
+// src: GUESS 0x00d6d720 (confidence: medium)
+static __declspec(noinline) int Object_ComputeLimitedAxisAngle(ConstraintSource* apSource, ConstraintDest* out,
                                              ConstraintContext* apContext, VectorInput a, VectorInput b)
 {
     unsigned long result;
@@ -2761,7 +2781,7 @@ static __declspec(noinline) int FUN_00d6d720(ConstraintSource* apSource, Constra
 }
 void ConstraintCaller(ConstraintSource* s, ConstraintDest* o, ConstraintContext* c, __m128* a, __m128* b)
 {
-    FUN_00d6d720(s, o, c, a, b);
+    Object_ComputeLimitedAxisAngle(s, o, c, a, b);
 }
 
 extern "C" __m128 _mm_load_ps(const float*);
@@ -2802,8 +2822,8 @@ struct hkVec4
     {
         q = v.q;
     }
-    hkVec4* FUN_00c7f700(const struct hkTransF* t, const hkVec4* v);
-    hkVec4* FUN_00c7f750(const struct hkRot* m, const hkVec4* v);
+    hkVec4* hkVector4_setRotatedDir(const struct hkTransF* t, const hkVec4* v);
+    hkVec4* hkVector4_setMul3(const struct hkRot* m, const hkVec4* v);
 };
 struct hkVec4F
 {
@@ -2900,8 +2920,8 @@ struct Accum
     hkVec4 m_vInverseInertiaAndMass;
     hkVec4 m_kCenterPosition;
     hkVec4 m_rot[3];
-    Accum* FUN_00d71f90(const Accum* src);
-    Accum* FUN_00d72030(const Accum* src);
+    Accum* CopySelectedFields(const Accum* src);
+    Accum* InitializeFields_00d72030(const Accum* src);
 };
 struct QueryIn
 {
@@ -3307,28 +3327,29 @@ struct PulleyScale
     float m_dt;
     float m_rhs;
 };
-void __cdecl FUN_00cd5530(hkRot* out, const hkTransF* t, const hkRot* m);
-void __cdecl FUN_00dcf5b0(StiffSpringInfo* info, const QueryIn* in, QueryOut* out, float error);
-void __cdecl FUN_00dcf280(LinInfo* info, const QueryIn* in, QueryOut* out);
+void __cdecl hkMatrix3_MultiplyMatrixColumns(hkRot* out, const hkTransF* t, const hkRot* m);
+void __cdecl Hkp1dbilateralconstraintbuildjacobian_BuildJacobianAndAdvance(StiffSpringInfo* info, const QueryIn* in, QueryOut* out, float error);
+void __cdecl hk1dLinearBilateralConstraintBuildJacobian(LinInfo* info, const QueryIn* in, QueryOut* out);
 void __cdecl ComputeAngularJacobian(LinInfo* info, const QueryIn* in, QueryOut* out);
-void __cdecl FUN_00dcfa30(LinInfo* info, const QueryIn* in, QueryOut* out);
-void __cdecl FUN_00dcf100(LinFrictionInfo* info, const QueryIn* in, QueryOut* out);
-void __cdecl FUN_00dcee80(AngInfo* info, const QueryIn* in, QueryOut* out);
-void __cdecl FUN_00dcefb0(AngFrictionInfo* info, const QueryIn* in, QueryOut* out);
+void __cdecl hk1dLinearLimitBuildJacobian(LinInfo* info, const QueryIn* in, QueryOut* out);
+void __cdecl hk1dLinearFrictionBuildJacobian(LinFrictionInfo* info, const QueryIn* in, QueryOut* out);
+void __cdecl hk1dAngularBilateralConstraintBuildJacobian(AngInfo* info, const QueryIn* in, QueryOut* out);
+void __cdecl Hkp1dbilateralconstraintbuildjacobian_BuildRotatedVertexJacobianPairs(AngFrictionInfo* info, const QueryIn* in, QueryOut* out);
 void __cdecl ComputeJacobian(const hkVec4* axis, const hkVec4* pivot, const QueryIn* in, char* schemas,
                              MotorInput* min);
-void __cdecl FUN_00dcfff0(Motor* motor, MotorInput* min, MotorOutput* mout);
-void __cdecl FUN_00dd03c0(MotorOutput* mout, const QueryIn* in, char* schemas, QueryOut* out);
+void __cdecl _hkCalcMotorData(Motor* motor, MotorInput* min, MotorOutput* mout);
+void __cdecl _hk1dLinearVelocityMotorCommitJacobian(MotorOutput* mout, const QueryIn* in, char* schemas, QueryOut* out);
 void __cdecl WriteVector(const hkRot* a, const hkRot* b, QueryOut* out);
-void __cdecl FUN_00dced90(const hkVec4* a, const hkVec4* b, QueryOut* out);
-void __cdecl FUN_00dcedd0(const hkVec4* v, int which, QueryOut* out);
-void __cdecl FUN_00d72190(const Atom* atom, const QueryIn* in, hkBool writeHeader, QueryOut* out);
-void __cdecl FUN_00d72090(void* p);
-void __cdecl FUN_00d6f460(const Atom* atoms, int sizeOfAllAtoms, const QueryIn* queryIn, QueryOut* out);
+void __cdecl Hkpbuildjacobianfromatoms_WriteVectorPairRecordAndAdvance(const hkVec4* a, const hkVec4* b, QueryOut* out);
+void __cdecl Hkpbuildjacobianfromatoms_WriteType1ARecordAndAdvance(const hkVec4* v, int which, QueryOut* out);
+void __cdecl hkSimpleContactConstraintDataBuildJacobian(const Atom* atom, const QueryIn* in, hkBool writeHeader, QueryOut* out);
+void __cdecl _hkSimpleContactConstraintDataAddALittleSurfaceViscosity(void* p);
+void __cdecl hkSolverBuildJacobianFromAtomsNotContact(const Atom* atoms, int sizeOfAllAtoms, const QueryIn* queryIn, QueryOut* out);
 
 extern "C" int __stdcall bs_index(int handle, int flag);
 extern float DAT_010c7948[];
-static __declspec(noinline) void FUN_00d6ced0(const BallSocketAtom* atom, const QueryIn* in, const hkTrans* baseA,
+// src: GUESS 0x00d6ced0 (confidence: medium)
+static __declspec(noinline) void hkVector4_BuildConstraintRowsAndCheckSpeedLimit(const BallSocketAtom* atom, const QueryIn* in, const hkTrans* baseA,
                                               const hkTrans* baseB, QueryOut* out)
 {
     float maxImpulse = atom->m_usFlags;
@@ -3341,9 +3362,9 @@ static __declspec(noinline) void FUN_00d6ced0(const BallSocketAtom* atom, const 
     hkVec4 rB;
     rB.q = _mm_sub_ps(baseB->col(3).q, bodyB->m_kCenterPosition.q);
     hkVector4 mA;
-    mA.FUN_004b4ab0(reinterpret_cast<const hkRotation&>(bodyA->m_rot[0]), reinterpret_cast<const hkVector4&>(bodyA->m_vAngularVelocity));
+    mA.hkVector4_setRotatedInverseDir(reinterpret_cast<const hkRotation&>(bodyA->m_rot[0]), reinterpret_cast<const hkVector4&>(bodyA->m_vAngularVelocity));
     hkVector4 mB;
-    mB.FUN_004b4ab0(reinterpret_cast<const hkRotation&>(bodyB->m_rot[0]), reinterpret_cast<const hkVector4&>(bodyB->m_vAngularVelocity));
+    mB.hkVector4_setRotatedInverseDir(reinterpret_cast<const hkRotation&>(bodyB->m_rot[0]), reinterpret_cast<const hkVector4&>(bodyB->m_vAngularVelocity));
     int handle = in->unk68;
     if (handle)
     {
@@ -3372,7 +3393,8 @@ static __forceinline void setHeader(SchemaHeader* h, int whole, int low, int hig
     h->m_whole = whole;
     ((SolverSchemaType*)h)->m_flag = size;
 }
-static __declspec(noinline) void FUN_00d6ea30(const QueryIn* in, QueryOut* out, SolverResults* runtime,
+// src: GUESS 0x00d6ea30 (confidence: medium)
+static __declspec(noinline) void Hkpbuildjacobianfromatoms_WriteTypeOneRecordAndAdvance(const QueryIn* in, QueryOut* out, SolverResults* runtime,
                                               unsigned char size)
 {
     SchemaHeader* h = (SchemaHeader*)out->m_pQueryResultSchema;
@@ -3645,7 +3667,7 @@ static __forceinline void case4(const Atom*& atoms, QueryIn& in, hkTrans& baseA,
 static __forceinline void case5(const Atom*& atoms, QueryIn& in, hkTrans& baseA, hkTrans& baseB, QueryOut* out)
 {
     const BallSocketAtom* a = (const BallSocketAtom*)atoms;
-    FUN_00d6ced0(a, &in, &baseA, &baseB, out);
+    hkVector4_BuildConstraintRowsAndCheckSpeedLimit(a, &in, &baseA, &baseB, out);
     atoms = (const Atom*)(a + 1);
     in.m_pByteBuffer += 3;
     in.m_pUserData += 3;
@@ -3673,7 +3695,7 @@ static __forceinline void case6(const Atom*& atoms, QueryIn& in, hkTrans& baseA,
         info.m_dir.q = _mm_mul_ps(_mm_shuffle_ps(s, s, 0), d);
     }
     float error = a->m_fRestLength - len;
-    FUN_00dcf5b0(&info, &in, out, error);
+    Hkp1dbilateralconstraintbuildjacobian_BuildJacobianAndAdvance(&info, &in, out, error);
     in.m_pByteBuffer += 1;
     atoms = (const Atom*)(a + 1);
     in.m_pUserData += 1;
@@ -3685,7 +3707,7 @@ static __forceinline void case7(const Atom*& atoms, QueryIn& in, hkTrans& baseA,
     info.m_kPivotA.q = baseA.col(3).q;
     info.m_kPivotB.q = baseB.col(3).q;
     info.m_kAxisEndPoints.q = baseB.col(a->m_ucAxisIndex).q;
-    FUN_00dcf280(&info, &in, out);
+    hk1dLinearBilateralConstraintBuildJacobian(&info, &in, out);
     in.m_pByteBuffer += 1;
     atoms = (const Atom*)((const char*)a + 4);
     in.m_pUserData += 1;
@@ -3713,7 +3735,7 @@ static __forceinline void case9(const Atom*& atoms, QueryIn& in, hkTrans& baseA,
     info.m_kAxisEndPoints.q = baseB.col(a->m_ucAxisIndex).q;
     info.m_f30 = a->m_kMinimumCorner;
     info.m_f34 = a->m_kMaximumCorner;
-    FUN_00dcfa30(&info, &in, out);
+    hk1dLinearLimitBuildJacobian(&info, &in, out);
     in.m_pByteBuffer += 1;
     atoms = (const Atom*)(a + 1);
     in.m_pUserData += 1;
@@ -3728,7 +3750,7 @@ static __forceinline void case10(const Atom*& atoms, QueryIn& in, hkTrans& baseA
         info.m_kAxisEndPoints.q = baseB.col(a->m_ucFrictionAxis).q;
         info.m_fFriction = a->m_fFriction;
         info.m_pRuntime = in.m_pByteBuffer;
-        FUN_00dcf100(&info, &in, out);
+        hk1dLinearFrictionBuildJacobian(&info, &in, out);
     }
     else
     {
@@ -3759,8 +3781,8 @@ static __forceinline void case11(const Atom*& atoms, QueryIn& in, hkTrans& baseA
         min.m_fMaxImpulse = *previousTargetPosition -
                             toFloat(dot3(_mm_sub_ps(baseA.col(3).q, baseB.col(3).q), baseB.col(a->m_ucMotorAxis).q));
         MotorOutput mout;
-        FUN_00dcfff0(motor, &min, &mout);
-        FUN_00dd03c0(&mout, &in, schemas, out);
+        _hkCalcMotorData(motor, &min, &mout);
+        _hk1dLinearVelocityMotorCommitJacobian(&mout, &in, schemas, out);
         if (*previousTargetPosition != a->m_vVector || !*initialized)
         {
             *previousTargetPosition = a->m_vVector;
@@ -3786,11 +3808,11 @@ static __forceinline void case12(const Atom*& atoms, QueryIn& in, hkTrans& baseA
     info.m_kPointA.q = baseA.col(freeAxis).q;
     info.m_iThirdValue.q = ((const hkVec4*)(bb + o1))->q;
     info.m_kPointB.q = ((const hkVec4*)(bb + o2))->q;
-    FUN_00dcee80(&info, &in, out);
+    hk1dAngularBilateralConstraintBuildJacobian(&info, &in, out);
     info.m_iThirdValue.q = ((const hkVec4*)(bb + o2))->q;
     __m128 mask = DAT_010c44d0;
     info.m_kPointB.q = _mm_xor_ps(mask, ((const hkVec4*)(bb + o1))->q);
-    FUN_00dcee80(&info, &in, out);
+    hk1dAngularBilateralConstraintBuildJacobian(&info, &in, out);
     in.m_pByteBuffer += 2;
     atoms = (const Atom*)((const char*)a + 4);
     in.m_pUserData += 2;
@@ -3804,7 +3826,7 @@ static __forceinline void case13(const Atom*& atoms, QueryIn& in, hkTrans& baseA
         info.m_kPointB.q = ((const hkVec4*)((const char*)&baseA + DAT_010d33c0[i]))->q;
         info.m_kPointA.q = ((const hkVec4*)((const char*)&baseA + DAT_010d33c0[i + 1]))->q;
         info.m_iThirdValue.q = ((const hkVec4*)((const char*)&baseB + DAT_010d33c0[i + 2]))->q;
-        FUN_00dcee80(&info, &in, out);
+        hk1dAngularBilateralConstraintBuildJacobian(&info, &in, out);
     }
     atoms = (const Atom*)((const char*)a + 4);
     in.m_pByteBuffer += a->m_ucNumConstrainedAxes;
@@ -3960,7 +3982,7 @@ static __forceinline void case17(const Atom*& atoms, QueryIn& in, hkTrans& baseA
         info.m_axes = &baseA.col(a->m_ucFirstFrictionAxis);
         info.m_numAxes = a->m_ucNumFrictionAxes;
         info.m_pRuntime = in.m_pByteBuffer;
-        FUN_00dcefb0(&info, &in, out);
+        Hkp1dbilateralconstraintbuildjacobian_BuildRotatedVertexJacobianPairs(&info, &in, out);
     }
     else
     {
@@ -4038,7 +4060,7 @@ static __forceinline void case18(const Atom*& atoms, QueryIn& in, hkTrans& baseA
         min.m_fTargetVelocity = a->m_fTargetAngle - *previousTargetAngle;
         min.m_fMaxImpulse = *previousTargetAngle - angle;
         MotorOutput mout;
-        FUN_00dcfff0(motor, &min, &mout);
+        _hkCalcMotorData(motor, &min, &mout);
         s->m_angB.w = mout.m_f00.value * in.m_fFirstQueryValue;
         SchemaMotor* t = (SchemaMotor*)out->m_pQueryResultSchema;
         t->m_angA.x = t->m_angA.x + 1.192092896e-07f;
@@ -4136,7 +4158,7 @@ static __forceinline void case19(const Atom*& atoms, QueryIn& input, hkTrans& ba
     if (a->m_bLimitEnabled)
     {
         hkRot target;
-        FUN_00cd5530(&target, in.m_kBodyBLocalFrame, &a->m_kMotorAxes);
+        hkMatrix3_MultiplyMatrixColumns(&target, in.m_kBodyBLocalFrame, &a->m_kMotorAxes);
         MotorInput min;
         min.m_pStepInfo = &in;
         int axisIndex[3] = {0, 1, 2};
@@ -4171,7 +4193,7 @@ static __forceinline void case19(const Atom*& atoms, QueryIn& input, hkTrans& ba
                 min.m_fTargetVelocity = targetData[0] - previousTargetAngles[i];
                 min.m_fMaxImpulse = previousTargetAngles[i] - angleData[0];
                 MotorOutput mout;
-                FUN_00dcfff0(motor, &min, &mout);
+                _hkCalcMotorData(motor, &min, &mout);
                 s->m_angB.w = mout.m_f00 * in.m_fFirstQueryValue;
                 SchemaMotor* t = (SchemaMotor*)out->m_pQueryResultSchema;
                 t->m_angA.x = t->m_angA.x + 1.192092896e-07f;
@@ -4402,13 +4424,13 @@ static __forceinline void case28(const Atom*& atoms, QueryIn& in, hkTrans& baseA
     const Atom* child = a->m_base.m_pChildAtom;
     int childSize = a->m_base.m_iChildSize;
     hkVec4 dispA;
-    dispA.FUN_00c7f700(in.m_kBodyALocalFrame, &a->m_kDisplacementA);
+    dispA.hkVector4_setRotatedDir(in.m_kBodyALocalFrame, &a->m_kDisplacementA);
     hkVec4 dispB;
-    dispB.FUN_00c7f700(in.m_kBodyBLocalFrame, &a->m_kDisplacementB);
+    dispB.hkVector4_setRotatedDir(in.m_kBodyBLocalFrame, &a->m_kDisplacementB);
     Accum accA;
-    accA.FUN_00d71f90(in.m_pBodyA);
+    accA.CopySelectedFields(in.m_pBodyA);
     Accum accB;
-    accB.FUN_00d71f90(in.m_pBodyB);
+    accB.CopySelectedFields(in.m_pBodyB);
     accA.m_kCenterPosition.q = _mm_add_ps(dispA.q, accA.m_kCenterPosition.q);
     accB.m_kCenterPosition.q = _mm_add_ps(dispB.q, accB.m_kCenterPosition.q);
     in6.m_pBodyA = &accA;
@@ -4430,19 +4452,19 @@ static __forceinline void case28(const Atom*& atoms, QueryIn& in, hkTrans& baseA
     minusOne2.q = _mm_load_ss(&DAT_01012054);
     negB.scale((const hkVec4&)minusOne2);
     hkVec4 dvA;
-    dvA.FUN_00c7f750((const hkRot*)&negA, &accA.m_vAngularVelocity);
+    dvA.hkVector4_setMul3((const hkRot*)&negA, &accA.m_vAngularVelocity);
     hkVec4 dvB;
-    dvB.FUN_00c7f750((const hkRot*)&negB, &accB.m_vAngularVelocity);
+    dvB.hkVector4_setMul3((const hkRot*)&negB, &accB.m_vAngularVelocity);
     accA.m_vLinearVelocity.q = _mm_add_ps(accA.m_vLinearVelocity.q, dvA.q);
     accB.m_vLinearVelocity.q = _mm_add_ps(accB.m_vLinearVelocity.q, dvB.q);
     WriteVector((const hkRot*)&negA, (const hkRot*)&negB, out);
     if (child->m_type == 0x16)
     {
-        FUN_00d72190(child, &in6, hkBool(true), out);
+        hkSimpleContactConstraintDataBuildJacobian(child, &in6, hkBool(true), out);
     }
     else
     {
-        FUN_00d6f460(child, childSize, &in6, out);
+        hkSolverBuildJacobianFromAtomsNotContact(child, childSize, &in6, out);
     }
     WriteVector((const hkRot*)&skewA, (const hkRot*)&skewB, out);
     atoms = (const Atom*)(a + 1);
@@ -4479,11 +4501,11 @@ static __forceinline void case23(const Atom*& atoms, QueryIn& in, hkTrans& baseA
     const Atom* child = a->m_base.m_pChildAtom;
     if (child->m_type == 0x16)
     {
-        FUN_00d72190(child, &in2, hkBool(true), out);
+        hkSimpleContactConstraintDataBuildJacobian(child, &in2, hkBool(true), out);
     }
     else
     {
-        FUN_00d6f460(child, childSize, &in2, out);
+        hkSolverBuildJacobianFromAtomsNotContact(child, childSize, &in2, out);
     }
     atoms = (const Atom*)(a + 1);
 }
@@ -4498,15 +4520,15 @@ static __forceinline void case25(const Atom*& atoms, QueryIn& in, hkTrans& baseA
     {
         c = ((const ModifierAtom*)c)->m_pChildAtom;
     } while (c->m_type >= 0x17);
-    FUN_00d72090((void*)&((const ContactAtom*)c)->unk10);
+    _hkSimpleContactConstraintDataAddALittleSurfaceViscosity((void*)&((const ContactAtom*)c)->unk10);
     const Atom* child = a->m_pChildAtom;
     if (child->m_type == 0x16)
     {
-        FUN_00d72190(child, &in4, hkBool(true), out);
+        hkSimpleContactConstraintDataBuildJacobian(child, &in4, hkBool(true), out);
     }
     else
     {
-        FUN_00d6f460(child, childSize, &in4, out);
+        hkSolverBuildJacobianFromAtomsNotContact(child, childSize, &in4, out);
     }
     atoms = (const Atom*)((const char*)a + 0x20);
 }
@@ -4521,23 +4543,23 @@ static __forceinline void case24(const Atom*& atoms, QueryIn& in, hkTrans& baseA
     *(hkVec4F*)&factorA = a->m_kFactorA;
     *(hkVec4F*)&factorB = a->m_kFactorB;
     Accum accA;
-    accA.FUN_00d71f90(in.m_pBodyA);
+    accA.CopySelectedFields(in.m_pBodyA);
     Accum accB;
-    accB.FUN_00d71f90(in.m_pBodyB);
+    accB.CopySelectedFields(in.m_pBodyB);
     accA.m_vInverseInertiaAndMass.q = _mm_mul_ps(accA.m_vInverseInertiaAndMass.q, factorA.q);
     in3.m_pBodyA = &accA;
     in3.m_pBodyB = &accB;
     accB.m_vInverseInertiaAndMass.q = _mm_mul_ps(accB.m_vInverseInertiaAndMass.q, factorB.q);
-    FUN_00dced90(&accA.m_vInverseInertiaAndMass, &accB.m_vInverseInertiaAndMass, out);
+    Hkpbuildjacobianfromatoms_WriteVectorPairRecordAndAdvance(&accA.m_vInverseInertiaAndMass, &accB.m_vInverseInertiaAndMass, out);
     if (child->m_type == 0x16)
     {
-        FUN_00d72190(child, &in3, hkBool(true), out);
+        hkSimpleContactConstraintDataBuildJacobian(child, &in3, hkBool(true), out);
     }
     else
     {
-        FUN_00d6f460(child, childSize, &in3, out);
+        hkSolverBuildJacobianFromAtomsNotContact(child, childSize, &in3, out);
     }
-    FUN_00dced90(&in.m_pBodyA->m_vInverseInertiaAndMass, &in.m_pBodyB->m_vInverseInertiaAndMass, out);
+    Hkpbuildjacobianfromatoms_WriteVectorPairRecordAndAdvance(&in.m_pBodyA->m_vInverseInertiaAndMass, &in.m_pBodyB->m_vInverseInertiaAndMass, out);
     atoms = (const Atom*)(a + 1);
 }
 class SurfaceAxis
@@ -4562,18 +4584,18 @@ static __forceinline void case26(const Atom*& atoms, QueryIn& in, hkTrans& baseA
     QueryIn in5 = in;
     const ContactAtom* contact = (const ContactAtom*)a->m_base.m_pChildAtom;
     out->m_pQueryResultSchema -= 16;
-    FUN_00d6ea30(&in, out, (SolverResults*)&contact->m_kPoints[contact->m_usMaxNumContactPoints],
+    Hkpbuildjacobianfromatoms_WriteTypeOneRecordAndAdvance(&in, out, (SolverResults*)&contact->m_kPoints[contact->m_usMaxNumContactPoints],
                  contact->m_ucContactPointPropertiesStriding);
     bool isBodyB = in.unk6c == 0;
     Accum acc;
     if (!isBodyB)
     {
-        acc.FUN_00d72030(in.m_pBodyA);
+        acc.InitializeFields_00d72030(in.m_pBodyA);
         in.m_pBodyA = &acc;
     }
     else
     {
-        acc.FUN_00d72030(in.m_pBodyB);
+        acc.InitializeFields_00d72030(in.m_pBodyB);
         in.m_pBodyB = &acc;
         velocity.q = _mm_xor_ps(velocity.q, DAT_010c4c00);
     }
@@ -4585,11 +4607,11 @@ static __forceinline void case26(const Atom*& atoms, QueryIn& in, hkTrans& baseA
     __m128 d = dot3(n, v);
     SurfaceAxis tangent;
     tangent = _mm_xor_ps(_mm_sub_ps(v, _mm_mul_ps(_mm_shuffle_ps(d, d, 0), n)), DAT_010c44d0);
-    FUN_00dcedd0((const hkVec4*)&tangent, which, out);
+    Hkpbuildjacobianfromatoms_WriteType1ARecordAndAdvance((const hkVec4*)&tangent, which, out);
     acc.m_vLinearVelocity.q = _mm_add_ps(acc.m_vLinearVelocity.q, tangent);
-    FUN_00d72190((const Atom*)contact, &in5, hkBool(false), out);
+    hkSimpleContactConstraintDataBuildJacobian((const Atom*)contact, &in5, hkBool(false), out);
     tangent = _mm_xor_ps(tangent, DAT_010c44d0);
-    FUN_00dcedd0((const hkVec4*)&tangent, which, out);
+    Hkpbuildjacobianfromatoms_WriteType1ARecordAndAdvance((const hkVec4*)&tangent, which, out);
     atoms = (const Atom*)((const char*)a + 0x30);
 }
 struct AngularStorage : AngLimitInfo
@@ -4597,7 +4619,8 @@ struct AngularStorage : AngLimitInfo
 };
 // Iterates through a sequence of physics atoms, dispatching each by type to update the query output and build angular limits.
 // @fnv 0x00d6f460
-void __cdecl FUN_00d6f460(const Atom* atoms, int sizeOfAllAtoms, const QueryIn* queryIn, QueryOut* out)
+// src: XBOX_PDB 0x00d6f460
+void __cdecl hkSolverBuildJacobianFromAtomsNotContact(const Atom* atoms, int sizeOfAllAtoms, const QueryIn* queryIn, QueryOut* out)
 {
     QueryIn in = *queryIn;
     const Atom* atomsEnd = (const Atom*)((const char*)atoms + sizeOfAllAtoms);
@@ -4911,7 +4934,8 @@ __forceinline void makePulleyRow(const PulleyRowWork& work, PulleyRowSchema* out
 }
 // Normalizes the two rope direction vectors, builds a pulley row from in and mat into *outCursor via makePulleyRow, and advances the cursor.
 // @fnv 0x00d6e300
-static __declspec(noinline) void FUN_00d6e300(PulleyRowQuery* apQuery, PulleyRowSchema** outCursor,
+// src: GUESS 0x00d6e300 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00d6e300(PulleyRowQuery* apQuery, PulleyRowSchema** outCursor,
                                               PulleyRowGeometry* apGeometry)
 {
     PulleyRowWork work;
@@ -4962,6 +4986,6 @@ static __declspec(noinline) void FUN_00d6e300(PulleyRowQuery* apQuery, PulleyRow
 }
 void PulleyRow_use(PulleyRowQuery* in, PulleyRowSchema** cursor, PulleyRowGeometry* mat)
 {
-    FUN_00d6e300(in, cursor, mat);
+    Object_UpdateFields_00d6e300(in, cursor, mat);
 }
 }

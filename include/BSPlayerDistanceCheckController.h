@@ -13,10 +13,10 @@ public:
 
     void* __thiscall ScalarDeletingDestructor(unsigned int flags);
     const NiRTTI* const* GetNiRTTI();
-    double FUN_00508120();
+    double NiControllerSequence_GetLastTime();
     int GetField38();
     void UpdateDoorSpawn(unsigned int unkArg);
-    void FUN_008d1720();
+    void TargetIsRequiredType();
 
     unsigned int unk34;
     void (__cdecl* m_callback)(void*);

@@ -98,7 +98,7 @@ struct ObjType
 };
 struct BaseInterp
 {
-    bool __thiscall FUN_00a81fe0(NiStream*);
+    bool __thiscall BSTextureSet_RegisterStreamables(NiStream*);
 };
 
 // @fnv 0x00a4bbe0
@@ -106,7 +106,7 @@ bool __thiscall NiLookAtInterpolator::RegisterStreamables(NiStream& arStream)
 {
     NiStream* kStream = &arStream;
     unsigned int ui;
-    if (!((BaseInterp*)this)->FUN_00a81fe0(kStream))
+    if (!((BaseInterp*)this)->BSTextureSet_RegisterStreamables(kStream))
         return false;
     for (ui = 0; ui < 3; ++ui)
     {
@@ -125,7 +125,8 @@ bool __thiscall NiLookAtInterpolator::RegisterStreamables(NiStream& arStream)
 inline void* operator new(unsigned int, NiLookAtInterpolator* p) throw() { return p; }
 
 // @fnv 0x00a4c5a0
-void* __cdecl FUN_00a4c5a0()
+// src: EXE 0x00a4c5a0
+void* __cdecl NiLookAtInterpolator_CreateObject()
 {
     void* p = NiLookAtInterpolator::operator new(0x44);
     if (p)
@@ -302,7 +303,7 @@ NiObject* NiLookAtInterpolator::MakeClone(CloningProcess& kCloning)
 {
     NiLookAtInterpolator* allocated = static_cast<NiLookAtInterpolator*>(NiLookAtInterpolator::operator new(0x44));
     NiLookAtInterpolator* node = allocated ? ::new (allocated) NiLookAtInterpolator(0, 0, 0) : 0;
-    FUN_00a4c4b0(node, kCloning);
+    CopyMembers_00a4c4b0(node, kCloning);
     return node;
 }
 
@@ -320,8 +321,8 @@ struct Arg_b9286
 
 struct Holder_b9286
 {
-    void __thiscall FUN_00a38cb0(Arg_b9286* a);
-    void __thiscall FUN_00a570b0(Arg_b9286* a);
+    void __thiscall NiQuatTransform_GetViewerStrings(Arg_b9286* a);
+    void __thiscall NiInterpolator_GetViewerStrings(Arg_b9286* a);
 };
 
 struct Obj_b9286
@@ -354,15 +355,15 @@ struct Obj_b9286
 };
 
 extern "C" void* g_011f3f90;
-extern "C" void* __cdecl FUN_00a7d330(void* p);
-extern "C" void* __cdecl FUN_00a7d5a0(const char* s, void* p);
+extern "C" void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* p);
+extern "C" void* __cdecl NiGetViewerString_00a7d5a0(const char* s, void* p);
 
 // @fnv 0x00a4c780
 void NiLookAtInterpolator::GetViewerStrings(NiViewerStringsArray* apStrings)
 {
     Arg_b9286* a = (Arg_b9286*)apStrings;
-    ((Holder_b9286*)this)->FUN_00a570b0(a);
-    void* p = FUN_00a7d330(g_011f3f90);
+    ((Holder_b9286*)this)->NiInterpolator_GetViewerStrings(a);
+    void* p = NiViewerStrings_NiGetViewerString_Title(g_011f3f90);
     unsigned int b = a->m0a;
     unsigned int c = a->m08;
     if (b >= c)
@@ -370,7 +371,7 @@ void NiLookAtInterpolator::GetViewerStrings(NiViewerStringsArray* apStrings)
         a->FUN_0096ad30((unsigned int)a->m0e + b);
     }
     a->FUN_0096ae90(b, &p);
-    p = FUN_00a7d5a0("m_pkLookAt", m_pkLookAt);
+    p = NiGetViewerString_00a7d5a0("m_pkLookAt", m_pkLookAt);
     b = a->m0a;
     c = a->m08;
     if (b >= c)
@@ -378,7 +379,7 @@ void NiLookAtInterpolator::GetViewerStrings(NiViewerStringsArray* apStrings)
         a->FUN_0096ad30((unsigned int)a->m0e + b);
     }
     a->FUN_0096ae90(b, &p);
-    reinterpret_cast<Holder_b9286*>(&m_kTransform)->FUN_00a38cb0(a);
+    reinterpret_cast<Holder_b9286*>(&m_kTransform)->NiQuatTransform_GetViewerStrings(a);
     Obj_b9286** pp = (Obj_b9286**)m_pItems;
     for (unsigned int i = 3; i != 0; --i)
     {
@@ -396,7 +397,8 @@ using fnv_00eea6d0::EmptyFS;
 
 // Assigns kName's handle to the interpolator's name field, incrementing the new string's refcount and decrementing the old one's.
 // @fnv 0x00eea6d0
-void NiLookAtInterpolator::FUN_00eea6d0(const NiFixedString& kName)
+// src: COMMUNITY 0x00eea6d0
+void NiLookAtInterpolator::SetLookAtName(const NiFixedString& kName)
 {
     char* pcNewHandle = kName.m_kHandle;
     if (m_kTargetNodeName.m_kHandle != pcNewHandle)
@@ -532,7 +534,7 @@ template <class T> inline void SaveBinary341(BinaryOutput341& output, const T& v
 // The shared interpolator lacks the SaveBinary override at 0x00a724d0.
 struct Interpolator341
 {
-    void FUN_00a724d0(NiStream*);
+    void NiInterpolator_LinkObject(NiStream*);
 };
 
 // Serializes the LookAt's flags, target link, target name, transform and three interpolator links to the stream.
@@ -540,7 +542,7 @@ struct Interpolator341
 void NiLookAtInterpolator::SaveBinary(NiStream& arStream)
 {
     NiStream* stream = &arStream;
-    ((Interpolator341*)this)->FUN_00a724d0(stream);
+    ((Interpolator341*)this)->NiInterpolator_LinkObject(stream);
     SaveBinary341(*(BinaryOutput341*)stream->GetWriter(), m_usFlags);
     stream->SaveLinkID(reinterpret_cast<const NiObject*>(m_pkLookAt));
     stream->SerializeString((const char*)&m_kTargetNodeName);
@@ -744,7 +746,7 @@ struct LookVector
     {
         return LookVector(y * v.GetZ() - z * v.GetY(), z * v.GetX() - x * v.GetZ(), x * v.GetY() - y * v.GetX());
     }
-    __declspec(noalias) void FUN_004a0c10();
+    __declspec(noalias) void Unitize_004a0c10();
 };
 struct LookMatrix
 {
@@ -890,7 +892,7 @@ bool NiLookAtInterpolator::UpdateTransform(float time, NiObjectNET* apTarget, Ni
         rotation.Identity();
     else
     {
-        vDirection.FUN_004a0c10();
+        vDirection.Unitize_004a0c10();
         LookVector vUp;
         float projection;
         if ((vDirection.z < DAT_01098c00 && vDirection.z > DAT_01098bf8) ||
@@ -905,7 +907,7 @@ bool NiLookAtInterpolator::UpdateTransform(float time, NiObjectNET* apTarget, Ni
             projection = vDirection.z;
         }
         vUp -= vDirection * projection;
-        vUp.FUN_004a0c10();
+        vUp.Unitize_004a0c10();
         if (!bool(m_usFlags & 1))
             vDirection = -vDirection;
 
@@ -1025,7 +1027,8 @@ struct S_00a4c4b0_Xform
 using namespace fnv_00a4c4b0;
 
 // @fnv 0x00a4c4b0
-void __thiscall NiLookAtInterpolator::FUN_00a4c4b0(NiLookAtInterpolator* dest, CloningProcess& c)
+// src: XBOX_PDB 0x00a4c4b0
+void __thiscall NiLookAtInterpolator::CopyMembers_00a4c4b0(NiLookAtInterpolator* dest, CloningProcess& c)
 {
     ((NiObject*)this)->CopyMemberData(dest, c);
     unsigned int f = m_usFlags;

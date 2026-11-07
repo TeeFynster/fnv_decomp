@@ -62,7 +62,7 @@
 // the vtables and the adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_0060c440();
+    virtual void AdjustThisAndForward_0060c440();
     int unk04;
     int unk08;
     int unk0C;
@@ -121,14 +121,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_0060c440();
+    virtual void AdjustThisAndForward_0060c440();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x0060c440
-    virtual void FUN_0060c440();
+// src: GUESS 0x0060c440 (confidence: low)
+    virtual void AdjustThisAndForward_0060c440();
 };
 
 Derived::Derived()
@@ -201,7 +202,7 @@ AdjustorThunkHolder::AdjustorThunkHolder()
 namespace fnv_0060c460 {
 struct PrimaryBase
 {
-    virtual void FUN_0060c460();
+    virtual void AdjustThisAndForward_0060c460();
     int unk04;
     int unk08;
     int unk0C;
@@ -241,14 +242,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_0060c460();
+    virtual void AdjustThisAndForward_0060c460();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x0060c460
-    virtual void FUN_0060c460();
+// src: GUESS 0x0060c460 (confidence: low)
+    virtual void AdjustThisAndForward_0060c460();
 };
 
 Derived::Derived()

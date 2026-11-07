@@ -19,7 +19,7 @@ std::basic_string<char, std::char_traits<char>, std::allocator<char> >& std::bas
         return assign(*this, source - _Myptr(), count);
     if (_Grow(count, false))
     {
-        FUN_0044ccd0(_Myptr(), capacity, source, count);
+        std_Traits_helper_copy_s_std_char_traits_char(_Myptr(), capacity, source, count);
         _Eos(count);
     }
     return *this;

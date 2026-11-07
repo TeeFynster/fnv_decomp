@@ -6,8 +6,8 @@
 #define BGSSAVELOADHISTORY_DECLS_H
 
 
-void FUN_0084c2a0(unsigned int first, unsigned int second, unsigned char flags);
-int FUN_00407000(char* buffer, const char* format, char* arguments);
+void BGSSaveLoadGlobalData_RevertGlobalDataRange(unsigned int first, unsigned int second, unsigned char flags);
+int BSvsprintf(char* buffer, const char* format, char* arguments);
 
 
 class NavMeshInfo;

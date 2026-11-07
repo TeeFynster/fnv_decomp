@@ -39,14 +39,15 @@ extern "C"
 #include "../../../../../include/hkQuaternion.h"
 #include "../../../../../include/hkMemoryRouter.h"
 
-void __cdecl FUN_00ce5a70(hkQsTransform* out, const hkQsTransform* a, const hkQsTransform* b, int mode,
+void __cdecl hkaSkeletonMapperUtils_computeMappingTransform(hkQsTransform* out, const hkQsTransform* a, const hkQsTransform* b, int mode,
                           float weightA, float weightB);
 
 // @fnv 0x00ce5f90
-void __cdecl FUN_00ce5f90(hkQsTransform* out, const hkQsTransform* poseA, short boneA,
+// src: HAVOK_LIB 0x00ce5f90
+void __cdecl hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(hkQsTransform* out, const hkQsTransform* poseA, short boneA,
                           const hkQsTransform* poseB, short boneB, int mode, float weightA, float weightB)
 {
-    FUN_00ce5a70(out, &poseA[boneA], &poseB[boneB], mode, weightA, weightB);
+    hkaSkeletonMapperUtils_computeMappingTransform(out, &poseA[boneA], &poseB[boneB], mode, weightA, weightB);
 }
 
 #include <xmmintrin.h>
@@ -68,7 +69,8 @@ struct __declspec(align(16)) VertexRecord
 
 // Computes the min and max of m_kPathOffset across aiCount VertexRecord entries, storing results in apMin and apMax.
 // @fnv 0x00ce5560
-void __cdecl FUN_00ce5560(const VertexRecord* apVertices, int aiCount, LocalM128* apMin, LocalM128* apMax)
+// src: GUESS 0x00ce5560 (confidence: medium)
+void __cdecl Object_GetPathOffsetBounds(const VertexRecord* apVertices, int aiCount, LocalM128* apMin, LocalM128* apMax)
 {
     *apMin = _mm_set_ps1(DAT_0104da48);
     *apMax = _mm_set_ps1(DAT_0104e148);
@@ -153,11 +155,12 @@ struct ScaleParams
     hkReal m_scaleB;
 };
 
-void __cdecl FUN_00ce5560(const hkQsTransform* pose, int numBones, hkVector4& minOut, hkVector4& maxOut);
+void __cdecl Object_GetPathOffsetBounds(const hkQsTransform* pose, int numBones, hkVector4& minOut, hkVector4& maxOut);
 
 // Computes scale factors for two poses based on ScaleParams mode, storing results in outA and outB.
 // @fnv 0x00ce55d0
-void __cdecl FUN_00ce55d0(const ScaleParams* params, int unused, const hkQsTransform* poseA, int numBonesA,
+// src: GUESS 0x00ce55d0 (confidence: medium)
+void __cdecl hkQsTransform_ComputePoseScaleFactors(const ScaleParams* params, int unused, const hkQsTransform* poseA, int numBonesA,
                           const hkQsTransform* poseB, int numBonesB, hkQsTransform* outA, hkQsTransform* outB)
 {
     setIdentity(*outA);
@@ -166,8 +169,8 @@ void __cdecl FUN_00ce55d0(const ScaleParams* params, int unused, const hkQsTrans
     if (params->m_iValueAfterFlags == 0)
     {
         hkVector4 minA, maxA, minB, maxB;
-        FUN_00ce5560(poseA, numBonesA, minA, maxA);
-        FUN_00ce5560(poseB, numBonesB, minB, maxB);
+        Object_GetPathOffsetBounds(poseA, numBonesA, minA, maxA);
+        Object_GetPathOffsetBounds(poseB, numBonesB, minB, maxB);
         hkVector4 extA;
         extA.setSub4(maxA, minA);
         hkVector4 extB;
@@ -230,7 +233,8 @@ typedef float(__thiscall* ReadValue)(void*);
 
 // Returns 1 if state->mode is not 1, otherwise returns whether the larger absolute angle of first or second is at most state->threshold.
 // @fnv 0x00ce57c0
-unsigned char __cdecl FUN_00ce57c0(ThresholdState* state, void* unused1, void* unused2, ValueSource* first,
+// src: HAVOK_LIB 0x00ce57c0
+unsigned char __cdecl hkaSkeletonMapperUtils_checkRotation(ThresholdState* state, void* unused1, void* unused2, ValueSource* first,
                                    ValueSource* second)
 {
     if (state->mode != 1)
@@ -294,7 +298,8 @@ static __forceinline hkReal hkLength3(const hkVector4& v)
 
 // Walks the parent chain from bone to ancestor, rotating the accumulated position, adding translations, and summing their lengths.
 // @fnv 0x00ce5e60
-void FUN_00ce5e60(const hkaSkeletonq* apSkeleton, const hkQsTransform* poses, hkInt16 ancestor, hkInt16 bone,
+// src: GUESS 0x00ce5e60 (confidence: medium)
+void Object_AccumulateBoneChainLength(const hkaSkeletonq* apSkeleton, const hkQsTransform* poses, hkInt16 ancestor, hkInt16 bone,
                   hkReal* pfLengthOut, hkVector4* posOut)
 {
     *pfLengthOut = 0.0f;
@@ -337,14 +342,15 @@ struct BonePairInfo
     hkVector4 m_vScale;
 };
 
-void FUN_00ce5f90(const void* data, const hkQsTransform* poseA, hkInt16 boneA, const hkQsTransform* poseB,
+void hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(const void* data, const hkQsTransform* poseA, hkInt16 boneA, const hkQsTransform* poseB,
                   hkInt16 boneB, hkVector4* out, hkReal eps, hkReal weight);
-void FUN_00ce5e60(const hkaSkeleton* skel, const hkQsTransform* poses, hkInt16 ancestor, hkInt16 bone,
+void Object_AccumulateBoneChainLength(const hkaSkeleton* skel, const hkQsTransform* poses, hkInt16 ancestor, hkInt16 bone,
                   hkReal* lengthOut, hkVector4* posOut);
 
 // Fills out with bone indices, offset, rotation, scale, and relative rotation derived from two skeleton bone pairs.
 // @fnv 0x00ce5fe0
-void FUN_00ce5fe0(const void* data, const hkaSkeleton* skelA, const hkQsTransform* poseA, hkInt16 boneA0,
+// src: GUESS 0x00ce5fe0 (confidence: medium)
+void Object_BuildBonePairMapping(const void* data, const hkaSkeleton* skelA, const hkQsTransform* poseA, hkInt16 boneA0,
                   hkInt16 boneA1, const hkaSkeleton* skelB, const hkQsTransform* poseB, hkInt16 boneB0, hkInt16 boneB1,
                   BonePairInfo* out)
 {
@@ -352,24 +358,24 @@ void FUN_00ce5fe0(const void* data, const hkaSkeleton* skelA, const hkQsTransfor
     out->m_boneA1 = boneA1;
     out->m_boneB0 = boneB0;
     out->m_boneB1 = boneB1;
-    FUN_00ce5f90(data, poseA, boneA0, poseB, boneB0, &out->m_offset, 1e-5f, 1.0f);
+    hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(data, poseA, boneA0, poseB, boneB0, &out->m_offset, 1e-5f, 1.0f);
 
     hkReal lenA;
     hkReal lenB;
     hkVector4 dirA;
     hkVector4 dirB;
-    FUN_00ce5e60(skelA, poseA, boneA0, boneA1, &lenA, &dirA);
-    FUN_00ce5e60(skelB, poseB, boneB0, boneB1, &lenB, &dirB);
+    Object_AccumulateBoneChainLength(skelA, poseA, boneA0, boneA1, &lenA, &dirA);
+    Object_AccumulateBoneChainLength(skelB, poseB, boneB0, boneB1, &lenB, &dirB);
 
     dirA.normalize3();
     dirB.normalize3();
 
     __declspec(align(16)) hkQuaternion rot;
-    rot.FUN_00cd9d10(dirB, dirA);
+    rot.ComputeValues_00cd9d10(dirB, dirA);
     *reinterpret_cast<LocalM128*>(&out->m_rotation) = *reinterpret_cast<const LocalM128*>(&rot);
     lenA = 1.0f / lenA;
     out->m_vScale.m_vComponents = _mm_set_ps1(lenA);
-    out->m_relRotation.FUN_00c74b70(poseA[boneA1].m_rotation, poseB[boneB1].m_rotation);
+    out->m_relRotation.hkQuaternion_setInverseMul(poseA[boneA1].m_rotation, poseB[boneB1].m_rotation);
 }
 }  // namespace fnv_00ce5fe0
 
@@ -381,7 +387,7 @@ inline void* operator new(size_t, void* p)
 }
 
 // hkMemoryRouter is the shared router: GetMonitorStream binds to 0x00c85750, with the heap at +0x10.
-extern "C" void __cdecl FUN_00c908c0(hkMemoryAllocator* mem, void* array, int numElems, int elemSize);
+extern "C" void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* mem, void* array, int numElems, int elemSize);
 
 struct HkElem8
 {
@@ -426,7 +432,7 @@ template <typename T> struct HkArrayLocalForm
         {
             int cap2 = 2 * capacity;
             int newCap = n < cap2 ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newCap, sizeof(T));
+            hkArrayUtil__reserve(&alloc, this, newCap, sizeof(T));
         }
     }
 

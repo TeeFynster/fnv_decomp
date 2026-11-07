@@ -11,7 +11,7 @@
 // sizeof(PrimaryBase) = vptr (4) + 18 int fields (72) = 0x4c.
 struct PrimaryBase
 {
-    virtual void FUN_0050ade0();
+    virtual void AdjustThisAndForward_0050ade0();
     int unk04;
     int unk08;
     int unk0C;
@@ -34,14 +34,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_0050ade0();
+    virtual void AdjustThisAndForward_0050ade0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x0050ade0
-    virtual void FUN_0050ade0();
+// src: GUESS 0x0050ade0 (confidence: low)
+    virtual void AdjustThisAndForward_0050ade0();
 };
 
 Derived::Derived()

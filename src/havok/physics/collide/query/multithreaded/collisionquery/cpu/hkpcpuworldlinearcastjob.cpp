@@ -14,10 +14,11 @@ struct FUN_00df71c0_Class
     int unk08;
     int unk0c;
     FUN_00df71c0_Value* unk10;
-    float FUN_00df71c0();
+    float GetValue_00df71c0();
 };
 // @fnv 0x00df71c0
-float FUN_00df71c0_Class::FUN_00df71c0()
+// src: GUESS 0x00df71c0 (confidence: medium)
+float FUN_00df71c0_Class::GetValue_00df71c0()
 {
     return unk10->value;
 }
@@ -64,10 +65,11 @@ struct Param
 struct This
 {
     int CastAgainstCollidable(Param*);
-    int FUN_00df72e0(Param*);
+    int hkCpuWorldLinearCastCollector_addLeaf(Param*);
 };
 // @fnv 0x00df72e0
-int This::FUN_00df72e0(Param* pParam)
+// src: HAVOK_LIB 0x00df72e0
+int This::hkCpuWorldLinearCastCollector_addLeaf(Param* pParam)
 {
     Param* pNext = pParam;
     pNext = pNext->next0c;
@@ -334,11 +336,12 @@ struct FUN_00df7320_Shape
 struct FUN_00df7320_Collector
 {
     float CastAgainstCollidable(FUN_00df7320_Shape* value);
-    float FUN_00df7320(FUN_00df7320_Shape* shape, FUN_00df7320_Shape* other);
+    float ProcessAndReturnValue_00df7320(FUN_00df7320_Shape* shape, FUN_00df7320_Shape* other);
 };
 
 // @fnv 0x00df7320
-float FUN_00df7320_Collector::FUN_00df7320(FUN_00df7320_Shape* shape, FUN_00df7320_Shape* other)
+// src: GUESS 0x00df7320 (confidence: low)
+float FUN_00df7320_Collector::ProcessAndReturnValue_00df7320(FUN_00df7320_Shape* shape, FUN_00df7320_Shape* other)
 {
     FUN_00df7320_Shape* target = (FUN_00df7320_Shape*)((char*)shape + shape->unk05);
     return CastAgainstCollidable(target);
@@ -366,20 +369,21 @@ namespace fnv_00df71a0 {
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (8).
 struct PrimaryBase
 {
-    virtual void FUN_00df71a0();
+    virtual void AdjustThisAndForward_00df71a0();
     int unk04;
 };
 
 struct SecondaryBase
 {
-    virtual void FUN_00df71a0();
+    virtual void AdjustThisAndForward_00df71a0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00df71a0
-    virtual void FUN_00df71a0();
+// src: GUESS 0x00df71a0 (confidence: low)
+    virtual void AdjustThisAndForward_00df71a0();
 };
 
 Derived::Derived()
@@ -431,7 +435,7 @@ struct S_00df71d0_Router
     }
 };
 
-S_00df71d0_Router* FUN_00c85750();
+S_00df71d0_Router* hkMemoryRouter_getInstance();
 
 struct S_00df71d0_B0
 {
@@ -500,7 +504,7 @@ struct FUN_00df71d0 : S_00df71d0_B0, S_00df71d0_B1, S_00df71d0_B2, S_00df71d0_B3
     {}
     static void operator delete(void* p, unsigned int n)
     {
-        FUN_00c85750()->heap().ReleaseBlock(p, n);
+        hkMemoryRouter_getInstance()->heap().ReleaseBlock(p, n);
     }
 };
 

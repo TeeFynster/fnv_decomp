@@ -35,12 +35,12 @@ struct FUN_0073af60_shell
     int m_0x24;
     int m_0x28;
     int m_0x2c;
-    bool __thiscall FUN_0073af60();
+    bool __thiscall IsWellFormedMenu();
 };
 void __cdecl _Deallocate(void*);
 struct FUN_0073ad00_shell
 {
-    void __thiscall FUN_0073ad30();
+    void __thiscall SetVtableAndProcessState_0073ad30();
     void* __thiscall FUN_0073ad00(unsigned int);
 };
 struct BSCullingProcess;
@@ -72,12 +72,12 @@ struct blob12
 // Exe 0x00709fd0 allocates the full 0x580-byte shared InterfaceManager.
 struct FUN_0073b020_shell : public InterfaceManager
 {
-    int FUN_0073b020();
+    int InterfaceManager_GetCursorY();
 };
-float __cdecl FUN_00715da0();
+float __cdecl InterfaceManager_GetScreenHeight();
 struct FUN_0073b460_shell
 {
-    bool __thiscall FUN_0073b460();
+    bool __thiscall TESObjectBOOK_GetCantTake();
 };
 struct Inner73b430
 {
@@ -116,7 +116,7 @@ struct FUN_0073b050_shell : Menu
     unsigned int m_0x34;
     float m_fValue;
 
-    void __thiscall FUN_0073b050(int, Tile*);
+    void __thiscall DoStillDown(int, Tile*);
 };
 struct FUN_00a1c520_shell
 {
@@ -124,11 +124,11 @@ struct FUN_00a1c520_shell
 };
 struct Res_0073b0f0
 {
-    short FUN_00418770();
+    short ExtraDataList_GetCount();
 };
 struct Obj30_0073b0f0
 {
-    Res_0073b0f0* FUN_005d43c0(int);
+    Res_0073b0f0* BSFile_GetDevice(int);
 };
 struct VT_0073b0f0
 {
@@ -388,9 +388,9 @@ struct FUN_0073b0f0_cls
 };
 struct BookInput
 {
-    bool FUN_00409700();
+    bool TESObjectBOOK_GetScroll();
     const char* CallInnerFoo();
-    bool FUN_0073b460();
+    bool TESObjectBOOK_GetCantTake();
 };
 
 struct BookTarget : Menu
@@ -401,7 +401,7 @@ struct BookTarget : Menu
     Tile* FUN_00726070();
     void UpdateBookMenu(BookInput*, int);
 };
-void __cdecl FUN_00717280(int);
+void __cdecl InterfaceManager_PlayMenuSound(int);
 struct BookMenu_Shell
 {
     virtual void v0();
@@ -428,7 +428,7 @@ struct BookMenu_Shell
 };
 extern const char DAT_01070fa8[];
 extern const char DAT_01070f84[];
-extern void __cdecl FUN_00703c00(const char*, ...);
+extern void __cdecl Interface_PrintLine(const char*, ...);
 struct LoadBook
 {
     Tile* FUN_00726070();
@@ -437,7 +437,7 @@ struct LoadBook
 
 struct IMH
 {
-    Tile* FUN_00586150();
+    Tile* CombatController_GetCombatState();
 };
 struct BookMenuData : Menu
 {
@@ -467,13 +467,14 @@ struct MenuH
     void SetMenuVisibility(bool);
 };
 Menu* __cdecl FindMenuById(int);
-InterfaceManager* __cdecl FUN_004b7210();
+InterfaceManager* __cdecl InterfaceManager_GetSingleton();
 void __cdecl FNV_Warning(const char*, ...);
-void __cdecl FUN_00717280(int);
+void __cdecl InterfaceManager_PlayMenuSound(int);
 void* __fastcall FUN_00726070(Menu*);
 
 // @fnv 0x0073ad50
-Tile* __cdecl FUN_0073ad50(TESObjectBOOK* apBook, TESObjectREFR* apRef)
+// src: XBOX_PDB 0x0073ad50
+Tile* __cdecl BookMenu_Create(TESObjectBOOK* apBook, TESObjectREFR* apRef)
 {
     BookMenu* g_pHudMainMenuInstance;
     InterfaceManager* pin;
@@ -488,29 +489,29 @@ Tile* __cdecl FUN_0073ad50(TESObjectBOOK* apBook, TESObjectREFR* apRef)
     pbook = apBook;
     if (!pbook)
         return 0;
-    pin = FUN_004b7210();
+    pin = InterfaceManager_GetSingleton();
     ftop_depth = Tile::GetInterfaceScale();
     ptile = 0;
-    ptile = ((IMH*)pin)->FUN_00586150()->FUN_00a01b00("Data\\Menus\\book_menu.xml");
-    pmenu = ptile->FUN_00a03c90();
+    ptile = ((IMH*)pin)->CombatController_GetCombatState()->Tile_ReadFile("Data\\Menus\\book_menu.xml");
+    pmenu = ptile->Tile_GetMenu();
     g_pHudMainMenuInstance = (BookMenu*)pmenu;
     ((BookMenuData*)g_pHudMainMenuInstance)->m_pObjectToUpdateMenuTile = apBook;
     if (pmenu && ((MenuH*)pmenu)->GetID() == 0x402)
     {
         ((MenuH*)pmenu)->SetTileMenu(dynamic_cast<TileMenu*>((Tile*)ptile), false);
         BookMenu* g_pHudMainMenuInstance = dynamic_cast<BookMenu*>(pmenu);
-        if (!((FUN_0073af60_shell*)g_pHudMainMenuInstance)->FUN_0073af60())
+        if (!((FUN_0073af60_shell*)g_pHudMainMenuInstance)->IsWellFormedMenu())
         {
             FNV_Warning("MENUS: Book Menu Creation Failed... Are your menu and art resources up to date?");
             return 0;
         }
         if (ptile->GetFloat(0xfa7) == 6006.0 || ptile->GetFloat(0xfa7) == 102.0)
-            ptile->FUN_00a012d0(0xfad, ftop_depth, true);
+            ptile->Tile_Set(0xfad, ftop_depth, true);
         ((BookMenuData*)g_pHudMainMenuInstance)->UpdateBookMenu(apBook, apRef);
-        if (((BookMenuData*)g_pHudMainMenuInstance)->m_pObjectToUpdateMenuTile->FUN_00409700())
-            FUN_00717280(0x18);
+        if (((BookMenuData*)g_pHudMainMenuInstance)->m_pObjectToUpdateMenuTile->TESObjectBOOK_GetScroll())
+            InterfaceManager_PlayMenuSound(0x18);
         else
-            FUN_00717280(0x1a);
+            InterfaceManager_PlayMenuSound(0x1a);
         ((MenuH*)pmenu)->SetMenuVisibility(false);
         return ptile;
     }

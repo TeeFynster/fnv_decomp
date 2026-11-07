@@ -15,7 +15,7 @@ struct Body_e45e
 {
     int unk[0x1a0 / 4];
     __m128 m_kInertiaAndMassInv;
-    void FUN_00ca88e0(float mass);
+    void hkpRigidBody_setMassInv(float mass);
     void FUN_00c905b0();
     float getMassInv() const
     {
@@ -31,10 +31,11 @@ struct World_e45e
     Body_e45e** m_data;
     int m_iElementCount;
     int m_iCapacityState;
-    Body_e45e* FUN_00e45e60(int index);
+    Body_e45e* hkpGravityGun_dropObject(int index);
 };
 // @fnv 0x00e45e60
-Body_e45e* World_e45e::FUN_00e45e60(int index)
+// src: XBOX_PDB 0x00e45e60
+Body_e45e* World_e45e::hkpGravityGun_dropObject(int index)
 {
     Body_e45e** volatile* pdata = (Body_e45e * * volatile*)&m_data;
     Body_e45e* body = (*pdata)[index];
@@ -45,7 +46,7 @@ Body_e45e* World_e45e::FUN_00e45e60(int index)
     const char* src = (const char*)&data[index + 1];
     for (int i = 0; i < n; i += 4)
         *(unsigned int*)(dst + i) = *(const unsigned int*)(src + i);
-    body->FUN_00ca88e0((float)(body->getMassInv() * DAT_01016408));
+    body->hkpRigidBody_setMassInv((float)(body->getMassInv() * DAT_01016408));
     body->FUN_00c905b0();
     return body;
 }

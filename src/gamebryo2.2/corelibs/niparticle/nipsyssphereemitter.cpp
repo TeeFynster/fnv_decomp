@@ -16,14 +16,16 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_01202510;
 
 // @fnv 0x00c1fe10
-GlobalObjectO2_00a7b610* __cdecl FUN_00c1fe10()
+// src: COMMUNITY 0x00c1fe10
+GlobalObjectO2_00a7b610* __cdecl NiPSysSphereEmitter_GetRTTI()
 {
     return &g_01202510;
 }
 
 extern int DAT_010bd974;
 // @fnv 0x00c1fff0
-BSFadeNode* __cdecl FUN_00c1fff0()
+// src: EXE 0x00c1fff0
+BSFadeNode* __cdecl NiPSysSphereEmitter_CreateObject()
 {
     BSFadeNode* p = static_cast<BSFadeNode*>(BSFadeNode::operator new(0x5c));
     if (p)
@@ -60,10 +62,11 @@ extern "C" bool __cdecl NiPSysVolumeEmitter_IsEqual();
 struct Holder00c1fde0 : NiPSysVolumeEmitter
 {
     float m_fCylinderRadius;
-    bool __thiscall FUN_00c1fde0(void* pkObject);
+    bool __thiscall NiPSysSphereEmitter_IsEqual(void* pkObject);
 };
 // @fnv 0x00c1fde0
-bool __thiscall Holder00c1fde0::FUN_00c1fde0(void* pkObject)
+// src: XBOX_PDB 0x00c1fde0
+bool __thiscall Holder00c1fde0::NiPSysSphereEmitter_IsEqual(void* pkObject)
 {
     Holder00c1fde0* pkDest = (Holder00c1fde0*)pkObject;
     if (!reinterpret_cast<bool (__thiscall*)(const NiPSysVolumeEmitter*, NiObject*)>(
@@ -76,7 +79,7 @@ bool __thiscall Holder00c1fde0::FUN_00c1fde0(void* pkObject)
 
 struct SphereEmitterCloneView
 {
-    void* FUN_00c31b10(BSFadeNode* pkObject, void* pkCloningProcess);
+    void* NiPSysVolumeEmitter_CopyMembers(BSFadeNode* pkObject, void* pkCloningProcess);
     BSFadeNode* CreateFadeNode(void* pkCloningProcess);
 };
 
@@ -94,7 +97,7 @@ BSFadeNode* SphereEmitterCloneView::CreateFadeNode(void* pkCloningProcess)
     {
         pkObject = 0;
     }
-    FUN_00c31b10(pkObject, pkCloningProcess);
+    NiPSysVolumeEmitter_CopyMembers(pkObject, pkCloningProcess);
     *reinterpret_cast<float*>(reinterpret_cast<char*>(pkObject) + 0x58) =
         *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x58);
     return pkObject;
@@ -127,8 +130,8 @@ struct FUN_00c200c0_Arr
 };
 
 extern "C" void __stdcall FUN_00c31db0(FUN_00c200c0_Arr* p);
-extern "C" unsigned int __cdecl FUN_00a7d330(unsigned int v);
-extern "C" unsigned int __cdecl FUN_00a7d550(const void* p, float f);
+extern "C" unsigned int __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int v);
+extern "C" unsigned int __cdecl NiGetViewerString_00a7d550(const void* p, float f);
 extern "C" unsigned int DAT_01202510;
 extern "C" int UNK_01015a9c;
 
@@ -144,14 +147,14 @@ struct Emitter00c200c0
 void __thiscall Emitter00c200c0::AppendTwoValues(FUN_00c200c0_Arr* p)
 {
     FUN_00c31db0(p);
-    unsigned int uiValue = FUN_00a7d330(DAT_01202510);
+    unsigned int uiValue = NiViewerStrings_NiGetViewerString_Title(DAT_01202510);
     unsigned int n = p->m_usSize;
     if (n >= p->m_usMax)
     {
         p->FUN_0096ad30(p->m_usGrow + n);
     }
     p->FUN_0096ae90(n, &uiValue);
-    uiValue = FUN_00a7d550(&UNK_01015a9c, m_f58);
+    uiValue = NiGetViewerString_00a7d550(&UNK_01015a9c, m_f58);
     n = p->m_usSize;
     if (n >= p->m_usMax)
     {

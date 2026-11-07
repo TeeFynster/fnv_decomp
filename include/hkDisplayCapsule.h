@@ -23,5 +23,5 @@ public:
     int unk7C;
     int unk80;
 
-    void FUN_00d22d70();
+    void buildGeometry();
 };

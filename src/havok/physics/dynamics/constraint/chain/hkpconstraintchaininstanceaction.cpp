@@ -6,17 +6,20 @@
 #include "../../../../../../include/hkpConstraintChainInstanceAction.h"
 
 // @fnv 0x00e063e0
-void __fastcall FUN_00e063e0(hkpConstraintChainInstanceAction* self, void* unusedEdx, int arg0)
+// src: HAVOK_LIB 0x00e063e0
+void __fastcall hkpConstraintChainInstanceAction_entityRemovedCallback(hkpConstraintChainInstanceAction* self, void* unusedEdx, int arg0)
 {
     self->m_pConstraintChainInstance->vf04((void*)arg0);
 }
 
 // @fnv 0x00e063c0
-void __stdcall FUN_00e063c0(int)
+// src: COMMUNITY 0x00e063c0
+void __stdcall nullsub_82(int)
 {}
 
 // @fnv 0x00e063d0
-int __stdcall FUN_00e063d0(int arg0, int arg1)
+// src: GUESS 0x00e063d0 (confidence: high)
+int __stdcall hkpConstraintChainInstanceAction_ReturnZero(int arg0, int arg1)
 {
     return 0;
 }
@@ -37,12 +40,12 @@ struct FnvMemoryRouter
     void* unk0c;
     FnvAllocator* allocator;
 };
-extern "C" FnvMemoryRouter* __cdecl FUN_00c85750();
+extern "C" FnvMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 // @fnv 0x00e063f0
 void __fastcall CopyEntityArray(hkpConstraintChainInstanceAction* self, void* unusedEdx, hkArray<hkpEntity*>* output)
 {
     hkArray<hkpEntity*>* source = &self->m_pConstraintChainInstance->m_ppRigidBodies;
-    FnvAllocator* allocator = FUN_00c85750()->allocator;
+    FnvAllocator* allocator = hkMemoryRouter_getInstance()->allocator;
     int capacity = output->m_iCapacityState & 0x3fffffff;
     if (capacity < source->m_iElementCount)
     {

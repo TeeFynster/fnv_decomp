@@ -333,11 +333,12 @@ bool BGSTalkingActivator::IsRadioStation()
 
 struct FUN_00516bf0_shell : public BGSTalkingActivator
 {
-    Actor* FUN_00516bf0();
+    Actor* BGSExplosion_GetImpactDataSet();
 };
 
 // @fnv 0x00516bf0
-Actor* FUN_00516bf0_shell::FUN_00516bf0()
+// src: XBOX_PDB 0x00516bf0
+Actor* FUN_00516bf0_shell::BGSExplosion_GetImpactDataSet()
 {
     return *(Actor**)((char*)this + 0x90);
 }
@@ -359,13 +360,15 @@ struct StackIdx
 };
 
 // @fnv 0x006a1440
-Elem12& __fastcall FUN_006a1440(ArrayObj* pThis, StackIdx aiIndex)
+// src: GUESS 0x006a1440 (confidence: low)
+Elem12& __fastcall Object_GetIndexedValue_006a1440(ArrayObj* pThis, StackIdx aiIndex)
 {
     return pThis->m_pBase[aiIndex.i];
 }
 
 // @fnv 0x004ff190
-void FUN_004ff190()
+// src: COMMUNITY 0x004ff190
+void BGSTalkingActivator_ClearRadioStationList()
 {
     BGSTalkingActivator::ms_kRadioStations.RemoveAll();
 }
@@ -388,7 +391,7 @@ void* __thiscall FUN_004fe6e0_Class::FUN_004fe6e0(unsigned int flags)
 
 struct Proxy00511120
 {
-    void FUN_00511120(TESForm*);
+    void TESObjectACTI_Copy(TESForm*);
 };
 struct FUN_004fecf0_ : BGSTalkingActivator
 {
@@ -400,7 +403,7 @@ void FUN_004fecf0_::CopyVoiceTypeFromActivator(TESForm* apCopy)
     BGSTalkingActivator* acti = dynamic_cast<BGSTalkingActivator*>(apCopy);
     if (!acti)
         return;
-    ((Proxy00511120*)this)->FUN_00511120(apCopy);
+    ((Proxy00511120*)this)->TESObjectACTI_Copy(apCopy);
     SetVoiceType((BGSVoiceType*)((PlayerMover*)acti)->GetActorStateFlags());
 }
 
@@ -417,16 +420,17 @@ struct TalkingActivatorSaveBuffer : BGSSaveFormBuffer
 };
 struct FUN_00511860_shell
 {
-    void FUN_00511860(void*);
+    void TESObjectACTI_SaveGame(void*);
 };
 struct FUN_004ff800_shell : public FUN_00511860_shell
 {
-    void FUN_004ff800(BGSSaveFormBuffer*);
+    void BGSTalkingActivator_SaveGame(BGSSaveFormBuffer*);
 };
 // @fnv 0x004ff800
-void FUN_004ff800_shell::FUN_004ff800(BGSSaveFormBuffer* apSaveGameBuffer)
+// src: XBOX_PDB 0x004ff800
+void FUN_004ff800_shell::BGSTalkingActivator_SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    FUN_00511860_shell::FUN_00511860(apSaveGameBuffer);
+    FUN_00511860_shell::TESObjectACTI_SaveGame(apSaveGameBuffer);
     if (static_cast<TalkingActivatorSaveBuffer*>(apSaveGameBuffer)->GetChangeFlags(0x800000))
         apSaveGameBuffer->SerializeFormData(((void**)this)[36], 0);
 }
@@ -434,7 +438,7 @@ void FUN_004ff800_shell::FUN_004ff800(BGSSaveFormBuffer* apSaveGameBuffer)
 namespace fnv_004ff850 {
 struct Base005118c0
 {
-    void FUN_005118c0(BGSLoadFormBuffer*);
+    void TESObjectACTI_LoadGame(BGSLoadFormBuffer*);
 };
 struct FUN_004ff850_shell
 {
@@ -445,7 +449,7 @@ struct FUN_004ff850_shell
 // @fnv 0x004ff850
 void FUN_004ff850_shell::LoadForm(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    ((Base005118c0*)this)->FUN_005118c0(apLoadGameBuffer);
+    ((Base005118c0*)this)->TESObjectACTI_LoadGame(apLoadGameBuffer);
     if (apLoadGameBuffer->GetChangeFlags(0x800000).operator bool())
     {
         apLoadGameBuffer->ReadFormIdentifier(&_90);
@@ -481,7 +485,7 @@ struct FUN_00485680
 };
 struct S_00487010
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 struct S_0048a520
 {
@@ -489,42 +493,43 @@ struct S_0048a520
 };
 struct S_0048cca0
 {
-    void FUN_0048cca0();
+    void Save_0048cca0();
 };
-void FUN_00485910(unsigned int, unsigned int);
+void TESForm_AddChunk_00485910(unsigned int, unsigned int);
 struct FUN_004fec10_shell
 {
-    void FUN_004fec10();
+    void BGSTalkingActivator_Save();
 };
 // @fnv 0x004fec10
-void FUN_004fec10_shell::FUN_004fec10()
+// src: XBOX_PDB 0x004fec10
+void FUN_004fec10_shell::BGSTalkingActivator_Save()
 {
     reinterpret_cast<FUN_004855a0*>(this)->M();
-    reinterpret_cast<S_00487010*>(reinterpret_cast<char*>(this) + 0x30)->FUN_00487010();
+    reinterpret_cast<S_00487010*>(reinterpret_cast<char*>(this) + 0x30)->Save_00487010();
     reinterpret_cast<S_0048a520*>(reinterpret_cast<char*>(this) + 0x3c)
         ->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    reinterpret_cast<S_0048cca0*>(reinterpret_cast<char*>(this) + 0x5c)->FUN_0048cca0();
+    reinterpret_cast<S_0048cca0*>(reinterpret_cast<char*>(this) + 0x5c)->Save_0048cca0();
     reinterpret_cast<S_00477f20*>(reinterpret_cast<char*>(this) + 0x68)->FUN_00477f20();
     if (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x74))
     {
         unsigned int id =
             reinterpret_cast<TESForm*>(*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x74))
                 ->GetFormID();
-        FUN_00485910(0x4d414e53, id);
+        TESForm_AddChunk_00485910(0x4d414e53, id);
     }
     if (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x94))
     {
         unsigned int id =
             reinterpret_cast<TESForm*>(*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x94))
                 ->GetFormID();
-        FUN_00485910(0x4d414e56, id);
+        TESForm_AddChunk_00485910(0x4d414e56, id);
     }
     if (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x7c))
     {
         unsigned int id =
             reinterpret_cast<TESForm*>(*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x7c))
                 ->GetFormID();
-        FUN_00485910(0x4d414e49, id);
+        TESForm_AddChunk_00485910(0x4d414e49, id);
     }
     reinterpret_cast<FUN_00485680*>(this)->M();
 }
@@ -632,32 +637,33 @@ struct FUN_004534f0_shell
 {
     void FUN_004534f0(void* a);
 };
-TESForm* __cdecl FUN_004839c0(unsigned int a);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int a);
 struct FUN_004ff8a0_shell : public BGSTalkingActivator
 {
-    void FUN_004ff8a0(BGSLoadFormBuffer* arg);
+    void BGSTalkingActivator_InitLoadGame(BGSLoadFormBuffer* arg);
 };
 // Calls FUN_004534f0, then conditionally replaces m_pTempRef with an Actor cast of the form returned by FUN_004839c0.
 // @fnv 0x004ff8a0
-void FUN_004ff8a0_shell::FUN_004ff8a0(BGSLoadFormBuffer* arg)
+// src: COMMUNITY 0x004ff8a0
+void FUN_004ff8a0_shell::BGSTalkingActivator_InitLoadGame(BGSLoadFormBuffer* arg)
 {
     ((FUN_004534f0_shell*)this)->FUN_004534f0(arg);
     if (arg->GetChangeFlags(0x800000).operator bool())
     {
         m_pTempRef =
-            (TESObjectREFR*)(m_pTempRef != 0 ? dynamic_cast<Actor*>(FUN_004839c0((unsigned int)m_pTempRef)) : 0);
+            (TESObjectREFR*)(m_pTempRef != 0 ? dynamic_cast<Actor*>(TESForm_GetFormByNumericID((unsigned int)m_pTempRef)) : 0);
     }
 }
 
 struct ActivatorComparison
 {
-    bool __thiscall FUN_005111e0(TESForm* form);
+    bool __thiscall TESObjectACTI_Compare(TESForm* form);
 };
 
 struct TalkingActivatorComparison : BGSTalkingActivator
 {
     BGSVoiceType* __thiscall FUN_009185e0();
-    bool __thiscall FUN_004fed50(TESForm* form);
+    bool __thiscall BGSTalkingActivator_Compare(TESForm* form);
 };
 
 BGSVoiceType* __thiscall TalkingActivatorComparison::FUN_009185e0()
@@ -667,12 +673,13 @@ BGSVoiceType* __thiscall TalkingActivatorComparison::FUN_009185e0()
 
 // Returns true if form is not a BGSTalkingActivator, FUN_005111e0 returns true, or the two FUN_009185e0 results differ.
 // @fnv 0x004fed50
-bool __thiscall TalkingActivatorComparison::FUN_004fed50(TESForm* form)
+// src: XBOX_PDB 0x004fed50
+bool __thiscall TalkingActivatorComparison::BGSTalkingActivator_Compare(TESForm* form)
 {
     BGSTalkingActivator* activator = dynamic_cast<BGSTalkingActivator*>(form);
     if (!activator)
         return true;
-    if (reinterpret_cast<ActivatorComparison*>(this)->FUN_005111e0(form))
+    if (reinterpret_cast<ActivatorComparison*>(this)->TESObjectACTI_Compare(form))
         return true;
     if (FUN_009185e0() != static_cast<TalkingActivatorComparison*>(activator)->FUN_009185e0())
         return true;

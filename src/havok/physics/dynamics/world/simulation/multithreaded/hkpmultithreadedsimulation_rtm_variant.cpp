@@ -51,8 +51,8 @@ struct FUN_00d04300
     int* m_p;
     FUN_00d04300(bool del);
 };
-int __fastcall FUN_00d021e0(int self, int, int* out);
-void __fastcall FUN_00d021f0(void* this_, int, int* arg, int);
+int __fastcall hkpMultiThreadedSimulation_getMultithreadConfig(int self, int, int* out);
+void __fastcall hkpMultiThreadedSimulation_setMultithreadConfig(void* this_, int, int* arg, int);
 struct S_00d02020_Owner
 {
     virtual void v00();
@@ -93,7 +93,7 @@ struct S_00d02020_Pair
     S_00d02020_Handle* m_kPointA;
     S_00d02020_Handle* m_kPointB;
 };
-void __stdcall FUN_00d02020(S_00d02020_Pair* pair);
+void __stdcall hkpMultiThreadedSimulation_MtPhantomBroadPhaseListener_removeCollisionPair(S_00d02020_Pair* pair);
 struct CompareValue
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
@@ -179,7 +179,7 @@ struct World
 };
 struct Reserve
 {
-    void FUN_00d97070(int);
+    void hkpBroadPhase_enableMultiThreading(int);
 };
 struct Owner
 {
@@ -365,8 +365,8 @@ struct SubNode
     int unk0c;
     signed char off10;  // +0x10  byte offset of the polymorphic object
 };
-void __stdcall FUN_00d01fc0(HandlePair* pHandlePair);
-bool FUN_00d02160(int* apPairA, int* apPairB);
+void __stdcall hkpMultiThreadedSimulation_MtPhantomBroadPhaseListener_addCollisionPair(HandlePair* pHandlePair);
+bool pairLessThan(int* apPairA, int* apPairB);
 struct PairEntry
 {
     int first;
@@ -378,9 +378,9 @@ struct PairArray
     int m_iElementCount;
     unsigned int m_pRayCursor;
 };
-char* __cdecl FUN_00c85750();
+char* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* alloc, PairArray* arr, int elemSize);
-void __cdecl FUN_00cc0f40(char* a, char* b, char* c);
+void __cdecl hkpWorldAgentUtil_addAgent(char* a, char* b, char* c);
 struct FUN_00d026e0_cls
 {
     int unk00;
@@ -394,9 +394,9 @@ struct SortPair8
 };
 typedef bool(__cdecl* SortPairLess)(const SortPair8* lhs, const SortPair8* rhs);
 void __cdecl QuickSortPairs(SortPair8* apPairs, int lo, int hi, SortPairLess apLess);
-void __stdcall FUN_00d020f0(S_00d02020_Pair* pair);
-void __stdcall FUN_00d02200(int);
-void __stdcall FUN_00d02210(int, int, int);
+void __stdcall hkpMultiThreadedSimulation_MtBroadPhaseBorderListener_removeCollisionPair(S_00d02020_Pair* pair);
+void __stdcall hkpMultiThreadedSimulation_61(int);
+void __stdcall hkpMultiThreadedSimulation_assertThereIsNoCollisionInformationForEntities(int, int, int);
 struct OwnerD020;
 class PhantomD020
 {
@@ -467,7 +467,7 @@ struct __declspec(align(16)) SolverContext
     int unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C;
     int unk40, unk44, unk48, unk4C, unk50, unk54, unk58, unk5C;
     int unk60, unk64, unk68, unk6C, unk70, unk74, unk78, unk7C;
-    void FUN_00cfa6e0(void*, void*, int);
+    void hkpConstraintQueryIn_set(void*, void*, int);
 };
 struct PhysicsOwner
 {
@@ -581,7 +581,7 @@ struct __declspec(align(16)) ResultJob : JobHeader
 struct JobQueue
 {
     void AddObjectCopy(BuildJob*, int);
-    void FUN_00d051b0();
+    void hkJobQueue_processAllJobs();
 };
 struct Allocator
 {
@@ -627,7 +627,7 @@ struct Processor
     JobQueue* active;
 
     void ProcessGroups(int**, int, struct Group*, int, TaskInput*, hkBool);
-    void FUN_00d0c9c0(int**, int, TaskInput*, GroupIdentity*, hkBool);
+    void hkpContinuousSimulation_processAgentNnEntries(int**, int, TaskInput*, GroupIdentity*, hkBool);
 };
 struct Group
 {
@@ -637,10 +637,10 @@ struct Group
     int unk14;
 };
 void __cdecl ResizeAudioStream(void* alloc, void* arr, int elemSize);
-extern "C" void __cdecl FUN_00cb1280(void* p, int v, int n);
+extern "C" void __cdecl hkString_memSet(void* p, int v, int n);
 __forceinline hkMemoryRouterQ_hkpmultithreadedsimulation_rtm_variant& getRouter()
 {
-    return *(hkMemoryRouterQ_hkpmultithreadedsimulation_rtm_variant*)FUN_00c85750();
+    return *(hkMemoryRouterQ_hkpmultithreadedsimulation_rtm_variant*)hkMemoryRouter_getInstance();
 }
 #include "../../../../../../../include/hkArray.h"
 // The function's local arrays are released by explicit calls (no destructor, no EH state), so they are hkArrayBase
@@ -770,7 +770,7 @@ struct SimulationIslandQ
 struct InputQ
 {
     int LookupHashEntry(int key, int flag);
-    void FUN_00cb1870(hkMemoryAllocator* heap, int key, EntityQ* entity);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocator* heap, int key, EntityQ* entity);
 };
 struct CollideSimQ
 {
@@ -782,8 +782,8 @@ struct CollideSimQ
     int m_3c;
     int unk40[0x20];
     int m_c0;
-    void FUN_00d0db40(EntityQ** entities, int numEntities, void* input, int* out);
-    void FUN_00d03030(AgentEntryQ** entries, int numEntries, void* input, SimulationIslandQ* island, hkBool flag);
+    void hkpContinuousSimulation_collideEntitiesOfOneIslandNarrowPhaseContinuous_toiOnly(EntityQ** entities, int numEntities, void* input, int* out);
+    void hkpMultiThreadedSimulation_processAgentNnEntries(AgentEntryQ** entries, int numEntries, void* input, SimulationIslandQ* island, hkBool flag);
     void ProcessCollisionEntries(EntityQ** entities, int numEntities, void* input, InputQ* collInput) throw();
 };
 extern "C" void _ReadWriteBarrier(void);
@@ -826,7 +826,7 @@ struct S00d02880_Key
 {
     int v;
 };
-static S00d02880_Elem* FUN_00d02880(S00d02880_Arr* b, S00d02880_Key t);
+static S00d02880_Elem* getIslandEntriesInfo(S00d02880_Arr* b, S00d02880_Key t);
 S00d02880_Elem* S00d02880_Call(S00d02880_Arr* a, S00d02880_Key key);
 #include <windows.h>
 #include <xmmintrin.h>
@@ -871,7 +871,7 @@ struct MessageBuilder
     unsigned int capacity;
     char* cursor;
     __declspec(nothrow) MessageBuilder(char* buffer, unsigned int capacity);
-    void FUN_00cc01c0(const char* text);
+    void ProcessAndReturnValue_00cc01c0(const char* text);
     void FUN_00cc00e0();
 };
 struct ObjectLink
@@ -1029,7 +1029,7 @@ template <class T, class L> inline void sortPairs(T* data, int count, L less)
         QuickSortPairs((SortPair8*)data, lo, hi, (SortPairLess)less);
     }
 }
-void __cdecl FUN_00d02250(PairList<TypedPair>& list);
+void __cdecl sortPairList(PairList<TypedPair>& list);
 extern int DAT_01269200;
 extern const float DAT_0104da48 = 3.402820018375656e+38f;
 struct ProfileNamedRecord : TraceRecord
@@ -1048,7 +1048,7 @@ struct RuntimeBase
 };
 struct Job
 {
-    int FUN_00d04440();
+    int hkJobQueue_getMasterThreadFinishingFlags();
     void SetSimulationEnabled(int);
     void SetValue(int);
 };
@@ -2058,11 +2058,11 @@ struct StepWorld
     PendingConstraints* f1b8;
 
     void IncrementCounter();
-    void FUN_00c910b0();
+    void nullsub_6();
     void FUN_00c91120();
-    void FUN_00c91140();
-    void FUN_00c91190();
-    int FUN_00c93570();
+    void UpdateFields_00c91140();
+    void hkpWorld_unlock();
+    int hkpWorld_getMemoryWatchDog();
 };
 struct TimeInfo
 {
@@ -2073,16 +2073,16 @@ struct StepPair
     Handle* first;
     Handle* second;
 };
-void __cdecl FUN_00dd7d00(Island**, int, int, void(__cdecl*)(bool*, CompareObject*, CompareObject*));
-void __cdecl FUN_00cf7130(PairArray*, PairArray*);
-void __cdecl FUN_00d02250(PairArray*);
-void __cdecl FUN_00cb4c60(StepWorld*, Island*, Island*);
-Agent* __cdecl FUN_00cc0f40(Body*, Body*, Dispatcher*);
+void __cdecl hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(Island**, int, int, void(__cdecl*)(bool*, CompareObject*, CompareObject*));
+void __cdecl hkpTypedBroadPhaseDispatcher_removeDuplicates(PairArray*, PairArray*);
+void __cdecl sortPairList(PairArray*);
+void __cdecl hkpWorldOperationUtil_internalMergeTwoIslands(StepWorld*, Island*, Island*);
+Agent* __cdecl hkpWorldAgentUtil_addAgent(Body*, Body*, Dispatcher*);
 Agent* __cdecl FindEntryValue(Body*, Body*);
-void __cdecl FUN_00cc1160(Agent*);
-void __cdecl FUN_00cfedd0(Agent*, Dispatcher*, Output*, Manager*);
-void __cdecl FUN_00d00aa0(StepWorld*, Constraint*);
-void __cdecl FUN_00d014f0(StepWorld*, TimeInfo*);
+void __cdecl hkpWorldAgentUtil_removeAgentAndItsToiEvents(Agent*);
+void __cdecl hkAgentNnMachine_ProcessAgent(Agent*, Dispatcher*, Output*, Manager*);
+void __cdecl hkpWorldCallbackUtil_fireConstraintViolated(StepWorld*, Constraint*);
+void __cdecl hkpWorldCallbackUtil_firePostCollideCallback(StepWorld*, TimeInfo*);
 void __cdecl ProcessChildLoop(StepWorld*);
 __forceinline Body* bodyOf(Handle* h)
 {
@@ -2265,7 +2265,7 @@ struct Stepper
 
     void AddToiEvent(Output*, Agent*, void*);
 
-    int FUN_00d03290(Job*, Jobs*);
+    int hkpMultiThreadedSimulation_finishMtStep(Job*, Jobs*);
 };
 extern "C" void _ReadWriteBarrier(void);
 unsigned __int64 __cdecl __rdtsc(void);
@@ -2288,7 +2288,7 @@ struct Singleton
 void __cdecl ResizeAudioStream(void*, PairArray*, int);
 static inline Singleton* GetSingleton()
 {
-    return (Singleton*)FUN_00c85750();
+    return (Singleton*)hkMemoryRouter_getInstance();
 }
 struct ArrPair
 {
@@ -2355,9 +2355,9 @@ struct ObjA
     int m_08;
     void EnsureCapacity(DeallocCtx* ctx, int zero);
     int LookupHashEntry(void* elem, int zero);
-    void FUN_00cb1870(DeallocCtx* ctx, void* elem, int one);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(DeallocCtx* ctx, void* elem, int one);
     void ProcessArgument(DeallocCtx* ctx);
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 struct CollisionCell
 {
@@ -4331,7 +4331,7 @@ struct SubObj
         return m_78;
     }
     void FUN_00c91120();
-    void FUN_00c91140();
+    void UpdateFields_00c91140();
 };
 struct ElemSub
 {
@@ -4705,7 +4705,7 @@ struct ThisCls
     int m_04;
     int m_08;
     SubObj* m_0c;
-    void FUN_00d03c20(ParamObj* p0, ParamObj* p1);
+    void hkpMultiThreadedSimulation_collideEntitiesNeedingPsiCollisionDetectionNarrowPhase_toiOnly(ParamObj* p0, ParamObj* p1);
     void ProcessGroups(int* a, int b, Group* c, int d, void* e, CollisionFlag f);
 };
 
@@ -4842,9 +4842,9 @@ struct Glob
     int unk14;
     GlobObj* m_18;
 };
-void __cdecl FUN_00cb55d0(void* p);
-void __cdecl FUN_00d01bc0(void* p);
-void __cdecl FUN_00d892d0();
+void __cdecl hkpWorldOperationUtil_cleanupDirtyIslands(void* p);
+void __cdecl hkpWorldMemoryUtil_checkMemoryForIntegration(void* p);
+void __cdecl hkSolveUpload();
 struct Sub
 {
     int unk00;
@@ -4956,7 +4956,7 @@ struct __declspec(align(16)) Msg : JobBase
 };
 struct ArgCls
 {
-    void FUN_00d04a80(int a, int b);
+    void hkJobQueue_setQueueCapacityForJobType(int a, int b);
     void AddObjectCopy(Msg* m, int b);
 };
 struct QueueHandle
@@ -4997,7 +4997,7 @@ struct RegA
     int unk74;
     int unk78;
     int unk7c;
-    void FUN_00cfa6e0(Sub* s, Vec4* v, void* h);
+    void hkpConstraintQueryIn_set(Sub* s, Vec4* v, void* h);
 };
 struct RegB
 {
@@ -5181,14 +5181,14 @@ struct Obj
             if (m_8c)
                 FUN_00c91120();
             if (m_a4 == 1 && m_90)
-                FUN_00c91140();
+                UpdateFields_00c91140();
         }
     }
-    void* FUN_00c93570();
+    void* hkpWorld_getMemoryWatchDog();
     void ComputeMemoryUsage(MemoryInfo* out);
     void FUN_00c91120();
-    void FUN_00c91140();
-    void FUN_00c910b0();
+    void UpdateFields_00c91140();
+    void nullsub_6();
 };
 struct Simulation
 {
@@ -5243,8 +5243,8 @@ struct Simulation
     int unkb4;
     int m_b8;
     int m_bc;
-    int FUN_00d022b0(ArgCls* arg, float dt);
-    void FUN_00cf8b00();
+    int hkpMultiThreadedSimulation_stepBeginSt(ArgCls* arg, float dt);
+    void hkpSimulation_applyActions();
 };
 static __forceinline void scaleGravity(Vec4* dst, const Obj& world, const float& scale)
 {
@@ -5254,7 +5254,8 @@ static __forceinline void scaleGravity(Vec4* dst, const Obj& world, const float&
                                               StepBeginSse::_mm_load_ps((const float*)&world.m_10)));
 }
 // @fnv 0x00d022b0
-int Simulation::FUN_00d022b0(ArgCls* arg, float dt)
+// src: XBOX_PDB 0x00d022b0
+int Simulation::hkpMultiThreadedSimulation_stepBeginSt(ArgCls* arg, float dt)
 {
     union StepTraceScratch
     {
@@ -5275,17 +5276,17 @@ int Simulation::FUN_00d022b0(ArgCls* arg, float dt)
         Obj* world = m_0c;
         world->m_4c->v14(world, &v);
     }
-    FUN_00cb55d0(m_0c);
+    hkpWorldOperationUtil_cleanupDirtyIslands(m_0c);
     MemoryInfo outVal;
     m_0c->ComputeMemoryUsage(&outVal);
-    Glob* g = (Glob*)FUN_00c85750();
+    Glob* g = (Glob*)hkMemoryRouter_getInstance();
     bool ok = g->m_18->v20(outVal.maximum);
     if (!ok)
     {
-        if (m_0c->FUN_00c93570())
+        if (m_0c->hkpWorld_getMemoryWatchDog())
         {
             m_0c->unlock();
-            FUN_00d01bc0(m_0c);
+            hkpWorldMemoryUtil_checkMemoryForIntegration(m_0c);
             m_0c->m_94 += 1;
         }
         else
@@ -5296,7 +5297,7 @@ int Simulation::FUN_00d022b0(ArgCls* arg, float dt)
             return 1;
         }
     }
-    FUN_00d892d0();
+    hkSolveUpload();
     m_0c->m_1d0 = v;
     Sub* sub = &const_cast<Obj*&>(m_0c)->m_1e0;
     sub->m_10c = sub->m_120 * v.z;
@@ -5309,7 +5310,7 @@ int Simulation::FUN_00d022b0(ArgCls* arg, float dt)
     edi->m_114 = &world->m_1d0;
     edi->m_90.FUN_00cfa7d0(m_0c->m_78);
     world = m_0c;
-    edi->m_10.FUN_00cfa6e0(&world->m_1e0, &world->m_1d0, world->m_1b8);
+    edi->m_10.hkpConstraintQueryIn_set(&world->m_1e0, &world->m_1d0, world->m_1b8);
     edi->m_110 = this;
     edi->m_118 = m_0c->m_78->m_08;
     edi->m_11c = &DAT_01269210;
@@ -5322,21 +5323,21 @@ int Simulation::FUN_00d022b0(ArgCls* arg, float dt)
         {
             writeTrace(&DAT_010cc5b0, scratch.ticks);
             m_0c->m_98 -= 1;
-            FUN_00cf8b00();
+            hkpSimulation_applyActions();
             m_0c->m_98 += 1;
         }
         Msg msg;
         msg.d20 = count;
         msg.header = (int)m_0c->m_74;
-        arg->FUN_00d04a80(0, count);
-        arg->FUN_00d04a80(1, count);
+        arg->hkJobQueue_setQueueCapacityForJobType(0, count);
+        arg->hkJobQueue_setQueueCapacityForJobType(1, count);
         arg->AddObjectCopy(&msg, 1);
     }
     m_0c->m_1e0.advanceCounters();
     world = m_0c;
     m_b8 = world->m_2c;
     m_bc = world->m_38;
-    world->FUN_00c910b0();
+    world->nullsub_6();
     writeTrace(&DAT_01076f38, scratch.ticks);
     return 0;
 }

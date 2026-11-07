@@ -41,16 +41,16 @@ class BSTempEffectParticle : public BSTempEffect
     ParticleObj* GetParticleObject();
     ParticleSource* GetSource();
     void SetParentCell(TESObjectCELL* apCell);
-    bool FUN_00689af0();
-    void FUN_00689920(const char* name);
-    void FUN_006896c0();
+    bool CheckShouldSave();
+    void PlaySequence(const char* name);
+    void Detach_006896c0();
     bool UpdateTransform(float time);
     bool LoadFromSave();
 
     void StopSounds();
     void InitLoopSounds();
-    void FUN_0068a8d0(void* pValue);
-    void FUN_0068aa50(void* searchArg);
+    void PlayImpactDataSounds(void* pValue);
+    void BSTempEffectParticle_ResetGravity(void* searchArg);
     void AttachModel(NiNode* parent, NiMatrix3 rotation, NiPoint3 position, float scale, unsigned int flags);
     void AttachModel(Parent* parent, NiMatrix3 rotation, NiPoint3 position, float scale, unsigned int flags);
     void AttachModel(void* parent, Matrix rotation, NiPoint3 position, float scale, int flags);

@@ -27,7 +27,7 @@ struct FirstBase
 {
     int unk00;
     int unk04;
-    void FUN_00d6a250(Receiver* apReceiver);
+    void ForwardCall_00d6a250(Receiver* apReceiver);
 };
 
 struct SecondBase
@@ -48,12 +48,13 @@ struct Receiver
 
 // Passes the enclosing FullObject (this minus 0x20) to the receiver's ClearValue.
 // @fnv 0x00d6a250
-void FirstBase::FUN_00d6a250(Receiver* apReceiver)
+// src: GUESS 0x00d6a250 (confidence: low)
+void FirstBase::ForwardCall_00d6a250(Receiver* apReceiver)
 {
     apReceiver->ClearValue((FullObject*)((char*)this - 0x20));
 }
 
-hkMemoryRouter* FUN_00c85750() throw();
+hkMemoryRouter* hkMemoryRouter_getInstance() throw();
 struct S_00d6a750_Source
 {
     void ClearValue(hkpWorldPostSimulationListener* listener) throw();
@@ -101,7 +102,7 @@ template <class T> __forceinline void hkArrayUtil_destruct(T* t, int n)
 
 __forceinline hkpMidphaseViewer::ElementArray::~ElementArray() throw()
 {
-    hkMemoryAllocator& alloc = FUN_00c85750()->heap();
+    hkMemoryAllocator& alloc = hkMemoryRouter_getInstance()->heap();
     hkArrayUtil_destruct(m_data, m_iElementCount);
     m_iElementCount = 0;
     if ((m_iCapacityState & 0x80000000) == 0)
@@ -124,10 +125,10 @@ class BSAudio;
 namespace fnv_00d6a810 {
 
 
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* audio()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 
 struct RefObj
@@ -145,7 +146,8 @@ inline void* hkAlloc(int n)
 }
 
 // @fnv 0x00d6a810
-void* __cdecl FUN_00d6a810(int a)
+// src: COMMUNITY 0x00d6a810
+void* __cdecl hkpMidphaseViewer_Create(int a)
 {
     hkpMidphaseViewer* o = ::new (hkAlloc(sizeof(hkpMidphaseViewer))) hkpMidphaseViewer(a);
     return o ? (char*)o + 8 : 0;
@@ -160,12 +162,13 @@ struct Registry_00dd9380
 extern Registry_00dd9380* DAT_01269cd0;
 extern char DAT_010d22e0[];
 extern void* DAT_01269024;
-void FUN_00d6a810();
+void hkpMidphaseViewer_Create();
 
 // @fnv 0x00d6a850
-void FUN_00d6a850()
+// src: GUESS 0x00d6a850 (confidence: low)
+void hkpMidphaseViewer_Create_SetDAT01269024()
 {
-    DAT_01269024 = DAT_01269cd0->Register(DAT_010d22e0, FUN_00d6a810);
+    DAT_01269024 = DAT_01269cd0->Register(DAT_010d22e0, hkpMidphaseViewer_Create);
 }
 
 struct Target
@@ -230,7 +233,7 @@ struct S_d6a280_Owner
 
 struct S_d6a280_Elem
 {
-    void FUN_00c93920(hkpWorldPostSimulationListener* listener) throw();
+    void hkpWorld_addWorldPostSimulationListener(hkpWorldPostSimulationListener* listener) throw();
 };
 
 // Constructs the base with a, then calls FUN_00c93920 on each item of m_24's m_items array, passing this.
@@ -240,7 +243,7 @@ hkpMidphaseViewer::hkpMidphaseViewer(int a) : hkpWorldViewerBase((const void*)a)
     if (m_iValueAtOffset0C != 0)
     {
         for (int i = 0; i < ((S_d6a280_Owner*)m_iValueAtOffset0C)->m_uiItemCount; i++)
-            ((S_d6a280_Owner*)m_iValueAtOffset0C)->m_items[i]->FUN_00c93920((hkpWorldPostSimulationListener*)this);
+            ((S_d6a280_Owner*)m_iValueAtOffset0C)->m_items[i]->hkpWorld_addWorldPostSimulationListener((hkpWorldPostSimulationListener*)this);
     }
 }
 
@@ -248,7 +251,8 @@ namespace fnv_00d6a870 {
 extern int DAT_01269024;
 
 // @fnv 0x00d6a870
-int __cdecl FUN_00d6a870()
+// src: GUESS 0x00d6a870 (confidence: low)
+int __cdecl hkpMidphaseViewer_GetDAT01269024()
 {
     return DAT_01269024;
 }
@@ -273,7 +277,7 @@ struct hkpPhysicsWorld
     hkpWorldViewerRegistry* unk10;
 };
 
-extern hkpPhysicsWorld* FUN_00c85750();
+extern hkpPhysicsWorld* hkMemoryRouter_getInstance();
 
 }  // namespace fnv_00d6a8b0
 
@@ -284,7 +288,7 @@ void* hkpMidphaseViewer::FUN_00d6a8b0(int flags)
     FUN_00d6a750();
     if (flags & 1)
     {
-        fnv_00d6a8b0::hkpPhysicsWorld* world = fnv_00d6a8b0::FUN_00c85750();
+        fnv_00d6a8b0::hkpPhysicsWorld* world = fnv_00d6a8b0::hkMemoryRouter_getInstance();
         world->unk10->removeViewer(this, m_usMemSizeAndFlags);
     }
     return this;

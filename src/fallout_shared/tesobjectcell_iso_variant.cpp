@@ -7,8 +7,8 @@
 #include <stddef.h>
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
-unsigned int FUN_0054f4c0();
-NiAVObject* FUN_0054f4f0();
+unsigned int TESTerrainLODManager_GetGrassNode();
+NiAVObject* TESMain_GetWeatherRoot();
 
 struct ExpiredRefPosition3
 {
@@ -16,7 +16,7 @@ struct ExpiredRefPosition3
 };
 struct FUN_00546af0_shell : public TESObjectCELL
 {
-    unsigned int FUN_00546af0();
+    unsigned int GetDetachTime();
 };
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 extern TESDataHandler* g_dataHandler;
@@ -24,11 +24,11 @@ struct RefNode;
 struct RefrShell;
 struct ZoneShell
 {
-    bool FUN_00526120(FUN_00546af0_shell* cell);
+    bool ShouldCellRecalc(FUN_00546af0_shell* cell);
 };
 struct Modelish
 {
-    bool FUN_0042cde0();
+    bool InventoryChanges_IsEmpty();
 };
 struct RefNode
 {
@@ -61,20 +61,20 @@ public:
 
     int FUN_00418520();
     bool FUN_00418750();
-    short FUN_00418770();
-    bool FUN_004127e0(ExtraShell_tesobjectcell_iso_variant*);
-    void FUN_00419ad0(int);
-    void FUN_00411ec0(ExtraShell_tesobjectcell_iso_variant*);
+    short ExtraDataList_GetCount();
+    bool ExtraDataList_CompareList(ExtraShell_tesobjectcell_iso_variant*);
+    void ExtraDataList_SetCount(int);
+    void ExtraDataList_CopyList(ExtraShell_tesobjectcell_iso_variant*);
     signed char GetExtraByteValue();
-    void FUN_0042dec0();
+    void ExtraDataList_RemoveHotkey();
     OpacityFadeState* GetOffsetC();
     void FUN_0041aeb0();
-    void FUN_0041af50();
-    void* FUN_0042e250();
-    RefNode* FUN_0041df90();
-    void FUN_0041dfd0();
-    void FUN_0041de40(int a);
-    RefrShell* FUN_0041e310();
+    void ExtraDataList_RemoveScript();
+    void* ExtraDataList_GetModelSwap();
+    RefNode* ExtraDataList_GetDroppedItemList();
+    void ExtraDataList_RemoveDroppedItemList();
+    void ExtraDataList_SetItemDropper(int a);
+    RefrShell* ExtraDataList_GetAshPileRef();
 };
 struct RefrShell
 {
@@ -281,23 +281,23 @@ struct RefrShell
     virtual void v199();
     virtual void v200();
     virtual void V201(int a, int b, int c);
-    bool FUN_005653d0();
-    bool FUN_0056ae60();
+    bool TESObjectREFR_GetRefPersists_005653d0();
+    bool TESObjectREFR_GetRespawn();
     bool IsExpired(unsigned int a);
-    bool FUN_00577de0();
-    void FUN_00572270();
+    bool TESObjectREFR_HasQuestObject();
+    void TESObjectREFR_MarkAsDeleted();
     ZoneShell* FUN_00567d20();
-    bool FUN_00452370();
+    bool TESForm_GetDestructible();
     bool FUN_00440d80();
-    bool FUN_00565450();
-    void FUN_00569250();
-    void FUN_00484580(bool b);
+    bool TESObjectREFR_GetPersistFlagValue();
+    void TESObjectREFR_Lock();
+    void TESForm_SetEmpty(bool b);
     void SetFlag2000(bool b);
-    bool FUN_0087f4a0();
-    unsigned int FUN_0084e3a0();
-    TESBoundObject* FUN_007af430();
-    void FUN_00575830(ExpiredRefPosition3* p);
-    void FUN_00575700(ExpiredRefPosition3 p);
+    bool Actor_GetRespawn();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    TESBoundObject* BGSSaveFormBuffer_GetForm();
+    void TESObjectREFR_SetLocationOnReference(ExpiredRefPosition3* p);
+    void TESObjectREFR_SetAngleOnReference(ExpiredRefPosition3 p);
 };
 struct Calendar
 {
@@ -308,25 +308,26 @@ struct DHShell : public TESDataHandler
     bool FUN_00469860(unsigned int id);
 };
 extern Calendar g_calendar;
-unsigned int __cdecl FUN_00526100();
-bool __fastcall FUN_005262a0(void* zone);
-Obj34* __cdecl FUN_00475400(void* p);
-void __cdecl DoCheckScriptRunnerAndRun(RefrShell* refr, ExtraShell_tesobjectcell_iso_variant* extra);
-bool __cdecl MarkBaseExtraListScriptEvent(RefrShell* refr, ExtraShell_tesobjectcell_iso_variant* extra, unsigned int a);
-ExtraShell_tesobjectcell_iso_variant* __fastcall FUN_005d43c0(RefrShell* refr);
+unsigned int __cdecl TESObjectCELL_GetHoursToRespawnCell();
+bool __fastcall BGSEncounterZone_ShouldReset(void* zone);
+Obj34* __cdecl BGSDestructibleObjectForm_GetDestructionForm(void* p);
+void __cdecl Script_InitActionList(RefrShell* refr, ExtraShell_tesobjectcell_iso_variant* extra);
+bool __cdecl Script_SetActionFlag(RefrShell* refr, ExtraShell_tesobjectcell_iso_variant* extra, unsigned int a);
+ExtraShell_tesobjectcell_iso_variant* __fastcall BSFile_GetDevice(RefrShell* refr);
 struct CellShell : public FUN_00546af0_shell
 {
     ZoneShell* FUN_00546c20();
-    RefNode* FUN_009604f0();
+    RefNode* GetRefList_009604f0();
     void SetDetachTime(unsigned int a, bool b);
     void* FUN_0054ddd0();
     bool FUN_00550200(ExpiredRefPosition3* p);
-    bool FUN_0054df30();
+    bool TESObjectCELL_HandleExpiredReferences();
 };
 // @fnv 0x0054df30
-bool CellShell::FUN_0054df30()
+// src: XBOX_PDB 0x0054df30
+bool CellShell::TESObjectCELL_HandleExpiredReferences()
 {
-    if (g_BGSSaveLoadGame->FUN_0042ce10())
+    if (g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
         return false;
     unsigned long _type;
     bool _changed;
@@ -338,34 +339,34 @@ bool CellShell::FUN_0054df30()
     _oldState = g_calendar.FUN_00867e30();
     _changed = 0;
     _done = 0;
-    _type = FUN_00546af0();
+    _type = GetDetachTime();
     if (_type == 0)
     {
         CellRefLockEnter();
         RefNode* a;
-        a = FUN_009604f0();
+        a = GetRefList_009604f0();
         for (; 0 != a && !a->FUN_008256d0();)
         {
             RefrShell* flag6;
             flag6 = *a->FUN_006815c0();
             a = a->FUN_00726070();
-            switch (static_cast<int>(flag6->FUN_007af430()->FUN_00401170()))
+            switch (static_cast<int>(flag6->BGSSaveFormBuffer_GetForm()->FUN_00401170()))
             {
             case 0x1b:
-                if (flag6->FUN_005653d0())
+                if (flag6->TESObjectREFR_GetRefPersists_005653d0())
                 {
-                    flag6->V130(!flag6->FUN_0056ae60());
+                    flag6->V130(!flag6->TESObjectREFR_GetRespawn());
                 }
                 break;
             case 0x2a:
             case 0x2b:
-                if (flag6->FUN_005653d0())
+                if (flag6->TESObjectREFR_GetRefPersists_005653d0())
                 {
                     RefrShell* c;
                     c = flag6;
                     if (c->IsExpired(_oldState))
                     {
-                        flag6->V130(!flag6->FUN_0056ae60());
+                        flag6->V130(!flag6->TESObjectREFR_GetRespawn());
                     }
                 }
                 break;
@@ -384,12 +385,12 @@ bool CellShell::FUN_0054df30()
     }
     else
     {
-        if (_oldState - _type > FUN_00526100())
+        if (_oldState - _type > TESObjectCELL_GetHoursToRespawnCell())
             _allowed = 1;
         if (0 != _special)
         {
-            if (FUN_005262a0(_special))
-                _changed = _special->FUN_00526120(this);
+            if (BGSEncounterZone_ShouldReset(_special))
+                _changed = _special->ShouldCellRecalc(this);
             else
                 _changed = 0;
         }
@@ -400,15 +401,15 @@ bool CellShell::FUN_0054df30()
     }
     CellRefLockEnter();
     {
-        _item = FUN_009604f0();
+        _item = GetRefList_009604f0();
         for (; 0 != _item && !_item->FUN_008256d0();)
         {
             RefrShell* refr2;
             refr2 = *_item->FUN_006815c0();
             _item = _item->FUN_00726070();
-            if (_done && ((DHShell*)g_dataHandler)->FUN_00469860(refr2->FUN_0084e3a0()))
+            if (_done && ((DHShell*)g_dataHandler)->FUN_00469860(refr2->GetHavokWorldObjectCountInSceneGraph_0084e3a0()))
             {
-                if (!refr2->V88() && !refr2->FUN_00577de0())
+                if (!refr2->V88() && !refr2->TESObjectREFR_HasQuestObject())
                     refr2->V49(1);
                 continue;
             }
@@ -425,12 +426,12 @@ bool CellShell::FUN_0054df30()
             {
                 if (_allowed)
                 {
-                    if (refr2->FUN_00452370())
+                    if (refr2->TESForm_GetDestructible())
                     {
                         Obj34* v;
-                        v = FUN_00475400(refr2->FUN_007af430());
+                        v = BGSDestructibleObjectForm_GetDestructionForm(refr2->BGSSaveFormBuffer_GetForm());
                         v->UpdateSoundLevel(refr2);
-                        if (!!FUN_005d43c0(refr2)->FUN_0042e250())
+                        if (!!BSFile_GetDevice(refr2)->ExtraDataList_GetModelSwap())
                             refr2->SetFlag2000(true);
                     }
                 }
@@ -440,7 +441,7 @@ bool CellShell::FUN_0054df30()
                 {
                     if (q)
                     {
-                        if (!FUN_005262a0(q))
+                        if (!BGSEncounterZone_ShouldReset(q))
                             continue;
                     }
                 }
@@ -452,23 +453,23 @@ bool CellShell::FUN_0054df30()
             }
             if (0 != cnt)
             {
-                if (cnt->FUN_0087f4a0())
+                if (cnt->Actor_GetRespawn())
                 {
                     cnt->V201(1, 0, 0);
                     RefNode* i;
-                    i = FUN_005d43c0(cnt)->FUN_0041df90();
+                    i = BSFile_GetDevice(cnt)->ExtraDataList_GetDroppedItemList();
                     if (0 != i)
                     {
                         for (; 0 != i && !i->FUN_008256d0();)
                         {
                             RefrShell* tmp;
                             tmp = *i->FUN_006815c0();
-                            FUN_005d43c0(tmp)->FUN_0041de40(0);
+                            BSFile_GetDevice(tmp)->ExtraDataList_SetItemDropper(0);
                             if (!tmp->V88())
-                                tmp->FUN_00572270();
+                                tmp->TESObjectREFR_MarkAsDeleted();
                             i->FUN_0063f7b0();
                         }
-                        FUN_005d43c0(cnt)->FUN_0041dfd0();
+                        BSFile_GetDevice(cnt)->ExtraDataList_RemoveDroppedItemList();
                     }
                     ExpiredRefPosition3 b;
                     cnt->V92(&b);
@@ -488,63 +489,63 @@ bool CellShell::FUN_0054df30()
                     }
                     if (s)
                     {
-                        cnt->FUN_00575830(&b);
-                        cnt->FUN_00575700(cnt->V91());
+                        cnt->TESObjectREFR_SetLocationOnReference(&b);
+                        cnt->TESObjectREFR_SetAngleOnReference(cnt->V91());
                     }
                 }
                 else
                 {
                     if (cnt->V139(0))
                     {
-                        if (!cnt->V88() && !cnt->FUN_00577de0())
+                        if (!cnt->V88() && !cnt->TESObjectREFR_HasQuestObject())
                         {
-                            cnt->FUN_00572270();
+                            cnt->TESObjectREFR_MarkAsDeleted();
                             RefrShell* x;
-                            x = FUN_005d43c0(cnt)->FUN_0041e310();
+                            x = BSFile_GetDevice(cnt)->ExtraDataList_GetAshPileRef();
                             if (!!x)
-                                x->FUN_00572270();
+                                x->TESObjectREFR_MarkAsDeleted();
                         }
                         RefNode* p;
-                        p = FUN_005d43c0(cnt)->FUN_0041df90();
+                        p = BSFile_GetDevice(cnt)->ExtraDataList_GetDroppedItemList();
                         if (!!p)
                         {
                             for (; p && !p->FUN_008256d0();)
                             {
                                 RefrShell* y;
                                 y = *p->FUN_006815c0();
-                                FUN_005d43c0(y)->FUN_0041de40(0);
+                                BSFile_GetDevice(y)->ExtraDataList_SetItemDropper(0);
                                 if (!y->V88())
-                                    y->FUN_00572270();
+                                    y->TESObjectREFR_MarkAsDeleted();
                                 p->FUN_0063f7b0();
                             }
-                            FUN_005d43c0(cnt)->FUN_0041dfd0();
+                            BSFile_GetDevice(cnt)->ExtraDataList_RemoveDroppedItemList();
                         }
                     }
                 }
             }
             else
             {
-                switch (static_cast<int>(refr2->FUN_007af430()->FUN_00401170()))
+                switch (static_cast<int>(refr2->BGSSaveFormBuffer_GetForm()->FUN_00401170()))
                 {
                 case 0x1b:
-                    if (refr2->FUN_0056ae60())
+                    if (refr2->TESObjectREFR_GetRespawn())
                     {
                         refr2->V130(0);
-                        if (!!reinterpret_cast<Modelish*>(FUN_005d43c0(refr2)->FUN_00418520()))
+                        if (!!reinterpret_cast<Modelish*>(BSFile_GetDevice(refr2)->FUN_00418520()))
                         {
-                            if (!reinterpret_cast<Modelish*>(FUN_005d43c0(refr2)->FUN_00418520())->FUN_0042cde0())
-                                refr2->FUN_00569250();
+                            if (!reinterpret_cast<Modelish*>(BSFile_GetDevice(refr2)->FUN_00418520())->InventoryChanges_IsEmpty())
+                                refr2->TESObjectREFR_Lock();
                         }
                     }
                     break;
                 case 0x26:
-                    refr2->FUN_00484580(false);
+                    refr2->TESForm_SetEmpty(false);
                     break;
                 case 0x1d:
-                    if (refr2->FUN_00440d80() && !refr2->FUN_00565450() && !refr2->V88())
+                    if (refr2->FUN_00440d80() && !refr2->TESObjectREFR_GetPersistFlagValue() && !refr2->V88())
                     {
                         IngredientItem* j;
-                        j = dynamic_cast<IngredientItem*>(refr2->FUN_007af430());
+                        j = dynamic_cast<IngredientItem*>(refr2->BGSSaveFormBuffer_GetForm());
                         if (0 != j)
                         {
                             if (reinterpret_cast<EffectItemListBoolQuery&>(reinterpret_cast<char*>(j)[
@@ -556,8 +557,8 @@ bool CellShell::FUN_0054df30()
                     break;
                 }
             }
-            DoCheckScriptRunnerAndRun(refr2, FUN_005d43c0(refr2));
-            MarkBaseExtraListScriptEvent(refr2, FUN_005d43c0(refr2), 0x80000000);
+            Script_InitActionList(refr2, BSFile_GetDevice(refr2));
+            Script_SetActionFlag(refr2, BSFile_GetDevice(refr2), 0x80000000);
         }
     }
     CellRefLockLeave();

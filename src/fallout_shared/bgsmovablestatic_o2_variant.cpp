@@ -9,7 +9,7 @@
 // ?FUN_004fc1a0@...@WGI@AEX_v@Z.
 struct PrimaryBase
 {
-    virtual void FUN_004fc1a0();
+    virtual void AdjustThisAndForward_004fc1a0();
     int unk04;
     int unk08;
     int unk0C;
@@ -30,14 +30,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_004fc1a0();
+    virtual void AdjustThisAndForward_004fc1a0();
 };
 
 struct AdjustedDerived : PrimaryBase, SecondaryBase
 {
     AdjustedDerived();
 // @fnv 0x004fc1a0
-    virtual void FUN_004fc1a0();
+// src: GUESS 0x004fc1a0 (confidence: low)
+    virtual void AdjustThisAndForward_004fc1a0();
 };
 
 AdjustedDerived::AdjustedDerived()

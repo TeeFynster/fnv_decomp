@@ -5,21 +5,21 @@
 
 void __stdcall ClearTwoInts(int* a, int* b);
 extern int g_D67960Value;
-int __cdecl FUN_00d67960();
+int __cdecl Object_GetG_D67960Value_00d67960();
 struct Item;
 struct Sink
 {
-    void FUN_00c9c670(Item*);
+    void removeEntityListener_00c9c670(Item*);
 };
 struct Link
 {
-    void FUN_00cb1fb0(Sink*);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(Sink*);
 };
 struct Item
 {
     int value;
     Link link;
-    void FUN_00d67bc0(Sink*);
+    void ProcessState_00d67bc0(Sink*);
 };
 struct Prefix
 {
@@ -99,7 +99,7 @@ struct BSAudio
     int unk00, unk04, unk08, unk0C;
     void* allocator;
 };
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 class FUN_00d67ce0 : public FUN_00ddccb0,
                      public hkpContactListener,
                      public hkpWorldPostSimulationListener,
@@ -143,7 +143,7 @@ extern S_00d67e10_Registry* g_00d67e10_registry;
 extern int g_00d67e10_toiCounterId;
 void RegisterToiCounter();
 struct BSAudio;
-__declspec(nothrow) BSAudio* FUN_00c85750();
+__declspec(nothrow) BSAudio* hkMemoryRouter_getInstance();
 struct AudioHeap
 {
     char pad[0x10];
@@ -203,7 +203,7 @@ struct Member : MemberBase
     __declspec(nothrow) void Release(void* heap);
     ~Member()
     {
-        Release(((AudioHeap*)FUN_00c85750())->heap);
+        Release(((AudioHeap*)hkMemoryRouter_getInstance())->heap);
     }
 };
 struct FUN_00d67fa0 : Base0, Iface1, Iface2, Iface3
@@ -260,9 +260,9 @@ struct Query
 };
 struct BaseHelper
 {
-    void FUN_00d68030(void* entry, int mode);
+    void hkpToiCountViewer_displayCountForBody(void* entry, int mode);
 };
-int __cdecl FUN_00d679c0(float* direction);
+int __cdecl Object_GetSignedLargestComponentIndex(float* direction);
 struct Context
 {
     void ProcessQuery(Query* query);
@@ -279,7 +279,7 @@ struct FUN_00d67970_class
     void* unk08;
     void* unk0c;
 
-    void __thiscall FUN_00d67970(FUN_00d67970_helper* helper);
+    void __thiscall hkpToiCountViewer_worldAddedCallback(FUN_00d67970_helper* helper);
 };
 struct OwnerBinding
 {
@@ -339,8 +339,8 @@ struct SpawnedObject
     unsigned int unk00;
     unsigned int unk04;
     SpawnedObject* m_08;
-    void FUN_00c9c670(void* listener) throw();
-    void FUN_00c91a20(void* listener) throw();
+    void removeEntityListener_00c9c670(void* listener) throw();
+    void hkpWorld_removeContactListener(void* listener) throw();
     void ClearValue(void* listener) throw();
 };
 struct Alloc
@@ -352,7 +352,7 @@ struct Alloc
     virtual void Grow(SpawnedObject** out, unsigned int size);
 };
 struct BSAudio;
-BSAudio* FUN_00c85750() throw();
+BSAudio* hkMemoryRouter_getInstance() throw();
 void __cdecl ResizeAudioStream(void* a, void* arr, unsigned int size) throw();
 struct Map
 {
@@ -387,7 +387,7 @@ struct Map
         return it <= m_hashModMask;
     }
 
-    void FUN_00cb1fb0(SpawnedObject* o) throw();
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(SpawnedObject* o) throw();
 };
 struct Array
 {
@@ -397,7 +397,7 @@ struct Array
 
     void clear()
     {
-        BSAudio* h = FUN_00c85750();
+        BSAudio* h = hkMemoryRouter_getInstance();
         Alloc* al = (Alloc*)h->allocator;
         int cap = m_iCapacityState;
         m_iElementCount = 0;
@@ -428,10 +428,10 @@ __declspec(align(16)) struct SquaredLanes
     float m_uiZ;
     float m_w;
 };
-int __cdecl FUN_00d679c0(const __m128* v);
+int __cdecl Object_GetSignedLargestComponentIndex(const __m128* v);
 struct PtrMapEntryObj
 {
-    void FUN_00c9c670(void* arg);
+    void removeEntityListener_00c9c670(void* arg);
 };
 struct PtrMapEntry
 {
@@ -463,7 +463,7 @@ struct FUN_00d67da0_cls
     int m_i30;
     PtrMapStorage m_kStorage;
 
-    void FUN_00d67da0();
+    void hkpToiCountViewer_reset();
 };
 #include "../../../../../../../include/hkMemoryAllocator.h"
 struct AudioCoreView
@@ -492,7 +492,7 @@ struct BSAudioString
 
     void Release()
     {
-        hkMemoryAllocator* allocator = ((AudioCoreView*)FUN_00c85750())->m_pThreadAllocator;
+        hkMemoryAllocator* allocator = ((AudioCoreView*)hkMemoryRouter_getInstance())->m_pThreadAllocator;
         m_fRestLength = 0;
         if ((m_pRayCursor & 0x80000000) == 0)
             allocator->bufFree(m_data, m_pRayCursor & 0x3fffffff);
@@ -540,14 +540,14 @@ struct ContactViewer
     int unk30;
     ContactTable m_table;
 
-    void FUN_00d68030(void* entry, int mode);
+    void hkpToiCountViewer_displayCountForBody(void* entry, int mode);
 };
-extern void __cdecl FUN_00d67a50(int owner, int id, void* entry, int mode, const char* name, unsigned int info,
+extern void __cdecl HkptoicountviewerGsEhscNogsNoehsc_UpdateState_00d67a50(int owner, int id, void* entry, int mode, const char* name, unsigned int info,
                                  float value, BSAudioValue flags);
 struct D681E0Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00d681e0();
+    virtual void AdjustThisAndForward_00d681e0();
 
     int unk04;
     int unk08;
@@ -559,14 +559,15 @@ struct D681E0Primary
 };
 struct D681E0Secondary
 {
-    virtual void FUN_00d681e0();
+    virtual void AdjustThisAndForward_00d681e0();
 };
 struct D681E0Object : D681E0Primary, D681E0Secondary
 {
     D681E0Object();
 
 // @fnv 0x00d681e0
-    virtual void FUN_00d681e0();
+// src: GUESS 0x00d681e0 (confidence: low)
+    virtual void AdjustThisAndForward_00d681e0();
 };
 D681E0Object::D681E0Object()
 {}
@@ -575,7 +576,7 @@ D681E0Object::D681E0Object()
 // so the secondary base sits at +0x28 and MSVC emits the this-adjusting thunk.
 struct AdjPrimaryBase
 {
-    virtual void FUN_00d68200();
+    virtual void AdjustThisAndForward_00d68200();
     int unk04;
     int unk08;
     int unk0C;
@@ -588,13 +589,14 @@ struct AdjPrimaryBase
 };
 struct AdjSecondaryBase
 {
-    virtual void FUN_00d68200();
+    virtual void AdjustThisAndForward_00d68200();
 };
 struct AdjDerived : AdjPrimaryBase, AdjSecondaryBase
 {
     AdjDerived();
 // @fnv 0x00d68200
-    virtual void FUN_00d68200();
+// src: GUESS 0x00d68200 (confidence: low)
+    virtual void AdjustThisAndForward_00d68200();
 };
 AdjDerived::AdjDerived()
 {}

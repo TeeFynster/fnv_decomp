@@ -48,10 +48,11 @@ struct FUN_00621060_shell
 {
     int* vtbl;
     void __thiscall SetValue();
-    FUN_00621060_shell* __thiscall FUN_00621060();
+    FUN_00621060_shell* __thiscall hkpCdPointCollector_hkpCdPointCollector();
 };
 // @fnv 0x00621060
-FUN_00621060_shell* __thiscall FUN_00621060_shell::FUN_00621060()
+// src: XBOX_PDB 0x00621060
+FUN_00621060_shell* __thiscall FUN_00621060_shell::hkpCdPointCollector_hkpCdPointCollector()
 {
     vtbl = &DAT_0104da3c;
     SetValue();
@@ -70,7 +71,8 @@ struct TopicObj
 BSAudio* __cdecl _FUN_00c85750();
 // If a1 is non-null, gets the object from _FUN_00c85750 and calls its Func with a1 and 8.
 // @fnv 0x006210d0
-void FUN_006210d0(void* a1)
+// src: GUESS 0x006210d0 (confidence: low)
+void Cameracaster_UpdateState_006210d0(void* a1)
 {
     if (a1 != 0)
     {
@@ -88,7 +90,8 @@ struct Caller
     virtual void Foo(void*, int);
 };
 // @fnv 0x00621170
-void FUN_00621170(void* apArg)
+// src: GUESS 0x00621170 (confidence: low)
+void Cameracaster_UpdateState_00621170(void* apArg)
 {
     if (apArg != 0)
     {
@@ -103,13 +106,14 @@ typedef char _sizecheck_RootContactPoint[sizeof(RootContactPoint) == 112 ? 1 : -
 
 struct FUN_006281a0_shell
 {
-    void FUN_006281a0(void*);
+    void AssignFields_006281a0(void*);
 };
 
 // @fnv 0x006212c0
-RootContactPoint* RootContactPoint::FUN_006212c0(void* apSource)
+// src: GUESS 0x006212c0 (confidence: low)
+RootContactPoint* RootContactPoint::InitializeFields_006212c0(void* apSource)
 {
-    ((FUN_006281a0_shell*)this)->FUN_006281a0(apSource);
+    ((FUN_006281a0_shell*)this)->AssignFields_006281a0(apSource);
     m_pRootCollidableA = ((RootContactPoint*)apSource)->m_pRootCollidableA;
     m_uiShapeKeyA = ((RootContactPoint*)apSource)->m_uiShapeKeyA;
     for (unsigned int uiIndex = 0; uiIndex < 8; ++uiIndex)
@@ -128,17 +132,18 @@ void __thiscall FUN_00621060_shell::SetValue()
     *(float*)((char*)this + 4) = DAT_0104da48;
 }
 
-void __fastcall FUN_00626870(void*);
+void __fastcall hkArrayBase_hkpRootCdBodyPair_clear(void*);
 
 struct FUN_00621120_shell : public FUN_00621060_shell
 {
-    void __thiscall FUN_00621120();
+    void __thiscall hkpAllCdPointCollector_reset();
 };
 
 // @fnv 0x00621120
-void __thiscall FUN_00621120_shell::FUN_00621120()
+// src: XBOX_PDB 0x00621120
+void __thiscall FUN_00621120_shell::hkpAllCdPointCollector_reset()
 {
-    FUN_00626870(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x10));
+    hkArrayBase_hkpRootCdBodyPair_clear(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x10));
     SetValue();
 }
 
@@ -148,19 +153,20 @@ struct Cnt621210
 };
 struct Rcv621210
 {
-    void FUN_00622570(bool);
+    void UpdateState_00622570(bool);
 };
 struct Hld621210
 {
     char _pad[16];
     Cnt621210 _c;
-    Rcv621210* FUN_00621210(Rcv621210* p);
+    Rcv621210* hkpAllCdPointCollector_hasHit(Rcv621210* p);
 };
 // Calls FUN_00622570 on p with whether _c._ref_00726070() is greater than zero, then returns p.
 // @fnv 0x00621210
-Rcv621210* Hld621210::FUN_00621210(Rcv621210* apReceiver)
+// src: COMMUNITY 0x00621210
+Rcv621210* Hld621210::hkpAllCdPointCollector_hasHit(Rcv621210* apReceiver)
 {
-    apReceiver->FUN_00622570(_c._ref_00726070() > 0);
+    apReceiver->UpdateState_00622570(_c._ref_00726070() > 0);
     return apReceiver;
 }
 
@@ -168,11 +174,12 @@ struct DummyFlagsShell
 {
     char _pad[0x410];
     bhkCharacterListener _flags;
-    bool FUN_00621240();
+    bool bhkCharacterController_QChaseBip();
 };
 
 // @fnv 0x00621240
-bool DummyFlagsShell::FUN_00621240()
+// src: XBOX_PDB 0x00621240
+bool DummyFlagsShell::bhkCharacterController_QChaseBip()
 {
     return _flags.GetFlags(0x800) != 0;
 }
@@ -187,18 +194,18 @@ void* __thiscall FUN_006210a0_shell::FUN_006210a0(unsigned int flags)
 {
     SetVtable();
     if (flags & 1)
-        FUN_006210d0(this);
+        Cameracaster_UpdateState_006210d0(this);
     return this;
 }
 
-void __cdecl FUN_00621170(void*);
+void __cdecl Cameracaster_UpdateState_00621170(void*);
 void FUN_006211b0(void*);
 // @fnv 0x00621140
 void* hkpAllCdPointCollector::FUN_00621140(unsigned int aiFlags)
 {
     FUN_006211b0();
     if (aiFlags & 1)
-        FUN_00621170(this);
+        Cameracaster_UpdateState_00621170(this);
     return this;
 }
 
@@ -231,13 +238,13 @@ struct FUN_00620ff0 : Base_620ff0
 
     FUN_00620ff0();
     virtual void v00();
-    void FUN_00621120();
+    void hkpAllCdPointCollector_reset();
 };
 
 // @fnv 0x00620ff0
 FUN_00620ff0::FUN_00620ff0() : m_10(0)
 {
-    FUN_00621120();
+    hkpAllCdPointCollector_reset();
 }
 
 extern int DAT_0104da28;

@@ -14,7 +14,7 @@ class MobileObject;
 class PathfindQueueStorage_pathfind_decls
 {
 public:
-    void FUN_0096aaf0(MobileObject* apObject, int aeLevel);
+    void ProcessArray_RemoveActor_0096aaf0(MobileObject* apObject, int aeLevel);
 };
 
 class MobileObject;
@@ -28,12 +28,12 @@ public:
     PathfindQueueStorage_pathfind_decls storage;
     unsigned char unk05[3];
 
-    void FUN_0096d470(MobileObject*, int);
-    void FUN_0096d470(ActorSV*, int);
-    void FUN_0096d470(ReferenceView*, int);
-    float FUN_0096d490();
-    void FUN_0096d450(MobileObject*, int, bool, bool, bool);
-    void FUN_0096d450(ActorSV*, int, bool, bool, ActorSV*);
+    void ProcessLists_RemoveReference(MobileObject*, int);
+    void ProcessLists_RemoveReference(ActorSV*, int);
+    void ProcessLists_RemoveReference(ReferenceView*, int);
+    float ProcessLists_GetSystemTimeClock();
+    void ProcessLists_AddReference(MobileObject*, int, bool, bool, bool);
+    void ProcessLists_AddReference(ActorSV*, int, bool, bool, ActorSV*);
 };
 #include "../../../include/PathingPath.h"
 class NavMesh;
@@ -50,15 +50,15 @@ class TESObjectREFR;
 class PathingRequestUnknown : public PathingRequest
 {
 };
-bool FUN_006d0b10(PathingRequest*, PathingSolution*);
-bool FUN_006d0be0(PathingRequestClosePoint*, PathingSolution*);
-bool FUN_006d2c80(PathingRequestUnknown*, PathingSolution*);
+bool Pathing_Pathfind(PathingRequest*, PathingSolution*);
+bool Pathing_BuildFleePath(PathingRequestClosePoint*, PathingSolution*);
+bool Pathing_BuildCoveredMovePath(PathingRequestUnknown*, PathingSolution*);
 
 #include "../../../include/PathingGraphNode.h"
 class PacketNodeRecord : public PathingGraphNode
 {
   public:
-    bool FUN_006cac70();
+    bool VirtualPathingNode_HasActualLocation();
 };
 #include "../../../include/BSSimpleArray.h"
 int CollectNearbyEdges(PathingLocation*, int, TESObjectREFR*);

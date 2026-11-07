@@ -32,8 +32,8 @@ struct BGSListForm;
 
 struct EncodeReferenceView : TESForm
 {
-    void* GetContainer();
-    TESForm* FUN_007af430();
+    void* TESObjectREFR_HasContainer();
+    TESForm* BGSSaveFormBuffer_GetForm();
 };
 
 struct BGSEncounterZone;
@@ -97,7 +97,7 @@ struct EncodeWord
 
 struct EncodeCompiler
 {
-    bool FUN_005afad0(EncodeWord*, bool, bool);
+    bool ScriptCompileData_GetReferencedObject(EncodeWord*, bool, bool);
 };
 
 struct EncodeParameter
@@ -121,17 +121,17 @@ extern TESForm* DAT_011ca224;
 
 bool FUN_00481f30(int);
 
-int FUN_005af5f0(EncodeCompiler*, EncodeWord*, char*, unsigned*, unsigned char, int);
+int ScriptCompiler_GetNextWord(EncodeCompiler*, EncodeWord*, char*, unsigned*, unsigned char, int);
 
 void FUN_005aea90(EncodeCompiler*, const char*, ...);
 
-void FUN_005b5e40(const char*, ...);
+void Warning_005b5e40(const char*, ...);
 
-int FUN_00404dc0(const char*, const char*);
+int BSstricmp(const char*, const char*);
 
 void* FUN_00401460(void*, const void*, unsigned);
 
-int FUN_004b12d0(const char*);
+int IsAFloat(const char*);
 
 int FUN_004b1230(const char*);
 
@@ -169,7 +169,8 @@ extern const char* DAT_0118a2d8[];
 extern unsigned char DAT_0118a598[];
 
 // @fnv 0x005b1ba0
-bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* parameters, ScriptLineBuffer* line,
+// src: EXE 0x005b1ba0
+bool __cdecl ScriptCompiler_StandardCompile(unsigned short count, const EncodeParameter* parameters, ScriptLineBuffer* line,
                           EncodeCompiler* compiler)
 
 {
@@ -191,7 +192,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
 
         EncodeWord word7;
 
-        int lengthVal = FUN_005af5f0(compiler, &word7, line->cLine, &line->uiElapsedMilliseconds, kindX, 0);
+        int lengthVal = ScriptCompiler_GetNextWord(compiler, &word7, line->cLine, &line->uiElapsedMilliseconds, kindX, 0);
 
         if (!lengthVal)
         {
@@ -217,7 +218,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
         }
 
         if (DAT_0118cdd0[parameters[index4].type].isReference &&
-            (!compiler->FUN_005afad0(&word7, false, false) || !word7.refIndex))
+            (!compiler->ScriptCompileData_GetReferencedObject(&word7, false, false) || !word7.refIndex))
         {
             FUN_005aea90(compiler, "Item '%s' not found for parameter %s.\r\nCompiled script not saved!", &word7,
                          parameters[index4].name);
@@ -290,7 +291,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
                     {
 
                     case 26:
-                        if (!reference->GetContainer())
+                        if (!reference->TESObjectREFR_HasContainer())
                         {
                             FUN_005aea90(
                                 compiler,
@@ -301,7 +302,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
                         break;
 
                     case 24:
-                        if (reference->FUN_007af430() != DAT_011ca224)
+                        if (reference->BGSSaveFormBuffer_GetForm() != DAT_011ca224)
                         {
                             FUN_005aea90(compiler,
                                          "Invalid map marker '%s' for parameter %s.\r\nCompiled script not saved!",
@@ -857,7 +858,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
             break;
 
             default:
-                FUN_005b5e40(
+                Warning_005b5e40(
                     "SCRIPTS: Param type '%d' (referenced object) unimplemented in ScriptCompiler::StandardCompile.",
                     parameters[index4].type);
                 return false;
@@ -950,7 +951,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
                     else
                     {
 
-                        if (!FUN_004b12d0(word7.text))
+                        if (!IsAFloat(word7.text))
                         {
                             FUN_005aea90(compiler,
                                          "Unknown variable '%s' for parameter %s.\r\nCompiled script not saved!",
@@ -1000,7 +1001,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
 
                 for (value = 0; value < 5; ++value)
                 {
-                    if (!FUN_00404dc0(DAT_01186cf4[value], word7.text))
+                    if (!BSstricmp(DAT_01186cf4[value], word7.text))
                         break;
                 }
 
@@ -1026,7 +1027,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
 
                 for (value = 0; value < 5; ++value)
                 {
-                    if (!FUN_00404dc0(DAT_0119bbb0[value], word7.text))
+                    if (!BSstricmp(DAT_0119bbb0[value], word7.text))
                         break;
                 }
 
@@ -1052,7 +1053,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
 
                 for (value = 0; value < 14; ++value)
                 {
-                    if (!FUN_00404dc0(DAT_011869bc[value], word7.text))
+                    if (!BSstricmp(DAT_011869bc[value], word7.text))
                         break;
                 }
 
@@ -1141,10 +1142,10 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
 
                 int value = 2;
 
-                if (!FUN_00404dc0(word7.text, DAT_01199e8c))
+                if (!BSstricmp(word7.text, DAT_01199e8c))
                     value = 0;
 
-                else if (!FUN_00404dc0(word7.text, DAT_01199e90))
+                else if (!BSstricmp(word7.text, DAT_01199e90))
                     value = 1;
 
                 if (value == 2)
@@ -1169,7 +1170,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
 
                 for (jProbe3 = 0; jProbe3 < 245; ++jProbe3)
                 {
-                    if (!FUN_00404dc0(word7.text, DAT_011977d8[jProbe3].name))
+                    if (!BSstricmp(word7.text, DAT_011977d8[jProbe3].name))
                     {
                         value = jProbe3;
                         break;
@@ -1196,7 +1197,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
 
                 for (int j = 0; j < 87; ++j)
                 {
-                    if (!FUN_00404dc0(word7.text, DAT_0118a2d8[j]))
+                    if (!BSstricmp(word7.text, DAT_0118a2d8[j]))
                     {
                         value = DAT_0118a598[j];
                         break;
@@ -1217,7 +1218,7 @@ bool __cdecl Cmd_Default_Parse(unsigned short count, const EncodeParameter* para
             break;
 
             default:
-                FUN_005b5e40("SCRIPTS: Param type '%d' unimplemented in ScriptCompiler::StandardCompile.",
+                Warning_005b5e40("SCRIPTS: Param type '%d' unimplemented in ScriptCompiler::StandardCompile.",
                              parameters[index4].type);
                 return false;
             }

@@ -197,8 +197,8 @@ void PackageEventActionData_packageeventaction::Clear()
     delete *((Script**)this + 1);
 }
 
-extern "C" void FUN_004856d0(int);
-extern "C" void FUN_00485910(int, int);
+extern "C" void TESForm_AddChunk(int);
+extern "C" void TESForm_AddChunk_00485910(int, int);
 // These operations are not declared by the shared Script header yet.
 // This adapter supplies only the missing methods, with no copied Script layout.
 struct PackageEventScriptMethods
@@ -209,13 +209,13 @@ struct PackageEventScriptMethods
 // @fnv 0x0067dc80
 void PackageEventActionData_packageeventaction::Save(int aeChunk)
 {
-    FUN_004856d0(aeChunk);
+    TESForm_AddChunk(aeChunk);
     unsigned int iid = m_pIdleForm ? ((TESForm*)m_pIdleForm)->GetFormID() : 0;
-    FUN_00485910(0x4d414e49, iid);
+    TESForm_AddChunk_00485910(0x4d414e49, iid);
     iid = pTopic ? pTopic->GetFormID() : 0;
     if (m_pScript)
         ((PackageEventScriptMethods*)m_pScript)->ProcessHeader();
-    FUN_00485910(0x4d414e54, iid);
+    TESForm_AddChunk_00485910(0x4d414e54, iid);
 }
 
 struct QuantityData

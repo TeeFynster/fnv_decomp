@@ -50,7 +50,7 @@ struct xHit
 struct xHitList
 {
     int FUN_00726070();
-    xHit* FUN_00807770(int);
+    xHit* EvaluateValue_00807770(int);
 };
 struct xTag
 {
@@ -62,9 +62,9 @@ struct __declspec(align(16)) xCollector
 {
     xCollector();
     ~xCollector();
-    xTag FUN_00621210();
-    void FUN_00cabad0();
-    xHitList* FUN_00460140();
+    xTag hkpAllCdPointCollector_hasHit();
+    void hkpAllCdPointCollector_sortHits();
+    xHitList* TESDataHandler_GetWorldSpaceList();
     int m_q[0xe8];
 };
 struct xPhantom
@@ -74,18 +74,18 @@ struct xPhantom
 struct xFilter
 {
     xFilter(unsigned int);
-    int FUN_0043b4d0();
+    int CFilter_GetLayer();
     unsigned int m_uiFilterValue;
 };
 unsigned int __fastcall xFUN_0043b540(void*);
 struct xNode
 {
-    bool FUN_00456610();
+    bool GetAppCulled_00456610();
 };
 xNode* xFUN_00c7fa90(void*);
 struct xOwnerP
 {
-    bool FUN_00621240();
+    bool bhkCharacterController_QChaseBip();
 };
 struct xActor
 {
@@ -165,50 +165,51 @@ struct xMenuItem
 struct MenuItemCollection
 {
     unsigned int FUN_0044ddc0();
-    xMenuItem* FUN_009c71c0();
+    xMenuItem* VATS_GetCurrentAction();
 };
 extern MenuItemCollection xg_11f2250;
 extern xActor* xg_11f21cc;
 extern xActor* xg_player_11dea3c;
 struct xOutHit
 {
-    void FUN_006212c0(xHit*);
+    void InitializeFields_006212c0(xHit*);
     xVec4* FUN_006815c0();
 };
 void xFUN_00458620(xP3&, xVec4*);
 struct xPtr
 {
-    xPhantom* FUN_00559450();
+    xPhantom* Modelloader_GetReferencedThis();
     void* m_p;
 };
 struct xCaster
 {
     xPtr m_iWordAt00;
-    bool FUN_00620bc0(const xP3& akFrom, xP3& akTo, xOutHit* apOut);
+    bool CameraCaster_Pick(const xP3& akFrom, xP3& akTo, xOutHit* apOut);
 };
 // @fnv 0x00620bc0
-bool xCaster::FUN_00620bc0(const xP3& akFrom, xP3& akTo, xOutHit* apOut)
+// src: XBOX_PDB 0x00620bc0
+bool xCaster::CameraCaster_Pick(const xP3& akFrom, xP3& akTo, xOutHit* apOut)
 {
     bool RESULT = false;
-    if (m_iWordAt00.FUN_00559450())
+    if (m_iWordAt00.Modelloader_GetReferencedThis())
     {
         xVec4 FROM;
         xCollector COL;
         xVec4b TO;
         xFUN_004a3e00(&FROM, akFrom);
         xFUN_004a3e00(&TO, akTo);
-        m_iWordAt00.FUN_00559450()->InvokeInterfaceCall(&FROM, &TO, &COL, 0);
-        RESULT = COL.FUN_00621210().FUN_005609f0();
+        m_iWordAt00.Modelloader_GetReferencedThis()->InvokeInterfaceCall(&FROM, &TO, &COL, 0);
+        RESULT = COL.hkpAllCdPointCollector_hasHit().FUN_005609f0();
         if (RESULT)
         {
-            COL.FUN_00cabad0();
+            COL.hkpAllCdPointCollector_sortHits();
             int I = 0;
             bool FOUND = false;
             bool ISX = xg_11f2250.FUN_0044ddc0() == 4;
             xActor* TARGET = 0;
             if (ISX)
             {
-                xMenuItem* ITEM = xg_11f2250.FUN_009c71c0();
+                xMenuItem* ITEM = xg_11f2250.VATS_GetCurrentAction();
                 if (ITEM)
                     TARGET = ITEM->m_iThirdValue;
                 else
@@ -216,13 +217,13 @@ bool xCaster::FUN_00620bc0(const xP3& akFrom, xP3& akTo, xOutHit* apOut)
                 if (!TARGET)
                     TARGET = xg_player_11dea3c;
             }
-            while (!FOUND && I < COL.FUN_00460140()->FUN_00726070())
+            while (!FOUND && I < COL.TESDataHandler_GetWorldSpaceList()->FUN_00726070())
             {
-                void* SHAPE = COL.FUN_00460140()->FUN_00807770(I)->m_48;
+                void* SHAPE = COL.TESDataHandler_GetWorldSpaceList()->EvaluateValue_00807770(I)->m_48;
                 xFilter FILTER(xFUN_0043b540(SHAPE));
-                int TYPE = FILTER.FUN_0043b4d0();
+                int TYPE = FILTER.CFilter_GetLayer();
                 xNode* NODE = xFUN_00c7fa90(SHAPE);
-                if (TYPE != 0x11 && (!NODE || NODE->FUN_00456610()))
+                if (TYPE != 0x11 && (!NODE || NODE->GetAppCulled_00456610()))
                 {
                     I++;
                     continue;
@@ -251,7 +252,7 @@ bool xCaster::FUN_00620bc0(const xP3& akFrom, xP3& akTo, xOutHit* apOut)
                             {
                                 xActor* PACTOR = ACTOR;
                                 xOwnerP* OWNER = PACTOR->FUN_009306d0();
-                                if (OWNER && OWNER->FUN_00621240())
+                                if (OWNER && OWNER->bhkCharacterController_QChaseBip())
                                     FOUND = false;
                             }
                         }
@@ -261,11 +262,11 @@ bool xCaster::FUN_00620bc0(const xP3& akFrom, xP3& akTo, xOutHit* apOut)
                 if (!FOUND)
                     I++;
                 else if (ISX)
-                    void* LAST = COL.FUN_00460140()->FUN_00807770(I)->m_48;
+                    void* LAST = COL.TESDataHandler_GetWorldSpaceList()->EvaluateValue_00807770(I)->m_48;
             }
             if (FOUND)
             {
-                apOut->FUN_006212c0(COL.FUN_00460140()->FUN_00807770(I));
+                apOut->InitializeFields_006212c0(COL.TESDataHandler_GetWorldSpaceList()->EvaluateValue_00807770(I));
                 xFUN_00458620(akTo, apOut->FUN_006815c0());
             }
             else

@@ -35,11 +35,12 @@ struct FUN_00cbb1b0_Class
 {
     char pad0[0x48];
     hkReal m_fMaxRelativeForce;
-    void __thiscall FUN_00cbb1b0(hkReal a);
+    void __thiscall hkpMouseSpringAction_setMaxRelativeForce(hkReal a);
 };
 
 // @fnv 0x00cbb1b0
-void FUN_00cbb1b0_Class::FUN_00cbb1b0(hkReal a)
+// src: XBOX_PDB 0x00cbb1b0
+void FUN_00cbb1b0_Class::hkpMouseSpringAction_setMaxRelativeForce(hkReal a)
 {
     m_fMaxRelativeForce = a;
 }
@@ -47,7 +48,8 @@ void FUN_00cbb1b0_Class::FUN_00cbb1b0(hkReal a)
 extern "C" int DAT_01268a14;
 
 // @fnv 0x00cbb8a0
-int __cdecl FUN_00cbb8a0()
+// src: COMMUNITY 0x00cbb8a0
+int __cdecl hkpUnaryAction_getClassType()
 {
     return (int)&DAT_01268a14;
 }
@@ -67,7 +69,7 @@ extern float DAT_0101b2d0;
 extern float DAT_0104da48;
 extern const char str_011b1f3c[];
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct Ms_Sphere
 {
@@ -226,7 +228,7 @@ struct Ms_B
 };
 struct Ms_N
 {
-    void __thiscall FUN_00cb0c10(const char* s);
+    void __thiscall UpdateState_00cb0c10(const char* s);
 };
 extern "C"
 {
@@ -258,12 +260,13 @@ struct Ms_cls
     float objDamping;
     int shapeKey;
     hkArrayBase<int> cb;
-    Ms_cls* FUN_00cbb560(LocalM128* a0, LocalM128* a1, float a2, float a3, float a4, Ms_Ent* a5, hkArray<int>* a6);
+    Ms_cls* hkpMouseSpringAction_hkpMouseSpringAction(LocalM128* a0, LocalM128* a1, float a2, float a3, float a4, Ms_Ent* a5, hkArray<int>* a6);
 };
 
 // Initializes the Ms_cls object with position, mouse, and damping parameters, copies an array, and computes a shape key via a collision test against the world.
 // @fnv 0x00cbb560
-Ms_cls* Ms_cls::FUN_00cbb560(LocalM128* apPos, LocalM128* apMouse, float afDamping, float afElasticity, float afObjDamping,
+// src: EXE 0x00cbb560
+Ms_cls* Ms_cls::hkpMouseSpringAction_hkpMouseSpringAction(LocalM128* apPos, LocalM128* apMouse, float afDamping, float afElasticity, float afObjDamping,
                              Ms_Ent* apEnt, hkArray<int>* apArr)
 {
     ((Ms_B*)this)->FUN_00d2b260(apEnt, 0);
@@ -277,7 +280,7 @@ Ms_cls* Ms_cls::FUN_00cbb560(LocalM128* apPos, LocalM128* apMouse, float afDampi
     maxRel = 250.0f;
     if (apArr)
     {
-        hkMemoryAllocator& h = *(hkMemoryAllocator*)FUN_00c85750()->m_heap;
+        hkMemoryAllocator& h = *(hkMemoryAllocator*)hkMemoryRouter_getInstance()->m_heap;
         int cap = cb.m_iCapacityState & 0x3fffffff;
         if (cap < apArr->m_iElementCount)
         {
@@ -331,16 +334,16 @@ Ms_cls* Ms_cls::FUN_00cbb560(LocalM128* apPos, LocalM128* apMouse, float afDampi
         if (coll.hit)
             shapeKey = coll.key;
     }
-    ((Ms_N*)&unk14)->FUN_00cb0c10(str_011b1f3c);
+    ((Ms_N*)&unk14)->UpdateState_00cb0c10(str_011b1f3c);
     return this;
 }
 
 namespace fnv_00cbb790 {
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 // 0x00c85750 returns the shared hkMemoryRouter; its heap pointer is at +0x10.
 inline hkMemoryAllocator& heapCBB7()
 {
-    return *(hkMemoryAllocator*)((hkMemoryRouter*)FUN_00c85750())->m_heap;
+    return *(hkMemoryAllocator*)((hkMemoryRouter*)hkMemoryRouter_getInstance())->m_heap;
 }
 
 template <typename T> inline void copyCBB7(T* pDst, const T* pSrc, int n)
@@ -387,7 +390,7 @@ class FUN_00cbb4e0 : public hkpUnaryAction
 
     void* operator new(unsigned int uiSize)
     {
-        hkMemoryRouter* pkRouter = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryRouter* pkRouter = (hkMemoryRouter*)hkMemoryRouter_getInstance();
         hkReferencedObject* pkObj = (hkReferencedObject*)((hkMemoryAllocator*)pkRouter->m_heap)->blockAlloc(uiSize);
         pkObj->m_usMemSizeAndFlags = (hkUint16)uiSize;
         return pkObj;
@@ -469,14 +472,14 @@ struct Cls
     int m_58;
     int m_5c;
     Cls* FUN_00cbb8b0(int flags);
-    void FUN_00d2b2b0();
+    void ReleaseReference_00d2b2b0();
 };
 
 // Clears the array at m_54 and releases its buffer unless flagged, calls FUN_00d2b2b0, and frees this through the TLS heap when bit 0 of flags is set.
 // @fnv 0x00cbb8b0
 Cls* Cls::FUN_00cbb8b0(int flags)
 {
-    hkMemoryRouter* tls = FUN_00c85750();
+    hkMemoryRouter* tls = hkMemoryRouter_getInstance();
     hkMemoryAllocator* heap = (hkMemoryAllocator*)tls->m_heap;
     int n = m_5c;
     m_58 = 0;
@@ -484,10 +487,10 @@ Cls* Cls::FUN_00cbb8b0(int flags)
         heap->bufFree((void*)m_54, (n & 0x3fffffff) * 4);
     m_54 = 0;
     m_5c = 0x80000000;
-    FUN_00d2b2b0();
+    ReleaseReference_00d2b2b0();
     if (flags & 1)
     {
-        hkMemoryRouter* tls2 = FUN_00c85750();
+        hkMemoryRouter* tls2 = hkMemoryRouter_getInstance();
         hkMemoryAllocator* heap2 = (hkMemoryAllocator*)tls2->m_heap;
         heap2->blockFree(this, (unsigned short)m_04);
     }
@@ -517,7 +520,7 @@ class UnkCall
     int unk04;
     int m_pOwningWorld;
 
-    void FUN_00c9c1d0();
+    void activate_00c9c1d0();
 };
 
 class hkpPositionTrackerCBB1
@@ -537,11 +540,12 @@ class hkpPositionTrackerCBB1
     int unk2C;
     hkVector4 m_vContactPosition;
 
-    void FUN_00cbb150(const hkVector4& kPosition);
+    void hkpMouseSpringAction_setMousePosition(const hkVector4& kPosition);
 };
 
 // @fnv 0x00cbb150
-void hkpPositionTrackerCBB1::FUN_00cbb150(const hkVector4& kPosition)
+// src: COMMUNITY 0x00cbb150
+void hkpPositionTrackerCBB1::hkpMouseSpringAction_setMousePosition(const hkVector4& kPosition)
 {
     LocalM128 d = _mm_sub_ps(kPosition.m_vComponents, m_vContactPosition.m_vComponents);
     d = _mm_and_ps(d, DAT_01017d10);
@@ -550,7 +554,7 @@ void hkpPositionTrackerCBB1::FUN_00cbb150(const hkVector4& kPosition)
     if ((iMask & 7) != 7)
     {
         if (m_pOwnerObject && m_pOwnerObject->m_pOwningWorld)
-            m_pOwnerObject->FUN_00c9c1d0();
+            m_pOwnerObject->activate_00c9c1d0();
     }
     m_vContactPosition = kPosition;
 }
@@ -595,5 +599,5 @@ FUN_00cbb4e0::FUN_00cbb4e0(int arg) : m_kAppliedCallbacks(FinishingFlag())
     _mm_store_ps((float*)&m_kMousePositionInWorld, zero);
     _mm_store_ps((float*)&m_kGrabPointInBodySpace, zero);
     m_uiCollisionShapeKey = 0xFFFFFFFF;
-    ((Ms_N*)&m_name)->FUN_00cb0c10("hkpMouseSpringAction");
+    ((Ms_N*)&m_name)->UpdateState_00cb0c10("hkpMouseSpringAction");
 }

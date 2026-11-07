@@ -40,7 +40,8 @@ struct ListenerOwner
     ListenerArray m_kListeners;
 };
 
-static __declspec(noinline) void FUN_00d85d40(ListenerArray* pArr)
+// src: GUESS 0x00d85d40 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d85d40(ListenerArray* pArr)
 {
     for (int i = (int)pArr->m_wCount - 1; i >= 0; i--)
     {
@@ -55,7 +56,8 @@ static __declspec(noinline) void FUN_00d85d40(ListenerArray* pArr)
 
 // Invokes v03 on each non-null listener in pOwner->m_kListeners with pOwner, logging start and end ticks, then compacts the array.
 // @fnv 0x00d85ef0
-void __cdecl FUN_00d85ef0(ListenerOwner* pOwner)
+// src: HAVOK_LIB 0x00d85ef0
+void __cdecl hkpConstraintCallbackUtil_fireConstraintDeleted(ListenerOwner* pOwner)
 {
     volatile DWORD ticks[2];
     ListenerArray* pArr = &pOwner->m_kListeners;
@@ -94,5 +96,5 @@ void __cdecl FUN_00d85ef0(ListenerOwner* pOwner)
             i--;
         } while (i >= 0);
     }
-    FUN_00d85d40(pArr);
+    Object_ProcessEntries_00d85d40(pArr);
 }

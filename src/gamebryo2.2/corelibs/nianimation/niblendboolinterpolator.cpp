@@ -35,16 +35,17 @@ bool __fastcall SupportsBoolInterpolator(NiBlendBoolInterpolator* self, int, NiI
     return interpolator->IsBoolValueSupported();
 }
 
-void __fastcall FUN_00a36890(void* pThis);
+void __fastcall NiBlendInterpolator_NiBlendInterpolator(void* pThis);
 extern int DAT_0109a67c;
 
 // @fnv 0x00a565c0
-void* __cdecl FUN_00a565c0()
+// src: EXE 0x00a565c0
+void* __cdecl NiBlendBoolInterpolator_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x34);
     if (p)
     {
-        FUN_00a36890(p);
+        NiBlendInterpolator_NiBlendInterpolator(p);
         *reinterpret_cast<void**>(p) = &DAT_0109a67c;
         reinterpret_cast<unsigned char*>(p)[0x30] = DAT_0109a914;
         return p;
@@ -86,7 +87,8 @@ struct GlobalObjectO2_00a7b610
 };
 extern GlobalObjectO2_00a7b610 g_011f407c;
 // @fnv 0x00a56620
-void* __cdecl FUN_00a56620()
+// src: COMMUNITY 0x00a56620
+void* __cdecl NiBlendBoolInterpolator_GetRTTI()
 {
     return &g_011f407c;
 }
@@ -110,7 +112,7 @@ NiBlendBoolInterpolator* __fastcall CloneBoolInterpolator(NiBlendBoolInterpolato
         BSFadeNode::operator new(sizeof(NiBlendBoolInterpolator)));
     if (object)
     {
-        FUN_00a36890(object);
+        NiBlendInterpolator_NiBlendInterpolator(object);
         *reinterpret_cast<void**>(object) = &DAT_0109a67c;
         object->m_bBoolValue = DAT_0109a914;
     }
@@ -173,15 +175,15 @@ struct M76Glob
     int pad;
 };
 extern M76Glob* g_011f407c;
-char* __cdecl FUN_00a7d330(M76Glob*);
-char* __cdecl FUN_00a7d410(const char*, unsigned int);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(M76Glob*);
+char* __cdecl NiGetViewerString_00a7d410(const char*, unsigned int);
 // Calls FUN_00a38080, then appends the result of FUN_00a7d330 and the formatted "m_bBoolValue" string to pkStrings.
 // @fnv 0x00a56960
 void __fastcall AddBoolValueStrings(NiBlendBoolInterpolator* self, int, M76Arr* pkStrings)
 {
     self->NiBlendInterpolator::AppendInterpolatorStrings(reinterpret_cast<StrArr*>(pkStrings));
-    pkStrings->Add(FUN_00a7d330(g_011f407c));
-    pkStrings->Add(FUN_00a7d410("m_bBoolValue", self->m_bBoolValue));
+    pkStrings->Add(NiViewerStrings_NiGetViewerString_Title(g_011f407c));
+    pkStrings->Add(NiGetViewerString_00a7d410("m_bBoolValue", self->m_bBoolValue));
 }
 }  // namespace fnv_00a56960
 

@@ -7,7 +7,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00a53070
-int __stdcall FUN_00a53070(unsigned short usChannel)
+// src: GUESS 0x00a53070 (confidence: high)
+int __stdcall NiBoolInterpolator_ReturnConstant_5(unsigned short usChannel)
 {
     return 5;
 }
@@ -31,15 +32,16 @@ NiAnimationKey* NiBoolInterpolator::GetChannelKeys(unsigned short usChannel) con
 }
 
 // These base overrides are not declared by the shared NiKeyBasedInterpolator yet.
-void __cdecl FUN_00aa0ad0();
-void __cdecl FUN_00c85800();
-void __cdecl FUN_00a95ca0();
+void __cdecl BSPackedAdditionalGeometryData_RegisterStreamables();
+void __cdecl bhkCharacterProxy_IsEqual();
+void __cdecl NiKeyBasedInterpolator_LinkObject();
 void __cdecl FUN_00a3cbf0();
 
 // @fnv 0x00a3c5b0
-bool __thiscall NiBoolInterpolator::FUN_00a3c5b0(NiStream* kStream)
+// src: XBOX_PDB 0x00a3c5b0
+bool __thiscall NiBoolInterpolator::RegisterStreamables_00a3c5b0(NiStream* kStream)
 {
-    if (!reinterpret_cast<bool (__thiscall*)(NiKeyBasedInterpolator*, NiStream*)>(&FUN_00aa0ad0)(this, kStream))
+    if (!reinterpret_cast<bool (__thiscall*)(NiKeyBasedInterpolator*, NiStream*)>(&BSPackedAdditionalGeometryData_RegisterStreamables)(this, kStream))
         return false;
     NiBoolData* pkBoolData = m_spBoolData.m_pObject;
     if (pkBoolData)
@@ -298,7 +300,7 @@ __forceinline void S_00a53680_Save(NiBinaryStream* o, void* v, unsigned n, unsig
 // @fnv 0x00a53680
 void NiBoolInterpolator::SaveBinary(NiStream& stream)
 {
-    reinterpret_cast<void (__thiscall*)(NiKeyBasedInterpolator*, NiStream*)>(&FUN_00a95ca0)(this, &stream);
+    reinterpret_cast<void (__thiscall*)(NiKeyBasedInterpolator*, NiStream*)>(&NiKeyBasedInterpolator_LinkObject)(this, &stream);
     S_00a53680_Stream* kStream = reinterpret_cast<S_00a53680_Stream*>(&stream);
     S_00a53680_Save(kStream->unk250, &m_bBoolValue, 1, 1);
     kStream->vf12(reinterpret_cast<int>(m_spBoolData.m_pObject));
@@ -316,9 +318,9 @@ struct FUN_00a536d0_arr
     void FUN_0096ae90(unsigned int index, void* item);
 };
 
-void* FUN_00a7d330(int value);
-void* FUN_00a7d410(const char* fmt, unsigned int value);
-void* FUN_00a7d5a0(const char* fmt, void* value);
+void* NiViewerStrings_NiGetViewerString_Title(int value);
+void* NiGetViewerString_00a7d410(const char* fmt, unsigned int value);
+void* NiGetViewerString_00a7d5a0(const char* fmt, void* value);
 extern int DAT_011f404c;
 
 // @fnv 0x00a536d0
@@ -329,7 +331,7 @@ void NiBoolInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
     unsigned int idx;
 
     reinterpret_cast<void (__thiscall*)(NiKeyBasedInterpolator*, NiViewerStringsArray*)>(&FUN_00a3cbf0)(this, strings);
-    v = FUN_00a7d330(DAT_011f404c);
+    v = NiViewerStrings_NiGetViewerString_Title(DAT_011f404c);
     idx = pArr->m_usElementCount;
     if (idx >= pArr->m_usCapacity)
     {
@@ -337,7 +339,7 @@ void NiBoolInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
     }
     pArr->FUN_0096ae90(idx, &v);
 
-    v = FUN_00a7d410("m_bBoolValue", m_bBoolValue);
+    v = NiGetViewerString_00a7d410("m_bBoolValue", m_bBoolValue);
     idx = pArr->m_usElementCount;
     if (idx >= pArr->m_usCapacity)
     {
@@ -346,7 +348,7 @@ void NiBoolInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
     pArr->FUN_0096ae90(idx, &v);
 
     void* pBoolData = m_spBoolData.m_pObject;
-    v = FUN_00a7d5a0("m_spBoolData", pBoolData);
+    v = NiGetViewerString_00a7d5a0("m_spBoolData", pBoolData);
     idx = pArr->m_usElementCount;
     if (idx >= pArr->m_usCapacity)
     {
@@ -359,7 +361,7 @@ void NiBoolInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
 bool NiBoolInterpolator::IsEqual(NiObject* object) const
 {
     NiBoolInterpolator* other = static_cast<NiBoolInterpolator*>(object);
-    if (!reinterpret_cast<bool (__thiscall*)(const NiKeyBasedInterpolator*, NiObject*)>(&FUN_00c85800)(this, object))
+    if (!reinterpret_cast<bool (__thiscall*)(const NiKeyBasedInterpolator*, NiObject*)>(&bhkCharacterProxy_IsEqual)(this, object))
         return false;
     if (m_bBoolValue != other->m_bBoolValue)
         return false;
@@ -423,12 +425,13 @@ bool NiBoolInterpolator::UpdateBool(float fValue, NiObjectNET* target, bool& out
     return true;
 }
 
-void __cdecl FUN_00aa1000();
+void __cdecl NiCollisionObject_CopyMembers();
 
 // @fnv 0x00aa0ab0
-void __cdecl FUN_00aa0ab0()
+// src: XBOX_PDB 0x00aa0ab0
+void __cdecl NiKeyBasedInterpolator_CopyMembers()
 {
-    FUN_00aa1000();
+    NiCollisionObject_CopyMembers();
 }
 
 namespace ni535 {

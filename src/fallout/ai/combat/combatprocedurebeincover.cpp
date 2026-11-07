@@ -95,13 +95,13 @@ void CombatProcedureBeInCover::StopAttackerAndEngageTarget()
 {
     Actor* actor = (((TESAmmoInitCalls*)m_pCombatController))->GetFieldBC();
     actor->StopMoving();
-    ((CombatProcedureEngageTarget*)this)->FUN_00996e40();
+    ((CombatProcedureEngageTarget*)this)->ClearMoveMode();
     RunProcedure();
 }
 
 struct FUN_00980070_shell
 {
-    unsigned int FUN_00980070();
+    unsigned int GetCurrentCombatStyle();
 };
 struct FUN_008d7f40_shell
 {
@@ -114,15 +114,15 @@ void CombatProcedureBeInCover::UpdateCombatProcedure(Projectile* apProjectile)
     {
     case 1:
         ((FUN_008d7f40_shell*)&m_waitTimer)
-            ->FUN_008d7f40(GetCoverWaitTime((TESCombatStyle*)((FUN_00980070_shell*)(int)m_pCombatController)->FUN_00980070()));
+            ->FUN_008d7f40(GetCoverWaitTime((TESCombatStyle*)((FUN_00980070_shell*)(int)m_pCombatController)->GetCurrentCombatStyle()));
         break;
     case 2:
-        ((CombatProcedureEngageTarget*)this)->FUN_00996de0()->StopMoving();
+        ((CombatProcedureEngageTarget*)this)->CombatProcedure_GetAttacker()->StopMoving();
         RunProcedure();
         eState = COVER_STATE_FIRING_OUT_OF_COVER;
         ((FUN_008d7f40_shell*)&m_firingTimer)
             ->FUN_008d7f40(
-                ((TESCombatStyle*)((FUN_00980070_shell*)(int)m_pCombatController)->FUN_00980070())->GetRandomValue());
+                ((TESCombatStyle*)((FUN_00980070_shell*)(int)m_pCombatController)->GetCurrentCombatStyle())->GetRandomValue());
         break;
     }
 }
@@ -178,7 +178,7 @@ void CombatProcedureBeInCover::DebugText(IDebugText* pDebugText, DEBUGTEXT_LOCAT
         pDebugText->Print(aeLocation, aeJustify, str_01091474);
         pDebugText->Print(aeLocation, aeJustify, str_01091458, m_waitingOutTimer.GetElapsedTime(),
                           m_waitingOutTimer.GetValue());
-        if (m_targetBlockedTimer.FUN_0097fa50())
+        if (m_targetBlockedTimer.CombatTimer_IsSet())
         {
             pDebugText->Print(aeLocation, aeJustify, str_01091434, m_targetBlockedTimer.GetElapsedTime(),
                               m_targetBlockedTimer.GetValue());
@@ -206,7 +206,7 @@ void CombatProcedureBeInCover::DebugText(IDebugText* pDebugText, DEBUGTEXT_LOCAT
         break;
     }
 
-    if (m_reevaluateTimer.FUN_0097fa50())
+    if (m_reevaluateTimer.CombatTimer_IsSet())
     {
         pDebugText->Print(aeLocation, aeJustify, str_010913a4, m_reevaluateTimer.GetElapsedTime(),
                           m_reevaluateTimer.GetValue());
@@ -251,7 +251,7 @@ CombatProcedureBeInCover::CombatProcedureBeInCover(void* pLoc) : eState(COVER_ST
 
 struct FUN_00586150_shell
 {
-    void* FUN_00586150();
+    void* CombatController_GetCombatState();
 };
 
 struct FUN_0097fb60_shell
@@ -275,7 +275,7 @@ void CombatProcedureBeInCover::SaveGame(BGSSaveFormBuffer* a1)
     unsigned char flag;
 
     CombatProcedure::SaveGame(a1);
-    flag = ((FUN_0097fb60_shell*)((FUN_00586150_shell*)((void*)m_pCombatController))->FUN_00586150())->GetFieldAtE8() ==
+    flag = ((FUN_0097fb60_shell*)((FUN_00586150_shell*)((void*)m_pCombatController))->CombatController_GetCombatState())->GetFieldAtE8() ==
            (int)m_pCurrentCoverPoint;
     ((FUN_00865e50_shell*)a1)->FUN_00865e50(&eState, 4, 0);
     ((FUN_00865e50_shell*)a1)->FUN_00865e50(&flag, 1, 0);
@@ -305,15 +305,15 @@ void CombatProcedureBeInCover::LoadGame(BGSLoadFormBuffer* apBuffer)
 {
     CombatProcedure::LoadGame(apBuffer);
     bool bHasCover = false;
-    apBuffer->FUN_00864980(&eState, 4u);
-    apBuffer->FUN_00864980(&bHasCover, 1u);
+    apBuffer->LoadData(&eState, 4u);
+    apBuffer->LoadData(&bHasCover, 1u);
     if (bHasCover)
-        m_pCurrentCoverPoint = (void*)((FUN_0097fb60_shell*)(((InterfaceManager*)m_pCombatController))->FUN_00586150())->GetFieldAtE8();
+        m_pCurrentCoverPoint = (void*)((FUN_0097fb60_shell*)(((InterfaceManager*)m_pCombatController))->CombatController_GetCombatState())->GetFieldAtE8();
     else
-        m_pCurrentCoverPoint = (void*)GetFieldValue((unsigned int*)(((InterfaceManager*)m_pCombatController))->FUN_00586150());
-    apBuffer->FUN_00864980(m_afFirstVector, 0xcu);
-    apBuffer->FUN_00864980(m_afSecondVector, 0xcu);
-    apBuffer->FUN_00864980(_pad1, 0xcu);
+        m_pCurrentCoverPoint = (void*)GetFieldValue((unsigned int*)(((InterfaceManager*)m_pCombatController))->CombatController_GetCombatState());
+    apBuffer->LoadData(m_afFirstVector, 0xcu);
+    apBuffer->LoadData(m_afSecondVector, 0xcu);
+    apBuffer->LoadData(_pad1, 0xcu);
     ((FUN_009a5f20_Timer*)&m_waitTimer)->FUN_009a5f20(apBuffer);
     ((FUN_009a5f20_Timer*)&m_waitingOutTimer)->FUN_009a5f20(apBuffer);
     ((FUN_009a5f20_Timer*)&m_firingTimer)->FUN_009a5f20(apBuffer);
@@ -332,12 +332,12 @@ struct CoverClock
 {
     int started;
     float duration;
-    bool FUN_0097fa50();
+    bool CombatTimer_IsSet();
     bool FUN_008d7f80();
     void FUN_008d7f40(float);
     float GetElapsedTime();
     float GetValue();
-    float FUN_006a7f50();
+    float AStarSearch_EvaluateValue_006a7f50();
     void Reset();
 };
 struct CoverRequest
@@ -518,7 +518,7 @@ struct CoverActor
     virtual const CoverPoint& GetPosition();
 
     void StopMoving();
-    float FUN_008854d0(bool);
+    float Actor_GetSneakHeight(bool);
     float GetActorHeight() const;
     void* GetWorld();
     void* GetContainingCell();
@@ -566,7 +566,7 @@ struct CoverStamp
 {
     int value;
     float GetElapsedTime();
-    float FUN_006a7f50();
+    float AStarSearch_EvaluateValue_006a7f50();
 };
 struct CoverState
 {
@@ -583,10 +583,10 @@ struct CoverGroup
 };
 struct CoverManager
 {
-    CoverState* FUN_00586150();
+    CoverState* CombatController_GetCombatState();
     CoverGroup* GetGroup();
-    bool FUN_00998a30();
-    TESCombatStyle* FUN_00980070();
+    bool CombatController_GetAttackerCanSneak();
+    TESCombatStyle* GetCurrentCombatStyle();
 };
 struct CoverSetting
 {
@@ -605,20 +605,20 @@ static const char kCoverLOS[] = "Target has LOS on Cover position";
 // @fnv 0x009d25b0
 void CombatProcedureBeInCover::UpdateCoverState()
 {
-    if (!(((CoverManager*)m_pCombatController))->FUN_00586150()->Validate(((CombatCoverPoint*)m_pCurrentCoverPoint)))
+    if (!(((CoverManager*)m_pCombatController))->CombatController_GetCombatState()->Validate(((CombatCoverPoint*)m_pCurrentCoverPoint)))
     {
         ((CombatProcedureEngageTarget*)this)->Fail("Cover Location no longer exists");
         return;
     }
-    CoverActor* actor_ = (CoverActor*)((CombatProcedureEngageTarget*)this)->FUN_00996de0();
+    CoverActor* actor_ = (CoverActor*)((CombatProcedureEngageTarget*)this)->CombatProcedure_GetAttacker();
     CoverActor* targetTmp = (CoverActor*)((CombatProcedureEngageTarget*)this)->GetTarget();
-    CoverState* combat7 = (((CoverManager*)m_pCombatController))->FUN_00586150();
+    CoverState* combat7 = (((CoverManager*)m_pCombatController))->CombatController_GetCombatState();
     CoverGroup* group7 = (((CoverManager*)m_pCombatController))->GetGroup();
     bool evaluatedA = false;
     bool changedVal = false;
     bool canFire4 = ((CombatCoverPoint*)m_pCurrentCoverPoint)->CanFire();
-    bool active8 = (((CoverManager*)m_pCombatController))->FUN_00998a30();
-    if (!(*(CoverClock*)&m_reevaluateTimer).FUN_0097fa50())
+    bool active8 = (((CoverManager*)m_pCombatController))->CombatController_GetAttackerCanSneak();
+    if (!(*(CoverClock*)&m_reevaluateTimer).CombatTimer_IsSet())
         (*(CoverClock*)&m_reevaluateTimer).FUN_008d7f40(1.0f);
     else if ((*(CoverClock*)&m_reevaluateTimer).FUN_008d7f80())
     {
@@ -654,7 +654,7 @@ void CombatProcedureBeInCover::UpdateCoverState()
         ((CombatCoverPoint*)m_pCurrentCoverPoint)->occupied = false;
         ComputePositions((((CoverManager*)m_pCombatController)), ((CombatCoverPoint*)m_pCurrentCoverPoint), (*(CoverPoint*)m_afFirstVector), (*(CoverPoint*)m_afSecondVector));
         (*(CoverPoint*)_pad1) = (*(CoverPoint*)m_afSecondVector);
-        float height = (((CoverManager*)m_pCombatController))->FUN_00998a30() ? actor_->FUN_008854d0(false) : actor_->GetActorHeight();
+        float height = (((CoverManager*)m_pCombatController))->CombatController_GetAttackerCanSneak() ? actor_->Actor_GetSneakHeight(false) : actor_->GetActorHeight();
         (*(CoverPoint*)_pad1).z = height * 0.75 + (*(CoverPoint*)_pad1).z;
         CoverRequest request;
         actor_->SetupPath(request, (*(CoverPoint*)m_afFirstVector), actor_->GetContainingCell(), actor_->GetWorld(), 0.0f, 0);
@@ -666,7 +666,7 @@ void CombatProcedureBeInCover::UpdateCoverState()
         eState = COVER_STATE_MOVING_IN_AND_ROTATE;
         if (((CombatCoverPoint*)m_pCurrentCoverPoint)->CanRotate())
             ((CoverProcedureCalls*)this)->LookAt((*(CoverPoint*)_pad1), 3);
-        ((CombatProcedureEngageTarget*)this)->FUN_00996e20(3);
+        ((CombatProcedureEngageTarget*)this)->SetMoveMode_00996e20(3);
         break;
     }
     case 1: {
@@ -690,7 +690,7 @@ void CombatProcedureBeInCover::UpdateCoverState()
                     ((CoverProcedureCalls*)this)->ClearLook();
                 ((CoverProcedureCalls*)this)->LookAt(targetTmp->GetAim(), 1);
                 eState = COVER_STATE_MOVING_OUT;
-                ((CombatProcedureEngageTarget*)this)->FUN_00996e20(canFire4 && active8 ? 2 : 1);
+                ((CombatProcedureEngageTarget*)this)->SetMoveMode_00996e20(canFire4 && active8 ? 2 : 1);
             }
         }
         break;
@@ -705,16 +705,16 @@ void CombatProcedureBeInCover::UpdateCoverState()
         {
             eState = COVER_STATE_WAITING_OUT_OF_COVER;
             ((CoverProcedureCalls*)this)->ClearLook();
-            (*(CoverClock*)&m_waitingOutTimer).FUN_008d7f40(GetOutOfCoverWaitTime((((CoverManager*)m_pCombatController))->FUN_00980070()));
+            (*(CoverClock*)&m_waitingOutTimer).FUN_008d7f40(GetOutOfCoverWaitTime((((CoverManager*)m_pCombatController))->GetCurrentCombatStyle()));
         }
         break;
     }
     case 3: {
         CoverStamp stamp = combat7->GetStamp();
-        if (stamp.FUN_006a7f50() > (*(CoverClock*)&m_waitTimer).FUN_006a7f50())
+        if (stamp.AStarSearch_EvaluateValue_006a7f50() > (*(CoverClock*)&m_waitTimer).AStarSearch_EvaluateValue_006a7f50())
         {
             eState = COVER_STATE_FIRING_OUT_OF_COVER;
-            (*(CoverClock*)&m_firingTimer).FUN_008d7f40((((CoverManager*)m_pCombatController))->FUN_00980070()->GetRandomValue());
+            (*(CoverClock*)&m_firingTimer).FUN_008d7f40((((CoverManager*)m_pCombatController))->GetCurrentCombatStyle()->GetRandomValue());
             (*(CoverClock*)&m_targetBlockedTimer).Reset();
         }
         else if ((*(CoverClock*)&m_waitingOutTimer).FUN_008d7f80())
@@ -731,7 +731,7 @@ void CombatProcedureBeInCover::UpdateCoverState()
         }
         if (combat7->IsBlocked())
         {
-            if (!(*(CoverClock*)&m_targetBlockedTimer).FUN_0097fa50())
+            if (!(*(CoverClock*)&m_targetBlockedTimer).CombatTimer_IsSet())
                 (*(CoverClock*)&m_targetBlockedTimer).FUN_008d7f40(2.0f);
             else if ((*(CoverClock*)&m_targetBlockedTimer).FUN_008d7f80())
             {
@@ -753,7 +753,7 @@ void CombatProcedureBeInCover::UpdateCoverState()
                 ((CombatProcedureEngageTarget*)this)->Fail("Cannot setup path to move back to Cover position");
                 return;
             }
-            ((CombatProcedureEngageTarget*)this)->FUN_00996e20(canFire4 && active8 ? 2 : 1);
+            ((CombatProcedureEngageTarget*)this)->SetMoveMode_00996e20(canFire4 && active8 ? 2 : 1);
             eState = COVER_STATE_MOVING_IN;
         }
         break;
@@ -768,8 +768,8 @@ void CombatProcedureBeInCover::UpdateCoverState()
         {
             eState = COVER_STATE_WAITING_BEHIND_COVER;
             ((CoverProcedureCalls*)this)->ClearLook();
-            ((CombatProcedureEngageTarget*)this)->FUN_00996e20(2);
-            (*(CoverClock*)&m_waitTimer).FUN_008d7f40(GetCoverWaitTime((((CoverManager*)m_pCombatController))->FUN_00980070()));
+            ((CombatProcedureEngageTarget*)this)->SetMoveMode_00996e20(2);
+            (*(CoverClock*)&m_waitTimer).FUN_008d7f40(GetCoverWaitTime((((CoverManager*)m_pCombatController))->GetCurrentCombatStyle()));
         }
         else
         {
@@ -779,7 +779,7 @@ void CombatProcedureBeInCover::UpdateCoverState()
                 eState = COVER_STATE_MOVING_IN_AND_ROTATE;
                 if (((CombatCoverPoint*)m_pCurrentCoverPoint)->CanRotate())
                     ((CoverProcedureCalls*)this)->LookAt((*(CoverPoint*)_pad1), 3);
-                ((CombatProcedureEngageTarget*)this)->FUN_00996e20(1);
+                ((CombatProcedureEngageTarget*)this)->SetMoveMode_00996e20(1);
             }
         }
         break;
@@ -794,8 +794,8 @@ void CombatProcedureBeInCover::UpdateCoverState()
         if (actor_->PathFinished())
         {
             eState = COVER_STATE_WAITING_BEHIND_COVER;
-            ((CombatProcedureEngageTarget*)this)->FUN_00996e20(2);
-            (*(CoverClock*)&m_waitTimer).FUN_008d7f40(GetCoverWaitTime((((CoverManager*)m_pCombatController))->FUN_00980070()));
+            ((CombatProcedureEngageTarget*)this)->SetMoveMode_00996e20(2);
+            (*(CoverClock*)&m_waitTimer).FUN_008d7f40(GetCoverWaitTime((((CoverManager*)m_pCombatController))->GetCurrentCombatStyle()));
         }
         break;
     }
@@ -809,7 +809,7 @@ void CombatProcedureBeInCover::UpdateCoverState()
                 ((CombatProcedureEngageTarget*)this)->Fail("Cannot setup path to move back to Cover position");
                 return;
             }
-            ((CombatProcedureEngageTarget*)this)->FUN_00996e20(canFire4 && active8 ? 2 : 1);
+            ((CombatProcedureEngageTarget*)this)->SetMoveMode_00996e20(canFire4 && active8 ? 2 : 1);
             eState = COVER_STATE_MOVING_IN;
         }
         else if ((*(CoverClock*)&m_holdingGroundTimer).FUN_008d7f80())

@@ -53,7 +53,7 @@ public:
                         const hkVector4& kTwistAxisA, const hkVector4& kTwistAxisB);
     void setInWorldSpace(const hkTransform& kBodyATransform, const hkTransform& kBodyBTransform,
                          const hkVector4& kPivot, const hkVector4& kTwistAxisW, const hkVector4& kPlaneAxisW);
-    hkBool FUN_00cdf090() const;
+    hkBool isValid_00cdf090() const;
     void getConstraintFrameA(hkRotation* pOut);
     void getConstraintFrameB(hkRotation* pOut);
     void setPlaneAngularLimit(float fStart, float fEnd);

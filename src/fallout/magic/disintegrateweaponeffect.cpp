@@ -442,7 +442,7 @@ struct Effect
     virtual void ApplyDamage(TargetObject* apTarget, float afAmount, int aiFlag);
 
     TargetSource* FUN_008d8520();
-    const char* FUN_0055d520();
+    const char* TESObjectREFR_GetFullName();
 };
 
 struct EffectOwner
@@ -450,8 +450,8 @@ struct EffectOwner
     Effect* FUN_00822b40();
 };
 
-bool __cdecl FUN_005b6f70();
-void __cdecl FUN_00703c00(const char* apFormat, ...);
+bool __cdecl CombatController_GetShowVerboseMessages();
+void __cdecl Interface_PrintLine(const char* apFormat, ...);
 
 // Gets the effect's target and applies disintegrate weapon damage to it, then logs the damage if FUN_005b6f70 is true.
 // @fnv 0x0080d7b0
@@ -465,7 +465,7 @@ void DisintegrateWeaponEffect::ApplyDisintegrateWeaponDamage()
     if (pTarget != 0)
         pEffect->ApplyDamage(pTarget, GetFloatAtOffset1C(), 0);
 
-    if (FUN_005b6f70())
-        FUN_00703c00("%s's %s takes %0.2f disintegrate weapon damage!", pEffect->FUN_0055d520(),
+    if (CombatController_GetShowVerboseMessages())
+        Interface_PrintLine("%s's %s takes %0.2f disintegrate weapon damage!", pEffect->TESObjectREFR_GetFullName(),
                      pTarget->GetTargetFullName(), GetFloatAtOffset1C());
 }

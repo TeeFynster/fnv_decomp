@@ -35,7 +35,7 @@ struct FUN_00a77980_shell
 };
 struct FUN_00e7cdf0_shell
 {
-    unsigned char FUN_00e7cdf0();
+    unsigned char NiDX9DepthStencilBufferData_HasValidDepthBuffer();
     int _p1;
     int _p2;
     int _p3;
@@ -43,7 +43,7 @@ struct FUN_00e7cdf0_shell
     int _p5;
     int _p6;
 };
-void __cdecl FUN_00e7d1b0();
+void __cdecl ReleaseStorage_00e7d1b0();
 void __cdecl operator delete(void* p, unsigned int size);
 struct FUN_00e7d230_cls
 {
@@ -56,7 +56,7 @@ struct FUN_00e7f790_Class
 {
     void __thiscall DestroyList();
 };
-int __cdecl FUN_00e60c70(int a);
+int __cdecl Runtime_EvaluateValue_00e60c70(int a);
 struct FUN_00e67fd0_cls
 {
     void __thiscall ClearEntries();
@@ -88,7 +88,7 @@ struct FUN_00e7d490_Class
     void* _18;
     void* _1c;
     void* _20;
-    void __thiscall FUN_00e7d490();
+    void __thiscall NiDX9TextureBufferData_ReleaseReferences();
 };
 
 struct StagePool
@@ -116,7 +116,7 @@ struct FUN_00e7efc0_List
     int _z;
     int count;
     FUN_00e7efc0_Node* head;
-    FUN_00e7efc0_Node* __thiscall FUN_00e7efc0(FUN_00e7efc0_Node* node);
+    FUN_00e7efc0_Node* __thiscall NiD3DRenderStateGroup_RemoveRSEntryFromSavedList(FUN_00e7efc0_Node* node);
 };
 struct DX9SurfaceDesc_00e68530
 {
@@ -189,7 +189,7 @@ struct NiDX9SourceCubeMapData_S
     bool m_b6c;
     bool m_bHasTexture;
     unsigned int m_uiSize;
-    bool FUN_00e68530(DX9BaseTexture_00e68530* pkD3DTexture);
+    bool NiDX9SourceTextureData_InitializeFromD3DTexture(DX9BaseTexture_00e68530* pkD3DTexture);
 };
 struct FUN_00e7d560_Class
 {
@@ -216,7 +216,7 @@ struct FUN_00e7d560_Class
     void* _50;
     void* _54;
     void* _58;
-    void __thiscall FUN_00e7d560();
+    void __thiscall NiDX9ImplicitBufferData_ReleaseReferences();
 };
 struct FUN_00e673f0_shell
 {
@@ -238,7 +238,7 @@ struct FUN_00e63ec0_Class
     int _04;
     int* _08;
     int _0c;
-    int __thiscall FUN_00e63ec0(int a, int* out);
+    int __thiscall ProcessEntries_00e63ec0(int a, int* out);
 };
 extern MemoryManager g_memoryManager;
 extern int DAT_010eec54;
@@ -254,7 +254,7 @@ struct FUN_00e7b230_Class
 extern void* const DAT_010eecac[];
 void NiFree(void*);
 extern int DAT_0126f590;
-unsigned char __cdecl FUN_00e7cca0(int* pObject);
+unsigned char __cdecl NiDX9DepthStencilBufferData_SetNULLDepthStencilTarget(int* pObject);
 extern NiRefObject vftable_NiRefObject;
 extern int DAT_010eeed4;
 extern int DAT_010eefbc;
@@ -272,11 +272,11 @@ struct FUN_00e7d1b0_Class
     void* _18;
     void* _1c;
     void* _20;
-    void __thiscall FUN_00e7d1b0();
+    void __thiscall ReleaseStorage_00e7d1b0();
 };
 struct FUN_00e7d690_Class
 {
-    void __thiscall FUN_00e7d4e0();
+    void __thiscall UpdateFields_00e7d4e0();
     FUN_00e7d690_Class* __thiscall FUN_00e7d690(int flags);
 };
 struct FUN_00e7ef80_Node
@@ -291,7 +291,7 @@ struct FUN_00e7ef80_List
     int _x;
     int count;
     FUN_00e7ef80_Node* head;
-    FUN_00e7ef80_Node* __thiscall FUN_00e7ef80(FUN_00e7ef80_Node* node);
+    FUN_00e7ef80_Node* __thiscall NiD3DRenderStateGroup_RemoveRSEntryFromNoSaveList(FUN_00e7ef80_Node* node);
 };
 class D3DRenderStateGroup
 {
@@ -323,10 +323,10 @@ struct FUN_00e611d0_Object
     int unk18;
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 void __cdecl AppendIndexSequence(int, int, int, int, int);
 void __cdecl AppendIndices(int, int, int, int, int);
-void __cdecl FUN_00e611d0(FUN_00e611d0_Object* object, int value);
+void __cdecl hkMemoryRouter_AppendObjectIndicesByType(FUN_00e611d0_Object* object, int value);
 struct FUN_00e61230_Buffer
 {
     unsigned int field00;
@@ -349,14 +349,14 @@ struct FUN_00e61230_Receiver
     virtual void begin(void* value, unsigned int mode, FUN_00e61230_Buffer* buffer) = 0;
     virtual void end(FUN_00e61230_Buffer* buffer) = 0;
 };
-extern "C" void __cdecl FUN_00e611d0(FUN_00e61230_Buffer* buffer, unsigned int stage);
+extern "C" void __cdecl hkMemoryRouter_AppendObjectIndicesByType(FUN_00e61230_Buffer* buffer, unsigned int stage);
 void __cdecl RunReceiverStage(FUN_00e61230_Receiver* receiver, void* value, unsigned int stage);
 struct E65000Entry
 {
     float m_fValue;
     int m_iData;
 };
-static float FUN_00e65000(E65000Entry* pkEntries, int iIndex, float fValue);
+static float shiftDopLow(E65000Entry* pkEntries, int iIndex, float fValue);
 float E65000Swap(E65000Entry* pkEntries, int iIndex, float fValue);
 class E673F0Geometry
 {
@@ -389,7 +389,7 @@ struct IndexSource_e67420
     unsigned int* m_puiIndices;
     int m_iIntCount;
 
-    bool FUN_00e67420(unsigned int iIndex, unsigned int* p0, unsigned int* p1, unsigned int* p2);
+    bool ComputeValue_00e67420(unsigned int iIndex, unsigned int* p0, unsigned int* p1, unsigned int* p2);
 };
 class FUN_00e67660_cls;
 class FnvEnt67;
@@ -1335,7 +1335,7 @@ class FUN_00e67660_cls
     int unkdd8;
     int unkddc;
     FnvNode67* m_de0[100];
-    int FUN_00e67660(FnvNode67* a1, int a2, int* a3, FnvEnt67** a4);
+    int hkWingedEdge_findVisibleTriangles(FnvNode67* a1, int a2, int* a3, FnvEnt67** a4);
 };
 extern float DAT_0104da48;
 void* __cdecl _memmove(void*, const void*, unsigned);
@@ -1399,8 +1399,8 @@ struct CopyPixels
     unsigned bytesPerPixel;
 };
 const char* __cdecl GetHResultName(long);
-void __cdecl FUN_00a29680(const char*, ...);
-void __cdecl FUN_00e68150(CopyPixels* pSourcePixels, unsigned level, CopySurface* surface, unsigned face);
+void __cdecl Object_DoNothing(const char*, ...);
+void __cdecl NiDX9SourceTextureData_CopyDataToSurfaceLevel(CopyPixels* pSourcePixels, unsigned level, CopySurface* surface, unsigned face);
 struct TexDevice
 {
     virtual void __stdcall vf0() = 0;
@@ -1702,7 +1702,7 @@ struct TextureOwner
 extern int DAT_0126efc0;
 extern bool DAT_0126f0d0;
 const char* __cdecl GetHResultName(long);
-void __cdecl FUN_00a29680(const char*, ...);
+void __cdecl Object_DoNothing(const char*, ...);
 inline bool IsPowerOfTwo(unsigned n)
 {
     if (!n)
@@ -1884,9 +1884,9 @@ struct CubeMapSurface
     virtual void v01();
     virtual void __stdcall Release();
 };
-extern "C" void __cdecl FUN_00e68150(int a, unsigned int b, int c, int d);
+extern "C" void __cdecl NiDX9SourceTextureData_CopyDataToSurfaceLevel(int a, unsigned int b, int c, int d);
 extern "C" void* __cdecl GetHResultName(int r);
-extern "C" void __cdecl FUN_00a29680(const char* fmt, unsigned int i, void* s);
+extern "C" void __cdecl Object_DoNothing(const char* fmt, unsigned int i, void* s);
 struct FUN_00e68870_arg
 {
     int unk00;
@@ -1948,7 +1948,7 @@ struct FUN_00e68870_cls
     int unk70;
     int unk74;
     unsigned int m_78;
-    void __thiscall FUN_00e68870(FUN_00e68870_arg* a1);
+    void __thiscall NiDX9SourceTextureData_CopyDataToSurface(FUN_00e68870_arg* a1);
 };
 extern "C" char DAT_010ed37c[];
 void __cdecl FUN_00aa1460(void* pObject, unsigned int value);
@@ -2025,7 +2025,7 @@ struct Entry
     unsigned int subIdentifier;
     unsigned int properties;
     unsigned int group;
-    unsigned int FUN_00e7af60(unsigned int accumulated);
+    unsigned int NiDX9AdapterDesc_ModeDesc_GetClosestRefreshRate(unsigned int accumulated);
 };
 struct EntryArray
 {
@@ -2042,7 +2042,7 @@ struct Owner
     {
         return *reinterpret_cast<EntryArray*>(reinterpret_cast<char*>(this) + 0x450);
     }
-    Entry* FUN_00e7b190(unsigned int group, unsigned int identifier, unsigned int subIdentifier,
+    Entry* NiDX9AdapterDesc_ValidateFullscreenMode(unsigned int group, unsigned int identifier, unsigned int subIdentifier,
                         unsigned int* accumulated);
 };
 struct FUN_00e7b550_cls
@@ -2508,10 +2508,10 @@ struct FUN_00e7bc90 : Base_e7bc90
 };
 struct FUN_00e7bcd0_Item
 {
-    void FUN_00e7bb50();
+    void ReleaseStorage_00e7bb50();
 };
 void __cdecl FUN_00aa1460(void* p, int size);
-void __cdecl FUN_00aa10f0(void* p);
+void __cdecl _NiFree_00aa10f0(void* p);
 struct FUN_00e7bcd0_cls
 {
     int unk00;
@@ -2555,7 +2555,7 @@ struct S_00e7c610_Object
     unsigned char unk5e;
     unsigned char unk5f;
 };
-void __stdcall FUN_00e7c610(float* afMatrix, S_00e7c610_Object* pObject);
+void __stdcall NiD3DDefaultShader_PackTextureTransform(float* afMatrix, S_00e7c610_Object* pObject);
 class FUN_00e7cc90_cls
 {
   public:
@@ -2586,7 +2586,7 @@ class FUN_00e7cc90_cls
     virtual void v24();
     virtual void v25();
     virtual void v26();
-    bool FUN_00e7cc90();
+    bool NiDX92DBufferData_Shutdown();
 };
 struct E7CCD0Device
 {
@@ -2701,7 +2701,7 @@ struct FnvBufferData
     int unk0c;
     int unk10;
     int m_nId;
-    unsigned char FUN_00e7cdb0(FnvRendererData* pRenderer);
+    unsigned char NiDX9DepthStencilBufferData_SetDepthTarget(FnvRendererData* pRenderer);
 };
 extern int g_nLastId;
 typedef int(__stdcall* FNV_PFN_2)(void* obj, void* arg);
@@ -2741,7 +2741,7 @@ class FUN_00e7ce30_cls
     void* m_0c;
     int m_10;
     void* m_14;
-    unsigned char FUN_00e7ce30(void* a1);
+    unsigned char NiDX9ImplicitDepthStencilBufferData_Recreate(void* a1);
 };
 struct FNV_Frame
 {
@@ -2774,11 +2774,11 @@ class FUN_00e7d180_cls
     int unk10;
     Handler* m_14;
 
-    void FUN_00e7d180();
+    void NiDX92DBufferData_ReleaseReferences();
 };
 struct CpuOpaque;
 extern CpuOpaque DAT_0126f5a4;
-CpuOpaque* __cdecl FUN_00e7d220();
+CpuOpaque* __cdecl NiDX9TextureBufferData_GetRTTI();
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
 struct D3DSurfaceDesc_e7d250
 {
@@ -2797,17 +2797,17 @@ const char* __cdecl NiDX9ErrorString(long hr);
 void __cdecl NiDX9Warning(const char* pcFormat, ...);
 
 extern int DAT_0126f5e0;
-int* __cdecl FUN_00e7d550();
+int* __cdecl NiDX9ImplicitBufferData_GetRTTI();
 extern int DAT_0126f5b4;
-void* __cdecl FUN_00e7d680(void);
+void* __cdecl NiDX9ImplicitDepthStencilBufferData_GetRTTI(void);
 class BE7F610Heap
 {
   public:
     void Deallocate(void* pvMem);
 };
 extern BE7F610Heap g_kE7F610Heap;
-void __cdecl FUN_00aa10f0(void* pvMem);
-void __cdecl FUN_00aa1490(void* pvMem, unsigned int uiAlignment);
+void __cdecl _NiFree_00aa10f0(void* pvMem);
+void __cdecl NiMemObject_ReleaseStorage_00aa1490(void* pvMem, unsigned int uiAlignment);
 class BE7F610Object
 {
   public:
@@ -2831,7 +2831,7 @@ class BE7F610Buffer : public BE7F610Object
   public:
     __forceinline ~BE7F610Buffer()
     {
-        FUN_00aa1490(m_pResource, 0x10);
+        NiMemObject_ReleaseStorage_00aa1490(m_pResource, 0x10);
         if (m_pkLeaf)
             m_pkLeaf->FUN_00e7f050(1);
     }
@@ -2847,7 +2847,7 @@ template <class T> class BE7F610Queue : public BE7F610Object
     {
         m_iArrayLength = 0;
         delete m_pkOwned;
-        FUN_00aa10f0(m_pvItems);
+        _NiFree_00aa10f0(m_pvItems);
     }
 
     void* m_pvItems;
@@ -2859,7 +2859,7 @@ extern BE7F610Queue<BE7F610Worker>* g_pkE7F610WorkerQueue;
 extern BE7F610Queue<BE7F610Buffer>* g_pkE7F610BufferQueue;
 void __cdecl DestroyGlobalQueues();
 extern int DAT_0126f728;
-int __cdecl FUN_00e7f7c0();
+int __cdecl NiD3DPass_GetD3DRenderState();
 struct Q74
 {
     unsigned int a, b, c, d;
@@ -3030,7 +3030,7 @@ struct E74Accumulator
     char pad634[0x278];
     E74GroupMgr* m_pkGroupMgr;
     void* m_pkActorGroup;
-    bool FUN_00e72c20(E74Geometry* pkGeom, E74RefShader* pkShader);
+    bool NiDX9Renderer_IsHardwareSkinned(E74Geometry* pkGeom, E74RefShader* pkShader);
     void AddTail(E74Node* pkNode)
     {
         if (m_pkTail)
@@ -3759,7 +3759,7 @@ struct FUN_00e74c00_cls
     int unkB04;
     void** m_ppCallbackData;
 
-    bool FUN_00e736b0();
+    bool RendererRecreateHook();
     bool HandleDeviceLost();
 };
 typedef int(__stdcall* FNVSlot3Fn)(void*);
@@ -3779,7 +3779,8 @@ struct Node
     int m_unk04;
     Item* m_item;
 };
-__declspec(noinline) int __cdecl FUN_00e7acb0(int key)
+// src: GAMEBRYO_LIB 0x00e7acb0
+__declspec(noinline) int __cdecl NiDX9SystemDesc_GetBPPFromFormat(int key)
 {
     switch (key)
     {
@@ -4024,8 +4025,8 @@ struct IndexAllocator
     int unk00;
 };
 struct IndexArray;
-void __cdecl FUN_00c908c0(IndexAllocator* alloc, IndexArray* arr, int newCap, int elemSize);
-void* __cdecl FUN_00cb1260(void* dst, const void* src, unsigned int n);
+void __cdecl hkArrayUtil__reserve(IndexAllocator* alloc, IndexArray* arr, int newCap, int elemSize);
+void* __cdecl hkString_memCpy(void* dst, const void* src, unsigned int n);
 struct IndexArray
 {
     unsigned short* data;
@@ -4044,7 +4045,7 @@ struct HeapAlloc
 
 inline hkMemoryRouter* getRouter() throw()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 void __cdecl ResizeAudioStream(HeapAlloc* alloc, void* arr, int elemSize);
 template <class T> inline void construct(T* p, int n, const T& t)
@@ -4110,8 +4111,8 @@ inline bool isTri(int t)
     }
     return false;
 }
-void __cdecl FUN_00e60e40(int type, int count, int data, IntArray* out);
-void __cdecl FUN_00e60f50(int type, int data, int count, int base, IntArray* out);
+void __cdecl Object_AppendPrimitiveIndices(int type, int count, int data, IntArray* out);
+void __cdecl hkArray_AppendTriangleIndicesWithOffset(int type, int data, int count, int base, IntArray* out);
 void __cdecl AppendIndices(int type, int data, int count, int base, U16Array* out);
 void __cdecl BuildIndexArray(IndexSource* src, IntArray* out);
 struct hkPairE63E
@@ -4158,7 +4159,7 @@ struct FnvCpu_FUN_00e687f0_CpuObject
     unsigned int unk60;
     unsigned int unk64;
     int value;
-    int FUN_00e687f0();
+    int NiDX9TextureData_GetLevels();
 };
 struct FnvCpu_FUN_00e68800_CpuObject
 {
@@ -4188,7 +4189,7 @@ struct FnvCpu_FUN_00e68800_CpuObject
     unsigned int unk5c;
     unsigned int unk60;
     int value;
-    int FUN_00e68800();
+    int NiDX9TextureData_GetD3DTexture();
 };
 struct FUN_00e76620_cls
 {
@@ -4206,19 +4207,19 @@ struct FUN_00e76620_cls
     int unk2c;
     int unk30;
     unsigned char unk34;
-    unsigned char __thiscall FUN_00e76620();
+    unsigned char __thiscall NiDX9ShaderDeclaration_GetSoftwareVertexProcessing();
 };
-void __cdecl FUN_00c908c0(void*, IndexArray*, int, int);
+void __cdecl hkArrayUtil__reserve(void*, IndexArray*, int, int);
 void __cdecl AppendIndexSequence(int type, int count, int start, IndexArray* output, void* allocator);
 
 namespace HavokHeapAccess {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
-void* __cdecl FUN_00cb1260(void* pDst, const void* pSrc, int iNumBytes);
+void* __cdecl hkString_memCpy(void* pDst, const void* pSrc, int iNumBytes);
 
-void __cdecl FUN_00e60f50(int iType, const int* piIndices, int iNumIndices, int iOffset, hkArray<int>& kOut);
+void __cdecl hkArray_AppendTriangleIndicesWithOffset(int iType, const int* piIndices, int iNumIndices, int iOffset, hkArray<int>& kOut);
 extern "C" double DAT_010229b8;
-static float FUN_00e62ac0(unsigned seed);
+static float rand01_00e62ac0(unsigned seed);
 volatile unsigned g_e62ac0_seed = 12345u;
 volatile float g_e62ac0_sink;
 void e62ac0_probe_caller(void);
@@ -4257,9 +4258,9 @@ struct E65020Entry
     int unk00;
     float m_fValue;
 };
-static float FUN_00e65020(E65020Entry* pkEntries, int iIndex, float fValue);
+static float shiftDopHigh(E65020Entry* pkEntries, int iIndex, float fValue);
 float E65020Swap(E65020Entry* pkEntries, int iIndex, float fValue);
-void __cdecl FUN_00e67560();
+void __cdecl nullsub_338();
 struct FUN_00e68820_cls
 {
     int unk00;
@@ -4292,7 +4293,7 @@ struct FUN_00e68820_cls
     int unk6C;
     int unk70;
     int unk74;
-    int FUN_00e68820();
+    int NiDX9SourceTextureData_GetPalette();
 };
 struct FUN_00e69620_Target
 {
@@ -4890,7 +4891,7 @@ struct FUN_00e69620_cls
     int unk87C;
     int unk880;
     FUN_00e69620_Target* unk884;
-    void FUN_00e69620();
+    void NiDX9Renderer_GetDefaultBackBuffer();
 };
 typedef int D3DFORMAT;
 typedef int D3DDEVTYPE;
@@ -5050,7 +5051,7 @@ struct FUN_00e7b260 : ModeItem404
 
     FUN_00e7b260(S00e7b590_D3D* dev, int ctx, D3DDEVTYPE id, D3DFORMAT key, bool fullscreen, bool windowed) throw();
 };
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 class GlobalObject_0096a2d0
 {
 
@@ -5062,7 +5063,7 @@ class GlobalObject_0096a2d0
 extern BlkListNodeView* DAT_011c5f58;
 extern GlobalObject_0096a2d0 g_011c5f80;
 extern unsigned int DAT_011c5f84;
-void __cdecl FUN_0043a080();
+void __cdecl NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();
 struct ItemList168
 {
 
@@ -5099,7 +5100,7 @@ struct FUN_00e7ce10_cls
     int unk10;
     int m_14;
 
-    unsigned char FUN_00e7ce10();
+    unsigned char NiDX9DepthStencilBufferData_HasValidStencilBuffer();
 };
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
@@ -5156,7 +5157,7 @@ struct CriticalSectionE7CF
 };
 extern CriticalSectionE7CF DAT_0126f600;
 extern NiTListE7CF<ItemE7CF*> DAT_0126f5c8;
-void __cdecl FUN_00e7cf00(void* pArg);
+void __cdecl NiDX9AdditionalDepthStencilBufferData_RecreateAll(void* pArg);
 struct SurfDesc
 {
     int Format;
@@ -5231,7 +5232,7 @@ struct Tex
     void SetValues(unsigned, unsigned);
 };
 const char* FUN_00e7a9a0(int);
-void FUN_00a29680(const char*, ...);
+void Object_DoNothing(const char*, ...);
 extern int DAT_0126f580;
 extern int DAT_0126f590;
 class RT
@@ -5266,7 +5267,7 @@ class RT
     Surf* m_pkSurf;
     char pad[0x58 - 0x18];
     Swap* m_pkSwap;
-    bool FUN_00e7d0a0(Swap* pkSwap);
+    bool NiDX9ImplicitBufferData_Recreate(Swap* pkSwap);
 };
 int ApplyOperator(int op, int val);
 
@@ -5281,19 +5282,19 @@ static __forceinline void IntArrayX_GrowArrayCapacity(hkArrayBase<int>& self, He
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0((IndexAllocator*)&alloc, (IndexArray*)(&self), newSize, sizeof(int));
+            hkArrayUtil__reserve((IndexAllocator*)&alloc, (IndexArray*)(&self), newSize, sizeof(int));
         }
     }
 
 static __forceinline int* IntArrayX_expandBy(hkArrayBase<int>& self, int n)
 {
-        HeapAlloc& alloc = *reinterpret_cast<HeapAlloc*>(((hkMemoryRouter*)FUN_00c85750())->m_heap);
+        HeapAlloc& alloc = *reinterpret_cast<HeapAlloc*>(((hkMemoryRouter*)hkMemoryRouter_getInstance())->m_heap);
         int oldSize = self.m_iElementCount;
         IntArrayX_GrowArrayCapacity(self, alloc, oldSize + n);
         self.m_iElementCount += n;
         return self.m_data + oldSize;
     }
-void __cdecl FUN_00e60e40(int type, int count, int data, IntArray* out);
+void __cdecl Object_AppendPrimitiveIndices(int type, int count, int data, IntArray* out);
 typedef ::__m128 LocalM128;
 using ::_mm_sub_ps;
 using ::_mm_mul_ps;
@@ -5320,9 +5321,9 @@ struct BarycentricResult
 {
     float u, v, w;
 };
-void __cdecl FUN_00e61a10(const LocalM128* point, const LocalM128* a, const LocalM128* b, const LocalM128* c,
+void __cdecl Runtime_ComputeTriangleBarycentricWeights(const LocalM128* point, const LocalM128* a, const LocalM128* b, const LocalM128* c,
                           BarycentricResult* result);
-void __cdecl FUN_00e67550();
+void __cdecl nullsub_337();
 bool __cdecl SetModeFlags(int mode, int* outValue, unsigned int* flags);
 namespace se695c0 {
 
@@ -5786,11 +5787,12 @@ struct Owner
     int unk6fc;
     Block m_kBlock;
 
-    int FUN_00e695c0(int iArg);
+    int SelectFormatTileValue_Thunk(int iArg);
 };
 
 // @fnv 0x00e695c0
-int Owner::FUN_00e695c0(int iArg)
+// src: GUESS 0x00e695c0 (confidence: medium)
+int Owner::SelectFormatTileValue_Thunk(int iArg)
 {
     return SelectFormatTileValue(iArg, &m_kBlock);
 }
@@ -5799,7 +5801,7 @@ int Owner::FUN_00e695c0(int iArg)
 #include "../../include/NiDX9RenderTargetInfo.h"
 extern "C" int __cdecl abs(int v);
 extern unsigned int DAT_011bf140[];
-int __cdecl FUN_00e7a8b0(unsigned int tbl, int* a, unsigned int* b);
+int __cdecl NiDX9DeviceDesc_DisplayFormatInfo_GetDepthStencilBPPFromFormat(unsigned int tbl, int* a, unsigned int* b);
 class DepthStencilSearch
 {
   public:
@@ -5821,12 +5823,12 @@ struct ClosestList
         pos = pos->m_pkNext;
         return *elem;
     }
-    int FUN_00e7af60(int target);
+    int NiDX9AdapterDesc_ModeDesc_GetClosestRefreshRate(int target);
 };
-int FUN_00e7ccf0(unsigned int index);
+int Runtime_GetIndexMask(unsigned int index);
 class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_0126f59c;
-GlobalObjectO2_00a7b610* FUN_00e7cd30();
+GlobalObjectO2_00a7b610* Runtime_GetField0126f59cAddress();
 class FUN_00e7a5e0_Object
 {
   public:
@@ -5903,17 +5905,17 @@ __forceinline bool IsBumpFormatQ(int eFormat)
            eFormat == 0x3d || eFormat == 0x3e || eFormat == 0x43;
 }
 int __cdecl FUN_00ec65a6(char* pcDest, unsigned int uiDestSize, const char* pcSrc);
-void __cdecl FUN_00aa2a00(char* pcPath);
+void __cdecl NiPath_Standardize(char* pcPath);
 int __cdecl FUN_00aa1360(const char* s1, const char* s2);
 NiFile* __cdecl FUN_00aa1a20(const char* pcName, int eMode, unsigned int uiBufferSize);
-void* __cdecl FUN_00aa1070(unsigned int uiSize);
-void __cdecl FUN_00aa10f0(void* pvMem);
+void* __cdecl _NiMalloc_00aa1070(unsigned int uiSize);
+void __cdecl _NiFree_00aa10f0(void* pvMem);
 void* __cdecl FUN_00ec44d0(void* pvDest, const void* pvSrc, unsigned int uiSize);
-long __stdcall FUN_00ee6e22(const void* pvSrc, unsigned int uiSize, D3DXImageInfoQ* pkInfo);
-__declspec(noalias) long __stdcall FUN_00ee6e1c(void* pkDevice, const void* pvSrc, unsigned int uiSize,
+long __stdcall D3DXGetImageInfoFromFileInMemory_00ee6e22(const void* pvSrc, unsigned int uiSize, D3DXImageInfoQ* pkInfo);
+__declspec(noalias) long __stdcall D3DXCreateTextureFromFileInMemory_00ee6e1c(void* pkDevice, const void* pvSrc, unsigned int uiSize,
                                                 IDirect3DBaseTexture9** ppkTexture);
-long __stdcall FUN_00ee6e16(void* pkDevice, const void* pvSrc, unsigned int uiSize, IDirect3DBaseTexture9** ppkTexture);
-long __stdcall FUN_00ee6e10(void* pkDevice, const void* pvSrc, unsigned int uiSize, IDirect3DBaseTexture9** ppkTexture);
+long __stdcall D3DXCreateCubeTextureFromFileInMemory_00ee6e16(void* pkDevice, const void* pvSrc, unsigned int uiSize, IDirect3DBaseTexture9** ppkTexture);
+long __stdcall D3DXCreateVolumeTextureFromFileInMemory_00ee6e10(void* pkDevice, const void* pvSrc, unsigned int uiSize, IDirect3DBaseTexture9** ppkTexture);
 extern unsigned int DAT_0126efc4;
 extern unsigned int DAT_0126efc8;
 struct LocalGroup2
@@ -6015,7 +6017,7 @@ struct SpinLk
 {
     int owner;
     unsigned int count;
-    void FUN_0040fbf0(const char* name = 0) throw();
+    void BSSpinLock_Lock(const char* name = 0) throw();
     void Unlock() throw()
     {
         if (--count == 0)
@@ -6038,9 +6040,9 @@ struct PoolAlloc
 {
     static ListItem* Allocate() throw()
     {
-        DAT_011c5f80.FUN_0040fbf0();
+        DAT_011c5f80.BSSpinLock_Lock();
         if (!NiTAbstractPoolAllocator_unsigned_int_instance.head)
-            FUN_0043a080();
+            NiTAbstractPoolAllocator_unsigned_int_CreateFreeMem();
         ListItem* p = NiTAbstractPoolAllocator_unsigned_int_instance.head;
         ListItem*& next = ((NiTAbstractPoolAllocator_unsigned_int_instance.head)->next);
         NiTAbstractPoolAllocator_unsigned_int_instance.head = next;
@@ -6089,7 +6091,7 @@ struct PtrList
         head = n;
     }
 };
-int __cdecl FUN_00e7acb0(int name) throw();
+int __cdecl NiDX9SystemDesc_GetBPPFromFormat(int name) throw();
 struct DisplayModeInfo
 {
     unsigned int width;
@@ -6100,11 +6102,11 @@ struct DisplayModeInfo
     DisplayModeInfo(const DisplayMode& d) throw() : width(d.width), height(d.height), format(d.format)
     {
         list.AddHead(d.refresh);
-        unk08 = FUN_00e7acb0(d.format);
+        unk08 = NiDX9SystemDesc_GetBPPFromFormat(d.format);
     }
     void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
 struct FormatNode
@@ -6492,7 +6494,7 @@ struct S00e60650
     int unk14;
     int unk18;
     int value;
-    int FUN_00e60650();
+    int GetValue();
 };
 // FUN_00e60660: __thiscall accessor, returns this ? &this->field_14 : 0
 struct FUN_00e60660_Cls;
@@ -6504,7 +6506,7 @@ struct FUN_00e60660_Cls
     int unk0c;
     int unk10;
     int unk14;
-    int* __thiscall FUN_00e60660();
+    int* __thiscall ComputeValue_00e60660();
 };
 extern const char DAT_010ed328[];
 extern const char DAT_010ed2d0[];
@@ -6542,7 +6544,7 @@ struct TextureAccessor
     unsigned int mipCount;
     unsigned int pixelSize;
 };
-void __cdecl FUN_00e683d0(TextureAccessor* source, unsigned int level, CopySurface* surface, unsigned int face);
+void __cdecl NiDX9SourceTextureData_CopyRendererDataToSurfaceLevel(TextureAccessor* source, unsigned int level, CopySurface* surface, unsigned int face);
 extern int DAT_010eec54;
 extern int DAT_010eec7c;
 void* __cdecl FUN_00ec61c0(void* p, int c, unsigned int n);
@@ -6565,10 +6567,10 @@ struct D3DProbe
 };
 struct ModeItemInit
 {
-    FUN_00e7b260* FUN_00e7b260(S00e7b590_D3D* dev, int ctx, D3DDEVTYPE eDeviceType, D3DFORMAT eAdapterFormat,
+    FUN_00e7b260* ProbeDeviceRenderFormats(S00e7b590_D3D* dev, int ctx, D3DDEVTYPE eDeviceType, D3DFORMAT eAdapterFormat,
                                bool bFullscreen, bool bWindowed);
 };
-void __cdecl FUN_00e7cec0();
+void __cdecl NiDX9AdditionalDepthStencilBufferData_ShutdownAll();
 
 extern NiRenderer* g_rendererE7D6B0;
 extern int g_dsAE7D6B0;
@@ -6668,7 +6670,7 @@ class XfTransformBlock
     int unk50;
     XfCallee* m_pCalleeA;
     XfCallee* m_pCalleeB;
-    void FUN_00e62b20(LocalM128* in, LocalM128* out);
+    void UpdateFields_00e62b20(LocalM128* in, LocalM128* out);
 };
 using ::_mm_xor_ps;
 using ::_mm_sub_ss;
@@ -6725,8 +6727,8 @@ struct PodDst
 };
 struct SupportOwner
 {
-    void FUN_00e62b20(const hkVector4* direction, SupportResult* result);
-    LocalM128* FUN_00e62c60(Arg<LocalM128> out, const hkVector4* direction, Arg<const LocalM128> point, Arg<SupportResult> result);
+    void UpdateFields_00e62b20(const hkVector4* direction, SupportResult* result);
+    LocalM128* ProcessAndReturnValue_00e62c60(Arg<LocalM128> out, const hkVector4* direction, Arg<const LocalM128> point, Arg<SupportResult> result);
 };
 extern "C"
 {
@@ -6813,7 +6815,7 @@ struct TrianglePlane
     int m_3c;
     float m_40;
 
-    void FUN_00e67570();
+    void ComputePlaneNormalAndDistance();
 };
 using ::_mm_sqrt_ss;
 struct S00e61d30_TriVerts
@@ -6827,7 +6829,7 @@ static inline LocalM128 Sum3(LocalM128 a, LocalM128 b)
     LocalM128 m = _mm_mul_ps(a, b);
     return _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m));
 }
-void FUN_00e61d30(const S00e61d30_TriVerts* tri, float* out);
+void Runtime_ComputeValues_00e61d30(const S00e61d30_TriVerts* tri, float* out);
 extern "C"
 {
     double __cdecl fabs(double x);
@@ -6850,7 +6852,7 @@ struct S00e67ae0_HullFace
 struct S00e67ae0_HullWalker
 {
     void ClearEntries();
-    S00e67ae0_HullFace* FUN_00e67ae0(S00e67ae0_HullFace* start);
+    S00e67ae0_HullFace* FindHullFaceBySideTests(S00e67ae0_HullFace* start);
 };
 NiPixelFormat* __cdecl CreatePixelFormat(unsigned int eD3DFormat);
 
@@ -6886,7 +6888,8 @@ extern double DAT_01032980;
 extern float DAT_0104da48;
 
 extern ::LocalM128 DAT_01267e30;
-static __declspec(noinline) float FUN_00e62ac0(int seed)
+// src: HAVOK_LIB 0x00e62ac0
+static __declspec(noinline) float rand01_00e62ac0(int seed)
 {
     int v = (12345 - seed * 1043968403) & 0x7fffffff;
     return (float)((double)v * DAT_010229b8);
@@ -6961,11 +6964,11 @@ class E63Hull
     E63Oct<E63Quad<E63Face> > m_faces4_35;
     E63Oct<E63Quad<E63Face> > m_faces36_67;
     E63Oct<E63Quad<E63Face> > m_faces68_99;
-    void FUN_00e63ba0(::LocalM128* a, ::LocalM128* b, ::LocalM128* c);
+    void ProcessEntries_00e63ba0(::LocalM128* a, ::LocalM128* b, ::LocalM128* c);
     E63Face* GetNearestEntry();
-    int FUN_00e67660(E63Face* a1, E63Vert* a2, int* a3, E63Edge** a4);
-    int FUN_00e67740(int numNew, E63Edge* edge, E63Vert* vert);
-    E63Face* FUN_00e67ae0(E63Face* face);
+    int hkWingedEdge_findVisibleTriangles(E63Face* a1, E63Vert* a2, int* a3, E63Edge** a4);
+    int ProcessAndTransformResult_00e67740(int numNew, E63Edge* edge, E63Vert* vert);
+    E63Face* FindHullFaceBySideTests(E63Face* face);
 };
 struct E63Out
 {
@@ -6997,9 +7000,9 @@ struct Solver
     ::LocalM128* m_64;
     ::LocalM128* m_68;
     int m_6c;
-    int FUN_00e62d30(E63Out* out, int* status);
-    void FUN_00e62b20(E63Face* face, E63Vert* vert);
-    int FUN_00e63770(E63Out* out);
+    int UpdateState_00e62d30(E63Out* out, int* status);
+    void UpdateFields_00e62b20(E63Face* face, E63Vert* vert);
+    int ProcessEntries_00e63770(E63Out* out);
 };
 static __forceinline void transposeThree(::LocalM128& a, ::LocalM128& b, ::LocalM128& c)
 {
@@ -7042,7 +7045,7 @@ static __forceinline int expand(Solver* self, E63Hull& hull, E63Face* face, E63V
         status = 5;
         return 1;
     }
-    if (hull.FUN_00e67660(face, vert, &status, &outEdge) != 0)
+    if (hull.hkWingedEdge_findVisibleTriangles(face, vert, &status, &outEdge) != 0)
     {
         status = 5;
         return 1;
@@ -7052,7 +7055,7 @@ static __forceinline int expand(Solver* self, E63Hull& hull, E63Face* face, E63V
         status = 2;
         return 1;
     }
-    if (hull.FUN_00e67740(status, outEdge, vert) != 0)
+    if (hull.ProcessAndTransformResult_00e67740(status, outEdge, vert) != 0)
     {
         status = 5;
         return 1;
@@ -7060,7 +7063,8 @@ static __forceinline int expand(Solver* self, E63Hull& hull, E63Face* face, E63V
     return 0;
 }
 // @fnv 0x00e63770
-int Solver::FUN_00e63770(E63Out* out)
+// src: GUESS 0x00e63770 (confidence: low)
+int Solver::ProcessEntries_00e63770(E63Out* out)
 {
     int status;
     E63Edge* outEdge;
@@ -7069,7 +7073,7 @@ int Solver::FUN_00e63770(E63Out* out)
     for (;;)
     {
         status = 0;
-        if (FUN_00e62d30(out, &status) == 1)
+        if (UpdateState_00e62d30(out, &status) == 1)
         {
             if (status != 5)
                 return status;
@@ -7077,7 +7081,7 @@ int Solver::FUN_00e63770(E63Out* out)
         }
         {
             E63Hull hull;
-            hull.FUN_00e63ba0(m_60, m_64, m_68);
+            hull.ProcessEntries_00e63ba0(m_60, m_64, m_68);
             for (;;)
             {
                 face = hull.GetNearestEntry();
@@ -7085,7 +7089,7 @@ int Solver::FUN_00e63770(E63Out* out)
                 E63Vert* vert = (&hull.m_vert0) + idx;
                 hull.m_uiVertexCount = idx + 1;
                 vert->m_30 = 0;
-                FUN_00e62b20(face, vert);
+                UpdateFields_00e62b20(face, vert);
                 int expanded = expand(this, hull, face, vert, status, outEdge);
                 if (expanded == 1)
                     break;
@@ -7102,11 +7106,11 @@ int Solver::FUN_00e63770(E63Out* out)
                     m_68[0] = face->m_v0->m_00;
                     m_68[1] = face->m_v1->m_00;
                     m_68[2] = face->m_v2->m_00;
-                    FUN_00e61a10(&DAT_01267e30, &m_68[0], &m_68[1], &m_68[2],
+                    Runtime_ComputeTriangleBarycentricWeights(&DAT_01267e30, &m_68[0], &m_68[1], &m_68[2],
                                  reinterpret_cast<BarycentricResult*>(&bary));
                     if (!(bary.m128_f32[0] < 0.0f) && !(bary.m128_f32[1] < 0.0f) && !(bary.m128_f32[2] < 0.0f))
                         goto found_face;
-                    face = hull.FUN_00e67ae0(face);
+                    face = hull.FindHullFaceBySideTests(face);
                 }
             found_face:
                 E63Vert* v0 = face->m_v0;
@@ -7150,7 +7154,7 @@ int Solver::FUN_00e63770(E63Out* out)
         if (m_5c < 20)
         {
             m_6c = 0;
-            *(float*)&outEdge = (float)((FUN_00e62ac0(m_5c) - DAT_01032980) * DAT_010dbb40);
+            *(float*)&outEdge = (float)((rand01_00e62ac0(m_5c) - DAT_01032980) * DAT_010dbb40);
             bary.m128_f32[0] = *(float*)&outEdge;
             bary.m128_f32[1] = *(float*)&outEdge;
             bary.m128_f32[2] = *(float*)&outEdge;

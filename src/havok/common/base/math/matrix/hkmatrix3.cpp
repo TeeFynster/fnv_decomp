@@ -69,7 +69,8 @@ struct CD4AF0Vector4
 
 
 // @fnv 0x00cd4af0
-hkBool hkMatrix3::FUN_00cd4af0() const
+// src: HAVOK_LIB 0x00cd4af0
+hkBool hkMatrix3::isOk_00cd4af0() const
 {
     return reinterpret_cast<const CD4AF0Vector4&>(m_kColumn0).IsStreamValid() && reinterpret_cast<const CD4AF0Vector4&>(m_kColumn1).IsStreamValid() && reinterpret_cast<const CD4AF0Vector4&>(m_kColumn2).IsStreamValid();
 }
@@ -96,12 +97,13 @@ void hkMatrix3::transpose() throw()
 
 struct S_00cd55a0
 {
-    void FUN_00cd5050();
+    void ComputeInverseWithDeterminantThreshold();
 };
 // @fnv 0x00cd55a0
-void FUN_00cd55a0(S_00cd55a0* p)
+// src: GUESS 0x00cd55a0 (confidence: low)
+void Object_ForwardCall_00cd55a0(S_00cd55a0* p)
 {
-    p->FUN_00cd5050();
+    p->ComputeInverseWithDeterminantThreshold();
 }
 
 // Copies the transpose of s into this matrix: diagonal entries copied directly, off-diagonal entries swapped, and the fourth column zeroed.
@@ -127,14 +129,15 @@ struct Matrix3x4
 class CMatrixOps
 {
   public:
-    bool FUN_00cd4e90(float epsilon);
+    bool hkMatrix3_isSymmetric(float epsilon);
 
   private:
     Matrix3x4 m_mat;
-    unsigned char* FUN_00cd4e00(unsigned char* out, const Matrix3x4* temp, float epsilon);
+    unsigned char* CompareMatrixColumnsWithinTolerance(unsigned char* out, const Matrix3x4* temp, float epsilon);
 };
 // @fnv 0x00cd4e90
-bool CMatrixOps::FUN_00cd4e90(float epsilon)
+// src: HAVOK_LIB 0x00cd4e90
+bool CMatrixOps::hkMatrix3_isSymmetric(float epsilon)
 {
     __declspec(align(16)) Matrix3x4 temp;
     temp.m[0][0] = m_mat.m[0][0];
@@ -150,7 +153,7 @@ bool CMatrixOps::FUN_00cd4e90(float epsilon)
     temp.m[1][2] = m_mat.m[2][1];
     temp.m[2][1] = m_mat.m[1][2];
     unsigned char out;
-    return *FUN_00cd4e00(&out, &temp, epsilon) != 0;
+    return *CompareMatrixColumnsWithinTolerance(&out, &temp, epsilon) != 0;
 }
 
 // @fnv 0x00cd5880
@@ -174,7 +177,8 @@ static __forceinline void matrixRotatedDir(hkVector4& dst, const hkMatrix3& r, c
 
 // Transposes kA, applies the transposed matrix to each column of kB, and stores those results here.
 // @fnv 0x00cd4bf0
-void hkMatrix3::FUN_00cd4bf0(char* a, char* b)
+// src: GUESS 0x00cd4bf0 (confidence: high)
+void hkMatrix3::SetTransposeProduct(char* a, char* b)
 {
     const hkMatrix3& kA = *reinterpret_cast<const hkMatrix3*>(a);
     const hkMatrix3& kB = *reinterpret_cast<const hkMatrix3*>(b);
@@ -236,7 +240,8 @@ struct Mat34
 
 // Computes the c, s, p, q of a Jacobi rotation that zeroes a.m[p][q] of a 3x4 matrix, storing the result in outp.
 // @fnv 0x00cd5270
-static __declspec(noinline) void FUN_00cd5270(const Mat34& apMatrix, int q, int p, JacobiRot* apOut)
+// src: HAVOK_LIB 0x00cd5270
+static __declspec(noinline) void _constructSchurMatrix(const Mat34& apMatrix, int q, int p, JacobiRot* apOut)
 {
     JacobiRot* out = apOut;
     JacobiRot** ppOut = &apOut;
@@ -264,7 +269,7 @@ Mat34 g_m5270;
 JacobiRot g_r5270;
 void caller_cd5270()
 {
-    FUN_00cd5270(g_m5270, g_q5270, g_p5270, &g_r5270);
+    _constructSchurMatrix(g_m5270, g_q5270, g_p5270, &g_r5270);
 }
 
 struct Mat
@@ -285,7 +290,8 @@ struct Mat
 
 // Computes the Euclidean norm of the 3x3 block formed by the first three entries of each row.
 // @fnv 0x00cd5340
-static __declspec(noinline) float FUN_00cd5340(const Mat* apMatrix)
+// src: HAVOK_LIB 0x00cd5340
+static __declspec(noinline) float _frobeniusNorm(const Mat* apMatrix)
 {
     float sum = 0.0f;
     const float* q = &apMatrix->f00 + 8;
@@ -301,18 +307,19 @@ static __declspec(noinline) float FUN_00cd5340(const Mat* apMatrix)
 
 float MatNorm(const Mat* m)
 {
-    return FUN_00cd5340(m) * 2.0f;
+    return _frobeniusNorm(m) * 2.0f;
 }
 
 struct S_00cd53a0_Matrix3
 {
     float m_col[3][4];
-    float FUN_00cd53a0();
+    float _offDiagNorm();
 };
 
 // Computes the Frobenius norm of the 3x3 matrix by summing the squares of the off-diagonal elements and returning the square root.
 // @fnv 0x00cd53a0
-float S_00cd53a0_Matrix3::FUN_00cd53a0()
+// src: HAVOK_LIB 0x00cd53a0
+float S_00cd53a0_Matrix3::_offDiagNorm()
 {
     float sum = 0.0f;
     for (int i = 0; i < 3; i++)
@@ -335,7 +342,8 @@ __forceinline float& hkMatrix3::operator()(int row, int col)
 
 // Finds the element with the largest absolute value in the upper triangle of m and stores its row and column indices.
 // @fnv 0x00cd5400
-static void FUN_00cd5400(hkMatrix3& m, int& rowOut, int& colOut)
+// src: HAVOK_LIB 0x00cd5400
+static void _findLargestOffDiagEntry(hkMatrix3& m, int& rowOut, int& colOut)
 {
     float maxVal = 0.0f;
     for (int i = 0; i < 3; i++)
@@ -358,7 +366,7 @@ static void FUN_00cd5400(hkMatrix3& m, int& rowOut, int& colOut)
 
 void cd5400_caller(hkMatrix3& m, int* r, int* c)
 {
-    FUN_00cd5400(m, *r, *c);
+    _findLargestOffDiagEntry(m, *r, *c);
 }
 
 struct VProduct
@@ -389,11 +397,12 @@ struct VProduct
 struct MProduct
 {
     VProduct columns[3];
-    void FUN_00cd55b0(const MProduct& a, const MProduct& b);
+    void hkMatrix3_setMul(const MProduct& a, const MProduct& b);
 };
 // Computes the matrix product of a and b, storing the result in columns.
 // @fnv 0x00cd55b0
-void MProduct::FUN_00cd55b0(const MProduct& aLeft, const MProduct& aRight)
+// src: XBOX_PDB 0x00cd55b0
+void MProduct::hkMatrix3_setMul(const MProduct& aLeft, const MProduct& aRight)
 {
     MProduct m = aLeft;
     for (int i = 2; i >= 0; --i)
@@ -429,7 +438,8 @@ struct Matrix34
 
 // Initializes a 3x4 matrix to identity, then replaces four elements using fields and indices from src.
 // @fnv 0x00cd54d0
-static __declspec(noinline) void FUN_00cd54d0(Matrix34* apMatrix, const SrcRec* src)
+// src: GUESS 0x00cd54d0 (confidence: medium)
+static __declspec(noinline) void hkMatrix3_InitializeIdentityMatrixAndSelectedValues(Matrix34* apMatrix, const SrcRec* src)
 {
     _mm_store_ps(&apMatrix->m[0], _mm_setzero_ps());
     _mm_store_ps(&apMatrix->m[4], _mm_setzero_ps());
@@ -447,7 +457,7 @@ static __declspec(noinline) void FUN_00cd54d0(Matrix34* apMatrix, const SrcRec* 
 
 void S00cd54d0_wrap(const SrcRec* src, Matrix34* dest)
 {
-    FUN_00cd54d0(dest, src);
+    hkMatrix3_InitializeIdentityMatrixAndSelectedValues(dest, src);
 }
 
 extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
@@ -518,7 +528,8 @@ static __forceinline MatrixInverseVector& inverseColumn(hkMatrix3& m, int i)
 
 // Computes the inverse via cofactor columns, returning 0 on success.
 // @fnv 0x00cd4f10
-int hkMatrix3::FUN_00cd4f10(float epsilon)
+// src: XBOX_PDB 0x00cd4f10
+int hkMatrix3::invert_00cd4f10(float epsilon)
 {
     MatrixInverseVector r0;
     r0.setCross(inverseColumn(*this, 1), inverseColumn(*this, 2));
@@ -594,7 +605,8 @@ struct hkVecInv
 
 // Computes three column cross products, substitutes a value when the determinant is below a threshold, then scales the columns by its reciprocal.
 // @fnv 0x00cd5050
-void S_00cd55a0::FUN_00cd5050()
+// src: GUESS 0x00cd5050 (confidence: medium)
+void S_00cd55a0::ComputeInverseWithDeterminantThreshold()
 {
     hkMatrix3* m = (hkMatrix3*)this;
     hkVecInv r0;
@@ -657,13 +669,13 @@ class DiagMat
         c1 = v.c1;
         c2 = v.c2;
     }
-    int FUN_00cd56c0(DiagMat& vectors, DiagVec& values, int maxIter, float epsilon) const;
-    void FUN_00cd5680(const DiagMat& other);
-    void FUN_00cd55b0(const DiagMat& a, const DiagMat& b);
+    int DiagonalizeMatrixJacobi(DiagMat& vectors, DiagVec& values, int maxIter, float epsilon) const;
+    void hkMatrix3f_mul(const DiagMat& other);
+    void hkMatrix3_setMul(const DiagMat& a, const DiagMat& b);
     void FUN_00cd4b60();
     float offnorm()
     {
-        return ((S_00cd53a0_Matrix3*)this)->FUN_00cd53a0();
+        return ((S_00cd53a0_Matrix3*)this)->_offDiagNorm();
     }
     float& at(int row, int col)
     {
@@ -681,28 +693,29 @@ class DiagMat
 };
 // Diagonalizes the matrix via Jacobi rotations, accumulating eigenvectors in vectors and eigenvalues in values, returning 1 on failure.
 // @fnv 0x00cd56c0
-int DiagMat::FUN_00cd56c0(DiagMat& apEigenvectors, DiagVec& apEigenvalues, int aiMaxIterations, float epsilon) const
+// src: GUESS 0x00cd56c0 (confidence: medium)
+int DiagMat::DiagonalizeMatrixJacobi(DiagMat& apEigenvectors, DiagVec& apEigenvalues, int aiMaxIterations, float epsilon) const
 {
-    if (!((CMatrixOps*)this)->FUN_00cd4e90(epsilon))
+    if (!((CMatrixOps*)this)->hkMatrix3_isSymmetric(epsilon))
         return 1;
     DiagMat current(*this);
     apEigenvectors.identity();
-    float tolerance = FUN_00cd5340((const Mat*)this) * epsilon;
+    float tolerance = _frobeniusNorm((const Mat*)this) * epsilon;
     int iteration = 0;
     float norm = current.offnorm();
     while (!(norm < tolerance) && iteration < aiMaxIterations)
     {
         int p = 0, q = 0;
-        FUN_00cd5400((hkMatrix3&)current, p, q);
+        _findLargestOffDiagEntry((hkMatrix3&)current, p, q);
         JacobiRot rotation;
-        FUN_00cd5270((const Mat34&)current, p, q, &rotation);
+        _constructSchurMatrix((const Mat34&)current, p, q, &rotation);
         DiagMat jacobi;
-        FUN_00cd54d0((Matrix34*)&jacobi, (const SrcRec*)&rotation);
+        hkMatrix3_InitializeIdentityMatrixAndSelectedValues((Matrix34*)&jacobi, (const SrcRec*)&rotation);
         DiagMat transposed(jacobi);
         transposed.FUN_00cd4b60();
-        current.FUN_00cd5680(jacobi);
-        current.FUN_00cd55b0(transposed, current);
-        apEigenvectors.FUN_00cd5680(jacobi);
+        current.hkMatrix3f_mul(jacobi);
+        current.hkMatrix3_setMul(transposed, current);
+        apEigenvectors.hkMatrix3f_mul(jacobi);
         ++iteration;
         norm = current.offnorm();
     }
@@ -741,7 +754,8 @@ extern "C" __declspec(align(16)) const LocalM128 g_signClear;
 
 // Compares each column of m_mat against other within epsilon and stores the result as a byte in out.
 // @fnv 0x00cd4e00
-unsigned char* CMatrixOps::FUN_00cd4e00(unsigned char* apResult, const Matrix3x4* other, float epsilon)
+// src: GUESS 0x00cd4e00 (confidence: medium)
+unsigned char* CMatrixOps::CompareMatrixColumnsWithinTolerance(unsigned char* apResult, const Matrix3x4* other, float epsilon)
 {
     const hkMatrix3& lhs = *reinterpret_cast<const hkMatrix3*>(&m_mat);
     const hkMatrix3& rhs = *reinterpret_cast<const hkMatrix3*>(other);
@@ -786,7 +800,7 @@ extern "C" LocalM128 _mm_load_ps(float const* p);
 
 struct FUN_00cd55b0_cls
 {
-    void FUN_00cd55b0(const void* src, int arg);
+    void hkMatrix3_setMul(const void* src, int arg);
 };
 
 struct FUN_00cd5680_cls
@@ -795,7 +809,7 @@ struct FUN_00cd5680_cls
     LocalM128 m_v1;
     LocalM128 m_v2;
 
-    void FUN_00cd5680(int arg);
+    void hkMatrix3f_mul(int arg);
 };
 
 struct __declspec(align(16)) FUN_00cd5680_tmp
@@ -816,10 +830,11 @@ struct __declspec(align(16)) FUN_00cd5680_tmp
 
 // Loads three 16-byte blocks from a temporary populated by FUN_00cd55b0 into m_v0, m_v1, and m_v2.
 // @fnv 0x00cd5680
-void FUN_00cd5680_cls::FUN_00cd5680(int arg)
+// src: COMMUNITY 0x00cd5680
+void FUN_00cd5680_cls::hkMatrix3f_mul(int arg)
 {
     FUN_00cd5680_tmp tmp;
-    ((FUN_00cd55b0_cls*)&tmp)->FUN_00cd55b0(this, arg);
+    ((FUN_00cd55b0_cls*)&tmp)->hkMatrix3_setMul(this, arg);
     this->m_v0 = _mm_load_ps((float*)&tmp.unk00);
     this->m_v1 = _mm_load_ps((float*)&tmp.unk10);
     this->m_v2 = _mm_load_ps((float*)&tmp.unk20);
@@ -845,7 +860,8 @@ extern "C" LocalM128 _mm_load_ps(const float* p);
 
 // out[i] = m * in[i] for the three columns of a 3x4 SSE matrix (columns processed last to first).
 // @fnv 0x00cd5530
-void __cdecl FUN_00cd5530(float* out, const float* apMatrix, const float* in)
+// src: GUESS 0x00cd5530 (confidence: high)
+void __cdecl hkMatrix3_MultiplyMatrixColumns(float* out, const float* apMatrix, const float* in)
 {
     LocalM128 r0 = _mm_load_ps(apMatrix);
     LocalM128 r1 = _mm_load_ps(apMatrix + 4);
@@ -864,8 +880,8 @@ void __cdecl FUN_00cd5530(float* out, const float* apMatrix, const float* in)
 }
 
 extern const float DAT_0104da4c = 1.1920929e-7f;
-extern "C" void FUN_00cd5530(void*, const void*, const void*);
-extern "C" void FUN_00cd55a0(void*);
+extern "C" void hkMatrix3_MultiplyMatrixColumns(void*, const void*, const void*);
+extern "C" void Object_ForwardCall_00cd55a0(void*);
 
 class ChainScalar
 {
@@ -1024,7 +1040,7 @@ class ChainMat
     }
     void product(const ChainMat& a, const ChainMat& b)
     {
-        FUN_00cd5530(static_cast<void*>(this), static_cast<const void*>(&a), static_cast<const void*>(&b));
+        hkMatrix3_MultiplyMatrixColumns(static_cast<void*>(this), static_cast<const void*>(&a), static_cast<const void*>(&b));
     }
     void sub(const ChainMat& a)
     {
@@ -1120,7 +1136,8 @@ struct ProbeRow
 };
 // Fills ProbeRow output with lower, diag, and upper matrices by computing paired and shared Jacobian terms over ChainBody offsets.
 // @fnv 0x00dd0660
-static __declspec(noinline) void FUN_00dd0660(int aiRowCount, float regularizer, ProbeJac* apJacobian,
+// src: GUESS 0x00dd0660 (confidence: medium)
+static __declspec(noinline) void Object_BuildChainJacobianMatrices(int aiRowCount, float regularizer, ProbeJac* apJacobian,
                                               ProbeOffset* offsets, const ChainBody* bodies, ProbeRow* output,
                                               int bufferSize)
 {
@@ -1172,7 +1189,7 @@ static __declspec(noinline) void FUN_00dd0660(int aiRowCount, float regularizer,
             float& value = output[row].diag(i, i);
             value = chainMaximum(value, 1.1920929e-7f);
         }
-        FUN_00cd55a0(reinterpret_cast<void*>(&output[row].diag));
+        Object_ForwardCall_00cd55a0(reinterpret_cast<void*>(&output[row].diag));
         output[row].upper.product(output[row].diag, matNext);
         matPrevious = matNext;
         upper = output[row].upper;
@@ -1186,5 +1203,5 @@ const ChainBody* volatile probe_bodies;
 ProbeRow* volatile probe_rows;
 void native_entry()
 {
-    FUN_00dd0660(probe_count, probe_cfm, probe_jac, probe_offsets, probe_bodies, probe_rows, 0);
+    Object_BuildChainJacobianMatrices(probe_count, probe_cfm, probe_jac, probe_offsets, probe_bodies, probe_rows, 0);
 }

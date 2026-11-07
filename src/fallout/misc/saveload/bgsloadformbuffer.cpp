@@ -64,21 +64,23 @@ struct Dummy84eaf0
 
 struct Dummy864490
 {
-    void FUN_00864490();
+    void MOVABLE_STATIC_DATA_MOVABLE_STATIC_DATA();
 };
 
 // @fnv 0x00864450
-FormLoadContext* __fastcall FUN_00864450(FormLoadContext* apObject)
+// src: COMMUNITY 0x00864450
+FormLoadContext* __fastcall BGSSaveLoadFormHeader_BGSSaveLoadFormHeader(FormLoadContext* apObject)
 {
     reinterpret_cast<Dummy84eaf0*>(apObject)->ClearNumericIDIndex();
     reinterpret_cast<FormChangeMask*>(reinterpret_cast<char*>(apObject) + 3)->FormChangeMask::FormChangeMask();
-    reinterpret_cast<Dummy864490*>(reinterpret_cast<char*>(apObject) + 7)->FUN_00864490();
+    reinterpret_cast<Dummy864490*>(reinterpret_cast<char*>(apObject) + 7)->MOVABLE_STATIC_DATA_MOVABLE_STATIC_DATA();
     *(reinterpret_cast<unsigned char*>(apObject) + 8) = 0;
     return apObject;
 }
 
 // @fnv 0x00864490
-char* __fastcall FUN_00864490(char* p)
+// src: XBOX_PDB 0x00864490
+char* __fastcall MOVABLE_STATIC_DATA_MOVABLE_STATIC_DATA(char* p)
 {
     *p = 0;
     return p;
@@ -86,8 +88,8 @@ char* __fastcall FUN_00864490(char* p)
 
 #include "../../../../include/SIZE_TYPE.h"
 unsigned int __cdecl ReadSizedUnsignedInt(SaveLoadFile*, unsigned int&, SIZE_TYPE);
-unsigned int __fastcall FUN_00853500(void*);
-SIZE_TYPE __fastcall FUN_00864520(void*);
+unsigned int __fastcall BGSNumericIDIndex_GetNumericID(void*);
+SIZE_TYPE __fastcall BGSSaveLoadFormInfo_GetSizeType(void*);
 
 struct BGSSaveLoadFile_Read_shell : public SaveLoadFile
 {
@@ -101,8 +103,8 @@ int BGSLoadFormBuffer::LoadHeader(SaveLoadFile* apFile)
     unsigned int iLoadedSize;
 
     ((BGSSaveLoadFile_Read_shell*)apFile)->Read(Header, 9);
-    iFormID = FUN_00853500(Header);
-    esizeType = FUN_00864520(Header + 7);
+    iFormID = BGSNumericIDIndex_GetNumericID(Header);
+    esizeType = BGSSaveLoadFormInfo_GetSizeType(Header + 7);
     iLoadedSize = ReadSizedUnsignedInt(apFile, iSize, esizeType);
     if (iLoadedSize != iSize)
         return -1;
@@ -111,11 +113,12 @@ int BGSLoadFormBuffer::LoadHeader(SaveLoadFile* apFile)
 
 struct FUN_00864520_shell : public BGSSaveLoadFormInfo
 {
-    int FUN_00864520();
+    int BGSSaveLoadFormInfo_GetSizeType();
 };
 
 // @fnv 0x00864520
-int FUN_00864520_shell::FUN_00864520()
+// src: XBOX_PDB 0x00864520
+int FUN_00864520_shell::BGSSaveLoadFormInfo_GetSizeType()
 {
     return *(unsigned char*)this >> 6;
 }

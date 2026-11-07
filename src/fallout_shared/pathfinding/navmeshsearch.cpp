@@ -53,13 +53,13 @@ class AStarMapNav
 {
   public:
     char storage[0x1fe0];
-    void FUN_00996800();
+    void AStarMap_AStarNode_NavMeshSearchNode_NavMeshSearchLink_Clear();
 };
 class AStarQueueNav
 {
   public:
     char storage[0x54];
-    void FUN_006a84e0();
+    void AStarQueue_NavMeshSearchNode_NavMeshSearchLink_Clear();
 };
 
 
@@ -70,8 +70,8 @@ float abs(float);
 }
 float GetDirectionAngle(const NiPoint3&);
 void WrapValueToRange(float&, float, float);
-void FUN_005330e0(float&, float, float);
-bool FUN_009a3830(NavMeshInfo*&, NavMeshInfo*&);
+void BSClamp_float(float&, float, float);
+bool Actor_AreReferencedValuesEqual(NavMeshInfo*&, NavMeshInfo*&);
 
 // Clears the node and link arrays, sets up start and goal points, runs the search, and optionally collects meshes from the solution.
 // @fnv 0x006a6b70
@@ -97,10 +97,10 @@ bool NavMeshSearch::ComputePath(const PathingRequest* request, const NavMeshTria
     (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_fCenterX = center.x;
     (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_fCenterY = center.y;
     (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_fCenterZ = center.z;
-    FUN_006a7d30(((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FUN_006a6eb0() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0()).FUN_00457990() * 2.0f);
+    AStarSearch_NavMeshSearchNode_NavMeshSearchLink_SetMaxFitness(((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FastNavMeshTriLocation_GetLocation() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FastNavMeshTriLocation_GetLocation()).FUN_00457990() * 2.0f);
     FindOrCreateSearchNode(
-        FUN_006a94f0((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_pLocationNavMesh, (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_usTriangleIdentifier),
-        (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)), ((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FUN_006a6eb0() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0()).FUN_00457990());
+        GetKeyForNode_006a94f0((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_pLocationNavMesh, (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_usTriangleIdentifier),
+        (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)), ((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FastNavMeshTriLocation_GetLocation() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FastNavMeshTriLocation_GetLocation()).FUN_00457990());
     m_pNavMeshInfos = solution;
     if (m_pNavMeshInfos)
     {
@@ -122,7 +122,7 @@ bool NavMeshSearch::HasReachedGoal(const SearchNode* node)
 {
     if (m_pPathingRequest && m_pPathingRequest->GetFloatAtOffset68() > 100.0)
     {
-        NiPoint3 kDelta = (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0() - node->GetNode().FUN_006a6eb0();
+        NiPoint3 kDelta = (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FastNavMeshTriLocation_GetLocation() - node->GetNode().FastNavMeshTriLocation_GetLocation();
         float fDistanceSquared = kDelta.GetSquaredXYLength();
         float fHeightSquared = kDelta.z * kDelta.z;
         if (m_pPathingRequest->FUN_009b0bd0() * 0.25 * m_pPathingRequest->FUN_009b0bd0() > fDistanceSquared &&
@@ -143,7 +143,7 @@ void NavMeshSearch::SetSearchNodeTriangle(SearchNode* node, NavMesh* mesh, unsig
     data.m_fCenterX = center.x;
     data.m_fCenterY = center.y;
     data.m_fCenterZ = center.z;
-    float distance = (data.FUN_006a6eb0() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0()).FUN_00457990();
+    float distance = (data.FastNavMeshTriLocation_GetLocation() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FastNavMeshTriLocation_GetLocation()).FUN_00457990();
     node->FUN_004f5d90(distance * double(0.01f));
 }
 
@@ -151,27 +151,30 @@ void NavMeshSearch::SetSearchNodeTriangle(SearchNode* node, NavMesh* mesh, unsig
 // @fnv 0x006a7c40
 void NavMeshSearch::ClearSearch()
 {
-    (*reinterpret_cast<AStarMapNav*>(&unk014)).FUN_00996800();
-    (*reinterpret_cast<AStarQueueNav*>(&unk1ff4)).FUN_006a84e0();
+    (*reinterpret_cast<AStarMapNav*>(&unk014)).AStarMap_AStarNode_NavMeshSearchNode_NavMeshSearchLink_Clear();
+    (*reinterpret_cast<AStarQueueNav*>(&unk1ff4)).AStarQueue_NavMeshSearchNode_NavMeshSearchLink_Clear();
     m_pFirstNode = 0;
     m_pCurrentNode = 0;
     m_pLastCreatedNode = 0;
 }
 
 // @fnv 0x006a7940
-bool PathingRequest::FUN_006a7940() const
+// src: COMMUNITY 0x006a7940
+bool PathingRequest::GetCanSwim() const
 {
     return bCanSwim;
 }
 
 // @fnv 0x006a7980
-bool PathingRequest::FUN_006a7980() const
+// src: COMMUNITY 0x006a7980
+bool PathingRequest::GetTryToUseCurvedPath() const
 {
     return m_bCanUseDoors;
 }
 
 // @fnv 0x006a79a0
-bool PathingRequest::FUN_006a79a0() const
+// src: XBOX_PDB 0x006a79a0
+bool PathingRequest::GetIgnoreLocks_006a79a0() const
 {
     return bIgnoreLocks;
 }
@@ -179,10 +182,11 @@ bool PathingRequest::FUN_006a79a0() const
 struct S3e60
 {
     bool GetFlag(unsigned int) const;
-    bool FUN_006a7ad0(unsigned int f);
+    bool BSSimpleArray_NiAVObject_1024_GetAt(unsigned int f);
 };
 // @fnv 0x006a7ad0
-bool S3e60::FUN_006a7ad0(unsigned int auiFlag)
+// src: XBOX_PDB 0x006a7ad0
+bool S3e60::BSSimpleArray_NiAVObject_1024_GetAt(unsigned int auiFlag)
 {
     return GetFlag(auiFlag);
 }
@@ -191,10 +195,11 @@ namespace fnv_006a7af0 {
 struct S3e60
 {
     bool GetFlag(unsigned int) const;
-    bool FUN_006a7af0(unsigned int f);
+    bool BSSimpleArray_NiPoint3_1024_GetAt(unsigned int f);
 };
 // @fnv 0x006a7af0
-bool S3e60::FUN_006a7af0(unsigned int auiFlag)
+// src: XBOX_PDB 0x006a7af0
+bool S3e60::BSSimpleArray_NiPoint3_1024_GetAt(unsigned int auiFlag)
 {
     return GetFlag(auiFlag);
 }
@@ -230,23 +235,23 @@ FUN_006a7bc0_Class::~FUN_006a7bc0_Class()
 struct PNode;
 struct HX
 {
-    bool FUN_006a8290(PNode*, BSSimpleArray<NavMeshTriangleReference, 1024>*, BSSimpleArray<EdgeExtraInfo, 1024>*);
+    bool AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(PNode*, BSSimpleArray<NavMeshTriangleReference, 1024>*, BSSimpleArray<EdgeExtraInfo, 1024>*);
 };
 struct H1
 {
-    void FUN_006a8750(unsigned int, int);
+    void AllocateStorage_006a8750(unsigned int, int);
 };
 struct H2
 {
-    void FUN_006a8890(int, int);
+    void UpdateState_006a8890(int, int);
 };
 struct H3
 {
-    NavMeshTriangleEdgeReference* FUN_006a1440(unsigned short);
+    NavMeshTriangleEdgeReference* Object_GetIndexedValue_006a1440(unsigned short);
 };
 struct H4
 {
-    NavMeshTriangleReference* FUN_006b3160(unsigned int);
+    NavMeshTriangleReference* GetIndexedValue_006b3160(unsigned int);
 };
 struct PNode
 {
@@ -256,7 +261,8 @@ struct PNode
     PNode* next;
 };
 // @fnv 0x006a8290
-bool HX::FUN_006a8290(PNode* apFinalNode, BSSimpleArray<NavMeshTriangleReference, 1024>* arr,
+// src: XBOX_PDB 0x006a8290
+bool HX::AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(PNode* apFinalNode, BSSimpleArray<NavMeshTriangleReference, 1024>* arr,
                       BSSimpleArray<EdgeExtraInfo, 1024>* arrEdges)
 {
     PNode* pNode;
@@ -271,15 +277,15 @@ bool HX::FUN_006a8290(PNode* apFinalNode, BSSimpleArray<NavMeshTriangleReference
         icount = icount + 1;
         pNode = pNode->next;
     }
-    ((H1*)arr)->FUN_006a8750(icount, 1);
-    ((H2*)arrEdges)->FUN_006a8890(icount - 1, 1);
+    ((H1*)arr)->AllocateStorage_006a8750(icount, 1);
+    ((H2*)arrEdges)->UpdateState_006a8890(icount - 1, 1);
     pNode = apFinalNode;
     iElementIndex = icount - 1;
     while (pNode)
     {
-        *((H4*)arr)->FUN_006b3160(iElementIndex) = pNode->f;
+        *((H4*)arr)->GetIndexedValue_006b3160(iElementIndex) = pNode->f;
         if (iElementIndex > 0)
-            *((H3*)arrEdges)->FUN_006a1440(iElementIndex - 1) = pNode->e;
+            *((H3*)arrEdges)->Object_GetIndexedValue_006a1440(iElementIndex - 1) = pNode->e;
         pNode = pNode->next;
         iElementIndex = iElementIndex - 1;
     }
@@ -289,7 +295,8 @@ bool HX::FUN_006a8290(PNode* apFinalNode, BSSimpleArray<NavMeshTriangleReference
 void* __cdecl memset(void*, int, unsigned int);
 
 // @fnv 0x006a84e0
-void __fastcall FUN_006a84e0(char* this_ptr)
+// src: XBOX_PDB 0x006a84e0
+void __fastcall AStarQueue_NavMeshSearchNode_NavMeshSearchLink_Clear(char* this_ptr)
 {
     memset(this_ptr + 4, 0, 0x50);
 }
@@ -297,7 +304,8 @@ void __fastcall FUN_006a84e0(char* this_ptr)
 unsigned int __fastcall _ref_0084e3a0(NavMesh*);
 
 // @fnv 0x006a94f0
-unsigned int NavMeshSearch::FUN_006a94f0(NavMesh* apNavMesh, unsigned short aiTri)
+// src: XBOX_PDB 0x006a94f0
+unsigned int NavMeshSearch::GetKeyForNode_006a94f0(NavMesh* apNavMesh, unsigned short aiTri)
 {
     return ((_ref_0084e3a0(apNavMesh) & 0xFFFF) << 16) | aiTri;
 }
@@ -305,7 +313,8 @@ unsigned int NavMeshSearch::FUN_006a94f0(NavMesh* apNavMesh, unsigned short aiTr
 
 // Copies the triangle center into the returned point.
 // @fnv 0x006a6eb0
-NiPoint3 NavMeshTriangleReference::FUN_006a6eb0() const
+// src: COMMUNITY 0x006a6eb0
+NiPoint3 NavMeshTriangleReference::FastNavMeshTriLocation_GetLocation() const
 {
     return NiPoint3(m_fCenterX, m_fCenterY, m_fCenterZ);
 }
@@ -382,11 +391,12 @@ bool PathingRequest::GetByteAtOffset9E() const
 struct FUN_00aa5410_Helper
 {
     int InitWithAlignedSize(unsigned int);
-    FUN_00aa5410_Helper* FUN_006a8380();
+    FUN_00aa5410_Helper* ProcessAndReturnValue_006a8380();
 };
 
 // @fnv 0x006a8380
-FUN_00aa5410_Helper* FUN_00aa5410_Helper::FUN_006a8380()
+// src: GUESS 0x006a8380 (confidence: low)
+FUN_00aa5410_Helper* FUN_00aa5410_Helper::ProcessAndReturnValue_006a8380()
 {
     InitWithAlignedSize(0x7800);
     return this;
@@ -531,8 +541,8 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                 triangle = currentNode.m_pLocationNavMesh->FUN_005582f0(currentNode.m_usTriangleIdentifier);
                 if (triangle->IsEdgeFlagSet(edgeIndex))
                 {
-                    info = currentNode.m_pLocationNavMesh->GetEdge(triangle->FUN_0068f2c0(edgeIndex))->info;
-                    if (m_pNavMeshInfos->Find(info, 0, FUN_009a3830) == (unsigned int)-1)
+                    info = currentNode.m_pLocationNavMesh->GetEdge(triangle->GetEdgeExtraInfo_0068f2c0(edgeIndex))->info;
+                    if (m_pNavMeshInfos->Find(info, 0, Actor_AreReferencedValuesEqual) == (unsigned int)-1)
                         continue;
                 }
             }
@@ -558,7 +568,7 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                     if (m_pPathingRequest->FUN_006a78f0() > 0.0)
                     {
                         NiPoint3 centerA = neighborMesh->GetNavMeshData(neighborTriangle);
-                        NiPoint3 toDestination = centerA - m_pPathingRequest->FUN_006a7910();
+                        NiPoint3 toDestination = centerA - m_pPathingRequest->GetTargetPoint();
                         if (toDestination.FUN_004a7290() >
                             m_pPathingRequest->FUN_006a78f0() * m_pPathingRequest->FUN_006a78f0())
                             continue;
@@ -576,12 +586,12 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                             TESObjectREFR* doorRef = (TESObjectREFR*)TESForm::GetFormByID(doorID);
                             if (doorRef != 0)
                             {
-                                if (!m_pPathingRequest->FUN_006a79a0())
+                                if (!m_pPathingRequest->GetIgnoreLocks_006a79a0())
                                 {
-                                    if (doorRef->FUN_0057b460())
+                                    if (doorRef->TESObjectREFR_GetInaccessible())
                                         continue;
                                     (*reinterpret_cast<DoorAccessData*>(&unk208c)).SetDoorReference(doorRef);
-                                    lockData7 = m_pPathingRequest->FUN_006c9900();
+                                    lockData7 = m_pPathingRequest->GetActorLockData();
                                     if (!(*reinterpret_cast<DoorAccessData*>(&unk208c)).CanUnlockDoor(lockData7, doorRef, canUnlock3))
                                         continue;
                                 }
@@ -594,9 +604,9 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                         neighborMesh->FUN_005582f0(neighborTriangle)->FUN_00691140(0x10))
                         continue;
                     stancePenalty4 = 1.0f;
-                    nextCrouchX = neighborMesh->FUN_005582f0(neighborTriangle)->FUN_006a5ec0();
-                    currentCrouch3 = currentNode.FUN_006a78d0()->FUN_006a5ec0();
-                    if (!m_pPathingRequest->FUN_006a7940() && !m_pPathingRequest->GetByteAtOffset9E())
+                    nextCrouchX = neighborMesh->FUN_005582f0(neighborTriangle)->NavMeshTriangle_IsWater();
+                    currentCrouch3 = currentNode.NavMeshSearchNode_GetTriangle()->NavMeshTriangle_IsWater();
+                    if (!m_pPathingRequest->GetCanSwim() && !m_pPathingRequest->GetByteAtOffset9E())
                     {
                         if (nextCrouchX)
                             continue;
@@ -623,8 +633,8 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                     }
                     {
                         NiPoint3 nextCenter = neighborMesh->GetNavMeshData(neighborTriangle);
-                        NiPoint3 currentCenter5 = current->GetNode().FUN_006a6eb0();
-                        baseDistance7 = (nextCenter - currentCenter5).FUN_00589850();
+                        NiPoint3 currentCenter5 = current->GetNode().FastNavMeshTriLocation_GetLocation();
+                        baseDistance7 = (nextCenter - currentCenter5).NiPoint3_XYLength();
                         if (neighborMesh->FUN_005582f0(neighborTriangle)->HasFlag40())
                             baseDistance7 *= DAT_01016408;
                         if (m_pPathingRequest != 0 && m_pPathingRequest->GetString() != 0)
@@ -645,19 +655,19 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                             }
                         }
                         NiPoint3 edgeStart, edgeEnd5;
-                        neighborMesh->FUN_0068f0c0(neighborTriangle, outEdge, edgeStart, edgeEnd5);
-                        float edgeLength = (edgeStart - edgeEnd5).FUN_00589850();
+                        neighborMesh->GetEdgeVertices_0068f0c0(neighborTriangle, outEdge, edgeStart, edgeEnd5);
+                        float edgeLength = (edgeStart - edgeEnd5).NiPoint3_XYLength();
                         float maxEdgeLength6 = DAT_010231a0;
                         float narrowPenalty2 = 1.0f - edgeLength / maxEdgeLength6;
-                        FUN_005330e0(narrowPenalty2, 0.0f, 1.0f);
+                        BSClamp_float(narrowPenalty2, 0.0f, 1.0f);
                         baseDistance7 *= narrowPenalty2 * DAT_01011588 + DAT_01011588;
                         baseDistance7 *= stancePenalty4;
                         baseDistance7 *= revisitPenalty4;
                         baseDistance7 *= usePenalty6;
-                        if (m_pPathingRequest->FUN_006a7980())
+                        if (m_pPathingRequest->GetTryToUseCurvedPath())
                         {
-                            NiPoint3 goalVector = (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FUN_006a6eb0() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0();
-                            NiPoint3 nodeVector = nextCenter - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0();
+                            NiPoint3 goalVector = (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FastNavMeshTriLocation_GetLocation() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FastNavMeshTriLocation_GetLocation();
+                            NiPoint3 nodeVector = nextCenter - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FastNavMeshTriLocation_GetLocation();
                             float goalDistance8 = GetDirectionAngle(goalVector);
                             float nodeDistance3 = GetDirectionAngle(nodeVector);
                             float difference7 = nodeDistance3 - goalDistance8;
@@ -669,7 +679,7 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                             baseDistance7 *= std::abs(nodeLength_ - adjustedTmp) * DAT_0119cdf8;
                         }
                         baseDistance7 += current->GetCost();
-                        switch (CreateOrUpdateNode(FUN_006a94f0(neighborMesh, neighborTriangle), baseDistance7,
+                        switch (CreateOrUpdateNode(GetKeyForNode_006a94f0(neighborMesh, neighborTriangle), baseDistance7,
                                                    resultNodeA))
                         {
                         case 0:
@@ -692,7 +702,8 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
 }
 
 // @fnv 0x006a7910
-NiPoint3 PathingRequest::FUN_006a7910() const
+// src: COMMUNITY 0x006a7910
+NiPoint3 PathingRequest::GetTargetPoint() const
 {
     return Center;
 }

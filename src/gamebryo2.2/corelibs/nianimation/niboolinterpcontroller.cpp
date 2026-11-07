@@ -11,7 +11,8 @@
 
 NiBlendInterpolator* __fastcall ConstructBlendInterpolator(NiBlendInterpolator*, int, int, float, int);
 // @fnv 0x00a57750
-NiBlendInterpolator* __stdcall FUN_00a57750(int aiUnused, int aiArg, int aiUnused2, float a4, int a5)
+// src: XBOX_PDB 0x00a57750
+NiBlendInterpolator* __stdcall NiBoolInterpController_CreateBlendInterpolator(int aiUnused, int aiArg, int aiUnused2, float a4, int a5)
 {
     void* pMemory = NiMemObject::operator new(0x34);
     if (pMemory)
@@ -21,13 +22,14 @@ NiBlendInterpolator* __stdcall FUN_00a57750(int aiUnused, int aiArg, int aiUnuse
 
 extern char const* const g_011f3f08_arg1;
 void __stdcall FUN_00a390a0(StrArr*);
-char* __cdecl FUN_00a7d330(const char*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
 // Appends the string returned by FUN_00a7d330(g_011f3f08_arg1) to the StrArr at index e, growing it by the value at offset 14 plus e when e >= c.
 // @fnv 0x00a57800
-void __stdcall FUN_00a57800(StrArr* apStrings)
+// src: XBOX_PDB 0x00a57800
+void __stdcall NiBoolInterpController_GetViewerStrings(StrArr* apStrings)
 {
     FUN_00a390a0(apStrings);
-    char* pString = FUN_00a7d330(g_011f3f08_arg1);
+    char* pString = NiViewerStrings_NiGetViewerString_Title(g_011f3f08_arg1);
     unsigned int e = apStrings->m_usSize;
     unsigned int c = apStrings->m_usMaxSize;
     if (e >= c)

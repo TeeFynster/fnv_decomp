@@ -26,14 +26,14 @@ struct FUN_00e61720
     void* m_iMaterialIndex;
     IndexArray m_kUserChannels;
     FUN_00e61720(void* arg);
-    void FUN_00e61770(void* arg);
+    void UpdateState_00e61770(void* arg);
 };
 inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
 class hkMemoryAllocatorE6;
-void __cdecl FUN_00c908c0(hkMemoryAllocatorE6& alloc, void* pArray, int iReqElem, int iElemSize);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocatorE6& alloc, void* pArray, int iReqElem, int iElemSize);
 class hkMemoryRouterE6
 {
   public:
@@ -119,7 +119,7 @@ template <class T> class hkArrayE6
         {
             int cap2 = 2 * getCapacity();
             int newCap = newSize < cap2 ? cap2 : newSize;
-            FUN_00c908c0(alloc, this, newCap, sizeof(T));
+            hkArrayUtil__reserve(alloc, this, newCap, sizeof(T));
         }
         T* pDestroy = m_data + newSize;
         for (int i = 0; i < oldSize - newSize; i++)
@@ -144,7 +144,7 @@ class hkxMaterialE6;
 class hkxMeshSectionE6 : public hkReferencedObjectE6
 {
   public:
-    hkxMeshSectionE6& FUN_00e61770(const hkxMeshSectionE6& o);
+    hkxMeshSectionE6& UpdateState_00e61770(const hkxMeshSectionE6& o);
     hkRefPtrE6<hkReferencedObjectE6> m_pMeshVertexBuffer;
     hkArrayE6<hkRefPtrE6<hkReferencedObjectE6> > m_kIndexBuffers;
     hkRefPtrE6<hkReferencedObjectE6> m_iMaterialIndex;
@@ -177,7 +177,7 @@ struct hkContainerAllocHolder
     void* unk10;
 };
 
-hkContainerAllocHolder* FUN_00c85750();
+hkContainerAllocHolder* hkMemoryRouter_getInstance();
 void ResizeAudioStream(void* alloc, void* array, int elemSize);
 
 class hkErrStreamData
@@ -204,7 +204,7 @@ extern hkErrorData* DAT_01268360;
 
 static inline void PushBackTriangle(hkArray<hkGeometryTriangle>& arr, const hkGeometryTriangle& t)
 {
-    hkContainerAllocHolder* holder = FUN_00c85750();
+    hkContainerAllocHolder* holder = hkMemoryRouter_getInstance();
     if (arr.m_iElementCount == (arr.m_iCapacityState & 0x3fffffff))
         ResizeAudioStream(holder->unk10, &arr, sizeof(hkGeometryTriangle));
     arr.m_data[arr.m_iElementCount++] = t;
@@ -213,14 +213,15 @@ static inline void PushBackTriangle(hkArray<hkGeometryTriangle>& arr, const hkGe
 class hkxMeshSectionImpl : public hkxMeshSection
 {
   public:
-    void FUN_00e61480(hkGeometryData& geometry);
-    void FUN_00e61530(hkGeometryData& geometry, int materialIndex);
+    void hkxMeshSection_collectVertexPositions(hkGeometryData& geometry);
+    void hkxMeshSection_appendGeometry(hkGeometryData& geometry, int materialIndex);
 };
 
 // @fnv 0x00e61530
-void hkxMeshSectionImpl::FUN_00e61530(hkGeometryData& geometry, int materialIndex)
+// src: XBOX_PDB 0x00e61530
+void hkxMeshSectionImpl::hkxMeshSection_appendGeometry(hkGeometryData& geometry, int materialIndex)
 {
-    FUN_00e61480(geometry);
+    hkxMeshSection_collectVertexPositions(geometry);
 
     for (int ib = 0; ib < m_kIndexBuffers.m_iElementCount; ib++)
     {

@@ -30,7 +30,7 @@ public:
     {
         int count, capacity, data, grow;
         unsigned int FUN_0044ddc0();
-        ClickNode** FUN_006a7ad0(unsigned int);
+        ClickNode** BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
         void FUN_008454f0(bool);
     };
 
@@ -43,7 +43,7 @@ public:
     {
         int a, b, c, d;
         unsigned int FUN_0044ddc0();
-        Cb_WM*& FUN_006a7ad0(unsigned int);
+        Cb_WM*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
     };
 
     struct Pair_WM
@@ -55,7 +55,7 @@ public:
     {
         int a, b, c, d;
         unsigned int FUN_0044ddc0();
-        Lvl_WM*& FUN_006a7ad0(unsigned int);
+        Lvl_WM*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
     };
 
     struct DigitList109
@@ -197,9 +197,9 @@ public:
     int GetSelectedIndex();
     int GetCount();
     void Init();
-    int FUN_00794d30();
-    int FUN_00794d80();
-    void FUN_00795e20();
-    void FUN_00796100();
+    int LoveTesterMenu_GetCurrentStatesActorValue();
+    int SPECIALBookMenu_GetTotalPointsUsed();
+    void RefreshPage();
+    void VigorTester_InitTextures();
     void FUN_00a1d910();
 };

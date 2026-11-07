@@ -15,7 +15,7 @@ public:
     void ShutdownPoint3();
     static void __cdecl InitializePoint3();
     void UpdateShaderMaterialCache(void*);
-    void FUN_00e94050(void*);
+    void NiDX9MaterialManager_UpdateToDevice(void*);
     void FUN_00aa0390();
     NiShaderFactory* Create();
 

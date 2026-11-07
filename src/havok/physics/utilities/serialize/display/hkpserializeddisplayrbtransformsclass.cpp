@@ -9,7 +9,7 @@ struct Allocator
     virtual void unknown04() = 0;
     virtual void Release(void* object, unsigned int bytes) = 0;
 };
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 struct Owner
 {
     unsigned int unk00;
@@ -24,7 +24,7 @@ Owner* Owner::FUN_00dfc490(unsigned int flags)
     FUN_00e3a3d0();
     if (flags & 1u)
     {
-        BSAudio* audio = FUN_00c85750();
+        BSAudio* audio = hkMemoryRouter_getInstance();
         unsigned int bytes = size4;
         reinterpret_cast<Allocator*>(audio->pListener)->Release(this, bytes);
     }

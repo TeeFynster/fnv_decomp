@@ -19,7 +19,7 @@ struct ArrowPoint
 {
     float x, y, z;
     float Length() const;
-    ArrowPoint* FUN_00c5a800(ArrowPoint* result) const;
+    ArrowPoint* NiPoint3_Perpendicular(ArrowPoint* result) const;
 };
 struct ArrowColor
 {
@@ -126,7 +126,7 @@ __forceinline void PerpendicularScale(ArrowPoint& out, const ArrowPoint& n, Arro
 {
     ArrowMatrix coordinateFrame;
     {
-        const ArrowPoint* point = n.FUN_00c5a800(&temp);
+        const ArrowPoint* point = n.NiPoint3_Perpendicular(&temp);
         ArrowPoint v6 = {point->x * factor, point->y * factor, point->z * factor};
         out.x = v6.x;
         out.y = v6.y;
@@ -171,7 +171,8 @@ __forceinline void ConstructColors(ArrowColor* const& memory)
     }
 }
 // @fnv 0x00c59a50
-ArrowGeometry* __cdecl FUN_00c59a50(const ArrowPoint& direction, const ArrowColor* color)
+// src: XBOX_PDB 0x00c59a50
+ArrowGeometry* __cdecl BSTestObjects_CreateDirArrow(const ArrowPoint& direction, const ArrowColor* color)
 {
     ArrowPoint n3;
     float q;

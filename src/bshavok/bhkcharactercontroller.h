@@ -10,5 +10,5 @@ float& bhkCharacterController::GetVectorElement(int index)
 CharacterControllerValue MobileObject::GetVectorElement()
 {
     bhkCharacterController* controller = GetPhysicsCharacterController();
-    return controller ? reinterpret_cast<const CharacterControllerValue&>(controller->FUN_0070c440()) : CharacterControllerValue(0);
+    return controller ? reinterpret_cast<const CharacterControllerValue&>(controller->bhkCharacterController_GetCollisionFilter()) : CharacterControllerValue(0);
 }

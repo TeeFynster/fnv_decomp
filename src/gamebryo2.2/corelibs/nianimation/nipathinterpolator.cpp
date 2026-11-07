@@ -17,14 +17,16 @@
 extern "C" void* g_011f3f68;
 
 // @fnv 0x00a3dab0
-void* __cdecl FUN_00a3dab0()
+// src: COMMUNITY 0x00a3dab0
+void* __cdecl NiPosData_GetRTTI()
 {
     return &g_011f3f68;
 }
 
 // Returns the pointer stored at offset 8 of the object at this+0x18 for idx 0 or this+0x1c for idx 1, or null if absent.
 // @fnv 0x00a3dae0
-void* __thiscall NiPathInterpolator::FUN_00a3dae0(short idx)
+// src: GAMEBRYO_LIB 0x00a3dae0
+void* __thiscall NiPathInterpolator::GetKeyCount(short idx)
 {
     if (idx == 0)
     {
@@ -62,7 +64,8 @@ int __thiscall NiPathInterpolator::GetValueByIndex(short aiIndex)
 
 // Returns the int at offset 0xC of the object stored at this+0x18 when arg is 0, or at this+0x1C when arg is 1; otherwise returns 0.
 // @fnv 0x00a3db40
-int __thiscall NiPathInterpolator::FUN_00a3db40(short aiSlot)
+// src: GAMEBRYO_LIB 0x00a3db40
+int __thiscall NiPathInterpolator::GetKeyArray(short aiSlot)
 {
     if (aiSlot == 0)
     {
@@ -81,7 +84,8 @@ int __thiscall NiPathInterpolator::FUN_00a3db40(short aiSlot)
 
 // Returns byte at offset 0x14 of the object stored at this+0x18 for arg 0 or this+0x1c for arg 1, otherwise 0.
 // @fnv 0x00a3db70
-char __thiscall NiPathInterpolator::FUN_00a3db70(unsigned short ausIndex)
+// src: GAMEBRYO_LIB 0x00a3db70
+char __thiscall NiPathInterpolator::GetKeyStride(unsigned short ausIndex)
 {
     if (ausIndex == 0)
     {
@@ -114,7 +118,8 @@ struct FloatDataHelper
 
 // Forwards the two float arguments to the FloatDataHelper stored at offset 0x1c, if that pointer is non-null.
 // @fnv 0x00a3dc50
-void __thiscall NiPathInterpolator::FUN_00a3dc50(float m_fStartTime, float m_fMaximumDistance)
+// src: XBOX_PDB 0x00a3dc50
+void __thiscall NiPathInterpolator::GuaranteeTimeRange_00a3dc50(float m_fStartTime, float m_fMaximumDistance)
 {
     FloatDataHelper* p = (FloatDataHelper*)m_pPathInterp;
     if (p)
@@ -153,7 +158,8 @@ void* __thiscall FUN_00a3dac0_shell::DestroyIfOdd(short idx)
 extern void* DAT_011f3ca8[];
 // Reads a type index, element size and base pointer from this+0x18, then calls the DAT_011f3ca8 entry for that type with two element pointers and pData.
 // @fnv 0x00a3ddf0
-void* NiPathInterpolator::FUN_00a3ddf0(void* pData, int aiIndexA, int aiIndexB, float fTime)
+// src: GAMEBRYO_LIB 0x00a3ddf0
+void* NiPathInterpolator::GenPathInterp(void* pData, int aiIndexA, int aiIndexB, float fTime)
 {
     char* pcElementBase = 0;
     int iType;
@@ -204,7 +210,8 @@ class CloningProcess
 
 // Calls ProcessClone on this object and on the path and percentage objects if they are set.
 // @fnv 0x00a3dc80
-void __thiscall NiPathInterpolator::FUN_00a3dc80(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a3dc80
+void __thiscall NiPathInterpolator::ProcessClone_00a3dc80(CloningProcess& kCloning)
 {
     ((NiObject*)this)->NiObject::ProcessClone(kCloning);
     NiObject* pkPath = m_pPathObject;
@@ -217,13 +224,14 @@ void __thiscall NiPathInterpolator::FUN_00a3dc80(CloningProcess& kCloning)
 
 struct HC1Base
 {
-    bool __thiscall FUN_00aa0ad0(void*);
+    bool __thiscall BSPackedAdditionalGeometryData_RegisterStreamables(void*);
 };
 
 // @fnv 0x00a3dcc0
-bool NiPathInterpolator::FUN_00a3dcc0(void* pkStream)
+// src: XBOX_PDB 0x00a3dcc0
+bool NiPathInterpolator::RegisterStreamables_00a3dcc0(void* pkStream)
 {
-    if (!((HC1Base*)this)->FUN_00aa0ad0(pkStream))
+    if (!((HC1Base*)this)->BSPackedAdditionalGeometryData_RegisterStreamables(pkStream))
         return false;
     NiObject* pPath = m_pPathObject;
     if (pPath)
@@ -307,13 +315,13 @@ struct Stream
         return readProc(this, dst, count, &actual, 1);
     }
 };
-void __stdcall FUN_00aa0ac0(NiStream*);
+void __stdcall NiKeyBasedInterpolator_LoadBinary(NiStream*);
 
 // Reads channel, value38, value28, value2c and channel30 from the source's stream, accumulating bytesRead, then calls FUN_00a645b0 twice.
 // @fnv 0x00a3ed90
 void NiPathInterpolator::ReadFromStream(NiStream* source)
 {
-    FUN_00aa0ac0(source);
+    NiKeyBasedInterpolator_LoadBinary(source);
     Stream* stream = (Stream*)source->GetBinaryStream();
     stream->bytesRead += stream->Read(&m_uiObjectFlags, 2);
     unsigned int value;
@@ -341,7 +349,7 @@ struct FNV_WriteStream
     FNV_WriteFn m_pfn;
 };
 
-struct StreamBase { void FUN_00a95ca0(NiStream*); void FUN_00a95ca0(NiStream&); };
+struct StreamBase { void NiKeyBasedInterpolator_LinkObject(NiStream*); void NiKeyBasedInterpolator_LinkObject(NiStream&); };
 
 // The single write the record layout performs: hand the payload and its size
 // to the stream's callback and accumulate the byte count it returns.
@@ -356,7 +364,7 @@ static __forceinline void FNV_WriteField(FNV_WriteStream* pWriter, void* pData, 
 // @fnv 0x00a3ef70
 void NiPathInterpolator::WriteToStream(NiStream* pStream)
 {
-    ((StreamBase*)this)->FUN_00a95ca0(pStream);
+    ((StreamBase*)this)->NiKeyBasedInterpolator_LinkObject(pStream);
     FNV_WriteField((FNV_WriteStream*)pStream->GetWriter(), &m_uiObjectFlags, 2);
     FNV_WriteField((FNV_WriteStream*)pStream->GetWriter(), &m_iPathPointCount, 4);
     FNV_WriteField((FNV_WriteStream*)pStream->GetWriter(), &m_fPreviousTime, 4);
@@ -451,7 +459,8 @@ inline PositionKeyInterpolator* NiPathInterpolator::GetPathKeys(unsigned int& co
 }
 
 // @fnv 0x00a3f2f0
-void NiPathInterpolator::FUN_00a3f2f0(NiPathInterpolator* pDest, CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a3f2f0
+void NiPathInterpolator::CopyMembers_00a3f2f0(NiPathInterpolator* pDest, CloningProcess& kCloning)
 {
     ((NiInterpolatorBase*)this)->CopyMemberData((NiInterpolatorBase*)pDest, kCloning);
     pDest->m_uiObjectFlags = m_uiObjectFlags;
@@ -503,7 +512,7 @@ void NiPathInterpolator::FindKeyPair(float fTime, unsigned int& ruiKey0, unsigne
 {
     if (GetBit(0x10))
     {
-        FUN_00a3ea60(fTime, ruiKey0, ruiKey1, rfNormTime);
+        GetPercentLoc(fTime, ruiKey0, ruiKey1, rfNormTime);
         unk10 = ruiKey0;
         return;
     }
@@ -609,7 +618,8 @@ extern double DAT_01032980;
 
 // Normalizes fTime to [0,1], locates the path key segment containing the target distance, and refines the local parameter via Newton iteration.
 // @fnv 0x00a3ea60
-void NiPathInterpolator::FUN_00a3ea60(float fTime, unsigned int& ri1, unsigned int& ri2, float& rfLocalTime)
+// src: GAMEBRYO_LIB 0x00a3ea60
+void NiPathInterpolator::GetPercentLoc(float fTime, unsigned int& ri1, unsigned int& ri2, float& rfLocalTime)
 {
     unsigned int uiNumKeys = m_pPathObject ? m_pPathObject->m_uiNumKeys : 0;
     if (fTime == 0.0f)
@@ -646,7 +656,7 @@ void NiPathInterpolator::FUN_00a3ea60(float fTime, unsigned int& ri1, unsigned i
     }
     for (int it = 0; it < 32; it++)
     {
-        float fError = FUN_00a3e680(i1, i2, fLocalTime) - fAccumulatedDistance;
+        float fError = NiPathInterpolator_PathLength(i1, i2, fLocalTime) - fAccumulatedDistance;
         if ((float)fabs(fError) <= DAT_01032980)
             break;
         fLocalTime = (float)(fLocalTime - fError / SampleLength(i1, i2, fLocalTime));
@@ -675,9 +685,10 @@ extern CurvatureFunction DAT_011f3d38[];
 
 // Reads path data from a stream, updates constant-velocity state, and computes curvature from the path object's position keys.
 // @fnv 0x00a3ee80
-void NiPathInterpolator::FUN_00a3ee80(NiStream& stream)
+// src: GAMEBRYO_LIB 0x00a3ee80
+void NiPathInterpolator::LinkObject_00a3ee80(NiStream& stream)
 {
-    ((StreamBase*)this)->FUN_00a95ca0(stream);
+    ((StreamBase*)this)->NiKeyBasedInterpolator_LinkObject(stream);
     AssignPathPointer(m_pPathObject, (NiPosData*)stream.GetLoadedObject());
     AssignPathPointer(m_pPathInterp, stream.GetLoadedObject());
     SetCVDataNeedsUpdate(true);
@@ -779,7 +790,7 @@ bool NiPathInterpolator::UpdateTransform(float fTime, NiObjectNET* pkTarget, NiQ
         m_kRotationMatrix.FromRotationMatrix(kRot);
     }
 
-    m_kPathOffset = FUN_00a3ddf0(iI1, iI2, fPct);
+    m_kPathOffset = GenPathInterp(iI1, iI2, fPct);
 
     kValue.GetTransformScale(&m_kPathOffset);
     if (GetFollow())
@@ -797,7 +808,8 @@ template <class T> static __forceinline NiPointer<NiObject>& EqualityPointer(T*&
 
 // Compares base equality, path objects and interpolator, path lengths, total length, point count, flags, and timing state.
 // @fnv 0x00a3e7b0
-bool NiPathInterpolator::FUN_00a3e7b0(NiObject* pkObject)
+// src: XBOX_PDB 0x00a3e7b0
+bool NiPathInterpolator::IsEqual_00a3e7b0(NiObject* pkObject)
 {
     if (!BaseIsEqual(pkObject))
         return false;
@@ -863,7 +875,7 @@ struct FV3
         v.z = -z;
         return v;
     }
-    void __thiscall FUN_004a0c10();
+    void __thiscall Unitize_004a0c10();
     FV3 __thiscall FUN_004b3800(const FV3&) const;
     FV3 __thiscall FUN_00439e90(const FV3&) const;
 };
@@ -949,7 +961,7 @@ void __thiscall NiPathInterpolator::EvaluateBasis(unsigned int aiFirstKey, unsig
                                            type, &vOtherPos, &vOtherTangent, &normal, &otherCurvature);
                         vTangent =
                             FUN_004a3760(firstWeight, vTangent).FUN_00439e90(FUN_004a3760(secondWeight, vOtherTangent));
-                        vTangent.FUN_004a0c10();
+                        vTangent.Unitize_004a0c10();
                         curvature = firstWeight * curvature + secondWeight * otherCurvature;
                         normal = vPosition.FUN_004b3800(vTangent);
                     }
@@ -973,7 +985,7 @@ void __thiscall NiPathInterpolator::EvaluateBasis(unsigned int aiFirstKey, unsig
                                            &otherCurvature);
                         vTangent =
                             FUN_004a3760(firstWeight, vTangent).FUN_00439e90(FUN_004a3760(secondWeight, vOtherTangent));
-                        vTangent.FUN_004a0c10();
+                        vTangent.Unitize_004a0c10();
                         curvature = firstWeight * curvature + secondWeight * otherCurvature;
                         normal = vPosition.FUN_004b3800(vTangent);
                     }

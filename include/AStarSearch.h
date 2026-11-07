@@ -35,7 +35,7 @@ public:
     AStarNodeType* FindOrCreateSearchNode(unsigned int uiKey,
         const NodeDataType& ObjectResolver, float m_fCost);
     AStarNodeType* ComputePath();
-    bool FUN_006a8290(AStarNodeType* pNode, unsigned int uiParam1,
+    bool AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(AStarNodeType* pNode, unsigned int uiParam1,
         unsigned int uiParam2);
     bool Search(unsigned int uiParam1, unsigned int uiParam2, bool bUseBestNode);
     void* __thiscall FUN_006b3850(unsigned int flags);
@@ -70,7 +70,7 @@ public:
     AStarNodeType* FindOrCreateSearchNode(unsigned int uiKey,
         CombatPlanNode * const& ObjectResolver, float m_fCost);
     AStarNodeType* ComputePath();
-    bool FUN_006a8290(AStarNodeType* pNode, unsigned int uiParam1,
+    bool AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(AStarNodeType* pNode, unsigned int uiParam1,
         unsigned int uiParam2);
     bool Search(unsigned int uiParam1, unsigned int uiParam2, bool bUseBestNode);
     void* __thiscall FUN_006b3850(unsigned int flags);
@@ -105,7 +105,7 @@ public:
     AStarNodeType* FindOrCreateSearchNode(unsigned int uiKey,
         const NavMeshSearchNode& ObjectResolver, float m_fCost);
     AStarNodeType* ComputePath();
-    bool FUN_006a8290(AStarNodeType* pNode, unsigned int uiParam1,
+    bool AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(AStarNodeType* pNode, unsigned int uiParam1,
         unsigned int uiParam2);
     bool Search(unsigned int uiParam1, unsigned int uiParam2, bool bUseBestNode);
     void* __thiscall FUN_006b3850(unsigned int flags);
@@ -129,7 +129,7 @@ public:
     CREATE_ASTARNODE_RESULT CreateOrUpdateNode(unsigned int, float, AStarNodeType*&);
     AStarNodeType* FindOrCreateSearchNode(unsigned int, const PathSmootherPOVNode&, float);
     AStarNodeType* ComputePath();
-    bool FUN_006a8290(AStarNodeType*, unsigned int, unsigned int);
+    bool AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(AStarNodeType*, unsigned int, unsigned int);
     bool Search(unsigned int, unsigned int, bool);
     void* __thiscall FUN_006b3850(unsigned int);
 };
@@ -162,7 +162,7 @@ template <> class AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdgeRefer
                                                                  const NavMeshTriangleReference& ObjectResolver,
                                                                  float m_fCost);
     AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* ComputePath();
-    bool FUN_006a8290(AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* pNode, unsigned int uiParam1, unsigned int uiParam2);
+    bool AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* pNode, unsigned int uiParam1, unsigned int uiParam2);
     bool Search(unsigned int uiParam1, unsigned int uiParam2, bool bUseBestNode);
 };
 
@@ -189,7 +189,7 @@ template <> class AStarSearch<AStarNodeData*, AStarNodeLink*>
                                                                  AStarNodeData* const& ObjectResolver,
                                                                  float m_fCost);
     AStarNode<AStarNodeData*, AStarNodeLink*>* ComputePath();
-    bool FUN_006a8290(AStarNode<AStarNodeData*, AStarNodeLink*>* pNode, unsigned int uiParam1, unsigned int uiParam2);
+    bool AStarSearch_NavMeshSearchNode_NavMeshSearchLink_GetPathToNode(AStarNode<AStarNodeData*, AStarNodeLink*>* pNode, unsigned int uiParam1, unsigned int uiParam2);
     bool Search(unsigned int uiParam1, unsigned int uiParam2, bool bUseBestNode);
 };
 #endif

@@ -34,7 +34,7 @@ struct S_d2f5a0
     int unk4;
     int unk8;
     S_d2f5a0_Array m_aiIndexedValues;
-    void FUN_00d2f5a0(int a);
+    void hkpBvTreeAgent_invalidateTim(int a);
 };
 struct TargetObject
 {
@@ -80,19 +80,20 @@ struct Built
     int field08;
     void __thiscall FUN_00d2f980(int);
 };
-extern "C" Global* __cdecl FUN_00c85750();
-void __cdecl FUN_00d2f9d0(int arg1, int arg2, int arg3, int arg4);
-void __cdecl FUN_00d30f50(void* apFirst, void* apSecond, void* apThird, void* apFourth, void* apFifth);
-void __stdcall FUN_00d315a0(void* apFirst, void* apSecond, void* apThird, void* apFourth, void* apFifth);
-extern "C" void __cdecl FUN_00d31110(void* arg0, void* arg1, void* arg2, void* arg3);
+extern "C" Global* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkpBvTreeAgent_createShapeBvAgent(int arg1, int arg2, int arg3, int arg4);
+void __cdecl hkpBvTreeAgent_staticLinearCast(void* apFirst, void* apSecond, void* apThird, void* apFourth, void* apFifth);
+void __stdcall hkpBvTreeAgent_linearCast(void* apFirst, void* apSecond, void* apThird, void* apFourth, void* apFifth);
+extern "C" void __cdecl hkpBvTreeAgent_staticGetClosestPoints(void* arg0, void* arg1, void* arg2, void* arg3);
 // @fnv 0x00d315d0
-extern "C" void __stdcall FUN_00d315d0(void* arg0, void* arg1, void* arg2, void* arg3)
+// src: HAVOK_SRC 0x00d315d0
+extern "C" void __stdcall hkpBvTreeAgent_getClosestPoints(void* arg0, void* arg1, void* arg2, void* arg3)
 {
-    FUN_00d31110(arg0, arg1, arg2, arg3);
+    hkpBvTreeAgent_staticGetClosestPoints(arg0, arg1, arg2, arg3);
 }
 
-void __cdecl FUN_00d312f0(void* apA, void* apB, void* apC, void* apD);
-void __stdcall FUN_00d315f0(void* apA, void* apB, void* apC, void* apD);
+void __cdecl hkpBvTreeAgent_staticGetPenetrations(void* apA, void* apB, void* apC, void* apD);
+void __stdcall hkpBvTreeAgent_getPenetrations(void* apA, void* apB, void* apC, void* apD);
 struct D2FA00Allocator
 {
     virtual void unk00();
@@ -112,7 +113,7 @@ struct D2FA00MemoryRouter
     }
 };
 namespace fnvc_adapt {
-extern "C" D2FA00MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D2FA00MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 }
 
 class D2FA00ReferencedObject
@@ -121,7 +122,7 @@ class D2FA00ReferencedObject
     static void* operator new(unsigned int nbytes)
     {
         D2FA00ReferencedObject* b =
-            static_cast<D2FA00ReferencedObject*>(fnvc_adapt::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
+            static_cast<D2FA00ReferencedObject*>(fnvc_adapt::hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -157,10 +158,10 @@ class D2FA00ShapeAgent : public D2FA00Agent
     {}
     virtual ~D2FA00ShapeAgent();
 };
-D2FA00Agent* __cdecl FUN_00d2fa00(const void* bodyA, const void* bodyB, const void* input, void* mgr);
+D2FA00Agent* __cdecl hkpBvTreeAgent_createBvTreeShapeAgent(const void* bodyA, const void* bodyB, const void* input, void* mgr);
 extern char str_010ce9a4[];
 extern char str_010ce9ac[];
-extern "C" void* __cdecl FUN_00d06f80(void* apBuffer, int aiCount);
+extern "C" void* __cdecl hkStatisticsCollector_getAllocatedSize(void* apBuffer, int aiCount);
 struct S_00d2f8f0_Elem
 {
     int unk00;
@@ -234,7 +235,7 @@ class OwnerD2F5
     int unk04[2];
     hkArray<EntryD2F5> m_entries;
 
-    void FUN_00d2f550(void* pArg);
+    void hkpBvTreeAgent_cleanup(void* pArg);
 };
 
 #include <xmmintrin.h>
@@ -299,11 +300,12 @@ struct SlotBox
 };
 
 // @fnv 0x00d2f690
-void FUN_00d2f690(SlotRef* a, SlotRef* b, SlotParam* p, SlotBox* box)
+// src: XBOX_PDB 0x00d2f690
+void hkpBvTreeAgent_calcAabbLinearCast(SlotRef* a, SlotRef* b, SlotParam* p, SlotBox* box)
 {
     Transform t1;
     SlotTemp2 t2;
-    t1.FUN_00cb22f0(reinterpret_cast<const Transform*>(b->m_08), reinterpret_cast<const Transform*>(a->m_08));
+    t1.hkTransform_setMulInverseMul(reinterpret_cast<const Transform*>(b->m_08), reinterpret_cast<const Transform*>(a->m_08));
     SlotObj* obj = a->m_ent;
     obj->Eval(&t1, p->m_08, box);
     t2.Build(b->m_08, (char*)p + 0x50);
@@ -673,7 +675,7 @@ struct SolRouter
     SolHeap* heapPtr;
     static SolRouter& GetMonitorStream()
     {
-        return *reinterpret_cast<SolRouter*>(FUN_00c85750());
+        return *reinterpret_cast<SolRouter*>(hkMemoryRouter_getInstance());
     }
     SolHeap& heap()
     {
@@ -695,9 +697,9 @@ template <class T> __forceinline void SolFreeStack(T* p)
 {
     SolRouter::GetMonitorStream().stack().deallocate(p);
 }
-extern void __cdecl FUN_00c908c0(SolHeap&, void*, int, int);
-extern void __cdecl FUN_00d2cc70(void*, const void*, int);
-extern void __cdecl FUN_00d88040(int);
+extern void __cdecl hkArrayUtil__reserve(SolHeap&, void*, int, int);
+extern void __cdecl hkMemUtil_memMove(void*, const void*, int);
+extern void __cdecl hkSetOutOfMemoryState(int);
 extern char DAT_011b4284, DAT_01268ad4;
 struct SolSortState
 {
@@ -749,7 +751,7 @@ template <class T> __forceinline void constructFrom(T* d, int n, const T* p, Sol
 }
 __forceinline void move(void* d, const void* p, int n)
 {
-    FUN_00d2cc70(d, p, n);
+    hkMemUtil_memMove(d, p, n);
 }
 __forceinline void copyBytes(void* d, const void* p, int n)
 {
@@ -789,7 +791,7 @@ template <class T> struct SolArrayBase
         {
             int twice = 2 * available;
             int target = n < twice ? twice : n;
-            FUN_00c908c0(heap, this, target, sizeof(T));
+            hkArrayUtil__reserve(heap, this, target, sizeof(T));
         }
     }
     __forceinline void setSizeWith(SolHeap& heap, int n)
@@ -887,12 +889,12 @@ template <class T> struct SolLocalArray : SolArray<T>
         SolFreeStack(localMemory);
     }
 };
-extern D2FA00Agent* __cdecl FUN_00d107a0();
+extern D2FA00Agent* __cdecl hkpNullAgent_getNullAgent();
 struct SolNull
 {
     static D2FA00Agent* getNullAgentOriginal()
     {
-        return FUN_00d107a0();
+        return hkpNullAgent_getNullAgent();
     }
     static SolAgent* GetNullAgent()
     {
@@ -928,7 +930,7 @@ struct SolUpdater : SolAgent
 {
     SolArray<SolEntry> m_kEntries;
     SolBox m_kBoundingBox;
-    void FUN_00d2fac0(const SolBody&, const SolBody&, const SolInput&, SolOwner&);
+    void hkpBvTreeAgent_prepareCollisionPartners(const SolBody&, const SolBody&, const SolInput&, SolOwner&);
 };
 
 struct SolChildState
@@ -1076,7 +1078,8 @@ template <class E> struct SolMerge
     }
 };
 // @fnv 0x00d2fac0
-void SolUpdater::FUN_00d2fac0(const SolBody& first, const SolBody& second, const SolInput& value, SolOwner& context)
+// src: XBOX_PDB 0x00d2fac0
+void SolUpdater::hkpBvTreeAgent_prepareCollisionPartners(const SolBody& first, const SolBody& second, const SolInput& value, SolOwner& context)
 {
     SolBox bounds;
     {
@@ -1084,7 +1087,7 @@ void SolUpdater::FUN_00d2fac0(const SolBody& first, const SolBody& second, const
         {
             const Transform& secondTransform = second.getTransform();
             const Transform& firstTransform = first.getTransform();
-            transform.FUN_00cb22f0(secondTransform, firstTransform);
+            transform.hkTransform_setMulInverseMul(secondTransform, firstTransform);
         }
         float extra = value.getTolerance() * 0.5;
         first.getShape()->getAabb(transform, value.getTolerance() + extra, bounds);
@@ -1101,7 +1104,7 @@ void SolUpdater::FUN_00d2fac0(const SolBody& first, const SolBody& second, const
     int amount = (keys.GetLogicalSize() - m_kEntries.GetLogicalSize()) * 128;
     if (!SolRouter::GetMonitorStream().heap().CanAllocateBytes(amount))
     {
-        FUN_00d88040(1);
+        hkSetOutOfMemoryState(1);
         return;
     }
     const SolContainer* container = shape->GetShapeContainer();

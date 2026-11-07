@@ -45,7 +45,7 @@ struct B
     int f2;
     int f3;
 
-    void* FUN_00d74d40();
+    void* hkgpConvexHull_BuildConfig_BuildConfig();
 };
 struct A
 {
@@ -56,9 +56,9 @@ struct A
     int f4;
 
     void FUN_00d76ca0();
-    int FUN_00d774a0(void*, int, void*);
-    void FUN_00d76120(int, int);
-    void FUN_00d76940();
+    int ProcessEntries_00d774a0(void*, int, void*);
+    void ProcessState_00d76120(int, int);
+    void ReleaseStorage_00d76940();
 };
 int __cdecl ProcessArg(Arg* a, int second);
 
@@ -152,7 +152,8 @@ struct PlaneSet
     hkVector4* m_kPlaneArray;
     int m_iValue;
 };
-__declspec(noinline) int FUN_00dd6380(PlaneSet* set, int a, int b, int c, PointResult* out)
+// src: GUESS 0x00dd6380 (confidence: low)
+__declspec(noinline) int Object_ProcessAndReturnValue_00dd6380(PlaneSet* set, int a, int b, int c, PointResult* out)
 {
     const hkVector4& pa = set->m_kPlaneArray[a];
     const hkVector4& pb = set->m_kPlaneArray[b];
@@ -186,7 +187,8 @@ __declspec(noinline) int FUN_00dd6380(PlaneSet* set, int a, int b, int c, PointR
     return 0;
 }
 // @fnv 0x00dd6510
-int FUN_00dd6510(const hkVector4* direction, PlaneSet* set, int first, int second, PointResult* neg, PointResult* pos)
+// src: GUESS 0x00dd6510 (confidence: low)
+int hkVector4_ProcessEntries_00dd6510(const hkVector4* direction, PlaneSet* set, int first, int second, PointResult* neg, PointResult* pos)
 {
     neg->m_kPointA = -1;
     neg->m_kPointB = -1;
@@ -200,7 +202,7 @@ int FUN_00dd6510(const hkVector4* direction, PlaneSet* set, int first, int secon
         if (i == first || i == second)
             continue;
         PointResult p;
-        if (FUN_00dd6380(set, first, second, i, &p) != 0)
+        if (Object_ProcessAndReturnValue_00dd6380(set, first, second, i, &p) != 0)
             continue;
         if (!initialized)
         {

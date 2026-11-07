@@ -138,7 +138,8 @@ struct Result
     CvxDistVector4 pointA, pointB, localB, plane;
 };
 // @fnv 0x00e625c0
-static __declspec(noinline) void FUN_00e625c0(const Matrix* matrix, Shape* shape, Shape* other, const CvxDistVector4* normal,
+// src: GUESS 0x00e625c0 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00e625c0(const Matrix* matrix, Shape* shape, Shape* other, const CvxDistVector4* normal,
                                               Result* result)
 {
     Result* output = result;
@@ -165,5 +166,5 @@ static __declspec(noinline) void FUN_00e625c0(const Matrix* matrix, Shape* shape
 // assign its internal register ABI. It forwards genuine function arguments.
 void ProjectShapes(const Matrix* matrix, Shape* shape, Shape* other, const CvxDistVector4* normal, Result* result)
 {
-    FUN_00e625c0(matrix, shape, other, normal, result);
+    Object_UpdateFields_00e625c0(matrix, shape, other, normal, result);
 }

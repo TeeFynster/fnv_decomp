@@ -8,11 +8,12 @@
 
 struct FUN_00bb79d0_class
 {
-    void __thiscall FUN_00bb79d0(bool value);
+    void __thiscall TileShaderProperty_SetUseScissorTest(bool value);
 };
 
 // @fnv 0x00bb79d0
-void __thiscall FUN_00bb79d0_class::FUN_00bb79d0(bool value)
+// src: COMMUNITY 0x00bb79d0
+void __thiscall FUN_00bb79d0_class::TileShaderProperty_SetUseScissorTest(bool value)
 {
     *(char*)((char*)this + 0xac) = value;
 }
@@ -25,12 +26,12 @@ struct SharedData_S
 {
     char pad[0xc];
     int m_uiRefCount;
-    void FUN_00a8a670();
+    void ForwardCall_00a8a670();
     void DecRefCount()
     {
         if (--m_uiRefCount == 0)
         {
-            FUN_00a8a670();
+            ForwardCall_00a8a670();
             ::operator delete(this, 0x10);
         }
     }
@@ -84,12 +85,13 @@ struct GeomData_S
     NiPoint3* m_pkNormal;
     NiColorA* m_pkColor;
     NiPoint2* m_pkTexture;
-    void FUN_00a670c0(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, NiColorA* pkColor,
+    void NiGeometryData_Replace(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, NiColorA* pkColor,
                       NiPoint2* pkTexture, unsigned short usNumTextureSets, unsigned short eNBTMethod);
 };
 
 // @fnv 0x00a670c0
-void GeomData_S::FUN_00a670c0(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, NiColorA* pkColor,
+// src: XBOX_PDB 0x00a670c0
+void GeomData_S::NiGeometryData_Replace(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, NiColorA* pkColor,
                               NiPoint2* pkTexture, unsigned short usNumTextureSets, unsigned short eNBTMethod)
 {
     if (GetShared())

@@ -17,7 +17,7 @@ class TeleportableReference
     TESForm* GetTeleportDestinationForm(void);
     TESWorldSpace* GetTeleportWorldspace(void);
     void SetLinkedDoorReference(TESObjectREFR* reference, bool set);
-    DoorCell* FUN_0043a2b0(void);
+    DoorCell* DoorTeleportData_GetTeleportCell(void);
     bool InitItem(TESForm* form);
     void Load(TESFile* file);
     // SaveGame

@@ -125,10 +125,11 @@ unsigned int FUN_00846d80_cls::RemapFormID(unsigned int formID)
 struct FormIDConverter;
 struct FUN_00846d20_shell : public FormIDConverter
 {
-    unsigned int FUN_00846d20(unsigned int formID);
+    unsigned int BGSSaveLoadFormIDMap_GetFormID(unsigned int formID);
 };
 // @fnv 0x00846d20
-unsigned int FUN_00846d20_shell::FUN_00846d20(unsigned int formID)
+// src: XBOX_PDB 0x00846d20
+unsigned int FUN_00846d20_shell::BGSSaveLoadFormIDMap_GetFormID(unsigned int formID)
 {
     if (g_dataHandler->FormIDExists(formID))
         return formID;
@@ -206,24 +207,25 @@ typedef char _sizecheck_BGSSaveLoadFile[sizeof(SaveLoadFile) == 272 ? 1 : -1];
 
 struct FUN_00846d20_shell : public FormIDConverter
 {
-    unsigned int FUN_00846d20(unsigned int formID);
+    unsigned int BGSSaveLoadFormIDMap_GetFormID(unsigned int formID);
 };
 void __cdecl ReadFileIntoBuffer(SaveLoadFile*, unsigned int*, unsigned int);
 
 struct FUN_00846e00_cls : public FormIDConverter
 {
-    void FUN_00846e00(SaveLoadFile* file);
+    void BGSSaveLoadFormIDMap_Save(SaveLoadFile* file);
 };
 
 // Passes the count minus one and each converted index value to FUN_00845d20 with file and size 4.
 // @fnv 0x00846e00
-void FUN_00846e00_cls::FUN_00846e00(SaveLoadFile* file)
+// src: COMMUNITY 0x00846e00
+void FUN_00846e00_cls::BGSSaveLoadFormIDMap_Save(SaveLoadFile* file)
 {
     unsigned int count = this->m_uiFormIDCount - 1;
     ReadFileIntoBuffer(file, &count, 4);
     for (unsigned int i = 1; i < this->m_uiFormIDCount; i++)
     {
-        unsigned int id = ((FUN_00846d20_shell*)this)->FUN_00846d20(i);
+        unsigned int id = ((FUN_00846d20_shell*)this)->BGSSaveLoadFormIDMap_GetFormID(i);
         ReadFileIntoBuffer(file, &id, 4);
     }
 }

@@ -13,7 +13,7 @@ public:
         CURRENT_POSE = 2
     };
 
-    void __cdecl FUN_00ce3a00(const hkQsTransform* poseAModelSpace, const hkQsTransform* originalPoseBLocalSpace, hkQsTransform* poseBModelSpace, int source) const;
+    void __cdecl mapPose(const hkQsTransform* poseAModelSpace, const hkQsTransform* originalPoseBLocalSpace, hkQsTransform* poseBModelSpace, int source) const;
 
     char pad8[0x8];
     hkaSkeletonMapperData m_kMappingData;

@@ -34,12 +34,13 @@ extern "C" LocalM128 _mm_set_ps1(float);
 
 
 extern char const* const g_01268970_arg1;
-void __cdecl FUN_00c90360(char const* const* arg1, char const* const* arg2);
+void __cdecl hkReferencedObject_calcContentStatistics(char const* const* arg1, char const* const* arg2);
 
 // @fnv 0x00d22360
-void __cdecl FUN_00d22360(char const* const* arg1, char const* const* arg2)
+// src: XBOX_PDB 0x00d22360
+void __cdecl hkpCapsuleShape_calcContentStatistics(char const* const* arg1, char const* const* arg2)
 {
-    FUN_00c90360(arg1, &g_01268970_arg1);
+    hkReferencedObject_calcContentStatistics(arg1, &g_01268970_arg1);
 }
 
 // @fnv 0x00d22350
@@ -139,7 +140,7 @@ struct ClosestLineResult
     Point4 pointA;
     Point4 pointB;
 };
-void __cdecl FUN_00d231b0(const Point4& a, const Point4& b, const Point4& c, const Point4& d, ClosestLineResult* out);
+void __cdecl hkLineSegmentUtil_closestPointInfLineInfLine(const Point4& a, const Point4& b, const Point4& c, const Point4& d, ClosestLineResult* out);
 // Calls FUN_00d231b0 to compute the closest points between two lines and writes the points, fractions and distance to the output pointers.
 // @fnv 0x00d22700
 void __cdecl GetClosestLinePoints(const Point4& aLineAStart, const Point4& aLineAEnd, const Point4& aLineBStart,
@@ -147,7 +148,7 @@ void __cdecl GetClosestLinePoints(const Point4& aLineAStart, const Point4& aLine
                                   Point4* pointA, Point4* pointB)
 {
     ClosestLineResult result;
-    FUN_00d231b0(aLineAStart, aLineAEnd, aLineBStart, aLineBEnd, &result);
+    hkLineSegmentUtil_closestPointInfLineInfLine(aLineAStart, aLineAEnd, aLineBStart, aLineBEnd, &result);
     *reinterpret_cast<LocalM128*>(pointA) = *reinterpret_cast<const LocalM128*>(&result.pointA);
     *reinterpret_cast<LocalM128*>(pointB) = *reinterpret_cast<const LocalM128*>(&result.pointB);
     *pfFractionA = result.fractionA;
@@ -172,7 +173,8 @@ void hkpCapsuleShape::GetCentre(hkVector4& centreOut) const
 
 // Projects a point onto a line segment defined by two endpoints, clamping the result to the segment bounds and writing it to out.
 // @fnv 0x00d224c0
-void __cdecl FUN_00d224c0(float* apPoint, float* apStart, float* apEnd, float* out)
+// src: XBOX_PDB 0x00d224c0
+void __cdecl hkpCapsuleShape_closestPointLineSeg(float* apPoint, float* apStart, float* apEnd, float* out)
 {
     LocalM128 vStart = _mm_load_ps(apStart);
     LocalM128 vEnd = _mm_load_ps(apEnd);

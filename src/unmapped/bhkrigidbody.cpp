@@ -37,19 +37,20 @@ inline const hkpShape* hkpCdBody::getShape() const { return m_pCollisionShape; }
 
 // Calls FUN_00c859e0, reads a count from the stream, then reads that many NiObjects and passes each non-null one to FUN_00c8ef80.
 // @fnv 0x00c8f3c0
-void bhkRigidBody::FUN_00c8f3c0(NiStream* stream)
+// src: XBOX_PDB 0x00c8f3c0
+void bhkRigidBody::LinkObject_00c8f3c0(NiStream* stream)
 {
-    FUN_00c859e0(stream);
+    bhkWorldObject_LinkObject(stream);
     unsigned int count = stream->GetLinkID();
     for (unsigned int i = 0; i < count; ++i)
     {
         NiObject* obj = stream->GetLoadedObject();
         if (obj)
-            FUN_00c8ef80(obj);
+            bhkRigidBody_AddActCon(obj);
     }
 }
 
-char* __cdecl FUN_00a7d5e0(const char*, const char*);
+char* __cdecl NiGetViewerString_00a7d5e0(const char*, const char*);
 
 // Appends the MOTION type name string matching type (DYNAMIC, SPHERE, BOX, KEYFRAMED, FIXED, THIN BOX, else INVALID) to arr.
 // @fnv 0x00c8ee20
@@ -59,31 +60,31 @@ void __cdecl AddMotionTypeName(StrArr* arr, int type)
     switch (type)
     {
     case 1:
-        s = FUN_00a7d5e0("MOTION", "DYNAMIC");
+        s = NiGetViewerString_00a7d5e0("MOTION", "DYNAMIC");
         ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 2:
-        s = FUN_00a7d5e0("MOTION", "SPHERE");
+        s = NiGetViewerString_00a7d5e0("MOTION", "SPHERE");
         ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 3:
-        s = FUN_00a7d5e0("MOTION", "BOX");
+        s = NiGetViewerString_00a7d5e0("MOTION", "BOX");
         ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 4:
-        s = FUN_00a7d5e0("MOTION", "KEYFRAMED");
+        s = NiGetViewerString_00a7d5e0("MOTION", "KEYFRAMED");
         ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 5:
-        s = FUN_00a7d5e0("MOTION", "FIXED");
+        s = NiGetViewerString_00a7d5e0("MOTION", "FIXED");
         ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 6:
-        s = FUN_00a7d5e0("MOTION", "THIN BOX");
+        s = NiGetViewerString_00a7d5e0("MOTION", "THIN BOX");
         ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     default:
-        s = FUN_00a7d5e0("MOTION", "INVALID");
+        s = NiGetViewerString_00a7d5e0("MOTION", "INVALID");
         {
             unsigned int i = arr->m_usSize;
             if (i >= arr->m_usMaxSize)
@@ -95,11 +96,12 @@ void __cdecl AddMotionTypeName(StrArr* arr, int type)
 }
 
 // @fnv 0x00c8eb00
-void __thiscall bhkRigidBody::FUN_00c8eb00()
+// src: XBOX_PDB 0x00c8eb00
+void __thiscall bhkRigidBody::Remove_00c8eb00()
 {
     iFlags &= 0xffffff77;
     ProcessListNodes();
-    FUN_00c9d590();
+    bhkEntity_Remove();
 }
 
 struct LinkedRecord
@@ -209,7 +211,8 @@ struct S_00c8d440_Target
 extern S_00c8d440_Target* DAT_01268360;
 
 // @fnv 0x00c8d440
-void __stdcall FUN_00c8d440(bool flag)
+// src: XBOX_PDB 0x00c8d440
+void __stdcall bhkRigidBody_SetHavokAssertState(bool flag)
 {
     S_00c8d440_Target* t = DAT_01268360;
     t->v4(0xf043d534, S_00c8d440_Arg(flag));
@@ -309,7 +312,7 @@ struct NativeLink
     NativeThing* object;
     unsigned int category;
 };
-NativeLink* FUN_00c85ef0(NativeLink*, NativeThing*, const NiRTTI*);
+NativeLink* bhkWorldObject_GetProperty(NativeLink*, NativeThing*, const NiRTTI*);
 extern unsigned char DAT_011afe59;
 struct BodyUpdate
 {
@@ -362,18 +365,18 @@ struct BodyUpdate
     {
         return (flags >> 6) & 1;
     }
-    bool FUN_00c85810(void*);
-    void FUN_00a29680();
+    bool bhkWorldObject_Add(void*);
+    void Object_DoNothing();
     void UpdateMatchingNodes(void*);
-    void* FUN_00c87a40();
+    void* bhkWorldObject_GethkWorld();
     bool InWorld()
     {
         NativeThing* body = native;
         if (!body)
             return false;
-        FUN_00a29680();
+        Object_DoNothing();
         bool inWorld = body->world != 0;
-        FUN_00a29680();
+        Object_DoNothing();
         return inWorld;
     }
     int MotionType() const
@@ -391,12 +394,12 @@ struct BodyUpdate
 bool BodyUpdate::UpdateBody(void* update)
 {
     NativeLink link;
-    NativeThing* object = FUN_00c85ef0(&link, this ? native : 0, &DAT_01267b70)->object;
+    NativeThing* object = bhkWorldObject_GetProperty(&link, this ? native : 0, &DAT_01267b70)->object;
     NativeData* data = object ? object->GetData() : 0;
     bool bUnitScale = data && data->factor18 == 1.0f && data->factor1c == 1.0f;
     if ((!bUnitScale || data->count > 0 || DAT_011afe59) && !IsDisabled())
     {
-        bool result = FUN_00c85810(update);
+        bool result = bhkWorldObject_Add(update);
         if (result || (InWorld() && IsMoving()))
         {
             if ((!bUnitScale || data->count > 0) && !IsDisabled())
@@ -408,7 +411,7 @@ bool BodyUpdate::UpdateBody(void* update)
     }
     else
     {
-        if (FUN_00c87a40())
+        if (bhkWorldObject_GethkWorld())
             Reset();
         if (data)
             data->lastUpdate = update;
@@ -444,26 +447,27 @@ struct S_c8dcb0_Obj
     int unk24;
 };
 extern int DAT_01267b70;
-S_c8dcb0_Res* __cdecl FUN_00c85ef0(S_c8dcb0_Res*, int, int*);
+S_c8dcb0_Res* __cdecl bhkWorldObject_GetProperty(S_c8dcb0_Res*, int, int*);
 struct S_c8dcb0_Base
 {
     int unk00;
     int unk04;
     int unk08;
-    bool FUN_00c85810(int a);
+    bool bhkWorldObject_Add(int a);
     void UpdateMatchingNodes(int a);
-    bool FUN_00c8dcb0(int a);
+    bool bhkRigidBody_ForceAdd(int a);
 };
 // Calls FUN_00c85810(a); if true calls UpdateMatchingNodes(a), then looks up an object by unk08 and sets its unk24 to a via v15().
 // @fnv 0x00c8dcb0
-bool S_c8dcb0_Base::FUN_00c8dcb0(int aiValue)
+// src: XBOX_PDB 0x00c8dcb0
+bool S_c8dcb0_Base::bhkRigidBody_ForceAdd(int aiValue)
 {
-    bool r = FUN_00c85810(aiValue);
+    bool r = bhkWorldObject_Add(aiValue);
     if (r)
         UpdateMatchingNodes(aiValue);
     int key = this ? unk08 : 0;
     S_c8dcb0_Res res;
-    S_c8dcb0_Obj* o = FUN_00c85ef0(&res, key, &DAT_01267b70)->p;
+    S_c8dcb0_Obj* o = bhkWorldObject_GetProperty(&res, key, &DAT_01267b70)->p;
     if (o)
     {
         S_c8dcb0_Obj* t = o->v15();
@@ -474,7 +478,8 @@ bool S_c8dcb0_Base::FUN_00c8dcb0(int aiValue)
 }
 }  // namespace fnv_00c8dcb0
 
-bool __cdecl FUN_00c8cce0(int* type)
+// src: XBOX_PDB 0x00c8cce0
+bool __cdecl bhkRigidBody_IsMotionTypeDynamic(int* type)
 {
     bool result = false;
     if (*type > 0 && (*type <= 3 || *type == 6))
@@ -591,7 +596,7 @@ bool C8Owner::SetState(int state)
         if (IsSpecial(flags.type))
         {
             C8Flags newFlags = flags;
-            bool hit = FUN_00c8cce0(&state);
+            bool hit = bhkRigidBody_IsMotionTypeDynamic(&state);
             newFlags.type = hit ? 0x1d : 8;
             if (state != iCurrent)
             {
@@ -613,7 +618,7 @@ bool C8Owner::SetState(int state)
             {
             case 4:
             case 5:
-                if (FUN_00c8cce0(&state) && GetValue() == 0.0f)
+                if (bhkRigidBody_IsMotionTypeDynamic(&state) && GetValue() == 0.0f)
                     skip = true;
                 break;
             }
@@ -829,12 +834,13 @@ class C8EC60World
     {
         return &m_kIterator;
     }
-    void FUN_00c8ec60();
+    void bhkRigidBody_RemoveActionConstraints();
 };
 
 // Iterates the world's objects and calls ResetWorldObject on constraints and ref objects that hold a non-null constraint or referenced data.
 // @fnv 0x00c8ec60
-void C8EC60World::FUN_00c8ec60()
+// src: COMMUNITY 0x00c8ec60
+void C8EC60World::bhkRigidBody_RemoveActionConstraints()
 {
     C8EC60Iterator* pkIter = GetIterator();
     while (pkIter && pkIter->m_pkCurrent)
@@ -858,7 +864,7 @@ extern int DAT_0126810c;
 extern int DAT_012681fc;
 extern int DAT_012681bc;
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct OwnerBase
 {
@@ -870,7 +876,7 @@ struct OwnerBase
 
     static void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
 
@@ -919,15 +925,16 @@ struct SpawnedObject : public ChainB_cls
 
 // Allocates and constructs a new SpawnedObject, incrementing the three global counters in its constructors, and returns it.
 // @fnv 0x00c8ed70
-SpawnedObject* __cdecl FUN_00c8ed70()
+// src: EXE 0x00c8ed70
+SpawnedObject* __cdecl bhkRigidBody_CreateObject()
 {
     return new SpawnedObject();
 }
 
 struct HavokShape
 {
-    void FUN_00c8f080();
-    void FUN_00c8eb20(void* context);
+    void bhkRigidBody_Fix();
+    void bhkRigidBody_UnFix(void* context);
 };
 struct HavokLookup
 {
@@ -973,9 +980,9 @@ void __cdecl ApplyHavokOperation(HavokObject* object, int operation, void* conte
             if (lookup != 0 && lookup->shape != 0)
             {
                 if ((char)operation)
-                    lookup->shape->FUN_00c8f080();
+                    lookup->shape->bhkRigidBody_Fix();
                 else
-                    lookup->shape->FUN_00c8eb20(context);
+                    lookup->shape->bhkRigidBody_UnFix(context);
             }
         }
         NiNode* node = object->GetCellChildAt();
@@ -1329,7 +1336,7 @@ void RigidBodyS::CopyBodyToClone(RigidBodyS* dest, CloningProcess* c)
         dest->UpdateStub();
     }
     for (; n && n->data; n = n->next)
-        reinterpret_cast<bhkRigidBody*>(dest)->FUN_00c8ef80(n->data->MakeClone(*c));
+        reinterpret_cast<bhkRigidBody*>(dest)->bhkRigidBody_AddActCon(n->data->MakeClone(*c));
 }
 
 extern __declspec(thread) unsigned int hkThreadMemoryFlags;
@@ -1475,12 +1482,12 @@ struct ScopedMemoryContext
 
 struct GlobalObject_004ee810
 {
-    void FUN_004ee920();
+    void BSSimpleList_NiPointer_bhkAction_RemoveAll();
 };
 
 struct FUN_00c9d4c0_holder
 {
-    void FUN_00c9d4c0();
+    void bhkEntity_Kill();
 };
 
 struct Shell_c8da40 : public FUN_00c9d4c0_holder
@@ -1492,16 +1499,17 @@ struct Shell_c8da40 : public FUN_00c9d4c0_holder
     int uNewnk;
     GlobalObject_004ee810 uTmpnk;
 
-    void FUN_00c8da40();
+    void bhkRigidBody_Kill();
 };
 
 // Switches to memory context 0x10, calls FUN_004ee920 on uTmpnk, then calls FUN_00c9d4c0.
 // @fnv 0x00c8da40
-void Shell_c8da40::FUN_00c8da40()
+// src: XBOX_PDB 0x00c8da40
+void Shell_c8da40::bhkRigidBody_Kill()
 {
     ScopedMemoryContext kContext(0x10);
-    uTmpnk.FUN_004ee920();
-    FUN_00c9d4c0();
+    uTmpnk.BSSimpleList_NiPointer_bhkAction_RemoveAll();
+    bhkEntity_Kill();
 }
 
 extern char DAT_0126818c;
@@ -1613,14 +1621,14 @@ struct LiquidLink
 struct FUN_00c8e9c0 : LiquidBase
 {
     LiquidLink link;
-    void FUN_00c8da40();
+    void bhkRigidBody_Kill();
     virtual ~FUN_00c8e9c0();
 };
 // Destructor that calls FUN_00c8da40 and decrements g_iLiquidActionCount.
 // @fnv 0x00c8e9c0
 FUN_00c8e9c0::~FUN_00c8e9c0()
 {
-    FUN_00c8da40();
+    bhkRigidBody_Kill();
     --g_iLiquidActionCount;
 }
 
@@ -1704,11 +1712,12 @@ class SerializableObjectListOwner
     int unk10;
     NiTPointerList<NiPointer<NiObject> > m_kThirdFollowingStreamField;
 
-    void FUN_00c8ef80(NiObject* pkObject);
+    void bhkRigidBody_AddActCon(NiObject* pkObject);
 };
 // Adds pkObject to the object list if it is a geometry or node, using an allocation tag scope of 0x10.
 // @fnv 0x00c8ef80
-void SerializableObjectListOwner::FUN_00c8ef80(NiObject* pkObject)
+// src: XBOX_PDB 0x00c8ef80
+void SerializableObjectListOwner::bhkRigidBody_AddActCon(NiObject* pkObject)
 {
     AllocTagScopeC8E kScope(0x10);
     if (pkObject && (pkObject->IsKindOfType(&g_kGeometryRTTIC8E) || pkObject->IsKindOfType(&g_kNodeRTTIC8E)))
@@ -1774,7 +1783,8 @@ void FUN_00c88990_cls::PopAndRelease()
 
 // Recursively visits child nodes, calling FUN_00c8ec60 on the linked shape found via FUN_00653290 on each object's property when present.
 // @fnv 0x00c8ecf0
-void __cdecl FUN_00c8ecf0(HavokObject* object)
+// src: COMMUNITY 0x00c8ecf0
+void __cdecl bhkRigidBody_RemoveAllActionConstraints(HavokObject* object)
 {
     if (!object)
         return;
@@ -1783,14 +1793,14 @@ void __cdecl FUN_00c8ecf0(HavokObject* object)
     {
         HavokLookup* link = object->property->FUN_00653290(&DAT_012043f8);
         if (link && link->shape)
-            reinterpret_cast<C8EC60World*>(link->shape)->FUN_00c8ec60();
+            reinterpret_cast<C8EC60World*>(link->shape)->bhkRigidBody_RemoveActionConstraints();
     }
 
     NiNode* node = object->GetCellChildAt();
     if (node)
     {
         for (unsigned int i = 0; i < node->m_kChildren.m_usSize; ++i)
-            FUN_00c8ecf0(((HavokObject**)node->m_kChildren.m_pBase)[i]);
+            bhkRigidBody_RemoveAllActionConstraints(((HavokObject**)node->m_kChildren.m_pBase)[i]);
     }
 }
 
@@ -1808,11 +1818,12 @@ struct Ent
     int unk;
     int unkCur;
     Body* m_pPhysicsBody;
-    hkVector4 FUN_00c8d200();
+    hkVector4 GetCenterOfMassLocal_00c8d200();
 };
 // Returns the physics body's m_kPos, or the global DAT_01267e30 vector when this or the body pointer is null.
 // @fnv 0x00c8d200
-hkVector4 Ent::FUN_00c8d200()
+// src: XBOX_PDB 0x00c8d200
+hkVector4 Ent::GetCenterOfMassLocal_00c8d200()
 {
     const hkVector4* p;
     if (this && m_pPhysicsBody)
@@ -1867,7 +1878,7 @@ class WorldObject_c8d3
     int unk04;
     Entity_c8d3* m_pkEntity;
 
-    void FUN_00a29680();
+    void Object_DoNothing();
     void GetAabb(hkAabb& kOut);
 };
 
@@ -1881,9 +1892,9 @@ void WorldObject_c8d3::GetAabb(hkAabb& kOut)
         Entity_c8d3* pkEntity = m_pkEntity;
         if (pkEntity)
         {
-            FUN_00a29680();
+            Object_DoNothing();
             pkBody = static_cast<hkpCdBody*>(pkEntity);
-            FUN_00a29680();
+            Object_DoNothing();
         }
     }
     const hkpShape* pkShape = pkBody ? pkBody->getShape() : 0;
@@ -2094,7 +2105,7 @@ struct BodyMemory
         return allocator->Allocate(size);
     }
 };
-BodyMemory* FUN_00c85750();
+BodyMemory* hkMemoryRouter_getInstance();
 struct FUN_00ca8c90
 {
     unsigned int unk00;
@@ -2234,11 +2245,11 @@ struct FUN_00ca8c90
     unsigned int unk218;
     unsigned int unk21C;
     FUN_00ca8c90(void* settings);
-    void FUN_00ca8420(int motion, int activate, int extra);
+    void hkpRigidBody_setMotionType(int motion, int activate, int extra);
     void FUN_00c905b0();
     static void* operator new(unsigned int size)
     {
-        FUN_00ca8c90* p = (FUN_00ca8c90*)FUN_00c85750()->AllocateBody(size);
+        FUN_00ca8c90* p = (FUN_00ca8c90*)hkMemoryRouter_getInstance()->AllocateBody(size);
         p->allocationSize = (unsigned short)size;
         return p;
     }
@@ -2310,17 +2321,17 @@ struct BodyBuild
     virtual void FinishBuild(BuildSettings* settings);
     unsigned int unk04;
     BodyNative* native;
-    void FUN_00a29680();
+    void Object_DoNothing();
     void GetAabb(hkAabb* bounds);
-    float FUN_00577b50();
+    float bhkRigidBody_GethkMaxLinearVelocity();
     BodyMotion* GetMotion()
     {
         BodyNative* p = native;
         if (!p)
             return 0;
-        FUN_00a29680();
+        Object_DoNothing();
         BodyMotion* result = p ? &p->motion : 0;
-        FUN_00a29680();
+        Object_DoNothing();
         return result;
     }
     void ConfigureBody(BuildSettings* settings);
@@ -2365,7 +2376,7 @@ void BodyBuild::ConfigureBody(BuildSettings* settings)
     if (savedMotion != 8)
     {
         settings->motionType = (signed char)savedMotion;
-        body->FUN_00ca8420(savedMotion, 1, 0);
+        body->hkpRigidBody_setMotionType(savedMotion, 1, 0);
     }
     SetBody(body);
     body->FUN_00c905b0();
@@ -2386,7 +2397,7 @@ void BodyBuild::ConfigureBody(BuildSettings* settings)
                 axis = extent.m128_f32[0] > extent.m128_f32[2] ? 2 : 0;
             if (!(extent.m128_f32[axis] > DAT_012677bc))
             {
-                float scale = FUN_00577b50();
+                float scale = bhkRigidBody_GethkMaxLinearVelocity();
                 scale *= DAT_011b0c48;
                 if (!(scale < DAT_012677c0))
                 {
@@ -2418,7 +2429,7 @@ struct Matrix
 };
 struct Receiver
 {
-    void FUN_00c7f640(Matrix*, const __m128*);
+    void setTransformedPos_00c7f640(Matrix*, const __m128*);
 };
 struct BodySlot
 {
@@ -2435,16 +2446,16 @@ struct CollisionOwner
     void* vtable;
     void* unk04;
     void* node;
-    void FUN_00a29680();
+    void Object_DoNothing();
     void DispatchCollision(Receiver*);
     __forceinline BodySlot* GetSlot()
     {
         char* base = (char*)node;
         if (base)
         {
-            FUN_00a29680();
+            Object_DoNothing();
             base += 16;
-            FUN_00a29680();
+            Object_DoNothing();
             if (base)
                 return (BodySlot*)base;
         }
@@ -2473,8 +2484,8 @@ void CollisionOwner::DispatchCollision(Receiver* target)
     {
         first = _mm_setr_ps(DAT_0104ffb8, DAT_0104ffb8, DAT_0104ffb8, DAT_01011d78);
         second = _mm_setr_ps(DAT_01017d00, DAT_01017d00, DAT_01017d00, DAT_01011d78);
-        target->FUN_00c7f640(&source, &first);
-        ((Receiver*)((char*)target + 16))->FUN_00c7f640(&source, &second);
+        target->setTransformedPos_00c7f640(&source, &first);
+        ((Receiver*)((char*)target + 16))->setTransformedPos_00c7f640(&source, &second);
     }
 }
 
@@ -2698,13 +2709,13 @@ class WorldObject_c8ea
 {
   public:
     virtual void v00();
-    void FUN_00c9d4f0(char* pkStream);
+    void bhkEntity_LoadBinary(char* pkStream);
     float FUN_0062ab20();
 };
 
 struct LoadStream_c8ea
 {
-    void FUN_00a64670();
+    void NiStream_ReadMultipleLinkIDs();
 };
 
 class Entity_c8ea : public WorldObject_c8ea
@@ -2759,14 +2770,15 @@ class Entity_c8ea : public WorldObject_c8ea
     int unk04, unk08, unk0c;
     int m_iSlotCount;
 
-    void FUN_00c8ea30(char* pkStream);
+    void bhkRigidBody_LoadBinary(char* pkStream);
 };
 
 // Calls FUN_00c9d4f0, swaps the rigid body's endianness unless a stream byte is 1, clamps a float to 1000, may set a type byte, and reads m_iSlotCount.
 // @fnv 0x00c8ea30
-void Entity_c8ea::FUN_00c8ea30(char* pkStream)
+// src: XBOX_PDB 0x00c8ea30
+void Entity_c8ea::bhkRigidBody_LoadBinary(char* pkStream)
 {
-    FUN_00c9d4f0(pkStream);
+    bhkEntity_LoadBinary(pkStream);
     char* pkBody;
     {
         int iIndex;
@@ -2784,7 +2796,7 @@ void Entity_c8ea::FUN_00c8ea30(char* pkStream)
         if (uiType == 0xe)
             *(unsigned char*)(pkBody + 0xd4) = 4;
     }
-    ((LoadStream_c8ea*)pkStream)->FUN_00a64670();
+    ((LoadStream_c8ea*)pkStream)->NiStream_ReadMultipleLinkIDs();
     (*(NiBinaryStream**)(pkStream + 0x24c))->Read(&m_iSlotCount, 4);
 }
 
@@ -3081,17 +3093,17 @@ struct RefObject_eb20
     unsigned int m_uiValue1;
     ConstraintList_eb20 m_kConstraints;
 
-    void* FUN_00c87a40();
+    void* bhkWorldObject_GethkWorld();
     int GetWorld()
     {
-        WorldData_eb20* pkData = (WorldData_eb20*)FUN_00c87a40();
+        WorldData_eb20* pkData = (WorldData_eb20*)bhkWorldObject_GethkWorld();
         return pkData ? pkData->m_iWorld : 0;
     }
     unsigned char IsInWorld() const
     {
         return (m_uiValue1 >> 2) & 1;
     }
-    void FUN_00c8eb20(bool bSetWorld);
+    void bhkRigidBody_UnFix(bool bSetWorld);
 };
 
 extern "C" __declspec(thread) int tls_iMemContext_eb20;
@@ -3113,7 +3125,8 @@ extern char DAT_0126818c;
 
 // If in a world, registers linked constraints and pops them, sets the world on the others when bSetWorld is true, then clears the in-world bit.
 // @fnv 0x00c8eb20
-void RefObject_eb20::FUN_00c8eb20(bool bSetWorld)
+// src: XBOX_PDB 0x00c8eb20
+void RefObject_eb20::bhkRigidBody_UnFix(bool bSetWorld)
 {
     MemContextGuard_eb20 kGuard(0x10);
     if (IsInWorld())
@@ -3629,7 +3642,7 @@ struct IntegerTriple
     void* unk350;
 };
 
-Obj* __cdecl FUN_00cc81c0(Obj*, float);
+Obj* __cdecl bhkFixedConstraint_FixConstraint(Obj*, float);
 struct ParentData
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
@@ -3665,11 +3678,12 @@ struct Target
         ParentData* s = parent ? parent->GetSub() : 0;
         return s ? s->unk1c : 0;
     }
-    void FUN_00c8f080();
+    void bhkRigidBody_Fix();
 };
 // Replaces each matching object in the list with the result of FUN_00cc81c0, attached to the owner, then sets flag value 4.
 // @fnv 0x00c8f080
-void Target::FUN_00c8f080()
+// src: XBOX_PDB 0x00c8f080
+void Target::bhkRigidBody_Fix()
 {
     MemScope scope;
     if (getFlag() & 1)
@@ -3702,10 +3716,10 @@ void Target::FUN_00c8f080()
                 if (sub == 17 || (sub >= 21 && sub <= 22))
                     scale = DAT_01017870;
             }
-            Obj* replacement = FUN_00cc81c0(body, scale);
+            Obj* replacement = bhkFixedConstraint_FixConstraint(body, scale);
             if (replacement)
             {
-                ((bhkRigidBody*)this)->FUN_00c8ef80((NiObject*)replacement);
+                ((bhkRigidBody*)this)->bhkRigidBody_AddActCon((NiObject*)replacement);
                 body->detach();
                 replacement->attach(owner);
             }

@@ -46,19 +46,19 @@ struct AtmoObject;
 
 struct AtmoPropertyList
 {
-    void* FUN_0043c490();
+    void* GetTranslate_0043c490();
 };
 struct AtmoShaderMgr
 {
-    AtmoPropertyList* FUN_00558310();
+    AtmoPropertyList* BSSceneGraph_GetCameraRoot();
 };
-AtmoShaderMgr* __cdecl FUN_0045c670();
-void __cdecl FUN_00b899a0(NiPointer<NiNode>* pspNode);
+AtmoShaderMgr* __cdecl Main_GetWorldSceneGraph();
+void __cdecl SkyShader_CreateSkyQuad(NiPointer<NiNode>* pspNode);
 void __cdecl FUN_00b55540(int iUnk, NiFogProperty* pkFog);
-void __cdecl FUN_005b5e40(const char* pFormat, ...);
+void __cdecl Warning_005b5e40(const char* pFormat, ...);
 extern unsigned char g_bNoSky_011f941e;
 extern char g_kNiNodeRTTI_011f4a40[];
-bool __cdecl FUN_0043b300(void* pkRTTI, AtmoObject* pkObject);
+bool __cdecl NiObject_IsKindOf(void* pkRTTI, AtmoObject* pkObject);
 
 struct AtmoObject
 {
@@ -66,7 +66,7 @@ struct AtmoObject
     virtual void v01();
     virtual void v02();
     virtual int IsGeometry();
-    NiNode* FUN_0045bc00(int iIndex);
+    NiNode* NiNode_GetAtChecked(int iIndex);
 };
 
 struct AtmoStream
@@ -74,7 +74,7 @@ struct AtmoStream
     char unk000[0x5cc];
     AtmoStream();
     ~AtmoStream();
-    bool FUN_00c3a8a0(const char* pPath, int iFlags);
+    bool BSStream_Load(const char* pPath, int iFlags);
 };
 
 struct AtmoLoadedModel
@@ -82,7 +82,7 @@ struct AtmoLoadedModel
     int unk00[4];
     AtmoLoadedModel(const char* pPath, AtmoStream* pkStream, int a3, int a4);
     ~AtmoLoadedModel();
-    AtmoObject* FUN_0043b230();
+    AtmoObject* NiObjectNET_GetControllers();
 };
 
 // @fnv 0x00633260
@@ -91,36 +91,36 @@ void Atmosphere::SetAtmosphere(NiNode* pkRoot, NiFogProperty* pkFog)
     CreateSortAdjustNode(pkRoot);
     if (!g_bNoSky_011f941e)
     {
-        FUN_00b899a0(&m_spSkyShape);
-        m_spSkyShape->FUN_004902f0(true);
-        m_spSkyShape->FUN_00440460((const NiPoint3*)FUN_0045c670()->FUN_00558310()->FUN_0043c490());
+        SkyShader_CreateSkyQuad(&m_spSkyShape);
+        m_spSkyShape->NiAVObject_SetSelectiveUpdate(true);
+        m_spSkyShape->NiAVObject_SetTranslate((const NiPoint3*)Main_GetWorldSceneGraph()->BSSceneGraph_GetCameraRoot()->GetTranslate_0043c490());
         m_spSkyNode = new AtmosphereModelNode(0);
-        m_spSkyNode->FUN_004902f0(true);
+        m_spSkyNode->NiAVObject_SetSelectiveUpdate(true);
         m_spSkyNode->AttachChildInAvailableSlot((NiAVObject*)m_spSkyShape.operator->(), true);
         m_pRootNode->AttachChildInAvailableSlot((NiAVObject*)m_spSkyNode.operator->(), true);
     }
 
     AtmoStream kStream;
-    if (kStream.FUN_00c3a8a0("Meshes\\Sky\\Atmosphere.nif", 0))
+    if (kStream.BSStream_Load("Meshes\\Sky\\Atmosphere.nif", 0))
     {
         AtmoLoadedModel kModel_("Meshes\\Sky\\Atmosphere.nif", &kStream, 0, 0);
-        AtmoObject* pkFirstVal2 = kModel_.FUN_0043b230();
+        AtmoObject* pkFirstVal2 = kModel_.NiObjectNET_GetControllers();
         NiNode* pkMeshRes = 0;
-        AtmoObject* pkObjectOut = kModel_.FUN_0043b230();
+        AtmoObject* pkObjectOut = kModel_.NiObjectNET_GetControllers();
         if (pkObjectOut)
         {
             if (pkObjectOut->IsGeometry())
-                pkMeshRes = pkObjectOut->FUN_0045bc00(0);
-            else if (FUN_0043b300(g_kNiNodeRTTI_011f4a40, pkObjectOut))
+                pkMeshRes = pkObjectOut->NiNode_GetAtChecked(0);
+            else if (NiObject_IsKindOf(g_kNiNodeRTTI_011f4a40, pkObjectOut))
                 pkMeshRes = (NiNode*)pkObjectOut;
         }
         if (!pkMeshRes)
         {
-            FUN_005b5e40("Cannot load the atmosphere model.");
+            Warning_005b5e40("Cannot load the atmosphere model.");
             return;
         }
         m_spAtmosphere = pkMeshRes;
-        m_spAtmosphere->FUN_004902f0(true);
+        m_spAtmosphere->NiAVObject_SetSelectiveUpdate(true);
         m_pRootNode->AttachChildInAvailableSlot((NiAVObject*)m_spAtmosphere.operator->(), true);
     }
     m_spFog = pkFog;
@@ -145,41 +145,41 @@ struct Light
 };
 struct FUN_00633bf0_Class
 {
-    void FUN_00633bf0(const NiPoint3* v);
+    void NiFogProperty_SetFogColor(const NiPoint3* v);
 };
 struct FUN_00633c20_Class : FUN_00633bf0_Class
 {
-    void FUN_00633c20(float a, float b);
+    void BSFogProperty_SetWaterDistance(float a, float b);
 };
 struct FUN_00633c40_Class : FUN_00633c20_Class
 {
-    void FUN_00633c40(float a);
+    void BSFogProperty_SetFogHeight(float a);
 };
 struct FUN_00633c60_Class : FUN_00633c40_Class
 {
-    void FUN_00633c60(const NiPoint3& v);
+    void BSFogProperty_SetWaterColor(const NiPoint3& v);
 };
 struct Fog : FUN_00633c60_Class
 {
-    void FUN_0049ed90(bool b);
-    void FUN_005bf9a0(float a, float b);
-    void FUN_005bfbd0(float a);
+    void NiAlphaProperty_SetAlphaBlending(bool b);
+    void BSFogProperty_SetDistance(float a, float b);
+    void FOHUDEffectManager_SetBlurIntensityHUD(float a);
 };
 struct Node : BSMultiBoundRoom
 {
     float GetFieldE4Float();
-    int FUN_00476c90();
-    NiPoint3* FUN_00624700();
+    int Sky_GetMode();
+    NiPoint3* GetExtraPartList();
     NiPoint3* FUN_0050d100();
     NiPoint3* FUN_009c1a50();
-    NiPoint3* FUN_005a8080();
-    Light* FUN_00923000();
+    NiPoint3* ComputeValue_005a8080();
+    Light* TESAmmo_GetAmmoEffectList();
     float GetFieldE8Float();
 };
 struct Probe
 {
     int FUN_008d6f30();
-    float FUN_0057b0a0();
+    float TESObjectREFR_GetRelevantWaterHeight();
 };
 struct Info
 {
@@ -263,11 +263,11 @@ extern Param DAT_011ff8f0;
 extern Param DAT_011ff900;
 extern unsigned char DAT_011f941e;
 extern float DAT_011f9190;
-Fog* __cdecl FUN_00b55520(int a0);
+Fog* __cdecl BSShaderManager_GetFogProperty(int a0);
 void __cdecl FUN_00b55540(int a0, Fog* a1);
-AtmosphereSceneGraph* __cdecl FUN_0045c670();
-void* __fastcall FUN_00558310(AtmosphereSceneGraph* w);
-Info* __fastcall FUN_0045bb80(void* p);
+AtmosphereSceneGraph* __cdecl Main_GetWorldSceneGraph();
+void* __fastcall BSSceneGraph_GetCameraRoot(AtmosphereSceneGraph* w);
+Info* __fastcall NiAVObject_GetWorldTranslate(void* p);
 }  // namespace fnv_006335d0
 
 // Refreshes the fog reference and positions, and syncs the camera frustum far plane.
@@ -301,26 +301,26 @@ void Atmosphere::UpdateAtmosphere(Sky* node, float f)
 
                                         if (!node)
                                             return;
-                                        if (FUN_00b55520(0) != reinterpret_cast<Fog*>(m_spFog.operator->()))
+                                        if (BSShaderManager_GetFogProperty(0) != reinterpret_cast<Fog*>(m_spFog.operator->()))
                                             FUN_00b55540(0, reinterpret_cast<Fog*>(m_spFog.operator->()));
                                         FUN_008d0600(node, f);
-                                        if (reinterpret_cast<Node*>(node)->FUN_00476c90() == 3 || 2 == reinterpret_cast<Node*>(node)->FUN_00476c90())
+                                        if (reinterpret_cast<Node*>(node)->Sky_GetMode() == 3 || 2 == reinterpret_cast<Node*>(node)->Sky_GetMode())
                                         {
                                             if (!(m_spAtmosphere.operator->()))
                                                 return;
                                             if (DAT_011dea3c != 0 && DAT_011dea3c->FUN_008d6f30() &&
-                                                FUN_0045bb80(FUN_00558310(fnv_006335d0::FUN_0045c670()))->unk08 <
-                                                    DAT_011dea3c->FUN_0057b0a0())
+                                                NiAVObject_GetWorldTranslate(BSSceneGraph_GetCameraRoot(fnv_006335d0::Main_GetWorldSceneGraph()))->unk08 <
+                                                    DAT_011dea3c->TESObjectREFR_GetRelevantWaterHeight())
                                             {
-                                                DAT_011ff8e0 = *pData.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_00624700()->x,
-                                                                                   reinterpret_cast<Node*>(node)->FUN_00624700()->y,
-                                                                                   reinterpret_cast<Node*>(node)->FUN_00624700()->z, 1.0f);
+                                                DAT_011ff8e0 = *pData.FUN_00414430(reinterpret_cast<Node*>(node)->GetExtraPartList()->x,
+                                                                                   reinterpret_cast<Node*>(node)->GetExtraPartList()->y,
+                                                                                   reinterpret_cast<Node*>(node)->GetExtraPartList()->z, 1.0f);
                                                 DAT_011ff8f0 =
-                                                    *p0.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_00624700()->x, reinterpret_cast<Node*>(node)->FUN_00624700()->y,
-                                                                     reinterpret_cast<Node*>(node)->FUN_00624700()->z, 1.0f);
-                                                DAT_011ff900 = *light.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_00624700()->x,
-                                                                                   reinterpret_cast<Node*>(node)->FUN_00624700()->y,
-                                                                                   reinterpret_cast<Node*>(node)->FUN_00624700()->z, 1.0);
+                                                    *p0.FUN_00414430(reinterpret_cast<Node*>(node)->GetExtraPartList()->x, reinterpret_cast<Node*>(node)->GetExtraPartList()->y,
+                                                                     reinterpret_cast<Node*>(node)->GetExtraPartList()->z, 1.0f);
+                                                DAT_011ff900 = *light.FUN_00414430(reinterpret_cast<Node*>(node)->GetExtraPartList()->x,
+                                                                                   reinterpret_cast<Node*>(node)->GetExtraPartList()->y,
+                                                                                   reinterpret_cast<Node*>(node)->GetExtraPartList()->z, 1.0);
                                             }
                                             else
                                             {
@@ -331,33 +331,33 @@ void Atmosphere::UpdateAtmosphere(Sky* node, float f)
                                                     *p4.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_009c1a50()->x, reinterpret_cast<Node*>(node)->FUN_009c1a50()->y,
                                                                      reinterpret_cast<Node*>(node)->FUN_009c1a50()->z, 1.0);
                                                 DAT_011ff900 =
-                                                    *t.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_005a8080()->x, reinterpret_cast<Node*>(node)->FUN_005a8080()->y,
-                                                                    reinterpret_cast<Node*>(node)->FUN_005a8080()->z, 1.0f);
+                                                    *t.FUN_00414430(reinterpret_cast<Node*>(node)->ComputeValue_005a8080()->x, reinterpret_cast<Node*>(node)->ComputeValue_005a8080()->y,
+                                                                    reinterpret_cast<Node*>(node)->ComputeValue_005a8080()->z, 1.0f);
                                             }
                                         }
                                         if (0 != reinterpret_cast<Fog*>(m_spFog.operator->()))
                                         {
-                                            p1 = reinterpret_cast<Node*>(node)->FUN_00923000();
-                                            reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_0049ed90(p1->unk04 > p1->unk00);
+                                            p1 = reinterpret_cast<Node*>(node)->TESAmmo_GetAmmoEffectList();
+                                            reinterpret_cast<Fog*>(m_spFog.operator->())->NiAlphaProperty_SetAlphaBlending(p1->unk04 > p1->unk00);
                                             if (unk18)
                                             {
-                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_005bf9a0(p1->unk00, p1->unk04);
-                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_005bfbd0(reinterpret_cast<Node*>(node)->GetFieldE8Float());
+                                                reinterpret_cast<Fog*>(m_spFog.operator->())->BSFogProperty_SetDistance(p1->unk00, p1->unk04);
+                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FOHUDEffectManager_SetBlurIntensityHUD(reinterpret_cast<Node*>(node)->GetFieldE8Float());
                                             }
                                             if (!(DAT_011f941e))
                                             {
                                                 p3 = DAT_011f9190 / 3.75f;
-                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633bf0(
-                                                    reinterpret_cast<Node*>(node)->FUN_00624700()->ScaleTo(reinterpret_cast<NiPoint3*>(pNode), p3));
+                                                reinterpret_cast<Fog*>(m_spFog.operator->())->NiFogProperty_SetFogColor(
+                                                    reinterpret_cast<Node*>(node)->GetExtraPartList()->ScaleTo(reinterpret_cast<NiPoint3*>(pNode), p3));
                                             }
                                             else
                                             {
-                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633bf0(reinterpret_cast<Node*>(node)->FUN_00624700());
+                                                reinterpret_cast<Fog*>(m_spFog.operator->())->NiFogProperty_SetFogColor(reinterpret_cast<Node*>(node)->GetExtraPartList());
                                             }
                                             len = reinterpret_cast<Node*>(node)->GetFieldE4Float();
-                                            reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633c40(reinterpret_cast<Node*>(node)->GetFieldE4Float());
-                                            reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633c20(p1->unk08, p1->unk0c);
-                                            reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633c60(*(NiPoint3*)reinterpret_cast<Node*>(node)->FUN_006ab360());
+                                            reinterpret_cast<Fog*>(m_spFog.operator->())->BSFogProperty_SetFogHeight(reinterpret_cast<Node*>(node)->GetFieldE4Float());
+                                            reinterpret_cast<Fog*>(m_spFog.operator->())->BSFogProperty_SetWaterDistance(p1->unk08, p1->unk0c);
+                                            reinterpret_cast<Fog*>(m_spFog.operator->())->BSFogProperty_SetWaterColor(*(NiPoint3*)reinterpret_cast<Node*>(node)->TESCombatStyle_GetAdvancedData());
                                         }
                                     }
                                 }
@@ -367,15 +367,15 @@ void Atmosphere::UpdateAtmosphere(Sky* node, float f)
                     if (unk18)
                     {
                         u = 0;
-                        farv = fnv_006335d0::FUN_0045c670()->v40();
-                        u = fnv_006335d0::FUN_0045c670()->GetCamera();
+                        farv = fnv_006335d0::Main_GetWorldSceneGraph()->v40();
+                        u = fnv_006335d0::Main_GetWorldSceneGraph()->GetCamera();
                         if (0 != u)
                         {
                             tmp = u->GetViewFrustum();
                             if (farv != tmp.m_fFarPlane)
                             {
                                 tmp.m_fFarPlane = farv;
-                                u->FUN_00507700(farv / tmp.m_fNearPlane);
+                                u->NiCamera_SetMaxFarNearRatio(farv / tmp.m_fNearPlane);
                                 u->FUN_00a6faf0(tmp);
                             }
                         }
@@ -417,8 +417,8 @@ struct FUN_00633cc0 : FUN_00633cc0_SkyObject
     unsigned short m_58;
     unsigned char m_5a;
 
-    void FUN_00633d90();
-    void FUN_00634930();
+    void Clouds_ZeroGeo();
+    void Clouds_ClearTransTextures();
     FUN_00633cc0();
     virtual void vf();
 };
@@ -427,7 +427,7 @@ struct FUN_00633cc0 : FUN_00633cc0_SkyObject
 // @fnv 0x00633cc0
 FUN_00633cc0::FUN_00633cc0() : m_58(0)
 {
-    FUN_00633d90();
-    FUN_00634930();
+    Clouds_ZeroGeo();
+    Clouds_ClearTransTextures();
     m_5a = 0;
 }

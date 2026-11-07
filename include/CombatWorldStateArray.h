@@ -9,6 +9,6 @@ public:
     char _50[0x0C];
 
     void __thiscall CopyFrom(CombatWorldStateArray* apWorldStateArray);
-    CombatWorldStateArray* FUN_009aa490(CombatWorldStateArray*);
-    bool FUN_009aadc0(unsigned int, int);
+    CombatWorldStateArray* CombatWorldStateArray_0(CombatWorldStateArray*);
+    bool CombatWorldStateArray_IsTrue(unsigned int, int);
 };

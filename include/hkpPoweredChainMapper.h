@@ -14,7 +14,7 @@ class hkpPoweredChainMapper : public hkReferencedObject
 public:
     virtual ~hkpPoweredChainMapper() throw();
 
-    void FUN_00e3a440(int linkIndex, int motorIndex, hkpConstraintMotor* motor);
+    void setMotors(int linkIndex, int motorIndex, hkpConstraintMotor* motor);
     void CollectSlotValues(int range, int slot, hkArray<int>& out);
     void SetLinkVector(int chainIndex, const __m128& vec);
 

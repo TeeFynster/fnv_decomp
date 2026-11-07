@@ -12,7 +12,7 @@ public:
 
     ExtraActorCause();
     void FUN_0042cb30();
-    void FUN_0042ea00(int value);
+    void SetActorCause(int value);
     void* FUN_0042cb00(unsigned int flags);
 
     NiPointer<ActorCause> actorCause;

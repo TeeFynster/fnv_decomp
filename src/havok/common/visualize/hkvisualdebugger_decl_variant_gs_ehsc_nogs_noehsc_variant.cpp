@@ -13,8 +13,8 @@
 // Unused sibling-function skeletons (including the key/item entry pair) were removed from this variant.
 #include <math.h>
 typedef unsigned __int64 TickCount;
-TickCount __cdecl FUN_00d60570();
-TickCount __cdecl FUN_00d60580();
+TickCount __cdecl hkStopwatch_getTickCounter();
+TickCount __cdecl hkStopwatch_getTicksPerSecond();
 double __cdecl DivideInt64ToFloat(TickCount, TickCount);
 extern float DAT_0104da4c;
 extern const char DAT_010caf8c[];
@@ -44,10 +44,10 @@ void hkVisualDebugger::step(float timeStep)
     {
         TickCount elapsed = m_frameTimer.m_ticks_total;
         if (m_frameTimer.m_running_flag)
-            elapsed += FUN_00d60570() - m_frameTimer.m_ticks_at_start;
-        stepTime = (float)(DivideInt64ToFloat(elapsed, FUN_00d60580()) * 1000.0);
+            elapsed += hkStopwatch_getTickCounter() - m_frameTimer.m_ticks_at_start;
+        stepTime = (float)(DivideInt64ToFloat(elapsed, hkStopwatch_getTicksPerSecond()) * 1000.0);
         m_frameTimer.m_running_flag = false;
-        TickCount now = FUN_00d60570();
+        TickCount now = hkStopwatch_getTickCounter();
         m_frameTimer.m_ticks_total += now - m_frameTimer.m_ticks_at_start;
         m_frameTimer.m_split_total += now - m_frameTimer.m_ticks_at_split;
         ++m_frameTimer.m_num_timings;
@@ -87,7 +87,7 @@ void hkVisualDebugger::step(float timeStep)
         m_frameTimer.m_split_total = 0;
         m_frameTimer.m_num_timings = 0;
         m_frameTimer.m_running_flag = true;
-        TickCount now = FUN_00d60570();
+        TickCount now = hkStopwatch_getTickCounter();
         m_frameTimer.m_ticks_at_start = now;
         m_frameTimer.m_ticks_at_split = m_frameTimer.m_ticks_at_start;
     }

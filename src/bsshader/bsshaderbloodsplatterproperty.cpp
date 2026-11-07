@@ -40,7 +40,8 @@ struct S_00b81420_Node : S_00b81420_AVObject
 
 // If obj is geometry, sets property 3's m_iValue when its type is 0x17; otherwise recurses into each child of obj's node.
 // @fnv 0x00b81420
-void FUN_00b81420(S_00b81420_AVObject* obj, int value)
+// src: XBOX_PDB 0x00b81420
+void BSShaderBloodSplatterProperty_SetFadeSourceRecurse(S_00b81420_AVObject* obj, int value)
 {
     if (!obj)
         return;
@@ -60,7 +61,7 @@ void FUN_00b81420(S_00b81420_AVObject* obj, int value)
             {
                 S_00b81420_AVObject* child = node->m_ppObjects[i];
                 if (child)
-                    FUN_00b81420(child, value);
+                    BSShaderBloodSplatterProperty_SetFadeSourceRecurse(child, value);
             }
         }
     }
@@ -105,12 +106,13 @@ class FUN_00b81330_cls
     unsigned int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60;
     int m_64;
 
-    SpawnedP* FUN_00b81330(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4, unsigned int a5,
+    SpawnedP* BSShaderBloodSplatterProperty_GetRenderPasses(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4, unsigned int a5,
                            unsigned int a6);
 };
 
 // @fnv 0x00b81330
-SpawnedP* FUN_00b81330_cls::FUN_00b81330(unsigned int a1, unsigned int a2, unsigned int auiUnused3, unsigned int a4,
+// src: XBOX_PDB 0x00b81330
+SpawnedP* FUN_00b81330_cls::BSShaderBloodSplatterProperty_GetRenderPasses(unsigned int a1, unsigned int a2, unsigned int auiUnused3, unsigned int a4,
                                          unsigned int auiUnused5, unsigned int auiUnused6)
 {
     unsigned int uiCacheKey = (a4 << 8) | a2;
@@ -253,7 +255,7 @@ struct Item
 
 struct Owner
 {
-    void FUN_00b812b0(Item* item, int arg);
+    void BSShaderBloodSplatterProperty_CopyMembers(Item* item, int arg);
     Item* CreateItem(int arg);
 };
 
@@ -261,7 +263,7 @@ struct Owner
 Item* Owner::CreateItem(int arg)
 {
     Item* item = new Item;
-    FUN_00b812b0(item, arg);
+    BSShaderBloodSplatterProperty_CopyMembers(item, arg);
     return item;
 }
 
@@ -330,10 +332,10 @@ struct StringOwner
 };
 
 extern unsigned int DAT_011ff0f4;
-unsigned int __cdecl FUN_00a7d330(unsigned int v);
-unsigned int __cdecl FUN_00c4bb40(unsigned int v);
-unsigned int __cdecl FUN_00a7d5e0(const char* s, unsigned int v);
-unsigned int __cdecl FUN_00a7d5a0(const char* s, unsigned int v);
+unsigned int __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int v);
+unsigned int __cdecl BSUtilities_GetTextureName(unsigned int v);
+unsigned int __cdecl NiGetViewerString_00a7d5e0(const char* s, unsigned int v);
+unsigned int __cdecl NiGetViewerString_00a7d5a0(const char* s, unsigned int v);
 extern const char str_010ae79c[];
 
 // Appends a value and formatted child labels to a StringArray via append.
@@ -342,20 +344,20 @@ void StringOwner::BuildStringArray(unsigned int apArray)
 {
     StringArray* pArray = (StringArray*)apArray;
     WriteToSettingArray(pArray);
-    pArray->append(apArray, FUN_00a7d330(DAT_011ff0f4));
+    pArray->append(apArray, NiViewerStrings_NiGetViewerString_Title(DAT_011ff0f4));
     for (unsigned int index = 0; index < 2; ++index)
     {
         unsigned int label = children[index];
-        label = FUN_00c4bb40(label);
+        label = BSUtilities_GetTextureName(label);
         if (label)
         {
-            unsigned int text = FUN_00a7d5e0(str_010ae79c, label);
+            unsigned int text = NiGetViewerString_00a7d5e0(str_010ae79c, label);
             pArray->append(apArray, text);
         }
         else
         {
             unsigned int child = children[index];
-            unsigned int text = FUN_00a7d5a0(str_010ae79c, child);
+            unsigned int text = NiGetViewerString_00a7d5a0(str_010ae79c, child);
             pArray->append(apArray, text);
         }
     }

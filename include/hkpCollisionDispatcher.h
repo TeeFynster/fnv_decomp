@@ -223,8 +223,8 @@ public:
                                         hkpShapeType origB, DebugTable* debugTable, int recursionDepth);
     void RegisterAgentType(signed char (*table)[32], signed char agentType, int typeA, int typeB,
                            signed char origA, signed char origB, CollisionAgentEntry (*entries)[32], int depth);
-    void FUN_00cfbf60(int primaryType, int alternateType);
-    void FUN_00cfc1d0();
+    void registerAlternateShapeType(int primaryType, int alternateType);
+    void debugPrintTable();
     void updateShapeInheritance(int primaryType, int alternateType, bool recurse);
 
     void Set(bool b);
@@ -236,16 +236,16 @@ public:
                            int entries, int depth);
     void RegisterAgentType(char* table, int agentType, int typeA, int typeB, int origA, int origB,
                            int entries, int depth);
-    void FUN_00cfbbe0(CollisionAgentFunctionTable* record, int typeA, int typeB);
+    void AppendRecordAndRegisterAgents(CollisionAgentFunctionTable* record, int typeA, int typeB);
     void AddSpawnEntry(SpawnRequest* request, int typeA, int typeB);
     void AddSpawnEntry(CollisionAgentFunctionTable* record, int typeA, int typeB);
     int AddEntry(SrcRec* record, int typeA, int typeB);
     int AddEntry(Agent3FunctionTable* record, int typeA, int typeB);
     void Destroy();
-    hkpCollisionDispatcher* FUN_00cfc030(unsigned int creationFunction, unsigned int factory);
+    hkpCollisionDispatcher* hkpCollisionDispatcher_hkpCollisionDispatcher(unsigned int creationFunction, unsigned int factory);
     void Reset_cfb080();
-    void FUN_00cfb080();
-    void FUN_00cfb570(Src* source);
+    void hkpCollisionDispatcher_resetCreationFunctions();
+    void hkpCollisionDispatcher_initCollisionQualityInfo(Src* source);
 
     hkpContactMgrFactory* m_apContactMgrFactoriesByResponsePair[HK_MAX_RESPONSE_TYPE][HK_MAX_RESPONSE_TYPE];
     __declspec(align(16)) hkUint32 m_auiAlternateTypeFlags[HK_MAX_SHAPE_TYPE];

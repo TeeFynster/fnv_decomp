@@ -41,12 +41,13 @@ struct S_00d070c0
     S_00d070c0_Inner* unk14;
 };
 
-void __cdecl FUN_00cb3c80(void* a, S_00d070c0* obj);
+void __cdecl hkpWorldOperationUtil_addConstraintToCriticalLockedIsland(void* a, S_00d070c0* obj);
 
 // @fnv 0x00d070c0
-void __stdcall FUN_00d070c0(S_00d070c0* obj)
+// src: HAVOK_SRC 0x00d070c0
+void __stdcall hkpSimulationIsland_addConstraintToCriticalLockedIsland(S_00d070c0* obj)
 {
-    FUN_00cb3c80(obj->unk14->unk08, obj);
+    hkpWorldOperationUtil_addConstraintToCriticalLockedIsland(obj->unk14->unk08, obj);
 }
 
 struct Holder
@@ -66,12 +67,13 @@ struct Owner
     Holder* m_pHolder;
 };
 
-void __cdecl FUN_00cb3da0(void* apTarget, Owner* apOwner);
+void __cdecl Object_NotifyAndDetachRecord(void* apTarget, Owner* apOwner);
 
 // @fnv 0x00d070e0
-void __stdcall FUN_00d070e0(Owner* apOwner)
+// src: HAVOK_SRC 0x00d070e0
+void __stdcall hkpSimulationIsland_removeConstraintFromCriticalLockedIsland(Owner* apOwner)
 {
-    FUN_00cb3da0(apOwner->m_pHolder->m_pFlagTarget, apOwner);
+    Object_NotifyAndDetachRecord(apOwner->m_pHolder->m_pFlagTarget, apOwner);
 }
 
 struct FUN_00d07130Arg
@@ -283,7 +285,7 @@ struct D077D0MemoryRouter
     }
 };
 
-extern "C" D077D0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D077D0MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 struct D077D0LocalBuffer
 {
@@ -323,17 +325,18 @@ struct D077D0Object
     int m_iCapacity;
 
     bool CheckConnectivity(D077D0BitField& bits);
-    bool FUN_00d077d0();
+    bool hkpSimulationIsland_isFullyConnected();
 };
 
 // @fnv 0x00d077d0
-bool D077D0Object::FUN_00d077d0()
+// src: HAVOK_LIB 0x00d077d0
+bool D077D0Object::hkpSimulationIsland_isFullyConnected()
 {
     D077D0LocalBuffer buffer;
-    buffer.m_data = FUN_00c85750().stackAllocInts(m_iCapacity);
+    buffer.m_data = hkMemoryRouter_getInstance().stackAllocInts(m_iCapacity);
     D077D0BitField bits(buffer.m_data, m_iCapacity);
     bool result = CheckConnectivity(bits);
-    FUN_00c85750().stackFree(buffer.m_data);
+    hkMemoryRouter_getInstance().stackFree(buffer.m_data);
     return result;
 }
 
@@ -342,7 +345,8 @@ struct GlobalObjectO2_00d472a0
 };
 extern GlobalObjectO2_00d472a0 g_012687cc;
 // @fnv 0x00d078d0
-GlobalObjectO2_00d472a0* FUN_00d078d0()
+// src: GUESS 0x00d078d0 (confidence: low)
+GlobalObjectO2_00d472a0* hkpSimulationIsland_GetField012687ccAddress()
 {
     return &g_012687cc;
 }
@@ -351,7 +355,8 @@ GlobalObjectO2_00d472a0* FUN_00d078d0()
 // Sub-object pointer lives at +0x30 of the owner; flags byte at +0x12 of it.
 
 // @fnv 0x00d07100
-void __stdcall FUN_00d07100(char* owner, unsigned char bits)
+// src: HAVOK_LIB 0x00d07100
+void __stdcall hkpSimulationIsland_addCallbackRequest(char* owner, unsigned char bits)
 {
     char* sub = *(char**)(owner + 0x30);
     *(unsigned char*)(sub + 0x12) |= bits;
@@ -642,7 +647,7 @@ bool S_00d074c0_Island::CheckConnectivity(S_00d074c0_UnionFind& aUnionFind) thro
 }
 
 namespace fnvc_adapt {
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 }
 void __cdecl ResizeAudioStream(hkMemoryAllocator* apAllocator, void* apContainer, unsigned int auiElemSize);
 
@@ -689,7 +694,7 @@ struct FUN_00d07470_cls
 void FUN_00d07470_cls::AddItem(ListItem* apItem)
 {
     PointerList* pItems = &m_kNode;
-    hkMemoryRouter* pHolder = fnvc_adapt::FUN_00c85750();
+    hkMemoryRouter* pHolder = fnvc_adapt::hkMemoryRouter_getInstance();
     if (pItems->m_uCount == (pItems->m_uCapFlags & 0x3fffffffu))
     {
         ResizeAudioStream(reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap), pItems, 4);
@@ -704,7 +709,7 @@ void FUN_00d07470_cls::AddItem(ListItem* apItem)
 
 namespace fnv_00d07720 {
 namespace fnvc_adapt {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 }
 extern int DAT_010ccf28;
 extern int DAT_0102e388;
@@ -746,7 +751,7 @@ void FUN_00d07720_cls::ResetArrays()
 {
     m_vptr00 = (int)&DAT_010ccf28;
 
-    hkMemoryRouter* pHolder = fnvc_adapt::FUN_00c85750();
+    hkMemoryRouter* pHolder = fnvc_adapt::hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uCapBits1 = m_uCapBits1;
     m_iCount1 = 0;
@@ -757,7 +762,7 @@ void FUN_00d07720_cls::ResetArrays()
     m_pData1 = 0;
     m_uCapBits1 = 0x80000000u;
 
-    hkMemoryRouter* pHolder2 = fnvc_adapt::FUN_00c85750();
+    hkMemoryRouter* pHolder2 = fnvc_adapt::hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
     unsigned int uCapBits2 = m_uCapBits2;
     m_iCount2 = 0;
@@ -768,7 +773,7 @@ void FUN_00d07720_cls::ResetArrays()
     m_pData2 = 0;
     m_uCapBits2 = 0x80000000u;
 
-    hkMemoryRouter* pHolder3 = fnvc_adapt::FUN_00c85750();
+    hkMemoryRouter* pHolder3 = fnvc_adapt::hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator3 = reinterpret_cast<hkMemoryAllocator*>(pHolder3->m_heap);
     unsigned int uCapBits3 = m_uCapBits3;
     m_iCount3 = 0;
@@ -785,7 +790,7 @@ void FUN_00d07720_cls::ResetArrays()
 
 namespace fnv_00d078e0 {
 namespace fnvc_adapt {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 struct FUN_00d078e0_cls
@@ -806,7 +811,7 @@ FUN_00d078e0_cls* FUN_00d078e0_cls::Destroy(unsigned char acFlags)
     ResetArrays();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = fnvc_adapt::FUN_00c85750();
+        hkMemoryRouter* pHolder = fnvc_adapt::hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         FreeAudioMemory(pAllocator, this, m_uSize);
     }
@@ -816,7 +821,8 @@ FUN_00d078e0_cls* FUN_00d078e0_cls::Destroy(unsigned char acFlags)
 
 // 0x00d07120  bare ret
 // @fnv 0x00d07120
-void FUN_00d07120()
+// src: COMMUNITY 0x00d07120
+void nullsub_10()
 {}
 
 // SaveIsland
@@ -891,9 +897,9 @@ struct FUN_00d07210_Island
     void SaveIsland(FUN_00d07210_Writer* save, int unkArg);
 };
 
-int __cdecl FUN_00d06f80(void* data, int bytes);
+int __cdecl hkStatisticsCollector_getAllocatedSize(void* data, int bytes);
 void __cdecl CollectSectors(void* agents, FUN_00d07210_Writer* save);
-void __cdecl FUN_00d97130(void* agents, void* world, FUN_00d07210_Writer* save);
+void __cdecl hkpAgentMachineUtil_calcNnStatistics(void* agents, void* world, FUN_00d07210_Writer* save);
 
 // Serializes the island's entity and action pointer arrays, per-entity constraints, agents and collision agents through the writer.
 // @fnv 0x00d07210
@@ -901,7 +907,7 @@ void FUN_00d07210_Island::SaveIsland(FUN_00d07210_Writer* save, int)
 {
     if ((m_kActorEntries.m_iCapacityState & 0x80000000) == 0 || save->m_force)
     {
-        int alloc = FUN_00d06f80(m_kActorEntries.m_data, m_kActorEntries.getCapacity() * 4);
+        int alloc = hkStatisticsCollector_getAllocatedSize(m_kActorEntries.m_data, m_kActorEntries.getCapacity() * 4);
         save->Array(3, "EntityPtrs", m_kActorEntries.m_data, m_kActorEntries.GetLogicalSize() * 4, alloc);
     }
 
@@ -936,7 +942,7 @@ void FUN_00d07210_Island::SaveIsland(FUN_00d07210_Writer* save, int)
         {
             int capacity = m_ppActions.getCapacity();
             void* data = m_ppActions.m_data;
-            alloc = FUN_00d06f80(data, capacity * 4);
+            alloc = hkStatisticsCollector_getAllocatedSize(data, capacity * 4);
         }
         save->Array(3, "ActionPtrs", m_ppActions.m_data, m_ppActions.GetLogicalSize() * 4, alloc);
     }
@@ -949,7 +955,7 @@ void FUN_00d07210_Island::SaveIsland(FUN_00d07210_Writer* save, int)
 
     CollectSectors(&m_pAgents, save);
     save->Block("CollAgents");
-    FUN_00d97130(&m_pAgents, unk18->unk78, save);
+    hkpAgentMachineUtil_calcNnStatistics(&m_pAgents, unk18->unk78, save);
     save->End();
 }
 
@@ -1030,7 +1036,7 @@ struct ItemList
     unsigned int m_capFlags;  // +0x08 (low 30 bits = capacity)
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* alloc, void* list, unsigned int n);
 
 struct FUN_00d07420_cls
@@ -1087,17 +1093,18 @@ struct FUN_00d07420_cls
     int unkC8;
     FUN_00d07420_cls* m_cc;  // +0xcc
 
-    void FUN_00d07420(FUN_00d07420_cls* item);
+    void hkpSimulationIsland_internalAddEntity(FUN_00d07420_cls* item);
 };
 
 // Sets item's parent to this and its index to the current count, then appends item to this object's item list, growing it via FUN_00c90940 when full.
 // @fnv 0x00d07420
-void FUN_00d07420_cls::FUN_00d07420(FUN_00d07420_cls* item)
+// src: HAVOK_LIB 0x00d07420
+void FUN_00d07420_cls::hkpSimulationIsland_internalAddEntity(FUN_00d07420_cls* item)
 {
     item->m_cc = this;
     item->m_a8 = (unsigned short)m_kNode.m_uiItemCount;
     ItemList* list = &m_kNode;
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     if (list->m_uiItemCount == (int)(list->m_capFlags & 0x3fffffffu))
     {
         ResizeAudioStream(holder->m_heap, list, 4);

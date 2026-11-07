@@ -21,7 +21,7 @@ extern "C" void _mm_store_ss(float* p, LocalM128 a);
 struct S00e43f70_Vec
 {
     LocalM128 q;
-    void FUN_00c7f700(const void* a, const void* b);
+    void hkVector4_setRotatedDir(const void* a, const void* b);
 };
 
 struct S00e43f70_Obj
@@ -30,16 +30,17 @@ struct S00e43f70_Obj
     int unk04;
     float unk08;
     float unk0c;
-    void FUN_00e43f70(int a0, char* a1, S00e43f70_Obj* a2, float* a3);
+    void hkpVehicleDefaultSteering_calcMainSteeringAngle(int a0, char* a1, S00e43f70_Obj* a2, float* a3);
 };
 
 // Stores a scaled product of two floats into a3, scaling it down when the dot product of two vectors exceeds the threshold in unk0c.
 // @fnv 0x00e43f70
-void S00e43f70_Obj::FUN_00e43f70(int aiUnused, char* a1, S00e43f70_Obj* apOther, float* apResult)
+// src: HAVOK_SRC 0x00e43f70
+void S00e43f70_Obj::hkpVehicleDefaultSteering_calcMainSteeringAngle(int aiUnused, char* a1, S00e43f70_Obj* apOther, float* apResult)
 {
     *apResult = apOther->unk08 * unk08;
     S00e43f70_Vec v;
-    v.FUN_00c7f700(*(char**)(a1 + 0x18) + 0xf0, *(char**)(a1 + 0x1c) + 0x40);
+    v.hkVector4_setRotatedDir(*(char**)(a1 + 0x18) + 0xf0, *(char**)(a1 + 0x1c) + 0x40);
     LocalM128 w = _mm_load_ps((const float*)(*(char**)(a1 + 0x18) + 0x1b0));
     LocalM128 p = _mm_mul_ps(w, v.q);
     LocalM128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
@@ -76,11 +77,12 @@ class hkMaskedE440 : public hkBaseE440
     char* m_uiMask;
     int m_numMask;
 
-    void FUN_00e44010(float t, int a, int b, hkOutputE440* out);
+    void hkpVehicleDefaultSteering_calcSteering(float t, int a, int b, hkOutputE440* out);
 };
 
 // @fnv 0x00e44010
-void hkMaskedE440::FUN_00e44010(float t, int a, int b, hkOutputE440* out)
+// src: HAVOK_LIB 0x00e44010
+void hkMaskedE440::hkpVehicleDefaultSteering_calcSteering(float t, int a, int b, hkOutputE440* out)
 {
     vfn_10(t, a, b, out);
     for (int i = 0; i < m_numMask; i++)

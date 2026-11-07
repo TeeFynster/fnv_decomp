@@ -4,7 +4,8 @@
 #include <xmmintrin.h>
 // Counts two byte positions, then stably sorts words from data through temp and back to data.
 // @fnv 0x00d9fcf0
-void FUN_00d9fcf0(unsigned int* data, int count, unsigned int* temp)
+// src: XBOX_PDB 0x00d9fcf0
+void hkRadixSort_sort16(unsigned int* data, int count, unsigned int* temp)
 {
     __declspec(align(16)) unsigned int* ptrs1[256];
     __declspec(align(16)) unsigned int* ptrs0[256];

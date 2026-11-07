@@ -32,18 +32,18 @@ void HighActorCuller::Operate(MobileObject* mobile)
     {
         m_kFadeNodeCuller.Process(object);
         BSFadeNode* fade = object->IsFadeNode();
-        if (fade && !fade->FUN_00552470())
+        if (fade && !fade->NiNode_QNotVisible())
         {
             // Preserve the original trivial snapshot; NiBound has an out-of-line copy constructor.
             unsigned __int64 bound[sizeof(NiBound) / sizeof(unsigned __int64)];
             memcpy(bound, &static_cast<const NiAVObject*>(fade)->GetBoundingVolume(), sizeof(bound));
             m_spMultiBoundSphere->SetGridPosition(reinterpret_cast<const NiBound*>(bound)->GetNavMeshData());
-            m_spMultiBoundSphere->FUN_00819a50(reinterpret_cast<const NiBound*>(bound)->FUN_0084d030());
+            m_spMultiBoundSphere->CombatLocation_SetRadius(reinterpret_cast<const NiBound*>(bound)->FUN_0084d030());
             BSPortalGraph* graph = 0;
             if (g_TES->GetInteriorCell())
-                graph = g_TES->GetInteriorCell()->FUN_009d9f20();
+                graph = g_TES->GetInteriorCell()->GetPortalGraph_009d9f20();
             else if (g_TES->GetParentWorldSpace())
-                graph = g_TES->GetParentWorldSpace()->FUN_006698d0();
+                graph = g_TES->GetParentWorldSpace()->TESPackage_GetOnChangeIdle();
             if (graph)
             {
                 NiTPointerList<BSOcclusionPlane*>& occluders = graph->GetOccluderList();
@@ -53,7 +53,7 @@ void HighActorCuller::Operate(MobileObject* mobile)
                     BSOcclusionPlane* plane = occluders.GetNext(position);
                     if (plane && static_cast<const BSOcclusionPlane*>(plane)->GetCullResult() == 1)
                     {
-                        if (!m_pMultiBoundNode->CheckProcStateAndPlane(m_kFadeNodeCuller.GetCamera()->FUN_0045bb80(),
+                        if (!m_pMultiBoundNode->CheckProcStateAndPlane(m_kFadeNodeCuller.GetCamera()->NiAVObject_GetWorldTranslate(),
                                                                        m_kFadeNodeCuller, plane))
                             fade->SetTaskFlag(true);
                     }

@@ -14,7 +14,8 @@
 #include "../../../../../../include/hkVector4.h"
 
 // @fnv 0x00cf1480
-void FUN_00cf1480(float afValue1, float afValue2, int* piTarget)
+// src: HAVOK_LIB 0x00cf1480
+void hkSweptTransformUtil_setTimeInformation(float afValue1, float afValue2, int* piTarget)
 {
     *reinterpret_cast<float*>(piTarget + 19) = afValue1;
     *reinterpret_cast<float*>(piTarget + 23) = afValue2;
@@ -380,10 +381,10 @@ struct S_00cf10f0_Ctx
     }
 };
 
-hkMemoryRouter* FUN_00c85750() throw();
+hkMemoryRouter* hkMemoryRouter_getInstance() throw();
 
 struct S_00cf10f0_Arr4;
-void __cdecl FUN_00c908c0(hkMemoryAllocator* heap, S_00cf10f0_Arr4* arr, int n, int elemSize);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* heap, S_00cf10f0_Arr4* arr, int n, int elemSize);
 
 struct S_00cf10f0_Arr4
 {
@@ -392,10 +393,10 @@ struct S_00cf10f0_Arr4
     int m_cap;
     __forceinline void reserve(int n) throw()
     {
-        hkMemoryAllocator& h = FUN_00c85750()->heap();
+        hkMemoryAllocator& h = hkMemoryRouter_getInstance()->heap();
         int cap = m_cap & 0x3fffffff;
         if (cap < n)
-            FUN_00c908c0(&h, this, (n < cap * 2) ? cap * 2 : n, 4);
+            hkArrayUtil__reserve(&h, this, (n < cap * 2) ? cap * 2 : n, 4);
     }
     __forceinline void SetSizeAndGrow(int n) throw()
     {
@@ -420,7 +421,7 @@ int __cdecl LoadIntArray(S_00cf10f0_Stream* kStream, S_00cf10f0_Arr4* pArray)
     S_00cf10f0_Ctx guard(0x10);
     int n = 0;
     BinaryStreamLoad(*kStream->unk24c, &n, 1);
-    pArray->_clearAndDeallocate(FUN_00c85750()->heap());
+    pArray->_clearAndDeallocate(hkMemoryRouter_getInstance()->heap());
     pArray->SetSizeAndGrow(n);
     int bytes = n * 4;
     for (int iIndex = 0; iIndex < n; iIndex++)
@@ -447,13 +448,13 @@ struct HeapContextGuard
     }
 };
 
-__declspec(nothrow) hkMemoryRouter* __cdecl FUN_00c85750();
+__declspec(nothrow) hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* audio()
 {
-    return FUN_00c85750();
+    return hkMemoryRouter_getInstance();
 }
 
-__declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
+__declspec(nothrow) void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 
 struct BlobStream
 {
@@ -495,7 +496,7 @@ struct ByteArrayLocalForm
         if (getCapacity() < n)
         {
             int cap = 2 * getCapacity();
-            FUN_00c908c0(alloc, this, n < cap ? cap : n, sizeof(char));
+            hkArrayUtil__reserve(alloc, this, n < cap ? cap : n, sizeof(char));
         }
         m_iElementCount = n;
     }
@@ -560,11 +561,12 @@ int __cdecl ReadBlobObject(BlobStream* stream, BlobObject** ppOut)
 }
 }  // namespace fnv_00cf1270
 
-int __cdecl FUN_00cf1f80(int, int, int);
+int __cdecl hkSweptTransformUtil_warpTo(int, int, int);
 // @fnv 0x00cf2160
-int __cdecl FUN_00cf2160(unsigned int uiValue, unsigned int arg1)
+// src: HAVOK_LIB 0x00cf2160
+int __cdecl hkSweptTransformUtil_warpToRotation(unsigned int uiValue, unsigned int arg1)
 {
-    unsigned int callResult0 = (unsigned int)FUN_00cf1f80((int)(arg1 + 48u), (int)uiValue, (int)arg1);
+    unsigned int callResult0 = (unsigned int)hkSweptTransformUtil_warpTo((int)(arg1 + 48u), (int)uiValue, (int)arg1);
     return (int)callResult0;
 }
 
@@ -654,7 +656,7 @@ struct FUN_008cd6a0_Class
     V4 rot0;
     V4 rot1;
     V4 comLocal;
-    void __thiscall FUN_00cb2d90(void*);
+    void __thiscall hkRotation_set(void*);
 };
 
 __forceinline void interpolate(__m128& dst, __m128 a, __m128 b, float w)
@@ -714,7 +716,7 @@ void __cdecl UpdateRotationInterpolation(float time, FUN_008cd6a0_Class* apTrans
     apTransform->com1.q = com;
     apTransform->com1.q.m128_f32[3] = 0.0f;
 
-    apTransform->FUN_00cb2d90(&apTransform->rot1);
+    apTransform->hkRotation_set(&apTransform->rot1);
 
     __m128 v = apTransform->comLocal.q;
     __m128 y = _mm_shuffle_ps(v, v, 0x55);
@@ -725,7 +727,7 @@ void __cdecl UpdateRotationInterpolation(float time, FUN_008cd6a0_Class* apTrans
     apTransform->translation.q = _mm_sub_ps(apTransform->com1.q, rot);
 }
 
-void FUN_00cf1480(float a, float b, int* c);
+void hkSweptTransformUtil_setTimeInformation(float a, float b, int* c);
 
 struct __declspec(align(16)) MotionVec4
 {
@@ -804,7 +806,8 @@ struct TransformData
 };
 // Weights the row vectors by transform components, adds source, stores the result in output and output2, and copies translation to output3.
 // @fnv 0x00cf20d0
-extern "C" void __cdecl FUN_00cf20d0(const __m128* source, TransformData* data)
+// src: COMMUNITY 0x00cf20d0
+extern "C" void __cdecl hkSweptTransformUtil_warpToPosition(const __m128* source, TransformData* data)
 {
     data->zero = _mm_setzero_ps();
     data->sourceCopy = *source;
@@ -835,17 +838,18 @@ struct Obj_t
     __m128 m80;
     __m128 m90;
 
-    void FUN_00cb2d90(const __m128& value);
+    void hkRotation_set(const __m128& value);
 };
 
 // Applies a 3x3 matrix (m00, m10, m20) times a vector (m80) plus translation (first) to produce m40 and m50, preserving the w component of m40.
 // @fnv 0x00cf1f80
-void __cdecl FUN_00cf1f80(const __m128& apTranslation, const __m128& second, Obj_t* obj)
+// src: COMMUNITY 0x00cf1f80
+void __cdecl hkSweptTransformUtil_warpTo(const __m128& apTranslation, const __m128& second, Obj_t* obj)
 {
     obj->m90 = _mm_setzero_ps();
     obj->m60 = second;
     obj->m70 = second;
-    obj->FUN_00cb2d90(second);
+    obj->hkRotation_set(second);
     {
         __m128& t = obj->m30;
         t = apTranslation;
@@ -930,7 +934,8 @@ struct OutputArg
 };
 // Interpolates a swept transform's rotation and position at time t, writing the result into out and adjusting its translation by the local center of mass.
 // @fnv 0x00cf1920
-void __cdecl FUN_00cf1920(const hkSweptTransform* sweptTrans, float afTime, FUN_008cd6a0_Class* apTransform, ...)
+// src: GUESS 0x00cf1920 (confidence: medium)
+void __cdecl Object_InterpolateSweptTransform(const hkSweptTransform* sweptTrans, float afTime, FUN_008cd6a0_Class* apTransform, ...)
 {
     hkVector4 qResult;
     {
@@ -955,7 +960,7 @@ void __cdecl FUN_00cf1920(const hkSweptTransform* sweptTrans, float afTime, FUN_
         qResult.normalize4();
     }
     FUN_008cd6a0_Class* pTransform = apTransform;
-    pTransform->FUN_00cb2d90(&qResult);
+    pTransform->hkRotation_set(&qResult);
 
     hkVector4& vTranslation = *((hkVector4*)&pTransform->translation);
     __m128 vTimeWeight = _mm_load_ss(&afTime);
@@ -981,7 +986,8 @@ struct MotionExtR : FUN_008cd6a0_Class
 
 // Computes values from time and com0/com1, then updates rot1, com1, deltaAngle, and translation.
 // @fnv 0x00cf1b10
-void __cdecl FUN_00cf1b10(float time, FUN_008cd6a0_Class* self)
+// src: XBOX_PDB 0x00cf1b10
+void __cdecl hkSweptTransformUtil_backStepMotionState(float time, FUN_008cd6a0_Class* self)
 {
     float t0 = (time - self->com0.q.m128_f32[3]) * self->com1.q.m128_f32[3];
     float w = (DAT_0104da4c < t0) ? t0 : DAT_0104da4c;
@@ -1019,7 +1025,7 @@ void __cdecl FUN_00cf1b10(float time, FUN_008cd6a0_Class* self)
     __m128 wb = _mm_load_ss(&w);
     wb = _mm_shuffle_ps(wb, wb, 0);
     ((MotionExtR*)self)->deltaAngle.q = _mm_mul_ps(wb, ((MotionExtR*)self)->deltaAngle.q);
-    self->FUN_00cb2d90(&self->rot1);
+    self->hkRotation_set(&self->rot1);
 
     __m128 vComLocal = self->comLocal.q;
     __m128 vRy = _mm_mul_ps(_mm_shuffle_ps(vComLocal, vComLocal, 0x55), self->col1.q);

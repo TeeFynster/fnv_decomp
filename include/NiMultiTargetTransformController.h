@@ -46,8 +46,8 @@ public:
     unsigned short FindIndexByValue(NiAVObject* target);
     void SetInterpolatorTarget(unsigned short index, NiAVObject* target);
     void CopyMemberData(NiMultiTargetTransformController* clone, CloningProcess& process);
-    void FUN_00a2feb0(unsigned short n);
-    void FUN_00a30160();
+    void AllocateStorage(unsigned short n);
+    void ClearInterpolators();
 
     NiBlendTransformInterpolator* m_pkBlendInterpolators;
     NiAVObject** m_ppTargetObjects;

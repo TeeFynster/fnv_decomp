@@ -4,7 +4,8 @@
 struct ID3DXBuffer;
 extern "C" __declspec(dllimport) HRESULT WINAPI D3DXCreateBuffer(DWORD, ID3DXBuffer**);
 // @fnv 0x00ee6e3a
-HRESULT WINAPI FUN_00ee6e3a(DWORD size, ID3DXBuffer** buffer)
+// src: COMMUNITY 0x00ee6e3a
+HRESULT WINAPI D3DXCreateBuffer_0(DWORD size, ID3DXBuffer** buffer)
 {
     return D3DXCreateBuffer(size, buffer);
 }

@@ -77,7 +77,7 @@ public:
     unsigned char QueuedMessages[12];
 
     bool __thiscall FUN_00ae9d50(int);
-    bool __thiscall FUN_00ae9b50(int, float);
+    bool __thiscall CanPlayNow(int, float);
     void __thiscall SetFlagAndApplyValue(bool);
     unsigned int GetID() const;
     void SetID(unsigned int value);

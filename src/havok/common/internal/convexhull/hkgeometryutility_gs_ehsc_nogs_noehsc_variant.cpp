@@ -57,7 +57,7 @@ struct FUN_00d5a630_ctxB
     void InitB();
 };
 extern float DAT_0106ea1c;
-void __cdecl FUN_00d5a630(void* a1, int a2, int a3);
+void __cdecl hkGeometryUtility_createConvexGeometry(void* a1, int a2, int a3);
 struct S_00d5a6b0_Elem
 {
     float x;
@@ -92,7 +92,7 @@ struct D5C110MemoryRouter
         return *m_pStreamAllocator;
     }
 };
-extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D5C110MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 struct D5C110Vector4
 {
     float m_uiX;
@@ -112,7 +112,7 @@ struct D5C110VertexArray
 
     void ClearAndRelease()
     {
-        D5C110Allocator& alloc = FUN_00c85750().heap();
+        D5C110Allocator& alloc = hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(D5C110Vector4));
@@ -137,7 +137,7 @@ void __cdecl InitAndSetB(const D5C110StridedVertices& vertices, D5C110Geometry& 
 void __cdecl BuildGeometryFromShape(const void* shape, D5C110Geometry& out);
 struct D5C110VertexArray;
 void __cdecl ProcessArg(const void* shape, D5C110VertexArray& vertices);
-void __cdecl FUN_00d5a6a0(const void* shape, D5C110VertexArray& vertices);
+void __cdecl hkGeometryUtility_createVerticesFromPlaneEquations(const void* shape, D5C110VertexArray& vertices);
 
 #include <xmmintrin.h>
 struct S_00d5ac50_R
@@ -168,7 +168,7 @@ struct S_00d5ac50_P
 
 extern __m128 DAT_010c44d0;
 
-S_00d5ac50_R FUN_00d5a6e0(S_00d5ac50_M& m, int iters);
+S_00d5ac50_R Object_ProcessEntries_00d5a6e0(S_00d5ac50_M& m, int iters);
 
 static __forceinline __m128& S_q(S_00d5ac50_V& v)
 {
@@ -186,9 +186,10 @@ static __forceinline float S_dot3(__m128 x)
 }
 
 // @fnv 0x00d5ac50
-S_00d5ac50_R FUN_00d5ac50(S_00d5ac50_M& m, S_00d5ac50_V* p0, S_00d5ac50_V* p1, S_00d5ac50_V* p2)
+// src: GUESS 0x00d5ac50 (confidence: low)
+S_00d5ac50_R HkgeometryutilityGsEhscNogsNoehsc_ComputeValues_00d5ac50(S_00d5ac50_M& m, S_00d5ac50_V* p0, S_00d5ac50_V* p1, S_00d5ac50_V* p2)
 {
-    S_00d5ac50_R r = FUN_00d5a6e0(m, 30);
+    S_00d5ac50_R r = Object_ProcessEntries_00d5a6e0(m, 30);
     S_00d5ac50_V& o0 = *p0;
     S_00d5ac50_V& o1 = *p1;
     S_00d5ac50_V& o2 = *p2;

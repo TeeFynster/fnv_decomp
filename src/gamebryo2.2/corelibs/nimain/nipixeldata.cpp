@@ -133,7 +133,7 @@ bool NiPixelData::RegisterStreamables(NiStream& stream)
     return true;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 extern int DAT_0109dbb4;
 // Constructor entry points used by the default and copy initialization paths.
@@ -158,7 +158,7 @@ static __forceinline void InitializePixelData(NiPixelData* data)
 // @fnv 0x00a7c3f0
 void* __cdecl CreateSpawnedPixelData()
 {
-    NiPixelData* data = static_cast<NiPixelData*>(FUN_00aa13e0(sizeof(NiPixelData)));
+    NiPixelData* data = static_cast<NiPixelData*>(Object_DispatchCommandFour(sizeof(NiPixelData)));
     if (data)
     {
         InitializePixelData(data);
@@ -292,8 +292,8 @@ void NiPixelData::LoadBinary(NiStream& kStream)
     stream.Read(pixels, m_puiOffsetInBytes[m_uiMipmapLevels] * m_uiFaces, 1);
 }
 
-char* __cdecl FUN_00a7d330(char* pcText);
-char* __cdecl FUN_00a7d510(const char* pcName, unsigned int uiValue);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char* pcText);
+char* __cdecl NiGetViewerString_00a7d510(const char* pcName, unsigned int uiValue);
 inline void StrArr::AppendReference(char*& element)
 {
     unsigned int uiIndex = m_usSize;
@@ -320,19 +320,19 @@ void NiPixelData::GetViewerStrings(NiViewerStringsArray* strings)
 {
     StrArr* pkStrings = reinterpret_cast<StrArr*>(strings);
     ((Base00a5d6e0*)this)->AppendCameraPathEntries(pkStrings);
-    char* pcString = FUN_00a7d330(*(char**)&g_011f4a90);
+    char* pcString = NiViewerStrings_NiGetViewerString_Title(*(char**)&g_011f4a90);
     pkStrings->AppendReference(pcString);
-    pcString = FUN_00a7d510("Width", GetWidth());
+    pcString = NiGetViewerString_00a7d510("Width", GetWidth());
     pkStrings->AppendReference(pcString);
-    pcString = FUN_00a7d510("Height", GetHeight());
+    pcString = NiGetViewerString_00a7d510("Height", GetHeight());
     pkStrings->AppendReference(pcString);
-    pcString = FUN_00a7d510("m_uiMipmapLevels", m_uiMipmapLevels);
+    pcString = NiGetViewerString_00a7d510("m_uiMipmapLevels", m_uiMipmapLevels);
     pkStrings->AppendReference(pcString);
-    pcString = FUN_00a7d510("m_uiFaces", m_uiFaces);
+    pcString = NiGetViewerString_00a7d510("m_uiFaces", m_uiFaces);
     pkStrings->AppendReference(pcString);
-    pcString = FUN_00a7d510("TotalSizeInBytes", PixelTotalSize(this));
+    pcString = NiGetViewerString_00a7d510("TotalSizeInBytes", PixelTotalSize(this));
     pkStrings->AppendReference(pcString);
-    pcString = FUN_00a7d510("FaceSizeInBytes", PixelFaceSize(this));
+    pcString = NiGetViewerString_00a7d510("FaceSizeInBytes", PixelFaceSize(this));
     pkStrings->AppendReference(pcString);
 }
 
@@ -509,7 +509,8 @@ class NiPalettePtr
 };
 
 // @fnv 0x00a7c030
-NiPixelData* NiPixelData::FUN_00a7c030(const NiPixelData& kSrc)
+// src: EXE 0x00a7c030
+NiPixelData* NiPixelData::NiPixelData_00a7c030(const NiPixelData& kSrc)
 {
     reinterpret_cast<NiObjectInitialization*>(this)->Construct();
     *reinterpret_cast<void**>(this) = &DAT_0109dbb4;

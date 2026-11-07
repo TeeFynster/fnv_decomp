@@ -14,7 +14,7 @@ public:
     void* Destroy(unsigned int flags);
     void SaveWithTag();
     void SetLocationFromPackage(int aiPackageId);
-    bool FUN_0067af50(TESPackageData* pkOtherData);
+    bool Compare_0067af50(TESPackageData* pkOtherData);
 
     AF50Location* m_pkLocation;
 };

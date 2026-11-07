@@ -4,7 +4,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00ddcdd0
-unsigned int FUN_00ddcdd0(unsigned int auiValue, unsigned int auiIndex, unsigned int auiFieldValue)
+// src: HAVOK_LIB 0x00ddcdd0
+unsigned int hkpMeshWeldingUtility_modifyCombinedEdgesBitcode(unsigned int auiValue, unsigned int auiIndex, unsigned int auiFieldValue)
 {
     return (auiValue & ~(0x1f << (auiIndex * 5))) | (auiFieldValue << (auiIndex * 5));
 }
@@ -84,7 +85,7 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
@@ -99,7 +100,7 @@ CpuObject* CpuObject::DestroyOrFree(unsigned int flags)
     FUN_00ddcc60();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
+        CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;
@@ -127,7 +128,7 @@ int FindAngleIndex(float angle)
     return index;
 }
 
-int __cdecl FUN_00cb0fa0(const char* pcA, const char* pcB);
+int __cdecl hkString_strCmp(const char* pcA, const char* pcB);
 
 class __declspec(novtable) BDDCCB0ReferencedObject
 {
@@ -194,7 +195,7 @@ FUN_00ddccb0_cls::FUN_00ddccb0_cls(const hkArrayBase<BDDCCB0ProcessContext*>& kC
     int iSize = kContexts.GetLogicalSize();
     for (int i = 0; i < iSize; i++)
     {
-        if (FUN_00cb0fa0("Physics", kContexts[i]->getType()) == 0)
+        if (hkString_strCmp("Physics", kContexts[i]->getType()) == 0)
         {
             m_pkContext = static_cast<BDDCCB0PhysicsContext*>(kContexts[i]);
             break;
@@ -224,7 +225,8 @@ struct Flag
 
 // Compares unk08 of two Item objects and returns a Flag holding whether the first is less than the second.
 // @fnv 0x00ddcda0
-Flag __cdecl FUN_00ddcda0(Item* apLeft, Item* apRight)
+// src: GUESS 0x00ddcda0 (confidence: low)
+Flag __cdecl Object_CompareField08_00ddcda0(Item* apLeft, Item* apRight)
 {
     bool r;
     if (apLeft->unk08 < apRight->unk08)
@@ -351,20 +353,21 @@ Derived::Derived()
 struct A1_00ddcd60
 {
     A1_00ddcd60();
-    virtual void FUN_00ddcd60();
+    virtual void AdjustThisAndForward_00ddcd60();
     char pad[0x04];
 };
 struct A2_00ddcd60
 {
     A2_00ddcd60();
-    virtual void FUN_00ddcd60();
+    virtual void AdjustThisAndForward_00ddcd60();
 };
 struct Own_00ddcd60 : A1_00ddcd60, A2_00ddcd60
 {
     Own_00ddcd60();
     virtual void key_fn();
 // @fnv 0x00ddcd60
-    void FUN_00ddcd60();
+// src: GUESS 0x00ddcd60 (confidence: low)
+    void AdjustThisAndForward_00ddcd60();
 };
 Own_00ddcd60::Own_00ddcd60()
 {}

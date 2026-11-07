@@ -49,6 +49,6 @@ class NiRangeLODData : public NiLODData
     void SetRange(unsigned int i, float fNear, float fFar);
     void CopyTo(NiRangeLODData* pkDest, CloningProcess* kCloning);
     void CopyMemberData(NiRangeLODData* pkDest, CloningProcess& kCloning);
-    NiObject* FUN_00a97ce0(CloningProcess& kCloning);
+    NiObject* CreateClone_00a97ce0(CloningProcess& kCloning);
 };
 

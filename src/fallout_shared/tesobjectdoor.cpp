@@ -50,7 +50,7 @@ class LockExtraData
 class TeleportableReference
 {
   public:
-    TESObjectCELL* FUN_0043a2b0();
+    TESObjectCELL* DoorTeleportData_GetTeleportCell();
     TESWorldSpace* GetTeleportWorldspace();
     NiPoint3* GetPosition();
     NiPoint3* GetRotation();
@@ -74,11 +74,11 @@ extern TESBoundObject* g_pLockpickItem;
 extern TESObjectREFR* DAT_011c9350;
 extern Setting DAT_011c9384, DAT_011d276c, DAT_011d5110;
 extern const float DAT_010162c0;
-void FUN_00519810(TESObjectREFR*, TESObjectREFR*);
-void FUN_00600900(TESBoundObject*);
-void FUN_00600920(int);
-void FUN_00600940(bool);
-void FUN_00705830(TESObjectREFR*, int, int);
+void TESObjectDOOR_LinkRandomTeleportDoors(TESObjectREFR*, TESObjectREFR*);
+void TESIdleManager_SetUsedItem(TESBoundObject*);
+void TESIdleManager_SetUsedItemLevel(int);
+void TESIdleManager_SetUsedItemActivate(bool);
+void Interface_CreateLockPickMenu(TESObjectREFR*, int, int);
 void ApplyPerkModifiers(int, Actor*, float*);
 int Warning(const char*, ...);
 extern "C" void* _alloca(unsigned int);
@@ -185,7 +185,7 @@ void TESObjectDOOR::InitItem()
     TESScriptableForm::InitItem(this);
     BGSDestructibleObjectForm::InitItem(this);
     TESModelTextureSwap::InitItem(this);
-    BSSimpleList<TESForm*>* current = FUN_00871a30();
+    BSSimpleList<TESForm*>* current = TESDataHandler_GetFactions();
     BSSimpleList<TESForm*>* previous = 0;
     while (current && !current->IsEmpty())
     {
@@ -303,43 +303,47 @@ struct blob8
     char b[8];
 };
 
-hkpRigidBody* __fastcall FUN_004ae750(void* p);
-int __fastcall FUN_00517670(hkpRigidBody* p);
+hkpRigidBody* __fastcall Bipedanim_GetReferenceFlagsOrZero(void* p);
+int __fastcall hkpRigidBody_getMotionType(hkpRigidBody* p);
 
 struct bhkRigidBody_shell
 {
-    int FUN_00517630();
+    int bhkRigidBody_GetMotionType();
 };
 
 // @fnv 0x00517630
-int bhkRigidBody_shell::FUN_00517630()
+// src: XBOX_PDB 0x00517630
+int bhkRigidBody_shell::bhkRigidBody_GetMotionType()
 {
-    hkpRigidBody* pb = FUN_004ae750(this);
-    return pb ? FUN_00517670(pb) : 5;
+    hkpRigidBody* pb = Bipedanim_GetReferenceFlagsOrZero(this);
+    return pb ? hkpRigidBody_getMotionType(pb) : 5;
 }
 
 class BGSRagdoll;
 template <class T> class BSSimpleList;
 
-int __fastcall FUN_00517690(void* pThis);
+int __fastcall hkpMotion_getType(void* pThis);
 
 // @fnv 0x00517670
-int __fastcall FUN_00517670(TESDataHandler* apDataHandler)
+// src: XBOX_PDB 0x00517670
+int __fastcall hkpRigidBody_getMotionType(TESDataHandler* apDataHandler)
 {
-    return FUN_00517690(apDataHandler->GetBGSRagdollList());
+    return hkpMotion_getType(apDataHandler->GetBGSRagdollList());
 }
 
 
 
 // @fnv 0x00517690
-int __fastcall FUN_00517690(char* pThis)
+// src: XBOX_PDB 0x00517690
+int __fastcall hkpMotion_getType(char* pThis)
 {
     return ((PackageTargetRecord*)(pThis + 8))->GetTargetKind();
 }
 
 // Returns true if the byte at offset 0x84 of thisPtr has bit 2 set, otherwise false.
 // @fnv 0x00517fa0
-bool TESObjectDOOR::FUN_00517fa0()
+// src: XBOX_PDB 0x00517fa0
+bool TESObjectDOOR::IsAutomaticDoor()
 {
     if (cFlags & 2)
         return true;
@@ -350,7 +354,8 @@ bool TESObjectDOOR::FUN_00517fa0()
 
 // Returns true if the 0x10 flag is set in cFlags, otherwise false.
 // @fnv 0x00518080
-bool TESObjectDOOR::FUN_00518080()
+// src: XBOX_PDB 0x00518080
+bool TESObjectDOOR::IsSlidingDoor()
 {
     if (cFlags & 0x10)
         return true;
@@ -459,7 +464,7 @@ bool __cdecl CanActivateDoor(LockExtraData* apDoorLock, Actor* apActor, TESObjec
     bool bretval = false;
     if (apActor && apDoorLock)
     {
-        if ((apActor->FUN_008842c0() && (((ProcessVtbl0x128*)apActor->GetProcess())->v74() == g_thePlayer) &&
+        if ((apActor->Actor_IsFollowing() && (((ProcessVtbl0x128*)apActor->GetProcess())->v74() == g_thePlayer) &&
              apDoorRef->Set3DObject()) ||
             apActor->IsDisabled())
         {
@@ -477,12 +482,13 @@ struct BSXFlags_shell
 {
     char _pad[0xc];
     unsigned int m_uiCurrentValue;
-    void FUN_00519230(unsigned int aiFlags, bool abTF);
+    void BSXFlags_SetFlags(unsigned int aiFlags, bool abTF);
     void ClearFlags(unsigned int aiFlags);
 };
 
 // @fnv 0x00519230
-void BSXFlags_shell::FUN_00519230(unsigned int aiFlags, bool abTF)
+// src: XBOX_PDB 0x00519230
+void BSXFlags_shell::BSXFlags_SetFlags(unsigned int aiFlags, bool abTF)
 {
     if (abTF)
         m_uiCurrentValue |= aiFlags;
@@ -491,18 +497,20 @@ void BSXFlags_shell::FUN_00519230(unsigned int aiFlags, bool abTF)
 }
 
 // @fnv 0x005bb4d0
-bool BSAudio::FUN_005bb4d0()
+// src: XBOX_PDB 0x005bb4d0
+bool BSAudio::TESRegionData_GetPriority()
 {
     return bMultiThread;
 }
 
 struct FUN_00693d50_shell : public BaseProcess
 {
-    void FUN_00693d50(float);
+    void BaseProcess_SetLastTimeProcessed(float);
 };
 
 // @fnv 0x00693d50
-void FUN_00693d50_shell::FUN_00693d50(float afTime)
+// src: XBOX_PDB 0x00693d50
+void FUN_00693d50_shell::BaseProcess_SetLastTimeProcessed(float afTime)
 {
     *(float*)((char*)this + 0x20) = afTime;
 }
@@ -536,10 +544,11 @@ struct Base_004d9210
 extern int DAT_01021024;
 struct Holder_004d9100
 {
-    Holder_004d9100* FUN_004d9100(int a, int b);
+    Holder_004d9100* InitializeFields_004d9100(int a, int b);
 };
 // @fnv 0x004d9100
-Holder_004d9100* Holder_004d9100::FUN_004d9100(int aiArg1, int aiArg2)
+// src: GUESS 0x004d9100 (confidence: low)
+Holder_004d9100* Holder_004d9100::InitializeFields_004d9100(int aiArg1, int aiArg2)
 {
     ((Base_004d9210*)this)->FUN_004d9210(aiArg1, aiArg2);
     *(void**)this = (void*)&DAT_01021024;
@@ -560,7 +569,8 @@ void* __thiscall TESObjectDOOR::FUN_005174d0(unsigned int flags)
 
 // Sets or clears bit 3 (0x8) of the byte at offset 0x84 according to abSet.
 // @fnv 0x00518030
-void TESObjectDOOR::FUN_00518030(bool abSet)
+// src: XBOX_PDB 0x00518030
+void TESObjectDOOR::SetMinimalUse(bool abSet)
 {
     if (abSet)
         cFlags |= 8;
@@ -568,8 +578,8 @@ void TESObjectDOOR::FUN_00518030(bool abSet)
         cFlags &= ~8;
 }
 
-void __cdecl FUN_00485910(unsigned int, unsigned int);
-void __cdecl FUN_004858f0(unsigned int, unsigned char);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_3(unsigned int, unsigned char);
 struct DoorFormNode
 {
     bool FUN_008256d0();
@@ -591,9 +601,9 @@ struct DoorSave_shell
     TESForm* form7c;
     TESForm* form80;
     unsigned char flags;
-    void FUN_004855a0();
-    void FUN_00485680();
-    DoorFormNode* FUN_00871a30();
+    void BeginFormRecord();
+    void FinishFormRecord();
+    DoorFormNode* TESDataHandler_GetFactions();
     void WriteSaveData();
 };
 // Writes the door save record: calls each part's writer, emits form IDs for form78/form7c/form80 and flags, then walks the node list emitting each form ID.
@@ -602,36 +612,36 @@ void DoorSave_shell::WriteSaveData()
 {
     DoorFormNode* pCurrentElementNext;
     unsigned int itempint;
-    FUN_004855a0();
-    part30.FUN_00487010();
+    BeginFormRecord();
+    part30.Save_00487010();
     ((void(__thiscall*)(TESModel*, unsigned int, unsigned int, unsigned int)) & WriteDoorModelChunks)(
         &part3c, 0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    part5c.FUN_0048cca0();
+    part5c.Save_0048cca0();
     part68.Save();
     if (form78)
     {
         itempint = form78->GetFormID();
-        FUN_00485910(0x4d414e53, itempint);
+        TESForm_AddChunk_00485910(0x4d414e53, itempint);
     }
     if (form7c)
     {
         itempint = form7c->GetFormID();
-        FUN_00485910(0x4d414e41, itempint);
+        TESForm_AddChunk_00485910(0x4d414e41, itempint);
     }
     if (form80)
     {
         itempint = form80->GetFormID();
-        FUN_00485910(0x4d414e42, itempint);
+        TESForm_AddChunk_00485910(0x4d414e42, itempint);
     }
-    FUN_004858f0(0x4d414e46, flags);
-    pCurrentElementNext = FUN_00871a30();
+    TESForm_AddChunk_3(0x4d414e46, flags);
+    pCurrentElementNext = TESDataHandler_GetFactions();
     while (pCurrentElementNext && !pCurrentElementNext->FUN_008256d0())
     {
         itempint = (*pCurrentElementNext->FUN_006815c0())->GetFormID();
-        FUN_00485910(0x4d414e54, itempint);
+        TESForm_AddChunk_00485910(0x4d414e54, itempint);
         pCurrentElementNext = pCurrentElementNext->FUN_00726070();
     }
-    FUN_00485680();
+    FinishFormRecord();
 }
 
 struct DoorTeleportNode
@@ -645,7 +655,7 @@ struct DoorTeleportNode
 
 struct DoorCompare_shell : public TESObjectDOOR
 {
-    bool FUN_00485270(TESForm* form);
+    bool TESForm_CompareAllComponents(TESForm* form);
     TESSound* GetOpenSoundForm();
     TESSound* GetCloseSoundForm();
     TESSound* GetLoopSoundForm();
@@ -660,7 +670,7 @@ bool DoorCompare_shell::CompareDoor(TESForm* form)
     DoorCompare_shell* door = (DoorCompare_shell*)dynamic_cast<TESObjectDOOR*>(form);
     if (!door)
         return true;
-    if (FUN_00485270(door))
+    if (TESForm_CompareAllComponents(door))
         return true;
     if (m_pOpenSound != door->GetOpenSoundForm())
         return true;
@@ -688,19 +698,20 @@ struct S_00518f80_Obj
 };
 struct S_00518f80_Ref : TESObjectREFR
 {
-    S_00518f80_Obj* FUN_007af430();
+    S_00518f80_Obj* BGSSaveFormBuffer_GetForm();
 };
 // These operations are not yet declared by the shared classes.
 extern "C" void SetDoorActivationReference();
 extern PlayerCharacter* DAT_011dea3c;
-S_00518f80_Ref* __cdecl FUN_0056f930(unsigned int id);
+S_00518f80_Ref* __cdecl TESObjectREFR_FindReferenceFor3D(unsigned int id);
 // @fnv 0x00518f80
-void __cdecl FUN_00518f80(unsigned int uiRefId)
+// src: XBOX_PDB 0x00518f80
+void __cdecl TESObjectDOOR_AutoDoorCallback(unsigned int uiRefId)
 {
-    S_00518f80_Ref* ref = FUN_0056f930(uiRefId);
+    S_00518f80_Ref* ref = TESObjectREFR_FindReferenceFor3D(uiRefId);
     if (ref)
     {
-        if (ref->FUN_007af430()->FUN_00401170() == 0x1c)
+        if (ref->BGSSaveFormBuffer_GetForm()->FUN_00401170() == 0x1c)
         {
             if (!ref->FUN_00477ba0())
             {
@@ -757,11 +768,11 @@ struct DoorCopy
     TESSound *openSound, *closeSound, *loopSound;
     unsigned char flags;
     void FUN_00519550();
-    DoorCopyNode* FUN_00871a30();
-    TESSound* FUN_00407820();
+    DoorCopyNode* TESDataHandler_GetFactions();
+    TESSound* GetEffectShader_00407820();
     TESSound* FUN_00407840();
     TESSound* FUN_004fb070();
-    void FUN_004851b0(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
     void CopyFromDoor(TESForm*);
 };
 // Copies the door node list, flags and open/close/loop sounds from the TESObjectDOOR cast of form into this door, then calls FUN_004851b0(form).
@@ -773,8 +784,8 @@ void DoorCopy::CopyFromDoor(TESForm* form)
         return;
     DoorCopyNode* destination = 0;
     FUN_00519550();
-    DoorCopyNode* node2 = source3->FUN_00871a30();
-    destination = FUN_00871a30();
+    DoorCopyNode* node2 = source3->TESDataHandler_GetFactions();
+    destination = TESDataHandler_GetFactions();
     while (node2 && !node2->FUN_008256d0())
     {
         destination->FUN_00905820(node2->FUN_006815c0());
@@ -783,10 +794,10 @@ void DoorCopy::CopyFromDoor(TESForm* form)
         node2 = node2->FUN_00726070();
     }
     flags = source3->flags;
-    openSound = source3->FUN_00407820();
+    openSound = source3->GetEffectShader_00407820();
     closeSound = source3->FUN_00407840();
     loopSound = source3->FUN_004fb070();
-    FUN_004851b0(form);
+    TESForm_CopyAllComponents(form);
 }
 
 #include <float.h>
@@ -797,7 +808,7 @@ struct ActivateVector
 };
 struct ActivateAnimation
 {
-    void FUN_00498910(int, int);
+    void Animation_SpecialIdleFree(int, int);
 };
 struct ActivateKey
 {
@@ -823,10 +834,10 @@ struct ActivateLock
 };
 struct ActivateTeleport
 {
-    void* FUN_0043a2b0();
+    void* DoorTeleportData_GetTeleportCell();
     void* FUN_0043a320();
     int FUN_00717e50();
-    ActivateVector* FUN_00460140();
+    ActivateVector* TESDataHandler_GetWorldSpaceList();
 };
 struct ActivateProcess
 {
@@ -1220,7 +1231,7 @@ struct ActivateProcess
     virtual void Slot60c();
     virtual int State();
     int FUN_0045cd60();
-    void FUN_008fe960(TESObjectREFR*, TESObjectREFR*, bool);
+    void HighProcess_FadeOut(TESObjectREFR*, TESObjectREFR*, bool);
 };
 extern "C" ActivateTeleport* GetDoorTeleportData();
 extern "C" ActivateLock* GetDoorLockData();
@@ -1237,17 +1248,17 @@ struct ActivateDetection
 };
 extern ActivateDetection* DAT_011dea10;
 void DispatchMessageToSink(const char*, int, const char*, int, float, int);
-void FUN_00519810(TESObjectREFR*, TESObjectREFR*);
+void TESObjectDOOR_LinkRandomTeleportDoors(TESObjectREFR*, TESObjectREFR*);
 bool FUN_00518f00(TESObjectREFR*, TESObjectREFR*, int, int);
 void FUN_005e58f0(int, TESObjectREFR*, float*);
-void FUN_00706f30(int);
-void FUN_00705830(TESObjectREFR*, int, int);
-void FUN_00600900(ActivateKey*);
-void FUN_00600940(int);
-void FUN_00600920(int);
-int FUN_00406d00(char*, unsigned, const char*, ...);
-void FUN_00573800(TESObjectREFR*, void*, void*);
-void FUN_0047a560(TESObjectREFR*, TESObjectREFR*, void*);
+void Interface_PlayMenuSound(int);
+void Interface_CreateLockPickMenu(TESObjectREFR*, int, int);
+void TESIdleManager_SetUsedItem(ActivateKey*);
+void TESIdleManager_SetUsedItemActivate(int);
+void TESIdleManager_SetUsedItemLevel(int);
+int BSsprintf(char*, unsigned, const char*, ...);
+void TESObjectREFR_MoveRefToNewSpace(TESObjectREFR*, void*, void*);
+void BGSOpenCloseForm_HandleActivate(TESObjectREFR*, TESObjectREFR*, void*);
 struct DoorActivation
 {
     unsigned unk000;
@@ -1280,9 +1291,9 @@ struct DoorActivation
     unsigned unk06c;
     unsigned unk070;
     bool ActivateDoor(TESObjectREFR*, TESObjectREFR*, int, int, int);
-    bool FUN_005194d0();
+    bool IsRandomDoor();
     TESObjectREFR* FindRandomSelection(TESObjectREFR*, TESObjectREFR*);
-    TESObjectREFR* FUN_00407820();
+    TESObjectREFR* GetEffectShader_00407820();
     void QueueDoorTeleport(TESObjectREFR*);
 };
 // Handles activation of a door reference by an activator: checks teleport/lock state, opens or unlocks the door, plays sounds, and performs teleportation.
@@ -1293,7 +1304,7 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
         return false;
     ActivateTeleport* teleport = ((ActivateTeleport*(__thiscall*)(TESObjectREFR*)) &GetDoorTeleportData)(reference);
     ActivateLock* lockA = ((ActivateLock*(__thiscall*)(TESObjectREFR*)) &GetDoorLockData)(reference);
-    if (!teleport && FUN_005194d0())
+    if (!teleport && IsRandomDoor())
     {
         TESObjectREFR* destination = FindRandomSelection(reference, activator);
         if (!destination)
@@ -1302,7 +1313,7 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
                                   "Interface\\Icons\\Message Icons\\glow_message_vaultboy_sad.dds", 0, 2.0f, 0);
             return false;
         }
-        FUN_00519810(reference, destination);
+        TESObjectDOOR_LinkRandomTeleportDoors(reference, destination);
         teleport = ((ActivateTeleport*(__thiscall*)(TESObjectREFR*)) &GetDoorTeleportData)(reference);
         if (!teleport)
             return false;
@@ -1321,10 +1332,10 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
         {
             bool hasSkeleton = false;
             if (actor->IsCharacter())
-                hasSkeleton = actor->FUN_00891db0(reinterpret_cast<TESBoundObject*>(DAT_011ca268), 0, 1, 0, reinterpret_cast<int&>(usedKey2));
+                hasSkeleton = actor->Actor_HasObjects(reinterpret_cast<TESBoundObject*>(DAT_011ca268), 0, 1, 0, reinterpret_cast<int&>(usedKey2));
             if (lockA->key)
             {
-                if (!DAT_011c9350 && !actor->FUN_00891db0(reinterpret_cast<TESBoundObject*>(lockA->key), 0, 1, 0, reinterpret_cast<int&>(usedKey2)))
+                if (!DAT_011c9350 && !actor->Actor_HasObjects(reinterpret_cast<TESBoundObject*>(lockA->key), 0, 1, 0, reinterpret_cast<int&>(usedKey2)))
                 {
                     if (actor == (TESObjectREFR*)DAT_011dea3c)
                     {
@@ -1337,10 +1348,10 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
                             DispatchMessageToSink(DAT_011d276c.FUN_00403df0(), 0,
                                                   "Interface\\Icons\\Message Icons\\glow_message_padlock.dds", 0, 2.0f,
                                                   0);
-                            FUN_00706f30(18);
+                            Interface_PlayMenuSound(18);
                         }
                         else
-                            FUN_00705830(reference, 0, 0);
+                            Interface_CreateLockPickMenu(reference, 0, 0);
                         return false;
                     }
                     else if (!hasSkeleton)
@@ -1349,19 +1360,19 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
                     {
                         ActivateAnimation* animationPart1 = reinterpret_cast<ActivateAnimation*>(actor->GetAnimData());
                         if (animationPart1)
-                            animationPart1->FUN_00498910(1, 0);
-                        FUN_00600900(DAT_011ca268);
-                        FUN_00600940(1);
-                        FUN_00600920(1);
+                            animationPart1->Animation_SpecialIdleFree(1, 0);
+                        TESIdleManager_SetUsedItem(DAT_011ca268);
+                        TESIdleManager_SetUsedItemActivate(1);
+                        TESIdleManager_SetUsedItemLevel(1);
                         process1->Open(actor, 0, 2, 1, 0, 1);
-                        FUN_00600900((ActivateKey*)0);
-                        FUN_00600940(0);
-                        FUN_00600920(-1);
+                        TESIdleManager_SetUsedItem((ActivateKey*)0);
+                        TESIdleManager_SetUsedItemActivate(0);
+                        TESIdleManager_SetUsedItemLevel(-1);
                         ExtraLock* statePart2 = ((ExtraLock*(__thiscall*)(TESObjectREFR*)) &GetDoorExtraLock)(reference);
                         if (statePart2)
                         {
                             statePart2->FUN_00517360();
-                            reference->FUN_005789b0();
+                            reference->TESObjectREFR_AddLockChange();
                         }
                     }
                 }
@@ -1372,11 +1383,11 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
                     if (statePart3)
                     {
                         statePart3->FUN_00517360();
-                        reference->FUN_005789b0();
+                        reference->TESObjectREFR_AddLockChange();
                     }
                     BSAudio::GetSingleton()->GetSoundHandleByEditorID("UILockpickingUnlock", 0x121).Play(false);
                     char message[256];
-                    FUN_00406d00(message, 255, DAT_011d5110.FUN_00403df0(),
+                    BSsprintf(message, 255, DAT_011d5110.FUN_00403df0(),
                                  lockA->key->name.GetFullName());
                     DispatchMessageToSink(message, 0, "Interface\\Icons\\Message Icons\\glow_message_key.dds", 0, 2.0f,
                                           0);
@@ -1397,10 +1408,10 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
                     {
                         DispatchMessageToSink(DAT_011d276c.FUN_00403df0(), 0,
                                               "Interface\\Icons\\Message Icons\\glow_message_padlock.dds", 0, 2.0f, 0);
-                        FUN_00706f30(18);
+                        Interface_PlayMenuSound(18);
                     }
                     else
-                        FUN_00705830(reference, 0, 0);
+                        Interface_CreateLockPickMenu(reference, 0, 0);
                     return false;
                 }
                 else if (!hasSkeleton)
@@ -1409,19 +1420,19 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
                 {
                     ActivateAnimation* animationPart2 = reinterpret_cast<ActivateAnimation*>(actor->GetAnimData());
                     if (animationPart2)
-                        animationPart2->FUN_00498910(1, 0);
-                    FUN_00600900(DAT_011ca268);
-                    FUN_00600940(1);
-                    FUN_00600920(1);
+                        animationPart2->Animation_SpecialIdleFree(1, 0);
+                    TESIdleManager_SetUsedItem(DAT_011ca268);
+                    TESIdleManager_SetUsedItemActivate(1);
+                    TESIdleManager_SetUsedItemLevel(1);
                     process1->Open(actor, 0, 2, 1, 0, 1);
-                    FUN_00600900((ActivateKey*)0);
-                    FUN_00600940(0);
-                    FUN_00600920(-1);
+                    TESIdleManager_SetUsedItem((ActivateKey*)0);
+                    TESIdleManager_SetUsedItemActivate(0);
+                    TESIdleManager_SetUsedItemLevel(-1);
                     ExtraLock* statePart5 = ((ExtraLock*(__thiscall*)(TESObjectREFR*)) &GetDoorExtraLock)(reference);
                     if (statePart5)
                     {
                         statePart5->FUN_00517360();
-                        reference->FUN_005789b0();
+                        reference->TESObjectREFR_AddLockChange();
                     }
                 }
             }
@@ -1431,30 +1442,30 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
     {
         if (!DAT_011dea3c->FUN_0094df60() && !process1->FUN_0045cd60() && process1->State() != 4)
         {
-            if (FUN_00407820() && reference && reference->GetNiNode())
+            if (GetEffectShader_00407820() && reference && reference->GetNiNode())
             {
                 BSSoundHandle sound;
                 if (actor == (TESObjectREFR*)DAT_011dea3c)
-                    sound = BSAudio::GetSingleton()->FUN_00ad73b0(FUN_00407820()->FUN_0084e3a0(), 0x80000121);
+                    sound = BSAudio::GetSingleton()->GetSoundHandleByFormID_00ad73b0(GetEffectShader_00407820()->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), 0x80000121);
                 else
-                    sound = BSAudio::GetSingleton()->FUN_00ad73b0(FUN_00407820()->FUN_0084e3a0(), 0x102u);
+                    sound = BSAudio::GetSingleton()->GetSoundHandleByFormID_00ad73b0(GetEffectShader_00407820()->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), 0x102u);
                 if (actor != (TESObjectREFR*)DAT_011dea3c)
                 {
                     NiPoint3 position = *static_cast<const TESObjectREFR*>(reference)->GetPos();
                     sound.SetPosition(position.x, position.y, position.z);
                 }
                 sound.Play(0);
-                if (actor == (TESObjectREFR*)DAT_011dea3c && !BSAudio::GetSingleton()->FUN_005bb4d0())
+                if (actor == (TESObjectREFR*)DAT_011dea3c && !BSAudio::GetSingleton()->TESRegionData_GetPriority())
                     for (int i = 0; i < 4; ++i)
                         BSAudio::GetSingleton()->Update(false);
             }
-            process1->FUN_008fe960(actor, reference, true);
+            process1->HighProcess_FadeOut(actor, reference, true);
             if (actor == (TESObjectREFR*)DAT_011dea3c)
                 return true;
             else
                 return false;
         }
-        void* cell = teleport->FUN_0043a2b0();
+        void* cell = teleport->DoorTeleportData_GetTeleportCell();
         void* world = teleport->FUN_0043a320();
         reinterpret_cast<ActivateProcess*>(actor->FUN_008d8520())->SetTarget(reference);
         if (actor == (TESObjectREFR*)DAT_011dea3c)
@@ -1471,15 +1482,15 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
             ((void(__thiscall*)(TESObjectREFR*, int)) &SetDoorReferencePosition)(activator, teleport->FUN_00717e50());
             if (cell && ((ActivateDetection*)DAT_011dea10)->FUN_004511e0(cell, 0))
             {
-                ((void(__thiscall*)(TESObjectREFR*, float)) &SetDoorReferenceRotation)(activator, teleport->FUN_00460140()->z);
-                activator->FUN_00575770(0.0f);
+                ((void(__thiscall*)(TESObjectREFR*, float)) &SetDoorReferenceRotation)(activator, teleport->TESDataHandler_GetWorldSpaceList()->z);
+                activator->TESObjectREFR_SetAngleOnReferenceX(0.0f);
             }
             else
-                activator->FUN_00575770(FLT_MAX);
+                activator->TESObjectREFR_SetAngleOnReferenceX(FLT_MAX);
             Actor* actorAgain = dynamic_cast<Actor*>(activator);
             if (actorAgain)
-                actorAgain->FUN_008ae640(0);
-            FUN_00573800(activator, cell, world);
+                actorAgain->Actor_SetForceUpdateQuest(0);
+            TESObjectREFR_MoveRefToNewSpace(activator, cell, world);
         }
     }
     else
@@ -1488,9 +1499,9 @@ bool DoorActivation::ActivateDoor(TESObjectREFR* reference, TESObjectREFR* activ
         if (statePart6)
         {
             statePart6->FUN_00517360();
-            reference->FUN_005789b0();
+            reference->TESObjectREFR_AddLockChange();
         }
-        FUN_0047a560(reference, activator, this ? &unk070 : 0);
+        BGSOpenCloseForm_HandleActivate(reference, activator, this ? &unk070 : 0);
     }
     return true;
 }
@@ -1534,7 +1545,7 @@ void TESObjectDOOR::QueueDoorTeleport(TESObjectREFR* apRef)
         TeleportableReference* pTeleport2 = ((RefShell*)apRef)->GetTeleportData();
         if (pTeleport2)
         {
-            TESObjectCELL* pDestinationCell = pTeleport2->FUN_0043a2b0();
+            TESObjectCELL* pDestinationCell = pTeleport2->DoorTeleportData_GetTeleportCell();
             TESWorldSpace* pWorld8 = pTeleport2->GetTeleportWorldspace();
             FastTravelRequest* pRequest = new FastTravelRequest();
             pRequest->kPosition = *pTeleport2->GetPosition();
@@ -1567,12 +1578,12 @@ struct Proc
 {
     bool FUN_00425fd0();
     void LockAndProcessPerks();
-    void FUN_00557be0();
+    void TESObjectCELL_ForceLODFadeInLoadedCells();
 };
 
 struct FUN_0084e3a0_Class
 {
-    int FUN_0084e3a0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 struct Obj
@@ -1582,7 +1593,7 @@ struct Obj
 
 struct Mid
 {
-    VObj* FUN_00559450();
+    VObj* Modelloader_GetReferencedThis();
 };
 
 struct VObj
@@ -1709,7 +1720,7 @@ struct VObj
 
 struct Ref
 {
-    Obj* FUN_007af430();
+    Obj* BGSSaveFormBuffer_GetForm();
     Mid* FUN_00568e50();
 };
 
@@ -1721,13 +1732,13 @@ struct GlobalObj
 
 struct Other
 {
-    void FUN_00851d30();
+    void QueueAutosave();
 };
 
 extern GlobalObj DAT_011d8980;
 extern Other* DAT_011de134;
 
-void __cdecl FUN_00519290();
+void __cdecl TESObjectDOOR_PlayerPullFollower();
 
 // Plays sound 0x121 for the given ref when its object and mid object pass checks, then updates the player proc state and notifies DAT_011de134.
 // @fnv 0x00518cf0
@@ -1736,20 +1747,20 @@ void __cdecl PlaySoundForRef(unsigned int id)
     Ref* ref = (Ref*)id;
     if (ref)
     {
-        FUN_00519290();
+        TESObjectDOOR_PlayerPullFollower();
         if (reinterpret_cast<Proc*>(DAT_011dea3c->FUN_008d6f30()) && reinterpret_cast<Proc*>(DAT_011dea3c->FUN_008d6f30())->FUN_00425fd0())
         {
             reinterpret_cast<Proc*>(DAT_011dea3c->FUN_008d6f30())->LockAndProcessPerks();
         }
-        Obj* obj = ref->FUN_007af430();
+        Obj* obj = ref->BGSSaveFormBuffer_GetForm();
         if (obj->FUN_00407840())
         {
-            if (ref->FUN_00568e50()->FUN_00559450())
+            if (ref->FUN_00568e50()->Modelloader_GetReferencedThis())
             {
-                if (ref->FUN_00568e50()->FUN_00559450()->Gate1d0())
+                if (ref->FUN_00568e50()->Modelloader_GetReferencedThis()->Gate1d0())
                 {
                     BSSoundHandle soundHandle =
-                        BSAudio::GetSingleton()->FUN_00ad73b0(obj->FUN_00407840()->FUN_0084e3a0(), 0x121);
+                        BSAudio::GetSingleton()->GetSoundHandleByFormID_00ad73b0(obj->FUN_00407840()->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), 0x121);
                     soundHandle.Play(0);
                 }
             }
@@ -1758,11 +1769,11 @@ void __cdecl PlaySoundForRef(unsigned int id)
     Proc* tailProc = reinterpret_cast<Proc*>(DAT_011dea3c->FUN_008d6f30());
     if (tailProc && !tailProc->FUN_00425fd0())
     {
-        tailProc->FUN_00557be0();
+        tailProc->TESObjectCELL_ForceLODFadeInLoadedCells();
     }
     if (*DAT_011d8980.FUN_00408d60() && tailProc)
     {
-        DAT_011de134->FUN_00851d30();
+        DAT_011de134->QueueAutosave();
     }
 }
 }  // namespace fnv_00518cf0
@@ -1771,9 +1782,9 @@ void* __cdecl operator new(unsigned int);
 
 struct FollowerExtraData
 {
-    ExtraFollower* FUN_00422700();
-    void FUN_00422690(Actor* actor);
-    void FUN_00422720();
+    ExtraFollower* ExtraDataList_GetFollowerExtra();
+    void ExtraDataList_RemoveFollower(Actor* actor);
+    void ExtraDataList_RemoveFollowerExtra();
 };
 extern "C" bool CanFollowerUseDoor();
 extern "C" void PrepareFollowerForDoor();
@@ -1789,9 +1800,10 @@ struct Calendar
 extern Calendar g_calendar;
 
 // @fnv 0x00519290
-void __cdecl FUN_00519290()
+// src: XBOX_PDB 0x00519290
+void __cdecl TESObjectDOOR_PlayerPullFollower()
 {
-    ExtraFollower* followers = reinterpret_cast<FollowerExtraData*>(g_thePlayer->TESObjectREFR::FUN_005d43c0())->FUN_00422700();
+    ExtraFollower* followers = reinterpret_cast<FollowerExtraData*>(g_thePlayer->TESObjectREFR::BSFile_GetDevice())->ExtraDataList_GetFollowerExtra();
     if (followers)
     {
         BSSimpleList<Actor*>* removed = new BSSimpleList<Actor*>;
@@ -1815,7 +1827,7 @@ void __cdecl FUN_00519290()
                 {
                     ((void(__thiscall*)(Actor*)) &PrepareFollowerForDoor)(actor);
                     static_cast<FUN_00693d50_shell*>(actor->GetProcess())
-                        ->FUN_00693d50(g_calendar.FUN_00867da0() - 1.0);
+                        ->BaseProcess_SetLastTimeProcessed(g_calendar.FUN_00867da0() - 1.0);
                 }
             }
             source = source->GetNext();
@@ -1824,14 +1836,14 @@ void __cdecl FUN_00519290()
         while (source && source->GetItem())
         {
             Actor* actorToRemove = source->GetItem();
-            reinterpret_cast<FollowerExtraData*>(g_thePlayer->TESObjectREFR::FUN_005d43c0())->FUN_00422690(actorToRemove);
+            reinterpret_cast<FollowerExtraData*>(g_thePlayer->TESObjectREFR::BSFile_GetDevice())->ExtraDataList_RemoveFollower(actorToRemove);
             source = source->GetNext();
         }
         reinterpret_cast<FollowerListOps*>(removed)->FUN_00470470();
         delete removed;
         if (followers->list->IsEmpty())
         {
-            reinterpret_cast<FollowerExtraData*>(g_thePlayer->TESObjectREFR::FUN_005d43c0())->FUN_00422720();
+            reinterpret_cast<FollowerExtraData*>(g_thePlayer->TESObjectREFR::BSFile_GetDevice())->ExtraDataList_RemoveFollowerExtra();
         }
     }
 }

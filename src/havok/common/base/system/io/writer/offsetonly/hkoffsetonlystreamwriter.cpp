@@ -29,12 +29,13 @@ struct E02E70Stats
     int m_pTileTemplate;
     int m_peak;
 
-    int FUN_00e02e70(void* p, int numBytes);
+    int hkOffsetOnlyStreamWriter_write(void* p, int numBytes);
 };
 
 // Adds numBytes to the running total, updates the peak if the total exceeds it, and returns numBytes.
 // @fnv 0x00e02e70
-int E02E70Stats::FUN_00e02e70(void* p, int numBytes)
+// src: HAVOK_LIB 0x00e02e70
+int E02E70Stats::hkOffsetOnlyStreamWriter_write(void* p, int numBytes)
 {
     m_pTileTemplate += numBytes;
     m_peak = (m_pTileTemplate > m_peak) ? m_pTileTemplate : m_peak;
@@ -81,13 +82,15 @@ int FUN_00e02e90_cls::ApplyValue(int value, int mode)
 }
 
 // @fnv 0x00e02f10
-void __stdcall FUN_00e02f10(unsigned char* output)
+// src: XBOX_PDB 0x00e02f10
+void __stdcall hkOffsetOnlyStreamWriter_isOk(unsigned char* output)
 {
     *output = 1;
 }
 
 // @fnv 0x00e02f20
-void __stdcall FUN_00e02f20(unsigned char* output)
+// src: XBOX_PDB 0x00e02f20
+void __stdcall hkOffsetOnlyStreamWriter_seekTellSupported(unsigned char* output)
 {
     *output = 1;
 }
@@ -98,11 +101,12 @@ struct FUN_00e02ee0_cls
     int unk04;
     int unk08;
 
-    int FUN_00e02ee0();
+    int GetUnk08_00e02ee0();
 };
 
 // @fnv 0x00e02ee0
-int FUN_00e02ee0_cls::FUN_00e02ee0()
+// src: GUESS 0x00e02ee0 (confidence: low)
+int FUN_00e02ee0_cls::GetUnk08_00e02ee0()
 {
     return unk08;
 }

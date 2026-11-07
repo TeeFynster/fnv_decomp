@@ -29,6 +29,6 @@ public:
     void WriteTrackedObjects();
     int sendRecursiveQ(const void* object, const hkClass* pClassInfo,
                        hkArrQLocalForm<hkWrittenObjectQ>* written) throw();
-    int FUN_00ddb770(const void* object, const hkClass* pClassInfo, hkBool recurse,
+    int writeObject(const void* object, const hkClass* pClassInfo, hkBool recurse,
                      hkArrQLocalForm<hkWrittenObjectQ>* written) throw();
 };

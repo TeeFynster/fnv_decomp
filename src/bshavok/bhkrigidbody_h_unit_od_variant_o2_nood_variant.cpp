@@ -41,11 +41,12 @@ struct S8d280_Mat
 class FUN_00c8d280_cls : public bhkRefObject
 {
   public:
-    S8d280_Mat* FUN_00c8d280(S8d280_Mat* out);
+    S8d280_Mat* bhkRigidBody_GetTransform(S8d280_Mat* out);
 };
 
 // @fnv 0x00c8d280
-S8d280_Mat* FUN_00c8d280_cls::FUN_00c8d280(S8d280_Mat* out)
+// src: XBOX_PDB 0x00c8d280
+S8d280_Mat* FUN_00c8d280_cls::bhkRigidBody_GetTransform(S8d280_Mat* out)
 {
     if (this != 0)
     {
@@ -311,7 +312,7 @@ struct MaterialInspector
     InspectionNode firstField;
     void BaseInspect(InspectorList*);
     void ReadInfo(void*);
-    void FUN_00c8f870(InspectorList*);
+    void bhkRigidBody_GetViewerStrings(InspectorList*);
 };
 struct PointFormat
 {
@@ -404,7 +405,8 @@ extern void __cdecl ExtractPoint(PointFormat*, const FloatVector*);
 extern void __cdecl AddMotion(InspectorList*, int);
 extern int __cdecl FormatText(char*, unsigned int, const char*, ...);
 // @fnv 0x00c8f870
-void MaterialInspector::FUN_00c8f870(InspectorList* output)
+// src: XBOX_PDB 0x00c8f870
+void MaterialInspector::bhkRigidBody_GetViewerStrings(InspectorList* output)
 {
     MemoryContext context;
     BaseInspect(output);
@@ -519,7 +521,7 @@ void MaterialInspector::FUN_00c8f870(InspectorList* output)
 }
 
 struct Q8f6e0_Tls;
-extern Q8f6e0_Tls* FUN_00c85750();
+extern Q8f6e0_Tls* hkMemoryRouter_getInstance();
 struct Q8f6e0_Heap
 {
     virtual void v00();
@@ -629,7 +631,7 @@ struct __declspec(align(16)) Q8f6e0_Pre
 };
 __forceinline Q8f6e0_Pre::~Q8f6e0_Pre()
 {
-    Q8f6e0_Heap& h = *FUN_00c85750()->heap;
+    Q8f6e0_Heap& h = *hkMemoryRouter_getInstance()->heap;
     size = 0;
     if ((capFlags & 0x80000000) == 0)
         h.ReturnMemory(data, (capFlags & 0x3fffffff) * 8);
@@ -725,7 +727,7 @@ struct Q8f6e0_Arg
     int unk248;
     Q8f6e0_Mem* mem;
 };
-extern int __cdecl FUN_00406d00(char* buf, int n, const char* fmt, ...);
+extern int __cdecl BSsprintf(char* buf, int n, const char* fmt, ...);
 extern Q8f6e0_Report* DAT_01268360;
 extern const char str_010c6118[];
 extern const char str_010c60dc[];
@@ -777,11 +779,12 @@ struct Q8f6e0_Obj
     virtual void vac();
     virtual void vb0();
     virtual Q8f6e0_Dummy* vB4(unsigned char* p);
-    int FUN_00c8f6e0(Q8f6e0_Arg* a);
-    int FUN_00c87710(Q8f6e0_Arg* a);
+    int bhkRigidBody_LoadCInfo(Q8f6e0_Arg* a);
+    int bhkSerializable_LoadCInfo(Q8f6e0_Arg* a);
 };
 // @fnv 0x00c8f6e0
-int Q8f6e0_Obj::FUN_00c8f6e0(Q8f6e0_Arg* a)
+// src: XBOX_PDB 0x00c8f6e0
+int Q8f6e0_Obj::bhkRigidBody_LoadCInfo(Q8f6e0_Arg* a)
 {
     unsigned char flag;
     int r = this->vA8();
@@ -798,12 +801,12 @@ int Q8f6e0_Obj::FUN_00c8f6e0(Q8f6e0_Arg* a)
     }
     else
     {
-        FUN_00c87710(a);
+        bhkSerializable_LoadCInfo(a);
     }
     if (warn || recovered)
     {
         char buf[0x100];
-        FUN_00406d00(buf, 0x100, str_010c6118, a->name);
+        BSsprintf(buf, 0x100, str_010c6118, a->name);
         DAT_01268360->log(!recovered, 0x234f2250, buf, str_010c60dc, 0x220);
     }
     return r;

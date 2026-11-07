@@ -83,11 +83,12 @@ struct TagScope
 
 struct SoundPlayback
 {
-    BSSoundHandle FUN_00ad7550(unsigned int a, unsigned int b);
+    BSSoundHandle BSAudio_GetSoundHandleByEditorName(unsigned int a, unsigned int b);
 };
 
 // @fnv 0x00ad7550
-BSSoundHandle SoundPlayback::FUN_00ad7550(unsigned int a, unsigned int b)
+// src: COMMUNITY 0x00ad7550
+BSSoundHandle SoundPlayback::BSAudio_GetSoundHandleByEditorName(unsigned int a, unsigned int b)
 {
     TagScope scope;
     return GetPlaybackDevice()->Play(a, b);

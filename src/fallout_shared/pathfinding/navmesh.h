@@ -8,9 +8,9 @@ NiPoint3 NavMesh::GetNavMeshData(unsigned short m_usTriangleID)
 {
     NavMeshTriangle* pTriangle = GetTriangle(m_usTriangleID);
     {
-        NiPoint3 Center = FUN_0068f0a0(pTriangle->FUN_005582d0(0));
-        Center += FUN_0068f0a0(pTriangle->FUN_005582d0(1));
-        Center += FUN_0068f0a0(pTriangle->FUN_005582d0(2));
+        NiPoint3 Center = GetVertex_0068f0a0(pTriangle->GetVert_005582d0(0));
+        Center += GetVertex_0068f0a0(pTriangle->GetVert_005582d0(1));
+        Center += GetVertex_0068f0a0(pTriangle->GetVert_005582d0(2));
         Center *= DAT_0102f200;
         return Center;
     }

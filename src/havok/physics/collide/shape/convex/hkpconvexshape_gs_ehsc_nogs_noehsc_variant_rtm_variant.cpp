@@ -50,11 +50,12 @@ class DummyClass
     virtual void vfn5();
     virtual void vfn6();
     virtual void getAabb(const hkTransform& localToWorld, float tolerance, CenterAabb& out) const;
-    void FUN_00c9e250(CenterVector* centreOut);
+    void hkpConvexTransformShapeBase_getCentreImpl(CenterVector* centreOut);
 };
 
 // @fnv 0x00c9e250
-void DummyClass::FUN_00c9e250(CenterVector* centreOut)
+// src: HAVOK_SRC 0x00c9e250
+void DummyClass::hkpConvexTransformShapeBase_getCentreImpl(CenterVector* centreOut)
 {
     CenterAabb aabb;
     getAabb(DAT_01268370, 0.0f, aabb);

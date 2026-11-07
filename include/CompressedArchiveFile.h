@@ -15,10 +15,10 @@ public:
     virtual void Seek(int offset, int mode);
 
     void DestroyCompressedArchiveFile();
-    bool FUN_00afc060(bool a1, bool a2);
+    bool CompressedArchiveFile_Open(bool a1, bool a2);
     void FUN_00aa15a0();
     unsigned int ReadAtOffset(void* buffer, unsigned int size, int mode);
-    unsigned int FUN_00afc0e0(char* buffer, unsigned int size);
+    unsigned int CompressedArchiveFile_ReadF(char* buffer, unsigned int size);
     void* FUN_00afc6c0(unsigned int flags);
     void* FUN_00afc6f0(unsigned int flags);
 

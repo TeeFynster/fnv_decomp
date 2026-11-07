@@ -11,7 +11,7 @@ enum Index
 bool IsSkill(Index);
 bool IsDerivedAttribute(Index);
 }
-bool FUN_005d1260(ActorValue::Index);
+bool ActorValue_IsAttribute(ActorValue::Index);
 class ActorValueOwner
 {
   public:
@@ -825,7 +825,7 @@ class TaskQueueInterface
   public:
     static TaskQueueInterface* GetSingleton();
 };
-void __cdecl FUN_0087a8b0(TaskQueueInterface*, int, Actor*, ...);
+void __cdecl TaskQueueInterface_QueueScriptFunctionCall(TaskQueueInterface*, int, Actor*, ...);
 
 // Getter bodies are shared by the original linker. The receiver overlays below
 // preserve canonical symbol bindings: +0x24 target, +0x28 caster, +0x0c source.
@@ -858,7 +858,7 @@ class ActiveEffect
     virtual void vfn_58();
     virtual void vfn_5c();
     virtual ActorValue::Index GetActorValue();
-    bool FUN_007df210();
+    bool HasConditions();
     bool IsFlagged();
     virtual void ApplyActorValueModifier(Actor*, float, ActorValue::Index);
     void Finalize();

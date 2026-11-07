@@ -42,8 +42,8 @@ public:
     NiAVObjectPalette* GetStringAtOffset();
     int GetStringAtOffset(int offset);
 
-    NiControllerSequence* FUN_0047a520(const NiFixedString& name);
-    NiControllerSequence* FUN_0047a520(const char* name);
+    NiControllerSequence* NiControllerManager_GetSequenceByName(const NiFixedString& name);
+    NiControllerSequence* NiControllerManager_GetSequenceByName(const char* name);
     void FUN_0047aa40(bool value);
     bool FUN_0047aab0(NiControllerSequence* sequence, int priority, int startOver,
         float weight, float easeInTime, NiControllerSequence* timeSyncSequence);
@@ -51,9 +51,9 @@ public:
         float weight, float easeInTime, int timeSyncSequence);
     void FUN_0047b220(NiControllerSequence* sequence, float easeOutTime);
     void FUN_0048fef0(float time);
-    unsigned int FUN_00495d00();
-    NiControllerSequence* FUN_00495d20(unsigned int index);
-    bool FUN_004f05a0();
+    unsigned int GetSequenceCount_00495d00();
+    NiControllerSequence* GetSequenceAt_00495d20(unsigned int index);
+    bool NiTimeController_GetActive();
 
     NiTObjectArray<NiPointer<NiControllerSequence> > m_kSequences;
     NiTPrimitiveSet<NiControllerSequence*> m_kPlayingSequences;

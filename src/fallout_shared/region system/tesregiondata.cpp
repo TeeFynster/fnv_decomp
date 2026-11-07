@@ -57,7 +57,7 @@ TESRegionData::TESRegionData(const TESRegionData& other)
 }
 
 #include <string.h>
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int, const void*, unsigned int);
 
 struct RegionSaveData
@@ -66,15 +66,15 @@ struct RegionSaveData
     bool bOverride;
     unsigned char m_ucRegionPriority;
     unsigned short unk06;
-    void FUN_00503210();
+    void QuestPerkEntryData_Endian();
 };
 
 // Getter entry points not yet declared by the shared header.
 // This helper adds no data or virtual slots to the shared layout.
 struct RegionDataAccess : TESRegionData
 {
-    bool FUN_004f1540();
-    unsigned char FUN_005bb4d0();
+    bool TESRegionData_GetOverride();
+    unsigned char TESRegionData_GetPriority();
 };
 
 // @fnv 0x004f14c0
@@ -83,11 +83,11 @@ void TESRegionData::Save()
     RegionSaveData data;
     memset(&data, 0, sizeof(data));
     data.m_eRegionDataId = static_cast<unsigned int>(GetType());
-    data.bOverride = static_cast<RegionDataAccess*>(this)->FUN_004f1540();
-    data.m_ucRegionPriority = static_cast<RegionDataAccess*>(this)->FUN_005bb4d0();
-    if (FUN_00401500())
-        data.FUN_00503210();
+    data.bOverride = static_cast<RegionDataAccess*>(this)->TESRegionData_GetOverride();
+    data.m_ucRegionPriority = static_cast<RegionDataAccess*>(this)->TESRegionData_GetPriority();
+    if (TESForm_QEndianSwapOnSave())
+        data.QuestPerkEntryData_Endian();
     AppendChunk(0x54414452, &data, sizeof(data));
-    if (FUN_00401500())
-        data.FUN_00503210();
+    if (TESForm_QEndianSwapOnSave())
+        data.QuestPerkEntryData_Endian();
 }

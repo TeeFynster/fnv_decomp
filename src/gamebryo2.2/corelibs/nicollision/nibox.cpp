@@ -26,11 +26,12 @@ struct ColorContainer
         float y;
         float z;
     } extraVector;
-    void FUN_00eae630(NiStream* stream);
+    void NiBox_SaveBinary(NiStream* stream);
 };
 // Saves the four colors and the extra vector to the stream, writing the vector as 12 bytes through the buffer's write function.
 // @fnv 0x00eae630
-void ColorContainer::FUN_00eae630(NiStream* stream)
+// src: XBOX_PDB 0x00eae630
+void ColorContainer::NiBox_SaveBinary(NiStream* stream)
 {
     firstColor.SaveBinary(*stream);
     NiColor* color = &secondColor;

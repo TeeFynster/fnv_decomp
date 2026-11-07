@@ -87,16 +87,16 @@ struct __declspec(align(16)) FUN_00c681c0
     FUN_00c681c0();
     ~FUN_00c681c0()
     {
-        FUN_00553520();
+        Object_ForwardCall_00553520();
     }
-    void FUN_00553520();
-    void FUN_00c90db0(float);
+    void Object_ForwardCall_00553520();
+    void hkpWorldCinfo_setBroadPhaseWorldSize(float);
 };
 struct Component
 {
     void FUN_00483710();
 };
-void* __cdecl FUN_00553300(unsigned int);
+void* __cdecl Object_OurMemalign_Thunk(unsigned int);
 struct CurveBase
 {
     U32 field08, field0c, field10, field14, field18, field1c, field20;
@@ -210,16 +210,16 @@ struct ParticleSystem
     unsigned int fieldc8;
     static void* operator new(unsigned int n)
     {
-        return FUN_00553300(n);
+        return Object_OurMemalign_Thunk(n);
     }
     Component* FUN_00541c80();
-    void FUN_005533f0(void*);
-    void FUN_00553480(CurveBase*);
+    void bhkWorld_AddEntityListener(void*);
+    void bhkWorld_AddTrapListener(CurveBase*);
     void SetField(void*);
-    void FUN_005534f0(void*);
-    void FUN_00553440(void*);
-    void FUN_00c68750(FUN_006815c0*);
-    void FUN_00454380(bool);
+    void bhkWorld_AppendAcousticSpaceListener(void*);
+    void bhkWorld_AddContactListener(void*);
+    void bhkWorld_SetOrigin(FUN_006815c0*);
+    void bhkWorld_SetEnabled(bool);
     void SetProcessEnabled(int);
 };
 struct FUN_00c99ff0 : ParticleSystem
@@ -275,45 +275,46 @@ extern "C"
     extern const char str_0102ed68[];
     extern FUN_00624150* DAT_011ca088;
 }
-extern float __cdecl FUN_004a3e90(float);
-extern void* __cdecl FUN_0062f3d0();
-extern void* __cdecl FUN_00453720();
-extern bool __cdecl FUN_00456c70();
+extern float __cdecl NI2HK_004a3e90(float);
+extern void* __cdecl TESWaterListener_GetExteriorListener();
+extern void* __cdecl FOCollisionListener_GetSingleton();
+extern bool __cdecl TES_QCollisionDisableFlag();
 // @fnv 0x00554010
-ParticleSystem* __cdecl FUN_00554010(const FUN_006815c0* origin)
+// src: XBOX_PDB 0x00554010
+ParticleSystem* __cdecl TESObjectCELL_CreateWorld(const FUN_006815c0* origin)
 {
     FUN_00404eb0 context(16, 1, str_0102ed68, 0x3c1b);
     FUN_00c681c0 source;
     __declspec(align(16)) unsigned char rotation[sizeof(hkVector4)];
-    source.orientation.FUN_004a3f10(reinterpret_cast<hkVector4*>(rotation)->FUN_005532a0(0.0f, 0.0f, DAT_011ca158, 0.0f));
-    source.FUN_00c90db0(FUN_004a3e90(DAT_0102f104));
+    source.orientation.SetValue(reinterpret_cast<hkVector4*>(rotation)->hkVector4_hkVector4(0.0f, 0.0f, DAT_011ca158, 0.0f));
+    source.hkpWorldCinfo_setBroadPhaseWorldSize(NI2HK_004a3e90(DAT_0102f104));
     FUN_006815c0 direction;
     direction = *origin;
     direction.z = 0.0f;
     source.alpha = 1.0f;
     __declspec(align(16)) FUN_006815c0 velocity;
-    *velocity.FUN_00560d30(0) = FUN_004a3e90(DAT_0102f100);
-    *velocity.FUN_00560d30(1) = FUN_004a3e90(DAT_0102f100);
-    *velocity.FUN_00560d30(2) = FUN_004a3e90(DAT_0102f100);
+    *velocity.FUN_00560d30(0) = NI2HK_004a3e90(DAT_0102f100);
+    *velocity.FUN_00560d30(1) = NI2HK_004a3e90(DAT_0102f100);
+    *velocity.FUN_00560d30(2) = NI2HK_004a3e90(DAT_0102f100);
     __declspec(align(16)) FUN_006815c0 acceleration;
-    *acceleration.FUN_00560d30(0) = FUN_004a3e90(DAT_0102f0fc);
-    *acceleration.FUN_00560d30(1) = FUN_004a3e90(DAT_0102f0fc);
-    *acceleration.FUN_00560d30(2) = FUN_004a3e90(DAT_0102f0fc);
+    *acceleration.FUN_00560d30(0) = NI2HK_004a3e90(DAT_0102f0fc);
+    *acceleration.FUN_00560d30(1) = NI2HK_004a3e90(DAT_0102f0fc);
+    *acceleration.FUN_00560d30(2) = NI2HK_004a3e90(DAT_0102f0fc);
     ParticleSystem* system = new FUN_00c99ff0(&source, &velocity, &acceleration);
     system->FUN_00541c80()->FUN_00483710();
-    system->FUN_005533f0(new FUN_00554590());
-    system->FUN_00553480(new FUN_0062d5c0());
-    system->SetField(FUN_0062f3d0());
-    system->FUN_005534f0(new FUN_0061f460());
-    system->FUN_00553440(FUN_00453720());
-    system->FUN_005533f0(new FUN_0062a460());
+    system->bhkWorld_AddEntityListener(new FUN_00554590());
+    system->bhkWorld_AddTrapListener(new FUN_0062d5c0());
+    system->SetField(TESWaterListener_GetExteriorListener());
+    system->bhkWorld_AppendAcousticSpaceListener(new FUN_0061f460());
+    system->bhkWorld_AddContactListener(FOCollisionListener_GetSingleton());
+    system->bhkWorld_AddEntityListener(new FUN_0062a460());
     if (!DAT_011ca088)
         DAT_011ca088 = new FUN_00624150();
     DAT_011ca088->NotifyActivation(system->FUN_00541c80());
-    system->FUN_00c68750(&direction);
+    system->bhkWorld_SetOrigin(&direction);
     system->FUN_00541c80()->FUN_00483710();
     system->Update();
-    system->FUN_00454380(!FUN_00456c70());
+    system->bhkWorld_SetEnabled(!TES_QCollisionDisableFlag());
     system->SetProcessEnabled(0);
     return system;
 }

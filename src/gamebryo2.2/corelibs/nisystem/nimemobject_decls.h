@@ -2,7 +2,7 @@
 class Flag512Receiver
 {
   public:
-    void FUN_00633ba0(bool enabled, unsigned int mask);
+    void NiAlphaProperty_SetBit(bool enabled, unsigned int mask);
     void SetFlag512(bool enabled);
 };
 #include "../../../../include/NiPoint2.h"

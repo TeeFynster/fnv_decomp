@@ -124,4 +124,5 @@ void BGSTerminal::AddMenuItem(TerminalMenuItem* item) { if(item) reinterpret_cas
 BSSimpleList<TESClass*>* TESDataHandler::GetTESClassList() { return reinterpret_cast<BSSimpleList<TESClass*>*>(listClasses); }
 
 // @fnv 0x00500a20
-void InterfaceManager::FUN_00500a20(Tile* tile) { *reinterpret_cast<Tile**>(reinterpret_cast<char*>(this)+160) = tile; }
+// src: COMMUNITY 0x00500a20
+void InterfaceManager::BGSTerminal_SetPassword(Tile* tile) { *reinterpret_cast<Tile**>(reinterpret_cast<char*>(this)+160) = tile; }

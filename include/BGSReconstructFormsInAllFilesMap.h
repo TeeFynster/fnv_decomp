@@ -21,8 +21,8 @@ public:
     void Clear();
     void BuildMap();
     void AddFormFlagEntry(ChangedFormRecord* data);
-    unsigned int FUN_00849c80();
-    TESForm* FUN_00849ca0(unsigned int);
+    unsigned int GetCount_00849c80();
+    TESForm* GetAt_00849ca0(unsigned int);
 };
 
 

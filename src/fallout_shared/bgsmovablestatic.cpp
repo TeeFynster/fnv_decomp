@@ -47,11 +47,12 @@ struct blob36
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
 struct FUN_004fbf00_shell : public BGSMovableStatic
 {
-    void FUN_004fbf00(TESSound*);
+    void MobileObject_SetTalkingActivatorRef(TESSound*);
 };
 
 // @fnv 0x004fbf00
-void FUN_004fbf00_shell::FUN_004fbf00(TESSound* apSound)
+// src: XBOX_PDB 0x004fbf00
+void FUN_004fbf00_shell::MobileObject_SetTalkingActivatorRef(TESSound* apSound)
 {
     *reinterpret_cast<TESSound**>(reinterpret_cast<char*>(this) + 0x6c) = apSound;
 }
@@ -60,7 +61,7 @@ struct SFTX
 {
     void SetFormType(int);
 };
-char* __fastcall FUN_00864490(char*);
+char* __fastcall MOVABLE_STATIC_DATA_MOVABLE_STATIC_DATA(char*);
 
 struct MovableStaticObject : TESFullName, BGSDestructibleObjectForm, TESObjectSTAT
 {
@@ -71,7 +72,7 @@ struct MovableStaticObject : TESFullName, BGSDestructibleObjectForm, TESObjectST
 // @fnv 0x004fba00
 MovableStaticObject::MovableStaticObject()
 {
-    FUN_00864490((char*)this + 0x70);
+    MOVABLE_STATIC_DATA_MOVABLE_STATIC_DATA((char*)this + 0x70);
     ((SFTX*)((char*)this + 0x14))->SetFormType(0x22);
     ((BGSMovableStatic*)this)->BGSMovableStatic::InitializeComponent();
 }
@@ -139,14 +140,14 @@ struct FUN_00485680
 };
 struct FUN_00485e00_shell
 {
-    void FUN_00485e20(Date*, int);
+    void TESForm___SaveData(Date*, int);
 };
 struct SoundH
 {
     unsigned int Deallocate();
 };
-bool FUN_00401500();
-void FUN_00485910(unsigned int, unsigned int);
+bool TESForm_QEndianSwapOnSave();
+void TESForm_AddChunk_00485910(unsigned int, unsigned int);
 struct FUN_004fbf20_shell
 {
     void Destroy();
@@ -156,18 +157,18 @@ void FUN_004fbf20_shell::Destroy()
 {
     unsigned int itempint;
     ((FUN_004855a0*)this)->M();
-    ((TESFullName*)((char*)this - 0x14))->FUN_00487010();
+    ((TESFullName*)((char*)this - 0x14))->Save_00487010();
     ((DoorPart3c*)((char*)this + 0x30))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
     ((DoorPart68*)((char*)this - 8))->FUN_00477f20();
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((Date*)((char*)this + 0x5c))->Date::~Date();
-    ((FUN_00485e00_shell*)this)->FUN_00485e20((Date*)((char*)this + 0x5c), 1);
-    if (FUN_00401500())
+    ((FUN_00485e00_shell*)this)->TESForm___SaveData((Date*)((char*)this + 0x5c), 1);
+    if (TESForm_QEndianSwapOnSave())
         ((Date*)((char*)this + 0x5c))->Date::~Date();
     if (*(void**)((char*)this + 0x58))
     {
         itempint = (*(SoundH**)((char*)this + 0x58))->Deallocate();
-        FUN_00485910(0x4d414e53, itempint);
+        TESForm_AddChunk_00485910(0x4d414e53, itempint);
     }
     ((FUN_00485680*)this)->M();
 }
@@ -287,7 +288,7 @@ struct StaticRecord
     unsigned int unk28;
     unsigned int unk2c;
     void LoadRecordHeader(TESFile*);
-    void FUN_004861f0(TESFile*, void*, unsigned short);
+    void TESForm_LoadData(TESFile*, void*, unsigned short);
 };
 struct MovableRecord : TESFullName, BGSDestructibleObjectForm, StaticRecord, AlchTexSwap
 {
@@ -337,12 +338,12 @@ bool MovableRecord::LoadRecordChunks(TESFile* file)
             BGSDestructibleObjectForm::LoadDestructibleData(static_cast<BGSDestructibleObjectForm*>(this), file);
             break;
         case 0x41544144:
-            FUN_004861f0(file, &this->data, 1);
+            TESForm_LoadData(file, &this->data, 1);
             break;
         case 0x4d414e53:
             f = 0;
             file->GetChunkData(&f);
-            reinterpret_cast<FUN_004fbf00_shell*>(this)->FUN_004fbf00(reinterpret_cast<TESSound*>(f));
+            reinterpret_cast<FUN_004fbf00_shell*>(this)->MobileObject_SetTalkingActivatorRef(reinterpret_cast<TESSound*>(f));
             break;
         }
         if (!file->GetNextChunk())
@@ -355,7 +356,7 @@ class TESForm;
 namespace fnv_004fbfe0 {
 struct FUN_004fbf00_shell
 {
-    void FUN_004fbf00(TESSound*);
+    void MobileObject_SetTalkingActivatorRef(TESSound*);
 };
 struct FUN_004fc060_shell
 {
@@ -369,16 +370,17 @@ void* __cdecl FUN_00ec43fb(int, int, void*, void*, int);
 
 struct FUN_005e78f0_t
 {
-    void FUN_004851b0(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
 };
 
 struct FUN_004fbfe0_shell : public TESObjectSTAT  // TESForm vftable slot 66 of BGSMovableStatic: this = TESObjectSTAT subobject (+0x14)
 {
-    void FUN_004fbfe0(int);
+    void BGSMovableStatic_Copy(int);
 };
 
 // @fnv 0x004fbfe0
-void FUN_004fbfe0_shell::FUN_004fbfe0(int arg)
+// src: COMMUNITY 0x004fbfe0
+void FUN_004fbfe0_shell::BGSMovableStatic_Copy(int arg)
 {
     int result = (int)FUN_00ec43fb(arg, 0, &DAT_01183028, &DAT_01189d4c, 0);
 
@@ -386,12 +388,12 @@ void FUN_004fbfe0_shell::FUN_004fbfe0(int arg)
         return;
     {
         reinterpret_cast<FUN_004fbf00_shell*>(reinterpret_cast<char*>(this) - 0x14)
-            ->FUN_004fbf00(reinterpret_cast<TESSound*>(reinterpret_cast<TESChallenge*>(result)->GetProgressValue()));
+            ->MobileObject_SetTalkingActivatorRef(reinterpret_cast<TESSound*>(reinterpret_cast<TESChallenge*>(result)->GetProgressValue()));
 
         reinterpret_cast<FUN_004fc060_shell*>(&reinterpret_cast<BGSMovableStatic*>(reinterpret_cast<char*>(this) - 0x14)->data)
             ->SetByteFromPtr(&reinterpret_cast<BGSMovableStatic*>(result)->data);
 
-        reinterpret_cast<FUN_005e78f0_t*>(this)->FUN_004851b0(
+        reinterpret_cast<FUN_005e78f0_t*>(this)->TESForm_CopyAllComponents(
             result ? reinterpret_cast<::TESForm*>(reinterpret_cast<char*>(result) + 0x14) : 0);
     }
 }
@@ -400,7 +402,7 @@ void FUN_004fbfe0_shell::FUN_004fbfe0(int arg)
 
 struct MovableStaticComponentComparison
 {
-    bool FUN_00485270(::TESForm*);
+    bool TESForm_CompareAllComponents(::TESForm*);
 };
 struct MovableStaticDataComparison
 {
@@ -412,17 +414,18 @@ struct MovableStaticSoundComparison
 };
 struct MovableStaticFormComparison : ::TESObjectSTAT  // TESForm vftable slot 67 of BGSMovableStatic: this = TESObjectSTAT subobject (+0x14)
 {
-    bool FUN_004fc080(::TESForm* apCompare);
+    bool BGSMovableStatic_TESObjectSTAT_Compare(::TESForm* apCompare);
 };
 // Returns true if apCompare is not a BGSMovableStatic, either comparison helper returns true, or the sound results differ.
 // @fnv 0x004fc080
-bool MovableStaticFormComparison::FUN_004fc080(::TESForm* apCompare)
+// src: COMMUNITY 0x004fc080
+bool MovableStaticFormComparison::BGSMovableStatic_TESObjectSTAT_Compare(::TESForm* apCompare)
 {
     ::BGSMovableStatic* pMovableStatic = dynamic_cast< ::BGSMovableStatic*>(apCompare);
     if (!pMovableStatic)
         return true;
     if (((MovableStaticComponentComparison*)this)
-            ->FUN_00485270(pMovableStatic ? (::TESForm*)((char*)pMovableStatic + 0x14) : 0))
+            ->TESForm_CompareAllComponents(pMovableStatic ? (::TESForm*)((char*)pMovableStatic + 0x14) : 0))
         return true;
     if (((MovableStaticDataComparison*)&((::BGSMovableStatic*)((char*)this - 0x14))->data)->IsByteDifferent(&pMovableStatic->data))
         return true;

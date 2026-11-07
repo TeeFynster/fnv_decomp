@@ -20,7 +20,7 @@ class RotationMatrix3x3
         m_fComponents[2][1] = 0.0f;
         m_fComponents[2][2] = 1.0f;
     }
-    void FUN_00b273d0(float);
+    void CRotTransform_RotateY(float);
 };
 // These methods are inlined in this unit's original debug build.
 __forceinline CVec3::CVec3()

@@ -14,12 +14,12 @@ public:
     virtual MoppCodeHeader* slotB4(char* pAllocated);
 
     void* GetHavokShape();
-    void* FUN_004ae750();
-    void FUN_0056ea00(float radius);
-    void FUN_00c84df0(void* a, ArgB* b);
-    void FUN_00ca0740(void* a, ArgB* b);
-    void FUN_00ca5460(void* a, ArgB* b);
-    void FUN_00cb7a90(void* a, ArgB* b);
+    void* Bipedanim_GetReferenceFlagsOrZero();
+    void bhkSphereShape_Init(float radius);
+    void bhkShape_CopyMembers(void* a, ArgB* b);
+    void CopyMembers_00ca0740(void* a, ArgB* b);
+    void bhkPackedNiTriStripsShape_CopyMembers(void* a, ArgB* b);
+    void bhkMultiSphereShape_CopyMembers(void* a, ArgB* b);
     void ScaleTarget(void* a, ArgB* b);
 
     static NiObject* __cdecl CreateObject();

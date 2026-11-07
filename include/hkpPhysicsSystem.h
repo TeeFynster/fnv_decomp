@@ -38,10 +38,10 @@ public:
     const hkArray<hkpRigidBody*>& getRigidBodies() const;
     void __thiscall AddShape(hkpRigidBody* body);
     void __thiscall AddAction(hkpAction* action);
-    void __thiscall FUN_00d064f0(void* phantom);
-    void __thiscall FUN_00d06540(hkpConstraintInstance* constraint);
-    void __thiscall FUN_00d06590(hkpAction* action);
-    void __thiscall FUN_00d06130(int index);
-    void __thiscall FUN_00d061b0(int index);
-    void __thiscall FUN_00d061f0(int index);
+    void __thiscall hkpPhysicsSystem_addPhantom(void* phantom);
+    void __thiscall hkpPhysicsSystem_addConstraint(hkpConstraintInstance* constraint);
+    void __thiscall hkpPhysicsSystem_addAction(hkpAction* action);
+    void __thiscall hkpPhysicsSystem_removeRigidBody(int index);
+    void __thiscall hkpPhysicsSystem_removeConstraint(int index);
+    void __thiscall hkpPhysicsSystem_removeAction(int index);
 };

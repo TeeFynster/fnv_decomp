@@ -168,42 +168,44 @@ bool BGSEncounterZone::QMatchPCBelowMin()
 BGSEncounterZone::~BGSEncounterZone()
 {}
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 // @fnv 0x00525e70
 void BGSEncounterZone::Save()
 {
     TESForm* powner;
-    TESForm::FUN_004855a0();
+    TESForm::BeginFormRecord();
     powner = Data.m_pOwnerForm;
     if (powner)
     {
         Data.m_pOwnerForm = reinterpret_cast<TESForm*>(powner->GetFormID());
     }
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         Data.Endian();
     AppendChunk(0x41544144, &Data, 8);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         Data.Endian();
     Data.m_pOwnerForm = powner;
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // @fnv 0x00526070
-void BGSEncounterZone::FUN_00526070(unsigned int arg)
+// src: COMMUNITY 0x00526070
+void BGSEncounterZone::SetDetachTime_00526070(unsigned int arg)
 {
     GameData.m_uiDetachTime = arg;
     MarkAsModified(0x80000000);
 }
 
-unsigned int __cdecl FUN_00526100();
+unsigned int __cdecl TESObjectCELL_GetHoursToRespawnCell();
 // @fnv 0x005260a0
-void BGSEncounterZone::FUN_005260a0(unsigned int uiValue)
+// src: COMMUNITY 0x005260a0
+void BGSEncounterZone::SetAttachTime(unsigned int uiValue)
 {
     GameData.m_uiFirstValueAfterDetachTime = uiValue;
     if (GameData.m_uiDetachTime != 0)
     {
-        if (GameData.m_uiFirstValueAfterDetachTime - GameData.m_uiDetachTime > FUN_00526100())
+        if (GameData.m_uiFirstValueAfterDetachTime - GameData.m_uiDetachTime > TESObjectCELL_GetHoursToRespawnCell())
             GameData.DetachTimeRecord = uiValue;
     }
     MarkAsModified(0x80000000);
@@ -218,7 +220,8 @@ struct GlobalObject2_0040c150
 GlobalObject2_0040c150 g_011ca160;
 
 // @fnv 0x00526100
-int __cdecl FUN_00526100()
+// src: XBOX_PDB 0x00526100
+int __cdecl TESObjectCELL_GetHoursToRespawnCell()
 {
     return *g_011ca160.Int();
 }
@@ -226,28 +229,31 @@ int __cdecl FUN_00526100()
 
 // Returns false if the value at offset 0x28 is zero, otherwise returns whether other's FUN_00546af0() result is below that value.
 // @fnv 0x00526120
-bool BGSEncounterZone::FUN_00526120(TESObjectCELL* other)
+// src: COMMUNITY 0x00526120
+bool BGSEncounterZone::ShouldCellRecalc(TESObjectCELL* other)
 {
     if (GameData.DetachTimeRecord == 0)
         return false;
-    unsigned int v = other->FUN_00546af0();
+    unsigned int v = other->GetDetachTime();
     if (v < GameData.DetachTimeRecord)
         return true;
     return false;
 }
 
 // @fnv 0x00526160
-void BGSEncounterZone::FUN_00526160(unsigned short arg)
+// src: XBOX_PDB 0x00526160
+void BGSEncounterZone::SetZoneLevel(unsigned short arg)
 {
     GameData.m_usDetachRecordValue = arg;
     MarkAsModified(0x80000000);
 }
 
 // @fnv 0x00526270
-void BGSEncounterZone::FUN_00526270()
+// src: XBOX_PDB 0x00526270
+void BGSEncounterZone::DetermineLevel()
 {
     if (GameData.m_usDetachRecordValue == 0)
-        FUN_00526160(GetCalculatedLevel());
+        SetZoneLevel(GetCalculatedLevel());
 }
 
 struct Calendar
@@ -255,14 +261,15 @@ struct Calendar
     unsigned int GetGameHoursPassed();
 };
 extern Calendar g_calendar;
-unsigned int __cdecl FUN_00526100();
+unsigned int __cdecl TESObjectCELL_GetHoursToRespawnCell();
 // @fnv 0x005262a0
-bool __fastcall FUN_005262a0(BGSEncounterZone* apZone)
+// src: XBOX_PDB 0x005262a0
+bool __fastcall BGSEncounterZone_ShouldReset(BGSEncounterZone* apZone)
 {
     bool result = true;
     if (apZone != BGSEncounterZone::ms_pDefaultEncounterZone && apZone->GameData.m_usDetachRecordValue)
     {
-        if (apZone->FUN_00526320())
+        if (apZone->QNeverReset())
         {
             result = false;
         }
@@ -272,7 +279,7 @@ bool __fastcall FUN_005262a0(BGSEncounterZone* apZone)
             if (next)
             {
                 unsigned int now = g_calendar.GetGameHoursPassed();
-                if (now - next <= FUN_00526100())
+                if (now - next <= TESObjectCELL_GetHoursToRespawnCell())
                     result = false;
             }
             else
@@ -285,7 +292,8 @@ bool __fastcall FUN_005262a0(BGSEncounterZone* apZone)
 }
 
 // @fnv 0x00526320
-bool BGSEncounterZone::FUN_00526320()
+// src: XBOX_PDB 0x00526320
+bool BGSEncounterZone::QNeverReset()
 {
     return (Data.cFlags & 1) ? true : false;
 }
@@ -316,7 +324,8 @@ void BGSEncounterZone::RevertAndClearIfChanged(BGSLoadFormBuffer* pLoadBuffer)
 
 // Loads the encounter zone from the buffer, reading a flag byte and, for version 8+, a 16-byte field at offset 0x20.
 // @fnv 0x005264a0
-void BGSEncounterZone::FUN_005264a0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x005264a0
+void BGSEncounterZone::LoadGame_005264a0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     unsigned char ctempFlags;
 
@@ -346,7 +355,8 @@ void BGSEncounterZone::FUN_005264a0(BGSLoadFormBuffer* apLoadGameBuffer)
 extern "C" int __cdecl memcmp(const void*, const void*, unsigned int);
 // Returns true when other is not a BGSEncounterZone, the base comparison returns true, or the Data bytes differ.
 // @fnv 0x00526000
-bool BGSEncounterZone::FUN_00526000(TESForm* other)
+// src: XBOX_PDB 0x00526000
+bool BGSEncounterZone::Compare_00526000(TESForm* other)
 {
     BGSEncounterZone* zone = dynamic_cast<BGSEncounterZone*>(other);
     if (!zone)
@@ -362,7 +372,8 @@ void* __cdecl _memcpy(void*, const void*, unsigned int);
 
 // Copies the base form and encounter-zone data from another BGSEncounterZone.
 // @fnv 0x00525fa0
-void BGSEncounterZone::FUN_00525fa0(TESForm* source)
+// src: XBOX_PDB 0x00525fa0
+void BGSEncounterZone::Copy_00525fa0(TESForm* source)
 {
     BGSEncounterZone* other = dynamic_cast<BGSEncounterZone*>(source);
     if (!other)

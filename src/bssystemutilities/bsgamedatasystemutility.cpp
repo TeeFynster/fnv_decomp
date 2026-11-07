@@ -34,13 +34,13 @@ void FUN_00af39e0_shell::CallVirtualMethod2()
 extern MemoryManager g_memoryManager;
 struct FUN_00af3a10_Class
 {
-    void FUN_00af39c0();
+    void SetVirtualTable_00af39c0();
     void* FUN_00af3a10(unsigned int);
 };
 // @fnv 0x00af3a10
 void* FUN_00af3a10_Class::FUN_00af3a10(unsigned int flags)
 {
-    FUN_00af39c0();
+    SetVirtualTable_00af39c0();
     if (flags & 1)
         g_memoryManager.Deallocate(this);
     return this;

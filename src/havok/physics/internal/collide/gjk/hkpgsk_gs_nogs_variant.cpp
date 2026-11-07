@@ -25,7 +25,7 @@ struct ThisClass
     char pad2[0x90];
     Entry entries2[3];
 
-    void FUN_00da9790(Dest* out);
+    void hkpGsk_exitAndExportCacheImpl(Dest* out);
 };
 
 #include <xmmintrin.h>
@@ -48,7 +48,7 @@ struct __declspec(align(16)) SegmentClosestResult
     GskVectorPacketLocal_00da98f0 pointA, pointB;
     float distanceSquared;
 };
-extern void __cdecl FUN_00d22e40(const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, SegmentClosestResult*);
+extern void __cdecl hkLineSegmentUtil_closestLineSegLineSeg(const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, SegmentClosestResult*);
 extern const signed char DAT_010cb440[];
 extern const float DAT_0104da48;
 struct Simplex
@@ -59,17 +59,18 @@ struct Simplex
     GskVectorPacketLocal_00da98f0 unk60, unk70, unk80, unk90;
     GskVectorPacketLocal_00da98f0 verticesB[4];
     GskVectorPacketLocal_00da98f0 supportB[4];
-    int FUN_00da8500(const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, int);
-    void FUN_00da98f0();
+    int TestTriangleOrientationAndSwapVertices(const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, int);
+    void hkpGsk_reduceDimensionExtended();
 };
 // @fnv 0x00da98f0
-void Simplex::FUN_00da98f0()
+// src: XBOX_PDB 0x00da98f0
+void Simplex::hkpGsk_reduceDimensionExtended()
 {
     if (countB == 3)
     {
         for (int i = 0; i < countA; ++i)
         {
-            if (FUN_00da8500(&verticesA[i], verticesB, 0) == 7)
+            if (TestTriangleOrientationAndSwapVertices(&verticesA[i], verticesB, 0) == 7)
             {
                 verticesA[0] = verticesA[i];
                 countA = 1;
@@ -81,7 +82,7 @@ void Simplex::FUN_00da98f0()
     {
         for (int j = 0; j < countB; ++j)
         {
-            if (FUN_00da8500(&verticesB[j], verticesA, 0) == 7)
+            if (TestTriangleOrientationAndSwapVertices(&verticesB[j], verticesA, 0) == 7)
             {
                 supportB[0] = supportB[j];
                 verticesB[0] = verticesB[j];
@@ -100,7 +101,7 @@ void Simplex::FUN_00da98f0()
             GskVectorPacketLocal_00da98f0 directionA = _mm_sub_ps(verticesA[DAT_010cb440[i + 2]].quad, verticesA[i].quad);
             GskVectorPacketLocal_00da98f0 directionB = _mm_sub_ps(verticesB[DAT_010cb440[j + 2]].quad, verticesB[j].quad);
             SegmentClosestResult result;
-            FUN_00d22e40(&verticesA[i], &directionA, &verticesB[j], &directionB, &result);
+            hkLineSegmentUtil_closestLineSegLineSeg(&verticesA[i], &directionA, &verticesB[j], &directionB, &result);
             if (result.distanceSquared < bestDistance)
             {
                 bestDistance = result.distanceSquared;
@@ -214,11 +215,12 @@ struct Collision_workspace
     unsigned int unk174;
     unsigned int unk178;
     unsigned int unk17c;
-    int FUN_00daad40(Collision_vcls*, Collision_vcls*, void*, Collision_vector*);
+    int hkpGsk_getClosestFeature(Collision_vcls*, Collision_vcls*, void*, Collision_vector*);
 };
 
 // @fnv 0x00dabca0
-int FUN_00dabca0(Collision_ctx* self, Collision_in* in, Collision_vector* out, Collision_vector* out2)
+// src: XBOX_PDB 0x00dabca0
+int hkpGsk_getClosestPoint(Collision_ctx* self, Collision_in* in, Collision_vector* out, Collision_vector* out2)
 {
     Collision_vector normal;
     Collision_workspace scratch;
@@ -239,10 +241,10 @@ int FUN_00dabca0(Collision_ctx* self, Collision_in* in, Collision_vector* out, C
     shapeA->v0f((void*)in, (int)scratch.countA, &scratch.vector20);
     shapeB->v0f((void*)((char*)in + scratch.countA * 2), (int)scratch.countB, &scratch.vectore0);
 
-    scratch.FUN_00daad40(self->m_08, self->m_0c, (void*)self->m_vptr, &normal);
+    scratch.hkpGsk_getClosestFeature(self->m_08, self->m_0c, (void*)self->m_vptr, &normal);
     if (scratch.changed != 0)
     {
-        ((ThisClass*)&scratch)->FUN_00da9790((Dest*)in);
+        ((ThisClass*)&scratch)->hkpGsk_exitAndExportCacheImpl((Dest*)in);
     }
 
     Collision_mat* M = self->m_04;
@@ -293,8 +295,9 @@ struct Result
     __m128 v;
 };
 // @fnv 0x00da8350
+// src: GUESS 0x00da8350 (confidence: low)
 static __declspec(noinline) Result
-    FUN_00da8350(const __m128* pkPoint, const __m128* pkOrigin, const __m128* pkNormal, __m128* pkNormalOut)
+    HkpgskGsNogs_ComputeValues_00da8350(const __m128* pkPoint, const __m128* pkOrigin, const __m128* pkNormal, __m128* pkNormalOut)
 {
 
     __m128 kDelta = _mm_sub_ps(*pkPoint, *pkOrigin);
@@ -316,5 +319,5 @@ __m128* volatile gOut;
 __m128* volatile gD;
 void Caller()
 {
-    *gD = FUN_00da8350(gP, gO, gN, gOut).v;
+    *gD = HkpgskGsNogs_ComputeValues_00da8350(gP, gO, gN, gOut).v;
 }

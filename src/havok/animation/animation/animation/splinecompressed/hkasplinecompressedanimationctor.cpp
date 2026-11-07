@@ -24,7 +24,7 @@ struct __declspec(align(16)) FUN_005611c0_t
     {
         *(LocalM128*)&x = *(const LocalM128*)&o.x;
     }
-    void FUN_005611c0();
+    void normalize_005611c0();
 };
 
 struct Buffer
@@ -33,8 +33,8 @@ struct Buffer
     int m_iElementCount;
 };
 
-void __cdecl FUN_00e318a0(int type, Buffer* buf);
-void __cdecl FUN_00e31800(int size, Buffer* buf);
+void __cdecl hkaSplineCompressedAnimation_writeAlignQuaternion(int type, Buffer* buf);
+void __cdecl hkaSplineCompressedAnimation_writeZeros(int size, Buffer* buf);
 void __cdecl CallHandlerByIndex(int, int, int);
 extern int DAT_010eb3d0[];
 
@@ -48,32 +48,33 @@ struct Writer
     char pad[0x74];
     Buffer m_buf;
 
-    void FUN_00e319e0(unsigned char flags, int type, const FUN_005611c0_t* v, int last, const VecArray* arr);
+    void ProcessEntries_00e319e0(unsigned char flags, int type, const FUN_005611c0_t* v, int last, const VecArray* arr);
 };
 
 // @fnv 0x00e319e0
-void Writer::FUN_00e319e0(unsigned char flags, int type, const FUN_005611c0_t* apVec, int last,
+// src: GUESS 0x00e319e0 (confidence: low)
+void Writer::ProcessEntries_00e319e0(unsigned char flags, int type, const FUN_005611c0_t* apVec, int last,
                           const VecArray* apVecArray)
 {
     if (flags & 0xf0)
     {
-        FUN_00e318a0(type, &m_buf);
+        hkaSplineCompressedAnimation_writeAlignQuaternion(type, &m_buf);
         int size = DAT_010eb3d0[type];
         for (int i = 0; i <= last; i++)
         {
             FUN_005611c0_t t = apVecArray->m_data[i];
-            t.FUN_005611c0();
-            FUN_00e31800(size, &m_buf);
+            t.normalize_005611c0();
+            hkaSplineCompressedAnimation_writeZeros(size, &m_buf);
             CallHandlerByIndex(type, (int)&t, (int)(m_buf.m_data + m_buf.m_iElementCount - size));
         }
     }
     else if (flags & 0x0f)
     {
-        FUN_00e318a0(type, &m_buf);
+        hkaSplineCompressedAnimation_writeAlignQuaternion(type, &m_buf);
         int size = DAT_010eb3d0[type];
         FUN_005611c0_t t = *apVec;
-        t.FUN_005611c0();
-        FUN_00e31800(size, &m_buf);
+        t.normalize_005611c0();
+        hkaSplineCompressedAnimation_writeZeros(size, &m_buf);
         CallHandlerByIndex(type, (int)&t, (int)(m_buf.m_data + m_buf.m_iElementCount - size));
     }
 }
@@ -84,11 +85,11 @@ struct Buffer
     unsigned short* data;
     unsigned int byteSize;
 };
-void __cdecl FUN_00e31800(unsigned int, Buffer*);
+void __cdecl hkaSplineCompressedAnimation_writeZeros(unsigned int, Buffer*);
 // @fnv 0x00e31ad0
 void __cdecl WriteUInt16ToBuffer(unsigned short value, Buffer* buffer)
 {
-    FUN_00e31800(2, buffer);
+    hkaSplineCompressedAnimation_writeZeros(2, buffer);
     *(unsigned short*)((char*)buffer->data + buffer->byteSize - 2) = value;
 }
 }  // namespace fnv_00e31ad0
@@ -192,7 +193,7 @@ void __cdecl AppendChar(char acChar, E317C0CharArray& arOut)
     arOut.pushBack(acChar);
 }
 
-extern void __cdecl FUN_00e31800(int amount, struct MemWriter* writer);
+extern void __cdecl hkaSplineCompressedAnimation_writeZeros(int amount, struct MemWriter* writer);
 
 struct MemWriter
 {
@@ -203,7 +204,7 @@ struct MemWriter
 // @fnv 0x00e31b00
 void __cdecl WriteFloatToMemWriter(float value, MemWriter* writer)
 {
-    FUN_00e31800(4, writer);
+    hkaSplineCompressedAnimation_writeZeros(4, writer);
     *(float*)(writer->data + writer->used - 4) = value;
 }
 
@@ -305,8 +306,8 @@ struct FUN_00e32cf0_Class
 FUN_00e32cf0_Class::~FUN_00e32cf0_Class() throw()
 {}
 
-void __cdecl FUN_00e31740(unsigned char a, unsigned int b, char** pp);
-void __cdecl FUN_00e31780(unsigned char a, unsigned int b, char** pp);
+void __cdecl Object_UpdateFields_00e31740(unsigned char a, unsigned int b, char** pp);
+void __cdecl Object_UpdateFields_00e31780(unsigned char a, unsigned int b, char** pp);
 
 union e319Rec
 {
@@ -345,11 +346,12 @@ struct e319Cls
     int m_74;
     char pad78[8];
     int m_80;
-    void FUN_00e31900();
+    void hkaSplineCompressedAnimation_handleEndian();
 };
 
 // @fnv 0x00e31900
-void e319Cls::FUN_00e31900()
+// src: HAVOK_LIB 0x00e31900
+void e319Cls::hkaSplineCompressedAnimation_handleEndian()
 {
     if (m_80 == 0)
         return;
@@ -361,14 +363,14 @@ void e319Cls::FUN_00e31900()
         {
             e319Rec rec;
             rec.raw = *pSrc++;
-            FUN_00e31740(*pSrc++, rec.f.lo, &p);
-            FUN_00e31780(*pSrc++, rec.f.mid, &p);
-            FUN_00e31740(*pSrc++, rec.f.hi, &p);
+            Object_UpdateFields_00e31740(*pSrc++, rec.f.lo, &p);
+            Object_UpdateFields_00e31780(*pSrc++, rec.f.mid, &p);
+            Object_UpdateFields_00e31740(*pSrc++, rec.f.hi, &p);
         }
         for (int iTail = 0; iTail < m_14; iTail++)
         {
             unsigned char ucTail = *pSrc++;
-            FUN_00e31740((unsigned char)(ucTail & 0xf9), (ucTail >> 1) & 3, &p);
+            Object_UpdateFields_00e31740((unsigned char)(ucTail & 0xf9), (ucTail >> 1) & 3, &p);
         }
     }
 }
@@ -486,7 +488,7 @@ FUN_00e32af0::FUN_00e32af0(SrcL* pSource, const Elem28L* elem, void* arg3) throw
 #include <stdlib.h>
 extern "C"
 {
-    void __cdecl FUN_00e31850(int alignment, void* stream);
+    void __cdecl hkaSplineCompressedAnimation_writeAlign(int alignment, void* stream);
     void __cdecl WriteFloatToMemWriter(float val, void* stream);
     void __cdecl AppendChar(unsigned int val, void* stream);
     void __cdecl WriteUInt16ToBuffer(unsigned int val, void* stream);
@@ -515,7 +517,7 @@ void AnimationCompressor::WriteCompressedAnimation(unsigned char mask, int quant
                                                    const Vector4Array* data)
 {
     void* stream = &m_stream;
-    FUN_00e31850(4, stream);
+    hkaSplineCompressedAnimation_writeAlign(4, stream);
 
     unsigned int bit = 1;
     for (int i = 0; i < 3; ++i, bit = _rotl(bit, 1))
@@ -572,7 +574,8 @@ void __cdecl ResizeAudioStream(void* alloc, Buf* buf, int n);
 
 // Appends count zero bytes to buf, calling FUN_00c90940 when its length equals the masked capacity.
 // @fnv 0x00e31800
-void __cdecl FUN_00e31800(int count, Buf* buf)
+// src: HAVOK_LIB 0x00e31800
+void __cdecl hkaSplineCompressedAnimation_writeZeros(int count, Buf* buf)
 {
     if (count > 0)
     {
@@ -604,7 +607,8 @@ struct BufferInfo
 extern void __cdecl ResizeAudioStream(void*, BufferInfo*, int);
 // Appends zero bytes until no bits selected by alignment minus one remain set in the buffer length.
 // @fnv 0x00e31850
-void __cdecl FUN_00e31850(unsigned int alignment, BufferInfo* buffer)
+// src: HAVOK_LIB 0x00e31850
+void __cdecl hkaSplineCompressedAnimation_writeAlign(unsigned int alignment, BufferInfo* buffer)
 {
     unsigned int mask = alignment - 1;
     while (buffer->length & mask)
@@ -631,7 +635,8 @@ struct FUN_00e318a0_buf
 extern void __cdecl ResizeAudioStream(void* apAllocator, FUN_00e318a0_buf* apBuf, int aiFlag);
 
 // @fnv 0x00e318a0
-void __cdecl FUN_00e318a0(unsigned int auBit, FUN_00e318a0_buf* apBuf)
+// src: HAVOK_LIB 0x00e318a0
+void __cdecl hkaSplineCompressedAnimation_writeAlignQuaternion(unsigned int auBit, FUN_00e318a0_buf* apBuf)
 {
     unsigned int mask = DAT_010eb3e8[auBit];
     if ((apBuf->m_uLength & mask) != 0)

@@ -41,7 +41,8 @@ union hkAabbQ
 };
 
 // @fnv 0x00d05df0
-void __cdecl FUN_00d05df0(hkpPhantom* phantom, const hkTransform& transform)
+// src: COMMUNITY 0x00d05df0
+void __cdecl tranformPhantom(hkpPhantom* phantom, const hkTransform& transform)
 {
     switch (phantom->getType())
     {
@@ -62,8 +63,8 @@ void __cdecl FUN_00d05df0(hkpPhantom* phantom, const hkTransform& transform)
         current.m_kColumn1 = c1.q;
         current.m_kColumn2 = c2.q;
         current.m_vTranslation = t.q;
-        current.FUN_00cb23e0(transform);
-        sp->FUN_00c9e910(current);
+        current.ProcessTransformedMatrixCopy_00cb23e0(transform);
+        sp->hkpShapePhantom_setTransform(current);
         break;
     }
     case 0: {
@@ -72,7 +73,7 @@ void __cdecl FUN_00d05df0(hkpPhantom* phantom, const hkTransform& transform)
         aabb.f = reinterpret_cast<const hkAabbf&>(ap->m_kBounds);
         aabb.q.m_kMinimumCorner = _mm_add_ps(transform.m_vTranslation, aabb.q.m_kMinimumCorner);
         aabb.q.m_kMaximumCorner = _mm_add_ps(transform.m_vTranslation, aabb.q.m_kMaximumCorner);
-        ap->FUN_00cf24a0(aabb);
+        ap->hkpAabbPhantom_setAabb(aabb);
         break;
     }
     }

@@ -64,11 +64,12 @@ struct __declspec(align(16)) QueryCollector
     {}
 };
 
-int FUN_00d883c0(void* a, int b, int c, QueryCollector* out);
+int Object_ProcessAndReturnValue_00d883c0(void* a, int b, int c, QueryCollector* out);
 
 // @fnv 0x00d88aa0
-int FUN_00d88aa0(void* a)
+// src: GUESS 0x00d88aa0 (confidence: low)
+int Object_ProcessAndReturnValue_00d88aa0(void* a)
 {
     QueryCollector collector;
-    return FUN_00d883c0(a, 0, 0, &collector);
+    return Object_ProcessAndReturnValue_00d883c0(a, 0, 0, &collector);
 }

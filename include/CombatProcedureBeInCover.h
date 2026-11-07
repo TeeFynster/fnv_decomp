@@ -25,7 +25,7 @@ public:
         float m_fStartTime;
         float m_fTimeout;
 
-        bool FUN_0097fa50();
+        bool CombatTimer_IsSet();
         float GetValue();
         float GetElapsedTime();
     };

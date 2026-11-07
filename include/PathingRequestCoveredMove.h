@@ -16,11 +16,11 @@ public:
 
     PathingRequestCoveredMove* FUN_006e4a50();
 
-    void FUN_005076c0(float);
-    void FUN_006e4f10(unsigned int);
+    void PathingRequestCoveredMove_SetAttackerHealth(float);
+    void PathingRequestCoveredMove_SetTargetLocation(unsigned int);
     int GetOffsetF4();
-    int FUN_006e4f90();
-    AvoidanceItems* FUN_006e4f90(void*);
+    int PathingRequestCoveredMove_GetUnreachableCoverLocations();
+    AvoidanceItems* PathingRequestCoveredMove_GetUnreachableCoverLocations(void*);
 
     union
     {

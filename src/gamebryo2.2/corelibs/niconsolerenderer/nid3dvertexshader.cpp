@@ -17,12 +17,12 @@ void NiD3DVertexShader::UnloadShader()
     }
 }
 
-extern void __cdecl FUN_00e92ee0(NiD3DVertexShader* pkShader);
+extern void __cdecl NiD3DShaderProgramFactory_RecreateVertexShader(NiD3DVertexShader* pkShader);
 
 // @fnv 0x00e89ad0
 void NiD3DVertexShader::BuildVertexShader()
 {
-    FUN_00e92ee0(this);
+    NiD3DShaderProgramFactory_RecreateVertexShader(this);
 }
 
 extern "C" void* __cdecl memmove(void* pvDest, const void* pvSrc, unsigned int uiSize);

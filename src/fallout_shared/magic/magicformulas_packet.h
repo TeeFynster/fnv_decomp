@@ -18,5 +18,5 @@ class QuestStage
     unsigned char GetIndex();
 };
 
-InterfaceManager* FUN_004b7210();
+InterfaceManager* InterfaceManager_GetSingleton();
 #endif

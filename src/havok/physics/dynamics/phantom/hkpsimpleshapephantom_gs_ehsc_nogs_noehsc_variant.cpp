@@ -99,12 +99,13 @@ public:
 // 0x00d1f270 uses the shared phantom layout; this extension supplies methods absent from its header.
 struct PositionAndLinearCastPhantom : hkpSimpleShapePhantom
 {
-    void FUN_00d07ec0(LcAabb* aabb);
-    void FUN_00d1f270(const LcVec4& position, const LcCastIn& input, void* castCollector, void* startCollector);
+    void hkpPhantom_updateBroadPhase(LcAabb* aabb);
+    void hkpSimpleShapePhantom_setPositionAndLinearCast(const LcVec4& position, const LcCastIn& input, void* castCollector, void* startCollector);
 };
 
 // @fnv 0x00d1f270
-void PositionAndLinearCastPhantom::FUN_00d1f270(const LcVec4& position, const LcCastIn& input, void* castCollector, void* startCollector)
+// src: HAVOK_SRC 0x00d1f270
+void PositionAndLinearCastPhantom::hkpSimpleShapePhantom_setPositionAndLinearCast(const LcVec4& position, const LcCastIn& input, void* castCollector, void* startCollector)
 {
     m_kMotionState.m_kMotionTransform.m_vTranslation = position.m_vComponents;
     LcAabb aabb;
@@ -120,7 +121,7 @@ void PositionAndLinearCastPhantom::FUN_00d1f270(const LcVec4& position, const Lc
     __m128 pathMax = _mm_max_ps(zero, path.m_vComponents);
     aabb.unk00.m_vComponents = _mm_add_ps(aabb.unk00.m_vComponents, pathMin);
     aabb.unk10.m_vComponents = _mm_add_ps(aabb.unk10.m_vComponents, pathMax);
-    FUN_00d07ec0(&aabb);
+    hkpPhantom_updateBroadPhase(&aabb);
 
     LcCastInput lcInput;
     const LcProcessInput* in = static_cast<const LcProcessInput*>(static_cast<hkpWorld*>(m_pOwningWorld)->m_pCollisionInput);

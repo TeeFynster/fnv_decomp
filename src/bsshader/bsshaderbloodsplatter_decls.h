@@ -13,7 +13,7 @@ class BeamStage
   public:
     unsigned char layoutPrefix[0x60];
     unsigned int m_uiRefCount;
-    void FUN_00e7def0(unsigned int);
+    void NiD3DTextureStage_SetFilterMode(unsigned int);
     void ReturnToPool();
     void DecRefCount()
     {

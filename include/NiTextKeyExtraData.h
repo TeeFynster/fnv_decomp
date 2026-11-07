@@ -11,7 +11,7 @@ class NiTextKeyExtraData : public NiExtraData
 
     TimedTextEntry* GetKeys(unsigned int& uiNumKeys) const;
     TimedTextEntry* GetKeys(unsigned int* uiNumKeys);
-    TimedTextEntry* FUN_00495f30(unsigned int* uiNumKeys);
+    TimedTextEntry* GetKeys_00495f30(unsigned int* uiNumKeys);
 
     unsigned int m_uiNumKeys;
     TimedTextEntry* m_pKeys;

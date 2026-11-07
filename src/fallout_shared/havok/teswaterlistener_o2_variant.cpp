@@ -16,14 +16,14 @@ struct FUN_0062e750_shell
 };
 void __cdecl _Deallocate(void* p);
 extern int DAT_011c7a3c;
-void FUN_0062f310(int value);
+void TESWaterSystem_SetCurrentWaterType(int value);
 extern unsigned char DAT_011c7a5a;
-void FUN_0062f8e0(unsigned char value);
+void TESWaterSystem_SetCameraInPlaceableWater(unsigned char value);
 extern float _DAT_011c7a5c;
-void FUN_0062f8f0(float value);
+void TESWaterSystem_SetCameraRelevantWaterHeight(float value);
 unsigned int __cdecl GetOcclusionPlaneThreadID(BSOcclusionPlane* pPlane);
 extern "C" float __cdecl ExpFloat(float);
-float FUN_00630aa0(float value);
+float exp_00630aa0(float value);
 extern "C" double __cdecl _exp(double);
 float ExpFloat(float value);
 extern float _gModifierZero;
@@ -33,28 +33,29 @@ struct FUN_005631e0_shell
     int __thiscall MaskWithField(int a);
     bool __thiscall IsNonZero(int a);
 };
-float __cdecl FUN_004a3e90(float);
+float __cdecl NI2HK_004a3e90(float);
 struct FUN_0062e710_shell
 {
     void __thiscall SetValueAt(float f, int a, int b);
 };
 struct BSSimpleList_Ragdoll
 {
-    void* __thiscall FUN_006310e0();
+    void* __thiscall hkpMotion_getCenterOfMassInWorld();
 };
 struct FUN_006310c0_shell
 {
-    void __thiscall FUN_006310c0();
+    void __thiscall hkpRigidBody_getCenterOfMassInWorld();
 };
 
 struct FUN_00c9a460_shell
 {
     void __thiscall AddObject(int a);
-    void __thiscall FUN_00c9a600(int a);
+    void __thiscall bhkEntityListener_entityAddedCallback(int a);
 };
 
 // @fnv 0x00c9a600
-void __thiscall FUN_00c9a460_shell::FUN_00c9a600(int a)
+// src: XBOX_PDB 0x00c9a600
+void __thiscall FUN_00c9a460_shell::bhkEntityListener_entityAddedCallback(int a)
 {
     int r = ((int(__thiscall*)(void*, int))(*reinterpret_cast<void***>(this))[9])(this, a);
     AddObject(r);

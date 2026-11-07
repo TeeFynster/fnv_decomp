@@ -24,12 +24,12 @@ public:
     bool TestFlag400(unsigned int flag);
     void FinishSetup();
     void SetLightEnabled();
-    bool FUN_00444d00(int flag);
-    void FUN_005726e0(void* light, bool enabled);
-    bool FUN_009b4700(int arg, bool flag);
-    bool FUN_009c43e0(int arg, bool flag);
-    void FUN_009b4c70();
-    void FUN_009b4d10(BGSLoadFormBuffer* buffer);
+    bool Projectile_IsFlagSet(int flag);
+    void TESObjectREFR_SetLight_005726e0(void* light, bool enabled);
+    bool TurnOff(int arg, bool flag);
+    bool Projectile_DisarmPlacedExplosives(int arg, bool flag);
+    void ReportHavokDeactivation();
+    void RevertBGS_009b4d10(BGSLoadFormBuffer* buffer);
     void DispatchReferenceSourceFiles(ObjHelper*, void*, void*, void*, void*, void*, void*);
     void HandleContactHit(GPContact* contact);
 };

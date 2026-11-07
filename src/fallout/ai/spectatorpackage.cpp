@@ -6,8 +6,8 @@ int SpectatorPackage::IsComplete(const SpectatorPackage& other)
 {
     if (&other != this)
     {
-        FUN_009f9c20(this);
-        if (FUN_009f9bb0(this, &other) < 0)
+        Object_ReleaseMediaTypeData(this);
+        if (Runtime_CopyMemory_009f9bb0(this, &other) < 0)
             return 0x8007000e;
     }
     return 0;

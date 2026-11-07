@@ -22,8 +22,8 @@ public:
     virtual float Unk_117(void);
 
     float GetAnimationSpeedMultiplier(ANIM_GROUP_ENUM group);
-    float FUN_008d4f10();
-    float FUN_008d46f0();
-    float FUN_00821640();
+    float CalculateRunSpeed_008d4f10();
+    float Creature_GetWeaponSkill();
+    float TESObjectWEAP_GetShotsPerSecond();
     static void __cdecl SetNodeFlagsRecursive(NiAVObject*, int, bool, bool, bool);
 };

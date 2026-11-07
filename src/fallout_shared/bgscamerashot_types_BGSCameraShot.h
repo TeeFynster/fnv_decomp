@@ -26,7 +26,7 @@ enum BGSCameraShot__CAM_OBJECT
 class BGSCameraShot__CAMERA_SHOT_DATA
 {
   public:
-    void FUN_0058c3c0();
+    void ProcessState_0058c3c0();
     BGSCameraShot__CAM_ACTION m_eAction;    // +0x0, 4 bytes
     BGSCameraShot__CAM_OBJECT pInputFile;   // +0x4, 4 bytes
     BGSCameraShot__CAM_OBJECT m_eAttacker;  // +0x8, 4 bytes

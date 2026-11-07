@@ -23,7 +23,7 @@ class PathPool
 {
   public:
     void* AdvanceCounter();
-    void* FUN_006e8f40(void* id);
+    void* GetElementAddress30_006e8f40(void* id);
 };
 
 class FormIDArray
@@ -49,7 +49,7 @@ class PathOwner
 void* PathOwner::CreatePathNode(void* a, TESForm* apForm)
 {
     void* id = pool.AdvanceCounter();
-    void* pNodePlace = pool.FUN_006e8f40(id);
+    void* pNodePlace = pool.GetElementAddress30_006e8f40(id);
     new (pNodePlace) PathNodeA(a, apForm);
     if (apForm)
     {

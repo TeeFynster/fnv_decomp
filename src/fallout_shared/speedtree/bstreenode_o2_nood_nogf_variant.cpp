@@ -64,11 +64,11 @@ inline void hkTransform::operator=(const hkTransform& transform)
 
 extern hkTransform g_kIdentityTransformC8C;
 
-extern "C" void __cdecl FUN_00624b10(NiMatrix3* pOut, const hkRotation* pIn);
+extern "C" void __cdecl HK2NI_00624b10(NiMatrix3* pOut, const hkRotation* pIn);
 extern "C" void __cdecl FUN_00458620(NiPoint3* pOut, const hkVector4* pIn);
 
 
-__declspec(restrict) void* __cdecl FUN_00aa13e0(unsigned int uiSize);
+__declspec(restrict) void* __cdecl Object_DispatchCommandFour(unsigned int uiSize);
 void __cdecl FUN_00aa1460(void* p);
 
 
@@ -95,11 +95,12 @@ class SceneObjectC8C
     int unk00, unk04;
     BodyC8C* m_pkBody;
 
-    void FUN_00c8c860(NiNode* pkParent, ArgC8C* iValue);
+    void bhkTransformShape_BuildDisplayGeometry(NiNode* pkParent, ArgC8C* iValue);
 };
 
 // @fnv 0x00c8c860
-void SceneObjectC8C::FUN_00c8c860(NiNode* pkParent, ArgC8C* iValue)
+// src: XBOX_PDB 0x00c8c860
+void SceneObjectC8C::bhkTransformShape_BuildDisplayGeometry(NiNode* pkParent, ArgC8C* iValue)
 {
     AutoMemContext kContext(0x10);
 
@@ -107,7 +108,7 @@ void SceneObjectC8C::FUN_00c8c860(NiNode* pkParent, ArgC8C* iValue)
     kXform = (this && m_pkBody) ? m_pkBody->m_kTransform : g_kIdentityTransformC8C;
 
     NiTransform kLocal;
-    FUN_00624b10(&kLocal.m_Rotate, &kXform.m_rotation);
+    HK2NI_00624b10(&kLocal.m_Rotate, &kXform.m_rotation);
     FUN_00458620(&kLocal.m_Translate, &kXform.position);
 
     NiNode* __restrict pkNode = new NiNode(0);

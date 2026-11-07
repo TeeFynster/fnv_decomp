@@ -31,9 +31,9 @@ public:
     bool HasNonDetrimentalEffectWithFlag(unsigned int flag);
     bool HasDetrimentalEffect();
     EffectItem* GetEffectItemAtIndex(unsigned char index);
-    bool FUN_00405d80();
-    bool FUN_00405da0();
-    bool FUN_00405fe0();
-    bool FUN_00406090();
-    void FUN_00406340();
+    bool IsHostile_00405d80();
+    bool CanBePoison();
+    bool HasTouchEffect();
+    bool HasSelfEffect();
+    void RemoveAllEffects();
 };

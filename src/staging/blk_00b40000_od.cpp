@@ -6,11 +6,12 @@
 #include "../../include/CIdvCamera.h"
 
 // @fnv 0x00b402d0
-CIdvCamera& CIdvCameraClone::FUN_00b402d0(CIdvCamera const& src)
+// src: GUESS 0x00b402d0 (confidence: low)
+CIdvCamera& CIdvCameraClone::UpdateState_00b402d0(CIdvCamera const& src)
 {
     if (&src != this)
     {
-        CIdvCamera::FUN_00b3f0c0(src);
+        CIdvCamera::AssignFields_00b3f0c0(src);
         unk10 = static_cast<const CIdvCameraClone&>(src).unk10;
         unk14 = static_cast<const CIdvCameraClone&>(src).unk14;
         unk18 = static_cast<const CIdvCameraClone&>(src).unk18;
@@ -57,7 +58,7 @@ void* operator new(unsigned int);
 CIdvCamera& CIdvCameraClone::CloneCamera()
 {
     CIdvCameraClone* p = new CIdvCameraClone;
-    p->FUN_00b402d0(*this);
+    p->UpdateState_00b402d0(*this);
     return *p;
 }
 
@@ -89,13 +90,14 @@ extern int DAT_010a58fc;
 struct CIdvCameraInitializer : CIdvCameraClone
 {
     void FUN_00b3f030();
-    CIdvCameraInitializer* __thiscall FUN_00b40070(NiPoint3* position, unsigned char value18, unsigned char value10,
+    CIdvCameraInitializer* __thiscall UpdateState_00b40070(NiPoint3* position, unsigned char value18, unsigned char value10,
                                                 float value, int result);
 };
 
 // Calls FUN_00b3f030, sets unk00 to &DAT_010a58fc, stores value10, value18, value and result, zeroes three points, and copies position into unk04.
 // @fnv 0x00b40070
-CIdvCameraInitializer* __thiscall CIdvCameraInitializer::FUN_00b40070(NiPoint3* position, unsigned char value18,
+// src: GUESS 0x00b40070 (confidence: low)
+CIdvCameraInitializer* __thiscall CIdvCameraInitializer::UpdateState_00b40070(NiPoint3* position, unsigned char value18,
                                                                 unsigned char value10, float value, int result)
 {
     NiPoint3* firstPointA;
@@ -177,7 +179,7 @@ class FUN_00b40a60_cls
     unsigned int m_30;
 
     void InitBase(int a, int b);
-    FUN_00b40a60_cls* FUN_00b40a60();
+    FUN_00b40a60_cls* InitializeFields_00b40a60();
 };
 
 struct FUN_00b40a60_loc
@@ -190,7 +192,8 @@ struct FUN_00b40a60_loc
 };
 
 // @fnv 0x00b40a60
-FUN_00b40a60_cls* FUN_00b40a60_cls::FUN_00b40a60()
+// src: GUESS 0x00b40a60 (confidence: low)
+FUN_00b40a60_cls* FUN_00b40a60_cls::InitializeFields_00b40a60()
 {
     unsigned int pad;
     unsigned char* pFlag;
@@ -337,10 +340,10 @@ struct FnvScratch
 };
 
 // The allocator the original calls with (count, 0); it hands out count * 8 bytes.
-void* FUN_00b42df0(unsigned int count, void* allocator);
+void* Runtime_UpdateState_00b42df0(unsigned int count, void* allocator);
 
 // The out-of-range reporter the original calls when the count is too large.
-void FUN_00b0fb80();
+void BxLengthError_Thunk();
 
 // @fnv 0x00b41c80
 bool FnvCamera::ReserveEntries(unsigned int count)
@@ -360,11 +363,11 @@ bool FnvCamera::ReserveEntries(unsigned int count)
         scratch.unk8c = 0x1fffffff;
         if ((scratch.unk8c > 0 ? scratch.unk8c : 1) < count)
         {
-            FUN_00b0fb80();
+            BxLengthError_Thunk();
         }
         else
         {
-            unk0c = FUN_00b42df0(count, 0);
+            unk0c = Runtime_UpdateState_00b42df0(count, 0);
             unk10 = unk0c;
             unk14 = (char*)unk0c + count * 8;
         }
@@ -378,11 +381,12 @@ struct FUN_00b42be0_cls
     unsigned int m_04;
     unsigned int m_08;
 
-    FUN_00b42be0_cls* FUN_00b42be0(FUN_00b42be0_cls* src);
+    FUN_00b42be0_cls* InitializeFields_00b42be0(FUN_00b42be0_cls* src);
 };
 
 // @fnv 0x00b42be0
-FUN_00b42be0_cls* FUN_00b42be0_cls::FUN_00b42be0(FUN_00b42be0_cls* src)
+// src: GUESS 0x00b42be0 (confidence: low)
+FUN_00b42be0_cls* FUN_00b42be0_cls::InitializeFields_00b42be0(FUN_00b42be0_cls* src)
 {
     unsigned int* x8;
     unsigned int* y;
@@ -444,7 +448,8 @@ struct FnvThrowObj
 };
 
 // @fnv 0x00b42df0
-void* __cdecl FUN_00b42df0(unsigned int count, void* allocator)
+// src: GUESS 0x00b42df0 (confidence: low)
+void* __cdecl Runtime_UpdateState_00b42df0(unsigned int count, void* allocator)
 {
     if (count <= 0)
     {
@@ -471,7 +476,7 @@ struct S_00b41ae0_Bits
     unsigned int unk04;
     unsigned int unk08;
 
-    unsigned int* FUN_00b420f0();
+    unsigned int* EvaluateValue_00b420f0();
     S_00b41ae0_Bits* SetBit(bool bSet);
 };
 
@@ -482,18 +487,19 @@ S_00b41ae0_Bits* S_00b41ae0_Bits::SetBit(bool bSet)
     S_00b41ae0_Pad pad;
     if (bSet)
     {
-        *FUN_00b420f0() |= (1u << unk08);
+        *EvaluateValue_00b420f0() |= (1u << unk08);
     }
     else
     {
-        *FUN_00b420f0() &= ~(1u << unk08);
+        *EvaluateValue_00b420f0() &= ~(1u << unk08);
     }
     return this;
 }
 
 // Divides the three low bytes of unk14 by 255.0, low byte first, writes them to pOut[0], pOut[1] and pOut[2], and returns pOut.
 // @fnv 0x00b40430
-float* CIdvCamera::FUN_00b40430(float* pOut)
+// src: COMMUNITY 0x00b40430
+float* CIdvCamera::CBillboardLeaf_GetColor(float* pOut)
 {
     float fGr = (static_cast<unsigned int>(static_cast<CIdvCameraClone*>(this)->unk14) & 0xff) / 255.0;
     float fRed = ((static_cast<unsigned int>(static_cast<CIdvCameraClone*>(this)->unk14) & 0xff00) >> 8) / 255.0;
@@ -517,11 +523,12 @@ const char* RandomGen::GetName()
 
 struct Gen
 {
-    const char* FUN_00b43d70();
+    const char* GetConstantString();
 };
 
 // @fnv 0x00b43d70
-const char* Gen::FUN_00b43d70()
+// src: GUESS 0x00b43d70 (confidence: high)
+const char* Gen::GetConstantString()
 {
     return "Uniform";
 }
@@ -529,11 +536,12 @@ const char* Gen::FUN_00b43d70()
 namespace fnv_00b43d80 {
 struct Gen
 {
-    const char* FUN_00b43d80();
+    const char* ComputeValue_00b43d80();
 };
 
 // @fnv 0x00b43d80
-const char* Gen::FUN_00b43d80()
+// src: GUESS 0x00b43d80 (confidence: low)
+const char* Gen::ComputeValue_00b43d80()
 {
     return "Normal";
 }
@@ -542,11 +550,12 @@ const char* Gen::FUN_00b43d80()
 namespace fnv_00b43d90 {
 struct Gen
 {
-    const char* FUN_00b43d90();
+    const char* GetConstantString();
 };
 
 // @fnv 0x00b43d90
-const char* Gen::FUN_00b43d90()
+// src: GUESS 0x00b43d90 (confidence: high)
+const char* Gen::GetConstantString()
 {
     return "PosGen";
 }
@@ -555,11 +564,12 @@ const char* Gen::FUN_00b43d90()
 namespace fnv_00b43da0 {
 struct Gen
 {
-    const char* FUN_00b43da0();
+    const char* ComputeValue_00b43da0();
 };
 
 // @fnv 0x00b43da0
-const char* Gen::FUN_00b43da0()
+// src: GUESS 0x00b43da0 (confidence: low)
+const char* Gen::ComputeValue_00b43da0()
 {
     return "SymGen";
 }

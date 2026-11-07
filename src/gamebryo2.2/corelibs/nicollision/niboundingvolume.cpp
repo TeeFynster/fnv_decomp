@@ -214,7 +214,8 @@ typedef unsigned int(__cdecl* e9Dispatch)(e9Obj*);
 
 // Reads a 4-byte type from the object's sink and dispatches to the handler at DAT_0126fa7c[type] when the type is in 0..5, otherwise returns 0.
 // @fnv 0x00e9cab0
-unsigned int __cdecl FUN_00e9cab0(e9Obj* pObj)
+// src: XBOX_PDB 0x00e9cab0
+unsigned int __cdecl NiBoundingVolume_CreateFromStream(e9Obj* pObj)
 {
     int iType;
     pObj->m_pSink->Read(&iType, 4);

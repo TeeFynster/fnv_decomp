@@ -109,14 +109,15 @@ class Ring216
     int count184;
 
     void AddValueToColumnRange(float v);
-    void FUN_00bc1c70(int idx);
-    void FUN_00bc2590(int idx);
+    void BoltShaderProperty_CleanupSegments(int idx);
+    void BoltShaderProperty_ExtendSegments(int idx);
     void RemoveFromEnd(int idx);
 
     void AddValue(float p1, float p2, float p3, float p4);
 };
 
-void Ring216::FUN_00bc1c70(int idx)
+// src: COMMUNITY 0x00bc1c70
+void Ring216::BoltShaderProperty_CleanupSegments(int idx)
 {
     int remainder = idx % unk140;
     m_78 += remainder;
@@ -147,14 +148,14 @@ void Ring216::AddValue(float afValue, float p2, float afScale, float afUnused)
     if (-this->m_144 >= z)
     {
         z = -z / this->m_144;
-        this->FUN_00bc1c70((int)z);
+        this->BoltShaderProperty_CleanupSegments((int)z);
         this->m_180 = *(float*)(this->m_60 + (this->m_78 << 4) + 4);
     }
 
     if (p2 > this->m_84)
     {
         z = (p2 - this->m_84) / this->m_144;
-        this->FUN_00bc2590((int)z);
+        this->BoltShaderProperty_ExtendSegments((int)z);
         this->m_84 = *(float*)(this->m_60 + (this->m_7c << 4) + 4);
         return;
     }

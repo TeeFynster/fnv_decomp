@@ -159,8 +159,8 @@ struct S_00dad4d0_Set
     }
 };
 bool FindAndPromoteEntry(S_00dad4d0_Set* set, S_00dad4d0_Key* key);
-void __fastcall FUN_00dae220(int unused, S_00dad640_Set* set);
-void __cdecl FUN_00dae340(S_00dad640_Set* set, unsigned int index);
+void __fastcall hkGskManifold_garbageCollect(int unused, S_00dad640_Set* set);
+void __cdecl _hkGskManifold_removePoint(S_00dad640_Set* set, unsigned int index);
 
 #include <xmmintrin.h>
 extern float DAT_0104da48;
@@ -189,11 +189,12 @@ struct S_00daee00_Point
 struct S_00daee00
 {
     S_00daee00_Point points[5];
-    int FUN_00daee00();
+    int hkGskManifold_findRedundant5thPoint();
 };
 
 // @fnv 0x00daee00
-int S_00daee00::FUN_00daee00()
+// src: COMMUNITY 0x00daee00
+int S_00daee00::hkGskManifold_findRedundant5thPoint()
 {
     // The fallback phase reuses the completed geometric reduction scratch.
     float maxDist = 0.0f;
@@ -374,7 +375,8 @@ static __forceinline __m128 Dot3_3vs3(const __m128& a0, const __m128& b0, const 
 }
 
 // @fnv 0x00dad720
-static __declspec(noinline) int FUN_00dad720(S_00dad720_Rec* rec, S_00dad720_Vec* vecs, S_00dad720_Out* out)
+// src: GUESS 0x00dad720 (confidence: low)
+static __declspec(noinline) int Object_ProcessAndReturnValue_00dad720(S_00dad720_Rec* rec, S_00dad720_Vec* vecs, S_00dad720_Out* out)
 {
     const __m128& pa = *(__m128*)((char*)vecs + rec->m_kPointA);
     const __m128& pb = *(__m128*)((char*)vecs + rec->m_kPointB);
@@ -412,7 +414,7 @@ volatile int g_res;
 void CallTarget_dad720()
 {
     S_00dad720_Out* o = (S_00dad720_Out*)g_out;
-    g_res = FUN_00dad720((S_00dad720_Rec*)g_rec, (S_00dad720_Vec*)g_vecs, o);
+    g_res = Object_ProcessAndReturnValue_00dad720((S_00dad720_Rec*)g_rec, (S_00dad720_Vec*)g_vecs, o);
 }
 
 #include <xmmintrin.h>
@@ -492,7 +494,8 @@ struct TriangleClosestPointInfo
 };
 
 // @fnv 0x00dad860
-static __declspec(noinline) int FUN_00dad860(const MeshVertexBasisData& work, const AlignedPairData& point,
+// src: GUESS 0x00dad860 (confidence: low)
+static __declspec(noinline) int Object_ProcessAndReturnValue_00dad860(const MeshVertexBasisData& work, const AlignedPairData& point,
                                              TriangleClosestPointInfo& out)
 {
     const hkVector4& a0 = work.getVertexA(point.m_vert0);
@@ -529,7 +532,7 @@ const AlignedPairData* volatile g_point;
 TriangleClosestPointInfo* volatile g_out;
 int S00dad860_Call()
 {
-    return FUN_00dad860(*g_work, *g_point, *g_out);
+    return Object_ProcessAndReturnValue_00dad860(*g_work, *g_point, *g_out);
 }
 }  // namespace fnv_00dad860
 
@@ -551,7 +554,8 @@ struct S_00dae220_Set
 };
 
 // @fnv 0x00dae220
-void __fastcall FUN_00dae220(int unused, S_00dae220_Set* set)
+// src: COMMUNITY 0x00dae220
+void __fastcall hkGskManifold_garbageCollect(int unused, S_00dae220_Set* set)
 {
     __declspec(align(16)) unsigned char used[16];
     unsigned int remap[16];
@@ -623,7 +627,7 @@ struct ContactRecord
 struct ContactCache
 {
     ContactRecord points[4];
-    int FUN_00daee00();
+    int hkGskManifold_findRedundant5thPoint();
 };
 struct ContactContext
 {
@@ -659,17 +663,18 @@ static inline S_00dad4d0_Entry& ContactEntry(ContactManifold* set, unsigned inde
     return *reinterpret_cast<S_00dad4d0_Entry*>(reinterpret_cast<char*>(set) + 4 + index * 8);
 }
 
-static void __fastcall FUN_00dae220(int, ContactManifold* set);
+static void __fastcall hkGskManifold_garbageCollect(int, ContactManifold* set);
 
 // @fnv 0x00daf1e0
-int FUN_00daf1e0(ContactManifold* set, void* a, void* b, void* c, ContactContext* context, S_00dad4d0_Key* key,
+// src: COMMUNITY 0x00daf1e0
+int hkGskManifold_addPoint(ContactManifold* set, void* a, void* b, void* c, ContactContext* context, S_00dad4d0_Key* key,
                  ContactRecord* point, ContactCache* cache, ContactManager* manager, int defer)
 {
     int replaced = 4;
     unsigned short id;
     if (set->count == 4)
     {
-        int index = cache->FUN_00daee00();
+        int index = cache->hkGskManifold_findRedundant5thPoint();
         if (index == 4)
             return 5;
         manager->remove(set->entries[index].id, context->userData);
@@ -678,7 +683,7 @@ int FUN_00daf1e0(ContactManifold* set, void* a, void* b, void* c, ContactContext
             *added = set->entries[0];
         else
             *added = set->entries[1];
-        FUN_00dae220(index, set);
+        hkGskManifold_garbageCollect(index, set);
         id = manager->add(a, b, c, context, key, point);
         if (id == 0xffff)
         {
@@ -792,7 +797,8 @@ int FUN_00daf1e0(ContactManifold* set, void* a, void* b, void* c, ContactContext
 }
 
 // Compact the shared vertex table and re-encode every contact's offsets.
-static __declspec(noinline) void __fastcall FUN_00dae220(int, ContactManifold* set)
+// src: COMMUNITY 0x00dae220
+static __declspec(noinline) void __fastcall hkGskManifold_garbageCollect(int, ContactManifold* set)
 {
     __declspec(align(16)) unsigned int usedWords[4];
     _mm_store_ps(reinterpret_cast<float*>(usedWords), _mm_setzero_ps());

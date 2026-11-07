@@ -15,6 +15,6 @@ void NiTransform::CalculateInverse(NiTransform& out)
 {
  out.m_Rotate = m_Rotate.Transpose();
  out.m_fScale = 1.0f / m_fScale;
- out.m_Translate = NiPosData::ComputePositionAtTime(out.m_fScale, static_cast<const NiMatrix3&>(out.m_Rotate) * static_cast<const NiPoint3&>(m_Translate).FUN_004a0bd0());
+ out.m_Translate = NiPosData::ComputePositionAtTime(out.m_fScale, static_cast<const NiMatrix3&>(out.m_Rotate) * static_cast<const NiPoint3&>(m_Translate).GetNegatedVector());
 }
 #pragma optimize("", on)

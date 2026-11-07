@@ -57,13 +57,14 @@ void* __thiscall FUN_00c220a0_shell::FUN_00c220a0(unsigned int flags)
 
 struct FUN_00c21fd0_shell : public NiPSysEmitter
 {
-    void* FUN_00c21fd0();
+    void* NiPSysEmitter_GetRTTI();
 };
 
 extern char const* const g_01202500_arg1;
 
 // @fnv 0x00c21fd0
-void* __thiscall FUN_00c21fd0_shell::FUN_00c21fd0()
+// src: COMMUNITY 0x00c21fd0
+void* __thiscall FUN_00c21fd0_shell::NiPSysEmitter_GetRTTI()
 {
     return (void*)&g_01202500_arg1;
 }
@@ -80,7 +81,7 @@ struct FUN_00a69720_shell
 };
 
 char* __cdecl _FUN_00a7d330(char const*);
-char* __cdecl FUN_00a7d550(char const*, float);
+char* __cdecl NiGetViewerString_00a7d550(char const*, float);
 
 extern char const str_01044b18[];
 extern char const str_010bdf30[];
@@ -96,11 +97,12 @@ extern char const str_010bdfd0[];
 
 struct FUN_00c22780_shell : public Base00c319e0
 {
-    void FUN_00c22780(StrArr* pkStrings);
+    void NiPSysEmitter_GetViewerStrings(StrArr* pkStrings);
 };
 
 // @fnv 0x00c22780
-void FUN_00c22780_shell::FUN_00c22780(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c22780
+void FUN_00c22780_shell::NiPSysEmitter_GetViewerStrings(StrArr* pkStrings)
 {
     char* pString;
     unsigned int index;
@@ -113,37 +115,37 @@ void FUN_00c22780_shell::FUN_00c22780(StrArr* pkStrings)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_01044b18, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x18));
+    pString = NiGetViewerString_00a7d550(str_01044b18, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x18));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdfd0, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x1c));
+    pString = NiGetViewerString_00a7d550(str_010bdfd0, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x1c));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdfc4, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x20));
+    pString = NiGetViewerString_00a7d550(str_010bdfc4, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x20));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdfac, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x24));
+    pString = NiGetViewerString_00a7d550(str_010bdfac, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x24));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdf9c, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x28));
+    pString = NiGetViewerString_00a7d550(str_010bdf9c, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x28));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdf84, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x2c));
+    pString = NiGetViewerString_00a7d550(str_010bdf84, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x2c));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
@@ -155,25 +157,25 @@ void FUN_00c22780_shell::FUN_00c22780(StrArr* pkStrings)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdf64, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x40));
+    pString = NiGetViewerString_00a7d550(str_010bdf64, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x40));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdf50, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x44));
+    pString = NiGetViewerString_00a7d550(str_010bdf50, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x44));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdf44, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x48));
+    pString = NiGetViewerString_00a7d550(str_010bdf44, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x48));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
     pkStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d550(str_010bdf30, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x4c));
+    pString = NiGetViewerString_00a7d550(str_010bdf30, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x4c));
     index = pkStrings->m_usSize;
     if (index >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(index + pkStrings->m_usGrowBy);
@@ -227,7 +229,8 @@ bool FUN_00c226a0_cls::Equals(FUN_00c226a0_cls* other)
 }
 
 // @fnv 0x00d070a0
-void __stdcall FUN_00d070a0(int, int)
+// src: COMMUNITY 0x00d070a0
+void __stdcall ThisCall_Nullsub_2Ints(int, int)
 {}
 
 extern int __cdecl FUN_00ecadb8();
@@ -270,7 +273,7 @@ struct Point3ParameterData
 class Emitter : public NiPSysEmitter
 {
   public:
-    void FUN_00c220c0(float fTime, unsigned short usNumParticles, const float* afAges);
+    void NiPSysEmitter_EmitParticles(float fTime, unsigned short usNumParticles, const float* afAges);
 };
 inline float NiFastSin(float fAngleDifference)
 {
@@ -281,7 +284,8 @@ inline float NiFastCos(float fAngleDifference)
     return DAT_011f4ae0[(int)(fAngleDifference * (512.0 / DAT_011aeae8)) & 511];
 }
 // @fnv 0x00c220c0
-void Emitter::FUN_00c220c0(float fTime, unsigned short usNumParticles, const float* afAges)
+// src: XBOX_PDB 0x00c220c0
+void Emitter::NiPSysEmitter_EmitParticles(float fTime, unsigned short usNumParticles, const float* afAges)
 {
     NiPSysData* pkData = reinterpret_cast<NiPSysData*>(m_pkTarget->m_spModelData.m_pObject);
     NiPoint3* pkVertex = pkData->m_pkVertex;
@@ -319,7 +323,7 @@ void Emitter::FUN_00c220c0(float fTime, unsigned short usNumParticles, const flo
         if (pucTex)
             pucTex[usNew] = FUN_00ecadb8() % ucTexCount;
         pkInfo->m_fZValue = fTime - pkInfo->m_fXValue;
-        m_pkTarget->FUN_00c1aee0(usNew);
+        m_pkTarget->InitializeNewParticle(usNew);
     }
 }
 
@@ -374,11 +378,12 @@ inline void S_00c22530_ReadFloat(S_00c22530_Stream& s, float& f)
 struct S_00c22530_Emitter : NiPSysEmitter
 {
     void FUN_00c31950(NiStream& stream);
-    void FUN_00c22530(S_00c22530_Stream& stream);
+    void NiPSysEmitter_SaveBinary(S_00c22530_Stream& stream);
 };
 // Calls FUN_00c31950, then reads emitter fields and particle color from the stream.
 // @fnv 0x00c22530
-void S_00c22530_Emitter::FUN_00c22530(S_00c22530_Stream& stream)
+// src: XBOX_PDB 0x00c22530
+void S_00c22530_Emitter::NiPSysEmitter_SaveBinary(S_00c22530_Stream& stream)
 {
     FUN_00c31950(stream);
     S_00c22530_ReadFloat(stream, m_fEmissionSpeed);

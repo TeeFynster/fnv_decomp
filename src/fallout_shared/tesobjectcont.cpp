@@ -149,7 +149,7 @@ bool TESObjectCONT::LoadForm(TESFile* file)
                 memset(&cntoItem, 0, 8);
                 file->GetChunkData(&cntoItem, 8);
                 if (file->IsEndianConversionRequired())
-                    cntoItem.FUN_00462230();
+                    cntoItem.TwoValues_Endian();
                 DAT_011c9348 = reinterpret_cast<ContainerItemExtraOwner*>(
                     reinterpret_cast<TESContainer*>(reinterpret_cast<unsigned char*>(this) + 0x30)
                         ->AddContainerObject(&cntoItem));
@@ -188,7 +188,7 @@ bool TESObjectCONT::LoadForm(TESFile* file)
         case 0x4D414E51: {
             unsigned int qnamFormID = 0;
             file->GetChunkData(&qnamFormID);
-            FUN_004fb0b0(qnamFormID);
+            SetImpactDataSet_004fb0b0(qnamFormID);
             break;
         }
 
@@ -226,12 +226,12 @@ void* S2::DestroyIfFlagged(unsigned int flags)
 
 struct FUN_00516b60_shell
 {
-    void FUN_004851b0(TESForm*);
+    void TESForm_CopyAllComponents(TESForm*);
     unsigned char* GetTESChallengeList();
     TESSound* GetAreaSound();
     void SetAreaSound(TESSound*);
     TESObjectREFR* GetTempRef();
-    void FUN_004fb0b0(TESObjectREFR*);
+    void SetImpactDataSet_004fb0b0(TESObjectREFR*);
     BGSVoiceType* GetActorStateFlags();
     void SetVoiceType(BGSVoiceType*);
     void CopyFromContainer(TESForm* apCopy);
@@ -242,16 +242,16 @@ void FUN_00516b60_shell::CopyFromContainer(TESForm* apCopy)
     TESObjectCONT* cont = dynamic_cast<TESObjectCONT*>(apCopy);
     if (!cont)
         return;
-    ((FUN_00516b60_shell*)this)->FUN_004851b0(apCopy);
+    ((FUN_00516b60_shell*)this)->TESForm_CopyAllComponents(apCopy);
     *(unsigned char*)((char*)this + 0x98) = *((FUN_00516b60_shell*)cont)->GetTESChallengeList();
     ((FUN_00516b60_shell*)this)->SetAreaSound(((FUN_00516b60_shell*)cont)->GetAreaSound());
-    ((FUN_00516b60_shell*)this)->FUN_004fb0b0(((FUN_00516b60_shell*)cont)->GetTempRef());
+    ((FUN_00516b60_shell*)this)->SetImpactDataSet_004fb0b0(((FUN_00516b60_shell*)cont)->GetTempRef());
     ((FUN_00516b60_shell*)this)->SetVoiceType(((FUN_00516b60_shell*)cont)->GetActorStateFlags());
 }
 
 struct FUN_005e79a0_t
 {
-    bool FUN_00485270(TESForm*);
+    bool TESForm_CompareAllComponents(TESForm*);
 };
 struct FUN_00516bf0_shell
 {
@@ -276,7 +276,7 @@ bool FUN_00516c10_shell::IsNotMatchingContainer(TESForm* apCompare)
     TESObjectCONT* pComp = dynamic_cast<TESObjectCONT*>(apCompare);
     if (!pComp)
         return true;
-    if (((FUN_005e79a0_t*)this)->FUN_00485270(pComp))
+    if (((FUN_005e79a0_t*)this)->TESForm_CompareAllComponents(pComp))
         return true;
     if (*(signed char*)((char*)this + 0x98) != *(signed char*)((FUN_00461150_shell*)pComp)->GetTESChallengeList())
         return true;
@@ -291,7 +291,7 @@ bool FUN_00516c10_shell::IsNotMatchingContainer(TESForm* apCompare)
 
 struct FUN_00516a20_shell
 {
-    void FUN_00516a20();
+    void TESObjectCONT_SaveAlt();
 };
 
 struct FUN_00481b40_shell
@@ -311,7 +311,7 @@ struct FUN_00485680
 
 struct DoorPart30
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 
 struct DoorPart3c
@@ -321,7 +321,7 @@ struct DoorPart3c
 
 struct DoorPart5c
 {
-    void FUN_0048cca0();
+    void Save_0048cca0();
 };
 
 struct DoorPart68
@@ -331,20 +331,21 @@ struct DoorPart68
 
 struct FUN_00485e00_shell
 {
-    void FUN_00485e20(TESForm*, int);
+    void TESForm___SaveData(TESForm*, int);
 };
 
 bool _FUN_00401500();
 void _FUN_00485910(unsigned int, unsigned int);
 
 // @fnv 0x00516a20
-void FUN_00516a20_shell::FUN_00516a20()
+// src: COMMUNITY 0x00516a20
+void FUN_00516a20_shell::TESObjectCONT_SaveAlt()
 {
     reinterpret_cast<FUN_004855a0*>(this)->M();
-    reinterpret_cast<DoorPart30*>(reinterpret_cast<char*>(this) + 0x3c)->FUN_00487010();
+    reinterpret_cast<DoorPart30*>(reinterpret_cast<char*>(this) + 0x3c)->Save_00487010();
     reinterpret_cast<DoorPart3c*>(reinterpret_cast<char*>(this) + 0x48)
         ->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    reinterpret_cast<DoorPart5c*>(reinterpret_cast<char*>(this) + 0x68)->FUN_0048cca0();
+    reinterpret_cast<DoorPart5c*>(reinterpret_cast<char*>(this) + 0x68)->Save_0048cca0();
     reinterpret_cast<FUN_00481b40_shell*>(reinterpret_cast<char*>(this) + 0x30)->FUN_00481b40();
     reinterpret_cast<DoorPart68*>(reinterpret_cast<char*>(this) + 0x7c)->FUN_00477f20();
 
@@ -353,7 +354,7 @@ void FUN_00516a20_shell::FUN_00516a20()
         reinterpret_cast<TESForm*>(reinterpret_cast<char*>(this) + 0x98)->TESForm::ClearData();
     }
 
-    reinterpret_cast<FUN_00485e00_shell*>(this)->FUN_00485e20(
+    reinterpret_cast<FUN_00485e00_shell*>(this)->TESForm___SaveData(
         reinterpret_cast<TESForm*>(reinterpret_cast<char*>(this) + 0x98), 1);
 
     if (_FUN_00401500())

@@ -7,31 +7,34 @@
 extern const void* g_01202710;
 
 // @fnv 0x00c2b040
-const void* __cdecl FUN_00c2b040()
+// src: COMMUNITY 0x00c2b040
+const void* __cdecl NiPSysFieldMaxDistanceCtlr_GetRTTI()
 {
     return &g_01202710;
 }
 
 struct NiPSysFieldMaxDistanceCtlr : NiPSysModifierFloatCtlr
 {
-    void FUN_00c2b050(float fValue);
-    void* FUN_00c2b070(unsigned int a1);
+    void SetTargetFloatValue(float fValue);
+    void* CreateClone_00c2b070(unsigned int a1);
 };
 
 // @fnv 0x00c2b050
-void NiPSysFieldMaxDistanceCtlr::FUN_00c2b050(float fValue)
+// src: XBOX_PDB 0x00c2b050
+void NiPSysFieldMaxDistanceCtlr::SetTargetFloatValue(float fValue)
 {
     float* p = reinterpret_cast<float*>(m_pkTargetModifier);
     p[0xA] = fValue;
     p[0xB] = fValue * fValue;
 }
 
-void __stdcall FUN_00c32f60(StrArr*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 // @fnv 0x00c2b0c0
-void __stdcall FUN_00c2b0c0(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c2b0c0
+void __stdcall NiPSysFieldMaxDistanceCtlr_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00c32f60(pkStrings);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pkStrings);
     char* psz = _FUN_00a7d330((const char*)g_01202710);
     unsigned int uSize = pkStrings->m_usSize;
     if (uSize >= pkStrings->m_usMaxSize)
@@ -39,7 +42,7 @@ void __stdcall FUN_00c2b0c0(StrArr* pkStrings)
     pkStrings->SetAt(uSize, psz);
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern char DAT_010bf354[];
 
 inline void* operator new(unsigned int, void* location)
@@ -52,9 +55,10 @@ void __cdecl FUN_00c32de0();
 
 // Allocates a 0x40-byte object, runs its base constructor and sets its vtable, then passes it with a1 to FUN_00c32de0 and returns it.
 // @fnv 0x00c2b070
-void* NiPSysFieldMaxDistanceCtlr::FUN_00c2b070(unsigned int a1)
+// src: XBOX_PDB 0x00c2b070
+void* NiPSysFieldMaxDistanceCtlr::CreateClone_00c2b070(unsigned int a1)
 {
-    NiPSysFieldMaxDistanceCtlr* p = (NiPSysFieldMaxDistanceCtlr*)FUN_00aa13e0(0x40);
+    NiPSysFieldMaxDistanceCtlr* p = (NiPSysFieldMaxDistanceCtlr*)Object_DispatchCommandFour(0x40);
     if (p != 0)
     {
         ::new (p) NiPSysModifierFloatCtlr;

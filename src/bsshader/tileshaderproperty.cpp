@@ -11,7 +11,8 @@
 extern "C" void* g_012007d8;
 
 // @fnv 0x00bb7d60
-void* __cdecl FUN_00bb7d60()
+// src: XBOX_PDB 0x00bb7d60
+void* __cdecl TileShaderProperty_GetRTTI()
 {
     return &g_012007d8;
 }
@@ -53,7 +54,8 @@ inline void NiTexture::DecRefCount()
 }
 // Replaces m_spTexture.m_pObject with apTexture, releasing the old texture and incrementing the new one's reference count when they differ.
 // @fnv 0x00bb7a10
-void TileShaderProperty::FUN_00bb7a10(NiTexture* apTexture)
+// src: XBOX_PDB 0x00bb7a10
+void TileShaderProperty::SetTileTexture(NiTexture* apTexture)
 {
     if (m_spTexture.m_pObject != apTexture)
     {
@@ -153,10 +155,10 @@ inline unsigned int NiBinaryStream::BinaryRead(void* pvDst, unsigned int uiBytes
 // This call interface supplies only their declarations, with no duplicate object layout.
 struct BSShaderPropertyStreamIO
 {
-    void FUN_00ba92c0(NiStream* stream);
-    void FUN_00ba9380(NiStream* stream);
+    void BSShaderProperty_LoadBinary(NiStream* stream);
+    void BSShaderProperty_SaveBinary(NiStream* stream);
 };
-void __cdecl FUN_00aa10f0(unsigned int v);
+void __cdecl _NiFree_00aa10f0(unsigned int v);
 template <class T> inline void LoadBin(NiBinaryStream& kStream, T& val)
 {
     unsigned int uiSize = sizeof(T);
@@ -165,14 +167,15 @@ template <class T> inline void LoadBin(NiBinaryStream& kStream, T& val)
 
 // Loads the base property and tile mode, then reads and assigns the tile name.
 // @fnv 0x00bb7b60
-void TileShaderProperty::FUN_00bb7b60(NiStream* a1)
+// src: XBOX_PDB 0x00bb7b60
+void TileShaderProperty::LoadBinary_00bb7b60(NiStream* a1)
 {
-    reinterpret_cast<BSShaderPropertyStreamIO*>(this)->FUN_00ba92c0(a1);
+    reinterpret_cast<BSShaderPropertyStreamIO*>(this)->BSShaderProperty_LoadBinary(a1);
     LoadBin(*a1->m_pkIstr, m_iUnk8C);
     char* v = 0;
     a1->ReadStreamString(v);
     m_kName.Set(v, 0);
-    FUN_00aa10f0(reinterpret_cast<unsigned int>(v));
+    _NiFree_00aa10f0(reinterpret_cast<unsigned int>(v));
 }
 
 template <class T> inline void SaveBin(NiBinaryStream& kStream, const T& val)
@@ -182,23 +185,24 @@ template <class T> inline void SaveBin(NiBinaryStream& kStream, const T& val)
 }
 // Saves the base property, tile mode and tile name.
 // @fnv 0x00bb7be0
-void TileShaderProperty::FUN_00bb7be0(NiStream* a1)
+// src: XBOX_PDB 0x00bb7be0
+void TileShaderProperty::SaveBinary_00bb7be0(NiStream* a1)
 {
-    reinterpret_cast<BSShaderPropertyStreamIO*>(this)->FUN_00ba9380(a1);
+    reinterpret_cast<BSShaderPropertyStreamIO*>(this)->BSShaderProperty_SaveBinary(a1);
     SaveBin(*a1->m_pkOstr, m_iUnk8C);
-    a1->FUN_00a64160(m_kName.pString);
+    a1->SaveCString(m_kName.pString);
 }
 class TexturePool_bb7d
 {
   public:
-    void FUN_00aa4060(void* pvHandle);
+    void MemoryManager_Deallocate(void* pvHandle);
 };
 extern TexturePool_bb7d DAT_011f6238;
 
 template <> inline BSStringT<char>::~BSStringT()
 {
     if (pString)
-        DAT_011f6238.FUN_00aa4060(pString);
+        DAT_011f6238.MemoryManager_Deallocate(pString);
     pString = 0;
     sMaxLen = 0;
     sLen = 0;

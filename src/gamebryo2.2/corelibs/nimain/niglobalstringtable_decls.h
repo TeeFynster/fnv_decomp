@@ -45,7 +45,7 @@ class NiPlaybackManager
     virtual void vfn_38();
     virtual unsigned vfn_3c();
     bool GetNameByKey(const char*, char*);
-    void FUN_00ec1a00();
+    void MoviePlayer_SignalBinkOpen();
 };
 extern NiPlaybackManager* DAT_0126fac4;
 extern NiPlaybackTimestamp DAT_0126fad4;

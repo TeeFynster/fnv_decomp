@@ -10,11 +10,12 @@ int TruncateFloatToInt(float value);
 struct S_00538f40
 {
     __m128 m;
-    void FUN_00538f40();
+    void hkVector4_setZero4();
 };
 
 // @fnv 0x00538f40
-void S_00538f40::FUN_00538f40()
+// src: XBOX_PDB 0x00538f40
+void S_00538f40::hkVector4_setZero4()
 {
     m = _mm_setzero_ps();
 }

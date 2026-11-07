@@ -40,7 +40,7 @@ class BSDistantTreeShader : public BSShader
     void InitializeShaderData();
     void UpdateShaderConstants();
     BSDistantTreeShader* FUN_00bb6c30(NiD3DVertexDeclaration*);
-    void FUN_00bb64a0();
+    void BSDistantTreeShader_LoadStagesAndPasses();
     // const NiRTTI* __cdecl BSDistantTreeShader::*()
     // BSDistantTreeShader
     // void __cdecl BSDistantTreeShader::*()

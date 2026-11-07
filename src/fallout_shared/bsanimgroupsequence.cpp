@@ -69,9 +69,9 @@ class TimedTextEntry
     float Time();
 };
 extern const float DAT_01023850;
-const NiFixedString& FUN_004ef990();
+const NiFixedString& FixedStrings_QAttachSound();
 extern "C" int _strnicmp(const char*, const char*, unsigned int);
-int FUN_00404dc0(const char*, const char*);
+int BSstricmp(const char*, const char*);
 extern "C" char* strchr(const char*, int);
 extern "C" char* __insecure_strcpy(char*, const char*);
 int Warning(const char*, ...);
@@ -86,7 +86,7 @@ unsigned char BSAnimGroupSequence::GetPriority(const char* objectName, unsigned 
         if (!name)
             Warning("NULL object name found in tag array for sequence '%s'.",
                     GetName().operator const char*());
-        if (name && !FUN_00404dc0(name, objectName))
+        if (name && !BSstricmp(name, objectName))
         {
             if (indexOut)
                 *indexOut = i;
@@ -133,7 +133,8 @@ BSAnimGroupSequence::~BSAnimGroupSequence()
 
 // Returns 0.0f unless the sequence's state at offset 0x44 is 1-3, otherwise evaluates the helper at afTime plus the offset at 0x48 with clamping.
 // @fnv 0x004eec60
-float BSAnimGroupSequence::FUN_004eec60(float afTime)
+// src: XBOX_PDB 0x004eec60
+float BSAnimGroupSequence::GetScaledTime(float afTime)
 {
     switch (m_eAnimationState)
     {
@@ -144,12 +145,13 @@ float BSAnimGroupSequence::FUN_004eec60(float afTime)
     default:
         return 0.0f;
     }
-    return FUN_00a30970(afTime + m_fSequenceOffset, true);
+    return ComputeScaledTime_00a30970(afTime + m_fSequenceOffset, true);
 }
 
 // Reads a time, a byte, and three ints from the buffer, stores fTime minus fBase into f48, sets f4c and f50 to -DAT_01023850, then calls FUN_004eec60 with fBase.
 // @fnv 0x004efd10
-void BSAnimGroupSequence::FUN_004efd10(BGSLoadFormBuffer* pBuffer, float fBaseTime)
+// src: COMMUNITY 0x004efd10
+void BSAnimGroupSequence::LoadGameBGS_004efd10(BGSLoadFormBuffer* pBuffer, float fBaseTime)
 {
     float fTime = 0.0f;
     pBuffer->ReadTypedData(&fTime, 4u);
@@ -162,31 +164,35 @@ void BSAnimGroupSequence::FUN_004efd10(BGSLoadFormBuffer* pBuffer, float fBaseTi
     pBuffer->ReadTypedData(&m_fDestinationFrame, 4u);
     m_fStartTime = -DAT_01023850;
     m_fEndTime = -DAT_01023850;
-    FUN_004eec60(fBaseTime);
+    GetScaledTime(fBaseTime);
 }
 
 extern NiFixedString* DAT_011c61c8;
 
 // @fnv 0x004ef990
-const NiFixedString& __cdecl FUN_004ef990()
+// src: XBOX_PDB 0x004ef990
+const NiFixedString& __cdecl FixedStrings_QAttachSound()
 {
     return *DAT_011c61c8;
 }
 
 // @fnv 0x004eec20
-NiObject* __thiscall BSAnimGroupSequence::FUN_004eec20(CloningProcess* arCloneData)
+// src: XBOX_PDB 0x004eec20
+NiObject* __thiscall BSAnimGroupSequence::CreateClone(CloningProcess* arCloneData)
 {
     return NiControllerSequence::MakeClone(*arCloneData);
 }
 
 // @fnv 0x004eec40
-void BSAnimGroupSequence::FUN_004eec40(NiTPrimitiveArray<const char*>* pkStrings)
+// src: XBOX_PDB 0x004eec40
+void BSAnimGroupSequence::GetViewerStrings_004eec40(NiTPrimitiveArray<const char*>* pkStrings)
 {
     NiControllerSequence::AddViewerStrings(pkStrings);
 }
 
 // @fnv 0x004ef970
-void NiAVObject::FUN_004ef970(bool enabled)
+// src: XBOX_PDB 0x004ef970
+void NiAVObject::SetHasMovingSound(bool enabled)
 {
     SetBit(enabled, 0x20000);
 }
@@ -194,7 +200,8 @@ void NiAVObject::FUN_004ef970(bool enabled)
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 // @fnv 0x004efaa0
-unsigned short FUN_004efaa0()
+// src: COMMUNITY 0x004efaa0
+unsigned short BSAnimGroupSequence_GetSequenceSaveSize()
 {
     unsigned short v = 0;
     v += 4;
@@ -208,33 +215,35 @@ unsigned short FUN_004efaa0()
 }
 
 // @fnv 0x004efb20
-void BSAnimGroupSequence::FUN_004efb20(float afTime)
+// src: COMMUNITY 0x004efb20
+void BSAnimGroupSequence::SaveGameTES_004efb20(float afTime)
 {
     float foffset = m_fSequenceOffset + afTime;
-    g_TESSaveLoadGame->FUN_008579b0(&foffset, 4u);
-    g_TESSaveLoadGame->FUN_008579b0(&m_eAnimationState, 4u);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&foffset, 4u);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_eAnimationState, 4u);
     if (g_TESSaveLoadGame->FUN_008df040() < 0x71)
     {
-        g_TESSaveLoadGame->FUN_008579b0(&foffset, 4u);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&foffset, 4u);
     }
-    g_TESSaveLoadGame->FUN_008579b0(&m_fLastTime, 4u);
-    g_TESSaveLoadGame->FUN_008579b0(&m_fWeightAdjustedLastTime, 4u);
-    g_TESSaveLoadGame->FUN_008579b0(&m_fDestinationFrame, 4u);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_fLastTime, 4u);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_fWeightAdjustedLastTime, 4u);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_fDestinationFrame, 4u);
 }
 
 
 // @fnv 0x004eedd0
 bool BSAnimGroupSequence::AttachToOwner(NiAVObject* target, int argument)
 {
-    return FUN_00a31910(target, reinterpret_cast<NiAVObject*>(m_pkOwnerManager->GetStringAtOffset()), argument);
+    return ResolveTransformInterpolators(target, reinterpret_cast<NiAVObject*>(m_pkOwnerManager->GetStringAtOffset()), argument);
 }
 
-unsigned short __cdecl FUN_004efaa0();
+unsigned short __cdecl BSAnimGroupSequence_GetSequenceSaveSize();
 
 // @fnv 0x004efb10
-unsigned short __thiscall BSAnimGroupSequence::FUN_004efb10()
+// src: XBOX_PDB 0x004efb10
+unsigned short __thiscall BSAnimGroupSequence::GetSaveSize_004efb10()
 {
-    return FUN_004efaa0();
+    return BSAnimGroupSequence_GetSequenceSaveSize();
 }
 
 // The shared sequence lacks the block-count accessor at 0x0084e3a0 and the
@@ -250,7 +259,8 @@ void __fastcall ClearSequenceBlendInterpolators(NiControllerSequence* sequence)
 
 // Adds value to m_0x48 and saves the sum, m_0x44, m_0x34, m_0x38 and m_0x54 into the save buffer.
 // @fnv 0x004efc90
-void __thiscall BSAnimGroupSequence::FUN_004efc90(BGSSaveFormBuffer* buffer, float value)
+// src: COMMUNITY 0x004efc90
+void __thiscall BSAnimGroupSequence::SaveGameBGS_004efc90(BGSSaveFormBuffer* buffer, float value)
 {
     float temp = m_fSequenceOffset + value;
     buffer->SaveData(&temp, 4, 0);
@@ -263,7 +273,7 @@ void __thiscall BSAnimGroupSequence::FUN_004efc90(BGSSaveFormBuffer* buffer, flo
 
 
 
-void __cdecl FUN_00a35700(int, int, GO*);
+void __cdecl NiControllerSequence_CreateSequenceFromFile(int, int, GO*);
 
 // Constructs a sequence from the cloned object returned in value, then assigns it to target.
 // @fnv 0x004eeb60
@@ -272,14 +282,15 @@ void __cdecl AssignNewObjectFromValue(int arg1, int arg2, GO* target)
     {
         GO value(0);
 
-        FUN_00a35700(arg1, arg2, &value);
+        NiControllerSequence_CreateSequenceFromFile(arg1, arg2, &value);
 
         target->operator=(new BSAnimGroupSequence(0, reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(static_cast<const GO&>(value)))));
     }
 }
 
 // @fnv 0x004efbc0
-void BSAnimGroupSequence::FUN_004efbc0(float value)
+// src: XBOX_PDB 0x004efbc0
+void BSAnimGroupSequence::LoadGame_004efbc0(float value)
 {
     float loadedValue;
 
@@ -298,12 +309,13 @@ void BSAnimGroupSequence::FUN_004efbc0(float value)
     m_fStartTime = -DAT_01023850;
     m_fEndTime = -DAT_01023850;
 
-    this->FUN_004eec60(value);
+    this->GetScaledTime(value);
 }
 
 extern unsigned char DAT_01096968;
 // @fnv 0x004eecb0
-void BSAnimGroupSequence::FUN_004eecb0()
+// src: COMMUNITY 0x004eecb0
+void BSAnimGroupSequence::ValidateTargets()
 {
     if (!m_pkOwnerManager)
         return;
@@ -367,8 +379,8 @@ bool __cdecl PlaySequenceSounds(NiControllerSequence* sequence, TESObjectREFR* r
                 wrapped5 = true;
             unsigned int count8 = 0;
             TimedTextEntry* keys2 = 0;
-            if (sequence->FUN_00700300())
-                keys2 = sequence->FUN_00700300()->GetKeys(&count8);
+            if (sequence->GetName_00700300())
+                keys2 = sequence->GetName_00700300()->GetKeys(&count8);
             for (unsigned int index = 0; index < count8; index++)
             {
                 char* text_2 = (char*)(const char*)keys2[index].Text();
@@ -402,12 +414,12 @@ bool __cdecl PlaySequenceSounds(NiControllerSequence* sequence, TESObjectREFR* r
                             if (nodeName5[0])
                                 node9 = static_cast<const NiNode*>(reference->GetNiNode())->GetObjectByName(NiFixedString(static_cast<const char*>(nodeName5)));
                             else
-                                node9 = static_cast<const NiNode*>(reference->GetNiNode())->GetObjectByName(FUN_004ef990());
+                                node9 = static_cast<const NiNode*>(reference->GetNiNode())->GetObjectByName(FixedStrings_QAttachSound());
                             if (!node9)
                                 node9 = reference->GetNiNode();
                         }
                         if (node9)
-                            BSAudio::GetSingleton()->FUN_00ad8570(node9, 1.0f, 0x40000000u);
+                            BSAudio::GetSingleton()->BSAudio_StopMovingSounds(node9, 1.0f, 0x40000000u);
                     }
                     else if (!_strnicmp("Enum: HitShader", text_2, 15))
                         g_thePlayer->ApplyHitShaderToReference(reference);
@@ -444,16 +456,16 @@ bool __cdecl PlaySequenceSounds(NiControllerSequence* sequence, TESObjectREFR* r
                         if (objectName3[0])
                             node9 = static_cast<const NiNode*>(reference->GetNiNode())->GetObjectByName(NiFixedString(static_cast<const char*>(objectName3)));
                         else
-                            node9 = static_cast<const NiNode*>(reference->GetNiNode())->GetObjectByName(FUN_004ef990());
+                            node9 = static_cast<const NiNode*>(reference->GetNiNode())->GetObjectByName(FixedStrings_QAttachSound());
                         if (looping5 && !node9)
                             node9 = reference->GetNiNode();
                         if (node9)
-                            node9->FUN_004ef970(true);
-                        reference->GetNiNode()->FUN_004ef970(true);
+                            node9->SetHasMovingSound(true);
+                        reference->GetNiNode()->SetHasMovingSound(true);
                         if (node9)
-                            position4 = node9->FUN_0045bb80();
+                            position4 = node9->NiAVObject_GetWorldTranslate();
                         else
-                            position4 = reference->GetNiNode()->FUN_0045bb80();
+                            position4 = reference->GetNiNode()->NiAVObject_GetWorldTranslate();
                     }
                     if (reference &&
                         (looping5 || special2 || CanPlaySequenceSoundAt(sound2, position4, 1.0f)))
@@ -498,9 +510,9 @@ bool __cdecl PlaySequenceSounds(NiControllerSequence* sequence, TESObjectREFR* r
         if (GetSequenceCycleType(sequence))
         {
             result2 = true;
-            if (sequence->FUN_00639aa0() == -DAT_01023850)
+            if (sequence->TESCombatStyle_GetTargetingFOV() == -DAT_01023850)
                 result2 = false;
-            else if (GetSequenceScaledLastTime(sequence) < sequence->FUN_00508100())
+            else if (GetSequenceScaledLastTime(sequence) < sequence->GetEndKeyTime_00508100())
                 result2 = false;
         }
     }

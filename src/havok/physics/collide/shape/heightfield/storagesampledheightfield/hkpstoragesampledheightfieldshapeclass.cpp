@@ -37,11 +37,12 @@ struct S_00d49600
     int unk64;
     int unk68;
     float unk6C;
-    float FUN_00d49600(int x, int z);
+    float hkpStorageSampledHeightFieldShape_getHeightAtImpl(int x, int z);
 };
 // Returns the z component of the vector at unk60 indexed by (unk68 - z) * unk10 + x, plus unk6C.
 // @fnv 0x00d49600
-float S_00d49600::FUN_00d49600(int x, int z)
+// src: XBOX_PDB 0x00d49600
+float S_00d49600::hkpStorageSampledHeightFieldShape_getHeightAtImpl(int x, int z)
 {
     return unk60[(unk68 - z) * unk10 + x].z + unk6C;
 }
@@ -60,7 +61,7 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
@@ -74,7 +75,7 @@ CpuObject* CpuObject::FUN_00d49630(unsigned int flags)
     FUN_00d496d0();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
+        CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;

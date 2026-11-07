@@ -17,12 +17,12 @@ public:
     virtual void vf04();
     virtual void vf05();
     virtual void vf06();
-    virtual hkDataArrayNative* FUN_00dbc0c0(int index);
-    virtual int FUN_00dbbc50(int a);
+    virtual hkDataArrayNative* swizzleObjectMember(int index);
+    virtual int asVec(int a);
     virtual void vf09();
-    virtual int FUN_00dbbc60(int a);
+    virtual int asString(int a);
     virtual void vf11();
-    virtual float FUN_00dbbca0(int index);
+    virtual float asReal(int index);
     virtual void vf13();
     virtual void vf14();
     virtual void vf15();
@@ -30,7 +30,7 @@ public:
     virtual void vf17();
     virtual __int64 GetEntry64(int a);
     virtual void vf19();
-    virtual NativeDBC* FUN_00dbc000(int index);
+    virtual NativeDBC* asObject(int index);
     virtual void vf21();
     virtual hkDataArrayNative* GetElement(int iIndex);
     virtual void vf23();

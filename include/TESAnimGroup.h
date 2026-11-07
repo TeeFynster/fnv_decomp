@@ -39,7 +39,7 @@ class TESAnimGroup : public NiRefObject
 
     void __thiscall FUN_005f22d0();
     void* __thiscall FUN_005f22a0(unsigned int flags);
-    void __thiscall FUN_00496910();
+    void __thiscall Animation_ResetVtableAndFinishScriptRunLock();
 
     struct AnimGroupSound
     {
@@ -111,9 +111,9 @@ class TESAnimGroup : public NiRefObject
     void SetDecal(unsigned char decal);
     char GetMorphKey();
     void SetMorphKey(unsigned char key);
-    unsigned short FUN_0047d3b0();
-    unsigned short FUN_005f23e0();
-    bool FUN_005f26c0();
+    unsigned short GetAnimGroupType_0047d3b0();
+    unsigned short GetWeapon();
+    bool IsPowerAttack_005f26c0();
     void FUN_005f2820(unsigned int count);
     bool FUN_005f3740(unsigned int action, float time);
     float FUN_005f3780(int action);

@@ -9,7 +9,7 @@
 struct CpuObject
 {
     int value;
-    void FUN_00e10a10(int value);
+    void hkpPrimitiveDrawer_setDisplayHandler(int value);
 };
 
 #include "../../../../../../../../../include/hkRotation.h"
@@ -48,12 +48,13 @@ struct DisplayTarget
 
 struct CpuObjectDerived : CpuObject
 {
-    void FUN_00e10a20(const hkVector4* center, hkVector4* axis, hkVector4* perp, float startAngle, float endAngle,
+    void ProcessEntries_00e10a20(const hkVector4* center, hkVector4* axis, hkVector4* perp, float startAngle, float endAngle,
                       float radius, int numSegments, int a8, int a9, int a10);
 };
 
 // @fnv 0x00e10a20
-void CpuObjectDerived::FUN_00e10a20(const hkVector4* center, hkVector4* axis, hkVector4* perp, float startAngle,
+// src: GUESS 0x00e10a20 (confidence: low)
+void CpuObjectDerived::ProcessEntries_00e10a20(const hkVector4* center, hkVector4* axis, hkVector4* perp, float startAngle,
                                     float endAngle, float radius, int numSegments, int a8, int a9, int a10)
 {
     perp->normalize3();
@@ -64,7 +65,7 @@ void CpuObjectDerived::FUN_00e10a20(const hkVector4* center, hkVector4* axis, hk
     rad4 = _mm_shuffle_ps(rad4, rad4, 0);
     hkVector4 cur;
     cur.m_vComponents = _mm_mul_ps(rad4, perp->m_vComponents);
-    cur.FUN_00c7f700(&rot, &cur);
+    cur.hkVector4_setRotatedDir(&rot, &cur);
     cur.m_vComponents = _mm_add_ps(center->m_vComponents, cur.m_vComponents);
     float stepAngle = (endAngle - startAngle) / numSegments;
     rot.FUN_00cb2e30(axis, stepAngle);
@@ -72,7 +73,7 @@ void CpuObjectDerived::FUN_00e10a20(const hkVector4* center, hkVector4* axis, hk
     {
         hkVector4 next;
         next.m_vComponents = _mm_sub_ps(cur.m_vComponents, center->m_vComponents);
-        next.FUN_00c7f700(&rot, &next);
+        next.hkVector4_setRotatedDir(&rot, &next);
         next.m_vComponents = _mm_add_ps(center->m_vComponents, next.m_vComponents);
         ((DisplayTarget*)value)->DisplayLine(&cur, &next, a8, a9, a10);
         cur.m_vComponents = next.m_vComponents;

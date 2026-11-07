@@ -17,22 +17,22 @@ extern GcRefList g_kPendingRefs_011de8bc;
 
 struct GcManager
 {
-    void FUN_00445570(void* pkRef);
+    void ModelLoader_CancelReference(void* pkRef);
     bool FUN_00868250();
-    void FUN_004aaf10();
+    void ModelLoader_UnlockModelMap();
 };
 extern GcManager* g_pkGcManager_011c3b3c;
 
 struct GcLoader
 {
-    bool FUN_0042ce10();
+    bool BGSSaveLoadGame_GetSaveGameLoading();
 };
 extern GcLoader* g_pkLoader_011ddf38;
 extern __declspec(thread) bool t_bInLoad;
 
 struct GcBaseForm
 {
-    bool FUN_00549580();
+    bool TESForm_GetHasSpokenFlag();
 };
 struct GcParentCell
 {
@@ -318,31 +318,32 @@ class GcRef
     virtual void v268();
     virtual void StopCombat(int i);
 
-    unsigned int FUN_0084e3a0();
-    void FUN_0056fcb0();
-    void FUN_00483c70();
-    GcBaseForm* FUN_007af430();
-    GcExtra* FUN_00575d70();
-    void FUN_00420ba0(int i);
-    void FUN_005de0a0(int iFlags, int i);
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    void TESObjectREFR_Release3DRelatedData();
+    void TESForm_RemoveFromDataStructures();
+    GcBaseForm* BGSSaveFormBuffer_GetForm();
+    GcExtra* TESObjectREFR_GetWorldSpace();
+    void Projectile_SetDesiredTarget(int i);
+    void Projectile_SetFlag(int iFlags, int i);
 };
-GcRef* __cdecl FUN_004839c0(unsigned int auiFormId);
+GcRef* __cdecl TESForm_GetFormByNumericID(unsigned int auiFormId);
 
 static const char s_szLockName[] = "GarbageCollector::Add(TESObjectREFR)";
 extern const char g_szGcEnd[] = "";
 
 // @fnv 0x00867f90
-void __cdecl FUN_00867f90(GcRef* pkRef)
+// src: COMMUNITY 0x00867f90
+void __cdecl GarbageCollector_Add_TESObjectREFR(GcRef* pkRef)
 {
     GcScopedLock kLock(1, s_szLockName);
-    if (FUN_004839c0(pkRef->FUN_0084e3a0()) != pkRef)
+    if (TESForm_GetFormByNumericID(pkRef->GetHavokWorldObjectCountInSceneGraph_0084e3a0()) != pkRef)
     {
         delete pkRef;
     }
     else
     {
         pkRef->Set3D(1);
-        pkRef->FUN_0056fcb0();
+        pkRef->TESObjectREFR_Release3DRelatedData();
         if (pkRef->IsActor())
         {
             GcRef* pkActor = pkRef;
@@ -351,24 +352,24 @@ void __cdecl FUN_00867f90(GcRef* pkRef)
         if (pkRef->IsDead())
         {
             GcRef* pkDead = pkRef;
-            pkDead->FUN_00420ba0(0);
-            pkDead->FUN_005de0a0(0x400, 0);
+            pkDead->Projectile_SetDesiredTarget(0);
+            pkDead->Projectile_SetFlag(0x400, 0);
         }
-        g_pkGcManager_011c3b3c->FUN_00445570(pkRef);
-        pkRef->FUN_00483c70();
-        if (pkRef->FUN_007af430()->FUN_00549580())
+        g_pkGcManager_011c3b3c->ModelLoader_CancelReference(pkRef);
+        pkRef->TESForm_RemoveFromDataStructures();
+        if (pkRef->BGSSaveFormBuffer_GetForm()->TESForm_GetHasSpokenFlag())
         {
-            GcExtra* pkExtra = pkRef->FUN_00575d70();
+            GcExtra* pkExtra = pkRef->TESObjectREFR_GetWorldSpace();
             if (pkExtra && pkExtra->FUN_00586170())
                 pkExtra->FUN_00586170()->FUN_006fcf30(pkRef);
         }
         pkRef->AssignEditorID(0);
-        if (!t_bInLoad || (g_pkLoader_011ddf38 && g_pkLoader_011ddf38->FUN_0042ce10()))
+        if (!t_bInLoad || (g_pkLoader_011ddf38 && g_pkLoader_011ddf38->BGSSaveLoadGame_GetSaveGameLoading()))
         {
             if (g_pkGcManager_011c3b3c->FUN_00868250())
             {
                 delete pkRef;
-                g_pkGcManager_011c3b3c->FUN_004aaf10();
+                g_pkGcManager_011c3b3c->ModelLoader_UnlockModelMap();
             }
             else
             {

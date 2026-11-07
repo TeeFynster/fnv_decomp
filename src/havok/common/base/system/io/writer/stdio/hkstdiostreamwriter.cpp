@@ -3,7 +3,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00d2bef0
-void __stdcall FUN_00d2bef0(char* p)
+// src: HAVOK_SRC 0x00d2bef0
+void __stdcall hkStdioStreamWriter_seekTellSupported(char* p)
 {
     *p = 1;
 }
@@ -29,12 +30,13 @@ extern int DAT_0102e388;
 struct FUN_00d2bfb0_class
 {
     int* vtbl;
-    void FUN_00d2bfb0();
+    void fclose_00d2bfb0();
     void __thiscall FUN_00d2be50();
 };
 
 // @fnv 0x00d2bfb0
-void __thiscall FUN_00d2bfb0_class::FUN_00d2bfb0()
+// src: XBOX_PDB 0x00d2bfb0
+void __thiscall FUN_00d2bfb0_class::fclose_00d2bfb0()
 {
     vtbl = &DAT_010ce6f4;
     FUN_00d2be50();
@@ -43,7 +45,8 @@ void __thiscall FUN_00d2bfb0_class::FUN_00d2bfb0()
 
 void __cdecl FUN_00ecda70(void*);
 // @fnv 0x00d2bec0
-void __fastcall FUN_00d2bec0(void* self, int)
+// src: HAVOK_LIB 0x00d2bec0
+void __fastcall hkStdioStreamWriter_flush(void* self, int)
 {
     void* p = *(void**)((char*)self + 8);
     if (p)
@@ -55,10 +58,11 @@ struct FUN_00d2bf20_class
 {
     char m0[8];
     void* m8;
-    long FUN_00d2bf20();
+    long hkStdioStreamWriter_tell();
 };
 // @fnv 0x00d2bf20
-long FUN_00d2bf20_class::FUN_00d2bf20()
+// src: HAVOK_LIB 0x00d2bf20
+long FUN_00d2bf20_class::hkStdioStreamWriter_tell()
 {
     return _ftell(m8);
 }
@@ -164,7 +168,8 @@ unsigned char* FUN_00d2bed0_cls::GetFlagAsByte(unsigned char* out)
 }
 
 // @fnv 0x00d2bee0
-void __stdcall FUN_00d2bee0(unsigned char* output)
+// src: HAVOK_SRC 0x00d2bee0
+void __stdcall hkStdioStreamWriter_markSupported(unsigned char* output)
 {
     *output = 1;
 }

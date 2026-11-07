@@ -24,35 +24,36 @@ extern unsigned char DAT_011dd436;
 extern BSSoundHandle DAT_011dd5bc;
 extern BSSimpleList<FalloutRadio::RadioStationState*> DAT_011dd554;
 
-void FUN_008325a0(bool);
+void FalloutAudioMedia_MediaSetRadio(bool);
 
 class Conversation
 {
   public:
     BSSimpleList<DialogueItem*> items;
     BSSimpleList<DialogueItem*>* current;
-    bool FUN_0083b9f0();
-    void FUN_0083c470();
-    bool FUN_0083b9a0();
+    bool Conversation_NextItem();
+    void Conversation_PrecacheSounds();
+    bool Conversation_FirstItem();
     DialogueItem* FUN_0083c820();
     ~Conversation();
 };
 TESTopic* GetTopicSubTypeName(int, int);
 FalloutRadio::RadioStationState* CreateRadioStationState(BGSTalkingActivator*, bool);
-void FUN_00834260(FalloutRadio::RadioStationState*);
+void FalloutRadio_UpdateStation(FalloutRadio::RadioStationState*);
 void AdvanceConversation(FalloutRadio::RadioStationState*, TESTopic*);
-bool FUN_00833ce0();
+bool FalloutRadio_GetIsDialogueOnlyRadio();
 void FUN_008304a0();
 void FUN_008304c0();
 class ATM
 {
   public:
-    void FUN_004538a0(const char*);
+    void BSCriticalSection_Enter(const char*);
     void FUN_004538c0();
 };
 extern ATM g_011dd5e8;
 // @fnv 0x00835be0
-void FUN_00835be0(BGSTalkingActivator* form, TESTopic* topic)
+// src: EXE 0x00835be0
+void FalloutRadio_StartRadioConversation(BGSTalkingActivator* form, TESTopic* topic)
 {
     TESTopic* a = 0;
     FalloutRadio::RadioStationState* station = 0;
@@ -74,25 +75,25 @@ void FUN_00835be0(BGSTalkingActivator* form, TESTopic* topic)
     if (!station || station->form->FUN_00440da0())
         return;
     bool f = station->station.IsFlag20Set();
-    g_011dd5e8.FUN_004538a0("FalloutRadio::StartRadioConversation");
+    g_011dd5e8.BSCriticalSection_Enter("FalloutRadio::StartRadioConversation");
     if (station->station.conversation)
-        while (station->station.conversation->FUN_0083b9f0())
+        while (station->station.conversation->Conversation_NextItem())
         {
         }
-    if (station->station.FUN_00833be0())
+    if (station->station.FalloutRadio_StationState_IsTransmitting())
     {
-        station->station.FUN_00833100(false);
+        station->station.FalloutRadio_StationState_SetContBroadcast(false);
         station->station.state = 1;
-        FUN_00834260(station);
+        FalloutRadio_UpdateStation(station);
     }
     if (DAT_011dd42c == station && DAT_011dd434)
     {
         DAT_011dd5bc.Stop();
         DAT_011dd5bc.Release();
-        if (FUN_00833ce0())
+        if (FalloutRadio_GetIsDialogueOnlyRadio())
         {
             FUN_008304a0();
-            FUN_008325a0(true);
+            FalloutAudioMedia_MediaSetRadio(true);
             FalloutAudioMedia::PlayMedia(MEDIATYPE_MEDIA_RADIO, 0, 1000, false, false, 0.0f, 0);
             FUN_008304c0();
         }
@@ -107,8 +108,8 @@ void FUN_00835be0(BGSTalkingActivator* form, TESTopic* topic)
     }
     AdvanceConversation(station, a);
     station->station.state = 0;
-    station->station.conversation->FUN_0083c470();
-    station->station.conversation->FUN_0083b9a0();
+    station->station.conversation->Conversation_PrecacheSounds();
+    station->station.conversation->Conversation_FirstItem();
     if (!station->station.conversation->FUN_0083c820())
     {
         delete station->station.conversation;
@@ -121,10 +122,10 @@ void FUN_00835be0(BGSTalkingActivator* form, TESTopic* topic)
         {
             DAT_011dd5bc.Stop();
             DAT_011dd5bc.Release();
-            if (FUN_00833ce0())
+            if (FalloutRadio_GetIsDialogueOnlyRadio())
             {
                 FUN_008304a0();
-                FUN_008325a0(true);
+                FalloutAudioMedia_MediaSetRadio(true);
                 FalloutAudioMedia::PlayMedia(MEDIATYPE_MEDIA_RADIO, 0, 1000, false, false, 0.0f, 0);
                 FUN_008304c0();
             }
@@ -133,8 +134,8 @@ void FUN_00835be0(BGSTalkingActivator* form, TESTopic* topic)
     }
     if (station->station.state > 1)
         station->station.state = 0;
-    station->station.nextUpdate = BSAudio::FUN_00453a70()->GetSynchTime() + 50;
+    station->station.nextUpdate = BSAudio::BSAudio_QInstance()->GetSynchTime() + 50;
     station->station.SetFlag80(true);
-    station->station.FUN_00833100(f);
+    station->station.FalloutRadio_StationState_SetContBroadcast(f);
     g_011dd5e8.FUN_004538c0();
 }

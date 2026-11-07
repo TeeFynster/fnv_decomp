@@ -17,5 +17,5 @@ template <class T, class Traits, class Alloc> class basic_string
     void _Eos(unsigned int);
 };
 }
-void FUN_0044ccd0(char*, unsigned int, const char*, unsigned int);
+void std_Traits_helper_copy_s_std_char_traits_char(char*, unsigned int, const char*, unsigned int);
 #endif

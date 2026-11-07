@@ -87,11 +87,12 @@ struct Param6450
 };
 struct S6450 : Base6450
 {
-    S6450* __thiscall FUN_0067c450(Param6450 v);
+    S6450* __thiscall TESPatrolPackageData_TESPatrolPackageData(Param6450 v);
 };
 // Calls FUN_0067ad20, stores a pointer to DAT_010689e4 at offset 0 and copies v.a and v.b into bytes at offsets 4 and 5, then returns this.
 // @fnv 0x0067c450
-S6450* __thiscall S6450::FUN_0067c450(Param6450 aParams)
+// src: EXE 0x0067c450
+S6450* __thiscall S6450::TESPatrolPackageData_TESPatrolPackageData(Param6450 aParams)
 {
     FUN_0067ad20();
     *reinterpret_cast<unsigned int*>(this) = reinterpret_cast<unsigned int>(&DAT_010689e4);
@@ -115,10 +116,11 @@ struct Target0067c6f0
 {
     float f;
     PackageEventActionData_packagedatapatrol c;
-    void FUN_0067c6f0(Target0067c6f0* src);
+    void PatrolRefData_Copy(Target0067c6f0* src);
 };
 // @fnv 0x0067c6f0
-void Target0067c6f0::FUN_0067c6f0(Target0067c6f0* apSource)
+// src: COMMUNITY 0x0067c6f0
+void Target0067c6f0::PatrolRefData_Copy(Target0067c6f0* apSource)
 {
     f = apSource->f;
     c.CopyFrom(&apSource->c);
@@ -128,10 +130,11 @@ struct FUN_0067c720_shell
 {
     float m_fPatrolValue;
     void CallNestedMethod();
-    bool FUN_0067c720(const FUN_0067c720_shell* apCompare);
+    bool PatrolRefData_Compare(const FUN_0067c720_shell* apCompare);
 };
 // @fnv 0x0067c720
-bool FUN_0067c720_shell::FUN_0067c720(const FUN_0067c720_shell* apCompare)
+// src: XBOX_PDB 0x0067c720
+bool FUN_0067c720_shell::PatrolRefData_Compare(const FUN_0067c720_shell* apCompare)
 {
     if (reinterpret_cast<PackageEventActionData_packagedatapatrol*>(reinterpret_cast<char*>(this) + 4)->IsDifferentFrom(
             reinterpret_cast<PackageEventActionData_packagedatapatrol*>(reinterpret_cast<char*>(const_cast<FUN_0067c720_shell*>(apCompare)) + 4)))
@@ -147,11 +150,12 @@ struct FUN_0067c6c0_shell
     char pad[4];
     MagicCaster caster;
     PackageEventActionData_packagedatapatrol action;
-    void FUN_0067c6c0(int item);
+    void PatrolRefData_InitItem(int item);
 };
 
 // @fnv 0x0067c6c0
-void FUN_0067c6c0_shell::FUN_0067c6c0(int item)
+// src: XBOX_PDB 0x0067c6c0
+void FUN_0067c6c0_shell::PatrolRefData_InitItem(int item)
 {
     caster.SetSelectedMagicItem(3);
     reinterpret_cast<PackageEventActionData_packagedatapatrol*>(reinterpret_cast<char*>(this) + 4)->InitItem(item);
@@ -164,19 +168,20 @@ struct Date
     unsigned short pad;
     ~Date();
 };
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int id, void* p, unsigned int size);
 
 // @fnv 0x0067c570
-void TESPatrolPackageData::FUN_0067c570()
+// src: XBOX_PDB 0x0067c570
+void TESPatrolPackageData::Save_0067c570()
 {
     unsigned char patrolData[2];
     memset(patrolData, 0, 2);
     patrolData[0] = m_bPrimaryComparisonFlag;
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((Date*)patrolData)->Date::~Date();
     AppendChunk(0x54504b50, patrolData, 2);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((Date*)patrolData)->Date::~Date();
 }
 
@@ -194,7 +199,8 @@ PackageEventActionData_packagedatapatrol::PackageEventActionData_packagedatapatr
 }
 
 // @fnv 0x0067c500
-bool TESPatrolPackageData::FUN_0067c500(TESPackageData* apCompare)
+// src: XBOX_PDB 0x0067c500
+bool TESPatrolPackageData::Compare_0067c500(TESPackageData* apCompare)
 {
     TESPatrolPackageData* pcomp = dynamic_cast<TESPatrolPackageData*>(apCompare);
     if (!pcomp)
@@ -208,7 +214,8 @@ bool TESPatrolPackageData::FUN_0067c500(TESPackageData* apCompare)
 
 // Copies the two boolean fields from a TESPatrolPackageData source into this TESPatrolPackageData instance.
 // @fnv 0x0067c4b0
-void TESPatrolPackageData::FUN_0067c4b0(TESPackageData* apCopy)
+// src: XBOX_PDB 0x0067c4b0
+void TESPatrolPackageData::Copy_0067c4b0(TESPackageData* apCopy)
 {
     TESPatrolPackageData* pcopy;
     pcopy = dynamic_cast<TESPatrolPackageData*>(apCopy);

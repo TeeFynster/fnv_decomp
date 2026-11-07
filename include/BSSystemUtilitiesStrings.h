@@ -12,5 +12,5 @@ public:
     void SetStringAt(unsigned int index, const char* str);
     void CallVTableMethod();
     void* DestroyIfFlagged(unsigned int flags);
-    void FUN_00af35c0();
+    void SetVirtualTable_00af35c0();
 };

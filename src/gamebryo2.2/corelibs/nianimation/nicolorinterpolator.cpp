@@ -172,7 +172,8 @@ extern int DAT_011a9434;
 extern int DAT_011a9438;
 extern int DAT_011a943c;
 // @fnv 0x00a3c130
-NiColorInterpolator* FUN_00a3c130()
+// src: EXE 0x00a3c130
+NiColorInterpolator* NiColorInterpolator_CreateObject()
 {
     NiColorInterpolator* p = (NiColorInterpolator*)NiColorInterpolator::operator new(0x24);
     if (p)
@@ -339,8 +340,8 @@ struct ViewerArray
     void FUN_0096ae90(unsigned int index, void* elem);
 };
 
-void* FUN_00a7d330(void* arg);
-void* FUN_00a7d5a0(const char* name, unsigned int value);
+void* NiViewerStrings_NiGetViewerString_Title(void* arg);
+void* NiGetViewerString_00a7d5a0(const char* name, unsigned int value);
 
 struct InterpolatorViewerBase
 {
@@ -352,7 +353,7 @@ void NiColorInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
 {
     ViewerArray* out = reinterpret_cast<ViewerArray*>(strings);
     ((InterpolatorViewerBase*)this)->GetViewerStrings(out);
-    void* pValue = FUN_00a7d330(g_011f3730);
+    void* pValue = NiViewerStrings_NiGetViewerString_Title(g_011f3730);
     unsigned int uiIndex = out->m_usNext;
     if (uiIndex >= out->m_usMax)
     {
@@ -371,7 +372,7 @@ void NiColorInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
     out->FUN_0096ae90(uiIndex, &pValue);
 
     unsigned int v = reinterpret_cast<unsigned int>(m_spColorData.m_pObject);
-    void* s = FUN_00a7d5a0("m_spColorData", v);
+    void* s = NiGetViewerString_00a7d5a0("m_spColorData", v);
     uiIndex = out->m_usNext;
     uiMax = out->m_usMax;
     pValue = s;
@@ -382,7 +383,7 @@ void NiColorInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
     out->FUN_0096ae90(uiIndex, &pValue);
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 inline void* __cdecl operator new(unsigned int, void* p) throw()
 {
     return p;
@@ -399,7 +400,7 @@ struct ColorInterpolatorCloneSource
 // @fnv 0x00a3c1f0
 NiColorInterpolator* ColorInterpolatorCloneSource::CreateColorInterpolator(int arg)
 {
-    void* memory = FUN_00aa13e0(sizeof(NiColorInterpolator));
+    void* memory = Object_DispatchCommandFour(sizeof(NiColorInterpolator));
     NiColorInterpolator* interpolator = memory ? ::new (memory) NiColorInterpolator(0) : 0;
     CopyMembers(interpolator, arg);
     return interpolator;

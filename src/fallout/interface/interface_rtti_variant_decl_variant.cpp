@@ -13,28 +13,29 @@
 #include "../../../include/VATSMenu.h"
 #include "../../../include/SleepWaitMenu.h"
 const char kMeshesFolder[] = "Meshes";
-unsigned int FUN_00702440();
-bool FUN_00705100();
-unsigned int FUN_00706f20();
-bool FUN_00707b50();
+unsigned int NiVertexColorProperty_GetType();
+bool DialogMenu_IsDialogActive();
+unsigned int HudMainMenu_GetMenuID();
+bool Renderer_GetWidescreen();
 class InterfaceManagerKey
 {
   public:
-    bool FUN_009373f0();
+    bool TESTextureList_GetTextureCount();
 };
-Tile* __cdecl FUN_00a09030(unsigned int eLine);
-void __cdecl FUN_007e9200();
-void __cdecl FUN_00705640();
+Tile* __cdecl Tile_GetMenuByClass(unsigned int eLine);
+void __cdecl VATSMenu_Create();
+void __cdecl Interface_CreateVATSMenu();
 
-Tile* __cdecl FUN_00a09030(unsigned int);
+Tile* __cdecl Tile_GetMenuByClass(unsigned int);
 bool __cdecl IsSomethingZero();
 void __cdecl CreateSleepWaitMenu(bool);
 // @fnv 0x007054f0
-void __cdecl FUN_007054f0(bool sleep)
+// src: COMMUNITY 0x007054f0
+void __cdecl Interface_CreateSleepMenu(bool sleep)
 {
-    if (FUN_004b7210() && FUN_004b7210()->FUN_009373f0() && IsSomethingZero())
+    if (InterfaceManager_GetSingleton() && InterfaceManager_GetSingleton()->TESTextureList_GetTextureCount() && IsSomethingZero())
     {
-        Tile* menu = FUN_00a09030(1012);
+        Tile* menu = Tile_GetMenuByClass(1012);
         SleepWaitMenu* tile = menu ? dynamic_cast<SleepWaitMenu*>(static_cast<const Tile*>(menu)->GetMenu()) : 0;
         if (tile)
             delete tile;

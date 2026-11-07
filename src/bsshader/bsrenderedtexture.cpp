@@ -69,7 +69,7 @@ BSShaderNoLightingProperty::BSShaderNoLightingProperty()
     SetFlag(32, true);
 }
 
-bool __cdecl FUN_00b6b7d0(NiRenderTargetGroup* pkGroup, int iArg);
+bool __cdecl BSRenderedTexture_Begin(NiRenderTargetGroup* pkGroup, int iArg);
 
 // 0x011f4748 is NiRenderer::ms_pRenderer; NiDX9Renderer supplies virtual slot 95.
 // Its shared vf95 declaration lacks the Boolean result consumed by this caller.
@@ -81,10 +81,11 @@ static inline bool QueryFrameState(NiDX9Renderer* renderer)
 
 // Sets the frame state to 2 when it is 0 and virtual slot 95 returns true, then forwards to FUN_00b6b7d0.
 // @fnv 0x00b6b8d0
-bool __cdecl FUN_00b6b8d0(int iArg, NiRenderTargetGroup* pkGroup)
+// src: COMMUNITY 0x00b6b8d0
+bool __cdecl BSRenderedTexture_StartOffscreen(int iArg, NiRenderTargetGroup* pkGroup)
 {
     int& iState = NiRenderer::ms_pRenderer->m_eFrameState;
     if (iState == 0 && QueryFrameState(static_cast<NiDX9Renderer*>(NiRenderer::ms_pRenderer)))
         iState = 2;
-    return FUN_00b6b7d0(pkGroup, iArg);
+    return BSRenderedTexture_Begin(pkGroup, iArg);
 }

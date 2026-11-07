@@ -27,12 +27,13 @@ struct ArgB
 
 
 // @fnv 0x00ca5460
-void bhkSphereShape::FUN_00ca5460(void* a1, ArgB* a2)
+// src: XBOX_PDB 0x00ca5460
+void bhkSphereShape::bhkPackedNiTriStripsShape_CopyMembers(void* a1, ArgB* a2)
 {
     unsigned char c;
     char* r = reinterpret_cast<char*>(this->slotB4((char*)&c));
     float v = a2->f10;
     __m128 t = _mm_load_ss(&v);
     *(__m128*)(r + 0x10) = _mm_mul_ps(_mm_shuffle_ps(t, t, 0), *(__m128*)(r + 0x10));
-    this->bhkSphereShape::FUN_00c84df0(a1, a2);
+    this->bhkSphereShape::bhkShape_CopyMembers(a1, a2);
 }

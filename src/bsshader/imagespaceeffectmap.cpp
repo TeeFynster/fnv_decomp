@@ -50,7 +50,7 @@ struct S_Obj
 };
 struct S_Src
 {
-    S_Obj* FUN_00ba3780();
+    S_Obj* ImageSpaceTexture_GetTexture();
 };
 struct S_Mid
 {
@@ -71,14 +71,15 @@ struct S_00baa330_Cls
     int unk24;
     int unk28;
     S_Mid* m2c;
-    bool FUN_00baa330(int a);
+    bool ImageSpaceEffectMap_UpdateParams(int a);
 };
 
 // @fnv 0x00baa330
-bool S_00baa330_Cls::FUN_00baa330(int aiUnused)
+// src: COMMUNITY 0x00baa330
+bool S_00baa330_Cls::ImageSpaceEffectMap_UpdateParams(int aiUnused)
 {
     S_Dst* dst = *m1c;
-    S_Obj* pObj = m2c->m4->FUN_00ba3780();
+    S_Obj* pObj = m2c->m4->ImageSpaceTexture_GetTexture();
     dst->FUN_00b8a790(0, 1.0f / (float)pObj->v94(), 1.0f / (float)pObj->v98(), 0.0f, 0.0f);
     return true;
 }
@@ -139,7 +140,7 @@ struct Mid08_cls
 struct MemMgr_cls
 {
     int unk00;
-    void* FUN_00aa3e40(unsigned int size);
+    void* Game_DoHeapAlloc(unsigned int size);
 };
 
 extern MemMgr_cls DAT_011f6238;
@@ -184,7 +185,7 @@ struct FUN_00b8a9e0
     FUN_00b8a9e0();
     static void* operator new(unsigned int size) throw()
     {
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
     void FUN_00b8ab10(int a1, int a2);
     void FUN_00b8a790(int a1, float f0, float f1, float f2, float f3);

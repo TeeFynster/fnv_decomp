@@ -27,15 +27,15 @@ struct PhTag;
 // 0x00d07950 and 0x00d07ec0 access only hkpPhantom state, not hkpAabbPhantom bounds.
 struct PhantomOperations : hkpPhantom {
     void NotifyListeners();
-    void FUN_00d07af0();
-    void FUN_00d07a90();
+    void hkpPhantom_removeNullPhantomListeners();
+    void hkpPhantom_removeNullOverlapListeners();
     void RemoveListener(void* listener);
     void WriteToStream(PhArchive*, PhTag*);
     void WritePhantomLists(PhArchive*, int);
-    void FUN_00d07950(const hkAabb&);
-    void FUN_00d07b50();
+    void hkpPhantom_setBoundingVolumeData(const hkAabb&);
+    void hkpPhantom_firePhantomRemoved();
     void AddItem(void*);
-    void FUN_00d07ec0(const hkAabb&) throw();
+    void hkpPhantom_updateBroadPhase(const hkAabb&) throw();
     void NotifyElements();
 };
 
@@ -68,7 +68,7 @@ void PhantomOperations::NotifyListeners()
         if (m_kPhantomListeners[i] != 0)
             static_cast<hkpPhantomListener*>(m_kPhantomListeners[i])->phantomShapeSetCallback(this);
     }
-    FUN_00d07af0();
+    hkpPhantom_removeNullPhantomListeners();
 }
 
 // @fnv 0x00d07c10
@@ -106,7 +106,7 @@ public:
     virtual void Write(int type, const char* name, void* ptr, int size, int extra);
 };
 extern PhTag DAT_01268808;
-int FUN_00d06f80(void* p, int n);
+int hkStatisticsCollector_getAllocatedSize(void* p, int n);
 
 // Writes the overlap and phantom lists to the archive via Write, after calling WriteToStream with DAT_01268808.
 // @fnv 0x00d07cf0
@@ -116,22 +116,22 @@ void PhantomOperations::WritePhantomLists(PhArchive* pArchive, int unused)
     int overlapCapacity = m_kPhantomOverlapListeners.m_iCapacityState;
     if (!(overlapCapacity & 0x80000000) || pArchive->m_flag) {
         void* base = m_kPhantomOverlapListeners.m_data;
-        int e = FUN_00d06f80(base, (overlapCapacity & 0x3fffffff) * 4);
+        int e = hkStatisticsCollector_getAllocatedSize(base, (overlapCapacity & 0x3fffffff) * 4);
         pArchive->Write(3, "OvrlapLisPtr", m_kPhantomOverlapListeners.m_data, m_kPhantomOverlapListeners.m_iElementCount * 4, e);
     }
     int listenerCapacity = m_kPhantomListeners.m_iCapacityState;
     if (!(listenerCapacity & 0x80000000) || pArchive->m_flag) {
         void* base = m_kPhantomListeners.m_data;
-        int e = FUN_00d06f80(base, (listenerCapacity & 0x3fffffff) * 4);
+        int e = hkStatisticsCollector_getAllocatedSize(base, (listenerCapacity & 0x3fffffff) * 4);
         pArchive->Write(3, "PhantmLisPtr", m_kPhantomListeners.m_data, m_kPhantomListeners.m_iElementCount * 4, e);
     }
 }
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return FUN_00c85750().heap();
+    return hkMemoryRouter_getInstance().heap();
 }
 
 template <typename T>
@@ -182,9 +182,9 @@ __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& 
 void hkpPhantom::FreeListenerArrays() throw()
 {
     if (m_kPhantomOverlapListeners.m_iElementCount == 0)
-        m_kPhantomOverlapListeners._clearAndDeallocate(FUN_00c85750().heap());
+        m_kPhantomOverlapListeners._clearAndDeallocate(hkMemoryRouter_getInstance().heap());
     if (m_kPhantomListeners.m_iElementCount == 0)
-        m_kPhantomListeners._clearAndDeallocate(FUN_00c85750().heap());
+        m_kPhantomListeners._clearAndDeallocate(hkMemoryRouter_getInstance().heap());
 }
 
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
@@ -228,7 +228,8 @@ __forceinline void zeroExpD07950(hkpCollidableBoundingVolumeData& b)
 }
 
 // @fnv 0x00d07950
-void PhantomOperations::FUN_00d07950(const hkAabb& aabb)
+// src: XBOX_PDB 0x00d07950
+void PhantomOperations::hkpPhantom_setBoundingVolumeData(const hkAabb& aabb)
 {
     CollisionInputQuantizationData* collisionInput = static_cast<CollisionInputQuantizationData*>(static_cast<hkpWorld*>(m_pOwningWorld)->m_pCollisionInput);
     const LocalM128 vClampMax = *(const LocalM128*)&DAT_011b6d70;
@@ -262,7 +263,8 @@ void PhantomOperations::FUN_00d07950(const hkAabb& aabb)
 
 // Iterates m_kPhantomOverlapListeners in reverse and removes any null entries via removeAtAndCopy.
 // @fnv 0x00d07a90
-void PhantomOperations::FUN_00d07a90()
+// src: HAVOK_LIB 0x00d07a90
+void PhantomOperations::hkpPhantom_removeNullOverlapListeners()
 {
     for (int i = m_kPhantomOverlapListeners.m_iElementCount - 1; i >= 0; i--)
     {
@@ -273,7 +275,8 @@ void PhantomOperations::FUN_00d07a90()
 
 // Iterates m_kPhantomListeners in reverse and removes any null entries via removeAtAndCopy.
 // @fnv 0x00d07af0
-void PhantomOperations::FUN_00d07af0()
+// src: HAVOK_LIB 0x00d07af0
+void PhantomOperations::hkpPhantom_removeNullPhantomListeners()
 {
     for (int i = m_kPhantomListeners.m_iElementCount - 1; i >= 0; i--)
     {
@@ -287,25 +290,27 @@ static __forceinline void** listenerSlot(hkArray<void*>& a, int i) { return a.m_
 
 // Iterates the m_kPhantomListeners array in reverse, calling phantomRemoved on each non-null entry, then calls FUN_00d07af0.
 // @fnv 0x00d07b50
-void PhantomOperations::FUN_00d07b50()
+// src: HAVOK_LIB 0x00d07b50
+void PhantomOperations::hkpPhantom_firePhantomRemoved()
 {
     for (int i = m_kPhantomListeners.m_iElementCount - 1; i >= 0; --i) {
         if (*listenerSlot(m_kPhantomListeners, i))
             static_cast<hkpPhantomListener*>(*listenerSlot(m_kPhantomListeners, i))->PhantomRemovedCallback(this);
     }
-    FUN_00d07af0();
+    hkpPhantom_removeNullPhantomListeners();
 }
 
 // Notifies phantom-added listeners in reverse, then compacts null entries.
 // @fnv 0x00d07b90
-void hkpPhantom::FUN_00d07b90()
+// src: HAVOK_LIB 0x00d07b90
+void hkpPhantom::firePhantomAdded()
 {
     for (int i = m_kPhantomListeners.GetLogicalSize(); --i >= 0; ) {
         if (m_kPhantomListeners[i]) {
             static_cast<hkpPhantomListener*>(m_kPhantomListeners[i])->PhantomAddedCallback(this);
         }
     }
-    static_cast<PhantomOperations*>(this)->FUN_00d07af0();
+    static_cast<PhantomOperations*>(this)->hkpPhantom_removeNullPhantomListeners();
 }
 
 inline int FindListener(const hkArray<void*>& listeners, void* listener)
@@ -326,7 +331,8 @@ inline void CopyPointerRange(void** destination, void** source, int byteCount)
 
 // Removes the given listener from m_kPhantomOverlapListeners by shifting subsequent entries down and decrementing the count.
 // @fnv 0x00d07c80
-void hkpPhantom::FUN_00d07c80(hkpPhantomOverlapListener* listener) throw()
+// src: HAVOK_LIB 0x00d07c80
+void hkpPhantom::removePhantomOverlapListener_00d07c80(hkpPhantomOverlapListener* listener) throw()
 {
     int index = FindListener(m_kPhantomOverlapListeners, listener);
     --m_kPhantomOverlapListeners.m_iElementCount;
@@ -343,7 +349,8 @@ void PhantomOperations::AddItem(void* item)
 
 // Adds the given item to the owner's internal array of pointers.
 // @fnv 0x00d07de0
-void hkpPhantom::FUN_00d07de0(hkpPhantomOverlapListener* item)
+// src: HAVOK_LIB 0x00d07de0
+void hkpPhantom::addPhantomOverlapListener_00d07de0(hkpPhantomOverlapListener* item)
 {
     void* pointer = item;
     m_kPhantomOverlapListeners.pushBack(pointer);
@@ -434,14 +441,15 @@ struct hkWorldOperation {
 
 // Updates the phantom's AABB in the broad phase, dispatches collision pair changes, and marks the KD-tree dirty if the world owns one.
 // @fnv 0x00d07ec0
-void PhantomOperations::FUN_00d07ec0(const hkAabb& kNewAabb) throw()
+// src: HAVOK_LIB 0x00d07ec0
+void PhantomOperations::hkpPhantom_updateBroadPhase(const hkAabb& kNewAabb) throw()
 {
     if (m_pOwningWorld) {
         if (areCriticalOperationsLockedForPhantoms(static_cast<hkpWorld*>(m_pOwningWorld))) {
             hkWorldOperation::PhantomBroadphaseUpdate kOp;
             kOp.m_pPhantom = this;
             kOp.m_kBounds = &kNewAabb;
-            static_cast<hkpWorld*>(m_pOwningWorld)->FUN_00c91160(&kOp);
+            static_cast<hkpWorld*>(m_pOwningWorld)->hkpWorld_queueOperation(&kOp);
             return;
         }
 
@@ -458,11 +466,11 @@ void PhantomOperations::FUN_00d07ec0(const hkAabb& kNewAabb) throw()
             hkpTypedBroadPhaseDispatcher::SortPairs(kNewPairs, kDelPairs);
             static_cast<hkpTypedBroadPhaseDispatcher*>(static_cast<hkpWorld*>(m_pOwningWorld)->m_pBroadPhaseDispatcher)->DispatchCollisionPairs(kDelPairs.begin(), kDelPairs.GetLogicalSize());
             static_cast<hkpTypedBroadPhaseDispatcher*>(static_cast<hkpWorld*>(m_pOwningWorld)->m_pBroadPhaseDispatcher)->DispatchNewPairs(kNewPairs.begin(), kNewPairs.GetLogicalSize(), (static_cast<hkpWorld*>(m_pOwningWorld)->m_pCollisionFilter ? static_cast<hkpCollidableCollidableFilter*>(static_cast<hkpCollisionFilter*>(static_cast<hkpWorld*>(m_pOwningWorld)->m_pCollisionFilter)) : 0));
-            FUN_00d07a90();
+            hkpPhantom_removeNullOverlapListeners();
         }
         static_cast<hkpBroadPhase*>(static_cast<hkpWorld*>(m_pOwningWorld)->m_pJobSemaphore)->unlock();
 
-        FUN_00d07950(kNewAabb);
+        hkpPhantom_setBoundingVolumeData(kNewAabb);
 
         if (static_cast<hkpWorld*>(m_pOwningWorld)->m_pKdTreeManager)
             static_cast<hkpKdTreeManager*>(static_cast<hkpWorld*>(m_pOwningWorld)->m_pKdTreeManager)->setDirty(0);

@@ -11,7 +11,8 @@
 extern "C" void* g_011f3f98;
 
 // @fnv 0x00a4cd30
-void* __cdecl FUN_00a4cd30()
+// src: COMMUNITY 0x00a4cd30
+void* __cdecl NiLookAtController_GetRTTI()
 {
     return &g_011f3f98;
 }
@@ -54,7 +55,8 @@ void NiLookAtController::AppendString(StrArr* pkStrings)
 NiObject* __fastcall GetLoadedObject(NiStream* stream);
 
 // @fnv 0x00a4c840
-void NiLookAtController::FUN_00a4c840(NiStream& stream)
+// src: XBOX_PDB 0x00a4c840
+void NiLookAtController::LinkObject_00a4c840(NiStream& stream)
 {
     NiTimeController::LinkObject(stream);
     m_pkLookAt = static_cast<NiAVObject*>(GetLoadedObject(&stream));
@@ -62,13 +64,14 @@ void NiLookAtController::FUN_00a4c840(NiStream& stream)
 
 struct TCReg
 {
-    bool __thiscall FUN_00a6d0f0(NiStream&);
+    bool __thiscall NiTimeController_RegisterStreamables(NiStream&);
 };
 
 // @fnv 0x00a4c860
-bool __thiscall NiLookAtController::FUN_00a4c860(NiStream& s)
+// src: XBOX_PDB 0x00a4c860
+bool __thiscall NiLookAtController::RegisterStreamables_00a4c860(NiStream& s)
 {
-    if (!((TCReg*)this)->FUN_00a6d0f0(s))
+    if (!((TCReg*)this)->NiTimeController_RegisterStreamables(s))
         return false;
     if (m_pkLookAt)
         m_pkLookAt->RegisterStreamables(s);
@@ -253,11 +256,12 @@ struct BaseLoad
 };
 struct StreamFinish
 {
-    void FUN_00a645b0();
+    void ReadLinkID();
 };
 
 // @fnv 0x00a4ce20
-void NiLookAtController::FUN_00a4ce20(NiStream& stream)
+// src: XBOX_PDB 0x00a4ce20
+void NiLookAtController::LoadBinary_00a4ce20(NiStream& stream)
 {
     reinterpret_cast<BaseLoad*>(this)->FUN_00a6d5e0(stream);
     StreamLayout& streamLayout = reinterpret_cast<StreamLayout&>(stream);
@@ -272,7 +276,7 @@ void NiLookAtController::FUN_00a4ce20(NiStream& stream)
         unsigned int size = 2;
         input->position += read(input, _pad, 2, &size, 1);
     }
-    reinterpret_cast<StreamFinish*>(&stream)->FUN_00a645b0();
+    reinterpret_cast<StreamFinish*>(&stream)->ReadLinkID();
 }
 
 struct BaseClone
@@ -496,7 +500,8 @@ struct Base44
 };
 
 // @fnv 0x00a4cea0
-void NiLookAtController::FUN_00a4cea0(NiStream* pkStream)
+// src: XBOX_PDB 0x00a4cea0
+void NiLookAtController::SaveBinary_00a4cea0(NiStream* pkStream)
 {
     StreamObj* stream = reinterpret_cast<StreamObj*>(pkStream);
     reinterpret_cast<Base44*>(this)->FUN_00a6d730(stream);
@@ -574,7 +579,8 @@ inline NiLookAtController* AllocateLookAtController()
 }
 
 // @fnv 0x00a4cd60
-NiLookAtController* NiLookAtController::FUN_00a4cd60(void* pkCloning)
+// src: XBOX_PDB 0x00a4cd60
+NiLookAtController* NiLookAtController::CreateClone_00a4cd60(void* pkCloning)
 {
     NiLookAtController* pkClone = AllocateLookAtController();
     reinterpret_cast<BaseCopy*>(this)->FUN_00a6cfe0(pkClone, pkCloning);
@@ -595,14 +601,15 @@ void* __cdecl CreateMorphData()
 
 struct BaseEqual
 {
-    bool FUN_00a6cc80(NiLookAtController* other);
+    bool NiTimeController_IsEqual(NiLookAtController* other);
 };
 
 // Compares the base controller and the optional look-at object.
 // @fnv 0x00a4c890
-bool NiLookAtController::FUN_00a4c890(NiLookAtController* other)
+// src: XBOX_PDB 0x00a4c890
+bool NiLookAtController::IsEqual_00a4c890(NiLookAtController* other)
 {
-    if (!reinterpret_cast<BaseEqual*>(this)->FUN_00a6cc80(other))
+    if (!reinterpret_cast<BaseEqual*>(this)->NiTimeController_IsEqual(other))
         return false;
     if ((m_pkLookAt && !other->m_pkLookAt) || (!m_pkLookAt && other->m_pkLookAt))
         return false;
@@ -649,7 +656,7 @@ struct S00a4c8e0_Pt
     {
         return S00a4c8e0_Pt(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x);
     }
-    __declspec(noalias) void FUN_004a0c10();
+    __declspec(noalias) void Unitize_004a0c10();
 };
 struct S00a4c8e0_Mat
 {
@@ -736,7 +743,7 @@ void NiLookAtController::Update(NiUpdateData& update)
     }
     else
     {
-        at.FUN_004a0c10();
+        at.Unitize_004a0c10();
         S00a4c8e0_Pt up;
         float d;
         if (at.z < 1.001f && at.z > 0.9990000128746033)
@@ -750,7 +757,7 @@ void NiLookAtController::Update(NiUpdateData& update)
             d = at.z;
         }
         up -= at * d;
-        up.FUN_004a0c10();
+        up.Unitize_004a0c10();
         if (!GetFlip())
             at = -at;
         S00a4c8e0_Pt right = up.Cross(at);

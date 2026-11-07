@@ -126,13 +126,14 @@ struct Owner132
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14;
     Context132* context;
-    void FUN_00b7b730(Group132*, unsigned int, int, const char*);
+    void ShadowLightShader_SetupGeometryConstants_ObjToCube(Group132*, unsigned int, int, const char*);
 };
-void __cdecl FUN_00b799a0(Matrix132*, const char*);
-Matrix132* __stdcall FUN_00ee6de0(Matrix132*, const Matrix132*, const Matrix132*);
-Matrix132* __stdcall FUN_00ee6dd4(Matrix132*, const Matrix132*);
+void __cdecl NiD3DUtility_GetD3DFromNi_(Matrix132*, const char*);
+Matrix132* __stdcall D3DXMatrixMultiply_00ee6de0(Matrix132*, const Matrix132*, const Matrix132*);
+Matrix132* __stdcall D3DXMatrixTranspose_00ee6dd4(Matrix132*, const Matrix132*);
 // @fnv 0x00b7b730
-void Owner132::FUN_00b7b730(Group132* group, unsigned int slot, int skipLoad, const char* name)
+// src: COMMUNITY 0x00b7b730
+void Owner132::ShadowLightShader_SetupGeometryConstants_ObjToCube(Group132* group, unsigned int slot, int skipLoad, const char* name)
 {
     Matrix132 matrix, result, temporary;
     if (!DAT_011febdc->enabled)
@@ -141,7 +142,7 @@ void Owner132::FUN_00b7b730(Group132* group, unsigned int slot, int skipLoad, co
         (slot >= 0x244 && slot <= 0x24b) || (slot >= 0x2d8 && slot <= 0x2ef) || slot == 0xfe || slot == 0x10b)
     {
         temporary = context->transform;
-        FUN_00ee6dd4(&DAT_011fecc8, &temporary);
+        D3DXMatrixTranspose_00ee6dd4(&DAT_011fecc8, &temporary);
         return;
     }
     Group132* geometry = DAT_011f91e0;
@@ -154,13 +155,13 @@ void Owner132::FUN_00b7b730(Group132* group, unsigned int slot, int skipLoad, co
     result.m12 = result.m13 = result.m14 = result.m21 = result.m23 = result.m24 = result.m31 = result.m32 = result.m34 =
         result.m41 = result.m42 = result.m43 = 0.0f;
     if (!skipLoad)
-        FUN_00b799a0(&matrix, name);
+        NiD3DUtility_GetD3DFromNi_(&matrix, name);
     matrix.m41 += DAT_011f474c.x;
     matrix.m42 += DAT_011f474c.y;
     matrix.m43 += DAT_011f474c.z;
-    FUN_00ee6de0(&temporary, &matrix, &geometry->objects[0]->transform);
+    D3DXMatrixMultiply_00ee6de0(&temporary, &matrix, &geometry->objects[0]->transform);
     result = temporary;
-    FUN_00ee6dd4(&result, &result);
+    D3DXMatrixTranspose_00ee6dd4(&result, &result);
     memmove(&DAT_011fecc8, &result, sizeof(result));
 }
 
@@ -331,15 +332,16 @@ struct ClipManager
 {
     unsigned int unk000, unk004, unk008, unk00c, unk010, unk014;
     ClipRenderData* renderer;
-    void FUN_00b7be00(unsigned int state);
+    void ShadowLightShader_SetupGeometryConstants_SimpleShadowClipPlanes(unsigned int state);
 };
-extern ClipMatrix* __stdcall FUN_00ee6dda(ClipMatrix*, float*, const ClipMatrix*);
-extern ClipPlane16* __stdcall FUN_00ee6dce(ClipPlane16*, const ClipPlane16*);
-extern ClipPlane16* __stdcall FUN_00ee6dc8(ClipPlane16*, const ClipPlane16*, const ClipMatrix*);
+extern ClipMatrix* __stdcall D3DXMatrixInverse_00ee6dda(ClipMatrix*, float*, const ClipMatrix*);
+extern ClipPlane16* __stdcall D3DXPlaneNormalize_00ee6dce(ClipPlane16*, const ClipPlane16*);
+extern ClipPlane16* __stdcall D3DXPlaneTransform_00ee6dc8(ClipPlane16*, const ClipPlane16*, const ClipMatrix*);
 extern "C" void* __cdecl FUN_00ec44d0(void*, const void*, unsigned int);
 
 // @fnv 0x00b7be00
-void ClipManager::FUN_00b7be00(unsigned int state)
+// src: COMMUNITY 0x00b7be00
+void ClipManager::ShadowLightShader_SetupGeometryConstants_SimpleShadowClipPlanes(unsigned int state)
 {
     if (state >= 0x231 && state <= 0x234)
     {
@@ -358,9 +360,9 @@ void ClipManager::FUN_00b7be00(unsigned int state)
             ClipMatrix transform;
             ClipMatrix inverse;
             ClipPlane16 transformed[6];
-            FUN_00ee6de0((Matrix132*)&transform, (const Matrix132*)&view, (const Matrix132*)&projection);
-            FUN_00ee6dda(&inverse, 0, &transform);
-            FUN_00ee6dd4((Matrix132*)&transform, (const Matrix132*)&inverse);
+            D3DXMatrixMultiply_00ee6de0((Matrix132*)&transform, (const Matrix132*)&view, (const Matrix132*)&projection);
+            D3DXMatrixInverse_00ee6dda(&inverse, 0, &transform);
+            D3DXMatrixTranspose_00ee6dd4((Matrix132*)&transform, (const Matrix132*)&inverse);
 
             for (int i = 0; i < 6; ++i)
             {
@@ -371,8 +373,8 @@ void ClipManager::FUN_00b7be00(unsigned int state)
                 plane.z = n.z;
                 plane.d = -pSrc[i].d;
                 ClipPlane16 outPlane;
-                FUN_00ee6dce(&plane, &plane);
-                FUN_00ee6dc8(&outPlane, &plane, &transform);
+                D3DXPlaneNormalize_00ee6dce(&plane, &plane);
+                D3DXPlaneTransform_00ee6dc8(&outPlane, &plane, &transform);
                 transformed[i].x = outPlane.x;
                 transformed[i].y = outPlane.y;
                 transformed[i].z = outPlane.z;
@@ -628,7 +630,7 @@ extern D3DXVECTOR4 DAT_011fd9b8;
 extern D3DXVECTOR4 DAT_011fd9c8;
 extern D3DXVECTOR4 DAT_011fd9d8;
 
-BSFogProperty* FUN_00b55520(int iType);
+BSFogProperty* BSShaderManager_GetFogProperty(int iType);
 
 class BSShaderPass
 {
@@ -648,11 +650,12 @@ class BSShaderPass
     NiD3DShaderConstantMap* m_pkPixelConstantMap;
     NiD3DShaderConstantMap* m_pkVertexConstantMap;
 
-    void FUN_00b7b450(unsigned int uiPass);
+    void ShadowLightShader_SetupPassConstants(unsigned int uiPass);
 };
 
 // @fnv 0x00b7b450
-void BSShaderPass::FUN_00b7b450(unsigned int uiPass)
+// src: COMMUNITY 0x00b7b450
+void BSShaderPass::ShadowLightShader_SetupPassConstants(unsigned int uiPass)
 {
     if (uiPass == 0x250 || uiPass == 0x251)
         return;
@@ -676,7 +679,7 @@ void BSShaderPass::FUN_00b7b450(unsigned int uiPass)
 
     if (*reinterpret_cast<bool*>(&DAT_011febf8->unk08))
     {
-        BSFogProperty* pkFog = FUN_00b55520(DAT_011f91c4);
+        BSFogProperty* pkFog = BSShaderManager_GetFogProperty(DAT_011f91c4);
         if (pkFog)
         {
             float fNear = pkFog->nearDepth;
@@ -699,7 +702,7 @@ void BSShaderPass::FUN_00b7b450(unsigned int uiPass)
     if (((ShaderGeometryGroup*)DAT_011f91e0)->current->m_iShaderConstants)
     {
         Matrix132 kWorld;
-        FUN_00ee6dd4(&kWorld, (Matrix132*)(m_pfConstants + 640));
+        D3DXMatrixTranspose_00ee6dd4(&kWorld, (Matrix132*)(m_pfConstants + 640));
         ShaderConstantDevice* pkDevice = DAT_0126f74c->m_pDeviceHolder->m_pDirectInputDevice;
         pkDevice->SetVertexShaderConstantF(1, &kWorld.m11, 4);
     }

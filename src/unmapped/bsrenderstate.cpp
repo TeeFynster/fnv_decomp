@@ -657,7 +657,8 @@ struct DeviceView
 };
 // If the three tracked slots are zero, calls device vtable[26] with opcodes 0x35/0x36/0x37 and values from DAT_011ad8a8, then adds delta to the third slot.
 // @fnv 0x00b980c0
-void __cdecl FUN_00b980c0(int aiFirstIndex, int aiSecondIndex, int aiThirdIndex, int delta)
+// src: COMMUNITY 0x00b980c0
+void __cdecl BSRenderState_SetStencilAction(int aiFirstIndex, int aiSecondIndex, int aiThirdIndex, int delta)
 {
     if (DAT_011ff9d8[DAT_011ffb04] == 0)
     {
@@ -1284,7 +1285,8 @@ extern unsigned int DAT_011ffb18;
 extern int DAT_011ff9d8[];
 extern GraphicsRenderer* volatile g_pkRenderer;
 // @fnv 0x00b98180
-void FUN_00b98180(int a, int aiValue39, int aiValue3A, int aiSlotIncrement)
+// src: COMMUNITY 0x00b98180
+void BSRenderState_SetStencilFunc(int a, int aiValue39, int aiValue3A, int aiSlotIncrement)
 {
     if (DAT_011ff9d8[DAT_011ffb10] == 0)
     {

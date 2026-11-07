@@ -331,7 +331,8 @@ const char* GraphicsRenderer::GetD3DFormatName(_D3DFORMAT format) {
 extern "C" void* g_011f4430;
 
 // @fnv 0x00a5f200
-void* __cdecl FUN_00a5f200()
+// src: COMMUNITY 0x00a5f200
+void* __cdecl NiVertexColorProperty_GetRTTI()
 {
     return &g_011f4430;
 }
@@ -339,26 +340,30 @@ void* __cdecl FUN_00a5f200()
 extern "C" int g_011f443c;
 
 // @fnv 0x00a5f4f0
-int __cdecl FUN_00a5f4f0()
+// src: COMMUNITY 0x00a5f4f0
+int __cdecl NiZBufferProperty_GetRTTI()
 {
     return (int)&g_011f443c;
 }
 
 // @fnv 0x00a5f500
-int __cdecl FUN_00a5f500()
+// src: COMMUNITY 0x00a5f500
+int __cdecl NiZBufferProperty_GetType_0()
 {
     return 0xb;
 }
 
 // @fnv 0x00dc9e60
-int __cdecl FUN_00dc9e60()
+// src: GUESS 0x00dc9e60 (confidence: low)
+int __cdecl Object_ComputeValue_00dc9e60()
 {
     return 10;
 }
 
 
 // @fnv 0x00e695e0
-unsigned int __fastcall FUN_00e695e0(NiDX9Renderer* self, void*)
+// src: COMMUNITY 0x00e695e0
+unsigned int __fastcall NiDX9Renderer_GetMaxBuffersPerRenderTargetGroup(NiDX9Renderer* self, void*)
 {
     return self->uiMaxBuffersPerRenderTargetGroup;
 }
@@ -366,22 +371,24 @@ unsigned int __fastcall FUN_00e695e0(NiDX9Renderer* self, void*)
 struct FUN_00e695f0_shell {
     char pad[0x8a4];
     unsigned char flag;
-    unsigned char FUN_00e695f0();
+    unsigned char NiDX9Renderer_GetIndependentBufferBitDepths();
 };
 
 // @fnv 0x00e695f0
-unsigned char FUN_00e695f0_shell::FUN_00e695f0()
+// src: COMMUNITY 0x00e695f0
+unsigned char FUN_00e695f0_shell::NiDX9Renderer_GetIndependentBufferBitDepths()
 {
     return flag;
 }
 
 struct FUN_00e69600_shell
 {
-    unsigned int __thiscall FUN_00e69600();
+    unsigned int __thiscall NiDX9Renderer_GetDefaultRenderTargetGroup();
 };
 
 // @fnv 0x00e69600
-unsigned int __thiscall FUN_00e69600_shell::FUN_00e69600()
+// src: COMMUNITY 0x00e69600
+unsigned int __thiscall FUN_00e69600_shell::NiDX9Renderer_GetDefaultRenderTargetGroup()
 {
     return reinterpret_cast<unsigned int*>(this)[0x221];
 }
@@ -399,7 +406,8 @@ void FUN_00e69900_shell::SetTwoValues(unsigned int uiFirst, unsigned int uiSecon
 
 // Copies path into the global file path buffer (max 0xff chars) when path is non-null, otherwise clears the first byte.
 // @fnv 0x00e69ad0
-void FUN_00e69ad0(const char* path)
+// src: COMMUNITY 0x00e69ad0
+void NiDX9Renderer_SetLastErrorString(const char* path)
 {
     if (path)
     {
@@ -476,7 +484,8 @@ void __cdecl BuildWorldToSkinTransform(NiWorldToSkin_niconsolerenderer* out, con
 extern int DAT_0126efc0;
 
 // @fnv 0x00e6c760
-bool __stdcall FUN_00e6c760(int value)
+// src: COMMUNITY 0x00e6c760
+bool __stdcall NiDX9Renderer_SetMipmapSkipLevel(int value)
 {
     DAT_0126efc0 = value;
     return true;
@@ -486,19 +495,21 @@ namespace fnv_00e6c770 {
 extern unsigned int DAT_0126efc0;
 
 // @fnv 0x00e6c770
-unsigned int __cdecl FUN_00e6c770()
+// src: COMMUNITY 0x00e6c770
+unsigned int __cdecl NiDX9Renderer_GetMipmapSkipLevel()
 {
     return DAT_0126efc0;
 }
 }  // namespace fnv_00e6c770
 
-void __cdecl FUN_00aa1110(void*);
+void __cdecl _NiAlignedFree(void*);
 
 // @fnv 0x00e6d740
-void __stdcall FUN_00e6d740(void* apObject)
+// src: COMMUNITY 0x00e6d740
+void __stdcall NiDX9Renderer_PurgeSkinInstance(void* apObject)
 {
     void* p = *(void**)((char*)apObject + 0x28);
-    FUN_00aa1110(p);
+    _NiAlignedFree(p);
     *(void**)((char*)apObject + 0x28) = 0;
     *(void**)((char*)apObject + 0x24) = 0;
 }
@@ -509,7 +520,8 @@ extern unsigned int DAT_011c5f84;
 struct LinkedListEntry { LinkedListEntry* next; LinkedListEntry* prev; char* data; };
 
 // @fnv 0x00e6e8a0
-void __stdcall FUN_00e6e8a0(LinkedListEntry* pNode)
+// src: COMMUNITY 0x00e6e8a0
+void __stdcall NiTPointerListBase_DeleteItem(LinkedListEntry* pNode)
 {
     pNode->data = 0;
     g_011c5f80.Lock(0);
@@ -559,18 +571,20 @@ NiTPointerMap<NiDynamicTexture*, NiDX9DynamicTextureData*>::NewItem() {
 extern "C" void* g_0126f0f0;
 
 // @fnv 0x00e757b0
-void* __cdecl FUN_00e757b0()
+// src: COMMUNITY 0x00e757b0
+void* __cdecl NiDX9Renderer_GetRTTI()
 {
     return &g_0126f0f0;
 }
 
 struct FUN_00e757c0_shell {
     unsigned char* data;
-    unsigned char FUN_00e757c0();
+    unsigned char NiDX9Renderer_IsVerticalDisplay();
 };
 
 // @fnv 0x00e757c0
-unsigned char __thiscall FUN_00e757c0_shell::FUN_00e757c0()
+// src: COMMUNITY 0x00e757c0
+unsigned char __thiscall FUN_00e757c0_shell::NiDX9Renderer_IsVerticalDisplay()
 {
     return *(reinterpret_cast<unsigned char*>(this) + 0xad0);
 }
@@ -579,7 +593,8 @@ namespace fnv_00e757d0 {
 
 
 // @fnv 0x00e757d0
-unsigned int __fastcall FUN_00e757d0(NiDX9Renderer* self, void*)
+// src: COMMUNITY 0x00e757d0
+unsigned int __fastcall NiDX9Renderer_GetFlags(NiDX9Renderer* self, void*)
 {
     return self->uiFlags;
 }
@@ -589,7 +604,8 @@ namespace fnv_00e75810 {
 
 
 // @fnv 0x00e75810
-void* __fastcall FUN_00e75810(NiDX9Renderer* self, void*)
+// src: COMMUNITY 0x00e75810
+void* __fastcall NiDX9Renderer_GetCurrentRenderTargetGroup(NiDX9Renderer* self, void*)
 {
     return self->pCurrentRenderTargetGroup;
 }
@@ -599,7 +615,8 @@ namespace fnv_00e75820 {
 
 
 // @fnv 0x00e75820
-void __fastcall FUN_00e75820(NiDX9Renderer* self, void*, float fValue)
+// src: COMMUNITY 0x00e75820
+void __fastcall NiDX9Renderer_SetDepthClear(NiDX9Renderer* self, void*, float fValue)
 {
     self->fDepthClear = fValue;
 }
@@ -618,11 +635,12 @@ float FUN_00e75830_shell::GetSomeFloat()
 struct FUN_00e75840_shell {
     unsigned int pad[0x5e0/4];
     unsigned int color;
-    void FUN_00e75840(float* param);
+    void NiDX9Renderer_SetBackgroundColor(float* param);
 };
 
 // @fnv 0x00e75840
-void __thiscall FUN_00e75840_shell::FUN_00e75840(float* afColor)
+// src: COMMUNITY 0x00e75840
+void __thiscall FUN_00e75840_shell::NiDX9Renderer_SetBackgroundColor(float* afColor)
 {
     double f = (double)afColor[0];
     double r = f * 255.0;
@@ -644,7 +662,8 @@ namespace fnv_00e75a20 {
 
 
 // @fnv 0x00e75a20
-void __fastcall FUN_00e75a20(NiDX9Renderer* self, void*, unsigned int value)
+// src: COMMUNITY 0x00e75a20
+void __fastcall NiDX9Renderer_SetStencilClear(NiDX9Renderer* self, void*, unsigned int value)
 {
     self->uiStencilClear = value;
 }
@@ -654,7 +673,8 @@ namespace fnv_00e75a30 {
 
 
 // @fnv 0x00e75a30
-unsigned int __fastcall FUN_00e75a30(NiDX9Renderer* self, void*)
+// src: COMMUNITY 0x00e75a30
+unsigned int __fastcall NiDX9Renderer_GetStencilClear(NiDX9Renderer* self, void*)
 {
     return self->uiStencilClear;
 }
@@ -663,7 +683,8 @@ unsigned int __fastcall FUN_00e75a30(NiDX9Renderer* self, void*)
 extern "C" void* g_01270900;
 
 // @fnv 0x00e766f0
-void* __cdecl FUN_00e766f0()
+// src: COMMUNITY 0x00e766f0
+void* __cdecl NiShaderDeclaration_GetRTTI()
 {
     return &g_01270900;
 }
@@ -688,7 +709,8 @@ extern int DAT_0126f580[];
 
 // If param2 is non-zero and its entry in DAT_0126f580 is set, calls the object's vtable slot 0x25 with (param1, param2, 0) and clears the entry.
 // @fnv 0x00e7cc50
-void __cdecl FUN_00e7cc50(int* pObject, int iIndex)
+// src: GAMEBRYO_LIB 0x00e7cc50
+void __cdecl NiDX92DBufferData_ClearRenderTarget(int* pObject, int iIndex)
 {
     if (iIndex != 0 && DAT_0126f580[iIndex] != 0)
     {
@@ -702,10 +724,11 @@ void __cdecl FUN_00e7cc50(int* pObject, int iIndex)
 
 extern "C" void __cdecl ReleaseShaderNodes(void*);
 struct FUN_00e69650_shell {
-    bool __thiscall FUN_00e69650(int);
+    bool __thiscall NiDX9Renderer_PurgeAllTextures(int);
 };
 // @fnv 0x00e69650
-bool __thiscall FUN_00e69650_shell::FUN_00e69650(int)
+// src: GAMEBRYO_LIB 0x00e69650
+bool __thiscall FUN_00e69650_shell::NiDX9Renderer_PurgeAllTextures(int)
 {
     ReleaseShaderNodes(this);
     return true;
@@ -757,7 +780,7 @@ struct IDev
     virtual int __stdcall f41() = 0;
     virtual int __stdcall EndScene() = 0;
 };
-struct FUN_00e8bf80_shell { void __thiscall FUN_00e8bf80(); };
+struct FUN_00e8bf80_shell { void __thiscall NiDX9VertexBufferManager_EndFrame(); };
 struct FUN_00e69660_shell
 {
     char _p0[0x288];
@@ -775,7 +798,7 @@ bool __thiscall FUN_00e69660_shell::EndSceneIfNeeded()
     if (f6fc == 0) {
         if (dev->EndScene() < 0)
             return false;
-        h8bc->FUN_00e8bf80();
+        h8bc->NiDX9VertexBufferManager_EndFrame();
     }
     return true;
 }
@@ -868,11 +891,12 @@ struct Dev
 };
 struct RendererHolder
 {
- int __thiscall FUN_00e698a0(int a1, int a2, int a3, int a4);
+ int __thiscall NiDX9Renderer_DrawIndexedPrimitive_TRIANGLELIST(int a1, int a2, int a3, int a4);
 };
 // Forwards the four arguments to the Dev at offset 0x288, calling DrawIndexedPrimitive with primitive type 4 and returns its result.
 // @fnv 0x00e698a0
-int __thiscall RendererHolder::FUN_00e698a0(int a1, int aiVertexCount, int a3, int aiPrimitiveCount)
+// src: COMMUNITY 0x00e698a0
+int __thiscall RendererHolder::NiDX9Renderer_DrawIndexedPrimitive_TRIANGLELIST(int a1, int aiVertexCount, int a3, int aiPrimitiveCount)
 {
  Dev* dev = *(Dev**)((char*)this + 0x288);
  return dev->DrawIndexedPrimitive(4, a1, 0, aiVertexCount, a3, aiPrimitiveCount);
@@ -903,16 +927,17 @@ void FUN_00e69970_shell::ClearShader(void* pkShader)
 
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-int __cdecl FUN_00e68ef0(void*, void*);
-struct StandIn_e6dc40 { bool FUN_00e6dc40(void*); };
+int __cdecl NiDX9SourceTextureData_Create(void*, void*);
+struct StandIn_e6dc40 { bool NiDX9Renderer_CreateSourceTexture(void*); };
 // Locks the critical section at this+0x180, reads the int at a1+0x24, computes it via FUN_00e68ef0 if zero, unlocks, and returns it.
 // @fnv 0x00e6dc40
-bool StandIn_e6dc40::FUN_00e6dc40(void* a1)
+// src: COMMUNITY 0x00e6dc40
+bool StandIn_e6dc40::NiDX9Renderer_CreateSourceTexture(void* a1)
 {
 	EnterCriticalSection((void*)((char*)this + 0x180));
 	int v = *(int*)((char*)a1 + 0x24);
 	if (!v)
-		v = FUN_00e68ef0(a1, this);
+		v = NiDX9SourceTextureData_Create(a1, this);
 	LeaveCriticalSection((void*)((char*)this + 0x180));
 	return v;
 }
@@ -934,28 +959,29 @@ bool Stand_00e6dc80::CreateVertexBufferIfNeeded(Param_00e6dc80* pParam, unsigned
 
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-int __cdecl FUN_00e8abf0(void*, void*);
-struct FUN_00e6dcc0_shell { bool __thiscall FUN_00e6dcc0(void*); };
+int __cdecl NiDX9SourceCubeMapData_Create(void*, void*);
+struct FUN_00e6dcc0_shell { bool __thiscall NiDX9Renderer_CreateSourceCubeMap(void*); };
 // Locks the critical section at this+0x180, returns true if a1+0x24 is nonzero, otherwise calls FUN_00e8abf0(a1, this) and unlocks before returning its result.
 // @fnv 0x00e6dcc0
-bool __thiscall FUN_00e6dcc0_shell::FUN_00e6dcc0(void* a1)
+// src: COMMUNITY 0x00e6dcc0
+bool __thiscall FUN_00e6dcc0_shell::NiDX9Renderer_CreateSourceCubeMap(void* a1)
 {
 	EnterCriticalSection((void*)((char*)this + 0x180));
 	if (*(int*)((char*)a1 + 0x24) != 0)
 		return true;
-	int r = FUN_00e8abf0(a1, this);
+	int r = NiDX9SourceCubeMapData_Create(a1, this);
 	LeaveCriticalSection((void*)((char*)this + 0x180));
 	return r;
 }
 
 namespace fnv_00e6dd00 {
-void* __cdecl FUN_00e901a0(void*, void*);
+void* __cdecl NiDX9RenderedCubeMapData_Create(void*, void*);
 struct ProxyRenderer { bool __thiscall EnsureVertexBufferSet(void*); };
 // @fnv 0x00e6dd00
 bool __thiscall ProxyRenderer::EnsureVertexBufferSet(void* a1)
 {
     if (*(unsigned int*)((char*)a1 + 0x24) == 0) {
-        void* v = FUN_00e901a0(a1, this);
+        void* v = NiDX9RenderedCubeMapData_Create(a1, this);
         if (!v)
             return false;
         ((NiVBSet*)((char*)this + 0x8dc))->Create((unsigned int)a1, v);
@@ -1166,11 +1192,12 @@ extern const char* const g_011f4a68_arg1;
 struct FUN_00e71cc0_shell {
     void* pad[0x8c8/4];
     void* __thiscall DeactivateActiveItem(void*);
-    void __thiscall FUN_00e71cc0(void* a1);
+    void __thiscall NiDX9Renderer_PurgeEffect(void* a1);
 };
 // If a1 is non-null, dynamic-casts it to the target type and, when the cast succeeds, passes the result to DeactivateActiveItem on the object at this+0x8c8.
 // @fnv 0x00e71cc0
-void __thiscall FUN_00e71cc0_shell::FUN_00e71cc0(void* pObject)
+// src: COMMUNITY 0x00e71cc0
+void __thiscall FUN_00e71cc0_shell::NiDX9Renderer_PurgeEffect(void* pObject)
 {
     if (pObject) {
         void* casted = ((NiObject*)pObject)->DynamicCast(&g_011f4a68_arg1);
@@ -1201,10 +1228,11 @@ struct BSBatchRenderer__AlphaList {
 };
 
 struct NiConsoleRenderer_shellEx : GraphicsRenderer {
-    void __thiscall FUN_00e75310(NiD3DShaderInterface* shader);
+    void __thiscall NiDX9Renderer_ReleaseD3DShader(NiD3DShaderInterface* shader);
 };
 // @fnv 0x00e75310
-void __thiscall NiConsoleRenderer_shellEx::FUN_00e75310(NiD3DShaderInterface* shader)
+// src: COMMUNITY 0x00e75310
+void __thiscall NiConsoleRenderer_shellEx::NiDX9Renderer_ReleaseD3DShader(NiD3DShaderInterface* shader)
 {
     shader->SetShaderObject(0);
     ((BSBatchRenderer__AlphaList*)((char*)this + 0x90c))->Remove((BSBatchRenderer__GeometryGroup*&)shader);
@@ -1257,9 +1285,10 @@ bool NiDX9ShaderDeclaration::GenerateVertexParameters(IDirect3DVertexDeclaration
 
 extern void* DAT_0126f550;
 extern const void* DAT_010ee898;
-void __cdecl FUN_00e7a760();
+void __cdecl Object_ProcessEntries_00e7a760();
 // @fnv 0x00e7a860
-void __cdecl FUN_00e7a860()
+// src: COMMUNITY 0x00e7a860
+void __cdecl NiD3DShaderDeclaration__SDMInit()
 {
     void* p = g_memoryManager.Allocate(0x10);
     if (p) {
@@ -1273,7 +1302,7 @@ void __cdecl FUN_00e7a860()
     } else {
         DAT_0126f550 = 0;
     }
-    FUN_00e7a760();
+    Object_ProcessEntries_00e7a760();
 }
 
 extern int DAT_0126f0ec;
@@ -1377,7 +1406,7 @@ const char* __thiscall FUN_00e69c00_shell::GetVertexProcessingFlagsString()
 struct FUN_00e6d710_shell {
     char pad[0x8ac];
     void* m_8ac;
-    void __thiscall FUN_00e6d710(void* a);
+    void __thiscall NiDX9Renderer_PurgeScreenTexture(void* a);
 };
 
 struct FUN_00e6d710_target {
@@ -1392,7 +1421,8 @@ struct FUN_00e6d710_target {
 
 // If a is non-null and its field at offset 0x1c is non-zero, calls m6 on m_8ac with a.
 // @fnv 0x00e6d710
-void __thiscall FUN_00e6d710_shell::FUN_00e6d710(void* a) {
+// src: COMMUNITY 0x00e6d710
+void __thiscall FUN_00e6d710_shell::NiDX9Renderer_PurgeScreenTexture(void* a) {
     if (a && *(unsigned int*)((char*)a + 0x1c)) {
         ((FUN_00e6d710_target*)m_8ac)->m6(a);
     }
@@ -1415,10 +1445,11 @@ namespace fnv_00e6dfa0 {
 struct DynamicTextureOwner {
     unsigned int pad[0x24 / 4];
     unsigned int count;
-    bool __thiscall FUN_00e6dfa0(NiDynamicTexture* texture);
+    bool __thiscall NiDX9Renderer_RemoveDynamicTextureData(NiDynamicTexture* texture);
 };
 // @fnv 0x00e6dfa0
-bool __thiscall DynamicTextureOwner::FUN_00e6dfa0(NiDynamicTexture* texture)
+// src: COMMUNITY 0x00e6dfa0
+bool __thiscall DynamicTextureOwner::NiDX9Renderer_RemoveDynamicTextureData(NiDynamicTexture* texture)
 {
     *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(texture) + 0x24) = 0;
     return reinterpret_cast<DynamicTextureMapBase*>(reinterpret_cast<char*>(this) + 0x8ec)->RemoveAt(texture);
@@ -1460,11 +1491,12 @@ struct FUN_00e752b0_shell {
     char _pad[0x90c];
     struct Node { Node* next; Node* prev; void* data; } *m_Head, *m_Tail;
     NodePoolView m_Pool;
-    void FUN_00e752b0(void* pkD3DShader);
+    void NiXenonRenderer_RegisterD3DShader(void* pkD3DShader);
 };
 // Allocates a node from the pool, stores pkD3DShader in it, and links it at the head of the list, updating the tail when the list was empty.
 // @fnv 0x00e752b0
-void FUN_00e752b0_shell::FUN_00e752b0(void* pkD3DShader)
+// src: XBOX_PDB 0x00e752b0
+void FUN_00e752b0_shell::NiXenonRenderer_RegisterD3DShader(void* pkD3DShader)
 {
     Node* pkNode = (Node*)m_Pool.AddHead();
     pkNode->data = pkD3DShader;
@@ -1534,11 +1566,12 @@ struct Group765 : VBase765 {
 	unsigned int count;
 	struct Entry { unsigned int a; unsigned int b; unsigned int c; void* r; };
 	Entry* entries;
-	void* FUN_00e765e0(unsigned int index);
+	void* NiDX9ShaderDeclaration_GetVertexStride(unsigned int index);
 };
 // Returns entries[index].r when index is below count, otherwise returns 0; calls Touch() before the lookup.
 // @fnv 0x00e765e0
-void* Group765::FUN_00e765e0(unsigned int index)
+// src: COMMUNITY 0x00e765e0
+void* Group765::NiDX9ShaderDeclaration_GetVertexStride(unsigned int index)
 {
 	if (index >= count)
 		return 0;
@@ -1561,7 +1594,7 @@ extern int DAT_010ee70c;
 extern MemoryManager g_memoryManager;
 void __cdecl _delete(void*, unsigned int);
 struct ICom78510 { virtual int __stdcall Q(); virtual int __stdcall A(); virtual int __stdcall R(); };
-struct H78510 { void __thiscall FUN_00e78be0(); };
+struct H78510 { void __thiscall ProcessEntries_00e78be0(); };
 struct S78510 { char pad[0x2c]; void* p1; ICom78510* p2; char tail[4]; void* __thiscall FUN_00e78510(unsigned int); };
 // @fnv 0x00e78510
 void* __thiscall S78510::FUN_00e78510(unsigned int auiFlags)
@@ -1573,7 +1606,7 @@ void* __thiscall S78510::FUN_00e78510(unsigned int auiFlags)
         p2->R();
         p2 = 0;
     }
-    ((H78510*)this)->FUN_00e78be0();
+    ((H78510*)this)->ProcessEntries_00e78be0();
     if (auiFlags & 1) {
         _delete(this, 0x38);
     }
@@ -1692,7 +1725,8 @@ struct FUN_00e76c30_Info {
 };
 
 // @fnv 0x00e76c30
-unsigned int FUN_00e76c30(FUN_00e76c30_Info* pkInfo)
+// src: COMMUNITY 0x00e76c30
+unsigned int NiD3DShaderDeclaration_Pack_FloatToShort(FUN_00e76c30_Info* pkInfo)
 {
     unsigned int uiTotal = 0;
     float* pfSrc = pkInfo->pfSrc;
@@ -1770,7 +1804,8 @@ struct FUN_00e79f40_Stream {
 
 // Converts s->count elements from src (via optional indices) into packed 32-bit values at dst, or fills dst with 0xff when src is null; returns total bytes.
 // @fnv 0x00e79f40
-int FUN_00e79f40(FUN_00e79f40_Stream* pStream)
+// src: COMMUNITY 0x00e79f40
+int NiD3DShaderDeclaration_Pack_ByteToUByteColor(FUN_00e79f40_Stream* pStream)
 {
     char* src = pStream->src;
     unsigned short* indices = pStream->indices;
@@ -1929,11 +1964,12 @@ struct FUN_00e76500_shell
     unsigned char f28;
     unsigned int pad29[1];
     void* f30;
-    bool FUN_00e76500(unsigned int a, unsigned int b);
+    bool NiDX9ShaderDeclaration_RemoveEntry(unsigned int a, unsigned int b);
 };
 
 // @fnv 0x00e76500
-bool FUN_00e76500_shell::FUN_00e76500(unsigned int a, unsigned int b)
+// src: COMMUNITY 0x00e76500
+bool FUN_00e76500_shell::NiDX9ShaderDeclaration_RemoveEntry(unsigned int a, unsigned int b)
 {
     if (a >= f1c)
         return false;
@@ -1971,7 +2007,8 @@ extern AA1110MemManager* g_pkAA1110MemManager;
 
 // NiFree
 // @fnv 0x00aa1110
-void FUN_00aa1110(void* pvMem)
+// src: GAMEBRYO_LIB 0x00aa1110
+void _NiAlignedFree(void* pvMem)
 {
     if (pvMem)
         g_pkAA1110MemManager->m_pHeapAllocator->Deallocate(pvMem, 10, (unsigned int)-1);
@@ -2555,21 +2592,23 @@ class FUN_00e69640_cls
     int unk8bc;
     int unk8c0;
     FUN_00e69640_target* m_8c4;
-    void FUN_00e69640(int a);
+    void NiDX9Renderer_PrecacheTexture(int a);
 };
 
 // @fnv 0x00e69640
-void FUN_00e69640_cls::FUN_00e69640(int a)
+// src: COMMUNITY 0x00e69640
+void FUN_00e69640_cls::NiDX9Renderer_PrecacheTexture(int a)
 {
     m_8c4->Forward(a);
 }
 
 struct VertexDeclarationElement { unsigned short stream,offset; unsigned char type,method,usage,m_ucUsageIndex; };
 struct VertexDeclarationDevice : Dev { virtual long __stdcall DrawPrimitiveUP(); virtual long __stdcall DrawIndexedPrimitiveUP(); virtual long __stdcall ProcessVertices(); virtual long __stdcall CreateVertexDeclaration(const VertexDeclarationElement*, void**); };
-struct RendererDeclarationOwner { unsigned int m_rendererFields[0xa0]; void* m_vertexDeclaration; unsigned int m_declarationState; VertexDeclarationDevice* m_device; void* __thiscall FUN_00e696a0(); };
+struct RendererDeclarationOwner { unsigned int m_rendererFields[0xa0]; void* m_vertexDeclaration; unsigned int m_declarationState; VertexDeclarationDevice* m_device; void* __thiscall NiDX9Renderer_GetDecl_ParticlesSubTexture(); };
 // Creates the vertex declaration from a fixed element array on first use and returns it, or null if creation fails.
 // @fnv 0x00e696a0
-void* RendererDeclarationOwner::FUN_00e696a0() {
+// src: COMMUNITY 0x00e696a0
+void* RendererDeclarationOwner::NiDX9Renderer_GetDecl_ParticlesSubTexture() {
  if (!m_vertexDeclaration) {
     VertexDeclarationElement elements[5] = { {0,0,2,0,0,0}, {0,12,2,0,3,0}, {0,24,4,0,10,0}, {0,28,1,0,5,0}, {255,0,17,0,0,0} };
     if (m_device->CreateVertexDeclaration(elements, &m_vertexDeclaration) < 0) m_vertexDeclaration = 0;
@@ -3167,11 +3206,12 @@ class FUN_00e69960_cls
     int unk8b0;
     int unk8b4;
     FUN_00e69960_target* m_8b8;
-    void FUN_00e69960(int a);
+    void NiDX9Renderer_PurgeMaterial(int a);
 };
 
 // @fnv 0x00e69960
-void FUN_00e69960_cls::FUN_00e69960(int a)
+// src: COMMUNITY 0x00e69960
+void FUN_00e69960_cls::NiDX9Renderer_PurgeMaterial(int a)
 {
     m_8b8->Forward(a);
 }
@@ -3204,11 +3244,12 @@ extern "C" void* (__stdcall* g_0126f0dc)(unsigned int);
 extern "C" unsigned int DAT_0126f0f8;
 
 bool __cdecl InitD3D9CreateFunctions();
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 // Returns the cached global pointer, creating it via a factory call and helper object when unset and InitD3D9CreateFunctions succeeds.
 // @fnv 0x00e69a60
-void* __cdecl FUN_00e69a60()
+// src: COMMUNITY 0x00e69a60
+void* __cdecl NiDX9SystemDesc_Get()
 {
     if (g_0126f0e8 != 0) {
         return g_0126f0e8;
@@ -3218,7 +3259,7 @@ void* __cdecl FUN_00e69a60()
     }
     FUN_00e69a60_obj20* obj = (FUN_00e69a60_obj20*)g_0126f0dc(0x20);
     if (obj != 0) {
-        FUN_00e69a60_obj14* helper = (FUN_00e69a60_obj14*)FUN_00aa13e0(0x14);
+        FUN_00e69a60_obj14* helper = (FUN_00e69a60_obj14*)Object_DispatchCommandFour(0x14);
         if (helper != 0) {
             g_0126f0e8 = helper->FUN_00e7bc90(obj, &DAT_0126f0f8);
         } else {
@@ -3978,12 +4019,13 @@ struct E6D310Renderer {
     int unk284;
     E6D310Device* m_device;
 
-    void FUN_00e6d310(E6D310StripSet* set, E6D310Geometry* geometry, int unused);
+    void NiDX9Renderer_Do_DrawPartition(E6D310StripSet* set, E6D310Geometry* geometry, int unused);
 };
 
 // For each strip, computes the primitive count and issues a DrawIndexedPrimitive call, advancing the index start offset.
 // @fnv 0x00e6d310
-void E6D310Renderer::FUN_00e6d310(E6D310StripSet* stripSet, E6D310Geometry* geometry, int unused)
+// src: COMMUNITY 0x00e6d310
+void E6D310Renderer::NiDX9Renderer_Do_DrawPartition(E6D310StripSet* stripSet, E6D310Geometry* geometry, int unused)
 {
     unsigned int start = 0;
     for (unsigned int i = 0; i < stripSet->m_stripCount; i++) {
@@ -4440,7 +4482,7 @@ struct SourceManager {
 };
 extern const char DAT_010ed96c[];
 char* __cdecl GetHRESULTText(unsigned int status);
-void __cdecl FUN_00a29680(const char* format, const char* message);
+void __cdecl Object_DoNothing(const char* format, const char* message);
 struct Renderer {
     void* __thiscall LockRenderSource(SourceManager* manager, int* pitch);
 };
@@ -4465,7 +4507,7 @@ void* Renderer::LockRenderSource(SourceManager* manager, int* piPitch)
         LockedRect lockedRect;
         long result = texture->LockRect(0, &lockedRect, 0, lockFlags);
         if (result < 0) {
-            FUN_00a29680(DAT_010ed96c, GetHRESULTText(result));
+            Object_DoNothing(DAT_010ed96c, GetHRESULTText(result));
         } else {
             void* bits = lockedRect.bits;
             *piPitch = lockedRect.pitch;
@@ -4510,14 +4552,15 @@ public:
     FUN_00e6de70_D* m_288;
     char unk028c[0x6f5 - 0x28c];
     unsigned char m_6f5;
-    bool __thiscall FUN_00e6de70(FUN_00e6de70_A* a1);
+    bool __thiscall NiDX9Renderer_UnLockDynamicTexture(FUN_00e6de70_A* a1);
 };
 
 const char* __cdecl GetHResultName(int code);
-void __cdecl FUN_00a29680(const char* fmt, const char* text);
+void __cdecl Object_DoNothing(const char* fmt, const char* text);
 
 // @fnv 0x00e6de70
-bool __thiscall FUN_00e6de70_cls::FUN_00e6de70(FUN_00e6de70_A* a1)
+// src: EXE 0x00e6de70
+bool __thiscall FUN_00e6de70_cls::NiDX9Renderer_UnLockDynamicTexture(FUN_00e6de70_A* a1)
 {
     if (a1 == 0) {
         return false;
@@ -4540,7 +4583,7 @@ bool __thiscall FUN_00e6de70_cls::FUN_00e6de70(FUN_00e6de70_A* a1)
     }
     int r = c->v20(0);
     if (r < 0) {
-        FUN_00a29680("NiDX9Renderer::UnLockDynamicTexture Failed> UnlockRect - %s", GetHResultName(r));
+        Object_DoNothing("NiDX9Renderer::UnLockDynamicTexture Failed> UnlockRect - %s", GetHResultName(r));
         return false;
     }
     if (m_6f5 == 0) {
@@ -4550,7 +4593,7 @@ bool __thiscall FUN_00e6de70_cls::FUN_00e6de70(FUN_00e6de70_A* a1)
         }
         int r3 = m_288->v31(c, r2);
         if (r3 < 0) {
-            FUN_00a29680("NiDX9Renderer::UnLockDynamicTexture Failed> UpdateTexture - %s", GetHResultName(r3));
+            Object_DoNothing("NiDX9Renderer::UnLockDynamicTexture Failed> UpdateTexture - %s", GetHResultName(r3));
             return false;
         }
     }
@@ -5395,9 +5438,9 @@ struct ResourceParameters {
 };
 extern const char DAT_010edbb8[];
 extern const char* DAT_0109b220;
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 const char* __cdecl FUN_00a5b690(const char* name);
-RefObject* __cdecl FUN_00a5ff10(RenderResource* resource, const char* name, ResourceParameters* parameters);
+RefObject* __cdecl NiSourceTexture_Create(RenderResource* resource, const char* name, ResourceParameters* parameters);
 struct RendererBridge {
     RendererStateSlot* State(unsigned int idx) {
         return reinterpret_cast<RendererStateSlot*>(reinterpret_cast<char*>(this) + 0x700 + 0x58 * idx);
@@ -5422,7 +5465,7 @@ bool RendererBridge::InitializeRendererResources() {
     InitFormats();
 
     ResourceDescriptor* source = Source();
-    void* storage = FUN_00aa13e0(0x74);
+    void* storage = Object_DispatchCommandFour(0x74);
     RenderResource* resource;
     if (storage != 0) resource = static_cast<RenderResource*>(storage)->FUN_00a7c190(2, 1, source, 1, 1);
     else resource = 0;
@@ -5450,7 +5493,7 @@ bool RendererBridge::InitializeRendererResources() {
     resourceParams.unk08 = 0;
     resourceParams.unk04 = 0;
     const char* name = FUN_00a5b690(DAT_010edbb8);
-    RefObject* selected = FUN_00a5ff10(resource, name, &resourceParams);
+    RefObject* selected = NiSourceTexture_Create(resource, name, &resourceParams);
     if (Target() != selected) {
         if (Target()) Target()->DecRefCount();
         Target() = selected;
@@ -5801,7 +5844,7 @@ struct Arg1 {
 
 class FUN_00e72c20_cls : public Ifc {
 public:
-    bool FUN_00e72c20(Arg1* a1, Ifc* a2);
+    bool NiDX9Renderer_IsHardwareSkinned(Arg1* a1, Ifc* a2);
     char unk0004[0x5d1];
     unsigned char f5d5;
     char unk05d6[0x6f0 - 0x5d6];
@@ -5809,7 +5852,8 @@ public:
 };
 
 // @fnv 0x00e72c20
-bool FUN_00e72c20_cls::FUN_00e72c20(Arg1* a1, Ifc* pObj) {
+// src: COMMUNITY 0x00e72c20
+bool FUN_00e72c20_cls::NiDX9Renderer_IsHardwareSkinned(Arg1* a1, Ifc* pObj) {
     X* x = a1->pB8;
     if (x->f34 != 0) {
         return false;
@@ -6483,7 +6527,7 @@ struct FUN_00e744b0_cls {
     unsigned int unk8a8;
     unsigned int m_8ac;
     unsigned int m_8b0;
-    bool __thiscall FUN_00e72c20(FUN_00e744b0_Src* p, int z);
+    bool __thiscall NiDX9Renderer_IsHardwareSkinned(FUN_00e744b0_Src* p, int z);
     void __thiscall DrawStrip(FUN_00e744b0_Src* p, unsigned int b, unsigned int c, FUN_00e744b0_Blk52* B, FUN_00e744b0_Blk16* A);
     void __thiscall DrawMesh(FUN_00e744b0_Src* p, unsigned int b, unsigned int c, FUN_00e744b0_Blk52* B, FUN_00e744b0_Blk16* A, unsigned int f);
     void ProcessVObj(FUN_00e744b0_Src* ebx);
@@ -6504,7 +6548,7 @@ void FUN_00e744b0_cls::ProcessVObj(FUN_00e744b0_Src* apSrc)
             A.d[0] = src[0]; A.d[1] = src[1]; A.d[2] = src[2]; A.d[3] = src[3];
             unsigned int esi = (unsigned int)vo;
             unsigned int edi = bc;
-            bool r = FUN_00e72c20(apSrc, 0);
+            bool r = NiDX9Renderer_IsHardwareSkinned(apSrc, 0);
             ((FUN_00e744b0_obj*)m_8ac)->ProcessCollector(m_8b0, esi, edi, *(unsigned int*)&r, 0, 0);
             if (r) {
                 DrawStrip(apSrc, esi, edi, &B, &A);
@@ -7751,7 +7795,7 @@ struct Renderer {
  Manager* manager;
  unsigned handle;
  void RenderInput(Input*);
- void FUN_00e74cc0(Input*);
+ void NiDX9Renderer_PackScreenTextureGeomBuffer(Input*);
  void DrawMesh(int,int,int,LocalTransform*,Bound*,void*);
 };
 // If not active and input has content, builds default properties when missing, sets state/mode, passes input to manager, renders it, then restores state and mode.
@@ -7777,7 +7821,7 @@ void Renderer::RenderInput(Input* input) {
  properties->SetSlot((::Property*)input->property);
  state=properties;mode=0;
  manager->Set(handle,input);
- FUN_00e74cc0(input);
+ NiDX9Renderer_PackScreenTextureGeomBuffer(input);
  LocalTransform transform;
  // DrawMesh fills this scratch bound; leave its storage uninitialized.
  unsigned __int64 bound[sizeof(Bound) / sizeof(unsigned __int64)];
@@ -8442,11 +8486,12 @@ struct ConsoleRendererShaders {
     int unk904;
     int unk908;
     ShaderList m_kShaderList;
-    void FUN_00e75380();
+    void NiDX9Renderer_PurgeAllD3DShaders();
 };
 
 // @fnv 0x00e75380
-void ConsoleRendererShaders::FUN_00e75380() {
+// src: COMMUNITY 0x00e75380
+void ConsoleRendererShaders::NiDX9Renderer_PurgeAllD3DShaders() {
     while (m_kShaderList.count != 0) {
         D3DShaderStub* pkShader = (D3DShaderStub*)m_kShaderList.head->data;
         pkShader->UnloadShader();
@@ -9041,11 +9086,12 @@ public:
     int unk8B4;
     E757E0Renderer* m_pOwnerShader;
 
-    void FUN_00e757e0();
+    void NiDX9Renderer_GetLeftRightSwap();
 };
 
 // @fnv 0x00e757e0
-void E757E0Owner::FUN_00e757e0() {
+// src: COMMUNITY 0x00e757e0
+void E757E0Owner::NiDX9Renderer_GetLeftRightSwap() {
     m_pOwnerShader->Flush();
 }
 
@@ -10226,11 +10272,12 @@ struct FUN_00e75a40_cls
     int unk08B0;
     int unk08B4;
     Target* m_8b8;
-    void FUN_00e75a40();
+    void NiDX9Renderer_GetMaxFogValue();
 };
 
 // @fnv 0x00e75a40
-void FUN_00e75a40_cls::FUN_00e75a40()
+// src: COMMUNITY 0x00e75a40
+void FUN_00e75a40_cls::NiDX9Renderer_GetMaxFogValue()
 {
     m_8b8->Tail();
 }
@@ -10323,11 +10370,12 @@ struct FUN_00e75a50_owner :
     P48, P49, P50, P51, P52, P53, P54, P55
 {
     FUN_00e75a50_Interface* unk8b8;
-    void __thiscall FUN_00e75a50(float value);
+    void __thiscall NiDX9Renderer_SetMaxFogValue(float value);
 };
 
 // @fnv 0x00e75a50
-void __thiscall FUN_00e75a50_owner::FUN_00e75a50(float value)
+// src: COMMUNITY 0x00e75a50
+void __thiscall FUN_00e75a50_owner::NiDX9Renderer_SetMaxFogValue(float value)
 {
     unk8b8->f16(value);
 }
@@ -10374,12 +10422,13 @@ public:
     unsigned int unk2c;
     FUN_00e76570_obj* m_30;
 
-    bool FUN_00e76570(unsigned int index);
+    bool NiDX9ShaderDeclaration_ClearAllEntries(unsigned int index);
 };
 
 // If index is below m_20, resets each of m_1c entries in the item at m_24+index, sets m_28, and calls vtable slot 2 on m_30 before clearing it.
 // @fnv 0x00e76570
-bool FUN_00e76570_cls::FUN_00e76570(unsigned int index)
+// src: COMMUNITY 0x00e76570
+bool FUN_00e76570_cls::NiDX9ShaderDeclaration_ClearAllEntries(unsigned int index)
 {
     if (index >= m_20) {
         return false;
@@ -10902,7 +10951,8 @@ struct FUN_00e77590_Info {
 };
 
 // @fnv 0x00e77590
-unsigned int FUN_00e77590(FUN_00e77590_Info* pkInfo)
+// src: COMMUNITY 0x00e77590
+unsigned int NiD3DShaderDeclaration_Pack_ByteToShort(FUN_00e77590_Info* pkInfo)
 {
     unsigned int uiTotal = 0;
     signed char* pcSrc = pkInfo->pcSrc;
@@ -10979,7 +11029,8 @@ struct FUN_00e77950_Info {
 };
 
 // @fnv 0x00e77950
-unsigned int FUN_00e77950(FUN_00e77950_Info* pkInfo)
+// src: COMMUNITY 0x00e77950
+unsigned int NiD3DShaderDeclaration_Pack_FloatToUnsignedByte(FUN_00e77950_Info* pkInfo)
 {
     unsigned int uiTotal = 0;
     unsigned char* pucDest = pkInfo->pucDest;
@@ -11054,7 +11105,8 @@ struct FUN_00e77eb0_Info {
 };
 
 // @fnv 0x00e77eb0
-unsigned int FUN_00e77eb0(FUN_00e77eb0_Info* pkInfo)
+// src: COMMUNITY 0x00e77eb0
+unsigned int NiD3DShaderDeclaration_Pack_ShortToUnsignedByte(FUN_00e77eb0_Info* pkInfo)
 {
     unsigned int uiSize = 0;
     unsigned short* psSrc = pkInfo->psSrc;
@@ -11252,7 +11304,7 @@ int PackVertexColors(Stream_e78910* aStream)
 }
 
 extern const char DAT_010ee7cc[];
-void __cdecl FUN_00aa1490(void* apMemory, unsigned int auiSize);
+void __cdecl NiMemObject_ReleaseStorage_00aa1490(void* apMemory, unsigned int auiSize);
 
 struct FUN_00e78be0_cls {
     void* m_vptr00;
@@ -11267,12 +11319,13 @@ struct FUN_00e78be0_cls {
     char* m_pArr24;
 
     void BaseTeardown();
-    void FUN_00e78be0() throw();
+    void ProcessEntries_00e78be0() throw();
 };
 
 // Sets the vtable, frees each 16-byte array element's 0x1c-byte payload and the array, releases m_p10 via its vtable slot 2, then calls BaseTeardown.
 // @fnv 0x00e78be0
-void FUN_00e78be0_cls::FUN_00e78be0() throw()
+// src: GUESS 0x00e78be0 (confidence: low)
+void FUN_00e78be0_cls::ProcessEntries_00e78be0() throw()
 {
     m_vptr00 = (void*)DAT_010ee7cc;
     if (m_pArr24 != 0) {
@@ -11282,13 +11335,13 @@ void FUN_00e78be0_cls::FUN_00e78be0() throw()
             do {
                 char* e = m_pArr24 + off;
                 if (e != 0) {
-                    FUN_00aa1490(*(void**)(e + 8), 0x1c);
+                    NiMemObject_ReleaseStorage_00aa1490(*(void**)(e + 8), 0x1c);
                 }
                 i++;
                 off += 16;
             } while (i < m_uCount20);
         }
-        FUN_00aa1490(m_pArr24, 0x10);
+        NiMemObject_ReleaseStorage_00aa1490(m_pArr24, 0x10);
     }
     void* obj = m_p10;
     m_pArr24 = 0;
@@ -11320,7 +11373,8 @@ struct FUN_00e79370_Info {
 };
 
 // @fnv 0x00e79370
-unsigned int FUN_00e79370(FUN_00e79370_Info* pkInfo)
+// src: COMMUNITY 0x00e79370
+unsigned int NiD3DShaderDeclaration_Pack_UnsignedLongToFloat(FUN_00e79370_Info* pkInfo)
 {
     unsigned int uiTotal = 0;
     unsigned char* pucSrc = pkInfo->pucSrc;
@@ -11813,11 +11867,12 @@ struct FUN_00e69790_shell {
     int unk280;
     Declaration_e69790* declaration;
     Device_e69790* device;
-    Declaration_e69790* FUN_00e69790();
+    Declaration_e69790* NiDX9Renderer_GetDecl_Particles();
 };
 // Creates the vertex declaration from a fixed element array via device->CreateVertexDeclaration if not yet created, and returns it.
 // @fnv 0x00e69790
-Declaration_e69790* FUN_00e69790_shell::FUN_00e69790() {
+// src: COMMUNITY 0x00e69790
+Declaration_e69790* FUN_00e69790_shell::NiDX9Renderer_GetDecl_Particles() {
     if (!declaration) {
         VertexElement_e69790 elements[6] = {
             {0, 0, 2, 0, 0, 0},
@@ -11940,7 +11995,7 @@ struct PackingPacket {
     void* vertexData;
     void* stripLengths;
     bool FUN_00e8eeb0();
-    void FUN_00e8ef10(unsigned int);
+    void NiGeometryBufferData_SetStreamCount(unsigned int);
     void FUN_00e8eee0();
 };
 struct PackingData {
@@ -11999,7 +12054,7 @@ struct PackingGeometry {
     unsigned int streamCount;
 };
 struct PackingVertexManager {
-    unsigned int FUN_00e8c820(NiGeometryData*, void*, PackingData*, unsigned short, void*, unsigned int);
+    unsigned int NiDX9VertexBufferManager_PackSkinnedVB(NiGeometryData*, void*, PackingData*, unsigned short, void*, unsigned int);
 };
 struct PackingIndexManager {
     void* FUN_00e8f200(void*, unsigned int, unsigned int, void*, void**, unsigned int, unsigned int);
@@ -12049,14 +12104,14 @@ bool PackingRenderer::UpdatePackingPacket(PackingPacket* packet, NiGeometryData*
     if (force) dirty = 0xfff;
     if (cached) {
         if (streamCount != packet->streamCount) {
-            packet->FUN_00e8ef10(streamCount);
+            packet->NiGeometryBufferData_SetStreamCount(streamCount);
             dirty = 0xfff;
         }
     } else {
         PackingOwner* owner = packet->owner;
         for (unsigned int i = 0; i < streamCount; ++i)
             owner->ReleaseStream(packet, i);
-        packet->FUN_00e8ef10(streamCount);
+        packet->NiGeometryBufferData_SetStreamCount(streamCount);
         packet->cache = 0;
         dirty = 0xfff;
     }
@@ -12073,7 +12128,7 @@ bool PackingRenderer::UpdatePackingPacket(PackingPacket* packet, NiGeometryData*
             unsigned int packed = 0;
             if (geometry) packed = geometry->Pack(model, geometryData, data, dirty, stream, i, 0, 0, 0);
             if (!packed) {
-                if (streamCount != 1 || !((PackingVertexManager*)m_pShaderStreamInfo)->FUN_00e8c820(
+                if (streamCount != 1 || !((PackingVertexManager*)m_pShaderStreamInfo)->NiDX9VertexBufferManager_PackSkinnedVB(
                     model, geometryData, data, dirty, stream, 0))
                     return false;
             }
@@ -12175,7 +12230,7 @@ struct Device_e6e
 
 struct Mgr_e6e
 {
-    unsigned int FUN_00e7b0f0(int iA, int iFormat, int iB, int iC);
+    unsigned int NiDX9SystemDesc_GetNearestDepthStencilFormat(int iA, int iFormat, int iB, int iC);
 };
 
 struct Map_e6e
@@ -12912,7 +12967,7 @@ void* FUN_00e6ee00_cls::GetOrCreateFormatEntry(int iFormat, int iB, int iC)
     else
         pSrc = pObj->ContainsNode(&g_0126f5d8);
     int iFmt = FUN_00e7bd20(iFormat);
-    unsigned int uiKey = m_5dc->FUN_00e7b0f0(pSrc->unk28, iFmt, iB, iC);
+    unsigned int uiKey = m_5dc->NiDX9SystemDesc_GetNearestDepthStencilFormat(pSrc->unk28, iFmt, iB, iC);
     {
         NiPixelFormat* pVal = 0;
         if (m_kFormatEntries.GetAt(static_cast<_D3DFORMAT>(uiKey), pVal) && pVal)
@@ -13614,8 +13669,8 @@ extern NiRTTI g_011f5b70;
 extern NiRTTI g_011f4a40;
 extern NiRTTI g_011f4a20;
 
-bool __cdecl FUN_0043b300(const NiRTTI* pkRTTI, NiAVObject* pkObject);
-void __cdecl FUN_00a29680(const char* format, const char* message);
+bool __cdecl NiObject_IsKindOf(const NiRTTI* pkRTTI, NiAVObject* pkObject);
+void __cdecl Object_DoNothing(const char* format, const char* message);
 struct PG_Preparer { bool Prepare(NiGeometryGroup* c, NiGeometryData* d, NiSkinInstance* e, bool f, unsigned int g, unsigned int h); };
 
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
@@ -13777,11 +13832,12 @@ struct PG_Renderer {
     bool FUN_00e72c20_s(PG_GeomFull* p, int z);
     bool FUN_00e72aa0_s(PG_GeomFull* p, PG_Data* d, NiSkinInstance* s, unsigned int t, unsigned int a, unsigned int b);
     bool FUN_00e72980_s(PG_GeomFull* p, PG_Data* d, unsigned int n, unsigned int v, void* q, void* r, unsigned int c, unsigned int t);
-    bool FUN_00e73f60(PG_GeomFull* p, unsigned int a2, unsigned int a3, unsigned int a4);
+    bool NiDX9Renderer_PrecacheGeometry(PG_GeomFull* p, unsigned int a2, unsigned int a3, unsigned int a4);
 };
 
 // @fnv 0x00e73f60
-bool PG_Renderer::FUN_00e73f60(PG_GeomFull* p, unsigned int a2, unsigned int a3, unsigned int auiTechnique)
+// src: COMMUNITY 0x00e73f60
+bool PG_Renderer::NiDX9Renderer_PrecacheGeometry(PG_GeomFull* p, unsigned int a2, unsigned int a3, unsigned int auiTechnique)
 {
     if (!PG_IsKindOf(g_011f5b70, p))
         return false;
@@ -13790,7 +13846,7 @@ bool PG_Renderer::FUN_00e73f60(PG_GeomFull* p, unsigned int a2, unsigned int a3,
     PG_Prop* pShader = p->m_pShaderHandle;
     PG_Data* pData = p->m_spGeometryData;
     if (!pShader) {
-        FUN_00a29680("PrecacheGeometry> No shader found for object %s!\n", p->m_pcName);
+        Object_DoNothing("PrecacheGeometry> No shader found for object %s!\n", p->m_pcName);
         return false;
     }
 
@@ -13804,12 +13860,12 @@ bool PG_Renderer::FUN_00e73f60(PG_GeomFull* p, unsigned int a2, unsigned int a3,
     bool bResult = false;
     if (bPrecached) {
         bResult = FUN_00e72aa0_s(p, pData, pSkinInstance, uiTech, a2, a3);
-    } else if (FUN_0043b300(&g_011f4a40, (NiAVObject*)p)) {
+    } else if (NiObject_IsKindOf(&g_011f4a40, (NiAVObject*)p)) {
         unsigned int usActive = pData->GetActiveVertexQuantity();
         unsigned int usVerts = pData->m_usVertices;
         void* m_pkDeltas = pData->FUN_00a7b850_s();
         bResult = FUN_00e72980_s(p, pData, usActive, usVerts, m_pkDeltas, 0, 1, uiTech);
-    } else if (FUN_0043b300(&g_011f4a20, (NiAVObject*)p)) {
+    } else if (NiObject_IsKindOf(&g_011f4a20, (NiAVObject*)p)) {
         unsigned int usActive = pData->GetActiveVertexQuantity();
         unsigned int usVerts = pData->m_usVertices;
         void* m_pkDeltas = pData->FUN_00a75f10_s();
@@ -14064,7 +14120,7 @@ struct Renderer {
     int unk06D4; int unk06D8; int unk06DC; int unk06E0; int unk06E4; int unk06E8; int unk06EC; int unk06F0;
     int unk06F4; int unk06F8;
     bool m_bDeviceLost;
-    bool FUN_00e72c20(Geom* geom, int flag);
+    bool NiDX9Renderer_IsHardwareSkinned(Geom* geom, int flag);
     void DrawGeometry(Geom* geom);
 };
 
@@ -14082,7 +14138,7 @@ void Renderer::DrawGeometry(Geom* geom)
     unsigned int boundStorage[sizeof(NiBound) / sizeof(unsigned int)];
     NiBound& kBound = *reinterpret_cast<NiBound*>(boundStorage);
     memcpy(&kBound, &rkBound, sizeof(kBound));
-    bool bHasPartitions = FUN_00e72c20(geom, 0);
+    bool bHasPartitions = NiDX9Renderer_IsHardwareSkinned(geom, 0);
     GeomBuffData* pBuffData = geom->m_spGeometryData->m_pkGeometryRendererData;
     geom->m_pGeometryShader->GetActiveVertexQuantity();
     CopyPoint3Storage(m_kBound.m_kCenter, kBound.m_kCenter);
@@ -14817,11 +14873,12 @@ struct ResolveRenderer {
  unsigned int unk8f8;
  unsigned int unk8fc;
  BoundCache cache;
- bool FUN_00e74dc0();
+ bool NiDX9Renderer_EndUsingRenderTargetGroup();
 };
 // For each bound in the collection, copies surface data to the device and adds cache-enabled bounds to the cache list, then clears the collection.
 // @fnv 0x00e74dc0
-bool ResolveRenderer::FUN_00e74dc0() {
+// src: COMMUNITY 0x00e74dc0
+bool ResolveRenderer::NiDX9Renderer_EndUsingRenderTargetGroup() {
  if(!disabled) {
   for(unsigned int uiIndex=0;uiIndex<collection->Count();++uiIndex) {
    NiDX92DBufferData* object=collection->Get(uiIndex);
@@ -15040,7 +15097,8 @@ struct FUN_00e77b50_Info {
 };
 
 // @fnv 0x00e77b50
-unsigned int FUN_00e77b50(FUN_00e77b50_Info* pkInfo)
+// src: COMMUNITY 0x00e77b50
+unsigned int NiD3DShaderDeclaration_Pack_LongToUnsignedByte(FUN_00e77b50_Info* pkInfo)
 {
     unsigned int uiTotal = 0;
     unsigned char* pucSrc = pkInfo->pucSrc;
@@ -16629,12 +16687,12 @@ struct FUN_00e754a0 : RendererBase {
  RendererArray<2> arrayaf4;
  RendererArray<1> arrayb04;
  NiTMap<_D3DFORMAT, NiPixelFormat*> mapb14;
- void FUN_00e6b990();
+ void NiXenonRenderer_InitToDefault();
  FUN_00e754a0() throw();
 };
 // @fnv 0x00e754a0
 FUN_00e754a0::FUN_00e754a0() throw() : unk630(0), mapb14(7) {
- FUN_00e6b990();
+ NiXenonRenderer_InitToDefault();
 }
 
 extern double DAT_010231e8;
@@ -17019,10 +17077,11 @@ struct FUN_00e759c0_cls {
     unsigned char unk5e1;
     unsigned char unk5e2;
     unsigned char unk5e3;
-    void FUN_00e759c0(float* out);
+    void NiDX9Renderer_GetBackgroundColor(float* out);
 };
 // @fnv 0x00e759c0
-void FUN_00e759c0_cls::FUN_00e759c0(float* out) {
+// src: COMMUNITY 0x00e759c0
+void FUN_00e759c0_cls::NiDX9Renderer_GetBackgroundColor(float* out) {
     double k = 1.0f / 255.0f;
     out[3] = (float)(k * unk5e3);
     out[0] = (float)(k * unk5e2);
@@ -17091,8 +17150,8 @@ struct E6F310Rect {
     int y2;
 };
 struct FUN_00e7cdf0_shell {
-    unsigned char FUN_00e7cdf0();
-    unsigned char FUN_00e7ce10();
+    unsigned char NiDX9DepthStencilBufferData_HasValidDepthBuffer();
+    unsigned char NiDX9DepthStencilBufferData_HasValidStencilBuffer();
 };
 struct E6F310Info {
     FUN_00e7cdf0_shell* ContainsNode(const NiRTTI* pkList);
@@ -17202,7 +17261,7 @@ struct E6F310Device {
     virtual long __stdcall SetViewport(const void*);
 };
 struct E6F310Renderer {
-    void FUN_00e6f310(NiRectF_niconsolerenderer* pkRect, unsigned int uiFlags);
+    void NiDX9Renderer_Clear(NiRectF_niconsolerenderer* pkRect, unsigned int uiFlags);
     int unk000;
     int unk004;
     int unk008;
@@ -17755,7 +17814,8 @@ struct E6F310Renderer {
     E6F310Target* m_pkTarget;
 };
 // @fnv 0x00e6f310
-void E6F310Renderer::FUN_00e6f310(NiRectF_niconsolerenderer* pkRect, unsigned int uiFlags)
+// src: COMMUNITY 0x00e6f310
+void E6F310Renderer::NiDX9Renderer_Clear(NiRectF_niconsolerenderer* pkRect, unsigned int uiFlags)
 {
     if (!uiFlags || m_bSkip || !m_pkTarget)
         return;
@@ -17780,8 +17840,8 @@ void E6F310Renderer::FUN_00e6f310(NiRectF_niconsolerenderer* pkRect, unsigned in
     if (pkInfo) {
         FUN_00e7cdf0_shell* pkCaps = pkInfo->ContainsNode(&g_0126f5ac);
         if (pkCaps) {
-            ulClearFlags |= ((uiFlags & 4) && pkCaps->FUN_00e7cdf0()) ? 2 : 0;
-            ulClearFlags |= ((uiFlags & 2) && pkCaps->FUN_00e7ce10()) ? 4 : 0;
+            ulClearFlags |= ((uiFlags & 4) && pkCaps->NiDX9DepthStencilBufferData_HasValidDepthBuffer()) ? 2 : 0;
+            ulClearFlags |= ((uiFlags & 2) && pkCaps->NiDX9DepthStencilBufferData_HasValidStencilBuffer()) ? 4 : 0;
         }
     }
     m_uiVpWidth = m_pkTarget->GetWidth(0);
@@ -17791,7 +17851,7 @@ void E6F310Renderer::FUN_00e6f310(NiRectF_niconsolerenderer* pkRect, unsigned in
 }
 
 class NiRTTI;
-bool __cdecl FUN_0043b300(const NiRTTI* type, NiAVObject* obj);
+bool __cdecl NiObject_IsKindOf(const NiRTTI* type, NiAVObject* obj);
 extern const NiRTTI g_011f4a88;
 extern const NiRTTI g_011f4a70;
 
@@ -17837,9 +17897,9 @@ void __stdcall ApplyPacketUpdate(PacketObj* pPacketObj, PacketTarget* target, in
         if (!(mask & 0x20))
             ((PacketTarget*)target->unk08)->Release();
     } else if (!(mask & 0x10)) {
-        if (FUN_0043b300(&g_011f4a88, (NiAVObject*)pPacketObj))
+        if (NiObject_IsKindOf(&g_011f4a88, (NiAVObject*)pPacketObj))
             pPacketObj->SetA(pPacketObj->unk40, 0);
-        else if (FUN_0043b300(&g_011f4a70, (NiAVObject*)pPacketObj))
+        else if (NiObject_IsKindOf(&g_011f4a70, (NiAVObject*)pPacketObj))
             pPacketObj->SetB(pPacketObj->unk44, pPacketObj->unk48, 0);
     }
 }
@@ -18081,7 +18141,7 @@ void* FUN_00a75f10(); void* FUN_00a7b850();
 
 };
 } // namespace fnv_00e71fe0
-bool FUN_0043b300(const NiRTTI*,NiAVObject*);
+bool NiObject_IsKindOf(const NiRTTI*,NiAVObject*);
 struct Owner108 {
 virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void ReleaseStream(Packet108*,unsigned int);
 };
@@ -18090,11 +18150,11 @@ unsigned int unk00, flags; Owner108* owner; unsigned int unk0c,unk10; bool dynam
 unsigned int activeVertices,vertices,streamCount,unk24; void** streams; unsigned int indexCount,indexOffset; void* indexBuffer; unsigned int unk38,unk3c,stripLengths,triangles,stripCount;void* activeTriangles;void* indices;
 __forceinline void SetVertexCounts(unsigned short av,unsigned short v) { activeVertices=av; vertices=v; }
 __forceinline void SetTriangleCounts(unsigned short at,unsigned short t,void* lens,unsigned short strips,void* idx) { stripLengths=at; triangles=t; activeTriangles=lens; indices=idx; stripCount=strips; }
-bool FUN_00e8eeb0(); void FUN_00e8ef10(unsigned int); void FUN_00e8eee0();
+bool FUN_00e8eeb0(); void NiGeometryBufferData_SetStreamCount(unsigned int); void FUN_00e8eee0();
 };
 struct Geo108 {unsigned int unk00,unk04,unk08,unk0c,unk10,unk14,revision;};
 
-struct VB108 { unsigned int FUN_00e8bf90(); void* FUN_00e8c1e0(fnv_00e71fe0::FUN_00e71fe0_GeometryData*,Geo108*,unsigned short,void*,int);};
+struct VB108 { unsigned int FUN_00e8bf90(); void* NiDX9VertexBufferManager_PackUntransformedVB(fnv_00e71fe0::FUN_00e71fe0_GeometryData*,Geo108*,unsigned short,void*,int);};
 struct IB108 { void* FUN_00e8f200(void*,unsigned int,unsigned int,void*,unsigned int*,unsigned int,unsigned int);};
 extern bool DAT_0126f0d0;
 // NiDX9Renderer packet-building view: managers at 0x8bc/0x8c0; its shared header lacks PrepareGeometryPacket (0x00e71fe0).
@@ -18692,7 +18752,7 @@ bool GeometryPacketBuilder::PrepareGeometryPacket(Packet108* packet, fnv_00e71fe
   activeTriangles = 0;
   stripCount = 1;
   indexCount = (unsigned short)triangles * 3;
- } else if (FUN_0043b300(&DAT_011f4a70,reinterpret_cast<NiAVObject*>(source))) {
+ } else if (NiObject_IsKindOf(&DAT_011f4a70,reinterpret_cast<NiAVObject*>(source))) {
   stripLengths = source->GetNumberOfVertices();
   triangles = source->triangles;
   indices = source->FUN_00a75f10();
@@ -18712,13 +18772,13 @@ bool GeometryPacketBuilder::PrepareGeometryPacket(Packet108* packet, fnv_00e71fe
  if (force) dirty = 0xfff;
  if (cached) {
   if (streams != packet->streamCount) {
-   packet->FUN_00e8ef10(streams);
+   packet->NiGeometryBufferData_SetStreamCount(streams);
    dirty = 0xfff;
   }
  } else {
   Owner108* owner = packet->owner;
   for (unsigned int i=0;i<streams;i++) owner->ReleaseStream(packet,i);
-  packet->FUN_00e8ef10(streams);
+  packet->NiGeometryBufferData_SetStreamCount(streams);
   packet->unk38 = 0;
   dirty = 0xfff;
  }
@@ -18728,7 +18788,7 @@ bool GeometryPacketBuilder::PrepareGeometryPacket(Packet108* packet, fnv_00e71fe
   for (unsigned int i=0; i<streams; i++) {
    void* stream = i < packet->streamCount ? packet->streams[i] : 0;
    if (!shader || !shader->Pack(source,geometry,0,dirty,stream,i,0,0,0)) {
-    if (streams != 1 || !vb->FUN_00e8c1e0(source,geometry,dirty,stream,0)) return false;
+    if (streams != 1 || !vb->NiDX9VertexBufferManager_PackUntransformedVB(source,geometry,dirty,stream,0)) return false;
    }
   }
  }
@@ -18754,7 +18814,8 @@ bool GeometryPacketBuilder::PrepareGeometryPacket(Packet108* packet, fnv_00e71fe
 __declspec(noreturn) void __cdecl AddGeometryToBatch();
 
 // @fnv 0x00e752a0
-void __cdecl FUN_00e752a0() {
+// src: COMMUNITY 0x00e752a0
+void __cdecl NiDX9Renderer_BatchRenderShape() {
     AddGeometryToBatch();
 }
 
@@ -18836,8 +18897,8 @@ bool __stdcall IsAlwaysTrue(void* a1, void* a2, void* a3)
 
 namespace fnv_00e6eea0 {
 extern char DAT_0126f59c, DAT_0126f5ac, DAT_0126f5d8;
-void __cdecl FUN_00e7cc50(int* param1, int param2);
-void __cdecl FUN_00a29680(const char* fmt, const char* text);
+void __cdecl NiDX92DBufferData_ClearRenderTarget(int* param1, int param2);
+void __cdecl Object_DoNothing(const char* fmt, const char* text);
 struct RTTIX { const char* name; const RTTIX* parent; };
 struct DevX;
 class ObjX {
@@ -18861,7 +18922,7 @@ public:
     virtual ObjX* GetRenderTargetBuffer(unsigned int ui) const;
     virtual ObjX* GetDepthAttachment() const;
 };
-bool __cdecl FUN_00e7cca0(DevX* pkDev);
+bool __cdecl NiDX9DepthStencilBufferData_SetNULLDepthStencilTarget(DevX* pkDev);
 inline bool IsKindOfX2(const ObjX* p, const void* r) {
     for (const RTTIX* t = p->GetRTTI(); t; t = t->parent)
         if (t == r) return true;
@@ -18887,21 +18948,22 @@ public:
     TargetX* m_pDefaultRenderTargetGroup;
     TargetX* m_pCurrentRenderTargetGroup;
     TargetX* m_pkCurrOnscreenRenderTargetGroup;
-    bool FUN_00e6eea0(TargetX* pkTarget, unsigned int uiClearMode);
+    bool NiDX9Renderer_BeginUsingRenderTargetGroup(TargetX* pkTarget, unsigned int uiClearMode);
 };
 // @fnv 0x00e6eea0
-bool RendX::FUN_00e6eea0(TargetX* pkTarget, unsigned int uiClearMode)
+// src: EXE 0x00e6eea0
+bool RendX::NiDX9Renderer_BeginUsingRenderTargetGroup(TargetX* pkTarget, unsigned int uiClearMode)
 {
     if (!m_bDeviceLost) {
-    FUN_00e7cc50((int*)m_pDirect3DDevice, 1);
-    FUN_00e7cc50((int*)m_pDirect3DDevice, 2);
-    FUN_00e7cc50((int*)m_pDirect3DDevice, 3);
+    NiDX92DBufferData_ClearRenderTarget((int*)m_pDirect3DDevice, 1);
+    NiDX92DBufferData_ClearRenderTarget((int*)m_pDirect3DDevice, 2);
+    NiDX92DBufferData_ClearRenderTarget((int*)m_pDirect3DDevice, 3);
     for (unsigned int ui = 0; ui < pkTarget->GetBufferCount(); ui++) {
         ObjX* pkObj = pkTarget->GetRenderTargetBuffer(ui);
         BufDataX* pkBuffData = DynCastX(pkObj, &DAT_0126f59c);
         if (pkBuffData && !pkBuffData->SetRenderTarget(m_pDirect3DDevice, ui)) {
             BeginUsingRenderTargetGroup(m_pDefaultRenderTargetGroup, uiClearMode);
-            FUN_00a29680("NiDX9Renderer::BeginUsingRenderTargetGroup> Failed - %s",
+            Object_DoNothing("NiDX9Renderer::BeginUsingRenderTargetGroup> Failed - %s",
                 "Setting an output target failed. Resetting to default target.");
             return false;
         }
@@ -18911,13 +18973,13 @@ bool RendX::FUN_00e6eea0(TargetX* pkTarget, unsigned int uiClearMode)
     if (pkDepth) {
         if (!pkDepth->SetDepthTarget(m_pDirect3DDevice)) {
             BeginUsingRenderTargetGroup(m_pDefaultRenderTargetGroup, uiClearMode);
-            FUN_00a29680("NiDX9Renderer::BeginUsingRenderTargetGroup> Failed - %s",
+            Object_DoNothing("NiDX9Renderer::BeginUsingRenderTargetGroup> Failed - %s",
                 "Setting the depth/stencil buffer failed. Resetting to default target.");
             return false;
         }
-    } else if (!FUN_00e7cca0(m_pDirect3DDevice)) {
+    } else if (!NiDX9DepthStencilBufferData_SetNULLDepthStencilTarget(m_pDirect3DDevice)) {
         BeginUsingRenderTargetGroup(m_pDefaultRenderTargetGroup, uiClearMode);
-        FUN_00a29680("NiDX9Renderer::BeginUsingRenderTargetGroup> Failed - %s",
+        Object_DoNothing("NiDX9Renderer::BeginUsingRenderTargetGroup> Failed - %s",
             "Setting the depth/stencil buffer to NULL failed. Resetting to default target.");
         return false;
     }
@@ -18944,7 +19006,7 @@ struct DevX { DevVT* vt; };
 struct BufDataX { char pad[0xc]; PixFmtX* m_pkRenderPixelFormat; int m_10; SurfX* m_pkSurface; };
 struct BufX { char pad[0x10]; BufDataX* m_pRendererData; };
 struct RectUX { unsigned int m_fMinimumU, m_fMaximumU, m_fMinimumV, m_fMaximumV; };
-void FUN_00a29680(const char* fmt, ...);
+void Object_DoNothing(const char* fmt, ...);
 const char* GetHResultName(long hr);
 class RendX {
 public:
@@ -18952,28 +19014,29 @@ public:
     DevX* m_pDirect3DDevice;
     char pad2[0x6fc - 0x28c];
     bool m_bDeviceLost;
-    bool FUN_00e6f6e0(const BufX* pkSrc, BufX* pkDest, const RectUX* pkSrcRect, unsigned int uiDestX, unsigned int uiDestY);
+    bool NiDX9Renderer_FastCopy(const BufX* pkSrc, BufX* pkDest, const RectUX* pkSrcRect, unsigned int uiDestX, unsigned int uiDestY);
 };
 // Copies a source surface to a destination surface via StretchRect, validating device, renderer data, pixel formats, and surfaces.
 // @fnv 0x00e6f6e0
-bool RendX::FUN_00e6f6e0(const BufX* pkSrc, BufX* pkDest, const RectUX* pkSrcRect, unsigned int uiDestX, unsigned int uiDestY)
+// src: EXE 0x00e6f6e0
+bool RendX::NiDX9Renderer_FastCopy(const BufX* pkSrc, BufX* pkDest, const RectUX* pkSrcRect, unsigned int uiDestX, unsigned int uiDestY)
 {
     if (m_bDeviceLost)
         return false;
     BufDataX* pkSrcData = pkSrc->m_pRendererData;
     BufDataX* pkDestData = pkDest->m_pRendererData;
     if (!pkSrcData || !pkDestData) {
-        FUN_00a29680("NiDX9Renderer::FastCopy> Failed - %s", "No RendererData found");
+        Object_DoNothing("NiDX9Renderer::FastCopy> Failed - %s", "No RendererData found");
         return false;
     }
     if (pkSrcData->m_pkRenderPixelFormat->FUN_00a765c0(pkDestData->m_pkRenderPixelFormat)) {
-        FUN_00a29680("NiDX9Renderer::FastCopy> Failed - %s", "Pixel formats do not match");
+        Object_DoNothing("NiDX9Renderer::FastCopy> Failed - %s", "Pixel formats do not match");
         return false;
     }
     SurfX* pkSrcSurf = pkSrcData->m_pkSurface;
     SurfX* pkDestSurf = pkDestData->m_pkSurface;
     if (!pkSrcSurf || !pkDestSurf) {
-        FUN_00a29680("NiDX9Renderer::FastCopy> Failed - %s", "NULL Surface found");
+        Object_DoNothing("NiDX9Renderer::FastCopy> Failed - %s", "NULL Surface found");
         return false;
     }
     long hr;
@@ -18992,7 +19055,7 @@ bool RendX::FUN_00e6f6e0(const BufX* pkSrc, BufX* pkDest, const RectUX* pkSrcRec
         hr = m_pDirect3DDevice->vt->StretchRect(m_pDirect3DDevice, pkSrcSurf, 0, pkDestSurf, 0, 0);
     }
     if (hr < 0) {
-        FUN_00a29680("NiDX9Renderer::FastCopy> Failed StretchRect - %s", GetHResultName(hr));
+        Object_DoNothing("NiDX9Renderer::FastCopy> Failed StretchRect - %s", GetHResultName(hr));
         return false;
     }
     return true;
@@ -19854,12 +19917,13 @@ public:
             m_630 = 0;
         }
     }
-    void FUN_00e711e0();
+    void NiDX9Renderer_EndBatch();
 };
 
 // Calls callbacks for entries in the list, masks object flags, releases the shader, and clears the list.
 // @fnv 0x00e711e0
-void S00e711e0_Owner::FUN_00e711e0()
+// src: COMMUNITY 0x00e711e0
+void S00e711e0_Owner::NiDX9Renderer_EndBatch()
 {
     S00e711e0_Entry* head = m_620;
     if (head == 0 || m_6fc != 0) goto L_end;
@@ -20817,11 +20881,12 @@ public:
     unsigned int unknown4_field;
     MapEntry** entries;
     unsigned int count;
-    void FUN_00e72cf0(unsigned int key, ReferencePtr value);
+    void SetMapEntryWithReferenceCounting(unsigned int key, ReferencePtr value);
 };
 // Inserts or updates a key/value pair in the hash map, managing reference counts on the stored object.
 // @fnv 0x00e72cf0
-void RendererPacketMap::FUN_00e72cf0(unsigned int key, ReferencePtr value) {
+// src: GUESS 0x00e72cf0 (confidence: high)
+void RendererPacketMap::SetMapEntryWithReferenceCounting(unsigned int key, ReferencePtr value) {
     unsigned int bucket = Bucket(key);
     MapEntry* entry = entries[bucket];
     for (; entry; entry=entry->next) {
@@ -20855,7 +20920,7 @@ void RendererPacketMap::FUN_00e72cf0(unsigned int key, ReferencePtr value) {
 namespace fnv_00e73eb0 {
 extern "C" void* __cdecl memmove(void* pvDst, const void* pvSrc, unsigned int uiSize);
 
-void __cdecl FUN_00a29680(const char* pcMessage);
+void __cdecl Object_DoNothing(const char* pcMessage);
 
 struct PresentParamsE73E {
     unsigned int m_uiBackBufferWidth;
@@ -20900,13 +20965,14 @@ public:
     unsigned char unk000[0x884];
     AdapterListE73E* m_pkAdapterList;
 
-    bool FUN_00e736b0();
-    int FUN_00e73eb0(unsigned int uiWidth, unsigned int uiHeight);
+    bool RendererRecreateHook();
+    int NiDX9Renderer_Recreate_(unsigned int uiWidth, unsigned int uiHeight);
 };
 
 // Saves current present params, sets new back buffer size, calls FUN_00e736b0, and restores params on failure.
 // @fnv 0x00e73eb0
-int DX9RendererE73E::FUN_00e73eb0(unsigned int uiWidth, unsigned int uiHeight)
+// src: COMMUNITY 0x00e73eb0
+int DX9RendererE73E::NiDX9Renderer_Recreate_(unsigned int uiWidth, unsigned int uiHeight)
 {
     AdapterSlotE73E* pkSlot = m_pkAdapterList->GetSlot(0);
     DeviceDescE73E* pkDesc = !pkSlot->m_pkAdapter ? 0 : pkSlot->m_pkAdapter->ContainsNode(&g_0126f5d8);
@@ -20915,11 +20981,11 @@ int DX9RendererE73E::FUN_00e73eb0(unsigned int uiWidth, unsigned int uiHeight)
     memmove(&kSaved, pkParams, sizeof(PresentParamsE73E));
     pkParams->m_uiBackBufferWidth = uiWidth;
     pkParams->m_uiBackBufferHeight = uiHeight;
-    if (!FUN_00e736b0()) {
-        FUN_00a29680("NiDX9Renderer::Recreate> Could not reset device to desired parameters - trying to recover original values\n");
+    if (!RendererRecreateHook()) {
+        Object_DoNothing("NiDX9Renderer::Recreate> Could not reset device to desired parameters - trying to recover original values\n");
         memmove(pkParams, &kSaved, sizeof(PresentParamsE73E));
-        if (!FUN_00e736b0()) {
-            FUN_00a29680("NiDX9Renderer::Recreate> Could not recover original presentation parameters\n");
+        if (!RendererRecreateHook()) {
+            Object_DoNothing("NiDX9Renderer::Recreate> Could not recover original presentation parameters\n");
             return 0;
         }
         return 1;
@@ -20939,11 +21005,12 @@ struct S00e76450_Obj {
     unsigned char flag;
     int unk2c;
     S00e76450_Callback* callback;
-    bool FUN_00e76450(unsigned int x, unsigned int y, int a, int b, int c, int d, int e, int f);
+    bool NiDX9ShaderDeclaration_SetEntryAlt(unsigned int x, unsigned int y, int a, int b, int c, int d, int e, int f);
 };
 
 // @fnv 0x00e76450
-bool S00e76450_Obj::FUN_00e76450(unsigned int x, unsigned int y, int aiUnused, int b, int c, int d, int e, int f)
+// src: COMMUNITY 0x00e76450
+bool S00e76450_Obj::NiDX9ShaderDeclaration_SetEntryAlt(unsigned int x, unsigned int y, int aiUnused, int b, int c, int d, int e, int f)
 {
     if (y >= count) return false;
     if (x >= dim) return false;
@@ -20969,7 +21036,8 @@ void* __cdecl FUN_00ec44d0(void*, const void*, unsigned int);
 
 // Copies or zeroes count destination elements using strides and optional indices, then returns the accumulated element sizes.
 // @fnv 0x00e78f80
-unsigned int __cdecl FUN_00e78f80(Stream_e78910* apStream)
+// src: COMMUNITY 0x00e78f80
+unsigned int __cdecl NiD3DShaderDeclaration_Pack_FloatToFloat(Stream_e78910* apStream)
 {
     unsigned int total = 0;
     unsigned short* indices = apStream->indices;
@@ -21072,7 +21140,8 @@ struct PixRow_00e79760 {
 
 // Converts available 16-bit values to floats, zero-fills remaining output values, and returns the accumulated row sizes.
 // @fnv 0x00e79760
-unsigned int FUN_00e79760(PixRow_00e79760* r)
+// src: COMMUNITY 0x00e79760
+unsigned int NiD3DShaderDeclaration_Pack_UnsignedShortToFloat(PixRow_00e79760* r)
 {
   unsigned int total = 0;
   unsigned int base = r->m_srcBase;
@@ -21123,7 +21192,8 @@ unsigned int FUN_00e79760(PixRow_00e79760* r)
 }
 
 // @fnv 0x00e79d00
-unsigned int FUN_00e79d00(NormalizedStream* s)
+// src: COMMUNITY 0x00e79d00
+unsigned int NiD3DShaderDeclaration_Pack_FloatToUByteColor(NormalizedStream* s)
 {
     unsigned char* source = s->source;
     unsigned short* indices = s->indices;
@@ -21191,13 +21261,14 @@ public:
     int unk000[0x134 / 4];
     PointerListE7B<DepthStencilE7B*> m_kBuffers;
 
-    void* FUN_00e7b0f0(unsigned int uiKey, unsigned int uiFormat, unsigned int uiDepthBits,
+    void* NiDX9SystemDesc_GetNearestDepthStencilFormat(unsigned int uiKey, unsigned int uiFormat, unsigned int uiDepthBits,
         unsigned int uiStencilBits);
 };
 
 // Searches m_kBuffers for a matching key, adjusts the bit-count arguments under conditions, and returns FindBestFullscreenFormat's result.
 // @fnv 0x00e7b0f0
-void* DepthStencilFormatRegistry::FUN_00e7b0f0(unsigned int uiBufferKey, unsigned int uiFormat, unsigned int uiDepthBits,
+// src: COMMUNITY 0x00e7b0f0
+void* DepthStencilFormatRegistry::NiDX9SystemDesc_GetNearestDepthStencilFormat(unsigned int uiBufferKey, unsigned int uiFormat, unsigned int uiDepthBits,
     unsigned int uiStencilBits)
 {
     NiTListItem<DepthStencilE7B*>* kPos = m_kBuffers.GetHeadPos();
@@ -21818,16 +21889,18 @@ struct FUN_00e69610_Obj {
     int unk87C;
     int unk880;
     FUN_00e69610_Packet* m_pAssociatedPacket;
-    void FUN_00e69610();
+    void NiDX9Renderer_GetDefaultDepthStencilBuffer();
 };
 // @fnv 0x00e69610
-void FUN_00e69610_Obj::FUN_00e69610()
+// src: COMMUNITY 0x00e69610
+void FUN_00e69610_Obj::NiDX9Renderer_GetDefaultDepthStencilBuffer()
 {
     m_pAssociatedPacket->v45();
 }
 
 // @fnv 0x00e69e50
-unsigned int FUN_00e69e50(int format)
+// src: GAMEBRYO_LIB 0x00e69e50
+unsigned int NiDX9Renderer_GetPresentInterval(int format)
 {
     switch (format)
     {
@@ -21875,11 +21948,11 @@ struct SrcObj {
 
     StripRecord* GetStrip(int i) { return &strips[i]; }
 
-    unsigned short FUN_00c25db0(unsigned short row);
-    unsigned short FUN_00c25dd0();
-    float FUN_00c25eb0(unsigned short row);
+    unsigned short BSStripPSysData_GetPointCount(unsigned short row);
+    unsigned short BSStripPSysData_GetMaxPointCount();
+    float BSStripPSysData_GetTexCoordDelta(unsigned short row);
     const NiPoint3* GetElementField(unsigned short row, unsigned short col);
-    const NiPoint3* FUN_00c25e90(unsigned short row, unsigned short col);
+    const NiPoint3* BSStripPSysData_GetPointNorms(unsigned short row, unsigned short col);
     const ColorF* GetParticleColor(unsigned short row, unsigned short col);
 };
 
@@ -21893,11 +21966,12 @@ static inline int WrapIndex(int i, int n)
 
 struct MeshGenerator {
     float* WriteVertex(float* pDest, const NiPoint3& kPos, const NiPoint3& kNormal, unsigned int uiColor, float fTextureCoordinateU, float fV, float fW);
-    void FUN_00e6d3a0(float* pDest, unsigned short* pIndex, SrcObj* pSrc, unsigned int* puiVerts, unsigned int* puiIndices);
+    void NiDX9Renderer_PackParticleStrips(float* pDest, unsigned short* pIndex, SrcObj* pSrc, unsigned int* puiVerts, unsigned int* puiIndices);
 };
 
 // @fnv 0x00e6d3a0
-void MeshGenerator::FUN_00e6d3a0(float* pDest, unsigned short* pIndex, SrcObj* pSrc, unsigned int* puiVerts, unsigned int* puiIndices)
+// src: COMMUNITY 0x00e6d3a0
+void MeshGenerator::NiDX9Renderer_PackParticleStrips(float* pDest, unsigned short* pIndex, SrcObj* pSrc, unsigned int* puiVerts, unsigned int* puiIndices)
 {
     const unsigned char* pAlpha = pSrc->alphas;
     unsigned int uiVerts = 0;
@@ -21907,7 +21981,7 @@ void MeshGenerator::FUN_00e6d3a0(float* pDest, unsigned short* pIndex, SrcObj* p
     bool bEffectFlag = false;
 
     for (unsigned short usRow = 0; usRow < usRows; usRow++) {
-        unsigned short m_usPassCountLocal = pSrc->FUN_00c25db0(usRow);
+        unsigned short m_usPassCountLocal = pSrc->BSStripPSysData_GetPointCount(usRow);
         if (m_usPassCountLocal >= 2) {
             if (bEffectFlag) {
                 *pIndex++ = (unsigned short)(uiIndex - 1);
@@ -21917,10 +21991,10 @@ void MeshGenerator::FUN_00e6d3a0(float* pDest, unsigned short* pIndex, SrcObj* p
                 bEffectFlag = true;
             }
 
-            pSrc->FUN_00c25dd0();
-            pSrc->FUN_00c25eb0(usRow);
+            pSrc->BSStripPSysData_GetMaxPointCount();
+            pSrc->BSStripPSysData_GetTexCoordDelta(usRow);
             float fV = 0.0f;
-            float fStep = pSrc->FUN_00c25eb0(usRow);
+            float fStep = pSrc->BSStripPSysData_GetTexCoordDelta(usRow);
 
             unsigned short usBase = (unsigned short)(uiIndex + 2);
             unsigned short usCol = pSrc->strips[usRow].start;
@@ -21928,7 +22002,7 @@ void MeshGenerator::FUN_00e6d3a0(float* pDest, unsigned short* pIndex, SrcObj* p
             for (unsigned short i = 0; i < m_usPassCountLocal; i++) {
                 uiVerts += 4;
                 const NiPoint3* pPos = pSrc->GetElementField(usRow, usCol);
-                const NiPoint3* pNorm = pSrc->FUN_00c25e90(usRow, usCol);
+                const NiPoint3* pNorm = pSrc->BSStripPSysData_GetPointNorms(usRow, usCol);
 
                 unsigned int uiColor = (((fnv_FloatToInt(pSrc->GetParticleColor(usRow, usCol)->a * 255.0) << 8 | fnv_FloatToInt(pSrc->GetParticleColor(usRow, usCol)->r * 255.0)) << 8 | fnv_FloatToInt(pSrc->GetParticleColor(usRow, usCol)->g * 255.0)) << 8) | fnv_FloatToInt(pSrc->GetParticleColor(usRow, usCol)->b * 255.0);
 
@@ -22608,12 +22682,13 @@ struct XRenderer {
     int unk938;
     int unk93c;
     XD3DMatrix m_kFirstShadowMatrix;
-    void FUN_00e6fbb0(const XTransform& kXform, bool bPush);
+    void NiDX9Renderer_SetModelTransform(const XTransform& kXform, bool bPush);
 };
 
 // Converts kXform to m_kFirstShadowMatrix, optionally pushes it to the D3D device, applies it to the render state, and updates m_kCameraUp and m_kCameraRight.
 // @fnv 0x00e6fbb0
-void XRenderer::FUN_00e6fbb0(const XTransform& kXform, bool bPush)
+// src: COMMUNITY 0x00e6fbb0
+void XRenderer::NiDX9Renderer_SetModelTransform(const XTransform& kXform, bool bPush)
 {
     ConvertNiToD3D(&m_kFirstShadowMatrix, &kXform.m_kOrientation, &kXform.m_kTranslation, kXform.m_fScale);
     if (bPush)
@@ -23505,10 +23580,10 @@ struct QuadGeometry {
  unsigned int GetStride() { return count>0 ? strides[0] : 0; }
 };
 struct QuadInput { unsigned int unk00,unk04; QuadData* data; unsigned int unk0c; unsigned short count,unk12; QuadSource* source; unsigned int unk18; QuadGeometry* geometry; };
-struct QuadUploader { unsigned int FUN_00e8c570(QuadGeometry*,unsigned short,QuadPoint*,FUN_004a7800*,QuadPoint*,unsigned short,QuadBuffer*,unsigned int); };
+struct QuadUploader { unsigned int NiDX9VertexBufferManager_PackTransformedVB(QuadGeometry*,unsigned short,QuadPoint*,FUN_004a7800*,QuadPoint*,unsigned short,QuadBuffer*,unsigned int); };
 struct QuadIndexUploader { unsigned int FUN_00e8f200(unsigned short*,unsigned int,unsigned int,unsigned int,unsigned int*,unsigned int,unsigned int); };
 extern bool DAT_0126f0d0;
-void* FUN_00aa1070(unsigned int);
+void* _NiMalloc_00aa1070(unsigned int);
 struct QuadRenderer {
  unsigned int unk000;
  unsigned int unk004;
@@ -24269,12 +24344,12 @@ void QuadRenderer::UploadQuads(QuadInput* input,unsigned short flags)
           texcoords[vertex].y=(j%2)==0 ? u : vbottom;
        }
     }
-    if(!uploader->FUN_00e8c570(geometry,vertices,points,colors,texcoords,flags,buffer,0)) return;
+    if(!uploader->NiDX9VertexBufferManager_PackTransformedVB(geometry,vertices,points,colors,texcoords,flags,buffer,0)) return;
  }
  if(dynamic) {
     if((unsigned int)nindices>indexCapacity) {
        _NiFreeAlias(indices);
-       indices=(unsigned short*)FUN_00aa1070(nindices*2);
+       indices=(unsigned short*)_NiMalloc_00aa1070(nindices*2);
        indexCapacity=nindices;
        unsigned short k=0;
        for(unsigned int v=0;v<nvertices;v+=4) {
@@ -24399,7 +24474,7 @@ bool S72_Renderer::BuildAndRegisterNodes(unsigned int uiUnused, S72_Model* pkMod
         for (unsigned int i = 0; i < ItemUpdateArray; ++i)
         {
             unsigned int uiId = pkPkt->GetAt(i)->unk04;
-            S72_Node* pNode = (S72_Node*)FUN_00aa13e0(0x24);
+            S72_Node* pNode = (S72_Node*)Object_DispatchCommandFour(0x24);
             pNode->unk00 = pkModel;
             pNode->unk04 = 0;
             pNode->unk08 = 0;
@@ -24435,18 +24510,19 @@ struct PackingEntry_cc0 {
 
 struct PackingManager_cc0 {
     void UploadQuads(PackingEntry_cc0* entry, unsigned short flags);
-    void FUN_00e74cc0(PackingEntry_cc0* entry);
+    void NiDX9Renderer_PackScreenTextureGeomBuffer(PackingEntry_cc0* entry);
 };
 
 // For a nonnull entry, releases a stale packet stream, sets update flags to 15 when needed, conditionally calls UploadQuads, and clears entry flags.
 // @fnv 0x00e74cc0
-void PackingManager_cc0::FUN_00e74cc0(PackingEntry_cc0* entry)
+// src: COMMUNITY 0x00e74cc0
+void PackingManager_cc0::NiDX9Renderer_PackScreenTextureGeomBuffer(PackingEntry_cc0* entry)
 {
     if (entry) {
         PackingPacket* packet = entry->packet;
         bool current = packet->FUN_00e8eeb0();
         packet->flags = (unsigned int)&DAT_01400000;
-        packet->FUN_00e8ef10(1);
+        packet->NiGeometryBufferData_SetStreamCount(1);
         unsigned short flags = entry->flags;
 
         if (!current) {
@@ -24498,15 +24574,16 @@ struct Dev74 { virtual void v0(); virtual void v1(); virtual void v2(); virtual 
 struct Sub74 { void FUN_00e8b560(); };
 class Rend74 { public:
     char pad0[0x288]; Dev74* m_pDirect3DDevice; char pad1[0x8c8-0x28c]; Sub74* m_8c8; char pad2[0x900-0x8cc]; List74 m_kList;
-    bool HandleDeviceLost(); void FUN_00e74120();
-    bool FUN_00e74f40();
+    bool HandleDeviceLost(); void NiDX9Renderer_PerformPrecache();
+    bool NiDX9Renderer_BeginScene();
 };
 // If HandleDeviceLost is true, calls recovery methods and BeginScene; on success it empties m_kList, then returns true.
 // @fnv 0x00e74f40
-bool Rend74::FUN_00e74f40()
+// src: COMMUNITY 0x00e74f40
+bool Rend74::NiDX9Renderer_BeginScene()
 {
     if (HandleDeviceLost()) {
-        FUN_00e74120();
+        NiDX9Renderer_PerformPrecache();
         m_8c8->FUN_00e8b560();
         if (m_pDirect3DDevice->BeginScene() < 0) return false;
         unsigned int remaining = reinterpret_cast<const volatile List74&>(m_kList).count;
@@ -24571,21 +24648,22 @@ struct S00e75340_Group {
     void FUN_00e818d0(int);
 };
 struct S00e75340_Alpha {
-    void FUN_00e7db70(S00e75340_Group** pp);
+    void NiTPointerListBase_Remove(S00e75340_Group** pp);
 };
 struct S00e75340_Renderer {
-    void __thiscall FUN_00e75340(S00e75340_Group* volatile group);
+    void __thiscall NiXenonRenderer_PurgeD3DShader(S00e75340_Group* volatile group);
 };
 
 // Calls PrepareForRemoval and FUN_00e818d0(0), then passes the address of the group parameter to the function at offset 0x90c.
 // @fnv 0x00e75340
-void S00e75340_Renderer::FUN_00e75340(S00e75340_Group* volatile group)
+// src: XBOX_PDB 0x00e75340
+void S00e75340_Renderer::NiXenonRenderer_PurgeD3DShader(S00e75340_Group* volatile group)
 {
     S00e75340_Group* g = group;
     g->PrepareForRemoval();
     g->FUN_00e818d0(0);
     S00e75340_Renderer* r = this;
-    reinterpret_cast<S00e75340_Alpha*>(reinterpret_cast<char*>(r) + 0x90c)->FUN_00e7db70((S00e75340_Group**)&group);
+    reinterpret_cast<S00e75340_Alpha*>(reinterpret_cast<char*>(r) + 0x90c)->NiTPointerListBase_Remove((S00e75340_Group**)&group);
 }
 
 struct ShaderDeclStandIn
@@ -24690,7 +24768,8 @@ static inline void S00e783b0_Pad(unsigned char* pucPad, unsigned short usCopy)
 
 // Copies vertex data from source to destination with optional index remapping and padding, returning total bytes written.
 // @fnv 0x00e783b0
-unsigned int __cdecl FUN_00e783b0(StreamCopyInfo* pkInfo)
+// src: COMMUNITY 0x00e783b0
+unsigned int __cdecl NiD3DShaderDeclaration_Pack_UnsignedByteToUnsignedByte(StreamCopyInfo* pkInfo)
 {
     unsigned int uiBytesWritten = 0;
     unsigned short* pusRemap = pkInfo->indices;
@@ -24739,7 +24818,8 @@ unsigned int __cdecl FUN_00e783b0(StreamCopyInfo* pkInfo)
 }
 
 // @fnv 0x00e78a70
-unsigned int FUN_00e78a70(Stream_e78910* apStream)
+// src: COMMUNITY 0x00e78a70
+unsigned int NiD3DShaderDeclaration_Pack_UnsignedShortToUByteColor(Stream_e78910* apStream)
 {
     unsigned short* indices = apStream->indices;
     char* dst = apStream->dst;
@@ -24799,7 +24879,8 @@ struct Stream78 {
 };
 // With a source, copies bytes and zeroes following words; without one, zeroes each element, then returns accumulated element sizes.
 // @fnv 0x00e78e30
-unsigned int FUN_00e78e30(Stream78* pkInfo) {
+// src: COMMUNITY 0x00e78e30
+unsigned int NiD3DShaderDeclaration_Pack_Float_ExtraOutsToZero(Stream78* pkInfo) {
  unsigned int uiTotalBytes=0;
  char* pucSrc=pkInfo->pucSrc;
  unsigned short* pusRemap=pkInfo->pusRemap;
@@ -24961,7 +25042,7 @@ unsigned int __stdcall ConvertGeometryData(unsigned short count, NiGeometryData*
         info.source=skin->packed; break;
     case 4: info.source=geometry->m_pkColor; stride=16; sourceFormat=4; goto setStrides;
     case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
-        info.source=geometry->FUN_00a66960((unsigned short)(desc->semantic-5)); stride=8; sourceFormat=2; goto setStrides;
+        info.source=geometry->NiGeometryData_GetTextureSet((unsigned short)(desc->semantic-5)); stride=8; sourceFormat=2; goto setStrides;
     case 14: {
         NiPoint3* normals=geometry->m_pkNormal;
         if(normals && (geometry->m_usDataFlags&0xf000)) {
@@ -24979,7 +25060,7 @@ unsigned int __stdcall ConvertGeometryData(unsigned short count, NiGeometryData*
     default:
         if(desc->semantic&0x80000000) {
             int channel=desc->semantic&0x7fffffff;
-            if(model->FUN_00a72720(channel, &dest, &sourceFormat, &flag, &geometry, &info.sourceStride, &info.elementSize)) info.source=dest;
+            if(model->NiAdditionalGeometryData_GetDataStream(channel, &dest, &sourceFormat, &flag, &geometry, &info.sourceStride, &info.elementSize)) info.source=dest;
             else { info.source=0; sourceFormat=0; stride=0; goto setStrides; }
         }
         break;
@@ -25004,7 +25085,8 @@ convert:
 
 // Maps key to two output values, writing each through its pointer and setting both to zero for unrecognized keys.
 // @fnv 0x00e7a8b0
-void FUN_00e7a8b0(int key, int* outA, int* outB)
+// src: GAMEBRYO_LIB 0x00e7a8b0
+void NiDX9DeviceDesc_DisplayFormatInfo_GetDepthStencilBPPFromFormat(int key, int* outA, int* outB)
 {
     switch (key)
     {
@@ -25107,9 +25189,9 @@ public:
 extern "C" int fnv_CopyFilePath(char*,unsigned int,const char*,unsigned int);
 extern char DAT_011f4648[256];
 void __cdecl NiOutputDebugString_stub(const char*);
-void __cdecl FUN_00e7f830(int);
-void __cdecl FUN_00e7f840(int);
-void __cdecl FUN_00e7f850(int);
+void __cdecl NiD3DPass_SetMaxTextureBlendStages(int);
+void __cdecl NiD3DPass_SetMaxSimultaneousTextures(int);
+void __cdecl NiD3DPass_SetMaxSamplers(int);
 extern bool DAT_0126f0d1;
 extern bool DAT_0126f0d2;
 extern unsigned int DAT_0126f050;
@@ -25752,7 +25834,7 @@ public:
     unsigned int m_auiShaderVer7;
     unsigned int m_auiShaderVer8;
     unsigned int m_auiShaderVer9;
-    bool FUN_00e6c240(void* pkDevice);
+    bool NiDX9Renderer_InitializeDeviceCaps(void* pkDevice);
     __forceinline void InitSamplerGlobals()
     {
     bool bAniso = (m_kDeviceCapabilities.TextureFilterCaps & 0x400) != 0;
@@ -25799,7 +25881,8 @@ public:
 
 // Queries device caps, validates multi-texture support, stores capability flags and shader versions, then initializes sampler globals.
 // @fnv 0x00e6c240
-bool DeviceCapabilityState::FUN_00e6c240(void* pkDevice)
+// src: COMMUNITY 0x00e6c240
+bool DeviceCapabilityState::NiDX9Renderer_InitializeDeviceCaps(void* pkDevice)
 {
     if (m_pDirect3DDevice->GetDeviceCaps(&m_kDeviceCapabilities) < 0)
     {
@@ -25847,12 +25930,12 @@ bool DeviceCapabilityState::FUN_00e6c240(void* pkDevice)
     m_auiShaderVer8 = 0xfffe0000;
     m_auiShaderVer9 = 2;
 
-    FUN_00e7f830(m_kDeviceCapabilities.MaxTextureBlendStages);
-    FUN_00e7f840(m_kDeviceCapabilities.MaxSimultaneousTextures);
+    NiD3DPass_SetMaxTextureBlendStages(m_kDeviceCapabilities.MaxTextureBlendStages);
+    NiD3DPass_SetMaxSimultaneousTextures(m_kDeviceCapabilities.MaxSimultaneousTextures);
     if (m_uiSecondRendererStateValue >= 0xffff0200)
-        FUN_00e7f850(16);
+        NiD3DPass_SetMaxSamplers(16);
     else
-        FUN_00e7f850(m_kDeviceCapabilities.MaxTextureBlendStages);
+        NiD3DPass_SetMaxSamplers(m_kDeviceCapabilities.MaxTextureBlendStages);
 
     InitSamplerGlobals();
     return true;
@@ -25889,10 +25972,10 @@ struct CameraMgrView {
     virtual void SetRange(float, float);
     virtual bool IsLeftHanded();
 };
-NiPoint3* __stdcall FUN_00ee6e34(NiPoint3*, const NiPoint3*, const D3DMATRIX_Custom*);
-NiPoint3* __stdcall FUN_00ee6dec(NiPoint3*, const NiPoint3*);
-NiPoint3* __stdcall FUN_00ee6df8(NiPoint3*, const NiPoint3*, const D3DMATRIX_Custom*);
-void __stdcall FUN_00ee6de0(D3DMATRIX_Custom*, const D3DMATRIX_Custom*, const D3DMATRIX_Custom*);
+NiPoint3* __stdcall D3DXVec4Transform_0(NiPoint3*, const NiPoint3*, const D3DMATRIX_Custom*);
+NiPoint3* __stdcall D3DXVec3Normalize_00ee6dec(NiPoint3*, const NiPoint3*);
+NiPoint3* __stdcall D3DXVec3TransformCoord_00ee6df8(NiPoint3*, const NiPoint3*, const D3DMATRIX_Custom*);
+void __stdcall D3DXMatrixMultiply_00ee6de0(D3DMATRIX_Custom*, const D3DMATRIX_Custom*, const D3DMATRIX_Custom*);
 inline float dotView(const NiPoint3& a, const NiPoint3& b) { return a.x*b.x+a.y*b.y+a.z*b.z; }
 struct CameraRenderer18 {
     unsigned int unk000;
@@ -26499,10 +26582,11 @@ struct CameraRenderer18 {
     float proj[4][4];
     D3DMATRIX_Custom viewProj;
     float inverse[4][4];
-    void FUN_00e6c780(const NiPoint3*, const NiPoint3*, const NiPoint3*, const NiPoint3*, const NiFrustum*, const NiRect_Custom_niconsolerenderer*);
+    void NiDX9Renderer_SetupCamera(const NiPoint3*, const NiPoint3*, const NiPoint3*, const NiPoint3*, const NiFrustum*, const NiRect_Custom_niconsolerenderer*);
 };
 // @fnv 0x00e6c780
-void CameraRenderer18::FUN_00e6c780(const NiPoint3* position, const NiPoint3* direction, const NiPoint3* up, const NiPoint3* right, const NiFrustum* frustum, const NiRect_Custom_niconsolerenderer* viewport)
+// src: COMMUNITY 0x00e6c780
+void CameraRenderer18::NiDX9Renderer_SetupCamera(const NiPoint3* position, const NiPoint3* direction, const NiPoint3* up, const NiPoint3* right, const NiFrustum* frustum, const NiRect_Custom_niconsolerenderer* viewport)
 {
     if (disabled) return;const NiFrustum* f=frustum;
 
@@ -26571,9 +26655,9 @@ void CameraRenderer18::FUN_00e6c780(const NiPoint3* position, const NiPoint3* di
         CameraVector18 corner18, clipPlane18;
         worldNormal18.x=0; worldNormal18.y=0; worldNormal18.w=0; worldNormal18.z=1;
         clipOrigin18.x=0; clipOrigin18.y=0; clipOrigin18.z=DAT_0126efd4;
-        FUN_00ee6e34((NiPoint3*)&clipNormal18,(const NiPoint3*)&worldNormal18,(const D3DMATRIX_Custom*)view);
-        FUN_00ee6dec((NiPoint3*)&clipNormal18,(const NiPoint3*)&clipNormal18);
-        FUN_00ee6df8((NiPoint3*)&clipPosition18,(const NiPoint3*)&clipOrigin18,(const D3DMATRIX_Custom*)view);
+        D3DXVec4Transform_0((NiPoint3*)&clipNormal18,(const NiPoint3*)&worldNormal18,(const D3DMATRIX_Custom*)view);
+        D3DXVec3Normalize_00ee6dec((NiPoint3*)&clipNormal18,(const NiPoint3*)&clipNormal18);
+        D3DXVec3TransformCoord_00ee6df8((NiPoint3*)&clipPosition18,(const NiPoint3*)&clipOrigin18,(const D3DMATRIX_Custom*)view);
         clipPlane18.x=clipNormal18.x; clipPlane18.y=clipNormal18.y; clipPlane18.z=clipNormal18.z;
         clipPlane18.w=-dotView(*(NiPoint3*)&clipPosition18,*(NiPoint3*)&clipNormal18);
         corner18.x=(clipPlane18.x>0?1.0f:clipPlane18.x<0?DAT_01012054:0.0f)/proj[0][0];
@@ -26593,7 +26677,7 @@ void CameraRenderer18::FUN_00e6c780(const NiPoint3* position, const NiPoint3* di
     vp.Height=(unsigned long)(screenHeight*(viewport->m_fMinimumV-viewport->m_fMaximumV));
     vp.MinZ=0; vp.MaxZ=1;
     device->SetViewport(&vp);
-    FUN_00ee6de0(&viewProj,(const D3DMATRIX_Custom*)view,(const D3DMATRIX_Custom*)proj);
+    D3DXMatrixMultiply_00ee6de0(&viewProj,(const D3DMATRIX_Custom*)view,(const D3DMATRIX_Custom*)proj);
     manager->SetRange(f->nearPlane,f->farPlane);
 }
 
@@ -26981,7 +27065,7 @@ struct BridgeFields {
 
 
 struct NPFNew : NiPixelFormat {
-    static void* operator new(unsigned int size) { return g_memoryManager.FUN_00aa3e40(size); }
+    static void* operator new(unsigned int size) { return g_memoryManager.Game_DoHeapAlloc(size); }
     NPFNew(const NiPixelFormat& o) : NiPixelFormat(o) {}
 };
 
@@ -27227,7 +27311,7 @@ struct Map610 {
     bool __thiscall FUN_00a53c30(unsigned int uiKey, unsigned int* puiOut);
     void __thiscall InsertOrUpdate(unsigned int uiKey, void* pkObj);
 };
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct ThisObj {
     unsigned int unk000;
@@ -27652,7 +27736,7 @@ bool __thiscall ThisObj::BuildPacketEntries(void* a1, void* pkModel, Arg3* pkArg
                         for (unsigned int i = 0; i < uiStreamCount; i++) {
                             StreamObj* pkStream = pkPacket->GetStream(i);
                             unsigned int uiKey = pkStream->key;
-                            NewObj* pkObj = (NewObj*)FUN_00aa13e0(0x24);
+                            NewObj* pkObj = (NewObj*)Object_DispatchCommandFour(0x24);
                             pkObj->Init(pkModel, pkArg3, &pkEntries[n], pkGeom, a5, a6, pkPacket, i);
                             unsigned int uiOut;
                             pkObj->f20 = map.FUN_00a53c30(uiKey, &uiOut) ? uiOut : 0;
@@ -27755,7 +27839,7 @@ struct InitState {
  virtual void SetDepth(void*);
 };
 struct InitSmartState { InitState* pointer; __forceinline InitSmartState(InitState* p) { FUN_00b6aed0(p); } InitSmartState(const InitSmartState&); void FUN_00b6aed0(InitState*); };
-struct InitStateMap { void FUN_00e72cf0(unsigned, InitSmartState); };
+struct InitStateMap { void SetMapEntryWithReferenceCounting(unsigned, InitSmartState); };
 struct InitDevice { void* table; };
 struct InitBuffer { unsigned field0, valid; static InitBuffer* Valid(InitBuffer* b) { return b->valid ? b : 0; } static InitBuffer* Valid2(InitBuffer* b) { if(b->valid) return b; return 0; } };
 struct InitAdapter {
@@ -28086,8 +28170,8 @@ struct InitVertexTable {
 };
 struct InitTextureManager { InitTextureManager* FUN_00e8d0e0(InitDevice*); };
 struct InitLightManager { InitLightManager* FUN_00e8fb20(InitDevice*); };
-struct InitGeometryManager { InitGeometryManager* FUN_00e90a80(InitRenderer*); };
-struct InitShaderManager { InitShaderManager* FUN_00e8bae0(InitVertexManager*, InitDevice*); };
+struct InitGeometryManager { InitGeometryManager* NiDX9TextureManager_NiDX9TextureManager(InitRenderer*); };
+struct InitShaderManager { InitShaderManager* NiDX9LightManager_NiDX9LightManager(InitVertexManager*, InitDevice*); };
 struct InitObject {
 
  virtual void slot0();
@@ -28110,7 +28194,7 @@ struct InitObject {
  virtual void slot17();
  virtual void slot18();
  virtual void Initialize();
- InitObject* FUN_00e909e0();
+ InitObject* NiDX9ErrorShader_NiDX9ErrorShader();
 };
 
 struct InitPoint { float x,y,z; };
@@ -28935,39 +29019,40 @@ struct InitRenderer {
  unsigned fieldac8;
  unsigned fieldacc;
  bool tall;
- bool FUN_00e6bf50(unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,InitPresent*);
- bool FUN_00e6c240(InitPresent*);
+ bool NiDX9Renderer_InitializePresentParams(unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,unsigned,InitPresent*);
+ bool NiDX9Renderer_InitializeDeviceCaps(InitPresent*);
  bool InitializeRendererResources();
  void AssignRefObject(InitObject*);
- bool FUN_00e72e60(unsigned width,unsigned height,unsigned options,unsigned deviceWindow,unsigned focusWindow,unsigned adapterIndex,unsigned deviceChoice,unsigned p8,unsigned p9,unsigned p10,unsigned p11,unsigned p12,unsigned p13,unsigned p14);
+ bool NiXenonRenderer_Create(unsigned width,unsigned height,unsigned options,unsigned deviceWindow,unsigned focusWindow,unsigned adapterIndex,unsigned deviceChoice,unsigned p8,unsigned p9,unsigned p10,unsigned p11,unsigned p12,unsigned p13,unsigned p14);
 };
 // @fnv 0x00e72e60
-bool InitRenderer::FUN_00e72e60(unsigned width,unsigned height,unsigned options,unsigned deviceWindow,unsigned focusWindow,unsigned adapterIndex,unsigned deviceChoice,unsigned p8,unsigned p9,unsigned p10,unsigned p11,unsigned p12,unsigned aiBackBufferCountOut,unsigned p14)
+// src: XBOX_PDB 0x00e72e60
+bool InitRenderer::NiXenonRenderer_Create(unsigned width,unsigned height,unsigned options,unsigned deviceWindow,unsigned focusWindow,unsigned adapterIndex,unsigned deviceChoice,unsigned p8,unsigned p9,unsigned p10,unsigned p11,unsigned p12,unsigned aiBackBufferCountOut,unsigned p14)
 {
  fielda98=width; fielda9c=height; fieldaa0=options; fieldaa4=deviceWindow; fieldaa8=focusWindow; fieldaac=adapterIndex;
  fieldab0=deviceChoice; fieldab4=p8; fieldab8=p9; fieldabc=p10; fieldac0=p11; fieldac4=p12; fieldac8=aiBackBufferCountOut; fieldacc=p14;
  DAT_0126efd4=0.0f; DAT_0126efd1=0;
- FUN_00e69a60();
+ NiDX9SystemDesc_Get();
  field5c4=adapterIndex; field3bc=deviceWindow; field3c0=focusWindow;
  if (!SetModeFlags(deviceChoice,&field5c8,&field5cc)) {
-  fnv_CopyFilePath(DAT_011f4648,256,DAT_010ee20c,255); FUN_00a29680(DAT_010ee1c8); return false;
+  fnv_CopyFilePath(DAT_011f4648,256,DAT_010ee20c,255); Object_DoNothing(DAT_010ee1c8); return false;
  }
  if(options&0x40) field5cc|=2;
  if(options&0x20) field5cc|=4;
  adapter=DAT_0126f0e8->GetAt(field5c4);
- if(!adapter) { fnv_CopyFilePath(DAT_011f4648,256,DAT_010ee1a0,255); FUN_00a29680(DAT_010ee160); return false; }
+ if(!adapter) { fnv_CopyFilePath(DAT_011f4648,256,DAT_010ee1a0,255); Object_DoNothing(DAT_010ee160); return false; }
  buffer=adapter->GetBuffer(field5c8);
- if(!buffer) { fnv_CopyFilePath(DAT_011f4648,256,DAT_010ee20c,255); FUN_00a29680(DAT_010ee1c8); return false; }
+ if(!buffer) { fnv_CopyFilePath(DAT_011f4648,256,DAT_010ee20c,255); Object_DoNothing(DAT_010ee1c8); return false; }
  InitPresent present;
  void* color;
  void* depth;
  FUN_00ec61c0(&present,0,sizeof(present));
  while(true) {
-  FUN_00a29680(DAT_010ee118);
+  Object_DoNothing(DAT_010ee118);
   InitBuffer* pBuffer=DAT_0126f0e8->GetAt(field5c4)->GetBuffer2(field5c8);
   if(!pBuffer) {
-   fnv_CopyFilePath(DAT_011f4648,256,DAT_010ee0e8,255); FUN_00a29680(DAT_010ee0ac);
-  } else if(FUN_00e6bf50(field3bc,width,height,options,p12,p8,p9,aiBackBufferCountOut,p11,p14,p10,&present)) {
+   fnv_CopyFilePath(DAT_011f4648,256,DAT_010ee0e8,255); Object_DoNothing(DAT_010ee0ac);
+  } else if(NiDX9Renderer_InitializePresentParams(field3bc,width,height,options,p12,p8,p9,aiBackBufferCountOut,p11,p14,p10,&present)) {
    aiBackBufferCountOut=present.backBufferCount;
    InitDisplay displayMode;
    memset(&displayMode,0,sizeof(displayMode));
@@ -28984,7 +29069,7 @@ bool InitRenderer::FUN_00e72e60(unsigned width,unsigned height,unsigned options,
    if(result>=0) break;
    flag6fc=0;
    if(aiBackBufferCountOut!=present.backBufferCount) {
-    FUN_00a29680(DAT_010ee048);
+    Object_DoNothing(DAT_010ee048);
     if(DAT_0126f0d0) {
      InitDevice* pCreatedDevice;
      result=((InitD3D*)DAT_0126f0d8)->table->CreateDeviceEx(DAT_0126f0d8,field5c4,field5c8,field3c0,field5cc,&present,present.windowed ? 0 : &displayMode,&pCreatedDevice);
@@ -28995,15 +29080,15 @@ bool InitRenderer::FUN_00e72e60(unsigned width,unsigned height,unsigned options,
     if(result>=0) break;
    }
   }
-  if(deviceChoice==4) { FUN_00e69ad0(DAT_010ededc); FUN_00a29680(DAT_010ede88); return false; }
+  if(deviceChoice==4) { NiDX9Renderer_SetLastErrorString(DAT_010ededc); Object_DoNothing(DAT_010ede88); return false; }
   ++deviceChoice;
-  if(deviceChoice==4) { FUN_00a29680(DAT_010ede30); return false; }
-  FUN_00a29680(DAT_010edfe0);
-  if(!SetModeFlags(deviceChoice,&field5c8,&field5cc)) { FUN_00e69ad0(DAT_010ee20c); FUN_00a29680(DAT_010ee1c8); return false; }
+  if(deviceChoice==4) { Object_DoNothing(DAT_010ede30); return false; }
+  Object_DoNothing(DAT_010edfe0);
+  if(!SetModeFlags(deviceChoice,&field5c8,&field5cc)) { NiDX9Renderer_SetLastErrorString(DAT_010ee20c); Object_DoNothing(DAT_010ee1c8); return false; }
  }
  {
- if(!device) { FUN_00e69ad0(DAT_010edfac); FUN_00a29680(DAT_010edf60); return false; }
- if(!FUN_00e6c240(&present)) return false;
+ if(!device) { NiDX9Renderer_SetLastErrorString(DAT_010edfac); Object_DoNothing(DAT_010edf60); return false; }
+ if(!NiDX9Renderer_InitializeDeviceCaps(&present)) return false;
  flag5d4=(field5cc&0x40)==0;
  flag5d5=(field5cc&0x80)!=0;
  color=0; depth=0;
@@ -29012,23 +29097,23 @@ bool InitRenderer::FUN_00e72e60(unsigned width,unsigned height,unsigned options,
  state=CreateShaderLevel(1,this);
  state->SetColor(color,0);
  state->SetDepth(depth);
- stateMap.FUN_00e72cf0(deviceWindow,InitSmartState(state));
+ stateMap.SetMapEntryWithReferenceCounting(deviceWindow,InitSmartState(state));
  field5d0=GetValueForIndex(MapCodeToIndex(state->GetFormat(0)->format));
- if(!InitializeRendererResources()) { FUN_00a29680(DAT_010edf10); return false; }
+ if(!InitializeRendererResources()) { Object_DoNothing(DAT_010edf10); return false; }
  vertices=CreateRenderer(this,&field28c,1);
  FUN_00e81940(this);
- InitTextureManager* textureMem=(InitTextureManager*)FUN_00aa13e0(0x100);
+ InitTextureManager* textureMem=(InitTextureManager*)Object_DispatchCommandFour(0x100);
  textures=textureMem ? textureMem->FUN_00e8d0e0(device) : 0;
- InitLightManager* lightMem=(InitLightManager*)FUN_00aa13e0(0x4c);
+ InitLightManager* lightMem=(InitLightManager*)Object_DispatchCommandFour(0x4c);
  lights=lightMem ? lightMem->FUN_00e8fb20(device) : 0;
- InitGeometryManager* geomMem=(InitGeometryManager*)FUN_00aa13e0(0x10);
- geometry=geomMem ? geomMem->FUN_00e90a80(this) : 0;
+ InitGeometryManager* geomMem=(InitGeometryManager*)Object_DispatchCommandFour(0x10);
+ geometry=geomMem ? geomMem->NiDX9TextureManager_NiDX9TextureManager(this) : 0;
  buffers=FUN_00e88eb0(device,textures);
  buffers->FUN_00e88c20((GetFlags()&2)!=0);
  field8b0=buffers->GetBuffer(1);
  field8b4=buffers->GetBuffer(2);
- InitShaderManager* shaderMem=(InitShaderManager*)FUN_00aa13e0(0x23c);
- shaders=shaderMem ? shaderMem->FUN_00e8bae0(vertices,device) : 0;
+ InitShaderManager* shaderMem=(InitShaderManager*)Object_DispatchCommandFour(0x23c);
+ shaders=shaderMem ? shaderMem->NiDX9LightManager_NiDX9LightManager(vertices,device) : 0;
  if(caps->field30) ((InitVertexTable*)vertices->table)->Enable(vertices,1);
  currentState=state;
  NiFrustum frustum;
@@ -29043,8 +29128,8 @@ bool InitRenderer::FUN_00e72e60(unsigned width,unsigned height,unsigned options,
  SetCamera(&DAT_011f426c,&DAT_011a946c,&DAT_011a9478,&DAT_011a9484,&frustum,&viewport);
  currentState=0; activeState=0;
  NiShaderFactory::GetInstance();
- InitObject* objectMem=(InitObject*)FUN_00aa13e0(0x40);
- InitObject* object=objectMem ? objectMem->FUN_00e909e0() : 0;
+ InitObject* objectMem=(InitObject*)Object_DispatchCommandFour(0x40);
+ InitObject* object=objectMem ? objectMem->NiDX9ErrorShader_NiDX9ErrorShader() : 0;
  object->Initialize();
  AssignRefObject(object);
  return true;
@@ -29095,7 +29180,8 @@ struct CallbackRegistry { int unk00; CallbackBucket** buckets; };
 extern void* DAT_0126f550;
 // Selects a callback by type and mode, then stores it in the CallbackRegistry bucket for that type.
 // @fnv 0x00e78560
-void __cdecl FUN_00e78560(unsigned int type, unsigned int mode) {
+// src: COMMUNITY 0x00e78560
+void __cdecl NiD3DShaderDeclaration_SetDefaultPackingFunction(unsigned int type, unsigned int mode) {
  CallbackBucket* bucket = static_cast<CallbackRegistry*>(DAT_0126f550)->buckets[type];
  int callback = 0;
  if (!mode) { callback=reinterpret_cast<int>(cb_e7cd40); bucket->callbacks.SetAt(0,callback); return; }
@@ -29174,7 +29260,8 @@ struct StreamE788 {
 };
 // Copies one 32-bit value per element, using optional indices or writing -1 when the source is null; returns an accumulated count.
 // @fnv 0x00e78880
-int __cdecl FUN_00e78880(StreamE788* pkStream)
+// src: COMMUNITY 0x00e78880
+int __cdecl NiD3DShaderDeclaration_Pack_UnsignedLongToUByteColor(StreamE788* pkStream)
 {
     char* pcDst = pkStream->m_pcDst;
     unsigned short* pusIndices = pkStream->m_pusIndices;
@@ -29231,7 +29318,8 @@ struct CopyStreamData {
 };
 
 // @fnv 0x00e78d50
-int __cdecl FUN_00e78d50(CopyStreamData* apStreamData) {
+// src: COMMUNITY 0x00e78d50
+int __cdecl NiD3DShaderDeclaration_Pack_Float_DropIns(CopyStreamData* apStreamData) {
     CopyFill zero = {};
     int total=zero.value;
     char* destination = apStreamData->unk2C;
@@ -29348,7 +29436,7 @@ struct ParticleRenderer {
     int unk640; int unk644; int unk648;
     ParticlePoint m_kU;
     ParticlePoint m_kV;
-    void FUN_00e6ab40(
+    void NiDX9Renderer_PackPoints(
         ParticleVertex* pDestVertices,
         const ParticlePoint* pPositions,
         const ColorA* pColors,
@@ -29360,7 +29448,8 @@ struct ParticleRenderer {
     );
 };
 // @fnv 0x00e6ab40
-void ParticleRenderer::FUN_00e6ab40(
+// src: COMMUNITY 0x00e6ab40
+void ParticleRenderer::NiDX9Renderer_PackPoints(
     ParticleVertex* pDestVertices,
     const ParticlePoint* pPositions,
     const ColorA* pColors,
@@ -29592,7 +29681,7 @@ struct S00e69ea0_Vtx {
 struct S00e69ea0_Rnd : StandIn_Renderer {
     const S00e69ea0_Pt& GetRight() const { return *(const S00e69ea0_Pt*)&m_kScreenRight; }
     const S00e69ea0_Pt& GetUp() const { return *(const S00e69ea0_Pt*)&m_kScreenUp; }
-    void FUN_00e69ea0(S00e69ea0_Vtx* pkVerts, const S00e69ea0_Pt* pkCenters,
+    void NiDX9Renderer_PackPointsSubTexture(S00e69ea0_Vtx* pkVerts, const S00e69ea0_Pt* pkCenters,
         const S00e69ea0_Color* pkColors, const float* pfWidths,
         const float* pfHeights, const float* pfAngles, unsigned short m_usPassCountLocal);
 };
@@ -29601,7 +29690,8 @@ static __forceinline S00e69ea0_Pt AddLast(const S00e69ea0_Pt& p,const S00e69ea0_
 
 static __forceinline void WriteQuadVertex(S00e69ea0_Vtx* v, const S00e69ea0_Pt& p, const S00e69ea0_Pt& n, unsigned int c, const float& u, const float& w) { v->kPos=p; v->uiColor=c; v->kNormal=n; v->fTextureCoordinateU=u; v->fV=w; }
 // @fnv 0x00e69ea0
-void S00e69ea0_Rnd::FUN_00e69ea0(S00e69ea0_Vtx* pkVerts, const S00e69ea0_Pt* pkCenters,
+// src: COMMUNITY 0x00e69ea0
+void S00e69ea0_Rnd::NiDX9Renderer_PackPointsSubTexture(S00e69ea0_Vtx* pkVerts, const S00e69ea0_Pt* pkCenters,
     const S00e69ea0_Color* pkColors, const float* pfWidths,
     const float* pfHeights, const float* pfAngles, unsigned short m_usPassCountLocal)
 {
@@ -30008,7 +30098,7 @@ struct StripStream {
 struct StripRendererData {
     unsigned int GetStride(unsigned int stream) const { return stream < streamCount ? strides[stream] : 0; }
     void SetVertexCount(unsigned int count) { maxVertices = vertexCount = count; }
-    void FUN_00e8ef10(unsigned int);
+    void NiGeometryBufferData_SetStreamCount(unsigned int);
     void SetComPointer(unsigned int);
     unsigned int unk000;
     unsigned int flags;
@@ -30033,8 +30123,8 @@ struct StripRendererData {
     unsigned int unk50;
 };
 struct StripGeometryData {
-    unsigned short FUN_00c25db0(unsigned int);
-    unsigned short FUN_00c25dd0();
+    unsigned short BSStripPSysData_GetPointCount(unsigned int);
+    unsigned short BSStripPSysData_GetMaxPointCount();
     unsigned int unk000;
     unsigned int unk004;
     unsigned short fullCount; unsigned short unk0A;
@@ -30103,17 +30193,17 @@ struct StripGeometry {
 };
 struct StripPackManager { void ProcessCollector(void*,StripGeometryData*,void*,void*,void*,void*); };
 struct StripVertexManager {
-    void FUN_00e8bfa0(StripRendererData*,bool);
-    void* FUN_00e8bff0(void*,unsigned int,unsigned int,unsigned int);
+    void NiDX9VertexBufferManager_AllocateBufferSpace(StripRendererData*,bool);
+    void* NiDX9VertexBufferManager_LockVB(void*,unsigned int,unsigned int,unsigned int);
     void CopyAndRelease(void*);
 };
 struct StripIndexManager { StripIndexBuffer* AcquireCachedResource(unsigned int,unsigned int,unsigned int,unsigned int); };
 struct StripRenderer {
     void DrawExpanded(StripRendererData*, StripIndexBuffer*, unsigned int, void*, StripGeometryData*, StripStream*);
-    unsigned int FUN_00e69790();
-    unsigned int FUN_00e696a0();
-    void FUN_00e6d3a0(void*,void*,StripGeometryData*,unsigned int&,unsigned int&);
-    void FUN_00e70720(StripGeometry*);
+    unsigned int NiDX9Renderer_GetDecl_Particles();
+    unsigned int NiDX9Renderer_GetDecl_ParticlesSubTexture();
+    void NiDX9Renderer_PackParticleStrips(void*,void*,StripGeometryData*,unsigned int&,unsigned int&);
+    void NiDX9Renderer_RenderLines(StripGeometry*);
 
     unsigned int unk000;
     unsigned int unk004;
@@ -30676,7 +30766,8 @@ struct StripRenderer {
 };
 // Renders a strip geometry by computing vertex/index counts, configuring the renderer data and render state, and submitting the draw call.
 // @fnv 0x00e70720
-void StripRenderer::FUN_00e70720(StripGeometry* geometry)
+// src: COMMUNITY 0x00e70720
+void StripRenderer::NiDX9Renderer_RenderLines(StripGeometry* geometry)
 {
     if (disabled) return;
     if ((properties->flags->flags & 1) && properties->alpha->alpha <= 0.0f) return;
@@ -30691,7 +30782,7 @@ void StripRenderer::FUN_00e70720(StripGeometry* geometry)
     unsigned int numIndices = 0;
     bool hasStrip = false;
     for (unsigned int i = 0; i < count; ++i) {
-        unsigned short length = data->FUN_00c25db0(i);
+        unsigned short length = data->BSStripPSysData_GetPointCount(i);
         if (length >= 2) {
             numVertices += 4 * length;
             if (hasStrip) numIndices += 2;
@@ -30703,7 +30794,7 @@ void StripRenderer::FUN_00e70720(StripGeometry* geometry)
     if (!numVertices || !shader) return;
     packManager->ProcessCollector(bufferState,data,0,0,0,0);
     StripRendererData* rd = data->rendererData;
-    rd->FUN_00e8ef10(1);
+    rd->NiGeometryBufferData_SetStreamCount(1);
     rd->maxPrimitives = rd->primitiveCount = numIndices - 2;
     rd->maxVertices = rd->vertexCount = numVertices;
     rd->unk50 = 0;
@@ -30715,12 +30806,12 @@ void StripRenderer::FUN_00e70720(StripGeometry* geometry)
     renderState->SetTransform(transform);
     if (colors) {
         if (rd->streamCount > 0) rd->strides[0] = 40;
-        renderState->SetFormat(FUN_00e69790(),false);
-        rd->SetComPointer(FUN_00e69790());
+        renderState->SetFormat(NiDX9Renderer_GetDecl_Particles(),false);
+        rd->SetComPointer(NiDX9Renderer_GetDecl_Particles());
     } else {
         if (rd->streamCount > 0) rd->strides[0] = 36;
-        renderState->SetFormat(FUN_00e696a0(),false);
-        rd->SetComPointer(FUN_00e696a0());
+        renderState->SetFormat(NiDX9Renderer_GetDecl_ParticlesSubTexture(),false);
+        rd->SetComPointer(NiDX9Renderer_GetDecl_ParticlesSubTexture());
     }
     rd->primitiveType = 5;
     shader->v90();
@@ -30729,13 +30820,13 @@ void StripRenderer::FUN_00e70720(StripGeometry* geometry)
     shader->v80(properties);
     shader->v84(properties);
     shader->v88(properties,true);
-    vertexManager->FUN_00e8bfa0(rd,false);
+    vertexManager->NiDX9VertexBufferManager_AllocateBufferSpace(rd,false);
     StripStream* stream;
     if (rd->streamCount > 0) stream = rd->streams[0];
     else stream = 0;
     if (!stream->GetBuffer()) return;
     unsigned int vertexBytes = colors ? numVertices * 40 : numVertices * 36;
-    void* vertices = vertexManager->FUN_00e8bff0(stream->GetBuffer(),stream->GetOffset(),vertexBytes,stream->GetSize());
+    void* vertices = vertexManager->NiDX9VertexBufferManager_LockVB(stream->GetBuffer(),stream->GetOffset(),vertexBytes,stream->GetSize());
     if (!vertices) return;
     StripIndexBuffer* indices = rd->indexBuffer;
     unsigned int indexBytes = numIndices * 2;
@@ -30744,7 +30835,7 @@ void StripRenderer::FUN_00e70720(StripGeometry* geometry)
         unsigned int total = 0;
         bool bAnyStrip = false;
         for (unsigned int i = 0; i < uiFullCount; ++i) {
-            unsigned short length = data->FUN_00c25dd0();
+            unsigned short length = data->BSStripPSysData_GetMaxPointCount();
             if (length >= 2) {
                 if (bAnyStrip) total += 2;
                 else bAnyStrip = true;
@@ -30768,12 +30859,12 @@ __forceinline void StripRenderer::DrawExpanded(StripRendererData* rd, StripIndex
         void* indexData = 0;
         long status = indices->Lock(0,indexBytes,&indexData,0);
         if (status >= 0) {
-            FUN_00e6d3a0(vertices,indexData,data,writtenVertices,numIndices);
+            NiDX9Renderer_PackParticleStrips(vertices,indexData,data,writtenVertices,numIndices);
             vertexManager->CopyAndRelease(stream->GetBuffer());
             indices->Unlock();
             ready = true;
         } else {
-            FUN_00a29680(DAT_010eddd0);
+            Object_DoNothing(DAT_010eddd0);
             indices->Unlock();
             indices->Release();
         }
@@ -30821,7 +30912,7 @@ struct LineBufferData {
     unsigned int unk30;
     unsigned int unk34;
     unsigned int m_uiBufferSize;
-    void FUN_00e8ef10(unsigned int uiStreamCount);
+    void NiGeometryBufferData_SetStreamCount(unsigned int uiStreamCount);
     void FUN_00e8f010(unsigned int uiFVF);
 };
 struct LineGeomData {
@@ -30965,8 +31056,8 @@ struct LineIBManager {
     void* ResizeTempLineConnectivity(unsigned int uiVerts, unsigned char* pkFlags, unsigned int* puiIndexCount, unsigned int uiUnk, unsigned int uiFlag);
 };
 struct LineVBManager {
-    void FUN_00e8bfa0(LineBufferData* pkBuffData, unsigned int uiUnk);
-    float* FUN_00e8bff0(void* pkVB, unsigned int uiElapsedMilliseconds, unsigned int uiSize, unsigned int uiStride);
+    void NiDX9VertexBufferManager_AllocateBufferSpace(LineBufferData* pkBuffData, unsigned int uiUnk);
+    float* NiDX9VertexBufferManager_LockVB(void* pkVB, unsigned int uiElapsedMilliseconds, unsigned int uiSize, unsigned int uiStride);
     bool CopyAndRelease(void* pkVB);
 };
 extern const LineColorA g_kLineDefaultColor_e70be0;
@@ -31533,10 +31624,11 @@ struct LineRenderer {
     LineRenderState* m_pCurrentRenderState;
     LineVBManager* m_pShaderStreamInfo;
     LineIBManager* m_pRenderTargetGroup;
-    void FUN_00e70be0(LineGeometry* pkLines);
+    void NiDX9Renderer_RenderScreenTexture(LineGeometry* pkLines);
 };
 // @fnv 0x00e70be0
-void LineRenderer::FUN_00e70be0(LineGeometry* pkLines)
+// src: COMMUNITY 0x00e70be0
+void LineRenderer::NiDX9Renderer_RenderScreenTexture(LineGeometry* pkLines)
 {
     if (m_bDeviceLost)
         return;
@@ -31575,13 +31667,13 @@ void LineRenderer::FUN_00e70be0(LineGeometry* pkLines)
     }
     LineShader* pkShader = pkLines->m_pShaderHandle;
     LineBufferData* pkBuffData = pkData->m_pkGeometryRendererData;
-    pkBuffData->FUN_00e8ef10(1);
+    pkBuffData->NiGeometryBufferData_SetStreamCount(1);
     pkBuffData->m_uiVertexCount = uiVerts;
     pkBuffData->m_uiVertexDataSize = uiVerts;
     pkBuffData->FUN_00e8f010(uiFVF);
     if (pkBuffData->m_uiRegisterStreamCount > 0)
         pkBuffData->m_puiVertexStrides[0] = uiStride;
-    m_pShaderStreamInfo->FUN_00e8bfa0(pkBuffData, 0);
+    m_pShaderStreamInfo->NiDX9VertexBufferManager_AllocateBufferSpace(pkBuffData, 0);
     LineVBInfo* pkVBInfo = (pkBuffData->m_uiRegisterStreamCount > 0) ? pkBuffData->m_ppkVBInfo[0] : 0;
     m_pCurrentRenderState->SetShaderDeclaration(pkBuffData->m_pkVertexDeclaration, false);
     if (!pkVBInfo->m_pkOwningStream)
@@ -31590,7 +31682,7 @@ void LineRenderer::FUN_00e70be0(LineGeometry* pkLines)
     {
         if (pkColors)
         {
-            float* pfOut = m_pShaderStreamInfo->FUN_00e8bff0(pkVBInfo->m_pkOwningStream, pkVBInfo->m_uiValueBeforeCount,
+            float* pfOut = m_pShaderStreamInfo->NiDX9VertexBufferManager_LockVB(pkVBInfo->m_pkOwningStream, pkVBInfo->m_uiValueBeforeCount,
                 pkVBInfo->m_uiSize, pkVBInfo->m_uiStride);
             if (!pfOut)
                 return;
@@ -31610,7 +31702,7 @@ void LineRenderer::FUN_00e70be0(LineGeometry* pkLines)
         }
         else
         {
-            float* pfOut = m_pShaderStreamInfo->FUN_00e8bff0(pkVBInfo->m_pkOwningStream, pkVBInfo->m_uiValueBeforeCount,
+            float* pfOut = m_pShaderStreamInfo->NiDX9VertexBufferManager_LockVB(pkVBInfo->m_pkOwningStream, pkVBInfo->m_uiValueBeforeCount,
                 pkVBInfo->m_uiSize, pkVBInfo->m_uiStride);
             if (!pfOut)
                 return;
@@ -31629,7 +31721,7 @@ void LineRenderer::FUN_00e70be0(LineGeometry* pkLines)
     }
     else if (pkColors)
     {
-        float* pfOut = m_pShaderStreamInfo->FUN_00e8bff0(pkVBInfo->m_pkOwningStream, pkVBInfo->m_uiValueBeforeCount,
+        float* pfOut = m_pShaderStreamInfo->NiDX9VertexBufferManager_LockVB(pkVBInfo->m_pkOwningStream, pkVBInfo->m_uiValueBeforeCount,
             pkVBInfo->m_uiSize, pkVBInfo->m_uiStride);
         if (!pfOut)
             return;
@@ -31646,7 +31738,7 @@ void LineRenderer::FUN_00e70be0(LineGeometry* pkLines)
     }
     else
     {
-        float* pfOut = m_pShaderStreamInfo->FUN_00e8bff0(pkVBInfo->m_pkOwningStream, pkVBInfo->m_uiValueBeforeCount,
+        float* pfOut = m_pShaderStreamInfo->NiDX9VertexBufferManager_LockVB(pkVBInfo->m_pkOwningStream, pkVBInfo->m_uiValueBeforeCount,
             pkVBInfo->m_uiSize, pkVBInfo->m_uiStride);
         if (!pfOut)
             return;
@@ -32565,13 +32657,14 @@ struct Se745_StandinRenderer {
     unsigned int pad6f8;
     unsigned char m_6fc;
 
-    bool FUN_00e72c20(Se745_Src* a1, int a2);
-    void FUN_00e745a0(Se745_Src* a1);
+    bool NiDX9Renderer_IsHardwareSkinned(Se745_Src* a1, int a2);
+    void NiDX9Renderer_RenderTriShape2(Se745_Src* a1);
 };
 
 // Draws geometry strips or primitives via m_pDirectInputDevice, selecting indexed or non-indexed paths based on animation state and buffer flags.
 // @fnv 0x00e745a0
-void Se745_StandinRenderer::FUN_00e745a0(Se745_Src* apSrc) {
+// src: COMMUNITY 0x00e745a0
+void Se745_StandinRenderer::NiDX9Renderer_RenderTriShape2(Se745_Src* apSrc) {
     if (this->m_6fc)
         return;
 
@@ -32580,7 +32673,7 @@ void Se745_StandinRenderer::FUN_00e745a0(Se745_Src* apSrc) {
         return;
 
     Se745_ObjBc* pObjectInstance = apSrc->m_bc;
-    bool bHasAnimation = this->FUN_00e72c20(apSrc, 0);
+    bool bHasAnimation = this->NiDX9Renderer_IsHardwareSkinned(apSrc, 0);
     Se745_GeomData* pBuffer = apSrc->m_b8->m_geom;
     apSrc->m_c0->Func36();
 
@@ -32692,13 +32785,14 @@ struct Renderer {unsigned int unk0;unsigned int unk4;unsigned int unk8;unsigned 
 
 
 v634=DAT_011a946c;v640=DAT_011a9478;v64c=DAT_011a946c;v658=DAT_011a9478;unk684=0.1f;}
-void FUN_00e6b990();};
+void NiXenonRenderer_InitToDefault();};
 
 
 
 // Resets selected renderer fields, clears four state, counter, and ref entries, sets the matrix to identity, and writes values to DAT_0126efd8.
 // @fnv 0x00e6b990
-void Renderer::FUN_00e6b990(){unk288=0;FUN_00ec61c0(&unk28c,0,0x130);
+// src: XBOX_PDB 0x00e6b990
+void Renderer::NiXenonRenderer_InitToDefault(){unk288=0;FUN_00ec61c0(&unk28c,0,0x130);
 
 
 
@@ -33044,7 +33138,7 @@ struct ScrDX9Renderer {
     int unk860; int unk864; int unk868; int unk86C; int unk870; int unk874; int unk878; int unk87C;
     int unk880;
     ScrTargetGroup* m_pDefaultRenderTargetGroup;
-    NiPixelData* FUN_00e6f4e0(const ScrRect* pkScreenRect, ScrTargetGroup* pkTarget);
+    NiPixelData* NiDX9Renderer_TakeScreenShot(const ScrRect* pkScreenRect, ScrTargetGroup* pkTarget);
 };
 
 enum ScrAllocationTag { ScrAllocatePixels };
@@ -33052,7 +33146,8 @@ __forceinline void* operator new(unsigned int size, ScrAllocationTag) { return N
 
 // Locks a render target surface, copies the pixel rows into a new NiPixelData buffer, and returns it.
 // @fnv 0x00e6f4e0
-NiPixelData* ScrDX9Renderer::FUN_00e6f4e0(const ScrRect* pkScreenRect, ScrTargetGroup* pkTarget)
+// src: COMMUNITY 0x00e6f4e0
+NiPixelData* ScrDX9Renderer::NiDX9Renderer_TakeScreenShot(const ScrRect* pkScreenRect, ScrTargetGroup* pkTarget)
 {
     if (m_bDeviceLost)
         return 0;
@@ -33197,7 +33292,8 @@ extern float DAT_0106b9e0;
 
 // Updates the matrix buffer from per-bone transforms and reports whether a non-unit scale was detected.
 // @fnv 0x00e6fe30
-void __fastcall FUN_00e6fe30(NiDX9Renderer* self, void*, SkinMatrixBlock* block, Xf* parent, bool transpose, unsigned int rows, bool skipExtra) {
+// src: COMMUNITY 0x00e6fe30
+void __fastcall NiDX9Renderer_CalculateBoneMatrices(NiDX9Renderer* self, void*, SkinMatrixBlock* block, Xf* parent, bool transpose, unsigned int rows, bool skipExtra) {
     const char* cur = block->entry;
     if (cur == (*(NiD3DHLSLVertexShader**)self->_undescribed_8BC)->NiD3DHLSLVertexShader::GetEntryPoint() && rows == block->rowsStored)
         return;
@@ -33216,7 +33312,7 @@ void __fastcall FUN_00e6fe30(NiDX9Renderer* self, void*, SkinMatrixBlock* block,
 
     unsigned int need = (boneCount * rows) << 4;
     if (need > uiCapacity) {
-        FUN_00aa1110(buffer);
+        _NiAlignedFree(buffer);
         buffer = NiAlignedAlloc(need, 0x10);
         block->buffer = buffer;
         block->capacity = need;
@@ -33322,12 +33418,12 @@ extern bool DAT_0126f0d0;
 
 
 
-extern "C" void __cdecl FUN_00a29680(void*);
+extern "C" void __cdecl Object_DoNothing(void*);
 
 void __cdecl FUN_00b71a40(void*,void*,void*,float);
 
 
-NiPoint3* __cdecl FUN_004b3ae0(NiPoint3*, const NiPoint3&, const float*);
+NiPoint3* __cdecl NiPoint3_TransformByMatrix3(NiPoint3*, const NiPoint3&, const float*);
 
 struct Object3 {int x,y,z;};
 
@@ -33896,7 +33992,7 @@ struct VertexData : Holder_00e8f040 {
 
 
 
-    void FUN_00e8ef10(int flag);
+    void NiGeometryBufferData_SetStreamCount(int flag);
 
     // void FUN_00e8f040(unsigned int val);
 
@@ -33914,9 +34010,9 @@ struct RendererStorage {
 
 struct S_00e8c0d0 {
 
-    void FUN_00e8bfa0(VertexData*,int);
+    void NiDX9VertexBufferManager_AllocateBufferSpace(VertexData*,int);
 
-    unsigned int FUN_00e8bff0(unsigned int, unsigned int,unsigned int,unsigned int);
+    unsigned int NiDX9VertexBufferManager_LockVB(unsigned int, unsigned int,unsigned int,unsigned int);
 
     bool CopyAndRelease(void*);
 
@@ -34121,15 +34217,15 @@ struct ParticleDrawContext {
 
 
 
-    FakeCOM_00e8f040* FUN_00e69790();
+    FakeCOM_00e8f040* NiDX9Renderer_GetDecl_Particles();
 
-    FakeCOM_00e8f040* FUN_00e696a0();
+    FakeCOM_00e8f040* NiDX9Renderer_GetDecl_ParticlesSubTexture();
 
-    void FUN_00e6ab40(unsigned int, unsigned int,unsigned int,unsigned int,unsigned int,unsigned int,unsigned int,unsigned int);
+    void NiDX9Renderer_PackPoints(unsigned int, unsigned int,unsigned int,unsigned int,unsigned int,unsigned int,unsigned int,unsigned int);
 
-    void FUN_00e69ea0(unsigned int, unsigned int,unsigned int,unsigned int,unsigned int,unsigned int,unsigned int);
+    void NiDX9Renderer_PackPointsSubTexture(unsigned int, unsigned int,unsigned int,unsigned int,unsigned int,unsigned int,unsigned int);
 
-    void FUN_00e70140(SceneArg* input);
+    void NiDX9Renderer_RenderParticles(SceneArg* input);
 
 };
 
@@ -34150,7 +34246,7 @@ static __forceinline bool FillIndices(ParticleGeometry* a, IndexBuffer* data, un
             }
             data->Unlock();
         } else {
-            FUN_00a29680("NiDX9IndexBufferManager::PackBuffer> Failed to lock index buffer\n");
+            Object_DoNothing("NiDX9IndexBufferManager::PackBuffer> Failed to lock index buffer\n");
             data->Unlock();
             data->Release();
             return 0;
@@ -34160,7 +34256,8 @@ static __forceinline bool FillIndices(ParticleGeometry* a, IndexBuffer* data, un
 
 // Draws particle geometry by setting up vertex/index buffers, applying material and transform, then issuing DrawIndexedPrimitive calls per overlay command.
 // @fnv 0x00e70140
-void ParticleDrawContext::FUN_00e70140(SceneArg* apSceneArg)
+// src: COMMUNITY 0x00e70140
+void ParticleDrawContext::NiDX9Renderer_RenderParticles(SceneArg* apSceneArg)
 {
     if ((unsigned char)disabled) return;
     if ((gate->flags[6] & 1) && (gate->aux->m3c <= 0.0f)) return;
@@ -34187,7 +34284,7 @@ void ParticleDrawContext::FUN_00e70140(SceneArg* apSceneArg)
 
     overlay = (unsigned int)(unsigned short)primitiveCount * 4;
     VertexData* buffer = a->vertex;
-    buffer->FUN_00e8ef10(1);
+    buffer->NiGeometryBufferData_SetStreamCount(1);
 
     buffer->unk018 = overlay;
     buffer->unk01c = (unsigned int)4 * (unsigned short)elementCount;
@@ -34230,32 +34327,32 @@ void ParticleDrawContext::FUN_00e70140(SceneArg* apSceneArg)
     device->SetTransform(0x100, &unk940);
     state->End(&srcMaterial);
 
-    { NiPoint3 transformed; CopyPoint3Storage(unk64c, *FUN_004b3ae0(&transformed, unk634, (const float*)&srcMaterial)); }
-    { NiPoint3 transformed; CopyPoint3Storage(unk658, *FUN_004b3ae0(&transformed, unk640, (const float*)&srcMaterial)); }
+    { NiPoint3 transformed; CopyPoint3Storage(unk64c, *NiPoint3_TransformByMatrix3(&transformed, unk634, (const float*)&srcMaterial)); }
+    { NiPoint3 transformed; CopyPoint3Storage(unk658, *NiPoint3_TransformByMatrix3(&transformed, unk640, (const float*)&srcMaterial)); }
 
     FakeCOM_00e8f040* handle;
     if (p64) {
-        handle = FUN_00e69790();
+        handle = NiDX9Renderer_GetDecl_Particles();
         buffer->SetComPointer(handle);
         if (0 < buffer->streamSize) buffer->format[0] = 0x28;
-        shader->FUN_00e8bfa0(buffer, 0);
+        shader->NiDX9VertexBufferManager_AllocateBufferSpace(buffer, 0);
         StreamRecord* j = (buffer->streamSize > 0) ? (StreamRecord*)*buffer->current : 0;
         indexDest = &j->buffer;
         if (!j->Buffer()) return;
-        unsigned int ib = shader->FUN_00e8bff0((unsigned int)j->Buffer(), (unsigned int)j->Offset(), overlay * 40, (unsigned int)j->Count());
+        unsigned int ib = shader->NiDX9VertexBufferManager_LockVB((unsigned int)j->Buffer(), (unsigned int)j->Offset(), overlay * 40, (unsigned int)j->Count());
         if (ib == 0) return;
-        this->FUN_00e6ab40(ib, primitiveSize, m, p4c, k_field_8, p5c, p64, primitiveCount);
+        this->NiDX9Renderer_PackPoints(ib, primitiveSize, m, p4c, k_field_8, p5c, p64, primitiveCount);
     } else {
-        handle = FUN_00e696a0();
+        handle = NiDX9Renderer_GetDecl_ParticlesSubTexture();
         buffer->SetComPointer(handle);
         if (0 < buffer->streamSize) buffer->format[0] = 0x24;
-        shader->FUN_00e8bfa0(buffer, 0);
+        shader->NiDX9VertexBufferManager_AllocateBufferSpace(buffer, 0);
         StreamRecord* j = (buffer->streamSize > 0) ? (StreamRecord*)*buffer->current : 0;
         indexDest = &j->buffer;
         if (!j->Buffer()) return;
-        unsigned int ib = shader->FUN_00e8bff0((unsigned int)j->Buffer(), (unsigned int)j->Offset(), 36 * overlay, (unsigned int)j->Count());
+        unsigned int ib = shader->NiDX9VertexBufferManager_LockVB((unsigned int)j->Buffer(), (unsigned int)j->Offset(), 36 * overlay, (unsigned int)j->Count());
         if (!ib) return;
-        this->FUN_00e69ea0(ib, primitiveSize, m, p4c, k_field_8, p5c, primitiveCount);
+        this->NiDX9Renderer_PackPointsSubTexture(ib, primitiveSize, m, p4c, k_field_8, p5c, primitiveCount);
     }
 
     shader->CopyAndRelease(*(void**)indexDest);

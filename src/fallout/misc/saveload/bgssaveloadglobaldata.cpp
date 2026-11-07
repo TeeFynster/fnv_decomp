@@ -44,7 +44,7 @@ class ScreenCustomSplatter
   public:
     static void Clear();
 };
-BSPortal* FUN_0045a190();
+BSPortal* Main_GetMasterParticleSystemManager();
 // Exe 0x0084d160: unit-local Interface view; declarations and layout are preserved.
 class BgssaveloadglobaldataInterfaceView
 {
@@ -61,13 +61,13 @@ class GlobalObject_0096d020
 {
 };
 extern GlobalObject_0096d020 g_011e0e80;
-void FUN_004d60c0(BGSLoadGameBuffer*);
+void MiscStatManager_Revert(BGSLoadGameBuffer*);
 void ResetRadioGlobals(BGSLoadGameBuffer*);
 class MagicItem;
 
-void FUN_0084cd40(BGSLoadGameBuffer*);
+void BGSSaveLoadGlobalData_LoadGlobals(BGSLoadGameBuffer*);
 void ReadSavedSettings(BGSLoadGameBuffer*);
-void FUN_008368b0(BGSLoadGameBuffer*);
+void FalloutRadio_LoadGame(BGSLoadGameBuffer*);
 class SoundPlaybackManager
 {
   public:
@@ -108,7 +108,7 @@ void SaveGameLoader::UnloadGameData()
 {
     ScreenSplatter::Clear();
     ScreenCustomSplatter::Clear();
-    FUN_0045a190()->BSPortal::~BSPortal();
+    Main_GetMasterParticleSystemManager()->BSPortal::~BSPortal();
     BSSimpleList<NiPointer<ImageSpaceModifierInstance> >* node = (BSSimpleList<NiPointer<ImageSpaceModifierInstance> >*)g_TES->FUN_0043b5d0();
     while (node)
     {
@@ -208,7 +208,7 @@ bool SaveGameLoader::LoadFormRange(unsigned int type, BGSLoadGameBuffer* buffer,
     case 1:
         return false;
     case 2:
-        g_TES->FUN_00459840(buffer);
+        g_TES->TES_Revert(buffer);
         return true;
     case 3:
         if (globals)
@@ -230,7 +230,7 @@ bool SaveGameLoader::LoadFormRange(unsigned int type, BGSLoadGameBuffer* buffer,
         UnloadGameData();
         return true;
     case 0:
-        FUN_004d60c0(buffer);
+        MiscStatManager_Revert(buffer);
         return true;
     case 8:
         return false;
@@ -265,7 +265,7 @@ bool SaveGameLoader::LoadGlobalDataRange(unsigned int type, BGSLoadGameBuffer* b
         g_TES->LoadGame(buffer);
         return true;
     case 3:
-        FUN_0084cd40(buffer);
+        BGSSaveLoadGlobalData_LoadGlobals(buffer);
         return true;
     case 4:
         ((FalloutRadio*)&g_011e0e80)->LoadGame(buffer);
@@ -289,7 +289,7 @@ bool SaveGameLoader::LoadGlobalDataRange(unsigned int type, BGSLoadGameBuffer* b
         ActorCause::LoadReferencesFromBuffer(buffer);
         return true;
     case 10:
-        FUN_008368b0(buffer);
+        FalloutRadio_LoadGame(buffer);
         return true;
     case 11:
         SoundPlaybackManager::LoadGame(buffer);
@@ -324,7 +324,8 @@ void __cdecl LoadGlobalDataRanges(SaveLoadFile* file, unsigned int count)
 }
 
 // @fnv 0x0084bfb0
-void __cdecl FUN_0084bfb0(unsigned int start, unsigned int end)
+// src: XBOX_PDB 0x0084bfb0
+void __cdecl BGSSaveLoadGlobalData_InitGlobalDataRange(unsigned int start, unsigned int end)
 {
     BGSLoadGameBuffer buffer;
     for (unsigned int i = start; i < end; ++i)
@@ -338,7 +339,8 @@ struct G975
     void fnv_call_975af0(BGSLoadGameBuffer*);
 };
 // @fnv 0x0084c030
-bool __cdecl FUN_0084c030(unsigned int type, BGSLoadGameBuffer* buffer)
+// src: XBOX_PDB 0x0084c030
+bool __cdecl BGSSaveLoadGlobalData_InitGlobalDataRange_0084c030(unsigned int type, BGSLoadGameBuffer* buffer)
 {
     switch (type)
     {
@@ -352,7 +354,7 @@ bool __cdecl FUN_0084c030(unsigned int type, BGSLoadGameBuffer* buffer)
         ((G975*)&g_011e0e80)->fnv_call_975af0(buffer);
         return true;
     case 5:
-        ((CombatManager*)BGSSaveLoadGlobalDataWorldspacePtr)->FUN_00993600(buffer);
+        ((CombatManager*)BGSSaveLoadGlobalDataWorldspacePtr)->InitLoadGame_00993600(buffer);
         return true;
     case 6:
         return false;
@@ -381,7 +383,8 @@ bool __cdecl FUN_0084c030(unsigned int type, BGSLoadGameBuffer* buffer)
 namespace fnv_0084c110 {
 
 // @fnv 0x0084c110
-void __cdecl FUN_0084c110(unsigned int aiStart, unsigned int aiEnd)
+// src: XBOX_PDB 0x0084c110
+void __cdecl BGSSaveLoadGlobalData_FinishLoadGlobalDataRange(unsigned int aiStart, unsigned int aiEnd)
 {
     BGSLoadGameBuffer loadGameBuffer;
     for (unsigned int i = aiStart; i < aiEnd; ++i)
@@ -408,7 +411,8 @@ typedef char _sizecheck_BGSSaveLoadGame[sizeof(BGSSaveLoadGame) == 588 ? 1 : -1]
 
 // Sets or clears bit 0x40 in the flags field according to abValue.
 // @fnv 0x0084cc40
-void BGSSaveLoadGame::FUN_0084cc40(bool abValue)
+// src: XBOX_PDB 0x0084cc40
+void BGSSaveLoadGame::SetPlayerLocationInvalid_0084cc40(bool abValue)
 {
     if (abValue)
         iGlobalFlags |= 0x40;
@@ -432,11 +436,12 @@ unsigned int __fastcall GetDataHandlerField208(TESDataHandler* handler)
 extern TESDataHandler* g_dataHandler;
 
 // @fnv 0x0084cc90
-void FUN_0084cc90(BGSSaveFormBuffer* apBuffer)
+// src: COMMUNITY 0x0084cc90
+void BGSSaveLoadGlobalData_SaveGlobals(BGSSaveFormBuffer* apBuffer)
 {
     BSSimpleList<TESGlobal*>* pList = g_dataHandler->GetTESGlobalList();
     int iCount = 0;
-    unsigned int uiStart = apBuffer->FUN_00865f20();
+    unsigned int uiStart = apBuffer->StartVariableSizedValue();
     BSSimpleList<TESGlobal*>* pIter = pList;
     while (pIter)
     {
@@ -450,7 +455,7 @@ void FUN_0084cc90(BGSSaveFormBuffer* apBuffer)
         }
         pIter = pIter->GetNext();
     }
-    apBuffer->FUN_00865ff0(iCount, uiStart);
+    apBuffer->SaveVariableSizedValue_00865ff0(iCount, uiStart);
 }
 
 namespace fnv_00866200 {
@@ -478,7 +483,7 @@ struct BGSSaveLoadChangeFlags
 struct BGSSaveLoadFormType
 {
     unsigned char m_ucFormType;
-    int FUN_00864520();
+    int BGSSaveLoadFormInfo_GetSizeType();
 };
 
 struct FormLoadContext
@@ -496,11 +501,12 @@ void __cdecl WriteValueByType(SaveLoadFile* apFile, unsigned int auiValue, int a
 struct FUN_00866200_owner
 {
     char* pBuffer;
-    void FUN_00866200(SaveLoadFile* apFile, unsigned int auiFormID, BGSSaveLoadChangeFlags aChangeFlags);
+    void BGSUnloadedFormBuffer_Save(SaveLoadFile* apFile, unsigned int auiFormID, BGSSaveLoadChangeFlags aChangeFlags);
 };
 
 // @fnv 0x00866200
-void FUN_00866200_owner::FUN_00866200(SaveLoadFile* apFile, unsigned int auiFormID, BGSSaveLoadChangeFlags aChangeFlags)
+// src: COMMUNITY 0x00866200
+void FUN_00866200_owner::BGSUnloadedFormBuffer_Save(SaveLoadFile* apFile, unsigned int auiFormID, BGSSaveLoadChangeFlags aChangeFlags)
 {
     char* pData = pBuffer;
     char* pCurrent = pBuffer + 2;
@@ -510,7 +516,7 @@ void FUN_00866200_owner::FUN_00866200(SaveLoadFile* apFile, unsigned int auiForm
     header.m_ucFormType.m_ucFormType = pData[0];
     header.cVersion = pData[1];
     apFile->WriteToFile(&header, 9);
-    int iSize = header.m_ucFormType.FUN_00864520();
+    int iSize = header.m_ucFormType.BGSSaveLoadFormInfo_GetSizeType();
     unsigned int uiValue = 0;
     pCurrent += ReadValueBySizeType(pCurrent, &uiValue, iSize);
     WriteValueByType(apFile, uiValue, iSize);
@@ -534,11 +540,12 @@ struct ItemListNode
 
 struct FUN_00975840_owner
 {
-    void FUN_00975840(BGSSaveFormBuffer* apBuffer);
+    void ProcessLists_SaveGame(BGSSaveFormBuffer* apBuffer);
 };
 
 // @fnv 0x00975840
-void FUN_00975840_owner::FUN_00975840(BGSSaveFormBuffer* apBuffer)
+// src: COMMUNITY 0x00975840
+void FUN_00975840_owner::ProcessLists_SaveGame(BGSSaveFormBuffer* apBuffer)
 {
     apBuffer->SaveData((char*)this + 0x154, 4, 0);
     apBuffer->SaveData((char*)this + 0x158, 4, 0);
@@ -547,7 +554,7 @@ void FUN_00975840_owner::FUN_00975840(BGSSaveFormBuffer* apBuffer)
     for (unsigned int i = 0; i < 5; ++i)
     {
         unsigned int ItemUpdateArray = 0;
-        unsigned int uiStart = apBuffer->FUN_00865f20();
+        unsigned int uiStart = apBuffer->StartVariableSizedValue();
         ItemListNode* pIter = ((ItemListNode**)((char*)this + 0x44))[i];
         while (pIter)
         {
@@ -559,7 +566,7 @@ void FUN_00975840_owner::FUN_00975840(BGSSaveFormBuffer* apBuffer)
             }
             pIter = pIter->FUN_00726070();
         }
-        apBuffer->FUN_00865ff0(ItemUpdateArray, uiStart);
+        apBuffer->SaveVariableSizedValue_00865ff0(ItemUpdateArray, uiStart);
     }
 }
 }  // namespace fnv_00975840
@@ -637,15 +644,15 @@ class LLD_Quest : public TESForm
 class LLD_PlayerCharacter : public TESObjectREFR
 {
   public:
-    void FUN_0093c200(LLD_Point3, LLD_Point3, LLD_Cell*, bool);
-    void FUN_0093cce0(LLD_Point3, LLD_Point3, TESWorldSpace*, bool);
-    void FUN_0093db60(int, LLD_Cell*);
+    void PlayerCharacter_PositionPlayer(LLD_Point3, LLD_Point3, LLD_Cell*, bool);
+    void PlayerCharacter_PositionPlayerExterior(LLD_Point3, LLD_Point3, TESWorldSpace*, bool);
+    void PlayerCharacter_CenterOnCell(int, LLD_Cell*);
     void SetCameraPathEnabled(bool, unsigned int);
 };
 class LLD_Cell
 {
   public:
-    NiNode* FUN_00545cb0();
+    NiNode* Get3D_00545cb0();
     void RemoveReference(TESObjectREFR*);
 };
 
@@ -659,11 +666,11 @@ class LLD_LoadingMenu
 };
 int __fastcall FNV_GetFormType(TESForm*);
 int __cdecl TruncateFloatToInt(float);
-void __cdecl FUN_0084cbd0(const char*, ...);
+void __cdecl BSprintf(const char*, ...);
 char* __cdecl FUN_00ec7750(const char*, const char*);
 unsigned int __cdecl FUN_00ec8d08(const char*, char**, int);
-void __cdecl FUN_00868d70(int);
-void __cdecl FUN_00c459d0(int);
+void __cdecl GarbageCollector_ClearAll(int);
+void __cdecl NiObjectGarbage_ClearAll(int);
 class PlayerCharacter;
 extern PlayerCharacter* g_thePlayer;
 extern TESDataHandler* g_dataHandler;
@@ -696,7 +703,7 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
             LLD_Cell* pcell = (LLD_Cell*)plocation;
             if (((LLD_PlayerCharacter*)g_thePlayer)->GetParentCell() != (TESObjectCELL*)pcell)
                 ((LLD_PlayerCharacter*)g_thePlayer)
-                    ->FUN_0093c200(playerLocation, ((LLD_PlayerCharacter*)g_thePlayer)->GetAngle(), pcell, false);
+                    ->PlayerCharacter_PositionPlayer(playerLocation, ((LLD_PlayerCharacter*)g_thePlayer)->GetAngle(), pcell, false);
             if (ptesWorldSpace)
                 g_TES->AssignWorldSpace(ptesWorldSpace);
             g_TES->SetCurrentGridX(icurrentGridX);
@@ -724,7 +731,7 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
                 icellX = TruncateFloatToInt(playerLocation.x) >> 12;
                 icellY = TruncateFloatToInt(playerLocation.y) >> 12;
                 pcell = ((LLD_Cell* (__thiscall*)(TESDataHandler*, int, int, TESWorldSpace*, bool))DataHandlerGetOrCreateCell)(g_dataHandler, icellX, icellY, pworld, false);
-                if (!pcell || !pcell->FUN_00545cb0())
+                if (!pcell || !pcell->Get3D_00545cb0())
                 {
                     if (((LLD_PlayerCharacter*)g_thePlayer)->GetParentCell())
                         ((LLD_Cell*)((LLD_PlayerCharacter*)g_thePlayer)->GetParentCell())->RemoveReference((LLD_PlayerCharacter*)g_thePlayer);
@@ -735,7 +742,7 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
                 {
                     g_BGSSaveLoadGame->SetPositioningPlayerCharacter(true);
                     ((LLD_PlayerCharacter*)g_thePlayer)
-                        ->FUN_0093c200(playerLocation, ((LLD_PlayerCharacter*)g_thePlayer)->GetAngle(), pcell, false);
+                        ->PlayerCharacter_PositionPlayer(playerLocation, ((LLD_PlayerCharacter*)g_thePlayer)->GetAngle(), pcell, false);
                     g_BGSSaveLoadGame->SetPositioningPlayerCharacter(false);
                 }
                 else
@@ -752,11 +759,11 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
     {
         unsigned int isafeMarkerID;
         TESObjectREFR* pref;
-        g_BGSSaveLoadGame->FUN_0084cc40(true);
+        g_BGSSaveLoadGame->SetPlayerLocationInvalid_0084cc40(true);
         BSSimpleList<LLD_Quest*>* pIter = (BSSimpleList<LLD_Quest*>*)g_dataHandler->GetTESQuestList();
         while (pIter && pIter->GetItem())
         {
-            FUN_0084cbd0("Quest %s (%08x) compared to Patch04Debug\n",
+            BSprintf("Quest %s (%08x) compared to Patch04Debug\n",
                          ((LLD_FullName*)((char*)pIter->GetItem() + 0x30))->GetFullName(),
                          pIter->GetItem()->GetFormID());
             if (((LLD_FullNameLen*)((char*)pIter->GetItem() + 0x30))->GetModelLength() > 8 &&
@@ -778,9 +785,9 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
             TESWorldSpace* pworld = pref->GetParentWorldSpace();
             bvalidPlayerLocation = true;
             if (pworld)
-                ((LLD_PlayerCharacter*)g_thePlayer)->FUN_0093cce0(loc, angle, pworld, true);
+                ((LLD_PlayerCharacter*)g_thePlayer)->PlayerCharacter_PositionPlayerExterior(loc, angle, pworld, true);
             else if (pcell)
-                ((LLD_PlayerCharacter*)g_thePlayer)->FUN_0093c200(loc, angle, pcell, true);
+                ((LLD_PlayerCharacter*)g_thePlayer)->PlayerCharacter_PositionPlayer(loc, angle, pcell, true);
             else
                 bvalidPlayerLocation = false;
         }
@@ -799,14 +806,14 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
                 if (!pcell)
                     pcell = ((LLD_Cell* (__thiscall*)(TESDataHandler*, int, int, int, TESWorldSpace*))DataHandlerCreateCell)(g_dataHandler, 0, 0, 0, pworld);
                 if (pcell)
-                    ((LLD_PlayerCharacter*)g_thePlayer)->FUN_0093db60(0, pcell);
+                    ((LLD_PlayerCharacter*)g_thePlayer)->PlayerCharacter_CenterOnCell(0, pcell);
             }
         }
     }
 
-    g_TES->FUN_004539a0(true, 0);
-    FUN_00868d70(0);
-    FUN_00c459d0(0);
+    g_TES->TES_ClearAllCells(true, 0);
+    GarbageCollector_ClearAll(0);
+    NiObjectGarbage_ClearAll(0);
 }
 
 void __cdecl SaveLoadScreenData(BGSSaveFormBuffer* pkBuffer);
@@ -835,23 +842,24 @@ void __cdecl SavePlayerLocation(BGSSaveFormBuffer* pkBuffer)
 }
 
 void __cdecl SavePlayerLocation(BGSSaveFormBuffer*);
-void __cdecl FUN_007066d0(BGSSaveFormBuffer*);
+void __cdecl Interface_SaveGame(BGSSaveFormBuffer*);
 void __cdecl SaveImageSpaceModifierInstances(BGSSaveFormBuffer*);
 void __cdecl SaveMiscStats(BGSSaveFormBuffer*);
 void __cdecl SaveE6D0Items(BGSSaveFormBuffer*);
-void __cdecl FUN_008366e0(BGSSaveFormBuffer*);
-void __cdecl FUN_0082ec40(BGSSaveFormBuffer*);
-void __cdecl FUN_00845cc0(const char*, ...);
+void __cdecl FalloutRadio_SaveGame(BGSSaveFormBuffer*);
+void __cdecl TESAudio_SaveGame(BGSSaveFormBuffer*);
+void __cdecl SaveGameWarning(const char*, ...);
 struct Manager84
 {
-    void FUN_00975840(BGSSaveFormBuffer*);
+    void ProcessLists_SaveGame(BGSSaveFormBuffer*);
     void FUN_004534f0(BGSSaveFormBuffer*);
 };
 // Sky saving is absent from the shared interface; preserve the thiscall ABI.
 extern "C" void SaveSkyGame();
 // Dispatches saving of global data to a handler based on the type id, logging an error and returning false for unknown types.
 // @fnv 0x0084bcd0
-bool __cdecl FUN_0084bcd0(unsigned int type, BGSSaveFormBuffer* buffer)
+// src: COMMUNITY 0x0084bcd0
+bool __cdecl BGSSaveLoadGlobalData_SaveGlobalData(unsigned int type, BGSSaveFormBuffer* buffer)
 {
     switch (type)
     {
@@ -862,16 +870,16 @@ bool __cdecl FUN_0084bcd0(unsigned int type, BGSSaveFormBuffer* buffer)
         g_TES->SaveGame(buffer);
         return true;
     case 3:
-        FUN_0084cc90(buffer);
+        BGSSaveLoadGlobalData_SaveGlobals(buffer);
         return true;
     case 4:
-        ((Manager84*)&g_011e0e80)->FUN_00975840(buffer);
+        ((Manager84*)&g_011e0e80)->ProcessLists_SaveGame(buffer);
         return true;
     case 5:
         ((CombatManager*)BGSSaveLoadGlobalDataWorldspacePtr)->SaveGame(buffer);
         return true;
     case 6:
-        FUN_007066d0(buffer);
+        Interface_SaveGame(buffer);
         return true;
     case 7:
         SaveImageSpaceModifierInstances(buffer);
@@ -886,16 +894,16 @@ bool __cdecl FUN_0084bcd0(unsigned int type, BGSSaveFormBuffer* buffer)
         SaveE6D0Items(buffer);
         return true;
     case 10:
-        FUN_008366e0(buffer);
+        FalloutRadio_SaveGame(buffer);
         return true;
     case 11:
-        FUN_0082ec40(buffer);
+        TESAudio_SaveGame(buffer);
         return true;
     case 1000:
         ((Manager84*)&g_011e0e80)->FUN_004534f0(buffer);
         return true;
     default:
-        FUN_00845cc0("SAVELOAD: Unknown global data type %i in SaveGlobalData()", type);
+        SaveGameWarning("SAVELOAD: Unknown global data type %i in SaveGlobalData()", type);
         return false;
     }
 }
@@ -920,7 +928,8 @@ struct GlobalSeenMap
 };
 
 // @fnv 0x0084cd40
-void FUN_0084cd40(BGSLoadGameBuffer* pLoadBuffer)
+// src: COMMUNITY 0x0084cd40
+void BGSSaveLoadGlobalData_LoadGlobals(BGSLoadGameBuffer* pLoadBuffer)
 {
     SaveLoadChangeHistory* history5 = g_BGSSaveLoadGame->GetHistory();
     GlobalSeenMap unchanged2(37);
@@ -975,7 +984,7 @@ void __cdecl SaveImageSpaceModifierInstances(int pBuffer)
     float v5;
 
     v3 = 0;
-    aV11 = ((BGSSaveFormBuffer*)pBuffer)->FUN_00865f20();
+    aV11 = ((BGSSaveFormBuffer*)pBuffer)->StartVariableSizedValue();
     i6 = (BSSimpleList<NiPointer<ImageSpaceModifierInstance> >*)g_TES->FUN_0043b5d0();
     while (i6 != 0)
     {
@@ -997,14 +1006,15 @@ void __cdecl SaveImageSpaceModifierInstances(int pBuffer)
         }
         i6 = i6->GetNext();
     }
-    ((BGSSaveFormBuffer*)pBuffer)->FUN_00865ff0(v3, aV11);
+    ((BGSSaveFormBuffer*)pBuffer)->SaveVariableSizedValue_00865ff0(v3, aV11);
 }
 
 #include <stdarg.h>
 void __cdecl FUN_00ecbe60(const char* fmt, va_list args);
 
 // @fnv 0x0084cbd0
-void __cdecl FUN_0084cbd0(const char* apFormat, ...)
+// src: COMMUNITY 0x0084cbd0
+void __cdecl BSprintf(const char* apFormat, ...)
 {
     va_list args;
     va_start(args, apFormat);

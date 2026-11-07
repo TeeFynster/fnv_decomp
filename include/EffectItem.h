@@ -76,23 +76,23 @@ public:
     void Save();
     void Init(int value);
     void Initialize(EffectSetting* setting);
-    void FUN_00403be0(EffectSetting* setting);
-    bool FUN_004043d0(int magnitude);
-    bool FUN_00404470(int area);
-    bool FUN_00404510(int duration);
-    bool FUN_00404560(unsigned int range);
+    void Initialize_00403be0(EffectSetting* setting);
+    bool SetMagnitude_004043d0(int magnitude);
+    bool SetArea_00404470(int area);
+    bool SetDuration_00404510(int duration);
+    bool SetRange_00404560(unsigned int range);
     bool SetMagnitude(int magnitude);
     bool SetArea(int area);
     bool SetDuration(int duration);
     bool SetRange(unsigned int range);
-    EffectItem* FUN_0084e3a0();
+    EffectItem* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     int FUN_00403ea0();
     float FUN_00403f00();
 
     void DestroyContents();                          // 0x00403d50
     void InitItem(TESForm* form);                    // 0x00403db0
     int GetAffectedActorValue();                     // 0x00403ea0
-    bool FUN_00403ee0();                             // 0x00403ee0
+    bool IsActorValueUsed();                             // 0x00403ee0
     float GetRawCost();                              // 0x00403f00 computes and caches m_fCost
     float GetCost(Actor* actor);                     // 0x00403f80
     bool Compare(EffectItem* other);                 // 0x004042a0
@@ -107,7 +107,7 @@ public:
     bool IsDetrimental();                            // 0x00405e40
     PerkEntryConditionSet* GetConditions();          // 0x00409140
     void Process(TESObjectREFR* target, int arg);    // 0x0062e500
-    bool FUN_008231f0();                             // 0x008231f0
+    bool IsScriptEffect_008231f0();                             // 0x008231f0
     EffectSetting* GetEffectSetting();               // 0x00825c00
     int GetRange();                                  // 0x0084e3a0 (folded int getter)
     bool Load(TESFile* file, const char* actorEffect);

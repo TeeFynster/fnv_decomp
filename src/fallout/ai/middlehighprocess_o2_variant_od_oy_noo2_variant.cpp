@@ -17,26 +17,27 @@ struct __declspec(align(16)) hkVector4L
     __m128 m_vComponents;
     hkVector4L();
 };
-hkVector4L& FUN_004a3e00(hkVector4L& out, const NiPoint3& in);
+hkVector4L& NI2HK(hkVector4L& out, const NiPoint3& in);
 
 struct hkpRigidBodyL
 {
-    void FUN_00cac960(const hkVector4L& position);
+    void hkpCharacterProxy_setLinearVelocity(const hkVector4L& position);
 };
 
 struct RigidBodyOwnerL
 {
-    hkpRigidBodyL* FUN_004ae750();
-    void FUN_00926980(const NiPoint3& pos);
+    hkpRigidBodyL* Bipedanim_GetReferenceFlagsOrZero();
+    void bhkCharacterController_SetLinearVelocity_Ni(const NiPoint3& pos);
 };
 
 // @fnv 0x00926980
-void RigidBodyOwnerL::FUN_00926980(const NiPoint3& pos)
+// src: COMMUNITY 0x00926980
+void RigidBodyOwnerL::bhkCharacterController_SetLinearVelocity_Ni(const NiPoint3& pos)
 {
     hkVector4L kPos;
-    hkpRigidBodyL* pBody = FUN_004ae750();
+    hkpRigidBodyL* pBody = Bipedanim_GetReferenceFlagsOrZero();
     if (pBody)
-        pBody->FUN_00cac960(FUN_004a3e00(kPos, pos));
+        pBody->hkpCharacterProxy_setLinearVelocity(NI2HK(kPos, pos));
 }
 
 class NiPoint3L
@@ -560,7 +561,7 @@ class CharControllerL
     float m_fG;
 };
 
-void* __cdecl FUN_00458b20();
+void* __cdecl hkVector4_getZero();
 
 class CellRefL
 {
@@ -829,11 +830,12 @@ class PlayerL
     int unk144;
     CellRefL m_kCell;
 
-    void FUN_00928a50(BGSLoadFormBufferL* pkBuffer);
+    void BaseProcess_LoadCharController(BGSLoadFormBufferL* pkBuffer);
 };
 
 // @fnv 0x00928a50
-void PlayerL::FUN_00928a50(BGSLoadFormBufferL* pkBuffer)
+// src: COMMUNITY 0x00928a50
+void PlayerL::BaseProcess_LoadCharController(BGSLoadFormBufferL* pkBuffer)
 {
     ActorL* pkActor = pkBuffer->GetForm();
     CharControllerL* pkController = GetPhysicsCharacterController();
@@ -880,7 +882,7 @@ void PlayerL::FUN_00928a50(BGSLoadFormBufferL* pkBuffer)
             if (IsInCell(m_iWorldSpace, m_kCell.GetContainingCell()))
                 pkController->m_kFlags.SetFlags(0x8000000, true);
             pkController->SetEnabled(false);
-            pkController->SetWorld(FUN_00458b20());
+            pkController->SetWorld(hkVector4_getZero());
             hkQuaternionL kRotationBasis(0.0f, 0.0f, 1.0f, 0.0f);
             pkController->SetRotation(&kRotationBasis);
         }

@@ -491,7 +491,7 @@ struct MyContext
     int unk78;
 
     void UpdateWorldBounds(void* detail);
-    int FUN_00eba680(void* other);
+    int NiOBBox_TestIntersection(void* other);
 };
 
 // Recursively compares this node's context with another node's, refreshing cached ids, and descends into child nodes up to the given depths.
@@ -514,7 +514,7 @@ bool NiOBBNode::CompareTreeRecursive(NiOBBNode* other, char* apThisData, char* a
         boundsId(other) = idB;
     }
 
-    if (!(*(MyContext*)this->pad1).FUN_00eba680(&(*(MyContext*)other->pad1)))
+    if (!(*(MyContext*)this->pad1).NiOBBox_TestIntersection(&(*(MyContext*)other->pad1)))
         return false;
 
     if (!depthA || !depthB)
@@ -568,7 +568,7 @@ struct OBBShape
 struct OBBContext
 {
     int unk00;
-    int FUN_00ebc2a0(OBBContext* pkOther, float* pfTime, NiPoint3* pkPoint);
+    int NiOBBox_FindIntersection(OBBContext* pkOther, float* pfTime, NiPoint3* pkPoint);
     void ProjectOntoAxes(NiPoint3* pkPoint, NiPoint3* pkNormal);
 };
 
@@ -619,13 +619,14 @@ struct OBBLeaf
     int unk78;
     OBBShape* m_pkShape;
 
-    int FUN_00eb9b00(OBBLeaf* pkOther, int iA, int iB, int iC, int iD, bool* pbHit);
+    int NiOBBNode_BoxBoxCollision(OBBLeaf* pkOther, int iA, int iB, int iC, int iD, bool* pbHit);
     int RunSwapTests(OBBCollisionRecord* pkRecord);
 };
 
 // On a collision, sets pbHit, projects the contact point onto both contexts' axes, and runs swap tests.
 // @fnv 0x00eb9b00
-int OBBLeaf::FUN_00eb9b00(OBBLeaf* pkOther, int iA, int iB, int iC, int iD, bool* pbHit)
+// src: GAMEBRYO_LIB 0x00eb9b00
+int OBBLeaf::NiOBBNode_BoxBoxCollision(OBBLeaf* pkOther, int iA, int iB, int iC, int iD, bool* pbHit)
 {
     OBBCollisionRecord kRecord;
     kRecord.m_iE = 0;
@@ -649,7 +650,7 @@ int OBBLeaf::FUN_00eb9b00(OBBLeaf* pkOther, int iA, int iB, int iC, int iD, bool
     }
     else
     {
-        iCollide = m_kContext.FUN_00ebc2a0(&pkOther->m_kContext, &kRecord.m_fTime, &kRecord.m_kPoint);
+        iCollide = m_kContext.NiOBBox_FindIntersection(&pkOther->m_kContext, &kRecord.m_fTime, &kRecord.m_kPoint);
     }
     if (iCollide)
     {
@@ -688,7 +689,7 @@ struct RayTree
     RayTree* m_0x84;
     int m_0x88;
     bool FUN_00eb6b70();
-    int FUN_00eb9b00(RayTree* pOther, void* a2, void* a3, void* a4, void* a5, void* a10);
+    int NiOBBNode_BoxBoxCollision(RayTree* pOther, void* a2, void* a3, void* a4, void* a5, void* a10);
 };
 
 // Checks bounds, then tests this node or recursively tests its children, returning a positive result or 0.
@@ -709,11 +710,11 @@ int RayTree::Intersect(RayTree* pOther, void* a2, void* a3, void* a4, void* a5, 
         pOther->context.UpdateWorldBounds((char*)a5 + 0x68);
         pOther->m_0x88 = aiBoundsIdB;
     }
-    if (!context.FUN_00eba680(&pOther->context))
+    if (!context.NiOBBox_TestIntersection(&pOther->context))
         goto fail;
 
     if (!aiDepthA || !adDepthB)
-        return FUN_00eb9b00(pOther, a2, a3, a4, a5, a10);
+        return NiOBBNode_BoxBoxCollision(pOther, a2, a3, a4, a5, a10);
 
     if (Slot04())
     {
@@ -729,7 +730,7 @@ int RayTree::Intersect(RayTree* pOther, void* a2, void* a3, void* a4, void* a5, 
             goto fail;
         }
         int b;
-        b = FUN_00eb9b00(pOther, a2, a3, a4, a5, a10);
+        b = NiOBBNode_BoxBoxCollision(pOther, a2, a3, a4, a5, a10);
         if (b >= 1)
             return b;
         goto fail;
@@ -742,7 +743,7 @@ int RayTree::Intersect(RayTree* pOther, void* a2, void* a3, void* a4, void* a5, 
             RayTree* child = m_0x80;
             if (!child || !m_0x84)
             {
-                int result = FUN_00eb9b00(pOther, a2, a3, a4, a5, a10);
+                int result = NiOBBNode_BoxBoxCollision(pOther, a2, a3, a4, a5, a10);
                 _ReadWriteBarrier();
                 return result;
             }
@@ -761,7 +762,7 @@ int RayTree::Intersect(RayTree* pOther, void* a2, void* a3, void* a4, void* a5, 
 
             static_cast<volatile int&>(aiDepthA) = aiDepthA - 1;
             if (!child || !m_0x84)
-                return FUN_00eb9b00(pOther, a2, a3, a4, a5, a10);
+                return NiOBBNode_BoxBoxCollision(pOther, a2, a3, a4, a5, a10);
             int b = child->Intersect(pOther, a2, a3, a4, a5, aiDepthA, adDepthB, aiBoundsIdA, aiBoundsIdB, a10);
             if (b >= 1)
                 return b;
@@ -780,12 +781,13 @@ static __forceinline float dotProduct(const V3& a, const V3& b)
 }
 struct RayNodeW7_Derived : RayNodeW7
 {
-    void FUN_00eb8dc0(const V3* vertices, int first, int last, const int* srcIndices, int* outLeft, int* outRight,
+    void NiOBBNode_DivideTriangles(const V3* vertices, int first, int last, const int* srcIndices, int* outLeft, int* outRight,
                       int* dstIndices);
 };
 
 // @fnv 0x00eb8dc0
-void RayNodeW7_Derived::FUN_00eb8dc0(const V3* vertices, int first, int last, const int* srcIndices, int* outLeft,
+// src: GAMEBRYO_LIB 0x00eb8dc0
+void RayNodeW7_Derived::NiOBBNode_DivideTriangles(const V3* vertices, int first, int last, const int* srcIndices, int* outLeft,
                                      int* outRight, int* dstIndices)
 {
 
@@ -847,7 +849,7 @@ void RayNodeW7_Derived::FUN_00eb8dc0(const V3* vertices, int first, int last, co
 
 struct S00eb9fa0_Pool
 {
-    void* FUN_00aa3e40(unsigned int s);
+    void* Game_DoHeapAlloc(unsigned int s);
 };
 extern S00eb9fa0_Pool DAT_011f6238;
 struct BuildBox
@@ -867,7 +869,7 @@ struct S00eb9fa0_Node
     virtual ~S00eb9fa0_Node();
     static void* operator new(unsigned int s)
     {
-        return DAT_011f6238.FUN_00aa3e40(s);
+        return DAT_011f6238.Game_DoHeapAlloc(s);
     }
     S00eb9fa0_Node()
     {
@@ -877,7 +879,7 @@ struct S00eb9fa0_Node
     }
     void ComputeTriangleBounds(void* a0, const unsigned short* a1, const V3* a2, float* a3, V3* a4, int iStart,
                                int iEnd, int* a7);
-    __declspec(noalias) void FUN_00eb8dc0(V3* a5, int iStart, int iEnd, int* a7, int* piMid, int* piRight, int* a8);
+    __declspec(noalias) void NiOBBNode_DivideTriangles(V3* a5, int iStart, int iEnd, int* a7, int* piMid, int* piRight, int* a8);
     void BuildNode(void* a0, const unsigned short* a1, const V3* a2, const V3* a3, float* a4, V3* a5, int iStart,
                    int iEnd, int* a7, int* a8, int iMin);
 };
@@ -904,7 +906,7 @@ void S00eb9fa0_Node::BuildNode(void* a0, const unsigned short* apIndices, const 
         int iSplit, iNext;
         {
             int iMid, iRight;
-            FUN_00eb8dc0(a5, iStart, iEnd, a7, &iMid, &iRight, apOrder);
+            NiOBBNode_DivideTriangles(a5, iStart, iEnd, a7, &iMid, &iRight, apOrder);
             iSplit = iMid;
             iNext = iRight;
         }

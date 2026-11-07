@@ -4,7 +4,7 @@
 
 // src/havok/physics/collide/query/collector/raycollector/hkpallrayhitcollector.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/query/collector/raycollector/hkpallrayhitcollector.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-void __cdecl FUN_00c852c0(void* owner, int a2, int a3, int a4);
+void __cdecl hkAlgorithm_quickSortRecursive_hknpCollisionResult_hkAlgorithm_less_hknpCollisionResult(void* owner, int a2, int a3, int a4);
 class FUN_00c855f0_cls
 {
   public:
@@ -15,7 +15,7 @@ class FUN_00c855f0_cls
     void* m_10;
     int m_14;
 
-    void FUN_00c855f0();
+    void hknpAllHitsCollector_sortHits();
 };
 
 #include <xmmintrin.h>
@@ -71,7 +71,8 @@ template <typename T> static __forceinline void swap(T& a, T& b)
 }
 
 // @fnv 0x00c852c0
-void __cdecl FUN_00c852c0(Item* arr, int low, int high, int a4)
+// src: COMMUNITY 0x00c852c0
+void __cdecl hkAlgorithm_quickSortRecursive_hknpCollisionResult_hkAlgorithm_less_hknpCollisionResult(Item* arr, int low, int high, int a4)
 {
     int i = low;
     int j = high;
@@ -101,7 +102,7 @@ void __cdecl FUN_00c852c0(Item* arr, int low, int high, int a4)
     } while (i <= j);
 
     if (low < j)
-        FUN_00c852c0(arr, low, j, a4);
+        hkAlgorithm_quickSortRecursive_hknpCollisionResult_hkAlgorithm_less_hknpCollisionResult(arr, low, j, a4);
     if (i < high)
-        FUN_00c852c0(arr, i, high, a4);
+        hkAlgorithm_quickSortRecursive_hknpCollisionResult_hkAlgorithm_less_hknpCollisionResult(arr, i, high, a4);
 }

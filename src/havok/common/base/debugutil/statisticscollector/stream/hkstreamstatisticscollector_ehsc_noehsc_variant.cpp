@@ -25,16 +25,16 @@ struct VirtualBase
 };
 struct FUN_00ddf020_Class
 {
-    void __thiscall FUN_00ddf020();
+    void __thiscall Dispatch_Thunk();
 };
 struct BSAudio;
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* audio()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
-extern "C" void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* arr, int capacity, int elemSize);
-extern "C" void __cdecl FUN_00cb1260(void* dst, const void* src, int n);
+extern "C" void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* alloc, void* arr, int capacity, int elemSize);
+extern "C" void __cdecl hkString_memCpy(void* dst, const void* src, int n);
 union Swap16
 {
     unsigned short u;
@@ -62,7 +62,7 @@ struct Obj
     void SetData(const void* src, int n, hkBool swap);
 };
 void __cdecl ResizeAudioStream(void* heap, void* arr, int elemSize);
-static int* FUN_00ddf370(hkArray<char>* a, int n);
+static int* _newCommand(hkArray<char>* a, int n);
 int* __cdecl fnv_caller(hkArray<char>* a, int n);
 inline void* operator new(size_t, void* p)
 {
@@ -103,9 +103,9 @@ struct MonitorNode
 struct MonitorString
 {
     unsigned int tagged;
-    void FUN_00cb0b80(const char* s);
+    void InitializeTextHandle(const char* s);
     void FUN_00cb0bd0(const MonitorString& s);
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
 struct MonitorStrings
 {
@@ -113,8 +113,9 @@ struct MonitorStrings
     int size;
     int capacity;
 };
-extern "C" int __cdecl FUN_00cb0fa0(const char* a, const char* b);
-static __declspec(noinline) MonitorNode* FUN_00ddf070(const char* name, MonitorStrings* strings, MonitorNode* parent,
+extern "C" int __cdecl hkString_strCmp(const char* a, const char* b);
+// src: HAVOK_LIB 0x00ddf070
+static __declspec(noinline) MonitorNode* _newNode(const char* name, MonitorStrings* strings, MonitorNode* parent,
                                                       int first, int second)
 {
     if (!name)
@@ -124,7 +125,7 @@ static __declspec(noinline) MonitorNode* FUN_00ddf070(const char* name, MonitorS
     MonitorNode* node = 0;
     for (int i = 0; parent && i < parent->children.size; ++i)
     {
-        if (!FUN_00cb0fa0(parent->children.data[i]->name, name))
+        if (!hkString_strCmp(parent->children.data[i]->name, name))
         {
             node = parent->children.data[i];
             break;
@@ -135,14 +136,14 @@ static __declspec(noinline) MonitorNode* FUN_00ddf070(const char* name, MonitorS
         if (strings && name)
         {
             MonitorString text;
-            text.FUN_00cb0b80(name);
+            text.InitializeTextHandle(name);
             void* heap = audio()->m_heap;
             if (strings->size == (strings->capacity & 0x3fffffff))
                 ResizeAudioStream(heap, strings, 4);
             if (&strings->data[strings->size])
                 strings->data[strings->size].FUN_00cb0bd0(text);
             ++strings->size;
-            text.FUN_00cb0c00();
+            text.Object_UpdateFields_00cb0c00();
             name = (const char*)(strings->data[strings->size - 1].tagged & ~1u);
         }
         hkMemoryAllocator* allocator = audio()->m_heap;
@@ -185,7 +186,7 @@ class ObjDDF9
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
     int unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C, unk50, unk54;
 };
-void __stdcall FUN_00ddf740(hkArray<ObjDDF9*>& kArray, int iParam) throw();
+void __stdcall hkStreamStatisticsCollector_makeTree(hkArray<ObjDDF9*>& kArray, int iParam) throw();
 void __stdcall ClearAllItems(int iUnused0, int iUnused1);
 extern int DAT_010d8040;
 struct SubBase
@@ -194,7 +195,7 @@ struct SubBase
 };
 inline hkMemoryRouter* holderGet()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 struct SpawnedHandle
 {
@@ -216,7 +217,7 @@ struct SpawnedHandle
         if (getCap() < n)
         {
             int cap = 2 * getCap();
-            FUN_00c908c0(&alloc, this, n < cap ? cap : n, 1);
+            hkArrayUtil__reserve(&alloc, this, n < cap ? cap : n, 1);
         }
         m_uiFilterValue = n;
     }
@@ -231,14 +232,14 @@ struct FUN_00ddf170_cls
     SpawnedHandle m_14;
     SpawnedHandle m_20;
 
-    FUN_00ddf170_cls* FUN_00ddf170(int a1, int a2);
+    FUN_00ddf170_cls* hkStreamStatisticsCollector_hkStreamStatisticsCollector(int a1, int a2);
 };
-int FUN_00cb10d0(const char* s);
+int hkString_strLen(const char* s);
 struct StrPacker
 {
     int unk00, unk04, unk08, unk0c, unk10;
     hkArray<char> m14;
-    void FUN_00ddf5a0(const char* str);
+    void hkStreamStatisticsCollector_pushDir(const char* str);
 };
 struct FUN_00ddeff0
 {
@@ -273,7 +274,7 @@ struct FUN_00ddeff0
 };
 struct FUN_00ddf640_Cls : Obj
 {
-    unsigned char* FUN_00ddf640();
+    unsigned char* hkStreamStatisticsCollector_popDir();
 };
 
 struct MonitorTreeNode
@@ -308,11 +309,12 @@ template <class T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocato
 
 struct MonitorTreeBuilder : Obj
 {
-    void FUN_00ddf740(hkArray<MonitorNode*>* roots, MonitorStrings* strings);
+    void hkStreamStatisticsCollector_makeTree(hkArray<MonitorNode*>* roots, MonitorStrings* strings);
 };
 
 // @fnv 0x00ddf740
-void MonitorTreeBuilder::FUN_00ddf740(hkArray<MonitorNode*>* roots, MonitorStrings* strings)
+// src: HAVOK_LIB 0x00ddf740
+void MonitorTreeBuilder::hkStreamStatisticsCollector_makeTree(hkArray<MonitorNode*>* roots, MonitorStrings* strings)
 {
     hkArray<MonitorNode*> stack;
     MonitorNode* top;
@@ -350,12 +352,12 @@ void MonitorTreeBuilder::FUN_00ddf740(hkArray<MonitorNode*>* roots, MonitorStrin
             break;
         case 'P': {
             MonitorNode* parent = stack.back();
-            MonitorNode* child = FUN_00ddf070(name, strings, parent, rec->a, rec->b);
+            MonitorNode* child = _newNode(name, strings, parent, rec->a, rec->b);
             stack.pushBack(child);
             break;
         }
         case 'C':
-            FUN_00ddf070(name, strings, stack.back(), rec->a, rec->b);
+            _newNode(name, strings, stack.back(), rec->a, rec->b);
             break;
         default:
             return;

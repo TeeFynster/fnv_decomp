@@ -1119,13 +1119,13 @@ class BaseProcess
     void SetPlaybackTime(Actor*, TESObjectREFR*, bool);
     void FUN_007037c0(unsigned int);
     float FUN_007df1f0();
-    void FUN_00693d50(float);
+    void BaseProcess_SetLastTimeProcessed(float);
     unsigned int FUN_0059bb30();
     double GetField43C();
     float GetField440();
-    void FUN_00977c90(float);
+    void HighProcess_SetRadiationLevel(float);
     void AddAvoidArea(Actor*, NiPoint3, float, float, float, TESObjectREFR*, bool);
-    void FUN_008c8fd0(bool active);
+    void HighProcess_SetSkippedLastUpdate(bool active);
 
     void SetLipSyncEnabled(bool abVal);
 };

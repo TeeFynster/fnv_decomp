@@ -9,5 +9,5 @@ public:
         unsigned char value;
     };
 
-    void FUN_00ca9360(const float*);
+    void FindFloatTableIndex(const float*);
 };

@@ -6,8 +6,8 @@
 #include "../../include/TESForm.h"
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
-unsigned int FUN_0054f4c0();
-NiAVObject* FUN_0054f4f0();
+unsigned int TESTerrainLODManager_GetGrassNode();
+NiAVObject* TESMain_GetWeatherRoot();
 
 #include "../../include/BSSimpleList.h"
 
@@ -44,25 +44,25 @@ extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 class FUN_00439f90_shell
 {
   public:
-    bool FUN_00439f90();
+    bool TESObjectREFR_IsMultiBoundRef();
 };
 
 class FUN_00569ac0_shell
 {
   public:
-    TESObjectREFR* FUN_00569ac0();
+    TESObjectREFR* TESObjectREFR_GetMultiBoundRef();
 };
 
 class FUN_005656d0_shell
 {
   public:
-    bool FUN_005656d0();
+    bool TESObjectREFR_HasScript();
 };
 
 class FUN_0056a250_shell
 {
   public:
-    bool FUN_0056a250();
+    bool TESObjectREFR_IsActivatingChildren();
 };
 
 class FUN_00545740_shell
@@ -74,13 +74,13 @@ class FUN_00545740_shell
 class FUN_00545960_shell
 {
   public:
-    void* FUN_00545960(TESObjectREFR*);
+    void* TESObjectCELL_GetMultiBoundNode(TESObjectREFR*);
 };
 
 class FUN_00587870_shell
 {
   public:
-    BSSimpleList<TESObjectREFR*>* FUN_00587870(TESObjectCELL*);
+    BSSimpleList<TESObjectREFR*>* TESWorldSpace_GetOverlappedMultiBoundRefs(TESObjectCELL*);
 };
 
 class BSSimpleList_standin
@@ -154,11 +154,12 @@ class CellSubTarget
 class Cell_Sub : public TESObjectCELL
 {
   public:
-    void FUN_00544ce0();
+    void TESObjectCELL_CreateLoadedData();
 };
 
 // @fnv 0x00544ce0
-void Cell_Sub::FUN_00544ce0()
+// src: COMMUNITY 0x00544ce0
+void Cell_Sub::TESObjectCELL_CreateLoadedData()
 {
     if (((CellC4Holder*)this)->unkC4 == 0)
     {
@@ -166,17 +167,17 @@ void Cell_Sub::FUN_00544ce0()
     }
     CellRefLockEnter();
     BSSimpleList<TESObjectREFR*> localList9;
-    BSSimpleList<TESObjectREFR*>* iter = (BSSimpleList<TESObjectREFR*>*)FUN_009604f0();
+    BSSimpleList<TESObjectREFR*>* iter = (BSSimpleList<TESObjectREFR*>*)GetRefList_009604f0();
     while (iter != 0 && !iter->IsEmpty())
     {
         TESObjectREFR* item5 = iter->GetItem();
         iter = iter->GetNext();
-        if (!((TESForm*)item5)->GetDeleted() || g_BGSSaveLoadGame->FUN_0042ce10())
+        if (!((TESForm*)item5)->GetDeleted() || g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading())
         {
-            if (((FUN_00439f90_shell*)item5)->FUN_00439f90())
+            if (((FUN_00439f90_shell*)item5)->TESObjectREFR_IsMultiBoundRef())
             {
                 ((FUN_00545740_shell*)this)->GetOrCreateFaceGenNode(item5);
-                if (((FUN_00569ac0_shell*)item5)->FUN_00569ac0())
+                if (((FUN_00569ac0_shell*)item5)->TESObjectREFR_GetMultiBoundRef())
                 {
                     localList9.AddHead(item5);
                 }
@@ -185,12 +186,12 @@ void Cell_Sub::FUN_00544ce0()
             {
                 if (!((TESForm*)item5)->IsActor())
                 {
-                    if (((FUN_005656d0_shell*)item5)->FUN_005656d0())
+                    if (((FUN_005656d0_shell*)item5)->TESObjectREFR_HasScript())
                     {
                         ((CellC4Holder*)this)->unkC4->list4C.AddHead(item5);
                     }
                 }
-                if (((FUN_0056a250_shell*)item5)->FUN_0056a250())
+                if (((FUN_0056a250_shell*)item5)->TESObjectREFR_IsActivatingChildren())
                 {
                     ((CellC4Holder*)this)->unkC4->list54.AddHead(item5);
                 }
@@ -202,9 +203,9 @@ void Cell_Sub::FUN_00544ce0()
     {
         TESObjectREFR* item3 = localList9.GetItem();
         ((BSSimpleList_standin*)&localList9)->FUN_0063f7b0();
-        TESObjectREFR* other = ((FUN_00569ac0_shell*)item3)->FUN_00569ac0();
-        CellSubTarget* a8 = (CellSubTarget*)((FUN_00545960_shell*)this)->FUN_00545960(item3);
-        CellSubTarget* b2 = (CellSubTarget*)((FUN_00545960_shell*)this)->FUN_00545960(other);
+        TESObjectREFR* other = ((FUN_00569ac0_shell*)item3)->TESObjectREFR_GetMultiBoundRef();
+        CellSubTarget* a8 = (CellSubTarget*)((FUN_00545960_shell*)this)->TESObjectCELL_GetMultiBoundNode(item3);
+        CellSubTarget* b2 = (CellSubTarget*)((FUN_00545960_shell*)this)->TESObjectCELL_GetMultiBoundNode(other);
         if (a8 != b2)
         {
             b2->Unk_37(a8, 1);
@@ -213,7 +214,7 @@ void Cell_Sub::FUN_00544ce0()
     TESWorldSpace* extra9 = GetParentWorldSpace();
     if (extra9 != 0)
     {
-        iter = ((FUN_00587870_shell*)extra9)->FUN_00587870(this);
+        iter = ((FUN_00587870_shell*)extra9)->TESWorldSpace_GetOverlappedMultiBoundRefs(this);
         while (iter != 0 && !iter->IsEmpty())
         {
             ((FUN_00545740_shell*)this)->GetOrCreateFaceGenNode(iter->GetItem());

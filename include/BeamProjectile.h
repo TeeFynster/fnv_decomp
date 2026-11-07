@@ -25,19 +25,19 @@ public:
 
     void LoadProjectile(BGSLoadFormBuffer* apLoadGameBuffer);
     void SaveProjectile(BGSSaveFormBuffer* apSaveGameBuffer);
-    void FUN_009b4cf0(BGSLoadFormBuffer* apLoadGameBuffer);
-    void FUN_009abf10(BGSLoadFormBuffer* apLoadGameBuffer);
-    void FUN_009bab00(BGSLoadFormBuffer* apLoadGameBuffer);
-    void FUN_00979bb0(BGSSaveFormBuffer* apSaveGameBuffer);
-    void FUN_009abef0(BGSLoadFormBuffer* apLoadGameBuffer);
+    void LoadGame_009b4cf0(BGSLoadFormBuffer* apLoadGameBuffer);
+    void RevertBGS_009abf10(BGSLoadFormBuffer* apLoadGameBuffer);
+    void InitLoadGame_009bab00(BGSLoadFormBuffer* apLoadGameBuffer);
+    void SaveGame_00979bb0(BGSSaveFormBuffer* apSaveGameBuffer);
+    void FinishLoadGame_009abef0(BGSLoadFormBuffer* apLoadGameBuffer);
 
-    void FUN_00979140();
-    void __thiscall FUN_00979280();
-    unsigned char FUN_00979510(void* a1, void* a2, void* a3,
+    void Process3D();
+    void __thiscall Initialize_00979280();
+    unsigned char AddImpact(void* a1, void* a2, void* a3,
                               void* a4, void* a5, void* a6);
-    void FUN_009795c0(float value);
-    void FUN_009795e0(NiAVObject* apObject, float scale);
-    float FUN_00979840(NiGeometry* arg);
-    float FUN_00979840(NiAVObject* obj);
+    void Projectile_SetRange(float value);
+    void ScaleBeamGeometryLength(NiAVObject* apObject, float scale);
+    float FindBeamGeometryLength(NiGeometry* arg);
+    float FindBeamGeometryLength(NiAVObject* obj);
     void ScaleNode(NiAVObject* node, float fScale, float fDivisor);
 };

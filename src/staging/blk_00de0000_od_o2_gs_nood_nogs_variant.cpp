@@ -137,7 +137,8 @@ static inline void memCpy16(void* dst, const void* src, int numQuads)
 }
 
 // @fnv 0x00df7760
-void FUN_00df7760(const CastSettings* settings, const CollisionAgentContext* in, CastJob* jobs, int numJobs)
+// src: XBOX_PDB 0x00df7760
+void hkCpuPairLinearCastImplementation(const CastSettings* settings, const CollisionAgentContext* in, CastJob* jobs, int numJobs)
 {
     RootContactPoint shapeB[16];
     RootContactPoint idx[16];
@@ -198,7 +199,8 @@ inline hkxNode::hkxNode(FinishingFlag flag) throw()
 {}
 
 // @fnv 0x00dfd800
-void* __cdecl FUN_00dfd800()
+// src: GUESS 0x00dfd800 (confidence: low)
+void* __cdecl Object_ProcessAndReturnValue_00dfd800()
 {
     __declspec(align(16)) unsigned char storage[sizeof(hkxNode)];
     ::new (storage) hkxNode(FinishingFlag(0));

@@ -9638,13 +9638,14 @@ GlobalObject_00a7b610 g_012043dc(g_012043dc_arg0, g_012043dc_arg1);
 // @fnv 0x00fbc9a0
 GlobalObject_00a7b610 g_012043e4(g_012043e4_arg0, g_012043e4_arg1);
 
-extern void __cdecl FUN_00632e30();
+extern void __cdecl SettingT_BlendSettingCollection_InitCollection();
 extern int DAT_011cc694;
 
 // @fnv 0x00632e20
-int __cdecl FUN_00632e20()
+// src: XBOX_PDB 0x00632e20
+int __cdecl SettingT_BlendSettingCollection_QCollection()
 {
-    FUN_00632e30();
+    SettingT_BlendSettingCollection_InitCollection();
     return DAT_011cc694;
 }
 
@@ -9669,11 +9670,12 @@ extern void* DAT_010827e8;
 struct FUN_008699c0_shell
 {
     void FUN_00869aa0(unsigned int maxSize, unsigned int growBy);
-    void* FUN_008699c0(unsigned int maxSize, unsigned int growBy);
+    void* NiTObjectArray_TESObjectREFR_NiTObjectArray(unsigned int maxSize, unsigned int growBy);
 };
 
 // @fnv 0x008699c0
-void* FUN_008699c0_shell::FUN_008699c0(unsigned int maxSize, unsigned int growBy)
+// src: EXE 0x008699c0
+void* FUN_008699c0_shell::NiTObjectArray_TESObjectREFR_NiTObjectArray(unsigned int maxSize, unsigned int growBy)
 {
     FUN_00869aa0(maxSize, growBy);
     *(void**)this = &DAT_010827e8;
@@ -9683,7 +9685,7 @@ void* FUN_008699c0_shell::FUN_008699c0(unsigned int maxSize, unsigned int growBy
 struct FUN_00869b10_shell
 {
     void* m_vft;
-    void* __thiscall FUN_00869b10(void* a, void* b);
+    void* __thiscall NiTObjectArray_BipedAnim_NiTObjectArray(void* a, void* b);
 };
 
 struct FUN_00869bf0_holder
@@ -9695,7 +9697,8 @@ void __thiscall FUN_00869bf0_holder::FUN_00869bf0(void* a, void* b)
 {}
 
 // @fnv 0x00869b10
-void* __thiscall FUN_00869b10_shell::FUN_00869b10(void* a, void* b)
+// src: EXE 0x00869b10
+void* __thiscall FUN_00869b10_shell::NiTObjectArray_BipedAnim_NiTObjectArray(void* a, void* b)
 {
     extern void* DAT_010827f8;
     ((FUN_00869bf0_holder*)this)->FUN_00869bf0(a, b);
@@ -9706,21 +9709,22 @@ void* __thiscall FUN_00869b10_shell::FUN_00869b10(void* a, void* b)
 struct AX
 {
     void* m_vft;
-    void FUN_006b3eb0(unsigned int, unsigned int);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 };
 extern void* DAT_0106ba6c;
 
 struct FUN_00869f00_shell
 {
     void* m_vft;
-    void* FUN_00869f00(unsigned int a, unsigned int b);
+    void* BSSimpleArray_NavMesh_1024_BSSimpleArray_NavMesh_1024_00869f00(unsigned int a, unsigned int b);
 };
 
 // @fnv 0x00869f00
-void* FUN_00869f00_shell::FUN_00869f00(unsigned int a, unsigned int b)
+// src: COMMUNITY 0x00869f00
+void* FUN_00869f00_shell::BSSimpleArray_NavMesh_1024_BSSimpleArray_NavMesh_1024_00869f00(unsigned int a, unsigned int b)
 {
     this->m_vft = &DAT_0106ba6c;
-    ((AX*)this)->FUN_006b3eb0(a, b);
+    ((AX*)this)->BSSimpleArray_float_1024_InitialSetup(a, b);
     return this;
 }
 
@@ -9743,10 +9747,11 @@ struct StandIn_00559cc0
 {
     int m0;
     void InitArray(int);
-    StandIn_00559cc0* FUN_00559cc0(int);
+    StandIn_00559cc0* NiTMap_TESObjectREFR_TESObjectREFR_NiTMap(int);
 };
 // @fnv 0x00559cc0
-StandIn_00559cc0* StandIn_00559cc0::FUN_00559cc0(int a)
+// src: EXE 0x00559cc0
+StandIn_00559cc0* StandIn_00559cc0::NiTMap_TESObjectREFR_TESObjectREFR_NiTMap(int a)
 {
     InitArray(a);
     m0 = (int)&DAT_0102f408;
@@ -9772,10 +9777,11 @@ struct FUN_00709f80_Obj
     int m3;
     int m4;
     int m5;
-    FUN_00709f80_Obj* FUN_00709f80();
+    FUN_00709f80_Obj* QueuedMenuRequest_QueuedMenuRequest();
 };
 // @fnv 0x00709f80
-FUN_00709f80_Obj* FUN_00709f80_Obj::FUN_00709f80()
+// src: COMMUNITY 0x00709f80
+FUN_00709f80_Obj* FUN_00709f80_Obj::QueuedMenuRequest_QueuedMenuRequest()
 {
     m0 = 0;
     m1 = 0;
@@ -9839,7 +9845,7 @@ FUN_0045cf30::FUN_0045cf30(unsigned int uiValue, unsigned char ucType) : B45CF30
 
 class FUN_0045d060;
 
-void* FUN_0045d180();
+void* SettingT_RendererSettingCollection_GetCollection();
 
 class FloatNamedBase
 {
@@ -9866,12 +9872,12 @@ class FUN_0045d060 : public FloatNamedBase
 // @fnv 0x0045d060
 FUN_0045d060::FUN_0045d060(const char* name, float value) : FloatNamedBase(name, value)
 {
-    ((FloatObjectRegistry*)FUN_0045d180())->Register(this);
+    ((FloatObjectRegistry*)SettingT_RendererSettingCollection_GetCollection())->Register(this);
 }
 
 class FUN_004a4a40;
 
-void* __cdecl FUN_0045d180();
+void* __cdecl SettingT_RendererSettingCollection_GetCollection();
 
 class NamedBase
 {
@@ -9898,7 +9904,7 @@ class FUN_004a4a40 : public NamedBase
 // @fnv 0x004a4a40
 FUN_004a4a40::FUN_004a4a40(const char* name, int value) : NamedBase(name, value)
 {
-    ((ObjectRegistry*)FUN_0045d180())->Register(this);
+    ((ObjectRegistry*)SettingT_RendererSettingCollection_GetCollection())->Register(this);
 }
 
 struct FUN_004de2f0_base
@@ -9982,7 +9988,7 @@ class FUN_00632ee0 : public NamedBase
 // @fnv 0x00632ee0
 FUN_00632ee0::FUN_00632ee0(const char* name, float value) : NamedBase(name, value)
 {
-    ((ObjectRegistry*)FUN_00632e20())->Register(this);
+    ((ObjectRegistry*)SettingT_BlendSettingCollection_QCollection())->Register(this);
 }
 }  // namespace fnv_00632ee0
 

@@ -15,7 +15,7 @@ extern "C" void __cdecl _delete(void*, unsigned int);
 // @fnv 0x00e898a0
 void* NiD3DShaderProgram::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_00e89840();
+    UpdateFields_00e89840();
     if (flags & 1)
         _delete(this, 0x2c);
     return this;
@@ -72,8 +72,8 @@ void __cdecl _NiFreeAlias(void*);
 extern int DAT_010f119c;
 struct S
 {
-    void FUN_00e971d0();
-    void FUN_00e89b70();
+    void SetVtableAndProcessState_00e971d0();
+    void RemoveDeviceAndClearShader();
 };
 struct ComObj
 {
@@ -83,7 +83,8 @@ struct ComObj
 };
 // Sets the vtable, frees the two pointers at offsets 0x3C and 0x40, releases and clears the ComObj at 0x44, then calls FUN_00e89b70.
 // @fnv 0x00e971d0
-void S::FUN_00e971d0()
+// src: GUESS 0x00e971d0 (confidence: low)
+void S::SetVtableAndProcessState_00e971d0()
 {
     void* v1 = *(void**)((char*)this + 0x3C);
     *(void**)this = (void*)&DAT_010f119c;
@@ -95,7 +96,7 @@ void S::FUN_00e971d0()
         p->Release();
         *(ComObj**)((char*)this + 0x44) = 0;
     }
-    FUN_00e89b70();
+    RemoveDeviceAndClearShader();
 }
 
 __declspec(noinline) void RemoveDeviceFromMap(Direct3DDeviceInterface*);
@@ -108,7 +109,8 @@ struct FUN_00e69970_class
 
 // Sets the vtable, removes this device from the map, calls FUN_00e69970 when offset 0x34 is nonzero using the pointer at 0x24, then calls FUN_00e89840.
 // @fnv 0x00e89b70
-__declspec(noinline) void S::FUN_00e89b70()
+// src: GUESS 0x00e89b70 (confidence: medium)
+__declspec(noinline) void S::RemoveDeviceAndClearShader()
 {
     char* self = (char*)this;
     *(void**)self = (void*)&DAT_010ef87c;
@@ -117,5 +119,5 @@ __declspec(noinline) void S::FUN_00e89b70()
     {
         ((FUN_00e69970_class*)*(void**)(self + 0x24))->ClearShader(this);
     }
-    ((NiD3DShaderProgram*)this)->FUN_00e89840();
+    ((NiD3DShaderProgram*)this)->UpdateFields_00e89840();
 }

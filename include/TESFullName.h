@@ -39,7 +39,7 @@ public:
     void* GetFullNameString();
     unsigned int GetModelLength() const;
     int GetLength() const;
-    void FUN_00487010();
+    void Save_00487010();
     void FUN_00402d00();
 
     BSStringT<char> m_kName;

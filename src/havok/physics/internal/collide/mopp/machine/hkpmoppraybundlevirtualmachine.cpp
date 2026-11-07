@@ -16,12 +16,13 @@ __declspec(align(16)) struct FUN_00dd4a50_cls
     unsigned int m_i30;
     unsigned int m_i34;
 
-    FUN_00dd4a50_cls* FUN_00dd4a50(const FUN_00dd4a50_cls* src);
+    FUN_00dd4a50_cls* InitializeFields_00dd4a50(const FUN_00dd4a50_cls* src);
 };
 
 // Copies m_v00, m_i10, m_v20, m_i30 and m_i34 from src into this and returns this.
 // @fnv 0x00dd4a50
-FUN_00dd4a50_cls* FUN_00dd4a50_cls::FUN_00dd4a50(const FUN_00dd4a50_cls* src)
+// src: GUESS 0x00dd4a50 (confidence: low)
+FUN_00dd4a50_cls* FUN_00dd4a50_cls::InitializeFields_00dd4a50(const FUN_00dd4a50_cls* src)
 {
     m_v00 = src->m_v00;
     m_i10 = src->m_i10;
@@ -51,12 +52,13 @@ struct RayBundleCopy
 {
     S00dd4a90_Rotation m_kLocalRotations[2];
     S00dd4a90_Vec4 m_extra;
-    RayBundleCopy& FUN_00dd4a90(const RayBundleCopy& rhs);
+    RayBundleCopy& CopyRotationsAndExtraVector(const RayBundleCopy& rhs);
 };
 
 // Copies the two local rotation matrices and the extra vector from rhs into this RayBundleCopy and returns a reference to this.
 // @fnv 0x00dd4a90
-RayBundleCopy& RayBundleCopy::FUN_00dd4a90(const RayBundleCopy& rhs)
+// src: GUESS 0x00dd4a90 (confidence: high)
+RayBundleCopy& RayBundleCopy::CopyRotationsAndExtraVector(const RayBundleCopy& rhs)
 {
     for (unsigned int i = 0; i < 2; ++i)
         m_kLocalRotations[i] = rhs.m_kLocalRotations[i];

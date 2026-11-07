@@ -167,12 +167,13 @@ void MapMarkerData::SetTravelLocation(bool travelLoc)
 class MapMarkerCompare : public MapMarkerData
 {
   public:
-    bool FUN_00438e40(MapMarkerData* other);
+    bool MapMarkerData_Compare(MapMarkerData* other);
 };
 
 // Returns true if any of LocationName, cFlags, sType, or pReputationData differs from the other MapMarkerData.
 // @fnv 0x00438e40
-bool MapMarkerCompare::FUN_00438e40(MapMarkerData* other)
+// src: XBOX_PDB 0x00438e40
+bool MapMarkerCompare::MapMarkerData_Compare(MapMarkerData* other)
 {
     if (LocationName.CompareWithBase(reinterpret_cast<BaseFormComponent*>(other)))
         return true;
@@ -187,11 +188,12 @@ bool MapMarkerCompare::FUN_00438e40(MapMarkerData* other)
 
 struct StringHolder
 {
-    const char* FUN_00408da0();
-    const char* FUN_00438eb0();
+    const char* TESModel_GetModel();
+    const char* MapMarkerData_GetLocationName();
 };
 // @fnv 0x00438eb0
-const char* StringHolder::FUN_00438eb0()
+// src: XBOX_PDB 0x00438eb0
+const char* StringHolder::MapMarkerData_GetLocationName()
 {
-    return FUN_00408da0();
+    return TESModel_GetModel();
 }

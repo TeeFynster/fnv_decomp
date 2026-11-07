@@ -14,10 +14,11 @@ struct SubAlloc
 };
 struct PointerCountProcessor
 {
-    void FUN_00aa3830(void*, unsigned int);
+    void NiSmallObjectAllocator_Deallocate(void*, unsigned int);
 };
 // @fnv 0x00aa3830
-void PointerCountProcessor::FUN_00aa3830(void* p, unsigned int stNumBytes)
+// src: COMMUNITY 0x00aa3830
+void PointerCountProcessor::NiSmallObjectAllocator_Deallocate(void* p, unsigned int stNumBytes)
 {
     SubAlloc* pAlloc = (SubAlloc*)((char*)this + (stNumBytes << 8) - 0x100);
     void* pCriticalSection = (char*)pAlloc + 0x80;
@@ -161,11 +162,12 @@ struct AllocBlock
 class FUN_00aa3810_cls
 {
   public:
-    int FUN_00aa3810(unsigned int index);
+    int NiSmallObjectAllocator_Allocate(unsigned int index);
 };
 
 // @fnv 0x00aa3810
-int FUN_00aa3810_cls::FUN_00aa3810(unsigned int index)
+// src: COMMUNITY 0x00aa3810
+int FUN_00aa3810_cls::NiSmallObjectAllocator_Allocate(unsigned int index)
 {
     AllocBlock* block = (AllocBlock*)((char*)this + (index << 8) - 0x100);
     return block->FUN_00aa35a0();

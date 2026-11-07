@@ -28,7 +28,7 @@ public:
         int m_iGrow;
 
         unsigned int FUN_0044ddc0();
-        BkButton*& FUN_006a7ad0(unsigned int index);
+        BkButton*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int index);
         void FUN_007cb2e0(BkButton* const& item);
     };
 
@@ -40,7 +40,7 @@ public:
         int m_iGrow;
 
         unsigned int FUN_0044ddc0();
-        BkDisplay*& FUN_006a7ad0(unsigned int index);
+        BkDisplay*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int index);
         void FUN_007cb2e0(BkDisplay* const& item);
     };
 
@@ -58,7 +58,7 @@ public:
         int grow;
 
         unsigned int FUN_0044ddc0();
-        BookButton*& FUN_006a7ad0(unsigned int);
+        BookButton*& BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
     };
 
     struct BookGroup
@@ -131,14 +131,14 @@ public:
     int m1e0;
 
     bool HandleInput(int aiKey);
-    int FUN_007ca030();
-    int FUN_00794d30();
-    int FUN_00794d80();
-    void FUN_007c6200();
+    int GetCurrentStatesActorValue();
+    int LoveTesterMenu_GetCurrentStatesActorValue();
+    int SPECIALBookMenu_GetTotalPointsUsed();
+    void DoIdle_007c6200();
     bool HandleSpecialBookKey(unsigned int key, int unused);
-    bool FUN_007c9dc0(bool forward);
+    bool TurnPage(bool forward);
     void InitMenu();
-    void FUN_007cadd0();
+    void LoadBBTextures();
     void InvokeCallbacksForSlot();
     void HandleKey(unsigned int key, int unused);
 };

@@ -37,7 +37,7 @@ extern void* const NavMeshSearchMaxCost_vftable[];
 // @fnv 0x006ab450
 void* NavMeshSearchMaxCost::Destroy(unsigned int flags)
 {
-    FUN_006ab480();
+    UpdateFields_006ab480();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -50,7 +50,8 @@ int __thiscall NavMeshSearchMaxCost::GetField2048()
 }
 
 // @fnv 0x006abb60
-bool __thiscall NavMeshSearchMaxCost::FUN_006abb60(const SearchNode* apNode)
+// src: XBOX_PDB 0x006abb60
+bool __thiscall NavMeshSearchMaxCost::IsGoalNode_006abb60(const SearchNode* apNode)
 {
     if (!hasGoal)
         return false;
@@ -67,11 +68,12 @@ struct FUN_006abcb0_shell
 {
     char _pad[16];
     ScrapHeapBuffer* heap;
-    void* __thiscall FUN_006abcb0(unsigned int);
+    void* __thiscall BSScrapArray_NavMeshSearchNode_1024_Allocate(unsigned int);
 };
 // Allocates n blocks of 0x14 bytes from the heap and returns the pointer.
 // @fnv 0x006abcb0
-void* __thiscall FUN_006abcb0_shell::FUN_006abcb0(unsigned int auiCount)
+// src: COMMUNITY 0x006abcb0
+void* __thiscall FUN_006abcb0_shell::BSScrapArray_NavMeshSearchNode_1024_Allocate(unsigned int auiCount)
 {
     void* tmp;
     tmp = heap->Allocate(auiCount * 0x14, DAT_010a2720);
@@ -95,11 +97,12 @@ struct FUN_006abce0_shell
 {
     char _pad[0x10];
     ScrapHeapBuffer* heap;
-    void* __thiscall FUN_006abce0(void*, unsigned int);
+    void* __thiscall BSScrapArray_NavMeshSearchNode_1024_Reallocate(void*, unsigned int);
 };
 // Allocates count*0x14 bytes, copies GetFlags()*0x14 bytes from src into it, frees src, and returns the new buffer.
 // @fnv 0x006abce0
-void* __thiscall FUN_006abce0_shell::FUN_006abce0(void* pSource, unsigned int count)
+// src: COMMUNITY 0x006abce0
+void* __thiscall FUN_006abce0_shell::BSScrapArray_NavMeshSearchNode_1024_Reallocate(void* pSource, unsigned int count)
 {
     void* dst = heap->Allocate(count * 0x14, DAT_010a2720);
     __memcpy(dst, pSource, ((NavmeshsearchmaxcostOffset08View*)this)->GetFlags() * 0x14);
@@ -118,11 +121,12 @@ struct GlobalObject_00869f00
 struct FUN_006abdc0_shell
 {
     int* p;
-    void __thiscall FUN_006abdc0();
+    void __thiscall ResetVirtualTableAndClear_006abdc0();
 };
 
 // @fnv 0x006abdc0
-void __thiscall FUN_006abdc0_shell::FUN_006abdc0()
+// src: GUESS 0x006abdc0 (confidence: medium)
+void __thiscall FUN_006abdc0_shell::ResetVirtualTableAndClear_006abdc0()
 {
     p = &DAT_0106b8c8;
     ((GlobalObject_00869f00*)this)->Clear(true);
@@ -158,11 +162,12 @@ extern void* DAT_0106b8a0;
 
 struct FUN_006abc30_shell
 {
-    void __thiscall FUN_006abc30();
+    void __thiscall SetVtableAndProcessState_006abc30();
 };
 
 // @fnv 0x006abc30
-void __thiscall FUN_006abc30_shell::FUN_006abc30()
+// src: GUESS 0x006abc30 (confidence: low)
+void __thiscall FUN_006abc30_shell::SetVtableAndProcessState_006abc30()
 {
     *(void**)this = &DAT_0106b8a0;
     ((GlobalObject_00869f00*)this)->Clear(true);
@@ -195,24 +200,24 @@ struct FUN_00aa42e0_shell
 {
     void* __thiscall FUN_00aa42e0();
 };
-FUN_00aa42e0_shell* __cdecl FUN_00401020();
+FUN_00aa42e0_shell* __cdecl MemoryManager_Instance();
 struct FUN_006abbb0 : FUN_006abf60
 {
     void* unk10;
     FUN_006abbb0();
     virtual ~FUN_006abbb0();
-    void __thiscall FUN_009a3d00(int, int);
+    void __thiscall BSSimpleArray_WeaponData_1024_InitialSetup(int, int);
 };
 // Initializes unk10 from FUN_00401020()->FUN_00aa42e0() and calls FUN_009a3d00(0, 0).
 // @fnv 0x006abbb0
 FUN_006abbb0::FUN_006abbb0()
 {
-    unk10 = FUN_00401020()->FUN_00aa42e0();
-    FUN_009a3d00(0, 0);
+    unk10 = MemoryManager_Instance()->FUN_00aa42e0();
+    BSSimpleArray_WeaponData_1024_InitialSetup(0, 0);
 }
 
 namespace fnv_006abd40 {
-void* __cdecl FUN_00401020();
+void* __cdecl MemoryManager_Instance();
 
 struct NavMeshSearchHeapObj
 {
@@ -234,14 +239,14 @@ struct FUN_006abd40 : NavMeshSearchGraphBase
     void* m_10;
 
     FUN_006abd40();
-    void FUN_006b3f40(unsigned int a, unsigned int b);
+    void BSSimpleArray_NavMeshPOVSearchNode_1024_InitialSetup(unsigned int a, unsigned int b);
 };
 
 // @fnv 0x006abd40
 FUN_006abd40::FUN_006abd40()
 {
-    m_10 = ((NavMeshSearchHeapObj*)FUN_00401020())->FUN_00aa42e0();
-    FUN_006b3f40(0, 0);
+    m_10 = ((NavMeshSearchHeapObj*)MemoryManager_Instance())->FUN_00aa42e0();
+    BSSimpleArray_NavMeshPOVSearchNode_1024_InitialSetup(0, 0);
 }
 }  // namespace fnv_006abd40
 
@@ -250,8 +255,8 @@ struct NavMeshSearchLocation
     NavMesh* m_pLocationNavMesh;
     unsigned short m_usTriangleID;
     NiPoint3 kPosition;
-    NiPoint3* FUN_006a6eb0(NiPoint3* apResult);
-    NiPoint3 FUN_006a6eb0();
+    NiPoint3* FastNavMeshTriLocation_GetLocation(NiPoint3* apResult);
+    NiPoint3 FastNavMeshTriLocation_GetLocation();
 };
 // @fnv 0x006ab4a0
 bool NavMeshSearchMaxCost::StartSearch(int aiSearchType, NavMeshSearchLocation* apStart, PathingLocation* apGoal,
@@ -262,7 +267,7 @@ bool NavMeshSearchMaxCost::StartSearch(int aiSearchType, NavMeshSearchLocation* 
     apInfos->Clear(false);
     apAltInfos->Clear(false);
     FUN_006a7c40();
-    if (!apGoal->FUN_006a9520() && apGoal->FUN_006dd6f0(false))
+    if (!apGoal->PathingLocation_QUnused() && apGoal->FUN_006dd6f0(false))
     {
         NavMeshPtr spGoalNavMesh;
         unsigned short m_usTriangleID;
@@ -281,8 +286,8 @@ bool NavMeshSearchMaxCost::StartSearch(int aiSearchType, NavMeshSearchLocation* 
     {
         float kStartPos[3];
         float kTmpGoalPos[3];
-        FUN_006a7c90(FUN_006a94f0(apStart->m_pLocationNavMesh, apStart->m_usTriangleID), apStart,
-                     (*(*(NavMeshSearchLocation*)&unk205c).FUN_006a6eb0((NiPoint3*)kStartPos) - *(*(NavMeshSearchLocation*)&unk2070).FUN_006a6eb0((NiPoint3*)kTmpGoalPos)).Length());
+        FUN_006a7c90(GetKeyForNode_006a94f0(apStart->m_pLocationNavMesh, apStart->m_usTriangleID), apStart,
+                     (*(*(NavMeshSearchLocation*)&unk205c).FastNavMeshTriLocation_GetLocation((NiPoint3*)kStartPos) - *(*(NavMeshSearchLocation*)&unk2070).FastNavMeshTriLocation_GetLocation((NiPoint3*)kTmpGoalPos)).Length());
     }
     bool bFoundPath = FUN_006a7d60(apInfos, apAltInfos, false);
     return bFoundPath;
@@ -381,9 +386,9 @@ struct DoorBase
 };
 struct Door
 {
-    DoorBase* FUN_007af430();
+    DoorBase* BGSSaveFormBuffer_GetForm();
 };
-Door* __cdecl FUN_004839c0(unsigned int);
+Door* __cdecl TESForm_GetFormByNumericID(unsigned int);
 }  // namespace fnv_006ab8e0
 
 struct NodeOutput
@@ -402,11 +407,11 @@ bool NavMeshSearchMaxCost::ExpandNeighborNodes(NavMeshTriangleReference* source,
         int linked;
         if (reinterpret_cast<NavMeshAStarNode*>(source)->location.m_pLocationNavMesh->FindAdjacentEdge(reinterpret_cast<NavMeshAStarNode*>(source)->location.m_usTriangleID, i, &mesh, &triangle, &linked))
         {
-            fnv_006ab8e0::EdgeExtraInfo* edge = (fnv_006ab8e0::EdgeExtraInfo*)reinterpret_cast<NavMeshAStarNode*>(source)->location.m_pLocationNavMesh->FUN_0068f230(reinterpret_cast<NavMeshAStarNode*>(source)->location.m_usTriangleID, i);
+            fnv_006ab8e0::EdgeExtraInfo* edge = (fnv_006ab8e0::EdgeExtraInfo*)reinterpret_cast<NavMeshAStarNode*>(source)->location.m_pLocationNavMesh->GetEdgeExtraInfo(reinterpret_cast<NavMeshAStarNode*>(source)->location.m_usTriangleID, i);
             if (edge && edge->type == 1)
                 continue;
             NiPoint3 center = mesh->FUN_00558220(triangle);
-            float cost = (center - reinterpret_cast<NavMeshAStarNode*>(source)->location.FUN_006a6eb0()).FUN_00589850() + reinterpret_cast<NavMeshAStarNode*>(source)->cost;
+            float cost = (center - reinterpret_cast<NavMeshAStarNode*>(source)->location.FastNavMeshTriLocation_GetLocation()).NiPoint3_XYLength() + reinterpret_cast<NavMeshAStarNode*>(source)->cost;
             if (cost > maxCost)
                 continue;
             if (((fnv_006ab8e0::NavMeshTriangleView*)mesh->FUN_005582f0(triangle))->FUN_00691140(0x1000))
@@ -418,24 +423,24 @@ bool NavMeshSearchMaxCost::ExpandNeighborNodes(NavMeshTriangleReference* source,
                 else
                 {
                     unsigned int door = *mesh->FUN_00699af0(triangle);
-                    Door* doorId = FUN_004839c0(door);
+                    Door* doorId = TESForm_GetFormByNumericID(door);
                     if (doorId)
                     {
                         const PathingActorData* actor;
                         bool unlocked;
                         {
                             DoorAccessData lock(reinterpret_cast<TESObjectREFR*>(doorId));
-                            actor = ((PathingRequest*)unk2058)->FUN_006c9900();
+                            actor = ((PathingRequest*)unk2058)->GetActorLockData();
                             if (!lock.CanUnlockDoor(actor, reinterpret_cast<TESObjectREFR*>(doorId), unlocked))
                                 continue;
-                            if (doorId->FUN_007af430()->FUN_00518000())
+                            if (doorId->BGSSaveFormBuffer_GetForm()->FUN_00518000())
                                 continue;
                         }
                     }
                 }
             }
             NavMeshTriangleReference* nodeA;
-            switch (FUN_006a7e00(FUN_006a94f0(mesh, triangle), cost, &nodeA))
+            switch (FUN_006a7e00(GetKeyForNode_006a94f0(mesh, triangle), cost, &nodeA))
             {
             case 0:
                 FUN_006a6ef0(nodeA, mesh, triangle);
@@ -453,7 +458,8 @@ bool NavMeshSearchMaxCost::ExpandNeighborNodes(NavMeshTriangleReference* source,
 // This cleanup entry calls FUN_006a6b00 rather than the shared base destructor.
 
 // @fnv 0x006ab480
-void NavMeshSearchMaxCost::FUN_006ab480()
+// src: GUESS 0x006ab480 (confidence: low)
+void NavMeshSearchMaxCost::UpdateFields_006ab480()
 {
     *(void* const**)this = NavMeshSearchMaxCost_vftable;
     FUN_006a6b00();

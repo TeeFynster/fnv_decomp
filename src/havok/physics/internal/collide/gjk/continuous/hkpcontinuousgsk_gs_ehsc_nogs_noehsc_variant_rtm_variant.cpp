@@ -121,8 +121,8 @@ struct SweepState
     hkVector4 oa;  // 110
     hkVector4 ob;  // 120
 };
-void __cdecl FUN_00db4b50(SweepObj* obj, float t, SweepState* st);
-float __cdecl FUN_00db4ca0(SweepObj* obj, float* p, hkVector4* v, float a, float b, float c, float d, float e,
+void __cdecl hkTransform_setMulInverseMul_UpdateState_00db4b50(SweepObj* obj, float t, SweepState* st);
+float __cdecl Object_ProcessEntries_00db4ca0(SweepObj* obj, float* p, hkVector4* v, float a, float b, float c, float d, float e,
                            SweepOut* out);
 static inline __m128 Cross(const __m128& a, const __m128& b)
 {
@@ -143,13 +143,13 @@ static inline __m128 Dot4xyz1(const __m128& a, const __m128& b)
     __m128 x3 = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0x55), xx);
     return _mm_add_ps(x2, x3);
 }
-void __cdecl FUN_00db4e40(SweepObj* obj, float* p, SweepOut* out);
+void __cdecl Object_ProcessEntries_00db4e40(SweepObj* obj, float* p, SweepOut* out);
 // Adapted from the project's prior contributor draft of 24 October 2026.
 // The same-file caller lets VC2008 reproduce the private register convention.
 extern const __m128 DAT_010c44d0;
 extern const __m128 DAT_010ec7f0;
 extern const double DAT_010290f0;
-static float FUN_00db49b0(char* a, char* b, __m128* p, __m128* v0, __m128* v1, __m128* v2, float t);
+static float HkpcontinuousgskGsEhscNogsNoehsc_ComputeValues_00db49b0(char* a, char* b, __m128* p, __m128* v0, __m128* v1, __m128* v2, float t);
 __m128* volatile dbPlanes;
 char* volatile dbBodyA;
 char* volatile dbBodyB;
@@ -1114,7 +1114,8 @@ static __forceinline void hkGskRecalcContact(ConvexShapePairCache* gsk, const hk
                                gsk->m_ucDimensionB, masterNormalA, pointBinAOut, supportOut);
 }
 // @fnv 0x00db54b0
-static __declspec(noinline) void FUN_00db54b0(const AgentSubtypeMarker& in3, ContactPointWeldingParameters& tol,
+// src: GUESS 0x00db54b0 (confidence: low)
+static __declspec(noinline) void hkVector4_ProcessEntries_00db54b0(const AgentSubtypeMarker& in3, ContactPointWeldingParameters& tol,
                                               ConvexShapePairCache& gsk, int featureChange,
                                               const hkVector4& oldMasterNormal, const hkVector4* deltaAngles,
                                               hkReal startRt, hkReal endRt, hkReal distance0, hkReal distance1,
@@ -1345,5 +1346,5 @@ void hk_user(const AgentSubtypeMarker& in3, ContactPointWeldingParameters& tol, 
              const hkVector4& oldMasterNormal, const hkVector4* deltaAngles, hkReal startRt, hkReal endRt,
              hkReal distance0, hkReal distance1, WorldOperationEntry& out)
 {
-    FUN_00db54b0(in3, tol, gsk, featureChange, oldMasterNormal, deltaAngles, startRt, endRt, distance0, distance1, out);
+    hkVector4_ProcessEntries_00db54b0(in3, tol, gsk, featureChange, oldMasterNormal, deltaAngles, startRt, endRt, distance0, distance1, out);
 }

@@ -156,8 +156,8 @@ struct FUN_00c315b0_arr
 };
 
 extern void __stdcall FUN_00a390a0(FUN_00c315b0_arr* arr);
-extern void* __cdecl FUN_00a7d330(void* p);
-extern void* __cdecl FUN_00a7d5e0(const char* fmt, void* p);
+extern void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* p);
+extern void* __cdecl NiGetViewerString_00a7d5e0(const char* fmt, void* p);
 extern void* DAT_012027c8;
 
 // @fnv 0x00c315b0
@@ -165,7 +165,7 @@ void __fastcall AppendModifierInfo(NiPSysModifierCtlr* controller, void*, void* 
 {
     FUN_00c315b0_arr* arr = (FUN_00c315b0_arr*)arg;
     FUN_00a390a0(arr);
-    void* v1 = FUN_00a7d330(DAT_012027c8);
+    void* v1 = NiViewerStrings_NiGetViewerString_Title(DAT_012027c8);
     unsigned int count = arr->m_iArrayLength;
     if (count >= arr->m_iCap)
     {
@@ -178,7 +178,7 @@ void __fastcall AppendModifierInfo(NiPSysModifierCtlr* controller, void*, void* 
     }
     arr->FUN_0096ae90(count, arg);
     void* pModifierName = controller->m_kTargetModifierName.m_kHandle;
-    void* pNameString = FUN_00a7d5e0("Modifier Name", pModifierName);
+    void* pNameString = NiGetViewerString_00a7d5e0("Modifier Name", pModifierName);
     count = arr->m_iArrayLength;
     if (count >= arr->m_iCap)
     {

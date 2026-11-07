@@ -48,7 +48,7 @@ public:
     CharGenMenu();
     void SetTile(int id, Tile* tile);
     int __thiscall vf13();
-    int __thiscall FUN_00753340();
+    int __thiscall GetMenuID_00753340();
     void UpdateValueString(Tile*);
     void UpdatePointsDisplay();
     bool HasAllSlotsSet();
@@ -56,6 +56,6 @@ public:
     void InitMenu();
     void BuildSkillList();
     void HandleSkillMenuCommand(int, Tile*);
-    bool __thiscall FUN_00754150(int, float);
+    bool __thiscall UpdateState_00754150(int, float);
     bool __thiscall HandleButton(int, float);
 };

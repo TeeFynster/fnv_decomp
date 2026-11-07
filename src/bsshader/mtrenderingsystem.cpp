@@ -18,7 +18,7 @@ void AILinearTaskThread::ExecuteTask()
 void TaskThreadManager::StartRenderingTaskThread()
 {
     if (DAT_011f94b4)
-        LaunchWorkerThread(1, DAT_01200080, FUN_00ba3190, "Rendering Task Thread 2", 0x20000);
+        LaunchWorkerThread(1, DAT_01200080, MTRenderingSystem_TaskThreadCallback, "Rendering Task Thread 2", 0x20000);
 }
 #pragma optimize("", off)
 

@@ -30,13 +30,14 @@ struct KeyEntry
 
 struct Obj
 {
-    void FUN_00db1990(void* a1, KeyEntry* key, float scale);
-    void FUN_00db1d90(void* a1, int idxA, int idxB, int axisA, int axisB, const Vec4& vecA, const Vec4& vecB,
+    void ProcessEntries_00db1990(void* a1, KeyEntry* key, float scale);
+    void UpdateState_00db1d90(void* a1, int idxA, int idxB, int axisA, int axisB, const Vec4& vecA, const Vec4& vecB,
                       float scale);
 };
 
 // @fnv 0x00db1d90
-void Obj::FUN_00db1d90(void* a1, int idxA, int idxB, int axisA, int axisB, const Vec4& vecA, const Vec4& vecB,
+// src: GUESS 0x00db1d90 (confidence: low)
+void Obj::UpdateState_00db1d90(void* a1, int idxA, int idxB, int axisA, int axisB, const Vec4& vecA, const Vec4& vecB,
                        float scale)
 {
     const float one = 1.0f;
@@ -51,18 +52,18 @@ void Obj::FUN_00db1d90(void* a1, int idxA, int idxB, int axisA, int axisB, const
     int maskB = _mm_movemask_ps(_mm_cmplt_ps(*(__m128*)&tmpB, zero));
     key.k0 = (unsigned char)(((maskA | 0xf8) << 4) | idxA);
     key.k1 = (unsigned char)((((~maskB) & 7) << 4) + idxB);
-    FUN_00db1990(a1, &key, scale);
+    ProcessEntries_00db1990(a1, &key, scale);
 
     int stepA = (axisA == 0) ? 0 : ((axisA != 1) + 1);
     int bitA = 1 << (stepA + 4);
     int stepB = (axisB == 0) ? 0 : ((axisB != 1) + 1);
 
     key.k0 ^= bitA;
-    FUN_00db1990(a1, &key, scale);
+    ProcessEntries_00db1990(a1, &key, scale);
 
     key.k1 ^= (unsigned char)(1 << (stepB + 4));
-    FUN_00db1990(a1, &key, scale);
+    ProcessEntries_00db1990(a1, &key, scale);
 
     key.k0 ^= bitA;
-    FUN_00db1990(a1, &key, scale);
+    ProcessEntries_00db1990(a1, &key, scale);
 }

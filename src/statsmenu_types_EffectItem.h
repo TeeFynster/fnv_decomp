@@ -39,7 +39,7 @@ class EffectItem
     PerkEntryConditionSet Conditions;          // +0x1C, 8 bytes
     EffectSetting* GetEffectSetting() const;
     bool IsScriptBasedEffect();
-    bool FUN_00403ee0();
+    bool IsActorValueUsed();
     int GetAffectedActorValue();
     int FUN_00403ea0();
     // EffectItem

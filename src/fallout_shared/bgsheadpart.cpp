@@ -53,7 +53,8 @@ BGSHeadPart::BGSHeadPart() : TESForm(), TESFullName(), TESModelTextureSwap(), m_
 extern "C" void* __cdecl _alloca(unsigned int);
 
 // @fnv 0x005e7530
-bool BGSHeadPart::FUN_005e7530(TESFile* apFile)
+// src: XBOX_PDB 0x005e7530
+bool BGSHeadPart::Load_005e7530(TESFile* apFile)
 {
     // The original caller consumes the full EAX result; the shared accessor returns a byte.
     if (((int(__thiscall*)(TESFile*))ref_00472660)(apFile) != 9)
@@ -110,7 +111,8 @@ bool BGSHeadPart::FUN_005e7530(TESFile* apFile)
 }
 
 // @fnv 0x00624700
-void* BGSHeadPart::FUN_00624700()
+// src: XBOX_PDB 0x00624700
+void* BGSHeadPart::GetExtraPartList()
 {
     return &m_kExtraParts;
 }
@@ -123,29 +125,29 @@ struct List_005e7480
 };
 // The shared model header does not declare the three-chunk save helper.
 extern "C" void ref_0048a520();
-void FUN_004858f0(unsigned int, unsigned char);
-void FUN_00485910(unsigned int, unsigned int);
+void TESForm_AddChunk_3(unsigned int, unsigned char);
+void TESForm_AddChunk_00485910(unsigned int, unsigned int);
 // @fnv 0x005e7480
 void BGSHeadPart::InitializeHeadPart()
 {
     BSSimpleList<BGSHeadPart*>* pCurrentElementNext;
-    FUN_004855a0();
-    TESFullName::FUN_00487010();
+    BeginFormRecord();
+    TESFullName::Save_00487010();
     ((void(__thiscall*)(TESModelTextureSwap*, unsigned int, unsigned int, unsigned int))ref_0048a520)(
         reinterpret_cast<TESModelTextureSwap*>(reinterpret_cast<char*>(this) + 0x24),
         0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    FUN_004858f0(0x41544144, cFlags);
-    pCurrentElementNext = reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(FUN_00624700());
+    TESForm_AddChunk_3(0x41544144, cFlags);
+    pCurrentElementNext = reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(GetExtraPartList());
     while (pCurrentElementNext && !reinterpret_cast<List_005e7480*>(pCurrentElementNext)->FUN_008256d0())
     {
         unsigned int itempint;
         BGSHeadPart* ppart;
         ppart = reinterpret_cast<List_005e7480*>(pCurrentElementNext)->FUN_006815c0();
         pCurrentElementNext = reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(reinterpret_cast<List_005e7480*>(pCurrentElementNext)->FUN_00726070());
-        itempint = ppart->FUN_0084e3a0();
-        FUN_00485910(0x4d414e48, itempint);
+        itempint = ppart->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e48, itempint);
     }
-    FUN_00485680();
+    FinishFormRecord();
 }
 
 struct List_009e03e0
@@ -156,7 +158,8 @@ struct List_009e03e0
     List_009e03e0* FUN_00726070();
 };
 // @fnv 0x005e78f0
-void BGSHeadPart::FUN_005e78f0(TESForm* apCopy)
+// src: XBOX_PDB 0x005e78f0
+void BGSHeadPart::Copy_005e78f0(TESForm* apCopy)
 {
     BSSimpleList<BGSHeadPart*>* pCurrentElementNext;
     BGSHeadPart* pSourcePart;
@@ -166,8 +169,8 @@ void BGSHeadPart::FUN_005e78f0(TESForm* apCopy)
     TESForm::CopyFrom(apCopy);
     cFlags = pSourcePart->cFlags;
     pCurrentElementNext = 0;
-    reinterpret_cast<List_009e03e0*>(FUN_00624700())->RemoveAll();
-    pCurrentElementNext = reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(pSourcePart->FUN_00624700());
+    reinterpret_cast<List_009e03e0*>(GetExtraPartList())->RemoveAll();
+    pCurrentElementNext = reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(pSourcePart->GetExtraPartList());
     while (pCurrentElementNext && !reinterpret_cast<List_009e03e0*>(pCurrentElementNext)->FUN_008256d0())
     {
         BGSHeadPart* ppart = reinterpret_cast<List_009e03e0*>(pCurrentElementNext)->FUN_006815c0();
@@ -184,7 +187,8 @@ struct LH
     LH* FUN_00726070();
 };
 // @fnv 0x005e79a0
-bool BGSHeadPart::FUN_005e79a0(TESForm* apCompare)
+// src: XBOX_PDB 0x005e79a0
+bool BGSHeadPart::Compare_005e79a0(TESForm* apCompare)
 {
     BGSHeadPart* pcomp;
     BSSimpleList<BGSHeadPart*>* pCurrentElementNext;
@@ -195,12 +199,12 @@ bool BGSHeadPart::FUN_005e79a0(TESForm* apCompare)
         return true;
     if ((char)pcomp->cFlags != (char)cFlags)
         return true;
-    pCurrentElementNext = reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(pcomp->FUN_00624700());
+    pCurrentElementNext = reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(pcomp->GetExtraPartList());
     while (pCurrentElementNext && !reinterpret_cast<LH*>(pCurrentElementNext)->FUN_008256d0())
     {
         BGSHeadPart* ppart = reinterpret_cast<LH*>(pCurrentElementNext)->FUN_006815c0();
         pCurrentElementNext = reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(reinterpret_cast<LH*>(pCurrentElementNext)->FUN_00726070());
-        if (!reinterpret_cast<LH*>(FUN_00624700())->IsInList(ppart))
+        if (!reinterpret_cast<LH*>(GetExtraPartList())->IsInList(ppart))
             return true;
     }
     return false;
@@ -224,7 +228,7 @@ void* Deleter::Destroy(unsigned int flags)
 // @fnv 0x005e73a0
 BGSHeadPart::~BGSHeadPart()
 {
-    FUN_005e7460();
+    ClearData_005e7460();
 }
 
 // FUN_005e6600: real destructor (__thiscall, no params) of a class with:
@@ -235,7 +239,7 @@ BGSHeadPart::~BGSHeadPart()
 struct FUN_005e6470
 {
     virtual ~FUN_005e6470();
-    void FUN_005e6c60(int);
+    void SetLabel(int);
     int unk04;
 };
 
@@ -254,11 +258,12 @@ struct FUN_005e6600 : FUN_005e6470
 // @fnv 0x005e6600
 FUN_005e6600::~FUN_005e6600()
 {
-    this->FUN_005e6c60(0);
+    this->SetLabel(0);
 }
 
 // @fnv 0x005e7a60
-unsigned char BGSHeadPart::FUN_005e7a60()
+// src: COMMUNITY 0x005e7a60
+unsigned char BGSHeadPart::IsPlayable_005e7a60()
 {
     return (static_cast<signed char>(cFlags) & 1) != 0;
 }
@@ -269,9 +274,10 @@ struct HeadPartListOperations
 };
 
 // @fnv 0x005e7460
-void BGSHeadPart::FUN_005e7460()
+// src: COMMUNITY 0x005e7460
+void BGSHeadPart::ClearData_005e7460()
 {
-    reinterpret_cast<HeadPartListOperations*>(FUN_00624700())
+    reinterpret_cast<HeadPartListOperations*>(GetExtraPartList())
         ->FUN_00470470();
 }
 
@@ -288,7 +294,8 @@ void LinkFormID(unsigned int*, TESFile*);
 TESForm* LookupFormByID(unsigned int);
 void FNV_Warning(const char*, ...);
 // @fnv 0x005e77b0
-void BGSHeadPart::FUN_005e77b0()
+// src: XBOX_PDB 0x005e77b0
+void BGSHeadPart::InitItem_005e77b0()
 {
     if (static_cast<const TESForm*>(this)->GetInitialized())
         return;

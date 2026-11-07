@@ -10,7 +10,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00e4dd90_shell
 {
-    void __thiscall FUN_00e4dd90(float* output);
+    void __thiscall hkKdTreeCpuBroadphaseBundleCastCollector_getHitFractions(float* output);
 };
 struct FUN_00e4dde0
 {
@@ -52,7 +52,7 @@ struct FUN_00e4dde0
     int unk8C;
     FUN_00e4dde0();
 };
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00e4e3c0
 {
     int m_i04;
@@ -99,7 +99,7 @@ struct FUN_00e4e3c0
 
     static void operator delete(void* apMemory)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         reinterpret_cast<hkMemoryAllocator*>(pAllocator)->blockFree(apMemory, sizeof(FUN_00e4e3c0));
     }
@@ -221,13 +221,14 @@ struct FloatMatrix3
     LocalM128 col2;
 };
 
-void __cdecl FUN_00e2ab00(InputStruct* input, FloatMatrix3* m1, FloatMatrix3* m2);
-void __cdecl FUN_00d99570(unsigned char* out, void* a1, FloatMatrix3* m1, FloatMatrix3* m2, FUN_00e4dde0* obj,
+void __cdecl Object_ProcessAndReturnValue_00e2ab00(InputStruct* input, FloatMatrix3* m1, FloatMatrix3* m2);
+void __cdecl hkKdTreeUtils_castRayBundleIterative(unsigned char* out, void* a1, FloatMatrix3* m1, FloatMatrix3* m2, FUN_00e4dde0* obj,
                           int flag);
 extern int DAT_011b3830[];
 
 // @fnv 0x00e2acf0
-void FUN_00e2acf0(void* a1, InputStruct* a2, void* a3, float* a4)
+// src: GUESS 0x00e2acf0 (confidence: low)
+void hkKdTreeUtils_castRayBundleIterative_ProcessEntries_00e2acf0(void* a1, InputStruct* a2, void* a3, float* a4)
 {
     if (!a1)
         return;
@@ -259,10 +260,10 @@ void FUN_00e2acf0(void* a1, InputStruct* a2, void* a3, float* a4)
 
     FloatMatrix3 m1;
     FloatMatrix3 m2;
-    FUN_00e2ab00(a2, &m1, &m2);
+    Object_ProcessAndReturnValue_00e2ab00(a2, &m1, &m2);
 
     unsigned char result;
-    FUN_00d99570(&result, a1, &m1, &m2, &obj, DAT_011b3830[a2->count]);
+    hkKdTreeUtils_castRayBundleIterative(&result, a1, &m1, &m2, &obj, DAT_011b3830[a2->count]);
 
     for (int k = 0; k < a2->count; k++)
     {
@@ -270,5 +271,5 @@ void FUN_00e2acf0(void* a1, InputStruct* a2, void* a3, float* a4)
         a2->saved[k] = local.saved[k];
     }
 
-    ((FUN_00e4dd90_shell*)&obj)->FUN_00e4dd90(a4);
+    ((FUN_00e4dd90_shell*)&obj)->hkKdTreeCpuBroadphaseBundleCastCollector_getHitFractions(a4);
 }

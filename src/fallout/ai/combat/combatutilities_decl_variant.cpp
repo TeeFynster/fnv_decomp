@@ -17,7 +17,7 @@ class HandleRef
 public:
     unsigned int bits;
     HandleRef(int bits);
-    void FUN_004a39f0(int layer);
+    void CFilter_SetLayer(int layer);
 };
 struct __declspec(align(16)) SightRayInput
 {
@@ -35,15 +35,15 @@ struct __declspec(align(16)) BhkPickData
     unsigned int collectorMode;
     bool enabled;
     BhkPickData();
-    void FUN_0059ceb0(hkpClosestRayHitCollector* collector);
-    void FUN_004a3f70(HandleRef filter);
-    void FUN_004a3da0(const NiPoint3& start);
-    void FUN_004a3eb0(const NiPoint3& end);
+    void bhkPickData_SetClosestCollector(hkpClosestRayHitCollector* collector);
+    void bhkPickData_SetFilter(HandleRef filter);
+    void bhkPickData_SetFrom(const NiPoint3& start);
+    void bhkPickData_SetTo(const NiPoint3& end);
 };
 class LookTarget
 {
 public:
-    void* FUN_00553ee0(BhkPickData* ray);
+    void* TESObjectCELL_Pick(BhkPickData* ray);
 };
 class GlobalObject_0045d260
 {
@@ -52,10 +52,11 @@ class GlobalObject_0045d260
 };
 extern GlobalObject_0045d260 g_011f1c7c;
 float __cdecl GetScaleOrHeightDelta(TESObjectREFR* source, int mode);
-float __cdecl FUN_009a8460(TESObjectREFR* target, int mode, bool flag);
-TESObjectREFR* __cdecl FUN_0056f930(void* hit);
+float __cdecl CombatUtilities_GetTargetFiringZOffset(TESObjectREFR* target, int mode, bool flag);
+TESObjectREFR* __cdecl TESObjectREFR_FindReferenceFor3D(void* hit);
 // @fnv 0x009a7940
-bool __cdecl FUN_009a7940(Actor* source, TESObjectREFR* target, const NiPoint3& from, const NiPoint3& to,
+// src: XBOX_PDB 0x009a7940
+bool __cdecl CombatUtilities_CalculateLOS(Actor* source, TESObjectREFR* target, const NiPoint3& from, const NiPoint3& to,
                           int unused, int requestedLayer)
 {
     g_011f1c7c.IsInCombat();
@@ -66,7 +67,7 @@ bool __cdecl FUN_009a7940(Actor* source, TESObjectREFR* target, const NiPoint3& 
     start.z += GetScaleOrHeightDelta(source, 1);
     NiPoint3 end = to;
     if (target)
-        end.z += FUN_009a8460(target, 2, true);
+        end.z += CombatUtilities_GetTargetFiringZOffset(target, 2, true);
     BhkPickData ray;
     HandleRef filter = source->FUN_00931ed0();
     if (target && target->IsMobileObject())
@@ -75,19 +76,19 @@ bool __cdecl FUN_009a7940(Actor* source, TESObjectREFR* target, const NiPoint3& 
         filter = mobile->FUN_00931ed0();
     }
     hkpClosestRayHitCollector collector(layer, reinterpret_cast<const SightFilter*>(&filter));
-    ray.FUN_0059ceb0(&collector);
+    ray.bhkPickData_SetClosestCollector(&collector);
     filter = source->FUN_00931ed0();
-    filter.FUN_004a39f0(layer);
-    ray.FUN_004a3f70(filter);
-    ray.FUN_004a3da0(start);
-    ray.FUN_004a3eb0(end);
-    void* hit = source->FUN_008d6f30()->FUN_00553ee0(&ray);
+    filter.CFilter_SetLayer(layer);
+    ray.bhkPickData_SetFilter(filter);
+    ray.bhkPickData_SetFrom(start);
+    ray.bhkPickData_SetTo(end);
+    void* hit = source->FUN_008d6f30()->TESObjectCELL_Pick(&ray);
     if (!hit)
     {
         g_011f1c7c.IsInCombat();
         return true;
     }
-    TESObjectREFR* hitRef = FUN_0056f930(hit);
+    TESObjectREFR* hitRef = TESObjectREFR_FindReferenceFor3D(hit);
     if (target && hitRef == target)
     {
         g_011f1c7c.IsInCombat();

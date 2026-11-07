@@ -41,47 +41,58 @@ void __fastcall ReleaseSavedMotion(hkpKeyframedRigidMotion* motion, void*)
 }
 
 // @fnv 0x00d1dec0
-void __stdcall FUN_00d1dec0(int)
+// src: COMMUNITY 0x00d1dec0
+void __stdcall nullsub_38(int)
 {}
 
 // @fnv 0x00d1ded0
-void __stdcall FUN_00d1ded0(int)
+// src: COMMUNITY 0x00d1ded0
+void __stdcall nullsub_39(int)
 {}
 
 // @fnv 0x00d1dee0
-void __stdcall FUN_00d1dee0(int)
+// src: COMMUNITY 0x00d1dee0
+void __stdcall nullsub_40(int)
 {}
 
 // @fnv 0x00d1def0
-void __stdcall FUN_00d1def0(int)
+// src: COMMUNITY 0x00d1def0
+void __stdcall nullsub_41(int)
 {}
 
 // @fnv 0x00d1df00
-void __stdcall FUN_00d1df00(int)
+// src: COMMUNITY 0x00d1df00
+void __stdcall nullsub_42(int)
 {}
 
 // @fnv 0x00d1df10
-void __stdcall FUN_00d1df10(int, int)
+// src: COMMUNITY 0x00d1df10
+void __stdcall nullsub_43(int, int)
 {}
 
 // @fnv 0x00d1df20
-void __stdcall FUN_00d1df20(int)
+// src: COMMUNITY 0x00d1df20
+void __stdcall nullsub_44(int)
 {}
 
 // @fnv 0x00d1df30
-void __stdcall FUN_00d1df30(int, int)
+// src: COMMUNITY 0x00d1df30
+void __stdcall nullsub_46(int, int)
 {}
 
 // @fnv 0x00d1df40
-void __stdcall FUN_00d1df40(int a, int b, int c)
+// src: COMMUNITY 0x00d1df40
+void __stdcall nullsub_45(int a, int b, int c)
 {}
 
 // @fnv 0x00d1df50
-void __stdcall FUN_00d1df50(int, int)
+// src: COMMUNITY 0x00d1df50
+void __stdcall nullsub_47(int, int)
 {}
 
 // @fnv 0x00d1df60
-void __stdcall FUN_00d1df60(int, int)
+// src: COMMUNITY 0x00d1df60
+void __stdcall nullsub_48(int, int)
 {}
 
 template <typename ENUM, typename STORAGE>
@@ -112,7 +123,8 @@ struct FUN_00d1e030_t
     float fC, fD, fE, fF;
 };
 // @fnv 0x00d1e030
-void __stdcall FUN_00d1e030(FUN_00d1e030_t* p)
+// src: HAVOK_SRC 0x00d1e030
+void __stdcall hkpKeyframedRigidMotion_getInertiaWorld(FUN_00d1e030_t* p)
 {
     LocalM128 z = _mm_setzero_ps();
     *(LocalM128*)&p->f0 = z;
@@ -191,7 +203,8 @@ void __fastcall ComputeVelocityAlongDirection(const hkpKeyframedRigidMotion* mot
 extern "C" void _mm_store_ps(float*, LocalM128);
 
 // @fnv 0x00d1e010
-void __stdcall FUN_00d1e010(hkVector4* inertia)
+// src: HAVOK_SRC 0x00d1e010
+void __stdcall hkpKeyframedRigidMotion_getInertiaLocal(hkVector4* inertia)
 {
     LocalM128 zero = _mm_setzero_ps();
     _mm_store_ps(reinterpret_cast<float*>(inertia), zero);

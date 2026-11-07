@@ -4,10 +4,11 @@
 struct CpuObject
 {
     int value;
-    void FUN_00e10a10(int value);
+    void hkpPrimitiveDrawer_setDisplayHandler(int value);
 };
 // @fnv 0x00e10a10
-void CpuObject::FUN_00e10a10(int value)
+// src: COMMUNITY 0x00e10a10
+void CpuObject::hkpPrimitiveDrawer_setDisplayHandler(int value)
 {
     this->value = value;
 }

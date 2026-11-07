@@ -20,7 +20,7 @@ public:
     void SetMoonPhaseDays(unsigned int days);
     void SetUsesMasser(bool value);
     void SetUsesSecunda(bool value);
-    unsigned char FUN_00595f10(int a1);
+    unsigned char GetTransTime(int a1);
 
     TESModel m_kStarsModel;
     TESWeatherList weatherList;

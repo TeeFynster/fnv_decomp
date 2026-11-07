@@ -435,7 +435,7 @@ mutable hkPadSpu<hkpCollisionQualityInfo*>m_pCollisionQualityInfo;
 mutable hkpAgent1nSector*m_pAgent1nSector;};
 namespace hkpCollectionCollectionAgent3
 {
-hkpAgentData*__cdecl FUN_00d35770(const AgentSubtypeMarker&input,FourByteState*entry,hkpAgentData*agentData,hkVector4*separatingNormal,WorldOperationEntry&result);
+hkpAgentData*__cdecl process_00d35770(const AgentSubtypeMarker&input,FourByteState*entry,hkpAgentData*agentData,hkVector4*separatingNormal,WorldOperationEntry&result);
 void __cdecl RegisterAgentFunctions(hkpCollisionDispatcher*dispatcher);
 void __cdecl InitAgentFunc(hkpCollisionDispatcher::Agent3FunctionTable&f);
 void __cdecl CleanupAgent(FourByteState*entry,hkpAgentData*agentData,const hkpCdBody&bodyA,const hkpCdBody&bodyB,const CollisionAgentContext&input,hkpContactMgr*mgr,hkpConstraintOwner&constraintOwner);
@@ -447,7 +447,7 @@ extern bool g_bCollisionAgentFlag;
 
 namespace hkBvTreeAgent3
 {
-hkpAgentData*__cdecl FUN_00d35770(const AgentSubtypeMarker&input,FourByteState*entry,hkpAgentData*agentData,hkVector4*separatingNormal,WorldOperationEntry&result);
+hkpAgentData*__cdecl process_00d35770(const AgentSubtypeMarker&input,FourByteState*entry,hkpAgentData*agentData,hkVector4*separatingNormal,WorldOperationEntry&result);
 void __cdecl RegisterAgentFunctions(hkpCollisionDispatcher*dispatcher);
 void __cdecl InitAgentFunc(hkpCollisionDispatcher::Agent3FunctionTable&f);
 void __cdecl CleanupAgent(FourByteState*entry,hkpAgentData*agentData,const hkpCdBody&bodyA,const hkpCdBody&bodyB,const CollisionAgentContext&input,hkpContactMgr*mgr,hkpConstraintOwner&constraintOwner);
@@ -706,7 +706,8 @@ aabbInt->GetIteratorKey()=key;
 DONT_SORT:
 ;}
 // @fnv 0x00d35770
-hkpAgentData*__cdecl hkpCollectionCollectionAgent3::FUN_00d35770(const AgentSubtypeMarker&input,FourByteState*entry,hkpAgentData*agentData,hkVector4*separatingNormal,WorldOperationEntry&output)
+// src: XBOX_PDB 0x00d35770
+hkpAgentData*__cdecl hkpCollectionCollectionAgent3::process_00d35770(const AgentSubtypeMarker&input,FourByteState*entry,hkpAgentData*agentData,hkVector4*separatingNormal,WorldOperationEntry&output)
 {
 {hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerBeginListCommand*h=reinterpret_cast<hkMonitorStream::TimerBeginListCommand*>(mStream.getEnd());h->m_commandAndMonitor="L" "t" "CollColl3";h->m_nameOfFirstSplit="S" "t" "Init";h->setTime();mStream.setEnd((char*)(h+1));}};
 AgentSectorPointerArray*agent1nTrack=reinterpret_cast<AgentSectorPointerArray*>(agentData);

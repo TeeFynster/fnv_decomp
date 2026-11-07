@@ -39,19 +39,20 @@ extern "C"
 
 extern "C"
 {
-    int __cdecl FUN_00cea030(void*, void*);
-    int __cdecl FUN_00ce9db0(void*, void*);
-    int __cdecl FUN_00ce9e90(void*);
+    int __cdecl hkaRagdollUtils_reorderForRagdoll(void*, void*);
+    int __cdecl HkaragdollutilsFpfast_ProcessEntries_00ce9db0(void*, void*);
+    int __cdecl alignConstraintSpacesToChildren(void*);
 }
 
 // @fnv 0x00cea7c0
-int __cdecl FUN_00cea7c0(void* apFirst, void* apSecond, void* apThird)
+// src: HAVOK_LIB 0x00cea7c0
+int __cdecl hkaRagdollUtils_reorderAndAlignForRagdoll(void* apFirst, void* apSecond, void* apThird)
 {
-    if (FUN_00cea030(apFirst, apSecond))
+    if (hkaRagdollUtils_reorderForRagdoll(apFirst, apSecond))
         return 1;
-    if (FUN_00ce9db0(apSecond, apThird))
+    if (HkaragdollutilsFpfast_ProcessEntries_00ce9db0(apSecond, apThird))
         return 1;
-    if (FUN_00ce9e90(apSecond))
+    if (alignConstraintSpacesToChildren(apSecond))
         return 1;
     return 0;
 }
@@ -78,7 +79,8 @@ struct Counter
 extern "C" void __cdecl AssignNodeFlags(int, int, int);
 // Sets unk2c of every item in the container to value, increments counter->unk30 and passes the new count to AssignNodeFlags with c->unk14 and c->unk18.
 // @fnv 0x00ce9fa0
-void __cdecl FUN_00ce9fa0(Container* pContainer, int value, Counter* counter)
+// src: HAVOK_LIB 0x00ce9fa0
+void __cdecl hkaRagdollUtils_setCollisionLayer(Container* pContainer, int value, Counter* counter)
 {
     for (int i = 0; i < pContainer->unk0c; ++i)
         pContainer->items[i]->unk2c = value;
@@ -145,7 +147,7 @@ struct SpawnedAllocator
     virtual void* allocate(int size);
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct SpawnedObject
 {
@@ -174,7 +176,7 @@ struct SourceRecord
 // @fnv 0x00ce9ff0
 int __cdecl SpawnObjectFromRecord(SourceRecord* pSourceRecord)
 {
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     SpawnedAllocator* pAllocator = reinterpret_cast<SpawnedAllocator*>(holder->m_heap);
     SpawnedObject* obj = (SpawnedObject*)pAllocator->allocate(0x30);
     obj->m_size04 = 0x30;
@@ -234,11 +236,11 @@ struct LogText
     {
         FUN_00cc00e0();
     }
-    LogText* FUN_00cc01c0(const char* value) throw();
+    LogText* ProcessAndReturnValue_00cc01c0(const char* value) throw();
     LogText* WriteInt(int value) throw();
     void FUN_00cc00e0() throw();
 };
-extern "C" void __cdecl FUN_00c908c0(HeapAllocator* allocator, ScratchArray* array, int capacity, int itemSize);
+extern "C" void __cdecl hkArrayUtil__reserve(HeapAllocator* allocator, ScratchArray* array, int capacity, int itemSize);
 extern "C" const char DAT_010cbde0[];
 extern "C" const char DAT_010cbdec[];
 extern "C" const char DAT_010cbe00[];
@@ -263,7 +265,7 @@ static __forceinline void reserveArray(HeapAllocator* allocator, ScratchArray* a
     {
         int doubled = capacity * 2;
         int newCapacity = size < doubled ? doubled : size;
-        FUN_00c908c0(allocator, array, newCapacity, 4);
+        hkArrayUtil__reserve(allocator, array, newCapacity, 4);
     }
 }
 static __forceinline void fillWords(int* destination, int value, int count) throw()
@@ -381,7 +383,8 @@ static int findNode(const IntArray* nodes, void* value)
 }
 // Checks link count and endpoint membership, then orders nodes by successor-chain length and reorders links accordingly.
 // @fnv 0x00cea030
-extern "C" int __cdecl FUN_00cea030(void* apNodes, void* apLinks)
+// src: HAVOK_LIB 0x00cea030
+extern "C" int __cdecl hkaRagdollUtils_reorderForRagdoll(void* apNodes, void* apLinks)
 {
     IntArray* nodes = static_cast<IntArray*>(apNodes);
     NodeArray* links = static_cast<NodeArray*>(apLinks);
@@ -392,11 +395,11 @@ extern "C" int __cdecl FUN_00cea030(void* apNodes, void* apLinks)
         int messageStorage[128];
         hkErrStream message(messageStorage, 512);
         reinterpret_cast<LogText*>(&message)
-            ->FUN_00cc01c0(DAT_010cbde0)
+            ->ProcessAndReturnValue_00cc01c0(DAT_010cbde0)
             ->WriteInt(nodeCount - 1)
-            ->FUN_00cc01c0(DAT_010cbdec)
+            ->ProcessAndReturnValue_00cc01c0(DAT_010cbdec)
             ->WriteInt(linkCount)
-            ->FUN_00cc01c0(DAT_010cbe00);
+            ->ProcessAndReturnValue_00cc01c0(DAT_010cbe00);
         DAT_01268360->message(1, 0xabba54bb, reinterpret_cast<const char*>(messageStorage), DAT_010cbd34, 0x144);
         return 1;
     }
@@ -479,7 +482,7 @@ struct ScratchAllocator
 };
 static ScratchAllocator* scratchState() throw()
 {
-    return reinterpret_cast<ScratchAllocator*>(FUN_00c85750());
+    return reinterpret_cast<ScratchAllocator*>(hkMemoryRouter_getInstance());
 }
 extern "C" void __cdecl ResizeAudioStream(HeapAllocator*, void*, int);
 template <class T> static __forceinline T* allocateBuffer(HeapAllocator* allocator, int& count) throw()
@@ -598,7 +601,8 @@ struct Ragdoll
 extern "C" void __cdecl MarkHierarchyDescendants(Skeleton*, int, char*, int) throw();
 // Splits a Ragdoll into two output Ragdolls by partitioning bones into hierarchy descendants of source and the rest.
 // @fnv 0x00ceaf60
-void __cdecl FUN_00ceaf60(Ragdoll* original, int aiSourceBone, Ragdoll** first, Ragdoll** second)
+// src: HAVOK_LIB 0x00ceaf60
+void __cdecl hkaRagdollUtils_splitRagdollInstanceShallow(Ragdoll* original, int aiSourceBone, Ragdoll** first, Ragdoll** second)
 {
     Ragdoll** outputs[2];
     outputs[0] = first;
@@ -830,7 +834,8 @@ inline void hkVector4::setXYZW(const hkVector4& xyz, const hkVector4& w)
 {
     getQuad() = _mm_shuffle_ps(xyz.getQuad(), _mm_unpackhi_ps(xyz.getQuad(), w.getQuad()), 196);
 }
-inline void hkQuaternion::FUN_00c66320(const hkQuaternion& a, const hkQuaternion& b)
+// src: COMMUNITY 0x00c66320
+inline void hkQuaternion::setMul(const hkQuaternion& a, const hkQuaternion& b)
 {
     hkVector4 cross;
     cross.setCross(a.getImag(), b.getImag());
@@ -869,16 +874,16 @@ struct hkQsXform
     hkQuaternion m_rotation;
     hkVector4 m_vScale;
 
-    hkBoolR FUN_00ce5120(const hkQsXform& other, float eps) const;
-    void FUN_00ce5070(const void* transform);
-    void FUN_00ce50b0(void* transformOut) const;
+    hkBoolR ProcessAndReturnValue_00ce5120(const hkQsXform& other, float eps) const;
+    void setFromTransformNoScale(const void* transform);
+    void CopyRotationAndTranslationToTarget(void* transformOut) const;
 
     __forceinline void SetProduct(const hkQsXform& t1, const hkQsXform& t2)
     {
         hkVector4 extra;
         extra.SetRotatedDirection(t1.m_rotation, t2.m_vTranslation);
         m_vTranslation.setAdd4(t1.m_vTranslation, extra);
-        m_rotation.FUN_00c66320(t1.m_rotation, t2.m_rotation);
+        m_rotation.setMul(t1.m_rotation, t2.m_rotation);
         m_vScale.setMul4(t1.m_vScale, t2.m_vScale);
     }
     __forceinline void SetConjugate(const hkQsXform& t)
@@ -994,10 +999,10 @@ struct Body
     hkXform m_kMotionTransform;
     hkVector4 m_vCenterOfMass0;
     hkVector4 m_vCenterOfMass1;
-    void FUN_00ca8890(const hkXform& t);
-    void FUN_00ca85f0(const hkVector4& com);
+    void hkpRigidBody_setTransform(const hkXform& t);
+    void hkpRigidBody_setCenterOfMassLocal(const hkVector4& com);
 };
-void __cdecl FUN_00d748d0(Body* body, MassA* a, MassB* b);
+void __cdecl hkpEntity_RemapSingleEntityCollisionShapes(Body* body, MassA* a, MassB* b);
 
 extern hkQsXform DAT_01268700;
 extern float DAT_01017d00;
@@ -1013,12 +1018,13 @@ static __forceinline ErrorIface* GetError()
 }
 
 // @fnv 0x00ce9880
-static __declspec(noinline) int FUN_00ce9880(const hkQsXform& t, Body* body)
+// src: XBOX_PDB 0x00ce9880
+static __declspec(noinline) int moveRigidBodyPivot(const hkQsXform& t, Body* body)
 {
-    if (t.FUN_00ce5120(DAT_01268700, DAT_01017d00).m_cBooleanValue == 0)
+    if (t.ProcessAndReturnValue_00ce5120(DAT_01268700, DAT_01017d00).m_cBooleanValue == 0)
     {
         hkQsXform bodyQs;
-        bodyQs.FUN_00ce5070(&body->m_kMotionTransform);
+        bodyQs.setFromTransformNoScale(&body->m_kMotionTransform);
 
         hkQsXform combined;
         combined.SetProduct(bodyQs, t);
@@ -1030,8 +1036,8 @@ static __declspec(noinline) int FUN_00ce9880(const hkQsXform& t, Body* body)
         hkXform kXform;
         {
             void* shape = body->m_pCollisionShape;
-            inv.FUN_00ce50b0(&kXform);
-            ShapeObj* pShapeObj = (ShapeObj*)heap(FUN_00c85750()).allocate(0x70);
+            inv.CopyRotationAndTranslationToTarget(&kXform);
+            ShapeObj* pShapeObj = (ShapeObj*)heap(hkMemoryRouter_getInstance()).allocate(0x70);
             pShapeObj->m_usMemSizeAndFlags = 0x70;
             ShapeObj* pTransformedShape = pShapeObj->FUN_00cf5990(shape, kXform);
             body->SetCollisionShapeAndKey(pTransformedShape);
@@ -1042,16 +1048,16 @@ static __declspec(noinline) int FUN_00ce9880(const hkQsXform& t, Body* body)
             a.FUN_00d733e0();
             MassB b;
             b.FUN_00d73410();
-            FUN_00d748d0(body, &a, &b);
+            hkpEntity_RemapSingleEntityCollisionShapes(body, &a, &b);
         }
         GetError()->SetErrorCodeEnabled(0x2ff8c16f, bErrorEnabled);
-        combined.FUN_00ce50b0(&kXform);
-        body->FUN_00ca8890(kXform);
+        combined.CopyRotationAndTranslationToTarget(&kXform);
+        body->hkpRigidBody_setTransform(kXform);
         if (body->m_bFlag != 5)
         {
             hkVector4 lc;
-            lc.FUN_00c7f690(reinterpret_cast<const hkTransform&>(kXform), com);
-            body->FUN_00ca85f0(lc);
+            lc.hkVector4_setTransformedInversePos(reinterpret_cast<const hkTransform&>(kXform), com);
+            body->hkpRigidBody_setCenterOfMassLocal(lc);
         }
     }
     return 0;
@@ -1061,5 +1067,5 @@ volatile int g_inBody;
 volatile int g_out;
 void CallTarget_ce9880()
 {
-    g_out = FUN_00ce9880(*(const hkQsXform*)g_inT, (Body*)g_inBody);
+    g_out = moveRigidBodyPivot(*(const hkQsXform*)g_inT, (Body*)g_inBody);
 }

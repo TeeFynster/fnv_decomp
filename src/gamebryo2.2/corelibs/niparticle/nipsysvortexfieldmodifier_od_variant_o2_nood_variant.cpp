@@ -9,7 +9,7 @@
 // src/gamebryo2.2/corelibs/niparticle/nipsysvortexfieldmodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysvortexfieldmodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern "C" void* g_01202688;
-void* __cdecl FUN_00c26810();
+void* __cdecl NiPSysVortexFieldModifier_GetRTTI();
 
 // FUN_00c26de0: NiPSysFieldModifier-style Update with attenuation - per-particle
 // force from FUN_00c26820, scaled by magnitude * dt / dist^attenuation.
@@ -28,11 +28,11 @@ struct TPoint3
     {
         return TPoint3(x - kPt.x, y - kPt.y, z - kPt.z);
     }
-    bool FUN_004390c0(const TPoint3& kPt) const;
+    bool HasEqualComponents(const TPoint3& kPt) const;
     float FUN_00457990() const;
-    void FUN_004a0c10();
-    TPoint3& FUN_00439180(float fScalar);
-    TPoint3& FUN_0063c8a0(const TPoint3& kPt);
+    void Unitize_004a0c10();
+    TPoint3& ScaleComponents(float fScalar);
+    TPoint3& ComputeValue_0063c8a0(const TPoint3& kPt);
 };
 
 extern const TPoint3 DAT_011f426c;
@@ -145,20 +145,21 @@ struct TFieldModifier
     float m_fFieldStrength;
     TPoint3 m_kLightVector;
 
-    void FUN_00c26de0(float fTime, TPSysData* pkData);
-    void FUN_00c269b0(float fTime, TPSysData* pkData);
-    void FUN_00c26c00(float fTime, TPSysData* pkData);
-    __declspec(noalias) TPoint3 FUN_00c26820(const TPoint3& kFieldPos, const TPoint3& kFieldDir, const TPoint3& kPos);
+    void NiPSysVortexFieldModifier_Update(float fTime, TPSysData* pkData);
+    void ApplyVortexVelocityWithinDistance(float fTime, TPSysData* pkData);
+    void ApplyParticleForces(float fTime, TPSysData* pkData);
+    __declspec(noalias) TPoint3 Object_ProcessAndReturnValue_00c26820(const TPoint3& kFieldPos, const TPoint3& kFieldDir, const TPoint3& kPos);
 };
 
 // @fnv 0x00c26de0
-void TFieldModifier::FUN_00c26de0(float fTime, TPSysData* pkData)
+// src: XBOX_PDB 0x00c26de0
+void TFieldModifier::NiPSysVortexFieldModifier_Update(float fTime, TPSysData* pkData)
 {
     if (m_fInfluence == 0.0f)
         return;
     if (pkData->GetShaderParticleCount() == 0)
         return;
-    if (m_kLightVector.FUN_004390c0(DAT_011f426c))
+    if (m_kLightVector.HasEqualComponents(DAT_011f426c))
         return;
     if (!m_pkFieldObject)
         return;
@@ -166,9 +167,9 @@ void TFieldModifier::FUN_00c26de0(float fTime, TPSysData* pkData)
     if (m_fFieldAttenuation == 0.0f)
     {
         if (m_bEnableMaxDistance)
-            FUN_00c269b0(fTime, pkData);
+            ApplyVortexVelocityWithinDistance(fTime, pkData);
         else
-            FUN_00c26c00(fTime, pkData);
+            ApplyParticleForces(fTime, pkData);
         return;
     }
 
@@ -192,7 +193,7 @@ void TFieldModifier::FUN_00c26de0(float fTime, TPSysData* pkData)
         NiPoint3 kRotatedDir = static_cast<const NiMatrix3&>(kFieldToPSys.m_Rotate).operator*(
             reinterpret_cast<const NiPoint3&>(m_kLightVector));
         TPoint3& kFieldDir = reinterpret_cast<TPoint3&>(kRotatedDir);
-        kFieldDir.FUN_004a0c10();
+        kFieldDir.Unitize_004a0c10();
 
         for (unsigned short i = 0; i < pkData->GetShaderParticleCount(); i++)
         {
@@ -207,12 +208,12 @@ void TFieldModifier::FUN_00c26de0(float fTime, TPSysData* pkData)
                 {
                     if (!m_bEnableMaxDistance || fDist <= m_fDistanceLimit)
                     {
-                        TPoint3 kForce = FUN_00c26820(kFieldPos, kFieldDir, kPos);
+                        TPoint3 kForce = Object_ProcessAndReturnValue_00c26820(kFieldPos, kFieldDir, kPos);
                         if (m_fFieldAttenuation == 0.0f)
-                            kForce.FUN_00439180(fDeltaT * m_fInfluence);
+                            kForce.ScaleComponents(fDeltaT * m_fInfluence);
                         else
-                            kForce.FUN_00439180(fDeltaT * m_fInfluence / NiPow(fDist, m_fFieldAttenuation));
-                        pkInfo->m_kValue.FUN_0063c8a0(kForce);
+                            kForce.ScaleComponents(fDeltaT * m_fInfluence / NiPow(fDist, m_fFieldAttenuation));
+                        pkInfo->m_kValue.ComputeValue_0063c8a0(kForce);
                     }
                 }
             }

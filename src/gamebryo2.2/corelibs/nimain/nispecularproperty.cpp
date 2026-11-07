@@ -16,15 +16,15 @@ inline NiSpecularProperty::NiSpecularProperty() throw()
 NiObject* NiSpecularProperty::MakeClone(CloningProcess& kCloning)
 {
     NiSpecularProperty* pkObject = new NiSpecularProperty;
-    ((NiCullingProperty*)this)->FUN_00a5d7a0(pkObject, kCloning);
+    ((NiCullingProperty*)this)->NiProperty_CopyMembers(pkObject, kCloning);
     pkObject->m_uiObjectFlags = m_uiObjectFlags;
     return pkObject;
 }
 
 extern unsigned int DAT_011f5ecc;
 
-unsigned int __cdecl FUN_00a7d330(unsigned int key);
-unsigned int __cdecl FUN_00a7d370(const char* name, unsigned int value);
+unsigned int __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int key);
+unsigned int __cdecl NiGetViewerString(const char* name, unsigned int value);
 
 struct FUN_00a951f0_list
 {
@@ -47,7 +47,7 @@ void __fastcall NiSpecularProperty_GetViewerStrings(NiSpecularProperty* property
                                                    FUN_00a951f0_list* list)
 {
     NiProperty_GetViewerStrings(property, unusedEDX, list);
-    unsigned int item = FUN_00a7d330(DAT_011f5ecc);
+    unsigned int item = NiViewerStrings_NiGetViewerString_Title(DAT_011f5ecc);
     unsigned int count = list->m_0a;
     if (count >= list->m_08)
         list->FUN_0096ad30(count + list->m_0e);
@@ -56,7 +56,7 @@ void __fastcall NiSpecularProperty_GetViewerStrings(NiSpecularProperty* property
     unsigned char ucSpecFlag = (unsigned char)property->m_uiObjectFlags;
     ucSpecFlag &= 1;
     *(volatile unsigned char*)&item = ucSpecFlag;
-    unsigned int result = FUN_00a7d370("m_bSpec", *(volatile unsigned int*)&item);
+    unsigned int result = NiGetViewerString("m_bSpec", *(volatile unsigned int*)&item);
     *(volatile unsigned int*)&item = result;
 
     count = list->m_0a;

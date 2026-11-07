@@ -17,7 +17,8 @@ NetworkSystemUtility& NetworkSystemUtility::GetRandomGenerator()
 }
 
 // @fnv 0x00af2d40
-void* __fastcall FUN_00af2d40(void* pThis)
+// src: COMMUNITY 0x00af2d40
+void* __fastcall BSNetworkSystemUtility_BSNetworkSystemUtility(void* pThis)
 {
     *(bool*)pThis = false;
     *((void**)pThis + 1) = 0;
@@ -26,8 +27,9 @@ void* __fastcall FUN_00af2d40(void* pThis)
 
 struct FUN_00af2d60_Class
 {
-    void FUN_00af2d60();
+    void nullsub_327();
 };
 // @fnv 0x00af2d60
-void FUN_00af2d60_Class::FUN_00af2d60()
+// src: COMMUNITY 0x00af2d60
+void FUN_00af2d60_Class::nullsub_327()
 {}

@@ -99,10 +99,11 @@ void IdleSystem::Startup()
 
 struct FUN_00af2470_class
 {
-    bool FUN_00af2470();
+    bool return_0_1();
 };
 // @fnv 0x00af2470
-bool FUN_00af2470_class::FUN_00af2470()
+// src: COMMUNITY 0x00af2470
+bool FUN_00af2470_class::return_0_1()
 {
     return false;
 }
@@ -110,11 +111,12 @@ bool FUN_00af2470_class::FUN_00af2470()
 struct FUN_00af2420_class
 {
     void FUN_00af25b0(void** p);
-    bool FUN_00af2420(int value);
+    bool BSAwardsSystemUtility_Unlock(int value);
 };
 
 // @fnv 0x00af2420
-bool FUN_00af2420_class::FUN_00af2420(int value)
+// src: COMMUNITY 0x00af2420
+bool FUN_00af2420_class::BSAwardsSystemUtility_Unlock(int value)
 {
     void* q = g_memoryManager.Allocate(4);
     void *p = q ? *(void**)q = (void*)value, q : 0;

@@ -263,7 +263,8 @@ void FUN_00d06640_class::Destroy()
 }
 
 // @fnv 0x00cb0020
-void __stdcall FUN_00cb0020(unsigned char* output)
+// src: XBOX_PDB 0x00cb0020
+void __stdcall hkMemoryTrackStreamWriter_seekTellSupported(unsigned char* output)
 {
     *output = 0;
 }
@@ -406,7 +407,7 @@ void __fastcall CopyPhysicsSystem(hkpPhysicsSystem* system, void*, const hkpPhys
     system->m_kPhantoms = kOther.m_kPhantoms;
     system->m_ppConstraints = kOther.m_ppConstraints;
     system->m_ppActions = kOther.m_ppActions;
-    system->m_name.FUN_00cb0c30(&kOther.m_name);
+    system->m_name.UpdateState_00cb0c30(&kOther.m_name);
     system->m_ulUserData = kOther.m_ulUserData;
     system->m_bSlotEnabled = kOther.m_bSlotEnabled;
 }
@@ -425,12 +426,13 @@ class hkOwnerD064
     int unk00[11];
     hkArray<hkShapeD064*> m_shapes;
 
-    void FUN_00d064f0(hkShapeD064* shape);
+    void hkpPhysicsSystem_addPhantom(hkShapeD064* shape);
 };
 
 // If shape is non-null, calls shape->FUN_00c90510() and appends it to m_shapes via AddBack.
 // @fnv 0x00d064f0
-void hkOwnerD064::FUN_00d064f0(hkShapeD064* shape)
+// src: HAVOK_LIB 0x00d064f0
+void hkOwnerD064::hkpPhysicsSystem_addPhantom(hkShapeD064* shape)
 {
     if (shape)
     {
@@ -453,12 +455,13 @@ class hkOwnerXd06540
     int unk00[5];
     hkArray<hkShapeXd06540*> m_shapes;
 
-    void FUN_00d06540(hkShapeXd06540* shape);
+    void hkpPhysicsSystem_addConstraint(hkShapeXd06540* shape);
 };
 
 // If shape is non-null, calls shape->FUN_00c90510() and appends shape to m_shapes via AddBack.
 // @fnv 0x00d06540
-void hkOwnerXd06540::FUN_00d06540(hkShapeXd06540* shape)
+// src: HAVOK_LIB 0x00d06540
+void hkOwnerXd06540::hkpPhysicsSystem_addConstraint(hkShapeXd06540* shape)
 {
     if (shape)
     {
@@ -481,12 +484,13 @@ class hkOwnerXd06590
     int unk00[8];
     hkArray<hkShapeXd06590*> m_shapes;
 
-    void FUN_00d06590(hkShapeXd06590* shape);
+    void hkpPhysicsSystem_addAction(hkShapeXd06590* shape);
 };
 
 // If shape is non-null, calls shape->FUN_00c90510() and appends it to m_shapes via AddBack.
 // @fnv 0x00d06590
-void hkOwnerXd06590::FUN_00d06590(hkShapeXd06590* shape)
+// src: HAVOK_LIB 0x00d06590
+void hkOwnerXd06590::hkpPhysicsSystem_addAction(hkShapeXd06590* shape)
 {
     if (shape)
     {
@@ -523,7 +527,7 @@ __declspec(align(16)) struct AlignedTransform
         m_vTranslation = o.m_vTranslation;
     }
 
-    void FUN_00cb23e0(const hkTransform* other);
+    void ProcessTransformedMatrixCopy_00cb23e0(const hkTransform* other);
 };
 
 struct FUN_00ca8890_Class
@@ -545,15 +549,15 @@ struct FUN_00ca8890_Class
     int unkE0, unkE4, unkE8, unkEC;
     hkTransform m_kMotionTransform;
 
-    void FUN_00ca8890(const AlignedTransform* t);
+    void hkpRigidBody_setTransform(const AlignedTransform* t);
 };
 
 struct FUN_00cf30f0_Class
 {
-    void FUN_00cf30f0(const hkTransform* t);
+    void ApplyTransformToWorldConstraint(const hkTransform* t);
 };
 
-void FUN_00d05df0(void* phantom, const hkTransform* t);
+void tranformPhantom(void* phantom, const hkTransform* t);
 
 // The original transform input is copied as four scalar words per column before the aligned SIMD copy.
 struct TransformColumnFields
@@ -580,16 +584,16 @@ void PhysicsSystemWrapper::ApplyMotionTransform(const hkTransform* a2)
 
         AlignedTransform t2 = t1;
 
-        t2.FUN_00cb23e0(&((FUN_00ca8890_Class*)m_ppRigidBodies.m_data[i])->m_kMotionTransform);
-        ((FUN_00ca8890_Class*)m_ppRigidBodies.m_data[i])->FUN_00ca8890(&t2);
+        t2.ProcessTransformedMatrixCopy_00cb23e0(&((FUN_00ca8890_Class*)m_ppRigidBodies.m_data[i])->m_kMotionTransform);
+        ((FUN_00ca8890_Class*)m_ppRigidBodies.m_data[i])->hkpRigidBody_setTransform(&t2);
     }
     for (int i = 0; i < m_ppConstraints.m_iElementCount; ++i)
     {
-        ((FUN_00cf30f0_Class*)m_ppConstraints.m_data[i])->FUN_00cf30f0(a2);
+        ((FUN_00cf30f0_Class*)m_ppConstraints.m_data[i])->ApplyTransformToWorldConstraint(a2);
     }
     for (int i = 0; i < m_kPhantoms.m_iElementCount; ++i)
     {
-        FUN_00d05df0(m_kPhantoms.m_data[i], a2);
+        tranformPhantom(m_kPhantoms.m_data[i], a2);
     }
 }
 
@@ -603,11 +607,12 @@ struct BodyCollection
     ReferenceBody** data;
     int count;
     unsigned int capacityFlags;
-    void FUN_00d06130(unsigned int index);
+    void hkpPhysicsSystem_removeRigidBody(unsigned int index);
 };
 // Calls FUN_00c905b0 on the element at index, decrements count, and shifts the last element into the slot if index is not the last.
 // @fnv 0x00d06130
-void BodyCollection::FUN_00d06130(unsigned int index)
+// src: HAVOK_LIB 0x00d06130
+void BodyCollection::hkpPhysicsSystem_removeRigidBody(unsigned int index)
 {
     data[index]->FUN_00c905b0();
     --count;
@@ -630,11 +635,12 @@ struct OwnerD061
     hkRefD061** refs3;
     int count3;
     unsigned int capacityFlags3;
-    void FUN_00d06170(int index);
+    void hkpPhysicsSystem_removePhantom(int index);
 };
 // Calls FUN_00c905b0 on refs3[index], decrements count3, and moves the last element into the slot if index is not the last.
 // @fnv 0x00d06170
-void OwnerD061::FUN_00d06170(int index)
+// src: HAVOK_LIB 0x00d06170
+void OwnerD061::hkpPhysicsSystem_removePhantom(int index)
 {
     refs3[index]->FUN_00c905b0();
     --count3;
@@ -663,12 +669,13 @@ struct FUN_00d061b0_Class
     void* vftable;
     int unk04, unk08, unk0C, unk10;
     hkArray<RefObj*> m_refs;
-    void FUN_00d061b0(int index);
+    void hkpPhysicsSystem_removeConstraint(int index);
 };
 
 // Calls FUN_00c905b0 on m_refs[index], then removes that entry from m_refs.
 // @fnv 0x00d061b0
-void FUN_00d061b0_Class::FUN_00d061b0(int index)
+// src: HAVOK_LIB 0x00d061b0
+void FUN_00d061b0_Class::hkpPhysicsSystem_removeConstraint(int index)
 {
     m_refs[index]->FUN_00c905b0();
     m_refs.removeAt(index);
@@ -685,12 +692,13 @@ struct FUN_00d061f0_Class
     void* vftable;
     int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
     hkArray<RefObj*> m_refs;
-    void FUN_00d061f0(int index);
+    void hkpPhysicsSystem_removeAction(int index);
 };
 
 // Calls FUN_00c905b0 on the RefObj at index, then removes that entry from m_refs.
 // @fnv 0x00d061f0
-void FUN_00d061f0_Class::FUN_00d061f0(int index)
+// src: HAVOK_LIB 0x00d061f0
+void FUN_00d061f0_Class::hkpPhysicsSystem_removeAction(int index)
 {
     m_refs[index]->FUN_00c905b0();
     m_refs.removeAt(index);
@@ -1015,8 +1023,8 @@ class hkpConstraintInstanceD : public hkReferencedObjectD
     {
         return m_pEntityB;
     }
-    hkBoolD FUN_00cf2fb0() const throw();
-    hkpConstraintInstanceD* FUN_00cf3fa0(hkpRigidBodyD* pk, hkpRigidBodyD* pkB, int eMode) const throw();
+    hkBoolD isConstrainedToWorld() const throw();
+    hkpConstraintInstanceD* clone_00cf3fa0(hkpRigidBodyD* pk, hkpRigidBodyD* pkB, int eMode) const throw();
 
     void* m_pOwnerObject;
     void* m_data;
@@ -1042,7 +1050,7 @@ class FUN_00d065e0 : public hkReferencedObjectD
 {
   public:
     FUN_00d065e0() throw();
-    FUN_00d065e0* FUN_00d06720() const throw();
+    FUN_00d065e0* hkpPhysicsSystem_clone() const throw();
 
     hkArray<hkpRigidBodyD*> m_ppRigidBodies;
     hkArray<hkpConstraintInstanceD*> m_ppConstraints;
@@ -1054,11 +1062,12 @@ class FUN_00d065e0 : public hkReferencedObjectD
 };
 
 // @fnv 0x00d06720
-FUN_00d065e0* FUN_00d065e0::FUN_00d06720() const throw()
+// src: HAVOK_LIB 0x00d06720
+FUN_00d065e0* FUN_00d065e0::hkpPhysicsSystem_clone() const throw()
 {
     FUN_00d065e0* newSystem = new FUN_00d065e0();
 
-    newSystem->m_name.FUN_00cb0c30(&m_name);
+    newSystem->m_name.UpdateState_00cb0c30(&m_name);
     newSystem->m_ulUserData = m_ulUserData;
     newSystem->m_bSlotEnabled = m_bSlotEnabled;
 
@@ -1083,10 +1092,10 @@ FUN_00d065e0* FUN_00d065e0::FUN_00d06720() const throw()
         hkpConstraintInstanceD* constraint = m_ppConstraints[i];
         hkpRigidBodyD* pNewRigidBodyA = newSystem->m_ppRigidBodies[m_ppRigidBodies.indexOf(constraint->getRigidBody())];
         hkpRigidBodyD* pNewRigidBodyB =
-            constraint->FUN_00cf2fb0()
+            constraint->isConstrainedToWorld()
                 ? 0
                 : newSystem->m_ppRigidBodies[m_ppRigidBodies.indexOf(constraint->getRigidBodyB())];
-        newSystem->m_ppConstraints[i] = constraint->FUN_00cf3fa0(pNewRigidBodyA, pNewRigidBodyB, 0);
+        newSystem->m_ppConstraints[i] = constraint->clone_00cf3fa0(pNewRigidBodyA, pNewRigidBodyB, 0);
     }
 
     for (i = 0; i < m_ppActions.GetLogicalSize(); i++)

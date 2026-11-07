@@ -9,7 +9,7 @@
 // @fnv 0x00b8ab10
 void ImageSpaceShaderParam::AllocateShaderConstants(int vertexCount, int pixelCount)
 {
-    FUN_00b8a7e0();
+    ClearConstantGroups();
     m_pVertexShaderConstantMap = new NiD3DShaderConstantMap(g_pkRenderer, 0u);
     m_pPixelShaderConstantMap = new NiD3DShaderConstantMap(g_pkRenderer, 2u);
     m_iVertexShaderConstantCount = vertexCount + 3;
@@ -55,7 +55,8 @@ void ImageSpaceShaderParam::SetRenderState(unsigned int state, unsigned int valu
 
 // Releases the object references and deallocates the two buffers, clearing each pointer to null.
 // @fnv 0x00b8a7e0
-void ImageSpaceShaderParam::FUN_00b8a7e0()
+// src: COMMUNITY 0x00b8a7e0
+void ImageSpaceShaderParam::ClearConstantGroups()
 {
     if (m_pVertexShaderConstantMap.m_pObject)
     {
@@ -87,7 +88,8 @@ void ImageSpaceShaderParam::CopyParamData(int index, const float* data, unsigned
 }
 
 // @fnv 0x00b8a7c0
-void ImageSpaceShaderParam::FUN_00b8a7c0()
+// src: COMMUNITY 0x00b8a7c0
+void ImageSpaceShaderParam::SetBlurClearMode()
 {
     m_eClearFlags = DAT_011f9440 ? NiRenderer::CLEAR_ALL : NiRenderer::CLEAR_NONE;
 }
@@ -212,12 +214,13 @@ struct ShaderPass_4e30
     int unk64;
     ParamColor_4e30 kColor;
 
-    bool FUN_00c04e30(int arg);
+    bool ImageSpaceEffectCinematic_UpdateParams(int arg);
 };
 
 // Sets a shader reference vector and three parameter vectors, using pPoint coordinates for the first when bUsePoint is set.
 // @fnv 0x00c04e30
-bool ShaderPass_4e30::FUN_00c04e30(int arg)
+// src: COMMUNITY 0x00c04e30
+bool ShaderPass_4e30::ImageSpaceEffectCinematic_UpdateParams(int arg)
 {
     ShaderConstants_4e30* pShader = pOwner->pShader;
     float fRadius;

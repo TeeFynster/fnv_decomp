@@ -71,32 +71,32 @@ public:
     LocalVec Cross(const LocalVec& v) const;
     LocalVec ApplyScaled(float scale);
     LocalVec ApplyScaled(float scale) const;
-    void FUN_00acf580(unsigned n, Tok value);
-    LocalVec FUN_004a0bd0();
-    LocalVec FUN_004a0bd0() const;
+    void ProcessState_00acf580(unsigned n, Tok value);
+    LocalVec GetNegatedVector();
+    LocalVec GetNegatedVector() const;
     LocalVec FUN_0053d1a0(const LocalVec& v);
     LocalVec FUN_004b3800(const LocalVec& v);
     LocalVec FUN_004b3800(const LocalVec& v) const;
     LocalVec FUN_00439e90(const LocalVec& v);
     LocalVec FUN_00439e90(const LocalVec& v) const;
-    LocalVec FUN_00439ef0(const LocalVec& v);
-    LocalVec FUN_00439ef0(const LocalVec& v) const;
+    LocalVec SubtractIntoVector(const LocalVec& v);
+    LocalVec SubtractIntoVector(const LocalVec& v) const;
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     void FUN_006815c0();
-    void FUN_00439180(float scale);
-    LocalVec& FUN_0063c8a0(const LocalVec& v);
+    void ScaleComponents(float scale);
+    LocalVec& ComputeValue_0063c8a0(const LocalVec& v);
     float FUN_004a7290();
     float FUN_004a7290() const;
-    void FUN_004b4db0(const float* values);
+    void SetQuaternionComponentsFromVector(const float* values);
     void FUN_00a38560();
-    void FUN_004f0180(void* value);
+    void NiQuaternion_ToRotation(void* value);
 
     LocalVec& ScaleByInverse(float divisor);
     float FUN_00457910();
-    LocalVec* FUN_006a6eb0();
-    bool FUN_004390c0(const LocalVec& v);
+    LocalVec* FastNavMeshTriLocation_GetLocation();
+    bool HasEqualComponents(const LocalVec& v);
 
     __m128 get() const;
     void set(__m128 value);
@@ -138,37 +138,37 @@ public:
     void normalize();
     void negate(const LocalVec& v);
 
-    void FUN_00c7f640(const void* matrix, const hkVector4& point);
-    void FUN_00c7f640(Mat4* matrix, void* point);
-    void FUN_00c7f640(const void* matrix, const LocalVec* point);
-    void FUN_00c7f640(const void* matrix, const void* point);
-    void FUN_00c7f700(Mat3* matrix, void* point);
-    void FUN_00c7f700(const void* matrix, const LocalVec* point);
-    void FUN_00b12790();
-    void FUN_00b13040(LocalVec* out, const LocalVec* v);
+    void setTransformedPos_00c7f640(const void* matrix, const hkVector4& point);
+    void setTransformedPos_00c7f640(Mat4* matrix, void* point);
+    void setTransformedPos_00c7f640(const void* matrix, const LocalVec* point);
+    void setTransformedPos_00c7f640(const void* matrix, const void* point);
+    void hkVector4_setRotatedDir(Mat3* matrix, void* point);
+    void hkVector4_setRotatedDir(const void* matrix, const LocalVec* point);
+    void Normalize_00b12790();
+    void Diff_00b13040(LocalVec* out, const LocalVec* v);
     LocalVec* ScaleSwizzled(LocalVec* out, float factor);
     void AddVector(LocalVec* out, const LocalVec* v);
     float Dot(const LocalVec& v);
     LocalVec* FUN_004a3c90(const LocalVec* v);
     LocalVec* FUN_0062b0a0(LocalVec* out, LocalVec* v);
-    LocalVec* FUN_0062af00(LocalVec* target);
+    LocalVec* hkVector4_lengthInverse3(LocalVec* target);
 
     void FUN_00cf7690(Elem* value);
-    void FUN_00b1e970();
+    void UpdateState_00b1e970();
     Iter begin();
     Iter end();
-    CIter FUN_00b33030(CIter first, CIter last);
-    void FUN_00b32120();
+    CIter UpdateState_00b33030(CIter first, CIter last);
+    void m_vStrips_clear();
     unsigned int size() const;
     unsigned int capacity() const;
-    void FUN_00b2df90();
-    void FUN_00b2e140(Elem* first, Elem* last);
+    void ClearAllElements();
+    void B2EDestroyRange_Thunk(Elem* first, Elem* last);
     bool InitBuffer(unsigned int count);
     Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
-    LocalVec& FUN_00b2db10(const LocalVec& v);
-    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
-    void FUN_00acac40();
-    LocalVec& FUN_00ad61e0(const LocalVec& v);
+    LocalVec& CTreeEngine_SetLeafTextures(const LocalVec& v);
+    CMutIter ProcessAndReturnValue_00aceb80(CMutIter first, CMutIter last);
+    void ProcessState_00acac40();
+    LocalVec& ReleaseStorage_00ad61e0(const LocalVec& v);
 };
 #include "../../include/NiPoint3.h"
 
@@ -345,7 +345,8 @@ extern float const g_011c7374_arg1;
 
 // Initializes the object's fields to zero/default values, sets flags at offset 0x10, and clears bit 0x8000.
 // @fnv 0x00ae95e0
-void __fastcall FUN_00ae95e0(BSGameSound* pObject)
+// src: XBOX_PDB 0x00ae95e0
+void __fastcall BSGameSound_Init(BSGameSound* pObject)
 {
     pObject->iSoundID = 0;
     pObject->iSoundTypeFlags = 0;
@@ -450,7 +451,8 @@ BSGameSound::~BSGameSound()
 extern double _gModifierZero;
 
 // @fnv 0x00ae9b50
-bool BSGameSound::FUN_00ae9b50(int mask, float afTime)
+// src: COMMUNITY 0x00ae9b50
+bool BSGameSound::CanPlayNow(int mask, float afTime)
 {
     if ((iWeatherFlags & mask) == 0 && iWeatherFlags != 0 && mask != 0)
         return false;
@@ -546,7 +548,7 @@ FUN_00aeac20* FUN_00aea5c0::Create(unsigned int auiValue)
 
 namespace fnv_00aea700 {
 struct FUN_00aea700;
-void __fastcall FUN_00aea210(FUN_00aea700* p);
+void __fastcall SetVtableAndProcessState_00aea210(FUN_00aea700* p);
 struct FUN_00aea700
 {
     void* DeleteThis(unsigned int flags);
@@ -555,7 +557,7 @@ struct FUN_00aea700
 // @fnv 0x00aea700
 void* FUN_00aea700::DeleteThis(unsigned int flags)
 {
-    FUN_00aea210(this);
+    SetVtableAndProcessState_00aea210(this);
     if (flags & 1)
         g_memoryManager._DeallocateAlias(this);
     return this;
@@ -618,7 +620,7 @@ struct BSAudioSink
     virtual void __stdcall FUN_00f8();
 };
 
-extern "C" void FUN_00ad7150();
+extern "C" void BSAudio_Shutdown();
 
 extern void(__cdecl* g_pAudioShutdownCallback)();
 
@@ -626,7 +628,7 @@ extern void(__cdecl* g_pAudioShutdownCallback)();
 void BSWin32Audio::Shutdown()
 {
     this->bInitialized = 0;
-    ((void(__thiscall*)(BSAudio*))FUN_00ad7150)(this);
+    ((void(__thiscall*)(BSAudio*))BSAudio_Shutdown)(this);
     g_pAudioShutdownCallback();
     if (this->pListener)
     {
@@ -650,7 +652,7 @@ void BSWin32Audio::Shutdown()
 extern "C" char DAT_011f6d9c, DAT_01202800, DAT_011f6238;
 extern "C" char DAT_010a3b10, DAT_010a3ae0, DAT_010a3a78, DAT_010a3a38, DAT_010a39f8, DAT_01100fa4;
 extern "C" __declspec(dllimport) void* __stdcall GetModuleHandleA(const char*);
-extern "C" int __stdcall FUN_00ee81e0(int, void*, int);
+extern "C" int __stdcall DirectSoundCreate8_00ee81e0(int, void*, int);
 extern "C" void* __cdecl FUN_00ec61c0(void*, int, unsigned);
 struct Sound
 {
@@ -674,7 +676,7 @@ struct FUN_00aea730_Class : Sound
     FUN_00aea730_Class(int);
     static void* operator new(unsigned n)
     {
-        return ((MemoryManager*)&DAT_011f6238)->FUN_00aa3e40(n);
+        return ((MemoryManager*)&DAT_011f6238)->Game_DoHeapAlloc(n);
     }
     static void operator delete(void*);
 };
@@ -719,7 +721,7 @@ void BSWin32AudioInitialization::SetWindow(int aiWindow)
     if (*(const unsigned char*)((Text*)&DAT_011f6d9c)->Get())
     {
         GetModuleHandleA(0);
-        iResult = FUN_00ee81e0(0, &this->pDirectSound, 0);
+        iResult = DirectSoundCreate8_00ee81e0(0, &this->pDirectSound, 0);
         if (!CheckResult(iResult, &DAT_010a3b10))
             return;
         iResult = ((Com*)this->pDirectSound)->coop((int)this->hWnd, 2);
@@ -745,7 +747,7 @@ void BSWin32AudioInitialization::SetWindow(int aiWindow)
     }
     this->bInitialized = 1;
     this->bAudioEnabled = 1;
-    BSAudioManager::GetRandomGenerator().FUN_00ad9640();
+    BSAudioManager::GetRandomGenerator().BSAudioManager_Initialize();
     FUN_00ad7020(0);
 }
 
@@ -753,11 +755,12 @@ extern "C" int __cdecl strcat_s(char*, unsigned int, const char*);
 
 struct AudioPathFixer
 {
-    void FUN_00aea640(char* apName);
+    void BSWin32Audio_FixSoundPath(char* apName);
 };
 // If apName starts with "fx" or "song", copies it to a buffer, then rewrites apName to "data\sound\" followed by the original name.
 // @fnv 0x00aea640
-void AudioPathFixer::FUN_00aea640(char* apName)
+// src: XBOX_PDB 0x00aea640
+void AudioPathFixer::BSWin32Audio_FixSoundPath(char* apName)
 {
     char acBuffer[260];
     if (apName && ((apName[0] == 102 && apName[1] == 120) ||

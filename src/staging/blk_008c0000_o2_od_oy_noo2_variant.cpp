@@ -14,20 +14,21 @@
 #include "../../include/bhkCollisionObject.h"
 #include "../../include/bhkRigidBody.h"
 
-hkVector4* __cdecl FUN_004a3e00(hkVector4* destination, const NiPoint3* source);
+hkVector4* __cdecl NI2HK(hkVector4* destination, const NiPoint3* source);
 class FUN_008c5d90_Class
 {
   public:
-    void FUN_008c5df0(hkVector4* converted);
-    void FUN_008c5d90(const NiPoint3* source);
+    void bhkMouseSpringAction_SetMousePosition_hk(hkVector4* converted);
+    void bhkMouseSpringAction_SetMousePosition(const NiPoint3* source);
 };
 // Preserve the original stack-cookie coverage after replacing the local vector representation.
 #pragma strict_gs_check(push, on)
 // @fnv 0x008c5d90
-void FUN_008c5d90_Class::FUN_008c5d90(const NiPoint3* source)
+// src: XBOX_PDB 0x008c5d90
+void FUN_008c5d90_Class::bhkMouseSpringAction_SetMousePosition(const NiPoint3* source)
 {
     __declspec(align(16)) hkVector4 vector;
-    FUN_008c5df0(FUN_004a3e00(&vector, source));
+    bhkMouseSpringAction_SetMousePosition_hk(NI2HK(&vector, source));
 }
 #pragma strict_gs_check(pop)
 
@@ -36,8 +37,8 @@ struct __declspec(align(16)) Rotation_8cc740
 {
     char m_acRotationData[16];
     Rotation_8cc740(const char* pcName);
-    Rotation_8cc740 FUN_00458700(int iFlags) const;
-    float FUN_004586d0() const;
+    Rotation_8cc740 hkVector4_getSimdAt(int iFlags) const;
+    float EvaluateValue_004586d0() const;
 };
 
 struct ProjectionData_8cc740
@@ -54,12 +55,12 @@ struct ProjectionData_8cc740
 
 struct Source_8cc740
 {
-    const char* FUN_00807080();
+    const char* bhkCharacterProxy_GethkLinearVelocity();
 };
 
 struct Node_8cc740
 {
-    NiMatrix3* FUN_00461130();
+    NiMatrix3* NiAVObject_GetWorldRotate();
 };
 
 struct Listener_8cc740;
@@ -395,7 +396,7 @@ class Controller_8cc740
 
 struct Grid_8cc740
 {
-    unsigned int FUN_00457880(const NiPoint3& kPos);
+    unsigned int TES_GetLandMaterialType(const NiPoint3& kPos);
 };
 
 void __cdecl FUN_00458620(NiPoint3* pkOut, const Rotation_8cc740* pkRot);
@@ -541,22 +542,23 @@ class Owner_8cc740
     NiPoint3 m_kOffset;
 
     Source_8cc740* FUN_009306d0();
-    void FUN_008cfad0(float fScaleMultiplier, NiPoint3 kPos, int iZero, unsigned int uiType);
-    Emitter18_8cc740* FUN_008cdd90();
-    Emitter30_8cc740* FUN_009ee040();
+    void ArrowProjectile_PlayArrowCollisionSound(float fScaleMultiplier, NiPoint3 kPos, int iZero, unsigned int uiType);
+    Emitter18_8cc740* DialoguePackage_GetCurrentDialogItem();
+    Emitter30_8cc740* DialoguePackage_GetActorStartedConversation();
     Emitter18_8cc740* FUN_004f9bf0();
-    void* FUN_007af430();
-    void FUN_008ccce0(const NiPoint3& kPos, const NiPoint3& kWorldPosition);
-    void FUN_008cc6d0(int iState);
-    void FUN_008cc740(const NiPoint3& kPos, const NiPoint3& kWorldPosition);
+    void* BGSSaveFormBuffer_GetForm();
+    void ArrowProjectile_Bounce(const NiPoint3& kPos, const NiPoint3& kWorldPosition);
+    void EffectSetting_SetAreaSound(int iState);
+    void ArrowProjectile_CollideTerrain(const NiPoint3& kPos, const NiPoint3& kWorldPosition);
 };
 
 // @fnv 0x008cc740
-void Owner_8cc740::FUN_008cc740(const NiPoint3& kPos, const NiPoint3& kWorldPosition)
+// src: XBOX_PDB 0x008cc740
+void Owner_8cc740::ArrowProjectile_CollideTerrain(const NiPoint3& kPos, const NiPoint3& kWorldPosition)
 {
     m_pUserData = new ProjectionData_8cc740;
     NiPoint3 kIntersectionOffset = m_kOffset;
-    NiPoint3::FUN_00525340(kIntersectionOffset);
+    NiPoint3::NiPoint3_UnitizeVector(kIntersectionOffset);
     kIntersectionOffset *= 24.0f;
     m_pUserData->m_iFadeIndex = 2;
     m_pUserData->m_iFlags = 0;
@@ -567,16 +569,16 @@ void Owner_8cc740::FUN_008cc740(const NiPoint3& kPos, const NiPoint3& kWorldPosi
     m_pUserData->m_kValue = DAT_011f426c;
     if (FUN_009306d0())
     {
-        Rotation_8cc740 kRot(FUN_009306d0()->FUN_00807080());
-        if (kRot.FUN_00458700(0).FUN_004586d0() == -DAT_01085910)
+        Rotation_8cc740 kRot(FUN_009306d0()->bhkCharacterProxy_GethkLinearVelocity());
+        if (kRot.hkVector4_getSimdAt(0).EvaluateValue_004586d0() == -DAT_01085910)
         {
             if (GetNode())
-                m_pUserData->m_kValue = GetNode()->FUN_00461130()->operator*(DAT_011a9478 * m_fScale);
+                m_pUserData->m_kValue = GetNode()->NiAVObject_GetWorldRotate()->operator*(DAT_011a9478 * m_fScale);
         }
         else
             FUN_00458620(&m_pUserData->m_kValue, &kRot);
     }
-    unsigned int uiType = DAT_011dea10->FUN_00457880(kPos);
+    unsigned int uiType = DAT_011dea10->TES_GetLandMaterialType(kPos);
     switch (uiType)
     {
     case 0:
@@ -586,36 +588,36 @@ void Owner_8cc740::FUN_008cc740(const NiPoint3& kPos, const NiPoint3& kWorldPosi
     case 11:
     case 13:
     case 15:
-        FUN_008ccce0(kPos, kWorldPosition);
+        ArrowProjectile_Bounce(kPos, kWorldPosition);
         break;
     }
     m_iActive = 1;
-    FUN_008cfad0(m_pUserData->m_kValue.Length(), kPos, 0, uiType);
+    ArrowProjectile_PlayArrowCollisionSound(m_pUserData->m_kValue.Length(), kPos, 0, uiType);
     if (m_pkController && m_pkController->GetEffect())
         m_pkController->GetEffect()->FUN_008d0600(kPos, 0);
     if (m_pkController)
     {
-        if (FUN_008cdd90())
+        if (DialoguePackage_GetCurrentDialogItem())
         {
-            m_pkController->m_kSink.Attach(FUN_008cdd90());
+            m_pkController->m_kSink.Attach(DialoguePackage_GetCurrentDialogItem());
             m_pkController->m_kSink.SetActive(0);
-            m_pkController->m_kSink.TryCast(FUN_007af430());
+            m_pkController->m_kSink.TryCast(BGSSaveFormBuffer_GetForm());
         }
-        if (FUN_009ee040())
+        if (DialoguePackage_GetActorStartedConversation())
         {
-            m_pkController->m_kSink.Attach(FUN_009ee040());
+            m_pkController->m_kSink.Attach(DialoguePackage_GetActorStartedConversation());
             m_pkController->m_kSink.SetActive(0);
-            m_pkController->m_kSink.TryCast(FUN_007af430());
+            m_pkController->m_kSink.TryCast(BGSSaveFormBuffer_GetForm());
         }
         if (FUN_004f9bf0())
         {
             m_pkController->m_kSink.Attach(FUN_004f9bf0());
             m_pkController->m_kSink.SetActive(0);
-            m_pkController->m_kSink.TryCast(FUN_007af430());
+            m_pkController->m_kSink.TryCast(BGSSaveFormBuffer_GetForm());
         }
     }
-    if (FUN_008cdd90())
-        FUN_008cc6d0(3);
+    if (DialoguePackage_GetCurrentDialogItem())
+        EffectSetting_SetAreaSound(3);
 }
 
 extern NiPoint3 xg_11a9478;
@@ -630,8 +632,8 @@ struct __declspec(align(16)) xVec4
 {
     xM128 m_vComponents;
     xVec4(const NiPoint3&);
-    xVec4 FUN_00458700(int) const;
-    float FUN_004586d0() const;
+    xVec4 hkVector4_getSimdAt(int) const;
+    float EvaluateValue_004586d0() const;
 };
 struct xData
 {
@@ -646,11 +648,11 @@ struct xData
 };
 struct xHolder
 {
-    const NiPoint3* FUN_00807080();
+    const NiPoint3* bhkCharacterProxy_GethkLinearVelocity();
 };
 struct xDHOwner
 {
-    NiMatrix3* FUN_00461130();
+    NiMatrix3* NiAVObject_GetWorldRotate();
 };
 void xFUN_00458620(NiPoint3*, xVec4*);
 struct xActor
@@ -778,11 +780,12 @@ struct xActor
     int m_90, m_94;
     float m_98;
     xHolder* FUN_009306d0();
-    void FUN_008ccce0(const NiPoint3& akA, const NiPoint3& akB);
+    void ArrowProjectile_Bounce(const NiPoint3& akA, const NiPoint3& akB);
 };
 
 // @fnv 0x008ccce0
-void xActor::FUN_008ccce0(const NiPoint3& akA, const NiPoint3& akB)
+// src: XBOX_PDB 0x008ccce0
+void xActor::ArrowProjectile_Bounce(const NiPoint3& akA, const NiPoint3& akB)
 {
     if (m_88)
     {
@@ -804,11 +807,11 @@ void xActor::FUN_008ccce0(const NiPoint3& akA, const NiPoint3& akB)
     m_88->m_1c = NiPoint3::ZERO;
     if (FUN_009306d0())
     {
-        xVec4 V(*FUN_009306d0()->FUN_00807080());
-        if (V.FUN_00458700(0).FUN_004586d0() == -xg_1085910)
+        xVec4 V(*FUN_009306d0()->bhkCharacterProxy_GethkLinearVelocity());
+        if (V.hkVector4_getSimdAt(0).EvaluateValue_004586d0() == -xg_1085910)
         {
             if (FUN_1d0())
-                m_88->m_1c = FUN_1d0()->FUN_00461130()->operator*(xg_11a9478 * m_98);
+                m_88->m_1c = FUN_1d0()->NiAVObject_GetWorldRotate()->operator*(xg_11a9478 * m_98);
         }
         else
             xFUN_00458620(&m_88->m_1c, &V);
@@ -829,8 +832,8 @@ struct __declspec(align(16)) xVec4
 {
     xM128 m_vComponents;
     xVec4(const NiPoint3&);
-    xVec4 FUN_00458700(int) const;
-    float FUN_004586d0() const;
+    xVec4 hkVector4_getSimdAt(int) const;
+    float EvaluateValue_004586d0() const;
 };
 struct xData
 {
@@ -845,11 +848,11 @@ struct xData
 };
 struct xHolder
 {
-    const NiPoint3* FUN_00807080();
+    const NiPoint3* bhkCharacterProxy_GethkLinearVelocity();
 };
 struct xDHOwner
 {
-    NiMatrix3* FUN_00461130();
+    NiMatrix3* NiAVObject_GetWorldRotate();
 };
 void xFUN_00458620(NiPoint3*, xVec4*);
 struct xActor
@@ -977,11 +980,12 @@ struct xActor
     int m_90, m_94;
     float m_98;
     xHolder* FUN_009306d0();
-    void FUN_008ccfb0(int aiValue);
+    void ArrowProjectile_Simulate(int aiValue);
 };
 
 // @fnv 0x008ccfb0
-void xActor::FUN_008ccfb0(int aiValue)
+// src: XBOX_PDB 0x008ccfb0
+void xActor::ArrowProjectile_Simulate(int aiValue)
 {
     if (m_88)
         m_88->m_iWordAt00 = 4;
@@ -997,11 +1001,11 @@ void xActor::FUN_008ccfb0(int aiValue)
         m_88->m_1c = NiPoint3::ZERO;
         if (FUN_009306d0())
         {
-            xVec4 V(*FUN_009306d0()->FUN_00807080());
-            if (V.FUN_00458700(0).FUN_004586d0() == -xg_1085910)
+            xVec4 V(*FUN_009306d0()->bhkCharacterProxy_GethkLinearVelocity());
+            if (V.hkVector4_getSimdAt(0).EvaluateValue_004586d0() == -xg_1085910)
             {
                 if (FUN_1d0())
-                    m_88->m_1c = FUN_1d0()->FUN_00461130()->operator*(xg_11a9478 * m_98);
+                    m_88->m_1c = FUN_1d0()->NiAVObject_GetWorldRotate()->operator*(xg_11a9478 * m_98);
             }
             else
                 xFUN_00458620(&m_88->m_1c, &V);
@@ -1119,10 +1123,10 @@ class Target8CD
     void* m_pvTarget;
 };
 
-void* __cdecl FUN_004b5260(void* pvTarget);
-void __cdecl FUN_00c6a350(void* pvSource, int a, int b, int c, int d);
-void __cdecl FUN_0062a7e0(hkVector4* pkTransform, void* pvTarget);
-void __cdecl FUN_005b5e40(const char* pcMessage);
+void* __cdecl FindFirstCollisionObject(void* pvTarget);
+void __cdecl bhkWorld_SetMotion(void* pvSource, int a, int b, int c, int d);
+void __cdecl TESArrowTargetListener_AddArrowTarget(hkVector4* pkTransform, void* pvTarget);
+void __cdecl Warning_005b5e40(const char* pcMessage);
 
 // 0x008cd520 binds ArrowProjectile::HandleType1; its collision pointer is at +0x88, unlike Projectile.
 class ArrowImpactHandler
@@ -1332,24 +1336,25 @@ class ArrowImpactHandler
     unsigned int unk84;
     Target8CD* m_pkTarget;
 
-    bool FUN_008cd520(Caster8CD* pkCaster);
+    bool ArrowProjectile_ProcessCollisionReference(Caster8CD* pkCaster);
 };
 
 // Preserve the original stack-cookie coverage after replacing the local vector representation.
 #pragma strict_gs_check(push, on)
 // @fnv 0x008cd520
-bool ArrowImpactHandler::FUN_008cd520(Caster8CD* pkCaster)
+// src: XBOX_PDB 0x008cd520
+bool ArrowImpactHandler::ArrowProjectile_ProcessCollisionReference(Caster8CD* pkCaster)
 {
     Prepare();
     if (m_pkTarget->m_iActive)
     {
-        bhkCollisionObject* pkRef = (bhkCollisionObject*)FUN_004b5260(m_pkTarget->m_pvTarget);
+        bhkCollisionObject* pkRef = (bhkCollisionObject*)FindFirstCollisionObject(m_pkTarget->m_pvTarget);
         if (!pkRef)
             return false;
-        bhkRigidBody* pkItem = static_cast<bhkRigidBody*>(pkRef->FUN_006fa820());
-        FUN_00c6a350(GetSource(), 4, 1, 0, 1);
-        SpellHandle8CD kHandle(6, pkItem->FUN_0043b4f0().FUN_004a3a20(), 0);
-        if (pkItem->FUN_0043b4f0().FUN_0043b4d0() != 4)
+        bhkRigidBody* pkItem = static_cast<bhkRigidBody*>(pkRef->bhkNiCollisionObject_GetWorldObject());
+        bhkWorld_SetMotion(GetSource(), 4, 1, 0, 1);
+        SpellHandle8CD kHandle(6, pkItem->bhkWorldObject_GetCollisionFilter().CFilter_GetGroup(), 0);
+        if (pkItem->bhkWorldObject_GetCollisionFilter().CFilter_GetLayer() != 4)
             kHandle.SetFlags(0xf);
         pkCaster->SetHandle(kHandle);
         Listener8CD* pkListener = g_kListeners8CD.Get();
@@ -1361,13 +1366,13 @@ bool ArrowImpactHandler::FUN_008cd520(Caster8CD* pkCaster)
             {
                 hkVector4 kTransform;
                 pkCaster->GetTransform(kTransform);
-                FUN_0062a7e0(&kTransform, m_pkTarget->m_pvTarget);
+                TESArrowTargetListener_AddArrowTarget(&kTransform, m_pkTarget->m_pvTarget);
             }
         }
     }
     else
     {
-        FUN_005b5e40(
+        Warning_005b5e40(
             "AI: An arrow thinks it is colliding with an Reference, but there is no Reference in the collision data!");
         return false;
     }
@@ -1430,57 +1435,58 @@ struct ObjectD0020
     virtual void v24();
     virtual void v25();
     virtual BodyD0020* GetBody();
-    bhkFilter FUN_0043b4f0();
-    float FUN_004b5400();
-    ResultD0020* FUN_004ae750(const hkVector4&, const hkVector4&);
+    bhkFilter bhkWorldObject_GetCollisionFilter();
+    float bhkRigidBody_GetMass();
+    ResultD0020* Bipedanim_GetReferenceFlagsOrZero(const hkVector4&, const hkVector4&);
 };
 struct TargetD0020
 {
     bool GetByteAtOffsetC3();
-    float FUN_008d01e0();
+    float NiAVObject_GetWorldScale();
     void SetByteAtOffsetC3(bool);
-    void FUN_008d0020(NiPoint3 position, NiPoint3 direction, ObjectD0020* object);
+    void ArrowProjectile_ApplyCollisionForce(NiPoint3 position, NiPoint3 direction, ObjectD0020* object);
 };
 // Preserve the original stack-cookie coverage after replacing the local vector representation.
 #pragma strict_gs_check(push, on)
 // @fnv 0x008d0020
-void TargetD0020::FUN_008d0020(NiPoint3 position, NiPoint3 direction, ObjectD0020* object)
+// src: XBOX_PDB 0x008d0020
+void TargetD0020::ArrowProjectile_ApplyCollisionForce(NiPoint3 position, NiPoint3 direction, ObjectD0020* object)
 {
     if (!object || GetByteAtOffsetC3())
         return;
     BodyD0020* body = object->GetBody();
     if (body)
     {
-        float strength = FUN_008d01e0();
-        bhkFilter type = object->FUN_0043b4f0();
-        switch (type.FUN_0043b4d0())
+        float strength = NiAVObject_GetWorldScale();
+        bhkFilter type = object->bhkWorldObject_GetCollisionFilter();
+        switch (type.CFilter_GetLayer())
         {
         case 14:
-            strength *= *DAT_011ce3e4.FUN_00403e20();
+            strength *= *DAT_011ce3e4.Setting_Float_00403e20();
             break;
         case 8:
-            strength *= *DAT_011cecac.FUN_00403e20();
+            strength *= *DAT_011cecac.Setting_Float_00403e20();
             break;
         case 10:
-            strength *= *DAT_011cf9d4.FUN_00403e20();
+            strength *= *DAT_011cf9d4.Setting_Float_00403e20();
             break;
         default:
-            strength *= *DAT_011ce798.FUN_00403e20();
+            strength *= *DAT_011ce798.Setting_Float_00403e20();
             break;
         }
-        float weight = object->FUN_004b5400();
-        if (weight < *DAT_011cf114.FUN_00403e20())
-            strength *= weight / *DAT_011cf114.FUN_00403e20();
-        strength *= *DAT_011ce224.FUN_00403e20();
+        float weight = object->bhkRigidBody_GetMass();
+        if (weight < *DAT_011cf114.Setting_Float_00403e20())
+            strength *= weight / *DAT_011cf114.Setting_Float_00403e20();
+        strength *= *DAT_011ce224.Setting_Float_00403e20();
         hkVector4 dir;
-        FUN_004a3e00(&dir, &direction);
+        NI2HK(&dir, &direction);
         hkVector4 pos;
-        FUN_004a3e00(&pos, &position);
-        dir.FUN_0062aea0();
+        NI2HK(&pos, &position);
+        dir.normalize3_0062aea0();
         hkSimdReal scale(strength);
-        dir.FUN_00627920(scale);
+        dir.hkVector4_mul4(scale);
         body->FUN_00483710();
-        object->FUN_004ae750(dir, pos)->ApplyVirtualCall();
+        object->Bipedanim_GetReferenceFlagsOrZero(dir, pos)->ApplyVirtualCall();
         body->FUN_00483710();
     }
     SetByteAtOffsetC3(true);
@@ -1490,12 +1496,12 @@ void TargetD0020::FUN_008d0020(NiPoint3 position, NiPoint3 direction, ObjectD002
 struct __declspec(align(16)) Quat08
 {
     __m128 quad;
-    void* FUN_005532a0(float, float, float, float);
+    void* hkVector4_hkVector4(float, float, float, float);
 };
 struct Row08
 {
     float x, y, z, w;
-    void FUN_004a3f10(const void*);
+    void SetValue(const void*);
 };
 struct Rec08
 {
@@ -1526,7 +1532,7 @@ struct Data08
 };
 struct Col_0043b4f0
 {
-    int FUN_0043b540();
+    int hkpCollidable_getCollisionFilterInfo();
 };
 struct Node08
 {
@@ -1552,48 +1558,49 @@ struct Node08
 };
 struct FUN_00807770_Class
 {
-    int FUN_00807770(int);
+    int EvaluateValue_00807770(int);
 };
-void* __cdecl FUN_004b59f0(const void*);
+void* __cdecl hkpGetRigidBody(const void*);
 void* __cdecl GetReferenceFromObject(Col_0043b4f0*);
 struct FUN_0089f4e0_shell
 {
-    void* FUN_0089f4e0();
+    void* PlayerCharacter_GetGrabObject();
 };
 extern FUN_0089f4e0_shell* DAT_011dea3c;
 struct Holder00807080
 {
-    const char* FUN_00807080();
-    void FUN_008d1180(FUN_00807770_Class*, Data08*);
+    const char* bhkCharacterProxy_GethkLinearVelocity();
+    void ProcessEntries_008d1180(FUN_00807770_Class*, Data08*);
 };
 // @fnv 0x008d1180
-void Holder00807080::FUN_008d1180(FUN_00807770_Class* nodes, Data08* data)
+// src: GUESS 0x008d1180 (confidence: low)
+void Holder00807080::ProcessEntries_008d1180(FUN_00807770_Class* nodes, Data08* data)
 {
     int count = data->count;
     for (int i = 0; i < count; i++)
     {
         Rec08* record = &data->records[i];
-        Node08* node = (Node08*)nodes->FUN_00807770(i);
-        void* collision = FUN_004b59f0(node->collision);
-        bhkFilter filter(node->collision->FUN_0043b540());
-        int layer = filter.FUN_0043b4d0();
+        Node08* node = (Node08*)nodes->EvaluateValue_00807770(i);
+        void* collision = hkpGetRigidBody(node->collision);
+        bhkFilter filter(node->collision->hkpCollidable_getCollisionFilterInfo());
+        int layer = filter.CFilter_GetLayer();
         if (!collision)
         {
             if (layer != 30)
             {
-                record->b.FUN_004a3f10(FUN_00807080());
+                record->b.SetValue(bhkCharacterProxy_GethkLinearVelocity());
                 Quat08 q;
-                record->a.FUN_004a3f10(q.FUN_005532a0(0.0f, 0.0f, 0.0f, 1.0f));
+                record->a.SetValue(q.hkVector4_hkVector4(0.0f, 0.0f, 0.0f, 1.0f));
             }
         }
         else
         {
             void* ref = GetReferenceFromObject(node->collision);
-            if (ref && ref == DAT_011dea3c->FUN_0089f4e0())
+            if (ref && ref == DAT_011dea3c->PlayerCharacter_GetGrabObject())
             {
-                record->b.FUN_004a3f10(FUN_00807080());
+                record->b.SetValue(bhkCharacterProxy_GethkLinearVelocity());
                 Quat08 q;
-                record->a.FUN_004a3f10(q.FUN_005532a0(0.0f, 0.0f, 0.0f, 1.0f));
+                record->a.SetValue(q.hkVector4_hkVector4(0.0f, 0.0f, 0.0f, 1.0f));
                 break;
             }
         }

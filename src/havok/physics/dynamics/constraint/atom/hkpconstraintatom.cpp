@@ -22,11 +22,12 @@ struct FUN_00d21ce0_cls
     void* m_base;
     void* m_pBridge;
     void* m_pConstraintData;
-    void FUN_00d21ce0(void* data);
+    void hkpBridgeConstraintAtom_init(void* data);
 };
 
 // @fnv 0x00d21ce0
-void FUN_00d21ce0_cls::FUN_00d21ce0(void* data)
+// src: XBOX_PDB 0x00d21ce0
+void FUN_00d21ce0_cls::hkpBridgeConstraintAtom_init(void* data)
 {
     m_pConstraintData = data;
     m_pBridge = (void*)0xd21cc0;
@@ -45,7 +46,8 @@ struct GenericConstraintAtomScheme
 
 // Walks a linked list from self while the node's first ushort is at least 0x17, OR-ing each node's FUN_00d22090(a, b) result and returning it.
 // @fnv 0x00d22120
-int __cdecl FUN_00d22120(void* pNode, void* a, void* b)
+// src: HAVOK_LIB 0x00d22120
+int __cdecl hkpModifierConstraintAtom_addAllModifierDataToConstraintInfo(void* pNode, void* a, void* b)
 {
     int result = 0;
     if (*(unsigned short*)pNode >= 0x17)
@@ -53,7 +55,7 @@ int __cdecl FUN_00d22120(void* pNode, void* a, void* b)
         void* p = pNode;
         do
         {
-            result |= ((hkpModifierConstraintAtom*)p)->FUN_00d22090(*(GenericConstraintAtomScheme*)a, *(unsigned char*)b);
+            result |= ((hkpModifierConstraintAtom*)p)->addModifierDataToConstraintInfo(*(GenericConstraintAtomScheme*)a, *(unsigned char*)b);
             p = *(void**)((char*)p + 0x14);
         } while (*(unsigned short*)p >= 0x17);
     }
@@ -61,7 +63,8 @@ int __cdecl FUN_00d22120(void* pNode, void* a, void* b)
 }
 
 // @fnv 0x00d21d00
-void __stdcall FUN_00d21d00(int, int, int, int, int, int)
+// src: COMMUNITY 0x00d21d00
+void __stdcall nullsub_31(int, int, int, int, int, int)
 {}
 
 struct FUN_00d21de0_cls
@@ -71,11 +74,12 @@ struct FUN_00d21de0_cls
     unsigned char unk08;
     unsigned char unk09;
     unsigned char unk0A;
-    FUN_00d21de0_cls* __thiscall FUN_00d21de0(int a);
+    FUN_00d21de0_cls* __thiscall hkpSimpleContactConstraintAtom_hkpSimpleContactConstraintAtom(int a);
 };
 
 // @fnv 0x00d21de0
-FUN_00d21de0_cls* FUN_00d21de0_cls::FUN_00d21de0(int a)
+// src: HAVOK_LIB 0x00d21de0
+FUN_00d21de0_cls* FUN_00d21de0_cls::hkpSimpleContactConstraintAtom_hkpSimpleContactConstraintAtom(int a)
 {
     if (a != 0)
     {
@@ -88,13 +92,14 @@ FUN_00d21de0_cls* FUN_00d21de0_cls::FUN_00d21de0(int a)
 class hkpIgnoreModifierConstraintAtom : public hkpModifierConstraintAtom
 {
 public:
-    int FUN_00d22030(GenericConstraintAtomScheme* info);
+    int getConstraintInfo_00d22030(GenericConstraintAtomScheme* info);
 };
-void __cdecl FUN_00d21a60(const hkpModifierConstraintAtom* atom, unsigned int count, GenericConstraintAtomScheme* result);
+void __cdecl hkpConstraintData_getConstraintInfoUtil(const hkpModifierConstraintAtom* atom, unsigned int count, GenericConstraintAtomScheme* result);
 
 // Walks the atom chain while type >= 23, then subtracts the partial solver temps, results and schema size from info unless the atom type is 22 or 1.
 // @fnv 0x00d22030
-int hkpIgnoreModifierConstraintAtom::FUN_00d22030(GenericConstraintAtomScheme* info)
+// src: HAVOK_LIB 0x00d22030
+int hkpIgnoreModifierConstraintAtom::getConstraintInfo_00d22030(GenericConstraintAtomScheme* info)
 {
     hkpModifierConstraintAtom* atom = this;
     unsigned int count = 0;
@@ -106,7 +111,7 @@ int hkpIgnoreModifierConstraintAtom::FUN_00d22030(GenericConstraintAtomScheme* i
     if (atom->m_type != 22 && atom->m_type != 1)
     {
         GenericConstraintAtomScheme partialInfo;
-        FUN_00d21a60(atom, count, &partialInfo);
+        hkpConstraintData_getConstraintInfoUtil(atom, count, &partialInfo);
         info->numSolverElemTemps -= partialInfo.numSolverElemTemps;
         info->numSolverResults -= partialInfo.numSolverResults;
         info->sizeOfSchemas -= partialInfo.sizeOfSchemas;
@@ -205,7 +210,7 @@ void hkpMassChangerModifierConstraintAtomq::ScaleInverseInertia(const void* cp, 
             const hkMatrix3& rot = *in->m_rotation;
             ScratchMatrix localStorage;
             hkMatrix3& local = reinterpret_cast<hkMatrix3&>(localStorage);
-            local.FUN_00cd4bf0((char*)&rot, (char*)&in->m_kInverseInertiaMatrix);
+            local.SetTransposeProduct((char*)&rot, (char*)&in->m_kInverseInertiaMatrix);
             ScratchMatrix scaledStorage;
             hkMatrix3& scaled = reinterpret_cast<hkMatrix3&>(scaledStorage);
             scaled.SetProduct(local, rot);
@@ -226,14 +231,15 @@ void hkpMassChangerModifierConstraintAtomq::ScaleInverseInertia(const void* cp, 
 class hkpMovingSurfaceModifierConstraintAtom : public hkpModifierConstraintAtom
 {
   public:
-    void FUN_00d21f50(const hkContactPoint& kCp, void* pvA, void* pvB, void* pvC, intptr_t kVelOut);
+    void CopyMemory_00d21f50(const hkContactPoint& kCp, void* pvA, void* pvB, void* pvC, intptr_t kVelOut);
 
     hkVector4 m_fVelocity;
 };
 
 // Subtracts a copy of m_fVelocity scaled by its dot product with the separating normal from that copy, and adds the result to kVelOut.
 // @fnv 0x00d21f50
-void hkpMovingSurfaceModifierConstraintAtom::FUN_00d21f50(const hkContactPoint& kCp, void* pvA, void* pvB,
+// src: GUESS 0x00d21f50 (confidence: low)
+void hkpMovingSurfaceModifierConstraintAtom::CopyMemory_00d21f50(const hkContactPoint& kCp, void* pvA, void* pvB,
                                                               void* pvC, intptr_t kVelOut)
 {
     using namespace constraint_atom_simd;
@@ -250,7 +256,8 @@ void hkpMovingSurfaceModifierConstraintAtom::FUN_00d21f50(const hkContactPoint& 
 }
 
 // @fnv 0x00d22090
-int hkpModifierConstraintAtom::FUN_00d22090(GenericConstraintAtomScheme& kInfo, unsigned char& ucUsedFlagsOut)
+// src: HAVOK_LIB 0x00d22090
+int hkpModifierConstraintAtom::addModifierDataToConstraintInfo(GenericConstraintAtomScheme& kInfo, unsigned char& ucUsedFlagsOut)
 {
     int iCallbackRequest = 0;
     switch (m_type)
@@ -270,7 +277,7 @@ int hkpModifierConstraintAtom::FUN_00d22090(GenericConstraintAtomScheme& kInfo, 
         ucUsedFlagsOut |= 4;
         break;
     case 0x1b:
-        iCallbackRequest = static_cast<hkpIgnoreModifierConstraintAtom*>(this)->FUN_00d22030(&kInfo);
+        iCallbackRequest = static_cast<hkpIgnoreModifierConstraintAtom*>(this)->getConstraintInfo_00d22030(&kInfo);
         break;
     case 0x1c:
         kInfo.sizeOfSchemas += 0xd0;
@@ -335,11 +342,12 @@ struct ComChangerAtom
     hkVector4q m_kDisplacementA;
     hkVector4q m_kDisplacementB;
 
-    void FUN_00d22160(const void* cp, InitInput& inA, BodyVelocity& velA, InitInput& inB, BodyVelocity& velB);
+    void UpdateFields_00d22160(const void* cp, InitInput& inA, BodyVelocity& velA, InitInput& inB, BodyVelocity& velB);
 };
 
 // @fnv 0x00d22160
-void ComChangerAtom::FUN_00d22160(const void* cp, InitInput& inA, BodyVelocity& velA, InitInput& inB,
+// src: GUESS 0x00d22160 (confidence: low)
+void ComChangerAtom::UpdateFields_00d22160(const void* cp, InitInput& inA, BodyVelocity& velA, InitInput& inB,
                                   BodyVelocity& velB)
 {
     hkVector4q vRotatedDisplacementA;
@@ -382,11 +390,12 @@ struct Cls_00d21fc0
     int unk18;
     int unk1c;
     hkVector4q m_uiValueCount;
-    void __thiscall FUN_00d21fc0(__m128* a, int b, int c, int d, int e, int out);
+    void __thiscall CopyData_00d21fc0(__m128* a, int b, int c, int d, int e, int out);
 };
 // Computes d = dot3(quad(a.m_kColumn1), m_uiValueCount), then subtracts (m_uiValueCount - d * m_uiValueCount) from the vector at out.
 // @fnv 0x00d21fc0
-void __thiscall Cls_00d21fc0::FUN_00d21fc0(__m128* a, int b, int c, int d, int e, int out)
+// src: GUESS 0x00d21fc0 (confidence: medium)
+void __thiscall Cls_00d21fc0::CopyData_00d21fc0(__m128* a, int b, int c, int d, int e, int out)
 {
     hkVector4q n;
     memcpy(&n, &m_uiValueCount, sizeof(n));

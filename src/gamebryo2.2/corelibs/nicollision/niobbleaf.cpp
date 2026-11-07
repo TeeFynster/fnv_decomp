@@ -65,32 +65,32 @@ public:
     LocalVec Cross(const LocalVec& v) const;
     LocalVec ApplyScaled(float scale);
     LocalVec ApplyScaled(float scale) const;
-    void FUN_00acf580(unsigned n, Tok value);
-    LocalVec FUN_004a0bd0();
-    LocalVec FUN_004a0bd0() const;
+    void ProcessState_00acf580(unsigned n, Tok value);
+    LocalVec GetNegatedVector();
+    LocalVec GetNegatedVector() const;
     LocalVec FUN_0053d1a0(const LocalVec& v);
     LocalVec FUN_004b3800(const LocalVec& v);
     LocalVec FUN_004b3800(const LocalVec& v) const;
     LocalVec FUN_00439e90(const LocalVec& v);
     LocalVec FUN_00439e90(const LocalVec& v) const;
-    LocalVec FUN_00439ef0(const LocalVec& v);
-    LocalVec FUN_00439ef0(const LocalVec& v) const;
+    LocalVec SubtractIntoVector(const LocalVec& v);
+    LocalVec SubtractIntoVector(const LocalVec& v) const;
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     void FUN_006815c0();
-    void FUN_00439180(float scale);
-    LocalVec& FUN_0063c8a0(const LocalVec& v);
+    void ScaleComponents(float scale);
+    LocalVec& ComputeValue_0063c8a0(const LocalVec& v);
     float FUN_004a7290();
     float FUN_004a7290() const;
-    void FUN_004b4db0(const float* values);
+    void SetQuaternionComponentsFromVector(const float* values);
     void FUN_00a38560();
-    void FUN_004f0180(void* value);
+    void NiQuaternion_ToRotation(void* value);
 
     LocalVec& ScaleByInverse(float divisor);
     float FUN_00457910();
-    LocalVec* FUN_006a6eb0();
-    bool FUN_004390c0(const LocalVec& v);
+    LocalVec* FastNavMeshTriLocation_GetLocation();
+    bool HasEqualComponents(const LocalVec& v);
 
     __m128 get() const;
     void set(__m128 value);
@@ -132,37 +132,37 @@ public:
     void normalize();
     void negate(const LocalVec& v);
 
-    void FUN_00c7f640(const void* matrix, const hkVector4& point);
-    void FUN_00c7f640(Mat4* matrix, void* point);
-    void FUN_00c7f640(const void* matrix, const LocalVec* point);
-    void FUN_00c7f640(const void* matrix, const void* point);
-    void FUN_00c7f700(Mat3* matrix, void* point);
-    void FUN_00c7f700(const void* matrix, const LocalVec* point);
-    void FUN_00b12790();
-    void FUN_00b13040(LocalVec* out, const LocalVec* v);
+    void setTransformedPos_00c7f640(const void* matrix, const hkVector4& point);
+    void setTransformedPos_00c7f640(Mat4* matrix, void* point);
+    void setTransformedPos_00c7f640(const void* matrix, const LocalVec* point);
+    void setTransformedPos_00c7f640(const void* matrix, const void* point);
+    void hkVector4_setRotatedDir(Mat3* matrix, void* point);
+    void hkVector4_setRotatedDir(const void* matrix, const LocalVec* point);
+    void Normalize_00b12790();
+    void Diff_00b13040(LocalVec* out, const LocalVec* v);
     LocalVec* ScaleSwizzled(LocalVec* out, float factor);
     void AddVector(LocalVec* out, const LocalVec* v);
     float Dot(const LocalVec& v);
     LocalVec* FUN_004a3c90(const LocalVec* v);
     LocalVec* FUN_0062b0a0(LocalVec* out, LocalVec* v);
-    LocalVec* FUN_0062af00(LocalVec* target);
+    LocalVec* hkVector4_lengthInverse3(LocalVec* target);
 
     void FUN_00cf7690(Elem* value);
-    void FUN_00b1e970();
+    void UpdateState_00b1e970();
     Iter begin();
     Iter end();
-    CIter FUN_00b33030(CIter first, CIter last);
-    void FUN_00b32120();
+    CIter UpdateState_00b33030(CIter first, CIter last);
+    void m_vStrips_clear();
     unsigned int size() const;
     unsigned int capacity() const;
-    void FUN_00b2df90();
-    void FUN_00b2e140(Elem* first, Elem* last);
+    void ClearAllElements();
+    void B2EDestroyRange_Thunk(Elem* first, Elem* last);
     bool InitBuffer(unsigned int count);
     Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
-    LocalVec& FUN_00b2db10(const LocalVec& v);
-    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
-    void FUN_00acac40();
-    LocalVec& FUN_00ad61e0(const LocalVec& v);
+    LocalVec& CTreeEngine_SetLeafTextures(const LocalVec& v);
+    CMutIter ProcessAndReturnValue_00aceb80(CMutIter first, CMutIter last);
+    void ProcessState_00acac40();
+    LocalVec& ReleaseStorage_00ad61e0(const LocalVec& v);
 };
 // LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3; this unit defines inline bodies for both NiPoint3 and the stand-in in different forms (constructor/temporary, operand order), so one NiPoint3 cannot carry both.
 #include "../../../../include/NiPoint3.h"
@@ -247,46 +247,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 #include "../../../../include/NiPoint3.h"
@@ -310,12 +310,13 @@ struct S_00eb8250_Edges
     void* m_e2;
 };
 
-int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* tri, LocalVec3* n, float d, int p3, float p4, int p5,
+int __cdecl NiOBBLeaf_TestEdgeTri(void* a, void* b, S_00eb8250_Tri* tri, LocalVec3* n, float d, int p3, float p4, int p5,
                          int p6);
 
 // Computes the triangle's normal and plane offset, then tests it against all three edge pairs via FUN_00eb7dc0, OR-ing the results.
 // @fnv 0x00eb8250
-int __cdecl FUN_00eb8250(S_00eb8250_Edges* e, S_00eb8250_Tri* tri, int p3, float p4, int p5, int p6)
+// src: GAMEBRYO_LIB 0x00eb8250
+int __cdecl NiOBBLeaf_FindIntersection(S_00eb8250_Edges* e, S_00eb8250_Tri* tri, int p3, float p4, int p5, int p6)
 {
     LocalVec3 u, v, n;
     u.x = tri->m_kPointB->x - tri->m_kPointA->x;
@@ -329,9 +330,9 @@ int __cdecl FUN_00eb8250(S_00eb8250_Edges* e, S_00eb8250_Tri* tri, int p3, float
     n.z = u.x * v.y - u.y * v.x;
     const LocalVec3& a = *tri->m_kPointA;
     float d = a.x * n.x + a.y * n.y + a.z * n.z;
-    int r = FUN_00eb7dc0(e->m_e0, e->m_e1, tri, &n, d, p3, p4, p5, p6);
-    r |= FUN_00eb7dc0(e->m_e0, e->m_e2, tri, &n, d, p3, p4, p5, p6);
-    r |= FUN_00eb7dc0(e->m_e1, e->m_e2, tri, &n, d, p3, p4, p5, p6);
+    int r = NiOBBLeaf_TestEdgeTri(e->m_e0, e->m_e1, tri, &n, d, p3, p4, p5, p6);
+    r |= NiOBBLeaf_TestEdgeTri(e->m_e0, e->m_e2, tri, &n, d, p3, p4, p5, p6);
+    r |= NiOBBLeaf_TestEdgeTri(e->m_e1, e->m_e2, tri, &n, d, p3, p4, p5, p6);
     return r;
 }
 
@@ -414,13 +415,14 @@ struct FNV_PhysObj
     FNV_Shape m_8c;
 
     int RunSwapTests(FNV_Node* node);
-    int FUN_00eb85d0(FNV_PhysObj* pObj, FNV_Shape* a2, FNV_Shape* a3, FNV_Shape* a4, FNV_Shape* a5, unsigned char* a6);
+    int NiOBBLeaf_FaceFaceCollision(FNV_PhysObj* pObj, FNV_Shape* a2, FNV_Shape* a3, FNV_Shape* a4, FNV_Shape* a5, unsigned char* a6);
 };
 
 extern int ComputeContactTime(FNV_PhysObj* a, FNV_PhysObj* b, int* c, FNV_Vec3* d);
 
 // @fnv 0x00eb85d0
-int FNV_PhysObj::FUN_00eb85d0(FNV_PhysObj* pObj, FNV_Shape* pShape0, FNV_Shape* pShape1, FNV_Shape* pShape2,
+// src: GAMEBRYO_LIB 0x00eb85d0
+int FNV_PhysObj::NiOBBLeaf_FaceFaceCollision(FNV_PhysObj* pObj, FNV_Shape* pShape0, FNV_Shape* pShape1, FNV_Shape* pShape2,
                               FNV_Shape* pShape3, unsigned char* pbResult)
 {
     FNV_Node node;
@@ -476,7 +478,7 @@ struct S_00eb8680_Sub
     int unk70;
     int unk74;
     int unk78;
-    int FUN_00eba680(S_00eb8680_Sub* other);
+    int NiOBBox_TestIntersection(S_00eb8680_Sub* other);
     void UpdateWorldBounds(void* p);
 };
 
@@ -493,12 +495,13 @@ struct S_00eb8680_Obj
     {
         return vfn2(p, a2, a3, a4, n, k1, k2);
     }
-    bool FUN_00eb8680(S_00eb8680_Obj* other, unsigned char* a2, unsigned char* a3, void* a4, unsigned count, int k1,
+    bool NiOBBLeaf_TestCollision(S_00eb8680_Obj* other, unsigned char* a2, unsigned char* a3, void* a4, unsigned count, int k1,
                       int k2);
 };
 
 // @fnv 0x00eb8680
-bool S_00eb8680_Obj::FUN_00eb8680(S_00eb8680_Obj* other, unsigned char* pDataA, unsigned char* pDataB, void* a4,
+// src: XBOX_PDB 0x00eb8680
+bool S_00eb8680_Obj::NiOBBLeaf_TestCollision(S_00eb8680_Obj* other, unsigned char* pDataA, unsigned char* pDataB, void* a4,
                                   unsigned count, int k1, int k2)
 {
     if (k1 != unk88)
@@ -511,7 +514,7 @@ bool S_00eb8680_Obj::FUN_00eb8680(S_00eb8680_Obj* other, unsigned char* pDataA, 
         other->sub.UpdateWorldBounds(pDataB + 0x68);
         other->unk88 = k2;
     }
-    if (!sub.FUN_00eba680(&other->sub))
+    if (!sub.NiOBBox_TestIntersection(&other->sub))
         return false;
     if (other->vfn1() || count == 0 || (!other->unk80 && !other->unk84))
         return true;
@@ -587,7 +590,7 @@ struct S_00eb8790_Volume
     int unk74;
     int unk78;
     void UpdateWorldBounds(const S_00eb8790_Transform& transform);
-    int FUN_00eba680(const S_00eb8790_Volume& other);
+    int NiOBBox_TestIntersection(const S_00eb8790_Volume& other);
 };
 
 struct S_00eb8790_Node
@@ -595,11 +598,11 @@ struct S_00eb8790_Node
     virtual void v0();
     virtual bool isLeaf();
     virtual void v2();
-    virtual int FUN_00eb8790(S_00eb8790_Node* other, int a1, int a2, S_00eb8790_Body* bodyA, S_00eb8790_Body* bodyB,
+    virtual int NiOBBLeaf_FindCollisions(S_00eb8790_Node* other, int a1, int a2, S_00eb8790_Body* bodyA, S_00eb8790_Body* bodyB,
                              int a5, int depth, int stampA, int stampB, int a9);
 
-    int FUN_00eb85d0(S_00eb8790_Node* other, int a1, int a2, S_00eb8790_Body* bodyA, S_00eb8790_Body* bodyB, int a9);
-    int FUN_00eb9b00(S_00eb8790_Node* other, int a1, int a2, S_00eb8790_Body* bodyA, S_00eb8790_Body* bodyB, int a9);
+    int NiOBBLeaf_FaceFaceCollision(S_00eb8790_Node* other, int a1, int a2, S_00eb8790_Body* bodyA, S_00eb8790_Body* bodyB, int a9);
+    int NiOBBNode_BoxBoxCollision(S_00eb8790_Node* other, int a1, int a2, S_00eb8790_Body* bodyA, S_00eb8790_Body* bodyB, int a9);
 
     S_00eb8790_Volume m_iBufferSize;  // 04
     S_00eb8790_Node* m_childA;        // 80
@@ -608,7 +611,8 @@ struct S_00eb8790_Node
 };
 
 // @fnv 0x00eb8790
-int S_00eb8790_Node::FUN_00eb8790(S_00eb8790_Node* other, int a1, int a2, S_00eb8790_Body* bodyA,
+// src: XBOX_PDB 0x00eb8790
+int S_00eb8790_Node::NiOBBLeaf_FindCollisions(S_00eb8790_Node* other, int a1, int a2, S_00eb8790_Body* bodyA,
                                   S_00eb8790_Body* bodyB, int a5, int depth, int stampA, int stampB, int a9)
 {
     if (stampA != m_stamp)
@@ -621,26 +625,26 @@ int S_00eb8790_Node::FUN_00eb8790(S_00eb8790_Node* other, int a1, int a2, S_00eb
         other->m_iBufferSize.UpdateWorldBounds(bodyB->m_kMotionTransform);
         other->m_stamp = stampB;
     }
-    if (!m_iBufferSize.FUN_00eba680(other->m_iBufferSize))
+    if (!m_iBufferSize.NiOBBox_TestIntersection(other->m_iBufferSize))
         return 0;
     if (!other->isLeaf())
     {
         if (depth && (other->m_childA || other->m_childB))
         {
-            int result = FUN_00eb8790(other->m_childA, a1, a2, bodyA, bodyB, a5, depth - 1, stampA, stampB, a9);
+            int result = NiOBBLeaf_FindCollisions(other->m_childA, a1, a2, bodyA, bodyB, a5, depth - 1, stampA, stampB, a9);
             if (result >= 1)
                 return result;
             S_00eb8790_Node* pChildB = other->m_childB;
-            result = FUN_00eb8790(pChildB, a1, a2, bodyA, bodyB, a5, depth - 1, stampA, stampB, a9);
+            result = NiOBBLeaf_FindCollisions(pChildB, a1, a2, bodyA, bodyB, a5, depth - 1, stampA, stampB, a9);
             if (result >= 1)
                 return result;
             return 0;
         }
-        return FUN_00eb9b00(other, a1, a2, bodyA, bodyB, a9);
+        return NiOBBNode_BoxBoxCollision(other, a1, a2, bodyA, bodyB, a9);
     }
     if (a5 < 0 && depth < 0)
-        return FUN_00eb85d0(other, a1, a2, bodyA, bodyB, a9);
-    return FUN_00eb9b00(other, a1, a2, bodyA, bodyB, a9);
+        return NiOBBLeaf_FaceFaceCollision(other, a1, a2, bodyA, bodyB, a9);
+    return NiOBBNode_BoxBoxCollision(other, a1, a2, bodyA, bodyB, a9);
 }
 
 // ComputeBarycentric: barycentric-style solve over three edge vectors from a base point.
@@ -680,7 +684,8 @@ void ComputeBarycentric(const Vec3f* apVertex0, const Vec3f* apVertex1, const Ve
 }
 
 // @fnv 0x00ee8990
-bool FUN_00ee8990()
+// src: COMMUNITY 0x00ee8990
+bool NiObject_StreamCanSkip()
 {
     return false;
 }
@@ -823,12 +828,13 @@ struct Obj5
 
 struct FUN_00eb8930_cls : Owner
 {
-    int FUN_00eb8930(LocalVec3* a1, LocalVec3* a2, Rec* a3, unsigned char* out, Obj5* a5, int a6);
+    int NiOBBLeaf_FindIntersections(LocalVec3* a1, LocalVec3* a2, Rec* a3, unsigned char* out, Obj5* a5, int a6);
 };
 
 // Calls an intersection helper and, on success, stores its returned point and parameter in a node, with an optional triangle normal.
 // @fnv 0x00eb8930
-int FUN_00eb8930_cls::FUN_00eb8930(LocalVec3* a1, LocalVec3* a2, Rec* apRec, unsigned char* pOutHit, Obj5* apObj5, int a6)
+// src: XBOX_PDB 0x00eb8930
+int FUN_00eb8930_cls::NiOBBLeaf_FindIntersections(LocalVec3* a1, LocalVec3* a2, Rec* apRec, unsigned char* pOutHit, Obj5* apObj5, int a6)
 {
     if (a6 != m_88)
     {
@@ -853,7 +859,7 @@ int FUN_00eb8930_cls::FUN_00eb8930(LocalVec3* a1, LocalVec3* a2, Rec* apRec, uns
         LocalVec3 ub = *m_90 - *m_8c;
         LocalVec3 wa = *m_94 - *m_8c;
         LocalVec3 cross = ub.Cross(wa);
-        cross.FUN_004a0c10();
+        cross.Unitize_004a0c10();
         memcpy(&n->m_28, &cross, sizeof(cross));
     }
     return 0;
@@ -1171,11 +1177,11 @@ FUN_00eb6b90::FUN_00eb6b90(S_eb6b90_Root* pkRoot, unsigned short* pusTriList, Ni
     kTargetCenter = (kP0 + kP1 + kMid) / 3.0f;
 
     akAxis[0] = kP1 - kP0;
-    akAxis[0].FUN_004a0c10();
+    akAxis[0].Unitize_004a0c10();
     akAxis[1] = kMid - kP0;
     float projection = akAxis[0] * akAxis[1];
     akAxis[1] -= projection * akAxis[0];
-    akAxis[1].FUN_004a0c10();
+    akAxis[1].Unitize_004a0c10();
     akAxis[2] = akAxis[0].Cross(akAxis[1]);
 
     NiPoint3 minCoord(0.0f, 0.0f, 0.0f);
@@ -1259,7 +1265,8 @@ int __cdecl IntersectPlane(float, LocalVec3*, float, int, void*, void*, float*, 
                            LocalVec3*);
 // Clips barycentric coordinates to the positive octant and updates the bound and point when a nearer candidate is found.
 // @fnv 0x00eb7dc0
-int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* apTriangle, LocalVec3* apNormal, float d, int p3,
+// src: GAMEBRYO_LIB 0x00eb7dc0
+int __cdecl NiOBBLeaf_TestEdgeTri(void* a, void* b, S_00eb8250_Tri* apTriangle, LocalVec3* apNormal, float d, int p3,
                          float p4, volatile int apNearestDistance, int apHitPoint)
 {
     float t;
@@ -1387,7 +1394,7 @@ inside:
     return 1;
 }
 
-extern "C" __declspec(noalias) int __cdecl FUN_00eb8250(S_00eb8250_Edges*, S_00eb8250_Tri*, const NiPoint3&, float,
+extern "C" __declspec(noalias) int __cdecl NiOBBLeaf_FindIntersection(S_00eb8250_Edges*, S_00eb8250_Tri*, const NiPoint3&, float,
                                                         float*, NiPoint3*);
 struct PhysObjInfo
 {
@@ -1434,11 +1441,11 @@ int ComputeContactTime(PhysObj_eb83b0* apObjA, PhysObj_eb83b0* apObjB, float* pf
     NiPoint3 vContactA, vContactB;
     NiPoint3 relativeVelocity;
     relativeVelocity = pInfoA->velocity - *velocityB;
-    int hitA = FUN_00eb8250((S_00eb8250_Edges*)&apObjA->m_8c, (S_00eb8250_Tri*)&apObjB->m_8c, relativeVelocity,
+    int hitA = NiOBBLeaf_FindIntersection((S_00eb8250_Edges*)&apObjA->m_8c, (S_00eb8250_Tri*)&apObjB->m_8c, relativeVelocity,
                             duration, &timeA, &vContactA);
     float timeB = 3.402823466e+38F;
     relativeVelocity = *velocityB - pInfoA->velocity;
-    int hitB = FUN_00eb8250((S_00eb8250_Edges*)&apObjB->m_8c, (S_00eb8250_Tri*)&apObjA->m_8c, relativeVelocity,
+    int hitB = NiOBBLeaf_FindIntersection((S_00eb8250_Edges*)&apObjB->m_8c, (S_00eb8250_Tri*)&apObjA->m_8c, relativeVelocity,
                             duration, &timeB, &vContactB);
     if (hitA)
     {

@@ -24,10 +24,10 @@ public:
     void SetTile(int aiID, Tile* apTile);
     void* DestroyTutorialMenu(unsigned int flags);
     void DestroyMenu();
-    bool FUN_007e8e60(int aiButton, float afValue);
+    bool DoGamepad_007e8e60(int aiButton, float afValue);
     bool HandleGamepadButton(int aiButton, float afValue);
-    void FUN_007e8db0(int aiID, Tile* apTarget);
-    void FUN_007e8e20();
+    void DoClick_007e8db0(int aiID, Tile* apTarget);
+    void ProcessAndTransformResult_007e8e20();
     void DecrementAndDispatch();
     void ShowPageByIndex(int aiPage);
     void ShowPageByIndex(unsigned int auiPage);
@@ -35,7 +35,7 @@ public:
     void Refresh();
     void ApplyRecordToTiles(BGSMessage* record);
     void ApplyRecordToTiles(void* apTile);
-    void FUN_007e9010();
+    void UpdatePrevNext();
 
     static void Create(unsigned int, unsigned int);
 };

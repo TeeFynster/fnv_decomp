@@ -9,7 +9,7 @@
 
 struct FUN_00e4dd90_shell
 {
-    void __thiscall FUN_00e4dd90(float* output);
+    void __thiscall hkKdTreeCpuBroadphaseBundleCastCollector_getHitFractions(float* output);
 };
 struct FUN_00e4dde0
 {
@@ -51,7 +51,7 @@ struct FUN_00e4dde0
     int unk8C;
     FUN_00e4dde0();
 };
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00e4e3c0
 {
     int m_i04;
@@ -98,7 +98,7 @@ struct FUN_00e4e3c0
 
     static void operator delete(void* apMemory)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         // The game dispatches Free through vtable slot 2.
         typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
@@ -260,7 +260,7 @@ __declspec(align(16)) struct FUN_009c1aa0_Class
     float f44;
     float f48;
 
-    FUN_009c1aa0_Class& __thiscall FUN_009c1aa0(const FUN_009c1aa0_Class& src);
+    FUN_009c1aa0_Class& __thiscall ProcessEntries_009c1aa0(const FUN_009c1aa0_Class& src);
     bool DidHit() const
     {
         return gate < 1.0f;
@@ -479,11 +479,12 @@ struct Cls
 
     int flags80[4];
 
-    void __thiscall FUN_00e4de10(Param* p1, const Mask& p2);
+    void __thiscall hkKdTreeCpuBroadphaseBundleCastCollector_addMidPhaseHit(Param* p1, const Mask& p2);
 };
 
 // @fnv 0x00e4de10
-void __thiscall Cls::FUN_00e4de10(Param* p1, const Mask& p2)
+// src: HAVOK_SRC 0x00e4de10
+void __thiscall Cls::hkKdTreeCpuBroadphaseBundleCastCollector_addMidPhaseHit(Param* p1, const Mask& p2)
 {
     HeadObj* head = p1->head;
     if (head)
@@ -534,7 +535,7 @@ void __thiscall Cls::FUN_00e4de10(Param* p1, const Mask& p2)
                     (flags80[i] == 0 || bundleOutput.entries[i].gate < f0c->entries[i].gate))
                 {
                     DestEntry* dst = &f0c->entries[i];
-                    ((FUN_009c1aa0_Class*)dst)->FUN_009c1aa0(bundleOutput.entries[i]);
+                    ((FUN_009c1aa0_Class*)dst)->ProcessEntries_009c1aa0(bundleOutput.entries[i]);
                     dst->info50 = *(int*)&(&bundleOutput.entries[i])[1].x;
                     f0c->entries[i].field50 = p1;
                     const KdRayRotation& rot = transform.getRotation();

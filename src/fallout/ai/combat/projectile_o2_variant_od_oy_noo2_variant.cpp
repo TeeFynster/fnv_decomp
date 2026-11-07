@@ -355,8 +355,8 @@ class RefPB
 extern RefPB* g_pkPlayerPB;
 extern RefPB* g_pkPlayerTeammatePB;
 
-CollisionPB* __cdecl FUN_004a8b00(NodePB* pkNode);
-BodyPB* __cdecl FUN_004b5a80(void* pvEntity);
+CollisionPB* __cdecl bhkNiCollisionObject_GetbhkNiCollisionObject(NodePB* pkNode);
+BodyPB* __cdecl bhkEntity_Getbhk(void* pvEntity);
 void __cdecl FUN_00b6bb30(NodePB* pkNode, float fAlpha);
 float __cdecl FUN_00408840(float fValue);
 SpherePB* __cdecl CreateOctahedron(float fRadius, const NiColorAPB& kColor, int iFlags);
@@ -364,7 +364,7 @@ SpherePB* __cdecl CreateOctahedron(float fRadius, const NiColorAPB& kColor, int 
 class ProjPB : public RefPB
 {
   public:
-    void FUN_009becc0(float fUnused);
+    void Projectile_Update(float fUnused);
     char m_acPad2[0xd8 - 0xa8];
     float m_fXValue;
     float m_fPadDC;
@@ -379,7 +379,8 @@ class ProjPB : public RefPB
 };
 
 // @fnv 0x009becc0
-void ProjPB::FUN_009becc0(float fUnused)
+// src: XBOX_PDB 0x009becc0
+void ProjPB::Projectile_Update(float fUnused)
 {
     float fTimeSinceScaleStart = g_kTimerPB.GetMovementDelta();
     if (g_kVATSPB.GetMode() == 4 && !HasFlag(4))
@@ -404,10 +405,10 @@ void ProjPB::FUN_009becc0(float fUnused)
         if (pkShooter->m_kAVOwner.GetActorValueInt(0x33) > 0 && Get3D())
         {
             NodePB* pkNode = Get3D();
-            CollisionPB* pkCollision = FUN_004a8b00(pkNode);
+            CollisionPB* pkCollision = bhkNiCollisionObject_GetbhkNiCollisionObject(pkNode);
             BodyPB* pkBody = 0;
             BodyPB* pkMotion = 0;
-            pkBody = pkCollision ? FUN_004b5a80(((WorldObjectPB*)pkCollision->GetWorldObject())->GetEntity()) : 0;
+            pkBody = pkCollision ? bhkEntity_Getbhk(((WorldObjectPB*)pkCollision->GetWorldObject())->GetEntity()) : 0;
             if (pkBody)
             {
                 pkMotion = pkBody->GetMotion();
@@ -415,7 +416,7 @@ void ProjPB::FUN_009becc0(float fUnused)
                 hkVector4 kImpulse(0.0f, 0.0f, -30.0f, 0.0f);
                 kImpulse = *(const hkVector4*)pkWorld->GetGravity();
                 hkSimdRealPB kScale(2.0f);
-                kImpulse.FUN_00627920((const hkSimdReal&)kScale);
+                kImpulse.hkVector4_mul4((const hkSimdReal&)kScale);
                 pkMotion->ApplyImpulse(fTimeSinceScaleStart, kImpulse);
             }
         }
@@ -462,7 +463,7 @@ struct S9c_Room
 struct S9c_Base
 {
     bool HasFlag8();
-    S9c_Room* FUN_006ab360();
+    S9c_Room* TESCombatStyle_GetAdvancedData();
 };
 struct S9c_Geom;
 struct S9c_Obj
@@ -475,11 +476,11 @@ struct S9c_Target
 };
 struct S9c_Ref
 {
-    S9c_Target* FUN_004543c0();
+    S9c_Target* TESObjectCELL_GetbhkWorld();
 };
 struct S9c_Pos
 {
-    NiPoint3 FUN_00439ef0(const NiPoint3& rhs) const;
+    NiPoint3 SubtractIntoVector(const NiPoint3& rhs) const;
     NiPoint3 FUN_00439e90(const NiPoint3& rhs) const;
 };
 struct S9c_Vec
@@ -499,7 +500,7 @@ struct S9c_Rec
 };
 struct S9c_Coll
 {
-    void* FUN_009b2c90();
+    void* hkpTypedBroadPhaseHandle_getOwner();
 };
 struct __declspec(align(16)) S9c_Hits
 {
@@ -763,7 +764,7 @@ struct __declspec(align(16)) S9c_Hits
     S9c_Hits(bool b);
     ~S9c_Hits();
     int FUN_00726070();
-    S9c_Rec* FUN_00626660(int);
+    S9c_Rec* ComputeValue_00626660(int);
 };
 struct S9c_Geom
 {
@@ -789,25 +790,25 @@ struct S9c_Geom
 struct S9c_Layer
 {
     void* p;
-    int FUN_0043b4d0();
+    int CFilter_GetLayer();
 };
 struct S9c_World
 {
-    S9c_Layer FUN_0043b4f0();
+    S9c_Layer bhkWorldObject_GetCollisionFilter();
 };
 struct S9c_Form
 {
-    void* FUN_005d43c0();
+    void* BSFile_GetDevice();
 };
-void* __cdecl FUN_004b5820(void*);
-S9c_Form* __cdecl FUN_0056f930(void*);
-void* __cdecl FUN_004b5950(void*);
-S9c_World* __cdecl FUN_004b5a80(void*);
-void __cdecl MarkBaseExtraListScriptEvent(void*, void*, unsigned int);
+void* __cdecl GetAVObjectForCollidable(void*);
+S9c_Form* __cdecl TESObjectREFR_FindReferenceFor3D(void*);
+void* __cdecl hkpGetPhantom(void*);
+S9c_World* __cdecl bhkEntity_Getbhk(void*);
+void __cdecl Script_SetActionFlag(void*, void*, unsigned int);
 extern NiPoint3 DAT_011a9490;
 extern void* DAT_011ca288;
 S9c_Pt __cdecl FUN_004a3760(float, const NiPoint3*);
-void __cdecl FUN_004a3e00(S9c_Vec*, const NiPoint3*);
+void __cdecl NI2HK(S9c_Vec*, const NiPoint3*);
 
 struct S9c_Actor
 {
@@ -939,42 +940,43 @@ struct S9c_Actor
     virtual S9c_Pos* GetVirtualPosition();
     S9c_Base* FUN_004181e0();
     S9c_Ref* FUN_008d6f30();
-    bool FUN_009c0090();
+    bool Projectile_TestProjectileInTriggerZone();
 };
 // @fnv 0x009c0090
-bool S9c_Actor::FUN_009c0090()
+// src: XBOX_PDB 0x009c0090
+bool S9c_Actor::Projectile_TestProjectileInTriggerZone()
 {
     bool found = false;
-    if (FUN_004181e0()->HasFlag8() && FUN_004181e0()->FUN_006ab360()->FUN_0048cee0())
+    if (FUN_004181e0()->HasFlag8() && FUN_004181e0()->TESCombatStyle_GetAdvancedData()->FUN_0048cee0())
     {
-        S9c_Target* target = FUN_008d6f30() ? FUN_008d6f30()->FUN_004543c0() : 0;
+        S9c_Target* target = FUN_008d6f30() ? FUN_008d6f30()->TESObjectCELL_GetbhkWorld() : 0;
         if (!target)
             return found;
         S9c_Obj* obj = target->FUN_00541c80();
         S9c_Geom* geom = obj ? obj->FUN_006286d0() : 0;
-        NiPoint3 from = GetVirtualPosition()->FUN_00439ef0(FUN_004a3760(1.0f, &DAT_011a9490));
+        NiPoint3 from = GetVirtualPosition()->SubtractIntoVector(FUN_004a3760(1.0f, &DAT_011a9490));
         NiPoint3 to = GetVirtualPosition()->FUN_00439e90(FUN_004a3760(1.0f, &DAT_011a9490));
         S9c_Ray ray;
-        FUN_004a3e00(&ray.from, &from);
-        FUN_004a3e00(&ray.to, &to);
+        NI2HK(&ray.from, &from);
+        NI2HK(&ray.to, &to);
         S9c_Hits hits(false);
         geom->Query(&ray, &hits);
         for (int i = 0; !found && i < hits.FUN_00726070(); i++)
         {
-            S9c_Rec* rec = hits.FUN_00626660(i);
+            S9c_Rec* rec = hits.ComputeValue_00626660(i);
             S9c_Coll* coll = rec->obj;
-            void* item = coll->FUN_009b2c90();
-            void* a = FUN_004b5820(item);
-            S9c_Form* form = FUN_0056f930(a);
-            void* c = FUN_004b5950(item);
-            S9c_World* world = c ? FUN_004b5a80(c) : 0;
+            void* item = coll->hkpTypedBroadPhaseHandle_getOwner();
+            void* a = GetAVObjectForCollidable(item);
+            S9c_Form* form = TESObjectREFR_FindReferenceFor3D(a);
+            void* c = hkpGetPhantom(item);
+            S9c_World* world = c ? bhkEntity_Getbhk(c) : 0;
             if (world && form)
             {
-                if (world->FUN_0043b4f0().FUN_0043b4d0() == 23 || world->FUN_0043b4f0().FUN_0043b4d0() == 24)
+                if (world->bhkWorldObject_GetCollisionFilter().CFilter_GetLayer() == 23 || world->bhkWorldObject_GetCollisionFilter().CFilter_GetLayer() == 24)
                 {
                     found = true;
-                    MarkBaseExtraListScriptEvent(this, form->FUN_005d43c0(), 0x80);
-                    MarkBaseExtraListScriptEvent(DAT_011ca288, form->FUN_005d43c0(), 0x100);
+                    Script_SetActionFlag(this, form->BSFile_GetDevice(), 0x80);
+                    Script_SetActionFlag(DAT_011ca288, form->BSFile_GetDevice(), 0x100);
                 }
             }
         }
@@ -1325,12 +1327,12 @@ extern DebugP9* g_pkDebugP9;
 
 void __cdecl FUN_00458620(NiPoint3P9& kOut, const __m128& kIn);
 float __cdecl FUN_00408840(float fValue);
-float __cdecl FUN_00404010(float fA, float fB);
-void __cdecl FUN_005b5e40(const char* pcFormat, ...);
+float __cdecl BSMAX_00404010(float fA, float fB);
+void __cdecl Warning_005b5e40(const char* pcFormat, ...);
 bool __cdecl FUN_00888960();
-void __cdecl FUN_00c66230(bool bValue);
-void* __cdecl FUN_005dbe10();
-void* __cdecl FUN_004b3890(const NiPoint3P9& kStart, const NiColorAP9& kStartColor, const NiPoint3P9& kEnd,
+void __cdecl bhkWorld_SetPickCountOverride(bool bValue);
+void* __cdecl bhkCollisionFilter_GetNewSystemGroup();
+void* __cdecl MakeLine(const NiPoint3P9& kStart, const NiColorAP9& kStartColor, const NiPoint3P9& kEnd,
                            const NiColorAP9& kEndColor, int iFlags);
 
 class PlayerP9
@@ -1528,14 +1530,15 @@ class RefP9
     BaseFormP9* GetBaseForm();
     bool CheckHits(PickQueryP9& kQuery, float& fDistance);
     void OnHit();
-    bool FUN_009c03f0();
+    bool Projectile_RunTargetPick();
     char m_acPad[0x11c - 4];
     CollSrcP9 m_kCollSrc;
 };
-int __cdecl FUN_009c0d80(PickQueryP9& kQuery, RefP9* pkRef, BaseFormP9* pkBase, int iA, int iB, float fDistance);
+int __cdecl Projectile_ProcessTargetPick(PickQueryP9& kQuery, RefP9* pkRef, BaseFormP9* pkBase, int iA, int iB, float fDistance);
 
 // @fnv 0x009c03f0
-bool RefP9::FUN_009c03f0()
+// src: XBOX_PDB 0x009c03f0
+bool RefP9::Projectile_RunTargetPick()
 {
     if (!GetParentCell() || !GetParentCell()->GetWorld())
         return false;
@@ -1562,7 +1565,7 @@ bool RefP9::FUN_009c03f0()
         if (GetShooter() && GetShooter()->IsActor())
             kFlags.SetTarget(GetShooter()->GetHandle().Get());
         else
-            kFlags.SetTarget(FUN_005dbe10());
+            kFlags.SetTarget(bhkCollisionFilter_GetNewSystemGroup());
     }
     if (m_kCollSrc.GetHolder() && m_kCollSrc.GetHolder()->GetFilter())
         kQuery.SetFilter(m_kCollSrc.GetHolder()->GetFilter());
@@ -1577,11 +1580,11 @@ bool RefP9::FUN_009c03f0()
     NiPoint3P9 kExtent = kMaxPoint - kMinBoundsCur;
     kExtent /= 2.0f;
     NiPoint3P9 kRel = kPos - kTargetCenter;
-    float fRatio = FUN_00404010(FUN_00408840(kRel.x / kExtent.x),
-                                FUN_00404010(FUN_00408840(kRel.y / kExtent.y), FUN_00408840(kRel.z / kExtent.z)));
+    float fRatio = BSMAX_00404010(FUN_00408840(kRel.x / kExtent.x),
+                                BSMAX_00404010(FUN_00408840(kRel.y / kExtent.y), FUN_00408840(kRel.z / kExtent.z)));
     if (fRatio > 1.0)
     {
-        FUN_005b5e40("COMBAT: Projectile %s is spawning outside of the broadphase.",
+        Warning_005b5e40("COMBAT: Projectile %s is spawning outside of the broadphase.",
                      GetBaseForm()->HasFullName() ? GetBaseForm()->GetFullName() : GetBaseForm()->m_kName.c_str());
     }
     else
@@ -1589,8 +1592,8 @@ bool RefP9::FUN_009c03f0()
         NiPoint3P9 kEnd = kPos + kRay;
         NiPoint3P9 kEndRel = kEnd - kTargetCenter;
         float fEndRatio =
-            FUN_00404010(FUN_00408840(kEndRel.x / kExtent.x),
-                         FUN_00404010(FUN_00408840(kEndRel.y / kExtent.y), FUN_00408840(kEndRel.z / kExtent.z)));
+            BSMAX_00404010(FUN_00408840(kEndRel.x / kExtent.x),
+                         BSMAX_00404010(FUN_00408840(kEndRel.y / kExtent.y), FUN_00408840(kEndRel.z / kExtent.z)));
         if (fEndRatio > 1.0)
         {
             if (kPos.x + kRay.x > kMaxPoint.x)
@@ -1613,17 +1616,17 @@ bool RefP9::FUN_009c03f0()
     HitResultsP9 kResults;
     kQuery.SetResults(&kResults);
     bool bOld = FUN_00888960();
-    FUN_00c66230(true);
+    bhkWorld_SetPickCountOverride(true);
     bool bHitDetected = g_pkPlayerP9->GetParentCell()->GetWorld()->Pick(kQuery);
-    FUN_00c66230(bOld);
+    bhkWorld_SetPickCountOverride(bOld);
     float fDistance = 3.402823466e+38F;
     bHitDetected = bHitDetected | CheckHits(kQuery, fDistance);
     if (bHitDetected)
-        bHitDetected = FUN_009c0d80(kQuery, this, GetBaseForm(), 0, 1, fDistance) != 0;
+        bHitDetected = Projectile_ProcessTargetPick(kQuery, this, GetBaseForm(), 0, 1, fDistance) != 0;
     if (g_kShowRaysP9.GetBool())
     {
         NiColorAP9 kColor = kQuery.HasHit() ? NiColorAP9(1.0f, 0.0f, 0.0f, 1.0f) : NiColorAP9(1.0f, 1.0f, 0.0f, 1.0f);
-        void* pvLine = FUN_004b3890(kPos, kColor, kPos + kRay, kColor, 1);
+        void* pvLine = MakeLine(kPos, kColor, kPos + kRay, kColor, 1);
         g_pkDebugP9->AddLine(pvLine, g_kRayTimeP9.GetValue());
     }
     if (kQuery.HasHit())
@@ -1638,7 +1641,7 @@ class FUN_005dbf20
     __m128 m_vValue;
 };
 
-hkVector4& FUN_004a3e00(hkVector4& kOut, const NiPoint3& kIn);
+hkVector4& NI2HK(hkVector4& kOut, const NiPoint3& kIn);
 
 class ImpulseBody
 {
@@ -1695,53 +1698,54 @@ class ImpulseRigidBody
     virtual void v37();
     virtual ImpulseLock* GetLock();  // +0x98
 
-    int FUN_00517630();  // motion type
-    ImpulseBody* FUN_004ae750();
+    int bhkRigidBody_GetMotionType();  // motion type
+    ImpulseBody* Bipedanim_GetReferenceFlagsOrZero();
 };
 
-void* FUN_004b59f0(const void* pvObject);
-void* FUN_004b5a80(const void* pvObject);
+void* hkpGetRigidBody(const void* pvObject);
+void* bhkEntity_Getbhk(const void* pvObject);
 
 class ImpulseActorBase
 {
   public:
-    float FUN_00644930();
+    float Explosion_GetRadius();
 };
 
-float FUN_0062b520(float fBase, ImpulseRigidBody* pkBody, int iMode);
+float TESHavokUtilities_ScaleGameplayImpulseForce(float fBase, ImpulseRigidBody* pkBody, int iMode);
 
 class ImpulseSource
 {
   public:
     ImpulseActorBase* FUN_004181e0();
-    void FUN_009c2e80(NiPoint3 kPoint, NiPoint3 kDirection, void* pvTarget);
+    void Projectile_ApplyImpactForce(NiPoint3 kPoint, NiPoint3 kDirection, void* pvTarget);
 };
 
 // @fnv 0x009c2e80
-void ImpulseSource::FUN_009c2e80(NiPoint3 kPoint, NiPoint3 kDirection, void* pvTarget)
+// src: XBOX_PDB 0x009c2e80
+void ImpulseSource::Projectile_ApplyImpactForce(NiPoint3 kPoint, NiPoint3 kDirection, void* pvTarget)
 {
     if (!pvTarget)
         return;
-    ImpulseRigidBody* pkBody = (ImpulseRigidBody*)FUN_004b5a80(FUN_004b59f0(pvTarget));
+    ImpulseRigidBody* pkBody = (ImpulseRigidBody*)bhkEntity_Getbhk(hkpGetRigidBody(pvTarget));
     ImpulseLock* pkLock = pkBody ? pkBody->GetLock() : 0;
     if (pkLock)
     {
-        if (pkBody->FUN_00517630() < 4)
+        if (pkBody->bhkRigidBody_GetMotionType() < 4)
         {
-            float fForce = FUN_004181e0()->FUN_00644930();
-            fForce = FUN_0062b520(fForce, pkBody, 1);
+            float fForce = FUN_004181e0()->Explosion_GetRadius();
+            fForce = TESHavokUtilities_ScaleGameplayImpulseForce(fForce, pkBody, 1);
             if (fForce != 0.0)
             {
                 hkVector4 kImpulse;
-                FUN_004a3e00(kImpulse, kDirection);
+                NI2HK(kImpulse, kDirection);
                 hkVector4 kPosition;
-                FUN_004a3e00(kPosition, kPoint);
-                if (kImpulse.FUN_00630b40().FUN_004586d0() > 0.0)
-                    kImpulse.FUN_0062aea0();
+                NI2HK(kPosition, kPoint);
+                if (kImpulse.FUN_00630b40().EvaluateValue_004586d0() > 0.0)
+                    kImpulse.normalize3_0062aea0();
                 FUN_005dbf20 kScale(fForce);
-                kImpulse.FUN_00627920((const hkSimdReal&)kScale);
+                kImpulse.hkVector4_mul4((const hkSimdReal&)kScale);
                 pkLock->FUN_00483710();
-                pkBody->FUN_004ae750()->ApplyVirtualCall(kImpulse, kPosition);
+                pkBody->Bipedanim_GetReferenceFlagsOrZero()->ApplyVirtualCall(kImpulse, kPosition);
                 pkLock->FUN_00483710();
             }
         }
@@ -1937,11 +1941,12 @@ class NiNode9C
 };
 
 CollisionObject9C* __cdecl FUN_0043b610(NiAVObject9C* pkObject);
-bool __cdecl FUN_0043b300(NiRTTI9C* pkRTTI, void* pvObject);
+bool __cdecl NiObject_IsKindOf(NiRTTI9C* pkRTTI, void* pvObject);
 void __cdecl FUN_0056df80(hkTransform9C& kOut, const void* pvTransform);
 
 // @fnv 0x009c5ba0
-bool __cdecl FUN_009c5ba0(World9C* pkWorld, NiAVObject9C* pkObject, bool bCheckMotion, bool bUpdate)
+// src: COMMUNITY 0x009c5ba0
+bool __cdecl Projectile_PickSceneGraph(World9C* pkWorld, NiAVObject9C* pkObject, bool bCheckMotion, bool bUpdate)
 {
     bool bStateChanged = false;
     if (pkObject)
@@ -1955,13 +1960,13 @@ bool __cdecl FUN_009c5ba0(World9C* pkWorld, NiAVObject9C* pkObject, bool bCheckM
                 (!bCheckMotion || pkWorldObject->GetFlags().GetMotionType() != 1))
             {
                 hkTransform9C kXform;
-                if (FUN_0043b300(&g_kBlendCollisionRTTI9C, pkCollision))
+                if (NiObject_IsKindOf(&g_kBlendCollisionRTTI9C, pkCollision))
                 {
                     BlendCollisionObject9C* pkBlend = (BlendCollisionObject9C*)pkCollision;
                     if (!pkWorldObject->IsFixed() || pkBlend->GetBlend() == 1.0)
                     {
                         FUN_0056df80(kXform, pkObject->GetWorldTransform());
-                        if (FUN_0043b300(&g_kPhantomRTTI9C, pkWorldObject))
+                        if (NiObject_IsKindOf(&g_kPhantomRTTI9C, pkWorldObject))
                         {
                             Phantom9C* pkPhantom = (Phantom9C*)pkWorldObject;
                             hkTransform9C kLocal;
@@ -1998,7 +2003,7 @@ bool __cdecl FUN_009c5ba0(World9C* pkWorld, NiAVObject9C* pkObject, bool bCheckM
             for (unsigned int i = 0; i < pkNode->GetArrayCount(); i++)
             {
                 NiAVObject9C* pkChild = pkNode->GetAt(i);
-                bStateChanged = bStateChanged | FUN_009c5ba0(pkWorld, pkChild, bCheckMotion, false);
+                bStateChanged = bStateChanged | Projectile_PickSceneGraph(pkWorld, pkChild, bCheckMotion, false);
             }
         }
     }

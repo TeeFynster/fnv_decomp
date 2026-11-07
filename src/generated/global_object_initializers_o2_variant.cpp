@@ -9637,9 +9637,9 @@ GlobalObject_00a7b610 g_012043d4(g_012043d4_arg0, g_012043d4_arg1);
 GlobalObject_00a7b610 g_012043dc(g_012043dc_arg0, g_012043dc_arg1);
 // @fnv 0x00fbc9a0
 GlobalObject_00a7b610 g_012043e4(g_012043e4_arg0, g_012043e4_arg1);
-extern void __cdecl FUN_00632e30();
+extern void __cdecl SettingT_BlendSettingCollection_InitCollection();
 extern int DAT_011cc694;
-int __cdecl FUN_00632e20();
+int __cdecl SettingT_BlendSettingCollection_QCollection();
 struct FUN_006ffc90_shell
 {
     int m_kPointA;
@@ -9650,12 +9650,12 @@ extern void* DAT_010827e8;
 struct FUN_008699c0_shell
 {
     void FUN_00869aa0(unsigned int maxSize, unsigned int growBy);
-    void* FUN_008699c0(unsigned int maxSize, unsigned int growBy);
+    void* NiTObjectArray_TESObjectREFR_NiTObjectArray(unsigned int maxSize, unsigned int growBy);
 };
 struct FUN_00869b10_shell
 {
     void* m_vft;
-    void* __thiscall FUN_00869b10(void* a, void* b);
+    void* __thiscall NiTObjectArray_BipedAnim_NiTObjectArray(void* a, void* b);
 };
 struct FUN_00869bf0_holder
 {
@@ -9664,31 +9664,32 @@ struct FUN_00869bf0_holder
 struct AX
 {
     void* m_vft;
-    void FUN_006b3eb0(unsigned int, unsigned int);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 };
 extern void* DAT_0106ba6c;
 struct FUN_00869f00_shell
 {
     void* m_vft;
-    void* FUN_00869f00(unsigned int a, unsigned int b);
+    void* BSSimpleArray_NavMesh_1024_BSSimpleArray_NavMesh_1024_00869f00(unsigned int a, unsigned int b);
 };
 
 extern int DAT_012024d4;
-void __cdecl FUN_00aa2080(void*, void*);
+void __cdecl NiStaticDataManager_AddLibrary(void*, void*);
 void __cdecl RegisterParticleSystems();
-void __cdecl FUN_00c1a7d0();
+void __cdecl NiParticleSDM_Shutdown();
 
 struct FUN_00c1ad50_class
 {
-    void* FUN_00c1ad50();
+    void* NiParticleSDM_NiParticleSDM();
 };
 
 // @fnv 0x00c1ad50
-void* FUN_00c1ad50_class::FUN_00c1ad50()
+// src: COMMUNITY 0x00c1ad50
+void* FUN_00c1ad50_class::NiParticleSDM_NiParticleSDM()
 {
     int count = DAT_012024d4;
     ++DAT_012024d4;
     if (!count)
-        FUN_00aa2080((void*)&RegisterParticleSystems, (void*)&FUN_00c1a7d0);
+        NiStaticDataManager_AddLibrary((void*)&RegisterParticleSystems, (void*)&NiParticleSDM_Shutdown);
     return this;
 }

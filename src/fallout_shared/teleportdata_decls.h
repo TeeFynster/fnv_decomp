@@ -19,7 +19,7 @@ struct DoorTeleportLoadData
 class DoorTeleportSpaceReceiver
 {
   public:
-    TESForm* FUN_009dcd40(void);
+    TESForm* IsPathingComplete(void);
 };
 struct DoorTeleportSpaceOwner
 {

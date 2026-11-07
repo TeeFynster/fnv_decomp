@@ -49,7 +49,7 @@ class DurationData
 {
   public:
     char month;  // +0x0
-    int FUN_00678ca0();
+    int PackageLocation_GetLocType();
 };
 
 #endif

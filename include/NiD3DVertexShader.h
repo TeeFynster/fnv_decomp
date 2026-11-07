@@ -32,8 +32,8 @@ public:
     void SetFileName(const char* pcFileName);
     void SetD3DPixelShader(RenderableGeometry* hShader);
     NiD3DVertexShader* Construct(GraphicsRenderer* pkRenderer);
-    void FUN_00be0bd0(COMUnknownInterface* hDecl);
-    void FUN_00be0bf0(bool bSoftwareVP);
+    void SetVertexDeclaration_00be0bd0(COMUnknownInterface* hDecl);
+    void SetSoftwareVertexProcessing_00be0bf0(bool bSoftwareVP);
     void IncRefCount();
     void DecRefCount();
 

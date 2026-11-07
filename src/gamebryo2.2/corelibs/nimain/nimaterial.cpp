@@ -23,7 +23,8 @@ inline NiRefObject::~NiRefObject()
 extern "C" char const* const g_011f6048_arg1;
 
 // @fnv 0x00a8f860
-char const* const* __cdecl FUN_00a8f860()
+// src: COMMUNITY 0x00a8f860
+char const* const* __cdecl NiMaterial_GetRTTI()
 {
     return &g_011f6048_arg1;
 }
@@ -135,7 +136,7 @@ FUN_00a8f950::FUN_00a8f950(const NiFixedString& name) : m_name(name)
 class RegistryA8F9
 {
   public:
-    void FUN_00aa0250(NiFixedString& kName) throw();
+    void NiTStringPointerMap_NiAVObject_RemoveAt(NiFixedString& kName) throw();
 };
 
 namespace a8f9 {
@@ -147,7 +148,7 @@ class NamedA8F9 : public NiRefObject
   public:
     virtual ~NamedA8F9()
     {
-        a8f9::DAT_011f5e34->FUN_00aa0250(m_kName);
+        a8f9::DAT_011f5e34->NiTStringPointerMap_NiAVObject_RemoveAt(m_kName);
     }
 
     NiFixedString m_kName;
@@ -217,7 +218,8 @@ extern "C" CRITICAL_SECTION DAT_011f600c;
 
 // Locks DAT_011f600c, nulls every element of DAT_011ac040, resets its size to zero, and unlocks.
 // @fnv 0x00a9bb60
-void __cdecl FUN_00a9bb60()
+// src: GAMEBRYO_LIB 0x00a9bb60
+void __cdecl NiMetricsLayer__SDMShutdown()
 {
     EnterCriticalSection(&DAT_011f600c);
     unsigned int uiIndex = 0;

@@ -18,16 +18,17 @@ struct FileFormCollection;
 typedef char _sizecheck_TESTextureList[sizeof(FileEntryList) == 8 ? 1 : -1];
 struct FUN_008c1be0_shell
 {
-    void FUN_008c1be0(int param_1);
+    void bhkTTNode_TESObjectREFR_GetFlags(int param_1);
 };
-void FUN_008c1be0_shell::FUN_008c1be0(int param_1)
+// src: XBOX_PDB 0x008c1be0
+void FUN_008c1be0_shell::bhkTTNode_TESObjectREFR_GetFlags(int param_1)
 {}
 struct FUN_004898c0_shell
 {
-    void FUN_004898c0(int param_1);
+    void BSArchive_GetFlag_(int param_1);
 };
 extern bool DAT_011acdf8;
-bool FUN_004898e0();
+bool ArchiveManager_ArchivesEnabled();
 struct FUN_00489860_shell
 {
     unsigned char b0;
@@ -35,7 +36,7 @@ struct FUN_00489860_shell
     unsigned char b2;
     unsigned char b3;
     int i4;
-    unsigned char* __thiscall FUN_00489860(unsigned char a, unsigned char b, unsigned char c, unsigned char d, int e);
+    unsigned char* __thiscall BSHash_BSHash_0(unsigned char a, unsigned char b, unsigned char c, unsigned char d, int e);
 };
 struct BGSLoadFormBuffer;
 struct BGSSaveFormBuffer;
@@ -68,8 +69,8 @@ struct G2
 void __cdecl _Deallocate(void*);
 struct FUN_004898a0_shell : public FUN_004898c0_shell
 {
-    int FUN_004898c0(int param_1);
-    bool FUN_004898a0();
+    int BSArchive_GetFlag_(int param_1);
+    bool BSArchive_HasEmbeddedFileNames();
 };
 struct FUN_004f9ec0_shell
 {
@@ -77,7 +78,7 @@ struct FUN_004f9ec0_shell
     void* __thiscall DestroyIfFlagged(unsigned int flags);
 };
 void __cdecl FUN_00406d30(char* dst, int maxLen, const char* src);
-char* __cdecl FUN_0040ab30(const char* s, int ch);
+char* __cdecl strrchr_0040ab30(const char* s, int ch);
 class B479FB0Actor;
 class B479FB0Idle
 {
@@ -101,7 +102,7 @@ class B479FB0IdleList
     short unk06;
     B479FB0Idle** m_ppkIdles;
 
-    bool FUN_00479fb0(B479FB0Actor* pkActor, int iArg);
+    bool BGSIdleCollection_HasIdleForActor(B479FB0Actor* pkActor, int iArg);
 };
 int __cdecl B489480Stricmp(const char* pcA, const char* pcB);
 struct FUN_004898a0_shell;
@@ -134,9 +135,9 @@ struct Cls
 extern char DAT_011c5574;
 extern char DAT_011c555c;
 FUN_004898a0_shell* __cdecl GetFltValue(int);
-bool __cdecl FUN_004898e0();
+bool __cdecl ArchiveManager_ArchivesEnabled();
 unsigned int __cdecl FindFileEntryInArchives(int, FUN_00489860_shell*, FUN_00489860_shell*, int);
-void __cdecl FUN_005b5e40(const char* fmt, ...);
+void __cdecl Warning_005b5e40(const char* fmt, ...);
 
 class String;
 #include "../../include/BSSimpleList.h"
@@ -167,7 +168,7 @@ struct DestructibleHeader
     unsigned char flags;
     unsigned short unused;
     DestructibleHeader();
-    void FUN_00503210();
+    void QuestPerkEntryData_Endian();
 };
 struct DestructionStageChunk
 {
@@ -179,15 +180,16 @@ struct DestructionStageChunk
     TESForm* explosion;
     TESForm* debris;
     unsigned int debrisCount;
-    void FUN_00478130();
+    void SAVE_DESTRUCTIBLE_OBJECT_STAGE_Endian();
 };
 extern "C" void* __cdecl _alloca(unsigned int);
 extern "C" void* __cdecl memset(void*, int, unsigned int);
-void __cdecl FUN_005b5e40(const char*, ...);
-void __cdecl FUN_004893e0(TESModel*, TESFile*);
+void __cdecl Warning_005b5e40(const char*, ...);
+void __cdecl TESModel_LoadModelTextureChunk(TESModel*, TESFile*);
 
 // @fnv 0x004781e0
-void __cdecl FUN_004781e0(BGSDestructibleObjectForm* component, TESFile* file)
+// src: XBOX_PDB 0x004781e0
+void __cdecl BGSDestructibleObjectForm_LoadChunk(BGSDestructibleObjectForm* component, TESFile* file)
 {
     if (!file || !component)
         return;
@@ -201,14 +203,14 @@ void __cdecl FUN_004781e0(BGSDestructibleObjectForm* component, TESFile* file)
         if (file->GetChunkSize() != 8)
         {
             TESForm* form = dynamic_cast<TESForm*>(component);
-            FUN_005b5e40("MASTERFILE: Old Destruction data found on form %08X %s.  It needs to be resaved.",
+            Warning_005b5e40("MASTERFILE: Old Destruction data found on form %08X %s.  It needs to be resaved.",
                          static_cast<const TESForm*>(form)->GetFormID(), form->GetName());
-            component->FUN_00478690();
+            component->BGSDestructibleObjectForm_RemoveData();
             return;
         }
         file->GetChunkData(&header, 0);
         if (file->IsEndianConversionRequired())
-            header.FUN_00503210();
+            header.QuestPerkEntryData_Endian();
         pkData->health = header.health;
         pkData->stageCount = header.stageCount;
         pkData->flags = header.flags;
@@ -221,7 +223,7 @@ void __cdecl FUN_004781e0(BGSDestructibleObjectForm* component, TESFile* file)
         memset(&stage, 0, sizeof(stage));
         file->GetChunkData(&stage, sizeof(stage));
         if (file->IsEndianConversionRequired())
-            stage.FUN_00478130();
+            stage.SAVE_DESTRUCTIBLE_OBJECT_STAGE_Endian();
         unsigned char index = stage.index;
         if (index < pkData->stageCount)
         {
@@ -245,7 +247,7 @@ void __cdecl FUN_004781e0(BGSDestructibleObjectForm* component, TESFile* file)
                 }
                 case 0x54444d44:
                     pkData->stages[index]->EnsureB2_4fe();
-                    FUN_004893e0(pkData->stages[index]->replacementModel, file);
+                    TESModel_LoadModelTextureChunk(pkData->stages[index]->replacementModel, file);
                     break;
                 case 0x53444d44: {
                     pkData->stages[index]->EnsureB2_4fe();

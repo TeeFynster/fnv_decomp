@@ -13,7 +13,7 @@
 
 // src/havok/common/serialize/tagfile/binary/hkbinarytagfilewriter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/tagfile/binary/hkbinarytagfilewriter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 struct UnkRet
 {
     int a;
@@ -48,7 +48,7 @@ struct UnkHolder
     int a;
     int b;
     int c;
-    void __thiscall FUN_00dbedb0(UnkRet*, int);
+    void __thiscall ProcessEntries_00dbedb0(UnkRet*, int);
 };
 struct FUN_00dc0380
 {
@@ -62,30 +62,30 @@ struct FUN_00dc0380
 struct ObjectHandle
 {
     void* object;
-    __declspec(nothrow) int FUN_00dbac00();
-    __declspec(nothrow) void FUN_00dbab70();
+    __declspec(nothrow) int InvokeVirtualMethod_00dbac00();
+    __declspec(nothrow) void ReleaseStorage_00dbab70();
     ~ObjectHandle()
     {
-        FUN_00dbab70();
+        ReleaseStorage_00dbab70();
     }
 };
 struct StringHandle
 {
     void* object;
-    __declspec(nothrow) int FUN_00dba980();
-    __declspec(nothrow) void FUN_00dba7f0();
+    __declspec(nothrow) int hkDataObject_isNull();
+    __declspec(nothrow) void ReleaseStorage_00dba7f0();
     ~StringHandle()
     {
-        FUN_00dba7f0();
+        ReleaseStorage_00dba7f0();
     }
 };
 struct Value
 {
-    int FUN_00dbac40();
+    int InvokeVirtualMethod_00dbac40();
     int CallVirtualWithArg();
     float ApplyValue();
-    void* FUN_00dbac70();
-    __declspec(nothrow) ObjectHandle FUN_00dbacd0();
+    void* ForwardCall_00dbac70();
+    __declspec(nothrow) ObjectHandle GetMemberArrayValue();
     __declspec(nothrow) StringHandle CreateValueInto();
 };
 int __stdcall IsTruthy(Value* value);
@@ -124,7 +124,7 @@ struct AudioResourceState
 };
 inline hkMemoryRouter* audio()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 struct ArrayDeallocator
 {
@@ -137,7 +137,7 @@ struct ArrayDeallocator
 struct Element
 {
     int m_i00;
-    void FUN_00dba7f0();
+    void ReleaseStorage_00dba7f0();
 };
 struct SubObject
 {
@@ -187,9 +187,9 @@ struct FUN_00dc05b0_writer
     void __thiscall FUN_00dc0500(int, int);
     void __thiscall WriteInt(unsigned int);
     void __thiscall WriteVarint(unsigned int, unsigned int);
-    void __thiscall FUN_00dbf450(int, int);
-    void __thiscall FUN_00dc00b0(int);
-    void __thiscall FUN_00dc0460();
+    void __thiscall WriteReferencedObjectRecursively(int, int);
+    void __thiscall ProcessEntries_00dc00b0(int);
+    void __thiscall ProcessState_00dc0460();
 };
 struct CallbackTarget
 {
@@ -209,7 +209,7 @@ struct CallbackTarget
 int __stdcall WriteAudioObject(int value, CallbackTarget* target, int source);
 struct Obj
 {
-    void __thiscall FUN_00d605d0(unsigned char);
+    void __thiscall hkOArchive_write8u(unsigned char);
     void __thiscall WriteVarint(__int64);
 };
 struct FUN_00dbe8c0_cls
@@ -280,9 +280,9 @@ struct FUN_00dbec60_cls
     unsigned int m_04;
     int m_08;
 
-    void FUN_00dbec60(AllocOwner* alloc, int count);
+    void hkMapBase_struct_hkCppTypeInfoHash_struct_hkRttiParser_Node_const_struct_hkCppTypeInfoHash_resizeTable(AllocOwner* alloc, int count);
 };
-extern "C" int __cdecl FUN_00cb10d0(const char* s);
+extern "C" int __cdecl hkString_strLen(const char* s);
 struct DBED30StringMap
 {
     void* m_kPrimitiveElement;
@@ -342,7 +342,7 @@ struct S_00dc0500_Str
     int unk04;
     int unk08;
     int unk0c;
-    void __thiscall FUN_00d874d0(int* s, int n);
+    void __thiscall hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_insert(int* s, int n);
 };
 struct FUN_00d87790 : S_00dc0500_Str
 {
@@ -355,8 +355,8 @@ struct S_00dc0500_Holder : UnkHolder
         a = 0;
         b = 0;
         c = -1;
-        BSAudio* p = FUN_00c85750();
-        FUN_00dbedb0((UnkRet*)((hkMemoryRouter*)p)->m_heap, 0);
+        BSAudio* p = hkMemoryRouter_getInstance();
+        ProcessEntries_00dbedb0((UnkRet*)((hkMemoryRouter*)p)->m_heap, 0);
     }
 };
 struct S_00dc0500_Arr
@@ -387,14 +387,14 @@ struct S_dbf1a0_Map
     int unk00;
     int unk04;
     int __thiscall GetValue(const char* name, int defValue) throw();
-    void __thiscall FUN_00d874d0(const char* name, int value) throw();
+    void __thiscall hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_insert(const char* name, int value) throw();
 };
 struct S_dbf1a0_Handle
 {
     void* m_ptr;
     S_dbf1a0_Handle(void* p) throw()
     {
-        FUN_00dba650(p);
+        SetField00(p);
     }
     S_dbf1a0_Handle() throw()
     {
@@ -402,15 +402,15 @@ struct S_dbf1a0_Handle
     }
     ~S_dbf1a0_Handle() throw()
     {
-        FUN_00dba660();
+        Object_DoNothing_00dba660();
     }
 
-    void __thiscall FUN_00dba650(void* p) throw();
-    void __thiscall FUN_00dba660() throw();
-    const char* __thiscall FUN_00dba680() const throw();
-    int __thiscall FUN_00dba690() const throw();
+    void __thiscall SetField00(void* p) throw();
+    void __thiscall Object_DoNothing_00dba660() throw();
+    const char* __thiscall hkDataClass_getName() const throw();
+    int __thiscall ForwardCall_00dba690() const throw();
     S_dbf1a0_Handle __thiscall SetShiftedValue() const throw();
-    int __thiscall FUN_00dba6f0() const throw();
+    int __thiscall ForwardCall_00dba6f0() const throw();
     void __thiscall DispatchRecords(void* arr) const throw();
 };
 struct S_dbf1a0_Elem
@@ -460,7 +460,7 @@ template <typename T> struct S_dbf1a0_Array
 
     __forceinline S_dbf1a0_Array(int n) throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {
-        hkTempAlloc& alloc = ((S_dbf1a0_Router*)FUN_00c85750())->heap();
+        hkTempAlloc& alloc = ((S_dbf1a0_Router*)hkMemoryRouter_getInstance())->heap();
         T* p = n ? alloc._bufAlloc<T>(n) : 0;
         int cap = n ? n : 0x80000000;
         m_data = p;
@@ -479,7 +479,7 @@ template <typename T> struct S_dbf1a0_Array
 
     __forceinline ~S_dbf1a0_Array() throw()
     {
-        hkTempAlloc& alloc = ((S_dbf1a0_Router*)FUN_00c85750())->heap();
+        hkTempAlloc& alloc = ((S_dbf1a0_Router*)hkMemoryRouter_getInstance())->heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc._bufFree<T>(m_data, m_iCapacityState & 0x3fffffff);
@@ -523,7 +523,7 @@ class hkPairMapDBE8
     int m_iCapacityFlags;
     int m_iPairCount;
 
-    void FUN_00dbec60(hkMemoryAllocatorDBE8& alloc, int iNewCap);
+    void hkMapBase_struct_hkCppTypeInfoHash_struct_hkRttiParser_Node_const_struct_hkCppTypeInfoHash_resizeTable(hkMemoryAllocatorDBE8& alloc, int iNewCap);
     int InsertOrUpdate(hkMemoryAllocatorDBE8& alloc, hkPairKeyDBE8 key, unsigned int uiValue);
 };
 struct ObjC;
@@ -541,18 +541,18 @@ struct Rec
 struct Wrap
 {
     void* m_p;
-    __declspec(nothrow) int FUN_00dbac10() const;
-    __declspec(nothrow) Pair FUN_00dbabb0(int idx) const;
-    __declspec(nothrow) Pair FUN_00dbab90(int idx) const;
-    __declspec(nothrow) int FUN_00dbac00() const;
-    __declspec(nothrow) void FUN_00dbab70();
-    __declspec(nothrow) void FUN_00dba7f0();
-    __declspec(nothrow) ObjC FUN_00dbac20() const;
-    __declspec(nothrow) void FUN_00dba660();
+    __declspec(nothrow) int ForwardCall_00dbac10() const;
+    __declspec(nothrow) Pair CreateResultPair(int idx) const;
+    __declspec(nothrow) Pair UpdateState_00dbab90(int idx) const;
+    __declspec(nothrow) int InvokeVirtualMethod_00dbac00() const;
+    __declspec(nothrow) void ReleaseStorage_00dbab70();
+    __declspec(nothrow) void ReleaseStorage_00dba7f0();
+    __declspec(nothrow) ObjC ProcessAndReturnValue_00dbac20() const;
+    __declspec(nothrow) void Object_DoNothing_00dba660();
     __declspec(nothrow) Wrap InvokeCallbackInto(int v) const;
     ~Wrap()
     {
-        FUN_00dbab70();
+        ReleaseStorage_00dbab70();
     }
 };
 struct Node50
@@ -566,12 +566,12 @@ struct Node50
 struct ObjC
 {
     void* m_00;
-    __declspec(nothrow) int FUN_00dba730();
+    __declspec(nothrow) int ForwardCall_00dba730();
     __declspec(nothrow) void DispatchItems(hkArrayBase<Rec>& a);
-    __declspec(nothrow) void FUN_00dba660();
+    __declspec(nothrow) void Object_DoNothing_00dba660();
     ~ObjC()
     {
-        FUN_00dba660();
+        Object_DoNothing_00dba660();
     }
 };
 struct __declspec(align(8)) Obj2
@@ -607,7 +607,7 @@ __forceinline void initializeRecords(hkArrayBase<Rec>& out,int n)
     out.m_data = 0;
     out.m_iElementCount = 0;
     out.m_iCapacityState = (int)0x80000000;
-    BSAudio* router = FUN_00c85750();
+    BSAudio* router = hkMemoryRouter_getInstance();
     AllocV* allocator = (AllocV*)&((hkMemoryRouter*)router)->temp();
     Rec* data = allocateRecords(allocator, capacity);
     int flags = capacity ? capacity : (int)0x80000000;
@@ -617,17 +617,17 @@ __forceinline void initializeRecords(hkArrayBase<Rec>& out,int n)
     for (int k = 0; k < capacity; ++k)
         new (data + k) Rec;
 }
-extern "C" void __cdecl FUN_00c908c0(void* owner, hkArrayBase<Rec>* arr, int newCap, int stride);
+extern "C" void __cdecl hkArrayUtil__reserve(void* owner, hkArrayBase<Rec>* arr, int newCap, int stride);
 struct Host
 {
     __declspec(nothrow) void WriteArray(const Wrap& arg0, int count);
-    __declspec(nothrow) void FUN_00d605d0(int v);
+    __declspec(nothrow) void hkOArchive_write8u(int v);
     __declspec(nothrow) void WriteVarint(__int64 v);
     __declspec(nothrow) void HashUInt(float f);
     __declspec(nothrow) void WriteFloatArray(void* p, int v);
-    __declspec(nothrow) void FUN_00dc00b0(const StringHandle& v);
+    __declspec(nothrow) void ProcessEntries_00dc00b0(const StringHandle& v);
     __declspec(nothrow) void WriteString(int v);
-    __declspec(nothrow) void FUN_00d607b0(void* p, int n);
+    __declspec(nothrow) void hkOArchive_writeRaw(void* p, int n);
     __declspec(nothrow) int IsTruthy(Pair* p);
 };
 struct S_00dbfef0_A;
@@ -642,27 +642,27 @@ struct S_00dbfef0_X
 struct S_00dbfef0_Node
 {
     int QueryAndWriteResult();
-    int FUN_00dba990();
-    float FUN_00dbaa00();
+    int ForwardCall_00dba990();
+    float InvokeVirtualMethod_00dbaa00();
     int DispatchToInterface(int n);
-    int FUN_00dba9c0();
-    int FUN_00dba9d0(S_00dbfef0_B* out);
+    int hkDataObject_Value_asString();
+    int GetWrappedDataObject(S_00dbfef0_B* out);
     void GetResult(S_00dbfef0_A* out);
 };
 struct S_00dbfef0_B
 {
     S_00dbfef0_X* p;
-    void FUN_00dba7f0();
-    int FUN_00dba680();
-    void FUN_00dba660();
+    void ReleaseStorage_00dba7f0();
+    int hkDataClass_getName();
+    void Object_DoNothing_00dba660();
 };
 struct S_00dbfef0_A
 {
     S_00dbfef0_Node* p;
-    int FUN_00dbac00();
-    int FUN_00dbac10();
-    void FUN_00dbac20(S_00dbfef0_B* b);
-    void FUN_00dbab70();
+    int InvokeVirtualMethod_00dbac00();
+    int ForwardCall_00dbac10();
+    void ProcessAndReturnValue_00dbac20(S_00dbfef0_B* b);
+    void ReleaseStorage_00dbab70();
 };
 struct S_00dbfef0_Sub
 {
@@ -679,13 +679,13 @@ struct S_00dbfef0_Visitor
     int unk18;
     int unk1C;
     S_00dbfef0_Sub m_sub;
-    void FUN_00d605d0(int v);
+    void hkOArchive_write8u(int v);
     void HashUInt(float v);
     void WriteFloatArray(int p, int n);
     void WriteVarint(__int64 v);
     void WriteString(int v);
     void WriteArray(S_00dbfef0_A* a, int n);
-    void FUN_00dc00b0(int v);
+    void ProcessEntries_00dc00b0(int v);
     void WriteNode(S_00dbfef0_Node* node, S_00dbfef0_B b);
 };
 
@@ -735,7 +735,7 @@ struct MemRouter
 };
 __forceinline MemRouter& router()
 {
-    return *(MemRouter*)FUN_00c85750();
+    return *(MemRouter*)hkMemoryRouter_getInstance();
 }
 void __cdecl ResizeAudioStream(ContainerHeap& heap, void* arr, int elemSize);
 struct HandleMap
@@ -787,10 +787,11 @@ struct ObjCloner
     DataWorld* m_pOwningWorld;
     HandleMap m_kHandleMap;
     PtrArrayLocalForm<DataObj*> m_objs;
-    DataObj FUN_00dbedd0(const DataObj& src);
+    DataObj AllocateStorage_00dbedd0(const DataObj& src);
 };
 // @fnv 0x00dbedd0
-DataObj ObjCloner::FUN_00dbedd0(const DataObj& src)
+// src: GUESS 0x00dbedd0 (confidence: low)
+DataObj ObjCloner::AllocateStorage_00dbedd0(const DataObj& src)
 {
     if (m_pOwningWorld && !src.GetObjectKind())
     {

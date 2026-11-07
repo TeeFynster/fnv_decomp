@@ -37,7 +37,7 @@ class UseDoorCalls
     void QueueActorTask();
     void SetLocationOnReference(NiPoint3&);
     void* FUN_005c3420();
-    void* FUN_00439ef0(void*, void*);
+    void* SubtractIntoVector(void*, void*);
     float GetSquaredXYLength();
 };
 
@@ -130,7 +130,7 @@ class RefCall
 {
   public:
     bool Activate(TESObjectREFR*, bool, TESBoundObject*, int);
-    bool FUN_00474cb0();
+    bool GetFormEditorIDLength();
     const char* GetFullName();
 };
 

@@ -33,7 +33,7 @@ typedef NiTPointerMap<unsigned int, NiDX9VertexBufferManager::NiDX9VBInfo*> Vert
 #include "../../include/NiPoint3.h"
 #include "../../include/Vec4.h"
 struct FUN_00e891f0_Class {
-    void __thiscall FUN_00e891f0();
+    void __thiscall NiD3DTextureStageGroup_RemoveAllStageStates();
 };
 extern "C" void __cdecl operator delete(void* p, unsigned int size);
 extern int DAT_010efc34;
@@ -41,54 +41,54 @@ void __cdecl FUN_00e68830();
 struct FUN_00e8aa40_Class {
     int __thiscall FUN_00e8aa40(bool flag);
 };
-void __stdcall FUN_00e8b490(int* paiValues, int iFirst, int iSecond);
-void FUN_00e933d0();
+void __stdcall Runtime_UpdateState_00e8b490(int* paiValues, int iFirst, int iSecond);
+void NiD3DShaderProgramFactory__SDMShutdown();
 extern "C" void __cdecl FUN_00e93400();
 extern MemoryManager g_memoryManager;
 extern bool DAT_0126f0d0;
-void __cdecl FUN_00e941a0(void* apData);
+void __cdecl NiVBSet_DetermineUsageAndPool(void* apData);
 struct FUN_00e95b80_Class {
-    void __thiscall FUN_00e95b80();
+    void __thiscall SetVirtualTable_00e95b80();
 };
 struct FUN_00e97790_Class {
     int __thiscall InitFromSource(int a, int b);
 };
-int __cdecl FUN_00e978a0(int a, int b);
+int __cdecl NiDX9ShaderConstantManager_Create(int a, int b);
 extern "C" void __cdecl NiFreeAlias(void*);
 extern int DAT_010f0f7c;
 struct FUN_00e98640_Class {
-    void __thiscall FUN_00e98640();
+    void __thiscall ReleaseStorage_00e98640();
 };
 struct FUN_00e81d00_Class {
     char m_auiShapeKeys[0x38];
     void* m_pRenderState;
     void* m_pShaderObject;
     void* m_pD3DDevice;
-    void __thiscall FUN_00e81d00(void* renderer);
+    void __thiscall NiD3DShaderConstantMap_SetD3DRenderer(void* renderer);
 };
 void __fastcall ClearFields(void* self);
-extern "C" void __cdecl FUN_00aa1490(void*, unsigned int);
+extern "C" void __cdecl NiMemObject_ReleaseStorage_00aa1490(void*, unsigned int);
 struct FUN_00e89560_Class {
     void* m_ptr;
     void* m_obj;
-    void __thiscall FUN_00e89560();
+    void __thiscall ReleaseStorage_00e89560();
 };
 extern int DAT_0126f9a0;
 struct P03MM { void* __thiscall Allocate(unsigned int); };
-void FUN_00e895f0();
+void NiD3DTextureStageGroup_InitializePools();
 struct NiConsoleRendererStub {
     void* m_pCurrentRenderState;
     void* m_pD3DDevice;
 };
 struct FUN_00e89760_Class {
-    void __thiscall FUN_00e89760(NiConsoleRendererStub* renderer);
+    void __thiscall NiD3DShaderProgram_SetD3DRenderer(NiConsoleRendererStub* renderer);
 };
 extern int DAT_011f4500;
 void __cdecl ReleaseShaderNodes();
 extern NiD3DShaderProgramCreator* DAT_0126fa54;
 extern const unsigned char DAT_010bc868[];
 extern int DAT_010f0af4;
-void __cdecl FUN_00e91b90();
+void __cdecl NiD3DShaderProgramCreatorObj__SDMInit();
 extern int DAT_010f0e50;
 extern int DAT_010f0e70;
 extern "C" void __cdecl NiFree(void*);
@@ -170,8 +170,8 @@ struct FUN_00e8a1f0_Class {
 };
 extern int DAT_010f0ac0;
 extern NiD3DShaderProgramCreator* DAT_0126fa50;
-void __cdecl FUN_00e91b40();
-unsigned int __fastcall FUN_00e8a240(char* self, int);
+void __cdecl NiD3DShaderProgramCreatorAsm__SDMInit();
+unsigned int __fastcall NiPixelFormat_GetNumComponents(char* self, int);
 void __cdecl _NiFree(void* p);
 extern int DAT_010efdd8;
 extern int DAT_010efdf8;
@@ -197,17 +197,17 @@ extern unsigned char DAT_010f02d0[];
 extern MemoryManager _g_memoryManager;
 void __cdecl _NiFree(void* p);
 extern int DAT_0126fa04;
-void __cdecl FUN_00aa2080(void*, void*);
-void __cdecl FUN_00e91dc0();
-void __cdecl FUN_00e91c80();
+void __cdecl NiStaticDataManager_AddLibrary(void*, void*);
+void __cdecl NiDX9RendererSDM_Init();
+void __cdecl NiDX9RendererSDM_Shutdown();
 struct FUN_00e91e30_This {
-    void* FUN_00e91e30();
+    void* UpdateState_00e91e30();
 };
 extern void* DAT_0126fa0c;
 struct FUN_00e92080_This {
     virtual void Release(int);
 };
-void FUN_00e92080();
+void NiD3DShaderFactory__SDMShutdown();
 extern int DAT_010f0df0;
 extern int DAT_010f0e10;
 extern int DAT_010f0e30;
@@ -262,10 +262,10 @@ struct FUN_00e94070_Class {
     void __thiscall ReleaseOwnedObject(FUN_00e94070_Class* p);
 };
 struct FUN_00e942d0_Class {
-    void __thiscall FUN_00e942d0();
+    void __thiscall ClearAllData();
 };
 extern int DAT_0126fa30;
-void __stdcall FUN_00e94330(void* p);
+void __stdcall NiVBSet_FreeBlock(void* p);
 void __cdecl _NiFree(void* p);
 struct FUN_00e94390_Class {
     void* m_vptr;
@@ -298,7 +298,7 @@ struct FUN_00e96c90_Class {
     FUN_00e89970_Object* m_38;
 
     void __thiscall FUN_00e89970();
-    void __thiscall FUN_00e96c90();
+    void __thiscall UpdateState_00e96c90();
 };
 extern "C" void __cdecl operator delete(void* p, unsigned int size);
 void __cdecl FUN_00e989c0();
@@ -324,7 +324,7 @@ struct SpawnedObject {
     void __thiscall ReleaseResources();
 };
 struct GlobalHolder {
-    void __thiscall FUN_00aa4060(SpawnedObject* p);
+    void __thiscall MemoryManager_Deallocate(SpawnedObject* p);
 };
 extern SpawnedObject* DAT_0126f72c;
 extern GlobalHolder DAT_011f6238;
@@ -539,7 +539,7 @@ struct E88980SamplerState {
 };
 extern unsigned short g_ausE88980SamplerMapping[];
 typedef void (__stdcall *FUN_00e88a20_Slot)(void* self, int code, int value);
-char __fastcall FUN_00e88ac0(void* self);
+char __fastcall NiD3DRenderState_GetForceNormalizeNormals(void* self);
 extern unsigned short DAT_0126f92c[];
 struct SlotGroup {
     int m_uiItemCount;
@@ -578,7 +578,7 @@ struct LightSlots {
     int m_countC;
     bool m_flagC[5];
 
-    void FUN_00e890c0(int key, int value, bool typeA, bool flag);
+    void NiD3DTextureStageGroup_SetSamplerState(int key, int value, bool typeA, bool flag);
 };
 extern unsigned short DAT_0126f948[8];
 struct SlotDispatcher
@@ -647,15 +647,15 @@ struct FUN_00e89250_cls
 struct FUN_00e89410_Class
 {
     void* __thiscall DispatchSlots(unsigned int index);
-    void* __thiscall FUN_00e892d0(unsigned int index);
+    void* __thiscall NiD3DTextureStageGroup_SetAllStageSamplers(unsigned int index);
     void* __thiscall GetItemByIndex(unsigned int index);
 };
 extern unsigned int DAT_011bf558;
 struct ScalarDeletingObject {
-    void FUN_00e89560();
+    void ReleaseStorage_00e89560();
     void* DestroyScalarObject(unsigned char flags);
 };
-extern "C" void __cdecl FUN_00aa10f0(void*);
+extern "C" void __cdecl _NiFree_00aa10f0(void*);
 extern int DAT_010ef73c;
 extern int DAT_0101dce4;
 extern volatile long DAT_011f4400;
@@ -678,7 +678,7 @@ struct FUN_00e89840_Class {
     ReleaseInterface* m_20;
     int m_24;
     int m_28;
-    void FUN_00e89840();
+    void UpdateFields_00e89840();
 };
 struct FUN_00e89ae0_obj;
 typedef int (__stdcall *FUN_00e89ae0_vfn)(FUN_00e89ae0_obj*, int, int, int);
@@ -2097,9 +2097,9 @@ struct CubeMapSurface {
     virtual void v01();
     virtual void __stdcall Release();
 };
-extern "C" void __cdecl FUN_00e68150(int a, unsigned int b, int c, int d);
+extern "C" void __cdecl NiDX9SourceTextureData_CopyDataToSurfaceLevel(int a, unsigned int b, int c, int d);
 extern "C" void* __cdecl GetHResultName(int r);
-extern "C" void __cdecl FUN_00a29680(const char* fmt, unsigned int i, void* s);
+extern "C" void __cdecl Object_DoNothing(const char* fmt, unsigned int i, void* s);
 struct FUN_00e8aaf0_cls {
     int unk00;
     int unk04;
@@ -2128,7 +2128,7 @@ struct FUN_00e8aaf0_cls {
     int unk60;
     CubeMapSource* m_64;
     unsigned int m_68;
-    void __thiscall FUN_00e8aaf0(int a1, int a2);
+    void __thiscall NiDX9SourceCubeMapData_CopyDataToSurface(int a1, int a2);
 };
 class MobileTargetObj {
 public:
@@ -2160,7 +2160,7 @@ public:
     unsigned int unk30;
     unsigned int unk34;
 
-    void FUN_00e8b170();
+    void NiDX9LightManager_InitRenderModes();
 };
 class FUN_00e8b1f0_cls {
 public:
@@ -2311,7 +2311,7 @@ struct Value {
 };
 struct Item { Item* next; Key* key; Value* value; };
 struct PoolNode { PoolNode* next; PoolNode* prev; void* data; };
-struct LockObj { unsigned int value; void FUN_0040fbf0(char*); };
+struct LockObj { unsigned int value; void BSSpinLock_Lock(char*); };
 extern LockObj DAT_011c5f80;
 extern unsigned int DAT_011c5f84;
 extern PoolNode* DAT_011c5f58;
@@ -2331,12 +2331,12 @@ struct Target {
  unsigned int unk20,unk24,unk28,unk2c,unk30,unk34,unk38;
  unsigned int bits[8];
  void ClearBit(unsigned int index) { unsigned int word=index>>5; unsigned int mask=1<<(index&31); bits[word]&=~mask; }
- Item* FUN_00ee8ac0();
- void FUN_00e8b630();
+ Item* NiTMapIterator_GetFirstPos();
+ void ProcessEntries_00e8b630();
 };
 extern int DAT_010efdd8;
 extern int DAT_010efdf8;
-extern "C" void* __cdecl FUN_00aa1070(unsigned int);
+extern "C" void* __cdecl _NiMalloc_00aa1070(unsigned int);
 extern "C" void* __cdecl FUN_00ec61c0(void*, int, unsigned int);
 struct Observer {
     virtual void __stdcall Slot0();
@@ -2359,8 +2359,8 @@ struct MapProcessor {
     int field34;
     int field38;
     unsigned char data3c[512];
-    void FUN_00e8b170();
-    MapProcessor* FUN_00e8bae0(void* context, Observer* observer);
+    void NiDX9LightManager_InitRenderModes();
+    MapProcessor* NiDX9LightManager_NiDX9LightManager(void* context, Observer* observer);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* p);
 extern "C" __declspec(dllimport) void __stdcall InitializeCriticalSection(void* cs);
@@ -2381,7 +2381,7 @@ public:
     unsigned int m_04;
     unsigned int m_08;
 
-    void FUN_00e8e290(unsigned int newCap);
+    void ResizeStringArray(unsigned int newCap);
     void PushBack(char* const* src);
 };
 struct ListNode_b5254 {
@@ -2474,7 +2474,7 @@ public:
     FUN_00e95b60_cls* Reset();
 };
 struct S_00e97790_This {
-    void __thiscall FUN_00e98910(void* p);
+    void __thiscall NiD3DShaderConstantManager_NiD3DShaderConstantManager(void* p);
 };
 struct FUN_00e984d0_Struct {
     int unk00;
@@ -2482,10 +2482,10 @@ struct FUN_00e984d0_Struct {
     int unk08;
     int (__cdecl *unk0c)(FUN_00e984d0_Struct*, int, int, int*, int);
 };
-void __cdecl FUN_00e984d0(FUN_00e984d0_Struct* pStruct, int aiArg1, int aiArg2);
-struct FnvCpu_FUN_00e98e10_CpuTarget { void FUN_00e98cb0(); };
+void __cdecl Runtime_UpdateState_00e984d0(FUN_00e984d0_Struct* pStruct, int aiArg1, int aiArg2);
+struct FnvCpu_FUN_00e98e10_CpuTarget { void NiPick_Results_ClearArray(); };
 struct FnvCpu_FUN_00e98e10_CpuOwner {
-    void FUN_00e98e10();
+    void ProcessState_00e98e10();
 };
 typedef bool (__cdecl *FNV_CondFn_e9c8c0)(float, void*, unsigned int, void*, unsigned int);
 class FUN_00e9c8c0_obj {
@@ -2530,7 +2530,7 @@ struct FUN_00e9e840_Class
     virtual bool m_virtual08(int value);
     virtual bool m_virtual09(int value);
 
-    bool __thiscall FUN_00e9e840(int value);
+    bool __thiscall ProcessAndTransformResult_00e9e840(int value);
 };
 inline int FUN_00e9e840_Class::m_virtual01(int value)
 {
@@ -2568,7 +2568,8 @@ inline bool FUN_00e9e840_Class::m_virtual09(int value)
 {
     return value != 0;
 }
-bool FUN_00e9e840_Class::FUN_00e9e840(int value)
+// src: GUESS 0x00e9e840 (confidence: low)
+bool FUN_00e9e840_Class::ProcessAndTransformResult_00e9e840(int value)
 {
     return !m_virtual09(value);
 }
@@ -2830,7 +2831,7 @@ float f64;
 int f68;
 bool UpdateFromSource(LightSource* source);
 };
-extern "C" void __cdecl FUN_00aa10f0(void* p);
+extern "C" void __cdecl _NiFree_00aa10f0(void* p);
 extern int DAT_010f0ef0;
 struct FUN_00e89740_Obj {
     int unk00;
@@ -2840,7 +2841,7 @@ struct FUN_00e89740_Obj {
 
     void Cleanup();
 };
-void FUN_00e89740();
+void NiD3DTextureStageGroup_ShutdownPools();
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plValue);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plValue);
 extern char* DAT_0109b220;
@@ -2870,13 +2871,13 @@ public:
     }
     char* m_kHandle;
 };
-FixedStr* FUN_00a63ae0(unsigned int ItemUpdateArray);
+FixedStr* NiTNewInterface_NiFixedString_Allocate(unsigned int ItemUpdateArray);
 // array new
-void FUN_00a644a0(FixedStr* pkArray);
+void Object_ProcessEntries_00a644a0(FixedStr* pkArray);
 // array delete
 class FixedStrArray {
 public:
-    void FUN_00e8e290(unsigned int uiMaxSize);
+    void ResizeStringArray(unsigned int uiMaxSize);
 
     FixedStr* m_pBase;
     unsigned int m_uiMaxSize;
@@ -2906,7 +2907,7 @@ struct E98CB0Arr {
     unsigned short m_usESize;
     unsigned short pad;
     int unk10;
-    void FUN_00e98cb0(bool bFree);
+    void NiPick_Results_ClearArray(bool bFree);
 };
 struct NiColor3 {
     float m_r;
@@ -2927,9 +2928,9 @@ struct SubObjF8 {
     int m_1c;
     int m_20;
     int m_24;
-    void __thiscall FUN_00e68810() throw();
+    void __thiscall ReturnThis2() throw();
     SubObjF8() {
-        FUN_00e68810();
+        ReturnThis2();
     }
 };
 struct PairEntry {
@@ -2951,7 +2952,7 @@ struct FUN_00e8bf80_Object {
     int unk20, unk24, unk28, unk2c;
     int unk30, unk34, unk38;
     int m_uiItemCount;
-    void __thiscall FUN_00e8bf80();
+    void __thiscall NiDX9VertexBufferManager_EndFrame();
 };
 struct FUN_00e8d350_Class {
     int unk00;
@@ -2971,7 +2972,7 @@ struct FUN_00e8d350_Class {
     int unk38;
     int unk3C;
 
-    int* __thiscall FUN_00e8d350();
+    int* __thiscall NiDX9FragmentShader_GetShaderInstanceDesc();
 };
 struct Item9ea;
 bool DispatchByVirtualIndex(float fTime, Item9ea* pkItem, void* p2, void* p3, void* p4, void* p5, void* p6);
@@ -2985,7 +2986,7 @@ struct Seq9ea
     int m_10;
     unsigned int m_uiLast;
 };
-bool FUN_00e9ea70(float fTime, Seq9ea* pkSeq, void* p2, void* p3, void* p4, void* p5, void* p6);
+bool NiUnionBV_UnionTriTestIntersect(float fTime, Seq9ea* pkSeq, void* p2, void* p3, void* p4, void* p5, void* p6);
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 struct ColorWithAlpha { float r,g,b,a; ColorWithAlpha(float red,float green,float blue):r(red),g(green),b(blue) {} void addScaled(const ColorWithAlpha& source,float factor) { r+=source.r*factor;g+=source.g*factor;b+=source.b*factor; } };
 struct ActiveLight;
@@ -3144,12 +3145,12 @@ struct LightInputNode { LightInputNode* next; SceneLight* light; };
 struct LightInput { unsigned int field00,field04,field08; LightInputNode* head; };
 inline SceneLight*& nextLight(PoolNode*& node) { SceneLight*& item=(SceneLight*&)node->data; node=node->next; return item; }
 struct ShadowSceneLightList { PoolNode* head; PoolNode* tail; unsigned int count; void* InsertHead(SceneLight* const*); SceneLight* FUN_004edf00();
- __forceinline void recycle(PoolNode* node) { node->data=0; DAT_011c5f80.FUN_0040fbf0(0); node->prev=0; node->next=DAT_011c5f58; --DAT_011c5f84; DAT_011c5f58=node; if (!DAT_011c5f84) DAT_011c5f80.value=0; }
+ __forceinline void recycle(PoolNode* node) { node->data=0; DAT_011c5f80.BSSpinLock_Lock(0); node->prev=0; node->next=DAT_011c5f58; --DAT_011c5f84; DAT_011c5f58=node; if (!DAT_011c5f84) DAT_011c5f80.value=0; }
  __forceinline SceneLight* remove(PoolNode*& node) { if(node==head) { PoolNode* old=head; head=old->next; if(head) head->prev=0; else tail=0; SceneLight* element=(SceneLight*)old->data; recycle(old); --count; return element; } else if(node==tail) { return FUN_004edf00(); } else { PoolNode* prev=node->prev; PoolNode* next=node->next; if(prev)prev->next=next; if(next)next->prev=prev; SceneLight* element=(SceneLight*)node->data; recycle(node); --count; return element; } }
 };
 extern const float runtimeFloatSettingDefault9;
 struct LightManager { unsigned int field00,field04,field08,field0c; ShadowSceneLightList active; LightDevice* device; MobileTargetObj* render; unsigned int field24,field28; unsigned char field2c; bool enabled; unsigned short field2e;
- unsigned int AllocateBitIndex(); void InsertOrUpdate(SceneLight*,ActiveLight*); void FUN_00e8b740(LightInput* input); };
+ unsigned int AllocateBitIndex(); void InsertOrUpdate(SceneLight*,ActiveLight*); void NiDX9LightManager_UpdateLights(LightInput* input); };
 struct S00e8f190_Iface { void** vtable; };
 typedef int (__thiscall *S00e8f190_Query)(void* vt, S00e8f190_Iface* object, int a, int b, int c, int d, S00e8f190_Iface** result, int zero);
 typedef void (__fastcall *S00e8f190_Release)(void* flag, void* vt, S00e8f190_Iface* object, void* flag2);
@@ -3205,11 +3206,11 @@ struct StageArray {
     unsigned short m_usESize;
     unsigned short m_usGrowBy;
 
-    void FUN_00e7fd20(unsigned int size) throw();
+    void NiD3DPass_SetAtGrow(unsigned int size) throw();
     void Set(unsigned int index, const StagePtr& obj) throw();
     void SetAtGrow(unsigned int index, const StagePtr& obj) {
         if (index >= m_usMaxSize)
-            FUN_00e7fd20(index + m_usGrowBy);
+            NiD3DPass_SetAtGrow(index + m_usGrowBy);
         Set(index, obj);
     }
 };
@@ -3224,7 +3225,7 @@ struct StageSet {
     int m_1C;
     StageArray m_20;
 
-    int FUN_00e802b0(unsigned int index, Stage321* obj);
+    int NiD3DPass_SetStage(unsigned int index, Stage321* obj);
 };
 struct S00e81b00_Mat {
     float m00, m04, m08, m0c, m10, m14, m18, m1c, m20, m24, m28, m2c, m30, m34, m38, m3c;
@@ -3503,9 +3504,9 @@ struct ThisObj {
     int unk60; int unk64; int unk68; int unk6c;
     int unk70; int unk74; int unk78; int unk7c;
     SixIntegerRecord kLock;
-    bool FUN_00e8bfa0(Outer* outer, unsigned int arg);
-    void* FUN_00e8bff0(VertexBuffer* vb, unsigned int offset, unsigned int size, unsigned int flags);
-    VBEntry* FUN_00e8c570(C_00e8f010* owner, unsigned short count, const TwoComponentVector* pos, const float* col, const unsigned int* uv, unsigned int streamFlags, VBEntry* existing, void* data);
+    bool NiDX9VertexBufferManager_AllocateBufferSpace(Outer* outer, unsigned int arg);
+    void* NiDX9VertexBufferManager_LockVB(VertexBuffer* vb, unsigned int offset, unsigned int size, unsigned int flags);
+    VBEntry* NiDX9VertexBufferManager_PackTransformedVB(C_00e8f010* owner, unsigned short count, const TwoComponentVector* pos, const float* col, const unsigned int* uv, unsigned int streamFlags, VBEntry* existing, void* data);
 };
 struct S00e8f360_Desc {
     unsigned int Format;
@@ -3643,7 +3644,7 @@ struct FUN_00e93470_Class {
     unsigned char m_copyText;
     void __thiscall FUN_00e93470(FUN_00e93470_Output* out, const char* text, unsigned int data);
 };
-extern "C" void* __cdecl FUN_00aa1070(unsigned int length);
+extern "C" void* __cdecl _NiMalloc_00aa1070(unsigned int length);
 extern "C" void __cdecl FUN_00ec65a6(void* destination, unsigned int length, const char* source);
 struct RefBaseE989 {
     unsigned int m_uiRefCount;
@@ -3685,7 +3686,7 @@ typedef void (__cdecl *FUN_00e9ca50_Entry)(
     int,
     int);
 extern void **DAT_0126faa0;
-void __cdecl FUN_00e9ca50( float value, FUN_00e9ca50_Object *object, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10);
+void __cdecl NiBoundingVolume_FindTriIntersect( float value, FUN_00e9ca50_Object *object, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10);
 struct FUN_00e9ec90 {
     void* m_pData;
     virtual ~FUN_00e9ec90();
@@ -3694,7 +3695,7 @@ struct FUN_00e9ec90 {
 static const void* kNull = 0;
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 extern "C" void _ReadWriteBarrier();
-void* FUN_00aa13e0(unsigned int size);
+void* Object_DispatchCommandFour(unsigned int size);
 struct S00e8fa80_Node {
     volatile unsigned int key;
     unsigned char flag;
@@ -3714,7 +3715,7 @@ struct S00e8fa80_Obj {
     S00e8fa80_Map map1c, map2c, map3c;
     S00e8fa80_Node* GetOrCreateNode(int a, unsigned int b, int c);
 };
-void* FUN_00aa13e0(unsigned int size);
+void* Object_DispatchCommandFour(unsigned int size);
 struct BlockLink {unsigned int next; unsigned int prev; BlockLink() : next(0), prev(0) {} };
 struct AllocationBlock {
     void* unk00;
@@ -3726,7 +3727,7 @@ struct AllocationBlock {
     BlockLink link;
 };
 struct FUN_00a64330_Obj {
-    unsigned int __thiscall FUN_00a64330(AllocationBlock** key);
+    unsigned int __thiscall NiTArray_void_cdecl_NiStream_NiObject_NiTMallocInterface_void_cdecl_NiStream_NiObject_AddFirstEmpty(AllocationBlock** key);
 };
 struct BlockAllocator {
     unsigned int unk00;
@@ -3741,7 +3742,7 @@ struct BlockAllocator {
     unsigned int unk24;
     unsigned int unk28;
     FUN_00a64330_Obj unk2C;
-    unsigned int __thiscall FUN_00e98660(unsigned int size);
+    unsigned int __thiscall NiVBBlock_AllocateChip(unsigned int size);
 };
 extern int DAT_0126fa58;
 void AllocateNodeList();
@@ -4406,10 +4407,10 @@ struct DeviceResource {
     void SetDimensions(unsigned int x, unsigned int y) { width = x; height = y; }
     void FUN_00e687a0(TextureInput*, ResourceConfig*);
     bool SetProgram(void*);
-    TextureDescription* FUN_00e8a300(TextureDescription*, void*, TextureDescription**);
-    bool FUN_00e8aa70();
-    void FUN_00e8ab70(DirectResource*, unsigned int);
-    void FUN_00e8aaf0(TextureSurface*, unsigned int);
+    TextureDescription* NiDX9TextureData_FindMatchingPixelFormat(TextureDescription*, void*, TextureDescription**);
+    bool NiDX9SourceCubeMapData_CreateCubeMap();
+    void NiDX9SourceCubeMapData_CopyRendererDataToCubeMapFace(DirectResource*, unsigned int);
+    void NiDX9SourceCubeMapData_CopyDataToSurface(TextureSurface*, unsigned int);
 };
 struct PlainResource58 {
     void* vtable;
@@ -4856,10 +4857,10 @@ struct CreationContext {
         f = adapterFormat;
     }
 };
-extern void* __cdecl FUN_00aa13e0(unsigned int);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern TextureSurface* __cdecl DispatchIfHighBitSet(TextureInput*, unsigned int, int);
 extern ResourceManager* __cdecl FUN_00a76640();
-extern void __cdecl FUN_00a29680(const void*, ...);
+extern void __cdecl Object_DoNothing(const void*, ...);
 extern int __cdecl FUN_00e7bd20(TextureDescription*);
 extern char DAT_010efd88, DAT_010ed4dc;
 extern unsigned char DAT_011f4508;
@@ -4870,7 +4871,7 @@ inline bool IsPowerOfTwo(unsigned int value) {
     if (value == 0) return false;
     return (value & (value - 1)) == 0;
 }
-DeviceResource* __cdecl FUN_00e8abf0(TextureInput* input, ResourceConfig* config);
+DeviceResource* __cdecl NiDX9SourceCubeMapData_Create(TextureInput* input, ResourceConfig* config);
 struct ShaderComponent093 {
     int type;
     int format;
@@ -4879,7 +4880,7 @@ struct ShaderComponent093 {
     short unk0a;
 };
 struct ShaderRequest093 {
-    unsigned int FUN_00e8a240();
+    unsigned int NiPixelFormat_GetNumComponents();
     int unknown00;
     unsigned int kind;
     int disabled;
@@ -4930,7 +4931,7 @@ __declspec(noinline) char PixelComponentReader093::GetEntryData(int index, int* 
     *type = request->components[index].type;
     return *type != 19;
 }
-void* __stdcall FUN_00e8a300(ShaderRequest093* request, ShaderTraits093* traits, ShaderChoices093* choices);
+void* __stdcall NiDX9TextureData_FindMatchingPixelFormat(ShaderRequest093* request, ShaderTraits093* traits, ShaderChoices093* choices);
 struct FUN_00e8b0c0_Item {
     char m_uiStandInValue[0x4c];
     void* m_4c;
@@ -4964,8 +4965,8 @@ struct FUN_00e8b0c0_Class {
     char m_6e[0x84 - 0x6e];
     int m_84;
 
-    void __thiscall FUN_00e8b0c0();
-    void __thiscall FUN_00e8aaf0(FUN_00e8b0c0_Ret* p, int idx);
+    void __thiscall UpdateChangedEntries();
+    void __thiscall NiDX9SourceCubeMapData_CopyDataToSurface(FUN_00e8b0c0_Ret* p, int idx);
 };
 extern "C" bool __stdcall SetProgram(void* a);
 struct FUN_00e98910_Target {
@@ -5010,12 +5011,12 @@ struct FUN_00e98910_Class {
     FUN_00e98910_Target* unk80;
     void* unk84;
 
-    FUN_00e98910_Class* __thiscall FUN_00e98910(int* context);
+    FUN_00e98910_Class* __thiscall NiD3DShaderConstantManager_NiD3DShaderConstantManager(int* context);
 };
 extern "C" void __cdecl NiFree(void*);
-extern "C" void __cdecl FUN_00aa1490(void*, unsigned int);
+extern "C" void __cdecl NiMemObject_ReleaseStorage_00aa1490(void*, unsigned int);
 struct E895A0_Sdo {
-    void FUN_00e89560();
+    void ReleaseStorage_00e89560();
     void* DestroyScalarObject(unsigned char flags);
 };
 struct E895A0_Node : E895A0_Sdo {
@@ -5032,7 +5033,7 @@ struct E895A0_Object {
     int m_04;
     int m_08;
     E895A0_Node* m_0c;
-    void __thiscall FUN_00e895a0();
+    void __thiscall ReleaseStorage_00e895a0();
 };
 
 struct Item_cd60 {
@@ -5040,7 +5041,7 @@ struct Item_cd60 {
     int unk10; int unk14; int unk18; int unk1C;
     ComStub* m_pkHolder;
     int unk24; int unk28; int unk2C; int unk30; int unk34; int unk38;
-    void __thiscall FUN_00e95b80();
+    void __thiscall SetVirtualTable_00e95b80();
 };
 
 struct Entry_cd60 {
@@ -5068,7 +5069,8 @@ __declspec(noalias) void VertexBufferMapBase::GetNext(void*& pos,
     unsigned int& key, NiDX9VertexBufferManager::NiDX9VBInfo*& value) const;
 
 // @fnv 0x00e8cd60
-void NiDX9VertexBufferManager::FUN_00e8cd60()
+// src: COMMUNITY 0x00e8cd60
+void NiDX9VertexBufferManager::DestroyDefaultBuffers()
 {
     VertexBufferMap* map = &this->first;
     {
@@ -5088,7 +5090,7 @@ void NiDX9VertexBufferManager::FUN_00e8cd60()
                         ComStub* holder = item->m_pkHolder;
                         if (holder != 0)
                             holder->Release();
-                        ((FUN_00e95b80_Class*)item)->FUN_00e95b80();
+                        ((FUN_00e95b80_Class*)item)->SetVirtualTable_00e95b80();
                         operator delete(item, 0x3c);
                     }
                     ++pp;
@@ -5118,7 +5120,7 @@ template <class TAlloc, class TKEY, class TVAL>
 __forceinline NiTMapBase<TAlloc, TKEY, TVAL>::~NiTMapBase()
 {
     RemoveAll();
-    FUN_00aa10f0(m_ppkHashTable);
+    _NiFree_00aa10f0(m_ppkHashTable);
 }
 
 template <class TKEY, class TVAL>
@@ -5143,7 +5145,8 @@ inline void VertexBufferMapBase::GetNext(void*& pos, unsigned int& key,
     pos = 0;
 }
 // @fnv 0x00e8ceb0
-void NiDX9VertexBufferManager::FUN_00e8ceb0() {
+// src: GUESS 0x00e8ceb0 (confidence: low)
+void NiDX9VertexBufferManager::ReleaseStorage_00e8ceb0() {
     NiDX9VertexBufferManager* self = this;
     *(void**)self = &DAT_010efe94;
     VertexBufferMap* map;
@@ -5163,7 +5166,7 @@ void NiDX9VertexBufferManager::FUN_00e8ceb0() {
                     ShaderEntry093* entry = record->entries[i];
                     if (entry) {
                         if (entry->resource) entry->resource->Release();
-                        entry->FUN_00e95b80();
+                        entry->SetVirtualTable_00e95b80();
                         FUN_00aa1460(entry, sizeof(ShaderEntry093));
                     }
                 }
@@ -5176,7 +5179,7 @@ void NiDX9VertexBufferManager::FUN_00e8ceb0() {
     self->third.RemoveAll();
     self->device->Release();
     self->device = 0;
-    FUN_00aa10f0(self->allocation);
+    _NiFree_00aa10f0(self->allocation);
     DeleteCriticalSection(&self->lock);
     self->third.VertexBufferMap::~NiTPointerMap();
     self->second.VertexBufferMap::~NiTPointerMap();
@@ -5188,17 +5191,18 @@ void NiDX9VertexBufferManager::FUN_00e8ceb0() {
 extern "C" void __cdecl ShutdownE6EC20();
 extern "C" void __cdecl DestroyBucketTable();
 extern "C" void __cdecl DestroyGlobalQueues();
-extern "C" void __cdecl FUN_00e80630();
+extern "C" void __cdecl NiD3DShader_ShutdownPools();
 extern "C" void __cdecl ResetGlobalString();
-void __cdecl FUN_00e89740();
-void __cdecl FUN_00e92080();
-extern "C" void __cdecl FUN_00e93260(void*);
-extern "C" void __cdecl FUN_00e93f50(void*);
+void __cdecl NiD3DTextureStageGroup_ShutdownPools();
+void __cdecl NiD3DShaderFactory__SDMShutdown();
+extern "C" void __cdecl NiD3DShaderProgramFactory_UnregisterShaderCreator(void*);
+extern "C" void __cdecl NiD3DShaderProgramCreator_SetD3DRenderer(void*);
 extern unsigned char DAT_0126fa00;
 extern NiD3DShaderProgramCreator* DAT_0126fa3c;
 
 // @fnv 0x00e91c80
-void __cdecl FUN_00e91c80()
+// src: COMMUNITY 0x00e91c80
+void __cdecl NiDX9RendererSDM_Shutdown()
 {
     if (DAT_0126fa00)
     {
@@ -5207,7 +5211,7 @@ void __cdecl FUN_00e91c80()
         void* p = DAT_0126fa3c;
         if (p)
         {
-            FUN_00e93260(p);
+            NiD3DShaderProgramFactory_UnregisterShaderCreator(p);
             if (DAT_0126fa3c)
                 delete DAT_0126fa3c;
         }
@@ -5215,7 +5219,7 @@ void __cdecl FUN_00e91c80()
         p = DAT_0126fa54;
         if (p)
         {
-            FUN_00e93260(p);
+            NiD3DShaderProgramFactory_UnregisterShaderCreator(p);
             if (DAT_0126fa54)
                 delete DAT_0126fa54;
         }
@@ -5223,24 +5227,25 @@ void __cdecl FUN_00e91c80()
         p = DAT_0126fa50;
         if (p)
         {
-            FUN_00e93260(p);
+            NiD3DShaderProgramFactory_UnregisterShaderCreator(p);
             if (DAT_0126fa50)
                 delete DAT_0126fa50;
         }
         DAT_0126fa50 = 0;
-        FUN_00e93f50(0);
-        FUN_00e933d0();
-        FUN_00e92080();
+        NiD3DShaderProgramCreator_SetD3DRenderer(0);
+        NiD3DShaderProgramFactory__SDMShutdown();
+        NiD3DShaderFactory__SDMShutdown();
         DestroyBucketTable();
-        FUN_00e80630();
+        NiD3DShader_ShutdownPools();
         DestroyGlobalQueues();
-        FUN_00e89740();
+        NiD3DTextureStageGroup_ShutdownPools();
         ShutdownE6EC20();
     }
 }
 
 // @fnv 0x00e94290
-void __cdecl FUN_00e94290()
+// src: COMMUNITY 0x00e94290
+void __cdecl NiVBSet_DeleteBlocks()
 {
     FreeNodeList();
     FUN_00e98640_Class* node = reinterpret_cast<FUN_00e98640_Class*>(DAT_0126fa30);
@@ -5251,7 +5256,7 @@ void __cdecl FUN_00e94290()
         {
             next = reinterpret_cast<FUN_00e98640_Class*>(
                 reinterpret_cast<int*>(node)[0x3c / 4]);
-            node->FUN_00e98640();
+            node->ReleaseStorage_00e98640();
             operator delete(node, 0x44);
             node = next;
         } while (node);

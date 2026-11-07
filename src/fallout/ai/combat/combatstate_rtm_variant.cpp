@@ -71,14 +71,14 @@ struct CombatAvoidanceSphere
     int unk18;
     int unk1c;
 };
-TESForm* __cdecl FUN_004839c0(unsigned int);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int);
 
 struct CombatLoadBuffer
 {
 
     virtual unsigned char Version();
 
-    void FUN_00864980(void*, unsigned int);
+    void LoadData(void*, unsigned int);
 
     unsigned int FUN_008648a0();
 
@@ -115,7 +115,7 @@ struct LoadInfo
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     LoadInfo();
-    void FUN_009a31b0(CombatLoadBuffer*);
+    void CombatState_LocationTarget_LoadGame(CombatLoadBuffer*);
 };
 
 struct LoadBoundPair
@@ -128,17 +128,17 @@ struct LoadBoundPair
 struct LoadArea
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38;
-    void FUN_009a3050(CombatLoadBuffer*);
+    void CombatCoverSearch_LoadGameBGS(CombatLoadBuffer*);
 };
 
 struct LoadA
 {
-    void FUN_009a2d50(CombatLoadBuffer*);
+    void LoadValueAndTimestamp(CombatLoadBuffer*);
 };
 
 struct LoadB
 {
-    void FUN_009a2db0(CombatLoadBuffer*);
+    void LoadWorldLocationAndTimestamp(CombatLoadBuffer*);
 };
 
 struct LoadWeaponArray
@@ -147,7 +147,7 @@ struct LoadWeaponArray
     TESObjectWEAP** data;
     unsigned int count, capacity;
     void FUN_006f2290(unsigned int, bool);
-    TESObjectWEAP** FUN_006a7ad0(unsigned int);
+    TESObjectWEAP** BSSimpleArray_NiAVObject_1024_GetAt(unsigned int);
 };
 
 struct LoadArrayA
@@ -156,7 +156,7 @@ struct LoadArrayA
     LoadA* data;
     unsigned int count, capacity;
     void FUN_009a3480(unsigned int, bool);
-    LoadA* FUN_00844160(unsigned int);
+    LoadA* BSSimpleArray_GroupMemberData_1024_GetAt(unsigned int);
 };
 
 struct LoadArrayB
@@ -165,7 +165,7 @@ struct LoadArrayB
     LoadB* data;
     unsigned int count, capacity;
     void FUN_009a3610(unsigned int, bool);
-    LoadB* FUN_006dad90(unsigned int);
+    LoadB* BSSimpleArray_CombatMember_1024_GetAt(unsigned int);
 };
 
 void* __cdecl operator new(unsigned int);
@@ -351,13 +351,14 @@ struct CombatLoadState
 
     unsigned int unk228;
 
-    void FUN_009a0510(CombatCoverPointData_combatstate_rtm_variant*);
+    void CombatState_ReserveCoverLocation(CombatCoverPointData_combatstate_rtm_variant*);
 
-    void FUN_009a2040(CombatLoadBuffer*);
+    void CombatState_LoadGameBGS(CombatLoadBuffer*);
 };
 
 // @fnv 0x009a2040
-void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
+// src: COMMUNITY 0x009a2040
+void CombatLoadState::CombatState_LoadGameBGS(CombatLoadBuffer* buffer)
 
 {
 
@@ -365,15 +366,15 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
 
     unsigned char pairPresence;
 
-    buffer->FUN_00864980(&flags, 1);
+    buffer->LoadData(&flags, 1);
 
-    buffer->FUN_00864980(&state, 4);
+    buffer->LoadData(&state, 4);
 
     if (state == -1)
         state = 0;
 
     for (unsigned int i = 0; i < 6; i++)
-        weapons[i] = dynamic_cast<TESObjectWEAP*>(FUN_004839c0(buffer->FUN_008648a0()));
+        weapons[i] = dynamic_cast<TESObjectWEAP*>(TESForm_GetFormByNumericID(buffer->FUN_008648a0()));
 
     {
 
@@ -384,67 +385,67 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
         for (unsigned int i = 0; i < weaponCount; i++)
         {
 
-            TESObjectWEAP** item = otherWeapons.FUN_006a7ad0(i);
+            TESObjectWEAP** item = otherWeapons.BSSimpleArray_NiAVObject_1024_GetAt(i);
 
-            *item = dynamic_cast<TESObjectWEAP*>(FUN_004839c0(buffer->FUN_008648a0()));
+            *item = dynamic_cast<TESObjectWEAP*>(TESForm_GetFormByNumericID(buffer->FUN_008648a0()));
         }
 
-        currentWeapon = dynamic_cast<TESObjectWEAP*>(FUN_004839c0(buffer->FUN_008648a0()));
+        currentWeapon = dynamic_cast<TESObjectWEAP*>(TESForm_GetFormByNumericID(buffer->FUN_008648a0()));
 
-        buffer->FUN_00864980(&value38, 4);
+        buffer->LoadData(&value38, 4);
 
         for (unsigned int i = 0; i < 7; i++)
-            buffer->FUN_00864980(&values3c[i], 4);
+            buffer->LoadData(&values3c[i], 4);
 
-        buffer->FUN_00864980(&unk058, 4);
+        buffer->LoadData(&unk058, 4);
 
-        buffer->FUN_00864980(&unk05c, 4);
+        buffer->LoadData(&unk05c, 4);
 
-        buffer->FUN_00864980(&unk064, 4);
+        buffer->LoadData(&unk064, 4);
 
-        buffer->FUN_00864980(&unk068, 4);
+        buffer->LoadData(&unk068, 4);
 
-        buffer->FUN_00864980(&unk06c, 4);
+        buffer->LoadData(&unk06c, 4);
 
-        buffer->FUN_00864980(&flag70, 1);
+        buffer->LoadData(&flag70, 1);
 
-        buffer->FUN_00864980(&flag71, 1);
+        buffer->LoadData(&flag71, 1);
 
-        buffer->FUN_00864980(&flag72, 1);
+        buffer->LoadData(&flag72, 1);
 
-        buffer->FUN_00864980(&flag73, 1);
+        buffer->LoadData(&flag73, 1);
 
-        buffer->FUN_00864980(&flag74, 1);
+        buffer->LoadData(&flag74, 1);
 
-        buffer->FUN_00864980(&flag75, 1);
+        buffer->LoadData(&flag75, 1);
 
-        buffer->FUN_00864980(&flag76, 1);
+        buffer->LoadData(&flag76, 1);
 
-        buffer->FUN_00864980(&flag77, 1);
+        buffer->LoadData(&flag77, 1);
 
-        explosion = dynamic_cast<BGSExplosion*>(FUN_004839c0(buffer->FUN_008648a0()));
+        explosion = dynamic_cast<BGSExplosion*>(TESForm_GetFormByNumericID(buffer->FUN_008648a0()));
 
-        buffer->FUN_00864980(&unk07c, 4);
+        buffer->LoadData(&unk07c, 4);
 
-        buffer->FUN_00864980(&unk080, 4);
+        buffer->LoadData(&unk080, 4);
 
-        buffer->FUN_00864980(&position, 12);
+        buffer->LoadData(&position, 12);
 
-        buffer->FUN_00864980(&unk090, 4);
+        buffer->LoadData(&unk090, 4);
 
-        buffer->FUN_00864980(&flagc8, 1);
+        buffer->LoadData(&flagc8, 1);
 
-        buffer->FUN_00864980(&flagc9, 1);
+        buffer->LoadData(&flagc9, 1);
 
-        buffer->FUN_00864980(&unk0cc, 4);
+        buffer->LoadData(&unk0cc, 4);
 
-        buffer->FUN_00864980(&unk0d0, 4);
+        buffer->LoadData(&unk0d0, 4);
 
-        buffer->FUN_00864980(&unk0d4, 4);
+        buffer->LoadData(&unk0d4, 4);
 
-        buffer->FUN_00864980(&unk08, 4);
+        buffer->LoadData(&unk08, 4);
 
-        buffer->FUN_00864980(&flagd8, 1);
+        buffer->LoadData(&flagd8, 1);
 
         buffer->FUN_008648e0(&unk0dc);
 
@@ -472,7 +473,7 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
 
         presence = 0;
 
-        buffer->FUN_00864980(&presence, 1);
+        buffer->LoadData(&presence, 1);
 
         if (presence & 1)
         {
@@ -484,7 +485,7 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
             if (cover->IsReserved())
             {
                 cover->SetReserved(false);
-                FUN_009a0510(cover);
+                CombatState_ReserveCoverLocation(cover);
             }
         }
 
@@ -498,7 +499,7 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
             if (alternateCover->IsReserved())
             {
                 alternateCover->SetReserved(false);
-                FUN_009a0510(alternateCover);
+                CombatState_ReserveCoverLocation(alternateCover);
             }
         }
 
@@ -511,14 +512,14 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
         if (presence & 32)
         {
             info = new LoadInfo;
-            info->FUN_009a31b0(buffer);
+            info->CombatState_LocationTarget_LoadGame(buffer);
         }
 
         if (presence & 2)
-            area1.FUN_009a3050(buffer);
+            area1.CombatCoverSearch_LoadGameBGS(buffer);
 
         if (presence & 8)
-            area2.FUN_009a3050(buffer);
+            area2.CombatCoverSearch_LoadGameBGS(buffer);
 
         {
 
@@ -529,9 +530,9 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
             for (unsigned int i = 0; i < countA; i++)
             {
 
-                LoadA* item = itemsA.FUN_00844160(i);
+                LoadA* item = itemsA.BSSimpleArray_GroupMemberData_1024_GetAt(i);
 
-                item->FUN_009a2d50(buffer);
+                item->LoadValueAndTimestamp(buffer);
             }
 
             {
@@ -543,18 +544,18 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
                 for (unsigned int i = 0; i < countB; i++)
                 {
 
-                    LoadB* item = itemsB.FUN_006dad90(i);
+                    LoadB* item = itemsB.BSSimpleArray_CombatMember_1024_GetAt(i);
 
-                    item->FUN_009a2db0(buffer);
+                    item->LoadWorldLocationAndTimestamp(buffer);
                 }
 
                 stamp184.FUN_009a5ff0(buffer);
 
-                buffer->FUN_00864980(&flag188, 1);
+                buffer->LoadData(&flag188, 1);
 
                 pairPresence = 0;
 
-                buffer->FUN_00864980(&pairPresence, 1);
+                buffer->LoadData(&pairPresence, 1);
 
                 for (unsigned int i = 0; i < 5; i++)
                 {
@@ -566,26 +567,26 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
 
                         buffer->FUN_008648e0(pairs[i]);
 
-                        pairs[i]->object = dynamic_cast<TESBoundObject*>(FUN_004839c0(buffer->FUN_008648a0()));
+                        pairs[i]->object = dynamic_cast<TESBoundObject*>(TESForm_GetFormByNumericID(buffer->FUN_008648a0()));
                     }
                 }
 
                 for (unsigned int i = 0; i < 2; i++)
                 {
 
-                    objects[i] = dynamic_cast<TESBoundObject*>(FUN_004839c0(buffer->FUN_008648a0()));
+                    objects[i] = dynamic_cast<TESBoundObject*>(TESForm_GetFormByNumericID(buffer->FUN_008648a0()));
 
                     objectStamps[i].FUN_009a5f20(buffer);
                 }
 
-                buffer->FUN_00864980(&unk1bc, 4);
+                buffer->LoadData(&unk1bc, 4);
 
                 buffer->FUN_008648e0(&unk1c0);
 
-                buffer->FUN_00864980(&flag1c8, 1);
+                buffer->LoadData(&flag1c8, 1);
 
                 if (buffer->Version() >= 15)
-                    buffer->FUN_00864980(&unk228, 4);
+                    buffer->LoadData(&unk228, 4);
 
                 stamp1cc.FUN_009a5f20(buffer);
 

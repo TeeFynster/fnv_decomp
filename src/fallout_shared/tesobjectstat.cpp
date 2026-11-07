@@ -96,54 +96,56 @@ void* Standin::DestroyIfFlagged(unsigned int flags)
 struct FUN_004855a0_shell
 {
     void M();
-    void FUN_004855a0();
+    void BeginFormRecord();
 };
 struct FUN_00485680_shell
 {
     void M();
-    void FUN_00485680();
+    void FinishFormRecord();
 };
 struct S_0048a520_shell
 {
     void ProcessAndFreeData(unsigned int, unsigned int, unsigned int);
 };
-void __cdecl FUN_004858f0(unsigned int, unsigned char);
-void __cdecl FUN_00485910(unsigned int, unsigned int);
+void __cdecl TESForm_AddChunk_3(unsigned int, unsigned char);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
 
 struct FUN_0051b4b0_shell : public FUN_004855a0_shell
 {
-    void FUN_0051b4b0();
+    void TESObjectSTAT_SaveAlt();
 };
 
 // @fnv 0x0051b4b0
-void FUN_0051b4b0_shell::FUN_0051b4b0()
+// src: COMMUNITY 0x0051b4b0
+void FUN_0051b4b0_shell::TESObjectSTAT_SaveAlt()
 {
     ((FUN_004855a0_shell*)this)->M();
     ((S_0048a520_shell*)((char*)this + 0x30))->ProcessAndFreeData(0x4C444F4D, 0x54444F4D, 0x53444F4D);
-    FUN_004858f0(0x53555242, *(unsigned char*)((char*)this + 0x50));
+    TESForm_AddChunk_3(0x53555242, *(unsigned char*)((char*)this + 0x50));
     if (*(unsigned int*)((char*)this + 0x54))
     {
         unsigned int id = ((TESForm*)(*(unsigned int*)((char*)this + 0x54)))->GetFormID();
-        FUN_00485910(0x4D414E52, id);
+        TESForm_AddChunk_00485910(0x4D414E52, id);
     }
     ((FUN_00485680_shell*)this)->M();
 }
 
 struct FUN_005e79a0_t
 {
-    bool FUN_00485270(TESForm*);
-    bool FUN_0051b650(TESForm* form);
+    bool TESForm_CompareAllComponents(TESForm*);
+    bool TESObjectSTAT_Compare(TESForm* form);
     char m_cType;
     TESSound* m_pSoundForm;
 };
 // Casts form to TESObjectSTAT and returns true if it is null, passes FUN_00485270, or differs in the byte at 0x50 or the TESSound pointer at 0x54.
 // @fnv 0x0051b650
-bool FUN_005e79a0_t::FUN_0051b650(TESForm* form)
+// src: XBOX_PDB 0x0051b650
+bool FUN_005e79a0_t::TESObjectSTAT_Compare(TESForm* form)
 {
     TESObjectSTAT* other = dynamic_cast<TESObjectSTAT*>(form);
     if (!other)
         return true;
-    if (FUN_00485270(other))
+    if (TESForm_CompareAllComponents(other))
         return true;
     if (*(char*)((char*)this + 0x50) != *(char*)((char*)other + 0x50))
         return true;
@@ -158,12 +160,13 @@ void __cdecl _FNV_Warning(char*, unsigned int, char*, unsigned int);
 
 struct TESObjectSTAT_shell : public TESForm
 {
-    void FUN_0051b530();
+    void TESObjectSTAT_InitItem();
     void FUN_0048aa80(TESForm*);
 };
 
 // @fnv 0x0051b530
-void TESObjectSTAT_shell::FUN_0051b530()
+// src: XBOX_PDB 0x0051b530
+void TESObjectSTAT_shell::TESObjectSTAT_InitItem()
 {
     unsigned int itempint;
 
@@ -214,16 +217,17 @@ FUN_0051b200::~FUN_0051b200()
 
 struct FUN_005e78f0_t
 {
-    void FUN_004851b0(TESForm* apForm);
+    void TESForm_CopyAllComponents(TESForm* apForm);
 };
 
 struct StatCopy : public TESObjectSTAT
 {
-    void __thiscall FUN_0051b5f0(TESForm* apCopy);
+    void __thiscall TESObjectSTAT_Copy(TESForm* apCopy);
 };
 
 // @fnv 0x0051b5f0
-void __thiscall StatCopy::FUN_0051b5f0(TESForm* apCopy)
+// src: XBOX_PDB 0x0051b5f0
+void __thiscall StatCopy::TESObjectSTAT_Copy(TESForm* apCopy)
 {
     TESObjectSTAT* pcopy = dynamic_cast<TESObjectSTAT*>(apCopy);
     if (!pcopy)
@@ -231,6 +235,6 @@ void __thiscall StatCopy::FUN_0051b5f0(TESForm* apCopy)
         return;
     }
     this->m_pSoundForm = pcopy->m_pSoundForm;
-    ((FUN_005e78f0_t*)this)->FUN_004851b0(pcopy);
+    ((FUN_005e78f0_t*)this)->TESForm_CopyAllComponents(pcopy);
     this->m_cType = pcopy->m_cType;
 }

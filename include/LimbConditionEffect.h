@@ -16,7 +16,7 @@ public:
     virtual void ApplyActorValueModifier(Actor* apActor, float afModifier, ActorValue::Index aeOverrideActorValue);
 
     LimbConditionEffect(void*, void*, void*);
-    LimbConditionEffect* __thiscall FUN_0080f060(void*, void*, void*);
+    LimbConditionEffect* __thiscall LimbConditionEffect_0080f060(void*, void*, void*);
     unsigned short __thiscall FUN_0080f2b0(Actor* apActor);
 
     static ActiveEffect* Instantiate(MagicCaster* apCaster, MagicItem* apSpell, EffectItem* apEffect);

@@ -91,10 +91,10 @@ class GraphicsRenderer
     unsigned char pad28c[0x8b8 - 0x28c];
     Direct3DDeviceInterface* m_pD3DDevice;
 };
-void FUN_00e7f920(GraphicsRenderer*);
-void FUN_00e7e8d0(GraphicsRenderer*);
-void FUN_00e92f70(GraphicsRenderer*);
-void FUN_00e93f50(GraphicsRenderer*);
+void NiD3DPass_SetD3DRenderer(GraphicsRenderer*);
+void NiD3DTextureStage_SetD3DRenderer(GraphicsRenderer*);
+void NiD3DShaderProgramFactory_SetD3DRenderer(GraphicsRenderer*);
+void NiD3DShaderProgramCreator_SetD3DRenderer(GraphicsRenderer*);
 class Program : public NiMemObject
 {
   public:

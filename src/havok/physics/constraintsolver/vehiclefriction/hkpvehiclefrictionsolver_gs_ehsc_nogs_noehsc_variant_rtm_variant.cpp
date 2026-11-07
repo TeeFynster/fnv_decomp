@@ -54,7 +54,8 @@ static float PowerStep(float x)
 }
 
 // @fnv 0x00e593f0
-void FUN_00e593f0(CurveInput* a, CurveOutput* b)
+// src: XBOX_PDB 0x00e593f0
+void hkVehicleFrictionDescriptionInitValues(CurveInput* a, CurveOutput* b)
 {
     b->common = a->common;
     b->blocks[0].radius = a->radius[0];

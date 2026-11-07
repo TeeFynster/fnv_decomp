@@ -43,7 +43,7 @@ struct InteriorCellData
 class CellLightingTemplate
 {
   public:
-    float FUN_009a9350();
+    float TESCombatStyle_GetWeaponMinRangeMult();
 };
 extern BGSLoadedReferenceCollection* DAT_011c95c8;
 class ActorCause;

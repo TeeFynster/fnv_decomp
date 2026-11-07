@@ -128,8 +128,8 @@ class ImageSpaceShaderParam : public ShaderEffectParamLocal_00b8a9e0
     NiTPrimitiveArray_enum_NiTexturingProperty__FilterMode_ m_kTextureFilterModes;  // +0x68, 16 bytes
     NiTPointerMap<unsigned int, unsigned int> m_kRenderStateMap;                    // +0x78, 16 bytes
     void AllocateShaderConstants(int vertexCount, int pixelCount);
-    void FUN_00b8a7e0();
-    void FUN_00b8a7c0();
+    void ClearConstantGroups();
+    void SetBlurClearMode();
     void CopyParamData(int index, const float* data, unsigned int size);
     void SetShaderConstantVector4(int index, float x, float y, float z, float w);
     void SetRenderState(unsigned int state, unsigned int value);

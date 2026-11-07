@@ -34,11 +34,12 @@ struct FUN_004f16c0
 
 struct FUN_004f1b60_shell : LocalTESRegionDataGrass
 {
-    TESRegionData* FUN_004f1b60();
+    TESRegionData* TESRegionDataGrass_Copy();
 };
 
 // @fnv 0x004f1b60
-TESRegionData* FUN_004f1b60_shell::FUN_004f1b60()
+// src: XBOX_PDB 0x004f1b60
+TESRegionData* FUN_004f1b60_shell::TESRegionDataGrass_Copy()
 {
     FUN_004f16c0* pdata = new FUN_004f16c0((const void*)this);
 
@@ -57,7 +58,7 @@ struct GrassRecord
 {
     unsigned int formID;
     unsigned int flags;
-    void FUN_00462230();
+    void TwoValues_Endian();
 };
 struct FUN_004f5620
 {
@@ -117,7 +118,7 @@ bool GrassRegion::LoadGrassRecords(FileReader* file)
         for (unsigned int index = 0; index < count_; index++)
         {
             if (file->IsEndianConversionRequired())
-                records[index].FUN_00462230();
+                records[index].TwoValues_Endian();
             objectX = new FUN_004f5620(records[index]);
             if (objectX)
             {
@@ -228,7 +229,7 @@ struct GrassMergeList
 {
     void ClearList();
     void CopyTargetList(GrassMergeList* destination);
-    void FUN_004f61d0(float ownWeight, GrassMergeList* priority, float sourceWeight);
+    void TESRegionGrassObjectList_MergeLists(float ownWeight, GrassMergeList* priority, float sourceWeight);
 };
 float __cdecl floor(float value);
 struct GrassMergeRegion : TESRegionData
@@ -236,8 +237,8 @@ struct GrassMergeRegion : TESRegionData
     virtual REGION_DATA_ID GetType();
     virtual void v9();
     virtual GrassMergeList* GetGrassList();
-    bool FUN_004f1540();
-    unsigned char FUN_005bb4d0();
+    bool TESRegionData_GetOverride();
+    unsigned char TESRegionData_GetPriority();
     void FUN_004f15a0(int value);
     bool FUN_004f15c0(unsigned char value);
     void MergeGrassRegion(GrassMergeRegion* data, void* context);
@@ -252,8 +253,8 @@ void GrassMergeRegion::MergeGrassRegion(GrassMergeRegion* apPriority, void* cont
         return;
     if (m_bHasRegionData)
     {
-        FUN_004f15a0(priority->FUN_004f1540());
-        FUN_004f15c0(priority->FUN_005bb4d0());
+        FUN_004f15a0(priority->TESRegionData_GetOverride());
+        FUN_004f15c0(priority->TESRegionData_GetPriority());
         GetGrassList()->ClearList();
         priority->GetGrassList()->CopyTargetList(GetGrassList());
     }
@@ -263,27 +264,27 @@ void GrassMergeRegion::MergeGrassRegion(GrassMergeRegion* apPriority, void* cont
     }
     else if (bOverride)
     {
-        if (priority->FUN_004f1540() && priority->FUN_005bb4d0() > FUN_005bb4d0())
+        if (priority->TESRegionData_GetOverride() && priority->TESRegionData_GetPriority() > TESRegionData_GetPriority())
         {
-            FUN_004f15a0(priority->FUN_004f1540());
-            FUN_004f15c0(priority->FUN_005bb4d0());
+            FUN_004f15a0(priority->TESRegionData_GetOverride());
+            FUN_004f15c0(priority->TESRegionData_GetPriority());
             GetGrassList()->ClearList();
             priority->GetGrassList()->CopyTargetList(GetGrassList());
         }
     }
-    else if (priority->FUN_004f1540())
+    else if (priority->TESRegionData_GetOverride())
     {
-        FUN_004f15a0(priority->FUN_004f1540());
-        FUN_004f15c0(priority->FUN_005bb4d0());
+        FUN_004f15a0(priority->TESRegionData_GetOverride());
+        FUN_004f15c0(priority->TESRegionData_GetPriority());
         GetGrassList()->ClearList();
         priority->GetGrassList()->CopyTargetList(GetGrassList());
     }
     else
     {
-        GetGrassList()->FUN_004f61d0((float)FUN_005bb4d0(), priority->GetGrassList(), (float)priority->FUN_005bb4d0());
-        source = FUN_005bb4d0() * FUN_005bb4d0() + (100 - FUN_005bb4d0()) * priority->FUN_005bb4d0();
+        GetGrassList()->TESRegionGrassObjectList_MergeLists((float)TESRegionData_GetPriority(), priority->GetGrassList(), (float)priority->TESRegionData_GetPriority());
+        source = TESRegionData_GetPriority() * TESRegionData_GetPriority() + (100 - TESRegionData_GetPriority()) * priority->TESRegionData_GetPriority();
         source +=
-            (100 - priority->FUN_005bb4d0()) * FUN_005bb4d0() + priority->FUN_005bb4d0() * priority->FUN_005bb4d0();
+            (100 - priority->TESRegionData_GetPriority()) * TESRegionData_GetPriority() + priority->TESRegionData_GetPriority() * priority->TESRegionData_GetPriority();
         source *= 0.005f;
         FUN_004f15c0((unsigned char)floor(source));
     }

@@ -13,14 +13,14 @@ public:
 
     BSMultiBoundAABB();
     virtual ~BSMultiBoundAABB();
-    virtual int FUN_004a7030();
+    virtual int GetDebugGeomShapeSize();
     virtual void SetGridPosition(const NiPoint3& center);
 
     const Vec57& extent();
     void setExtent(const Vec57& extent);
 
     float GetPointLength();
-    void FUN_00c39270(NiPoint3* points);
-    void FUN_00c389e0(Vec4* point);
+    void BSMultiBoundAABB_GetVertices(NiPoint3* points);
+    void GetNiBound(Vec4* point);
     void* FUN_004a7060(unsigned int flags);
 };

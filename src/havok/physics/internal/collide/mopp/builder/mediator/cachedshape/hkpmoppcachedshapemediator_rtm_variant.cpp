@@ -61,9 +61,9 @@ struct S_00d54cd0_Result
     int unk28;
     bool unk2C;
 };
-S_00d54cd0_Result* FUN_00d54a40(S_00d54cd0_Base* col, void* world, S_00d54cd0_Input* in, void* out) throw();
-S_00d54cd0_Result* FUN_00d54cd0(void* world, S_00d54cd0_Input* pInput, void* out);
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+S_00d54cd0_Result* hkpMoppUtility_buildCodeInternal(S_00d54cd0_Base* col, void* world, S_00d54cd0_Input* in, void* out) throw();
+S_00d54cd0_Result* hkpMoppUtility_buildCode(void* world, S_00d54cd0_Input* pInput, void* out);
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct Record
 {
     int m_i00;
@@ -102,7 +102,7 @@ struct RecordArray
 
     ~RecordArray() throw()
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
@@ -201,7 +201,7 @@ struct FUN_00dd5660_cls
     int unk10;
     int unk14;
     int unk18;
-    int FUN_00dd5660();
+    int GetUnk18_00dd5660();
 };
 void __cdecl ResizeAudioStream(hkMemoryAllocator* apAllocator, void* apVector, int aiElemSize);
 struct Src_00dd5b00
@@ -271,7 +271,7 @@ struct FUN_00dd5de0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dd5de0* b = static_cast<FUN_00dd5de0*>(p);
-        reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->m_heap)->bufFree(p, static_cast<int>(b->m_usMemSizeAndFlags));
+        reinterpret_cast<hkMemoryAllocator*>(hkMemoryRouter_getInstance()->m_heap)->bufFree(p, static_cast<int>(b->m_usMemSizeAndFlags));
     }
 };
 struct OutCollection
@@ -292,7 +292,7 @@ struct Owner
     unsigned int unk00, unk04, unk08, unk0c, unk10;
     OutCollection* collection;
     int count;
-    void FUN_00dd55f0(OutRecord* out);
+    void hkpMoppCachedShapeMediator_getPrimitives(OutRecord* out);
 };
 
 struct Entry
@@ -312,11 +312,12 @@ struct IntervalSet : Obj_00dd5b00
         hi = m_kNode.m_pData[e.index].m_ranges[axis].m_fHi;
     }
 
-    void FUN_00dd5670(int a1, int axis, Entry* entries, int count, float* outMin, float* outMax);
+    void hkpMoppCachedShapeMediator_projectPrimitives(int a1, int axis, Entry* entries, int count, float* outMin, float* outMax);
 };
 
 // @fnv 0x00dd5670
-void IntervalSet::FUN_00dd5670(int a1, int axis, Entry* entries, int count, float* outMin, float* outMax)
+// src: HAVOK_LIB 0x00dd5670
+void IntervalSet::hkpMoppCachedShapeMediator_projectPrimitives(int a1, int axis, Entry* entries, int count, float* outMin, float* outMax)
 {
     float lo, hi;
     GetRange(entries[0], axis, lo, hi);
@@ -348,10 +349,11 @@ struct Lst
 };
 struct CachedRangeMediator : Obj_00dd5b00
 {
-    void __thiscall FUN_00dd58d0(int unused, int k, Lst* l, int count, float* outMin, float* outMax);
+    void __thiscall hkpMoppCachedShapeMediator_findExtents(int unused, int k, Lst* l, int count, float* outMin, float* outMax);
 };
 // @fnv 0x00dd58d0
-void CachedRangeMediator::FUN_00dd58d0(int unused, int k, Lst* l, int count, float* outMin, float* outMax)
+// src: HAVOK_LIB 0x00dd58d0
+void CachedRangeMediator::hkpMoppCachedShapeMediator_findExtents(int unused, int k, Lst* l, int count, float* outMin, float* outMax)
 {
     float mn = m_kNode.m_pData[l->e[0].idx].m_ranges[k].m_fLo;
     float mx = m_kNode.m_pData[l->e[0].idx].m_ranges[k].m_fHi;

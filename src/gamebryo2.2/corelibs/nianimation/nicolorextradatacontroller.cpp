@@ -17,7 +17,8 @@ extern "C"
 }
 
 // @fnv 0x00a4fb00
-void* __cdecl FUN_00a4fb00()
+// src: COMMUNITY 0x00a4fb00
+void* __cdecl NiColorExtraDataController_GetRTTI()
 {
     return &g_011f3fdc;
 }
@@ -44,7 +45,8 @@ extern int DAT_0109947c;
 
 // Allocates a 0x40-byte BSFadeNode, initialises it via InitTimeController, sets its vtable to DAT_0109947c, and returns it (or null on allocation failure).
 // @fnv 0x00a4fac0
-void* __cdecl FUN_00a4fac0()
+// src: EXE 0x00a4fac0
+void* __cdecl NiColorExtraDataController_CreateObject()
 {
     void* mem = BSFadeNode::operator new(0x40);
     if (mem)
@@ -61,7 +63,8 @@ struct Holder_00a55f80
     void* __thiscall FUN_00a55f80(int, float, int);
 };
 // @fnv 0x00a4fa70
-void* __stdcall FUN_00a4fa70(int a1, int a2, int a3, float a4, int a5)
+// src: XBOX_PDB 0x00a4fa70
+void* __stdcall NiColorExtraDataController_CreateBlendInterpolator(int a1, int a2, int a3, float a4, int a5)
 {
     void* p = BSFadeNode::operator new(0x44);
     if (p)
@@ -74,7 +77,8 @@ struct Interp9
     void* __thiscall FUN_00a3bd80(NiColorA c);
 };
 // @fnv 0x00a4fb30
-void* __thiscall NiColorExtraDataController::FUN_00a4fb30(unsigned short usIndex)
+// src: XBOX_PDB 0x00a4fb30
+void* __thiscall NiColorExtraDataController::CreatePoseInterpolator(unsigned short usIndex)
 {
     void* mem = BSFadeNode::operator new(0x24);
     if (mem)
@@ -87,7 +91,8 @@ void* __thiscall NiColorExtraDataController::FUN_00a4fb30(unsigned short usIndex
 
 extern NiRTTI _g_011f3730;
 // @fnv 0x00a4fc90
-void NiColorExtraDataController::FUN_00a4fc90(NiInterpolator* pkInterp, unsigned short usIndex)
+// src: XBOX_PDB 0x00a4fc90
+void NiColorExtraDataController::SynchronizePoseInterpolator(NiInterpolator* pkInterp, unsigned short usIndex)
 {
     NiColorInterpolator* pkColorInterp;
     if (!pkInterp)
@@ -168,12 +173,13 @@ struct InterpVT_00a4faa0
 
 // Calls IsCorrectType on the interpolator's vtable and returns the result, ignoring the index.
 // @fnv 0x00a4faa0
-bool __stdcall FUN_00a4faa0(NiInterpolator* pkInterpolator, unsigned short usIndex)
+// src: XBOX_PDB 0x00a4faa0
+bool __stdcall NiColorExtraDataController_InterpolatorIsCorrectType(NiInterpolator* pkInterpolator, unsigned short usIndex)
 {
     return reinterpret_cast<InterpVT_00a4faa0*>(pkInterpolator)->IsCorrectType();
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern int DAT_0109947c;
 
 extern "C" void FUN_00c312f0();
@@ -182,7 +188,7 @@ extern "C" void FUN_00c312f0();
 // @fnv 0x00a4fb80
 NiColorExtraDataController* __fastcall CreateObject(NiColorExtraDataController* self, void*, unsigned int arg)
 {
-    NiColorExtraDataController* p = (NiColorExtraDataController*)FUN_00aa13e0(0x40);
+    NiColorExtraDataController* p = (NiColorExtraDataController*)Object_DispatchCommandFour(0x40);
     if (p != 0)
     {
         InitTimeController((int*)p);
@@ -235,7 +241,8 @@ void __fastcall UpdateColorController(NiColorExtraDataController* self, void*, N
 extern "C" void __cdecl IsEquivalent();
 
 // @fnv 0x00a4faf0
-void __cdecl FUN_00a4faf0()
+// src: XBOX_PDB 0x00a4faf0
+void __cdecl NiColorExtraDataController_IsEqual()
 {
     IsEquivalent();
 }

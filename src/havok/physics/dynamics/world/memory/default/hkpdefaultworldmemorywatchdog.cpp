@@ -80,7 +80,8 @@ struct EntityRemovalIsland
 };
 
 // @fnv 0x00e48290
-void __cdecl FUN_00e48290(EntityRemovalIsland* pIsland, int level, int bytes, int* piMaxLevel)
+// src: HAVOK_LIB 0x00e48290
+void __cdecl hkpDefaultWorldMemoryWatchDog_removeObjectsFromIsland(EntityRemovalIsland* pIsland, int level, int bytes, int* piMaxLevel)
 {
     for (int i = pIsland->m_numEntities - 1; i >= 0; i--)
     {
@@ -122,7 +123,7 @@ void WatchdogReclaimer::ProcessList(hkpWorld* pkWorld)
                 island = static_cast<EntityRemovalIsland*>(pkWorld->m_kActiveSimulationIslands.m_data[i]);
             else
                 island = static_cast<EntityRemovalIsland*>(pkWorld->m_kInactiveSimulationIslands.m_data[-i - 1]);
-            FUN_00e48290(island, iFlags, bytes, &iOut);
+            hkpDefaultWorldMemoryWatchDog_removeObjectsFromIsland(island, iFlags, bytes, &iOut);
             if (reinterpret_cast<hkMemoryAllocator&>((&hkMemoryRouter::getInstance())->heap()).canAllocTotal(bytes))
                 return;
             i--;

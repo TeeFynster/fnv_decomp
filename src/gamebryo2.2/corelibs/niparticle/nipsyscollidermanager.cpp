@@ -39,13 +39,15 @@ struct ModifierViewerStrings : NiPSysModifier
 };
 
 // @fnv 0x00c2d540
-void* __cdecl FUN_00c2d540()
+// src: COMMUNITY 0x00c2d540
+void* __cdecl NiPSysColliderManager_GetRTTI()
 {
     return &g_01202780;
 }
 
 // @fnv 0x00c2d5b0
-NiPSysColliderManager* __cdecl FUN_00c2d5b0()
+// src: EXE 0x00c2d5b0
+NiPSysColliderManager* __cdecl NiPSysColliderManager_CreateObject()
 {
     NiPSysColliderManager* p = static_cast<NiPSysColliderManager*>(NiPSysPositionModifier::operator new(0x1c));
     if (p)

@@ -21,7 +21,8 @@ extern int DAT_010c8198;
 // These helpers have no member declarations in the shared context header.
 // Keep the original this pointer in ECX and stack arguments in their original slots.
 // @fnv 0x00ca95e0
-__declspec(noinline) void __fastcall FUN_00ca95e0(hkpCharacterContext* context)
+// src: GUESS 0x00ca95e0 (confidence: low)
+__declspec(noinline) void __fastcall hkpCharacterContext_UpdateFields_00ca95e0(hkpCharacterContext* context)
 {
     *reinterpret_cast<int**>(context) = &DAT_010c8198;
     static_cast<hkReferencedObject*>(context->unk0C)->removeReference();
@@ -29,7 +30,8 @@ __declspec(noinline) void __fastcall FUN_00ca95e0(hkpCharacterContext* context)
 }
 
 // @fnv 0x00ca9670
-void __fastcall FUN_00ca9670(hkpCharacterContext* context, void*, float a, float b, float c)
+// src: HAVOK_LIB 0x00ca9670
+void __fastcall hkpCharacterContext_setFilterParameters(hkpCharacterContext* context, void*, float a, float b, float c)
 {
     context->unk24 = a;
     context->unk20 = b;
@@ -37,13 +39,15 @@ void __fastcall FUN_00ca9670(hkpCharacterContext* context, void*, float a, float
 }
 
 // @fnv 0x00ca9660
-void __fastcall FUN_00ca9660(hkpCharacterContext* context, void*, unsigned char value)
+// src: GUESS 0x00ca9660 (confidence: low)
+void __fastcall hkpCharacterContext_SetUnk18_00ca9660(hkpCharacterContext* context, void*, unsigned char value)
 {
     context->unk18 = value;
 }
 
 // @fnv 0x00ca9690
-void __fastcall FUN_00ca9690(hkpCharacterContext* context, void*, int value)
+// src: GUESS 0x00ca9690 (confidence: low)
+void __fastcall hkpCharacterContext_UpdateState_00ca9690(hkpCharacterContext* context, void*, int value)
 {
     context->unk08 = value;
 }
@@ -69,7 +73,8 @@ hkpCharacterContext* hkpCharacterContext::Initialize(void* arg0, int arg1)
 }
 
 // @fnv 0x00ca9600
-int __fastcall FUN_00ca9600(hkpCharacterContext* context)
+// src: XBOX_PDB 0x00ca9600
+int __fastcall hkpCharacterContext_getState(hkpCharacterContext* context)
 {
     return context->unk10;
 }
@@ -95,7 +100,7 @@ class CharacterTransitionDispatch
 class CharacterStateLookup
 {
   public:
-    CharacterTransitionDispatch* FUN_00cbc510(int iState) const throw();
+    CharacterTransitionDispatch* GetIndexedValue_00cbc510(int iState) const throw();
 };
 
 // Leaves the current state, stores the new state id, then enters the new state via the state manager.
@@ -105,10 +110,10 @@ void __fastcall SetState(hkpCharacterContext* context, void*, int iState,
 {
     int iPrevState = context->unk10;
     static_cast<const CharacterStateLookup*>(context->unk0C)
-        ->FUN_00cbc510(context->unk10)->leaveState(*context, iState, kInput, kOutput);
+        ->GetIndexedValue_00cbc510(context->unk10)->leaveState(*context, iState, kInput, kOutput);
     context->unk10 = iState;
     static_cast<const CharacterStateLookup*>(context->unk0C)
-        ->FUN_00cbc510(iState)->enterState(*context, iPrevState, kInput, kOutput);
+        ->GetIndexedValue_00cbc510(iState)->enterState(*context, iPrevState, kInput, kOutput);
 }
 
 struct FnvCpu_FUN_00ca9810_CpuAllocator
@@ -125,15 +130,15 @@ struct FnvCpu_FUN_00ca9810_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00ca9810_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00ca9810_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00ca9810_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 // Calls FUN_00ca95e0, then if bit 0 of flags is set, invokes the allocator from FUN_00c85750 on this with size, and returns this.
 // @fnv 0x00ca9810
 hkpCharacterContext* __fastcall Destroy(hkpCharacterContext* context, void*, unsigned int flags)
 {
-    FUN_00ca95e0(context);
+    hkpCharacterContext_UpdateFields_00ca95e0(context);
     if (flags & 1)
     {
-        FnvCpu_FUN_00ca9810_CpuAllocatorHolder* pAllocatorHolder = FUN_00c85750();
+        FnvCpu_FUN_00ca9810_CpuAllocatorHolder* pAllocatorHolder = hkMemoryRouter_getInstance();
         pAllocatorHolder->allocator->Invoke(context, context->m_usMemSizeAndFlags);
     }
     return context;
@@ -266,7 +271,8 @@ struct StateManager
 };
 
 // @fnv 0x00ca96a0
-void __fastcall FUN_00ca96a0(hkpCharacterContext* context, void*, const PhysicsDataBlock& input, Vector4Data& output)
+// src: GUESS 0x00ca96a0 (confidence: low)
+void __fastcall hkpCharacterContext_UpdateFields_00ca96a0(hkpCharacterContext* context, void*, const PhysicsDataBlock& input, Vector4Data& output)
 {
     output.m_fVelocity = input.m_fVelocity;
 

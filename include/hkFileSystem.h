@@ -13,5 +13,5 @@ public:
     virtual void calcContentStatistics(hkStatisticsCollector* collector, const hkClass* cls) const;
     virtual void v0c();
     virtual hkStreamWriter* OpenWriter(const char* pcName) throw();
-    virtual int FUN_00624e70(const char*, void*);
+    virtual int return_1_0(const char*, void*);
 };

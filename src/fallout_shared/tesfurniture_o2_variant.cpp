@@ -9,7 +9,7 @@
 // base sub-object is moved back by 0x3c before tail-jumping to the final overrider.
 struct PrimaryBase
 {
-    virtual void FUN_00509a00();
+    virtual void AdjustThisAndForward_00509a00();
     int unk04;
     int unk08;
     int unk0C;
@@ -28,14 +28,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00509a00();
+    virtual void AdjustThisAndForward_00509a00();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00509a00
-    virtual void FUN_00509a00();
+// src: GUESS 0x00509a00 (confidence: low)
+    virtual void AdjustThisAndForward_00509a00();
 };
 
 Derived::Derived()

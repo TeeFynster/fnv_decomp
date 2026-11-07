@@ -41,7 +41,7 @@ class ContainerItemExtra
   public:
     unsigned int data[3];
     ContainerItemExtra();
-    void FUN_0040eb90(float);
+    void ContainerItemExtra_AdjustHealthPercent(float);
     void InitItem(TESForm*);
 };
 struct LeveledObject
@@ -456,7 +456,7 @@ void TESLeveledList::LoadGame(BGSLoadFormBuffer* buffer)
                     if (savedItem.health != -1.0)
                     {
                         extra = new ContainerItemExtra;
-                        extra->FUN_0040eb90(savedItem.health);
+                        extra->ContainerItemExtra_AdjustHealthPercent(savedItem.health);
                     }
                     reinterpret_cast<FileEntryList*>(this)->Copy(buffer->GetForm(), level, count, savedItem.form,
                                                                  extra);
@@ -649,11 +649,12 @@ int __thiscall LeveledListLevelDifference::Character(TESLeveledList* list)
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
 struct FUN_00526ac0_shell : public TESGlobal
 {
-    float FUN_00526ac0();
+    float BSMultiBoundCapsule_QMultiBoundRadius();
 };
 
 // @fnv 0x00526ac0
-float FUN_00526ac0_shell::FUN_00526ac0()
+// src: XBOX_PDB 0x00526ac0
+float FUN_00526ac0_shell::BSMultiBoundCapsule_QMultiBoundRadius()
 {
     return *(float*)((char*)this + 0x24);
 }
@@ -691,64 +692,70 @@ int FUN_00c611d0_shell::GetFour()
 
 struct FUN_00c611e0_shell
 {
-    int __thiscall FUN_00c611e0(int arg1);
+    int __thiscall BSMultiBoundCapsule_CheckBound(int arg1);
 };
 
 // @fnv 0x00c611e0
-int __thiscall FUN_00c611e0_shell::FUN_00c611e0(int arg1)
+// src: COMMUNITY 0x00c611e0
+int __thiscall FUN_00c611e0_shell::BSMultiBoundCapsule_CheckBound(int arg1)
 {
     return 0;
 }
 
 struct FUN_00c61230_shell
 {
-    bool FUN_00c61230(int);
+    bool BSMultiBoundCapsule_WithinFrustum(int);
 };
 
 // @fnv 0x00c61230
-bool FUN_00c61230_shell::FUN_00c61230(int)
+// src: XBOX_PDB 0x00c61230
+bool FUN_00c61230_shell::BSMultiBoundCapsule_WithinFrustum(int)
 {
     return false;
 }
 
 struct FUN_00c61240_shell
 {
-    bool __thiscall FUN_00c61240(int);
+    bool __thiscall BSMultiBoundCapsule_CompletelyWithinFrustum(int);
 };
 
 // @fnv 0x00c61240
-bool __thiscall FUN_00c61240_shell::FUN_00c61240(int)
+// src: XBOX_PDB 0x00c61240
+bool __thiscall FUN_00c61240_shell::BSMultiBoundCapsule_CompletelyWithinFrustum(int)
 {
     return 0;
 }
 
 struct FUN_00c61250_shell
 {
-    void __thiscall FUN_00c61250(int a);
+    void __thiscall BSMultiBoundCapsule_GetNiBound(int a);
 };
 
 // @fnv 0x00c61250
-void __thiscall FUN_00c61250_shell::FUN_00c61250(int a)
+// src: COMMUNITY 0x00c61250
+void __thiscall FUN_00c61250_shell::BSMultiBoundCapsule_GetNiBound(int a)
 {}
 
 struct FUN_00c61260_shell
 {
-    void FUN_00c61260(int a, int b, int c, int d, int e, int f);
+    void BSMultiBoundCapsule_CreateDebugGeometry(int a, int b, int c, int d, int e, int f);
 };
 
 // @fnv 0x00c61260
-void __thiscall FUN_00c61260_shell::FUN_00c61260(int a, int b, int c, int d, int e, int f)
+// src: COMMUNITY 0x00c61260
+void __thiscall FUN_00c61260_shell::BSMultiBoundCapsule_CreateDebugGeometry(int a, int b, int c, int d, int e, int f)
 {}
 
 extern "C" void* g_01204398;
 
 struct FUN_00c61270_shell
 {
-    void* __thiscall FUN_00c61270();
+    void* __thiscall BSMultiBoundCapsule_GetRTTI();
 };
 
 // @fnv 0x00c61270
-void* __thiscall FUN_00c61270_shell::FUN_00c61270()
+// src: COMMUNITY 0x00c61270
+void* __thiscall FUN_00c61270_shell::BSMultiBoundCapsule_GetRTTI()
 {
     return &g_01204398;
 }
@@ -784,7 +791,8 @@ extern int DAT_010c34ac;
 
 // Initialize the capsule without introducing calls to its empty point constructors.
 // @fnv 0x00c60d50
-BSMultiBoundCapsule* __fastcall FUN_00c60d50(BSMultiBoundCapsule* capsule)
+// src: EXE 0x00c60d50
+BSMultiBoundCapsule* __fastcall BSMultiBoundCapsule_BSMultiBoundCapsule(BSMultiBoundCapsule* capsule)
 {
     FUN_00c4f980(capsule);
     *reinterpret_cast<int**>(capsule) = &DAT_010c34ac;
@@ -822,7 +830,7 @@ struct ColorStreamIO
 struct FUN_00c4f9f0_shell
 {
     char _pad[12];
-    void FUN_00c4f9f0(void*);
+    void BSMultiBoundShape_LoadBinary(void*);
 };
 template <typename T> void ReadBinaryValue(void*, T&);
 struct FUN_00c60e70_shell : public FUN_00c4f9f0_shell
@@ -830,12 +838,13 @@ struct FUN_00c60e70_shell : public FUN_00c4f9f0_shell
     NiColor c1;
     NiColor c2;
     unsigned int u;
-    void FUN_00c60e70(void*);
+    void BSMultiBoundCapsule_LoadBinary(void*);
 };
 // @fnv 0x00c60e70
-void FUN_00c60e70_shell::FUN_00c60e70(void* stream)
+// src: XBOX_PDB 0x00c60e70
+void FUN_00c60e70_shell::BSMultiBoundCapsule_LoadBinary(void* stream)
 {
-    FUN_00c4f9f0(stream);
+    BSMultiBoundShape_LoadBinary(stream);
     ColorStreamIO::Load(&c1, stream);
     ColorStreamIO::Load(&c2, stream);
     ReadBinaryValue<unsigned int>(stream, u);
@@ -843,25 +852,27 @@ void FUN_00c60e70_shell::FUN_00c60e70(void* stream)
 
 struct FUN_00c60ec0_shell
 {
-    void FUN_00c4fa10(int);
-    void FUN_00c60ec0(int a);
+    void BSMultiBoundShape_LinkObject(int);
+    void BSMultiBoundCapsule_LinkObject(int a);
 };
 
 // @fnv 0x00c60ec0
-void FUN_00c60ec0_shell::FUN_00c60ec0(int aiValue)
+// src: XBOX_PDB 0x00c60ec0
+void FUN_00c60ec0_shell::BSMultiBoundCapsule_LinkObject(int aiValue)
 {
-    FUN_00c4fa10(aiValue);
+    BSMultiBoundShape_LinkObject(aiValue);
 }
 
 struct FUN_00c38020_shell
 {
-    unsigned char FUN_00c4fa30(int);
-    bool FUN_00c60ee0(int);
+    unsigned char BSMultiBoundShape_RegisterStreamables(int);
+    bool BSMultiBoundCapsule_RegisterStreamables(int);
 };
 // @fnv 0x00c60ee0
-bool FUN_00c38020_shell::FUN_00c60ee0(int a)
+// src: XBOX_PDB 0x00c60ee0
+bool FUN_00c38020_shell::BSMultiBoundCapsule_RegisterStreamables(int a)
 {
-    if (!FUN_00c4fa30(a))
+    if (!BSMultiBoundShape_RegisterStreamables(a))
         return false;
     return true;
 }
@@ -869,7 +880,7 @@ bool FUN_00c38020_shell::FUN_00c60ee0(int a)
 namespace fnv_00c60f10 {
 struct FUN_00c38050_Holder
 {
-    void FUN_00c4fa60(void*);
+    void BSMultiBoundShape_SaveBinary(void*);
     unsigned char data[12];
 };
 void __cdecl CallAnimCallback(void*, int*);
@@ -878,12 +889,13 @@ struct Host : FUN_00c38050_Holder
     NiColor c1;
     NiColor c2;
     int f24;
-    void FUN_00c60f10(void*);
+    void BSMultiBoundCapsule_SaveBinary(void*);
 };
 // @fnv 0x00c60f10
-void Host::FUN_00c60f10(void* s)
+// src: XBOX_PDB 0x00c60f10
+void Host::BSMultiBoundCapsule_SaveBinary(void* s)
 {
-    FUN_00c38050_Holder::FUN_00c4fa60(s);
+    FUN_00c38050_Holder::BSMultiBoundShape_SaveBinary(s);
     ColorStreamIO::Save(&c1, s);
     ColorStreamIO::Save(&c2, s);
     CallAnimCallback(s, &f24);
@@ -896,7 +908,7 @@ void TESLeveledList::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
     if (apSaveGameBuffer->GetChangeFlags(0x80000000).operator bool())
     {
         unsigned int isaveGameCount = 0;
-        unsigned int isaveGameBufferPos = apSaveGameBuffer->FUN_00865f20();
+        unsigned int isaveGameBufferPos = apSaveGameBuffer->StartVariableSizedValue();
         BSSimpleList<LeveledObject*>* pCurrentElementNext = (BSSimpleList<LeveledObject*>*)((char*)this + 0x14);
         while (pCurrentElementNext)
         {
@@ -914,7 +926,7 @@ void TESLeveledList::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
             }
             pCurrentElementNext = pCurrentElementNext->GetNext();
         }
-        apSaveGameBuffer->FUN_00865ff0(isaveGameCount, isaveGameBufferPos);
+        apSaveGameBuffer->SaveVariableSizedValue_00865ff0(isaveGameCount, isaveGameBufferPos);
     }
 }
 
@@ -925,11 +937,12 @@ struct Shell
     NiPoint3 m0c;
     NiPoint3 m18;
     float m24;
-    void FUN_00c60e00(Shell* dest, int a);
+    void BSMultiBoundShape_CopyMembers(Shell* dest, int a);
 };
 // Calls CopyMembersStreamWithField on dest, then copies m0c, m18 and m24 from this into dest.
 // @fnv 0x00c60e00
-void Shell::FUN_00c60e00(Shell* dest, int aiArg)
+// src: XBOX_PDB 0x00c60e00
+void Shell::BSMultiBoundShape_CopyMembers(Shell* dest, int aiArg)
 {
     CopyMembersStreamWithField(dest, aiArg);
     // Preserve the original trivial, bitwise vector copies. NiPoint3's shared
@@ -952,20 +965,21 @@ struct Shell : public A51BF0Base
 {
     char padding[36];
 
-    void FUN_00c60e00(Shell* object, int value);
+    void BSMultiBoundShape_CopyMembers(Shell* object, int value);
 };
 
 struct FUN_00c60d70_shell : public Shell
 {
-    Shell* FUN_00c60d70(int value);
+    Shell* BSMultiBoundCapsule_CreateClone(int value);
 };
 
 // Allocates a BSMultiBoundCapsule, copies the members, and returns the new object.
 // @fnv 0x00c60d70
-Shell* FUN_00c60d70_shell::FUN_00c60d70(int value)
+// src: XBOX_PDB 0x00c60d70
+Shell* FUN_00c60d70_shell::BSMultiBoundCapsule_CreateClone(int value)
 {
     Shell* shell = reinterpret_cast<Shell*>(new BSMultiBoundCapsule);
-    FUN_00c60e00(shell, value);
+    BSMultiBoundShape_CopyMembers(shell, value);
     return shell;
 }
 }  // namespace fnv_00c60d70
@@ -978,7 +992,7 @@ struct ScriptAddedEntries
 };
 struct CurrentLeveledEntries
 {
-    void FUN_00905330(LeveledObject* const&);
+    void RemoveMatchingItem(LeveledObject* const&);
 };
 
 // @fnv 0x00487980
@@ -988,7 +1002,7 @@ void TESLeveledList::ClearScriptAddedLeveledObjects()
     {
         LeveledObject* entryToDestroy = reinterpret_cast<ScriptAddedEntries*>(&m_kLeveledObjects)->FUN_006815c0();
         reinterpret_cast<ScriptAddedEntries*>(&m_kLeveledObjects)->FUN_0063f7b0();
-        reinterpret_cast<CurrentLeveledEntries*>(&leveledList)->FUN_00905330(entryToDestroy);
+        reinterpret_cast<CurrentLeveledEntries*>(&leveledList)->RemoveMatchingItem(entryToDestroy);
 
         LeveledObject* item = entryToDestroy;
         LeveledObject* removed = item;
@@ -996,10 +1010,10 @@ void TESLeveledList::ClearScriptAddedLeveledObjects()
     }
 }
 
-extern void __cdecl FUN_004858f0(unsigned int, unsigned int);
-extern void __cdecl FUN_00485910(unsigned int, unsigned int);
+extern void __cdecl TESForm_AddChunk_3(unsigned int, unsigned int);
+extern void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
 extern void __cdecl AppendChunk(unsigned int, const void*, unsigned int);
-extern unsigned char __cdecl FUN_00401500();
+extern unsigned char __cdecl TESForm_QEndianSwapOnSave();
 
 struct LevelNode_00488400
 {
@@ -1015,12 +1029,12 @@ struct ExtraSaver_00488400 : ContainerItemExtra
 // @fnv 0x00488400
 void TESLeveledList::Save()
 {
-    FUN_004858f0(0x444c564c, m_pChanceGlobal);
-    FUN_004858f0(0x464c564c, m_ucChanceNone);
+    TESForm_AddChunk_3(0x444c564c, m_pChanceGlobal);
+    TESForm_AddChunk_3(0x464c564c, m_ucChanceNone);
     if (m_pLevelGlobal)
     {
         unsigned int chanceFormID = m_pLevelGlobal->GetFormID();
-        FUN_00485910(0x474c564c, chanceFormID);
+        TESForm_AddChunk_00485910(0x474c564c, chanceFormID);
     }
     LevelNode_00488400* pEntryNode = static_cast<LevelNode_00488400*>(GetLeveledList());
     LeveledObject* entry;
@@ -1030,10 +1044,10 @@ void TESLeveledList::Save()
         levelEntryData.f1 = entry->pForm->GetFormID();
         levelEntryData.f0 = entry->sLevel;
         levelEntryData.f2 = entry->m_sCount;
-        if (FUN_00401500())
+        if (TESForm_QEndianSwapOnSave())
             levelEntryData.SwapEndian();
         AppendChunk(0x4f4c564c, &levelEntryData, 12);
-        if (FUN_00401500())
+        if (TESForm_QEndianSwapOnSave())
             levelEntryData.SwapEndian();
         if (entry->m_pExtraData)
             static_cast<ExtraSaver_00488400*>(entry->m_pExtraData)->WriteToChunk();
@@ -1045,7 +1059,7 @@ struct NiObject;
 
 struct TCEq
 {
-    bool FUN_00c4fa80(NiObject* pObject);
+    bool BSMultiBoundShape_IsEqual(NiObject* pObject);
 };
 
 struct TCColorEq : public TCEq
@@ -1056,14 +1070,15 @@ struct TCColorEq : public TCEq
     NiPoint3 m0c;
     NiPoint3 m18;
     float m24;
-    bool FUN_00c60f60(NiObject* pObject);
+    bool BSMultiBoundCapsule_IsEqual(NiObject* pObject);
 };
 
 // Calls the base equality check, then compares m0c, m18 and m24 against the same fields of pObject cast to TCColorEq.
 // @fnv 0x00c60f60
-bool TCColorEq::FUN_00c60f60(NiObject* pObject)
+// src: XBOX_PDB 0x00c60f60
+bool TCColorEq::BSMultiBoundCapsule_IsEqual(NiObject* pObject)
 {
-    bool bResultTmp = FUN_00c4fa80(pObject);
+    bool bResultTmp = BSMultiBoundShape_IsEqual(pObject);
     if (bResultTmp)
     {
         TCColorEq* pOther = (TCColorEq*)pObject;
@@ -1135,12 +1150,13 @@ struct Struct08
 
 struct C00c611f0
 {
-    int FUN_00c611f0(Struct08* arg);
+    int BSMultiBoundCapsule_CheckBound_00c611f0(Struct08* arg);
 };
 
 // Calls v8c on the VTarget pointer stored in arg->unk0c and returns 0.
 // @fnv 0x00c611f0
-int C00c611f0::FUN_00c611f0(Struct08* apStruct)
+// src: XBOX_PDB 0x00c611f0
+int C00c611f0::BSMultiBoundCapsule_CheckBound_00c611f0(Struct08* apStruct)
 {
     int res;
     VTarget* volatile form = apStruct->unk0c;
@@ -1240,7 +1256,8 @@ bool TESLeveledList::IsEqualToBase(BaseFormComponent* component)
 
 // Allocates and returns a new BSMultiBoundCapsule instance on the heap.
 // @fnv 0x00c610a0
-BSMultiBoundCapsule* __cdecl FUN_00c610a0(void)
+// src: EXE 0x00c610a0
+BSMultiBoundCapsule* __cdecl BSMultiBoundCapsule_CreateObject(void)
 {
     return new BSMultiBoundCapsule();
 }
@@ -1313,7 +1330,7 @@ void TESLeveledList::BaseFormRecord(BaseFormComponent* apSource)
         it = it->FUN_00726070();
     }
     m_pLevelGlobal = src3->m_pLevelGlobal;
-    FUN_0042e680(src3->vfn_10());
+    ExtraWeaponModFlags_SetWeaponModFlags(src3->vfn_10());
     SetCalcAllBelow(src3->FUN_004877e0());
     SetMultCalc(src3->vfn_14());
     SetUseAll(src3->FUN_004878a0());

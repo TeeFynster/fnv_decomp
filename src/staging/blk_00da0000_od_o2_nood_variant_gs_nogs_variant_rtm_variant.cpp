@@ -34,13 +34,13 @@ struct ScratchBlock
     unsigned int unk38;
     unsigned int unk3C;
 };
-void __cdecl FUN_00da6fd0(ScratchBlock* block);
+void __cdecl Object_InitializeDispatchFunctionTable(ScratchBlock* block);
 class ScratchOwner
 {
   public:
     void AddEntry(ScratchBlock* block, int a, int b);
 };
-void __cdecl FUN_00da7020(ScratchOwner* owner);
+void __cdecl hkListAgent3_registerAgent3(ScratchOwner* owner);
 struct S00da0780_Member
 {
     S00da0780_Member(FinishingFlag flag);  // FUN_00cb0a70
@@ -56,7 +56,7 @@ class __declspec(align(16)) S00da0780_Object
     S00da0780_Member m_kMember;
     int unk0C;
 };
-const void* __cdecl FUN_00da0780();
+const void* __cdecl getVtablehkLocalFrameGroup();
 #include <xmmintrin.h>
 __declspec(align(16)) struct FUN_00da7180_cls
 {
@@ -68,7 +68,7 @@ __declspec(align(16)) struct FUN_00da7180_cls
     unsigned int m_i2C;
     unsigned int m_i30;
 
-    FUN_00da7180_cls* FUN_00da7180(const FUN_00da7180_cls* src);
+    FUN_00da7180_cls* AssignFields_00da7180(const FUN_00da7180_cls* src);
 };
 
 extern char g_initFlag;
@@ -249,13 +249,14 @@ class S00da8180_AabbCastMachine
     const AabbCastInput* m_pRayCastInput;
     int m_isStartQuery;
 
-    void FUN_00da71c0(const MachineVectorIndexRecord* query, const unsigned char* pc, Vector4Pair* fQuery, int level);
-    void FUN_00da8180(const AabbCastInput& input, void* castCollector, void* startCollector);
+    void ProcessMoppCommands_00da71c0(const MachineVectorIndexRecord* query, const unsigned char* pc, Vector4Pair* fQuery, int level);
+    void ProcessAndReturnValue_00da8180(const AabbCastInput& input, void* castCollector, void* startCollector);
 };
 
 extern void visitLevel(int);
 
-__declspec(noinline) void S00da8180_AabbCastMachine::FUN_00da71c0(const MachineVectorIndexRecord* query,
+// src: GUESS 0x00da71c0 (confidence: low)
+__declspec(noinline) void S00da8180_AabbCastMachine::ProcessMoppCommands_00da71c0(const MachineVectorIndexRecord* query,
                                                                   const unsigned char* pc, Vector4Pair* fQuery,
                                                                   int level)
 {
@@ -265,12 +266,13 @@ __declspec(noinline) void S00da8180_AabbCastMachine::FUN_00da71c0(const MachineV
     child.m_vTo = fQuery->m_vTo;
     if (level < 3)
     {
-        FUN_00da71c0(query, pc + 1, &child, level + 1);
+        ProcessMoppCommands_00da71c0(query, pc + 1, &child, level + 1);
     }
 }
 
 // @fnv 0x00da8180
-void S00da8180_AabbCastMachine::FUN_00da8180(const AabbCastInput& input, void* castCollector, void* startCollector)
+// src: GUESS 0x00da8180 (confidence: low)
+void S00da8180_AabbCastMachine::ProcessAndReturnValue_00da8180(const AabbCastInput& input, void* castCollector, void* startCollector)
 {
     if (!g_initFlag)
     {
@@ -305,5 +307,5 @@ void S00da8180_AabbCastMachine::FUN_00da8180(const AabbCastInput& input, void* c
     query.m_iValueAtOffset04 = 0;
     query.m_property = 0;
     m_isStartQuery = (*programCounter != 0xd) - 1;
-    FUN_00da71c0(&query, programCounter, &fQuery, 0);
+    ProcessMoppCommands_00da71c0(&query, programCounter, &fQuery, 0);
 }

@@ -35,8 +35,8 @@ public:
         char padding[8];
 
         bool IsFlag20Set();
-        bool FUN_00833be0();
-        void FUN_00833100(bool);
+        bool FalloutRadio_StationState_IsTransmitting();
+        void FalloutRadio_StationState_SetContBroadcast(bool);
         void SetFlag80(bool);
     };
 

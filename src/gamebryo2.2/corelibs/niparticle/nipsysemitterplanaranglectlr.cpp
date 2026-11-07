@@ -7,31 +7,34 @@
 extern void* g_01202738;
 
 // @fnv 0x00c2b550
-void* __cdecl FUN_00c2b550()
+// src: COMMUNITY 0x00c2b550
+void* __cdecl NiPSysEmitterPlanarAngleCtlr_GetRTTI()
 {
     return &g_01202738;
 }
 
 struct NiPSysEmitterPlanarAngleCtlr : NiPSysModifierFloatCtlr
 {
-    void FUN_00c2b560(float& fValue);
-    void FUN_00c2b570(float fValue);
+    void UpdateFields_00c2b560(float& fValue);
+    void SetTargetFloatValue_00c2b570(float fValue);
     void* CreateTargetObj(void* arg);
 };
 
 // @fnv 0x00c2b560
-void NiPSysEmitterPlanarAngleCtlr::FUN_00c2b560(float& fValue)
+// src: GUESS 0x00c2b560 (confidence: low)
+void NiPSysEmitterPlanarAngleCtlr::UpdateFields_00c2b560(float& fValue)
 {
     fValue = *(float*)((char*)m_pkTargetModifier + 0x28);
 }
 
-void __stdcall FUN_00c32f60(StrArr*);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 // Grows pkStrings if full, then appends the string returned by _FUN_00a7d330(g_01202738) at index m_usSize.
 // @fnv 0x00c2b5d0
-void __stdcall FUN_00c2b5d0(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c2b5d0
+void __stdcall NiPSysEmitterPlanarAngleCtlr_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00c32f60(pkStrings);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pkStrings);
     char* pcString = _FUN_00a7d330((const char*)g_01202738);
     unsigned int uiSize = pkStrings->m_usSize;
     if (uiSize >= pkStrings->m_usMaxSize)
@@ -40,12 +43,13 @@ void __stdcall FUN_00c2b5d0(StrArr* pkStrings)
 }
 
 // @fnv 0x00c2b570
-void __thiscall NiPSysEmitterPlanarAngleCtlr::FUN_00c2b570(float fValue)
+// src: XBOX_PDB 0x00c2b570
+void __thiscall NiPSysEmitterPlanarAngleCtlr::SetTargetFloatValue_00c2b570(float fValue)
 {
     *(float*)((char*)m_pkTargetModifier + 0x28) = fValue;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 inline void* operator new(unsigned int, void* object) throw()
 {
@@ -61,7 +65,7 @@ void __cdecl FUN_00c32de0();
 void* NiPSysEmitterPlanarAngleCtlr::CreateTargetObj(void* arg)
 {
     NiPSysEmitterPlanarAngleCtlr* obj =
-        (NiPSysEmitterPlanarAngleCtlr*)FUN_00aa13e0(sizeof(NiPSysEmitterPlanarAngleCtlr));
+        (NiPSysEmitterPlanarAngleCtlr*)Object_DispatchCommandFour(sizeof(NiPSysEmitterPlanarAngleCtlr));
     if (obj)
     {
         ::new (obj) NiPSysModifierFloatCtlr;

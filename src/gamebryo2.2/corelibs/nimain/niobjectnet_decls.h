@@ -13,7 +13,7 @@
 
 class CloningProcess;
 extern unsigned int DAT_01268280;
-float __cdecl FUN_004a3e90(float);
+float __cdecl NI2HK_004a3e90(float);
 extern char g_NiObjectNETExtraDataLock;
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);

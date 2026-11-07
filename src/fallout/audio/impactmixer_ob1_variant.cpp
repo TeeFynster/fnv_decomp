@@ -29,12 +29,12 @@ inline NiPoint3 operator*(float scalar, const NiPoint3& point)
 // src/fallout/audio/impactmixer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/audio/impactmixer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern int DAT_011dd878;
-bool FUN_00839da0();
+bool ImpactMixer_GetGunshotsInitialized();
 extern int DAT_011dd878;
-void FUN_00839dc0(bool b);
+void ImpactMixer_SetGunshotsInitialized(bool b);
 extern int DAT_011a17f8[0x24];
 int GetTypeValue(int aiType);
-void FUN_00837520();
+void ImpactMixer_PlayHitSound();
 extern int DAT_01000000;
 struct DummyFlags
 {
@@ -42,7 +42,7 @@ struct DummyFlags
 };
 struct FUN_00838750_shell
 {
-    bool FUN_00838750();
+    bool bhkCharacterController_GetOnStairs();
 };
 struct FUN_00541570_shell
 {
@@ -50,7 +50,7 @@ struct FUN_00541570_shell
     unsigned char m_0x1c;
     unsigned int GetField1C();
 };
-void __cdecl FUN_00839dc0(bool b);
+void __cdecl ImpactMixer_SetGunshotsInitialized(bool b);
 extern float DAT_01016970;
 void __cdecl InitializeSlots();
 struct FUN_0063a3c0_cls
@@ -89,15 +89,15 @@ struct NavQueryResult
 };
 struct CellNavInfo
 {
-    void FUN_0053b550(NavQueryResult* pkResult, NiPoint3* pkPos, int iFlag);
-    MaterialRecord* FUN_0053a630(unsigned char ucA, unsigned short usB);
+    void TESObjectLAND_GetCoordData(NavQueryResult* pkResult, NiPoint3* pkPos, int iFlag);
+    MaterialRecord* TESObjectLAND_GetMainTexture_0053a630(unsigned char ucA, unsigned short usB);
 };
 struct FootstepCell
 {
     bool FUN_00425fd0();
     bool FUN_004518e0();
-    CellNavInfo* FUN_00546fb0();
-    bool FUN_005547c0(NiPoint3* pkPos, float* pfHeight);
+    CellNavInfo* TESObjectCELL_GetLand();
+    bool TESObjectCELL_GetLandHeight(NiPoint3* pkPos, float* pfHeight);
 };
 struct TESStandIn
 {
@@ -120,7 +120,7 @@ extern const char g_szFootstepEnd[] = "";
 void __cdecl PlayFootstepImpact(Actor* pActor, int iMaterial);
 struct SetObj
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 struct StrObj
 {
@@ -215,7 +215,7 @@ static const char kStr_PHYChainlink[] = "PHYChainlink";
 static const char kStr_PHYTile[] = "PHYTile";
 static const char kStr_PHYCarpet[] = "PHYCarpet";
 static const char kStr_PHYTumbleweed[] = "PHYTumbleweed";
-int __cdecl FUN_00839e00(int type, float fA, float fB);
+int __cdecl ImpactMixer_GetSoundForType(int type, float fA, float fB);
 struct Point3;
 class TESSound;
 struct S_0083a930_EntryData
@@ -310,7 +310,7 @@ struct S_0083a930_Process
 };
 struct S_0083a930_Setting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern S_0083a930_Setting DAT_011dd900;
 extern Actor* DAT_011dea3c;
@@ -346,14 +346,14 @@ struct FootstepQuery
 };
 struct NavOps
 {
-    void FUN_0053b550(FootstepQuery*, NiPoint3*, int);
+    void TESObjectLAND_GetCoordData(FootstepQuery*, NiPoint3*, int);
 };
 extern const char armorPowerRightName[];
 extern const char armorPowerLeftName[];
 extern const char armorRightName[];
 extern const char armorLeftName[];
-bool FUN_00702360();
-bool FUN_00525420();
+bool Interface_IsInMenuMode();
+bool Main_GetSceneIsComplex();
 struct PointOps : NiPoint3
 {
     NiPoint3& Subtract(const NiPoint3&);
@@ -369,8 +369,8 @@ struct ListenerOps
 struct SoundOps
 {
     unsigned char GetField45();
-    BGSSoundDescriptor* FUN_0084e3a0(int);
-    const char* FUN_00511840();
+    BGSSoundDescriptor* GetHavokWorldObjectCountInSceneGraph_0084e3a0(int);
+    const char* TESSound_GetFilename();
 };
 struct MaterialOps
 {
@@ -639,7 +639,7 @@ struct SkinOps
     int unk408;
     int unk40c;
     MaterialOps material;
-    bool FUN_00838750();
+    bool bhkCharacterController_GetOnStairs();
 };
 extern S_0083a930_Setting DAT_011dd988;
 extern SoundOps* DAT_011dd860;
@@ -652,8 +652,8 @@ struct FootstepEntry
 };
 extern FootstepEntry DAT_011dd650[];
 void PlayFootstepSound(Actor* ref, int foot);
-float FUN_0040ebd0(float a, float b);
-float FUN_00404010(float a, float b);
+float BSMIN(float a, float b);
+float BSMAX_00404010(float a, float b);
 void PlayBlockSound(int aUnused, TESObjectWEAP* a1, float x0, float y0, float z0, float x1, float y1, float z1);
 
 inline void* operator new(unsigned int, void* location)
@@ -671,7 +671,7 @@ inline void operator delete[](void*, void*)
 extern MemoryManager DAT_011f6238;
 inline void* operator new[](unsigned int size)
 {
-    return DAT_011f6238.FUN_00aa3e40(size);
+    return DAT_011f6238.Game_DoHeapAlloc(size);
 }
 void operator delete[](void* memory);
 // The original's point type here is NiPoint3: operator- 0x439ef0, Cross 0x4b3800, Unitize 0x4a0c10 and operator+
@@ -708,7 +708,7 @@ struct FilterData
 
     static __forceinline void* operator new[](unsigned int size)
     {
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
     static void operator delete[](void*);
 };
@@ -717,13 +717,13 @@ extern void __stdcall FUN_00401050(void* storage, unsigned int elementSize, unsi
 extern void __cdecl FUN_004a7800(void* value);
 extern void* __cdecl FUN_00ec44d0(void* target, const void* source, unsigned int bytes);
 extern unsigned char DAT_010c2c38;
-extern void* __cdecl FUN_00aa13e0(unsigned int bytes);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int bytes);
 struct FilterArray
 {
     FilterData values[8];
     static __forceinline void* operator new(unsigned int size)
     {
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
     static void operator delete(void*);
     __forceinline FilterArray()
@@ -845,14 +845,15 @@ struct CollisionGenerator : CollisionShape
     unsigned int unkc0;
     static __forceinline void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     static void operator delete(void*);
     CollisionGenerator(unsigned int count, NiPoint3* vertices, int unused, FilterData* _filters, int a, int b, int c,
                        int d, void* data);
 };
 // @fnv 0x00c55d50
-CollisionShape* __cdecl FUN_00c55d50(NiPoint3* start, NiPoint3* end, float forwardExtent, float backwardExtent,
+// src: COMMUNITY 0x00c55d50
+CollisionShape* __cdecl BSTestObjects_CreateBox(NiPoint3* start, NiPoint3* end, float forwardExtent, float backwardExtent,
                                      float upExtent, float downExtent, FilterData* nearFilter, FilterData* farFilter)
 {
     NiPoint3* verticesX;

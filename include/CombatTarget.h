@@ -13,5 +13,5 @@ public:
     void SetValue(unsigned int key, unsigned int x, unsigned int y);
     bool Lookup(unsigned int key, CombatPair* out);
     ObjectName* FUN_00413f40();
-    void FUN_009856e0(CombatWriter*, SavedCombatState*);
+    void SaveGame_009856e0(CombatWriter*, SavedCombatState*);
 };

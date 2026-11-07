@@ -84,12 +84,12 @@ public:
     PacketCallLocal_00d59cc0(float x, float y, float z, float w);
     PacketCallLocal_00d59cc0(const __m128& vector);
 
-    PacketCallLocal_00d59cc0* FUN_005532a0(float x, float y, float z, float w);
-    void FUN_004a3f10(PacketCallLocal_00d59cc0* vector);
-    void __thiscall FUN_004b4db0(const PacketCallLocal_00d59cc0* vector);
-    PacketCallLocal_00d59cc0& FUN_00e531a0(int parameter);
-    PacketCallLocal_00d59cc0 FUN_00e53260(int parameter);
-    void FUN_005611c0();
+    PacketCallLocal_00d59cc0* hkVector4_hkVector4(float x, float y, float z, float w);
+    void SetValue(PacketCallLocal_00d59cc0* vector);
+    void __thiscall SetQuaternionComponentsFromVector(const PacketCallLocal_00d59cc0* vector);
+    PacketCallLocal_00d59cc0& ComputeValue_00e531a0(int parameter);
+    PacketCallLocal_00d59cc0 ProcessAndReturnValue_00e53260(int parameter);
+    void normalize_005611c0();
 
     void operator=(const PacketCallLocal_00d59cc0& vector);
     float& operator()(int index);
@@ -159,13 +159,13 @@ void hkpConvexVerticesShape::GetFirstVertex(hkVector4& vertex) const
     out[3] = 0.0f;
 }
 
-void __cdecl FUN_00d26230(void*, void*, void*, float, int);
+void __cdecl hkAabbUtil_calcAabb_00d26230(void*, void*, void*, float, int);
 
 // Calls FUN_00d26230 with this+0x20, this+0x30, the float at this+0x10 plus b, and c.
 // @fnv 0x00d591d0
 void hkpConvexVerticesShape::CalculateAabb(const hkTransform& a, float afDelta, hkAabb& c) const
 {
-    FUN_00d26230(
+    hkAabbUtil_calcAabb_00d26230(
         const_cast<hkTransform*>(&a),
         reinterpret_cast<void*>(reinterpret_cast<char*>(const_cast<hkpConvexVerticesShape*>(this)) + 0x20),
         reinterpret_cast<void*>(reinterpret_cast<char*>(const_cast<hkpConvexVerticesShape*>(this)) + 0x30),
@@ -178,7 +178,7 @@ struct RefObj { void RetainReference(); void removeReference(); };
 struct DDCC60World { void removeReference(); };
 // Local fallback: shared hkpConvexVerticesShape lacks AssignReference and FUN_00d59f40.
 struct FUN_00d5a320 {
-    void FUN_00d59f40();
+    void ProcessEntries_00d59f40();
     void AssignReference(RefObj* p, bool b);
 };
 // Releases the current reference at this+0x60, stores p there, and if b and p are set calls FUN_00d59f40.
@@ -188,7 +188,7 @@ void FUN_00d5a320::AssignReference(RefObj* apRef, bool b)
     if (apRef) apRef->RetainReference();
     if (*(DDCC60World**)((char*)this + 0x60)) (*(DDCC60World**)((char*)this + 0x60))->removeReference();
     *(RefObj**)((char*)this + 0x60) = apRef;
-    if (b && apRef) FUN_00d59f40();
+    if (b && apRef) ProcessEntries_00d59f40();
 }
 
 hkMemoryRouter* _D1A0E0GetMemoryRouter();
@@ -220,14 +220,15 @@ FUN_00d5a4e0_StandIn* FUN_00d5a4e0_StandIn::FUN_00d5a4e0(unsigned char deleting)
 }
 
 // @fnv 0x00d58d40
-static Vec4* __cdecl FUN_00d58d40(Vec4* base, int index)
+// src: XBOX_PDB 0x00d58d40
+static Vec4* __cdecl ConvexVerticesShape_FetchVectorFromPpuArray(Vec4* base, int index)
 {
     return base + index;
 }
 
 Vec4* caller_d58d40(Vec4* base, int index)
 {
-    return FUN_00d58d40(base, index);
+    return ConvexVerticesShape_FetchVectorFromPpuArray(base, index);
 }
 
 // @fnv 0x00d58d10
@@ -242,14 +243,15 @@ const hkArray<hkVector4>& hkpConvexVerticesShape::GetPlaneEquations() const
     return m_kVertexPositions;
 }
 
-struct CallTarget_00d5a410 { int FUN_00d5a410(int, int, int, int, int); };
+struct CallTarget_00d5a410 { int hkArrayBase_hkVector4_spliceInto(int, int, int, int, int); };
 struct SearchObject {
-    int FUN_00d5a4c0(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
+    int ProcessAndReturnValue_00d5a4c0(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
 };
 // @fnv 0x00d5a4c0
-int SearchObject::FUN_00d5a4c0(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3)
+// src: GUESS 0x00d5a4c0 (confidence: low)
+int SearchObject::ProcessAndReturnValue_00d5a4c0(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3)
 {
-    unsigned int uiCallResult = (unsigned int)((CallTarget_00d5a410*)this)->FUN_00d5a410((int)arg0, (int)arg1, (int)0u, (int)arg2, (int)arg3);
+    unsigned int uiCallResult = (unsigned int)((CallTarget_00d5a410*)this)->hkArrayBase_hkVector4_spliceInto((int)arg0, (int)arg1, (int)0u, (int)arg2, (int)arg3);
     return (int)uiCallResult;
 }
 
@@ -488,7 +490,7 @@ public:
     int m_planeCapacity;
 
     void FUN_00d59200(hkArray<hkVector4q, hkArrayqPolicy>& vertices) const throw();
-    void FUN_00d59900(const float* vertices, int striding, int numVertices) throw();
+    void hkpConvexVerticesShape_copyVertexData(const float* vertices, int striding, int numVertices) throw();
     void Transform(const hkTransform& t);
 };
 
@@ -499,7 +501,7 @@ void hkpConvexVerticesShapeq::Transform(const hkTransform& t)
     hkLocalArrayq<hkVector4q> vertices(GetNumCollisionSpheres());
     FUN_00d59200(vertices);
     hkTransformPoints(t, vertices.begin(), vertices.GetLogicalSize(), vertices.begin());
-    FUN_00d59900((const float*)vertices.begin(), sizeof(hkVector4q), vertices.GetLogicalSize());
+    hkpConvexVerticesShape_copyVertexData((const float*)vertices.begin(), sizeof(hkVector4q), vertices.GetLogicalSize());
     hkTransformPlaneEquations((const hkTransformq&)t, m_planeData, m_iPlaneCount, m_planeData);
 }
 
@@ -567,7 +569,7 @@ struct ConvexD5A360 {
     int unk50;
     hkArray<Vector4D5A360, ArrayD5A360Policy> m_kVertices;
     int m_iConnectivity;
-    void FUN_00d59f40();
+    void ProcessEntries_00d59f40();
     void SetVertices(const hkArray<Vector4D5A360, ArrayD5A360Policy>& kVertices);
 };
 
@@ -577,7 +579,7 @@ void ConvexD5A360::SetVertices(const hkArray<Vector4D5A360, ArrayD5A360Policy>& 
 {
     m_kVertices = kVertices;
     if (m_iConnectivity)
-        FUN_00d59f40();
+        ProcessEntries_00d59f40();
 }
 
 // @fnv 0x00d58d20
@@ -630,25 +632,26 @@ void hkpConvexVerticesShape::GetVerticesFromIds(const hkpVertexId* ids, int numI
 
 class SpliceAllocator;
 struct AlignedSpliceVector {LocalM128 value;};
-void __cdecl FUN_00c908c0(SpliceAllocator& allocator,void* array,int capacity,int elementBytes);
-void __cdecl FUN_00d2cc70(void* destination,const void* source,unsigned bytes);
+void __cdecl hkArrayUtil__reserve(SpliceAllocator& allocator,void* array,int capacity,int elementBytes);
+void __cdecl hkMemUtil_memMove(void* destination,const void* source,unsigned bytes);
 struct VectorSpliceArray {
     AlignedSpliceVector* data;
     int size;
     int capacityAndFlags;
-    void FUN_00d5a410(SpliceAllocator& allocator,int first,int removeCount,const AlignedSpliceVector* source,int insertCount);
+    void hkArrayBase_hkVector4_spliceInto(SpliceAllocator& allocator,int first,int removeCount,const AlignedSpliceVector* source,int insertCount);
 };
 // Removes removeCount elements at first, inserts insertCount elements from source, and grows the buffer via FUN_00c908c0 if capacity is insufficient.
 // @fnv 0x00d5a410
-void VectorSpliceArray::FUN_00d5a410(SpliceAllocator& allocator,int first,int removeCount,const AlignedSpliceVector* source,int insertCount) {
+// src: XBOX_PDB 0x00d5a410
+void VectorSpliceArray::hkArrayBase_hkVector4_spliceInto(SpliceAllocator& allocator,int first,int removeCount,const AlignedSpliceVector* source,int insertCount) {
     int newSize=size-removeCount+insertCount;
     int tailCount=size-first-removeCount;
     if((capacityAndFlags&0x3fffffff)<newSize) {
         int requested=(capacityAndFlags&0x3fffffff)*2;
         if(newSize>=requested)requested=newSize;
-        FUN_00c908c0(allocator,this,requested,sizeof(AlignedSpliceVector));
+        hkArrayUtil__reserve(allocator,this,requested,sizeof(AlignedSpliceVector));
     }
-    FUN_00d2cc70(data+first+insertCount,data+first+removeCount,tailCount*sizeof(AlignedSpliceVector));
+    hkMemUtil_memMove(data+first+insertCount,data+first+removeCount,tailCount*sizeof(AlignedSpliceVector));
     AlignedSpliceVector* destination=data+first;
     for(int i=0;i<insertCount;++i) {
         LocalM128 value=source[i].value;
@@ -657,12 +660,12 @@ void VectorSpliceArray::FUN_00d5a410(SpliceAllocator& allocator,int first,int re
     size=newSize;
 }
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 // hkArray<T>::~hkArray() = clearAndDeallocate() on the heap allocator (slot 4 of hkMemoryAllocator is ReturnMemory).
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return FUN_00c85750().heap();
+    return hkMemoryRouter_getInstance().heap();
 }
 template <typename T> __forceinline void hkArrayBase<T>::clear()
 {
@@ -746,12 +749,13 @@ struct MatchShape : public hkpShape
     int m_rotatedSize;
     int m_rotatedCapacity;
     int m_iStridedVertexCount;
-    void FUN_00d58ee0(const MatchVector& direction, MatchVector& supportingVertexOut) const;
+    void hkpConvexVerticesShape_getSupportingVertexImpl(const MatchVector& direction, MatchVector& supportingVertexOut) const;
 };
 
 // Finds the vertex with the maximum dot product against direction and writes its position and index to supportingVertexOut.
 // @fnv 0x00d58ee0
-void MatchShape::FUN_00d58ee0(const MatchVector& direction, MatchVector& supportingVertexOut) const
+// src: HAVOK_SRC 0x00d58ee0
+void MatchShape::hkpConvexVerticesShape_getSupportingVertexImpl(const MatchVector& direction, MatchVector& supportingVertexOut) const
 {
     const hkFourTransposedPointsQ* fv = m_kRotatedVertices;
     static const MatchVector minusMax(-3.40282e+38f);
@@ -803,7 +807,7 @@ struct InputValues {
 };
 
 struct FinalCall {
-    void FUN_00d59900(int x, int z, int y);
+    void hkpConvexVerticesShape_copyVertexData(int x, int z, int y);
 };
 
 __forceinline void AllocateVectors(
@@ -821,7 +825,7 @@ __forceinline void ResizePlanes(
     hkArray<Vector4D5A360, ArrayD5A360Policy>& planes,
     const hkArray<Vector4D5A360, ArrayD5A360Policy>& source)
 {
-    hkMemoryAllocator& allocator = FUN_00c85750().heap();
+    hkMemoryAllocator& allocator = hkMemoryRouter_getInstance().heap();
 
     if ((planes.m_iCapacityState & 0x3fffffff) < source.m_iElementCount) {
         if ((planes.m_iCapacityState & 0x80000000) == 0)
@@ -891,7 +895,7 @@ FUN_00d59bd0::FUN_00d59bd0(InputValues* input, const hkArray<Vector4D5A360, Arra
     : ConvexPart(6, r), convexPiece(0), connectivity(0)
 {
     ResizePlanes(planes, source);
-    ((FinalCall*)this)->FUN_00d59900(input->x, input->z, input->y);
+    ((FinalCall*)this)->hkpConvexVerticesShape_copyVertexData(input->x, input->z, input->y);
 }
 
 extern "C" LocalM128 _mm_set_ss(float);
@@ -1021,11 +1025,12 @@ struct ConvexVertsShape {
     int m_iStridedVertexCount;
     ConvexPiece* m_piece;
     hkArrayBase<V4> m_kPlaneArray;
-    hkBoolRet FUN_00d592a0(const RayInput& input, RayOutput& results);
+    hkBoolRet hkpConvexVerticesShape_castRayImpl(const RayInput& input, RayOutput& results);
 };
 
 // @fnv 0x00d592a0
-hkBoolRet ConvexVertsShape::FUN_00d592a0(const RayInput& input, RayOutput& results)
+// src: HAVOK_SRC 0x00d592a0
+hkBoolRet ConvexVertsShape::hkpConvexVerticesShape_castRayImpl(const RayInput& input, RayOutput& results)
 {
     TimerMark("TtrcConvexVert", 0);
     if (m_kPlaneArray.m_iElementCount == 0) {
@@ -1064,7 +1069,7 @@ hkBoolRet ConvexVertsShape::FUN_00d592a0(const RayInput& input, RayOutput& resul
                     LocalM128 dot = _mm_add_ss(_mm_shuffle_ps(pd, pd, 0x55), pd);
                     dot = _mm_add_ss(_mm_shuffle_ps(pd, pd, 0xaa), dot);
                     scratch.plane.w = LowFloat(_mm_sub_ss(DAT_010c7160, dot));
-                    hkMemoryRouter& router = FUN_00c85750();
+                    hkMemoryRouter& router = hkMemoryRouter_getInstance();
                     if (arr->m_iElementCount == (arr->m_iCapacityState & 0x3fffffff)) {
                         ResizeAudioStream(router.m_heap, arr, 0x10);
                     }
@@ -1137,13 +1142,13 @@ static __forceinline void VertArray96Q_SetSizeAndGrow(hkArrayBase<hkVector4q>& s
 
 static __forceinline void VertArray96Q_SetSizeAndGrow(hkArrayBase<hkVector4q>& self, int n)
 {
-        hkMemoryAllocator& alloc = FUN_00c85750().heap();
+        hkMemoryAllocator& alloc = hkMemoryRouter_getInstance().heap();
         int cap = self.m_iCapacityState & 0x3fffffff;
         if (cap < n)
         {
             int cap2 = cap + cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(reinterpret_cast<SpliceAllocator&>(alloc), (&self), newSize, sizeof(hkVector4q));
+            hkArrayUtil__reserve(reinterpret_cast<SpliceAllocator&>(alloc), (&self), newSize, sizeof(hkVector4q));
         }
         self.m_iElementCount = n;
     }
@@ -1241,12 +1246,13 @@ struct ConvexVerticesShape
     hkArrayBase<FourVectors> m_kRotatedVertices;
     int m_iStridedVertexCount;
 
-    void FUN_00d59900(const float* vertexIn, int byteStriding, int numVertices);
+    void hkpConvexVerticesShape_copyVertexData(const float* vertexIn, int byteStriding, int numVertices);
 };
 
 // Stores numVertices, copies vertexIn into m_kRotatedVertices padded to a multiple of four, and computes the AABB center and half-extents.
 // @fnv 0x00d59900
-void ConvexVerticesShape::FUN_00d59900(const float* vertexIn, int byteStriding, int numVertices)
+// src: XBOX_PDB 0x00d59900
+void ConvexVerticesShape::hkpConvexVerticesShape_copyVertexData(const float* vertexIn, int byteStriding, int numVertices)
 {
     m_iStridedVertexCount = numVertices;
     int paddedSize = (numVertices + 3) & ~3;

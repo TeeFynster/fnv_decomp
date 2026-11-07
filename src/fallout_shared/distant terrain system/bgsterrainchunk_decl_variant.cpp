@@ -36,11 +36,11 @@ struct FUN_006fb6e0_shell
 };
 struct FUN_006fb940_shell
 {
-    void FUN_006fb940(float a, float b, float c);
+    void BSShaderPPLightingProperty_SetLODTexParams(float a, float b, float c);
 };
 extern int _sprintf_s(char*, unsigned int, const char*, ...);
 extern "C" void __cdecl UpdateListItems();
-void __cdecl FUN_006fd1a0();
+void __cdecl BGSTerrainManager_ShowMinimumDetail();
 struct FakeWorld006faad0
 {
     virtual const char* f0();
@@ -206,7 +206,7 @@ struct FakeFab
 void __cdecl BuildLodNormalTexturePath(char* a1, FakeFab* a2, int a3, short a4, short a5);
 struct FUN_006fb760_shell
 {
-    void FUN_006fb760();
+    void BGSTerrainChunk_Show();
 };
 void __cdecl _Deallocate(void*);
 struct FUN_006fbfe0_shell
@@ -300,7 +300,7 @@ void __cdecl BuildLODDiffuseTexturePath(char* buf, FakeObj* obj, int level, shor
 struct GO;
 struct FUN_006fea10_Class
 {
-    unsigned char FUN_006fe920(bool);
+    unsigned char BGSTerrainNode_CheckMeshSolidUnderMe(bool);
 };
 struct SoundListView
 {
@@ -316,7 +316,7 @@ struct ModelLoader
 };
 struct FUN_0043cc60_shell
 {
-    int FUN_0043cc60();
+    int IOTask_GetIOTaskPriority();
 };
 extern ModelLoader* g_modelLoader;
 void __cdecl BuildLODDiffuseTexturePath(char*, FakeObj*, int, short, short);
@@ -335,22 +335,22 @@ struct TESObjectDoorController
 struct Obj006fac;
 struct Ref006fac
 {
-    Obj006fac* FUN_00559450();
+    Obj006fac* Modelloader_GetReferencedThis();
     void FUN_0066b0d0(void*);
     int data;
 };
 struct Obj006fac
 {
-    Obj006fac* FUN_00559450();
-    Obj006fac* FUN_004ea9a0();
+    Obj006fac* Modelloader_GetReferencedThis();
+    Obj006fac* BGSTerrainManager_GetLODLandRoot();
     Obj006fac* FUN_006629f0();
-    Obj006fac* FUN_0043b230();
+    Obj006fac* NiObjectNET_GetControllers();
     NiPoint3& GetOffsetC();
     NiPoint3& FUN_00500940();
     float GetFieldCC();
     void FUN_00439920(void*);
-    void FUN_00a5a040();
-    void FUN_00a59c60(const FUN_0043d410&);
+    void UpdateProperties();
+    void NiAVObject_Update(const FUN_0043d410&);
     unsigned char GetByteAtOffset5C();
     unsigned char GetByteAt5D();
     virtual void v0();
@@ -461,7 +461,7 @@ struct FUN_00c37ec0 : TESObjectDoorController
     virtual void v44();
     virtual void v45();
     virtual void position(const NiPoint3&);
-    void FUN_00439680(const NiPoint3&);
+    void BSMultiBound_SetHalfExtents(const NiPoint3&);
 };
 struct FUN_00c46970 : TESObjectDoorController
 {
@@ -474,10 +474,10 @@ struct Target006fac
     Ref006fac r4, r8, rc, r10, r14, r18;
     int p1c, p20, p24;
     unsigned char enabled, done;
-    void FUN_006facb0();
-    Obj006fac* FUN_00559450();
+    void BGSTerrainChunk_Attach();
+    Obj006fac* Modelloader_GetReferencedThis();
     void UpdateWaterReferences(int);
-    void FUN_006fb7e0();
+    void BGSTerrainChunk_InitializeShaderProperty();
     void AddSelfToList();
     void SetAllAppCulled();
 };
@@ -487,8 +487,8 @@ struct B5D0Status
 };
 struct B5D0Item
 {
-    B5D0Status* FUN_00559450();
-    void FUN_006fb760();
+    B5D0Status* Modelloader_GetReferencedThis();
+    void BGSTerrainChunk_Show();
     void SetAllAppCulled();
 };
 struct B5D0List
@@ -572,9 +572,9 @@ struct PropState
     virtual void v69();
     virtual void* v70(NiGeometry*, NiProperty*);
 };
-int FUN_00438220();
+int NiShadeProperty_GetType();
 void __cdecl FUN_00b57e30(NiGeometry*, int, int);
-NiRenderer* FUN_0043c4b0();
+NiRenderer* NiXenonRenderer_GetRenderer();
 class TerrainChunk
 {
   public:
@@ -593,7 +593,7 @@ class TerrainChunk
     char unk2B;
     NiPointer<NiNode> m_spProperty;
 
-    void FUN_006fb7e0();
+    void BGSTerrainChunk_InitializeShaderProperty();
 };
 struct LoadedNode
 {
@@ -607,7 +607,7 @@ struct NodeRef
 };
 struct FinalObject
 {
-    void FUN_006fa990();
+    void BGSTerrainChunk_OnLoadFinished();
 };
 
 void BuildLodMeshPath(char*, TESWorldSpace*, int, short, short);
@@ -618,6 +618,6 @@ BGSTerrainChunkLoadTask::BGSTerrainChunkLoadTask(void* block, TESWorldSpace* spa
 {
     char fileName[260];
     BuildLodMeshPath(fileName, world, level, (short)x, (short)y);
-    FUN_00c3cee0(fileName + 5);
+    SetFileName_00c3cee0(fileName + 5);
     LookupFileEntryByArchive(0);
 }

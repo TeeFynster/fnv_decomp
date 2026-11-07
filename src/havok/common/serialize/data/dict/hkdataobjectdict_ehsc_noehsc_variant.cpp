@@ -59,14 +59,14 @@ struct hkRouterX
     }
 };
 
-extern "C" void* FUN_00c85750() throw();
+extern "C" void* hkMemoryRouter_getInstance() throw();
 
 static __forceinline hkRouterX& getRouterX()
 {
-    return *reinterpret_cast<hkRouterX*>(FUN_00c85750());
+    return *reinterpret_cast<hkRouterX*>(hkMemoryRouter_getInstance());
 }
 
-void __cdecl FUN_00c908c0(hkAllocX& alloc, void* array, int numElem, int sizeElem) throw();
+void __cdecl hkArrayUtil__reserve(hkAllocX& alloc, void* array, int numElem, int sizeElem) throw();
 
 template <typename T> struct hkHeapArrXLocalForm
 { // local form of hkArray: 0x00dc85a0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
@@ -99,7 +99,7 @@ template <typename T> struct hkHeapArrXLocalForm
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, sizeof(T));
+            hkArrayUtil__reserve(alloc, this, newSize, sizeof(T));
         }
     }
     __forceinline void reserve(int n)
@@ -162,7 +162,7 @@ struct hkRouterDC82
     }
 };
 namespace hkRouterNsDC82 {
-extern "C" hkRouterDC82& __cdecl FUN_00c85750() throw();
+extern "C" hkRouterDC82& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 #include "../../../../../../include/hkDataClassImpl.h"
@@ -170,7 +170,7 @@ extern "C" hkRouterDC82& __cdecl FUN_00c85750() throw();
 // hkDataRefCounted's class allocator, inlined here: the router heap allocates and the size is recorded at +4.
 inline void* hkDataRefCounted::operator new(unsigned int n)
 {
-    void* p = hkRouterNsDC82::FUN_00c85750().heap().AllocateMemoryBlock(n);
+    void* p = hkRouterNsDC82::hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(n);
     static_cast<hkDataRefCounted*>(p)->m_memSize = (unsigned short)n;
     return p;
 }
@@ -311,10 +311,10 @@ inline void hkDataClassDict::setParent(hkDataClassDict* p)
 struct hkStringMapDC82
 {
     void* GetValue(const char* key, void* def);
-    void FUN_00d874d0(const char* key, const char* val);
+    void hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_insert(const char* key, const char* val);
 };
 
-extern "C" char* FUN_00cb1410(const char* s);
+extern "C" char* hkString_strDup_00cb1410(const char* s);
 struct hkTrackerDC82
 {
     hkStringMapDC82 m_kLookupMap;
@@ -345,19 +345,19 @@ struct hkTrackerDC82
             const char* r = (const char*)m_pStringFunctions.GetValue(s, 0);
             if (r == 0)
             {
-                r = FUN_00cb1410(s);
-                m_pStringFunctions.FUN_00d874d0(r, r);
+                r = hkString_strDup_00cb1410(s);
+                m_pStringFunctions.hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_insert(r, r);
             }
             return r;
         }
         return 0;
     }
     void RegisterObject(hkDataClassDict* c);
-    hkRefPtrDC82<hkRefObjDC82> FUN_00dc8d70(const char* name);
+    hkRefPtrDC82<hkRefObjDC82> FindOrCreateTypeEntry(const char* name);
 };
 
 extern const char* DAT_011b7bfc;
-extern "C" char* FUN_00cb1410(const char* s);
+extern "C" char* hkString_strDup_00cb1410(const char* s);
 int GetShapeTypeFlags(int type, int subtype, const hkClass* pClassInfo, int count);
 
 // Shared hkDataWorldDict.h is absent; both dictionary-world functions use this tracker at +0x08.
@@ -377,7 +377,7 @@ class hkDataWorldDict
 
     void addClassMemberX(hkDataClass& pClassInfo, const char* name, int type, const char* className,
                          int aiFlags) throw();
-    hkDataClassImpl* FUN_00dc85a0(const char* name, const hkDataWorldDict& worldFrom);
+    hkDataClassImpl* copyClassFromWorld(const char* name, const hkDataWorldDict& worldFrom);
     int m_referenceCounts;
     hkTrackerDC82* m_pTracker;
 
@@ -391,11 +391,12 @@ class hkDataWorldDict
         hkTrackerDC82* tracker = m_pTracker;
         return tracker->InternString(s);
     }
-    hkDataClassDict* FUN_00dc8270(const hkClass& pClassInfo);
+    hkDataClassDict* wrapClass(const hkClass& pClassInfo);
 };
 
 // @fnv 0x00dc8270
-hkDataClassDict* hkDataWorldDict::FUN_00dc8270(const hkClass& pClassInfo)
+// src: XBOX_PDB 0x00dc8270
+hkDataClassDict* hkDataWorldDict::wrapClass(const hkClass& pClassInfo)
 {
     hkDataClassDict* c = new hkDataClassDict(this, pClassInfo.FUN_00d46d40(), pClassInfo.FUN_00d47120());
     if (pClassInfo.FUN_00d46d50())
@@ -404,7 +405,7 @@ hkDataClassDict* hkDataWorldDict::FUN_00dc8270(const hkClass& pClassInfo)
         hkDataClassDict* p = FindTrackedClass(parent->FUN_00d46d40());
         if (p == 0)
         {
-            p = FUN_00dc8270(*pClassInfo.FUN_00d46d50());
+            p = wrapClass(*pClassInfo.FUN_00d46d50());
         }
         c->setParent(p);
     }
@@ -417,28 +418,28 @@ hkDataClassDict* hkDataWorldDict::FUN_00dc8270(const hkClass& pClassInfo)
         hkHandleDC82 typeName;
         if ((m.m_flags & 0x400) != 0x400)
         {
-            type = GetShapeTypeFlags(GetDataDictMemberType(m), GetDataDictMemberSubtype(m), m.FUN_00d86920(), m.FUN_00d86940());
-            if (m.FUN_00d86920())
+            type = GetShapeTypeFlags(GetDataDictMemberType(m), GetDataDictMemberSubtype(m), m.getClass(), m.getCstyleArraySize());
+            if (m.getClass())
             {
-                if (const hkVariant* attr = m.FUN_00d86960(DAT_011b7bfc))
+                if (const hkVariant* attr = m.getAttribute_00d86960(DAT_011b7bfc))
                 {
                     hkMemberAccessorDC82 acc(attr, "typeName");
-                    typeName = m_pTracker->FUN_00dc8d70(*acc.GetStringPointerAt(0));
+                    typeName = m_pTracker->FindOrCreateTypeEntry(*acc.GetStringPointerAt(0));
                 }
-                else if (const hkVariant* attr = m.FUN_00d86920()->FUN_00d47260(DAT_011b7bfc))
+                else if (const hkVariant* attr = m.getClass()->FUN_00d47260(DAT_011b7bfc))
                 {
                     hkMemberAccessorDC82 acc(attr, "typeName");
-                    typeName = m_pTracker->FUN_00dc8d70(*acc.GetStringPointerAt(0));
+                    typeName = m_pTracker->FindOrCreateTypeEntry(*acc.GetStringPointerAt(0));
                 }
                 else
                 {
-                    typeName = m_pTracker->FUN_00dc8d70(m.FUN_00d86920()->FUN_00d46d40());
+                    typeName = m_pTracker->FindOrCreateTypeEntry(m.getClass()->FUN_00d46d40());
                 }
             }
         }
         const char* name = internString(m.m_name);
         hkRefObjDC82* typeObj = typeName.m_pRetainedObject;
-        c->FUN_00dc9f20(name, type, typeName, m.FUN_00d86940());
+        c->FUN_00dc9f20(name, type, typeName, m.getCstyleArraySize());
         if (typeObj)
             typeObj->removeReference();
     }
@@ -446,7 +447,8 @@ hkDataClassDict* hkDataWorldDict::FUN_00dc8270(const hkClass& pClassInfo)
 }
 
 // @fnv 0x00dc85a0
-hkDataClassImpl* hkDataWorldDict::FUN_00dc85a0(const char* name, const hkDataWorldDict& worldFrom)
+// src: XBOX_PDB 0x00dc85a0
+hkDataClassImpl* hkDataWorldDict::copyClassFromWorld(const char* name, const hkDataWorldDict& worldFrom)
 {
     if (hkDataClassImpl* c = GetClassFromName(name))
         return c;
@@ -477,7 +479,7 @@ hkDataClassImpl* hkDataWorldDict::FUN_00dc85a0(const char* name, const hkDataWor
         if (m.m_valueClass)
         {
             className = m.m_valueClass->getName();
-            FUN_00dc85a0(className, worldFrom);
+            copyClassFromWorld(className, worldFrom);
         }
         addClassMemberX(pClassInfo, m.m_name, m.m_type, className, m.m_iFlags);
     }
@@ -493,5 +495,5 @@ void hkDataWorldDict::addClassMemberX(hkDataClass& klass, const char* pcName, in
     const char* pcPooled = m_pTracker->InternString(pcName);
     if (pkClass->getDeclaredMemberIndexByName(pcName) != -1)
         pkClass->FUN_00dc9470(pcPooled);
-    pkClass->FUN_00dc9f20(pcPooled, iType, m_pTracker->FUN_00dc8d70(pcTypeName), iCount);
+    pkClass->FUN_00dc9f20(pcPooled, iType, m_pTracker->FindOrCreateTypeEntry(pcTypeName), iCount);
 }

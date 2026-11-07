@@ -127,8 +127,8 @@ public:
     void SetRotatedDirection(const hkMatrix3& r, const hkVector4q& b) throw(); // exe: 0x00c7f700
     void SetRotatedDirection(const hkRotationq& r, const hkVector4q& b);
     void SetTransformedPoint(const hkTransformq& a, const hkVector4q& bIn);
-    void FUN_00c7f640(const hkTransform& t, const hkVector4q& v);
-    void FUN_004b4ab0(const hkRotation& r, const hkVector4q& v);
-    void FUN_00c7f690(const hkTransform& t, const hkVector4& v);
+    void setTransformedPos_00c7f640(const hkTransform& t, const hkVector4q& v);
+    void hkVector4_setRotatedInverseDir(const hkRotation& r, const hkVector4q& v);
+    void hkVector4_setTransformedInversePos(const hkTransform& t, const hkVector4& v);
 };
 

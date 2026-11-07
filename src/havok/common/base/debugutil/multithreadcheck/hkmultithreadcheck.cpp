@@ -7,11 +7,12 @@
 class FUN_00cf6d20_Class
 {
   public:
-    void FUN_00cf6d20();
+    void hkMultiThreadCheck_disableChecks();
 };
 
 // @fnv 0x00cf6d20
-void FUN_00cf6d20_Class::FUN_00cf6d20()
+// src: XBOX_PDB 0x00cf6d20
+void FUN_00cf6d20_Class::hkMultiThreadCheck_disableChecks()
 {
     *reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(this) + 4) |= 0x8000;
 }

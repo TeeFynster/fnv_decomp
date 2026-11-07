@@ -19,8 +19,8 @@ public:
 
     void DestroyContactPointViewer() throw();
     void ProcessSpawnedList();
-    void FUN_00de2da0(Cont* island);
-    void FUN_00de2da0(void* island);
+    void drawAllContactPointsInIsland_00de2da0(Cont* island);
+    void drawAllContactPointsInIsland_00de2da0(void* island);
     void drawAllContactPointsInIsland(hkpSimulationIsland* island);
 
     float m_uiFilterValue;

@@ -215,7 +215,7 @@ struct D10800Input
     int m_pCollisionQualityInfo;
 };
 
-void __cdecl FUN_00cc0f40(D10800Collidable* collA, D10800Collidable* collB, D10800Input* input);
+void __cdecl hkpWorldAgentUtil_addAgent(D10800Collidable* collA, D10800Collidable* collB, D10800Input* input);
 
 struct D10800World
 {
@@ -272,7 +272,7 @@ void D10800Listener::DispatchCollisionPair(D10800HandlePair& pair)
     if (quality)
     {
         input->m_pCollisionQualityInfo = dispatcher->m_pCollisionQualityInfo[quality].m_data;
-        FUN_00cc0f40(collA, collB, input);
+        hkpWorldAgentUtil_addAgent(collA, collB, input);
     }
 }
 
@@ -300,7 +300,7 @@ struct D10860HandlePair
 struct D10860Agent;
 
 D10860Agent* __cdecl FindEntryValue(const D10860Collidable* collA, const D10860Collidable* collB);
-void __cdecl FUN_00cc10b0(D10860Agent* agent);
+void __cdecl hkpWorldAgentUtil_removeAgent(D10860Agent* agent);
 
 struct D10860Listener
 {
@@ -314,5 +314,5 @@ void D10860Listener::ProcessHandlePair(D10860HandlePair& pair)
     D10860Collidable* collB = pair.m_kPointB->getOwner();
     D10860Agent* agent = FindEntryValue(collA, collB);
     if (agent)
-        FUN_00cc10b0(agent);
+        hkpWorldAgentUtil_removeAgent(agent);
 }

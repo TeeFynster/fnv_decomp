@@ -5,7 +5,7 @@
 #include "../../../../../include/BSAudio.h"
 #include "../../../../../include/hkMemoryAllocator.h"
 
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 struct AudioObject
 {
     unsigned int unk00;
@@ -13,7 +13,7 @@ struct AudioObject
     void FUN_00e023c0();
     static void operator delete(void* p)
     {
-        BSAudio* audio = FUN_00c85750();
+        BSAudio* audio = hkMemoryRouter_getInstance();
         AudioObject* object = static_cast<AudioObject*>(p);
         reinterpret_cast<hkMemoryAllocator*>(audio->pListener)->blockFree(p, object->allocationSize);
     }

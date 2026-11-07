@@ -98,7 +98,7 @@ public:
     void RemoveData();
     void EnsureCurrentEntry();
     DestructionStage** AllocateSpawnedItemArray(unsigned int);
-    void FUN_00478690();
+    void BGSDestructibleObjectForm_RemoveData();
     void FUN_004786e0(BaseFormComponent* source);
     DestructibleData* FUN_00726070();
 };

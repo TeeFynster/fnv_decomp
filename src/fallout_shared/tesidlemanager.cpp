@@ -56,7 +56,7 @@ void IdleAnimationManager::BuildIdlePath(const char* source, char* destination)
         }
         else
         {
-            match = FUN_0040ab30(buffer, '\\');
+            match = strrchr_0040ab30(buffer, '\\');
             if (match)
             {
                 ++match;
@@ -81,7 +81,7 @@ BSSimpleList<const char*>* IdleAnimationManager::FindIdleArrayEntry(const char* 
             char buffer[128];
             {
                 TaskQueueInterface::CopyStringToBuffer(buffer, 128, directory);
-                char* match = FUN_0040ab30(buffer, '\\');
+                char* match = strrchr_0040ab30(buffer, '\\');
                 TaskQueueInterface::CopyStringToBuffer(match + 1, 128 - (match - buffer) - 1,
                                                        fnv_tesidlemanager_idle_anims);
                 if (GetAt(buffer, pIdleEntry) && pIdleEntry)
@@ -141,7 +141,7 @@ TESIdleForm* IdleAnimationManager::FindIdleFormForObject(TESObjectREFR* action, 
             }
         }
     }
-    if (result && result->FUN_005ff1d0() && !result->IsIdleFile())
+    if (result && result->TESIdleForm_GetAllowNoFile() && !result->IsIdleFile())
         result = 0;
     return result;
 }
@@ -202,7 +202,7 @@ IdleAnimationDirectoryEntry* IdleAnimationManager::ClearIdleData(const char* dir
                         char buffer[128];
                         {
                             TaskQueueInterface::CopyStringToBuffer(buffer, 128, directory);
-                            char* slash = FUN_0040ab30(buffer, '\\');
+                            char* slash = strrchr_0040ab30(buffer, '\\');
                             TaskQueueInterface::CopyStringToBuffer(slash + 1, 128 - (slash - buffer) - 1,
                                                                    fnv_tesidlemanager_idle_anims);
                             supplied = new IdleAnimationDirectoryEntry(directory);
@@ -231,7 +231,8 @@ const char** __fastcall _ref_006815c0(BSSimpleList<const char*>*);
 void __fastcall _ref_0063f7b0(BSSimpleList<const char*>*);
 
 // @fnv 0x006003c0
-void __fastcall FUN_006003c0(void* thisPtr)
+// src: COMMUNITY 0x006003c0
+void __fastcall TESIdleManager_InitRootIdleArrays(void* thisPtr)
 {
     void* pIter = ((NiTPointerMap<unsigned int, void*>*)thisPtr)->GetFirstPos();
     while (pIter)
@@ -327,7 +328,8 @@ NiFormArray* FUN_00600630_shell::GetIdleFormArray(TESForm* apIdleDir)
 extern int _fnv_tesidlemanager_used_item;
 
 // @fnv 0x00600900
-void FUN_00600900(int param)
+// src: XBOX_PDB 0x00600900
+void TESIdleManager_SetUsedItem(int param)
 {
     _fnv_tesidlemanager_used_item = param;
 }
@@ -335,7 +337,8 @@ void FUN_00600900(int param)
 extern int DAT_01199c8c;
 
 // @fnv 0x00600910
-int __cdecl FUN_00600910()
+// src: XBOX_PDB 0x00600910
+int __cdecl TESIdleManager_GetUsedItemLevel()
 {
     return DAT_01199c8c;
 }
@@ -343,7 +346,8 @@ int __cdecl FUN_00600910()
 extern int DAT_01199c8c;
 
 // @fnv 0x00600920
-void FUN_00600920(int value)
+// src: XBOX_PDB 0x00600920
+void TESIdleManager_SetUsedItemLevel(int value)
 {
     DAT_01199c8c = value;
 }
@@ -351,7 +355,8 @@ void FUN_00600920(int value)
 extern unsigned char _fnv_tesidlemanager_used_item_activate;
 
 // @fnv 0x00600940
-void FUN_00600940(unsigned char value)
+// src: XBOX_PDB 0x00600940
+void TESIdleManager_SetUsedItemActivate(unsigned char value)
 {
     _fnv_tesidlemanager_used_item_activate = value;
 }
@@ -373,11 +378,12 @@ void* S005fff90::FUN_005fff90(unsigned int flags)
 
 struct FUN_006005c0_shell : public IdleAnimationManager
 {
-    NiFormArray* FUN_006005c0(const char* path);
+    NiFormArray* _TESIdleManager_GetIdleAnimRoot(const char* path);
 };
 
 // @fnv 0x006005c0
-NiFormArray* FUN_006005c0_shell::FUN_006005c0(const char* path)
+// src: COMMUNITY 0x006005c0
+NiFormArray* FUN_006005c0_shell::_TESIdleManager_GetIdleAnimRoot(const char* path)
 {
     NiFormArray* result = 0;
     if (path)
@@ -495,7 +501,8 @@ void IdleCleanup::DeleteAllOwnedForms()
 void __fastcall ClearIdleFormArray(NiFormArray* array);
 
 // @fnv 0x00600030
-void IdleAnimationManager::FUN_00600030()
+// src: GUESS 0x00600030 (confidence: low)
+void IdleAnimationManager::ReleaseStorage_00600030()
 {
     void* a = ((NiTPointerMap<void*, NiFormArray*>*)this)->GetFirstPos();
     while (a != 0)

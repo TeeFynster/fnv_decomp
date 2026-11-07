@@ -303,7 +303,7 @@ template <class T> inline void LoadPixelEnum(PixelStream& stream, T& value)
 class PixelFormatReader : public NiPixelFormat
 {
   public:
-    void FUN_00a7c9f0(Format format, unsigned char bits, unsigned int* masks);
+    void NiPixelFormat_ConvertOldPixelFormat(Format format, unsigned char bits, unsigned int* masks);
     void ReadFromStream(PixelStream& stream);
 };
 // @fnv 0x00a7ced0
@@ -326,7 +326,7 @@ void PixelFormatReader::ReadFromStream(PixelStream& stream)
             unsigned int fastCompare2;
             LoadPixelValue(stream, fastCompare2);
         }
-        FUN_00a7c9f0(m_eFormat, m_ucBitsPerPixel, masks);
+        NiPixelFormat_ConvertOldPixelFormat(m_eFormat, m_ucBitsPerPixel, masks);
     }
     else
     {
@@ -366,7 +366,8 @@ extern const NiPixelFormat kBUMPLUMA32;
 
 // Stores the format, bits per pixel, and renderer hint, then maps the format and color masks to a NiPixelFormat constant or marks it unknown.
 // @fnv 0x00a7c9f0
-void PixelFormatReader::FUN_00a7c9f0(Format eFormat, unsigned char ucBitsPerPixel, unsigned int* apuiMasks)
+// src: COMMUNITY 0x00a7c9f0
+void PixelFormatReader::NiPixelFormat_ConvertOldPixelFormat(Format eFormat, unsigned char ucBitsPerPixel, unsigned int* apuiMasks)
 {
     m_ucBitsPerPixel = ucBitsPerPixel;
     m_eFormat = eFormat;

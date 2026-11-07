@@ -14,7 +14,7 @@
 class AnimationInterpolatorNode : public NiMultiTargetTransformController
 {
   public:
-    bool FUN_004f05a0();
+    bool NiTimeController_GetActive();
     void UpdateInterpolatorsAtTime(float time, bool selective);
 };
 

@@ -3,7 +3,7 @@
 
 #include "../../../../../../../include/hkpListAgent.h"
 
-extern "C" void __cdecl FUN_00da3510(void*, void*);
+extern "C" void __cdecl hkpAgent1nSector_ProcessEntries_00da3510(void*, void*);
 
 struct hkAgent1nMachine
 {
@@ -13,51 +13,54 @@ struct hkAgent1nMachine
 // @fnv 0x00d36850
 void __thiscall hkpListAgent::vf09(void* arg)
 {
-    FUN_00da3510(&m0[4], arg);
+    hkpAgent1nSector_ProcessEntries_00da3510(&m0[4], arg);
 }
 
-extern "C" void __cdecl FUN_00d36990(int, int, int, int);
+extern "C" void __cdecl Hkpshapecollectionagent_ForwardCall_00d36990(int, int, int, int);
 
 // @fnv 0x00d36b00
-void __stdcall FUN_00d36b00(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
+// src: HAVOK_SRC 0x00d36b00
+void __stdcall hkpListAgent_getPenetrations(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
 {
-    FUN_00d36990(aiArg1, aiArg2, aiArg3, aiArg4);
+    Hkpshapecollectionagent_ForwardCall_00d36990(aiArg1, aiArg2, aiArg3, aiArg4);
 }
 
-extern "C" void __cdecl FUN_00da35f0(void*, float, float, int);
+extern "C" void __cdecl _hkAgent1nMachine_WarpTime(void*, float, float, int);
 // The shared class does not yet declare these method signatures. The unused
 // EDX parameter preserves their original ECX receiver and stack arguments.
 // Forwards the three arguments to FUN_00da35f0 with the object's field at offset 0x10 as its first argument.
 // @fnv 0x00d36870
 void __fastcall hkpListAgent_warpTime(hkpListAgent* agent, void*, float afValue1, float afValue2, int aiValue)
 {
-    FUN_00da35f0(&agent->m0[4], afValue1, afValue2, aiValue);
+    _hkAgent1nMachine_WarpTime(&agent->m0[4], afValue1, afValue2, aiValue);
 }
 
-void __cdecl FUN_00d36920(void* a, void* b, void* c, void* d);
+void __cdecl Object_QueryClosestPoints_Thunk(void* a, void* b, void* c, void* d);
 
 // @fnv 0x00d36940
-void __stdcall FUN_00d36940(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
+// src: HAVOK_SRC 0x00d36940
+void __stdcall hkpListAgent_getClosestPoints(void* apArg1, void* apArg2, void* apArg3, void* apArg4)
 {
-    FUN_00d36920(apArg1, apArg2, apArg3, apArg4);
+    Object_QueryClosestPoints_Thunk(apArg1, apArg2, apArg3, apArg4);
 }
 
-void __cdecl FUN_00d36930(int a1, int a2, int a3, int a4, int a5);
+void __cdecl hkpConvexListAgent_ForwardCall_00d36930(int a1, int a2, int a3, int a4, int a5);
 
 // Forwards all five arguments to FUN_00d36930.
 // @fnv 0x00d36960
-void __stdcall FUN_00d36960(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5)
+// src: HAVOK_SRC 0x00d36960
+void __stdcall hkpListAgent_linearCast(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5)
 {
-    FUN_00d36930(aiArg1, aiArg2, aiArg3, aiArg4, aiArg5);
+    hkpConvexListAgent_ForwardCall_00d36930(aiArg1, aiArg2, aiArg3, aiArg4, aiArg5);
 }
 
-extern "C" void __cdecl FUN_00da42b0(void* a, int b, int c, int d);
+extern "C" void __cdecl hkAgent1nMachine_Destroy(void* a, int b, int c, int d);
 
 // Releases the agent track, then invokes the deleting destructor.
 // @fnv 0x00d36820
 void __fastcall hkpListAgent_cleanup(hkpListAgent* agent, void*, int aiValue)
 {
-    FUN_00da42b0(&agent->m0[4], *(int*)agent->m0, (int)agent->m_pContactManager, aiValue);
+    hkAgent1nMachine_Destroy(&agent->m0[4], *(int*)agent->m0, (int)agent->m_pContactManager, aiValue);
     typedef void (__thiscall *DeletingDestructor)(hkpListAgent*, int);
     (*(DeletingDestructor**)agent)[0](agent, 1);
 }
@@ -69,15 +72,15 @@ struct S_00d368a0_Arg
     int m_field08;
 };
 
-void __cdecl FUN_00d97250(void* sub, int field08, S_00d368a0_Arg* arg);
+void __cdecl hkpAgentMachineUtil_calc1nStatistics(void* sub, int field08, S_00d368a0_Arg* arg);
 
 // @fnv 0x00d368a0
 void __fastcall hkpListAgent_updateShapeCollectionFilter(hkpListAgent* agent, void*, S_00d368a0_Arg* a, int unused)
 {
-    FUN_00d97250(&agent->m0[4], a->m_field08, a);
+    hkpAgentMachineUtil_calc1nStatistics(&agent->m0[4], a->m_field08, a);
 }
 
-extern "C" void __cdecl FUN_00da48e0(void*, void*);
+extern "C" void __cdecl hkAgent1nMachine_UpdateShapeCollectionFilter(void*, void*);
 
 struct VirtTarget
 {
@@ -112,5 +115,5 @@ void __fastcall hkpListAgent_processCollision(hkpListAgent* agent, void*, void* 
     s.unk14 = iStored;
     s.unk18 = (int)a4;
     s.unk0C = (*(VirtTarget**)a2)->v10();
-    FUN_00da48e0(&agent->m0[4], &s);
+    hkAgent1nMachine_UpdateShapeCollectionFilter(&agent->m0[4], &s);
 }

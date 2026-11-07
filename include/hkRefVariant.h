@@ -13,5 +13,5 @@ public:
     ~hkRefVariant() throw();
 
     void FUN_00d47770(const void* object, const hkClass* pClassInfo);
-    const hkClass* FUN_00d477a0() const;
+    const hkClass* hkRefVariant_getClass() const;
 };

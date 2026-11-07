@@ -46,13 +46,13 @@ GlobalObjectO2_00a7b610* FUN_004392e0_shell::GetGlobalObject()
     return &g_011f4408;
 }
 
-extern "C" void __cdecl FUN_00439320();
+extern "C" void __cdecl ForwardCall_00439320();
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 
 // @fnv 0x004392f0
 void* NiAlphaProperty::FUN_004392f0(unsigned int flags)
 {
-    this->NiAlphaProperty::FUN_00439320();
+    this->NiAlphaProperty::ForwardCall_00439320();
     if (flags & 1)
         __Dummy_00b6fef0(this, 0x1c);
     return this;
@@ -64,10 +64,11 @@ struct Call_439090_tgt
 };
 struct FUN_00439060_shell
 {
-    bool FUN_00439060(void* arg);
+    bool MultiBoundMarkerData_Compare(void* arg);
 };
 // @fnv 0x00439060
-bool FUN_00439060_shell::FUN_00439060(void* arg)
+// src: XBOX_PDB 0x00439060
+bool FUN_00439060_shell::MultiBoundMarkerData_Compare(void* arg)
 {
     if (!arg)
         return true;
@@ -205,9 +206,9 @@ struct BoundRef
     virtual void v124();
     virtual const NiPoint3& GetBoundCenter();
 
-    bool FUN_00439f90();
-    const NiPoint3& FUN_00569880();
-    NiMatrix3 FUN_0056fa00();
+    bool TESObjectREFR_IsMultiBoundRef();
+    const NiPoint3& TESObjectREFR_GetMultiBoundHalfExtent();
+    NiMatrix3 TESObjectREFR_GetOrientation();
 };
 
 struct CellRect
@@ -218,12 +219,12 @@ struct CellRect
     int iBottom;
 };
 
-bool __cdecl FUN_004b1e80(CellRect* pkRect, NiPoint3* pkStart, NiPoint3* pkEnd, NiPoint3* pkIntersect);
+bool __cdecl TES_LineVsRect(CellRect* pkRect, NiPoint3* pkStart, NiPoint3* pkEnd, NiPoint3* pkIntersect);
 
 // @fnv 0x00439940
 bool __cdecl BoundIntersectsCell(BoundRef* pRef, int m_iGridPositionX, int m_iGridCoordinateY)
 {
-    if (pRef && pRef->FUN_00439f90())
+    if (pRef && pRef->TESObjectREFR_IsMultiBoundRef())
     {
         CellRect kRectWork;
         kRectWork.iLeft = m_iGridPositionX << 12;
@@ -235,24 +236,24 @@ bool __cdecl BoundIntersectsCell(BoundRef* pRef, int m_iGridPositionX, int m_iGr
         NiPoint3 kXY;
         NiPoint3 kY_;
         NiPoint3 kZ6;
-        NiPoint3 kExtentLoc = pRef->FUN_00569880();
+        NiPoint3 kExtentLoc = pRef->TESObjectREFR_GetMultiBoundHalfExtent();
         NiPoint3 kCenterZ = pRef->GetBoundCenter();
-        const NiMatrix3 kRot9 = pRef->FUN_0056fa00();
+        const NiMatrix3 kRot9 = pRef->TESObjectREFR_GetOrientation();
         kRot9.GetCol(0, kXY);
-        kXY.FUN_00439180(kExtentLoc.x);
+        kXY.ScaleComponents(kExtentLoc.x);
         kRot9.GetCol(1, kY_);
-        kY_.FUN_00439180(kExtentLoc.y);
+        kY_.ScaleComponents(kExtentLoc.y);
         kRot9.GetCol(2, kZ6);
-        kZ6.FUN_00439180(kExtentLoc.z);
+        kZ6.ScaleComponents(kExtentLoc.z);
 
         akCornersY[0] = kCenterZ.FUN_00439e90(kXY).FUN_00439e90(kY_).FUN_00439e90(kZ6);
-        akCornersY[1] = kCenterZ.FUN_00439e90(kXY).FUN_00439e90(kY_).FUN_00439ef0(kZ6);
-        akCornersY[2] = kCenterZ.FUN_00439e90(kXY).FUN_00439ef0(kY_).FUN_00439e90(kZ6);
-        akCornersY[3] = kCenterZ.FUN_00439e90(kXY).FUN_00439ef0(kY_).FUN_00439ef0(kZ6);
-        akCornersY[4] = kCenterZ.FUN_00439ef0(kXY).FUN_00439e90(kY_).FUN_00439e90(kZ6);
-        akCornersY[5] = kCenterZ.FUN_00439ef0(kXY).FUN_00439e90(kY_).FUN_00439ef0(kZ6);
-        akCornersY[6] = kCenterZ.FUN_00439ef0(kXY).FUN_00439ef0(kY_).FUN_00439e90(kZ6);
-        akCornersY[7] = kCenterZ.FUN_00439ef0(kXY).FUN_00439ef0(kY_).FUN_00439ef0(kZ6);
+        akCornersY[1] = kCenterZ.FUN_00439e90(kXY).FUN_00439e90(kY_).SubtractIntoVector(kZ6);
+        akCornersY[2] = kCenterZ.FUN_00439e90(kXY).SubtractIntoVector(kY_).FUN_00439e90(kZ6);
+        akCornersY[3] = kCenterZ.FUN_00439e90(kXY).SubtractIntoVector(kY_).SubtractIntoVector(kZ6);
+        akCornersY[4] = kCenterZ.SubtractIntoVector(kXY).FUN_00439e90(kY_).FUN_00439e90(kZ6);
+        akCornersY[5] = kCenterZ.SubtractIntoVector(kXY).FUN_00439e90(kY_).SubtractIntoVector(kZ6);
+        akCornersY[6] = kCenterZ.SubtractIntoVector(kXY).SubtractIntoVector(kY_).FUN_00439e90(kZ6);
+        akCornersY[7] = kCenterZ.SubtractIntoVector(kXY).SubtractIntoVector(kY_).SubtractIntoVector(kZ6);
 
         char aacFaces_2[8][4] = {{0, 1, 2, 4}, {3, 1, 2, 7}, {5, 1, 4, 7}, {6, 2, 4, 7}};
         NiPoint3 kKIntersect;
@@ -262,7 +263,7 @@ bool __cdecl BoundIntersectsCell(BoundRef* pRef, int m_iGridPositionX, int m_iGr
             for (int j = 1; j < 4; j++)
             {
                 NiPoint3 kEnd = akCornersY[aacFaces_2[i][j]];
-                if (FUN_004b1e80(&kRectWork, &kStart, &kEnd, &kKIntersect))
+                if (TES_LineVsRect(&kRectWork, &kStart, &kEnd, &kKIntersect))
                     return true;
             }
         }

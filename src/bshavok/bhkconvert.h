@@ -10,7 +10,7 @@ hkTransform& FromHK(hkTransform& out, const NiTransform& in)
     // The conversion fills SIMD storage without calling a default constructor.
     __m128 position;
     reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(&position)->GetItem();
-    out.FUN_0056d300(FUN_004a3e00(reinterpret_cast<hkVector4&>(position), in.m_Translate));
+    out.bhkRigidBodyCinfo_SetPosition(NI2HK(reinterpret_cast<hkVector4&>(position), in.m_Translate));
     return out;
 }
 
@@ -20,8 +20,8 @@ NiPoint3& SetNiPoint3FromHkVector4(NiPoint3& out, const hkVector4& in)
 {
     // These output lanes are initialized by FUN_00458700.
     __m128 x, y, z;
-    out.x = FUN_004587d0(in.FUN_00458700(reinterpret_cast<hkSimdReal&>(x), 0).getReal());
-    out.y = FUN_004587d0(in.FUN_00458700(reinterpret_cast<hkSimdReal&>(y), 1).getReal());
-    out.z = FUN_004587d0(in.FUN_00458700(reinterpret_cast<hkSimdReal&>(z), 2).getReal());
+    out.x = HK2NI(in.hkVector4_getSimdAt(reinterpret_cast<hkSimdReal&>(x), 0).getReal());
+    out.y = HK2NI(in.hkVector4_getSimdAt(reinterpret_cast<hkSimdReal&>(y), 1).getReal());
+    out.z = HK2NI(in.hkVector4_getSimdAt(reinterpret_cast<hkSimdReal&>(z), 2).getReal());
     return out;
 }

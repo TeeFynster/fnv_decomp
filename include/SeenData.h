@@ -14,12 +14,12 @@ public:
     virtual void AddToNode(NiNode* pNode, NiPoint3& kPos, bool bFlag);
     virtual unsigned short GetSaveSize(bool abRecursing);
     virtual void Save(BGSSaveFormBuffer* buffer);
-    virtual void FUN_0087a060(bool abRecursing);
+    virtual void SaveGame_0087a060(bool abRecursing);
     virtual void LoadGame(BGSLoadFormBuffer* buffer);
-    virtual void FUN_0087a090(unsigned short count);
+    virtual void LoadGame_0087a090(unsigned short count);
 
     bool IsBitSet(unsigned int index);
-    bool FUN_00879a40(unsigned int index, bool set);
+    bool SetSeenBit(unsigned int index, bool set);
     bool HasEnoughSeenPoints(const NiPoint3& point, const NiPoint3& offset);
     void AttachMarkersForSeenData(NiNode* parent, const NiPoint3& offset, int unused);
     void SaveFormData(void* buffer);

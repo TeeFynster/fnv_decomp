@@ -3,7 +3,8 @@
 
 extern int DAT_01269200;
 // @fnv 0x00d88040
-void __cdecl FUN_00d88040(int value)
+// src: XBOX_PDB 0x00d88040
+void __cdecl hkSetOutOfMemoryState(int value)
 {
     DAT_01269200 = value;
 }

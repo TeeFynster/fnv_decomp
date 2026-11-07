@@ -11,7 +11,8 @@ struct VTableObject
     virtual void __fastcall Release(int value);
 };
 // @fnv 0x00eae6e0
-void __fastcall FUN_00eae6e0(VTableObject* object, int value)
+// src: GAMEBRYO_SRC 0x00eae6e0
+void __fastcall NiIntersector_Test(VTableObject* object, int value)
 {
     object->Release(value);
 }
@@ -78,30 +79,33 @@ struct FnvCpu_FUN_00eae6f0_CpuObject
     unsigned int unk14;
     unsigned int unk18;
     float value;
-    float FUN_00eae6f0();
+    float NiIntersector_GetContactTime();
 };
 // @fnv 0x00eae6f0
-float FnvCpu_FUN_00eae6f0_CpuObject::FUN_00eae6f0()
+// src: COMMUNITY 0x00eae6f0
+float FnvCpu_FUN_00eae6f0_CpuObject::NiIntersector_GetContactTime()
 {
     return value;
 }
 
 struct FnvCpu_FUN_00eae700_CpuObject
 {
-    char* FUN_00eae700();
+    char* NiIntersector_GetContactPoint();
 };
 // @fnv 0x00eae700
-char* FnvCpu_FUN_00eae700_CpuObject::FUN_00eae700()
+// src: COMMUNITY 0x00eae700
+char* FnvCpu_FUN_00eae700_CpuObject::NiIntersector_GetContactPoint()
 {
     return reinterpret_cast<char*>(this) + 32;
 }
 
 struct FnvCpu_FUN_00eae710_CpuObject
 {
-    char* FUN_00eae710();
+    char* NiIntersector_GetContactNormal();
 };
 // @fnv 0x00eae710
-char* FnvCpu_FUN_00eae710_CpuObject::FUN_00eae710()
+// src: COMMUNITY 0x00eae710
+char* FnvCpu_FUN_00eae710_CpuObject::NiIntersector_GetContactNormal()
 {
     return reinterpret_cast<char*>(this) + 44;
 }

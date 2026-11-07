@@ -4,7 +4,8 @@
 extern int DAT_011d59dc;
 
 // @fnv 0x00652130
-int __cdecl FUN_00652130()
+// src: COMMUNITY 0x00652130
+int __cdecl BSFaceGenModelMap_GetFaceGenLockCount()
 {
     return DAT_011d59dc;
 }

@@ -45,7 +45,8 @@ struct FakeConstantTable00e96d10
     virtual long __stdcall GetDesc(_D3DXCONSTANTTABLE_DESC* pDesc);
 };
 // @fnv 0x00e96d10
-unsigned int NiD3DHLSLPixelShader::FUN_00e96d10()
+// src: GAMEBRYO_LIB 0x00e96d10
+unsigned int NiD3DHLSLPixelShader::GetVariableCount()
 {
     _D3DXCONSTANTTABLE_DESC kDesc;
     if (!m_pShaderConstantTable)
@@ -157,14 +158,14 @@ struct __declspec(align(16)) Matrix16
     float m[16];
 };
 
-Matrix16* __stdcall FUN_00ee6dd4(Matrix16* pOut, const Matrix16* pM);
-void __cdecl FUN_00a29680(const char* pcFormat, ...);
+Matrix16* __stdcall D3DXMatrixTranspose_00ee6dd4(Matrix16* pOut, const Matrix16* pM);
+void __cdecl Object_DoNothing(const char* pcFormat, ...);
 
 // The shared entry does not yet declare the name setter or the resolved byte.
 // The resolved byte occupies the second byte of its trailing alignment padding.
 struct ShaderConstantEntryOperations : NiShaderConstantMapEntry
 {
-    __declspec(noalias) void FUN_00e81c60(const NiFixedString& kName);
+    __declspec(noalias) void NiShaderConstantMapEntry_SetVariableName(const NiFixedString& kName);
 };
 
 __forceinline bool& IsEntryResolved(NiShaderConstantMapEntry* entry)
@@ -1413,8 +1414,8 @@ bool NiD3DHLSLPixelShader::SetShaderConstantArray(NiShaderConstantMapEntry* pkEn
         NiFixedString& kVariableName = CopyFixedString(kVariableNameStorage, pkEntry->m_kSecondaryString);
         if (!kVariableName.Exists())
         {
-            kVariableName.FUN_0043ba10(pkEntry->m_kControlPoint);
-            static_cast<ShaderConstantEntryOperations*>(pkEntry)->FUN_00e81c60(kVariableName);
+            kVariableName.AssignInternedString(pkEntry->m_kControlPoint);
+            static_cast<ShaderConstantEntryOperations*>(pkEntry)->NiShaderConstantMapEntry_SetVariableName(kVariableName);
         }
 
         const char* hConstant = reinterpret_cast<ConstantTable*>(m_pShaderConstantTable)->FindConstantByName(NULL, kVariableName);
@@ -1429,7 +1430,7 @@ bool NiD3DHLSLPixelShader::SetShaderConstantArray(NiShaderConstantMapEntry* pkEn
         }
         else
         {
-            FUN_00a29680("NiD3DHLSLPixelShader::SetShaderConstantArray - %s - variable %s not found\n", m_pcProgramName,
+            Object_DoNothing("NiD3DHLSLPixelShader::SetShaderConstantArray - %s - variable %s not found\n", m_pcProgramName,
                          (const char*)kVariableName);
             kVariableName.Release();
             return false;
@@ -1445,7 +1446,7 @@ bool NiD3DHLSLPixelShader::SetShaderConstantArray(NiShaderConstantMapEntry* pkEn
         {
             Matrix16 kMatrix;
             bSuccess = false;
-            FUN_00ee6dd4(&kMatrix,
+            D3DXMatrixTranspose_00ee6dd4(&kMatrix,
                          (const Matrix16*)((const char*)pvDataSource + pusReorderArray[i] * uiRegistersPerEntry * 16));
             HRESULT hr =
                 reinterpret_cast<D3DRenderer*>(m_pRenderState)->GetD3DDevice()->SetPixelShaderConstantF(uiRegister, kMatrix.m, uiRegistersPerEntry);
@@ -1464,7 +1465,7 @@ bool NiD3DHLSLPixelShader::SetShaderConstantArray(NiShaderConstantMapEntry* pkEn
         for (unsigned int i = 0; i < uiNumEntries; i++)
         {
             Matrix16 kMatrix;
-            FUN_00ee6dd4(&kMatrix, (const Matrix16*)pVector4);
+            D3DXMatrixTranspose_00ee6dd4(&kMatrix, (const Matrix16*)pVector4);
             bSuccess = false;
             D3DRenderer* pkRenderer = reinterpret_cast<D3DRenderer*>(m_pRenderState);
             if (pkRenderer->m_pkDevice->lpVtbl->SetPixelShaderConstantF(pkRenderer->m_pkDevice, uiRegister, kMatrix.m,
@@ -1485,8 +1486,8 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile lo
 extern char* DAT_0109b220;
 extern int DAT_011f5fc4[];
 extern char DAT_010f13f0[];
-void FUN_00a29680(const char* format, ...);
-void __stdcall FUN_00ee6dd4(void* value, int source);
+void Object_DoNothing(const char* format, ...);
+void __stdcall D3DXMatrixTranspose_00ee6dd4(void* value, int source);
 
 
 inline void ReleaseString(char* p)
@@ -2736,9 +2737,9 @@ struct Handler
     {
         return m_device->Invoke(id, data, count) >= 0;
     }
-    bool FUN_00e898e0(int id, int arg, int extra, int flags);
-    bool FUN_00e89910(int id, int arg, int extra, int flags);
-    bool FUN_00e89940(int id, int arg, int extra, int flags);
+    bool NiDX9RenderState_SetPixelShaderConstantB(int id, int arg, int extra, int flags);
+    bool NiDX9RenderState_SetPixelShaderConstantF(int id, int arg, int extra, int flags);
+    bool NiDX9RenderState_SetPixelShaderConstantI(int id, int arg, int extra, int flags);
 };
 
 
@@ -2762,8 +2763,8 @@ bool NiD3DHLSLPixelShader::SetShaderConstant(NiShaderConstantMapEntry* entry, vo
         NiFixedString& name = CopyFixedString(nameStorage, entry->m_kSecondaryString);
         if (!name.Exists())
         {
-            name.FUN_0043ba10(entry->m_kControlPoint);
-            static_cast<ShaderConstantEntryOperations*>(entry)->FUN_00e81c60(name);
+            name.AssignInternedString(entry->m_kControlPoint);
+            static_cast<ShaderConstantEntryOperations*>(entry)->NiShaderConstantMapEntry_SetVariableName(name);
         }
         char* text = name.m_kHandle;
         int handle = reinterpret_cast<fnv_00e96da0::Library*>(m_pShaderConstantTable)->Find(0, text);
@@ -2778,7 +2779,7 @@ bool NiD3DHLSLPixelShader::SetShaderConstant(NiShaderConstantMapEntry* entry, vo
         }
         else
         {
-            fnv_00e96da0::FUN_00a29680(fnv_00e96da0::DAT_010f13f0, m_pcProgramName, text);
+            fnv_00e96da0::Object_DoNothing(fnv_00e96da0::DAT_010f13f0, m_pcProgramName, text);
             ReleaseString(text);
             return false;
         }
@@ -2791,34 +2792,34 @@ bool NiD3DHLSLPixelShader::SetShaderConstant(NiShaderConstantMapEntry* entry, vo
         {
             int count = entry->m_uiValue4;
             int id = entry->m_uiValue3;
-            if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->FUN_00e89910(id, (int)arg, count, 0))
+            if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->NiDX9RenderState_SetPixelShaderConstantF(id, (int)arg, count, 0))
                 ok = true;
         }
         else if (type == 4)
         {
             int count = entry->m_uiValue4;
             int id = entry->m_uiValue3;
-            if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->FUN_00e89910(id, (int)arg, count, 0))
+            if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->NiDX9RenderState_SetPixelShaderConstantF(id, (int)arg, count, 0))
                 ok = true;
         }
         else if (type == 3)
         {
             int count = entry->m_uiValue4;
             int id = entry->m_uiValue3;
-            if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->FUN_00e89940(id, (int)arg, count, 0))
+            if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->NiDX9RenderState_SetPixelShaderConstantI(id, (int)arg, count, 0))
                 ok = true;
         }
         else if (type == 1)
         {
             int count = entry->m_uiValue4;
             int id = entry->m_uiValue3;
-            if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->FUN_00e898e0(id, (int)arg, count, 0))
+            if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->NiDX9RenderState_SetPixelShaderConstantB(id, (int)arg, count, 0))
                 ok = true;
         }
     }
     else
     {
-        fnv_00e96da0::FUN_00ee6dd4(&info, (int)arg);
+        fnv_00e96da0::D3DXMatrixTranspose_00ee6dd4(&info, (int)arg);
         if (reinterpret_cast<fnv_00e96da0::Handler*>(m_pRenderState)->Upload(entry->m_uiValue3, &info, entry->m_uiValue4))
             ok = true;
     }

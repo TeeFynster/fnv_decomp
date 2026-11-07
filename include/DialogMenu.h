@@ -75,7 +75,7 @@ public:
     DialogState BeginDialogueResponse(bool);
     void LoadTopicsList();
     bool AreTilesInitialized();
-    bool FUN_007620f0();
+    bool DialogMenu_IsWellFormedMenu();
     TESSound* GetCastSound();
 
     static int ms_iDialogMenuValue;

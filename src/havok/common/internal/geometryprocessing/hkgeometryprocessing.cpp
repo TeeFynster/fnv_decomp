@@ -26,29 +26,31 @@ __thiscall FUN_00dee620::FUN_00dee620(int aiFlags)
         Deallocate(this);
 }
 
-extern "C" void __cdecl FUN_00dedf10(void*, void*, void*, void*, int, int);
+extern "C" void __cdecl hkVector4_ProcessEntries_00dedf10(void*, void*, void*, void*, int, int);
 // Forwards the four pointers to FUN_00dedf10 with two trailing int arguments set to 0.
 // @fnv 0x00dee5f0
-void __cdecl FUN_00dee5f0(void* first, void* second, void* third, void* fourth)
+// src: HAVOK_LIB 0x00dee5f0
+void __cdecl hkGeometryProcessing_generateRandomDistribution(void* first, void* second, void* third, void* fourth)
 {
-    FUN_00dedf10(first, second, third, fourth, 0, 0);
+    hkVector4_ProcessEntries_00dedf10(first, second, third, fourth, 0, 0);
 }
 
 struct FUN_00dee6b0_Class
 {
     int unk00;
     float unk04;
-    float FUN_00dee6b0(int testFlag);
+    float GetUnk04(int testFlag);
 };
 // @fnv 0x00dee6b0
-float FUN_00dee6b0_Class::FUN_00dee6b0(int testFlag)
+// src: GUESS 0x00dee6b0 (confidence: low)
+float FUN_00dee6b0_Class::GetUnk04(int testFlag)
 {
     return unk04;
 }
 
 extern int DAT_010cd664;
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00dee6c0_cls
 {
@@ -64,7 +66,7 @@ FUN_00dee6c0_cls* FUN_00dee6c0_cls::FUN_00dee6c0(unsigned char acFlags)
     m_vptr = (int)&DAT_010cd664;
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, 0x40);
     }
@@ -194,7 +196,8 @@ extern const hkVector4 DAT_010c7160;
 
 // Computes the squared distance from point a to the segment bc, clamping the projection parameter to [0,1] and storing it in out.
 // @fnv 0x00de94b0
-float __cdecl FUN_00de94b0(const hkVector4& a, const hkVector4& b, const hkVector4& c, float* pfT)
+// src: GUESS 0x00de94b0 (confidence: medium)
+float __cdecl hkVector4_GetPointSegmentSquaredDistance(const hkVector4& a, const hkVector4& b, const hkVector4& c, float* pfT)
 {
     hkVector4 d1;
     d1.setSub4(b, a);
@@ -303,7 +306,8 @@ static __forceinline float& supportingComponent(hkVector4& value, int i)
 
 // Finds the vertex with the maximum dot product against direction, stores it in supportingVertexOut, and packs vertexId into the w component.
 // @fnv 0x00dea810
-void __cdecl FUN_00dea810(const FourPointsArray& rotatedVertices, const hkVector4& direction,
+// src: GUESS 0x00dea810 (confidence: medium)
+void __cdecl hkVector4_FindSupportingVertex(const FourPointsArray& rotatedVertices, const hkVector4& direction,
                           hkVector4& supportingVertexOut)
 {
 
@@ -487,7 +491,7 @@ struct Sub08_cls
 
 struct Sub20_cls
 {
-    Triangle* FUN_00e241a0(Triangle* node);
+    Triangle* UpdateFields_00e241a0(Triangle* node);
 };
 
 struct FUN_00e19200_cls
@@ -496,12 +500,13 @@ struct FUN_00e19200_cls
     unsigned int unk04;
     Sub08_cls m_08;
     Sub20_cls m_20;
-    void FUN_00e19200(Triangle* a, const __m128* b, int c);
+    void SplitTriangleWithNewVertex(Triangle* a, const __m128* b, int c);
 };
 
 // Creates a new vertex from b, assigns it to three triangles, and rewires their edge links to split t0.
 // @fnv 0x00e19200
-void FUN_00e19200_cls::FUN_00e19200(Triangle* apTriangle, const __m128* b, int aiUnused)
+// src: GUESS 0x00e19200 (confidence: medium)
+void FUN_00e19200_cls::SplitTriangleWithNewVertex(Triangle* apTriangle, const __m128* b, int aiUnused)
 {
     PendingBlock stBlock;
     stBlock.m_40 = -1;
@@ -509,8 +514,8 @@ void FUN_00e19200_cls::FUN_00e19200(Triangle* apTriangle, const __m128* b, int a
     Vertex* v = m_08.PushFront(&stBlock);
     v->m_vHitNormal = DAT_01267e30;
     v->m_vContactPosition = asGeometryQuad(*b);
-    Triangle* pTriangle1 = m_20.FUN_00e241a0(apTriangle);
-    Triangle* pTriangle2 = m_20.FUN_00e241a0(apTriangle);
+    Triangle* pTriangle1 = m_20.UpdateFields_00e241a0(apTriangle);
+    Triangle* pTriangle2 = m_20.UpdateFields_00e241a0(apTriangle);
     apTriangle->m_kVertices[0] = v;
     pTriangle1->m_kVertices[1] = v;
     pTriangle2->m_kVertices[2] = v;
@@ -524,7 +529,8 @@ void FUN_00e19200_cls::FUN_00e19200(Triangle* apTriangle, const __m128* b, int a
 namespace fnv_00dea6b0 {
 // Checks if point p lies inside triangle abc by verifying the dot product of each edge cross product with the triangle normal is at least tol.
 // @fnv 0x00dea6b0
-bool __cdecl FUN_00dea6b0(const hkVector4& p, const hkVector4& a, const hkVector4& b,
+// src: XBOX_PDB 0x00dea6b0
+bool __cdecl hkGeometryProcessing_checkPointInsideTriangle(const hkVector4& p, const hkVector4& a, const hkVector4& b,
                           const hkVector4& c, float afTolerance)
 {
     hkVector4 ab;
@@ -617,7 +623,8 @@ struct CubeBox
 
 // Sets lower and upper from the center using the signed extent component with greatest magnitude on x, y, or z.
 // @fnv 0x00de9590
-void __cdecl FUN_00de9590(CubeBox* box)
+// src: GUESS 0x00de9590 (confidence: medium)
+void __cdecl Hkgeometryprocessing_GetCubeBoundsFromLargestExtent(CubeBox* box)
 {
     CubeVector center;
     CubeVector extent;
@@ -636,7 +643,8 @@ extern float DAT_0104da48;
 
 // Computes the closest distance between two line segments defined by start and end points, writing clamped parameters to the output pointers.
 // @fnv 0x00dea450
-float __cdecl FUN_00dea450(const hkVector4& firstStart, const hkVector4& firstEnd, const hkVector4& secondStart,
+// src: GUESS 0x00dea450 (confidence: medium)
+float __cdecl hkVector4_GetClosestSegmentParameters(const hkVector4& firstStart, const hkVector4& firstEnd, const hkVector4& secondStart,
                            const hkVector4& secondEnd, float* firstParameter, float* secondParameter)
 {
     hkVector4 firstDirection;
@@ -685,7 +693,8 @@ float __cdecl FUN_00dea450(const hkVector4& firstStart, const hkVector4& firstEn
 
 extern const float DAT_0101622c;
 // @fnv 0x00de9b90
-Vec4 __cdecl FUN_00de9b90(const Vec4& a, const Vec4& b, const Vec4& c, const Vec4& d)
+// src: GUESS 0x00de9b90 (confidence: low)
+Vec4 __cdecl Hkgeometryprocessing_ComputeValues_00de9b90(const Vec4& a, const Vec4& b, const Vec4& c, const Vec4& d)
 {
     GeometryQuad scale = geometry_sse::_mm_load_ss(&DAT_0101622c);
     GeometryQuad cv = reinterpret_cast<const GeometryQuad&>(c);
@@ -852,11 +861,12 @@ static __forceinline float doubleArea(const GeomVector& origin, const GeomVector
 {
     return offsetCross(origin, a, b).magnitude();
 }
-float __cdecl FUN_00de9e10(const GeomVector&, const GeomVector&, const GeomVector&, GeomVector&, float*);
+float __cdecl hkGeometryProcessing_squaredDistanceFromPointToLine(const GeomVector&, const GeomVector&, const GeomVector&, GeomVector&, float*);
 
 // Computes the squared distance from a point to a triangle, returning the closest normal and optional barycentric weights.
 // @fnv 0x00de9f10
-float __cdecl FUN_00de9f10(const GeomVector& point, const GeomVector& a, const GeomVector& b, const GeomVector& c,
+// src: XBOX_PDB 0x00de9f10
+float __cdecl hkGeometryProcessing_squaredDistanceFromPointToTriangle(const GeomVector& point, const GeomVector& a, const GeomVector& b, const GeomVector& c,
                            GeomVector& normal, GeomVector* weights)
 {
     GeomVector plane = makePlane(a, b, c, true);
@@ -885,9 +895,9 @@ float __cdecl FUN_00de9f10(const GeomVector& point, const GeomVector& a, const G
         GeomVector normals[3];
         float fractions[3];
         float distances[3];
-        distances[0] = FUN_00de9e10(point, a, b, normals[0], &fractions[0]);
-        distances[1] = FUN_00de9e10(point, b, c, normals[1], &fractions[1]);
-        distances[2] = FUN_00de9e10(point, c, a, normals[2], &fractions[2]);
+        distances[0] = hkGeometryProcessing_squaredDistanceFromPointToLine(point, a, b, normals[0], &fractions[0]);
+        distances[1] = hkGeometryProcessing_squaredDistanceFromPointToLine(point, b, c, normals[1], &fractions[1]);
+        distances[2] = hkGeometryProcessing_squaredDistanceFromPointToLine(point, c, a, normals[2], &fractions[2]);
         int edge =
             distances[0] < distances[1] ? (distances[0] < distances[2] ? 0 : 2) : (distances[1] < distances[2] ? 1 : 2);
         normal = normals[edge];
@@ -944,7 +954,8 @@ inline float S00dea980_f(GeometryQuad v)
 }
 
 // @fnv 0x00dea980
-float FUN_00dea980(const hkVector4* apFirst, const hkVector4* apSecond, const hkVector4* apThird)
+// src: GUESS 0x00dea980 (confidence: low)
+float hkVector4_ProcessAndReturnValue_00dea980(const hkVector4* apFirst, const hkVector4* apSecond, const hkVector4* apThird)
 {
     GeometryQuad vFirst = geometryQuad(*apFirst);
     GeometryQuad v1 = geometryQuad(*apSecond);
@@ -987,7 +998,8 @@ static __forceinline void medianInterpolate(hkVector4& result, const hkVector4& 
 }
 // Interpolates between first and second using a fraction loaded from DAT_01016248.
 // @fnv 0x00de9b10
-hkVector4 __cdecl FUN_00de9b10(const hkVector4& first, const hkVector4& second)
+// src: GUESS 0x00de9b10 (confidence: medium)
+hkVector4 __cdecl hkVector4_InterpolateVectorsWithGlobalFraction(const hkVector4& first, const hkVector4& second)
 {
     hkVector4 result;
     medianInterpolate(result, first, second, hkSimdReal(asSharedQuad(geometry_sse::_mm_load_ss(&DAT_01016248))));
@@ -1003,7 +1015,8 @@ struct CentroidVector
 };
 
 // @fnv 0x00de9b50
-CentroidVector __cdecl FUN_00de9b50(const CentroidVector* apCentroidA, const CentroidVector* apCentroidB,
+// src: GUESS 0x00de9b50 (confidence: low)
+CentroidVector __cdecl Hkgeometryprocessing_ComputeValues_00de9b50(const CentroidVector* apCentroidA, const CentroidVector* apCentroidB,
                                     const CentroidVector* apCentroidC)
 {
     GeometryQuad vSum = geometry_sse::_mm_load_ps((const float*)&apCentroidA->value);

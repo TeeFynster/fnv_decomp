@@ -25,7 +25,8 @@ unsigned int __cdecl _strlen(const char*);
 int __cdecl _strcpy_s(char*, unsigned int, const char*);
 // Copies apName into a newly allocated buffer stored in pFileName, using strlen(apName)+1 bytes.
 // @fnv 0x00c3cee0
-void QueuedFileEntry::FUN_00c3cee0(const char* apName)
+// src: XBOX_PDB 0x00c3cee0
+void QueuedFileEntry::SetFileName_00c3cee0(const char* apName)
 {
     unsigned int uiLen;
     if (apName)
@@ -108,7 +109,7 @@ FUN_00905ba0::FUN_00905ba0(int a, int b, const char* name) : QueuedFileEntry(0)
     f30 = b;
     f34 = 0;
     f38 = a;
-    FUN_00c3cee0(name);
+    SetFileName_00c3cee0(name);
     LookupFileEntryByArchive(4);
 }
 
@@ -133,7 +134,7 @@ extern PoolHolder DAT_011f6238;
 
 struct RefRelease
 {
-    void FUN_0044dd60();
+    void BSTask_int64_DecRefCount();
 };
 
 struct QueuedFileRef
@@ -154,7 +155,7 @@ struct QueuedFileRef
     {
         if (m_pObject != 0)
         {
-            reinterpret_cast<RefRelease*>(m_pObject)->FUN_0044dd60();
+            reinterpret_cast<RefRelease*>(m_pObject)->BSTask_int64_DecRefCount();
         }
     }
 };
@@ -167,9 +168,10 @@ struct ChildrenOps
     unsigned int SimpleArrayStorage;
     unsigned int unk10;
 
-    unsigned int FUN_00c3d6c0();
+    unsigned int QueuedChildren_GetAppendIndex();
 
-    void FUN_00c3d4f0(const QueuedFileRef& pRef)
+// src: COMMUNITY 0x00c3d4f0
+    void QueuedChildren_Append(const QueuedFileRef& pRef)
     {
         unsigned int iIndex;
         unsigned int iCount;
@@ -186,7 +188,7 @@ struct ChildrenOps
         QueuedFile* pTmp;
         void* pRaw;
 
-        iIndex = FUN_00c3d6c0();
+        iIndex = QueuedChildren_GetAppendIndex();
         iCount = iSize;
         iOldCount = iCount;
         iReserved = SimpleArrayStorage;
@@ -236,17 +238,18 @@ struct FUN_00c3c4e0
 
 struct FUN_00c3c700_cls : public QueuedFile
 {
-    void FUN_00c3c700(QueuedFile* apChild);
+    void QueuedFile_AddChild(QueuedFile* apChild);
 };
 
 // @fnv 0x00c3c700
-void FUN_00c3c700_cls::FUN_00c3c700(QueuedFile* apChild)
+// src: COMMUNITY 0x00c3c700
+void FUN_00c3c700_cls::QueuedFile_AddChild(QueuedFile* apChild)
 {
     if (pChildren == 0)
     {
         pChildren = reinterpret_cast<QueuedChildren*>(new FUN_00c3c4e0);
     }
-    reinterpret_cast<ChildrenOps*>(pChildren)->FUN_00c3d4f0(apChild);
+    reinterpret_cast<ChildrenOps*>(pChildren)->QueuedChildren_Append(apChild);
 }
 
 static __forceinline void DeadQ1()
@@ -355,7 +358,7 @@ struct ObjectC3
     {
         return children ? children->GetSize() == children->finished : true;
     }
-    void FUN_0044dd60();
+    void BSTask_int64_DecRefCount();
     void AcquireReference()
     {
         InterlockedIncrement(&refs);
@@ -367,7 +370,7 @@ inline PointerC3& PointerC3::operator=(ObjectC3* rhs)
     if (value != rhs)
     {
         if (value)
-            value->FUN_0044dd60();
+            value->BSTask_int64_DecRefCount();
         value = rhs;
         if (value)
             value->AcquireReference();
@@ -398,7 +401,7 @@ void ObjectC3::NotifyParents()
             delete parents;
             parents = 0;
         }
-        FUN_0044dd60();
+        BSTask_int64_DecRefCount();
     }
 }
 
@@ -444,11 +447,12 @@ struct FUN_00c3d440_cls
     FUN_00c3d440_src* m_pSrc;
 
     void FUN_0043db70();
-    void FUN_00c3d440();
+    void QueuedFileEntry_GenerateKey();
 };
 
 // @fnv 0x00c3d440
-void FUN_00c3d440_cls::FUN_00c3d440()
+// src: XBOX_PDB 0x00c3d440
+void FUN_00c3d440_cls::QueuedFileEntry_GenerateKey()
 {
     if (m_pSrc != 0)
     {

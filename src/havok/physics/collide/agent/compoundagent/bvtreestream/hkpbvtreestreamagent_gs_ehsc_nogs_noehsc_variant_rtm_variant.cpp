@@ -43,11 +43,11 @@ typedef int hkBool32;
 typedef unsigned short hkContactPointId;
 #include "../../../../../../../include/hkResult.h"
 
-extern "C" void __cdecl FUN_00d31110(void*,void*,void*,void*);
+extern "C" void __cdecl hkpBvTreeAgent_staticGetClosestPoints(void*,void*,void*,void*);
 // @fnv 0x00d2dd50
 extern "C" void __stdcall FUN_00d2dd50(void* a, void* b, void* c, void* d)
 {
-    FUN_00d31110(a, b, c, d);
+    hkpBvTreeAgent_staticGetClosestPoints(a, b, c, d);
 }
 
 template<typename T>

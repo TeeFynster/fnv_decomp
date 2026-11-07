@@ -42,18 +42,19 @@ inline void hkVector4::set(float x, float y, float z, float w)
     *reinterpret_cast<LocalM128*>(this) = _mm_setr_ps(x, y, z, w);
 }
 
-void __cdecl FUN_00d26230(int transform, int extents, int center, float tolerance, int output);
+void __cdecl hkAabbUtil_calcAabb_00d26230(int transform, int extents, int center, float tolerance, int output);
 
 // The shared collide class supplies the layout; this unit's bounds method is
 // declared here because the shared header does not yet declare that method.
 class WheelBoundsCalculator : public hkpVehicleLinearCastWheelCollide
 {
 public:
-    void __thiscall FUN_00e36700(const hkpVehicleInstance* vehicle, unsigned char wheelIndex, hkAabb& output);
+    void __thiscall hkpVehicleLinearCastWheelCollide_calcAabbOfWheel(const hkpVehicleInstance* vehicle, unsigned char wheelIndex, hkAabb& output);
 };
 
 // @fnv 0x00e36700
-void __thiscall WheelBoundsCalculator::FUN_00e36700(const hkpVehicleInstance* vehicle, unsigned char wheelIndex, hkAabb& output)
+// src: XBOX_PDB 0x00e36700
+void __thiscall WheelBoundsCalculator::hkpVehicleLinearCastWheelCollide_calcAabbOfWheel(const hkpVehicleInstance* vehicle, unsigned char wheelIndex, hkAabb& output)
 {
     int index = wheelIndex;
     const hkpVehicleData::WheelComponentParams* wheel = vehicle->m_data->m_kWheelParams.m_data + index;
@@ -68,6 +69,6 @@ void __thiscall WheelBoundsCalculator::FUN_00e36700(const hkpVehicleInstance* ve
     center.set(0.0f, -halfHeight, 0.0f, 0.0f);
 
     int transform = reinterpret_cast<int>(&m_kWheelStates.m_data[index].m_kMotionTransform);
-    FUN_00d26230(transform, reinterpret_cast<int>(&extents), reinterpret_cast<int>(&center), zero,
+    hkAabbUtil_calcAabb_00d26230(transform, reinterpret_cast<int>(&extents), reinterpret_cast<int>(&center), zero,
                  reinterpret_cast<int>(&output));
 }

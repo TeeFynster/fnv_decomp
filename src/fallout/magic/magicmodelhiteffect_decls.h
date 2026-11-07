@@ -25,8 +25,8 @@ extern ModelLoader* g_modelLoader;
 extern TimeGlobal g_timeGlobal;
 extern PlayerCharacter* g_thePlayer;
 extern NiRTTI DAT_011f36ac;
-SkyShaderProperty* __cdecl FUN_00653270(const NiRTTI*, NiProperty*);
+SkyShaderProperty* __cdecl NiObject_DynamicCast(const NiRTTI*, NiProperty*);
 NiAVObject* __cdecl LoadAndCloneModel(const char*);
-void __cdecl FUN_00c4b500(NiAVObject*);
+void __cdecl BSUtilities_ProcessSelectiveUpdate(NiAVObject*);
 extern const char kMagicModelHitEffectName[];
 #endif

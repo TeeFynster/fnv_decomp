@@ -24,7 +24,7 @@ void NiBSplineData::LoadBinary(NiStream& stream)
     pStream->m_uiAbsoluteCurrentPos += pStream->m_pfnRead(pStream, puiControlPointCount, 4, ComponentSize(4), 1);
     if (*puiControlPointCount)
     {
-        float* pfControlPoints = (float*)FUN_00aa1070(*puiControlPointCount * 4);
+        float* pfControlPoints = (float*)_NiMalloc_00aa1070(*puiControlPointCount * 4);
         unsigned int controlPointBytes = *puiControlPointCount * 4;
         m_pfControlPoints = pfControlPoints;
         pStream = stream.m_pkIstr;
@@ -37,7 +37,7 @@ void NiBSplineData::LoadBinary(NiStream& stream)
     pStream->m_uiAbsoluteCurrentPos += pStream->m_pfnRead(pStream, puiControlPointCount, 4, ComponentSize(4), 1);
     if (*puiControlPointCount)
     {
-        short* psCompactControlPoints = (short*)FUN_00aa1070(*puiControlPointCount * 2);
+        short* psCompactControlPoints = (short*)_NiMalloc_00aa1070(*puiControlPointCount * 2);
         unsigned int compactControlPointBytes = *puiControlPointCount * 2;
         m_psCompactControlPoints = psCompactControlPoints;
         pStream = stream.m_pkIstr;
@@ -56,7 +56,7 @@ void NiBSplineData::CalculateSplineValue(float time, float* value, unsigned int 
     int iCount, max;
     basis.Compute(time, iCount, max);
     float points[16];
-    FUN_00a89650(m_psCompactControlPoints + dimension * iCount + handle, dimension * 4, offset, halfRange, points,
+    NiCompUtility_DecompressFloatArray(m_psCompactControlPoints + dimension * iCount + handle, dimension * 4, offset, halfRange, points,
                  dimension * 4);
     unsigned int index = 0;
     time = basis.weights[0];
@@ -144,8 +144,8 @@ extern void* g_011f4034;
 extern const char str_01099f08[];
 extern const char str_01099ee8[];
 
-void* __cdecl FUN_00a7d330(void* pv);
-void* __cdecl FUN_00a7d510(const char* pcName, unsigned int uiValue);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* pv);
+void* __cdecl NiGetViewerString_00a7d510(const char* pcName, unsigned int uiValue);
 
 struct ArrayArg
 {
@@ -164,7 +164,7 @@ void __fastcall GetSplineViewerStrings(NiBSplineData* self, int, ArrayArg& kStre
 {
     self->NiObject::AddViewerStrings(reinterpret_cast<NiViewerStringsArray*>(&kStream));
     {
-        void* p = FUN_00a7d330(g_011f4034);
+        void* p = NiViewerStrings_NiGetViewerString_Title(g_011f4034);
         unsigned int uiPos = kStream.m_0a;
         if (uiPos >= kStream.m_08)
         {
@@ -173,7 +173,7 @@ void __fastcall GetSplineViewerStrings(NiBSplineData* self, int, ArrayArg& kStre
         kStream.FUN_0096ae90(uiPos, &p);
     }
     {
-        void* q = FUN_00a7d510(str_01099f08, self->m_uiControlPointCount);
+        void* q = NiGetViewerString_00a7d510(str_01099f08, self->m_uiControlPointCount);
         unsigned int uiPos = kStream.m_0a;
         if (uiPos >= kStream.m_08)
         {
@@ -182,7 +182,7 @@ void __fastcall GetSplineViewerStrings(NiBSplineData* self, int, ArrayArg& kStre
         kStream.FUN_0096ae90(uiPos, &q);
     }
     {
-        void* r = FUN_00a7d510(str_01099ee8, self->m_uiCompactControlPointCount);
+        void* r = NiGetViewerString_00a7d510(str_01099ee8, self->m_uiCompactControlPointCount);
         unsigned int uiPos = kStream.m_0a;
         if (uiPos >= kStream.m_08)
         {

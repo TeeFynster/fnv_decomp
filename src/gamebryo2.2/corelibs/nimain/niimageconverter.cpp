@@ -92,7 +92,8 @@ struct VTable_FUN_00a76d40
 };
 
 // @fnv 0x00a76d40
-bool __fastcall FUN_00a76d40(const VTable_FUN_00a76d40* pThis, int, const NiPixelFormat& kSrcFmt)
+// src: XBOX_PDB 0x00a76d40
+bool __fastcall NiDevImageConverter_IsASupportedMipmapGenerationFormat(const VTable_FUN_00a76d40* pThis, int, const NiPixelFormat& kSrcFmt)
 {
     if (pThis->v20(kSrcFmt) || pThis->v24(kSrcFmt))
         return true;
@@ -123,7 +124,7 @@ extern void* DAT_011f4a78;
 void _NiFreeAlias(void*) throw();
 struct Sub80
 {
-    void FUN_00a8ada0() throw();
+    void ProcessState_00a8ada0() throw();
 };
 
 struct FUN_00a76680 : NiRefObject
@@ -137,7 +138,7 @@ FUN_00a76680::~FUN_00a76680()
     if (DAT_011f4a78)
         _NiFreeAlias(DAT_011f4a78);
     DAT_011f4a78 = 0;
-    ((Sub80*)((char*)this + 0x80))->FUN_00a8ada0();
+    ((Sub80*)((char*)this + 0x80))->ProcessState_00a8ada0();
 }
 }  // namespace fnv_00a76680
 
@@ -155,7 +156,7 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volati
 struct FileNameComponents
 {
     FileNameComponents(const char* pcFullPath);
-    void FUN_00aa29d0(char* pcPath, unsigned int uiLen);
+    void NiFilename_GetFullPath(char* pcPath, unsigned int uiLen);
     char m_acHead[0x303];
     char m_acTail[0x100];
 };
@@ -163,14 +164,15 @@ int strcpy_s(char*, unsigned int, const char*);
 extern const char* DAT_011f4a78;
 extern char* EmptyFS;
 // @fnv 0x00a76960
-void FUN_00a76960(char** apszSource, char** apszDest)
+// src: COMMUNITY 0x00a76960
+void NiImageConverter_ConvertFilenameToPlatformSpecific_(char** apszSource, char** apszDest)
 {
     if (DAT_011f4a78)
     {
         FileNameComponents kName(*apszSource);
         strcpy_s(kName.m_acTail, 0x100, DAT_011f4a78);
         char acBuf[0x104];
-        kName.FUN_00aa29d0(acBuf, 0x104);
+        kName.NiFilename_GetFullPath(acBuf, 0x104);
         char* pcOldString = *apszDest;
         if (pcOldString != acBuf)
         {
@@ -198,7 +200,8 @@ namespace fnv_00a76b30 {
 
 // If the global NiRefObject pointer DAT_011f4a7c is set, decrements its reference count and clears the pointer.
 // @fnv 0x00a76b30
-void FUN_00a76b30()
+// src: COMMUNITY 0x00a76b30
+void NiImageConverter__SDMShutdown()
 {
     if (DAT_011f4a7c)
     {
@@ -266,7 +269,7 @@ NiPixelData* NiImageConverter::ConvertImageData(const NiPixelData& kSrc, const N
                 if (!pkOptDest->m_spPalette.value)
                 {
                     void* pal = BSFadeNode::operator new(0x24);
-                    pkOptDest->FUN_00a76a60(pal ? new (pal) NiPalette(*kSrc.GetPalette()) : 0);
+                    pkOptDest->NiPixelData_SetPalette(pal ? new (pal) NiPalette(*kSrc.GetPalette()) : 0);
                 }
                 else
                     ((PaletteCopyAccess*)pkOptDest->m_spPalette.value)->CopyFrom(*(NiPalette*)kSrc.m_spPalette.value);
@@ -275,7 +278,7 @@ NiPixelData* NiImageConverter::ConvertImageData(const NiPixelData& kSrc, const N
         }
     }
     void* pNewPixelData = BSFadeNode::operator new(0x74);
-    return pNewPixelData ? ((NiPixelData*)pNewPixelData)->FUN_00a7c030(kSrc) : 0;
+    return pNewPixelData ? ((NiPixelData*)pNewPixelData)->NiPixelData_00a7c030(kSrc) : 0;
 }
 
 struct FUN_00aa27d0
@@ -343,7 +346,8 @@ static inline unsigned short Chan(unsigned int p, const Fmt* s, const Fmt* d, in
 }
 // Converts each 16-bit source pixel to the destination format by remapping its four channels through Chan and OR-ing them together.
 // @fnv 0x00a76d70
-void FUN_00a76d70(unsigned int uiWidth, unsigned int uiHeight, unsigned int, unsigned char* pucDst, unsigned int,
+// src: GAMEBRYO_LIB 0x00a76d70
+void NiDevImageConverter_ConvertRGBA16ToBGRA16(unsigned int uiWidth, unsigned int uiHeight, unsigned int, unsigned char* pucDst, unsigned int,
                   const Fmt* pDstFmt, const unsigned char* pucSrc, const Fmt* pSrcFmt)
 {
     const unsigned short* pSrcPixels = (const unsigned short*)pucSrc;
@@ -360,20 +364,22 @@ void FUN_00a76d70(unsigned int uiWidth, unsigned int uiHeight, unsigned int, uns
 }
 
 struct PixelFormatBitLayout;
-void __cdecl FUN_00a76d70(unsigned int, unsigned int, unsigned int, unsigned char*, NiPalette const*,
+void __cdecl NiDevImageConverter_ConvertRGBA16ToBGRA16(unsigned int, unsigned int, unsigned int, unsigned char*, NiPalette const*,
                           PixelFormatBitLayout const&, unsigned char const*, PixelFormatBitLayout const&);
 
 // @fnv 0x00a76e90
-void __cdecl FUN_00a76e90(unsigned int a, unsigned int b, unsigned int c, unsigned char* d, NiPalette const* e,
+// src: GUESS 0x00a76e90 (confidence: medium)
+void __cdecl NiPalette_NiDevImageConverter_ConvertRGBA16ToBGRA16_Thunk(unsigned int a, unsigned int b, unsigned int c, unsigned char* d, NiPalette const* e,
                           PixelFormatBitLayout const& f, unsigned char const* g, PixelFormatBitLayout const& h)
 {
-    FUN_00a76d70(a, b, c, d, e, f, g, h);
+    NiDevImageConverter_ConvertRGBA16ToBGRA16(a, b, c, d, e, f, g, h);
 }
 
 void __cdecl BuildFullPath(void);
 
 // @fnv 0x00aa29d0
-void __cdecl FUN_00aa29d0(void)
+// src: COMMUNITY 0x00aa29d0
+void __cdecl NiFilename_GetFullPath(void)
 {
     BuildFullPath();
 }
@@ -397,7 +403,7 @@ struct FileNameComponents
     {
         _strcpy_s(m_acExtension, 0x100, pcExt);
     }
-    void FUN_00aa29d0(char* pcDest, unsigned int uiDestLen);
+    void NiFilename_GetFullPath(char* pcDest, unsigned int uiDestLen);
 };
 
 // Populates a buffer from pcPath, setting its extension from DAT_011f4a78 when that value is non-null.
@@ -409,7 +415,7 @@ char* GetPathWithExtension(const char* pcPath)
     {
         FileNameComponents kFilename(pcPath);
         kFilename.SetExt(DAT_011f4a78);
-        kFilename.FUN_00aa29d0(pcDest, 0x104);
+        kFilename.NiFilename_GetFullPath(pcDest, 0x104);
     }
     else
     {
@@ -423,7 +429,7 @@ extern void* DAT_011f4a78;
 void _NiFreeAlias(void*) throw();
 struct Sub80
 {
-    void FUN_00a8ada0() throw();
+    void ProcessState_00a8ada0() throw();
 };
 
 struct FUN_00a76bb0 : NiRefObject
@@ -439,7 +445,7 @@ FUN_00a76bb0::~FUN_00a76bb0()
     if (DAT_011f4a78)
         _NiFreeAlias(DAT_011f4a78);
     DAT_011f4a78 = 0;
-    ((Sub80*)((char*)this + 0x80))->FUN_00a8ada0();
+    ((Sub80*)((char*)this + 0x80))->ProcessState_00a8ada0();
 }
 }  // namespace fnv_00a76bb0
 

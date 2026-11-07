@@ -68,7 +68,7 @@ public:
     int GetNextSpeaker();
     void SetNextSpeaker(int speaker);
     unsigned short GetInfoIndex();
-    bool FUN_0083ec10();
+    bool IsRunForRumors();
     void SetInfoIndex(unsigned short index);
     PerkEntryConditionSet* GetInfoConditions();
     void SetConditionList(PerkEntryConditionSet* conditions);

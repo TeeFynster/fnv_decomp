@@ -12,7 +12,7 @@ public:
     virtual ~ExtraAudioBuoyMarker();
 
     bool Compare(BSExtraData* extra) override;
-    bool FUN_00431710(BSExtraData* apCompare);
+    bool Compare_00431710(BSExtraData* apCompare);
 
     union
     {

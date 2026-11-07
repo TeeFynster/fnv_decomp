@@ -23,8 +23,8 @@ public:
     TESObjectTREE();
     TreeRecordData* GetData();
     NiPoint2* GetDimensions();
-    TreeDimensions* FUN_0045bb80();
-    bool FUN_0051d250();
+    TreeDimensions* NiAVObject_GetWorldTranslate();
+    bool TESObjectTREE_IsLargeEnoughForDistantLOD();
     void UpdateRustleSpeed(const float speed);
     virtual void InitItem();
     bool Load(TESFile* file);

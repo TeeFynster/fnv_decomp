@@ -47,8 +47,8 @@ public:
     bool ProcessObstacleTask(ObstacleTaskData*);
     LockPrimitive* GetCharPtrAtOffset();
     void ProcessActivatedObstacles();
-    void FUN_006c0c30(TESObjectREFR*);
-    void FUN_006c0c80(TESObjectREFR*); // 0x006c0c80 (thiscall; called from TESObjectCELL code)
-    void FUN_006c1170();
-    void FUN_006c1060(TESObjectREFR* object);
+    void NavMeshObstacleManager_AddObstacleForReference(TESObjectREFR*);
+    void NavMeshObstacleManager_RemoveObstacleForReference(TESObjectREFR*); // 0x006c0c80 (thiscall; called from TESObjectCELL code)
+    void NavMeshObstacleManager_QueueUpdateAllObstacle();
+    void NavMeshObstacleManager_OnDoorRemove(TESObjectREFR* object);
 };

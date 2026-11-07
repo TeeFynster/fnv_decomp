@@ -31,8 +31,8 @@
 class LockFreeMap_TESObjectREFR___BSTreeNode___;
 extern BSTreeManager* DAT_011d5c48;
 extern TES* g_TES;
-void FUN_00664940();
-void* FUN_00664840(bool);
+void BSTreeManager_Destroy_();
+void* BSTreeManager_GetInstance(bool);
 void SetGlobalValue(bool);
 void SetGlobalFloatFromUInt(unsigned int);
 void ClampAndStoreValue(float);
@@ -48,7 +48,7 @@ void BSTreeManager::Create(bool create)
     if (DAT_011d5c48)
     {
         if (create)
-            FUN_00664940();
+            BSTreeManager_Destroy_();
         else
             return;
     }
@@ -59,9 +59,9 @@ void BSTreeManager::Create(bool create)
 // @fnv 0x00665860
 void BSTreeManager::UpdateTreeInstances()
 {
-    if (((NiPointer<NiAVObject>*)((char*)FUN_00664840(true) + 4))->operator NiAVObject*())
+    if (((NiPointer<NiAVObject>*)((char*)BSTreeManager_GetInstance(true) + 4))->operator NiAVObject*())
     {
-        ((NiPointer<NiNode>*)((char*)FUN_00664840(true) + 4))->operator=(0);
+        ((NiPointer<NiNode>*)((char*)BSTreeManager_GetInstance(true) + 4))->operator=(0);
         SetGlobalValue(false);
         g_TES->LoadCanopyShadowTexture("Data\\Textures\\Trees\\CanopyShadow.dds", 0);
     }
@@ -69,7 +69,8 @@ void BSTreeManager::UpdateTreeInstances()
 
 // Returns DAT_011d5c48, creating the BSTreeManager first when create is true and it is not yet set.
 // @fnv 0x00664840
-void* FUN_00664840(bool create)
+// src: XBOX_PDB 0x00664840
+void* BSTreeManager_GetInstance(bool create)
 {
     if (!DAT_011d5c48 && create)
         BSTreeManager::Create(false);
@@ -126,7 +127,8 @@ void BSTreeModel::SetByteAtOffset44(unsigned char value)
 extern Setting originalRuntimeFloatSetting1295;
 
 // @fnv 0x006655a0
-float FUN_006655a0()
+// src: COMMUNITY 0x006655a0
+float GameSetting_fTreeNearDistanceBase_Get()
 {
     return *originalRuntimeFloatSetting1295.Float();
 }
@@ -146,7 +148,8 @@ extern unsigned char* __cdecl _FUN_00664840(bool);
 
 // Returns 1 if GetFirstProcessListByte succeeds and the byte at offset 0x18 of the object from _FUN_00664840(true) is nonzero, otherwise 0.
 // @fnv 0x0054ee20
-unsigned char FUN_0054ee20(bool abCreateIfNotFound)
+// src: COMMUNITY 0x0054ee20
+unsigned char BSTreeManager_GetTreesEnabled(bool abCreateIfNotFound)
 {
     int result;
     if (GetFirstProcessListByte() && ((unsigned char*)(_FUN_00664840(true) + 0x18))[0])
@@ -162,7 +165,8 @@ struct S664990
 };
 // If DAT_011d5c48 is set, calls its DestroyIfFlagged with 1, then clears DAT_011d5c48.
 // @fnv 0x00664940
-void FUN_00664940()
+// src: COMMUNITY 0x00664940
+void BSTreeManager_Destroy_()
 {
     void* b;
     if (DAT_011d5c48)
@@ -200,16 +204,18 @@ void* FUN_00664990_shell::DestroyIfFlagged(unsigned int flags)
 extern Setting DAT_011f9158;
 // Returns the result of FUN_006655a0 multiplied by the float value stored in DAT_011f9158.
 // @fnv 0x00665570
-float FUN_00665570()
+// src: COMMUNITY 0x00665570
+float fTreeNearDistance_Get()
 {
-    return (double)FUN_006655a0() * *DAT_011f9158.Float();
+    return (double)GameSetting_fTreeNearDistanceBase_Get() * *DAT_011f9158.Float();
 }
 
 double GetOriginalRuntimeFloatSetting1296();
 extern Setting DAT_011f9158;
 // Returns the value from GetOriginalRuntimeFloatSetting1296 multiplied by the float stored in DAT_011f9158.
 // @fnv 0x006655c0
-float FUN_006655c0()
+// src: COMMUNITY 0x006655c0
+float fTreeFarDistanceBase_Get()
 {
     return GetOriginalRuntimeFloatSetting1296() * *DAT_011f9158.Float();
 }
@@ -228,11 +234,12 @@ struct I1_665b80
 };
 struct C665b80
 {
-    void FUN_00665b80(int, I2_665b80*);
+    void BSTreeManager_AddBackgroundLoadedTree(int, I2_665b80*);
 };
 // Calls Foo on the object at this+0x1c; if it returns false, calls Func(1) on b when b is non-null.
 // @fnv 0x00665b80
-void C665b80::FUN_00665b80(int aiValue, I2_665b80* pObject)
+// src: XBOX_PDB 0x00665b80
+void C665b80::BSTreeManager_AddBackgroundLoadedTree(int aiValue, I2_665b80* pObject)
 {
     I2_665b80* p1;
     I2_665b80* p2;
@@ -258,22 +265,22 @@ struct B006815c0
     float y;
     float z;
 };
-NiPoint3* __fastcall FUN_0045bb80(NiAVObject*);
+NiPoint3* __fastcall NiAVObject_GetWorldTranslate(NiAVObject*);
 struct Twin_0084d030
 {
     float GetStoredFloatValue();
 };
 extern GameTimerRecord g_timeGlobal;
 extern float DAT_011d5dd4;
-void FUN_00b07060(float);
-void FUN_00b06c10(float*, float*);
+void CSpeedTreeRT_SetTime(float);
+void CSpeedTreeRT_SetCamera(float*, float*);
 struct CP_008c48d0
 {
     int GetPrevPath();
 };
 struct FUN_00450570_shell
 {
-    TESFile* FUN_00450570();
+    TESFile* Sky_GetFog();
 };
 struct FUN_004534f0_shell
 {
@@ -287,7 +294,8 @@ extern Setting g_011d5d98;
 extern Setting g_011d5d4c;
 
 // @fnv 0x006652e0
-void FUN_006652e0(NiAVObject* apCamera, bool abMenuMode)
+// src: XBOX_PDB 0x006652e0
+void BSTreeManager_Update(NiAVObject* apCamera, bool abMenuMode)
 {
     B006815c0 vecTemp;
     float fcamDir[3];
@@ -295,18 +303,18 @@ void FUN_006652e0(NiAVObject* apCamera, bool abMenuMode)
     if (!abMenuMode)
     {
         DAT_011d5dd4 += ((Twin_0084d030*)&g_timeGlobal)->GetStoredFloatValue();
-        FUN_00b07060(DAT_011d5dd4);
+        CSpeedTreeRT_SetTime(DAT_011d5dd4);
     }
     if (apCamera)
     {
-        fcamLoc[0] = FUN_0045bb80(apCamera)->x;
-        fcamLoc[1] = FUN_0045bb80(apCamera)->y;
-        fcamLoc[2] = FUN_0045bb80(apCamera)->z;
+        fcamLoc[0] = NiAVObject_GetWorldTranslate(apCamera)->x;
+        fcamLoc[1] = NiAVObject_GetWorldTranslate(apCamera)->y;
+        fcamLoc[2] = NiAVObject_GetWorldTranslate(apCamera)->z;
         vecTemp = (const B006815c0&)NiPosData::ComputePositionAtTime(-1.0f, apCamera->GetWorldTranslation());
         fcamDir[0] = vecTemp.x;
         fcamDir[1] = vecTemp.y;
         fcamDir[2] = vecTemp.z;
-        FUN_00b06c10(fcamLoc, fcamDir);
+        CSpeedTreeRT_SetCamera(fcamLoc, fcamDir);
     }
     if (!abMenuMode)
     {
@@ -318,14 +326,14 @@ void FUN_006652e0(NiAVObject* apCamera, bool abMenuMode)
                 *(float*)(_FUN_00664840(1) + 0x14) =
                     ((Sky*)((BSShaderNoLightingProperty*)g_TES)->GetBaseTexture())->GetFieldCC();
             if ((unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8) &&
-                ((FUN_00450570_shell*)((BSShaderNoLightingProperty*)g_TES)->GetBaseTexture())->FUN_00450570())
+                ((FUN_00450570_shell*)((BSShaderNoLightingProperty*)g_TES)->GetBaseTexture())->Sky_GetFog())
             {
                 NiColor col = *(const NiColor*)((FUN_00450570_shell*)((BSShaderNoLightingProperty*)g_TES)->GetBaseTexture())
-                           ->FUN_00450570()
+                           ->Sky_GetFog()
                            ->GetName();
                 ((FUN_004534f0_shell*)(unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8))->FUN_004534f0((unsigned int)&col);
                 ((FUN_004534f0_shell*)(unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8))->FUN_004534f0((unsigned int)&col);
-                ((NiProperty*)(unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8))->FUN_004bc450(&col);
+                ((NiProperty*)(unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8))->NiMaterialProperty_SetEmittance(&col);
             }
         }
         ((FUN_006658b0_shell*)_FUN_00664840(1))->Update();
@@ -416,13 +424,14 @@ struct C665be0_shell
     void* unk18;
     FUN_00665be0_interface* unk1c;
 
-    void FUN_00665be0(int value);
+    void BSTreeManager_RemoveBackgroundLoadedTree(int value);
 };
 
 extern "C" void __cdecl _free(void*);
 
 // @fnv 0x00665be0
-void C665be0_shell::FUN_00665be0(int value)
+// src: XBOX_PDB 0x00665be0
+void C665be0_shell::BSTreeManager_RemoveBackgroundLoadedTree(int value)
 {
     void* result = 0;
 
@@ -583,8 +592,8 @@ NiPointer<NiTexture>* Mgr6649c0::GetOrCreateTexturePointer(unsigned int key)
 class TreeReference : public TESObjectREFR
 {
   public:
-    unsigned int FUN_005692d0();
-    float FUN_00567400();
+    unsigned int TESObjectREFR_GetSpeedTreeSeed();
+    float TESObjectREFR_GetScale_00567400();
 };
 class LockFreeMap_TESObjectREFR___BSTreeNode___
 {
@@ -623,8 +632,8 @@ NiAVObject* TreeManager::CreateTreeInstance(TreeReference* reference, TESObjectT
     }
     unsigned int node = 1;
     if (reference)
-        node = reference->FUN_005692d0();
-    ((TreeModelManager*)FUN_00664840(true))->GetOrCreateModel(tree, node, scale);
+        node = reference->TESObjectREFR_GetSpeedTreeSeed();
+    ((TreeModelManager*)BSTreeManager_GetInstance(true))->GetOrCreateModel(tree, node, scale);
     if (!(BSTreeModel*)scale)
         return 0;
     if (((BSTreeModel*)scale)->FUN_00726070() > 2)
@@ -638,13 +647,13 @@ NiAVObject* TreeManager::CreateTreeInstance(TreeReference* reference, TESObjectT
     }
     else
     {
-        if (!((BSTreeModel*)scale)->FUN_0066ac40(tree, node))
+        if (!((BSTreeModel*)scale)->BSTreeModel_InitFromBase(tree, node))
             return 0;
         model = scale;
     }
     float key = 1.0f;
     if (reference)
-        key = reference->FUN_00567400();
+        key = reference->TESObjectREFR_GetScale_00567400();
     NiAVObject* instanceModel = model->CreateInstance(key);
     if (instanceModel)
         instanceModel->SetName(NiFixedString(tree->GetModelFilePath()));
@@ -670,28 +679,29 @@ struct TextureFormatPrefs
     unsigned int mipmapped;
 };
 extern const TextureFormatPrefs DAT_011a9598;
-NiSourceTexture* FUN_00a5ff10(NiPixelData* pixels, const char* name, const TextureFormatPrefs& preferences);
+NiSourceTexture* NiSourceTexture_Create(NiPixelData* pixels, const char* name, const TextureFormatPrefs& preferences);
 
 // Ensures the tree state's shadow texture is loaded from CanopyShadow.dds or generated as a 16x16 white NiPixelData, then returns it.
 // @fnv 0x00665610
-NiSourceTexture* FUN_00665610()
+// src: XBOX_PDB 0x00665610
+NiSourceTexture* BSTreeManager_GetCanopyShadow()
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TREEART, true,
                            "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\SpeedTree\\BSTreeManager.cpp", 629);
-    if (!((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*())
+    if (!((TreeTextureState*)BSTreeManager_GetInstance(true))->shadow.operator NiSourceTexture*())
     {
         if (g_TES)
             ((TextureLoader*)g_TES)
                 ->FUN_004568c0("Data\\Textures\\Trees\\CanopyShadow.dds",
-                               ((TreeTextureState*)FUN_00664840(true))->shadow, true, false);
+                               ((TreeTextureState*)BSTreeManager_GetInstance(true))->shadow, true, false);
         else
-            ((TreeTextureState*)FUN_00664840(true))->shadow.operator=(0);
-        SetGlobalValue((unsigned int)((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*());
+            ((TreeTextureState*)BSTreeManager_GetInstance(true))->shadow.operator=(0);
+        SetGlobalValue((unsigned int)((TreeTextureState*)BSTreeManager_GetInstance(true))->shadow.operator NiSourceTexture*());
     }
-    if (!((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*())
+    if (!((TreeTextureState*)BSTreeManager_GetInstance(true))->shadow.operator NiSourceTexture*())
     {
         NiPixelData* pixels = new NiPixelData(16, 16, &DAT_011aa2e8, 1, 1);
-        unsigned char* pPixelBytes = pixels->FUN_0064dac0(0u, 0u);
+        unsigned char* pPixelBytes = pixels->NiPixelData_GetPixels(0u, 0u);
         for (unsigned int y = 0; y < 16; ++y)
         {
             for (unsigned int x = 0; x < 16; ++x)
@@ -702,11 +712,11 @@ NiSourceTexture* FUN_00665610()
             }
         }
         pixels->FUN_004f31b0();
-        ((TreeTextureState*)FUN_00664840(true))
-            ->shadow.operator=(FUN_00a5ff10(pixels, NiFixedString("CanopyShadowTexture"), DAT_011a9598));
-        SetGlobalValue((unsigned int)((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*());
+        ((TreeTextureState*)BSTreeManager_GetInstance(true))
+            ->shadow.operator=(NiSourceTexture_Create(pixels, NiFixedString("CanopyShadowTexture"), DAT_011a9598));
+        SetGlobalValue((unsigned int)((TreeTextureState*)BSTreeManager_GetInstance(true))->shadow.operator NiSourceTexture*());
     }
-    return ((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*();
+    return ((TreeTextureState*)BSTreeManager_GetInstance(true))->shadow.operator NiSourceTexture*();
 }
 }  // namespace fnv_00665610
 
@@ -727,16 +737,17 @@ struct Map664
 };
 struct Timer664
 {
-    void FUN_004538a0(int);
+    void BSCriticalSection_Enter(int);
     void FUN_004538c0();
 };
 extern "C" char DAT_011d5cc0;
 struct Entry664
 {
-    static void FUN_00664cd0(bool);
+    static void BSTreeManager_ClearModelCache(bool);
 };
 // @fnv 0x00664cd0
-void Entry664::FUN_00664cd0(bool partial)
+// src: XBOX_PDB 0x00664cd0
+void Entry664::BSTreeManager_ClearModelCache(bool partial)
 {
     NiPointer<BSTreeModel>* p;
     void* h;
@@ -750,7 +761,7 @@ void Entry664::FUN_00664cd0(bool partial)
     Map664 *k, *ba, *j, *e;
     if (!*(Map664**)_FUN_00664840(true))
         return;
-    ((Timer664*)&DAT_011d5cc0)->FUN_004538a0(0);
+    ((Timer664*)&DAT_011d5cc0)->BSCriticalSection_Enter(0);
     if (partial)
     {
         h = (*(Map664**)_FUN_00664840(true))->FUN_004b9ba0();
@@ -820,13 +831,13 @@ struct WindFrequency
 {
     float x, y;
 };
-float FUN_0063c600(float);
-float FUN_0057e960(float);
+float NiSinQ(float);
+float NiCosQ(float);
 namespace std {
 double abs(float);
 }
-void FUN_00bb2fc0(int, float, float);
-void FUN_00bb1390(float, float, float, float);
+void Object_ProcessAndReturnValue_00bb2fc0(int, float, float);
+void Runtime_UpdateState_00bb1390(float, float, float, float);
 struct C6658
 {
     char pad[20];
@@ -850,14 +861,14 @@ void C6658::Update()
         if (value != 0.0)
             ((float*)&DAT_011d5dd8)[i] = ((float*)&DAT_011d5dd8)[i] * (*(float*)&DAT_011d5de8) / value;
         float speed4 = value * 20.0;
-        float s7 = FUN_0063c600(speed4 * ((WindFrequency*)&DAT_0119b8cc)[i].x * ((float*)&DAT_011d5dd8)[i]);
-        float c = FUN_0057e960(speed4 * ((WindFrequency*)&DAT_0119b8cc)[i].y * ((float*)&DAT_011d5dd8)[i]);
+        float s7 = NiSinQ(speed4 * ((WindFrequency*)&DAT_0119b8cc)[i].x * ((float*)&DAT_011d5dd8)[i]);
+        float c = NiCosQ(speed4 * ((WindFrequency*)&DAT_0119b8cc)[i].y * ((float*)&DAT_011d5dd8)[i]);
         if (i == 2)
         {
             sum += std::abs(s7);
             sum += std::abs(c);
         }
-        FUN_00bb2fc0(i, amplitudeB * s7, amplitudeB * c);
+        Object_ProcessAndReturnValue_00bb2fc0(i, amplitudeB * s7, amplitudeB * c);
     }
     float a7 = (1.0 - *((Setting*)&DAT_011d5dc4)->Float()) +
                *((Setting*)&DAT_011d5dc4)->Float() * sum / 2.0;
@@ -867,7 +878,7 @@ void C6658::Update()
                     *((Setting*)&DAT_011d5c68)->Float() * sum / 2.0;
     float d9 = (1.0 - *((Setting*)&DAT_011d5c74)->Float()) +
                *((Setting*)&DAT_011d5c74)->Float() * sum / 2.0;
-    FUN_00bb1390(value * a7, value * b,
+    Runtime_UpdateState_00bb1390(value * a7, value * b,
                  ((Time6658*)&DAT_011f6394)->FUN_0084d030() * *((Setting*)&DAT_011d5cdc)->Float() * outerc4,
                  ((Time6658*)&DAT_011f6394)->FUN_0084d030() * *((Setting*)&DAT_011d5c5c)->Float() * d9);
     (*(float*)&DAT_011d5de8) = value;

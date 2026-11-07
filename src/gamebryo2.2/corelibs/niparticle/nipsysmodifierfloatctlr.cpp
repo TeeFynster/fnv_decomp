@@ -29,7 +29,8 @@ void NiPSysModifierFloatCtlr::LinkObject(NiStream& stream)
 extern const char* const g_012026d8_arg1;
 
 // @fnv 0x00c32e00
-const char* const* __cdecl FUN_00c32e00()
+// src: COMMUNITY 0x00c32e00
+const char* const* __cdecl NiPSysModifierFloatCtlr_GetRTTI()
 {
     return &g_012026d8_arg1;
 }
@@ -51,7 +52,8 @@ char* __cdecl _FUN_00a7d330(const char*);
 void __stdcall AppendModifierInfo(StrArr*);
 // Appends the string returned by _FUN_00a7d330(g_012026d8_arg1) to pkStrings, growing the array if its count reaches capacity.
 // @fnv 0x00c32f60
-void __stdcall FUN_00c32f60(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c32f60
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr* pkStrings)
 {
     AppendModifierInfo(pkStrings);
     char* pString = _FUN_00a7d330(g_012026d8_arg1);
@@ -65,7 +67,8 @@ void __stdcall FUN_00c32f60(StrArr* pkStrings)
 
 extern int g_011f3738;
 // @fnv 0x00c32e90
-void __thiscall NiPSysModifierFloatCtlr::FUN_00c32e90(NiObject* pkInterp, unsigned short usIndex)
+// src: XBOX_PDB 0x00c32e90
+void __thiscall NiPSysModifierFloatCtlr::SynchronizePoseInterpolator_00c32e90(NiObject* pkInterp, unsigned short usIndex)
 {
     NiObject* pkFloatInterp;
     float fValue;
@@ -104,7 +107,8 @@ void NiPSysModifierFloatCtlr::UpdateController(float& fTime)
 
 void __cdecl FUN_00a57780();
 // @fnv 0x00a44cd0
-void __cdecl FUN_00a44cd0()
+// src: XBOX_PDB 0x00a44cd0
+void __cdecl BSFrustumFOVController_RegisterStreamables()
 {
     FUN_00a57780();
 }

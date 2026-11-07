@@ -131,7 +131,8 @@ void* __fastcall FUN_00a50e50(void* pThis, int, unsigned int flags)
 extern int g_011f4004;
 
 // @fnv 0x00a50e40
-int* __cdecl FUN_00a50e40()
+// src: COMMUNITY 0x00a50e40
+int* __cdecl NiBSplineCompTransformInterpolator_GetRTTI()
 {
     return &g_011f4004;
 }

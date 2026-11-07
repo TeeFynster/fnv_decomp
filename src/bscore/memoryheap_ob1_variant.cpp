@@ -8,7 +8,7 @@
 __declspec(dllimport) int __stdcall VirtualFree(void*, unsigned long, unsigned long);
 struct FUN_00aa7ab0_s
 {
-    unsigned int FUN_00aa7ab0(char* pBase, unsigned int uiElapsedMilliseconds, unsigned int uiSize);
+    unsigned int MemoryHeap_CleanExtraPages(char* pBase, unsigned int uiElapsedMilliseconds, unsigned int uiSize);
 };
 struct FUN_00aa7a30_shell
 {
@@ -16,15 +16,15 @@ struct FUN_00aa7a30_shell
 };
 struct FUN_00aa7c00_shell
 {
-    unsigned int __thiscall FUN_00aa7c00(const void* apPointer);
+    unsigned int __thiscall MemoryHeap_TotalSize(const void* apPointer);
 };
 struct FUN_00aa7c30_shell
 {
-    int FUN_00aa7c30();
+    int return_0_7();
 };
 struct FUN_00aa7c50_s
 {
-    int FUN_00aa7c50();
+    int return_0_0();
 };
 struct FUN_00aa7c60_cls
 {
@@ -42,7 +42,7 @@ struct FUN_00aa7d60_cls
 {
     char pad0[0x10];
     unsigned int m_uiPage;
-    void FUN_00aa7d60(FUN_00aa7d60_blk* pBlock);
+    void MemoryHeap_DecommitPages(FUN_00aa7d60_blk* pBlock);
 };
 extern MemoryManager g_memoryManager;
 struct FakeHeap
@@ -50,10 +50,10 @@ struct FakeHeap
     void FUN_00aa7930();
     void* FUN_00aa7e20(unsigned int);
 };
-void __fastcall FUN_00aa9d10(void* this_ptr);
+void __fastcall MemoryHeap_DoNothing(void* this_ptr);
 struct FUN_00b02710_Cls
 {
-    void FUN_00b02710(void*, int);
+    void AbstractHeap_CommitPages(void*, int);
 };
 struct FUN_00aa79a0_shell
 {
@@ -75,7 +75,7 @@ struct FUN_00aa7ca0_cls
     char pad0[0x20f0];
     bool m_bFlag;
     unsigned int WriteBucketInfo(FUN_00aa7ca0_obj* p);
-    unsigned int FUN_00aa7ca0(FUN_00aa7ca0_obj* p);
+    unsigned int MemoryHeap_OutputBucketInfo(FUN_00aa7ca0_obj* p);
 };
 struct AA7D00Stream
 {
@@ -2196,7 +2196,7 @@ struct AA7D00Saver
     bool m_bSkip;
 
     int ValueReferencePair(AA7D00Stream* pkStream, bool bFlag);
-    int FUN_00aa7d00(AA7D00Stream* pkStream, bool bFlag);
+    int MemoryHeap_OutputBlockInfo(AA7D00Stream* pkStream, bool bFlag);
 };
 
 struct BlockHeader
@@ -2228,11 +2228,12 @@ class HeapValidator
     virtual void slot2();
     virtual void slot3();
     virtual bool Contains(const void* pointer);
-    bool FUN_00aa7b70(const void* pointer);
+    bool MemoryHeap_BlockIsOk(const void* pointer);
 };
 
 // @fnv 0x00aa7b70
-bool HeapValidator::FUN_00aa7b70(const void* pointer)
+// src: XBOX_PDB 0x00aa7b70
+bool HeapValidator::MemoryHeap_BlockIsOk(const void* pointer)
 {
     const BlockHeader* header = BlockHeader::FromMemory(pointer);
     return Contains(pointer) && !header->IsFree() && header->GuardIntact();

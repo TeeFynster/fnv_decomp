@@ -26,8 +26,8 @@ Tile* __cdecl ItemModMenu::Create()
         Tile* menuTile;
     } state;
 
-    state.resourceProvider = FUN_004b7210();
-    state.menuTile = (Tile*)Tile::FindMenuById(FUN_00783640());
+    state.resourceProvider = InterfaceManager_GetSingleton();
+    state.menuTile = (Tile*)Tile::FindMenuById(ItemModMenu_GetClassStatic());
     if (state.menuTile != 0)
     {
         state.firstCopy = state.menuTile;
@@ -42,13 +42,13 @@ Tile* __cdecl ItemModMenu::Create()
         }
     }
 
-    state.fileTile = ((InterfaceManager*)state.resourceProvider)->FUN_00586150()->ReadFile(DAT_01073c34);
+    state.fileTile = ((InterfaceManager*)state.resourceProvider)->CombatController_GetCombatState()->ReadFile(DAT_01073c34);
     DAT_011d9f54 = state.fileTile->GetMenu();
-    if (DAT_011d9f54 != 0 && DAT_011d9f54->GetClass() == FUN_00783640())
+    if (DAT_011d9f54 != 0 && DAT_011d9f54->GetClass() == ItemModMenu_GetClassStatic())
     {
         DAT_011d9f54->SetTileMenu((TileMenu*)state.fileTile, false);
-        ((InventoryMenu*)DAT_011d9f54)->FUN_00867a20();
-        if (!DAT_011d9f54->FUN_007273f0())
+        ((InventoryMenu*)DAT_011d9f54)->Menu_SetRenderedMenu();
+        if (!DAT_011d9f54->ItemModMenu_IsWellFormedMenu())
         {
             Warning(DAT_01073be0);
             return 0;
@@ -115,7 +115,8 @@ int ItemModMenu::GetClass()
 
 // Checks the 14 int entries at offset 0x28 and returns false if any is zero, otherwise true.
 // @fnv 0x007273f0
-bool Menu::FUN_007273f0()
+// src: XBOX_PDB 0x007273f0
+bool Menu::ItemModMenu_IsWellFormedMenu()
 {
     for (int i = 0; i < 14; ++i)
     {
@@ -126,7 +127,8 @@ bool Menu::FUN_007273f0()
 }
 
 // @fnv 0x00783640
-int __cdecl FUN_00783640()
+// src: XBOX_PDB 0x00783640
+int __cdecl ItemModMenu_GetClassStatic()
 {
     return 0x425;
 }
@@ -149,7 +151,7 @@ void ItemModMenu::UpdateItemModTile(int aiID, Tile* apTarget)
     if (aiID == 15)
     {
         m_pTiles[9]->Set(0xFA3, 0);
-        if (reinterpret_cast<MenuList*>(&m_kItemList)->FUN_0071ae60() > 1)
+        if (reinterpret_cast<MenuList*>(&m_kItemList)->ListBox_ItemChange_NumUnfiltered() > 1)
         {
             m_pTiles[8]->Set(0xFA3, 0);
         }
@@ -223,7 +225,7 @@ int CompareItemVisibility(ListBoxItem<FUN_00783810_ListItem*>* apItem1, ListBoxI
 struct ModEntry;
 struct ModObject
 {
-    float FUN_004bcdb0(int);
+    float ItemChange_GetItemHealth(int);
     ModEntry* FUN_0044ddc0();
     unsigned char FUN_004bd820();
 };
@@ -244,10 +246,10 @@ void __cdecl UpdateTileFromObject(Tile* tile, ModObject* object)
 {
     if (!tile || !object)
         return;
-    float value = object->FUN_004bcdb0(1);
+    float value = object->ItemChange_GetItemHealth(1);
     tile->FUN_00700320(0xfaa, 15);
     tile->FUN_00700320(0xfa3, tile->FUN_00a011b0(0xfac) >= DAT_01012060 ? 1 : 0);
-    tile->FUN_00a012d0(0xfa3, 1.0f, true);
+    tile->Tile_Set(0xfa3, 1.0f, true);
     ModEntry* entry = DAT_011d9f58->FUN_0044ddc0();
     if (DAT_011d9f58->FUN_004bd820())
     {
@@ -256,7 +258,7 @@ void __cdecl UpdateTileFromObject(Tile* tile, ModObject* object)
             ((DAT_011d9f58->FUN_004bd820() & 2) && other == entry->FUN_004bd570(2)) ||
             ((DAT_011d9f58->FUN_004bd820() & 4) && other == entry->FUN_004bd570(4)))
         {
-            (*reinterpret_cast<ModTileList*>(&tile->m_kChildTileList)->FUN_007b5370())->FUN_00a012d0(0xfa9, DAT_01073c54, true);
+            (*reinterpret_cast<ModTileList*>(&tile->m_kChildTileList)->FUN_007b5370())->Tile_Set(0xfa9, DAT_01073c54, true);
         }
     }
 }
@@ -352,7 +354,8 @@ extern int g_iEqUnused;
 
 // Merges the current entry's extra data into the player's inventory, equips it to a free hand slot, and returns whether it was equipped.
 // @fnv 0x00783af0
-bool ItemModMenu::FUN_00783af0(EqEntry* apTarget)
+// src: XBOX_PDB 0x00783af0
+bool ItemModMenu::ItemModItem(EqEntry* apTarget)
 {
     EqEntry* pPlayerEntry =
         EqInventoryChanges::GetOrAddInventoryChanges(g_pEqPlayer)->FindEntry(g_pEqCurrentEntry->GetType(), 1, 0);
@@ -441,8 +444,8 @@ bool ItemModMenu::FUN_00783af0(EqEntry* apTarget)
     return bEquipped;
 }
 
-bool __cdecl FUN_004b71d0();
-void __cdecl FUN_00706ff0(int);
+bool __cdecl InterfaceManager_Has360Controller();
+void __cdecl Interface_SetCurrentFocusTarget(int);
 
 struct ModStr
 {
@@ -475,13 +478,14 @@ struct ModListOwner
     bool IsEmpty() const;
     ModListEntry** GetFirst();
     void Advance(int count);
-    void FUN_007b4410();
+    void RaceSexMenu_MenuOptionList_SetActive();
 };
 
 // @fnv 0x007b4410
-void ModListOwner::FUN_007b4410()
+// src: XBOX_PDB 0x007b4410
+void ModListOwner::RaceSexMenu_MenuOptionList_SetActive()
 {
-    if (FUN_004b71d0())
+    if (InterfaceManager_Has360Controller())
     {
         if (!pEntry && !IsEmpty())
             pEntry = *GetFirst();
@@ -489,7 +493,7 @@ void ModListOwner::FUN_007b4410()
         {
             ModStr savedTraitString(pEntry->pTile->GetString(0xfe8));
             pEntry->pTile->SetInt(0xfe8, -1);
-            FUN_00706ff0((int)pEntry->pTile);
+            Interface_SetCurrentFocusTarget((int)pEntry->pTile);
             pEntry->pTile->SetString(0xfe8, savedTraitString, true);
             while (true)
             {
@@ -524,15 +528,15 @@ class TESObjectREFR_GetFlags_Helper
 class ItemEntry : public BSStringT<char>
 {
   public:
-    bool FUN_004bddd0(bool);
-    void FUN_004bdc70();
+    bool ItemChange_GetWorn(bool);
+    void ItemChange_RemoveIsModding();
 };
 class TileValueList
 {
   public:
     Tile** FUN_007b5370(unsigned int);
 };
-BSAudio* FUN_00453a70();
+BSAudio* BSAudio_QInstance();
 struct FUN_004f2770_Class
 {
     virtual void v000();
@@ -778,7 +782,7 @@ struct FUN_004f2770_Class
     virtual void v0ef();
     virtual void v0f0();
     virtual void UpdateRepairMenu();
-    void EquipItem(unsigned int, ContNode*, TESForm*, bool, bool, bool);
+    void Actor_QueueEquipObject(unsigned int, ContNode*, TESForm*, bool, bool, bool);
 };
 extern FUN_004f2770_Class* _g_thePlayer;
 extern ItemEntry* DAT_011d9f58;
@@ -790,10 +794,10 @@ class ItemModListW
     ItemEntry* FUN_007a1910();
     void RemoveTile(int);
 };
-void FUN_00717280(int);
-void FUN_00784710(ItemEntry*, int);
-void FUN_00782a90();
-void FUN_007048f0(int, int, int);
+void InterfaceManager_PlayMenuSound(int);
+void ItemModMenu_InitItemModMenu(ItemEntry*, int);
+void InventoryMenu_UpdateInventoryMenu();
+void Interface_SetInventoryMenuVisible(int, int, int);
 
 // @fnv 0x007838a0
 }  // namespace fnv_007838a0
@@ -803,8 +807,8 @@ void ItemModMenu::HandleSelection(int tileID, Tile* clickedTile)
     using namespace fnv_007838a0;
     using fnv_007838a0::DAT_011d9f58;
     using fnv_007838a0::_g_thePlayer;
-    using fnv_007838a0::FUN_00784710;
-    using fnv_007838a0::FUN_00453a70;
+    using fnv_007838a0::ItemModMenu_InitItemModMenu;
+    using fnv_007838a0::BSAudio_QInstance;
     bool bHandled = false;
     if (!clickedTile && tileID >= 0 && tileID < 14)
         clickedTile = m_pTiles[tileID];
@@ -821,33 +825,33 @@ void ItemModMenu::HandleSelection(int tileID, Tile* clickedTile)
                 ItemEntry* pEntry = ((ItemModListW*)&m_kItemList)->FUN_007a1910();
                 TESForm* pForm =
                     (const char*)*pEntry ? *(TESForm**)&((B006815c0*)(const char*)*pEntry)->B006815c0::B006815c0() : 0;
-                if (FUN_00783af0(reinterpret_cast<EqEntry*>(pEntry)))
+                if (ItemModItem(reinterpret_cast<EqEntry*>(pEntry)))
                 {
                     _g_thePlayer->SendItemModEvent(((TESObjectREFR_GetFlags_Helper*)pEntry)->CallGetFlags(), pForm,
                                                    true, false, false, false, false, false, true, false);
-                    FUN_00453a70()->GetSoundHandleByEditorID("UIItemGunsSmallUp ", 0x121).Play(false);
+                    BSAudio_QInstance()->GetSoundHandleByEditorID("UIItemGunsSmallUp ", 0x121).Play(false);
                     ((ItemModListW*)&m_kItemList)->RemoveTile(((ItemModListW*)&m_kItemList)->v1());
-                    FUN_00784710(DAT_011d9f58, 0);
-                    if (pEntry->FUN_004bddd0(false))
+                    ItemModMenu_InitItemModMenu(DAT_011d9f58, 0);
+                    if (pEntry->ItemChange_GetWorn(false))
                     {
                         _g_thePlayer->UpdateRepairMenu();
-                        FUN_00782a90();
+                        InventoryMenu_UpdateInventoryMenu();
                     }
                 }
             }
         }
         break;
     case 12:
-        FUN_00717280(0x24);
+        InterfaceManager_PlayMenuSound(0x24);
         if (DAT_011d9f40 == 1)
         {
-            _g_thePlayer->EquipItem(
+            _g_thePlayer->Actor_QueueEquipObject(
                 ((TESObjectREFR_GetFlags_Helper*)DAT_011d9f58)->CallGetFlags(), fnv_007838a0::FUN_00726070((ContNode*)DAT_011d9f58),
                 *(TESForm**)&((B006815c0*)(const char*)*DAT_011d9f58)->B006815c0::B006815c0(), true, false, true);
-            DAT_011d9f58->FUN_004bdc70();
+            DAT_011d9f58->ItemChange_RemoveIsModding();
             DAT_011d9f40 = 0;
         }
-        FUN_007048f0(1, 0, 0);
+        Interface_SetInventoryMenuVisible(1, 0, 0);
         break;
     }
 }
@@ -859,26 +863,26 @@ struct Data78
 };
 struct Entry78
 {
-    bool FUN_004bddd0(bool);
-    void FUN_004bdb40();
-    Data78* FUN_00559450();
+    bool ItemChange_GetWorn(bool);
+    void ItemChange_SetIsModding();
+    Data78* Modelloader_GetReferencedThis();
     int FUN_00726070();
     Form78* FUN_0044ddc0();
-    float FUN_004bcdb0(int);
+    float ItemChange_GetItemHealth(int);
     const char* GetIconFilename(int);
 };
 struct Form78
 {
     int FUN_00401170();
-    float FUN_004be060();
+    float TESObjectARMO_GetArmorRating();
 };
 struct Name78
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct Player78
 {
-    void UnequipItem(Form78*, int, void*, int, int, int);
+    void QueueUnEquipObject(Form78*, int, void*, int, int, int);
 };
 extern Player78* _g_thePlayer;
 extern Entry78* g_011d9f58;
@@ -893,7 +897,7 @@ struct Box78
     virtual void v6();
     virtual void clear();
     virtual void sort(void (*)(void*, void*));
-    void FUN_007314c0(void (*)(void*, void*), int, int);
+    void ListBox_ItemChange_Traverse(void (*)(void*, void*), int, int);
 };
 struct Setting78
 {
@@ -907,10 +911,10 @@ float FUN_00476b20(float);
 void PopulateModListScreen();
 void UpdateTileFromObject(void*, void*);
 void CompareItemVisibility(void*, void*);
-bool FUN_004b71d0();
+bool InterfaceManager_Has360Controller();
 struct Input78
 {
-    void FUN_00718630(int, int, int);
+    void InterfaceManager_TutorialManager_ShowMessage(int, int, int);
 };
 struct Manager78
 {
@@ -1224,11 +1228,12 @@ struct Manager78
     int unk4cc;
     int unk4d0;
     Input78 unk4d4;
-    void FUN_00715860(Tile*);
+    void InterfaceManager_SetCurrentFocusTarget(Tile*);
 };
-void FUN_007046f0(int, int, int);
+void Interface_SetItemModMenuVisible(int, int, int);
 // @fnv 0x00784710
-void FUN_00784710(Entry78* pEntry, bool b)
+// src: XBOX_PDB 0x00784710
+void ItemModMenu_InitItemModMenu(Entry78* pEntry, bool b)
 {
     if (b)
         DAT_011d9f40 = 0;
@@ -1236,14 +1241,14 @@ void FUN_00784710(Entry78* pEntry, bool b)
     {
         if (pEntry)
             g_011d9f58 = pEntry;
-        if (g_011d9f58 && b && g_011d9f58->FUN_004bddd0(false))
+        if (g_011d9f58 && b && g_011d9f58->ItemChange_GetWorn(false))
         {
-            g_011d9f58->FUN_004bdb40();
-            _g_thePlayer->UnequipItem(g_011d9f58->FUN_0044ddc0(), g_011d9f58->FUN_00726070(),
-                                       *g_011d9f58->FUN_00559450()->FUN_006815c0(), 0, 0, 1);
+            g_011d9f58->ItemChange_SetIsModding();
+            _g_thePlayer->QueueUnEquipObject(g_011d9f58->FUN_0044ddc0(), g_011d9f58->FUN_00726070(),
+                                       *g_011d9f58->Modelloader_GetReferencedThis()->FUN_006815c0(), 0, 0, 1);
             DAT_011d9f40 = 1;
         }
-        float condition = g_011d9f58->FUN_004bcdb0(1) / 100.0;
+        float condition = g_011d9f58->ItemChange_GetItemHealth(1) / 100.0;
         ((ItemModMenu*)DAT_011d9f54)->m_pTiles[4]->Set(0x1004, condition, true);
         ((ItemModMenu*)DAT_011d9f54)->m_pTiles[4]->Set(0xfa3, 1);
         if (g_011d9f58->FUN_0044ddc0()->FUN_00401170() == 40)
@@ -1254,14 +1259,14 @@ void FUN_00784710(Entry78* pEntry, bool b)
                     DAT_011d9f44,
                     (int)FUN_004bd510(GetWeaponDamage(g_011d9f58->FUN_0044ddc0(), condition, pEntry, 0), 1.0f));
             ((ItemModMenu*)DAT_011d9f54)
-                ->m_pTiles[0]->Set(0xfc4, ((Name78*)((char*)g_011d9f58->FUN_0044ddc0() + 0x30))->FUN_00408da0(), true);
+                ->m_pTiles[0]->Set(0xfc4, ((Name78*)((char*)g_011d9f58->FUN_0044ddc0() + 0x30))->TESModel_GetModel(), true);
         }
         else
         {
             ((ItemModMenu*)DAT_011d9f54)->m_pTiles[5]->Set(DAT_011d9f3c, g_011d20c4.FUN_00403df0(), true);
             ((ItemModMenu*)DAT_011d9f54)
                 ->m_pTiles[5]->Set(DAT_011d9f44, (int)FUN_00476b20(FUN_00646360(
-                                               (int)g_011d9f58->FUN_0044ddc0()->FUN_004be060(), condition)));
+                                               (int)g_011d9f58->FUN_0044ddc0()->TESObjectARMO_GetArmorRating(), condition)));
         }
         if (pEntry)
         {
@@ -1269,15 +1274,15 @@ void FUN_00784710(Entry78* pEntry, bool b)
             ((ItemModMenu*)DAT_011d9f54)->m_pTiles[3]->Set(0xfcc, g_011d9f58->GetIconFilename(0), true);
             PopulateModListScreen();
         }
-        (*reinterpret_cast<Box78*>(&static_cast<ItemModMenu*>(DAT_011d9f54)->m_kItemList)).FUN_007314c0(UpdateTileFromObject, 0, 0x7fffffff);
+        (*reinterpret_cast<Box78*>(&static_cast<ItemModMenu*>(DAT_011d9f54)->m_kItemList)).ListBox_ItemChange_Traverse(UpdateTileFromObject, 0, 0x7fffffff);
         (*reinterpret_cast<Box78*>(&static_cast<ItemModMenu*>(DAT_011d9f54)->m_kItemList)).sort(CompareItemVisibility);
-        if (pEntry && FUN_004b71d0())
-            ((Manager78*)FUN_004b7210())->FUN_00715860((*reinterpret_cast<Box78*>(&static_cast<ItemModMenu*>(DAT_011d9f54)->m_kItemList)).selected(1, 0, 0xfc3, 1));
+        if (pEntry && InterfaceManager_Has360Controller())
+            ((Manager78*)InterfaceManager_GetSingleton())->InterfaceManager_SetCurrentFocusTarget((*reinterpret_cast<Box78*>(&static_cast<ItemModMenu*>(DAT_011d9f54)->m_kItemList)).selected(1, 0, 0xfc3, 1));
         ((ItemModMenu*)DAT_011d9f54)->HandleMouseover(15, reinterpret_cast<Tile*>((*reinterpret_cast<Box78*>(&static_cast<ItemModMenu*>(DAT_011d9f54)->m_kItemList)).count()));
         if (pEntry)
         {
-            FUN_007046f0(1, 0, 0);
-            ((Manager78*)FUN_004b7210())->unk4d4.FUN_00718630(6, FUN_00783640(), 500);
+            Interface_SetItemModMenuVisible(1, 0, 0);
+            ((Manager78*)InterfaceManager_GetSingleton())->unk4d4.InterfaceManager_TutorialManager_ShowMessage(6, ItemModMenu_GetClassStatic(), 500);
         }
     }
 }
@@ -1340,7 +1345,8 @@ int xTraitID(const char* p);
 
 // Updates the selected entry's display, shakes the pip manager when the queried value changes, and sets description and icon tiles when available.
 // @fnv 0x00783ed0
-void ItemModMenu::FUN_00783ed0(int m_uiSoundID, int iUnused)
+// src: XBOX_PDB 0x00783ed0
+void ItemModMenu::DoEnter(int m_uiSoundID, int iUnused)
 {
     switch (m_uiSoundID)
     {

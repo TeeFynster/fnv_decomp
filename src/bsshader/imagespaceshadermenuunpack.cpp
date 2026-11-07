@@ -511,7 +511,7 @@ void HudInner::UpdateHudGeometry(int aiUnk, SurfaceOwner* apSurface, HudParam* a
             p = &DAT_01202410;
         if (DAT_011ae5d4)
         {
-            NiPointer<BSRenderedTexture> pTexture = (*unk2c)->FUN_00ba3770();
+            NiPointer<BSRenderedTexture> pTexture = (*unk2c)->ImageSpaceTexture_GetRenderedTexture();
             ReleasePointer(DAT_011f91ac->unk200);
             NiScreenElements* pScreenElements =
                 new NiScreenElements(new NiScreenElementsData(false, false, 1, 1, 1, 4, 1, 2, 1));
@@ -538,16 +538,16 @@ void HudInner::UpdateHudGeometry(int aiUnk, SurfaceOwner* apSurface, HudParam* a
                 float e0 = qw + v4;
                 float e1 = qh + v5;
                 static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject)->SetRectangle(i, fX, fY, fW, fH);
-                static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject)->FUN_00a87900();
+                static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject)->NiScreenElementsData_UpdateBound();
                 NiScreenElementsData* pScreenElementsData = static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject);
                 pScreenElementsData->FUN_00a88130(i, 0, v4, v5, e0, e1);
                 static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject)->FUN_00a67050(0);
                 NiFixedString sName(NiGlobalStringTable::AddString("Interface: HUD Unpack Geometry"), 0);
                 pScreenElements->AssignFixedString(&sName);
             }
-            pScreenElements->FUN_00a5a040();
+            pScreenElements->UpdateProperties();
             NiUpdateData ud;
-            pScreenElements->FUN_00a59c60(&ud);
+            pScreenElements->NiAVObject_Update(&ud);
             pScreenElements->m_spShader = reinterpret_cast<NiShader*>((char*)this - 0x6c);
             DAT_011f91ac->unk200 = pScreenElements;
         }
@@ -561,7 +561,7 @@ void HudInner::UpdateHudGeometry(int aiUnk, SurfaceOwner* apSurface, HudParam* a
             if (DAT_011f4748->unk208 == true)
                 DAT_011f4748->vf64(&color);
         }
-        spr->FUN_00a87790(DAT_011f4748);
+        spr->NiScreenElements_Draw(DAT_011f4748);
         DAT_011ae5d4 = false;
     }
 }

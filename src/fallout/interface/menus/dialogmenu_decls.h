@@ -70,10 +70,10 @@ class DialogueResponse;
 class MobileObjectView
 {
   public:
-    bool FUN_00574900();
+    bool MobileObject_IsTalkingActivator();
     TESPackage* GetCurrentPackage();
     const char* GetFullName();
-    void FUN_00934250();
+    void MobileObject_StopCurrentDialogue();
     bool IsInThirdPerson();
     virtual void vfn_0();
     virtual void vfn_4();
@@ -384,7 +384,7 @@ class PlayerCharacterView : public MobileObjectView
   public:
     unsigned char layoutPadding80[0x24];
     ActorValueOwner actorValueOwner;
-    bool FUN_004eaf60();
+    bool PlayerCharacter_Is3rdPerson();
     void Show1stPerson(bool);
     void FocusOnActor(MobileObjectView*, float, bool);
     void SetAimingWeapon(bool, bool, bool);
@@ -497,7 +497,7 @@ public:
     DialogState BeginDialogueResponse(bool);
     void LoadTopicsList();
     bool AreTilesInitialized();
-    bool FUN_007620f0();
+    bool DialogMenu_IsWellFormedMenu();
     TESSound* GetCastSound();
 
     static int ms_iDialogMenuValue;

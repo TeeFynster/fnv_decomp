@@ -26,11 +26,11 @@ public:
     virtual bool Compare(TESForm* form);
 
     bool Load(TESFile* file);
-    void FUN_005f0140();
-    void FUN_005f02a0(TESForm* form);
-    bool FUN_005f02f0(TESForm* form);
-    void FUN_004851b0(TESForm* form);
-    bool FUN_00485270(TESForm* form);
+    void Save_005f0140();
+    void Copy_005f02a0(TESForm* form);
+    bool Compare_005f02f0(TESForm* form);
+    void TESForm_CopyAllComponents(TESForm* form);
+    bool TESForm_CompareAllComponents(TESForm* form);
 
     union
     {

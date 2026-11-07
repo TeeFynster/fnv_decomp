@@ -29,17 +29,19 @@ extern "C" void* g_01204388;
 
 struct FUN_00c600f0_Class
 {
-    void* __thiscall FUN_00c600f0();
+    void* __thiscall BSPSysStripUpdateModifier_GetRTTI();
 };
 
 // @fnv 0x00c600f0
-void* __thiscall FUN_00c600f0_Class::FUN_00c600f0()
+// src: COMMUNITY 0x00c600f0
+void* __thiscall FUN_00c600f0_Class::BSPSysStripUpdateModifier_GetRTTI()
 {
     return &g_01204388;
 }
 
 // @fnv 0x00c60910
-void BSPSysSimpleColorModifier::FUN_00c60910(NiStream& stream)
+// src: XBOX_PDB 0x00c60910
+void BSPSysSimpleColorModifier::LinkObject_00c60910(NiStream& stream)
 {
     NiPSysModifier::LinkObject(stream);
 }
@@ -47,11 +49,12 @@ void BSPSysSimpleColorModifier::FUN_00c60910(NiStream& stream)
 struct FUN_00c60930_class
 {
     void FUN_00c31670(void*);
-    void FUN_00c60930(void* a);
+    void BSPSysSimpleColorModifier_RegisterStreamables(void* a);
 };
 
 // @fnv 0x00c60930
-void FUN_00c60930_class::FUN_00c60930(void* a)
+// src: XBOX_PDB 0x00c60930
+void FUN_00c60930_class::BSPSysSimpleColorModifier_RegisterStreamables(void* a)
 {
     FUN_00c31670(a);
 }
@@ -60,60 +63,65 @@ extern "C" void* g_01204390;
 
 struct FUN_00c60d40_Class
 {
-    void* __thiscall FUN_00c60d40();
+    void* __thiscall BSPSysSimpleColorModifier_GetRTTI();
 };
 
 // @fnv 0x00c60d40
-void* __thiscall FUN_00c60d40_Class::FUN_00c60d40()
+// src: COMMUNITY 0x00c60d40
+void* __thiscall FUN_00c60d40_Class::BSPSysSimpleColorModifier_GetRTTI()
 {
     return &g_01204390;
 }
 
 struct FUN_00c61420_Class
 {
-    void* __thiscall FUN_00c61420(void* p);
+    void* __thiscall BSWArray_CreateClone(void* p);
 };
 
 // @fnv 0x00c61420
-void* __thiscall FUN_00c61420_Class::FUN_00c61420(void* apUnused)
+// src: COMMUNITY 0x00c61420
+void* __thiscall FUN_00c61420_Class::BSWArray_CreateClone(void* apUnused)
 {
     return this;
 }
 
 struct FUN_00a99870_Class
 {
-    void __thiscall FUN_00a99870(int, int);
+    void __thiscall CopyMembers_00a99870(int, int);
 };
 
-void __thiscall FUN_00a99870_Class::FUN_00a99870(int, int)
+// src: XBOX_PDB 0x00a99870
+void __thiscall FUN_00a99870_Class::CopyMembers_00a99870(int, int)
 {}
 
 struct FUN_00c61430_Class
 {
-    void __thiscall FUN_00c61430(int, int);
+    void __thiscall ForwardCall_00c61430(int, int);
 };
 
 // @fnv 0x00c61430
-void __thiscall FUN_00c61430_Class::FUN_00c61430(int a, int b)
+// src: GUESS 0x00c61430 (confidence: low)
+void __thiscall FUN_00c61430_Class::ForwardCall_00c61430(int a, int b)
 {
-    ((FUN_00a99870_Class*)this)->FUN_00a99870(a, b);
+    ((FUN_00a99870_Class*)this)->CopyMembers_00a99870(a, b);
 }
 
 struct FUN_00c61450_Class
 {
     void FUN_00a99a90(int);
-    void FUN_00c61450(int a);
+    void BSWArray_LoadBinary(int a);
 };
 
 // @fnv 0x00c61450
-void FUN_00c61450_Class::FUN_00c61450(int aiValue)
+// src: XBOX_PDB 0x00c61450
+void FUN_00c61450_Class::BSWArray_LoadBinary(int aiValue)
 {
     FUN_00a99a90(aiValue);
 }
 
 struct FUN_00a9af00_class
 {
-    void FUN_00a9af00(int a);
+    void NiBinaryExtraData_LinkObject(int a);
 };
 
 struct FUN_00c61470_class : FUN_00a9af00_class
@@ -124,12 +132,12 @@ struct FUN_00c61470_class : FUN_00a9af00_class
 // @fnv 0x00c61470
 void FUN_00c61470_class::CallBaseWithArg(int aiValue)
 {
-    FUN_00a9af00(aiValue);
+    NiBinaryExtraData_LinkObject(aiValue);
 }
 
 struct FUN_00c61490_Class
 {
-    bool FUN_00a89ae0(const void* arg);
+    bool RegisterStreamables_00a89ae0(const void* arg);
     bool IsNot(const void* arg);
 };
 
@@ -137,38 +145,41 @@ struct FUN_00c61490_Class
 // @fnv 0x00c61490
 bool FUN_00c61490_Class::IsNot(const void* arg)
 {
-    return !FUN_00a89ae0(arg);
+    return !RegisterStreamables_00a89ae0(arg);
 }
 
 struct FUN_00c614c0_Class
 {
-    void __thiscall FUN_00a89210(void*);
-    void __thiscall FUN_00c614c0(void* ap);
+    void __thiscall SaveBinary_00a89210(void*);
+    void __thiscall BSWArray_SaveBinary(void* ap);
 };
 
 // @fnv 0x00c614c0
-void __thiscall FUN_00c614c0_Class::FUN_00c614c0(void* ap)
+// src: XBOX_PDB 0x00c614c0
+void __thiscall FUN_00c614c0_Class::BSWArray_SaveBinary(void* ap)
 {
-    FUN_00a89210(ap);
+    SaveBinary_00a89210(ap);
 }
 
 struct FUN_00c614e0_Class
 {
-    char FUN_00a998e0(int arg);
-    char FUN_00c614e0(int arg);
+    char IsEqual_00a998e0(int arg);
+    char BSWArray_IsEqual(int arg);
 };
 // Calls FUN_00a998e0 with arg and returns its result.
 // @fnv 0x00c614e0
-char FUN_00c614e0_Class::FUN_00c614e0(int arg)
+// src: XBOX_PDB 0x00c614e0
+char FUN_00c614e0_Class::BSWArray_IsEqual(int arg)
 {
-    char result = FUN_00a998e0(arg);
+    char result = IsEqual_00a998e0(arg);
     return result;
 }
 
 extern NiFixedString* DAT_012043a0;
 
 // @fnv 0x00c61610
-void NiAVObject::FUN_00c61610()
+// src: COMMUNITY 0x00c61610
+void NiAVObject::BSWArray_SetName()
 {
     SetName(*DAT_012043a0);
 }
@@ -177,22 +188,24 @@ extern "C" void* g_012043a4;
 
 struct FUN_00c61810_class
 {
-    void* FUN_00c61810();
+    void* BSWArray_GetRTTI();
 };
 
 // @fnv 0x00c61810
-void* FUN_00c61810_class::FUN_00c61810()
+// src: COMMUNITY 0x00c61810
+void* FUN_00c61810_class::BSWArray_GetRTTI()
 {
     return &g_012043a4;
 }
 
 struct FUN_00c61820_class
 {
-    void* FUN_00c61820(int);
+    void* PArrayPoint_Copy(int);
 };
 
 // @fnv 0x00c61820
-void* FUN_00c61820_class::FUN_00c61820(int)
+// src: COMMUNITY 0x00c61820
+void* FUN_00c61820_class::PArrayPoint_Copy(int)
 {
     return this;
 }
@@ -207,43 +220,47 @@ namespace fnv_00c61f10 {
 // This forwarding entry point is absent from the shared class.
 struct VolumeEmitterLink : NiPSysVolumeEmitter
 {
-    void FUN_00c61f10(NiStream& stream);
+    void BSPSysArrayEmitter_LinkObject(NiStream& stream);
 };
 
 // @fnv 0x00c61f10
-void VolumeEmitterLink::FUN_00c61f10(NiStream& stream)
+// src: XBOX_PDB 0x00c61f10
+void VolumeEmitterLink::BSPSysArrayEmitter_LinkObject(NiStream& stream)
 {
     NiPSysVolumeEmitter::LinkObject(stream);
 }
 }  // namespace fnv_00c61f10
 
 // @fnv 0x00c61f30
-void NiObject::FUN_00c61f30(NiStream& stream)
+// src: XBOX_PDB 0x00c61f30
+void NiObject::BSPSysArrayEmitter_PostLinkObject(NiStream& stream)
 {
-    FUN_00c62140();
+    BSPSysArrayEmitter_SetupArray();
     NiObject::LinkObject(stream);
 }
 
 struct FUN_00c61f60_class
 {
-    void __thiscall FUN_00c2f4f0(int);
-    void __thiscall FUN_00c61f60(int);
+    void __thiscall NiPSysAirFieldModifier_RegisterStreamables(int);
+    void __thiscall BSPSysArrayEmitter_RegisterStreamables(int);
 };
 
 // @fnv 0x00c61f60
-void __thiscall FUN_00c61f60_class::FUN_00c61f60(int arg)
+// src: XBOX_PDB 0x00c61f60
+void __thiscall FUN_00c61f60_class::BSPSysArrayEmitter_RegisterStreamables(int arg)
 {
-    FUN_00c2f4f0(arg);
+    NiPSysAirFieldModifier_RegisterStreamables(arg);
 }
 
 struct FUN_00c61f80_cls
 {
     void FUN_00c31b60(void* apParam);
-    void FUN_00c61f80(void* apParam);
+    void BSPSysArrayEmitter_SaveBinary(void* apParam);
 };
 
 // @fnv 0x00c61f80
-void FUN_00c61f80_cls::FUN_00c61f80(void* apParam)
+// src: XBOX_PDB 0x00c61f80
+void FUN_00c61f80_cls::BSPSysArrayEmitter_SaveBinary(void* apParam)
 {
     FUN_00c31b60(apParam);
 }
@@ -252,37 +269,40 @@ void FUN_00c61f80_cls::FUN_00c61f80(void* apParam)
 struct CylinderEmitterEntries : NiPSysCylinderEmitter
 {
     bool FUN_00c31b80(NiAVObject*);
-    bool FUN_00c61fa0(NiAVObject*);
+    bool BSPSysArrayEmitter_IsEqual(NiAVObject*);
 };
 
 // @fnv 0x00c61fa0
-bool CylinderEmitterEntries::FUN_00c61fa0(NiAVObject* ap)
+// src: XBOX_PDB 0x00c61fa0
+bool CylinderEmitterEntries::BSPSysArrayEmitter_IsEqual(NiAVObject* ap)
 {
     return FUN_00c31b80(ap);
 }
 
 struct FUN_00c627e0_Class
 {
-    void __thiscall FUN_00c62140();
-    void __thiscall FUN_00c627e0(void* p);
+    void __thiscall BSPSysArrayEmitter_SetupArray();
+    void __thiscall BSPSysArrayEmitter_SetEmitterObj(void* p);
 };
 
 // @fnv 0x00c627e0
-void __thiscall FUN_00c627e0_Class::FUN_00c627e0(void* pValue)
+// src: XBOX_PDB 0x00c627e0
+void __thiscall FUN_00c627e0_Class::BSPSysArrayEmitter_SetEmitterObj(void* pValue)
 {
     *(void**)((char*)this + 0x54) = pValue;
-    FUN_00c62140();
+    BSPSysArrayEmitter_SetupArray();
 }
 
 extern "C" void* g_012043b8;
 
 struct FUN_00c632e0_Class
 {
-    void* __thiscall FUN_00c632e0();
+    void* __thiscall PArrayPoint_GetRTTI();
 };
 
 // @fnv 0x00c632e0
-void* __thiscall FUN_00c632e0_Class::FUN_00c632e0()
+// src: COMMUNITY 0x00c632e0
+void* __thiscall FUN_00c632e0_Class::PArrayPoint_GetRTTI()
 {
     return &g_012043b8;
 }
@@ -290,10 +310,11 @@ void* __thiscall FUN_00c632e0_Class::FUN_00c632e0()
 namespace fnv_00c63930 {
 struct FUN_00c63930_Class : public NiPSysModifier
 {
-    void FUN_00c63930(NiStream&);
+    void BSParentVelocityModifier_LinkObject(NiStream&);
 };
 // @fnv 0x00c63930
-void FUN_00c63930_Class::FUN_00c63930(NiStream& stream)
+// src: XBOX_PDB 0x00c63930
+void FUN_00c63930_Class::BSParentVelocityModifier_LinkObject(NiStream& stream)
 {
     NiPSysModifier::LinkObject(stream);
 }
@@ -320,21 +341,22 @@ extern GlobalObject_00a7b610 g_012043c8;
 
 struct FUN_00c63aa0_class
 {
-    GlobalObject_00a7b610* FUN_00c63aa0();
+    GlobalObject_00a7b610* BSParentVelocityModifier_GetRTTI();
 };
 
 // @fnv 0x00c63aa0
-GlobalObject_00a7b610* FUN_00c63aa0_class::FUN_00c63aa0()
+// src: COMMUNITY 0x00c63aa0
+GlobalObject_00a7b610* FUN_00c63aa0_class::BSParentVelocityModifier_GetRTTI()
 {
     return &g_012043c8;
 }
 
-void __cdecl FUN_00c63c30(int, int);
+void __cdecl NiFixedString_CopyMemory_00c63c30(int, int);
 
 // @fnv 0x00c63c10
 void __cdecl CallWithSameArgumentTwice(int aiValue)
 {
-    FUN_00c63c30(aiValue, aiValue);
+    NiFixedString_CopyMemory_00c63c30(aiValue, aiValue);
 }
 
 // @fnv 0x00c644b0
@@ -346,11 +368,12 @@ void BSDecalPlacementVectorExtraData::LinkToObject(void* apObject)
 struct FUN_00c644d0_Class
 {
     unsigned char Equals(const char*);
-    unsigned char FUN_00c644d0(const char*);
+    unsigned char BSDecalPlacementVectorExtraData_IsEqual(const char*);
 };
 // Calls Equals with arg and returns its result.
 // @fnv 0x00c644d0
-unsigned char FUN_00c644d0_Class::FUN_00c644d0(const char* arg)
+// src: XBOX_PDB 0x00c644d0
+unsigned char FUN_00c644d0_Class::BSDecalPlacementVectorExtraData_IsEqual(const char* arg)
 {
     unsigned char result = Equals(arg);
     return result;
@@ -372,19 +395,21 @@ void* __thiscall FUN_00c64600_Class::GetGlobalPointer()
 // NiStream has no declaration for this string-registration entry point.
 struct StreamStringRegistration : NiStream
 {
-    void FUN_00a64160(const char*);
+    void SaveCString(const char*);
 };
 
 // Links this object to the stream, then passes the string pointer at offset 8 to the stream's FUN_00a64160.
 // @fnv 0x00c64950
-void NiObject::FUN_00c64950(NiStream* stream)
+// src: XBOX_PDB 0x00c64950
+void NiObject::BSReference_SaveBinary(NiStream* stream)
 {
     NiObject::LinkObject(*stream);
-    static_cast<StreamStringRegistration*>(stream)->FUN_00a64160(*(const char**)((char*)this + 8));
+    static_cast<StreamStringRegistration*>(stream)->SaveCString(*(const char**)((char*)this + 8));
 }
 
 // @fnv 0x00c64aa0
-void NiObject::FUN_00c64aa0(NiStream& stream)
+// src: XBOX_PDB 0x00c64aa0
+void NiObject::BSNodeReferences_LoadBinary(NiStream& stream)
 {
     NiObject::LoadBinary(stream);
     stream.ReadUnsignedInteger();
@@ -412,7 +437,8 @@ int __thiscall FUN_00c64fc0_class::GetThisAddress(int)
 }
 
 // @fnv 0x00c65160
-void NiExtraData::FUN_00c65160(NiStream& stream)
+// src: XBOX_PDB 0x00c65160
+void NiExtraData::BSAttachPoints_LinkObject(NiStream& stream)
 {
     NiExtraData::LinkObject(stream);
 }
@@ -420,12 +446,13 @@ void NiExtraData::FUN_00c65160(NiStream& stream)
 struct C00c541e0
 {
     bool FUN_00a7b3d0(int);
-    bool FUN_00c65290(int a);
+    bool BSAttachPoints_IsEqual(int a);
 };
 
 // Calls FUN_00a7b3d0 with the given int and returns its bool result.
 // @fnv 0x00c65290
-bool C00c541e0::FUN_00c65290(int aiValue)
+// src: XBOX_PDB 0x00c65290
+bool C00c541e0::BSAttachPoints_IsEqual(int aiValue)
 {
     bool result = FUN_00a7b3d0(aiValue);
     return result;
@@ -469,7 +496,7 @@ NiTArray<BSAttachPointPair*, NiTMallocInterface<BSAttachPointPair*> >::~NiTArray
 
 struct FUN_00c600c0_class
 {
-    void* __thiscall FUN_00c5fd50();
+    void* __thiscall UpdateState_00c5fd50();
     void* __thiscall FUN_00c600c0(unsigned int flags);
     static void __cdecl operator delete(void* p, unsigned int size);
 };
@@ -478,7 +505,7 @@ struct FUN_00c600c0_class
 // @fnv 0x00c600c0
 void* __thiscall FUN_00c600c0_class::FUN_00c600c0(unsigned int flags)
 {
-    FUN_00c5fd50();
+    UpdateState_00c5fd50();
     if (flags & 1)
         operator delete(this, 0x1c);
     return this;
@@ -527,7 +554,7 @@ void __cdecl operator delete(void*, int);
 // @fnv 0x00c632f0
 void* __thiscall FUN_00c632f0_class::FUN_00c632f0(unsigned int flags)
 {
-    reinterpret_cast<NiExtraData*>(this)->FUN_00a7b300();
+    reinterpret_cast<NiExtraData*>(this)->DestroyFields_00a7b300();
     if (flags & 1)
         operator delete(this, 12);
     return this;
@@ -550,10 +577,11 @@ struct SObj;
 void __cdecl CallAnimCallback(SStream*, SObj*);
 struct FUN_00c63970_class : NiPSysModifier
 {
-    void __thiscall FUN_00c63970(void* stream);
+    void __thiscall BSParentVelocityModifier_SaveBinary(void* stream);
 };
 // @fnv 0x00c63970
-void __thiscall FUN_00c63970_class::FUN_00c63970(void* stream)
+// src: XBOX_PDB 0x00c63970
+void __thiscall FUN_00c63970_class::BSParentVelocityModifier_SaveBinary(void* stream)
 {
     NiPSysModifier::SaveBinary(*reinterpret_cast<NiStream*>(stream));
     CallAnimCallback(reinterpret_cast<SStream*>(stream), reinterpret_cast<SObj*>(reinterpret_cast<char*>(this) + 0x20));
@@ -583,10 +611,11 @@ struct FUN_00c64710_Class
     void* m_iWordAt00;
     void* m_iWordAt04;
     void* m_8;
-    void FUN_00c64710();
+    void ReleaseStorage_00c64710();
 };
 // @fnv 0x00c64710
-void FUN_00c64710_Class::FUN_00c64710()
+// src: GUESS 0x00c64710 (confidence: low)
+void FUN_00c64710_Class::ReleaseStorage_00c64710()
 {
     void* p = m_iWordAt00;
     while (p)
@@ -605,30 +634,33 @@ void FUN_00c64710_Class::FUN_00c64710()
 
 struct FUN_00c64930_Class
 {
-    void FUN_00c64930(int a);
+    void BSReference_LinkObject(int a);
 };
 
 // @fnv 0x00c64930
-void FUN_00c64930_Class::FUN_00c64930(int a)
+// src: COMMUNITY 0x00c64930
+void FUN_00c64930_Class::BSReference_LinkObject(int a)
 {}
 
 struct FUN_00c64940_Class
 {
-    bool FUN_00c64940(int a);
+    bool BSReference_RegisterStreamables(int a);
 };
 // @fnv 0x00c64940
-bool FUN_00c64940_Class::FUN_00c64940(int a)
+// src: COMMUNITY 0x00c64940
+bool FUN_00c64940_Class::BSReference_RegisterStreamables(int a)
 {
     return true;
 }
 
 struct FUN_00c64c30_Class
 {
-    bool __thiscall FUN_00c64c30(int a);
+    bool __thiscall BSNodeReferences_IsEqual(int a);
 };
 
 // @fnv 0x00c64c30
-bool __thiscall FUN_00c64c30_Class::FUN_00c64c30(int a)
+// src: XBOX_PDB 0x00c64c30
+bool __thiscall FUN_00c64c30_Class::BSNodeReferences_IsEqual(int a)
 {
     return false;
 }
@@ -668,10 +700,11 @@ SimpleColorModifierConstruction::SimpleColorModifierConstruction()
 
 struct FUN_00c60950_class : BSPSysSimpleColorModifier
 {
-    void FUN_00c60950(NiStream* stream);
+    void BSPSysSimpleColorModifier_SaveBinary(NiStream* stream);
 };
 // @fnv 0x00c60950
-void FUN_00c60950_class::FUN_00c60950(NiStream* stream)
+// src: XBOX_PDB 0x00c60950
+void FUN_00c60950_class::BSPSysSimpleColorModifier_SaveBinary(NiStream* stream)
 {
     NiPSysModifier::SaveBinary(*reinterpret_cast<NiStream*>(stream));
     CallAnimCallback((SStream*)stream, reinterpret_cast<SObj*>(&fadeIn));
@@ -721,11 +754,12 @@ extern GlobalObject_00a7b610 g_012043b0;
 
 struct FUN_00c63320_Class
 {
-    GlobalObject_00a7b610* __thiscall FUN_00c63320();
+    GlobalObject_00a7b610* __thiscall BSPSysArrayEmitter_GetRTTI();
 };
 
 // @fnv 0x00c63320
-GlobalObject_00a7b610* FUN_00c63320_Class::FUN_00c63320()
+// src: COMMUNITY 0x00c63320
+GlobalObject_00a7b610* FUN_00c63320_Class::BSPSysArrayEmitter_GetRTTI()
 {
     return &g_012043b0;
 }
@@ -739,15 +773,16 @@ struct FUN_00c65210_class
     void* m_10;
     void* m_14;
     unsigned short m_18;
-    void __thiscall FUN_00c65210(NiStream& stream);
+    void __thiscall BSAttachPoints_SaveBinary(NiStream& stream);
 };
-void __cdecl FUN_0044adf0(NiStream& stream, const unsigned int& count);
+void __cdecl NiStreamSaveBinary_unsigned_int(NiStream& stream, const unsigned int& count);
 // @fnv 0x00c65210
-void __thiscall FUN_00c65210_class::FUN_00c65210(NiStream& stream)
+// src: XBOX_PDB 0x00c65210
+void __thiscall FUN_00c65210_class::BSAttachPoints_SaveBinary(NiStream& stream)
 {
     reinterpret_cast<NiExtraData*>(this)->NiExtraData::SaveBinary(stream);
     unsigned int count = m_18;
-    FUN_0044adf0(stream, count);
+    NiStreamSaveBinary_unsigned_int(stream, count);
     for (unsigned int i = 0; i < count; i++)
     {
         const char* pcString = ((const char**)m_10)[i];
@@ -783,7 +818,8 @@ struct FUN_00c61b10
 };
 // Allocates and constructs a new FUN_00c61b10 object, returning the pointer.
 // @fnv 0x00c61e70
-FUN_00c61b10* FUN_00c61e70()
+// src: EXE 0x00c61e70
+FUN_00c61b10* BSPSysArrayEmitter_CreateObject()
 {
     return new FUN_00c61b10;
 }
@@ -842,11 +878,12 @@ struct FUN_00c64780_Class
     void* m_iWordAt00;
     void* m_iWordAt04;
     void* m_8;
-    void FUN_00c64780(const char* apName);
+    void BSReference_SetName(const char* apName);
 };
 // Frees the stored string, then allocates a copy of apName (if non-null) and stores it in m_8.
 // @fnv 0x00c64780
-void FUN_00c64780_Class::FUN_00c64780(const char* apName)
+// src: XBOX_PDB 0x00c64780
+void FUN_00c64780_Class::BSReference_SetName(const char* apName)
 {
     unsigned int uiSize;
     void* pOld7 = m_8;
@@ -904,11 +941,12 @@ bool __thiscall FUN_00c60000_Class::IsEqualWithFloat(void* apObject)
 
 struct FUN_00c60700_Class : BSPSysSimpleColorModifier
 {
-    void FUN_00c60700(NiPSysModifier* dst, CloningProcess& proc);
+    void BSPSysSimpleColorModifier_CopyMembers(NiPSysModifier* dst, CloningProcess& proc);
 };
 
 // @fnv 0x00c60700
-void FUN_00c60700_Class::FUN_00c60700(NiPSysModifier* dst, CloningProcess& proc)
+// src: XBOX_PDB 0x00c60700
+void FUN_00c60700_Class::BSPSysSimpleColorModifier_CopyMembers(NiPSysModifier* dst, CloningProcess& proc)
 {
     this->CopyMemberData(dst, proc);
 
@@ -928,11 +966,12 @@ template <class T> void __cdecl ReadBinaryValue(NiStream& stream, T& value);
 
 struct FUN_00c60850_Class : public BSPSysSimpleColorModifier
 {
-    void FUN_00c60850(NiStream& stream);
+    void BSPSysSimpleColorModifier_LoadBinary(NiStream& stream);
 };
 
 // @fnv 0x00c60850
-void FUN_00c60850_Class::FUN_00c60850(NiStream& stream)
+// src: XBOX_PDB 0x00c60850
+void FUN_00c60850_Class::BSPSysSimpleColorModifier_LoadBinary(NiStream& stream)
 {
     NiPSysModifier::LoadBinary(stream);
 
@@ -955,11 +994,12 @@ struct FUN_004a4cc0_shell
 
 struct FUN_00c60a10_Class : BSPSysSimpleColorModifier
 {
-    bool __thiscall FUN_00c60a10(NiObject*);
+    bool __thiscall BSPSysSimpleColorModifier_IsEqual(NiObject*);
 };
 
 // @fnv 0x00c60a10
-bool FUN_00c60a10_Class::FUN_00c60a10(NiObject* pObject)
+// src: XBOX_PDB 0x00c60a10
+bool FUN_00c60a10_Class::BSPSysSimpleColorModifier_IsEqual(NiObject* pObject)
 {
     if (!reinterpret_cast<const NiPSysModifier*>(this)->NiPSysModifier::IsEqual(pObject))
         return false;
@@ -1013,7 +1053,8 @@ extern NiFixedString DAT_011f49e0;
 
 // Allocates a FUN_00c612b0_Class object, sets its name to DAT_011f49e0, and returns it as an NiAVObject.
 // @fnv 0x00c61510
-NiAVObject* __cdecl FUN_00c61510()
+// src: EXE 0x00c61510
+NiAVObject* __cdecl BSWArray_CreateObject()
 {
     NiAVObject* object = reinterpret_cast<NiAVObject*>(new FUN_00c612b0_Class);
     object->SetName(DAT_011f49e0);
@@ -1022,17 +1063,18 @@ NiAVObject* __cdecl FUN_00c61510()
 
 struct FUN_00c61830_class
 {
-    void FUN_00c61830(void* a, void* b);
+    void ForwardCall_00c61830(void* a, void* b);
 };
 // @fnv 0x00c61830
-void FUN_00c61830_class::FUN_00c61830(void* a, void* b)
+// src: GUESS 0x00c61830 (confidence: low)
+void FUN_00c61830_class::ForwardCall_00c61830(void* a, void* b)
 {
-    reinterpret_cast<NiExtraData*>(this)->FUN_00a7b330(a, b);
+    reinterpret_cast<NiExtraData*>(this)->CopyMembers_00a7b330(a, b);
 }
 
 struct FUN_00c62390_class
 {
-    void FUN_00c62390(void*, void*);
+    void BSPSysArrayEmitter_GetAPoint(void*, void*);
 };
 struct FUN_00c61ba0_class : FUN_00c62390_class
 {
@@ -1041,7 +1083,7 @@ struct FUN_00c61ba0_class : FUN_00c62390_class
 // @fnv 0x00c61ba0
 void FUN_00c61ba0_class::ForwardToBase(void* apUnused, void* apArg1, void* apArg2)
 {
-    FUN_00c62390(apArg1, apArg2);
+    BSPSysArrayEmitter_GetAPoint(apArg1, apArg2);
 }
 
 namespace fnv_00c61bc0 {
@@ -1054,7 +1096,7 @@ struct A51BF0Base
 
 struct FUN_00c61bc0_class
 {
-    void __thiscall FUN_00c61c50(FUN_00c61b10* object, int arg);
+    void __thiscall BSPSysArrayEmitter_CopyMembers(FUN_00c61b10* object, int arg);
     FUN_00c61b10* __thiscall CreateObject(int arg);
 };
 
@@ -1063,7 +1105,7 @@ struct FUN_00c61bc0_class
 FUN_00c61b10* __thiscall FUN_00c61bc0_class::CreateObject(int arg)
 {
     FUN_00c61b10* object = new FUN_00c61b10;
-    FUN_00c61c50(object, arg);
+    BSPSysArrayEmitter_CopyMembers(object, arg);
     return object;
 }
 }  // namespace fnv_00c61bc0
@@ -1104,29 +1146,31 @@ void* __thiscall FUN_00c63a70_Class::FUN_00c63a70(unsigned int flags)
 
 struct DecalPlacementEntries : BSDecalPlacementVectorExtraData
 {
-    void* FUN_00c640f0(void* object, int value);
-    void* FUN_00c64060(int value);
+    void* BSDecalPlacementVectorExtraData_CopyMembers(void* object, int value);
+    void* BSDecalPlacementVectorExtraData_CreateClone(int value);
     BSDecalPlacementVectorExtraData* Construct(int parameter);
 };
 
 // @fnv 0x00c64060
-void* DecalPlacementEntries::FUN_00c64060(int value)
+// src: XBOX_PDB 0x00c64060
+void* DecalPlacementEntries::BSDecalPlacementVectorExtraData_CreateClone(int value)
 {
     BSDecalPlacementVectorExtraData* pObject = new BSDecalPlacementVectorExtraData(0);
-    this->FUN_00c640f0(pObject, value);
+    this->BSDecalPlacementVectorExtraData_CopyMembers(pObject, value);
     return pObject;
 }
 
 struct FUN_00c64500_Class : FUN_00c61490_Class
 {
-    bool FUN_00c64500(const void* arg);
+    bool BSDecalPlacementVectorExtraData_RegisterStreamables(const void* arg);
 };
 
 // Returns the negation of FUN_00a89ae0(arg).
 // @fnv 0x00c64500
-bool FUN_00c64500_Class::FUN_00c64500(const void* arg)
+// src: XBOX_PDB 0x00c64500
+bool FUN_00c64500_Class::BSDecalPlacementVectorExtraData_RegisterStreamables(const void* arg)
 {
-    return !FUN_00a89ae0(arg);
+    return !RegisterStreamables_00a89ae0(arg);
 }
 
 namespace fnv_00c64530 {
@@ -1163,12 +1207,13 @@ int __cdecl __stricmp(const char*, const char*);
 
 struct FUN_00c64980_Class : A46BB0Object
 {
-    bool FUN_00c64980(A46BB0Object* arg);
+    bool BSReference_IsEqual(A46BB0Object* arg);
 };
 
 // Returns true when IsEqual(arg) holds and both objects' string pointers at offset 8 are non-null and __stricmp-equal.
 // @fnv 0x00c64980
-bool FUN_00c64980_Class::FUN_00c64980(A46BB0Object* apOther)
+// src: XBOX_PDB 0x00c64980
+bool FUN_00c64980_Class::BSReference_IsEqual(A46BB0Object* apOther)
 {
     if (this->IsEqual(apOther))
     {
@@ -1189,7 +1234,7 @@ bool FUN_00c64980_Class::FUN_00c64980(A46BB0Object* apOther)
 
 struct FUN_0043ba10_shell
 {
-    FUN_0043ba10_shell* FUN_0043ba10(unsigned int);
+    FUN_0043ba10_shell* AssignInternedString(unsigned int);
 };
 struct FUN_00c64dc0_Class
 {
@@ -1201,15 +1246,16 @@ struct FUN_00c64dc0_Class
     int m_8;
     int m_iThirdValue;
     int m_10;
-    FUN_0043ba10_shell* FUN_00c64dc0(unsigned int a);
+    FUN_0043ba10_shell* BSAttachPointPair_SetChild(unsigned int a);
 };
 // @fnv 0x00c64dc0
-FUN_0043ba10_shell* FUN_00c64dc0_Class::FUN_00c64dc0(unsigned int a)
+// src: COMMUNITY 0x00c64dc0
+FUN_0043ba10_shell* FUN_00c64dc0_Class::BSAttachPointPair_SetChild(unsigned int a)
 {
     int v0;
     int v1;
     int v2;
-    return m_iWordAt04.FUN_0043ba10(a);
+    return m_iWordAt04.AssignInternedString(a);
 }
 
 void __cdecl operator delete(void* p, unsigned int size);
@@ -1230,7 +1276,7 @@ void* __thiscall FUN_00c64e70_Class::FUN_00c65650(unsigned int flags)
     return this;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct SpawnedObject_b9118
 {
@@ -1238,13 +1284,14 @@ struct SpawnedObject_b9118
     SpawnedObject_b9118();
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
 
 // Allocates and constructs a SpawnedObject_b9118 via its custom operator new and returns the pointer.
 // @fnv 0x00c607d0
-SpawnedObject_b9118* FUN_00c607d0()
+// src: EXE 0x00c607d0
+SpawnedObject_b9118* BSPSysSimpleColorModifier_CreateObject()
 {
     SpawnedObject_b9118* result = new SpawnedObject_b9118();
     return result;
@@ -1281,14 +1328,15 @@ struct FUN_00c61c50_cls
     unsigned int* m_60;
     unsigned short pad1[1];
     unsigned short m_66;
-    void FUN_00c31b10(unsigned int a, unsigned int b);
-    void FUN_00c61c50(unsigned int x, unsigned int y);
+    void NiPSysVolumeEmitter_CopyMembers(unsigned int a, unsigned int b);
+    void BSPSysArrayEmitter_CopyMembers(unsigned int x, unsigned int y);
 };
 // @fnv 0x00c61c50
-void FUN_00c61c50_cls::FUN_00c61c50(unsigned int x, unsigned int y)
+// src: XBOX_PDB 0x00c61c50
+void FUN_00c61c50_cls::BSPSysArrayEmitter_CopyMembers(unsigned int x, unsigned int y)
 {
     unsigned int pad[0xf];
-    FUN_00c31b10(x, y);
+    NiPSysVolumeEmitter_CopyMembers(x, y);
     unsigned int n = m_66;
     if (n != 0)
     {
@@ -1318,7 +1366,7 @@ struct FUN_00c62140_Item
     virtual void v00();
     virtual void v01();
     virtual void v02();
-    void FUN_00a59c60(FUN_00c62140_Val* pVal);
+    void NiAVObject_Update(FUN_00c62140_Val* pVal);
     int unk04;
     int unk08;
     int unk0C;
@@ -1415,12 +1463,13 @@ struct FUN_00c62140_cls
     int unk58;
     NiTPrimitiveArray<NiPointer<NiAVObject> > color3Start;
 
-    void FUN_00c62140();
-    void FUN_00c62200(FUN_00c62140_Elem* pElem);
+    void BSPSysArrayEmitter_SetupArray();
+    void BSPSysArrayEmitter_SetObjectPointers(FUN_00c62140_Elem* pElem);
 };
 
 // @fnv 0x00c62140
-void FUN_00c62140_cls::FUN_00c62140()
+// src: XBOX_PDB 0x00c62140
+void FUN_00c62140_cls::BSPSysArrayEmitter_SetupArray()
 {
     color3Start.RemoveAll();
     FUN_00c62140_Obj* pad;
@@ -1435,7 +1484,7 @@ void FUN_00c62140_cls::FUN_00c62140()
         val.m_06 = 0;
         val.m_07 = 0;
         val.m_08 = 0;
-        pItem->FUN_00a59c60(&val);
+        pItem->NiAVObject_Update(&val);
         unsigned int slot = pItem->m_a6;
         while (slot-- != 0)
         {
@@ -1443,7 +1492,7 @@ void FUN_00c62140_cls::FUN_00c62140()
             FUN_00c62140_Elem** i;
             i = &pItem->m_a0[slot];
             FUN_00c62140_Elem* e = *i;
-            FUN_00c62200(e);
+            BSPSysArrayEmitter_SetObjectPointers(e);
         }
     }
 }
@@ -1537,11 +1586,12 @@ class FUN_00c634b0_cls
     unsigned int m_1c;
     unsigned int m_20, m_24, m_28, m_2c;
     XSub30 m_30;
-    void FUN_00c634b0(XObj70* a1, unsigned short idx);
+    void BSParentVelocityModifier_Initialize(XObj70* a1, unsigned short idx);
 };
 
 // @fnv 0x00c634b0
-void FUN_00c634b0_cls::FUN_00c634b0(XObj70* pObj, unsigned short usIndex)
+// src: XBOX_PDB 0x00c634b0
+void FUN_00c634b0_cls::BSParentVelocityModifier_Initialize(XObj70* pObj, unsigned short usIndex)
 {
     XItem28* p = pObj->m_70;
     p = p + usIndex;
@@ -1575,14 +1625,14 @@ void FUN_00c63780_c::ResetVector()
 }
 
 namespace fnv_00c637b0 {
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct ParticlePositionClone : ParticlePositionModifierConstruction
 {
     unsigned char data[0x3c - sizeof(ParticlePositionModifierConstruction)];
 
     static __forceinline void* __cdecl operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
 struct FUN_00c637b0_Class : FUN_00c63840_Class
@@ -1599,14 +1649,14 @@ ParticlePositionClone* FUN_00c637b0_Class::CreateParticlePositionClone(CloningPr
 }
 }  // namespace fnv_00c637b0
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct PositionModifierObject_b9439
 {
     char m00[0x3c];
     PositionModifierObject_b9439();
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
 // Allocates and constructs a PositionModifierObject_b9439 via its custom operator new and returns the pointer.
@@ -1629,14 +1679,15 @@ struct ArgObj
 struct FUN_00c63a00_cls
 {
     void FUN_00c319e0(void* a);
-    void FUN_00c63a00(ArgObj* a1);
+    void BSParentVelocityModifier_GetViewerStrings(ArgObj* a1);
 };
 
-unsigned int __cdecl FUN_00a7d330(unsigned int v);
-unsigned int __cdecl FUN_00a7d550(const char* name, float f);
+unsigned int __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int v);
+unsigned int __cdecl NiGetViewerString_00a7d550(const char* name, float f);
 
 // @fnv 0x00c63a00
-void FUN_00c63a00_cls::FUN_00c63a00(ArgObj* a1)
+// src: XBOX_PDB 0x00c63a00
+void FUN_00c63a00_cls::BSParentVelocityModifier_GetViewerStrings(ArgObj* a1)
 {
     unsigned int r1;
     unsigned int r2;
@@ -1644,9 +1695,9 @@ void FUN_00c63a00_cls::FUN_00c63a00(ArgObj* a1)
     Pad32 pad;
     FUN_00c319e0(a1);
     g = *(unsigned int*)&g_012043c8;
-    r1 = FUN_00a7d330(g);
+    r1 = NiViewerStrings_NiGetViewerString_Title(g);
     a1->FUN_0096a610(&r1);
-    r2 = FUN_00a7d550("Damping", *(float*)((char*)this + 0x20));
+    r2 = NiGetViewerString_00a7d550("Damping", *(float*)((char*)this + 0x20));
     a1->FUN_0096a610(&r2);
 }
 
@@ -1660,32 +1711,33 @@ struct S_00c643d0_Foo
     void* m_entries[16];
 
     void __thiscall FUN_00a9a4e0(int arg);
-    void __thiscall FUN_00c643d0(int arg);
+    void __thiscall BSDecalPlacementVectorExtraData_SaveBinary(int arg);
 };
 
-extern "C" void __cdecl FUN_00a303a0(int arg, void* object);
-extern "C" void __cdecl FUN_00a417b0(int arg, void* data, int count);
+extern "C" void __cdecl NiStreamSaveBinary_unsigned_short(int arg, void* object);
+extern "C" void __cdecl NiPoint3_SaveBinary(int arg, void* data, int count);
 
 // @fnv 0x00c643d0
-void __thiscall S_00c643d0_Foo::FUN_00c643d0(int arg)
+// src: XBOX_PDB 0x00c643d0
+void __thiscall S_00c643d0_Foo::BSDecalPlacementVectorExtraData_SaveBinary(int arg)
 {
     this->FUN_00a9a4e0(arg);
 
-    FUN_00a303a0(arg, &this->m_uiItemCount);
+    NiStreamSaveBinary_unsigned_short(arg, &this->m_uiItemCount);
 
     for (int i = 0; i < this->m_uiItemCount; ++i)
     {
-        FUN_00a303a0(arg, this->m_entries[i]);
+        NiStreamSaveBinary_unsigned_short(arg, this->m_entries[i]);
 
         int count2 = *reinterpret_cast<unsigned short*>(this->m_entries[i]);
         void* count = reinterpret_cast<char*>(this->m_entries[i]) + 4;
 
-        FUN_00a417b0(arg, count, count2 * 3);
+        NiPoint3_SaveBinary(arg, count, count2 * 3);
 
         int data = *reinterpret_cast<unsigned short*>(this->m_entries[i]);
         void* pDataB = reinterpret_cast<char*>(this->m_entries[i]) + 0x64;
 
-        FUN_00a417b0(arg, pDataB, data * 3);
+        NiPoint3_SaveBinary(arg, pDataB, data * 3);
     }
 }
 
@@ -1730,24 +1782,25 @@ class FUN_00c64b90_cls
     FUN_00c64b90_item** m_0c;
     int unk10;
     unsigned short m_14;
-    void FUN_00c64b90(FUN_00c64b90_target* a1);
-    void FUN_00a89af0(FUN_00c64b90_target* a1);
+    void BSNodeReferences_SaveBinary(FUN_00c64b90_target* a1);
+    void nullsub_3(FUN_00c64b90_target* a1);
 };
 
-void __cdecl FUN_0044adf0(FUN_00c64b90_target* a1, unsigned int* p);
+void __cdecl NiStreamSaveBinary_unsigned_int(FUN_00c64b90_target* a1, unsigned int* p);
 
 // @fnv 0x00c64b90
-void FUN_00c64b90_cls::FUN_00c64b90(FUN_00c64b90_target* apTarget)
+// src: XBOX_PDB 0x00c64b90
+void FUN_00c64b90_cls::BSNodeReferences_SaveBinary(FUN_00c64b90_target* apTarget)
 {
     unsigned int count;
     unsigned int i;
     FUN_00c64b90_item* item3;
     unsigned int v2;
     unsigned int bytes;
-    FUN_00a89af0(apTarget);
+    nullsub_3(apTarget);
     count = m_14;
     bytes = count * 2;
-    FUN_0044adf0(apTarget, &bytes);
+    NiStreamSaveBinary_unsigned_int(apTarget, &bytes);
     for (i = 0; i < count; i++)
     {
         item3 = m_0c[i];
@@ -1764,11 +1817,12 @@ struct FUN_00c64da0_cls
 {
     int unk00;
     void Callee0043ba10(int a);
-    void FUN_00c64da0(int a);
+    void BSAttachPointPair_SetParent(int a);
 };
 
 // @fnv 0x00c64da0
-void FUN_00c64da0_cls::FUN_00c64da0(int a)
+// src: COMMUNITY 0x00c64da0
+void FUN_00c64da0_cls::BSAttachPointPair_SetParent(int a)
 {
     int unkLoc0;
     int unkLoc1;
@@ -1789,19 +1843,19 @@ struct DispatchStub_c64
 };
 struct ItemCallee_c64
 {
-    void FUN_00c65490(int a1, int a2);
+    void BSAttachPoints_AddPair(int a1, int a2);
 };
 
 // Calls FUN_00a7b330 with a8 and cc, then for each of m18 entries in m10 calls FUN_00c65490 on the item and item+4.
 // @fnv 0x00c64fd0
 void DispatchStub_c64::DispatchToItems(int pTarget, int cc)
 {
-    reinterpret_cast<NiExtraData*>(this)->FUN_00a7b330((void*)pTarget, (void*)cc);
+    reinterpret_cast<NiExtraData*>(this)->CopyMembers_00a7b330((void*)pTarget, (void*)cc);
     unsigned int count = m18;
     for (unsigned int i = 0; i < count; i++)
     {
         int item = (int)m10[i];
-        reinterpret_cast<ItemCallee_c64*>(pTarget)->FUN_00c65490(item, item + 4);
+        reinterpret_cast<ItemCallee_c64*>(pTarget)->BSAttachPoints_AddPair(item, item + 4);
     }
 }
 
@@ -1991,8 +2045,8 @@ struct FUN_00c615a0_class
 extern "C" void* g_012043a4;
 extern const char str_0109df4c[];
 struct GlobalObject_00a7b610;
-char* __cdecl FUN_00a7d330(GlobalObject_00a7b610* value);
-char* __cdecl FUN_00a7d510(const char* format, unsigned int value);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(GlobalObject_00a7b610* value);
+char* __cdecl NiGetViewerString_00a7d510(const char* format, unsigned int value);
 
 struct Unused20
 {
@@ -2004,9 +2058,9 @@ void FUN_00c615a0_class::AppendGlobalAndFormatValues(NiTPrimitiveArray<unsigned 
 {
     FUN_00a99b20(values);
     void* global_ptr = g_012043a4;
-    unsigned int first = (unsigned int)FUN_00a7d330((GlobalObject_00a7b610*)global_ptr);
+    unsigned int first = (unsigned int)NiViewerStrings_NiGetViewerString_Title((GlobalObject_00a7b610*)global_ptr);
     values->AddFirstEmpty(first);
-    unsigned int second = (unsigned int)FUN_00a7d510(str_0109df4c, unk0c);
+    unsigned int second = (unsigned int)NiGetViewerString_00a7d510(str_0109df4c, unk0c);
     values->AddFirstEmpty(second);
     Unused20 tmp;
 }
@@ -2015,11 +2069,12 @@ struct C639a0Cls : NiPSysModifier
 {
     char pad[0x20 - sizeof(NiPSysModifier)];
     float m_20;
-    bool __thiscall FUN_00c639a0(NiObject* pObject);
+    bool __thiscall BSParentVelocityModifier_IsEqual(NiObject* pObject);
 };
 // Compares this object with pObject: first via FUN_00c31830, then checks that m_20 matches.
 // @fnv 0x00c639a0
-bool C639a0Cls::FUN_00c639a0(NiObject* pObject)
+// src: XBOX_PDB 0x00c639a0
+bool C639a0Cls::BSParentVelocityModifier_IsEqual(NiObject* pObject)
 {
     bool bEqual = NiPSysModifier::IsEqual(pObject);
     if (bEqual)
@@ -2081,8 +2136,8 @@ struct FUN_00c61fc0_cls
     void Serialize(void* a1);
 };
 
-void* __cdecl FUN_00a7d330(int value);
-int __cdecl FUN_00a7d5e0(int* dat, int value);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(int value);
+int __cdecl NiGetViewerString_00a7d5e0(int* dat, int value);
 extern int DAT_01063e84;
 
 // After FUN_00c31db0, passes FUN_00a7d330's value, an "ArrayType" string for unk58, and each item's unk08 (last to first) to a1->FUN_0096a610.
@@ -2106,7 +2161,7 @@ void FUN_00c61fc0_cls::Serialize(void* apTarget)
     long gb;
     FUN_00c31db0(apTarget);
     v1 = *(int*)&g_012043b0;
-    mb = FUN_00a7d330(v1);
+    mb = NiViewerStrings_NiGetViewerString_Title(v1);
     ((FUN_0096a610_Target*)apTarget)->FUN_0096a610(&mb);
     xa = unk58;
     ib = BuildAttachTypeString("ArrayType", xa);
@@ -2119,7 +2174,7 @@ void FUN_00c61fc0_cls::Serialize(void* apTarget)
         if (!!x)
         {
             ra = x->unk08;
-            cur = FUN_00a7d5e0(&DAT_01063e84, ra);
+            cur = NiGetViewerString_00a7d5e0(&DAT_01063e84, ra);
             ((FUN_0096a610_Target*)apTarget)->FUN_0096a610(&cur);
         }
     }
@@ -2151,7 +2206,7 @@ class Mod600 : public Base00c319e0
     int unk14;
     float m_fValue;
 
-    void FUN_00c60050(NiTPrimitiveArray<unsigned int>* pkStrings);
+    void BSPSysStripUpdateModifier_GetViewerStrings(NiTPrimitiveArray<unsigned int>* pkStrings);
     virtual ~Mod600();
 };
 
@@ -2169,15 +2224,16 @@ struct LocalStackSpace
 
 // Calls base FUN_00c319e0, then adds a name string and a string formatted from fUpdateDeltaTime and m_fValue to pkStrings.
 // @fnv 0x00c60050
-void __thiscall Mod600::FUN_00c60050(NiTPrimitiveArray<unsigned int>* pkStrings)
+// src: XBOX_PDB 0x00c60050
+void __thiscall Mod600::BSPSysStripUpdateModifier_GetViewerStrings(NiTPrimitiveArray<unsigned int>* pkStrings)
 {
     Base00c319e0::FUN_00c319e0(pkStrings);
 
     GlobalObject_00a7b610* obj = (GlobalObject_00a7b610*)g_01204388;
-    unsigned int uiName = (unsigned int)FUN_00a7d330(obj);
+    unsigned int uiName = (unsigned int)NiViewerStrings_NiGetViewerString_Title(obj);
     pkStrings->AddFirstEmpty(uiName);
 
-    unsigned int uiValue = FUN_00a7d550("fUpdateDeltaTime", m_fValue);
+    unsigned int uiValue = NiGetViewerString_00a7d550("fUpdateDeltaTime", m_fValue);
     pkStrings->AddFirstEmpty(uiValue);
 
     {
@@ -2208,7 +2264,7 @@ Mod600::~Mod600()
 
 struct SpawnHeap_cls
 {
-    void __thiscall FUN_00aa4060(void* pObject);
+    void __thiscall MemoryManager_Deallocate(void* pObject);
 };
 
 extern "C" void* DAT_0109b220;
@@ -2218,7 +2274,8 @@ extern NiFixedString* DAT_012043a0;
 
 // If DAT_012043a0 is set, calls DAT_00fdf1c4 on its header unless it holds DAT_0109b220, frees it via FUN_00aa4060, then sets DAT_012043a0 to 0.
 // @fnv 0x00c61760
-void FUN_00c61760()
+// src: GUESS 0x00c61760 (confidence: low)
+void Object_UpdateFields_00c61760()
 {
     NiFixedString* tmp = DAT_012043a0;
     NiFixedString* p = tmp;
@@ -2238,7 +2295,7 @@ void FUN_00c61760()
 
         if ((1, 1) & 1)
         {
-            reinterpret_cast<SpawnHeap_cls*>(&DAT_011f6238)->FUN_00aa4060(p);
+            reinterpret_cast<SpawnHeap_cls*>(&DAT_011f6238)->MemoryManager_Deallocate(p);
         }
 
         result = p;
@@ -2264,7 +2321,8 @@ struct S61990Obj
 
 // Takes the global at DAT_012043ac, decrements the count at vt-8 unless vt equals DAT_0109b220, deallocates the object, and clears the global.
 // @fnv 0x00c61990
-void __cdecl FUN_00c61990()
+// src: GUESS 0x00c61990 (confidence: medium)
+void __cdecl Runtime_ReleaseReference_00c61990()
 {
     S61990Obj* ptr = (S61990Obj*)DAT_012043ac;
     S61990Obj* mgr = ptr;
@@ -2310,12 +2368,13 @@ struct Box0c64640
     unsigned short unk00;
     Pt3c64640 unk04[8];
     Pt3c64640 unk64[8];
-    Box0c64640* FUN_00c64640();
+    Box0c64640* InitializePointArrays();
 };
 
 // Sets unk00 to 0 and fills the unk04 and unk64 arrays with the global DAT_011f426c value, then returns this.
 // @fnv 0x00c64640
-Box0c64640* Box0c64640::FUN_00c64640()
+// src: GUESS 0x00c64640 (confidence: medium)
+Box0c64640* Box0c64640::InitializePointArrays()
 {
     int i;
     {
@@ -2357,12 +2416,13 @@ struct S_00c648a0_Base : NiObject
 
 struct S_00c648a0 : S_00c648a0_Base
 {
-    void FUN_00c648a0(ObjectLinkStream* apStream);
+    void BSReference_LoadBinary(ObjectLinkStream* apStream);
 };
 
 // Calls ReadGroup, reads unk08 from the stream, looks it up in the stream's map, and passes any found object to apStream->v28.
 // @fnv 0x00c648a0
-void S_00c648a0::FUN_00c648a0(ObjectLinkStream* apStream)
+// src: XBOX_PDB 0x00c648a0
+void S_00c648a0::BSReference_LoadBinary(ObjectLinkStream* apStream)
 {
     NiObject::LoadBinary(*apStream);
     apStream->FUN_00a64ce0(&unk08);
@@ -2392,7 +2452,8 @@ struct FUN_00c64de0 : BSFaceGenMorphData
 
 // Allocates a FUN_00c64de0 object, sets its name to DAT_011f49e0, and returns the new pointer.
 // @fnv 0x00c652c0
-FUN_00c64de0* __cdecl FUN_00c652c0()
+// src: COMMUNITY 0x00c652c0
+FUN_00c64de0* __cdecl BSAttachPoints_CreateObject()
 {
     FUN_00c64de0* object = new FUN_00c64de0;
     reinterpret_cast<NiAVObject*>(object)->SetName(DAT_011f49e0);
@@ -2433,7 +2494,7 @@ class BSAttachPoints : public ExtraDataViewerEntry
     AttachPoint** m_ppkPoints;
     int unk14;
     unsigned short m_usElementCount;
-    void FUN_00c65350(NiViewerStringsArray* pkStrings);
+    void GetViewerStrings_00c65350(NiViewerStringsArray* pkStrings);
 };
 
 struct FillPad3
@@ -2462,7 +2523,8 @@ struct FillPad5
 
 // Appends the RTTI name and one formatted string per attach point (index, parent, node) to pkStrings.
 // @fnv 0x00c65350
-void BSAttachPoints::FUN_00c65350(NiViewerStringsArray* pkStrings)
+// src: XBOX_PDB 0x00c65350
+void BSAttachPoints::GetViewerStrings_00c65350(NiViewerStringsArray* pkStrings)
 {
     char acBuffer[260];
     unsigned int i;

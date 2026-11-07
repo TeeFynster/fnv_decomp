@@ -23,7 +23,7 @@ public:
 
     static DebugText* __cdecl Instance(bool);
     static void ClearDebugText();
-    static void FUN_00a10c00(void*, const char*, int, float);
+    static void DebugText_AddFloatingText(void*, const char*, int, float);
 
     int Print(const char*, float, float, int, int, float, int, const NiColorA* = 0);
     void UpdateLayoutPositions();
@@ -31,7 +31,7 @@ public:
     int PrintFormattedLine(int iX, int iLine, int iFlags, const char* pcFormat, char* pArgs, const NiColorA* pkColor);
     int PrintFormattedAtSlot(int iSlot, int m_iPayloadInteger, const char* pcFormat, char* pArgs, const NiColorA* pkColor);
     int FindDebugTextResult(float fX, float fY, int iFlags);
-    bool FUN_00a103e0(char*, float, float, int);
+    bool GetDebugText_0(char*, float, float, int);
     int GetEntry(int);
     void __thiscall SetLine(DEBUGTEXT_LOCATION aeLoc, int aiLine);
 };

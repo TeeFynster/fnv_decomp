@@ -16,9 +16,9 @@ struct FUN_005a3740_cls
 };
 struct FUN_005a3790Class
 {
-    bool FUN_005a3790();
+    bool TESForm_GetIgnoreFriendlyHits();
 };
-bool __cdecl FUN_005a3760(void* reference, void* b, void* c, double& result);
+bool __cdecl Script_GetIgnoreFriendlyHitsConditionFunction(void* reference, void* b, void* c, double& result);
 struct FUN_005a7840_Class
 {
     void ClearFlag(unsigned char bFlag);
@@ -33,20 +33,20 @@ struct FUN_005a8080
 };
 extern unsigned char DAT_0118c684;
 extern int DAT_011cac64;
-void FUN_005b4940();
+void Script_ClearButtonPressed();
 extern int g_TES;
 struct FUN_00456a60_class
 {
-    void __thiscall FUN_00456a60();
+    void __thiscall TES_ToggleCollisionGeometry();
 };
-bool FUN_005b9220();
+bool Cmd_ToggleCollisionGeometry_Execute();
 extern int g_TES;
 extern char DAT_012680fc;
 struct FUN_00456a60_Class
 {
-    void __thiscall FUN_00456a60();
+    void __thiscall TES_ToggleCollisionGeometry();
 };
-char __cdecl FUN_005b9240();
+char __cdecl Cmd_ToggleMaterialGeometry_Execute();
 struct FUN_005b92e0_class
 {
     int __thiscall GetField59C();
@@ -57,7 +57,7 @@ struct FUN_005a7220_class
 };
 struct FUN_005a71d0_class
 {
-    void* __thiscall FUN_005a71d0();
+    void* __thiscall UpdateState_005a71d0();
 };
 struct FUN_005a7220_cls
 {
@@ -73,28 +73,28 @@ struct BSSimpleListBase
 };
 struct FUN_005a7c00_class : public BSSimpleListBase
 {
-    char __thiscall FUN_005a7c00(BSSimpleListBase* other);
+    char __thiscall TESRecipeComponent_Compare(BSSimpleListBase* other);
 };
 struct FUN_005a8e20_cls
 {
-    int __thiscall FUN_005a90b0(void* param, bool flag);
+    int __thiscall ScriptLocals_GetActionObject(void* param, bool flag);
     void __thiscall AttachScriptLocals(void* param);
-    char __thiscall FUN_005a8ef0(int param_2, int param_3);
+    char __thiscall ScriptLocals_CheckActionFlag(int param_2, int param_3);
 };
 char __cdecl ConsumeByteAtE4();
 void ShowMessageBox_Callback();
 extern unsigned char g_bLimbConditionEffectInitialized;
-void FUN_005b9200(unsigned char value);
+void SetIsMagicStatsEnabled(unsigned char value);
 extern NiPointer<NiNode> g_011dee84;
-NiNode* FUN_005bac60();
+NiNode* TESMain_GetMenuRoot();
 struct GlobalObject_00633c90
 {
     void* operator->() const;
 };
 extern GlobalObject_00633c90 g_011deca4;
-void* FUN_005bac70();
+void* TESMain_Get3DMenuRoot();
 extern int DAT_011c6f18;
-void FUN_005bac80(int value);
+void NiTreeCtrl_SetCallback(int value);
 struct FUN_00483370
 {
     virtual void DestructorEntry();
@@ -159,7 +159,7 @@ struct FUN_005bd580_cls
     int m_i12;
     int m_i13;
     float* m_pIntegerData;
-    float FUN_005bd580();
+    float Font_GetFontSize();
 };
 struct FUN_005a77b0 : FUN_00483370, FUN_00402d00
 {
@@ -173,11 +173,11 @@ struct FUN_005a78a0 : FUN_00483370, FUN_00402d00
 };
 struct FUN_004855a0_shell
 {
-    void FUN_004855a0();
+    void BeginFormRecord();
 };
 struct FUN_00487010_shell
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 struct FUN_00483710_shell
 {
@@ -185,13 +185,13 @@ struct FUN_00483710_shell
 };
 struct FUN_00485e20_shell
 {
-    void FUN_00485e20(int, int);
+    void TESForm___SaveData(int, int);
 };
 struct FUN_00485680_shell
 {
-    void FUN_00485680();
+    void FinishFormRecord();
 };
-unsigned char __cdecl FUN_00401500();
+unsigned char __cdecl TESForm_QEndianSwapOnSave();
 struct FUN_005a7a90_shell
 {
     int unk00;
@@ -210,7 +210,7 @@ struct FUN_005a7a90_shell
     int unk34;
     int unk38;
     int unk3c;
-    void FUN_005a7a90();
+    void TESRecipeCategory_SaveAlt();
 };
 struct FUN_005a7b00_Record
 {
@@ -242,7 +242,7 @@ struct FUN_005a7b00_Class
     unsigned int unk1c;
     unsigned int unk20;
     unsigned int m_24;
-    void FUN_004851b0(unsigned int id);
+    void TESForm_CopyAllComponents(unsigned int id);
     void InitializeFromRecord(unsigned int id);
 };
 extern "C" int __cdecl memcmp(const void* a, const void* b, unsigned int n);
@@ -255,7 +255,7 @@ class FUN_008ad910_ref
 class FUN_005e79a0_t
 {
   public:
-    bool FUN_00485270(TESForm* pkForm);
+    bool TESForm_CompareAllComponents(TESForm* pkForm);
 };
 class FUN_005a7b60_cls
 {
@@ -263,7 +263,7 @@ class FUN_005a7b60_cls
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20;
     unsigned char m_data;
 
-    bool FUN_005a7b60(TESForm* pkForm);
+    bool TESRecipeCategory_Compare(TESForm* pkForm);
 };
 void __cdecl operator delete(void*);
 struct DeletingObject
@@ -276,7 +276,7 @@ struct FUN_005a7870_cls
     virtual ~FUN_005a7870_cls();
 };
 void* memset(void* destination, int value, unsigned int size);
-bool __cdecl FUN_005b4960(int unused, char const* data, TESObjectREFR* reference1, TESObjectREFR* reference2,
+bool __cdecl Script_ParseString(int unused, char const* data, TESObjectREFR* reference1, TESObjectREFR* reference2,
                           Script* script, ScriptLocals* locals, int unused2, unsigned int& value, char const* format,
                           BSStringT<char>* string);
 

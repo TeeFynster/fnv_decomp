@@ -14,11 +14,12 @@ struct FUN_0081c470_shell
     float m_fFadeInTime;
     float m_fFadeOutTime;
     bool bFadeInActive;
-    void FUN_0081c470(bool abIn, float afTime);
+    void MagicLight_Fade(bool abIn, float afTime);
 };
 
 // @fnv 0x0081c470
-void FUN_0081c470_shell::FUN_0081c470(bool abIn, float afTime)
+// src: XBOX_PDB 0x0081c470
+void FUN_0081c470_shell::MagicLight_Fade(bool abIn, float afTime)
 {
     bFadeInActive = abIn;
     m_fFadeOutTime = afTime;
@@ -189,7 +190,7 @@ void MagicLightObject::CreatePointLight(unsigned int auiFormID, NiNode* apNode)
         ((NiPointLight*)m_pMenuLight)->SetEffectColor(reinterpret_cast<const NiPoint3&>(kDiffuseColor));
         MLPoint3 kAttenuation(g_fMagicLightAttenuation, 0.0f, 0.0f);
         ((NiPointLight*)m_pMenuLight)->FUN_0050dd50(reinterpret_cast<const NiPoint3&>(kAttenuation));
-        ((NiPointLight*)m_pMenuLight)->FUN_0050dd20(pLightForm->GetRadius());
+        ((NiPointLight*)m_pMenuLight)->NiLight_SetDimmer(pLightForm->GetRadius());
         ShadowSceneNode* pShadowNode5 = MLGetShadowSceneNode(0);
         if (pShadowNode5)
             pShadowNode5->GetShadowSceneLight(m_pMenuLight, true);
@@ -222,7 +223,7 @@ FUN_0081c240::~FUN_0081c240()
     m_pReferencedObject = 0;
     ShadowSceneNode* pShadow = FUN_00450b80(0);
     if (pShadow)
-        pShadow->FUN_00b5eed0(m_spNode);
+        pShadow->ShadowSceneNode_RemoveLight(m_spNode);
     m_spNode = 0;
     m_uiValue1 = 0;
 }

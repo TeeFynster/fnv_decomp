@@ -50,10 +50,11 @@ struct CpuObject
     unsigned int unk04;
     unsigned int unk08;
     CpuScalar* value;
-    float FUN_00d98420();
+    float hkpKdTreeWorldLinearCaster_getHitFraction();
 };
 // @fnv 0x00d98420
-float CpuObject::FUN_00d98420()
+// src: HAVOK_SRC 0x00d98420
+float CpuObject::hkpKdTreeWorldLinearCaster_getHitFraction()
 {
     return value->value;
 }

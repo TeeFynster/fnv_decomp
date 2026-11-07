@@ -71,32 +71,32 @@ public:
     LocalVec Cross(const LocalVec& v) const;
     LocalVec ApplyScaled(float scale);
     LocalVec ApplyScaled(float scale) const;
-    void FUN_00acf580(unsigned n, Tok value);
-    LocalVec FUN_004a0bd0();
-    LocalVec FUN_004a0bd0() const;
+    void ProcessState_00acf580(unsigned n, Tok value);
+    LocalVec GetNegatedVector();
+    LocalVec GetNegatedVector() const;
     LocalVec FUN_0053d1a0(const LocalVec& v);
     LocalVec FUN_004b3800(const LocalVec& v);
     LocalVec FUN_004b3800(const LocalVec& v) const;
     LocalVec FUN_00439e90(const LocalVec& v);
     LocalVec FUN_00439e90(const LocalVec& v) const;
-    LocalVec FUN_00439ef0(const LocalVec& v);
-    LocalVec FUN_00439ef0(const LocalVec& v) const;
+    LocalVec SubtractIntoVector(const LocalVec& v);
+    LocalVec SubtractIntoVector(const LocalVec& v) const;
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     void FUN_006815c0();
-    void FUN_00439180(float scale);
-    LocalVec& FUN_0063c8a0(const LocalVec& v);
+    void ScaleComponents(float scale);
+    LocalVec& ComputeValue_0063c8a0(const LocalVec& v);
     float FUN_004a7290();
     float FUN_004a7290() const;
-    void FUN_004b4db0(const float* values);
+    void SetQuaternionComponentsFromVector(const float* values);
     void FUN_00a38560();
-    void FUN_004f0180(void* value);
+    void NiQuaternion_ToRotation(void* value);
 
     LocalVec& ScaleByInverse(float divisor);
     float FUN_00457910();
-    LocalVec* FUN_006a6eb0();
-    bool FUN_004390c0(const LocalVec& v);
+    LocalVec* FastNavMeshTriLocation_GetLocation();
+    bool HasEqualComponents(const LocalVec& v);
 
     __m128 get() const;
     void set(__m128 value);
@@ -138,37 +138,37 @@ public:
     void normalize();
     void negate(const LocalVec& v);
 
-    void FUN_00c7f640(const void* matrix, const hkVector4& point);
-    void FUN_00c7f640(Mat4* matrix, void* point);
-    void FUN_00c7f640(const void* matrix, const LocalVec* point);
-    void FUN_00c7f640(const void* matrix, const void* point);
-    void FUN_00c7f700(Mat3* matrix, void* point);
-    void FUN_00c7f700(const void* matrix, const LocalVec* point);
-    void FUN_00b12790();
-    void FUN_00b13040(LocalVec* out, const LocalVec* v);
+    void setTransformedPos_00c7f640(const void* matrix, const hkVector4& point);
+    void setTransformedPos_00c7f640(Mat4* matrix, void* point);
+    void setTransformedPos_00c7f640(const void* matrix, const LocalVec* point);
+    void setTransformedPos_00c7f640(const void* matrix, const void* point);
+    void hkVector4_setRotatedDir(Mat3* matrix, void* point);
+    void hkVector4_setRotatedDir(const void* matrix, const LocalVec* point);
+    void Normalize_00b12790();
+    void Diff_00b13040(LocalVec* out, const LocalVec* v);
     LocalVec* ScaleSwizzled(LocalVec* out, float factor);
     void AddVector(LocalVec* out, const LocalVec* v);
     float Dot(const LocalVec& v);
     LocalVec* FUN_004a3c90(const LocalVec* v);
     LocalVec* FUN_0062b0a0(LocalVec* out, LocalVec* v);
-    LocalVec* FUN_0062af00(LocalVec* target);
+    LocalVec* hkVector4_lengthInverse3(LocalVec* target);
 
     void FUN_00cf7690(Elem* value);
-    void FUN_00b1e970();
+    void UpdateState_00b1e970();
     Iter begin();
     Iter end();
-    CIter FUN_00b33030(CIter first, CIter last);
-    void FUN_00b32120();
+    CIter UpdateState_00b33030(CIter first, CIter last);
+    void m_vStrips_clear();
     unsigned int size() const;
     unsigned int capacity() const;
-    void FUN_00b2df90();
-    void FUN_00b2e140(Elem* first, Elem* last);
+    void ClearAllElements();
+    void B2EDestroyRange_Thunk(Elem* first, Elem* last);
     bool InitBuffer(unsigned int count);
     Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
-    LocalVec& FUN_00b2db10(const LocalVec& v);
-    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
-    void FUN_00acac40();
-    LocalVec& FUN_00ad61e0(const LocalVec& v);
+    LocalVec& CTreeEngine_SetLeafTextures(const LocalVec& v);
+    CMutIter ProcessAndReturnValue_00aceb80(CMutIter first, CMutIter last);
+    void ProcessState_00acac40();
+    LocalVec& ReleaseStorage_00ad61e0(const LocalVec& v);
 };
 #include "../../../../../../../../../include/hkRotation.h"
 #include "../../../../../../../../../include/hkTransform.h"
@@ -320,7 +320,7 @@ struct ChainInstance
 
 struct Sub
 {
-    void FUN_00e10a10(void* a);
+    void hkpPrimitiveDrawer_setDisplayHandler(void* a);
 };
 struct Listener
 {
@@ -354,8 +354,8 @@ struct Obj
     hkRotation m_kFirstRotation;
     hkRotation m_kSecondRotation;
     Sub mC0;
-    void FUN_00de44c0(int a, int b);
-    void FUN_00de4530(int a, int b);
+    void hkpConstraintDrawer_drawPivots(int a, int b);
+    void hkpConstraintDrawer_drawBodyFrames(int a, int b);
     void FireChainConstraints(ChainInstance* c, Listener* l, int a, int b);
 };
 
@@ -363,7 +363,7 @@ struct Obj
 void Obj::FireChainConstraints(ChainInstance* apChain, Listener* apListener, int aiArg1, int aiArg2)
 {
     ChainData* data = apChain->m_data;
-    mC0.FUN_00e10a10(apListener);
+    mC0.hkpPrimitiveDrawer_setDisplayHandler(apListener);
     int iPairCount = apChain->m_iActorEntryCount - 1;
     for (int iPair = 0; iPair < iPairCount; iPair++)
     {
@@ -401,10 +401,10 @@ void Obj::FireChainConstraints(ChainInstance* apChain, Listener* apListener, int
             pivotA = ((PoweredInfo*)data->m_pConstraintInfo)[iPair].m_kPivotInA;
             break;
         }
-        m50.FUN_00c7f640(&transformB, pivotB);
-        m40.FUN_00c7f640(&transformA, pivotA);
-        FUN_00de44c0(aiArg1, aiArg2);
-        FUN_00de4530(aiArg1, aiArg2);
+        m50.setTransformedPos_00c7f640(&transformB, pivotB);
+        m40.setTransformedPos_00c7f640(&transformA, pivotA);
+        hkpConstraintDrawer_drawPivots(aiArg1, aiArg2);
+        hkpConstraintDrawer_drawBodyFrames(aiArg1, aiArg2);
         apListener->Fire(&m40, &m50, 0xffff0000, aiArg1, aiArg2);
     }
 }

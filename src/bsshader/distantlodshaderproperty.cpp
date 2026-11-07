@@ -95,7 +95,7 @@ struct S_A
         DAT_011f6238.Free(this);
     }
     void FUN_00b6f0b0();
-    void FUN_00b6e450(unsigned int v);
+    void BSTextureManager_PrecreateTextures(unsigned int v);
     static void* operator new(unsigned int n)
     {
         return DAT_011f6238.Alloc(n);
@@ -324,12 +324,13 @@ extern unsigned int DAT_011f9508;
 
 void InitRenderSystem();
 void ClearAllCachedStates();
-void FUN_00ba50d0();
-void FUN_00bc0940();
+void ParticleShader_Free();
+void BoltShader_Free();
 void ClearRefObject();
 
 // @fnv 0x00b578a0
-void FUN_00b578a0()
+// src: COMMUNITY 0x00b578a0
+void BSShaderManager_Reinitialize()
 {
     if (DAT_011f91c6 == 0)
     {
@@ -338,8 +339,8 @@ void FUN_00b578a0()
     }
 
     ClearAllCachedStates();
-    FUN_00ba50d0();
-    FUN_00bc0940();
+    ParticleShader_Free();
+    BoltShader_Free();
     ClearRefObject();
 
     if (DAT_011f91ac != 0)
@@ -361,7 +362,7 @@ void FUN_00b578a0()
         DAT_011f91ac = new S_B;
     }
 
-    DAT_011f91a8->FUN_00b6e450(DAT_011f9508);
+    DAT_011f91a8->BSTextureManager_PrecreateTextures(DAT_011f9508);
 }
 
 extern unsigned int DAT_011f9640;
@@ -377,7 +378,7 @@ struct DistantlodshaderpropertyListNodeView
 struct KeyedList
 {
     DistantlodshaderpropertyListNodeView* first;
-    void __thiscall FUN_00b584e0(unsigned int* key);
+    void __thiscall AllocateStorage_00b584e0(unsigned int* key);
     bool Find(const unsigned int& k, DistantlodshaderpropertyListNodeView** out)
     {
         DistantlodshaderpropertyListNodeView* n = first;
@@ -409,8 +410,8 @@ struct FnvOwner
     unsigned int m_14;
     unsigned int m_18;
     KeyedList m_1c;
-    void __thiscall FUN_00bd5d70(Vec4* v, unsigned int key);
-    void __thiscall FUN_00bd5e40();
+    void __thiscall DistantLODGroup_Add(Vec4* v, unsigned int key);
+    void __thiscall DistantLODGroup_UpdateGroupBound();
 };
 
 struct ObjR
@@ -478,11 +479,12 @@ struct Obj3
 };
 
 unsigned short __cdecl GetOrCreateItem(ObjA4* a4, void* a1, FnvOwner** out, Obj3* a3);
-ObjR* __stdcall FUN_00b585c0(void* v, FnvOwner** out);
+ObjR* __stdcall Object_GetOrCreateRenderItemCache(void* v, FnvOwner** out);
 
 // Passes Vec4 values assembled from a5 and a6 to the located object, then inserts key when absent from its KeyedList.
 // @fnv 0x00b59ae0
-void __cdecl FUN_00b59ae0(void* a1, unsigned int key, Obj3* apObj3, ObjA4* apObjA4, NiPoint3* apPoints, float* a6,
+// src: XBOX_PDB 0x00b59ae0
+void __cdecl DistantLODShaderProperty_AddDistantLOD(void* a1, unsigned int key, Obj3* apObj3, ObjA4* apObjA4, NiPoint3* apPoints, float* a6,
                           unsigned short count)
 {
     DAT_011f9640 += count;
@@ -507,23 +509,23 @@ void __cdecl FUN_00b59ae0(void* a1, unsigned int key, Obj3* apObj3, ObjA4* apObj
             v.y = apPoints[i].y;
             v.z = apPoints[i].z;
             v.w = a6[i];
-            pOwner->FUN_00bd5d70(&v, key);
+            pOwner->DistantLODGroup_Add(&v, key);
             --count;
         }
-        pOwner->FUN_00bd5e40();
+        pOwner->DistantLODGroup_UpdateGroupBound();
         iIndex = 0;
     }
 
     apObj3->v47();
     pOwner = 0;
-    ObjR* r = FUN_00b585c0(apObjA4->m_08, &pOwner);
+    ObjR* r = Object_GetOrCreateRenderItemCache(apObjA4->m_08, &pOwner);
     r->FUN_00a53c30();
 
     KeyedList* pKeyedList = &pOwner->m_1c;
     DistantlodshaderpropertyListNodeView* node;
     if (!pKeyedList->Find(key, &node) || node == 0)
     {
-        pKeyedList->FUN_00b584e0(&key);
+        pKeyedList->AllocateStorage_00b584e0(&key);
     }
 }
 
@@ -572,7 +574,7 @@ struct S_00b6f0b0_Node
 struct S_00b6f0b0_Lock
 {
     int owner;
-    void FUN_0040fbf0(const char* s) throw();
+    void BSSpinLock_Lock(const char* s) throw();
 };
 extern S_00b6f0b0_Lock DAT_011c5f80;
 extern S_00b6f0b0_Node* DAT_011c5f58;
@@ -656,7 +658,7 @@ FUN_00b6f0b0::~FUN_00b6f0b0()
         else
             m84.tail = 0;
         node->item = 0;
-        DAT_011c5f80.FUN_0040fbf0(0);
+        DAT_011c5f80.BSSpinLock_Lock(0);
         node->prev = 0;
         node->next = DAT_011c5f58;
         if (--DAT_011c5f84 == 0)
@@ -683,7 +685,7 @@ FUN_00b6f0b0::~FUN_00b6f0b0()
         else
             m78.tail = 0;
         node->item = 0;
-        DAT_011c5f80.FUN_0040fbf0(0);
+        DAT_011c5f80.BSSpinLock_Lock(0);
         node->prev = 0;
         node->next = DAT_011c5f58;
         if (--DAT_011c5f84 == 0)
@@ -951,7 +953,7 @@ struct Scene : NiObject
 
     NiProperty* FUN_00a59d30(int);
 
-    void FUN_00a5b230(unsigned int);
+    void NiAVObject_RemoveProperty(unsigned int);
 };
 
 struct Resource : NiRefObject
@@ -1114,7 +1116,8 @@ __forceinline bool IsKindOfType(NiObject* p, const NiRTTI* type)
 
 // Loads a distant LOD NIF, clones its geometry into a multi-instance buffer with instance IDs, and caches the resulting Resource under the input key.
 // @fnv 0x00b587c0
-Resource* __cdecl FUN_00b587c0(Input* input)
+// src: COMMUNITY 0x00b587c0
+Resource* __cdecl DistantLODShaderProperty_GetCachedGeometry(Input* input)
 {
 
     if (DAT_011f91c0 == 0)
@@ -1132,7 +1135,7 @@ Resource* __cdecl FUN_00b587c0(Input* input)
     if (!GetNiTStringMap()->FUN_00e92760(input->key, &cachedResource))
     {
 
-        if (!input->scene && input->path && stream.FUN_00c3a8a0(input->path, false))
+        if (!input->scene && input->path && stream.BSStream_Load(input->path, false))
         {
 
             // The top-level object array is at stream offset 0x220.
@@ -1415,7 +1418,7 @@ Resource* __cdecl FUN_00b587c0(Input* input)
                         texture = GetShaderTexture(shader, 0, 0);
                 }
 
-                geometry->FUN_00a5b230(0);
+                geometry->NiAVObject_RemoveProperty(0);
 
                 NiAlphaProperty* alpha = new NiAlphaProperty;
 

@@ -172,7 +172,8 @@ struct SArgs
 };
 // Stores the value pointed to by a.v into the element of self at index a.i.
 // @fnv 0x0047a110
-void __fastcall FUN_0047a110(Arr* self, SArgs aArgs)
+// src: XBOX_PDB 0x0047a110
+void __fastcall BSSimpleArray_TESAmmo_1024_SetAt(Arr* self, SArgs aArgs)
 {
     *self->GetAt(aArgs.i) = *aArgs.v;
 }
@@ -245,7 +246,7 @@ void BGSIdleCollection::CopyFromBase(BaseFormComponent* apCopyFC)
     m_fIdleChance = pSource->m_fIdleChance;
 }
 
-void __cdecl FUN_004858f0(unsigned int, unsigned char);
+void __cdecl TESForm_AddChunk_3(unsigned int, unsigned char);
 void __cdecl _FUN_00485910(unsigned int, float);
 void __cdecl _FUN_00485710(unsigned int, unsigned int*, unsigned int);
 extern "C" void* __cdecl _alloca(unsigned int);
@@ -259,8 +260,8 @@ void __fastcall SaveIdleCollection(BGSIdleCollection* self)
 
     if (self->m_ucPickType)
     {
-        FUN_004858f0(0x464c4449, self->m_ucIdleCount);
-        FUN_004858f0(0x434c4449, self->m_ucPickType);
+        TESForm_AddChunk_3(0x464c4449, self->m_ucIdleCount);
+        TESForm_AddChunk_3(0x434c4449, self->m_ucPickType);
         _FUN_00485910(0x544c4449, self->m_fIdleChance);
 
         isize3 = self->m_ucPickType << 2;

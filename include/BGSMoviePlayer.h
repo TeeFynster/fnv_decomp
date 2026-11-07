@@ -27,11 +27,11 @@ public:
     unsigned char field_20;
 
     void* __thiscall FUN_00867150(unsigned int flags);
-    void __thiscall FUN_00867180();
-    void __thiscall FUN_00867270();
-    void __thiscall FUN_00867280();
+    void __thiscall UpdateFields_00867180();
+    void __thiscall PauseMusic();
+    void __thiscall UnPauseMusic();
     bool FUN_00ec1840(bool);
-    bool FUN_00ec17c0();
+    bool MoviePlayer_GetPlayingSequence();
     void FUN_00ec29b0();
 
     bool CheckPlaybackContinue(bool allowInterruption);

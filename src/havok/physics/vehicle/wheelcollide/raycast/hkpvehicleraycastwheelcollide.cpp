@@ -49,7 +49,7 @@ typedef signed char hkInt8;
 typedef unsigned char hkUint8;
 
 // hkArray.h identifies hkMemoryRouter as the shared hkMemoryRouter layout.
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 union __declspec(align(16)) hkAabbQ
 {
@@ -60,7 +60,7 @@ union __declspec(align(16)) hkAabbQ
 
 inline void* hkpVehicleRayCastWheelCollide::operator new(unsigned int nbytes)
 {
-    hkpVehicleRayCastWheelCollide* b = static_cast<hkpVehicleRayCastWheelCollide*>(FUN_00c85750().heap().blockAlloc(nbytes));
+    hkpVehicleRayCastWheelCollide* b = static_cast<hkpVehicleRayCastWheelCollide*>(hkMemoryRouter_getInstance().heap().blockAlloc(nbytes));
     b->m_usMemSizeAndFlags = (unsigned short)nbytes;
     return b;
 }
@@ -76,13 +76,13 @@ void hkpVehicleRayCastWheelCollide::SetUserInfo(int aiValue)
 
 struct FUN_00c936a0_host
 {
-    void* FUN_00c936a0(void* phantom);
+    void* hkpWorld_addPhantom(void* phantom);
 };
 
 // @fnv 0x00e41ef0
 void* hkpVehicleRayCastWheelCollide::AddToWorld(void* world)
 {
-    return ((FUN_00c936a0_host*)world)->FUN_00c936a0(m_pPhantom);
+    return ((FUN_00c936a0_host*)world)->hkpWorld_addPhantom(m_pPhantom);
 }
 
 // @fnv 0x00e41e70
@@ -90,18 +90,18 @@ void hkpVehicleRayCastWheelCollide::UpdatePhantom(const hkpVehicleInstance* vehi
 {
     hkAabbQ aabb;
     this->GetWheelAabb(vehicle, &aabb);
-    this->m_pPhantom->FUN_00cf24a0(aabb);
+    this->m_pPhantom->hkpAabbPhantom_setAabb(aabb);
 }
 
 struct FUN_00c92c70_host
 {
-    void FUN_00c92c70(void* phantom);
+    void hkpWorld_removePhantom(void* phantom);
 };
 // @fnv 0x00e41f00
 void hkpVehicleRayCastWheelCollide::RemoveFromWorld()
 {
     void* p = m_pPhantom;
-    ((FUN_00c92c70_host*)*(void**)((char*)p + 8))->FUN_00c92c70(p);
+    ((FUN_00c92c70_host*)*(void**)((char*)p + 8))->hkpWorld_removePhantom(p);
 }
 
 extern int DAT_010e5ae4;
@@ -123,7 +123,7 @@ void hkpVehicleRayCastWheelCollide::Destroy()
     {
         if (this->m_kChassisRejectionListener.m_pChassisCollidable)
         {
-            phantom->FUN_00d07c80(&m_kChassisRejectionListener);
+            phantom->removePhantomOverlapListener_00d07c80(&m_kChassisRejectionListener);
         }
 
         this->m_pPhantom->removeReference();
@@ -145,7 +145,7 @@ template <typename T> __forceinline void ConstructWithCopy(T* destination, int c
 void hkpVehicleRayCastWheelCollide::AppendPhantom(hkArray<hkpAabbPhantom*>& phantoms)
 {
     hkpAabbPhantom* phantom = m_pPhantom;
-    hkMemoryAllocator& allocator = FUN_00c85750().heap();
+    hkMemoryAllocator& allocator = hkMemoryRouter_getInstance().heap();
     if (phantoms.m_iElementCount == phantoms.getCapacity())
         ResizeAudioStream(&allocator, &phantoms, sizeof(hkpAabbPhantom*));
     ConstructWithCopy(phantoms.m_data + phantoms.m_iElementCount, 1, phantom);
@@ -159,7 +159,7 @@ void hkpVehicleRayCastWheelCollide::CreateWheelPhantom(const hkpVehicleInstance*
 
     this->GetWheelAabb(vehicle, &aabb);
 
-    hkMemoryRouter& host = FUN_00c85750();
+    hkMemoryRouter& host = hkMemoryRouter_getInstance();
 
     hkpAabbPhantom* allocated = reinterpret_cast<hkpAabbPhantom*>(host.heap().blockAlloc(0xe0));
 
@@ -172,7 +172,7 @@ void hkpVehicleRayCastWheelCollide::CreateWheelPhantom(const hkpVehicleInstance*
 
     this->m_kChassisRejectionListener.m_pChassisCollidable = &reinterpret_cast<hkpWorldObject*>(vehicle->m_pEntity)->m_kCollidable;
 
-    pPhantom->FUN_00d07de0(&this->m_kChassisRejectionListener);
+    pPhantom->addPhantomOverlapListener_00d07de0(&this->m_kChassisRejectionListener);
 }
 
 extern "C" LocalM128 _mm_xor_ps(LocalM128 a, LocalM128 b);
@@ -230,8 +230,8 @@ hkpVehicleRayCastWheelCollide* hkpVehicleRayCastWheelCollide::Clone(hkpWorldObje
     hkpVehicleRayCastWheelCollide* clone = new hkpVehicleRayCastWheelCollide();
     clone->m_pPhantom = phantoms.m_data[0];
     clone->m_pPhantom->addReference();
-    clone->m_pPhantom->FUN_00d07c80(&m_kChassisRejectionListener);
-    clone->m_pPhantom->FUN_00d07de0(&clone->m_kChassisRejectionListener);
+    clone->m_pPhantom->removePhantomOverlapListener_00d07c80(&m_kChassisRejectionListener);
+    clone->m_pPhantom->addPhantomOverlapListener_00d07de0(&clone->m_kChassisRejectionListener);
     clone->m_kChassisRejectionListener.m_pChassisCollidable = &chassis->m_kCollidable;
     clone->m_uiWheelCount = m_uiWheelCount;
     return clone;
@@ -262,7 +262,7 @@ void __thiscall hkpVehicleRayCastWheelCollide::CastWheelRay(const hkpVehicleInst
     *(LocalM128*)&input.m_vTo = *(LocalM128*)((const char*)&wheel + 0x60);
     input.m_uiFilterInfo = m_uiWheelCount;
     input.m_bEnableShapeCollectionFilter = 1;
-    m_pPhantom->FUN_00cf26b0(&input, &output);
+    m_pPhantom->hkpAabbPhantom_castRay_00cf26b0(&input, &output);
 }
 
 // Iterates over vehicle wheels, casts a ray for each, and processes or finalizes the collision output based on whether the ray hit.

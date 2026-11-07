@@ -56,12 +56,13 @@ struct FUN_00a88f00_Class
     int unk3c;
     int unk40;
     unsigned int unk44;
-    void FUN_00a88f00(NiStream& stream);
+    void NiTextureTransform_LoadBinary(NiStream& stream);
 };
 
 // Reads point00, point0c, unk08, a value into unk44 and point14 from the stream, then sets loaded to true.
 // @fnv 0x00a88f00
-void FUN_00a88f00_Class::FUN_00a88f00(NiStream& stream)
+// src: COMMUNITY 0x00a88f00
+void FUN_00a88f00_Class::NiTextureTransform_LoadBinary(NiStream& stream)
 {
     point00.LoadBinary(&stream);
     point0c.LoadBinary(&stream);
@@ -91,12 +92,13 @@ class FUN_00a88f80_cls
     int unk3c;
     int unk40;
     unsigned int unk44;
-    void FUN_00a88f80(NiStream& stream);
+    void NiTextureTransform_SaveBinary(NiStream& stream);
 };
 
 // Writes point00, point0c, unk08, unk44 and point14 to the stream in that order.
 // @fnv 0x00a88f80
-void FUN_00a88f80_cls::FUN_00a88f80(NiStream& stream)
+// src: COMMUNITY 0x00a88f80
+void FUN_00a88f80_cls::NiTextureTransform_SaveBinary(NiStream& stream)
 {
     point00.SaveBinary(&stream);
     point0c.SaveBinary(&stream);

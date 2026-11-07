@@ -18,16 +18,16 @@ struct FUN_00dee620
     void* m_pVTable;
     __thiscall FUN_00dee620(int testFlag);
 };
-extern "C" void __cdecl FUN_00dedf10(void*, void*, void*, void*, int, int);
-void __cdecl FUN_00dee5f0(void* first, void* second, void* third, void* fourth);
+extern "C" void __cdecl hkVector4_ProcessEntries_00dedf10(void*, void*, void*, void*, int, int);
+void __cdecl hkGeometryProcessing_generateRandomDistribution(void* first, void* second, void* third, void* fourth);
 struct FUN_00dee6b0_Class
 {
     int unk00;
     float unk04;
-    float FUN_00dee6b0(int testFlag);
+    float GetUnk04(int testFlag);
 };
 extern int DAT_010cd664;
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
@@ -45,7 +45,8 @@ struct __declspec(align(16)) SphereOutput276
     __m128 value;
 };
 // @fnv 0x00de9650
-extern "C" void FUN_00de9650(SphereInput276* in, SphereOutput276* out)
+// src: GUESS 0x00de9650 (confidence: medium)
+extern "C" void Geometry_MapCoordinatesToSphere(SphereInput276* in, SphereOutput276* out)
 {
     float u = 2.0 * in->a - 1.0;
     float v = 2.0 * in->b - 1.0;
@@ -147,8 +148,8 @@ struct Vec4Array
 };
 struct Owner
 {
-    void FUN_00e11530(Vec4Pair* out);
-    float FUN_00e13660(Vec4* p, Vec4* q, unsigned char* ok);
+    void ProcessEntries_00e11530(Vec4Pair* out);
+    float ProcessAndReturnValue_00e13660(Vec4* p, Vec4* q, unsigned char* ok);
 };
 struct Obj
 {
@@ -156,7 +157,7 @@ struct Obj
 };
 void __cdecl ResizeAudioStream(void* allocator, Vec4Array* arr, int elemSize);
 extern Vec4 DAT_01267e30;
-bool __cdecl FUN_00dedbb0(Owner* self, int count, Vec4Array* out, Obj* obj);
+bool __cdecl hkGeometryProcessingInternals_generateRandomDistribution(Owner* self, int count, Vec4Array* out, Obj* obj);
 
 #include <xmmintrin.h>
 
@@ -164,7 +165,8 @@ extern __declspec(align(16)) float DAT_010c7160[4];
 extern float DAT_01012054;
 
 // @fnv 0x00de9e10
-float __cdecl FUN_00de9e10(float* arg1, float* arg2, float* arg3, float* result, float* optionalResult)
+// src: XBOX_PDB 0x00de9e10
+float __cdecl hkGeometryProcessing_squaredDistanceFromPointToLine(float* arg1, float* arg2, float* arg3, float* result, float* optionalResult)
 {
     __m128 b = _mm_load_ps(arg2);
     __m128 a = _mm_load_ps(arg1);

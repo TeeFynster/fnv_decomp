@@ -22,29 +22,29 @@
 #include "../../include/Vec4.h"
 extern int DAT_010305a8;
 extern int DAT_010c749c;
-void __cdecl FUN_00e00570(int* pObject, int b);
+void __cdecl finishLoadedObjecthkpTriangleShape(int* pObject, int b);
 extern int DAT_010305a8;
 extern int DAT_010cb5ac;
-void FUN_00e007b0(int* pObject, int flag);
+void finishLoadedObjecthkpSphereShape(int* pObject, int flag);
 extern int DAT_010305a8;
 extern int DAT_010ce4bc;
-void FUN_00e00b00(int* pObject, int flag);
+void hkpMultiSphereShape_hkpMultiSphereShape_0(int* pObject, int flag);
 extern int DAT_010305a8;
 extern int DAT_010ce25c;
-void FUN_00e01340(int* pObject, int b);
+void finishLoadedObjecthkpCapsuleShape(int* pObject, int b);
 extern int DAT_010305a8;
 extern int DAT_010c70b4;
-void __cdecl FUN_00e01410(int* pObject, int a);
+void __cdecl finishLoadedObjecthkpBoxShape(int* pObject, int a);
 extern int DAT_010e99d8;
 struct FUN_00cb0a70
 {
     void __thiscall m(int);
 };
-void FUN_00e01c30(void* apObject, void* aValue);
+void Object_UpdateState_00e01c30(void* apObject, void* aValue);
 extern int DAT_010c9314;
-void FUN_00e02780(void* apObject);
+void Object_UpdateFields_00e02780(void* apObject);
 int IsInRange(int aiValue, int aiLowerBound, int aiUpperBound);
-void FUN_00e04a60(void* pData);
+void Object_UpdateFields_00e04a60(void* pData);
 struct FUN_00e10740_a
 {
     int a;
@@ -55,11 +55,11 @@ struct FUN_00e10740_b
     int c;
     float d;
 };
-int __cdecl FUN_00e10740(const FUN_00e10740_a* pLeft, const FUN_00e10740_b* pRight);
+int __cdecl hkCompareInfosBySize(const FUN_00e10740_a* pLeft, const FUN_00e10740_b* pRight);
 struct FUN_00e11960_cls
 {
     int m_2c;
-    int FUN_00e11960();
+    int hkgpMesh_countParts();
 };
 struct FUN_00e11d80_class
 {
@@ -67,139 +67,139 @@ struct FUN_00e11d80_class
 };
 struct FUN_00e11da0_class
 {
-    void FUN_00e11da0(int value);
+    void hkgpMesh_setVerticesTag(int value);
 };
 struct FUN_00e000a0_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e000a0(FUN_00e000a0_vt* p);
+void __cdecl Object_InvokeVirtualMethod_00e000a0(FUN_00e000a0_vt* p);
 extern int DAT_010c59f4;
 extern int DAT_010c6cdc;
-void __cdecl FUN_00e00120(int* pObject, int bSetHalf);
+void __cdecl Object_UpdateFields_00e00120(int* pObject, int bSetHalf);
 extern int DAT_010e81a4;
-void __cdecl FUN_00e00180(int* p);
+void __cdecl Object_UpdateFields_00e00180(int* p);
 struct FUN_00e002d0_vt
 {
-    virtual void FUN_00e002d0(int);
+    virtual void Runtime_ForwardCall_00e002d0(int);
 };
-void __cdecl FUN_00e002d0(FUN_00e002d0_vt* p);
+void __cdecl Runtime_ForwardCall_00e002d0(FUN_00e002d0_vt* p);
 extern int DAT_010c59f4;
 extern int DAT_010c6ea4;
-void __cdecl FUN_00e002f0(int* pObject, int bSetValue);
+void __cdecl Object_UpdateState_00e002f0(int* pObject, int bSetValue);
 extern int DAT_010e83b4;
-void __cdecl FUN_00e00350(int* a);
-void __cdecl FUN_00e00720(void* p);
+void __cdecl Runtime_UpdateState_00e00350(int* a);
+void __cdecl Object_InvokeVirtualMethod_00e00720(void* p);
 extern int DAT_010305a8;
 extern int DAT_010c6fd0;
 extern int DAT_010cc41c;
-void __cdecl FUN_00e00740(int* pObject, int bClear);
+void __cdecl finishLoadedObjecthkpTransformShape(int* pObject, int bClear);
 extern int DAT_010e8824;
-void __cdecl FUN_00e00810(int* p);
+void __cdecl Runtime_UpdateState_00e00810(int* p);
 struct FUN_00e00930_vt
 {
     virtual void __thiscall m0(int);
 };
-void __cdecl FUN_00e00930(FUN_00e00930_vt* p);
-void __cdecl FUN_00e00b40(int* p);
+void __cdecl Runtime_ForwardCall_00e00930(FUN_00e00930_vt* p);
+void __cdecl Object_ProcessAndTransformResult_00e00b40(int* p);
 struct FUN_00e00c70_vt
 {
     virtual void __thiscall m0(int);
 };
-void __cdecl FUN_00e00c70(FUN_00e00c70_vt* p);
+void __cdecl Runtime_ForwardCall_00e00c70(FUN_00e00c70_vt* p);
 extern int DAT_010c63cc;
-void __cdecl FUN_00e00d10(int* p);
-int __cdecl FUN_00e00d30(int* p);
+void __cdecl Runtime_UpdateState_00e00d10(int* p);
+int __cdecl Runtime_EvaluateValue_00e00d30(int* p);
 extern int DAT_010e8d8c;
-void __cdecl FUN_00e00db0(int* a);
+void __cdecl Runtime_UpdateState_00e00db0(int* a);
 extern int DAT_010305a8;
 extern int DAT_010c6fd0;
 extern int DAT_010d0e5c;
-void __cdecl FUN_00e00e90(int* pObject, int bClear);
+void __cdecl finishLoadedObjecthkpConvexTranslateShape(int* pObject, int bClear);
 extern int DAT_010305a8;
 extern int DAT_010c6fd0;
 extern int DAT_010d102c;
-void __cdecl FUN_00e00f00(int** a, int abReset);
+void __cdecl finishLoadedObjecthkpConvexTransformShape(int** a, int abReset);
 extern int DAT_010305a8;
 extern int DAT_010ce31c;
 extern int DAT_010e901c;
-void __cdecl FUN_00e010e0(int* pObject, int abFlag);
-void __cdecl FUN_00e011f0(void* a);
+void __cdecl Object_UpdateFields_00e010e0(int* pObject, int abFlag);
+void __cdecl Runtime_Helper_00e011f0(void* a);
 extern int DAT_010305a8;
 extern int DAT_010c6ff8;
 extern int DAT_010c6fd0;
-void __cdecl FUN_00e013a0(int** p, int abClear);
+void __cdecl Object_UpdateFields_00e013a0(int** p, int abClear);
 extern int DAT_010e9300;
-void FUN_00e01530(int* p);
+void Runtime_UpdateState_00e01530(int* p);
 extern int DAT_010e9358;
-void FUN_00e01570(int* p);
+void Runtime_UpdateState_00e01570(int* p);
 extern int DAT_010e93ac;
-void FUN_00e015b0(int** p);
+void Runtime_UpdateState_00e015b0(int** p);
 typedef void(__thiscall* Fn)(void*, int);
-void __cdecl FUN_00e01640(int* p);
+void __cdecl Object_ProcessState_00e01640(int* p);
 extern int DAT_010e943c;
-void __cdecl FUN_00e01660(int* p);
+void __cdecl Object_UpdateFields_00e01660(int* p);
 extern int DAT_010e9494;
-void __cdecl FUN_00e016a0(int* p);
+void __cdecl Object_UpdateFields_00e016a0(int* p);
 struct FUN_00e017d0_vt
 {
-    virtual void FUN_00e017d0(int);
+    virtual void Runtime_ForwardCall_00e017d0(int);
 };
-void __cdecl FUN_00e017d0(FUN_00e017d0_vt* p);
+void __cdecl Runtime_ForwardCall_00e017d0(FUN_00e017d0_vt* p);
 extern int DAT_010e95b4;
-void FUN_00e017f0(FUN_00cb0a70** apObject, int aiValue);
+void Object_UpdateState_00e017f0(FUN_00cb0a70** apObject, int aiValue);
 extern int DAT_010e9614;
-void FUN_00e018e0(int* a);
+void Object_UpdateFields_00e018e0(int* a);
 extern int DAT_010e350c;
-void __cdecl FUN_00e019f0(int* p);
+void __cdecl Runtime_UpdateState_00e019f0(int* p);
 extern int DAT_010e96c8;
-void __cdecl FUN_00e01a30(int* p);
+void __cdecl Runtime_UpdateState_00e01a30(int* p);
 extern int DAT_010e977c;
-void __cdecl FUN_00e01b10(int* a);
+void __cdecl Runtime_UpdateState_00e01b10(int* a);
 extern int DAT_010e9b7c;
-void __cdecl FUN_00e01f50(int* p);
+void __cdecl Runtime_UpdateState_00e01f50(int* p);
 struct FUN_00e020e0_vt
 {
-    virtual int FUN_00e020e0(int);
+    virtual int Object_ForwardCall_00e020e0(int);
 };
-int __cdecl FUN_00e020e0(FUN_00e020e0_vt* c);
+int __cdecl Object_ForwardCall_00e020e0(FUN_00e020e0_vt* c);
 extern int DAT_010e9ccc;
-void __cdecl FUN_00e02140(int* pObject, int iValue);
-void __cdecl FUN_00e02260(int** p);
+void __cdecl Object_UpdateFields_00e02140(int* pObject, int iValue);
+void __cdecl Object_InvokeVirtualMethod_00e02260(int** p);
 typedef int(__thiscall* FUN_00e02340_fn)(void*, int);
-int __cdecl FUN_00e02340(void* obj);
+int __cdecl Object_GetIndexedValue_00e02340(void* obj);
 extern int DAT_010e9e74;
-void __cdecl FUN_00e02360(int* p);
+void __cdecl Object_UpdateFields_00e02360(int* p);
 extern int DAT_010e9f48;
-void FUN_00e023a0(int* p);
+void Object_UpdateFields_00e023a0(int* p);
 extern int DAT_010e9fa4;
-void FUN_00e02480(int* p);
+void Object_UpdateFields_00e02480(int* p);
 extern int DAT_010ea0a4;
-void __cdecl FUN_00e024c0(int* p);
+void __cdecl Object_UpdateFields_00e024c0(int* p);
 typedef int(__thiscall* VFunc0)(void*, int);
-int __cdecl FUN_00e024e0(void* p);
+int __cdecl Object_GetIndexedValue_00e024e0(void* p);
 extern int DAT_010e310c;
-void FUN_00e02500(int* a);
+void Object_UpdateFields_00e02500(int* a);
 extern int DAT_010ea10c;
-void __cdecl FUN_00e02540(int** p);
+void __cdecl Object_UpdateFields_00e02540(int** p);
 extern int DAT_010ea154;
-void __cdecl FUN_00e02580(int* a);
+void __cdecl Object_UpdateFields_00e02580(int* a);
 extern int DAT_010ea188;
-void FUN_00e02630(int* p);
+void Runtime_UpdateState_00e02630(int* p);
 struct FUN_00e026c0_vtbl
 {
     virtual int v0(int);
 };
-int __cdecl FUN_00e026c0(FUN_00e026c0_vtbl* p);
+int __cdecl Object_InvokeVirtualMethod_00e026c0(FUN_00e026c0_vtbl* p);
 extern int DAT_010ea1ac;
-void __cdecl FUN_00e026e0(int* p);
+void __cdecl Object_UpdateFields_00e026e0(int* p);
 struct FUN_00e02720_vtbl
 {
     virtual void m0(int);
 };
-void FUN_00e02720(FUN_00e02720_vtbl* p);
+void Object_InvokeVirtualMethod_00e02720(FUN_00e02720_vtbl* p);
 typedef void(__thiscall* vt)(void*, int);
-void __cdecl FUN_00e02760(void* p);
+void __cdecl Object_ProcessState_00e02760(void* p);
 struct FUN_00e0bf20_s
 {
     int a;
@@ -221,99 +221,99 @@ struct FUN_00e11dc0_class
     int m_24;
     int m_28;
     int m_2c;
-    void __thiscall FUN_00e11dc0();
+    void __thiscall hkgpMesh_copyPartIdToVerticesW();
 };
-int __cdecl FUN_00e00100(void* p);
-void FUN_00e00160(FUN_00e000a0_vt* p);
+int __cdecl Object_InvokeVirtualMethod_00e00100(void* p);
+void Object_InvokeVirtualMethod_00e00160(FUN_00e000a0_vt* p);
 struct FUN_00e001a0_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e001a0(FUN_00e001a0_vt* p);
+void __cdecl Object_InvokeVirtualMethod_00e001a0(FUN_00e001a0_vt* p);
 extern int DAT_010cc2fc;
 extern int DAT_010d79c4;
-void FUN_00e001c0(FUN_00cb0a70* obj, int aiValue);
-int* __cdecl FUN_00e00320();
+void Object_UpdateFields_00e001c0(FUN_00cb0a70* obj, int aiValue);
+int* __cdecl Object_GetGlobalObjectAddress_00e00320();
 struct FUN_00e00330_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e00330(FUN_00e00330_vt* p);
+void __cdecl Runtime_ForwardCall_00e00330(FUN_00e00330_vt* p);
 struct FUN_00e00370_vt
 {
     virtual void m0(int);
 };
-void __cdecl FUN_00e00370(FUN_00e00370_vt* p);
+void __cdecl Runtime_ForwardCall_00e00370(FUN_00e00370_vt* p);
 struct FUN_00e00430_vt
 {
     virtual void __thiscall m0(int);
 };
-void __cdecl FUN_00e00430(FUN_00e00430_vt* p);
+void __cdecl Runtime_ForwardCall_00e00430(FUN_00e00430_vt* p);
 extern int DAT_010c59f4;
 extern int DAT_010c6dc4;
-void __cdecl FUN_00e00450(void* apObject, int flag);
+void __cdecl Object_UpdateState_00e00450(void* apObject, int flag);
 typedef void(__thiscall* VFn)(void*, int);
-void __cdecl FUN_00e00550(void* p);
+void __cdecl Runtime_UpdateState_00e00550(void* p);
 struct FUN_00e005b0_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e005b0(FUN_00e005b0_vt* p);
+void __cdecl Runtime_ForwardCall_00e005b0(FUN_00e005b0_vt* p);
 struct FUN_00e00670_vt
 {
     virtual void m0(int);
 };
-void __cdecl FUN_00e00670(FUN_00e00670_vt* p);
+void __cdecl Runtime_ForwardCall_00e00670(FUN_00e00670_vt* p);
 struct FUN_00e00790_vt
 {
     virtual void __thiscall m(int);
 };
-void __cdecl FUN_00e00790(FUN_00e00790_vt* p);
+void __cdecl Runtime_ForwardCall_00e00790(FUN_00e00790_vt* p);
 struct FUN_00e007f0_vt
 {
     virtual void m0(int);
 };
-void __cdecl FUN_00e007f0(FUN_00e007f0_vt* p);
+void __cdecl Runtime_ForwardCall_00e007f0(FUN_00e007f0_vt* p);
 struct FUN_00e00a20_vt
 {
     virtual void m0(int);
 };
-void __cdecl FUN_00e00a20(FUN_00e00a20_vt* p);
-void __cdecl FUN_00e00ae0(FUN_00e00930_vt* p);
+void __cdecl Object_InvokeVirtualMethod_00e00a20(FUN_00e00a20_vt* p);
+void __cdecl Object_InvokeVirtualMethod_00e00ae0(FUN_00e00930_vt* p);
 struct FUN_00dcd380_cls
 {
     void __thiscall FUN_00dcd380(int b);
 };
 extern int DAT_010e8a90;
 extern int DAT_010e8ab0;
-void __cdecl FUN_00e00c90(void* pObject, int b);
+void __cdecl Object_UpdateState_00e00c90(void* pObject, int b);
 struct FUN_00e00cf0_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e00cf0(FUN_00e00cf0_vt* p);
+void __cdecl Runtime_ForwardCall_00e00cf0(FUN_00e00cf0_vt* p);
 struct FUN_00e00d90_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e00d90(FUN_00e00d90_vt* p);
+void __cdecl Runtime_ForwardCall_00e00d90(FUN_00e00d90_vt* p);
 struct FUN_00e00e70_vt
 {
-    virtual int FUN_00e00e70(int);
+    virtual int Runtime_ForwardCall_00e00e70(int);
 };
-int __cdecl FUN_00e00e70(FUN_00e00e70_vt* p);
-void __cdecl FUN_00e010c0(FUN_00e000a0_vt* p);
+int __cdecl Runtime_ForwardCall_00e00e70(FUN_00e00e70_vt* p);
+void __cdecl Object_InvokeVirtualMethod_00e010c0(FUN_00e000a0_vt* p);
 struct FUN_00e01380_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e01380(FUN_00e01380_vt* p);
+void __cdecl Object_InvokeVirtualMethod_00e01380(FUN_00e01380_vt* p);
 typedef void(__thiscall* Fn0)(void*, int);
-void __cdecl FUN_00e013f0(void* p);
+void __cdecl Runtime_UpdateState_00e013f0(void* p);
 typedef int(__thiscall* Vfn)(void*, int);
-int __cdecl FUN_00e01450(void* p);
+int __cdecl Runtime_EvaluateValue_00e01450(void* p);
 extern int DAT_0126e330;
-int* __cdecl FUN_00e01460();
+int* __cdecl Object_GetGlobalObjectAddress_00e01460();
 extern int DAT_010e929c;
 struct FUN_00e01470_s
 {
@@ -330,41 +330,41 @@ struct FUN_00e01470_s
     int m_28;
     FUN_00cb0a70* m_2c;
 };
-void __cdecl FUN_00e01470(FUN_00e01470_s* pObject, int iValue);
-void __cdecl FUN_00e01510(FUN_00cb0a70* p);
+void __cdecl Object_UpdateState_00e01470(FUN_00e01470_s* pObject, int iValue);
+void __cdecl Runtime_Helper_00e01510(FUN_00cb0a70* p);
 struct FUN_00e01550_vt
 {
     virtual void m0(int);
 };
-void __cdecl FUN_00e01550(FUN_00e01550_vt* p);
-void __cdecl FUN_00e018c0(int* p);
+void __cdecl Runtime_ForwardCall_00e01550(FUN_00e01550_vt* p);
+void __cdecl Object_ProcessAndTransformResult_00e018c0(int* p);
 typedef void(__thiscall* Fn)(void*, int);
-void __cdecl FUN_00e019d0(void* p);
+void __cdecl Runtime_UpdateState_00e019d0(void* p);
 struct FUN_00e01a10_vt
 {
     virtual void m0(int);
 };
-void __cdecl FUN_00e01a10(FUN_00e01a10_vt* p);
+void __cdecl Runtime_ForwardCall_00e01a10(FUN_00e01a10_vt* p);
 typedef void(__thiscall* Fn)(void*, int);
-void __cdecl FUN_00e01af0(void* p);
+void __cdecl Runtime_UpdateState_00e01af0(void* p);
 struct FUN_00e01c10_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e01c10(FUN_00e01c10_vt* p);
+void __cdecl Runtime_ForwardCall_00e01c10(FUN_00e01c10_vt* p);
 struct FUN_00e01cd0_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e01cd0(FUN_00e01cd0_vt* p);
+void __cdecl Runtime_ForwardCall_00e01cd0(FUN_00e01cd0_vt* p);
 extern int DAT_010e9a34;
-void FUN_00e01cf0(void* pObject, void* b);
+void finishLoadedObjecthkpSerializedAgentNnEntry_00e01cf0(void* pObject, void* b);
 struct FUN_00e01e40_vt
 {
     virtual void m0(int);
 };
-void __cdecl FUN_00e01e40(FUN_00e01e40_vt* p);
-void __cdecl FUN_00e01f30(int* p);
+void __cdecl Object_InvokeVirtualMethod_00e01e40(FUN_00e01e40_vt* p);
+void __cdecl Runtime_Helper_00e01f30(int* p);
 extern int DAT_010e9dec;
 struct FUN_00cb0a70_00e02280
 {
@@ -373,18 +373,18 @@ struct FUN_00cb0a70_00e02280
     int pad2;
     void __thiscall m(int);
 };
-void __cdecl FUN_00e02280(int* pObject, int iValue);
+void __cdecl Object_UpdateFields_00e02280(int* pObject, int iValue);
 typedef void(__thiscall* VFn)(void*, int);
-void __cdecl FUN_00e02380(void* p);
+void __cdecl Object_ProcessState_00e02380(void* p);
 typedef int(__thiscall* Vf0)(void*, int);
-int __cdecl FUN_00e024a0(void* p);
-int* __cdecl FUN_00e02510();
+int __cdecl Object_ComputeValue_00e024a0(void* p);
+int* __cdecl Runtime_GetDAT010e310cAddress();
 struct FUN_00e02560_vt
 {
     virtual int m(int);
 };
-int __cdecl FUN_00e02560(FUN_00e02560_vt* p);
-int __cdecl FUN_00e02610(FUN_00e026c0_vtbl* p);
+int __cdecl Object_InvokeVirtualMethod_00e02560(FUN_00e02560_vt* p);
+int __cdecl Runtime_ForwardCall_00e02610(FUN_00e026c0_vtbl* p);
 struct FUN_00e027b0_cls
 {
     int m_iWordAt00;
@@ -399,14 +399,14 @@ struct FUN_00e0bf30_s
     int a;
     int b;
     FUN_00cb0a70 c;
-    FUN_00e0bf30_s* __thiscall FUN_00e0bf30(int v);
+    FUN_00e0bf30_s* __thiscall hkMonitorStreamStringMap_StringMap_StringMap(int v);
 };
-void* __cdecl FUN_00e114a0();
+void* __cdecl GetConvexHull();
 struct FUN_00d752e0_cls
 {
-    void __thiscall FUN_00d752e0();
+    void __thiscall hkgpConvexHull_getVolume();
 };
-void __cdecl FUN_00e114b0();
+void __cdecl Runtime_ForwardCall_00e114b0();
 struct FUN_00e11d60_class
 {
     int m_iWordAt00;
@@ -422,9 +422,9 @@ struct FUN_00e11d60_class
     int m_28;
     int* m_2c;
     int m_30;
-    void __thiscall FUN_00e11d60(int val);
+    void __thiscall hkgpMesh_setPartId(int val);
 };
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 extern int DAT_0102e388;
 struct FUN_00e00000_cls
 {
@@ -443,43 +443,43 @@ struct FUN_00e00000_cls
     int m_iCount1;
     unsigned int m_uCapBits1;
 
-    void FUN_00e00000();
+    void ReleaseBothArrays();
 };
 extern int DAT_0126d9a0;
-int __cdecl FUN_00e000b0();
+int __cdecl Runtime_EvaluateValue_00e000b0();
 // Forward a value to the owner object when the owner pointer is present.
 struct FUN_00d50c00_cls
 {
     void __thiscall FUN_00d50c00(int value);
 };
-void __cdecl FUN_00e000c0(FUN_00d50c00_cls* pOwner, int value);
+void __cdecl Object_ProcessState_00e000c0(FUN_00d50c00_cls* pOwner, int value);
 struct CpuOpaque;
 extern CpuOpaque DAT_0126d9e8;
-CpuOpaque* __cdecl FUN_00e00110();
+CpuOpaque* __cdecl Runtime_GetDAT0126d9e8Address();
 extern int DAT_010c6cdc;
-int* FUN_00e00150();
+int* Runtime_GetDAT010c6cdcAddress();
 extern int DAT_0126da30;
-int* __cdecl FUN_00e00170();
+int* __cdecl Runtime_GetDAT0126da30Address();
 extern int DAT_010e81a4;
-void* __cdecl FUN_00e00190();
+void* __cdecl Runtime_GetDAT010e81a4Address();
 extern int DAT_0126da78;
-int* __cdecl FUN_00e001b0();
+int* __cdecl Runtime_GetDAT0126da78Address();
 struct FUN_00e00220_Class
 {
     virtual void VF00(int value);
 };
-void __cdecl FUN_00e00220(FUN_00e00220_Class* param_1);
+void __cdecl Object_InvokeVirtualMethod_00e00220(FUN_00e00220_Class* param_1);
 extern int g_unk0126dac0;
-void* __cdecl FUN_00e00230();
+void* __cdecl Runtime_GetUnk0126dac0Address();
 // FUN_00e002e0 : a one-line function - getter
 extern int g_target_00e002e0;
-void* FUN_00e002e0();
+void* Object_GetGlobalObjectAddress_00e002e0();
 extern int g_unk0126db50;
-void* __cdecl FUN_00e00340();
+void* __cdecl Object_GetGlobalObjectAddress_00e00340();
 extern int DAT_010e83b4;
-int* __cdecl FUN_00e00360();
+int* __cdecl Object_GetGlobalObjectAddress_00e00360();
 extern unsigned char DAT_0126db98;
-void* __cdecl FUN_00e00380();
+void* __cdecl Object_GetGlobalObjectAddress_00e00380();
 struct E00390FinishFlag
 {
     int m_bFinishing;
@@ -494,7 +494,7 @@ class E00390Object
         return p;
     }
 };
-void FUN_00e00390(void* apMemory, int aiFinishFlag);
+void Runtime_AllocateStorage_00e00390(void* apMemory, int aiFinishFlag);
 struct S_00e003d0_Arr
 {
     int* data;
@@ -602,32 +602,32 @@ struct FUN_00e003d0 : S_00e003d0_Base, S_00e003d0_Arrs
 void S_00e003d0_Base::unk00()
 {}
 extern int DAT_0126dbe0;
-int* __cdecl FUN_00e00440(void);
+int* __cdecl Object_GetGlobalObjectAddress_00e00440(void);
 extern int DAT_010c6dc4;
-void* FUN_00e00480();
+void* Object_GetGlobalObjectAddress_00e00480();
 struct S_00e00490_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e00490(S_00e00490_vt* p);
+void __cdecl Runtime_ForwardCall_00e00490(S_00e00490_vt* p);
 extern int DAT_0126dc28;
-int* __cdecl FUN_00e004a0();
+int* __cdecl Object_GetGlobalObjectAddress_00e004a0();
 struct FUN_00e004f0_class
 {
     void __thiscall FUN_00e004f0(int value);
 };
-void __cdecl FUN_00e004b0(FUN_00e004f0_class* object, int value);
+void __cdecl Runtime_ProcessState_00e004b0(FUN_00e004f0_class* object, int value);
 extern int DAT_0126dc70;
-int* __cdecl FUN_00e00560();
+int* __cdecl Object_GetGlobalObjectAddress_00e00560();
 extern int DAT_010c749c;
-int* FUN_00e005a0();
+int* Object_GetGlobalObjectAddress_00e005a0();
 extern int DAT_0126dcb8;
-void* __cdecl FUN_00e005c0();
+void* __cdecl Object_GetGlobalObjectAddress_00e005c0();
 struct Handler_cls
 {
     void __thiscall Handle(int value);
 };
-void __cdecl FUN_00e005d0(Handler_cls* pHandler, int value);
+void __cdecl Runtime_ProcessState_00e005d0(Handler_cls* pHandler, int value);
 struct S_00e00610_P
 {
     virtual void unk00();
@@ -673,7 +673,7 @@ struct FUN_00e00610 : S_00e00610_Mid
     FUN_00e00610(int flag);
 };
 extern int DAT_0126dd00;
-int* FUN_00e00680();
+int* Object_GetGlobalObjectAddress_00e00680();
 // FUN_00e00690: null-guarded forwarding of a second argument to a
 // member function of the first (object) argument.
 class FUN_00e00690_cls
@@ -681,7 +681,7 @@ class FUN_00e00690_cls
   public:
     void FUN_00e006d0(int a1);
 };
-void __cdecl FUN_00e00690(FUN_00e00690_cls* pObject, int aiValue);
+void __cdecl Object_ProcessState_00e00690(FUN_00e00690_cls* pObject, int aiValue);
 extern int DAT_010c6fd0;
 struct S_00e006d0_A
 {
@@ -715,19 +715,19 @@ struct FUN_00e006d0 : S_00e006d0_B
     FUN_00e006d0(int flag);
 };
 extern int DAT_0126dd48;
-int __cdecl FUN_00e00730();
+int __cdecl Runtime_EvaluateValue_00e00730();
 extern int DAT_010cc41c;
-int* __cdecl FUN_00e00780();
+int* __cdecl Object_GetGlobalObjectAddress_00e00780();
 struct CpuOpaque;
 extern CpuOpaque DAT_0126dd90;
-CpuOpaque* __cdecl FUN_00e007a0();
+CpuOpaque* __cdecl Object_GetGlobalObjectAddress_00e007a0();
 extern int DAT_010cb5ac;
-int* __cdecl FUN_00e007e0();
+int* __cdecl Object_GetGlobalObjectAddress_00e007e0();
 struct CpuOpaque;
 extern CpuOpaque DAT_0126ddd8;
-CpuOpaque* __cdecl FUN_00e00800();
+CpuOpaque* __cdecl Object_GetGlobalObjectAddress_00e00800();
 extern int DAT_010e8824;
-int* FUN_00e00820();
+int* Object_GetGlobalObjectAddress_00e00820();
 struct S_00e00830_Allocator
 {
     virtual void unk0();
@@ -743,7 +743,7 @@ struct S_00e00830_Router
     int unk8;
     int unkC;
     S_00e00830_Allocator* m_pStreamAllocator;
-    static S_00e00830_Router& FUN_00c85750();
+    static S_00e00830_Router& hkMemoryRouter_getInstance();
     S_00e00830_Allocator& heap()
     {
         return *m_pStreamAllocator;
@@ -752,10 +752,10 @@ struct S_00e00830_Router
 struct S_00e00830_Ref
 {
     void* m_ptr;
-    void FUN_00cb0c00() throw();
+    void Object_UpdateFields_00cb0c00() throw();
     ~S_00e00830_Ref() throw()
     {
-        FUN_00cb0c00();
+        Object_UpdateFields_00cb0c00();
     }
 };
 struct S_00e00830_Target
@@ -815,7 +815,7 @@ template <typename T> struct S_00e00830_Array
     }
     __forceinline ~S_00e00830_Array() throw()
     {
-        _clearAndDeallocate(S_00e00830_Router::FUN_00c85750().heap());
+        _clearAndDeallocate(S_00e00830_Router::hkMemoryRouter_getInstance().heap());
     }
 };
 struct S_00e00830_Base
@@ -835,37 +835,38 @@ struct FUN_00e00830 : S_00e00830_Base
 };
 // FUN_00e00940 : a one-line function - getter
 extern int g_target_00e00940;
-void* FUN_00e00940();
+void* Object_GetGlobalObjectAddress_00e00940();
 // Resets an object to the "script terminal" class layout: it installs the
 // secondary base vtable, the primary vtable and finally the derived vtable.
 extern int DAT_010e8894;
 extern int DAT_010e88b4;
 extern int DAT_010e88a4;
-void __cdecl FUN_00e00950(int* pObject);
+void __cdecl Object_UpdateState_00e00950(int* pObject);
 extern int DAT_010e88b4;
-int __cdecl FUN_00e00970();
+int __cdecl Runtime_EvaluateValue_00e00970();
 extern "C" struct FUN_00e009c0_vt
 {
     virtual void m0(int);
 };
 // @fnv 0x00e009c0
-extern "C" void __cdecl FUN_00e009c0(FUN_00e009c0_vt* p)
+// src: GUESS 0x00e009c0 (confidence: low)
+extern "C" void __cdecl Object_InvokeVirtualMethod_00e009c0(FUN_00e009c0_vt* p)
 {
     p->m0(0);
 }
 struct CpuOpaque;
 extern CpuOpaque DAT_0126de68;
-CpuOpaque* __cdecl FUN_00e009d0();
+CpuOpaque* __cdecl Runtime_GetDAT0126de68Address();
 extern int DAT_010d0e18;
-int* __cdecl FUN_00e00a10();
+int* __cdecl Runtime_GetDAT010d0e18Address();
 // FUN_00e00a30 : a one-line function - getter
 extern int g_target_00e00a30;
-void* FUN_00e00a30();
+void* Runtime_GetTarget00e00a30Address();
 struct FUN_00e00a40_cls
 {
     void __thiscall FUN_00e00a80(int a);
 };
-void __cdecl FUN_00e00a40(FUN_00e00a40_cls* pObject, int a);
+void __cdecl Object_ProcessState_00e00a40(FUN_00e00a40_cls* pObject, int a);
 class __declspec(novtable) BE00A80Base
 {
   public:
@@ -912,11 +913,11 @@ class FUN_00e00a80_cls : public BE00A80Base,
     int m_iEnabled;
 };
 extern char DAT_0126def8;
-char* __cdecl FUN_00e00af0(void);
+char* __cdecl Runtime_GetDAT0126def8Address(void);
 extern int DAT_010ce4bc;
-void* FUN_00e00b30();
+void* Runtime_GetDAT010ce4bcAddress();
 extern int g_unk0126df40;
-void* __cdecl FUN_00e00b50();
+void* __cdecl Runtime_GetUnk0126df40Address();
 inline void* operator new(unsigned int, void* pvWhere) throw()
 {
     return pvWhere;
@@ -966,52 +967,52 @@ class FUN_00e00ba0 : E00ba0_b0, E00ba0_b1, E00ba0_b2, E00ba0_b3, E00ba0_b4
 };
 struct CpuOpaque;
 extern CpuOpaque DAT_0126df88;
-CpuOpaque* __cdecl FUN_00e00c80();
+CpuOpaque* __cdecl Object_GetGlobalObjectAddress_00e00c80();
 extern int DAT_0126dfd0;
-int* __cdecl FUN_00e00d00();
+int* __cdecl Object_GetGlobalObjectAddress_00e00d00();
 // FUN_00e00d20: cdecl, returns the address of a global object.
 extern int DAT_010c63cc;
-int* __cdecl FUN_00e00d20();
+int* __cdecl Object_GetGlobalObjectAddress_00e00d20();
 extern int DAT_0126e018;
-int* __cdecl FUN_00e00d40();
+int* __cdecl Object_GetGlobalObjectAddress_00e00d40();
 struct FUN_00d57b20_class
 {
-    void __thiscall FUN_00d57b20(int value);
+    void __thiscall hkpCylinderShape_hkpCylinderShape_00d57b20(int value);
 };
-void __cdecl FUN_00e00d50(FUN_00d57b20_class* pObject, int value);
+void __cdecl hkpCylinderShape_hkpCylinderShape_00d57b20_ProcessState_00e00d50(FUN_00d57b20_class* pObject, int value);
 extern int DAT_0126e060;
-void* __cdecl FUN_00e00da0();
+void* __cdecl Object_GetGlobalObjectAddress_00e00da0();
 extern int DAT_010e8d8c;
-int* __cdecl FUN_00e00dc0();
+int* __cdecl Object_GetGlobalObjectAddress_00e00dc0();
 extern int DAT_0126e0a8;
-void* __cdecl FUN_00e00e80();
+void* __cdecl Object_GetGlobalObjectAddress_00e00e80();
 extern int DAT_010d0e5c;
-int* __cdecl FUN_00e00ed0();
+int* __cdecl Runtime_GetDAT010d0e5cAddress();
 struct S_00e00ee0_vt
 {
     virtual void m0(int a);
 };
-void __cdecl FUN_00e00ee0(S_00e00ee0_vt* p);
+void __cdecl Object_InvokeVirtualMethod_00e00ee0(S_00e00ee0_vt* p);
 extern int DAT_0126e0f0;
-void* __cdecl FUN_00e00ef0();
+void* __cdecl Runtime_GetDAT0126e0f0Address();
 extern int DAT_010d102c;
-void* FUN_00e00f40();
+void* Object_GetGlobalObjectAddress_00e00f40();
 // FUN_00e00f50: calls the first virtual (slot 0) of the object passed in the
 // first stack argument, with a single 0 argument.
 struct FUN_00e00f50_cls
 {
     virtual void m_fn(int aParam);
 };
-void __cdecl FUN_00e00f50(FUN_00e00f50_cls* pObj);
+void __cdecl Runtime_ForwardCall_00e00f50(FUN_00e00f50_cls* pObj);
 extern int DAT_0126e138;
-int* __cdecl FUN_00e00f60();
+int* __cdecl Object_GetGlobalObjectAddress_00e00f60();
 // FUN_00e00f70: forwards a value to a helper on the passed-in object
 // when that object is present.
 struct FUN_00e00f70_cls
 {
     void __thiscall FUN_00e00fb0(int value);
 };
-void __cdecl FUN_00e00f70(FUN_00e00f70_cls* pObject, int value);
+void __cdecl Object_ProcessState_00e00f70(FUN_00e00f70_cls* pObject, int value);
 extern int DAT_010305a8;
 extern int DAT_010c6fb0;
 extern int DAT_010cc364;
@@ -1035,9 +1036,9 @@ struct VirtualSlotObject
 {
     virtual void unk00(int arg);
 };
-void __cdecl FUN_00e01050(VirtualSlotObject* p);
+void __cdecl Runtime_ForwardCall_00e01050(VirtualSlotObject* p);
 extern int DAT_0126e180;
-int* __cdecl FUN_00e01060();
+int* __cdecl Object_GetGlobalObjectAddress_00e01060();
 extern int DAT_010c6fb0;
 extern int DAT_010d10c4;
 extern int DAT_010d10a4;
@@ -1052,13 +1053,13 @@ struct InitObject
 };
 void __cdecl InitObjectFields(volatile InitObject* pObject, int iFlag);
 extern int DAT_010d10c4;
-void* __cdecl FUN_00e010b0();
+void* __cdecl Runtime_GetDAT010d10c4Address();
 extern int DAT_0126e1c8;
-void* __cdecl FUN_00e010d0(void);
+void* __cdecl Runtime_GetDAT0126e1c8Address(void);
 extern int DAT_010e901c;
-void* __cdecl FUN_00e01130();
+void* __cdecl Runtime_GetDAT010e901cAddress();
 extern int DAT_0126e210;
-void* __cdecl FUN_00e01200();
+void* __cdecl Object_GetGlobalObjectAddress_00e01200();
 // FUN_00e01250: thiscall ctor (flag arg) storing secondary vtables at +8,+0xc,+0x10,+0x14
 // from inline base ctors, then the primary vtable at +0, then the secondary vtables again,
 // then an optional int at +0x20.
@@ -1095,58 +1096,58 @@ struct FUN_00e01320_cls
 {
     virtual void m_v00(int arg);
 };
-void __cdecl FUN_00e01320(FUN_00e01320_cls* pObject);
+void __cdecl Object_InvokeVirtualMethod_00e01320(FUN_00e01320_cls* pObject);
 extern int DAT_0126e258;
-int* __cdecl FUN_00e01330(void);
+int* __cdecl Runtime_GetDAT0126e258Address(void);
 extern int DAT_010ce25c;
-int* __cdecl FUN_00e01370();
+int* __cdecl Runtime_GetDAT010ce25cAddress();
 extern int DAT_0126e2a0;
-int __cdecl FUN_00e01390();
-void* __cdecl FUN_00e013e0();
+int __cdecl Runtime_EvaluateValue_00e01390();
+void* __cdecl Object_GetGlobalObjectAddress_00e013e0();
 extern int DAT_0126e2e8;
-int* __cdecl FUN_00e01400();
+int* __cdecl Object_GetGlobalObjectAddress_00e01400();
 extern int DAT_010c70b4;
-int* __cdecl FUN_00e01440();
+int* __cdecl Object_GetGlobalObjectAddress_00e01440();
 // FUN_00e01520 : a one-line function - getter
 extern int g_target_00e01520;
-void* FUN_00e01520();
+void* Object_GetGlobalObjectAddress_00e01520();
 extern int DAT_010e9300;
-int* FUN_00e01540();
+int* Object_GetGlobalObjectAddress_00e01540();
 extern int DAT_0126e3c0;
-void* __cdecl FUN_00e01560();
+void* __cdecl Object_GetGlobalObjectAddress_00e01560();
 extern int DAT_010e9358;
-int* __cdecl FUN_00e01580();
+int* __cdecl Object_GetGlobalObjectAddress_00e01580();
 struct FnvCpu_FUN_00e01590_CpuInterface
 {
     virtual void Invoke(int value);
 };
-void __cdecl FUN_00e01590(FnvCpu_FUN_00e01590_CpuInterface* object);
+void __cdecl Runtime_ForwardCall_00e01590(FnvCpu_FUN_00e01590_CpuInterface* object);
 extern int DAT_0126e408;
-int* __cdecl FUN_00e015a0();
+int* __cdecl Object_GetGlobalObjectAddress_00e015a0();
 extern int DAT_010e93ac;
-void* __cdecl FUN_00e015c0();
+void* __cdecl Object_GetGlobalObjectAddress_00e015c0();
 struct CpuOpaque;
 extern CpuOpaque DAT_0126e450;
-CpuOpaque* __cdecl FUN_00e01650();
+CpuOpaque* __cdecl Runtime_GetDAT0126e450Address();
 extern int DAT_010e943c;
-void* __cdecl FUN_00e01670();
+void* __cdecl Runtime_GetDAT010e943cAddress();
 struct CallerVtbl
 {
     virtual int v0(int);
 };
-int __cdecl FUN_00e01680(CallerVtbl* p);
+int __cdecl Object_InvokeVirtualMethod_00e01680(CallerVtbl* p);
 extern int DAT_0126e498;
-void* __cdecl FUN_00e01690();
+void* __cdecl Runtime_GetDAT0126e498Address();
 extern int DAT_010e9494;
-int* __cdecl FUN_00e016b0();
+int* __cdecl Runtime_GetDAT010e9494Address();
 // Stand-in for the object whose first virtual slot is invoked with the constant 0.
 struct FUN_00e016c0_cls
 {
     virtual void m0(int a);
 };
-void __cdecl FUN_00e016c0(FUN_00e016c0_cls* pObject);
+void __cdecl Object_InvokeVirtualMethod_00e016c0(FUN_00e016c0_cls* pObject);
 extern int DAT_0126e4e0;
-int __cdecl FUN_00e016d0();
+int __cdecl Runtime_EvaluateValue_00e016d0();
 struct EffectSubObject
 {
     int unk00;
@@ -1165,37 +1166,37 @@ struct EffectHolder
     EffectHolder()
     {}
 };
-void __cdecl FUN_00e016e0(EffectHolder* apHolder, int flags);
+void __cdecl Object_ProcessState_00e016e0(EffectHolder* apHolder, int flags);
 extern int DAT_0126e528;
-int* __cdecl FUN_00e017e0();
+int* __cdecl Object_GetGlobalObjectAddress_00e017e0();
 extern int DAT_0126e570;
-int* __cdecl FUN_00e018d0();
+int* __cdecl Runtime_GetDAT0126e570Address();
 extern int DAT_010e9614;
-void* __cdecl FUN_00e018f0();
+void* __cdecl Runtime_GetDAT010e9614Address();
 extern int DAT_0126e5b8;
-int __cdecl FUN_00e019e0();
+int __cdecl Object_ComputeValue_00e019e0();
 extern int DAT_010e350c;
-int* __cdecl FUN_00e01a00();
+int* __cdecl Object_GetGlobalObjectAddress_00e01a00();
 struct CpuOpaque;
 extern CpuOpaque DAT_0126e600;
-CpuOpaque* __cdecl FUN_00e01a20();
+CpuOpaque* __cdecl Object_GetGlobalObjectAddress_00e01a20();
 extern int DAT_010e96c8;
-void* __cdecl FUN_00e01a40();
+void* __cdecl Object_GetGlobalObjectAddress_00e01a40();
 extern int g_unk0126e648;
-void* __cdecl FUN_00e01b00();
+void* __cdecl Object_GetGlobalObjectAddress_00e01b00();
 extern int DAT_010e977c;
-int* FUN_00e01b20();
+int* Object_GetGlobalObjectAddress_00e01b20();
 extern int DAT_0126e690;
-void* __cdecl FUN_00e01c20();
+void* __cdecl Object_GetGlobalObjectAddress_00e01c20();
 extern int g_unkGlobal;
-void* FUN_00e01ce0();
+void* Object_GetGlobalObjectAddress_00e01ce0();
 struct FUN_00e01e00_vt
 {
     virtual void m(int);
 };
-void __cdecl FUN_00e01e00(FUN_00e01e00_vt* p);
+void __cdecl Object_InvokeVirtualMethod_00e01e00(FUN_00e01e00_vt* p);
 extern int DAT_0126e720;
-int* __cdecl FUN_00e01e10();
+int* __cdecl Runtime_GetDAT0126e720Address();
 // Null-guarded forwarder: the first argument is an object pointer; when it
 // is non-null the second argument is forwarded to a member function of that
 // object (called with the object as 'this').
@@ -1206,7 +1207,7 @@ class FUN_00e01e20_cls
 };
 void __cdecl CallHandleIfNotNull(FUN_00e01e20_cls* pObject, int aiValue);
 extern int DAT_0126e768;
-int* __cdecl FUN_00e01e70();
+int* __cdecl Runtime_GetDAT0126e768Address();
 extern int DAT_010e9acc;
 struct FUN_00e01e80_obj
 {
@@ -1218,89 +1219,89 @@ struct FUN_00e01e80_obj
     int unk14;
     int unk18;
 };
-void __cdecl FUN_00e01e80(FUN_00e01e80_obj* pObj, int aiValue);
+void __cdecl Object_UpdateFields_00e01e80(FUN_00e01e80_obj* pObj, int aiValue);
 extern int DAT_0126e7b0;
-int* __cdecl FUN_00e01f40();
+int* __cdecl Object_GetGlobalObjectAddress_00e01f40();
 extern int DAT_010e9b7c;
-unsigned int __cdecl FUN_00e01f60();
+unsigned int __cdecl Object_ComputeValue_00e01f60();
 struct FUN_00e4ae80_Obj
 {
     void __thiscall FUN_00e4ae80(int value);
 };
-void __cdecl FUN_00e020c0(FUN_00e4ae80_Obj* pObj, int iValue);
+void __cdecl Object_ProcessState_00e020c0(FUN_00e4ae80_Obj* pObj, int iValue);
 extern int g_unk0126e7f8;
-void* __cdecl FUN_00e02110();
+void* __cdecl Runtime_GetUnk0126e7f8Address();
 // FUN_00e02120: cdecl, takes a pointer, calls virtual slot 0 with argument 0.
 class FUN_00e02120_cls
 {
   public:
     virtual int v00(int arg);
 };
-void FUN_00e02120(FUN_00e02120_cls* obj);
+void Object_InvokeVirtualMethod_00e02120(FUN_00e02120_cls* obj);
 extern int g_unk0126e840;
-void* __cdecl FUN_00e02130();
+void* __cdecl Runtime_GetUnk0126e840Address();
 struct GlobalObject
 {
     int unk00;
 };
 extern GlobalObject g_global;
-GlobalObject* __cdecl FUN_00e02270();
+GlobalObject* __cdecl Runtime_GetGlobalAddress_00e02270();
 struct Data_0126e8d0;
 extern Data_0126e8d0 DAT_0126e8d0;
-Data_0126e8d0* __cdecl FUN_00e02350();
+Data_0126e8d0* __cdecl Runtime_GetDAT0126e8d0Address();
 extern int DAT_010e9e74;
-void* __cdecl FUN_00e02370();
+void* __cdecl Runtime_GetDAT010e9e74Address();
 extern int DAT_0126e918;
-int* __cdecl FUN_00e02390();
+int* __cdecl Runtime_GetDAT0126e918Address();
 extern int DAT_010e9f48;
-int* __cdecl FUN_00e023b0();
+int* __cdecl Runtime_GetDAT010e9f48Address();
 struct E02460Object
 {
     virtual void Destroy(bool bFree);
 };
-void FUN_00e02460(E02460Object* pkObject);
+void Object_Destroy_Thunk_00e02460(E02460Object* pkObject);
 extern int DAT_0126e960;
-int* __cdecl FUN_00e02470();
+int* __cdecl Runtime_GetDAT0126e960Address();
 extern int DAT_010e9fa4;
-void* __cdecl FUN_00e02490();
+void* __cdecl Runtime_GetDAT010e9fa4Address();
 // FUN_00e024b0 : a one-line function - getter
 extern int g_target_00e024b0;
-void* FUN_00e024b0();
+void* Runtime_GetTarget00e024b0Address();
 extern int DAT_010ea0a4;
-int __cdecl FUN_00e024d0();
+int __cdecl Runtime_EvaluateValue_00e024d0();
 extern int DAT_0126e9f0;
-int* __cdecl FUN_00e024f0();
+int* __cdecl Runtime_GetDAT0126e9f0Address();
 struct E02520Object
 {
     virtual void Destroy(bool bFree);
 };
-void FUN_00e02520(E02520Object* pkObject);
+void Object_Destroy_Thunk_00e02520(E02520Object* pkObject);
 extern int DAT_010ea10c;
-void* FUN_00e02550();
+void* Runtime_GetDAT010ea10cAddress();
 extern unsigned char DAT_0126ea80;
-void* __cdecl FUN_00e02570();
+void* __cdecl Runtime_GetDAT0126ea80Address();
 extern int DAT_010ea154;
-int __cdecl FUN_00e02590();
+int __cdecl Runtime_EvaluateValue_00e02590();
 extern int DAT_0126eac8;
-void* FUN_00e02620();
+void* Object_GetGlobalObjectAddress_00e02620();
 extern int DAT_010ea188;
-int __cdecl FUN_00e02640();
+int __cdecl Object_ComputeValue_00e02640();
 extern unsigned char DAT_0126eb10;
-unsigned char* __cdecl FUN_00e026d0();
+unsigned char* __cdecl Runtime_GetDAT0126eb10Address();
 extern int DAT_010ea1ac;
-int* FUN_00e026f0();
+int* Runtime_GetDAT010ea1acAddress();
 class E02700Object
 {
   public:
     void Process(void* pvData);
 };
-void __cdecl FUN_00e02700(E02700Object* pkObject, void* pvData);
+void __cdecl Object_ProcessState_00e02700(E02700Object* pkObject, void* pvData);
 extern int g_0126eb58;
-int* __cdecl FUN_00e02750();
+int* __cdecl Runtime_GetField0126eb58Address();
 extern int DAT_0126eba0;
-int* __cdecl FUN_00e02770();
+int* __cdecl Runtime_GetDAT0126eba0Address();
 extern int DAT_010c9314;
-void* __cdecl FUN_00e027a0();
+void* __cdecl Object_GetGlobalObjectAddress_00e027a0();
 int __cdecl ReadIntAtOffset(int index, int* data);
 void __cdecl UpdateStateFlags(void* pData);
 void __cdecl ReverseBytesInGroupsOfFour(unsigned char* p);
@@ -1315,7 +1316,7 @@ template <class T> inline void swap(T& a, T& b)
 }
 void __cdecl ReverseBytesInGroupsOfFour(unsigned char* p);
 void __cdecl SwapQuadBytes(unsigned char* pData);
-void __cdecl FUN_00e05eb0(unsigned char* pBuffer);
+void __cdecl hkpSaveContactPointsEndianUtil_swapEndianType(unsigned char* pBuffer);
 inline void E05F60Swap(char& a, char& b)
 {
     char t = a;
@@ -1338,9 +1339,9 @@ struct E05F60Header
     unsigned int m_value1;
 };
 void __cdecl SwapHeaderEndianness(E05F60Header* pkHeader);
-void __cdecl FUN_00e05fe0(unsigned char* pBuffer);
-void __cdecl FUN_00e06010(unsigned char* pucBuffer);
-int __cdecl FUN_00e09620();
+void __cdecl hkpSaveContactPointsEndianUtil_swapEndianType_00e05fe0(unsigned char* pBuffer);
+void __cdecl hkpSaveContactPointsEndianUtil_swapEndianType_00e06010(unsigned char* pucBuffer);
+int __cdecl Object_ComputeValue_00e09620();
 struct SearchItem
 {
     unsigned int unk00, unk04, unk08, unk0C;
@@ -1359,12 +1360,12 @@ struct SearchContainer
     SearchItem** m_items;
     int m_uiItemCount;
 };
-SearchItem* FUN_00e10820(SearchContainer* c, double key, int aiFieldIndex);
+SearchItem* findChildNode(SearchContainer* c, double key, int aiFieldIndex);
 struct FUN_00e10a00_cls
 {
     int m_00;
 
-    FUN_00e10a00_cls* FUN_00e10a00();
+    FUN_00e10a00_cls* return_input_and_0_it_1();
 };
 // FUN_00e114f0: thiscall, 3 unused stack params, sets a flag byte at +0x100.
 class FUN_00e114f0_cls
@@ -1435,7 +1436,7 @@ class FUN_00e114f0_cls
     int m_f8;
     int m_fc;
     unsigned char m_100;
-    void __thiscall FUN_00e114f0(int a1, int a2, int a3);
+    void __thiscall SetField100(int a1, int a2, int a3);
 };
 struct FlagObjectPad
 {
@@ -1508,11 +1509,11 @@ struct FlagObjectPad
 class FUN_00e11500_cls : public FlagObjectPad
 {
   public:
-    void FUN_00e11500(int a1, int a2);
+    void SetFlag100_00e11500(int a1, int a2);
 };
 struct FUN_00e11510_obj
 {
-    void __thiscall FUN_00e11510(int a, int b);
+    void __thiscall UpdateState_00e11510(int a, int b);
 };
 struct FUN_00e11520_class
 {
@@ -1581,7 +1582,7 @@ struct FUN_00e11520_class
     int unkf8;
     int unkfc;
     char flag100;
-    void FUN_00e11520(int a, int b);
+    void SetFlag100_00e11520(int a, int b);
 };
 class hkMemberE00
 {
@@ -3146,12 +3147,12 @@ struct Context
 };
 void SwapHeaderBytesAndAdvance(Input*);
 void SwapQuadBytes(Input*);
-void FUN_00e05eb0(Input*);
-int FUN_00dcd4d0(unsigned int);
+void hkpSaveContactPointsEndianUtil_swapEndianType(Input*);
+int hkpSaveContactPointsUtil_getSerializedAgentType(unsigned int);
 void SwapHkHeaderE05E(Payload*);
 void SwapHeaderEndianness(Payload*);
-void FUN_00e05fe0(Payload*);
-void FUN_00e06010(void*);
+void hkpSaveContactPointsEndianUtil_swapEndianType_00e05fe0(Payload*);
+void hkpSaveContactPointsEndianUtil_swapEndianType_00e06010(void*);
 void ProcessListBlocks(Context**, void*);
 void ProcessInput(Context** context, Input* input, void* argument, bool reverse, int* type, bool* changed);
 struct ListEntryE061
@@ -3210,12 +3211,12 @@ struct FUN_00e00dd0_cls
     int unk18;
     int unk1C;
 
-    void __thiscall FUN_00e00dd0();
+    void __thiscall UpdateState_00e00dd0();
 };
 void ReverseBytesInGroupsOfFour(unsigned char* pucData);
 struct S_e05_res
 {
-    char* __thiscall FUN_00d46d80(char* a, S_e05_res* b);
+    char* __thiscall hkClass_isSuperClass(char* a, S_e05_res* b);
 };
 struct S_e05_obj
 {
@@ -3225,7 +3226,7 @@ struct S_e05_obj
     virtual void v3();
     virtual S_e05_res* m4(int value);
 };
-static bool FUN_00e050c0(S_e05_obj* obj, int arg, int value);
+static bool Object_ProcessAndReturnValue_00e050c0(S_e05_obj* obj, int arg, int value);
 struct S_e05_g
 {
     S_e05_obj* volatile obj;
@@ -3296,7 +3297,7 @@ struct S00e0bf50_Acc
     unsigned short m_2c;
     unsigned short m_2e;
 };
-static void FUN_00e0bf50(S00e0bf50_Acc* dst, S00e0bf50_Acc* src);
+static void hkMakeSum(S00e0bf50_Acc* dst, S00e0bf50_Acc* src);
 void S00e0bf50_Call(S00e0bf50_Acc* dst, S00e0bf50_Acc* src);
 template <int SIZE> __forceinline void memCpyOneAlignedE030(void* dst, const void* src)
 {
@@ -3332,7 +3333,7 @@ class ParserE030
     const char* m_pcBegin;
     const char* m_pcEnd;
 
-    void FUN_00e03010(int iOffset, hkArray<RangeE030>& kOut);
+    void ReadOffsetStringRanges(int iOffset, hkArray<RangeE030>& kOut);
 };
 struct Slot00e04e10
 {
@@ -3344,9 +3345,9 @@ struct Slot00e04e10
 };
 struct Mgr00e04e10
 {
-    unsigned char* FUN_00d46d80(unsigned char* out, void* key);
+    unsigned char* hkClass_isSuperClass(unsigned char* out, void* key);
 };
-static bool __cdecl FUN_00e04e10(Slot00e04e10* obj, int a, int b);
+static bool __cdecl hkClass_isSuperClass_UpdateState_00e04e10(Slot00e04e10* obj, int a, int b);
 bool keep_alive_b11536(Slot00e04e10* obj, int a, int b);
 extern const char DAT_010cb2c0[];
 extern const char DAT_010eaa4c[];
@@ -3389,7 +3390,7 @@ extern const char DAT_010ea88c[];
 extern const char DAT_010ea878[];
 struct ColorRegistry
 {
-    void FUN_00e0d980(const char* name, unsigned int color);
+    void hkMonitorStreamColorTable_addColor(const char* name, unsigned int color);
     void RegisterDefaultColors();
 };
 struct FUN_00e004f0 : S_00e003d0_Base, S_00e003d0_Arrs
@@ -3411,18 +3412,19 @@ struct FUN_00e004f0 : S_00e003d0_Base, S_00e003d0_Arrs
 // sub ecx,8; jmp target  ==  MSVC adjustor thunk (second base of a multiple-inheritance override)
 struct SpawnedPrimaryBase
 {
-    virtual void FUN_00e00980();
+    virtual void AdjustThisAndForward_00e00980();
     int unk04;
 };
 struct SpawnedSecondaryBase
 {
-    virtual void FUN_00e00980();
+    virtual void AdjustThisAndForward_00e00980();
 };
 struct SpawnedDerived : SpawnedPrimaryBase, SpawnedSecondaryBase
 {
     SpawnedDerived();
 // @fnv 0x00e00980
-    virtual void FUN_00e00980();
+// src: GUESS 0x00e00980 (confidence: low)
+    virtual void AdjustThisAndForward_00e00980();
 };
 SpawnedDerived::SpawnedDerived()
 {}
@@ -3441,10 +3443,10 @@ struct VecList113
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10;
     VecNode113* head;
-    __m128* FUN_00e11570(__m128* __restrict out, const __m128* direction);
+    __m128* ProcessEntries_00e11570(__m128* __restrict out, const __m128* direction);
 };
-float __cdecl FUN_00e13870(int a, int b);
-int __stdcall FUN_00e16e20(int a, int b, float c);
+float __cdecl Hkgpmesh_ComputeValues_00e13870(int a, int b);
+int __stdcall Object_IsComputedValueBelowThreshold_00e16e20(int a, int b, float c);
 struct ExportPlacement;
 inline void* operator new(unsigned int, ExportPlacement* address)
 {
@@ -3459,13 +3461,13 @@ struct ExportHeap
 {
     int unk00, unk04, unk08, unk0c;
     void* heap;
-    static ExportHeap& __cdecl FUN_00c85750();
+    static ExportHeap& __cdecl hkMemoryRouter_getInstance();
 };
 struct ExportAlloc
 {
     __forceinline ExportHeap& get(void*) const
     {
-        return ExportHeap::FUN_00c85750();
+        return ExportHeap::hkMemoryRouter_getInstance();
     }
 };
 template <class T> __forceinline void createExportObjects(T* first, int count)
@@ -3504,7 +3506,7 @@ struct ExportSection
     int exportEnd;
     void ReadRecords(const void* base, ExportList<ExportRecord, ExportAlloc>& out) const;
 };
-void __cdecl FUN_00e0cce0();
+void __cdecl Object_DoNothing_00e0cce0();
 struct Allocator;
 struct PtrMap
 {
@@ -3516,22 +3518,22 @@ struct PtrMap
         unk00 = 0;
         unk04 = 0;
         unk08 = -1;
-        EnsureCapacity(FUN_00c85750()->GetAlloc(), 0);
+        EnsureCapacity(hkMemoryRouter_getInstance()->GetAlloc(), 0);
     }
     __forceinline void destroy()
     {
-        ProcessArgument(FUN_00c85750()->GetAlloc());
-        FUN_00a29680();
+        ProcessArgument(hkMemoryRouter_getInstance()->GetAlloc());
+        Object_DoNothing();
     }
     void EnsureCapacity(Allocator& allocator, int count);
-    void FUN_00cb1870(Allocator& allocator, unsigned int key, unsigned int value);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(Allocator& allocator, unsigned int key, unsigned int value);
     unsigned int LookupHashEntry(unsigned int key, unsigned int defaultValue);
-    void FUN_00cb1fb0(unsigned int key);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(unsigned int key);
     void ProcessArgument(Allocator& allocator);
-    void FUN_00a29680();
+    void Object_DoNothing();
     __forceinline void insert(unsigned int key, unsigned int value)
     {
-        FUN_00cb1870(FUN_00c85750()->GetAlloc(), key, value);
+        hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryRouter_getInstance()->GetAlloc(), key, value);
     }
     __forceinline unsigned int FindValueForKey(unsigned int key, unsigned int def)
     {
@@ -3539,7 +3541,7 @@ struct PtrMap
     }
     __forceinline void remove(unsigned int key)
     {
-        FUN_00cb1fb0(key);
+        hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(key);
     }
 };
 template <class T> struct ListItem
@@ -3660,7 +3662,7 @@ template <class T> struct PoolBlock
 };
 struct PoolBase
 {
-    void* FUN_00e23530();
+    void* AllocateChainedSlotBlock();
 };
 template <class T> struct PoolList : PoolBase
 {
@@ -3673,7 +3675,7 @@ template <class T> struct PoolList : PoolBase
 
     __forceinline void* allocateItem()
     {
-        PoolBlock<T>* block = (m_iBlockCount && m_kBlocks[0]->m_free) ? m_kBlocks[0] : (PoolBlock<T>*)FUN_00e23530();
+        PoolBlock<T>* block = (m_iBlockCount && m_kBlocks[0]->m_free) ? m_kBlocks[0] : (PoolBlock<T>*)AllocateChainedSlotBlock();
         T* element = block->m_free;
         block->m_free = *(T**)element;
         ++block->m_iAllocatedCount;
@@ -3698,7 +3700,7 @@ struct Mesh
     PoolList<Vertex> m_kVertices;
     PoolList<Triangle> m_uiTriangleCount;
     void ReleaseSubobject();
-    void FUN_00e192c0(Mesh* mesh);
+    void hkgpMesh_append(Mesh* mesh);
 };
 extern "C" void _ReadWriteBarrier();
 struct ScalarQ
@@ -3748,7 +3750,7 @@ struct MeshQ
     int unkd0, unkd4, unkd8, unkdc, unke0, unke4, unke8, unkec;
     int unkf0, unkf4, unkf8, unkfc, unk100;
     float squaredTolerance;
-    int FUN_00e11990(const hkVector4& plane, int index);
+    int ProcessEntries_00e11990(const hkVector4& plane, int index);
 };
 
 struct SortItem
@@ -3765,11 +3767,12 @@ struct SortedList
     int unk04;
     SortItem** ppItems;
 
-    void FUN_00e09670(SortItem* apItem);
+    void hkpMoppDefaultSplitter_hkpMoppMaxList_addElement(SortItem* apItem);
 };
 
 // @fnv 0x00e09670
-void SortedList::FUN_00e09670(SortItem* apItem)
+// src: HAVOK_LIB 0x00e09670
+void SortedList::hkpMoppDefaultSplitter_hkpMoppMaxList_addElement(SortItem* apItem)
 {
     float fPriority = apItem->fPriority;
     int i;

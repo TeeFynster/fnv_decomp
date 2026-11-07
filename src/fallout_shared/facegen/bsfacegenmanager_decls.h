@@ -1,7 +1,7 @@
 // fallout_shared/facegen/bsfacegenmanager_decls.h: supporting declarations for bsfacegenmanager_ob1_variant.cpp
 
 extern BSFaceGenManager* DAT_011d59e8;
-void FUN_006519f0();
+void BSFaceGenManager_InitializeSystem();
 extern "C" void* memset(void*, int, unsigned int);
 #include "../../../include/TESRace.h"
 #include "../../../include/ENUM_FORM_ID.h"

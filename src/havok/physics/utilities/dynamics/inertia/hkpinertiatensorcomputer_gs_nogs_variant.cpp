@@ -8,11 +8,11 @@
 struct Object
 {
 };
-void __cdecl FUN_00cebdf0(float* source, float value, Object* destination);
-void __cdecl FUN_00cebe50(float* source, float scale, Object* destination);
+void __cdecl Hkpinertiatensorcomputer_CopyAndScalePropertyBlock(float* source, float value, Object* destination);
+void __cdecl hkpInertiaTensorComputer_setAndScaleToDensity(float* source, float scale, Object* destination);
 struct Receiver
 {
-    void FUN_00cecc90(float value);
+    void SetScalarAndRescaleVector(float value);
 };
 struct State
 {
@@ -20,7 +20,7 @@ struct State
     int count;
     int context;
 };
-void FUN_00cebbb0(void* state, float zero, void* receiver);
+void hkpInertiaTensorComputer_computeConvexHullMassProperties(void* state, float zero, void* receiver);
 int __cdecl ApplyLimitToReceiver(int owner, int context, int count, float limit, Receiver* receiver, float value);
 struct FUN_00cebe80_Struct
 {
@@ -28,7 +28,7 @@ struct FUN_00cebe80_Struct
     float unk04;
     float unk08;
 };
-void __cdecl FUN_00cebe80(FUN_00cebe80_Struct* pThis, float fParam2, float* pOut);
+void __cdecl hkpInertiaTensorComputer_shiftInertiaToCom(FUN_00cebe80_Struct* pThis, float fParam2, float* pOut);
 void __cdecl AddInertiaTensor(float* param_1, float param_2, float* param_3);
 struct FUN_00cec6b0_cls
 {
@@ -68,7 +68,7 @@ struct FUN_00cec6b0_cls
     float m_84;
     float m_88;
 
-    void FUN_00cec6b0(float a1, float b, float* p, float* M);
+    void InternalInertiaTensorComputer_computeInertialTensorInternal(float a1, float b, float* p, float* M);
 };
 struct CECCD0Value
 {
@@ -119,7 +119,7 @@ static inline float S_MaxLT(float x, float y)
 {
     return (x < y) ? y : x;
 }
-void __cdecl FUN_00ced230(float d, S_00ced230_T* p);
+void __cdecl hkpInertiaTensorComputer_clipInertia(float d, S_00ced230_T* p);
 struct S_00cee1c0_Heap
 {
     virtual void v00();
@@ -143,8 +143,8 @@ struct S_00cee1c0_Arr
     unsigned int m_cap;
     unsigned int* m_pTrailingData;
 };
-S_00cee1c0_Router* FUN_00c85750();
-float __cdecl FUN_00cedec0(S_00cee1c0_Arr* arr, int unk, float value);
+S_00cee1c0_Router* hkMemoryRouter_getInstance();
+float __cdecl hkInertiaTensorComputer_optimizeInertiasOfConstraintTreeInt(S_00cee1c0_Arr* arr, int unk, float value);
 void __cdecl ProcessArrayWithValue(unsigned int* source, int count, int unk, float value);
 
 #include <xmmintrin.h>
@@ -190,10 +190,11 @@ struct Dest
 };
 
 // helper at 0x00cf0690 - writes a float through its third argument
-void __cdecl FUN_cf0690(void* a, float b, float* out);
+void __cdecl hkpInertiaTensorComputer_computeShapeVolumeMassProperties(void* a, float b, float* out);
 
 // @fnv 0x00cf07a0
-void FUN_00cf07a0(void* a, float b, Dest* c)
+// src: XBOX_PDB 0x00cf07a0
+void hkpInertiaTensorComputer_setShapeVolumeMassProperties(void* a, float b, Dest* c)
 {
     Src s;
     s.f0 = 0.0f;
@@ -202,7 +203,7 @@ void FUN_00cf07a0(void* a, float b, Dest* c)
     s.m20 = _mm_setzero_ps();
     s.m30 = _mm_setzero_ps();
     s.m40 = _mm_setzero_ps();
-    FUN_cf0690(a, b, &s.f0);
+    hkpInertiaTensorComputer_computeShapeVolumeMassProperties(a, b, &s.f0);
     c->f90 = s.f1;
     c->m80 = s.m10;
     c->m50 = s.m20;

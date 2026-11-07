@@ -27,8 +27,8 @@ class NiBound
     const NiBound& operator=(const NiBound& bound);
 
     bool operator==(const NiBound& bound) const;
-    bool FUN_00a926b0(const NiBound& bound);
-    bool __thiscall FUN_00a92660(const NiBound& bound);
+    bool IsDifferent(const NiBound& bound);
+    bool __thiscall Object_HasEqualFloatComponents(const NiBound& bound);
 
     void SetGridPosition(float x, float y, float z);
     void SetGridPosition(void* position);
@@ -46,7 +46,7 @@ class NiBound
     void ComputeFromPoints(int count, void* points);
     void ComputeFromPoints(int count, const NiPoint3* points);
     void ComputeBoundingSphere(unsigned int vertexCount, const NiPoint3* vertices);
-    void FUN_00a7f3f0(const NiBound* other);
+    void NiBound_Merge(const NiBound* other);
     void Update(void* data);
     void Update(void* data, void* transform);
     void Update(const NiBound& bound, const NiTransform& transform);
@@ -75,7 +75,7 @@ class NiBound
     void SaveBinary(NiStream& stream);
     char* FormatToBuffer(char* buffer);
     char* FormatToBuffer(const char* prefix);
-    char* FUN_00a7fb20(const char* prefix);
+    char* GetViewerString_00a7fb20(const char* prefix);
 };
 
 typedef char NiBound_size_check[(sizeof(NiBound) == 16) ? 1 : -1];

@@ -24,7 +24,7 @@ public:
     BSFile* GetFile(int archive, int flags);
     void GetLookupFileName(int archive, char* name);
     bool GetDescription(char* description, unsigned int bufferSize, char* prefix);
-    void FUN_00c3cee0(const char* name);
+    void SetFileName_00c3cee0(const char* name);
 
     char* pFileName;
     BSFileEntry* m_pFileEntry;

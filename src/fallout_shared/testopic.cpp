@@ -241,17 +241,19 @@ bool FUN_00616f40_shell::DispatchOnNextFormType(TESObject* obj, int a, int b, in
 
 struct FUN_00619010_shell : public TESTopic
 {
-    void FUN_00619010(char*);
+    void TESTopic_SetDumbDialogue(char*);
 };
 
 // @fnv 0x00619010
-void FUN_00619010_shell::FUN_00619010(char* apPrompt)
+// src: COMMUNITY 0x00619010
+void FUN_00619010_shell::TESTopic_SetDumbDialogue(char* apPrompt)
 {
     m_kDummyPrompt.Set(apPrompt, 0);
 }
 
 // @fnv 0x00619410
-bool __fastcall FUN_00619410(const char* pFlags)
+// src: COMMUNITY 0x00619410
+bool __fastcall TESTopicInfo_IsRandom(const char* pFlags)
 {
     return (bool)(pFlags[0x25] & 2);
 }
@@ -315,22 +317,24 @@ QuestDialogueInfo* FUN_006195d0_shell::GetOrCreateQuestInfo(TESQuest* apQuest, b
 
 struct FUN_00619a70_shell : public TESTopicInfo
 {
-    unsigned short FUN_00619a70();
+    unsigned short TESTopicInfo_GetInfoIndex();
 };
 
 // @fnv 0x00619a70
-unsigned short FUN_00619a70_shell::FUN_00619a70()
+// src: COMMUNITY 0x00619a70
+unsigned short FUN_00619a70_shell::TESTopicInfo_GetInfoIndex()
 {
     return *(unsigned short*)((char*)this + 0x20);
 }
 
 struct FUN_00619b20_shell : public TESTopicInfo
 {
-    bool FUN_00619b20();
+    bool TESTopicInfo_IsSayOnce();
 };
 
 // @fnv 0x00619b20
-bool FUN_00619b20_shell::FUN_00619b20()
+// src: XBOX_PDB 0x00619b20
+bool FUN_00619b20_shell::TESTopicInfo_IsSayOnce()
 {
     return (bool)(*reinterpret_cast<char*>(reinterpret_cast<char*>(this) + 0x25) & 4);
 }
@@ -383,11 +387,12 @@ TESQuest* FUN_00619d00_shell::FindQuestForTopicInfo(TESTopicInfo* apInfo)
 
 struct FUN_00619df0_shell : public TESTopic
 {
-    bool FUN_00619df0();
+    bool TESTopic_IsRemappedRumors();
 };
 
 // @fnv 0x00619df0
-bool FUN_00619df0_shell::FUN_00619df0()
+// src: XBOX_PDB 0x00619df0
+bool FUN_00619df0_shell::TESTopic_IsRemappedRumors()
 {
     return (*((char*)this + 0x25) & 1) ? true : false;
 }
@@ -459,7 +464,8 @@ struct TopicInfoStandin
 };
 // For each entry in apInfoArray up to its form ID, calls FUN_0061f340 on the entry with its index as a 16-bit value.
 // @fnv 0x00619fe0
-void FUN_00619fe0(TopicInfoArray* apInfoArray)
+// src: COMMUNITY 0x00619fe0
+void TopicInfoArray_SetTopicIndices(TopicInfoArray* apInfoArray)
 {
     if (apInfoArray)
     {
@@ -577,7 +583,7 @@ TESTopic* __cdecl FindTopicByInfo(TESTopicInfo* pTopicInfo)
 }
 }  // namespace fnv_0061a310
 
-bool __cdecl FUN_0061a450(TESTopic* pMenuTopicEntry, TESTopic* apTopic, bool abUsePriority);
+bool __cdecl TESTopic_CompareTopics(TESTopic* pMenuTopicEntry, TESTopic* apTopic, bool abUsePriority);
 bool __fastcall _ref_008256d0(void* p);
 BSSimpleList<TESTopic*>* __fastcall _ref_00726070(void* p);
 
@@ -603,7 +609,7 @@ void __cdecl AddTopicToList(TESTopic* apTopic, BSSimpleList<TESTopic*>* apTopicL
                 TESTopic* pMenuTopicEntry = *(TESTopic**)((TESTopicInfoData*)pCurrentElementNext)->GetLinkFromList();
                 if (pMenuTopicEntry == apTopic)
                     break;
-                if (FUN_0061a450(pMenuTopicEntry, apTopic, abUsePriority))
+                if (TESTopic_CompareTopics(pMenuTopicEntry, apTopic, abUsePriority))
                 {
                     ((BSSimpleList<char const*>*)pCurrentElementNext)->AddHead((char const*&)apTopic);
                     break;
@@ -620,13 +626,14 @@ void __cdecl AddTopicToList(TESTopic* apTopic, BSSimpleList<TESTopic*>* apTopicL
 }
 
 int __cdecl _stricmp(const char*, const char*);
-float __fastcall FUN_00526ae0(TESTopic*);
-bool __cdecl FUN_0040eb10(float, float, float);
+float __fastcall TESTopic_GetPriority_GetUnk28(TESTopic*);
+bool __cdecl FloatEQ(float, float, float);
 extern double DAT_01030f28;
 
 // Compares two TESTopic objects by priority (when abUsePriority) or by name, returning whether the first sorts before the second.
 // @fnv 0x0061a450
-bool __cdecl FUN_0061a450(TESTopic* apTopic1, TESTopic* apTopic2, bool abUsePriority)
+// src: COMMUNITY 0x0061a450
+bool __cdecl TESTopic_CompareTopics(TESTopic* apTopic1, TESTopic* apTopic2, bool abUsePriority)
 {
     if (apTopic1 != 0 && apTopic2 != 0)
     {
@@ -634,10 +641,10 @@ bool __cdecl FUN_0061a450(TESTopic* apTopic1, TESTopic* apTopic2, bool abUsePrio
         const char* topic2name = apTopic2->GetName();
         if (abUsePriority)
         {
-            float fPriorityDiff = FUN_00526ae0(apTopic2) - FUN_00526ae0(apTopic1);
+            float fPriorityDiff = TESTopic_GetPriority_GetUnk28(apTopic2) - TESTopic_GetPriority_GetUnk28(apTopic1);
             if (fPriorityDiff > DAT_01030f28)
                 return true;
-            else if (FUN_0040eb10(fPriorityDiff, 0.0f, 0.001f))
+            else if (FloatEQ(fPriorityDiff, 0.0f, 0.001f))
             {
                 if (*topic1name < *topic2name)
                     return true;
@@ -722,22 +729,23 @@ bool CheckTopicsForQuest(TESQuest* apQuest)
 
 struct FUN_0061bcd0_shell : public TESTopic
 {
-    void FUN_0061bcd0();
+    void TESTopic_InitializeData();
 };
 
 extern int DAT_01011584;
 
 struct FUN_00619010_helper
 {
-    void FUN_00619010(int* pData);
+    void TESTopic_SetDumbDialogue(int* pData);
 };
 
 // Clears the form's data via TESForm::ClearData, then passes DAT_01011584 to FUN_00619010 on this object.
 // @fnv 0x0061bcd0
-void FUN_0061bcd0_shell::FUN_0061bcd0()
+// src: COMMUNITY 0x0061bcd0
+void FUN_0061bcd0_shell::TESTopic_InitializeData()
 {
     TESForm::ClearData();
-    reinterpret_cast<FUN_00619010_helper*>(this)->FUN_00619010(&DAT_01011584);
+    reinterpret_cast<FUN_00619010_helper*>(this)->TESTopic_SetDumbDialogue(&DAT_01011584);
 }
 
 extern int DAT_0104d458;
@@ -745,7 +753,7 @@ extern int DAT_0104d458;
 struct Dummy_0061bf20
 {
     int* vtable;
-    void FUN_006b3f40(int, int);
+    void BSSimpleArray_NavMeshPOVSearchNode_1024_InitialSetup(int, int);
 };
 
 // Sets the object's vtable to DAT_0104d458, calls FUN_006b3f40(0, 0), and returns the object.
@@ -753,7 +761,7 @@ struct Dummy_0061bf20
 Dummy_0061bf20* __fastcall ConstructDummy(Dummy_0061bf20* apObject)
 {
     apObject->vtable = &DAT_0104d458;
-    apObject->FUN_006b3f40(0, 0);
+    apObject->BSSimpleArray_NavMeshPOVSearchNode_1024_InitialSetup(0, 0);
     return apObject;
 }
 
@@ -763,11 +771,12 @@ struct S2f850
 };
 struct NavShell2 : public S2f850
 {
-    unsigned int FUN_00469500(NavMeshPtr apNavMesh);
+    unsigned int NavMeshArray_AddNavMesh(NavMeshPtr apNavMesh);
 };
 // Calls AppendValue with apNavMesh and returns its result.
 // @fnv 0x00469500
-unsigned int NavShell2::FUN_00469500(NavMeshPtr apNavMesh)
+// src: COMMUNITY 0x00469500
+unsigned int NavShell2::NavMeshArray_AddNavMesh(NavMeshPtr apNavMesh)
 {
     unsigned int ireturn = AppendValue(apNavMesh);
     return ireturn;
@@ -777,10 +786,11 @@ struct TopicFlagStandIn
 {
     char pad[0x26];
     char flags;
-    bool FUN_0061aef0();
+    bool TESTopicInfo_IsSayOnceADay();
 };
 // @fnv 0x0061aef0
-bool TopicFlagStandIn::FUN_0061aef0()
+// src: XBOX_PDB 0x0061aef0
+bool TopicFlagStandIn::TESTopicInfo_IsSayOnceADay()
 {
     return (flags & 1) ? true : false;
 }
@@ -975,7 +985,7 @@ struct FUN_0061f280_shell
 };
 struct FUN_00619b20_shell
 {
-    bool FUN_00619b20();
+    bool TESTopicInfo_IsSayOnce();
 };
 struct FUN_00619a90_shell
 {
@@ -994,7 +1004,7 @@ void __thiscall FUN_00619a90_shell::ProcessTopicInfoList(unsigned int param)
         for (; i < count; ++i)
         {
             TESTopicInfo* info = reinterpret_cast<TopicInfoArray*>(list)->GetAt(i);
-            if (info && ((FUN_00619b20_shell*)info)->FUN_00619b20() && ((BSTempEffectDebris*)info)->IsNew())
+            if (info && ((FUN_00619b20_shell*)info)->TESTopicInfo_IsSayOnce() && ((BSTempEffectDebris*)info)->IsNew())
                 ((FUN_0061f280_shell*)info)->FUN_0061f280();
         }
     }
@@ -1008,11 +1018,12 @@ struct FUN_0061a760_shell
 };
 struct FUN_0061a720_shell : FUN_0061a760_shell
 {
-    TESTopicInfo* FUN_0061a720(MobileObject*, PlayerCharacter*);
+    TESTopicInfo* TESTopic_GetMatchingInfo(MobileObject*, PlayerCharacter*);
 };
 // Calls GetTopicInfo with speaker and listener; returns its TESTopicInfo unless the deferred flag was set, in which case returns null.
 // @fnv 0x0061a720
-TESTopicInfo* FUN_0061a720_shell::FUN_0061a720(MobileObject* speaker, PlayerCharacter* listener)
+// src: XBOX_PDB 0x0061a720
+TESTopicInfo* FUN_0061a720_shell::TESTopic_GetMatchingInfo(MobileObject* speaker, PlayerCharacter* listener)
 {
     bool deferred = false;
     TESTopicInfo* info;
@@ -1026,7 +1037,7 @@ TESTopicInfo* FUN_0061a720_shell::FUN_0061a720(MobileObject* speaker, PlayerChar
 
 struct FUN_0061b320_shell : public TESTopic
 {
-    DialogueItem* FUN_0061b320(TESObjectREFR*, TESObjectREFR*, TESTopic*, void*, bool);
+    DialogueItem* TESTopic_CreateDialogueItem(TESObjectREFR*, TESObjectREFR*, TESTopic*, void*, bool);
 };
 
 struct FUN_0083c520
@@ -1037,12 +1048,13 @@ struct FUN_0083c520
 struct TopicInfo_Ext
 {
     TESQuest* FUN_006733e0();
-    void FUN_0061f170(bool, TESObjectREFR*);
+    void TESTopicInfo_RunResult(bool, TESObjectREFR*);
     void FUN_0061f150();
 };
-bool __fastcall FUN_00579200(char const*);
+bool __fastcall TESTopicInfo_IsRunImmediately(char const*);
 // @fnv 0x0061b320
-DialogueItem* FUN_0061b320_shell::FUN_0061b320(TESObjectREFR* apSpeaker, TESObjectREFR* apTarget,
+// src: XBOX_PDB 0x0061b320
+DialogueItem* FUN_0061b320_shell::TESTopic_CreateDialogueItem(TESObjectREFR* apSpeaker, TESObjectREFR* apTarget,
                                                TESTopic* apPreviousTopic, void* apConversationList, bool abRunImmediate)
 {
     bool bIgnoreMe;
@@ -1053,9 +1065,9 @@ DialogueItem* FUN_0061b320_shell::FUN_0061b320(TESObjectREFR* apSpeaker, TESObje
         DialogueItem* pDialogueItem =
             (DialogueItem*)new FUN_0083c520(((TopicInfo_Ext*)info)->FUN_006733e0(), this, info, apSpeaker);
         if (abRunImmediate && pDialogueItem && pDialogueItem->GetInfo() &&
-            FUN_00579200((char const*)pDialogueItem->GetInfo()))
+            TESTopicInfo_IsRunImmediately((char const*)pDialogueItem->GetInfo()))
         {
-            ((TopicInfo_Ext*)pDialogueItem->GetInfo())->FUN_0061f170(false, apSpeaker);
+            ((TopicInfo_Ext*)pDialogueItem->GetInfo())->TESTopicInfo_RunResult(false, apSpeaker);
             ((TopicInfo_Ext*)pDialogueItem->GetInfo())->FUN_0061f150();
         }
         return pDialogueItem;
@@ -1117,18 +1129,19 @@ struct FUN_006195d0_shell : public TESTopic
 };
 struct FUN_00619010_shell : public TESTopic
 {
-    void FUN_00619010(char*);
+    void TESTopic_SetDumbDialogue(char*);
 };
 
 extern TESTopic* g_loadingTopic;
 
 struct FUN_00618aa0_t : public TESTopic
 {
-    bool FUN_00618aa0(::TESFile* pFile);
+    bool TESTopic_Load(::TESFile* pFile);
 };
 
 // @fnv 0x00618aa0
-bool FUN_00618aa0_t::FUN_00618aa0(::TESFile* pFile)
+// src: COMMUNITY 0x00618aa0
+bool FUN_00618aa0_t::TESTopic_Load(::TESFile* pFile)
 {
     unsigned char formid = (unsigned char)((TESFileRef*)pFile)->_ref_00472660();
     QuestDialogueInfo* pLastQuestInfo = 0;
@@ -1224,7 +1237,7 @@ bool FUN_00618aa0_t::FUN_00618aa0(::TESFile* pFile)
         case 0x4d554454: {
             char szBuffer[256];
             ((TESFileRef*)pFile)->_ref_00472890(szBuffer, 0x100);
-            ((FUN_00619010_shell*)this)->FUN_00619010(szBuffer);
+            ((FUN_00619010_shell*)this)->TESTopic_SetDumbDialogue(szBuffer);
             break;
         }
         case 0x41544144:
@@ -1266,10 +1279,11 @@ struct FUN_00484020_shell
 int __fastcall FNV_GetFormType(TESForm*);
 struct FUN_00619430_shell : TESTopic
 {
-    bool FUN_00619430(TESForm* apForm);
+    bool TESTopic_SavesBefore(TESForm* apForm);
 };
 // @fnv 0x00619430
-bool FUN_00619430_shell::FUN_00619430(TESForm* apForm)
+// src: XBOX_PDB 0x00619430
+bool FUN_00619430_shell::TESTopic_SavesBefore(TESForm* apForm)
 {
     bool bResult = false;
     switch (::FNV_GetFormType(apForm))
@@ -1342,7 +1356,7 @@ struct FUN_004612e0_shell
 bool __fastcall _ref_008256d0(void*);
 struct TopicSort_0061a5a0
 {
-    static bool __cdecl FUN_0061a450(TESTopic*, TESTopic*, bool);
+    static bool __cdecl TESTopic_CompareTopics(TESTopic*, TESTopic*, bool);
     static void __cdecl AddTopicToList(TESTopic*, BSSimpleList<TESTopic*>*, bool);
 };
 
@@ -1365,11 +1379,11 @@ void SortTopicList(bool abSortByPriority, BSSimpleList<TESTopic*>* apTopicList)
             TESTopic* ptopic2 =
                 (*(TESTopic**)((TESTopicInfoData*)(((BSSimpleList<TESTopic*>*)((GridArray*)(pCurrentElementNext))->GetCenterX())))
                       ->GetLinkFromList());
-            if (TopicSort_0061a5a0::FUN_0061a450(ptopic1, ptopic2, abSortByPriority))
+            if (TopicSort_0061a5a0::TESTopic_CompareTopics(ptopic1, ptopic2, abSortByPriority))
             {
                 if (plastlist)
                 {
-                    ((SL*)plastlist)->FUN_00905330((Actor* const&)ptopic1);
+                    ((SL*)plastlist)->RemoveMatchingItem((Actor* const&)ptopic1);
                     pCurrentElementNext = ((BSSimpleList<TESTopic*>*)((GridArray*)(plastlist))->GetCenterX());
                 }
                 else
@@ -1466,11 +1480,12 @@ struct FUN_006189a0_cls
     virtual void v08();
     virtual void v09();
     virtual void Forward(int a);
-    void FUN_006189a0(int a);
+    void TESTopic_SaveEdit(int a);
 };
 
 // @fnv 0x006189a0
-void FUN_006189a0_cls::FUN_006189a0(int a)
+// src: XBOX_PDB 0x006189a0
+void FUN_006189a0_cls::TESTopic_SaveEdit(int a)
 {
     Forward(a);
 }
@@ -1483,10 +1498,10 @@ class FUN_00935a40_cls
     int unk08;
     FUN_00935a40_cls* m_pFirstNode;
 
-    bool FUN_00574900();
+    bool MobileObject_IsTalkingActivator();
     FUN_00935a40_cls* FUN_005e3fa0();
-    FUN_00935a40_cls* FUN_005d43c0();
-    FUN_00935a40_cls* FUN_0042efe0();
+    FUN_00935a40_cls* BSFile_GetDevice();
+    FUN_00935a40_cls* ExtraDataList_GetExtraSayTopicInfoOnceADayExtra();
     FUN_00935a40_cls* FUN_00726070();
     FUN_00935a40_cls** FUN_006815c0();
 
@@ -1498,13 +1513,13 @@ class FUN_00935a40_cls
 bool FUN_00935a40_cls::HasEntryWithKey(int key)
 {
     FUN_00935a40_cls* res = 0;
-    if (this->FUN_00574900())
+    if (this->MobileObject_IsTalkingActivator())
     {
-        res = this->FUN_005e3fa0()->FUN_005d43c0()->FUN_0042efe0();
+        res = this->FUN_005e3fa0()->BSFile_GetDevice()->ExtraDataList_GetExtraSayTopicInfoOnceADayExtra();
     }
     else
     {
-        res = this->FUN_005d43c0()->FUN_0042efe0();
+        res = this->BSFile_GetDevice()->ExtraDataList_GetExtraSayTopicInfoOnceADayExtra();
     }
     if (res != 0)
     {
@@ -1525,7 +1540,7 @@ bool FUN_00935a40_cls::HasEntryWithKey(int key)
 namespace fnv_00619030 {
 extern PlayerCharacter* g_thePlayer;
 
-extern TESForm* FUN_004839c0(unsigned int formID);
+extern TESForm* TESForm_GetFormByNumericID(unsigned int formID);
 extern void ResolveFormID(unsigned int* formID, TESFile* file);
 extern void FNV_Warning(const char* fmt, ...);
 
@@ -1572,7 +1587,7 @@ void TESTopic_Shell::InitializeTopic()
                 for (int i = 0; i < count; i++)
                 {
                     unsigned int formID = questInfo->m_kInfoLinks.GetAt(i).nID;
-                    TESTopicInfo* pTopicInfo = dynamic_cast<TESTopicInfo*>(FUN_004839c0(formID));
+                    TESTopicInfo* pTopicInfo = dynamic_cast<TESTopicInfo*>(TESForm_GetFormByNumericID(formID));
                     questInfo->m_kInfoLinks.GetAt(i).pInfo = pTopicInfo;
                     if (pTopicInfo)
                     {
@@ -1596,7 +1611,7 @@ void TESTopic_Shell::InitializeTopic()
                     else
                     {
                         unsigned int uiChunkType = (unsigned int)questInfo->pQuest;
-                        TESQuest* quest = dynamic_cast<TESQuest*>(FUN_004839c0(uiChunkType));
+                        TESQuest* quest = dynamic_cast<TESQuest*>(TESForm_GetFormByNumericID(uiChunkType));
                         ((BSSimpleArray_Helper*)&questInfo->m_kInfoLinks)->RemoveAt(i, true);
                         count--;
                         i--;
@@ -1606,13 +1621,13 @@ void TESTopic_Shell::InitializeTopic()
                 if (questInfo->pQuest)
                 {
                     unsigned int uiChunkType = (unsigned int)questInfo->pQuest;
-                    questInfo->pQuest = dynamic_cast<TESQuest*>(FUN_004839c0(uiChunkType));
+                    questInfo->pQuest = dynamic_cast<TESQuest*>(TESForm_GetFormByNumericID(uiChunkType));
                 }
                 else if (questInfo->m_pAlternateQuest)
                 {
                     unsigned int formID = (unsigned int)questInfo->m_pAlternateQuest;
                     ResolveFormID(&formID, GetFile(-1));
-                    questInfo->m_pAlternateQuest = dynamic_cast<TESQuest*>(FUN_004839c0(formID));
+                    questInfo->m_pAlternateQuest = dynamic_cast<TESQuest*>(TESForm_GetFormByNumericID(formID));
                 }
                 else
                 {
@@ -1684,7 +1699,7 @@ class TopicMethods : public TESTopic
 extern TESTopic* g_loadingTopic;
 void FNV_Warning(const char* format, ...);
 TESTopicInfo* GetTopicInfoByIndex(QuestDialogueInfo* questInfo, int index);
-void FUN_00619fe0(TopicInfoArray* array);
+void TopicInfoArray_SetTopicIndices(TopicInfoArray* array);
 
 // @fnv 0x00619820
 bool TopicMethods::AddTopicInfo(TESQuest* quest, TESTopicInfo* info, unsigned int previousInfoID)
@@ -1756,7 +1771,7 @@ bool TopicMethods::AddTopicInfo(TESQuest* quest, TESTopicInfo* info, unsigned in
         questInfo->GetInfoArray()->InsertInfoAt(0, info);
     }
     questInfo->GetInfoArray()->Compact();
-    FUN_00619fe0(questInfo->GetInfoArray());
+    TopicInfoArray_SetTopicIndices(questInfo->GetInfoArray());
     return true;
 }
 
@@ -1770,7 +1785,8 @@ extern SettingFloat DAT_011d14d0;
 
 // Returns the negated DAT_011cff1c value minus DAT_011d14d0 multiplied by (1.0f minus iValue / 100.0f).
 // @fnv 0x00648f60
-float FUN_00648f60(int iValue)
+// src: XBOX_PDB 0x00648f60
+float GamePlayFormulas_GetSpeechFailPenalty(int iValue)
 {
     return -*DAT_011cff1c.Float() - *DAT_011d14d0.Float() * (1.0f - iValue / 100.0f);
 }
@@ -1809,23 +1825,23 @@ struct ConversationDataView
 };
 struct InfoView
 {
-    bool FUN_00579200();
-    void FUN_0061f170(bool, TESObjectREFR*);
+    bool TESTopicInfo_IsRunImmediately();
+    void TESTopicInfo_RunResult(bool, TESObjectREFR*);
     void FUN_0061f150();
     ConversationDataView* GetField38();
     int GetSignedByteAtOffset36();
 };
 struct ItemView
 {
-    InfoView* FUN_0084e3a0();
+    InfoView* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     bool FUN_0083c7b0();
     ItemView* FUN_0083c820();
     BSStringT<char>* FUN_006815c0();
-    TESForm* FUN_009611e0();
+    TESForm* NiAVObject_GetParent();
 };
 struct DataHandlerView
 {
-    FUN_0061b320_shell* FUN_00461690(int);
+    FUN_0061b320_shell* TESDataHandler_GetTopic(int);
 };
 struct AIView
 {
@@ -1869,7 +1885,7 @@ struct ActorBaseView : TESForm
 };
 extern unsigned char DAT_011cbeac;
 void __cdecl DebugLog(const char*, ...);
-void __cdecl FUN_00403d30(void*, int, unsigned int);
+void __cdecl ourMemset(void*, int, unsigned int);
 // Adds dialogue items to history by selecting topics for speaker and listener, with random selection among available topic links.
 // @fnv 0x0061b440
 unsigned int __cdecl GenerateConversation(TESObjectREFR* speaker, TESObjectREFR* listener, DialogueList* history,
@@ -1896,43 +1912,43 @@ unsigned int __cdecl GenerateConversation(TESObjectREFR* speaker, TESObjectREFR*
         return 0;
     nextItem = initialTopic;
     if (!nextItem)
-        nextItem = ((DataHandlerView*)g_dataHandler)->FUN_00461690(210);
+        nextItem = ((DataHandlerView*)g_dataHandler)->TESDataHandler_GetTopic(210);
     DialogueItem* base = 0;
     int exhausted = -1;
     srand((unsigned int)GetTime64(0));
     while (nextItem && history->FUN_005ae380() < 100)
     {
         TopicList* topics;
-        base = nextItem->FUN_0061b320(previous, currentSpeaker, currentListener, history, false);
+        base = nextItem->TESTopic_CreateDialogueItem(previous, currentSpeaker, currentListener, history, false);
         if (!base)
         {
             if (!initialTopic || ((InfoView*)initialTopic)->GetSignedByteAtOffset36() == 1)
             {
-                nextItem = ((DataHandlerView*)g_dataHandler)->FUN_00461690(212);
-                base = nextItem->FUN_0061b320(previous, currentSpeaker, currentListener, history, false);
+                nextItem = ((DataHandlerView*)g_dataHandler)->TESDataHandler_GetTopic(212);
+                base = nextItem->TESTopic_CreateDialogueItem(previous, currentSpeaker, currentListener, history, false);
             }
             if (!base)
                 break;
         }
-        if (base && ((ItemView*)base)->FUN_0084e3a0() && ((ItemView*)base)->FUN_0084e3a0()->FUN_00579200())
+        if (base && ((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0() && ((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->TESTopicInfo_IsRunImmediately())
         {
-            ((ItemView*)base)->FUN_0084e3a0()->FUN_0061f170(false, speaker);
-            ((ItemView*)base)->FUN_0084e3a0()->FUN_0061f170(true, speaker);
-            ((ItemView*)base)->FUN_0084e3a0()->FUN_0061f150();
+            ((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->TESTopicInfo_RunResult(false, speaker);
+            ((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->TESTopicInfo_RunResult(true, speaker);
+            ((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->FUN_0061f150();
         }
         history->AddTail(base);
         currentListener = (TESTopic*)nextItem;
         nextItem = 0;
         choice = 0;
         item = false;
-        FUN_00403d30(used, 0, 2000);
+        ourMemset(used, 0, 2000);
         exhausted = -1;
         while (!choice && !item)
         {
             int count;
-            if (((ItemView*)base)->FUN_0084e3a0() && ((ItemView*)base)->FUN_0084e3a0()->GetField38())
+            if (((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0() && ((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->GetField38())
             {
-                topics = ((ItemView*)base)->FUN_0084e3a0()->GetField38()->FUN_00413f40();
+                topics = ((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->GetField38()->FUN_00413f40();
                 count = topics->FUN_005ae380();
                 if (count)
                 {
@@ -1951,7 +1967,7 @@ unsigned int __cdecl GenerateConversation(TESObjectREFR* speaker, TESObjectREFR*
                     topics = topics->FUN_00726070();
                     n++;
                 }
-                switch (((ItemView*)base)->FUN_0084e3a0()->GetSignedByteAtOffset36())
+                switch (((ItemView*)base)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->GetSignedByteAtOffset36())
                 {
                 case 2:
                     if (rand() % 2 != 0)
@@ -1967,7 +1983,7 @@ unsigned int __cdecl GenerateConversation(TESObjectREFR* speaker, TESObjectREFR*
                 for (unsigned int i = 0; i < (unsigned int)count && item; i++)
                     if (!used[i])
                         item = false;
-                choice = nextItem->FUN_0061b320(previous, currentSpeaker, currentListener, history, false);
+                choice = nextItem->TESTopic_CreateDialogueItem(previous, currentSpeaker, currentListener, history, false);
             }
             else
                 item = true;
@@ -1987,12 +2003,12 @@ unsigned int __cdecl GenerateConversation(TESObjectREFR* speaker, TESObjectREFR*
                 {
                     if (entry->FUN_0083c7b0())
                     {
-                        DebugLog("Item %d: %s says '%s'", index, entry->FUN_009611e0()->GetName(),
+                        DebugLog("Item %d: %s says '%s'", index, entry->NiAVObject_GetParent()->GetName(),
                                  entry->FUN_0083c820()->FUN_006815c0()->String());
                     }
                     else
                     {
-                        DebugLog("Item %d: %s has no response!", index, entry->FUN_009611e0()->GetName());
+                        DebugLog("Item %d: %s has no response!", index, entry->NiAVObject_GetParent()->GetName());
                     }
                 }
                 index++;

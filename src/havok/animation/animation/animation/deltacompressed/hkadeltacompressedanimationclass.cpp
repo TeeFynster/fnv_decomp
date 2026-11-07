@@ -6,7 +6,7 @@
 #include "../../../../../../include/hkMemoryRouter.h"
 
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00dfbb80_cls
 {
@@ -52,7 +52,7 @@ struct FUN_00dfbb80_cls
 // @fnv 0x00dfbb80
 FUN_00dfbb80_cls* FUN_00dfbb80_cls::ReleaseBuffer(unsigned char acFlags)
 {
-    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryRouter* pAudioHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     unsigned int uiCap = m_iCap;
     m_iArrayLength = 0;
@@ -65,7 +65,7 @@ FUN_00dfbb80_cls* FUN_00dfbb80_cls::ReleaseBuffer(unsigned char acFlags)
     BaseRelease();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder2 = FUN_00c85750();
+        hkMemoryRouter* pHolder2 = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
         pAllocator2->blockFree(this, m_uSize);
     }

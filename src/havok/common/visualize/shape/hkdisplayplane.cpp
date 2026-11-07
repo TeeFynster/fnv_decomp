@@ -71,10 +71,11 @@ struct Cls_00de4e20
     Vec4 m_p;
     Vec4 m_kPointB;
     Vec4 m_q;
-    void __thiscall FUN_00de4e20(Vec4* out);
+    void __thiscall hkDisplayPlane_createPlanePoints(Vec4* out);
 };
 // @fnv 0x00de4e20
-void __thiscall Cls_00de4e20::FUN_00de4e20(Vec4* out)
+// src: XBOX_PDB 0x00de4e20
+void __thiscall Cls_00de4e20::hkDisplayPlane_createPlanePoints(Vec4* out)
 {
     Vec4 cross;
     cross.setCross(m_kPointA, m_kPointB);
@@ -153,16 +154,17 @@ __declspec(align(16)) struct VecTemp4
     unsigned int m_30, m_34, m_38, m_3c;
 };
 
-extern "C" void __cdecl FUN_00c908c0(unsigned int a1, VecBuf* v, int cap, int elem);
+extern "C" void __cdecl hkArrayUtil__reserve(unsigned int a1, VecBuf* v, int cap, int elem);
 
 struct FUN_00de5050_cls
 {
     void Fill(VecTemp4* out);
-    void FUN_00de5050(VecBuf* s, unsigned int a2);
+    void hkDisplayPlane_getWireframeGeometry(VecBuf* s, unsigned int a2);
 };
 
 // @fnv 0x00de5050
-void FUN_00de5050_cls::FUN_00de5050(VecBuf* s, unsigned int a2)
+// src: HAVOK_SRC 0x00de5050
+void FUN_00de5050_cls::hkDisplayPlane_getWireframeGeometry(VecBuf* s, unsigned int a2)
 {
     int n = (int)(s->m_iElementCount & 0x3fffffff);
     if (n < 12)
@@ -172,7 +174,7 @@ void FUN_00de5050_cls::FUN_00de5050(VecBuf* s, unsigned int a2)
         {
             cap = 12;
         }
-        FUN_00c908c0(a2, s, cap, 0x10);
+        hkArrayUtil__reserve(a2, s, cap, 0x10);
     }
     VecTemp4 tmp;
     s->m_uiItemCount = 12;
@@ -215,8 +217,8 @@ struct S_00de5110_Router
     }
 };
 
-S_00de5110_Router& FUN_00c85750() throw();
-void FUN_00c908c0(S_00de5110_Heap& alloc, void* array, int numElements, int sizeElem) throw();
+S_00de5110_Router& hkMemoryRouter_getInstance() throw();
+void hkArrayUtil__reserve(S_00de5110_Heap& alloc, void* array, int numElements, int sizeElem) throw();
 
 template <typename T> struct S_00de5110_ArrayLocalForm
 { // local form of hkArray: 0x00de5110 needs the original inline/out-of-line helper split; shared replacement changes bytes.
@@ -247,7 +249,7 @@ template <typename T> struct S_00de5110_ArrayLocalForm
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(a, this, newSize, sizeof(T));
+            hkArrayUtil__reserve(a, this, newSize, sizeof(T));
         }
     }
     __forceinline void _setSize(S_00de5110_Heap& a, int n) throw()
@@ -264,11 +266,11 @@ template <typename T> struct S_00de5110_ArrayLocalForm
     }
     __forceinline void SetSizeAndGrow(int n) throw()
     {
-        _setSize(FUN_00c85750().heap(), n);
+        _setSize(hkMemoryRouter_getInstance().heap(), n);
     }
     __forceinline T* expandBy(int n) throw()
     {
-        return _expandBy(FUN_00c85750().heap(), n);
+        return _expandBy(hkMemoryRouter_getInstance().heap(), n);
     }
 };
 
@@ -296,7 +298,7 @@ struct S_00de5110_Geometry
     {}
     static void* operator new(unsigned int n) throw()
     {
-        return FUN_00c85750().heap().AllocateMemoryBlock(n);
+        return hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(n);
     }
     static void operator delete(void*) throw()
     {}
@@ -334,7 +336,7 @@ struct S_00de5110_Pyramid
     int unk6C;
     Vec4 m_apex;
 
-    void FUN_00de4e20(Vec4* verts);
+    void hkDisplayPlane_createPlanePoints(Vec4* verts);
     void BuildPyramidGeometry();
 };
 
@@ -345,7 +347,7 @@ void S_00de5110_Pyramid::BuildPyramidGeometry()
     m_pSourceGeometry = new S_00de5110_Geometry();
     m_pSourceGeometry->m_kVertices.SetSizeAndGrow(5);
     m_pSourceGeometry->m_kVertices[4] = m_apex;
-    FUN_00de4e20(m_pSourceGeometry->m_kVertices.begin());
+    hkDisplayPlane_createPlanePoints(m_pSourceGeometry->m_kVertices.begin());
     m_pSourceGeometry->m_uiTriangleCount.expandBy(1)->set(2, 4, 3);
     m_pSourceGeometry->m_uiTriangleCount.expandBy(1)->set(0, 4, 2);
     m_pSourceGeometry->m_uiTriangleCount.expandBy(1)->set(1, 4, 0);
@@ -377,7 +379,7 @@ extern int DAT_010d828c;
 class FUN_00de4f20_cls
 {
   public:
-    FUN_00de4f20_cls* FUN_00de4f20(const Vec4i* p0, const Vec4i* p1, const Vec4i* p2, const Vec4i* p3);
+    FUN_00de4f20_cls* InitializeFields_00de4f20(const Vec4i* p0, const Vec4i* p1, const Vec4i* p2, const Vec4i* p3);
 
     int m_vptr;              // 0x00
     unsigned short unk04;    // 0x04
@@ -400,7 +402,8 @@ class FUN_00de4f20_cls
 
 // Sets identity rotation columns, m_50 = 7 and m_06 = 1, zeroes m_kAxisEndPoints, and copies p0, p2, p1, p3 into m_60, m_70, m_80, m_90.
 // @fnv 0x00de4f20
-FUN_00de4f20_cls* FUN_00de4f20_cls::FUN_00de4f20(const Vec4i* p0, const Vec4i* p1, const Vec4i* p2, const Vec4i* p3)
+// src: GUESS 0x00de4f20 (confidence: low)
+FUN_00de4f20_cls* FUN_00de4f20_cls::InitializeFields_00de4f20(const Vec4i* p0, const Vec4i* p1, const Vec4i* p2, const Vec4i* p3)
 {
     float one = 1.0f;
     *(volatile int*)&m_08 = 0;

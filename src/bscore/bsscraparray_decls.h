@@ -11,7 +11,7 @@ class Animation;
 class NavMeshInfo;
 
 template <class T> class NiPointer;
-MemoryManager* FUN_00401020();
+MemoryManager* MemoryManager_Instance();
 
 
 extern unsigned int DAT_01084074;

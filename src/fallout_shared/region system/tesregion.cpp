@@ -149,7 +149,7 @@ bool TESRegion::Load(TESFile* file)
     loadState.lists = GetRegionPointLists();
     while (loadState.lists && loadState.lists->GetItem())
     {
-        if (!loadState.lists->GetItem()->FUN_004f81e0(true))
+        if (!loadState.lists->GetItem()->TESRegionPointList_Validate(true))
         {
             loadState.invalid = loadState.lists->GetItem();
             ((TESRegionLoadList*)GetRegionPointLists())->Remove(loadState.invalid);
@@ -173,12 +173,13 @@ TESRegionDataManager* FUN_00740940_shell::GetRegionDataManager()
     return *(TESRegionDataManager**)((char*)this + 0x624);
 }
 
-void __fastcall FUN_005827d0(char*);
+void __fastcall TESWeatherList_GetRandomWeather(char*);
 
 // @fnv 0x004f10b0
-void __fastcall FUN_004f10b0(char* param_1)
+// src: COMMUNITY 0x004f10b0
+void __fastcall TESWeatherList_GetRandomWeather_(char* param_1)
 {
-    FUN_005827d0(param_1 + 8);
+    TESWeatherList_GetRandomWeather(param_1 + 8);
 }
 
 struct RDL_004f3330
@@ -234,7 +235,7 @@ struct ListProxy
 };
 struct DataProxy
 {
-    void FUN_004f3470(DataProxy*);
+    void TESRegionDataList_Copy(DataProxy*);
 };
 // Copies this region into destination (allocating one if null), copying its data and each list node's point proxy.
 // @fnv 0x004f10d0
@@ -243,7 +244,7 @@ TESRegion* TESRegion::Clone(TESRegion* destination)
     TESRegion* result = destination ? destination : new TESRegion;
     ListProxy* pNode = FUN_00441110();
     WarnCopyUnsupported(result);
-    FUN_009611e0()->FUN_004f3470(result->FUN_009611e0());
+    NiAVObject_GetParent()->TESRegionDataList_Copy(result->NiAVObject_GetParent());
     while (pNode && pNode->FUN_006815c0())
     {
         result->FUN_00441110()->FUN_005ae3d0(pNode->FUN_006815c0()->CloneRegionPointList(0));
@@ -254,8 +255,8 @@ TESRegion* TESRegion::Clone(TESRegion* destination)
 
 struct S_004f1300_Item
 {
-    int FUN_0084e3a0();
-    float FUN_00526ae0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    float TESTopic_GetPriority_GetUnk28();
 };
 
 struct S_004f1300_Base0
@@ -269,27 +270,28 @@ struct S_004f1300_Holder : S_004f1300_Base0, BSSimpleList<S_004f1300_Item*>
 
 struct S_004f1300_Mgr
 {
-    S_004f1300_Holder* FUN_004169d0();
+    S_004f1300_Holder* TESDataHandler_GetRegionList();
 };
 
 struct S_004f1300_Save
 {
     unsigned short* FUN_00825c00();
-    void FUN_008579b0(void* apData, unsigned int auiSize);
-    void FUN_00857a10(void* apData, unsigned int auiSize);
+    void TESSaveLoadGame_SaveGameDataOLD(void* apData, unsigned int auiSize);
+    void TESSaveLoadGame_SaveNumericID(void* apData, unsigned int auiSize);
 };
 
 extern S_004f1300_Save* DAT_011de45c;
 extern S_004f1300_Mgr* DAT_011c3f2c;
 
 // @fnv 0x004f1300
-void __cdecl FUN_004f1300()
+// src: GUESS 0x004f1300 (confidence: low)
+void __cdecl Object_ProcessEntries_004f1300()
 {
     unsigned short m_usPassCountLocal = 0;
     unsigned short* pusCount4 = DAT_011de45c->FUN_00825c00();
-    DAT_011de45c->FUN_008579b0(&m_usPassCountLocal, 2);
+    DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&m_usPassCountLocal, 2);
 
-    BSSimpleList<S_004f1300_Item*>* pNodeX = DAT_011c3f2c->FUN_004169d0();
+    BSSimpleList<S_004f1300_Item*>* pNodeX = DAT_011c3f2c->TESDataHandler_GetRegionList();
     while (pNodeX && !pNodeX->IsEmpty())
     {
         S_004f1300_Item* pItem = pNodeX->GetItem();
@@ -297,11 +299,11 @@ void __cdecl FUN_004f1300()
         float fSecondFunctionValue = 0.0f;
         if (pItem)
         {
-            iID2 = pItem->FUN_0084e3a0();
-            fSecondFunctionValue = pItem->FUN_00526ae0();
+            iID2 = pItem->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            fSecondFunctionValue = pItem->TESTopic_GetPriority_GetUnk28();
         }
-        DAT_011de45c->FUN_00857a10(&iID2, 4);
-        DAT_011de45c->FUN_008579b0(&fSecondFunctionValue, 4);
+        DAT_011de45c->TESSaveLoadGame_SaveNumericID(&iID2, 4);
+        DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&fSecondFunctionValue, 4);
         m_usPassCountLocal++;
         pNodeX = pNodeX->GetNext();
     }
@@ -329,14 +331,14 @@ void TESRegion::UpdateWeather()
     }
 }
 
-void __cdecl FUN_00485910(unsigned int uiType, unsigned int uiID_ldrt);
+void __cdecl TESForm_AddChunk_00485910(unsigned int uiType, unsigned int uiID_ldrt);
 struct RefQ
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct ElemQ
 {
-    void FUN_004f77c0();
+    void TESRegionPointList_Save();
 };
 struct VElemQ
 {
@@ -359,24 +361,24 @@ struct LstBQ
 // @fnv 0x004f0a40
 void TESRegion::SaveForm()
 {
-    FUN_004855a0();
+    BeginFormRecord();
     RefQ* pRef_gmplt = (RefQ*)GetParentWorldSpace();
     if (pRef_gmplt)
     {
-        unsigned int uiID_ldrt = pRef_gmplt->FUN_0084e3a0();
-        FUN_00485910(0x4d414e57, uiID_ldrt);
+        unsigned int uiID_ldrt = pRef_gmplt->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        TESForm_AddChunk_00485910(0x4d414e57, uiID_ldrt);
     }
     LstAQ* pIterA_kkeo = (LstAQ*)FUN_00441110();
     while (pIterA_kkeo && !pIterA_kkeo->FUN_008256d0())
     {
-        (*pIterA_kkeo->FUN_006815c0())->FUN_004f77c0();
+        (*pIterA_kkeo->FUN_006815c0())->TESRegionPointList_Save();
         pIterA_kkeo = pIterA_kkeo->FUN_00726070();
     }
-    LstBQ* pIterB_jeqla = (LstBQ*)FUN_009611e0();
+    LstBQ* pIterB_jeqla = (LstBQ*)NiAVObject_GetParent();
     while (pIterB_jeqla && !pIterB_jeqla->FUN_008256d0())
     {
         (*pIterB_jeqla->FUN_006815c0())->Save();
         pIterB_jeqla = pIterB_jeqla->FUN_00726070();
     }
-    FUN_00485680();
+    FinishFormRecord();
 }

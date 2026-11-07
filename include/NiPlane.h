@@ -23,8 +23,8 @@ public:
     bool operator==(const NiPoint3& point);
 
     bool FUN_00439090(const NiPlane* other);
-    bool FUN_004390c0(const NiPlane& other);
-    bool FUN_004390c0(const NiPoint3& point);
+    bool HasEqualComponents(const NiPlane& other);
+    bool HasEqualComponents(const NiPoint3& point);
 
     void Apply(const NiMatrix3& matrix, const NiPoint3& translation);
     int Side(const FNVVec3& point) const;

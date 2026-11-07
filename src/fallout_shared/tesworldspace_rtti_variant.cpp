@@ -22,7 +22,7 @@ struct GROUP_HEADER
     int iGroupType;
 };
 extern unsigned int kGroupFormType;
-TESForm* FUN_004839c0(unsigned int);
+TESForm* TESForm_GetFormByNumericID(unsigned int);
 class FormGroupOwner
 {
   public:
@@ -43,10 +43,11 @@ class FormGroupOwner
     virtual void v38();
     virtual bool IsParentForm(TESForm* pkForm);
     bool IsFormTypeBelowThreshold(GROUP_HEADER* pkGroup);
-    bool FUN_00584d40(GROUP_HEADER* pkGroup);
+    bool TESWorldSpace_SavesBefore_00584d40(GROUP_HEADER* pkGroup);
 };
 // @fnv 0x00584d40
-bool FormGroupOwner::FUN_00584d40(GROUP_HEADER* pkGroup)
+// src: XBOX_PDB 0x00584d40
+bool FormGroupOwner::TESWorldSpace_SavesBefore_00584d40(GROUP_HEADER* pkGroup)
 {
     bool bResult = false;
     if (pkGroup && pkGroup->uiType == kGroupFormType)
@@ -61,7 +62,7 @@ bool FormGroupOwner::FUN_00584d40(GROUP_HEADER* pkGroup)
             bResult = false;
             break;
         case 6: {
-            TESObjectCELL* pkCell = dynamic_cast<TESObjectCELL*>(FUN_004839c0(pkGroup->uiLabel));
+            TESObjectCELL* pkCell = dynamic_cast<TESObjectCELL*>(TESForm_GetFormByNumericID(pkGroup->uiLabel));
             if (pkCell)
                 bResult = IsParentForm((TESForm*)pkCell);
         }
@@ -70,7 +71,7 @@ bool FormGroupOwner::FUN_00584d40(GROUP_HEADER* pkGroup)
         case 5:
             break;
         case 1: {
-            TESWorldSpace* pkWorld = dynamic_cast<TESWorldSpace*>(FUN_004839c0(pkGroup->uiLabel));
+            TESWorldSpace* pkWorld = dynamic_cast<TESWorldSpace*>(TESForm_GetFormByNumericID(pkGroup->uiLabel));
             if (pkWorld)
                 bResult = IsParentForm((TESForm*)pkWorld);
         }
@@ -83,11 +84,12 @@ bool FormGroupOwner::FUN_00584d40(GROUP_HEADER* pkGroup)
     return bResult;
 }
 
-TESForm* __cdecl FUN_004839c0(unsigned int);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int);
 // 0x0098e990 fixes up a combat group's saved actors; the shared group header has no declaration yet.
 extern "C" void ActorCombatGroup_UpdateElements();
 // @fnv 0x00993600
-void CombatManager::FUN_00993600(void* stream)
+// src: COMMUNITY 0x00993600
+void CombatManager::InitLoadGame_00993600(void* stream)
 {
     NiTMap<Actor*, unsigned __int64>* oldMapX = m_pActorCombatGroupMap;
     m_pActorCombatGroupMap = new NiTMap<Actor*, unsigned __int64>(0x25);
@@ -100,7 +102,7 @@ void CombatManager::FUN_00993600(void* stream)
     {
         oldMapX->GetNext(position, actor_, valueTmp);
         // Persisted pointer-map keys hold a 32-bit form identifier until fixup.
-        actor_ = actor_ ? dynamic_cast<Actor*>(FUN_004839c0((unsigned int)actor_)) : 0;
+        actor_ = actor_ ? dynamic_cast<Actor*>(TESForm_GetFormByNumericID((unsigned int)actor_)) : 0;
         if (actor_)
             m_pActorCombatGroupMap->SetAt(actor_, valueTmp);
     }
@@ -250,7 +252,7 @@ class WorldSpaceOwner5845
     void SetParentWorld(TESWorldSpace* p);
     void FinishInit(int i);
     TESObjectCELL* GetPersistentCell();
-    void FUN_005845e0();
+    void TESWorldSpace_InitItem();
 
     unsigned int unk04;
     unsigned int unk08;
@@ -307,7 +309,8 @@ class WorldSpaceOwner5845
 };
 
 // @fnv 0x005845e0
-void WorldSpaceOwner5845::FUN_005845e0()
+// src: XBOX_PDB 0x005845e0
+void WorldSpaceOwner5845::TESWorldSpace_InitItem()
 {
     if (!IsTemporary5845())
     {
@@ -316,7 +319,7 @@ void WorldSpaceOwner5845::FUN_005845e0()
         if (uiFormIDA)
         {
             ResolveFormID5845(&uiFormIDA, GetFile(-1));
-            TESClimate* pkClimate = dynamic_cast<TESClimate*>(FUN_004839c0(uiFormIDA));
+            TESClimate* pkClimate = dynamic_cast<TESClimate*>(TESForm_GetFormByNumericID(uiFormIDA));
             if (!pkClimate)
             {
                 if (HasEditorID())
@@ -332,7 +335,7 @@ void WorldSpaceOwner5845::FUN_005845e0()
         if (uiFormIDA)
         {
             ResolveFormID5845(&uiFormIDA, GetFile(-1));
-            TESImageSpace* pkImageSpace2 = dynamic_cast<TESImageSpace*>(FUN_004839c0(uiFormIDA));
+            TESImageSpace* pkImageSpace2 = dynamic_cast<TESImageSpace*>(TESForm_GetFormByNumericID(uiFormIDA));
             if (!pkImageSpace2)
             {
                 if (HasEditorID())
@@ -348,7 +351,7 @@ void WorldSpaceOwner5845::FUN_005845e0()
         if (uiFormIDA)
         {
             ResolveFormID5845(&uiFormIDA, GetFile(-1));
-            BGSEncounterZone* pkEncounterZone = dynamic_cast<BGSEncounterZone*>(FUN_004839c0(uiFormIDA));
+            BGSEncounterZone* pkEncounterZone = dynamic_cast<BGSEncounterZone*>(TESForm_GetFormByNumericID(uiFormIDA));
             if (!pkEncounterZone)
             {
                 if (HasEditorID())
@@ -364,7 +367,7 @@ void WorldSpaceOwner5845::FUN_005845e0()
         if (uiFormIDA)
         {
             ResolveFormID5845(&uiFormIDA, GetFile(-1));
-            TESWaterForm* pkWaterType4 = dynamic_cast<TESWaterForm*>(FUN_004839c0(uiFormIDA));
+            TESWaterForm* pkWaterType4 = dynamic_cast<TESWaterForm*>(TESForm_GetFormByNumericID(uiFormIDA));
             if (!pkWaterType4)
             {
                 if (HasEditorID())
@@ -380,7 +383,7 @@ void WorldSpaceOwner5845::FUN_005845e0()
         if (uiFormIDA)
         {
             ResolveFormID5845(&uiFormIDA, GetFile(-1));
-            TESWaterForm* pkLODWaterType3 = dynamic_cast<TESWaterForm*>(FUN_004839c0(uiFormIDA));
+            TESWaterForm* pkLODWaterType3 = dynamic_cast<TESWaterForm*>(TESForm_GetFormByNumericID(uiFormIDA));
             if (!pkLODWaterType3)
             {
                 if (HasEditorID())
@@ -396,7 +399,7 @@ void WorldSpaceOwner5845::FUN_005845e0()
         if (uiFormIDA)
         {
             ResolveFormID5845(&uiFormIDA, GetFile(-1));
-            BGSMusicType* kPkMusicType = dynamic_cast<BGSMusicType*>(FUN_004839c0(uiFormIDA));
+            BGSMusicType* kPkMusicType = dynamic_cast<BGSMusicType*>(TESForm_GetFormByNumericID(uiFormIDA));
             if (!kPkMusicType)
             {
                 if (HasEditorID())
@@ -412,7 +415,7 @@ void WorldSpaceOwner5845::FUN_005845e0()
         if (uiFormIDA)
         {
             ResolveFormID5845(&uiFormIDA, GetFile(-1));
-            TESWorldSpace* pkParentWorldVal = dynamic_cast<TESWorldSpace*>(FUN_004839c0(uiFormIDA));
+            TESWorldSpace* pkParentWorldVal = dynamic_cast<TESWorldSpace*>(TESForm_GetFormByNumericID(uiFormIDA));
             if (!pkParentWorldVal)
             {
                 if (HasEditorID())
@@ -449,7 +452,7 @@ extern char DAT_01183028, DAT_01183fb4, DAT_0118ac2c;
 struct FormX
 {
     int FUN_00401170();
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     bool IsLessThan(FormX* pkForm);
 };
 struct WorldX;
@@ -464,15 +467,16 @@ struct CellX
 };
 struct WorldX
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     bool IsLessThan(FormX* pkForm);
     virtual void v00(), v04(), v08(), v0c(), v10(), v14(), v18(), v1c(), v20(), v24(), v28(), v2c(), v30(), v34(),
         v38();
     virtual bool IsChildOf(WorldX* pkWorld);
-    bool FUN_00584be0(FormX* pkForm);
+    bool TESWorldSpace_SavesBefore(FormX* pkForm);
 };
 // @fnv 0x00584be0
-bool WorldX::FUN_00584be0(FormX* pkForm)
+// src: XBOX_PDB 0x00584be0
+bool WorldX::TESWorldSpace_SavesBefore(FormX* pkForm)
 {
     bool bResult = false;
     switch (pkForm->FUN_00401170())
@@ -487,7 +491,7 @@ bool WorldX::FUN_00584be0(FormX* pkForm)
         break;
     }
     case 0x41:
-        if (FUN_0084e3a0() < pkForm->FUN_0084e3a0())
+        if (GetHavokWorldObjectCountInSceneGraph_0084e3a0() < pkForm->GetHavokWorldObjectCountInSceneGraph_0084e3a0())
             bResult = true;
         break;
     case 0x3a:

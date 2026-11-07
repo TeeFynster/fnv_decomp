@@ -10,7 +10,7 @@ public:
     ExtraSavedHavokData();
 
     void* __thiscall Destroy(unsigned int flags);
-    void FUN_00435c10();
+    void DeleteBuffer_00435c10();
 
     char* m_pSavedHavokData;
 };

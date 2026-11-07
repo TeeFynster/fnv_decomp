@@ -109,7 +109,7 @@ __forceinline void hkQsTransform::SetProduct(const hkQsTransform& t1, const hkQs
     hkVector4 rotated;
     rotated.SetRotatedDirection(t1.m_rotation, t2.m_vTranslation);
     m_vTranslation.setAdd4(rotated, t1.m_vTranslation);
-    m_rotation.FUN_00c66320(t1.m_rotation, t2.m_rotation);
+    m_rotation.setMul(t1.m_rotation, t2.m_rotation);
     m_vScale.setMul4(t1.m_vScale, t2.m_vScale);
 }
 
@@ -144,11 +144,12 @@ struct SkeletonPoseData
     {
         arrayElement(m_pBoneFlags, i) &= ~f;
     }
-    const hkQsTransform& FUN_00cda180(int boneIdx);
+    const hkQsTransform& hkaPose_calculateBoneModelSpace(int boneIdx);
 };
 
 // @fnv 0x00cda180
-const hkQsTransform& SkeletonPoseData::FUN_00cda180(int boneIdx)
+// src: COMMUNITY 0x00cda180
+const hkQsTransform& SkeletonPoseData::hkaPose_calculateBoneModelSpace(int boneIdx)
 {
     int ancestorIdx = boneIdx;
     while (isFlagOn(ancestorIdx, F_BONE_MODEL_DIRTY))

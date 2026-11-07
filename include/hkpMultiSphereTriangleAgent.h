@@ -40,6 +40,6 @@ public:
     virtual void vf12();
     virtual void vf13();
 
-    void FUN_00d37ed0(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
+    void getPenetrations_00d37ed0(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                       const void* input, hkpCdBodyPairCollector& collector);
 };

@@ -11,7 +11,7 @@ class RadioConvTask
 {
 public:
     virtual void* DestroyIfFlagged(unsigned int flags);
-    virtual void FUN_008372e0();
+    virtual void Run_008372e0();
     virtual void vf02();
     virtual void vf03();
     virtual bool __thiscall GetDescription(char* apDescription, unsigned int aiBufferSize);

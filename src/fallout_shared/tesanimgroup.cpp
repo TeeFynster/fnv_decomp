@@ -235,7 +235,8 @@ void TESAnimGroup::SetSoundsFromSequence(NiControllerSequence* sequence)
 }
 
 // @fnv 0x0047d3b0
-unsigned short TESAnimGroup::FUN_0047d3b0()
+// src: XBOX_PDB 0x0047d3b0
+unsigned short TESAnimGroup::GetAnimGroupType_0047d3b0()
 {
     return sType;
 }
@@ -309,7 +310,8 @@ extern const char* DAT_01197794[];
 extern const char* DAT_011977a4[];
 
 // @fnv 0x005f38d0
-void __cdecl FUN_005f38d0(const char* apModelName, unsigned int* aeMove, unsigned int* aeWeapon, bool* abPowerArmor)
+// src: COMMUNITY 0x005f38d0
+void __cdecl TESAnimGroup_ParseAnimGroupFilename(const char* apModelName, unsigned int* aeMove, unsigned int* aeWeapon, bool* abPowerArmor)
 {
     unsigned int n;
     const char* plastSlash = _strrchr(apModelName, '\\');
@@ -405,17 +407,19 @@ int TESAnimGroup::GetMoveAnimGroup()
     return TESAnimGroup::GetMoveType(this->sType);
 }
 
-extern "C" unsigned short __cdecl FUN_005f2400(unsigned short);
+extern "C" unsigned short __cdecl TESAnimGroup_GetWeapon(unsigned short);
 
 // @fnv 0x005f23e0
-unsigned short __thiscall TESAnimGroup::FUN_005f23e0()
+// src: COMMUNITY 0x005f23e0
+unsigned short __thiscall TESAnimGroup::GetWeapon()
 {
-    return FUN_005f2400(sType);
+    return TESAnimGroup_GetWeapon(sType);
 }
 
 namespace fnv_005f2400 {
 // @fnv 0x005f2400
-int FUN_005f2400(unsigned short ausValue)
+// src: XBOX_PDB 0x005f2400
+int TESAnimGroup_GetWeapon(unsigned short ausValue)
 {
     return (ausValue & 0xf00) >> 8;
 }
@@ -455,7 +459,8 @@ bool __cdecl IsNine(int);
 
 // Returns false for type 0xff, otherwise looks up the type's entry and returns the result of IsNine on its stored value.
 // @fnv 0x005f25d0
-bool FUN_005f25d0(unsigned short ausType)
+// src: XBOX_PDB 0x005f25d0
+bool TESAnimGroup_IsAttackSpinAction(unsigned short ausType)
 {
     if (ausType == 0xff)
         return false;
@@ -512,7 +517,8 @@ void TESAnimGroup::ResizeSoundList(unsigned int count)
 int __cdecl GetType(unsigned short);
 // Returns true when GetType(a) is 0, 1 or 0xAA, otherwise false.
 // @fnv 0x005f4cc0
-bool __cdecl FUN_005f4cc0(unsigned short ausType)
+// src: COMMUNITY 0x005f4cc0
+bool __cdecl TESAnimGroup_IsIdleAnim(unsigned short ausType)
 {
     switch (GetType(ausType))
     {
@@ -554,7 +560,7 @@ long atol(const char* str);
 int strcpy_s(char* dest, unsigned int size, const char* src);
 int sprintf_s(char* buffer, unsigned int size, const char* format, ...);
 int TruncateFloatToInt(float f);
-void FUN_0043b2b0(bool b);
+void MessageHandler_IncDisableWarningCount(bool b);
 
 // These folded no-argument thiscall accessors take the sequence in ECX, as do
 // single-argument fastcall functions; the shared header has no declarations.
@@ -582,7 +588,8 @@ extern TESDataHandler* g_dataHandler;
 
 // Parses a controller sequence's text keys to build a TESAnimGroup, setting parent, morph, blend, decal and sound data and warning on bad notes.
 // @fnv 0x005f3a20
-TESAnimGroup* FUN_005f3a20(NiControllerSequence* apSequence, const char* apModelName)
+// src: COMMUNITY 0x005f3a20
+TESAnimGroup* TESAnimGroup_LoadAnimGroup(NiControllerSequence* apSequence, const char* apModelName)
 {
     ANIM_GROUP_ENUM m;
     char message[260];
@@ -594,7 +601,7 @@ TESAnimGroup* FUN_005f3a20(NiControllerSequence* apSequence, const char* apModel
     ANIM_GROUP_MOVE_ENUM eanimMove = ANIM_GROUP_MOVE_ENUM_AGM_NONE;
     ANIM_GROUP_WEAPON_ENUM eanimWeapon = ANIM_GROUP_WEAPON_ENUM_AGW_NONE;
     const char* plastSlash = _strrchr(apModelName, '\\');
-    FUN_0043b2b0(true);
+    MessageHandler_IncDisableWarningCount(true);
     const char* paccumName = GetSequenceAccumulationRootName(apSequence);
     int iaccumIndex = -1;
     int inonAccumIndex = -1;
@@ -625,11 +632,11 @@ TESAnimGroup* FUN_005f3a20(NiControllerSequence* apSequence, const char* apModel
 
     ParseAnimationGroupFilename(apModelName, eanimMove, eanimWeapon, bpowerArmor);
 
-    if (apSequence && apSequence->FUN_00700300())
+    if (apSequence && apSequence->GetName_00700300())
     {
         unsigned int numKeys;
         char plocalKeyText[260];
-        TimedTextEntry* key = apSequence->FUN_00700300()->GetKeys(numKeys);
+        TimedTextEntry* key = apSequence->GetName_00700300()->GetKeys(numKeys);
         for (n = 0; n < numKeys; n++)
         {
             NiFixedString keyText(*(NiFixedString*)key[n].GetText());
@@ -925,7 +932,7 @@ TESAnimGroup* FUN_005f3a20(NiControllerSequence* apSequence, const char* apModel
         }
     }
 
-    FUN_0043b2b0(false);
+    MessageHandler_IncDisableWarningCount(false);
     if (bshowWarning)
         _FNV_Warning("ANIMATION: Animation group note problem. See %s file.", TESFile::IsTempIDLoadable());
     return panimGroup;
@@ -934,7 +941,8 @@ TESAnimGroup* FUN_005f3a20(NiControllerSequence* apSequence, const char* apModel
 
 // Returns true when the animation group's sType maps to one of the codes 0x5c through 0x65, otherwise false.
 // @fnv 0x005f26c0
-bool TESAnimGroup::FUN_005f26c0()
+// src: COMMUNITY 0x005f26c0
+bool TESAnimGroup::IsPowerAttack_005f26c0()
 {
     switch (GetType(sType))
     {
@@ -956,7 +964,8 @@ bool TESAnimGroup::FUN_005f26c0()
 
 // FUN_005f2750: switch over a byte-coded action id; true for the listed action ids.
 // @fnv 0x005f2750
-bool __cdecl FUN_005f2750(int a)
+// src: XBOX_PDB 0x005f2750
+bool __cdecl TESAnimGroup_IsIronSightsAction(int a)
 {
     switch (a)
     {

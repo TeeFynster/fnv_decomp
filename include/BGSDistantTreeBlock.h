@@ -35,7 +35,7 @@ public:
     void MarkTreeInstance(unsigned int);
     void MarkTreeInstance(unsigned int aID, bool update);
     void ClearInstanceFlag(unsigned int aID);
-    void FUN_006f7780();
+    void BGSDistantTreeBlock_ClearQueuedTrees();
     void ProcessAllTrees();
 };
 #pragma pack(pop)

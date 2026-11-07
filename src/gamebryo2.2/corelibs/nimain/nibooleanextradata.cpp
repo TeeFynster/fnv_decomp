@@ -12,7 +12,8 @@
 extern NiRTTI g_011f5f5c;
 
 // @fnv 0x00a9af30
-NiRTTI* __cdecl FUN_00a9af30()
+// src: COMMUNITY 0x00a9af30
+NiRTTI* __cdecl NiBooleanExtraData_GetRTTI()
 {
     return &g_011f5f5c;
 }
@@ -20,7 +21,8 @@ NiRTTI* __cdecl FUN_00a9af30()
 extern int DAT_010a112c;
 
 // @fnv 0x00a9af90
-void* __cdecl FUN_00a9af90()
+// src: EXE 0x00a9af90
+void* __cdecl NiBooleanExtraData_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x10);
     if (p)
@@ -61,7 +63,8 @@ bool NiBooleanExtraData::IsEqualTo(NiObject* pObject)
 }
 
 // @fnv 0x00a9af40
-NiBooleanExtraData* __fastcall FUN_00a9af40(NiBooleanExtraData* self, void*, CloningProcess* pkCloning)
+// src: XBOX_PDB 0x00a9af40
+NiBooleanExtraData* __fastcall NiBooleanExtraData_CreateClone(NiBooleanExtraData* self, void*, CloningProcess* pkCloning)
 {
     NiBooleanExtraData* pkClone = static_cast<NiBooleanExtraData*>(BSFadeNode::operator new(0x10));
     if (pkClone)
@@ -74,7 +77,7 @@ NiBooleanExtraData* __fastcall FUN_00a9af40(NiBooleanExtraData* self, void*, Clo
     {
         pkClone = 0;
     }
-    self->FUN_00a7b330(pkClone, pkCloning);
+    self->CopyMembers_00a7b330(pkClone, pkCloning);
     pkClone->m_bValue = self->m_bValue;
     return pkClone;
 }
@@ -109,7 +112,8 @@ void __fastcall ReadFromStream(NiBooleanExtraData* self, void*, NiStream* istr)
 extern void SaveExtraData();
 
 // @fnv 0x00a9b040
-void __fastcall FUN_00a9b040(NiBooleanExtraData* self, void*, NiStream* s)
+// src: XBOX_PDB 0x00a9b040
+void __fastcall NiBooleanExtraData_SaveBinary(NiBooleanExtraData* self, void*, NiStream* s)
 {
     reinterpret_cast<void (__thiscall*)(NiExtraData*, NiStream*)>(&SaveExtraData)(self, s);
     unsigned char ucValue = self->m_bValue;

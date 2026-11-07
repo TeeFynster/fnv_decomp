@@ -95,7 +95,8 @@ inline hkpMotion::hkpMotion(FinishingFlag flag) : hkReferencedObject(flag)
 }
 
 // @fnv 0x00c9c380
-__declspec(noinline) int hkpEntity::FUN_00c9c380() throw()
+// src: HAVOK_LIB 0x00c9c380
+__declspec(noinline) int hkpEntity::getNumConstraints() throw()
 {
     return m_kSlaveConstraints.m_iElementCount + m_eSmallArraySerializeOverrideType.m_iElementCount;
 }
@@ -203,7 +204,7 @@ char* __fastcall getConstraintSlaves(hkpEntity* self)
     return reinterpret_cast<char*>(&self->m_kSlaveConstraints);
 }
 
-void __cdecl FUN_00d1a330(int a1, int* a2, int a3);
+void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(int a1, int* a2, int a3);
 
 // If m_08 and m_10 are set, calls FUN_00d1a330 with m_08->m_78, a pointer to this, and 1.
 // @fnv 0x00c9bfa0
@@ -212,7 +213,7 @@ void __fastcall synchronizeEntity(hkpEntity* self)
     if (self->m_pOwningWorld && self->m_kCollidable.m_pCollisionShape)
     {
         hkpEntity* entity = self;
-        FUN_00d1a330(reinterpret_cast<int*>(self->m_pOwningWorld)[0x78 / 4], (int*)&entity, 1);
+        hkpEntityAabbUtil_entityBatchRecalcAabb(reinterpret_cast<int*>(self->m_pOwningWorld)[0x78 / 4], (int*)&entity, 1);
     }
 }
 
@@ -238,10 +239,10 @@ void __fastcall activateEntity(hkpEntity* self, int)
     {
         hkWorldOperationC9C3 kOp;
         kOp.m_pEntity = self;
-        static_cast<hkpWorld*>(self->m_pOwningWorld)->FUN_00c91160(&kOp);
+        static_cast<hkpWorld*>(self->m_pOwningWorld)->hkpWorld_queueOperation(&kOp);
         return;
     }
-    self->FUN_00c9c1d0();
+    self->activate_00c9c1d0();
 }
 
 struct WorldOp
@@ -261,7 +262,7 @@ void __fastcall deactivateEntity(hkpEntity* self)
         WorldOp op;
         op.m_pEntity = self;
         op.m_type = 0x22;
-        world->FUN_00c91160(&op);
+        world->hkpWorld_queueOperation(&op);
         return;
     }
     deactivateEntityImmediately(self);
@@ -324,7 +325,7 @@ void hkpEntityStats::CollectStats(hkStreamWriter* collector, const hkClass* cls)
     WriteToStream(collector, &g_01268808);
 }
 
-void __cdecl FUN_00d06cb0(void* array, int elemSize);
+void __cdecl hkSmallArrayUtil__reserveMore(void* array, int elemSize);
 
 inline int findEmptyContactSlot(const hkpEntitySmallArraySerializeOverrideType& slots)
 {
@@ -338,7 +339,7 @@ inline void appendContactSlot(hkpEntitySmallArraySerializeOverrideType& slots, v
 {
     unsigned short capacity = static_cast<unsigned short>(slots.m_iCapacityState & 0x3fff);
     if (slots.m_iElementCount == capacity)
-        FUN_00d06cb0(&slots, sizeof(void*));
+        hkSmallArrayUtil__reserveMore(&slots, sizeof(void*));
     static_cast<void**>(slots.m_data)[slots.m_iElementCount++] = value;
 }
 
@@ -371,7 +372,7 @@ struct ConstraintMasterRecord
     int m_2c;
 };
 
-void FUN_00c9d250(void* a1, int a2, int a3, void* a4);
+void hkpConstraintInstance_SortConstraintInstances(void* a1, int a2, int a3, void* a4);
 // @fnv 0x00c9c860
 void __fastcall updateConstraintSlaveIndices(hkpEntity* self, int)
 {
@@ -381,7 +382,7 @@ void __fastcall updateConstraintSlaveIndices(hkpEntity* self, int)
     }
     if (self->m_kSlaveConstraints.m_iElementCount > 1)
     {
-        FUN_00c9d250(self->m_kSlaveConstraints.m_data, 0, self->m_kSlaveConstraints.m_iElementCount - 1, self);
+        hkpConstraintInstance_SortConstraintInstances(self->m_kSlaveConstraints.m_data, 0, self->m_kSlaveConstraints.m_iElementCount - 1, self);
     }
     for (int i = 0; i < self->m_kSlaveConstraints.m_iElementCount; ++i)
     {
@@ -529,14 +530,14 @@ struct FnvCpu_FUN_00c9d160_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00c9d160_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00c9d160_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00c9d160_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 // @fnv 0x00c9d160
 hkpMotion* __fastcall deleteMotion(hkpMotion* self, int, unsigned int flags)
 {
     self->hkpMotion::~hkpMotion();
     if (flags & 1)
     {
-        FnvCpu_FUN_00c9d160_CpuAllocatorHolder* holder = FUN_00c85750();
+        FnvCpu_FUN_00c9d160_CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(self, self->m_usMemSizeAndFlags);
     }
     return self;
@@ -607,7 +608,7 @@ struct FnvCpu_FUN_00c9d460_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00c9d460_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00c9d460_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00c9d460_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00c9d460_CpuObject
 {
     unsigned int unk00;
@@ -621,7 +622,7 @@ FnvCpu_FUN_00c9d460_CpuObject* FnvCpu_FUN_00c9d460_CpuObject::FUN_00c9d460(unsig
     FUN_00c9d3b0();
     if (flags & 1)
     {
-        FnvCpu_FUN_00c9d460_CpuAllocatorHolder* holder = FUN_00c85750();
+        FnvCpu_FUN_00c9d460_CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;
@@ -770,12 +771,13 @@ struct S00c92a80_cls
     int unk00;
     int unk04;
     S00c92a80_Obj* obj;
-    void FUN_00c92a80(int a0, int a1);
+    void hkpWorld_findInitialContactPoints(int a0, int a1);
 };
 
 // Reads a float from obj, builds a S00c92a80_Range, and calls obj->v1c with a0, a1, this, the range, and 1.
 // @fnv 0x00c92a80
-void S00c92a80_cls::FUN_00c92a80(int a0, int a1)
+// src: HAVOK_LIB 0x00c92a80
+void S00c92a80_cls::hkpWorld_findInitialContactPoints(int a0, int a1)
 {
     float b = *(float*)((char*)obj + 0x18);
     float a = *(float*)((char*)obj + 0x18);
@@ -784,7 +786,8 @@ void S00c92a80_cls::FUN_00c92a80(int a0, int a1)
 }
 
 // @fnv 0x00c9bfd0
-static __declspec(noinline) unsigned char* FUN_00c9bfd0(hkpEntity* self, unsigned char* out)
+// src: HAVOK_LIB 0x00c9bfd0
+static __declspec(noinline) unsigned char* hkEntity_isActive(hkpEntity* self, unsigned char* out)
 {
     hkpSimulationIsland* p = self->m_pSimulationIsland;
     if (!p)
@@ -797,12 +800,13 @@ static __declspec(noinline) unsigned char* FUN_00c9bfd0(hkpEntity* self, unsigne
 extern "C" unsigned char* c9bfd0_out_val(void);
 void c9bfd0_caller(hkpEntity* self)
 {
-    (void)FUN_00c9bfd0(self, c9bfd0_out_val());
+    (void)hkEntity_isActive(self, c9bfd0_out_val());
 }
 
 // Writes a 2-bit value extracted from byte 0x26 of m_cc into out, or 0 if m_cc is null.
 // @fnv 0x00c9bff0
-unsigned char* hkpEntity::FUN_00c9bff0(unsigned char* out)
+// src: HAVOK_LIB 0x00c9bff0
+unsigned char* hkpEntity::isActive_00c9bff0(unsigned char* out)
 {
     if (m_pSimulationIsland == 0)
     {
@@ -890,7 +894,8 @@ void __cdecl AddEntryToList(hkpWorld* world, hkpSimulationIsland* island);
 // Deactivation flag setup is not declared by the shared motion interface.
 
 // @fnv 0x00c9c1d0
-void hkpEntity::FUN_00c9c1d0()
+// src: HAVOK_LIB 0x00c9c1d0
+void hkpEntity::activate_00c9c1d0()
 {
     hkBool active(char(0));
     if (m_pSimulationIsland)
@@ -909,7 +914,8 @@ void hkpEntity::FUN_00c9c1d0()
 
 // Ensures m_pExtendedListeners is allocated, then nulls the entry for pvListener in m_pExtendedListeners->m_entityListeners.
 // @fnv 0x00c9c670
-void hkpEntity::FUN_00c9c670(void* pvListener)
+// src: HAVOK_LIB 0x00c9c670
+void hkpEntity::removeEntityListener_00c9c670(void* pvListener)
 {
     if (!m_pExtendedListeners)
         m_pExtendedListeners = new hkpEntityExtendedListeners;
@@ -921,7 +927,7 @@ void hkpEntity::FUN_00c9c670(void* pvListener)
 // @fnv 0x00c9c7c0
 void __fastcall collectEntityConstraints(hkpEntity* self, int, hkArray<hkpConstraintInstance*>& constraints)
 {
-    constraints.setSize(self->FUN_00c9c380());
+    constraints.setSize(self->getNumConstraints());
     int k = 0;
     for (int i = 0; i < self->m_eSmallArraySerializeOverrideType.m_iElementCount; i++)
         // The approved headers expose this array as void storage; hkConstraintInternal is 0x30 bytes.
@@ -1079,7 +1085,8 @@ struct hkEntryLessD250
 
 // Recursively sorts the hkpConstraintInstance array in place using the quicksort algorithm with the hkEntryLessD250 comparator.
 // @fnv 0x00c9d250
-void __cdecl FUN_00c9d250(hkpConstraintInstance** pArr, int aiLow, int aiHigh, hkEntryLessD250 cmpLess)
+// src: GUESS 0x00c9d250 (confidence: medium)
+void __cdecl hkpConstraintInstance_SortConstraintInstances(hkpConstraintInstance** pArr, int aiLow, int aiHigh, hkEntryLessD250 cmpLess)
 {
     int i, iRight;
     hkpConstraintInstance* x;
@@ -1110,7 +1117,7 @@ begin:
     } while (i <= iRight);
 
     if (aiLow < iRight)
-        FUN_00c9d250(pArr, aiLow, iRight, cmpLess);
+        hkpConstraintInstance_SortConstraintInstances(pArr, aiLow, iRight, cmpLess);
     if (i < aiHigh)
     {
         aiLow = i;
@@ -1130,7 +1137,7 @@ void __fastcall addActivationListener(hkpEntity* self, int, hkpEntityActivationL
 {
     if (self->m_pExtendedListeners == 0)
     {
-        FnvCpu_FUN_00c9d160_CpuAllocatorHolder* holder = FUN_00c85750();
+        FnvCpu_FUN_00c9d160_CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         FUN_00c9c700_Allocator* allocator = (FUN_00c9c700_Allocator*)holder->allocator;
         hkpEntityExtendedListeners* array = (hkpEntityExtendedListeners*)allocator->slot04(0x10);
 
@@ -1175,7 +1182,7 @@ void __fastcall addActivationListener(hkpEntity* self, int, hkpEntityActivationL
     }
 
     if (array->m_activationListeners.m_size == (array->m_activationListeners.m_capacityAndFlags & 0x3fff))
-        FUN_00d06cb0(array, 4);
+        hkSmallArrayUtil__reserveMore(array, 4);
 
     array->m_activationListeners.m_data[array->m_activationListeners.m_size] = value;
     ++array->m_activationListeners.m_size;
@@ -1254,7 +1261,7 @@ struct FnvRouter
     void* d;
     FnvMem* heap;
 };
-extern FnvRouter* __cdecl FUN_00c85750();
+extern FnvRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct FnvRef : hkReferencedObject, hkpContactListener
 {
@@ -1267,7 +1274,7 @@ template <typename Array> __forceinline void clearSmallArray(Array& array, int e
     {
         unsigned c = array.m_iCapacityState & 0x3fff;
         void* d = array.m_data;
-        FnvRouter* router = FUN_00c85750();
+        FnvRouter* router = hkMemoryRouter_getInstance();
         FnvMem* mem = router->heap;
         mem->freeArray(d, c * elementSize);
     }
@@ -1291,7 +1298,7 @@ template <typename T> __forceinline void releaseExtendedArray(hkSmallArray<T>& a
     {
         unsigned c = array.m_capacityAndFlags & 0x3fff;
         void* d = array.m_data;
-        FnvRouter* router = FUN_00c85750();
+        FnvRouter* router = hkMemoryRouter_getInstance();
         FnvMem* mem = router->heap;
         mem->freeArray(d, c * 4);
     }
@@ -1315,7 +1322,7 @@ __forceinline void freeExtendedListeners(hkpEntityExtendedListeners* listeners)
 {
     releaseExtendedArray(listeners->m_entityListeners);
     releaseExtendedArray(listeners->m_activationListeners);
-    FnvRouter* router = FUN_00c85750();
+    FnvRouter* router = hkMemoryRouter_getInstance();
     FnvMem* mem = router->heap;
     mem->freeArray(listeners, 16);
 }
@@ -1333,7 +1340,7 @@ void __fastcall rebuildEntity(hkpEntity* self)
     }
     if (self->m_kCollidable.m_kCollisionEntries.m_iElementCount == 0)
     {
-        FnvRouter* router = FUN_00c85750();
+        FnvRouter* router = hkMemoryRouter_getInstance();
         FnvMem* mem = router->heap;
         int f = self->m_kCollidable.m_kCollisionEntries.m_iCapacityState;
         self->m_kCollidable.m_kCollisionEntries.m_iElementCount = 0;
@@ -1346,7 +1353,7 @@ void __fastcall rebuildEntity(hkpEntity* self)
         clearSmallArray(self->m_eSmallArraySerializeOverrideType, 48);
     if (self->m_kSlaveConstraints.m_iElementCount == 0)
     {
-        FnvRouter* router = FUN_00c85750();
+        FnvRouter* router = hkMemoryRouter_getInstance();
         FnvMem* mem = router->heap;
         int f = self->m_kSlaveConstraints.m_iCapacityState;
         self->m_kSlaveConstraints.m_iElementCount = 0;
@@ -1357,7 +1364,7 @@ void __fastcall rebuildEntity(hkpEntity* self)
     }
     if (self->m_pByteBuffer.m_iElementCount == 0)
     {
-        FnvRouter* router = FUN_00c85750();
+        FnvRouter* router = hkMemoryRouter_getInstance();
         FnvMem* mem = router->heap;
         int f = self->m_pByteBuffer.m_iCapacityState;
         self->m_pByteBuffer.m_iElementCount = 0;

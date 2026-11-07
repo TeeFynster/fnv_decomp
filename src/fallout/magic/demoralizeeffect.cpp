@@ -30,7 +30,7 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 void DemoralizeEffect::SaveGame(Actor* apActor)
 {
     ActiveEffect::SaveGame(apActor);
-    g_TESSaveLoadGame->FUN_008579b0(&m_bDemoralized, 1);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_bDemoralized, 1);
 }
 
 struct PackageNodeHandler
@@ -254,7 +254,7 @@ void DemoralizeEffect::Finish()
     Actor* caster = FUN_0045cd60() ? FUN_0045cd60()->GetCasterActor() : 0;
     if (target)
     {
-        if (target->FUN_00493bb0())
+        if (target->Actor_IsInCombat())
         {
             target->Unk_10D(caster);
             if (caster && target->FUN_008d8520())
@@ -262,8 +262,8 @@ void DemoralizeEffect::Finish()
                 reinterpret_cast<PackageNodeHandler*>(target->FUN_008d8520())->Restore(target, caster, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0);
             }
         }
-        else if (target->FUN_008a6650(0))
-            target->FUN_008a6730(caster);
+        else if (target->Actor_IsFleeing(0))
+            target->Actor_RemoveFleeTarget(caster);
     }
 }
 
@@ -298,9 +298,9 @@ void DemoralizeEffect::Start()
                 (*reinterpret_cast<void***>(caster))[0x428 / 4])(caster, target2, 0)->FUN_008d0600();
             m_bDemoralized = 1;
         }
-        else if (!caster->FUN_008a6650(0))
+        else if (!caster->Actor_IsFleeing(0))
         {
-            caster->FUN_00881680(0);
+            caster->Actor_EndInterruptPackage(0);
             // The shared slot 0x410 currently has no arguments; retain this call's ABI.
             reinterpret_cast<void (__thiscall*)(Actor*, Actor*, bool, bool, bool, int, int, float, float)>(
                 (*reinterpret_cast<void***>(caster))[0x410 / 4])(
@@ -313,7 +313,7 @@ void DemoralizeEffect::Start()
 extern int DAT_011a0ef8;
 extern int DAT_011a106c;
 
-bool FUN_006494d0(unsigned short, float);
+bool MagicFormulas_CheckTargetLevelMagnitude(unsigned short, float);
 int FUN_00ec43fb(MagicTarget*, int, int*, int*, int);
 
 // @fnv 0x0080c980
@@ -321,7 +321,7 @@ bool DemoralizeEffect::IsEffectValid(MagicTarget* apTarget)
 {
     Actor* actor = apTarget ? apTarget->FUN_00822b40() : 0;
     if (actor != 0 && !actor->HasHealth(false) && !actor->GetIsDying() &&
-        FUN_006494d0(actor->FUN_0087f9f0(), this->GetFloatAtOffset1C()))
+        MagicFormulas_CheckTargetLevelMagnitude(actor->GetLevel_0087f9f0(), this->GetFloatAtOffset1C()))
     {
         int result = FUN_00ec43fb(apTarget, 0, &DAT_011a0ef8, &DAT_011a106c, 0);
         if (result != 0)
@@ -329,7 +329,7 @@ bool DemoralizeEffect::IsEffectValid(MagicTarget* apTarget)
         }
         else
         {
-            if (actor->FUN_00608d80())
+            if (actor->Actor_IsReanimated())
                 return false;
         }
         return true;

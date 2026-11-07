@@ -20,13 +20,13 @@ public:
     void* DestroyAndFree(unsigned int flags);
     void InitFromActor(void*);
     void SetCantOpenDoors(bool);
-    void FUN_008df000();
+    void PathingRequest_SetNoDestination();
     void AssignAtOffsetB0(const NiPointer<void>&);
     void SetByteAtOffset9B(int);
     const NiPointer<Actor>& GetLOSActor() const;
-    void FUN_006e5a40(NiPoint3, float);
-    void FUN_006e4340(float);
-    void FUN_009d9ee0(void*);
+    void SetSearchCenter(NiPoint3, float);
+    void PathingRequestLOS_SetIgnoreLocationRadius(float);
+    void PathingRequestLOS_SetIgnoreLocations(void*);
     NiPoint3& GetPosition(NiPoint3&) const;
     float GetRadius() const;
     void Place(NiPoint3, float);

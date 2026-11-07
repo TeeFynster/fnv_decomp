@@ -7,7 +7,8 @@
 bool __cdecl ComputeBarycentricCoordinates(const NiPoint2&, const NiPoint2&, const NiPoint2&, const NiPoint2&,
                                            NiPoint3*);
 // @fnv 0x006b9790
-bool __cdecl FUN_006b9790(const NiPoint3& aPoint1, const NiPoint3& aPoint2, const NiPoint3& aPoint3,
+// src: XBOX_PDB 0x006b9790
+bool __cdecl NavMeshMath_Get2DBaryCentricCoord(const NiPoint3& aPoint1, const NiPoint3& aPoint2, const NiPoint3& aPoint3,
                           const NiPoint3& aPoint4, NiPoint3* out)
 {
     return ComputeBarycentricCoordinates(NiPoint2(aPoint1.x, aPoint1.y), NiPoint2(aPoint2.x, aPoint2.y),

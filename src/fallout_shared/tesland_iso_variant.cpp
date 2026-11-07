@@ -29,7 +29,8 @@ struct CacheEntry
 CacheLookup* GetArrayHolder();
 
 // @fnv 0x00b61940
-bool FUN_00b61940(void* entry, const char* key)
+// src: COMMUNITY 0x00b61940
+bool TallGrassShaderProperty_ContainsChunk(void* entry, const char* key)
 {
     const char* groupName = static_cast<CacheEntry*>(entry)->name;
     entry = 0;
@@ -61,11 +62,12 @@ struct LandscapeSpecularView
     void* textureBc;
     void* textureC0;
     unsigned char* specularExponents;
-    void FUN_00b66640(unsigned char a, unsigned char b, unsigned char c, unsigned char d, unsigned char e,
+    void BSShaderPPLightingProperty_SetLandscapeSpecularExponents(unsigned char a, unsigned char b, unsigned char c, unsigned char d, unsigned char e,
                       unsigned char f, unsigned char g, unsigned char h, unsigned char i, unsigned char j);
 };
 // @fnv 0x00b66640
-void LandscapeSpecularView::FUN_00b66640(unsigned char a, unsigned char b, unsigned char c, unsigned char d,
+// src: COMMUNITY 0x00b66640
+void LandscapeSpecularView::BSShaderPPLightingProperty_SetLandscapeSpecularExponents(unsigned char a, unsigned char b, unsigned char c, unsigned char d,
                                          unsigned char e, unsigned char f, unsigned char g, unsigned char h,
                                          unsigned char i, unsigned char j)
 {
@@ -280,9 +282,9 @@ class Mgr_e74120_Map
 class S_00e8c0d0
 {
   public:
-    unsigned int FUN_00e8bff0(void* p1, unsigned int p2, unsigned int p3, int p4);
-    bool FUN_00e8c820(void* p1, void* p2, void* p3, int p4, UploadBatchPart* p5, unsigned int p6);
-    bool FUN_00e8c1e0(void* p1, void* p2, int p3, UploadBatchPart* p4, unsigned int p5);
+    unsigned int NiDX9VertexBufferManager_LockVB(void* p1, unsigned int p2, unsigned int p3, int p4);
+    bool NiDX9VertexBufferManager_PackSkinnedVB(void* p1, void* p2, void* p3, int p4, UploadBatchPart* p5, unsigned int p6);
+    bool NiDX9VertexBufferManager_PackUntransformedVB(void* p1, void* p2, int p3, UploadBatchPart* p4, unsigned int p5);
     bool FUN_00e8c0d0(void* p1);
 };
 
@@ -848,11 +850,12 @@ class Mgr_e74120
     void FUN_00e71fe0(void* p1, void* p2, void* p3, void* p4, int p5);
     void FUN_00e6fa90(UploadBatchHeader* p1, void* p2, void* p3);
 
-    void FUN_00e74120();
+    void NiDX9Renderer_PerformPrecache();
 };
 
 // @fnv 0x00e74120
-void Mgr_e74120::FUN_00e74120()
+// src: COMMUNITY 0x00e74120
+void Mgr_e74120::NiDX9Renderer_PerformPrecache()
 {
     EnterCriticalSection(&cs80);
     EnterCriticalSection(&cs100);
@@ -889,7 +892,7 @@ void Mgr_e74120::FUN_00e74120()
             {
                 unsigned int fl = sub->allocationFlags;
                 void* vb = sub->buffer;
-                unsigned int base = helper8bc->FUN_00e8bff0(vb, lo, hi - lo, fl);
+                unsigned int base = helper8bc->NiDX9VertexBufferManager_LockVB(vb, lo, hi - lo, fl);
                 UploadBatchItem* it = val;
                 do
                 {
@@ -902,9 +905,9 @@ void Mgr_e74120::FUN_00e74120()
                         !it->unk0c->FUN_00e74288(it->unk00, it->unk04, it->unk08, 0xfff, sub, index, offset, 0, 0))
                     {
                         if (it->unk08)
-                            helper8bc->FUN_00e8c820(it->unk00, it->unk04, it->unk08, 0xfff, sub, offset);
+                            helper8bc->NiDX9VertexBufferManager_PackSkinnedVB(it->unk00, it->unk04, it->unk08, 0xfff, sub, offset);
                         else
-                            helper8bc->FUN_00e8c1e0(it->unk00, it->unk04, 0xfff, sub, offset);
+                            helper8bc->NiDX9VertexBufferManager_PackUntransformedVB(it->unk00, it->unk04, 0xfff, sub, offset);
                     }
                     if (it->unk1c == 0)
                     {
@@ -1006,7 +1009,7 @@ struct CacheAllocationScope
 };
 struct CacheItem
 {
-    int FUN_00bd8670(const char*);
+    int TallGrassGroup_RemoveTerrainChunk(const char*);
     void FUN_00bd8f90();
 };
 struct CacheListNode
@@ -1019,14 +1022,14 @@ struct CacheLock
 {
     int state;
     unsigned int live;
-    void FUN_0040fbf0(const char*);
+    void BSSpinLock_Lock(const char*);
 };
 extern CacheLock DAT_011c5f80;
 extern CacheListNode* DAT_011c5f58;
 extern unsigned int DAT_011f9ef4;
 struct CacheMemory
 {
-    void FUN_00aa4060(void*);
+    void MemoryManager_Deallocate(void*);
 };
 extern CacheMemory DAT_011f6238;
 struct CacheList
@@ -1062,7 +1065,7 @@ struct CacheList
             if (next)
                 next->previous = previous;
             slot = 0;
-            DAT_011c5f80.FUN_0040fbf0(0);
+            DAT_011c5f80.BSSpinLock_Lock(0);
             node->previous = 0;
             node->next = DAT_011c5f58;
             DAT_011c5f80.live--;
@@ -1119,7 +1122,8 @@ struct CacheMap
 };
 CacheMap* GetArrayHolder();
 // @fnv 0x00b61370
-void FUN_00b61370(const char* key)
+// src: COMMUNITY 0x00b61370
+void TallGrassShaderProperty_RemoveFromTerrainChunk(const char* key)
 {
     CacheAllocationScope scope(0x1c);
     void* position = GetArrayHolder()->First();
@@ -1145,11 +1149,11 @@ void FUN_00b61370(const char* key)
                     CacheListNode* bucket = node;
                     CacheItem*& slot = entries->GetNext(node);
                     CacheItem* item = slot;
-                    if (item && !item->FUN_00bd8670(key))
+                    if (item && !item->TallGrassGroup_RemoveTerrainChunk(key))
                     {
                         entries->Remove(bucket, slot);
                         item->FUN_00bd8f90();
-                        DAT_011f6238.FUN_00aa4060(item);
+                        DAT_011f6238.MemoryManager_Deallocate(item);
                         DAT_011f9ef4--;
                     }
                 }

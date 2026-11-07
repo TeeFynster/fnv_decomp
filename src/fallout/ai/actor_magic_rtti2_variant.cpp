@@ -15,7 +15,8 @@ struct ActorCreatureStandIn
 {
     float FUN_0088b850();
 // @fnv 0x008d4750
-    float FUN_008d4750()
+// src: COMMUNITY 0x008d4750
+    float Creature_GetReach()
     {
         float j = 0.0f;
         TESCreature* p = dynamic_cast< ::TESCreature*>(((::Actor*)this)->GetActorBase());
@@ -25,7 +26,7 @@ struct ActorCreatureStandIn
         }
         else
         {
-            j = (float)p->FUN_005f9ad0();
+            j = (float)p->ShadowSceneNode_GetDisableLightUpdate();
             if (p->GetCreatureType() == 7)
             {
                 j *= originalRuntimeFloatSetting704.Float()->f;
@@ -35,4 +36,4 @@ struct ActorCreatureStandIn
     }
 };
 
-float (ActorCreatureStandIn::*fnv_008d4750_entry)() = &ActorCreatureStandIn::FUN_008d4750;
+float (ActorCreatureStandIn::*fnv_008d4750_entry)() = &ActorCreatureStandIn::Creature_GetReach;

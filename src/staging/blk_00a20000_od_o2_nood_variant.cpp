@@ -41,27 +41,27 @@ struct FUN_00a25bf0_class
     int m_60;
     int m_64;
     int m_68;
-    char FUN_00a25bf0(int a);
+    char UpdateState_00a25bf0(int a);
 };
 struct FUN_00a25d50_Class
 {
     unsigned int GetField14278();
 };
 extern "C" __declspec(dllimport) char* __stdcall lstrcpyA(char* dst, const char* src);
-char* __cdecl FUN_00a25e00(char* dst, char* src);
+char* __cdecl Object_LstrcpyA_Thunk(char* dst, char* src);
 struct FUN_00a24f10_Class
 {
-    unsigned int FUN_00a24f10(unsigned int i);
+    unsigned int Controls_GetKeybind(unsigned int i);
 };
 extern int DAT_00ff0000;
 struct FUN_00a24f60_Class
 {
-    void FUN_00a24f60(int a, unsigned int b);
+    void Controls_SetKeybind(int a, unsigned int b);
 };
 struct InputManager
 {
-    void FUN_00a25410(int);
-    void FUN_00a253d0();
+    void Controls_ClearUserAction(int);
+    void Controls_ClearUserActions();
 };
 struct FUN_00a24080_Class
 {
@@ -71,7 +71,7 @@ extern unsigned short DAT_011f35bc;
 extern unsigned short DAT_011f35ac;
 struct FUN_00a25560_Class
 {
-    void FUN_00a25560(int a);
+    void UpdateGlobalMaskedBits(int a);
 };
 extern bool DAT_011f35c8;
 struct FUN_00a269f0_Class
@@ -80,30 +80,30 @@ struct FUN_00a269f0_Class
 };
 struct FUN_00a257c0_Class
 {
-    void FUN_00a257c0(float v);
+    void Controls_Poll(float v);
 };
 struct FUN_00a26010_Class
 {
-    unsigned char FUN_00a26010();
+    unsigned char return_1_3();
     int m_50;
     int m_68;
     void AddEntry(int a);
 };
 struct FUN_00a25d80_Class
 {
-    char FUN_00a25d80();
+    char nullsub_306();
 };
 struct FUN_00a25dc0_Class
 {
-    void FUN_00a25dc0(int a);
+    void nullsub_303(int a);
 };
 struct FUN_00a25dd0_Class
 {
-    void FUN_00a25dd0(int a);
+    void nullsub_302(int a);
 };
 struct FUN_00a25fb0_Class
 {
-    void FUN_00a25fb0(int a, int b);
+    void nullsub_299(int a, int b);
 };
 struct FUN_00a232d0_Class
 {
@@ -111,7 +111,7 @@ struct FUN_00a232d0_Class
 };
 struct FUN_00a24eb0_Class
 {
-    void FUN_00a24eb0(int a, int b);
+    void Controls_RemoveDuplicateControls(int a, int b);
 };
 struct FUN_00a26480_class
 {
@@ -124,7 +124,7 @@ struct FUN_00a26480_class
     unsigned short m_16;
     unsigned short m_18;
     unsigned short m_1a;
-    unsigned int FUN_00a26480(FUN_00a26480_class* p, unsigned short n);
+    unsigned int ComputeValue_00a26480(FUN_00a26480_class* p, unsigned short n);
 };
 struct FUN_00a264d0_Class
 {
@@ -145,7 +145,7 @@ struct FUN_00a26310_Class
     int m_28;
     int m_2c;
     int m_30;
-    void FUN_00a26310(int a, FUN_00a26480_class* b);
+    void XRumbleControl_InitRumble(int a, FUN_00a26480_class* b);
 };
 
 struct FUN_00a22640_Class
@@ -165,7 +165,7 @@ struct FUN_00a22640_Class
     int m_30;
     int m_34;
     ::BSStringT<char> m_38;
-    void FUN_00a22640();
+    void ProcessState_00a22640();
 };
 struct FUN_00a24b70_Class
 {
@@ -174,30 +174,30 @@ struct FUN_00a24b70_Class
     unsigned char m_08[0x1b8c];
     unsigned char m_1b94[0x70];
 
-    void FUN_00a24b70(int param);
+    void Controls_InitDefaultKeybinds(int param);
 };
 struct FUN_00a25d70_Class
 {
-    unsigned int FUN_00a25d70();
+    unsigned int nullsub_307();
 };
 struct FUN_00a25da0_Class
 {
-    char FUN_00a25da0();
+    char nullsub_304();
 };
 void* _memmove(void* dst, const void* src, unsigned int count);
 struct FUN_00a25e20_Class
 {
-    void FUN_00a25e20(int* a, int* b, void* src);
+    void UpdateFields_00a25e20(int* a, int* b, void* src);
 };
 void* __cdecl _memmove(void* dst, const void* src, unsigned int count);
 struct FUN_00a25e70_Class
 {
-    void FUN_00a25e70(int* a, int* b, int src);
+    void UpdateState_00a25e70(int* a, int* b, int src);
 };
 void* _memmove(void* dst, const void* src, unsigned int count);
 struct FUN_00a25ec0_Class
 {
-    void FUN_00a25ec0(int* a, int* b, void* src);
+    void UpdateFields_00a25ec0(int* a, int* b, void* src);
 };
 void* _memmove(void* dst, const void* src, unsigned int n);
 struct FUN_00a25f10_Class
@@ -206,7 +206,7 @@ struct FUN_00a25f10_Class
 };
 struct FUN_00a26220_Class
 {
-    unsigned int FUN_00a26220();
+    unsigned int ProcessAndReturnValue_00a26220();
     unsigned int FUN_00a26240();
 };
 extern "C" __declspec(dllimport) unsigned int __stdcall GetTickCount();
@@ -237,7 +237,7 @@ extern short DAT_011f35b0;
 extern short DAT_011f35b2;
 struct FUN_00a23e10_Class : public FUN_00a24080_Class
 {
-    int FUN_00a23e10(int param1, int param2);
+    int Controls_GetControllerButton(int param1, int param2);
 };
 struct InputDevice
 {
@@ -292,7 +292,7 @@ struct ControlsIniLoader : public FUN_00a24f60_Class
 // FUN_00a232c0 : an empty __thiscall member function (an /Od build).
 struct FnvEmpty_00a232c0
 {
-    void FUN_00a232c0();
+    void nullsub_1();
 };
 struct ButtonDevice
 {
@@ -2041,7 +2041,7 @@ struct ButtonDevice
     int swapped;
     unsigned int unk1b50, unk1b54;
     unsigned char clicks[8];
-    int FUN_00a23a50(int button, unsigned int query);
+    int Controls_GetMouseButton(int button, unsigned int query);
 };
 extern unsigned char DAT_011f35ae;
 extern unsigned char DAT_011f35af;
@@ -2061,8 +2061,8 @@ class A24080Property
 };
 struct FUN_00a25180_cls
 {
-    void FUN_00a24eb0(int a, int b);
-    void FUN_00a25180(int a1, int a2, unsigned char a3);
+    void Controls_RemoveDuplicateControls(int a, int b);
+    void Controls_SetActionMapping(int a1, int a2, unsigned char a3);
 };
 struct InputHandler
 {
@@ -3833,9 +3833,9 @@ struct InputHandler
     unsigned char m_1b90;
     unsigned char m_1b91;
 
-    void FUN_00a237f0(unsigned int* out);
-    void FUN_00a25180(int index, int flags, unsigned char state);
-    int FUN_00a23a50(int index, int flags);
+    void HasResourceWithLookupValueOne(unsigned int* out);
+    void Controls_SetActionMapping(int index, int flags, unsigned char state);
+    int Controls_GetMouseButton(int index, int flags);
     bool HandleInput(int key);
 };
 class SpawnedObject
@@ -3862,7 +3862,7 @@ struct FUN_00a252d0_cls
     void SetEnabled(unsigned char enable);
 };
 void __cdecl FUN_00ec61c0(void* dst, int value, unsigned int size);
-void FUN_00a24830();
+void DIEnumDevicesCallback();
 struct FUN_00a25810_Target
 {
     int m_00;
@@ -3879,12 +3879,12 @@ struct FUN_00a25810_Class
 {
     void ResetTargetState();
 };
-extern "C" void __stdcall FUN_00ee820a(int, unsigned short*);
+extern "C" void __stdcall XInputManager_KillRumbles(int, unsigned short*);
 // FUN_00a25870 - returns the flag byte stored in the global at 0x011f3630.
 // The module is an unoptimised (/Od) build, so even this one-liner keeps the
 // full frame: push ebp / mov ebp,esp / mov al,[g] / pop ebp / ret.
 extern unsigned char DAT_011f3630;
-unsigned char FUN_00a25870();
+unsigned char Runtime_GetDAT011f3630();
 void* __cdecl _fnv_zlib_memset(void* dst, int val, unsigned int size);
 struct InputPair
 {
@@ -3943,16 +3943,16 @@ struct FUN_00a259b0
 };
 struct FUN_00a25bc0_Class
 {
-    void FUN_00a25bc0();
+    void nullsub_313();
 };
 struct FUN_00a25bd0_cls
 {
     int unk00;
-    void FUN_00a25bd0();
+    void nullsub_312();
 };
 struct S
 {
-    void FUN_00a25be0();
+    void nullsub_311();
 };
 extern int* DAT_011f63a8;
 extern int DAT_011f3638;
@@ -4018,45 +4018,45 @@ struct S_00a25c80_Class
     unsigned char m_85;
     unsigned char m_86;
     unsigned char m_87;
-    void FUN_00a25c80();
+    void ProcessAndReturnValue_00a25c80();
 };
 struct FUN_00a25d30_Class
 {
-    void FUN_00a25d30();
+    void nullsub_310();
 };
 struct FUN_00a25d40_cls
 {
     int unk00;
-    void FUN_00a25d40();
+    void nullsub_309();
 };
 struct FUN_00a25d90_cls
 {
     int m_00;
-    void FUN_00a25d90();
+    void nullsub_305();
 };
 struct FUN_00a25db0_cls
 {
     int unk00;
-    void FUN_00a25db0();
+    void nullsub_297();
 };
 struct FUN_00a25de0_Class
 {
-    void FUN_00a25de0();
+    void nullsub_301();
 };
 struct FUN_00a25df0_cls
 {
     int unk00;
-    void FUN_00a25df0();
+    void nullsub_300();
 };
 void __cdecl FUN_00ec44d0(int a, int b, int c);
 class FUN_00a25f60_cls
 {
   public:
-    void FUN_00a25f60(int* p1, int* p2, int p3, int p4);
+    void UpdateFields_00a25f60(int* p1, int* p2, int p3, int p4);
 };
 struct FUN_00a26300_Class
 {
-    void FUN_00a26300();
+    void nullsub_298();
 };
 struct FUN_00a26410_arg
 {
@@ -4065,7 +4065,7 @@ struct FUN_00a26410_arg
 };
 struct FUN_00a26a50_Class
 {
-    unsigned short FUN_00a26a50(FUN_00a26410_arg* a, unsigned int b);
+    unsigned short UpdateState_00a26a50(FUN_00a26410_arg* a, unsigned int b);
 };
 struct FUN_00a26410_cls : FUN_00a26a50_Class
 {
@@ -4075,7 +4075,7 @@ struct FUN_00a26520_Class
 {
     void UpdateWaveChannel(int a, short* b, int c);
 };
-void __stdcall FUN_00ee820a(int a, short* b);
+void __stdcall XInputManager_KillRumbles(int a, short* b);
 struct TwoShorts
 {
     short x;
@@ -4087,7 +4087,7 @@ extern const double DAT_01011590;
 double __cdecl FUN_00eca060(double v);
 struct FUN_00a26a50_cls
 {
-    unsigned short FUN_00a26a50(unsigned int* p, unsigned int angle);
+    unsigned short UpdateState_00a26a50(unsigned int* p, unsigned int angle);
 };
 struct Scratch
 {
@@ -4098,7 +4098,7 @@ struct Scratch
 };
 extern Scratch DAT_011f35a8;
 extern Scratch DAT_011f35b8;
-int __stdcall FUN_009f996e(int user, Scratch* state);
+int __stdcall XInputGetState_009f996e(int user, Scratch* state);
 struct PollingDevice
 {
     virtual long __stdcall QueryInterface() = 0;
@@ -4135,7 +4135,7 @@ struct DeviceStatePair
 };
 struct InputPoller : InputHandler
 {
-    void FUN_00a23010();
+    void Controls_UpdateValues();
 };
 struct RumbleEvent
 {
@@ -4168,7 +4168,7 @@ struct EventMemory
 };
 extern EventMemory _g_memoryManager;
 extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
-extern "C" void __stdcall FUN_00ee820a(int, unsigned short*);
+extern "C" void __stdcall XInputManager_KillRumbles(int, unsigned short*);
 struct Controller
 {
     int unk0000;
@@ -5934,13 +5934,13 @@ struct Controller
     EventQueue* queue;
     int unk1b84;
     unsigned char enabled;
-    void FUN_00a255b0(float left, float right, int a, int b, int value, unsigned char state, bool force);
+    void Controls_Rumble(float left, float right, int a, int b, int value, unsigned char state, bool force);
 };
 int __cdecl FUN_00ec68e4(const char* name, unsigned int a1);
 class FUN_00a261a0_cls
 {
   public:
-    int FUN_00a261a0(unsigned int a1);
+    int XGamerProfile_GetContentBit(unsigned int a1);
 };
 struct WaveConfig
 {
@@ -6010,11 +6010,12 @@ struct Spl_a28060_Key
 };
 extern int DAT_011a7ed4;
 extern float DAT_011f3658;
-void __cdecl FUN_00a27d60(float t, Spl_a28060_Key* a, Spl_a28060_Key* b, Spl_a28060_Pt* out);
-void __cdecl FUN_00a27e40(float t, Spl_a28060_Key* a, Spl_a28060_Key* b, Spl_a28060_Pt* out);
+void __cdecl NiBezPosKey_InterpolateD1(float t, Spl_a28060_Key* a, Spl_a28060_Key* b, Spl_a28060_Pt* out);
+void __cdecl NiBezPosKey_InterpolateD2(float t, Spl_a28060_Key* a, Spl_a28060_Key* b, Spl_a28060_Pt* out);
 
 // @fnv 0x00a28060
-float __cdecl FUN_00a28060(Spl_a28060_Key* keys, int count)
+// src: GAMEBRYO_LIB 0x00a28060
+float __cdecl NiBezPosKey_ComputeMaxCurvature(Spl_a28060_Key* keys, int count)
 {
     float fScaledValue = 0.0f;
     for (unsigned int i = 0; i < (unsigned int)(count - 1); i++)
@@ -6025,8 +6026,8 @@ float __cdecl FUN_00a28060(Spl_a28060_Key* keys, int count)
         {
             float t = j * DAT_011f3658;
             Spl_a28060_Pt d1, d2;
-            FUN_00a27d60(t, a, b, &d1);
-            FUN_00a27e40(t, a, b, &d2);
+            NiBezPosKey_InterpolateD1(t, a, b, &d1);
+            NiBezPosKey_InterpolateD2(t, a, b, &d2);
             float v = d1.Cross(d2).Length() / d1.SqrLength();
             if (v > fScaledValue)
                 fScaledValue = v;
@@ -6080,10 +6081,11 @@ struct Spl_a2b6d0_Key
 extern int DAT_011a7ed4;
 extern float DAT_011f3658;
 void __cdecl ComputeInterpolatedPosition(float t, Spl_a2b6d0_Key* a, Spl_a2b6d0_Key* b, Spl_a2b6d0_Pt* out);
-void __cdecl FUN_00a2b130(float t, Spl_a2b6d0_Key* a, Spl_a2b6d0_Key* b, Spl_a2b6d0_Pt* out);
+void __cdecl NiTCBPosKey_InterpolateD2(float t, Spl_a2b6d0_Key* a, Spl_a2b6d0_Key* b, Spl_a2b6d0_Pt* out);
 
 // @fnv 0x00a2b6d0
-float __cdecl FUN_00a2b6d0(Spl_a2b6d0_Key* keys, int count)
+// src: GAMEBRYO_LIB 0x00a2b6d0
+float __cdecl NiTCBPosKey_ComputeMaxCurvature(Spl_a2b6d0_Key* keys, int count)
 {
     float fScaledValue = 0.0f;
     for (unsigned int i = 0; i < (unsigned int)(count - 1); i++)
@@ -6095,7 +6097,7 @@ float __cdecl FUN_00a2b6d0(Spl_a2b6d0_Key* keys, int count)
             float t = j * DAT_011f3658;
             Spl_a2b6d0_Pt d1, d2;
             ComputeInterpolatedPosition(t, a, b, &d1);
-            FUN_00a2b130(t, a, b, &d2);
+            NiTCBPosKey_InterpolateD2(t, a, b, &d2);
             float v = d1.Cross(d2).Length() / d1.SqrLength();
             if (v > fScaledValue)
                 fScaledValue = v;

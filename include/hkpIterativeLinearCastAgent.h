@@ -17,7 +17,7 @@ public:
     virtual void CastImpl(const hkpCdBody* bodyA, const hkpCdBody* bodyB,
                           const void* input, hkpSimpleClosestContactCollector* collector);
 
-    void FUN_00daf540(const hkpCdBody* bodyA, const hkpCdBody* bodyB,
+    void ProcessEntries_00daf540(const hkpCdBody* bodyA, const hkpCdBody* bodyB,
                       const ShapeSweepParameters* input,
                       hkpCdPointCollector* castCollector,
                       hkpCdPointCollector* startCollector);

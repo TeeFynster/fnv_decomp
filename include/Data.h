@@ -40,13 +40,13 @@ public:
     static void* operator new(unsigned int);
 
     void Load(unsigned int);
-    float FUN_00507da0(float, float, float, bool);
-    float FUN_00821640();
-    float FUN_00821660();
+    float TESEffectShader_BirthParticles(float, float, float, bool);
+    float TESObjectWEAP_GetShotsPerSecond();
+    float GetFootWeight();
     float GetFloatAt144();
     float GetValue();
-    float FUN_00567470();
-    float FUN_00821680();
+    float TESEffectShader_GetAddOnScaleStart();
+    float TESObjectWEAP_GetFiringRumbleRightMotorStrength();
     void UpdateShaderState(Texture*, float, float, float, bool);
     void FUN_00680110(void*);
     void FUN_00403550(int);
@@ -57,7 +57,7 @@ public:
     int GetLength();
     void GetData(char*);
     void** FUN_006815c0();
-    List* FUN_0043c490();
+    List* GetTranslate_0043c490();
     int FUN_0044ddc0();
     Ref* Target();
     int Radius();

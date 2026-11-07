@@ -30,14 +30,14 @@ public:
     float GetActorValueModifierAmount(char key, bool& found);
     float GetActorValueModifierAmount(char key);
     void ModifyModifier(char key, float delta, ClampStyle clamp);
-    void FUN_009375e0(char key, float value);
+    void ModifierList_SetModifier(char key, float value);
     static float ModifyAndClamp(float value, float delta, ClampStyle clamp);
     void EraseModifier(Modifier* modifier);
     void CopyModifierListFrom(ActorValueModifierList* other);
     void AppendModifier(Modifier* modifier);
     void RemoveAllModifiers();
     void AddFastModifier(char key, Modifier* modifier);
-    void FUN_00937b50(BGSSaveFormBuffer* buffer);
+    void ModifierList_SaveGameBGS(BGSSaveFormBuffer* buffer);
     void Revert();
     void LoadGame(BGSLoadFormBuffer* buffer);
     void InitLoadGame(BGSLoadFormBuffer* buffer);

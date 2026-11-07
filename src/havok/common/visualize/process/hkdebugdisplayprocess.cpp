@@ -106,10 +106,11 @@ class Process
     int unk18;
     int unk1c;
     void* listenerVftable;
-    void FUN_00ddcb50();
+    void SetVtableAndProcessState_00ddcb50();
 };
 // @fnv 0x00ddcb50
-void Process::FUN_00ddcb50()
+// src: GUESS 0x00ddcb50 (confidence: low)
+void Process::SetVtableAndProcessState_00ddcb50()
 {
     vftable = &DAT_010d7ed0;
     baseVftable = &DAT_010d7eb0;
@@ -139,7 +140,7 @@ struct S_00ddcb90_Router
     }
 };
 
-S_00ddcb90_Router* FUN_00c85750();
+S_00ddcb90_Router* hkMemoryRouter_getInstance();
 
 struct S_00ddcb90_RefObj
 {
@@ -149,7 +150,7 @@ struct S_00ddcb90_RefObj
     {}
     void* operator new(unsigned int nbytes)
     {
-        S_00ddcb90_RefObj* b = static_cast<S_00ddcb90_RefObj*>(FUN_00c85750()->heap().AllocateMemoryBlock(nbytes));
+        S_00ddcb90_RefObj* b = static_cast<S_00ddcb90_RefObj*>(hkMemoryRouter_getInstance()->heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -175,7 +176,8 @@ struct S_00ddcb90_Obj : S_00ddcb90_RefObj, S_00ddcb90_Base2
 
 // Allocates and constructs a new S_00ddcb90_Obj via its operator new and returns it as S_00ddcb90_Base2.
 // @fnv 0x00ddcb90
-S_00ddcb90_Base2* FUN_00ddcb90()
+// src: HAVOK_LIB 0x00ddcb90
+S_00ddcb90_Base2* hkDebugDisplayProcess_create()
 {
     return new S_00ddcb90_Obj();
 }
@@ -183,7 +185,8 @@ S_00ddcb90_Base2* FUN_00ddcb90()
 namespace fnv_00ddcbe0 {
 extern int DAT_01269cdc;
 // @fnv 0x00ddcbe0
-int FUN_00ddcbe0()
+// src: GUESS 0x00ddcbe0 (confidence: low)
+int Object_GetDAT_01269cdc_00ddcbe0()
 {
     return DAT_01269cdc;
 }
@@ -202,24 +205,25 @@ struct ProcessServices
     int a, b, c, d;
     Allocator* allocator;
 };
-ProcessServices* __cdecl FUN_00c85750();
+ProcessServices* __cdecl hkMemoryRouter_getInstance();
 struct Process
 {
     int unk00;
     unsigned short unk04;
     unsigned short unk06;
     int unk08;
-    void FUN_00ddcb50();
-    Process* FUN_00ddcc10(unsigned char flags);
+    void SetVtableAndProcessState_00ddcb50();
+    Process* hkDebugDisplayProcess_Destroy(unsigned char flags);
 };
 // Calls FUN_00ddcb50, and if flags has bit 0 set, releases this process with size unk04 through the allocator from FUN_00c85750; returns this.
 // @fnv 0x00ddcc10
-Process* Process::FUN_00ddcc10(unsigned char flags)
+// src: COMMUNITY 0x00ddcc10
+Process* Process::hkDebugDisplayProcess_Destroy(unsigned char flags)
 {
-    FUN_00ddcb50();
+    SetVtableAndProcessState_00ddcb50();
     if (flags & 1)
     {
-        ProcessServices* services = FUN_00c85750();
+        ProcessServices* services = hkMemoryRouter_getInstance();
         unsigned short size = unk04;
         Allocator* allocator = services->allocator;
         allocator->Release(this, size);
@@ -363,11 +367,12 @@ class FUN_00ddcad0_owner
 class FUN_00ddcad0_cls
 {
   public:
-    void FUN_00ddcad0(int a);
+    void hkDebugDisplayProcess_sendMemStatsDump(int a);
 };
 
 // @fnv 0x00ddcad0
-void FUN_00ddcad0_cls::FUN_00ddcad0(int a)
+// src: HAVOK_LIB 0x00ddcad0
+void FUN_00ddcad0_cls::hkDebugDisplayProcess_sendMemStatsDump(int a)
 {
     FUN_00ddcad0_owner* owner = *(FUN_00ddcad0_owner**)((char*)this - 8);
     owner->v40(a);
@@ -414,7 +419,7 @@ struct ForwarderBaseDDCA
 
 struct ForwarderInterfaceDDCA
 {
-    SinkDDCA* FUN_00ddca10(int a, int b, int c, int d);
+    SinkDDCA* hkDebugDisplayProcess_displayPoint(int a, int b, int c, int d);
 };
 
 struct ForwarderDDCA : public ForwarderBaseDDCA, public ForwarderInterfaceDDCA
@@ -422,7 +427,8 @@ struct ForwarderDDCA : public ForwarderBaseDDCA, public ForwarderInterfaceDDCA
 };
 
 // @fnv 0x00ddca10
-SinkDDCA* ForwarderInterfaceDDCA::FUN_00ddca10(int aArg1, int aArg2, int aArg3, int aArg4)
+// src: HAVOK_LIB 0x00ddca10
+SinkDDCA* ForwarderInterfaceDDCA::hkDebugDisplayProcess_displayPoint(int aArg1, int aArg2, int aArg3, int aArg4)
 {
     SinkDDCA* pkDelegate =
         reinterpret_cast<ForwarderBaseDDCA*>(reinterpret_cast<char*>(this) - sizeof(ForwarderBaseDDCA))->m_delegate;
@@ -465,20 +471,21 @@ namespace fnv_00ddcc00 {
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (8).
 struct PrimaryBase
 {
-    virtual void FUN_00ddcc00();
+    virtual void AdjustThisAndForward_00ddcc00();
     int unk04;
 };
 
 struct SecondaryBase
 {
-    virtual void FUN_00ddcc00();
+    virtual void AdjustThisAndForward_00ddcc00();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00ddcc00
-    virtual void FUN_00ddcc00();
+// src: GUESS 0x00ddcc00 (confidence: low)
+    virtual void AdjustThisAndForward_00ddcc00();
 };
 
 Derived::Derived()
@@ -504,11 +511,12 @@ struct FNVHolder
 class FUN_00ddc900_cls
 {
   public:
-    void FUN_00ddc900(int a, int b, int c, unsigned int d);
+    void hkDebugDisplayProcess_addGeometryInstance(int a, int b, int c, unsigned int d);
 };
 
 // @fnv 0x00ddc900
-void FUN_00ddc900_cls::FUN_00ddc900(int a, int b, int c, unsigned int d)
+// src: HAVOK_LIB 0x00ddc900
+void FUN_00ddc900_cls::hkDebugDisplayProcess_addGeometryInstance(int a, int b, int c, unsigned int d)
 {
     FNVHolder* h = (FNVHolder*)((char*)this - 8);
     FNVTarget* t = h->m_target;
@@ -552,11 +560,12 @@ struct FNVHolder
 class FUN_00ddc940_cls
 {
   public:
-    void FUN_00ddc940(int a, int b, int c, unsigned int d);
+    void hkDebugDisplayProcess_displayGeometry(int a, int b, int c, unsigned int d);
 };
 
 // @fnv 0x00ddc940
-void FUN_00ddc940_cls::FUN_00ddc940(int aiArg1, int aiArg2, int aiArg3, unsigned int d)
+// src: HAVOK_LIB 0x00ddc940
+void FUN_00ddc940_cls::hkDebugDisplayProcess_displayGeometry(int aiArg1, int aiArg2, int aiArg3, unsigned int d)
 {
     FNVHolder* h = (FNVHolder*)((char*)this - 8);
     FNVTarget* t = h->m_target;
@@ -590,11 +599,12 @@ struct FNVHolder
 class FUN_00ddc980_cls
 {
   public:
-    void FUN_00ddc980(int a, int b, int c);
+    void hkDebugDisplayProcess_updateGeometry(int a, int b, int c);
 };
 
 // @fnv 0x00ddc980
-void FUN_00ddc980_cls::FUN_00ddc980(int aArg1, int aArg2, int aArg3)
+// src: HAVOK_LIB 0x00ddc980
+void FUN_00ddc980_cls::hkDebugDisplayProcess_updateGeometry(int aArg1, int aArg2, int aArg3)
 {
     FNVHolder* h = (FNVHolder*)((char*)this - 8);
     FNVTarget* t = h->m_target;
@@ -622,10 +632,11 @@ class FNVTarget
 class FUN_00ddc9a0_cls
 {
   public:
-    void FUN_00ddc9a0(int a, unsigned int b);
+    void hkDebugDisplayProcess_removeGeometry(int a, unsigned int b);
 };
 // @fnv 0x00ddc9a0
-void FUN_00ddc9a0_cls::FUN_00ddc9a0(int aiArg, unsigned int auiParam)
+// src: HAVOK_LIB 0x00ddc9a0
+void FUN_00ddc9a0_cls::hkDebugDisplayProcess_removeGeometry(int aiArg, unsigned int auiParam)
 {
     FNVTarget* t = *(FNVTarget**)((char*)this - 8);
     void** pVTable = *(void***)t;
@@ -664,11 +675,12 @@ struct FNVHolder
 class FUN_00ddca30_cls
 {
   public:
-    void FUN_00ddca30(int a, int b, int c, int d, unsigned int e);
+    void hkDebugDisplayProcess_displayLine(int a, int b, int c, int d, unsigned int e);
 };
 
 // @fnv 0x00ddca30
-void FUN_00ddca30_cls::FUN_00ddca30(int aiArg1, int aiArg2, int aiArg3, int aiArg4, unsigned int auArg5)
+// src: HAVOK_LIB 0x00ddca30
+void FUN_00ddca30_cls::hkDebugDisplayProcess_displayLine(int aiArg1, int aiArg2, int aiArg3, int aiArg4, unsigned int auArg5)
 {
     FNVHolder* h = (FNVHolder*)((char*)this - 8);
     FNVTarget* t = h->m_target;
@@ -700,10 +712,11 @@ struct VirtualReceiver
 };
 struct WrapperObject
 {
-    int __thiscall FUN_00ddcab0(int first, int second, int third);
+    int __thiscall hkDebugDisplayProcess_displayAnnotation(int first, int second, int third);
 };
 // @fnv 0x00ddcab0
-int WrapperObject::FUN_00ddcab0(int first, int second, int third)
+// src: HAVOK_LIB 0x00ddcab0
+int WrapperObject::hkDebugDisplayProcess_displayAnnotation(int first, int second, int third)
 {
     VirtualReceiver* receiver = *(VirtualReceiver**)((char*)this - 8);
     return receiver->method13(first, second, DAT_01269cdc);
@@ -736,12 +749,13 @@ class FUN_00ddcaf0_cls
     void* m_20;
 
     void Helper();
-    FUN_00ddcaf0_cls* FUN_00ddcaf0();
+    FUN_00ddcaf0_cls* hkDebugDisplayProcess_hkDebugDisplayProcess();
 };
 
 // Initializes m_06, m_0c, m_08, m_20, and m_vtbl, calls Helper if DAT_01269cdc is zero, then dispatches m_20 via GlobalDispatcher.
 // @fnv 0x00ddcaf0
-FUN_00ddcaf0_cls* FUN_00ddcaf0_cls::FUN_00ddcaf0()
+// src: HAVOK_LIB 0x00ddcaf0
+FUN_00ddcaf0_cls* FUN_00ddcaf0_cls::hkDebugDisplayProcess_hkDebugDisplayProcess()
 {
     unsigned char flag = 1;
     m_06 = 1;
@@ -762,20 +776,21 @@ FUN_00ddcaf0_cls* FUN_00ddcaf0_cls::FUN_00ddcaf0()
 }  // namespace fnv_00ddcaf0
 
 namespace fnv_00ddcbc0 {
-void* __cdecl FUN_00ddcb90();
+void* __cdecl hkDebugDisplayProcess_create();
 
 struct S_00ddcbc0_Factory
 {
-    void* FUN_00dd9380(const char* name, void*(__cdecl* createFn)());
+    void* hkProcessFactory_registerProcess(const char* name, void*(__cdecl* createFn)());
 };
 
 extern "C" S_00ddcbc0_Factory* DAT_01269cd0;
 extern "C" void* DAT_01269cdc;
 
 // @fnv 0x00ddcbc0
-void FUN_00ddcbc0()
+// src: COMMUNITY 0x00ddcbc0
+void hkDebugDisplayProcess_registerProcess()
 {
-    DAT_01269cdc = DAT_01269cd0->FUN_00dd9380("Debug Display", FUN_00ddcb90);
+    DAT_01269cdc = DAT_01269cd0->hkProcessFactory_registerProcess("Debug Display", hkDebugDisplayProcess_create);
 }
 }  // namespace fnv_00ddcbc0
 
@@ -796,14 +811,15 @@ struct BehaviorReceiver : TargetIface
 
 struct BehaviorForwarder
 {
-    int FUN_00ddca00(const HavokElementArray<int>& words, const HavokElementArray<int>& values, const HavokElementArray<int>& quads,
+    int hkDebugDisplayProcess_updateBehavior(const HavokElementArray<int>& words, const HavokElementArray<int>& values, const HavokElementArray<int>& quads,
                      const HavokElementArray<hkVector4>& vectors, const HavokElementArray<char*>& nodes,
                      const HavokElementArray<int>& states, const HavokElementArray<int>& transitions,
                      const HavokElementArray<hkQsTransform>& poses);
 };
 
 // @fnv 0x00ddca00
-int BehaviorForwarder::FUN_00ddca00(const HavokElementArray<int>& words, const HavokElementArray<int>& values,
+// src: HAVOK_LIB 0x00ddca00
+int BehaviorForwarder::hkDebugDisplayProcess_updateBehavior(const HavokElementArray<int>& words, const HavokElementArray<int>& values,
                                     const HavokElementArray<int>& quads, const HavokElementArray<hkVector4>& vectors,
                                     const HavokElementArray<char*>& nodes, const HavokElementArray<int>& states,
                                     const HavokElementArray<int>& transitions, const HavokElementArray<hkQsTransform>& poses)
@@ -828,7 +844,7 @@ struct TextReceiver : TargetIface
 struct TextEntry
 {
     void* vftable;
-    int FUN_00ddca70(const char* text, int color, int id, int tag);
+    int hkDebugDisplayProcess_displayText(const char* text, int color, int id, int tag);
 };
 
 struct TextForwarder : OwnerHolder, TextEntry
@@ -836,7 +852,8 @@ struct TextForwarder : OwnerHolder, TextEntry
 };
 
 // @fnv 0x00ddca70
-int TextEntry::FUN_00ddca70(const char* text, int color, int id, int tag)
+// src: HAVOK_LIB 0x00ddca70
+int TextEntry::hkDebugDisplayProcess_displayText(const char* text, int color, int id, int tag)
 {
     __assume(this != 0);
     TextForwarder& owner = static_cast<TextForwarder&>(*this);
@@ -864,7 +881,7 @@ struct ImmediateReceiver : TargetIface
 
 struct ImmediateForwarder
 {
-    int FUN_00ddcae0();
+    int hkDebugDisplayProcess_holdImmediate();
 };
 
 struct ImmediateOwner : OwnerHolder
@@ -873,7 +890,8 @@ struct ImmediateOwner : OwnerHolder
 };
 
 // @fnv 0x00ddcae0
-int ImmediateForwarder::FUN_00ddcae0()
+// src: HAVOK_LIB 0x00ddcae0
+int ImmediateForwarder::hkDebugDisplayProcess_holdImmediate()
 {
     ImmediateOwner* owner = reinterpret_cast<ImmediateOwner*>(reinterpret_cast<char*>(this) - sizeof(OwnerHolder));
     return static_cast<ImmediateReceiver*>(owner->m_target)->GetTypeItem();

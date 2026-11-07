@@ -31,8 +31,8 @@ public:
     BSStream();
     virtual ~BSStream();
 
-    using NiStream::FUN_00c3a8a0;
-    virtual bool FUN_00c3a8a0(const char* name);
+    using NiStream::BSStream_Load;
+    virtual bool BSStream_Load(const char* name);
 
     unsigned int GetRefAt21C();
     NiNode* GetStringAt(unsigned int index);

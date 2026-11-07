@@ -41,7 +41,7 @@ Derived::Derived()
 // bases declare, so the secondary base's vtable gets a thunk that moves `this` back by the primary base size (0x4c).
 struct AdjustPrimaryBase
 {
-    virtual void FUN_00403a60();
+    virtual void AdjustThisAndForward_00403a60();
     int unk04;
     int unk08;
     int unk0C;
@@ -64,14 +64,15 @@ struct AdjustPrimaryBase
 
 struct AdjustSecondaryBase
 {
-    virtual void FUN_00403a60();
+    virtual void AdjustThisAndForward_00403a60();
 };
 
 struct AdjustDerived : AdjustPrimaryBase, AdjustSecondaryBase
 {
     AdjustDerived();
 // @fnv 0x00403a60
-    virtual void FUN_00403a60();
+// src: GUESS 0x00403a60 (confidence: low)
+    virtual void AdjustThisAndForward_00403a60();
 };
 
 AdjustDerived::AdjustDerived()

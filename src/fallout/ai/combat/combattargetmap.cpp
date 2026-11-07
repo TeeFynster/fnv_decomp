@@ -19,7 +19,7 @@ public:
     ~CombatThreatRecord_combattargetmap();
     bool IsXLessThan(float);
     void LoadGame(BGSLoadGameBuffer*);
-    void __thiscall FUN_009a5e50();
+    void __thiscall SetVtableAndProcessState_009a5e50();
 };
 #include "../../../../include/DummyPointerMap.h"
 #include "../../../../include/GO.h"
@@ -44,7 +44,7 @@ void CombatTargetMap::ResetTargetMap()
                 ((BGSSaveLoadChangesMap*)this)->RemoveAt(key);
             }
         }
-        ((CombatTargetMapLock*)((char*)this + 0x10))->FUN_00aa62e0();
+        ((CombatTargetMapLock*)((char*)this + 0x10))->BSReadWriteLock_UnlockWrite();
     }
 }
 
@@ -54,7 +54,8 @@ struct _Node_006f99e0
 };
 
 // @fnv 0x006f99e0
-void* __fastcall FUN_006f99e0(void* _this)
+// src: COMMUNITY 0x006f99e0
+void* __fastcall ImpactImpactMap_NewItem(void* _this)
 {
     return new _Node_006f99e0;
 }

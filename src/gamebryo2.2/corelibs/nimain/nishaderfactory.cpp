@@ -38,7 +38,8 @@ const NiRTTI* NiD3DShaderProgram::GetRTTI() const
 
 int __cdecl SwapBufferBySizes(void*, unsigned int, void*, void*);
 // @fnv 0x00aa19e0
-unsigned int __cdecl FUN_00aa19e0(NiFile* apFile, void* apBuffer, unsigned int auiSize, void* apArg4, void* apArg5)
+// src: GAMEBRYO_LIB 0x00aa19e0
+unsigned int __cdecl NiFile_ReadAndSwap(NiFile* apFile, void* apBuffer, unsigned int auiSize, void* apArg4, void* apArg5)
 {
     if (auiSize <= 0)
         return 0;
@@ -75,7 +76,7 @@ public:
     void* m_pResource;
 };
 
-void* __cdecl FUN_00aa13e0(unsigned int uiSize);
+void* __cdecl Object_DispatchCommandFour(unsigned int uiSize);
 
 // The bare handle of an NiFixedString whose constructor and destructor these functions spell out inline (NiMain
 // has no exception frames; a real NiFixedString local would add one to this /EHsc unit).
@@ -109,7 +110,7 @@ bool __cdecl AcquireGlobalConstantEntry(const NiFixedString* pkName, unsigned in
         pkItem = pkItem->m_pkNext;
     }
 
-    void* pvMem = FUN_00aa13e0(0x18);
+    void* pvMem = Object_DispatchCommandFour(0x18);
     if (pvMem == 0)
         return false;
     const char* pcName = pkName->m_kHandle;
@@ -251,7 +252,8 @@ NiShaderFactory::~NiShaderFactory() throw()
 }
 
 // @fnv 0x00a38de0
-int __stdcall FUN_00a38de0(int unk08)
+// src: COMMUNITY 0x00a38de0
+int __stdcall _return0(int unk08)
 {
     return 0;
 }
@@ -264,7 +266,7 @@ extern int DAT_011f4400;
 typedef int(__stdcall* FUN_00aa0190_Decrement)(void*);
 extern FUN_00aa0190_Decrement DAT_00fdf1c4;
 
-void __cdecl FUN_00aa10f0(void* p);
+void __cdecl _NiFree_00aa10f0(void* p);
 void __cdecl FUN_00aa1460(void* p, unsigned int size);
 
 // @fnv 0x00aa0190
@@ -272,7 +274,7 @@ void* __thiscall NiGlobalConstantEntry::Destroy(int aiFlags)
 {
     void* saved = m_pResource;
     *(int**)this = &DAT_010a2148;
-    FUN_00aa10f0(saved);
+    _NiFree_00aa10f0(saved);
 
     void* head = m_kName.m_kHandle;
     FUN_00aa0190_Decrement decrement = DAT_00fdf1c4;
@@ -294,7 +296,8 @@ void* __thiscall NiGlobalConstantEntry::Destroy(int aiFlags)
 
 // Returns 0 regardless of its three arguments.
 // @fnv 0x00b57fc0
-int __stdcall FUN_00b57fc0(int arg0, int arg1, int arg2)
+// src: COMMUNITY 0x00b57fc0
+int __stdcall NiShaderFactory_Func000(int arg0, int arg1, int arg2)
 {
     return 0;
 }
@@ -303,7 +306,7 @@ extern char* _EmptyFS;
 
 struct Stub
 {
-    __declspec(noalias) void FUN_00aa0250(NiFixedString* kKey);
+    __declspec(noalias) void NiTStringPointerMap_NiAVObject_RemoveAt(NiFixedString* kKey);
 };
 
 // Finds the global constant entry for pkName in the shader factory, decrements its ref count, and deletes it when it reaches zero.
@@ -339,7 +342,7 @@ bool RemoveGlobalConstant(const NiFixedString* pkName)
     kLocal.m_kHandle = pcHandle;
     if (pkEntry->m_uiRefCount == 1)
     {
-        ((Stub*)&pkFactory->m_kGlobalConstantEntryMap)->FUN_00aa0250(reinterpret_cast<NiFixedString*>(&kLocal));
+        ((Stub*)&pkFactory->m_kGlobalConstantEntryMap)->NiTStringPointerMap_NiAVObject_RemoveAt(reinterpret_cast<NiFixedString*>(&kLocal));
         if (InterlockedDecrement((long*)&pkEntry->m_uiRefCount) == 0)
             pkEntry->DeleteThis();
     }

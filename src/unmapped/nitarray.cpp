@@ -23,10 +23,11 @@
 
 // Forwards p to the shader factory at offset 0xf8, then passes the pointer at 0x10f8 to its second method.
 // @fnv 0x00e87980
-void NiD3DRenderState::FUN_00e87980(void* apData)
+// src: COMMUNITY 0x00e87980
+void NiD3DRenderState::ApplyMaterial(void* apData)
 {
     ((NiD3DShaderFactory*)((char*)this + 0xf8))->UpdateShaderMaterialCache(apData);
-    ((NiD3DShaderFactory*)((char*)this + 0xf8))->FUN_00e94050(*(void**)((char*)this + 0x10f8));
+    ((NiD3DShaderFactory*)((char*)this + 0xf8))->NiDX9MaterialManager_UpdateToDevice(*(void**)((char*)this + 0x10f8));
 }
 
 struct FUN_009ba5f0_shell
@@ -81,11 +82,12 @@ template <> void NiTArray<KeyPair*, NiTMallocInterface<KeyPair*> >::SetAt(unsign
 struct KeyPairArray : NiTPrimitiveArray<KeyPair*>
 {
     int FindPairIndex(void* apFirst, void* apSecond);
-    bool FUN_00a41520(void* apFirst, void* apSecond);
+    bool BSAnimNoteListener_Register(void* apFirst, void* apSecond);
 };
 
 // @fnv 0x00a41520
-bool KeyPairArray::FUN_00a41520(void* apFirst, void* apSecond)
+// src: COMMUNITY 0x00a41520
+bool KeyPairArray::BSAnimNoteListener_Register(void* apFirst, void* apSecond)
 {
     if (FindPairIndex(apFirst, apSecond) == -1)
     {
@@ -121,12 +123,12 @@ void __cdecl DeleteNiNodePointerArray(NiPointer<NiNode>* pNodePointerArray)
     }
 }
 
-void* __cdecl FUN_00aa1070(unsigned int auiSize);
-void __cdecl FUN_00aa10f0(void* apMemory);
+void* __cdecl _NiMalloc_00aa1070(unsigned int auiSize);
+void __cdecl _NiFree_00aa10f0(void* apMemory);
 
 template <> inline KeyPair** NiTMallocInterface<KeyPair*>::Allocate(unsigned int auiCount)
 {
-    return (KeyPair**)FUN_00aa1070(sizeof(KeyPair*) * auiCount);
+    return (KeyPair**)_NiMalloc_00aa1070(sizeof(KeyPair*) * auiCount);
 }
 
 // Resizes the key-pair array to auiNewSize, clearing dropped entries, reallocating, copying old entries and freeing the old buffer.
@@ -167,7 +169,7 @@ template <> void NiTArray<KeyPair*, NiTMallocInterface<KeyPair*> >::SetSize(unsi
         this->m_pBase = 0;
     }
 
-    FUN_00aa10f0(oldEntries);
+    _NiFree_00aa10f0(oldEntries);
 }
 
 // Stores the entry pointer at the given index, growing the count and adjusting the non-null entry counter when the slot's nullness changes.
@@ -234,7 +236,7 @@ void C89CD0Holder::ProcessTarget(void* arg)
 
 struct Target
 {
-    void FUN_00c89bf0(void* apArg);
+    void UpdateState_00c89bf0(void* apArg);
 };
 
 struct FUN_00c89cf0_cls
@@ -252,7 +254,7 @@ void FUN_00c89cf0_cls::DispatchToTarget(void* apArg)
     if (this != 0)
     {
         if (m_pFlagTarget != 0)
-            m_pFlagTarget->FUN_00c89bf0(apArg);
+            m_pFlagTarget->UpdateState_00c89bf0(apArg);
     }
 }
 
@@ -299,7 +301,7 @@ template <> inline NiPointer<NiShaderConstantMapEntry>& NiPointer<NiShaderConsta
 
 typedef NiPointer<NiObject> ObjectPtr;
 
-ObjectPtr* __cdecl FUN_00c1d790(unsigned int auiCount);
+ObjectPtr* __cdecl NiTObjectArray_NiPointer_NiScreenTexture_NiTObjectArray_NiPointer_NiScreenTexture(unsigned int auiCount);
 void __cdecl ReleaseObjectArray(ObjectPtr* pkArray);
 
 // Resizes the object array to uiMaxSize, releasing surplus elements and reallocating m_pBase while preserving existing entries.
@@ -327,7 +329,7 @@ template <> void NiTArray<ObjectPtr, NiTNewInterface<ObjectPtr> >::SetSize(unsig
     this->m_usMaxSize = (unsigned short)uiCapacity;
     if (uiCapacity > 0)
     {
-        this->m_pBase = FUN_00c1d790(this->m_usMaxSize);
+        this->m_pBase = NiTObjectArray_NiPointer_NiScreenTexture_NiTObjectArray_NiPointer_NiScreenTexture(this->m_usMaxSize);
         for (i = 0; i < this->m_usSize; i++)
             this->m_pBase[i] = pSaveBase[i];
         for (i = this->m_usSize; i < this->m_usMaxSize; i++)
@@ -456,12 +458,13 @@ struct FUN_00e878c0_cls
     int unk30;
     int m_34;
 
-    int FUN_00e878c0(NiShaderConstantMapEntry* apObj);
+    int NiD3DShaderConstantMap_InsertEntry(NiShaderConstantMapEntry* apObj);
 };
 
 // Holds a reference on apObj while calling FUN_00e87800 on the sub-object at unk0c; sets m_34 to 0x30 if it returns -1, and returns m_34.
 // @fnv 0x00e878c0
-int FUN_00e878c0_cls::FUN_00e878c0(NiShaderConstantMapEntry* apObj)
+// src: COMMUNITY 0x00e878c0
+int FUN_00e878c0_cls::NiD3DShaderConstantMap_InsertEntry(NiShaderConstantMapEntry* apObj)
 {
     NiShaderConstantMapEntry* pObj = apObj;
     *(NiShaderConstantMapEntry* volatile*)&apObj = pObj;
@@ -501,12 +504,13 @@ struct FUN_00e87920_cls
     int unk30;
     int m_34;
 
-    int FUN_00e87920(NiShaderConstantMapEntry* apObj);
+    int NiD3DShaderConstantMap_InsertEntry_00e87920(NiShaderConstantMapEntry* apObj);
 };
 
 // Holds a reference on apObj while calling FUN_00e87800 on the sub-object at unk1c; sets m_34 to 0x30 if it returns -1, and returns m_34.
 // @fnv 0x00e87920
-int FUN_00e87920_cls::FUN_00e87920(NiShaderConstantMapEntry* apObj)
+// src: GAMEBRYO_LIB 0x00e87920
+int FUN_00e87920_cls::NiD3DShaderConstantMap_InsertEntry_00e87920(NiShaderConstantMapEntry* apObj)
 {
     NiShaderConstantMapEntry* pObj = apObj;
     *(NiShaderConstantMapEntry* volatile*)&apObj = pObj;
@@ -648,7 +652,7 @@ template <class T> struct TFixedArray
     int unk0c;
     TFixedArray(unsigned int uiSize) : m_uiSize(uiSize), unk0c(0)
     {
-        m_pData = (T*)FUN_00aa1070(uiSize * sizeof(T));
+        m_pData = (T*)_NiMalloc_00aa1070(uiSize * sizeof(T));
         FUN_00ec61c0(m_pData, 0, m_uiSize * sizeof(T));
     }
     virtual ~TFixedArray();
@@ -744,12 +748,12 @@ void __cdecl RemoveGlobalConstant(void** appRef);
 
 struct FUN_00e7de30_cls
 {
-    void FUN_00e7de30();
+    void UpdateReferenceState_00e7de30();
 };
 
 struct FUN_00e891f0_cls
 {
-    void FUN_00e891f0();
+    void NiD3DTextureStageGroup_RemoveAllStageStates();
     void ClearFields();
 };
 
@@ -795,25 +799,26 @@ struct FUN_00e7ecd0_cls
     unsigned char m_5e;
     unsigned char m_5f;
 
-    void FUN_00e7ecd0();
+    void NiD3DTextureStage_ReturnStageToPool();
 };
 
 // If m_5f is 0, calls FUN_00e7de30 then FUN_00aa1460(this, 0x68); otherwise resets m_10, m_18 and other fields and passes this to DAT_0126f6cc->FindOrAdd.
 // @fnv 0x00e7ecd0
-void FUN_00e7ecd0_cls::FUN_00e7ecd0()
+// src: COMMUNITY 0x00e7ecd0
+void FUN_00e7ecd0_cls::NiD3DTextureStage_ReturnStageToPool()
 {
     void* ref;
 
     if (m_5f == 0)
     {
-        ((FUN_00e7de30_cls*)this)->FUN_00e7de30();
+        ((FUN_00e7de30_cls*)this)->UpdateReferenceState_00e7de30();
         FUN_00aa1460(this, 0x68);
         return;
     }
 
     FUN_00e891f0_cls* obj = m_10;
     m_08 = 0;
-    obj->FUN_00e891f0();
+    obj->NiD3DTextureStageGroup_RemoveAllStageStates();
     m_10->ClearFields();
 
     RefHolder* holder = m_18;
@@ -989,7 +994,8 @@ struct MaterialDeviceView
 };
 
 // @fnv 0x00e94050
-__declspec(noinline) void NiD3DShaderFactory::FUN_00e94050(void* apDevice)
+// src: GAMEBRYO_LIB 0x00e94050
+__declspec(noinline) void NiD3DShaderFactory::NiDX9MaterialManager_UpdateToDevice(void* apDevice)
 {
     MaterialDeviceView* device = (MaterialDeviceView*)apDevice;
     if (*(bool*)((char*)this + 4))

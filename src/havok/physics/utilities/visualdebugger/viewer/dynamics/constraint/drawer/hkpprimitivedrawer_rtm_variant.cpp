@@ -6,7 +6,7 @@
 struct CpuObject
 {
     int value;
-    void FUN_00e10a10(int value);
+    void hkpPrimitiveDrawer_setDisplayHandler(int value);
 };
 
 namespace ArrowDraw {
@@ -52,7 +52,7 @@ struct ArrowDrawVector
 struct ArrowDrawQuaternion
 {
     float x, y, z, w;
-    void FUN_00cb2450(int axis, float angle);
+    void hkQuaternion_setAxisAngle(int axis, float angle);
 };
 
 struct ArrowDrawTarget
@@ -71,8 +71,8 @@ struct ArrowDrawTarget
 
 struct ArrowDrawObject : ::CpuObject
 {
-    void FUN_00e11180(const ArrowDrawVector* p1, int p2, const ArrowDrawVector* p3, int p4, float p5, int p6, int p7);
-    void FUN_00e10d50(const ArrowDrawVector* a0, int a1, const ArrowDrawVector* a2, int a3, float a4, int a5, int a6);
+    void ProcessEntries_00e11180(const ArrowDrawVector* p1, int p2, const ArrowDrawVector* p3, int p4, float p5, int p6, int p7);
+    void ComputeValues_00e10d50(const ArrowDrawVector* a0, int a1, const ArrowDrawVector* a2, int a3, float a4, int a5, int a6);
 };
 
 static __forceinline ArrowDrawMath::LocalM128 Hk_e10d50_splat(float f)
@@ -100,7 +100,8 @@ static __forceinline ArrowDrawMath::LocalM128 Hk_e10d50_rot(const ArrowDrawMath:
 }
 
 // @fnv 0x00e10d50
-void ArrowDrawObject::FUN_00e10d50(const ArrowDrawVector* a0, int a1, const ArrowDrawVector* a2, int a3, float a4,
+// src: GUESS 0x00e10d50 (confidence: low)
+void ArrowDrawObject::ComputeValues_00e10d50(const ArrowDrawVector* a0, int a1, const ArrowDrawVector* a2, int a3, float a4,
                                    int a5, int a6)
 {
     ArrowDrawVector p1, p2;
@@ -108,8 +109,8 @@ void ArrowDrawObject::FUN_00e10d50(const ArrowDrawVector* a0, int a1, const Arro
     p1.m = ArrowDrawMath::_mm_add_ps(ArrowDrawMath::_mm_mul_ps(Hk_e10d50_splat(a4), ((const ArrowDrawVector*)a1)->m),
                                      a0->m);
     ((ArrowDrawTarget*)value)->edge(a0, &p1, a3, a5, a6);
-    q1.FUN_00cb2450((int)a2, DAT_01064f60);
-    q2.FUN_00cb2450((int)a2, DAT_01016b78);
+    q1.hkQuaternion_setAxisAngle((int)a2, DAT_01064f60);
+    q2.hkQuaternion_setAxisAngle((int)a2, DAT_01016b78);
     double na = -a4;
     ArrowDrawMath::LocalM128 r1 = Hk_e10d50_rot(*(ArrowDrawMath::LocalM128*)&q1, ((const ArrowDrawVector*)a1)->m);
     volatile float s = (float)(na * DAT_010c4ab0);

@@ -146,11 +146,12 @@ struct FUN_00bc1b90_shell
 {
     char pad[0x178];
     int m_178;
-    bool __thiscall FUN_00bc1b90(int value);
+    bool __thiscall BoltShaderProperty_SetupGeometry(int value);
 };
 
 // @fnv 0x00bc1b90
-bool __thiscall FUN_00bc1b90_shell::FUN_00bc1b90(int value)
+// src: XBOX_PDB 0x00bc1b90
+bool __thiscall FUN_00bc1b90_shell::BoltShaderProperty_SetupGeometry(int value)
 {
     m_178 = value;
     return 1;
@@ -476,16 +477,17 @@ struct Obj_bc18d0
     Prop_bc18d0* GetProperty(int iType);
 };
 
-Obj_bc18d0* __cdecl FUN_00bc15a0();
+Obj_bc18d0* __cdecl BoltShader_GetBoltGeometry();
 void __cdecl FUN_00b57e30(Obj_bc18d0* pkObj, int a2, int a3);
 
 // Clones a node from FUN_00bc15a0, attaches it to pkNode, gets property type 3, and if its m_iType1c is 0xf increments DAT_01201f54 and calls v39 on it.
 // @fnv 0x00bc18d0
-Prop_bc18d0* __cdecl FUN_00bc18d0(Obj_bc18d0* pkNode)
+// src: COMMUNITY 0x00bc18d0
+Prop_bc18d0* __cdecl BoltShader_Start(Obj_bc18d0* pkNode)
 {
     if (pkNode)
     {
-        Obj_bc18d0* pkClone = FUN_00bc15a0()->Clone();
+        Obj_bc18d0* pkClone = BoltShader_GetBoltGeometry()->Clone();
         pkNode->AttachChild55(pkClone, true);
         FUN_00b57e30(pkClone, 0, 0);
         Prop_bc18d0* pkProp = pkClone->GetProperty(3);
@@ -495,7 +497,7 @@ Prop_bc18d0* __cdecl FUN_00bc18d0(Obj_bc18d0* pkNode)
         Prop_bc18d0* pkShaderProp = bIsShaderType ? pkProp : 0;
         if (pkShaderProp)
         {
-            FUN_00bc15a0();
+            BoltShader_GetBoltGeometry();
             ++DAT_01201f54;
             pkShaderProp->v39(pkClone);
             return pkShaderProp;
@@ -645,7 +647,8 @@ extern Fn1470Ref* DAT_01201f58;
 
 // Calls Slot3c for each matching result; when the counter is nonpositive, releases and clears the global reference and resets the counter.
 // @fnv 0x00bc1470
-void __cdecl FUN_00bc1470(Fn1470Owner* pOwner, Fn1470Result* pWanted)
+// src: COMMUNITY 0x00bc1470
+void __cdecl BoltShader_Stop(Fn1470Owner* pOwner, Fn1470Result* pWanted)
 {
     if (pOwner == 0 || pWanted == 0)
     {
@@ -695,7 +698,7 @@ void __cdecl FUN_00bc1470(Fn1470Owner* pOwner, Fn1470Result* pWanted)
     DAT_01201f54 = 0;
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 extern MemoryManager _g_memoryManager;
 
@@ -725,9 +728,9 @@ class FUN_00ba63e0 : public NiObject
     int unk24;
     int unk28;
     FUN_00ba63e0(unsigned short, unsigned int);
-    void FUN_00a72ca0(unsigned int);
-    void FUN_00a72bb0(unsigned int, void*, unsigned int, unsigned int);
-    void FUN_00a726a0(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+    void SetSize_Thunk(unsigned int);
+    void NiAdditionalGeometryData_SetDataBlock(unsigned int, void*, unsigned int, unsigned int);
+    void NiAdditionalGeometryData_SetDataStream(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
 };
 
 class FUN_00a7b630 : public NiObject
@@ -905,7 +908,8 @@ inline unsigned int GetSegmentCount()
 
 // Returns the cached object or creates one from repeated quad vertex and index data and stores it in the cache.
 // @fnv 0x00bc15a0
-Obj_bc18d0* FUN_00bc15a0()
+// src: XBOX_PDB 0x00bc15a0
+Obj_bc18d0* BoltShader_GetBoltGeometry()
 {
     if (CachedShape())
         return (Obj_bc18d0*)(FUN_00a74480*)CachedShape();
@@ -951,9 +955,9 @@ Obj_bc18d0* FUN_00bc15a0()
     FUN_00a7b630* pkData = new FUN_00a7b630(usNumVertices, pVertices, 0, 0, 0, 0, 0, usNumTriangles, pIndices);
 
     FUN_00ba63e0* pkExt = new FUN_00ba63e0(usNumVertices, 1);
-    pkExt->FUN_00a72ca0(1);
-    pkExt->FUN_00a72bb0(0, GetOrCreateTable(), (unsigned short)usNumVertices * 4, 1);
-    pkExt->FUN_00a726a0(0, 0, 0, 1, usNumVertices, 4, 4);
+    pkExt->SetSize_Thunk(1);
+    pkExt->NiAdditionalGeometryData_SetDataBlock(0, GetOrCreateTable(), (unsigned short)usNumVertices * 4, 1);
+    pkExt->NiAdditionalGeometryData_SetDataStream(0, 0, 0, 1, usNumVertices, 4, 4);
 
     pkData->FUN_00a67260(pkExt);
 

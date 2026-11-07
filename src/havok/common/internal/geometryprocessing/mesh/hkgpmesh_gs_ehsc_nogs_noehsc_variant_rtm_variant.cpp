@@ -65,12 +65,12 @@ public:
     PacketCallLocal_00e19d60(float x, float y, float z, float w);
     PacketCallLocal_00e19d60(const __m128& vector);
 
-    PacketCallLocal_00e19d60* FUN_005532a0(float x, float y, float z, float w);
-    void FUN_004a3f10(PacketCallLocal_00e19d60* vector);
-    void __thiscall FUN_004b4db0(const PacketCallLocal_00e19d60* vector);
-    PacketCallLocal_00e19d60& FUN_00e531a0(int parameter);
-    PacketCallLocal_00e19d60 FUN_00e53260(int parameter);
-    void FUN_005611c0();
+    PacketCallLocal_00e19d60* hkVector4_hkVector4(float x, float y, float z, float w);
+    void SetValue(PacketCallLocal_00e19d60* vector);
+    void __thiscall SetQuaternionComponentsFromVector(const PacketCallLocal_00e19d60* vector);
+    PacketCallLocal_00e19d60& ComputeValue_00e531a0(int parameter);
+    PacketCallLocal_00e19d60 ProcessAndReturnValue_00e53260(int parameter);
+    void normalize_005611c0();
 
     void operator=(const PacketCallLocal_00e19d60& vector);
     float& operator()(int index);
@@ -127,7 +127,7 @@ public:
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00e12140_cls
 {
-    void FUN_00e12140();
+    void hkgpMesh_setPartIdsAsPlaneIndices();
 };
 extern "C" void __cdecl Deallocate(void*);
 extern int DAT_010eadfc;
@@ -142,13 +142,13 @@ struct FUN_00e234e0_
 };
 struct FUN_00e238e0_
 {
-    void FUN_00e238e0();
+    void ProcessState_00e238e0();
 };
 void __cdecl ProcessEntries();
-void __cdecl FUN_00e23a10();
+void __cdecl hkgpAbstractMeshDefinitions_List_struct_hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Triangle_struct_hkgpAbstractMeshDefinitions_List_struct_hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Vertex_struct_hkgpTriangulatorBase_VertexBase_struct_hkGeometryProcessing_PoolAllocator_struct_hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Vertex_32_struct_hkContainerHeapAllocator_Item_struct_hkGeometryProcessing_PoolAllocator_struct_hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Triangle_32_struct_hkContainerHeapAllocator_reset();
 struct FUN_00e24a80_Class
 {
-    void __thiscall FUN_00e24a80();
+    void __thiscall hkgpAbstractMesh_hkgpTriangulatorType_hkgpTriangulatorBase_VertexBase_hkgpTriangulatorBase_TriangleBase_hkgpTriangulatorBase_DefaultEdgeData_hkContainerHeapAllocator_hkContainerHeapAllocator_1_Edge_hkgpTriangulatorType_hkgpTriangulatorBase_VertexBase_hkgpTriangulatorBase_TriangleBase_hkgpTriangulatorBase_DefaultEdgeData_hkContainerHeapAllocator_hkContainerHeapAllocator_1_Vertex_hkgpTriangulatorType_hkgpTriangulatorBase_VertexBase_hkgpTriangulatorBase_TriangleBase_hkgpTriangulatorBase_();
 };
 struct __declspec(align(16)) S_00e120e0_Vec
 {
@@ -185,7 +185,7 @@ struct S_00e120e0_Collector
     }
     virtual void Add();
 };
-void __cdecl FUN_00d1d570(void* pWorld, const S_00e120e0_Vec& kData, S_00e120e0_Collector* pCollector);
+void __cdecl AabbTree_ProcessIfPresent_00d1d570(void* pWorld, const S_00e120e0_Vec& kData, S_00e120e0_Collector* pCollector);
 struct S_00e120e0
 {
     int unk00;
@@ -248,7 +248,7 @@ struct Allocator
     virtual void v0c();
     __declspec(nothrow) virtual void freeBlock(void*, int);
 };
-__declspec(nothrow) hkMemoryRouter& __cdecl FUN_00c85750();
+__declspec(nothrow) hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 struct VectorArray
 {
     PacketCallLocal_00e19d60* data;
@@ -268,7 +268,7 @@ struct Options
     unsigned int unk00, unk04;
     unsigned char flag08, flag09, flag0a, flag0b;
     unsigned int unk0c;
-    __declspec(nothrow) void FUN_00d74d40();
+    __declspec(nothrow) void hkgpConvexHull_BuildConfig_BuildConfig();
 };
 struct FUN_00d76ca0
 {
@@ -284,10 +284,10 @@ struct FUN_00d76ca0
     }
     static void* operator new(unsigned int bytes)
     {
-        return allocate(reinterpret_cast<Allocator&>(FUN_00c85750().heap()), bytes);
+        return allocate(reinterpret_cast<Allocator&>(hkMemoryRouter_getInstance().heap()), bytes);
     }
-    __declspec(nothrow) void FUN_00d771c0(PacketCallLocal_00e19d60*, int, const Options&);
-    __declspec(nothrow) int FUN_00d74e10();
+    __declspec(nothrow) void hkgpConvexHull_build(PacketCallLocal_00e19d60*, int, const Options&);
+    __declspec(nothrow) int GetInnerField1A8();
 };
 struct Hull
 {
@@ -350,11 +350,11 @@ struct Hull
     unsigned int unke0;
     FUN_00d76ca0* builder;
     __declspec(nothrow) void ReleaseSubobject();
-    __declspec(nothrow) void FUN_00e12640(VectorArray&);
+    __declspec(nothrow) void hkgpMesh_fetchPositions(VectorArray&);
     bool BuildHull();
 };
 void __cdecl __debugbreak();
-int __stdcall FUN_00e230f0(int);
+int __stdcall hkgpAbstractMesh_struct_hkgpMeshBase_Edge_struct_hkgpMeshBase_Vertex_struct_hkgpMeshBase_Triangle_struct_hkContainerHeapAllocator_checkTopology(int);
 extern char DAT_0103d078[];
 extern char DAT_010eaf08[];
 extern char DAT_010eaeb4[];
@@ -364,7 +364,7 @@ struct CharBuffer
     char* end;
     unsigned int capacity;
     void FUN_00cb1600(char*, unsigned int);
-    CharBuffer* FUN_00cc01c0(const char*);
+    CharBuffer* ProcessAndReturnValue_00cc01c0(const char*);
     CharBuffer* WriteInt(int);
     void FUN_00cc00e0();
 };
@@ -463,7 +463,7 @@ struct FUN_00e14fe0_cls
     char m_b100;
     char m_b101;
     void RemoveTriangle(FUN_00e14fe0_node* apNode);
-    void FUN_00e14fe0(void* apKey);
+    void hkgpMesh_removePlaneTriangles(void* apKey);
 };
 extern int DAT_01268370;
 struct ArrayHeader
@@ -484,12 +484,12 @@ struct ArrayPair
 };
 struct Builder
 {
-    void FUN_00d76410(int aiFlag, ArrayPair* apPair) throw();
+    void hkgpConvexHull_generateGeometry(int aiFlag, ArrayPair* apPair) throw();
 };
 struct FUN_00e1d900_cls
 {
-    void FUN_00e1ce10(ArrayPair* apPair, int* apGlobal, int aiValue) throw();
-    void FUN_00e1d900(Builder* apBuilder);
+    void hkgpMesh_appendFromGeometry(ArrayPair* apPair, int* apGlobal, int aiValue) throw();
+    void hkgpMesh_appendFromConvexHull(Builder* apBuilder);
 };
 struct QueryObject
 {
@@ -576,7 +576,7 @@ struct DataBlock
     int m_i40;
     int m_i44;
 
-    DataBlock& FUN_00e22ec0(const DataBlock& arSource);
+    DataBlock& hkgpMeshBase_Vertex_Vertex(const DataBlock& arSource);
 };
 struct StateBlock
 {
@@ -593,13 +593,13 @@ struct StateBlock
     unsigned short m_uItemCount : 12;
     unsigned short m_u22;
 
-    StateBlock& FUN_00e23080(const StateBlock& arSource);
+    StateBlock& hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Triangle_Triangle(const StateBlock& arSource);
 };
 struct Node
 {
     Node* next;
     Node* previous;
-    Node* FUN_00e22ec0(Node* source);
+    Node* hkgpMeshBase_Vertex_Vertex(Node* source);
 };
 struct Manager
 {
@@ -615,7 +615,7 @@ struct This
     int unk08;
     Node* head;
     unsigned int count;
-    Manager* FUN_00e23530();
+    Manager* AllocateChainedSlotBlock();
     void PushFront(Node* volatile source);
 };
 struct S_00e25f00_Elem
@@ -667,7 +667,7 @@ struct E25FB0Item
 };
 struct E25FB0Mesh
 {
-    void FUN_00e25cd0(E25FB0Edge* edge, const int* data);
+    void hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_setEdgeData(E25FB0Edge* edge, const int* data);
     void ProcessItems(E25FB0Edge edge, const E25FB0Item* items);
 };
 struct DataBlock_00e118e0
@@ -688,8 +688,8 @@ struct Inputs_00e118e0
 };
 struct FUN_00e118e0_class
 {
-    void __thiscall FUN_00e11710(void*, void*, void*, void*, void*);
-    void __thiscall FUN_00e118e0(const volatile Inputs_00e118e0*, void*, void*);
+    void __thiscall ValidateTriangleAndComputePlane(void*, void*, void*, void*, void*);
+    void __thiscall hkgpMesh_setPlane(const volatile Inputs_00e118e0*, void*, void*);
 };
 struct E12160Vertex
 {
@@ -751,7 +751,7 @@ struct S_00e12920
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28;
     S_00e12920_Node* head;
-    bool FUN_00e12920();
+    bool hkgpMesh_isClosedManifold();
 };
 typedef unsigned int hkUint32;
 struct S_00e13910_Triangle
@@ -882,7 +882,7 @@ struct __declspec(align(16)) HullTriangle
 };
 struct HullTrianglePool
 {
-    HullTriangle* FUN_00e241a0(HullTriangle* storage);
+    HullTriangle* UpdateFields_00e241a0(HullTriangle* storage);
 };
 struct FUN_00e19cf0_cls
 {
@@ -896,7 +896,7 @@ struct FUN_00e19cf0_cls
     int unk1C;
     HullTrianglePool m_kNodePool;
 
-    void FUN_00e11710(float* a, float* b, float* c, HullPlane* out, char normalize);
+    void ValidateTriangleAndComputePlane(float* a, float* b, float* c, HullPlane* out, char normalize);
     HullTriangle* CreateTriangle(HullVertex* a, HullVertex* b, HullVertex* c);
 };
 extern "C" double __cdecl sqrt(double);
@@ -1023,13 +1023,13 @@ struct Triple
 {
     Components first, second, third;
 };
-int __cdecl FUN_00deab10(void*, const Triple*);
+int __cdecl hkGeometryProcessing_checkTrianglesIntersection(void*, const Triple*);
 struct FUN_00e22270_Class
 {
     int unk00;
     unsigned int flags;
     int unk08, unk0c, output;
-    float FUN_00e22270(InputPacket*);
+    float hkgpMeshInternals_TriangleOverlap_addLeaf(InputPacket*);
 };
 struct Target
 {
@@ -1041,7 +1041,7 @@ struct FUN_00e22470_cls
 {
     int unk00;
     Target* m_04;
-    void FUN_00e22470(int a);
+    void IConvexOverlapImpl_ShapeBridge_getSupportingVertex(int a);
 };
 struct FUN_00e22970_Item
 {
@@ -1055,7 +1055,7 @@ struct FUN_00e22970_Cls
 
     void AppendItems(void* apArg1, const FUN_00e22970_Item* apSrc, int aCount);
 };
-void __cdecl FUN_00c908c0(void* apArg1, FUN_00e22970_Cls* apThis, int aCapacity, int aElemSize);
+void __cdecl hkArrayUtil__reserve(void* apArg1, FUN_00e22970_Cls* apThis, int aCapacity, int aElemSize);
 extern "C" void* __cdecl memcpy(void* apDst, const void* apSrc, unsigned int aCount);
 struct FUN_00e229f0_cls
 {
@@ -1065,14 +1065,14 @@ struct FUN_00e229f0_cls
 
     void AppendInts(int a1, int* a2, int a3);
 };
-void __cdecl FUN_00c908c0(int a1, void* self, int newCap, int elemSize);
+void __cdecl hkArrayUtil__reserve(int a1, void* self, int newCap, int elemSize);
 struct FUN_00e22c80_cls
 {
     unsigned int m_00;
     unsigned int m_04;
     unsigned int m_08;
 
-    FUN_00e22c80_cls* FUN_00e22c80(unsigned int value, FUN_00e22c80_cls* src);
+    FUN_00e22c80_cls* ComputeValue_00e22c80(unsigned int value, FUN_00e22c80_cls* src);
 };
 extern unsigned int DAT_01267e30;
 extern unsigned int DAT_01267e34;
@@ -1126,7 +1126,7 @@ struct FUN_00e22f20_cls
     int unk38;
     int unk3C;
     int unk40;
-    FUN_00e22f20_cls& FUN_00e22f20(const FUN_00e22f20_cls& src);
+    FUN_00e22f20_cls& hkgpMeshBase_Triangle_Triangle(const FUN_00e22f20_cls& src);
 };
 struct SearchItem
 {
@@ -1206,7 +1206,7 @@ struct PoolNode
     PoolNode* m_00;
     PoolNode* m_04;
 
-    PoolNode* FUN_00e22f20(void* value);
+    PoolNode* hkgpMeshBase_Triangle_Triangle(void* value);
 };
 struct FreeCtx
 {
@@ -1857,7 +1857,7 @@ struct Holder
 {
     FreeCtx* m_00;
 };
-FreeCtx* __cdecl FUN_00e23530(void);
+FreeCtx* __cdecl AllocateChainedSlotBlock(void);
 class FUN_00e241a0_cls
 {
   public:
@@ -1867,7 +1867,7 @@ class FUN_00e241a0_cls
     PoolNode* m_0c;
     int m_10;
 
-    void FUN_00e241a0(void* value);
+    void UpdateFields_00e241a0(void* value);
 };
 struct FUN_00e247a0_cls
 {
@@ -1878,7 +1878,7 @@ struct FUN_00e247a0_cls
     char* m_04;
     unsigned int m_08;
     unsigned int m_0c;
-    FUN_00e247a0_cls* FUN_00e247a0();
+    FUN_00e247a0_cls* hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_EdgeDataValue_EdgeDataValue();
 };
 extern "C" void _ReadWriteBarrier(void);
 struct E24850Element
@@ -1927,7 +1927,7 @@ struct E24850List
     int m_iNodeCount;
 
     E24850Block* addBlock();
-    E24850Node* FUN_00e24850(void* data);
+    E24850Node* hkgpAbstractMeshDefinitions_List_struct_hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Triangle_struct_hkgpAbstractMeshDefinitions_List_struct_hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Vertex_struct_hkgpTriangulatorBase_VertexBase_struct_hkGeometryProcessing_PoolAllocator_struct_hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Vertex_32_struct_hkContainerHeapAllocator_Item_struct_hkGeometryProcessing_PoolAllocator_struct_hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_Triangle_32_struct_hkContainerHeapAllocator_allocate(void* data);
 };
 // Text writer: format an integer into a scratch buffer and write it to the stream.
 int __cdecl CC0280Format(char* pcBuffer, unsigned int uiSize, const char* pcFormat, ...);
@@ -1957,12 +1957,12 @@ class CC0280Writer
 };
 struct BSAudio;
 namespace fnvc_adapt {
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 }
 struct FUN_00d9be30_cls
 {
     int m_vptr;
-    void FUN_00d9be30();
+    void UpdateState_00d9be30();
 };
 struct FUN_00d9c010_cls
 {
@@ -2036,7 +2036,7 @@ struct FUN_00e18a50_cls
     int m_cnt1;
     unsigned int m_cap1;
 
-    void FUN_00e18a50();
+    void UpdateState_00e18a50();
     void ResetState();
 };
 // Havok ray/plane-triangle cast step: intersect the cast ray with the triangle's plane, test the hit point
@@ -2091,7 +2091,7 @@ struct CastBody
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     CastTri* m_tri;
 };
-bool __cdecl FUN_00dea6b0(const Vec4f* pkPoint, const Vec4f& kA, const Vec4f& kB, const Vec4f& kC, float fTolerance);
+bool __cdecl hkGeometryProcessing_checkPointInsideTriangle(const Vec4f* pkPoint, const Vec4f& kA, const Vec4f& kB, const Vec4f& kC, float fTolerance);
 static inline MeshSimdReal Dot3(__m128 a, __m128 b)
 {
     const __m128 m = _mm_mul_ps(a, b);
@@ -2141,13 +2141,13 @@ struct SceneSet
     SceneBone* m_0c;
     SceneBone* m_10;
 };
-void __cdecl FUN_00cbeb70(void* v, int count, void* p);
+void __cdecl hkAabbUtil_calcAabb_00cbeb70(void* v, int count, void* p);
 typedef unsigned int BufferAddress138;
 struct FUN_00e227f0_cls
 {
     unsigned int unk00;
     SceneSet* m_04;
-    void* FUN_00e227f0(BufferAddress138 bufferAddress);
+    void* ComputeValues_00e227f0(BufferAddress138 bufferAddress);
 };
 struct __declspec(align(16)) S_Vec
 {
@@ -2167,8 +2167,8 @@ struct S_00e11910_Src
 };
 struct S_00e11910_Cls
 {
-    char FUN_00e11710(float* a, float* b, float* c, S_Vec* out, int normalize);
-    char FUN_00e11910(S_00e11910_Src* self);
+    char ValidateTriangleAndComputePlane(float* a, float* b, float* c, S_Vec* out, int normalize);
+    char UpdateTriangleNormal(S_00e11910_Src* self);
 };
 struct E11B00Vertex
 {
@@ -2189,7 +2189,7 @@ struct E11B00Hull
 
     void updateFaces();
     static void updateStatistics();
-    void FUN_00e11b00(const PacketCallLocal_00e19d60& scale);
+    void ScaleMeshVerticesAndUpdateStatistics(const PacketCallLocal_00e19d60& scale);
 };
 struct S_00e12260_Aabb
 {
@@ -2215,8 +2215,8 @@ struct S_00e12260_Collector : S_00e12260_CollectorBase
     }
     virtual void AddHit(int hit);
 };
-void FUN_00cbeb70(const PacketCallLocal_00e19d60* verts, int numVerts, S_00e12260_Aabb& aabbOut);
-void FUN_00d1d570(void* tree, const S_00e12260_Aabb& aabb, S_00e12260_Collector* collector);
+void hkAabbUtil_calcAabb_00cbeb70(const PacketCallLocal_00e19d60* verts, int numVerts, S_00e12260_Aabb& aabbOut);
+void AabbTree_ProcessIfPresent_00d1d570(void* tree, const S_00e12260_Aabb& aabb, S_00e12260_Collector* collector);
 struct S_00e12260
 {
     int unk00;
@@ -2236,7 +2236,7 @@ struct S_00e12260
     int unk38;
     int unk3C;
     int unk40;
-    int FUN_00e12260(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const PacketCallLocal_00e19d60& c);
+    int CountTriangleTreeHits(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const PacketCallLocal_00e19d60& c);
 };
 struct S_00e13660_Res
 {
@@ -2265,8 +2265,8 @@ struct S_00e13660_Res
 };
 struct FUN_00e13660_cls
 {
-    void FUN_00e13210(unsigned int a1, S_00e13660_Res* out);
-    float FUN_00e13660(unsigned int a1, __m128* out, bool* flag);
+    void FindClosestMeshTriangle(unsigned int a1, S_00e13660_Res* out);
+    float ProcessAndReturnValue_00e13660(unsigned int a1, __m128* out, bool* flag);
 };
 typedef unsigned int HullU32;
 struct HullTriAN
@@ -2396,7 +2396,7 @@ struct FUN_00e221e0_Input
     int unk1C;
     FUN_00e221e0_Triangle* unk20;
 };
-float __cdecl FUN_00de9f10(const Vec4* point, const Vec4* a, const Vec4* b, const Vec4* c, Float4* closest,
+float __cdecl hkGeometryProcessing_squaredDistanceFromPointToTriangle(const Vec4* point, const Vec4* a, const Vec4* b, const Vec4* c, Float4* closest,
                            Float4* weights);
 struct FUN_00e221e0_Collector
 {
@@ -2461,7 +2461,7 @@ template <class T> struct ArrAB
 struct FUN_00e22f90_cls
 {
     ArrAB<PoolBlockAB*> m_kBlocks;
-    void FUN_00e22f90(PoolItemAB* item);
+    void hkGeometryProcessing_PoolAllocator_hkgpMeshBase_Triangle_32_hkContainerHeapAllocator_release(PoolItemAB* item);
 };
 extern int DAT_010eade0;
 struct FUN_00e121c0_probe
@@ -2481,10 +2481,10 @@ struct FUN_00e121c0_probe
     int m_i30;
     float m_f34;
 };
-void __cdecl FUN_00d1d0b0(void* owner, const void* a, const void* b, FUN_00e121c0_probe* out, float f);
+void __cdecl hkVector4_VisitRayIntersectedTreeLeaves(void* owner, const void* a, const void* b, FUN_00e121c0_probe* out, float f);
 struct FUN_00e121c0_cls
 {
-    float FUN_00e121c0(const __m128* a, const __m128* b, int* outI);
+    float ProcessAndReturnValue_00e121c0(const __m128* a, const __m128* b, int* outI);
 };
 inline const S_00e13910_Edge& nullMeshEdge()
 {
@@ -2504,7 +2504,7 @@ struct TrianglePool
     TriangleNode* m_pFirstNode;
     int m_uiItemCount;
 
-    void FUN_00e22f90(void* p);
+    void hkGeometryProcessing_PoolAllocator_hkgpMeshBase_Triangle_32_hkContainerHeapAllocator_release(void* p);
     __forceinline void remove(TriangleNode* t)
     {
         TriangleNode* next = t->m_next;
@@ -2516,7 +2516,7 @@ struct TrianglePool
         else
             m_pFirstNode = next;
         m_uiItemCount--;
-        FUN_00e22f90(t);
+        hkGeometryProcessing_PoolAllocator_hkgpMeshBase_Triangle_32_hkContainerHeapAllocator_release(t);
     }
 };
 static __forceinline void bind(S_00e13910_Edge a, S_00e13910_Edge b)
@@ -2579,7 +2579,7 @@ void __cdecl QueryAabbE15(BroadPhaseE15* pkBroadPhase, const hkAabb& kAabb, Aabb
 class TriangleQueryE15
 {
   public:
-    void FUN_00e15220(const PacketCallLocal_00e19d60& kA, const PacketCallLocal_00e19d60& kB, const PacketCallLocal_00e19d60& kC,
+    void hkgpMesh_enumerateTriangleOverlaps(const PacketCallLocal_00e19d60& kA, const PacketCallLocal_00e19d60& kB, const PacketCallLocal_00e19d60& kC,
                       hkArray<TriangleEntryE15*>* pkOverlapsOut) throw();
     int unk00;
     int unk04;
@@ -2608,7 +2608,7 @@ struct FUN_00e21d40_cls
     hkVector4 m_10;
     hkVector4 m_20;
 
-    void FUN_00e21d40(const hkVector4* dir, hkVector4* out);
+    void hkgpMesh_LineShape_getSupportingVertex(const hkVector4* dir, hkVector4* out);
 };
 static float DotProduct3(__m128 a, __m128 b)
 {
@@ -2662,8 +2662,8 @@ struct T27Item
 struct T27Cls
 {
     unsigned int LookupPairResult(T27Edge* path);
-    void FUN_00e27450(T27Edge* path);
-    unsigned __int64 FUN_00e27ae0(T27Edge edge, T27Item* items);
+    void hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_clearEdgeData(T27Edge* path);
+    unsigned __int64 hkgpTriangulatorType_struct_hkgpTriangulatorBase_VertexBase_struct_hkgpTriangulatorBase_TriangleBase_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_struct_hkContainerHeapAllocator_1_backupBothEdgeData(T27Edge edge, T27Item* items);
 };
 extern const char str_010d365c[];
 extern const char str_010d35f0[];
@@ -2684,14 +2684,14 @@ struct GpPool
 
     static void operator delete(void* p, unsigned int size)
     {
-        ((BlockAllocAB*)&reinterpret_cast<Allocator&>(FUN_00c85750().heap()))->ReleaseBlock(p, size);
+        ((BlockAllocAB*)&reinterpret_cast<Allocator&>(hkMemoryRouter_getInstance().heap()))->ReleaseBlock(p, size);
     }
 };
 struct GpPoolAllocator
 {
     ArrAB<GpPool*> m_pools;
 
-    void FUN_00e24e40(GpPoolItem* item);
+    void hkGeometryProcessing_PoolAllocator_struct_hkgpTriangulatorBase_DefaultEdgeData_struct_hkContainerHeapAllocator_32_struct_hkContainerHeapAllocator_release(GpPoolItem* item);
 };
 
 #include <math.h>
@@ -2899,9 +2899,9 @@ static __forceinline ::ErrorReporter& S00e19d60_getError()
     return *::DAT_01268360;
 }
 
-float __cdecl FUN_00dea450(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const PacketCallLocal_00e19d60& c,
+float __cdecl hkVector4_GetClosestSegmentParameters(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const PacketCallLocal_00e19d60& c,
                            const PacketCallLocal_00e19d60& d, float& s, float& t);
-float __cdecl FUN_00de94b0(const PacketCallLocal_00e19d60& p, const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, float& t);
+float __cdecl hkVector4_GetPointSegmentSquaredDistance(const PacketCallLocal_00e19d60& p, const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, float& t);
 
 static __forceinline float S00e19d60_distanceToPlane(const PacketCallLocal_00e19d60& plane, const PacketCallLocal_00e19d60& x)
 {
@@ -2938,14 +2938,15 @@ static __forceinline PacketCallLocal_00e19d60 S00e19d60_planeEquation(const Pack
 
 struct S00e19d60_Mesh
 {
-    S00e19d60_Edge FUN_00e191a0(S00e19d60_Edge e, const PacketCallLocal_00e19d60& p, bool b);
-    void FUN_00e19200(S00e19d60_Triangle* t, const PacketCallLocal_00e19d60& p, bool b);
-    static bool __cdecl FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Triangle* triA, S00e19d60_Mesh* meshB,
+    S00e19d60_Edge ProcessAndReturnValue_00e191a0(S00e19d60_Edge e, const PacketCallLocal_00e19d60& p, bool b);
+    void SplitTriangleWithNewVertex(S00e19d60_Triangle* t, const PacketCallLocal_00e19d60& p, bool b);
+    static bool __cdecl hkgpMesh_clipTriangles(S00e19d60_Mesh* meshA, S00e19d60_Triangle* triA, S00e19d60_Mesh* meshB,
                                      S00e19d60_Triangle* triB, float minDistance);
 };
 
 // @fnv 0x00e19d60
-bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Triangle* triA, S00e19d60_Mesh* meshB,
+// src: XBOX_PDB 0x00e19d60
+bool __cdecl S00e19d60_Mesh::hkgpMesh_clipTriangles(S00e19d60_Mesh* meshA, S00e19d60_Triangle* triA, S00e19d60_Mesh* meshB,
                                           S00e19d60_Triangle* triB, float minDistance)
 {
     const float sqDistance = minDistance * minDistance;
@@ -2962,7 +2963,7 @@ bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Trian
             PacketCallLocal_00e19d60 b0 = edgeB.start()->m_vContactPosition;
             PacketCallLocal_00e19d60 b1 = edgeB.end()->m_vContactPosition;
             float u, v;
-            const float d = FUN_00dea450(a0, a1, b0, b1, u, v);
+            const float d = hkVector4_GetClosestSegmentParameters(a0, a1, b0, b1, u, v);
             if (d < minDistance)
             {
                 bool clipA = true;
@@ -2980,8 +2981,8 @@ bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Trian
                     clipB = false;
                 if (clipA && clipB)
                 {
-                    meshA->FUN_00e191a0(edgeA, x, false);
-                    meshB->FUN_00e191a0(edgeB, x, false);
+                    meshA->ProcessAndReturnValue_00e191a0(edgeA, x, false);
+                    meshB->ProcessAndReturnValue_00e191a0(edgeB, x, false);
                     do
                     {
                         char reportBuf[512];
@@ -3011,9 +3012,9 @@ bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Trian
                     continue;
                 if (MeshVector_distanceToSquared3(p, b) < sqDistance)
                     continue;
-                if (FUN_00de94b0(p, a, b, t) < sqDistance)
+                if (hkVector4_GetPointSegmentSquaredDistance(p, a, b, t) < sqDistance)
                 {
-                    meshes[j]->FUN_00e191a0(e, p, false);
+                    meshes[j]->ProcessAndReturnValue_00e191a0(e, p, false);
                     do
                     {
                         char reportBuf[512];
@@ -3049,11 +3050,11 @@ bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Trian
                     PacketCallLocal_00e19d60 x;
                     MeshVector_setInterpolate4(x, a, b, t);
                     if (MeshVector_distanceToSquared3(x, a) > sqDistance && MeshVector_distanceToSquared3(x, b) > sqDistance &&
-                        ::FUN_00dea6b0((const ::Vec4f*)&x, (const ::Vec4f&)vertices[0], (const ::Vec4f&)vertices[1],
+                        ::hkGeometryProcessing_checkPointInsideTriangle((const ::Vec4f*)&x, (const ::Vec4f&)vertices[0], (const ::Vec4f&)vertices[1],
                                        (const ::Vec4f&)vertices[2], -1.1920929e-07f))
                     {
-                        meshes[j]->FUN_00e191a0(e, x, false);
-                        meshes[i]->FUN_00e19200(triangles[i], x, false);
+                        meshes[j]->ProcessAndReturnValue_00e191a0(e, x, false);
+                        meshes[i]->SplitTriangleWithNewVertex(triangles[i], x, false);
                         do
                         {
                             char reportBuf[512];

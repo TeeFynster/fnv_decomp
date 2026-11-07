@@ -7,37 +7,41 @@
 extern "C" void* g_01202750;
 
 // @fnv 0x00c2b8b0
-void* __cdecl FUN_00c2b8b0()
+// src: COMMUNITY 0x00c2b8b0
+void* __cdecl NiPSysEmitterDeclinationVarCtlr_GetRTTI()
 {
     return &g_01202750;
 }
 
 struct NiPSysEmitterDeclinationVarCtlr : NiPSysModifierFloatCtlr
 {
-    void FUN_00c2a0b0(float fValue);
-    void FUN_00c2b8c0(float& fValue);
+    void SetTargetValueAtOffset24(float fValue);
+    void UpdateFields_00c2b8c0(float& fValue);
 };
 
 // @fnv 0x00c2a0b0
-void NiPSysEmitterDeclinationVarCtlr::FUN_00c2a0b0(float fValue)
+// src: GUESS 0x00c2a0b0 (confidence: medium)
+void NiPSysEmitterDeclinationVarCtlr::SetTargetValueAtOffset24(float fValue)
 {
     *(float*)((char*)m_pkTargetModifier + 0x24) = fValue;
 }
 
 // @fnv 0x00c2b8c0
-void NiPSysEmitterDeclinationVarCtlr::FUN_00c2b8c0(float& fValue)
+// src: GUESS 0x00c2b8c0 (confidence: low)
+void NiPSysEmitterDeclinationVarCtlr::UpdateFields_00c2b8c0(float& fValue)
 {
     fValue = *(float*)((char*)m_pkTargetModifier + 0x24);
 }
 
-void __stdcall FUN_00c32f60(StrArr* pArr);
-char* FUN_00a7d330(char* s);
+void __stdcall NiPSysModifierFloatCtlr_GetViewerStrings(StrArr* pArr);
+char* NiViewerStrings_NiGetViewerString_Title(char* s);
 
 // @fnv 0x00c2b920
-void __stdcall FUN_00c2b920(StrArr* pStringArray)
+// src: XBOX_PDB 0x00c2b920
+void __stdcall NiPSysEmitterDeclinationVarCtlr_GetViewerStrings(StrArr* pStringArray)
 {
-    FUN_00c32f60(pStringArray);
-    char* s = FUN_00a7d330((char*)g_01202750);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pStringArray);
+    char* s = NiViewerStrings_NiGetViewerString_Title((char*)g_01202750);
     unsigned int uiIndex = pStringArray->m_usSize;
     if (uiIndex >= pStringArray->m_usMaxSize)
         pStringArray->SetSize(uiIndex + pStringArray->m_usGrowBy);
@@ -46,7 +50,7 @@ void __stdcall FUN_00c2b920(StrArr* pStringArray)
 
 extern int DAT_010bfb54;
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct SpawnedObject
 {
@@ -74,13 +78,14 @@ struct FUN_00c2b8d0_cls
 {
     void FUN_00c32de0(SpawnedObject* obj, void* arg);
 
-    SpawnedObject* FUN_00c2b8d0(void* arg);
+    SpawnedObject* NiPSysEmitterDeclinationVarCtlr_CreateClone(void* arg);
 };
 
 // @fnv 0x00c2b8d0
-SpawnedObject* FUN_00c2b8d0_cls::FUN_00c2b8d0(void* arg)
+// src: XBOX_PDB 0x00c2b8d0
+SpawnedObject* FUN_00c2b8d0_cls::NiPSysEmitterDeclinationVarCtlr_CreateClone(void* arg)
 {
-    SpawnedObject* obj = (SpawnedObject*)FUN_00aa13e0(0x40);
+    SpawnedObject* obj = (SpawnedObject*)Object_DispatchCommandFour(0x40);
     if (obj != 0)
     {
         obj->FUN_00c32d80();

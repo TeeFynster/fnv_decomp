@@ -81,11 +81,12 @@ struct FUN_00df6690_StandIn
     char pad[0x50];
     int** m_table;
 
-    int* FUN_00df6690(int index);
+    int* hkSimpleLocalFrame_getChildFrame(int index);
 };
 
 // @fnv 0x00df6690
-int* FUN_00df6690_StandIn::FUN_00df6690(int index)
+// src: HAVOK_LIB 0x00df6690
+int* FUN_00df6690_StandIn::hkSimpleLocalFrame_getChildFrame(int index)
 {
     return m_table[index];
 }
@@ -114,10 +115,11 @@ struct FnvCpu_FUN_00df6680_CpuObject
     unsigned int unk4c;
     unsigned int unk50;
     int value;
-    int FUN_00df6680();
+    int GetValue_00df6680();
 };
 // @fnv 0x00df6680
-int FnvCpu_FUN_00df6680_CpuObject::FUN_00df6680()
+// src: GUESS 0x00df6680 (confidence: high)
+int FnvCpu_FUN_00df6680_CpuObject::GetValue_00df6680()
 {
     return value;
 }
@@ -146,7 +148,7 @@ void FUN_00df66a0_Node::GetWorldTransform(hkTransform* dest)
         hkTransform local;
         v8()->GetWorldTransform(&parent);
         v3(&local);
-        dest->FUN_00cb2240(parent, local);
+        dest->hkTransform_setMul(parent, local);
     }
     else
     {
@@ -180,7 +182,7 @@ class hkpDF65Child
 class hkpDF65Node : public hkReferencedObject
 {
   public:
-    void FUN_00df65d0(const hkVector4& kPos, float fRadius, hkpDF65Collector* pkCollector);
+    void hkSimpleLocalFrame_getNearbyFrames(const hkVector4& kPos, float fRadius, hkpDF65Collector* pkCollector);
 
     unsigned int unk08, unk0C;
     hkTransform m_kMotionTransform;
@@ -188,7 +190,8 @@ class hkpDF65Node : public hkReferencedObject
 };
 
 // @fnv 0x00df65d0
-void hkpDF65Node::FUN_00df65d0(const hkVector4& kPos, float afRadius, hkpDF65Collector* pkCollector)
+// src: HAVOK_SRC 0x00df65d0
+void hkpDF65Node::hkSimpleLocalFrame_getNearbyFrames(const hkVector4& kPos, float afRadius, hkpDF65Collector* pkCollector)
 {
     hkVector4 kDiff;
     kDiff.setSub4(kPos, m_kMotionTransform.position);
@@ -200,7 +203,7 @@ void hkpDF65Node::FUN_00df65d0(const hkVector4& kPos, float afRadius, hkpDF65Col
     if (m_children.GetLogicalSize() > 0)
     {
         hkVector4 kLocalPos;
-        kLocalPos.FUN_00c7f690(m_kMotionTransform, kPos);
+        kLocalPos.hkVector4_setTransformedInversePos(m_kMotionTransform, kPos);
         for (int i = 0; i < m_children.GetLogicalSize(); i++)
         {
             m_children[i]->query(kLocalPos, afRadius, pkCollector);
@@ -234,19 +237,20 @@ struct df6710_self
     virtual void unk06();
     virtual void unk07();
     virtual df6710_frame* unk08();
-    void FUN_00df6710(hkVector4* m);
+    void hkLocalFrame_getPositionInRoot(hkVector4* m);
 };
 
 // Calls unk05 with m, then walks the unk08 chain and passes each unk03 output and m to FUN_00c7f640.
 // @fnv 0x00df6710
-void df6710_self::FUN_00df6710(hkVector4* apMatrix)
+// src: HAVOK_LIB 0x00df6710
+void df6710_self::hkLocalFrame_getPositionInRoot(hkVector4* apMatrix)
 {
     hkTransform buf;
     unk05(apMatrix);
     for (df6710_frame* p = unk08(); p; p = p->unk08())
     {
         p->unk03(&buf);
-        apMatrix->FUN_00c7f640(buf, *apMatrix);
+        apMatrix->setTransformedPos_00c7f640(buf, *apMatrix);
     }
 }
 
@@ -288,13 +292,13 @@ hkTransform FUN_00df67a0_cls::GetMotionTransform() const
     return m_kMotionTransform;
 }
 
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 
 template <typename T, typename Allocator>
 __forceinline hkArray<T, Allocator>::~hkArray() throw()
 {
-    hkMemoryAllocator& alloc = FUN_00c85750()->heap();
+    hkMemoryAllocator& alloc = hkMemoryRouter_getInstance()->heap();
     m_iElementCount = 0;
     if ((m_iCapacityState & 0x80000000) == 0)
         alloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
@@ -305,10 +309,10 @@ __forceinline hkArray<T, Allocator>::~hkArray() throw()
 struct FUN_00cb0c00_class
 {
     const char* m_pcText;
-    void FUN_00cb0c00() throw();
+    void Object_UpdateFields_00cb0c00() throw();
     ~FUN_00cb0c00_class() throw()
     {
-        FUN_00cb0c00();
+        Object_UpdateFields_00cb0c00();
     }
 };
 
@@ -381,11 +385,12 @@ class FUN_00df65b0_cls
     int unk3C;
     hkVector4 m_vector;
 
-    hkVector4 FUN_00df65b0() const;
+    hkVector4 hkSimpleLocalFrame_getLocalPosition() const;
 };
 
 // @fnv 0x00df65b0
-hkVector4 FUN_00df65b0_cls::FUN_00df65b0() const
+// src: HAVOK_SRC 0x00df65b0
+hkVector4 FUN_00df65b0_cls::hkSimpleLocalFrame_getLocalPosition() const
 {
     return m_vector;
 }

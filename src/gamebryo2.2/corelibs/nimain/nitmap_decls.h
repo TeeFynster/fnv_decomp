@@ -2,7 +2,7 @@ class BGSReconstructCellSubBlocksMap;
 class GlobalObject_004ee810
 {
   public:
-    void FUN_004ee920();
+    void BSSimpleList_NiPointer_bhkAction_RemoveAll();
 };
 extern GlobalObject_004ee810 g_011d6a30;
 extern unsigned int DAT_011d6a20;
@@ -11,6 +11,6 @@ extern unsigned int DAT_011d6a20;
 class ModelLoader
 {
   public:
-    void FUN_0048eff0(unsigned int key);
-    void FUN_00445370(unsigned int key, bool flag);
+    void ReleaseKFFile_0048eff0(unsigned int key);
+    void ModelLoader_ReleaseKF(unsigned int key, bool flag);
 };

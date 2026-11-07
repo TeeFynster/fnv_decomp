@@ -15,7 +15,7 @@ void* __thiscall TESAmbushPackageData::Destroy(unsigned int flags)
     return this;
 }
 
-void __cdecl FUN_004856d0(int);
+void __cdecl TESForm_AddChunk(int);
 struct LocationDescriptor
 {
     void __thiscall Save(int);
@@ -23,7 +23,7 @@ struct LocationDescriptor
 // @fnv 0x0067afc0
 void __thiscall TESAmbushPackageData::SaveWithTag()
 {
-    FUN_004856d0(0x4d414b50);
+    TESForm_AddChunk(0x4d414b50);
     if (m_pkLocation)
         reinterpret_cast<LocationDescriptor*>(m_pkLocation)->Save(0x32444c50);
 }
@@ -94,7 +94,8 @@ class AF50Location
 
 // Casts pkOtherData to TESAmbushPackageData and returns true if the cast fails or the two m_pkLocation values differ, otherwise false.
 // @fnv 0x0067af50
-bool TESAmbushPackageData::FUN_0067af50(TESPackageData* pkOtherData)
+// src: XBOX_PDB 0x0067af50
+bool TESAmbushPackageData::Compare_0067af50(TESPackageData* pkOtherData)
 {
     TESAmbushPackageData* pkOther = dynamic_cast<TESAmbushPackageData*>(pkOtherData);
     if (!pkOther)

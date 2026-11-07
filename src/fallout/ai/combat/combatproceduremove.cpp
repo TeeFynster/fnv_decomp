@@ -52,7 +52,8 @@ void Holder::SetValue(float afValue)
 
 extern float DAT_010162c0;
 // @fnv 0x009d8440
-float CombatProcedureMove::FUN_009d8440()
+// src: XBOX_PDB 0x009d8440
+float CombatProcedureMove::GetHidingTime()
 {
     switch (static_cast<int>(mode))
     {
@@ -79,19 +80,20 @@ void CombatProcedureMove::ClearTargetRef(TESObjectREFR* apRef)
 
 struct FUN_009d6c80_shell
 {
-    void FUN_009d6c80();
+    void CombatState_UnreserveSecondaryCoverLocation();
 };
 struct IMH
 {
-    FUN_009d6c80_shell* FUN_00586150();
+    FUN_009d6c80_shell* CombatController_GetCombatState();
 };
 // If the bool at offset 0x54 is set, calls FUN_009d6c80 through the object at offset 4 and clears the flag.
 // @fnv 0x009d84b0
-void CombatProcedureMove::FUN_009d84b0()
+// src: XBOX_PDB 0x009d84b0
+void CombatProcedureMove::StartedPlanning()
 {
     if (active54)
     {
-        reinterpret_cast<IMH*>(m_pCombatController)->FUN_00586150()->FUN_009d6c80();
+        reinterpret_cast<IMH*>(m_pCombatController)->CombatController_GetCombatState()->CombatState_UnreserveSecondaryCoverLocation();
         active54 = 0;
     }
 }
@@ -100,21 +102,22 @@ class Tile;
 namespace fnv_009d84e0 {
 struct IMH
 {
-    Tile* FUN_00586150();
+    Tile* CombatController_GetCombatState();
 };
 struct FUN_009d7c20_shell
 {
-    void FUN_009d7c20();
+    void CombatState_ReserveSecondaryCoverLocation();
 };
 }  // namespace fnv_009d84e0
 
 // @fnv 0x009d84e0
-void CombatProcedureMove::FUN_009d84e0()
+// src: XBOX_PDB 0x009d84e0
+void CombatProcedureMove::FinishedPlanning()
 {
     if (unk10 == 2 || unk10 == 3)
     {
-        reinterpret_cast<fnv_009d84e0::FUN_009d7c20_shell*>(reinterpret_cast<fnv_009d84e0::IMH*>(m_pCombatController)->FUN_00586150())
-            ->FUN_009d7c20();
+        reinterpret_cast<fnv_009d84e0::FUN_009d7c20_shell*>(reinterpret_cast<fnv_009d84e0::IMH*>(m_pCombatController)->CombatController_GetCombatState())
+            ->CombatState_ReserveSecondaryCoverLocation();
         active54 = true;
     }
 }
@@ -139,21 +142,22 @@ void CombatProcedureMove::UpdateCombatMovement()
     }
     else if (unk10 == 3)
         ((CombatProcedure*)this)->RunProcedure();
-    reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e40();
+    reinterpret_cast<CombatProcedureEngageTarget*>(this)->ClearMoveMode();
     if (active54)
-        reinterpret_cast<IMH*>(m_pCombatController)->FUN_00586150()->FUN_009d6c80();
+        reinterpret_cast<IMH*>(m_pCombatController)->CombatController_GetCombatState()->CombatState_UnreserveSecondaryCoverLocation();
 }
 
 
 // @fnv 0x009d8880
-void CombatProcedureMove::FUN_009d8880(BGSSaveFormBuffer* buffer)
+// src: XBOX_PDB 0x009d8880
+void CombatProcedureMove::SaveGame_009d8880(BGSSaveFormBuffer* buffer)
 {
     CombatProcedure::SaveGame(buffer);
 
     buffer->SaveData(&unk10, static_cast<unsigned short>(4), static_cast<unsigned short>(0));
 
-    startTransform.FUN_00527b70(buffer);
-    currentTransform.FUN_00527b70(buffer);
+    startTransform.BGSWorldLocation_SaveGame(buffer);
+    currentTransform.BGSWorldLocation_SaveGame(buffer);
 
     buffer->SaveData(&rate, static_cast<unsigned short>(4), static_cast<unsigned short>(0));
 
@@ -180,15 +184,16 @@ void CombatProcedureMove::FUN_009d8880(BGSSaveFormBuffer* buffer)
 
 
 // @fnv 0x009d89a0
-void CombatProcedureMove::FUN_009d89a0(BGSLoadFormBuffer* buffer)
+// src: XBOX_PDB 0x009d89a0
+void CombatProcedureMove::LoadGame_009d89a0(BGSLoadFormBuffer* buffer)
 {
     CombatProcedure::LoadGame(buffer);
 
     buffer->ReadTypedData(static_cast<void*>(&unk10), 4u);
 
-    startTransform.FUN_00527ba0(buffer);
+    startTransform.BGSLoadGameBuffer_LoadBGSWorldLocation(buffer);
 
-    currentTransform.FUN_00527ba0(buffer);
+    currentTransform.BGSLoadGameBuffer_LoadBGSWorldLocation(buffer);
 
     buffer->ReadTypedData(static_cast<void*>(&rate), 4u);
 
@@ -222,8 +227,8 @@ void CombatProcedureMove::FUN_009d89a0(BGSLoadFormBuffer* buffer)
 struct MoveInput
 {
     CombatProcedureMove::Location* FUN_006815c0();
-    unsigned int FUN_0044edb0();
-    bool FUN_0097be60(int);
+    unsigned int TESMain_GetThread();
+    bool CombatLocation_GetFlag(int);
 };
 // @fnv 0x009d69f0
 CombatProcedureMove::CombatProcedureMove(MoveInput* input, float speed, unsigned int flags)
@@ -234,8 +239,8 @@ CombatProcedureMove::CombatProcedureMove(MoveInput* input, float speed, unsigned
     {
         startTransform = *input->FUN_006815c0();
         currentTransform = startTransform;
-        target38 = input->FUN_0044edb0();
-        if (input->FUN_0097be60(2))
+        target38 = input->TESMain_GetThread();
+        if (input->CombatLocation_GetFlag(2))
             rate = -rate;
     }
 }
@@ -382,8 +387,8 @@ struct TargetActor
 struct ResultValue
 {
     void* BuildAvoidanceNodes();
-    void* FUN_00989490();
-    void* FUN_009892a0(void*);
+    void* CombatGroup_CreateFlankingAvoidNodeArray();
+    void* CombatGroup_CreateMovementAvoidNodeArray(void*);
 };
 struct ManagerValue
 {
@@ -391,11 +396,11 @@ struct ManagerValue
 };
 extern ManagerValue* DAT_011f1958;
 extern const float DAT_01012054;
-extern float FUN_00435dd0();
+extern float CombatTimer_GetTimer();
 struct OutputValue
 {
     void Assign(void*);
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
 };
 struct MemberValue
 {
@@ -403,7 +408,7 @@ struct MemberValue
 };
 struct IMValue
 {
-    Holder* FUN_00586150();
+    Holder* CombatController_GetCombatState();
     ResultValue* FUN_004fb070(TargetActor*, void*);
 };
 struct ModeValue
@@ -419,26 +424,26 @@ extern ModeValue DAT_011a5650[];
 // @fnv 0x009d82e0
 void CombatProcedureMove::UpdateOutput(OutputValue* output)
 {
-    TargetActor* holder = reinterpret_cast<TargetActor*>(reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996de0());
-    Holder* target = reinterpret_cast<IMValue*>(m_pCombatController)->FUN_00586150();
+    TargetActor* holder = reinterpret_cast<TargetActor*>(reinterpret_cast<CombatProcedureEngageTarget*>(this)->CombatProcedure_GetAttacker());
+    Holder* target = reinterpret_cast<IMValue*>(m_pCombatController)->CombatController_GetCombatState();
     output->Assign(
         DAT_011f1958->FUN_00825c00(holder->vtable->get(holder, holder, DAT_01012054))->BuildAvoidanceNodes());
-    target->SetValue(FUN_00435dd0());
+    target->SetValue(CombatTimer_GetTimer());
     void* actor = 0;
     switch (static_cast<int>(mode))
     {
     case 4:
-        output->Assign(reinterpret_cast<IMValue*>(m_pCombatController)->FUN_004fb070(holder, reinterpret_cast<MemberValue*>(&startTransform)->FUN_006815c0(0.0f, output->FUN_00559450()))->FUN_00989490());
+        output->Assign(reinterpret_cast<IMValue*>(m_pCombatController)->FUN_004fb070(holder, reinterpret_cast<MemberValue*>(&startTransform)->FUN_006815c0(0.0f, output->Modelloader_GetReferencedThis()))->CombatGroup_CreateFlankingAvoidNodeArray());
         break;
     case 0:
     case 1:
-        actor = reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e00();
+        actor = reinterpret_cast<CombatProcedureEngageTarget*>(this)->GetTarget_00996e00();
         break;
     }
     if (DAT_011a5650[mode].enabled)
     {
         output->Assign(
-            reinterpret_cast<IMValue*>(m_pCombatController)->FUN_004fb070(holder, reinterpret_cast<MemberValue*>(&startTransform)->FUN_006815c0(0.0f, output->FUN_00559450()))->FUN_009892a0(actor));
+            reinterpret_cast<IMValue*>(m_pCombatController)->FUN_004fb070(holder, reinterpret_cast<MemberValue*>(&startTransform)->FUN_006815c0(0.0f, output->Modelloader_GetReferencedThis()))->CombatGroup_CreateMovementAvoidNodeArray(actor));
     }
 }
 
@@ -728,7 +733,8 @@ struct ByteAndFlagState
 extern ByteAndFlagState MoveModes[];
 extern bool DAT_011a5bfc;
 // @fnv 0x009d6ca0
-void CombatProcedureMove::FUN_009d6ca0()
+// src: XBOX_PDB 0x009d6ca0
+void CombatProcedureMove::Update_009d6ca0()
 {
     bool changed3;
     bool stop5;
@@ -991,7 +997,7 @@ void CombatProcedureMove::FUN_009d6ca0()
         else if (other7)
         {
             float deadline = float(reinterpret_cast<MoveTimer*>(&pos40)->Time() + 1.0);
-            if (deadline < FUN_00435dd0())
+            if (deadline < CombatTimer_GetTimer())
             {
                 if (manager2->PathFailed())
                     finished6 = true;
@@ -1071,7 +1077,7 @@ struct Request052
     int unkac;
     Request052();
     ~Request052();
-    void FUN_006e2980(NiPoint3&, float);
+    void PathingRequest_SetCenterRadius(NiPoint3&, float);
     void SetUseSoft(int);
 };
 struct SpecialRequest052
@@ -1153,12 +1159,12 @@ class CombatMovementRequestAccess : public Actor
 {
 public:
     void BuildPathingRequest(void*, NiPoint3*, void*, float, void*);
-    void* FUN_008b3820();
+    void* Actor_GetCurrentPathingRequest();
 };
 struct LocationMember052
 {
     NiPoint3* FUN_006815c0();
-    void* FUN_0084e3a0();
+    void* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     void FUN_0098ddd0(NiPoint3*);
     int unk00, unk04, unk08, unk0c;
 };
@@ -1173,14 +1179,14 @@ struct Holder052
 {
     State052* FUN_007058c0();
     bool FUN_00461580(int);
-    float FUN_009a0b00();
+    float CombatState_GetLocationTargetDistance();
     bool IsFlagSet(int);
-    void FUN_0099d310(SpecialRequest052*);
+    void BuildCoveredMoveRequest(SpecialRequest052*);
 };
 struct Manager052
 {
-    Holder052* FUN_00586150();
-    bool FUN_00981940(int);
+    Holder052* CombatController_GetCombatState();
+    bool CombatController_CombatPlanContainsAction(int);
 };
 struct Location052
 {
@@ -1207,7 +1213,7 @@ struct Avoid052
 };
 struct Output052
 {
-    Avoid052* FUN_00559450();
+    Avoid052* Modelloader_GetReferencedThis();
     void Assign(Avoid052*);
 };
 extern Setting DAT_011cf120, DAT_011cf4e0;
@@ -1216,8 +1222,8 @@ struct Ref052
     int value;
     void FUN_0066b0d0(void*);
 };
-NiPoint3 __cdecl FUN_009a68b0(Actor*, Actor*, NiPoint3*, float);
-bool __cdecl FUN_009a7940(Actor*, Actor*, NiPoint3*, NiPoint3*, int, int);
+NiPoint3 __cdecl CombatUtilities_ComputeFaceTargetLocation(Actor*, Actor*, NiPoint3*, float);
+bool __cdecl CombatUtilities_CalculateLOS(Actor*, Actor*, NiPoint3*, NiPoint3*, int, int);
 extern const char DAT_01091c80[];
 // @fnv 0x009d7d00
 bool CombatProcedureMove::UpdateMovementRequest(Output052* output)
@@ -1225,9 +1231,9 @@ bool CombatProcedureMove::UpdateMovementRequest(Output052* output)
     float request;
     bool d;
     float g;
-    ::Actor* a = reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996de0();
-    void* c = reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e00();
-    Holder052* k = reinterpret_cast<Manager052*>(m_pCombatController)->FUN_00586150();
+    ::Actor* a = reinterpret_cast<CombatProcedureEngageTarget*>(this)->CombatProcedure_GetAttacker();
+    void* c = reinterpret_cast<CombatProcedureEngageTarget*>(this)->GetTarget_00996e00();
+    Holder052* k = reinterpret_cast<Manager052*>(m_pCombatController)->CombatController_GetCombatState();
     int b = 3;
     NiPoint3 h = DAT_011f426c;
     g = 0.0f;
@@ -1238,15 +1244,15 @@ bool CombatProcedureMove::UpdateMovementRequest(Output052* output)
         g = DAT_0103a1c4;
         break;
     case 0:
-        if (reinterpret_cast<Manager052*>(m_pCombatController)->FUN_00981940(24))
+        if (reinterpret_cast<Manager052*>(m_pCombatController)->CombatController_CombatPlanContainsAction(24))
             b = 4;
         break;
     }
     State052* i = k->FUN_007058c0();
-    if (i && i->type == 1 && !k->FUN_00461580(256) && mode != 8 && i->location.FUN_0084e3a0() == a->FUN_00575ca0())
+    if (i && i->type == 1 && !k->FUN_00461580(256) && mode != 8 && i->location.GetHavokWorldObjectCountInSceneGraph_0084e3a0() == a->TESObjectREFR_GetSpace())
     {
         h = *i->location.FUN_006815c0();
-        g = k->FUN_009a0b00();
+        g = k->CombatState_GetLocationTargetDistance();
         NiPoint3 delta = h - *static_cast<const ::Actor*>(a)->GetPos();
         if (delta.FUN_004a7290() > g * g)
             g = 0.0f;
@@ -1256,16 +1262,16 @@ bool CombatProcedureMove::UpdateMovementRequest(Output052* output)
         request = rate;
     if (mode == 1 && unk10 == 1 && reinterpret_cast<::Actor*>(target38))
     {
-        NiPoint3 position = FUN_009a68b0(a, reinterpret_cast<::Actor*>(target38), reinterpret_cast<LocationMember052*>(&startTransform)->FUN_006815c0(), DAT_01012054);
+        NiPoint3 position = CombatUtilities_ComputeFaceTargetLocation(a, reinterpret_cast<::Actor*>(target38), reinterpret_cast<LocationMember052*>(&startTransform)->FUN_006815c0(), DAT_01012054);
         Location052 location(position, a);
         if (location.FUN_006ded70(a->FUN_008be1b0()) &&
-            FUN_009a7940(a, reinterpret_cast<::Actor*>(target38), &position, reinterpret_cast<LocationMember052*>(&startTransform)->FUN_006815c0(), 0, -1))
+            CombatUtilities_CalculateLOS(a, reinterpret_cast<::Actor*>(target38), &position, reinterpret_cast<LocationMember052*>(&startTransform)->FUN_006815c0(), 0, -1))
         {
             reinterpret_cast<LocationMember052*>(&currentTransform)->FUN_0098ddd0(&position);
-            if (!output->FUN_00559450())
+            if (!output->Modelloader_GetReferencedThis())
                 output->Assign(new Avoid052);
-            output->FUN_00559450()->AppendNode(
-                PathingAvoidNode(*reinterpret_cast<const ::Actor*>(target38)->GetPos(), *DAT_011cf4e0.FUN_00403e20(), *DAT_011cf120.FUN_00403e20()));
+            output->Modelloader_GetReferencedThis()->AppendNode(
+                PathingAvoidNode(*reinterpret_cast<const ::Actor*>(target38)->GetPos(), *DAT_011cf4e0.Setting_Float_00403e20(), *DAT_011cf120.Setting_Float_00403e20()));
         }
     }
     void* e = 0;
@@ -1273,7 +1279,7 @@ bool CombatProcedureMove::UpdateMovementRequest(Output052* output)
     SpecialRequest052 f;
     if (DAT_011a5bfc && (unsigned char)DAT_011a5650[mode].unk02 && k->IsFlagSet(1) && !a->FUN_00931850())
     {
-        k->FUN_0099d310(&f);
+        k->BuildCoveredMoveRequest(&f);
         f.FUN_00705b10(mode);
         e = &f;
     }
@@ -1285,8 +1291,8 @@ bool CombatProcedureMove::UpdateMovementRequest(Output052* output)
         request = -request;
         d = true;
     }
-    static_cast<CombatMovementRequestAccess*>(a)->BuildPathingRequest(e, reinterpret_cast<LocationMember052*>(&currentTransform)->FUN_006815c0(), reinterpret_cast<LocationMember052*>(&currentTransform)->FUN_0084e3a0(), request, output->FUN_00559450());
-    ((Request052*)e)->FUN_006e2980(h, g);
+    static_cast<CombatMovementRequestAccess*>(a)->BuildPathingRequest(e, reinterpret_cast<LocationMember052*>(&currentTransform)->FUN_006815c0(), reinterpret_cast<LocationMember052*>(&currentTransform)->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), request, output->Modelloader_GetReferencedThis());
+    ((Request052*)e)->PathingRequest_SetCenterRadius(h, g);
     if (d)
         ((Request052*)e)->SetUseSoft(0);
     if (!a->SetPathingRequestAvoidNodes(e))
@@ -1295,8 +1301,8 @@ bool CombatProcedureMove::UpdateMovementRequest(Output052* output)
         return false;
     }
     unk60 = -1;
-    reinterpret_cast<Ref052*>(&state58)->FUN_0066b0d0(static_cast<CombatMovementRequestAccess*>(a)->FUN_008b3820());
-    reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e20(b);
+    reinterpret_cast<Ref052*>(&state58)->FUN_0066b0d0(static_cast<CombatMovementRequestAccess*>(a)->Actor_GetCurrentPathingRequest());
+    reinterpret_cast<CombatProcedureEngageTarget*>(this)->SetMoveMode_00996e20(b);
     return true;
 }
 
@@ -1432,10 +1438,10 @@ struct DebugReference
     virtual void slot123();
     virtual void slot124();
     virtual const DebugPoint& GetDebugPosition();
-    DebugReference* FUN_00575ca0();
-    unsigned int FUN_0084e3a0();
-    int FUN_00474cb0();
-    const char* FUN_0055d520();
+    DebugReference* TESObjectREFR_GetSpace();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    int GetFormEditorIDLength();
+    const char* TESObjectREFR_GetFullName();
 };
 struct DebugOwner
 {
@@ -1444,14 +1450,14 @@ struct DebugOwner
 struct DebugLocation
 {
     DebugPoint& FUN_006815c0();
-    DebugReference* FUN_0084e3a0();
+    DebugReference* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
 };
 struct DebugTimer
 {
     float FUN_00435e00();
-    float FUN_006b9130();
-    bool FUN_0097fa50();
+    float CombatTimer_GetTargetTime();
+    bool CombatTimer_IsSet();
     float start, duration;
 };
 struct DebugDisplay
@@ -1477,17 +1483,17 @@ void CombatProcedureMove::PrintDebugInfo(DebugDisplay* display, int x, int y)
         break;
     case 2:
         display->Print(x, y, "MOVING_USING_COVER");
-        display->Print(x, y, "Check Cover Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&state6C)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&state6C)->FUN_006b9130());
+        display->Print(x, y, "Check Cover Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&state6C)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&state6C)->CombatTimer_GetTargetTime());
         break;
     case 3:
         display->Print(x, y, "HIDING_BEHIND_COVER");
-        display->Print(x, y, "Hiding Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&pos40)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&pos40)->FUN_006b9130());
-        display->Print(x, y, "Check Cover Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&state6C)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&state6C)->FUN_006b9130());
+        display->Print(x, y, "Hiding Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&pos40)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&pos40)->CombatTimer_GetTargetTime());
+        display->Print(x, y, "Check Cover Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&state6C)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&state6C)->CombatTimer_GetTargetTime());
         break;
     }
     DebugPoint position = reinterpret_cast<DebugLocation*>(&startTransform)->FUN_006815c0();
-    DebugReference* cell = reinterpret_cast<DebugLocation*>(&startTransform)->FUN_0084e3a0();
-    if (cell && cell != reinterpret_cast<DebugOwner*>(m_pCombatController)->GetFieldBC()->FUN_00575ca0())
+    DebugReference* cell = reinterpret_cast<DebugLocation*>(&startTransform)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    if (cell && cell != reinterpret_cast<DebugOwner*>(m_pCombatController)->GetFieldBC()->TESObjectREFR_GetSpace())
         display->Print(x, y, "Destination: %s (%.02f,%.02f,%.02f)", cell->GetDebugName(), position.x, position.y,
                        position.z);
     else
@@ -1496,12 +1502,12 @@ void CombatProcedureMove::PrintDebugInfo(DebugDisplay* display, int x, int y)
     {
         DebugPoint targetPosition = reinterpret_cast<DebugReference*>(target38)->GetDebugPosition();
         display->Print(x, y, "Target: '%s' (%08X) - Position: (%.02f,%.02f,%.02f)",
-                       reinterpret_cast<DebugReference*>(target38)->FUN_00474cb0() ? reinterpret_cast<DebugReference*>(target38)->GetDebugName() : reinterpret_cast<DebugReference*>(target38)->FUN_0055d520(), reinterpret_cast<DebugReference*>(target38)->FUN_0084e3a0(),
+                       reinterpret_cast<DebugReference*>(target38)->GetFormEditorIDLength() ? reinterpret_cast<DebugReference*>(target38)->GetDebugName() : reinterpret_cast<DebugReference*>(target38)->TESObjectREFR_GetFullName(), reinterpret_cast<DebugReference*>(target38)->GetHavokWorldObjectCountInSceneGraph_0084e3a0(),
                        targetPosition.x, targetPosition.y, targetPosition.z);
     }
-    if (reinterpret_cast<DebugTimer*>(&state74)->FUN_0097fa50())
+    if (reinterpret_cast<DebugTimer*>(&state74)->CombatTimer_IsSet())
         display->Print(x, y, "Check Destination Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&state74)->FUN_00435e00(),
-                       reinterpret_cast<DebugTimer*>(&state74)->FUN_006b9130());
+                       reinterpret_cast<DebugTimer*>(&state74)->CombatTimer_GetTargetTime());
 }
 
 
@@ -1509,7 +1515,7 @@ namespace fnv_009d8ad0 {
 using ::TESForm;
 using ::TESObjectREFR;
 
-extern "C" TESForm* __cdecl FUN_004839c0(unsigned int formID);
+extern "C" TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int formID);
 
 // CombatProcedure vftable 0x01090874 slot 16 is 0x004534f0 (empty, ret 4); CombatProcedureMove overrides it with
 // 0x009d8ad0, which first runs the base version. The shared CombatProcedure declares that slot as vf16().
@@ -1530,14 +1536,15 @@ struct CommandTarget
 // Resolves the saved target form and restores the movement request when active5C is set.
 // @fnv 0x009d8ad0
 
-void CombatProcedureMove::FUN_009d8ad0(unsigned int value)
+// src: XBOX_PDB 0x009d8ad0
+void CombatProcedureMove::InitLoadGame_009d8ad0(unsigned int value)
 {
-    ::Actor* context = reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996de0();
+    ::Actor* context = reinterpret_cast<CombatProcedureEngageTarget*>(this)->CombatProcedure_GetAttacker();
 
     reinterpret_cast<fnv_009d8ad0::CombatProcedureSlot16Base*>(this)->FUN_004534f0(value);
 
-    target38 = (unsigned int)(target38 ? dynamic_cast<TESObjectREFR*>(fnv_009d8ad0::FUN_004839c0(target38)) : 0);
+    target38 = (unsigned int)(target38 ? dynamic_cast<TESObjectREFR*>(fnv_009d8ad0::TESForm_GetFormByNumericID(target38)) : 0);
 
     if (active5C)
-        reinterpret_cast<fnv_009d8ad0::CommandTarget*>(&state58)->FUN_0066b0d0(static_cast<CombatMovementRequestAccess*>(context)->FUN_008b3820());
+        reinterpret_cast<fnv_009d8ad0::CommandTarget*>(&state58)->FUN_0066b0d0(static_cast<CombatMovementRequestAccess*>(context)->Actor_GetCurrentPathingRequest());
 }

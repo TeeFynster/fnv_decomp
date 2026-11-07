@@ -12,5 +12,5 @@ public:
     hkpTyremark* m_data;
 
     hkpTyremark* __thiscall ComputeIndex(int index);
-    void __thiscall FUN_00e39f50(hkpTyremark* tyremark);
+    void __thiscall addTyremarkPoint(hkpTyremark* tyremark);
 };

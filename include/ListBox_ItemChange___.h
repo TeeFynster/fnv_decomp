@@ -10,11 +10,11 @@ public:
     void Initialize(Tile*, const char*);
     void FUN_007a1930(bool);
     Tile* GetHighlightedItem();
-    void FUN_007832e0(float, float);
+    void ListBox_ItemChange_SetListState(float, float);
     Tile* FUN_00825c00();
     void ApplyFilter(void (__cdecl*)());
-    void FUN_007314c0(void (__cdecl*)(void*, int), int, int);
-    void FUN_007314c0(void (__cdecl*)(Tile*), int, int);
+    void ListBox_ItemChange_Traverse(void (__cdecl*)(void*, int), int, int);
+    void ListBox_ItemChange_Traverse(void (__cdecl*)(Tile*), int, int);
 
     int unk00;
     int unk04;

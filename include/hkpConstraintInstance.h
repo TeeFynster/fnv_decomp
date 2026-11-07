@@ -89,9 +89,9 @@ public:
     hkpEntity* getEntityA() const;
     const hkpConstraintData* getData() const;
     hkpConstraintOwner* getOwner() const;
-    hkBool FUN_00cf2fb0() const throw();
+    hkBool isConstrainedToWorld() const throw();
     ConstraintPriority getPriority() const { return (ConstraintPriority)m_priority; }
-    hkpConstraintInstance* FUN_00cf3fa0(hkpEntity* pkEntityA, hkpEntity* pkEntityB, int eMode) const throw();
+    hkpConstraintInstance* clone_00cf3fa0(hkpEntity* pkEntityA, hkpEntity* pkEntityB, int eMode) const throw();
 
     hkpConstraintOwner* m_pOwnerObject;
     hkpConstraintData* m_data;

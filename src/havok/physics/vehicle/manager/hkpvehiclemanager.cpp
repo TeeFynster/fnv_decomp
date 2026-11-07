@@ -63,7 +63,7 @@ struct E426F0MemoryRouter
     }
 };
 
-extern "C" E426F0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" E426F0MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
 
 struct E426F0Object
@@ -79,7 +79,7 @@ static __forceinline void E426F0ObjectArray_construct(E426F0Object** p, int n, E
 
 static __forceinline void E426F0ObjectArray_AddBack(hkArrayBase<E426F0Object*>& self, E426F0Object* const& e)
 {
-        E426F0Allocator& alloc = FUN_00c85750().heap();
+        E426F0Allocator& alloc = hkMemoryRouter_getInstance().heap();
         if (self.m_iElementCount == self.getCapacity())
             ResizeAudioStream(&alloc, (&self), sizeof(E426F0Object*));
         E426F0ObjectArray_construct(self.m_data + self.m_iElementCount, 1, e);
@@ -126,7 +126,7 @@ struct E42740MemoryRouter
     }
 };
 
-extern "C" E42740MemoryRouter& __cdecl FUN_00c85750();
+extern "C" E42740MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 class E42740ReferencedObject
 {
@@ -142,7 +142,7 @@ class E42740ReferencedObject
 
 static __forceinline void E42740ObjectArray_destroy(hkArrayBase<E42740ReferencedObject*>& self)
 {
-        E42740Allocator& alloc = FUN_00c85750().heap();
+        E42740Allocator& alloc = hkMemoryRouter_getInstance().heap();
         self.m_iElementCount = 0;
         if ((self.m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(self.m_data, (self.m_iCapacityState & 0x3fffffff) * sizeof(E42740ReferencedObject*));
@@ -182,7 +182,7 @@ struct E426F0Allocator
     virtual void Free(void* p, unsigned int size);
 };
 
-void __cdecl FUN_00c908c0(E426F0Allocator* alloc, void* list, unsigned int newCap, unsigned int elemSize);
+void __cdecl hkArrayUtil__reserve(E426F0Allocator* alloc, void* list, unsigned int newCap, unsigned int elemSize);
 
 struct ParamObj
 {
@@ -232,8 +232,8 @@ struct ItemRec
     int unk38;
     ObjBase* m_3c;
 
-    void sub_e37940();
-    void sub_e39030(ParamObj* p, void* buf);
+    void hkpVehicleInstance_updateBeforeCollisionDetection();
+    void hkpVehicleInstance_stepVehicleUsingWheelCollideOutput(ParamObj* p, void* buf);
 };
 
 struct LocalArray
@@ -262,7 +262,7 @@ void FUN_00e427b0_cls::ProcessItems(ParamObj* p)
     buffer.m_data = 0;
     buffer.m_iElementCount = 0;
     buffer.m_iCapacityState = 0x80000000;
-    E426F0MemoryRouter& router = FUN_00c85750();
+    E426F0MemoryRouter& router = hkMemoryRouter_getInstance();
     void* initial = (void*)router.unk00;
     router.unk00 += 0x600;
     buffer.m_data = initial;
@@ -277,7 +277,7 @@ void FUN_00e427b0_cls::ProcessItems(ParamObj* p)
         {
             ItemRec* item = m_items[i];
             int flag = item->m_1c->m_20;
-            E426F0MemoryRouter& h2 = FUN_00c85750();
+            E426F0MemoryRouter& h2 = hkMemoryRouter_getInstance();
             E426F0Allocator* pAllocator = h2.m_pStreamAllocator;
             int cap = buffer.m_iCapacityState & 0x3fffffff;
             if (cap < flag)
@@ -287,13 +287,13 @@ void FUN_00e427b0_cls::ProcessItems(ParamObj* p)
                 {
                     iNewCapacity = flag;
                 }
-                FUN_00c908c0(pAllocator, &buffer, iNewCapacity, 0x60);
+                hkArrayUtil__reserve(pAllocator, &buffer, iNewCapacity, 0x60);
             }
             buffer.m_iElementCount = flag;
-            item->sub_e37940();
+            item->hkpVehicleInstance_updateBeforeCollisionDetection();
             ObjBase* pObj = item->m_3c;
             pObj->v10(p->m_08, item, buffer.m_data);
-            item->sub_e39030(p, buffer.m_data);
+            item->hkpVehicleInstance_stepVehicleUsingWheelCollideOutput(p, buffer.m_data);
             i++;
         } while (i < count);
     }
@@ -302,9 +302,9 @@ void FUN_00e427b0_cls::ProcessItems(ParamObj* p)
         buffer.m_iElementCount = 0;
     }
     void* last = buffer.m_initialBuffer;
-    E426F0MemoryRouter& h3 = FUN_00c85750();
+    E426F0MemoryRouter& h3 = hkMemoryRouter_getInstance();
     h3.unk00 = (int)last;
-    E426F0MemoryRouter& h4 = FUN_00c85750();
+    E426F0MemoryRouter& h4 = hkMemoryRouter_getInstance();
     E426F0Allocator* alloc = h4.m_pStreamAllocator;
     unsigned int flags = buffer.m_iCapacityState;
     buffer.m_iElementCount = 0;

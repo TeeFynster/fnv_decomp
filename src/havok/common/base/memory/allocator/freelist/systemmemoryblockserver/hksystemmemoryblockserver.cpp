@@ -62,10 +62,11 @@ struct FUN_00d60460_Class
     int m_pAuxiliaryObject;
     FUN_00d60460_Block* m_block;
 
-    void FUN_00d60460(void*, int);
+    void hkSystemMemoryBlockServer_free(void*, int);
 };
 
-void FUN_00d60460_Class::FUN_00d60460(void* p, int size)
+// src: HAVOK_LIB 0x00d60460
+void FUN_00d60460_Class::hkSystemMemoryBlockServer_free(void* p, int size)
 {
     m_uiBufferCapacity -= size;
     m_block->free(p, size);
@@ -84,11 +85,12 @@ struct FUN_00d604e0_cls
     int unk08;
     int unk0C;
     FUN_00d604e0_inner* m_pInner;
-    void FUN_00d604e0(int a);
+    void hkSystemMemoryBlockServer_criticalAlloc(int a);
 };
 
 // @fnv 0x00d604e0
-void FUN_00d604e0_cls::FUN_00d604e0(int a)
+// src: HAVOK_LIB 0x00d604e0
+void FUN_00d604e0_cls::hkSystemMemoryBlockServer_criticalAlloc(int a)
 {
     m_pInner->Tail(a);
 }
@@ -107,11 +109,12 @@ struct FUN_00d604f0_cls
     int unk08;
     int unk0C;
     SpawnedTarget* m_10;
-    void FUN_00d604f0(int a);
+    void hkSystemMemoryBlockServer_criticalFree(int a);
 };
 
 // @fnv 0x00d604f0
-void FUN_00d604f0_cls::FUN_00d604f0(int a)
+// src: HAVOK_LIB 0x00d604f0
+void FUN_00d604f0_cls::hkSystemMemoryBlockServer_criticalFree(int a)
 {
     m_10->Forward(a);
 }
@@ -120,7 +123,8 @@ void FUN_00d604f0_cls::FUN_00d604f0(int a)
 // Original: mov eax,[esp+4]; mov byte ptr [eax],0; ret 0x14
 
 // @fnv 0x00d60530
-void __stdcall FUN_00d60530(unsigned char* out, int a2, int a3, int a4, int a5)
+// src: HAVOK_SRC 0x00d60530
+void __stdcall hkSystemMemoryBlockServer_resize(unsigned char* out, int a2, int a3, int a4, int a5)
 {
     *out = 0;
 }
@@ -155,11 +159,12 @@ struct FUN_00d60490_cls
     int unk04;
     int unk08;
     int unk0C;
-    int FUN_00d60490();
+    int GetUnk0C();
 };
 
 // @fnv 0x00d60490
-int FUN_00d60490_cls::FUN_00d60490()
+// src: GUESS 0x00d60490 (confidence: low)
+int FUN_00d60490_cls::GetUnk0C()
 {
     return unk0C;
 }
@@ -172,11 +177,12 @@ struct hkObjD604
     unsigned int m_pRayCursor;
     unsigned int m_iElementCount;
 
-    hkBool FUN_00d604a0(unsigned int n);
+    hkBool hkSystemMemoryBlockServer_setMemoryLimit(unsigned int n);
 };
 
 // @fnv 0x00d604a0
-hkBool hkObjD604::FUN_00d604a0(unsigned int n)
+// src: HAVOK_LIB 0x00d604a0
+hkBool hkObjD604::hkSystemMemoryBlockServer_setMemoryLimit(unsigned int n)
 {
     if (n == 0)
     {

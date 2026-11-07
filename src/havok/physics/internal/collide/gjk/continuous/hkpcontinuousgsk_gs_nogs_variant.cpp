@@ -18,14 +18,15 @@ struct Out
     float u[3];
     __m128 pos;
 };
-void FUN_00db4b50(void* a, float t, Sample* out);
+void hkTransform_setMulInverseMul_UpdateState_00db4b50(void* a, float t, Sample* out);
 extern const double DAT_010290b0;  // 0.5
 extern const double DAT_0101ffa0;  // 0.1
 extern const float DAT_0101e2bc;   // 0.1f
 extern const double DAT_0106b9e8;  // 0.9
 extern const float DAT_010177e8;   // 0.9f
 // @fnv 0x00db4ca0
-float FUN_00db4ca0(void* a, const float* target, const __m128* origin, float A, float B, float C, float D, int unused,
+// src: GUESS 0x00db4ca0 (confidence: low)
+float Object_ProcessEntries_00db4ca0(void* a, const float* target, const __m128* origin, float A, float B, float C, float D, int unused,
                    Out* res)
 {
     float t = A;
@@ -47,7 +48,7 @@ float FUN_00db4ca0(void* a, const float* target, const __m128* origin, float A, 
         }
         Sample s;
         t = (1.0f - t) * A + B * t;
-        FUN_00db4b50(a, t, &s);
+        hkTransform_setMulInverseMul_UpdateState_00db4b50(a, t, &s);
         __m128 w = *(__m128*)&s.d[48];
         __m128 v = _mm_mul_ps(_mm_sub_ps(*origin, *(__m128*)&s.d[52]), w);
         __m128 p = _mm_add_ss(_mm_shuffle_ps(v, v, 0xaa), _mm_shuffle_ps(w, w, 0xff));

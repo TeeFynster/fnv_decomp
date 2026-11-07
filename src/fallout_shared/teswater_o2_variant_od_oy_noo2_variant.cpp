@@ -53,24 +53,24 @@ class LocalPoint3Ext
     float GetSquaredXYLength() const;
     float Length() const;
 
-    AimVector FUN_00439ef0(const AimVector& point) const;
-    LocalPoint3Ext FUN_00439ef0(const NiPoint3& point) const;
-    NiPoint3* FUN_00439ef0(NiPoint3* output, const NiPoint3& point) const;
+    AimVector SubtractIntoVector(const AimVector& point) const;
+    LocalPoint3Ext SubtractIntoVector(const NiPoint3& point) const;
+    NiPoint3* SubtractIntoVector(NiPoint3* output, const NiPoint3& point) const;
     AimVector FUN_00439e90(const AimVector& point) const;
     bool FUN_00439090(const AimVector& point) const;
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     void FUN_006815c0();
     float FUN_004a7290() const;
     float FUN_00457910();
-    LocalPoint3Ext& FUN_0063c8a0(const NiPoint3& point);
-    NiPoint3 FUN_004a0bd0() const;
+    LocalPoint3Ext& ComputeValue_0063c8a0(const NiPoint3& point);
+    NiPoint3 GetNegatedVector() const;
 };
 extern int DAT_0109cb9c;
-void __fastcall FUN_00a5a390(void* p);
+void __fastcall ReleaseStorage_00a5a390(void* p);
 struct FUN_00a6fae0_Class
 {
-    void __thiscall FUN_00a6fae0();
+    void __thiscall UpdateFields_00a6fae0();
 };
 // Lazily create the shader property for this geometry, picking the shader type by whether the geometry is skinned.
 class B9F30MemoryManager
@@ -252,7 +252,7 @@ class B9F30Owner
     int unk148;
     B9F30Property* m_pkProperty;
 
-    B9F30Property* FUN_00b69f30(B9F30Geometry* pkGeometry);
+    B9F30Property* WaterShaderProperty_GetWaterPass(B9F30Geometry* pkGeometry);
 };
 
 struct B006815c0
@@ -264,7 +264,7 @@ struct NiMatrix
 {
     float m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44;
     void* CopyFrom(const void*);
-    NiMatrix FUN_004ed140(const NiMatrix&);
+    NiMatrix ProcessAndReturnValue_004ed140(const NiMatrix&);
 };
 struct NiMatrixEx : NiMatrix
 {
@@ -277,36 +277,37 @@ struct CameraMatrixSource
     const void* GetOffset980();
     const void* GetOffsetPointer();
 };
-CameraMatrixSource* FUN_004a0e90();
-NiPoint3* FUN_004ed180();
+CameraMatrixSource* BSShaderManager_GetRenderer();
+NiPoint3* BSShader_GetCameraWorldTranslate();
 struct NiVec4
 {
     float x, y, z, w;
 };
-NiRenderer* FUN_0043c4b0();
+NiRenderer* NiXenonRenderer_GetRenderer();
 extern "C" void* __stdcall D3DXMatrixInverse(void*, float*, const void*);
 extern "C" void* __stdcall D3DXMatrixTranspose(void*, const void*);
 extern "C" hkVector4* __stdcall D3DXPlaneNormalize(hkVector4*, const hkVector4*);
 extern "C" hkVector4* __stdcall D3DXPlaneTransform(hkVector4*, const hkVector4*, const void*);
 struct WaterPlaneHost
 {
-    void FUN_004ecef0(float, float, float, float, int);
+    void TESWaterSystem_SetClipPlane(float, float, float, float, int);
 };
 // @fnv 0x004ecef0
-void WaterPlaneHost::FUN_004ecef0(float x, float y, float z, float w, int unused)
+// src: COMMUNITY 0x004ecef0
+void WaterPlaneHost::TESWaterSystem_SetClipPlane(float x, float y, float z, float w, int unused)
 {
     B006815c0 view, projection, inverse;
     NiMatrixEx translated;
-    translated.CopyFrom(FUN_004a0e90()->GetOffset980());
+    translated.CopyFrom(BSShaderManager_GetRenderer()->GetOffset980());
     translated.m41 =
-        -reinterpret_cast<LocalPoint3Ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m11, translated.m21, translated.m31));
+        -reinterpret_cast<LocalPoint3Ext*>(BSShader_GetCameraWorldTranslate())->Dot(NiPoint3(translated.m11, translated.m21, translated.m31));
     translated.m42 =
-        -reinterpret_cast<LocalPoint3Ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m12, translated.m22, translated.m32));
+        -reinterpret_cast<LocalPoint3Ext*>(BSShader_GetCameraWorldTranslate())->Dot(NiPoint3(translated.m12, translated.m22, translated.m32));
     translated.m43 =
-        -reinterpret_cast<LocalPoint3Ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m13, translated.m23, translated.m33));
+        -reinterpret_cast<LocalPoint3Ext*>(BSShader_GetCameraWorldTranslate())->Dot(NiPoint3(translated.m13, translated.m23, translated.m33));
     NiMatrixEx project;
-    project.CopyFrom(FUN_004a0e90()->GetOffsetPointer());
-    NiMatrix transform = translated.FUN_004ed140(project);
+    project.CopyFrom(BSShaderManager_GetRenderer()->GetOffsetPointer());
+    NiMatrix transform = translated.ProcessAndReturnValue_004ed140(project);
     D3DXMatrixInverse(&inverse, 0, &transform);
     D3DXMatrixTranspose(&transform, &inverse);
     hkVector4 plane, result;
@@ -321,5 +322,5 @@ void WaterPlaneHost::FUN_004ecef0(float x, float y, float z, float w, int unused
     output.y = result.y;
     output.z = result.z;
     output.w = result.w;
-    FUN_0043c4b0()->CallFooForEachElement(0, 1, &output);
+    NiXenonRenderer_GetRenderer()->CallFooForEachElement(0, 1, &output);
 }

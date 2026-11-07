@@ -19,10 +19,11 @@ struct FUN_00d1f1e0_class
         return -1;
     }
 
-    int FUN_00d1f1e0();
+    int hkpShapeContainer_getNumChildShapes();
 };
 
-int FUN_00d1f1e0_class::FUN_00d1f1e0()
+// src: HAVOK_LIB 0x00d1f1e0
+int FUN_00d1f1e0_class::hkpShapeContainer_getNumChildShapes()
 {
     int count = 0;
     int child = FUN_00d1f1e0_2();
@@ -40,17 +41,19 @@ struct FUN_00d1f210_cls
 {
     int unk00;
     int m_04;
-    int FUN_00d1f210(int a1, int a2);
+    int hkpShapeContainer_getChildShape(int a1, int a2);
 };
 
 // @fnv 0x00d1f210
-int FUN_00d1f210_cls::FUN_00d1f210(int a1, int a2)
+// src: COMMUNITY 0x00d1f210
+int FUN_00d1f210_cls::hkpShapeContainer_getChildShape(int a1, int a2)
 {
     return m_04;
 }
 
 // @fnv 0x00d1f1d0
-int __stdcall FUN_00d1f1d0(int)
+// src: COMMUNITY 0x00d1f1d0
+int __stdcall hkpShapeContainer_getCollisionFilterInfo(int)
 {
     return 0;
 }

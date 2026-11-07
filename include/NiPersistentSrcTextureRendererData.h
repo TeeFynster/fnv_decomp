@@ -38,8 +38,8 @@ public:
 
     void LinkPalette(NiStream& stream);
     void AppendToStrings(ViewerArray* strings);
-    bool FUN_00a98170(NiStream& stream);
-    bool FUN_00a982f0(NiObject* object);
+    bool RegisterStreamables_00a98170(NiStream& stream);
+    bool IsEqual_00a982f0(NiObject* object);
     void FUN_00a984b0(NiStream& stream);
     unsigned int GetWidth(unsigned int level = 0) const;
     unsigned int GetHeight(unsigned int level = 0) const;

@@ -24,6 +24,6 @@ public:
     virtual void vf16();
 
     void Attach();
-    void FUN_00441b80();
+    void ForwardCall_00441b80();
     void FUN_004414f0();
 };

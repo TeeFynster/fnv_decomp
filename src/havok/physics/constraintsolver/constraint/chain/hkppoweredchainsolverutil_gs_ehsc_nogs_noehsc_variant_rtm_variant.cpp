@@ -488,13 +488,13 @@ struct __declspec(align(16)) BufB
     float f0bc;
 };
 extern void __cdecl ResetJacobianRows(int a, int b, void* c, void* d);
-extern void __cdecl FUN_00df07c0(int a, void* b);
-extern void __cdecl FUN_00e29250(void* a, void* b);
-extern void __cdecl FUN_00e29470(void* a, void* b, int c);
-extern void __cdecl FUN_00e29380(void* a, void* b);
-extern void __cdecl FUN_00e298f0(void* a, void* b);
+extern void __cdecl Object_ProcessEntries_00df07c0(int a, void* b);
+extern void __cdecl _hkMatrix6SetTranspose(void* a, void* b);
+extern void __cdecl hkMatrix3_ProcessEntries_00e29470(void* a, void* b, int c);
+extern void __cdecl Object_SubtractVectorBundles(void* a, void* b);
+extern void __cdecl Runtime_ForwardCall_00e298f0(void* a, void* b);
 extern float DAT_0104da4c;
-void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4);
+void __cdecl Hkppoweredchainsolverutil_UpdateState_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4);
 struct MatrixGroup
 {
     char data0[0xc0];
@@ -510,8 +510,8 @@ struct InputStruct
     char pad2[8];
     hkAabb* aabbs;
 };
-extern "C" void __cdecl FUN_00e29510(void* out, const void* matrix, const void* in);
-void __cdecl FUN_00df11a0(InputStruct* a, hkAabb* out);
+extern "C" void __cdecl hkVector4_ComputeValues_00e29510(void* out, const void* matrix, const void* in);
+void __cdecl hkAabb_ProcessEntries_00df11a0(InputStruct* a, hkAabb* out);
 template <class T> class Slot
 {
   public:
@@ -616,7 +616,8 @@ struct PoweredChain
     Slot<Quad8*> m_velocities;
 };
 // @fnv 0x00df1260
-extern "C" void __cdecl FUN_00df1260(PoweredChain* chain, int* chosenConstraint, int* chosenAxis, float* chosenImpulse)
+// src: GUESS 0x00df1260 (confidence: low)
+extern "C" void __cdecl Object_ProcessEntries_00df1260(PoweredChain* chain, int* chosenConstraint, int* chosenAxis, float* chosenImpulse)
 {
     const Quad8* target = chain->m_velocities + 1;
     float worst = 0.0f;
@@ -627,7 +628,7 @@ extern "C" void __cdecl FUN_00df1260(PoweredChain* chain, int* chosenConstraint,
     for (int i = chain->m_iConstraintCount - 1; i >= 0; i--)
     {
         Quad8 product;
-        FUN_00e29510(&product, &chain->m_kMatrices[i].m_kMiddle, &accum);
+        hkVector4_ComputeValues_00e29510(&product, &chain->m_kMatrices[i].m_kMiddle, &accum);
         accum.setSub8(target[i], product);
         for (int axis = 0; axis < 3; axis++)
         {
@@ -881,7 +882,8 @@ static __forceinline Scalar angularDv(const AngularJac& j, const Accumulator2& a
     return result;
 }
 // @fnv 0x00df0d30
-extern "C" void FUN_00df0d30(const ConstraintSolverState& info, VelocityPair* output)
+// src: GUESS 0x00df0d30 (confidence: medium)
+extern "C" void hkpPoweredChain_ComputeLinkVelocityDeltas(const ConstraintSolverState& info, VelocityPair* output)
 {
     LinearJac* j = info.linear;
     AngularJac* k = info.angular;
@@ -1045,7 +1047,8 @@ static __forceinline ScalarValue angularVelocity(const AngularPair& jac, const B
     return customVelocity(jac, a, b, info, tau, damping, jac.rhs());
 }
 // @fnv 0x00df1060
-void __cdecl FUN_00df1060(int index, int axis, const ChainState& state, Quad8* out)
+// src: GUESS 0x00df1060 (confidence: low)
+void __cdecl Object_UpdateFields_00df1060(int index, int axis, const ChainState& state, Quad8* out)
 {
     int i = index;
     Quad8& dst = out[i];
@@ -1345,7 +1348,8 @@ __forceinline hkSimd getAngularDv0(const hkAngJac& jac, const hkAccum& mA, const
     return getAngularDv0CustomRhs(jac, mA, mB, info, tau, damping, jac.getAngularRhs());
 }
 // @fnv 0x00df1430
-void __cdecl FUN_00df1430(const hkChainInfo& info, int& modifiedConstraintIndex, int& modifiedCoordinateIndex,
+// src: GUESS 0x00df1430 (confidence: low)
+void __cdecl hkChainInfo_ProcessEntries_00df1430(const hkChainInfo& info, int& modifiedConstraintIndex, int& modifiedCoordinateIndex,
                           hkVec8* impulse, void* motorsState)
 {
     const hkVec8* g = ((hkVec8*)info.m_vectorG) + 1;
@@ -1360,7 +1364,7 @@ void __cdecl FUN_00df1430(const hkChainInfo& info, int& modifiedConstraintIndex,
     impLeft.setZero8();
     {
         hkVec8 tmp;
-        FUN_00e29510(&tmp, &((hkTriple*)info.m_kMatrices)[info.m_iConstraintCount - 1].m_diag, &impLeft);
+        hkVector4_ComputeValues_00e29510(&tmp, &((hkTriple*)info.m_kMatrices)[info.m_iConstraintCount - 1].m_diag, &impLeft);
         impLeft.setSub8(g[info.m_iConstraintCount - 1], tmp);
     }
     for (int i = info.m_iConstraintCount - 1; i >= 0; i--)
@@ -1372,7 +1376,7 @@ void __cdecl FUN_00df1430(const hkChainInfo& info, int& modifiedConstraintIndex,
         if (tIdx >= 0)
         {
             hkVec8 tmp;
-            FUN_00e29510(&tmp, &baseTriple->m_diag, &impLeft);
+            hkVector4_ComputeValues_00e29510(&tmp, &baseTriple->m_diag, &impLeft);
             impLeft.setSub8(g[tIdx], tmp);
         }
         else
@@ -1382,19 +1386,19 @@ void __cdecl FUN_00df1430(const hkChainInfo& info, int& modifiedConstraintIndex,
         hkMat6 offDiagTransp;
         if (tIdx >= 0)
         {
-            FUN_00e29250(&offDiagTransp, (void*)&baseTriple->m_upperInv);
+            _hkMatrix6SetTranspose(&offDiagTransp, (void*)&baseTriple->m_upperInv);
         }
         else
         {
             offDiagTransp.setIdentity();
         }
         hkVec8 resultVelocityVec;
-        FUN_00e29510(&resultVelocityVec, &offDiagTransp, &impLeft);
+        hkVector4_ComputeValues_00e29510(&resultVelocityVec, &offDiagTransp, &impLeft);
         {
             hkVec8 tmp;
-            FUN_00e29510(&tmp, &baseTriple[1].m_upper, &impCenter);
+            hkVector4_ComputeValues_00e29510(&tmp, &baseTriple[1].m_upper, &impCenter);
             resultVelocityVec.add8(tmp);
-            FUN_00e29510(&tmp, &baseTriple[1].m_upperInv, &impRight);
+            hkVector4_ComputeValues_00e29510(&tmp, &baseTriple[1].m_upperInv, &impRight);
             resultVelocityVec.add8(tmp);
         }
         for (int c = 0; c < 3; c++)

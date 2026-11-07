@@ -24,7 +24,7 @@ struct FUN_00d0b1e0
 extern int DAT_0102e388;
 extern int DAT_010cb1e4;
 extern int DAT_010cb1c4;
-extern "C" void* __cdecl FUN_00c85750();
+extern "C" void* __cdecl hkMemoryRouter_getInstance();
 struct CallbackInterface
 {
     virtual void f0();
@@ -46,15 +46,15 @@ FUN_00d0b1e0::FUN_00d0b1e0(int flags)
     unk00 = &DAT_0102e388;
     if (flags & 1)
     {
-        Manager* manager = (Manager*)FUN_00c85750();
+        Manager* manager = (Manager*)hkMemoryRouter_getInstance();
         manager->interface10->callback(this, unk04);
     }
 }
 
 struct CallbackTarget
 {
-    void FUN_00c91750(void* apValue);
-    void FUN_00c91a70(void* apValue);
+    void hkpWorld_removeConstraintListener(void* apValue);
+    void hkpWorld_removeWorldDeletionListener(void* apValue);
 };
 
 struct OuterRefHolder
@@ -70,7 +70,7 @@ struct SubEntry
 {
     int unk00;
 
-    void FUN_00d9e280(CallbackTarget* apTarget);
+    void ClearValue_Thunk_00d9e280(CallbackTarget* apTarget);
 };
 
 struct FUN_00d0ae30_cls
@@ -79,15 +79,16 @@ struct FUN_00d0ae30_cls
     int unk04;
     SubEntry m_08;
 
-    void FUN_00d0ae30(CallbackTarget* apTarget);
+    void hkpCollisionCallbackUtil_worldDeletedCallback(CallbackTarget* apTarget);
 };
 
 // @fnv 0x00d0ae30
-void FUN_00d0ae30_cls::FUN_00d0ae30(CallbackTarget* apTarget)
+// src: HAVOK_LIB 0x00d0ae30
+void FUN_00d0ae30_cls::hkpCollisionCallbackUtil_worldDeletedCallback(CallbackTarget* apTarget)
 {
-    m_08.FUN_00d9e280(apTarget);
-    apTarget->FUN_00c91750(((char*)this - 0xc) != 0 ? (char*)this - 4 : 0);
-    apTarget->FUN_00c91a70(((char*)this - 0xc) != 0 ? (char*)this : 0);
+    m_08.ClearValue_Thunk_00d9e280(apTarget);
+    apTarget->hkpWorld_removeConstraintListener(((char*)this - 0xc) != 0 ? (char*)this - 4 : 0);
+    apTarget->hkpWorld_removeWorldDeletionListener(((char*)this - 0xc) != 0 ? (char*)this : 0);
     ((OuterRefHolder*)((char*)this - 0xc))->FUN_00c905b0();
 }
 
@@ -174,11 +175,12 @@ struct Params
 };
 
 extern "C" void __cdecl DispatchCollisionEvents(void* obj, Data* data);
-extern "C" void __cdecl FUN_00cfffb0(void* obj, Data* data);
+extern "C" void __cdecl hkpEntityCallbackUtil_fireContactConstraintAddedCallback(void* obj, Data* data);
 
 // Records a profiler tick, then if pObj->v20() is 11 calls DispatchCollisionEvents once and FUN_00cfffb0 twice with a Data record, and records an end tick.
 // @fnv 0x00d0ae80
-void __stdcall FUN_00d0ae80(Params* p)
+// src: XBOX_PDB 0x00d0ae80
+void __stdcall hkpCollisionCallbackUtil_constraintAddedCallback(Params* p)
 {
     PFN_TlsGetValue pfnTls = TlsGetValue;
     // Collision records use uninitialized storage; Data's unrelated lifecycle is not invoked.
@@ -209,9 +211,9 @@ void __stdcall FUN_00d0ae80(Params* p)
         *(void**)&data.uiCategoryID = b;
         DispatchCollisionEvents(a->unk08, &data);
         data.eReqSkill = (ActorValue::Index)0;
-        FUN_00cfffb0(a, &data);
+        hkpEntityCallbackUtil_fireContactConstraintAddedCallback(a, &data);
         data.eReqSkill = (ActorValue::Index)1;
-        FUN_00cfffb0(b, &data);
+        hkpEntityCallbackUtil_fireContactConstraintAddedCallback(b, &data);
     }
 
     volatile DWORD tickExit;
@@ -256,7 +258,7 @@ struct S_00d0af60_Shape
     virtual void v18();
     virtual void v1c();
     virtual int getType();
-    void* FUN_00d92820();
+    void* hkpSimpleContactConstraintData_getSimpleConstraintContactMgr();
 };
 
 struct S_00d0af60_Entity
@@ -277,12 +279,13 @@ struct S_00d0af60_Input
     S_00d0af60_Entity* unk18;
 };
 
-void FUN_00d00de0(void*, Data*);
-void FUN_00d00060(S_00d0af60_Entity*, Data*);
+void hkpWorldCallbackUtil_fireContactConstraintRemovedCallback(void*, Data*);
+void hkpEntityCallbackUtil_fireContactConstraintRemovedCallback(S_00d0af60_Entity*, Data*);
 
 // Between two profiler timers, if the shape's type is 11, builds an event and calls FUN_00d00de0 with a->unk8, then FUN_00d00060 for each entity.
 // @fnv 0x00d0af60
-void __stdcall FUN_00d0af60(S_00d0af60_Input* in)
+// src: XBOX_PDB 0x00d0af60
+void __stdcall hkpCollisionCallbackUtil_constraintRemovedCallback(S_00d0af60_Input* in)
 {
     S_00d0af60_Timer("TtCollLfUtil");
     S_00d0af60_Shape* shape = in->unkC;
@@ -290,18 +293,18 @@ void __stdcall FUN_00d0af60(S_00d0af60_Input* in)
     {
         unsigned int eventStorage[sizeof(Data) / sizeof(unsigned int)];
         Data& ev = *(Data*)eventStorage;
-        void* obj = shape->FUN_00d92820();
+        void* obj = shape->hkpSimpleContactConstraintData_getSimpleConstraintContactMgr();
         S_00d0af60_Entity* a = in->unk14;
         S_00d0af60_Entity* b = in->unk18;
         *(void**)&ev.uiSubCategoryID = obj;
         ev.eReqSkill = (ActorValue::Index)2;
         *(S_00d0af60_Entity**)&ev.iReqSkillLevel = a;
         *(S_00d0af60_Entity**)&ev.uiCategoryID = b;
-        FUN_00d00de0(a->unk8, &ev);
+        hkpWorldCallbackUtil_fireContactConstraintRemovedCallback(a->unk8, &ev);
         ev.eReqSkill = (ActorValue::Index)0;
-        FUN_00d00060(a, &ev);
+        hkpEntityCallbackUtil_fireContactConstraintRemovedCallback(a, &ev);
         ev.eReqSkill = (ActorValue::Index)1;
-        FUN_00d00060(b, &ev);
+        hkpEntityCallbackUtil_fireContactConstraintRemovedCallback(b, &ev);
     }
     S_00d0af60_Timer("Et");
 }
@@ -310,20 +313,21 @@ void __stdcall FUN_00d0af60(S_00d0af60_Input* in)
 // class deriving from two bases; PrimaryBase is 8 bytes (vptr + one int).
 struct AdjPrimaryBase
 {
-    virtual void FUN_00d0b1c0();
+    virtual void AdjustThisAndForward_00d0b1c0();
     int unk04;
 };
 
 struct AdjSecondaryBase
 {
-    virtual void FUN_00d0b1c0();
+    virtual void AdjustThisAndForward_00d0b1c0();
 };
 
 struct AdjDerived : AdjPrimaryBase, AdjSecondaryBase
 {
     AdjDerived();
 // @fnv 0x00d0b1c0
-    virtual void FUN_00d0b1c0();
+// src: GUESS 0x00d0b1c0 (confidence: low)
+    virtual void AdjustThisAndForward_00d0b1c0();
 };
 
 AdjDerived::AdjDerived()
@@ -383,13 +387,14 @@ struct TargetClass
     char pad00[0x1c0];
     hkpCollisionCallbackUtil* m_pCallbackData;
 
-    void __thiscall FUN_00c93a60(void* p);
-    void __thiscall FUN_00c937e0(void* p);
+    void __thiscall hkpWorld_addWorldDeletionListener(void* p);
+    void __thiscall hkpWorld_addConstraintListener(void* p);
 };
 
 // Increments the reference count of m_pCallbackData if present, otherwise allocates a 0x4c chunk, initializes it, and wires it into the object.
 // @fnv 0x00d0b040
-void __cdecl FUN_00d0b040(TargetClass* obj)
+// src: HAVOK_LIB 0x00d0b040
+void __cdecl hkpCollisionCallbackUtil_addCollisionCallbackUtil(TargetClass* obj)
 {
     hkpCollisionCallbackUtil* util = obj->m_pCallbackData;
     if (util)
@@ -404,8 +409,8 @@ void __cdecl FUN_00d0b040(TargetClass* obj)
     util = mem->Initialize();
     obj->m_pCallbackData = util;
 
-    obj->FUN_00c93a60(util ? &util->field_0C : 0);
-    obj->FUN_00c937e0(util ? &util->field_08 : 0);
+    obj->hkpWorld_addWorldDeletionListener(util ? &util->field_0C : 0);
+    obj->hkpWorld_addConstraintListener(util ? &util->field_08 : 0);
     util->field_14.PassObjectToTarget(obj);
 }
 }  // namespace fnv_00d0b040

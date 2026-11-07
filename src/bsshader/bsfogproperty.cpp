@@ -74,7 +74,8 @@ void __fastcall DestroyProperty(NiProperty* property)
 extern int g_012007e0;
 
 // @fnv 0x00bb8170
-int* __cdecl FUN_00bb8170()
+// src: XBOX_PDB 0x00bb8170
+int* __cdecl BSFogProperty_GetRTTI()
 {
     return &g_012007e0;
 }
@@ -82,7 +83,8 @@ int* __cdecl FUN_00bb8170()
 extern char const* const g_012007e0_arg1;
 
 // @fnv 0x00a99f20
-char const* const* __cdecl FUN_00a99f20()
+// src: COMMUNITY 0x00a99f20
+char const* const* __cdecl NiFogProperty_GetRTTI()
 {
     return &g_012007e0_arg1;
 }
@@ -118,7 +120,8 @@ void* __fastcall DestroyObjectArray(
 
 void DestroyFogProperty();
 // @fnv 0x00a99f30
-void FUN_00a99f30()
+// src: GUESS 0x00a99f30 (confidence: medium)
+void BSFogProperty_DestroyFogProperty_Thunk()
 {
     DestroyFogProperty();
 }

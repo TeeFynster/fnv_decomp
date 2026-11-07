@@ -8,7 +8,7 @@ typedef ::__m128 LocalM128;
 // src/havok/physics/constraintsolver/solve/hkpsolver.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/constraintsolver/solve/hkpsolver.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern unsigned char DAT_011b9434[128];
-int __cdecl FUN_00d921d0(const signed char* index);
+int __cdecl Hkpsolver_GetIndexedValue_00d921d0(const signed char* index);
 typedef ::__m128 LocalM128;
 using ::_mm_add_ss;
 // @fnv 0x00c6cce0
@@ -18,7 +18,8 @@ extern "C" void __cdecl AddScalarFloat(LocalM128* out, const LocalM128* a, const
 }
 
 // @fnv 0x00d921c0
-char* __cdecl FUN_00d921c0(char* dst, const char* src)
+// src: GUESS 0x00d921c0 (confidence: low)
+char* __cdecl Object_ComputeValue_00d921c0(char* dst, const char* src)
 {
     *dst = *src;
     return dst;
@@ -44,7 +45,8 @@ struct Vec4Dst
 };
 
 // @fnv 0x00891060
-Vec4Dst* __cdecl FUN_00891060(Vec4Dst* out, Vec4Src* b, Vec4Src* a)
+// src: GUESS 0x00891060 (confidence: low)
+Vec4Dst* __cdecl Object_ProcessAndReturnValue_00891060(Vec4Dst* out, Vec4Src* b, Vec4Src* a)
 {
     out->SetVec(_mm_mul_ss(*b->GetVec(), *a->GetVec()));
     return out;

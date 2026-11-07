@@ -15,7 +15,7 @@
 class AddonNodeData
 {
   public:
-    void FUN_00512810();
+    void BSEndian_Thunk();
     unsigned short m_usAddonNodeIndex;  // +0x0, 2 bytes
     unsigned char cFlags;               // +0x2, 1 bytes
     unsigned char layoutPadding3[1];

@@ -17,7 +17,7 @@ inline hkpCollisionDispatcher::CollisionAgentFunctionTable::CollisionAgentFuncti
 
 void __cdecl TestGsk();
 void __cdecl FUN_00dac450();
-void __cdecl FUN_00daf8e0();
+void __cdecl Object_ProcessEntries_00daf8e0();
 
 // @fnv 0x00dacc70
 __declspec(noinline) void __cdecl hkpGskfAgent::InitAgentFunc(hkpCollisionDispatcher::CollisionAgentFunctionTable& f)
@@ -25,7 +25,7 @@ __declspec(noinline) void __cdecl hkpGskfAgent::InitAgentFunc(hkpCollisionDispat
     f.m_pCreateFunc = m_pVirtualFunction0;
     f.m_pQueryPenetrationsFunc = (hkpCollisionDispatcher::GetPenetrationsFunc)TestGsk;
     f.m_pGetPenetrationsFunc = (hkpCollisionDispatcher::GetClosestPointsFunc)FUN_00dac450;
-    f.m_pLinearCastFunc = (hkpCollisionDispatcher::LinearCastFunc)FUN_00daf8e0;
+    f.m_pLinearCastFunc = (hkpCollisionDispatcher::LinearCastFunc)Object_ProcessEntries_00daf8e0;
     f.m_bIsFlipped = false;
     f.m_bIsPredictive = false;
 }
@@ -39,7 +39,7 @@ void hkpGskfAgent::cleanup(hkpConstraintOwner& arg)
     delete this;
 }
 
-void __cdecl FUN_00dae340(void*, int);
+void __cdecl _hkGskManifold_removePoint(void*, int);
 
 // @fnv 0x00dacb20
 void hkpGskfAgent::removePoint(hkContactPointId id)
@@ -53,7 +53,7 @@ void hkpGskfAgent::removePoint(hkContactPointId id)
         {
             if (*(unsigned short*)p == id)
             {
-                FUN_00dae340(&m_kContactManifold, i);
+                _hkGskManifold_removePoint(&m_kContactManifold, i);
                 return;
             }
             ++i;
@@ -108,7 +108,7 @@ struct __declspec(align(16)) Dsub
 {
     Dvec4 v0, v1, v2, v3;
     Dvec4 unk40, unk50;
-    void FUN_00cb22f0(Dvec4* pts, Dvec4* other);
+    void hkTransform_setMulInverseMul(Dvec4* pts, Dvec4* other);
 };
 
 struct Dtask
@@ -155,7 +155,7 @@ void hkpGskfAgent::ProcessAgent(const hkpCdBody& bodyA, const hkpCdBody& bodyB, 
     res.f04 = a2;
     res.f10 = (int)m_pContactManager;
     res.f0c = a3;
-    res.sub.FUN_00cb22f0(a1->f08, a2->f08);
+    res.sub.hkTransform_setMulInverseMul(a1->f08, a2->f08);
     ProcessCollision(&res, &ctx.f0, &ctx.f1, (int*)m_pAccess, (int*)&m_kContactManifold, (int*)&m_vSeparatingNormal, a4);
 }
 

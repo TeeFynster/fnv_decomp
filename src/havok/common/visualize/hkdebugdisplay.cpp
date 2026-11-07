@@ -17,7 +17,7 @@ struct FUN_00c99fb0_Manager
     int unk0c;
     FUN_00c99fb0_Interface* allocator;
 };
-extern FUN_00c99fb0_Manager* __cdecl FUN_00c85750();
+extern FUN_00c99fb0_Manager* __cdecl hkMemoryRouter_getInstance();
 extern "C" void __stdcall DeleteCriticalSection(void* section);
 struct FUN_00c99fb0
 {
@@ -36,10 +36,10 @@ FUN_00c99fb0::~FUN_00c99fb0()
     if (field14)
     {
         DeleteCriticalSection(field14);
-        FUN_00c85750()->allocator->FreeObject(field14, 0x18);
+        hkMemoryRouter_getInstance()->allocator->FreeObject(field14, 0x18);
     }
     int count = field10;
-    FUN_00c99fb0_Manager* manager = FUN_00c85750();
+    FUN_00c99fb0_Manager* manager = hkMemoryRouter_getInstance();
     field0c = 0;
     if (count >= 0)
         manager->allocator->FreeBuffer(field08, (count & 0x3fffffff) * 4);
@@ -49,7 +49,7 @@ FUN_00c99fb0::~FUN_00c99fb0()
 void FUN_00c99fb0::operator delete(void* object)
 {
     FUN_00c99fb0* self = (FUN_00c99fb0*)object;
-    FUN_00c99fb0_Manager* manager = FUN_00c85750();
+    FUN_00c99fb0_Manager* manager = hkMemoryRouter_getInstance();
     unsigned short size = self->unk04;
     manager->allocator->FreeObject(object, size);
 }

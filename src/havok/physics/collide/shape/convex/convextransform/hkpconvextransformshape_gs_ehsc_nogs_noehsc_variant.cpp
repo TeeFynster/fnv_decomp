@@ -24,15 +24,15 @@ struct FUN_00d5d730_class
     virtual void v7();
     virtual void v8();
     virtual void v9();
-    void FUN_00d5d730(FUN_00d5d730_class* pChild, const char* name);
+    void hkpConvexTransformShape_calcContentStatistics(FUN_00d5d730_class* pChild, const char* name);
 };
 struct FUN_00c90360_helper
 {
-    void FUN_00c90360(FUN_00d5d730_class* pChild, const char* const* name);
+    void hkReferencedObject_calcContentStatistics(FUN_00d5d730_class* pChild, const char* const* name);
 };
 struct FUN_00d5e020_standin
 {
-    int FUN_00d5e020(int a, int b);
+    int hkpConvexTransformShape_calcSizeForSpu(int a, int b);
 };
 struct Inner
 {
@@ -58,11 +58,11 @@ struct FUN_00d5d720_cls
     int unk10;
     int unk14;
     Inner* m_pInner;
-    void FUN_00d5d720();
+    void hkpConvexTransformShape_getNumCollisionSpheresImpl();
 };
 struct GetChildShapeHost : hkpConvexTransformShapeBase
 {
-    hkpSingleShapeContainer* FUN_00d5d760();
+    hkpSingleShapeContainer* hkpConvexTransformShape_getContainer();
 };
 struct Aabb_00d5d800;
 struct Shape_00d5d800
@@ -78,7 +78,7 @@ struct Shape_00d5d800
 };
 struct Xf_00d5d800 : hkTransform
 {
-    void FUN_00cb2240(const hkTransform& a, const hkTransform& b);
+    void hkTransform_setMul(const hkTransform& a, const hkTransform& b);
 };
 struct Cls_00d5d800
 {
@@ -162,7 +162,7 @@ struct RtChild : public hkpShape
 };
 struct RtStandin : public hkpConvexTransformShape
 {
-    hkBool FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
+    hkBool hkpConvexTransformShape_castRayImpl(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
 };
 static __forceinline void timer_begin(const char* name)
 {
@@ -234,7 +234,7 @@ struct FUN_00d5de40_Obj
     hkVector4 unk40;
     hkVector4 unk50;
 
-    void FUN_00d5de40(hkVector4* value);
+    void hkpConvexTransformShape_getCentreImpl(hkVector4* value);
 };
 
 struct ChildShape
@@ -262,11 +262,12 @@ struct XformShape
     ChildShape* m_pChildAtom;
     int unk1c;
     __m128 m_c0, m_c1, m_c2, m_t;
-    void FUN_00d5dc70(const V4& dir, V4& out);
+    void hkpConvexTransformShape_getSupportingVertexImpl(const V4& dir, V4& out);
 };
 
 // @fnv 0x00d5dc70
-void XformShape::FUN_00d5dc70(const V4& dir, V4& out)
+// src: HAVOK_SRC 0x00d5dc70
+void XformShape::hkpConvexTransformShape_getSupportingVertexImpl(const V4& dir, V4& out)
 {
     __m128 a = m_c0, b = m_c1, c = m_c2;
     __m128 tmp = _mm_unpacklo_ps(a, b);

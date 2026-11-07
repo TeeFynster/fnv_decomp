@@ -771,14 +771,14 @@ extern IntSetting631 g_kMaxRays631;
 extern int g_iLine631;
 extern void* g_pvLastHit631;
 
-void __cdecl FUN_004a3e00(hkVector4& kOut, const NiPoint3& kIn);
-NiAVObject* __cdecl FUN_004b5820(Collidable631* pkCollidable);
-TESObjectREFR* __cdecl FUN_0056f930(void* pvObject);
-Entity631* __cdecl FUN_004b59f0(Collidable631* pkCollidable);
-void* __cdecl FUN_004b5a80(Entity631* pkEntity);
-void __cdecl FUN_004b2780(List631* pkList, const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared,
+void __cdecl NI2HK(hkVector4& kOut, const NiPoint3& kIn);
+NiAVObject* __cdecl GetAVObjectForCollidable(Collidable631* pkCollidable);
+TESObjectREFR* __cdecl TESObjectREFR_FindReferenceFor3D(void* pvObject);
+Entity631* __cdecl hkpGetRigidBody(Collidable631* pkCollidable);
+void* __cdecl bhkEntity_Getbhk(Entity631* pkEntity);
+void __cdecl PickDistance(List631* pkList, const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared,
                           NiAVObject* pkNode, int iFlags);
-float __cdecl FUN_004587d0(float fValue);
+float __cdecl HK2NI(float fValue);
 
 // ViewCaster has no shared include/ header yet; retain its declaration with its real name.
 class ViewCaster
@@ -788,12 +788,13 @@ class ViewCaster
     Shape631* GetShape();
     Caster631* GetCaster();
     void Prepare();
-    TESObjectREFR* FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared, float* pfDistance,
+    TESObjectREFR* FindActivateREFR(const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared, float* pfDistance,
                                    bool* pbAlternate);
 };
 
 // @fnv 0x00631d60
-TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared,
+// src: XBOX_PDB 0x00631d60
+TESObjectREFR* ViewCaster::FindActivateREFR(const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared,
                                               float* pfDistance, bool* pbAlternate)
 {
     Scope631 kScope(0x10, 1, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Havok\\ViewCaster.cpp", 0x9b);
@@ -811,9 +812,9 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
         kList.SetSorted(1);
         g_iLine631 = 0xdad;
         hkVector4 kFrom;
-        FUN_004a3e00(kFrom, *pkOrigin);
+        NI2HK(kFrom, *pkOrigin);
         hkVector4 kTo;
-        FUN_004a3e00(kTo, kEnd);
+        NI2HK(kTo, kEnd);
         bool bHits = false;
         CastInput631 kInput;
         kInput.m_fRadiusB = 0.01f;
@@ -849,10 +850,10 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
                 if (kHit.m_pkCollidable)
                 {
                     g_iLine631 = 0xdb0;
-                    NiAVObject* pkObject = FUN_004b5820(kHit.m_pkCollidable);
+                    NiAVObject* pkObject = GetAVObjectForCollidable(kHit.m_pkCollidable);
                     g_iLine631 = 0xdb1;
                     if (pkObject)
-                        pkRef = FUN_0056f930(pkObject);
+                        pkRef = TESObjectREFR_FindReferenceFor3D(pkObject);
                     if (!pkRef || pkRef == g_pkPlayer631)
                         continue;
                     bool bHidden = false;
@@ -860,12 +861,12 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
                     NiAVObject* pkRoot = reinterpret_cast<NiAVObject*>(pkRef->GetNiNode());
                     while (!bHidden && pkWalk && pkWalk != pkRoot)
                     {
-                        bHidden |= pkWalk->FUN_00456610();
+                        bHidden |= pkWalk->GetAppCulled_00456610();
                         pkWalk = reinterpret_cast<NiAVObject*>(pkWalk->GetParent());
                     }
                     if (bHidden)
                         continue;
-                    Entity631* pkEntity = FUN_004b59f0(kHit.m_pkCollidable);
+                    Entity631* pkEntity = hkpGetRigidBody(kHit.m_pkCollidable);
                     bool bSolid = false;
                     Filter631 kFilter(kHit.m_pkCollidable->GetFilterInfo());
                     switch (kFilter.GetLayer())
@@ -882,7 +883,7 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
                     }
                     break;
                     }
-                    if (reinterpret_cast<BaseForm631*>(pkRef->FUN_007af430()) == g_pkSpecialBase631)
+                    if (reinterpret_cast<BaseForm631*>(pkRef->BGSSaveFormBuffer_GetForm()) == g_pkSpecialBase631)
                         bSolid = true;
                     if (pkEntity && pkEntity != pkLastEntity && bSolid)
                     {
@@ -893,8 +894,8 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
                             RayInput631 kRay;
                             kRay.m_uiFilter = GetShape()->GetFilter().GetValue();
                             hkTransform kXform(pkEntity->GetTransform());
-                            kRay.m_kFrom.FUN_00c7f690(kXform, kFrom);
-                            kRay.m_kTo.FUN_00c7f690(kXform, kTo);
+                            kRay.m_kFrom.hkVector4_setTransformedInversePos(kXform, kFrom);
+                            kRay.m_kTo.hkVector4_setTransformedInversePos(kXform, kTo);
                             RayOutput631 kOut;
                             kOut.Reset();
                             Owner631* pkShape = kHit.m_pkCollidable->GetOwner();
@@ -915,7 +916,7 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
                         if (pkLast != pkRef && reinterpret_cast<NiAVObject*>(pkRef->GetNiNode()) && iTargets < *g_kMaxTargets631.GetInt())
                         {
                             iTargets++;
-                            FUN_004b2780(&kList, pkOrigin, pkDir, fImpulseRadiusSquared, reinterpret_cast<NiAVObject*>(pkRef->GetNiNode()), 0);
+                            PickDistance(&kList, pkOrigin, pkDir, fImpulseRadiusSquared, reinterpret_cast<NiAVObject*>(pkRef->GetNiNode()), 0);
                         }
                     }
                     bool bValid = true;
@@ -951,18 +952,18 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
                         kIntersectionOffset.setSub4(kHit.GetPosition(), kFrom);
                         hkVector4 kWorldPosition;
                         kWorldPosition.setSub4(kTo, kFrom);
-                        kWorldPosition.FUN_0062aea0();
-                        kWorldPosition.FUN_00627920(kWorldPosition.dot3(kIntersectionOffset));
+                        kWorldPosition.normalize3_0062aea0();
+                        kWorldPosition.hkVector4_mul4(kWorldPosition.dot3(kIntersectionOffset));
                         hkVector4 kPerp;
                         kPerp.setSub4(kIntersectionOffset, kWorldPosition);
-                        float fProjectionAlongAim = FUN_004587d0(kPerp.length3().getReal());
+                        float fProjectionAlongAim = HK2NI(kPerp.length3().getReal());
                         if (fProjectionAlongAim < fAlternateOffset)
                         {
                             if (iRays < *g_kMaxRays631.GetInt())
                             {
                                 if (pkAlternate && pkAlternate == pkRef)
                                 {
-                                    fAlternateDistance = FUN_004587d0(kIntersectionOffset.length3().getReal());
+                                    fAlternateDistance = HK2NI(kIntersectionOffset.length3().getReal());
                                     fAlternateOffset = fProjectionAlongAim;
                                 }
                                 else
@@ -979,27 +980,27 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
                                     {
                                         if (kRayHits.GetHits()->GetSize() > 0)
                                         {
-                                            NiAVObject* pkHitObject = FUN_004b5820(
+                                            NiAVObject* pkHitObject = GetAVObjectForCollidable(
                                                 (Collidable631*)kRayHits.GetHits()->GetAt(0)->m_pvRootCollidable);
                                             if (pkHitObject)
                                             {
-                                                TESObjectREFR* pkHitRef = FUN_0056f930(pkHitObject);
+                                                TESObjectREFR* pkHitRef = TESObjectREFR_FindReferenceFor3D(pkHitObject);
                                                 if (pkHitRef && pkHitRef == pkRef)
                                                 {
                                                     pkAlternate = pkRef;
                                                     fAlternateDistance =
-                                                        FUN_004587d0(kIntersectionOffset.length3().getReal());
+                                                        HK2NI(kIntersectionOffset.length3().getReal());
                                                     fAlternateOffset = fProjectionAlongAim;
-                                                    pvAlternateHit = FUN_004b5a80(pkEntity);
+                                                    pvAlternateHit = bhkEntity_Getbhk(pkEntity);
                                                 }
                                             }
                                         }
                                         else
                                         {
                                             pkAlternate = pkRef;
-                                            fAlternateDistance = FUN_004587d0(kIntersectionOffset.length3().getReal());
+                                            fAlternateDistance = HK2NI(kIntersectionOffset.length3().getReal());
                                             fAlternateOffset = fProjectionAlongAim;
-                                            pvAlternateHit = FUN_004b5a80(pkEntity);
+                                            pvAlternateHit = bhkEntity_Getbhk(pkEntity);
                                         }
                                     }
                                 }
@@ -1018,7 +1019,7 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
             g_iLine631 = 0xdb6;
             void* pvObject = kList.GetResults()->GetAt(0)->GetObject();
             g_iLine631 = 0xdb7;
-            pkResult = FUN_0056f930(pvObject);
+            pkResult = TESObjectREFR_FindReferenceFor3D(pvObject);
             g_iLine631 = 0xdb8;
             *pfDistance = kList.GetResults()->GetAt(0)->GetDistance();
             g_iLine631 = 0xdb9;
@@ -1037,10 +1038,10 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
         if (bCheck)
         {
             bool bUseAlternate = true;
-            if (pkResult && reinterpret_cast<BaseForm631*>(pkResult->FUN_007af430()))
+            if (pkResult && reinterpret_cast<BaseForm631*>(pkResult->BGSSaveFormBuffer_GetForm()))
             {
                 bUseAlternate = false;
-                switch (reinterpret_cast<BaseForm631*>(pkResult->FUN_007af430())->GetFormType())
+                switch (reinterpret_cast<BaseForm631*>(pkResult->BGSSaveFormBuffer_GetForm())->GetFormType())
                 {
                 case 0x20:
                 case 0x21:
@@ -1048,7 +1049,7 @@ TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3
                     bUseAlternate = true;
                     break;
                 case 0x1e:
-                    if (!reinterpret_cast<BaseForm631*>(pkResult->FUN_007af430())->IsPlayable())
+                    if (!reinterpret_cast<BaseForm631*>(pkResult->BGSSaveFormBuffer_GetForm())->IsPlayable())
                         bUseAlternate = true;
                     break;
                 }

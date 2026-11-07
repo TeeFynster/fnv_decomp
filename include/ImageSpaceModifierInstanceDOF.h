@@ -29,11 +29,11 @@ class ImageSpaceModifierInstanceDOF : public ImageSpaceModifierInstanceTemp
     void SetStrength(float);
     void SetIntensity(float);
 
-    void FUN_005bbd60(bool);
+    void ImageSpaceModifierInstance_SetPermanent(bool);
     void FUN_0063f790(float);
     void FUN_0050f9a0(void*);
     float FUN_0084d030();
-    void FUN_00693d50(float);
+    void BaseProcess_SetLastTimeProcessed(float);
 
     float fDistance;
     float fImpulseRadiusSquared;

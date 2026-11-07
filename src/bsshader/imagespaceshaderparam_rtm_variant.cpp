@@ -100,7 +100,7 @@ struct ShaderPass_4e30
     int unk64;
     ParamColor_4e30 kColor;
 
-    bool FUN_00c04e30(int arg);
+    bool ImageSpaceEffectCinematic_UpdateParams(int arg);
 };
 
 
@@ -156,11 +156,12 @@ struct ImageSpaceEffectFourTexturePass
     int unk54;
     int unk58;
     bool unk5C;
-    bool FUN_00ba4270(int a1);
+    bool ImageSpaceEffectBlur_UpdateParams(int a1);
 };
 
 // @fnv 0x00ba4270
-bool ImageSpaceEffectFourTexturePass::FUN_00ba4270(int a1)
+// src: COMMUNITY 0x00ba4270
+bool ImageSpaceEffectFourTexturePass::ImageSpaceEffectBlur_UpdateParams(int a1)
 {
     float m_fGlyphWidthInPixels = (float)unk28.GetAt(2)->GetTexture()->GetWidth();
     float m_fGlyphExtent = (float)unk28.GetAt(1)->GetTexture()->GetHeight();

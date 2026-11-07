@@ -38,10 +38,11 @@ struct FUN_00d2bb40_cls
     int m_14;
     int m_18;
     int m_1c;
-    int FUN_00d2bb40();
+    int hkBufferedStreamReader_rewindToMark();
 };
 // @fnv 0x00d2bb40
-int FUN_00d2bb40_cls::FUN_00d2bb40()
+// src: HAVOK_LIB 0x00d2bb40
+int FUN_00d2bb40_cls::hkBufferedStreamReader_rewindToMark()
 {
     if (m_1c >= 0)
     {
@@ -60,7 +61,7 @@ struct hkBufferedStreamReader
     hkReferencedObject* m_pObject;
     int m_iValueAfterStandIn;
     int m_pAuxiliaryObject;
-    void FUN_00d2bc10();
+    void UpdateState_00d2bc10();
     void Destroy();
 };
 // @fnv 0x00d2bc70
@@ -68,7 +69,7 @@ void hkBufferedStreamReader::Destroy()
 {
     m_pVTable = &DAT_010ce688;
     m_pObject->removeReference();
-    ((hkBufferedStreamReader*)((char*)this + 0xc))->FUN_00d2bc10();
+    ((hkBufferedStreamReader*)((char*)this + 0xc))->UpdateState_00d2bc10();
     m_pVTable = &DAT_0102e388;
 }
 
@@ -115,11 +116,12 @@ struct FUN_00d2bb10_this
     int m_10;
     int m_14;
     int m_18;
-    bool* FUN_00d2bb10(bool* out);
+    bool* hkBufferedStreamReader_markSupported(bool* out);
 };
 
 // @fnv 0x00d2bb10
-bool* FUN_00d2bb10_this::FUN_00d2bb10(bool* out)
+// src: HAVOK_SRC 0x00d2bb10
+bool* FUN_00d2bb10_this::hkBufferedStreamReader_markSupported(bool* out)
 {
     *out = (m_18 != 0);
     return out;
@@ -135,12 +137,13 @@ struct FUN_00d2ba00_cls : FUN_00d2ba80_cls
     int m_vContactPosition;
     int m_kRayEnd;
 
-    int FUN_00d2ba00(char* pBuffer, int nSize);
+    int hkBufferedStreamReader_read(char* pBuffer, int nSize);
 };
 
 // Copies up to nSize bytes from the internal buffer into pBuffer, refilling via v12 when exhausted, and returns the number of bytes read.
 // @fnv 0x00d2ba00
-int FUN_00d2ba00_cls::FUN_00d2ba00(char* apDest, int nSize)
+// src: HAVOK_LIB 0x00d2ba00
+int FUN_00d2ba00_cls::hkBufferedStreamReader_read(char* apDest, int nSize)
 {
     char* pDest = apDest;
     int nRemaining = nSize;
@@ -198,14 +201,15 @@ struct FUN_00d2bb60_cls
 };
 
 // @fnv 0x00d2bb60
-int __fastcall FUN_00d2bb60(FUN_00d2bb60_cls* self, int unused, int value)
+// src: HAVOK_LIB 0x00d2bb60
+int __fastcall hkBufferedStreamReader_seekTellSupported(FUN_00d2bb60_cls* self, int unused, int value)
 {
     self->m_pObject->v9(value);
     return value;
 }
 
-MemoryManager* FUN_00c85750();
-void* FUN_00c85620(void*, void*, unsigned int);
+MemoryManager* hkMemoryRouter_getInstance();
+void* hkMemoryRouter_alignedAlloc(void*, void*, unsigned int);
 struct FUN_00d2bbd0_cls
 {
     void* m_00;
@@ -219,8 +223,8 @@ struct FUN_00d2bbd0_cls
 // @fnv 0x00d2bbd0
 FUN_00d2bbd0_cls* FUN_00d2bbd0_cls::Init(int p)
 {
-    void* a = FUN_00c85750()->allocator;
-    m_00 = FUN_00c85620(a, (void*)p, 0x40);
+    void* a = hkMemoryRouter_getInstance()->allocator;
+    m_00 = hkMemoryRouter_alignedAlloc(a, (void*)p, 0x40);
     m_04 = 0;
     m_08 = 0;
     m_0c = p;
@@ -289,10 +293,11 @@ struct Stream
     int a, b;
     Reader* reader;
     int c, pos, end;
-    hkBool FUN_00d2bad0();
+    hkBool hkBufferedStreamReader_isOk();
 };
 // @fnv 0x00d2bad0
-hkBool Stream::FUN_00d2bad0()
+// src: HAVOK_LIB 0x00d2bad0
+hkBool Stream::hkBufferedStreamReader_isOk()
 {
     unsigned char byte;
     return hkBool(pos != end || *reader->v3(&byte) != 0);
@@ -377,7 +382,7 @@ void hkTrackerD2BB::Reset(int flags)
     m_target->reset(flags);
 }
 
-extern "C" void __cdecl FUN_00cb1270(void*, const void*, int);
+extern "C" void __cdecl hkString_memMove(void*, const void*, int);
 // @fnv 0x00d2b900
 void BufferedReaderBuffer::CompactBuffer() throw()
 {
@@ -400,7 +405,7 @@ void BufferedReaderBuffer::CompactBuffer() throw()
         int dataSize = m_readPos - m_markPos;
         int remainder = dataSize % 512;
         int padBytes = (remainder != 0) ? (512 - remainder) : 0;
-        FUN_00cb1270(m_buf + padBytes, m_buf + m_markPos, dataSize);
+        hkString_memMove(m_buf + padBytes, m_buf + m_markPos, dataSize);
         m_markPos = padBytes;
         m_readPos = ((dataSize / 512) + (remainder != 0 ? 1 : 0)) * 512;
         m_bufferedBytes = m_readPos;
@@ -422,11 +427,12 @@ struct FUN_00d2bc30_cls
     unsigned short m_06;
     int m_08;
     FUN_00d2bbd0_cls* Init(int);
-    FUN_00d2bc30_cls* FUN_00d2bc30(int, int);
+    FUN_00d2bc30_cls* hkBufferedStreamReader_hkBufferedStreamReader(int, int);
 };
 // Sets m_06 to 1, stores a in m_08, sets vtable, calls FUN_00d2bbd0 with b, and calls Refresh on m_08.
 // @fnv 0x00d2bc30
-FUN_00d2bc30_cls* FUN_00d2bc30_cls::FUN_00d2bc30(int aiShape, int b)
+// src: HAVOK_LIB 0x00d2bc30
+FUN_00d2bc30_cls* FUN_00d2bc30_cls::hkBufferedStreamReader_hkBufferedStreamReader(int aiShape, int b)
 {
     m_06 = 1;
     m_08 = aiShape;
@@ -456,19 +462,20 @@ hkBufferedStreamReader* BufferedReaderDeletionView::FUN_00d2bca0(unsigned int fl
     Destroy();
     if (flags & 1)
     {
-        MemoryManager* router = FUN_00c85750();
+        MemoryManager* router = hkMemoryRouter_getInstance();
         unsigned short size = static_cast<unsigned short>(m_uiStandInValue);
         static_cast<BufferedReaderHeap*>(router->allocator)->ReleaseBlock(this, size);
     }
     return this;
 }
 
-void __cdecl FUN_00c85660(void* allocator, void* buffer);
+void __cdecl hkMemoryRouter_alignedFree(void* allocator, void* buffer);
 
 // @fnv 0x00d2bc10
-__declspec(noinline) void hkBufferedStreamReader::FUN_00d2bc10()
+// src: GUESS 0x00d2bc10 (confidence: low)
+__declspec(noinline) void hkBufferedStreamReader::UpdateState_00d2bc10()
 {
     void* buffer = m_pVTable;
-    MemoryManager* memory = FUN_00c85750();
-    FUN_00c85660(memory->allocator, buffer);
+    MemoryManager* memory = hkMemoryRouter_getInstance();
+    hkMemoryRouter_alignedFree(memory->allocator, buffer);
 }

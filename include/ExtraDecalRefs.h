@@ -13,7 +13,7 @@ class ExtraDecalRefs : public BSExtraData
 {
 public:
     ExtraDecalRefs();
-    void FUN_00433db0(TESForm* form);
+    void InitItem_00433db0(TESForm* form);
 
     ReferenceIntersectionData* FindDecalReference(TESObjectREFR*);
     void Copy(BSExtraDataEx* apSource);

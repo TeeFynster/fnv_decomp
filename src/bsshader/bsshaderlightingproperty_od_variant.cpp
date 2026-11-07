@@ -8,11 +8,12 @@
 struct FUN_0076a3d0_Class
 {
     void __thiscall FUN_00700270(int);
-    void __thiscall FUN_0076a3d0(int);
+    void __thiscall ForwardCall_0076a3d0(int);
 };
 
 // @fnv 0x0076a3d0
-void __thiscall FUN_0076a3d0_Class::FUN_0076a3d0(int a)
+// src: GUESS 0x0076a3d0 (confidence: low)
+void __thiscall FUN_0076a3d0_Class::ForwardCall_0076a3d0(int a)
 {
     FUN_00700270(a);
 }

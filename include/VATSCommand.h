@@ -8,7 +8,7 @@ class VATSCommand
 {
 public:
     void Initialize();
-    void FUN_009ca500();
+    void VATS_COMMAND_Initialize();
     ~VATSCommand();
 
     int eAction;

@@ -16,38 +16,40 @@ void ApplyPerkModifiers(int entryPoint, Actor* actor, ...);
 struct Struct801420
 {
     int f0;
-    void FUN_00801420(unsigned char a, int b);
-    void FUN_00801450(unsigned char a, int b);
-    void FUN_00801880();
+    void FOVATSEffectManager_DrawTarget(unsigned char a, int b);
+    void FOVATSEffectManager_DrawSingleTarget(unsigned char a, int b);
+    void FOVATSEffectManager_DrawMultipleTargets();
 };
 // @fnv 0x00801420
-void Struct801420::FUN_00801420(unsigned char a, int b)
+// src: COMMUNITY 0x00801420
+void Struct801420::FOVATSEffectManager_DrawTarget(unsigned char a, int b)
 {
     if (f0 == 0)
-        FUN_00801450(a, b);
+        FOVATSEffectManager_DrawSingleTarget(a, b);
     else
-        FUN_00801880();
+        FOVATSEffectManager_DrawMultipleTargets();
 }
 
-extern "C" unsigned char __cdecl FUN_00709d00();
+extern "C" unsigned char __cdecl Interface_GetIsVATSRescanning();
 
 // Retained with this unit's FOVATSEffectManager stand-ins: the shared header lacks
 // FUN_00801420, FUN_00801450, FUN_00801880, FUN_00800f30 and OnIdle's helper methods.
 
 // @fnv 0x00801a60
-void FOVATSEffectManager::FUN_00801a60(int a, int b, int c, unsigned char d)
+// src: COMMUNITY 0x00801a60
+void FOVATSEffectManager::PrepareEffect(int a, int b, int c, unsigned char d)
 {
-    if (FUN_00709d00())
+    if (Interface_GetIsVATSRescanning())
         return;
     if (reinterpret_cast<unsigned char*>(this)[0x129])
     {
         if (reinterpret_cast<unsigned char*>(this)[0x2b4])
         {
-            FUN_00801ad0(a, b, c, d);
+            PrepareScanEffect(a, b, c, d);
         }
         else
         {
-            FUN_00801bb0(a, b, c, d);
+            FOVATSEffectManager_PrepareHighlightEffect(a, b, c, d);
         }
     }
 }
@@ -67,12 +69,13 @@ public:
 extern int DAT_012007fc;
 
 // @fnv 0x008019d0
-void FOVATSEffectManager::FUN_008019d0()
+// src: COMMUNITY 0x008019d0
+void FOVATSEffectManager::VATSEffect_ShutdownEffect()
 {
-    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0x0A)->SetFormType(0);
-    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0x0B)->SetFormType(0);
-    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0x0A)->Play();
-    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0x0B)->Play();
+    ImageSpaceManager::BSShaderManager_GetImageSpaceManager()->GetEffect_004ebbc0(0x0A)->SetFormType(0);
+    ImageSpaceManager::BSShaderManager_GetImageSpaceManager()->GetEffect_004ebbc0(0x0B)->SetFormType(0);
+    ImageSpaceManager::BSShaderManager_GetImageSpaceManager()->GetEffect_004ebbc0(0x0A)->Play();
+    ImageSpaceManager::BSShaderManager_GetImageSpaceManager()->GetEffect_004ebbc0(0x0B)->Play();
     DAT_012007fc = 0;
 }
 
@@ -85,58 +88,59 @@ struct RefLike
 
 struct FormLike
 {
-    unsigned int FUN_0043b540();
+    unsigned int hkpCollidable_getCollisionFilterInfo();
 };
 
 struct NodeLike
 {
-    int FUN_004b4ec0();
+    int hkpRigidBody_getPosition();
 };
 
 struct FilterLike
 {
-    int FUN_004a3a20();
+    int CFilter_GetGroup();
 };
 
 struct FilterHolder
 {
     int val;
     FilterHolder(int a);
-    int FUN_004a3a20();
+    int CFilter_GetGroup();
 };
 
 struct CellLike
 {
-    unsigned int FUN_009611e0();
+    unsigned int NiAVObject_GetParent();
 };
 
 struct TESLike
 {
-    CellLike* FUN_00457620(NiPoint3* pos);
+    CellLike* TES_GetLandGeometry(NiPoint3* pos);
 };
 
 struct ExtraLike
 {
-    unsigned int FUN_00c85c80(int a);
+    unsigned int bhkWorldObject_GetAVObject(int a);
 };
 
 extern TESLike* g_TES;
 
-void* FUN_004b59f0(const void* p);
-void* FUN_004b5950(const void* p);
+void* hkpGetRigidBody(const void* p);
+void* hkpGetPhantom(const void* p);
 RefLike* FUN_004b5a20(void* p);
 void FUN_00458620(NiPoint3* out, int v);
-void* FUN_004b5ad0(NiAVObject* p);
-void* FUN_004b5a80(const void* p);
+void* bhkUtilFunctions_IsbhkPCollisionObject(NiAVObject* p);
+void* bhkEntity_Getbhk(const void* p);
 
 // @fnv 0x004b5820
-unsigned int FUN_004b5820(FormLike* form)
+// src: XBOX_PDB 0x004b5820
+unsigned int GetAVObjectForCollidable(FormLike* form)
 {
     unsigned int result5 = 0;
     if (form)
     {
-        void* node_ = FUN_004b59f0(form);
-        void* objTmp = !node_ ? FUN_004b5950(form) : 0;
+        void* node_ = hkpGetRigidBody(form);
+        void* objTmp = !node_ ? hkpGetPhantom(form) : 0;
         if (node_)
         {
             RefLike* ref = FUN_004b5a20(node_);
@@ -144,30 +148,30 @@ unsigned int FUN_004b5820(FormLike* form)
             {
                 result5 = ref->GetFlags();
             }
-            else if (FilterHolder(form->FUN_0043b540()).FUN_004a3a20() == 1)
+            else if (FilterHolder(form->hkpCollidable_getCollisionFilterInfo()).CFilter_GetGroup() == 1)
             {
                 NiPoint3 pos4;
-                FUN_00458620(&pos4, ((NodeLike*)node_)->FUN_004b4ec0());
-                CellLike* cellA = g_TES->FUN_00457620(&pos4);
-                if (cellA && cellA->FUN_009611e0())
+                FUN_00458620(&pos4, ((NodeLike*)node_)->hkpRigidBody_getPosition());
+                CellLike* cellA = g_TES->TES_GetLandGeometry(&pos4);
+                if (cellA && cellA->NiAVObject_GetParent())
                 {
-                    result5 = cellA->FUN_009611e0();
+                    result5 = cellA->NiAVObject_GetParent();
                 }
             }
         }
         else
         {
-            RefLike* ref2 = (RefLike*)FUN_004b5ad0((NiAVObject*)objTmp);
+            RefLike* ref2 = (RefLike*)bhkUtilFunctions_IsbhkPCollisionObject((NiAVObject*)objTmp);
             if (ref2)
             {
                 result5 = ref2->GetFlags();
             }
             if (!result5)
             {
-                ExtraLike* extra5 = (ExtraLike*)FUN_004b5a80(objTmp);
+                ExtraLike* extra5 = (ExtraLike*)bhkEntity_Getbhk(objTmp);
                 if (extra5)
                 {
-                    result5 = extra5->FUN_00c85c80(0);
+                    result5 = extra5->bhkWorldObject_GetAVObject(0);
                 }
             }
         }
@@ -178,15 +182,15 @@ unsigned int FUN_004b5820(FormLike* form)
 struct VQueryObj
 {
     ~VQueryObj();
-    unsigned char FUN_00c4edf0(unsigned int* result, int wait);
+    unsigned char BSOcclusionQuery_GetResult(unsigned int* result, int wait);
 };
 
 struct VRenderer
 {
-    void FUN_004a0370();
-    void FUN_004a03c0();
+    void NiXenonRenderer_LockRenderer();
+    void NiXenonRenderer_UnlockRenderer();
 };
-VRenderer* __cdecl FUN_0043c4b0();
+VRenderer* __cdecl NiXenonRenderer_GetRenderer();
 
 struct VTimeGlobal
 {
@@ -474,18 +478,19 @@ struct VATSEffectStub
     int unk2c4;
     unsigned int unk2c8;
 
-    void FUN_00800370();
-    void FUN_008006b0();
-    void FUN_00800740(float t);
+    void FOVATSEffectManager_OnIdle();
+    void FOVATSEffectManager_TriggerDistort();
+    void FOVATSEffectManager_UpdateBurst(float t);
     void SetScaledValues(float t);
-    void FUN_00800820(float t);
+    void FOVATSEffectManager_UpdateTargetPulse(float t);
     void UpdateProgress(float t);
-    void FUN_00800900(float t);
-    void FUN_00800ac0(int a, int b, int c);
+    void FOVATSEffectManager_UpdateScan(float t);
+    void FOVATSEffectManager_SetTarget(int a, int b, int c);
 };
 
 // @fnv 0x00800370
-void VATSEffectStub::FUN_00800370()
+// src: COMMUNITY 0x00800370
+void VATSEffectStub::FOVATSEffectManager_OnIdle()
 {
     if (!node)
     {
@@ -496,7 +501,7 @@ void VATSEffectStub::FUN_00800370()
     float time = (float)g_timeGlobal.FUN_00825c00();
     if (unk2b4)
     {
-        FUN_00800900(time);
+        FOVATSEffectManager_UpdateScan(time);
     }
     else
     {
@@ -506,31 +511,31 @@ void VATSEffectStub::FUN_00800370()
         }
         else if (time > unk294)
         {
-            FUN_008006b0();
+            FOVATSEffectManager_TriggerDistort();
         }
         SetScaledValues(time);
         if (state == 1 && unk10 != -1)
         {
-            FUN_00800820(time);
+            FOVATSEffectManager_UpdateTargetPulse(time);
         }
     }
     if (unk298)
     {
-        FUN_00800740(time);
+        FOVATSEffectManager_UpdateBurst(time);
     }
     if (target && target->v22c(0))
     {
-        FUN_00800ac0(0, -1, 0);
+        FOVATSEffectManager_SetTarget(0, -1, 0);
     }
     VDebugPrint("====== VATSEffectOnIdle ======");
     for (unsigned int i = 0; i < 16; i++)
     {
         if (node && queriesA[i] && queriesB[i])
         {
-            FUN_0043c4b0()->FUN_004a0370();
+            NiXenonRenderer_GetRenderer()->NiXenonRenderer_LockRenderer();
             unsigned int a;
             unsigned int b;
-            if (queriesA[i]->FUN_00c4edf0(&a, 1) && queriesB[i]->FUN_00c4edf0(&b, 1) && !done[i])
+            if (queriesA[i]->BSOcclusionQuery_GetResult(&a, 1) && queriesB[i]->BSOcclusionQuery_GetResult(&b, 1) && !done[i])
             {
                 delete queriesA[i];
                 queriesA[i] = 0;
@@ -541,7 +546,7 @@ void VATSEffectStub::FUN_00800370()
                 resultA[i] = a;
                 resultB[i] = b * unk2c8;
             }
-            FUN_0043c4b0()->FUN_004a03c0();
+            NiXenonRenderer_GetRenderer()->NiXenonRenderer_UnlockRenderer();
         }
     }
 }
@@ -599,11 +604,12 @@ struct S801880
     int unk2C4;
     int unk2C8;
     Str8 name;
-    void FUN_00801880();
+    void FOVATSEffectManager_DrawMultipleTargets();
 };
 
 // @fnv 0x00801880
-void S801880::FUN_00801880()
+// src: COMMUNITY 0x00801880
+void S801880::FOVATSEffectManager_DrawMultipleTargets()
 {
     if (this->count > 0)
     {
@@ -647,7 +653,7 @@ struct Vec4Tmp_00801ad0
 
 struct Holder_00801ad0
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 
 struct Obj719_00801ad0
@@ -668,7 +674,7 @@ struct Obj0664_00801ad0
 // 0x004bc320 selects a rendered texture (also bound by imagespacetexture and watershader), not an Actor method.
 struct RenderedTextureSource
 {
-    void* FUN_004bc320(int a);
+    void* BSRenderedTexture_GetTexture(int a);
 };
 
 extern Holder_00801ad0 DAT_011db7b4;
@@ -683,24 +689,25 @@ extern float DAT_01201f2c;
 extern float DAT_011ae614;
 extern float DAT_011ae618;
 
-Obj719_00801ad0* __stdcall FUN_00718b60(int, Vec4Tmp_00801ad0*);
+Obj719_00801ad0* __stdcall SystemColorManager_GetInstance(int, Vec4Tmp_00801ad0*);
 
 // @fnv 0x00801ad0
-void FOVATSEffectManager::FUN_00801ad0(int a0, int a1, int a2, unsigned char a3)
+// src: COMMUNITY 0x00801ad0
+void FOVATSEffectManager::PrepareScanEffect(int a0, int a1, int a2, unsigned char a3)
 {
     Vec4Tmp_00801ad0 tmp;
     tmp.FUN_00414430(0.0f, 0.0f, 0.0f, 0.0f);
-    FUN_00718b60(1, &tmp)->FUN_00719060();
+    SystemColorManager_GetInstance(1, &tmp)->FUN_00719060();
     DAT_01201f2c = *(float*)((char*)this + 0x2bc);
-    DAT_011ae614 = *DAT_011db7b4.FUN_00403e20();
-    DAT_011ae618 = *DAT_011db694.FUN_00403e20();
+    DAT_011ae614 = *DAT_011db7b4.Setting_Float_00403e20();
+    DAT_011ae618 = *DAT_011db694.Setting_Float_00403e20();
     DAT_01201f30 = tmp.d0;
     DAT_01201f34 = tmp.d1;
     DAT_01201f38 = tmp.d2;
     DAT_01201f3c = tmp.d3;
     ((Obj6e5_00801ad0*)&DAT_01201f40)->FUN_006e5cc0((char*)this + 0x2c4);
-    ((Obj0664_00801ad0*)&DAT_01201f44)->FUN_0066b0d0(((RenderedTextureSource*)a1)->FUN_004bc320(0));
-    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0xb)->SetFormType(1);
+    ((Obj0664_00801ad0*)&DAT_01201f44)->FUN_0066b0d0(((RenderedTextureSource*)a1)->BSRenderedTexture_GetTexture(0));
+    ImageSpaceManager::BSShaderManager_GetImageSpaceManager()->GetEffect_004ebbc0(0xb)->SetFormType(1);
 }
 
 struct FUN_00414430
@@ -984,7 +991,7 @@ struct RenderActor
     virtual void v418();
     virtual void v41c();
     virtual float GetRefraction();
-    ExtraListRender* FUN_005d43c0();
+    ExtraListRender* BSFile_GetDevice();
 };
 struct RenderDevice
 {
@@ -1039,8 +1046,8 @@ struct FUN_004a4410
 {
     int handle;
     ~FUN_004a4410();
-    void FUN_00c4ed70();
-    void FUN_00c4edb0();
+    void BSOcclusionQuery_Begin();
+    void BSOcclusionQuery_End();
 };
 struct FUN_00c4ecf0
 {
@@ -1054,7 +1061,7 @@ struct RenderAccumulator
 struct AccumulatorPtr
 {
     RenderAccumulator* value;
-    RenderAccumulator* FUN_00559450();
+    RenderAccumulator* Modelloader_GetReferencedThis();
 };
 struct RenderTexture
 {
@@ -1062,29 +1069,30 @@ struct RenderTexture
 };
 extern unsigned char DAT_01200bf6, DAT_011fd86c;
 extern Actor* DAT_011dea3c;
-bool FUN_004e9510();
-void FUN_00b6b8d0(int, void*);
+bool BSRenderedTexture_IsOutsideFrame();
+void BSRenderedTexture_StartOffscreen(int, void*);
 void FUN_00b6b790();
 void FUN_00b4f450(int);
-void FUN_005b5e40(const char*);
+void Warning_005b5e40(const char*);
 struct VATSRender : VATSEffectStub
 {
     AccumulatorPtr accumulator;
-    void FUN_00801420(unsigned char, int);
-    void FUN_00800f30(RenderTexture*, int, unsigned char, int, int, unsigned char);
+    void FOVATSEffectManager_DrawTarget(unsigned char, int);
+    void FOVATSEffectManager_DrawTargetToTexture(RenderTexture*, int, unsigned char, int, int, unsigned char);
 };
 // @fnv 0x00800f30
-void VATSRender::FUN_00800f30(RenderTexture* texture, int mode, unsigned char draw, int flags, int view,
+// src: COMMUNITY 0x00800f30
+void VATSRender::FOVATSEffectManager_DrawTargetToTexture(RenderTexture* texture, int mode, unsigned char draw, int flags, int view,
                               unsigned char finish)
 {
     if (((RenderActor*)target)->IsHidden(0))
         return;
-    RenderDevice* restore = (RenderDevice*)FUN_0043c4b0();
+    RenderDevice* restore = (RenderDevice*)NiXenonRenderer_GetRenderer();
     FUN_00414430 enabled(0.0f, 0.0f, 0.0f, 0.0f);
     restore->GetColor(&enabled);
     restore->SetColor(&FUN_00414430(0.0f, 0.0f, 0.0f, 0.0f));
-    if (FUN_004e9510())
-        FUN_00b6b8d0(view, texture->FUN_00b6b260());
+    if (BSRenderedTexture_IsOutsideFrame())
+        BSRenderedTexture_StartOffscreen(view, texture->FUN_00b6b260());
     DAT_01200bf6 = 1;
     DAT_011fd86c = 1;
     unsigned char refraction;
@@ -1096,8 +1104,8 @@ void VATSRender::FUN_00800f30(RenderTexture* texture, int mode, unsigned char dr
     ExtraRefraction* amount = 0;
     float renderer = 0.0f;
     ApplyPerkModifiers(0x45, DAT_011dea3c, &renderer);
-    if (saved && saved->FUN_005d43c0() && renderer > 0.0)
-        amount = saved->FUN_005d43c0()->GetRefractionProperty();
+    if (saved && saved->BSFile_GetDevice() && renderer > 0.0)
+        amount = saved->BSFile_GetDevice()->GetRefractionProperty();
     actor = 0;
     float issued = 0.0f;
     if (amount && saved)
@@ -1114,7 +1122,7 @@ void VATSRender::FUN_00800f30(RenderTexture* texture, int mode, unsigned char dr
                 delete (FUN_004a4410*)queriesB[unk23c];
             queriesB[unk23c] = (VQueryObj*)new FUN_00c4ecf0;
             refraction = 1;
-            ((FUN_004a4410*)queriesB[unk23c])->FUN_00c4ed70();
+            ((FUN_004a4410*)queriesB[unk23c])->BSOcclusionQuery_Begin();
         }
         else if (mode == 1)
         {
@@ -1122,32 +1130,32 @@ void VATSRender::FUN_00800f30(RenderTexture* texture, int mode, unsigned char dr
                 delete (FUN_004a4410*)queriesA[unk23c];
             queriesA[unk23c] = (VQueryObj*)new FUN_00c4ecf0;
             refraction = 1;
-            ((FUN_004a4410*)queriesA[unk23c])->FUN_00c4ed70();
+            ((FUN_004a4410*)queriesA[unk23c])->BSOcclusionQuery_Begin();
         }
     }
-    accumulator.FUN_00559450()->FUN_004a1040(8);
+    accumulator.Modelloader_GetReferencedThis()->FUN_004a1040(8);
     FUN_00b4f450(8);
-    FUN_00801420(draw, flags);
+    FOVATSEffectManager_DrawTarget(draw, flags);
     FUN_00b4f450(0);
-    accumulator.FUN_00559450()->FUN_004a1040(0);
+    accumulator.Modelloader_GetReferencedThis()->FUN_004a1040(0);
     if (refraction)
     {
         if (mode == 2)
         {
             if (queriesB[unk23c])
             {
-                ((FUN_004a4410*)queriesB[unk23c])->FUN_00c4edb0();
+                ((FUN_004a4410*)queriesB[unk23c])->BSOcclusionQuery_End();
                 pending[unk23c] = 1;
             }
             else
-                FUN_005b5e40("pPartialLimbQuery is NULL even though we just issued one.  This should be impossible.");
+                Warning_005b5e40("pPartialLimbQuery is NULL even though we just issued one.  This should be impossible.");
         }
         else if (mode == 1)
         {
             if (queriesA[unk23c])
-                ((FUN_004a4410*)queriesA[unk23c])->FUN_00c4edb0();
+                ((FUN_004a4410*)queriesA[unk23c])->BSOcclusionQuery_End();
             else
-                FUN_005b5e40("pEntireLimbQuery is NULL even though we just issued one.  This should be impossible.");
+                Warning_005b5e40("pEntireLimbQuery is NULL even though we just issued one.  This should be impossible.");
         }
     }
     if (finish)
@@ -1359,21 +1367,22 @@ struct EffectModeSetup
     int unk2bc;
     float value2c0;
     int unk2c4;
-    void FUN_00801bb0(int, RenderedTextureSource*, int, unsigned char);
+    void FOVATSEffectManager_PrepareHighlightEffect(int, RenderedTextureSource*, int, unsigned char);
 };
 // @fnv 0x00801bb0
-void EffectModeSetup::FUN_00801bb0(int unused, RenderedTextureSource* actor, int unused2, unsigned char flag)
+// src: COMMUNITY 0x00801bb0
+void EffectModeSetup::FOVATSEffectManager_PrepareHighlightEffect(int unused, RenderedTextureSource* actor, int unused2, unsigned char flag)
 {
     Vec4Tmp_00801ad0 vector;
     vector.FUN_00414430(0.0f, 0.0f, 0.0f, 0.0f);
-    FUN_00718b60(1, &vector)->FUN_00719060();
+    SystemColorManager_GetInstance(1, &vector)->FUN_00719060();
     DAT_012007fc = 1;
-    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(10)->SetFormType(1);
-    DAT_01200818.FUN_0066b0d0(actor->FUN_004bc320(0));
+    ImageSpaceManager::BSShaderManager_GetImageSpaceManager()->GetEffect_004ebbc0(10)->SetFormType(1);
+    DAT_01200818.FUN_0066b0d0(actor->BSRenderedTexture_GetTexture(0));
     if (enabled)
     {
-        DAT_012007f0 = *DAT_011db6e4.FUN_00403e20();
-        DAT_011ae5f8 = *DAT_011db79c.FUN_00403e20();
+        DAT_012007f0 = *DAT_011db6e4.Setting_Float_00403e20();
+        DAT_011ae5f8 = *DAT_011db79c.Setting_Float_00403e20();
         DAT_012007f4 = value28c;
         DAT_012007f8 = 0;
     }
@@ -1386,8 +1395,8 @@ void EffectModeSetup::FUN_00801bb0(int unused, RenderedTextureSource* actor, int
     DAT_012007e8 = 0.0f;
     DAT_01200810.FUN_006e5cc0(&unk2c4);
     DAT_01200800 = vector;
-    DAT_011ae5ec = *DAT_011db714.FUN_00403e20();
-    DAT_011ae5e8 = *DAT_011db720.FUN_00403e20();
+    DAT_011ae5ec = *DAT_011db714.Setting_Float_00403e20();
+    DAT_011ae5e8 = *DAT_011db720.Setting_Float_00403e20();
     DAT_011ae5ec += value2ac;
     DAT_011ae5e8 += value2b0;
     if (scaled)
@@ -1396,16 +1405,16 @@ void EffectModeSetup::FUN_00801bb0(int unused, RenderedTextureSource* actor, int
         DAT_011ae5e8 *= 1.0f + value2a8;
     }
     DAT_011ae5fc = value2c0;
-    DAT_011ae5f0 = *DAT_011db778.FUN_00403e20();
+    DAT_011ae5f0 = *DAT_011db778.Setting_Float_00403e20();
     DAT_011ae5f4 = 1.0f;
     DAT_012007ec = flag ? 1 : 0;
 }
 
 struct Obj9
 {
-    bool FUN_00456610();
+    bool GetAppCulled_00456610();
     void FUN_00450f90(int);
-    int FUN_007fa950();
+    int SkyObject_GetNiNode();
 };
 struct Mid9
 {
@@ -1804,13 +1813,13 @@ struct Svc9
 };
 struct X10
 {
-    void FUN_004a0fd0(int);
-    void FUN_004fb0b0(int);
+    void BSCullingProcess_SetAccumulator(int);
+    void SetImpactDataSet_004fb0b0(int);
 };
 struct Sub9
 {
     int v;
-    int FUN_00559450();
+    int Modelloader_GetReferencedThis();
 };
 struct P2Obj
 {
@@ -1999,25 +2008,26 @@ struct This9
     int unk2c8;
     Sub9 sub2cc;
     void UpdateEquipmentVisibility();
-    void FUN_008022c0();
+    void FOVATSEffectManager_RestoreBodyParts();
 };
-P2Obj* __cdecl FUN_0045c670();
-void __cdecl FUN_00b6bee0(Svc9*, void*, X10*);
+P2Obj* __cdecl Main_GetWorldSceneGraph();
+void __cdecl BSShaderUtil_AccumulateScene(Svc9*, void*, X10*);
 void __cdecl FUN_00b6c0d0(Svc9*, int, int);
 
 // @fnv 0x00801450
-void Struct801420::FUN_00801450(unsigned char a, int b)
+// src: COMMUNITY 0x00801450
+void Struct801420::FOVATSEffectManager_DrawSingleTarget(unsigned char a, int b)
 {
     if (((This9*)this)->actor)
     {
         if ((((This9*)this)->b129 && !(((This9*)this)->b2b4) || a) && b != 1)
             ((This9*)this)->UpdateEquipmentVisibility();
-        VRenderer* ptr12 = FUN_0043c4b0();
-        P2Obj* q23 = FUN_0045c670();
+        VRenderer* ptr12 = NiXenonRenderer_GetRenderer();
+        P2Obj* q23 = Main_GetWorldSceneGraph();
         Actor9* actor_ = ((This9*)this)->actor;
         X10* x102 = q23->FUN_008d80e0();
-        x102->FUN_004a0fd0(((This9*)this)->sub2cc.FUN_00559450());
-        x102->FUN_004fb0b0(1);
+        x102->BSCullingProcess_SetAccumulator(((This9*)this)->sub2cc.Modelloader_GetReferencedThis());
+        x102->SetImpactDataSet_004fb0b0(1);
         Svc9* svcX = q23->FUN_006629f0();
         Mgr9* mgr2X = 0;
         Obj9* o1z = 0;
@@ -2032,7 +2042,7 @@ void Struct801420::FUN_00801450(unsigned char a, int b)
                 if (!(((This9*)this)->b2b4) || a)
                 {
                     if (o1z && mgr2X)
-                        FUN_00b6bee0(svcX, o1z, x102);
+                        BSShaderUtil_AccumulateScene(svcX, o1z, x102);
                 }
             }
         }
@@ -2041,10 +2051,10 @@ void Struct801420::FUN_00801450(unsigned char a, int b)
             bool flag_ = 0;
             if (o1z)
             {
-                flag_ = !o1z->FUN_00456610();
+                flag_ = !o1z->GetAppCulled_00456610();
                 o1z->FUN_00450f90(1);
             }
-            FUN_00b6bee0(svcX, (void*)((This9*)this)->sub08.FUN_00559450(), x102);
+            BSShaderUtil_AccumulateScene(svcX, (void*)((This9*)this)->sub08.Modelloader_GetReferencedThis(), x102);
             if (((This9*)this)->actor->vt100())
             {
                 Actor9* formA = ((This9*)this)->actor;
@@ -2053,9 +2063,9 @@ void Struct801420::FUN_00801450(unsigned char a, int b)
                 void* res3cA;
                 if (rAX)
                 {
-                    res3cA = formA->vt1d0()->vt9c((int)&PtrObj9(rAX->FUN_007fa950()));
+                    res3cA = formA->vt1d0()->vt9c((int)&PtrObj9(rAX->SkyObject_GetNiNode()));
                     if (res3cA)
-                        FUN_00b6bee0(svcX, res3cA, x102);
+                        BSShaderUtil_AccumulateScene(svcX, res3cA, x102);
                 }
                 if (((This9*)this)->f240 > 0)
                 {
@@ -2066,9 +2076,9 @@ void Struct801420::FUN_00801450(unsigned char a, int b)
                         void* res4c_;
                         if (ares44C)
                         {
-                            res4c_ = formA->vt1d0()->vt9c((int)&PtrObj9(ares44C->FUN_007fa950()));
+                            res4c_ = formA->vt1d0()->vt9c((int)&PtrObj9(ares44C->SkyObject_GetNiNode()));
                             if (res4c_)
-                                FUN_00b6bee0(svcX, res4c_, x102);
+                                BSShaderUtil_AccumulateScene(svcX, res4c_, x102);
                         }
                     }
                 }
@@ -2076,11 +2086,11 @@ void Struct801420::FUN_00801450(unsigned char a, int b)
             if (o1z && flag_)
                 o1z->FUN_00450f90(0);
         }
-        FUN_00b6c0d0(svcX, ((This9*)this)->sub2cc.FUN_00559450(), 0);
-        x102->FUN_004a0fd0(0);
-        x102->FUN_004fb0b0(0);
+        FUN_00b6c0d0(svcX, ((This9*)this)->sub2cc.Modelloader_GetReferencedThis(), 0);
+        x102->BSCullingProcess_SetAccumulator(0);
+        x102->SetImpactDataSet_004fb0b0(0);
         if ((((This9*)this)->b129 && !(((This9*)this)->b2b4) || a) && b != 1)
-            ((This9*)this)->FUN_008022c0();
+            ((This9*)this)->FOVATSEffectManager_RestoreBodyParts();
         (void)ptr12;
     }
 }

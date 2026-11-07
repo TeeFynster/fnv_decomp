@@ -181,11 +181,12 @@ struct S_00eb3d90
         m_pos = pSphere->m_kCenterPosition + kWorldPosition * pSphere->m_fSphereRadius;
         m_dir = -kWorldPosition;
     }
-    void FUN_00eb3d90(const NiPoint3& start, const NiPoint3& end);
+    void NiBoxSphereIntersector_ComputeContactInformation(const NiPoint3& start, const NiPoint3& end);
 };
 // Computes m_pos and m_dir from start and end based on m_type, using SetFromSphere, SetPosition, or a midpoint of the sphere and box centers.
 // @fnv 0x00eb3d90
-void S_00eb3d90::FUN_00eb3d90(const NiPoint3& start, const NiPoint3& end)
+// src: GAMEBRYO_SRC 0x00eb3d90
+void S_00eb3d90::NiBoxSphereIntersector_ComputeContactInformation(const NiPoint3& start, const NiPoint3& end)
 {
     if (m_type == 2)
     {

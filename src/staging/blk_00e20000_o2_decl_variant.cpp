@@ -35,17 +35,17 @@ struct FUN_00e3f340_Class
 };
 struct FUN_00e3f900_class
 {
-    int __thiscall FUN_00cb0a70(int a);
-    int __thiscall FUN_00e3f900(int a);
+    int __thiscall ReturnSelf(int a);
+    int __thiscall ProcessAndReturnValue_00e3f900(int a);
 };
-int __cdecl FUN_00e30f40(int a, int b);
+int __cdecl hkaSplineCompressedAnimation_packMaskAndQuantizationType(int a, int b);
 struct S_00df8990_Obj;
 extern void(__cdecl* DAT_0126ec04)(void*, void*, S_00df8990_Obj*);
-void __cdecl FUN_00e2b9b0(void*, void*, S_00df8990_Obj*);
-void __cdecl FUN_00e2ba90();
+void __cdecl Runtime_ProcessEntries_00e2b9b0(void*, void*, S_00df8990_Obj*);
+void __cdecl Runtime_SetDAT0126ec04();
 extern int DAT_010eb3b8[];
 extern int DAT_010eb3d0[];
-int __cdecl FUN_00e30ff0(int a, int b);
+int __cdecl hkaSplineCompressedAnimation_handleEndianQuaternion(int a, int b);
 void __cdecl AlignAndAdvance(char flags, int a, int b, int* p);
 extern int DAT_010eb770;
 struct FUN_00e34800
@@ -59,7 +59,7 @@ struct FUN_00e34800
 };
 struct CB2FC0Object
 {
-    void __thiscall FUN_00cb2d90(void*);
+    void __thiscall hkRotation_set(void*);
 };
 struct FUN_00e3b4d0_Class
 {
@@ -68,7 +68,7 @@ struct FUN_00e3b4d0_Class
 int __cdecl CompareStringsCaseInsensitive(int, int);
 struct FUN_00e3ec30_Class
 {
-    int __thiscall FUN_00e3ec30(int arg);
+    int __thiscall ProcessEntries_00e3ec30(int arg);
 };
 struct D481D0RefVariant
 {
@@ -76,13 +76,13 @@ struct D481D0RefVariant
 };
 struct FUN_00e3f8d0_class
 {
-    void FUN_00e3f8d0(void* a, const void* b);
+    void Set_Thunk(void* a, const void* b);
 };
 struct FUN_00e29620_class
 {
-    void __thiscall FUN_00e29620(int param);
+    void __thiscall ProcessEntries_00e29620(int param);
 };
-void __cdecl FUN_00e298f0(FUN_00e29620_class* object, int param);
+void __cdecl Runtime_ForwardCall_00e298f0(FUN_00e29620_class* object, int param);
 struct SplitChunk
 {
     int unk00;
@@ -162,7 +162,7 @@ struct E2baaDst
     int unk50;
     int unk54;
 };
-E2baaDst* __cdecl FUN_00e2baa0(E2baaDst* out, E2baaSrc* src, int flag);
+E2baaDst* __cdecl setCollector(E2baaDst* out, E2baaSrc* src, int flag);
 struct FUN_00e2d0d0_cls;
 struct E2d0Ref;
 struct E2d0Node;
@@ -1130,12 +1130,12 @@ class FUN_00e30f10
 unsigned short NormalizeToUShort(float fMin, float fScaledValue, float fValue);
 void __cdecl SwapBytesAndAdvance(int n, unsigned char** pp);
 void __cdecl FillInterpolatedValues(int count, float** array, float first, float last);
-unsigned int __cdecl FUN_00e31570(unsigned char a1, unsigned int* a2);
-void __cdecl FUN_00e315a0(unsigned char a1, unsigned int a2, unsigned int a3, unsigned int* a4);
-void __cdecl FUN_00e31740(unsigned char flag, unsigned int a2, unsigned int* out);
-int __cdecl FUN_00e31570(int a, int* c);
+unsigned int __cdecl hkaSplineCompressedAnimation_handleEndianKnots(unsigned char a1, unsigned int* a2);
+void __cdecl hkaSplineCompressedAnimation_handleEndianScalarControlPoints(unsigned char a1, unsigned int a2, unsigned int a3, unsigned int* a4);
+void __cdecl Object_UpdateFields_00e31740(unsigned char flag, unsigned int a2, unsigned int* out);
+int __cdecl hkaSplineCompressedAnimation_handleEndianKnots(int a, int* c);
 void __cdecl AlignAndAdvance(int a, int result, int b, int* c);
-void __cdecl FUN_00e31780(int a, int b, int* c);
+void __cdecl Object_UpdateFields_00e31780(int a, int b, int* c);
 int __cdecl FindKeyInterval(int a, int b, unsigned char key, unsigned char* t);
 unsigned char* StoreBoolFlag(unsigned char* pDest, int value);
 struct FUN_00e33910_item
@@ -1234,7 +1234,7 @@ struct FUN_00e3a270 : S_00e3a270_RefObj
     FUN_00e3a270();
     virtual void FUN_vfn0();
 };
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct S_00e3ae70_Item
 {
     int unk00;
@@ -1265,7 +1265,7 @@ struct LinkOwner
     void* unk00;
     void* unk04;
     void* unk08;
-    void __thiscall FUN_00d21ce0(void*);
+    void __thiscall hkpBridgeConstraintAtom_init(void*);
 };
 struct FUN_00e3b060_Class
 {
@@ -1337,7 +1337,7 @@ class FUN_00e3dfb0_cls
     int unk34;
     int m_38;
 
-    int FUN_00e3dfb0(FUN_00e3dfb0_arg* rec);
+    int hkxVertexBuffer_getVertexDataPtr(FUN_00e3dfb0_arg* rec);
 };
 struct FUN_00e3ec00_Class
 {
@@ -1386,7 +1386,7 @@ struct S_00e3ed00_Foo
     S_00e3ed00_Foo** children;
     int childCount;
 
-    S_00e3ed00_Result* __thiscall FUN_00c85750();
+    S_00e3ed00_Result* __thiscall hkMemoryRouter_getInstance();
     int __thiscall AppendToTraversalList(S_00e3ed00_Foo* param1, S_00e3ed00_List* param2);
 };
 void __cdecl ResizeAudioStream(int param1, S_00e3ed00_List* param2, int param3);
@@ -1476,7 +1476,7 @@ struct E3F0F0Owner
     int* m_piFirst;
     int* m_piLast;
 
-    void FUN_00e3f0f0();
+    void ProcessState_00e3f0f0();
 };
 struct FUN_00e3f210_cls
 {
@@ -1521,7 +1521,7 @@ class BE3E7E0Table
     BE3E7E0Entry* FindEntryByName(const char* pcName);
 };
 void __cdecl SetEntity();
-void __cdecl FUN_00e36f40();
+void __cdecl Object_SetEntity_Thunk();
 struct FUN_00e39e80_class
 {
     int unk00;
@@ -1532,14 +1532,14 @@ struct FUN_00e39e80_class
     int unk14;
     int unk18;
     float unk1C;
-    float FUN_00e39e80();
+    float GetUnk1C_00e39e80();
 };
 struct FUN_00e3df50_Class
 {
-    FUN_00e3df50_Class* __thiscall FUN_00e3df50(int param);
+    FUN_00e3df50_Class* __thiscall ReturnSelf(int param);
 };
-int __cdecl FUN_00e3dfb0(int param_1, int* param_2);
-int __cdecl FUN_00e3e020(int param_1, int* param_2);
+int __cdecl hkxVertexBuffer_getVertexDataPtr(int param_1, int* param_2);
+int __cdecl Object_HkxVertexBuffer_getVertexDataPtr_Thunk(int param_1, int* param_2);
 struct FNVTreeNode
 {
     int unk00;
@@ -1564,7 +1564,7 @@ class Base
     int unk04;
     int unk08;
     int unk0C;
-    int FUN_00e3f270();
+    int GetUnk0C();
 };
 struct FUN_00e31080
 {
@@ -1616,7 +1616,8 @@ struct FUN_00e3f370_cls
 
 extern "C" unsigned int __cdecl _rotl(unsigned int, int);
 // @fnv 0x00e315a0
-void __cdecl FUN_00e315a0(unsigned char flags, unsigned int count, unsigned int wide, unsigned int* cursor)
+// src: HAVOK_LIB 0x00e315a0
+void __cdecl hkaSplineCompressedAnimation_handleEndianScalarControlPoints(unsigned char flags, unsigned int count, unsigned int wide, unsigned int* cursor)
 {
     if (!flags)
         return;

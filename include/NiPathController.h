@@ -29,25 +29,25 @@ public:
     void SetSpawnedArgs(SpawnedArg* args);
     void FUN_00a6d500(SpawnedArg* args);
     NiPathController* CreatePathObject(int value);
-    void FUN_00a4b0b0(NiPathController* destination, void* cloning);
-    void FUN_00a4b0b0(NiPathController* destination, int cloning);
-    bool FUN_00a4a710(NiObject* object);
+    void CopyMembers_00a4b0b0(NiPathController* destination, void* cloning);
+    void CopyMembers_00a4b0b0(NiPathController* destination, int cloning);
+    bool IsEqual_00a4a710(NiObject* object);
 
     void* InvokeIndexedCallback(void* result, int first, int second, float time);
     void InvokeIndexedCallback(NiPoint3* result, int first, int second, float time);
     float GetKeyDerivativeLength(int first, int second, float time);
     float GetKeyDerivativeLength(unsigned int first, unsigned int second, float time);
-    float FUN_00a4a6a0(int first, int second, float scale);
-    double FUN_00a4a6a0(unsigned int first, unsigned int second, float scale);
+    float PathLength(int first, int second, float scale);
+    double PathLength(unsigned int first, unsigned int second, float scale);
     float GetTotalLength();
     void GetLengths(unsigned int* keys, unsigned int* count, int* type, unsigned char* stride);
     PositionKey* GetKeys(unsigned int& count, int& type, unsigned char& stride) const;
-    void FUN_00a4a980(float time, unsigned int* first, unsigned int* second, float* position);
-    void FUN_00a4a980(float time, unsigned int& first, unsigned int& second, float& position);
-    void FUN_00a4ab50(float time, int* first, int* second, float* position);
-    void FUN_00a4ab50(float time, unsigned int& first, unsigned int& second, float& position);
-    void FUN_00a49e70(int first, int second, float time, NiMatrix3* rotation);
-    void FUN_00a49e70(unsigned int first, unsigned int second, float time, NiMatrix3& rotation);
+    void GetPercentLoc_00a4a980(float time, unsigned int* first, unsigned int* second, float* position);
+    void GetPercentLoc_00a4a980(float time, unsigned int& first, unsigned int& second, float& position);
+    void GetLoc(float time, int* first, int* second, float* position);
+    void GetLoc(float time, unsigned int& first, unsigned int& second, float& position);
+    void CalcRefFrame(int first, int second, float time, NiMatrix3* rotation);
+    void CalcRefFrame(unsigned int first, unsigned int second, float time, NiMatrix3& rotation);
     void UpdatePathTarget(float* time);
 
     bool GetFollow() const;

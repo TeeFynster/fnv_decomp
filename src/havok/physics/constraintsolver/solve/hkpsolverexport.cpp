@@ -2,10 +2,11 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // FUN_00df0680: cdecl forwarder to FUN_00def570 (single jmp body).
-void FUN_00def570();
+void hkReal_IntegrateConstraintSchemas();
 
 // @fnv 0x00df0680
-void __cdecl FUN_00df0680()
+// src: COMMUNITY 0x00df0680
+void __cdecl hkExportImpulsesAndRhs()
 {
-    FUN_00def570();
+    hkReal_IntegrateConstraintSchemas();
 }

@@ -52,7 +52,7 @@ void GarbageCollector::ClearTempEffects()
     {
         LockGarbageCollector(kGarbageCollectorClearTempEffectsLabel, true);
         g_011de828.RemoveAll();
-        g_modelLoader->FUN_004aaf10();
+        g_modelLoader->ModelLoader_UnlockModelMap();
         UnlockGarbageCollector(true);
     }
 }
@@ -71,7 +71,7 @@ void GarbageCollector::Update()
     budget.size = 0;
     budget.remaining = 0;
     budget.multiplier = 1;
-    if (FUN_00446ef0()->FUN_00878360())
+    if (MemoryLevelManager_GetSingleton()->MemoryLevelManager_WasLastCheckedMemLevelCloseToLow())
         budget.multiplier = 2;
     if (g_011de808.GetSize())
     {
@@ -87,7 +87,7 @@ void GarbageCollector::Update()
                 g_011de808.RemoveAt(budget.size);
                 delete object;
             }
-            g_modelLoader->FUN_004aaf10();
+            g_modelLoader->ModelLoader_UnlockModelMap();
         }
     }
     else if (g_011de910.GetSize())
@@ -104,7 +104,7 @@ void GarbageCollector::Update()
                 g_011de910.RemoveAt(budget.size);
                 delete object;
             }
-            g_modelLoader->FUN_004aaf10();
+            g_modelLoader->ModelLoader_UnlockModelMap();
         }
     }
     else if (g_011de838.GetSize())
@@ -128,7 +128,7 @@ void GarbageCollector::Update()
     }
     else if (g_011de848.GetSize())
     {
-        FUN_00869420(&g_011de848, &g_011de888);
+        j_CopyArrays_V_NiTObjectArray_V_NiPointer_VNiAVObject_GarbageCollector_KAXPBV_NiTObjectArray_V_NiPointer_VNiAVObject_PAV1_Z(&g_011de848, &g_011de888);
         g_011de848.RemoveAll();
     }
     else if (ms_kReferencesQueuedForRemoval.GetSize())
@@ -143,11 +143,11 @@ void GarbageCollector::Update()
                 --budget.size;
                 --budget.remaining;
                 TESObjectREFR* object = ms_kReferencesQueuedForRemoval.GetAt(0);
-                if (object->IsActor() || object->FUN_00564d80())
+                if (object->IsActor() || object->GetTargeted())
                     --special;
                 delete object;
             }
-            g_modelLoader->FUN_004aaf10();
+            g_modelLoader->ModelLoader_UnlockModelMap();
         }
     }
     else if (ObjectGarbageB.GetSize())
@@ -192,33 +192,34 @@ void __cdecl AddNavMeshToGarbageCollector(NavMeshPtr& apNavMesh)
     ((NavMesh*)apNavMesh)->NiRefObject::IncRefCount();
     if (DAT_tlsFlag)
     {
-        NavMesh* mesh = apNavMesh.FUN_00458b50();
+        NavMesh* mesh = apNavMesh.AnimatingText_GetFullText();
         g_011de924.Add(mesh);
     }
     else
     {
-        NavMesh* mesh = apNavMesh.FUN_00458b50();
+        NavMesh* mesh = apNavMesh.AnimatingText_GetFullText();
         g_011de898.Add(mesh);
     }
 }
 
-bool __cdecl FUN_00867f70();
+bool __cdecl GarbageCollector_TryEnterCrit();
 bool __cdecl HasFlags(int);
 bool __cdecl BSSpinLockGlobalTryLock();
-void __cdecl FUN_00452530();
-void FUN_00869560(void*, void*);
+void __cdecl BSTexturePalette_Unlock();
+void Object_ProcessEntries_00869560(void*, void*);
 extern NiTObjectArray<NiPointer<BSTempEffect> > g_011de858;
 extern bool DAT_011de958;
 extern __declspec(thread) bool bCollecting;
 
 // @fnv 0x00868d70
-void FUN_00868d70(bool abTryLock)
+// src: EXE 0x00868d70
+void GarbageCollector_ClearAll(bool abTryLock)
 {
     if (DAT_011de958)
         return;
     bool bLocked = true;
     if (abTryLock)
-        bLocked = FUN_00867f70();
+        bLocked = GarbageCollector_TryEnterCrit();
     else
         LockGarbageCollector("GarbageCollector::ClearAll()", true);
     if (bLocked)
@@ -229,7 +230,7 @@ void FUN_00868d70(bool abTryLock)
         if (!HasFlags(0x10) && BSSpinLockGlobalTryLock())
         {
             g_011de828.RemoveAll();
-            FUN_00452530();
+            BSTexturePalette_Unlock();
         }
         if (!HasFlags(8) && g_modelLoader->FUN_00868250())
         {
@@ -240,7 +241,7 @@ void FUN_00868d70(bool abTryLock)
                 delete pobject;
             }
             g_011de808.RemoveAll();
-            g_modelLoader->FUN_004aaf10();
+            g_modelLoader->ModelLoader_UnlockModelMap();
         }
         if (!HasFlags(4) && g_modelLoader->FUN_00868250())
         {
@@ -251,7 +252,7 @@ void FUN_00868d70(bool abTryLock)
                 delete pobject;
             }
             g_011de910.RemoveAll();
-            g_modelLoader->FUN_004aaf10();
+            g_modelLoader->ModelLoader_UnlockModelMap();
         }
         if (!HasFlags(2))
         {
@@ -270,7 +271,7 @@ void FUN_00868d70(bool abTryLock)
                 delete pref;
             }
             GarbageCollector::ms_kReferencesQueuedForRemoval.RemoveAll();
-            g_modelLoader->FUN_004aaf10();
+            g_modelLoader->ModelLoader_UnlockModelMap();
         }
         if (!HasFlags(0x20))
         {
@@ -283,11 +284,11 @@ void FUN_00868d70(bool abTryLock)
         {
             ForEachNavMesh(&GarbageCollector::ObjectGarbageB, &GarbageCollector::ms_kReferencesQueuedForRemoval);
             GarbageCollector::ObjectGarbageB.RemoveAll();
-            FUN_00869420(&g_011de848, &g_011de888);
+            j_CopyArrays_V_NiTObjectArray_V_NiPointer_VNiAVObject_GarbageCollector_KAXPBV_NiTObjectArray_V_NiPointer_VNiAVObject_PAV1_Z(&g_011de848, &g_011de888);
             g_011de848.RemoveAll();
             ForEachNavMesh(&g_011de838, &g_011de910);
             g_011de838.RemoveAll();
-            FUN_00869560(&g_011de858, &g_011de828);
+            Object_ProcessEntries_00869560(&g_011de858, &g_011de828);
             g_011de858.RemoveAll();
             CopyNonNullElements(&g_011de898, &g_011de924);
             g_011de898.Clear(true);
@@ -309,13 +310,15 @@ void __cdecl LockGlobalObject(const char* apLabel)
 }
 
 // @fnv 0x00867f70
-bool __cdecl FUN_00867f70()
+// src: COMMUNITY 0x00867f70
+bool __cdecl GarbageCollector_TryEnterCrit()
 {
     return g_011de8e0.TryLock();
 }
 
 // @fnv 0x00867f80
-void FUN_00867f80()
+// src: COMMUNITY 0x00867f80
+void GarbageCollector_LeaveCrit()
 {
     g_011de8e0.Unlock();
 }
@@ -340,7 +343,7 @@ void FUN_00868210_shell::ClearBitsAndUnlockGC()
     UnlockGarbageCollector(false);
 }
 
-void __cdecl FUN_00868770(int* a, int b);
+void __cdecl Garbagecollector_ForwardCall_00868770(int* a, int b);
 
 // NiAVObject.h lacks the collector mark operation (0x00868740).
 // Keep just its member-call adapter; the refcount field comes from the shared class.
@@ -352,7 +355,7 @@ struct GarbageMarkAdapter
 // @fnv 0x00868740
 void GarbageMarkAdapter::MarkForCollection()
 {
-    FUN_00868770(reinterpret_cast<int*>(&reinterpret_cast<NiAVObject*>(this)->m_uiRefCount),
+    Garbagecollector_ForwardCall_00868770(reinterpret_cast<int*>(&reinterpret_cast<NiAVObject*>(this)->m_uiRefCount),
         reinterpret_cast<NiAVObject*>(this)->m_uiRefCount | 0x40000000);
 }
 
@@ -377,7 +380,7 @@ FUN_008681c0_shell* __thiscall FUN_008681c0_shell::InitFlags(int aiFlags, const 
 // @fnv 0x00868ce0
 void __thiscall NiAVObject::RemoveGarbageMark()
 {
-    FUN_00868770(reinterpret_cast<int*>(&m_uiRefCount), m_uiRefCount & 0xBFFFFFFF);
+    Garbagecollector_ForwardCall_00868770(reinterpret_cast<int*>(&m_uiRefCount), m_uiRefCount & 0xBFFFFFFF);
 }
 
 // @fnv 0x008693c0
@@ -425,7 +428,8 @@ struct ChildGarbageCleanupAdapter
     void ClearChildGarbage();
 };
 // @fnv 0x00572160
-void NiNode::FUN_00572160()
+// src: XBOX_PDB 0x00572160
+void NiNode::DetachAllChildren_00572160()
 {
     unsigned int i;
     unsigned int count = m_kChildren.GetSize();
@@ -440,14 +444,16 @@ void NiNode::FUN_00572160()
 
 extern void(__stdcall* DAT_00fdf0e4)(void*, void*);
 // @fnv 0x00868770
-void __cdecl FUN_00868770(int* a, int b)
+// src: GUESS 0x00868770 (confidence: low)
+void __cdecl Garbagecollector_ForwardCall_00868770(int* a, int b)
 {
     DAT_00fdf0e4(a, (void*)b);
 }
 
 // Adds a temporary-effect pointer to the active or deferred garbage queue.
 // @fnv 0x00868490
-void __cdecl FUN_00868490(int aiEffect)
+// src: EXE 0x00868490
+void __cdecl GarbageCollector_Add(int aiEffect)
 {
     TwoPointerRecord e(0x10, "GarbageCollector::Add(BSTempEffect)");
     if (DAT_tlsFlag)
@@ -465,16 +471,17 @@ void __cdecl FUN_00868490(int aiEffect)
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 // @fnv 0x00868560
-void __cdecl FUN_00868560(GarbageCollectorDeleteB* apObject)
+// src: EXE 0x00868560
+void __cdecl GarbageCollector_Add_00868560(GarbageCollectorDeleteB* apObject)
 {
     TwoPointerRecord autoEvent(4, "GarbageCollector::Add(BipedAnim)");
 
-    if (!DAT_tlsFlag || (g_BGSSaveLoadGame != 0 && g_BGSSaveLoadGame->FUN_0042ce10()))
+    if (!DAT_tlsFlag || (g_BGSSaveLoadGame != 0 && g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading()))
     {
         if (g_modelLoader->FUN_00868250())
         {
             delete apObject;
-            g_modelLoader->FUN_004aaf10();
+            g_modelLoader->ModelLoader_UnlockModelMap();
         }
         else
         {
@@ -489,7 +496,8 @@ void __cdecl FUN_00868560(GarbageCollectorDeleteB* apObject)
 
 // Marks a non-null object for collection and queues its smart pointer.
 // @fnv 0x00868660
-void FUN_00868660(NiAVObject* apObject)
+// src: EXE 0x00868660
+void GarbageCollector_Add_00868660(NiAVObject* apObject)
 {
     TwoPointerRecord autoEvent(2, "GarbageCollector::Add(NiAVObject)");
 
@@ -517,13 +525,13 @@ struct ControllerRemovalAdapter
 };
 struct AnimationObject
 {
-    void FUN_0048ff50();
-    NiControllerManager* FUN_00496940();
+    void FreeAllIdles();
+    NiControllerManager* GetControllerManager_00496940();
     NiAVObject* FUN_005585e0();
 };
 struct AnimationLoader
 {
-    void FUN_00445430(AnimationObject*);
+    void ModelLoader_CancelReplacementKFList(AnimationObject*);
 };
 extern int DAT_011f36bc;
 extern int g_011f36e4;
@@ -531,9 +539,9 @@ extern int g_011f36e4;
 void AddAnimationToGarbageCollector(AnimationObject* object)
 {
     TwoPointerRecord event(8, "GarbageCollector::Add(Animation)");
-    object->FUN_0048ff50();
-    if (object->FUN_00496940())
-        object->FUN_00496940()->FUN_0048fef0(0.0f);
+    object->FreeAllIdles();
+    if (object->GetControllerManager_00496940())
+        object->GetControllerManager_00496940()->FUN_0048fef0(0.0f);
     NiAVObject* pRoot = object->FUN_005585e0();
     if (pRoot)
     {
@@ -544,8 +552,8 @@ void AddAnimationToGarbageCollector(AnimationObject* object)
         if (controller)
             reinterpret_cast<ControllerRemovalAdapter*>(pRoot)->RemoveController(controller);
     }
-    ((AnimationLoader*)g_modelLoader)->FUN_00445430(object);
-    if (!DAT_tlsFlag || (g_BGSSaveLoadGame && g_BGSSaveLoadGame->FUN_0042ce10()))
+    ((AnimationLoader*)g_modelLoader)->ModelLoader_CancelReplacementKFList(object);
+    if (!DAT_tlsFlag || (g_BGSSaveLoadGame && g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading()))
     {
         delete (GarbageCollectorDeleteA*)object;
     }

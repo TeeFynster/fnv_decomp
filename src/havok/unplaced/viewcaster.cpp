@@ -4,26 +4,27 @@
 
 struct Inner62
 {
-    int FUN_00c87a40();
+    int bhkWorldObject_GethkWorld();
 };
 
-int __cdecl FUN_00621480(int value);
+int __cdecl bhkWorld_Getbhk(int value);
 
 struct FUN_00621440_cls
 {
     int unk00;
 
-    void* FUN_00559450();
-    int FUN_00621440();
+    void* Modelloader_GetReferencedThis();
+    int CameraCaster_GetWorld();
 };
 
 // If FUN_00559450 returns non-null, passes the result of its FUN_00c87a40 call through FUN_00621480; otherwise returns 0.
 // @fnv 0x00621440
-int FUN_00621440_cls::FUN_00621440()
+// src: XBOX_PDB 0x00621440
+int FUN_00621440_cls::CameraCaster_GetWorld()
 {
     int result = 0;
-    if (FUN_00559450())
-        result = FUN_00621480(((Inner62*)FUN_00559450())->FUN_00c87a40());
+    if (Modelloader_GetReferencedThis())
+        result = bhkWorld_Getbhk(((Inner62*)Modelloader_GetReferencedThis())->bhkWorldObject_GethkWorld());
     return result;
 }
 
@@ -69,7 +70,7 @@ struct SpawnedObject
     virtual void v37();
     virtual void v38();
     virtual void v39(SpawnedObject* obj);
-    void FUN_00c68e30(SpawnedObject* a, unsigned int b);
+    void bhkWorld_SetDebugObjectColor(SpawnedObject* a, unsigned int b);
 };
 
 class ScopeGuard
@@ -85,21 +86,22 @@ unsigned int __cdecl PackBytesBigEndian(unsigned int a, unsigned int b, unsigned
 class FUN_00631ca0_cls
 {
   public:
-    SpawnedObject* FUN_00559450();
-    void FUN_00631ca0(SpawnedObject* obj);
+    SpawnedObject* Modelloader_GetReferencedThis();
+    void ViewCaster_Add(SpawnedObject* obj);
 };
 
 // Creates a scope guard, and if the stored object is non-null, calls v39 on it and then FUN_00c68e30 with the object and a computed value.
 // @fnv 0x00631ca0
-void FUN_00631ca0_cls::FUN_00631ca0(SpawnedObject* obj)
+// src: XBOX_PDB 0x00631ca0
+void FUN_00631ca0_cls::ViewCaster_Add(SpawnedObject* obj)
 {
     ScopeGuard guard(0x10, 1, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Havok\\ViewCaster.cpp", 0x74);
-    if (this->FUN_00559450() != 0)
+    if (this->Modelloader_GetReferencedThis() != 0)
     {
-        this->FUN_00559450()->v39(obj);
+        this->Modelloader_GetReferencedThis()->v39(obj);
         if (obj != 0)
         {
-            obj->FUN_00c68e30(this->FUN_00559450(), PackBytesBigEndian(0x58, 0xad, 0x56, 0x19));
+            obj->bhkWorld_SetDebugObjectColor(this->Modelloader_GetReferencedThis(), PackBytesBigEndian(0x58, 0xad, 0x56, 0x19));
         }
     }
 }
@@ -139,12 +141,13 @@ struct FUN_00632d40_shell : PathingCopyBase
     int unk4C;
     PathingCopyBlock unk50;
 
-    FUN_00632d40_shell& FUN_00632d40(const FUN_00632d40_shell& other);
+    FUN_00632d40_shell& hkpRootCdPoint_hkpRootCdPoint(const FUN_00632d40_shell& other);
 };
 
 // Copy-assigns all members of the source object into this object and returns a reference to this.
 // @fnv 0x00632d40
-FUN_00632d40_shell& FUN_00632d40_shell::FUN_00632d40(const FUN_00632d40_shell& other)
+// src: XBOX_PDB 0x00632d40
+FUN_00632d40_shell& FUN_00632d40_shell::hkpRootCdPoint_hkpRootCdPoint(const FUN_00632d40_shell& other)
 {
     PathingCopyBase::operator=(other);
     unk20 = other.unk20;

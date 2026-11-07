@@ -141,7 +141,7 @@ public:
     virtual bool LoadObjectSizeTable();                                      // 23 0x00a64740
 
     bool LoadRTTIAndObjects();
-    void FUN_00a64d80(unsigned int param);
+    void LoadRTTIString(unsigned int param);
     bool FUN_00a640b0(const char* name);
     void RegisterStreamable(void* object);
     void Register(void* object);
@@ -149,8 +149,8 @@ public:
     void FUN_0096ad30(unsigned int size);
     void FUN_0096ae90(unsigned int index, const unsigned int* value);
     NiObject* FUN_00a63430();
-    void FUN_00a633b0(NiSourceTexture* texture);
-    void FUN_00a64160(const char* name);
+    void NiTexture_SetTexture(NiSourceTexture* texture);
+    void SaveCString(const char* name);
     void Read(void* data, unsigned int size, unsigned int count);
     void ReadStreamString(char*& string);
     void WriteStreamString(const char* string);
@@ -163,8 +163,8 @@ public:
     NiObject* GetLoadedObject();
     NiObject* GetLoadedObject(unsigned int linkID);
     bool Load(const char* name, BSFile* file);
-    bool FUN_00c3a8a0(const char* name, BSFile* file);
-    bool FUN_00c3a8a0(const char* name, bool flag);
+    bool BSStream_Load(const char* name, BSFile* file);
+    bool BSStream_Load(const char* name, bool flag);
     bool Save(NiFile* file);
     NiObject* DeserializeObject();
     unsigned int GetLinkID();
@@ -183,7 +183,7 @@ public:
     void InsertObject(NiObject* object);
     bool GetLastLoadedFilePath(char* buffer, unsigned int size);
     void ReadLinkIDStub();
-    void FUN_00a645b0();
+    void ReadLinkID();
     unsigned int GetFileVersion() const;
     void SetLastNiTimeControllerFlags(unsigned short flags);
     NiBinaryStream& Istr();

@@ -47,8 +47,8 @@ public:
     BSSimpleList<ActiveEffect*>* GetActiveEffectList() const;
     bool MagicTargetIsActor() const;
 
-    bool FUN_00822f70(ActorValue::Index);
-    bool FUN_00822c30(MagicItem*, ActiveEffect*);
+    bool HasRecoverableActorValueEffect(ActorValue::Index);
+    bool IsLastEffect(MagicItem*, ActiveEffect*);
     void FUN_00824400(MagicItem*, int, int);
     void FUN_00823c40(float);
     Actor* FUN_00822b40();
@@ -72,16 +72,16 @@ public:
     bool HasActiveEffectOfArchetype(int archetype, bool include);
     void DispelMatchingActiveEffects(unsigned int formID, unsigned int flags, TESResponse* caster);
     void DispelMatchingActiveEffects(EffectItem*, MagicItem*, void*);
-    void FUN_008248e0(MagicItem* apItem, bool abImmediate);
-    void FUN_008255a0();
-    float FUN_00822eb0(MagicItem* apSpell);
-    bool FUN_00822e00();
+    void MagicTarget_Dispel_008248e0(MagicItem* apItem, bool abImmediate);
+    void MagicTarget_EvaluateSpellConditions();
+    float MagicTarget_GetUsageMonitorEffectMagnitude(MagicItem* apSpell);
+    bool MagicTarget_HasDamageHealthEffect();
     void UpdateEffectsByFlags(unsigned int auiFlags);
     void RemoveEffectsByArchetype(int aiArchetype, int iProcessLevel);
-    void FUN_008249d0(bool immediate);
-    void FUN_00824df0(void* pOwner, int iKind);
-    void FUN_00824df0(MagicItem*, MagicItem*);
-    void FUN_008251c0(ActiveEffect* pEffect, bool b);
+    void MagicTarget_DispelAllSpells(bool immediate);
+    void MagicTarget_SetDisplacementSpell(void* pOwner, int iKind);
+    void MagicTarget_SetDisplacementSpell(MagicItem*, MagicItem*);
+    void MagicTarget_RemoveEffect(ActiveEffect* pEffect, bool b);
     bool ApplyAddiction(StandinAlchemyItem* apItem);
-    void FUN_00824630(int aiType);
+    void MagicTarget_Dispel(int aiType);
 };

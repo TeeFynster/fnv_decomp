@@ -25,7 +25,7 @@ public:
 
     void ResetFormData();
     bool Load(TESFile* file);
-    void FUN_00500a20(BGSNote* note);
+    void BGSTerminal_SetPassword(BGSNote* note);
     void AddMenuItem(TerminalMenuItem* item);
     BSSimpleList<TerminalMenuItem*>* FUN_00461150();
 

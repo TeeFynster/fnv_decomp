@@ -21,10 +21,10 @@
 // src/havok/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct BSAudio;
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* audio()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 struct Block5
 {
@@ -50,7 +50,7 @@ struct CloneDataA : CloneDataBase
     Block5b unk94;
     Block5 unka8;
     CloneDataA* FUN_00d4f2a0();
-    void FUN_00d4f270(hkBool flag);
+    void hkpRagdollLimitsData_setConeLimitStabilization(hkBool flag);
 };
 struct CloneDataB : CloneDataBase
 {
@@ -154,7 +154,7 @@ class FnvHolder
     char unk00[0x0c];
     FnvInner* m_0c;
 };
-int FUN_00e5ad40(FnvHolder* a0, __m128* a1, __m128* a2);
+int hkpConstraintUtils_getConstraintPivots(FnvHolder* a0, __m128* a1, __m128* a2);
 struct Ent
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
@@ -174,9 +174,9 @@ struct Ent
     int unk190, unk194, unk198, unk19c, unk1a0, unk1a4, unk1a8, unk1ac;
     __m128 unk1b0;
     __m128 unk1c0;
-    void FUN_00ca8800(__m128* v);
+    void hkpRigidBody_setPosition(__m128* v);
     void OnTrigger(int arg);
-    void FUN_00561800(void* p);
+    void hkpRigidBody_setAngularVelocity(void* p);
 };
 struct FnvHolder2 : FnvHolder
 {
@@ -187,7 +187,7 @@ struct FnvHolder2 : FnvHolder
 struct Conv
 {
     __m128 m;
-    void FUN_00c7f640(__m128* src, __m128* arg);
+    void setTransformedPos_00c7f640(__m128* src, __m128* arg);
 };
 // Constraint pivots followed by their transformed positions.
 struct WorkVectors
@@ -202,7 +202,7 @@ extern "C"
     const __m128 DAT_010ec7f0 = {{1.0f, 1.0f, 1.0f, 1.0f}};
     const float DAT_010959f4 = 1e-6f;
 }
-bool* FUN_00e5af80(bool* out, FnvHolder2* h, float t, float t2);
+bool* hkpConstraintUtils_checkAndFixConstraint(bool* out, FnvHolder2* h, float t, float t2);
 
 // Keep the original inline operations with the shared class declarations.
 __forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
@@ -298,7 +298,8 @@ __forceinline const hkVector4& hkpRigidBody::getCenterOfMassLocal()
 }
 
 // @fnv 0x00e5a800
-void __cdecl FUN_00e5a800(Instance* constraint)
+// src: GUESS 0x00e5a800 (confidence: low)
+void __cdecl Object_ProcessAndReturnValue_00e5a800(Instance* constraint)
 {
     SourceData* data = constraint->unk0c;
     hkpSetLocalTransformsConstraintAtom* transformsAtom = 0;

@@ -7,8 +7,8 @@ struct DFD0SwapFlag
     bool m_bValue;
 };
 
-void __cdecl FUN_00401080(int* piValue, DFD0SwapFlag kFlag);
-void __cdecl FUN_00407a90(short* psValue, DFD0SwapFlag kFlag);
+void __cdecl BSEndian_00401080(int* piValue, DFD0SwapFlag kFlag);
+void __cdecl BSEndian_00407a90(short* psValue, DFD0SwapFlag kFlag);
 
 struct DFD0File
 {
@@ -43,7 +43,7 @@ void DFD0Data::LoadFormRef(void* pUnused, DFD0File* pkFile, const char* pBuffer)
 {
     int iFormID = *(const int*)pBuffer;
     if (pkFile->IsEndianConversionRequired())
-        FUN_00401080(&iFormID, DFD0SwapFlag());
+        BSEndian_00401080(&iFormID, DFD0SwapFlag());
     ResolveFormID(&iFormID, pkFile);
     if (iFormID)
         m_pBase = g_DFD0TES->GetForm(iFormID)->GetBase();
@@ -52,5 +52,5 @@ void DFD0Data::LoadFormRef(void* pUnused, DFD0File* pkFile, const char* pBuffer)
     pBuffer += 4;
     m_sCount = *(const short*)pBuffer;
     if (pkFile->IsEndianConversionRequired())
-        FUN_00407a90(&m_sCount, DFD0SwapFlag());
+        BSEndian_00407a90(&m_sCount, DFD0SwapFlag());
 }

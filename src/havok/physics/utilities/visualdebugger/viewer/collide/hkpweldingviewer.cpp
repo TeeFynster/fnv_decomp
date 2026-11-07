@@ -8,7 +8,7 @@
 
 struct FUN_00dd9380_class
 {
-    void* FUN_00dd9380(const char* name, void* factory);
+    void* hkProcessFactory_registerProcess(const char* name, void* factory);
 };
 extern int DAT_01269cd0;
 extern int DAT_01268fbc;
@@ -16,7 +16,7 @@ void* __cdecl FUN_00d62e20();
 // @fnv 0x00d62e60
 void __cdecl RegisterWeldingViewer()
 {
-    void* result = ((FUN_00dd9380_class*)DAT_01269cd0)->FUN_00dd9380("WeldingViewer", (void*)&FUN_00d62e20);
+    void* result = ((FUN_00dd9380_class*)DAT_01269cd0)->hkProcessFactory_registerProcess("WeldingViewer", (void*)&FUN_00d62e20);
     DAT_01268fbc = (int)result;
 }
 
@@ -31,7 +31,7 @@ struct S_00d62650_B3
 };
 struct S_00d62650_Arg
 {
-    void __thiscall FUN_00c93920(S_00d62650_B3* p);
+    void __thiscall hkpWorld_addWorldPostSimulationListener(S_00d62650_B3* p);
 };
 struct S_00d62650_B2
 {
@@ -47,7 +47,7 @@ struct S_00d62650_D : S_00d62650_B1, S_00d62650_B2, S_00d62650_B3
 // @fnv 0x00d62650
 void S_00d62650_D::DispatchToArg(S_00d62650_Arg* arg)
 {
-    arg->FUN_00c93920(this);
+    arg->hkpWorld_addWorldPostSimulationListener(this);
 }
 
 // hkpWeldingViewer - virtual slot 2 of the base subobject at +0x20.
@@ -66,19 +66,20 @@ struct HKConstraint
     int unk00;
     int unk04;
     void* unk08;
-    void FUN_00d62680(HKWorldList* list);
+    void ProcessAndTransformResult_00d62680(HKWorldList* list);
 };
 
 // Passes a pointer to unk08 to the list's add method, or null when the adjusted this pointer is zero.
 // @fnv 0x00d62680
-void HKConstraint::FUN_00d62680(HKWorldList* pWorldList)
+// src: GUESS 0x00d62680 (confidence: low)
+void HKConstraint::ProcessAndTransformResult_00d62680(HKWorldList* pWorldList)
 {
     pWorldList->IsEntityAdded(((char*)this - 0x20) ? (void*)&unk08 : (void*)0);
 }
 
 struct S_00d626b0_Item
 {
-    void FUN_00c93920(void* apSub);
+    void hkpWorld_addWorldPostSimulationListener(void* apSub);
 };
 
 struct S_00d626b0_Owner
@@ -160,7 +161,7 @@ FUN_00d626b0::FUN_00d626b0(int aiArg) throw() : S_00d626b0_R(aiArg)
     if (m_24)
     {
         for (int i = 0; i < m_24->m_70; i++)
-            m_24->m_6c[i]->FUN_00c93920((S_00d626b0_S*)this);
+            m_24->m_6c[i]->hkpWorld_addWorldPostSimulationListener((S_00d626b0_S*)this);
     }
 }
 
@@ -288,13 +289,14 @@ struct Viewer
     void* ctor0d626b0(void* arg);
 };
 
-extern "C" void* __cdecl FUN_00c85750();
+extern "C" void* __cdecl hkMemoryRouter_getInstance();
 
 // Allocates a 0x2c-byte Viewer from the manager's pool, sets its size field, constructs it with arg, and returns a pointer offset by 8 or null.
 // @fnv 0x00d62e20
-void* __cdecl FUN_00d62e20_impl(void* arg)
+// src: GUESS 0x00d62e20 (confidence: low)
+void* __cdecl Object_ProcessAndReturnValue_00d62e20(void* arg)
 {
-    Manager* pManager = (Manager*)FUN_00c85750();
+    Manager* pManager = (Manager*)hkMemoryRouter_getInstance();
     Viewer* pViewer = pManager->unk10->alloc0x2c(0x2c);
     pViewer->unk04 = 0x2c;
     void* pResult = pViewer->ctor0d626b0(arg);
@@ -306,13 +308,14 @@ void* __cdecl FUN_00d62e20_impl(void* arg)
 extern int g_D62E80Value;
 
 // @fnv 0x00d62e80
-int __cdecl FUN_00d62e80()
+// src: GUESS 0x00d62e80 (confidence: low)
+int __cdecl Object_GetG_D62E80Value_00d62e80()
 {
     return g_D62E80Value;
 }
 
 namespace fnv_00d62ec0 {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00d62ec0_cls
 {
@@ -333,7 +336,7 @@ FUN_00d62ec0_cls* FUN_00d62ec0_cls::Destroy(unsigned char acFlags)
     FUN_00d62720();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, m_uSize);
     }
@@ -373,14 +376,14 @@ Own_00d62e90* make_00d62e90()
 struct D62EA0Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00d62ea0();
+    virtual void AdjustThisAndForward_00d62ea0();
 
     int unk04;
 };
 
 struct D62EA0Secondary
 {
-    virtual void FUN_00d62ea0();
+    virtual void AdjustThisAndForward_00d62ea0();
 };
 
 struct D62EA0Object : D62EA0Primary, D62EA0Secondary
@@ -388,7 +391,8 @@ struct D62EA0Object : D62EA0Primary, D62EA0Secondary
     D62EA0Object();
 
 // @fnv 0x00d62ea0
-    virtual void FUN_00d62ea0();
+// src: GUESS 0x00d62ea0 (confidence: low)
+    virtual void AdjustThisAndForward_00d62ea0();
 };
 
 D62EA0Object::D62EA0Object()

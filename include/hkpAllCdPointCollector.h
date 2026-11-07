@@ -17,7 +17,7 @@ public:
 
     hkBoolStub DidHit() const;
     void sortHits();
-    void FUN_00cabad0();
+    void hkpAllCdPointCollector_sortHits();
     void FUN_006211b0();
     void* FUN_00621140(unsigned int aiFlags);
 

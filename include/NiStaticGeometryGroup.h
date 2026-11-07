@@ -13,7 +13,7 @@ public:
     virtual void Purge();
     virtual ~NiStaticGeometryGroup();
 
-    void FUN_00e946b0();
+    void Purge_00e946b0();
     void FUN_00e98710();
     void* Destroy(unsigned int);
 

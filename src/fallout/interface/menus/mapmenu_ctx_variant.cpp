@@ -44,7 +44,8 @@ unsigned int __cdecl BSStringLength(const char*);
 extern "C" int __cdecl _mbsnicmp(const char*, const char*, size_t);
 
 // @fnv 0x007984d0
-TESWorldSpace* MapMenu::FUN_007984d0(NiPoint3 pt)
+// src: XBOX_PDB 0x007984d0
+TESWorldSpace* MapMenu::CalculatePlayerMarkerSpace(NiPoint3 pt)
 {
     TESWorldSpace* result5 = 0;
     float maxDist = 3.402823466e+38F;
@@ -64,13 +65,13 @@ TESWorldSpace* MapMenu::FUN_007984d0(NiPoint3 pt)
         loc4 = PathingLocation(&ptCopy3, ws4);
         if (loc4.FUN_006de250() && this->m_pCurrentWorldspace && ws4)
         {
-            if (BSStringLength(this->m_pCurrentWorldspace->FUN_00586440()) < 31 ||
-                BSStringLength(ws4->FUN_00586440()) < 31)
+            if (BSStringLength(this->m_pCurrentWorldspace->GetWorldMapTextureName()) < 31 ||
+                BSStringLength(ws4->GetWorldMapTextureName()) < 31)
             {
                 continue;
             }
-            if (_mbsnicmp(this->m_pCurrentWorldspace->FUN_00586440() + 29,
-                          ws4->FUN_00586440() + 29, 3) == 0)
+            if (_mbsnicmp(this->m_pCurrentWorldspace->GetWorldMapTextureName() + 29,
+                          ws4->GetWorldMapTextureName() + 29, 3) == 0)
             {
                 result5 = ws4;
                 break;

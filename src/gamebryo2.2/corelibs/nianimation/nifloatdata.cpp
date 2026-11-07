@@ -108,7 +108,7 @@ extern GlobalObjectO2_00a7b610* g_011f3748;
 
 void __stdcall AppendCameraPathEntries(StrArr* strings);
 char* __cdecl _FUN_00a7d330(GlobalObjectO2_00a7b610* object);
-char* __cdecl FUN_00a7d510(char const* name, unsigned int value);
+char* __cdecl NiGetViewerString_00a7d510(char const* name, unsigned int value);
 
 // @fnv 0x00a3d050
 void __fastcall GetFloatDataViewerStrings(NiFloatData* self, void*, StrArr* strings)
@@ -124,7 +124,7 @@ void __fastcall GetFloatDataViewerStrings(NiFloatData* self, void*, StrArr* stri
 
     strings->SetAt(index, value);
 
-    value = FUN_00a7d510("m_uiNumKeys", self->m_uiNumKeys);
+    value = NiGetViewerString_00a7d510("m_uiNumKeys", self->m_uiNumKeys);
     index = strings->m_usSize;
     capacity = strings->m_usMaxSize;
 
@@ -182,7 +182,7 @@ inline void NiRefObject::DecRef()
         DeleteThis();
 }
 
-extern void __cdecl FUN_00a3d630(int, int, TimedAnimationKey*, unsigned int, float, float, TimedAnimationKey**,
+extern void __cdecl NiAnimationKey_CopySequence(int, int, TimedAnimationKey*, unsigned int, float, float, TimedAnimationKey**,
                                  unsigned int*);
 
 // @fnv 0x00a3ce20
@@ -197,7 +197,7 @@ void __fastcall CloneFloatDataRange(NiFloatData* self, void*, float m_fStartTime
     {
         TimedAnimationKey* pKeys = 0;
         unsigned int uiNumKeys = 0;
-        FUN_00a3d630(0, (int)self->m_eRequestType, self->m_pKeyArray, self->m_uiNumKeys, m_fStartTime, m_fMaximumDistance, &pKeys,
+        NiAnimationKey_CopySequence(0, (int)self->m_eRequestType, self->m_pKeyArray, self->m_uiNumKeys, m_fStartTime, m_fMaximumDistance, &pKeys,
                      &uiNumKeys);
         pCur->SetColorKeys(pKeys, uiNumKeys, self->m_eRequestType);
     }

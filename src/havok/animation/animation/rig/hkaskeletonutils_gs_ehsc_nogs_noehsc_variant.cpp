@@ -55,15 +55,15 @@ struct FUN_00cdd3f0_s
     int* field_0x18;
     int field_0x1c;
 };
-void FUN_00cdd3f0(struct FUN_00cdd3f0_s* p);
-extern "C" void __cdecl FUN_00cddad0(int, int, int*, int, int);
+void hkaSkeletonUtils_unlockTranslations(struct FUN_00cdd3f0_s* p);
+extern "C" void __cdecl hkaSkeletonUtils_transformLocalPoseToWorldPose(int, int, int*, int, int);
 extern int DAT_01268700;
 void __cdecl CallWithGlobal(int a, int b, int c, int d);
-extern "C" void __cdecl FUN_00cddd20(void* a, void* b, void* c, void* d, void* e);
+extern "C" void __cdecl Object_ToLocal_Thunk(void* a, void* b, void* c, void* d, void* e);
 extern int DAT_01268700;
-void FUN_00cddef0(void* a, void* b, void* c, void* d);
+void hkaSkeletonUtils_transformModelPoseToLocalPose(void* a, void* b, void* c, void* d);
 extern "C" void __cdecl Atan2(float, float);
-void __cdecl FUN_00ce00f0(float a, float b);
+void __cdecl Hkaskeletonutils_ForwardCall_00ce00f0(float a, float b);
 int __cdecl CompareStringsCaseInsensitive(const void* pKey, const void* pItem);
 struct S_00cdd390_Entry
 {
@@ -186,9 +186,9 @@ struct ScanRec
 };
 struct ScanObj
 {
-    void FUN_00cde940(int a, int b, void* c);
+    void ForwardCall_00cde940(int a, int b, void* c);
 };
-HolderRec* FUN_00c85750();
+HolderRec* hkMemoryRouter_getInstance();
 unsigned char* WalkChainUntilLimit(unsigned char* pOut, ScanRec* rec, short limit, short start, ScanObj* obj);
 
 // ---------------------------------------------------------------------------
@@ -211,26 +211,28 @@ unsigned char* WalkChainUntilLimit(unsigned char* pOut, ScanRec* rec, short limi
 // 2008 add a /GS stack cookie that the original does not have.
 // ---------------------------------------------------------------------------
 
-void __cdecl FUN_00cde740(const hkQsTransform* a, const hkQsTransform* b, const hkVector4* t, hkQsTransform* out);
+void __cdecl hkQsTransform_UpdateFields_00cde740(const hkQsTransform* a, const hkQsTransform* b, const hkVector4* t, hkQsTransform* out);
 
 // @fnv 0x00cdd480
-void FUN_00cdd480(unsigned count, hkQsTransform* a, hkQsTransform* b, float* c, hkQsTransform* d)
+// src: GUESS 0x00cdd480 (confidence: low)
+void hkQsTransform_ProcessEntries_00cdd480(unsigned count, hkQsTransform* a, hkQsTransform* b, float* c, hkQsTransform* d)
 {
     for (unsigned i = 0; i < count; i++)
     {
         hkVector4 t;
         _mm_store_ps((float*)&t, _mm_load_ss(&c[i]));
-        FUN_00cde740(a + i, b + i, &t, d + i);
+        hkQsTransform_UpdateFields_00cde740(a + i, b + i, &t, d + i);
     }
 }
 
 // @fnv 0x00cdd4f0
-void __cdecl FUN_00cdd4f0(unsigned int n, char* a, char* b, float f, char* c)
+// src: GUESS 0x00cdd4f0 (confidence: low)
+void __cdecl hkVector4_ProcessEntries_00cdd4f0(unsigned int n, char* a, char* b, float f, char* c)
 {
     hkVector4 s;
     *(__m128*)&s = _mm_load_ss(&f);
     for (unsigned int i = 0; i < n; i++)
-        FUN_00cde740(reinterpret_cast<hkQsTransform*>(a + i * 48),
+        hkQsTransform_UpdateFields_00cde740(reinterpret_cast<hkQsTransform*>(a + i * 48),
                      reinterpret_cast<hkQsTransform*>(b + i * 48), &s,
                      reinterpret_cast<hkQsTransform*>(c + i * 48));
 }
@@ -281,12 +283,13 @@ __forceinline void hkQsTransform::SetProduct(const hkQsTransform& t1, const hkQs
     hkVector4 temp;
     temp.SetRotatedDirection(t1.m_rotation, t2.m_vTranslation);
     m_vTranslation.setAdd4(temp, t1.m_vTranslation);
-    m_rotation.FUN_00c66320(t1.m_rotation, t2.m_rotation);
+    m_rotation.setMul(t1.m_rotation, t2.m_rotation);
     m_vScale.setMul4(t1.m_vScale, t2.m_vScale);
 }
 
 // @fnv 0x00cddad0
-extern "C" void __cdecl FUN_00cddad0(int numTransforms, int parentIndicesIn, int* worldFromModelIn, int poseLocalIn,
+// src: COMMUNITY 0x00cddad0
+extern "C" void __cdecl hkaSkeletonUtils_transformLocalPoseToWorldPose(int numTransforms, int parentIndicesIn, int* worldFromModelIn, int poseLocalIn,
                                      int poseModelIn)
 {
     for (int i = 0; i < numTransforms; i++)
@@ -299,7 +302,8 @@ extern "C" void __cdecl FUN_00cddad0(int numTransforms, int parentIndicesIn, int
 }
 
 // @fnv 0x00cddbf0
-void __cdecl FUN_00cddbf0(int boneIndex, const short* parentIndices, const hkQsTransform* poseLocal,
+// src: GUESS 0x00cddbf0 (confidence: high)
+void __cdecl hkQsTransform_AccumulateBoneParentTransforms(int boneIndex, const short* parentIndices, const hkQsTransform* poseLocal,
                           hkQsTransform& poseModelOut)
 {
     poseModelOut = poseLocal[boneIndex];
@@ -310,7 +314,8 @@ void __cdecl FUN_00cddbf0(int boneIndex, const short* parentIndices, const hkQsT
 }
 
 // @fnv 0x00cddf20
-void __cdecl FUN_00cddf20(int numTransforms, const hkQsTransform& transform, const hkQsTransform* transformsIn,
+// src: GUESS 0x00cddf20 (confidence: low)
+void __cdecl hkQsTransform_ProcessEntries_00cddf20(int numTransforms, const hkQsTransform& transform, const hkQsTransform* transformsIn,
                           hkQsTransform* transformsOut)
 {
     for (int i = 0; i < numTransforms; i++)
@@ -402,7 +407,8 @@ __forceinline void hkQsTransform::SetMulInverse(const hkQsTransform& a, const hk
 }
 
 // @fnv 0x00cde010
-void __cdecl FUN_00cde010(int iCount, const hkQsTransform& kA, const hkQsTransform* pkB, hkQsTransform* pkOut)
+// src: GUESS 0x00cde010 (confidence: medium)
+void __cdecl hkQsTransform_SetTransformArrayMulInverse(int iCount, const hkQsTransform& kA, const hkQsTransform* pkB, hkQsTransform* pkOut)
 {
     for (int i = 0; i < iCount; i++)
         pkOut[i].SetMulInverse(kA, pkB[i]);
@@ -446,7 +452,8 @@ static __forceinline __m128 blend(__m128 a, __m128 b, const hkVector4* tp)
     return _mm_add_ps(_mm_mul_ps(omt, a), _mm_mul_ps(b, t));
 }
 // @fnv 0x00cde740
-void __cdecl FUN_00cde740(const hkQsTransform* a, const hkQsTransform* b, const hkVector4* tp, hkQsTransform* out)
+// src: GUESS 0x00cde740 (confidence: low)
+void __cdecl hkQsTransform_UpdateFields_00cde740(const hkQsTransform* a, const hkQsTransform* b, const hkVector4* tp, hkQsTransform* out)
 {
     st(out->m_vTranslation, blend(ld(a->m_vTranslation), ld(b->m_vTranslation), tp));
     float dot;
@@ -473,7 +480,7 @@ void __cdecl FUN_00cde740(const hkQsTransform* a, const hkQsTransform* b, const 
     }
     else
     {
-        out->m_rotation.FUN_005611c0();
+        out->m_rotation.normalize_005611c0();
     }
 }
 
@@ -516,7 +523,8 @@ static __forceinline __m128 rotate(__m128 a, __m128 b)
 }
 
 // @fnv 0x00cde2d0
-void __cdecl FUN_00cde2d0(SkinXformSet* set, const hkQsTransform* input, hkQsTransform* output)
+// src: GUESS 0x00cde2d0 (confidence: low)
+void __cdecl hkQsTransform_ProcessEntries_00cde2d0(SkinXformSet* set, const hkQsTransform* input, hkQsTransform* output)
 {
     int count = set->m_uiItemCount;
     for (int index = 0; index < count; ++index)

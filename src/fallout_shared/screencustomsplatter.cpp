@@ -18,7 +18,7 @@
 class PortalEntry
 {
   public:
-    void FUN_00c5dea0();
+    void BSMasterParticleSystem_ResetSystems();
 };
 class ScreenCustomSplatter
 {
@@ -51,7 +51,7 @@ class GraphicsRenderer
     unsigned int GetRenderTargetWidth();
     unsigned int GetRenderTargetHeight();
 };
-NiRenderer* FUN_0043c4b0();
+NiRenderer* NiXenonRenderer_GetRenderer();
 extern SettingT<INISettingCollection> DAT_011c77f4;
 extern NiPointer<NiNode> DAT_011c781c;
 extern SettingT_GameSettingCollection_ DAT_011cfc2c;
@@ -72,7 +72,7 @@ void __fastcall ClearPortalEntries(BSPortal* portal)
         slot = entry;
         value = slot;
         if (value)
-            value->FUN_00c5dea0();
+            value->BSMasterParticleSystem_ResetSystems();
     }
 }
 // @fnv 0x004defb0
@@ -80,7 +80,7 @@ void ScreenCustomSplatter::Clear()
 {
     if (DAT_011c77e8)
     {
-        DAT_011c7810->FUN_004def90();
+        DAT_011c7810->NiNode_RemoveAllChildren();
         DAT_011c77dc = 0;
         DAT_011c77ec = 0.0f;
         DAT_011c77e9 = 0;
@@ -98,10 +98,10 @@ void ScreenCustomSplatter::Init()
     DAT_011c77e8 = DAT_011c77f4.Bool()[0];
     if (DAT_011c77e8)
     {
-        GraphicsRenderer* renderer = reinterpret_cast<GraphicsRenderer*>(FUN_0043c4b0());
+        GraphicsRenderer* renderer = reinterpret_cast<GraphicsRenderer*>(NiXenonRenderer_GetRenderer());
         float fAspect = (float)renderer->GetRenderTargetWidth() / (float)renderer->GetRenderTargetHeight();
         reinterpret_cast<NiPointer<NiAVObject>&>(DAT_011c781c) = new NiCamera;
-        DAT_011c781c->FUN_00440460(NiPoint3(0.0f, 0.0f, DAT_01022960));
+        DAT_011c781c->NiAVObject_SetTranslate(NiPoint3(0.0f, 0.0f, DAT_01022960));
         NiUpdateData update1(0.0f, false, false);
         DAT_011c781c->Update(update1);
         reinterpret_cast<NiCamera*>(DAT_011c781c.operator->())->AimAt(NiPoint3::ZERO, DAT_011a9478);
@@ -139,7 +139,8 @@ void CreateCSDFadeNode()
 }
 
 // @fnv 0x004de890
-NiFixedString* FUN_004de890()
+// src: COMMUNITY 0x004de890
+NiFixedString* BSCustomSplatterExtraData_GetTag()
 {
     return DAT_011c77e4;
 }
@@ -147,7 +148,8 @@ NiFixedString* FUN_004de890()
 extern float DAT_011feda4;
 
 // @fnv 0x004de8a0
-void FUN_004de8a0(float value)
+// src: COMMUNITY 0x004de8a0
+void BSShaderBloodSplatter_SetFlareOffsetScale(float value)
 {
     DAT_011feda4 = value;
 }
@@ -155,7 +157,8 @@ void FUN_004de8a0(float value)
 extern float DAT_011ad874;
 
 // @fnv 0x004de8b0
-void FUN_004de8b0(float value)
+// src: COMMUNITY 0x004de8b0
+void BSShaderBloodSplatter_SetFlareMult(float value)
 {
     DAT_011ad874 = value;
 }
@@ -163,7 +166,8 @@ void FUN_004de8b0(float value)
 extern float DAT_011ad878;
 
 // @fnv 0x004de8c0
-void FUN_004de8c0(float f)
+// src: COMMUNITY 0x004de8c0
+void BSShaderBloodSplatter_SetGlobalAlpha(float f)
 {
     DAT_011ad878 = f;
 }
@@ -171,7 +175,8 @@ void FUN_004de8c0(float f)
 extern float DAT_011ad878;
 
 // @fnv 0x004de8d0
-float FUN_004de8d0()
+// src: COMMUNITY 0x004de8d0
+float BSShaderBloodSplatter_GetGlobalAlpha()
 {
     return DAT_011ad878;
 }
@@ -185,13 +190,14 @@ const NiRTTI* BSCustomSplatterExtraData::GetRTTI() const
 }
 
 // @fnv 0x004deb10
-void BSCustomSplatterExtraData::FUN_004deb10()
+// src: GUESS 0x004deb10 (confidence: low)
+void BSCustomSplatterExtraData::ForwardCall_004deb10()
 {
-    FUN_00a7b300();
+    DestroyFields_00a7b300();
 }
 
 // @fnv 0x004dea80
-BSCustomSplatterExtraData::BSCustomSplatterExtraData(SplatterWordsView* apSource) : NiExtraData(*FUN_004de890())
+BSCustomSplatterExtraData::BSCustomSplatterExtraData(SplatterWordsView* apSource) : NiExtraData(*BSCustomSplatterExtraData_GetTag())
 {
     q = *apSource;
 }
@@ -200,7 +206,7 @@ void __cdecl _delete(void*, unsigned int);
 // @fnv 0x004deae0
 void* BSCustomSplatterExtraData::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_004deb10();
+    ForwardCall_004deb10();
     if (flags & 1)
         _delete(this, 0x1c);
     return this;
@@ -220,11 +226,12 @@ struct TimeGlobal
 extern TimeGlobal DAT_011f6394;
 extern SettingT_GameSettingCollection_ DAT_011ceeb4, DAT_011cf6a8;
 float LinearInterpolate(float, float, float, float, float);
-float FUN_0040ebd0(float, float);
+float BSMIN(float, float);
 
 // Advances each splatter child's elapsed time, removes expired ones, updates opacity and NiUpdateData, then advances the fade value toward 1.
 // @fnv 0x004de600
-void FUN_004de600()
+// src: COMMUNITY 0x004de600
+void ScreenCustomSplatter_Update()
 {
     if (DAT_011c77e8)
     {
@@ -237,7 +244,7 @@ void FUN_004de600()
             if (child)
             {
                 BSCustomSplatterExtraData* extra = static_cast<BSCustomSplatterExtraData*>(
-                    child->FUN_00a5bdd0(*FUN_004de890()));
+                    child->FUN_00a5bdd0(*BSCustomSplatterExtraData_GetTag()));
                 OpacityFadeState* data = extra->GetOffsetC();
                 data->elapsed += elapsed;
                 if (data->elapsed >= data->duration)
@@ -263,14 +270,14 @@ void FUN_004de600()
                 }
             }
         }
-        FUN_004de8a0(DAT_011ceeb4.Float()->f);
-        FUN_004de8b0(DAT_011cf6a8.Float()->f);
-        float fade = FUN_004de8d0();
+        BSShaderBloodSplatter_SetFlareOffsetScale(DAT_011ceeb4.Float()->f);
+        BSShaderBloodSplatter_SetFlareMult(DAT_011cf6a8.Float()->f);
+        float fade = BSShaderBloodSplatter_GetGlobalAlpha();
         if (fade < 1.0)
         {
             fade += elapsed / 0.4;
-            fade = FUN_0040ebd0(1.0f, fade);
-            FUN_004de8c0(fade);
+            fade = BSMIN(1.0f, fade);
+            BSShaderBloodSplatter_SetGlobalAlpha(fade);
         }
     }
 }
@@ -355,10 +362,11 @@ extern NiPointer<SplatterRoot> g_spSplatterRoot;
 extern SettingT_GameSettingCollection_ g_fSplatterDefaultAlpha;
 
 SplatterGeometry* CreateDebrisNode(unsigned int ItemUpdateArray, float fSizeMin, float fSizeMax);
-void FUN_00b81420(SplatterGeometry* pGeom, void* pList);
+void BSShaderBloodSplatterProperty_SetFadeSourceRecurse(SplatterGeometry* pGeom, void* pList);
 
 // @fnv 0x004de8e0
-void FUN_004de8e0(unsigned int ItemUpdateArray, float fAlpha, int iUnused, float fSizeMin, float fSizeMax)
+// src: COMMUNITY 0x004de8e0
+void ScreenCustomSplatter_Activate(unsigned int ItemUpdateArray, float fAlpha, int iUnused, float fSizeMin, float fSizeMax)
 {
     if (DAT_011c77e8)
     {
@@ -383,7 +391,7 @@ void FUN_004de8e0(unsigned int ItemUpdateArray, float fAlpha, int iUnused, float
             pGeom->AddExtraData(pExtraData);
             pGeom->SetName(NiFixedString("ScreenSplatterRoot"));
             g_spSplatterRoot->AttachChildInAvailableSlot(pGeom, true);
-            FUN_00b81420(pGeom, pExtraData->GetList());
+            BSShaderBloodSplatterProperty_SetFadeSourceRecurse(pGeom, pExtraData->GetList());
             NiUpdateData kUpdate(0.0f, false, false);
             g_spSplatterRoot->Update(kUpdate);
         }

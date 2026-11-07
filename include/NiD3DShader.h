@@ -18,7 +18,7 @@ public:
     NiD3DShader& operator=(const NiD3DShader&);
     void* DestroyIfFlagged(unsigned int);
     void __thiscall FUN_00e806c0();
-    void __thiscall FUN_00e7c540();
+    void __thiscall UpdateFields_00e7c540();
     static unsigned int IsRendererActive();
     static void __cdecl InitializePoint3();
 

@@ -37,7 +37,7 @@ public:
 // @fnv 0x007a8a10
 MessageMenu_007a8a10::MessageMenu_007a8a10()
 {
-    FUN_004b7210()->ucMsgBoxButton = 255;
+    InterfaceManager_GetSingleton()->ucMsgBoxButton = 255;
     messageCount = 0;
 }
 
@@ -49,16 +49,17 @@ int CompanionWheelMenu::GetClass()
 
 struct FUN_00884480_shell
 {
-    bool __thiscall FUN_00884480(void);
+    bool __thiscall Actor_CanSpeak(void);
 };
 extern Actor* g_thePlayer;
 
 // @fnv 0x00754d90
-bool FUN_00754d90(Actor* apActor)
+// src: COMMUNITY 0x00754d90
+bool CompanionWheelMenu_GetShouldCompanionWheelOpen(Actor* apActor)
 {
     if (!apActor)
         return false;
-    if (!static_cast<FUN_00884480_shell*>(static_cast<void*>(apActor))->FUN_00884480())
+    if (!static_cast<FUN_00884480_shell*>(static_cast<void*>(apActor))->Actor_CanSpeak())
         return false;
     int tmp;
     if (apActor->IsHostileToActor(g_thePlayer, 0, &tmp, false))
@@ -67,7 +68,8 @@ bool FUN_00754d90(Actor* apActor)
 }
 
 // @fnv 0x00755260
-int __cdecl FUN_00755260()
+// src: COMMUNITY 0x00755260
+int __cdecl return_1075()
 {
     return 0x433;
 }
@@ -75,7 +77,8 @@ int __cdecl FUN_00755260()
 extern "C" float __cdecl LogFloat(float);
 
 // @fnv 0x00755660
-float FUN_00755660(float value)
+// src: XBOX_PDB 0x00755660
+float NiATan(float value)
 {
     return LogFloat(value);
 }
@@ -83,7 +86,8 @@ float FUN_00755660(float value)
 extern "C" void __cdecl CloseMenuAndRefresh(int);
 
 // @fnv 0x00756960
-void __fastcall FUN_00756960(CompanionWheelMenu* apMenu)
+// src: XBOX_PDB 0x00756960
+void __fastcall CompanionWheelMenu_Do_Talk(CompanionWheelMenu* apMenu)
 {
     apMenu->unk74 = 1;
     CloseMenuAndRefresh(1);
@@ -93,12 +97,13 @@ extern bool __cdecl _FUN_004b71d0();
 
 struct FUN_00755680_shell
 {
-    bool __thiscall FUN_00755680();
+    bool __thiscall InterfaceManager_GetMouseVisible();
 };
 
 // Returns true if _FUN_004b71d0 is false or the byte at offset 0x7d equals 1; otherwise returns false.
 // @fnv 0x00755680
-bool __thiscall FUN_00755680_shell::FUN_00755680()
+// src: XBOX_PDB 0x00755680
+bool __thiscall FUN_00755680_shell::InterfaceManager_GetMouseVisible()
 {
     if (!_FUN_004b71d0() || ((unsigned char*)this)[0x7d] == 1)
         return true;
@@ -134,7 +139,8 @@ struct FUN_008a7760_holder
     void __thiscall OpenDialogMenu();
 };
 // @fnv 0x00756930
-void CompanionWheelMenu::FUN_00756930()
+// src: XBOX_PDB 0x00756930
+void CompanionWheelMenu::Do_Backup()
 {
     if (companion)
         ((FUN_008a7760_holder*)companion)->OpenDialogMenu();
@@ -209,7 +215,7 @@ CompanionWheelMenu::~CompanionWheelMenu()
     DAT_011d92b8 = 0;
 }
 
-void __cdecl FUN_00717280(int);
+void __cdecl InterfaceManager_PlayMenuSound(int);
 
 // @fnv 0x007552e0
 void CompanionWheelMenu::HandleSelection(int aiID, Tile* apTarget)
@@ -223,53 +229,53 @@ void CompanionWheelMenu::HandleSelection(int aiID, Tile* apTarget)
     switch (aiID)
     {
     case 11:
-        FUN_00717280(1);
+        InterfaceManager_PlayMenuSound(1);
         CloseMenuAndRefresh(1);
         break;
 
     case 3:
-        FUN_00756960(this);
-        FUN_00717280(1);
+        CompanionWheelMenu_Do_Talk(this);
+        InterfaceManager_PlayMenuSound(1);
         break;
 
     case 2:
         ToggleFollowerWait();
         this->SelectTile(aiID, true);
-        FUN_00717280(1);
+        InterfaceManager_PlayMenuSound(1);
         break;
 
     case 4:
-        FUN_00756930();
-        FUN_00717280(1);
+        Do_Backup();
+        InterfaceManager_PlayMenuSound(1);
         break;
 
     case 0:
         this->ToggleAggressive();
         this->SelectTile(aiID, true);
-        FUN_00717280(1);
+        InterfaceManager_PlayMenuSound(1);
         break;
 
     case 1:
         this->HealCompanion();
         this->SelectTile(aiID, true);
-        FUN_00717280(1);
+        InterfaceManager_PlayMenuSound(1);
         break;
 
     case 7:
         ToggleRelatedTopic();
         this->SelectTile(aiID, true);
-        FUN_00717280(1);
+        InterfaceManager_PlayMenuSound(1);
         break;
 
     case 6:
-        this->FUN_007568d0();
-        FUN_00717280(1);
+        this->CompanionWheelMenu_Do_OpenInventory();
+        InterfaceManager_PlayMenuSound(1);
         break;
 
     case 5:
         ToggleFollowersTacticsDistance();
         this->SelectTile(aiID, true);
-        FUN_00717280(1);
+        InterfaceManager_PlayMenuSound(1);
         break;
     }
 }
@@ -312,7 +318,7 @@ void CompanionWheelMenu::ToggleRelatedTopic()
 }
 
 unsigned int __cdecl gm_GetTickCount(void);
-float __cdecl FUN_00755660(float value);
+float __cdecl NiATan(float value);
 int __cdecl _FUN_00ec7d40(int value);
 
 extern char $SG3295[];
@@ -351,12 +357,12 @@ void CompanionWheelMenu::UpdateDialog()
     _FUN_004b7210();
     if (_FUN_004b71d0())
     {
-        if (!((FUN_00755680_shell*)_FUN_004b7210())->FUN_00755680())
+        if (!((FUN_00755680_shell*)_FUN_004b7210())->InterfaceManager_GetMouseVisible())
         {
             _FUN_004b7210();
             if (_FUN_004b71d0())
             {
-                if (!((FUN_00755680_shell*)_FUN_004b7210())->FUN_00755680())
+                if (!((FUN_00755680_shell*)_FUN_004b7210())->InterfaceManager_GetMouseVisible())
                 {
                     if (_FUN_00ec7d40(DAT_011d8a5e) > 0x1EA9 || _FUN_00ec7d40(DAT_011d8a74) > 0x1EA9)
                     {
@@ -375,7 +381,7 @@ void CompanionWheelMenu::UpdateDialog()
 
         if (fInputVectorY != 0.0f)
         {
-            fInputAngle = FUN_00755660(-fInputVectorX / fInputVectorY);
+            fInputAngle = NiATan(-fInputVectorX / fInputVectorY);
         }
         else if (fInputVectorX > 0.0f)
         {
@@ -392,23 +398,23 @@ void CompanionWheelMenu::UpdateDialog()
         if (fInputVectorX < 0.0f && fInputVectorY < 0.0f)
             fInputAngle = fInputAngle + _DAT_0104eea0;
 
-        FUN_00755c50(fInputAngle);
+        SetButtonAsHighlighted(fInputAngle);
     }
 }
 
 struct MenuFactory
 {
-    Menu* FUN_00a03c90();
+    Menu* Tile_GetMenu();
 };
-MenuFactory* __cdecl FUN_00a09030(int id);
+MenuFactory* __cdecl Tile_GetMenuByClass(int id);
 int __cdecl OpenCompanionMenu(int value);
 
 // Looks up the menu factory for id 0x433, deletes its CompanionWheelMenu if present, then returns the result of OpenCompanionMenu(value).
 // @fnv 0x00754cf0
 bool __cdecl DestroyCompanionWheelMenu(int value)
 {
-    MenuFactory* factory = FUN_00a09030(0x433);
-    CompanionWheelMenu* menu = factory ? dynamic_cast<CompanionWheelMenu*>(factory->FUN_00a03c90()) : 0;
+    MenuFactory* factory = Tile_GetMenuByClass(0x433);
+    CompanionWheelMenu* menu = factory ? dynamic_cast<CompanionWheelMenu*>(factory->Tile_GetMenu()) : 0;
     if (menu)
         delete menu;
     if (OpenCompanionMenu(value))
@@ -424,29 +430,29 @@ extern const char DAT_01071dbc[];
 extern const char DAT_01011584[];
 struct ResourceProvider
 {
-    Tile* FUN_00586150();
+    Tile* CombatController_GetCombatState();
 };
 extern Setting DAT_011d3534, DAT_011d33fc, DAT_011d3ec8, DAT_011d27d8;
 extern CompanionWheelMenu* companionMenu;
 // 0x007b78a0 validates the loaded menu; shared CompanionWheelMenu has no declaration.
 bool __fastcall ValidateLoadedMenu(CompanionWheelMenu*);
-CompanionWheelMenu* FUN_00a09030(int);
-BSAudio* FUN_00453a70();
+CompanionWheelMenu* Tile_GetMenuByClass(int);
+BSAudio* BSAudio_QInstance();
 float __stdcall FUN_00a01530(bool);
-void FUN_005b5e40(const char*, ...);
+void Warning_005b5e40(const char*, ...);
 extern const char DAT_01071d58[];
 extern const char DAT_01025cc4[];
 extern const char DAT_01071db4[];
 // @fnv 0x00754de0
 Tile* OpenCompanionMenu(Actor* actor)
 {
-    ResourceProvider* a = (ResourceProvider*)FUN_004b7210();
-    CompanionWheelMenu* p = FUN_00a09030(FUN_00755260());
+    ResourceProvider* a = (ResourceProvider*)InterfaceManager_GetSingleton();
+    CompanionWheelMenu* p = Tile_GetMenuByClass(return_1075());
     if (p)
         delete p;
-    Tile* h = a->FUN_00586150()->ReadFile(DAT_01071dfc);
+    Tile* h = a->CombatController_GetCombatState()->ReadFile(DAT_01071dfc);
     companionMenu = (CompanionWheelMenu*)h->GetMenu();
-    if (companionMenu && companionMenu->GetClass() == FUN_00755260())
+    if (companionMenu && companionMenu->GetClass() == return_1075())
     {
         companionMenu->companion = actor;
         if (companionMenu->companion)
@@ -477,12 +483,12 @@ Tile* OpenCompanionMenu(Actor* actor)
         companionMenu->FUN_00a1dc70((TileMenu*)h, false);
         if (!ValidateLoadedMenu(companionMenu))
         {
-            FUN_005b5e40(DAT_01071d58);
+            Warning_005b5e40(DAT_01071d58);
             return 0;
         }
-        FUN_00453a70()->GetSoundHandleByEditorID(DAT_01025cc4, 0x121).Play(false);
+        BSAudio_QInstance()->GetSoundHandleByEditorID(DAT_01025cc4, 0x121).Play(false);
         if (h->FUN_00a011b0(0xfa7) == 6006.0 || h->FUN_00a011b0(0xfa7) == 102.0)
-            h->FUN_00a012d0(0xfad, FUN_00a01530(true));
+            h->Tile_Set(0xfad, FUN_00a01530(true));
         companionMenu->FUN_00a1dc20(false);
         return h;
     }
@@ -492,7 +498,7 @@ Tile* OpenCompanionMenu(Actor* actor)
 }
 }  // namespace fnv_00754de0
 
-extern "C" bool __cdecl FUN_00702450(int);
+extern "C" bool __cdecl Interface_IsTopMenuID(int);
 
 // If menu 0x433 is active, dispatches HandleSelection for input 9 (the selected tile, else tile 11) or 10 (tile 11)
 // and returns whether it dispatched.
@@ -500,7 +506,7 @@ extern "C" bool __cdecl FUN_00702450(int);
 bool CompanionWheelMenu::HandleMenuInput(int aiAction, float unused)
 {
     bool result = false;
-    if (!FUN_00702450(0x433))
+    if (!Interface_IsTopMenuID(0x433))
     {
         return result;
     }
@@ -530,19 +536,20 @@ struct WheelHost
     char unk00[0x28];
     int m_aiIndexedValues[16];
     void __thiscall SelectTile(int, bool);
-    void __thiscall FUN_00755760(int a, int b);
+    void __thiscall CompanionWheelMenu_DoEnter(int a, int b);
 };
 
-bool __cdecl FUN_00702450(int);
+bool __cdecl Interface_IsTopMenuID(int);
 
 // @fnv 0x00755760
-void __thiscall WheelHost::FUN_00755760(int aiSlot, int aiValue)
+// src: XBOX_PDB 0x00755760
+void __thiscall WheelHost::CompanionWheelMenu_DoEnter(int aiSlot, int aiValue)
 {
     if (aiValue == 0 && aiSlot >= 0 && aiSlot < 16)
     {
         aiValue = m_aiIndexedValues[aiSlot];
     }
-    if (FUN_00702450(0x433) == 0)
+    if (Interface_IsTopMenuID(0x433) == 0)
     {
     }
     else
@@ -579,11 +586,11 @@ struct ActorLevelInfo
 };
 struct DialoguePolicy
 {
-    bool FUN_00619df0();
+    bool TESTopic_IsRemappedRumors();
 };
 struct DialogueManager
 {
-    DialogueItem* FUN_0061b320(InteractionActor*, InteractionActor*, int, int, int);
+    DialogueItem* TESTopic_CreateDialogueItem(InteractionActor*, InteractionActor*, int, int, int);
 };
 DialogueManager* GetTopicSubTypeName(int, int);
 struct ActorPosition
@@ -1025,34 +1032,34 @@ struct InteractionActor
     unsigned int unk84;
     ActorExtraData extras;
     InteractionActor* FUN_008d8520();
-    bool FUN_00493bb0();
+    bool Actor_IsInCombat();
     bool FUN_00566950();
-    bool FUN_00608d80();
-    bool FUN_0087f3d0();
+    bool Actor_IsReanimated();
+    bool GetEssential();
     TESPackage* FUN_009344a0();
     bool FUN_004997b0();
-    bool FUN_008ace90();
+    bool GetGhost_008ace90();
     void StartDialog(DialogueManager*, int, int);
-    void FUN_008bb520(ActorPosition);
+    void Actor_RequestRotate(ActorPosition);
     bool FUN_008b3bb0();
-    bool FUN_008b3c30();
-    void FUN_008a8e50();
-    void FUN_008a7a90();
-    const char* FUN_0055d520();
+    bool Actor_IsRotating();
+    void Actor_StopAttack();
+    void Actor_ForceIdleAnimation();
+    const char* TESObjectREFR_GetFullName();
 };
 extern InteractionActor* interactionPlayer;
 struct DialogueDisplay
 {
-    void FUN_009c8950(int, int);
+    void QuitVATSPlayback(int, int);
 };
 extern DialogueDisplay dialogueDisplay;
-void FUN_00709470(int, InteractionActor*, unsigned int, int, int, int);
+void Interface_QueueMenuCreate(int, InteractionActor*, unsigned int, int, int, int);
 struct InputState
 {
     void FUN_00ad8780();
 };
-InputState* __stdcall FUN_00453a70(int);
-int FUN_00702640();
+InputState* __stdcall BSAudio_QInstance(int);
+int Interface_GetMenuModeType();
 struct MessageSetting
 {
     const char* FUN_00403df0();
@@ -1111,22 +1118,22 @@ void InteractionMenu::UpdateCompanionInteraction()
     TESPackage* targetPackageB = actor2->GetAssignedPackage();
     if (player2)
     {
-        if (aTarget->FUN_00493bb0() && player2 == interactionPlayer && aTarget->FUN_00566950())
+        if (aTarget->Actor_IsInCombat() && player2 == interactionPlayer && aTarget->FUN_00566950())
         {
-            dialogueDisplay.FUN_009c8950(0, 0);
-            FUN_00709470(4, aTarget, 0, 0, 1, 0);
+            dialogueDisplay.QuitVATSPlayback(0, 0);
+            Interface_QueueMenuCreate(4, aTarget, 0, 0, 1, 0);
             return;
         }
-        if (aTarget && (!aTarget->FUN_00493bb0() || aTarget->CanInteract()) &&
+        if (aTarget && (!aTarget->Actor_IsInCombat() || aTarget->CanInteract()) &&
             (player2 != interactionPlayer || !aTarget->GetState() || aTarget->GetState() == 9 ||
              aTarget->GetState() == 4 ||
              (aTarget->FUN_008d8520()->GetLevelInfo() && aTarget->FUN_008d8520()->GetLevelInfo()->level > 19)))
         {
-            if (aTarget->FUN_00608d80())
+            if (aTarget->Actor_IsReanimated())
                 return;
             if (!aTarget->IsUnavailable(0))
             {
-                if (player2 == interactionPlayer && aTarget->CanInteract() && aTarget->FUN_0087f3d0())
+                if (player2 == interactionPlayer && aTarget->CanInteract() && aTarget->GetEssential())
                 {
                     return;
                 }
@@ -1137,7 +1144,7 @@ void InteractionMenu::UpdateCompanionInteraction()
                 {
                     if (player2 == interactionPlayer &&
                         (aTarget->CanInteract() || (interactionPlayer->FUN_004997b0() && !aTarget->FUN_00566950())) &&
-                        !aTarget->FUN_008ace90())
+                        !aTarget->GetGhost_008ace90())
                     {
                     }
                     else
@@ -1149,12 +1156,12 @@ void InteractionMenu::UpdateCompanionInteraction()
                         if (manager)
                         {
                             if (player2 == interactionPlayer)
-                                item3 = manager->FUN_0061b320(aTarget, interactionPlayer, 0, 0, 0);
+                                item3 = manager->TESTopic_CreateDialogueItem(aTarget, interactionPlayer, 0, 0, 0);
                             else if (player2->FUN_008d8520()->CanDialogue())
-                                item3 = manager->FUN_0061b320(player2, interactionPlayer, 0, 0, 0);
+                                item3 = manager->TESTopic_CreateDialogueItem(player2, interactionPlayer, 0, 0, 0);
                         }
-                        if (item3 && item3->FUN_0084e3a0()->FUN_00619df0() && item3->FUN_0083c7b0() &&
-                            !item3->FUN_0083c7e0())
+                        if (item3 && item3->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->TESTopic_IsRemappedRumors() && item3->FUN_0083c7b0() &&
+                            !item3->NextResponse_0083c7e0())
                         {
                             if (aTarget->GetState() == 9)
                             {
@@ -1176,15 +1183,15 @@ void InteractionMenu::UpdateCompanionInteraction()
                                 aTarget->FUN_008d8520()->GetLevelInfo()->level > 19)
                                 aTarget->FUN_008d8520()->SetFlags(512);
                             if (!aTarget->GetState())
-                                aTarget->FUN_008bb520(*player2->GetPosition(0));
+                                aTarget->Actor_RequestRotate(*player2->GetPosition(0));
                             unsigned int topic = 0;
                             InteractionActor* participant = 0;
                             if (player2 == interactionPlayer)
                             {
-                                if (!aTarget->FUN_008b3bb0() && !aTarget->FUN_008b3c30())
+                                if (!aTarget->FUN_008b3bb0() && !aTarget->Actor_IsRotating())
                                     aTarget->FUN_008d8520()->Prepare(aTarget);
-                                player2->FUN_008a8e50();
-                                aTarget->FUN_008a8e50();
+                                player2->Actor_StopAttack();
+                                aTarget->Actor_StopAttack();
                                 DialoguePackage* package = dynamic_cast<DialoguePackage*>(player2->FUN_009344a0());
                                 if (package)
                                     topic = package->topic;
@@ -1192,21 +1199,21 @@ void InteractionMenu::UpdateCompanionInteraction()
                                 if (aTarget->GetRelated() == interactionPlayer && targetPackageB &&
                                     !targetPackageB->FUN_0041ca90())
                                 {
-                                    if (targetPackageB->FUN_0041d8a0() &&
-                                        !((PackageNode*)targetPackageB->FUN_0041d8a0())->FUN_00726070())
+                                    if (targetPackageB->TESPackage_GetPackageSchedule() &&
+                                        !((PackageNode*)targetPackageB->TESPackage_GetPackageSchedule())->FUN_00726070())
                                         actor2->SetPackage(player2, 2);
                                     else
                                         actor2->SetPackage(aTarget, 1);
                                 }
-                                FUN_00453a70(4)->FUN_00ad8780();
+                                BSAudio_QInstance(4)->FUN_00ad8780();
                                 aTarget->extras.FUN_00815b00();
                                 if (aTarget->GetState() != 9)
                                 {
                                     InteractionActor* speaker = player2;
                                     if (speaker == interactionPlayer)
                                         speaker = aTarget;
-                                    dialogueDisplay.FUN_009c8950(0, 0);
-                                    FUN_00709470(4, speaker, topic, 0, 1, 0);
+                                    dialogueDisplay.QuitVATSPlayback(0, 0);
+                                    Interface_QueueMenuCreate(4, speaker, topic, 0, 1, 0);
                                 }
                                 else
                                 {
@@ -1214,38 +1221,38 @@ void InteractionMenu::UpdateCompanionInteraction()
                                     aTarget->ResetDialogue();
                                 }
                             }
-                            else if (FUN_00702640() != 1009)
+                            else if (Interface_GetMenuModeType() != 1009)
                             {
                                 if (!interactionPlayer->FUN_008d8520()->AllowTarget(player2))
                                     return;
-                                FUN_00453a70(4)->FUN_00ad8780();
-                                player2->FUN_008a8e50();
-                                aTarget->FUN_008a8e50();
+                                BSAudio_QInstance(4)->FUN_00ad8780();
+                                player2->Actor_StopAttack();
+                                aTarget->Actor_StopAttack();
                                 participant = player2;
-                                if (!player2->FUN_00493bb0())
+                                if (!player2->Actor_IsInCombat())
                                 {
                                     DialoguePackage* package = dynamic_cast<DialoguePackage*>(player2->FUN_009344a0());
                                     if (package)
                                         topic = package->topic;
                                 }
-                                if (playerPackage8->FUN_0041d8a0() && !((PackageNode*)playerPackage8->FUN_0041d8a0())->FUN_00726070())
+                                if (playerPackage8->TESPackage_GetPackageSchedule() && !((PackageNode*)playerPackage8->TESPackage_GetPackageSchedule())->FUN_00726070())
                                     player2->FUN_008d8520()->SetPackage(player2, 2);
                                 else
                                     player2->FUN_008d8520()->SetPackage(player2, 1);
                                 aTarget->extras.FUN_00815b00();
                                 if (aTarget == interactionPlayer)
-                                    aTarget->FUN_008a7a90();
+                                    aTarget->Actor_ForceIdleAnimation();
                                 else
                                     aTarget->FUN_008d8520()->SetFlags(1024);
                                 if (player2 == interactionPlayer)
-                                    player2->FUN_008a7a90();
+                                    player2->Actor_ForceIdleAnimation();
                                 else
                                     player2->FUN_008d8520()->SetFlags(1024);
-                                dialogueDisplay.FUN_009c8950(0, 0);
+                                dialogueDisplay.QuitVATSPlayback(0, 0);
                                 InteractionActor* speaker = player2;
                                 if (speaker == interactionPlayer)
                                     speaker = aTarget;
-                                FUN_00709470(4, speaker, topic, 0, 1, 0);
+                                Interface_QueueMenuCreate(4, speaker, topic, 0, 1, 0);
                             }
                         }
                         delete item3;
@@ -1256,7 +1263,7 @@ void InteractionMenu::UpdateCompanionInteraction()
         else if (aTarget && aTarget->GetLock() && player2 == interactionPlayer && aTarget->GetLock()->FUN_0047c850())
         {
             char message[200];
-            sprintf(message, "%s %s", aTarget->FUN_0055d520(), lockedMessage.FUN_00403df0());
+            sprintf(message, "%s %s", aTarget->TESObjectREFR_GetFullName(), lockedMessage.FUN_00403df0());
             DispatchMessageToSink(message, 0, 0, 0, messageDuration, 0);
         }
     }
@@ -1548,9 +1555,9 @@ struct CStringArg_757690
     unsigned data;
     unsigned length;
     ~CStringArg_757690();
-    unsigned __thiscall FUN_004048e0();
-    int __thiscall FUN_00559450();
-    int __thiscall FUN_00559450(int);
+    unsigned __thiscall BSStringT_char_Length();
+    int __thiscall Modelloader_GetReferencedThis();
+    int __thiscall Modelloader_GetReferencedThis(int);
 };
 struct CInterface_757690
 {
@@ -1558,14 +1565,14 @@ struct CInterface_757690
 };
 struct CRandom_757690
 {
-    float* __thiscall FUN_00403e20();
+    float* __thiscall Setting_Float_00403e20();
 };
 extern CInterface_757690 DAT_011d8928;
 extern CRandom_757690 DAT_011d2178;
 extern double DAT_01012060;
 extern double DAT_01017b70;
 unsigned __cdecl FUN_00ec6130(int);
-unsigned __cdecl FUN_00457fe0();
+unsigned __cdecl Cmd_GetSessionTime_Execute();
 // The CompanionWheelMenu's text-and-timeout setter.
 struct CWheelMenu_757690
 {
@@ -1575,22 +1582,22 @@ struct CWheelMenu_757690
 void __thiscall CWheelMenu_757690::SetItemTextAndValue(CStringArg_757690 text, BSSoundHandle value)
 {
     float shift = 0.0f;
-    if (text.FUN_004048e0() > 0)
+    if (text.BSStringT_char_Length() > 0)
     {
         if (*DAT_011d8928.FUN_00408d60() || (reinterpret_cast<CompanionWheelMenu*>(this)->companion != 0 &&
-                                             reinterpret_cast<CompanionWheelMenu*>(this)->companion->FUN_008c1bc0()))
+                                             reinterpret_cast<CompanionWheelMenu*>(this)->companion->BSSoundHandle_BSSoundHandle_008c1bc0()))
         {
             if (reinterpret_cast<CompanionWheelMenu*>(this)->tiles[12])
             {
-                reinterpret_cast<CompanionWheelMenu*>(this)->tiles[12]->Set(0xfc4, (const char*)text.FUN_00559450(1));
+                reinterpret_cast<CompanionWheelMenu*>(this)->tiles[12]->Set(0xfc4, (const char*)text.Modelloader_GetReferencedThis(1));
             }
             shift = (float)value.GetDuration();
             if (shift == DAT_01012060)
             {
                 shift =
-                    (float)((double)FUN_00ec6130(text.FUN_00559450()) * (*DAT_011d2178.FUN_00403e20()) * DAT_01017b70);
+                    (float)((double)FUN_00ec6130(text.Modelloader_GetReferencedThis()) * (*DAT_011d2178.Setting_Float_00403e20()) * DAT_01017b70);
             }
-            reinterpret_cast<CompanionWheelMenu*>(this)->textClearTime = (unsigned)((double)FUN_00457fe0() + shift);
+            reinterpret_cast<CompanionWheelMenu*>(this)->textClearTime = (unsigned)((double)Cmd_GetSessionTime_Execute() + shift);
         }
     }
 }
@@ -1606,10 +1613,10 @@ struct ResultList
     ~ResultList();
     void FUN_00ad8e60(void (*)(unsigned int), unsigned int);
 };
-void FUN_005790f0(unsigned int);
+void TESObjectREFR_SayToCallBack(unsigned int);
 struct Sequence
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     void FUN_0083c7b0();
     int FUN_0083c820();
     void FUN_0083c850(int);
@@ -1617,7 +1624,7 @@ struct Sequence
 };
 struct Idle
 {
-    Sequence* FUN_0061b320(Reference*, int, int, int, int);
+    Sequence* TESTopic_CreateDialogueItem(Reference*, int, int, int, int);
 };
 struct Reference
 {
@@ -1880,13 +1887,13 @@ struct Reference
     virtual void v256();
     virtual void v257();
     virtual ResultList PlayActor(Idle*, Actor*, bool, bool, int, int);
-    void FUN_0057ad20(Idle*);
-    unsigned int FUN_0084e3a0();
-    void FUN_0057ace0(unsigned int);
+    void TESObjectREFR_SetSayToTopic(Idle*);
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    void TESObjectREFR_SetSayToTopicInfo(unsigned int);
     Reference* FUN_005e3fa0();
     void FUN_00484490();
-    void FUN_00575690(void*);
-    void FUN_00575830(void*);
+    void TESObjectREFR_SetObjectReference(void*);
+    void TESObjectREFR_SetLocationOnReference(void*);
 };
 struct Process
 {
@@ -2311,13 +2318,14 @@ extern Setting DAT_011cd378;
 extern const float DAT_01012054;
 extern const char DAT_011846d4, DAT_011841cc;
 Actor* FUN_00ec43fb(Reference*, int, const void*, const void*, int);
-void MarkBaseExtraListScriptEvent(Idle*, void*, int);
+void Script_SetActionFlag(Idle*, void*, int);
 int __fastcall GetActorKnockState(::Actor*);
-Reference* FUN_00564480(int, int);
-bool FUN_005accb0(void*, void*, void*, Reference*, void*, void*, void*, Idle**, int*, void**, int*, int*);
+Reference* TESObjectREFR_CreateReference(int, int);
+bool Script_ParseParameters(void*, void*, void*, Reference*, void*, void*, void*, Idle**, int*, void**, int*, int*);
 // Plays an idle animation on the source actor or reference, choosing the sequence and dispatching play events, then restores the previous setting value.
 // @fnv 0x005c8a50
-bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* containing, void* script, void* locals,
+// src: EXE 0x005c8a50
+bool Cmd_Say_Execute(void* paramInfo, void* scriptData, Reference* source, void* containing, void* script, void* locals,
                   double* result, void* offset)
 {
     *result = 0.0;
@@ -2326,7 +2334,7 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
     void* object4 = 0;
     int immediateA = 0;
     int _usePriority = 0;
-    if (!FUN_005accb0(paramInfo, scriptData, offset, source, containing, script, locals, &idleVal, &force, &object4,
+    if (!Script_ParseParameters(paramInfo, scriptData, offset, source, containing, script, locals, &idleVal, &force, &object4,
                       &immediateA, &_usePriority))
         return false;
     bool forceFlag4 = false;
@@ -2339,8 +2347,8 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
     if (_usePriority > 0)
         priorityFlag = true;
     Actor* actor = FUN_00ec43fb(source, 0, &DAT_011841cc, &DAT_011846d4, 0);
-    int previous = *DAT_011cd378.FUN_0043d4d0();
-    DAT_011cd378.FUN_0045ce80(0x7fffffff);
+    int previous = *DAT_011cd378.Setting_Int();
+    DAT_011cd378.ProcessAndReturnValue_0045ce80(0x7fffffff);
     if (idleVal)
     {
         if (actor)
@@ -2359,25 +2367,25 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
                 }
                 else if (immediateA)
                 {
-                    actor->FUN_0057ad20(idleVal);
-                    Sequence* chosen = idleVal->FUN_0061b320((Reference*)actor, 0, 0, 0, 0);
+                    actor->TESObjectREFR_SetSayToTopic(idleVal);
+                    Sequence* chosen = idleVal->TESTopic_CreateDialogueItem((Reference*)actor, 0, 0, 0, 0);
                     if (chosen)
-                        source->FUN_0057ace0(chosen->FUN_0084e3a0());
+                        source->TESObjectREFR_SetSayToTopicInfo(chosen->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                     ResultList events = actor->PlayActor(idleVal, actor, immediateFlag4, priorityFlag, 0, 0);
-                    events.FUN_00ad8e60(FUN_005790f0, source->FUN_0084e3a0());
+                    events.FUN_00ad8e60(TESObjectREFR_SayToCallBack, source->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                     return true;
                 }
                 if (DAT_011dea3c->FUN_0094df60() || ((Process*)actor->FUN_008d8520())->FUN_0045cd60() != 0 ||
-                    (actor->FUN_0087f3d0() && GetActorKnockState(actor) == 6))
+                    (actor->GetEssential() && GetActorKnockState(actor) == 6))
                 {
-                    Sequence* selected = idleVal->FUN_0061b320((Reference*)actor, 0, 0, 0, 1);
+                    Sequence* selected = idleVal->TESTopic_CreateDialogueItem((Reference*)actor, 0, 0, 0, 1);
                     if (selected)
                     {
                         selected->FUN_0083c7b0();
                         int unused = selected->FUN_0083c820();
                         selected->FUN_0083c850(0);
                         selected->FUN_0083c850(1);
-                        MarkBaseExtraListScriptEvent(idleVal, actor->FUN_005d43c0(), 0x40000);
+                        Script_SetActionFlag(idleVal, actor->BSFile_GetDevice(), 0x40000);
                         delete selected;
                     }
                 }
@@ -2386,35 +2394,35 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
             }
             else if (actor->FUN_008d8520())
             {
-                MarkBaseExtraListScriptEvent(idleVal, actor->FUN_005d43c0(), 0x40000);
+                Script_SetActionFlag(idleVal, actor->BSFile_GetDevice(), 0x40000);
                 ((Process*)actor->FUN_008d8520())->Clear(0);
             }
         }
         else if (source && object4)
         {
-            Reference* created = FUN_00564480(59, 0);
+            Reference* created = TESObjectREFR_CreateReference(59, 0);
             created->FUN_00484490();
-            created->FUN_00575690(object4);
-            created->FUN_00575830(source->GetParent());
-            source->FUN_0057ad20(idleVal);
-            Sequence* chosen2 = idleVal->FUN_0061b320(created, 0, 0, 0, 0);
+            created->TESObjectREFR_SetObjectReference(object4);
+            created->TESObjectREFR_SetLocationOnReference(source->GetParent());
+            source->TESObjectREFR_SetSayToTopic(idleVal);
+            Sequence* chosen2 = idleVal->TESTopic_CreateDialogueItem(created, 0, 0, 0, 0);
             if (chosen2)
-                source->FUN_0057ace0(chosen2->FUN_0084e3a0());
+                source->TESObjectREFR_SetSayToTopicInfo(chosen2->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
             ResultList events7 = created->Play(idleVal, created, immediateFlag4, priorityFlag, 0, 0, forceFlag4);
-            events7.FUN_00ad8e60(FUN_005790f0, source->FUN_0084e3a0());
+            events7.FUN_00ad8e60(TESObjectREFR_SayToCallBack, source->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
             delete created;
         }
         else if (source->GetNode() || (source->IsSpecial() && source->FUN_005e3fa0()->GetNode()))
         {
-            source->FUN_0057ad20(idleVal);
-            Sequence* chosen3 = idleVal->FUN_0061b320(source, 0, 0, 0, 0);
+            source->TESObjectREFR_SetSayToTopic(idleVal);
+            Sequence* chosen3 = idleVal->TESTopic_CreateDialogueItem(source, 0, 0, 0, 0);
             if (chosen3)
-                source->FUN_0057ace0(chosen3->FUN_0084e3a0());
+                source->TESObjectREFR_SetSayToTopicInfo(chosen3->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
             ResultList events3 = source->Play(idleVal, 0, immediateFlag4, priorityFlag, 0, 0, forceFlag4);
-            events3.FUN_00ad8e60(FUN_005790f0, source->FUN_0084e3a0());
+            events3.FUN_00ad8e60(TESObjectREFR_SayToCallBack, source->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
         }
     }
-    DAT_011cd378.FUN_0045ce80(previous);
+    DAT_011cd378.ProcessAndReturnValue_0045ce80(previous);
     return true;
 }
 }
@@ -2556,7 +2564,7 @@ struct HealingExtraList
 };
 struct HealingInventoryEntry
 {
-    HealingExtraList* FUN_00559450();
+    HealingExtraList* Modelloader_GetReferencedThis();
     TESBoundObject* FUN_0044ddc0();
     void* FUN_004459e0(unsigned int);
 };
@@ -2706,10 +2714,10 @@ struct HealingActorValues
 struct HealingActor : HealingActorBase, HealingActorValues
 {
     float GetHealthFraction();
-    HealingInventoryEntry* FUN_00576260(void*, int);
+    HealingInventoryEntry* TESObjectREFR_GetInventoryItem_00576260(void*, int);
     void EquipItemWithCaster(void*, HealingExtra*, int);
     void FUN_008c3c40(int, int);
-    void FUN_0088b740(int, float);
+    void Actor_RestoreActorValue(int, float);
 };
 extern HealingActor* DAT_011dea3c;
 extern char DAT_01183108, DAT_01183028, DAT_011830cc;
@@ -2718,7 +2726,7 @@ extern float DAT_01013974;
 TESForm* FUN_0058db10(int);
 void* FUN_00ec43fb(void*, int, void*, void*, int);
 float FUN_00646800(HealingActorValues*, int, int);
-void* FUN_008d5910(int);
+void* FollowerBarks_GetBarkTopicByType(int);
 struct CompanionHealingMenu
 {
     int unk00;
@@ -2759,7 +2767,7 @@ void CompanionHealingMenu::HealCompanion()
         TESBoundObject* item = dynamic_cast<TESBoundObject*>(FUN_0058db10(0));
         if (item)
         {
-            HealingInventoryEntry* entry = DAT_011dea3c->FUN_00576260(item, 0);
+            HealingInventoryEntry* entry = DAT_011dea3c->TESObjectREFR_GetInventoryItem_00576260(item, 0);
             if (entry)
             {
                 float healthX = companion->GetHealthFraction();
@@ -2787,19 +2795,19 @@ void CompanionHealingMenu::HealCompanion()
                     if (healthX < DAT_01012070)
                         companion->EquipItemWithCaster(
                             dynamic_cast<AlchemyItem*>(entry->FUN_0044ddc0()),
-                            entry->FUN_00559450() ? entry->FUN_00559450()->FUN_006815c0() : 0, 1);
+                            entry->Modelloader_GetReferencedThis() ? entry->Modelloader_GetReferencedThis()->FUN_006815c0() : 0, 1);
                     DAT_011dea3c->RemoveItem(entry->FUN_0044ddc0(),
-                                             entry->FUN_00559450() ? entry->FUN_00559450()->FUN_006815c0() : 0, 1, 0, 0,
+                                             entry->Modelloader_GetReferencedThis() ? entry->Modelloader_GetReferencedThis()->FUN_006815c0() : 0, 1, 0, 0,
                                              0, 0, 0, 1, 0);
                     companion->FUN_008c3c40(0, 1);
-                    companion->FUN_0088b740(31, DAT_01013974);
-                    companion->FUN_0088b740(29, DAT_01013974);
-                    companion->FUN_0088b740(30, DAT_01013974);
-                    companion->FUN_0088b740(27, DAT_01013974);
-                    companion->FUN_0088b740(28, DAT_01013974);
-                    companion->FUN_0088b740(26, DAT_01013974);
-                    companion->FUN_0088b740(25, DAT_01013974);
-                    void* topic = FUN_008d5910(13);
+                    companion->Actor_RestoreActorValue(31, DAT_01013974);
+                    companion->Actor_RestoreActorValue(29, DAT_01013974);
+                    companion->Actor_RestoreActorValue(30, DAT_01013974);
+                    companion->Actor_RestoreActorValue(27, DAT_01013974);
+                    companion->Actor_RestoreActorValue(28, DAT_01013974);
+                    companion->Actor_RestoreActorValue(26, DAT_01013974);
+                    companion->Actor_RestoreActorValue(25, DAT_01013974);
+                    void* topic = FollowerBarks_GetBarkTopicByType(13);
                     PlayTopicResponse(topic);
                 }
                 {
@@ -3114,10 +3122,10 @@ struct CompanionStatsPrimaryObject
 // Retained Actor query view: 0x008a0c20 reads ActorValueOwner at +0xa4; shared Actor lacks this method and the slot-239 pointer-return/int-argument signature.
 struct CompanionStatsActorQueries : CompanionStatsPrimaryObject, ActorValueOwner
 {
-    float FUN_008a0c20();
+    float Actor_GetMaxCarryWeight();
 };
 
-float __cdecl FUN_008a0cd0(ActorValueOwner* owner, int value);
+float __cdecl Actor_GetInventoryWeight(ActorValueOwner* owner, int value);
 
 struct InvEntry755d
 {
@@ -3154,12 +3162,13 @@ struct Wheel755d
     int unk60;
     int unk64;
     CompanionStatsActorQueries* actor;
-    void FUN_00755dc0(int mode);
+    void CompanionWheelMenu_SetButtonContextText(int mode);
 };
 
 // Builds a string for selected modes and writes it to the tile's 0xfc4 string field.
 // @fnv 0x00755dc0
-void Wheel755d::FUN_00755dc0(int mode)
+// src: XBOX_PDB 0x00755dc0
+void Wheel755d::CompanionWheelMenu_SetButtonContextText(int mode)
 {
     char rltxt[260];
     int b;
@@ -3185,7 +3194,7 @@ void Wheel755d::FUN_00755dc0(int mode)
                 rlObj = dynamic_cast<TESBoundObject*>(FUN_0058db10(0));
                 if (rlObj)
                 {
-                    _rlQ1 = (InvEntry755d*)DAT_011dea3c->FUN_00576260(rlObj, 0);
+                    _rlQ1 = (InvEntry755d*)DAT_011dea3c->TESObjectREFR_GetInventoryItem_00576260(rlObj, 0);
                     if (_rlQ1)
                     {
                         rlV = _rlQ1->FUN_00726070();
@@ -3211,8 +3220,8 @@ void Wheel755d::FUN_00755dc0(int mode)
         case 6:
             if (actor)
             {
-                rlA5 = (int)FUN_008a0cd0(actor, 0xd);
-                a2 = (int)actor->FUN_008a0c20();
+                rlA5 = (int)Actor_GetInventoryWeight(actor, 0xd);
+                a2 = (int)actor->Actor_GetMaxCarryWeight();
                 sprintf_s(rltxt, 260, "%s  %d/%d", DAT_011d1e60.String(), rlA5, a2);
             }
             break;
@@ -3224,7 +3233,7 @@ void Wheel755d::FUN_00755dc0(int mode)
     }
 }
 
-extern "C" BSAudio* __cdecl FUN_00453a70();
+extern "C" BSAudio* __cdecl BSAudio_QInstance();
 extern MessageSetting DAT_011d33fc;
 extern MessageSetting DAT_011d4288;
 extern MessageSetting DAT_011d2d90;
@@ -3259,7 +3268,7 @@ struct WheelSelection
     int selected;
     void SelectTile(int next, bool force);
     void SetTileText(const char*);
-    void FUN_00755dc0(int);
+    void CompanionWheelMenu_SetButtonContextText(int);
 };
 
 // Selects a tile in the wheel, updating highlight state, tile text, and playing a UI scroll sound.
@@ -3268,7 +3277,7 @@ void WheelSelection::SelectTile(int next, bool force)
 {
     if (!force && selected == next)
         return;
-    FUN_00453a70()->GetSoundHandleByEditorID("UIPipBoyScroll", 0x121).Play(false);
+    BSAudio_QInstance()->GetSoundHandleByEditorID("UIPipBoyScroll", 0x121).Play(false);
     if (selected != -1 && tiles[selected])
         tiles[selected]->Set(0x100e, 0);
     switch (selected)
@@ -3346,7 +3355,7 @@ void WheelSelection::SelectTile(int next, bool force)
         SetTileText($SG3295);
         break;
     }
-    FUN_00755dc0(selected);
+    CompanionWheelMenu_SetButtonContextText(selected);
 }
 
 // Toggles followerWait, plays the matching follower topic, and updates the tile set helper state.

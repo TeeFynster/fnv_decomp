@@ -8,7 +8,7 @@
 #include "../../include/SpellItem.h"
 #include "../../include/BGSSleepDeprevationStage.h"
 
-void FUN_00402550(BGSSleepDeprevationStage* stage);
+void BGSSleepDeprevationStage_AddStage(BGSSleepDeprevationStage* stage);
 
 class SleepStageDataOperations
 {

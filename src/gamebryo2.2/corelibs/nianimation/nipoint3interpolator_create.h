@@ -6,34 +6,34 @@ class StateNode
   public:
     void ResetCameraState();
 };
-void FUN_005293f0(ImageSpaceModifierInstanceDOF*);
+void ImageSpaceModifierInstance_Stop(ImageSpaceModifierInstanceDOF*);
 #include "../../../../include/SettingT_GameSettingCollection_.h"
 #include "../../../../include/OSGlobals.h"
 #include "../../../../include/ShadowSceneNode.h"
 extern SettingT_GameSettingCollection_ DAT_011ce424, DAT_011ce564, DAT_011ce6d8, DAT_011cf1f8;
-ImageSpaceModifierInstanceDOF* FUN_0052a440(float, float, float, float, float, NiPoint2*, float);
+ImageSpaceModifierInstanceDOF* ImageSpaceModifierInstanceRB_Trigger(float, float, float, float, float, NiPoint2*, float);
 class VATS
 {
   public:
-    class LightTarget* FUN_005d8710();
+    class LightTarget* VATS_GetVATSLight();
     void SetLight(NiPointLight*, bool);
     void SetCurrentTarget(class TESObjectREFR*);
 };
 class LightTarget
 {
   public:
-    class NiAVObject* FUN_004e6540();
+    class NiAVObject* ShadowSceneLight_GetLight();
 };
 class ShadowLightData* GetVATSEffect();
 class ShadowLightData
 {
   public:
-    void FUN_008009d0();
+    void FOVATSEffectManager_DisableScan();
 };
 class InputManager
 {
   public:
-    void FUN_00a25410();
+    void Controls_ClearUserAction();
 };
 class GlobalObject_009c6a30
 {
@@ -63,5 +63,5 @@ extern int DAT_011f21b8, DAT_011f21c0, DAT_011f21c4, DAT_011f21c8, DAT_011f21dc;
 extern bool DAT_011f21d0, DAT_011f21d2, DAT_011f21d3, DAT_011f21e4;
 extern float DAT_011f21d4, DAT_011f21d8;
 extern const float DAT_01016248;
-void FUN_009c7190(bool);
+void BSShaderManager_SetFullScreenMotionBlurVATS(bool);
 #endif

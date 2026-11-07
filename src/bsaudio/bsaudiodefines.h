@@ -193,7 +193,7 @@ T NiTPointerListBase<Allocator, T>::RemoveHead()
 SoundMessageRecord::~SoundMessageRecord()
 {
     if (pObject)
-        FUN_00c45830(pObject);
+        NiObjectGarbage_Add(pObject);
 }
 
 #endif

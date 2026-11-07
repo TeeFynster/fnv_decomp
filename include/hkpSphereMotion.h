@@ -21,12 +21,12 @@ public:
     virtual void vf5c(float fTimestep, const hkVector4& kForce);
     virtual void StepMotion(float fTimestep, const hkVector4& kTorque);
 
-    void FUN_00d1e1d0(int iOut);
-    void FUN_00d1e230(float* pOut);
-    void FUN_00d1e290(const hkMatrix3& kInertia);
+    void getInertiaLocal(int iOut);
+    void hkpSphereMotion_getInertiaWorld(float* pOut);
+    void setInertiaLocal(const hkMatrix3& kInertia);
     void SetInertiaAndMassInv(const float* pInverseInertia);
-    void FUN_00d1e390(hkMatrix3& kInertiaInvOut);
-    void FUN_00d1e3d0(hkMatrix3* pOut) const;
+    void GetDiagonalInverseInertia_00d1e3d0(hkMatrix3& kInertiaInvOut);
+    void GetDiagonalInverseInertia(hkMatrix3* pOut) const;
     void ApplyImpulse(const hkVector4& kImpulse, const hkVector4& kPosition);
     const hkVector4& AddAngularImpulse(const hkVector4& kImpulse);
     void ComputeVelocityAndInverseVirtualMass(const hkVector4& kPosition, const hkVector4& kNormal,

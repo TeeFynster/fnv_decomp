@@ -52,12 +52,12 @@ void AlchemyItem::InitItem()
     ((MagicItemObject*)this)->MagicItemObject::InitItem();
     ((BGSPickupPutdownSounds*)((char*)this + 0xAC))->InitItem((TESForm*)this);
 
-    unsigned int formID = (unsigned int)FUN_004030b0();
+    unsigned int formID = (unsigned int)CombatController_GetTarget();
     if (formID)
     {
         TESForm::RemapFormIDForFile(formID, ((TESForm*)this)->GetFile(-1));
         FUN_00874460(dynamic_cast<SpellItem*>(TESForm::GetFormByID(formID)));
-        if (!FUN_004030b0())
+        if (!CombatController_GetTarget())
         {
             Warning("MASTERFILE: Failed to find addiction item (%08X) for ingestible '%s' (%08X).", formID, GetName(),
                     ((TESForm*)this)->GetFormID());
@@ -91,18 +91,20 @@ void AlchemyItem::SetSound(TESSound* sound)
 }
 
 // @fnv 0x004030b0
-void* AlchemyItem::FUN_004030b0()
+// src: XBOX_PDB 0x004030b0
+void* AlchemyItem::CombatController_GetTarget()
 {
     return (void*)unk0C0;
 }
 
 struct FUN_004029d0_shell : public AlchemyItem
 {
-    bool FUN_004029d0(int);
+    bool AlchemyItem_IsFlagSet(int);
 };
 
 // @fnv 0x004029d0
-bool FUN_004029d0_shell::FUN_004029d0(int aiFlag)
+// src: XBOX_PDB 0x004029d0
+bool FUN_004029d0_shell::AlchemyItem_IsFlagSet(int aiFlag)
 {
     return (*((unsigned char*)this + 0xbc) & aiFlag) != 0;
 }
@@ -110,7 +112,8 @@ bool FUN_004029d0_shell::FUN_004029d0(int aiFlag)
 extern int DAT_01011d68;
 
 // @fnv 0x00402d30
-int* __fastcall FUN_00402d30(int* this_ptr)
+// src: EXE 0x00402d30
+int* __fastcall BaseFormComponent_BaseFormComponent(int* this_ptr)
 {
     *this_ptr = (int)&DAT_01011d68;
     return this_ptr;
@@ -130,14 +133,15 @@ MagicItemObject::MagicItemObject()
 namespace fnv_004029b0 {
 struct FUN_004029d0_shell
 {
-    bool FUN_004029d0(int);
-    bool FUN_004029b0();
+    bool AlchemyItem_IsFlagSet(int);
+    bool AlchemyItem_IsAutoCalc();
 };
 
 // @fnv 0x004029b0
-bool FUN_004029d0_shell::FUN_004029b0()
+// src: COMMUNITY 0x004029b0
+bool FUN_004029d0_shell::AlchemyItem_IsAutoCalc()
 {
-    return !FUN_004029d0(1);
+    return !AlchemyItem_IsFlagSet(1);
 }
 }  // namespace fnv_004029b0
 
@@ -181,36 +185,38 @@ void __thiscall FUN_00403720_shell::SwapEndian()
 namespace fnv_00402a90 {
 struct FUN_004029d0_shell
 {
-    bool FUN_004029d0(int);
+    bool AlchemyItem_IsFlagSet(int);
 };
 
 struct FUN_00402a90_shell
 {
-    bool FUN_00402a90();
+    bool AlchemyItem_IsFood();
 };
 // Returns true when the object at this-0x3c passes FUN_004029d0(2) and this object's FUN_00405da0 returns false.
 // @fnv 0x00402a90
-bool FUN_00402a90_shell::FUN_00402a90()
+// src: COMMUNITY 0x00402a90
+bool FUN_00402a90_shell::AlchemyItem_IsFood()
 {
-    return ((FUN_004029d0_shell*)((char*)this - 0x3c))->FUN_004029d0(2) && !((EffectItemList*)this)->HasDetrimentalEffect();
+    return ((FUN_004029d0_shell*)((char*)this - 0x3c))->AlchemyItem_IsFlagSet(2) && !((EffectItemList*)this)->HasDetrimentalEffect();
 }
 }  // namespace fnv_00402a90
 
 namespace fnv_00402ae0 {
 struct FUN_004029d0_shell
 {
-    bool FUN_004029d0(int);
+    bool AlchemyItem_IsFlagSet(int);
 };
 
 struct FUN_00402ae0_shell
 {
-    bool FUN_00402ae0();
+    bool AlchemyItem_IsMedicine();
 };
 
 // @fnv 0x00402ae0
-bool FUN_00402ae0_shell::FUN_00402ae0()
+// src: COMMUNITY 0x00402ae0
+bool FUN_00402ae0_shell::AlchemyItem_IsMedicine()
 {
-    return ((FUN_004029d0_shell*)((char*)this - 0x3c))->FUN_004029d0(4);
+    return ((FUN_004029d0_shell*)((char*)this - 0x3c))->AlchemyItem_IsFlagSet(4);
 }
 }  // namespace fnv_00402ae0
 
@@ -243,7 +249,7 @@ struct S_0048a520
 };
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
 struct FUN_0047a240_shell
 {
@@ -259,29 +265,30 @@ struct FUN_0047b560_holder
 };
 struct FUN_00479350_shell
 {
-    void FUN_00479350(void);
+    void BGSEquipType_Save(void);
 };
 struct FUN_00485e00_shell
 {
-    void FUN_00485e00(void);
+    void TESForm_SaveData(void);
 };
 
 struct FUN_00402f10_shell
 {
-    void FUN_00402f10();
+    void AlchemyItem_SaveMagicItemComponents();
 };
 
 // @fnv 0x00402f10
-void FUN_00402f10_shell::FUN_00402f10()
+// src: XBOX_PDB 0x00402f10
+void FUN_00402f10_shell::AlchemyItem_SaveMagicItemComponents()
 {
     ((S_0048a520*)((char*)this + 0x1c))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    ((FUN_0048e370_obj*)((char*)this + 0x3c))->FUN_0048e370(0x4e4f4349);
+    ((FUN_0048e370_obj*)((char*)this + 0x3c))->TESTexture_Save(0x4e4f4349);
     ((FUN_0047a240_shell*)((char*)this + 0x48))->FUN_0047a240(0x4f43494d);
-    ((TESScriptableForm*)((char*)this + 0x58))->FUN_0048cca0();
+    ((TESScriptableForm*)((char*)this + 0x58))->Save_0048cca0();
     ((S_00477f20*)((char*)this + 0x74))->FUN_00477f20();
     ((FUN_0047b560_holder*)((char*)this + 0x7c))->LogFormIDs();
-    ((FUN_00479350_shell*)((char*)this + 0x6c))->FUN_00479350();
-    ((FUN_00485e00_shell*)((char*)this - 0x30))->FUN_00485e00();
+    ((FUN_00479350_shell*)((char*)this + 0x6c))->BGSEquipType_Save();
+    ((FUN_00485e00_shell*)((char*)this - 0x30))->TESForm_SaveData();
 }
 
 namespace fnv_00403790 {
@@ -307,11 +314,12 @@ extern TESObjectSTAT* DAT_011ca23c;
 struct H0050fb90
 {
     int _FNV_GetFormType();
-    bool FUN_0050fb90();
+    bool TESObject_IsOcclusionMarker();
 };
 // Returns true if this object's form type is 0x20 and it matches one of the three TESObjectSTAT globals; otherwise false.
 // @fnv 0x0050fb90
-bool H0050fb90::FUN_0050fb90()
+// src: XBOX_PDB 0x0050fb90
+bool H0050fb90::TESObject_IsOcclusionMarker()
 {
     if (!this)
         return false;
@@ -326,7 +334,7 @@ extern "C" void* __cdecl _alloca(unsigned int);
 
 struct AlchBase30
 {
-    virtual void FUN_00403280(TESFile*, int);
+    virtual void AlchemyItem_LoadMagicItemChunk(TESFile*, int);
     char pad[0x18];
 };
 struct AlchTexSwap
@@ -371,7 +379,7 @@ struct AlchPickup
 void __cdecl FUN_004892d0(AlchTexSwap*, TESFile*);
 void __cdecl FUN_0048e3d0(AlchTexture*, TESFile*);
 void __cdecl FUN_0047a290(AlchMsgIcon*, TESFile*);
-void __cdecl FUN_004781e0(AlchDestr*, TESFile*);
+void __cdecl BGSDestructibleObjectForm_LoadChunk(AlchDestr*, TESFile*);
 struct FUN_00403280_t : TESBoundObject,
                         AlchBase30,
                         AlchTexSwap,
@@ -383,12 +391,13 @@ struct FUN_00403280_t : TESBoundObject,
                         AlchDestr,
                         AlchPickup
 {
-    void FUN_00403280(TESFile* apFile, int aiChunk);
+    void AlchemyItem_LoadMagicItemChunk(TESFile* apFile, int aiChunk);
 };
 
 // Dispatches on the chunk type and loads the matching subrecord (model, icon, script, equipment, pickup, destruction or data) from the file.
 // @fnv 0x00403280
-void FUN_00403280_t::FUN_00403280(TESFile* apFile, int aiChunk)
+// src: COMMUNITY 0x00403280
+void FUN_00403280_t::AlchemyItem_LoadMagicItemChunk(TESFile* apFile, int aiChunk)
 {
     switch (aiChunk)
     {
@@ -420,7 +429,7 @@ void FUN_00403280_t::FUN_00403280(TESFile* apFile, int aiChunk)
     }
     case 0x54534544:
     case 0x44545344:
-        FUN_004781e0(this, apFile);
+        BGSDestructibleObjectForm_LoadChunk(this, apFile);
         break;
     case 0x50595445: {
         unsigned int formID = 0;
@@ -644,7 +653,7 @@ struct AlchData
     void SwapEndian();
 };
 void AppendChunk(unsigned int, void*, unsigned int);
-bool FUN_00401500();
+bool TESForm_QEndianSwapOnSave();
 
 struct AlchSaveBase
 {
@@ -658,7 +667,7 @@ struct AlchSaveBase
     virtual void s1C();
     virtual void s20();
     virtual unsigned int s24();
-    virtual void FUN_00402f90();
+    virtual void AlchemyItem_Endian();
 };
 struct AlchemySave : TESBoundObject, AlchSaveBase
 {
@@ -697,24 +706,25 @@ struct AlchemySave : TESBoundObject, AlchSaveBase
     int unkB4;
     AlchData data;
 
-    FormStub* FUN_004030b0();
+    FormStub* CombatController_GetTarget();
     void SetSound(FormStub* sound);
     FormStub* GetFieldC8();
     void FUN_00874460(FormStub* item);
-    virtual void FUN_00402f90();
+    virtual void AlchemyItem_Endian();
 };
 
 // @fnv 0x00402f90
-void AlchemySave::FUN_00402f90()
+// src: COMMUNITY 0x00402f90
+void AlchemySave::AlchemyItem_Endian()
 {
-    FormStub* oldItem = FUN_004030b0();
-    FUN_00874460(FUN_004030b0() ? (FormStub*)FUN_004030b0()->GetFormIDStub() : 0);
+    FormStub* oldItem = CombatController_GetTarget();
+    FUN_00874460(CombatController_GetTarget() ? (FormStub*)CombatController_GetTarget()->GetFormIDStub() : 0);
     FormStub* pOldSound = GetFieldC8();
     SetSound(GetFieldC8() ? (FormStub*)GetFieldC8()->GetFormIDStub() : 0);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         data.SwapEndian();
     AppendChunk(s24(), &data, 0x14);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         data.SwapEndian();
     FUN_00874460(oldItem);
     SetSound(pOldSound);
@@ -743,11 +753,12 @@ struct FUN_00403590_sub
 class FUN_00403590_cls
 {
   public:
-    bool FUN_00403590(int aParam);
+    bool AlchemyItem_CompareMagicItemData(int aParam);
 };
 
 // @fnv 0x00403590
-bool FUN_00403590_cls::FUN_00403590(int aParam)
+// src: XBOX_PDB 0x00403590
+bool FUN_00403590_cls::AlchemyItem_CompareMagicItemData(int aParam)
 {
     char* pObject = (char*)FUN_00ec43fb(aParam, 0, &DAT_01183140, &DAT_011830cc, 0);
     if (pObject == 0)

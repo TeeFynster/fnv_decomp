@@ -210,17 +210,18 @@ struct SpawnedObject
 
 SpawnedObject* __fastcall FUN_00822b40(int p);
 float __fastcall GetFloatAtOffset1C(void* self);
-unsigned short __fastcall FUN_0087f9f0(SpawnedObject* obj);
-bool __cdecl FUN_006494d0(unsigned short a, float b);
+unsigned short __fastcall GetLevel_0087f9f0(SpawnedObject* obj);
+bool __cdecl MagicFormulas_CheckTargetLevelMagnitude(unsigned short a, float b);
 
 struct FUN_0080b450_cls
 {
-    bool FUN_0080b450(int p);
+    bool CommandCreatureEffect_CheckTarget(int p);
     int unk0;
 };
 
 // @fnv 0x0080b450
-bool FUN_0080b450_cls::FUN_0080b450(int p)
+// src: XBOX_PDB 0x0080b450
+bool FUN_0080b450_cls::CommandCreatureEffect_CheckTarget(int p)
 {
     SpawnedObject* a = p != 0 ? FUN_00822b40(p) : 0;
     SpawnedObject* b = (a != 0 && a->vf87()) ? a : 0;
@@ -228,5 +229,5 @@ bool FUN_0080b450_cls::FUN_0080b450(int p)
     {
         return false;
     }
-    return FUN_006494d0(FUN_0087f9f0(b), GetFloatAtOffset1C(this));
+    return MagicFormulas_CheckTargetLevelMagnitude(GetLevel_0087f9f0(b), GetFloatAtOffset1C(this));
 }

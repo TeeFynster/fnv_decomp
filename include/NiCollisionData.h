@@ -22,7 +22,7 @@ class NiCollisionData : public NiCollisionObject
     virtual void AddViewerStrings(NiViewerStringsArray* apStrings);
     virtual void SetSceneObject(NiAVObject*);
     virtual void Unk_24(NiUpdateData&);
-    virtual NiPoint3 FUN_00eacd30();
+    virtual NiPoint3 GetVelocity();
 
     void SetBoundingVolume(NiBoundingVolume* pkBV);
     void CreateTriData(int);
@@ -30,13 +30,13 @@ class NiCollisionData : public NiCollisionObject
     void* DestroyIfFlagged(unsigned int);
     void VirtAt64(StrArr*);
     void FUN_00a81100(StrArr*);
-    void FUN_00aa1000(NiCollisionData*, CloningProcess&);
-    void FUN_00eacde0();
-    void FUN_00ead1e0();
-    void FUN_00ead250();
-    void FUN_00ead330(NiAVObject* pkSceneObject);
+    void NiCollisionObject_CopyMembers(NiCollisionData*, CloningProcess&);
+    void UpdateFields_00eacde0();
+    void CreateWorldVertices();
+    void UpdateWorldVertices();
+    void SetSceneGraphObject(NiAVObject* pkSceneObject);
     void FUN_00ead760(NiStream&);
-    void FUN_00ead870(StrArr*);
+    void GetViewerStrings_00ead870(StrArr*);
 
     NiPoint3 m_kLocalVelocity;
     NiPoint3 m_kWorldVelocity;

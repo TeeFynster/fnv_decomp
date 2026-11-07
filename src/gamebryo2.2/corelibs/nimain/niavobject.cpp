@@ -58,7 +58,8 @@ void __thiscall NiAVObject::UpdateControllers(NiUpdateData& data)
 extern char const* const g_011f4428_arg1;
 
 // @fnv 0x00a5a420
-char const* const* __cdecl FUN_00a5a420()
+// src: COMMUNITY 0x00a5a420
+char const* const* __cdecl NiAVObject_GetRTTI()
 {
     return &g_011f4428_arg1;
 }
@@ -66,7 +67,8 @@ char const* const* __cdecl FUN_00a5a420()
 extern const void* DAT_011f9140;
 
 // @fnv 0x00b4e1d0
-const void* __cdecl FUN_00b4e1d0()
+// src: XBOX_PDB 0x00b4e1d0
+const void* __cdecl BSFadeNode_GetRTTI()
 {
     return &DAT_011f9140;
 }
@@ -220,14 +222,14 @@ bool __thiscall NiAVObject::GetHasPropertyController() const
     return false;
 }
 
-void __fastcall FUN_00a5a390(void*);
+void __fastcall ReleaseStorage_00a5a390(void*);
 void __cdecl _delete(void*, unsigned int);
 
 // Calls FUN_00a5a390 on this, frees this with _delete when bit 0 of a1 is set, and returns this.
 // @fnv 0x00a5aa90
 void* __fastcall DeleteAVObject(NiAVObject* object, void*, unsigned int auiFlags)
 {
-    FUN_00a5a390(object);
+    ReleaseStorage_00a5a390(object);
     if (auiFlags & 1)
         _delete(object, 0x9c);
     return object;
@@ -252,7 +254,8 @@ namespace fnv_00a59e20 { extern int EmptyFS; }
 using fnv_00a59e20::EmptyFS;
 
 // @fnv 0x00a59e20
-int NiAVObject::FUN_00a59e20(int param)
+// src: GAMEBRYO_LIB 0x00a59e20
+int NiAVObject::GetObjectByName_00a59e20(int param)
 {
     int handle = *reinterpret_cast<int*>(param);
     if (handle == EmptyFS)
@@ -419,7 +422,8 @@ inline ItemBase* const& GetNext(NiTListItem<ItemBase*>*& pos)
 }
 
 // @fnv 0x00a59e70
-void __stdcall FUN_00a59e70(ListOwner* owner, Holder* holder)
+// src: XBOX_PDB 0x00a59e70
+void __stdcall NiAVObject_ProcessPropertyClones(ListOwner* owner, Holder* holder)
 {
     NiTListItem<ItemBase*>* node = owner->m_04;
     while (node != 0)
@@ -629,11 +633,12 @@ struct FUN_00a71b70_cls
 {
     char _pad_00[0x18];
     unsigned char m_18;
-    FUN_00a71b70_cls* FUN_00a71b70(unsigned char v);
+    FUN_00a71b70_cls* SetField18(unsigned char v);
 };
 
 // @fnv 0x00a71b70
-FUN_00a71b70_cls* FUN_00a71b70_cls::FUN_00a71b70(unsigned char v)
+// src: GUESS 0x00a71b70 (confidence: low)
+FUN_00a71b70_cls* FUN_00a71b70_cls::SetField18(unsigned char v)
 {
     m_18 = v;
     return this;
@@ -736,14 +741,14 @@ FUN_00b4e150::FUN_00b4e150() : B4E150SortAdjustNode(0)
 
 struct FUN_0040fbf0_shell
 {
-    void FUN_0040fbf0(char* name);
+    void BSSpinLock_Lock(char* name);
 };
 
 struct FUN_00a5e3a0_Helper
 {
-    void FUN_00a5e3a0(NiPropertyState*& ps);
+    void NiNode_UpdatePropertiesUpward(NiPropertyState*& ps);
     NiPropertyState* FUN_00a89ab0();
-    void* FUN_00aa3e40(unsigned int size);
+    void* Game_DoHeapAlloc(unsigned int size);
 };
 
 extern unsigned int DAT_011f42a0;
@@ -751,17 +756,18 @@ extern unsigned int DAT_011f42a4;
 extern unsigned int DAT_011f6238;
 
 // @fnv 0x00a5a040
-void NiAVObject::FUN_00a5a040()
+// src: XBOX_PDB 0x00a5a040
+void NiAVObject::UpdateProperties()
 {
     NiPropertyState* ps = 0;
-    ((FUN_0040fbf0_shell*)&DAT_011f42a0)->FUN_0040fbf0(0);
+    ((FUN_0040fbf0_shell*)&DAT_011f42a0)->BSSpinLock_Lock(0);
     if (reinterpret_cast<FUN_00a5e3a0_Helper*>(m_pkParent) != 0)
     {
-        reinterpret_cast<FUN_00a5e3a0_Helper*>(m_pkParent)->FUN_00a5e3a0(ps);
+        reinterpret_cast<FUN_00a5e3a0_Helper*>(m_pkParent)->NiNode_UpdatePropertiesUpward(ps);
     }
     else
     {
-        void* pAlloc = ((FUN_00a5e3a0_Helper*)&DAT_011f6238)->FUN_00aa3e40(28);
+        void* pAlloc = ((FUN_00a5e3a0_Helper*)&DAT_011f6238)->Game_DoHeapAlloc(28);
         if (pAlloc != 0)
         {
             ps = ((FUN_00a5e3a0_Helper*)pAlloc)->FUN_00a89ab0();
@@ -845,7 +851,7 @@ struct LoadedPtr
 struct LoadedArray
 {
     void FUN_00a5a310(const LoadedPtr&) throw();
-    void FUN_00439fd0(const LoadedPtr&) throw();
+    void NiAVObject_AttachProperty_00439fd0(const LoadedPtr&) throw();
 };
 
 // Reads a child count from the stream and loads each child into children, then loads the controller for newer versions.
@@ -873,7 +879,7 @@ void __fastcall LinkAVObject(NiAVObject* object, void*, NiStream* stream)
             count--;
             LoadedRef* raw = reinterpret_cast<LoadedRef*>(stream->GetLoadedObject());
             LoadedPtr child = raw;
-            reinterpret_cast<LoadedArray*>(&object->m_kPropertyList)->FUN_00439fd0(child);
+            reinterpret_cast<LoadedArray*>(&object->m_kPropertyList)->NiAVObject_AttachProperty_00439fd0(child);
             if (raw && !InterlockedDecrement(&raw->count))
                 raw->DeleteThis();
         }
@@ -916,7 +922,7 @@ struct SerializedField
     unsigned int state18;
     unsigned int state1C;
     unsigned int state20;
-    unsigned int FUN_00a59af0(const char* name);
+    unsigned int GetViewerString_00a59af0(const char* name);
     unsigned int ToString(const char* name);
 };
 struct SmallField
@@ -924,7 +930,7 @@ struct SmallField
     unsigned int state0;
     unsigned int state4;
     unsigned int state8;
-    unsigned int FUN_00a59af0(const char* name);
+    unsigned int GetViewerString_00a59af0(const char* name);
     unsigned int ToString(const char* name);
 };
 struct IndexedElement
@@ -939,14 +945,14 @@ inline IndexedElement* const& GetNextIndexed(NiTListItem<IndexedElement*>*& pos)
     pos = pos->m_pkNext;
     return element;
 }
-void __stdcall FUN_00a5ca80(Stream* stream);
-unsigned int __cdecl FUN_00a7d330(unsigned int source);
-unsigned int __cdecl FUN_00a7d370(const char* name, unsigned int value);
-unsigned int __cdecl FUN_00a7d550(const char* name, float value);
-unsigned int __cdecl FUN_00a7d5a0(unsigned int value, IndexedElement* element);
+void __stdcall NiObjectNET_GetViewerStrings(Stream* stream);
+unsigned int __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int source);
+unsigned int __cdecl NiGetViewerString(const char* name, unsigned int value);
+unsigned int __cdecl NiGetViewerString_00a7d550(const char* name, float value);
+unsigned int __cdecl NiGetViewerString_00a7d5a0(unsigned int value, IndexedElement* element);
 struct TextSource
 {
-    unsigned int FUN_00a7fb20(const char* name);
+    unsigned int GetViewerString_00a7fb20(const char* name);
 };
 extern unsigned int DAT_011f4280;
 extern char DAT_011f4288;
@@ -957,15 +963,15 @@ extern char DAT_0109b138, DAT_0109b124, DAT_0109b118, DAT_0109b10c;
 // @fnv 0x00a5ad00
 void __fastcall GetAVViewerStrings(NiAVObject* object, void*, Stream* stream)
 {
-    FUN_00a5ca80(stream);
-    stream->Add(FUN_00a7d330(DAT_011f4280));
+    NiObjectNET_GetViewerStrings(stream);
+    stream->Add(NiViewerStrings_NiGetViewerString_Title(DAT_011f4280));
     union FlagWord
     {
         unsigned int word;
         unsigned char byte;
     } firstFlag;
     firstFlag.byte = static_cast<unsigned char>(object->m_uFlags) & 1;
-    stream->Add(FUN_00a7d370(&DAT_0109b204, firstFlag.word));
+    stream->Add(NiGetViewerString(&DAT_0109b204, firstFlag.word));
     unsigned char bFlag11 = static_cast<unsigned char>(object->m_uFlags >> 11) & 1;
     if (bFlag11)
     {
@@ -975,43 +981,43 @@ void __fastcall GetAVViewerStrings(NiAVObject* object, void*, Stream* stream)
             unsigned char byte;
         } flag11;
         flag11.byte = bFlag11;
-        stream->Add(FUN_00a7d370(&DAT_0109b1f8, flag11.word));
+        stream->Add(NiGetViewerString(&DAT_0109b1f8, flag11.word));
     }
-    stream->Add((*reinterpret_cast<SmallField*>(&object->m_kLocal.m_Translate)).FUN_00a59af0(&DAT_0109b1e4));
+    stream->Add((*reinterpret_cast<SmallField*>(&object->m_kLocal.m_Translate)).GetViewerString_00a59af0(&DAT_0109b1e4));
     stream->Add((*reinterpret_cast<SerializedField*>(&object->m_kLocal.m_Rotate)).ToString(&DAT_0109b1d4));
-    stream->Add(FUN_00a7d550(&DAT_0109b1c4, object->m_kLocal.m_fScale));
-    stream->Add((*reinterpret_cast<SmallField*>(&object->m_kWorld.m_Translate)).FUN_00a59af0(&DAT_0109b1b0));
+    stream->Add(NiGetViewerString_00a7d550(&DAT_0109b1c4, object->m_kLocal.m_fScale));
+    stream->Add((*reinterpret_cast<SmallField*>(&object->m_kWorld.m_Translate)).GetViewerString_00a59af0(&DAT_0109b1b0));
     stream->Add((*reinterpret_cast<SerializedField*>(&object->m_kWorld.m_Rotate)).ToString(&DAT_0109b1a0));
-    stream->Add(FUN_00a7d550(&DAT_0109b190, object->m_kWorld.m_fScale));
-    stream->Add((reinterpret_cast<TextSource*>(object->m_kWorldBound) ? reinterpret_cast<TextSource*>(object->m_kWorldBound) : reinterpret_cast<TextSource*>(&DAT_011f4288))->FUN_00a7fb20(&DAT_0109b184));
+    stream->Add(NiGetViewerString_00a7d550(&DAT_0109b190, object->m_kWorld.m_fScale));
+    stream->Add((reinterpret_cast<TextSource*>(object->m_kWorldBound) ? reinterpret_cast<TextSource*>(object->m_kWorldBound) : reinterpret_cast<TextSource*>(&DAT_011f4288))->GetViewerString_00a7fb20(&DAT_0109b184));
     union FlagWord1
     {
         unsigned int word;
         unsigned char byte;
     } flag1;
     flag1.byte = static_cast<unsigned char>(object->m_uFlags >> 1) & 1;
-    stream->Add(FUN_00a7d370(&DAT_0109b178, flag1.word));
+    stream->Add(NiGetViewerString(&DAT_0109b178, flag1.word));
     union FlagWord2
     {
         unsigned int word;
         unsigned char byte;
     } flag2;
     flag2.byte = static_cast<unsigned char>(object->m_uFlags >> 2) & 1;
-    stream->Add(FUN_00a7d370(&DAT_0109b164, flag2.word));
+    stream->Add(NiGetViewerString(&DAT_0109b164, flag2.word));
     union FlagWord4
     {
         unsigned int word;
         unsigned char byte;
     } flag4;
     flag4.byte = static_cast<unsigned char>(object->m_uFlags >> 4) & 1;
-    stream->Add(FUN_00a7d370(&DAT_0109b154, flag4.word));
+    stream->Add(NiGetViewerString(&DAT_0109b154, flag4.word));
     union FlagWord3
     {
         unsigned int word;
         unsigned char byte;
     } flag3;
     flag3.byte = static_cast<unsigned char>(object->m_uFlags >> 3) & 1;
-    stream->Add(FUN_00a7d370(&DAT_0109b138, flag3.word));
+    stream->Add(NiGetViewerString(&DAT_0109b138, flag3.word));
     if (object->m_kPropertyList.m_kItemCount.m_uiCount)
     {
         NiTListItem<IndexedElement*>* node = reinterpret_cast<NiTListItem<IndexedElement*>*>(object->m_kPropertyList.m_pkHead);
@@ -1019,7 +1025,7 @@ void __fastcall GetAVViewerStrings(NiAVObject* object, void*, Stream* stream)
         {
             IndexedElement* element = GetNextIndexed(node);
             unsigned int key = *element->GetValue();
-            unsigned int next = FUN_00a7d5a0(key, element);
+            unsigned int next = NiGetViewerString_00a7d5a0(key, element);
             unsigned int index = stream->length;
             if (index >= stream->capacity)
                 stream->FUN_0096ad30(index + stream->growth);
@@ -1042,7 +1048,7 @@ void __fastcall GetAVViewerStrings(NiAVObject* object, void*, Stream* stream)
         }
     }
     if (object->m_spCollisionObject.m_pObject)
-        stream->Add(FUN_00a7d5a0((unsigned int)&DAT_0109b124, reinterpret_cast<IndexedElement*>(object->m_spCollisionObject.m_pObject)));
+        stream->Add(NiGetViewerString_00a7d5a0((unsigned int)&DAT_0109b124, reinterpret_cast<IndexedElement*>(object->m_spCollisionObject.m_pObject)));
     unsigned char bFlag10 = static_cast<unsigned char>(object->m_uFlags >> 10) & 1;
     if (bFlag10)
     {
@@ -1052,7 +1058,7 @@ void __fastcall GetAVViewerStrings(NiAVObject* object, void*, Stream* stream)
             unsigned char byte;
         } flag10;
         flag10.byte = bFlag10;
-        stream->Add(FUN_00a7d370(&DAT_0109b118, flag10.word));
+        stream->Add(NiGetViewerString(&DAT_0109b118, flag10.word));
     }
     unsigned char bit13 = static_cast<unsigned char>(object->m_uFlags >> 13) & 1;
     if (bit13)
@@ -1063,7 +1069,7 @@ void __fastcall GetAVViewerStrings(NiAVObject* object, void*, Stream* stream)
             unsigned char byte;
         } flag13;
         flag13.byte = bit13;
-        stream->Add(FUN_00a7d370(&DAT_0109b10c, flag13.word));
+        stream->Add(NiGetViewerString(&DAT_0109b10c, flag13.word));
     }
 }
 
@@ -1093,7 +1099,8 @@ void NiAVObject::UpdateRigidDownwardPass(NiUpdateData& kData, unsigned int uiUnu
 
 // 0x00c6c760  ret 0xc
 // @fnv 0x00c6c760
-void __stdcall FUN_00c6c760(int, int, int)
+// src: COMMUNITY 0x00c6c760
+void __stdcall nullsub_34(int, int, int)
 {}
 
 // Returns the first attached property of the requested type.
@@ -1498,11 +1505,12 @@ struct WorkerProperties
     WorkerPointer shading;
     WorkerPointer stencil;
     WorkerPointer depth;
-    void FUN_00a89960();
+    void NiPropertyState_Reset();
 };
 // Assigns six global WorkerProperty pointers to the corresponding WorkerPointer members.
 // @fnv 0x00a89960
-void WorkerProperties::FUN_00a89960()
+// src: XBOX_PDB 0x00a89960
+void WorkerProperties::NiPropertyState_Reset()
 {
     alpha = DAT_011f4410;
     culling = DAT_011f5d28;
@@ -1597,7 +1605,7 @@ struct A170Lock
 {
     int m_pOwnerObject;
     int m_uiItemCount;
-    void __thiscall FUN_0040fbf0(unsigned int);
+    void __thiscall BSSpinLock_Lock(unsigned int);
     void Unlock()
     {
         if (--m_uiItemCount == 0)
@@ -1608,7 +1616,7 @@ extern A170Lock DAT_011f42a0;
 
 struct A170Heap
 {
-    void* __thiscall FUN_00aa3e40(unsigned int);
+    void* __thiscall Game_DoHeapAlloc(unsigned int);
 };
 extern A170Heap DAT_011f6238;
 
@@ -1628,11 +1636,11 @@ void NiAVObject::BuildPropertyState(NiPropertyState* apSource, bool abAllocate, 
         apResult = apSource;
         return;
     }
-    fnv_00a5a170::DAT_011f42a0.FUN_0040fbf0(0);
+    fnv_00a5a170::DAT_011f42a0.BSSpinLock_Lock(0);
     NiPropertyState* result;
     if (abAllocate)
     {
-        void* p = fnv_00a5a170::DAT_011f6238.FUN_00aa3e40(0x1c);
+        void* p = fnv_00a5a170::DAT_011f6238.Game_DoHeapAlloc(0x1c);
         result = p ? reinterpret_cast<NiPropertyState*>(((fnv_00a5a170::A170Set*)p)->FUN_00a89810(reinterpret_cast<fnv_00a5a170::A170Set*>(apSource))) : 0;
     }
     else

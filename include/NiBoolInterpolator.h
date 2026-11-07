@@ -40,7 +40,7 @@ class NiBoolInterpolator : public NiKeyBasedInterpolator
     void CopyMemberData(NiBoolInterpolator*, CloningProcess&);
     void SetBoolValue(bool);
     NiStream* LinkObject(NiStream*);
-    bool __thiscall FUN_00a3c5b0(NiStream*);
+    bool __thiscall RegisterStreamables_00a3c5b0(NiStream*);
 
     bool m_bBoolValue;
     unsigned char unk0D[3];

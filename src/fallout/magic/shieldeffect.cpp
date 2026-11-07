@@ -36,7 +36,7 @@ void ShieldEffect::SaveGame(Actor* actor)
 {
     ValueModifierEffect::FUN_00802db0(actor);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x6e)
-        g_TESSaveLoadGame->FUN_008579b0(&m_uiUnknownValue, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_uiUnknownValue, 4);
 }
 
 // @fnv 0x00828430

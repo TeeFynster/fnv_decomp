@@ -30,10 +30,11 @@ struct FUN_00afb190_entry
 };
 struct FUN_00afb190_shell
 {
-    bool FUN_00afb190(FUN_00afb190_entry* entry, const char* name);
+    bool Archive_CheckInvalidateFile(FUN_00afb190_entry* entry, const char* name);
 };
 // @fnv 0x00afb190
-bool FUN_00afb190_shell::FUN_00afb190(FUN_00afb190_entry* entry, const char* name)
+// src: COMMUNITY 0x00afb190
+bool FUN_00afb190_shell::Archive_CheckInvalidateFile(FUN_00afb190_entry* entry, const char* name)
 {
     char path[0x104];
     if (DAT_011acdf9 && !entry->IsChecked())
@@ -54,5 +55,6 @@ bool FUN_00afb190_shell::FUN_00afb190(FUN_00afb190_entry* entry, const char* nam
 }
 
 // @fnv 0x00af2d30
-void FUN_00af2d30()
+// src: GUESS 0x00af2d30 (confidence: high)
+void Runtime_DoNothing()
 {}

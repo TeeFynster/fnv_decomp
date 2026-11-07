@@ -122,11 +122,12 @@ struct Cls
     Entry* cursor;
     Block current;
     char flag;
-    void FUN_00e65040(Flag a, int b);
+    void hkpMoppKDopGeometriesVirtualMachine_pushKDop(Flag a, int b);
 };
 // Writes the flag, optional value, current block and flag byte into the entry at cursor, then advances cursor.
 // @fnv 0x00e65040
-void Cls::FUN_00e65040(Flag aFlag, int b)
+// src: HAVOK_LIB 0x00e65040
+void Cls::hkpMoppKDopGeometriesVirtualMachine_pushKDop(Flag aFlag, int b)
 {
     Entry* e = cursor;
     e->unk6d = aFlag.v;
@@ -212,7 +213,7 @@ S_00e65e70* S_00e65e70::Reset()
     return this;
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00e65ea0_cls
 {
@@ -240,7 +241,7 @@ struct FUN_00e65ea0_cls
 // @fnv 0x00e65ea0
 void FUN_00e65ea0_cls::ClearArray()
 {
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uFlags = m_uiObjectFlags;
     m_uCount = 0;
@@ -274,7 +275,7 @@ struct ItemList
     }
     void AddBack(void* const& value)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         if (count == (int)(capacity & 0x3fffffff))
             ResizeAudioStream(holder->m_heap, this, 4);
         CopyConstruct(data + count, 1, value);
@@ -346,13 +347,14 @@ struct FUN_00e65080_cls
     void* m_bc;
     unsigned char m_c0;
 
-    void FUN_00e65040(FlagArg flag, void* item);
-    void FUN_00e65080(void* item, unsigned int unused);
+    void hkpMoppKDopGeometriesVirtualMachine_pushKDop(FlagArg flag, void* item);
+    void hkpMoppKDopGeometriesVirtualMachine_addHit(void* item, unsigned int unused);
 };
 
 // Adds item to m_34 if absent, calls FUN_00e65040 when m_b8 is clear or item matches m_bc, and sets m_c0 when m_b0 is true.
 // @fnv 0x00e65080
-void FUN_00e65080_cls::FUN_00e65080(void* item, unsigned int unused)
+// src: HAVOK_LIB 0x00e65080
+void FUN_00e65080_cls::hkpMoppKDopGeometriesVirtualMachine_addHit(void* item, unsigned int unused)
 {
     if (m_34.indexOf(item) == -1)
     {
@@ -360,7 +362,7 @@ void FUN_00e65080_cls::FUN_00e65080(void* item, unsigned int unused)
         bool selected = flagB8 != 0 && item == m_bc;
         if (flagB8 == 0 || selected)
         {
-            FUN_00e65040(FlagArg(true), item);
+            hkpMoppKDopGeometriesVirtualMachine_pushKDop(FlagArg(true), item);
             bool result = m_b0 || selected;
             m_b0 = result;
         }
@@ -422,11 +424,12 @@ struct E65Solver
     int unkAC;
     E65Key m_key;
     hkBool m_flag;
-    void FUN_00e65140(E65Out* out, int v);
-    void FUN_00e65d90(E65Input* in, E65Key* key, int param);
+    void hkpMoppKDopGeometriesVirtualMachine_queryMoppKDopGeometriesRecurse(E65Out* out, int v);
+    void ProcessEntries_00e65d90(E65Input* in, E65Key* key, int param);
 };
 // @fnv 0x00e65d90
-void E65Solver::FUN_00e65d90(E65Input* apInput, E65Key* __restrict key, int aiDataBlock)
+// src: GUESS 0x00e65d90 (confidence: low)
+void E65Solver::ProcessEntries_00e65d90(E65Input* apInput, E65Key* __restrict key, int aiDataBlock)
 {
     m_kIntegerDataBlock = aiDataBlock;
     E65Out out;
@@ -455,7 +458,7 @@ void E65Solver::FUN_00e65d90(E65Input* apInput, E65Key* __restrict key, int aiDa
     }
     int v = *(volatile int*)&apInput->unk20;
     out.unk14 = 0;
-    FUN_00e65140(&out, v);
+    hkpMoppKDopGeometriesVirtualMachine_queryMoppKDopGeometriesRecurse(&out, v);
 }
 
 struct DecodedParts
@@ -517,7 +520,7 @@ struct MoppErrorStream
 
     void FUN_00cb1600(char*, int);
 
-    void FUN_00cc01c0(const char*);
+    void ProcessAndReturnValue_00cc01c0(const char*);
 
     void FUN_00cc00e0();
 };
@@ -541,12 +544,13 @@ struct hkpMoppFindAllVirtualMachine
 
     MoppResults* results;
 
-    void FUN_00e65ee0(const MoppState* state, const unsigned char* code);
+    void queryOnTree(const MoppState* state, const unsigned char* code);
 };
 
 // Interprets a MOPP bytecode stream, updating primitiveOffset and properties, and appends decoded primitive indices to results.
 // @fnv 0x00e65ee0
-void hkpMoppFindAllVirtualMachine::FUN_00e65ee0(const MoppState* state, const unsigned char* code)
+// src: HAVOK_LIB 0x00e65ee0
+void hkpMoppFindAllVirtualMachine::queryOnTree(const MoppState* state, const unsigned char* code)
 
 {
 
@@ -587,7 +591,7 @@ void hkpMoppFindAllVirtualMachine::FUN_00e65ee0(const MoppState* state, const un
 
             code += 4;
 
-            FUN_00e65ee0(state, code);
+            queryOnTree(state, code);
 
             code += secondOffset;
             continue;
@@ -603,7 +607,7 @@ void hkpMoppFindAllVirtualMachine::FUN_00e65ee0(const MoppState* state, const un
 
             code += 3;
 
-            FUN_00e65ee0(state, code);
+            queryOnTree(state, code);
 
             code += secondOffset;
             continue;
@@ -621,7 +625,7 @@ void hkpMoppFindAllVirtualMachine::FUN_00e65ee0(const MoppState* state, const un
 
             code += 7;
 
-            FUN_00e65ee0(state, code + firstOffset);
+            queryOnTree(state, code + firstOffset);
 
             code += secondOffset;
             continue;
@@ -777,7 +781,7 @@ void hkpMoppFindAllVirtualMachine::FUN_00e65ee0(const MoppState* state, const un
 
             errorStream.FUN_00cb1600(reinterpret_cast<char*>(errorBuffer), sizeof(errorBuffer));
 
-            errorStream.FUN_00cc01c0(
+            errorStream.ProcessAndReturnValue_00cc01c0(
                 "Unknown command - This mopp data has been corrupted (check for memory trashing), or an hkpMoppBvTreeShape has been pointed at invalid mopp data.\n");
 
             if (reinterpret_cast<MoppError*>(DAT_01268360)
@@ -865,7 +869,7 @@ append:
 
     MoppResults* output = results;
 
-    hkMemoryRouter* memory = FUN_00c85750();
+    hkMemoryRouter* memory = hkMemoryRouter_getInstance();
 
     if (output->size == (output->capacityAndFlags & 0x3fffffff))
 
@@ -998,14 +1002,15 @@ struct S_00e65140_VM
     int unkbc;        // bc
     char m_abort;     // c0
 
-    void FUN_00e65040(FlagArg isLeaf, int key);
-    void FUN_00e65080(int key, const unsigned int* properties);
-    void FUN_00e65140(const S_00e65140_Query* query, const unsigned char* PC);
+    void hkpMoppKDopGeometriesVirtualMachine_pushKDop(FlagArg isLeaf, int key);
+    void hkpMoppKDopGeometriesVirtualMachine_addHit(int key, const unsigned int* properties);
+    void hkpMoppKDopGeometriesVirtualMachine_queryMoppKDopGeometriesRecurse(const S_00e65140_Query* query, const unsigned char* PC);
 };
 
 // Executes a Mopp byte-code stream, updating the DOP bounds and recording primitive hits via FUN_00e65080.
 // @fnv 0x00e65140
-void S_00e65140_VM::FUN_00e65140(const S_00e65140_Query* query, const unsigned char* PC)
+// src: HAVOK_LIB 0x00e65140
+void S_00e65140_VM::hkpMoppKDopGeometriesVirtualMachine_queryMoppKDopGeometriesRecurse(const S_00e65140_Query* query, const unsigned char* PC)
 {
     S_00e65140_Query scaledQuery;
     int axis;
@@ -1288,11 +1293,11 @@ void S_00e65140_VM::FUN_00e65140(const S_00e65140_Query* query, const unsigned c
         doSplit: {
             float old = S00e65140_shiftDopHigh(m_kDop, (S00e65140_Dop::DOP_AXIS)axis, splitMax);
             PC += offset;
-            FUN_00e65140(query, PC);
+            hkpMoppKDopGeometriesVirtualMachine_queryMoppKDopGeometriesRecurse(query, PC);
             S00e65140_shiftDopHigh(m_kDop, (S00e65140_Dop::DOP_AXIS)axis, old);
             old = S00e65140_shiftDopLow(m_kDop, (S00e65140_Dop::DOP_AXIS)axis, splitMin);
             PC -= offset - rightOffset;
-            FUN_00e65140(query, PC);
+            hkpMoppKDopGeometriesVirtualMachine_queryMoppKDopGeometriesRecurse(query, PC);
             S00e65140_shiftDopLow(m_kDop, (S00e65140_Dop::DOP_AXIS)axis, old);
             return;
         }
@@ -1307,7 +1312,7 @@ void S_00e65140_VM::FUN_00e65140(const S_00e65140_Query* query, const unsigned c
             if (m_iNumNodes == 0 || m_depth < m_iNumNodes)
             {
                 added = true;
-                FUN_00e65040(FlagArg(false), -1);
+                hkpMoppKDopGeometriesVirtualMachine_pushKDop(FlagArg(false), -1);
             }
             else
             {
@@ -1318,7 +1323,7 @@ void S_00e65140_VM::FUN_00e65140(const S_00e65140_Query* query, const unsigned c
             S00e65140_doubleCut(m_kDop, axis, splitMin, splitMax, oldLo, oldHi);
             PC += 3;
             m_depth++;
-            FUN_00e65140(query, PC);
+            hkpMoppKDopGeometriesVirtualMachine_queryMoppKDopGeometriesRecurse(query, PC);
             m_depth--;
             if (added && m_b8 && !m_abort)
             {
@@ -1337,7 +1342,7 @@ void S_00e65140_VM::FUN_00e65140(const S_00e65140_Query* query, const unsigned c
             if (m_iNumNodes == 0 || m_depth < m_iNumNodes)
             {
                 added = true;
-                FUN_00e65040(FlagArg(false), -1);
+                hkpMoppKDopGeometriesVirtualMachine_pushKDop(FlagArg(false), -1);
             }
             else
             {
@@ -1348,7 +1353,7 @@ void S_00e65140_VM::FUN_00e65140(const S_00e65140_Query* query, const unsigned c
             S00e65140_doubleCut(m_kDop, axis, splitMin, splitMax, oldLo, oldHi);
             PC += 7;
             m_depth++;
-            FUN_00e65140(query, PC);
+            hkpMoppKDopGeometriesVirtualMachine_queryMoppKDopGeometriesRecurse(query, PC);
             m_depth--;
             if (added && m_b8)
             {
@@ -1411,14 +1416,14 @@ void S_00e65140_VM::FUN_00e65140(const S_00e65140_Query* query, const unsigned c
             m_primitiveId = command - 0x30;
         AddHit:
             m_primitiveId += query->m_uiPropertyCount;
-            FUN_00e65080(m_primitiveId, query->m_kProperties);
+            hkpMoppKDopGeometriesVirtualMachine_addHit(m_primitiveId, query->m_kProperties);
             m_primitiveId = -1;
             return;
         default: {
             unsigned int assertBuf[128];
             MoppErrorStream ostr;
             ostr.FUN_00cb1600((char*)assertBuf, 0x200);
-            ostr.FUN_00cc01c0(
+            ostr.ProcessAndReturnValue_00cc01c0(
                 "Unknown command - This mopp data has been corrupted (check for memory trashing), or an hkpMoppBvTreeShape has been pointed at invalid mopp data.\n");
             if (reinterpret_cast<MoppError*>(DAT_01268360)
                     ->message(3, 0x1298fedd, (const char*)assertBuf,

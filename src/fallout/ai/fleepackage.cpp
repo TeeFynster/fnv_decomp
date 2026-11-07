@@ -24,7 +24,8 @@ struct BSSimpleListTESRaceSize
 
 // Returns true if the list at offset 0x98 has one entry that is the player and FUN_00953c50 fails; otherwise false.
 // @fnv 0x009f1990
-bool FleePackage::FUN_009f1990()
+// src: COMMUNITY 0x009f1990
+bool FleePackage::ShouldShutDown()
 {
     if (((BSSimpleListTESRaceSize*)((char*)&AvoidedRefList))->GetSize() == 1)
     {
@@ -33,7 +34,7 @@ bool FleePackage::FUN_009f1990()
             PlayerCharacter* item = *((BSSimpleListTESRaceSize*)((char*)&AvoidedRefList))->_ref_006815c0();
             if (item == g_thePlayer)
             {
-                if (!g_thePlayer->FUN_00953c50(&flag))
+                if (!g_thePlayer->PlayerCharacter_IsPlayerCharacterInCombat(&flag))
                     return true;
             }
         }
@@ -43,7 +44,8 @@ bool FleePackage::FUN_009f1990()
 
 // Adds apRef to AvoidedRefList if it is not already present.
 // @fnv 0x009f1310
-void FleePackage::FUN_009f1310(TESObjectREFR* apRef)
+// src: XBOX_PDB 0x009f1310
+void FleePackage::AddAvoidedRef(TESObjectREFR* apRef)
 {
     if (!AvoidedRefList.IsInList(apRef))
         AvoidedRefList.AddHead(apRef);
@@ -63,7 +65,7 @@ class LocationDescriptor
     char pad[0xc];
     LocationDescriptor();
     ~LocationDescriptor();
-    void FUN_0067f3c0(TESObjectREFR*);
+    void PackageLocation_SetLocReference(TESObjectREFR*);
 };
 
 struct TESObjectREFR_Flags
@@ -98,11 +100,11 @@ FUN_009f9250::FUN_009f9250(TESObjectREFR* apRef, int aiUnk88, int aiUnk8c, int a
     PackageTargetRecord* pTarget;
     LocationDescriptor* ploc;
     ploc = new LocationDescriptor;
-    ploc->FUN_0067f3c0(apRef);
-    FUN_00671d30(ploc);
+    ploc->PackageLocation_SetLocReference(apRef);
+    SetPackageLocation(ploc);
     delete ploc;
     pTarget = new PackageTargetRecord;
-    FUN_00672fc0(pTarget);
+    SetPackageTarget(pTarget);
     delete pTarget;
     SetProcedureType((PACKAGE_PROCEDURE_TYPE)0x14);
     GetTarget()->SetTargetKind(0);
@@ -139,12 +141,12 @@ void FleePackage::RemoveRef(TESObjectREFR* apRef)
             ((PTHelper*)((Script*)this)->GetData())
                 ->SetTargetObjectReference(*(((BSSimpleList_TESObjectREFR_Helper*)((char*)&AvoidedRefList))->_ref_006815c0()));
             ((LocationDescriptor*)((Script*)this)->GetText())
-                ->FUN_0067f3c0(*(((BSSimpleList_TESObjectREFR_Helper*)((char*)&AvoidedRefList))->_ref_006815c0()));
+                ->PackageLocation_SetLocReference(*(((BSSimpleList_TESObjectREFR_Helper*)((char*)&AvoidedRefList))->_ref_006815c0()));
         }
         else
         {
             ((PTHelper*)((Script*)this)->GetData())->SetTargetObjectReference(0);
-            ((LocationDescriptor*)((Script*)this)->GetText())->FUN_0067f3c0(0);
+            ((LocationDescriptor*)((Script*)this)->GetText())->PackageLocation_SetLocReference(0);
         }
     }
     if (apRef == pRefA4)
@@ -673,7 +675,8 @@ struct FUN_009f1140_VirtualTarget
 };
 
 // @fnv 0x009f1140
-bool FleePackage::FUN_009f1140(TESObjectREFR* apRef, TESObjectREFR* apContext)
+// src: XBOX_PDB 0x009f1140
+bool FleePackage::FindTeleportDoor(TESObjectREFR* apRef, TESObjectREFR* apContext)
 {
     if (!flag80)
         return false;
@@ -701,7 +704,7 @@ bool FleePackage::FUN_009f1140(TESObjectREFR* apRef, TESObjectREFR* apContext)
 
 struct Saver
 {
-    unsigned short FUN_00678fd0();
+    unsigned short TESPackage_GetSaveSize();
 };
 
 
@@ -739,10 +742,10 @@ unsigned short FleePackage::GetSaveSize()
     unsigned short usSize = 0;
     unsigned short usOldSize;
 
-    usSize += reinterpret_cast<Saver*>(this)->FUN_00678fd0();
+    usSize += reinterpret_cast<Saver*>(this)->TESPackage_GetSaveSize();
     usOldSize = usSize;
 
-    if (reinterpret_cast<TESSaveLoadGame*>(DAT_011de45c)->FUN_00862110())
+    if (reinterpret_cast<TESSaveLoadGame*>(DAT_011de45c)->TESSaveLoadGame_UseSaveGameBlocks())
     {
         usSize += 4;
         usSize += 2;
@@ -784,7 +787,7 @@ unsigned short FleePackage::GetSaveSize()
 
 struct FUN_006797c0_shell
 {
-    void FUN_006797c0(void*);
+    void TESPackage_SaveGame(void*);
 };
 
 struct FleeSaveReferenceList
@@ -802,7 +805,7 @@ void FleePackage::SaveExtraData(BGSSaveFormBuffer* apSaveGameBuffer)
     unsigned int isaveGameCount;
     TESObjectREFR* pCurrentElementNext;
 
-    reinterpret_cast<FUN_006797c0_shell*>(this)->FUN_006797c0(apSaveGameBuffer);
+    reinterpret_cast<FUN_006797c0_shell*>(this)->TESPackage_SaveGame(apSaveGameBuffer);
 
     apSaveGameBuffer->SaveData((void*)((char*)&flag80), 1, 0);
     apSaveGameBuffer->SaveData((void*)((char*)&flag81), 1, 0);
@@ -816,7 +819,7 @@ void FleePackage::SaveExtraData(BGSSaveFormBuffer* apSaveGameBuffer)
     apSaveGameBuffer->SerializeFormData(pRefA4, 0);
 
     isaveGameCount = 0;
-    pForm = apSaveGameBuffer->FUN_00865f20();
+    pForm = apSaveGameBuffer->StartVariableSizedValue();
     isaveGameBufferPos = (FleeSaveReferenceList*)((char*)&AvoidedRefList);
 
     while (isaveGameBufferPos != 0)
@@ -830,7 +833,7 @@ void FleePackage::SaveExtraData(BGSSaveFormBuffer* apSaveGameBuffer)
         isaveGameBufferPos = isaveGameBufferPos->_ref_00726070();
     }
 
-    apSaveGameBuffer->FUN_00865ff0(isaveGameCount, pForm);
+    apSaveGameBuffer->SaveVariableSizedValue_00865ff0(isaveGameCount, pForm);
 }
 
 struct G2
@@ -840,7 +843,8 @@ struct G2
 
 // Calls LoadGame, reads several fields from the buffer, then reads a count and loads that many TESObjectREFR forms into the list at offset 0x98.
 // @fnv 0x009f24d0
-void FleePackage::FUN_009f24d0(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009f24d0
+void FleePackage::LoadGame_009f24d0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     reinterpret_cast<TESPackage*>(this)->TESPackage::LoadGame(apLoadGameBuffer);
 
@@ -1016,8 +1020,8 @@ struct FUN_009f1210_ref
     virtual void M137();
     virtual void M138();
     virtual bool M139(int a);
-    bool FUN_005653d0();
-    float FUN_005723b0(FUN_009f1210_ref* apRef, int a2, int a3);
+    bool TESObjectREFR_GetRefPersists_005653d0();
+    float TESObjectREFR_GetDistanceFromReference(FUN_009f1210_ref* apRef, int a2, int a3);
     bool FUN_00440da0();
 };
 extern const float DAT_01016970;
@@ -1025,7 +1029,7 @@ extern const float DAT_01016970;
 // @fnv 0x009f1210
 TESObjectREFR* FleePackage::FindNearestRef(TESObjectREFR* apRef)
 {
-    if (flag80 == 0 || !reinterpret_cast<FUN_009f1210_ref*>(apRef)->FUN_005653d0())
+    if (flag80 == 0 || !reinterpret_cast<FUN_009f1210_ref*>(apRef)->TESObjectREFR_GetRefPersists_005653d0())
     {
         return 0;
     }
@@ -1038,7 +1042,7 @@ TESObjectREFR* FleePackage::FindNearestRef(TESObjectREFR* apRef)
     {
         cand = *nodeB->_ref_006815c0();
         nodeB = nodeB->FUN_00726070();
-        d2 = cand->FUN_005723b0(reinterpret_cast<FUN_009f1210_ref*>(apRef), 0, 0);
+        d2 = cand->TESObjectREFR_GetDistanceFromReference(reinterpret_cast<FUN_009f1210_ref*>(apRef), 0, 0);
         if (cand->FUN_00440da0() || cand->M139(0))
         {
             RemoveRef(reinterpret_cast<TESObjectREFR*>(cand));
@@ -1196,7 +1200,7 @@ struct AvoidedReference
     virtual void slot138();
     virtual bool IsDead(int);
     bool FUN_00440d80();
-    bool FUN_00493bb0();
+    bool Actor_IsInCombat();
 };
 extern AvoidedReference* DAT_011dea3c;
 struct AvoidedList
@@ -1209,10 +1213,10 @@ struct AvoidedList
 };
 struct AvoidanceSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern AvoidanceSetting DAT_011cd348;
-double FUN_00435dd0();
+double CombatTimer_GetTimer();
 struct AvoidanceContext
 {
     virtual void slot0();
@@ -1230,7 +1234,7 @@ struct AvoidanceContext
 void FleePackage::RemoveInvalidAvoidedReferences(AvoidanceContext* context)
 {
     AvoidedList* current = reinterpret_cast<AvoidedList*>(&AvoidedRefList);
-    float limit2 = *DAT_011cd348.FUN_00403e20();
+    float limit2 = *DAT_011cd348.Setting_Float_00403e20();
     while (current && current->FUN_006815c0())
     {
         AvoidedReference* reference6 = current->FUN_006815c0();
@@ -1238,8 +1242,8 @@ void FleePackage::RemoveInvalidAvoidedReferences(AvoidanceContext* context)
         bool remove4 = reference6->IsDead(0) || reference6->FUN_00440d80();
         if (!remove4 && actor && flag81)
         {
-            remove4 = (!actor->FUN_00493bb0() && actor != DAT_011dea3c) ||
-                      (context && FUN_00435dd0() - context->GetLastTime(actor, 0) > limit2);
+            remove4 = (!actor->Actor_IsInCombat() && actor != DAT_011dea3c) ||
+                      (context && CombatTimer_GetTimer() - context->GetLastTime(actor, 0) > limit2);
         }
         if (remove4)
         {
@@ -1399,7 +1403,7 @@ extern const float runtimeFloatSettingDefault38;
 extern const float runtimeFloatSettingDefault1232;
 extern const float runtimeFloatSettingDefault1018;
 
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMAX_00404010(float, float);
 
 // @fnv 0x009f1440
 PathingAvoidNodeArray* FleePackage::BuildAvoidNodeArray()
@@ -1408,7 +1412,7 @@ PathingAvoidNodeArray* FleePackage::BuildAvoidNodeArray()
     float fRadius3 = ((TESPackage*)this)->GetTarget()
                          ? (float)((FUN_00672930_flags*)((TESPackage*)this)->GetTarget())->GetFlags()
                          : runtimeFloatSettingDefault1232;
-    fRadius3 = FUN_00404010(fRadius3, runtimeFloatSettingDefault38);
+    fRadius3 = BSMAX_00404010(fRadius3, runtimeFloatSettingDefault38);
     AvoidedList* pNode;
     float fRadius4;
     AvoidedReference* pRef;
@@ -1421,8 +1425,8 @@ PathingAvoidNodeArray* FleePackage::BuildAvoidNodeArray()
 
         iSize = ((FUN_00672930_flags*)pNodes_)->GetFlags();
         pNodes_->SetSize(iSize + 1, true);
-        fRadius4 = FUN_00404010(fRadius3 * fRadius3, runtimeFloatSettingDefault1018);
-        *pNodes_->FUN_006a1400(iSize) = PathingAvoidNode(*((AvoidedRefTarget*)pRef)->GetPos(), fRadius3, fRadius4);
+        fRadius4 = BSMAX_00404010(fRadius3 * fRadius3, runtimeFloatSettingDefault1018);
+        *pNodes_->BSSimpleArray_PathingAvoidNode_1024_GetAt(iSize) = PathingAvoidNode(*((AvoidedRefTarget*)pRef)->GetPos(), fRadius3, fRadius4);
     }
     return pNodes_;
 }
@@ -1436,16 +1440,16 @@ struct DoorAccess
 struct ReferenceAccess
 {
     bool FUN_00440d80();
-    bool FUN_004077c0();
+    bool TESForm_GetTemporary();
     bool FUN_00440da0();
-    void* FUN_007af430();
+    void* BGSSaveFormBuffer_GetForm();
     void* FUN_00568e50();
-    bool FUN_00575d10();
-    float FUN_005723b0(ReferenceAccess*, int, int);
-    DoorAccess* FUN_00569160();
-    bool FUN_005785e0(ReferenceAccess*, bool);
-    bool FUN_00891db0(TESObjectREFR*, int, int, int, int*);
-    NiPoint3 const& FUN_00568fa0();
+    bool TESObjectREFR_GetInterior();
+    float TESObjectREFR_GetDistanceFromReference(ReferenceAccess*, int, int);
+    DoorAccess* TESObjectREFR_GetLock();
+    bool TESObjectREFR_IsAnOwner(ReferenceAccess*, bool);
+    bool Actor_HasObjects(TESObjectREFR*, int, int, int, int*);
+    NiPoint3 const& TESObjectREFR_GetLinkedDoorTeleportPosition();
 };
 extern void* DAT_011ca258;
 extern const float runtimeFloatSettingDefault1070;
@@ -1465,31 +1469,31 @@ bool __cdecl CanActorReachReference(TESObjectREFR* reference, long context)
                 {
                     int iAccessResult;
                     if (!reference || ((ReferenceAccess*)reference)->FUN_00440d80() ||
-                        ((ReferenceAccess*)reference)->FUN_004077c0() || ((ReferenceAccess*)reference)->FUN_00440da0())
+                        ((ReferenceAccess*)reference)->TESForm_GetTemporary() || ((ReferenceAccess*)reference)->FUN_00440da0())
                         return false;
                     iAccessResult = 0;
                     pActor = (ReferenceAccess*)context;
                     if (!pActor)
                         return false;
-                    if (((ReferenceAccess*)reference)->FUN_007af430() == DAT_011ca258)
+                    if (((ReferenceAccess*)reference)->BGSSaveFormBuffer_GetForm() == DAT_011ca258)
                         return false;
                     if (!((ReferenceAccess*)reference)->FUN_00568e50())
                         return false;
-                    m_fUnknownValue2 = DAT_011f2f1c && ((ReferenceAccess*)DAT_011f2f1c)->FUN_00575d10()
+                    m_fUnknownValue2 = DAT_011f2f1c && ((ReferenceAccess*)DAT_011f2f1c)->TESObjectREFR_GetInterior()
                                            ? runtimeFloatSettingDefault1070
                                            : runtimeFloatSettingDefault142;
-                    fDistance = ((ReferenceAccess*)reference)->FUN_005723b0(pActor, 0, 0);
-                    fTargetDistance = ((ReferenceAccess*)reference)->FUN_005723b0((ReferenceAccess*)DAT_011f2f1c, 0, 0);
+                    fDistance = ((ReferenceAccess*)reference)->TESObjectREFR_GetDistanceFromReference(pActor, 0, 0);
+                    fTargetDistance = ((ReferenceAccess*)reference)->TESObjectREFR_GetDistanceFromReference((ReferenceAccess*)DAT_011f2f1c, 0, 0);
                     if (fTargetDistance > m_fUnknownValue2 || fTargetDistance > fDistance)
                     {
-                        DoorAccess* door = ((ReferenceAccess*)reference)->FUN_00569160();
-                        if (door && door->FUN_005021a0() && !((ReferenceAccess*)reference)->FUN_005785e0(pActor, true))
+                        DoorAccess* door = ((ReferenceAccess*)reference)->TESObjectREFR_GetLock();
+                        if (door && door->FUN_005021a0() && !((ReferenceAccess*)reference)->TESObjectREFR_IsAnOwner(pActor, true))
                         {
-                            if (!door->destination || !pActor->FUN_00891db0(door->destination, 0, 1, 0, &iAccessResult))
+                            if (!door->destination || !pActor->Actor_HasObjects(door->destination, 0, 1, 0, &iAccessResult))
                                 return false;
                         }
                         PathingLocation actorLocation((TESObjectREFR*)pActor);
-                        PathingLocation referenceLocation(((ReferenceAccess*)reference)->FUN_00568fa0(), reference);
+                        PathingLocation referenceLocation(((ReferenceAccess*)reference)->TESObjectREFR_GetLinkedDoorTeleportPosition(), reference);
                         if (!CallWithNullArgs(&actorLocation, &referenceLocation, 0))
                             return false;
                         DAT_011f2f10 = (int)reference;
@@ -1523,8 +1527,8 @@ struct SaveDebugRecord
 struct SaveStream
 {
     unsigned char* FUN_00825c00();
-    bool FUN_00862110();
-    void FUN_008579b0(void*, int);
+    bool TESSaveLoadGame_UseSaveGameBlocks();
+    void TESSaveLoadGame_SaveGameDataOLD(void*, int);
     SaveDebugRecord* GetHitSound();
 };
 
@@ -1532,7 +1536,7 @@ struct PackageSaveAccess
 {
     void SavePackage();
     void ForwardToSaveLoadGame(void*, int);
-    void FUN_00484ce0(void*, int);
+    void TESForm_SaveGameDataOLD(void*, int);
 };
 void __cdecl FNV_Warning(const char*, ...);
 // @fnv 0x009f1b70
@@ -1544,16 +1548,16 @@ void FleePackage::SaveFleePackage()
     unsigned char* aPosition = reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_00825c00();
     if (*g_011de4e8.Bool())
         aPosition = reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_00825c00();
-    if (reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_00862110())
+    if (reinterpret_cast<SaveStream*>(DAT_011de45c)->TESSaveLoadGame_UseSaveGameBlocks())
     {
         unsigned int tag = 0x424c4f4b;
-        reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_008579b0(&tag, 4);
+        reinterpret_cast<SaveStream*>(DAT_011de45c)->TESSaveLoadGame_SaveGameDataOLD(&tag, 4);
         position = reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_00825c00();
-        reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_008579b0(&sizeVal, 2);
+        reinterpret_cast<SaveStream*>(DAT_011de45c)->TESSaveLoadGame_SaveGameDataOLD(&sizeVal, 2);
     }
     unsigned short kCount = 0;  // Number of avoided references.
     unsigned char* _position = reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_00825c00();
-    reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_008579b0(&kCount, 2);
+    reinterpret_cast<SaveStream*>(DAT_011de45c)->TESSaveLoadGame_SaveGameDataOLD(&kCount, 2);
     SavedReferenceList* node = reinterpret_cast<SavedReferenceList*>(&AvoidedRefList);
     while (node && !node->FUN_008256d0())
     {
@@ -1572,13 +1576,13 @@ void FleePackage::SaveFleePackage()
     if (pRefA0)
         form = reinterpret_cast<SavedReference*>(pRefA0)->GetFormID();
     reinterpret_cast<PackageSaveAccess*>(this)->ForwardToSaveLoadGame(&form, 4);
-    reinterpret_cast<PackageSaveAccess*>(this)->FUN_00484ce0(&flag81, 1);
-    reinterpret_cast<PackageSaveAccess*>(this)->FUN_00484ce0(&flagA8, 1);
-    reinterpret_cast<PackageSaveAccess*>(this)->FUN_00484ce0(&flag94, 1);
-    reinterpret_cast<PackageSaveAccess*>(this)->FUN_00484ce0(&timer, 4);
-    reinterpret_cast<PackageSaveAccess*>(this)->FUN_00484ce0(&this->position, 12);
-    reinterpret_cast<PackageSaveAccess*>(this)->FUN_00484ce0(&flag80, 1);
-    reinterpret_cast<PackageSaveAccess*>(this)->FUN_00484ce0(&flagA9, 1);
+    reinterpret_cast<PackageSaveAccess*>(this)->TESForm_SaveGameDataOLD(&flag81, 1);
+    reinterpret_cast<PackageSaveAccess*>(this)->TESForm_SaveGameDataOLD(&flagA8, 1);
+    reinterpret_cast<PackageSaveAccess*>(this)->TESForm_SaveGameDataOLD(&flag94, 1);
+    reinterpret_cast<PackageSaveAccess*>(this)->TESForm_SaveGameDataOLD(&timer, 4);
+    reinterpret_cast<PackageSaveAccess*>(this)->TESForm_SaveGameDataOLD(&this->position, 12);
+    reinterpret_cast<PackageSaveAccess*>(this)->TESForm_SaveGameDataOLD(&flag80, 1);
+    reinterpret_cast<PackageSaveAccess*>(this)->TESForm_SaveGameDataOLD(&flagA9, 1);
     if (*g_011de4e8.Bool())
     {
         unsigned char* end = reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_00825c00();
@@ -1597,7 +1601,7 @@ void FleePackage::SaveFleePackage()
                                          str_01093344);
         }
     }
-    if (reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_00862110())
+    if (reinterpret_cast<SaveStream*>(DAT_011de45c)->TESSaveLoadGame_UseSaveGameBlocks())
     {
         unsigned char* end = reinterpret_cast<SaveStream*>(DAT_011de45c)->FUN_00825c00();
         unsigned char* data = position;
@@ -1644,7 +1648,8 @@ struct PackageLoadAccess
 
 // Loads the package's avoided-ref list, targets, flags, value and position from the save buffer, validating the BLOK header and block size.
 // @fnv 0x009f1e80
-void FleePackage::FUN_009f1e80()
+// src: XBOX_PDB 0x009f1e80
+void FleePackage::LoadGame_009f1e80()
 {
     unsigned short usCount4;
     unsigned int uiRefA7;
@@ -1767,7 +1772,8 @@ struct TESPackageInitLoadAccess
 
 // Calls the base InitLoadGame, re-resolves pRefA0/pRefA4 and the AvoidedRefList entries via _ref_004839c0, removing entries that no longer resolve.
 // @fnv 0x009f25f0
-void FleePackage::FUN_009f25f0(void* apBuffer)
+// src: XBOX_PDB 0x009f25f0
+void FleePackage::InitLoadGame_009f25f0(void* apBuffer)
 {
     reinterpret_cast<TESPackageInitLoadAccess*>(this)->InitLoadGame(apBuffer);
     pRefA0 = pRefA0 ? dynamic_cast<TESObjectREFR*>(_ref_004839c0((unsigned int)pRefA0)) : 0;

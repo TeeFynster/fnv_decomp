@@ -15,7 +15,7 @@ class hkpProjectileGun : public hkpFirstPersonGun
     hkArray<void*> m_kRigidBodies;  // +0x2C
     void* m_pOwningWorld;           // +0x38
     void* m_pBroadPhaseRegionData;  // +0x3C
-    void FUN_00e44ef0();            // 0x00e44ef0, a member (contributor flag 1 Nov); declaration only, layout unchanged
+    void removeDestroyedProjectiles();            // 0x00e44ef0, a member (contributor flag 1 Nov); declaration only, layout unchanged
 };
 #pragma pack(pop)
 typedef char fnv_hk_size_hkpProjectileGun[(sizeof(hkpProjectileGun) == 0x40) ? 1 : -1];

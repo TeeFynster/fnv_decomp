@@ -18,7 +18,7 @@ struct FloatLess
         return a < b;
     }
 };
-void __cdecl FUN_00e50f10(float* pArr, int d, int h, FloatLess cmpLess);
+void __cdecl hkAlgorithm_quickSortRecursive_float_class_hkAlgorithm_less_float(float* pArr, int d, int h, FloatLess cmpLess);
 typedef ::__m128 LocalM128;
 using ::_mm_sub_ps;
 using ::_mm_mul_ps;
@@ -36,7 +36,7 @@ static inline LocalM128 Dot3_e4b570(LocalM128 p)
 {
     return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p));
 }
-int __cdecl FUN_00e4b570(const LocalM128* point, const LocalM128* verts, float* out);
+int __cdecl Runtime_ProcessEntries_00e4b570(const LocalM128* point, const LocalM128* verts, float* out);
 
 extern "C" double __cdecl sqrt(double);
 
@@ -48,7 +48,8 @@ struct Quaternion81
     float x, y, z, w;
 };
 // @fnv 0x00e52590
-void __cdecl FUN_00e52590(const Quaternion81* quaternion, unsigned char* packed)
+// src: GUESS 0x00e52590 (confidence: low)
+void __cdecl Runtime_ComputeValues_00e52590(const Quaternion81* quaternion, unsigned char* packed)
 {
     static float scale = static_cast<float>(sqrt(2.0)) * 2047.0;
     const float* components = &quaternion->x;

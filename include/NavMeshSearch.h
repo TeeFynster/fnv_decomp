@@ -35,8 +35,8 @@ public:
     void FUN_006a7b10();
     void FUN_006a7bc0();
     void FUN_006a6b00();
-    void FUN_006a7d30(float);
-    unsigned int FUN_006a94f0(NavMesh*, unsigned short);
+    void AStarSearch_NavMeshSearchNode_NavMeshSearchLink_SetMaxFitness(float);
+    unsigned int GetKeyForNode_006a94f0(NavMesh*, unsigned short);
 
     void vf();
     unsigned int AddNode(NavMesh*, unsigned short, NavMeshNodeInfo*, float);

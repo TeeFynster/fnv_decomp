@@ -361,11 +361,12 @@ class FUN_00d1e970_cls
     virtual void v18();
     virtual void v19();
     virtual void v20(hkVector4& out, int arg3);
-    void FUN_00d1e970(float s, const hkVector4& v, int arg3);
+    void hkpBoxMotion_applyForce_00d1e970(float s, const hkVector4& v, int arg3);
 };
 
 // @fnv 0x00d1e970
-void FUN_00d1e970_cls::FUN_00d1e970(float s, const hkVector4& v, int arg3)
+// src: HAVOK_SRC 0x00d1e970
+void FUN_00d1e970_cls::hkpBoxMotion_applyForce_00d1e970(float s, const hkVector4& v, int arg3)
 {
     __declspec(align(16)) hkVector4 t;
     N::LocalM128 x = N::_mm_load_ss(&s);
@@ -401,11 +402,12 @@ struct FUN_00d1e9b0_cls
     virtual void v19();
     virtual void v20();
     virtual void v21(float* pOut);
-    void FUN_00d1e9b0(float f, float* v);
+    void hkpBoxMotion_applyTorque(float f, float* v);
 };
 
 // @fnv 0x00d1e9b0
-void FUN_00d1e9b0_cls::FUN_00d1e9b0(float f, float* v)
+// src: HAVOK_SRC 0x00d1e9b0
+void FUN_00d1e9b0_cls::hkpBoxMotion_applyTorque(float f, float* v)
 {
     __declspec(align(16)) float out[4];
     float* pOut = out;
@@ -420,10 +422,11 @@ extern "C" void _ReadWriteBarrier();
 class BoxMotionCandidate : public hkpBoxMotion
 {
   public:
-    void FUN_00d1e920(float amount, const hkVector4* direction);
+    void hkpBoxMotion_applyForce(float amount, const hkVector4* direction);
 };
 // @fnv 0x00d1e920
-void BoxMotionCandidate::FUN_00d1e920(float amount, const hkVector4* direction)
+// src: HAVOK_SRC 0x00d1e920
+void BoxMotionCandidate::hkpBoxMotion_applyForce(float amount, const hkVector4* direction)
 {
     N::LocalM128 a = N::_mm_load_ss(&amount);
     a = N::_mm_shuffle_ps(a, a, 0);

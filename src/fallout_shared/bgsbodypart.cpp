@@ -104,7 +104,7 @@ BGSBodyPart::BGSBodyPart()
 {
     memset(&Data, 0, 0x54);
     Data.Initialize();
-    FUN_005e3d20();
+    InitializeData_005e3d20();
 }
 
 // @fnv 0x005e3d80
@@ -136,12 +136,12 @@ void BGSBodyPart::InitItem(TESForm* form)
         TESForm::RemapFormIDForFile(formID, form->GetFile(-1));
         Data.m_pRelatedObject1 = dynamic_cast<BGSDebris*>(TESForm::GetFormByID(formID));
     }
-    formID = (unsigned int)((InterfaceManager*)this)->FUN_004fd400();
+    formID = (unsigned int)((InterfaceManager*)this)->GetAVEffect();
     if (formID)
     {
         TESForm::RemapFormIDForFile(formID, form->GetFile(-1));
         ((InterfaceManager*)this)
-            ->FUN_00500a20((Tile*)dynamic_cast<BGSImpactDataSet*>(TESForm::GetFormByID(formID)));
+            ->BGSTerminal_SetPassword((Tile*)dynamic_cast<BGSImpactDataSet*>(TESForm::GetFormByID(formID)));
     }
     formID = FUN_005e3fc0();
     if (formID)
@@ -272,7 +272,8 @@ BGSTextureModel::BGSTextureModel()
 void __fastcall _ref_006815c0(void*);
 
 // @fnv 0x005e3c00
-void* __fastcall FUN_005e3c00(char* pObject)
+// src: XBOX_PDB 0x005e3c00
+void* __fastcall PART_DATA_PART_DATA(char* pObject)
 {
     _ref_006815c0(pObject + 0x2c);
     _ref_006815c0(pObject + 0x38);
@@ -281,7 +282,8 @@ void* __fastcall FUN_005e3c00(char* pObject)
 
 // Initializes the model and ragdoll model components.
 // @fnv 0x005e3d20
-void BGSBodyPart::FUN_005e3d20()
+// src: XBOX_PDB 0x005e3d20
+void BGSBodyPart::InitializeData_005e3d20()
 {
     m_kModel.Init();
     m_kRagdollModel.Init();
@@ -328,8 +330,8 @@ class PartSink
 };
 
 extern int DAT_011f49d8;
-void* __cdecl FUN_00653270(void*, void*);
-void* __fastcall FUN_0043fad0(void*);
+void* __cdecl NiObject_DynamicCast(void*, void*);
+void* __fastcall NiGeometry_GetSkinInstance(void*);
 
 // Recursively walks a PartNode tree; for leaf nodes with a target, looks up a PartSink and adds two entries keyed by a1 and a1+0xc8.
 // @fnv 0x005e4730
@@ -351,8 +353,8 @@ void AddNodeEntries(unsigned int a1, PartNode* pNode)
     else if (pNode->GetTarget())
     {
         void* target = pNode->GetTarget();
-        void* base = FUN_0043fad0(target);
-        PartSink* sink2 = (PartSink*)FUN_00653270(&DAT_011f49d8, base);
+        void* base = NiGeometry_GetSkinInstance(target);
+        PartSink* sink2 = (PartSink*)NiObject_DynamicCast(&DAT_011f49d8, base);
         if (sink2)
         {
             sink2->AddEntry((unsigned short)a1, 0);
@@ -416,7 +418,7 @@ class NodeList
 class KeyName
 {
   public:
-    const char* FUN_0043fad0();
+    const char* NiGeometry_GetSkinInstance();
 };
 class TreeNode
 {
@@ -435,7 +437,7 @@ class FoundResult
     void SetEntryStateByKey(unsigned int value, int enabled);
 };
 extern char DAT_011f49d8[];
-FoundResult* __cdecl FUN_00653270(const char*, const char*);
+FoundResult* __cdecl NiObject_DynamicCast(const char*, const char*);
 // Recurses into a tree node's children; for each leaf with a key name, looks up a result by name and applies key and key+200 to it.
 // @fnv 0x005e4890
 void __cdecl ApplyKeyToLeafNodes(unsigned int key, TreeNode* node)
@@ -453,8 +455,8 @@ void __cdecl ApplyKeyToLeafNodes(unsigned int key, TreeNode* node)
     else if (node->GetKeyName())
     {
         KeyName* pKeyName = node->GetKeyName();
-        const char* pcText = pKeyName->FUN_0043fad0();
-        FoundResult* result = FUN_00653270(DAT_011f49d8, pcText);
+        const char* pcText = pKeyName->NiGeometry_GetSkinInstance();
+        FoundResult* result = NiObject_DynamicCast(DAT_011f49d8, pcText);
         if (result != 0)
         {
             result->SetEntryStateByKey(static_cast<unsigned short>(key), 1);

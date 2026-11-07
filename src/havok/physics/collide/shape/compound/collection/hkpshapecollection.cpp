@@ -16,11 +16,12 @@ class hkpShapeCollection_L
 {
   public:
     virtual ~hkpShapeCollection_L();
-    virtual int FUN_00d213d0();
+    virtual int hkpShapeCollection_getContainer();
 };
 
 // @fnv 0x00d213d0
-int hkpShapeCollection_L::FUN_00d213d0()
+// src: HAVOK_LIB 0x00d213d0
+int hkpShapeCollection_L::hkpShapeCollection_getContainer()
 {
     if (this != 0)
     {
@@ -30,19 +31,22 @@ int hkpShapeCollection_L::FUN_00d213d0()
 }
 
 extern char const* const DAT_01268910;
-void __cdecl FUN_00c90360(char const* const* first, char const* const* second);
+void __cdecl hkReferencedObject_calcContentStatistics(char const* const* first, char const* const* second);
 // @fnv 0x00d213e0
-void __cdecl FUN_00d213e0(char const* const* first, char const* const* ignored)
+// src: XBOX_PDB 0x00d213e0
+void __cdecl hkpShapeCollection_calcContentStatistics(char const* const* first, char const* const* ignored)
 {
-    FUN_00c90360(first, &DAT_01268910);
+    hkReferencedObject_calcContentStatistics(first, &DAT_01268910);
 }
 
 // @fnv 0x00d213f0
-void __stdcall FUN_00d213f0(int, int)
+// src: COMMUNITY 0x00d213f0
+void __stdcall nullsub_53(int, int)
 {}
 
 // @fnv 0x00d21400
-void __stdcall FUN_00d21400(int a1)
+// src: COMMUNITY 0x00d21400
+void __stdcall nullsub_52(int a1)
 {}
 
 struct Allocator
@@ -69,7 +73,7 @@ struct Holder
     unsigned int userData;
     unsigned int shapeType;
     void* shapeVtable;
-    MemorySystem* __thiscall FUN_00c85750();
+    MemorySystem* __thiscall hkMemoryRouter_getInstance();
     Holder* __thiscall Destroy(unsigned char flags);
 };
 // Sets shapeVtable and vtable, then frees the object via the memory system allocator if the low bit of flags is set.
@@ -80,7 +84,7 @@ Holder* __thiscall Holder::Destroy(unsigned char flags)
     vtable = &DAT_0102e388;
     if ((flags & 1) != 0)
     {
-        MemorySystem* memory = FUN_00c85750();
+        MemorySystem* memory = hkMemoryRouter_getInstance();
         memory->allocator->Free(this, memSizeAndFlags);
     }
     return this;
@@ -103,7 +107,7 @@ struct hkBoolRet
 class FUN_00d21450_Class : public hkpShapeCollection
 {
   public:
-    hkBoolRet FUN_00d21450(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
+    hkBoolRet hkpShapeCollection_castRayImpl(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
 };
 
 struct ShapeRayCastQuery
@@ -136,7 +140,8 @@ struct ShapeRayCastOutput
 
 // Casts a ray against each filtered child and stores the last hit shape key in output.m_uiShapeKeys.
 // @fnv 0x00d21450
-hkBoolRet FUN_00d21450_Class::FUN_00d21450(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const
+// src: HAVOK_LIB 0x00d21450
+hkBoolRet FUN_00d21450_Class::hkpShapeCollection_castRayImpl(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const
 {
     volatile unsigned int time;
     hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -276,11 +281,12 @@ struct __declspec(align(16)) ShapeBuf_L
 class Owner_L : public hkpShapeCollection
 {
   public:
-    void FUN_00d217d0(Arg0_L* arg0, Arg1_L* arg1, Arg2_L* arg2);
+    void hkpShapeCollection_castRayWithCollectorImpl(Arg0_L* arg0, Arg1_L* arg1, Arg2_L* arg2);
 };
 
 // @fnv 0x00d217d0
-void Owner_L::FUN_00d217d0(Arg0_L* arg0, Arg1_L* arg1, Arg2_L* arg2)
+// src: HAVOK_LIB 0x00d217d0
+void Owner_L::hkpShapeCollection_castRayWithCollectorImpl(Arg0_L* arg0, Arg1_L* arg1, Arg2_L* arg2)
 {
     volatile unsigned int uiTimestamp;
     hkMonitorStream* pProfSlot = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -458,7 +464,7 @@ class FUN_00d21410 : public hkpShape_ctor, public hkpShapeContainer
     WeldingAndType m_info;
     FUN_00d21410(int type, char collectionType);
     ~FUN_00d21410();
-    virtual int FUN_00d213d0();
+    virtual int hkpShapeCollection_getContainer();
 };
 
 // Constructs a shape object, initializing the reference count, user data, type, and collection type fields.

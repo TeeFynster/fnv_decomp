@@ -11,7 +11,7 @@
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_005129c0();
+    virtual void AdjustThisAndForward_005129c0();
     int unk04;
     int unk08;
     int unk0C;
@@ -37,14 +37,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_005129c0();
+    virtual void AdjustThisAndForward_005129c0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x005129c0
-    virtual void FUN_005129c0();
+// src: GUESS 0x005129c0 (confidence: low)
+    virtual void AdjustThisAndForward_005129c0();
 };
 
 Derived::Derived()
@@ -120,7 +121,7 @@ namespace fnv_005129e0 {
 // the vtables and the adjusting thunk.
 struct ArmaPrimaryBase
 {
-    virtual void FUN_005129e0();
+    virtual void AdjustThisAndForward_005129e0();
     int m_04;
     int m_08;
     int m_0c;
@@ -146,14 +147,15 @@ struct ArmaPrimaryBase
 
 struct ArmaSecondaryBase
 {
-    virtual void FUN_005129e0();
+    virtual void AdjustThisAndForward_005129e0();
 };
 
 struct ArmaDerived : ArmaPrimaryBase, ArmaSecondaryBase
 {
     ArmaDerived();
 // @fnv 0x005129e0
-    virtual void FUN_005129e0();
+// src: GUESS 0x005129e0 (confidence: low)
+    virtual void AdjustThisAndForward_005129e0();
 };
 
 ArmaDerived::ArmaDerived()

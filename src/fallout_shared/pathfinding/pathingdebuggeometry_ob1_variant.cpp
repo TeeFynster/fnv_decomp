@@ -209,41 +209,41 @@ struct Ref
     virtual void vtbl190();
     virtual void vt2fc();
     bool FUN_00440da0();
-    ExtraList* FUN_005d43c0();
-    void FUN_00576760();
-    void FUN_00484af0(int a);
+    ExtraList* BSFile_GetDevice();
+    void TESObjectREFR_CleanUpTraps();
+    void TESForm_SetDisabled(int a);
     Proc* FUN_008d8520();
     void ApplyActorSpells();
     Ref* FUN_008d6f30();
-    bool FUN_005656d0();
-    bool FUN_00564d80();
-    void FUN_0093a660(Ref* a);
-    void FUN_00967350(Ref* a);
-    void FUN_00952c30(Ref* a);
+    bool TESObjectREFR_HasScript();
+    bool GetTargeted();
+    void PlayerCharacter_RemoveActorFromPlayercombatList(Ref* a);
+    void PlayerCharacter_RemovePerceivedActor(Ref* a);
+    void PlayerCharacter_CheckForQuestTargetUpdate(Ref* a);
     int FUN_00931850();
-    bool FUN_00574900();
-    void FUN_00881680(int a);
-    void FUN_0088d640();
+    bool MobileObject_IsTalkingActivator();
+    void Actor_EndInterruptPackage(int a);
+    void Actor_GetOutofFurnitureQuick();
     void FUN_00407800(Proc* a);
-    void FUN_0056c880(unsigned int a, bool b);
-    void* FUN_0056ac90();
+    void TESObjectREFR_SetLoadedDataFlag(unsigned int a, bool b);
+    void* TESObjectREFR_GetEnableStateChildList();
     bool FUN_0056aa70();
-    void FUN_0056c780(int a);
-    void FUN_00573f40();
-    void FUN_00572270();
-    void FUN_00579ac0(bool a);
-    Ref* FUN_007af430();
-    void FUN_00574400();
-    void FUN_008b01c0();
-    void FUN_00545560(Ref* a);
-    bool FUN_00549580();
+    void TESForm_SetDisableFade(int a);
+    void TESObjectREFR_Enable();
+    void TESObjectREFR_MarkAsDeleted();
+    void TESObjectREFR_AttachSound(bool a);
+    Ref* BGSSaveFormBuffer_GetForm();
+    void TESObjectREFR_Disable();
+    void DoDeathStuff();
+    void TESObjectCELL_AddScriptedRef(Ref* a);
+    bool TESForm_GetHasSpokenFlag();
 };
 struct ExtraList
 {
-    Ref* FUN_0041e310();
-    bool FUN_0041dbd0();
-    void* FUN_0041df90();
-    void FUN_0041de40(Ref* a);
+    Ref* ExtraDataList_GetAshPileRef();
+    bool ExtraDataList_ShouldPopInWhenEnabledByParent();
+    void* ExtraDataList_GetDroppedItemList();
+    void ExtraDataList_SetItemDropper(Ref* a);
 };
 struct Iter
 {
@@ -566,7 +566,7 @@ struct Proc
 };
 struct ObjX
 {
-    void FUN_00568020(int a);
+    void TESObjectREFR_SetMarkerUsed(int a);
     ObjX* FUN_00586170();
     void FUN_006fcfa0();
 };
@@ -577,17 +577,17 @@ struct Tes
 struct GlobalObj
 {
     void RemoveActor(Ref* a);
-    void FUN_0096d470(Ref* a, int b);
-    void FUN_0096f600(Ref* a, int b);
+    void ProcessLists_RemoveReference(Ref* a, int b);
+    void ProcessLists_NullOutTargetRef(Ref* a, int b);
 };
 extern Ref* DAT_011dea3c;
 extern Ref* DAT_011ca27c;
 extern Ref* DAT_011ca280;
 extern Tes* DAT_011dea10;
 extern GlobalObj DAT_011e0e80;
-void __cdecl FUN_008cddd0(Ref* a, int b);
-int __cdecl FUN_00570f60();
-void __cdecl FUN_00835980(Ref* a);
+void __cdecl ArrowProjectile_DeleteAttachedArrows(Ref* a, int b);
+int __cdecl ArrowProjectile_GetArrowCount();
+void __cdecl FalloutRadio_DisableNPCRadio(Ref* a);
 struct ObjectResolver
 {
     int unk00;
@@ -611,7 +611,7 @@ extern PathingdebuggeometryListNodeView DAT_011db150;
 extern int DAT_011f21cc;
 extern int DAT_011db0d4;
 void Callee_007ebd50();
-void __cdecl FUN_007f6a20(int a1);
+void __cdecl VATSMenu_RemoveTarget(int a1);
 
 struct PointJack
 {
@@ -693,7 +693,8 @@ struct JackGeometry
     void SetName(const NameJack&);
 };
 // @fnv 0x00c59200
-JackGeometry* __cdecl FUN_00c59200(float scale)
+// src: XBOX_PDB 0x00c59200
+JackGeometry* __cdecl BSTestObjects_CreateCoordinateJack(float scale)
 {
     PointJack* positions = new PointJack[6];
     positions[0] = PointJack(0, 0, 0);

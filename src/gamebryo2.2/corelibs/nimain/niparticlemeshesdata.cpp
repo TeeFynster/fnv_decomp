@@ -15,13 +15,15 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f5f0c;
 
 // @fnv 0x00a98b00
-GlobalObjectO2_00a7b610* __cdecl FUN_00a98b00()
+// src: COMMUNITY 0x00a98b00
+GlobalObjectO2_00a7b610* __cdecl NiParticleMeshesData_GetRTTI()
 {
     return &g_011f5f0c;
 }
 
 // @fnv 0x00a98a10
-void NiParticleMeshesData::FUN_00a98a10(NiStream& stream)
+// src: XBOX_PDB 0x00a98a10
+void NiParticleMeshesData::LoadBinary_00a98a10(NiStream& stream)
 {
     NiParticlesData::LoadBinary(stream);
     stream.ResetStreamState();
@@ -29,7 +31,8 @@ void NiParticleMeshesData::FUN_00a98a10(NiStream& stream)
 
 // Removes node children from usActive up to m_usActive, then clamps m_usActive to m_usVertices.
 // @fnv 0x00a98a30
-void NiParticleMeshesData::FUN_00a98a30(unsigned short usActive)
+// src: XBOX_PDB 0x00a98a30
+void NiParticleMeshesData::SetActiveVertexCount(unsigned short usActive)
 {
     unsigned short i;
     for (i = usActive; i < m_usActive; ++i)
@@ -42,7 +45,8 @@ void NiParticleMeshesData::FUN_00a98a30(unsigned short usActive)
 
 // Registers the base NiLinesData streamables, then registers the streamables of the node at offset 0x70; returns false if the base call fails.
 // @fnv 0x00a98a80
-bool NiParticleMeshesData::FUN_00a98a80(NiStream& kStream)
+// src: XBOX_PDB 0x00a98a80
+bool NiParticleMeshesData::RegisterStreamables_00a98a80(NiStream& kStream)
 {
     if (!((NiLinesData*)this)->NiLinesData::RegisterStreamables(kStream))
         return 0;
@@ -51,7 +55,8 @@ bool NiParticleMeshesData::FUN_00a98a80(NiStream& kStream)
 }
 
 // @fnv 0x00a98ab0
-void NiParticleMeshesData::FUN_00a98ab0(NiStream& kStream)
+// src: XBOX_PDB 0x00a98ab0
+void NiParticleMeshesData::SaveBinary_00a98ab0(NiStream& kStream)
 {
     NiNode* pkNode;
     NiParticlesData::SaveBinary(kStream);
@@ -78,7 +83,8 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volati
 
 // Links the object to kStream, then swaps m_spRootNode to the stream's object, releasing the old one and retaining the new one.
 // @fnv 0x00a98d60
-void NiParticleMeshesData::FUN_00a98d60(NiStream& kStream)
+// src: XBOX_PDB 0x00a98d60
+void NiParticleMeshesData::LinkObject_00a98d60(NiStream& kStream)
 {
     ((NiLinesData*)this)->NiLinesData::LinkObject(kStream);
     NiObject* pkNew = kStream.GetLoadedObject();
@@ -208,7 +214,8 @@ inline void* __cdecl operator new(unsigned int, void* where)
 }
 // Allocates a 0x78-byte object, constructs it, sets the bool at offset 0x40 to true, and returns it.
 // @fnv 0x00a98d30
-NiParticleMeshesData* __cdecl FUN_00a98d30()
+// src: EXE 0x00a98d30
+NiParticleMeshesData* __cdecl NiParticleMeshesData_CreateObject()
 {
     NiParticleMeshesData* pObject = ::new (NiMemObject::operator new(0x78)) NiParticleMeshesData();
     pObject->m_bHasRadii = true;
@@ -227,13 +234,14 @@ struct FUN_0096ad30_This
     void FUN_0096ae90(unsigned int, void*);
 };
 void __stdcall FUN_00a97420(void*);
-void* __cdecl FUN_00a7d330(void*);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
 // Calls FUN_00a97420 on p, fetches an item via FUN_00a7d330, grows the container if count reaches capacity, then stores the item at index count.
 // @fnv 0x00a98de0
-void __stdcall FUN_00a98de0(FUN_0096ad30_This* pContainer)
+// src: XBOX_PDB 0x00a98de0
+void __stdcall NiParticleMeshesData_GetViewerStrings(FUN_0096ad30_This* pContainer)
 {
     FUN_00a97420(pContainer);
-    void* item = FUN_00a7d330(*(void**)&g_011f5f0c);
+    void* item = NiViewerStrings_NiGetViewerString_Title(*(void**)&g_011f5f0c);
     unsigned int count = pContainer->m_uiItemCount;
     unsigned int capacity = pContainer->m_pRayCursor;
     if (count >= capacity)

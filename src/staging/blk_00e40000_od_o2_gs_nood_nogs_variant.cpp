@@ -41,7 +41,8 @@ static __forceinline float SafeAcos(float r)
 }
 
 // @fnv 0x00e52320
-void __cdecl FUN_00e52320(const RotationVector* rotation, unsigned int* packed)
+// src: GUESS 0x00e52320 (confidence: low)
+void __cdecl Object_UpdateFields_00e52320(const RotationVector* rotation, unsigned int* packed)
 {
     RotationVector value = *rotation;
     *packed = 0;
@@ -85,7 +86,8 @@ using ::_mm_and_ps;
 extern const LocalM128 DAT_01017d10;
 
 // @fnv 0x00e526f0
-void __cdecl FUN_00e526f0(const hkQuaternion* q, short* out)
+// src: GUESS 0x00e526f0 (confidence: low)
+void __cdecl hkQuaternion_ComputeValues_00e526f0(const hkQuaternion* q, short* out)
 {
     extern float packingScale;
     extern unsigned int scaleInitialized;
@@ -127,7 +129,8 @@ union __declspec(align(16)) PackedQuaternionOutput
     float components[4];
 };
 // @fnv 0x00e52920
-void FUN_00e52920(const unsigned char* p, PackedQuaternionOutput* output)
+// src: GUESS 0x00e52920 (confidence: low)
+void Object_UpdateFields_00e52920(const unsigned char* p, PackedQuaternionOutput* output)
 {
     static float scale;
     extern unsigned int scaleInitialized;
@@ -168,7 +171,8 @@ union __declspec(align(16)) PackedQuaternionOutput
     float components[4];
 };
 // @fnv 0x00e52c30
-void FUN_00e52c30(const unsigned char* p, PackedQuaternionOutput* output)
+// src: GUESS 0x00e52c30 (confidence: low)
+void Runtime_ComputeValues_00e52c30(const unsigned char* p, PackedQuaternionOutput* output)
 {
     static float scale;
     extern unsigned int scaleInitialized;
@@ -203,15 +207,16 @@ void FUN_00e52c30(const unsigned char* p, PackedQuaternionOutput* output)
 }
 }  // namespace fnv_00e52c30
 
-struct FNV_ALIGN(16) FUN_00dd1bf0
+struct FNV_ALIGN(16) hkpMoppObbVirtualMachine_queryObb
 {
     int m[16];
     void Query(int a1, int a2, int a3, float a4, int a5);
 };
 
 // @fnv 0x00e5cfe0
-void FUN_00e5cfe0(int a1, int a2, int a3, float a4, int a5)
+// src: HAVOK_LIB 0x00e5cfe0
+void _hkMoppObbVirtualMachine_queryObb(int a1, int a2, int a3, float a4, int a5)
 {
-    FUN_00dd1bf0 obj;
+    hkpMoppObbVirtualMachine_queryObb obj;
     obj.Query(a1, a2, a3, a4, a5);
 }

@@ -10,7 +10,8 @@ typedef union __declspec(intrin_type) __declspec(align(16)) {
 #include "havok/hkpStorageSampledHeightFieldShape.h"
 
 // @fnv 0x00d496b0
-int __stdcall FUN_00d496b0(int unused, int aiValue)
+// src: HAVOK_LIB 0x00d496b0
+int __stdcall hkpCompressedSampledHeightFieldShape_calcSizeForSpu(int unused, int aiValue)
 {
     int r = (aiValue >= 0x80);
     --r;
@@ -25,7 +26,7 @@ extern int DAT_010cfb34;
 struct FUN_00d496d0
 {
     int vtbl;
-    void FUN_00d24660();
+    void SetVirtualTable_00d24660();
     ~FUN_00d496d0();
 };
 
@@ -35,7 +36,7 @@ FUN_00d496d0::~FUN_00d496d0()
     *(void**)this = &DAT_010cfb34;
     if (*(char*)((char*)this + 0x70))
         Deallocate(*(void**)((char*)this + 0x60));
-    FUN_00d24660();
+    SetVirtualTable_00d24660();
 }
 
 #pragma pack(push, 4)

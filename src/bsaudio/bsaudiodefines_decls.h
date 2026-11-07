@@ -28,7 +28,7 @@ template <> __forceinline NiPointer<NiAVObject>::~NiPointer()
     if (m_pObject != 0)
         m_pObject->DecRefCount();
 }
-void __cdecl FUN_00c45830(NiAVObject*);
+void __cdecl NiObjectGarbage_Add(NiAVObject*);
 class SoundMessageRecord
 {
   public:

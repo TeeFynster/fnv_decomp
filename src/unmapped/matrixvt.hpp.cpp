@@ -103,14 +103,14 @@ struct Iterator
     void* unk00;
     void* unk04;
     void CopyPairTo(Cursor* pos, int flags);
-    bool FUN_0065dfd0(void* handle);
-    float* FUN_0064dbd0();
+    bool IsNotIdentical(void* handle);
+    float* ForwardCall_0064dbd0();
 };
 
 class Mgr
 {
   public:
-    void FUN_0044a170(Iterator* iter);
+    void SetIteratorDataAndOwner(Iterator* iter);
     void* CallWithSelf(Cursor* key);
     Mgr* ScaleAll(float scale);
 };
@@ -122,9 +122,9 @@ Mgr* Mgr::ScaleAll(float scale)
     Iterator iter;
     Cursor key;
     Cursor currentPos;
-    for (this->FUN_0044a170(&iter); iter.FUN_0065dfd0(this->CallWithSelf(&key)); iter.CopyPairTo(&currentPos, 0))
+    for (this->SetIteratorDataAndOwner(&iter); iter.IsNotIdentical(this->CallWithSelf(&key)); iter.CopyPairTo(&currentPos, 0))
     {
-        *iter.FUN_0064dbd0() *= scale;
+        *iter.ForwardCall_0064dbd0() *= scale;
     }
     return this;
 }

@@ -57,7 +57,8 @@ extern const S_00ce5070_Vector4 DAT_010c7170;
 
 // Copies rotation and translation from a Transform into the QsTransform, and sets scale to the constant DAT_010c7170.
 // @fnv 0x00ce5070
-void hkQsTransform::FUN_00ce5070(const hkTransform& akTransform)
+// src: COMMUNITY 0x00ce5070
+void hkQsTransform::setFromTransformNoScale(const hkTransform& akTransform)
 {
     m_rotation.FUN_00cb26e0(akTransform.m_rotation);
     m_vTranslation.m_vComponents = akTransform.m_vTranslation;
@@ -67,20 +68,21 @@ void hkQsTransform::FUN_00ce5070(const hkTransform& akTransform)
 class CB2FC0Object
 {
   public:
-    void FUN_00cb2d90(void* snapshot);
+    void hkRotation_set(void* snapshot);
 };
 
 class FUN_00ce50b0_cls
 {
   public:
-    void FUN_00ce50b0(CB2FC0Object* target);
+    void CopyRotationAndTranslationToTarget(CB2FC0Object* target);
 };
 
 // @fnv 0x00ce50b0
-void FUN_00ce50b0_cls::FUN_00ce50b0(CB2FC0Object* target)
+// src: GUESS 0x00ce50b0 (confidence: medium)
+void FUN_00ce50b0_cls::CopyRotationAndTranslationToTarget(CB2FC0Object* target)
 {
     Matrix* self = (Matrix*)this;
-    target->FUN_00cb2d90(&self->values[4]);
+    target->hkRotation_set(&self->values[4]);
     __m128 vMatrix = _mm_load_ps(self->values);
     _mm_store_ps((float*)((char*)target + 0x30), vMatrix);
 }
@@ -89,17 +91,17 @@ void FUN_00ce50b0_cls::FUN_00ce50b0(CB2FC0Object* target)
 struct FUN_008cd6a0_Class
 {
     hkVector4 row0, row1, row2;
-    void FUN_00cb2d90(void*);
+    void hkRotation_set(void*);
 };
 struct FUN_00cdf250_class
 {
     hkVector4 row0, row1, row2;
-    void FUN_00cd55b0(int*, int);
+    void hkMatrix3_setMul(int*, int);
 };
 struct TransformMatrix
 {
     hkVector4 row0, row1, row2, row3;
-    void FUN_00cb2050(int);
+    void CopyMaskedMatrixRows(int);
 };
 // hkQsTransform layout with float rotation/scale lanes (0x00ce51f0 builds an hkTransform from it); kept local because the body reads the lanes as floats.
 struct QsTransformFloats
@@ -107,14 +109,15 @@ struct QsTransformFloats
     hkVector4 position;
     float rotationX, rotationY, rotationZ, rotationW;
     float scaleX, scaleY, scaleZ;
-    void FUN_00ce51f0(int);
+    void BuildMatrixFromRotationScaleAndPosition(int);
 };
 // Builds a matrix from rotation, scale, and position, then passes out to FUN_00cb2050.
 // @fnv 0x00ce51f0
-void QsTransformFloats::FUN_00ce51f0(int out)
+// src: GUESS 0x00ce51f0 (confidence: medium)
+void QsTransformFloats::BuildMatrixFromRotationScaleAndPosition(int out)
 {
     FUN_008cd6a0_Class rotMatrix;
-    rotMatrix.FUN_00cb2d90(&rotationX);
+    rotMatrix.hkRotation_set(&rotationX);
     FUN_00cdf250_class scaleMatrix;
     *(__m128*)&scaleMatrix.row0 = _mm_setzero_ps();
     scaleMatrix.row0.x = scaleX;
@@ -123,13 +126,13 @@ void QsTransformFloats::FUN_00ce51f0(int out)
     *(__m128*)&scaleMatrix.row2 = _mm_setzero_ps();
     scaleMatrix.row2.z = scaleZ;
     FUN_00cdf250_class combinedMatrix;
-    combinedMatrix.FUN_00cd55b0((int*)&rotMatrix, (int)&scaleMatrix);
+    combinedMatrix.hkMatrix3_setMul((int*)&rotMatrix, (int)&scaleMatrix);
     TransformMatrix resultMatrix;
     *(__m128*)&resultMatrix.row0 = *(__m128*)&combinedMatrix.row0;
     *(__m128*)&resultMatrix.row1 = *(__m128*)&combinedMatrix.row1;
     *(__m128*)&resultMatrix.row2 = *(__m128*)&combinedMatrix.row2;
     *(__m128*)&resultMatrix.row3 = *(__m128*)&position;
-    resultMatrix.FUN_00cb2050(out);
+    resultMatrix.CopyMaskedMatrixRows(out);
 }
 
 struct S_00ce5290_Vector4
@@ -211,7 +214,7 @@ struct S_00ce5290_Result
     int unkEC;
 };
 
-void FUN_00d72e90(const void* input, S_00ce5290_Result* out);
+void hkMathUtil_decompose4x4ColTransform(const void* input, S_00ce5290_Result* out);
 
 struct S_00ce5290
 {
@@ -226,7 +229,7 @@ struct S_00ce5290
 S_00ce5290_Bool S_00ce5290::SetFromInput(const void* input)
 {
     __declspec(align(16)) S_00ce5290_Result result;
-    FUN_00d72e90(input, &result);
+    hkMathUtil_decompose4x4ColTransform(input, &result);
     m_v0.q() = result.m_v0.q();
     m_v1.q() = result.m_v1.q();
     m_v2.q() = result.m_v2.q();

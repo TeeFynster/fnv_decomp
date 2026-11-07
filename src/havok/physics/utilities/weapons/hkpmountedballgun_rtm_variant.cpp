@@ -89,11 +89,11 @@ struct FUN_00e45150_class
 {
     MBG* Initialize(int a);
 };
-void* __cdecl FUN_00c85750();
-void __cdecl FUN_00cb1260(void* dst, const void* src, int numBytes);
+void* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkString_memCpy(void* dst, const void* src, int numBytes);
 inline hkMemoryRouterQ_hkpmountedballgun_rtm_variant& getRouter()
 {
-    return *(hkMemoryRouterQ_hkpmountedballgun_rtm_variant*)FUN_00c85750();
+    return *(hkMemoryRouterQ_hkpmountedballgun_rtm_variant*)hkMemoryRouter_getInstance();
 }
 template <typename T> inline T* hkAllocateChunkQ(int n)
 {
@@ -121,7 +121,7 @@ template <typename T> struct hkQueueQ
         if (m_pRayCursor)
             hkDeallocateChunkQ<T>(m_data, m_pRayCursor);
     }
-    void FUN_00e45460(int n);
+    void hkQueue_hkpRigidBody_setCapacity(int n);
 };
 template struct hkQueueQ<hkpRigidBody*>;
 
@@ -161,7 +161,7 @@ struct __declspec(align(16)) S00e451b0_ZInfo
     float unk90, unk94, unk98, unk9c, unkA0, unkA4, unkA8, unkAc, unkB0;
     unsigned char unkB4, unkB5, unkB6, unkB7;
     int unkB8, unkBc;
-    void FUN_00cf5ea0();
+    void InitializePhysicsFields();
 };
 struct S00e451b0_ZBody
 {
@@ -173,7 +173,7 @@ struct S00e451b0_ZBody
     S00e451b0_SIMD::LocalM128 unk40, unk50, unk60, unk70, unk80;
     int unk90, unk94, unk98;
     float unk9c;
-    S00e451b0_ZBody* FUN_00ca8c90(S00e451b0_ZInfo*);
+    S00e451b0_ZBody* AllocateStorage_00ca8c90(S00e451b0_ZInfo*);
     void FUN_00c905b0();
 };
 struct S00e451b0_ZListener
@@ -189,38 +189,38 @@ struct S00e451b0_ZWorld
 {
     int unk00, unk04, unk08, unk0c;
     hkVector4 unk10;
-    void FUN_00c914d0(S00e451b0_ZBody*, int);
+    void hkpWorld_addEntity(S00e451b0_ZBody*, int);
     void ProcessTarget(bool*, S00e451b0_ZBody*);
 };
 namespace ZMem {
-__declspec(nothrow) hkMemoryRouterQ_hkpmountedballgun_rtm_variant& __cdecl FUN_00c85750();
+__declspec(nothrow) hkMemoryRouterQ_hkpmountedballgun_rtm_variant& __cdecl hkMemoryRouter_getInstance();
 }
 extern const float DAT_0102226c, DAT_01013ea4, DAT_0101df44;
 extern float DAT_010231a8, DAT_010181bc;
-void __cdecl FUN_00cf07a0(S00e451b0_ZSphere*, float, S00e451b0_ZInfo*);
+void __cdecl hkpInertiaTensorComputer_setShapeVolumeMassProperties(S00e451b0_ZSphere*, float, S00e451b0_ZInfo*);
 struct __declspec(align(16)) S00e451b0_ZCastResult
 {
     S00e451b0_SIMD::LocalM128 point, normal;
     unsigned int shapeKey;
     S00e451b0_ZBody* body;
 };
-int __cdecl FUN_00e464e0(S00e451b0_ZWorld*, const S00e451b0_SIMD::LocalM128*, float, const S00e451b0_SIMD::LocalM128*,
+int __cdecl hkpWorldq_CastSphereAndStoreHit(S00e451b0_ZWorld*, const S00e451b0_SIMD::LocalM128*, float, const S00e451b0_SIMD::LocalM128*,
                          S00e451b0_ZCastResult*);
-void __cdecl FUN_00e463d0(const S00e451b0_SIMD::LocalM128*, const S00e451b0_SIMD::LocalM128*, const hkVector4*, float,
+void __cdecl hkpFirstPersonGun_calcVelocityToTarget(const S00e451b0_SIMD::LocalM128*, const S00e451b0_SIMD::LocalM128*, const hkVector4*, float,
                           S00e451b0_SIMD::LocalM128*);
 struct S00e451b0_ZQueue
 {
     S00e451b0_ZBody** unk00;
     int unk04, unk08, unk0c, unk10;
-    void FUN_00e45460(int);
+    void hkQueue_hkpRigidBody_setCapacity(int);
     void push(S00e451b0_ZBody* body)
     {
         if (unk10 >= unk04)
         {
             if (unk04 == 0)
-                FUN_00e45460(8);
+                hkQueue_hkpRigidBody_setCapacity(8);
             else
-                FUN_00e45460(unk04 * 2);
+                hkQueue_hkpRigidBody_setCapacity(unk04 * 2);
         }
         if (unk0c == unk04)
             unk0c = 0;
@@ -239,10 +239,11 @@ struct S00e451b0_ZQueue
 };
 struct S00e451b0_ZGun : hkpMountedBallGun
 {
-    void FUN_00e451b0(S00e451b0_ZWorld*, const hkTransform*);
+    void hkpMountedBallGun_fireGun(S00e451b0_ZWorld*, const hkTransform*);
 };
 // @fnv 0x00e451b0
-void S00e451b0_ZGun::FUN_00e451b0(S00e451b0_ZWorld* world, const hkTransform* transform)
+// src: HAVOK_SRC 0x00e451b0
+void S00e451b0_ZGun::hkpMountedBallGun_fireGun(S00e451b0_ZWorld* world, const hkTransform* transform)
 {
     S00e451b0_SIMD::LocalM128 direction = *(const S00e451b0_SIMD::LocalM128*)&transform->m_rotation.m_kColumn0;
     S00e451b0_SIMD::LocalM128 start =
@@ -251,8 +252,8 @@ void S00e451b0_ZGun::FUN_00e451b0(S00e451b0_ZWorld* world, const hkTransform* tr
     S00e451b0_SIMD::LocalM128 end = S00e451b0_SIMD::_mm_add_ps(
         S00e451b0_SIMD::_mm_mul_ps(S00e451b0_SIMD::_mm_shuffle_ps(distance.q, distance.q, 0), direction), start);
     S00e451b0_ZInfo info;
-    info.FUN_00cf5ea0();
-    S00e451b0_ZSphere* sphere = (S00e451b0_ZSphere*)ZMem::FUN_00c85750().heap().blockAlloc(0x20);
+    info.InitializePhysicsFields();
+    S00e451b0_ZSphere* sphere = (S00e451b0_ZSphere*)ZMem::hkMemoryRouter_getInstance().heap().blockAlloc(0x20);
     sphere->unk04 = 0x20;
     sphere = sphere->FUN_00cd8160(m_fBulletRadius);
     info.unk90 = m_fBulletMass;
@@ -265,14 +266,14 @@ void S00e451b0_ZGun::FUN_00e451b0(S00e451b0_ZWorld* world, const hkTransform* tr
     info.unkB7 = 6;
     info.unk10 = position;
     info.unkB4 = 2;
-    FUN_00cf07a0(sphere, m_fBulletMass * 2.0f, &info);
+    hkpInertiaTensorComputer_setShapeVolumeMassProperties(sphere, m_fBulletMass * 2.0f, &info);
     info.unk90 = m_fBulletMass;
     info.unk94 = 0.0f;
     info.unk98 = DAT_010231a8;
     S00e451b0_ZCastResult target;
-    if (!FUN_00e464e0(world, &start, DAT_010181bc, &end, &target))
+    if (!hkpWorldq_CastSphereAndStoreHit(world, &start, DAT_010181bc, &end, &target))
     {
-        FUN_00e463d0(&info.unk10, &target.point, &world->unk10, m_fBulletVelocity, &info.unk30);
+        hkpFirstPersonGun_calcVelocityToTarget(&info.unk10, &target.point, &world->unk10, m_fBulletVelocity, &info.unk30);
     }
     else
     {
@@ -282,14 +283,14 @@ void S00e451b0_ZGun::FUN_00e451b0(S00e451b0_ZWorld* world, const hkTransform* tr
     S00e451b0_SIMD::LocalM128 hit = target.point;
     for (int i = 0; i < m_kListeners.m_iElementCount; ++i)
         ((S00e451b0_ZListener**)m_kListeners.m_data)[i]->v14(posPtr, &hit);
-    S00e451b0_ZBody* body = (S00e451b0_ZBody*)ZMem::FUN_00c85750().heap().blockAlloc(0x220);
+    S00e451b0_ZBody* body = (S00e451b0_ZBody*)ZMem::hkMemoryRouter_getInstance().heap().blockAlloc(0x220);
     body->unk04 = 0x220;
-    body = body->FUN_00ca8c90(&info);
+    body = body->AllocateStorage_00ca8c90(&info);
     info.unk04->FUN_00c905b0();
     body->unk9c = m_fBulletSpread;
     for (int i = 0; i < m_kListeners.m_iElementCount; ++i)
         ((S00e451b0_ZListener**)m_kListeners.m_data)[i]->vC(body);
-    world->FUN_00c914d0(body, 1);
+    world->hkpWorld_addEntity(body, 1);
     ((S00e451b0_ZQueue*)m_pBulletQueue)->push(body);
     if (((S00e451b0_ZQueue*)m_pBulletQueue)->unk10 > m_iBulletBatchCount)
     {

@@ -21,7 +21,8 @@ typedef __declspec(align(16)) double VectorStorage[2];
 extern "C" void* DAT_011b5ff0;
 
 // @fnv 0x00d66bd0
-void __stdcall FUN_00d66bd0(void** pOut, void** pCount)
+// src: HAVOK_LIB 0x00d66bd0
+void __stdcall hkpMousePickingViewer_getConsumableCommands(void** pOut, void** pCount)
 {
     *pOut = &DAT_011b5ff0;
     *pCount = (void*)3;
@@ -37,11 +38,12 @@ struct FUN_00d66cb0_class
     int m0;
     int m4;
     int m8;
-    void FUN_00d66cb0(int a);
+    void hkpMousePickingViewer_worldRemovedCallback(int a);
 };
 
 // @fnv 0x00d66cb0
-void FUN_00d66cb0_class::FUN_00d66cb0(int aiValue)
+// src: HAVOK_LIB 0x00d66cb0
+void FUN_00d66cb0_class::hkpMousePickingViewer_worldRemovedCallback(int aiValue)
 {
     if (aiValue == *(int*)((char*)this + 8))
         ((FUN_00d66c10_class*)((char*)this - 0x20))->RemoveAmbientLight();
@@ -60,7 +62,7 @@ class hkpMousePickingViewer : public hkpWorldViewerBase
   public:
     virtual ~hkpMousePickingViewer() throw();
     __declspec(noinline) hkpMousePickingViewer* Initialize(int contexts);
-    void FUN_00d66c10() throw();
+    void hkpMousePickingViewer_releaseObject() throw();
 
     hkpPhysicsContext* m_iValueAtOffset0C;
     unsigned int unk20;
@@ -83,27 +85,29 @@ hkpMousePickingViewer* hkpMousePickingViewer::Initialize(int contexts)
 
 extern int DAT_01269cd0;
 extern int DAT_01268ff8;
-void __cdecl FUN_00d66c50();
+void __cdecl hkpMousePickingViewer_create();
 // @fnv 0x00d66c90
 void* __cdecl RegisterMousePicking()
 {
-    DAT_01268ff8 = (int)((hkProcessFactory*)DAT_01269cd0)->RegisterProcess("Mouse Picking", (void*)FUN_00d66c50);
+    DAT_01268ff8 = (int)((hkProcessFactory*)DAT_01269cd0)->RegisterProcess("Mouse Picking", (void*)hkpMousePickingViewer_create);
     return (void*)DAT_01268ff8;
 }
 
 extern int DAT_01268ff8;
 
 // @fnv 0x00d66ed0
-int __cdecl FUN_00d66ed0()
+// src: GUESS 0x00d66ed0 (confidence: low)
+int __cdecl Hkpmousepickingviewer_GetDAT01268ff8()
 {
     return DAT_01268ff8;
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 // @fnv 0x00d66c50
-void* __cdecl FUN_00d66c50(unsigned int value)
+// src: XBOX_PDB 0x00d66c50
+void* __cdecl hkpMousePickingViewer_create(unsigned int value)
 {
-    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryRouter* holder = hkMemoryRouter_getInstance();
     FUN_00d66cd0::hkpMousePickingViewer* block = static_cast<FUN_00d66cd0::hkpMousePickingViewer*>(
         holder->m_heap->blockAlloc(sizeof(FUN_00d66cd0::hkpMousePickingViewer)));
     block->m_usMemSizeAndFlags = sizeof(FUN_00d66cd0::hkpMousePickingViewer);
@@ -116,7 +120,7 @@ void* __cdecl FUN_00d66c50(unsigned int value)
 namespace fnv_00d66d00 {
 typedef unsigned __int64 hkUint64D66D;
 
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 // These entry points are absent from the shared class declarations.
 extern "C" void ConstructMouseSpringAction();
@@ -135,7 +139,7 @@ static __forceinline hkMemoryAllocator& MouseSpringHeap(hkMemoryRouter* holder)
 
 static __forceinline void* AllocateMouseSpringStorage(unsigned int size)
 {
-    void* memory = MouseSpringHeap(FUN_00c85750()).blockAlloc(size);
+    void* memory = MouseSpringHeap(hkMemoryRouter_getInstance()).blockAlloc(size);
     static_cast<unsigned short*>(memory)[2] = static_cast<unsigned short>(size);
     return memory;
 }
@@ -169,7 +173,7 @@ hkBool MousePickD66D::PickEntity(hkUint64D66D uiCollidableUserData, const hkVect
             {
                 VectorStorage positionStorage;
                 hkVector4& kPositionInRbLocal = *reinterpret_cast<hkVector4*>(&positionStorage);
-                kPositionInRbLocal.FUN_00c7f690(pkEntity->m_pMotionState.m_kMotionState.m_kMotionTransform, kPositionInWorld);
+                kPositionInRbLocal.hkVector4_setTransformedInversePos(pkEntity->m_pMotionState.m_kMotionState.m_kMotionTransform, kPositionInWorld);
                 hkpMouseSpringAction* spring = static_cast<hkpMouseSpringAction*>(
                     AllocateMouseSpringStorage(sizeof(hkpMouseSpringAction)));
                 m_pkMouseSpring = reinterpret_cast<MouseSpringConstructor>(&ConstructMouseSpringAction)(
@@ -187,8 +191,8 @@ struct Derived;
 
 struct Stream
 {
-    void FUN_00ddac60(void* vec);
-    int FUN_00dd8fe0(void* buf, int size, int count);
+    void readQuadVector4(void* vec);
+    int hkIArchive_readArrayGeneric(void* buf, int size, int count);
     char* GetStreamResult(char* buf);
 };
 
@@ -201,12 +205,12 @@ struct Base2
     {
         return (Derived*)((char*)this - 8);
     }
-    void FUN_00d66e10(unsigned char type);
+    void hkpMousePickingViewer_consumeCommand(unsigned char type);
 };
 
 struct Derived
 {
-    void FUN_00d66c10();
+    void hkpMousePickingViewer_releaseObject();
     void DispatchToChild(void* vec);
     void PickEntity(char* str, int a, int b, void* vec);
 };
@@ -217,7 +221,8 @@ struct Buf4
 };
 
 // @fnv 0x00d66e10
-void Base2::FUN_00d66e10(unsigned char type)
+// src: HAVOK_LIB 0x00d66e10
+void Base2::hkpMousePickingViewer_consumeCommand(unsigned char type)
 {
     Buf4 buf;
     union
@@ -234,10 +239,10 @@ void Base2::FUN_00d66e10(unsigned char type)
     switch (type)
     {
     case 0xb2:
-        getDerived()->FUN_00d66c10();
+        getDerived()->hkpMousePickingViewer_releaseObject();
         return;
     case 0xb1: {
-        stream->FUN_00ddac60(&u.b1_vec);
+        stream->readQuadVector4(&u.b1_vec);
         if (stream->GetStreamResult(&buf.b1)[0])
         {
             getDerived()->DispatchToChild(&u.b1_vec);
@@ -245,8 +250,8 @@ void Base2::FUN_00d66e10(unsigned char type)
         return;
     }
     case 0xb0: {
-        stream->FUN_00ddac60(&u.b0.vec);
-        stream->FUN_00dd8fe0(&u.b0.pair0, 8, 1);
+        stream->readQuadVector4(&u.b0.vec);
+        stream->hkIArchive_readArrayGeneric(&u.b0.pair0, 8, 1);
         if (stream->GetStreamResult(&buf.b2)[0])
         {
             getDerived()->PickEntity(&buf.b3, u.b0.pair0, u.b0.pair1, &u.b0.vec);
@@ -259,7 +264,7 @@ void Base2::FUN_00d66e10(unsigned char type)
 }
 
 namespace fnv_00d66f00 {
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00d66f00_CpuObject
 {
     unsigned int unk00;
@@ -274,7 +279,7 @@ FnvCpu_FUN_00d66f00_CpuObject* FnvCpu_FUN_00d66f00_CpuObject::FUN_00d66f00(unsig
     FUN_00d66cd0();
     if (flags & 1)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         holder->m_heap->blockFree(this, size);
     }
     return this;
@@ -291,18 +296,19 @@ class FUN_00d66c10_cls
     hkpWorld* m_pOwningWorld;
     hkpUnaryAction* m_pEntity;
 
-    void FUN_00d66c10();
+    void hkpMousePickingViewer_releaseObject();
 };
 
 // @fnv 0x00d66c10
-void FUN_00d66c10_cls::FUN_00d66c10()
+// src: HAVOK_LIB 0x00d66c10
+void FUN_00d66c10_cls::hkpMousePickingViewer_releaseObject()
 {
     if (m_pEntity)
     {
         if (m_pEntity->m_pOwningWorld)
         {
             reinterpret_cast<WorldActionRemover>(&RemoveMouseSpringAction)(m_pOwningWorld, m_pEntity);
-            m_pEntity->m_pEntity->FUN_00c9c1d0();
+            m_pEntity->m_pEntity->activate_00c9c1d0();
             m_pEntity->removeReference();
         }
         else
@@ -318,7 +324,7 @@ namespace FUN_00d66cd0 {
 // @fnv 0x00d66cd0
 hkpMousePickingViewer::~hkpMousePickingViewer() throw()
 {
-    FUN_00d66c10();
+    hkpMousePickingViewer_releaseObject();
 }
 }
 
@@ -326,7 +332,7 @@ namespace fnv_00d66ee0 {
 // sub ecx,0x20; jmp target: MSVC adjustor thunk for the secondary base (PrimaryBase is 0x20 bytes).
 struct PrimaryBase
 {
-    virtual void FUN_00d66ee0();
+    virtual void AdjustThisAndForward_00d66ee0();
     int unk04;
     int unk08;
     int unk0C;
@@ -338,14 +344,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00d66ee0();
+    virtual void AdjustThisAndForward_00d66ee0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00d66ee0
-    virtual void FUN_00d66ee0();
+// src: GUESS 0x00d66ee0 (confidence: low)
+    virtual void AdjustThisAndForward_00d66ee0();
 };
 
 Derived::Derived()

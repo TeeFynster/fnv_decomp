@@ -58,9 +58,9 @@ class MemoryManager
 
     void CreatePool(unsigned int blockSize, unsigned int poolSize, char* description);
     void CreateMemoryPool(unsigned int blockSize, unsigned int poolSize, const char* description);
-    void FUN_00866770();
+    void SpecifyPools();
     void FUN_00e00008(void* pointer, unsigned short type);
-    void* FUN_00aa3e40(unsigned int size);
+    void* Game_DoHeapAlloc(unsigned int size);
     bool available(int size);
     void slot0();
     void slot1();
@@ -119,7 +119,7 @@ class MemoryManager
         return iNumHeaps + iNumPhysicalHeaps;
     }
     void* GetEntryAt(unsigned int index);
-    void FUN_00aa43a0(int unused);
+    void CheckMemoryIntegrity_00aa43a0(int unused);
     void FUN_00483710();
     IMemoryHeap* GetHeapByIndex(unsigned int index);
     IMemoryHeap* GetHeapForPointer(const void* pointer);

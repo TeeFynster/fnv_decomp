@@ -26,17 +26,17 @@ typedef ::__m128 LocalM128;
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct FUN_00622430_shell
 {
-    unsigned int __thiscall FUN_00622430();
+    unsigned int __thiscall bhkTransformShape_GetCInfoSize();
 };
 extern NiRTTI g_011d5e70;
 struct FUN_0066b5b0_shell
 {
     const NiRTTI* __thiscall GetNiRTTI();
 };
-extern "C" unsigned char __cdecl FUN_0054ee20();
+extern "C" unsigned char __cdecl BSTreeManager_GetTreesEnabled();
 struct DummyNode
 {
-    void __thiscall FUN_00a5dbe0(NiCullingProcess* arCuller);
+    void __thiscall NiNode_OnVisible(NiCullingProcess* arCuller);
     void __thiscall FUN_0066bf50(NiCullingProcess* arCuller);
 };
 struct FUN_00c6c290_holder
@@ -45,7 +45,7 @@ struct FUN_00c6c290_holder
 };
 struct FUN_0066d410_shell : public FUN_00c6c290_holder
 {
-    void FUN_0066d410();
+    void ForwardCall_0066d410();
 };
 extern const NiRTTI g_012683d0;
 struct FUN_0066d430_shell
@@ -55,17 +55,17 @@ struct FUN_0066d430_shell
 void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 struct FUN_0066d440_shell
 {
-    void FUN_0066d470();
+    void ForwardCall_0066d470();
     void* FUN_0066d440(unsigned int flags);
 };
 struct FUN_0066d470_shell
 {
-    void FUN_0066d410();
-    void FUN_0066d470();
+    void ForwardCall_0066d410();
+    void ForwardCall_0066d470();
 };
 struct FUN_0066d510_shell
 {
-    const void* FUN_0066d510();
+    const void* bhkMultiSphereShape_GetRTTI();
 };
 extern const void* g_012683e0;
 struct FUN_0066d520_shell
@@ -107,7 +107,7 @@ struct FUN_0066d400_shell
 };
 struct HC1Base
 {
-    bool FUN_00aa0ad0(NiStream*);
+    bool BSPackedAdditionalGeometryData_RegisterStreamables(NiStream*);
 };
 struct VirtCls
 {
@@ -148,7 +148,7 @@ struct S_00c8c390
 {
     char _0[8];
     Mid14* p8;
-    bool FUN_00c8c390(NiStream*);
+    bool bhkTransformShape_RegisterStreamables(NiStream*);
 };
 struct S_00c8c810_A
 {
@@ -169,9 +169,9 @@ struct H_00c8c810
 {
     char _p[8];
     S_00c8c810_C* p;
-    void __thiscall FUN_00c84e50(bool);
-    void __thiscall FUN_00c8c770();
-    void __thiscall FUN_00c8c810(bool);
+    void __thiscall bhkShape_Link(bool);
+    void __thiscall bhkTransformShape_RembhkShapeRef();
+    void __thiscall bhkTransformShape_Link(bool);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 struct Inner00cb7750
@@ -179,7 +179,7 @@ struct Inner00cb7750
     int _00;
     int _04;
     int m_08;
-    void __thiscall FUN_00c9ec60(NiTransform*);
+    void __thiscall bhkShapePhantom_GetTransform_00c9ec60(NiTransform*);
 };
 struct S00cb7750
 {
@@ -281,11 +281,11 @@ struct S00cb7750
     int _08;
     int _0C;
     Inner00cb7750* m_10;
-    void __thiscall FUN_00cb7750();
+    void __thiscall bhkSPCollisionObject_hktoNiTransform();
 };
-void* __fastcall FUN_00c6b910(void*);
+void* __fastcall NiRTTI_UpdateState_00c6b910(void*);
 extern int DAT_01066b94;
-BSFadeNode* FUN_00c87fc0();
+BSFadeNode* bhkPCollisionObject_CreateObject();
 struct Middle
 {
     int unk00;
@@ -297,12 +297,12 @@ struct This
     int unk00;
     int unk04;
     Middle* middle;
-    void FUN_00c84e20(unsigned int* output);
+    void bhkShape_CopyCinfo(unsigned int* output);
 };
 struct LegacyLinker : NiCollisionObject
 {
     void FUN_00c6bb70(NiStream*);
-    void FUN_00c87f80(NiStream*);
+    void bhkPCollisionObject_LinkObject(NiStream*);
 };
 struct C8C330Source
 {
@@ -368,8 +368,8 @@ struct C8C330Owner
     virtual void vfunc0B0();
     virtual C8C330Child* GetOrCreateChild(bool* pbCreated);
 
-    void FUN_00c84cc0(C8C330Node* pkNode);
-    void FUN_00c8c330(C8C330Node* pkNode);
+    void bhkShape_LinkObject(C8C330Node* pkNode);
+    void bhkTransformShape_LinkObject(C8C330Node* pkNode);
 };
 typedef unsigned int C8CA60size_t;
 struct C8CA60MemoryManager
@@ -416,18 +416,18 @@ struct C8CA60Owner
     void* m_pParentNode;
     C8CA60Child* m_pkChild;
 
-    void FUN_00c8c410(C8CA60Child* pkChild);
-    C8CA60Child* FUN_00c8ca60(bool* pbCreated);
+    void bhkTransformShape_CopyCinfo(C8CA60Child* pkChild);
+    C8CA60Child* bhkTransformShape_CreateCinfo(bool* pbCreated);
 };
 struct NativeTransform
 {
     float rotation[12];
     float translation[4];
 };
-void __cdecl FUN_00624b10(NiTransform*, NiPoint3*);
+void __cdecl HK2NI_00624b10(NiTransform*, NiPoint3*);
 void __cdecl FUN_00458620(NiPoint3*, const float*);
 extern NativeTransform DAT_01268370;
-char* __cdecl FUN_00a7d330(void*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
 extern unsigned int DAT_0126fd98;
 extern __declspec(thread) unsigned int currentTask;
 struct Component
@@ -474,8 +474,8 @@ struct Object
 {
     unsigned int unk00, unk04;
     State* state;
-    void FUN_00c851c0(StrArr*);
-    void FUN_00c8cb20(StrArr*);
+    void bhkShape_GetViewerStrings(StrArr*);
+    void bhkTransformShape_GetViewerStrings(StrArr*);
     Component* getComponent()
     {
         if (this)
@@ -516,7 +516,7 @@ template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(co
 }
 
 typedef NiTArray<char*, NiTMallocInterface<char*> > CB7800StringArray;
-extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
+extern "C" char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcText);
 extern __declspec(thread) int g_CB7800AllocTag;
 struct CB7800AllocTagScope
 {
@@ -540,7 +540,7 @@ struct CB7800Object : CB7800Base
 {
     static CB7800RTTI ms_kRTTI;
 
-    void FUN_00cb7800(CB7800StringArray* pkStrings);
+    void bhkSPCollisionObject_AddViewerStrings(CB7800StringArray* pkStrings);
 };
 struct S_00cb78b0_Base
 {
@@ -549,11 +549,11 @@ struct S_00cb78b0_Base
 struct FUN_00cb78b0 : S_00cb78b0_Base
 {
     static int ms_count;
-    void FUN_00c876a0();
+    void bhkSerializable_Kill();
     virtual ~FUN_00cb78b0();
 };
-void FUN_00c876f0();
-void FUN_00c87700();
+void bhkSerializable_CloneCritLock();
+void bhkSerializable_CloneCritUnlock();
 extern int DAT_012680f8;
 extern int DAT_01268274;
 extern int DAT_012683dc;
@@ -646,10 +646,10 @@ struct S_00cb79d0
     virtual void v047();
     virtual void v048();
     virtual void v049(S_00cb79d0_Base* obj, int arg);
-    S_00cb79d0_C* FUN_00cb79d0(int arg);
+    S_00cb79d0_C* bhkMultiSphereShape_CreateClone(int arg);
 };
 void SwapByteQuadWords(void* buffer, int words);
-void __cdecl FUN_00cf0930(void* buffer, int bytes, NiPoint3* vector);
+void __cdecl bhkStream_SwapHKArray(void* buffer, int bytes, NiPoint3* vector);
 struct TlsBlock_t
 {
     int unk000;
@@ -845,8 +845,8 @@ struct TlsGuard_t
 };
 struct FUN_00c88210_cls
 {
-    void __thiscall FUN_00c6ba30(BSFadeNode* node, unsigned int flags);
-    BSFadeNode* FUN_00c88210(unsigned int flags);
+    void __thiscall bhkNiCollisionObject_CopyMembers(BSFadeNode* node, unsigned int flags);
+    BSFadeNode* bhkPCollisionObject_CreateClone(unsigned int flags);
 };
 extern __declspec(thread) int g_iC882C0AllocTag;
 struct BC882C0AllocTagScope
@@ -865,12 +865,12 @@ struct BC882C0AllocTagScope
 };
 typedef NiTArray<char*, NiTMallocInterface<char*> > BC882C0StringArray;
 extern const char* g_pcC882C0Name;
-char* __cdecl FUN_00a7d330(const char* pcString);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcString);
 class FUN_00c882c0_cls
 {
   public:
     void C882C0BaseGetViewerStrings(BC882C0StringArray* pkArray);
-    void FUN_00c882c0(BC882C0StringArray* pkArray);
+    void bhkPCollisionObject_AddViewerStrings(BC882C0StringArray* pkArray);
 };
 struct ScaleMatrix
 {
@@ -943,8 +943,8 @@ struct FUN_00caaea0_shell
     virtual void v43() = 0;
     virtual void v44() = 0;
     virtual ScaleMatrix* getMatrix(bool* outFlag) = 0;
-    void FUN_00c84df0(void* context, SourceObject* source);
-    void FUN_00caaea0(void* context, SourceObject* source);
+    void bhkShape_CopyMembers(void* context, SourceObject* source);
+    void bhkCapsuleShape_CopyMembers(void* context, SourceObject* source);
 };
 struct S_00caaf40_Tls
 {
@@ -1137,8 +1137,8 @@ struct S_00caaf40_Ctx
         DAT_tls.ctx = saved;
     }
 };
-void FUN_00c876f0();
-void FUN_00c87700();
+void bhkSerializable_CloneCritLock();
+void bhkSerializable_CloneCritUnlock();
 struct S_00caaf40_Obj
 {
     int unk00;
@@ -1201,7 +1201,7 @@ struct S_00caaf40
     virtual void vfn_bc();
     virtual void vfn_c0();
     virtual void vfn_c4(S_00caaf40_Obj* o, int a);
-    S_00caaf40_Obj* FUN_00caaf40(int a);
+    S_00caaf40_Obj* bhkCapsuleShape_CreateClone(int a);
 };
 struct AudioTlsState
 {
@@ -1242,7 +1242,7 @@ struct Heap
         return unk10->Alloc(size);
     }
 };
-Heap* FUN_00c85750();
+Heap* hkMemoryRouter_getInstance();
 struct FUN_00d22590
 {
     int unk00;
@@ -1266,7 +1266,7 @@ struct FUN_00d22590
     void FUN_00c905b0();
     static void* operator new(unsigned int size)
     {
-        FUN_00d22590* p = (FUN_00d22590*)FUN_00c85750()->Alloc(size);
+        FUN_00d22590* p = (FUN_00d22590*)hkMemoryRouter_getInstance()->Alloc(size);
         p->unk04 = (short)size;
         return p;
     }
@@ -1310,7 +1310,7 @@ struct Owner
     virtual void f33();
     virtual void f34();
     virtual void AddElement(FUN_00d22590* e);
-    void FUN_00cab0e0(int a, int b, float c);
+    void bhkCapsuleShape_Init(int a, int b, float c);
 };
 struct FUN_00cb7790_node
 {
@@ -1348,13 +1348,13 @@ struct FUN_00cb7790_receiver
     unsigned int unk00;
     unsigned int unk04;
     void* object;
-    void __thiscall FUN_0056df20(NiTransform*);
+    void __thiscall bhkShapePhantom_SetTransform(NiTransform*);
 };
 struct FUN_00cb7790_state
 {
     unsigned int owner;
     unsigned int depth;
-    void __thiscall FUN_0040fbf0(int);
+    void __thiscall BSSpinLock_Lock(int);
 };
 extern FUN_00cb7790_state DAT_01267b80;
 struct FUN_00cb7790_class
@@ -1364,7 +1364,7 @@ struct FUN_00cb7790_class
     FUN_00cb7790_node* node;
     unsigned int unk0C;
     FUN_00cb7790_receiver* receiver;
-    void __thiscall FUN_00cb7790();
+    void __thiscall bhkSPCollisionObject_NitohkTransform();
 };
 // FUN_00cb7920 - factory for a bhkMultiSphereShape.
 //
@@ -1409,7 +1409,7 @@ struct Guard
 };
 void* __cdecl opnew(unsigned int);
 void __cdecl opdelete(void*);
-Node* FUN_00cb7920();
+Node* bhkMultiSphereShape_CreateObject();
 struct Shader
 {
     virtual void f00();
@@ -1458,16 +1458,16 @@ struct Shader
     virtual void f43();
     virtual void f44();
     virtual int* f45(struct Pass** pass);
-    void FUN_00c84d00(struct Pass* pass);
-    void FUN_00cb7b20(struct Pass* pass);
+    void bhkShape_LoadBinary(struct Pass* pass);
+    void bhkMultiSphereShape_LoadBinary(struct Pass* pass);
 };
 struct Pass
 {
     int unk000;
     char unk004;
 };
-void FUN_00cf0930(int* a, int b, int* c);
-void FUN_00cf0f40(Pass* pass, int* b);
+void bhkStream_SwapHKArray(int* a, int b, int* c);
+void bhkStream_LoadBinary(Pass* pass, int* b);
 struct A1Owner
 {
     unsigned int unk00;
@@ -1604,8 +1604,8 @@ struct OwnerB
     unsigned int unk00;
     Triple m04;
 };
-void __cdecl FUN_00cf0930(void* a, void* b, void* c);
-void __cdecl FUN_00cf0cf0(void* a, void* b);
+void __cdecl bhkStream_SwapHKArray(void* a, void* b, void* c);
+void __cdecl bhkStream_SaveBinary(void* a, void* b);
 struct TmpGuard
 {
     unsigned int m0;
@@ -1620,7 +1620,7 @@ struct TmpGuard
     }
     ~TmpGuard()
     {
-        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         m1 = 0;
         if ((m2 & 0x80000000u) == 0)
@@ -1678,8 +1678,8 @@ struct FUN_00cb8010_cls
     virtual void vB0();
     virtual OwnerB* v45(unsigned char* pFlag);
 
-    void __thiscall FUN_00c84d50(A1Owner* a1);
-    void __thiscall FUN_00cb8010(A1Owner* a1);
+    void __thiscall bhkShape_SaveBinary(A1Owner* a1);
+    void __thiscall bhkMultiSphereShape_SaveBinary(A1Owner* a1);
 };
 struct CTarget
 {
@@ -1758,9 +1758,9 @@ struct CObj
     int unk04;
     CLevel1* unk08;
 
-    bool __thiscall FUN_00c8c3d0(int value);
+    bool __thiscall bhkTransformShape_CanShare(int value);
 };
-bool __stdcall FUN_00c84ec0(void* value);
+bool __stdcall bhkShape_CanShare(void* value);
 inline bool Walk(CObj* o, int v, bool r)
 {
     if (o)
@@ -1780,12 +1780,12 @@ inline bool Walk(CObj* o, int v, bool r)
     return r;
 }
 extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long);
-void __cdecl FUN_00c8c020(unsigned int* apData);
+void __cdecl bhkStream_Endian(unsigned int* apData);
 struct FUN_00c8c1e0_arg
 {
     int unk00;
     unsigned int m04;
-    void FUN_00a645b0();
+    void ReadLinkID();
     int unk08;
     int unk0C;
     int unk10;
@@ -1939,7 +1939,7 @@ struct FUN_00c8c1e0_rec
     int unk0C;
     FUN_00c8c1e0_sub sub;
 };
-extern "C" void __cdecl FUN_00c8c020(void* p);
+extern "C" void __cdecl bhkStream_Endian(void* p);
 struct FUN_00c8c1e0_cls
 {
     virtual void v00()
@@ -2033,8 +2033,8 @@ struct FUN_00c8c1e0_cls
     virtual void v44()
     {}
     virtual FUN_00c8c1e0_rec* GetRec(FUN_00c8c1e0_arg*& a);
-    void FUN_00c84d00(FUN_00c8c1e0_arg* a);
-    void FUN_00c8c1e0(FUN_00c8c1e0_arg* a1);
+    void bhkShape_LoadBinary(FUN_00c8c1e0_arg* a);
+    void bhkTransformShape_LoadBinary(FUN_00c8c1e0_arg* a1);
 };
 struct C8C260Block
 {
@@ -2045,7 +2045,7 @@ struct C8C260Block
     int m_kHeader[12];
     unsigned int m_iSlotIds[4];
 };
-void __cdecl FUN_00c8c020(int* header);
+void __cdecl bhkStream_Endian(int* header);
 inline void C8C260Swap32(unsigned int* p)
 {
     *p = _byteswap_ulong(*p);
@@ -2198,7 +2198,7 @@ inline void C8C260Prepare(C8C260Block* block, C8C260Renderer* pkRenderer)
         C8C260Swap32((unsigned int*)(header + 13));
         C8C260Swap32((unsigned int*)(header + 14));
         C8C260Swap32((unsigned int*)(header + 15));
-        FUN_00c8c020(header);
+        bhkStream_Endian(header);
     }
 }
 struct C8C260Inner
@@ -2268,8 +2268,8 @@ struct C8C260Shader
     int unk04;
     C8C260Link* m_link;
 
-    void FUN_00c84d50(C8C260Renderer* pkRenderer);
-    void FUN_00c8c260(C8C260Renderer* pkRenderer);
+    void bhkShape_SaveBinary(C8C260Renderer* pkRenderer);
+    void bhkTransformShape_SaveBinary(C8C260Renderer* pkRenderer);
 };
 inline void* C8C260GetTarget(C8C260Shader* p)
 {
@@ -2279,12 +2279,12 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volati
 typedef void(__thiscall* ReleaseFn_t)(S_00c8c810_A* apObj);
 struct CollisionStreamLoader : NiCollisionObject
 {
-    void __thiscall FUN_00c6c330(NiStream& stream);
+    void __thiscall bhkNiCollisionObject_LoadBinary(NiStream& stream);
     void __thiscall FUN_00a80fd0(NiStream& stream);
 };
 struct LegacyCollisionLoader : CollisionStreamLoader
 {
-    void __thiscall FUN_00c87f60(NiStream& stream);
+    void __thiscall bhkPCollisionObject_LoadBinary(NiStream& stream);
 };
 
 #include <xmmintrin.h>
@@ -2311,7 +2311,7 @@ struct Sphere
 {
     hkVector4 center;
 };
-extern "C" void __cdecl FUN_00d230e0(const Sphere*, LocalM128*, LocalM128*, LocalM128*);
+extern "C" void __cdecl hkLineSegmentUtil_closestPointLineSeg(const Sphere*, LocalM128*, LocalM128*, LocalM128*);
 extern const float DAT_01011d78;
 extern const float DAT_01017718;
 extern const float DAT_01016248;
@@ -2376,7 +2376,7 @@ bool bhkCapsuleShape::GetClosestPoints(const hkSphere& sphereArg, const hkTransf
         endpoints[i] = _mm_add_ps(y, z);
     }
     LocalM128 closest;
-    FUN_00d230e0(sphere, &endpoints[0], &endpoints[1], &closest);
+    hkLineSegmentUtil_closestPointLineSeg(sphere, &endpoints[0], &endpoints[1], &closest);
     float totalRadius = sphere->center.f[3] + shape->radius;
     LocalM128 delta = _mm_sub_ps(sphere->center.v, closest);
 
@@ -2451,7 +2451,8 @@ struct BhkVecArray
     unsigned int m_uCount;
 };
 // @fnv 0x00cb7a90
-void bhkSphereShape::FUN_00cb7a90(void* a1, ArgB* a2)
+// src: XBOX_PDB 0x00cb7a90
+void bhkSphereShape::bhkMultiSphereShape_CopyMembers(void* a1, ArgB* a2)
 {
     char flag;
     BhkVecArray* arr = reinterpret_cast<BhkVecArray*>(this->slotB4(&flag));
@@ -2472,7 +2473,7 @@ void bhkSphereShape::FUN_00cb7a90(void* a1, ArgB* a2)
             } while (n != 0);
         }
     }
-    this->bhkSphereShape::FUN_00c84df0(a1, a2);
+    this->bhkSphereShape::bhkShape_CopyMembers(a1, a2);
 }
 
 #include <xmmintrin.h>
@@ -2510,7 +2511,7 @@ struct ShapeHolder
 
 struct CollisionBoundsUpdater : S00cb7750
 {
-    void FUN_00c88020();
+    void bhkPCollisionObject_hktoNiTransform();
 };
 
 struct Amount
@@ -2544,7 +2545,8 @@ struct BstreenodeVector4fView
 };
 
 // @fnv 0x00c88020
-void CollisionBoundsUpdater::FUN_00c88020()
+// src: XBOX_PDB 0x00c88020
+void CollisionBoundsUpdater::bhkPCollisionObject_hktoNiTransform()
 {
     ShapeHolder* shape = reinterpret_cast<ShapeHolder*>(m_10);
     if (shape != 0)

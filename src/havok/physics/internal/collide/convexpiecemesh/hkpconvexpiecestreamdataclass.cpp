@@ -16,22 +16,22 @@ struct Holder
     int unk0c;
     Manager* manager;
 };
-Holder* FUN_00c85750();
+Holder* hkMemoryRouter_getInstance();
 struct Record
 {
     int unk00;
     unsigned short value;
-    void FUN_00dffca0();
+    void DestroyFields_00dffca0();
     Record* FUN_00dffd50(unsigned int flags);
 };
 // Calls FUN_00dffca0, and if flags has bit 0 set, notifies the manager from FUN_00c85750 with this record and value; returns this.
 // @fnv 0x00dffd50
 Record* Record::FUN_00dffd50(unsigned int flags)
 {
-    FUN_00dffca0();
+    DestroyFields_00dffca0();
     if (flags & 1)
     {
-        Holder* holder = FUN_00c85750();
+        Holder* holder = hkMemoryRouter_getInstance();
         holder->manager->Notify(this, value);
     }
     return this;
@@ -66,12 +66,12 @@ struct FUN_00dffca0_cls : BufferOwnerBase
     OwnedBuffer m_buf1;
     OwnedBuffer m_buf2;
 
-    void FUN_00dffca0();
+    void DestroyFields_00dffca0();
 };
 
 static void ReleaseOwnedBuffer(OwnedBuffer& buf)
 {
-    Holder* holder = FUN_00c85750();
+    Holder* holder = hkMemoryRouter_getInstance();
     BufAllocator* allocator = reinterpret_cast<BufAllocator*>(holder->manager);
     unsigned int flags = buf.flags;
     buf.unk04 = 0;
@@ -85,7 +85,8 @@ static void ReleaseOwnedBuffer(OwnedBuffer& buf)
 
 // Releases the three owned buffers and then calls the base class destructor.
 // @fnv 0x00dffca0
-void FUN_00dffca0_cls::FUN_00dffca0()
+// src: GUESS 0x00dffca0 (confidence: medium)
+void FUN_00dffca0_cls::DestroyFields_00dffca0()
 {
     ReleaseOwnedBuffer(m_buf2);
     ReleaseOwnedBuffer(m_buf1);

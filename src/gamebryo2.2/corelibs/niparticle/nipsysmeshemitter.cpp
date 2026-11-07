@@ -25,7 +25,8 @@ __forceinline void CopyParticlePoint(NiPoint3& output, const NiPoint3& value)
 extern int g_01202500;
 
 // @fnv 0x00c1f4f0
-int* __cdecl FUN_00c1f4f0()
+// src: COMMUNITY 0x00c1f4f0
+int* __cdecl NiPSysMeshEmitter_GetRTTI()
 {
     return &g_01202500;
 }
@@ -39,13 +40,15 @@ void NiPSysVolumeEmitter::vf43(NiAVObject* pkEmitterObj)
 extern void* g_01202508;
 
 // @fnv 0x00c1fa40
-void* __cdecl FUN_00c1fa40()
+// src: COMMUNITY 0x00c1fa40
+void* __cdecl NiPSysCylinderEmitter_GetRTTI()
 {
     return &g_01202508;
 }
 
 // @fnv 0x00c1f9e0
-bool __thiscall NiPSysCylinderEmitter::FUN_00c1f9e0(NiAVObject* pkObject)
+// src: XBOX_PDB 0x00c1f9e0
+bool __thiscall NiPSysCylinderEmitter::IsEqual_00c1f9e0(NiAVObject* pkObject)
 {
     NiPSysCylinderEmitter* pkDest = (NiPSysCylinderEmitter*)pkObject;
     if (FUN_00c31b80(pkObject) && m_fCylinderRadius == pkDest->m_fCylinderRadius &&
@@ -57,7 +60,8 @@ bool __thiscall NiPSysCylinderEmitter::FUN_00c1f9e0(NiAVObject* pkObject)
 extern double DAT_01011588;
 extern double DAT_01016ff0;
 // @fnv 0x00c1ced0
-float FUN_00c1ced0(float number)
+// src: GAMEBRYO_LIB 0x00c1ced0
+float NiFastSqrt(float number)
 {
     float y = number;
     float fHalfX = number * DAT_01011588;
@@ -120,10 +124,11 @@ struct NiPSysMeshEmitter : NiPSysEmitter
         void FUN_00c1e9a0(unsigned int);
     } m_kGeometryEmitters;
     void SetSkinGeom(NiGeometry*);
-    void FUN_00c1f990(NiStream&);
+    void LinkObject_00c1f990(NiStream&);
 };
 // @fnv 0x00c1f990
-void NiPSysMeshEmitter::FUN_00c1f990(NiStream& kStream)
+// src: XBOX_PDB 0x00c1f990
+void NiPSysMeshEmitter::LinkObject_00c1f990(NiStream& kStream)
 {
     NiPSysEmitter::LinkObject(kStream);
     unsigned int uiSize = kStream.GetLinkID();
@@ -154,15 +159,16 @@ struct FUN_00c1f5f0_shell : NiPSysMeshEmitter
     void __thiscall PickRandomVertex(NiGeometry*, NiPoint3&, NiPoint3&);
     void __thiscall PickEmitterParticle(NiGeometry*, NiPoint3&, NiPoint3&);
     void __thiscall GetRandomEmitterParticle(NiSkinInstance*, NiGeometry*, NiPoint3&, NiPoint3&);
-    void __thiscall FUN_00c1e080(NiSkinInstance*, NiGeometry*, NiPoint3&, NiPoint3&);
-    void __thiscall FUN_00c1e4e0(NiSkinInstance*, NiGeometry*, NiPoint3&, NiPoint3&);
+    void __thiscall NiPSysMeshEmitter_EmitFromSkinnedEdge(NiSkinInstance*, NiGeometry*, NiPoint3&, NiPoint3&);
+    void __thiscall SampleSkinPartitionTriangle(NiSkinInstance*, NiGeometry*, NiPoint3&, NiPoint3&);
     void __thiscall EmitFromMesh(NiGeometry*, NiPoint3&, NiPoint3&);
 
-    void __thiscall FUN_00c1f5f0(NiPoint3& kPosition, NiPoint3& kMotionVelocity);
+    void __thiscall NiPSysMeshEmitter_ComputeInitialPositionAndVelocity(NiPoint3& kPosition, NiPoint3& kMotionVelocity);
 };
 
 // @fnv 0x00c1f5f0
-void __thiscall FUN_00c1f5f0_shell::FUN_00c1f5f0(NiPoint3& kPosition, NiPoint3& kMotionVelocity)
+// src: XBOX_PDB 0x00c1f5f0
+void __thiscall FUN_00c1f5f0_shell::NiPSysMeshEmitter_ComputeInitialPositionAndVelocity(NiPoint3& kPosition, NiPoint3& kMotionVelocity)
 {
     unsigned int uiEmitterIndex;
     NiGeometry* pkGeomEmitter;
@@ -205,7 +211,7 @@ void __thiscall FUN_00c1f5f0_shell::FUN_00c1f5f0(NiPoint3& kPosition, NiPoint3& 
     case 3:
         if (pkEmitData)
         {
-            FUN_00c1e080(pkSkin, pkGeomEmitter, kPosition, kMotionVelocity);
+            NiPSysMeshEmitter_EmitFromSkinnedEdge(pkSkin, pkGeomEmitter, kPosition, kMotionVelocity);
             return;
         }
         EmitFromMesh(pkGeomEmitter, kPosition, kMotionVelocity);
@@ -215,7 +221,7 @@ void __thiscall FUN_00c1f5f0_shell::FUN_00c1f5f0(NiPoint3& kPosition, NiPoint3& 
     case 4:
         if (pkEmitData)
         {
-            FUN_00c1e4e0(pkSkin, pkGeomEmitter, kPosition, kMotionVelocity);
+            SampleSkinPartitionTriangle(pkSkin, pkGeomEmitter, kPosition, kMotionVelocity);
             return;
         }
         PickEmitterParticle(pkGeomEmitter, kPosition, kMotionVelocity);
@@ -232,7 +238,7 @@ void __thiscall FUN_00c1f5f0_shell::FUN_00c1f5f0(NiPoint3& kPosition, NiPoint3& 
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 struct SkinData_c1d170
 {
@@ -248,7 +254,7 @@ struct Partition_c1d170
                         unsigned int uiBonesPerVertex, unsigned int uiStart, bool bForce, bool barg7, bool barg8);
     static void* __cdecl operator new(unsigned int s) throw()
     {
-        return FUN_00aa13e0(s);
+        return Object_DispatchCommandFour(s);
     }
 };
 
@@ -352,7 +358,7 @@ class Stub_00c31b60
     int unk50;
     int unk54;
 
-    void FUN_00c22530(void* pkStream);
+    void NiPSysEmitter_SaveBinary(void* pkStream);
 };
 
 class C1E8E0Controller : public Stub_00c31b60
@@ -370,14 +376,15 @@ class C1E8E0Controller : public Stub_00c31b60
     float m_fValue1;
     NiColorSaveHelper m_kFogTint;
 
-    void FUN_00c1e8e0(NiStream& kStream);
+    void NiPSysMeshEmitter_SaveBinary(NiStream& kStream);
 };
 
 // Writes the object count, each object's link ID, m_fValue0, m_fValue1 and the color helper to the stream.
 // @fnv 0x00c1e8e0
-void C1E8E0Controller::FUN_00c1e8e0(NiStream& kStream)
+// src: XBOX_PDB 0x00c1e8e0
+void C1E8E0Controller::NiPSysMeshEmitter_SaveBinary(NiStream& kStream)
 {
-    FUN_00c22530(&kStream);
+    NiPSysEmitter_SaveBinary(&kStream);
     unsigned int uiObjectCount = m_usObjectCount;
     C1E8E0SaveBinary(kStream, uiObjectCount);
     for (unsigned int i = 0; i < uiObjectCount; i++)
@@ -426,7 +433,7 @@ void MeshEmitter_c1cf50::ComputeEmitterParticleTransform(NiAVObject* geometry, N
     transform.FUN_004b4880(inverseWorld);
     inverseWorld.FUN_0062c250(&transform, geometryWorld);
     struct ParticleScratch { NiPoint3 scaled; NiPoint3 rotated; } scratch;
-    { NiPoint3* value = transform.FUN_00524c40(reinterpret_cast<NiPoint3*>(&scratch.rotated), reinterpret_cast<const NiPoint3&>(arPosition)); memcpy(&arPosition, value, sizeof(arPosition)); }
+    { NiPoint3* value = transform.ComputeValue_00524c40(reinterpret_cast<NiPoint3*>(&scratch.rotated), reinterpret_cast<const NiPoint3&>(arPosition)); memcpy(&arPosition, value, sizeof(arPosition)); }
     switch (velocityMode)
     {
     case 0:
@@ -436,7 +443,7 @@ void MeshEmitter_c1cf50::ComputeEmitterParticleTransform(NiAVObject* geometry, N
         arVelocity.x = (GetRandomNumber() * 2.0 / DAT_01029790) - 1.0;
         arVelocity.y = (GetRandomNumber() * 2.0 / DAT_01029790) - 1.0;
         arVelocity.z = (GetRandomNumber() * 2.0 / DAT_01029790) - 1.0;
-        arVelocity.FUN_004a0c10();
+        arVelocity.Unitize_004a0c10();
         {
             float random = (float)(GetRandomNumber() / DAT_01029790);
             float magnitude = speed + speedVariation * (random - DAT_01011588);
@@ -447,7 +454,7 @@ void MeshEmitter_c1cf50::ComputeEmitterParticleTransform(NiAVObject* geometry, N
         NiPoint3& v = scratch.rotated; (transform.m_Rotate.*reinterpret_cast<ParticleRotatePoint>(static_cast<SharedRotatePoint>(&NiMatrix3::operator*)))(&v, &direction);
         float random = (float)(GetRandomNumber() / DAT_01029790);
         float magnitude = speed + speedVariation * (random - DAT_01011588);
-        v.FUN_004a0c10();
+        v.Unitize_004a0c10();
         scratch.scaled.x = v.x * magnitude;
         scratch.scaled.y = v.y * magnitude;
         scratch.scaled.z = v.z * magnitude;
@@ -500,13 +507,14 @@ struct Emit_c1f880
     NiPoint3 vec7C;
     Emit_c1f880* FUN_00c1f550();
     void CopyTo(Emit_c1f880* pkEmitter, unsigned int uiArg);
-    Emit_c1f880* FUN_00c1f880(unsigned int uiArg);
+    Emit_c1f880* NiPSysMeshEmitter_CreateClone(unsigned int uiArg);
 };
 
 // @fnv 0x00c1f880
-Emit_c1f880* Emit_c1f880::FUN_00c1f880(unsigned int uiArg)
+// src: XBOX_PDB 0x00c1f880
+Emit_c1f880* Emit_c1f880::NiPSysMeshEmitter_CreateClone(unsigned int uiArg)
 {
-    Emit_c1f880* pkNew = (Emit_c1f880*)FUN_00aa13e0(0x88);
+    Emit_c1f880* pkNew = (Emit_c1f880*)Object_DispatchCommandFour(0x88);
     Emit_c1f880* pkResult;
     if (pkNew != 0)
     {
@@ -574,7 +582,8 @@ NiPSysMeshEmitterObject* __cdecl CreateNiPSysMeshEmitterObject()
 extern "C" void __cdecl FUN_00c31750();
 
 // @fnv 0x00c1fa20
-void __cdecl FUN_00c1fa20()
+// src: GUESS 0x00c1fa20 (confidence: low)
+void __cdecl Object_ForwardCall_00c1fa20()
 {
     FUN_00c31750();
 }
@@ -750,7 +759,7 @@ struct AccObj
 {
     NiPoint3 a1;
     NiPoint3 a2;
-    __declspec(noalias) void __thiscall FUN_004a0c10();
+    __declspec(noalias) void __thiscall Unitize_004a0c10();
 };
 struct LoopPair
 {
@@ -861,7 +870,7 @@ void __stdcall SkinVertex(NiPoint3* outPos, NiPoint3* outVel, Arg3Obj* arg3, Arg
             idx = arg5->m_24;
         } while (r < idx);
     }
-    acc.FUN_004a0c10();
+    acc.Unitize_004a0c10();
     memcpy(&*outPos, &acc.a2, sizeof(*outPos));
     memcpy(&*outVel, &acc.a1, sizeof(*outVel));
 }
@@ -994,8 +1003,8 @@ bool SkinEmitter::GetRandomEmitterParticle(SkinInst* skin, SkinGeometry* geometr
 }  // namespace fnv_00c1dec0
 
 int __cdecl FUN_00ecadb8();
-float __cdecl FUN_00639780();
-void __cdecl FUN_00525340(NiPoint3*);
+float __cdecl Object_ProcessAndReturnValue_00639780();
+void __cdecl NiPoint3_UnitizeVector(NiPoint3*);
 NiPoint3 __cdecl FUN_004a3760(float, const NiPoint3&);
 extern NiPoint3 NiPoint3_ZERO;
 
@@ -1066,7 +1075,7 @@ struct MyPoint3 : NiPoint3
     {
         return MyPoint3(x * f, y * f, z * f);
     }
-    NiPoint3 __thiscall FUN_0053d280(float) const;
+    NiPoint3 __thiscall ProcessAndReturnValue_0053d280(float) const;
     float __thiscall FUN_00457990();
 };
 
@@ -1112,13 +1121,14 @@ struct EmitterAccessor
     bool __thiscall ComputeEmitterParticleTransform(NiGeometry* pkGeometry, NiPoint3& kPosition,
                                                     NiPoint3& kMotionVelocity);
 
-    bool __thiscall FUN_00c1e4e0(NiSkinInstance* pkSkinInstance, NiGeometry* pkGeometry, NiPoint3& kPosition,
+    bool __thiscall SampleSkinPartitionTriangle(NiSkinInstance* pkSkinInstance, NiGeometry* pkGeometry, NiPoint3& kPosition,
                                  NiPoint3& kMotionVelocity);
 };
 
 // Picks a random skin partition and triangle, samples two vertices and normals, computes a position, and may update motion velocity.
 // @fnv 0x00c1e4e0
-bool EmitterAccessor::FUN_00c1e4e0(NiSkinInstance* pkSkinInstance, NiGeometry* pkGeometry, NiPoint3& kPosition,
+// src: GUESS 0x00c1e4e0 (confidence: medium)
+bool EmitterAccessor::SampleSkinPartitionTriangle(NiSkinInstance* pkSkinInstance, NiGeometry* pkGeometry, NiPoint3& kPosition,
                                    NiPoint3& kMotionVelocity)
 {
     if (!pkGeometry || !((MyGeomVtbl*)pkGeometry)->GetModelData())
@@ -1138,7 +1148,7 @@ bool EmitterAccessor::FUN_00c1e4e0(NiSkinInstance* pkSkinInstance, NiGeometry* p
     if (!pkPartition->m_usTriangles)
         return this->GetRandomEmitterParticle(pkSkinInstance, pkGeometry, kPosition, kMotionVelocity);
 
-    unsigned int uiTriangle = (unsigned int)(pkPartition->m_usTriangles * FUN_00639780());
+    unsigned int uiTriangle = (unsigned int)(pkPartition->m_usTriangles * Object_ProcessAndReturnValue_00639780());
     int iMaxTriangle = (int)pkPartition->m_usTriangles - 1;
     if ((int)uiTriangle >= iMaxTriangle)
         uiTriangle = iMaxTriangle;
@@ -1180,21 +1190,21 @@ bool EmitterAccessor::FUN_00c1e4e0(NiSkinInstance* pkSkinInstance, NiGeometry* p
     this->SkinVertex(kPos0, kNorm0, pkGeometry, pkData, pkPartition, usV0);
     this->SkinVertex(kPos1, kNorm1, pkGeometry, pkData, pkPartition, usV1);
     {
-        NiPoint3 kTmp = ((MyPoint3&)kPos0 + (MyPoint3&)kPos1).FUN_0053d280(2.0f);
+        NiPoint3 kTmp = ((MyPoint3&)kPos0 + (MyPoint3&)kPos1).ProcessAndReturnValue_0053d280(2.0f);
         memcpy(&kPosition, &kTmp, sizeof(kPosition));
     }
 
     if (this->m_iEmissionDirection == 0)
     {
-        NiPoint3 kNormal = ((MyPoint3&)kNorm0 + (MyPoint3&)kNorm1).FUN_0053d280(2.0f);
-        FUN_00525340(&kNormal);
+        NiPoint3 kNormal = ((MyPoint3&)kNorm0 + (MyPoint3&)kNorm1).ProcessAndReturnValue_0053d280(2.0f);
+        NiPoint3_UnitizeVector(&kNormal);
         float fSpeed = ((MyPoint3*)&kMotionVelocity)->FUN_00457990();
         CopyParticlePoint(kMotionVelocity, FUN_004a3760(fSpeed, kNormal));
     }
 
     if (this->m_iEmissionType == 4)
     {
-        CopyParticlePoint(kPosition, ((MyPoint3&)kPos1 - (MyPoint3&)kPos0) * FUN_00639780() + (MyPoint3&)kPos0);
+        CopyParticlePoint(kPosition, ((MyPoint3&)kPos1 - (MyPoint3&)kPos0) * Object_ProcessAndReturnValue_00639780() + (MyPoint3&)kPos0);
     }
 
     this->ComputeEmitterParticleTransform(pkGeometry, kPosition, kMotionVelocity);
@@ -1258,13 +1268,13 @@ struct MeshViewerStringsArray
     }
 };
 
-char* __cdecl FUN_00a7d330(char*);
-char* __cdecl FUN_00a7d5e0(const char*, const char*);
-char* __cdecl FUN_00a7d550(const char*, float);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char*);
+char* __cdecl NiGetViewerString_00a7d5e0(const char*, const char*);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
 
 struct Standin_VolumeEmitter
 {
-    void FUN_00c22780(MeshViewerStringsArray* pkStrings);
+    void NiPSysEmitter_GetViewerStrings(MeshViewerStringsArray* pkStrings);
 };
 
 struct MeshEmitter
@@ -1322,9 +1332,9 @@ struct MeshEmitter
 // @fnv 0x00c1f050
 void MeshEmitter::WriteToViewerStrings(MeshViewerStringsArray* pkStrings)
 {
-    ((Standin_VolumeEmitter*)this)->FUN_00c22780(pkStrings);
+    ((Standin_VolumeEmitter*)this)->NiPSysEmitter_GetViewerStrings(pkStrings);
 
-    pkStrings->Add(FUN_00a7d330((char*)g_01202500));
+    pkStrings->Add(NiViewerStrings_NiGetViewerString_Title((char*)g_01202500));
 
     unsigned int i = 0;
     while (i < GetEmitterObjCount())
@@ -1333,7 +1343,7 @@ void MeshEmitter::WriteToViewerStrings(MeshViewerStringsArray* pkStrings)
         if (pkObj)
         {
             const char* pcObjName = pkObj->m_kName;
-            pkStrings->Add(FUN_00a7d5e0("Emitter Object", pcObjName));
+            pkStrings->Add(NiGetViewerString_00a7d5e0("Emitter Object", pcObjName));
         }
         i++;
     }
@@ -1341,44 +1351,44 @@ void MeshEmitter::WriteToViewerStrings(MeshViewerStringsArray* pkStrings)
     switch (m_eEmissionType)
     {
     case 0:
-        pkStrings->Add(FUN_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_VERTICES"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_VERTICES"));
         break;
     case 1:
-        pkStrings->Add(FUN_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_FACE_CENTER"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_FACE_CENTER"));
         break;
     case 2:
-        pkStrings->Add(FUN_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_EDGE_CENTER"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_EDGE_CENTER"));
         break;
     case 3:
-        pkStrings->Add(FUN_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_FACE_SURFACE"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_FACE_SURFACE"));
         break;
     case 4:
-        pkStrings->Add(FUN_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_EDGE_SURFACE"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eEmissionType", "NI_EMIT_FROM_EDGE_SURFACE"));
         break;
     default:
-        pkStrings->Add(FUN_00a7d5e0("m_eEmissionType", "UNKNOWN!!!"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eEmissionType", "UNKNOWN!!!"));
         break;
     }
 
     switch (m_eInitVelocityType)
     {
     case 0:
-        pkStrings->Add(FUN_00a7d5e0("m_eInitVelocityType", "NI_VELOCITY_USE_NORMALS"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eInitVelocityType", "NI_VELOCITY_USE_NORMALS"));
         break;
     case 1:
-        pkStrings->Add(FUN_00a7d5e0("m_eInitVelocityType", "NI_VELOCITY_USE_RANDOM"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eInitVelocityType", "NI_VELOCITY_USE_RANDOM"));
         break;
     case 2:
-        pkStrings->Add(FUN_00a7d5e0("m_eInitVelocityType", "NI_VELOCITY_USE_DIRECTION"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eInitVelocityType", "NI_VELOCITY_USE_DIRECTION"));
         break;
     default:
-        pkStrings->Add(FUN_00a7d5e0("m_eInitVelocityType", "UNKNOWN!!!"));
+        pkStrings->Add(NiGetViewerString_00a7d5e0("m_eInitVelocityType", "UNKNOWN!!!"));
         break;
     }
 
-    pkStrings->AddAxis(FUN_00a7d550("m_kEmissionAxis.x", m_kEmissionAxis.x));
-    pkStrings->AddAxis(FUN_00a7d550("m_kEmissionAxis.y", m_kEmissionAxis.y));
-    pkStrings->AddAxis(FUN_00a7d550("m_kEmissionAxis.z", m_kEmissionAxis.z));
+    pkStrings->AddAxis(NiGetViewerString_00a7d550("m_kEmissionAxis.x", m_kEmissionAxis.x));
+    pkStrings->AddAxis(NiGetViewerString_00a7d550("m_kEmissionAxis.y", m_kEmissionAxis.y));
+    pkStrings->AddAxis(NiGetViewerString_00a7d550("m_kEmissionAxis.z", m_kEmissionAxis.z));
 }
 
 struct CmpItem
@@ -1645,7 +1655,7 @@ struct GeometryRuntimeType
 };
 
 extern GeometryRuntimeType DAT_011f4a48;
-extern "C" void __cdecl FUN_00525340(MeshPoint* point);
+extern "C" void __cdecl NiPoint3_UnitizeVector(MeshPoint* point);
 
 typedef int(__thiscall* GeometryTestFn)(NiGeometry*);
 typedef GeometryRuntimeType*(__thiscall* GeometryRTTIFn)(NiGeometry*);
@@ -1735,7 +1745,7 @@ bool MeshEmitterCandidate::PickEmitterParticle(NiGeometry* geometry, MeshPoint& 
         MeshPoint normal0 = normals[vertex0];
         MeshPoint normal1 = normals[vertex1];
         MeshPoint normal = (normal0 + normal1) * 0.5f;
-        FUN_00525340(&normal);
+        NiPoint3_UnitizeVector(&normal);
         float magnitude = sqrtf(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
         velocity = normal * magnitude;
     }
@@ -1962,7 +1972,7 @@ struct GeometryRuntimeType
 };
 extern GeometryRuntimeType DAT_011f4a48;
 extern const double DAT_01099ee0;
-extern "C" void __cdecl FUN_00525340(MeshPoint* point);
+extern "C" void __cdecl NiPoint3_UnitizeVector(MeshPoint* point);
 typedef int(__thiscall* GeometryTestFn)(NiGeometry*);
 typedef GeometryRuntimeType*(__thiscall* GeometryRTTIFn)(NiGeometry*);
 typedef unsigned short(__thiscall* GetTriangleCountFn)(void*);
@@ -2020,7 +2030,7 @@ bool MeshEmitterCandidate::EmitFromMesh(NiGeometry* geometry, MeshPoint& positio
                 MeshPoint normal2 = normals[vertex2];
                 MeshPoint normalSum = normal0 + normal1 + normal2;
                 MeshPoint normal = normalSum * oneThird;
-                FUN_00525340(&normal);
+                NiPoint3_UnitizeVector(&normal);
                 float magnitude = sqrtf(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
                 velocity = normal * magnitude;
             }
@@ -2028,7 +2038,7 @@ bool MeshEmitterCandidate::EmitFromMesh(NiGeometry* geometry, MeshPoint& positio
             {
                 MeshPoint edgeA = v1 - v0;
                 MeshPoint edgeB = v2 - v0;
-                float scaleA = FUN_00c1ced0(static_cast<float>(GetRandomNumber()) / DAT_01029790);
+                float scaleA = NiFastSqrt(static_cast<float>(GetRandomNumber()) / DAT_01029790);
                 float scaleB = static_cast<float>(GetRandomNumber()) / DAT_01029790;
                 position = edgeA + (scaleA * (edgeB * scaleB - edgeA) + v0);
             }
@@ -2201,7 +2211,7 @@ struct NiSkinSlot790
     void __thiscall FUN_00c1f420(NiGeometry** pp);
 };
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct FUN_00c1f790_cls : NiPSysMeshEmitter
 {
@@ -2228,7 +2238,7 @@ void __thiscall FUN_00c1f790_cls::SetSkinGeom(NiGeometry* pkGeom)
         if (skin != 0)
         {
             unsigned int edi = reinterpret_cast<unsigned int>(skin->m_pkSkinMeshPartition.m_pObject);
-            p = (NiSkinRaw790*)FUN_00aa13e0(12);
+            p = (NiSkinRaw790*)Object_DispatchCommandFour(12);
             if (edi != 0)
             {
                 if (p != 0)
@@ -2245,7 +2255,7 @@ void __thiscall FUN_00c1f790_cls::SetSkinGeom(NiGeometry* pkGeom)
         }
         else
         {
-            p = (NiSkinRaw790*)FUN_00aa13e0(12);
+            p = (NiSkinRaw790*)Object_DispatchCommandFour(12);
         }
         if (p != 0)
         {
@@ -2312,14 +2322,14 @@ struct MeshParticleGroup
 struct MeshVectorOps
 {
     float x, y, z;
-    void FUN_0053d280(NiPoint3* output, float scalar) const;
+    void ProcessAndReturnValue_0053d280(NiPoint3* output, float scalar) const;
 
     float FUN_00457990() const;
 };
 __forceinline NiPoint3 ScaleVector(const NiPoint3& value, float scalar)
 {
     NiPoint3 result;
-    reinterpret_cast<const MeshVectorOps*>(&value)->FUN_0053d280(&result, scalar);
+    reinterpret_cast<const MeshVectorOps*>(&value)->ProcessAndReturnValue_0053d280(&result, scalar);
     return result;
 }
 __forceinline void AddVector(NiPoint3& output, const NiPoint3& a, const NiPoint3& b)
@@ -2349,7 +2359,7 @@ extern NiPoint3 NiPoint3_ZERO;
 class MeshReconstruction : public FUN_00c1f5f0_shell
 {
   public:
-    bool FUN_00c1e080(NiSkinInstance*, NiGeometry*, NiPoint3&, NiPoint3&);
+    bool NiPSysMeshEmitter_EmitFromSkinnedEdge(NiSkinInstance*, NiGeometry*, NiPoint3&, NiPoint3&);
     bool GetRandomEmitterParticle(NiSkinInstance*, NiGeometry*, NiPoint3&, NiPoint3&);
     void SkinVertex(NiPoint3&, NiPoint3&, NiGeometry*, NiSkinnedEmitterData*, MeshParticleSample*, unsigned int);
     void ComputeEmitterParticleTransform(NiGeometry*, NiPoint3&, NiPoint3&);
@@ -2364,7 +2374,8 @@ class MeshReconstruction : public FUN_00c1f5f0_shell
 };
 // Picks a random particle from a skin group, computes its position and velocity from three skinned vertices, and applies velocity-space and mode transforms.
 // @fnv 0x00c1e080
-bool MeshReconstruction::FUN_00c1e080(NiSkinInstance* apSkinInstance, NiGeometry* geometry, NiPoint3& position,
+// src: COMMUNITY 0x00c1e080
+bool MeshReconstruction::NiPSysMeshEmitter_EmitFromSkinnedEdge(NiSkinInstance* apSkinInstance, NiGeometry* geometry, NiPoint3& position,
                                       NiPoint3& velocity)
 {
     if (!geometry || !reinterpret_cast<GeometryCapability*>(geometry)->HasUsableSkinData())
@@ -2427,8 +2438,8 @@ bool MeshReconstruction::FUN_00c1e080(NiSkinInstance* apSkinInstance, NiGeometry
         scratch.y = triangle.v1.y + triangle.v0.y;
         scratch.z = triangle.v1.z + triangle.v0.z;
         AddAccumulator(triangle.accumulator, scratch, triangle.v2);
-        reinterpret_cast<MeshVectorOps*>(&triangle.accumulator)->FUN_0053d280(&triangle.v2, DAT_01017718);
-        FUN_00525340(&triangle.v2);
+        reinterpret_cast<MeshVectorOps*>(&triangle.accumulator)->ProcessAndReturnValue_0053d280(&triangle.v2, DAT_01017718);
+        NiPoint3_UnitizeVector(&triangle.v2);
         float magnitude = reinterpret_cast<MeshVectorOps*>(&velocity)->FUN_00457990();
         NiPoint3* result = FUN_004a3760(&triangle.accumulator, magnitude, &triangle.v2);
         CopyParticlePoint(velocity, *result);
@@ -2442,7 +2453,7 @@ bool MeshReconstruction::FUN_00c1e080(NiSkinInstance* apSkinInstance, NiGeometry
         triangle.accumulator.x = triangle.p2.x - triangle.p0.x;
         triangle.accumulator.y = triangle.p2.y - triangle.p0.y;
         triangle.accumulator.z = triangle.p2.z - triangle.p0.z;
-        float parameter = FUN_00c1ced0(func_0x00639780());
+        float parameter = NiFastSqrt(func_0x00639780());
         NiPoint3* firstResult = FUN_004a3760(&triangle.v1, func_0x00639780(), &triangle.accumulator);
         triangle.accumulator.x = firstResult->x - scratch.x;
         triangle.accumulator.y = firstResult->y - scratch.y;

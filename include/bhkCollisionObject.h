@@ -21,6 +21,6 @@ class bhkCollisionObject : public bhkNiCollisionObject
     static NiObject* CreateObject();
 
     bhkWorldObjectV* GetWorldObject();
-    bhkWorldObject* FUN_006fa820();
-    void FUN_004d9fa0(bool);
+    bhkWorldObject* bhkNiCollisionObject_GetWorldObject();
+    void bhkNiCollisionObject_SetReset(bool);
 };

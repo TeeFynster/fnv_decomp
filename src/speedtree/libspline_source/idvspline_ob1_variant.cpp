@@ -8,13 +8,13 @@ extern "C" int __cdecl _strlen(const char*);
 extern "C" int __cdecl _sscanf(const char*, const char*, ...);
 int __cdecl FUN_00ec8965(int);
 extern const char* const DAT_01019f08;
-const char* __cdecl FUN_00b37f50(const char* pInput, char* pToken);
+const char* __cdecl NextToken(const char* pInput, char* pToken);
 unsigned int __cdecl FUN_00ec7c56(void);
 struct Host00b3b050
 {
     int m0;
     int m1;
-    Host00b3b050* FUN_00b3b050(int a, int* b);
+    Host00b3b050* UpdateState_00b3b050(int a, int* b);
 };
 struct FUN_00b3c500
 {
@@ -37,7 +37,7 @@ struct Holder0394
     char _pad[0x18];
     Node0394* f18;
     int f1c;
-    void FUN_00b3a050(Node0394*);
+    void ProcessEntries_00b3a050(Node0394*);
     void ResetList();
 };
 struct NodeB
@@ -52,7 +52,7 @@ struct FUN_00b3b810_shell
     char _pad[0x18];
     NodeB* f18;
     int f1c;
-    NodeB* FUN_00b3b880();
+    NodeB* ReleaseStorage_00b3b880();
     void InitNode();
 };
 struct FUN_00b3b1d0_shell
@@ -60,16 +60,16 @@ struct FUN_00b3b1d0_shell
     char _pad[0x18];
     NodeB* f18;
     int f1c;
-    void FUN_00b3b1d0(NodeB*);
+    void UpdateState_00b3b1d0(NodeB*);
 };
 struct FUN_00b3b280_owner : FUN_00b3b810_shell
 {
-    void FUN_00b3b280(NodeB* pArg);
+    void UpdateFields_00b3b280(NodeB* pArg);
 };
-void __cdecl FUN_00b3b540(int, int);
+void __cdecl Object_AllocateElementStorage_00b3b540(int, int);
 struct FUN_00b3b9d0_shell
 {
-    void FUN_00b3b9d0(int);
+    void ProcessState_00b3b9d0(int);
 };
 extern "C" char DAT_010a57e8;
 int __cdecl FUN_00ec6da0(const char*, const char*);
@@ -92,8 +92,8 @@ struct VecB37
 struct HostB37
 {
     float x, y, z;
-    void FUN_00b380e0(VecB37*, VecB37*, float);
-    void FUN_00b37cc0(InputB37*);
+    void CIdvBezierSpline_AddControlPoint(VecB37*, VecB37*, float);
+    void CIdvBezierSpline_Parse(InputB37*);
 };
 
 unsigned int __cdecl FUN_00ec7c56(void);
@@ -118,10 +118,10 @@ struct FUN_00b3c4b0_class
     float f10;
     int i14;
 
-    FUN_00b3c4b0_class* FUN_00b3c4b0(int);
+    FUN_00b3c4b0_class* UpdateState_00b3c4b0(int);
     __forceinline FUN_00b3c4b0_class(int a)
     {
-        FUN_00b3c4b0(a);
+        UpdateState_00b3c4b0(a);
     }
     ~FUN_00b3c4b0_class();
 };
@@ -176,14 +176,15 @@ class IdvSpline
     int unk68;
     SplinePointVector m_tangents;  // 0x6c
 
-    FUN_00b3c4b0_class FUN_00b38f40(FUN_00b3c4b0_class* p0, FUN_00b3c4b0_class* p1, FUN_00b3c4b0_class* p2,
+    FUN_00b3c4b0_class ProcessAndReturnValue_00b38f40(FUN_00b3c4b0_class* p0, FUN_00b3c4b0_class* p1, FUN_00b3c4b0_class* p2,
                                     FUN_00b3c4b0_class* p3, float t);
 
-    FUN_00b3c4b0_class FUN_00b38b50(float t);
+    FUN_00b3c4b0_class ProcessEntries_00b38b50(float t);
 };
 
 // @fnv 0x00b38b50
-FUN_00b3c4b0_class IdvSpline::FUN_00b38b50(float t)
+// src: GUESS 0x00b38b50 (confidence: low)
+FUN_00b3c4b0_class IdvSpline::ProcessEntries_00b38b50(float t)
 {
     FUN_00b3c4b0_class result(2);
 
@@ -204,7 +205,7 @@ FUN_00b3c4b0_class IdvSpline::FUN_00b38b50(float t)
             }
             else if (t >= (float)i && (float)(i + 1) > t)
             {
-                result = FUN_00b38f40(&m_tangents.at(i * 3), &m_tangents.at(i * 3 + 1), &m_tangents.at(i * 3 + 2),
+                result = ProcessAndReturnValue_00b38f40(&m_tangents.at(i * 3), &m_tangents.at(i * 3 + 1), &m_tangents.at(i * 3 + 2),
                                       &m_tangents.at(i * 3 + 3), fract);
                 bFound = true;
             }
@@ -331,18 +332,19 @@ struct TreeB3B
         DestroyVal(v);
         FreeNode(p);
     }
-    void FUN_00b3a050(NodeT* rootnode)
+// src: GUESS 0x00b3a050 (confidence: low)
+    void ProcessEntries_00b3a050(NodeT* rootnode)
     {
         for (NodeT* pnode = rootnode; !IsNil(pnode); rootnode = pnode)
         {
-            FUN_00b3a050(Right(pnode));
+            ProcessEntries_00b3a050(Right(pnode));
             pnode = Left(pnode);
             DestroyNode(rootnode);
         }
     }
     void ResetList()
     {
-        FUN_00b3a050(Root());
+        ProcessEntries_00b3a050(Root());
         Root() = head, count = 0;
         Lmost() = head, Rmost() = head;
     }
@@ -359,7 +361,7 @@ struct TreeB3B
         return TreeConstIterB3B(where.ptr, this);
     }
     TreeIterB3B EraseOne(TreeConstIterB3B where);
-    TreeIterB3B FUN_00b3bb90(TreeConstIterB3B first, TreeConstIterB3B last);
+    TreeIterB3B ProcessEntries_00b3bb90(TreeConstIterB3B first, TreeConstIterB3B last);
 };
 
 inline void TreeIterBaseB3B::SetContainer(const TreeB3B* cont)
@@ -370,7 +372,8 @@ inline void TreeIterBaseB3B::SetContainer(const TreeB3B* cont)
 }
 
 // @fnv 0x00b3bb90
-TreeIterB3B TreeB3B::FUN_00b3bb90(TreeConstIterB3B first, TreeConstIterB3B last)
+// src: GUESS 0x00b3bb90 (confidence: low)
+TreeIterB3B TreeB3B::ProcessEntries_00b3bb90(TreeConstIterB3B first, TreeConstIterB3B last)
 {
     if (first == begin() && last == end())
     {
@@ -404,10 +407,10 @@ struct FUN_0044a4c0
 {
     int m[7];
     FUN_0044a4c0(const char* s);
-    void FUN_0044a730(bool b, unsigned int n);
+    void fopen_0044a730(bool b, unsigned int n);
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
 };
 struct FUN_0044a310
@@ -488,10 +491,10 @@ struct TreeQ
         int _Pad;
         return (0 < _Count ? _Count : 1);
     }
-    NodeQ* FUN_00ad1960(NodeQ* _Larg, NodeQ* _Parg, NodeQ* _Rarg, const ValQ& _Val, char _Carg);
-    void FUN_00ad1800(NodeQ* _Wherenode);
-    void FUN_00ad18b0(NodeQ* _Wherenode);
-    IterQ FUN_00acf120(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val);
+    NodeQ* CreateEntryInAllocatedStorage(NodeQ* _Larg, NodeQ* _Parg, NodeQ* _Rarg, const ValQ& _Val, char _Carg);
+    void UpdateFields_00ad1800(NodeQ* _Wherenode);
+    void UpdateState_00ad18b0(NodeQ* _Wherenode);
+    IterQ ProcessEntries_00acf120(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val);
 };
 inline IterQ::IterQ(NodeQ* p, const TreeQ* t) : _Myaux(0), _Ptr(p)
 {
@@ -500,13 +503,14 @@ inline IterQ::IterQ(NodeQ* p, const TreeQ* t) : _Myaux(0), _Ptr(p)
     _Myaux = t->_Myownedaux;
 }
 // @fnv 0x00acf120
-IterQ TreeQ::FUN_00acf120(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val)
+// src: GUESS 0x00acf120 (confidence: low)
+IterQ TreeQ::ProcessEntries_00acf120(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val)
 {
     if (max_size() - 1 <= _Mysize)
     {
         ThrowLen(LenErrQ("map/set<T> too long"));
     }
-    NodeQ* _Newnode = FUN_00ad1960(_Myhead, _Wherenode, _Myhead, _Val, 0);
+    NodeQ* _Newnode = CreateEntryInAllocatedStorage(_Myhead, _Wherenode, _Myhead, _Val, 0);
     ++_Mysize;
     if (_Wherenode == _Myhead)
     {
@@ -542,12 +546,12 @@ IterQ TreeQ::FUN_00acf120(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val)
                 if (_Pnode == _Right(_Parent(_Pnode)))
                 {
                     _Pnode = _Parent(_Pnode);
-                    FUN_00ad1800(_Pnode);
+                    UpdateFields_00ad1800(_Pnode);
                 }
                 _Color(_Parent(_Pnode)) = 1;
                 Dead3();
                 _Color(_Parent(_Parent(_Pnode))) = 0;
-                FUN_00ad18b0(_Parent(_Parent(_Pnode)));
+                UpdateState_00ad18b0(_Parent(_Parent(_Pnode)));
             }
         }
         else
@@ -566,12 +570,12 @@ IterQ TreeQ::FUN_00acf120(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val)
                 if (_Pnode == _Left(_Parent(_Pnode)))
                 {
                     _Pnode = _Parent(_Pnode);
-                    FUN_00ad18b0(_Pnode);
+                    UpdateState_00ad18b0(_Pnode);
                 }
                 _Color(_Parent(_Pnode)) = 1;
                 Dead2();
                 _Color(_Parent(_Parent(_Pnode))) = 0;
-                FUN_00ad1800(_Parent(_Parent(_Pnode)));
+                UpdateFields_00ad1800(_Parent(_Parent(_Pnode)));
             }
         }
     Dead3();
@@ -621,7 +625,7 @@ struct FUN_00b377c0
 };
 struct S00b37660_Cache
 {
-    FUN_00b377c0*& FUN_00b39210(InputB37* key);
+    FUN_00b377c0*& UpdateState_00b39210(InputB37* key);
 };
 extern S00b37660_Cache DAT_011f8e2c;
 struct FUN_00b37660
@@ -633,9 +637,9 @@ struct FUN_00b37660
     FUN_00b31270 unk54;
     FUN_00b31270 unk6c;
     FUN_00b37660(InputB37* name);
-    void FUN_00b37cc0(InputB37* name);
-    void FUN_00b38430(int n);
-    void FUN_00b1c7a0(FUN_00b377c0* src);
+    void CIdvBezierSpline_Parse(InputB37* name);
+    void CIdvBezierSpline_CreateEvenlySpacedPoints(int n);
+    void ProcessAndReturnValue_00b1c7a0(FUN_00b377c0* src);
 };
 inline void S00b37660_Pad()
 {
@@ -644,18 +648,18 @@ inline void S00b37660_Pad()
 // @fnv 0x00b37660
 FUN_00b37660::FUN_00b37660(InputB37* name)
 {
-    FUN_00b377c0* pCached = DAT_011f8e2c.FUN_00b39210(name);
+    FUN_00b377c0* pCached = DAT_011f8e2c.UpdateState_00b39210(name);
     if (!pCached)
     {
-        FUN_00b37cc0(name);
-        FUN_00b38430(500);
+        CIdvBezierSpline_Parse(name);
+        CIdvBezierSpline_CreateEvenlySpacedPoints(500);
         FUN_00b377c0* pNew = new FUN_00b377c0(this);
-        DAT_011f8e2c.FUN_00b39210(name) = pNew;
+        DAT_011f8e2c.UpdateState_00b39210(name) = pNew;
         S00b37660_Pad();
     }
     else
     {
-        FUN_00b1c7a0(pCached);
+        ProcessAndReturnValue_00b1c7a0(pCached);
     }
 }
 
@@ -723,7 +727,8 @@ class ComplexVector : public ContainerBase
     {
         DestroyRange(first, last, alloc);
     }
-    void FUN_00b397f0()
+// src: GUESS 0x00b397f0 (confidence: low)
+    void UpdateState_00b397f0()
     {
         if (first)
         {
@@ -736,7 +741,7 @@ class ComplexVector : public ContainerBase
     }
     ~ComplexVector()
     {
-        FUN_00b397f0();
+        UpdateState_00b397f0();
     }
 };
 class ScalarVector : public ContainerBase
@@ -782,7 +787,7 @@ FUN_00b37880_class::~FUN_00b37880_class()
 {}
 
 namespace fnv_00b37a00 {
-extern "C" void __cdecl FormHeap_Free(void* p);
+extern "C" void __cdecl FormHeapFreeAndLog_00401030(void* p);
 
 struct Sound_b37a
 {
@@ -793,7 +798,7 @@ struct Sound_b37a
     }
     static void operator delete(void* p)
     {
-        FormHeap_Free(p);
+        FormHeapFreeAndLog_00401030(p);
     }
 };
 
@@ -833,9 +838,10 @@ struct MapIter_b37a
     MapIter_b37a() : _Mycont(0), _Ptr(0)
     {}
     inline MapIter_b37a(Node_b37a* _Pnode, const Map_b37a* _Plist);
-    bool FUN_00b16830(const MapIter_b37a& _Right) const;
-    Pair_b37a* FUN_00b3b090() const;
-    MapIter_b37a& FUN_00b3b100()
+    bool AreValuesEqual_00b16830(const MapIter_b37a& _Right) const;
+    Pair_b37a* EvaluateValue_00b3b090() const;
+// src: GUESS 0x00b3b100 (confidence: low)
+    MapIter_b37a& ProcessAndReturnValue_00b3b100()
     {
         if (_Mycont == 0)
             FUN_00ec7c56();
@@ -873,7 +879,7 @@ struct Map_b37a
     int _Mysize;
 
     MapIter_b37a GetVtblAndValue();
-    void FUN_00b3a050(Node_b37a* _Rootnode);
+    void ProcessEntries_00b3a050(Node_b37a* _Rootnode);
     MapIter_b37a end()
     {
         return MapIter_b37a(_Myhead, this);
@@ -881,7 +887,7 @@ struct Map_b37a
     void ResetList()
     {
         Node_b37a* pRoot = _Myhead->_Parent;
-        FUN_00b3a050(pRoot);
+        ProcessEntries_00b3a050(pRoot);
         Node_b37a* pHead = _Myhead;
         Node_b37a*& rRoot = pHead->_Parent;
         Node_b37a*& rLeftmost = pHead->_Left;
@@ -903,12 +909,13 @@ inline MapIter_b37a::MapIter_b37a(Node_b37a* _Pnode, const Map_b37a* _Plist) : _
 extern Map_b37a DAT_011f8e2c;
 
 // @fnv 0x00b37a00
-void __cdecl FUN_00b37a00()
+// src: COMMUNITY 0x00b37a00
+void __cdecl CIdvBezierSpline_ClearCache()
 {
-    for (MapIter_b37a it = DAT_011f8e2c.GetVtblAndValue(); it.FUN_00b16830(DAT_011f8e2c.end()); it.FUN_00b3b100())
+    for (MapIter_b37a it = DAT_011f8e2c.GetVtblAndValue(); it.AreValuesEqual_00b16830(DAT_011f8e2c.end()); it.ProcessAndReturnValue_00b3b100())
     {
-        delete it.FUN_00b3b090()->second;
-        it.FUN_00b3b090()->second = 0;
+        delete it.EvaluateValue_00b3b090()->second;
+        it.EvaluateValue_00b3b090()->second = 0;
     }
     DAT_011f8e2c.ResetList();
 }
@@ -922,7 +929,7 @@ struct ValueB380
     ~ValueB380();
     void NormalizeData();
     ValueB380 ScaleData(float) const;
-    ValueB380 FUN_00b3c660(const ValueB380&) const;
+    ValueB380 ProcessEntries_00b3c660(const ValueB380&) const;
     ValueB380 Subtract(const ValueB380&) const;
 };
 template <class T> struct VectorB380
@@ -945,7 +952,7 @@ template <class T> struct VectorB380
             FUN_00ec7c56();
         return m0c[index];
     }
-    void FUN_00b39100(const T&);
+    void UpdateFields_00b39100(const T&);
     void PushBack(const T&);
 };
 struct OwnerB380
@@ -955,7 +962,7 @@ struct OwnerB380
     VectorB380<float> m3c;
     int m54, m58, m5c, m60, m64, m68;
     VectorB380<ValueB380> m6c;
-    void FUN_00b380e0(VecB37*, VecB37*, float);
+    void CIdvBezierSpline_AddControlPoint(VecB37*, VecB37*, float);
 };
 inline void FrameB380()
 {
@@ -963,7 +970,8 @@ inline void FrameB380()
     (void)&unused;
 }
 // @fnv 0x00b380e0
-void OwnerB380::FUN_00b380e0(VecB37* first, VecB37* second, float scale)
+// src: COMMUNITY 0x00b380e0
+void OwnerB380::CIdvBezierSpline_AddControlPoint(VecB37* first, VecB37* second, float scale)
 {
     ValueB380 a(first->x, first->y);
     ValueB380 direction(second->x, second->y);
@@ -971,12 +979,12 @@ void OwnerB380::FUN_00b380e0(VecB37* first, VecB37* second, float scale)
     if (!m0c.empty())
     {
         unsigned index = m0c.size() - 1;
-        m6c.FUN_00b39100(m0c.at(index).FUN_00b3c660(m24.at(index).ScaleData(m3c.at(index))));
-        m6c.FUN_00b39100(a.Subtract(direction.ScaleData(scale)));
+        m6c.UpdateFields_00b39100(m0c.at(index).ProcessEntries_00b3c660(m24.at(index).ScaleData(m3c.at(index))));
+        m6c.UpdateFields_00b39100(a.Subtract(direction.ScaleData(scale)));
     }
-    m0c.FUN_00b39100(a);
-    m6c.FUN_00b39100(a);
-    m24.FUN_00b39100(direction);
+    m0c.UpdateFields_00b39100(a);
+    m6c.UpdateFields_00b39100(a);
+    m24.UpdateFields_00b39100(direction);
     m3c.PushBack(scale);
     FrameB380();
 }
@@ -1003,11 +1011,12 @@ struct Pos_b38f40 : public FUN_00b3c500
 class Spl_b38f40
 {
   public:
-    Pos_b38f40 FUN_00b38f40(Pt_b38f40* p0, Pt_b38f40* p1, Pt_b38f40* p2, Pt_b38f40* p3, float t);
+    Pos_b38f40 ProcessAndReturnValue_00b38f40(Pt_b38f40* p0, Pt_b38f40* p1, Pt_b38f40* p2, Pt_b38f40* p3, float t);
 };
 
 // @fnv 0x00b38f40
-Pos_b38f40 Spl_b38f40::FUN_00b38f40(Pt_b38f40* p0, Pt_b38f40* p1, Pt_b38f40* p2, Pt_b38f40* p3, float t)
+// src: GUESS 0x00b38f40 (confidence: low)
+Pos_b38f40 Spl_b38f40::ProcessAndReturnValue_00b38f40(Pt_b38f40* p0, Pt_b38f40* p1, Pt_b38f40* p2, Pt_b38f40* p3, float t)
 {
     float g = Lerp_b38f40(p0->x, p1->x, t);
     float bb = Lerp_b38f40(p0->y, p1->y, t);
@@ -1380,7 +1389,8 @@ struct TreeString
         unsigned answer = textCompare(data() + offset, text, count < otherCount ? count : otherCount);
         return answer != 0 ? (int)answer : count < otherCount ? -1 : count == otherCount ? 0 : 1;
     }
-    int FUN_00ac9da0(const TreeString& right) const
+// src: GUESS 0x00ac9da0 (confidence: low)
+    int UpdateFields_00ac9da0(const TreeString& right) const
     {
         const TreeString* receiver = this;
         return receiver->compare(0, receiver->length, right.data(), right.size());
@@ -1388,7 +1398,7 @@ struct TreeString
 };
 inline bool operator<(const TreeString& left, const TreeString& right)
 {
-    return left.FUN_00ac9da0(right) < 0;
+    return left.UpdateFields_00ac9da0(right) < 0;
 }
 struct TreeValue
 {
@@ -1409,8 +1419,8 @@ struct FUN_00b3b050
     FUN_00b3b050() : owner(0), node(0)
     {}
     FUN_00b3b050(TreeNode*, const HintTree*);
-    FUN_00b3b050& FUN_00b3b440();
-    FUN_00b3b050& FUN_00b3b100();
+    FUN_00b3b050& ProcessAndReturnValue_00b3b440();
+    FUN_00b3b050& ProcessAndReturnValue_00b3b100();
 
     TreeNode* _Mynode() const
     {
@@ -1435,15 +1445,17 @@ struct TreeIterator : FUN_00b3b050
 {
     TreeIterator()
     {}
-    bool FUN_00b2ac30(const TreeIterator&) const;
-    TreeIterator& FUN_00b3b440()
+    bool EvaluateValue_00b2ac30(const TreeIterator&) const;
+// src: GUESS 0x00b3b440 (confidence: low)
+    TreeIterator& ProcessAndReturnValue_00b3b440()
     {
-        FUN_00b3b050::FUN_00b3b440();
+        FUN_00b3b050::ProcessAndReturnValue_00b3b440();
         return *this;
     }
-    TreeIterator& FUN_00b3b100()
+// src: GUESS 0x00b3b100 (confidence: low)
+    TreeIterator& ProcessAndReturnValue_00b3b100()
     {
-        FUN_00b3b050::FUN_00b3b100();
+        FUN_00b3b050::ProcessAndReturnValue_00b3b100();
         return *this;
     }
     TreeIterator(TreeNode* p, const HintTree* tree) : FUN_00b3b050(p, tree)
@@ -1528,85 +1540,87 @@ struct HintTree
         unsigned maximum = (unsigned)-1 / sizeof(TreeValue);
         return maximum > 0 ? maximum : 1;
     }
-    TreeNode* FUN_00b3b330(TreeNode*, TreeNode*, TreeNode*, const TreeValue&, char);
-    void FUN_00b3b1d0(TreeNode*);
-    void FUN_00b3b280(TreeNode*);
-    TreeIterator FUN_00b3ac00(bool, TreeNode*, const TreeValue&);
-    TreeInsertResult FUN_00b3a9b0(const TreeValue&);
-    TreeIterator FUN_00b398c0(TreeIterator where, const TreeValue& value);
+    TreeNode* AllocateStorage_00b3b330(TreeNode*, TreeNode*, TreeNode*, const TreeValue&, char);
+    void UpdateState_00b3b1d0(TreeNode*);
+    void UpdateFields_00b3b280(TreeNode*);
+    TreeIterator ProcessEntries_00b3ac00(bool, TreeNode*, const TreeValue&);
+    TreeInsertResult ProcessEntries_00b3a9b0(const TreeValue&);
+    TreeIterator ProcessAndReturnValue_00b398c0(TreeIterator where, const TreeValue& value);
 };
 // @fnv 0x00b398c0
-TreeIterator HintTree::FUN_00b398c0(TreeIterator where, const TreeValue& value)
+// src: GUESS 0x00b398c0 (confidence: low)
+TreeIterator HintTree::ProcessAndReturnValue_00b398c0(TreeIterator where, const TreeValue& value)
 {
     TreeIterator next;
     if (size() == 0)
-        return FUN_00b3ac00(true, head, value);
+        return ProcessEntries_00b3ac00(true, head, value);
     else if (false)
     {
         if (where.equal(begin()))
         {
             if (!(compare(_Key(where._Mynode()), _Kfn(value))))
-                return FUN_00b3ac00(true, where._Mynode(), value);
+                return ProcessEntries_00b3ac00(true, where._Mynode(), value);
         }
         else if (where.equal(end()))
         {
             if (!(compare(_Kfn(value), _Key(_Rmost()))))
-                return FUN_00b3ac00(false, _Rmost(), value);
+                return ProcessEntries_00b3ac00(false, _Rmost(), value);
         }
         else if (!(compare(_Key(where._Mynode()), _Kfn(value))) &&
-                 !(compare(_Kfn(value), _Key((next = where).FUN_00b3b440()._Mynode()))))
+                 !(compare(_Kfn(value), _Key((next = where).ProcessAndReturnValue_00b3b440()._Mynode()))))
         {
             if (_Isnil(_Right(next._Mynode())))
-                return FUN_00b3ac00(false, next._Mynode(), value);
+                return ProcessEntries_00b3ac00(false, next._Mynode(), value);
             else
-                return FUN_00b3ac00(true, where._Mynode(), value);
+                return ProcessEntries_00b3ac00(true, where._Mynode(), value);
         }
         else if (!(compare(_Kfn(value), _Key(where._Mynode()))) &&
-                 ((next = where).FUN_00b3b100().equal(end()) || !(compare(_Key(next._Mynode()), _Kfn(value)))))
+                 ((next = where).ProcessAndReturnValue_00b3b100().equal(end()) || !(compare(_Key(next._Mynode()), _Kfn(value)))))
         {
             if (_Isnil(_Right(where._Mynode())))
-                return FUN_00b3ac00(false, where._Mynode(), value);
+                return ProcessEntries_00b3ac00(false, where._Mynode(), value);
             else
-                return FUN_00b3ac00(true, next._Mynode(), value);
+                return ProcessEntries_00b3ac00(true, next._Mynode(), value);
         }
     }
     else
     {
-        if (where.FUN_00b2ac30(begin()))
+        if (where.EvaluateValue_00b2ac30(begin()))
         {
             if (compare(_Kfn(value), _Key(where._Mynode())))
-                return FUN_00b3ac00(true, where._Mynode(), value);
+                return ProcessEntries_00b3ac00(true, where._Mynode(), value);
         }
-        else if (where.FUN_00b2ac30(end()))
+        else if (where.EvaluateValue_00b2ac30(end()))
         {
             if (compare(_Key(_Rmost()), _Kfn(value)))
-                return FUN_00b3ac00(false, _Rmost(), value);
+                return ProcessEntries_00b3ac00(false, _Rmost(), value);
         }
         else if (compare(_Kfn(value), _Key(where._Mynode())) &&
-                 compare(_Key((next = where).FUN_00b3b440()._Mynode()), _Kfn(value)))
+                 compare(_Key((next = where).ProcessAndReturnValue_00b3b440()._Mynode()), _Kfn(value)))
         {
             if (_Isnil(_Right(next._Mynode())))
-                return FUN_00b3ac00(false, next._Mynode(), value);
+                return ProcessEntries_00b3ac00(false, next._Mynode(), value);
             else
-                return FUN_00b3ac00(true, where._Mynode(), value);
+                return ProcessEntries_00b3ac00(true, where._Mynode(), value);
         }
         else if (compare(_Key(where._Mynode()), _Kfn(value)) &&
-                 ((next = where).FUN_00b3b100().FUN_00b2ac30(end()) || compare(_Kfn(value), _Key(next._Mynode()))))
+                 ((next = where).ProcessAndReturnValue_00b3b100().EvaluateValue_00b2ac30(end()) || compare(_Kfn(value), _Key(next._Mynode()))))
         {
             if (_Isnil(_Right(where._Mynode())))
-                return FUN_00b3ac00(false, where._Mynode(), value);
+                return ProcessEntries_00b3ac00(false, where._Mynode(), value);
             else
-                return FUN_00b3ac00(true, next._Mynode(), value);
+                return ProcessEntries_00b3ac00(true, next._Mynode(), value);
         }
     }
-    return FUN_00b3a9b0(value).first;
+    return ProcessEntries_00b3a9b0(value).first;
 }
 
-inline TreeIterator HintTree::FUN_00b3ac00(bool addLeft, TreeNode* parent, const TreeValue& value)
+// src: GUESS 0x00b3ac00 (confidence: low)
+inline TreeIterator HintTree::ProcessEntries_00b3ac00(bool addLeft, TreeNode* parent, const TreeValue& value)
 {
     if (max_size() - 1 <= count)
         throw asgnb36::BxLengthError("map/set<T> too long");
-    TreeNode* added = FUN_00b3b330(head, parent, head, value, 0);
+    TreeNode* added = AllocateStorage_00b3b330(head, parent, head, value, 0);
     ++count;
     if (parent == head)
     {
@@ -1643,11 +1657,11 @@ inline TreeIterator HintTree::FUN_00b3ac00(bool addLeft, TreeNode* parent, const
                 if (node == _Right(_Parent(node)))
                 {
                     node = _Parent(node);
-                    FUN_00b3b1d0(node);
+                    UpdateState_00b3b1d0(node);
                 }
                 _Color(_Parent(node)) = 1;
                 _Color(_Parent(_Parent(node))) = 0;
-                FUN_00b3b280(_Parent(_Parent(node)));
+                UpdateFields_00b3b280(_Parent(_Parent(node)));
             }
         }
         else
@@ -1665,11 +1679,11 @@ inline TreeIterator HintTree::FUN_00b3ac00(bool addLeft, TreeNode* parent, const
                 if (node == _Left(_Parent(node)))
                 {
                     node = _Parent(node);
-                    FUN_00b3b280(node);
+                    UpdateFields_00b3b280(node);
                 }
                 _Color(_Parent(node)) = 1;
                 _Color(_Parent(_Parent(node))) = 0;
-                FUN_00b3b1d0(_Parent(_Parent(node)));
+                UpdateState_00b3b1d0(_Parent(_Parent(node)));
             }
         }
     }
@@ -1734,11 +1748,11 @@ unsigned int __cdecl FUN_00ec7c56();
 struct StrQ
 {
     int m[7];
-    int FUN_00ac9da0(const StrQ& r) const;
+    int UpdateFields_00ac9da0(const StrQ& r) const;
 };
 inline bool operator<(const StrQ& l, const StrQ& r)
 {
-    return l.FUN_00ac9da0(r) < 0;
+    return l.UpdateFields_00ac9da0(r) < 0;
 }
 struct ValQ
 {
@@ -1762,7 +1776,7 @@ struct FUN_00b3b050
     FUN_00b3b050()
     {}
     FUN_00b3b050(NodeQ* p, TreeQ* c);
-    FUN_00b3b050& FUN_00b3b440();
+    FUN_00b3b050& ProcessAndReturnValue_00b3b440();
     NodeQ* _Mynode() const
     {
         return _Ptr;
@@ -1833,11 +1847,12 @@ struct TreeQ
     {
         return FUN_00b3b050(_Lmost(), this);
     }
-    FUN_00b3b050 FUN_00b3ac00(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val);
-    PairQ FUN_00b3a9b0(const ValQ& _Val);
+    FUN_00b3b050 ProcessEntries_00b3ac00(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val);
+    PairQ ProcessEntries_00b3a9b0(const ValQ& _Val);
 };
 // @fnv 0x00b3a9b0
-PairQ TreeQ::FUN_00b3a9b0(const ValQ& _Val)
+// src: GUESS 0x00b3a9b0 (confidence: low)
+PairQ TreeQ::ProcessEntries_00b3a9b0(const ValQ& _Val)
 {
     NodeQ* _Trynode = _Root();
     NodeQ* _Wherenode = _Myhead;
@@ -1851,7 +1866,7 @@ PairQ TreeQ::FUN_00b3a9b0(const ValQ& _Val)
     if (_Multi)
     {
         Dead20();
-        return PairQ(FUN_00b3ac00(_Addleft, _Wherenode, _Val), true);
+        return PairQ(ProcessEntries_00b3ac00(_Addleft, _Wherenode, _Val), true);
     }
     else
     {
@@ -1859,13 +1874,13 @@ PairQ TreeQ::FUN_00b3a9b0(const ValQ& _Val)
         if (!_Addleft)
             ;
         else if (_Where == begin())
-            return PairQ(FUN_00b3ac00(true, _Wherenode, _Val), true);
+            return PairQ(ProcessEntries_00b3ac00(true, _Wherenode, _Val), true);
         else
-            _Where.FUN_00b3b440();
+            _Where.ProcessAndReturnValue_00b3b440();
         if (_Key(_Where._Mynode()) < _Kfn(_Val))
         {
             Dead1();
-            return PairQ(FUN_00b3ac00(_Addleft, _Wherenode, _Val), true);
+            return PairQ(ProcessEntries_00b3ac00(_Addleft, _Wherenode, _Val), true);
         }
         else
             return PairQ(_Where, false);
@@ -1901,7 +1916,8 @@ struct Key
         unsigned answer = textCompare(data() + offset, text, count < otherCount ? count : otherCount);
         return answer != 0 ? (int)answer : count < otherCount ? -1 : count == otherCount ? 0 : 1;
     }
-    int FUN_00ac9da0(const Key& right) const
+// src: GUESS 0x00ac9da0 (confidence: low)
+    int UpdateFields_00ac9da0(const Key& right) const
     {
         const Key* receiver = this;
         return receiver->compare(0, receiver->length, right.data(), right.size());
@@ -1916,7 +1932,7 @@ struct Node
 };
 inline bool operator<(const Key& left, const Key& right)
 {
-    return left.FUN_00ac9da0(right) < 0;
+    return left.UpdateFields_00ac9da0(right) < 0;
 }
 struct Less
 {
@@ -1930,10 +1946,11 @@ struct Tree
     Less compare;
     unsigned unk04, unk08, unk0c, unk10, unk14;
     Node* head;
-    Node* FUN_00b3afe0(const Key& key);
+    Node* ProcessEntries_00b3afe0(const Key& key);
 };
 // @fnv 0x00b3afe0
-Node* Tree::FUN_00b3afe0(const Key& key)
+// src: GUESS 0x00b3afe0 (confidence: low)
+Node* Tree::ProcessEntries_00b3afe0(const Key& key)
 {
     Node* node = head->parent;
     Node* lowerBound = head;
@@ -2378,11 +2395,12 @@ template <class _Ty> class _Tree_const_iteratorS : public _BiditS<_Ty>
 class FUN_00b3b090_Iterator : public _Tree_const_iteratorS<ValT>
 {
   public:
-    const ValT& FUN_00b3b090() const;
+    const ValT& EvaluateValue_00b3b090() const;
 };
 
 // @fnv 0x00b3b090
-const ValT& FUN_00b3b090_Iterator::FUN_00b3b090() const
+// src: GUESS 0x00b3b090 (confidence: low)
+const ValT& FUN_00b3b090_Iterator::EvaluateValue_00b3b090() const
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoS();
@@ -2804,11 +2822,12 @@ template <class _Ty> class _Tree_const_iteratorS : public _BiditS<_Ty>
 class FUN_00b3b440_Iterator : public _Tree_const_iteratorS<ValT>
 {
   public:
-    void FUN_00b3b440();
+    void ProcessAndReturnValue_00b3b440();
 };
 
 // @fnv 0x00b3b440
-void FUN_00b3b440_Iterator::FUN_00b3b440()
+// src: GUESS 0x00b3b440 (confidence: low)
+void FUN_00b3b440_Iterator::ProcessAndReturnValue_00b3b440()
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoS();
@@ -3185,14 +3204,15 @@ _FwdIt _Uninit_copyS(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al, _Nons
                      _Range_checked_iterator_tagS);
 
 // @fnv 0x00b3b5a0
-ElemB5A0* __cdecl FUN_00b3b5a0(ElemB5A0* _First, ElemB5A0* _Last, ElemB5A0* _Dest, allocatorS<ElemB5A0>& _Al)
+// src: GUESS 0x00b3b5a0 (confidence: low)
+ElemB5A0* __cdecl Object_ProcessAndReturnValue_00b3b5a0(ElemB5A0* _First, ElemB5A0* _Last, ElemB5A0* _Dest, allocatorS<ElemB5A0>& _Al)
 {
     return (_Uninit_copyS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Al, _Ptr_catS(_First, _Dest),
                           _Range_checked_iterator_tagS()));
 }
 }  // namespace fnv_00b3b5a0
 
-void FormHeap_Free(void* p);
+void FormHeapFreeAndLog_00401030(void* p);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
@@ -3214,7 +3234,8 @@ inline void Construct(ElQ* p, const ElQ& v)
     ::new (vp) ElQ(v);
 }
 // @fnv 0x00b3b5f0
-void FUN_00b3b5f0(ElQ* first, unsigned int n, const ElQ& val)
+// src: GUESS 0x00b3b5f0 (confidence: low)
+void Idvspline_ProcessEntries_00b3b5f0(ElQ* first, unsigned int n, const ElQ& val)
 {
     ElQ* next = first;
     try
@@ -3610,7 +3631,8 @@ struct ElemMOVE
     int unk04;
 };
 // @fnv 0x00b3b6f0
-ElemMOVE* __cdecl FUN_00b3b6f0(ElemMOVE* _First, ElemMOVE* _Last, ElemMOVE* _Dest, allocatorS<ElemMOVE>& _Al)
+// src: GUESS 0x00b3b6f0 (confidence: low)
+ElemMOVE* __cdecl Idvspline_EvaluateValue_00b3b6f0(ElemMOVE* _First, ElemMOVE* _Last, ElemMOVE* _Dest, allocatorS<ElemMOVE>& _Al)
 {
     return (_Uninit_moveS(_Checked_baseS(_First), _Checked_baseS(_Last), _Dest, _Al, _Move_catS(_Dest),
                           _Range_checked_iterator_tagS()));
@@ -3779,11 +3801,12 @@ struct Tree
         return _Pnode->_Isnil;
     }
 
-    NodeX* FUN_00b3b880();
+    NodeX* ReleaseStorage_00b3b880();
 };
 
 // @fnv 0x00b3b880
-NodeX* Tree::FUN_00b3b880()
+// src: GUESS 0x00b3b880 (confidence: low)
+NodeX* Tree::ReleaseStorage_00b3b880()
 {
     NodeX* _Wherenode = this->_Alnod.allocate(1);
     int _Linkcnt = 0;
@@ -4102,10 +4125,11 @@ template <class Value> struct EraseTree
         _Parent(_Wherenode) = _Pnode;
     }
 
-    iterator FUN_00b3bd80(const_iterator _Where);
+    iterator ReleaseEntries_00b3bd80(const_iterator _Where);
 };
 // @fnv 0x00b3bd80
-template <class Value> typename EraseTree<Value>::iterator EraseTree<Value>::FUN_00b3bd80(const_iterator _Where)
+// src: GUESS 0x00b3bd80 (confidence: low)
+template <class Value> typename EraseTree<Value>::iterator EraseTree<Value>::ReleaseEntries_00b3bd80(const_iterator _Where)
 
 {  // erase element at _Where
 
@@ -4262,7 +4286,7 @@ template <class Value> typename EraseTree<Value>::iterator EraseTree<Value>::FUN
     return (_Make_iter(_Where));  // return successor iterator
 }
 
-template EraseTree<int>::iterator EraseTree<int>::FUN_00b3bd80(EraseTree<int>::const_iterator);
+template EraseTree<int>::iterator EraseTree<int>::ReleaseEntries_00b3bd80(EraseTree<int>::const_iterator);
 
 unsigned int __cdecl FUN_00ec7c56(void);
 
@@ -4315,11 +4339,12 @@ struct FUN_00b37ad0_class
     int unk50;
     SplineVec m_vec;
 
-    float FUN_00b37ad0(float a2);
+    float CIdvBezierSpline_Evaluate(float a2);
 };
 
 // @fnv 0x00b37ad0
-float FUN_00b37ad0_class::FUN_00b37ad0(float a2)
+// src: COMMUNITY 0x00b37ad0
+float FUN_00b37ad0_class::CIdvBezierSpline_Evaluate(float a2)
 {
     float pItem;
     pItem = 0.0f;
@@ -4388,11 +4413,12 @@ class Cont_00b397f0
     GlobalObject_00b3f100* myFirst;
     GlobalObject_00b3f100* myLast;
     GlobalObject_00b3f100* myEnd;
-    void FUN_00b397f0();
+    void UpdateState_00b397f0();
 };
 
 // @fnv 0x00b397f0
-void Cont_00b397f0::FUN_00b397f0()
+// src: GUESS 0x00b397f0 (confidence: low)
+void Cont_00b397f0::UpdateState_00b397f0()
 {
     if (this->myFirst != 0)
     {
@@ -4438,10 +4464,10 @@ struct FUN_0044a4c0
 {
     int m[7];
     FUN_0044a4c0(const char* s);
-    void FUN_0044a730(bool b, unsigned int n);
+    void fopen_0044a730(bool b, unsigned int n);
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
 };
 struct FUN_0044a310
@@ -4522,10 +4548,10 @@ struct TreeQ
         int _Pad;
         return (0 < _Count ? _Count : 1);
     }
-    NodeQ* FUN_00ad1960(NodeQ* _Larg, NodeQ* _Parg, NodeQ* _Rarg, const ValQ& _Val, char _Carg);
-    void FUN_00ad1800(NodeQ* _Wherenode);
-    void FUN_00ad18b0(NodeQ* _Wherenode);
-    IterQ FUN_00b3ac00(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val);
+    NodeQ* CreateEntryInAllocatedStorage(NodeQ* _Larg, NodeQ* _Parg, NodeQ* _Rarg, const ValQ& _Val, char _Carg);
+    void UpdateFields_00ad1800(NodeQ* _Wherenode);
+    void UpdateState_00ad18b0(NodeQ* _Wherenode);
+    IterQ ProcessEntries_00b3ac00(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val);
 };
 inline IterQ::IterQ(NodeQ* p, const TreeQ* t) : _Myaux(0), _Ptr(p)
 {
@@ -4534,13 +4560,14 @@ inline IterQ::IterQ(NodeQ* p, const TreeQ* t) : _Myaux(0), _Ptr(p)
     _Myaux = t->_Myownedaux;
 }
 // @fnv 0x00b3ac00
-IterQ TreeQ::FUN_00b3ac00(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val)
+// src: GUESS 0x00b3ac00 (confidence: low)
+IterQ TreeQ::ProcessEntries_00b3ac00(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val)
 {
     if (max_size() - 1 <= _Mysize)
     {
         ThrowLen(LenErrQ("map/set<T> too long"));
     }
-    NodeQ* _Newnode = FUN_00ad1960(_Myhead, _Wherenode, _Myhead, _Val, 0);
+    NodeQ* _Newnode = CreateEntryInAllocatedStorage(_Myhead, _Wherenode, _Myhead, _Val, 0);
     ++_Mysize;
     if (_Wherenode == _Myhead)
     {
@@ -4576,12 +4603,12 @@ IterQ TreeQ::FUN_00b3ac00(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val)
                 if (_Pnode == _Right(_Parent(_Pnode)))
                 {
                     _Pnode = _Parent(_Pnode);
-                    FUN_00ad1800(_Pnode);
+                    UpdateFields_00ad1800(_Pnode);
                 }
                 _Color(_Parent(_Pnode)) = 1;
                 Dead3();
                 _Color(_Parent(_Parent(_Pnode))) = 0;
-                FUN_00ad18b0(_Parent(_Parent(_Pnode)));
+                UpdateState_00ad18b0(_Parent(_Parent(_Pnode)));
             }
         }
         else
@@ -4600,12 +4627,12 @@ IterQ TreeQ::FUN_00b3ac00(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val)
                 if (_Pnode == _Left(_Parent(_Pnode)))
                 {
                     _Pnode = _Parent(_Pnode);
-                    FUN_00ad18b0(_Pnode);
+                    UpdateState_00ad18b0(_Pnode);
                 }
                 _Color(_Parent(_Pnode)) = 1;
                 Dead2();
                 _Color(_Parent(_Parent(_Pnode))) = 0;
-                FUN_00ad1800(_Parent(_Parent(_Pnode)));
+                UpdateFields_00ad1800(_Parent(_Parent(_Pnode)));
             }
         }
     Dead3();
@@ -5027,11 +5054,12 @@ template <class _Ty> class _Tree_const_iteratorS : public _BiditS<_Ty>
 class FUN_00b3b100_Iterator : public _Tree_const_iteratorS<ValB100>
 {
   public:
-    void FUN_00b3b100();
+    void ProcessAndReturnValue_00b3b100();
 };
 
 // @fnv 0x00b3b100
-void FUN_00b3b100_Iterator::FUN_00b3b100()
+// src: GUESS 0x00b3b100 (confidence: low)
+void FUN_00b3b100_Iterator::ProcessAndReturnValue_00b3b100()
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoS();
@@ -5100,7 +5128,8 @@ struct string
     {
         CharTraits::assign(_Myptr()[_Mysize = _Newsize], char());
     }
-    void FUN_0044a730(bool _Built = false, unsigned int _Newsize = 0)
+// src: XBOX_PDB 0x0044a730
+    void fopen_0044a730(bool _Built = false, unsigned int _Newsize = 0)
     {
         if (!_Built)
             ;
@@ -5145,7 +5174,7 @@ struct string
         if (_Myres < _Newsize)
             _Copy(_Newsize, _Mysize);
         else if (_Trim && _Newsize < 16)
-            FUN_0044a730(true, _Newsize < _Mysize ? _Newsize : _Mysize);
+            fopen_0044a730(true, _Newsize < _Mysize ? _Newsize : _Mysize);
         else if (_Newsize == 0)
             _Eos(0);
         return 0 < _Newsize;
@@ -5168,7 +5197,7 @@ struct string
     }
     string(const string& _Right)
     {
-        FUN_0044a730();
+        fopen_0044a730();
         AssignSubstring(_Right, 0, DAT_010173f0);
     }
 };
@@ -5232,12 +5261,13 @@ inline TreeNode* __cdecl AllocateNode(unsigned int _Count, const void*)
 
 struct TreeClass
 {
-    TreeNode* FUN_00b3b330(TreeNode* _Larg, TreeNode* _Parg, TreeNode* _Rarg,
+    TreeNode* AllocateStorage_00b3b330(TreeNode* _Larg, TreeNode* _Parg, TreeNode* _Rarg,
                            const std::pair<const std::string, int>& _Val, char _Carg);
 };
 
 // @fnv 0x00b3b330
-TreeNode* TreeClass::FUN_00b3b330(TreeNode* _Larg, TreeNode* _Parg, TreeNode* _Rarg,
+// src: GUESS 0x00b3b330 (confidence: low)
+TreeNode* TreeClass::AllocateStorage_00b3b330(TreeNode* _Larg, TreeNode* _Parg, TreeNode* _Rarg,
                                   const std::pair<const std::string, int>& _Val, char _Carg)
 {
     TreeNode* _Warg = AllocateNode(1, 0);
@@ -5291,15 +5321,15 @@ struct SplinePointVector : SplineVecBase
     SplinePointVector();
     __forceinline ~SplinePointVector()
     {
-        FUN_00b397f0();
+        UpdateState_00b397f0();
     }
-    void FUN_00b397f0();
-    void FUN_00b39490(unsigned int, SplinePoint);
+    void UpdateState_00b397f0();
+    void ProcessState_00b39490(unsigned int, SplinePoint);
     __forceinline void resizeA(unsigned int n)
     {
         int ha0;
         int ha1;
-        FUN_00b39490(n, SplinePoint());
+        ProcessState_00b39490(n, SplinePoint());
     }
     __forceinline void resizeB(unsigned int n)
     {
@@ -5315,9 +5345,9 @@ struct SplinePointVector : SplineVecBase
         int hb9;
         int hb10;
         int hb11;
-        FUN_00b39490(n, SplinePoint());
+        ProcessState_00b39490(n, SplinePoint());
     }
-    void FUN_00b1e750();
+    void ClearAllElements();
     __forceinline unsigned int size() const
     {
         return last - first;
@@ -5349,8 +5379,8 @@ struct SplinePath
     SplinePointVector tangents;
     SplinePointVector scratch;
     SplinePointVector samples;
-    SplinePoint FUN_00b38b50(float);
-    void FUN_00b38430(unsigned int count);
+    SplinePoint ProcessEntries_00b38b50(float);
+    void CIdvBezierSpline_CreateEvenlySpacedPoints(unsigned int count);
 };
 __forceinline void padQ()
 {
@@ -5365,13 +5395,14 @@ __forceinline void padQ()
     int pq8;
 }
 // @fnv 0x00b38430
-void SplinePath::FUN_00b38430(unsigned int count)
+// src: COMMUNITY 0x00b38430
+void SplinePath::CIdvBezierSpline_CreateEvenlySpacedPoints(unsigned int count)
 {
     SplinePointVector sampled;
     sampled.resizeA(count);
     for (unsigned int i = 0; i < count; ++i)
-        sampled[i] = FUN_00b38b50(float(i) / count);
-    samples.FUN_00b1e750();
+        sampled[i] = ProcessEntries_00b38b50(float(i) / count);
+    samples.ClearAllElements();
     samples.resizeB(count);
     unsigned int segment = 0;
     samples[0] = controlPoints[0];
@@ -5402,7 +5433,7 @@ inline NodeB*& TreeLeftmost(FUN_00b3b810_shell* tree)
 }
 inline void FUN_00b3b810_shell::InitNode()
 {
-    f18 = FUN_00b3b880();
+    f18 = ReleaseStorage_00b3b880();
     reinterpret_cast<NodeT*>(f18)->isnil = true;
     f18->f4 = f18;
     TreeLeftmost(this) = f18, f18->f8 = f18;
@@ -5525,22 +5556,23 @@ FUN_00b3b9f0::FUN_00b3b9f0(lessS _Parg, asgnb36::BxAllocT<std::pair<const int, i
 
 struct CleanupCursor : TreeConstIterB3B
 {
-    void FUN_00b3b100();
+    void ProcessAndReturnValue_00b3b100();
     TreeConstIterB3B operator++(int)
     {
         TreeConstIterB3B old = *this;
-        FUN_00b3b100();
+        ProcessAndReturnValue_00b3b100();
         return old;
     }
 };
 
 struct TreeCleanup : TreeB3B
 {
-    TreeIterB3B FUN_00b3bb90(TreeConstIterB3B first, TreeConstIterB3B last);
-    void FUN_00b3ba90();
+    TreeIterB3B ProcessEntries_00b3bb90(TreeConstIterB3B first, TreeConstIterB3B last);
+    void UpdateState_00b3ba90();
 };
 
-inline TreeIterB3B TreeCleanup::FUN_00b3bb90(TreeConstIterB3B first, TreeConstIterB3B last)
+// src: GUESS 0x00b3bb90 (confidence: low)
+inline TreeIterB3B TreeCleanup::ProcessEntries_00b3bb90(TreeConstIterB3B first, TreeConstIterB3B last)
 {
     TreeConstIterB3B& cursor = first;
     if (cursor == begin() && last == end())
@@ -5557,9 +5589,10 @@ inline TreeIterB3B TreeCleanup::FUN_00b3bb90(TreeConstIterB3B first, TreeConstIt
 }
 
 // @fnv 0x00b3ba90
-void TreeCleanup::FUN_00b3ba90()
+// src: GUESS 0x00b3ba90 (confidence: low)
+void TreeCleanup::UpdateState_00b3ba90()
 {
-    FUN_00b3bb90(begin(), end());
+    ProcessEntries_00b3bb90(begin(), end());
     ((allocatorS<NodeT*>*)&unk10)->destroy(&Left(head));
     ((allocatorS<NodeT*>*)&unk10)->destroy(&Parent(head));
     ((allocatorS<NodeT*>*)&unk10)->destroy(&Right(head));

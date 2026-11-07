@@ -40,7 +40,7 @@ public:
 #else
     // MSVC supplies __vecDelDtor for the nontrivial array member.
 #endif
-    unsigned int FUN_005be5c0(int group);
-    unsigned int FUN_005de0f0(int group);
-    MobileObject* FUN_00968670(unsigned int index);
+    unsigned int ProcessArray_GetProcessLevelTail(int group);
+    unsigned int ProcessArray_GetProcessLevelHead(int group);
+    MobileObject* ProcessArray_GetItem(unsigned int index);
 };

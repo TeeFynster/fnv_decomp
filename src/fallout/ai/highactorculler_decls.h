@@ -38,12 +38,12 @@ class MobileObject : public TESObjectREFR
 class HighActorCullerCell : public TESObjectCELL
 {
   public:
-    BSPortalGraph* FUN_009d9f20();
+    BSPortalGraph* GetPortalGraph_009d9f20();
 };
 class TESWorldSpace
 {
   public:
-    BSPortalGraph* FUN_006698d0();
+    BSPortalGraph* TESPackage_GetOnChangeIdle();
 };
 class TES
 {
@@ -66,13 +66,13 @@ class NiAVObject
 class BSFadeNode : public NiAVObject
 {
   public:
-    bool FUN_00552470() const;
+    bool NiNode_QNotVisible() const;
     void SetTaskFlag(bool culled);
 };
 class NiCamera : public NiAVObject
 {
   public:
-    const NiPoint3& FUN_0045bb80() const;
+    const NiPoint3& NiAVObject_GetWorldTranslate() const;
 };
 
 class NiFrustum
@@ -176,7 +176,7 @@ class BSMultiBoundSphere
     virtual void vfn_b0();
     virtual void vfn_b4();
     virtual void SetGridPosition(const NiPoint3& center);
-    void FUN_00819a50(float radius);
+    void CombatLocation_SetRadius(float radius);
     char _pdbpad_4[8];
     char Center[12];
     float Radius;

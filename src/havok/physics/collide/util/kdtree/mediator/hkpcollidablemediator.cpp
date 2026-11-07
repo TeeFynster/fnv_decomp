@@ -3,9 +3,10 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 struct Child { unsigned int unk00; unsigned int unk04; };
-struct Owner { unsigned int unk00; unsigned int unk04; Child* child; unsigned int FUN_00d9e000(); };
+struct Owner { unsigned int unk00; unsigned int unk04; Child* child; unsigned int hkpCollidableMediator_getNumPrimitives(); };
 // @fnv 0x00d9e000
-unsigned int Owner::FUN_00d9e000() { return child->unk04; }
+// src: XBOX_PDB 0x00d9e000
+unsigned int Owner::hkpCollidableMediator_getNumPrimitives() { return child->unk04; }
 
 // InitWalker: thiscall (2 stack args). Stores vptr, flag word and list, walks the item list when ctx != 0, returns this.
 
@@ -32,7 +33,7 @@ struct SubRec {
     virtual void v10();
     virtual void v14();
     virtual void v18(OutSlot* out);
-    void FUN_00d07950(OutSlot* out);
+    void hkpPhantom_setBoundingVolumeData(OutSlot* out);
 };
 
 struct ItemRec {
@@ -90,7 +91,7 @@ struct CtxRec {
     void* m_78;
 };
 
-void __cdecl FUN_00d1a330(void* mgr, OutSlot* out, int flag);
+void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(void* mgr, OutSlot* out, int flag);
 
 class ListWalker {
 public:
@@ -117,12 +118,12 @@ ListWalker* ListWalker::InitWalker(ItemListRec* list, CtxRec* ctx)
                         OutPlain out;
                         SubRec* sub = (SubRec*)((char*)m_08->m_items[iIndex] + m_08->m_items[iIndex]->m_subOff);
                         out.m_ptr = sub;
-                        FUN_00d1a330(ctx->m_78, (OutSlot*)&out, 1);
+                        hkpEntityAabbUtil_entityBatchRecalcAabb(ctx->m_78, (OutSlot*)&out, 1);
                     } else {
                         OutSlot out;
                         SubRec* sub = (SubRec*)((char*)m_08->m_items[iIndex] + m_08->m_items[iIndex]->m_subOff);
                         sub->v18(&out);
-                        sub->FUN_00d07950(&out);
+                        sub->hkpPhantom_setBoundingVolumeData(&out);
                     }
                 }
                 ++iIndex;
@@ -136,11 +137,12 @@ struct FUN_00d9e010_cls {
     unsigned int unk00;
     unsigned int unk04;
     Child* child;
-    unsigned int FUN_00d9e010(unsigned int index);
+    unsigned int hkpCollidableMediator_getPrimitiveId(unsigned int index);
 };
 
 // @fnv 0x00d9e010
-unsigned int FUN_00d9e010_cls::FUN_00d9e010(unsigned int index)
+// src: HAVOK_LIB 0x00d9e010
+unsigned int FUN_00d9e010_cls::hkpCollidableMediator_getPrimitiveId(unsigned int index)
 {
     unsigned int* table = (unsigned int*)child->unk00;
     return table[index];

@@ -86,7 +86,7 @@ void DisintegrateArmorEffect::SaveGame(Actor* arg)
                 }
             }
         }
-        g_TESSaveLoadGame->FUN_008579b0(&result, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&result, 4);
     }
 }
 
@@ -122,7 +122,7 @@ void DisintegrateArmorEffect::LoadGame(Actor* pNode)
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x37)
     {
         int handle;
-        g_TESSaveLoadGame->FUN_008579e0(&handle, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&handle, 4);
         if (handle != -1)
         {
             Effect* fx = reinterpret_cast<fnv_0080d610::Node*>(pNode)->Resolve()->Find();
@@ -385,15 +385,15 @@ struct Result
     virtual void v0f0();
     virtual void v0f1();
     virtual void FUN_slot242(void* a, float b);
-    InventoryItem* FUN_0089d8b0(unsigned int flags);
-    int FUN_0055d520();
+    InventoryItem* Actor_GetRandomWornArmor(unsigned int flags);
+    int TESObjectREFR_GetFullName();
 };
 struct Node
 {
     Result* FUN_00822b40();
 };
-bool FUN_005b6f70();
-int FUN_00703c00(const char* fmt, ...);
+bool CombatController_GetShowVerboseMessages();
+int Interface_PrintLine(const char* fmt, ...);
 // @fnv 0x0080d340
 void DisintegrateArmorEffect::Start()
 {
@@ -404,13 +404,13 @@ void DisintegrateArmorEffect::Start()
     if (p == 0)
         return;
     {
-        this->m_pItem = p->FUN_0089d8b0(0);
+        this->m_pItem = p->Actor_GetRandomWornArmor(0);
         if (this->m_pItem != 0)
         {
             p->FUN_slot242((void*)this->m_pItem, this->GetFloatAtOffset1C(1));
-            if (FUN_005b6f70())
+            if (CombatController_GetShowVerboseMessages())
             {
-                FUN_00703c00("%s's %s takes %0.2f disintegrate armor damage!", p->FUN_0055d520(),
+                Interface_PrintLine("%s's %s takes %0.2f disintegrate armor damage!", p->TESObjectREFR_GetFullName(),
                              this->m_pItem->GetTargetFullName(), this->GetFloatAtOffset1C());
             }
             t = this->m_pItem;

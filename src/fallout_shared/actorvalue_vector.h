@@ -5,7 +5,7 @@
 struct ActorValueShortVector
 {
     short x, y, z;
-    void FUN_0050e960(int x, int y, int z);
+    void NiNPShortPoint3_NiNPShortPoint3(int x, int y, int z);
     ActorValueShortVector* Subtract(ActorValueShortVector* result, const ActorValueShortVector& other);
 };
 #endif

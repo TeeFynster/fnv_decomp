@@ -3,7 +3,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00aa4d30
-int __cdecl FUN_00aa4d30()
+// src: GUESS 0x00aa4d30 (confidence: high)
+int __cdecl BSCoreMessage_ReturnZero()
 {
     return 0;
 }
@@ -26,7 +27,7 @@ extern P03MM g_memoryManager;
 // @fnv 0x00aa4d00
 void* BSCoreMessage::FUN_00aa4d00(unsigned int flags)
 {
-    FUN_00aa4c80();
+    UpdateFields_00aa4c80();
     if (flags & 1)
         g_memoryManager._DeallocateAlias(this);
     return this;

@@ -29,7 +29,8 @@ struct FUN_0067ba40_Result
 };
 
 // @fnv 0x0067ba40
-void __thiscall TESEatPackageData::FUN_0067ba40(int flags)
+// src: XBOX_PDB 0x0067ba40
+void __thiscall TESEatPackageData::Copy_0067ba40(int flags)
 {
     FUN_0067ba40_Result* result = (FUN_0067ba40_Result*)FUN_00ec43fb(flags, 0, &DAT_0119bdec, &DAT_0119be3c, 0);
     if (result)

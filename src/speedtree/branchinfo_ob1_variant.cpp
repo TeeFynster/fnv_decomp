@@ -91,11 +91,12 @@ struct S_00b3f310_Item_WithDtor : S_00b3f310_Item
 
 struct FUN_00b3f310_Host : FUN_00b3f310
 {
-    void FUN_00b3f620();
+    void DeleteOwnedItems();
 };
 
 // @fnv 0x00b3f620
-void FUN_00b3f310_Host::FUN_00b3f620()
+// src: GUESS 0x00b3f620 (confidence: medium)
+void FUN_00b3f310_Host::DeleteOwnedItems()
 {
     delete (S_00b3f310_Item_WithDtor*)unk58;
     delete (S_00b3f310_Item_WithDtor*)unk5c;
@@ -128,9 +129,9 @@ struct FUN_0044a4c0
     FUN_0044a4c0(const FUN_0044a4c0& r);
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool b, unsigned n);
+    void fopen_0044a730(bool b, unsigned n);
 };
 struct FUN_00b096a0
 {
@@ -157,8 +158,8 @@ struct Parser
     unsigned uiPos;
     ByteVec kData;
     int GetNextElement();
-    float FUN_00b3ed20();
-    int FUN_00b13970();
+    float CTreeFileAccess_ParseFloat();
+    int CTreeFileAccess_ParseBranchParameter();
 };
 inline void DeadTop()
 {
@@ -174,18 +175,19 @@ struct BranchQ
     bool bB;
     char acPad[0x56];
     BranchQ();
-    void FUN_00b3fc80(int);
-    void FUN_00b3fcf0(int);
-    void FUN_00b3fd60(int);
-    void FUN_00b3fdd0(int);
-    void FUN_00b3fe40(int);
-    void FUN_00b3feb0(int);
-    void FUN_00b3ff20(int);
-    void FUN_00b3ff90(int);
-    void FUN_00b40000(int);
+    void UpdateFields_00b3fc80(int);
+    void ReleaseStorage_00b3fcf0(int);
+    void UpdateFields_00b3fd60(int);
+    void UpdateState_00b3fdd0(int);
+    void UpdateFields_00b3fe40(int);
+    void ReleaseStorage_00b3feb0(int);
+    void UpdateFields_00b3ff20(int);
+    void UpdateState_00b3ff90(int);
+    void UpdateFields_00b40000(int);
 };
 // @fnv 0x00b3f8e0
-BranchQ* FUN_00b3f8e0(Parser* p)
+// src: GUESS 0x00b3f8e0 (confidence: low)
+BranchQ* Object_ProcessEntries_00b3f8e0(Parser* p)
 {
     DeadTop();
     BranchQ* pBranch = new BranchQ;
@@ -198,31 +200,31 @@ BranchQ* FUN_00b3f8e0(Parser* p)
         switch (iToken)
         {
         case 0x1770:
-            pBranch->FUN_00b3fc80(p->FUN_00b13970());
+            pBranch->UpdateFields_00b3fc80(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1771:
-            pBranch->FUN_00b3fcf0(p->FUN_00b13970());
+            pBranch->ReleaseStorage_00b3fcf0(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1772:
-            pBranch->FUN_00b3fd60(p->FUN_00b13970());
+            pBranch->UpdateFields_00b3fd60(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1773:
-            pBranch->FUN_00b3fdd0(p->FUN_00b13970());
+            pBranch->UpdateState_00b3fdd0(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1781:
-            pBranch->FUN_00b40000(p->FUN_00b13970());
+            pBranch->UpdateFields_00b40000(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1774:
-            pBranch->FUN_00b3fe40(p->FUN_00b13970());
+            pBranch->UpdateFields_00b3fe40(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1775:
-            pBranch->FUN_00b3feb0(p->FUN_00b13970());
+            pBranch->ReleaseStorage_00b3feb0(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1776:
-            pBranch->FUN_00b3ff20(p->FUN_00b13970());
+            pBranch->UpdateFields_00b3ff20(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1777:
-            pBranch->FUN_00b3ff90(p->FUN_00b13970());
+            pBranch->UpdateState_00b3ff90(p->CTreeFileAccess_ParseBranchParameter());
             break;
         case 0x1778:
             pBranch->iA = p->GetNextElement();
@@ -231,19 +233,19 @@ BranchQ* FUN_00b3f8e0(Parser* p)
             pBranch->iB = p->GetNextElement();
             break;
         case 0x177a:
-            pBranch->afF[0] = p->FUN_00b3ed20();
+            pBranch->afF[0] = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x177b:
-            pBranch->afF[1] = p->FUN_00b3ed20();
+            pBranch->afF[1] = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x177c:
-            pBranch->afF[2] = p->FUN_00b3ed20();
+            pBranch->afF[2] = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x177d:
-            pBranch->afF[3] = p->FUN_00b3ed20();
+            pBranch->afF[3] = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x177e:
-            pBranch->afF[4] = p->FUN_00b3ed20();
+            pBranch->afF[4] = p->CTreeFileAccess_ParseFloat();
             break;
         case 0x177f:
             pBranch->bA = p->kData.FUN_00b15170(p->uiPos++) != 0;

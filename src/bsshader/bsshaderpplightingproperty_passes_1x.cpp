@@ -23,12 +23,13 @@ extern const char DAT_010bc5f4[];
 
 struct FUN_00bdac00_t : BSShaderPPLightingProperty
 {
-    void* FUN_00bdac00(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool, bool,
+    void* BSShaderPPLightingProperty_AddTexturePass_1x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool, bool,
                        bool);
 };
 
 // @fnv 0x00bdac00
-void* FUN_00bdac00_t::FUN_00bdac00(NiGeometry* apGeom, ShadowSceneLight* apLight, unsigned short* asCount,
+// src: XBOX_PDB 0x00bdac00
+void* FUN_00bdac00_t::BSShaderPPLightingProperty_AddTexturePass_1x(NiGeometry* apGeom, ShadowSceneLight* apLight, unsigned short* asCount,
                                    bool abUpdateList, bool* abFirst, bool abSkinned, bool abMultitexture,
                                    bool abFacegenBlend, bool abVertexColors, bool abTreeBranch, bool abHair)
 {

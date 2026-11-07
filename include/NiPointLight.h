@@ -34,11 +34,11 @@ class NiPointLight : public NiLight
     void FUN_0050c630(float value);
     void FUN_0050c660(float value);
     void FUN_0050c690(float value);
-    void FUN_0050dd20(float value);
+    void NiLight_SetDimmer(float value);
     void FUN_0050dd50(const NiPoint3& color);
     void FUN_004bc2c0();
-    bool FUN_00a7d730(NiObject* object);
-    void FUN_00a7d7a0(NiUpdateData& update);
+    bool IsEqual_00a7d730(NiObject* object);
+    void UpdateWorldData_00a7d7a0(NiUpdateData& update);
 
     unsigned char storage[0xfc - sizeof(NiLight)];
 };

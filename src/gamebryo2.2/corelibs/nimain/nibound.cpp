@@ -8,7 +8,8 @@ void* _NiMalloc(unsigned int);
 int NiSprintf(char*, unsigned int, const char*, ...);
 // Formats and returns a string containing the prefix, center coordinates, and bound radius.
 // @fnv 0x00a7fb20
-char* NiBound::FUN_00a7fb20(const char* pPrefix)
+// src: XBOX_PDB 0x00a7fb20
+char* NiBound::GetViewerString_00a7fb20(const char* pPrefix)
 {
     char* pString;
     unsigned int uiPrefixLen;

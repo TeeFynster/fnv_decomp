@@ -16,7 +16,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3538->SetRefID(0x12c, true);
         DAT_011c3538->SetEditorID_AtRuntime("MagicFailureSoundAlteration");
         DAT_011c3538->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3538);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3538);
     }
 
     DAT_011c353c = dynamic_cast<TESSound*>(GetFormByID(0x12d));
@@ -26,7 +26,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c353c->SetRefID(0x12d, true);
         DAT_011c353c->SetEditorID_AtRuntime("MagicFailureSoundConjuration");
         DAT_011c353c->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c353c);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c353c);
     }
 
     DAT_011c3540 = dynamic_cast<TESSound*>(GetFormByID(0x12e));
@@ -36,7 +36,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3540->SetRefID(0x12e, true);
         DAT_011c3540->SetEditorID_AtRuntime("MagicFailureSoundDestruction");
         DAT_011c3540->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3540);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3540);
     }
 
     DAT_011c3544 = dynamic_cast<TESSound*>(GetFormByID(0x12f));
@@ -46,7 +46,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3544->SetRefID(0x12f, true);
         DAT_011c3544->SetEditorID_AtRuntime("MagicFailureSoundIllusion");
         DAT_011c3544->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3544);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3544);
     }
 
     DAT_011c3548 = dynamic_cast<TESSound*>(GetFormByID(0x130));
@@ -56,7 +56,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3548->SetRefID(0x130, true);
         DAT_011c3548->SetEditorID_AtRuntime("MagicFailureSoundMysticism");
         DAT_011c3548->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3548);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3548);
     }
 
     DAT_011c354c = dynamic_cast<TESSound*>(GetFormByID(0x131));
@@ -66,7 +66,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c354c->SetRefID(0x131, true);
         DAT_011c354c->SetEditorID_AtRuntime("MagicFailureSoundRestoration");
         DAT_011c354c->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c354c);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c354c);
     }
 
     DAT_011c3550 = dynamic_cast<TESSound*>(GetFormByID(0x138));
@@ -76,7 +76,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3550->SetRefID(0x138, true);
         DAT_011c3550->SetEditorID_AtRuntime("MagicEnchantDrawSoundAlteration");
         DAT_011c3550->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3550);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3550);
     }
 
     DAT_011c3554 = dynamic_cast<TESSound*>(GetFormByID(0x139));
@@ -86,7 +86,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3554->SetRefID(0x139, true);
         DAT_011c3554->SetEditorID_AtRuntime("MagicEnchantDrawSoundConjuration");
         DAT_011c3554->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3554);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3554);
     }
 
     DAT_011c3558 = dynamic_cast<TESSound*>(GetFormByID(0x13a));
@@ -96,7 +96,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3558->SetRefID(0x13a, true);
         DAT_011c3558->SetEditorID_AtRuntime("MagicEnchantDrawSoundDestruction");
         DAT_011c3558->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3558);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3558);
     }
 
     DAT_011c355c = dynamic_cast<TESSound*>(GetFormByID(0x13b));
@@ -106,7 +106,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c355c->SetRefID(0x13b, true);
         DAT_011c355c->SetEditorID_AtRuntime("MagicEnchantDrawSoundIllusion");
         DAT_011c355c->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c355c);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c355c);
     }
 
     DAT_011c3560 = dynamic_cast<TESSound*>(GetFormByID(0x13c));
@@ -116,7 +116,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3560->SetRefID(0x13c, true);
         DAT_011c3560->SetEditorID_AtRuntime("MagicEnchantDrawSoundMysticism");
         DAT_011c3560->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3560);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3560);
     }
 
     DAT_011c3564 = dynamic_cast<TESSound*>(GetFormByID(0x13d));
@@ -126,7 +126,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3564->SetRefID(0x13d, true);
         DAT_011c3564->SetEditorID_AtRuntime("MagicEnchantDrawSoundRestoration");
         DAT_011c3564->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3564);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3564);
     }
 
     DAT_011c3568 = dynamic_cast<TESSound*>(GetFormByID(0x13e));
@@ -136,7 +136,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3568->SetRefID(0x13e, true);
         DAT_011c3568->SetEditorID_AtRuntime("MagicEnchantHitSoundAlteration");
         DAT_011c3568->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3568);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3568);
     }
 
     DAT_011c356c = dynamic_cast<TESSound*>(GetFormByID(0x13f));
@@ -146,7 +146,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c356c->SetRefID(0x13f, true);
         DAT_011c356c->SetEditorID_AtRuntime("MagicEnchantHitSoundConjuration");
         DAT_011c356c->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c356c);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c356c);
     }
 
     DAT_011c3570 = dynamic_cast<TESSound*>(GetFormByID(0x140));
@@ -156,7 +156,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3570->SetRefID(0x140, true);
         DAT_011c3570->SetEditorID_AtRuntime("MagicEnchantHitSoundDestruction");
         DAT_011c3570->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3570);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3570);
     }
 
     DAT_011c3574 = dynamic_cast<TESSound*>(GetFormByID(0x141));
@@ -166,7 +166,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3574->SetRefID(0x141, true);
         DAT_011c3574->SetEditorID_AtRuntime("MagicEnchantHitSoundIllusion");
         DAT_011c3574->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3574);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3574);
     }
 
     DAT_011c3578 = dynamic_cast<TESSound*>(GetFormByID(0x142));
@@ -176,7 +176,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c3578->SetRefID(0x142, true);
         DAT_011c3578->SetEditorID_AtRuntime("MagicEnchantHitSoundMysticism");
         DAT_011c3578->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c3578);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c3578);
     }
 
     DAT_011c357c = dynamic_cast<TESSound*>(GetFormByID(0x143));
@@ -186,7 +186,7 @@ void MagicSystem::InitializeMagicSystem()
         DAT_011c357c->SetRefID(0x143, true);
         DAT_011c357c->SetEditorID_AtRuntime("MagicEnchantHitSoundRestoration");
         DAT_011c357c->SetAltered(false);
-        g_dataHandler->FUN_0045c650()->AddHead(DAT_011c357c);
+        g_dataHandler->hkpMotion_getLinearVelocity()->AddHead(DAT_011c357c);
     }
 
     DAT_011c3580 = dynamic_cast<TESEffectShader*>(GetFormByID(0x144));
@@ -198,7 +198,7 @@ void MagicSystem::InitializeMagicSystem()
             DAT_011c3580->SetRefID(0x144, true);
             DAT_011c3580->SetEditorID_AtRuntime("effectAbsorb");
             DAT_011c3580->SetAltered(false);
-            g_dataHandler->FUN_00874670()->AddHead(DAT_011c3580);
+            g_dataHandler->TESDataHandler_GetEffectShaders()->AddHead(DAT_011c3580);
         }
     }
 
@@ -211,7 +211,7 @@ void MagicSystem::InitializeMagicSystem()
             DAT_011c3584->SetRefID(0x145, true);
             DAT_011c3584->SetEditorID_AtRuntime("effectReflect");
             DAT_011c3584->SetAltered(false);
-            g_dataHandler->FUN_00874670()->AddHead(DAT_011c3584);
+            g_dataHandler->TESDataHandler_GetEffectShaders()->AddHead(DAT_011c3584);
         }
     }
 
@@ -224,7 +224,7 @@ void MagicSystem::InitializeMagicSystem()
             DAT_011c3588->SetRefID(0x146, true);
             DAT_011c3588->SetEditorID_AtRuntime("LifeDetected");
             DAT_011c3588->SetAltered(false);
-            g_dataHandler->FUN_00874670()->AddHead(DAT_011c3588);
+            g_dataHandler->TESDataHandler_GetEffectShaders()->AddHead(DAT_011c3588);
         }
     }
 

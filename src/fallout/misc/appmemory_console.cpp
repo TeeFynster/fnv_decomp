@@ -5,7 +5,7 @@
 
 void* __cdecl operator new(unsigned);
 void* __cdecl operator new[](unsigned);
-void* __cdecl FUN_00403d30(void*, int, unsigned);
+void* __cdecl ourMemset(void*, int, unsigned);
 struct Heap
 {
     virtual void method0();
@@ -69,7 +69,7 @@ extern char DAT_010824fc, DAT_010824f0, DAT_010824e4;
 // @fnv 0x00866e00
 void MemoryManager::InitializeHeaps()
 {
-    FUN_00403d30(pHeapsByContextA, 0, 0x108);
+    ourMemset(pHeapsByContextA, 0, 0x108);
     iNumHeaps = 3;
     ppHeaps = new IMemoryHeap*[iNumHeaps];
     ppHeaps[0] = reinterpret_cast<IMemoryHeap*>(new FUN_00aa78a0(0xc800000, 0x5500000, &DAT_010824fc, false));

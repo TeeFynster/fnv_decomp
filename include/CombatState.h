@@ -216,20 +216,20 @@ public:
 #else
     // MSVC supplies __vecDelDtor(unsigned int) from the destructor.
 #endif
-    void FUN_0099d310(PathingRequest*);
-    bool FUN_0099d030(Arg0Class*, Arg1Class*, Arg2Class*, int, const NiPoint3&, float, void*);
-    bool FUN_0097ee90();
+    void BuildCoveredMoveRequest(PathingRequest*);
+    bool FindBestAdvanceLocation(Arg0Class*, Arg1Class*, Arg2Class*, int, const NiPoint3&, float, void*);
+    bool GetHasBufferedDetection_0097ee90();
     bool FUN_0097fd40();
     bool FUN_00461580(unsigned int);
     CombatSlot* GetActionAtIndex(int);
-    bool FUN_0099b8e0(void*, void*, CombatSearch*, CombatSpot*, int);
+    bool CombatState_FindBestCoverLocation(void*, void*, CombatSearch*, CombatSpot*, int);
     bool SelectAndMoveToPoint(CombatSpot*, int, int, float, float);
-    bool FUN_0099d030(void*, CombatSearch*, CombatSpot*, int, CombatPos*, float, int);
-    bool FUN_0099b5a0(CombatSpot*, char*, int);
-    bool FUN_0099ebe0(CombatSearch*, CombatSpot*, int);
+    bool FindBestAdvanceLocation(void*, CombatSearch*, CombatSpot*, int, CombatPos*, float, int);
+    bool CombatState_FindGrenadeThrowLocation(CombatSpot*, char*, int);
+    bool CombatState_FindBestFleeLocation(CombatSearch*, CombatSpot*, int);
     bool TryAssignAllyTarget(CombatSpot*, int);
-    bool FUN_009a02a0(CombatPos*, int, bool);
-    bool FUN_0099ac20(int);
+    bool CombatState_CheckMovement_009a02a0(CombatPos*, int, bool);
+    bool FindCombatLocation_0099ac20(int);
     int GetInventoryItemCount(TESForm*);
     void ProcessCoverLOSResult();
     void UpdateCombatStateData(int, float*, float*, float);
@@ -237,13 +237,13 @@ public:
     int GetActionAtIndex(unsigned int);
     int GetAt(int);
     unsigned char GetByte76();
-    void FUN_0099a7d0(TESObjectREFR*, TESBoundObject*, int, bool);
-    Actor* FUN_004030b0();
-    DetectionViewData* FUN_00586150(Actor*, Actor*);
+    void ActivatedReference(TESObjectREFR*, TESBoundObject*, int, bool);
+    Actor* CombatController_GetTarget();
+    DetectionViewData* CombatController_GetCombatState(Actor*, Actor*);
     float FUN_0097ac90(int);
     void SaveToStream(BGSSaveFormBuffer*);
     bool TestLoc(LocS*, int, int);
     WEAPStub* FUN_0097c150(int);
-    bool FUN_00998980();
+    bool GetHasBuffered360LineOfSight_00998980();
     int FUN_0041ca90();
 };

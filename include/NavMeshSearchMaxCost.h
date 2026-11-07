@@ -21,16 +21,16 @@ public:
     virtual bool CollectConnections(const SearchNode*, BSSimpleArray<SearchNode*, 1024>*);
     virtual bool HasReachedGoal(const SearchNode*);
 
-    void FUN_006ab480();
+    void UpdateFields_006ab480();
     void* __thiscall Destroy(unsigned int flags);
     int GetField2048();
-    bool FUN_006abb60(const SearchNode* apNode);
+    bool IsGoalNode_006abb60(const SearchNode* apNode);
 
     bool StartSearch(int aiSearchType, NavMeshSearchLocation* apStart,
                      PathingLocation* apGoal, PathBuilderDetailedPathInfos* apInfos,
                      PathBuilderDetailedPathInfos* apAltInfos);
     void FUN_006a7c40();
-    unsigned int FUN_006a94f0(NavMesh* apNavMesh, unsigned short ausTriangle);
+    unsigned int GetKeyForNode_006a94f0(NavMesh* apNavMesh, unsigned short ausTriangle);
     void FUN_006a7c90(unsigned int auiNode, NavMeshSearchLocation* apStart, float afDistance);
     bool FUN_006a7d60(PathBuilderDetailedPathInfos* apInfos,
                       PathBuilderDetailedPathInfos* apAltInfos, bool abArg);

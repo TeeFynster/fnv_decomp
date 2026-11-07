@@ -14,14 +14,15 @@ struct Owner
 {
     unsigned char unk00[0x4c];
     Item* item;
-    void FUN_00a76a60(Item* replacement);
+    void NiPixelData_SetPalette(Item* replacement);
 };
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
 
 // @fnv 0x00a76a60
-void Owner::FUN_00a76a60(Item* replacement)
+// src: COMMUNITY 0x00a76a60
+void Owner::NiPixelData_SetPalette(Item* replacement)
 {
     Item* previous = item;
     if (previous != replacement)

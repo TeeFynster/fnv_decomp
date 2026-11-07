@@ -39,12 +39,12 @@ struct FUN_004a8070_shell
     int GetScriptText();
 };
 extern unsigned char DAT_0118868c;
-unsigned char __cdecl FUN_004a82c0();
+unsigned char __cdecl BGSSceneInfo_GetAggregateInstances();
 int __cdecl MinInt(int iA, int iB);
 struct FUN_004a8f50_shell
 {
-    void FUN_004a95d0(int a);
-    void* FUN_004a8f50();
+    void NiTMap_NiTexture_TEX_USER_DATA_NiTMap(int a);
+    void* BGSTextureUseMap_BGSTextureUseMap();
 };
 struct GlobalObject2_0040c150
 {
@@ -55,7 +55,7 @@ struct GlobalObject2_0045cfe0
     int* Int();
 };
 GlobalObject2_0045cfe0 g_011c59e0;
-int FUN_004a9100();
+int BGSSceneInfo_GetActorMemoryBudgetCap();
 struct DummyArr
 {
     int GetBufferElementAddress(unsigned int);
@@ -97,16 +97,17 @@ struct Node
     virtual void vf0c();
     virtual SceneChildListView* GetChildren();
 
-    int FUN_0043b230();
+    int NiObjectNET_GetControllers();
 };
 
 // @fnv 0x004a9240
-int __cdecl FUN_004a9240(Node* node)
+// src: XBOX_PDB 0x004a9240
+int __cdecl BGSSceneInfo_GetHavokFaceCount(Node* node)
 {
     if (node == 0)
         return 0;
     int count = 0;
-    switch (node->FUN_0043b230())
+    switch (node->NiObjectNET_GetControllers())
     {
     case 3:
         return 1;
@@ -121,7 +122,7 @@ int __cdecl FUN_004a9240(Node* node)
             Node* child = list->GetAt(index, &buffer);
             if (child == 0)
                 break;
-            count += FUN_004a9240(child);
+            count += BGSSceneInfo_GetHavokFaceCount(child);
             index = list->GetNext(index);
         }
         return count;
@@ -137,7 +138,7 @@ int __cdecl FUN_004a9240(Node* node)
             Node* child = list->GetAt(index, &buffer);
             if (child == 0)
                 break;
-            count += FUN_004a9240(child);
+            count += BGSSceneInfo_GetHavokFaceCount(child);
             index = list->GetNext(index);
         }
         return count;
@@ -153,7 +154,7 @@ int __cdecl FUN_004a9240(Node* node)
             Node* child = list->GetAt(index, &buffer);
             if (child == 0)
                 break;
-            count += FUN_004a9240(child);
+            count += BGSSceneInfo_GetHavokFaceCount(child);
             index = list->GetNext(index);
         }
         return count;
@@ -169,7 +170,7 @@ int __cdecl FUN_004a9240(Node* node)
             Node* child = list->GetAt(index, &buffer);
             if (child == 0)
                 break;
-            count += FUN_004a9240(child);
+            count += BGSSceneInfo_GetHavokFaceCount(child);
             index = list->GetNext(index);
         }
         return count;

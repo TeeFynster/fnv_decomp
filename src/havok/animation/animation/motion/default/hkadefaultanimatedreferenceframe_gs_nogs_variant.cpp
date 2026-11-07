@@ -90,7 +90,8 @@ struct FUN_00e41090
 
 
 
-__declspec(noinline) void hkQuaternion::FUN_00c74ac0(const void* pa, const void* pb) throw()
+// src: COMMUNITY 0x00c74ac0
+__declspec(noinline) void hkQuaternion::setMulInverse(const void* pa, const void* pb) throw()
 {
     const __m128 a = *(const __m128*)pa;
     const __m128 b = *(const __m128*)pb;
@@ -111,7 +112,7 @@ __declspec(noinline) void hkQuaternion::FUN_00c74ac0(const void* pa, const void*
 }
 
 
-extern "C" void __cdecl FUN_00c908c0(hkMemoryAllocator* mem, void* arr, int newCap, int elemSize) throw();
+extern "C" void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* mem, void* arr, int newCap, int elemSize) throw();
 #include "../../../../../../include/hkArray.h"
 struct Config
 {
@@ -134,12 +135,12 @@ extern hkError* DAT_01268360;
 extern int DAT_01268700;
 extern int DAT_010e57a4;
 extern const char DAT_010ebe28[], DAT_010ebdec[], DAT_010ebdcc[], DAT_01012630[], DAT_010ebde0[], DAT_010ebd70[];
-extern "C" void __cdecl FUN_00e41220(const Config* cfg, const void* v1, void* outV, const void* v2) throw();
-extern "C" void __cdecl FUN_00e41bf0(void* outTransform, float time, const hkQsTransform* transforms, int numTransforms,
+extern "C" void __cdecl hkaDefaultAnimatedReferenceFrame_project(const Config* cfg, const void* v1, void* outV, const void* v2) throw();
+extern "C" void __cdecl hkQsTransform_UpdateState_00e41bf0(void* outTransform, float time, const hkQsTransform* transforms, int numTransforms,
                                      float duration) throw();
 
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750() throw();
-extern "C" void __cdecl FUN_00c908c0(hkMemoryAllocator* mem, void* arr, int newCap, int elemSize) throw();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
+extern "C" void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* mem, void* arr, int newCap, int elemSize) throw();
 
 class FUN_00e41830
 {
@@ -182,7 +183,7 @@ static __forceinline float my_fabs(float f)
 struct AngleRotation
 {
     __m128 value;
-    int FUN_00cb2ca0(const hkVector4* axis, hkVector4* rest, float* angle) throw();
+    int hkQuaternion_decomposeRestAxis(const hkVector4* axis, hkVector4* rest, float* angle) throw();
 };
 static __forceinline __m128 projectAxis(__m128 value, __m128 axis)
 {
@@ -191,7 +192,8 @@ static __forceinline __m128 projectAxis(__m128 value, __m128 axis)
     __m128 sum = _mm_add_ss(_mm_shuffle_ps(mul, mul, 0xaa), lo);
     return _mm_mul_ps(_mm_shuffle_ps(sum, sum, 0), axis);
 }
-extern "C" __declspec(noinline) void __cdecl FUN_00e41220(const Config* cfg, const void* transform, void* prev,
+// src: XBOX_PDB 0x00e41220
+extern "C" __declspec(noinline) void __cdecl hkaDefaultAnimatedReferenceFrame_project(const Config* cfg, const void* transform, void* prev,
                                                           const void* output) throw()
 {
     const hkQsTransform* pose = (const hkQsTransform*)transform;
@@ -210,7 +212,7 @@ extern "C" __declspec(noinline) void __cdecl FUN_00e41220(const Config* cfg, con
     {
         hkVector4 rest;
         float angle;
-        ((AngleRotation*)&pose->m_rotation)->FUN_00cb2ca0(&cfg->m_vStart, &rest, &angle);
+        ((AngleRotation*)&pose->m_rotation)->hkQuaternion_decomposeRestAxis(&cfg->m_vStart, &rest, &angle);
         float previous = ((const hkVector4*)prev)->v.m128_f32[3];
         while (angle - previous > double(3.14159265358979323846f))
             angle -= double(6.28318530717958647692f);
@@ -241,7 +243,7 @@ FUN_00e41830::FUN_00e41830(const Config& config) throw() : m_ppVirtualMethodTabl
     {
         hkVector4 outV0;
         tempV0.v = _mm_setzero_ps();
-        FUN_00e41220(&config, &DAT_01268700, &tempV0, &outV0);
+        hkaDefaultAnimatedReferenceFrame_project(&config, &DAT_01268700, &tempV0, &outV0);
         tempV0.v = outV0.v;
     }
     if (config.m_bFlag13)
@@ -276,7 +278,7 @@ FUN_00e41830::FUN_00e41830(const Config& config) throw() : m_ppVirtualMethodTabl
             }
         }
     }
-    hkMemoryAllocator& mem = reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap());
+    hkMemoryAllocator& mem = reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance()->heap());
     const int cap = samples.m_iCapacityState & 0x3fffffff;
     if (cap < numSamples)
     {
@@ -285,7 +287,7 @@ FUN_00e41830::FUN_00e41830(const Config& config) throw() : m_ppVirtualMethodTabl
         {
             newCap = numSamples;
         }
-        FUN_00c908c0(&mem, &samples, newCap, sizeof(hkVector4));
+        hkArrayUtil__reserve(&mem, &samples, newCap, sizeof(hkVector4));
     }
     samples.m_iElementCount = numSamples;
     for (int i = 0; i < numSamples; ++i)
@@ -293,13 +295,13 @@ FUN_00e41830::FUN_00e41830(const Config& config) throw() : m_ppVirtualMethodTabl
         __m128 unitScale = _mm_set1_ps(1.0f);
         float time = (float)i * dt;
         hkQsTransform curTransform;
-        FUN_00e41bf0(&curTransform, time, config.m_kTransforms, config.m_numQsTransforms, config.m_fAnimationDuration);
+        hkQsTransform_UpdateState_00e41bf0(&curTransform, time, config.m_kTransforms, config.m_numQsTransforms, config.m_fAnimationDuration);
         hkQsTransform qh;
-        qh.m_rotation.FUN_00c74ac0(&curTransform.m_rotation, &startTransform.m_rotation);
+        qh.m_rotation.setMulInverse(&curTransform.m_rotation, &startTransform.m_rotation);
         qh.m_vTranslation.v = _mm_sub_ps(curTransform.m_vTranslation.v, startTransform.m_vTranslation.v);
         qh.m_vScale.v = unitScale;
         hkVector4 sampleOut;
-        FUN_00e41220(&config, &qh, &tempV0, &sampleOut);
+        hkaDefaultAnimatedReferenceFrame_project(&config, &qh, &tempV0, &sampleOut);
         __m128 sample = sampleOut.v;
         samples.m_data[i].v = sample;
         tempV0.v = sample;

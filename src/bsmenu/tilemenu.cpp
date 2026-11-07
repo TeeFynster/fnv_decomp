@@ -18,7 +18,7 @@ class TileListBoxCalls_tilemenu : public Tile
 extern bool DAT_011f308f[];
 Menu* GetMenuById(int);
 void DebugLog(const char*, ...);
-void __fastcall FUN_00a0b020(TileMenu* tile);
+void __fastcall Tile_ForceTextureRelease(TileMenu* tile);
 
 __forceinline void Menu::SetVisible(int id, bool visible)
 {
@@ -122,10 +122,11 @@ Tile* TileMenu::SetTraitValue(int valueID, float floatValue, const char* strValu
 
 // Returns early if the menu's ID is 0x3ec or 0x3ef, otherwise calls FUN_00a0b020.
 // @fnv 0x00a1f310
-void __fastcall FUN_00a1f310(TileMenu* tile)
+// src: XBOX_PDB 0x00a1f310
+void __fastcall TileMenu_ForceTextureRelease(TileMenu* tile)
 {
     if (tile->pMenu && (tile->pMenu->GetClass() == 0x3ec || tile->pMenu->GetClass() == 0x3ef))
         return;
     else
-        FUN_00a0b020(tile);
+        Tile_ForceTextureRelease(tile);
 }

@@ -52,7 +52,7 @@ struct SpawnedArray
     unsigned int m_08;
 };
 void __cdecl FUN_00ec44d0(int a, int b, int c);
-void __cdecl FUN_00c908c0(SpawnedObject* obj, SpawnedArray* arr, int a, int stride);
+void __cdecl hkArrayUtil__reserve(SpawnedObject* obj, SpawnedArray* arr, int a, int stride);
 // ---------------------------------------------------------------------------
 // ResizeAudioStream - reserve/grow the element buffer of an audio stream.
 //
@@ -70,7 +70,7 @@ struct AudioStream
 extern "C" void* __cdecl FNV_block_copy(void* dst, const void* src, unsigned int size);
 void ResizeAudioStream(hkMemoryAllocator* pAlloc, AudioStream* pStream, int elemSize);
 typedef unsigned int hkUlong;
-extern void __cdecl FUN_00c908c0(void* alloc, void* arr, int n, int sizeElem);
+extern void __cdecl hkArrayUtil__reserve(void* alloc, void* arr, int n, int sizeElem);
 extern void __cdecl ResizeAudioStream(void* alloc, void* arr, int sizeElem);
 inline void* operator new(unsigned int, void* p)
 {
@@ -101,7 +101,7 @@ struct S_00da2bd0_CallTree
         if (cap < n)
         {
             int cap2 = cap * 2;
-            FUN_00c908c0(alloc, this, n < cap2 ? cap2 : n, sizeof(S_00da2bd0_Node));
+            hkArrayUtil__reserve(alloc, this, n < cap2 ? cap2 : n, sizeof(S_00da2bd0_Node));
         }
         int numNew = n - m_iElementCount;
         S_00da2bd0_Node* p = m_data + m_iElementCount;
@@ -133,8 +133,8 @@ struct Holder
     unsigned int unk10;
     void* m_pAllocator;
 };
-Holder* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(void* pAllocator, void* pBuf, int newCap, int bFlag);
+Holder* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(void* pAllocator, void* pBuf, int newCap, int bFlag);
 void __cdecl ResizeAudioStream(void* pAllocator, void* pBuf, int bFlag);
 extern "C" void _ReadWriteBarrier(void);
 struct FUN_00e108b0_cls
@@ -143,5 +143,5 @@ struct FUN_00e108b0_cls
     int m_len;
     unsigned int m_cap;
 
-    FUN_00e108b0_cls* FUN_00e108b0();
+    FUN_00e108b0_cls* InitializeStringBuffer();
 };

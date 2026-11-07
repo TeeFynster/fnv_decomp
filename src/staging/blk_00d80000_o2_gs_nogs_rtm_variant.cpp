@@ -41,9 +41,9 @@ public:
     int m_iJobId;
 };
 extern int DAT_010cc4f4;
-void __cdecl FUN_00d9f6d0(int* p);
+void __cdecl Runtime_UpdateState_00d9f6d0(int* p);
 struct FUN_00d85300_Stub {
-    void FUN_00d85300(int*);
+    void ComputeValue_00d85300(int*);
 };
 struct FUN_00d85a20_Stub : FUN_00d85300_Stub {
     int* CopyStateFrom(int* p);
@@ -75,8 +75,8 @@ struct AllocIface {
     virtual void unk00();
     virtual void* Alloc(unsigned int size);
 };
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
-void __cdecl FUN_00cb1260(void* dst, const void* src, unsigned int size);
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
+void __cdecl hkString_memCpy(void* dst, const void* src, unsigned int size);
 struct FUN_00d85360_cls {
     void* m_vptr;
     unsigned short m_w04;
@@ -102,7 +102,7 @@ struct FUN_00d85360_cls {
 
     FUN_00d85360_cls* FUN_00d54290();
 };
-FUN_00d85360_cls* __cdecl FUN_00d85360(int pSource);
+FUN_00d85360_cls* __cdecl hkpConstraintDataUtils_copyAtoms_hkpBallAndSocketConstraintData_(int pSource);
 struct S_00d85af0_Base {
     int unk00;
     int unk04;
@@ -140,7 +140,7 @@ struct S_00d85af0_Base {
     int unk84;
     int unk88;
     int unk8c;
-    void FUN_00d85300(const S_00d85af0_Base* o);
+    void ComputeValue_00d85300(const S_00d85af0_Base* o);
 };
 struct S_00d85af0_V3 { float x, y, z; };
 struct S_00d85af0_Cls : S_00d85af0_Base {
@@ -158,9 +158,9 @@ struct S_00d85af0_Cls : S_00d85af0_Base {
 };
 struct CpuOpaque;
 extern CpuOpaque DAT_01269514;
-CpuOpaque* __cdecl FUN_00d9f6c0();
+CpuOpaque* __cdecl Object_GetGlobalObjectAddress_00d9f6c0();
 extern int DAT_010cc4f4;
-unsigned int __cdecl FUN_00d9f6e0();
+unsigned int __cdecl Object_ComputeValue_00d9f6e0();
 // Havok object clone: allocate a default instance and copy the payload (everything after the header).
 struct D85660Allocator {
     virtual void unk00();
@@ -221,7 +221,7 @@ public:
     int m_iData098;
     int m_iData09C;
 };
-D85660Object* __cdecl FUN_00d85660(const D85660Object* pkSource);
+D85660Object* __cdecl copyConstraintAtoms_class_hkpHingeLimitsData(const D85660Object* pkSource);
 extern int DAT_010d3838;
 struct FUN_00d86260_Class {
     unsigned int m_vptr;
@@ -252,7 +252,7 @@ struct TargetData {
 };
 struct FUN_00d53200_class {
     int unk00;
-    void FUN_00c8a230(NiStream&) throw();
+    void hkConstraintCinfo_LoadBinary(NiStream&) throw();
 };
 struct Derived_00d53200 : public FUN_00d53200_class {
     TargetData* unk04;
@@ -454,7 +454,7 @@ struct Record {
     unsigned int unk6c;
     unsigned int words70;
 };
-void __stdcall FUN_00c8a280(DataStream* stream);
+void __stdcall hkConstraintCinfo_SaveBinary(DataStream* stream);
 struct DataOwner {
     unsigned int unknown00;
     Record* record;
@@ -469,9 +469,9 @@ inline int countBitsSetD866(unsigned int n)
     return (n & 0xff) + (n >> 16);
 }
 int __cdecl CountBitsInWords(const unsigned int* puiWords, int iNumWords);
-int __cdecl FUN_00cb0fd0(const char*, const char*, unsigned int);
-const char* __cdecl FUN_00cb1150(const char*, int);
-const char* __cdecl FUN_00cb1140(const char*, int);
+int __cdecl j_strncmp(const char*, const char*, unsigned int);
+const char* __cdecl hkString_strRchr(const char*, int);
+const char* __cdecl hkString_strChr(const char*, int);
 struct TypeEntry {
     const char* name;
     int unk04;
@@ -518,8 +518,8 @@ struct StringBuf {
 
     void FUN_00d61a50(const char* s);
     void FUN_00d61fc0(int from, int len);
-    int FUN_00d616e0(const char* other);
-    void FUN_00cbbd40();
+    int Object_ForwardCall_00d616e0(const char* other);
+    void UpdateFields_00cbbd40();
 };
 int __cdecl GetTypeCode(const char* typeName);
 struct B { char pad[0x12]; unsigned short w12; };
@@ -555,7 +555,7 @@ struct FUN_00d873b0_Obj {
 struct FUN_00d873f0_Holder {
     int unk00;
     FUN_00d86910_Obj* unk04;
-    FUN_00d873b0_Obj* __thiscall FUN_00d873f0(FUN_00d873b0_Obj* a);
+    FUN_00d873b0_Obj* __thiscall hkClassMemberAccessor_object(FUN_00d873b0_Obj* a);
 };
 class hkSetD874 {
 public:
@@ -563,21 +563,21 @@ public:
     int m_iCapacityFlags;
     int m_iPairCount;
 
-    int FUN_00d87410() const;
+    int hkCachedHashMap_hkStringMapOperations_hkContainerHeapAllocator_getIterator() const;
 };
 struct FUN_00d87910_cls {
     int m_00;
 
-    FUN_00d87910_cls* FUN_00d87910();
+    FUN_00d87910_cls* hkThread_hkThread();
 };
 extern "C" unsigned int (__stdcall *DAT_00fdf1d0)();
-unsigned __int64 __cdecl FUN_00d87a40();
-void __cdecl FUN_00d87920();
-void __cdecl FUN_00d87a70();
+unsigned __int64 __cdecl Object_ForwardCall_00d87a40();
+void __cdecl hkThread_stopThread();
+void __cdecl hkThread_stopThread_ForwardCall_00d87a70();
 struct FUN_00d87a80_Stub {
-    void* FUN_00d87a80(int);
+    void* GetSelf_00d87a80(int);
 };
-void __cdecl FUN_00d87a90();
+void __cdecl Runtime_DoNothing_00d87a90();
 extern int DAT_010d3cc0;
 D85660Object* __cdecl CreateD85660Object();
 class FUN_00d88050 {
@@ -588,7 +588,7 @@ public:
     int m_iValue;
     bool m_bValueAt0C;
 };
-void __cdecl FUN_00d88060();
+void __cdecl Object_DoNothing_00d88060();
 struct AllocIfaceFree : AllocIface
 {
     virtual void Free(void* block, unsigned int size);
@@ -600,13 +600,13 @@ struct FUN_00d880d0 {
     int m_i;
     void M_00d880d0();
 };
-void __cdecl FUN_00d880e0();
+void __cdecl Object_DoNothing_00d880e0();
 struct FUN_00d880f0_Class {
     int unk00;
     int unk04;
     unsigned char unk08;
 
-    void FUN_00d880f0(unsigned char val);
+    void SetUnk08(unsigned char val);
 };
 struct DispatchTarget {
     virtual void Event0();
@@ -631,7 +631,7 @@ public:
     virtual void V7();
     virtual void process(void* a, void* b, void* c, void* d);
 };
-void __cdecl FUN_00d92200(void* pvContext, hkTargetD922B** ppkTarget, void* a, void* b, void* c, void* pvUnused, void* d);
+void __cdecl hkAgent3Bridge_updateFilter(void* pvContext, hkTargetD922B** ppkTarget, void* a, void* b, void* c, void* pvUnused, void* d);
 class FUN_00d92250_obj {
 public:
     virtual void V0();
@@ -679,7 +679,7 @@ public:
     virtual void V10();
     virtual void process(void* pvData);
 };
-void __cdecl FUN_00d922a0(void* pvContext, hkTargetD92A** ppkTarget, void* pvData);
+void __cdecl hkAgent3Bridge_removePoint(void* pvContext, hkTargetD92A** ppkTarget, void* pvData);
 class hkTargetD922 {
 public:
     virtual void V0();
@@ -696,7 +696,7 @@ public:
     virtual void V11();
     virtual void process(void* pvData);
 };
-void __cdecl FUN_00d922c0(void* pvContext, hkTargetD922** ppkTarget, void* pvData);
+void __cdecl hkAgent3Bridge_commitPotential(void* pvContext, hkTargetD922** ppkTarget, void* pvData);
 struct FUN_00d922e0_Iface {
     virtual void unk00();
     virtual void unk04();
@@ -736,14 +736,14 @@ struct FUN_00d93310_cls {
     int m_04;
     int m_08;
 
-    FUN_00d93310_cls* FUN_00d93310();
+    FUN_00d93310_cls* hkpFixedSizePhysicsCommandQueue_256_hkpFixedSizePhysicsCommandQueue_256();
 };
 extern "C" {
     unsigned __int64 __rdtsc(void);
     void _ReadWriteBarrier(void);
     __declspec(dllimport) void* __stdcall TlsGetValue(unsigned int dwTlsIndex);
     extern unsigned int DAT_0126835c;
-    void __cdecl FUN_00d89f80(void* p, int a2, int a3, int a4, bool* pb);
+    void __cdecl Object_ProcessAndReturnValue_00d89f80(void* p, int a2, int a3, int a4, bool* pb);
 }
 struct TargetObj {
     int dummy;
@@ -782,10 +782,10 @@ struct Arg1 {
 };
 void LogIntegrateVelocity(Arg0* a1, Arg1* a2, Arg2* a3);
 extern "C" char str_010d4030[];
-void __cdecl FUN_00d61d00(unsigned int* result, char* text, double d0,
+void __cdecl hkStringBuf_printf(unsigned int* result, char* text, double d0,
                           int value0, double d1, int value1, double d2);
-unsigned int __cdecl FUN_00d97640(float* values, unsigned int* result, signed char value);
-void __cdecl FUN_00d61d00(...);
+unsigned int __cdecl hkVector4Util_toString3(float* values, unsigned int* result, signed char value);
+void __cdecl hkStringBuf_printf(...);
 int __cdecl FormatVec4(Vec4* v, int* dst, char acSeparator);
 struct hkRecordD983 {
     float m_00;
@@ -826,16 +826,16 @@ struct FUN_00d98390 {
 
     FUN_00d98390();
 };
-void __cdecl FUN_00d98630(void*, void*, void*, void*);
-void* __cdecl FUN_00d99540(void* a1, void* a2, void* a3, void* a4);
+void __cdecl Runtime_ProcessEntries_00d98630(void*, void*, void*, void*);
+void* __cdecl hkKdTreeUtils_isValidRayBundle(void* a1, void* a2, void* a3, void* a4);
 struct FNV_00d99f50_Entry { void* value; void* payload; };
 struct FNV_00d99f50_Result {
     unsigned char flag;
     FNV_00d99f50_Result() {}
     ~FNV_00d99f50_Result() {}
 };
-extern "C" void __cdecl FUN_00d98ca0(unsigned char* scratch, const FNV_00d99f50_Entry* entry, void* context, void* left, void* right);
-FNV_00d99f50_Result __cdecl FUN_00d99f50(int count, const FNV_00d99f50_Entry* const* entries, void* context, void* left, void* right);
+extern "C" void __cdecl hkKdTreeUtils_castRayIterative(unsigned char* scratch, const FNV_00d99f50_Entry* entry, void* context, void* left, void* right);
+FNV_00d99f50_Result __cdecl hkKdTreeUtils_castRayMultiTree(int count, const FNV_00d99f50_Entry* const* entries, void* context, void* left, void* right);
 struct FUN_00d9a4a0_Param {
     int unk00;
     int unk04;
@@ -860,10 +860,10 @@ struct FUN_00d9a4a0_Obj {
 
     void __thiscall InvokeCallback(int a1);
 };
-float __fastcall FUN_00d9a4a0( FUN_00d9a4a0_Obj* self, int unused, FUN_00d9a4a0_Param* param);
+float __fastcall Object_ProcessAndReturnValue_00d9a4a0( FUN_00d9a4a0_Obj* self, int unused, FUN_00d9a4a0_Param* param);
 struct IdxStand_ {
     char* m_iWordAt00;
-    void* FUN_00d9a4c0(int idx);
+    void* ComputeValue_00d9a4c0(int idx);
 };
 struct FUN_00d9a4d0_Class {
     int unk00;
@@ -873,17 +873,17 @@ struct FUN_00d9a4d0_Class {
 struct FnvCpu_FUN_00d9f6b0_CpuInterface {
     virtual void Invoke(int value);
 };
-void __cdecl FUN_00d9f6b0(FnvCpu_FUN_00d9f6b0_CpuInterface* object);
+void __cdecl Runtime_ForwardCall_00d9f6b0(FnvCpu_FUN_00d9f6b0_CpuInterface* object);
 extern char DAT_0102e388;
 struct FUN_00d9fb30_Stub {
-    void FUN_00d9fb30();
+    void SetVtableAndProcessState_00d9fb30();
 };
-void __stdcall FUN_00d9fb40(unsigned char* output, int unused1);
-void __stdcall FUN_00d9fca0(int);
-void __stdcall FUN_00d9fcb0(int, int, int);
-void __stdcall FUN_00d9fcc0(int);
-void __stdcall FUN_00d9fcd0(int);
-void __stdcall FUN_00d9fce0(int);
+void __stdcall Object_UpdateFields_00d9fb40(unsigned char* output, int unused1);
+void __stdcall nullsub_68(int);
+void __stdcall nullsub_69(int, int, int);
+void __stdcall nullsub_70(int);
+void __stdcall nullsub_71(int);
+void __stdcall nullsub_72(int);
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 extern unsigned int DAT_0126835c;
 typedef void* (__stdcall* D85TlsFn)(unsigned long);
@@ -912,7 +912,8 @@ struct D85Node5 {
     virtual void v04();
     virtual void v05(D85Msg m);
 };
-static __declspec(noinline) D85Ctn* FUN_00d85d40(D85Ctn* c) {
+// src: GUESS 0x00d85d40 (confidence: low)
+static __declspec(noinline) D85Ctn* Object_ProcessEntries_00d85d40(D85Ctn* c) {
     for (int i = c->count - 1; i >= 0; --i) {
         if (c->entries[i] != 0) continue;
         c->count -= 1;
@@ -924,7 +925,7 @@ static __declspec(noinline) D85Ctn* FUN_00d85d40(D85Ctn* c) {
     }
     return c;
 }
-void __cdecl FUN_00d85fa0(D85Msg a);
+void __cdecl hkpConstraintCallbackUtil_fireConstraintBroken(D85Msg a);
 extern int DAT_010d3838;
 struct FUN_00d86220_Class {
     unsigned int m_vptr;
@@ -938,7 +939,7 @@ struct FUN_00d86220_Class {
     FUN_00d86220_Class();
 };
 extern __declspec(thread) unsigned int tlsArr[0xb0];
-void __cdecl FUN_00c9eae0(void* p);
+void __cdecl Object_UpdateFields_00c9eae0(void* p);
 struct FUN_00dee750 {
     void* m_vptr;
     unsigned short m_usMemorySizeAndFlags;
@@ -988,13 +989,13 @@ struct FUN_00dee750 {
 
     static void* operator new(unsigned int sz)
     {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         AllocIface* alloc = reinterpret_cast<AllocIface*>(holder->m_heap);
         void* p = alloc->Alloc(sz);
         ((FUN_00dee750*)p)->m_usMemorySizeAndFlags = (unsigned short)sz;
         return p;
     }
-    static void operator delete(void* p) { FUN_00c9eae0(p); }
+    static void operator delete(void* p) { Object_UpdateFields_00c9eae0(p); }
 
     FUN_00dee750();
 };
@@ -1002,7 +1003,7 @@ struct FUN_00d86470_cls {
     int unk00;
     FUN_00dee750* m_04;
 
-    unsigned int FUN_00d86470();
+    unsigned int hkPointToPathConstraintCinfo_CreateData();
 };
 struct Cls00d86950 {
     int unk00;
@@ -1015,7 +1016,7 @@ struct S_00d87a60 {
     int GetValue();
 };
 extern void* DAT_012691fc;
-void* __cdecl FUN_00d880a0();
+void* __cdecl Object_GetDAT_012691fc_00d880a0();
 class FUN_00d88100_Class {
 public:
     bool m_bTriggered;
@@ -1026,7 +1027,7 @@ public:
     bool m_bEnableState;
     bool m_abFlags[3];
 
-    bool FUN_00d88100(int iIndex);
+    bool hkMemoryExceptionTestingUtil_isMemoryAvailableImpl(int iIndex);
 };
 struct S00d881a0_Leaf {
     int unk00;
@@ -1069,12 +1070,12 @@ struct S00d881a0_Mid {
 struct S00d881a0_Obj {
     S00d881a0_Mid* m00;
 };
-int __cdecl FUN_00d29bf0(void* a0, void* a1, void* a2, void* a3, void* a4, int a5);
-void __cdecl FUN_00d1a330(int a0, void* a1, void* a2);
-static int FUN_00d881a0(void* p, void* ecxv, char* eaxv, S00d881a0_Obj* esi, void* edi);
+int __cdecl hkRigidMotionUtilApplyAccumulators(void* a0, void* a1, void* a2, void* a3, void* a4, int a5);
+void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(int a0, void* a1, void* a2);
+static int hkConstraintSolverSetup_integrate2(void* p, void* ecxv, char* eaxv, S00d881a0_Obj* esi, void* edi);
 int S00d881a0_Wrap(void* p);
 static unsigned char* S00d96870_outp;
-static void FUN_00d96870(unsigned char* self, int* src, unsigned char* out);
+static void spawnBuildJacobiansJobs(unsigned char* self, int* src, unsigned char* out);
 void __fastcall S00d96870_Entry(unsigned char* self, int* src);
 extern "C" __m128 _mm_sub_ps(__m128, __m128);
 extern "C" __m128 _mm_load_ps(const float*);
@@ -1142,7 +1143,7 @@ public:
 };
 class SecondaryD9A4 {
 public:
-    virtual float FUN_00d9a480(ArgD9A4* pkArg) = 0;
+    virtual float ProcessAndReturnValue_00d9a480(ArgD9A4* pkArg) = 0;
 };
 class ObjD9A4 : public PrimaryD9A4, public SecondaryD9A4 {
 public:
@@ -1151,7 +1152,7 @@ public:
     InnerD9A4* m_pkInner;
 
     void InvokeCallback(int iValue);
-    virtual float FUN_00d9a480(ArgD9A4* pkArg);
+    virtual float ProcessAndReturnValue_00d9a480(ArgD9A4* pkArg);
 };
 struct __declspec(align(16)) FUN_00d9a4e0_Obj {
     __m128 unk00;
@@ -1183,7 +1184,8 @@ struct BoolResult {
 };
 
 // @fnv 0x00d84c50
-BoolResult FUN_00d84c50(const Shape* pkShape)
+// src: HAVOK_LIB 0x00d84c50
+BoolResult hkpConstraintPivotsUtil_constraintSupportsPivotGetSet(const Shape* pkShape)
 {
     switch (pkShape->GetType())
     {
@@ -1224,7 +1226,7 @@ public:
     int unk14;
     ShapeD84D* m_pkChild;
 
-    ShapeD84D* FUN_00cdf6d0();
+    ShapeD84D* GetFieldC();
 };
 void* __cdecl GetShapeData(ShapeD84D* pkShape);
 // pivot vector lives first in each 0x40-byte atom
@@ -1279,7 +1281,7 @@ struct PivotCData {
     virtual void v07();
     virtual int v08();
 
-    PivotCData* FUN_00cdf6c0();
+    PivotCData* hkpMalleableConstraintData_getWrappedConstraintData();
 
     unsigned int unk04;
     unsigned int unk08;
@@ -1306,7 +1308,8 @@ struct D90Node {
     virtual void v02();
     virtual void v03(D90Owner* pOwner);
 };
-static __declspec(noinline) D90Ctn* FUN_00d85d40(D90Ctn* c) {
+// src: GUESS 0x00d85d40 (confidence: low)
+static __declspec(noinline) D90Ctn* Object_ProcessEntries_00d85d40(D90Ctn* c) {
     for (int i = c->count - 1; i >= 0; --i) {
         if (c->entries[i] != 0) continue;
         c->count -= 1;
@@ -1318,7 +1321,7 @@ static __declspec(noinline) D90Ctn* FUN_00d85d40(D90Ctn* c) {
     }
     return c;
 }
-D90Ctn* __cdecl FUN_00d85d90(D90Owner* pOwner);
+D90Ctn* __cdecl hkpConstraintCallbackUtil_fireConstraintAdded(D90Owner* pOwner);
 static __forceinline void hkTimer(const char* name, volatile unsigned int& t)
 {
     hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -1348,7 +1351,8 @@ struct ResizableArray {
     }
 };
 struct hkpConstraintInstance;
-static void FUN_00d85d40(ResizableArray<hkpConstraintListener*>& cleanupArray)
+// src: GUESS 0x00d85d40 (confidence: low)
+static void Object_ProcessEntries_00d85d40(ResizableArray<hkpConstraintListener*>& cleanupArray)
 {
     for (int i = cleanupArray.GetLogicalSize() - 1; i >= 0; i--) {
         if (cleanupArray[i] == 0) {
@@ -1357,12 +1361,12 @@ static void FUN_00d85d40(ResizableArray<hkpConstraintListener*>& cleanupArray)
     }
 }
 void __cdecl NotifyConstraintRemoved(hkpConstraintInstance* constraint);
-void __cdecl FUN_00c908c0(AllocIface& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+void __cdecl hkArrayUtil__reserve(AllocIface& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
 extern const char DAT_010d3aa0[];
 extern const char DAT_010d3a90[];
-int __cdecl FUN_00cb0fd0(const char*, const char*, int) throw();
-int __cdecl FUN_00cb10d0(const char*) throw();
-const char* __cdecl FUN_00cb1140(const char*, int) throw();
+int __cdecl j_strncmp(const char*, const char*, int) throw();
+int __cdecl hkString_strLen(const char*) throw();
+const char* __cdecl hkString_strChr(const char*, int) throw();
 int __cdecl CallWithZeroMiddleArg(const char*, int) throw();
 int __cdecl GetTypeCode(const char*) throw();
 struct HkTempAllocator {
@@ -1399,7 +1403,7 @@ struct FUN_00d61b10 {
 
     FUN_00d61b10(const char*, int) throw();
     ~FUN_00d61b10() throw() {
-        hkMemoryRouter* router = FUN_00c85750();
+        hkMemoryRouter* router = hkMemoryRouter_getInstance();
         int cap = m_kStringBuffer.m_iCapacityState;
         HkTempAllocator* allocator = reinterpret_cast<HkTempAllocator*>(router->m_temp);
         m_kStringBuffer.m_iElementCount = 0;
@@ -1411,7 +1415,7 @@ struct FUN_00d61b10 {
 };
 int __cdecl GetTypeCodeFromString(const char* name) throw();
 struct FUN_00d87180_cls : S {
-    FUN_00d87180_cls* FUN_00d87180(unsigned int a, B* b);
+    FUN_00d87180_cls* hkClassMemberAccessor_hkClassMemberAccessor(unsigned int a, B* b);
 };
 class OwnerD87A {
 public:
@@ -1432,10 +1436,10 @@ struct MonitorBuffer {
     int m_uiItemCount;
     char m_bSlotEnabled;
     char m_buffer[50];
-    void FUN_00d880b0();
+    void hkMemoryExceptionTestingUtil_startNewDemoImpl();
 };
 // Solver-resource scaffolding belongs to the parent unit's 0x00d881d0 initializer; none of this variant's four functions uses it.
-void __cdecl FUN_00d892e0();
+void __cdecl Object_DoNothing_00d892e0();
 struct CleanupAllocator {
     virtual void unk00();
     virtual void unk04();
@@ -1479,7 +1483,7 @@ struct CleanupObject {
     void* unk78;
 
 };
-static void FUN_00d93ab0(CleanupObject* self);
+static void deleteTaskHeaderResources(CleanupObject* self);
 CleanupObject* volatile cleanupInput;
 void CleanupEntry();
 extern "C" void _ReadWriteBarrier(void);
@@ -1491,7 +1495,7 @@ extern unsigned int DAT_0126835c;
 extern "C" char str_010cc5c4[];
 extern "C" char str_010d3e98[];
 extern "C" char str_01076f38[];
-void __cdecl FUN_00d89ed0(void* p, int a, int b);
+void __cdecl Hkpsolver_ProcessEntries_00d89ed0(void* p, int a, int b);
 struct S00d944d0_Ent16 {
     char* m_name;
     unsigned int m_ts;
@@ -1524,7 +1528,7 @@ struct S00d944d0_Arg2 {
 struct S00d944d0_Arg1 {
     void ProcessCallback(S00d944d0_Arg2* a1, S00d944d0_Arg2* a2, int a3);
 };
-void __cdecl FUN_00d944d0(S00d944d0_Obj* a1, S00d944d0_Arg1* a2, S00d944d0_Arg2* a3);
+void __cdecl hkCpuSolveApplyGravityJob(S00d944d0_Obj* a1, S00d944d0_Arg1* a2, S00d944d0_Arg2* a3);
 extern char DAT_010cc5c4[];
 extern char DAT_010d3eb8[];
 extern char DAT_01076f38[];
@@ -1547,8 +1551,8 @@ struct SolverObject {
     int unk10, unk14, unk18, unk1c;
     SolverTarget* target;
 };
-void __cdecl FUN_00df0680(TargetObj*, int, int, int);
-void __cdecl FUN_00d94730(Arg0* world, Arg1* context, SolverObject* object);
+void __cdecl hkExportImpulsesAndRhs(TargetObj*, int, int, int);
+void __cdecl hkCpuSolveExportResultsJob(Arg0* world, Arg1* context, SolverObject* object);
 struct StructItem {
     short* unk00;
     int unk04;
@@ -1588,15 +1592,15 @@ struct StructB {
 };
 extern double DAT_010c9300;
 struct LocalFlag { unsigned char value; };
-void __cdecl FUN_00d72190(short* a1, StructB* a2, LocalFlag a3, int** a4);
-void __cdecl FUN_00d6f460(short* a1, unsigned short a2, StructB* a3, int** a4);
+void __cdecl hkSimpleContactConstraintDataBuildJacobian(short* a1, StructB* a2, LocalFlag a3, int** a4);
+void __cdecl hkSolverBuildJacobianFromAtomsNotContact(short* a1, unsigned short a2, StructB* a3, int** a4);
 static void WriteItems(StructA* a, StructB* b);
 extern "C" StructA* input_a();
 extern "C" StructB* input_b();
 void invoke_match();
 struct d94eb0_cls { unsigned char b; };
 extern "C" d94eb0_cls* d94eb0_target(void);
-static void FUN_00d94eb0(d94eb0_cls* dst);
+static void Runtime_UpdateState_00d94eb0(d94eb0_cls* dst);
 void d94eb0_caller(void);
 #include "../../include/hkEnum.h"
 using ::hkEnum;
@@ -1674,7 +1678,7 @@ struct S00d96970_Obj {
     unsigned char unk20;
     unsigned char unk21;
 };
-static void FUN_00d96970(S00d96970_Obj* self, const S00d96970_Local* src, S00d96970_Target* target, int value);
+static void spawnSplitSimulationIslandJob(S00d96970_Obj* self, const S00d96970_Local* src, S00d96970_Target* target, int value);
 void S00d96970_Entry(S00d96970_Obj* self, const S00d96970_Local* src, S00d96970_Target* target, int value);
 extern float DAT_01017b78;
 extern float DAT_01012068;
@@ -1689,14 +1693,14 @@ __forceinline unsigned int roundLane(const float& value)
     float copy = value;
     return fnv_FloatToInt(copy);
 }
-float FUN_00d974f0();
+float Runtime_ProcessEntries_00d974f0();
 extern const __m128 DAT_011b6de0;
-__m128 __cdecl FUN_00d98620();
+__m128 __cdecl Object_GetDAT_011b6de0_00d98620();
 struct ListenerArray {
     void** m_ppItems;
     unsigned short m_wCount;
 };
-static void FUN_00d85d40(ListenerArray* pArr);
+static void Object_ProcessEntries_00d85d40(ListenerArray* pArr);
 struct ListenerOwner {
     int unk00;
     ListenerArray m_kNode;
@@ -1728,7 +1732,7 @@ struct ContainerShape : Shape {
 };
 
 struct ListShape : Shape {
-    Shape* FUN_00cdf6c0();
+    Shape* hkpMalleableConstraintData_getWrappedConstraintData();
 };
 
 struct VertexShape : Shape {
@@ -1754,7 +1758,8 @@ struct TransformShape : Shape {
 };
 
 // @fnv 0x00d85040
-void FUN_00d85040(Shape* pkShape, const Transform& kTransform, int iIndex)
+// src: GUESS 0x00d85040 (confidence: low)
+void Object_ProcessEntries_00d85040(Shape* pkShape, const Transform& kTransform, int iIndex)
 {
     for (;;)
     {
@@ -1764,7 +1769,7 @@ void FUN_00d85040(Shape* pkShape, const Transform& kTransform, int iIndex)
             pkShape = ((ContainerShape*)pkShape)->m_pkChild;
             break;
         case 13:
-            pkShape = ((ListShape*)pkShape)->FUN_00cdf6c0();
+            pkShape = ((ListShape*)pkShape)->hkpMalleableConstraintData_getWrappedConstraintData();
             break;
         case 1:
             ((TransformShape*)pkShape)->m_akTransforms[iIndex].FUN_00c6cd60(kTransform);
@@ -1820,7 +1825,7 @@ extern unsigned int DAT_0126835c;
 typedef void* (__stdcall *D94TlsGetFn)(unsigned long);
 extern D94TlsGetFn DAT_00fdf044;
 extern const char str_010d3ef4[];
-void __cdecl FUN_00d29830(char* p, unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+void __cdecl hkRigidMotionUtilApplyForcesAndBuildAccumulators(char* p, unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 struct D94Sub {
     int u00;
     int u04;
@@ -1852,7 +1857,7 @@ struct D94Body {
 struct D94Obj {
     int ProcessCallback(D94Body* a, D94Body* b, int c);
 };
-int __cdecl FUN_00d94df0(char* a1, D94Obj* a2, D94Body* a3);
+int __cdecl hkCpuBuildAccumulatorsJob(char* a1, D94Obj* a2, D94Body* a3);
 #include <string.h>
 struct S00d967a0_Obj {
     void** vptr;
@@ -1923,7 +1928,7 @@ struct D986Result {
     D986Result(bool b) : value(b) {}
     operator bool() const { return value != 0; }
 };
-D986Result __cdecl FUN_00d98630(const __m128* src, const __m128* dst, int mask);
+D986Result __cdecl Runtime_ProcessEntries_00d98630(const __m128* src, const __m128* dst, int mask);
 // Real body is 0xd96600..0xd9679f (0x1A0). 0xd967a0 is a second function the claim swallowed.
 struct D96600Link {
     D96600Link* next;
@@ -1996,7 +2001,7 @@ struct D96600Blob {
     int unk78;
     int unk7c;
 
-    int FUN_00df2640(int** slot, D96600Blob* dst);
+    int hkpBroadPhaseJob_popJobTask(int** slot, D96600Blob* dst);
 };
 static __forceinline int popPart(D96600Blob* src, D96600Blob* dst)
 {
@@ -2030,7 +2035,7 @@ static __forceinline int popPart(D96600Blob* src, D96600Blob* dst)
         src->node20 = src->node20->next;
         return 1;
     case 12:
-        return src->FUN_00df2640(slot, dst);
+        return src->hkpBroadPhaseJob_popJobTask(slot, dst);
     case 11: {
         unsigned short step = 0x80;
         if (src->word34 > step) {
@@ -2133,8 +2138,8 @@ extern __m128 DAT_010c7170;
 extern const float DAT_010cd644 = 1.0000000272564224e16f;
 extern const float DAT_0104e148 = -3.402820018375656e38f;
 extern const float DAT_0104da48 = 3.402820018375656e38f;
-float __cdecl FUN_00c98210(float a, float b);
-float __cdecl FUN_00c9e0f0(float a, float b);
+float __cdecl NiMax(float a, float b);
+float __cdecl NiMin(float a, float b);
 template<class T> struct TreeRef { T* p; TreeRef(T* q):p(q){} operator T*()const{return p;} T* operator->()const{return p;} };
 __forceinline const QuantizedBounds* projectAt(const TreeNode& node, const QuantizedBounds* leaves, unsigned int index) { return leaves + (node.flags & 0x7fffffff) + index; }
 struct BoundPair { __m128 minimum, maximum; void set(float a, float b) { minimum = _mm_set_ps1(a); maximum = _mm_set_ps1(b); } };
@@ -2157,12 +2162,12 @@ struct __declspec(align(16)) S00d94a80_Local {
     unsigned int unk90;
     char* unk94;
 };
-void __cdecl FUN_00d6f460(char* atom, int count, S00d94a80_Local* ctx, int** cursor);
+void __cdecl hkSolverBuildJacobianFromAtomsNotContact(char* atom, int count, S00d94a80_Local* ctx, int** cursor);
 struct S00d94a80_Bool {
     bool m_cBooleanValue;
     S00d94a80_Bool(bool v) { m_cBooleanValue = v; }
 };
-void __cdecl FUN_00d72190(char* atom, S00d94a80_Local* ctx, S00d94a80_Bool bCopy, int** cursor);
+void __cdecl hkSimpleContactConstraintDataBuildJacobian(char* atom, S00d94a80_Local* ctx, S00d94a80_Bool bCopy, int** cursor);
 inline S00d94a80_Bool S00d94a80_True() { S00d94a80_Bool r(true); return r; }
 struct S00d94a80_A0 {
     SubObj* unk00;
@@ -2248,9 +2253,9 @@ static __forceinline void S00d94a80_Process(Arg0* a1, Arg2* p)
         char* atom = r->unk00;
         if (*(unsigned short*)atom == 0x16) {
             S00d94a80_Bool b(true);
-            FUN_00d72190(atom, &base, b, &cursor);
+            hkSimpleContactConstraintDataBuildJacobian(atom, &base, b, &cursor);
         } else {
-            FUN_00d6f460(atom, w14, &base, &cursor);
+            hkSolverBuildJacobianFromAtomsNotContact(atom, w14, &base, &cursor);
         }
     } while (--remaining);
     }
@@ -2268,7 +2273,7 @@ static __forceinline void S00d94a80_Process(Arg0* a1, Arg2* p)
     }
 
 }
-void __cdecl FUN_00d94a80(Arg0* a1, Arg1* a2, Arg2* a3);
+void __cdecl hkCpuBuildJacobiansJob(Arg0* a1, Arg1* a2, Arg2* a3);
 extern const float g_011c5874_arg1;
 extern const float runtimeFloatSettingDefault262;
 extern double DAT_01035718;
@@ -2278,7 +2283,7 @@ union F128U
     unsigned u[4];
 };
 static const F128U V4C = { { 196608.0f, 196608.0f, 196608.0f, 196608.0f } };
-float FUN_00d97440();
+float Object_ComputeBisectionMidpoint();
 extern "C" void _mm_store_ps(float* p, __m128 a);
 extern int DAT_010d37e4;
 struct FUN_00d84bd0
@@ -2557,7 +2562,8 @@ static __forceinline float decodeSplit(unsigned short value, float origin, float
     return value / 65535.0 * extent + origin;
 }
 // @fnv 0x00d99570
-extern "C" PacketResult __cdecl FUN_00d99570(const PacketTree* tree,
+// src: XBOX_PDB 0x00d99570
+extern "C" PacketResult __cdecl hkKdTreeUtils_castRayBundleIterative(const PacketTree* tree,
     const PacketRays& start, const PacketRays& finish,
     PacketCollector* collector, PacketMask::Bits lanes)
 {
@@ -2568,7 +2574,7 @@ extern "C" PacketResult __cdecl FUN_00d99570(const PacketTree* tree,
     int capacity = tree->m_iNumNodes > 0 ? tree->m_iNumNodes : 128;
     const PacketNode* node = root;
     __declspec(align(16)) PacketNode cached = *readPacketNode(root);
-    ::hkMemoryRouter* arena = ::FUN_00c85750();
+    ::hkMemoryRouter* arena = ::hkMemoryRouter_getInstance();
     PacketState* base = reinterpret_cast<PacketState*>(arena->m_stack.m_next.m_storage);
     arena->m_stack.m_next.m_storage = (char*)arena->m_stack.m_next.m_storage + ((capacity * sizeof(PacketState) + 127) & ~127);
     PacketState* stack = base;
@@ -2697,7 +2703,7 @@ extern "C" PacketResult __cdecl FUN_00d99570(const PacketTree* tree,
         active.combine(nearValue.less(effectiveFar),active);
         if(!active.any()) goto pop;
     }
-    ::FUN_00c85750()->m_stack.m_next.m_storage=(void*)(reinterpret_cast<int>(base));
+    ::hkMemoryRouter_getInstance()->m_stack.m_next.m_storage=(void*)(reinterpret_cast<int>(base));
     return true;
 }
 
@@ -2822,7 +2828,7 @@ struct Embedded5 {
     __m128 m40;
 };
 
-extern "C" int __cdecl FUN_00d1c2b0(int a1, Segment* seg, Spline3* spl, ContextArg a4, float a5, int a6, int a7);
+extern "C" int __cdecl hkAabbTreeQueryUtils_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_castAabb(int a1, Segment* seg, Spline3* spl, ContextArg a4, float a5, int a6, int a7);
 
 // LocalSolverState_00d9a2a0: the object 0x00d9a2a0 works on (Param3* at +8, Param2* at +0x18, then aligned vector
 // state) is not PathBuilder (include/PathBuilder.h, 0x14 bytes).
@@ -2841,10 +2847,11 @@ struct LocalSolverState_00d9a2a0 {
     float m_f84;
     int m_p6;
 
-    int FUN_00d9a2a0(int a1, Param2* a2, Param3* a3, int a4, Embedded5* a5, int a6, int a7, volatile int a8);
+    int ProcessAndReturnValue_00d9a2a0(int a1, Param2* a2, Param3* a3, int a4, Embedded5* a5, int a6, int a7, volatile int a8);
 };
 // @fnv 0x00d9a2a0
-int LocalSolverState_00d9a2a0::FUN_00d9a2a0(int a1, Param2* a2, Param3* a3, int a4, Embedded5* a5, int a6, int a7, volatile int a8) {
+// src: GUESS 0x00d9a2a0 (confidence: low)
+int LocalSolverState_00d9a2a0::ProcessAndReturnValue_00d9a2a0(int a1, Param2* a2, Param3* a3, int a4, Embedded5* a5, int a6, int a7, volatile int a8) {
     m_p7 = a7;
     m_p8 = a8;
     m_p2 = a2;
@@ -2881,7 +2888,7 @@ int LocalSolverState_00d9a2a0::FUN_00d9a2a0(int a1, Param2* a2, Param3* a3, int 
     multiplyVector(spl.m_tangent, SimdReal(0.5f), d);
     m_f80 = a3->m_f10;
     ContextArg context = { &unk04 };
-    return FUN_00d1c2b0(a1, &seg, &spl, context, a3->m_f10, 0, 0);
+    return hkAabbTreeQueryUtils_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_castAabb(a1, &seg, &spl, context, a3->m_f10, 0, 0);
 }
 
 }
@@ -2913,7 +2920,8 @@ inline __m128 scalar(float f) {return ::_mm_load_ss(&f);}
 inline void centerSwap(BoundsVector& result,const hkAabb& b) {const BoundsVector* vectors=reinterpret_cast<const BoundsVector*>(&b);__m128 sum=::_mm_add_ps(vectors[0].value,vectors[1].value);__m128 factor=scalar(0.5f);factor=::_mm_shuffle_ps(factor,factor,0);result.value=::_mm_mul_ps(factor,sum);}
 
 // @fnv 0x00d9a520
-extern "C" void __cdecl FUN_00d9a520(const hkAabb* bounds,const hkAabb* prims,IndexList* indices,int start,int count,hkAabb* left,hkAabb* right,int* leftCount,int* rightCount)
+// src: GUESS 0x00d9a520 (confidence: low)
+extern "C" void __cdecl hkAabb_ProcessEntries_00d9a520(const hkAabb* bounds,const hkAabb* prims,IndexList* indices,int start,int count,hkAabb* left,hkAabb* right,int* leftCount,int* rightCount)
 {
     static const float emptyMinimum = 3.402820018375656e38f;
     static const float emptyMaximum = -3.402820018375656e38f;
@@ -3036,7 +3044,8 @@ __forceinline void scanPartitionLeft(const PartitionQuantizedBounds* items, Part
     }
 }
 // @fnv 0x00d9a850
-extern "C" void __cdecl FUN_00d9a850(const PartitionBounds& bounds, const PartitionQuantizedBounds* items,
+// src: GUESS 0x00d9a850 (confidence: medium)
+extern "C" void __cdecl Bounds_PartitionOnLongestAxis(const PartitionBounds& bounds, const PartitionQuantizedBounds* items,
     PartitionIndices& indices, unsigned short start, int count,
     PartitionBounds& leftBounds, PartitionBounds& rightBounds, int& leftCount, int& rightCount)
 {

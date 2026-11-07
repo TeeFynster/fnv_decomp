@@ -32,6 +32,6 @@ class TESWorldSpace
   public:
     unsigned char prefix[0x7c];
     float field7c;
-    void FUN_00584150(float value);
+    void SetWaterLODHeight(float value);
 };
 #endif

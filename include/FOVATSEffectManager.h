@@ -62,24 +62,24 @@ public:
     FOVATSEffectManager();                        // 0x007ffec0
     void SetEffectMode(unsigned int);             // 0x0044ac20
     bool IsScanning();                            // 0x007f4810
-    void FUN_00800370();
+    void FOVATSEffectManager_OnIdle();
     void OnIdle();                                // 0x00800370
-    void FUN_008006b0();
-    void FUN_00800740(float);
+    void FOVATSEffectManager_TriggerDistort();
+    void FOVATSEffectManager_UpdateBurst(float);
     void SetScaledValues(float);
-    void FUN_00800820(float);
+    void FOVATSEffectManager_UpdateTargetPulse(float);
     void UpdateProgress(float);
-    void FUN_00800900(float);
+    void FOVATSEffectManager_UpdateScan(float);
     void DisableScan();                           // 0x008009d0
-    void FUN_00800ac0(int, int, int);
+    void FOVATSEffectManager_SetTarget(int, int, int);
     void ClearMultiTargets();                     // 0x00800ed0
-    void FUN_00800f30(RenderTexture*, int, unsigned char, int, int, unsigned char);
-    void FUN_00801420(unsigned char, int);
-    void FUN_00801450(unsigned char, int);
-    void FUN_00801880();
-    void FUN_008019d0();
-    void FUN_00801ad0(int, int, int, unsigned char);
-    void FUN_00801bb0(int, int, int, unsigned char);
-    void FUN_00801bb0(int, RenderedTextureSource*, int, unsigned char);
-    void FUN_00801a60(int, int, int, unsigned char);
+    void FOVATSEffectManager_DrawTargetToTexture(RenderTexture*, int, unsigned char, int, int, unsigned char);
+    void FOVATSEffectManager_DrawTarget(unsigned char, int);
+    void FOVATSEffectManager_DrawSingleTarget(unsigned char, int);
+    void FOVATSEffectManager_DrawMultipleTargets();
+    void VATSEffect_ShutdownEffect();
+    void PrepareScanEffect(int, int, int, unsigned char);
+    void FOVATSEffectManager_PrepareHighlightEffect(int, int, int, unsigned char);
+    void FOVATSEffectManager_PrepareHighlightEffect(int, RenderedTextureSource*, int, unsigned char);
+    void PrepareEffect(int, int, int, unsigned char);
 };

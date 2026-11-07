@@ -14,7 +14,8 @@
 extern "C" int __cdecl FUN_00ec7d40(int);
 
 // @fnv 0x0072fa80
-int __cdecl FUN_0072fa80(int param_1)
+// src: XBOX_PDB 0x0072fa80
+int __cdecl abs_0072fa80(int param_1)
 {
     return FUN_00ec7d40(param_1);
 }
@@ -24,24 +25,26 @@ struct FUN_00ad8d60_shell
     int m_uiSoundResourceID;
     int pad;
     int eState;
-    bool __thiscall FUN_00ad8d60(int param2);
+    bool __thiscall BSSoundHandle_FadeInPlay(int param2);
 };
 
 // @fnv 0x00ad8d60
-bool FUN_00ad8d60_shell::FUN_00ad8d60(int aiParam)
+// src: COMMUNITY 0x00ad8d60
+bool FUN_00ad8d60_shell::BSSoundHandle_FadeInPlay(int aiParam)
 {
     if (m_uiSoundResourceID == 0xffffffff)
     {
         return false;
     }
     eState = 1;
-    BSAudioManager::GetRandomGenerator().FUN_00adc670(m_uiSoundResourceID, aiParam);
+    BSAudioManager::GetRandomGenerator().BSAudioManager_FadeInPlay(m_uiSoundResourceID, aiParam);
     return true;
 }
 
 // Stores param at offset 0xa4 and fval at offset 0xa8 of this object.
 // @fnv 0x00ada300
-void BSAudioManager::FUN_00ada300(float fval, unsigned int param)
+// src: COMMUNITY 0x00ada300
+void BSAudioManager::SetConditions_00ada300(float fval, unsigned int param)
 {
     iWeatherFlags = param;
     fCurrentGamehour = fval;
@@ -50,14 +53,15 @@ void BSAudioManager::FUN_00ada300(float fval, unsigned int param)
 namespace fnv_00adad60 {
 struct BottomlessStack
 {
-    void FUN_00ae76b0();
+    void AudioMessageStack_Pop_00ae76b0();
 };
 }
 
 // @fnv 0x00adad60
-void BSAudioManager::FUN_00adad60()
+// src: XBOX_PDB 0x00adad60
+void BSAudioManager::AudioMessageStack_Pop()
 {
-    reinterpret_cast<fnv_00adad60::BottomlessStack*>(FreeMessages)->FUN_00ae76b0();
+    reinterpret_cast<fnv_00adad60::BottomlessStack*>(FreeMessages)->AudioMessageStack_Pop_00ae76b0();
 }
 
 namespace fnv_00adaf80 {
@@ -70,7 +74,8 @@ struct BottomlessStack
 }  // namespace fnv_00adaf80
 
 // @fnv 0x00adaf80
-SoundMessageRecord* BSAudioManager::FUN_00adaf80()
+// src: COMMUNITY 0x00adaf80
+SoundMessageRecord* BSAudioManager::GetFreeQueueMessage()
 {
     return reinterpret_cast<fnv_00adaf80::BottomlessStack*>(FreeQueueMessages)->Pop();
 }
@@ -78,22 +83,24 @@ SoundMessageRecord* BSAudioManager::FUN_00adaf80()
 // Remaining manager method views cover declarations absent from BSAudioManager.h.
 struct FUN_00adb960_shell
 {
-    bool __thiscall FUN_00adb960(int arg1, int arg2);
+    bool __thiscall BSAudioManager_SetBalance(int arg1, int arg2);
 };
 
 // @fnv 0x00adb960
-bool __thiscall FUN_00adb960_shell::FUN_00adb960(int arg1, int arg2)
+// src: COMMUNITY 0x00adb960
+bool __thiscall FUN_00adb960_shell::BSAudioManager_SetBalance(int arg1, int arg2)
 {
     return false;
 }
 
 struct FUN_00adbf40_shell
 {
-    bool FUN_00adbf40(float f1, float f2, float f3, float f4);
+    bool BSAudioManager_SetOrientation(float f1, float f2, float f3, float f4);
 };
 
 // @fnv 0x00adbf40
-bool FUN_00adbf40_shell::FUN_00adbf40(float f1, float f2, float f3, float f4)
+// src: COMMUNITY 0x00adbf40
+bool FUN_00adbf40_shell::BSAudioManager_SetOrientation(float f1, float f2, float f3, float f4)
 {
     return false;
 }
@@ -106,25 +113,25 @@ bool __thiscall AudioLoadTask::GetDescription(char* apDescription, unsigned int 
 
 struct FUN_00adcaa0_shell
 {
-    void FUN_00adcaa0(int param_2, int param_3);
+    void BSAudioManager_UnMuteAllOfType(int param_2, int param_3);
 };
 
 // Forwards the two arguments to BSAudioManager's FUN_00adcaa0.
 // @fnv 0x00ad84b0
 void BSAudio::ForwardToManager(unsigned int param_2, unsigned int param_3)
 {
-    ((FUN_00adcaa0_shell*)&BSAudioManager::GetRandomGenerator())->FUN_00adcaa0(param_2, param_3);
+    ((FUN_00adcaa0_shell*)&BSAudioManager::GetRandomGenerator())->BSAudioManager_UnMuteAllOfType(param_2, param_3);
 }
 
 struct FUN_00adcc10_shell
 {
-    void __thiscall FUN_00adcc10(int, int);
+    void __thiscall BSAudioManager_UnPauseAllOfType(int, int);
 };
 // Forwards param1 and param2 to the BSAudioManager method FUN_00adcc10.
 // @fnv 0x00ad8540
 void __thiscall BSAudio::ForwardToManager(unsigned int param1, bool param2)
 {
-    ((FUN_00adcc10_shell*)&BSAudioManager::GetRandomGenerator())->FUN_00adcc10(param1, param2);
+    ((FUN_00adcc10_shell*)&BSAudioManager::GetRandomGenerator())->BSAudioManager_UnPauseAllOfType(param1, param2);
 }
 
 struct S_00ae5f70
@@ -151,7 +158,8 @@ S_00ae5f70* __thiscall C_00ae5f70::Init(S_00ae5f70* pObject, int a2, int a3, int
 
 // Compares the unsigned ints pointed to by a and b, returning -1 if the first is smaller, 1 if larger, else 0.
 // @fnv 0x00ae5fb0
-int __cdecl FUN_00ae5fb0(unsigned int* puiLeft, unsigned int* puiRight)
+// src: GUESS 0x00ae5fb0 (confidence: high)
+int __cdecl BSAudioManager_CompareUnsignedValues(unsigned int* puiLeft, unsigned int* puiRight)
 {
     unsigned int v1 = *puiLeft;
     unsigned int v2 = *puiRight;
@@ -163,10 +171,11 @@ extern int DAT_011f6ecc;
 extern int DAT_01202800;
 struct FUN_00ae6c60_shell
 {
-    int __thiscall FUN_00ae6c60();
+    int __thiscall _BSAudioManager_AudioCacheSize();
 };
 // @fnv 0x00ae6c60
-int __thiscall FUN_00ae6c60_shell::FUN_00ae6c60()
+// src: COMMUNITY 0x00ae6c60
+int __thiscall FUN_00ae6c60_shell::_BSAudioManager_AudioCacheSize()
 {
     int* p = &g_011f6ec8 ? &DAT_011f6ecc : (DAT_01202800 = 0, &DAT_01202800);
     return *p;
@@ -179,11 +188,12 @@ extern int g_011f6ebc;
 struct BSAudioManager_shell : BSAudioManager
 {
     void __thiscall AddSound(int arg2);
-    void __thiscall FUN_00ae6ca0(bool enable);
+    void __thiscall BSAudioManager_SetCacheEnabled(bool enable);
 };
 // Stores enable into a global flag and, when disabling, calls AddSound(0).
 // @fnv 0x00ae6ca0
-void __thiscall BSAudioManager_shell::FUN_00ae6ca0(bool enable)
+// src: COMMUNITY 0x00ae6ca0
+void __thiscall BSAudioManager_shell::BSAudioManager_SetCacheEnabled(bool enable)
 {
     char* target = &g_011f6ebc ? (char*)&DAT_011f6ec0 : ((void)(DAT_01202800 = 0), (char*)&DAT_01202800);
     *target = enable;
@@ -198,10 +208,11 @@ extern bool DAT_011f6ec0;
 extern bool DAT_01202800;
 struct FUN_00ae6cf0_shell
 {
-    bool __thiscall FUN_00ae6cf0();
+    bool __thiscall BSAudioManager_IsEnableAudioCache();
 };
 // @fnv 0x00ae6cf0
-bool __thiscall FUN_00ae6cf0_shell::FUN_00ae6cf0()
+// src: COMMUNITY 0x00ae6cf0
+bool __thiscall FUN_00ae6cf0_shell::BSAudioManager_IsEnableAudioCache()
 {
     bool* mode = &g_011f6ebc ? &DAT_011f6ec0 : (DAT_01202800 = 0, &DAT_01202800);
     return *mode;
@@ -212,7 +223,8 @@ extern int DAT_010a3718;
 
 // Sets the vtable pointer to DAT_010a3718, touches the field at offset 0x30, then calls the base destructor.
 // @fnv 0x00ae7020
-void __thiscall AudioLoadTask::FUN_00ae7020()
+// src: GUESS 0x00ae7020 (confidence: medium)
+void __thiscall AudioLoadTask::DestroyFields_00ae7020()
 {
     *reinterpret_cast<void**>(this) = &DAT_010a3718;
     SoundAssetTmp = SoundAssetTmp;
@@ -280,14 +292,14 @@ extern P03MM* g_memoryManager;
 
 struct FUN_00ae7870_shell
 {
-    void __thiscall FUN_00ae78a0();
+    void __thiscall CloseAudioManagerHandles();
     void* __thiscall FUN_00ae7870(unsigned int flags);
 };
 
 // @fnv 0x00ae7870
 void* FUN_00ae7870_shell::FUN_00ae7870(unsigned int flags)
 {
-    FUN_00ae78a0();
+    CloseAudioManagerHandles();
     if (flags & 1)
         ((P03MM*)&g_memoryManager)->DeallocateAlias(this);
     return this;
@@ -298,7 +310,7 @@ void* FUN_00ae7870_shell::FUN_00ae7870(unsigned int flags)
 // @fnv 0x00ae7b10
 void* __thiscall AudioLoadTask::FUN_00ae7b10(unsigned int flags)
 {
-    FUN_00ae7020();
+    DestroyFields_00ae7020();
     if (flags & 1)
         reinterpret_cast<MemoryManager*>(&g_memoryManager)->Deallocate(this);
     return this;
@@ -312,11 +324,12 @@ struct Host00ae8ef0
 {
     char _p[12];
     AudioPointerAllocator<unsigned int> alloc;
-    void __thiscall FUN_00ae8ef0(void* p);
+    void __thiscall ClearAndFreeEntry(void* p);
 };
 // Clears the pointer at offset 8 of p, then deallocates p through the allocator.
 // @fnv 0x00ae8ef0
-void __thiscall Host00ae8ef0::FUN_00ae8ef0(void* p)
+// src: GUESS 0x00ae8ef0 (confidence: medium)
+void __thiscall Host00ae8ef0::ClearAndFreeEntry(void* p)
 {
     int d1;
     int d2;
@@ -415,13 +428,14 @@ void* __thiscall S00a0d390::FUN_00ae9100(unsigned int auiFlags)
 
 struct Helper
 {
-    void __thiscall FUN_00ae6f10(void*);
+    void __thiscall NiTPointerListBase_NiTPointerAllocator_unsigned_int_ShadowSceneLight_Remove(void*);
 };
 // Calls a helper on the BSAudioManager singleton with this task, then assigns the task's pointer field to itself.
 // @fnv 0x00ae7360
-void AudioLoadTask::FUN_00ae7360()
+// src: XBOX_PDB 0x00ae7360
+void AudioLoadTask::Finish_00ae7360()
 {
-    ((Helper*)&BSAudioManager::GetRandomGenerator())->FUN_00ae6f10(this);
+    ((Helper*)&BSAudioManager::GetRandomGenerator())->NiTPointerListBase_NiTPointerAllocator_unsigned_int_ShadowSceneLight_Remove(this);
     SoundAssetTmp = SoundAssetTmp;
 }
 
@@ -521,7 +535,8 @@ bool BSAudioManager::HasMatchingEntry(unsigned int mask)
 }
 
 // @fnv 0x00ae6e60
-bool __thiscall BSAudioManager::FUN_00ae6e60(int param_2, unsigned char abMatchStateOne)
+// src: COMMUNITY 0x00ae6e60
+bool __thiscall BSAudioManager::ClearPausedType(int param_2, unsigned char abMatchStateOne)
 {
     int i = 0;
     for (; i < *(unsigned int*)((char*)this + 0x17c); ++i)
@@ -556,12 +571,12 @@ extern char $SG6265[];
 
 struct FUN_00ada330_shell
 {
-    void __thiscall FUN_00ada330();
+    void __thiscall BSAudioManager_SynchVoiceStates();
 };
 
 struct FUN_00addc00_shell
 {
-    void __thiscall FUN_00addc00();
+    void __thiscall BSAudioManager_Process();
 };
 
 struct FUN_00ada1d0_shell
@@ -589,13 +604,13 @@ void FUN_00ada1d0_shell::InitUISounds(bool abPlayGameWorldSounds)
         m_bUISoundsEnabled = true;
     }
 
-    reinterpret_cast<FUN_00ada330_shell*>(this)->FUN_00ada330();
+    reinterpret_cast<FUN_00ada330_shell*>(this)->BSAudioManager_SynchVoiceStates();
 
     BSAudio* pAudio = DAT_011f6d98;
     volatile bool bAudioMultiThreaded = pAudio->bMultiThread;
     if (!bAudioMultiThreaded)
     {
-        reinterpret_cast<FUN_00addc00_shell&>(BSAudioManager::GetRandomGenerator()).FUN_00addc00();
+        reinterpret_cast<FUN_00addc00_shell&>(BSAudioManager::GetRandomGenerator()).BSAudioManager_Process();
     }
 }
 
@@ -691,11 +706,12 @@ struct ObjRegistry
     char unk98[0xdc - 0x98];
     CritSecA m_kCS;
 
-    bool FUN_00add480(int m_uiSoundID, bool bCheckAlt);
+    bool BSAudioManager_IsInCache(int m_uiSoundID, bool bCheckAlt);
 };
 
 // @fnv 0x00add480
-bool ObjRegistry::FUN_00add480(int m_uiSoundID, bool bCheckAlt)
+// src: COMMUNITY 0x00add480
+bool ObjRegistry::BSAudioManager_IsInCache(int m_uiSoundID, bool bCheckAlt)
 {
     if (m_uiSoundID == 0)
         return false;
@@ -720,7 +736,7 @@ bool ObjRegistry::FUN_00add480(int m_uiSoundID, bool bCheckAlt)
     return bFound;
 }
 
-extern "C" void __cdecl FUN_005b5e40(const char* msg, int value);
+extern "C" void __cdecl Warning_005b5e40(const char* msg, int value);
 
 extern int g_011f6ec8;
 extern int DAT_011f6ecc;
@@ -728,7 +744,7 @@ extern int DAT_01202800;
 
 struct AudioCacheOwner
 {
-    void FUN_00ae6ca0(int flags);
+    void BSAudioManager_SetCacheEnabled(int flags);
     void SetAudioCacheSize(int size);
 };
 
@@ -738,7 +754,7 @@ void AudioCacheOwner::SetAudioCacheSize(int size)
 {
     if (size == 0)
     {
-        FUN_00ae6ca0(0);
+        BSAudioManager_SetCacheEnabled(0);
     }
     if ((unsigned int)size < 0x1000)
     {
@@ -747,7 +763,7 @@ void AudioCacheOwner::SetAudioCacheSize(int size)
     }
     else
     {
-        FUN_005b5e40("AUDIO: Attempted to set audio cache size to %i. Cache size must be < 4MB", size);
+        Warning_005b5e40("AUDIO: Attempted to set audio cache size to %i. Cache size must be < 4MB", size);
     }
 }
 
@@ -828,13 +844,13 @@ struct Sound7390
 };
 struct AudioHelper7390
 {
-    void __thiscall FUN_00ae6f10();
+    void __thiscall NiTPointerListBase_NiTPointerAllocator_unsigned_int_ShadowSceneLight_Remove();
 };
-AudioHelper7390* __stdcall FUN_00ad9060(AudioLoadTask*);
+AudioHelper7390* __stdcall BSAudioManager_QInstance_00ad9060(AudioLoadTask*);
 // @fnv 0x00ae7390
 void __thiscall AudioLoadTask::Cancel(BS_TASK_STATE, void*)
 {
-    FUN_00ad9060(this)->FUN_00ae6f10();
+    BSAudioManager_QInstance_00ad9060(this)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_ShadowSceneLight_Remove();
     unsigned int uiSoundFlags;
     Sound7390* pDeleteFirst;
     Sound7390* pSoundToDelete;
@@ -968,12 +984,13 @@ void AE8470List::SortList(int(__cdecl* pfnCompare)(AE8470Item*, AE8470Item*))
 
 struct FUN_00ae8550_shell
 {
-    void __thiscall FUN_00ae8550(int* values, int(__cdecl* compare)(int, int), int count);
+    void __thiscall SortValuesByComparison(int* values, int(__cdecl* compare)(int, int), int count);
 };
 
 // Sorts the values array in place using a Shell sort with a Knuth gap sequence and the given comparison function.
 // @fnv 0x00ae8550
-void __thiscall FUN_00ae8550_shell::FUN_00ae8550(int* values, int(__cdecl* compare)(int, int), int count)
+// src: GUESS 0x00ae8550 (confidence: high)
+void __thiscall FUN_00ae8550_shell::SortValuesByComparison(int* values, int(__cdecl* compare)(int, int), int count)
 {
     int offset;
     {
@@ -1022,7 +1039,8 @@ extern Setting g_011f6ee0;
 void __cdecl SetAudioThreadName(int aiHandle, const char* apName);
 
 // @fnv 0x00ad9f30
-void BSAudioManager::FUN_00ad9f30(void)
+// src: COMMUNITY 0x00ad9f30
+void BSAudioManager::StartAudioThread(void)
 {
     if (pUpdateThread)
     {
@@ -1053,7 +1071,8 @@ typedef bool(__cdecl* ADD630ResolveFunc)(const char* pcName, char* pcPath, unsig
 extern BSAudio* DAT_011f6d98;
 
 // @fnv 0x00add630
-void BSAudioManager::FUN_00add630(unsigned int pcName, unsigned int uiFlags)
+// src: COMMUNITY 0x00add630
+void BSAudioManager::Precache_00add630(unsigned int pcName, unsigned int uiFlags)
 {
     unsigned int uiResolvedFlags3 = uiFlags;
     BSAudio* pkAudio5 = DAT_011f6d98;
@@ -1065,7 +1084,7 @@ void BSAudioManager::FUN_00add630(unsigned int pcName, unsigned int uiFlags)
     if (!bEnabled6 || !pfnResolve4 || !pfnResolve4(reinterpret_cast<const char*>(pcName), acPath4, &uiResolvedFlags3, &_uiExtra))
         return;
     uiFlags |= uiResolvedFlags3;
-    FUN_00add6f0(reinterpret_cast<unsigned int>(acPath4), uiFlags, _uiExtra);
+    BSAudioManager_Precache_00add6f0(reinterpret_cast<unsigned int>(acPath4), uiFlags, _uiExtra);
 }
 
 struct Sub
@@ -1106,7 +1125,8 @@ extern Setting g_011f6e74;
 
 // Scales a1 by fMasterVolume*fMasterSecondaryVolume and a setting value, then applies a further gain pair chosen by the flags in a2 and returns the result.
 // @fnv 0x00adac30
-float BSAudioManager::FUN_00adac30(float afBase, unsigned int auiFlags)
+// src: COMMUNITY 0x00adac30
+float BSAudioManager::GetVolumeValue(float afBase, unsigned int auiFlags)
 {
     float f6 = afBase;
     float* pSettingValue = &g_011f6e74 ? &g_011f6e74.uValue.f : &(*(float*)& DAT_01202800 = 0.0f);
@@ -1175,7 +1195,7 @@ struct LinkedSoundQueue
     unsigned int count;
     Sound* FUN_00ae7f90();
     Sound* PopFront();
-    void FUN_00a0c9f0(Sound* const&);
+    void _NiTListBase_AddHead(Sound* const&);
 };
 struct DeleteView
 {
@@ -1271,7 +1291,7 @@ void BSAudioManager::AddSound(BSGameSound* apSound)
             p->flags = f | 0x8000;
         }
     }
-    reinterpret_cast<LinkedSoundQueue*>(CachedSoundList)->FUN_00a0c9f0(v15);
+    reinterpret_cast<LinkedSoundQueue*>(CachedSoundList)->_NiTListBase_AddHead(v15);
     {
         struct U4
         {
@@ -1322,7 +1342,7 @@ void BSAudioManager::AddSound(BSGameSound* apSound)
                         else
                         {
                             if (v35)
-                                reinterpret_cast<LinkedSoundQueue*>(CachedSoundList)->FUN_00a0c9f0(v35);
+                                reinterpret_cast<LinkedSoundQueue*>(CachedSoundList)->_NiTListBase_AddHead(v35);
                         }
                         v1++;
                     }
@@ -1352,7 +1372,7 @@ struct LinkedSoundQueue
 struct FUN_00ae76b0_shell
 {
     void __thiscall FUN_00ae75f0(int item);
-    int __thiscall FUN_00ae76b0();
+    int __thiscall AudioMessageStack_Pop_00ae76b0();
 };
 struct AudioThreadData
 {
@@ -1396,8 +1416,8 @@ struct AudioThreadData
     int unkA4;
     int unkA8;
     CritSecA kLock;
-    bool __thiscall FUN_00adf080(int item);
-    void __thiscall FUN_00adad80(int item);
+    bool __thiscall ProcessMessage_00adf080(int item);
+    void __thiscall BSAudioManager_FreeMessage(int item);
     void __thiscall ProcessAudioQueue();
 };
 // @fnv 0x00addc70
@@ -1422,7 +1442,7 @@ void AudioThreadData::ProcessAudioQueue()
     while (!(bool)(int)(pListU->iCount == 0) && (aPHead = pListU->pHead) != 0 && (kPTail = pListU->pTail) != 0)
     {
         item9 = pListU->FUN_00ae7f90();
-        if (FUN_00adf080(item9))
+        if (ProcessMessage_00adf080(item9))
             return;
         kQueue.FUN_00ae75f0(item9);
     }
@@ -1431,11 +1451,11 @@ void AudioThreadData::ProcessAudioQueue()
     EnterCriticalSection(&kLock);
     iWriteIndex = (iWriteIndex + 1) % 2;
     iReadIndex = (iWriteIndex + 1) % 2;
-    item9 = kQueue.FUN_00ae76b0();
+    item9 = kQueue.AudioMessageStack_Pop_00ae76b0();
     while (item9)
     {
-        FUN_00adad80(item9);
-        item9 = kQueue.FUN_00ae76b0();
+        BSAudioManager_FreeMessage(item9);
+        item9 = kQueue.AudioMessageStack_Pop_00ae76b0();
     }
     LeaveCriticalSection(&kLock);
 }
@@ -1452,7 +1472,7 @@ typedef bool(__cdecl* Resolver_ae5680)(int, void*, unsigned int*, int*);
 
 struct AudioClass_ae5680
 {
-    Handle_ae5680 __thiscall FUN_00ae5a50(const void* pPath, unsigned int uiFlags, int iExtra);
+    Handle_ae5680 __thiscall BSAudioManager_InitSoundPath(const void* pPath, unsigned int uiFlags, int iExtra);
     Handle_ae5680* __thiscall ResolveAudioHandle(Handle_ae5680* pOut, int aiSoundId, unsigned int uiFlags);
 };
 
@@ -1509,7 +1529,7 @@ Handle_ae5680* AudioClass_ae5680::ResolveAudioHandle(Handle_ae5680* pOut, int ai
         iState |= 1;
         return pOut;
     }
-    Handle_ae5680 h7 = FUN_00ae5a50(path3, uiFlags, aIExtra);
+    Handle_ae5680 h7 = BSAudioManager_InitSoundPath(path3, uiFlags, aIExtra);
     pOut->f0 = h7.f0;
     pOut->f4 = h7.f4;
     pOut->f8 = h7.f8;
@@ -1523,11 +1543,12 @@ struct FUN_00ae8650_cls
     unsigned int m_00, m_04, m_08, m_0c;
     void* m_10;
     float m_14, m_18, m_1c;
-    FUN_00ae8650_cls* FUN_00ae8650();
+    FUN_00ae8650_cls* InitializeFields();
 };
 // Initializes all members to zero and increments the reference count of the object stored in m_10 if it is non-null.
 // @fnv 0x00ae8650
-FUN_00ae8650_cls* FUN_00ae8650_cls::FUN_00ae8650()
+// src: GUESS 0x00ae8650 (confidence: medium)
+FUN_00ae8650_cls* FUN_00ae8650_cls::InitializeFields()
 {
     void* pTarget;
     {
@@ -1559,7 +1580,8 @@ struct FUN_00ad90e0_shell
 };
 // Returns a pointer to a static singleton instance of FUN_00ad90e0_shell.
 // @fnv 0x00ad9060
-FUN_00ad90e0_shell* __cdecl FUN_00ad9060()
+// src: XBOX_PDB 0x00ad9060
+FUN_00ad90e0_shell* __cdecl BSAudioManager_QInstance_00ad9060()
 {
     static FUN_00ad90e0_shell sInstance;
     return &sInstance;
@@ -1575,7 +1597,7 @@ struct AudioHelperA
 struct AudioHelperB
 {
     void ProcessAudioQueue();
-    void FUN_00adddd0();
+    void BSAudioManager_ProcessSoundUpdates();
 };
 
 struct AudioManagerUpdate
@@ -1589,20 +1611,21 @@ struct AudioManagerUpdate
     unsigned int unk0c0, unk0c4, unk0c8, unk0cc, unk0d0, unk0d4, unk0d8;
     CritSecA critical0dc;
     CritSecA m_cs;
-    void FUN_00addc00();
+    void BSAudioManager_Process();
 };
 
 // Calls the audio system update helper, then acquires m_cs and invokes two AudioHelperB methods if the lock is obtained.
 // @fnv 0x00addc00
-void AudioManagerUpdate::FUN_00addc00()
+// src: COMMUNITY 0x00addc00
+void AudioManagerUpdate::BSAudioManager_Process()
 {
     BSAudio* p = DAT_011f6d98;
     reinterpret_cast<AudioHelperA*>(&p->SynchTimer)->UpdateAccumulatedTime();
     bool locked = fnv_Import_TryEnterCriticalSection(&m_cs) != 0;
     if (locked)
     {
-        reinterpret_cast<AudioHelperB*>(FUN_00ad9060())->ProcessAudioQueue();
-        reinterpret_cast<AudioHelperB*>(FUN_00ad9060())->FUN_00adddd0();
+        reinterpret_cast<AudioHelperB*>(BSAudioManager_QInstance_00ad9060())->ProcessAudioQueue();
+        reinterpret_cast<AudioHelperB*>(BSAudioManager_QInstance_00ad9060())->BSAudioManager_ProcessSoundUpdates();
         LeaveCriticalSection(&m_cs);
     }
 }
@@ -1644,7 +1667,8 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volati
 
 // Sets processing, signals signalSemaphore, waits on waitSemaphore, then clears processing.
 // @fnv 0x00ae7a50
-void BSAudioManagerThread::FUN_00ae7a50()
+// src: COMMUNITY 0x00ae7a50
+void BSAudioManagerThread::Suspended()
 {
 
     waiting48 = true;
@@ -1668,18 +1692,19 @@ extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void*, long, lon
 
 // Sets waiting48, releases workSemaphore3c, increments its count, and calls FUN_00aa6590.
 // @fnv 0x00ae7ac0
-void BSAudioManagerThread::FUN_00ae7ac0()
+// src: COMMUNITY 0x00ae7ac0
+void BSAudioManagerThread::ExitThread_00ae7ac0()
 {
     waiting48 = true;
     BSSemaphore_adf080* semaphore = &workSemaphore3c;
     ReleaseSemaphore(semaphore->semaphore, 1, 0);
     InterlockedIncrement(&semaphore->count);
-    FUN_00aa6590(0, 0);
+    ForwardCall_00aa6590(0, 0);
 }
 
 struct S00ae6f10_SubObj_00ae6f10
 {
-    void __thiscall FUN_00ae8150(void* p);
+    void __thiscall NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSTextureManager_RenderedTextureData_RemovePos(void* p);
 };
 struct S00ae6f10_FUN_00ae6f10_cls
 {
@@ -1752,7 +1777,7 @@ struct S00ae6f10_FUN_00ae6f10_cls
     int unk108;
     CritSecA m_10c;
     S00ae6f10_SubObj_00ae6f10 m_124;
-    void FUN_00ae6f10(int arg);
+    void NiTPointerListBase_NiTPointerAllocator_unsigned_int_ShadowSceneLight_Remove(int arg);
 };
 
 struct S00ae6f10_FUN_00ae6f10_frame
@@ -1773,11 +1798,12 @@ struct S00ae6f10_FUN_00ae6f10_frame
 
 // Locks m_10c, passes the address of arg to m_124.FUN_00ae8150, then unlocks m_10c.
 // @fnv 0x00ae6f10
-void S00ae6f10_FUN_00ae6f10_cls::FUN_00ae6f10(int aValue)
+// src: XBOX_PDB 0x00ae6f10
+void S00ae6f10_FUN_00ae6f10_cls::NiTPointerListBase_NiTPointerAllocator_unsigned_int_ShadowSceneLight_Remove(int aValue)
 {
     S00ae6f10_FUN_00ae6f10_frame frame;
     EnterCriticalSection(&m_10c);
-    m_124.FUN_00ae8150((void*)&aValue);
+    m_124.NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSTextureManager_RenderedTextureData_RemovePos((void*)&aValue);
     LeaveCriticalSection(&m_10c);
 }
 
@@ -1796,7 +1822,7 @@ unsigned int BSAudioManagerThread::ThreadProc()
     {
         if (DAT_01202d98 != 0)
         {
-            reinterpret_cast<AudioManagerUpdate*>(FUN_00ad9060())->FUN_00addc00();
+            reinterpret_cast<AudioManagerUpdate*>(BSAudioManager_QInstance_00ad9060())->BSAudioManager_Process();
         }
         Sleep(1);
     }
@@ -1810,10 +1836,11 @@ struct BSMapBase
 };
 struct FUN_00adc8b0_shell
 {
-    float __thiscall FUN_00adc8b0(unsigned long);
+    float __thiscall BSAudioManager_GetVolume(unsigned long);
 };
 // @fnv 0x00adc8b0
-float __thiscall FUN_00adc8b0_shell::FUN_00adc8b0(unsigned long auiKey)
+// src: XBOX_PDB 0x00adc8b0
+float __thiscall FUN_00adc8b0_shell::BSAudioManager_GetVolume(unsigned long auiKey)
 {
     float fVol;
     {

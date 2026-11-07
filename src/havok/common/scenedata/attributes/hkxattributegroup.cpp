@@ -12,11 +12,11 @@ __forceinline void* __cdecl operator new(unsigned int, void* pvWhere) throw()
     return pvWhere;
 }
 
-void FUN_00d2cc70(void* pvDst, void* pvSrc, unsigned int uiNumBytes) throw();
+void hkMemUtil_memMove(void* pvDst, void* pvSrc, unsigned int uiNumBytes) throw();
 
 inline hkStringPtr::~hkStringPtr() throw()
 {
-    FUN_00cb0c00();
+    Object_UpdateFields_00cb0c00();
 }
 
 // The shared hkStringPtr omits the copy constructor at 0x00cb0bd0.
@@ -86,7 +86,7 @@ void hkArrayBase<hkxAttribute>::_spliceInto(hkMemoryAllocator& kAlloc, int iInde
     if (iNewSize > getCapacity())
         GrowArrayCapacity(kAlloc, iNewSize);
     hkDestructE5CD(m_data + iIndex, iNumDel);
-    FUN_00d2cc70(m_data + iIndex + iNumToInsert, m_data + iIndex + iNumDel, iNumToMove * sizeof(hkxAttribute));
+    hkMemUtil_memMove(m_data + iIndex + iNumToInsert, m_data + iIndex + iNumDel, iNumToMove * sizeof(hkxAttribute));
     hkConstructWithArrayE5CD(m_data + iIndex, iNumToInsert, pkInsert);
     m_iElementCount = iNewSize;
 }
@@ -95,7 +95,7 @@ void hkArrayBase<hkxAttribute>::_spliceInto(hkMemoryAllocator& kAlloc, int iInde
 struct NameReference
 {
     unsigned int encoded;
-    int FUN_00cb0a80();
+    int hkStringPtr_getLength();
 };
 struct TextWriter
 {
@@ -118,7 +118,7 @@ AttributeFormatter* AttributeFormatter::WriteName(NameReference* name)
     {
         const char* text = (const char*)(name->encoded & ~1u);
         void** methods = output->virtualMethods;
-        int length = name->FUN_00cb0a80();
+        int length = name->hkStringPtr_getLength();
         ((WriteMethod)methods[4])(output, text, length);
     }
     else
@@ -151,7 +151,7 @@ struct MessageBuilder
     int length;
     int capacity;
     void FUN_00cb1600(char* buffer, unsigned int size);
-    MessageBuilder* FUN_00cc01c0(const char*);
+    MessageBuilder* ProcessAndReturnValue_00cc01c0(const char*);
     MessageBuilder* WriteName(AttrLookup*);
     void FUN_00cc00e0();
 };
@@ -187,11 +187,11 @@ int AttrLookup::GetAttributeMatrix(const char* apAttributeName, bool verbose, HM
         __declspec(align(16)) void* scratch[0x80];
         MessageBuilder message;
         message.FUN_00cb1600(reinterpret_cast<char*>(scratch), 0x200);
-        message.FUN_00cc01c0(DAT_010ecd74)
-            ->FUN_00cc01c0(apAttributeName)
-            ->FUN_00cc01c0(DAT_010eccfc)
+        message.ProcessAndReturnValue_00cc01c0(DAT_010ecd74)
+            ->ProcessAndReturnValue_00cc01c0(apAttributeName)
+            ->ProcessAndReturnValue_00cc01c0(DAT_010eccfc)
             ->WriteName(this)
-            ->FUN_00cc01c0(DAT_010ecd0c);
+            ->ProcessAndReturnValue_00cc01c0(DAT_010ecd0c);
         DAT_01268360->assertFailure(1, 0xabbaab81, scratch, DAT_010eccc8, 0xc4);
         message.FUN_00cc00e0();
     }
@@ -216,7 +216,7 @@ struct ElemArray
     int size;
     int capacityAndFlags;
 
-    void __thiscall FUN_00e5cec0(int alloc, int zero, hkxAttribute* src, int n);
+    void __thiscall SpliceArray_Thunk(int alloc, int zero, hkxAttribute* src, int n);
 };
 
 struct S00e5cce0_Class
@@ -224,12 +224,12 @@ struct S00e5cce0_Class
     int unk00;
     ElemArray arr;
 
-    void __thiscall FUN_00cb0c30(const S00e5cce0_Class& o);
-    S00e5cce0_Class& __thiscall FUN_00e5cce0(const S00e5cce0_Class& o);
+    void __thiscall UpdateState_00cb0c30(const S00e5cce0_Class& o);
+    S00e5cce0_Class& __thiscall CopyArrayAndReplaceElements(const S00e5cce0_Class& o);
 };
 
-void __cdecl FUN_00c908c0(int alloc, ElemArray* a, int bytes, int elemSize);
-Allocator* __cdecl FUN_00c85750(void);
+void __cdecl hkArrayUtil__reserve(int alloc, ElemArray* a, int bytes, int elemSize);
+Allocator* __cdecl hkMemoryRouter_getInstance(void);
 
 static __forceinline void destructElems(hkxAttribute* data, int n)
 {
@@ -241,7 +241,7 @@ static __forceinline void destructElems(hkxAttribute* data, int n)
             e.m_uiFilterValue.m_pRetainedObject->removeReference();
         }
         e.m_uiFilterValue.m_pRetainedObject = 0;
-        e.m_name.FUN_00cb0c00();
+        e.m_name.Object_UpdateFields_00cb0c00();
     }
 }
 
@@ -258,18 +258,19 @@ static __forceinline void constructElems(hkxAttribute* p, int n)
 
 // Calls FUN_00cb0c30(o), destroys existing elements, then copies o.arr via FUN_00e5cec0 and returns *this.
 // @fnv 0x00e5cce0
-S00e5cce0_Class& __thiscall S00e5cce0_Class::FUN_00e5cce0(const S00e5cce0_Class& aOther)
+// src: GUESS 0x00e5cce0 (confidence: medium)
+S00e5cce0_Class& __thiscall S00e5cce0_Class::CopyArrayAndReplaceElements(const S00e5cce0_Class& aOther)
 {
-    FUN_00cb0c30(aOther);
+    UpdateState_00cb0c30(aOther);
     ElemArray& s = arr;
-    Allocator* pAllocator = FUN_00c85750();
+    Allocator* pAllocator = hkMemoryRouter_getInstance();
     int alloc = pAllocator->unk10;
     int n = 0;
     int iCapacity = s.capacityAndFlags & 0x3fffffff;
     if (iCapacity < n)
     {
         int iNewCapacity = iCapacity + iCapacity;
-        FUN_00c908c0(alloc, &s, n < iNewCapacity ? iNewCapacity : n, 8);
+        hkArrayUtil__reserve(alloc, &s, n < iNewCapacity ? iNewCapacity : n, 8);
     }
 
     destructElems(s.data, s.size);
@@ -280,8 +281,8 @@ S00e5cce0_Class& __thiscall S00e5cce0_Class::FUN_00e5cce0(const S00e5cce0_Class&
     if (iCount != 0)
     {
         hkxAttribute* src = aOther.arr.data;
-        int a = FUN_00c85750()->unk10;
-        s.FUN_00e5cec0(a, 0, src, iCount);
+        int a = hkMemoryRouter_getInstance()->unk10;
+        s.SpliceArray_Thunk(a, 0, src, iCount);
     }
     return *this;
 }

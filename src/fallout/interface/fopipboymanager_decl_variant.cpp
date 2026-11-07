@@ -13,13 +13,13 @@
 class FopipboymanagerInterfaceView
 {
   public:
-    float FUN_009a9350();
-    float FUN_00792760();  // declared for the original code (decl_variants.py)
+    float TESCombatStyle_GetWeaponMinRangeMult();
+    float QueuedModel_GetOverriddenVisualDistance();  // declared for the original code (decl_variants.py)
   public:
     unsigned char interfaceState[0x174];
     FOPipboyManager* pPipboyManager;
     FOPipboyManager* GetPipboyManager();
-    static FopipboymanagerInterfaceView* FUN_004b7210();
+    static FopipboymanagerInterfaceView* InterfaceManager_GetSingleton();
     NiNode* GetRoot();
 };
 
@@ -39,38 +39,39 @@ class PipboySceneGraph : public SceneGraph
     NiCamera* FUN_006629f0();
 };
 
-SceneGraph* FUN_0045c670();
-bool FUN_007178a0();
+SceneGraph* Main_GetWorldSceneGraph();
+bool InterfaceManager_IsInPipboyMenu();
 bool FUN_00717920();
-double FUN_00706e20();
+double InterfaceManager_GetRealScreenHeight();
 extern int DAT_011a0ba0;
 // @fnv 0x007f8720
-bool FOPipboyManager::FUN_007f8720(bool press, bool release, float& x, float& y, int& button)
+// src: COMMUNITY 0x007f8720
+bool FOPipboyManager::CheckOrangeButtonsClicked(bool press, bool release, float& x, float& y, int& button)
 {
     bool result = false;
-    FopipboymanagerInterfaceView* ui = FopipboymanagerInterfaceView::FUN_004b7210();
-    if (!FUN_007fa950() || !(NiAVObject*)m_cPipBoyButtonAvailability[0] ||
+    FopipboymanagerInterfaceView* ui = FopipboymanagerInterfaceView::InterfaceManager_GetSingleton();
+    if (!SkyObject_GetNiNode() || !(NiAVObject*)m_cPipBoyButtonAvailability[0] ||
         !(NiAVObject*)m_cPipBoyButtonAvailability[1] || !(NiAVObject*)m_cPipBoyButtonAvailability[2])
         return false;
-    if (FUN_007178a0() && FUN_00717920() && (NiNode*)m_pPipBoyObject0)
+    if (InterfaceManager_IsInPipboyMenu() && FUN_00717920() && (NiNode*)m_pPipBoyObject0)
     {
         PipboyRayPoint origin;
         PipboyRayPoint c;
         NiPick b(0, 8);
         b.SetByteAtOffset17(true);
-        b.FUN_00705fc0(FUN_007fa950());
+        b.SetTarget_00705fc0(SkyObject_GetNiNode());
         b.FUN_006ecd40(0);
         b.SetByteAtOffset30(true);
-        NiCamera* a = static_cast<PipboySceneGraph*>(FUN_0045c670())->FUN_006629f0();
-        a->MapScreenToRay((int)ui->FUN_009a9350(), (int)ui->FUN_00792760(), origin, c, false);
+        NiCamera* a = static_cast<PipboySceneGraph*>(Main_GetWorldSceneGraph())->FUN_006629f0();
+        a->MapScreenToRay((int)ui->TESCombatStyle_GetWeaponMinRangeMult(), (int)ui->QueuedModel_GetOverriddenVisualDistance(), origin, c, false);
         if (b.FUN_00e98e20(origin, c, false))
         {
             unsigned int firstIndex = 0;
-            NiPick::Record* hit = b.FUN_00500940()->FUN_00968670(firstIndex);
-            if (hit && hit->FUN_00458b50() == FUN_007fa950())
+            NiPick::Record* hit = b.FUN_00500940()->ProcessArray_GetItem(firstIndex);
+            if (hit && hit->AnimatingText_GetFullText() == SkyObject_GetNiNode())
             {
                 NiPoint2 horizontal = *hit->FUN_00891170();
-                float scale = FUN_00706e20();
+                float scale = InterfaceManager_GetRealScreenHeight();
                 float uv = scale * (double)1.333333f;
                 x = horizontal.x * uv;
                 y = horizontal.y * scale;
@@ -84,13 +85,13 @@ bool FOPipboyManager::FUN_007f8720(bool press, bool release, float& x, float& y,
             b.SetByteAtOffset30(false);
             for (int i = 0; i < 3; i++)
             {
-                b.FUN_00705fc0(m_cPipBoyButtonAvailability[i]);
-                static_cast<PipboySceneGraph*>(FUN_0045c670())->FUN_006629f0()->MapScreenToRay((int)ui->FUN_009a9350(), (int)ui->FUN_00792760(), origin,
+                b.SetTarget_00705fc0(m_cPipBoyButtonAvailability[i]);
+                static_cast<PipboySceneGraph*>(Main_GetWorldSceneGraph())->FUN_006629f0()->MapScreenToRay((int)ui->TESCombatStyle_GetWeaponMinRangeMult(), (int)ui->QueuedModel_GetOverriddenVisualDistance(), origin,
                                                                c, false);
                 if (b.FUN_00e98e20(origin, c, false))
                 {
                     unsigned int hit = 0;
-                    NiPick::Record* hitIndex = b.FUN_00500940()->FUN_00968670(hit);
+                    NiPick::Record* hitIndex = b.FUN_00500940()->ProcessArray_GetItem(hit);
                     if (hitIndex)
                     {
                         if (press)

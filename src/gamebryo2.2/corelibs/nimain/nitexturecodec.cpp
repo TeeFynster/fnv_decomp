@@ -68,7 +68,7 @@ struct Conv
     void DecodeBlockColors(unsigned char*);
     void DecodeToOutput(unsigned char*);
     void DecodePaletteBlock(unsigned char*);
-    int FUN_00a8bdf0(unsigned char* p, unsigned int n, unsigned int m);
+    int CopyGeneratedRows(unsigned char* p, unsigned int n, unsigned int m);
     PixelData* ConvertTexture(SrcData* src);
 };
 
@@ -133,7 +133,7 @@ PixelData* Conv::ConvertTexture(SrcData* src)
                     }
                     if (uiRemW)
                     {
-                        FUN_00a8bdf0(dst, uiRemW, 4);
+                        CopyGeneratedRows(dst, uiRemW, 4);
                         dst += uiRemW * 4;
                     }
                     dst += uiWidth * 3 * 4;
@@ -142,11 +142,11 @@ PixelData* Conv::ConvertTexture(SrcData* src)
                 {
                     for (unsigned int uiBlockX = 0; uiBlockX < w; uiBlockX++)
                     {
-                        FUN_00a8bdf0(dst, 4, uiRemH);
+                        CopyGeneratedRows(dst, 4, uiRemH);
                         dst += 16;
                     }
                     if (uiRemW)
-                        FUN_00a8bdf0(dst, uiRemW, uiRemH);
+                        CopyGeneratedRows(dst, uiRemW, uiRemH);
                 }
             }
             face++;

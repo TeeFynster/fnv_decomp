@@ -8,7 +8,7 @@
 #include "havok/hkaDeltaCompressedAnimation.h"
 struct FUN_00e34b40_s
 {
-    unsigned int FUN_00e34b40(unsigned int arg);
+    unsigned int hkaDeltaCompressedAnimation_getFullCacheKey(unsigned int arg);
 };
 void __stdcall ZeroBuffer(int a, int b, unsigned int count, unsigned int* dst);
 struct FnvCpu_FUN_00e34990_CpuObject
@@ -24,11 +24,11 @@ struct FnvCpu_FUN_00e34990_CpuObject
     unsigned int unk20;
     unsigned int unk24;
     int value;
-    int FUN_00e34990();
+    int GetValue();
 };
 struct FUN_00e349a0_class : hkaDeltaCompressedAnimation
 {
-    int FUN_00e349a0(unsigned int arg, int unused);
+    int hkaDeltaCompressedAnimation_getNumDataChunks(unsigned int arg, int unused);
 };
 struct AnimDispatch
 {
@@ -65,7 +65,7 @@ struct FUN_00e34b50_s : hkaDeltaCompressedAnimation
     virtual void v1c();
     virtual void v20_2();
     virtual int v20();
-    void FUN_00e34b50(e34b50_reader* reader);
+    void hkaDeltaCompressedAnimation_clearAllCacheKeys(e34b50_reader* reader);
 };
 struct CompressedBlockRange
 {
@@ -131,7 +131,7 @@ struct StreamHolder
 {
     Stream* m_pBinaryStream;
 };
-static void FUN_00e34ab0(Source* src, int a, StreamHolder* h, int count);
+static void releaseToCache_00e34ab0(Source* src, int a, StreamHolder* h, int count);
 void Caller_00e34ab0(Source* src, int a, StreamHolder* h, int count);
 struct S00e34c10_Block
 {
@@ -158,7 +158,7 @@ struct S00e34c10_Cache
 struct S00e34c10_Anim : hkaDeltaCompressedAnimation
 {
     void __thiscall GetCompressedBlockRange(unsigned int blockIndex, int numBlocks, S00e34c10_Block* apBlocks);
-    void __thiscall FUN_00e34c10(unsigned int frameIndex, int unused, S00e34c10_Cache* cache, int mode);
+    void __thiscall hkaDeltaCompressedAnimation_getDataChunks(unsigned int frameIndex, int unused, S00e34c10_Cache* cache, int mode);
 };
 // FUN_00e34d80 - hkaDeltaCompressedAnimation block decode launcher (Havok timer-wrapped)
 // Per-TU private conventions: anim arrives in eax; callee FUN_00e349c0 takes dst in eax.
@@ -193,7 +193,8 @@ struct DqArgs
     unsigned int m_bitWidthIdxOff;            // +0x18
     unsigned int m_quantOff;                  // +0x1c
 };
-static __declspec(noinline) void FUN_00e349c0(float* dst, DqArgs args)
+// src: HAVOK_LIB 0x00e349c0
+static __declspec(noinline) void _decompress_00e349c0(float* dst, DqArgs args)
 {
     float* out = dst + args.m_offset;
     const float* offs = (const float*)args.m_offsetIdxOff;
@@ -208,7 +209,7 @@ static __declspec(noinline) void FUN_00e349c0(float* dst, DqArgs args)
         out[i] = offs[i] + scale[i] * (float)((q & bitMask) * width);
     }
 }
-static void FUN_00e34d80(hkaDeltaCompressedAnimation* anim, unsigned int time, float* dst, unsigned int count);
+static void decompressBlockToCache_00e34d80(hkaDeltaCompressedAnimation* anim, unsigned int time, float* dst, unsigned int count);
 // dummy callers negotiating the private conventions (never byte-compared)
 extern "C" void dq_args_fill(DqArgs* out);
 extern "C" float* dq_dst2_src(void);
@@ -221,7 +222,7 @@ void dq_call2(void)
 {
     DqArgs a;
     dq_args_fill(&a);
-    FUN_00e349c0(dq_dst2_src(), a);
+    _decompress_00e349c0(dq_dst2_src(), a);
 }
 struct AnimationStatistics
 {
@@ -248,7 +249,7 @@ struct AnimationStatistics
         compressionRatio = 0.0f;
     }
 };
-void __cdecl FUN_00e4ebb0(const unsigned short*, const unsigned short*, unsigned int, unsigned int,
+void __cdecl hkaTrackAnalysis_calcStats(const unsigned short*, const unsigned short*, unsigned int, unsigned int,
                           AnimationStatistics*);
 inline unsigned short swapMask(unsigned short value)
 {
@@ -294,7 +295,7 @@ inline float swapFloat(float value)
 }
 struct AnimationEndian : hkaDeltaCompressedAnimation
 {
-    void FUN_00e35050();
+    void hkaDeltaCompressedAnimation_handleEndian();
 };
 #include <string.h>
 #include <windows.h>
@@ -394,13 +395,14 @@ struct ScratchAllocator
 {
     char* current;
 };
-extern "C" ScratchAllocator* FUN_00c85750();
+extern "C" ScratchAllocator* hkMemoryRouter_getInstance();
 void __cdecl AnalyzeTrackWithZeroCount(const hkUint16*, const hkUint16*, unsigned int, unsigned int, TrackStatistics*);
-void __cdecl FUN_00e4f640(const RecomposeParameters*, hkQsTransform*, float*);
+void __cdecl hkaTrackAnalysis_recompose(const RecomposeParameters*, hkQsTransform*, float*);
 void __cdecl DecodeQuantizedBlock(const hkUint8*, const Quantization*, float*, int);
 void __cdecl PrefixSum(float*, int);
-int __cdecl FUN_00e51da0(int, const Quantization*);
-static void FUN_00e349c0(float* output, DecodeParameters parameters)
+int __cdecl hkCalcQuantizedSize(int, const Quantization*);
+// src: HAVOK_LIB 0x00e349c0
+static void _decompress_00e349c0(float* output, DecodeParameters parameters)
 {
     Quantization quantization;
     quantization.preserved = parameters.preserved;
@@ -413,7 +415,7 @@ static void FUN_00e349c0(float* output, DecodeParameters parameters)
         DecodeQuantizedBlock(parameters.data + byteOffset, &quantization, output, parameters.numValues);
         PrefixSum(output, parameters.numValues);
         output += parameters.blockSize;
-        byteOffset += FUN_00e51da0(parameters.numValues, &quantization);
+        byteOffset += hkCalcQuantizedSize(parameters.numValues, &quantization);
     }
 }
 __forceinline void UpdateBlockTail(unsigned int f, const int& step, int total, int& result)
@@ -423,7 +425,7 @@ __forceinline void UpdateBlockTail(unsigned int f, const int& step, int total, i
     if ((block + 1) * step > total)
         result = total - block * step;
 }
-void __cdecl FUN_00e354b0(unsigned int frame, float delta, unsigned int numTransforms, hkQsTransform* transforms,
+void __cdecl hkaDeltaCompressedAnimation_samplePartialWithDataChunks(unsigned int frame, float delta, unsigned int numTransforms, hkQsTransform* transforms,
                           unsigned int numFloats, float* floats, const Chunk* chunks, int chunkCount);
 
 #include <xmmintrin.h>
@@ -431,7 +433,8 @@ extern float DAT_01012068;
 extern __m128 DAT_010c71b0;
 
 // @fnv 0x00e34d30
-void __stdcall FUN_00e34d30(int a, int b, unsigned int count, unsigned int* target)
+// src: HAVOK_SRC 0x00e34d30
+void __stdcall hkaDeltaCompressedAnimation_sampleIndividualTransformTracks(int a, int b, unsigned int count, unsigned int* target)
 {
     if (count > 0)
     {

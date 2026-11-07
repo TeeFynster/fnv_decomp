@@ -133,7 +133,7 @@ public:
     BSRenderedTexture* CreateRenderTargetTexture(NiRenderer* renderer, int type, unsigned int flags,
                                                  BSRenderedTexture* alias, unsigned int aliasOffset);
     void RemoveRenderedTexture(BSRenderedTexture*);
-    void FUN_00b6d4c0(NiRefObject*);
+    void BSTextureManager_ReturnFrustumShadowTexture(NiRefObject*);
     void ReleaseByName(const char* name);
-    void* FUN_00b6e110(void* a1, int a2, int a3, int a4, int a5);
+    void* BSTextureManager_BorrowRenderedTexture(void* a1, int a2, int a3, int a4, int a5);
 };

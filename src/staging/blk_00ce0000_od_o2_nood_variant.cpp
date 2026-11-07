@@ -42,7 +42,8 @@ struct __declspec(align(16)) SortElem16
 typedef bool(__cdecl* SortElemLess)(const SortElem16& a, const SortElem16& b);
 
 // @fnv 0x00cf83c0
-void __cdecl FUN_00cf83c0(SortElem16* pArr, int d, int h, SortElemLess cmpLess)
+// src: HAVOK_LIB 0x00cf83c0
+void __cdecl hkAlgorithm_quickSortRecursive_struct_hkpBodyOperationEntry_bool(SortElem16* pArr, int d, int h, SortElemLess cmpLess)
 {
     int i, j;
     SortElem16 str;
@@ -72,7 +73,7 @@ begin:
     } while (i <= j);
     if (d < j)
     {
-        FUN_00cf83c0(pArr, d, j, cmpLess);
+        hkAlgorithm_quickSortRecursive_struct_hkpBodyOperationEntry_bool(pArr, d, j, cmpLess);
     }
     if (i < h)
     {
@@ -91,7 +92,8 @@ extern "C" LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
 struct QuaternionVector
 {
     LocalM128 value;
-    __declspec(noinline) void FUN_00c66320(const QuaternionVector* left, const QuaternionVector* right)
+// src: COMMUNITY 0x00c66320
+    __declspec(noinline) void setMul(const QuaternionVector* left, const QuaternionVector* right)
     {
         LocalM128 a = left->value;
         LocalM128 b = right->value;
@@ -139,7 +141,8 @@ template <class T> struct PointerParam
     }
 };
 // @fnv 0x00ce2d10
-void __cdecl FUN_00ce2d10(const PoseQsTransform* parents, PointerParam<const PoseQsTransform> local, const short* indices,
+// src: GUESS 0x00ce2d10 (confidence: low)
+void __cdecl Runtime_ProcessEntries_00ce2d10(const PoseQsTransform* parents, PointerParam<const PoseQsTransform> local, const short* indices,
                           int count, PoseQsTransform* output)
 {
     if (!indices)
@@ -161,7 +164,7 @@ void __cdecl FUN_00ce2d10(const PoseQsTransform* parents, PointerParam<const Pos
                 _mm_add_ps(_mm_mul_ps(cross, w), _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(w, w), DAT_010c71e0), v),
                                                             _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q)));
             output[i].translation = _mm_add_ps(_mm_add_ps(rotated, rotated), p.translation);
-            output[i].rotation.FUN_00c66320(&p.rotation, &l.rotation);
+            output[i].rotation.setMul(&p.rotation, &l.rotation);
             output[i].scale = _mm_mul_ps(l.scale, p.scale);
         }
     }
@@ -193,7 +196,7 @@ void __cdecl FUN_00ce2d10(const PoseQsTransform* parents, PointerParam<const Pos
                                             _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(w, w), DAT_010c71e0), v),
                                                        _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q)));
                 output[index].translation = _mm_add_ps(_mm_add_ps(rotated, rotated), parent.translation);
-                output[index].rotation.FUN_00c66320(&parent.rotation, &source->rotation);
+                output[index].rotation.setMul(&parent.rotation, &source->rotation);
                 output[index].scale = _mm_mul_ps(source->scale, parent.scale);
                 ++source;
             }
@@ -210,11 +213,12 @@ struct Cls
 {
     unsigned short m0, m2, m4, m6;
     LocalM128 v10, v20, v30, v40, v50, v60;
-    Cls* FUN_00ce4a50(Cls* src);
+    Cls* InitializeFields_00ce4a50(Cls* src);
 };
 
 // @fnv 0x00ce4a50
-Cls* Cls::FUN_00ce4a50(Cls* src)
+// src: GUESS 0x00ce4a50 (confidence: low)
+Cls* Cls::InitializeFields_00ce4a50(Cls* src)
 {
     m0 = src->m0;
     m2 = src->m2;
@@ -243,7 +247,8 @@ typedef char*(__cdecl* SortCmp)(void* tag, const SortRec* lhs, const SortRec* rh
 void __cdecl FUN_00ce245a(SortRec* a, int low, int high, SortCmp cmp);
 
 // @fnv 0x00cf8510
-void __cdecl FUN_00cf8510(SortRec* a, int low, int high, SortCmp cmp)
+// src: COMMUNITY 0x00cf8510
+void __cdecl hkAlgorithm_quickSortRecursive(SortRec* a, int low, int high, SortCmp cmp)
 {
     char tagLo;
     char tagHi;
@@ -302,7 +307,7 @@ extern "C" void _ReadWriteBarrier(void);
 extern unsigned int DAT_0126835c;
 extern char DAT_010cc678[];
 extern char DAT_010c41f8[];
-void* __cdecl FUN_00c85750(void);
+void* __cdecl hkMemoryRouter_getInstance(void);
 struct S00cfac20_Ray
 {
     hkVector4 from;
@@ -369,7 +374,7 @@ static inline void S00cfac20_release(hkMemoryRouter* stack, char* p)
 struct S00cfac20_Grp
 {
     void RecordAndDispatch(S00cfac20_Builder* b, S00cfac20_Ray* ray, void* ctx, void* mem, char* out);
-    void FUN_00cfac20(S00cfac20_Builder* b, S00cfac20_Ray* rays, int count, void* ctx, char* out);
+    void ProcessEntries_00cfac20(S00cfac20_Builder* b, S00cfac20_Ray* rays, int count, void* ctx, char* out);
 };
 static inline void S00cfac20_timer(const char* name)
 {
@@ -407,7 +412,8 @@ static __forceinline void S00cfac20_calcAabb(const S00cfac20_Ray* rays, int coun
     }
 }
 // @fnv 0x00cfac20
-void S00cfac20_Grp::FUN_00cfac20(S00cfac20_Builder* b, S00cfac20_Ray* rays, int count, void* ctx, char* out)
+// src: GUESS 0x00cfac20 (confidence: low)
+void S00cfac20_Grp::ProcessEntries_00cfac20(S00cfac20_Builder* b, S00cfac20_Ray* rays, int count, void* ctx, char* out)
 {
     char* dst;
     int j;
@@ -426,7 +432,7 @@ void S00cfac20_Grp::FUN_00cfac20(S00cfac20_Builder* b, S00cfac20_Ray* rays, int 
     }
     S00cfac20_Aabb aabb;
     S00cfac20_calcAabb(rays, count, aabb);
-    char* mem = S00cfac20_alloc(static_cast<hkMemoryRouter*>(FUN_00c85750()), b->GetLogicalSize());
+    char* mem = S00cfac20_alloc(static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance()), b->GetLogicalSize());
     b->init(&aabb, mem);
     S00cfac20_Ray* r = rays;
     dst = out;
@@ -435,7 +441,7 @@ void S00cfac20_Grp::FUN_00cfac20(S00cfac20_Builder* b, S00cfac20_Ray* rays, int 
         RecordAndDispatch(b, r++, ctx, mem, dst);
         dst += 0x60;
     }
-    S00cfac20_release(static_cast<hkMemoryRouter*>(FUN_00c85750()), mem);
+    S00cfac20_release(static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance()), mem);
     {
         S00cfac20_Mon* mon = (S00cfac20_Mon*)TlsGetValue(DAT_0126835c);
         char* p = mon->cur;
@@ -486,15 +492,15 @@ template <typename T> __forceinline void hkMemoryAllocator::_bufFree(void* p, in
     bufFree(p, numElem * sizeof(T));
 }
 
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 
 
 __forceinline hkMemoryAllocator& containerHeap()
 {
-    return static_cast<hkMemoryRouter*>(FUN_00c85750())->heap();
+    return static_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())->heap();
 }
 
-void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* array, int reqCapacity, int sizeElem);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* array, int reqCapacity, int sizeElem);
 
 template <typename T> __forceinline void hkConstructWithArray(T* t, int n, const T* tcopy)
 {
@@ -548,7 +554,7 @@ template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMem
     {
         int cap2 = 2 * capacity;
         int newSize = (n < cap2) ? cap2 : n;
-        FUN_00c908c0(alloc, this, newSize, sizeof(T));
+        hkArrayUtil__reserve(alloc, this, newSize, sizeof(T));
     }
 }
 template <typename T>
@@ -622,11 +628,12 @@ struct ShapeData
     bool m_flag;
     int m_uiItemCount;
 
-    ShapeData& FUN_00ce4ae0(const ShapeData& other);
+    ShapeData& AssignFields_00ce4ae0(const ShapeData& other);
 };
 
 // @fnv 0x00ce4ae0
-ShapeData& ShapeData::FUN_00ce4ae0(const ShapeData& other)
+// src: GUESS 0x00ce4ae0 (confidence: low)
+ShapeData& ShapeData::AssignFields_00ce4ae0(const ShapeData& other)
 {
     m_kFirstReferencedObject = other.m_kFirstReferencedObject;
     m_kSecondReferencedObject = other.m_kSecondReferencedObject;

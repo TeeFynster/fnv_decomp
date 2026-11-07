@@ -45,13 +45,14 @@ __forceinline void hkVector4::mul4(const float& factor)
 }
 
 // @fnv 0x00e46080
-void hkpGravityGun::FUN_00e46080(hkTransform* a4, hkpRigidBody* a3, hkpWorld* world)
+// src: XBOX_PDB 0x00e46080
+void hkpGravityGun::gravityGunPull(hkTransform* a4, hkpRigidBody* a3, hkpWorld* world)
 {
     hkVector4* direction = (hkVector4*)a4;
     int argC = (int)a3;
     int arg10 = (int)world;
     hkpGravityGun* gun = this;
-    hkpRigidBody* target = gun->FUN_00e45a60((int)direction, argC, arg10);
+    hkpRigidBody* target = gun->FindVisibleRigidBodyToGrab((int)direction, argC, arg10);
 
     if (target != 0)
     {
@@ -65,7 +66,7 @@ void hkpGravityGun::FUN_00e46080(hkTransform* a4, hkpRigidBody* a3, hkpWorld* wo
         {
             if (gun->m_kPickedBodies.m_iElementCount < gun->m_iMaxPickedBodies)
             {
-                gun->FUN_00e46000(target);
+                gun->takeObject(target);
                 return;
             }
         }
@@ -73,7 +74,7 @@ void hkpGravityGun::FUN_00e46080(hkTransform* a4, hkpRigidBody* a3, hkpWorld* wo
         hkVector4 impulse;
         _mm_store_ps((float*)&impulse, _mm_load_ps((const float*)direction));
         impulse.mul4(-gun->m_fPickAngle);
-        target->FUN_00c9c1d0();
+        target->activate_00c9c1d0();
         target->m_pMotionState.SetCollisionShape(impulse);
     }
 }

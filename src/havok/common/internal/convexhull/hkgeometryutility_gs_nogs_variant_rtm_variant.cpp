@@ -61,7 +61,7 @@ struct FUN_00d5a630_ctxB
     void InitB();
 };
 extern float DAT_0106ea1c;
-void __cdecl FUN_00d5a630(void* a1, int a2, int a3);
+void __cdecl hkGeometryUtility_createConvexGeometry(void* a1, int a2, int a3);
 struct S_00d5a6b0_Elem
 {
     float x;
@@ -96,7 +96,7 @@ struct D5C110MemoryRouter
         return *m_pStreamAllocator;
     }
 };
-extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D5C110MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 struct D5C110Vector4
 {
     float m_uiX;
@@ -116,7 +116,7 @@ struct D5C110VertexArray
 
     void ClearAndRelease()
     {
-        D5C110Allocator& alloc = FUN_00c85750().heap();
+        D5C110Allocator& alloc = hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(D5C110Vector4));
@@ -141,18 +141,18 @@ void __cdecl InitAndSetB(const D5C110StridedVertices& vertices, D5C110Geometry& 
 void __cdecl BuildGeometryFromShape(const void* shape, D5C110Geometry& out);
 struct D5C110VertexArray;
 void __cdecl ProcessArg(const void* shape, D5C110VertexArray& vertices);
-void __cdecl FUN_00d5a6a0(const void* shape, D5C110VertexArray& vertices);
+void __cdecl hkGeometryUtility_createVerticesFromPlaneEquations(const void* shape, D5C110VertexArray& vertices);
 #include <math.h>
 struct S00d5ad60_cls
 {
     float m_f00;
     unsigned char S00d5ad60_call(float* other, float threshold);
 };
-static unsigned char FUN_00d5ad60(S00d5ad60_cls* self, float* other, float threshold);
+static unsigned char approxEquals(S00d5ad60_cls* self, float* other, float threshold);
 typedef ::__m128 LocalM128;
 extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 extern float DAT_01011d78;
-static int FUN_00d5ad90(const float* pVec, float fTol);
+static int Hkgeometryutility_IsMaximumAbsoluteComponentNearOne(const float* pVec, float fTol);
 int __cdecl S00d5ad90_Wrap(const float* pVec, float fTol);
 struct S00d5c060_Src
 {
@@ -175,9 +175,9 @@ struct __declspec(align(16)) S00d5c060_Result
     unsigned int unk0C;
 };
 char* __cdecl AllocateWithHeader(D5C110Allocator* alloc, int size);
-char* __cdecl FUN_00c856c0(D5C110Allocator* owner, char* data);
-void __cdecl FUN_00d5beb0(S00d5c060_Result* self, char* data, int count, int flags, float scale);
-S00d5c060_Result FUN_00d5c060(const S00d5c060_Src* src, float scale);
+char* __cdecl hkMemoryRouter_easyFree(D5C110Allocator* owner, char* data);
+void __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(S00d5c060_Result* self, char* data, int count, int flags, float scale);
+S00d5c060_Result hkGeometryUtility_createMinBoundingSphere(const S00d5c060_Src* src, float scale);
 
 extern "C" LocalM128 _mm_load_ps(const float*);
 extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
@@ -223,7 +223,8 @@ static __forceinline int S00d5a6e0_FindCol(const float* sub, int start)
 }
 
 // @fnv 0x00d5a6e0
-hkBool __cdecl FUN_00d5a6e0(float m[3][4], int maxIterations)
+// src: GUESS 0x00d5a6e0 (confidence: low)
+hkBool __cdecl Object_ProcessEntries_00d5a6e0(float m[3][4], int maxIterations)
 {
     float maxLen = 0.0f;
     for (int i = 0; i < 3; i++)
@@ -433,7 +434,8 @@ template <typename T> inline T* S00d5ae60_addByteOffset(T* base, long offset)
 }
 
 // @fnv 0x00d5ae60
-static __declspec(noinline) void FUN_00d5ae60(const float* verts, int numVerts, int striding,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const float* verts, int numVerts, int striding,
                                               S00d5ae60_Vector4& halfExtents, const S00d5ae60_Vector4* axes,
                                               S00d5ae60_Vector4& center)
 {
@@ -498,5 +500,5 @@ struct S00d5ae60_Strided
 void S00d5ae60_calcObb(const S00d5ae60_Strided& sv, S00d5ae60_Vector4& halfExtents, S00d5ae60_Vector4* axes,
                        S00d5ae60_Vector4& center)
 {
-    FUN_00d5ae60(sv.m_kVertices, sv.m_iStridedVertexCount, sv.m_iVertexStride, halfExtents, axes, center);
+    Object_ProcessEntries_00d5ae60(sv.m_kVertices, sv.m_iStridedVertexCount, sv.m_iVertexStride, halfExtents, axes, center);
 }

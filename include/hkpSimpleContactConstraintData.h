@@ -24,7 +24,7 @@ public:
     int m_iAtomSize;
 
     hkpContactPointPropertiesCFD* GetContactPointProperties(unsigned short id);
-    int FUN_00cfd200(hkpConstraintOwner& kConstraintOwner, unsigned short uiId);
-    int FUN_00d92df0(hkpConstraintOwner& owner, hkContactPt** cpOut, hkCPProperties** cpiOut);
-    int FUN_00d92df0(hkpConstraintOwner& owner, hkContactPoint** cpOut, PhysicsMaterial** cpPropsOut);
+    int freeContactPoint(hkpConstraintOwner& kConstraintOwner, unsigned short uiId);
+    int allocateContactPoint(hkpConstraintOwner& owner, hkContactPt** cpOut, hkCPProperties** cpiOut);
+    int allocateContactPoint(hkpConstraintOwner& owner, hkContactPoint** cpOut, PhysicsMaterial** cpPropsOut);
 };

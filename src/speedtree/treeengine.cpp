@@ -5,12 +5,13 @@
 
 struct FUN_00b2bcf0_shell
 {
-    void FUN_00b2bcf0(float* a, float* b);
+    void CTreeEngine_GetSize(float* a, float* b);
 };
 
 // Reads two floats at offsets 0x4c and 0x50 from this and writes them to the two output pointers.
 // @fnv 0x00b2bcf0
-void FUN_00b2bcf0_shell::FUN_00b2bcf0(float* a, float* b)
+// src: COMMUNITY 0x00b2bcf0
+void FUN_00b2bcf0_shell::CTreeEngine_GetSize(float* a, float* b)
 {
     *a = *(float*)((char*)this + 0x4c);
     *b = *(float*)((char*)this + 0x50);
@@ -18,7 +19,8 @@ void FUN_00b2bcf0_shell::FUN_00b2bcf0(float* a, float* b)
 
 
 // @fnv 0x00b2bd20
-void CTreeEngine::FUN_00b2bd20(float afValue, float fVariance)
+// src: COMMUNITY 0x00b2bd20
+void CTreeEngine::SetSize_00b2bd20(float afValue, float fVariance)
 {
     *(float*)((char*)this + 0x4c) = afValue;
     *(float*)((char*)this + 0x50) = fVariance;
@@ -26,11 +28,12 @@ void CTreeEngine::FUN_00b2bd20(float afValue, float fVariance)
 
 struct FUN_00b2bdc0_shell
 {
-    void FUN_00b2bdc0(float a, float b);
+    void UpdateFields_00b2bdc0(float a, float b);
 };
 
 // @fnv 0x00b2bdc0
-void FUN_00b2bdc0_shell::FUN_00b2bdc0(float afValue44, float afValue40)
+// src: GUESS 0x00b2bdc0 (confidence: low)
+void FUN_00b2bdc0_shell::UpdateFields_00b2bdc0(float afValue44, float afValue40)
 {
     *(float*)(this + 0x44) = afValue44;
     *(float*)(this + 0x40) = afValue40;
@@ -87,10 +90,11 @@ struct ElementIterator
 };
 struct FUN_00b2daf0_shell : CTreeEngine
 {
-    void __thiscall FUN_00b2daf0(ElementIterator* a);
+    void __thiscall CTreeEngine_ParseFlareSeed(ElementIterator* a);
 };
 // @fnv 0x00b2daf0
-void __thiscall FUN_00b2daf0_shell::FUN_00b2daf0(ElementIterator* a)
+// src: COMMUNITY 0x00b2daf0
+void __thiscall FUN_00b2daf0_shell::CTreeEngine_ParseFlareSeed(ElementIterator* a)
 {
     *(int*)((char*)this + 0x54) = a->GetNextElement();
 }
@@ -131,7 +135,7 @@ NarrowString& NarrowString::AssignFromString(const NarrowString& aString)
 
 struct FUN_00b04d40_Obj
 {
-    float FUN_00b04d40(int a);
+    float CVec3_Distance(int a);
 };
 
 extern FUN_00b04d40_Obj DAT_011f8e9c;
@@ -168,7 +172,7 @@ float __thiscall FUN_00b2bd40_Obj::GetNormalizedValue()
 {
     float local;
     float fUnused;
-    float value = DAT_011f8e9c.FUN_00b04d40((int)((char*)this + 4));
+    float value = DAT_011f8e9c.CVec3_Distance((int)((char*)this + 4));
 
     unk14 = 1.0f - (value - unk44) / (unk40 - unk44);
 
@@ -186,7 +190,7 @@ float __thiscall FUN_00b2bd40_Obj::GetNormalizedValue()
 
 struct FUN_00b3d720_String
 {
-    void __thiscall FUN_0044a730(bool a, unsigned int b);
+    void __thiscall fopen_0044a730(bool a, unsigned int b);
     int unk00;
     int unk04;
     int unk08;
@@ -214,7 +218,7 @@ struct FUN_00b3d720_Class
     float unk4C;
     float unk50;
 
-    FUN_00b3d720_Class* __thiscall FUN_00b3d720();
+    FUN_00b3d720_Class* __thiscall SIdvLeafTexture_SIdvLeafTexture();
 };
 
 extern float DAT_01030ff0;
@@ -225,7 +229,8 @@ extern float DAT_01017b78;
 
 // Sets unk00 false, fills float triples at unk04, unk30, unk3C, unk48 from globals/constants, sets unk10, and calls FUN_0044a730(false, 0) on unk14.
 // @fnv 0x00b3d720
-FUN_00b3d720_Class* __thiscall FUN_00b3d720_Class::FUN_00b3d720()
+// src: XBOX_PDB 0x00b3d720
+FUN_00b3d720_Class* __thiscall FUN_00b3d720_Class::SIdvLeafTexture_SIdvLeafTexture()
 {
     int unused01;
     int unused02;
@@ -253,7 +258,7 @@ FUN_00b3d720_Class* __thiscall FUN_00b3d720_Class::FUN_00b3d720()
 
         stringlPointer = &this->unk14;
         bufferPointer = &buffer_;
-        stringlPointer->FUN_0044a730(false, 0);
+        stringlPointer->fopen_0044a730(false, 0);
 
         color24Pointer9 = &this->unk30;
         color24Pointer9[0] = DAT_01016248;
@@ -349,7 +354,7 @@ struct FUN_00b2ac80
     float f104;
     int i108;
     FUN_00b40850 s10c;
-    void FUN_00b2bc70(float v);
+    void SetWind(float v);
     FUN_00b2ac80(int param);
 };
 
@@ -420,5 +425,5 @@ FUN_00b2ac80::FUN_00b2ac80(int param)
     int d59;
     int d60;
     i5c = param;
-    FUN_00b2bc70(runtimeFloatSettingDefault1000);
+    SetWind(runtimeFloatSettingDefault1000);
 }

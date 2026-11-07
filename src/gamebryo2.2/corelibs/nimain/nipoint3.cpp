@@ -28,7 +28,8 @@ extern "C" unsigned int __cdecl strlen(char const*);
 
 // Allocates a buffer sized to the prefix plus 0x40 and formats "%s = (%g,%g,%g)" from the prefix and x, y, z into it, returning the buffer.
 // @fnv 0x00a59af0
-char* __thiscall NiPoint3::FUN_00a59af0(const char* pPrefix)
+// src: XBOX_PDB 0x00a59af0
+char* __thiscall NiPoint3::GetViewerString_00a59af0(const char* pPrefix)
 {
     unsigned int uiLen = strlen(pPrefix) + 0x40;
     char* pString = (char*)_NiMalloc(uiLen);
@@ -37,13 +38,13 @@ char* __thiscall NiPoint3::FUN_00a59af0(const char* pPrefix)
 }
 
 #include <math.h>
-void* FUN_00aa1070(unsigned int uiSize);
+void* _NiMalloc_00aa1070(unsigned int uiSize);
 
 // Allocates 256 words and stores masked bit patterns from square roots of floats constructed in two ranges.
 // @fnv 0x00a59b50
 unsigned int* __cdecl BuildSqrtLut()
 {
-    unsigned int* pLut = (unsigned int*)FUN_00aa1070(0x400);
+    unsigned int* pLut = (unsigned int*)_NiMalloc_00aa1070(0x400);
     for (unsigned int iIndex = 0; iIndex < 0x80; iIndex++)
     {
         float fValue;

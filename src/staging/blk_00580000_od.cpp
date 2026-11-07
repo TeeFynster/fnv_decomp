@@ -24,7 +24,7 @@
 
 struct FUN_004fc990_t
 {
-    void __thiscall FUN_004fc990(int, bool);
+    void __thiscall BGSPlaceableWater_SetFlag(int, bool);
 };
 
 struct FUN_00580310_t
@@ -35,13 +35,13 @@ struct FUN_00580310_t
 // @fnv 0x00580310
 void __thiscall FUN_00580310_t::SetFlag400(bool abEnabled)
 {
-    ((FUN_004fc990_t*)this)->FUN_004fc990(0x400, abEnabled);
+    ((FUN_004fc990_t*)this)->BGSPlaceableWater_SetFlag(0x400, abEnabled);
 }
 
 namespace fnv_00580540 {
 struct FUN_004fc990_t
 {
-    void FUN_004fc990(int, bool);
+    void BGSPlaceableWater_SetFlag(int, bool);
 };
 
 struct FUN_00580540_t
@@ -52,28 +52,28 @@ struct FUN_00580540_t
 // @fnv 0x00580540
 void FUN_00580540_t::SetValue(int value)
 {
-    reinterpret_cast<FUN_004fc990_t*>(this)->FUN_004fc990(2, reinterpret_cast<bool&>(value));
+    reinterpret_cast<FUN_004fc990_t*>(this)->BGSPlaceableWater_SetFlag(2, reinterpret_cast<bool&>(value));
 }
 }  // namespace fnv_00580540
 
 namespace fnv_00580560 {
 struct FUN_004fc990_t
 {
-    void FUN_004fc990(int, bool);
+    void BGSPlaceableWater_SetFlag(int, bool);
     void SetFlag80(bool argument0);
 };
 
 // @fnv 0x00580560
 void FUN_004fc990_t::SetFlag80(bool abEnabled)
 {
-    FUN_004fc990(0x80, abEnabled);
+    BGSPlaceableWater_SetFlag(0x80, abEnabled);
 }
 }  // namespace fnv_00580560
 
 namespace fnv_00580580 {
 struct FUN_004fc990_t
 {
-    void FUN_004fc990(int, bool);
+    void BGSPlaceableWater_SetFlag(int, bool);
 };
 struct FUN_00580580_t
 {
@@ -82,14 +82,14 @@ struct FUN_00580580_t
 // @fnv 0x00580580
 void FUN_00580580_t::SetFlag100(bool abEnabled)
 {
-    ((FUN_004fc990_t*)this)->FUN_004fc990(0x100, abEnabled);
+    ((FUN_004fc990_t*)this)->BGSPlaceableWater_SetFlag(0x100, abEnabled);
 }
 }  // namespace fnv_00580580
 
 namespace fnv_005805a0 {
 struct FUN_004fc990_t
 {
-    void FUN_004fc990(int, bool);
+    void BGSPlaceableWater_SetFlag(int, bool);
 };
 
 struct FUN_005805a0_t
@@ -100,28 +100,30 @@ struct FUN_005805a0_t
 // @fnv 0x005805a0
 void FUN_005805a0_t::SetFlag8000000(bool abEnabled)
 {
-    ((FUN_004fc990_t*)this)->FUN_004fc990(0x8000000, abEnabled);
+    ((FUN_004fc990_t*)this)->BGSPlaceableWater_SetFlag(0x8000000, abEnabled);
 }
 }  // namespace fnv_005805a0
 
 struct FUN_00581fb0_Class
 {
-    void __thiscall FUN_00581fb0(int index, int value);
+    void __thiscall TESImageSpaceModifiableCountForm_6_SetFormImageSpaceModifying(int index, int value);
 };
 
 // @fnv 0x00581fb0
-void __thiscall FUN_00581fb0_Class::FUN_00581fb0(int index, int value)
+// src: XBOX_PDB 0x00581fb0
+void __thiscall FUN_00581fb0_Class::TESImageSpaceModifiableCountForm_6_SetFormImageSpaceModifying(int index, int value)
 {
     *(int*)((char*)this + index * 4 + 4) = value;
 }
 
 struct FUN_005822a0_cls
 {
-    int __thiscall FUN_005822a0(int index);
+    int __thiscall TESImageSpaceModifiableCountForm_6_GetFormImageSpaceModifying(int index);
 };
 
 // @fnv 0x005822a0
-int __thiscall FUN_005822a0_cls::FUN_005822a0(int index)
+// src: XBOX_PDB 0x005822a0
+int __thiscall FUN_005822a0_cls::TESImageSpaceModifiableCountForm_6_GetFormImageSpaceModifying(int index)
 {
     return *(int*)((char*)this + index * 4 + 4);
 }
@@ -130,11 +132,12 @@ extern int DAT_01031fcc;
 struct FUN_00588fd0Class
 {
     void FUN_005891c0(int);
-    int* FUN_00588fd0(int a);
+    int* NiTMap_TESFile_TESWorldSpace_OFFSET_DATA_NiTMap(int a);
 };
 // Calls FUN_005891c0 with a, stores the address of DAT_01031fcc into this, and returns this.
 // @fnv 0x00588fd0
-int* FUN_00588fd0Class::FUN_00588fd0(int a)
+// src: EXE 0x00588fd0
+int* FUN_00588fd0Class::NiTMap_TESFile_TESWorldSpace_OFFSET_DATA_NiTMap(int a)
 {
     FUN_005891c0(a);
     *reinterpret_cast<int*>(this) = reinterpret_cast<int>(&DAT_01031fcc);
@@ -143,13 +146,14 @@ int* FUN_00588fd0Class::FUN_00588fd0(int a)
 
 struct FUN_0058bc00_obj
 {
-    void __fastcall FUN_0058bc00();
+    void __fastcall Object_ReleaseStorage();
 };
 
 // @fnv 0x0058b830
-void __fastcall FUN_0058b830(FUN_0058bc00_obj* this_ptr)
+// src: GUESS 0x0058b830 (confidence: low)
+void __fastcall Runtime_ForwardCall_0058b830(FUN_0058bc00_obj* this_ptr)
 {
-    this_ptr->FUN_0058bc00();
+    this_ptr->Object_ReleaseStorage();
 }
 
 struct FUN_0058cac0_Class
@@ -166,14 +170,15 @@ bool FUN_0058cac0_Class::IsFlag20Set() const
 
 struct FUN_00573eb0_Class
 {
-    int FUN_0047b4d0(int);
-    int FUN_0058cae0();
+    int NiPathInterpolator_GetBit(int);
+    int NiPathInterpolator_GetFollow();
 };
 
 // @fnv 0x0058cae0
-int FUN_00573eb0_Class::FUN_0058cae0()
+// src: XBOX_PDB 0x0058cae0
+int FUN_00573eb0_Class::NiPathInterpolator_GetFollow()
 {
-    return FUN_0047b4d0(0x20);
+    return NiPathInterpolator_GetBit(0x20);
 }
 
 struct FUN_0058cba0_class
@@ -182,11 +187,12 @@ struct FUN_0058cba0_class
     {
         FLAG_NONE = 0
     };
-    bool FUN_0058cba0(Flag flag);
+    bool EffectSetting_IsFlagSetAny(Flag flag);
 };
 
 // @fnv 0x0058cba0
-bool FUN_0058cba0_class::FUN_0058cba0(Flag flag)
+// src: XBOX_PDB 0x0058cba0
+bool FUN_0058cba0_class::EffectSetting_IsFlagSetAny(Flag flag)
 {
     return (*(int*)((char*)this + 0x58) & (int)flag) != 0;
 }
@@ -219,10 +225,11 @@ struct FUN_0058f820_class
 {
     int m_iWordAt00;
     void InitContainerItemExtra(int);
-    int __thiscall FUN_0058f820(int a);
+    int __thiscall ProcessAndReturnValue_0058f820(int a);
 };
 // @fnv 0x0058f820
-int __thiscall FUN_0058f820_class::FUN_0058f820(int a)
+// src: GUESS 0x0058f820 (confidence: low)
+int __thiscall FUN_0058f820_class::ProcessAndReturnValue_0058f820(int a)
 {
     InitContainerItemExtra(a);
     m_iWordAt00 = (int)&DAT_01033470;
@@ -257,11 +264,12 @@ int FUN_00591a20_Class::IsFlagBit4Set()
 
 struct FUN_00594d20_Class
 {
-    int __thiscall FUN_00594d20();
+    int __thiscall Stack_ExpressionOperand_32_empty();
 };
 
 // @fnv 0x00594d20
-int __thiscall FUN_00594d20_Class::FUN_00594d20()
+// src: XBOX_PDB 0x00594d20
+int __thiscall FUN_00594d20_Class::Stack_ExpressionOperand_32_empty()
 {
     return *(int*)((char*)this + 0x200) == -1;
 }
@@ -323,11 +331,12 @@ void* __thiscall FUN_00589030_Class::FUN_00589030(unsigned int flags)
 struct FUN_00580680_Class
 {
     virtual ~FUN_00580680_Class();
-    virtual void FUN_00580680(int a);
+    virtual void TESWaterForm_SetRemappedWaterForm(int a);
 };
 
 // @fnv 0x00580680
-void FUN_00580680_Class::FUN_00580680(int a)
+// src: XBOX_PDB 0x00580680
+void FUN_00580680_Class::TESWaterForm_SetRemappedWaterForm(int a)
 {
     if (this == (FUN_00580680_Class*)a)
     {
@@ -376,7 +385,7 @@ void __thiscall FUN_00582000_Class::ClearArray()
         m_cByteAtOffset1[i] = 0;
 }
 
-void __cdecl FUN_00485910(int, int);
+void __cdecl TESForm_AddChunk_00485910(int, int);
 struct FUN_00582040_Class
 {
     void ReleaseSoundSlots();
@@ -389,7 +398,7 @@ void FUN_00582040_Class::ReleaseSoundSlots()
         if (((int*)this)[i + 1])
         {
             int v = ((TESSound*)((int*)this)[i + 1])->Deallocate();
-            FUN_00485910(0x44414900 + i, v);
+            TESForm_AddChunk_00485910(0x44414900 + i, v);
         }
     }
 }
@@ -411,17 +420,18 @@ int __cdecl CompareSecondElement(unsigned int* pFirst, unsigned int* pSecond)
     return iResult;
 }
 
-extern "C" unsigned char __cdecl FUN_005548a0(unsigned char a);
+extern "C" unsigned char __cdecl TESObjectCELL_IsFormTypeCellChild(unsigned char a);
 
 // Returns 1 for characters 0x39 and 0x44, otherwise delegates to FUN_005548a0 with the same character.
 // @fnv 0x00588a60
-unsigned char __cdecl FUN_00588a60(unsigned char a)
+// src: COMMUNITY 0x00588a60
+unsigned char __cdecl TESWorldSpace_IsFormTypeWorldChild(unsigned char a)
 {
     if (a == 0x39)
         return 1;
     if (a == 0x44)
         return 1;
-    return FUN_005548a0(a);
+    return TESObjectCELL_IsFormTypeCellChild(a);
 }
 
 void __cdecl Deallocate(void*);
@@ -514,10 +524,11 @@ void __cdecl _NiFree(void*);
 extern int DAT_0103202c;
 struct FUN_00589290_Class
 {
-    void __thiscall FUN_00589290();
+    void __thiscall SetVtableAndProcessState_00589290();
 };
 // @fnv 0x00589290
-void __thiscall FUN_00589290_Class::FUN_00589290()
+// src: GUESS 0x00589290 (confidence: low)
+void __thiscall FUN_00589290_Class::SetVtableAndProcessState_00589290()
 {
     *(void**)this = (void*)&DAT_0103202c;
     ((NiTPointerMap<int, int>*)this)->RemoveAll();
@@ -551,10 +562,11 @@ extern int DAT_0103204c;
 void __cdecl _NiFree(void*);
 struct FUN_00589390_Holder
 {
-    void __thiscall FUN_00589390();
+    void __thiscall SetVtableAndProcessState_00589390();
 };
 // @fnv 0x00589390
-void __thiscall FUN_00589390_Holder::FUN_00589390()
+// src: GUESS 0x00589390 (confidence: low)
+void __thiscall FUN_00589390_Holder::SetVtableAndProcessState_00589390()
 {
     *(int*)this = (int)&DAT_0103204c;
     ((NiTPointerMap<int, int>*)this)->RemoveAll();
@@ -580,14 +592,14 @@ extern "C" void __cdecl Deallocate(void*);
 
 struct FUN_005893f0_Class
 {
-    void __thiscall FUN_00589290();
+    void __thiscall SetVtableAndProcessState_00589290();
     void* __thiscall FUN_005893f0(unsigned int flags);
 };
 
 // @fnv 0x005893f0
 void* __thiscall FUN_005893f0_Class::FUN_005893f0(unsigned int flags)
 {
-    FUN_00589290();
+    SetVtableAndProcessState_00589290();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -595,58 +607,61 @@ void* __thiscall FUN_005893f0_Class::FUN_005893f0(unsigned int flags)
 
 struct FUN_00589420_Class
 {
-    void __thiscall FUN_00589390();
+    void __thiscall SetVtableAndProcessState_00589390();
     void* __thiscall FUN_00589420(unsigned int flags);
 };
 
 // @fnv 0x00589420
 void* FUN_00589420_Class::FUN_00589420(unsigned int flags)
 {
-    FUN_00589390();
+    SetVtableAndProcessState_00589390();
     if (flags & 1)
         operator delete(this);
     return this;
 }
 
-float __cdecl FUN_004579e0(float);
+float __cdecl NiSqrt_004579e0(float);
 
 struct FUN_00589850_Class
 {
     float m_iWordAt00;
     float m_cByteAtOffset1;
-    float __thiscall FUN_00589850();
+    float __thiscall NiPoint3_XYLength();
 };
 
 // @fnv 0x00589850
-float __thiscall FUN_00589850_Class::FUN_00589850()
+// src: XBOX_PDB 0x00589850
+float __thiscall FUN_00589850_Class::NiPoint3_XYLength()
 {
-    return FUN_004579e0(this->m_iWordAt00 * this->m_iWordAt00 + this->m_cByteAtOffset1 * this->m_cByteAtOffset1);
+    return NiSqrt_004579e0(this->m_iWordAt00 * this->m_iWordAt00 + this->m_cByteAtOffset1 * this->m_cByteAtOffset1);
 }
 
 struct FUN_004726b0_class
 {
-    int __thiscall FUN_004726b0();
+    int __thiscall TESFile_GetTESChunk();
 };
 struct FUN_00589890_Class
 {
-    bool FUN_00589890(FUN_004726b0_class* apData);
+    bool AudioBuoyMarker_Load(FUN_004726b0_class* apData);
 };
 // @fnv 0x00589890
-bool FUN_00589890_Class::FUN_00589890(FUN_004726b0_class* apData)
+// src: COMMUNITY 0x00589890
+bool FUN_00589890_Class::AudioBuoyMarker_Load(FUN_004726b0_class* apData)
 {
     if (!apData)
         return false;
-    if (apData->FUN_004726b0() != 0x4b524d4d)
+    if (apData->TESFile_GetTESChunk() != 0x4b524d4d)
         return false;
     return true;
 }
 
 struct FUN_0058b680_Class
 {
-    unsigned int __thiscall FUN_0058b680(TESForm* form);
+    unsigned int __thiscall BGSCameraPath_GetIndexForChild(TESForm* form);
 };
 // @fnv 0x0058b680
-unsigned int __thiscall FUN_0058b680_Class::FUN_0058b680(TESForm* form)
+// src: COMMUNITY 0x0058b680
+unsigned int __thiscall FUN_0058b680_Class::BGSCameraPath_GetIndexForChild(TESForm* form)
 {
     unsigned int result = 0xFFFFFFFF;
     if (reinterpret_cast<NiFormArray**>(reinterpret_cast<char*>(this) + 0x2C)[0])
@@ -681,7 +696,7 @@ void FUN_0058b6c0_shell::RemoveSoundAt(unsigned int index)
 
 struct Holder680
 {
-    int __thiscall FUN_0058b680(int);
+    int __thiscall BGSCameraPath_GetIndexForChild(int);
 };
 struct Holder6c0
 {
@@ -691,16 +706,17 @@ struct Holder730
 {
     char _pad[0x2c];
     int m_2c;
-    void __thiscall FUN_0058b730(int);
+    void __thiscall BGSCameraPath_RemoveChild(int);
 };
 // If a1 and m_2c are both nonzero, calls FUN_0058b680 with a1 and passes its result to RemoveSoundAt.
 // @fnv 0x0058b730
-void __thiscall Holder730::FUN_0058b730(int a1)
+// src: COMMUNITY 0x0058b730
+void __thiscall Holder730::BGSCameraPath_RemoveChild(int a1)
 {
     int v;
     if (a1 != 0 && m_2c != 0)
     {
-        v = ((Holder680*)this)->FUN_0058b680(a1);
+        v = ((Holder680*)this)->BGSCameraPath_GetIndexForChild(a1);
         ((Holder6c0*)this)->RemoveSoundAt(v);
     }
 }
@@ -730,14 +746,14 @@ struct FUN_0058bc60_Class
 // @fnv 0x0058bc60
 void* FUN_0058bc60_Class::FUN_0058bc60(unsigned int flags)
 {
-    ((FUN_0058bc00_obj*)this)->FUN_0058bc00();
+    ((FUN_0058bc00_obj*)this)->Object_ReleaseStorage();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 }  // namespace fnv_0058bc60
 
-void __fastcall FUN_0058b830(FUN_0058bc00_obj* this_ptr);
+void __fastcall Runtime_ForwardCall_0058b830(FUN_0058bc00_obj* this_ptr);
 void __cdecl _Deallocate(void* p);
 struct FUN_0058bc90_Holder
 {
@@ -746,7 +762,7 @@ struct FUN_0058bc90_Holder
 // @fnv 0x0058bc90
 void* __thiscall FUN_0058bc90_Holder::FUN_0058bc90(unsigned int flags)
 {
-    FUN_0058b830((FUN_0058bc00_obj*)this);
+    Runtime_ForwardCall_0058b830((FUN_0058bc00_obj*)this);
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -763,11 +779,12 @@ struct FUN_0058cb60_Class
     unsigned int m_18;
     unsigned char m_1c;
     int m_20;
-    int __thiscall FUN_0058cb60(unsigned int* a, int* b, unsigned char* c);
+    int __thiscall NiTransformData_GetRotAnim(unsigned int* a, int* b, unsigned char* c);
 };
 // Writes m_8, m_10 and m_1c to the three output pointers and returns m_20.
 // @fnv 0x0058cb60
-int __thiscall FUN_0058cb60_Class::FUN_0058cb60(unsigned int* a, int* piValue, unsigned char* c)
+// src: XBOX_PDB 0x0058cb60
+int __thiscall FUN_0058cb60_Class::NiTransformData_GetRotAnim(unsigned int* a, int* piValue, unsigned char* c)
 {
     *a = m_8;
     *piValue = m_10;
@@ -777,12 +794,13 @@ int __thiscall FUN_0058cb60_Class::FUN_0058cb60(unsigned int* a, int* piValue, u
 
 struct FUN_0058f7f0_Class
 {
-    int* __thiscall FUN_0058f7f0(int a);
+    int* __thiscall ImpactSwap_GetAltFootstepMaterialName(int a);
 };
 
 // Returns a pointer to the entry at offset 0x30 plus a*0x1e if its first byte is nonzero, otherwise returns 0.
 // @fnv 0x0058f7f0
-int* __thiscall FUN_0058f7f0_Class::FUN_0058f7f0(int aiIndex)
+// src: COMMUNITY 0x0058f7f0
+int* __thiscall FUN_0058f7f0_Class::ImpactSwap_GetAltFootstepMaterialName(int aiIndex)
 {
     if (*(char*)((char*)this + 0x30 + aiIndex * 0x1e))
         return (int*)((char*)this + 0x30 + aiIndex * 0x1e);
@@ -814,10 +832,11 @@ struct FUN_0058f960_Obj
     int m_iWordAt00;
     int m_iWordAt04;
     void* m_8;
-    void __thiscall FUN_0058f960();
+    void __thiscall UpdateFields_0058f960();
 };
 // @fnv 0x0058f960
-void __thiscall FUN_0058f960_Obj::FUN_0058f960()
+// src: GUESS 0x0058f960 (confidence: low)
+void __thiscall FUN_0058f960_Obj::UpdateFields_0058f960()
 {
     m_iWordAt00 = (int)&DAT_01033490;
     if (m_8 != 0)
@@ -829,14 +848,14 @@ void __thiscall FUN_0058f960_Obj::FUN_0058f960()
 
 struct FUN_0058f9a0_Class
 {
-    void __thiscall FUN_0058f960();
+    void __thiscall UpdateFields_0058f960();
     void* __thiscall FUN_0058f9a0(unsigned int flags);
 };
 // Calls FUN_0058f960, then deletes this if flags has bit 0 set, and returns this.
 // @fnv 0x0058f9a0
 void* FUN_0058f9a0_Class::FUN_0058f9a0(unsigned int flags)
 {
-    FUN_0058f960();
+    UpdateFields_0058f960();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -864,7 +883,8 @@ extern void** DAT_011ca880;
 
 // Returns the pointer stored at index in the array DAT_011ca880 if index is within DAT_011ca87c, otherwise returns 0.
 // @fnv 0x005922a0
-void* FUN_005922a0(unsigned int index)
+// src: XBOX_PDB 0x005922a0
+void* BGSRadiationStage_GetStage(unsigned int index)
 {
     return index >= 0 && index < DAT_011ca87c ? DAT_011ca880[index] : 0;
 }
@@ -995,29 +1015,30 @@ struct Flt
 struct FUN_0058cb00_Class
 {
     char _pad[0x2c];
-    int FUN_0058cb00(unsigned int* a, int* b, unsigned char* c);
+    int NiTransformInterpolator_GetRotData(unsigned int* a, int* b, unsigned char* c);
 };
 // If the field at offset 0x2c is nonzero, forwards a, b and c to FUN_0058cb60 on that object; otherwise zeroes all three outputs and returns 0.
 // @fnv 0x0058cb00
-int FUN_0058cb00_Class::FUN_0058cb00(unsigned int* puiValue, int* piValue, unsigned char* pbValue)
+// src: XBOX_PDB 0x0058cb00
+int FUN_0058cb00_Class::NiTransformInterpolator_GetRotData(unsigned int* puiValue, int* piValue, unsigned char* pbValue)
 {
     if ((unsigned int)*(Flt*)((char*)this + 0x2c))
         return ((FUN_0058cb60_Class*)(unsigned int)*(Flt*)((char*)this + 0x2c))
-            ->FUN_0058cb60(puiValue, piValue, pbValue);
+            ->NiTransformData_GetRotAnim(puiValue, piValue, pbValue);
     *puiValue = 0;
     *piValue = 0;
     *pbValue = 0;
     return 0;
 }
 
-void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
+void __cdecl TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 void __cdecl _FUN_00485910(int, int);
 void __cdecl _FUN_00485910(int, float);
 
 // @fnv 0x00589560
 void TESModel::WriteToStream()
 {
-    FUN_004856f0(0x4c4c5546, GetFullName(), GetModelLength() + 1);
+    TESForm_AddChunkArray(0x4c4c5546, GetFullName(), GetModelLength() + 1);
 
     // These stream fields are not yet named in the shared definition.
     if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x24) != 0)
@@ -1046,7 +1067,7 @@ void ControllerArchive::LoadControllerArchive(int source)
         return;
     for (unsigned int i = 0; i < 6; ++i)
     {
-        FUN_00581fb0(i, loaded->FUN_005822a0(i));
+        TESImageSpaceModifiableCountForm_6_SetFormImageSpaceModifying(i, loaded->TESImageSpaceModifiableCountForm_6_GetFormImageSpaceModifying(i));
     }
 }
 
@@ -1069,7 +1090,7 @@ bool FUN_00582220_Class::IsNotEqual(int key)
     }
     for (unsigned int index = 0; index < 6; ++index)
     {
-        if (FUN_005822a0(index) != comparison->FUN_005822a0(index))
+        if (TESImageSpaceModifiableCountForm_6_GetFormImageSpaceModifying(index) != comparison->TESImageSpaceModifiableCountForm_6_GetFormImageSpaceModifying(index))
         {
             return true;
         }
@@ -1204,7 +1225,7 @@ void __thiscall S_00589770_Class::CopyFrom(S_00589770_Class* pSource)
     this->unk10 = pSource->unk10;
 }
 
-void __fastcall FUN_0058b830(FUN_0058bc00_obj* this_ptr);
+void __fastcall Runtime_ForwardCall_0058b830(FUN_0058bc00_obj* this_ptr);
 
 struct FUN_0058b450
 {
@@ -1227,7 +1248,7 @@ struct FUN_0058b7d0 : FUN_0058b450
 // @fnv 0x0058b7d0
 FUN_0058b7d0::~FUN_0058b7d0()
 {
-    FUN_0058b830(&m_18);
+    Runtime_ForwardCall_0058b830(&m_18);
 }
 
 void* __cdecl FUN_0096afc0(unsigned int size);
@@ -1392,7 +1413,7 @@ struct ModelComponent
 class ModelLoader
 {
   public:
-    void FUN_0045a5e0(const char*);
+    void ModelLoader_ReleaseFile(const char*);
 };
 extern ModelLoader* DAT_011c3b3c;
 extern bool DAT_011ca729;
@@ -1403,7 +1424,7 @@ class BSSimpleListTESRaceSize
     int GetSize();
 };
 extern BSSimpleListTESRaceSize DAT_011f2250;
-BSAudio* FUN_00453a70();
+BSAudio* BSAudio_QInstance();
 
 // BSAudio's shared declaration still returns the former sound-handle stand-in.
 // Declare the same entry point with the checked handle type for this unit.
@@ -1456,15 +1477,15 @@ void CameraState::ResetCameraState()
     unk68 = 0;
     node70 = static_cast<void*>(0);
     active = false;
-    if (static_cast<const NP&>(node6c).FUN_00559450())
+    if (static_cast<const NP&>(node6c).Modelloader_GetReferencedThis())
     {
         node6c = static_cast<void*>(0);
-        DAT_011c3b3c->FUN_0045a5e0(model.Name());
+        DAT_011c3b3c->ModelLoader_ReleaseFile(model.Name());
     }
     if (DAT_011ca729 && !DAT_011f2250.GetSize())
     {
         DAT_011ca729 = false;
-        BSSoundHandle sound = static_cast<BSAudioWithSoundHandle*>(FUN_00453a70())->GetSoundHandleByEditorID("UIVATSCameraOut", 0x121);
+        BSSoundHandle sound = static_cast<BSAudioWithSoundHandle*>(BSAudio_QInstance())->GetSoundHandleByEditorID("UIVATSCameraOut", 0x121);
         sound.Play(false);
     }
 }
@@ -1601,16 +1622,17 @@ FUN_00594cd0_Entry* __thiscall FUN_00594cd0_Class::PopEntry(FUN_00594cd0_Entry* 
 
 struct FUN_006ab360_t
 {
-    int* __thiscall FUN_006ab360();
+    int* __thiscall TESCombatStyle_GetAdvancedData();
 };
 
 // @fnv 0x0059ae10
-int __cdecl FUN_0059ae10(void* apLeft, void* apRight)
+// src: COMMUNITY 0x0059ae10
+int __cdecl TESCaravanCard_Compare_0(void* apLeft, void* apRight)
 {
     int y;
     int x;
-    x = *((FUN_006ab360_t*)*(void**)apLeft)->FUN_006ab360();
-    y = *((FUN_006ab360_t*)*(void**)apRight)->FUN_006ab360();
+    x = *((FUN_006ab360_t*)*(void**)apLeft)->TESCombatStyle_GetAdvancedData();
+    y = *((FUN_006ab360_t*)*(void**)apRight)->TESCombatStyle_GetAdvancedData();
     if (x > y)
     {
         return 1;

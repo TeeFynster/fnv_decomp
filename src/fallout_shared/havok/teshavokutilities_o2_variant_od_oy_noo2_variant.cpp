@@ -40,20 +40,20 @@ public:
     double DotProduct(const PodPoint3& point);
     float Length() const;
 
-    PodPoint3& FUN_00439180(float scalar);
+    PodPoint3& ScaleComponents(float scalar);
     PodPoint3 FUN_00439e90(const PodPoint3& shift) const;
     PodPoint3* FUN_00439e90(PodPoint3* output, const PodPoint3* other) const;
-    PodPoint3 FUN_00439ef0(const PodPoint3& other) const;
-    void FUN_00439ef0();
+    PodPoint3 SubtractIntoVector(const PodPoint3& other) const;
+    void SubtractIntoVector();
     PodPoint3 FUN_004b3800(const PodPoint3& axis) const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_00457910();
     float FUN_00457990() const;
     double FUN_004a7290();
     PodPoint3* FUN_006815c0();
-    PodPoint3* FUN_00416870(float x, float y, float z);
+    PodPoint3* SetComponents(float x, float y, float z);
     void FUN_0043d410(float x, int y, int z);
-    char* FUN_00a59af0(const char* text);
+    char* GetViewerString_00a59af0(const char* text);
 
     static void* operator new[](size_t size);
     static void operator delete[](void* memory);
@@ -72,35 +72,36 @@ struct HavokTransform
 };
 struct Node
 {
-    const NiTransform* FUN_00461130() const;
+    const NiTransform* NiAVObject_GetWorldRotate() const;
 };
 struct WorldObject
 {
     void GetAabb(Aabb* bounds);
-    void FUN_00c8d280(HavokTransform* transform);
+    void bhkRigidBody_GetTransform(HavokTransform* transform);
 };
 struct CollisionObject
 {
-    WorldObject* FUN_006fa820();
+    WorldObject* bhkNiCollisionObject_GetWorldObject();
     Node* FUN_0044ddc0();
 };
 struct RTTI;
 extern RTTI g_012683c8;
 extern PodPoint3 DAT_011f426c;
-CollisionObject* FUN_004b5260(Node*);
+CollisionObject* FindFirstCollisionObject(Node*);
 void FUN_00458620(PodPoint3* out, const __m128* havokPoint);
 PodPoint3* FUN_004a3760(PodPoint3* out, float scale, const PodPoint3* point);
 float FUN_00476b70(float minimum, float maximum);
-bool FUN_0043b300(const RTTI*, WorldObject*);
-NiTransform* FUN_00624ad0(NiTransform* out, const HavokTransform* havok);
+bool NiObject_IsKindOf(const RTTI*, WorldObject*);
+NiTransform* HK2NI_00624ad0(NiTransform* out, const HavokTransform* havok);
 // @fnv 0x0062bfb0
-PodPoint3* FUN_0062bfb0(PodPoint3* out, Node* node)
+// src: COMMUNITY 0x0062bfb0
+PodPoint3* TESHavokUtilities_GetLocalPointWithinCollision(PodPoint3* out, Node* node)
 {
     PodPoint3 chosen = DAT_011f426c;
-    CollisionObject* collision = FUN_004b5260(node);
+    CollisionObject* collision = FindFirstCollisionObject(node);
     if (collision)
     {
-        WorldObject* body = collision->FUN_006fa820();
+        WorldObject* body = collision->bhkNiCollisionObject_GetWorldObject();
         if (body)
         {
             Aabb bounds;
@@ -116,20 +117,20 @@ PodPoint3* FUN_0062bfb0(PodPoint3* out, Node* node)
             FUN_004a3760(&maxTermA, .55f, &maximum)->FUN_00439e90(&upper, FUN_004a3760(&minTermA, .45f, &minimum));
             FUN_004a3760(&maxTermB, .45f, &maximum)->FUN_00439e90(&lower, FUN_004a3760(&minTermB, .55f, &minimum));
             PodPoint3 random;
-            chosen = *random.FUN_00416870(FUN_00476b70(lower.x, upper.x), FUN_00476b70(lower.y, upper.y),
+            chosen = *random.SetComponents(FUN_00476b70(lower.x, upper.x), FUN_00476b70(lower.y, upper.y),
                                           FUN_00476b70(lower.z, upper.z));
-            if (FUN_0043b300(&g_012683c8, body) || collision->FUN_0044ddc0() != node)
+            if (NiObject_IsKindOf(&g_012683c8, body) || collision->FUN_0044ddc0() != node)
             {
                 HavokTransform bodyHavok;
                 bodyHavok.FUN_0056ded0();
-                body->FUN_00c8d280(&bodyHavok);
+                body->bhkRigidBody_GetTransform(&bodyHavok);
                 NiTransform bodyWorld;
-                FUN_00624ad0(&bodyWorld, &bodyHavok);
+                HK2NI_00624ad0(&bodyWorld, &bodyHavok);
                 bodyWorld.m_fScale = 1.0f;
                 NiTransform inverse;
-                node->FUN_00461130()->FUN_004b4880(inverse);
+                node->NiAVObject_GetWorldRotate()->FUN_004b4880(inverse);
                 PodPoint3 transformed;
-                chosen = *(PodPoint3*)(inverse * bodyWorld).FUN_00524c40((NiPoint3*)&transformed, (const NiPoint3&)chosen);
+                chosen = *(PodPoint3*)(inverse * bodyWorld).ComputeValue_00524c40((NiPoint3*)&transformed, (const NiPoint3&)chosen);
             }
         }
     }

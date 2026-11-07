@@ -52,7 +52,7 @@ bool TESEyes::IsFlag4Clear()
 
 struct FUN_005e79a0_t
 {
-    bool FUN_00485270(TESForm* apForm);
+    bool TESForm_CompareAllComponents(TESForm* apForm);
 };
 
 // @fnv 0x005fc420
@@ -61,7 +61,7 @@ bool TESEyes::IsNotEqual(TESForm* apCompare)
     TESEyes* pcomp = dynamic_cast<TESEyes*>(apCompare);
     if (pcomp == 0)
         return true;
-    if (reinterpret_cast<FUN_005e79a0_t*>(this)->FUN_00485270(pcomp))
+    if (reinterpret_cast<FUN_005e79a0_t*>(this)->TESForm_CompareAllComponents(pcomp))
         return true;
     if (pcomp->IsFlagSet() !=
         this->IsFlagSet())
@@ -86,20 +86,20 @@ void* TESEyes::ReleaseIfFlagged(unsigned int flags)
     return this;
 }
 
-void __cdecl FUN_004858f0(unsigned int, unsigned char);
+void __cdecl TESForm_AddChunk_3(unsigned int, unsigned char);
 // @fnv 0x005fc1d0
 void TESEyes::SaveEyes()
 {
-    TESForm::FUN_004855a0();
-    TESFullName::FUN_00487010();
+    TESForm::BeginFormRecord();
+    TESFullName::Save_00487010();
     TESTexture::Save(0x4E4F4349);
-    FUN_004858f0(0x41544144, cFlags);
-    TESForm::FUN_00485680();
+    TESForm_AddChunk_3(0x41544144, cFlags);
+    TESForm::FinishFormRecord();
 }
 
 struct FUN_005e78f0_t
 {
-    void FUN_004851b0(TESForm* apForm);
+    void TESForm_CopyAllComponents(TESForm* apForm);
 };
 // @fnv 0x005fc3a0
 void TESEyes::CopyFromEyes(TESForm* apCopy)
@@ -107,7 +107,7 @@ void TESEyes::CopyFromEyes(TESForm* apCopy)
     TESEyes* eyes = dynamic_cast<TESEyes*>(apCopy);
     if (!eyes)
         return;
-    ((FUN_005e78f0_t*)this)->FUN_004851b0(apCopy);
+    ((FUN_005e78f0_t*)this)->TESForm_CopyAllComponents(apCopy);
     this->SetFlag(eyes->IsFlagSet());
     this->SetMale(eyes->IsNotFlag2Set());
     this->SetFemale(eyes->IsFlag4Clear());
@@ -121,10 +121,10 @@ struct LH
 bool TESEyes::CanBeNPC(TESNPC* npc)
 {
     bool result = false;
-    if (npc && npc->FUN_004ac110())
+    if (npc && npc->TESNPC_GetRace())
     {
         TESNPC* race = (TESNPC*)this;
-        if (((LH*)((TESDataHandler*)npc->FUN_004ac110())->GetBGSRecipeCategoryList())->IsInList(race))
+        if (((LH*)((TESDataHandler*)npc->TESNPC_GetRace())->GetBGSRecipeCategoryList())->IsInList(race))
         {
             switch (npc->TESActorBase::GetSex())
             {

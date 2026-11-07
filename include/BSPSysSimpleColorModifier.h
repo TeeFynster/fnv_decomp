@@ -11,8 +11,8 @@ public:
     virtual void LinkObject(NiStream& stream);
     virtual void GetViewerStrings(NiViewerStringsArray* strings);
 
-    void FUN_00c60910(NiStream& stream);
-    void FUN_00c60b20(ViewerStrings* strings);
+    void LinkObject_00c60910(NiStream& stream);
+    void GetViewerStrings_00c60b20(ViewerStrings* strings);
 
     NiColorA color1;
     NiColorA color2;

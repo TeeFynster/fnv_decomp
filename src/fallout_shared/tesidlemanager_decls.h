@@ -52,7 +52,7 @@ class IdleAnimationManager : public NiTMap<const char*, IdleAnimationDirectoryEn
     TESIdleForm* FindIdleFormForObject(TESObjectREFR*, TESObjectREFR*);
     IdleAnimationDirectoryEntry* ClearIdleData(const char*, BSSimpleList<const char*>*, bool);
     void InsertOrUpdate(const char*, IdleAnimationDirectoryEntry*);
-    void FUN_00600030();
+    void ReleaseStorage_00600030();
     BSSimpleList<const char*>* FindIdleArrayEntry(const char* directory, ANIM_GROUP_WEAPON_ENUM weapon);
     static void BuildIdlePath(const char* source, char* destination);
     static TESObject* GetCurrentUsedItem();
@@ -67,7 +67,7 @@ class TaskQueueInterface
   public:
     static void CopyStringToBuffer(char*, unsigned int, const char*);
 };
-char* FUN_0040ab30(char*, int);
+char* strrchr_0040ab30(char*, int);
 char* FUN_004812f0(const char*, const char*);
 void FUN_00406d50(char*, unsigned int, const char*);
 char* strrchr(const char* string, int character);

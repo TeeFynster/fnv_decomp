@@ -21,7 +21,7 @@ class NiTriShapeData : public NiTriBasedGeomData
     void EnsureNormals(bool bInitialize);
     void RecalculateNormals();
     unsigned short* GetTriangleList();
-    bool FUN_00a7b7e0(const NiTriShapeData*);
+    bool IsEqual_00a7b7e0(const NiTriShapeData*);
 
     unsigned int m_uiTriListLength;
     unsigned short* m_pusTriList;

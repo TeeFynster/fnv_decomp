@@ -45,12 +45,13 @@ struct FUN_00db0920_cls
     unsigned char count;
     unsigned char flag22;
 
-    FUN_00db0920_cls* FUN_00db0920();
+    FUN_00db0920_cls* InitializeEmptyEntries();
 };
 
 // Zeroes all entry values, count, and flag fields, then returns this.
 // @fnv 0x00db0920
-FUN_00db0920_cls* FUN_00db0920_cls::FUN_00db0920()
+// src: GUESS 0x00db0920 (confidence: medium)
+FUN_00db0920_cls* FUN_00db0920_cls::InitializeEmptyEntries()
 {
     unsigned short* pEntryValues = &entries[0].value;
     pEntryValues[0] = 0;
@@ -76,12 +77,13 @@ class BoxPointLookup
 class BoxPointInsertion : public FUN_00db0920
 {
   public:
-    int FUN_00db0960(unsigned int a, unsigned int b, const unsigned char* key);
+    int hkpBoxBoxManifold_addPoint(unsigned int a, unsigned int b, const unsigned char* key);
 };
 
 // Inserts a key into the entries array if the count is under 8 and the key is not already present, returning the index or -1 on failure.
 // @fnv 0x00db0960
-int BoxPointInsertion::FUN_00db0960(unsigned int aiUnused, unsigned int b, const unsigned char* key)
+// src: HAVOK_LIB 0x00db0960
+int BoxPointInsertion::hkpBoxBoxManifold_addPoint(unsigned int aiUnused, unsigned int b, const unsigned char* key)
 {
     FUN_00db0920* self = this;
     unsigned char count = self->count;

@@ -19,7 +19,7 @@ public:
     int GetCullResult() const;
     int GetCullResult();
     int IsNotCulled();
-    void FUN_005578f0();
+    void TESObjectCELL_ClearLocationMarkers();
     void* FUN_004a6110(unsigned int);
     CellPoint3* FUN_00413f40();
 };

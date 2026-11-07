@@ -15,8 +15,8 @@
 
 // Unused declarations copied from the other hkOstream flag variants are omitted.
 #include <stdarg.h>
-extern "C" void __cdecl FUN_00cb0f50(char* buffer, unsigned int size, const char* fmt, char* args);
-extern "C" int __cdecl FUN_00cb10d0(int value);
+extern "C" void __cdecl hkString_vsnprintf(char* buffer, unsigned int size, const char* fmt, char* args);
+extern "C" int __cdecl hkString_strLen(int value);
 extern "C" const char str_010c9308[];
 
 class hkWriter0080
@@ -29,11 +29,12 @@ class hkWriter0080
     virtual void write(const char* data, int len);
 };
 
-static __declspec(noinline) void FUN_00cc0080(hkWriter0080* out, const char* str)
+// src: HAVOK_LIB 0x00cc0080
+static __declspec(noinline) void writeString(hkWriter0080* out, const char* str)
 {
     if (str)
     {
-        out->write(str, FUN_00cb10d0((int)str));
+        out->write(str, hkString_strLen((int)str));
     }
     else
     {
@@ -42,12 +43,13 @@ static __declspec(noinline) void FUN_00cc0080(hkWriter0080* out, const char* str
 }
 
 // @fnv 0x00cc0410
-void __cdecl FUN_00cc0410(hkOstream* self, const char* fmt, ...)
+// src: HAVOK_LIB 0x00cc0410
+void __cdecl hkOstream_printf(hkOstream* self, const char* fmt, ...)
 {
     char buf[0x2728];
     va_list ap;
     va_start(ap, fmt);
-    FUN_00cb0f50(buf, 0x2728, fmt, ap);
+    hkString_vsnprintf(buf, 0x2728, fmt, ap);
     va_end(ap);
-    FUN_00cc0080((hkWriter0080*)self->m_pStreamWriter, buf);
+    writeString((hkWriter0080*)self->m_pStreamWriter, buf);
 }

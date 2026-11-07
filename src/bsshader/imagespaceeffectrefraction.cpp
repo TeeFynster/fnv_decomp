@@ -22,7 +22,7 @@ BSRenderedTexture* RefractionImageSpaceEffect::GetRefractionTexture(bool create)
     if (!m_kRefractionTexture.GetTexture() && create)
     {
         DAT_011bf400 = 0;
-        m_kRefractionTexture.FUN_00ba37a0(
+        m_kRefractionTexture.ImageSpaceTexture_SetTexture(
             DAT_011f91a8->CreateRenderTargetTexture(NiRenderer::ms_pRenderer, 31, 0, 0, 0));
         DAT_011bf400 = 1;
     }

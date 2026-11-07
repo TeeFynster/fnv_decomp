@@ -44,15 +44,16 @@ struct SplatterShaderInfo
     _D3DXMACRO macros[9];
 };
 extern int g_011fedc8;
-int* __cdecl FUN_00b807b0();
+int* __cdecl BSShaderBloodSplatter_GetRTTI();
 
 struct FUN_0068ab60_shell
 {
-    void __thiscall FUN_0068ab80();
-    void __thiscall FUN_0068ab60();
+    void __thiscall ReleaseStorage_0068ab80();
+    void __thiscall ForwardCall_0068ab60();
 };
 // @fnv 0x0068ab60
-void __thiscall FUN_0068ab60_shell::FUN_0068ab60()
+// src: GUESS 0x0068ab60 (confidence: low)
+void __thiscall FUN_0068ab60_shell::ForwardCall_0068ab60()
 {
-    FUN_0068ab80();
+    ReleaseStorage_0068ab80();
 }

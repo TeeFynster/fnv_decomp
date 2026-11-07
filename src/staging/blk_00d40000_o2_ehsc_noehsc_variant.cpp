@@ -36,10 +36,10 @@ typedef ::__m128 LocalM128;
 #include "../../include/hkpShapeContainer.h"
 
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 namespace hkRouterD47F {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 template <class T> class hkRefPtrD47F
@@ -80,15 +80,15 @@ template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkM
 // @fnv 0x00d47fe0
 hkArray<hkNamedVariantD47F>* __fastcall DestroyNamedVariantArray(hkArray<hkNamedVariantD47F>* self, void*, unsigned int uiFlags)
 {
-    self->_clearAndDeallocate(hkRouterD47F::FUN_00c85750().heap());
+    self->_clearAndDeallocate(hkRouterD47F::hkMemoryRouter_getInstance().heap());
     if (uiFlags & 1)
-        hkRouterD47F::FUN_00c85750().heap().blockFree(self, sizeof(*self));
+        hkRouterD47F::hkMemoryRouter_getInstance().heap().blockFree(self, sizeof(*self));
     return self;
 }
 
 inline void hkReferencedObject::operator delete(void* p)
 {
-    reinterpret_cast<hkMemoryRouter*>(FUN_00c85750())
+    reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())
         ->heap().blockFree(p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
 }
 

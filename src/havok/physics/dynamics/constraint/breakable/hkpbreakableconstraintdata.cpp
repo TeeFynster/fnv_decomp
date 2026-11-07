@@ -46,7 +46,7 @@ __forceinline hkpBridgeConstraintAtom::hkpBridgeConstraintAtom() : hkpConstraint
 __forceinline hkpBridgeConstraintAtom::hkpBridgeConstraintAtom(FinishingFlag flag) : hkpConstraintAtom(flag)
 {
     if (flag.m_bFinishing)
-        FUN_00d21ce0(m_pConstraintData);
+        hkpBridgeConstraintAtom_init(m_pConstraintData);
 }
 
 #include "../../../../../../include/hkpBridgeAtoms.h"
@@ -85,18 +85,19 @@ public:
     void SetConstraintData(hkpConstraintData* data);
     virtual ~hkpBreakableConstraintData() throw();
     // The deleting wrapper at 0x00cc48b0 calls this destructor body out of line.
-    __declspec(noinline) void FUN_00d4e000();
+    __declspec(noinline) void UpdateFields_00d4e000();
     hkpBreakableConstraintData* Destroy(unsigned int flags);
-    void FUN_00d4de80(int, void* out);
+    void getRuntimeInfo(int, void* out);
     void PopulateInfo(hkpConstraintDataInfo& info) const;
-    void* FUN_00d4dea0(void* value);
-    void FUN_00d4e0f0(const hkpConstraintQueryIn& in, int out);
-    void FUN_00d4e1e0(const hkpConstraintQueryIn* in);
-    void FUN_00d4e020(hkpConstraintInstance* instance, hkBool broken, hkReal currentForce);
+    void* isValid_00d4dea0(void* value);
+    void buildJacobian(const hkpConstraintQueryIn& in, int out);
+    void buildJacobianCallback(const hkpConstraintQueryIn* in);
+    void setBroken(hkpConstraintInstance* instance, hkBool broken, hkReal currentForce);
 };
 
 // @fnv 0x00d4de80
-void hkpBreakableConstraintData::FUN_00d4de80(int, void* out)
+// src: HAVOK_LIB 0x00d4de80
+void hkpBreakableConstraintData::getRuntimeInfo(int, void* out)
 {
     ((int*)out)[1] = m_usNumSolverResults;
     ((int*)out)[0] = m_usRuntimeOffset + 0x34;
@@ -111,7 +112,8 @@ void hkpBreakableConstraintData::PopulateInfo(hkpConstraintDataInfo& info) const
 }
 
 // @fnv 0x00d4dea0
-void* hkpBreakableConstraintData::FUN_00d4dea0(void* value)
+// src: HAVOK_LIB 0x00d4dea0
+void* hkpBreakableConstraintData::isValid_00d4dea0(void* value)
 {
     // The shared v07 declaration omits this slot's output parameter.
     reinterpret_cast<void (__thiscall*)(hkpConstraintData*, void*)>(
@@ -123,7 +125,8 @@ extern void* DAT_010d0a1c;
 extern void* _DAT_0102e388;
 
 // @fnv 0x00d4e000
-void hkpBreakableConstraintData::FUN_00d4e000()
+// src: GUESS 0x00d4e000 (confidence: low)
+void hkpBreakableConstraintData::UpdateFields_00d4e000()
 {
     hkpConstraintData* oldData = m_pConstraintData;
     *reinterpret_cast<void**>(this) = &DAT_010d0a1c;
@@ -132,7 +135,8 @@ void hkpBreakableConstraintData::FUN_00d4e000()
 }
 
 // @fnv 0x00d4dec0
-int __cdecl FUN_00d4dec0()
+// src: GUESS 0x00d4dec0 (confidence: high)
+int __cdecl Object_Return0xc()
 {
     return 0xc;
 }
@@ -151,16 +155,16 @@ struct FnvCpu_FUN_00cc48b0_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00cc48b0_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00cc48b0_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00cc48b0_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 
 // Calls FUN_00d4e000, then if flags has bit 0 set, frees this object through the allocator from FUN_00c85750, and returns this.
 // @fnv 0x00cc48b0
 hkpBreakableConstraintData* hkpBreakableConstraintData::Destroy(unsigned int flags)
 {
-    FUN_00d4e000();
+    UpdateFields_00d4e000();
     if (flags & 1)
     {
-        FnvCpu_FUN_00cc48b0_CpuAllocatorHolder* holder = FUN_00c85750();
+        FnvCpu_FUN_00cc48b0_CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, m_usMemSizeAndFlags);
     }
     return this;
@@ -171,7 +175,7 @@ hkpBreakableConstraintData* hkpBreakableConstraintData::Destroy(unsigned int fla
 hkpBreakableConstraintData::hkpBreakableConstraintData(FinishingFlag flag) : hkpConstraintData(flag), m_kBridgeAtoms(flag)
 {
     if (flag.m_bFinishing)
-        m_kBridgeAtoms.m_kBridgeAtom.FUN_00d21ce0(this);
+        m_kBridgeAtoms.m_kBridgeAtom.hkpBridgeConstraintAtom_init(this);
 }
 
 // Stores ref, calls FUN_00c90510 on it if non-null, sets m_fSpringStrength to 0.01, and calls FUN_00d21ce0(this) on m_kBridgeAtoms.m_kBridgeAtom.
@@ -180,7 +184,7 @@ hkpMalleableConstraintData::hkpMalleableConstraintData(hkpConstraintData* ref) t
 {
     if (m_pConstraintData)
         m_pConstraintData->FUN_00c90510();
-    m_kBridgeAtoms.m_kBridgeAtom.FUN_00d21ce0(this);
+    m_kBridgeAtoms.m_kBridgeAtom.hkpBridgeConstraintAtom_init(this);
 }
 
 // No approved include/ constraint query definition exists yet.
@@ -221,10 +225,10 @@ struct hkpConstraintQueryIn
 // Shared hkpWorld lacks removeConstraint (0x00c97e80); keep its call declaration here.
 extern void removeWorldConstraint();
 
-void __stdcall FUN_00d4de30(const hkpConstraintQueryIn& in, int out);
-void __cdecl FUN_00d72190(hkpConstraintAtom* atoms, const hkpConstraintQueryIn& in, hkBool flag,
+void __stdcall hkpBreakableConstraintData_buildNopJacobian(const hkpConstraintQueryIn& in, int out);
+void __cdecl hkSimpleContactConstraintDataBuildJacobian(hkpConstraintAtom* atoms, const hkpConstraintQueryIn& in, hkBool flag,
                           int out);
-void __cdecl FUN_00d6f460(hkpConstraintAtom* atoms, int sizeOfAllAtoms, const hkpConstraintQueryIn& in, int out);
+void __cdecl hkSolverBuildJacobianFromAtomsNotContact(hkpConstraintAtom* atoms, int sizeOfAllAtoms, const hkpConstraintQueryIn& in, int out);
 
 struct hkpBreakableRuntime
 {
@@ -244,7 +248,8 @@ __forceinline void store3(const hkVector4& v, hkReal* p)
 
 // If the runtime flag is clear, saves body velocities and calls FUN_00d72190 or FUN_00d6f460; else calls FUN_00d4de30 and optionally removes the constraint.
 // @fnv 0x00d4e0f0
-void hkpBreakableConstraintData::FUN_00d4e0f0(const hkpConstraintQueryIn& in, int out)
+// src: XBOX_PDB 0x00d4e0f0
+void hkpBreakableConstraintData::buildJacobian(const hkpConstraintQueryIn& in, int out)
 {
     hkpBreakableRuntime* runtime = reinterpret_cast<hkpBreakableRuntime*>(in.m_pByteBuffer + m_usRuntimeOffset);
 
@@ -264,16 +269,16 @@ void hkpBreakableConstraintData::FUN_00d4e0f0(const hkpConstraintQueryIn& in, in
         {
             hkBool flag;
             flag.m_cBooleanValue = 1;
-            FUN_00d72190(info.m_kBridgeAtoms, in, flag, out);
+            hkSimpleContactConstraintDataBuildJacobian(info.m_kBridgeAtoms, in, flag, out);
         }
         else
         {
-            FUN_00d6f460(info.m_kBridgeAtoms, info.m_usSizeOfAllAtoms, in, out);
+            hkSolverBuildJacobianFromAtomsNotContact(info.m_kBridgeAtoms, info.m_usSizeOfAllAtoms, in, out);
         }
     }
     else
     {
-        FUN_00d4de30(in, out);
+        hkpBreakableConstraintData_buildNopJacobian(in, out);
 
         if (m_bRemoveWhenBroken)
         {
@@ -325,7 +330,8 @@ struct ContactImpulseInfo
 
 // If the squared impulse sum exceeds breaking strength squared, calls FUN_00d4e020 and optionally blends body velocities back; always zeroes the impulses.
 // @fnv 0x00d4e1e0
-void hkpBreakableConstraintData::FUN_00d4e1e0(const hkpConstraintQueryIn* in)
+// src: XBOX_PDB 0x00d4e1e0
+void hkpBreakableConstraintData::buildJacobianCallback(const hkpConstraintQueryIn* in)
 {
     ContactImpulseInfo* pImpulseInfo = reinterpret_cast<ContactImpulseInfo*>(in->m_pByteBuffer);
     hkpBreakableRuntime* runtime =
@@ -344,7 +350,7 @@ void hkpBreakableConstraintData::FUN_00d4e1e0(const hkpConstraintQueryIn* in)
         if (sumImpulse > m_fBreakingStrength * m_fBreakingStrength)
         {
 
-            FUN_00d4e020(static_cast<hkpConstraintInstance*>(in->m_pConstraintChainInstance.val()), true, hkMath_sqrt(sumImpulse));
+            setBroken(static_cast<hkpConstraintInstance*>(in->m_pConstraintChainInstance.val()), true, hkMath_sqrt(sumImpulse));
 
             if (m_bRevertBackVelocityOnBreak)
             {
@@ -402,7 +408,7 @@ hkpBreakableConstraintData::hkpBreakableConstraintData(hkpConstraintData* constr
         m_usRuntimeOffset = (unsigned short)info.m_iSolverIterationCount;
         m_usNumSolverResults = (unsigned short)info.m_iSolverResultCount;
     }
-    m_kBridgeAtoms.m_kBridgeAtom.FUN_00d21ce0(this);
+    m_kBridgeAtoms.m_kBridgeAtom.hkpBridgeConstraintAtom_init(this);
 }
 // Retains the wrapped data, releases the previous data, and caches its runtime-info sizes.
 // @fnv 0x00d4ded0
@@ -458,16 +464,17 @@ struct BrkInfo
     {}
 };
 
-void __cdecl FUN_00d85fa0(BrkInfo* pkInfo);
-void __cdecl FUN_00d86050(BrkInfo* pkInfo);
-void __cdecl FUN_00d00b40(hkpSimulationIsland* pkIsland, BrkInfo* pkInfo);
-void __cdecl FUN_00d00bf0(hkpSimulationIsland* pkIsland, BrkInfo* pkInfo);
+void __cdecl hkpConstraintCallbackUtil_fireConstraintBroken(BrkInfo* pkInfo);
+void __cdecl hkpConstraintCallbackUtil_fireConstraintRepaired(BrkInfo* pkInfo);
+void __cdecl hkpWorldCallbackUtil_fireConstraintBroken(hkpSimulationIsland* pkIsland, BrkInfo* pkInfo);
+void __cdecl hkpWorldCallbackUtil_fireConstraintRepaired(hkpSimulationIsland* pkIsland, BrkInfo* pkInfo);
 
 extern char DAT_01269c44;
 
 // Sets the broken flag on the breakable runtime, updates the constraint flags, and dispatches a BrkInfo event to listeners and the simulation island.
 // @fnv 0x00d4e020
-void hkpBreakableConstraintData::FUN_00d4e020(hkpConstraintInstance* apInstance, hkBool broken, float currentForce)
+// src: HAVOK_LIB 0x00d4e020
+void hkpBreakableConstraintData::setBroken(hkpConstraintInstance* apInstance, hkBool broken, float currentForce)
 {
     hkpConstraintInstance* instance = reinterpret_cast<hkpConstraintInstance*>(*(volatile int*)&apInstance);
     hkpBreakableRuntime* runtime =
@@ -496,17 +503,17 @@ void hkpBreakableConstraintData::FUN_00d4e020(hkpConstraintInstance* apInstance,
         event.m_threshold = m_fBreakingStrength;
         if (event.m_pHavokConstraint->m_kListeners.m_iElementCount)
         {
-            FUN_00d85fa0(&event);
+            hkpConstraintCallbackUtil_fireConstraintBroken(&event);
         }
-        FUN_00d00b40(world, &event);
+        hkpWorldCallbackUtil_fireConstraintBroken(world, &event);
     }
     else
     {
         event.m_0c = 0;
         if (event.m_pHavokConstraint->m_kListeners.m_iElementCount)
         {
-            FUN_00d86050(&event);
+            hkpConstraintCallbackUtil_fireConstraintRepaired(&event);
         }
-        FUN_00d00bf0(world, &event);
+        hkpWorldCallbackUtil_fireConstraintRepaired(world, &event);
     }
 }

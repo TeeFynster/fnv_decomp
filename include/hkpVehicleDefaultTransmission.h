@@ -8,7 +8,7 @@ struct Vehicle;
 class hkpVehicleDefaultTransmission : public hkpVehicleTransmission
 {
 public:
-    float FUN_00e43d40(const Vehicle* vehicle, const void* input);
+    float calcTransmissionRPM(const Vehicle* vehicle, const void* input);
     virtual void vf03();
     virtual void vf04();
     virtual float vf05(const Vehicle* vehicle, const void* input);

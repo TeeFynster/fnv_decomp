@@ -26,7 +26,8 @@ void NiVisController::GetVisibility(bool& abVisible)
 extern void* g_011f3f08;
 
 // @fnv 0x00a44eb0
-void* __cdecl FUN_00a44eb0()
+// src: COMMUNITY 0x00a44eb0
+void* __cdecl NiVisController_GetRTTI()
 {
     return &g_011f3f08;
 }
@@ -38,7 +39,8 @@ extern void* DAT_01097e8c;
 
 // Allocates and initializes a visibility controller, returning zero on allocation failure.
 // @fnv 0x00a44f10
-void* __cdecl FUN_00a44f10()
+// src: EXE 0x00a44f10
+void* __cdecl NiVisController_CreateObject()
 {
     void* mem = BSFadeNode::operator new(0x38);
     if (mem)
@@ -53,7 +55,8 @@ void* __cdecl FUN_00a44f10()
 extern const char* const g_011f3ec8_arg1;
 
 // @fnv 0x00a57660
-const char* __cdecl FUN_00a57660()
+// src: COMMUNITY 0x00a57660
+const char* __cdecl NiFloatInterpController_GetRTTI()
 {
     return (const char*)&g_011f3ec8_arg1;
 }
@@ -61,14 +64,16 @@ const char* __cdecl FUN_00a57660()
 extern const char* const g_011f3f08_arg1;
 
 // @fnv 0x00a577b0
-const char* const* __cdecl FUN_00a577b0()
+// src: COMMUNITY 0x00a577b0
+const char* const* __cdecl NiBoolInterpController_GetRTTI()
 {
     return &g_011f3f08_arg1;
 }
 
 void __stdcall FUN_00a57c70(void*);
 // @fnv 0x00a44d20
-void __stdcall FUN_00a44d20(void* stream)
+// src: XBOX_PDB 0x00a44d20
+void __stdcall BSFrustumFOVController_LoadBinary(void* stream)
 {
     NiStream* pStream = static_cast<NiStream*>(stream);
     FUN_00a57c70(pStream);
@@ -121,13 +126,14 @@ NiBoolInterpController* __fastcall ConstructBoolInterpController(NiBoolInterpCon
 }
 
 
-void __stdcall FUN_00a57800(StrArr*);
+void __stdcall NiBoolInterpController_GetViewerStrings(StrArr*);
 char* __cdecl _FUN_00a7d330(void*);
 
 // @fnv 0x00a44f40
-void __stdcall FUN_00a44f40(StrArr* pkStrings)
+// src: XBOX_PDB 0x00a44f40
+void __stdcall NiVisController_GetViewerStrings(StrArr* pkStrings)
 {
-    FUN_00a57800(pkStrings);
+    NiBoolInterpController_GetViewerStrings(pkStrings);
     char* pcStr = _FUN_00a7d330(g_011f3f08);
     unsigned int uiElementCount = *(unsigned short*)((char*)pkStrings + 0xa);
     unsigned int uiSize = *(unsigned short*)((char*)pkStrings + 8);
@@ -234,7 +240,7 @@ void __fastcall UpdateVisController(NiVisController* controller, void*, NiUpdate
     {
         controller->m_fControllerTime = DAT_01096324;
     }
-    else if (controller->FUN_00a36250(kUpdateData.fTime) &&
+    else if (controller->DontDoUpdate(kUpdateData.fTime) &&
              (!controller->m_spControllerInterpolator.m_pObject || !controller->m_spControllerInterpolator.m_pObject->AlwaysUpdate()))
     {
         return;

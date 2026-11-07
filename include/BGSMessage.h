@@ -41,9 +41,9 @@ public:
     BSSimpleList<PerkButtonEntry*>* GetButtonList();
     void CopyBase(TESForm* form);
 
-    bool FUN_00590d00();
+    bool GetIsMessageBox();
     bool IsFlagSet();
     void SetEnabled(bool enabled);
-    void FUN_00590ef0(bool enabled);
-    void FUN_005911d0(PerkButtonEntry* button);
+    void SetAutoDisplay_00590ef0(bool enabled);
+    void AddButton_005911d0(PerkButtonEntry* button);
 };

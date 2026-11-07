@@ -32,16 +32,16 @@ public:
 
     void CopyFromKeyframe(BSFaceGenKeyframe* keyframe);
     bool DiffersFrom(BSFaceGenKeyframe* keyframe);
-    BSFaceGenKeyframeMultiple* FUN_0064f530();
+    BSFaceGenKeyframeMultiple* CreateCopy_0064f530();
     bool BlendWith(BSFaceGenKeyframe* left, BSFaceGenKeyframe* right, float weight);
     bool BlendFrom(BSFaceGenKeyframe* other, float weight, bool includeZero, bool copyInvalid);
     bool Interpolate(float time, BSFaceGenKeyframe* other);
-    bool FUN_0064f7e0();
-    float FUN_005dd4e0(unsigned int quantity);
+    bool IsEmpty_0064f7e0();
+    float BSFaceGenKeyframeMultiple_GetQuantity(unsigned int quantity);
     unsigned int GetCount();
     float GetQuantity(unsigned int quantity);
     bool SetQuantity(unsigned int quantity, float value);
-    bool FUN_0064a4d0(unsigned int quantity, float value);
+    bool SetQuantity_0064a4d0(unsigned int quantity, float value);
     bool InsertIntoKeyframeList(NiTPointerList<BSFaceGenKeyframe*>* list);
     bool AddToCompatibleList(NiTPointerList<BSFaceGenKeyframe*>* list);
 

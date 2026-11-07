@@ -18,8 +18,8 @@ class __declspec(align(16)) FUN_006240d0
   public:
     __m128 centerAndRadius;
     FUN_006240d0();
-    void FUN_008a50f0(const hkVector4&);
-    void FUN_008a50d0(float);
+    void hkSphere_setPosition(const hkVector4&);
+    void hkSphere_setRadius(float);
 };
 struct Ref8;
 struct Node8;
@@ -29,26 +29,26 @@ struct Link8;
 struct Material8;
 struct Node8
 {
-    Node8* FUN_00461130();
+    Node8* NiAVObject_GetWorldRotate();
     NiPoint3 FUN_004b4500(const NiPoint3&);
     void FUN_004b4880(NiTransform*);
     void FUN_004b46a0(NiMatrix3*);
-    void FUN_00a59c60(const NiUpdateData&);
-    NiPoint3* FUN_0045bb80();
+    void NiAVObject_Update(const NiUpdateData&);
+    NiPoint3* NiAVObject_GetWorldTranslate();
 };
 struct Form8
 {
-    Link8* FUN_006fa820();
+    Link8* bhkNiCollisionObject_GetWorldObject();
     Node8* FUN_0044ddc0();
 };
 struct Link8
 {
-    Material8* FUN_004ae6a0();
-    Form8* FUN_004ae750();
+    Material8* bhkWorldObject_GetShape();
+    Form8* Bipedanim_GetReferenceFlagsOrZero();
 };
 struct Material8
 {
-    unsigned int FUN_006205a0();
+    unsigned int bhkShape_QMaterial();
 };
 struct Controller8
 {
@@ -384,32 +384,32 @@ struct Ref8
     bool requested;
     unsigned short unk0c2;
     Ref8* FUN_009306d0();
-    hkVector4* FUN_00807080();
-    Node8* FUN_0043fcd0();
-    Node8* FUN_00950bb0(int);
+    hkVector4* bhkCharacterProxy_GethkLinearVelocity();
+    Node8* TESObjectREFR_Get3D();
+    Node8* PlayerCharacter_Get3D_00950bb0(int);
     void CallProcessAt778();
-    void* FUN_005d43c0();
-    int FUN_007af430();
-    bool FUN_00493bb0();
+    void* BSFile_GetDevice();
+    int BGSSaveFormBuffer_GetForm();
+    bool Actor_IsInCombat();
     float FUN_00931d70();
-    bool FUN_00894d60();
+    bool GetBlocked();
     void* FUN_008d8520();
     NiPoint3* FUN_00436aa0();
     float GetActorHeight();
-    void FUN_008ccfb0(Ref8*);
-    void FUN_008d0020(NiPoint3, NiPoint3, Link8*);
-    void FUN_008ccce0(const NiPoint3*, const NiPoint3*);
-    void FUN_008cc6d0(int);
-    int FUN_008cdd90();
-    void FUN_008cba30(const NiPoint3*, const NiPoint3*, Ref8*);
+    void ArrowProjectile_Simulate(Ref8*);
+    void ArrowProjectile_ApplyCollisionForce(NiPoint3, NiPoint3, Link8*);
+    void ArrowProjectile_Bounce(const NiPoint3*, const NiPoint3*);
+    void EffectSetting_SetAreaSound(int);
+    int DialoguePackage_GetCurrentDialogItem();
+    void ArrowProjectile_CollideActor(const NiPoint3*, const NiPoint3*, Ref8*);
 };
 struct FloatSetting8
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 struct IntSetting8
 {
-    unsigned int* FUN_0043d4d0();
+    unsigned int* Setting_Int();
 };
 extern FloatSetting8 DAT_011cf624;
 extern IntSetting8 DAT_011cf510;
@@ -419,24 +419,25 @@ extern Ref8* DAT_011dea3c;
 extern float DAT_01085910, DAT_01085c58, DAT_010231a0, DAT_010162c0, DAT_0102226c, DAT_01047224;
 extern double DAT_010356f0, DAT_01011590;
 void FUN_00458620(void*, const void*);
-void MarkBaseExtraListScriptEvent(int, void*, int);
+void Script_SetActionFlag(int, void*, int);
 float RemapValueBySettings(float, int);
-void FUN_00cb9650(Node8*);
-void FUN_00c6a350(Node8*, int, int, int, int);
-void FUN_004a3e00(void*, const void*);
+void bhkForceController_RemoveForce(Node8*);
+void bhkWorld_SetMotion(Node8*, int, int, int, int);
+void NI2HK(void*, const void*);
 void SetCollisionScale(Node8*, const hkVector4&, float, int);
-void FUN_00525340(NiPoint3*);
-Node8* FUN_008cfbc0(Node8*, NiPoint3, NiPoint3, float*, bool);
-Form8* FUN_004b5260(Node8*);
+void NiPoint3_UnitizeVector(NiPoint3*);
+Node8* ArrowProjectile_PickSceneGraph(Node8*, NiPoint3, NiPoint3, float*, bool);
+Form8* FindFirstCollisionObject(Node8*);
 bool IsTargetInCone(Ref8*, Ref8*, int);
 Link8* FindPhysicsBodyByLayer(Node8*, int);
-Link8* FUN_00c806b0(Node8*, const FUN_006240d0*, bool);
+Link8* bhkUtilFunctions_GetClosestBody(Node8*, const FUN_006240d0*, bool);
 Form8* FUN_004b5a20(Form8*);
 Form8* FUN_0043b610(Node8*);
 unsigned int FUN_00487f50();
 
 // @fnv 0x008cba30
-void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim)
+// src: XBOX_PDB 0x008cba30
+void Ref8::ArrowProjectile_CollideActor(const NiPoint3* start, const NiPoint3* end, Ref8* victim)
 {
     state = new FUN_008cc6f0;
     state->mode = 0;
@@ -448,11 +449,11 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
     state->direction = DAT_011f426c;
     if (FUN_009306d0())
     {
-        hkVector4 direction(*FUN_009306d0()->FUN_00807080());
+        hkVector4 direction(*FUN_009306d0()->bhkCharacterProxy_GethkLinearVelocity());
         if (direction.getComponent(0).getReal() == -DAT_01085910)
         {
             if (v1d0())
-                state->direction = v1d0()->FUN_00461130()->FUN_004b4500(DAT_011a9478 * angle);
+                state->direction = v1d0()->NiAVObject_GetWorldRotate()->FUN_004b4500(DAT_011a9478 * angle);
         }
         else
             FUN_00458620(&state->direction, &direction);
@@ -466,27 +467,27 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
         state->victim = victim;
         if (victim)
             victim->CallProcessAt778();
-        MarkBaseExtraListScriptEvent(FUN_007af430(), state->victim->FUN_005d43c0(), 0x100);
+        Script_SetActionFlag(BGSSaveFormBuffer_GetForm(), state->victim->BSFile_GetDevice(), 0x100);
         if (actor)
         {
-            if (actor != DAT_011dea3c && !actor->FUN_00493bb0())
+            if (actor != DAT_011dea3c && !actor->Actor_IsInCombat())
                 goto sceneReady;
             bool blocked = victim->v22c(0);
             if (!blocked && victim->v22c(0) && (!victim->v21c() || victim->v38c()))
             {
-                Node8* scene = victim->FUN_0043fcd0();
+                Node8* scene = victim->TESObjectREFR_Get3D();
                 if (scene)
                 {
-                    float setting = RemapValueBySettings(*DAT_011cf624.FUN_00403e20(), 1);
-                    FUN_00cb9650(scene);
-                    FUN_00c6a350(scene, 1, 1, 0, 1);
+                    float setting = RemapValueBySettings(*DAT_011cf624.Setting_Float_00403e20(), 1);
+                    bhkForceController_RemoveForce(scene);
+                    bhkWorld_SetMotion(scene, 1, 1, 0, 1);
                     NiUpdateData zero(0.0f, false, false);
-                    scene->FUN_00a59c60(zero);
-                    NiPoint3 offset = root->FUN_00461130()->FUN_004b4500(DAT_011a9478);
-                    offset.FUN_004a0c10();
+                    scene->NiAVObject_Update(zero);
+                    NiPoint3 offset = root->NiAVObject_GetWorldRotate()->FUN_004b4500(DAT_011a9478);
+                    offset.Unitize_004a0c10();
                     offset = *v1f4() + (offset * DAT_01085c58);
                     hkVector4 position;
-                    FUN_004a3e00(&position, &offset);
+                    NI2HK(&position, &offset);
                     SetCollisionScale(scene, position, setting, 0);
                 }
             }
@@ -495,9 +496,9 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
         Link8* linked = 0;
         Node8* victimScene;
         if (victim == DAT_011dea3c)
-            victimScene = DAT_011dea3c->FUN_00950bb0(0);
+            victimScene = DAT_011dea3c->PlayerCharacter_Get3D_00950bb0(0);
         else
-            victimScene = victim->FUN_0043fcd0();
+            victimScene = victim->TESObjectREFR_Get3D();
         float range = DAT_010231a0;
         NiPoint3 direction;
         NiMatrix3 pitch;
@@ -506,27 +507,27 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
         heading.MakeXRotation(FUN_00931d70());
         pitch = pitch.operator*(heading);
         pitch.GetCol(1, direction);
-        FUN_00525340(&direction);
-        NiPoint3 ray = *v1f4() - (direction * range).FUN_0053d280(DAT_010162c0);
+        NiPoint3_UnitizeVector(&direction);
+        NiPoint3 ray = *v1f4() - (direction * range).ProcessAndReturnValue_0053d280(DAT_010162c0);
         bool found = false;
-        Node8* hit = FUN_008cfbc0(victim->v1d0(), ray, direction, &range, !victim->v22c(1));
+        Node8* hit = ArrowProjectile_PickSceneGraph(victim->v1d0(), ray, direction, &range, !victim->v22c(1));
         if (hit)
         {
             NiPoint3 scaled = direction * (float)(range + DAT_010356f0);
             NiTransform transform;
-            hit->FUN_00461130()->FUN_004b4880(&transform);
-            state->target = transform.FUN_00524c40(ray + scaled);
+            hit->NiAVObject_GetWorldRotate()->FUN_004b4880(&transform);
+            state->target = transform.ComputeValue_00524c40(ray + scaled);
             NiMatrix3 inverse;
-            hit->FUN_00461130()->FUN_004b46a0(&inverse);
-            state->rotation = inverse.operator*(*reinterpret_cast<NiMatrix3*>(root->FUN_00461130()));
+            hit->NiAVObject_GetWorldRotate()->FUN_004b46a0(&inverse);
+            state->rotation = inverse.operator*(*reinterpret_cast<NiMatrix3*>(root->NiAVObject_GetWorldRotate()));
             state->node = hit;
-            Form8* form = FUN_004b5260(hit);
+            Form8* form = FindFirstCollisionObject(hit);
             if (form)
-                linked = form->FUN_006fa820();
+                linked = form->bhkNiCollisionObject_GetWorldObject();
             found = true;
         }
         bool overrideHit = false;
-        if (victim->FUN_00894d60() && victim->FUN_008d8520() && IsTargetInCone(victim, this, 0))
+        if (victim->GetBlocked() && victim->FUN_008d8520() && IsTargetInCone(victim, this, 0))
         {
             NiPoint3 position = *victim->FUN_00436aa0();
             float top = victim->GetActorHeight() / DAT_01011590 + position.z;
@@ -537,47 +538,47 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
         {
             FUN_006240d0 bound;
             hkVector4 center;
-            FUN_004a3e00(&center, start);
-            bound.FUN_008a50f0(center);
-            bound.FUN_008a50d0(DAT_0102226c);
+            NI2HK(&center, start);
+            bound.hkSphere_setPosition(center);
+            bound.hkSphere_setRadius(DAT_0102226c);
             Link8* candidate = 0;
             if (overrideHit)
                 candidate = FindPhysicsBodyByLayer(victimScene, 7);
             else
-                candidate = FUN_00c806b0(victimScene, &bound, !victim->v22c(1));
+                candidate = bhkUtilFunctions_GetClosestBody(victimScene, &bound, !victim->v22c(1));
             if (candidate)
             {
                 linked = candidate;
-                Form8* object = FUN_004b5a20(linked->FUN_004ae750());
+                Form8* object = FUN_004b5a20(linked->Bipedanim_GetReferenceFlagsOrZero());
                 if (object)
                 {
                     hit = object->FUN_0044ddc0();
                     NiPoint3 scaled = direction * DAT_01047224;
                     NiTransform transform;
-                    hit->FUN_00461130()->FUN_004b4880(&transform);
-                    state->target = transform.FUN_00524c40(*hit->FUN_0045bb80() + scaled);
+                    hit->NiAVObject_GetWorldRotate()->FUN_004b4880(&transform);
+                    state->target = transform.ComputeValue_00524c40(*hit->NiAVObject_GetWorldTranslate() + scaled);
                     NiMatrix3 inverse;
-                    hit->FUN_00461130()->FUN_004b46a0(&inverse);
-                    state->rotation = inverse.operator*(*reinterpret_cast<NiMatrix3*>(root->FUN_00461130()));
+                    hit->NiAVObject_GetWorldRotate()->FUN_004b46a0(&inverse);
+                    state->rotation = inverse.operator*(*reinterpret_cast<NiMatrix3*>(root->NiAVObject_GetWorldRotate()));
                     state->node = hit;
                 }
             }
             if (!state->node)
             {
-                FUN_008ccfb0(victim);
+                ArrowProjectile_Simulate(victim);
                 return;
             }
         }
         if (linked)
-            FUN_008d0020(*start, root->FUN_00461130()->FUN_004b4500(DAT_011a9478), linked);
+            ArrowProjectile_ApplyCollisionForce(*start, root->NiAVObject_GetWorldRotate()->FUN_004b4500(DAT_011a9478), linked);
         if (state->node)
         {
             Form8* form = FUN_0043b610(state->node);
-            Link8* object = form ? form->FUN_006fa820() : 0;
-            Material8* material = object ? object->FUN_004ae6a0() : 0;
+            Link8* object = form ? form->bhkNiCollisionObject_GetWorldObject() : 0;
+            Material8* material = object ? object->bhkWorldObject_GetShape() : 0;
             if (material)
             {
-                switch (material->FUN_006205a0())
+                switch (material->bhkShape_QMaterial())
                 {
                 case 0:
                 case 3:
@@ -586,7 +587,7 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
                 case 11:
                 case 13:
                 case 15:
-                    FUN_008ccce0(start, end);
+                    ArrowProjectile_Bounce(start, end);
                     return;
                 default:
                     break;
@@ -595,15 +596,15 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
         }
         if (victim->v21c() && !victim->v38c())
         {
-            FUN_008ccfb0(victim);
-            FUN_008cc6d0(3);
+            ArrowProjectile_Simulate(victim);
+            EffectSetting_SetAreaSound(3);
             return;
         }
         else
         {
-            if (!FUN_008cdd90() && FUN_00487f50() % 100 < *DAT_011cf510.FUN_0043d4d0())
+            if (!DialoguePackage_GetCurrentDialogItem() && FUN_00487f50() % 100 < *DAT_011cf510.Setting_Int())
             {
-                victim->v190(FUN_007af430(), 0, 1);
+                victim->v190(BGSSaveFormBuffer_GetForm(), 0, 1);
                 requested = true;
             }
         }

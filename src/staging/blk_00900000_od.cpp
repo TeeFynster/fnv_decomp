@@ -82,12 +82,13 @@ namespace p07 {
 struct DelStandIn
 {
     void* Destroy(unsigned int);
-    void* FUN_00905ae0();
+    void* Destroy_Thunk();
 };
 }
 
 // @fnv 0x00905ae0
-void* p07::DelStandIn::FUN_00905ae0()
+// src: GUESS 0x00905ae0 (confidence: medium)
+void* p07::DelStandIn::Destroy_Thunk()
 {
     return Destroy(0);
 }
@@ -96,11 +97,12 @@ extern "C" void __cdecl DAT_01088640();
 
 struct FUN_00906110_Class
 {
-    void __thiscall FUN_00906110();
+    void __thiscall SetVtableAndProcessState_00906110();
 };
 
 // @fnv 0x00906110
-void __thiscall FUN_00906110_Class::FUN_00906110()
+// src: GUESS 0x00906110 (confidence: low)
+void __thiscall FUN_00906110_Class::SetVtableAndProcessState_00906110()
 {
     *reinterpret_cast<void**>(this) = &DAT_01088640;
 }
@@ -126,7 +128,7 @@ FUN_009137b0_t* FUN_009137b0_t::Construct(int a)
 
 struct FUN_00913980_StandIn
 {
-    void FUN_009138e0();
+    void UpdateFields_009138e0();
     void* FUN_00913980(unsigned int flags);
 };
 
@@ -134,7 +136,7 @@ struct FUN_00913980_StandIn
 // @fnv 0x00913980
 void* FUN_00913980_StandIn::FUN_00913980(unsigned int flags)
 {
-    FUN_009138e0();
+    UpdateFields_009138e0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -180,7 +182,7 @@ unsigned int FUN_00905450_StandIn::AppendNode(PathingAvoidNode* apNode)
     return count;
 }
 
-int __cdecl FUN_0043b460(long volatile*, long, long);
+int __cdecl BSAtomicCompareExchange(long volatile*, long, long);
 // Exe 0x00905510: unit-local Interface view; declarations and layout are preserved.
 struct BlkInterfaceView
 {
@@ -198,12 +200,12 @@ char FUN_00905510_Class::LockAndCall(int aiArg)
     char r;
     while (true)
     {
-        if (FUN_0043b460((long volatile*)(this + 1), 0, 1) == 0)
+        if (BSAtomicCompareExchange((long volatile*)(this + 1), 0, 1) == 0)
         {
             BlkInterfaceView::PrintDebugMessage();
             r = ((char(__thiscall*)(void*, int))vtbl[6])(this, aiArg);
             BlkInterfaceView::PrintDebugMessage();
-            FUN_0043b460((long volatile*)(this + 1), 1, 0);
+            BSAtomicCompareExchange((long volatile*)(this + 1), 1, 0);
             break;
         }
     }
@@ -212,14 +214,14 @@ char FUN_00905510_Class::LockAndCall(int aiArg)
 
 struct FUN_00905690_Class
 {
-    void __thiscall FUN_00905650();
+    void __thiscall SetVtableAndProcessState_00905650();
     void* __thiscall FUN_00905690(unsigned int flags);
 };
 
 // @fnv 0x00905690
 void* FUN_00905690_Class::FUN_00905690(unsigned int flags)
 {
-    FUN_00905650();
+    SetVtableAndProcessState_00905650();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -279,7 +281,7 @@ struct FUN_00906130_Class
 // @fnv 0x00906130
 void* FUN_00906130_Class::FUN_00906130(unsigned int flags)
 {
-    reinterpret_cast<FUN_00906110_Class*>(this)->FUN_00906110();
+    reinterpret_cast<FUN_00906110_Class*>(this)->SetVtableAndProcessState_00906110();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -288,7 +290,7 @@ void* FUN_00906130_Class::FUN_00906130(unsigned int flags)
 #include "../../include/RecursiveSpinLock.h"
 struct FUN_00449f80_Class
 {
-    void* FUN_00449f80(void* a, void* b, void* c, bool d);
+    void* LockFreeMap_GetInterface_0(void* a, void* b, void* c, bool d);
 };
 struct FUN_0044d070_Class
 {
@@ -313,7 +315,7 @@ bool FUN_009063b0_Class::LockedCall(void* apArg1, void* apArg2, void* apArg3, bo
 {
     m_20.Lock(0);
     bool r = reinterpret_cast<FUN_0044d070_Class*>(
-                 reinterpret_cast<FUN_00449f80_Class*>(this)->FUN_00449f80(apArg1, apArg2, apArg3, d))
+                 reinterpret_cast<FUN_00449f80_Class*>(this)->LockFreeMap_GetInterface_0(apArg1, apArg2, apArg3, d))
                  ->InsertOrReplace();
     m_20.Unlock();
     return r;
@@ -326,9 +328,9 @@ struct S5460
     virtual void* v2(unsigned int);
     virtual void v3();
     virtual void v4();
-    bool FUN_00438b90();
-    unsigned int FUN_009a3910();
-    void* FUN_006e3d30(unsigned int a, unsigned int b);
+    bool BSSimpleArray_NavMeshInfo_1024_ShouldGrow();
+    unsigned int BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
+    void* BSSimpleArray_PathingAvoidNode_1024_ReallocateBuffer(unsigned int a, unsigned int b);
     void* m_iWordAt04;
     unsigned int m_8;
     unsigned int m_iThirdValue;
@@ -337,7 +339,7 @@ struct S5460
 // @fnv 0x00905a10
 unsigned int S5460::GetNextIndex()
 {
-    if (FUN_00438b90())
+    if (BSSimpleArray_NavMeshInfo_1024_ShouldGrow())
     {
         if (m_iThirdValue == 0)
         {
@@ -347,8 +349,8 @@ unsigned int S5460::GetNextIndex()
         }
         else
         {
-            unsigned int idx = FUN_009a3910();
-            FUN_006e3d30(idx, m_8);
+            unsigned int idx = BSSimpleArray_NavMeshInfo_1024_GetNewSizeForGrow();
+            BSSimpleArray_PathingAvoidNode_1024_ReallocateBuffer(idx, m_8);
             m_iThirdValue = idx;
         }
     }
@@ -422,11 +424,12 @@ struct FUN_009138e0_Class
     void* m_iWordAt00;
     void* m_iWordAt04;
     void* m_8;
-    void FUN_009138e0();
+    void UpdateFields_009138e0();
     void FUN_008448e0();
 };
 // @fnv 0x009138e0
-void FUN_009138e0_Class::FUN_009138e0()
+// src: GUESS 0x009138e0 (confidence: low)
+void FUN_009138e0_Class::UpdateFields_009138e0()
 {
     m_iWordAt00 = (void*)&DAT_01088ff4;
     FUN_008448e0();
@@ -435,11 +438,12 @@ void FUN_009138e0_Class::FUN_009138e0()
 
 struct FUN_00913950_Class
 {
-    void* __thiscall FUN_00913950(int a);
+    void* __thiscall UpdateState_00913950(int a);
 };
 
 // @fnv 0x00913950
-void* FUN_00913950_Class::FUN_00913950(int a)
+// src: GUESS 0x00913950 (confidence: low)
+void* FUN_00913950_Class::UpdateState_00913950(int a)
 {
     ((int*)this)[0] = 0;
     ((int*)this)[1] = 0;
@@ -449,13 +453,14 @@ void* FUN_00913950_Class::FUN_00913950(int a)
 extern void* DAT_01088418;
 
 // @fnv 0x00905650
-void FUN_00905690_Class::FUN_00905650()
+// src: GUESS 0x00905650 (confidence: low)
+void FUN_00905690_Class::SetVtableAndProcessState_00905650()
 {
     *reinterpret_cast<int*>(this) = reinterpret_cast<int>(&DAT_01088418);
     reinterpret_cast<FUN_00905670_Class*>(this)->SetVTable();
 }
 
-void* __cdecl FUN_006e6da0(unsigned int size, void* heap);
+void* __cdecl Memory_ReturnPlacementAddress(unsigned int size, void* heap);
 
 struct SpawnedObject_b9530
 {
@@ -463,7 +468,7 @@ struct SpawnedObject_b9530
     SpawnedObject_b9530(int a);
     static void* operator new(unsigned int size, void* heap)
     {
-        return FUN_006e6da0(size, heap);
+        return Memory_ReturnPlacementAddress(size, heap);
     }
     static void operator delete(void* p, void* heap)
     {}
@@ -501,11 +506,12 @@ struct FUN_00906400_Owner
 {
     int m_iWordAt00;
     int* m_iWordAt04;
-    FUN_00906400_Sub* FUN_00906400(int a);
+    FUN_00906400_Sub* LockFreeMap_AllocateInterface(int a);
 };
 
 // @fnv 0x00906400
-FUN_00906400_Sub* FUN_00906400_Owner::FUN_00906400(int aiIndex)
+// src: COMMUNITY 0x00906400
+FUN_00906400_Sub* FUN_00906400_Owner::LockFreeMap_AllocateInterface(int aiIndex)
 {
     FUN_00906400_Guard guard(6, 1, "d:\\_fallout3\\platforms\\common\\code\\bsmain\\ThreadSafeStructures.h", 0x18e);
     return new FUN_00906400_Sub(this, &m_iWordAt04[aiIndex * 3], &m_iWordAt04[aiIndex * 3 + 1],
@@ -517,7 +523,7 @@ struct Request9065
     int unk00;
     unsigned int index;
     void* element;
-    bool FUN_006ebde0();
+    bool LockFreeMap_char_const_Model_LockFreeMapIterator_GetFinished();
     bool IsFlagSet();
     void FUN_0044de40(bool);
     void FUN_0044de80(bool);
@@ -525,7 +531,7 @@ struct Request9065
 struct Iterator9065
 {
     bool ProcessEntry();
-    bool FUN_00906c10();
+    bool ProcessEntries_00906c10();
 };
 struct FUN_00906570_Class
 {
@@ -538,7 +544,7 @@ struct FUN_00906570_Class
     int unk18;
     int unk1C;
     RecursiveSpinLock lock;
-    Iterator9065* FUN_00449f80(unsigned int, void**, void*);
+    Iterator9065* LockFreeMap_GetInterface_0(unsigned int, void**, void*);
     unsigned int FUN_0044ddc0();
     bool AdvanceRequest(Request9065*, void**, void*, bool);
 };
@@ -547,7 +553,7 @@ bool FUN_00906570_Class::AdvanceRequest(Request9065* request, void** ppOut, void
 {
     lock.Lock(0);
     bool success = false;
-    if (request->FUN_006ebde0())
+    if (request->LockFreeMap_char_const_Model_LockFreeMapIterator_GetFinished())
     {
         success = false;
     }
@@ -557,12 +563,12 @@ bool FUN_00906570_Class::AdvanceRequest(Request9065* request, void** ppOut, void
         {
             if (!request->IsFlagSet())
             {
-                success = FUN_00449f80(request->index, &request->element, context)->ProcessEntry();
+                success = LockFreeMap_GetInterface_0(request->index, &request->element, context)->ProcessEntry();
                 request->FUN_0044de40(true);
             }
             else
             {
-                success = FUN_00449f80(request->index, &request->element, context)->FUN_00906c10();
+                success = LockFreeMap_GetInterface_0(request->index, &request->element, context)->ProcessEntries_00906c10();
             }
             if (!success)
             {
@@ -623,7 +629,7 @@ struct LocalPair
 {
     int m_kPointA;
     int m_kPointB;
-    void __thiscall FUN_00913950(int a);
+    void __thiscall UpdateState_00913950(int a);
 };
 
 struct OutRecord
@@ -645,15 +651,16 @@ class FUN_00913910_cls
     int unk04;
     int unk08;
     SubObject m_sub;
-    void FUN_00913910(OutRecord* pOut);
+    void ResetPairAndFreeEntry(OutRecord* pOut);
 };
 
 // Initializes a LocalPair with 0, copies it into pOut->m_pair, then calls m_sub.FreeMemory(pOut).
 // @fnv 0x00913910
-void FUN_00913910_cls::FUN_00913910(OutRecord* pOut)
+// src: GUESS 0x00913910 (confidence: medium)
+void FUN_00913910_cls::ResetPairAndFreeEntry(OutRecord* pOut)
 {
     LocalPair local;
-    local.FUN_00913950(0);
+    local.UpdateState_00913950(0);
     pOut->m_pair = local;
     m_sub.FreeMemory(pOut);
 }
@@ -661,7 +668,7 @@ void FUN_00913910_cls::FUN_00913910(OutRecord* pOut)
 struct QHeadPtrDest
 {
     QHeadPtrDest& Assign(const QHeadPtr&);
-    void* FUN_006f74f0(void*);
+    void* AssignTaskReference(void*);
 };
 
 struct SubItem
@@ -675,7 +682,7 @@ struct Member14_18
 {
     int unk;
     int ClearLowBit();
-    SubItem* FUN_0044df00();
+    SubItem* ClearLowBit_Thunk();
 };
 
 struct OwnerClass
@@ -695,7 +702,7 @@ struct OwnerClass
     virtual void v12(void*, void**);
 };
 
-void FUN_0040fbe0();
+void ProgramFlow();
 
 struct TargetClass
 {
@@ -708,13 +715,14 @@ struct TargetClass
     Member14_18 m_18;
 
     bool ProcessNode(int a, void* b);
-    void FUN_00529000();
+    void LockFreeMap_LockFreeMapInterface_ClearReferencedNodes();
 
-    bool FUN_00906c10(int a, void** b, QHeadPtrDest* c);
+    bool ProcessEntries_00906c10(int a, void** b, QHeadPtrDest* c);
 };
 
 // @fnv 0x00906c10
-bool TargetClass::FUN_00906c10(int a, void** b, QHeadPtrDest* apHeadDest)
+// src: GUESS 0x00906c10 (confidence: low)
+bool TargetClass::ProcessEntries_00906c10(int a, void** b, QHeadPtrDest* apHeadDest)
 {
     bool bResult = false;
     while (true)
@@ -724,17 +732,17 @@ bool TargetClass::FUN_00906c10(int a, void** b, QHeadPtrDest* apHeadDest)
         {
             if (this->m_18.ClearLowBit())
             {
-                if (this->m_18.FUN_0044df00()->FUN_0044df20())
+                if (this->m_18.ClearLowBit_Thunk()->FUN_0044df20())
                 {
                     continue;
                 }
-                this->field_0->v12(this->m_18.FUN_0044df00()->unk0, b);
-                apHeadDest->Assign(this->m_18.FUN_0044df00()->headPtr);
+                this->field_0->v12(this->m_18.ClearLowBit_Thunk()->unk0, b);
+                apHeadDest->Assign(this->m_18.ClearLowBit_Thunk()->headPtr);
                 bResult = true;
-                FUN_0040fbe0();
-                if (this->m_18.FUN_0044df00()->FUN_0044df20())
+                ProgramFlow();
+                if (this->m_18.ClearLowBit_Thunk()->FUN_0044df20())
                 {
-                    apHeadDest->FUN_006f74f0(0);
+                    apHeadDest->AssignTaskReference(0);
                     continue;
                 }
                 break;
@@ -749,17 +757,17 @@ bool TargetClass::FUN_00906c10(int a, void** b, QHeadPtrDest* apHeadDest)
         {
             if (this->m_14.ClearLowBit())
             {
-                if (this->m_14.FUN_0044df00()->FUN_0044df20())
+                if (this->m_14.ClearLowBit_Thunk()->FUN_0044df20())
                 {
                     continue;
                 }
-                this->field_0->v12(this->m_14.FUN_0044df00()->unk0, b);
-                apHeadDest->Assign(this->m_14.FUN_0044df00()->headPtr);
+                this->field_0->v12(this->m_14.ClearLowBit_Thunk()->unk0, b);
+                apHeadDest->Assign(this->m_14.ClearLowBit_Thunk()->headPtr);
                 bResult = true;
-                FUN_0040fbe0();
-                if (this->m_14.FUN_0044df00()->FUN_0044df20())
+                ProgramFlow();
+                if (this->m_14.ClearLowBit_Thunk()->FUN_0044df20())
                 {
-                    apHeadDest->FUN_006f74f0(0);
+                    apHeadDest->AssignTaskReference(0);
                     continue;
                 }
                 break;
@@ -771,13 +779,13 @@ bool TargetClass::FUN_00906c10(int a, void** b, QHeadPtrDest* apHeadDest)
             }
         }
     }
-    this->FUN_00529000();
+    this->LockFreeMap_LockFreeMapInterface_ClearReferencedNodes();
     return bResult;
 }
 
 struct FUN_00528bb0_Class
 {
-    bool FUN_00528bb0();
+    bool LockFreeMap_TESObjectREFR_NiPointer_QueuedReference_LockFreeMapInterface_RemoveAt();
 };
 
 struct FUN_009062e0_Class
@@ -791,16 +799,17 @@ struct FUN_009062e0_Class
     int unk18;
     int unk1C;
     BSSpinLockUnlock_blk_00900000_od lock;
-    void* FUN_00449f80(void*);
-    bool FUN_009062e0(void* a);
+    void* LockFreeMap_GetInterface_0(void*);
+    bool LockFreeMap_T_Key_NiPointer_IOTask_RemoveAt(void* a);
 };
 
 // Locks the spin lock, calls FUN_00528bb0 on the object returned by FUN_00449f80(a), unlocks, and returns the result.
 // @fnv 0x009062e0
-bool FUN_009062e0_Class::FUN_009062e0(void* a)
+// src: COMMUNITY 0x009062e0
+bool FUN_009062e0_Class::LockFreeMap_T_Key_NiPointer_IOTask_RemoveAt(void* a)
 {
     lock.Lock(0);
-    bool r = ((FUN_00528bb0_Class*)FUN_00449f80(a))->FUN_00528bb0();
+    bool r = ((FUN_00528bb0_Class*)LockFreeMap_GetInterface_0(a))->LockFreeMap_TESObjectREFR_NiPointer_QueuedReference_LockFreeMapInterface_RemoveAt();
     lock.Unlock();
     return r;
 }
@@ -810,11 +819,11 @@ struct FUN_00528cb0_Guard
     int value;
     FUN_00528cb0_Guard(int value);
     ~FUN_00528cb0_Guard();
-    unsigned int FUN_00559450(int flag);
+    unsigned int Modelloader_GetReferencedThis(int flag);
 };
 struct FUN_0044ac40_Service
 {
-    void __thiscall FUN_0044ac40(unsigned int value);
+    void __thiscall BSTaskManager_CancelTask(unsigned int value);
 };
 extern FUN_0044ac40_Service* DAT_01202d98;
 struct FUN_00906050_Class
@@ -823,17 +832,18 @@ struct FUN_00906050_Class
     virtual void v1();
     virtual unsigned char v2(int value, FUN_00528cb0_Guard* guard);
     void __thiscall CallVirtual5(int value);
-    void __thiscall FUN_00906050(int value);
+    void __thiscall LipSyncBackgroundManager_CancelLipFile(int value);
 };
 // Creates a guard, calls v2 with the value and guard; if it succeeds, calls CallVirtual5 and passes the guard's flag result to DAT_01202d98.
 // @fnv 0x00906050
-void FUN_00906050_Class::FUN_00906050(int value)
+// src: COMMUNITY 0x00906050
+void FUN_00906050_Class::LipSyncBackgroundManager_CancelLipFile(int value)
 {
     FUN_00528cb0_Guard guard(0);
     if (v2(value, &guard))
     {
         CallVirtual5(value);
-        DAT_01202d98->FUN_0044ac40(guard.FUN_00559450(0));
+        DAT_01202d98->BSTaskManager_CancelTask(guard.Modelloader_GetReferencedThis(0));
     }
 }
 
@@ -859,7 +869,7 @@ FUN_00913880::~FUN_00913880()
     RemoveAll();
 }
 
-void __cdecl FormHeap_Free(void* p);
+void __cdecl FormHeapFreeAndLog_00401030(void* p);
 
 struct _Base_009064e0
 {
@@ -881,7 +891,7 @@ FUN_009064e0::~FUN_009064e0()
 {
     unk04(1);
     void* a = m_iThirdValue;
-    FormHeap_Free(a);
+    FormHeapFreeAndLog_00401030(a);
     void* b = m_iWordAt04;
-    FormHeap_Free(b);
+    FormHeapFreeAndLog_00401030(b);
 }

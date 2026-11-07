@@ -5,10 +5,10 @@
 typedef void (*Callback)();
 extern void CreateAgent();
 extern void InvokeDispatch();
-extern void FUN_00d922a0();
-extern void FUN_00d922c0();
+extern void hkAgent3Bridge_removePoint();
+extern void hkAgent3Bridge_commitPotential();
 extern void CallIfaceMethod();
-extern void FUN_00d92200();
+extern void hkAgent3Bridge_updateFilter();
 extern void AddChildAgent2ToCollector();
 extern void CallObjectVirtual();
 extern void DispatchVirtualCall();
@@ -41,20 +41,21 @@ struct Context
 };
 // Fills a CallbackTable with the callback functions and flags, then passes it to AddEntry with -1, -1.
 // @fnv 0x00d923b0
-void __cdecl FUN_00d923b0(void* context)
+// src: HAVOK_LIB 0x00d923b0
+void __cdecl hkAgent3Bridge_registerAgent3(void* context)
 {
     CallbackTable table;
     table.flag31 = 0;
     table.flag32 = 0;
     table.callback28 = 0;
     table.callback08 = 0;
-    table.callback10 = FUN_00d922c0;
+    table.callback10 = hkAgent3Bridge_commitPotential;
     table.callback14 = CallIfaceMethod;
-    table.callback0c = FUN_00d922a0;
+    table.callback0c = hkAgent3Bridge_removePoint;
     table.callback00 = CreateAgent;
     table.callback2c = CallVirtualWithVectorArgs;
     table.callback04 = InvokeDispatch;
-    table.callback18 = FUN_00d92200;
+    table.callback18 = hkAgent3Bridge_updateFilter;
     table.callback1c = AddChildAgent2ToCollector;
     table.callback20 = CallObjectVirtual;
     table.callback24 = DispatchVirtualCall;

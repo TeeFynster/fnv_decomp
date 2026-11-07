@@ -81,12 +81,12 @@ void __fastcall FUN_004056d0(void*);
 // @fnv 0x0040c1d0
 void MagicItemForm::SaveForm()
 {
-    TESForm::FUN_004855a0();
-    ((TESFullName*)((char*)this + 0x18))->FUN_00487010();
+    TESForm::BeginFormRecord();
+    ((TESFullName*)((char*)this + 0x18))->Save_00487010();
     ((MagicItem*)((char*)this + 0x18))->ClearMagicItemData();
     ((MagicItem*)((char*)this + 0x18))->SaveMagicItemData();
     FUN_004056d0((void*)((char*)this + 0x24));
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // @fnv 0x0040c450

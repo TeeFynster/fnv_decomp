@@ -128,7 +128,8 @@ inline void* operator new(size_t, unsigned int uiSize) throw()
 
 // Clones the skin instance when cloneable, remapping the skin root and bone objects through the cloning map and copying the bone pointer array.
 // @fnv 0x00a86830
-NiSkinInstance* NiSkinInstance::FUN_00a86830(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a86830
+NiSkinInstance* NiSkinInstance::CreateClone_00a86830(CloningProcess& kCloning)
 {
     if (!IsCloneable(kCloning))
         return this;
@@ -279,10 +280,10 @@ extern void __stdcall ClearStrings(Strings*);
 extern char* globalName;
 char* CopyName(char*);
 char* Label(const char*, const char*);
-char* FUN_00a7d510(const char*, unsigned int);
+char* NiGetViewerString_00a7d510(const char*, unsigned int);
 void* NiMalloc(unsigned int);
 void NiFree(void*);
-int FUN_00a86280(const void*, const void*);
+int CompareBoneNames(const void*, const void*);
 extern "C" void __cdecl SortNames(void*, unsigned int, unsigned int, int(__cdecl*)(const void*, const void*));
 void FUN_00a305b0(char*, unsigned int, const char*, ...);
 struct BonePtr
@@ -312,9 +313,9 @@ void NiSkinInstance::GetViewerStrings(NiViewerStringsArray* strings)
         unsigned int partitions = (unsigned int)m_pkSkinMeshPartition.m_pObject;
         if (partitions)
             partitions = (unsigned int)((Root*)m_pkSkinMeshPartition.m_pObject)->name;
-        apStrings->Add(FUN_00a7d510("Hardware partitions", partitions));
+        apStrings->Add(NiGetViewerString_00a7d510("Hardware partitions", partitions));
         unsigned int uiBoneCount = pPartition->m_uiBoneCount;
-        apStrings->Add(FUN_00a7d510("Bone Count", uiBoneCount));
+        apStrings->Add(NiGetViewerString_00a7d510("Bone Count", uiBoneCount));
         char** ppBoneNames = (char**)NiMalloc(uiBoneCount * sizeof(char*));
         char szBoneName[1000];
         for (unsigned int index = 0; index < uiBoneCount; ++index)
@@ -323,7 +324,7 @@ void NiSkinInstance::GetViewerStrings(NiViewerStringsArray* strings)
             ppBoneNames[index] = (char*)NiMalloc(strlen(szBoneName) + 1);
             strcpy(ppBoneNames[index], szBoneName);
         }
-        SortNames(ppBoneNames, uiBoneCount, 4, FUN_00a86280);
+        SortNames(ppBoneNames, uiBoneCount, 4, CompareBoneNames);
         for (unsigned int index = 0; index < uiBoneCount; ++index)
         {
             char szIndex[10];

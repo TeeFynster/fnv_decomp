@@ -15,9 +15,9 @@ struct FUN_00d08ff0_t {
     int c;
     int d;
 };
-void FUN_00d08ff0(FUN_00d08ff0_t* self, int arg);
+void hkpAabbTreeWorldManager_gatherCollidablesFromWorld(FUN_00d08ff0_t* self, int arg);
 struct FUN_00d08550_Class {
-    void __thiscall FUN_00d08550();
+    void __thiscall hkpAabbTreeWorldManager_setTreeIsClean();
 };
 extern unsigned int DAT_0126835c;
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
@@ -65,8 +65,8 @@ struct CollidableArray : hkArray<hkpCollidable*> {
     }
 };
 struct Tree {
-    unsigned short FUN_00d9c610(hkAabb*, hkpCollidable*);
-    void FUN_00d9c7d0(unsigned short);
+    unsigned short hkAabbTree_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_add(hkAabb*, hkpCollidable*);
+    void hkAabbTree_struct_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_remove(unsigned short);
 };
 struct ScanToken;
 struct TablePair { unsigned long key; unsigned long value; };
@@ -107,12 +107,12 @@ struct UpdateState {
     unsigned char fullScan; int scanStart; int scanLimit;
     unsigned char unk68; unsigned char dirty;
     __declspec(noinline) bool CheckCollidables(hkArrayBase<hkpCollidable*>&);
-    unsigned short FUN_00d083e0(hkpCollidable*);
-    bool isActive(int& value, hkpCollidable* node) { unsigned short id = FUN_00d083e0(node); return value == 1 && id != 0xffff; }
-    void FUN_00d08c90(hkpCollidable*);
-    void FUN_00d099a0(hkArrayBase<hkpCollidable*>&, int, int);
-    void FUN_00d094a0(FUN_00d08ff0_t*, hkArrayBase<hkpCollidable*>&, int, int, int);
-    void FUN_00d099d0(int, int);
+    unsigned short hkpAabbTreeWorldManager_getNodeIdx(hkpCollidable*);
+    bool isActive(int& value, hkpCollidable* node) { unsigned short id = hkpAabbTreeWorldManager_getNodeIdx(node); return value == 1 && id != 0xffff; }
+    void hkpAabbTreeWorldManager_pushBackToActiveList(hkpCollidable*);
+    void hkpAabbTreeWorldManager_buildActiveTree(hkArrayBase<hkpCollidable*>&, int, int);
+    void hkpAabbTreeWorldManager_buildKdTree(FUN_00d08ff0_t*, hkArrayBase<hkpCollidable*>&, int, int, int);
+    void hkpAabbTreeWorldManager_incrementalBuild(int, int);
 };
 __forceinline void hkMonitorStream::TimerCommand::setTime() {
     unsigned int ticks;
@@ -157,7 +157,8 @@ static __forceinline void hkAddValue(const char* name, float value) {
     }
 }
 // @fnv 0x00d099d0
-void UpdateState::FUN_00d099d0(int arg1, int arg2) {
+// src: HAVOK_LIB 0x00d099d0
+void UpdateState::hkpAabbTreeWorldManager_incrementalBuild(int arg1, int arg2) {
     CollidableArray inactive(nodes.GetLogicalSize());
     bool changed = false;
     if (incremental) {
@@ -172,7 +173,7 @@ void UpdateState::FUN_00d099d0(int arg1, int arg2) {
                     hkAabb bounds;
                     node->m_pCollisionShape->CalculateAabb(node->getTransform(), 0.0f, bounds);
                     hkAddValue("MiNum of Added Nodes", 1.0f);
-                    DispatchToOffsetTarget(inactive[i], t->FUN_00d9c610(&bounds, node));
+                    DispatchToOffsetTarget(inactive[i], t->hkAabbTree_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_add(&bounds, node));
             }
             dirty = false;
         }
@@ -183,23 +184,23 @@ void UpdateState::FUN_00d099d0(int arg1, int arg2) {
             int state = entries.getValue(it);
             if (isActive(state, node) && node->m_kBroadPhaseHandle.m_type == 1) {
                 hkAddValue("MiNum of Removed Nodes", 1.0f);
-                currentTree->FUN_00d9c7d0(FUN_00d083e0(node));
-                FUN_00d08c90(node);
+                currentTree->hkAabbTree_struct_hkAabbTreeData_hkAabbTreeAabb16_unsigned_short_remove(hkpAabbTreeWorldManager_getNodeIdx(node));
+                hkpAabbTreeWorldManager_pushBackToActiveList(node);
             }
         }
         hkTimerSplit("StUpdate Active");
-        FUN_00d099a0(nodes, arg1, arg2);
+        hkpAabbTreeWorldManager_buildActiveTree(nodes, arg1, arg2);
         hkTimerSplit("lt");
     } else {
         hkTimerBeginList("LtDynamicBuild", "StGather");
         nodes.clear();
-        FUN_00d08ff0((FUN_00d08ff0_t*)&nodes, gatherMode);
+        hkpAabbTreeWorldManager_gatherCollidablesFromWorld((FUN_00d08ff0_t*)&nodes, gatherMode);
         hkTimerSplit("StClear");
         hkTimerSplit("StRebuild");
-        FUN_00d094a0(&gather, nodes, gatherMode, arg1, arg2);
+        hkpAabbTreeWorldManager_buildKdTree(&gather, nodes, gatherMode, arg1, arg2);
         hkTimerSplit("lt");
     }
-    ((FUN_00d08550_Class*)this)->FUN_00d08550();
+    ((FUN_00d08550_Class*)this)->hkpAabbTreeWorldManager_setTreeIsClean();
     if (changed) dirty = true;
 }
 
@@ -212,7 +213,7 @@ __declspec(noinline) bool UpdateState::CheckCollidables(hkArrayBase<hkpCollidabl
             hkpEntity* owner=getEntityOwner(nodes[index]);
             if (owner) {
                 unsigned char activeValue;
-                owner->FUN_00c9bff0(&activeValue);
+                owner->isActive_00c9bff0(&activeValue);
                 bool active=activeValue!=0;
                 if (!active) {
                     output.pushBackUnchecked(nodes[index]);
@@ -231,7 +232,7 @@ __declspec(noinline) bool UpdateState::CheckCollidables(hkArrayBase<hkpCollidabl
             hkpEntity* owner=getEntityOwner(nodes[index]);
             if (owner) {
                 unsigned char activeValue;
-                owner->FUN_00c9bff0(&activeValue);
+                owner->isActive_00c9bff0(&activeValue);
                 bool active=activeValue!=0;
                 if (!active) {
                     output.pushBackUnchecked(nodes[index]);

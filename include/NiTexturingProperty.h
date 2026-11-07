@@ -68,11 +68,11 @@ class NiTexturingProperty : public NiProperty
     static NiFixedString ms_kTextureMapNames[10];
     static void InitializePoint3();
 
-    unsigned int FUN_00a46410();
-    void FUN_005b8fc0(void*);
+    unsigned int UpdateState_00a46410();
+    void SetBaseTexture(void*);
     void FUN_004f3200(int);
-    void FUN_00533fb0(int);
-    void FUN_00533f40(Map*);
+    void NiStencilProperty_SetStencilFailAction(int);
+    void SetBaseMap(Map*);
 
     void SetApplyMode(ApplyMode mode);
     void SetMultiTexture(bool multi);

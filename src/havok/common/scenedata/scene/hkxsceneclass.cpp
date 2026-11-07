@@ -16,7 +16,7 @@ struct AudioManager
     int unk0c;
     Allocator* allocator;
 };
-AudioManager* FUN_00c85750();
+AudioManager* hkMemoryRouter_getInstance();
 struct AudioObject
 {
     void* vtable;
@@ -31,7 +31,7 @@ AudioObject* AudioObject::Release(unsigned int flags)
     ClearScene();
     if (flags & 1)
     {
-        AudioManager* manager = FUN_00c85750();
+        AudioManager* manager = hkMemoryRouter_getInstance();
         manager->allocator->Free(this, allocationSize);
     }
     return this;

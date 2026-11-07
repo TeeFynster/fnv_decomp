@@ -15,6 +15,6 @@ public:
     void SetTargetValue(float fValue);
     void GetTargetValue(float& rfValue);
     void UpdateController(float& fTime);
-    void __thiscall FUN_00c32e90(NiObject* pkInterp, unsigned short usIndex);
+    void __thiscall SynchronizePoseInterpolator_00c32e90(NiObject* pkInterp, unsigned short usIndex);
 };
 

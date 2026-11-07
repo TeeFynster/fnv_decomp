@@ -10,7 +10,7 @@
 class CureEffectTarget : public MagicTarget
 {
 public:
-    void FUN_00824630(int);
+    void MagicTarget_Dispel(int);
     void RemoveEffectsByArchetype(int, int);
 };
 
@@ -33,7 +33,7 @@ bool CureEffect::IsEffectValid(MagicTarget* apTarget)
 void CureEffect::Start()
 {
     if (m_iCureType == -1)
-        static_cast<CureEffectTarget*>(GetTarget())->FUN_00824630(m_eSpellType);
+        static_cast<CureEffectTarget*>(GetTarget())->MagicTarget_Dispel(m_eSpellType);
     else
         static_cast<CureEffectTarget*>(GetTarget())->RemoveEffectsByArchetype(m_iCureType, 0);
 }

@@ -7,7 +7,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct hkpGskBaseAgent
 {
-    virtual void FUN_00dabe90(bool);
+    virtual void hkpGskBaseAgent_cleanup(bool);
 };
 typedef union __declspec(intrin_type) __declspec(align(16)) __m128
 {
@@ -68,7 +68,7 @@ struct hkTransform
     __m128 m_kColumn1;
     __m128 m_kColumn2;
     __m128 m_kColumn3;
-    void FUN_00cb22f0(const void* a, const void* b);
+    void hkTransform_setMulInverseMul(const void* a, const void* b);
 };
 struct GskInput
 {
@@ -99,7 +99,7 @@ struct hkpCdPointCollector
     virtual void vfunc00();
     virtual void AddCdPoint(const ContactPointPair& point);
 };
-int FUN_00dabca0(const GskInput* input, void* status, __m128* out1, __m128* out2);
+int hkpGsk_getClosestPoint(const GskInput* input, void* status, __m128* out1, __m128* out2);
 class FUN_00dac9e0_cls
 {
   public:
@@ -140,7 +140,7 @@ struct hkTransformDAC0
     hkMatrix3DAC0 m_rotation;
     hkVector4DAC0 m_vTranslation;
 
-    void FUN_00cb22f0(const hkTransformDAC0& kA, const hkTransformDAC0& kB);
+    void hkTransform_setMulInverseMul(const hkTransformDAC0& kA, const hkTransformDAC0& kB);
 
     const hkMatrix3DAC0& getRotation() const
     {
@@ -177,7 +177,7 @@ struct hkpCdBodyDAC0
 struct hkpCollisionInputDAC0;
 struct FUN_00daad40_solver
 {
-    void FUN_00daad40(const hkpConvexShapeDAC0* pkShapeA, const hkpConvexShapeDAC0* pkShapeB,
+    void hkpGsk_getClosestFeature(const hkpConvexShapeDAC0* pkShapeA, const hkpConvexShapeDAC0* pkShapeB,
                       const hkTransformDAC0& kAtB, hkVector4DAC0& kPointOut);
 };
 void __cdecl FUN_00dac020(const hkpCdBodyDAC0& kBodyA, const hkpCdBodyDAC0& kBodyB, const hkpCollisionInputDAC0& kInput,
@@ -320,9 +320,9 @@ struct GskStatus
     __m128 m_vertsA[12];
     __m128 m_vertsB[10];
 
-    void FUN_00daad40(const void* shapeA, const void* shapeB, const hkTransform* bTa, void* out10);
-    void FUN_00da9790(void* cache);
-    void FUN_00da9880(void* out10, hkContactPoint* pointOut);
+    void hkpGsk_getClosestFeature(const void* shapeA, const void* shapeB, const hkTransform* bTa, void* out10);
+    void hkpGsk_exitAndExportCacheImpl(void* cache);
+    void hkpGsk_convertFeatureToClosestDistance(void* out10, hkContactPoint* pointOut);
 };
 extern "C"
 {
@@ -395,7 +395,7 @@ struct S_00dac2b0_MonitorStream
 struct __declspec(align(16)) S_00dac2b0_Transform
 {
     float m[16];
-    void FUN_00cb22f0(const S_00dac2b0_Transform* a, const S_00dac2b0_Transform* b);
+    void hkTransform_setMulInverseMul(const S_00dac2b0_Transform* a, const S_00dac2b0_Transform* b);
 };
 struct __declspec(align(16)) S_00dac2b0_Vec
 {
@@ -406,8 +406,8 @@ struct S_00dac2b0_Cache
 {
     unsigned short id0, id1, id2, id3;
     unsigned char dimA, dimB, dims;
-    void FUN_00dafe70(const S_00dac2b0_Shape* a, const S_00dac2b0_Shape* b, const S_00dac2b0_Transform* t);
-    void FUN_00dafcd0(const S_00dac2b0_Shape* a, const S_00dac2b0_Shape* b, const S_00dac2b0_Transform* t);
+    void hkpGskCache_initTriangle(const S_00dac2b0_Shape* a, const S_00dac2b0_Shape* b, const S_00dac2b0_Transform* t);
+    void hkpGskCache_init(const S_00dac2b0_Shape* a, const S_00dac2b0_Shape* b, const S_00dac2b0_Transform* t);
 };
 struct S_00dac2b0_Shape
 {
@@ -444,7 +444,7 @@ struct __declspec(align(16)) S_00dac2b0_Gsk
     int unk1C;
     S_00dac2b0_Vec m_vertsA[12];
     S_00dac2b0_Vec m_vertsB[10];
-    int FUN_00daad40(const S_00dac2b0_Shape* a, const S_00dac2b0_Shape* b, const S_00dac2b0_Transform* t,
+    int hkpGsk_getClosestFeature(const S_00dac2b0_Shape* a, const S_00dac2b0_Shape* b, const S_00dac2b0_Transform* t,
                      S_00dac2b0_Vec* out);
 };
 struct S_00dac2b0_Body
@@ -547,7 +547,7 @@ struct S_00dac0b0_Transform
     S_00dac0b0_Vertex col1;
     S_00dac0b0_Vertex col2;
     S_00dac0b0_Vertex trans;
-    void FUN_00cb22f0(const S_00dac0b0_Transform* a, const S_00dac0b0_Transform* b);
+    void hkTransform_setMulInverseMul(const S_00dac0b0_Transform* a, const S_00dac0b0_Transform* b);
 };
 struct S_00dac0b0_Shape
 {
@@ -618,8 +618,8 @@ struct S_00dac0b0_Gsk
     S_00dac0b0_Vertex b08;
     S_00dac0b0_Vertex b09;
     S_00dac0b0_Transform aTb;
-    int FUN_00daad40(S_00dac0b0_Shape* a, S_00dac0b0_Shape* b, const S_00dac0b0_Transform& aTb, S_00dac0b0_Vertex* out);
-    void FUN_00da9790(S_00dac0b0_PackedCache* dst);
+    int hkpGsk_getClosestFeature(S_00dac0b0_Shape* a, S_00dac0b0_Shape* b, const S_00dac0b0_Transform& aTb, S_00dac0b0_Vertex* out);
+    void hkpGsk_exitAndExportCacheImpl(S_00dac0b0_PackedCache* dst);
 };
 template <class T> struct S_00dac0b0_Pad
 {

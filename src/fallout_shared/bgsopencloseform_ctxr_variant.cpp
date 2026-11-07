@@ -20,7 +20,7 @@
 class SoundH
 {
   public:
-    unsigned int FUN_0084e3a0(unsigned int);
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0(unsigned int);
 };
 class BSAudio;
 class BSAudioSoundHandle;
@@ -32,7 +32,7 @@ class BSAudioS_
 class BSAudio2
 {
   public:
-    BSAudioSoundHandle FUN_00ad73b0(unsigned int);
+    BSAudioSoundHandle GetSoundHandleByFormID_00ad73b0(unsigned int);
 };
 class TaskQ2
 {
@@ -54,7 +54,7 @@ class BSAudioSoundHandle
     int m8;
     BSAudioSoundHandle();
     ~BSAudioSoundHandle();
-    void FUN_00418890(const void*);
+    void ExtraDataList_GetSound(const void*);
     bool Play(bool);
     bool FUN_00ad8b60(float, float, float);
 };
@@ -71,14 +71,15 @@ struct LinkedReferenceArgument
     TESObjectREFR* reference;
 };
 void __fastcall SetLinkedReference(ExtraDataList*, LinkedReferenceArgument);
-bool FUN_008c7aa0();
-void FUN_00c6a270(NiAVObject*, bool, bool, int);
-void FUN_00c69ee0(void*, bool, bool);
+bool AILinearTaskThreadManager_ShouldQueue3DTask();
+void bhkWorld_Activate(NiAVObject*, bool, bool, int);
+void bhkWorld_RemoveObjects(void*, bool, bool);
 NiFixedString& FUN_0047a500();
 NiFixedString& FUN_0047a510();
 
 // @fnv 0x0047a560
-void FUN_0047a560(TESObjectREFR* apRefr, TESObjectREFR* apActor, BGSOpenCloseForm* apForm)
+// src: XBOX_PDB 0x0047a560
+void BGSOpenCloseForm_HandleActivate(TESObjectREFR* apRefr, TESObjectREFR* apActor, BGSOpenCloseForm* apForm)
 {
     if (!apRefr)
         return;
@@ -88,11 +89,11 @@ void FUN_0047a560(TESObjectREFR* apRefr, TESObjectREFR* apActor, BGSOpenCloseFor
         if (apRefr->GetNiNode()->NiObjectNET::GetControllers())
         {
             NiTimeController* p3d = apRefr->GetNiNode()->NiObjectNET::GetControllers();
-            NiControllerManager* pAV = (NiControllerManager*)FUN_00653270(&DAT_011f36ac, (NiProperty*)p3d);
+            NiControllerManager* pAV = (NiControllerManager*)NiObject_DynamicCast(&DAT_011f36ac, (NiProperty*)p3d);
             if (pAV)
             {
-                NiControllerSequence* pSeqA = pAV->FUN_0047a520(FUN_0047a500());
-                NiControllerSequence* pSeqB = pAV->FUN_0047a520(FUN_0047a510());
+                NiControllerSequence* pSeqA = pAV->NiControllerManager_GetSequenceByName(FUN_0047a500());
+                NiControllerSequence* pSeqB = pAV->NiControllerManager_GetSequenceByName(FUN_0047a510());
                 if (pSeqA && pSeqB)
                 {
                     bFlag = true;
@@ -122,38 +123,38 @@ void FUN_0047a560(TESObjectREFR* apRefr, TESObjectREFR* apActor, BGSOpenCloseFor
                             if (static_cast<const TESForm*>(apRefr->GetObjectReference())->GetFormType() == ENUM_FORM_ID_DOOR_ID)
                             {
                                 TESBoundObject* pObj = apRefr->GetObjectReference();
-                                if (((TESObjectDOOR*)pObj)->FUN_00518080())
+                                if (((TESObjectDOOR*)pObj)->IsSlidingDoor())
                                     bSkip = false;
                             }
                             if (bSkip)
                             {
                                 void* pNi = apRefr->GetNiNode();
-                                if (FUN_008c7aa0())
+                                if (AILinearTaskThreadManager_ShouldQueue3DTask())
                                 {
                                     ((TaskQ2*)TaskQueueInterface::GetSingleton())->QueueTaskIfPresent(pNi);
                                 }
                                 else
                                 {
-                                    FUN_00c6a270((NiAVObject*)pNi, 1, 1, 0);
-                                    FUN_00c69ee0(pNi, 1, 1);
+                                    bhkWorld_Activate((NiAVObject*)pNi, 1, 1, 0);
+                                    bhkWorld_RemoveObjects(pNi, 1, 1);
                                 }
                             }
                         }
                         pAV->FUN_0047aa40(true);
                         pAV->FUN_0047aab0(p2c, 0, 0, 1.0f, 0.0f, static_cast<NiControllerSequence*>(0));
-                        p2c->FUN_0098adb0(-DAT_0101ab70);
+                        p2c->PathingLOSGridMap_SetSightRadius(-DAT_0101ab70);
                         if (p28)
                         {
                             BSAudioSoundHandle h;
                             if (apActor == _g_thePlayer)
                             {
-                                h.FUN_00418890(&((BSAudio2*)BSAudioS_::GetSingleton())
-                                                    ->FUN_00ad73b0(p28->FUN_0084e3a0(0x80000121u)));
+                                h.ExtraDataList_GetSound(&((BSAudio2*)BSAudioS_::GetSingleton())
+                                                    ->GetSoundHandleByFormID_00ad73b0(p28->GetHavokWorldObjectCountInSceneGraph_0084e3a0(0x80000121u)));
                             }
                             else
                             {
-                                h.FUN_00418890(
-                                    &((BSAudio2*)BSAudioS_::GetSingleton())->FUN_00ad73b0(p28->FUN_0084e3a0(0x102)));
+                                h.ExtraDataList_GetSound(
+                                    &((BSAudio2*)BSAudioS_::GetSingleton())->GetSoundHandleByFormID_00ad73b0(p28->GetHavokWorldObjectCountInSceneGraph_0084e3a0(0x102)));
                                 NiPoint3 pt = *static_cast<const TESObjectREFR*>(apRefr)->GetPos();
                                 h.FUN_00ad8b60(pt.x, pt.y, pt.z);
                             }

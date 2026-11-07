@@ -26,9 +26,9 @@
 extern MemoryManager g_memoryManager;
 struct S
 {
-    S* FUN_00e9ee60(void*);
+    S* NiUnionBV_NiUnionBV(void*);
 };
-S* __fastcall FUN_00e9efb0(void* self);
+S* __fastcall NiUnionBV_Clone(void* self);
 // FUN_00e9ecc0 - 6-byte leaf stub of the retail binary.
 //
 // The original code is "mov eax, 4 ; ret": the function simply hands the
@@ -37,7 +37,7 @@ S* __fastcall FUN_00e9efb0(void* self);
 // is materialised from a relocated address expression instead.  That keeps
 // the original six-byte "mov eax, <imm32> ; ret" shape byte for byte.
 extern int g_fnv_00e9ecc0_value_anchor;
-int FUN_00e9ecc0();
+int bhkCharacterStateFlying_Update();
 
 class VirtualTextureView_00e9ecd0;
 struct Item
@@ -86,17 +86,18 @@ struct TexArray
 };
 struct TexCache
 {
-    void FUN_00e9e860();
-    void FUN_00e9ecd0(Source* src);
+    void NiUnionBV_RemoveAllBoundingVolumes();
+    void NiUnionBV_Copy(Source* src);
     unsigned int unk00;
     TexArray m_textures;
 };
 // @fnv 0x00e9ecd0
-void TexCache::FUN_00e9ecd0(Source* src)
+// src: GAMEBRYO_LIB 0x00e9ecd0
+void TexCache::NiUnionBV_Copy(Source* src)
 {
     if (src->GetType() == 4)
     {
-        FUN_00e9e860();
+        NiUnionBV_RemoveAllBoundingVolumes();
         m_textures.SetSize(src->m_uiItemCount);
         for (unsigned int i = 0; i < src->m_uiItemCount; i++)
         {
@@ -175,11 +176,12 @@ struct Source365
         return unk0e;
     }
 
-    State365* __thiscall FUN_00e9eef0();
+    State365* __thiscall NiUnionBV_Create();
 };
 
 // @fnv 0x00e9eef0
-State365* __thiscall Source365::FUN_00e9eef0()
+// src: GAMEBRYO_SRC 0x00e9eef0
+State365* __thiscall Source365::NiUnionBV_Create()
 {
     State365* state = static_cast<State365*>(g_memoryManager.Allocate(sizeof(State365)));
 

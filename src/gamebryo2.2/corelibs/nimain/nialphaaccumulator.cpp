@@ -72,10 +72,11 @@ DummyObj* __fastcall InitFromGlobals(DummyObj* pThis)
 
 struct FUN_00a43350_shell
 {
-    unsigned int FUN_00a43350(unsigned short usChannel);
+    unsigned int BSTreadTransfInterpolator_GetKeyContent(unsigned short usChannel);
 };
 // @fnv 0x00a43350
-unsigned int FUN_00a43350_shell::FUN_00a43350(unsigned short usChannel)
+// src: XBOX_PDB 0x00a43350
+unsigned int FUN_00a43350_shell::BSTreadTransfInterpolator_GetKeyContent(unsigned short usChannel)
 {
     return usChannel ? 6 : 0;
 }
@@ -87,7 +88,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_011f3ed8;
 // Returns the address of the global object g_011f3ed8.
 // @fnv 0x00a43360
-GlobalObjectO2_00a7b610* __cdecl FUN_00a43360()
+// src: COMMUNITY 0x00a43360
+GlobalObjectO2_00a7b610* __cdecl BSTreadTransfInterpolator_GetRTTI()
 {
     return &g_011f3ed8;
 }
@@ -140,7 +142,7 @@ struct FUN_00a43450_link
 };
 struct FUN_00aa0ad0_base
 {
-    bool FUN_00aa0ad0(FUN_00a43450_stream* arStream);
+    bool BSPackedAdditionalGeometryData_RegisterStreamables(FUN_00a43450_stream* arStream);
 };
 struct FUN_00a43450_shell : FUN_00aa0ad0_base
 {
@@ -149,13 +151,14 @@ struct FUN_00a43450_shell : FUN_00aa0ad0_base
     unsigned int m_uiLinkCount;
     char pad2[0x20 - 0x14];
     FUN_00a43450_data* m_pData;
-    bool FUN_00a43450(FUN_00a43450_stream* arStream);
+    bool BSTreadTransfInterpolator_RegisterStreamables(FUN_00a43450_stream* arStream);
 };
 // Calls the base register, then registers each link's name string and the data object's streamables with the stream; returns the base result.
 // @fnv 0x00a43450
-bool FUN_00a43450_shell::FUN_00a43450(FUN_00a43450_stream* arStream)
+// src: XBOX_PDB 0x00a43450
+bool FUN_00a43450_shell::BSTreadTransfInterpolator_RegisterStreamables(FUN_00a43450_stream* arStream)
 {
-    bool bret = FUN_00aa0ad0(arStream);
+    bool bret = BSPackedAdditionalGeometryData_RegisterStreamables(arStream);
     if (bret)
     {
         for (unsigned int ui = 0; ui < m_uiLinkCount; ui++)
@@ -168,11 +171,11 @@ bool FUN_00a43450_shell::FUN_00a43450(FUN_00a43450_stream* arStream)
 }
 
 // The base equality thunk returns a byte, which the alpha override normalizes.
-char __stdcall FUN_00aa0ae0(NiObject*);
+char __stdcall NiBackToFrontAccumulator_IsEqual(NiObject*);
 // @fnv 0x00a9b510
 bool NiAlphaAccumulator::IsEqual(NiObject* pkObject) const
 {
-    bool b = FUN_00aa0ae0(pkObject) != 0;
+    bool b = NiBackToFrontAccumulator_IsEqual(pkObject) != 0;
     return b;
 }
 
@@ -183,7 +186,7 @@ const NiRTTI* NiAlphaAccumulator::GetRTTI() const
     return (const NiRTTI*)&g_011fa000_arg1;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int);
+void* __cdecl Object_DispatchCommandFour(unsigned int);
 
 struct Base0_a43370
 {
@@ -218,7 +221,7 @@ struct Derived_a43370 : Base1_a43370
     {}
     static void* __cdecl operator new(unsigned int s) throw()
     {
-        return FUN_00aa13e0(s);
+        return Object_DispatchCommandFour(s);
     }
 };
 
@@ -233,7 +236,7 @@ extern int DAT_011f4748;
 
 struct FUN_00b58570_Class
 {
-    void* __thiscall FUN_00b58570(void* arg);
+    void* __thiscall NiTPointerListBase_AddTail(void* arg);
 };
 
 struct FUN_00a9b850_Prop
@@ -359,18 +362,19 @@ bool NiAlphaAccumulator::RegisterObject(NiGeometry* pkObject)
     if ((p->unk18 & 1) && (!m_bObserveNoSortHint || !((unsigned char)(p->unk18w >> 13) & 1)) &&
         ((unsigned char)~(pObject->unk30 >> 6) & 1))
     {
-        reinterpret_cast<FUN_00b58570_Class*>(&m_kItems)->FUN_00b58570(&pObject);
+        reinterpret_cast<FUN_00b58570_Class*>(&m_kItems)->NiTPointerListBase_AddTail(&pObject);
         return true;
     }
     pObject->vfn_0DC(g);
     return true;
 }
 
-void FUN_00a95ca0();
+void NiKeyBasedInterpolator_LinkObject();
 // @fnv 0x00a43330
-void FUN_00a43330()
+// src: COMMUNITY 0x00a43330
+void j_j_j_nullsub_3()
 {
-    FUN_00a95ca0();
+    NiKeyBasedInterpolator_LinkObject();
 }
 
 struct C8CCC0Base
@@ -387,18 +391,20 @@ bool FUN_00a43340::IsEqual(const FUN_00a43340& apObject)
     return C8CCC0Base::IsEqual(apObject);
 }
 
-void __cdecl FUN_00aa0ac0();
+void __cdecl NiKeyBasedInterpolator_LoadBinary();
 // @fnv 0x00a9b4f0
-void __cdecl FUN_00a9b4f0()
+// src: XBOX_PDB 0x00a9b4f0
+void __cdecl NiAlphaAccumulator_LoadBinary()
 {
-    FUN_00aa0ac0();
+    NiKeyBasedInterpolator_LoadBinary();
 }
 
-void __cdecl FUN_00aa0ad0();
+void __cdecl BSPackedAdditionalGeometryData_RegisterStreamables();
 // @fnv 0x00a9b500
-void __cdecl FUN_00a9b500()
+// src: XBOX_PDB 0x00a9b500
+void __cdecl NiAlphaAccumulator_RegisterStreamables()
 {
-    FUN_00aa0ad0();
+    BSPackedAdditionalGeometryData_RegisterStreamables();
 }
 
 struct S00a9b570_Pt
@@ -411,8 +417,8 @@ struct S00a9b570_Bound
     float m_fBoundRadius;
 };
 extern S00a9b570_Bound DAT_011f4288;
-void __cdecl FUN_00aa10f0(void* p);
-void* __cdecl FUN_00aa1070(unsigned int n);
+void __cdecl _NiFree_00aa10f0(void* p);
+void* __cdecl _NiMalloc_00aa1070(unsigned int n);
 
 inline float S00a9b570_Dot(const S00a9b570_Pt& a, const S00a9b570_Pt& b)
 {
@@ -513,11 +519,11 @@ void NiAlphaAccumulator::Sort()
         return;
     if (m_iNumItems > m_iMaxItems)
     {
-        FUN_00aa10f0(m_ppkItems);
+        _NiFree_00aa10f0(m_ppkItems);
         m_iMaxItems = m_iNumItems;
-        m_ppkItems = (NiGeometry**)FUN_00aa1070(m_iMaxItems * sizeof(NiGeometry*));
-        FUN_00aa10f0(m_pfDepths);
-        m_pfDepths = (float*)FUN_00aa1070(m_iMaxItems * sizeof(float));
+        m_ppkItems = (NiGeometry**)_NiMalloc_00aa1070(m_iMaxItems * sizeof(NiGeometry*));
+        _NiFree_00aa10f0(m_pfDepths);
+        m_pfDepths = (float*)_NiMalloc_00aa1070(m_iMaxItems * sizeof(float));
     }
     ItemListNode* kPos = m_kItemsToSortAndRender->m_pkHead;
     S00a9b570_Pt kViewDir = reinterpret_cast<const S00a9b570_Cam*>(m_pkCamera)->GetWorldTranslation();
@@ -561,7 +567,7 @@ extern NiRenderer* DAT_011f4748;
 
 struct S00a9b790_NodeAllocator
 {
-    ItemListNode* FUN_0043a010();
+    ItemListNode* NiGeometry_AddProperty();
 };
 
 class S00a9b790_NiAlphaProperty
@@ -711,7 +717,7 @@ class S00a9b790_NiVisibleArray
 
 static inline void AddTail(NiAlphaAccumulator* self, S00a9b790_NiGeometry* pkObject)
 {
-    ItemListNode* pkNode = ((S00a9b790_NodeAllocator*)&self->m_kItems.m_kItemCount)->FUN_0043a010();
+    ItemListNode* pkNode = ((S00a9b790_NodeAllocator*)&self->m_kItems.m_kItemCount)->NiGeometry_AddProperty();
     pkNode->m_element = reinterpret_cast<NiGeometry*>(pkObject);
     pkNode->m_pkNext = 0;
     pkNode->m_pkPrev = self->m_kItems.m_pkTail;
@@ -755,7 +761,7 @@ extern unsigned int kVtbl_NiAlphaAccumulator;
 // @fnv 0x00a9b730
 NiObject* NiAlphaAccumulator::MakeClone(CloningProcess& cloning)
 {
-    NiAlphaAccumulator* clone = (NiAlphaAccumulator*)FUN_00aa13e0(sizeof(NiAlphaAccumulator));
+    NiAlphaAccumulator* clone = (NiAlphaAccumulator*)Object_DispatchCommandFour(sizeof(NiAlphaAccumulator));
     if (clone)
     {
         InitializeBackToFrontAccumulator(clone);

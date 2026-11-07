@@ -35,7 +35,7 @@ public:
     {}
     virtual ~NiTObjectArray();
 
-    void FUN_00b799c0();
+    void NiTObjectArray_NiPointer_NiShaderConstantMapEntry_RemoveAll();
 
     union
     {

@@ -41,7 +41,7 @@ class NiFixedString
     void Assign(const char* text);
     void Clear();
     void Release();
-    __declspec(noalias) void FUN_0043ba10(const NiFixedString& text);
+    __declspec(noalias) void AssignInternedString(const NiFixedString& text);
     void* FUN_004b9900(unsigned int flags);
     void FUN_00761760(int* data, unsigned int count);
 #if !defined(_MSC_VER)

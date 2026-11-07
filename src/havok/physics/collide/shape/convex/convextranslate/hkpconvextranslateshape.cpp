@@ -53,11 +53,12 @@ struct Own_dd5e60
     int unk10;
     int unk14;
     Sub_dd5e60* m_sub;  // at +0x18
-    void __thiscall FUN_00dd5e60();
+    void __thiscall hkpConvexTranslateShape_getNumCollisionSpheresImpl();
 };
 
 // @fnv 0x00dd5e60
-void __thiscall Own_dd5e60::FUN_00dd5e60()
+// src: HAVOK_SRC 0x00dd5e60
+void __thiscall Own_dd5e60::hkpConvexTranslateShape_getNumCollisionSpheresImpl()
 {
     m_sub->v2C();
 }
@@ -108,7 +109,7 @@ struct Own_dd5e70
     int unk14;
     void* m_sub;
 
-    void __thiscall FUN_00c90360(Sub_dd5e70* object, const int* attribute);
+    void __thiscall hkReferencedObject_calcContentStatistics(Sub_dd5e70* object, const int* attribute);
     void __thiscall AttachChildAndAttribute(Sub_dd5e70* object, int unused);
 };
 
@@ -116,7 +117,7 @@ struct Own_dd5e70
 void __thiscall Own_dd5e70::AttachChildAndAttribute(Sub_dd5e70* object, int unused)
 {
     object->v0C("Child", m_sub, 0);
-    FUN_00c90360(object, &DAT_01268940);
+    hkReferencedObject_calcContentStatistics(object, &DAT_01268940);
 }
 
 struct FUN_00dd5ea0_class
@@ -127,10 +128,11 @@ struct FUN_00dd5ea0_class
     int unk0C;
     int unk10;
     int unk14;
-    void* FUN_00dd5ea0();
+    void* hkpConvexTranslateShape_getContainer();
 };
 // @fnv 0x00dd5ea0
-void* FUN_00dd5ea0_class::FUN_00dd5ea0()
+// src: HAVOK_SRC 0x00dd5ea0
+void* FUN_00dd5ea0_class::hkpConvexTranslateShape_getContainer()
 {
     return &unk14;
 }
@@ -168,12 +170,13 @@ struct ClsDD5F50
     int m_1c;
     hkVector4 m_vTranslation;  // +0x20
 
-    void __thiscall FUN_00dd5f50(const unsigned short* ids, int numIds, hkVector4* verticesOut);
+    void __thiscall hkpConvexTranslateShape_convertVertexIdsToVerticesImpl(const unsigned short* ids, int numIds, hkVector4* verticesOut);
 };
 
 // Calls the contained shape's virtual vertex generator, then adds m_vTranslation to each output vertex.
 // @fnv 0x00dd5f50
-void ClsDD5F50::FUN_00dd5f50(const unsigned short* ids, int numIds, hkVector4* verticesOut)
+// src: HAVOK_SRC 0x00dd5f50
+void ClsDD5F50::hkpConvexTranslateShape_convertVertexIdsToVerticesImpl(const unsigned short* ids, int numIds, hkVector4* verticesOut)
 {
     m_pContainedShape->FUN_00dd5f50_v(ids, numIds, verticesOut);
     for (int i = 0; i < numIds; i++)
@@ -263,12 +266,13 @@ class ConvexTranslateDD60
     const ShapeDD60* m_pContainedShape;
     int pad1c;
     hkVector4 m_vTranslation;
-    HkBoolDD FUN_00dd60e0(const RayInputDD60& input, RayOutputDD60& results) const;
+    HkBoolDD hkpConvexTranslateShape_castRayImpl(const RayInputDD60& input, RayOutputDD60& results) const;
 };
 
 // Subtracts m_vTranslation from the ray endpoints, calls m_pContainedShape->RayCast, and sets the shape key to 0 on a hit.
 // @fnv 0x00dd60e0
-HkBoolDD ConvexTranslateDD60::FUN_00dd60e0(const RayInputDD60& input, RayOutputDD60& results) const
+// src: HAVOK_SRC 0x00dd60e0
+HkBoolDD ConvexTranslateDD60::hkpConvexTranslateShape_castRayImpl(const RayInputDD60& input, RayOutputDD60& results) const
 {
     TimerMark("TtrcConvTransl");
     RayInputDD60 subInput;
@@ -303,12 +307,13 @@ struct FNV_dd6060_Shape
 struct FNV_dd6060_Class : hkpConvexTranslateShape
 {
 
-    void __thiscall FUN_00dd6060(const hkRotation* rotation, float distance, LocalM128* output);
+    void __thiscall hkpConvexTranslateShape_getAabbImpl(const hkRotation* rotation, float distance, LocalM128* output);
 };
 
 // Calls the contained shape's v1C, then adds the translation rotated by the rotation columns to output[0] and output[1].
 // @fnv 0x00dd6060
-void FNV_dd6060_Class::FUN_00dd6060(const hkRotation* rotation, float distance, LocalM128* output)
+// src: HAVOK_SRC 0x00dd6060
+void FNV_dd6060_Class::hkpConvexTranslateShape_getAabbImpl(const hkRotation* rotation, float distance, LocalM128* output)
 
 {
 

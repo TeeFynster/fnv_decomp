@@ -26,7 +26,7 @@ class ActorValueStore
   public:
     ActorValueStore();
     void ResetCacheValues();
-    void FUN_008c6f00(ActorValue::Index avIndex, float value);
+    void CachedActorValues_SetActorValue(ActorValue::Index avIndex, float value);
     void InvalidateValue(ActorValue::Index avIndex);
 
   private:

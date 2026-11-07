@@ -13,7 +13,7 @@ struct Host_CreatureInit;
 
 struct FormObj_CreatureInit
 {
-    unsigned int FUN_0084e3a0();
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 struct Sub30_CreatureInit
@@ -54,7 +54,7 @@ struct AIList_CreatureInit
 
 struct Sub90_CreatureInit
 {
-    void FUN_0047f4c0(void*);
+    void TESAIForm_InitItem(void*);
     int u00, u04, u08, u0c, u10, u14, u18, u1c;
     AIList_CreatureInit packages;
     int u28, u2c, u30;
@@ -226,20 +226,21 @@ struct Host_CreatureInit
 
     bool FUN_004013e0() const;
     void* FUN_00484e60(int);
-    unsigned int FUN_0084e3a0();
-    void FUN_00565210(bool);
+    unsigned int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    void TESObjectREFR_SetHasTemp3D(bool);
     void FUN_00484ab0(int);
-    void FUN_005f9340();
+    void TESCreature_InitItem();
 };
 
 extern "C" void __cdecl FUN_00485d50(unsigned int*, void*);
-extern "C" class TESForm* __cdecl FUN_004839c0(unsigned int);
-void __cdecl FUN_005b5e40(const char*, ...);
-TESCombatStyle* __cdecl FUN_00505000();
+extern "C" class TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int);
+void __cdecl Warning_005b5e40(const char*, ...);
+TESCombatStyle* __cdecl TESCombatStyle_GetDefaultCombatStyle();
 extern "C" const char DAT_010495e0[], DAT_01049598[], DAT_01049548[], DAT_010494f8[], DAT_0102c740[], DAT_010494bc[];
 
 // @fnv 0x005f9340
-void Host_CreatureInit::FUN_005f9340()
+// src: XBOX_PDB 0x005f9340
+void Host_CreatureInit::TESCreature_InitItem()
 {
     unsigned int formId;
     if (FUN_004013e0())
@@ -248,7 +249,7 @@ void Host_CreatureInit::FUN_005f9340()
     m_64.FUN_00481bb0(this);
     m_7c.FUN_0048d400(this);
     m_70.FUN_0047beb0(this);
-    m_90.FUN_0047f4c0(this);
+    m_90.TESAIForm_InitItem(this);
     m_30.FUN_0047d8b0(this);
     m_104.FUN_00478be0(this);
     if (m_30.u04 & 1)
@@ -265,14 +266,14 @@ void Host_CreatureInit::FUN_005f9340()
         if (soundId)
         {
             FUN_00485d50(&soundId, FUN_00484e60(-1));
-            m_128 = (struct Host_CreatureInit*)dynamic_cast<TESCreature*>(FUN_004839c0(soundId));
+            m_128 = (struct Host_CreatureInit*)dynamic_cast<TESCreature*>(TESForm_GetFormByNumericID(soundId));
             if (!m_128)
             {
-                FUN_005b5e40(DAT_010495e0, soundId, FUN_0084e3a0(), v76());
+                Warning_005b5e40(DAT_010495e0, soundId, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), v76());
             }
             else if (m_128 == this || m_128->m_30.FUN_0059bb30())
             {
-                FUN_005b5e40(DAT_01049598, m_128->v76(), m_128->FUN_0084e3a0(), v76(), FUN_0084e3a0());
+                Warning_005b5e40(DAT_01049598, m_128->v76(), m_128->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), v76(), GetHavokWorldObjectCountInSceneGraph_0084e3a0());
                 m_128 = 0;
             }
         }
@@ -283,25 +284,25 @@ void Host_CreatureInit::FUN_005f9340()
         if (combatId)
         {
             FUN_00485d50(&combatId, FUN_00484e60(-1));
-            m_140 = dynamic_cast<TESCombatStyle*>(FUN_004839c0(combatId));
+            m_140 = dynamic_cast<TESCombatStyle*>(TESForm_GetFormByNumericID(combatId));
             if (!m_140)
             {
-                FUN_005b5e40(DAT_01049548, combatId, FUN_0084e3a0(), v76());
+                Warning_005b5e40(DAT_01049548, combatId, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), v76());
             }
         }
     }
     if (!v98())
-        v99(FUN_00505000());
+        v99(TESCombatStyle_GetDefaultCombatStyle());
     if (m_144)
     {
         unsigned int bodyId = (unsigned int)m_144;
         if (bodyId)
         {
             FUN_00485d50(&bodyId, FUN_00484e60(-1));
-            m_144 = dynamic_cast<BGSBodyPartData*>(FUN_004839c0(bodyId));
+            m_144 = dynamic_cast<BGSBodyPartData*>(TESForm_GetFormByNumericID(bodyId));
             if (!m_144)
             {
-                FUN_005b5e40(DAT_010494f8, bodyId, FUN_0084e3a0(), v76());
+                Warning_005b5e40(DAT_010494f8, bodyId, GetHavokWorldObjectCountInSceneGraph_0084e3a0(), v76());
             }
         }
     }
@@ -309,60 +310,61 @@ void Host_CreatureInit::FUN_005f9340()
     if (formId)
     {
         FUN_00485d50(&formId, FUN_00484e60(-1));
-        m_14c = dynamic_cast<BGSImpactDataSet*>(FUN_004839c0(formId));
+        m_14c = dynamic_cast<BGSImpactDataSet*>(TESForm_GetFormByNumericID(formId));
         if (!m_14c)
-            FUN_005b5e40(DAT_0102c740, formId, v76(), FUN_0084e3a0());
+            Warning_005b5e40(DAT_0102c740, formId, v76(), GetHavokWorldObjectCountInSceneGraph_0084e3a0());
     }
     formId = (unsigned int)m_158;
     if (formId)
     {
         FUN_00485d50(&formId, FUN_00484e60(-1));
-        m_158 = dynamic_cast<BGSListForm*>(FUN_004839c0(formId));
+        m_158 = dynamic_cast<BGSListForm*>(TESForm_GetFormByNumericID(formId));
         if (!m_158)
-            FUN_005b5e40(DAT_010494bc, formId, v76(), FUN_0084e3a0());
+            Warning_005b5e40(DAT_010494bc, formId, v76(), GetHavokWorldObjectCountInSceneGraph_0084e3a0());
     }
     if (m_90.packages.Size() <= 0)
-        FUN_00565210(true);
+        TESObjectREFR_SetHasTemp3D(true);
     FUN_00484ab0(1);
 }
 
 namespace fnv_005fb270 {
-::TESForm* __cdecl FUN_004839c0(unsigned int formId);
+::TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int formId);
 
 struct TESCreatureCall_1b30
 {
-    void FUN_005f1b30(int a1, int a2);
+    void LoadGame_005f1b30(int a1, int a2);
 };
 
 struct TESCreatureCall_0d00
 {
-    void FUN_00484d00(void* p, int v);
-    void FUN_00484d40(unsigned int* p, int n);
+    void TESForm_LoadGameDataOLD(void* p, int v);
+    void TESForm_LoadNumericID(unsigned int* p, int n);
 };
 
 __if_exists(::TESCreature::m_ucField00)
 {
     struct TESCreatureLoad : ::TESCreature
     {
-        void FUN_005fb270(int a1, int a2);
+        void TESCreature_LoadGame(int a1, int a2);
     };
 }
 
 // @fnv 0x005fb270
-void TESCreatureLoad::FUN_005fb270(int a1, int a2)
+// src: XBOX_PDB 0x005fb270
+void TESCreatureLoad::TESCreature_LoadGame(int a1, int a2)
 {
-    ((TESCreatureCall_1b30*)this)->FUN_005f1b30(a1, a2);
+    ((TESCreatureCall_1b30*)this)->LoadGame_005f1b30(a1, a2);
     if (a1 & 0x200)
     {
-        ((TESCreatureCall_0d00*)this)->FUN_00484d00(&m_ucField00, 1);
-        ((TESCreatureCall_0d00*)this)->FUN_00484d00(&m_ucField01, 1);
-        ((TESCreatureCall_0d00*)this)->FUN_00484d00(&m_ucField02, 1);
+        ((TESCreatureCall_0d00*)this)->TESForm_LoadGameDataOLD(&m_ucField00, 1);
+        ((TESCreatureCall_0d00*)this)->TESForm_LoadGameDataOLD(&m_ucField01, 1);
+        ((TESCreatureCall_0d00*)this)->TESForm_LoadGameDataOLD(&m_ucField02, 1);
     }
     if (a1 & 0)
     {
         unsigned int formId;
-        ((TESCreatureCall_0d00*)this)->FUN_00484d40(&formId, 4);
-        ::TESCombatStyle* style = dynamic_cast< ::TESCombatStyle*>(FUN_004839c0(formId));
+        ((TESCreatureCall_0d00*)this)->TESForm_LoadNumericID(&formId, 4);
+        ::TESCombatStyle* style = dynamic_cast< ::TESCombatStyle*>(TESForm_GetFormByNumericID(formId));
         if (style)
         {
             m_pCombatStyle = style;

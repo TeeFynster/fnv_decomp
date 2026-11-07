@@ -69,7 +69,7 @@ struct S_00d27820_A
     unsigned char unk24;
     unsigned char flags;
 };
-void __cdecl FUN_00cb1270(int a, int b, char* c);
+void __cdecl hkString_memMove(int a, int b, char* c);
 
 // Removes the record p->m_pConstraintInternal from its node lists, shifts the following records down, adjusts buffer sizes and counts, and calls FUN_00c905b0.
 // @fnv 0x00d27820
@@ -107,7 +107,7 @@ void DetachRecord(hkpConstraintInstance* p)
         delta = -(int)pRec->sz;
         int iTotal = pRec->sz + pRec->cnt;
         S_00d27820_Buf* pBuf = &d->buf;
-        FUN_00cb1270(pRec->cnt, iTotal, pBuf->data + (pBuf->size - iTotal));
+        hkString_memMove(pRec->cnt, iTotal, pBuf->data + (pBuf->size - iTotal));
         pBuf->size -= pRec->sz;
         pRec->cnt = 0;
     }
@@ -171,16 +171,17 @@ struct ConstraintRuntimeInfo
 
 extern const hkUint16 DAT_010cb7a8[];
 
-hkpModifierConstraintAtom* __cdecl FUN_00d277f0(hkpConstraintInstance* instance);
+hkpModifierConstraintAtom* __cdecl hkpWorldConstraintUtil_findLastModifier(hkpConstraintInstance* instance);
 
 // Splices newModifier into the modifier atom chain of instance, updating child pointers and accumulating solver stats on the owner.
 // @fnv 0x00d27960
-void __cdecl FUN_00d27960(hkpConstraintInstance* instance, hkpConstraintOwner& constraintOwner,
+// src: HAVOK_LIB 0x00d27960
+void __cdecl hkpWorldConstraintUtil_addModifier(hkpConstraintInstance* instance, hkpConstraintOwner& constraintOwner,
                           hkpModifierConstraintAtom* newModifier)
 {
     constraintOwner.checkAccessRw();
 
-    hkpModifierConstraintAtom* lastModifier = FUN_00d277f0(instance);
+    hkpModifierConstraintAtom* lastModifier = hkpWorldConstraintUtil_findLastModifier(instance);
     ConstraintRuntimeInfo* pConstraintInternal = instance->m_pConstraintInternal;
 
     if (newModifier->m_type == 0x1a && lastModifier)
@@ -221,7 +222,7 @@ void __cdecl FUN_00d27960(hkpConstraintInstance* instance, hkpConstraintOwner& c
         GenericConstraintAtomScheme info;
         info.clear();
         hkUint8 usedFlags = 0;
-        int callbackRequest = newModifier->FUN_00d22090(info, usedFlags);
+        int callbackRequest = newModifier->addModifierDataToConstraintInfo(info, usedFlags);
         constraintOwner.AccumulateStats(instance, info);
 
         usedFlags &=
@@ -272,7 +273,7 @@ struct InternalArray
     ConstraintInternal* data;
     unsigned short size;
     unsigned short capacity;
-    void FUN_00d27f50(int, ConstraintInternal*);
+    void hkSmallArray_hkConstraintInternal_insertAt(int, ConstraintInternal*);
 };
 struct ConstraintPointer
 {
@@ -355,15 +356,16 @@ struct Entity
     unsigned int unkD8, unkDC, unkE0, unkE4;
     unsigned char motionType;
 };
-void FUN_00cb5570(void*, Entity*, Entity*);
-unsigned char FUN_00d22120(hkpConstraintAtom*, ConstraintInfo*, unsigned char*);
+void hkpWorldOperationUtil_mergeIslands(void*, Entity*, Entity*);
+unsigned char hkpModifierConstraintAtom_addAllModifierDataToConstraintInfo(hkpConstraintAtom*, ConstraintInfo*, unsigned char*);
 extern unsigned short DAT_010cb7a8[];
-void FUN_00c908c0(void*, ByteArray*, int, int);
+void hkArrayUtil__reserve(void*, ByteArray*, int, int);
 void ResizeAudioStream(void*, ConstraintArray*, int);
-void FUN_00cb1270(void*, const void*, int);
+void hkString_memMove(void*, const void*, int);
 // Initializes a ConstraintInternal entry, inserts it into the master entity's constraint array, allocates runtime memory, and registers the constraint as a slave.
 // @fnv 0x00d27ac0
-ConstraintPointer* FUN_00d27ac0(void* unused, hkpConstraintInstance* constraint)
+// src: HAVOK_LIB 0x00d27ac0
+ConstraintPointer* hkpWorldConstraintUtil_addConstraint(void* unused, hkpConstraintInstance* constraint)
 {
     constraint->addReference();
     ConstraintInfo info;
@@ -385,7 +387,7 @@ ConstraintPointer* FUN_00d27ac0(void* unused, hkpConstraintInstance* constraint)
     entry.priority = constraint->m_priority;
     if (entry.bodies[0]->motionType != 5 && entry.bodies[1]->motionType != 5 &&
         entry.bodies[0]->island != entry.bodies[1]->island)
-        FUN_00cb5570(entry.bodies[0]->world, entry.bodies[0], entry.bodies[1]);
+        hkpWorldOperationUtil_mergeIslands(entry.bodies[0]->world, entry.bodies[0], entry.bodies[1]);
     entry.masterIndex = entry.bodies[0]->motionType == 5;
     Entity* master = entry.bodies[entry.masterIndex];
     constraint->m_pOwnerObject = reinterpret_cast<hkpConstraintOwner*>(master->island);
@@ -405,7 +407,7 @@ ConstraintPointer* FUN_00d27ac0(void* unused, hkpConstraintInstance* constraint)
         entry.flags = 2;
     unsigned char flags = 0;
     if (constraint->m_pConstraintModifier)
-        entry.flags |= FUN_00d22120(reinterpret_cast<hkpConstraintAtom*>(constraint->m_pConstraintModifier), &info, &flags);
+        entry.flags |= hkpModifierConstraintAtom_addAllModifierDataToConstraintInfo(reinterpret_cast<hkpConstraintAtom*>(constraint->m_pConstraintModifier), &info, &flags);
     if (atomType == 22)
     {
         unsigned char combined = constraint->m_kActorEntries[1]->m_ucResponseModifierFlags | constraint->m_kActorEntries[0]->m_ucResponseModifierFlags;
@@ -441,7 +443,7 @@ ConstraintPointer* FUN_00d27ac0(void* unused, hkpConstraintInstance* constraint)
             break;
     }
     int firstChanged = count < (array.capacity & 0x3fff) ? index : 0;
-    array.FUN_00d27f50(index, &entry);
+    array.hkSmallArray_hkConstraintInternal_insertAt(index, &entry);
     for (int i = firstChanged; i < (int)array.size; ++i)
     {
         ConstraintInternal* changed = &array.data[i];
@@ -462,7 +464,7 @@ ConstraintPointer* FUN_00d27ac0(void* unused, hkpConstraintInstance* constraint)
         int newSize = oldSize + runtimeSize;
         hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
         if ((int)(storage.capacity & 0x3fffffff) < newSize)
-            FUN_00c908c0(router->m_heap, &storage, newSize, 1);
+            hkArrayUtil__reserve(router->m_heap, &storage, newSize, 1);
         storage.size = oldSize + runtimeInfo.size;
         char* position = storage.data;
         int displacement = storage.data - oldData;
@@ -477,7 +479,7 @@ ConstraintPointer* FUN_00d27ac0(void* unused, hkpConstraintInstance* constraint)
             }
         }
         int tailSize = (int)storage.size - (int)(position + internal->runtimeSize - master->runtime.data);
-        FUN_00cb1270(position + internal->runtimeSize, position, tailSize);
+        hkString_memMove(position + internal->runtimeSize, position, tailSize);
         displacement += internal->runtimeSize;
         internal->runtime = position;
         for (++i; i < (int)array.size; ++i)

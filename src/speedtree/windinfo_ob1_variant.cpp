@@ -17,17 +17,17 @@ struct S00b408b0_Reader
 {
     int GetNextElement();
     S00b408b0_Vec* GetVector3(S00b408b0_Vec* out);
-    float FUN_00b3ed20();
-    void FUN_00b06180();
+    float CTreeFileAccess_ParseFloat();
+    void ProcessAndTransformResult_00b06180();
 };
 
 struct S00b408b0_Str
 {
     S00b408b0_Str(const char* s);
-    void FUN_0044a730(int a, int b);
+    void fopen_0044a730(int a, int b);
     ~S00b408b0_Str()
     {
-        FUN_0044a730(1, 0);
+        fopen_0044a730(1, 0);
     }
     int m00;
     int m04;
@@ -133,11 +133,12 @@ struct S00b408b0_Obj
     S00b408b0_Vec pos;
     S00b408b0_Vec rot;
     float scale;
-    void FUN_00b408b0(S00b408b0_Reader* r);
+    void SIdvWindInfo_Parse(S00b408b0_Reader* r);
 };
 
 // @fnv 0x00b408b0
-void S00b408b0_Obj::FUN_00b408b0(S00b408b0_Reader* r)
+// src: COMMUNITY 0x00b408b0
+void S00b408b0_Obj::SIdvWindInfo_Parse(S00b408b0_Reader* r)
 {
     S00b408b0_Vec spare;
     S00b408b0_Vec a;
@@ -167,10 +168,10 @@ void S00b408b0_Obj::FUN_00b408b0(S00b408b0_Reader* r)
             pos = *r->GetVector3(&e);
             break;
         case 5005:
-            scale = r->FUN_00b3ed20();
+            scale = r->CTreeFileAccess_ParseFloat();
             break;
         case 5006:
-            r->FUN_00b06180();
+            r->ProcessAndTransformResult_00b06180();
             break;
         default: {
             S00b408b0_Str msg("malformed general wind information");

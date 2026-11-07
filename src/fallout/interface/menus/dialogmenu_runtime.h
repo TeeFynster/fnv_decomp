@@ -74,10 +74,10 @@ class TopicMenuController
     MenuTopic* GetFirstTopic();
     bool SelectTopic(bool);
     bool AdvanceTopic();
-    bool FUN_0083e430(int);
+    bool DialogMenu_SetClickedMenuItem(int);
     bool ShouldSkipTopic(MenuTopic*);
     bool Initialize(MobileObjectView*, TESTopic*);
-    bool FUN_00833c20();
+    bool ActiveEffect_IsActive();
     void AddHeadIfNotNull(BSSimpleList<MenuTopic*>*);
     void RunTopicResultScript();
     void UpdateTopicList();
@@ -96,9 +96,9 @@ extern TESTopicInfo* DAT_011d9518;
 TESTopicInfo* FindFollowupTopicInfo(TESTopicInfo*, bool*, void*, PlayerCharacterView*, bool, bool);
 FNV_STATIC_ASSERT(sizeof(MenuTopic) == 0x2C);
 
-InterfaceManager* FUN_004b7210();
-int FUN_007620e0();
-bool FUN_005d4a40();
+InterfaceManager* InterfaceManager_GetSingleton();
+int DialogMenu_GetClassStatic();
+bool Cmd_Default_Execute();
 
 class INISettingCollection;
 extern SettingT<INISettingCollection> DAT_011d8934;
@@ -113,7 +113,7 @@ extern SettingT<GameSettingCollection> DAT_011d3ee0, DAT_011d243c, DAT_011d318c;
 extern float DAT_011d951c;
 extern unsigned int DAT_011d9594;
 extern bool DAT_011f21d0, DAT_011f21d1;
-float FUN_0040ebd0(float, float);
+float BSMIN(float, float);
 class DialogMenuAudioCalls
 {
   public:

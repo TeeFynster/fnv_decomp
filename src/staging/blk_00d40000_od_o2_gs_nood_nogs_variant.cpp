@@ -19,7 +19,7 @@ struct ConstraintBasis
 {
     __m128 unk00, unk10;
     __m128 basisA[3], basisB[3];
-    void FUN_00d4f3d0(const FloatMatrix3*, const FloatMatrix3*, const __m128*, const __m128*);
+    void ComputeValues_00d4f3d0(const FloatMatrix3*, const FloatMatrix3*, const __m128*, const __m128*);
 };
 
 static __forceinline __m128 NormalizeAxis(__m128 value)
@@ -54,7 +54,8 @@ static __forceinline void Transform(const FloatMatrix3* m, const __m128* basis, 
 }
 
 // @fnv 0x00d4f3d0
-void ConstraintBasis::FUN_00d4f3d0(const FloatMatrix3* a, const FloatMatrix3* b, const __m128* axisA,
+// src: GUESS 0x00d4f3d0 (confidence: low)
+void ConstraintBasis::ComputeValues_00d4f3d0(const FloatMatrix3* a, const FloatMatrix3* b, const __m128* axisA,
                                    const __m128* axisB)
 {
     __m128 basis[3];
@@ -75,7 +76,7 @@ struct StubHeapHolder
     int unk0C;
     void* heap;
 };
-StubHeapHolder* FUN_00c85750();
+StubHeapHolder* hkMemoryRouter_getInstance();
 void ResizeAudioStream(void* heap, void* arr, int elemSize);
 
 template <class T> struct StubArray
@@ -94,7 +95,7 @@ template <class T> struct StubArray
     }
     void Add(const T& v)
     {
-        StubHeapHolder* h = FUN_00c85750();
+        StubHeapHolder* h = hkMemoryRouter_getInstance();
         if (count == (int)(capacity & 0x3fffffff))
             ResizeAudioStream(h->heap, this, sizeof(T));
         Construct(data + count, 1, v);
@@ -108,7 +109,7 @@ struct StubVecArray
     unsigned int capacity;
     void Add(const __m128& v)
     {
-        StubHeapHolder* h = FUN_00c85750();
+        StubHeapHolder* h = hkMemoryRouter_getInstance();
         if (count == (int)(capacity & 0x3fffffff))
             ResizeAudioStream(h->heap, this, sizeof(__m128));
         data[count] = v;
@@ -137,11 +138,12 @@ struct StubOwner
 {
     int unk00;
     StubBuilder* builder;
-    int FUN_00d52790(unsigned char flag, StubObj* obj);
+    int UpdateState_00d52790(unsigned char flag, StubObj* obj);
 };
 
 // @fnv 0x00d52790
-int StubOwner::FUN_00d52790(unsigned char flag, StubObj* obj)
+// src: GUESS 0x00d52790 (confidence: low)
+int StubOwner::UpdateState_00d52790(unsigned char flag, StubObj* obj)
 {
     builder->ops.Add(0xf);
     builder->ops.Add(flag);

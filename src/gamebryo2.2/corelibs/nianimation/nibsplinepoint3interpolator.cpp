@@ -98,7 +98,8 @@ struct FUN_00a57f20_shell
 };
 
 // @fnv 0x00a50840
-void* __cdecl FUN_00a50840()
+// src: EXE 0x00a50840
+void* __cdecl NiBSplinePoint3Interpolator_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x2c);
     if (p)
@@ -154,7 +155,7 @@ struct Base
 };
 
 char* __cdecl _FUN_00a7d330(char const*);
-char* __cdecl FUN_00a7d510(char const*, unsigned int);
+char* __cdecl NiGetViewerString_00a7d510(char const*, unsigned int);
 
 // @fnv 0x00a50960
 void __fastcall NiBSplinePoint3Interpolator_GetViewerStrings(NiBSplinePoint3Interpolator* self, void*, StrArr* pkStrings)
@@ -173,7 +174,7 @@ void __fastcall NiBSplinePoint3Interpolator_GetViewerStrings(NiBSplinePoint3Inte
         pkStrings->SetAt(index, pcString);
     }
 
-    pcString = FUN_00a7d510("m_kPoint3CPHandle", self->m_kPoint3CPHandle);
+    pcString = NiGetViewerString_00a7d510("m_kPoint3CPHandle", self->m_kPoint3CPHandle);
 
     {
         unsigned int index = pkStrings->m_usSize;

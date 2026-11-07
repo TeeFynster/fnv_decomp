@@ -69,7 +69,8 @@ void NiPSysData::vf41(unsigned short usParticle)
 extern const char* const g_01202680_arg1;
 
 // @fnv 0x00c24e90
-const char* const* __cdecl FUN_00c24e90()
+// src: COMMUNITY 0x00c24e90
+const char* const* __cdecl NiPSysData_GetRTTI()
 {
     return &g_01202680_arg1;
 }
@@ -121,7 +122,8 @@ void __fastcall DestroyParticleData(NiPSysData* data)
 //   * in both cases the "added particles" counter at +0x78 is cleared.
 
 // @fnv 0x00c24d20
-void NiPSysData::FUN_00c24d20()
+// src: XBOX_PDB 0x00c24d20
+void NiPSysData::ResolveAddedParticles()
 {
     if (m_usActive < m_usNumParticles)
     {
@@ -155,7 +157,8 @@ NiPSysData::NiPSysData() throw()
 {}
 
 // @fnv 0x00c24da0
-NiPSysData* __cdecl FUN_00c24da0()
+// src: EXE 0x00c24da0
+NiPSysData* __cdecl NiPSysData_CreateObject()
 {
     return new NiPSysData;
 }
@@ -257,11 +260,12 @@ struct FUN_00c25850_cls
     volatile float m_fValue10;
 
     void BaseCtor();
-    FUN_00c25850_cls* FUN_00c25850();
+    FUN_00c25850_cls* NiPSysUpdateTask_NiPSysUpdateTask();
 };
 
 // @fnv 0x00c25850
-FUN_00c25850_cls* FUN_00c25850_cls::FUN_00c25850()
+// src: EXE 0x00c25850
+FUN_00c25850_cls* FUN_00c25850_cls::NiPSysUpdateTask_NiPSysUpdateTask()
 {
     BaseCtor();
     m_iValue08 = 0;
@@ -278,9 +282,9 @@ inline void StrArr::AppendInline(char* value)
         SetSize(index + m_usGrowBy);
     SetAt(index, value);
 }
-char* __cdecl FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d5a0(const char*, void*);
-char* __cdecl FUN_00a7d490(const char*, unsigned short);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+char* __cdecl NiGetViewerString_00a7d5a0(const char*, void*);
+char* __cdecl NiGetViewerString_00a7d490(const char*, unsigned short);
 extern const char* const g_01202680_arg1;
 extern const char DAT_010be340[];
 extern const char DAT_010be32c[];
@@ -291,11 +295,11 @@ void NiPSysData::GetViewerStrings(NiViewerStringsArray* viewerStrings)
 {
     StrArr* strings = reinterpret_cast<StrArr*>(viewerStrings);
     NiParticlesData::GetViewerStrings(viewerStrings);
-    strings->AppendInline(FUN_00a7d330(g_01202680_arg1));
-    strings->AppendInline(FUN_00a7d5a0(DAT_010be340, m_pkParticleInfo));
-    strings->AppendInline(FUN_00a7d5a0(DAT_010be32c, m_pfRotationSpeeds));
-    strings->AppendInline(FUN_00a7d490(DAT_010be318, m_usNumActive));
-    strings->AppendInline(FUN_00a7d490(DAT_010be304, m_usNumParticles));
+    strings->AppendInline(NiViewerStrings_NiGetViewerString_Title(g_01202680_arg1));
+    strings->AppendInline(NiGetViewerString_00a7d5a0(DAT_010be340, m_pkParticleInfo));
+    strings->AppendInline(NiGetViewerString_00a7d5a0(DAT_010be32c, m_pfRotationSpeeds));
+    strings->AppendInline(NiGetViewerString_00a7d490(DAT_010be318, m_usNumActive));
+    strings->AppendInline(NiGetViewerString_00a7d490(DAT_010be304, m_usNumParticles));
 }
 
 __declspec(noinline) Point3ParameterData::Point3ParameterData() throw()

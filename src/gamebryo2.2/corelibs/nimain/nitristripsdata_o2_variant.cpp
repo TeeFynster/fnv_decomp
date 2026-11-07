@@ -12,7 +12,8 @@ extern const void* DAT_0109d8ac;
 NiTriBasedGeomData* __fastcall InitializeTriBasedGeomData(NiTriBasedGeomData* p);
 
 // @fnv 0x00a75e20
-NiTriStripsData* __fastcall FUN_00a75e20(NiTriStripsData* self)
+// src: EXE 0x00a75e20
+NiTriStripsData* __fastcall NiTriStripsData_NiTriStripsData(NiTriStripsData* self)
 {
     InitializeTriBasedGeomData(self);
     unsigned int v = 0;
@@ -34,7 +35,7 @@ struct SharedData_S
 {
     char pad_00[0x0c];
     int refCount;
-    void FUN_00a8a670();
+    void ForwardCall_00a8a670();
 };
 
 void _NiFree(void*);
@@ -52,7 +53,7 @@ void __fastcall SetTriangleStripData(NiTriStripsData* self, void*, unsigned shor
             SharedData_S* releasedData = (SharedData_S*)self->GetGroup();
             if (--releasedData->refCount == 0)
             {
-                releasedData->FUN_00a8a670();
+                releasedData->ForwardCall_00a8a670();
                 _delete(releasedData, 0x10);
             }
         }
@@ -62,7 +63,7 @@ void __fastcall SetTriangleStripData(NiTriStripsData* self, void*, unsigned shor
             SharedData_S* releasedData = (SharedData_S*)self->GetGroup();
             if (--releasedData->refCount == 0)
             {
-                releasedData->FUN_00a8a670();
+                releasedData->ForwardCall_00a8a670();
                 _delete(releasedData, 0x10);
             }
         }
@@ -183,9 +184,9 @@ class StripViewerArray
 extern "C" const char str_0109d984[];
 extern "C" const char str_0109d970[];
 extern "C" const char str_0109d960[];
-unsigned int FUN_00a7d330(const NiRTTI*);
-unsigned int FUN_00a7d490(const void*, unsigned short);
-unsigned int FUN_00a7d5a0(const void*, const void*);
+unsigned int NiViewerStrings_NiGetViewerString_Title(const NiRTTI*);
+unsigned int NiGetViewerString_00a7d490(const void*, unsigned short);
+unsigned int NiGetViewerString_00a7d5a0(const void*, const void*);
 
 // NiTriBasedGeomData's viewer-string override at 0x00a8aab0 is not declared
 // in the shared header. EDX is ignored by its thiscall implementation.
@@ -195,7 +196,7 @@ void __fastcall AppendTriangleDataViewerStrings(NiTriBasedGeomData*, void*, Stri
 void __fastcall GetTriangleStripViewerStrings(NiTriStripsData* self, void* unused, StripViewerArray& stream)
 {
     AppendTriangleDataViewerStrings(self, unused, stream);
-    unsigned int entry = FUN_00a7d330(*reinterpret_cast<const NiRTTI* const*>(&DAT_011f4a70));
+    unsigned int entry = NiViewerStrings_NiGetViewerString_Title(*reinterpret_cast<const NiRTTI* const*>(&DAT_011f4a70));
     unsigned int count = stream.m_usSize;
     if (count >= (unsigned int)stream.m_usMaxSize)
     {
@@ -203,7 +204,7 @@ void __fastcall GetTriangleStripViewerStrings(NiTriStripsData* self, void* unuse
     }
     stream.FUN_0096ae90(count, &entry);
 
-    entry = FUN_00a7d490(str_0109d984, self->m_usStrips);
+    entry = NiGetViewerString_00a7d490(str_0109d984, self->m_usStrips);
     count = stream.m_usSize;
     if (count >= (unsigned int)stream.m_usMaxSize)
     {
@@ -211,7 +212,7 @@ void __fastcall GetTriangleStripViewerStrings(NiTriStripsData* self, void* unuse
     }
     stream.FUN_0096ae90(count, &entry);
 
-    entry = FUN_00a7d5a0(str_0109d970, self->m_pusStripLengths);
+    entry = NiGetViewerString_00a7d5a0(str_0109d970, self->m_pusStripLengths);
     count = stream.m_usSize;
     if (count >= (unsigned int)stream.m_usMaxSize)
     {
@@ -219,7 +220,7 @@ void __fastcall GetTriangleStripViewerStrings(NiTriStripsData* self, void* unuse
     }
     stream.FUN_0096ae90(count, &entry);
 
-    entry = FUN_00a7d5a0(str_0109d960, self->m_pusStripLists);
+    entry = NiGetViewerString_00a7d5a0(str_0109d960, self->m_pusStripLists);
     count = stream.m_usSize;
     if (count >= (unsigned int)stream.m_usMaxSize)
     {
@@ -229,7 +230,7 @@ void __fastcall GetTriangleStripViewerStrings(NiTriStripsData* self, void* unuse
 }
 
 namespace fnv_00a761c0 {
-void* __cdecl FUN_00aa1070(unsigned int);
+void* __cdecl _NiMalloc_00aa1070(unsigned int);
 struct BinaryA
 {
     int unk0;
@@ -275,7 +276,7 @@ void NiTriStripsData::LoadBinary(NiStream& stream)
         if (GetGroup())
             m_pusStripLengths = (unsigned short*)((SharedView*)GetGroup())->Allocate(m_usStrips * sizeof(unsigned short));
         else
-            m_pusStripLengths = (unsigned short*)FUN_00aa1070(m_usStrips * sizeof(unsigned short));
+            m_pusStripLengths = (unsigned short*)_NiMalloc_00aa1070(m_usStrips * sizeof(unsigned short));
         InputStream(stream)->Read(m_pusStripLengths, m_usStrips * 2, 2);
         bool present;
         if (FileVersion(stream) >= 0x0a000111)
@@ -288,7 +289,7 @@ void NiTriStripsData::LoadBinary(NiStream& stream)
             if (GetGroup())
                 m_pusStripLists = (unsigned short*)((SharedView*)GetGroup())->Allocate(count * sizeof(unsigned short));
             else
-                m_pusStripLists = (unsigned short*)FUN_00aa1070(count * sizeof(unsigned short));
+                m_pusStripLists = (unsigned short*)_NiMalloc_00aa1070(count * sizeof(unsigned short));
             InputStream(stream)->Read(m_pusStripLists, count * 2, 2);
         }
     }
@@ -367,14 +368,14 @@ struct NiSharedDataA76
     int unk04;
     int unk08;
     int m_iRefCount;
-    void FUN_00a8a670() throw();
+    void ForwardCall_00a8a670() throw();
 };
 
 inline void ReleaseShared(NiSharedDataA76* pkShared) throw()
 {
     if (--pkShared->m_iRefCount == 0)
     {
-        pkShared->FUN_00a8a670();
+        pkShared->ForwardCall_00a8a670();
         operator_delete_sized(pkShared, 0x10);
     }
 }
@@ -399,7 +400,8 @@ NiTriStripsData::~NiTriStripsData()
 }
 
 // @fnv 0x00a75ec0
-NiTriBasedGeomData* __fastcall FUN_00a75ec0(NiTriBasedGeomData*)
+// src: EXE 0x00a75ec0
+NiTriBasedGeomData* __fastcall NiTriStripsData_CreateObject(NiTriBasedGeomData*)
 {
     NiTriStripsData* p = (NiTriStripsData*)BSFadeNode::operator new(sizeof(NiTriStripsData));
     if (p)

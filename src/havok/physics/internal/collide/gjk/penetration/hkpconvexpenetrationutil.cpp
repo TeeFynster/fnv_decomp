@@ -24,7 +24,7 @@ struct Obj
     int m_iThirdValue;
     int m_auiShapeKeys[4];
     Entry m_usTrailingValue[4];
-    void FUN_00e2d440();
+    void ProcessEntries_00e2d440();
     void SetEntries(const hkVector4* a, const hkVector4* b, const hkVector4* c);
 };
 
@@ -39,7 +39,7 @@ void Obj::SetEntries(const hkVector4* aVecA, const hkVector4* aVecB, const hkVec
         m_usTrailingValue[iIndex].m_iThirdValue = aVecC[iIndex];
         m_usTrailingValue[iIndex].m_flag = 0;
     }
-    FUN_00e2d440();
+    ProcessEntries_00e2d440();
     m_iThirdValue = 0;
 }
 
@@ -138,7 +138,8 @@ __forceinline void scalarDots(const S00cd7530_Vec& Q, const S00cd7530_Vec& R, fl
 }
 // Computes barycentric coordinates of a point relative to a triangle defined by three vertices and stores the result in a float array.
 // @fnv 0x00cd7530
-void FUN_00cd7530(P pos, P t0, Mid t1, __int64 packedTail)
+// src: GUESS 0x00cd7530 (confidence: medium)
+void Hkpconvexpenetrationutil_ComputeTriangleBarycentricCoordinates(P pos, P t0, Mid t1, __int64 packedTail)
 {
     union
     {
@@ -263,7 +264,7 @@ struct S00dfa940_Simplex
     int GetNearestEntry();
 };
 
-double FUN_00df9ae0();
+double rand01();
 
 struct S00dfa940_Solver
 {
@@ -293,16 +294,17 @@ struct S00dfa940_Solver
     const hkVector4* m_68;
     int m_6c;
 
-    int FUN_00dfa940(int a1);
-    int FUN_00df9fe0(int a1, int* out);
-    void FUN_00df9b50(int idx, S00dfa940_Entry* e);
-    int FUN_00df9c90(S00dfa940_Simplex* o, int idx, S00dfa940_Entry* e, int* out);
-    void FUN_00df9d90(S00dfa940_Simplex* o, int idx, int a1);
+    int BuildSimplexWithRetries(int a1);
+    int ProcessAndReturnValue_00df9fe0(int a1, int* out);
+    void UpdateState_00df9b50(int idx, S00dfa940_Entry* e);
+    int ComputeValues_00df9c90(S00dfa940_Simplex* o, int idx, S00dfa940_Entry* e, int* out);
+    void ProcessEntries_00df9d90(S00dfa940_Simplex* o, int idx, int a1);
 };
 
 // Loops building simplex entries until FUN_00df9fe0/FUN_00df9c90 give a result; on result 3 retries up to 0x14 times, adding an offset to m_30; returns status.
 // @fnv 0x00dfa940
-int S00dfa940_Solver::FUN_00dfa940(int a1)
+// src: GUESS 0x00dfa940 (confidence: medium)
+int S00dfa940_Solver::BuildSimplexWithRetries(int a1)
 {
     S00dfa940_Simplex simplex;
     hkVector4 tmp;
@@ -314,7 +316,7 @@ int S00dfa940_Solver::FUN_00dfa940(int a1)
     for (;;)
     {
         res = 0;
-        if (FUN_00df9fe0(a1, &res) == 1)
+        if (ProcessAndReturnValue_00df9fe0(a1, &res) == 1)
         {
             ret = res;
             if (ret != 3)
@@ -326,8 +328,8 @@ int S00dfa940_Solver::FUN_00dfa940(int a1)
             vi = simplex.GetNearestEntry();
             e = &simplex.m_usTrailingValue[simplex.m_num++];
             e->m_flag = 0;
-            FUN_00df9b50(vi, e);
-            if (FUN_00df9c90(&simplex, vi, e, &res) != 1)
+            UpdateState_00df9b50(vi, e);
+            if (ComputeValues_00df9c90(&simplex, vi, e, &res) != 1)
             {
                 for (;;)
                 {
@@ -341,8 +343,8 @@ int S00dfa940_Solver::FUN_00dfa940(int a1)
                     simplex.m_num++;
                     e = &simplex.m_usTrailingValue[n];
                     e->m_flag = 0;
-                    FUN_00df9b50(vi, e);
-                    if (FUN_00df9c90(&simplex, vi, e, &res) == 1)
+                    UpdateState_00df9b50(vi, e);
+                    if (ComputeValues_00df9c90(&simplex, vi, e, &res) == 1)
                         break;
                 }
             }
@@ -358,7 +360,7 @@ int S00dfa940_Solver::FUN_00dfa940(int a1)
         if (m_5c >= 0x14)
             goto out;
         m_6c = 0;
-        float f = (float)((FUN_00df9ae0() - DAT_01032980) * DAT_010dbb40);
+        float f = (float)((rand01() - DAT_01032980) * DAT_010dbb40);
         tmp.x = f;
         tmp.y = f;
         tmp.z = f;
@@ -366,7 +368,7 @@ int S00dfa940_Solver::FUN_00dfa940(int a1)
         m_30 = tmp;
     }
 done:
-    FUN_00df9d90(&simplex, vi, a1);
+    ProcessEntries_00df9d90(&simplex, vi, a1);
 out:
     return ret;
 }
@@ -419,7 +421,7 @@ struct __declspec(align(16)) S_00dfaac0_Penetration
 {
     int unk00;
     S_00dfaac0_Penetration(int a, int b, const hkTransform& t, float f, int c, int d, int e, int g);
-    int FUN_00dfa940(int out);
+    int BuildSimplexWithRetries(int out);
     int unk04;
     int unk08;
     int unk0C;
@@ -449,7 +451,7 @@ struct __declspec(align(16)) S_00dfaac0_Penetration
     int unk6C;
 };
 
-int __cdecl FUN_00e2db70(int a, int b, const hkTransform& t, int c, int d, int out);
+int __cdecl Geometry_RefineClosestPointsByDirectionSampling(int a, int b, const hkTransform& t, int c, int d, int out);
 
 // Constructs a Penetration object and calls FUN_00dfa940; if it returns 3, calls FUN_00e2db70 and returns 1, otherwise returns the original result.
 // @fnv 0x00dfaac0
@@ -457,10 +459,10 @@ int __cdecl TestPenetration(int a, int b, const hkTransform& t, float f, int c, 
 {
     S_00dfaac0_MonitorStream::GetMonitorStream().timer("TtPenetration");
     S_00dfaac0_Penetration penetration(a, b, t, f, c, d, e, g);
-    int result = penetration.FUN_00dfa940(out);
+    int result = penetration.BuildSimplexWithRetries(out);
     if (result == 3)
     {
-        FUN_00e2db70(a, b, t, c, d, out);
+        Geometry_RefineClosestPointsByDirectionSampling(a, b, t, c, d, out);
         result = 1;
     }
     S_00dfaac0_MonitorStream::GetMonitorStream().timer("Et");
@@ -469,8 +471,8 @@ int __cdecl TestPenetration(int a, int b, const hkTransform& t, float f, int c, 
 
 extern "C"
 {
-    void** FUN_00c85750();
-    void FUN_00e2d6c0(void*, void*, void*, void*, void*);
+    void** hkMemoryRouter_getInstance();
+    void Object_ProcessEntries_00e2d6c0(void*, void*, void*, void*, void*);
 }
 
 extern "C" const __m128 DAT_010c44d0;
@@ -571,10 +573,10 @@ struct Item
         m_unk6C = u6c;
     }
 
-    int FUN_00df9fe0(LocalStruct70* s, int* arr);
-    void FUN_00df9b50(int field2ff0, Entry* entry);
-    int FUN_00df9c90(const WorkObject& obj, int field2ff0, Entry* entry, int* arr);
-    void FUN_00df9d90(WorkObject* obj, int field2ff0, LocalStruct70* s);
+    int ProcessAndReturnValue_00df9fe0(LocalStruct70* s, int* arr);
+    void UpdateState_00df9b50(int field2ff0, Entry* entry);
+    int ComputeValues_00df9c90(const WorkObject& obj, int field2ff0, Entry* entry, int* arr);
+    void ProcessEntries_00df9d90(WorkObject* obj, int field2ff0, LocalStruct70* s);
 };
 
 struct WorkArray
@@ -591,11 +593,12 @@ struct WorkArray
 };
 
 // @fnv 0x00dfaba0
-int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int count, const hkTransform* arg4,
+// src: GUESS 0x00dfaba0 (confidence: low)
+int hkTransform_ProcessEntries_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int count, const hkTransform* arg4,
                  OutItem** arg5)
 {
     WorkArray storage;
-    void** tls = FUN_00c85750();
+    void** tls = hkMemoryRouter_getInstance();
     storage.data = (Item*)*tls;
     *tls = (char*)(Item*)storage.data + ((count * sizeof(Item) + 127) & ~127);
     Item* buffer = storage.begin();
@@ -613,7 +616,7 @@ int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int coun
             item->m_arg5 = arg5[i];
             item->init(arg1, arg2[i], *arg4, 0.0001f, item->m_vec70, item->m_vecB0, item->m_vecF0, 0);
 
-            if (item->FUN_00df9fe0(&local_s, arr) == 1)
+            if (item->ProcessAndReturnValue_00df9fe0(&local_s, arr) == 1)
             {
                 count--;
             }
@@ -631,7 +634,7 @@ int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int coun
         }
         else if (count < 2)
         {
-            *FUN_00c85750() = buffer;
+            *hkMemoryRouter_getInstance() = buffer;
             return 1;
         }
 
@@ -641,7 +644,7 @@ int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int coun
         bool flag;
         do
         {
-            FUN_00e2d6c0(&buffer[0].m_obj, &buffer[1].m_obj, &out_vec, &buffer[0].m_field2ff0, &buffer[1].m_field2ff0);
+            Object_ProcessEntries_00e2d6c0(&buffer[0].m_obj, &buffer[1].m_obj, &out_vec, &buffer[0].m_field2ff0, &buffer[1].m_field2ff0);
             flag = false;
             Item* pItem = buffer;
             for (int i = 0; i < count; ++i, ++pItem)
@@ -651,12 +654,12 @@ int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int coun
                     continue;
                 }
                 Entry* entry = pItem->m_obj.allocEntry();
-                pItem->FUN_00df9b50(pItem->m_field2ff0, entry);
-                if (pItem->FUN_00df9c90(pItem->m_obj, pItem->m_field2ff0, entry, &arr[i]) == 1)
+                pItem->UpdateState_00df9b50(pItem->m_field2ff0, entry);
+                if (pItem->ComputeValues_00df9c90(pItem->m_obj, pItem->m_field2ff0, entry, &arr[i]) == 1)
                 {
                     if (arr[i] == 3)
                     {
-                        *FUN_00c85750() = buffer;
+                        *hkMemoryRouter_getInstance() = buffer;
                         return 1;
                     }
                 }
@@ -677,7 +680,7 @@ int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int coun
     Item* pItem = buffer;
     for (int i = 0; i < count; ++i, ++pItem)
     {
-        pItem->FUN_00df9d90(&pItem->m_obj, pItem->m_field2ff0, &local_s);
+        pItem->ProcessEntries_00df9d90(&pItem->m_obj, pItem->m_field2ff0, &local_s);
 
         __m128 normal_y;
         __m128 normal_x, normal_z;
@@ -701,6 +704,6 @@ int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int coun
         pItem->m_arg5->direction.w = w;
     }
 
-    *FUN_00c85750() = buffer;
+    *hkMemoryRouter_getInstance() = buffer;
     return 0;
 }

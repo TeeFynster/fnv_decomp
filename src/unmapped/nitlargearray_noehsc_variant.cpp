@@ -35,15 +35,16 @@ inline bool NiFixedString::operator!=(const NiFixedString& b) const
     return m_kHandle != b.m_kHandle;
 }
 
-NiFixedString* __cdecl FUN_00a63ae0(unsigned int auiCount);
+NiFixedString* __cdecl NiTNewInterface_NiFixedString_Allocate(unsigned int auiCount);
 
 struct MyNiFixedStringArray : public NiFixedStringArray
 {
-    void FUN_00a65140(unsigned int uiMaxSize);
+    void NiTLargeArray_NiFixedString_NiTNewInterface_NiFixedString_SetSize(unsigned int uiMaxSize);
 };
 
 // @fnv 0x00a65140
-void MyNiFixedStringArray::FUN_00a65140(unsigned int uiMaxSize)
+// src: XBOX_PDB 0x00a65140
+void MyNiFixedStringArray::NiTLargeArray_NiFixedString_NiTNewInterface_NiFixedString_SetSize(unsigned int uiMaxSize)
 {
     if (uiMaxSize == m_uiMaxSize)
     {
@@ -69,7 +70,7 @@ void MyNiFixedStringArray::FUN_00a65140(unsigned int uiMaxSize)
     m_uiMaxSize = uiMaxSize;
     if (uiMaxSize > 0)
     {
-        m_pBase = FUN_00a63ae0(m_uiMaxSize);
+        m_pBase = NiTNewInterface_NiFixedString_Allocate(m_uiMaxSize);
 
         for (i = 0; i < m_uiSize; i++)
         {

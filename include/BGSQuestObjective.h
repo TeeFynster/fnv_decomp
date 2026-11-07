@@ -63,7 +63,7 @@ public:
     bool GetCompleted() const;
     bool GetDisplayed() const;
     const char* GetDisplayText();
-    TESQuest* FUN_0044edb0();
+    TESQuest* TESMain_GetThread();
     void AddMatchingTargetsToList(void* targets);
     bool HasFlag();
 };

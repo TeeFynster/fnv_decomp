@@ -55,7 +55,7 @@ FUN_004b0880::FUN_004b0880()
 
 struct FUN_004ee7d0_obj
 {
-    void FUN_004ee770();
+    void BGSDecalNode_RemoveDecals();
 };
 struct FUN_004ee7d0_node
 {
@@ -66,14 +66,15 @@ extern FUN_004ee7d0_node g_011c7d20;
 
 // Walks the node list from g_011c7d20, calling FUN_004ee770 on each node's referenced object when non-null.
 // @fnv 0x004ee7d0
-void FUN_004ee7d0()
+// src: COMMUNITY 0x004ee7d0
+void BGSDecalNode_RemoveAllDecals()
 {
     FUN_004ee7d0_node* node = &g_011c7d20;
     while (node)
     {
         FUN_004ee7d0_obj* obj = *node->_ref_006815c0();
         if (obj)
-            obj->FUN_004ee770();
+            obj->BGSDecalNode_RemoveDecals();
         node = node->FUN_00726070();
     }
 }
@@ -85,16 +86,17 @@ struct FUN_004f66c0_node
 };
 struct FUN_004f66c0_shell
 {
-    TESForm* FUN_004f66c0(int id);
+    TESForm* TESRegionList_HasRegion(int id);
 };
 // Walks the node chain starting at this+4 and returns the first item whose FUN_0084e3a0() equals id, or 0 if none matches.
 // @fnv 0x004f66c0
-TESForm* FUN_004f66c0_shell::FUN_004f66c0(int id)
+// src: COMMUNITY 0x004f66c0
+TESForm* FUN_004f66c0_shell::TESRegionList_HasRegion(int id)
 {
     FUN_004f66c0_node* node = this ? (FUN_004f66c0_node*)((char*)this + 4) : 0;
     while (node)
     {
-        if (*node->_ref_006815c0() && (*node->_ref_006815c0())->FUN_0084e3a0() == id)
+        if (*node->_ref_006815c0() && (*node->_ref_006815c0())->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == id)
             return *node->_ref_006815c0();
         node = node->FUN_00726070();
     }
@@ -103,7 +105,7 @@ TESForm* FUN_004f66c0_shell::FUN_004f66c0(int id)
 
 struct FUN_005549d0_obj
 {
-    void FUN_00577390(bool);
+    void TESObjectREFR_TogglePrimitive(bool);
 };
 struct FUN_005549d0_node
 {
@@ -112,17 +114,18 @@ struct FUN_005549d0_node
 };
 struct FUN_005549d0_shell
 {
-    void FUN_005549d0(bool flag);
+    void TESObjectCELL_TogglePrimitives(bool flag);
 };
 
 // Walks the linked list starting at this+0xac and calls FUN_00577390(flag) on each referenced object while the reference is non-null.
 // @fnv 0x005549d0
-void FUN_005549d0_shell::FUN_005549d0(bool flag)
+// src: COMMUNITY 0x005549d0
+void FUN_005549d0_shell::TESObjectCELL_TogglePrimitives(bool flag)
 {
     FUN_005549d0_node* node = (FUN_005549d0_node*)((char*)this + 0xac);
     while (node && *node->_ref_006815c0() != 0)
     {
-        (*node->_ref_006815c0())->FUN_00577390(flag);
+        (*node->_ref_006815c0())->TESObjectREFR_TogglePrimitive(flag);
         node = node->FUN_00726070();
     }
 }
@@ -140,10 +143,11 @@ struct FUN_0060f3a0_node
 struct FUN_0060f3a0_shell
 {
     FUN_0060f3a0_node* GetPosition();
-    void FUN_0060f3a0();
+    void ProcessEntries_0060f3a0();
 };
 // @fnv 0x0060f3a0
-void FUN_0060f3a0_shell::FUN_0060f3a0()
+// src: GUESS 0x0060f3a0 (confidence: low)
+void FUN_0060f3a0_shell::ProcessEntries_0060f3a0()
 {
     FUN_0060f3a0_node* node = GetPosition();
     while (node && !node->_ref_008256d0())
@@ -161,7 +165,7 @@ struct FUN_006137b0_node
     FUN_006137b0_node* FUN_00726070();
 };
 struct FUN_006137b0_shell;
-FUN_006137b0_node* __fastcall FUN_0045bb80(FUN_006137b0_shell*);
+FUN_006137b0_node* __fastcall NiAVObject_GetWorldTranslate(FUN_006137b0_shell*);
 struct FUN_006137b0_shell
 {
     TESForm* FindByKey(int key);
@@ -171,10 +175,10 @@ struct FUN_006137b0_shell
 // @fnv 0x006137b0
 TESForm* FUN_006137b0_shell::FindByKey(int key)
 {
-    FUN_006137b0_node* node = FUN_0045bb80(this);
+    FUN_006137b0_node* node = NiAVObject_GetWorldTranslate(this);
     while (node && *node->_ref_006815c0() != 0)
     {
-        if ((*node->_ref_006815c0())->FUN_0084e3a0() == key)
+        if ((*node->_ref_006815c0())->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == key)
             return *node->_ref_006815c0();
         node = node->FUN_00726070();
     }
@@ -188,17 +192,18 @@ struct SoundListView
 struct FUN_00613810_shell
 {
     int FindByKey(int);
-    void FUN_00613810(char* item);
+    void TESRace_AddHair(char* item);
 };
-SoundListView* __fastcall FUN_0045bb80(FUN_00613810_shell*);
+SoundListView* __fastcall NiAVObject_GetWorldTranslate(FUN_00613810_shell*);
 
 // Adds item to the list returned by FUN_0045bb80 unless item is null or FindByKey reports it already present.
 // @fnv 0x00613810
-void FUN_00613810_shell::FUN_00613810(char* item)
+// src: COMMUNITY 0x00613810
+void FUN_00613810_shell::TESRace_AddHair(char* item)
 {
-    if (item == 0 || FindByKey(((TESForm*)item)->FUN_0084e3a0()))
+    if (item == 0 || FindByKey(((TESForm*)item)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()))
         return;
-    FUN_0045bb80(this)->AddTail(item);
+    NiAVObject_GetWorldTranslate(this)->AddTail(item);
 }
 
 struct FUN_006138b0_node
@@ -218,7 +223,7 @@ TESForm* FUN_006138b0_shell::FindRecipeCategoryById(int id)
     FUN_006138b0_node* node = GetBGSRecipeCategoryList();
     while (node && *node->_ref_006815c0())
     {
-        if ((*node->_ref_006815c0())->FUN_0084e3a0() == id)
+        if ((*node->_ref_006815c0())->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == id)
             return *node->_ref_006815c0();
         node = node->FUN_00726070();
     }
@@ -233,17 +238,18 @@ struct SoundListView
 struct FUN_00613910_shell
 {
     int FindRecipeCategoryById(int);
-    void FUN_00613910(char* item);
+    void TESRace_AddEyeColor(char* item);
 };
-SoundListView* __fastcall FUN_00503650(FUN_00613910_shell*);
+SoundListView* __fastcall GetBackTexture(FUN_00613910_shell*);
 
 // Adds item to the list returned by FUN_00503650 unless item is null or FindRecipeCategoryById on its FUN_0084e3a0 result is nonzero.
 // @fnv 0x00613910
-void FUN_00613910_shell::FUN_00613910(char* item)
+// src: COMMUNITY 0x00613910
+void FUN_00613910_shell::TESRace_AddEyeColor(char* item)
 {
-    if (item == 0 || FindRecipeCategoryById(((TESForm*)item)->FUN_0084e3a0()))
+    if (item == 0 || FindRecipeCategoryById(((TESForm*)item)->GetHavokWorldObjectCountInSceneGraph_0084e3a0()))
         return;
-    FUN_00503650(this)->AddTail(item);
+    GetBackTexture(this)->AddTail(item);
 }
 }  // namespace fnv_00613910
 
@@ -314,14 +320,14 @@ struct ListX
 };
 struct FUN_0083b8d0 : ListX
 {
-    void FUN_0083b930();
+    void Conversation_ClearList();
     ~FUN_0083b8d0();
 };
 
 // @fnv 0x0083b8d0
 FUN_0083b8d0::~FUN_0083b8d0()
 {
-    FUN_0083b930();
+    Conversation_ClearList();
 }
 }  // namespace fnv_0083b8d0
 
@@ -357,10 +363,11 @@ struct FUN_008c5000_node
 };
 struct FUN_008c5000_shell
 {
-    FUN_008c5000_item* FUN_008c5000(int id);
+    FUN_008c5000_item* Actor_GetCastPowerItem(int id);
 };
 // @fnv 0x008c5000
-FUN_008c5000_item* FUN_008c5000_shell::FUN_008c5000(int id)
+// src: COMMUNITY 0x008c5000
+FUN_008c5000_item* FUN_008c5000_shell::Actor_GetCastPowerItem(int id)
 {
     FUN_008c5000_item* found = 0;
     if (id && *((FUN_008c5000_node*)((char*)this + 0xf4))->_ref_006815c0())
@@ -417,7 +424,8 @@ typedef void(__thiscall* FUN_008d1560_fn)(void*);
 
 // Loops while g_011dfe14._ref_008256d0() is false, calling a virtual slot on each element from _ref_006815c0() and then _ref_0063f7b0().
 // @fnv 0x008d1560
-void FUN_008d1560()
+// src: COMMUNITY 0x008d1560
+void BSDoorHavokController_ReenableDoors()
 {
     while (!g_011dfe14._ref_008256d0())
     {
@@ -438,11 +446,12 @@ struct FUN_00964100_node
 };
 struct FUN_00964100_shell
 {
-    FUN_00964100_item* FUN_00964100(int id);
+    FUN_00964100_item* PlayerCharacter_GetPlayerAction(int id);
 };
 // Walks the node list starting at this+0x60c and returns the first item whose id matches, or null if none is found.
 // @fnv 0x00964100
-FUN_00964100_item* FUN_00964100_shell::FUN_00964100(int id)
+// src: XBOX_PDB 0x00964100
+FUN_00964100_item* FUN_00964100_shell::PlayerCharacter_GetPlayerAction(int id)
 {
     FUN_00964100_item* item = 0;
     if (!*(FUN_00964100_node**)((char*)this + 0x60c))
@@ -544,11 +553,12 @@ struct FUN_004f6730_shell
 {
     int m_pad00;
     FUN_004f66c0_node m_kNode;
-    bool FUN_004f6730(FUN_004f6730_shell* other);
+    bool HasEqualListContents(FUN_004f6730_shell* other);
 };
 
 // @fnv 0x004f6730
-bool FUN_004f6730_shell::FUN_004f6730(FUN_004f6730_shell* other)
+// src: GUESS 0x004f6730 (confidence: medium)
+bool FUN_004f6730_shell::HasEqualListContents(FUN_004f6730_shell* other)
 {
     FUN_004f66c0_node* list2 = this ? &m_kNode : 0;
     FUN_004f66c0_node* list1 = other ? &other->m_kNode : 0;
@@ -578,7 +588,7 @@ bool FUN_004f6730_shell::FUN_004f6730(FUN_004f6730_shell* other)
 
 struct FUN_004f2770_Class
 {
-    void* FUN_004f2770();
+    void* PlayerCharacter_GetAllOccupiedRegions();
 };
 extern FUN_004f2770_Class* _g_thePlayer;
 
@@ -588,14 +598,15 @@ struct RegionList : public FUN_004f66c0_node
 };
 
 // @fnv 0x005a6280
-bool FUN_005a6280(void* apUnused, void* apRegion, void* apUnused2, double& result)
+// src: EXE 0x005a6280
+bool Cmd_PlayerInRegion_Eval(void* apUnused, void* apRegion, void* apUnused2, double& result)
 {
     result = 0.0;
     TESForm* region = (TESForm*)apRegion;
-    RegionList* iter = (RegionList*)_g_thePlayer->FUN_004f2770();
+    RegionList* iter = (RegionList*)_g_thePlayer->PlayerCharacter_GetAllOccupiedRegions();
     while (iter && *iter->_ref_006815c0())
     {
-        if ((*iter->_ref_006815c0())->FUN_0084e3a0() == region->FUN_0084e3a0())
+        if ((*iter->_ref_006815c0())->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == region->GetHavokWorldObjectCountInSceneGraph_0084e3a0())
         {
             result = 1.0;
             return true;
@@ -605,10 +616,11 @@ bool FUN_005a6280(void* apUnused, void* apRegion, void* apUnused2, double& resul
     return true;
 }
 
-bool __cdecl FUN_0061f420(unsigned int, unsigned int);
+bool __cdecl Object_ComputeValue_0061f420(unsigned int, unsigned int);
 
 // @fnv 0x0061f360
-void FUN_0061f360(void* pItem, void* pNode)
+// src: GUESS 0x0061f360 (confidence: low)
+void Object_ProcessEntries_0061f360(void* pItem, void* pNode)
 {
     if (pItem && pNode)
     {
@@ -625,7 +637,7 @@ void FUN_0061f360(void* pItem, void* pNode)
                 if (item == pItem)
                     return;
 
-                if (FUN_0061f420((unsigned int)item, (unsigned int)pItem))
+                if (Object_ComputeValue_0061f420((unsigned int)item, (unsigned int)pItem))
                 {
                     ((G2*)node)->AddHead((FUN_0066deb0* const&)pItem);
                     return;
@@ -683,7 +695,7 @@ struct BGSLoadFormBuffer;
 
 struct Conversation
 {
-    void FUN_0083c420(BGSLoadFormBuffer*);
+    void InitLoadGame_0083c420(BGSLoadFormBuffer*);
 };
 
 struct FUN_008363a0_item
@@ -705,15 +717,16 @@ struct FUN_008363a0_shell
     Conversation* m_conv;
     char pad04[0x14];
     FUN_008363a0_node m_kNode;
-    void FUN_008363a0(BGSLoadFormBuffer* buf);
+    void ProcessEntries_008363a0(BGSLoadFormBuffer* buf);
 };
 
 // @fnv 0x008363a0
-void FUN_008363a0_shell::FUN_008363a0(BGSLoadFormBuffer* pBuffer)
+// src: GUESS 0x008363a0 (confidence: low)
+void FUN_008363a0_shell::ProcessEntries_008363a0(BGSLoadFormBuffer* pBuffer)
 {
     if (m_conv)
     {
-        m_conv->FUN_0083c420(pBuffer);
+        m_conv->InitLoadGame_0083c420(pBuffer);
     }
     FUN_008363a0_node* list = (FUN_008363a0_node*)&m_kNode;
     FUN_008363a0_node* prev = 0;
@@ -814,11 +827,12 @@ struct Container_009b1630
 
 struct FUN_009b1630_shell
 {
-    void FUN_009b1630(Container_009b1630* container, int id, float value);
+    void Explosion_AddLimbTarget(Container_009b1630* container, int id, float value);
 };
 
 // @fnv 0x009b1630
-void FUN_009b1630_shell::FUN_009b1630(Container_009b1630* container, int id, float value)
+// src: XBOX_PDB 0x009b1630
+void FUN_009b1630_shell::Explosion_AddLimbTarget(Container_009b1630* container, int id, float value)
 {
     int iNodeCount = 0;
     FUN_009b1630_node* pNode;
@@ -853,7 +867,7 @@ struct FUN_009b3490_shell
     ~FUN_009b3490_shell();
 };
 
-void __fastcall FUN_009c2ff0(void*);
+void __fastcall Projectile_SpawnMuzzleFlash(void*);
 
 struct Standin_009b3400
 {
@@ -871,7 +885,7 @@ void Standin_009b3400::ClearList()
         delete item;
         ((FUN_0060f3a0_node*)((char*)this + 0x88))->_ref_0063f7b0();
     }
-    FUN_009c2ff0(this);
+    Projectile_SpawnMuzzleFlash(this);
     *(char*)((char*)this + 0x90) = 0;
 }
 
@@ -984,7 +998,7 @@ class B3B930List
     bool IsEmpty();
     B3B930Item** GetItem();
     void RemoveHead();
-    void FUN_0083b930();
+    void Conversation_ClearList();
 
     B3B930Item* m_pkItem;
     B3B930List* m_pkNext;
@@ -992,7 +1006,8 @@ class B3B930List
 };
 
 // @fnv 0x0083b930
-void B3B930List::FUN_0083b930()
+// src: XBOX_PDB 0x0083b930
+void B3B930List::Conversation_ClearList()
 {
     B3B930List* pkList = this;
     while (pkList && !pkList->IsEmpty())
@@ -1056,10 +1071,11 @@ struct RangeHolder : RangeHeader, RangeNode
 struct RangeConsumer
 {
     void AddIfAbsent(void*);
-    void FUN_004f61d0(float, RangeHolder*, float);
+    void TESRegionGrassObjectList_MergeLists(float, RangeHolder*, float);
 };
 // @fnv 0x004f61d0
-void RangeConsumer::FUN_004f61d0(float input, RangeHolder* holder, float other)
+// src: XBOX_PDB 0x004f61d0
+void RangeConsumer::TESRegionGrassObjectList_MergeLists(float input, RangeHolder* holder, float other)
 {
     RangeNode* position4 = 0;
     void* item = 0;
@@ -1099,7 +1115,7 @@ struct FUN_005ae380_node : BSSimpleList<InventoryStackRecord*>
 struct FUN_00591a40_fallback
 {
     int unk00;
-    void* FUN_00408da0();
+    void* TESModel_GetModel();
 };
 
 struct FUN_00591a40_class
@@ -1125,7 +1141,7 @@ void* FUN_00591a40_class::GetRandomItem()
 {
     int count = m_kNode.FUN_005ae380();
     if (m_kNode.IsEmpty() && count == 0)
-        return m_fallback.FUN_00408da0();
+        return m_fallback.TESModel_GetModel();
     else if (count == 1)
         return m_kNode.GetItem();
     else
@@ -1157,7 +1173,7 @@ void* FUN_00591a40_class::GetRandomItem()
             return node->GetItem();
     }
 
-    return m_fallback.FUN_00408da0();
+    return m_fallback.TESModel_GetModel();
 }
 
 struct CopyPair
@@ -1183,14 +1199,14 @@ struct CopyOwner
 {
     int unk00, unk04;
     CopyList* list;
-    void FUN_005a8c00();
+    void ScriptLocals_ClearActionList();
     void CopyFromSource(CopySource*);
 };
 // @fnv 0x005a8f40
 void CopyOwner::CopyFromSource(CopySource* source)
 {
     if (list)
-        FUN_005a8c00();
+        ScriptLocals_ClearActionList();
     if (source)
     {
         CopyList* input9 = source->FUN_0044ddc0();
@@ -1257,7 +1273,8 @@ extern Node2_00832010 g_011dd59c;
 void FUN_008329a0(int);
 
 // @fnv 0x00832010
-void FUN_00832010()
+// src: COMMUNITY 0x00832010
+void FalloutRadio_Shutdown()
 {
     DAT_011dd436 = 1;
     FUN_008329a0(1);
@@ -1390,7 +1407,7 @@ struct Obj_009b1510
     virtual void vF8();
     virtual void vFC();
     virtual bool IsReady();
-    int FUN_008b3ef0(int key);
+    int Actor_GetDamageLocation(int key);
 };
 struct Key_009b1510
 {
@@ -1407,10 +1424,11 @@ struct Cont_009b1510
 };
 struct Shell_009b1510 : FUN_009b1630_shell
 {
-    void FUN_009b1510(Cont_009b1510* cont, Key_009b1510* key, float value);
+    void Explosion_CheckLimbTarget(Cont_009b1510* cont, Key_009b1510* key, float value);
 };
 // @fnv 0x009b1510
-void Shell_009b1510::FUN_009b1510(Cont_009b1510* pContainer, Key_009b1510* key, float value)
+// src: COMMUNITY 0x009b1510
+void Shell_009b1510::Explosion_CheckLimbTarget(Cont_009b1510* pContainer, Key_009b1510* key, float value)
 {
     if (pContainer && pContainer->obj && pContainer->obj->IsReady())
     {
@@ -1428,9 +1446,9 @@ void Shell_009b1510::FUN_009b1510(Cont_009b1510* pContainer, Key_009b1510* key, 
         }
         if (count2 < 2 || !best3 || best3->value > value)
         {
-            int idx = kObj->FUN_008b3ef0(key->GetKey());
+            int idx = kObj->Actor_GetDamageLocation(key->GetKey());
             if (idx != -1 && idx != 14)
-                FUN_009b1630(reinterpret_cast<Container_009b1630*>(pContainer), idx, value);
+                Explosion_AddLimbTarget(reinterpret_cast<Container_009b1630*>(pContainer), idx, value);
         }
     }
 }
@@ -1447,20 +1465,21 @@ struct Thing
 {
     char pad[0x188];
     Node m_pFirstNode;
-    bool FUN_006c4970();
+    bool NavMeshObstacleManager_ProcessDisabledNavMeshes();
 };
 
-extern "C" void FUN_00694500(int value, int flag);
+extern "C" void NavMesh_SetDisableNavMesh(int value, int flag);
 
 // Iterates m_pFirstNode, calling FUN_00694500 on each node's value, then calls FUN_00470470 on m_pFirstNode and returns true.
 // @fnv 0x006c4970
-bool Thing::FUN_006c4970()
+// src: COMMUNITY 0x006c4970
+bool Thing::NavMeshObstacleManager_ProcessDisabledNavMeshes()
 {
     Node* node = &m_pFirstNode;
     while (node != 0 && !node->FUN_008256d0())
     {
         int value = *node->FUN_006815c0();
-        FUN_00694500(value, 1);
+        NavMesh_SetDisableNavMesh(value, 1);
         node = node->FUN_00726070();
     }
     m_pFirstNode.FUN_00470470();
@@ -1480,11 +1499,12 @@ struct FUN_004d65a0_Class
     HWND window;
     int unk10, unk14;
     TreeMap65 map;
-    void FUN_004d65a0(unsigned int key);
+    void ProcessTreeItemHandles_004d65a0(unsigned int key);
 };
 // For a nonzero key, builds a list from repeated 0x110A results and sends 0x1102 with wParam 2 for each listed handle.
 // @fnv 0x004d65a0
-void FUN_004d65a0_Class::FUN_004d65a0(unsigned int key)
+// src: GUESS 0x004d65a0 (confidence: low)
+void FUN_004d65a0_Class::ProcessTreeItemHandles_004d65a0(unsigned int key)
 {
     if (key)
     {
@@ -1515,13 +1535,14 @@ void FUN_004d65a0_Class::FUN_004d65a0(unsigned int key)
 // The original texture-list getter shares the no-argument thiscall body at 0x00500940.
 // The shared class has no declaration for it; fastcall passes the model in ECX.
 BSSimpleList<TESModelTextureSwap::Texture*>* __fastcall GetTextureSwapList(TESModelTextureSwap* model);
-TESModelTextureSwap* __cdecl FUN_00481010(void* form, int variant);
+TESModelTextureSwap* __cdecl TESBipedModelForm_GetWorldTESModel(void* form, int variant);
 
 // @fnv 0x0048b310
-bool FUN_0048b310(void* form, int variant)
+// src: COMMUNITY 0x0048b310
+bool TESModelTextureSwap_HasTextureSwap(void* form, int variant)
 {
     bool bFound = false;
-    TESModelTextureSwap* pkPath = FUN_00481010(form, variant);
+    TESModelTextureSwap* pkPath = TESBipedModelForm_GetWorldTESModel(form, variant);
     if (!pkPath)
         pkPath = dynamic_cast<TESModelTextureSwap*>(static_cast<TESForm*>(form));
     if (pkPath && !GetTextureSwapList(pkPath)->IsEmpty())

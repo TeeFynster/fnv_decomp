@@ -294,13 +294,14 @@ struct S_00d943d0_Obj
     void ProcessCallback(S_00d943d0_Item* a, S_00d943d0_Item* b, int c);
 };
 
-int __cdecl FUN_00d28a30(int* p1e0, int* p1d0, int* p200, int* ints, int n, int sz);
-int __cdecl FUN_00d29bf0(int* p1e0, int* p1d0, S_00d943d0_Elem* e, int* ints, int n, int sz);
-void __cdecl FUN_00d1a330(int a, int* ints, int n);
+int __cdecl hkRigidMotionUtilApplyForcesAndStep(int* p1e0, int* p1d0, int* p200, int* ints, int n, int sz);
+int __cdecl hkRigidMotionUtilApplyAccumulators(int* p1e0, int* p1d0, S_00d943d0_Elem* e, int* ints, int n, int sz);
+void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(int a, int* ints, int n);
 
 // Picks FUN_00d28a30 or FUN_00d29bf0 by item->m_flag to set item->m_result, calls FUN_00d1a330, then obj->ProcessCallback.
 // @fnv 0x00d943d0
-void __cdecl FUN_00d943d0(S_00d943d0_Ctx* ctx, S_00d943d0_Obj* obj, S_00d943d0_Item* item)
+// src: HAVOK_LIB 0x00d943d0
+void __cdecl hkCpuIntegrateMotionJob(S_00d943d0_Ctx* ctx, S_00d943d0_Obj* obj, S_00d943d0_Item* item)
 {
     S_00d943d0_TimerBeginList("LtIntegrate", "StIntegrateMotions");
 
@@ -312,13 +313,13 @@ void __cdecl FUN_00d943d0(S_00d943d0_Ctx* ctx, S_00d943d0_Obj* obj, S_00d943d0_I
     if (item->m_flag)
     {
         item->m_result =
-            FUN_00d28a30(&ctx->m_inner->unk1E0, &ctx->m_inner->unk1D0, &ctx->m_inner->unk200, ints, n, 0xe0);
+            hkRigidMotionUtilApplyForcesAndStep(&ctx->m_inner->unk1E0, &ctx->m_inner->unk1D0, &ctx->m_inner->unk200, ints, n, 0xe0);
     }
     else
     {
-        item->m_result = FUN_00d29bf0(&ctx->m_inner->unk1E0, &ctx->m_inner->unk1D0, e, ints, n, 0xe0);
+        item->m_result = hkRigidMotionUtilApplyAccumulators(&ctx->m_inner->unk1E0, &ctx->m_inner->unk1D0, e, ints, n, 0xe0);
     }
-    FUN_00d1a330(ctx->m_inner->unk078, ints, n);
+    hkpEntityAabbUtil_entityBatchRecalcAabb(ctx->m_inner->unk078, ints, n);
 
     S_00d943d0_Timer("lt");
 

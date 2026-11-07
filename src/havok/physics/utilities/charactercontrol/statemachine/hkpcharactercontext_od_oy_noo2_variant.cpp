@@ -289,11 +289,12 @@ struct Owner
     int unk3ec;
     int m_iValue;
 
-    void FUN_008e2680(int iValue);
+    void bhkCharacterController_SetTrueState(int iValue);
 };
 
 // @fnv 0x008e2680
-void Owner::FUN_008e2680(int iValue)
+// src: XBOX_PDB 0x008e2680
+void Owner::bhkCharacterController_SetTrueState(int iValue)
 {
     m_iValue = iValue;
 }

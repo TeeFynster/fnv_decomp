@@ -17,7 +17,7 @@ public:
     void FUN_008d0600(Sky* pWeatherSky, float fSeconds);
 
     void FUN_00633190();
-    void FUN_0063fdb0(void*);
+    void LoadGeometry(void*);
 
     NiPointer<NiNode> m_spAtmosphere;
     NiPointer<NiFogProperty> m_spFog;

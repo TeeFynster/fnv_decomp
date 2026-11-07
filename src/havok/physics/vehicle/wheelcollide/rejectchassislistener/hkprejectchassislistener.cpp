@@ -23,18 +23,20 @@ FUN_00e360f0::~FUN_00e360f0()
 struct FUN_00e36100_StandIn
 {
     int m_unk0;
-    void FUN_00e36100(int* pArg);
+    void hkpRejectChassisListener_collidableAddedCallback(int* pArg);
 };
 
 // @fnv 0x00e36100
-void FUN_00e36100_StandIn::FUN_00e36100(int* pArg)
+// src: HAVOK_LIB 0x00e36100
+void FUN_00e36100_StandIn::hkpRejectChassisListener_collidableAddedCallback(int* pArg)
 {
     if (*(int*)(pArg + 1) == *(int*)(this + 1) || *((unsigned char*)*(int*)(pArg + 1) + 0x18) != 1)
         *(int*)(pArg + 2) = 1;
 }
 
 // @fnv 0x00e360e0
-void __stdcall FUN_00e360e0(int arg)
+// src: GUESS 0x00e360e0 (confidence: high)
+void __stdcall Object_DoNothing_00e360e0(int arg)
 {}
 
 // FUN_00dfbd70: this-adjusting thunk {adjustor 8} for the virtual FunAdjust_Host::FUN_00dfbd70
@@ -91,7 +93,7 @@ struct hkMemoryRouterXdfbd40
     }
 };
 
-extern "C" hkMemoryRouterXdfbd40& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouterXdfbd40& __cdecl hkMemoryRouter_getInstance() throw();
 
 class hkObjdfbd40 : public hkpRejectChassisListener
 {
@@ -100,7 +102,7 @@ class hkObjdfbd40 : public hkpRejectChassisListener
 
     static void operator delete(void* p) throw()
     {
-        FUN_00c85750().heap().ReleaseBlock(p, static_cast<hkObjdfbd40*>(p)->GetAllocationSize());
+        hkMemoryRouter_getInstance().heap().ReleaseBlock(p, static_cast<hkObjdfbd40*>(p)->GetAllocationSize());
     }
     int GetAllocationSize() const
     {

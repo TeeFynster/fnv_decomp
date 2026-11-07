@@ -132,7 +132,7 @@ struct Feature
     char pad01;
     short m_idx[3];
 };
-int __cdecl FUN_00d230e0(const hkVector4* p, const hkVector4* a, const hkVector4* b, hkVector4* out);
+int __cdecl hkLineSegmentUtil_closestPointLineSeg(const hkVector4* p, const hkVector4* a, const hkVector4* b, hkVector4* out);
 static __forceinline LocalM128 Dot3(LocalM128 a, LocalM128 b)
 {
     LocalM128 x2 = _mm_mul_ps(a, b);
@@ -170,7 +170,8 @@ struct Comparison
     }
 };
 // @fnv 0x00e62100
-int __cdecl FUN_00e62100(const hkVector4* point, const hkVector4* tri, const float* plane, DistOut* out, Feature* feat)
+// src: GUESS 0x00e62100 (confidence: low)
+int __cdecl hkVector4_ProcessAndReturnValue_00e62100(const hkVector4* point, const hkVector4* tri, const float* plane, DistOut* out, Feature* feat)
 {
     if (feat)
         feat->m_type = 0;
@@ -224,7 +225,7 @@ int __cdecl FUN_00e62100(const hkVector4* point, const hkVector4* tri, const flo
     if (idx < 0)
     {
         idx += 8;
-        int r = FUN_00d230e0(point, &tri[DAT_010eced6[idx]], &tri[DAT_010eced4[idx]], &bary);
+        int r = hkLineSegmentUtil_closestPointLineSeg(point, &tri[DAT_010eced6[idx]], &tri[DAT_010eced4[idx]], &bary);
         if (feat)
         {
             if (r == 4)
@@ -249,8 +250,8 @@ int __cdecl FUN_00e62100(const hkVector4* point, const hkVector4* tri, const flo
         return 1;
     }
     hkVector4 c1;
-    int r0 = FUN_00d230e0(point, &tri[idx], &tri[DAT_010eced6[idx]], &bary);
-    int r1 = FUN_00d230e0(point, &tri[DAT_010eced4[idx]], &tri[idx], &c1);
+    int r0 = hkLineSegmentUtil_closestPointLineSeg(point, &tri[idx], &tri[DAT_010eced6[idx]], &bary);
+    int r1 = hkLineSegmentUtil_closestPointLineSeg(point, &tri[DAT_010eced4[idx]], &tri[idx], &c1);
     hkVector4 d0v, d1v;
     d0v.m_vComponents = _mm_sub_ps(point->m_vComponents, bary.m_vComponents);
     d1v.m_vComponents = _mm_sub_ps(point->m_vComponents, c1.m_vComponents);
@@ -326,7 +327,8 @@ template <typename T> inline void swapE6F(T& x, T& y)
 }
 
 // @fnv 0x00e61fb0
-void __cdecl FUN_00e61fb0(const hkVector4* pkTriangle, const float* afInputValues, hkMatrix4& kMatrixOut,
+// src: GUESS 0x00e61fb0 (confidence: low)
+void __cdecl hkVector4_ComputeValues_00e61fb0(const hkVector4* pkTriangle, const float* afInputValues, hkMatrix4& kMatrixOut,
                           hkVector4& kNormalOut)
 {
     hkVector4 e12;
@@ -404,11 +406,12 @@ struct S00e62c10_List
     LocalM128* unk68;
     int unk6c;
 
-    void FUN_00e62c10(const LocalM128* param);
+    void UpdateState_00e62c10(const LocalM128* param);
 };
 
 // @fnv 0x00e62c10
-void S00e62c10_List::FUN_00e62c10(const LocalM128* param)
+// src: GUESS 0x00e62c10 (confidence: low)
+void S00e62c10_List::UpdateState_00e62c10(const LocalM128* param)
 {
     int index = unk6c;
     unk68[index] = param[0];
@@ -444,12 +447,13 @@ struct TetraHull
     int unk1C;
     TetraVertex m_kVertices[4];
 
-    void FUN_00e679d0();
-    void FUN_00e63ba0(const hkVector4* a, const hkVector4* b, const hkVector4* c);
+    void ProcessEntries_00e679d0();
+    void ProcessEntries_00e63ba0(const hkVector4* a, const hkVector4* b, const hkVector4* c);
 };
 
 // @fnv 0x00e63ba0
-void TetraHull::FUN_00e63ba0(const hkVector4* a, const hkVector4* b, const hkVector4* c)
+// src: GUESS 0x00e63ba0 (confidence: low)
+void TetraHull::ProcessEntries_00e63ba0(const hkVector4* a, const hkVector4* b, const hkVector4* c)
 {
     m_iStridedVertexCount = 4;
     TetraVertex* v = m_kVertices;
@@ -460,7 +464,7 @@ void TetraHull::FUN_00e63ba0(const hkVector4* a, const hkVector4* b, const hkVec
         v->m_vContactPosition = c[i];
         v->m_flags = 0;
     }
-    FUN_00e679d0();
+    ProcessEntries_00e679d0();
     m_iResultCode = 0;
 }
 }  // namespace fnv_00e63ba0
@@ -480,7 +484,7 @@ struct MoppMemoryRouter
     int unk00, unk04, unk08, unk0c;
     void* heap;
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* heap, MoppResults* array, int elementSize);
 struct MoppErrorSink
 {
@@ -496,13 +500,13 @@ struct MoppFormatter
     unsigned short memorySize, referenceCount;
     void* writer;
     void FUN_00cb1600(char* buffer, int length);
-    void FUN_00cc01c0(const char* text);
+    void ProcessAndReturnValue_00cc01c0(const char* text);
     void FUN_00cc00e0();
 };
 struct MoppFindAllVM
 {
     MoppResults* results;
-    void FUN_00e66290(const MoppQueryState* current, const unsigned char* program);
+    void hkpMoppFindAllVirtualMachine_queryOnTreeRight(const MoppQueryState* current, const unsigned char* program);
 };
 static __forceinline void decodeWord(const unsigned char* __restrict p, unsigned int* __restrict out,
                                      unsigned int index)
@@ -525,7 +529,8 @@ static unsigned int readBig32(const unsigned char* p)
     return (readBig24(p) << 8) + p[3];
 }
 // @fnv 0x00e66290
-void MoppFindAllVM::FUN_00e66290(const MoppQueryState* current, const unsigned char* program)
+// src: HAVOK_LIB 0x00e66290
+void MoppFindAllVM::hkpMoppFindAllVirtualMachine_queryOnTreeRight(const MoppQueryState* current, const unsigned char* program)
 {
     MoppQueryState local;
     unsigned int primitive;
@@ -656,7 +661,7 @@ void MoppFindAllVM::FUN_00e66290(const MoppQueryState* current, const unsigned c
             unsigned __int64 buffer[64];
             char* text = reinterpret_cast<char*>(buffer);
             formatter.FUN_00cb1600(text, 512);
-            formatter.FUN_00cc01c0(
+            formatter.ProcessAndReturnValue_00cc01c0(
                 "Unknown command - This mopp data has been corrupted (check for memory trashing), or an hkpMoppBvTreeShape has been pointed at invalid mopp data.\n");
             if (DAT_01268360->Report(3, 0x1298fedd, text, ".\\Collide\\Mopp\\Machine\\hkpMoppFindAllVirtualMachine.cpp",
                                      211))
@@ -721,7 +726,7 @@ void MoppFindAllVM::FUN_00e66290(const MoppQueryState* current, const unsigned c
         terminal:
             primitive += current->primitiveOffset;
             MoppResults* array = results;
-            MoppMemoryRouter* router = (MoppMemoryRouter*)FUN_00c85750();
+            MoppMemoryRouter* router = (MoppMemoryRouter*)hkMemoryRouter_getInstance();
             if (array->count == (array->capacity & 0x3fffffff))
                 ResizeAudioStream(router->heap, array, 4);
             unsigned int* dest = &array->data[array->count++];
@@ -794,7 +799,7 @@ struct Hull
         for (int i = 0; i < num; ++i)
             result[i] = getEdge(edgeCount++);
     }
-    int FUN_00e67740(int count, HullLink* links, const HullVertex* endpoint);
+    int ProcessAndTransformResult_00e67740(int count, HullLink* links, const HullVertex* endpoint);
     __forceinline HullResult buildFan(int count, HullLink* links, const HullVertex* endpoint);
 };
 __forceinline HullResult Hull::buildFan(int count, HullLink* links, const HullVertex* endpoint)
@@ -874,7 +879,8 @@ __forceinline HullResult Hull::buildFan(int count, HullLink* links, const HullVe
 }
 
 // @fnv 0x00e67740
-int Hull::FUN_00e67740(int count, HullLink* links, const HullVertex* endpoint)
+// src: GUESS 0x00e67740 (confidence: low)
+int Hull::ProcessAndTransformResult_00e67740(int count, HullLink* links, const HullVertex* endpoint)
 {
     return buildFan(count, links, endpoint).value;
 }
@@ -922,7 +928,7 @@ struct TetraFace
     int unk48;
     int unk4C;
 
-    __declspec(noinline) void FUN_00e67570();
+    __declspec(noinline) void ComputePlaneNormalAndDistance();
 };
 
 struct TetraEdgeInit
@@ -951,10 +957,11 @@ struct TetraHull
     int unkF6C;
     TetraFace m_faces[4];
 
-    void FUN_00e679d0();
+    void ProcessEntries_00e679d0();
 };
 
-void TetraFace::FUN_00e67570()
+// src: GUESS 0x00e67570 (confidence: high)
+void TetraFace::ComputePlaneNormalAndDistance()
 {
     LocalM128 a = m_kEdges[0].m_pVertex->m_vContactPosition.m_vComponents;
     LocalM128 b = m_kEdges[1].m_pVertex->m_vContactPosition.m_vComponents;
@@ -970,7 +977,8 @@ void TetraFace::FUN_00e67570()
 }
 
 // @fnv 0x00e679d0
-void TetraHull::FUN_00e679d0()
+// src: GUESS 0x00e679d0 (confidence: low)
+void TetraHull::ProcessEntries_00e679d0()
 {
     m_numFaces = 4;
     const TetraEdgeInit* init = DAT_010ed0f0;
@@ -992,7 +1000,7 @@ void TetraHull::FUN_00e679d0()
     }
 
     TetraFace* last = &m_faces[3];
-    last->FUN_00e67570();
+    last->ComputePlaneNormalAndDistance();
 
     LocalM128 d = _mm_mul_ps(_mm_sub_ps(m_kVertices[0].m_vContactPosition.m_vComponents, m_kVertices[1].m_vContactPosition.m_vComponents),
                           last->m_kTriangleNormal.m_vComponents);
@@ -1013,7 +1021,7 @@ void TetraHull::FUN_00e679d0()
     TetraFace* f = first;
     for (int i = 3; i >= 0; i--)
     {
-        f->FUN_00e67570();
+        f->ComputePlaneNormalAndDistance();
         f++;
     }
 }
@@ -1025,7 +1033,8 @@ extern LocalM128 DAT_010c71c0;
 extern LocalM128 DAT_010c71d0;
 
 // @fnv 0x00e61e70
-void __cdecl FUN_00e61e70(const float* p, float* out)
+// src: GUESS 0x00e61e70 (confidence: low)
+void __cdecl hkVector4_ComputeValues_00e61e70(const float* p, float* out)
 {
     hkVector4 b;
     b.m_vComponents = _mm_sub_ps(_mm_load_ps(p + 8), _mm_load_ps(p + 4));

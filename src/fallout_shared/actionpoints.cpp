@@ -21,7 +21,8 @@ float ActionPoints::GetActionPoints()
 
 // Returns true for action codes 0-8, 16, 17, 19, 20 and 21, and false for any other code.
 // @fnv 0x0066dde0
-bool FUN_0066dde0(int aeAction)
+// src: XBOX_PDB 0x0066dde0
+bool ActionPoints_IsAttackAction(int aeAction)
 {
     switch (aeAction)
     {
@@ -46,7 +47,8 @@ bool FUN_0066dde0(int aeAction)
 }
 
 // @fnv 0x0066dba0
-int FUN_0066dba0(int aeWeaponType)
+// src: COMMUNITY 0x0066dba0
+int ActionPoints_GetAttackAction(int aeWeaponType)
 {
     int result = 22;
     if (aeWeaponType >= 0 && aeWeaponType < 14)
@@ -94,7 +96,8 @@ int FUN_0066dba0(int aeWeaponType)
 extern StartMenu* DAT_0119bb50[];
 
 // @fnv 0x0066ddc0
-char const* FUN_0066ddc0(int index)
+// src: COMMUNITY 0x0066ddc0
+char const* ActionPoints_GetActionPointsString(int index)
 {
     return reinterpret_cast<char const*>(DAT_0119bb50[index]->GetMenuTitle());
 }

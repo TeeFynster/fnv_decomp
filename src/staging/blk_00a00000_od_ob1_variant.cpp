@@ -19,7 +19,7 @@ struct FUN_00a1c020_Class
 };
 struct FUN_00a1e720_class
 {
-    void __thiscall FUN_00a1e720(int a, int b, int c);
+    void __thiscall BSMapBase_unsigned_int_ScrapHeap_SetValue(int a, int b, int c);
 };
 extern void* NiFreeAlias(void*);
 extern int DAT_01095524;
@@ -27,7 +27,7 @@ struct FUN_00a1e1a0_class
 {
     int m_vtbl;
     int m_field;
-    void __thiscall FUN_00a1e1a0();
+    void __thiscall ReleaseStorage_00a1e1a0();
 };
 struct FUN_00a11d80_Class
 {
@@ -53,8 +53,8 @@ struct StrA
     unsigned int _Myres;
     bool _Inside(const char*);
     bool _Grow(unsigned int, bool);
-    StrA& FUN_00a0c570(const StrA&, unsigned int, unsigned int);
-    StrA& FUN_00a0c430(const char* _Ptr, unsigned int _Count);
+    StrA& UpdateState_00a0c570(const StrA&, unsigned int, unsigned int);
+    StrA& std_string_append(const char* _Ptr, unsigned int _Count);
 };
 void* __cdecl _NiMalloc(unsigned int);
 void* __cdecl _fnv_zlib_memset(void* dst, int c, unsigned int n);
@@ -65,7 +65,7 @@ struct FUN_00a0d5f0_class
     int m_iElementCount;
     void* m_data;
     int m_auiShapeKeys;
-    FUN_00a0d5f0_class* __thiscall FUN_00a0d5f0(unsigned int size);
+    FUN_00a0d5f0_class* __thiscall NiTMapBase_NiTPointerAllocator_unsigned_int_char_const_int_NiTMapBase_NiTPointerAllocator_unsigned_int_char_const_int(unsigned int size);
 };
 void* _NiMalloc(unsigned int);
 void* _fnv_zlib_memset(void* dest, int val, unsigned int size);
@@ -137,7 +137,7 @@ struct FUN_00a0d710_class
     int m_iElementCount;
     void* m_data;
     int m_auiShapeKeys;
-    FUN_00a0d710_class* __thiscall FUN_00a0d710(unsigned int size);
+    FUN_00a0d710_class* __thiscall NiTMapBase_NiTPointerAllocator_unsigned_int_int_int_Init(unsigned int size);
 };
 extern void __cdecl _NiFree(void*);
 struct FUN_00a1ee60_class
@@ -156,7 +156,7 @@ struct S00a0d390
 struct FUN_00a0d960_class : S00a0d390
 {
     void* m_data;
-    void FUN_00a0d960();
+    void ReleaseStorage_00a0d960();
 };
 struct _BSAHelper
 {
@@ -219,7 +219,7 @@ void NiFree(void*);
 struct FUN_00a1e880_class : S00a0d390
 {
     void* m_data;
-    void FUN_00a1e880();
+    void SetVirtualTable_00a1e880();
 };
 // FUN_00a1ea70 (unit_1a635d660b3a.cpp) - 48B scalar-deleting-destructor shape
 // v0: verbatim transcription of IDA a1ea70..0xa1eaa0 (push ebp/mov/sub esp,20h/
@@ -252,7 +252,7 @@ struct S_00a0c9f0_Node
 struct S_00a0c9f0_Pool
 {
     int m_uiCount;
-    S_00a0c9f0_Node* FUN_0043a010();
+    S_00a0c9f0_Node* NiGeometry_AddProperty();
 };
 class S_00a0c9f0
 {
@@ -261,15 +261,15 @@ class S_00a0c9f0
     S_00a0c9f0_Pool m_kNodePool;
 
   public:
-    void __thiscall FUN_00a0c9f0(int* pValue);
+    void __thiscall _NiTListBase_AddHead(int* pValue);
 };
 struct FUN_00a0d790_class : S00a0d390
 {
     void* m_data;
-    void FUN_00a0d790();
+    void UpdateState_00a0d790();
 };
 extern int DAT_01094e9c;
-extern void* __cdecl FUN_00aa10f0(void*);
+extern void* __cdecl _NiFree_00aa10f0(void*);
 struct FUN_00a0d990_cls : S00a0d390
 {
     void* m_data;
@@ -373,7 +373,8 @@ inline void NiFixedString::operator delete(void* pvMem)
 
 
 // @fnv 0x00a1c790
-void __cdecl FUN_00a1c790()
+// src: GUESS 0x00a1c790 (confidence: low)
+void __cdecl Runtime_ReleaseStorage_00a1c790()
 {
     delete DAT_011f34cc;
 }
@@ -475,10 +476,11 @@ struct StrB
     {
         StrTraitsB::assign(_Myptr()[_Mysize = _Newsize], char());
     }
-    StrB& FUN_00a0c570(const StrB& _Right, unsigned int _Roff, unsigned int _Count);
+    StrB& UpdateState_00a0c570(const StrB& _Right, unsigned int _Roff, unsigned int _Count);
 };
 // @fnv 0x00a0c570
-StrB& StrB::FUN_00a0c570(const StrB& _Right, unsigned int _Roff, unsigned int _Count)
+// src: GUESS 0x00a0c570 (confidence: low)
+StrB& StrB::UpdateState_00a0c570(const StrB& _Right, unsigned int _Roff, unsigned int _Count)
 {
     if (_Right.size() < _Roff)
         FUN_00ec30e8();
@@ -580,11 +582,12 @@ struct StringQ
         return (_BUF_SIZE <= _Myres ? _Bx._Ptr : _Bx._Buf);
     }
 
-    unsigned int FUN_00a0c300(const char* _Ptr, unsigned int _Off, unsigned int _Count) const;
+    unsigned int std_string_rfind(const char* _Ptr, unsigned int _Off, unsigned int _Count) const;
 };
 
 // @fnv 0x00a0c300
-unsigned int StringQ::FUN_00a0c300(const char* _Ptr, unsigned int _Off, unsigned int _Count) const
+// src: COMMUNITY 0x00a0c300
+unsigned int StringQ::std_string_rfind(const char* _Ptr, unsigned int _Off, unsigned int _Count) const
 {
     if (_Count == 0)
         return (_Off < _Mysize ? _Off : _Mysize);
@@ -613,15 +616,16 @@ struct S00a1bc20_Guard
 class S00a1bc20_Obj
 {
   public:
-    void FUN_00a1c2d0();
-    void FUN_00a1bc20();
+    void ClearLinkedNodes();
+    void ProcessState_00a1bc20();
 };
 
 // @fnv 0x00a1bc20
-void S00a1bc20_Obj::FUN_00a1bc20()
+// src: GUESS 0x00a1bc20 (confidence: low)
+void S00a1bc20_Obj::ProcessState_00a1bc20()
 {
     S00a1bc20_Guard guard;
-    this->FUN_00a1c2d0();
+    this->ClearLinkedNodes();
 }
 
 void __cdecl NiFreeE900(void* pvMem);
@@ -762,7 +766,7 @@ struct PointerArrayBase
     virtual ~PointerArrayBase()
     {
         ClearAll();
-        FUN_00aa10f0(buckets);
+        _NiFree_00aa10f0(buckets);
     }
     virtual void Reserved1();
     virtual void Reserved2();
@@ -812,7 +816,7 @@ FUN_00a1ec70::~FUN_00a1ec70()
             {
                 BucketNode* saved = node;
                 node = node->next;
-                FUN_00aa10f0(saved->key);
+                _NiFree_00aa10f0(saved->key);
             }
         }
     }
@@ -832,7 +836,7 @@ struct PointerArrayBase
     virtual ~PointerArrayBase()
     {
         ClearAll();
-        FUN_00aa10f0(buckets);
+        _NiFree_00aa10f0(buckets);
     }
     virtual void Reserved1();
     virtual void Reserved2();
@@ -1263,9 +1267,9 @@ struct Base670
         while (m_field)
         {
             void* p1 = m_data;
-            FUN_00aa10f0(p1);
+            _NiFree_00aa10f0(p1);
             void* p2 = m_data;
-            FUN_00aa10f0(p2);
+            _NiFree_00aa10f0(p2);
             m_field--;
         }
     }
@@ -1276,7 +1280,7 @@ struct Base670
     virtual ~Base670()
     {
         ClearAll();
-        FUN_00aa10f0(m_data);
+        _NiFree_00aa10f0(m_data);
     }
 };
 struct FUN_00a0d670 : Base670

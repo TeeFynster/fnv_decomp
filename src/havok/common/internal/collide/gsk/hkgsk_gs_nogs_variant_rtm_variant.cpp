@@ -35,9 +35,9 @@ struct SimplexContext
     hkVector4* pointsB;
     Scalar4* differences;
     int count;
-    int FUN_00e63770(hkVector4*);
+    int ProcessEntries_00e63770(hkVector4*);
 };
-void __cdecl FUN_00e62740(const void*, const void*, const Transform*, hkVector4*, hkVector4*,
+void __cdecl Object_CopyData_00e62740(const void*, const void*, const Transform*, hkVector4*, hkVector4*,
                           hkVector4*);
 template <class T> struct Ref
 {
@@ -59,10 +59,11 @@ struct Simplex
     hkVector4 transformedB[4];
     hkVector4 pointsB[4];
     hkVector4 result;
-    void FUN_00e4c230(const void*, const void*, const Transform*, int*, int*, hkVector4*);
+    void ProcessEntries_00e4c230(const void*, const void*, const Transform*, int*, int*, hkVector4*);
 };
 // @fnv 0x00e4c230
-void Simplex::FUN_00e4c230(const void* shapeA, const void* shapeB, const Transform* transform, int* countA, int* countB,
+// src: GUESS 0x00e4c230 (confidence: low)
+void Simplex::ProcessEntries_00e4c230(const void* shapeA, const void* shapeB, const Transform* transform, int* countA, int* countB,
                            hkVector4* output)
 {
     int simplexCount = 4;
@@ -139,9 +140,9 @@ void Simplex::FUN_00e4c230(const void* shapeA, const void* shapeB, const Transfo
     context.pointsB = pointsB;
     context.differences = &differences.d0;
     context.count = simplexCount;
-    if (context.FUN_00e63770(output) == 5)
+    if (context.ProcessEntries_00e63770(output) == 5)
     {
-        FUN_00e62740(shapeA, shapeB, transform, pointsA, pointsB, output);
+        Object_CopyData_00e62740(shapeA, shapeB, transform, pointsA, pointsB, output);
         *countA = 1;
         *countB = 1;
     }

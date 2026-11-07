@@ -29,9 +29,9 @@ public:
     void FUN_006d3b00(float);
     void FUN_006d61e0(PathingAvoidNodeArray*);
     void FUN_006d61e0(void*);
-    void FUN_00507610(float);
+    void PathingRequestClosePoint_SetMinDistance(float);
     void FUN_006d1bc0(const PathingLocation&);
-    void FUN_008df000();
+    void PathingRequest_SetNoDestination();
 
     float fleeRadius;
 };

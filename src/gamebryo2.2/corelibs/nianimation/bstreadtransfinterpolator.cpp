@@ -20,7 +20,8 @@ unsigned int BSTreadTransfInterpolator::GetColorKeyCount(unsigned short arg) con
 }
 
 // @fnv 0x00a43580
-void* BSTreadTransfInterpolator::FUN_00a43580(unsigned short flag)
+// src: XBOX_PDB 0x00a43580
+void* BSTreadTransfInterpolator::GetKeyType(unsigned short flag)
 {
     if (!flag)
     {
@@ -99,7 +100,8 @@ bool BSTreadTransfInterpolator::UpdateSampleValue(float time, int, int)
 }
 
 // @fnv 0x00a435e0
-bool BSTreadTransfInterpolator::FUN_00a435e0(int arg)
+// src: XBOX_PDB 0x00a435e0
+bool BSTreadTransfInterpolator::GetChannelPosed(int arg)
 {
     if (reference.m_pObject != 0)
     {
@@ -371,7 +373,8 @@ inline BSTreadTransfInterpolator::BSTreadTransfInterpolator() throw()
 
 // Allocates a clone and copies the interpolator data.
 // @fnv 0x00a439e0
-BSTreadTransfInterpolator* BSTreadTransfInterpolator::FUN_00a439e0(void* kCloning)
+// src: XBOX_PDB 0x00a439e0
+BSTreadTransfInterpolator* BSTreadTransfInterpolator::CreateClone_00a439e0(void* kCloning)
 {
     BSTreadTransfInterpolator* pkClone = new BSTreadTransfInterpolator;
     FUN_00a43690(pkClone, kCloning);

@@ -8,7 +8,8 @@
 #include "../../../../include/NiUpdateData.h"
 
 // @fnv 0x00a7d730
-bool NiPointLight::FUN_00a7d730(NiObject* pObject)
+// src: XBOX_PDB 0x00a7d730
+bool NiPointLight::IsEqual_00a7d730(NiObject* pObject)
 {
     NiPointLight* pOtherLight = static_cast<NiPointLight*>(pObject);
     if (IsEqual(pOtherLight))
@@ -24,13 +25,15 @@ bool NiPointLight::FUN_00a7d730(NiObject* pObject)
 extern const char* const g_011f5ec4_arg1;
 
 // @fnv 0x00a7d790
-const char* const* __cdecl FUN_00a7d790()
+// src: COMMUNITY 0x00a7d790
+const char* const* __cdecl NiPointLight_GetRTTI()
 {
     return &g_011f5ec4_arg1;
 }
 
 // @fnv 0x00a7d7a0
-void NiPointLight::FUN_00a7d7a0(NiUpdateData& update)
+// src: XBOX_PDB 0x00a7d7a0
+void NiPointLight::UpdateWorldData_00a7d7a0(NiUpdateData& update)
 {
     NiAVObject::UpdateWorldData(update);
     ++revID;
@@ -39,7 +42,8 @@ void NiPointLight::FUN_00a7d7a0(NiUpdateData& update)
 extern const void* g_011f5f6c;
 
 // @fnv 0x00a9b390
-const void* __cdecl FUN_00a9b390()
+// src: COMMUNITY 0x00a9b390
+const void* __cdecl NiAmbientLight_GetRTTI()
 {
     return &g_011f5f6c;
 }
@@ -202,8 +206,8 @@ extern unsigned int DAT_011f4a98;
 extern const char str_0109de00[];
 extern const char str_0109ddf4[];
 extern const char str_0109dde8[];
-char* __cdecl FUN_00a7d330(unsigned int v);
-char* __cdecl FUN_00a7d550(const char* fmt, float v);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int v);
+char* __cdecl NiGetViewerString_00a7d550(const char* fmt, float v);
 
 inline void S_Push(S_00a7d960_arg* p, char* s)
 {
@@ -220,16 +224,17 @@ void NiPointLight::GetViewerStrings(NiViewerStringsArray* strings)
 {
     S_00a7d960_arg* pBuffer = reinterpret_cast<S_00a7d960_arg*>(strings);
     reinterpret_cast<NiLightBaseOperations*>(this)->GetViewerStrings(strings);
-    S_Push(pBuffer, FUN_00a7d330(DAT_011f4a98));
-    S_Push(pBuffer, FUN_00a7d550(str_0109de00, reinterpret_cast<float*>(storage)[0]));
-    S_Push(pBuffer, FUN_00a7d550(str_0109ddf4, reinterpret_cast<float*>(storage)[1]));
-    S_Push(pBuffer, FUN_00a7d550(str_0109dde8, reinterpret_cast<float*>(storage)[2]));
+    S_Push(pBuffer, NiViewerStrings_NiGetViewerString_Title(DAT_011f4a98));
+    S_Push(pBuffer, NiGetViewerString_00a7d550(str_0109de00, reinterpret_cast<float*>(storage)[0]));
+    S_Push(pBuffer, NiGetViewerString_00a7d550(str_0109ddf4, reinterpret_cast<float*>(storage)[1]));
+    S_Push(pBuffer, NiGetViewerString_00a7d550(str_0109dde8, reinterpret_cast<float*>(storage)[2]));
 }
 
 void __cdecl FUN_00a71f50();
 
 // @fnv 0x00a9b360
-void __cdecl FUN_00a9b360()
+// src: XBOX_PDB 0x00a9b360
+void __cdecl NiAmbientLight_LinkObject()
 {
     FUN_00a71f50();
 }
@@ -237,7 +242,8 @@ void __cdecl FUN_00a9b360()
 void __cdecl FUN_00a720f0(int param1, int param2);
 
 // @fnv 0x00a9b370
-void __cdecl FUN_00a9b370(int param1, int param2)
+// src: XBOX_PDB 0x00a9b370
+void __cdecl NiAmbientLight_SaveBinary(int param1, int param2)
 {
     FUN_00a720f0(param1, param2);
 }
@@ -245,7 +251,8 @@ void __cdecl FUN_00a9b370(int param1, int param2)
 extern void __cdecl FUN_00a72160();
 
 // @fnv 0x00a9b380
-void __cdecl FUN_00a9b380()
+// src: XBOX_PDB 0x00a9b380
+void __cdecl NiAmbientLight_IsEqual()
 {
     FUN_00a72160();
 }

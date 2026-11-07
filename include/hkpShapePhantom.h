@@ -14,7 +14,7 @@ public:
     virtual void vf16();
     virtual void vf17();
 
-    void FUN_00c9e910(const hkTransform& t);
+    void hkpShapePhantom_setTransform(const hkTransform& t);
     void __thiscall SetWorldPosition(void* body, float pos);
     void __thiscall SetWorldPosition(hkpRigidBody* body, float pos);
 

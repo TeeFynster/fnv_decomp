@@ -12,7 +12,7 @@ public:
     virtual ~ExtraContainerChanges();
 
     ExtraContainerChanges(InventoryChanges* changes);
-    EntryData* FUN_004d0650(TESForm*, int);
+    EntryData* InventoryChanges_GetInventoryItem(TESForm*, int);
 
     InventoryChanges* pChanges;
 };

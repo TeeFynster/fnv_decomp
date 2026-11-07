@@ -13,14 +13,14 @@ struct FUN_00b3ede0_shell
     void* prev;
     unsigned int used;
     unsigned int size;
-    void* FUN_00b3ede0();
+    void* AdvanceBlockAllocationCursor();
 };
 unsigned int __cdecl FUN_00ec7c56(void);
 struct FUN_00b3ef80_shell
 {
     int m_iValueAt00;
     void* m_pObjectAt04;
-    float FUN_00b3ed20();
+    float CTreeFileAccess_ParseFloat();
     CVec3 GetVector3();
 };
 struct FUN_00b3ed20_range
@@ -36,7 +36,7 @@ struct FUN_00b3ed20_cls
 {
     unsigned int m_nCursor;
     FUN_00b3ed20_range m_range;
-    float FUN_00b3ed20();
+    float CTreeFileAccess_ParseFloat();
 };
 // Stand-in for the element array the object points at.
 struct S_00b3ed80_Array
@@ -99,19 +99,19 @@ struct Str_00b3ee40
         Alloc_00b3ee40 c;
         Alloc_00b3ee40* pal = &c;
         int j, o, e, t, f7;
-        FUN_0044a730(false, 0);
+        fopen_0044a730(false, 0);
     }
     Str_00b3ee40(const Str_00b3ee40& rhs)
     {
         int k0, k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12, k13, k14, k15, k16;
-        FUN_0044a730(false, 0);
+        fopen_0044a730(false, 0);
         AssignSubstring(rhs, 0, DAT_010173f0);
     }
     ~Str_00b3ee40()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(bool, unsigned int);
+    void fopen_0044a730(bool, unsigned int);
     Str_00b3ee40& AssignSubstring(const Str_00b3ee40&, unsigned int, unsigned int);
     Str_00b3ee40& AppendChars(unsigned int, char);
     Str_00b3ee40& operator+=(char ch)
@@ -145,10 +145,11 @@ struct SpeedTreeFileInput
     unsigned int pos;
     Buf_00b3ee40 buf;
     int GetNextElement();
-    Str_00b3ee40 FUN_00b3ee40();
+    Str_00b3ee40 CTreeFileAccess_ParseString();
 };
 // @fnv 0x00b3ee40
-Str_00b3ee40 SpeedTreeFileInput::FUN_00b3ee40()
+// src: COMMUNITY 0x00b3ee40
+Str_00b3ee40 SpeedTreeFileInput::CTreeFileAccess_ParseString()
 {
     Str_00b3ee40 s;
     int count4 = GetNextElement();

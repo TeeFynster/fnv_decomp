@@ -35,7 +35,7 @@ struct Cls_00d24670 {
     virtual void v30();
     virtual float getH(int x, int y);
     virtual void getFlip(bool& flip);
-    void FUN_00d24670(int x, int y, float fx, float fy, LocalM128* nrm, float* height, int* flag);
+    void UpdateState_00d24670(int x, int y, float fx, float fy, LocalM128* nrm, float* height, int* flag);
 };
 struct hkInfoD260 {
     int unk00;
@@ -54,11 +54,11 @@ public:
     hkInfoD260* m_info;
 };
 struct FUN_00d24b50_Obj {
-    void __thiscall FUN_00d24b50(void* object, int flags, hkBool flag2, float f, hkCollectorD260* collector);
+    void __thiscall hkpSampledHeightFieldShape_castRayInternal(void* object, int flags, hkBool flag2, float f, hkCollectorD260* collector);
 };
 class hkShapeD260 : public FUN_00d24b50_Obj {
 public:
-    hkBool __thiscall FUN_00d26080(void* object, hkInfoD260* info);
+    hkBool __thiscall hkpSampledHeightFieldShape_castRayImpl(void* object, hkInfoD260* info);
 };
 struct S00d261b0_Elem {
     LocalM128 v00;
@@ -92,8 +92,8 @@ struct Val1 {
     Val1(const Val1& o) : m_00(o.m_00) {}
 };
 struct Host {
-    void FUN_00d24b50(int a1, int a2, Val1 v, float f, Local12* pLocal);
-    void FUN_00d260d0(int a1, int a2, const Arg3* a3);
+    void hkpSampledHeightFieldShape_castRayInternal(int a1, int a2, Val1 v, float f, Local12* pLocal);
+    void hkpSampledHeightFieldShape_castRayWithCollectorImpl(int a1, int a2, const Arg3* a3);
 };
 struct __declspec(align(16)) RayData {
     float x; float y; float z; float w;
@@ -117,8 +117,8 @@ struct Obj {
     int unk20;
     float unk24;
 
-    void FUN_00d24b50(RayData* data, void* arg2, hkBool arg3, float arg4, void* arg5);
-    void FUN_00d26120(Input* input, void* arg2, void* arg3);
+    void hkpSampledHeightFieldShape_castRayInternal(RayData* data, void* arg2, hkBool arg3, float arg4, void* arg5);
+    void hkpSampledHeightFieldShape_castSphere(Input* input, void* arg2, void* arg3);
 };
 extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
 struct SampledHeightField : hkpSampledHeightFieldShape {
@@ -135,9 +135,9 @@ struct SampledHeightField : hkpSampledHeightFieldShape {
     virtual void slot11();
     virtual void slot12();
     virtual float getHeightAt(int x, int z);
-    void FUN_00d249f0(hkUlong transform, float tolerance, hkUlong aabb);
+    void hkpSampledHeightFieldShape_getAabbImpl(hkUlong transform, float tolerance, hkUlong aabb);
 };
-void __cdecl FUN_00d26230(hkUlong, const hkVector4&, const hkVector4&, float, hkUlong);
+void __cdecl hkAabbUtil_calcAabb_00d26230(hkUlong, const hkVector4&, const hkVector4&, float, hkUlong);
 
 inline void* operator new(unsigned int,void* p) throw() { return p; }
 extern "C" { LocalM128 _mm_set_ps(float,float,float,float); LocalM128 _mm_setr_ps(float,float,float,float); LocalM128 _mm_mul_ps(LocalM128,LocalM128); LocalM128 _mm_load_ss(const float*); LocalM128 _mm_shuffle_ps(LocalM128,LocalM128,int); }
@@ -158,7 +158,7 @@ struct hkVec4
     const float& operator()(int i) const { return m_vComponents.m128_f32[i]; }
 };
 
-float FUN_00d97440() throw();
+float Object_ComputeBisectionMidpoint() throw();
 
 enum HeightFieldType { HEIGHTFIELD_STORAGE = 0, HEIGHTFIELD_COMPRESSED = 1, HEIGHTFIELD_USER = 2 };
 
@@ -199,7 +199,7 @@ struct HeightField : hkHeightFieldBase
 {
     __forceinline HeightField(const hkSampledHeightFieldShapeCinfo& ci, HeightFieldType hfType);
     ~HeightField();
-    HeightField* FUN_00d248a0(const hkSampledHeightFieldShapeCinfo& ci, HeightFieldType hfType);
+    HeightField* ProcessAndReturnValue_00d248a0(const hkSampledHeightFieldShapeCinfo& ci, HeightFieldType hfType);
     int m_iXResolution;
     int m_iZResolution;
     float m_fHeightScale;
@@ -235,10 +235,11 @@ __forceinline HeightField::HeightField(const hkSampledHeightFieldShapeCinfo& ci,
     m_kInverseScale.set(1.0f / ci.m_vScale(0), 1.0f / ci.m_vScale(1), 1.0f / ci.m_vScale(2));
 
     hkVec4 offset;
-    offset.setMul4(FUN_00d97440(), m_kHeightScaleVector);
+    offset.setMul4(Object_ComputeBisectionMidpoint(), m_kHeightScaleVector);
     offset.m_vComponents.m128_f32[1] = 0.0f;
     m_kOffset = offset;
 }
 
 // @fnv 0x00d248a0
-HeightField* HeightField::FUN_00d248a0(const hkSampledHeightFieldShapeCinfo& ci, HeightFieldType hfType) { __assume(this != 0); return new(this) HeightField(ci,hfType); }
+// src: GUESS 0x00d248a0 (confidence: low)
+HeightField* HeightField::ProcessAndReturnValue_00d248a0(const hkSampledHeightFieldShapeCinfo& ci, HeightFieldType hfType) { __assume(this != 0); return new(this) HeightField(ci,hfType); }

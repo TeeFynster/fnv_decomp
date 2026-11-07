@@ -6,7 +6,8 @@
 
 // Writes 3 and 0x18 into out[1] and out[0] when flag is set, otherwise writes 0 into both.
 // @fnv 0x00e3b520
-void __stdcall FUN_00e3b520(char flag, int* out)
+// src: HAVOK_LIB 0x00e3b520
+void __stdcall hkpRotationalConstraintData_getRuntimeInfo(char flag, int* out)
 {
     if (flag)
     {
@@ -20,20 +21,22 @@ void __stdcall FUN_00e3b520(char flag, int* out)
     }
 }
 
-void* __cdecl FUN_00d21a60(void*, int, int);
+void* __cdecl hkpConstraintData_getConstraintInfoUtil(void*, int, int);
 struct FUN_00e3b500_cls
 {
-    void __thiscall FUN_00e3b500(int arg);
+    void __thiscall hkpRotationalConstraintData_getConstraintInfo(int arg);
 };
 // @fnv 0x00e3b500
-void __thiscall FUN_00e3b500_cls::FUN_00e3b500(int arg)
+// src: HAVOK_LIB 0x00e3b500
+void __thiscall FUN_00e3b500_cls::hkpRotationalConstraintData_getConstraintInfo(int arg)
 {
-    FUN_00d21a60((char*)this + 0x10, 0x74, arg);
+    hkpConstraintData_getConstraintInfoUtil((char*)this + 0x10, 0x74, arg);
 }
 
 // Returns the constant value 16.
 // @fnv 0x00e3b5b0
-int __cdecl FUN_00e3b5b0()
+// src: GUESS 0x00e3b5b0 (confidence: high)
+int __cdecl hkpRotationalConstraintData_ReturnConstant_16()
 {
     return 16;
 }
@@ -54,11 +57,12 @@ struct RotationHelper
 
 struct hkpRotationalConstraintDataHelper : public hkpRotationalConstraintData
 {
-    hkBool_ret __thiscall FUN_00e3b550();
+    hkBool_ret __thiscall hkpRotationalConstraintData_isValid();
 };
 
 // @fnv 0x00e3b550
-hkBool_ret __thiscall hkpRotationalConstraintDataHelper::FUN_00e3b550()
+// src: XBOX_PDB 0x00e3b550
+hkBool_ret __thiscall hkpRotationalConstraintDataHelper::hkpRotationalConstraintData_isValid()
 {
     float eps = 0.001f;
     return ((RotationHelper*)&m_kBridgeAtoms.m_kLocalRotations.m_kRotationA)->IsOrthonormal(eps).m_cBooleanValue &&

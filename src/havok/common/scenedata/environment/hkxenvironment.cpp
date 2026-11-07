@@ -54,11 +54,12 @@ struct FnvVtObj
 {
     int m_vptr;
 
-    FnvVtObj* FUN_00e3f510(unsigned int unusedArg);
+    FnvVtObj* SetVptr_00e3f510(unsigned int unusedArg);
 };
 
 // @fnv 0x00e3f510
-FnvVtObj* FnvVtObj::FUN_00e3f510(unsigned int unusedArg)
+// src: GUESS 0x00e3f510 (confidence: low)
+FnvVtObj* FnvVtObj::SetVptr_00e3f510(unsigned int unusedArg)
 {
     m_vptr = (int)&DAT_010ebab8;
     return this;
@@ -69,11 +70,11 @@ struct EnvironmentVariable
     hkStringPtr m_name;
     hkStringPtr m_value;
 };
-HKXMemoryRouter* __cdecl FUN_00c85750();
+HKXMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 __forceinline void ReleaseEnvironmentVariables(hkArray<EnvironmentVariable>& variables)
 {
-    hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->manager);
+    hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(hkMemoryRouter_getInstance()->manager);
     EnvironmentVariable* entry = variables.m_data;
     if (variables.m_iElementCount > 0)
     {
@@ -139,7 +140,7 @@ template <typename T> __forceinline void hkArrayBase<T>::removeAt(int iIndex)
 
 template <> __forceinline void hkArray<EnvironmentVariable>::pushBack(const EnvironmentVariable& kElem)
 {
-    HKXMemoryRouter* pRouter = FUN_00c85750();
+    HKXMemoryRouter* pRouter = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAlloc = reinterpret_cast<hkMemoryAllocator*>(pRouter->manager);
     if (m_iElementCount == getCapacity())
         ResizeAudioStream(pAlloc, this, sizeof(EnvironmentVariable));
@@ -163,12 +164,13 @@ class hkxAttributeMapE3F3
     hkArray<EnvironmentVariable> m_pCustomAttributes;
 
     int FindEntryByKey(const char* pcName) throw();
-    int FUN_00e3f3b0(const char* pcName, const char* pcValue) throw();
+    int SetOrRemoveCustomAttribute(const char* pcName, const char* pcValue) throw();
 };
 
 // Sets or removes a custom attribute by name, returning 1 if a missing attribute was requested for removal, otherwise 0.
 // @fnv 0x00e3f3b0
-int hkxAttributeMapE3F3::FUN_00e3f3b0(const char* pcName, const char* pcValue) throw()
+// src: GUESS 0x00e3f3b0 (confidence: high)
+int hkxAttributeMapE3F3::SetOrRemoveCustomAttribute(const char* pcName, const char* pcValue) throw()
 {
     int iIndex = FindEntryByKey(pcName);
     if (pcValue == 0)

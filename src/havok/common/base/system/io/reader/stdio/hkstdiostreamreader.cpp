@@ -50,22 +50,25 @@ struct FUN_00d2bd50_cls
     void* m_04;
     void* m_08;
     void* m_0c;
-    long FUN_00d2bd50();
+    long hkStdioStreamReader_tell();
 };
 // @fnv 0x00d2bd50
-long FUN_00d2bd50_cls::FUN_00d2bd50()
+// src: HAVOK_LIB 0x00d2bd50
+long FUN_00d2bd50_cls::hkStdioStreamReader_tell()
 {
     return _ftell(m_0c);
 }
 
 // @fnv 0x00d2bd10
-void __stdcall FUN_00d2bd10(unsigned char* output)
+// src: HAVOK_SRC 0x00d2bd10
+void __stdcall hkStdioStreamReader_markSupported(unsigned char* output)
 {
     *output = 1;
 }
 
 // @fnv 0x00d2bd20
-void __stdcall FUN_00d2bd20(char* a1)
+// src: HAVOK_SRC 0x00d2bd20
+void __stdcall hkStdioStreamReader_seekTellSupported(char* a1)
 {
     *a1 = 1;
 }
@@ -131,10 +134,11 @@ struct Owner : DispatchObject
 {
     int unk04;
     void* unk08;
-    void FUN_00d2bdf0();
+    void hkStdioStreamReader_rewindToMark();
 };
 // @fnv 0x00d2bdf0
-void Owner::FUN_00d2bdf0()
+// src: HAVOK_SRC 0x00d2bdf0
+void Owner::hkStdioStreamReader_rewindToMark()
 {
     invoke(unk08, 0);
 }
@@ -152,7 +156,7 @@ struct Prefix
 
 struct FUN_00cb0a70_Class
 {
-    void FUN_00cb0a70(int);
+    void ReturnSelf(int);
 };
 struct FUN_00d2c7e0_class : Prefix
 {
@@ -164,7 +168,7 @@ struct FUN_00d2c7e0_class : Prefix
 FUN_00d2c7e0_class::FUN_00d2c7e0_class(int value)
 {
     vtable = (int)&DAT_010cc2fc;
-    sub.FUN_00cb0a70(value);
+    sub.ReturnSelf(value);
 }
 
 struct FUN_00d2bd00_cls
@@ -174,11 +178,12 @@ struct FUN_00d2bd00_cls
     int unk08;
     int unk0c;
     unsigned char unk10;
-    void FUN_00d2bd00(unsigned char* out);
+    void hkStdioStreamReader_isOk(unsigned char* out);
 };
 
 // @fnv 0x00d2bd00
-void FUN_00d2bd00_cls::FUN_00d2bd00(unsigned char* volatile out)
+// src: HAVOK_LIB 0x00d2bd00
+void FUN_00d2bd00_cls::hkStdioStreamReader_isOk(unsigned char* volatile out)
 {
     unsigned char value = unk10;
     *out = value;
@@ -227,7 +232,7 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
@@ -241,7 +246,7 @@ CpuObject* CpuObject::FUN_00d2be00(unsigned int flags)
     DestroyFileHandle();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
+        CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;

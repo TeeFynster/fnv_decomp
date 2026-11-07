@@ -21,9 +21,9 @@ public:
     float Length() const;
     float FUN_004a7290() const;
 
-    __declspec(noalias) void FUN_004a0c10();
+    __declspec(noalias) void Unitize_004a0c10();
     void FUN_006815c0();
-    P3 FUN_00439ef0(P3* rhs);
-    NiPoint3 FUN_00439ef0(const NiPoint3& rhs) const;
-    P3* FUN_004a0bd0(P3* rhs);
+    P3 SubtractIntoVector(P3* rhs);
+    NiPoint3 SubtractIntoVector(const NiPoint3& rhs) const;
+    P3* GetNegatedVector(P3* rhs);
 };

@@ -38,7 +38,7 @@ struct CtrlV
         return m_i28 == 0;
     }
     int BuildEntryValueArray();
-    bool FUN_00c491a0(ObjV* pkObj);
+    bool BSCompoundFrustum_Process(ObjV* pkObj);
     void SetActorList(int iState);
 };
 struct HostV
@@ -52,11 +52,12 @@ struct HostV
     {
         return (bool)m_pv8c;
     }
-    void FUN_00a694e0(ObjV* pkObj);
-    void FUN_00c4ee90(ObjV* pkObj);
+    void NiCullingProcess_DoCulling(ObjV* pkObj);
+    void BSCullingProcess_Process(ObjV* pkObj);
 };
 // @fnv 0x00c4ee90
-void HostV::FUN_00c4ee90(ObjV* pkObj)
+// src: XBOX_PDB 0x00c4ee90
+void HostV::BSCullingProcess_Process(ObjV* pkObj)
 {
     if (m_iFadeIndex != 2 && m_iFadeIndex != 1)
     {
@@ -71,7 +72,7 @@ void HostV::FUN_00c4ee90(ObjV* pkObj)
             if (pkObj->TestFlag(0x800) || !HasX())
                 pkObj->Attach(this);
             else
-                FUN_00a694e0(pkObj);
+                NiCullingProcess_DoCulling(pkObj);
         }
         else if (pkObj->TestFlag(0x800) || ((!m_pkCtrl || m_pkCtrl->IsEmpty()) && !HasX()))
         {
@@ -80,7 +81,7 @@ void HostV::FUN_00c4ee90(ObjV* pkObj)
         else
         {
             int iState = m_pkCtrl->BuildEntryValueArray();
-            if (m_pkCtrl->FUN_00c491a0(pkObj))
+            if (m_pkCtrl->BSCompoundFrustum_Process(pkObj))
                 pkObj->Attach(this);
             m_pkCtrl->SetActorList(iState);
         }
@@ -139,12 +140,13 @@ template <> __forceinline NiPointer<NiAccumulator>::operator NiAccumulator*() co
 
 // The shared declaration retains an opaque NiNodeX*: this parameter is a camera, while renderer +8 is an accumulator.
 // @fnv 0x00c4f070
-void NiCullingProcess::FUN_00c4f070(NiNodeX* a, NiAVObject* b, int c)
+// src: XBOX_PDB 0x00c4f070
+void NiCullingProcess::BSCullingProcess_Process_00c4f070(NiNodeX* a, NiAVObject* b, int c)
 {
     if (!a || !b)
         return;
     m_pkCamera = (const NiCamera*)a;
-    FUN_00a694a0((char*)m_pkCamera + 0xdc);
+    NiCullingProcess_SetFrustum((char*)m_pkCamera + 0xdc);
     void* saved = 0;
     if (c)
     {
@@ -165,7 +167,7 @@ void NiCullingProcess::FUN_00c4f070(NiNodeX* a, NiAVObject* b, int c)
         m_pkVisibleSet = saved;
 }
 
-void __cdecl FUN_00a29680(const char* pcFormat, ...);
+void __cdecl Object_DoNothing(const char* pcFormat, ...);
 
 inline NiFixedString::operator const char*() const
 {
@@ -178,7 +180,8 @@ inline const char* NiGeometry::GetName() const
 }
 
 // @fnv 0x00c4f1d0
-void BSCullingProcess::FUN_00c4f1d0(NiGeometry& kVisible)
+// src: XBOX_PDB 0x00c4f1d0
+void BSCullingProcess::AppendVirtual(NiGeometry& kVisible)
 {
     bool bRegistered = false;
     if (m_acRendererDataA)
@@ -188,7 +191,7 @@ void BSCullingProcess::FUN_00c4f1d0(NiGeometry& kVisible)
     }
     if (!bRegistered)
     {
-        FUN_00a29680("NiCullingProcess::Append> Geometry failed RegisterObject, not rendering: %s\n",
+        Object_DoNothing("NiCullingProcess::Append> Geometry failed RegisterObject, not rendering: %s\n",
                      kVisible.GetName() ? kVisible.GetName() : "NULL");
     }
 }

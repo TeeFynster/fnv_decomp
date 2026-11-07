@@ -85,46 +85,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 #include "../../../../include/Normal.h"
@@ -144,7 +144,8 @@ extern float DAT_0126fa78;
 
 // Stores f and the three components of p into globals and returns a pointer to DAT_0126fa68.
 // @fnv 0x00e9c7d0
-int* __cdecl FUN_00e9c7d0(float afValue, int* apComponents)
+// src: GAMEBRYO_LIB 0x00e9c7d0
+int* __cdecl NiCollisionConvert_ConvertToSphereBV_Fast(float afValue, int* apComponents)
 {
     DAT_0126fa78 = afValue;
     DAT_0126fa6c = apComponents[0];
@@ -169,7 +170,8 @@ struct Obj
     Obj* InitFromParams(float, int*);
 };
 // @fnv 0x00e9c800
-Obj* FUN_00e9c800(float afValue, int* p)
+// src: COMMUNITY 0x00e9c800
+Obj* NiCollisionConvert_ConvertToSphereBV_Safe(float afValue, int* p)
 {
     void* pMemory = g_memoryManager.Allocate(20);
     Obj* pObj;
@@ -251,10 +253,11 @@ struct ItemOwner
     int m_uiEdgeIndex;
 };
 
-bool __cdecl FUN_00e9c490(int a1, int a2, SpawnParam* p, int item);
+bool __cdecl NiCollisionTraversals_FindIntersections(int a1, int a2, SpawnParam* p, int item);
 
 // @fnv 0x00e9c680
-bool __cdecl FUN_00e9c680(int a1, int a2, SpawnParam* p, ItemOwner* owner)
+// src: COMMUNITY 0x00e9c680
+bool __cdecl NiCollisionTraversals_FindIntersectionsSwitchNode(int a1, int a2, SpawnParam* p, ItemOwner* owner)
 {
     bool result = false;
     int idx = owner->m_uiEdgeIndex;
@@ -280,7 +283,7 @@ bool __cdecl FUN_00e9c680(int a1, int a2, SpawnParam* p, ItemOwner* owner)
         {
             goto done;
         }
-        if (FUN_00e9c490(a1, a2, p, item))
+        if (NiCollisionTraversals_FindIntersections(a1, a2, p, item))
         {
             result = true;
         }
@@ -368,11 +371,12 @@ struct SpawnParam
     int unk28;
 };
 
-bool __cdecl FUN_00e9c490(int a1, int a2, SpawnParam* p, int item);
-bool __cdecl FUN_00e9c680(int a1, int a2, SpawnParam* p, ItemOwner* owner);
+bool __cdecl NiCollisionTraversals_FindIntersections(int a1, int a2, SpawnParam* p, int item);
+bool __cdecl NiCollisionTraversals_FindIntersectionsSwitchNode(int a1, int a2, SpawnParam* p, ItemOwner* owner);
 
 // @fnv 0x00e9c6f0
-bool __cdecl FUN_00e9c6f0(int a1, int a2, SpawnParam* pSpawnParam, ItemOwner* owner)
+// src: COMMUNITY 0x00e9c6f0
+bool __cdecl NiCollisionTraversals_FindIntersectionsNode(int a1, int a2, SpawnParam* pSpawnParam, ItemOwner* owner)
 {
     if (pSpawnParam->unk08 == 0 && pSpawnParam->m_iType == 1)
     {
@@ -389,7 +393,7 @@ bool __cdecl FUN_00e9c6f0(int a1, int a2, SpawnParam* pSpawnParam, ItemOwner* ow
             {
                 if (node == (NicollisiontraversalsListNodeView*)&DAT_011f5eb4)
                 {
-                    return FUN_00e9c680(a1, a2, pSpawnParam, owner);
+                    return NiCollisionTraversals_FindIntersectionsSwitchNode(a1, a2, pSpawnParam, owner);
                 }
                 node = node->m_pNext;
             } while (node != 0);
@@ -406,7 +410,7 @@ bool __cdecl FUN_00e9c6f0(int a1, int a2, SpawnParam* pSpawnParam, ItemOwner* ow
         int item = owner->m_pItems[i];
         if (item != 0)
         {
-            if (FUN_00e9c490(a1, a2, pSpawnParam, item))
+            if (NiCollisionTraversals_FindIntersections(a1, a2, pSpawnParam, item))
             {
                 result = true;
             }
@@ -508,12 +512,13 @@ extern int DAT_011f4a48;
 extern int DAT_011f5f64;
 static const float DAT_01011d78 = 0.0f;
 bool __cdecl RayIntersectsBound(S_00e9c490_Node* node, NiPoint3* p1, NiPoint3* p2);
-bool __cdecl FUN_00e9c6f0(NiPoint3* p1, NiPoint3* p2, S_00e9c490_Ctx* ctx, S_00e9c490_Node* node);
+bool __cdecl NiCollisionTraversals_FindIntersectionsNode(NiPoint3* p1, NiPoint3* p2, S_00e9c490_Ctx* ctx, S_00e9c490_Node* node);
 bool __cdecl RaycastShape(NiPoint3* p1, NiPoint3* p2, S_00e9c490_Ctx* ctx, S_00e9c490_Node* node);
-bool __cdecl FUN_0043b300(const void* rtti, S_00e9c490_Node* node);
+bool __cdecl NiObject_IsKindOf(const void* rtti, S_00e9c490_Node* node);
 
 // @fnv 0x00e9c490
-bool __cdecl FUN_00e9c490(NiPoint3* pPoint1, NiPoint3* pPoint2, S_00e9c490_Ctx* pContext,
+// src: COMMUNITY 0x00e9c490
+bool __cdecl NiCollisionTraversals_FindIntersections(NiPoint3* pPoint1, NiPoint3* pPoint2, S_00e9c490_Ctx* pContext,
                           S_00e9c490_Node* node)
 {
     if (!node)
@@ -526,21 +531,21 @@ bool __cdecl FUN_00e9c490(NiPoint3* pPoint1, NiPoint3* pPoint2, S_00e9c490_Ctx* 
     if (RayIntersectsBound(node, pPoint1, pPoint2) || (ref && (unsigned char)(ref->unk30 >> 13) & 1))
     {
         if (ref)
-            return FUN_00e9c6f0(pPoint1, pPoint2, pContext, node);
+            return NiCollisionTraversals_FindIntersectionsNode(pPoint1, pPoint2, pContext, node);
         if (node->v7())
             return RaycastShape(pPoint1, pPoint2, pContext, node);
-        if (DAT_0126fa65 && FUN_0043b300(&DAT_011f4a48, node))
+        if (DAT_0126fa65 && NiObject_IsKindOf(&DAT_011f4a48, node))
         {
-            NiPoint3 d = node->unk8c.FUN_00439ef0(*pPoint1);
+            NiPoint3 d = node->unk8c.SubtractIntoVector(*pPoint1);
             if (pPoint2->DotProduct(d) < DAT_01011d78)
                 return false;
             float len = d.FUN_00457990();
             pContext->unk18.GetTexture(node)->unk14 = len;
             return false;
         }
-        if (DAT_0126fa64 && FUN_0043b300(&DAT_011f5f64, node))
+        if (DAT_0126fa64 && NiObject_IsKindOf(&DAT_011f5f64, node))
         {
-            NiPoint3 d = node->unk8c.FUN_00439ef0(*pPoint1);
+            NiPoint3 d = node->unk8c.SubtractIntoVector(*pPoint1);
             if (pPoint2->DotProduct(d) < DAT_01011d78)
                 return false;
             S_00e9c490_Entry* pEntry = pContext->unk18.GetTexture(node);
@@ -560,7 +565,8 @@ bool __cdecl FUN_00e9c490(NiPoint3* pPoint1, NiPoint3* pPoint2, S_00e9c490_Ctx* 
 }
 
 // @fnv 0x00e9c7c0
-int FUN_00e9c7c0()
+// src: XBOX_PDB 0x00e9c7c0
+int NiBoundingVolume_Type()
 {
     return -1;
 }
@@ -600,7 +606,7 @@ public:
     RaycastPoint Cross(const RaycastPoint& rhs) const;
     float Length() const;
     float FUN_004a7290() const;
-    __declspec(noalias) void FUN_004a0c10();
+    __declspec(noalias) void Unitize_004a0c10();
 };
 inline RaycastPoint::RaycastPoint() throw() {}
 inline RaycastPoint RaycastPoint::operator*(float f) const
@@ -669,7 +675,7 @@ struct P4
     }
     P4 AddDelta(const P4&);
 };
-P4 __cdecl FUN_00532f40(float, const P4&);
+P4 __cdecl Object_ProcessAndReturnValue_00532f40(float, const P4&);
 extern NiPoint2 DAT_011f4980;
 extern P4 DAT_011a9be0;
 struct Matrix
@@ -719,7 +725,7 @@ struct Buffer
     {
         return *reinterpret_cast<NiPoint2*>(data + stride * i);
     }
-    void FUN_00534780(unsigned, P4*);
+    void NiGeometryDataIteratorNiColorA_Get(unsigned, P4*);
 };
 struct GeometryData
 {
@@ -779,10 +785,10 @@ struct GeometryData
     NiPoint2* texcoords;
     struct Provider* provider;
     bool FUN_00a67360(bool);
-    void FUN_00a673d0();
-    void FUN_00a67410(Buffer*);
+    void NiGeometryData_UnlockPackedVertexData();
+    void NiGeometryData_GetVerticesIterator(Buffer*);
     void GetBounds(Buffer*);
-    void FUN_00a67660(Buffer*);
+    void NiGeometryData_GetAdditionalColorData(Buffer*);
     void GetKeyAndMode(unsigned, Buffer*);
     unsigned short* FUN_00a7b850();
 };
@@ -938,7 +944,7 @@ bool __cdecl RaycastGeometry(const RaycastPoint* origin, const RaycastPoint* dir
         if (provider && provider->Available())
         {
             locked = data->FUN_00a67360(true);
-            data->FUN_00a67410(&positionBuffer);
+            data->NiGeometryData_GetVerticesIterator(&positionBuffer);
         }
     }
     unsigned short* triangles = data->FUN_00a7b850();
@@ -1037,7 +1043,7 @@ bool __cdecl RaycastGeometry(const RaycastPoint* origin, const RaycastPoint* dir
                 edge2 = p2 - p0;
                 normal = edge1.Cross(edge2);
             }
-            normal.FUN_004a0c10();
+            normal.Unitize_004a0c10();
             if (pick->coordinates == 1)
                 normal = reinterpret_cast<Matrix&>(worldTransform.rotation).FUN_004b4500(&normal);
             hit->normal = normal;
@@ -1047,13 +1053,13 @@ bool __cdecl RaycastGeometry(const RaycastPoint* origin, const RaycastPoint* dir
         if (pick->GetColor())
         {
             Buffer colorBuffer;
-            data->FUN_00a67660(&colorBuffer);
+            data->NiGeometryData_GetAdditionalColorData(&colorBuffer);
             if (colorBuffer.data)
             {
                 P4 c0, c1, c2;
-                colorBuffer.FUN_00534780(i0, &c0);
-                colorBuffer.FUN_00534780(i1, &c1);
-                colorBuffer.FUN_00534780(i2, &c2);
+                colorBuffer.NiGeometryDataIteratorNiColorA_Get(i0, &c0);
+                colorBuffer.NiGeometryDataIteratorNiColorA_Get(i1, &c1);
+                colorBuffer.NiGeometryDataIteratorNiColorA_Get(i2, &c2);
                 hit->color = c0 * b0 + c1 * b1 + c2 * b2;
             }
             else
@@ -1061,9 +1067,9 @@ bool __cdecl RaycastGeometry(const RaycastPoint* origin, const RaycastPoint* dir
                 P4* colors = geometry->data->colors;
                 if (colors)
                 {
-                    P4 blended = FUN_00532f40(b0, colors[i0])
-                                     .AddDelta(FUN_00532f40(b1, colors[i1]))
-                                     .AddDelta(FUN_00532f40(b2, colors[i2]));
+                    P4 blended = Object_ProcessAndReturnValue_00532f40(b0, colors[i0])
+                                     .AddDelta(Object_ProcessAndReturnValue_00532f40(b1, colors[i1]))
+                                     .AddDelta(Object_ProcessAndReturnValue_00532f40(b2, colors[i2]));
                     hit->color = blended;
                 }
                 else
@@ -1075,12 +1081,12 @@ bool __cdecl RaycastGeometry(const RaycastPoint* origin, const RaycastPoint* dir
         if (1 == pick->mode && pick->sort == 1)
         {
             if (locked)
-                data->FUN_00a673d0();
+                data->NiGeometryData_UnlockPackedVertexData();
             return true;
         }
     }
     if (locked)
-        data->FUN_00a673d0();
+        data->NiGeometryData_UnlockPackedVertexData();
     return found;
 }
 
@@ -1333,7 +1339,7 @@ struct Vec2
 };
 extern Vec2 __cdecl FUN_00532fd0(float, const Vec2&);
 extern LocalVec3 __cdecl FUN_004a3760(float, const LocalVec3&);
-extern Vec4 __cdecl FUN_00532f40(float, const Vec4&);
+extern Vec4 __cdecl Object_ProcessAndReturnValue_00532f40(float, const Vec4&);
 
 struct QueryResult
 {
@@ -1386,7 +1392,7 @@ struct BufferView
     int stride;
 
     bool owned;
-    void FUN_00534780(unsigned int, Vec4*);
+    void NiGeometryDataIteratorNiColorA_Get(unsigned int, Vec4*);
 };
 
 struct Stream
@@ -1500,17 +1506,17 @@ struct Mesh
 
     bool FUN_00a67360(int);
 
-    void FUN_00a67410(BufferView*);
+    void NiGeometryData_GetVerticesIterator(BufferView*);
 
     unsigned short* FUN_00a75f10();
 
-    void FUN_00a673d0();
+    void NiGeometryData_UnlockPackedVertexData();
 
     void GetKeyAndMode(int, BufferView*);
 
     void GetBounds(BufferView*);
 
-    void FUN_00a67660(BufferView*);
+    void NiGeometryData_GetAdditionalColorData(BufferView*);
 };
 
 struct Shape
@@ -1571,7 +1577,7 @@ bool __cdecl IntersectShape(const LocalVec3* rayStart, const LocalVec3* rayDirec
         if (stream && stream->Available())
         {
             ownsPositions = mesh->FUN_00a67360(1);
-            mesh->FUN_00a67410(&positions);
+            mesh->NiGeometryData_GetVerticesIterator(&positions);
         }
     }
     unsigned short* triangles = mesh->FUN_00a75f10();
@@ -1697,7 +1703,7 @@ bool __cdecl IntersectShape(const LocalVec3* rayStart, const LocalVec3* rayDirec
                         CopyVector(normal, edge1.FUN_004b3800(edge2));
                     }
                 }
-                reinterpret_cast<RaycastPoint&>(normal).FUN_004a0c10();
+                reinterpret_cast<RaycastPoint&>(normal).Unitize_004a0c10();
                 if (options->coordinateMode == 1)
                     CopyVector(normal, *reinterpret_cast<const LocalVec3*>(
                         &reinterpret_cast<const Mat3LocalView&>(xform.rotation).FUN_004b4500(
@@ -1709,14 +1715,14 @@ bool __cdecl IntersectShape(const LocalVec3* rayStart, const LocalVec3* rayDirec
             if (options->needsColor)
             {
                 BufferView colors = {0, 0, false};
-                mesh->FUN_00a67660(&colors);
+                mesh->NiGeometryData_GetAdditionalColorData(&colors);
                 if (colors.data)
                 {
                     Vec4 ca, cb, cc;
-                    colors.FUN_00534780(a, &ca);
-                    colors.FUN_00534780(b, &cb);
-                    colors.FUN_00534780(c, &cc);
-                    Vec4 sum = FUN_00532f40(weight, ca) + FUN_00532f40(u, cb) + FUN_00532f40(v, cc);
+                    colors.NiGeometryDataIteratorNiColorA_Get(a, &ca);
+                    colors.NiGeometryDataIteratorNiColorA_Get(b, &cb);
+                    colors.NiGeometryDataIteratorNiColorA_Get(c, &cc);
+                    Vec4 sum = Object_ProcessAndReturnValue_00532f40(weight, ca) + Object_ProcessAndReturnValue_00532f40(u, cb) + Object_ProcessAndReturnValue_00532f40(v, cc);
                     result->tangent = sum;
                 }
                 else
@@ -1724,8 +1730,8 @@ bool __cdecl IntersectShape(const LocalVec3* rayStart, const LocalVec3* rayDirec
                     Vec4* directColors = shape->mesh->colors;
                     if (directColors)
                     {
-                        Vec4 sum = FUN_00532f40(weight, directColors[a]) + FUN_00532f40(u, directColors[b]) +
-                                   FUN_00532f40(v, directColors[c]);
+                        Vec4 sum = Object_ProcessAndReturnValue_00532f40(weight, directColors[a]) + Object_ProcessAndReturnValue_00532f40(u, directColors[b]) +
+                                   Object_ProcessAndReturnValue_00532f40(v, directColors[c]);
                         result->tangent = sum;
                     }
                     else
@@ -1737,12 +1743,12 @@ bool __cdecl IntersectShape(const LocalVec3* rayStart, const LocalVec3* rayDirec
             if (options->mode == 1 && options->stopAtFirst == 1)
             {
                 if (ownsPositions)
-                    mesh->FUN_00a673d0();
+                    mesh->NiGeometryData_UnlockPackedVertexData();
                 return true;
             }
         }
         if (ownsPositions)
-            mesh->FUN_00a673d0();
+            mesh->NiGeometryData_UnlockPackedVertexData();
         return anyHit;
     }
 
@@ -1797,8 +1803,8 @@ struct Vec2
 };
 extern Vec2 __cdecl FUN_00532fd0(float, const Vec2&);
 extern NiPoint3 __cdecl FUN_004a3760(float, const NiPoint3&);
-extern Vec4 __cdecl FUN_00532f40(float, const Vec4&);
-extern __declspec(noalias) NiPoint3 __cdecl FUN_004b3ae0(const NiPoint3&, const float*);
+extern Vec4 __cdecl Object_ProcessAndReturnValue_00532f40(float, const Vec4&);
+extern __declspec(noalias) NiPoint3 __cdecl NiPoint3_TransformByMatrix3(const NiPoint3&, const float*);
 
 
 
@@ -1845,7 +1851,7 @@ struct BufferView
     NiPoint3* data;
     int stride;
     bool owned;
-    void FUN_00534780(unsigned int, Vec4*);
+    void NiGeometryDataIteratorNiColorA_Get(unsigned int, Vec4*);
 };
 
 struct Stream
@@ -1942,11 +1948,11 @@ struct Mesh
     int unk34, unk38, unk3C, unk40;
     unsigned short unk44;
     bool FUN_00a67360(int);
-    void FUN_00a67410(BufferView*);
-    void FUN_00a673d0();
+    void NiGeometryData_GetVerticesIterator(BufferView*);
+    void NiGeometryData_UnlockPackedVertexData();
     void GetKeyAndMode(int, BufferView*);
     void GetBounds(BufferView*);
-    void FUN_00a67660(BufferView*);
+    void NiGeometryData_GetAdditionalColorData(BufferView*);
 };
 
 struct RTTI
@@ -1980,7 +1986,7 @@ struct Shape
 class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f4a20;
 extern GlobalObjectO2_00a7b610 g_011f4a40;
-bool FUN_0043b300(const void*, Shape*);
+bool NiObject_IsKindOf(const void*, Shape*);
 bool __cdecl RaycastGeometry(const NiPoint3*, const NiPoint3*, Options*, Shape*);
 bool __cdecl IntersectShape(const NiPoint3*, const NiPoint3*, Options*, Shape*);
 
@@ -2013,13 +2019,13 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
             if (shape->mesh->unk44 == 1)
                 return IntersectShape(rayStart, rayDirection, options, shape);
         }
-        else if (FUN_0043b300(&g_011f4a40, shape))
+        else if (NiObject_IsKindOf(&g_011f4a40, shape))
             return RaycastGeometry(rayStart, rayDirection, options, shape);
         const Transform& xform = shape->World();
         NiPoint3 difference = *rayStart - *reinterpret_cast<const NiPoint3*>(&xform.position);
         float invScale = (float)(1.0f / xform.scale);
-        NiPoint3 localStart = FUN_004b3ae0(difference, &reinterpret_cast<const Mat3&>(xform.rotation).m00) * invScale;
-        NiPoint3 localDirection = FUN_004b3ae0(*rayDirection, &reinterpret_cast<const Mat3&>(xform.rotation).m00) * invScale;
+        NiPoint3 localStart = NiPoint3_TransformByMatrix3(difference, &reinterpret_cast<const Mat3&>(xform.rotation).m00) * invScale;
+        NiPoint3 localDirection = NiPoint3_TransformByMatrix3(*rayDirection, &reinterpret_cast<const Mat3&>(xform.rotation).m00) * invScale;
         bool anyHit = false;
         const unsigned short triangleCount = shape->mesh->GetTriangleTotal();
         bool ownsPositions = false;
@@ -2032,12 +2038,12 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
             if (stream && stream->Available())
             {
                 ownsPositions = mesh->FUN_00a67360(1);
-                mesh->FUN_00a67410(&positions);
+                mesh->NiGeometryData_GetVerticesIterator(&positions);
             }
             if (!positions.data)
             {
                 QueryResult* result = options->output.GetTexture(shape);
-                NiPoint3 offset = reinterpret_cast<const NiPoint3*>(&shape->World().position)->FUN_00439ef0(*rayStart);
+                NiPoint3 offset = reinterpret_cast<const NiPoint3*>(&shape->World().position)->SubtractIntoVector(*rayStart);
                 result->distance = offset.FUN_00457990();
                 return true;
             }
@@ -2142,7 +2148,7 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
                         }
                     }
                     // RaycastPoint declares the same normalize routine with its noalias contract.
-                    reinterpret_cast<RaycastPoint&>(normal).FUN_004a0c10();
+                    reinterpret_cast<RaycastPoint&>(normal).Unitize_004a0c10();
                     if (options->coordinateMode == 1)
                         normal = *reinterpret_cast<const NiPoint3*>(
                             &reinterpret_cast<const Mat3&>(xform.rotation).FUN_004b4500(
@@ -2154,17 +2160,17 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
                 if (options->needsColor)
                 {
                     BufferView colors = {0, 0, false};
-                    mesh->FUN_00a67660(&colors);
+                    mesh->NiGeometryData_GetAdditionalColorData(&colors);
                     if (colors.data)
                     {
                         // Preserve zero initialization and trivial copies for color samples.
                         P4 ca, cb, cc;
-                        colors.FUN_00534780(a, reinterpret_cast<Vec4*>(&ca));
-                        colors.FUN_00534780(b, reinterpret_cast<Vec4*>(&cb));
-                        colors.FUN_00534780(c, reinterpret_cast<Vec4*>(&cc));
-                        Vec4 sum = FUN_00532f40(weight, *reinterpret_cast<const Vec4*>(&ca))
-                            + FUN_00532f40(u, *reinterpret_cast<const Vec4*>(&cb))
-                            + FUN_00532f40(v, *reinterpret_cast<const Vec4*>(&cc));
+                        colors.NiGeometryDataIteratorNiColorA_Get(a, reinterpret_cast<Vec4*>(&ca));
+                        colors.NiGeometryDataIteratorNiColorA_Get(b, reinterpret_cast<Vec4*>(&cb));
+                        colors.NiGeometryDataIteratorNiColorA_Get(c, reinterpret_cast<Vec4*>(&cc));
+                        Vec4 sum = Object_ProcessAndReturnValue_00532f40(weight, *reinterpret_cast<const Vec4*>(&ca))
+                            + Object_ProcessAndReturnValue_00532f40(u, *reinterpret_cast<const Vec4*>(&cb))
+                            + Object_ProcessAndReturnValue_00532f40(v, *reinterpret_cast<const Vec4*>(&cc));
                         memcpy(&result->tangent, &sum, sizeof(sum));
                     }
                     else
@@ -2172,8 +2178,8 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
                         Vec4* directColors = shape->mesh->colors;
                         if (directColors)
                         {
-                            Vec4 sum = FUN_00532f40(weight, directColors[a]) + FUN_00532f40(u, directColors[b]) +
-                                       FUN_00532f40(v, directColors[c]);
+                            Vec4 sum = Object_ProcessAndReturnValue_00532f40(weight, directColors[a]) + Object_ProcessAndReturnValue_00532f40(u, directColors[b]) +
+                                       Object_ProcessAndReturnValue_00532f40(v, directColors[c]);
                             memcpy(&result->tangent, &sum, sizeof(sum));
                         }
                     }
@@ -2183,13 +2189,13 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
                 if (options->mode == 1 && options->stopAtFirst == 1)
                 {
                     if (ownsPositions)
-                        mesh->FUN_00a673d0();
+                        mesh->NiGeometryData_UnlockPackedVertexData();
                     return true;
                 }
             }
         }
         if (ownsPositions)
-            mesh->FUN_00a673d0();
+            mesh->NiGeometryData_UnlockPackedVertexData();
         return anyHit;
     }
 
@@ -2245,7 +2251,8 @@ struct Helper
 };
 // Builds temporary bounds from code and point, allocates a NiBoundingVolume, then copies the bounds into it.
 // @fnv 0x00e9c850
-NiBoundingVolume* __cdecl FUN_00e9c850(unsigned int code, int* point)
+// src: COMMUNITY 0x00e9c850
+NiBoundingVolume* __cdecl NiCollisionConvert_ConvertToBoxBV(unsigned int code, int* point)
 {
     if ((unsigned short)code == 0 || point == 0)
         return 0;

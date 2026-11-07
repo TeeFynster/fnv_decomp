@@ -15,7 +15,7 @@ public:
     virtual void* GetReferencedDataSafe();
 
     int Initialize();
-    bhkRefObject* FUN_00ccd100();
+    bhkRefObject* InitializeFields_00ccd100();
     void Destroy();
     void UpdateReference(bool);
 

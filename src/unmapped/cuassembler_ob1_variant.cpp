@@ -190,7 +190,8 @@ extern int DAT_011f6c88;
 extern char DAT_011f6c8c[];
 
 // @fnv 0x00ac6540
-bool __cdecl FUN_00ac6540(std::string& kString)
+// src: GUESS 0x00ac6540 (confidence: low)
+bool __cdecl Object_ProcessAndReturnValue_00ac6540(std::string& kString)
 {
     switch (DAT_011f6c88)
     {

@@ -173,8 +173,8 @@ inline unsigned int NiTArray<T, TAlloc>::Add(const T& pcElement)
 }
 
 extern const char* g_pcA58200Name;
-char* __cdecl FUN_00a7d330(const char* pcString);
-char* __cdecl FUN_00a7d550(const char* pcName, float fValue);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcString);
+char* __cdecl NiGetViewerString_00a7d550(const char* pcName, float fValue);
 void __fastcall GetInterpolatorViewerStrings(NiBSplineInterpolator*, void*, NiViewerStringsArray*);
 
 // The shared class does not yet declare this viewer override.
@@ -182,9 +182,9 @@ void __fastcall GetInterpolatorViewerStrings(NiBSplineInterpolator*, void*, NiVi
 void __fastcall NiBSplineInterpolator_GetViewerStrings(NiBSplineInterpolator* self, void* unused, NiViewerStringsArray* pkStrings)
 {
     GetInterpolatorViewerStrings(self, unused, pkStrings);
-    pkStrings->Add(FUN_00a7d330(g_pcA58200Name));
-    pkStrings->Add(FUN_00a7d550("m_fStartTime", self->m_fStartTime));
-    pkStrings->Add(FUN_00a7d550("m_fEndTime", self->m_fEndTime));
+    pkStrings->Add(NiViewerStrings_NiGetViewerString_Title(g_pcA58200Name));
+    pkStrings->Add(NiGetViewerString_00a7d550("m_fStartTime", self->m_fStartTime));
+    pkStrings->Add(NiGetViewerString_00a7d550("m_fEndTime", self->m_fEndTime));
     NiObject* first = self->m_spTransformData.m_pObject;
     if (first)
         first->GetViewerStrings(pkStrings);

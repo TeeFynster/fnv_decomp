@@ -21,7 +21,8 @@ struct LogSink
 };
 
 // @fnv 0x00aa0020
-int __cdecl FUN_00aa0020(int a1, int a2, const char* fmt, ...)
+// src: XBOX_PDB 0x00aa0020
+int __cdecl NiShaderFactory_ReportError(int a1, int a2, const char* fmt, ...)
 {
     char buf[0x800];
     va_list args;

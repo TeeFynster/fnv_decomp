@@ -8,13 +8,13 @@ class NiCullingProperty : public NiProperty
     virtual NiCullingProperty* MakeClone(CloningProcess& kCloning);
     virtual void LoadBinary(NiStream& stream);
 
-    void FUN_00a5d7a0(void* destination, CloningProcess& kCloning);
-    void FUN_00a5d7a0(NiCullingProperty* destination, CloningProcess& kCloning);
-    NiCullingProperty* FUN_00a8f530(CloningProcess& kCloning);
-    NiCullingProperty* FUN_00a9a5f0(CloningProcess& kCloning);
-    void FUN_00a8f650(NiStream& stream);
-    void FUN_00a99e00(void* destination, CloningProcess& kCloning);
-    void FUN_00a81430(void* destination, CloningProcess& kCloning);
+    void NiProperty_CopyMembers(void* destination, CloningProcess& kCloning);
+    void NiProperty_CopyMembers(NiCullingProperty* destination, CloningProcess& kCloning);
+    NiCullingProperty* CreateClone_00a8f530(CloningProcess& kCloning);
+    NiCullingProperty* NiDitherProperty_CreateClone(CloningProcess& kCloning);
+    void LoadBinary_00a8f650(NiStream& stream);
+    void NiFogProperty_CopyMembers(void* destination, CloningProcess& kCloning);
+    void NiShadeProperty_CopyMembers(void* destination, CloningProcess& kCloning);
 
     unsigned short m_usFlags;
     unsigned short unk1A;

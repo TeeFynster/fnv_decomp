@@ -17,7 +17,7 @@ class BSAnimGroupSequence;
 class Animation
 {
   public:
-    BSAnimGroupSequence* FUN_00491040(ANIM_GROUP_SECTION section);
+    BSAnimGroupSequence* Animation_GetCurrentSequence(ANIM_GROUP_SECTION section);
     BSAnimGroupSequence* GetSequenceForKey(BSAnimGroupSequence* sequence, unsigned short group);
     bool IsGroupQueued(unsigned short group);
     BSAnimGroupSequence* PlayGroup(unsigned short group, ACTION_FLAGS flags, int loops, ANIM_GROUP_SECTION section);

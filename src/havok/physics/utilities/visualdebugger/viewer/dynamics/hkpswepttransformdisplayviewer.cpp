@@ -9,7 +9,8 @@
 
 // Calls FindEntryIndex on the viewer at this-0x20 with a; if the returned index is non-negative, calls RemoveWorldData with it.
 // @fnv 0x00d64950
-void hkpSweptTransformDisplayViewer::FUN_00d64950(int a)
+// src: GUESS 0x00d64950 (confidence: high)
+void hkpSweptTransformDisplayViewer::RemoveWorldDataIfFound(int a)
 {
     hkpSweptTransformDisplayViewer* p = (hkpSweptTransformDisplayViewer*)((char*)this - 0x20);
     int r = p->FindEntryIndex(a);
@@ -17,17 +18,19 @@ void hkpSweptTransformDisplayViewer::FUN_00d64950(int a)
         p->RemoveWorldData(r);
 }
 
-extern "C" void FUN_00d64650();
+extern "C" void hkpSweptTransformDisplayViewer_addWorld();
 // @fnv 0x00d647f0
-void __fastcall FUN_00d647f0(void* self)
+// src: GUESS 0x00d647f0 (confidence: low)
+void __fastcall hkpSweptTransformDisplayViewer_addWorld_Helper_00d647f0(void* self)
 {
-    ((void(__thiscall*)(void*))FUN_00d64650)((char*)self - 0x20);
+    ((void(__thiscall*)(void*))hkpSweptTransformDisplayViewer_addWorld)((char*)self - 0x20);
 }
 
 extern "C" int g_ptr_0x1268fd0;
 
 // @fnv 0x00d64970
-int __cdecl FUN_00d64970()
+// src: GUESS 0x00d64970 (confidence: low)
+int __cdecl hkpSweptTransformDisplayViewer_GetPtr0x1268fd0()
 {
     return g_ptr_0x1268fd0;
 }
@@ -82,7 +85,8 @@ extern "C" int g_ptr_0x1268fd0;
 
 // @fnv 0x00d64120
 // This callback receives the entity-listener subobject.
-void __fastcall FUN_00d64120(hkpEntityListener* self, void*, SweptArg* a1)
+// src: HAVOK_LIB 0x00d64120
+void __fastcall hkpSweptTransformDisplayViewer_entityRemovedCallback(hkpEntityListener* self, void*, SweptArg* a1)
 {
     if (*(int*)&a1->m_10 == 0)
     {
@@ -202,7 +206,7 @@ void hkpSweptTransformDisplayViewer::NotifyItems()
             hkpSweptTransformDisplayViewer* listener = (hkpSweptTransformDisplayViewer*)((char*)this - 8);
             do
             {
-                ((FUN_00d647b0_Handler)FUN_00d64650)(listener, (*(FUN_00d647b0_Pool**)((char*)this + 0x1c))->m_items[i]);
+                ((FUN_00d647b0_Handler)hkpSweptTransformDisplayViewer_addWorld)(listener, (*(FUN_00d647b0_Pool**)((char*)this + 0x1c))->m_items[i]);
                 i++;
             } while (i < (*(FUN_00d647b0_Pool**)((char*)this + 0x1c))->m_uiItemCount);
         }
@@ -231,7 +235,7 @@ struct SweptRouter
     }
 };
 
-__declspec(nothrow) SweptRouter& __cdecl FUN_00c85750();
+__declspec(nothrow) SweptRouter& __cdecl hkMemoryRouter_getInstance();
 
 template <int SIZE> __forceinline void SweptMemCpyOne(void* dst, const void* src)
 {
@@ -257,7 +261,7 @@ struct SweptWorld
 };
 
 template<> __forceinline hkArray<unsigned long>::~hkArray() {
- SweptHeap& alloc=FUN_00c85750().heap();m_iElementCount=0;
+ SweptHeap& alloc=hkMemoryRouter_getInstance().heap();m_iElementCount=0;
  if((m_iCapacityState&0x80000000)==0)alloc.ReturnMemory(m_data,(m_iCapacityState&0x3fffffff)*sizeof(unsigned long));
  m_data=0;m_iCapacityState=0x80000000;
 }
@@ -268,7 +272,7 @@ struct SweptWorldData
 
     static void operator delete(void* p, unsigned int nbytes)
     {
-        FUN_00c85750().heap().ReleaseBlock(p, nbytes);
+        hkMemoryRouter_getInstance().heap().ReleaseBlock(p, nbytes);
     }
 };
 
@@ -292,7 +296,7 @@ void hkpSweptTransformDisplayViewer::RemoveWorldData(int index)
 
 class BSAudio;
 namespace fnv_00d648c0 {
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 extern int DAT_010d1918, DAT_010d18f8, DAT_010d18e8, DAT_010d18cc, DAT_010d18bc, DAT_010ccf7c;
 __forceinline void ResetWorldData(hkpSweptTransformDisplayViewer::WorldDataList& data)
 {
@@ -318,7 +322,7 @@ void __fastcall Destroy(hkpSweptTransformDisplayViewer* self)
             --i;
         } while (i >= 0);
     }
-    hkMemoryRouter* h = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* h = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkMemoryAllocator* a = reinterpret_cast<hkMemoryAllocator*>(h->m_heap);
     self->m_kWorldDataList.m_iElementCount = 0;
     unsigned int uiCapBits = self->m_kWorldDataList.m_iCapacityState;
@@ -489,12 +493,13 @@ void* __fastcall DeleteSweptTransformViewer(hkpSweptTransformDisplayViewer* self
 {
     fnv_00d648c0::Destroy(self);
     if (flags & 1)
-        FUN_00c85750().heap().ReleaseBlock(self, self->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance().heap().ReleaseBlock(self, self->m_usMemSizeAndFlags);
     return self;
 }
 
 // @fnv 0x00d64980
-__declspec(naked) void FUN_00d64980()
+// src: GUESS 0x00d64980 (confidence: low)
+__declspec(naked) void Object_ProcessState_00d64980()
 {
     __asm { sub ecx, 8 }
     __asm { jmp DeleteSweptTransformViewer }
@@ -508,7 +513,8 @@ __declspec(naked) void FUN_00d64990()
 }
 
 // @fnv 0x00d649a0
-__declspec(naked) void FUN_00d649a0()
+// src: GUESS 0x00d649a0 (confidence: low)
+__declspec(naked) void Object_ProcessState_00d649a0()
 {
     __asm { sub ecx, 2ch }
     __asm { jmp DeleteSweptTransformViewer }

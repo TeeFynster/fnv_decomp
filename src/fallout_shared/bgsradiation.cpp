@@ -44,7 +44,7 @@ BGSRadiationStage* BGSRadiationStage::GetStageForLevel(float level)
     searchState.index = 0;
     for (; searchState.index < DAT_011ca87c && searchState.result == 0; ++searchState.index)
     {
-        BGSRadiationStage* stage = FUN_005922a0(searchState.index);
+        BGSRadiationStage* stage = BGSRadiationStage_GetStage(searchState.index);
         if (stage != 0)
         {
             RadiationLevelValue value;

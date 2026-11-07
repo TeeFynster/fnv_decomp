@@ -15,11 +15,12 @@ class FUN_00c4ed40_cls
   public:
     Handler* m_00;
 
-    void FUN_00c4ed40();
+    void ProcessState_00c4ed40();
 };
 
 // @fnv 0x00c4ed40
-void FUN_00c4ed40_cls::FUN_00c4ed40()
+// src: GUESS 0x00c4ed40 (confidence: low)
+void FUN_00c4ed40_cls::ProcessState_00c4ed40()
 {
     if (m_00 != 0)
     {

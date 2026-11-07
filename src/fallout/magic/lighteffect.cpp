@@ -37,7 +37,7 @@ FUN_0080ed20_shell* FUN_0080ed20_shell::DivideByScalar(float divisor)
 void LightEffect::Revert(Actor* apActor)
 {
     ActiveEffect::Revert(apActor);
-    FUN_0080ed60();
+    DetachLight();
 }
 
 // Constructs a light effect with no attached light.
@@ -155,26 +155,26 @@ struct Effect
     int unk90;
     int field94;
 };
-void __cdecl FUN_0080ee50(int* value);
+void __cdecl LightEffect_AttachBestLightEffect(int* value);
 // Gets an Effect via FUN_0059bb30()->FUN_00822b40() and, if non-null, passes its field94 to FUN_0080ee50.
 // @fnv 0x0080e830
 void LightEffect::Start()
 {
     Effect* effect = FUN_0059bb30() ? (Effect*)FUN_0059bb30()->FUN_00822b40() : 0;
     if (effect)
-        FUN_0080ee50(effect ? &effect->field94 : 0);
+        LightEffect_AttachBestLightEffect(effect ? &effect->field94 : 0);
 }
 
-void __cdecl FUN_0080ee50(char* p);
+void __cdecl LightEffect_AttachBestLightEffect(char* p);
 
 // @fnv 0x0080e900
 void LightEffect::Finish()
 {
-    FUN_0080ed60();
+    DetachLight();
     char* a = FUN_0059bb30() != 0 ? (char*)FUN_0059bb30()->FUN_00822b40() : 0;
     if (a != 0)
     {
-        FUN_0080ee50(a != 0 ? a + 0x94 : 0);
+        LightEffect_AttachBestLightEffect(a != 0 ? a + 0x94 : 0);
     }
 }
 
@@ -182,9 +182,9 @@ extern int DAT_011dc304;
 
 struct EdCallee
 {
-    void* FUN_009611e0();
-    void FUN_00b5eed0(void* apArg);
-    void FUN_00572a50(int aiArg);
+    void* NiAVObject_GetParent();
+    void ShadowSceneNode_RemoveLight(void* apArg);
+    void TESObjectREFR_KillLight(int aiArg);
 };
 
 void* __cdecl FUN_00450b80(int aiArg);
@@ -192,7 +192,8 @@ void* __cdecl FUN_00450b80(int aiArg);
 typedef void(__thiscall* EdVirtual)(void* self, void* apArg);
 
 // @fnv 0x0080ed60
-void LightEffect::FUN_0080ed60()
+// src: XBOX_PDB 0x0080ed60
+void LightEffect::DetachLight()
 {
     void* pActor2;
     void* pTmp;
@@ -204,16 +205,16 @@ void LightEffect::FUN_0080ed60()
         pTmp = FUN_00450b80(0);
         if (pTmp != 0)
         {
-            ((EdCallee*)pTmp)->FUN_00b5eed0((NiPointLight*)m_spLight);
+            ((EdCallee*)pTmp)->ShadowSceneNode_RemoveLight((NiPointLight*)m_spLight);
         }
-        pObj = ((EdCallee*)(NiPointLight*)m_spLight)->FUN_009611e0();
+        pObj = ((EdCallee*)(NiPointLight*)m_spLight)->NiAVObject_GetParent();
         if (pObj != 0)
         {
             ((EdVirtual)(*(void***)pObj)[58])(pObj, (NiPointLight*)m_spLight);
         }
         if (pActor2 != 0)
         {
-            ((EdCallee*)pActor2)->FUN_00572a50(1);
+            ((EdCallee*)pActor2)->TESObjectREFR_KillLight(1);
         }
         m_spLight = 0;
         DAT_011dc304 = DAT_011dc304 - 1;
@@ -411,7 +412,7 @@ void LightEffect::AttachLightEffect()
         NiPoint3 offsetPoint5(fValX, 0.0f, 0.0f);
         this->m_spLight->FUN_0050dd50(offsetPoint5);
 
-        this->m_spLight->FUN_0050dd20(((PathingRequest*)pLightTmp)->GetFieldB4Float());
+        this->m_spLight->NiLight_SetDimmer(((PathingRequest*)pLightTmp)->GetFieldB4Float());
 
         ShadowSceneNode* aPScene = (ShadowSceneNode*)FUN_00450b80(0);
         if (aPScene)
@@ -419,14 +420,14 @@ void LightEffect::AttachLightEffect()
             aPScene->GetShadowSceneLight((NiLight*)(NiPointLight*)this->m_spLight, true);
         }
 
-        float fX = *g_011d1a30.Float() * pTarget3->FUN_00567400();
+        float fX = *g_011d1a30.Float() * pTarget3->TESObjectREFR_GetScale_00567400();
 
         float fY = (((ActorLightPositionView*)pTarget3)->GetLightPosition().y + *originalRuntimeFloatSetting1166.Float()) *
-                   pTarget3->FUN_00567400();
+                   pTarget3->TESObjectREFR_GetScale_00567400();
         float fZ = pTarget3->GetActorHeight() +
-                   *originalRuntimeFloatSetting1167.Float() * pTarget3->FUN_00567400();
+                   *originalRuntimeFloatSetting1167.Float() * pTarget3->TESObjectREFR_GetScale_00567400();
 
-        this->m_spLight->FUN_004bc1f0(fX, fY, fZ);
+        this->m_spLight->NiAVObject_SetTranslate_004bc1f0(fX, fY, fZ);
 
         NiPointer<NiNode> spNode3((pTarget3 == (Actor*)_g_thePlayer) ? _g_thePlayer->GetNode(false)
                                                                      : pTarget3->GetNiNode());

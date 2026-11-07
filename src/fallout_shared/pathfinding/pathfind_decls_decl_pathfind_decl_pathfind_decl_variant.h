@@ -7,15 +7,15 @@
 class PathingRequestUnknown : public PathingRequest
 {
 };
-bool FUN_006d0b10(PathingRequest*, PathingSolution*);
-bool FUN_006d0be0(PathingRequestClosePoint*, PathingSolution*);
-bool FUN_006d2c80(PathingRequestUnknown*, PathingSolution*);
+bool Pathing_Pathfind(PathingRequest*, PathingSolution*);
+bool Pathing_BuildFleePath(PathingRequestClosePoint*, PathingSolution*);
+bool Pathing_BuildCoveredMovePath(PathingRequestUnknown*, PathingSolution*);
 
 #include "../../../include/PathingGraphNode.h"
 class PacketNodeRecord : public PathingGraphNode
 {
   public:
-    bool FUN_006cac70();
+    bool VirtualPathingNode_HasActualLocation();
 };
 
 int CollectNearbyEdges(PathingLocation*, int, TESObjectREFR*);

@@ -98,46 +98,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 
@@ -184,7 +184,8 @@ extern "C"
 }
 
 // @fnv 0x00c2a9b0
-const void* __cdecl FUN_00c2a9b0()
+// src: COMMUNITY 0x00c2a9b0
+const void* __cdecl NiPSysGravityFieldModifier_GetRTTI()
 {
     return &g_01202708;
 }
@@ -228,7 +229,8 @@ NiPSysGravityFieldModifier* __cdecl CreateGravityFieldModifier()
 }
 
 // @fnv 0x00c26db0
-char NiPSysGravityFieldModifier::FUN_00c26db0(NiPSysGravityFieldModifier* other)
+// src: XBOX_PDB 0x00c26db0
+char NiPSysGravityFieldModifier::IsEqual_00c26db0(NiPSysGravityFieldModifier* other)
 {
     if (!NiPSysFieldModifier::IsEqual(other))
         return false;
@@ -271,7 +273,7 @@ void NiPSysGravityFieldModifier::LoadBinary(NiStream& aStream)
     src[2] = src[2];
     NiPoint3* b = &normalizedDirection;
     *b = *(NiPoint3*)a;
-    b->FUN_004a0c10();
+    b->Unitize_004a0c10();
 }
 
 struct FUN_00c2af80_Array
@@ -287,7 +289,7 @@ struct FUN_00c2af80_Array
     void __thiscall FUN_0096ae90(unsigned int index, void** item);
 };
 
-void* __cdecl FUN_00a7d330(void* value);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void* value);
 
 // NiPSysFieldModifier's shared declaration does not expose its viewer-string override.
 void __fastcall GetFieldModifierViewerStrings(NiPSysFieldModifier*, void*, NiViewerStringsArray*);
@@ -300,14 +302,14 @@ void NiPSysGravityFieldModifier::GetViewerStrings(NiViewerStringsArray* stream)
 
     FUN_00c2af80_Array* array = reinterpret_cast<FUN_00c2af80_Array*>(stream);
 
-    void* item = FUN_00a7d330(const_cast<void*>(g_01202708));
+    void* item = NiViewerStrings_NiGetViewerString_Title(const_cast<void*>(g_01202708));
 
     unsigned int count = array->unk0A;
     if (count >= array->unk08)
         array->FUN_0096ad30(array->unk0E + count);
     array->FUN_0096ae90(count, &item);
 
-    item = originalDirection.FUN_00a59af0("Direction");
+    item = originalDirection.GetViewerString_00a59af0("Direction");
 
     count = array->unk0A;
     if (count >= array->unk08)
@@ -373,7 +375,7 @@ inline NiPoint3 RotateFieldDirection(const NiMatrix3& matrix, const NiPoint3& di
     return matrix * direction;
 }
 
-float FUN_00404010(float, float);
+float BSMAX_00404010(float, float);
 // Applies a directional force to particles within the field, scaling by m_fInfluence, time delta, and optional distance m_fFieldAttenuation or m_bEnableMaxDistance radius.
 // @fnv 0x00c2acb0
 void NiPSysGravityFieldModifier::ApplyForceToParticles(float time, NiPSysData* pkData)
@@ -417,7 +419,7 @@ void NiPSysGravityFieldModifier::ApplyForceToParticles(float time, NiPSysData* p
             }
             else
             {
-                float scale = m_fInfluence * delta / FUN_00404010(1.0f, (float)pow(distanceSquared, halfAttenuation));
+                float scale = m_fInfluence * delta / BSMAX_00404010(1.0f, (float)pow(distanceSquared, halfAttenuation));
                 const NiPoint3& dir = forceDirection;
                 const double& wide = scale;
                 change = NiPoint3(wide * dir.x, scale * dir.y, scale * dir.z);

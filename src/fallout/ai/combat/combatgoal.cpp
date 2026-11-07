@@ -455,7 +455,8 @@ struct S
 };
 // Iterates the 16 entries of DAT_011f17a0 and, for each non-null CombatGoal, calls DestroyIfFlagged with 1.
 // @fnv 0x00984a90
-void FUN_00984a90()
+// src: GUESS 0x00984a90 (confidence: medium)
+void CombatGoal_DestroyGlobalCombatGoals()
 {
     unsigned int i;
     {

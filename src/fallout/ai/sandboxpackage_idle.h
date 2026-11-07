@@ -21,5 +21,5 @@ extern TESBoundObject* DAT_011ca244;
 extern TESBoundObject* DAT_011ca248;
 extern const float runtimeFloatSettingDefault94;
 extern float DAT_010249d8;
-float FUN_006435c0(void*, SANDBOX_PROCEDURE);
+float AiFormulas_ComputeRandomSandboxSubProcessDuration(void*, SANDBOX_PROCEDURE);
 #endif

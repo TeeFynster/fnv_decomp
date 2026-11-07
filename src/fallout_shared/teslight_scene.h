@@ -10,7 +10,7 @@ class TESObjectREFR;
 #include "../../include/NiMemObject.h"
 
 template <class T> unsigned int __cdecl BSStringLength(const T* string);
-bool __cdecl FUN_0043b300(const NiRTTI* type, NiAVObject* object);
+bool __cdecl NiObject_IsKindOf(const NiRTTI* type, NiAVObject* object);
 extern NiRTTI DAT_011f4a28;
 
 #endif

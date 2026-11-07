@@ -7,7 +7,7 @@
 #include "../../include/NavMeshObstacleManager.h"
 class NiProperty;
 class SkyShaderProperty;
-SkyShaderProperty* FUN_00653270(const NiRTTI*, NiProperty*);
+SkyShaderProperty* NiObject_DynamicCast(const NiRTTI*, NiProperty*);
 extern NiRTTI DAT_011f36ac;
 #include "../../include/OBJECT_ACTION.h"
 class AIThreadManager
@@ -20,7 +20,7 @@ class TaskQueueInterface
 {
   public:
     static TaskQueueInterface* GetSingleton();
-    void FUN_0087b600(TESObjectREFR*, bool, bool);
+    void TaskQueueInterface_QueueSetOpenState(TESObjectREFR*, bool, bool);
 };
 
 class GlobalObject_0045cf30
@@ -30,5 +30,5 @@ extern GlobalObject_0045cf30 g_011d7188;
 extern const char DAT_01011f30[];
 extern const char g_011d22b0_arg1[];
 extern float DAT_0101ab70;
-void FUN_00c6bd00(NiNode*, bool);
+void bhkNiCollisionObject_ResetSim(NiNode*, bool);
 #endif

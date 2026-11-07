@@ -33,7 +33,7 @@ struct GlobalObject2_0096a2d0
     int x;
 };
 extern GlobalObject2_0096a2d0 g_011db150;
-void FUN_007f6920();
+void VATSMenu_ClearTargetList();
 struct FUN_007ebd30_This
 {
     char pad[0x374];
@@ -41,7 +41,7 @@ struct FUN_007ebd30_This
     float __thiscall FUN_007ebd30();
 };
 extern int DAT_011db0d4;
-void __cdecl FUN_007f3bd0(int a1);
+void __cdecl VATSMenu_SetHeadingReached(int a1);
 // Exe 0x007f68a0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
 struct VatsmenuOffset08View
 {
@@ -60,16 +60,16 @@ struct FUN_007ef710_This
 };
 struct FUN_0070ec70_This
 {
-    int __thiscall FUN_0070ec70();
+    int __thiscall InterfaceManager_GetMouseWheel();
 };
-void* __cdecl FUN_004b7210();
+void* __cdecl InterfaceManager_GetSingleton();
 struct FUN_007ef760_Owner
 {
     virtual void vf0();
     virtual void vf1();
     virtual void vf2();
     virtual void vf3(int, int);
-    void __thiscall FUN_007ef760(int aiID, Tile* apTarget);
+    void __thiscall DoWheelMove_007ef760(int aiID, Tile* apTarget);
 };
 struct Vec2Tmp
 {
@@ -90,12 +90,12 @@ struct StandIn
 void __cdecl _FNV_Warning(char const*);
 void __cdecl _FUN_007037e0();
 void __cdecl ShutdownVats();
-Tile* FUN_007f4830(Tile* apParent, char const* axName);
+Tile* VATSMenu_VatsMenuRenderTemplate(Tile* apParent, char const* axName);
 Tile* __cdecl FindNamedTile(Tile*, char const*);
 void __cdecl _FNV_Warning(char const*);
 void __cdecl _FUN_007037e0();
 void __cdecl ShutdownVats();
-Tile* __cdecl FUN_007f4890(Tile* a1, char const* a2);
+Tile* __cdecl VATSMenu_VatsMenuGetTileByName(Tile* a1, char const* a2);
 extern GameTimerRecord g_timeGlobal;
 struct DAT_Pointee_7f4bb0
 {
@@ -104,7 +104,7 @@ struct DAT_Pointee_7f4bb0
     char pad2[4];
     int t;
 };
-bool FUN_007f4bb0();
+bool VATSMenu_SelectLeftHeld();
 // Exe 0x007f68a0: unit-local ListBox view; declarations and layout are preserved.
 struct VatsListCallView
 {
@@ -115,7 +115,7 @@ struct VatsListCallView
     virtual void v4();
     virtual Tile* v5(int);
     int GetFilteredCount(int);
-    Tile* FUN_007f6fb0();
+    Tile* ListBox_unsigned_int_GetLastItem();
 };
 
 
@@ -125,29 +125,30 @@ struct __declspec(align(16)) B006815c0
     B006815c0();
 };
 
-B006815c0* __cdecl FUN_004a3e00(B006815c0* a1, const NiPoint3& a2);
+B006815c0* __cdecl NI2HK(B006815c0* a1, const NiPoint3& a2);
 
 class Class_007f68a0
 {
   public:
     void ForwardToSubObject(B006815c0* a1);
-    void FUN_007f68a0(const NiPoint3& pt);
+    void bhkPickData_SetLength(const NiPoint3& pt);
 };
 
 // @fnv 0x007f68a0
-void Class_007f68a0::FUN_007f68a0(const NiPoint3& pt)
+// src: XBOX_PDB 0x007f68a0
+void Class_007f68a0::bhkPickData_SetLength(const NiPoint3& pt)
 {
     B006815c0 vec;
-    ForwardToSubObject(FUN_004a3e00(&vec, pt));
+    ForwardToSubObject(NI2HK(&vec, pt));
 }
 
 struct Quest007f6af0
 {
-    float FUN_00792760();
+    float QueuedModel_GetOverriddenVisualDistance();
 };
 struct Light007f6af0
 {
-    float FUN_009a9350();
+    float TESCombatStyle_GetWeaponMinRangeMult();
 };
 struct Anim007f6af0
 {
@@ -157,7 +158,7 @@ struct Node007f6af0
 {
     Anim007f6af0* FUN_006629f0();
 };
-Node007f6af0* FUN_0045c670();
+Node007f6af0* Main_GetWorldSceneGraph();
 extern float DAT_011a0b74;
 struct Filter007f6af0
 {
@@ -165,16 +166,16 @@ struct Filter007f6af0
     Filter007f6af0()
     {}
     Filter007f6af0(int);
-    void FUN_004a39f0(int);
-    void FUN_0059ce80(unsigned);
-    unsigned FUN_004a3a20();
+    void CFilter_SetLayer(int);
+    void CFilter_SetGroup(unsigned);
+    unsigned CFilter_GetGroup();
 };
 struct Hit007f6af0
 {
     int field_00[20];
     void* field_50;
     int field_54[3];
-    Hit007f6af0* FUN_00696c30(Hit007f6af0*);
+    Hit007f6af0* hkpWorldRayCastOutput_hkpWorldRayCastOutput_00696c30(Hit007f6af0*);
 };
 struct Hits007f6af0
 {
@@ -195,11 +196,11 @@ struct __declspec(align(16)) Ray007f6af0
 {
     char field_00[176];
     Ray007f6af0();
-    void FUN_004a3f70(int);
-    void FUN_004a3da0(NiPoint3*);
-    void FUN_007f68a0(NiPoint3 const&);
-    void FUN_004a3fb0(Collector007f6af0*);
-    Response007f6af0* FUN_008cdd90();
+    void bhkPickData_SetFilter(int);
+    void bhkPickData_SetFrom(NiPoint3*);
+    void bhkPickData_SetLength(NiPoint3 const&);
+    void bhkPickData_SetAllCollector(Collector007f6af0*);
+    Response007f6af0* DialoguePackage_GetCurrentDialogItem();
 };
 struct World007f6af0
 {
@@ -258,7 +259,7 @@ struct World007f6af0
 struct PlayerFilter007f6af0
 {
     int field_00;
-    unsigned FUN_004a3a20();
+    unsigned CFilter_GetGroup();
 };
 struct Player007f6af0
 {
@@ -266,10 +267,10 @@ struct Player007f6af0
     void* GetTarget();
 };
 extern Player007f6af0* DAT_011dea3c;
-World007f6af0* __fastcall FUN_004543c0(void*);
+World007f6af0* __fastcall TESObjectCELL_GetbhkWorld(void*);
 void FUN_00c82870(int, unsigned __int64);
-void* FUN_004b5820(void*);
-TESObjectREFR* FUN_0056f930(void*);
+void* GetAVObjectForCollidable(void*);
+TESObjectREFR* TESObjectREFR_FindReferenceFor3D(void*);
 extern ItemListContainer* DAT_011f21cc;
 struct Owner007f6af0
 {
@@ -278,15 +279,16 @@ struct Owner007f6af0
     void UpdateLimbHighlight();
 };
 // @fnv 0x007f6af0
-bool __fastcall FUN_007f6af0(Owner007f6af0* self)
+// src: XBOX_PDB 0x007f6af0
+bool __fastcall VATSMenu_PickNewTarget(Owner007f6af0* self)
 {
     if (self->field_10e)
         return false;
     float distance = DAT_011a0b74;
     NiPoint3 origin;
     NiPoint3 direction;
-    FUN_0045c670()->FUN_006629f0()->MapScreenToRay((int)((Light007f6af0*)FUN_004b7210())->FUN_009a9350(),
-                                                   (int)((Quest007f6af0*)FUN_004b7210())->FUN_00792760(), &origin,
+    Main_GetWorldSceneGraph()->FUN_006629f0()->MapScreenToRay((int)((Light007f6af0*)InterfaceManager_GetSingleton())->TESCombatStyle_GetWeaponMinRangeMult(),
+                                                   (int)((Quest007f6af0*)InterfaceManager_GetSingleton())->QueuedModel_GetOverriddenVisualDistance(), &origin,
                                                    &direction, 0);
     Ray007f6af0 ray;
     unsigned int mask = 0x140;
@@ -294,22 +296,22 @@ bool __fastcall FUN_007f6af0(Owner007f6af0* self)
     PlayerFilter007f6af0 playerFilter;
     DAT_011dea3c->FUN_00931ed0(&playerFilter);
     Filter007f6af0 filter(0);
-    filter.FUN_004a39f0(0x27);
-    filter.FUN_0059ce80(playerFilter.FUN_004a3a20());
-    ray.FUN_004a3f70(filter.field_00);
-    ray.FUN_004a3da0(&origin);
-    ray.FUN_007f68a0(direction * distance);
+    filter.CFilter_SetLayer(0x27);
+    filter.CFilter_SetGroup(playerFilter.CFilter_GetGroup());
+    ray.bhkPickData_SetFilter(filter.field_00);
+    ray.bhkPickData_SetFrom(&origin);
+    ray.bhkPickData_SetLength(direction * distance);
     Collector007f6af0 collector;
-    ray.FUN_004a3fb0(&collector);
-    World007f6af0* world = FUN_004543c0(DAT_011dea3c->GetTarget());
+    ray.bhkPickData_SetAllCollector(&collector);
+    World007f6af0* world = TESObjectCELL_GetbhkWorld(DAT_011dea3c->GetTarget());
     world->v50(&ray);
     int unused = 0;
-    for (int i = 0; i < ray.FUN_008cdd90()->GetVoiceFilePath()->FUN_00726070(); ++i)
+    for (int i = 0; i < ray.DialoguePackage_GetCurrentDialogItem()->GetVoiceFilePath()->FUN_00726070(); ++i)
     {
         Hit007f6af0 hit;
-        hit.FUN_00696c30(ray.FUN_008cdd90()->GetVoiceFilePath()->GetEntryAt(i));
-        void* object = FUN_004b5820(hit.field_50);
-        TESObjectREFR* ref = FUN_0056f930(object);
+        hit.hkpWorldRayCastOutput_hkpWorldRayCastOutput_00696c30(ray.DialoguePackage_GetCurrentDialogItem()->GetVoiceFilePath()->GetEntryAt(i));
+        void* object = GetAVObjectForCollidable(hit.field_50);
+        TESObjectREFR* ref = TESObjectREFR_FindReferenceFor3D(object);
         if (object)
         {
             VatsTargetEntryList* entry = ((StandIn*)self)->FindListEntryForTarget(ref);
@@ -319,7 +321,7 @@ bool __fastcall FUN_007f6af0(Owner007f6af0* self)
             }
             else if (entry)
             {
-                FUN_007f3bd0(0);
+                VATSMenu_SetHeadingReached(0);
                 self->UpdateLimbHighlight();
                 DAT_011f21cc = *(ItemListContainer**)*entry->FUN_006815c0();
                 return true;

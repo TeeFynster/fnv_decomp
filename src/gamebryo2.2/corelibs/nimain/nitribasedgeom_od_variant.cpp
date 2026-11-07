@@ -8,10 +8,11 @@
 
 struct S_0051d080
 {
-    void FUN_0051d080(bool, unsigned short);
+    void NiBillboardNode_SetFlags(bool, unsigned short);
 };
 // @fnv 0x0051d080
-void S_0051d080::FUN_0051d080(bool a1, unsigned short a2)
+// src: COMMUNITY 0x0051d080
+void S_0051d080::NiBillboardNode_SetFlags(bool a1, unsigned short a2)
 {
     if (a1)
         *(unsigned short*)((char*)this + 0xAC) |= a2;

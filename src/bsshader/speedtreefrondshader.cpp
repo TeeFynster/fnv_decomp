@@ -123,11 +123,12 @@ void SpeedTreeFrondShader_s::CreateConstantMap()
     SpeedTreeLeafShaderConstantMapSetup::ConfigureShaderConstantMap(m_spConstantMap, 0x11);
 }
 
-extern "C" void __cdecl FUN_00b7b450();
+extern "C" void __cdecl ShadowLightShader_SetupPassConstants();
 // @fnv 0x00bd3270
-void FUN_00bd3270()
+// src: COMMUNITY 0x00bd3270
+void SpeedTreeBranchShader_SetupPassConstants()
 {
-    FUN_00b7b450();
+    ShadowLightShader_SetupPassConstants();
 }
 
 struct ShaderProgram
@@ -136,7 +137,7 @@ struct ShaderProgram
     const char* defines[18];
 };
 void __cdecl FUN_00be0c00(const char*, char*);
-int __cdecl FUN_00406d00(char*, int, const char*, ...);
+int __cdecl BSsprintf(char*, int, const char*, ...);
 extern int DAT_011f91c0;
 struct BranchShader
 {
@@ -152,10 +153,11 @@ struct BranchShader
     NiPointer_s<NiRefObject_s> vertexShaders1[10];
     NiPointer_s<NiRefObject_s> vertexShaders2[20];
     NiRefObject_s* FUN_00be0fe0(const char*, const char* const*, const char*, const char*);
-    void FUN_00bd3280();
+    void SpeedTreeBranchShader_LoadVertexShaders();
 };
 // @fnv 0x00bd3280
-void BranchShader::FUN_00bd3280()
+// src: COMMUNITY 0x00bd3280
+void BranchShader::SpeedTreeBranchShader_LoadVertexShaders()
 {
     ShaderProgram shaderPrograms1x[10] = {{"lighting\\1x\\v\\base.v.hlsl", {"TREE", "", 0}},
                                           {"lighting\\1x\\v\\ambDiffuseDirTexture.v.hlsl", {"TREE", "", "VC", "", 0}},
@@ -195,7 +197,7 @@ void BranchShader::FUN_00bd3280()
         if (shaderPrograms1x[i].file)
         {
             FUN_00be0c00(shaderPrograms1x[i].file, shaderPath);
-            FUN_00406d00(name, 260, "STB1%03i.vso", i);
+            BSsprintf(name, 260, "STB1%03i.vso", i);
             vertexShaders1[i] = FUN_00be0fe0(shaderPath, shaderPrograms1x[i].defines, "vs_1_1", name);
         }
         else
@@ -208,7 +210,7 @@ void BranchShader::FUN_00bd3280()
         for (int i = 0; i < 20; ++i)
         {
             FUN_00be0c00(shaderPrograms2x[i].file, shaderPath);
-            FUN_00406d00(name, 260, "STB2%03i.vso", i);
+            BSsprintf(name, 260, "STB2%03i.vso", i);
             vertexShaders2[i] = FUN_00be0fe0(shaderPath, shaderPrograms2x[i].defines, "vs_2_0", name);
         }
     }

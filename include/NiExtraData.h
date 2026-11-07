@@ -20,14 +20,14 @@ class NiExtraData : public NiObject
 
     void SetName(const NiFixedString& name);
     void* CloneFloatExtraData(void* cloning);
-    void FUN_00519230(bool, bool);
+    void BSXFlags_SetFlags(bool, bool);
     bool FUN_00448a40();
-    bool FUN_004b5fa0();
+    bool BSXFlags_IsEditorMarker();
     void FUN_00a7b2e0();
-    void FUN_00a7b300();
-    void FUN_00a7b330(void* destination, void* cloning);
-    void FUN_00a7b330(void* destination, CloningProcess* cloning);
-    void FUN_00c65160(NiStream& stream);
+    void DestroyFields_00a7b300();
+    void CopyMembers_00a7b330(void* destination, void* cloning);
+    void CopyMembers_00a7b330(void* destination, CloningProcess* cloning);
+    void BSAttachPoints_LinkObject(NiStream& stream);
 
 
     NiFixedString m_kName;

@@ -29,7 +29,7 @@ struct ContactBody
     char unk100[0x10c - 0x100];
     float m_limitC;
 };
-bool FUN_00d28560(void* unused, char** items, int count, int offset);
+bool Object_ProcessEntries_00d28560(void* unused, char** items, int count, int offset);
 inline void* operator new(unsigned int, void* p) throw()
 {
     return p;
@@ -63,14 +63,15 @@ class S00d2c8a0_Derived : public S00d2c8a0_Base
     virtual void vf04();
     LocalM128 m_kScaleFactors;
 };
-const void* __cdecl FUN_00d2c8a0();
+const void* __cdecl Object_GetConstructedVirtualTable();
 struct SortPair
 {
     unsigned int key;
     unsigned int val;
 };
 // @fnv 0x00d36520
-extern "C" void FUN_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
+// src: GUESS 0x00d36520 (confidence: low)
+extern "C" void Object_ProcessEntries_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
 {
     int i;
     int j;
@@ -107,7 +108,7 @@ extern "C" void FUN_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
         } while (i <= j);
         if (lo < j)
         {
-            FUN_00d36520(arr, lo, j, extra);
+            Object_ProcessEntries_00d36520(arr, lo, j, extra);
         }
         if (i >= hi)
         {
@@ -116,17 +117,17 @@ extern "C" void FUN_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
         lo = i;
     }
 }
-void __cdecl FUN_00d367b0(hkpCollisionDispatcher::Agent3FunctionTable& kFuncs);
-void __cdecl FUN_00d367d0(hkpCollisionDispatcher* pkDispatcher);
+void __cdecl hkpCollectionAgent3_initAgentFunc(hkpCollisionDispatcher::Agent3FunctionTable& kFuncs);
+void __cdecl hkpCollectionAgent3_registerAgent3(hkpCollisionDispatcher* pkDispatcher);
 void InitOutputDefaults();
-void FUN_00d39130();
+void Runtime_ReleaseHandles_Thunk();
 void ReleaseHandles();
 void RemoveKeyFromTable();
 void InsertIntoSlotArray();
-void FUN_00d39090();
-void FUN_00d39150();
-void FUN_00d39390();
-void __cdecl FUN_00d39840(hkpCollisionDispatcher* pkDispatcher);
+void nullsub_15();
+void hkCollideCapsuleUtilCapsVsTri_ProcessEntries_00d39150();
+void hkCapsuleTriangleAgent3_process();
+void __cdecl hkCapsuleTriangleAgent3_registerAgent3(hkpCollisionDispatcher* pkDispatcher);
 extern "C"
 {
 using ::_mm_set_ps1;
@@ -151,7 +152,7 @@ static __forceinline void Dot3(float& result, LocalM128 u, LocalM128 v)
     LocalM128 z = _mm_shuffle_ps(m, m, 0xaa);
     _mm_store_ss(&result, _mm_add_ss(z, _mm_add_ss(y, m)));
 }
-int FUN_00d231b0(const LocalM128* pa, const LocalM128* pb, const LocalM128* pc, const LocalM128* pd, ClosestPointResult* out);
+int hkLineSegmentUtil_closestPointInfLineInfLine(const LocalM128* pa, const LocalM128* pb, const LocalM128* pc, const LocalM128* pd, ClosestPointResult* out);
 using ::_mm_store_ps;
 using ::_mm_xor_ps;
 extern float DAT_0104da48;
@@ -203,8 +204,8 @@ struct __declspec(align(16)) D2fCollector : D2fRayHitCollector
 };
 struct D2fWorld
 {
-    void FUN_00d315a0(int a, int b, D2fInput* in, D2fCollector* c1, D2fCollector* c2);
-    void FUN_00d2f460(int a1, int a2, const D2fInput* a3, int a4, void* a5);
+    void hkpBvTreeAgent_linearCast(int a, int b, D2fInput* in, D2fCollector* c1, D2fCollector* c2);
+    void CopyData_00d2f460(int a1, int a2, const D2fInput* a3, int a4, void* a5);
 };
 
 namespace N {
@@ -252,7 +253,7 @@ class S00d2c960_Motion
 class S00d2c960_Body
 {
   public:
-    void FUN_00c9c1d0();
+    void activate_00c9c1d0();
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -341,15 +342,16 @@ class FUN_00d2c960_cls
     unsigned int unk1C;
     unsigned int m_kRoomNode;
 
-    void FUN_00d2c960(const S00d2c960_Info* pkInfo);
+    void hkLiquidAction_applyAction(const S00d2c960_Info* pkInfo);
 };
 
 // @fnv 0x00d2c960
-void FUN_00d2c960_cls::FUN_00d2c960(const S00d2c960_Info* pkInfo)
+// src: XBOX_PDB 0x00d2c960
+void FUN_00d2c960_cls::hkLiquidAction_applyAction(const S00d2c960_Info* pkInfo)
 {
     float fTime = pkInfo->m_fTime;
     S00d2c960_Body* pkBody = m_pkBody;
     N::LocalM128 kPosition = pkBody->m_kPathOffset;
-    pkBody->FUN_00c9c1d0();
+    pkBody->activate_00c9c1d0();
     pkBody->m_kMotion.vf58(fTime, &m_kRoomNode, &kPosition);
 }

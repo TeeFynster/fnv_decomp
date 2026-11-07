@@ -8,7 +8,7 @@ class TreadEntry
 extern unsigned int DAT_011f36a0;
 extern char DAT_00a2d8a0;
 extern char DAT_00a2de70;
-void __cdecl FUN_00aa2080(void*, void*);
+void __cdecl NiStaticDataManager_AddLibrary(void*, void*);
 class GlobalObject_00a2e180
 {
   public:

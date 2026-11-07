@@ -9,7 +9,7 @@
 #include "../../../include/Setting.h"
 #include "../../../include/NiRenderer.h"
 #include "../../../include/NiDX9Renderer.h"
-void* FUN_00664840(bool create);
+void* BSTreeManager_GetInstance(bool create);
 void SetGlobalFloatFromUInt(unsigned int value);
 void ClampAndStoreValue(float value);
 extern NP DAT_011f95e4;
@@ -19,10 +19,10 @@ struct FUN_006652c0_shell
     void SetByteAtOffset44(unsigned char value);
 };
 extern Setting originalRuntimeFloatSetting1295;
-float FUN_006655a0();
+float GameSetting_fTreeNearDistanceBase_Get();
 extern unsigned char __cdecl GetFirstProcessListByte(void);
 extern unsigned char* __cdecl _FUN_00664840(bool);
-unsigned char FUN_0054ee20(bool abCreateIfNotFound);
+unsigned char BSTreeManager_GetTreesEnabled(bool abCreateIfNotFound);
 
 struct GraphicsRenderer : public NiRenderer
 {
@@ -32,7 +32,8 @@ struct GraphicsRenderer : public NiRenderer
 void __cdecl PushRefCountedSlot(NiRenderTargetGroup* pkTarget);
 
 // @fnv 0x00b6b7d0
-void FUN_00b6b7d0(NiRenderTargetGroup* pkTarget, unsigned int uiClone)
+// src: COMMUNITY 0x00b6b7d0
+void BSRenderedTexture_Begin(NiRenderTargetGroup* pkTarget, unsigned int uiClone)
 {
     NiRenderer* pkRenderer = NiRenderer::ms_pRenderer;
     if (pkTarget == 0)

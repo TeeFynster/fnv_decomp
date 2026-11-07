@@ -26,7 +26,7 @@ class BipedAnim
 class ModelLoader
 {
   public:
-    void FUN_004472a0(BSFaceGenModel*, NiPointer<BSFaceGenModelExtraData>*);
+    void ModelLoader_FindModel(BSFaceGenModel*, NiPointer<BSFaceGenModelExtraData>*);
 };
 extern ModelLoader* g_modelLoader;
 #endif

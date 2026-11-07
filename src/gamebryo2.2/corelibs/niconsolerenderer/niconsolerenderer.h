@@ -6,7 +6,7 @@
 #include "niconsolerenderer_vtable.h"
 #include "niconsolerenderer_packet.h"
 // 0x00a29680: an empty function (a bare ret) many units call with a message string
-void __cdecl FUN_00a29680(const char*, ...);
+void __cdecl Object_DoNothing(const char*, ...);
 #pragma optimize("", off)
 
 // @fnv 0x004dee10
@@ -20,7 +20,7 @@ unsigned int GraphicsRenderer::GetRenderTargetWidth()
     local.group = GetDefaultRT();
     if (local.group == 0)
         return 0;
-    local.array = (NiConsoleRendererHeightArray*)local.group->FUN_00ee84f0(0);
+    local.array = (NiConsoleRendererHeightArray*)local.group->GetBuffer_00ee84f0(0);
     if (local.array == 0)
         return 0;
     return local.array->GetSize();
@@ -37,7 +37,7 @@ unsigned int GraphicsRenderer::GetRenderTargetHeight()
     local.group = GetDefaultRT();
     if (local.group == 0)
         return 0;
-    local.caster = (MagicCaster*)local.group->FUN_00ee84f0(0);
+    local.caster = (MagicCaster*)local.group->GetBuffer_00ee84f0(0);
     if (local.caster == 0)
         return 0;
     return (unsigned int)local.caster->MagicCaster::GetSelectedMagicItem();
@@ -51,7 +51,7 @@ bool GraphicsRenderer::BeginUsingRenderTargetGroup(NiRenderTargetGroup* group, u
         return false;
     if (!group)
     {
-        FUN_00a29680(DAT_010ae590);
+        Object_DoNothing(DAT_010ae590);
         return false;
     }
     fnv_EnterCriticalSection(&m_kRendererLock);

@@ -77,7 +77,8 @@ const NiRTTI* NiPSysBoundUpdateModifier::GetRTTI() const
 extern "C" const NiRTTI g_01202550;
 
 // @fnv 0x00c23ce0
-const NiRTTI* __cdecl FUN_00c23ce0()
+// src: COMMUNITY 0x00c23ce0
+const NiRTTI* __cdecl NiPSysSpawnModifier_GetRTTI()
 {
     return &g_01202550;
 }
@@ -116,8 +117,8 @@ bool __fastcall SpawnModifiersEqual(const NiPSysSpawnModifier* modifier, void*, 
 void __cdecl FUN_00c319e0();
 
 char* __cdecl _FUN_00a7d330(void* value);
-char* __cdecl FUN_00a7d490(char const* name, unsigned short value);
-char* __cdecl FUN_00a7d550(char const* name, float value);
+char* __cdecl NiGetViewerString_00a7d490(char const* name, unsigned short value);
+char* __cdecl NiGetViewerString_00a7d550(char const* name, float value);
 
 // Appends formatted spawn-setting name/value strings to the StrArr, growing it when full.
 // @fnv 0x00c24a50
@@ -135,7 +136,7 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 
     {
-        char* value = FUN_00a7d490("Num Spawn Generations", modifier->m_usSpawnGenerationCount);
+        char* value = NiGetViewerString_00a7d490("Num Spawn Generations", modifier->m_usSpawnGenerationCount);
         unsigned int index = strings->m_usSize;
         if (index >= strings->m_usMaxSize)
             strings->SetSize(index + strings->m_usGrowBy);
@@ -143,7 +144,7 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 
     {
-        char* value = FUN_00a7d550("Percentage Spawned", modifier->m_fSpawnPercentage);
+        char* value = NiGetViewerString_00a7d550("Percentage Spawned", modifier->m_fSpawnPercentage);
         unsigned int index = strings->m_usSize;
         if (index >= strings->m_usMaxSize)
             strings->SetSize(index + strings->m_usGrowBy);
@@ -151,7 +152,7 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 
     {
-        char* value = FUN_00a7d490("Min Num to Spawn", modifier->m_usMinimumParticlesToSpawn);
+        char* value = NiGetViewerString_00a7d490("Min Num to Spawn", modifier->m_usMinimumParticlesToSpawn);
         unsigned int index = strings->m_usSize;
         if (index >= strings->m_usMaxSize)
             strings->SetSize(index + strings->m_usGrowBy);
@@ -159,7 +160,7 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 
     {
-        char* value = FUN_00a7d490("Max Num to Spawn", modifier->m_usMaximumParticlesToSpawn);
+        char* value = NiGetViewerString_00a7d490("Max Num to Spawn", modifier->m_usMaximumParticlesToSpawn);
         unsigned int index = strings->m_usSize;
         if (index >= strings->m_usMaxSize)
             strings->SetSize(index + strings->m_usGrowBy);
@@ -167,7 +168,7 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 
     {
-        char* value = FUN_00a7d550("Spawn Speed Chaos", modifier->m_fSpawnedSpeedChaos);
+        char* value = NiGetViewerString_00a7d550("Spawn Speed Chaos", modifier->m_fSpawnedSpeedChaos);
         unsigned int index = strings->m_usSize;
         if (index >= strings->m_usMaxSize)
             strings->SetSize(index + strings->m_usGrowBy);
@@ -175,7 +176,7 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 
     {
-        char* value = FUN_00a7d550("Spawn Dir Chaos", modifier->m_fSpawnDirectionChaos);
+        char* value = NiGetViewerString_00a7d550("Spawn Dir Chaos", modifier->m_fSpawnDirectionChaos);
         unsigned int index = strings->m_usSize;
         if (index >= strings->m_usMaxSize)
             strings->SetSize(index + strings->m_usGrowBy);
@@ -183,7 +184,7 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 
     {
-        char* value = FUN_00a7d550("Life Span", modifier->m_fYValue);
+        char* value = NiGetViewerString_00a7d550("Life Span", modifier->m_fYValue);
         unsigned int index = strings->m_usSize;
         if (index >= strings->m_usMaxSize)
             strings->SetSize(index + strings->m_usGrowBy);
@@ -191,7 +192,7 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 
     {
-        char* value = FUN_00a7d550("Life Span Variation", modifier->m_fLifeSpanVariation);
+        char* value = NiGetViewerString_00a7d550("Life Span Variation", modifier->m_fLifeSpanVariation);
         unsigned int index = strings->m_usSize;
         if (index >= strings->m_usMaxSize)
             strings->SetSize(index + strings->m_usGrowBy);
@@ -199,13 +200,13 @@ void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*,
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern int DAT_010be124;
 
 // @fnv 0x00c23d10
 NiPSysSpawnModifier* __fastcall CloneSpawnModifier(NiPSysSpawnModifier* modifier, void*, CloningProcess& process)
 {
-    NiPSysSpawnModifier* pkNew = (NiPSysSpawnModifier*)FUN_00aa13e0(0x34);
+    NiPSysSpawnModifier* pkNew = (NiPSysSpawnModifier*)Object_DispatchCommandFour(0x34);
     if (pkNew != 0)
     {
         pkNew->NiPSysModifier::NiPSysModifier();

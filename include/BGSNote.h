@@ -53,11 +53,11 @@ public:
     void ChangeNoteType(NOTE_TYPE type);
     bool Load(TESFile* file);
     TESTexture* GetNoteTexture();
-    TESSound* FUN_005e9100();
+    TESSound* GetNoteSound();
     void SetNoteSound(TESSound* sound);
-    TESTopic* FUN_005e9240();
+    TESTopic* GetNoteTopic();
     void SetNoteTopic(TESTopic* topic);
-    TESActorBase* FUN_005e92a0();
+    TESActorBase* GetNoteSpeaker();
     void SetNoteSpeaker(TESActorBase* speaker);
     void ResetFormData();
     int GetNoteType();

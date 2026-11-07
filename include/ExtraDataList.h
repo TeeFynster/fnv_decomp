@@ -119,40 +119,40 @@ public:
     void Set3DObject(NiAVObject* object);
     BSExtraData* GetExtraData(unsigned char type);
 
-    unsigned int FUN_0040fe20();
+    unsigned int BaseExtraList_ItemsInList();
     void RemoveExtra24();
 
-    void FUN_0040fae0(bool flag);
-    InventoryChanges* FUN_0041db00();
-    bool FUN_0041d030();
-    void* FUN_0041db50(unsigned char type);
-    void FUN_00554960(bool flag);
-    bool FUN_00554910();
+    void BaseExtraList_RemoveAll(bool flag);
+    InventoryChanges* ExtraDataList_IsEnableStateInverse();
+    bool ExtraDataList_HasOnlyOwnershipNonDefault();
+    void* ExtraDataList_SetEnableStateInverse(unsigned char type);
+    void TESObjectCELL_SetCollisionGeometryDisplay(bool flag);
+    bool TESObjectCELL_ToggleCollisionGeometry();
 
     ExtraContainerChanges* FUN_00418520();
-    SeenData* FUN_00421910();
-    short FUN_00418770();
-    void FUN_00412380(ExtraDataList* source);
-    void FUN_00419ad0(int count);
-    void FUN_00419ad0(unsigned short count);
-    bool FUN_004126c0(ExtraDataList* other, bool first, bool second);
-    bool FUN_004126c0(ExtraDataList* other, int first, int second);
-    void FUN_00419f80(void* data);
-    void FUN_00419f80(int data);
-    void FUN_00419f80(ScriptLocals* locals);
-    TESObjectREFR* FUN_0041c8d0();
-    Script* FUN_00418800();
-    void FUN_00419ed0(Script* script);
-    ScriptLocals* FUN_00418830();
-    void FUN_00418940(BSSoundHandle* handle);
-    void FUN_0041a090(BSSoundHandle* handle);
-    void FUN_0041f4c0(TESForm* form, bool flag);
-    void FUN_0041f650(TESForm* form, bool flag);
-    TESModel* FUN_0042e250();
+    SeenData* ExtraDataList_GetSeenData();
+    short ExtraDataList_GetCount();
+    void ExtraDataList_DuplicateExtraListForContainer(ExtraDataList* source);
+    void ExtraDataList_SetCount(int count);
+    void ExtraDataList_SetCount(unsigned short count);
+    bool ExtraDataList_CompareListForContainer(ExtraDataList* other, bool first, bool second);
+    bool ExtraDataList_CompareListForContainer(ExtraDataList* other, int first, int second);
+    void ExtraDataList_SetScriptLocals(void* data);
+    void ExtraDataList_SetScriptLocals(int data);
+    void ExtraDataList_SetScriptLocals(ScriptLocals* locals);
+    TESObjectREFR* ExtraDataList_GetReferencePointer();
+    Script* ExtraDataList_GetScript();
+    void ExtraDataList_SetScript(Script* script);
+    ScriptLocals* ExtraDataList_GetScriptLocals();
+    void ExtraDataList_GetCreatureAwakeSound(BSSoundHandle* handle);
+    void ExtraDataList_SetCreatureAwakeSound(BSSoundHandle* handle);
+    void ExtraDataList_SetReflectsRef(TESForm* form, bool flag);
+    void ExtraDataList_SetRefractsRef(TESForm* form, bool flag);
+    TESModel* ExtraDataList_GetModelSwap();
     float FUN_00422450();
     void FUN_0041f840();
-    bool FUN_00418ab0(bool flag);
-    void FUN_0041ab70(bool flag);
+    bool ExtraDataList_GetWorn(bool flag);
+    void ExtraDataList_SetCanNotWear(bool flag);
 
     // 0x004103d0 calls each helper with its list this in ECX; addresses checked in the exe.
     // 0x00411f20
@@ -313,5 +313,5 @@ public:
     // 0x0042e380
     void RemoveExtraByType(unsigned char acSlot);
     // 0x004103d0
-    void FUN_004103d0(BSExtraData* apExtra);
+    void AddExtraCopy(BSExtraData* apExtra);
 };

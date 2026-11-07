@@ -12,7 +12,8 @@
 #include "../../include/TESSaveLoadGame.h"
 
 // @fnv 0x0048e7f0
-void TESValueForm::FUN_0048e7f0(BaseFormComponent* component)
+// src: XBOX_PDB 0x0048e7f0
+void TESValueForm::CopyComponent(BaseFormComponent* component)
 {
     TESValueForm* form = dynamic_cast<TESValueForm*>(component);
     if (!form)
@@ -21,7 +22,8 @@ void TESValueForm::FUN_0048e7f0(BaseFormComponent* component)
 }
 
 // @fnv 0x0048e9b0
-unsigned short TESValueForm::FUN_0048e9b0(unsigned int aiFlags)
+// src: GUESS 0x0048e9b0 (confidence: medium)
+unsigned short TESValueForm::GetFlaggedDataSize(unsigned int aiFlags)
 {
     unsigned short isize = 0;
     if (aiFlags & 2)
@@ -35,10 +37,11 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 }  // namespace fnv_0048e9e0
 
 // @fnv 0x0048e9e0
-void TESValueForm::FUN_0048e9e0(unsigned int flags)
+// src: XBOX_PDB 0x0048e9e0
+void TESValueForm::SaveGame_0048e9e0(unsigned int flags)
 {
     if (flags & 2)
-        fnv_0048e9e0::g_TESSaveLoadGame->FUN_008579b0(&iValue, 4);
+        fnv_0048e9e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&iValue, 4);
 }
 
 
@@ -48,7 +51,8 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 }  // namespace fnv_0048ea10
 
 // @fnv 0x0048ea10
-void TESValueForm::FUN_0048ea10(unsigned int a, unsigned int b)
+// src: XBOX_PDB 0x0048ea10
+void TESValueForm::LoadGame_0048ea10(unsigned int a, unsigned int b)
 {
     if (a & 2)
         fnv_0048ea10::g_TESSaveLoadGame->ReadTypedData(&iValue, 4);
@@ -56,7 +60,8 @@ void TESValueForm::FUN_0048ea10(unsigned int a, unsigned int b)
 
 
 // @fnv 0x0048ea40
-void TESValueForm::FUN_0048ea40(BGSSaveFormBuffer* aBuffer)
+// src: COMMUNITY 0x0048ea40
+void TESValueForm::SaveGameBGS_0048ea40(BGSSaveFormBuffer* aBuffer)
 {
     if (reinterpret_cast<BGSLoadFormBuffer*>(aBuffer)->GetChangeFlags(2).operator bool())
         aBuffer->SaveData(&iValue, 4, 0);
@@ -72,7 +77,7 @@ void TESValueForm::LoadGame(BGSLoadFormBuffer* buffer)
 
 struct BaseData
 {
-    void* FUN_004216f0();
+    void* ExtraDataList_GetLevCreaOriginalBase();
 };
 struct Item
 {
@@ -211,31 +216,32 @@ struct Item
     virtual void v132();
     virtual void v133();
     virtual bool v134();
-    bool FUN_00576d30();
-    void* FUN_007af430();
-    BaseData* FUN_005d43c0();
+    bool TESForm_IsStillLoading();
+    void* BGSSaveFormBuffer_GetForm();
+    BaseData* BSFile_GetDevice();
 };
 struct Collection
 {
     int unk00;
-    unsigned int FUN_005be5c0(int);
-    Item* FUN_00968670(unsigned int);
+    unsigned int ProcessArray_GetProcessLevelTail(int);
+    Item* ProcessArray_GetItem(unsigned int);
 };
 struct Holder
 {
     int unk00;
     Collection items;
-    Item* FUN_00970a20(void*, int);
+    Item* ProcessLists_GetActorRefInHigh(void*, int);
 };
 // @fnv 0x00970a20
-Item* Holder::FUN_00970a20(void* key, int unused)
+// src: XBOX_PDB 0x00970a20
+Item* Holder::ProcessLists_GetActorRefInHigh(void* key, int unused)
 {
     Item* current = 0;
     Item* result = 0;
-    for (unsigned int index = 0; index < items.FUN_005be5c0(0); index++)
+    for (unsigned int index = 0; index < items.ProcessArray_GetProcessLevelTail(0); index++)
     {
-        result = items.FUN_00968670(index);
-        if (result && !current && !result->FUN_00576d30())
+        result = items.ProcessArray_GetItem(index);
+        if (result && !current && !result->TESForm_IsStillLoading())
         {
             Item* actor = 0;
             if (result && result->v64())
@@ -244,10 +250,10 @@ Item* Holder::FUN_00970a20(void* key, int unused)
             {
                 void* target = 0;
                 if (actor->v134())
-                    target = actor->FUN_007af430();
+                    target = actor->BGSSaveFormBuffer_GetForm();
                 if (target && key == target)
                     current = actor;
-                else if (actor->FUN_005d43c0()->FUN_004216f0() == key)
+                else if (actor->BSFile_GetDevice()->ExtraDataList_GetLevCreaOriginalBase() == key)
                     current = actor;
             }
         }

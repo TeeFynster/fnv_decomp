@@ -25,10 +25,11 @@ struct MatrixE1
 struct MatrixOwnerE1
 {
     void SetMatrix(const MatrixE1&);
-    void FUN_00e11ba0(const void*);
+    void UpdateFields_00e11ba0(const void*);
 };
 // @fnv 0x00e11ba0
-void MatrixOwnerE1::FUN_00e11ba0(const void* input)
+// src: GUESS 0x00e11ba0 (confidence: low)
+void MatrixOwnerE1::UpdateFields_00e11ba0(const void* input)
 {
     __declspec(align(16)) MatrixScalarsE1 identity;
     identity.c0 = g_identityMatrixE1.c0;

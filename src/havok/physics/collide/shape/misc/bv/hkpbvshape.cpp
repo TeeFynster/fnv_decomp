@@ -18,13 +18,13 @@ public:
     hkpShape* m_pBvShapeReference;
     hkpSingleShapeContainer m_pContainedShape;
 
-    __declspec(noinline) void FUN_00c9d930();
+    __declspec(noinline) void ReleaseReference_00c9d930();
     hkpBvShape* Destroy(int flags);
     void CalculateAabb(const hkTransform& transform, float tolerance, hkAabb& out) const;
     hkBool IntersectRayWithShape(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
     void CastRayWithCollector(const ShapeRayCastQuery& input, const hkpCdBody& parent, hkpRayHitCollector& collector) const;
     hkpSingleShapeContainer* GetContainer();
-    void FUN_00c90360(C9D8F0Callback* callback, void* typeInfo);
+    void hkReferencedObject_calcContentStatistics(C9D8F0Callback* callback, void* typeInfo);
     void NotifyCallback(C9D8F0Callback* callback, int flags);
 };
 
@@ -53,7 +53,7 @@ hkMemoryRouter* _D1A0E0GetMemoryRouter();
 // @fnv 0x00c9db30
 hkpBvShape* hkpBvShape::Destroy(int flags)
 {
-    FUN_00c9d930();
+    ReleaseReference_00c9d930();
 
     if (flags & 1)
     {
@@ -66,7 +66,8 @@ hkpBvShape* hkpBvShape::Destroy(int flags)
 }
 
 // @fnv 0x00c9d8b0
-int __stdcall FUN_00c9d8b0(int a1)
+// src: HAVOK_SRC 0x00c9d8b0
+int __stdcall hkpSingleShapeContainer_getNextKey(int a1)
 {
     return -1;
 }
@@ -86,7 +87,7 @@ struct C9D8F0Callback
 void hkpBvShape::NotifyCallback(C9D8F0Callback* callback, int flags)
 {
     callback->method3(&DAT_010c6fec, (void*)m_pContainedShape.m_pContainedShape, 0);
-    FUN_00c90360(callback, &DAT_01268910);
+    hkReferencedObject_calcContentStatistics(callback, &DAT_01268910);
 }
 
 // @fnv 0x00c9d920
@@ -186,7 +187,8 @@ extern int DAT_0102e388;
 
 // Releases the held shape reference and the contained shape (if non-null), rewriting the object's two vtable pointers to fixed addresses around the calls.
 // @fnv 0x00c9d930
-void hkpBvShape::FUN_00c9d930()
+// src: GUESS 0x00c9d930 (confidence: medium)
+void hkpBvShape::ReleaseReference_00c9d930()
 {
     hkpBvShape* self = (hkpBvShape*)this;
 

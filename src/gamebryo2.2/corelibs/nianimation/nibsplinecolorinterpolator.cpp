@@ -8,7 +8,8 @@
 #include "../../../../include/NiStream.h"
 
 // @fnv 0x00a51a20
-unsigned int NiBSplineColorInterpolator::FUN_00a51a20(unsigned short usChannel)
+// src: GAMEBRYO_LIB 0x00a51a20
+unsigned int NiBSplineColorInterpolator::GetControlHandle(unsigned short usChannel)
 {
     if (usChannel)
         return 0xffff;
@@ -18,7 +19,8 @@ unsigned int NiBSplineColorInterpolator::FUN_00a51a20(unsigned short usChannel)
 extern char const* const g_011f4024_arg1;
 
 // @fnv 0x00a51aa0
-char const* const* __cdecl FUN_00a51aa0()
+// src: COMMUNITY 0x00a51aa0
+char const* const* __cdecl NiBSplineColorInterpolator_GetRTTI()
 {
     return &g_011f4024_arg1;
 }
@@ -34,7 +36,8 @@ struct SplineBaseOperations
 };
 extern int DAT_01099d3c;
 // @fnv 0x00a51c60
-void* FUN_00a51c60()
+// src: EXE 0x00a51c60
+void* NiBSplineColorInterpolator_CreateObject()
 {
     NiBSplineColorInterpolator* p = (NiBSplineColorInterpolator*)BSFadeNode::operator new(52);
     if (p)
@@ -65,7 +68,8 @@ __forceinline void NiBSplineColorInterpolator::CopyTo(NiBSplineColorInterpolator
 }
 
 // @fnv 0x00a51bf0
-NiBSplineInterpolator* __fastcall FUN_00a51bf0(NiBSplineColorInterpolator* self, void* unused, CloningProcess& kCloning)
+// src: XBOX_PDB 0x00a51bf0
+NiBSplineInterpolator* __fastcall NiBSplineColorInterpolator_CreateClone(NiBSplineColorInterpolator* self, void* unused, CloningProcess& kCloning)
 {
     NiBSplineColorInterpolator* pkClone = (NiBSplineColorInterpolator*)NiObject::operator new(sizeof(NiBSplineColorInterpolator));
     if (pkClone)
@@ -94,7 +98,8 @@ struct FNVStreamBuffer
 };
 
 // @fnv 0x00a51ca0
-void __fastcall FUN_00a51ca0(NiBSplineColorInterpolator* self, void* unused, NiStream* stream)
+// src: XBOX_PDB 0x00a51ca0
+void __fastcall NiBSplineColorInterpolator_SaveBinary(NiBSplineColorInterpolator* self, void* unused, NiStream* stream)
 {
     ((SplineBaseOperations*)self)->SaveBinary(stream);
     self->m_kDiffuseColor.SaveBinary(*stream);
@@ -106,8 +111,8 @@ void __fastcall FUN_00a51ca0(NiBSplineColorInterpolator* self, void* unused, NiS
 }
 
 extern char const* const g_011f4024_arg1;
-char* __cdecl FUN_00a7d330(char const*);
-char* __cdecl FUN_00a7d510(char const*, unsigned int);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char const*);
+char* __cdecl NiGetViewerString_00a7d510(char const*, unsigned int);
 template <class T> struct FnvStringMallocInterface
 {
 };
@@ -127,12 +132,12 @@ struct StringArray : FnvStringPrimitiveArray<char*, FnvStringMallocInterface<cha
 void __fastcall AppendColorACPHandleStrings(NiBSplineColorInterpolator* self, void* unused, StringArray* array)
 {
     ((SplineBaseOperations*)self)->AppendStrings(array);
-    char* value = FUN_00a7d330(g_011f4024_arg1);
+    char* value = NiViewerStrings_NiGetViewerString_Title(g_011f4024_arg1);
     unsigned int index = array->size;
     if (index >= array->capacity)
         array->SetSize(index + array->growth);
     array->SetAt(index, value);
-    value = FUN_00a7d510("m_kColorACPHandle", self->m_kColorACPHandle);
+    value = NiGetViewerString_00a7d510("m_kColorACPHandle", self->m_kColorACPHandle);
     index = array->size;
     if (index >= array->capacity)
         array->SetSize(index + array->growth);
@@ -141,7 +146,8 @@ void __fastcall AppendColorACPHandleStrings(NiBSplineColorInterpolator* self, vo
 
 // Returns true when the channel is zero and its control-point count is zero.
 // @fnv 0x00a50610
-bool __fastcall FUN_00a50610(NiBSplineColorInterpolator* self, void* unused, unsigned short flag)
+// src: GUESS 0x00a50610 (confidence: medium)
+bool __fastcall NiBSplineColorInterpolator_IsChannelZeroAndEmpty(NiBSplineColorInterpolator* self, void* unused, unsigned short flag)
 {
     if (0 == flag)
     {
@@ -154,7 +160,8 @@ bool __fastcall FUN_00a50610(NiBSplineColorInterpolator* self, void* unused, uns
 extern "C++" unsigned char __stdcall LoadNiBSplineInterpolator(int value);
 
 // @fnv 0x00a50b10
-unsigned char __stdcall FUN_00a50b10(int value)
+// src: XBOX_PDB 0x00a50b10
+unsigned char __stdcall NiBSplineColorInterpolator_RegisterStreamables(int value)
 {
     return LoadNiBSplineInterpolator(value) != 0;
 }
@@ -210,7 +217,8 @@ bool __fastcall EvaluateColorAtTime(NiBSplineColorInterpolator* self, void* unus
 }
 
 // @fnv 0x00a51cf0
-bool __fastcall FUN_00a51cf0(NiBSplineColorInterpolator* self, void* unused, NiBSplineColorInterpolator* other)
+// src: GAMEBRYO_LIB 0x00a51cf0
+bool __fastcall NiBSplineColorInterpolator_IsEqual(NiBSplineColorInterpolator* self, void* unused, NiBSplineColorInterpolator* other)
 {
     if (!((SplineBaseOperations*)self)->IsEqual(other))
     {
@@ -225,7 +233,8 @@ bool __fastcall FUN_00a51cf0(NiBSplineColorInterpolator* self, void* unused, NiB
 }
 
 // @fnv 0x00a51a00
-unsigned int __stdcall FUN_00a51a00(unsigned short usValue)
+// src: XBOX_PDB 0x00a51a00
+unsigned int __stdcall NiBSplineColorInterpolator_GetDimension(unsigned short usValue)
 {
     return (0 == usValue) ? 4 : 0;
 }
@@ -239,7 +248,8 @@ struct A51D30Input
 
 // Loads the base spline data and colour, then reads the colour control-point handle.
 // @fnv 0x00a51d30
-void __fastcall FUN_00a51d30(NiBSplineColorInterpolator* self, void* unused, NiStream* stream)
+// src: XBOX_PDB 0x00a51d30
+void __fastcall NiBSplineColorInterpolator_LoadBinary(NiBSplineColorInterpolator* self, void* unused, NiStream* stream)
 {
     self->NiBSplineInterpolator::LoadBinary(*stream);
     self->m_kDiffuseColor.LoadBinary(*stream);

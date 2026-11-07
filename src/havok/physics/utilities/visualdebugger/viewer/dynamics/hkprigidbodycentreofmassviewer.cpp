@@ -37,7 +37,7 @@ struct Entries
 };
 struct Owner
 {
-    void FUN_00d69c10(void* item);
+    void ProcessEntries_00d69c10(void* item);
 };
 struct View
 {
@@ -49,22 +49,23 @@ struct View
     int unk14;
     int unk18;
     Entries* entries;
-    void FUN_00d69f60();
+    void ProcessEntries_00d69f60();
 };
 // Iterates entries and calls FUN_00d69c10 on each item via the owner at this-8.
 // @fnv 0x00d69f60
-void View::FUN_00d69f60()
+// src: GUESS 0x00d69f60 (confidence: low)
+void View::ProcessEntries_00d69f60()
 {
     if (entries)
     {
         for (int i = 0; i < entries->count; ++i)
-            reinterpret_cast<Owner*>(reinterpret_cast<char*>(this) - 8)->FUN_00d69c10(entries->items[i]);
+            reinterpret_cast<Owner*>(reinterpret_cast<char*>(this) - 8)->ProcessEntries_00d69c10(entries->items[i]);
     }
 }
 
 struct Target
 {
-    void FUN_00d69c10();
+    void ProcessEntries_00d69c10();
 };
 struct FUN_00d69fb0_cls
 {
@@ -74,7 +75,7 @@ struct FUN_00d69fb0_cls
 // @fnv 0x00d69fb0
 void FUN_00d69fb0_cls::CallTargetMethod()
 {
-    ((Target*)((char*)this - 0x20))->FUN_00d69c10();
+    ((Target*)((char*)this - 0x20))->ProcessEntries_00d69c10();
 }
 
 
@@ -118,7 +119,7 @@ struct D6A140MemoryRouter
     }
 };
 
-extern "C" D6A140MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D6A140MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 class D6A140ReferencedObject
 {
@@ -126,7 +127,7 @@ class D6A140ReferencedObject
     static void* operator new(unsigned int nbytes)
     {
         D6A140ReferencedObject* b =
-            static_cast<D6A140ReferencedObject*>(FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
+            static_cast<D6A140ReferencedObject*>(hkMemoryRouter_getInstance().heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -154,14 +155,16 @@ class D6A140Object : public D6A140ReferencedObject, public D6A140Interface
 
 // Allocates a D6A140Object with the given info and returns it as a D6A140Interface pointer.
 // @fnv 0x00d6a140
-D6A140Interface* __cdecl FUN_00d6a140(const void* info)
+// src: COMMUNITY 0x00d6a140
+D6A140Interface* __cdecl hkpRigidBodyCentreOfMassViewer_Create(const void* info)
 {
     return new D6A140Object(info);
 }
 
 extern void* DAT_01269020;
 // @fnv 0x00d6a1a0
-void* __cdecl FUN_00d6a1a0()
+// src: GUESS 0x00d6a1a0 (confidence: low)
+void* __cdecl Object_GetDAT_01269020_00d6a1a0()
 {
     return DAT_01269020;
 }
@@ -178,7 +181,7 @@ struct Manager
     int unk00, unk04, unk08, unk0C;
     Allocator* unk10;
 };
-extern Manager* __cdecl FUN_00c85750();
+extern Manager* __cdecl hkMemoryRouter_getInstance();
 struct Owner
 {
     __declspec(noinline) virtual ~Owner();
@@ -195,7 +198,7 @@ void* Owner::DestroyOwner(unsigned int flags)
     this->Owner::~Owner();
     if (flags & 1)
     {
-        Manager* manager = FUN_00c85750();
+        Manager* manager = hkMemoryRouter_getInstance();
         Allocator* allocator = manager->unk10;
         unsigned short size = unk04;
         allocator->Free(this, size);
@@ -330,11 +333,12 @@ class FUN_00d69b20_cls
 class FUN_00d69fa0_cls
 {
   public:
-    void FUN_00d69fa0();
+    void ForwardCall_00d69fa0();
 };
 
 // @fnv 0x00d69fa0
-void FUN_00d69fa0_cls::FUN_00d69fa0()
+// src: GUESS 0x00d69fa0 (confidence: low)
+void FUN_00d69fa0_cls::ForwardCall_00d69fa0()
 {
     ((FUN_00d69b20_cls*)((char*)this - 0x20))->FUN_00d69b20_target();
 }
@@ -394,12 +398,12 @@ class RegistryOwner
 extern RegistryOwner* DAT_01269cd0;
 extern void* DAT_01269020;
 
-extern void FUN_00d6a140();
+extern void hkpRigidBodyCentreOfMassViewer_Create();
 
 // @fnv 0x00d6a180
 void RegisterCenterOfMass()
 {
-    DAT_01269020 = DAT_01269cd0->Register("Center of Mass", FUN_00d6a140);
+    DAT_01269020 = DAT_01269cd0->Register("Center of Mass", hkpRigidBodyCentreOfMassViewer_Create);
 }
 
 struct DwordList
@@ -419,7 +423,7 @@ struct GlobalHolder
 };
 
 namespace fnvc_adapt {
-GlobalHolder* __cdecl FUN_00c85750();
+GlobalHolder* __cdecl hkMemoryRouter_getInstance();
 }
 extern "C" void _ReadWriteBarrier(void);
 void __cdecl ResizeAudioStream(void* aAlloc, void* aList, unsigned int aiElemSize);
@@ -438,7 +442,7 @@ struct FUN_00d6a000_cls
 void FUN_00d6a000_cls::AppendDword(unsigned int aValue)
 {
     DwordList* list = &m_kNode;
-    GlobalHolder* pAllocHolder = fnvc_adapt::FUN_00c85750();
+    GlobalHolder* pAllocHolder = fnvc_adapt::hkMemoryRouter_getInstance();
     if (list->m_iArrayLength == (int)(list->m_uCapFlags & 0x3fffffffu))
     {
         ResizeAudioStream(pAllocHolder->m_pAllocator, list, 4);
@@ -471,7 +475,7 @@ struct Manager
 };
 
 namespace fnvc_adapt {
-void* FUN_00c85750() throw();
+void* hkMemoryRouter_getInstance() throw();
 }
 
 struct Array
@@ -481,7 +485,7 @@ struct Array
     unsigned int capacity;
     ~Array() throw()
     {
-        Manager* mgr = (Manager*)fnvc_adapt::FUN_00c85750();
+        Manager* mgr = (Manager*)fnvc_adapt::hkMemoryRouter_getInstance();
         Allocator* alloc = mgr->unk10;
         count = 0;
         if (!(capacity & 0x80000000))
@@ -714,7 +718,7 @@ struct COMViewerPart
     int unk00;
     Body** items;
     int count;
-    void FUN_00d69d00(void* unused);
+    void hkpRigidBodyCentreOfMassViewer_postSimulationCallback(void* unused);
 };
 
 struct COMViewer : HandlerOwner, COMViewerPart
@@ -723,7 +727,8 @@ struct COMViewer : HandlerOwner, COMViewerPart
 
 // For each body whose motion.FUN_00c86430() is nonzero, draws red, green and blue lines from its position along its three axes through the display handler.
 // @fnv 0x00d69d00
-void COMViewerPart::FUN_00d69d00(void* unused)
+// src: XBOX_PDB 0x00d69d00
+void COMViewerPart::hkpRigidBodyCentreOfMassViewer_postSimulationCallback(void* unused)
 {
     (void)unused;
     struct Timings
@@ -808,7 +813,7 @@ Derived::Derived()
 struct AdjBase1
 {
     AdjBase1();
-    virtual void FUN_00d6a1c0();
+    virtual void AdjustThisAndForward_00d6a1c0();
     char pad[0x24];
 };
 
@@ -816,14 +821,15 @@ struct AdjBase2
 {
     AdjBase2();
 // @fnv 0x00d6a1c0
-    virtual void FUN_00d6a1c0();
+// src: GUESS 0x00d6a1c0 (confidence: low)
+    virtual void AdjustThisAndForward_00d6a1c0();
 };
 
 struct AdjOwner : AdjBase1, AdjBase2
 {
     AdjOwner();
     virtual void key_fn();  // key function - defined, so the vftable is emitted
-    void FUN_00d6a1c0();    // the shared override - declared only
+    void AdjustThisAndForward_00d6a1c0();    // the shared override - declared only
 };
 
 AdjOwner::AdjOwner()
@@ -901,7 +907,8 @@ struct Vec4Clamp
 
 // Clamps the vector in v to maxLen by scaling it down when its squared length exceeds maxLen squared.
 // @fnv 0x00d6b330
-static __declspec(noinline) void __cdecl FUN_00d6b330(Vec4Clamp* apVec, float maxLen)
+// src: GUESS 0x00d6b330 (confidence: high)
+static __declspec(noinline) void __cdecl Hkprigidbodycentreofmassviewer_ClampVectorLength(Vec4Clamp* apVec, float maxLen)
 {
     LocalM128 vComponents = apVec->m_vComponents;
     LocalM128 vSquared = _mm_mul_ps(vComponents, vComponents);
@@ -922,7 +929,7 @@ volatile float g_clampLen;
 Vec4Clamp* volatile g_clampVec;
 void CallClamp_d6b330()
 {
-    FUN_00d6b330(g_clampVec, g_clampLen);
+    Hkprigidbodycentreofmassviewer_ClampVectorLength(g_clampVec, g_clampLen);
 }
 
 struct Callback
@@ -974,8 +981,8 @@ struct Context
     int unk30;
     Record** list34;
     int count38;
-    void FUN_00c93820(Callback* ptr);
-    void FUN_00c93920(int* ptr);
+    void hkpWorld_addEntityListener(Callback* ptr);
+    void hkpWorld_addWorldPostSimulationListener(int* ptr);
 };
 struct CenterOfMassRemovalDispatcher
 {
@@ -991,14 +998,15 @@ struct CenterOfMassRemovalDispatcher
     int unk24;
     Callback callback28;
     int data2c;
-    void FUN_00d69c10(Context* context);
+    void ProcessEntries_00d69c10(Context* context);
 };
 // Passes callback28 and data2c to context, then calls callback28.deliver for each entry in the data48 lists of list28, list34 and special20.
 // @fnv 0x00d69c10
-void CenterOfMassRemovalDispatcher::FUN_00d69c10(Context* context)
+// src: GUESS 0x00d69c10 (confidence: low)
+void CenterOfMassRemovalDispatcher::ProcessEntries_00d69c10(Context* context)
 {
-    context->FUN_00c93820(this ? &callback28 : 0);
-    context->FUN_00c93920(this ? &data2c : 0);
+    context->hkpWorld_addEntityListener(this ? &callback28 : 0);
+    context->hkpWorld_addWorldPostSimulationListener(this ? &data2c : 0);
     for (int i = 0; i < context->count2c; ++i)
     {
         RemovalEntityList* pRemovalList = &context->list28[i]->data48;

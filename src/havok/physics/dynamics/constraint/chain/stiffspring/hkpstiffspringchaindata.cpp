@@ -35,7 +35,7 @@ extern "C"
 
 // The TLS accessor at 0x00c85750 and heap pointer at +0x10 identify hkMemoryRouter,
 // represented by the shared hkMemoryRouter declaration.
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 struct ConstraintInfo
 {
@@ -65,20 +65,21 @@ public:
     hkReal m_fMotorDamping;
     hkReal m_fMaxErrorDistance;
 
-    void FUN_00e3af80(bool bFlag, unsigned int* pOut);
-    void FUN_00e3af40(::ConstraintInfo& info);
-    void FUN_00e3b0f0(const SixteenWordFloatRecord& inNonConst, QueryResultSchema& out) volatile;
+    void getRuntimeInfo_00e3af80(bool bFlag, unsigned int* pOut);
+    void getConstraintInfo_00e3af40(::ConstraintInfo& info);
+    void buildJacobian_00e3b0f0(const SixteenWordFloatRecord& inNonConst, QueryResultSchema& out) volatile;
     hkpStiffSpringChainData* DestroyAndFree(unsigned int uiFlags) throw();
 
     static void operator delete(void* p) throw()
     {
-        FUN_00c85750().heap().blockFree(
+        hkMemoryRouter_getInstance().heap().blockFree(
             p, static_cast<hkpStiffSpringChainData*>(p)->m_usMemSizeAndFlags);
     }
 };
 
 // @fnv 0x00e3af80
-void hkpStiffSpringChainData::FUN_00e3af80(bool bFlag, unsigned int* pOut)
+// src: HAVOK_LIB 0x00e3af80
+void hkpStiffSpringChainData::getRuntimeInfo_00e3af80(bool bFlag, unsigned int* pOut)
 {
     if (bFlag)
     {
@@ -94,13 +95,15 @@ void hkpStiffSpringChainData::FUN_00e3af80(bool bFlag, unsigned int* pOut)
 }
 
 // @fnv 0x00e3af30
-int __cdecl FUN_00e3af30()
+// src: GUESS 0x00e3af30 (confidence: high)
+int __cdecl hkpStiffSpringChainData_ReturnConstant_0x64()
 {
     return 0x64;
 }
 
 // @fnv 0x00e3af40
-void hkpStiffSpringChainData::FUN_00e3af40(::ConstraintInfo& info)
+// src: HAVOK_LIB 0x00e3af40
+void hkpStiffSpringChainData::getConstraintInfo_00e3af40(::ConstraintInfo& info)
 {
     info.m_kBridgeAtoms = &m_kBridgeAtoms;
     info.m_iSolverResultCount = 0;
@@ -221,11 +224,11 @@ struct SolverPointTransform : public hkVector4
 void __cdecl ResizeAudioStream(hkMemoryAllocator* alloc, void* array, int sizeElem) throw();
 extern "C" void __cdecl AppendEventRecord(const SixteenWordFloatRecord& in, QueryResultSchema& out, void* solverResults,
                                      int solverResultStriding) throw();
-SolverSchemaHeader* __cdecl FUN_00dd13b0(SolverSchemaHeader* schema) throw();
-void __cdecl FUN_00dcee70(SixteenWordFloatRecord* in) throw();
-void __cdecl FUN_00dcf720(const hk1dLinearBilateralConstraintInfo& info, const SixteenWordFloatRecord& in,
+SolverSchemaHeader* __cdecl hkJacobianStiffSpringChainSchema_getJacobians(SolverSchemaHeader* schema) throw();
+void __cdecl hkLoadVelocityAccumulators(SixteenWordFloatRecord* in) throw();
+void __cdecl hk1dLinearBilateralConstraintBuildJacobianWithCustomRhs_noSchema(const hk1dLinearBilateralConstraintInfo& info, const SixteenWordFloatRecord& in,
                           SolverSchemaHeader* schema, hkReal rhs) throw();
-void __cdecl FUN_00dd1180(int numConstraints, hkReal tau, hkReal damping, hkReal cfm, int* offsets, hkUint32 base,
+void __cdecl hkStiffSpringChainBuildJacobian(int numConstraints, hkReal tau, hkReal damping, hkReal cfm, int* offsets, hkUint32 base,
                           SolverSchemaHeader* schema, const SixteenWordFloatRecord& in, QueryResultSchema& out) throw();
 __forceinline void* __cdecl operator new(unsigned int, void* p) throw()
 {
@@ -245,7 +248,7 @@ struct hkInplaceIntArray32
     }
     __forceinline ~hkInplaceIntArray32()
     {
-        hkMemoryAllocator* alloc = &FUN_00c85750().heap();
+        hkMemoryAllocator* alloc = &hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
         {
@@ -290,7 +293,8 @@ static __forceinline hkReal hkNormalizeWithLength3(SolverVectorStorage& v)
     return length;
 }
 // @fnv 0x00e3b0f0
-void hkpStiffSpringChainData::FUN_00e3b0f0(const SixteenWordFloatRecord& inNonConst, QueryResultSchema& out) volatile
+// src: XBOX_PDB 0x00e3b0f0
+void hkpStiffSpringChainData::buildJacobian_00e3b0f0(const SixteenWordFloatRecord& inNonConst, QueryResultSchema& out) volatile
 {
     AppendEventRecord(inNonConst, out, inNonConst.m_pByteBuffer, 8);
     SixteenWordFloatRecord in = inNonConst;
@@ -306,14 +310,14 @@ void hkpStiffSpringChainData::FUN_00e3b0f0(const SixteenWordFloatRecord& inNonCo
     in.m_kBodyBLocalFrame = &rA->m_pMotionState.m_kMotionState.m_kMotionTransform;
     in.m_fFourthQueryValue = 1.0f;
     in.m_iBeforeFourthQueryValue = in.m_fQueryInputValue;
-    SolverSchemaHeader* schema = FUN_00dd13b0(out.m_pQueryResultSchema.value());
+    SolverSchemaHeader* schema = hkJacobianStiffSpringChainSchema_getJacobians(out.m_pQueryResultSchema.value());
     for (int i = 0; i < numConstraints; i++)
     {
         in.m_pBodyA = in.m_pBodyB;
         in.m_kBodyALocalFrame = in.m_kBodyBLocalFrame;
         hkpEntity* rB = instance->m_ppRigidBodies.m_data[i + 1];
         in.m_pBodyB = (const QuantizedBoundsData*)(base + rB->m_uiFilterInfo);
-        velocityAccumulatorsOffsets.AddBack(&FUN_00c85750(),
+        velocityAccumulatorsOffsets.AddBack(&hkMemoryRouter_getInstance(),
                                             (hkUint32)in.m_pBodyB - base);
         in.m_kBodyBLocalFrame = &rB->m_pMotionState.m_kMotionState.m_kMotionTransform;
         hk1dLinearBilateralConstraintInfo bp;
@@ -331,11 +335,11 @@ void hkpStiffSpringChainData::FUN_00e3b0f0(const SixteenWordFloatRecord& inNonCo
             bp.m_kConstraintAxis.m_vComponents = DAT_01268370;
             length = 0.0f;
         }
-        FUN_00dcee70(&in);
+        hkLoadVelocityAccumulators(&in);
         hkReal rhs = m_pConstraintInfo.m_data[i].m_fSpringRestLength - length;
-        FUN_00dcf720(bp, in, schema, rhs);
+        hk1dLinearBilateralConstraintBuildJacobianWithCustomRhs_noSchema(bp, in, schema, rhs);
         schema = reinterpret_cast<SolverSchemaHeader*>(reinterpret_cast<char*>(schema) + 0x30);
     }
-    FUN_00dd1180(numConstraints, m_fTau, m_fMotorDamping, m_fMaxErrorDistance, velocityAccumulatorsOffsets.m_data, base,
+    hkStiffSpringChainBuildJacobian(numConstraints, m_fTau, m_fMotorDamping, m_fMaxErrorDistance, velocityAccumulatorsOffsets.m_data, base,
                  schema, inNonConst, out);
 }

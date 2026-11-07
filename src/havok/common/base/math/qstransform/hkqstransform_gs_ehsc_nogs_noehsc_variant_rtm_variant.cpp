@@ -18,7 +18,8 @@ extern "C" const __declspec(align(16)) unsigned int DAT_01017d10[4];
 #include "../../../../../../include/hkQsTransform.h"
 
 // @fnv 0x00ce5120
-hkBool hkQsTransform::FUN_00ce5120(const hkQsTransform& other, float epsilon) const
+// src: GUESS 0x00ce5120 (confidence: low)
+hkBool hkQsTransform::ProcessAndReturnValue_00ce5120(const hkQsTransform& other, float epsilon) const
 {
     __m128 eps = _mm_set1_ps(epsilon);
     __m128 absMask = *(const __m128*)DAT_01017d10;

@@ -41,16 +41,17 @@ struct FUN_007aa500
     ~FUN_007aa500();
 };
 unsigned int __cdecl FUN_007a92a0();
-void __cdecl FUN_007aa6a0(bool);
+void __cdecl MessageHandler_SetYesToAll(bool);
 
 // @fnv 0x007aa5c0
-void FUN_007aa5c0()
+// src: COMMUNITY 0x007aa5c0
+void MessageMenu_ProcessYesToAll()
 {
     if (FUN_007a92a0())
     {
         unsigned int uiID = ((MessageQueueEntryView*)FUN_007a92a0())->m_uiMessageFlags;
-        MessageHandler::pHandler->FUN_00aa4c40(uiID);
-        FUN_007aa6a0(true);
+        MessageHandler::pHandler->BSCoreMessage_DisableContextMessages(uiID);
+        MessageHandler_SetYesToAll(true);
         for (unsigned int i = DAT_011da4f4; i < ((MessagemenuOffset08View*)&g_011da53c)->GetFlags(); i++)
         {
             if ((*((MessageQueueComparisonArray*)&g_011da53c)->FUN_00877a30(i))->m_uiMessageFlags == uiID)
@@ -88,7 +89,8 @@ struct PerkActivationEntry
 };
 
 // @fnv 0x007aae70
-void FUN_007aae70()
+// src: GUESS 0x007aae70 (confidence: low)
+void BSSimpleArray_UpdateState_007aae70()
 {
     unsigned int ibuttonClicked;
     int icount;

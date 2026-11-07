@@ -47,7 +47,7 @@ NiPointer<BSShaderPPLightingProperty>& NiPointer<BSShaderPPLightingProperty>::op
 class TESAmmoInitCalls
 {
   public:
-    void* FUN_00923000();
+    void* TESAmmo_GetAmmoEffectList();
 };
 
 bool IsValidSandboxProcedure(int aiProcedure);

@@ -11,13 +11,15 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00a487e0
-NiAnimationKey::KeyContent __stdcall NiQuaternionInterpolator::FUN_00a487e0()
+// src: GUESS 0x00a487e0 (confidence: low)
+NiAnimationKey::KeyContent __stdcall NiQuaternionInterpolator::ComputeValue_00a487e0()
 {
     return NiAnimationKey::ROTKEY;
 }
 
 // @fnv 0x00a48960
-void NiQuaternionInterpolator::FUN_00a48960(float m_fStartTime, float m_fMaximumDistance)
+// src: XBOX_PDB 0x00a48960
+void NiQuaternionInterpolator::GuaranteeTimeRange_00a48960(float m_fStartTime, float m_fMaximumDistance)
 {
     NiRotData* p = m_spQuaternionData.m_pObject;
     if (p)
@@ -27,7 +29,8 @@ void NiQuaternionInterpolator::FUN_00a48960(float m_fStartTime, float m_fMaximum
 extern "C" const void* g_011f3f60;
 
 // @fnv 0x00a48ab0
-const void* __cdecl FUN_00a48ab0()
+// src: COMMUNITY 0x00a48ab0
+const void* __cdecl NiQuaternionInterpolator_GetRTTI()
 {
     return &g_011f3f60;
 }
@@ -97,7 +100,7 @@ bool __fastcall IsQuaternionPose(NiQuaternionInterpolator* self, void*, unsigned
 {
     if (self->m_spQuaternionData.m_pObject != 0)
         return false;
-    bool bIsDefault = !((NiBound*)&self->m_kQuaternionValue)->FUN_00a92660(g_NiBoundDefault);
+    bool bIsDefault = !((NiBound*)&self->m_kQuaternionValue)->Object_HasEqualFloatComponents(g_NiBoundDefault);
     return bIsDefault;
 }
 
@@ -126,7 +129,7 @@ inline TimedRotationKey* NiRotData::ComputePositionAtTime(unsigned int& uiNumKey
 inline bool QuaternionEqual(const NiQuaternion& a, const NiQuaternion& b)
 {
     // The original equality routine is declared by the shared NiBound header.
-    return ((NiBound*)&a)->FUN_00a92660((const NiBound&)b);
+    return ((NiBound*)&a)->Object_HasEqualFloatComponents((const NiBound&)b);
 }
 
 struct TimedRotationKey
@@ -272,8 +275,8 @@ struct Stream
     void __thiscall FUN_0096ae90(unsigned int index, void** value);
 };
 
-void* __cdecl FUN_00a7d330(const void* value);
-void* __cdecl FUN_00a7d5a0(const void* key, void* value);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(const void* value);
+void* __cdecl NiGetViewerString_00a7d5a0(const void* key, void* value);
 
 // The shared base does not declare its viewer-string override.
 void GetKeyBasedViewerStrings();
@@ -283,7 +286,7 @@ void NiQuaternionInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
 {
     Stream* stream = (Stream*)strings;
     reinterpret_cast<void (__thiscall*)(NiKeyBasedInterpolator*, NiViewerStringsArray*)>(&GetKeyBasedViewerStrings)(this, strings);
-    void* value = FUN_00a7d330(g_011f3f60);
+    void* value = NiViewerStrings_NiGetViewerString_Title(g_011f3f60);
     unsigned int index = stream->unk0a;
     if (index >= stream->unk08)
         stream->FUN_0096ad30(index + stream->unk0e);
@@ -296,7 +299,7 @@ void NiQuaternionInterpolator::GetViewerStrings(NiViewerStringsArray* strings)
     stream->FUN_0096ae90(index, &value);
 
     void* payload = m_spQuaternionData.m_pObject;
-    value = FUN_00a7d5a0(&DAT_010987ec, payload);
+    value = NiGetViewerString_00a7d5a0(&DAT_010987ec, payload);
     index = stream->unk0a;
     if (index >= stream->unk08)
         stream->FUN_0096ad30(index + stream->unk0e);

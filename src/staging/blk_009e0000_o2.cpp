@@ -13,7 +13,8 @@ namespace fnv_009fae90 {
 using fnv_009fae90::IUnknown;
 
 // @fnv 0x009faba0
-int __stdcall FUN_009faba0(int, int, int)
+// src: GUESS 0x009faba0 (confidence: high)
+int __stdcall Object_Return0x80004001(int, int, int)
 {
     return 0x80004001;
 }
@@ -31,11 +32,12 @@ void* __cdecl _fnv_zlib_memset(void* dst, int value, int size);
 
 struct FUN_009f9a30_class
 {
-    void FUN_009f9a30();
+    void AM_MEDIA_TYPE_AM_MEDIA_TYPE();
 };
 
 // @fnv 0x009f9a30
-void FUN_009f9a30_class::FUN_009f9a30()
+// src: COMMUNITY 0x009f9a30
+void FUN_009f9a30_class::AM_MEDIA_TYPE_AM_MEDIA_TYPE()
 {
     _fnv_zlib_memset(this, 0, 0x48);
     *(int*)((char*)this + 0x28) = 1;
@@ -44,7 +46,8 @@ void FUN_009f9a30_class::FUN_009f9a30()
 
 // The unused EDX parameter preserves the original member-call ABI.
 // @fnv 0x009f9d10
-SpectatorPackage* __fastcall FUN_009f9d10(SpectatorPackage* self, void*, const SpectatorPackage& aPackage)
+// src: GUESS 0x009f9d10 (confidence: low)
+SpectatorPackage* __fastcall Object_EvaluateValue_009f9d10(SpectatorPackage* self, void*, const SpectatorPackage& aPackage)
 {
     self->IsComplete(aPackage);
     return self;
@@ -54,14 +57,15 @@ SpectatorPackage* __fastcall FUN_009f9d10(SpectatorPackage* self, void*, const S
 int __fastcall CallAndReturnThis(SpectatorPackage* self, void*, int a)
 {
     typedef SpectatorPackage* (__thiscall* CopyPackage)(SpectatorPackage*, const SpectatorPackage&);
-    reinterpret_cast<CopyPackage>(&FUN_009f9d10)(self, *reinterpret_cast<const SpectatorPackage*>(a));
+    reinterpret_cast<CopyPackage>(&Object_EvaluateValue_009f9d10)(self, *reinterpret_cast<const SpectatorPackage*>(a));
     return (int)self;
 }
 
 extern void** DAT_00fdf1c0;
 
 // @fnv 0x009fa040
-void __cdecl FUN_009fa040(int* a)
+// src: GUESS 0x009fa040 (confidence: low)
+void __cdecl Object_UpdateFields_009fa040(int* a)
 {
     a = a + 5;
     ((void(__cdecl*)(void*))DAT_00fdf1c0)(a);
@@ -71,14 +75,16 @@ namespace fnv_009fa180 {
 extern "C" void* __cdecl DAT_00fdf1c0;
 
 // @fnv 0x009fa180
-void __stdcall FUN_009fa180(int a)
+// src: GUESS 0x009fa180 (confidence: low)
+void __stdcall Object_ForwardCall_009fa180(int a)
 {
     ((void(__stdcall*)(int))DAT_00fdf1c0)(a + 0x10);
 }
 }  // namespace fnv_009fa180
 
 // @fnv 0x009fa480
-int __stdcall FUN_009fa480(int aSource, int apOut)
+// src: GUESS 0x009fa480 (confidence: low)
+int __stdcall Object_ComputeValue_009fa480(int aSource, int apOut)
 {
     if (!apOut)
         return 0x80004003;
@@ -91,10 +97,11 @@ extern void(__stdcall* DAT_00fdf100)(int*);
 
 struct FUN_009fa4e0_class
 {
-    int FUN_009fa4e0(int a, int b);
+    int ProcessAndReturnValue_009fa4e0(int a, int b);
 };
 // @fnv 0x009fa4e0
-int FUN_009fa4e0_class::FUN_009fa4e0(int a, int aiValue)
+// src: GUESS 0x009fa4e0 (confidence: low)
+int FUN_009fa4e0_class::ProcessAndReturnValue_009fa4e0(int a, int aiValue)
 {
     int* p = *(int**)((char*)a + 0x10);
     DAT_00fdf05c(p);
@@ -111,7 +118,8 @@ int __stdcall GetFieldAt0C(int a, int* piOut)
 }
 
 // @fnv 0x009fa840
-int __stdcall FUN_009fa840(int* pFlags, int bSet)
+// src: GUESS 0x009fa840 (confidence: low)
+int __stdcall Object_ComputeValue_009fa840(int* pFlags, int bSet)
 {
     if (bSet)
         pFlags[1] |= 4;
@@ -121,7 +129,8 @@ int __stdcall FUN_009fa840(int* pFlags, int bSet)
 }
 
 // @fnv 0x009fa8b0
-int __stdcall FUN_009fa8b0(void* obj, int value)
+// src: GUESS 0x009fa8b0 (confidence: low)
+int __stdcall Runtime_UpdateState_009fa8b0(void* obj, int value)
 {
     if (value > *(int*)((char*)obj + 0x14))
         return 0x8004020d;
@@ -131,11 +140,12 @@ int __stdcall FUN_009fa8b0(void* obj, int value)
 
 struct FUN_009fb020_class
 {
-    int FUN_009fb020();
+    int ComputeValue_009fb020();
 };
 
 // @fnv 0x009fb020
-int FUN_009fb020_class::FUN_009fb020()
+// src: GUESS 0x009fb020 (confidence: low)
+int FUN_009fb020_class::ComputeValue_009fb020()
 {
     if (*(int*)((char*)this + 0x38) > 0 && *(int*)((char*)this + 0x40) > 0 && *(int*)((char*)this + 0x44) > 0)
     {
@@ -176,24 +186,25 @@ FUN_009fbca0* __thiscall FUN_009fbca0::Method(bool abDelete)
     return this;
 }
 
-int __stdcall FUN_009fd0a0(int);
+int __stdcall Object_CopyData(int);
 
 // @fnv 0x009fc450
-int __stdcall FUN_009fc450(int a)
+// src: GUESS 0x009fc450 (confidence: low)
+int __stdcall Runtime_UpdateState_009fc450(int a)
 {
     int b = *(int*)((int)a + 8);
-    return FUN_009fd0a0(b);
+    return Object_CopyData(b);
 }
 
 struct FUN_009fc460_Class
 {
-    int __thiscall FUN_009fa560();
+    int __thiscall UpdateFields_009fa560();
     void* __thiscall FUN_009fc460(int);
 };
 // @fnv 0x009fc460
 void* __thiscall FUN_009fc460_Class::FUN_009fc460(int flag)
 {
-    FUN_009fa560();
+    UpdateFields_009fa560();
     if (flag & 1)
         operator delete(this);
     return this;
@@ -245,24 +256,25 @@ int __stdcall GetValueAtOffset8(int a)
 
 struct FUN_009fe2a0_class
 {
-    int __thiscall FUN_009fe2a0();
+    int __thiscall ProcessAndReturnValue_009fe2a0();
 };
 
 // @fnv 0x009fdbd0
-int __stdcall FUN_009fdbd0(int a)
+// src: GUESS 0x009fdbd0 (confidence: low)
+int __stdcall Runtime_ForwardCall_009fdbd0(int a)
 {
-    return ((FUN_009fe2a0_class*)(*(int*)(a + 0xa4)))->FUN_009fe2a0();
+    return ((FUN_009fe2a0_class*)(*(int*)(a + 0xa4)))->ProcessAndReturnValue_009fe2a0();
 }
 
 struct FUN_009fddd0_class
 {
-    void __thiscall FUN_009fd3c0();
+    void __thiscall ProcessAndReturnValue_009fd3c0();
     FUN_009fddd0_class* __thiscall FUN_009fddd0(int);
 };
 // @fnv 0x009fddd0
 FUN_009fddd0_class* __thiscall FUN_009fddd0_class::FUN_009fddd0(int a)
 {
-    FUN_009fd3c0();
+    ProcessAndReturnValue_009fd3c0();
     if (a & 1)
         delete this;
     return this;
@@ -286,7 +298,8 @@ int __thiscall FUN_009fdeb0_class::FUN_009fdeb0(int flag)
 }
 
 // @fnv 0x009f9d60
-int __stdcall FUN_009f9d60(int apSource, int apDest)
+// src: GUESS 0x009f9d60 (confidence: medium)
+int __stdcall Object_CopyMediaTypeFields(int apSource, int apDest)
 {
     if (!apDest)
         return 0x80004003;
@@ -298,7 +311,8 @@ int __stdcall FUN_009f9d60(int apSource, int apDest)
 }
 
 // @fnv 0x009fa060
-long __stdcall FUN_009fa060(long* pObject)
+// src: GUESS 0x009fa060 (confidence: medium)
+long __stdcall Object_DecrementReferenceAndDelete(long* pObject)
 {
     long r = InterlockedDecrement(pObject + 5);
     if (r == 0 && pObject)
@@ -307,7 +321,8 @@ long __stdcall FUN_009fa060(long* pObject)
 }
 
 // @fnv 0x009fa1a0
-int __stdcall FUN_009fa1a0(int* pObject)
+// src: GUESS 0x009fa1a0 (confidence: medium)
+int __stdcall Object_DecrementReferenceAndDelete_009fa1a0(int* pObject)
 {
     int r = InterlockedDecrement((volatile long*)(pObject + 4));
     if (r == 0 && pObject)
@@ -318,33 +333,36 @@ int __stdcall FUN_009fa1a0(int* pObject)
 extern int DAT_01093bcc;
 extern int DAT_01093bdc;
 extern int DAT_01093f14;
-int __stdcall FUN_009f9980(int, int);
+int __stdcall Object_ProcessAndTransformResult_009f9980(int, int);
 int __stdcall GetObjectPointer(int, int);
 // @fnv 0x009fa580
-int __stdcall FUN_009fa580(int a, int b, int c)
+// src: GUESS 0x009fa580 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fa580(int a, int b, int c)
 {
-    if (FUN_009f9980(b, (int)&DAT_01093bdc) || FUN_009f9980(b, (int)&DAT_01093bcc) ||
-        FUN_009f9980(b, (int)&DAT_01093f14))
+    if (Object_ProcessAndTransformResult_009f9980(b, (int)&DAT_01093bdc) || Object_ProcessAndTransformResult_009f9980(b, (int)&DAT_01093bcc) ||
+        Object_ProcessAndTransformResult_009f9980(b, (int)&DAT_01093f14))
         return GetObjectPointer(a, c);
     return 0x80004002;
 }
 
-int __stdcall FUN_009f9cd0(int a);
+int __stdcall Runtime_UpdateState_009f9cd0(int a);
 
 // @fnv 0x009fa8d0
-int __stdcall FUN_009fa8d0(int p1, int* p2)
+// src: GUESS 0x009fa8d0 (confidence: low)
+int __stdcall Runtime_UpdateState_009fa8d0(int p1, int* p2)
 {
     if (!(*(unsigned char*)(p1 + 4) & 8))
     {
         *p2 = 0;
         return 1;
     }
-    *p2 = FUN_009f9cd0(*(int*)(p1 + 0x3c));
+    *p2 = Runtime_UpdateState_009f9cd0(*(int*)(p1 + 0x3c));
     return *p2 ? 0 : 0x8007000e;
 }
 
 // @fnv 0x009faca0
-int __stdcall FUN_009faca0(int pSource, int* pOutput)
+// src: GUESS 0x009faca0 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009faca0(int pSource, int* pOutput)
 {
     if (!pOutput)
         return 0x80004003;
@@ -364,33 +382,35 @@ int __stdcall FUN_009faca0(int pSource, int* pOutput)
 
 struct FUN_009fce60_class
 {
-    void __thiscall FUN_009fce60(int a);
+    void __thiscall InitializeFields_009fce60(int a);
 };
 struct FUN_009fcee0_class
 {
-    int* __thiscall FUN_009fcee0(int a, int b);
+    int* __thiscall ProcessAndReturnValue_009fcee0(int a, int b);
 };
 // Calls FUN_009fce60 on the object at offset 4 with a, then stores b (or this if b is null) at offset 4 and zero at offset 8, returning this.
 // @fnv 0x009fcee0
-int* __thiscall FUN_009fcee0_class::FUN_009fcee0(int aiValue, int apParent)
+// src: GUESS 0x009fcee0 (confidence: low)
+int* __thiscall FUN_009fcee0_class::ProcessAndReturnValue_009fcee0(int aiValue, int apParent)
 {
-    ((FUN_009fce60_class*)((char*)this + 4))->FUN_009fce60(aiValue);
+    ((FUN_009fce60_class*)((char*)this + 4))->InitializeFields_009fce60(aiValue);
     *(int*)((char*)this + 4) = apParent ? apParent : (int)this;
     *(int*)((char*)this + 8) = 0;
     return (int*)this;
 }
 
 namespace fnv_009fcf10 {
-int __stdcall FUN_009f9980(int a, int b);
+int __stdcall Object_ProcessAndTransformResult_009f9980(int a, int b);
 void __stdcall GetObjectPointer(int a, int b);
 extern int DAT_01093f14;
 
 // @fnv 0x009fcf10
-int __stdcall FUN_009fcf10(int aObject, int b, int* apOutInterface)
+// src: GUESS 0x009fcf10 (confidence: low)
+int __stdcall Runtime_UpdateState_009fcf10(int aObject, int b, int* apOutInterface)
 {
     if (!apOutInterface)
         return 0x80004003;
-    if (FUN_009f9980(b, (int)&DAT_01093f14))
+    if (Object_ProcessAndTransformResult_009f9980(b, (int)&DAT_01093f14))
     {
         GetObjectPointer(aObject, (int)apOutInterface);
         return 0;
@@ -402,53 +422,57 @@ int __stdcall FUN_009fcf10(int aObject, int b, int* apOutInterface)
 
 extern void(__stdcall* DAT_00fdf07c)(void*);
 // @fnv 0x009fcfe0
-void __fastcall FUN_009fcfe0(void** p)
+// src: GUESS 0x009fcfe0 (confidence: low)
+void __fastcall Object_ProcessState_009fcfe0(void** p)
 {
     if (*p)
         DAT_00fdf07c(*p);
 }
 
-extern "C" void __cdecl FUN_00e7cd40();
+extern "C" void __cdecl Ret0();
 // @fnv 0x009fd480
-void __fastcall FUN_009fd480(void* self)
+// src: GUESS 0x009fd480 (confidence: low)
+void __fastcall Object_UpdateFields_009fd480(void* self)
 {
     *(int*)((char*)self + 0xa0) = 0;
-    FUN_00e7cd40();
+    Ret0();
 }
 
 extern int DAT_01093b4c;
-int __stdcall FUN_009f9980(int a, int* b);
+int __stdcall Object_ProcessAndTransformResult_009f9980(int a, int* b);
 int __stdcall GetObjectPointer(int a, int b);
-int __stdcall FUN_009fa260(int a, int b, int c);
+int __stdcall Object_ProcessAndReturnValue_009fa260(int a, int b, int c);
 // @fnv 0x009fd490
-int __stdcall FUN_009fd490(int pThis, int b, int c)
+// src: GUESS 0x009fd490 (confidence: low)
+int __stdcall Object_UpdateState_009fd490(int pThis, int b, int c)
 {
     if (!c)
         return 0x80004003;
-    if (FUN_009f9980(b, &DAT_01093b4c))
+    if (Object_ProcessAndTransformResult_009f9980(b, &DAT_01093b4c))
     {
         *(int*)(pThis + 0xa0) = 1;
         return GetObjectPointer(pThis - 8, c);
     }
-    return FUN_009fa260(pThis, b, c);
+    return Object_ProcessAndReturnValue_009fa260(pThis, b, c);
 }
 
-extern int __stdcall FUN_009f9980(int a, int b);
+extern int __stdcall Object_ProcessAndTransformResult_009f9980(int a, int b);
 extern int DAT_01093f04;
 struct FUN_009fd530_class
 {
-    int __thiscall FUN_009fd530(int b);
+    int __thiscall UpdateState_009fd530(int b);
 };
 // @fnv 0x009fd530
-int __thiscall FUN_009fd530_class::FUN_009fd530(int b)
+// src: GUESS 0x009fd530 (confidence: low)
+int __thiscall FUN_009fd530_class::UpdateState_009fd530(int b)
 {
     int* lock = *(int**)((char*)this + 0x20);
     DAT_00fdf05c(lock);
     char* base = (char*)*(int**)((char*)this + 0x98);
-    if (FUN_009f9980((int)(base + 0x1a0), b))
+    if (Object_ProcessAndTransformResult_009f9980((int)(base + 0x1a0), b))
     {
         char* p = base + 0x1b0;
-        if (FUN_009f9980((int)p, (int)&DAT_01093f04) || FUN_009f9980((int)p, b + 0x10))
+        if (Object_ProcessAndTransformResult_009f9980((int)p, (int)&DAT_01093f04) || Object_ProcessAndTransformResult_009f9980((int)p, b + 0x10))
         {
             DAT_00fdf100(lock);
             return 0;
@@ -465,12 +489,13 @@ extern void(__stdcall* DAT_00fdf07c)(int*);
 
 struct FUN_009fe0c0_class
 {
-    int __thiscall FUN_009fe0c0();
+    int __thiscall CloseStoredHandles();
 };
 
 // Calls DAT_00fdf0d0 on the pointer at this+0x7c, then if the handle at this+0x80 is set, calls DAT_00fdf1c8 and DAT_00fdf07c on it and clears it; returns 0.
 // @fnv 0x009fe0c0
-int __thiscall FUN_009fe0c0_class::FUN_009fe0c0()
+// src: GUESS 0x009fe0c0 (confidence: medium)
+int __thiscall FUN_009fe0c0_class::CloseStoredHandles()
 {
     DAT_00fdf0d0((int*)*(int**)((char*)this + 0x7c));
     int handle = *(int*)((char*)this + 0x80);
@@ -484,46 +509,49 @@ int __thiscall FUN_009fe0c0_class::FUN_009fe0c0()
 }
 }  // namespace fnv_009fe0c0
 
-int __stdcall FUN_009fcf10(int a, int b, int c);
+int __stdcall Runtime_UpdateState_009fcf10(int a, int b, int c);
 extern int DAT_01093c3c;
 extern int DAT_01093b7c;
 // Checks b against two type descriptors and forwards a (offset by 0xc or 0x10) with c to the matching handler, otherwise calls FUN_009fcf10.
 // @fnv 0x009fa260
-int __stdcall FUN_009fa260(int a, int b, int c)
+// src: GUESS 0x009fa260 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fa260(int a, int b, int c)
 {
-    if (FUN_009f9980(b, &DAT_01093c3c))
+    if (Object_ProcessAndTransformResult_009f9980(b, &DAT_01093c3c))
         return GetObjectPointer(a ? a + 0xc : 0, c);
-    if (FUN_009f9980(b, &DAT_01093b7c))
+    if (Object_ProcessAndTransformResult_009f9980(b, &DAT_01093b7c))
         return GetObjectPointer(a ? a + 0x10 : 0, c);
-    return FUN_009fcf10(a, b, c);
+    return Runtime_UpdateState_009fcf10(a, b, c);
 }
 
 typedef int(__stdcall* FUN_009fa5d0_fp)(int);
 
 // @fnv 0x009fa5d0
-int __stdcall FUN_009fa5d0(int a)
+// src: GUESS 0x009fa5d0 (confidence: low)
+int __stdcall Runtime_UpdateState_009fa5d0(int a)
 {
     a += 0x44;
     return (*(FUN_009fa5d0_fp*)&DAT_00fdf1c0)(a);
 }
 
-int __stdcall FUN_009fcf10(int a, int b, int c);
+int __stdcall Runtime_UpdateState_009fcf10(int a, int b, int c);
 extern int DAT_01093bec;
 extern int DAT_01093bfc;
 extern int DAT_01093f24;
 extern int DAT_01093b9c;
 // @fnv 0x009fb480
-int __stdcall FUN_009fb480(int a, int b, int c)
+// src: GUESS 0x009fb480 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fb480(int a, int b, int c)
 {
-    if (FUN_009f9980(b, &DAT_01093bec))
+    if (Object_ProcessAndTransformResult_009f9980(b, &DAT_01093bec))
         return GetObjectPointer(a ? a + 0xc : 0, c);
-    if (FUN_009f9980(b, &DAT_01093bfc))
+    if (Object_ProcessAndTransformResult_009f9980(b, &DAT_01093bfc))
         return GetObjectPointer(a ? a + 0xc : 0, c);
-    if (FUN_009f9980(b, &DAT_01093f24))
+    if (Object_ProcessAndTransformResult_009f9980(b, &DAT_01093f24))
         return GetObjectPointer(a ? a + 0xc : 0, c);
-    if (FUN_009f9980(b, &DAT_01093b9c))
+    if (Object_ProcessAndTransformResult_009f9980(b, &DAT_01093b9c))
         return GetObjectPointer(a ? a + 0x10 : 0, c);
-    return FUN_009fcf10(a, b, c);
+    return Runtime_UpdateState_009fcf10(a, b, c);
 }
 
 extern int DAT_01093d84;
@@ -594,37 +622,40 @@ FUN_009fdd70_class::FUN_009fdd70_class(int a, int b, int c, int d)
     m_a4 = c;
 }
 
-int __stdcall FUN_009f9980(int a, int b);
+int __stdcall Object_ProcessAndTransformResult_009f9980(int a, int b);
 struct FUN_009f9a50_class
 {
-    int __thiscall FUN_009f9a50();
+    int __thiscall EvaluateValue_009f9a50();
 };
 // @fnv 0x009f9a50
-int FUN_009f9a50_class::FUN_009f9a50()
+// src: GUESS 0x009f9a50 (confidence: low)
+int FUN_009f9a50_class::EvaluateValue_009f9a50()
 {
-    if (FUN_009f9980((int)this, (int)&DAT_01093f04) || FUN_009f9980((int)((char*)this + 0x2c), (int)&DAT_01093f04))
+    if (Object_ProcessAndTransformResult_009f9980((int)this, (int)&DAT_01093f04) || Object_ProcessAndTransformResult_009f9980((int)((char*)this + 0x2c), (int)&DAT_01093f04))
         return 1;
     return 0;
 }
 
-void __stdcall FUN_009f9c20(SpectatorPackage*);
+void __stdcall Object_ReleaseMediaTypeData(SpectatorPackage*);
 extern void(__stdcall* DAT_00fdf45c)(SpectatorPackage*);
 
 // @fnv 0x009f9cb0
-void __stdcall FUN_009f9cb0(SpectatorPackage* apPackage)
+// src: GUESS 0x009f9cb0 (confidence: low)
+void __stdcall Runtime_ProcessState_009f9cb0(SpectatorPackage* apPackage)
 {
     if (apPackage)
     {
-        FUN_009f9c20(apPackage);
+        Object_ReleaseMediaTypeData(apPackage);
         DAT_00fdf45c(apPackage);
     }
 }
 
-int __fastcall FUN_009fce80(int);
+int __fastcall Object_UpdateFields_009fce80(int);
 // @fnv 0x009f9f50
-int __fastcall FUN_009f9f50(int p)
+// src: GUESS 0x009f9f50 (confidence: low)
+int __fastcall Runtime_EvaluateValue_009f9f50(int p)
 {
-    return FUN_009fce80(p ? p + 4 : 0);
+    return Object_UpdateFields_009fce80(p ? p + 4 : 0);
 }
 
 struct FUN_009fa1d0_vtbl
@@ -652,7 +683,7 @@ int __stdcall FUN_009fa1d0_s::ResetAndQueryVtbl()
 }
 
 extern int DAT_01093c9c;
-int __stdcall FUN_009f9cb0(int);
+int __stdcall Runtime_ProcessState_009f9cb0(int);
 struct FUN_009fa560_class
 {
     int m_vft;
@@ -671,20 +702,22 @@ struct FUN_009fa560_class
     int m_34;
     int m_38;
     int m_3c;
-    void __thiscall FUN_009fa560();
+    void __thiscall UpdateFields_009fa560();
 };
 // @fnv 0x009fa560
-void FUN_009fa560_class::FUN_009fa560()
+// src: GUESS 0x009fa560 (confidence: low)
+void FUN_009fa560_class::UpdateFields_009fa560()
 {
     *(int*)this = (int)&DAT_01093c9c;
     if (m_3c)
-        FUN_009f9cb0(m_3c);
+        Runtime_ProcessState_009f9cb0(m_3c);
 }
 
 extern void*(__stdcall* DAT_00fdf1c4)(int*);
 
 // @fnv 0x009fa5f0
-int __stdcall FUN_009fa5f0(int* pObject)
+// src: GUESS 0x009fa5f0 (confidence: low)
+int __stdcall Object_UpdateState_009fa5f0(int* pObject)
 {
     int* p = (int*)((char*)pObject + 0x44);
     int result;
@@ -717,7 +750,8 @@ int __stdcall FUN_009fa5f0(int* pObject)
 }
 
 // @fnv 0x009fa800
-int __stdcall FUN_009fa800(int* pFlags, int bSet)
+// src: GUESS 0x009fa800 (confidence: low)
+int __stdcall Object_ComputeValue_009fa800(int* pFlags, int bSet)
 {
     if (bSet)
         pFlags[1] |= 1;
@@ -727,7 +761,8 @@ int __stdcall FUN_009fa800(int* pFlags, int bSet)
 }
 
 // @fnv 0x009fa880
-int __stdcall FUN_009fa880(int* pFlags, int bSet)
+// src: GUESS 0x009fa880 (confidence: low)
+int __stdcall Object_ComputeValue_009fa880(int* pFlags, int bSet)
 {
     if (bSet)
         *(unsigned int*)(pFlags + 1) |= 2;
@@ -754,11 +789,12 @@ struct FUN_009fae70_class
     int m_2c;
     int m_30;
     int m_34;
-    void __thiscall FUN_009fae70();
+    void __thiscall ReleaseAndClearMember34();
 };
 // If m_34 is set, calls DAT_00fdf1b4 with m_30 and m_34, then clears m_34.
 // @fnv 0x009fae70
-void __thiscall FUN_009fae70_class::FUN_009fae70()
+// src: GUESS 0x009fae70 (confidence: medium)
+void __thiscall FUN_009fae70_class::ReleaseAndClearMember34()
 {
     if (m_34)
     {
@@ -769,13 +805,13 @@ void __thiscall FUN_009fae70_class::FUN_009fae70()
 
 struct FUN_009fc580_class
 {
-    void FUN_009fb1c0();
+    void ProcessState_009fb1c0();
     FUN_009fc580_class* Destroy(bool);
 };
 // @fnv 0x009fc580
 FUN_009fc580_class* FUN_009fc580_class::Destroy(bool abFree)
 {
-    FUN_009fb1c0();
+    ProcessState_009fb1c0();
     if (abFree & 1)
         _Deallocate(this);
     return this;
@@ -785,13 +821,13 @@ extern int DAT_01093cf8;
 extern int DAT_01093d28;
 struct FUN_009fcc20_class
 {
-    int __thiscall FUN_009fcb90(int a, int b, int c, int d, int e);
+    int __thiscall InitializeAllocatorState(int a, int b, int c, int d, int e);
     int __thiscall Initialize(int a, int b, int c);
 };
 // @fnv 0x009fcc20
 int __thiscall FUN_009fcc20_class::Initialize(int a, int b, int c)
 {
-    FUN_009fcb90(a, b, c, 1, 1);
+    InitializeAllocatorState(a, b, c, 1, 1);
     *(int*)this = (int)&DAT_01093d28;
     *(int*)((char*)this + 0xc) = (int)&DAT_01093cf8;
     *(int*)((char*)this + 0x60) = 0;
@@ -804,7 +840,8 @@ extern int DAT_011f3298;
 extern int(__stdcall* DAT_00fdf1c4)(int*);
 extern void(__stdcall* DAT_00fdf0a8)(int);
 // @fnv 0x009fce80
-void FUN_009fce80()
+// src: GUESS 0x009fce80 (confidence: low)
+void Object_UpdateFields_009fce80()
 {
     if (DAT_00fdf1c4(&DAT_011f3298) == 0 && DAT_011f3294)
     {
@@ -867,10 +904,11 @@ struct FUN_009fa350_class
 };
 struct FUN_009fd450_class
 {
-    void FUN_009fd450();
+    void UpdateState_009fd450();
 };
 // @fnv 0x009fd450
-void FUN_009fd450_class::FUN_009fd450()
+// src: GUESS 0x009fd450 (confidence: low)
+void FUN_009fd450_class::UpdateState_009fd450()
 {
     *(int*)((char*)this + 0xa0) = 0;
     ((FUN_009fa350_class*)this)->DispatchCall();
@@ -878,12 +916,13 @@ void FUN_009fd450_class::FUN_009fd450()
 
 struct FUN_009fe690_class
 {
-    int __thiscall FUN_009fe690();
+    int __thiscall FlushPendingWorkAndWait();
 };
 // @fnv 0x009fdbb0
-int __stdcall FUN_009fdbb0(int a)
+// src: GUESS 0x009fdbb0 (confidence: low)
+int __stdcall Runtime_ForwardCall_009fdbb0(int a)
 {
-    return ((FUN_009fe690_class*)*(int**)(a + 0xa4))->FUN_009fe690();
+    return ((FUN_009fe690_class*)*(int**)(a + 0xa4))->FlushPendingWorkAndWait();
 }
 
 struct FUN_009fdcb0_class
@@ -895,11 +934,12 @@ struct FUN_009fdcb0_class
     virtual void v10();
     virtual void v14();
     virtual int v18();
-    int* __thiscall FUN_009fdcb0(int a);
+    int* __thiscall GetConditionalSlotF8(int a);
 };
 // Returns a pointer to the slot at offset 0xf8 when v18() is positive and a is zero, otherwise returns null.
 // @fnv 0x009fdcb0
-int* FUN_009fdcb0_class::FUN_009fdcb0(int a)
+// src: GUESS 0x009fdcb0 (confidence: medium)
+int* FUN_009fdcb0_class::GetConditionalSlotF8(int a)
 {
     if (v18() > 0 && a == 0 && (char*)this + 0xf0 != 0)
         return (int*)((char*)this + 0xf8);
@@ -909,7 +949,8 @@ int* FUN_009fdcb0_class::FUN_009fdcb0(int a)
 extern "C" __declspec(dllimport) unsigned int __stdcall D3DPERF_SetOptions(unsigned int dwOptions);
 
 // @fnv 0x009f9968
-unsigned int __stdcall FUN_009f9968(unsigned int dwOptions)
+// src: COMMUNITY 0x009f9968
+unsigned int __stdcall D3DPERF_SetOptions_009f9968(unsigned int dwOptions)
 {
     return D3DPERF_SetOptions(dwOptions);
 }
@@ -939,7 +980,8 @@ struct FUN_009f9c20_cls
 };
 
 // @fnv 0x009f9c20
-void __stdcall FUN_009f9c20(FUN_009f9c20_cls* p)
+// src: GUESS 0x009f9c20 (confidence: medium)
+void __stdcall Object_ReleaseMediaTypeData(FUN_009f9c20_cls* p)
 {
     if (p->m_40 != 0)
     {
@@ -963,12 +1005,13 @@ void __stdcall FUN_009f9c20(FUN_009f9c20_cls* p)
 //   009f9c61  e8baffffff      call 0x009f9c20
 //   009f9c66  c3              ret
 
-void __stdcall FUN_009f9c20(SpectatorPackage* pkg);
+void __stdcall Object_ReleaseMediaTypeData(SpectatorPackage* pkg);
 
 // @fnv 0x009f9c60
-void __fastcall FUN_009f9c60(SpectatorPackage* self, void*)
+// src: GUESS 0x009f9c60 (confidence: low)
+void __fastcall Object_ForwardCall_009f9c60(SpectatorPackage* self, void*)
 {
-    FUN_009f9c20(self);
+    Object_ReleaseMediaTypeData(self);
 }
 
 struct SeekableStream
@@ -990,11 +1033,12 @@ struct OffsetStream
     SeekableStream* underlying;
     unsigned int unk1C;
     __int64 baseOffset;
-    int FUN_009f9db0(__int64* position);
+    int UpdateState_009f9db0(__int64* position);
 };
 
 // @fnv 0x009f9db0
-int OffsetStream::FUN_009f9db0(__int64* position)
+// src: GUESS 0x009f9db0 (confidence: low)
+int OffsetStream::UpdateState_009f9db0(__int64* position)
 {
     if (underlying == 0)
     {
@@ -1011,7 +1055,8 @@ int OffsetStream::FUN_009f9db0(__int64* position)
 }
 
 // @fnv 0x009f9f40
-int __stdcall FUN_009f9f40(int a, int b)
+// src: GUESS 0x009f9f40 (confidence: low)
+int __stdcall Object_ComputeValue_009f9f40(int a, int b)
 {
     return (int)0x80004001;
 }
@@ -1073,9 +1118,9 @@ int __stdcall GetInterfaceForObject(int pUnk, int pIid, int* ppvOut)
     {
         return 0x80004003;
     }
-    if (FUN_009f9980(pIid, (int*)&DAT_01093c2c) == 0)
+    if (Object_ProcessAndTransformResult_009f9980(pIid, (int*)&DAT_01093c2c) == 0)
     {
-        if (FUN_009f9980(pIid, (int*)&DAT_01093f14) == 0)
+        if (Object_ProcessAndTransformResult_009f9980(pIid, (int*)&DAT_01093f14) == 0)
         {
             *ppvOut = 0;
             return 0x80004002;
@@ -1115,7 +1160,8 @@ class CallerHolder
 };
 
 // @fnv 0x009fa090
-int __stdcall FUN_009fa090(CallerHolder* apHolder)
+// src: GUESS 0x009fa090 (confidence: low)
+int __stdcall Runtime_UpdateState_009fa090(CallerHolder* apHolder)
 {
     CallerHolder* esi = apHolder;
     esi->m_10 = esi->m_0c->v14();
@@ -1217,14 +1263,15 @@ void FUN_009fa100_cls::InitVTableAndInvokeCallback()
 extern int DAT_01093c1c;
 
 // @fnv 0x009fa120
-int __stdcall FUN_009fa120(int a, int b, int* apOut)
+// src: GUESS 0x009fa120 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fa120(int a, int b, int* apOut)
 {
     if (apOut == 0)
     {
         return 0x80004003;
     }
 
-    if (FUN_009f9980(b, &DAT_01093c1c) || FUN_009f9980(b, &DAT_01093f14))
+    if (Object_ProcessAndTransformResult_009f9980(b, &DAT_01093c1c) || Object_ProcessAndTransformResult_009f9980(b, &DAT_01093f14))
     {
         return GetObjectPointer(a, (int)apOut);
     }
@@ -1233,7 +1280,7 @@ int __stdcall FUN_009fa120(int a, int b, int* apOut)
     return 0x80004002;
 }
 
-int __cdecl FormHeap_Free(int);
+int __cdecl FormHeapFreeAndLog_00401030(int);
 
 class SubA4
 {
@@ -1266,7 +1313,7 @@ class FUN_009fa1f0_cls
 // @fnv 0x009fa1f0
 FUN_009fa1f0_cls::~FUN_009fa1f0_cls()
 {
-    FormHeap_Free(m_14);
+    FormHeapFreeAndLog_00401030(m_14);
 }
 
 struct S_009fa2f0_table
@@ -1299,7 +1346,8 @@ struct S_009fa2f0_owner
 };
 
 // @fnv 0x009fa2f0
-int __cdecl FUN_009fa2f0(S_009fa2f0_owner* pOwner)
+// src: GUESS 0x009fa2f0 (confidence: low)
+int __cdecl Runtime_UpdateState_009fa2f0(S_009fa2f0_owner* pOwner)
 {
     S_009fa2f0_sub* s = pOwner->unk28;
     return s->unk0c->m_fn1(&s->unk0c);
@@ -1335,7 +1383,8 @@ struct FUN_009fa380_cls
 };
 
 // @fnv 0x009fa380
-int __stdcall FUN_009fa380(FUN_009fa380_cls* apObj)
+// src: GUESS 0x009fa380 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fa380(FUN_009fa380_cls* apObj)
 {
     int result;
     if (apObj->m_pChildObject != 0)
@@ -1370,7 +1419,8 @@ class FUN_009fa4a0_cls
 
 // Returns E_POINTER for a null value, otherwise calls the virtual v08 on the object at p-0xc and maps a negative result to 1.
 // @fnv 0x009fa4a0
-int __stdcall FUN_009fa4a0(FUN_009fa4a0_cls* apObject, void* value)
+// src: GUESS 0x009fa4a0 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fa4a0(FUN_009fa4a0_cls* apObject, void* value)
 {
     if (value == 0)
     {
@@ -1393,11 +1443,12 @@ struct FUN_009fa4d0_cls
     int unk1C;
     int unk20;
     unsigned char m_24;
-    int FUN_009fa4d0();
+    int UpdateState_009fa4d0();
 };
 
 // @fnv 0x009fa4d0
-int FUN_009fa4d0_cls::FUN_009fa4d0()
+// src: GUESS 0x009fa4d0 (confidence: low)
+int FUN_009fa4d0_cls::UpdateState_009fa4d0()
 {
     m_24 = 0;
     return 0;
@@ -1405,7 +1456,8 @@ int FUN_009fa4d0_cls::FUN_009fa4d0()
 
 // FUN_009fa510: stdcall stub returning E_NOTIMPL (0x80004001) with 8 unused stack parameters.
 // @fnv 0x009fa510
-long __stdcall FUN_009fa510(int unk00, int unk04, int unk08, int unk0C, int unk10, int unk14, int unk18, int unk1C)
+// src: GUESS 0x009fa510 (confidence: high)
+long __stdcall Runtime_ReturnNotImplemented(int unk00, int unk04, int unk08, int unk0C, int unk10, int unk14, int unk18, int unk1C)
 {
     return (long)0x80004001;
 }
@@ -1422,7 +1474,8 @@ class FUN_009fa670_cls
 };
 
 // @fnv 0x009fa670
-int __stdcall FUN_009fa670(FUN_009fa670_cls* obj)
+// src: GUESS 0x009fa670 (confidence: low)
+int __stdcall Runtime_EvaluateValue_009fa670(FUN_009fa670_cls* obj)
 {
     return obj->m_14;
 }
@@ -1464,7 +1517,8 @@ copyOne:
 }
 
 // @fnv 0x009fa760
-int __stdcall FUN_009fa760(void* pObject, int* pStart, int* pEnd)
+// src: GUESS 0x009fa760 (confidence: low)
+int __stdcall Object_ComputeValue_009fa760(void* pObject, int* pStart, int* pEnd)
 {
     if (!(((unsigned char*)pObject)[4] & 0x20))
         return 0x80040251;
@@ -1505,7 +1559,8 @@ struct FUN_009fa8a0_cls
 };
 
 // @fnv 0x009fa8a0
-int __stdcall FUN_009fa8a0(FUN_009fa8a0_cls* a1)
+// src: GUESS 0x009fa8a0 (confidence: low)
+int __stdcall Object_GetField10_009fa8a0(FUN_009fa8a0_cls* a1)
 {
     return a1->m_10;
 }
@@ -1518,10 +1573,10 @@ struct EntryObject
     int unk04;
     int unk08;
     void* volatile secondaryVtable;
-    void FUN_009faf50(void* subobject);
-    void FUN_009fb170();
+    void Object_UpdateState_009faf50(void* subobject);
+    void ReleaseStorage_009fb170();
     void FUN_009fabb0();
-    void FUN_009fb1c0();
+    void ProcessState_009fb1c0();
 };
 struct CleanupGuard
 {
@@ -1537,11 +1592,12 @@ struct CleanupGuard
     }
 };
 // @fnv 0x009fb1c0
-void EntryObject::FUN_009fb1c0()
+// src: GUESS 0x009fb1c0 (confidence: low)
+void EntryObject::ProcessState_009fb1c0()
 {
     CleanupGuard cleanup(this);
-    FUN_009faf50((void*)&secondaryVtable);
-    FUN_009fb170();
+    Object_UpdateState_009faf50((void*)&secondaryVtable);
+    ReleaseStorage_009fb170();
 }
 
 struct C9FB250GUID;
@@ -1590,7 +1646,7 @@ struct FBC50Filter
 
 struct FBC50EnumPins
 {
-    virtual long __stdcall FUN_009fbc50(unsigned long cPins);
+    virtual long __stdcall SkipFilterPinsWithVersionCheck(unsigned long cPins);
 
     unsigned int m_uiReferenceCount;
     unsigned int m_PinCount;
@@ -1600,7 +1656,8 @@ struct FBC50EnumPins
 
 // Checks the filter's pin version against the stored version, then advances the pin index by cPins if it fits within the pin count, returning an HRESULT.
 // @fnv 0x009fbc50
-long __stdcall FBC50EnumPins::FUN_009fbc50(unsigned long cPins)
+// src: GUESS 0x009fbc50 (confidence: medium)
+long __stdcall FBC50EnumPins::SkipFilterPinsWithVersionCheck(unsigned long cPins)
 {
     if (m_pOwnerFilter->GetPinVersion() != m_iCurrentPinIndex)
         return 0x80040203;
@@ -1880,11 +1937,12 @@ struct S_009fd390_Base
 
 struct FUN_009fd390_cls : S_009fd390_Base
 {
-    int __thiscall FUN_009fd390();
+    int __thiscall RemoveNode_Thunk();
 };
 
 // @fnv 0x009fd390
-int __thiscall FUN_009fd390_cls::FUN_009fd390()
+// src: GUESS 0x009fd390 (confidence: medium)
+int __thiscall FUN_009fd390_cls::RemoveNode_Thunk()
 {
     return RemoveNode(m_00);
 }
@@ -2046,7 +2104,8 @@ struct Device
     Worker* m_a4;
 };
 // @fnv 0x009fdaf0
-int __stdcall FUN_009fdaf0(Device* device, int resource, BlkInterfaceView** output, int flags)
+// src: GUESS 0x009fdaf0 (confidence: low)
+int __stdcall Runtime_UpdateState_009fdaf0(Device* device, int resource, BlkInterfaceView** output, int flags)
 {
     if (output == 0)
         return 0x80004003;
@@ -2060,14 +2119,15 @@ int __stdcall FUN_009fdaf0(Device* device, int resource, BlkInterfaceView** outp
 
 struct FUN_009fe100_class
 {
-    void __thiscall FUN_009fe100(int a, int b, int c, int d);
+    void __thiscall ProcessAndReturnValue_009fe100(int a, int b, int c, int d);
 };
 
 // Forwards the four integer arguments to the FUN_009fe100 method of the object stored at owner->m_a4.
 // @fnv 0x009fdb60
-void __stdcall FUN_009fdb60(FUN_009fdd70_class* owner, int aiArg1, int aiArg2, int aiArg3, int aiArg4)
+// src: GUESS 0x009fdb60 (confidence: low)
+void __stdcall Object_ForwardCall_009fdb60(FUN_009fdd70_class* owner, int aiArg1, int aiArg2, int aiArg3, int aiArg4)
 {
-    ((FUN_009fe100_class*)owner->m_a4)->FUN_009fe100(aiArg1, aiArg2, aiArg3, aiArg4);
+    ((FUN_009fe100_class*)owner->m_a4)->ProcessAndReturnValue_009fe100(aiArg1, aiArg2, aiArg3, aiArg4);
 }
 
 struct FUN_009fe090_class
@@ -2122,7 +2182,8 @@ struct FUN_009fdb90_class
 };
 
 // @fnv 0x009fdb90
-void __stdcall FUN_009fdb90(FUN_009fdb90_class* p, int aiArg1, int aiArg2)
+// src: GUESS 0x009fdb90 (confidence: medium)
+void __stdcall Runtime_GetHelperValue_Thunk(FUN_009fdb90_class* p, int aiArg1, int aiArg2)
 {
     p->m_a4->GetHelperValue(aiArg1, aiArg2);
 }
@@ -2314,11 +2375,12 @@ struct FUN_009fded0_cls
     int m_1c;
     int m_20;
     int m_24;
-    int __thiscall FUN_009fded0(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
+    int __thiscall UpdateState_009fded0(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
 };
 
 // @fnv 0x009fded0
-int __thiscall FUN_009fded0_cls::FUN_009fded0(int aiField00, int aiField04, int aiField08, int aiField0c, int aiField14,
+// src: GUESS 0x009fded0 (confidence: low)
+int __thiscall FUN_009fded0_cls::UpdateState_009fded0(int aiField00, int aiField04, int aiField08, int aiField0c, int aiField14,
                                               int aiField10, int aiField18, int aiField1c, int aiField20)
 {
     m_00 = aiField00;
@@ -2491,13 +2553,14 @@ struct FUN_009fe3f0_class
     int m_68;
     int m_6c;
 
-    int __thiscall FUN_009fe3f0(int);
+    int __thiscall EvaluateValue_009fe3f0(int);
 };
 
 extern void(__stdcall* DAT_00fdf0d0)(void*);
 
 // @fnv 0x009fe3f0
-int __thiscall FUN_009fe3f0_class::FUN_009fe3f0(int value)
+// src: GUESS 0x009fe3f0 (confidence: low)
+int __thiscall FUN_009fe3f0_class::EvaluateValue_009fe3f0(int value)
 {
     if (m_50.AddNode(value))
     {
@@ -2515,7 +2578,8 @@ class ForwardTarget
 };
 
 // @fnv 0x009fe560
-void __stdcall FUN_009fe560(ForwardTarget* p)
+// src: GUESS 0x009fe560 (confidence: low)
+void __stdcall Object_InvokeVirtualMethod_009fe560(ForwardTarget* p)
 {
     p->Tail();
 }
@@ -2523,7 +2587,8 @@ void __stdcall FUN_009fe560(ForwardTarget* p)
 extern int DAT_011a6224;
 
 // @fnv 0x009fea24
-int __cdecl FUN_009fea24()
+// src: GUESS 0x009fea24 (confidence: low)
+int __cdecl Object_GetDAT_011a6224_009fea24()
 {
     return DAT_011a6224;
 }
@@ -2531,7 +2596,8 @@ int __cdecl FUN_009fea24()
 extern void(__cdecl* DAT_011a6238)(void);
 
 // @fnv 0x009fead0
-void __cdecl FUN_009fead0()
+// src: GUESS 0x009fead0 (confidence: low)
+void __cdecl Runtime_ForwardCall_009fead0()
 {
     DAT_011a6238();
 }
@@ -2539,7 +2605,8 @@ void __cdecl FUN_009fead0()
 extern void(__cdecl* DAT_011a6250)(void);
 
 // @fnv 0x009feae2
-void __cdecl FUN_009feae2()
+// src: GUESS 0x009feae2 (confidence: low)
+void __cdecl Object_ForwardCall_009feae2()
 {
     DAT_011a6250();
 }
@@ -2548,16 +2615,17 @@ namespace fnv_009f9cd0 {
 extern void*(__stdcall* DAT_00fdf460)(unsigned long);
 extern void(__stdcall* DAT_00fdf45c)(void*);
 
-int __stdcall FUN_009f9bb0(void* obj, int a);
+int __stdcall Runtime_CopyMemory_009f9bb0(void* obj, int a);
 
 // @fnv 0x009f9cd0
-int __stdcall FUN_009f9cd0(int a)
+// src: GUESS 0x009f9cd0 (confidence: low)
+int __stdcall Runtime_UpdateState_009f9cd0(int a)
 {
     void* obj = DAT_00fdf460(0x48);
     if (obj == 0)
         return 0;
 
-    if (FUN_009f9bb0(obj, a) < 0)
+    if (Runtime_CopyMemory_009f9bb0(obj, a) < 0)
     {
         DAT_00fdf45c(obj);
         return 0;
@@ -2708,7 +2776,8 @@ long __stdcall MemAllocStub::SetAllocProperties(AllocProps* pRequestedProps, All
 typedef void(__cdecl* ForwardFn)(void* obj, int arg);
 
 // @fnv 0x009fb230
-void __cdecl FUN_009fb230(void** p, int arg)
+// src: GUESS 0x009fb230 (confidence: low)
+void __cdecl Runtime_UpdateState_009fb230(void** p, int arg)
 {
     p = (void**)p[-2];
     (*(ForwardFn*)*p)(p, arg);
@@ -2717,10 +2786,11 @@ void __cdecl FUN_009fb230(void** p, int arg)
 struct FnvCpu_FUN_009fd0f0_CpuObject
 {
     int value;
-    int FUN_009fd0f0();
+    int NiInitOptions_GetAllocator();
 };
 // @fnv 0x009fd0f0
-int FnvCpu_FUN_009fd0f0_CpuObject::FUN_009fd0f0()
+// src: COMMUNITY 0x009fd0f0
+int FnvCpu_FUN_009fd0f0_CpuObject::NiInitOptions_GetAllocator()
 {
     return value;
 }
@@ -2737,11 +2807,11 @@ struct BlkVector4fView
 };
 
 extern int DAT_01093f04;
-int __stdcall FUN_009f9980(int, int);
+int __stdcall Object_ProcessAndTransformResult_009f9980(int, int);
 
 static inline int operator==(const BlkVector4fView& a, const BlkVector4fView& b)
 {
-    return FUN_009f9980((int)&a, (int)&b);
+    return Object_ProcessAndTransformResult_009f9980((int)&a, (int)&b);
 }
 
 static inline int operator!=(const BlkVector4fView& a, const BlkVector4fView& b)
@@ -2761,13 +2831,14 @@ struct MediaType
     unsigned int cbFormat;
     unsigned char* pbFormat;
 
-    int FUN_009f9a80(const MediaType* ppartial) const;
+    int MatchesPartialMediaType(const MediaType* ppartial) const;
 };
 
 // CMediaType::MatchesPartial(const CMediaType *ppartial) const
 // Returns 1 if the partial MediaType matches this one, treating a null GUID in the partial as a wildcard for that field.
 // @fnv 0x009f9a80
-int MediaType::FUN_009f9a80(const MediaType* ppartial) const
+// src: GUESS 0x009f9a80 (confidence: medium)
+int MediaType::MatchesPartialMediaType(const MediaType* ppartial) const
 {
     const BlkVector4fView& guidNull = *(const BlkVector4fView*)&DAT_01093f04;
 
@@ -2803,11 +2874,12 @@ class S009f9d50_Value
 {
   public:
     S009f9d50_Value& FUN_009f9c80(const S009f9d50_Value& kOther);  // operator=
-    S009f9d50_Value& FUN_009f9d50(const S009f9d50_Value& kOther);
+    S009f9d50_Value& ForwardCall_009f9d50(const S009f9d50_Value& kOther);
 };
 
 // @fnv 0x009f9d50
-S009f9d50_Value& S009f9d50_Value::FUN_009f9d50(const S009f9d50_Value& kOther)
+// src: GUESS 0x009f9d50 (confidence: low)
+S009f9d50_Value& S009f9d50_Value::ForwardCall_009f9d50(const S009f9d50_Value& kOther)
 {
     return FUN_009f9c80(kOther);
 }
@@ -2848,7 +2920,8 @@ struct FNVNameDest
 
 // Copies the name string and interface pointer from pSrc into pDst, adding a reference to the interface when present.
 // @fnv 0x009f9df0
-long __stdcall FUN_009f9df0(FNVNameSource* pSrc, FNVNameDest* pDst)
+// src: GUESS 0x009f9df0 (confidence: medium)
+long __stdcall Runtime_CopyNameAndRetainInterface(FNVNameSource* pSrc, FNVNameDest* pDst)
 {
     if (pDst == 0)
     {
@@ -2913,7 +2986,7 @@ unsigned long __stdcall ReleaseOwnerFilter(BasePin* pin)
 struct SubObj
 {
     int m_00;
-    int FUN_009f9d50(int a);
+    int ForwardCall_009f9d50(int a);
 };
 
 struct FUN_009fa330_cls
@@ -2932,14 +3005,15 @@ struct FUN_009fa330_cls
     int unk2C;
     int unk30;
     SubObj m_34;
-    int FUN_009fa330(int a);
+    int GetNegativeMemberResult(int a);
 };
 
 // Forwards the argument to the member at +0x34 and keeps only a negative result.
 // @fnv 0x009fa330
-int FUN_009fa330_cls::FUN_009fa330(int a)
+// src: GUESS 0x009fa330 (confidence: medium)
+int FUN_009fa330_cls::GetNegativeMemberResult(int a)
 {
-    int r = m_34.FUN_009f9d50(a);
+    int r = m_34.ForwardCall_009f9d50(a);
     return r & ((r >= 0) ? 0 : -1);
 }
 
@@ -2972,7 +3046,8 @@ void __stdcall CopyN(void* dst, void* src, int size);
 
 // Returns an error if output is null; else sets output->unk00 (calling its vtable unk04), unk08 (via CopyN) and unk04 from the source fields.
 // @fnv 0x009fa400
-int __stdcall FUN_009fa400(S_009fa400_source* source, S_009fa400_output* output)
+// src: GUESS 0x009fa400 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fa400(S_009fa400_source* source, S_009fa400_output* output)
 {
     if (output == 0)
         return 0x80004003;
@@ -3014,7 +3089,8 @@ struct S_009fa6f0_Foo
 
 // Stores *pTime, and *pDuration if given, in obj and sets or clears the matching flag bits in unk04; a null pTime only clears them.
 // @fnv 0x009fa6f0
-int __stdcall FUN_009fa6f0(S_009fa6f0_Foo* obj, __int64* pTime, __int64* pDuration)
+// src: GUESS 0x009fa6f0 (confidence: medium)
+int __stdcall Runtime_SetTimeDurationAndFlags(S_009fa6f0_Foo* obj, __int64* pTime, __int64* pDuration)
 {
     if (pTime == 0)
     {
@@ -3061,7 +3137,8 @@ struct SrcRec
 };
 // Stores src fields into m_30/m_34, computes m_38 as pValue minus src->m_00, sets flag 0x20, or clears flag 0x20 if src is null.
 // @fnv 0x009fa7a0
-int __stdcall FUN_009fa7a0(FUN_009fa7a0_rec* self, SrcRec* src, int* pValue)
+// src: GUESS 0x009fa7a0 (confidence: medium)
+int __stdcall Object_SetSamplePointerRange(FUN_009fa7a0_rec* self, SrcRec* src, int* pValue)
 {
     if (src == 0)
     {
@@ -3095,14 +3172,15 @@ struct S_009fa910_Foo
     int unk3c;
 };
 
-int __stdcall FUN_009f9cb0(int a);
+int __stdcall Runtime_ProcessState_009f9cb0(int a);
 
 // @fnv 0x009fa910
-int __stdcall FUN_009fa910(S_009fa910_Foo* obj, int value)
+// src: GUESS 0x009fa910 (confidence: low)
+int __stdcall Runtime_UpdateState_009fa910(S_009fa910_Foo* obj, int value)
 {
     if (obj->unk3c != 0)
     {
-        FUN_009f9cb0(obj->unk3c);
+        Runtime_ProcessState_009f9cb0(obj->unk3c);
         obj->unk3c = 0;
     }
 
@@ -3112,7 +3190,7 @@ int __stdcall FUN_009fa910(S_009fa910_Foo* obj, int value)
         return 0;
     }
 
-    obj->unk3c = FUN_009f9cd0(value);
+    obj->unk3c = Runtime_UpdateState_009f9cd0(value);
     if (obj->unk3c == 0)
     {
         obj->unk04 &= 0xfffffff7;
@@ -3197,8 +3275,8 @@ long __stdcall CopySampleProperties(MediaSample* pSample, unsigned int cb, void*
 }
 
 struct MediaTypeSI;
-MediaTypeSI* __stdcall FUN_009f9cd0(MediaTypeSI* a);
-void __stdcall FUN_009f9cb0(MediaTypeSI*);
+MediaTypeSI* __stdcall Runtime_UpdateState_009f9cd0(MediaTypeSI* a);
+void __stdcall Runtime_ProcessState_009f9cb0(MediaTypeSI*);
 
 // AM_SAMPLE2_PROPERTIES
 struct SampleProps
@@ -3233,12 +3311,13 @@ struct MediaSampleSI
     int unk38;
     MediaTypeSI* m_pMediaType;
     unsigned int m_dwStreamId;
-    long __stdcall FUN_009faa20(unsigned int cbProperties, const unsigned char* pbProperties);
+    long __stdcall SetSampleProperties(unsigned int cbProperties, const unsigned char* pbProperties);
 };
 
 // Validates and copies sample properties from pbProperties into this MediaSampleSI, updating flags, times, stream id, and media type.
 // @fnv 0x009faa20
-long __stdcall MediaSampleSI::FUN_009faa20(unsigned int cbProperties, const unsigned char* pbProperties)
+// src: GUESS 0x009faa20 (confidence: medium)
+long __stdcall MediaSampleSI::SetSampleProperties(unsigned int cbProperties, const unsigned char* pbProperties)
 {
     MediaTypeSI* pMediaType = 0;
 
@@ -3281,7 +3360,7 @@ long __stdcall MediaSampleSI::FUN_009faa20(unsigned int cbProperties, const unsi
             {
                 if (pProps->pMediaType == 0)
                     return 0x80004003L;
-                pMediaType = FUN_009f9cd0(pProps->pMediaType);
+                pMediaType = Runtime_UpdateState_009f9cd0(pProps->pMediaType);
                 if (pMediaType == 0)
                     return 0x8007000eL;
             }
@@ -3314,7 +3393,7 @@ long __stdcall MediaSampleSI::FUN_009faa20(unsigned int cbProperties, const unsi
             if (pProps->dwSampleFlags & 8)
             {
                 if (this->m_pMediaType != 0)
-                    FUN_009f9cb0(this->m_pMediaType);
+                    Runtime_ProcessState_009f9cb0(this->m_pMediaType);
                 this->m_pMediaType = pMediaType;
             }
         }
@@ -3344,7 +3423,8 @@ struct FUN_009fae30_Rec
 };
 // Under the critical section at r->m_cs, stores m_2c - m_30 + m_20 into *out and returns 0.
 // @fnv 0x009fae30
-int __stdcall FUN_009fae30(FUN_009fae30_Rec* r, int* out)
+// src: GUESS 0x009fae30 (confidence: medium)
+int __stdcall Runtime_GetLockedOffsetValue(FUN_009fae30_Rec* r, int* out)
 {
     void* pLock = ((char*)r - 0xc) ? (void*)&r->m_cs : 0;
     EnterCriticalSection(pLock);
@@ -3365,7 +3445,8 @@ struct Obj
     Tab* table;
 };
 // @fnv 0x009fb270
-unsigned long __stdcall FUN_009fb270(Obj** p)
+// src: GUESS 0x009fb270 (confidence: low)
+unsigned long __stdcall Runtime_UpdateState_009fb270(Obj** p)
 {
     Obj* q = p[-2];
     return q->table->release(q);
@@ -3459,7 +3540,7 @@ struct MediaEnumCount
     int unk00;
     ~MediaEnumCount()
     {
-        FUN_009fce80((int)this);
+        Object_UpdateFields_009fce80((int)this);
     }
 };
 
@@ -3649,7 +3730,8 @@ struct EnumPins9FB
 
 // Enumerates up to cPins pins from the owner filter, storing their IPin9FB pointers in ppPins and the fetched count in pcFetched.
 // @fnv 0x009fbb50
-int __stdcall FUN_009fbb50(EnumPins9FB* self, unsigned long cPins, IPin9FB** ppPins, unsigned long* pcFetched)
+// src: GUESS 0x009fbb50 (confidence: high)
+int __stdcall Object_EnumerateFilterPins(EnumPins9FB* self, unsigned long cPins, IPin9FB** ppPins, unsigned long* pcFetched)
 {
     if (ppPins == 0)
     {
@@ -3724,14 +3806,14 @@ struct EnumMediaType
     unsigned int formatSize;
     void* format;
     void FUN_009f9c70();
-    void FUN_009f9c60();
+    void Object_ForwardCall_009f9c60();
     EnumMediaType()
     {
         FUN_009f9c70();
     }
     ~EnumMediaType()
     {
-        FUN_009f9c60();
+        Object_ForwardCall_009f9c60();
     }
 };
 struct EnumMediaSource
@@ -3797,7 +3879,7 @@ int __stdcall GetMediaTypes(MediaEnumerator* self, unsigned long count, EnumMedi
 
 struct MediaTypeTry
 {
-    int FUN_009f9a80(MediaTypeTry* partial);
+    int MatchesPartialMediaType(MediaTypeTry* partial);
 };
 struct EnumMediaTry
 {
@@ -3808,14 +3890,15 @@ struct EnumMediaTry
     virtual long __stdcall Skip(unsigned long count);
     virtual long __stdcall Reset();
 };
-void __stdcall FUN_009f9cb0(MediaTypeTry* media);
+void __stdcall Runtime_ProcessState_009f9cb0(MediaTypeTry* media);
 struct PinTry
 {
-    long FUN_009fbf00(void* receiver, MediaTypeTry* media);
-    long FUN_009fbfc0(void* receiver, MediaTypeTry* partial, EnumMediaTry* enumerator);
+    long ProcessAndReturnValue_009fbf00(void* receiver, MediaTypeTry* media);
+    long ProcessEntries_009fbfc0(void* receiver, MediaTypeTry* partial, EnumMediaTry* enumerator);
 };
 // @fnv 0x009fbfc0
-long PinTry::FUN_009fbfc0(void* receiver, MediaTypeTry* partial, EnumMediaTry* enumerator)
+// src: GUESS 0x009fbfc0 (confidence: low)
+long PinTry::ProcessEntries_009fbfc0(void* receiver, MediaTypeTry* partial, EnumMediaTry* enumerator)
 {
     long hr = enumerator->Reset();
     if (hr < 0)
@@ -3828,17 +3911,17 @@ long PinTry::FUN_009fbfc0(void* receiver, MediaTypeTry* partial, EnumMediaTry* e
         if (enumerator->Next(1, &media, &fetched) != 0)
             break;
         long hr;
-        if (partial && !media->FUN_009f9a80(partial))
+        if (partial && !media->MatchesPartialMediaType(partial))
         {
             hr = 0x80040207;
         }
         else
         {
-            hr = FUN_009fbf00(receiver, media);
+            hr = ProcessAndReturnValue_009fbf00(receiver, media);
             if (hr < 0 && failure >= 0 && hr != (long)0x80004005 && hr != (long)0x80070057 && hr != (long)0x8004022a)
                 failure = hr;
         }
-        FUN_009f9cb0(media);
+        Runtime_ProcessState_009f9cb0(media);
         if (hr == 0)
             return hr;
     }
@@ -3882,12 +3965,13 @@ class FUN_009fc0b0_cls
     int unk20;
     unsigned short unk24;
     unsigned char m_26;
-    int FUN_009fc0b0(void* arg1, void* arg2);
+    int ProcessEntries_009fc0b0(void* arg1, void* arg2);
 };
 
 // Returns Call9fbf00(arg1, arg2) if arg2's Call9f9a50() is 0; else tries twice (vtable slot 12 on arg1 or &m_0c, then Call9fbfc0), returning 0 or an HRESULT.
 // @fnv 0x009fc0b0
-int FUN_009fc0b0_cls::FUN_009fc0b0(void* arg1, void* arg2)
+// src: GUESS 0x009fc0b0 (confidence: low)
+int FUN_009fc0b0_cls::ProcessEntries_009fc0b0(void* arg1, void* arg2)
 {
     void* out = 0;
     int hr;
@@ -4001,7 +4085,7 @@ struct DsPinBase0
 struct DsIPin : DsUnknown
 {
     virtual long __stdcall Connect(DsUnknown* pReceivePin, const void* pmt) = 0;
-    virtual long __stdcall FUN_009fc190(DsUnknown* pConnector, const void* pmt) = 0;
+    virtual long __stdcall ConnectPinWithMediaType(DsUnknown* pConnector, const void* pmt) = 0;
 };
 
 struct DsIQualityControl
@@ -4035,12 +4119,13 @@ struct DsBasePin : DsPinBase0, DsIPin, DsIQualityControl
     unsigned long __stdcall AddRef();
     unsigned long __stdcall Release();
     long __stdcall Connect(DsUnknown* pReceivePin, const void* pmt);
-    long __stdcall FUN_009fc190(DsUnknown* pConnector, const void* pmt);
+    long __stdcall ConnectPinWithMediaType(DsUnknown* pConnector, const void* pmt);
 };
 
 // Connects this pin to pConnector with media type pmt, validating state, checking compatibility, and completing the connection.
 // @fnv 0x009fc190
-long __stdcall DsBasePin::FUN_009fc190(DsUnknown* pConnector, const void* pmt)
+// src: GUESS 0x009fc190 (confidence: medium)
+long __stdcall DsBasePin::ConnectPinWithMediaType(DsUnknown* pConnector, const void* pmt)
 {
     if (pConnector == 0)
         return 0x80004003;
@@ -4127,7 +4212,8 @@ struct RecordView
 };
 
 // @fnv 0x009fc6d0
-int __stdcall FUN_009fc6d0(ResultRec* record, FUN_009fc600** result)
+// src: GUESS 0x009fc6d0 (confidence: low)
+int __stdcall Runtime_AllocateStorage_009fc6d0(ResultRec* record, FUN_009fc600** result)
 {
     if (!result)
         return (int)0x80004003;
@@ -4239,12 +4325,13 @@ struct FUN_009fc780
     long m_lRefCount;
 
     FUN_009fc780(CBasePin_9fc7e0* pPin, FUN_009fc780* pEnumMediaTypes);
-    long __stdcall FUN_009fc7e0(FUN_009fc780** ppEnum);
+    long __stdcall CreatePinEnumeratorIfVersionMatches(FUN_009fc780** ppEnum);
 };
 
 // Stores a new FUN_009fc780 built from m_pPin and this in *ppEnum if the pin's version equals m_iCurrentPinIndex; otherwise sets it null and returns an error.
 // @fnv 0x009fc7e0
-long __stdcall FUN_009fc780::FUN_009fc7e0(FUN_009fc780** ppEnumMediaTypes)
+// src: GUESS 0x009fc7e0 (confidence: medium)
+long __stdcall FUN_009fc780::CreatePinEnumeratorIfVersionMatches(FUN_009fc780** ppEnumMediaTypes)
 {
     if (ppEnumMediaTypes == 0)
         return 0x80004003;
@@ -4266,7 +4353,7 @@ long __stdcall FUN_009fc780::FUN_009fc7e0(FUN_009fc780** ppEnumMediaTypes)
 
 extern "C" void* __cdecl FUN_00ec44d0(void*, const void*, unsigned int);
 void* __cdecl operator new(unsigned int);
-int __stdcall FUN_009fd080(const wchar_t*);
+int __stdcall strlen_w(const wchar_t*);
 
 struct FUN_009fcee0
 {
@@ -4333,7 +4420,7 @@ FUN_009fc890::FUN_009fc890(int objectName, void* apOwnerFilter, int* lock, int* 
     m_dRate = 1.0;
     if (name)
     {
-        int len = FUN_009fd080(name) + 1;
+        int len = strlen_w(name) + 1;
         m_pName = new wchar_t[len];
         if (m_pName)
         {
@@ -4354,7 +4441,8 @@ class FUN_009fcab0_obj
 };
 
 // @fnv 0x009fcab0
-int __stdcall FUN_009fcab0(char* a, FUN_009fcab0_obj** out)
+// src: GUESS 0x009fcab0 (confidence: low)
+int __stdcall Runtime_AllocateStorage_009fcab0(char* a, FUN_009fcab0_obj** out)
 {
     if (out == 0)
     {
@@ -4431,7 +4519,7 @@ struct S9fcc60_Alloc : S9fcc60_Head, S9fcc60_CritSec
     int unk58;
     int unk5c;
     unsigned char* m_pBuffer;
-    int FUN_009fcc60();
+    int AllocateSampleBlocks();
 };
 
 struct S9fcc60_Sample
@@ -4450,8 +4538,8 @@ struct S9fcc60_Sample
 
 struct S9fcc60_Base
 {
-    int FUN_009fb020();
-    __declspec(nothrow) void FUN_009fb170();
+    int ComputeValue_009fb020();
+    __declspec(nothrow) void ReleaseStorage_009fb170();
 };
 
 __declspec(nothrow) void* __cdecl FormHeap_Allocate(unsigned int size);
@@ -4461,11 +4549,12 @@ extern "C" __declspec(dllimport) __declspec(nothrow) void* __stdcall VirtualAllo
 
 // Locks the allocator, computes aligned block size, allocates a buffer via VirtualAlloc, and builds the free list of sample blocks.
 // @fnv 0x009fcc60
-int S9fcc60_Alloc::FUN_009fcc60()
+// src: GUESS 0x009fcc60 (confidence: medium)
+int S9fcc60_Alloc::AllocateSampleBlocks()
 {
     S9fcc60_AutoLock lck(this);
 
-    int res = ((S9fcc60_Base*)this)->FUN_009fb020();
+    int res = ((S9fcc60_Base*)this)->ComputeValue_009fb020();
     if (res < 0)
     {
         return res;
@@ -4476,7 +4565,7 @@ int S9fcc60_Alloc::FUN_009fcc60()
     }
     if (m_pBuffer)
     {
-        ((S9fcc60_Base*)this)->FUN_009fb170();
+        ((S9fcc60_Base*)this)->ReleaseStorage_009fb170();
     }
 
     int lAlignedSize = m_lSize + m_lPrefix;
@@ -4522,7 +4611,8 @@ struct RefCounted
 };
 
 // @fnv 0x009fcf60
-unsigned long __stdcall FUN_009fcf60(RefCounted* pkObject)
+// src: GUESS 0x009fcf60 (confidence: low)
+unsigned long __stdcall Object_ProcessAndReturnValue_009fcf60(RefCounted* pkObject)
 {
     InterlockedIncrement((long volatile*)&pkObject->m_uiRefCount);
     return pkObject->m_uiRefCount > 1 ? pkObject->m_uiRefCount : 1;
@@ -4540,7 +4630,8 @@ class FUN_009fcf80_cls
 };
 // Decrements m_lRefCount; deletes self when it reaches zero, otherwise returns the remaining reference count clamped to a minimum of 1.
 // @fnv 0x009fcf80
-unsigned int __stdcall FUN_009fcf80(FUN_009fcf80_cls* self)
+// src: GUESS 0x009fcf80 (confidence: medium)
+unsigned int __stdcall Object_ReleaseReferenceAndClampCount(FUN_009fcf80_cls* self)
 {
     if (InterlockedDecrement(&self->m_lRefCount) == 0)
     {
@@ -4589,15 +4680,16 @@ int __stdcall CompareWideStrings(const wchar_t* p, const wchar_t* q)
 
 extern "C" __declspec(dllimport) void* __stdcall CoTaskMemAlloc(unsigned long cb);
 extern "C" void* __cdecl memcpy(void* dst, const void* src, unsigned int size);
-int __stdcall FUN_009fd080(const wchar_t* psz);
+int __stdcall strlen_w(const wchar_t* psz);
 
 // Allocates a CoTaskMemAlloc'd copy of psz, writes the pointer to ppszReturn, and returns HRESULT.
 // @fnv 0x009fd0a0
-long __stdcall FUN_009fd0a0(const wchar_t* psz, wchar_t** ppszReturn)
+// src: GUESS 0x009fd0a0 (confidence: medium)
+long __stdcall Object_CopyData(const wchar_t* psz, wchar_t** ppszReturn)
 {
     if (ppszReturn == 0)
         return 0x80004003L;
-    unsigned long nameLen = sizeof(wchar_t) * (FUN_009fd080(psz) + 1);
+    unsigned long nameLen = sizeof(wchar_t) * (strlen_w(psz) + 1);
     wchar_t* p = (wchar_t*)CoTaskMemAlloc(nameLen);
     int bAllocFailed;
     try
@@ -4630,7 +4722,7 @@ struct FUN_009fd200_list
     int freeCount;
     FUN_009fd200_node* freeHead;
 };
-void __cdecl FormHeap_Free(void* p);
+void __cdecl FormHeapFreeAndLog_00401030(void* p);
 class FUN_009fd200_cls
 {
   public:
@@ -4671,7 +4763,7 @@ unsigned int FUN_009fd200_cls::RemoveNode(FUN_009fd200_node* node)
         }
         else
         {
-            FormHeap_Free(node);
+            FormHeapFreeAndLog_00401030(node);
         }
         int* pCount = &list->count;
         *pCount -= 1;
@@ -4732,11 +4824,12 @@ struct HolderObj
     int unk10;
     int unk14;
     CalleeObj* m_pEntryObject;  // +0x18
-    int FUN_009fd3a0(int aMask);
+    int ProcessAndTransformResult_009fd3a0(int aMask);
 };
 
 // @fnv 0x009fd3a0
-int HolderObj::FUN_009fd3a0(int aMask)
+// src: GUESS 0x009fd3a0 (confidence: low)
+int HolderObj::ProcessAndTransformResult_009fd3a0(int aMask)
 {
     return !((m_pEntryObject->v04() - 1) & aMask);
 }
@@ -4750,7 +4843,8 @@ struct AggregateFD4
 };
 
 // @fnv 0x009fd430
-unsigned long __stdcall FUN_009fd430(AggregateFD4* pThis)
+// src: GUESS 0x009fd430 (confidence: medium)
+unsigned long __stdcall Object_Release_Thunk(AggregateFD4* pThis)
 {
     return pThis->m_pOuter->Release();
 }
@@ -4805,7 +4899,8 @@ struct Obj9FD5A0 : Base9FD5A0, Iface9FD5A0
 
 // Allocates an Obj9FD5A0, queries it for the DAT_01093bbc interface into ppv, and returns the HRESULT.
 // @fnv 0x009fd5a0
-long __stdcall FUN_009fd5a0(void** ppv)
+// src: GUESS 0x009fd5a0 (confidence: medium)
+long __stdcall Object_CreateAndQueryInterface(void** ppv)
 {
     if (ppv == 0)
         return 0x80004003;
@@ -4859,7 +4954,7 @@ struct AllocatorStream
     int unk10;
     int unk14;
     AlignmentDevice* pDevice;
-    int __thiscall FUN_009fd3a0(long alAlign);
+    int __thiscall ProcessAndTransformResult_009fd3a0(long alAlign);
     void __thiscall GetValue(long* aplAlign);
     int IsAligned(long align)
     {
@@ -4910,13 +5005,14 @@ struct AllocatorPin
     int unk9c;
     int unka0;
     AllocatorStream* pStream;
-    long __thiscall FUN_009fd5a0(IMemAllocator** appAllocator);
-    long __stdcall FUN_009fd6d0(IMemAllocator* apAllocator, ALLOCATOR_PROPERTIES* apRequest,
+    long __thiscall Object_CreateAndQueryInterface(IMemAllocator** appAllocator);
+    long __stdcall ChooseAndConfigureAlignedAllocator(IMemAllocator* apAllocator, ALLOCATOR_PROPERTIES* apRequest,
                                 IMemAllocator** appAllocator);
 };
 // Sets allocator properties on apAllocator or a fallback allocator, ensuring stream alignment, and stores the chosen allocator in appAllocator.
 // @fnv 0x009fd6d0
-long __stdcall AllocatorPin::FUN_009fd6d0(IMemAllocator* apAllocator, ALLOCATOR_PROPERTIES* apRequest,
+// src: GUESS 0x009fd6d0 (confidence: medium)
+long __stdcall AllocatorPin::ChooseAndConfigureAlignedAllocator(IMemAllocator* apAllocator, ALLOCATOR_PROPERTIES* apRequest,
                                           IMemAllocator** appAllocator)
 {
     if (!apAllocator)
@@ -4928,18 +5024,18 @@ long __stdcall AllocatorPin::FUN_009fd6d0(IMemAllocator* apAllocator, ALLOCATOR_
     if (!apRequest->cbAlign || !pStream->IsAligned(apRequest->cbAlign))
         pStream->GetValue(&apRequest->cbAlign);
     ALLOCATOR_PROPERTIES kActual;
-    if (apAllocator->SetProperties(apRequest, &kActual) >= 0 && pStream->FUN_009fd3a0(kActual.cbAlign))
+    if (apAllocator->SetProperties(apRequest, &kActual) >= 0 && pStream->ProcessAndTransformResult_009fd3a0(kActual.cbAlign))
     {
         apAllocator->AddRef();
         *appAllocator = apAllocator;
         return 0;
     }
     IMemAllocator* fallback;
-    long hr = FUN_009fd5a0(&fallback);
+    long hr = Object_CreateAndQueryInterface(&fallback);
     if (hr < 0)
         return hr;
     hr = fallback->SetProperties(apRequest, &kActual);
-    if (hr >= 0 && pStream->FUN_009fd3a0(kActual.cbAlign))
+    if (hr >= 0 && pStream->ProcessAndTransformResult_009fd3a0(kActual.cbAlign))
     {
         *appAllocator = fallback;
         return 0;
@@ -5021,7 +5117,8 @@ struct AsyncOutputPin
 
 // Clamps the sample time range to the stream length and issues an aligned async read into the sample buffer.
 // @fnv 0x009fd7f0
-long __stdcall FUN_009fd7f0(AsyncOutputPin* apPin, AsyncSample* pSample, unsigned long dwUser)
+// src: GUESS 0x009fd7f0 (confidence: medium)
+long __stdcall Runtime_RequestAlignedSampleRead(AsyncOutputPin* apPin, AsyncSample* pSample, unsigned long dwUser)
 {
     if (pSample == 0)
         return 0x80004003;
@@ -5127,12 +5224,13 @@ struct SampleFilterStub
     int unk9c;
     int unka0;
     SampleSourceStub* source;
-    long __stdcall FUN_009fd970(MediaSampleStub* pSample);
+    long __stdcall FillAlignedSampleBuffer(MediaSampleStub* pSample);
 };
 
 // Clamps the sample time range to the source's range and alignment, then fills the sample buffer via source->FillSample and sets its actual data length.
 // @fnv 0x009fd970
-long __stdcall SampleFilterStub::FUN_009fd970(MediaSampleStub* pSample)
+// src: GUESS 0x009fd970 (confidence: medium)
+long __stdcall SampleFilterStub::FillAlignedSampleBuffer(MediaSampleStub* pSample)
 {
     if (!pSample)
         return 0x80004003;
@@ -5173,7 +5271,7 @@ long __stdcall SampleFilterStub::FUN_009fd970(MediaSampleStub* pSample)
 
 struct Primary9FDTemplate
 {
-    virtual void __cdecl FUN_009fdce0();
+    virtual void __cdecl InvokeVirtualMethod_Thunk();
     int unk04;
     int unk08;
     int unk0c;
@@ -5181,18 +5279,19 @@ struct Primary9FDTemplate
 };
 struct Secondary9FDTemplate
 {
-    virtual void __cdecl FUN_009fdce0();
+    virtual void __cdecl InvokeVirtualMethod_Thunk();
 };
 // @fnv 0x009fdce0
 template <class T> struct Derived9FDTemplate : Primary9FDTemplate, Secondary9FDTemplate
 {
-    virtual void __cdecl FUN_009fdce0();
+    virtual void __cdecl InvokeVirtualMethod_Thunk();
 };
-template <class T> void __cdecl Derived9FDTemplate<T>::FUN_009fdce0()
+// src: GUESS 0x009fdce0 (confidence: medium)
+template <class T> void __cdecl Derived9FDTemplate<T>::InvokeVirtualMethod_Thunk()
 {
     InvokeVirtualMethod(this);
 }
-extern template void __cdecl Derived9FDTemplate<int>::FUN_009fdce0();
+extern template void __cdecl Derived9FDTemplate<int>::InvokeVirtualMethod_Thunk();
 Derived9FDTemplate<int> parent_template_object;
 
 class FUN_009fdf20_target
@@ -5220,12 +5319,13 @@ class FUN_009fdf20_cls
     void* m_1c;
     int m_20;
     int m_24;
-    int FUN_009fdf20();
+    int ProcessAndReturnValue_009fdf20();
 };
 
 // Calls m_04 methods unk05, unk01 and unk02, updates m_14 from the returned out value, and returns the status in m_24 (1 if m_14 changed).
 // @fnv 0x009fdf20
-int FUN_009fdf20_cls::FUN_009fdf20()
+// src: GUESS 0x009fdf20 (confidence: low)
+int FUN_009fdf20_cls::ProcessAndReturnValue_009fdf20()
 {
     int out;
     m_04->unk05();
@@ -5261,12 +5361,13 @@ int FUN_009fdf20_cls::FUN_009fdf20()
 extern "C" void __cdecl FUN_009fd320();
 
 // @fnv 0x009fdfd0
-void __cdecl FUN_009fdfd0()
+// src: GUESS 0x009fdfd0 (confidence: low)
+void __cdecl Runtime_ForwardCall_009fdfd0()
 {
     FUN_009fd320();
 }
 
-int __stdcall FUN_009fdf20(void);
+int __stdcall ProcessAndReturnValue_009fdf20(void);
 
 struct Ctx : FUN_009fded0_cls
 {
@@ -5275,13 +5376,14 @@ struct Ctx : FUN_009fded0_cls
 class Fdfe0Cls : public S_9fe1a0_Class
 {
   public:
-    int __thiscall FUN_009fdfe0(unsigned int p0, unsigned int p1, unsigned int p2, unsigned int p3, unsigned int* out,
+    int __thiscall ProcessAndReturnValue_009fdfe0(unsigned int p0, unsigned int p1, unsigned int p2, unsigned int p3, unsigned int* out,
                                 unsigned int p5);
 };
 
 // Checks p0, p2, p3 against unk18 alignment, calls FUN_009fded0, stores ctx.m_14 to out, returns FUN_009fdf20 result.
 // @fnv 0x009fdfe0
-int __thiscall Fdfe0Cls::FUN_009fdfe0(unsigned int p0, unsigned int p1, unsigned int p2, unsigned int p3,
+// src: GUESS 0x009fdfe0 (confidence: low)
+int __thiscall Fdfe0Cls::ProcessAndReturnValue_009fdfe0(unsigned int p0, unsigned int p1, unsigned int p2, unsigned int p3,
                                       unsigned int* out, unsigned int p5)
 {
     if (out == 0)
@@ -5298,12 +5400,12 @@ int __thiscall Fdfe0Cls::FUN_009fdfe0(unsigned int p0, unsigned int p1, unsigned
             if ((p3 & (align - 1)) == 0)
             {
                 Ctx ctx;
-                int hr = ctx.FUN_009fded0((int)this, (int)unk18, (int)p0, (int)p1, (int)p2, 1, (int)p3, (int)p5, 0);
+                int hr = ctx.UpdateState_009fded0((int)this, (int)unk18, (int)p0, (int)p1, (int)p2, 1, (int)p3, (int)p5, 0);
                 if (hr < 0)
                 {
                     return hr;
                 }
-                int r = FUN_009fdf20();
+                int r = ProcessAndReturnValue_009fdf20();
                 *out = (unsigned int)ctx.m_14;
                 return r;
             }
@@ -5502,7 +5604,7 @@ long AsyncIoStandIn::StartThread()
         return 0;
     m_evStop.Reset();
     unsigned long dwThreadID;
-    m_hThread = CreateThread(0, 0, (ThreadStartFn)FUN_009fe560, this, 0, &dwThreadID);
+    m_hThread = CreateThread(0, 0, (ThreadStartFn)Object_InvokeVirtualMethod_009fe560, this, 0, &dwThreadID);
     if (!m_hThread)
     {
         unsigned long dwErr = GetLastError();
@@ -5513,7 +5615,7 @@ long AsyncIoStandIn::StartThread()
 
 namespace fnv_009fe870 {
 extern "C" __declspec(dllimport) void __stdcall DeleteCriticalSection(void* pkSection);
-void __cdecl FormHeap_Free(void* pvMemory);  // free
+void __cdecl FormHeapFreeAndLog_00401030(void* pvMemory);  // free
 
 class OwnedLock
 {
@@ -5551,8 +5653,8 @@ class FUN_009fe870
 {
   public:
     ~FUN_009fe870();
-    void FUN_009fe690();
-    void FUN_009fe0c0();
+    void FlushPendingWorkAndWait();
+    void CloseStoredHandles();
 
     OwnedLock m_kLockA;              // +0x00
     OwnedLock m_kLockB;              // +0x1c
@@ -5566,15 +5668,15 @@ class FUN_009fe870
     class FUN_009fcfe0 m_kHandle7c;  // +0x7c
 };
 
-// Destructor that calls FUN_009fe690 and FUN_009fe0c0, then frees every item in m_kListB via FormHeap_Free and clears the list.
+// Destructor that calls FUN_009fe690 and FUN_009fe0c0, then frees every item in m_kListB via FUN_00401030 and clears the list.
 // @fnv 0x009fe870
 FUN_009fe870::~FUN_009fe870()
 {
-    FUN_009fe690();
-    FUN_009fe0c0();
+    FlushPendingWorkAndWait();
+    CloseStoredHandles();
     void* pvPos = m_kListB.m_pvHead;
     while (pvPos)
-        FormHeap_Free(m_kListB.PopAndGetValue(pvPos));
+        FormHeapFreeAndLog_00401030(m_kListB.PopAndGetValue(pvPos));
     m_kListB.ClearList();
 }
 }  // namespace fnv_009fe870
@@ -5602,12 +5704,13 @@ struct Host_9fe960
     int unk[6];
     Stream_9fe960* m_p18;
     int Queue(Req_9fe960* pReq);
-    int FUN_009fe960(int a1, int a2, int a3, int a4, int a5, int a6, int a7);
+    int CreateAndQueueAlignedRequest(int a1, int a2, int a3, int a4, int a5, int a6, int a7);
 };
 
 // Allocates a request, initializes it with the given parameters, and queues it on the host, returning the HRESULT.
 // @fnv 0x009fe960
-int Host_9fe960::FUN_009fe960(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+// src: GUESS 0x009fe960 (confidence: medium)
+int Host_9fe960::CreateAndQueueAlignedRequest(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
     if (a4)
     {
@@ -5659,7 +5762,8 @@ struct S_009f9bb0_Rec
 };
 // Copies src into dst, allocates and copies the heap buffer when src->unk40 is set, and AddRefs the COM pointer in unk3c.
 // @fnv 0x009f9bb0
-int __stdcall FUN_009f9bb0(S_009f9bb0_Rec* dst, S_009f9bb0_Rec* src)
+// src: GUESS 0x009f9bb0 (confidence: low)
+int __stdcall Runtime_CopyMemory_009f9bb0(S_009f9bb0_Rec* dst, S_009f9bb0_Rec* src)
 {
     *dst = *src;
     if (src->unk40)
@@ -5719,7 +5823,8 @@ struct S_009fa520_obj
 
 // Stores five values into the tail fields of S_009fa520_obj and returns 0.
 // @fnv 0x009fa520
-int __stdcall FUN_009fa520(S_009fa520_obj* obj, int a, int b, int c, int d, double e)
+// src: GUESS 0x009fa520 (confidence: low)
+int __stdcall Object_ComputeValue_009fa520(S_009fa520_obj* obj, int a, int b, int c, int d, double e)
 {
     obj->unk74 = a;
     obj->unk78 = b;
@@ -5780,7 +5885,7 @@ Derived_009fdcf0::Derived_009fdcf0()
 // Primary base is 0x14 bytes; the secondary base sits at +0x14 inside Derived.
 struct PrimaryBase_009fdd00
 {
-    virtual void __cdecl FUN_009fdd00();
+    virtual void __cdecl AdjustThisAndForward_009fdd00();
     int unk04;
     int unk08;
     int unk0C;
@@ -5789,14 +5894,15 @@ struct PrimaryBase_009fdd00
 
 struct SecondaryBase_009fdd00
 {
-    virtual void __cdecl FUN_009fdd00();
+    virtual void __cdecl AdjustThisAndForward_009fdd00();
 };
 
 struct Derived_009fdd00 : PrimaryBase_009fdd00, SecondaryBase_009fdd00
 {
     Derived_009fdd00();
 // @fnv 0x009fdd00
-    virtual void __cdecl FUN_009fdd00();
+// src: GUESS 0x009fdd00 (confidence: low)
+    virtual void __cdecl AdjustThisAndForward_009fdd00();
 };
 
 Derived_009fdd00::Derived_009fdd00()
@@ -5860,7 +5966,7 @@ void ThunkOwner::ThunkKey()
 // Primary base is 0x18 bytes (vptr + five ints); the secondary base sits at +0x18 inside Derived.
 struct PrimaryBase_009fdd20
 {
-    virtual void __cdecl FUN_009fdd20();
+    virtual void __cdecl AdjustThisAndForward_009fdd20();
     int unk04;
     int unk08;
     int unk0C;
@@ -5870,14 +5976,15 @@ struct PrimaryBase_009fdd20
 
 struct SecondaryBase_009fdd20
 {
-    virtual void __cdecl FUN_009fdd20();
+    virtual void __cdecl AdjustThisAndForward_009fdd20();
 };
 
 struct Derived_009fdd20 : PrimaryBase_009fdd20, SecondaryBase_009fdd20
 {
     Derived_009fdd20();
 // @fnv 0x009fdd20
-    virtual void __cdecl FUN_009fdd20();
+// src: GUESS 0x009fdd20 (confidence: low)
+    virtual void __cdecl AdjustThisAndForward_009fdd20();
 };
 
 Derived_009fdd20::Derived_009fdd20()
@@ -5939,7 +6046,7 @@ AdjDerived::AdjDerived()
 // ints); the secondary base subobject sits at +0x18 inside Derived.
 struct PrimaryBase_009fdd60
 {
-    virtual void __cdecl FUN_009fdd60();
+    virtual void __cdecl AdjustThisAndForward_009fdd60();
     int unk04;
     int unk08;
     int unk0C;
@@ -5949,14 +6056,15 @@ struct PrimaryBase_009fdd60
 
 struct SecondaryBase_009fdd60
 {
-    virtual void __cdecl FUN_009fdd60();
+    virtual void __cdecl AdjustThisAndForward_009fdd60();
 };
 
 struct Derived_009fdd60 : PrimaryBase_009fdd60, SecondaryBase_009fdd60
 {
     Derived_009fdd60();
 // @fnv 0x009fdd60
-    virtual void __cdecl FUN_009fdd60();
+// src: GUESS 0x009fdd60 (confidence: low)
+    virtual void __cdecl AdjustThisAndForward_009fdd60();
 };
 
 Derived_009fdd60::Derived_009fdd60()
@@ -6177,7 +6285,8 @@ FUN_009fddf0_cls::FUN_009fddf0_cls(int aBaseParam, int b, int c, int d)
 
 // Returns whether the first 16 bytes of b and a are identical using memcmp.
 // @fnv 0x009f9980
-int __stdcall FUN_009f9980(const void* apFirst, const void* apSecond)
+// src: GUESS 0x009f9980 (confidence: low)
+int __stdcall Object_ProcessAndTransformResult_009f9980(const void* apFirst, const void* apSecond)
 {
     return memcmp(apFirst, apSecond, 16) == 0;
 }
@@ -6220,7 +6329,7 @@ struct GraphLock
         LeaveCriticalSection(m_lock);
     }
 };
-unsigned int __stdcall FUN_009fd080(const wchar_t*);
+unsigned int __stdcall strlen_w(const wchar_t*);
 void* __cdecl _memmove(void*, const void*, unsigned int);
 // Locks the filter, updates m_graph and m_sink from graph, and replaces m_name with a copy of name.
 // @fnv 0x009f9e50
@@ -6244,7 +6353,7 @@ int __stdcall SetGraphAndName(GraphFilter* self, GraphUnknown* graph, const wcha
     }
     if (name)
     {
-        unsigned int n = FUN_009fd080(name) + 1;
+        unsigned int n = strlen_w(name) + 1;
         self->m_name = new wchar_t[n];
         if (self->m_name)
             _memmove(self->m_name, name, n * 2);
@@ -6328,7 +6437,8 @@ struct S_009fa820_Foo
 };
 
 // @fnv 0x009fa820
-int __stdcall FUN_009fa820(S_009fa820_Foo* obj)
+// src: GUESS 0x009fa820 (confidence: low)
+int __stdcall Object_ComputeValue_009fa820(S_009fa820_Foo* obj)
 {
     unsigned int u = (unsigned char)(~obj->unk04);
     unsigned int w = u >> 2;
@@ -6441,14 +6551,14 @@ class IMemAllocatorW
     virtual long __stdcall GetProperties(void* pProps) = 0;
     virtual long __stdcall Commit() = 0;
     virtual long __stdcall Decommit() = 0;
-    virtual long __stdcall FUN_009fad00(CMediaSampleW** ppBuffer, __int64* pStartTime, __int64* pEndTime,
+    virtual long __stdcall GetFreeSampleOrWait(CMediaSampleW** ppBuffer, __int64* pStartTime, __int64* pEndTime,
                                         unsigned long dwFlags) = 0;
 };
 
 class CBaseAllocatorW : public CUnknownW, public IMemAllocatorW, public CCritSecW
 {
   public:
-    long __stdcall FUN_009fad00(CMediaSampleW** ppBuffer, __int64* pStartTime, __int64* pEndTime,
+    long __stdcall GetFreeSampleOrWait(CMediaSampleW** ppBuffer, __int64* pStartTime, __int64* pEndTime,
                                 unsigned long dwFlags);
 
     void SetWaiting()
@@ -6470,7 +6580,8 @@ class CBaseAllocatorW : public CUnknownW, public IMemAllocatorW, public CCritSec
 
 // Pops a sample from m_lFree with refcount 1, waiting on m_hSem when empty unless dwFlags & 4 is set; fails if not committed.
 // @fnv 0x009fad00
-long __stdcall CBaseAllocatorW::FUN_009fad00(CMediaSampleW** ppBuffer, __int64* pStartTime, __int64* pEndTime,
+// src: GUESS 0x009fad00 (confidence: medium)
+long __stdcall CBaseAllocatorW::GetFreeSampleOrWait(CMediaSampleW** ppBuffer, __int64* pStartTime, __int64* pEndTime,
                                              unsigned long dwFlags)
 {
     CMediaSampleW* pSample;
@@ -6508,7 +6619,7 @@ struct SyncUnknown
 };
 struct SyncInterface
 {
-    virtual int __stdcall FUN_009fada0(SyncUnknown*) = 0;
+    virtual int __stdcall SetRetainedClock(SyncUnknown*) = 0;
 };
 struct SyncHead
 {
@@ -6531,11 +6642,12 @@ struct SyncOwner : SyncHead, SyncInterface, AllocCritSec
     int unk50;
     int unk54;
     SyncUnknown* clock;
-    virtual int __stdcall FUN_009fada0(SyncUnknown* clock);
+    virtual int __stdcall SetRetainedClock(SyncUnknown* clock);
 };
 // Locks the owner, AddRefs the new clock, Releases the old clock, stores the new clock pointer, and returns 0.
 // @fnv 0x009fada0
-int __stdcall SyncOwner::FUN_009fada0(SyncUnknown* clock)
+// src: GUESS 0x009fada0 (confidence: medium)
+int __stdcall SyncOwner::SetRetainedClock(SyncUnknown* clock)
 {
     AllocLock guard(this);
     if (clock)
@@ -6842,7 +6954,7 @@ struct FltMediaFilter
     virtual long __stdcall GetClassID(void* pClsID) = 0;
     virtual long __stdcall Stop() = 0;
     virtual long __stdcall Pause() = 0;
-    virtual long __stdcall FUN_009fb860(__int64 tStart) = 0;
+    virtual long __stdcall ProcessEntries_009fb860(__int64 tStart) = 0;
 };
 
 struct FltMovieSetup
@@ -6873,11 +6985,12 @@ struct FltBaseFilter : FltUnknown, FltMediaFilter, FltMovieSetup
     long __stdcall GetClassID(void* pClsID);
     long __stdcall Stop();
     long __stdcall Pause();
-    long __stdcall FUN_009fb860(__int64 tStart);
+    long __stdcall ProcessEntries_009fb860(__int64 tStart);
 };
 
 // @fnv 0x009fb860
-long __stdcall FltBaseFilter::FUN_009fb860(__int64 tStart)
+// src: GUESS 0x009fb860 (confidence: low)
+long __stdcall FltBaseFilter::ProcessEntries_009fb860(__int64 tStart)
 {
     FltAutoLock cObjectLock(m_pLock);
 
@@ -6934,12 +7047,13 @@ class ConnectionPin
     int m_10;
     int m_14;
     void* m_18;
-    int FUN_009fbf00(void* a1, int a2);
+    int ProcessAndReturnValue_009fbf00(void* a1, int a2);
 };
 
 // Calls v10(a1) and v08(a2), stores a1 in m_18, calls methods on a1 plus v09 and v12; on failure calls v11, releases m_18 and returns the error.
 // @fnv 0x009fbf00
-int ConnectionPin::FUN_009fbf00(void* a1, int a2)
+// src: GUESS 0x009fbf00 (confidence: low)
+int ConnectionPin::ProcessAndReturnValue_009fbf00(void* a1, int a2)
 {
     int hr = v10(a1);
     if (hr < 0)
@@ -6982,7 +7096,8 @@ int ConnectionPin::FUN_009fbf00(void* a1, int a2)
 }
 
 // @fnv 0x009fd080
-extern "C" int __stdcall FUN_009fd080(const unsigned short* apString)
+// src: COMMUNITY 0x009fd080
+extern "C" int __stdcall strlen_w(const unsigned short* apString)
 {
     int i = -1;
     do
@@ -7073,16 +7188,17 @@ CNode* CBaseList_9fd::AddNode(void* pObject)
 struct S_009fd2d0_Pos;
 struct S_009fd2d0_List
 {
-    S_009fd2d0_Pos* FUN_009fd0f0();
+    S_009fd2d0_Pos* NiInitOptions_GetAllocator();
     void* PopAndGetValue(S_009fd2d0_Pos** pos);
     int AddNode(void* item);
-    int FUN_009fd2d0(S_009fd2d0_List* src);
+    int CopyListNodes(S_009fd2d0_List* src);
 };
 // Walks src with FUN_009fd0f0 and PopAndGetValue, adding each item via AddNode; returns 0 as soon as an add fails, otherwise 1.
 // @fnv 0x009fd2d0
-int S_009fd2d0_List::FUN_009fd2d0(S_009fd2d0_List* src)
+// src: GUESS 0x009fd2d0 (confidence: medium)
+int S_009fd2d0_List::CopyListNodes(S_009fd2d0_List* src)
 {
-    S_009fd2d0_Pos* pos = src->FUN_009fd0f0();
+    S_009fd2d0_Pos* pos = src->NiInitOptions_GetAllocator();
     while (pos)
     {
         void* item = src->PopAndGetValue(&pos);
@@ -7113,7 +7229,7 @@ struct SyncRequest
     int m_1c;
     int m_20;
     int m_24;
-    int FUN_009fded0(void* owner, AlignSource* src, __int64 position, unsigned int length, int aligned,
+    int UpdateState_009fded0(void* owner, AlignSource* src, __int64 position, unsigned int length, int aligned,
                      unsigned char* buffer, void* context, unsigned int user);
 };
 
@@ -7126,32 +7242,33 @@ struct SyncReader
     int unk10;
     int unk14;
     AlignSource* m_18;
-    int FUN_009fdfe0(__int64 position, unsigned int length, unsigned char* buffer, unsigned int* out, unsigned int p6);
-    int FUN_009fe100(__int64 position, unsigned int length, unsigned char* buffer);
+    int ProcessAndReturnValue_009fdfe0(__int64 position, unsigned int length, unsigned char* buffer, unsigned int* out, unsigned int p6);
+    int ProcessAndReturnValue_009fe100(__int64 position, unsigned int length, unsigned char* buffer);
 };
 
 // @fnv 0x009fe100
-int SyncReader::FUN_009fe100(__int64 position, unsigned int length, unsigned char* buffer)
+// src: GUESS 0x009fe100 (confidence: low)
+int SyncReader::ProcessAndReturnValue_009fe100(__int64 position, unsigned int length, unsigned char* buffer)
 {
     if (((unsigned int)position & (m_18->GetAlignment() - 1)) == 0 && (length & (m_18->GetAlignment() - 1)) == 0 &&
         ((unsigned int)buffer & (m_18->GetAlignment() - 1)) == 0)
     {
         unsigned int actual;
-        return FUN_009fdfe0(position, length, buffer, &actual, 0);
+        return ProcessAndReturnValue_009fdfe0(position, length, buffer, &actual, 0);
     }
     else
     {
         SyncRequest ctx;
-        int hr = ctx.FUN_009fded0(this, m_18, position, length, 0, buffer, 0, 0);
+        int hr = ctx.UpdateState_009fded0(this, m_18, position, length, 0, buffer, 0, 0);
         if (hr >= 0)
-            return FUN_009fdf20();
+            return ProcessAndReturnValue_009fdf20();
         return hr;
     }
 }
 
 struct S_009fd390_Class
 {
-    int __thiscall FUN_009fd390();
+    int __thiscall RemoveNode_Thunk();
 
     int unk00;
     int unk04;
@@ -7214,7 +7331,7 @@ int S_009fe370_Class::LockAndProcess()
 {
     S_009fe370_AutoLock lock(&unk1c);
 
-    int result = unk50.FUN_009fd390();
+    int result = unk50.RemoveNode_Thunk();
 
     if (unk50.unk08 == 0)
     {
@@ -7229,7 +7346,7 @@ int S_009fe370_Class::LockAndProcess()
 
 struct S_009fe420_Item
 {
-    void __thiscall FUN_009fdf20();
+    void __thiscall ProcessAndReturnValue_009fdf20();
 };
 
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
@@ -7296,8 +7413,8 @@ struct S_009fe420_Cls
     int unk74;
     void* unk78;
 
-    S_009fe420_Item* __thiscall FUN_009fe2f0();
-    void __thiscall FUN_009fe3f0(S_009fe420_Item* item);
+    S_009fe420_Item* __thiscall ProbeUnderLockAndResetEvent();
+    void __thiscall EvaluateValue_009fe3f0(S_009fe420_Item* item);
     void __thiscall ProcessItems();
 };
 
@@ -7310,15 +7427,15 @@ void __thiscall S_009fe420_Cls::ProcessItems()
         S_009fe420_Item* item;
         {
             S_009fe420_Lock lock(&unk1C);
-            item = FUN_009fe2f0();
+            item = ProbeUnderLockAndResetEvent();
             if (!item)
                 break;
             unk70 += 1;
         }
-        item->FUN_009fdf20();
+        item->ProcessAndReturnValue_009fdf20();
         {
             S_009fe420_Lock lock(&unk1C);
-            FUN_009fe3f0(item);
+            EvaluateValue_009fe3f0(item);
             if (--unk70 == 0 && unk74)
                 SetEvent(unk78);
         }
@@ -7437,18 +7554,19 @@ struct InterfaceOwner
 
 // Tests b against DAT_01093bbc then DAT_01093bac with FUN_009f9980, then calls FUN_009fcf10 or FUN_009fceb0 depending on the results and interfaceEnabled5c.
 // @fnv 0x009fac30
-void __stdcall FUN_009fac30(int a, int b, int c)
+// src: GUESS 0x009fac30 (confidence: low)
+void __stdcall Runtime_UpdateState_009fac30(int a, int b, int c)
 {
-    int result = FUN_009f9980(b, &DAT_01093bbc);
+    int result = Object_ProcessAndTransformResult_009f9980(b, &DAT_01093bbc);
     InterfaceOwner* obj = (InterfaceOwner*)a;
 
     if (result == 0)
     {
-        result = FUN_009f9980(b, &DAT_01093bac);
+        result = Object_ProcessAndTransformResult_009f9980(b, &DAT_01093bac);
 
         if (result == 0 || obj->interfaceEnabled5c == 0)
         {
-            FUN_009fcf10((int)obj, b, c);
+            Runtime_UpdateState_009fcf10((int)obj, b, c);
             return;
         }
     }
@@ -7498,7 +7616,8 @@ class CriticalSectionGuard
 };
 // Acquires the packet's critical section, marks it active, and either clears a delayed flag or starts the parent and invokes the onStart callback.
 // @fnv 0x009fae90
-int __stdcall FUN_009fae90(Packet* packet)
+// src: GUESS 0x009fae90 (confidence: medium)
+int __stdcall Runtime_ActivatePacketUnderLock(Packet* packet)
 {
     CRITICAL_SECTION* section =
         reinterpret_cast<Parent*>(reinterpret_cast<char*>(packet) - 12) ? &packet->criticalSection : 0;
@@ -7595,12 +7714,13 @@ struct AsyncIo
 
     AsyncRequest* GetWorkItem();
     long PutDoneItem(AsyncRequest* pRequest);
-    long FUN_009fe690();
+    long FlushPendingWorkAndWait();
 };
 
 // Drains all pending work items into done state, then waits on m_evAllDone until m_cItemsOut reaches zero before signalling m_evDone.
 // @fnv 0x009fe690
-long AsyncIo::FUN_009fe690()
+// src: GUESS 0x009fe690 (confidence: medium)
+long AsyncIo::FlushPendingWorkAndWait()
 {
     {
         AsyncAutoLock lock(&m_csLists);
@@ -7713,7 +7833,8 @@ class S009faf50_CSGuard5
 };
 
 // @fnv 0x009faf50
-int __stdcall FUN_009faf50(S009faf50_FUN_009faf50_rec* self)
+// src: GUESS 0x009faf50 (confidence: low)
+int __stdcall Object_UpdateState_009faf50(S009faf50_FUN_009faf50_rec* self)
 {
     int ok = 0;
     {
@@ -7769,7 +7890,8 @@ struct S_009fba40_A
 
 // Calls virtual v20 on the object at self-0x10 and returns 1 if it gives 0; otherwise creates a COM object, passes it to WriteRecordSet, releases it, returns 0.
 // @fnv 0x009fba40
-int __stdcall FUN_009fba40(void* self)
+// src: GUESS 0x009fba40 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fba40(void* self)
 {
     S_009fba40_A* a = (S_009fba40_A*)((char*)self - 0x10);
     int r = a->v20();
@@ -7788,7 +7910,8 @@ int __stdcall FUN_009fba40(void* self)
 }
 
 // @fnv 0x009fbe40
-int __stdcall FUN_009fbe40(MediaEnumerator* self, int delta)
+// src: GUESS 0x009fbe40 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fbe40(MediaEnumerator* self, int delta)
 {
     if (delta == 0)
         return 0;
@@ -7837,12 +7960,13 @@ class S009fe2f0_FUN_009fe2f0_cls
     S009fe2f0_SubProbe38 m_38;
     void* m_68;
 
-    int FUN_009fe2f0();
+    int ProbeUnderLockAndResetEvent();
 };
 
 // Locks m_1c, calls m_38.Probe(), resets m_68 event if m_38.m_08 is zero, and returns the probe result.
 // @fnv 0x009fe2f0
-int S009fe2f0_FUN_009fe2f0_cls::FUN_009fe2f0()
+// src: GUESS 0x009fe2f0 (confidence: medium)
+int S009fe2f0_FUN_009fe2f0_cls::ProbeUnderLockAndResetEvent()
 {
     S009fe2f0_BSAutoCSLock6153 lock(&m_1c);
     int hr = m_38.Probe();
@@ -7868,11 +7992,12 @@ struct AsyncRequestQueue
     CBaseList_9fd m_listDone;
     void* m_evWork;
 
-    long FUN_009fe7e0(void* request);
+    long QueueAsyncWorkAndStartThread(void* request);
 };
 
 // @fnv 0x009fe7e0
-long AsyncRequestQueue::FUN_009fe7e0(void* request)
+// src: GUESS 0x009fe7e0 (confidence: medium)
+long AsyncRequestQueue::QueueAsyncWorkAndStartThread(void* request)
 {
     S_009fe420_Lock lock(&m_csLists);
     long result;
@@ -7951,7 +8076,8 @@ inline S9fcc60_Sample* RemoveAllocatorSample(S9fcc60_Alloc* allocator)
 }
 // Deletes all free samples from the allocator's free list and releases the underlying buffer via VirtualFree.
 // @fnv 0x009fb170
-void EntryObject::FUN_009fb170()
+// src: GUESS 0x009fb170 (confidence: low)
+void EntryObject::ReleaseStorage_009fb170()
 {
     S9fcc60_Alloc* self = reinterpret_cast<S9fcc60_Alloc*>(this);
     S9fcc60_Sample* node;
@@ -7969,7 +8095,8 @@ void EntryObject::FUN_009fb170()
 }
 
 // @fnv 0x009fb650
-int __stdcall FUN_009fb650(FltMediaFilter* self, void** pClock)
+// src: GUESS 0x009fb650 (confidence: low)
+int __stdcall Object_UpdateState_009fb650(FltMediaFilter* self, void** pClock)
 {
     if (pClock == 0)
     {
@@ -7991,7 +8118,8 @@ struct FUN_009fc600_30
     FUN_009fc600_30(SourceObj*, ResultRec*);
 };
 // @fnv 0x009fcdc0
-int __stdcall FUN_009fcdc0(int a, FUN_009fc600** out)
+// src: GUESS 0x009fcdc0 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fcdc0(int a, FUN_009fc600** out)
 {
     if (!out)
         return 0x80004003;
@@ -8008,12 +8136,13 @@ class AsyncIoWait : public S_009fe420_Cls
 {
   public:
     void* stopEvent;
-    int FUN_009fe500();
+    int ProcessItemsUntilStopEvent();
 };
 
 // Waits on stopEvent and unk68 until stopEvent signals, calling ProcessItems on each wake-up, then returns 0.
 // @fnv 0x009fe500
-int AsyncIoWait::FUN_009fe500()
+// src: GUESS 0x009fe500 (confidence: medium)
+int AsyncIoWait::ProcessItemsUntilStopEvent()
 {
     void* handles[2];
     handles[0] = stopEvent;
@@ -8026,7 +8155,8 @@ int AsyncIoWait::FUN_009fe500()
 }
 
 // @fnv 0x009fbab0
-int __stdcall FUN_009fbab0(void* self)
+// src: GUESS 0x009fbab0 (confidence: low)
+int __stdcall Object_UpdateState_009fbab0(void* self)
 {
     S_009fba40_A* a = (S_009fba40_A*)((char*)self - 0x10);
     int r = a->v20();
@@ -8048,7 +8178,7 @@ int __stdcall FUN_009fbab0(void* self)
 
 struct ResetMediaType_009fc390
 {
-    void FUN_009f9a30();
+    void AM_MEDIA_TYPE_AM_MEDIA_TYPE();
 };
 struct PinConnectionView_009fc390
 {
@@ -8066,7 +8196,8 @@ struct PinConnectionView_009fc390
 };
 
 // @fnv 0x009fc390
-int __stdcall FUN_009fc390(PinConnectionView_009fc390* owner, S_009f9bb0_Rec* target)
+// src: GUESS 0x009fc390 (confidence: low)
+int __stdcall Runtime_EvaluateValue_009fc390(PinConnectionView_009fc390* owner, S_009f9bb0_Rec* target)
 {
     if (!target)
         return 0x80004003;
@@ -8074,11 +8205,11 @@ int __stdcall FUN_009fc390(PinConnectionView_009fc390* owner, S_009f9bb0_Rec* ta
     PinCritSecLock guard(owner->lock);
     if (owner->connected != 0)
     {
-        FUN_009f9bb0(target, &owner->mediaType);
+        Runtime_CopyMemory_009f9bb0(target, &owner->mediaType);
         return 0;
     }
 
-    reinterpret_cast<ResetMediaType_009fc390*>(target)->FUN_009f9a30();
+    reinterpret_cast<ResetMediaType_009fc390*>(target)->AM_MEDIA_TYPE_AM_MEDIA_TYPE();
     return 0x80040209;
 }
 
@@ -8089,7 +8220,8 @@ struct S009fd3c0_FUN_009fa1f0_class
 
 // Stores four data pointers at offsets 0, 8, 0x14 and 0x18, then calls FUN_009fa1f0 on the subobject at offset 8.
 // @fnv 0x009fd3c0
-__declspec(noinline) void FUN_009fddd0_class::FUN_009fd3c0()
+// src: GUESS 0x009fd3c0 (confidence: low)
+__declspec(noinline) void FUN_009fddd0_class::ProcessAndReturnValue_009fd3c0()
 {
     char* base = reinterpret_cast<char*>(this);
 
@@ -8103,7 +8235,7 @@ __declspec(noinline) void FUN_009fddd0_class::FUN_009fd3c0()
 
 struct ReleaseWakeCall
 {
-    void FUN_009fae70();
+    void ReleaseAndClearMember34();
 };
 
 struct Lk_Outer
@@ -8151,7 +8283,8 @@ struct Lk_Owner
 
 // Links b at the head of o's list under a critical section, increments count, and when flag48 is set and count equals p30 clears it and calls o's vtable slot 2.
 // @fnv 0x009fc480
-int __stdcall FUN_009fc480(int apOwner, Lk_Item* apItem)
+// src: GUESS 0x009fc480 (confidence: medium)
+int __stdcall Object_LinkFreeListHeadAndNotify(int apOwner, Lk_Item* apItem)
 {
     if (!apItem)
         return 0x80004003;
@@ -8164,7 +8297,7 @@ int __stdcall FUN_009fc480(int apOwner, Lk_Item* apItem)
         o->head = apItem;
         o->count += 1;
         if (o->p28)
-            ((ReleaseWakeCall*)((char*)o - 0xc))->FUN_009fae70();
+            ((ReleaseWakeCall*)((char*)o - 0xc))->ReleaseAndClearMember34();
         int cnt = o->count;
         if (o->flag48 && cnt == o->p30)
         {
@@ -8191,21 +8324,22 @@ extern void*(__stdcall* DAT_00fdf0b4)(void*, long, long, char const*);
 
 struct AllocatorInitView
 {
-    int* __thiscall FUN_009fcee0(int a, int b);
+    int* __thiscall ProcessAndReturnValue_009fcee0(int a, int b);
 };
 
 struct AllocatorShell_9fcb90 : S9fcc60_Alloc
 {
-    int __thiscall FUN_009fcb90(int a, int b, int c, int d, int e);
+    int __thiscall InitializeAllocatorState(int a, int b, int c, int d, int e);
 };
 
 // Initializes the allocator by calling FUN_009fcee0, zeroing fields, and optionally allocating a handle via DAT_00fdf0b4.
 // @fnv 0x009fcb90
-int __thiscall AllocatorShell_9fcb90::FUN_009fcb90(int a, int b, int apError, int d, int e)
+// src: GUESS 0x009fcb90 (confidence: medium)
+int __thiscall AllocatorShell_9fcb90::InitializeAllocatorState(int a, int b, int apError, int d, int e)
 {
     S9fcc60_Alloc* fields = this;
 
-    reinterpret_cast<AllocatorInitView*>(this)->FUN_009fcee0(a, b);
+    reinterpret_cast<AllocatorInitView*>(this)->ProcessAndReturnValue_009fcee0(a, b);
     DAT_00fdf054(&fields->m_CritSec);
 
     int value = e;
@@ -8242,11 +8376,12 @@ extern int DAT_011f3298;
 
 struct ObjectLifetime : FUN_009fce60_class
 {
-    ObjectLifetime* __thiscall FUN_009fce60(int);
+    ObjectLifetime* __thiscall InitializeFields_009fce60(int);
 };
 
 // @fnv 0x009fce60
-ObjectLifetime* __thiscall ObjectLifetime::FUN_009fce60(int)
+// src: GUESS 0x009fce60 (confidence: low)
+ObjectLifetime* __thiscall ObjectLifetime::InitializeFields_009fce60(int)
 {
     InterlockedIncrement(reinterpret_cast<volatile long*>(&DAT_011f3298));
     return this;
@@ -8257,11 +8392,12 @@ extern "C" __declspec(dllimport) void* __stdcall CreateEventA(void*, int, int, c
 struct FUN_009fcfc0_class
 {
     void* m_p;
-    void* __thiscall FUN_009fcfc0(int a);
+    void* __thiscall CAMEvent_CAMEvent(int a);
 };
 
 // @fnv 0x009fcfc0
-void* __thiscall FUN_009fcfc0_class::FUN_009fcfc0(int a)
+// src: COMMUNITY 0x009fcfc0
+void* __thiscall FUN_009fcfc0_class::CAMEvent_CAMEvent(int a)
 {
     m_p = CreateEventA(0, a, 0, 0);
     return this;
@@ -8372,12 +8508,13 @@ struct AsyncReaderMediaStorage : DsBaseFilter
 
 struct AsyncPinMediaTypes : AsyncOutputPin
 {
-    int FUN_009fd4e0(int position, MediaType* output);
+    int GetFirstMediaType(int position, MediaType* output);
 };
 
 // For position 0, copies the stored media type into output and returns 0; otherwise returns an error or no-more-items code.
 // @fnv 0x009fd4e0
-int AsyncPinMediaTypes::FUN_009fd4e0(int position, MediaType* apMediaType)
+// src: GUESS 0x009fd4e0 (confidence: medium)
+int AsyncPinMediaTypes::GetFirstMediaType(int position, MediaType* apMediaType)
 {
     if (position < 0)
         return 0x80070057;
@@ -8395,12 +8532,13 @@ int AsyncPinMediaTypes::FUN_009fd4e0(int position, MediaType* apMediaType)
 
 struct AsyncFlush : S_009fe420_Cls
 {
-    int FUN_009fe2a0();
+    int ProcessAndReturnValue_009fe2a0();
 };
 
 // Locks unk1C, zeroes unk34, calls DAT_00fdf0d0 or DAT_00fdf1cc on unk6C depending on unk58, then unlocks and returns 0.
 // @fnv 0x009fe2a0
-int AsyncFlush::FUN_009fe2a0()
+// src: GUESS 0x009fe2a0 (confidence: low)
+int AsyncFlush::ProcessAndReturnValue_009fe2a0()
 {
     unk1C.Lock();
     unk34 = 0;
@@ -8421,7 +8559,7 @@ struct FUN_009f9c70 : ::MediaType
 // @fnv 0x009f9c70
 FUN_009f9c70::FUN_009f9c70()
 {
-    void (::FUN_009f9a30_class::*const initialize)() = &::FUN_009f9a30_class::FUN_009f9a30;
+    void (::FUN_009f9a30_class::*const initialize)() = &::FUN_009f9a30_class::AM_MEDIA_TYPE_AM_MEDIA_TYPE;
     (reinterpret_cast< ::FUN_009f9a30_class*>(this)->*initialize)();
 }
 }
@@ -8432,14 +8570,15 @@ static inline ::BasePinStub* PinOwnerFromInterface(::PinIface* pin)
 }
 
 // @fnv 0x009fc300
-int __stdcall FUN_009fc300(::PinIface* self)
+// src: GUESS 0x009fc300 (confidence: low)
+int __stdcall Object_ProcessAndReturnValue_009fc300(::PinIface* self)
 {
     ::PinCritSecLock lock(PinOwnerFromInterface(self)->m_pLock);
     if (!PinOwnerFromInterface(self)->IsStopped())
     {
         return 0x80040224;
     }
-    int(__stdcall* const disconnect)(::FUN_009fa380_cls*) = &::FUN_009fa380;
+    int(__stdcall* const disconnect)(::FUN_009fa380_cls*) = &::Object_ProcessAndReturnValue_009fa380;
     return disconnect(reinterpret_cast< ::FUN_009fa380_cls*>(PinOwnerFromInterface(self)));
 }
 

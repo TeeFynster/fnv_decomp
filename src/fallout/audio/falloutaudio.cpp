@@ -38,7 +38,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
     float fStartHour;
     float soundEndHour;
     BSSimpleList<RegionSound*>* sounds = g_thePlayer->GetRegionSounds();
-    bool isSubmerged = TESLandTexture::GetSoundSystem()->FUN_00ad7c50();
+    bool isSubmerged = TESLandTexture::GetSoundSystem()->IsListenerUnderwater_00ad7c50();
     BGSAcousticSpace* acousticSpace = !g_thePlayer                ? 0
                                       : !g_thePlayer->GetTarget() ? 0
                                                                   : g_thePlayer->GetTarget()->GetAcousticSpace();
@@ -62,7 +62,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
     {
         DAT_011dcfa8 = g_dataHandler->GetSoundByEditorID("UIActivateNothing");
         if (DAT_011dcfa8)
-            TESLandTexture::GetSoundSystem()->Precache(DAT_011dcfa8->FUN_00511840(), 0x121, DAT_011dcfa8);
+            TESLandTexture::GetSoundSystem()->Precache(DAT_011dcfa8->TESSound_GetFilename(), 0x121, DAT_011dcfa8);
     }
     if (!DAT_011dcfb4 && g_thePlayer && g_thePlayer->GetTarget() &&
         g_thePlayer->GetTarget()->GetAcousticSpace() != DAT_011dcfb4)
@@ -78,9 +78,9 @@ void SoundPlaybackManager::ProcessPendingSounds()
             sounds = source.data->GetOffsetC();
     }
     if (DAT_011dcfb4)
-        TESLandTexture::GetSoundSystem()->FUN_00ad79b0(DAT_011dcfb4->GetField4C());
+        TESLandTexture::GetSoundSystem()->SetEnvironment(DAT_011dcfb4->GetField4C());
     else
-        TESLandTexture::GetSoundSystem()->FUN_00ad79b0(0);
+        TESLandTexture::GetSoundSystem()->SetEnvironment(0);
     if (isSubmerged && g_thePlayer->GetTarget() && !DAT_011dd0a0.IsPlaying())
     {
         DAT_011dd0a0 = TESLandTexture::GetSoundSystem()->GetSoundHandleByEditorID("AMBUnderwaterLP", 0x2101);
@@ -95,13 +95,13 @@ void SoundPlaybackManager::ProcessPendingSounds()
         return;
     Sky* pWeatherSky = g_TES->GetLogDate();
     float time = pWeatherSky ? pWeatherSky->GetFieldEC() : 0.0f;
-    TESLandTexture::GetSoundSystem()->FUN_00ad77f0(time, 0);
+    TESLandTexture::GetSoundSystem()->SetConditions(time, 0);
     if (std::abs(TESLandTexture::GetSoundSystem()->GetCurrentTimeMilliseconds() - DAT_011dcfc0) > 1000)
     {
         if (g_thePlayer)
             g_thePlayer->ResetRegionSoundTimer();
         if (!Interface::GetSelectedTargetIndex(Interface::MenuLoading))
-            g_TES->FUN_00455690();
+            g_TES->TES_UpdateRefSounds();
         float fade = DAT_011dd044.Float()->f;
         if (DAT_011dd0d8.IsPlaying())
             fade = DAT_011dd094.Float()->f;
@@ -128,7 +128,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                     TESSound* sound = reinterpret_cast<TESSound*>(reinterpret_cast<LowProcess*>(DAT_011dcfb4)->BaseProcess::GetCurrentBoundObject());
                     if (sound)
                     {
-                        DAT_011dd0d8 = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(sound->FUN_00511840(),
+                        DAT_011dd0d8 = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(sound->TESSound_GetFilename(),
                                                                                                   0x11011, sound);
                         DAT_011dd0d8.FadeInPlay((unsigned int)(fade * 1000.0));
                     }
@@ -209,7 +209,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                     }
                     if (sound)
                     {
-                        DAT_011dd0d8 = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(sound->FUN_00511840(),
+                        DAT_011dd0d8 = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(sound->TESSound_GetFilename(),
                                                                                                   0x11011, sound);
                         DAT_011dd0d8.FadeInPlay((unsigned int)(fade * 1000.0));
                     }
@@ -246,7 +246,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                     continue;
                 }
                 fStartHour = pActiveSound->GetHighByteOfField4E() * 0.09375;
-                soundEndHour = pActiveSound->FUN_0082d700() * 0.09375;
+                soundEndHour = pActiveSound->GetEndTime_0082d700() * 0.09375;
                 looping = TESSound::GetPlaybackFlags(pActiveSound->CopyBig().iFlags) != 0;
                 if (pWeatherSky)
                 {
@@ -268,7 +268,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                 {
                     loopSoundHandle = new BSSoundHandle;
                     *loopSoundHandle = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(
-                        pActiveSound->FUN_00511840(), 0x11011, pActiveSound);
+                        pActiveSound->TESSound_GetFilename(), 0x11011, pActiveSound);
                     loopSoundHandle->SetAssumeSuccess(1);
                     DAT_011dd014.SetAt(pActiveSound->Deallocate(), loopSoundHandle);
                     loopSoundHandle->FadeInPlay((unsigned int)(DAT_011dd06c.Float()->f * 1000.0));
@@ -291,13 +291,13 @@ void SoundPlaybackManager::ProcessPendingSounds()
                     {
                         if (pActiveSound->CopyBig().iFlags & 0x40)
                             kPlaybackHandle = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(
-                                pActiveSound->FUN_00511840(), 0x11101, pActiveSound);
+                                pActiveSound->TESSound_GetFilename(), 0x11101, pActiveSound);
                         else
                             kPlaybackHandle = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(
-                                pActiveSound->FUN_00511840(), 0x11102, pActiveSound);
+                                pActiveSound->TESSound_GetFilename(), 0x11102, pActiveSound);
                         location = *static_cast<const TESObjectREFR*>(g_thePlayer)->GetPos();
                         if (pCurrentListener)
-                            location = pCurrentListener->FUN_00aeaad0();
+                            location = pCurrentListener->GetPosition_00aeaad0();
                         RegionSoundOffset offset;
                         offset.x = DialogueRandom() % 650 + 100;
                         offset.y = DialogueRandom() % 650 + 100;
@@ -373,7 +373,7 @@ void Sky::SetMode(Sky::SKY_MODE mode)
     {
         LoadAllTextures();
         if (m_pClouds)
-            m_pClouds->FUN_0063a610();
+            m_pClouds->ForceTransTextureUpdate();
         if (static_cast<NiAVObject*>(m_pRootNode))
             static_cast<NiAVObject*>(m_pRootNode)->FUN_00450f90(false);
         if (m_pSun)
@@ -411,9 +411,9 @@ bool SoundPlaybackManager::ResolveSoundFile(const char* name, char* path, unsign
     if (!name)
         return false;
     TESSound* sound = g_dataHandler->GetSoundByEditorID(name);
-    if (sound && sound->FUN_00511840() && path)
+    if (sound && sound->TESSound_GetFilename() && path)
     {
-        TaskQueueInterface::CopyStringToBuffer(path, 260, sound->FUN_00511840());
+        TaskQueueInterface::CopyStringToBuffer(path, 260, sound->TESSound_GetFilename());
     }
     else
     {
@@ -448,7 +448,7 @@ bool SoundPlaybackManager::CanPlaySoundAt(TESSound* sound, NiPoint3 position, fl
     if (!sound || !m_pAudioListener)
         return false;
     {
-        NiPoint3 kListenerPosition = m_pAudioListener->FUN_00aeaad0();
+        NiPoint3 kListenerPosition = m_pAudioListener->GetPosition_00aeaad0();
         float fDistance = sound->GetField45() * 100.0 * scale;
         if (std::abs(position.x - kListenerPosition.x) > fDistance ||
             std::abs(position.y - kListenerPosition.y) > fDistance ||
@@ -467,7 +467,7 @@ void SoundPlaybackManager::ResetAcousticSpace(BGSAcousticSpace* space)
     DAT_011dd0d8.Clear();
     DAT_011dcfb4 = 0;
     DAT_011dcfb1 = true;
-    TESLandTexture::GetSoundSystem()->FUN_00ad79b0(0);
+    TESLandTexture::GetSoundSystem()->SetEnvironment(0);
 }
 
 // @fnv 0x0082ec60
@@ -484,7 +484,7 @@ void SoundPlaybackManager::SetAcousticSpace(BGSAcousticSpace* space)
     DAT_011dd0d8.FadeOutAndRelease((unsigned int)(DAT_011dd050.Float()->f * 1000.0));
     DAT_011dd0d8.Clear();
     if (space)
-        TESLandTexture::GetSoundSystem()->FUN_00ad79b0(space->GetField4C());
+        TESLandTexture::GetSoundSystem()->SetEnvironment(space->GetField4C());
     DAT_011dcfb4 = space;
     DAT_011dcfb1 = true;
 }
@@ -517,7 +517,8 @@ TESSound* __cdecl GetUIActivateNothingSound()
 }
 
 // @fnv 0x0082ec40
-void FUN_0082ec40(BGSSaveFormBuffer* buffer)
+// src: COMMUNITY 0x0082ec40
+void TESAudio_SaveGame(BGSSaveFormBuffer* buffer)
 {
     buffer->SerializeFormData(DAT_011dcfa8, 0);
 }

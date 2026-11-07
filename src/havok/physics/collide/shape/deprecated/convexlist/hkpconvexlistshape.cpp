@@ -51,7 +51,8 @@ int __fastcall SumVirtualResults(hkpConvexListShape* self)
 }
 
 // @fnv 0x00d5e2f0
-const hkpShape* __fastcall FUN_00d5e2f0(hkpShapeContainer* self, int edx, int key, int pad)
+// src: HAVOK_LIB 0x00d5e2f0
+const hkpShape* __fastcall hkpConvexListShape_getChildShape(hkpShapeContainer* self, int edx, int key, int pad)
 {
     return reinterpret_cast<hkpConvexListShape*>(reinterpret_cast<char*>(self) - sizeof(hkpConvexShape))->m_kChildShapes.m_data[key];
 }
@@ -78,13 +79,15 @@ hkpShapeContainer* __fastcall GetConvexListContainer(hkpConvexListShape* self)
 }
 
 // @fnv 0x00d5e0d0
-int __cdecl FUN_00d5e0d0()
+// src: GUESS 0x00d5e0d0 (confidence: high)
+int __cdecl hkpConvexListShape_ReturnZero()
 {
     return 0;
 }
 
 // @fnv 0x00d5e0e0
-int __stdcall FUN_00d5e0e0(int)
+// src: GUESS 0x00d5e0e0 (confidence: high)
+int __stdcall Object_ReturnZero_00d5e0e0(int)
 {
     return 0;
 }
@@ -267,7 +270,7 @@ void hkpConvexListShape::UpdateCachedAabb(bool bUseCachedAabb) throw()
 
 namespace fnv_00d5e3c0 {
 
-void __cdecl FUN_00d26230(const hkTransform& kLocalToWorld, const hkVector4& m_kPoint2,
+void __cdecl hkAabbUtil_calcAabb_00d26230(const hkTransform& kLocalToWorld, const hkVector4& m_kPoint2,
                           const hkVector4& kTargetCenter, float fExtraRadius, hkAabb& kAabbOut);
 
 // Computes the world-space AABB of a convex list shape, using cached extents when available or merging child shape AABBs otherwise.
@@ -277,7 +280,7 @@ void __fastcall CalculateConvexListAabb(const hkpConvexListShape* self, void*,
 {
     if (self->m_bUseCachedAabb)
     {
-        FUN_00d26230(kLocalToWorld, self->m_kAabbHalfExtents, self->m_kAabbCenter, self->m_fSphereRadius + fTolerance, kOut);
+        hkAabbUtil_calcAabb_00d26230(kLocalToWorld, self->m_kAabbHalfExtents, self->m_kAabbCenter, self->m_fSphereRadius + fTolerance, kOut);
         return;
     }
 
@@ -351,7 +354,8 @@ extern int DAT_01268940;
 extern const char str_010cc3a4[];
 
 // @fnv 0x00d5e480
-void hkpConvexListShape::FUN_00d5e480(hkStatisticsCollector* visitor, int)
+// src: HAVOK_LIB 0x00d5e480
+void hkpConvexListShape::calcContentStatistics_00d5e480(hkStatisticsCollector* visitor, int)
 {
     const int& capacity = m_kChildShapes.m_iCapacityState;
     if (!(capacity & 0x80000000) || visitor->m_reportInplaceAllocations != 0)
@@ -371,7 +375,7 @@ void hkpConvexListShape::FUN_00d5e480(hkStatisticsCollector* visitor, int)
         }
     }
 
-    FUN_00c90360(visitor, &DAT_01268940);
+    hkReferencedObject_calcContentStatistics(visitor, &DAT_01268940);
 }
 
 
@@ -407,7 +411,7 @@ struct Node
     virtual void v14();
     virtual void v18();
     virtual void v1C();
-    virtual bool* FUN_00d5e500(bool* __restrict result, void* other, State* st);
+    virtual bool* hkpConvexListShape_castRayImpl(bool* __restrict result, void* other, State* st);
     DWORD unk04, unk08, unk0C, unk10;
     Coll coll;
 };
@@ -418,7 +422,8 @@ struct __declspec(align(16)) Buf
 
 // Recursively searches coll children for a match, records the selected id in st->slots, and sets *result to whether one was found.
 // @fnv 0x00d5e500
-bool* Node::FUN_00d5e500(bool* __restrict result, void* other, State* st)
+// src: HAVOK_LIB 0x00d5e500
+bool* Node::hkpConvexListShape_castRayImpl(bool* __restrict result, void* other, State* st)
 {
     Buf buf;
     struct F
@@ -440,7 +445,7 @@ bool* Node::FUN_00d5e500(bool* __restrict result, void* other, State* st)
     int iSelected = -1;
     for (int id = coll.First(); id != -1; id = coll.Next(id))
     {
-        coll.Get(id, &buf)->FUN_00d5e500(&found.d, other, st);
+        coll.Get(id, &buf)->hkpConvexListShape_castRayImpl(&found.d, other, st);
         if (found.d)
             iSelected = id;
     }
@@ -552,7 +557,7 @@ void __fastcall CastConvexListRayWithCollector(const hkpConvexListShape* self, v
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (0x14).
 struct PrimaryBase
 {
-    virtual void FUN_00d5e840();
+    virtual void AdjustThisAndForward_00d5e840();
     int unk04;
     int unk08;
     int unk0C;
@@ -561,14 +566,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00d5e840();
+    virtual void AdjustThisAndForward_00d5e840();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00d5e840
-    virtual void FUN_00d5e840();
+// src: GUESS 0x00d5e840 (confidence: low)
+    virtual void AdjustThisAndForward_00d5e840();
 };
 
 Derived::Derived()

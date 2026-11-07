@@ -36,7 +36,7 @@ public:
     bool IsMediaLocationActive();
     DEADREPFLAGS GetDeadRep();
     void ResetFormData();
-    int FUN_00598000();
+    int GetLoop();
     bool GetByteAtOffset55();
 
     unsigned int m_fUpdateCooldown;

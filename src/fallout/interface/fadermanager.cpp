@@ -133,8 +133,8 @@ void FaderManager::AddFader(FADER_ENUM eFader, float fDuration, bool bFadeOut)
     FaderSurfaceParameters surface;
     surface.pTexCoords = new NiPoint2[4];
     unsigned short* pTriangles = (unsigned short*)_NiMalloc(12);
-    float fHalfScreenWidth = FUN_004dc1f0() * 0.5;
-    float fHalfHeight = FUN_004dc200() * 0.5;
+    float fHalfScreenWidth = Renderer_GetScreenWidth() * 0.5;
+    float fHalfHeight = Renderer_GetScreenHeight() * 0.5;
     pScreenVertices[0] = NiPoint3(-fHalfScreenWidth, 0.0f, fHalfHeight);
     pScreenVertices[1] = NiPoint3(-fHalfScreenWidth, 0.0f, -fHalfHeight);
     pScreenVertices[2] = NiPoint3(fHalfScreenWidth, 0.0f, fHalfHeight);
@@ -152,7 +152,7 @@ void FaderManager::AddFader(FADER_ENUM eFader, float fDuration, bool bFadeOut)
     s_faders[eFader].pFadeNode = (BSFadeNode*)new NiSortAdjustNode(0);
     s_faders[eFader].pFadeNode->SetName(NiFixedString(s_faders[eFader].pTextureName));
     NiAlphaProperty* pBlendingProperty = new NiAlphaProperty;
-    pBlendingProperty->FUN_0049ed90(true);
+    pBlendingProperty->NiAlphaProperty_SetAlphaBlending(true);
     s_faders[eFader].pFadeNode->AttachProperty(pBlendingProperty);
     NiTriShape* faderShape = new NiTriShape(4, pScreenVertices, 0, 0, surface.pTexCoords, 1, 0, 2, pTriangles);
     s_faders[eFader].pFadeNode->AttachChildInAvailableSlot(faderShape, true);
@@ -169,7 +169,7 @@ void FaderManager::AddFader(FADER_ENUM eFader, float fDuration, bool bFadeOut)
     }
     TileShaderProperty* pTileShader = new TileShaderProperty(false);
     pTileShader->SetTextureImage(spTextureImage);
-    pTileShader->FUN_008cc6d0(3);
+    pTileShader->EffectSetting_SetAreaSound(3);
     pTileShader->SetAlpha(surface.fInitialAlpha);
     faderShape->AttachProperty((NiObject*)pTileShader);
     s_faders[eFader].m_pParentNode = (NiNode*)pTileShader;
@@ -210,17 +210,17 @@ void FaderManager::AddRoot(NiNode* pParent, float m_fProjectionDepth, bool abBel
     // This helper's canonical binding is a folded NiObject::LinkObject alias.
     apTargetLight->NiObject::LinkObject(*(NiStream*)pSortAdjustNode);
     pSortAdjustNode->AttachChildInAvailableSlot(apTargetLight, true);
-    float m_fGlyphWidthInPixels = (float)FUN_004dc1f0();
-    float halfHeight = (float)FUN_004dc200();
+    float m_fGlyphWidthInPixels = (float)Renderer_GetScreenWidth();
+    float halfHeight = (float)Renderer_GetScreenHeight();
     float fScale = 1.0f;
     if (halfHeight / m_fGlyphWidthInPixels != 0.75)
         fScale = 4.0f / 3.0f;
     if (m_fGlyphWidthInPixels != 1280.0)
         fScale *= 1280.0 / m_fGlyphWidthInPixels;
-    if (FUN_004de070())
+    if (is_bEyeFinity())
         fScale = 1.0f;
-    pSortAdjustNode->FUN_00440490(fScale);
-    pSortAdjustNode->FUN_00440460(NiPoint3(0.0f, m_fProjectionDepth, 0.0f));
+    pSortAdjustNode->NiAVObject_SetScale(fScale);
+    pSortAdjustNode->NiAVObject_SetTranslate(NiPoint3(0.0f, m_fProjectionDepth, 0.0f));
     pParent->AttachChildInAvailableSlot((NiAVObject*)pSortAdjustNode, true);
 }
 
@@ -268,11 +268,12 @@ struct FaderRec7
 };
 struct FM7
 {
-    bool FUN_007014a0(int);
+    bool FaderManager_IsFaderActive(int);
 };
 // Returns true when the fader record at idx has a nonzero f10 and a nonzero f8.
 // @fnv 0x007014a0
-bool FM7::FUN_007014a0(int aiIndex)
+// src: COMMUNITY 0x007014a0
+bool FM7::FaderManager_IsFaderActive(int aiIndex)
 {
     FaderRec7* f = (FaderRec7*)&s_faders[aiIndex];
     if (f->f10 && f->f8)
@@ -288,14 +289,15 @@ struct FUN_006ffe80_shell
 {
     int m_00, m_04, m_08, m_0c, m_10, m_14, m_18, m_1c, m_20, m_24;
     unsigned char m_28, m_29;
-    void FUN_006ffe80(int, int);
-    void FUN_006ffe10();
+    void AnimatingText_SetTraits(int, int);
+    void AnimatingText_Initialize();
 };
 // Calls FUN_006ffe80(0, 0), then initializes fields from DAT_0119f278/27c/280 and zeroes m_20, m_1c, m_24, m_29 while setting m_28 to 1.
 // @fnv 0x006ffe10
-void FUN_006ffe80_shell::FUN_006ffe10()
+// src: XBOX_PDB 0x006ffe10
+void FUN_006ffe80_shell::AnimatingText_Initialize()
 {
-    FUN_006ffe80(0, 0);
+    AnimatingText_SetTraits(0, 0);
     m_10 = DAT_0119f278;
     m_14 = DAT_0119f27c;
     m_18 = DAT_0119f280;

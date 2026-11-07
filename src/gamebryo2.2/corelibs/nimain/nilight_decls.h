@@ -49,7 +49,7 @@ class NiAVObject : public NiObjectNET
     virtual void vfn_48();
     virtual void LoadBinary(NiStream&);
     virtual void LinkObject(NiStream&);
-    void FUN_00a5ac90(NiAVObject*, CloningProcess&);
+    void CopyMembers_00a5ac90(NiAVObject*, CloningProcess&);
     NiNode* m_pParentNode;
     NiPointer<NiCollisionObject> m_spCollisionObject;
     FourComponentFloatVector* m_kWorldBound;

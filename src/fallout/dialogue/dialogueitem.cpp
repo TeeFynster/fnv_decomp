@@ -33,7 +33,8 @@ TESObjectREFR* __fastcall GetDialogueItemReferenceAt6C(DialogueItem* item)
 void* __fastcall _ref_00726070(void* pThis);
 
 // @fnv 0x0083c7e0
-bool DialogueItem::FUN_0083c7e0()
+// src: XBOX_PDB 0x0083c7e0
+bool DialogueItem::NextResponse_0083c7e0()
 {
     if (m_pCurrentResponseList)
     {
@@ -86,7 +87,7 @@ DialogueItem::~DialogueItem()
 
 struct FUN_0083c9e0_resp
 {
-    unsigned short FUN_0083d420();
+    unsigned short ProcessAndReturnValue_0083d420();
 };
 // @fnv 0x0083c9e0
 unsigned short __fastcall GetDialogueItemSaveSize(DialogueItem* item)
@@ -97,7 +98,7 @@ unsigned short __fastcall GetDialogueItemSaveSize(DialogueItem* item)
     while (pIter && !pIter->IsEmpty())
     {
         FUN_0083c9e0_resp* pResponse = reinterpret_cast<FUN_0083c9e0_resp*>(pIter->GetItem());
-        usSize += pResponse->FUN_0083d420();
+        usSize += pResponse->ProcessAndReturnValue_0083d420();
         pIter = pIter->GetNext();
     }
     usSize += 1;
@@ -180,7 +181,7 @@ void __fastcall SaveDialogueItemToSave(DialogueItem* item)
 {
     char cCount4 = 0;
     char* pCountPos8 = g_TESSaveLoadGame->GetCurrentPosition();
-    g_TESSaveLoadGame->FUN_008579b0(&cCount4, 1);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&cCount4, 1);
     BSSimpleList<DialogueResponse*>* plist2 = &item->m_kResponseList;
     while (plist2 && !plist2->IsEmpty())
     {
@@ -194,27 +195,27 @@ void __fastcall SaveDialogueItemToSave(DialogueItem* item)
     char cCurrentVal = -1;
     if (item->m_pCurrentResponseList)
         cCurrentVal = item->GetResponseIndex(item->m_pCurrentResponseList->GetItem());
-    g_TESSaveLoadGame->FUN_008579b0(&cCurrentVal, 1);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&cCurrentVal, 1);
 
     unsigned int aIInfoID = 0;
     if (item->pInfo)
         aIInfoID = item->pInfo->GetFormID();
-    g_TESSaveLoadGame->FUN_00857a10(static_cast<void*>(&aIInfoID), 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(static_cast<void*>(&aIInfoID), 4);
 
     unsigned int m_uiTopicFormID = 0;
     if (item->pTopic)
         m_uiTopicFormID = item->pTopic->GetFormID();
-    g_TESSaveLoadGame->FUN_00857a10(static_cast<void*>(&m_uiTopicFormID), 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(static_cast<void*>(&m_uiTopicFormID), 4);
 
     unsigned int iQuestID_2 = 0;
     if (item->pQuest)
         iQuestID_2 = item->pQuest->GetFormID();
-    g_TESSaveLoadGame->FUN_00857a10(static_cast<void*>(&iQuestID_2), 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(static_cast<void*>(&iQuestID_2), 4);
 
     unsigned int iSpeakerID = 0;
     if (item->m_pDialogueSpeaker)
         iSpeakerID = item->m_pDialogueSpeaker->GetFormID();
-    g_TESSaveLoadGame->FUN_00857a10(static_cast<void*>(&iSpeakerID), 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID(static_cast<void*>(&iSpeakerID), 4);
 }
 
 TESForm* GetFormByID(unsigned int);
@@ -230,7 +231,7 @@ void __fastcall ResolveDialogueItemSpeaker(DialogueItem* item)
 
 struct DialogueResponseBufferWriter
 {
-    void FUN_0083d690(BGSSaveGameBuffer*);
+    void DialogueResponse_SaveGame(BGSSaveGameBuffer*);
 };
 struct DialogueSaveBufferArgument
 {
@@ -247,19 +248,19 @@ void __fastcall SaveDialogueItemToBuffer(DialogueItem* item, DialogueSaveBufferA
     unsigned int isaveGameCount;
 
     isaveGameCount = 0;
-    isaveGameBufferPos = argument.buffer->FUN_00865f20();
+    isaveGameBufferPos = argument.buffer->StartVariableSizedValue();
     pCurrentElementNext = &item->m_kResponseList;
     while (pCurrentElementNext)
     {
         ::DialogueResponse* presponse = pCurrentElementNext->GetItem();
         if (presponse)
         {
-            reinterpret_cast<DialogueResponseBufferWriter*>(presponse)->FUN_0083d690(argument.buffer);
+            reinterpret_cast<DialogueResponseBufferWriter*>(presponse)->DialogueResponse_SaveGame(argument.buffer);
             isaveGameCount++;
         }
         pCurrentElementNext = pCurrentElementNext->GetNext();
     }
-    argument.buffer->FUN_00865ff0(isaveGameCount, isaveGameBufferPos);
+    argument.buffer->SaveVariableSizedValue_00865ff0(isaveGameCount, isaveGameBufferPos);
     scurrentResponse = item->m_pCurrentResponseList ? item->GetResponseIndex(item->m_pCurrentResponseList->GetItem()) : -1;
     argument.buffer->SaveData(static_cast<void*>(&scurrentResponse), 2, 0);
     argument.buffer->SerializeFormData(static_cast<void*>(item->pInfo), 0);
@@ -318,7 +319,7 @@ class DialogueResponse
 {
   public:
     DialogueResponse();
-    void FUN_0083d550();
+    void DialogueResponse_LoadGame();
     BSStringT<char> m_kResponseText;
     unsigned int eEmotion;
     unsigned int m_uiEmotionValue;
@@ -342,15 +343,15 @@ void __fastcall LoadDialogueItemFromSave(DialogueItem* item)
     unsigned int iQuestID_2;
     unsigned int iSpeakerID;
 
-    g_TESSaveLoadGame->FUN_008579e0(&cCount4, 1);
+    g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&cCount4, 1);
     for (iloopB = 0; iloopB < cCount4; iloopB++)
     {
         presponse3 = reinterpret_cast< ::DialogueResponse*>(new DialogueResponse);
-        reinterpret_cast<DialogueResponse*>(presponse3)->FUN_0083d550();
+        reinterpret_cast<DialogueResponse*>(presponse3)->DialogueResponse_LoadGame();
         item->m_kResponseList.AddTail(presponse3);
     }
 
-    g_TESSaveLoadGame->FUN_008579e0(&cCurrentVal, 1);
+    g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&cCurrentVal, 1);
     // The equivalent thiscall signature avoids a temporary value-type argument.
     if (cCurrentVal != -1)
         reinterpret_cast<void (__thiscall*)(DialogueItem*, DialogueResponse*)>(SetActiveDialogueResponse)(

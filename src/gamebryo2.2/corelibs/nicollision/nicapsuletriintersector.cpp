@@ -40,7 +40,7 @@ inline void AccumulateContactPoint(NiPoint3& point, const NiPoint3& displacement
 struct CollisionTriangle
 {
     NiPoint3 origin, edge0, edge1;
-    NiPoint3 FUN_00eb3830() const;
+    NiPoint3 NiTrigon_GetNormal() const;
 };
 struct S_eb5ce0_Obj
 {
@@ -59,14 +59,15 @@ struct S_eb5ce0_Obj
     int unk60;
     float s64;
     float s68;
-    void FUN_00eb5ce0(int unused, const NiPoint3* d);
+    void NiCapsuleTriIntersector_ComputeContactInformation(int unused, const NiPoint3* d);
 };
 // Computes the contact point and opposing triangle normal, then applies motion at the contact time in mode 2.
 // @fnv 0x00eb5ce0
-void S_eb5ce0_Obj::FUN_00eb5ce0(int unused, const NiPoint3* d)
+// src: GAMEBRYO_SRC 0x00eb5ce0
+void S_eb5ce0_Obj::NiCapsuleTriIntersector_ComputeContactInformation(int unused, const NiPoint3* d)
 {
     p20 = (triangle.origin + triangle.edge0 * s64) + triangle.edge1 * s68;
-    p2c = -triangle.FUN_00eb3830();
+    p2c = -triangle.NiTrigon_GetNormal();
     if (mode == 2)
     {
         AccumulateContactPoint(p20, *d * unk1c);
@@ -99,7 +100,7 @@ struct Frame2
     CapsuleAxis pair;
     Triple856 triple;
 };
-float __cdecl FUN_00eb1d20(NiPoint3* a, NiPoint3* b, float* time, float* p, float* q);
+float __cdecl NiSqrDistance_Compute_00eb1d20(NiPoint3* a, NiPoint3* b, float* time, float* p, float* q);
 class Native856
 {
   public:
@@ -117,5 +118,5 @@ float Native856::Evaluate(const NiPoint3* apOffset, const NiPoint3* b, float s)
     pair.points[0] += *apOffset * s;
     localTriple.points[0] += *b * s;
     float time;
-    return (float)((double)(FUN_00eb1d20(pair.points, localTriple.points, &time, &p, &q) * scale) - DAT_01012070);
+    return (float)((double)(NiSqrDistance_Compute_00eb1d20(pair.points, localTriple.points, &time, &p, &q) * scale) - DAT_01012070);
 }

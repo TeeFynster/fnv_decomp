@@ -31,14 +31,14 @@ FUN_009f91b0::FUN_009f91b0()
 
 struct FUN_009e9c10
 {
-    void FUN_009e9c30();
+    void SetVtableAndProcessState_009e9c30();
     void Call();
 };
 
 // @fnv 0x009e9c10
 void FUN_009e9c10::Call()
 {
-    FUN_009e9c30();
+    SetVtableAndProcessState_009e9c30();
 }
 
 extern "C" void* DAT_010939ec;
@@ -48,13 +48,14 @@ struct FUN_009f2970_Class
     void* m_iWordAt00;
     void* m_iWordAt04;
     void* m_8;
-    void FUN_009f2970(void* arg);
+    void GuardActorPackageData_SetTarget(void* arg);
 };
 // @fnv 0x009f2970
-void FUN_009f2970_Class::FUN_009f2970(void* arg)
+// src: COMMUNITY 0x009f2970
+void FUN_009f2970_Class::GuardActorPackageData_SetTarget(void* arg)
 {
     m_8 = arg;
-    ((TESObjectREFR*)m_8)->FUN_00564db0(true);
+    ((TESObjectREFR*)m_8)->TESObjectREFR_SetTargeted(true);
 }
 
 extern "C" void* DAT_01093614;
@@ -217,12 +218,13 @@ struct FUN_009f90f0_Class
     unsigned int m_iThirdValue;
     virtual ~FUN_009f90f0_Class();
     virtual unsigned int Write(unsigned int);
-    void FUN_009f8de0(unsigned int, unsigned int);
-    void FUN_009f90f0(unsigned int requested, unsigned int savedSize);
+    void ProcessEntries_009f8de0(unsigned int, unsigned int);
+    void BSSimpleArray_SpectatorThreatInfo_1024_Initialize(unsigned int requested, unsigned int savedSize);
 };
 
 // @fnv 0x009f90f0
-void FUN_009f90f0_Class::FUN_009f90f0(unsigned int uiRequestedSize, unsigned int savedSize)
+// src: COMMUNITY 0x009f90f0
+void FUN_009f90f0_Class::BSSimpleArray_SpectatorThreatInfo_1024_Initialize(unsigned int uiRequestedSize, unsigned int savedSize)
 {
     m_iWordAt04 = 0;
     m_8 = 0;
@@ -238,7 +240,7 @@ void FUN_009f90f0_Class::FUN_009f90f0(unsigned int uiRequestedSize, unsigned int
     }
     if (savedSize > 0)
     {
-        FUN_009f8de0(m_iWordAt04, savedSize);
+        ProcessEntries_009f8de0(m_iWordAt04, savedSize);
         m_8 = savedSize;
     }
 }
@@ -254,7 +256,7 @@ struct Host9f6340
     int iDataLength;
     virtual void v0();
     virtual int Write(unsigned int);
-    void FUN_009f6460(int, int);
+    void BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(int, int);
     void ResetAndWrite(unsigned int requested, unsigned int savedSize);
 };
 
@@ -273,7 +275,7 @@ void Host9f6340::ResetAndWrite(unsigned int requested, unsigned int savedSize)
     }
     if (savedSize > 0)
     {
-        FUN_009f6460(iSize, savedSize);
+        BSSimpleArray_SandBoxChoiceListItem_1024_ConstructItems(iSize, savedSize);
         iPosition = savedSize;
     }
 }
@@ -347,7 +349,8 @@ void* GlobalObject_009e9bb0::ReleaseIfFlagged(unsigned int flags)
 extern int DAT_01092930;
 
 // @fnv 0x009e9c30
-void FUN_009e9c10::FUN_009e9c30()
+// src: GUESS 0x009e9c30 (confidence: low)
+void FUN_009e9c10::SetVtableAndProcessState_009e9c30()
 {
     *(void**)this = &DAT_01092930;
     NiTMallocInterface<Actor*>::Deallocate(*(Actor***)((char*)this + 4));
@@ -364,7 +367,7 @@ struct FUN_009e9c60_Class : FUN_009e9c10
 // @fnv 0x009e9c60
 void* FUN_009e9c60_Class::FUN_009e9c60(unsigned int flags)
 {
-    FUN_009e9c30();
+    SetVtableAndProcessState_009e9c30();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -423,11 +426,12 @@ class FUN_009e99a0_cls
 
     int GetCount();
     void RegisterEntry(FUN_009e99a0_Entry* entry, int flag);
-    int FUN_009e99a0(unsigned int value);
+    int BSSimpleArray_DetailedActorPathHandler_ActorAvoidanceData_1024_Add(unsigned int value);
 };
 
 // @fnv 0x009e99a0
-int FUN_009e99a0_cls::FUN_009e99a0(unsigned int value)
+// src: COMMUNITY 0x009e99a0
+int FUN_009e99a0_cls::BSSimpleArray_DetailedActorPathHandler_ActorAvoidanceData_1024_Add(unsigned int value)
 {
     int iIndex = GetCount();
     RegisterEntry(m_pEntries + iIndex, 1);
@@ -438,11 +442,12 @@ int FUN_009e99a0_cls::FUN_009e99a0(unsigned int value)
 class FUN_009eb620_cls
 {
   public:
-    int FUN_009eb620();
+    int ProcessLists_GetCrimeNumber();
 };
 
 // @fnv 0x009eb620
-int FUN_009eb620_cls::FUN_009eb620()
+// src: XBOX_PDB 0x009eb620
+int FUN_009eb620_cls::ProcessLists_GetCrimeNumber()
 {
     return (*(int*)((char*)this + 0x103b8))++;
 }
@@ -451,11 +456,11 @@ struct S_009eb8a0_Time
 {
     int FUN_00867d20();
     char FUN_00867d60();
-    int FUN_00867c60();
+    int Calendar_GetYear();
 };
 struct S_009eb8a0_Setting
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 extern S_009eb8a0_Time DAT_011de7b8;
 extern S_009eb8a0_Setting DAT_011cd39c;
@@ -473,14 +478,15 @@ struct S_009eb8a0_Cls
     int unk28;
     int unk2c;
     int unk30;
-    bool FUN_009eb8a0();
+    bool Crime_ShouldCrimeBeRemoved();
 };
 // @fnv 0x009eb8a0
-bool S_009eb8a0_Cls::FUN_009eb8a0()
+// src: COMMUNITY 0x009eb8a0
+bool S_009eb8a0_Cls::Crime_ShouldCrimeBeRemoved()
 {
-    int now4 = (DAT_011de7b8.FUN_00867d20() << 9) | DAT_011de7b8.FUN_00867d60() | (DAT_011de7b8.FUN_00867c60() << 13);
+    int now4 = (DAT_011de7b8.FUN_00867d20() << 9) | DAT_011de7b8.FUN_00867d60() | (DAT_011de7b8.Calendar_GetYear() << 13);
     bool result5 = false;
-    if (now4 - unk30 >= *DAT_011cd39c.FUN_0043d4d0())
+    if (now4 - unk30 >= *DAT_011cd39c.Setting_Int())
     {
         result5 = true;
     }
@@ -966,7 +972,7 @@ struct GameReference
     virtual void unknownVirtual_109();
     virtual void unknownVirtual_10a();
     virtual GameReference* GetLinkedReference();
-    void FUN_00564db0(bool enabled);
+    void TESObjectREFR_SetTargeted(bool enabled);
 };
 struct ReferenceLinkController
 {
@@ -975,7 +981,7 @@ struct ReferenceLinkController
     unsigned int unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28;
     bool enabled;
     bool hasLinkedReference;
-    void FUN_009f6d50();
+    void SpectatorThreatInfo_Update();
     void SetSourceReference(GameReference* reference);
 };
 // @fnv 0x009f6c20
@@ -985,15 +991,15 @@ void ReferenceLinkController::SetSourceReference(GameReference* apSource)
     linked = apSource->GetLinkedReference();
     enabled = true;
     hasLinkedReference = linked != 0;
-    source->FUN_00564db0(true);
+    source->TESObjectREFR_SetTargeted(true);
     if (linked)
-        linked->FUN_00564db0(true);
-    FUN_009f6d50();
+        linked->TESObjectREFR_SetTargeted(true);
+    SpectatorThreatInfo_Update();
 }
 
 struct FUN_0045cec0
 {
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
     void FUN_0066b0d0(int release);
     ~FUN_0045cec0();
 };
@@ -1058,7 +1064,7 @@ struct Reference
     virtual void slot_0e0();
     virtual void slot_0e4();
     virtual void NotifyOwner(void* owner);
-    Reference* FUN_009611e0();
+    Reference* NiAVObject_GetParent();
 };
 struct FUN_009f6c90
 {
@@ -1081,11 +1087,11 @@ struct FUN_009f6c90
 // @fnv 0x009f6c90
 FUN_009f6c90::~FUN_009f6c90()
 {
-    if (ref.FUN_00559450())
+    if (ref.Modelloader_GetReferencedThis())
     {
-        if (((Reference*)ref.FUN_00559450())->FUN_009611e0())
+        if (((Reference*)ref.Modelloader_GetReferencedThis())->NiAVObject_GetParent())
         {
-            ((Reference*)ref.FUN_00559450())->FUN_009611e0()->NotifyOwner(ref.FUN_00559450());
+            ((Reference*)ref.Modelloader_GetReferencedThis())->NiAVObject_GetParent()->NotifyOwner(ref.Modelloader_GetReferencedThis());
         }
         ref.FUN_0066b0d0(0);
     }
@@ -1135,11 +1141,11 @@ struct ItemCls;
 struct MidCls;
 struct DestCls
 {
-    void FUN_00905330(FUN_009eb660* const&);
+    void RemoveMatchingItem(FUN_009eb660* const&);
 };
 struct MidCls
 {
-    DestCls* FUN_0041cf00();
+    DestCls* ExtraDataList_GetPlayerCrimeList();
 };
 struct SrcCls
 {
@@ -1208,14 +1214,14 @@ struct SrcCls
     virtual void unknownVirtual_62();
     virtual void unknownVirtual_63();
     virtual bool VCall100();
-    MidCls* FUN_005d43c0();
+    MidCls* BSFile_GetDevice();
 };
 struct ItemCls
 {
-    void FUN_0047eb90(int);
-    bool FUN_008a61b0();
-    void FUN_00881680(int);
-    MidCls* FUN_005d43c0();
+    void ForwardCall_0047eb90(int);
+    bool Actor_IsAlarmed();
+    void Actor_EndInterruptPackage(int);
+    MidCls* BSFile_GetDevice();
 };
 // Exe 0x009eb660: unit-local ListNode view; declarations and layout are preserved.
 struct BlkListNodeView
@@ -1243,11 +1249,11 @@ struct ListMember
 };
 struct DHCls
 {
-    bool FUN_004226e0();
+    bool TESDataHandler_GetClearingData();
 };
 struct GlobalCls
 {
-    void FUN_009726e0(FUN_009eb660*);
+    void ProcessLists_RemoveCrimeGlobalCrimeList(FUN_009eb660*);
     bool IsActorInOtherList(ItemCls*, FUN_009eb660*);
     BlkListNodeView* FindDialogueSpeakers(FUN_009eb660*, int);
 };
@@ -1265,7 +1271,7 @@ struct FUN_009eb660
     int f18;
     ListMember m1c;
     BlkListNodeView* m38;
-    void FUN_009eba30();
+    void Crime_ClearActorKnowList();
     SrcCls* FUN_0044ddc0();
     ~FUN_009eb660();
 };
@@ -1273,7 +1279,7 @@ struct FUN_009eb660
 // @fnv 0x009eb660
 FUN_009eb660::~FUN_009eb660()
 {
-    if (DAT_011c3f2c != 0 && !DAT_011c3f2c->FUN_004226e0())
+    if (DAT_011c3f2c != 0 && !DAT_011c3f2c->TESDataHandler_GetClearingData())
     {
         SrcCls* pACopy;
         BlkListNodeView* pA3;
@@ -1283,19 +1289,19 @@ FUN_009eb660::~FUN_009eb660()
         SrcCls* destA8;
         DestCls* destB_;
         ItemCls* item6;
-        FUN_009eba30();
-        DAT_011e0e80.FUN_009726e0(this);
+        Crime_ClearActorKnowList();
+        DAT_011e0e80.ProcessLists_RemoveCrimeGlobalCrimeList(this);
         if (f08 != 0)
         {
-            if (f08->FUN_005d43c0()->FUN_0041cf00() != 0)
-                f08->FUN_005d43c0()->FUN_0041cf00()->FUN_00905330(this);
+            if (f08->BSFile_GetDevice()->ExtraDataList_GetPlayerCrimeList() != 0)
+                f08->BSFile_GetDevice()->ExtraDataList_GetPlayerCrimeList()->RemoveMatchingItem(this);
         }
         pB6 = m38;
         while (pB6 != 0 && !pB6->FUN_008256d0())
         {
             node5 = (ItemCls*)*pB6->FUN_006815c0();
             if (!DAT_011e0e80.IsActorInOtherList(node5, this))
-                node5->FUN_0047eb90(0);
+                node5->ForwardCall_0047eb90(0);
             pB6 = pB6->FUN_00726070();
         }
         pACopy = FUN_0044ddc0();
@@ -1304,20 +1310,20 @@ FUN_009eb660::~FUN_009eb660()
             if (pACopy->VCall100())
             {
                 destA8 = pACopy;
-                itemB = destA8->FUN_005d43c0()->FUN_0041cf00();
+                itemB = destA8->BSFile_GetDevice()->ExtraDataList_GetPlayerCrimeList();
                 if (itemB != 0)
-                    itemB->FUN_00905330(this);
+                    itemB->RemoveMatchingItem(this);
             }
         }
         pA3 = DAT_011e0e80.FindDialogueSpeakers(this, 1);
         while (pA3 != 0)
         {
             item6 = (ItemCls*)*pA3->FUN_006815c0();
-            if (item6->FUN_008a61b0())
-                item6->FUN_00881680(0);
-            destB_ = item6->FUN_005d43c0()->FUN_0041cf00();
+            if (item6->Actor_IsAlarmed())
+                item6->Actor_EndInterruptPackage(0);
+            destB_ = item6->BSFile_GetDevice()->ExtraDataList_GetPlayerCrimeList();
             if (destB_ != 0)
-                destB_->FUN_00905330(this);
+                destB_->RemoveMatchingItem(this);
         }
     }
     if (m38 != 0)
@@ -1328,9 +1334,10 @@ FUN_009eb660::~FUN_009eb660()
     m1c.FUN_00470470();
 }
 
-void FUN_006d7110(void*, void*, NiPoint3*, float, NiPoint3*);
+void Pathing_FindPointOnNavMesh(void*, void*, NiPoint3*, float, NiPoint3*);
 // @fnv 0x009ed380
-NiPoint3 FUN_009ed380(TESObjectREFR* source, TESObjectREFR* target)
+// src: COMMUNITY 0x009ed380
+NiPoint3 BackUpPackage_CalculateBackUpPointInterior(TESObjectREFR* source, TESObjectREFR* target)
 {
     NiPoint3 result = NiPoint3::ZERO;
     if (target && source)
@@ -1339,11 +1346,11 @@ NiPoint3 FUN_009ed380(TESObjectREFR* source, TESObjectREFR* target)
         NiPoint3 distance = *static_cast<const TESObjectREFR*>(source)->GetPos();
         float targetPos = 300.0f;
         NiPoint3 sourcePos = distance - cell;
-        sourcePos.FUN_004a0c10();
+        sourcePos.Unitize_004a0c10();
         sourcePos = distance + sourcePos * targetPos;
         result = sourcePos;
         void* direction = source->GetParentCellStub();
-        FUN_006d7110(source->FUN_00575d70(), direction, &sourcePos, 200.0f, &result);
+        Pathing_FindPointOnNavMesh(source->TESObjectREFR_GetWorldSpace(), direction, &sourcePos, 200.0f, &result);
     }
     return result;
 }
@@ -1351,7 +1358,7 @@ NiPoint3 FUN_009ed380(TESObjectREFR* source, TESObjectREFR* target)
 namespace fnv_009ed4b0 {
 
 
-void __cdecl FUN_006d7110(TESWorldSpace* ws, ParentCellStub* cell, NiPoint3* pos, float radius, NiPoint3* out);
+void __cdecl Pathing_FindPointOnNavMesh(TESWorldSpace* ws, ParentCellStub* cell, NiPoint3* pos, float radius, NiPoint3* out);
 
 // @fnv 0x009ed4b0
 NiPoint3 __cdecl ComputeAdjustedTargetPosition(TESObjectREFR* target, TESObjectREFR* source)
@@ -1367,8 +1374,8 @@ NiPoint3 __cdecl ComputeAdjustedTargetPosition(TESObjectREFR* target, TESObjectR
         _dir = targetPosX + _dir * distance2;
         result5 = _dir;
         ParentCellStub* cellB = target->GetParentCellStub();
-        FUN_006d7110(target->FUN_00575d70(), cellB, &_dir, 200.0f, &result5);
-        if (result5.FUN_004390c0(_dir))
+        Pathing_FindPointOnNavMesh(target->TESObjectREFR_GetWorldSpace(), cellB, &_dir, 200.0f, &result5);
+        if (result5.HasEqualComponents(_dir))
         {
         }
     }
@@ -1407,12 +1414,12 @@ struct Waypoint
 };
 struct Route
 {
-    bool FUN_0076b610();
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
     unsigned FUN_0044ddc0();
     Waypoint& FUN_009a3280(unsigned);
 };
 NiPoint3 __cdecl RandomOffsetVectorFromOrigin(NiPoint3, float, float, int);
-void __cdecl FUN_006d7110(void*, void*, const NiPoint3*, float, NiPoint3*);
+void __cdecl Pathing_FindPointOnNavMesh(void*, void*, const NiPoint3*, float, NiPoint3*);
 struct Pather
 {
     int unk000;
@@ -1523,15 +1530,15 @@ struct Pather
 NiPoint3 Pather::GetPathPoint(TESObjectREFR* ref)
 {
     NiPoint3 result = destination;
-    if (destination.FUN_004390c0(NiPoint3::ZERO))
+    if (destination.HasEqualComponents(NiPoint3::ZERO))
     {
         destination = RandomOffsetVectorFromOrigin(*static_cast<const TESObjectREFR*>(ref)->GetPos(), 800.0f, 1000.0f, 0);
-        FUN_006d7110(ref->FUN_00575d70(), ref->GetParentCellStub(), static_cast<const TESObjectREFR*>(ref)->GetPos(), 300.0f, &destination);
+        Pathing_FindPointOnNavMesh(ref->TESObjectREFR_GetWorldSpace(), ref->GetParentCellStub(), static_cast<const TESObjectREFR*>(ref)->GetPos(), 300.0f, &destination);
         return destination;
     }
-    if (route.FUN_0076b610())
-        BuildPathRequest(*static_cast<const TESObjectREFR*>(ref)->GetPos(), destination, ref->GetParentCellStub(), ref->FUN_00575d70());
-    if (!route.FUN_0076b610() && index < route.FUN_0044ddc0())
+    if (route.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
+        BuildPathRequest(*static_cast<const TESObjectREFR*>(ref)->GetPos(), destination, ref->GetParentCellStub(), ref->TESObjectREFR_GetWorldSpace());
+    if (!route.NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() && index < route.FUN_0044ddc0())
     {
         Waypoint waypoint(route.FUN_009a3280(index));
         index = index + 1;
@@ -1540,7 +1547,7 @@ NiPoint3 Pather::GetPathPoint(TESObjectREFR* ref)
     else
     {
         result = RandomOffsetVectorFromOrigin(destination, 800.0f, 300.0f, 0);
-        FUN_006d7110(ref->FUN_00575d70(), ref->GetParentCellStub(), &result, 300.0f, &result);
+        Pathing_FindPointOnNavMesh(ref->TESObjectREFR_GetWorldSpace(), ref->GetParentCellStub(), &result, 300.0f, &result);
     }
     return result;
 }
@@ -1553,7 +1560,7 @@ struct FUN_0041ce10_Holder
 {
     void ClearScript(void* obj);
 };
-FUN_0041ce10_Holder* __fastcall FUN_005d43c0(FUN_004f2770_Class* player);
+FUN_0041ce10_Holder* __fastcall BSFile_GetDevice(FUN_004f2770_Class* player);
 
 struct FUN_009f9450 : TESPackage
 {
@@ -1566,7 +1573,7 @@ FUN_009f9450::~FUN_009f9450()
 {
     if (_g_thePlayer)
     {
-        FUN_005d43c0(_g_thePlayer)->ClearScript(this);
+        BSFile_GetDevice(_g_thePlayer)->ClearScript(this);
     }
 }
 

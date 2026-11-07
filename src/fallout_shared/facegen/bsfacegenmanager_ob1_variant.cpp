@@ -67,14 +67,14 @@ struct CoordConstIter
         m_aux = 0;
     }
     CoordConstIter(float* ptr, const ContainerBase* pVec);
-    void FUN_00659190();
-    bool FUN_0065dfd0(const CoordConstIter& other) const;
-    float* FUN_0064dda0() const;
+    void DoNothing();
+    bool IsNotIdentical(const CoordConstIter& other) const;
+    float* ProcessEntries_0064dda0() const;
     CoordConstIter operator++(int)
     {
         DeadQ1();
         CoordConstIter tmp = *this;
-        FUN_00659190();
+        DoNothing();
         return tmp;
     }
 };
@@ -89,7 +89,7 @@ struct CoordIter : CoordIterBase
     CoordIter operator++(int)
     {
         CoordIter tmp = *this;
-        FUN_00659190();
+        DoNothing();
         return tmp;
         DeadQ1();
     }
@@ -108,12 +108,12 @@ struct CoordVec : ContainerBase
         return CoordIter(m_pHeadNode, this);
         DeadQ1();
     }
-    CoordConstIter FUN_0065fd10() const;
+    CoordConstIter EvaluateValue_0065fd10() const;
     CoordConstIter end() const
     {
         return CoordConstIter(m_last, this);
     }
-    CoordVec& FUN_00aaef90(const CoordVec& rhs);
+    CoordVec& ProcessEntries_00aaef90(const CoordVec& rhs);
 };
 inline CoordConstIter::CoordConstIter(float* ptr, const ContainerBase* pVec)
 {
@@ -124,15 +124,16 @@ inline CoordConstIter::CoordConstIter(float* ptr, const ContainerBase* pVec)
     m_ptr = ptr;
 }
 // @fnv 0x00aaef90
-CoordVec& CoordVec::FUN_00aaef90(const CoordVec& rhs)
+// src: GUESS 0x00aaef90 (confidence: low)
+CoordVec& CoordVec::ProcessEntries_00aaef90(const CoordVec& rhs)
 {
     (m_rows == rhs.m_rows && m_cols == rhs.m_cols)
         ? (void)0
         : ReportAssertionViolation("d:\\_fallout3\\platforms\\common\\code\\sdk\\facegen\\matrixVT.hpp", 0x29e);
     CoordIter it2 = begin();
-    CoordConstIter it1 = rhs.FUN_0065fd10();
-    for (; it2.FUN_0065dfd0(end()) && it1.FUN_0065dfd0(rhs.end()); it2++, it1++)
-        *it2.FUN_0064dda0() -= (*it1.FUN_0064dda0());
+    CoordConstIter it1 = rhs.EvaluateValue_0065fd10();
+    for (; it2.IsNotIdentical(end()) && it1.IsNotIdentical(rhs.end()); it2++, it1++)
+        *it2.ProcessEntries_0064dda0() -= (*it1.ProcessEntries_0064dda0());
     return *this;
     DeadQ2();
 }
@@ -192,14 +193,16 @@ struct MatrixOps
     {
         return rows;
     }
-    MatrixRow FUN_0060b370(unsigned int i)
+// src: GUESS 0x0060b370 (confidence: low)
+    MatrixRow ForwardCall_0060b370(unsigned int i)
     {
         return MatrixRow(&data[0] + i * rows, rows);
     }
-    MatrixOps FUN_00aaf110(unsigned int, unsigned int, unsigned int, unsigned int);
+    MatrixOps ProcessEntries_00aaf110(unsigned int, unsigned int, unsigned int, unsigned int);
 };
 // @fnv 0x00aaf110
-MatrixOps MatrixOps::FUN_00aaf110(unsigned int startColumn, unsigned int startRow, unsigned int columnCount,
+// src: GUESS 0x00aaf110 (confidence: low)
+MatrixOps MatrixOps::ProcessEntries_00aaf110(unsigned int startColumn, unsigned int startRow, unsigned int columnCount,
                                   unsigned int rowCount)
 {
     if (startRow >= 0 && startColumn >= 0)
@@ -217,7 +220,7 @@ MatrixOps MatrixOps::FUN_00aaf110(unsigned int startColumn, unsigned int startRo
     {
         for (unsigned int column = 0; column < temporary.getColumns(); column++)
         {
-            copyColumn(&temporary.FUN_0060b370(column)[0], &FUN_0060b370(column + startColumn)[startRow],
+            copyColumn(&temporary.ForwardCall_0060b370(column)[0], &ForwardCall_0060b370(column + startColumn)[startRow],
                        temporary.getRows());
         }
     }

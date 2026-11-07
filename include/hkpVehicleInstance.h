@@ -85,7 +85,7 @@ public:
 
     void UpdateVehicle(hkReal deltaTime, const hkpVehicleWheelCollide::WheelCollideResult* cdInfo);
     hkpRigidBody* getChassis() const;
-    void FUN_00e38310(float deltaTime, const int* groundBody, const WGround* ground);
+    void ProcessEntries_00e38310(float deltaTime, const int* groundBody, const WGround* ground);
 
     hkpVehicleData* m_data;
     hkpVehicleDriverInput* m_pDriverInput;

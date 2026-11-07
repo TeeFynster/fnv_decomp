@@ -7,11 +7,12 @@ struct FUN_00d2c3a0_class
     void* m0;
     void* m4;
     void* m8;
-    void FUN_00d2c3a0(void* a, void* b);
+    void hkThreadMemory_setMemory(void* a, void* b);
 };
 
 // @fnv 0x00d2c3a0
-void FUN_00d2c3a0_class::FUN_00d2c3a0(void* pFirst, void* pSecond)
+// src: HAVOK_LIB 0x00d2c3a0
+void FUN_00d2c3a0_class::hkThreadMemory_setMemory(void* pFirst, void* pSecond)
 {
     if (pFirst)
     {
@@ -37,11 +38,12 @@ struct FUNClass
     virtual void unused();
     virtual unsigned int generate(int value);
     SlowPath* unk04;
-    void FUN_00d2c030(int* output, int count, int value);
+    void hkThreadMemory_blockAllocBatch(int* output, int count, int value);
 };
 // If value is at most 0x2000, fills output with count values from generate(value); otherwise delegates to unk04->process.
 // @fnv 0x00d2c030
-void FUNClass::FUN_00d2c030(int* output, int count, int value)
+// src: HAVOK_LIB 0x00d2c030
+void FUNClass::hkThreadMemory_blockAllocBatch(int* output, int count, int value)
 {
     if (value <= 0x2000)
     {
@@ -223,11 +225,12 @@ struct D2C520ThreadMemory
     D2C520FreeList m_kFreeListEntries[17];
     int m_iDofCount[17];
 
-    void FUN_00d2c520(int rowIndex);
+    void hkThreadMemory_clearRow(int rowIndex);
 };
 
 // @fnv 0x00d2c520
-void D2C520ThreadMemory::FUN_00d2c520(int rowIndex)
+// src: HAVOK_LIB 0x00d2c520
+void D2C520ThreadMemory::hkThreadMemory_clearRow(int rowIndex)
 {
     int numElem = m_kFreeListEntries[rowIndex].m_iBlockCount;
     int blockSize = m_iDofCount[rowIndex];
@@ -263,12 +266,13 @@ struct Allocator : FUN_00d2c3a0_class
     int unkD4;
     signed char bucketForSmallSize[44];
     int bucketForLargeSize[8];
-    FreeNode* FUN_00d2c5a0(int size);
+    FreeNode* hkThreadMemory_blockAlloc(int size);
 };
 // The target helper ignores EDX; this ABI-compatible signature keeps its this pointer in ECX and bucket on the stack.
 extern "C" FreeNode* __fastcall AllocateBlock(Allocator* self, int unused, int bucket);
 // @fnv 0x00d2c5a0
-FreeNode* Allocator::FUN_00d2c5a0(int size)
+// src: HAVOK_LIB 0x00d2c5a0
+FreeNode* Allocator::hkThreadMemory_blockAlloc(int size)
 {
     if (size <= 0x2000)
     {
@@ -291,7 +295,7 @@ FreeNode* Allocator::FUN_00d2c5a0(int size)
 }
 }  // namespace fnv_00d2c5a0
 
-extern void FUN_00d2caa0(void* res, int a1, int n);
+extern void hkMemUtil_memCpy_00d2caa0(void* res, int a1, int n);
 
 struct SelfCls
 {
@@ -299,15 +303,16 @@ struct SelfCls
     virtual void* vslot1(void* p);
     virtual void vslot2(int a, int b);
 
-    void* FUN_00d2c6d0(int a1, int a2, FUN_00d2c3a0_class* a3);
+    void* hkThreadMemory_bufRealloc(int a1, int a2, FUN_00d2c3a0_class* a3);
 };
 
 // @fnv 0x00d2c6d0
-void* SelfCls::FUN_00d2c6d0(int a1, int a2, FUN_00d2c3a0_class* a3)
+// src: HAVOK_LIB 0x00d2c6d0
+void* SelfCls::hkThreadMemory_bufRealloc(int a1, int a2, FUN_00d2c3a0_class* a3)
 {
     void* res = this->vslot1(a3->m0);
     int n = (int)a3->m0 < a2 ? (int)a3->m0 : a2;
-    FUN_00d2caa0(res, a1, n);
+    hkMemUtil_memCpy_00d2caa0(res, a1, n);
     this->vslot2(a1, a2);
     return res;
 }
@@ -325,20 +330,21 @@ struct FUN_00d2c7a0_class
     int unk08;
     int unk0c;
     FUN_00d2c7a0_Slot slots[17];
-    void __thiscall FUN_00d2c520(int index);
-    void __thiscall FUN_00d2c7a0();
+    void __thiscall hkThreadMemory_clearRow(int index);
+    void __thiscall hkThreadMemory_releaseCachedMemory();
 };
 
 // Iterates the 17 slots backwards and calls FUN_00d2c520 on each index whose slot holds an object.
 // @fnv 0x00d2c7a0
-void FUN_00d2c7a0_class::FUN_00d2c7a0()
+// src: HAVOK_LIB 0x00d2c7a0
+void FUN_00d2c7a0_class::hkThreadMemory_releaseCachedMemory()
 {
     int index = 16;
     FUN_00d2c7a0_Slot* slot = slots + 16;
     while (index >= 0)
     {
         if (slot->object)
-            FUN_00d2c520(index);
+            hkThreadMemory_clearRow(index);
         --index;
         --slot;
     }
@@ -383,11 +389,12 @@ struct FUN_00d2c020_class
     virtual void __fastcall slot04(unsigned int value);
     virtual void __fastcall slot08(unsigned int value);
 
-    void __fastcall FUN_00d2c020(unsigned int value);
+    void __fastcall hkThreadMemory_bufFree(unsigned int value);
 };
 
 // @fnv 0x00d2c020
-void __fastcall FUN_00d2c020_class::FUN_00d2c020(unsigned int value)
+// src: HAVOK_SRC 0x00d2c020
+void __fastcall FUN_00d2c020_class::hkThreadMemory_bufFree(unsigned int value)
 {
     slot08(value);
 }
@@ -410,10 +417,11 @@ struct FnvCpu_FUN_00d2c0f0_CpuOwner
 {
     unsigned int unk00;
     FnvCpu_FUN_00d2c0f0_CpuInterface* target;
-    void FUN_00d2c0f0(int arg0);
+    void hkThreadMemory_getMemoryStatistics(int arg0);
 };
 // @fnv 0x00d2c0f0
-void FnvCpu_FUN_00d2c0f0_CpuOwner::FUN_00d2c0f0(int arg0)
+// src: HAVOK_SRC 0x00d2c0f0
+void FnvCpu_FUN_00d2c0f0_CpuOwner::hkThreadMemory_getMemoryStatistics(int arg0)
 {
     target->Invoke(arg0);
 }
@@ -542,7 +550,7 @@ struct FUN_00d2c600_cls
     FUN_00d2c600_obj* m_04;
     int m_08;
 
-    void FUN_00d2c450(int index, void* p);
+    void hkThreadMemory_onRowFull(int index, void* p);
     void Free(void* p, int size);
 };
 
@@ -565,7 +573,7 @@ void FUN_00d2c600_cls::Free(void* apBlock, int size)
             FUN_00d2c600_bucket* bucket = (FUN_00d2c600_bucket*)((char*)this + 0xc + idx * 8);
             if (bucket->m_uiItemCount >= m_08)
             {
-                FUN_00d2c450(idx, apBlock);
+                hkThreadMemory_onRowFull(idx, apBlock);
             }
             else
             {
@@ -602,11 +610,12 @@ struct FUN_00d2c670_cls
     void* m_00;
     FUN_00d2c670_inner* m_04;
 
-    void FUN_00d2c670(int a);
+    void hkThreadMemory_canAllocTotal(int a);
 };
 
 // @fnv 0x00d2c670
-void FUN_00d2c670_cls::FUN_00d2c670(int a)
+// src: HAVOK_LIB 0x00d2c670
+void FUN_00d2c670_cls::hkThreadMemory_canAllocTotal(int a)
 {
     m_04->Forward(a);
 }
@@ -670,11 +679,12 @@ struct S_00d2c680_Cls
     int unkd4;
     signed char m_d8[0x2c];
     int m_104[8];
-    int FUN_00d2c680(int a0, int a1);
+    int hkThreadMemory_getAllocatedSize(int a0, int a1);
 };
 
 // @fnv 0x00d2c680
-int S_00d2c680_Cls::FUN_00d2c680(int aiArg, int a1)
+// src: HAVOK_LIB 0x00d2c680
+int S_00d2c680_Cls::hkThreadMemory_getAllocatedSize(int aiArg, int a1)
 {
     if (a1 <= 0x2000)
     {
@@ -730,11 +740,12 @@ struct Owner219
     CacheSlot219 caches[17];
     int blockSizes[17];
 
-    void FUN_00d2c450(int index, Node219* out);
+    void hkThreadMemory_onRowFull(int index, Node219* out);
 };
 // Uses blockSizes[index] to release out directly when batchThreshold is zero; otherwise trims cache batches and pushes out onto its head.
 // @fnv 0x00d2c450
-void Owner219::FUN_00d2c450(int aiSizeIndex, Node219* apBlock)
+// src: HAVOK_LIB 0x00d2c450
+void Owner219::hkThreadMemory_onRowFull(int aiSizeIndex, Node219* apBlock)
 {
     int blockSize = blockSizes[aiSizeIndex];
     int threshold = batchThreshold;
@@ -774,7 +785,7 @@ struct ThreadMemoryBase
     void* m0;
     void* m4;
     void* m8;
-    void FUN_00d2c3a0(void* a, void* b);
+    void hkThreadMemory_setMemory(void* a, void* b);
 };
 
 struct HKThreadMemory : ThreadMemoryBase
@@ -784,10 +795,11 @@ struct HKThreadMemory : ThreadMemoryBase
     unsigned char freeList[0x29];
     int bigBlocks[8];
     void InitSizeClasses();
-    HKThreadMemory* FUN_00d2c720();
+    HKThreadMemory* hkThreadMemory_hkThreadMemory();
 };
 
-__declspec(noinline) void ThreadMemoryBase::FUN_00d2c3a0(void* a, void* b)
+// src: HAVOK_LIB 0x00d2c3a0
+__declspec(noinline) void ThreadMemoryBase::hkThreadMemory_setMemory(void* a, void* b)
 {
     if (a)
     {
@@ -884,7 +896,8 @@ __declspec(noinline) void HKThreadMemory::InitSizeClasses()
 
 // Sets m0, clears 17 block entries, calls FUN_00d2c100 and FUN_00d2c3a0(0, 8), then returns this.
 // @fnv 0x00d2c720
-HKThreadMemory* HKThreadMemory::FUN_00d2c720()
+// src: HAVOK_LIB 0x00d2c720
+HKThreadMemory* HKThreadMemory::hkThreadMemory_hkThreadMemory()
 {
     m0 = &DAT_010cacd0;
     BlockEntry* p = blocks;
@@ -897,7 +910,7 @@ HKThreadMemory* HKThreadMemory::FUN_00d2c720()
         --n;
     }
     InitSizeClasses();
-    FUN_00d2c3a0(0, (void*)8);
+    hkThreadMemory_setMemory(0, (void*)8);
     return this;
 }
 
@@ -919,13 +932,14 @@ struct ThreadMemoryView : FUN_00d2c3a0_class
     unsigned char freeList[41];
     int bigBlocks[8];
     void InitSizeClasses();
-    void FUN_00d2c3a0(void* allocator, int limit);
-    ThreadMemoryView* FUN_00d2c760(void* allocator);
+    void hkThreadMemory_setMemory(void* allocator, int limit);
+    ThreadMemoryView* hkThreadMemory_hkThreadMemory_00d2c760(void* allocator);
 };
 
-__declspec(noinline) void ThreadMemoryView::FUN_00d2c3a0(void* allocator, int limit)
+// src: HAVOK_LIB 0x00d2c3a0
+__declspec(noinline) void ThreadMemoryView::hkThreadMemory_setMemory(void* allocator, int limit)
 {
-    FUN_00d2c3a0_class::FUN_00d2c3a0(allocator, (void*)limit);
+    FUN_00d2c3a0_class::hkThreadMemory_setMemory(allocator, (void*)limit);
 }
 
 __declspec(noinline) void ThreadMemoryView::InitSizeClasses()
@@ -935,7 +949,8 @@ __declspec(noinline) void ThreadMemoryView::InitSizeClasses()
 
 // Zeroes the 17 BlockEntry slots, calls FUN_00d2c100 and FUN_00d2c3a0(allocator, 8), then returns this.
 // @fnv 0x00d2c760
-ThreadMemoryView* ThreadMemoryView::FUN_00d2c760(void* allocator)
+// src: HAVOK_LIB 0x00d2c760
+ThreadMemoryView* ThreadMemoryView::hkThreadMemory_hkThreadMemory_00d2c760(void* allocator)
 {
     m0 = &DAT_010cacd0;
     BlockEntry* entry = blocks;
@@ -947,7 +962,7 @@ ThreadMemoryView* ThreadMemoryView::FUN_00d2c760(void* allocator)
         ++entry;
     } while (--remaining >= 0);
     InitSizeClasses();
-    FUN_00d2c3a0(allocator, 8);
+    hkThreadMemory_setMemory(allocator, 8);
     return this;
 }
 }  // namespace fnv_00d2c760

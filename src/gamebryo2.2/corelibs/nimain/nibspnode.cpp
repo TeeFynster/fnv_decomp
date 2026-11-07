@@ -20,17 +20,19 @@ inline NiPoint3 NiPoint3::operator/(float s) const { float inv = 1.0f / s; retur
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00a9a710
-void NiBSPNode::FUN_00a9a710(NiStream& stream)
+// src: XBOX_PDB 0x00a9a710
+void NiBSPNode::LoadBinary_00a9a710(NiStream& stream)
 {
     NiNode::LoadBinary(stream);
     m_pSphere.LoadBinary(stream);
 }
 
 // @fnv 0x00a9a840
-void __thiscall NiBSPNode::FUN_00a9a840(NiUpdateData& aUpdateData)
+// src: XBOX_PDB 0x00a9a840
+void __thiscall NiBSPNode::UpdateWorldData_00a9a840(NiUpdateData& aUpdateData)
 {
     NiAVObject::UpdateWorldData(aUpdateData);
-    FUN_00a9a760();
+    UpdateWorldPlane();
 }
 
 struct GlobalObjectO2_00a7b610
@@ -39,7 +41,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_011f5f54;
 
 // @fnv 0x00a9adc0
-GlobalObjectO2_00a7b610* __cdecl FUN_00a9adc0()
+// src: COMMUNITY 0x00a9adc0
+GlobalObjectO2_00a7b610* __cdecl NiBSPNode_GetRTTI()
 {
     return &g_011f5f54;
 }
@@ -61,7 +64,8 @@ void* __fastcall DestroyIfFlagged(NiBSPNode* apNode, void*, unsigned int auiFlag
 }
 
 // @fnv 0x00a9a740
-void NiBSPNode::FUN_00a9a740(NiStream& stream)
+// src: XBOX_PDB 0x00a9a740
+void NiBSPNode::SaveBinary_00a9a740(NiStream& stream)
 {
     NiNode::SaveBinary(stream);
     m_pSphere.SaveBinary(stream);
@@ -205,7 +209,7 @@ bool __fastcall IsEqualWithBound(NiBSPNode* apNode, void*, NiObject* pkObject)
 }
 
 extern char vtable_010a1024;
-void* __cdecl FUN_00aa13e0(unsigned int bytes);
+void* __cdecl Object_DispatchCommandFour(unsigned int bytes);
 void __cdecl InitializeNode();
 void __cdecl InitializePlane();
 struct ChildNode
@@ -214,9 +218,10 @@ struct ChildNode
 };
 
 // @fnv 0x00a9ae00
-void* __fastcall FUN_00a9ae00(NiBSPNode* apNode, void*, void* arg)
+// src: XBOX_PDB 0x00a9ae00
+void* __fastcall NiBSPNode_CreateClone(NiBSPNode* apNode, void*, void* arg)
 {
-    char* memory = (char*)FUN_00aa13e0(0xcc);
+    char* memory = (char*)Object_DispatchCommandFour(0xcc);
     char* result;
     if (memory)
     {
@@ -240,14 +245,16 @@ void* __fastcall FUN_00a9ae00(NiBSPNode* apNode, void*, void* arg)
 __declspec(noreturn) void __cdecl ReadChildListFromStream();
 
 // @fnv 0x00a9a730
-void __cdecl FUN_00a9a730()
+// src: XBOX_PDB 0x00a9a730
+void __cdecl NiBSPNode_LinkObject()
 {
     ReadChildListFromStream();
 }
 
 void __cdecl RegisterChildStreamables();
 // @fnv 0x00a93c40
-void __cdecl FUN_00a93c40()
+// src: XBOX_PDB 0x00a93c40
+void __cdecl NiBSPNode_RegisterStreamables()
 {
     RegisterChildStreamables();
 }
@@ -264,7 +271,8 @@ struct BSPWorldMatrix
 
 // Transforms modelNormal and modelConstant into world space using rotation, translation, and scale.
 // @fnv 0x00a9a760
-void NiBSPNode::FUN_00a9a760()
+// src: XBOX_PDB 0x00a9a760
+void NiBSPNode::UpdateWorldPlane()
 {
     NiPoint3 normal = (*(BSPWorldMatrix*)&m_kWorld.m_Rotate) * *(NiPoint3*)&m_pSphere.x;
     volatile float fWorldConstant = m_kWorld.m_Translate.Dot(normal);
@@ -372,12 +380,13 @@ struct NiBSPTransformNode
         (*(NiPoint3*)&m_kModelPlane.x) = normal;
         m_kModelPlane.c += (*(NiPoint3*)&m_kModelPlane.x) * kTrn;
     }
-    void FUN_00a9a860(const BSPMatrix& kMat, const NiPoint3& kTrn, bool bOnLeft);
+    void NiBSPNode_ApplyTransform(const BSPMatrix& kMat, const NiPoint3& kTrn, bool bOnLeft);
 };
 
 // Applies the supplied matrix and translation to the node's model plane and passes them to each non-null child.
 // @fnv 0x00a9a860
-void NiBSPTransformNode::FUN_00a9a860(const BSPMatrix& kMat, const NiPoint3& kTrn, bool bOnLeft)
+// src: XBOX_PDB 0x00a9a860
+void NiBSPTransformNode::NiBSPNode_ApplyTransform(const BSPMatrix& kMat, const NiPoint3& kTrn, bool bOnLeft)
 {
     if (bOnLeft)
     {

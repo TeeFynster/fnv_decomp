@@ -28,11 +28,11 @@ struct SweptRouter
 	SweptHeap* m_pStreamAllocator;
 	SweptHeap& heap() { return *m_pStreamAllocator; }
 };
-__declspec(nothrow) SweptRouter& __cdecl FUN_00c85750();
+__declspec(nothrow) SweptRouter& __cdecl hkMemoryRouter_getInstance();
 template <int SIZE> __forceinline void SweptMemCpyOne(void* dst, const void* src) { for (int i = 0; i < SIZE / 4; i++) ((unsigned int*)dst)[i] = ((const unsigned int*)src)[i]; }
 template <class T>
 static __forceinline void SweptArray_destroy(hkArrayBase<T>& self) throw()
-{ SweptArray__clearAndDeallocate(self, FUN_00c85750().heap()); }
+{ SweptArray__clearAndDeallocate(self, hkMemoryRouter_getInstance().heap()); }
 
 template <class T>
 static __forceinline void SweptArray_clear(hkArrayBase<T>& self) throw()
@@ -62,10 +62,10 @@ struct SweptArrayPolicy
     static __forceinline void destroy(hkArrayBase<T>& self) { SweptArray_destroy(self); }
 };
 void __cdecl ResizeAudioStream(void *,void *,int);
-struct FUN_008cd6a0_Class { void FUN_00cb2d90(void *); };
-struct ErrBuf { void FUN_00cb1600(char* b, int n); void FUN_00cc01c0(const char* s); void FUN_00cc00e0(); int unk00; int unk04; int unk08; };
-struct TmpA { void FUN_00ddfb70(); int unk00; int unk04; };
-struct TmpB { void FUN_00ddfb80(TmpA* a); void FUN_00de0f90(int a, void* b); int unk00; int unk04; int unk08; int unk0c; int unk10; };
+struct FUN_008cd6a0_Class { void hkRotation_set(void *); };
+struct ErrBuf { void FUN_00cb1600(char* b, int n); void ProcessAndReturnValue_00cc01c0(const char* s); void FUN_00cc00e0(); int unk00; int unk04; int unk08; };
+struct TmpA { void hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment(); int unk00; int unk04; };
+struct TmpB { void hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(TmpA* a); void UpdateState_00de0f90(int a, void* b); int unk00; int unk04; int unk08; int unk0c; int unk10; };
 struct Reporter { virtual void v0(); virtual void v1(); virtual void v2(); virtual void report(int a, int b, const char* msg, const char* file, int line); };
 extern Reporter* DAT_01268360;
 extern int DAT_01268fd0; extern int DAT_01268fd4; extern int DAT_01268fd8;
@@ -156,7 +156,8 @@ struct Arg {
 // Keep their original listener entry-point adjustments in free helpers.
 // The unused EDX parameter preserves the ECX receiver and stack argument.
 // @fnv 0x00d642c0
-void __fastcall FUN_00d642c0(hkpEntityListener* listener, void*, Arg* a)
+// src: XBOX_PDB 0x00d642c0
+void __fastcall hkpSweptTransformDisplayViewer_entityAddedCallback(hkpEntityListener* listener, void*, Arg* a)
 {
      
     if (a->unk10 == 0) return;
@@ -164,16 +165,16 @@ void __fastcall FUN_00d642c0(hkpEntityListener* listener, void*, Arg* a)
     if (idx < 0) return;
     hkArray<Shape*, SweptArrayPolicy> list(FinishingFlag(0));
     Entry* e; e = (*(Entry***)((char*)listener + 8))[idx];
-    list.m_data = 0; list.m_iElementCount = 0; list.m_iCapacityState = 0x80000000; TmpA ta; ta.FUN_00ddfb70();
-    TmpB tb; tb.FUN_00ddfb80(&ta);
-    tb.FUN_00de0f90(a->unk10, &list);
+    list.m_data = 0; list.m_iElementCount = 0; list.m_iCapacityState = 0x80000000; TmpA ta; ta.hkpShapeDisplayBuilder_hkpShapeDisplayBuilderEnvironment_hkpShapeDisplayBuilderEnvironment();
+    TmpB tb; tb.hkpShapeDisplayBuilder_hkpShapeDisplayBuilder(&ta);
+    tb.UpdateState_00de0f90(a->unk10, &list);
     for (int j = list.m_iElementCount - 1; j >= 0; j--) { Shape* s = (Shape*)list.m_data[j];
         if (s->unk50 == 6 && 0 == s->unk08) {
             char buf[512];
             ErrBuf eb;
             
             eb.FUN_00cb1600(buf, 0x200);
-            eb.FUN_00cc01c0("Unable to build display geometry from hkpShape geometry data");
+            eb.ProcessAndReturnValue_00cc01c0("Unable to build display geometry from hkpShape geometry data");
             DAT_01268360->report(0, -1, (const char*)&buf, ".\\VisualDebugger\\Viewer\\Dynamics\\hkpSweptTransformDisplayViewer.cpp", 0xa8);
             eb.FUN_00cc00e0();
             SweptArray_removeAt(list, j);
@@ -181,18 +182,18 @@ void __fastcall FUN_00d642c0(hkpEntityListener* listener, void*, Arg* a)
     if (0 < list.m_iElementCount && 5 != a->motionType) {
         unsigned char* id1 = (unsigned char*)&a->unk11;
         hkArrayBase<int>* ids = &e->unk04;
-        SweptRouter* b = &FUN_00c85750();
+        SweptRouter* b = &hkMemoryRouter_getInstance();
         if (ids->m_iElementCount == (ids->m_iCapacityState & 0x3fffffff)) ResizeAudioStream(b->m_pStreamAllocator, ids, 4);
         int* slot1 = ids->m_data + ids->m_iElementCount;
         for (int k = 0; k < 1; ++k) slot1[k] = (int)id1; ++ids->m_iElementCount;
         Mat m1; Mat m2;
-        ((FUN_008cd6a0_Class*)&m1)->FUN_00cb2d90(&a->rotation0);
+        ((FUN_008cd6a0_Class*)&m1)->hkRotation_set(&a->rotation0);
         __m128 v = a->center;
         
         __m128 p1 = _mm_sub_ps(a->position0,
             _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_load_ps(&m1.b0), _mm_shuffle_ps(v, v, 0x55)), _mm_mul_ps(_mm_load_ps(&m1.a0), _mm_shuffle_ps(v, v, 0))), _mm_mul_ps(_mm_load_ps(&m1.c0), _mm_shuffle_ps(v, v, 0xaa))));
         _mm_store_ps(&m1.d0, p1);
-        ((FUN_008cd6a0_Class*)&m2)->FUN_00cb2d90(&a->rotation1);
+        ((FUN_008cd6a0_Class*)&m2)->hkRotation_set(&a->rotation1);
         __m128 w = a->center;
         __m128 p2r = _mm_sub_ps(a->position1,
             _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(w, w, 0xaa), _mm_load_ps(&m2.c0)), _mm_add_ps(_mm_mul_ps(_mm_load_ps(&m2.b0), _mm_shuffle_ps(w, w, 0x55)), _mm_mul_ps(_mm_load_ps(&m2.a0), _mm_shuffle_ps(w, w, 0)))));
@@ -201,7 +202,7 @@ void __fastcall FUN_00d642c0(hkpEntityListener* listener, void*, Arg* a)
         d = ((Disp*)((hkpSweptTransformDisplayViewer*)((char*)listener - 0x28))->hkProcess::unk10);
         d->tag(DAT_01268fd8, id1, DAT_01268fd0);
         unsigned char* id2 = &a->unk12;
-        b = &FUN_00c85750();
+        b = &hkMemoryRouter_getInstance();
         if (ids->m_iElementCount == (ids->m_iCapacityState & 0x3fffffff)) ResizeAudioStream(b->m_pStreamAllocator, ids, 4);
         int* slot2 = ids->m_data + ids->m_iElementCount;
         for (int k = 0; k < 1; ++k) slot2[k] = (int)id2; ++ids->m_iElementCount;
@@ -259,7 +260,7 @@ struct S_00d63e40_Mat3 {
     S_00d63e40_V4 c1;
     S_00d63e40_V4 c2;
     S_00d63e40_V4 t;
-    void FUN_00cb2d90(const S_00d63e40_V4* q);
+    void hkRotation_set(const S_00d63e40_V4* q);
 };
 
 struct S_00d63e40_Handler {
@@ -407,7 +408,8 @@ struct S_00d63e40_WorldPad {
 };
 
 // @fnv 0x00d63e40
-void __fastcall FUN_00d63e40(hkpWorldPostSimulationListener* listener, void*, S_00d63e40_WorldPad world)
+// src: XBOX_PDB 0x00d63e40
+void __fastcall hkpSweptTransformDisplayViewer_postSimulationCallback(hkpWorldPostSimulationListener* listener, void*, S_00d63e40_WorldPad world)
 {
     hkpSweptTransformDisplayViewer* viewer = (hkpSweptTransformDisplayViewer*)((char*)listener - 0x20);
     S_00d63e40_Timer("TthkpSweptTransformDisplayViewer");
@@ -418,12 +420,12 @@ void __fastcall FUN_00d63e40(hkpWorldPostSimulationListener* listener, void*, S_
         {
             S_00d63e40_Entity* e = arr.m_data[j];
             S_00d63e40_Mat3 m;
-            m.FUN_00cb2d90(&e->rot0);
+            m.hkRotation_set(&e->rot0);
             __m128 c = e->com.q();
             __m128 r = _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(c, c, 0x55), m.c1.q()), _mm_mul_ps(_mm_shuffle_ps(c, c, 0), m.c0.q())), _mm_mul_ps(_mm_shuffle_ps(c, c, 0xaa), m.c2.q()));
             m.t.q() = _mm_sub_ps(e->pos0.q(), r);
             ((S_00d63e40_Handler*)viewer->hkProcess::unk04)->display(&m, &e->id0, DAT_01268fd0);
-            m.FUN_00cb2d90(&e->rot1);
+            m.hkRotation_set(&e->rot1);
             c = e->com.q();
             r = _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(c, c, 0x55), m.c1.q()), _mm_mul_ps(_mm_shuffle_ps(c, c, 0), m.c0.q())), _mm_mul_ps(_mm_shuffle_ps(c, c, 0xaa), m.c2.q()));
             m.t.q() = _mm_sub_ps(e->pos1.q(), r);

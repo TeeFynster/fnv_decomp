@@ -6,20 +6,21 @@
 
 struct FUN_006e2330_shell
 {
-    bool __thiscall FUN_006e2330();
+    bool __thiscall PathingNode_IsTeleportDoorNode();
 };
 
 struct FUN_006e22f0_shell : public FUN_006e2330_shell
 {
     TESObjectREFR* m_pDoorRef;
-    bool __thiscall FUN_006e22f0(TESObjectREFR* apActor);
+    bool __thiscall PathingNode_ActivateNode(TESObjectREFR* apActor);
 };
 
 // If FUN_006e2330() succeeds, activates the reference stored at offset 0x38 with apActor, returning the result; otherwise returns false.
 // @fnv 0x006e22f0
-bool __thiscall FUN_006e22f0_shell::FUN_006e22f0(TESObjectREFR* apActor)
+// src: COMMUNITY 0x006e22f0
+bool __thiscall FUN_006e22f0_shell::PathingNode_ActivateNode(TESObjectREFR* apActor)
 {
-    if (FUN_006e2330())
+    if (PathingNode_IsTeleportDoorNode())
         return ((TESObjectREFR**)((char*)this + 0x38))[0]->Activate(apActor, false, (TESObjectREFR*)0, 1);
     return false;
 }

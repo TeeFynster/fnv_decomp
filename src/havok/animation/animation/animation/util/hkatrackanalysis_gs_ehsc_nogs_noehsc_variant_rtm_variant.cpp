@@ -70,9 +70,9 @@ struct TextBuilder
     int length;
     int bufferCapacity;
     void FUN_00cb1600(char*, unsigned int);
-    TextBuilder* FUN_00cc01c0(const char*, int);
-    TextBuilder* FUN_00cc01c0(const char*, float);
-    void FUN_00cc02d0();
+    TextBuilder* ProcessAndReturnValue_00cc01c0(const char*, int);
+    TextBuilder* ProcessAndReturnValue_00cc01c0(const char*, float);
+    void EvaluateValue_00cc02d0();
     void WriteFloat();
     void FUN_00cc00e0();
 };
@@ -118,9 +118,9 @@ struct TrackBuffers_e50650
     hkArray<float> m_kCubicCoefficient;
     hkArray<unsigned char> m_kE;
 
-    void FUN_00e50ca0();
+    void ReleaseFiveArrays();
 };
-void FUN_00e4f910(TrackBuffers_e50650* pkBuffers, void* pkArg, void* pkArgCur, hkBool bFlag);
+void hkaTrackAnalysis_analyzeQsTransform(TrackBuffers_e50650* pkBuffers, void* pkArg, void* pkArgCur, hkBool bFlag);
 void ExpandTrackSource(const TrackSource_e50650* pkSource, void* pkArg, void* pkArgCur);
 struct StatsB0
 {
@@ -138,7 +138,7 @@ __declspec(noinline) void __cdecl CountTail(const unsigned short* p, void* a1, u
     Analyze(p, count, s);
     Analyze((const unsigned short*)a1, a3, s);
 }
-void __cdecl FUN_00e4ebb0(const unsigned short* p, void* a1, unsigned int count, unsigned int a3, StatsB0* s);
+void __cdecl hkaTrackAnalysis_calcStats(const unsigned short* p, void* a1, unsigned int count, unsigned int a3, StatsB0* s);
 #include <xmmintrin.h>
 #include <math.h>
 struct PerTransformIn
@@ -172,8 +172,8 @@ static __forceinline void ClearStatistics(TrackStatistics& s)
     s.rate = 0.0f;
 }
 typedef void(__cdecl* QsAnalyzeFn)(TrackBuffers_e50650*, void*, void*, hkBool);
-void __cdecl FUN_00e4ead0(const unsigned short* mask, unsigned int count, TrackStatistics* result);
-void __cdecl FUN_00e4ebb0(const unsigned short* maskT, const unsigned short* maskF, unsigned int numT,
+void __cdecl hkaTrackAnalysis_calcStatsQsTransform(const unsigned short* mask, unsigned int count, TrackStatistics* result);
+void __cdecl hkaTrackAnalysis_calcStats(const unsigned short* maskT, const unsigned short* maskF, unsigned int numT,
                           unsigned int numF, TrackStatistics* result);
 struct FloatLocalArray
 {
@@ -213,7 +213,7 @@ struct FloatLocalArray
         freeStorage(hkContainerHeapAllocator().get(&values));
     }
 };
-void __cdecl FUN_00e50920(const PerTransformIn& input, const PerFloatIn& finput, unsigned short* staticMask,
+void __cdecl hkaTrackAnalysis_analyze(const PerTransformIn& input, const PerFloatIn& finput, unsigned short* staticMask,
                           float* staticDOFs, hkBool displayStatsReport);
 
 extern const __m128 DAT_010c7160;
@@ -620,7 +620,7 @@ struct TrackReport
     {}
     void LogStatistics();
 };
-void FUN_00e4ead0(const unsigned short*, unsigned int, TrackReport&);
+void hkaTrackAnalysis_calcStatsQsTransform(const unsigned short*, unsigned int, TrackReport&);
 
 static __forceinline void analyzeTransformTracks(const TrackInput& input, unsigned short* flags, float* output,
                                                  const hkBool& report)
@@ -848,13 +848,14 @@ static __forceinline void analyzeTransformTracks(const TrackInput& input, unsign
     if (report)
     {
         TrackReport stats;
-        FUN_00e4ead0(flags, input.tracks, stats);
+        hkaTrackAnalysis_calcStatsQsTransform(flags, input.tracks, stats);
         stats.LogStatistics();
     }
 }
 
 // @fnv 0x00e4f910
-void __cdecl FUN_00e4f910(TrackBuffers_e50650* buffers, void* masks, void* values, hkBool report)
+// src: XBOX_PDB 0x00e4f910
+void __cdecl hkaTrackAnalysis_analyzeQsTransform(TrackBuffers_e50650* buffers, void* masks, void* values, hkBool report)
 {
     analyzeTransformTracks(*reinterpret_cast<const TrackInput*>(buffers), static_cast<unsigned short*>(masks),
                            static_cast<float*>(values), reinterpret_cast<const hkBool&>(report));

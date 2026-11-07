@@ -16,7 +16,7 @@
 inline hkAabb::hkAabb() {}
 
 
-hkMemoryRouter* FUN_00c85750() throw();
+hkMemoryRouter* hkMemoryRouter_getInstance() throw();
 
 template <class T> __forceinline void hkArrayUtil_destruct(T* t, int n)
 {
@@ -64,7 +64,7 @@ static __forceinline void TimerMark(char* marker)
     }
 }
 
-void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* arr, int newSize, int elemSize);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* alloc, void* arr, int newSize, int elemSize);
 struct __declspec(align(16)) UInt4 {
     unsigned x, y, z, w;
 };
@@ -77,7 +77,7 @@ struct Elem80 {
     int unk40; int unk44; int unk48; int unk4c; int unk50; int unk54; int unk58; int unk5c;
     int unk60; int unk64; int unk68; int unk6c; int unk70; int unk74; int unk78; int unk7c;
     void FUN_00de1210();
-    void FUN_00de1170(const Vec4& a, const Vec4& b);
+    void hkDisplayAABB_setExtents(const Vec4& a, const Vec4& b);
 };
 struct ListEntry {
     int m_00;
@@ -193,14 +193,15 @@ struct Self {
     int unk14;
     int unk18;
     int unk1c;
-    void FUN_00d6a2f0(Param* apParam);
+    void hkpMidphaseViewer_postSimulationCallback(Param* apParam);
 };
 
 struct ViewerPrefix { Dispatch* m_dispatch; int unk04; int unk08; int unk0c; };
 struct Viewer : ViewerPrefix, Self {};
 
 // @fnv 0x00d6a2f0
-void Self::FUN_00d6a2f0(Param* apParam)
+// src: XBOX_PDB 0x00d6a2f0
+void Self::hkpMidphaseViewer_postSimulationCallback(Param* apParam)
 {
     TimerMark(DAT_010d233c);
     hkArrayUtil_destruct(m_aiIndexedValues.m_data, m_aiIndexedValues.m_iElementCount);
@@ -243,19 +244,19 @@ void Self::FUN_00d6a2f0(Param* apParam)
                                     *(__m128*)&bounds.m_kMaximumCorner.x = _mm_mul_ps(*(__m128*)&bounds.m_kMaximumCorner.x, inv);
                                     *(__m128*)&bounds.m_kMinimumCorner.x = _mm_sub_ps(*(__m128*)&bounds.m_kMinimumCorner.x, _mm_load_ps(mat));
                                     *(__m128*)&bounds.m_kMaximumCorner.x = _mm_sub_ps(*(__m128*)&bounds.m_kMaximumCorner.x, _mm_load_ps(mat));
-                                    hkMemoryAllocator& alloc = FUN_00c85750()->heap();
+                                    hkMemoryAllocator& alloc = hkMemoryRouter_getInstance()->heap();
                                     ElemArray* output = &m_aiIndexedValues;
                                     int oldSize = output->m_iElementCount;
                                     int newSize = oldSize + 1;
                                     if ((output->m_iCapacityState & 0x3fffffff) < newSize) {
                                         int dbl = (output->m_iCapacityState & 0x3fffffff) * 2;
                                         if (newSize < dbl) newSize = dbl;
-                                        FUN_00c908c0(&alloc, output, newSize, 0x80);
+                                        hkArrayUtil__reserve(&alloc, output, newSize, 0x80);
                                     }
                                     Elem80* elem = &output->m_data[output->m_iElementCount];
                                     if (elem) elem->FUN_00de1210();
                                     output->m_iElementCount++;
-                                    output->m_data[oldSize].FUN_00de1170(*reinterpret_cast<const Vec4*>(&bounds.m_kMinimumCorner.x),
+                                    output->m_data[oldSize].hkDisplayAABB_setExtents(*reinterpret_cast<const Vec4*>(&bounds.m_kMinimumCorner.x),
                                                                       *reinterpret_cast<const Vec4*>(&bounds.m_kMaximumCorner.x));
                                     k++;
                                     list++;
@@ -278,17 +279,17 @@ void Self::FUN_00d6a2f0(Param* apParam)
     indices.m_data = 0;
     indices.m_iElementCount = 0;
     indices.m_iCapacityState = 0x80000000;
-    hkMemoryAllocator& alloc = FUN_00c85750()->heap();
+    hkMemoryAllocator& alloc = hkMemoryRouter_getInstance()->heap();
     Elem80** buf = AllocatePointers(alloc, allocatedCount);
     int capacity = allocatedCount ? allocatedCount : (int)0x80000000;
     indices.m_data = buf;
     indices.m_iElementCount = allocatedCount;
     indices.m_iCapacityState = capacity;
-    hkMemoryAllocator& alloc2 = FUN_00c85750()->heap();
+    hkMemoryAllocator& alloc2 = hkMemoryRouter_getInstance()->heap();
     if ((indices.m_iCapacityState & 0x3fffffff) < count) {
         int ns = (indices.m_iCapacityState & 0x3fffffff) * 2;
         if (count >= ns) ns = count;
-        FUN_00c908c0(&alloc2, &indices, ns, 4);
+        hkArrayUtil__reserve(&alloc2, &indices, ns, 4);
     }
     indices.m_iElementCount = count;
     for (int i = 0; i < count; i++) {
@@ -297,7 +298,7 @@ void Self::FUN_00d6a2f0(Param* apParam)
     Dispatch* disp = static_cast<Viewer*>(this)->m_dispatch;
     disp->FUN_dispatch(&indices, -0x5b00, 0, DAT_01269024);
     TimerMark(DAT_010c41f8);
-    hkMemoryAllocator& cleanupAlloc = FUN_00c85750()->heap();
+    hkMemoryAllocator& cleanupAlloc = hkMemoryRouter_getInstance()->heap();
     indices.m_iElementCount = 0;
     if ((indices.m_iCapacityState & 0x80000000u) == 0)
         cleanupAlloc.bufFree(indices.m_data, (indices.m_iCapacityState & 0x3fffffff) * 4);

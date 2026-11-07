@@ -12,12 +12,13 @@ typedef union __declspec(intrin_type) __declspec(align(16)) {
 #include "../../../../../../../include/hkMonitorStream.h"
 
 extern char const* const g_01268970_arg1;
-void __cdecl FUN_00c90360(char const* const*, char const* const*);
+void __cdecl hkReferencedObject_calcContentStatistics(char const* const*, char const* const*);
 
 // @fnv 0x00cd8040
-void __cdecl FUN_00cd8040(char const* const* a1, char const* const* a2)
+// src: HAVOK_SRC 0x00cd8040
+void __cdecl hkpSphereShape_calcContentStatistics(char const* const* a1, char const* const* a2)
 {
-    FUN_00c90360(a1, &g_01268970_arg1);
+    hkReferencedObject_calcContentStatistics(a1, &g_01268970_arg1);
 }
 
 extern int DAT_010cb5ac;
@@ -38,13 +39,15 @@ FUN_00cd8160::FUN_00cd8160(float radius)
 }
 
 // @fnv 0x00cd8050
-int __cdecl FUN_00cd8050()
+// src: GUESS 0x00cd8050 (confidence: high)
+int __cdecl hkpSphereShape_ReturnOne()
 {
     return 1;
 }
 
 // @fnv 0x00cd87f0
-int __stdcall FUN_00cd87f0(int a1, int a2)
+// src: GUESS 0x00cd87f0 (confidence: high)
+int __stdcall hkpSphereShape_ReturnConstant_0x20(int a1, int a2)
 {
     return 0x20;
 }
@@ -112,7 +115,7 @@ extern unsigned long DAT_0126835c;
 extern const char DAT_010cb5f4[];
 extern const char DAT_010c41f8[];
 
-void* __cdecl FUN_00cd85c0(void* pvResult, float fValue, int a, int b);
+void* __cdecl Object_ProcessAndReturnValue_00cd85c0(void* pvResult, float fValue, int a, int b);
 
 class HostCD81
 {
@@ -138,7 +141,7 @@ void* HostCD81::RecordTimerCommands(void* pvResult, int a, int b)
         end += sizeof(hkMonitorStream::TimerCommand);
         pkStream->m_end.m_storage = end;
     }
-    FUN_00cd85c0(pvResult, m_fValue, a, b);
+    Object_ProcessAndReturnValue_00cd85c0(pvResult, m_fValue, a, b);
     pkStream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
     char* end2 = pkStream->m_end.m_storage;
     if (end2 < pkStream->m_capacityMinus16.m_storage)
@@ -359,11 +362,12 @@ extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 struct ProbeSphere : hkpSphereShape
 {
-    RayMask FUN_00cd8220(const RayQuerySet&, RayHits&, const RayMask&) const;
+    RayMask hkpSphereShape_castRayBundleImpl(const RayQuerySet&, RayHits&, const RayMask&) const;
 };
 // Performs a vectorized ray-sphere intersection test, writing hit fractions and normals into hits and returning the active RayMask.
 // @fnv 0x00cd8220
-RayMask ProbeSphere::FUN_00cd8220(const RayQuerySet& ray, RayHits& hits, const RayMask& enabled) const
+// src: HAVOK_SRC 0x00cd8220
+RayMask ProbeSphere::hkpSphereShape_castRayBundleImpl(const RayQuerySet& ray, RayHits& hits, const RayMask& enabled) const
 {
     hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
     char* pCurrent = s->m_end.m_storage;
@@ -491,7 +495,8 @@ extern "C" LocalM128 _mm_setzero_ps(void);
 extern "C" void _mm_store_ps(float*, LocalM128);
 
 // @fnv 0x00cd8060
-void __stdcall FUN_00cd8060(int direction, float* vertexOut)
+// src: HAVOK_SRC 0x00cd8060
+void __stdcall hkpSphereShape_getSupportingVertexImpl(int direction, float* vertexOut)
 {
     LocalM128 zero = _mm_setzero_ps();
     _mm_store_ps(vertexOut, zero);
@@ -501,7 +506,8 @@ extern "C" void __movsd(unsigned long*, const unsigned long*, unsigned long);
 
 // Unpacks a count and destination pointer from packed, zeroes four floats at dst, then copies them forward over the following (count-1)*4 floats.
 // @fnv 0x00cd8080
-void __stdcall FUN_00cd8080(int aUnused, __int64 packed)
+// src: HAVOK_SRC 0x00cd8080
+void __stdcall hkpSphereShape_convertVertexIdsToVerticesImpl(int aUnused, __int64 packed)
 {
     union
     {
@@ -537,7 +543,8 @@ struct __declspec(align(16)) CentreVectorCD80
 };
 
 // @fnv 0x00cd80c0
-CentreVectorCD80 __stdcall FUN_00cd80c0()
+// src: HAVOK_SRC 0x00cd80c0
+CentreVectorCD80 __stdcall hkpSphereShape_getCentreImpl()
 {
     CentreVectorCD80 result;
     result.zero();
@@ -560,18 +567,20 @@ struct FUN_00cd8140_Obj
     int unk0C;
     float unk10;
 
-    void FUN_00cd8140(FUN_00cd8140_Result* result);
+    void hkpSphereShape_getCollisionSpheresImpl(FUN_00cd8140_Result* result);
 };
 
 // @fnv 0x00cd8140
-void FUN_00cd8140_Obj::FUN_00cd8140(FUN_00cd8140_Result* result)
+// src: HAVOK_SRC 0x00cd8140
+void FUN_00cd8140_Obj::hkpSphereShape_getCollisionSpheresImpl(FUN_00cd8140_Result* result)
 {
     _mm_store_ps(reinterpret_cast<float*>(result), _mm_setzero_ps());
     result->unk0C = unk10;
 }
 
 // @fnv 0x00cd80e0
-void __stdcall FUN_00cd80e0(float* output)
+// src: HAVOK_SRC 0x00cd80e0
+void __stdcall hkpSphereShape_getFirstVertex(float* output)
 {
     *reinterpret_cast<LocalM128*>(output) = _mm_setzero_ps();
 }

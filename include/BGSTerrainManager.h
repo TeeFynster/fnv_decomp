@@ -51,9 +51,9 @@ public:
     static void EnableBlockVisibility();
     static void EnableLODWaterProcessing(bool);
     bool FUN_00454b70();
-    void FUN_006fca90(const NiPoint3&, int);
-    void FUN_006fce00();
-    void FUN_006fd060();
+    void Update_006fca90(const NiPoint3&, int);
+    void UnloadAll_006fce00();
+    void TriggerLODApocalypse();
     static BGSTerrainManager* GetActiveManager();
     unsigned int GetBlockLevel();
     BGSTerrainChunk* GetChunkForPoint(void*);

@@ -5,8 +5,8 @@
 #include "tesobjectcell_packet.h"
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
-unsigned int FUN_0054f4c0();
-NiAVObject* FUN_0054f4f0();
+unsigned int TESTerrainLODManager_GetGrassNode();
+NiAVObject* TESMain_GetWeatherRoot();
 
 struct FUN_00b5a9a0_Node
 {
@@ -20,11 +20,12 @@ struct FUN_00b5a9a0_List
     FUN_00b5a9a0_Node* m_pHead;
     FUN_00b5a9a0_Node* m_pTail;
     unsigned int m_uiCount;
-    void __thiscall FUN_00b5a9a0(FUN_00b5a9a0_Node* node);
+    void __thiscall NiTListBase_AddNodeTail(FUN_00b5a9a0_Node* node);
 };
 
 // @fnv 0x00b5a9a0
-void __thiscall FUN_00b5a9a0_List::FUN_00b5a9a0(FUN_00b5a9a0_Node* node)
+// src: COMMUNITY 0x00b5a9a0
+void __thiscall FUN_00b5a9a0_List::NiTListBase_AddNodeTail(FUN_00b5a9a0_Node* node)
 {
     node->m_pListObject = 0;
     node->m_pNext = m_pTail;
@@ -50,11 +51,12 @@ struct FUN_00bb39e0_shell
     int m_00;
     int m_04;
     void* m_08;
-    void FUN_00bb39e0(const void* src, unsigned int count);
+    void UpdateFields_00bb39e0(const void* src, unsigned int count);
 };
 
 // @fnv 0x00bb39e0
-void FUN_00bb39e0_shell::FUN_00bb39e0(const void* src, unsigned int count)
+// src: GUESS 0x00bb39e0 (confidence: low)
+void FUN_00bb39e0_shell::UpdateFields_00bb39e0(const void* src, unsigned int count)
 {
     if (src && m_08)
     {

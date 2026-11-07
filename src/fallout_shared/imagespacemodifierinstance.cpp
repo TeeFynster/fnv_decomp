@@ -137,7 +137,7 @@ void ImageSpaceModifierInstanceDRB::Apply()
     {
         if (m_fStartTime < -10000.0)
             m_fStartTime = ImageSpaceModifierInstance::GetTime();
-        ImageSpaceManager* manager = ImageSpaceManager::FUN_004e3270();
+        ImageSpaceManager* manager = ImageSpaceManager::BSShaderManager_GetImageSpaceManager();
         if (m_spTargetObject)
         {
             ((NiAVObject*)m_spTargetObject)->UpdateWorldBound();
@@ -156,7 +156,7 @@ void ImageSpaceModifierInstanceDOF::Apply()
     {
         if (m_fStartTime < -10000.0)
             m_fStartTime = ImageSpaceModifierInstance::GetTime();
-        ImageSpaceManager* manager = ImageSpaceManager::FUN_004e3270();
+        ImageSpaceManager* manager = ImageSpaceManager::BSShaderManager_GetImageSpaceManager();
         if (m_spTargetObject)
         {
             ((NiAVObject*)m_spTargetObject)->UpdateWorldBound();
@@ -295,7 +295,8 @@ void* ImageSpaceModifierInstanceDOF::ScalarDeletingDestructor(unsigned int flags
 
 // Walks the image space modifier instance list from g_TES and removes every entry matching apInstance.
 // @fnv 0x005293f0
-void __cdecl FUN_005293f0(ImageSpaceModifierInstance* apInstance)
+// src: XBOX_PDB 0x005293f0
+void __cdecl ImageSpaceModifierInstance_Stop(ImageSpaceModifierInstance* apInstance)
 {
     BSSimpleList<NiPointer<ImageSpaceModifierInstance> >* pkList = reinterpret_cast<BSSimpleList<NiPointer<ImageSpaceModifierInstance> >*>(g_TES->FUN_0043b5d0());
     while (pkList)
@@ -489,7 +490,7 @@ bool ImageSpaceModifierInstanceForm::Blend(TESImageSpaceModifier* pModifier, flo
 }
 
 
-ImageSpaceManager* FUN_004e3270(void);
+ImageSpaceManager* BSShaderManager_GetImageSpaceManager(void);
 
 // @fnv 0x0052a330
 void ImageSpaceModifierInstanceRB::vf36()
@@ -499,13 +500,13 @@ void ImageSpaceModifierInstanceRB::vf36()
         if (m_fStartTime < -10000.0)
             m_fStartTime = ImageSpaceModifierInstance::GetTime();
 
-        ImageSpaceManager* pmanager = FUN_004e3270();
+        ImageSpaceManager* pmanager = BSShaderManager_GetImageSpaceManager();
 
         if (m_spTargetObject.operator NiAVObject*())
         {
             reinterpret_cast<NiAVObject*>(m_spTargetObject.operator NiAVObject*())->UpdateWorldBound();
 
-            pmanager->FUN_00b8b760(
+            pmanager->ApplyRadialBlurParamModifier(
                 fWaterLevelItem, m_fRampUp, fStart, m_fRampDown, m_fRampDownStart,
                 reinterpret_cast<NiAVObject*>(m_spTargetObject.operator NiAVObject*())->GetBoundingVolume());
         }
@@ -585,7 +586,8 @@ namespace fnv_0052a440 {
 
 // Allocates an ImageSpaceModifierInstanceRB with the given parameters, appends it to the modifier list, and returns it.
 // @fnv 0x0052a440
-ImageSpaceModifierInstance* __cdecl FUN_0052a440(float afStrength, float afRampup, float afStart, float afRampdown,
+// src: XBOX_PDB 0x0052a440
+ImageSpaceModifierInstance* __cdecl ImageSpaceModifierInstanceRB_Trigger(float afStrength, float afRampup, float afStart, float afRampdown,
                                                  float afDownStart, const NiPoint2& akCenter, float afDuration)
 {
     ImageSpaceModifierInstanceRB* p = new ImageSpaceModifierInstanceRB(
@@ -634,7 +636,8 @@ typedef void (BSAudioManager::*AudioMessageSender)(SOUND_MSG, unsigned int, int,
 
 // Sends SOUND_MSG_ENTER_DIALOGUE to the audio manager with no target object or position.
 // @fnv 0x00ad85a0
-void BSAudio::FUN_00ad85a0()
+// src: XBOX_PDB 0x00ad85a0
+void BSAudio::EnterDialogue()
 {
     (BSAudioManager::GetRandomGenerator().*reinterpret_cast<AudioMessageSender>(&BSAudioManager::SendSoundMessage))(
         SOUND_MSG_ENTER_DIALOGUE, 1, 0, NULL, (NiAVObject*)NULL, AudioPosition::ZERO);

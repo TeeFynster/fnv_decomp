@@ -26,8 +26,8 @@ public:
     operator void*() const;
     operator int() const;
 
-    AVObj* FUN_00559450();
-    int FUN_00559450() const;
+    AVObj* Modelloader_GetReferencedThis();
+    int Modelloader_GetReferencedThis() const;
     NP& FUN_0066b0d0(void* pObject);
 
     static void operator delete[](void* data);

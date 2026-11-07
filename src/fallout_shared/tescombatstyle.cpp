@@ -11,7 +11,7 @@ TESCombatStyle::TESCombatStyle()
 // @fnv 0x005050d0
 void TESCombatStyle::ResetFormData()
 {
-    TESCombatStyle* style = FUN_00505000();
+    TESCombatStyle* style = TESCombatStyle_GetDefaultCombatStyle();
     if (style)
     {
         memcpy(&Data, &GetCombatStyleData(style), 0x5c);
@@ -126,30 +126,30 @@ void* __fastcall DeleteCombatStyle(TESCombatStyle* self, void*, unsigned int fla
     return self;
 }
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 
 // @fnv 0x005053c0
 void __fastcall SaveCombatStyle(TESCombatStyle* self)
 {
-    self->FUN_004855a0();
-    if (FUN_00401500())
+    self->BeginFormRecord();
+    if (TESForm_QEndianSwapOnSave())
         self->Data.SwapEndianFields();
     AppendChunk(0x44545343, &self->Data, 0x5c);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         self->Data.SwapEndianFields();
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         SwapUInt32ChunkData(&self->m_kUInt32ChunkData);
     AppendChunk(0x44415343, &self->m_kUInt32ChunkData, 0x54);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         SwapUInt32ChunkData(&self->m_kUInt32ChunkData);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         self->m_kUnsignedIntArray16.SwapEndianFields();
     AppendChunk(0x44535343, &self->m_kUnsignedIntArray16, 0x40);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         self->m_kUnsignedIntArray16.SwapEndianFields();
-    self->FUN_00485680();
+    self->FinishFormRecord();
 }
 
 void __memcpy(void* __dst, const void* __src, unsigned int __n);

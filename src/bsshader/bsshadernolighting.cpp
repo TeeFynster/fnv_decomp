@@ -469,7 +469,7 @@ BSShader* BSShaderNoLighting::CreateShader()
                                                         pDecl8, pDecl9, pDecl10, pDecl11);
     shader->Initialize();
     shader->InitializeShaderData();
-    shader->FUN_00bc77e0();
+    shader->BSShaderNoLighting_LoadStagesAndPasses();
     shader->InitShaderConstants();
     shader->UseShaderDeclaration(pDecl0);
     return shader;
@@ -528,7 +528,7 @@ void BSShaderNoLighting::PrepareShaderPass(const NiPropertyState* properties)
     if ((unsigned int)(pass - 82) <= 5)
         CopyEntriesToGlobalBuffer(geometry, geometry->GetWorldTransform());
     UpdateGlobalMatrix(properties);
-    FUN_00bc7100();
+    BSShaderNoLighting_SetupGeometryConstants_WaterFog();
     UpdateMaterialColor(property, material);
     if ((unsigned int)(pass - 86) <= 1)
     {
@@ -569,9 +569,9 @@ void BSShaderNoLighting::PrepareShaderPass(const NiPropertyState* properties)
                                                  geometry->GetWorldTransform(), *bound, 0, true);
     }
     if (!((property->ulFlags[1] & 1) > 0))
-        FUN_00b97e30(0, 0);
+        BSRenderState_SetZWriteEnable(0, 0);
     if (!((property->ulFlags[0] & 0x80000000) > 0))
-        FUN_00b97de0(0, 0);
+        BSRenderState_SetZEnable(0, 0);
     NiWireframeProperty* wire = (NiWireframeProperty*)properties->m_aspProps[4];
     if (wire && (wire->m_uiObjectFlags & 1))
         m_pkD3DRenderState->SetWireframeProperty(wire);
@@ -671,16 +671,17 @@ void __stdcall UpdateGlobalMatrix(void* pObject)
     DAT_01202008 = mat.m[2][2];
 }
 
-void __fastcall FUN_00e6fe30(void* this_ptr, int edx_unused, int arg1, int arg2, int arg3, int arg4, int arg5);
+void __fastcall NiDX9Renderer_CalculateBoneMatrices(void* this_ptr, int edx_unused, int arg1, int arg2, int arg3, int arg4, int arg5);
 
 // If arg3 is non-null, calls FUN_00e6fe30 then invokes renderer vtable slot 0x78 with fields from this_ptr, arg2 and arg3, returning 0.
 // @fnv 0x00bc8f20
-int __fastcall FUN_00bc8f20(char* this_ptr, int edx_unused, int aiUnused, char* arg2, char* arg3, int arg4, int arg5,
+// src: XBOX_PDB 0x00bc8f20
+int __fastcall BSShaderNoLighting_SetupBoneMatrices(char* this_ptr, int edx_unused, int aiUnused, char* arg2, char* arg3, int arg4, int arg5,
                             int arg6, int arg7, int arg8)
 {
     if (arg3)
     {
-        FUN_00e6fe30(DAT_011f9508, edx_unused, (int)arg2, arg7, 0, 3, 1);
+        NiDX9Renderer_CalculateBoneMatrices(DAT_011f9508, edx_unused, (int)arg2, arg7, 0, 3, 1);
         void* obj = reinterpret_cast<NiD3DPass*>(DAT_0126f74c)->m_spVertexShader.m_pObject;
         typedef void(__thiscall * VFunc)(void*, int, int, int, int, int);
         VFunc fn = (*(VFunc**)obj)[0x78 / 4];
@@ -745,7 +746,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_01202040;
 
 // @fnv 0x00bc7710
-GlobalObjectO2_00a7b610* __cdecl FUN_00bc7710()
+// src: XBOX_PDB 0x00bc7710
+GlobalObjectO2_00a7b610* __cdecl BSShaderNoLighting_GetRTTI()
 {
     return &g_01202040;
 }
@@ -823,11 +825,12 @@ struct FUN_00bc7100_t
 {
     char pad[0x174];
     NLPass* pPass;
-    void FUN_00bc7100();
+    void BSShaderNoLighting_SetupGeometryConstants_WaterFog();
 };
 // If DAT_011f91e4 is in [0x2d8,0x2ef], enables pPass and writes DAT_011f9618 and the plane normal/distance into DAT_01202148 and DAT_01202158.
 // @fnv 0x00bc7100
-void FUN_00bc7100_t::FUN_00bc7100()
+// src: COMMUNITY 0x00bc7100
+void FUN_00bc7100_t::BSShaderNoLighting_SetupGeometryConstants_WaterFog()
 {
     if (DAT_011f91e4 >= 0x2d8 && DAT_011f91e4 <= 0x2ef)
     {
@@ -840,9 +843,9 @@ void FUN_00bc7100_t::FUN_00bc7100()
     }
 }
 
-void __cdecl FUN_00b98480(unsigned int, unsigned int);
-void __cdecl FUN_00b97e30(unsigned int, unsigned int);
-void __cdecl FUN_00b97de0(unsigned int, unsigned int);
+void __cdecl BSRenderState_SetWireframeEnable(unsigned int, unsigned int);
+void __cdecl BSRenderState_SetZWriteEnable(unsigned int, unsigned int);
+void __cdecl BSRenderState_SetZEnable(unsigned int, unsigned int);
 void __cdecl UpdateRendererStateCount(unsigned int, unsigned int);
 
 // Updates render states from the shader and wireframe properties.
@@ -852,15 +855,15 @@ void __stdcall UpdateFlagStates(const NiPropertyState* owner)
     BSShaderProperty* target = static_cast<BSShaderProperty*>(owner->m_aspProps[3]);
     if (target != 0 && (target->ulFlags[1] & 0x10000) > 0)
     {
-        FUN_00b98480(0, 0);
+        BSRenderState_SetWireframeEnable(0, 0);
     }
     if ((target->ulFlags[1] & 1) <= 0)
     {
-        FUN_00b97e30(1, 0);
+        BSRenderState_SetZWriteEnable(1, 0);
     }
     if ((target->ulFlags[0] & 0x80000000u) <= 0)
     {
-        FUN_00b97de0(1, 0);
+        BSRenderState_SetZEnable(1, 0);
     }
     NiWireframeProperty* other = static_cast<NiWireframeProperty*>(owner->m_aspProps[4]);
     if (other != 0 && (other->m_uiObjectFlags & 1) != 0)
@@ -875,7 +878,7 @@ void __cdecl AddToTwoCounters(int, int, int);
 struct ShaderDispatcher
 {
     void DispatchShaderProperty(NiAlphaProperty** property);
-    void FUN_00be1ff0(NiAlphaProperty** property);
+    void NiD3DShader_SetupGeometryAlphaBlending(NiAlphaProperty** property);
 };
 // Dispatches alpha-property rendering based on the current pass and alpha flags.
 // @fnv 0x00bc8ed0
@@ -890,7 +893,7 @@ void ShaderDispatcher::DispatchShaderProperty(NiAlphaProperty** property)
     }
     else
     {
-        FUN_00be1ff0(property);
+        NiD3DShader_SetupGeometryAlphaBlending(property);
     }
 }
 
@@ -936,12 +939,12 @@ struct BeamStage
     unsigned int unk58;
     unsigned int unk5c;
     int references;
-    void FUN_00e7ecd0();
+    void NiD3DTextureStage_ReturnStageToPool();
     __forceinline void Release()
     {
         --references;
         if (references == 0)
-            FUN_00e7ecd0();
+            NiD3DTextureStage_ReturnStageToPool();
     }
 };
 struct ShaderStagePointer
@@ -1054,23 +1057,24 @@ struct LightingShader
     NiD3DPixelShader* shader164;
     NiD3DPixelShader* shader168;
     NiD3DPixelShader* shader16c;
-    bool FUN_00bc77e0();
+    bool BSShaderNoLighting_LoadStagesAndPasses();
 };
 // Creates each shader pass in the lighting shader, optionally adding a new stage and assigning vertex and pixel shaders.
 // @fnv 0x00bc77e0
-bool LightingShader::FUN_00bc77e0()
+// src: COMMUNITY 0x00bc77e0
+bool LightingShader::BSShaderNoLighting_LoadStagesAndPasses()
 {
     FUN_00e804d0(&pass6c);
     ShaderStagePointer stage;
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    pass6c->FUN_00e802b0(pass6c->m_uiCurrentStage, stage.object);
+    pass6c->NiD3DPass_SetStage(pass6c->m_uiCurrentStage, stage.object);
     pass6c->m_spVertexShader = shadere4;
     pass6c->m_spPixelShader = shader154;
     FUN_00e804d0(&pass70);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    pass70->FUN_00e802b0(pass70->m_uiCurrentStage, stage.object);
+    pass70->NiD3DPass_SetStage(pass70->m_uiCurrentStage, stage.object);
     pass70->m_spVertexShader = shaderec;
     {
         NiD3DPixelShader* shader = shader15c;
@@ -1085,13 +1089,13 @@ bool LightingShader::FUN_00bc77e0()
     FUN_00e804d0(&pass7c);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    pass7c->FUN_00e802b0(pass7c->m_uiCurrentStage, stage.object);
+    pass7c->NiD3DPass_SetStage(pass7c->m_uiCurrentStage, stage.object);
     pass7c->m_spVertexShader = shaderf4;
     pass7c->m_spPixelShader = shader154;
     FUN_00e804d0(&pass80);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    pass80->FUN_00e802b0(pass80->m_uiCurrentStage, stage.object);
+    pass80->NiD3DPass_SetStage(pass80->m_uiCurrentStage, stage.object);
     pass80->m_spVertexShader = shaderfc;
     pass80->m_spPixelShader = shader15c;
     FUN_00e804d0(&pass84);
@@ -1103,13 +1107,13 @@ bool LightingShader::FUN_00bc77e0()
     FUN_00e804d0(&pass8c);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    pass8c->FUN_00e802b0(pass8c->m_uiCurrentStage, stage.object);
+    pass8c->NiD3DPass_SetStage(pass8c->m_uiCurrentStage, stage.object);
     pass8c->m_spVertexShader = shader104;
     pass8c->m_spPixelShader = shader154;
     FUN_00e804d0(&pass90);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    pass90->FUN_00e802b0(pass90->m_uiCurrentStage, stage.object);
+    pass90->NiD3DPass_SetStage(pass90->m_uiCurrentStage, stage.object);
     pass90->m_spVertexShader = shader10c;
     pass90->m_spPixelShader = shader15c;
     FUN_00e804d0(&pass94);
@@ -1121,13 +1125,13 @@ bool LightingShader::FUN_00bc77e0()
     FUN_00e804d0(&pass9c);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    pass9c->FUN_00e802b0(pass9c->m_uiCurrentStage, stage.object);
+    pass9c->NiD3DPass_SetStage(pass9c->m_uiCurrentStage, stage.object);
     pass9c->m_spVertexShader = shader114;
     pass9c->m_spPixelShader = shader154;
     FUN_00e804d0(&passa0);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passa0->FUN_00e802b0(passa0->m_uiCurrentStage, stage.object);
+    passa0->NiD3DPass_SetStage(passa0->m_uiCurrentStage, stage.object);
     passa0->m_spVertexShader = shader11c;
     passa0->m_spPixelShader = shader15c;
     FUN_00e804d0(&passa4);
@@ -1139,37 +1143,37 @@ bool LightingShader::FUN_00bc77e0()
     FUN_00e804d0(&passac);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passac->FUN_00e802b0(passac->m_uiCurrentStage, stage.object);
+    passac->NiD3DPass_SetStage(passac->m_uiCurrentStage, stage.object);
     passac->m_spVertexShader = shader124;
     passac->m_spPixelShader = shader15c;
     FUN_00e804d0(&passb0);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passb0->FUN_00e802b0(passb0->m_uiCurrentStage, stage.object);
+    passb0->NiD3DPass_SetStage(passb0->m_uiCurrentStage, stage.object);
     passb0->m_spVertexShader = shader128;
     passb0->m_spPixelShader = shader15c;
     FUN_00e804d0(&passb4);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passb4->FUN_00e802b0(passb4->m_uiCurrentStage, stage.object);
+    passb4->NiD3DPass_SetStage(passb4->m_uiCurrentStage, stage.object);
     passb4->m_spVertexShader = shader124;
     passb4->m_spPixelShader = shader160;
     FUN_00e804d0(&passb8);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passb8->FUN_00e802b0(passb8->m_uiCurrentStage, stage.object);
+    passb8->NiD3DPass_SetStage(passb8->m_uiCurrentStage, stage.object);
     passb8->m_spVertexShader = shader128;
     passb8->m_spPixelShader = shader160;
     FUN_00e804d0(&passbc);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passbc->FUN_00e802b0(passbc->m_uiCurrentStage, stage.object);
+    passbc->NiD3DPass_SetStage(passbc->m_uiCurrentStage, stage.object);
     passbc->m_spVertexShader = shader12c;
     passbc->m_spPixelShader = shader15c;
     FUN_00e804d0(&passc0);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passc0->FUN_00e802b0(passc0->m_uiCurrentStage, stage.object);
+    passc0->NiD3DPass_SetStage(passc0->m_uiCurrentStage, stage.object);
     passc0->m_spVertexShader = shader130;
     passc0->m_spPixelShader = shader15c;
     FUN_00e804d0(&passc4);
@@ -1179,7 +1183,7 @@ bool LightingShader::FUN_00bc77e0()
     FUN_00e804d0(&passc8);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passc8->FUN_00e802b0(passc8->m_uiCurrentStage, stage.object);
+    passc8->NiD3DPass_SetStage(passc8->m_uiCurrentStage, stage.object);
     passc8->m_spVertexShader = shader138;
     passc8->m_spPixelShader = shader16c;
     passc8->GetRenderStateGroup()->SetNodeValue(168, 3, true);
@@ -1190,7 +1194,7 @@ bool LightingShader::FUN_00bc77e0()
     FUN_00e804d0(&passd0);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passd0->FUN_00e802b0(passd0->m_uiCurrentStage, stage.object);
+    passd0->NiD3DPass_SetStage(passd0->m_uiCurrentStage, stage.object);
     passd0->m_spVertexShader = shader140;
     passd0->m_spPixelShader = shader16c;
     passd0->GetRenderStateGroup()->SetNodeValue(168, 3, true);
@@ -1201,7 +1205,7 @@ bool LightingShader::FUN_00bc77e0()
     FUN_00e804d0(&passd8);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passd8->FUN_00e802b0(passd8->m_uiCurrentStage, stage.object);
+    passd8->NiD3DPass_SetStage(passd8->m_uiCurrentStage, stage.object);
     passd8->m_spVertexShader = shader148;
     passd8->m_spPixelShader = shader16c;
     passd8->GetRenderStateGroup()->SetNodeValue(168, 3, true);
@@ -1212,7 +1216,7 @@ bool LightingShader::FUN_00bc77e0()
     FUN_00e804d0(&passe0);
     AssignStageFromPool(&stage);
     ConfigureBeamStage(stage.object, 0, 3, 2, true);
-    passe0->FUN_00e802b0(passe0->m_uiCurrentStage, stage.object);
+    passe0->NiD3DPass_SetStage(passe0->m_uiCurrentStage, stage.object);
     passe0->m_spVertexShader = shader150;
     passe0->m_spPixelShader = shader16c;
     passe0->GetRenderStateGroup()->SetNodeValue(168, 3, true);
@@ -1500,13 +1504,14 @@ void TechniqueShader::SetPass(unsigned int uiTechnique)
 
 struct BSShaderNoLightingShell : BSShaderNoLighting
 {
-    void FUN_00bc8d30();
+    void BSShaderNoLighting_ReloadShaders();
 };
 // @fnv 0x00bc8d30
-void BSShaderNoLightingShell::FUN_00bc8d30()
+// src: XBOX_PDB 0x00bc8d30
+void BSShaderNoLightingShell::BSShaderNoLighting_ReloadShaders()
 {
     InitializeShaderData();
-    FUN_00bc77e0();
+    BSShaderNoLighting_LoadStagesAndPasses();
 }
 
 namespace NoLightingConsts {
@@ -1516,7 +1521,7 @@ extern "C" unsigned int DAT_01202048;
 }
 
 extern unsigned char DAT_01011584[];
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 inline void NiD3DShaderConstantMap::IncRefCount()
 {
@@ -1549,11 +1554,12 @@ class NoLightingShaderBuild
     NiD3DShaderConstantMap* m34;
     char pad2[0x170 - 0x38];
     int m170, m174, m178, m17c, m180;
-    void FUN_00bc9cc0();
+    void BSShaderNoLighting_CreateConstantMaps();
 };
 // Lazily creates and populates the pixel and vertex constant maps with shader constant values and stores their indices in m170-m180.
 // @fnv 0x00bc9cc0
-void NoLightingShaderBuild::FUN_00bc9cc0()
+// src: XBOX_PDB 0x00bc9cc0
+void NoLightingShaderBuild::BSShaderNoLighting_CreateConstantMaps()
 {
     if (!m30)
     {

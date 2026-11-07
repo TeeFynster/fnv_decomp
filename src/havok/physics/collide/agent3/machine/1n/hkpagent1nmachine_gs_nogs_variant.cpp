@@ -38,8 +38,8 @@
 // src/havok/physics/collide/agent3/machine/1n/hkpagent1nmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent3/machine/1n/hkpagent1nmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 void ProcessEntryPair();
-void FUN_00da44d0(int, int, void*);
-void FUN_00da48e0(int b, int a);
+void hkAgent1nMachine_VisitAllAgents(int, int, void*);
+void hkAgent1nMachine_UpdateShapeCollectionFilter(int b, int a);
 typedef unsigned int BlockPoolsize_t;
 struct BlockPoolAllocator {
     virtual void unk00();
@@ -54,8 +54,8 @@ struct BlockPoolMemoryRouter {
 
     BlockPoolAllocator& heap() { return *m_pStreamAllocator; }
 };
-extern "C" BlockPoolMemoryRouter& __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(BlockPoolAllocator* alloc, void* array, int numElements, int sizeElem);
+extern "C" BlockPoolMemoryRouter& __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(BlockPoolAllocator* alloc, void* array, int numElements, int sizeElem);
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
 struct BlockPoolBlock {
     int unk00;
@@ -166,7 +166,7 @@ struct S_00da40e0_Input {
     hkpContactMgr* m_pContactManager;
     S_00da40e0_ConstraintOwner* m_pConstraintOwner;
 };
-const hkpCdBody* __cdecl FUN_00cfe1d0(const hkpCdBody* cdBody, hkpCdBody* newCdBodies,
+const hkpCdBody* __cdecl hkAgentMachine_processTransformedShapes(const hkpCdBody* cdBody, hkpCdBody* newCdBodies,
     S_00da40e0_MotionState* newMotionStates, int numSlots, unsigned char& changeCounter);
 S_00da40e0_Entry* __cdecl ProcessCollisionEntry(const S_00da40e0_Input& aInput, S_00da40e0_Entry* entry, S_00da40e0_AgentData* agentData);
 // hkpAgent1nMachine shape-collection filter visitor (one container side): re-check the filter for
@@ -211,9 +211,9 @@ struct CollisionAgentContext
 {
     char* m_pCollisionDispatcher;
 };
-void FUN_00da3510(AgentSectorPointerArray& agentTrack, CollisionAgentContext& input);
+void hkpAgent1nSector_ProcessEntries_00da3510(AgentSectorPointerArray& agentTrack, CollisionAgentContext& input);
 typedef void (__cdecl *Da35FuncPtr)(void* entry, void* payload, float fa, float fb, void* holder);
-void __cdecl FUN_00da35f0(hkpAgent1nSector*** container, float fa, float fb, void** holder);
+void __cdecl _hkAgent1nMachine_WarpTime(hkpAgent1nSector*** container, float fa, float fb, void** holder);
 static void* __cdecl Da35Search(hkpAgent1nSector*** container, int key1, int key2, void** out)
 {
     hkpAgent1nSector** streams = *container;
@@ -267,9 +267,9 @@ struct BlockPoolHeap : BlockPoolAllocator {
 };
 __forceinline BlockPoolHeap& fullHeap()
 {
-    return static_cast<BlockPoolHeap&>(FUN_00c85750().heap());
+    return static_cast<BlockPoolHeap&>(hkMemoryRouter_getInstance().heap());
 }
-void FUN_00da42b0(BlockPoolArray* blocks, hkpCollisionDispatcher* dispatcher, hkpContactMgr* mgr, S_00da40e0_ConstraintOwner& owner);
+void hkAgent1nMachine_Destroy(BlockPoolArray* blocks, hkpCollisionDispatcher* dispatcher, hkpContactMgr* mgr, S_00da40e0_ConstraintOwner& owner);
 #include <string.h>
 #include "../../../../../../../include/hkMatrix3.h"
 struct StreamAllocator : BlockPoolAllocator {
@@ -289,9 +289,9 @@ __forceinline static void streamCopy(void* dst, const void* src, int count) {
         s += 4;
     } while (--count > 0);
 }
-void __cdecl FUN_00d2cc70(void*, const void*, unsigned int);
+void __cdecl hkMemUtil_memMove(void*, const void*, unsigned int);
 typedef unsigned char* (__cdecl *StreamTransform)(void*, unsigned char*, unsigned char*);
-void FUN_00da44d0(int array_arg, int header_arg, void* callback);
+void hkAgent1nMachine_VisitAllAgents(int array_arg, int header_arg, void* callback);
 
 typedef float hkReal;
 typedef unsigned char hkUchar;
@@ -637,7 +637,8 @@ return HK_CONTACT_PAIR_NO_CONFLICT;
 }
 return HK_CONTACT_PAIR_REJECT_NEW;}
 // @fnv 0x00da3930
-void __cdecl FUN_00da3930(hkpAgent3Input&input,const hkpShapeContainer*shapeCollection,WorldOperationEntry&output)
+// src: GUESS 0x00da3930 (confidence: low)
+void __cdecl hkpAgent3Input_ProcessEntries_00da3930(hkpAgent3Input&input,const hkpShapeContainer*shapeCollection,WorldOperationEntry&output)
 {
 int numConflictContacts=0;
 hkUint16 conflictContacts[HK_MAX_CONTACT_POINT];

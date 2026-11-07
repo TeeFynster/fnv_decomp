@@ -491,13 +491,13 @@ struct __declspec(align(16)) BufB
     float f0bc;
 };
 extern void __cdecl ResetJacobianRows(int a, int b, void* c, void* d);
-extern void __cdecl FUN_00df07c0(int a, void* b);
-extern void __cdecl FUN_00e29250(void* a, void* b);
-extern void __cdecl FUN_00e29470(void* a, void* b, int c);
-extern void __cdecl FUN_00e29380(void* a, void* b);
-extern void __cdecl FUN_00e298f0(void* a, void* b);
+extern void __cdecl Object_ProcessEntries_00df07c0(int a, void* b);
+extern void __cdecl _hkMatrix6SetTranspose(void* a, void* b);
+extern void __cdecl hkMatrix3_ProcessEntries_00e29470(void* a, void* b, int c);
+extern void __cdecl Object_SubtractVectorBundles(void* a, void* b);
+extern void __cdecl Runtime_ForwardCall_00e298f0(void* a, void* b);
 extern float DAT_0104da4c;
-void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4);
+void __cdecl Hkppoweredchainsolverutil_UpdateState_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4);
 struct MatrixGroup
 {
     char data0[0xc0];
@@ -513,8 +513,8 @@ struct InputStruct
     char pad2[8];
     hkAabb* aabbs;
 };
-extern "C" void __cdecl FUN_00e29510(void* out, const void* matrix, const void* in);
-void __cdecl FUN_00df11a0(InputStruct* a, hkAabb* out);
+extern "C" void __cdecl hkVector4_ComputeValues_00e29510(void* out, const void* matrix, const void* in);
+void __cdecl hkAabb_ProcessEntries_00df11a0(InputStruct* a, hkAabb* out);
 
 extern "C" void _ReadBarrier(void);
 __forceinline hkSimdReal::hkSimdReal(const __m128& v) : value(v) {}
@@ -782,7 +782,7 @@ struct BoolValue
     __forceinline BoolValue(bool v) : value(v)
     {}
 };
-extern void __cdecl FUN_00df0870(BoolValue, MatrixTriple*, StepRecord*, Mat6*, Mat6**);
+extern void __cdecl Hkppoweredchainsolverutil_UpdateState_00df0870(BoolValue, MatrixTriple*, StepRecord*, Mat6*, Mat6**);
 static __forceinline void diagonalAt(int row, const CfmRecord& cfm, const LinearJac* __restrict j,
                                      const AngularJac* __restrict ja, OffsetRecord* offsets, const BodyRecord* base,
                                      Mat6& out)
@@ -880,7 +880,8 @@ static __forceinline void nextAt(int row, LinearJac* j, AngularJac* ja, OffsetRe
     }
 }
 // @fnv 0x00df19e0
-void __cdecl FUN_00df19e0(int count, const CfmRecord& cfm, StepRecord* motors, LinearJac* j, AngularJac* __restrict ja,
+// src: GUESS 0x00df19e0 (confidence: low)
+void __cdecl Object_ProcessEntries_00df19e0(int count, const CfmRecord& cfm, StepRecord* motors, LinearJac* j, AngularJac* __restrict ja,
                           OffsetRecord* offsets, const BodyRecord* base, MatrixTriple* triples, int bufferSize)
 {
     Mat6 previous;
@@ -899,7 +900,7 @@ void __cdecl FUN_00df19e0(int count, const CfmRecord& cfm, StepRecord* motors, L
     {
         BoolValue more(count - 1 - row != 0);
         StepRecord* local = motors + row;
-        FUN_00df0870(more, triples + row, local, &previous, &upper);
+        Hkppoweredchainsolverutil_UpdateState_00df0870(more, triples + row, local, &previous, &upper);
     }
 }
 
@@ -960,10 +961,11 @@ struct FUN_00df0870_Flag
     bool b;
 };
 
-void __cdecl FUN_00df0870(FUN_00df0870_Flag more, char* elem, const char* dst, FUN_00df2040_Blk* buf, char** outPtr);
+void __cdecl Hkppoweredchainsolverutil_UpdateState_00df0870(FUN_00df0870_Flag more, char* elem, const char* dst, FUN_00df2040_Blk* buf, char** outPtr);
 
 // @fnv 0x00df2040
-void __cdecl FUN_00df2040(int index, int count, const char* a3, char* a4)
+// src: GUESS 0x00df2040 (confidence: low)
+void __cdecl Object_ProcessEntries_00df2040(int index, int count, const char* a3, char* a4)
 {
     int t = index - 1;
     int i;
@@ -1016,6 +1018,6 @@ void __cdecl FUN_00df2040(int index, int count, const char* a3, char* a4)
     {
         FUN_00df0870_Flag flag;
         flag.b = (count - 1 - k != 0);
-        FUN_00df0870(flag, a4 + k * 0x3c0, a3 + k * 0x40, &buf, &ptr);
+        Hkppoweredchainsolverutil_UpdateState_00df0870(flag, a4 + k * 0x3c0, a3 + k * 0x40, &buf, &ptr);
     }
 }

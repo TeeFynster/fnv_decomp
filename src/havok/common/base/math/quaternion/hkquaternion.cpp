@@ -10,8 +10,8 @@
 class FUN_005611c0_t
 {
   public:
-    void FUN_005611c0();
-    void FUN_00cb2830(float* pts);
+    void normalize_005611c0();
+    void hkQuaternion_setAndNormalize(float* pts);
 };
 
 static float g_sink2550;
@@ -22,7 +22,8 @@ extern "C" double cb2550_clobber(double x);
 // pts stays live across an ABI-clobbering call, so it gets a callee-saved
 // register home and the private convention passes it in esi; obj is read
 // exactly once, late, so it stays on the stack.
-static __declspec(noinline) void FUN_00cb2550(FUN_005611c0_t* obj, float* pts)
+// src: COMMUNITY 0x00cb2550
+static __declspec(noinline) void quaternionFromRotatation(FUN_005611c0_t* obj, float* pts)
 {
     float s = pts[0] * pts[1];
     s = (float)cb2550_clobber(s);
@@ -33,10 +34,11 @@ static __declspec(noinline) void FUN_00cb2550(FUN_005611c0_t* obj, float* pts)
 }
 
 // @fnv 0x00cb2830
-void FUN_005611c0_t::FUN_00cb2830(float* apPoints)
+// src: HAVOK_LIB 0x00cb2830
+void FUN_005611c0_t::hkQuaternion_setAndNormalize(float* apPoints)
 {
-    FUN_00cb2550(this, apPoints);
-    FUN_005611c0();
+    quaternionFromRotatation(this, apPoints);
+    normalize_005611c0();
 }
 
 #include <xmmintrin.h>
@@ -44,7 +46,7 @@ void FUN_005611c0_t::FUN_00cb2830(float* apPoints)
 struct FUN_00cb24c0_cls
 {
     __m128 m_00;
-    void FUN_00c7f500(unsigned char* flag);
+    void hkVector4_isOk4(unsigned char* flag);
     unsigned char* IsNormalized(unsigned char* flag);
 };
 
@@ -52,7 +54,7 @@ struct FUN_00cb24c0_cls
 // @fnv 0x00cb24c0
 unsigned char* FUN_00cb24c0_cls::IsNormalized(unsigned char* apResult)
 {
-    FUN_00c7f500(apResult);
+    hkVector4_isOk4(apResult);
     __m128 t = _mm_mul_ps(m_00, m_00);
     __m128 a = _mm_add_ps(_mm_shuffle_ps(t, t, 0x4e), t);
     __m128 vSumAll = _mm_add_ps(_mm_shuffle_ps(a, a, 0xb1), a);
@@ -141,7 +143,8 @@ struct S00cb2550_Quat
 
 // Converts a rotation matrix to a quaternion and stores the quaternion in self->q.
 // @fnv 0x00cb2550
-static __declspec(noinline) void FUN_00cb2550(S00cb2550_Quat* apQuat, const S00cb2550_Rot& arRot)
+// src: COMMUNITY 0x00cb2550
+static __declspec(noinline) void quaternionFromRotatation(S00cb2550_Quat* apQuat, const S00cb2550_Rot& arRot)
 {
     S00cb2550_V4 v;
     float trace = arRot(0, 0) + arRot(1, 1) + arRot(2, 2);
@@ -180,5 +183,5 @@ static __declspec(noinline) void FUN_00cb2550(S00cb2550_Quat* apQuat, const S00c
 
 void S00cb2550_caller(S00cb2550_Quat* q, const S00cb2550_Rot& r)
 {
-    FUN_00cb2550(q, r);
+    quaternionFromRotatation(q, r);
 }

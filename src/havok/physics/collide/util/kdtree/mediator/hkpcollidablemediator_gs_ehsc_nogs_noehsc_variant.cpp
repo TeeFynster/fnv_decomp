@@ -9,7 +9,7 @@
 // src/havok/physics/collide/util/kdtree/mediator/hkpcollidablemediator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/util/kdtree/mediator/hkpcollidablemediator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct Child { unsigned int unk00; unsigned int unk04; };
-struct Owner { unsigned int unk00; unsigned int unk04; Child* child; unsigned int FUN_00d9e000(); };
+struct Owner { unsigned int unk00; unsigned int unk04; Child* child; unsigned int hkpCollidableMediator_getNumPrimitives(); };
 // InitWalker: thiscall (2 stack args). Stores vptr, flag word and list, walks the item list when ctx != 0, returns this.
 extern int DAT_010d40b4;
 struct __declspec(align(16)) OutSlot {
@@ -31,7 +31,7 @@ struct SubRec {
     virtual void v10();
     virtual void v14();
     virtual void v18(OutSlot* out);
-    void FUN_00d07950(OutSlot* out);
+    void hkpPhantom_setBoundingVolumeData(OutSlot* out);
 };
 struct ItemRec {
     unsigned int unk00;
@@ -85,7 +85,7 @@ struct CtxRec {
     unsigned int unk74;
     void* m_78;
 };
-void __cdecl FUN_00d1a330(void* mgr, OutSlot* out, int flag);
+void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(void* mgr, OutSlot* out, int flag);
 class ListWalker {
 public:
     int m_vptr;
@@ -98,7 +98,7 @@ struct FUN_00d9e010_cls {
     unsigned int unk00;
     unsigned int unk04;
     Child* child;
-    unsigned int FUN_00d9e010(unsigned int index);
+    unsigned int hkpCollidableMediator_getPrimitiveId(unsigned int index);
 };
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 
@@ -221,7 +221,8 @@ static __forceinline void convertToUint32WithClip(const __m128& in, const __m128
 }
 
 // @fnv 0x00d9e020
-void __stdcall FUN_00d9e020(const CollidableQ* collidable, __m128i* out)
+// src: XBOX_PDB 0x00d9e020
+void __stdcall hkpCollidableMediator_projectPrimitive(const CollidableQ* collidable, __m128i* out)
 {
     hkAabbUint32 aabb32;
     const hkAabbUint32& bv = collidable->m_kBoundingVolumeData;

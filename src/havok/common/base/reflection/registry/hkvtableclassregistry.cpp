@@ -25,7 +25,7 @@ struct Buffer
 {
     int value;
     void FUN_00cb0a60();
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
     int Equals(int);
 };
 struct Manager
@@ -38,10 +38,10 @@ struct Manager
 };
 extern Manager* DAT_01269b74;
 extern int DAT_011b7b88;
-IntResult FUN_00dcca60(Object*);
-void FUN_00d48af0(Object*, int*);
-int FUN_00cb1290(void*, const void*, int);
-int FUN_00dc0fb0();
+IntResult hkTagfileReader_detectFormat(Object*);
+void hkSerializeUtil_detectFormat(Object*, int*);
+int hkString_memCmp(void*, const void*, int);
+int hkVersionUtil_getCurrentVersion();
 struct ParseState
 {
     int status;
@@ -50,22 +50,23 @@ struct ParseState
 };
 // Checks the object and parse state, returning 1 when the buffer comparison or manager check succeeds.
 // @fnv 0x00d49240
-int FUN_00d49240(Object* object)
+// src: XBOX_PDB 0x00d49240
+int hkSerializeUtil_isLoadable(Object* object)
 {
     if (!object || !object->vf0c().value)
         return 0;
-    if (FUN_00dcca60(object).value > 1)
+    if (hkTagfileReader_detectFormat(object).value > 1)
         return 1;
     ParseState parseState;
     parseState.buffer.FUN_00cb0a60();
-    FUN_00d48af0(object, &parseState.status);
+    hkSerializeUtil_detectFormat(object, &parseState.status);
     if (parseState.status == 2)
     {
-        if (FUN_00cb1290(&parseState.bits, &DAT_011b7b88, 4) != 0)
+        if (hkString_memCmp(&parseState.bits, &DAT_011b7b88, 4) != 0)
             goto check3;
-        if (parseState.buffer.Equals(FUN_00dc0fb0()) != 0)
+        if (parseState.buffer.Equals(hkVersionUtil_getCurrentVersion()) != 0)
         {
-            parseState.buffer.FUN_00cb0c00();
+            parseState.buffer.Object_UpdateFields_00cb0c00();
             return 1;
         }
         goto manager;
@@ -76,10 +77,10 @@ check3:
 manager:
     if (DAT_01269b74->vf10(&parseState.status))
     {
-        parseState.buffer.FUN_00cb0c00();
+        parseState.buffer.Object_UpdateFields_00cb0c00();
         return 1;
     }
 failure:
-    parseState.buffer.FUN_00cb0c00();
+    parseState.buffer.Object_UpdateFields_00cb0c00();
     return 0;
 }

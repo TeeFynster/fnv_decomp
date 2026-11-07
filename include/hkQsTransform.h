@@ -43,7 +43,7 @@ public:
     hkQsTransform& CopyFromFloatArray(const hkQsTransform& t);
 
     void SetFromTransform(const hkTransform& transform);
-    void FUN_00ce5070(const hkTransform& transform);
+    void setFromTransformNoScale(const hkTransform& transform);
 
     void setIdentity();
     void SetConjugate(const hkQsTransform& t);
@@ -59,7 +59,7 @@ public:
     void SetBodyOrientation(const QuaternionStorage& rotation);
     void set(const VectorStorage& t, const QuaternionStorage& r, const VectorStorage& s);
     // 0x00ce5120: translation, scale and rotation (either sign) all within epsilon of other
-    hkBool FUN_00ce5120(const hkQsTransform& other, float epsilon) const;
+    hkBool ProcessAndReturnValue_00ce5120(const hkQsTransform& other, float epsilon) const;
 };
 
 typedef char hkQsTransform_size_check[(sizeof(hkQsTransform) == 48) ? 1 : -1];

@@ -24,7 +24,7 @@ void NiIntegersExtraData::LoadBinary(NiStream& stream)
         NiIntegerStreamEntry streamEntry;
         for (unsigned int i = 0; i < count; ++i)
         {
-            streamEntry.FUN_00c545d0(stream);
+            streamEntry.FurnitureMark_LoadBinary(stream);
             entries.Add(streamEntry);
             // Preserve the original frame's 176-byte unused local region.
             struct ReservedStreamLocals
@@ -82,11 +82,12 @@ extern NiFixedString* DAT_012031c0;
 
 struct NiExtraDataNameInitializer : NiExtraData
 {
-    void FUN_00c543e0();
+    void BSFurnitureMarker_SetName();
 };
 
 // @fnv 0x00c543e0
-void NiExtraDataNameInitializer::FUN_00c543e0()
+// src: COMMUNITY 0x00c543e0
+void NiExtraDataNameInitializer::BSFurnitureMarker_SetName()
 {
     reinterpret_cast<NiAVObject*>(this)->SetName(*DAT_012031c0);
 }
@@ -95,22 +96,24 @@ extern int g_012031c4;
 
 struct FUN_00c54d60_shell
 {
-    int* __thiscall FUN_00c54d60();
+    int* __thiscall BSFurnitureMarker_GetRTTI();
 };
 
 // @fnv 0x00c54d60
-int* __thiscall FUN_00c54d60_shell::FUN_00c54d60()
+// src: COMMUNITY 0x00c54d60
+int* __thiscall FUN_00c54d60_shell::BSFurnitureMarker_GetRTTI()
 {
     return &g_012031c4;
 }
 
 struct FUN_00c54030_shell
 {
-    int __thiscall FUN_00c54030(int param_1);
+    int __thiscall BSFurnitureMarker_CreateClone(int param_1);
 };
 
 // @fnv 0x00c54030
-int __thiscall FUN_00c54030_shell::FUN_00c54030(int param_1)
+// src: COMMUNITY 0x00c54030
+int __thiscall FUN_00c54030_shell::BSFurnitureMarker_CreateClone(int param_1)
 {
     return (int)this;
 }
@@ -121,10 +124,11 @@ struct FUN_00a7b290_shell
 };
 struct FUN_00c54150_shell
 {
-    void __thiscall FUN_00c54150(int param_1);
+    void __thiscall BSFurnitureMarker_RegisterStreamables(int param_1);
 };
 // @fnv 0x00c54150
-void __thiscall FUN_00c54150_shell::FUN_00c54150(int param_1)
+// src: XBOX_PDB 0x00c54150
+void __thiscall FUN_00c54150_shell::BSFurnitureMarker_RegisterStreamables(int param_1)
 {
     ((FUN_00a7b290_shell*)this)->FUN_00a7b290(param_1);
 }
@@ -132,32 +136,34 @@ void __thiscall FUN_00c54150_shell::FUN_00c54150(int param_1)
 struct C00c541e0
 {
     bool FUN_00a7b3d0(int);
-    bool FUN_00c541e0(int);
+    bool BSFurnitureMarker_IsEqual(int);
 };
 // Calls FUN_00a7b3d0 with the given int and returns its bool result.
 // @fnv 0x00c541e0
-bool C00c541e0::FUN_00c541e0(int a)
+// src: XBOX_PDB 0x00c541e0
+bool C00c541e0::BSFurnitureMarker_IsEqual(int a)
 {
     bool b = FUN_00a7b3d0(a);
     return b;
 }
 
-void __cdecl FUN_00a303a0(NiStream&, unsigned short*);
-void __cdecl FUN_00a29550(NiStream&, unsigned char*);
+void __cdecl NiStreamSaveBinary_unsigned_short(NiStream&, unsigned short*);
+void __cdecl Runtime_UpdateState_00a29550(NiStream&, unsigned char*);
 struct FUN_00c54660_shell
 {
     NiColor color;
     unsigned short fldC;
     unsigned char fldE;
-    void __thiscall FUN_00c54660(NiStream&);
+    void __thiscall ProcessState_00c54660(NiStream&);
 };
 // @fnv 0x00c54660
-void __thiscall FUN_00c54660_shell::FUN_00c54660(NiStream& aStream)
+// src: GUESS 0x00c54660 (confidence: low)
+void __thiscall FUN_00c54660_shell::ProcessState_00c54660(NiStream& aStream)
 {
     color.SaveBinary(aStream);
-    FUN_00a303a0(aStream, &fldC);
-    FUN_00a29550(aStream, &fldE);
-    FUN_00a29550(aStream, &fldE);
+    NiStreamSaveBinary_unsigned_short(aStream, &fldC);
+    Runtime_UpdateState_00a29550(aStream, &fldE);
+    Runtime_UpdateState_00a29550(aStream, &fldE);
 }
 
 void _delete(void*, unsigned int);
@@ -189,11 +195,12 @@ struct S
 {
     void* vtbl;
     void* ptr;
-    void __thiscall FUN_00c54810();
+    void __thiscall SetVtableAndProcessState_00c54810();
 };
 // Sets the object's vtable pointer to DAT_010c2b2c and deallocates its ptr through g_memoryManager.
 // @fnv 0x00c54810
-void __thiscall S::FUN_00c54810()
+// src: GUESS 0x00c54810 (confidence: low)
+void __thiscall S::SetVtableAndProcessState_00c54810()
 {
     *(int*)this = (int)&DAT_010c2b2c;
     void* p1 = ptr;
@@ -202,19 +209,20 @@ void __thiscall S::FUN_00c54810()
 }
 
 struct NiStream;
-void __cdecl FUN_0044adf0(NiStream&, unsigned const&);
+void __cdecl NiStreamSaveBinary_unsigned_int(NiStream&, unsigned const&);
 struct NiExtraDataSaveHelperShell : NiExtraData
 {
-    void FUN_00c54170(NiStream&);
+    void BSFurnitureMarker_SaveBinary(NiStream&);
 };
 // @fnv 0x00c54170
-void NiExtraDataSaveHelperShell::FUN_00c54170(NiStream& stream)
+// src: XBOX_PDB 0x00c54170
+void NiExtraDataSaveHelperShell::BSFurnitureMarker_SaveBinary(NiStream& stream)
 {
     NiExtraData::SaveBinary(stream);
     unsigned int count = *(unsigned short*)((char*)this + 0x18);
-    FUN_0044adf0(stream, count);
+    NiStreamSaveBinary_unsigned_int(stream, count);
     for (unsigned int i = 0; i < count; ++i)
-        (*(FUN_00c54660_shell**)((char*)this + 0x10))[i].FUN_00c54660(stream);
+        (*(FUN_00c54660_shell**)((char*)this + 0x10))[i].ProcessState_00c54660(stream);
 }
 
 struct A51BF0Base
@@ -232,7 +240,8 @@ extern NiFixedString DAT_011f49e0;
 
 // Allocates a FUN_00c53f10 object, sets its name to DAT_011f49e0, and returns it as an NiAVObject pointer.
 // @fnv 0x00c54210
-NiAVObject* FUN_00c54210()
+// src: EXE 0x00c54210
+NiAVObject* BSFurnitureMarker_CreateObject()
 {
     NiAVObject* object = reinterpret_cast<NiAVObject*>(new FUN_00c53f10);
     object->SetName(DAT_011f49e0);
@@ -244,23 +253,24 @@ class NiStream;
 struct FUN_00c54040_cls
 {
     unsigned int baseData[3];
-    void FUN_00a7b330(NiStream&, unsigned int);
+    void CopyMembers_00a7b330(NiStream&, unsigned int);
     unsigned int unk0c;
     char* entries;
     unsigned int unk14;
     unsigned short count;
 
-    void FUN_00c54040(NiStream& stream, unsigned int flags);
+    void ProcessEntries_00c54040(NiStream& stream, unsigned int flags);
 };
 
 // Calls FUN_00a7b330, then loops over count entries and passes each entry to FUN_00c54b70 on the stream's array at offset 0xc.
 // @fnv 0x00c54040
-void FUN_00c54040_cls::FUN_00c54040(NiStream& stream, unsigned int flags)
+// src: GUESS 0x00c54040 (confidence: low)
+void FUN_00c54040_cls::ProcessEntries_00c54040(NiStream& stream, unsigned int flags)
 {
     unsigned char pad[0x58];
     unsigned int i;
     unsigned int n;
-    FUN_00a7b330(stream, flags);
+    CopyMembers_00a7b330(stream, flags);
     n = count;
     for (i = 0; i < n; i++)
     {
@@ -271,11 +281,12 @@ void FUN_00c54040_cls::FUN_00c54040(NiStream& stream, unsigned int flags)
 struct S_00c54130
 {
     void FUN_00a7b3b0(int a);
-    void FUN_00c54130(int a);
+    void BSFurnitureMarker_LinkObject(int a);
 };
 
 // @fnv 0x00c54130
-void S_00c54130::FUN_00c54130(int a)
+// src: XBOX_PDB 0x00c54130
+void S_00c54130::BSFurnitureMarker_LinkObject(int a)
 {
     FUN_00a7b3b0(a);
 }
@@ -291,11 +302,12 @@ struct S_00c54550_Foo
     int unk08;
     unsigned short unk0c;
 
-    void __thiscall FUN_00c54550(float param_1);
+    void __thiscall FurnitureMark_SetHeading(float param_1);
 };
 
 // @fnv 0x00c54550
-void __thiscall S_00c54550_Foo::FUN_00c54550(float param_1)
+// src: XBOX_PDB 0x00c54550
+void __thiscall S_00c54550_Foo::FurnitureMark_SetHeading(float param_1)
 {
     while (param_1 < DAT_01012060)
         param_1 += DAT_012031cc;
@@ -310,8 +322,8 @@ class NiStream;
 
 extern double DAT_01017b70;
 
-void __cdecl FUN_00a30370(NiStream&, void*);
-void __cdecl FUN_00a643b0(NiStream&, void*);
+void __cdecl NiStreamLoadBinary_unsigned_short(NiStream&, void*);
+void __cdecl NiStreamLoadBinary_char_00a643b0(NiStream&, void*);
 
 struct FUN_00c545d0_cls
 {
@@ -319,23 +331,24 @@ struct FUN_00c545d0_cls
     void __thiscall FUN_00a59be0(NiStream&);
     unsigned short fldC;
     unsigned short fldE;
-    void __thiscall FUN_00c54550(float);
-    void __thiscall FUN_00c545d0(NiStream& s);
+    void __thiscall FurnitureMark_SetHeading(float);
+    void __thiscall FurnitureMark_LoadBinary(NiStream& s);
 };
 
 // @fnv 0x00c545d0
-void FUN_00c545d0_cls::FUN_00c545d0(NiStream& aStream)
+// src: COMMUNITY 0x00c545d0
+void FUN_00c545d0_cls::FurnitureMark_LoadBinary(NiStream& aStream)
 {
     unsigned char flag;
     FUN_00a59be0(aStream);
-    FUN_00a30370(aStream, &fldC);
-    FUN_00a643b0(aStream, &fldE);
-    FUN_00a643b0(aStream, &flag);
+    NiStreamLoadBinary_unsigned_short(aStream, &fldC);
+    NiStreamLoadBinary_char_00a643b0(aStream, &fldE);
+    NiStreamLoadBinary_char_00a643b0(aStream, &flag);
     short sValue = (short)fldC;
     if (sValue < 0)
     {
         float fScaled = (float)((double)sValue / DAT_01017b70);
-        FUN_00c54550(fScaled);
+        FurnitureMark_SetHeading(fScaled);
     }
 }
 
@@ -346,13 +359,14 @@ struct FUN_00c54b70_cls
     unsigned short m_0a;
     unsigned short unk0c;
     unsigned short m_0e;
-    void FUN_00c54850(unsigned int n);
+    void AllocateStorage_00c54850(unsigned int n);
     void FUN_00c54a30(unsigned int idx, NiIntegerStreamEntry& e);
-    unsigned int FUN_00c54b70(NiIntegerStreamEntry& e);
+    unsigned int NiTArray_FurnitureMark_NiTNewInterface_FurnitureMark_Add(NiIntegerStreamEntry& e);
 };
 
 // @fnv 0x00c54b70
-unsigned int FUN_00c54b70_cls::FUN_00c54b70(NiIntegerStreamEntry& aEntry)
+// src: COMMUNITY 0x00c54b70
+unsigned int FUN_00c54b70_cls::NiTArray_FurnitureMark_NiTNewInterface_FurnitureMark_Add(NiIntegerStreamEntry& aEntry)
 {
     unsigned int scratch[0x16];
     unsigned int tmp;
@@ -360,7 +374,7 @@ unsigned int FUN_00c54b70_cls::FUN_00c54b70(NiIntegerStreamEntry& aEntry)
         unsigned int index = m_0a;
         if (index >= m_08)
         {
-            FUN_00c54850(m_0e + index);
+            AllocateStorage_00c54850(m_0e + index);
         }
         FUN_00c54a30(index, aEntry);
         return index;
@@ -376,14 +390,15 @@ struct FUN_00c54c50_shell
     unsigned short fldC;
     unsigned short fldE;
 
-    FUN_00c54c50_shell* __thiscall FUN_00c54c50(unsigned short param_1, unsigned short param_2);
+    FUN_00c54c50_shell* __thiscall NiTArray_FurnitureMark_NiTNewInterface_FurnitureMark_NiTArray(unsigned short param_1, unsigned short param_2);
 };
 
 extern int DAT_010c2b2c;
-void* __cdecl FUN_00c54bc0(unsigned int);
+void* __cdecl Object_GetIndexedValue_00c54bc0(unsigned int);
 
 // @fnv 0x00c54c50
-FUN_00c54c50_shell* __thiscall FUN_00c54c50_shell::FUN_00c54c50(unsigned short param_1, unsigned short param_2)
+// src: EXE 0x00c54c50
+FUN_00c54c50_shell* __thiscall FUN_00c54c50_shell::NiTArray_FurnitureMark_NiTNewInterface_FurnitureMark_NiTArray(unsigned short param_1, unsigned short param_2)
 {
     int unk04;
     int unk08;
@@ -399,7 +414,7 @@ FUN_00c54c50_shell* __thiscall FUN_00c54c50_shell::FUN_00c54c50(unsigned short p
     this->fldC = 0;
 
     if (this->fld8 > 0)
-        this->ptr = FUN_00c54bc0(this->fld8);
+        this->ptr = Object_GetIndexedValue_00c54bc0(this->fld8);
     else
         this->ptr = 0;
 
@@ -413,12 +428,13 @@ struct FUN_00c54cc0_cls
     float m_08;
     unsigned short m_0c;
     unsigned char m_0e;
-    bool __thiscall FUN_00c54cc0(FUN_00c54cc0_cls* other);
+    bool __thiscall HasEqualFields(FUN_00c54cc0_cls* other);
 };
 
 // Compares m_00, m_04, m_08, m_0e and m_0c against another instance and returns whether all match.
 // @fnv 0x00c54cc0
-bool FUN_00c54cc0_cls::FUN_00c54cc0(FUN_00c54cc0_cls* other)
+// src: GUESS 0x00c54cc0 (confidence: medium)
+bool FUN_00c54cc0_cls::HasEqualFields(FUN_00c54cc0_cls* other)
 {
     return (bool)(((m_00 == other->m_00) && (m_04 == other->m_04) && (m_08 == other->m_08)) ? 1 : 0) &&
            (m_0e == other->m_0e) && (m_0c == other->m_0c);
@@ -465,17 +481,18 @@ struct FUN_00c542a0_shell : NiExtraData
     unsigned short count;
 
     void FUN_00a7b580(ViewerStringsArray*);
-    void FUN_00c542a0(ViewerStringsArray*);
+    void BSFurnitureMarker_GetViewerStrings(ViewerStringsArray*);
 };
 
 extern int g_012031c4;
-extern char* __cdecl FUN_00a7d330(int);
-extern char* __cdecl FUN_00a7d510(char const*, unsigned int);
-extern char* __cdecl FUN_00a7d550(char const*, float);
+extern char* __cdecl NiViewerStrings_NiGetViewerString_Title(int);
+extern char* __cdecl NiGetViewerString_00a7d510(char const*, unsigned int);
+extern char* __cdecl NiGetViewerString_00a7d550(char const*, float);
 
 // Appends marker count and per-marker number, position, and heading strings to the viewer strings array.
 // @fnv 0x00c542a0
-void FUN_00c542a0_shell::FUN_00c542a0(ViewerStringsArray* strings)
+// src: XBOX_PDB 0x00c542a0
+void FUN_00c542a0_shell::BSFurnitureMarker_GetViewerStrings(ViewerStringsArray* strings)
 {
     unsigned long iMarkers;
     unsigned int aIndex;
@@ -492,28 +509,28 @@ void FUN_00c542a0_shell::FUN_00c542a0(ViewerStringsArray* strings)
     FUN_00a7b580(strings);
 
     aNameValue = g_012031c4;
-    aRtti = FUN_00a7d330(aNameValue);
+    aRtti = NiViewerStrings_NiGetViewerString_Title(aNameValue);
     strings->AddFirstEmpty(aRtti);
 
     iMarkers = count;
-    pMark = FUN_00a7d510("iMarks", iMarkers);
+    pMark = NiGetViewerString_00a7d510("iMarks", iMarkers);
     strings->AddFirstEmpty(pMark);
 
     for (aIndex = 0; aIndex < iMarkers; ++aIndex)
     {
-        aPMarker = FUN_00a7d510("Mark", aIndex);
+        aPMarker = NiGetViewerString_00a7d510("Mark", aIndex);
         strings->AddFirstEmpty(aPMarker);
 
         marker = &entries[aIndex];
         val.numberValue = marker->number;
-        animationType = FUN_00a7d510(" Number", val.numberValue);
+        animationType = NiGetViewerString_00a7d510(" Number", val.numberValue);
         strings->AddFirstEmpty(animationType);
 
-        aCurrentPos = marker->pos.FUN_00a59af0(" Pos");
+        aCurrentPos = marker->pos.GetViewerString_00a59af0(" Pos");
         strings->AddFirstEmpty(aCurrentPos);
 
         val.headingValue = (float)(marker->heading / 1000.0);
-        aHeadingY = FUN_00a7d550(" Heading", val.headingValue);
+        aHeadingY = NiGetViewerString_00a7d550(" Heading", val.headingValue);
         strings->AddFirstEmpty(aHeadingY);
     }
 }

@@ -47,7 +47,8 @@ inline NiColorA::NiColorA(float red, float green, float blue, float alpha)
 extern int g_012007bc;
 
 // @fnv 0x00bb6490
-int* __cdecl FUN_00bb6490()
+// src: XBOX_PDB 0x00bb6490
+int* __cdecl BSDistantTreeShader_GetRTTI()
 {
     return &g_012007bc;
 }
@@ -60,11 +61,12 @@ struct Unknown_00bb62b0
     int m_70;
     char _1[0xc];
     NiGPUProgram* m_80;
-    NiPointer_NiGPUProgram_& FUN_00bb62b0(int);
+    NiPointer_NiGPUProgram_& BSDistantTreeShader_InitPass(int);
 };
 // Stores m_6c or m_70 into DAT_0126f74c based on a, then replaces the GPU program pointer at offset 0x28 with m_80.
 // @fnv 0x00bb62b0
-NiPointer_NiGPUProgram_& Unknown_00bb62b0::FUN_00bb62b0(int a)
+// src: XBOX_PDB 0x00bb62b0
+NiPointer_NiGPUProgram_& Unknown_00bb62b0::BSDistantTreeShader_InitPass(int a)
 {
     switch (a)
     {
@@ -77,7 +79,7 @@ NiPointer_NiGPUProgram_& Unknown_00bb62b0::FUN_00bb62b0(int a)
     }
 }
 
-void __cdecl FUN_00b98480(int, int);
+void __cdecl BSRenderState_SetWireframeEnable(int, int);
 struct S_00bb6b60_a
 {
     char _0[0x24];
@@ -89,11 +91,12 @@ struct S_00bb6b60_b
     S_00bb6b60_a* m_C;
 };
 // @fnv 0x00bb6b60
-void __stdcall FUN_00bb6b60(S_00bb6b60_b* p)
+// src: XBOX_PDB 0x00bb6b60
+void __stdcall BSDistantTreeShader_PostGeometry(S_00bb6b60_b* p)
 {
     S_00bb6b60_a* pFlagHolder = p->m_C;
     if (pFlagHolder && ((pFlagHolder->m_24 & 0x10000) > 0))
-        FUN_00b98480(0, 0);
+        BSRenderState_SetWireframeEnable(0, 0);
 }
 
 void __cdecl _delete(void*, unsigned int);
@@ -114,7 +117,7 @@ void* Struct00bb6e00::FUN_00bb6e00(unsigned int flags)
 
 struct FUN_00bb6060_shell : public BSDistantTreeShader
 {
-    void FUN_00bb6060();
+    void BSDistantTreeShader_LoadShaders();
 };
 
 int _sprintf_s(char*, unsigned int, const char*, ...);
@@ -163,7 +166,8 @@ struct ShPtr
 };
 
 // @fnv 0x00bb6060
-void FUN_00bb6060_shell::FUN_00bb6060()
+// src: COMMUNITY 0x00bb6060
+void FUN_00bb6060_shell::BSDistantTreeShader_LoadShaders()
 {
     char tempName[260];
     ShaderSourceInfo vertexShaderParams;
@@ -491,8 +495,8 @@ struct TreeVertexDecl
     virtual void Finalize();
 };
 
-TreeVertexDecl* FUN_00e76700(void*, int, bool);
-void* FUN_00aa13e0(unsigned int);
+TreeVertexDecl* NiDX9ShaderDeclaration_Create(void*, int, bool);
+void* Object_DispatchCommandFour(unsigned int);
 struct FUN_00bb6c30
 {
     virtual void Slot0();
@@ -631,16 +635,16 @@ struct FUN_00bb6c30
     int unkf8;
     static void* operator new(unsigned int bytes)
     {
-        return FUN_00aa13e0(bytes);
+        return Object_DispatchCommandFour(bytes);
     }
     FUN_00bb6c30(TreeVertexDecl*);
-    void FUN_00bb6060();
-    void FUN_00bb64a0();
+    void BSDistantTreeShader_LoadShaders();
+    void BSDistantTreeShader_LoadStagesAndPasses();
 };
 // @fnv 0x00bb6e30
 FUN_00bb6c30* CreateTreeShader()
 {
-    TreeVertexDecl* declaration = FUN_00e76700(DAT_011f9508, 4, true);
+    TreeVertexDecl* declaration = NiDX9ShaderDeclaration_Create(DAT_011f9508, 4, true);
     declaration->SetElement(0, 0, 0, 2, 0);
     declaration->SetElement(1, 1, 5, 1, 0);
     declaration->SetElement(2, 2, 3, 2, 0);
@@ -648,8 +652,8 @@ FUN_00bb6c30* CreateTreeShader()
     declaration->Finalize();
     FUN_00bb6c30* shader = new FUN_00bb6c30(declaration);
     shader->Initialize();
-    shader->FUN_00bb6060();
-    shader->FUN_00bb64a0();
+    shader->BSDistantTreeShader_LoadShaders();
+    shader->BSDistantTreeShader_LoadStagesAndPasses();
     shader->Complete();
     shader->SetDecl(declaration);
     return shader;
@@ -659,7 +663,7 @@ FUN_00bb6c30* CreateTreeShader()
 struct ZVec
 {
     float x, y, z;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
 };
 struct ZFog
 {
@@ -1062,9 +1066,9 @@ struct ZSky
     int unk150;
     NiColorA unk154;
 };
-ZFog* __cdecl FUN_00b55520(int);
-ZRenderer* __cdecl FUN_00b4f5c0();
-ZSky* __cdecl FUN_00b4f5d0();
+ZFog* __cdecl BSShaderManager_GetFogProperty(int);
+ZRenderer* __cdecl BSShaderManager_GetAccumulator();
+ZSky* __cdecl BSShaderManager_GetCurrentAccumulator();
 extern unsigned char DAT_011f91c4;
 extern unsigned int DAT_011f91b8;
 extern NiColorA DAT_011a9bd0;
@@ -1112,7 +1116,7 @@ struct ZTree
 // @fnv 0x00bb6700
 void ZTree::UpdateLighting(int arg)
 {
-    ZFog* fog = FUN_00b55520(DAT_011f91c4);
+    ZFog* fog = BSShaderManager_GetFogProperty(DAT_011f91c4);
     if (fog)
     {
         float fFogStart = fog->unk2C;
@@ -1132,16 +1136,16 @@ void ZTree::UpdateLighting(int arg)
     }
     if (DAT_011f91b8 == 15)
     {
-        unkAC = FUN_00b4f5d0()->unk154;
+        unkAC = BSShaderManager_GetCurrentAccumulator()->unk154;
         unkCC = DAT_011a9bd0;
         unkBC = DAT_011a9bd0;
         return;
     }
-    ZLight* light = FUN_00b4f5c0()->unk194->unkE0->unkF8;
+    ZLight* light = BSShaderManager_GetAccumulator()->unk194->unkE0->unkF8;
     if (light)
     {
         ZVec lightDir = light->unkF0;
-        lightDir.FUN_004a0c10();
+        lightDir.Unitize_004a0c10();
         ZVec ambient = light->unkC8;
         unkAC = NiColorA(ambient.x, ambient.y, ambient.z, 1.0f);
         ambient = light->unkD4;
@@ -1250,7 +1254,7 @@ struct TreeTextureStage : public BeamStage
 
 struct BSDistantTreeShaderPasses : public BSDistantTreeShader
 {
-    bool FUN_00bb64a0();
+    bool BSDistantTreeShader_LoadStagesAndPasses();
     NiD3DPass* GetPassData(int i)
     {
         return (NiD3DPass*)spRenderPass[i];
@@ -1259,14 +1263,15 @@ struct BSDistantTreeShaderPasses : public BSDistantTreeShader
 
 // Creates two D3D passes, configures a beam texture stage for each, and assigns the tree vertex and pixel shader variants to the pass data.
 // @fnv 0x00bb64a0
-bool BSDistantTreeShaderPasses::FUN_00bb64a0()
+// src: COMMUNITY 0x00bb64a0
+bool BSDistantTreeShaderPasses::BSDistantTreeShader_LoadStagesAndPasses()
 {
     NiD3DPass::CreateD3DPass(spRenderPass[0]);
     NiPointer<TreeTextureStage> spStage;
     BeamStage::CreateNewStage((NiPointer<BeamStage>&)spStage);
     ConfigureBeamStage(spStage, 0, 3, 2, true);
-    spStage->FUN_00e7def0(1);
-    spRenderPass[0]->FUN_00e802b0(GetPassData(0)->m_uiCurrentStage, spStage);
+    spStage->NiD3DTextureStage_SetFilterMode(1);
+    spRenderPass[0]->NiD3DPass_SetStage(GetPassData(0)->m_uiCurrentStage, spStage);
     GetPassData(0)->m_spVertexShader = (NiD3DVertexShader*)m_spTreeVertexShader;
     GetPassData(0)->m_spPixelShader = (NiD3DPixelShader*)m_spPixelShaderVariants[0];
 
@@ -1274,8 +1279,8 @@ bool BSDistantTreeShaderPasses::FUN_00bb64a0()
     spStage = 0;
     BeamStage::CreateNewStage((NiPointer<BeamStage>&)spStage);
     ConfigureBeamStage(spStage, 0, 3, 2, true);
-    spStage->FUN_00e7def0(1);
-    spRenderPass[1]->FUN_00e802b0(GetPassData(1)->m_uiCurrentStage, spStage);
+    spStage->NiD3DTextureStage_SetFilterMode(1);
+    spRenderPass[1]->NiD3DPass_SetStage(GetPassData(1)->m_uiCurrentStage, spStage);
     GetPassData(1)->m_spVertexShader = (NiD3DVertexShader*)m_spTreeVertexShader;
     GetPassData(1)->m_spPixelShader = (NiD3DPixelShader*)m_spPixelShaderVariants[1];
 
@@ -1284,16 +1289,16 @@ bool BSDistantTreeShaderPasses::FUN_00bb64a0()
 
 struct FUN_00bb66b0
 {
-    void FUN_00bb6060();
-    void FUN_00bb64a0();
+    void BSDistantTreeShader_LoadShaders();
+    void BSDistantTreeShader_LoadStagesAndPasses();
     void Call();
 };
 
 // @fnv 0x00bb66b0
 void FUN_00bb66b0::Call()
 {
-    FUN_00bb6060();
-    FUN_00bb64a0();
+    BSDistantTreeShader_LoadShaders();
+    BSDistantTreeShader_LoadStagesAndPasses();
 }
 
 struct GeomB8
@@ -1400,7 +1405,7 @@ struct GeomRenderer
 };
 struct GeomPass
 {
-    void FUN_00e6fbb0(int* p, int b);
+    void NiDX9Renderer_SetModelTransform(int* p, int b);
 };
 struct GeomSettings
 {
@@ -1540,7 +1545,7 @@ void GeomShader::RenderGeometry(int arg)
     int b8 = geom->unkB8->unk34;
     int bc = geom->unkBC;
     SetupGeometry(arg);
-    unk18->FUN_00e6fbb0(bound, 0);
+    unk18->NiDX9Renderer_SetModelTransform(bound, 0);
     GeomRenderer* r = unk30;
     if (r)
     {

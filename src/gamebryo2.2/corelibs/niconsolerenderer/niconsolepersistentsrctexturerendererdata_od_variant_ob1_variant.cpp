@@ -31,7 +31,8 @@ template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pObject)
 }
 
 // @fnv 0x00c35fe0
-void BSMultiBound::FUN_00c35fe0(BSMultiBound* pkDest, int kCloning)
+// src: XBOX_PDB 0x00c35fe0
+void BSMultiBound::CopyMembers_00c35fe0(BSMultiBound* pkDest, int kCloning)
 {
     CopyMembersStream((unsigned int)pkDest, (void*)kCloning);
     BSMultiBoundShape* pNewInstance = (BSMultiBoundShape*)pShape->MakeClone(*(CloningProcess*)kCloning);
@@ -48,9 +49,10 @@ bool BSMultiBound::RegisterStreamables(NiStream& arStream)
 }
 
 // @fnv 0x00c36240
-unsigned char BSMultiBound::FUN_00c36240(int arg)
+// src: XBOX_PDB 0x00c36240
+unsigned char BSMultiBound::QPointWithin(int arg)
 {
     if (pShape)
-        return pShape->FUN_00c50380((NiPoint3*)arg);
+        return pShape->BSMultiBoundSphere_QPointWithin((NiPoint3*)arg);
     return 0;
 }

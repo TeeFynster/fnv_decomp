@@ -28,10 +28,10 @@ struct FUN_00d3b3d0_Class
     void InvokeCallbacksAndRelease(int);
 };
 typedef void(__cdecl* HandlerFn)();
-void __cdecl FUN_00d3b380();
-void __cdecl FUN_00d3b420();
-void __cdecl FUN_00d3bd80();
-void __cdecl FUN_00daf8e0();
+void __cdecl hkpCapsuleCapsuleAgent_createCapsuleCapsuleAgent();
+void __cdecl hkpCapsuleCapsuleAgent_staticGetPenetrations();
+void __cdecl UpdateFields_00d3bd80();
+void __cdecl Object_ProcessEntries_00daf8e0();
 struct HandlerSet
 {
     HandlerFn m_pfnFirst;
@@ -43,10 +43,10 @@ struct HandlerSet
 };
 struct Registry
 {
-    void FUN_00cfbbe0(HandlerSet* apHandlers, int aiFirst, int aiSecond);
+    void AppendRecordAndRegisterAgents(HandlerSet* apHandlers, int aiFirst, int aiSecond);
 };
 void __cdecl RegisterHandlers(Registry* apRegistry);
-void __cdecl FUN_00d3b420(const void* a, const void* b, const void* c, void* d);
+void __cdecl hkpCapsuleCapsuleAgent_staticGetPenetrations(const void* a, const void* b, const void* c, void* d);
 struct D3B6D0Agent
 {
     virtual void ForwardToHandler(const void* a, const void* b, const void* c, void* d);
@@ -125,7 +125,7 @@ extern char DAT_010cefcc[];
 extern char DAT_010c41f8[];
 extern "C" void _ReadWriteBarrier();
 
-void __cdecl FUN_00d22e40(void*, void*, void*, void*, void*);
+void __cdecl hkLineSegmentUtil_closestLineSegLineSeg(void*, void*, void*, void*, void*);
 
 template <class T> struct LazyPtr
 {
@@ -142,7 +142,8 @@ template <class T> struct LazyPtr
     }
 };
 // @fnv 0x00d3b420
-void __cdecl FUN_00d3b420(Capsule* pFirst, Capsule* pSecond, void* pUnused, HitHandler* pHandler)
+// src: XBOX_PDB 0x00d3b420
+void __cdecl hkpCapsuleCapsuleAgent_staticGetPenetrations(Capsule* pFirst, Capsule* pSecond, void* pUnused, HitHandler* pHandler)
 {
     ProfilerTls* pTls = (ProfilerTls*)TlsGetValue(DAT_0126835c);
     char* pCur = pTls->unk04;
@@ -244,7 +245,7 @@ void __cdecl FUN_00d3b420(Capsule* pFirst, Capsule* pSecond, void* pUnused, HitH
 
     // Intersect the ray with the segment.
     RayHit hit;
-    FUN_00d22e40(&seg.v2, &rays.dir, &seg.v0, &rays.edge, &hit);
+    hkLineSegmentUtil_closestLineSegLineSeg(&seg.v2, &rays.dir, &seg.v0, &rays.edge, &hit);
 
     // The two radii decide whether the capsules overlap.
     float t = pSrc[4] + pSrc2[4];
@@ -295,9 +296,10 @@ struct TransformOutput
 {
     float rows[3][8];
 };
-void __cdecl FUN_00cd58b0(const void*, float, const void*, float, TransformOutput*);
+void __cdecl hkCollideCapsuleUtilManifoldCapsVsCaps(const void*, float, const void*, float, TransformOutput*);
 // @fnv 0x00d3b6f0
-static __declspec(noinline) void FUN_00d3b6f0(Capsule* first, TransformOutput* dst, Context* context, Capsule* second)
+// src: XBOX_PDB 0x00d3b6f0
+static __declspec(noinline) void getThreeClosestPointsInl(Capsule* first, TransformOutput* dst, Context* context, Capsule* second)
 {
     const float* nodeA = first->unk00;
     float scaleValue = context->scale;
@@ -370,7 +372,7 @@ static __declspec(noinline) void FUN_00d3b6f0(Capsule* first, TransformOutput* d
             *((__m128*)resultB + i) = _mm_add_ps(_mm_add_ps(y, x), _mm_add_ps(z, r3));
         }
     }
-    FUN_00cd58b0(resultA, nodeA[4], resultB, nodeB[4], dst);
+    hkCollideCapsuleUtilManifoldCapsVsCaps(resultA, nodeA[4], resultB, nodeB[4], dst);
 }
 Context* volatile contextSource;
 Capsule* volatile firstSource;
@@ -378,7 +380,7 @@ TransformOutput* volatile outputSource;
 Capsule* volatile secondSource;
 void invokeTransform()
 {
-    FUN_00d3b6f0(firstSource, outputSource, contextSource, secondSource);
+    getThreeClosestPointsInl(firstSource, outputSource, contextSource, secondSource);
 }
 }  // namespace fnv_00d3b6f0
 
@@ -476,16 +478,17 @@ struct MyCallback
     virtual void invoke(unsigned short id, int unk);
 };
 
-extern "C" void __cdecl FUN_00cd58b0(const Vec4* verticesA, float radiusA, const Vec4* verticesB, float radiusB,
+extern "C" void __cdecl hkCollideCapsuleUtilManifoldCapsVsCaps(const Vec4* verticesA, float radiusA, const Vec4* verticesB, float radiusB,
                                      PointResult* results);
 
 struct Agent : FUN_00d3b3d0_Class
 {
-    void FUN_00d3c060(const CdBody* bodyA, const CdBody* bodyB, const CollisionInput* input, Collector* collector);
+    void hkpCapsuleCapsuleAgent_processCollision(const CdBody* bodyA, const CdBody* bodyB, const CollisionInput* input, Collector* collector);
 };
 
 // @fnv 0x00d3c060
-void Agent::FUN_00d3c060(const CdBody* bodyA, const CdBody* bodyB, const CollisionInput* input, Collector* collector)
+// src: HAVOK_SRC 0x00d3c060
+void Agent::hkpCapsuleCapsuleAgent_processCollision(const CdBody* bodyA, const CdBody* bodyB, const CollisionInput* input, Collector* collector)
 {
     ProfilerTls* ms = (ProfilerTls*)TlsGetValue(DAT_0126835c);
     {
@@ -593,7 +596,7 @@ void Agent::FUN_00d3c060(const CdBody* bodyA, const CdBody* bodyB, const Collisi
         }
     }
 
-    FUN_00cd58b0(contacts.verticesA, capA->m_fSphereRadius, (const Vec4*)scratch.endpoints, capB->m_fSphereRadius, contacts.results);
+    hkCollideCapsuleUtilManifoldCapsVsCaps(contacts.verticesA, capA->m_fSphereRadius, (const Vec4*)scratch.endpoints, capB->m_fSphereRadius, contacts.results);
 
     Collector* output = collector;
     PointResult* res = contacts.results;

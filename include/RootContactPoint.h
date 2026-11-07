@@ -11,7 +11,7 @@ class hkpCollidable;
 class RootContactPoint
 {
 public:
-    RootContactPoint* FUN_006212c0(void* apSource);
+    RootContactPoint* InitializeFields_006212c0(void* apSource);
 
     hkContactPoint m_kContact;               // +0x00
     const hkpCollidable* m_pRootCollidableA; // +0x20

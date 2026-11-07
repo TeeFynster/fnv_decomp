@@ -75,13 +75,13 @@ public:
     float m_fValue2;
     TESObjectWEAP* pWeapon;
 
-    TESUseWeaponPackageData* __thiscall FUN_0067caa0();
+    TESUseWeaponPackageData* __thiscall InitializeFields_0067caa0();
     void* DestroyIfFlagged(unsigned int flags);
     void Copy(TESPackageData* source);
-    void FUN_0067cd90(TESPackageData* apSource);
-    bool FUN_0067cfc0(TESPackageData* apCompare);
-    void FUN_0067d350();
-    void FUN_0067d550(BGSSaveFormBuffer* buffer);
+    void Copy_0067cd90(TESPackageData* apSource);
+    bool Compare_0067cfc0(TESPackageData* apCompare);
+    void Save_0067d350();
+    void SaveGame_0067d550(BGSSaveFormBuffer* buffer);
     void LoadUseWeaponData(BGSLoadFormBuffer* buffer);
     void LoadForm(BGSLoadFormBuffer* apLoadGameBuffer);
 

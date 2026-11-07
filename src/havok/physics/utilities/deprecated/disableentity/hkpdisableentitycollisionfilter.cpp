@@ -54,30 +54,34 @@ class hkpDisableEntityCollisionFilter : public CollisionFilterBaseLocal_00e467d0
 };
 
 // @fnv 0x00e467b0
-void __stdcall FUN_00e467b0(char* flag, int a, int b)
+// src: GUESS 0x00e467b0 (confidence: low)
+void __stdcall hkpDisableEntityCollisionFilter_UpdateState_00e467b0(char* flag, int a, int b)
 {
     *flag = 1;
 }
 
 // @fnv 0x00e46780
-void __stdcall FUN_00e46780(unsigned char* flag, int p2, int p3, int p4, int p5, int p6)
+// src: GUESS 0x00e46780 (confidence: low)
+void __stdcall Object_UpdateFields_00e46780(unsigned char* flag, int p2, int p3, int p4, int p5, int p6)
 {
     *flag = 1;
 }
 
 // @fnv 0x00e46790
-void __stdcall FUN_00e46790(char* flag, int a, int b, int c, int d)
+// src: GUESS 0x00e46790 (confidence: low)
+void __stdcall hkpDisableEntityCollisionFilter_UpdateState_00e46790(char* flag, int a, int b, int c, int d)
 {
     *flag = 1;
 }
 
 // @fnv 0x00e467a0
-void __stdcall FUN_00e467a0(char* flag, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+// src: GUESS 0x00e467a0 (confidence: low)
+void __stdcall Object_UpdateFields_00e467a0(char* flag, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
     *flag = 1;
 }
 
-void* __cdecl FUN_00c85750(void);
+void* __cdecl hkMemoryRouter_getInstance(void);
 
 struct FUN_00dff930_Alloc
 {
@@ -101,7 +105,7 @@ void* hkpDisableEntityCollisionFilter::DeleteInstance(unsigned char uiFlags)
     this->hkpDisableEntityCollisionFilter::~hkpDisableEntityCollisionFilter();
     if (uiFlags & 1)
     {
-        FUN_00dff930_Mgr* mgr = reinterpret_cast<FUN_00dff930_Mgr*>(FUN_00c85750());
+        FUN_00dff930_Mgr* mgr = reinterpret_cast<FUN_00dff930_Mgr*>(hkMemoryRouter_getInstance());
         mgr->m_10->slot08(this, m_usMemSizeAndFlags);
     }
     return this;
@@ -109,7 +113,8 @@ void* hkpDisableEntityCollisionFilter::DeleteInstance(unsigned char uiFlags)
 
 // Empty function that takes an unsigned int argument and does nothing.
 // @fnv 0x00e467c0
-void __stdcall FUN_00e467c0(unsigned int a1)
+// src: COMMUNITY 0x00e467c0
+void __stdcall nullsub_87(unsigned int a1)
 {}
 
 // 0x00e467d0 uses this at the +0x08 collidable-filter base: its +0x2c array is the complete object's +0x34 disabled entities.
@@ -163,20 +168,21 @@ void hkpDisableEntityCollisionFilter::EntityRemovedCallback(hkpEntity* entity)
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (8).
 struct PrimaryBase
 {
-    virtual void FUN_00dff960();
+    virtual void AdjustThisAndForward_00dff960();
     int unk04;
 };
 
 struct SecondaryBase
 {
-    virtual void FUN_00dff960();
+    virtual void AdjustThisAndForward_00dff960();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00dff960
-    virtual void FUN_00dff960();
+// src: GUESS 0x00dff960 (confidence: low)
+    virtual void AdjustThisAndForward_00dff960();
 };
 
 Derived::Derived()
@@ -211,20 +217,21 @@ Derived::Derived()
 namespace fnv_00dff980 {
 struct Base1
 {
-    virtual void FUN_00dff980();
+    virtual void AdjustThisAndForward_00dff980();
     int unk04;
     int unk08;
     int unk0C;
 };
 struct Base2
 {
-    virtual void FUN_00dff980();
+    virtual void AdjustThisAndForward_00dff980();
 };
 struct Derived : Base1, Base2
 {
     Derived();
 // @fnv 0x00dff980
-    virtual void FUN_00dff980();
+// src: GUESS 0x00dff980 (confidence: low)
+    virtual void AdjustThisAndForward_00dff980();
 };
 Derived::Derived()
 {}
@@ -279,7 +286,7 @@ namespace fnv_00dff9a0 {
 // the vtables and the adjusting thunk.
 struct PrimaryBase
 {
-    virtual void FUN_00dff9a0();
+    virtual void AdjustThisAndForward_00dff9a0();
     int unk04;
     int unk08;
     int unk0C;
@@ -288,14 +295,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00dff9a0();
+    virtual void AdjustThisAndForward_00dff9a0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00dff9a0
-    virtual void FUN_00dff9a0();
+// src: GUESS 0x00dff9a0 (confidence: low)
+    virtual void AdjustThisAndForward_00dff9a0();
 };
 
 Derived::Derived()

@@ -8,7 +8,7 @@
 
 extern "C" int DAT_0102e388;
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00e02650_cls
 {
@@ -25,7 +25,7 @@ struct FUN_00e02650_cls
 // @fnv 0x00e02650
 FUN_00e02650_cls* FUN_00e02650_cls::Destroy(unsigned char acFlags)
 {
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     m_0c = 0;
     unsigned int uFlags = m_10;
@@ -40,7 +40,7 @@ FUN_00e02650_cls* FUN_00e02650_cls::Destroy(unsigned char acFlags)
     m_vptr = (int)&DAT_0102e388;
     if (bFree)
     {
-        hkMemoryRouter* pHolder2 = FUN_00c85750();
+        hkMemoryRouter* pHolder2 = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
         pAllocator2->blockFree(this, m_uSize);
     }

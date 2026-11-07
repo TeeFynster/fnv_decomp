@@ -7,7 +7,7 @@
 class BeamTextureState
 {
   public:
-    void FUN_00e890c0(unsigned int, unsigned int, unsigned int, bool);
+    void NiD3DTextureStageGroup_SetSamplerState(unsigned int, unsigned int, unsigned int, bool);
 };
 class BeamStage
 {

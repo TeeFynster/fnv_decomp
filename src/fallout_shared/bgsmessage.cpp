@@ -178,7 +178,8 @@ void BGSMessage::ClearButtons()
 }
 
 // @fnv 0x00590d00
-bool BGSMessage::FUN_00590d00()
+// src: COMMUNITY 0x00590d00
+bool BGSMessage::GetIsMessageBox()
 {
     return (iFlags & 1) ? true : false;
 }
@@ -191,7 +192,8 @@ bool BGSMessage::IsFlagSet()
 
 // If apItem is non-null, appends it to the button list.
 // @fnv 0x005911d0
-void BGSMessage::FUN_005911d0(PerkButtonEntry* apItem)
+// src: COMMUNITY 0x005911d0
+void BGSMessage::AddButton_005911d0(PerkButtonEntry* apItem)
 {
     if (apItem != 0)
     {
@@ -206,7 +208,8 @@ void BGSMessage::SetEnabled(bool enabled)
 }
 
 // @fnv 0x00590ef0
-void BGSMessage::FUN_00590ef0(bool enabled)
+// src: COMMUNITY 0x00590ef0
+void BGSMessage::SetAutoDisplay_00590ef0(bool enabled)
 {
     enabled ? iFlags |= 2 : iFlags &= ~2;
 }
@@ -254,7 +257,7 @@ void BGSMessage::CopyFromMessage(TESForm* form)
 struct String0bc0
 {
     int unk00, unk04;
-    const char* FUN_00559450();
+    const char* Modelloader_GetReferencedThis();
 };
 struct Conditions0bc0
 {
@@ -271,32 +274,32 @@ struct List0bc0
     Button0bc0*& FUN_006815c0();
     List0bc0* FUN_00726070();
 };
-void __cdecl FUN_00485910(unsigned int, unsigned int);
-int __cdecl FUN_0044a670(const char*);
-void __cdecl FUN_004856f0(unsigned int, const char*, unsigned int);
+void __cdecl TESForm_AddChunk_00485910(unsigned int, unsigned int);
+int __cdecl BSstrlen(const char*);
+void __cdecl TESForm_AddChunkArray(unsigned int, const char*, unsigned int);
 // @fnv 0x00590bc0
 void BGSMessage::WriteToStream()
 {
-    FUN_004855a0();
-    TESDescription::FUN_00482cb0();
-    TESFullName::FUN_00487010();
-    unsigned int id = GetIcon() ? GetIcon()->FUN_0084e3a0() : 0;
-    FUN_00485910(0x4d414e49, id);
-    FUN_00485910(0x4d414e44, iFlags);
-    if (!FUN_00590d00())
-        FUN_00485910(0x4d414e54, m_uiDisplayDuration);
+    BeginFormRecord();
+    TESDescription::Save_00482cb0();
+    TESFullName::Save_00487010();
+    unsigned int id = GetIcon() ? GetIcon()->GetHavokWorldObjectCountInSceneGraph_0084e3a0() : 0;
+    TESForm_AddChunk_00485910(0x4d414e49, id);
+    TESForm_AddChunk_00485910(0x4d414e44, iFlags);
+    if (!GetIsMessageBox())
+        TESForm_AddChunk_00485910(0x4d414e54, m_uiDisplayDuration);
     List0bc0* node = reinterpret_cast<List0bc0*>(GetButtonList());
     while (node && !node->FUN_008256d0())
     {
         Button0bc0* button = node->FUN_006815c0();
         node = node->FUN_00726070();
-        if (button->text.FUN_00559450())
-            FUN_004856f0(0x54585449, button->text.FUN_00559450(), FUN_0044a670(button->text.FUN_00559450()) + 1);
+        if (button->text.Modelloader_GetReferencedThis())
+            TESForm_AddChunkArray(0x54585449, button->text.Modelloader_GetReferencedThis(), BSstrlen(button->text.Modelloader_GetReferencedThis()) + 1);
         else
-            FUN_00485910(0x54585449, 0);
+            TESForm_AddChunk_00485910(0x54585449, 0);
         button->conditions.ProcessItems();
     }
-    FUN_00485680();
+    FinishFormRecord();
 }
 
 struct ButtonConditionView
@@ -324,7 +327,7 @@ bool BGSMessage::IsNotEqual(TESForm* form)
         return true;
     if (GetIcon() != right->GetIcon())
         return true;
-    if (FUN_00590d00() != right->FUN_00590d00())
+    if (GetIsMessageBox() != right->GetIsMessageBox())
         return true;
     if (IsFlagSet() != right->IsFlagSet())
         return true;

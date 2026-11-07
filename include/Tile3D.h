@@ -31,9 +31,9 @@ class Tile3D : public Tile
     void ConvertShadersToTileShader(NiAVObject* object);
     bool UpdateAnimation(float value, bool force);
     void UpdateAnimation(float value, int force);
-    const char* __thiscall FUN_00a0bdd0();
-    NiNodeV* FUN_0056c7f0();
-    bool FUN_00a20cc0(const char* sequenceName);
+    const char* __thiscall GetTypeName_00a0bdd0();
+    NiNodeV* GetModel_0056c7f0();
+    bool Tile3D_PlaySequence(const char* sequenceName);
 
     void* m_pParent;
     void* m_pChildTile;            // +0x3c, zeroed by the constructor 0x00a0bc80

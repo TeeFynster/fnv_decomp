@@ -20,7 +20,7 @@ struct Heap858
         return m_pHeapAllocator->Allocate(uiSize);
     }
 };
-extern "C" Heap858* __cdecl FUN_00c85750();
+extern "C" Heap858* __cdecl hkMemoryRouter_getInstance();
 
 struct Clonable858
 {
@@ -49,7 +49,7 @@ struct Object858
 
 struct Payload858
 {
-    void FUN_00d85ba0(const Payload858* pkSrc);
+    void ProcessAndReturnValue_00d85ba0(const Payload858* pkSrc);
     void AssignFrom(const Payload858* pkSrc);
     void CopyStateFrom(const Payload858* pkSrc);
 };
@@ -82,20 +82,21 @@ struct Raw858
 
 inline Raw858* Allocate858(unsigned int uiSize)
 {
-    Object858* pkObject = (Object858*)FUN_00c85750()->Allocate(uiSize);
+    Object858* pkObject = (Object858*)hkMemoryRouter_getInstance()->Allocate(uiSize);
     pkObject->usSize = (unsigned short)uiSize;
     return (Raw858*)pkObject;
 }
 
 // Allocates a new object matching pkSource's type (7, 6 or 2), copies its payload and iValue, clones child pointers, and returns it or 0.
 // @fnv 0x00d858f0
-Object858* __cdecl FUN_00d858f0(Object858* pkSource)
+// src: HAVOK_LIB 0x00d858f0
+Object858* __cdecl hkpConstraintDataCloningUtil_cloneIfCanHaveMotors(Object858* pkSource)
 {
     switch (pkSource->GetType())
     {
     case 7: {
         Type7Object858* pkResult = Allocate858(0x140)->FUN_00cdf2f0();
-        pkResult->kPayload.FUN_00d85ba0(&((Type7Object858*)pkSource)->kPayload);
+        pkResult->kPayload.ProcessAndReturnValue_00d85ba0(&((Type7Object858*)pkSource)->kPayload);
         pkResult->iValue = pkSource->iValue;
         Clonable858** ppkChildren = pkResult->apkChildren;
         for (int i = 0; i < 3; i++)
@@ -145,7 +146,7 @@ struct Heap858b
 };
 template <class T> __forceinline T* AllocA(unsigned int uiSize)
 {
-    Object858* p = (Object858*)((Heap858b*)FUN_00c85750())->heap().Allocate(uiSize);
+    Object858* p = (Object858*)((Heap858b*)hkMemoryRouter_getInstance())->heap().Allocate(uiSize);
     p->usSize = (unsigned short)uiSize;
     return (T*)p;
 }
@@ -155,7 +156,7 @@ struct Node858 : Object858
     int unk14;
     Object858* pkChild;
     float unk1c;
-    Object858* FUN_00cdf6d0();
+    Object858* GetFieldC();
 };
 struct Breakable858 : Object858
 {
@@ -214,43 +215,44 @@ struct Kind3Shape858
 };
 struct Kind3Result858
 {
-    void FUN_00dee6f0(Kind3Shape858* pkChild);
+    void hkpPointToPathConstraintData_setPath(Kind3Shape858* pkChild);
 };
 struct Raw858b
 {
     Breakable858* FUN_00d4df30(Object858* pkChild);
     Node858* FUN_00cdf710(Object858* pkChild);
 };
-Object858* __cdecl FUN_00d85360(Object858* pkSource);
-Object858* __cdecl FUN_00d853a0(Object858* pkSource);
-Object858* __cdecl FUN_00d853f0(Object858* pkSource);
+Object858* __cdecl hkpConstraintDataUtils_copyAtoms_hkpBallAndSocketConstraintData_(Object858* pkSource);
+Object858* __cdecl copyConstraintAtoms_class_hkpHingeConstraintData(Object858* pkSource);
+Object858* __cdecl copyConstraintAtoms_class_hkpLimitedHingeConstraintData(Object858* pkSource);
 Object858* __cdecl CloneShape(Object858* pkSource);
 Object858* __cdecl CloneAllocatedObject(Object858* pkSource);
 Object858* __cdecl CloneStub(Object858* pkSource);
-Object858* __cdecl FUN_00d85530(Object858* pkSource);
+Object858* __cdecl hkpConstraintDataUtils_copyAtoms_hkpStiffSpringConstraintData_(Object858* pkSource);
 Object858* __cdecl CloneWithInit(Object858* pkSource);
 Object858* __cdecl CloneDataBlock(Object858* pkSource);
 Object858* __cdecl CloneWithCopiedPayload(Object858* pkSource);
-Object858* __cdecl FUN_00d85660(Object858* pkSource);
+Object858* __cdecl copyConstraintAtoms_class_hkpHingeLimitsData(Object858* pkSource);
 Object858* __cdecl CloneWithAllocatedCopy(Object858* pkSource);
 
 // Dispatches on pkSource->GetType() to clone the object, recursively cloning child nodes and copying breakable properties.
 // @fnv 0x00d85700
-Object858* __cdecl FUN_00d85700(Object858* pkSource)
+// src: HAVOK_LIB 0x00d85700
+Object858* __cdecl hkpConstraintDataCloningUtil_deepClone(Object858* pkSource)
 {
     switch (pkSource->GetType())
     {
     case 0:
-        return FUN_00d85360(pkSource);
+        return hkpConstraintDataUtils_copyAtoms_hkpBallAndSocketConstraintData_(pkSource);
     case 1:
-        return FUN_00d853a0(pkSource);
+        return copyConstraintAtoms_class_hkpHingeConstraintData(pkSource);
     case 2:
-        return FUN_00d853f0(pkSource);
+        return copyConstraintAtoms_class_hkpLimitedHingeConstraintData(pkSource);
     case 3: {
         Object858* pkResult = CloneShape(pkSource);
         Kind3Shape858* pkChild = (Kind3Shape858*)((Node858*)pkSource)->pkChild;
         hkRefObj858* pkShape = pkChild->GetChildShape();
-        ((Kind3Result858*)pkResult)->FUN_00dee6f0(pkChild);
+        ((Kind3Result858*)pkResult)->hkpPointToPathConstraintData_setPath(pkChild);
         pkShape->removeReference();
         return pkResult;
     }
@@ -259,7 +261,7 @@ Object858* __cdecl FUN_00d85700(Object858* pkSource)
     case 7:
         return CloneStub(pkSource);
     case 8:
-        return FUN_00d85530(pkSource);
+        return hkpConstraintDataUtils_copyAtoms_hkpStiffSpringConstraintData_(pkSource);
     case 9:
         return CloneWithInit(pkSource);
     case 14:
@@ -267,12 +269,12 @@ Object858* __cdecl FUN_00d85700(Object858* pkSource)
     case 15:
         return CloneWithCopiedPayload(pkSource);
     case 18:
-        return FUN_00d85660(pkSource);
+        return copyConstraintAtoms_class_hkpHingeLimitsData(pkSource);
     case 19:
         return CloneWithAllocatedCopy(pkSource);
     case 12: {
         Breakable858* pkOld = (Breakable858*)pkSource;
-        Object858* pkChild = FUN_00d85700(pkOld->GetBreakableObject());
+        Object858* pkChild = hkpConstraintDataCloningUtil_deepClone(pkOld->GetBreakableObject());
         if (!pkChild)
             return 0;
         Breakable858* pkNew = AllocA<Raw858b>(0x28)->FUN_00d4df30(pkChild);
@@ -285,7 +287,7 @@ Object858* __cdecl FUN_00d85700(Object858* pkSource)
     }
     case 13: {
         Node858* pkNode = (Node858*)pkSource;
-        Object858* pkChild = FUN_00d85700(pkNode->FUN_00cdf6d0());
+        Object858* pkChild = hkpConstraintDataCloningUtil_deepClone(pkNode->GetFieldC());
         if (!pkChild)
             return 0;
         Node858* pkClone = AllocA<Raw858b>(0x20)->FUN_00cdf710(pkChild);

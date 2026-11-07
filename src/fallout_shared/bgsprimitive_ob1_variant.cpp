@@ -62,20 +62,20 @@ public:
     double DotProduct(const PodPoint3& point);
     float Length() const;
 
-    PodPoint3& FUN_00439180(float scalar);
+    PodPoint3& ScaleComponents(float scalar);
     PodPoint3 FUN_00439e90(const PodPoint3& shift) const;
     PodPoint3* FUN_00439e90(PodPoint3* output, const PodPoint3* other) const;
-    PodPoint3 FUN_00439ef0(const PodPoint3& other) const;
-    void FUN_00439ef0();
+    PodPoint3 SubtractIntoVector(const PodPoint3& other) const;
+    void SubtractIntoVector();
     PodPoint3 FUN_004b3800(const PodPoint3& axis) const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_00457910();
     float FUN_00457990() const;
     double FUN_004a7290();
     PodPoint3* FUN_006815c0();
-    PodPoint3* FUN_00416870(float x, float y, float z);
+    PodPoint3* SetComponents(float x, float y, float z);
     void FUN_0043d410(float x, int y, int z);
-    char* FUN_00a59af0(const char* text);
+    char* GetViewerString_00a59af0(const char* text);
 
     static void* operator new[](size_t size);
     static void operator delete[](void* memory);
@@ -111,9 +111,9 @@ public:
     float GetSquaredXYLength();
     float GetSquaredXYLength() const;
 
-    void FUN_004a0c10();
-    LocalPt3* FUN_00439ef0(LocalPt3* out, LocalPt3* other);
-    LocalPt3 FUN_00439ef0(const LocalPt3& rhs);
+    void Unitize_004a0c10();
+    LocalPt3* SubtractIntoVector(LocalPt3* out, LocalPt3* other);
+    LocalPt3 SubtractIntoVector(const LocalPt3& rhs);
     bool FUN_00439090(LocalPt3* other);
     float FUN_00457990() const;
 
@@ -205,46 +205,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 
@@ -263,7 +263,7 @@ class ColorPair
 class ColorPropertyBase
 {
   public:
-    bool FUN_00c4fa80(const ColorPropertyBase* pkOther);
+    bool BSMultiBoundShape_IsEqual(const ColorPropertyBase* pkOther);
 };
 
 class ColorProperty : public ColorPropertyBase
@@ -275,13 +275,14 @@ class ColorProperty : public ColorPropertyBase
     ColorPair m_kPrimaryColor;  // +0x0c
     ColorPair m_kColorB;        // +0x18
 
-    bool FUN_00c38090(const ColorPropertyBase* pkObject);
+    bool BSMultiBoundAABB_IsEqual(const ColorPropertyBase* pkObject);
 };
 
 // @fnv 0x00c38090
-bool ColorProperty::FUN_00c38090(const ColorPropertyBase* pkObject)
+// src: XBOX_PDB 0x00c38090
+bool ColorProperty::BSMultiBoundAABB_IsEqual(const ColorPropertyBase* pkObject)
 {
-    bool bEqual = FUN_00c4fa80(pkObject);
+    bool bEqual = BSMultiBoundShape_IsEqual(pkObject);
     if (bEqual)
     {
         const ColorProperty* pkOther = (const ColorProperty*)pkObject;
@@ -332,11 +333,12 @@ class CenteredPointBounds
     int unk08;
     Pt m_kCenter;
     Pt m_kExtent;
-    bool FUN_00c38a20(const Pt& kPoint);
+    bool BSMultiBoundAABB_QPointWithin(const Pt& kPoint);
 };
 
 // @fnv 0x00c38a20
-bool CenteredPointBounds::FUN_00c38a20(const Pt& kPoint)
+// src: XBOX_PDB 0x00c38a20
+bool CenteredPointBounds::BSMultiBoundAABB_QPointWithin(const Pt& kPoint)
 {
     Pt kDiff = kPoint - m_kCenter;
     return !(PtAbs(kDiff.x) - m_kExtent.x > 0.01f) && !(PtAbs(kDiff.y) - m_kExtent.y > 0.01f) &&
@@ -391,18 +393,19 @@ struct C_00c36580
     Obj_00a598f0 unk24;
 
     void __thiscall AddPropertyNames(int value);
-    void __thiscall FUN_00c36580(Obj_0096a610* value);
+    void __thiscall BSMultiBoundOBB_GetViewerStrings(Obj_0096a610* value);
 };
 
-int __cdecl FUN_00a7d330(int value);
+int __cdecl NiViewerStrings_NiGetViewerString_Title(int value);
 
 // @fnv 0x00c36580
-void __thiscall C_00c36580::FUN_00c36580(Obj_0096a610* value)
+// src: XBOX_PDB 0x00c36580
+void __thiscall C_00c36580::BSMultiBoundOBB_GetViewerStrings(Obj_0096a610* value)
 {
     AddPropertyNames((int)value);
 
     int src = g_01202818;
-    unsigned int first = (unsigned int)FUN_00a7d330(src);
+    unsigned int first = (unsigned int)NiViewerStrings_NiGetViewerString_Title(src);
     value->FUN_0096a610(first);
 
     unsigned int second = unk24.ToString("Axis");
@@ -583,7 +586,8 @@ struct AABBDebugView
     PodPoint3 center;
 
     float extentX, extentY, extentZ;
-    void FUN_00c39270(PodPoint3* out)
+// src: XBOX_PDB 0x00c39270
+    void BSMultiBoundAABB_GetVertices(PodPoint3* out)
     {
         PodPoint3 axisX = DAT_011a946c * extentX;
         PodPoint3 axisY = DAT_011a9478 * extentY;
@@ -598,17 +602,18 @@ struct AABBDebugView
         out[7] = center - axisX - axisY - axisZ;
     }
 
-    void FUN_00c38b00(Geometry*, Geometry*, Color);
+    void BSMultiBoundAABB_MakeDebugGeom(Geometry*, Geometry*, Color);
 };
 
 // @fnv 0x00c38b00
-void AABBDebugView::FUN_00c38b00(Geometry* lines, Geometry* triangles, Color color)
+// src: XBOX_PDB 0x00c38b00
+void AABBDebugView::BSMultiBoundAABB_MakeDebugGeom(Geometry* lines, Geometry* triangles, Color color)
 {
 
     PodPoint3 corners[8];
     InitializePoint3Array(corners, 8);
 
-    FUN_00c39270(corners);
+    BSMultiBoundAABB_GetVertices(corners);
 
     unsigned short edgesA[12][2] = {{0, 1}, {0, 2}, {1, 3}, {3, 2}, {4, 5}, {4, 6},
                                     {5, 7}, {7, 6}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
@@ -737,7 +742,8 @@ inline float NiPlane::Distance(const NiPoint3& kPt) const
     return reinterpret_cast<const NiPoint3*>(this)->DotProduct(kPt) - c;
 }
 
-inline void BSMultiBoundShape::FUN_00c37a00(NiPoint3* pts)
+// src: COMMUNITY 0x00c37a00
+inline void BSMultiBoundShape::BSMultiBoundOBB_GetVertices(NiPoint3* pts)
 {
     NiPoint3 axisX, axisY, axisZ;
     axisX *= static_cast<BSMultiBoundOBB*>(this)->m_kOffset.x;
@@ -768,14 +774,15 @@ inline void BSMultiBoundShape::GetPlanes(NiPlane* planes)
 }
 
 // @fnv 0x00c369b0
-int BSMultiBoundShape::FUN_00c369b0(BSMultiBound* p)
+// src: XBOX_PDB 0x00c369b0
+int BSMultiBoundShape::BSMultiBoundOBB_CheckBound_00c369b0(BSMultiBound* p)
 {
     int v = p->GetShape()->GetShapeType();
     if (v == 1)
     {
         BSMultiBoundShape* j = (BSMultiBoundShape*)p->GetShape();
         NiPoint3 e[8];
-        j->FUN_00c39270(e);
+        j->BSMultiBoundAABB_GetVertices(e);
         NiPlane c[3];
         this->GetPlanes(c);
         for (int i = 0; i < 8; i++)
@@ -796,7 +803,7 @@ int BSMultiBoundShape::FUN_00c369b0(BSMultiBound* p)
     {
         BSMultiBoundShape* c = (BSMultiBoundShape*)p->GetShape();
         NiPoint3 j[8];
-        c->FUN_00c37a00(j);
+        c->BSMultiBoundOBB_GetVertices(j);
         NiPlane e[3];
         this->GetPlanes(e);
         for (int i = 0; i < 8; i++)
@@ -837,15 +844,16 @@ inline bool NiFrustumPlanes::IsPlaneActive(unsigned int i)
 // BSMultiBoundOBB has no FUN_00c37050 frustum overload in the shared header.
 struct C37050_Bound
 {
-    void FUN_00c37a00(PodPoint3* corners);
-    bool FUN_00c37050(const NiFrustumPlanes& frustum);
+    void BSMultiBoundOBB_GetVertices(PodPoint3* corners);
+    bool BSMultiBoundOBB_CompletelyWithinFrustum(const NiFrustumPlanes& frustum);
 };
 // @fnv 0x00c37050
-bool C37050_Bound::FUN_00c37050(const NiFrustumPlanes& frustum)
+// src: XBOX_PDB 0x00c37050
+bool C37050_Bound::BSMultiBoundOBB_CompletelyWithinFrustum(const NiFrustumPlanes& frustum)
 {
     PodPoint3 corners[8];
     InitializePoint3Array(corners, 8);
-    FUN_00c37a00(corners);
+    BSMultiBoundOBB_GetVertices(corners);
     for (int i = 0; i < 6; i++)
     {
         if (const_cast<NiFrustumPlanes&>(frustum).IsPlaneActive(i))
@@ -918,10 +926,11 @@ struct FrustQ
     int unk00, unk04, unk08, unk0c, unk10, unk14;
     float m_fTolX, m_fTolY, m_fTolZ;
     void GetPlanes(PlaneQ* p);
-    bool FUN_00c378c0(const Pt3Q& kPt);
+    bool BSMultiBoundOBB_QPointWithin(const Pt3Q& kPt);
 };
 // @fnv 0x00c378c0
-bool FrustQ::FUN_00c378c0(const Pt3Q& kPt)
+// src: XBOX_PDB 0x00c378c0
+bool FrustQ::BSMultiBoundOBB_QPointWithin(const Pt3Q& kPt)
 {
     PlaneQ akPlanes3[3];
     DeadQ6();
@@ -963,7 +972,7 @@ struct PtOp
     float x;
     float y;
     float z;
-    PtOp FUN_00439ef0(const PtOp& o) const;
+    PtOp SubtractIntoVector(const PtOp& o) const;
 };
 struct Prim;
 struct Param
@@ -1026,18 +1035,20 @@ struct Prim
     int m_08;
     LocalVec3 m_kCenterPosition;
     LocalVec3 m_radii;
-    inline bool FUN_00c39560(LocalVec3 v)
+// src: COMMUNITY 0x00c39560
+    inline bool BSMultiBoundAABB_FastPointWithin(LocalVec3 v)
     {
         LocalVec3 delta = v - m_kCenterPosition;
         return AbsPoint(delta.x) - m_radii.x <= 0.01 && AbsPoint(delta.y) - m_radii.y <= 0.01 &&
                AbsPoint(delta.z) - m_radii.z <= 0.01;
     }
-    void FUN_00c37a00(LocalVec3* arr);
-    int FUN_00c384f0(Param* arg);
+    void BSMultiBoundOBB_GetVertices(LocalVec3* arr);
+    int BSMultiBoundAABB_CheckBound(Param* arg);
 };
 
 // @fnv 0x00c384f0
-int Prim::FUN_00c384f0(Param* arg)
+// src: XBOX_PDB 0x00c384f0
+int Prim::BSMultiBoundAABB_CheckBound(Param* arg)
 {
     int mode_2 = arg->GetBV()->v35();
     if (mode_2 == 1)
@@ -1054,15 +1065,15 @@ int Prim::FUN_00c384f0(Param* arg)
     else if (mode_2 == 2)
     {
         Prim* q = arg->GetBV();
-        if (!FUN_00c39560(q->m_kCenterPosition))
+        if (!BSMultiBoundAABB_FastPointWithin(q->m_kCenterPosition))
             return 0;
         else
         {
             LocalVec3 arr[8];
-            q->FUN_00c37a00(arr);
+            q->BSMultiBoundOBB_GetVertices(arr);
             for (int i3 = 0; i3 < 8; ++i3)
             {
-                if (!FUN_00c39560(arr[i3]))
+                if (!BSMultiBoundAABB_FastPointWithin(arr[i3]))
                     return 0;
             }
             return 2;
@@ -1118,11 +1129,12 @@ struct OccShape
         m_pkDeltas[6] = kTargetCenter - vX - vY + vZ;
         m_pkDeltas[7] = kTargetCenter - vX - vY - vZ;
     }
-    bool FUN_00c387f0(NiFrustumPlanes* pkPlanes);
+    bool BSMultiBoundAABB_WithinFrustum(NiFrustumPlanes* pkPlanes);
 };
 
 // @fnv 0x00c387f0
-bool OccShape::FUN_00c387f0(NiFrustumPlanes* pkPlanes)
+// src: XBOX_PDB 0x00c387f0
+bool OccShape::BSMultiBoundAABB_WithinFrustum(NiFrustumPlanes* pkPlanes)
 {
     LocalPt3 kVerts[8];
     bool bFlat = (m_fGlyphWidthInPixels == 0.0);
@@ -1148,7 +1160,7 @@ bool OccShape::FUN_00c387f0(NiFrustumPlanes* pkPlanes)
 }
 
 class CloningProcess;
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct FUN_00c4f8e0
 {
     int unk000;
@@ -1221,17 +1233,18 @@ struct FUN_00c4f8e0
     {
         int unused[4];
         (void)unused;
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     FUN_00c4f8e0();
 };
 struct C4F390_Owner
 {
     void CopyFields(FUN_00c4f8e0* clone, CloningProcess& cloning);
-    FUN_00c4f8e0* FUN_00c4f390(CloningProcess& cloning);
+    FUN_00c4f8e0* BSPortal_CreateClone(CloningProcess& cloning);
 };
 // @fnv 0x00c4f390
-FUN_00c4f8e0* C4F390_Owner::FUN_00c4f390(CloningProcess& cloning)
+// src: XBOX_PDB 0x00c4f390
+FUN_00c4f8e0* C4F390_Owner::BSPortal_CreateClone(CloningProcess& cloning)
 {
     FUN_00c4f8e0* clone = new FUN_00c4f8e0;
     CopyFields(clone, cloning);
@@ -1299,11 +1312,12 @@ class ObjA
     int unkA8;
     NodeA* unkAC;
 
-    int FUN_00c4f860();
+    int BSMultiBoundRoom_GetCullResult();
 };
 
 // @fnv 0x00c4f860
-int ObjA::FUN_00c4f860()
+// src: COMMUNITY 0x00c4f860
+int ObjA::BSMultiBoundRoom_GetCullResult()
 {
     NodeA* a = unkAC;
     NodeA* b;
@@ -1312,26 +1326,28 @@ int ObjA::FUN_00c4f860()
     return a ? (b = unkAC, c5 = b->unk0C, (c5 ? (d = b->unk0C, d->Get08()) : 0)) : 0;
 }
 
-float FUN_004019b0(float);
-inline float FUN_004579e0(float value) { return FUN_004019b0(value); }
+float sqrt_004019b0(float);
+// src: XBOX_PDB 0x004579e0
+inline float NiSqrt_004579e0(float value) { return sqrt_004019b0(value); }
 inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c) {}
 inline NiPoint3 NiPoint3::operator-(const NiPoint3& rhs) const
 { return NiPoint3(x - rhs.x, y - rhs.y, z - rhs.z); }
 inline float NiPoint3::SqrLength() const { return x * x + y * y + z * z; }
-inline float NiPoint3::Length() const { return FUN_004579e0(x * x + y * y + z * z); }
+inline float NiPoint3::Length() const { return NiSqrt_004579e0(x * x + y * y + z * z); }
 // Non-const locals call these overloads: same inline bodies as the const ones.
 inline float NiPoint3::SqrLength() { return x * x + y * y + z * z; }
-inline float NiPoint3::Length() { return FUN_004579e0(x * x + y * y + z * z); }
+inline float NiPoint3::Length() { return NiSqrt_004579e0(x * x + y * y + z * z); }
 
 // @fnv 0x00c4ff60
-int BSMultiBoundSphere::FUN_00c4ff60(BSMultiBound* other)
+// src: XBOX_PDB 0x00c4ff60
+int BSMultiBoundSphere::CheckBound(BSMultiBound* other)
 {
     int type = other->GetShape()->GetShapeType();
     if (type == 1)
     {
         BSMultiBoundAABB* box2 = static_cast<BSMultiBoundAABB*>(other->GetShape());
         NiPoint3 _vertices[8];
-        box2->FUN_00c39270(_vertices);
+        box2->BSMultiBoundAABB_GetVertices(_vertices);
         float radiusSquared8 = radius * radius;
         for (int i = 0; i < 8; i++)
         {
@@ -1346,7 +1362,7 @@ int BSMultiBoundSphere::FUN_00c4ff60(BSMultiBound* other)
     {
         BSMultiBoundOBB* box3 = static_cast<BSMultiBoundOBB*>(other->GetShape());
         NiPoint3 vertices5[8];
-        box3->FUN_00c37a00(vertices5);
+        box3->BSMultiBoundOBB_GetVertices(vertices5);
         float radiusSquared = radius * radius;
         for (int i = 0; i < 8; i++)
         {
@@ -1385,16 +1401,17 @@ struct C50380_Sphere
     PodPoint3 m_kCenter;
     float m_fBoundRadius;
 
-    bool __thiscall FUN_00c50380(PodPoint3* other);
+    bool __thiscall BSMultiBoundSphere_QPointWithin(PodPoint3* other);
 };
 
 
 // @fnv 0x00c50380
-bool __thiscall C50380_Sphere::FUN_00c50380(PodPoint3* other)
+// src: XBOX_PDB 0x00c50380
+bool __thiscall C50380_Sphere::BSMultiBoundSphere_QPointWithin(PodPoint3* other)
 {
     // Preserve the frame space reserved for the original inline point helpers.
     DeadQ4();
-    float fDist = other->FUN_00439ef0(m_kCenter).FUN_00457990();
+    float fDist = other->SubtractIntoVector(m_kCenter).FUN_00457990();
     return (fDist < m_fBoundRadius) ? true : false;
 }
 
@@ -1446,7 +1463,7 @@ class NiMatrix3OB
 class NiOBBOB
 {
   public:
-    void FUN_00c37a00(NiPoint3OB* pkVerts);
+    void BSMultiBoundOBB_GetVertices(NiPoint3OB* pkVerts);
     int m_aiPad[3];
     NiPoint3OB m_kCenter;
     float m_afExtents[3];
@@ -1454,7 +1471,8 @@ class NiOBBOB
 };
 
 // @fnv 0x00c37a00
-void NiOBBOB::FUN_00c37a00(NiPoint3OB* pkVerts)
+// src: COMMUNITY 0x00c37a00
+void NiOBBOB::BSMultiBoundOBB_GetVertices(NiPoint3OB* pkVerts)
 {
     NiPoint3OB kX = NiPoint3OB::ZERO;
     NiPoint3OB kY = NiPoint3OB::ZERO;
@@ -1588,7 +1606,7 @@ struct FUN_00c47660
     {
         int unused[3];
         (void)unused;
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
     static void operator delete(void* p);
 };
@@ -1626,7 +1644,7 @@ struct FUN_00c47770
 struct FUN_00c3a620
 {  // member at +0xb0; destructor at 0x00c3a620
     unsigned int unk00, unk04, unk08, unk0C;
-    void FUN_00b5af80(int iMode);
+    void UpdateFields_00b5af80(int iMode);
     ~FUN_00c3a620();
 };
 
@@ -1654,7 +1672,7 @@ class Owner_c4f550 : public FUN_00a5e930
 Owner_c4f550::~Owner_c4f550()
 {
     delete m_pkOwned;
-    m_kList.FUN_00b5af80(1);
+    m_kList.UpdateFields_00b5af80(1);
     m_uiCount = 0;
 }
 }  // namespace fnv_00c4f550
@@ -1824,11 +1842,12 @@ struct OBBox
     float fExtentY;
     float fExtentZ;
 
-    void FUN_00c39270(OBPoint* apCorners);
+    void BSMultiBoundAABB_GetVertices(OBPoint* apCorners);
 };
 
 // @fnv 0x00c39270
-void OBBox::FUN_00c39270(OBPoint* apCorners)
+// src: XBOX_PDB 0x00c39270
+void OBBox::BSMultiBoundAABB_GetVertices(OBPoint* apCorners)
 {
     OBPoint kX = g_kOBUnitX * fExtentX;
     OBPoint kY = g_kOBUnitY * fExtentY;
@@ -1873,39 +1892,41 @@ struct OrientedBox
     PodPoint3 extents;
     FloatMatrix3 rotation;
 
-    void FUN_00c37a00(PodPoint3* vertices)
+// src: COMMUNITY 0x00c37a00
+    void BSMultiBoundOBB_GetVertices(PodPoint3* vertices)
     {
         PodPoint3 axisX = PodPoint3::ZERO;
         PodPoint3 axisY = PodPoint3::ZERO;
         PodPoint3 axisZ = PodPoint3::ZERO;
         rotation.GetColumn(0, axisX);
-        axisX.FUN_00439180(extents.x);
+        axisX.ScaleComponents(extents.x);
         rotation.GetColumn(1, axisY);
-        axisY.FUN_00439180(extents.y);
+        axisY.ScaleComponents(extents.y);
         axisZ.x = rotation.entries[0][2];
         axisZ.y = rotation.entries[1][2];
         axisZ.z = rotation.entries[2][2];
-        axisZ.FUN_00439180(extents.z);
+        axisZ.ScaleComponents(extents.z);
         vertices[0] = center + axisX + axisY + axisZ;
-        vertices[1] = (center + axisX + axisY).FUN_00439ef0(axisZ);
-        vertices[2] = (center + axisX).FUN_00439ef0(axisY) + axisZ;
-        vertices[3] = (center + axisX).FUN_00439ef0(axisY).FUN_00439ef0(axisZ);
-        vertices[4] = center.FUN_00439ef0(axisX) + axisY + axisZ;
-        vertices[5] = (center.FUN_00439ef0(axisX) + axisY).FUN_00439ef0(axisZ);
-        vertices[6] = center.FUN_00439ef0(axisX).FUN_00439ef0(axisY) + axisZ;
-        vertices[7] = center.FUN_00439ef0(axisX).FUN_00439ef0(axisY).FUN_00439ef0(axisZ);
+        vertices[1] = (center + axisX + axisY).SubtractIntoVector(axisZ);
+        vertices[2] = (center + axisX).SubtractIntoVector(axisY) + axisZ;
+        vertices[3] = (center + axisX).SubtractIntoVector(axisY).SubtractIntoVector(axisZ);
+        vertices[4] = center.SubtractIntoVector(axisX) + axisY + axisZ;
+        vertices[5] = (center.SubtractIntoVector(axisX) + axisY).SubtractIntoVector(axisZ);
+        vertices[6] = center.SubtractIntoVector(axisX).SubtractIntoVector(axisY) + axisZ;
+        vertices[7] = center.SubtractIntoVector(axisX).SubtractIntoVector(axisY).SubtractIntoVector(axisZ);
     }
 
-    bool FUN_00c36f20(NiFrustumPlanes*);
+    bool BSMultiBoundOBB_WithinFrustum(NiFrustumPlanes*);
 };
 
 // @fnv 0x00c36f20
-bool OrientedBox::FUN_00c36f20(NiFrustumPlanes* frustum)
+// src: XBOX_PDB 0x00c36f20
+bool OrientedBox::BSMultiBoundOBB_WithinFrustum(NiFrustumPlanes* frustum)
 {
     PodPoint3 vertices[8];
     InitializePoint3Array(vertices, 8);
     bool flat = (extents.z == 0.0);
-    FUN_00c37a00(vertices);
+    BSMultiBoundOBB_GetVertices(vertices);
     for (int plane = 0; plane < 6; ++plane)
     {
         if ((bool)(frustum->m_uiActivePlaneMask & (1 << plane)))

@@ -13,7 +13,7 @@ class LocationDescriptor;
 class LocationDescriptor
 {
   public:
-    bool FUN_0067f970();
+    bool PackageLocation_IsLocationGeneric();
     TESBoundObject* FUN_0067f430();
     PACKAGE_OBJECT_TYPE GetObjectType();
     TESObjectREFR* GetLocationReference();

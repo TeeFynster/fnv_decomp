@@ -24,7 +24,8 @@ unsigned int __fastcall FlameProjectileGetEffectValue(FlameProjectile* self)
 
 // Loads the base BeamProjectile data, then reads two 4-byte values from the buffer into this+0x150 and this+0x154.
 // @fnv 0x009b3f00
-void FlameProjectile::FUN_009b3f00(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x009b3f00
+void FlameProjectile::LoadGame_009b3f00(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     reinterpret_cast<BeamProjectile*>(this)->BeamProjectile::LoadProjectile(apLoadGameBuffer);
     apLoadGameBuffer->ReadTypedData((char*)this + 0x150, 4);
@@ -33,9 +34,10 @@ void FlameProjectile::FUN_009b3f00(BGSLoadFormBuffer* apLoadGameBuffer)
 
 // Calls the base Projectile load routine, then zeroes the two floats at offsets 0x150 and 0x154.
 // @fnv 0x009b3f50
-void FlameProjectile::FUN_009b3f50(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: COMMUNITY 0x009b3f50
+void FlameProjectile::RevertBGS_009b3f50(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    Projectile::FUN_009c58e0(apLoadGameBuffer);
+    Projectile::RevertBGS_009c58e0(apLoadGameBuffer);
     *(float*)((char*)this + 0x150) = 0.0f;
     *(float*)((char*)this + 0x154) = 0.0f;
 }
@@ -43,26 +45,26 @@ void FlameProjectile::FUN_009b3f50(BGSLoadFormBuffer* apLoadGameBuffer)
 // placeholder declarations
 struct FUN_005de0a0_shell
 {
-    void FUN_005de0a0(int, int);
+    void Projectile_SetFlag(int, int);
 };
 
 struct FUN_009bda10_shell
 {
-    void FUN_009bda10();
+    void Projectile_Initialize();
 };
 
 // Calls FUN_005de0a0 with several bit flags and values, then calls FUN_009bda10.
 // @fnv 0x009b32b0
 void __fastcall FlameProjectileConfigureFlags(FlameProjectile* self)
 {
-    ((FUN_005de0a0_shell*)self)->FUN_005de0a0(0x10, 0);
-    ((FUN_005de0a0_shell*)self)->FUN_005de0a0(1, 0);
-    ((FUN_005de0a0_shell*)self)->FUN_005de0a0(2, 0);
-    ((FUN_005de0a0_shell*)self)->FUN_005de0a0(8, 1);
-    ((FUN_005de0a0_shell*)self)->FUN_005de0a0(0x20, 0);
-    ((FUN_005de0a0_shell*)self)->FUN_005de0a0(0x80, 1);
-    ((FUN_005de0a0_shell*)self)->FUN_005de0a0(0x100, 1);
-    ((FUN_009bda10_shell*)self)->FUN_009bda10();
+    ((FUN_005de0a0_shell*)self)->Projectile_SetFlag(0x10, 0);
+    ((FUN_005de0a0_shell*)self)->Projectile_SetFlag(1, 0);
+    ((FUN_005de0a0_shell*)self)->Projectile_SetFlag(2, 0);
+    ((FUN_005de0a0_shell*)self)->Projectile_SetFlag(8, 1);
+    ((FUN_005de0a0_shell*)self)->Projectile_SetFlag(0x20, 0);
+    ((FUN_005de0a0_shell*)self)->Projectile_SetFlag(0x80, 1);
+    ((FUN_005de0a0_shell*)self)->Projectile_SetFlag(0x100, 1);
+    ((FUN_009bda10_shell*)self)->Projectile_Initialize();
 }
 
 // The shared header has no save declaration. A value argument keeps the
@@ -91,12 +93,13 @@ struct FUN_005de0a0_shell
 {
     char _pad[0xc8];
     unsigned int m_flags;
-    void FUN_005de0a0(unsigned int aFlags, bool abSet);
+    void Projectile_SetFlag(unsigned int aFlags, bool abSet);
 };
 
 // Sets or clears the given flag bits in m_flags depending on abSet.
 // @fnv 0x005de0a0
-void FUN_005de0a0_shell::FUN_005de0a0(unsigned int aFlags, bool abSet)
+// src: XBOX_PDB 0x005de0a0
+void FUN_005de0a0_shell::Projectile_SetFlag(unsigned int aFlags, bool abSet)
 {
     if (abSet)
         m_flags |= aFlags;
@@ -109,12 +112,12 @@ namespace flame_particle {
 struct RTTI;
 struct Particle
 {
-    unsigned int FUN_004d7d50();
+    unsigned int NiParticleSystem_GetModifierCount();
     NiObject* GetByIndex(unsigned int index);
 };
 
 
-bool __cdecl FUN_0043b300(RTTI const* rtti, NiObject* object);
+bool __cdecl NiObject_IsKindOf(RTTI const* rtti, NiObject* object);
 
 extern void* g_01202560;
 extern int g_01202500_arg1;
@@ -131,15 +134,15 @@ float GetMaxParticleGlobalValue(NiNode* node)
     {
         NiNode* root;
 
-        if (FUN_0043b300(reinterpret_cast<RTTI const*>(&g_01202560), node))
+        if (NiObject_IsKindOf(reinterpret_cast<RTTI const*>(&g_01202560), node))
         {
             Particle* particle = reinterpret_cast<Particle*>(node);
 
-            for (unsigned int i = 0; result == _DAT_01012060 && i < particle->FUN_004d7d50(); ++i)
+            for (unsigned int i = 0; result == _DAT_01012060 && i < particle->NiParticleSystem_GetModifierCount(); ++i)
             {
                 NiObject* object = particle->GetByIndex(i);
 
-                if (object && FUN_0043b300(reinterpret_cast<RTTI const*>(&g_01202500_arg1), object))
+                if (object && NiObject_IsKindOf(reinterpret_cast<RTTI const*>(&g_01202500_arg1), object))
                 {
                     TESGlobal* global = reinterpret_cast<TESGlobal*>(object);
                     result = global->GetValue();
@@ -178,7 +181,7 @@ struct FloatMatrix3
 };
 struct GameNode
 {
-    FloatMatrix3* FUN_00461130(FloatMatrix3*);
+    FloatMatrix3* NiAVObject_GetWorldRotate(FloatMatrix3*);
 };
 struct OtherNode
 {
@@ -322,7 +325,7 @@ float GetMaxParticleGlobalValue(GameNode*);
 extern double _DAT_0106b9e8;
 struct ProjectileObject
 {
-    OtherNode* FUN_00874480();
+    OtherNode* Projectile_GetShooter();
     void UpdateProjectileNode();
 };
 // Gets the projectile's node and secondary node, sets a zero vector on the node, copies a matrix into this+0x94, and stores a scaled value at this+0x154.
@@ -332,7 +335,7 @@ void ProjectileObject::UpdateProjectileNode()
     GameNode* node = ((NodeGetter)(*reinterpret_cast<void***>(this))[0x1d0 / 4])(this);
     if (node)
     {
-        GameNode* secondary = FUN_00874480()->GetSecondary();
+        GameNode* secondary = Projectile_GetShooter()->GetSecondary();
         if (secondary)
         {
             // Reserve storage without invoking NiPoint3's separate default constructor.
@@ -342,8 +345,8 @@ void ProjectileObject::UpdateProjectileNode()
             FloatMatrix3 firstMatrix;
             FloatMatrix3 second;
             *reinterpret_cast<FloatMatrix3*>(reinterpret_cast<char*>(this) + 0x94) = *(
-                ((NodeGetter)(*reinterpret_cast<void***>(this))[0x1d0 / 4])(this)->FUN_00461130(&second)->FUN_0043f8d0(
-                    secondary->FUN_00461130(&firstMatrix)->FUN_004b45b0()));
+                ((NodeGetter)(*reinterpret_cast<void***>(this))[0x1d0 / 4])(this)->NiAVObject_GetWorldRotate(&second)->FUN_0043f8d0(
+                    secondary->NiAVObject_GetWorldRotate(&firstMatrix)->FUN_004b45b0()));
         }
         *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x154) =
             GetMaxParticleGlobalValue(node) * _DAT_0106b9e8;
@@ -499,20 +502,20 @@ struct FUN_004181e0_shell
 };
 struct FUN_00874480_shell
 {
-    unsigned int FUN_00874480();
+    unsigned int Projectile_GetShooter();
 };
 struct FUN_005be5c0_shell
 {
-    unsigned int FUN_005be5c0();
+    unsigned int ProcessArray_GetProcessLevelTail();
 };
 struct FUN_00968670_shell
 {
-    ProjObj* FUN_00968670();
+    ProjObj* ProcessArray_GetItem();
 };
 struct ProjMgr
 {
-    unsigned int FUN_005be5c0();
-    ProjObj* FUN_00968670();
+    unsigned int ProcessArray_GetProcessLevelTail();
+    ProjObj* ProcessArray_GetItem();
 };
 struct FUN_00717e50_shell
 {
@@ -525,9 +528,9 @@ extern FUN_00717e50_shell DAT_011e0e80;
 ProjObj* FindProjectObject(unsigned int a, unsigned int b)
 {
     ProjObj* result = 0;
-    for (unsigned int i = 0; result == 0 && i < DAT_011e0e80.FUN_00717e50(0)->FUN_005be5c0(); ++i)
+    for (unsigned int i = 0; result == 0 && i < DAT_011e0e80.FUN_00717e50(0)->ProcessArray_GetProcessLevelTail(); ++i)
     {
-        ProjObj* pObj = DAT_011e0e80.FUN_00717e50(i)->FUN_00968670();
+        ProjObj* pObj = DAT_011e0e80.FUN_00717e50(i)->ProcessArray_GetItem();
         if (pObj != 0)
         {
             if (pObj->v137() != 0)
@@ -535,7 +538,7 @@ ProjObj* FindProjectObject(unsigned int a, unsigned int b)
                 ProjObj* pCandidate = pObj;
                 if (((FUN_004181e0_shell*)pCandidate)->FUN_004181e0() == b)
                 {
-                    if (((FUN_00874480_shell*)pCandidate)->FUN_00874480() == a)
+                    if (((FUN_00874480_shell*)pCandidate)->Projectile_GetShooter() == a)
                     {
                         result = pCandidate;
                     }

@@ -53,8 +53,8 @@ struct MemRouter
     }
 };
 
-void* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(MemAllocator* alloc, VecArray* arr, int newCap, int elemSize);
+void* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(MemAllocator* alloc, VecArray* arr, int newCap, int elemSize);
 
 static __forceinline float distanceSquared(LocalM128 a, LocalM128 b)
 {
@@ -67,7 +67,8 @@ static __forceinline float distanceSquared(LocalM128 a, LocalM128 b)
 }
 
 // @fnv 0x00dd68d0
-void __cdecl FUN_00dd68d0(float tol, VecArray* arr, int* outCount)
+// src: GUESS 0x00dd68d0 (confidence: low)
+void __cdecl hkMemoryRouter_getInstance_ProcessEntries_00dd68d0(float tol, VecArray* arr, int* outCount)
 {
     LocalM128* cur = arr->m_data;
     int rem = arr->m_iElementCount - 1;
@@ -112,13 +113,13 @@ void __cdecl FUN_00dd68d0(float tol, VecArray* arr, int* outCount)
     }
     *outCount = (int)(out - arr->m_data);
     int count = *outCount;
-    MemAllocator& alloc = ((MemRouter*)FUN_00c85750())->heap();
+    MemAllocator& alloc = ((MemRouter*)hkMemoryRouter_getInstance())->heap();
     int cap = arr->m_iCapacityState & 0x3fffffff;
     if (cap < count)
     {
         int cap2 = cap * 2;
         int newCap = (count < cap2) ? cap2 : count;
-        FUN_00c908c0(&alloc, arr, newCap, 16);
+        hkArrayUtil__reserve(&alloc, arr, newCap, 16);
     }
     arr->m_iElementCount = count;
 }
@@ -174,7 +175,7 @@ struct Holder
     }
 };
 
-Holder* __cdecl FUN_00c85750();
+Holder* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(Allocator* allocator, void* container, int elementSize);
 
 template <class T> __forceinline void hkConstructWithCopy(T* p, int n, const T& t)
@@ -204,7 +205,7 @@ template <class T> struct Arr_00dd6a10
     }
     __forceinline void AddBack(const T& v)
     {
-        Holder* h = FUN_00c85750();
+        Holder* h = hkMemoryRouter_getInstance();
         if (size == (capacity & 0x3fffffff))
             ResizeAudioStream(h->allocator, this, sizeof(T));
         T* p = &data[size];
@@ -214,7 +215,7 @@ template <class T> struct Arr_00dd6a10
     }
     __forceinline void pushBackPlain(const T& v)
     {
-        Allocator& a = FUN_00c85750()->heap();
+        Allocator& a = hkMemoryRouter_getInstance()->heap();
         if (size == (capacity & 0x3fffffff))
             ResizeAudioStream(&a, this, sizeof(T));
         hkConstructWithCopy(data + size, 1, v);
@@ -222,7 +223,7 @@ template <class T> struct Arr_00dd6a10
     }
     __forceinline void clearAndFree()
     {
-        Allocator& a = FUN_00c85750()->heap();
+        Allocator& a = hkMemoryRouter_getInstance()->heap();
         size = 0;
         if ((capacity & 0x80000000) == 0)
             a.freeBlock(data, (capacity & 0x3fffffff) * sizeof(T));
@@ -233,12 +234,13 @@ typedef Arr_00dd6a10<Plane> PlaneArray;
 typedef Arr_00dd6a10<Triangle> TriangleArray;
 typedef Arr_00dd6a10<Edge> EdgeArray;
 
-char* __cdecl FUN_00dd66d0(char* flag, Plane* plane, PlaneArray* vertices, int a, int b, Triangle* tri,
+char* __cdecl hkBool_ProcessEntries_00dd66d0(char* flag, Plane* plane, PlaneArray* vertices, int a, int b, Triangle* tri,
                            TriangleArray* out);
-void __cdecl FUN_00dd62e0(PlaneArray* vertices, int i1, int i2, int i3, Plane* out);
+void __cdecl Object_UpdateFields_00dd62e0(PlaneArray* vertices, int i1, int i2, int i3, Plane* out);
 
 // @fnv 0x00dd6a10
-void __cdecl FUN_00dd6a10(Edge* edgeIn, PlaneArray* vertices, EdgeArray* visited, PlaneArray* planes)
+// src: GUESS 0x00dd6a10 (confidence: low)
+void __cdecl Runtime_ProcessEntries_00dd6a10(Edge* edgeIn, PlaneArray* vertices, EdgeArray* visited, PlaneArray* planes)
 {
     Edge* edge = edgeIn;
     EdgeArray*& vr = visited;
@@ -251,7 +253,7 @@ void __cdecl FUN_00dd6a10(Edge* edgeIn, PlaneArray* vertices, EdgeArray* visited
     neighbours.size = 0;
     neighbours.capacity = 0x80000000;
     char flag;
-    if (*FUN_00dd66d0(&flag, &edge->plane, vertices, edge->a, edge->b, edge->tri, &neighbours))
+    if (*hkBool_ProcessEntries_00dd66d0(&flag, &edge->plane, vertices, edge->a, edge->b, edge->tri, &neighbours))
     {
         planes->pushBackPlain(neighbours.data[0].plane);
 
@@ -261,14 +263,14 @@ void __cdecl FUN_00dd6a10(Edge* edgeIn, PlaneArray* vertices, EdgeArray* visited
             e1.a = neighbours.data[i].v0;
             e1.b = neighbours.data[i].v2;
             e1.tri = &neighbours.data[i];
-            FUN_00dd62e0(vertices, e1.tri->v0, e1.tri->v2, e1.tri->v1, &e1.plane);
-            FUN_00dd6a10(&e1, vertices, vr, planes);
+            Object_UpdateFields_00dd62e0(vertices, e1.tri->v0, e1.tri->v2, e1.tri->v1, &e1.plane);
+            Runtime_ProcessEntries_00dd6a10(&e1, vertices, vr, planes);
             Edge e2;
             e2.a = neighbours.data[i].v1;
             e2.b = neighbours.data[i].v2;
             e2.tri = &neighbours.data[i];
-            FUN_00dd62e0(vertices, e2.tri->v1, e2.tri->v2, e2.tri->v0, &e2.plane);
-            FUN_00dd6a10(&e2, vertices, vr, planes);
+            Object_UpdateFields_00dd62e0(vertices, e2.tri->v1, e2.tri->v2, e2.tri->v0, &e2.plane);
+            Runtime_ProcessEntries_00dd6a10(&e2, vertices, vr, planes);
         }
     }
     neighbours.clearAndFree();
@@ -295,7 +297,8 @@ class __declspec(align(16)) S00dced70_Object
 
 // Havok getVtable helper: build the object with the finish-loading flag and read its vtable pointer.
 // @fnv 0x00dced70
-const void* __cdecl FUN_00dced70()
+// src: GUESS 0x00dced70 (confidence: medium)
+const void* __cdecl Runtime_GetVtableFromTemporary_00dced70()
 {
     FinishingFlag flag(0);
     S00dced70_Object kObject(flag);
@@ -342,7 +345,8 @@ struct VectorArray
 };
 
 // @fnv 0x00dd62e0
-void __cdecl FUN_00dd62e0(VectorArray* self, int a, int b, int c, LocalM128* out)
+// src: GUESS 0x00dd62e0 (confidence: low)
+void __cdecl Object_UpdateFields_00dd62e0(VectorArray* self, int a, int b, int c, LocalM128* out)
 {
     const LocalM128& x = self->field_00[b];
     const LocalM128& y = self->field_00[a];
@@ -393,7 +397,7 @@ struct Holder_00dd6c10
     }
 };
 
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* allocator, void* container, int elementSize);
 
 template <class T> struct Arr_00dd6c10
@@ -427,7 +431,7 @@ struct PairList_00dd6c10
     }
     __forceinline void add(const Pair& item)
     {
-        Holder_00dd6c10* h = static_cast<Holder_00dd6c10*>(FUN_00c85750());
+        Holder_00dd6c10* h = static_cast<Holder_00dd6c10*>(hkMemoryRouter_getInstance());
         if (size == (capacity & 0x3fffffff))
             ResizeAudioStream(h->allocator, this, sizeof(Pair));
         Pair* p = &data[size];
@@ -446,7 +450,7 @@ struct PairList_00dd6c10
     }
     __forceinline void clearAndFree()
     {
-        _clearAndDeallocate(static_cast<Holder_00dd6c10*>(FUN_00c85750())->heap());
+        _clearAndDeallocate(static_cast<Holder_00dd6c10*>(hkMemoryRouter_getInstance())->heap());
     }
 };
 
@@ -507,8 +511,9 @@ struct PlanePoint
         plane2 = other.plane2;
     }
 };
-int __cdecl FUN_00dd6380(VecArr_00dd6c10* vectors, int first, int second, int third, PlanePoint* point);
-__declspec(noinline) int __cdecl FUN_00dd6510(const LocalM128* normal, VecArr_00dd6c10* vectors, int first, int second,
+int __cdecl Object_ProcessAndReturnValue_00dd6380(VecArr_00dd6c10* vectors, int first, int second, int third, PlanePoint* point);
+// src: GUESS 0x00dd6510 (confidence: low)
+__declspec(noinline) int __cdecl hkVector4_ProcessEntries_00dd6510(const LocalM128* normal, VecArr_00dd6c10* vectors, int first, int second,
                                               PlanePoint* lower, PlanePoint* upper)
 {
     lower->plane0 = lower->plane1 = lower->plane2 = -1;
@@ -519,7 +524,7 @@ __declspec(noinline) int __cdecl FUN_00dd6510(const LocalM128* normal, VecArr_00
         if (i == first || i == second)
             continue;
         PlanePoint point;
-        if (FUN_00dd6380(vectors, first, second, i, &point) != 0)
+        if (Object_ProcessAndReturnValue_00dd6380(vectors, first, second, i, &point) != 0)
             continue;
         if (!initialized)
         {
@@ -558,7 +563,8 @@ __declspec(noinline) int __cdecl FUN_00dd6510(const LocalM128* normal, VecArr_00
 }
 
 // @fnv 0x00dd6c10
-int __cdecl FUN_00dd6c10(VecArr_00dd6c10* vectors, int* first, int* second, PlanePoint* q, PlanePoint* p)
+// src: GUESS 0x00dd6c10 (confidence: low)
+int __cdecl hkVector4q_ProcessEntries_00dd6c10(VecArr_00dd6c10* vectors, int* first, int* second, PlanePoint* q, PlanePoint* p)
 {
     PairList_00dd6c10 visited;
     visited.init();
@@ -589,7 +595,7 @@ int __cdecl FUN_00dd6c10(VecArr_00dd6c10* vectors, int* first, int* second, Plan
         visited.add(bestPair);
         normal.setCross(reinterpret_cast<const hkVector4q&>(vectors->data[*first]),
                         reinterpret_cast<const hkVector4q&>(vectors->data[*second]));
-        if (FUN_00dd6510(&normal.m_vComponents, vectors, *first, *second, p, q) == 1)
+        if (hkVector4_ProcessEntries_00dd6510(&normal.m_vComponents, vectors, *first, *second, p, q) == 1)
         {
             visited.clearAndFree();
             return 1;

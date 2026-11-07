@@ -36,8 +36,8 @@ public:
     TESQuest* GetQuest();
     TESTopic* GetAudioBackendData();
     TESTopic* Deallocate();
-    DialoguePolicy* FUN_0084e3a0();
+    DialoguePolicy* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     bool FUN_0083c7b0();
-    bool FUN_0083c7e0();
+    bool NextResponse_0083c7e0();
     void FUN_0083c850(int);
 };

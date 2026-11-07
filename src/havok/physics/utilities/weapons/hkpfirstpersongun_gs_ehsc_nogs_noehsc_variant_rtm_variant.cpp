@@ -22,7 +22,8 @@ static __inline __m128 splat(const float* p)
 }
 
 // @fnv 0x00e463d0
-void __cdecl FUN_00e463d0(const hkVector4& from, const hkVector4& to, const hkVector4& dir, float t, hkVector4& out)
+// src: XBOX_PDB 0x00e463d0
+void __cdecl hkpFirstPersonGun_calcVelocityToTarget(const hkVector4& from, const hkVector4& to, const hkVector4& dir, float t, hkVector4& out)
 {
     float eps = DAT_0104da4c;
     float temp;

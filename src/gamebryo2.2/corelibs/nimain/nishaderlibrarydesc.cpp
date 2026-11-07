@@ -4,11 +4,12 @@
 
 struct IndexedObjectCollection
 {
-    void* __thiscall FUN_00a9ffe0(int idx);
+    void* __thiscall NiShaderLibraryDesc_GetShaderDesc(int idx);
 };
 
 // @fnv 0x00a9ffe0
-void* __thiscall IndexedObjectCollection::FUN_00a9ffe0(int idx)
+// src: XBOX_PDB 0x00a9ffe0
+void* __thiscall IndexedObjectCollection::NiShaderLibraryDesc_GetShaderDesc(int idx)
 {
     return (*(void***)((char*)this + 0x3C))[idx];
 }
@@ -34,11 +35,12 @@ struct MyDesc
     int unk40;
     unsigned short unk44;
 
-    unsigned int FUN_00a9ffd0();
+    unsigned int NiShaderLibraryDesc_GetShaderCount();
 };
 
 // @fnv 0x00a9ffd0
-unsigned int MyDesc::FUN_00a9ffd0()
+// src: XBOX_PDB 0x00a9ffd0
+unsigned int MyDesc::NiShaderLibraryDesc_GetShaderCount()
 {
     return unk44;
 }

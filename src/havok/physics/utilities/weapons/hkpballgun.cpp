@@ -44,7 +44,7 @@ template <class T> class hkQueue
 
     hkQueue() throw();
     ~hkQueue() throw();
-    void FUN_00e45460(int iCapacity);
+    void hkQueue_hkpRigidBody_setCapacity(int iCapacity);
 
     bool isEmpty() const
     {
@@ -110,7 +110,7 @@ hkpBallGun* __fastcall constructBallGun(hkpBallGun* gun, void*, int iNumBullets)
     gun->m_type = 1;
     gun->m_name = "BallGun";
     gun->m_pBulletQueue = new hkQueue<hkpRigidBody*>();
-    static_cast<hkQueue<hkpRigidBody*>*>(gun->m_pBulletQueue)->FUN_00e45460(iNumBullets);
+    static_cast<hkQueue<hkpRigidBody*>*>(gun->m_pBulletQueue)->hkQueue_hkpRigidBody_setCapacity(iNumBullets);
     return gun;
 }
 

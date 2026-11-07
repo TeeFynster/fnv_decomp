@@ -63,7 +63,7 @@ inline Tile::Extra::Extra(Tile* tile, NiNode* node) : pTile(tile), pNode(node)
 }
 
 NiNode* FUN_00706d30();
-void FUN_00707930(int iValue);
+void Interface_SetNeedToUpdate(int iValue);
 
 // @fnv 0x00a1f3b0
 NiNode* TileRect::CalculateNode()
@@ -75,8 +75,8 @@ NiNode* TileRect::CalculateNode()
     pkParent->AttachChildInAvailableSlot(static_cast<NiAVObject*>(m_pRenderedNodeEntry), true);
     m_pRenderedNodeEntry->SetName(NiFixedString(static_cast<const char*>(StringProvider.pString)));
     m_pRenderedNodeEntry->SetHidden(!IsTraitNonZero(0xfa3), 1);
-    m_pRenderedNodeEntry->FUN_00a5a040();
-    FUN_00707930(1);
+    m_pRenderedNodeEntry->UpdateProperties();
+    Interface_SetNeedToUpdate(1);
     m_pRenderedNodeEntry->AddExtraData(new Tile::Extra(this, m_pRenderedNodeEntry));
     Tile::SetTraitValue(0xfa1, GetFloat(0xfa1), 0);
     Tile::SetTraitValue(0xfa2, GetFloat(0xfa2), 0);

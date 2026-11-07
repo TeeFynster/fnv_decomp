@@ -46,9 +46,9 @@ public:
     void TransformPlane(const NiPlane4& source, const AffineMatrix& matrix);
     int MatchesBoundingVolume(const NiBoundingVolume& kABV) const;
 
-    void FUN_00e9cb50(NiStream& stream);
-    void FUN_00e9cb80(NiStream& stream);
-    NiBoundingVolume* FUN_00e9e680(const NiPoint3& akPoint, const NiPoint3& kNormal);
-    NiBoundingVolume* FUN_00e9e730();
+    void LoadBinary_00e9cb50(NiStream& stream);
+    void SaveBinary_00e9cb80(NiStream& stream);
+    NiBoundingVolume* NiHalfSpaceBV_00e9e680(const NiPoint3& akPoint, const NiPoint3& kNormal);
+    NiBoundingVolume* Clone_00e9e730();
     void SetWaterColorParameter();
 };

@@ -280,10 +280,10 @@ void MagicCaster::RemoveCastingArt()
     if (actor)
     {
         effect = ((CastingActor*)actor)->GetMagicNode();
-        if (effect && (unsigned int)effect->FUN_00453470() > 0)
+        if (effect && (unsigned int)effect->NiNode_GetChildCount() > 0)
         {
             hadNode = true;
-            effect->FUN_004def90();
+            effect->NiNode_RemoveAllChildren();
         }
         if (apTargetLight)
         {
@@ -316,46 +316,50 @@ struct S819
 {
     char p[0x594];
     BSS819 s;
-    int FUN_00819250();
+    int bhkCharacterController_GetCollisionGroup();
 };
 // @fnv 0x00819250
-int S819::FUN_00819250()
+// src: XBOX_PDB 0x00819250
+int S819::bhkCharacterController_GetCollisionGroup()
 {
-    return ((bhkWorldObject*)s) ? ((bhkWorldObject*)s)->FUN_0043b4f0().FUN_004a3a20() : 0;
+    return ((bhkWorldObject*)s) ? ((bhkWorldObject*)s)->bhkWorldObject_GetCollisionFilter().CFilter_GetGroup() : 0;
 }
 
 struct MagicCaster_shell : MagicCaster
 {
     MagicTarget* pTarget;
-    MagicTarget* FUN_0044edb0();
+    MagicTarget* TESMain_GetThread();
 };
 
 // @fnv 0x0044edb0
-MagicTarget* MagicCaster_shell::FUN_0044edb0()
+// src: COMMUNITY 0x0044edb0
+MagicTarget* MagicCaster_shell::TESMain_GetThread()
 {
     return *(MagicTarget**)((char*)this + 0x10);
 }
 
 struct FUN_008153a0_shell
 {
-    float FUN_008153a0(bool abJustArmor, float afUseThisFatigue);
+    float MagicCaster_GetMagicEffectivenessModifier(bool abJustArmor, float afUseThisFatigue);
 };
 
 // @fnv 0x008153a0
-float FUN_008153a0_shell::FUN_008153a0(bool abJustArmor, float afUseThisFatigue)
+// src: XBOX_PDB 0x008153a0
+float FUN_008153a0_shell::MagicCaster_GetMagicEffectivenessModifier(bool abJustArmor, float afUseThisFatigue)
 {
     return 1.0f;
 }
 
 struct FUN_00818cb0_shell
 {
-    bool __thiscall FUN_00818cb0(MagicItem* apSpell, float* afEffectStrength, MagicItem::CannotCastReason* apReason,
+    bool __thiscall MagicCaster_CheckCast(MagicItem* apSpell, float* afEffectStrength, MagicItem::CannotCastReason* apReason,
                                  bool abUseBaseMagicka);
 };
 
 // Initializes the optional effect strength to 1.0 and the reason to 0, then returns true.
 // @fnv 0x00818cb0
-bool __thiscall FUN_00818cb0_shell::FUN_00818cb0(MagicItem* apSpell, float* afEffectStrength,
+// src: XBOX_PDB 0x00818cb0
+bool __thiscall FUN_00818cb0_shell::MagicCaster_CheckCast(MagicItem* apSpell, float* afEffectStrength,
                                                  MagicItem::CannotCastReason* apReason, bool abUseBaseMagicka)
 {
     if (afEffectStrength)
@@ -367,10 +371,11 @@ bool __thiscall FUN_00818cb0_shell::FUN_00818cb0(MagicItem* apSpell, float* afEf
 
 struct FUN_008156e0_This : MagicCaster
 {
-    void FUN_008156e0(SpellItem* apSpell, bool abLoadCast);
+    void MagicCaster_CastRadiation(SpellItem* apSpell, bool abLoadCast);
 };
 // @fnv 0x008156e0
-void FUN_008156e0_This::FUN_008156e0(SpellItem* apSpell, bool abLoadCast)
+// src: XBOX_PDB 0x008156e0
+void FUN_008156e0_This::MagicCaster_CastRadiation(SpellItem* apSpell, bool abLoadCast)
 {
     SetSelectedMagicItem(apSpell);
     LaunchMagicProjectile(0.0F, 0, abLoadCast, 1.0F, 0);
@@ -378,10 +383,11 @@ void FUN_008156e0_This::FUN_008156e0(SpellItem* apSpell, bool abLoadCast)
 
 struct ProxyFor15820
 {
-    void FUN_00815820(MagicItem* apSpell, TESBoundObject* apSource, bool abLoadCast);
+    void MagicCaster_CastWornEnchantment(MagicItem* apSpell, TESBoundObject* apSource, bool abLoadCast);
 };
 // @fnv 0x00815820
-void ProxyFor15820::FUN_00815820(MagicItem* apSpell, TESBoundObject* apSource, bool abLoadCast)
+// src: XBOX_PDB 0x00815820
+void ProxyFor15820::MagicCaster_CastWornEnchantment(MagicItem* apSpell, TESBoundObject* apSource, bool abLoadCast)
 {
     if (apSpell == 0)
         return;
@@ -411,11 +417,12 @@ extern "C" void __cdecl TryCast(void*);
 struct FUN_00815380_shell
 {
     void __thiscall TryCast(int);
-    void __thiscall FUN_00815380();
+    void __thiscall MagicCaster_StartCast();
 };
 
 // @fnv 0x00815380
-void __thiscall FUN_00815380_shell::FUN_00815380()
+// src: XBOX_PDB 0x00815380
+void __thiscall FUN_00815380_shell::MagicCaster_StartCast()
 {
     TryCast(0);
 }
@@ -662,7 +669,7 @@ struct TgtOps
 extern Setting originalRuntimeFloatSetting594;
 extern Actor* _g_thePlayer;
 extern int DAT_011e0e80;
-float __cdecl FUN_009a64d0(Actor*, Actor*, int);
+float __cdecl CombatUtilities_GetDistanceBetweenFacingActors(Actor*, Actor*, int);
 bool __cdecl IsTargetInCone(Actor*, Actor*, float*);
 
 struct FUN_00817620_shell : MagicCaster
@@ -680,7 +687,7 @@ MagicTarget* FUN_00817620_shell::FindClosestMagicTarget()
     TESObjectREFR* pcaster = pactor ? pactor : GetCasterReference();
     Actor* pclosestTarget = 0;
     float fclosestDelta = 3.402823466e+38f;
-    if (FUN_009a64d0((Actor*)pcaster, _g_thePlayer, 0) <= freach)
+    if (CombatUtilities_GetDistanceBetweenFacingActors((Actor*)pcaster, _g_thePlayer, 0) <= freach)
     {
         float fdelta = 3.402823466e+38f;
         bool binStrikeAngle = pactor ? IsTargetInCone(pactor, _g_thePlayer, &fdelta) : true;
@@ -700,7 +707,7 @@ MagicTarget* FUN_00817620_shell::FindClosestMagicTarget()
         {
             if (ptargetActor != pcaster && !((ActorVT*)ptargetActor)->V139(0) && ptargetActor->GetNiNode())
             {
-                if (FUN_009a64d0((Actor*)pcaster, ptargetActor, 0) <= freach)
+                if (CombatUtilities_GetDistanceBetweenFacingActors((Actor*)pcaster, ptargetActor, 0) <= freach)
                 {
                     float fdelta = 3.402823466e+38f;
                     bool binStrikeAngle = pactor ? IsTargetInCone(pactor, ptargetActor, &fdelta) : true;
@@ -739,11 +746,12 @@ class FUN_008153b0_cls
   public:
     void* m_vtbl;
     MagicEffectCollection* m_pLight;
-    void FUN_008153b0();
+    void UpdateState_008153b0();
 };
 
 // @fnv 0x008153b0
-void FUN_008153b0_cls::FUN_008153b0()
+// src: GUESS 0x008153b0 (confidence: low)
+void FUN_008153b0_cls::UpdateState_008153b0()
 {
     MagicEffectCollection* target;
     MagicEffectCollection* light;
@@ -793,17 +801,18 @@ struct FUN_00815670_cls
     virtual void Unk_0E(void);
     virtual void Unk_0F(void);
     virtual void Unk_10(ChildCell* target);
-    void FUN_00815d00(float a1, int a2, bool a3, float a4, int a5);
-    void FUN_00815670(RefShell* ref, bool flag);
+    void MagicCaster_FindTargets(float a1, int a2, bool a3, float a4, int a5);
+    void MagicCaster_CastAddiction(RefShell* ref, bool flag);
 };
 
 // @fnv 0x00815670
-void FUN_00815670_cls::FUN_00815670(RefShell* ref, bool flag)
+// src: XBOX_PDB 0x00815670
+void FUN_00815670_cls::MagicCaster_CastAddiction(RefShell* ref, bool flag)
 {
     if (ref->child.Unk_06() == 10)
     {
         Unk_10(ref ? &ref->child : 0);
-        FUN_00815d00(0.0f, 0, flag, 1.0f, 0);
+        MagicCaster_FindTargets(0.0f, 0, flag, 1.0f, 0);
     }
 }
 
@@ -835,8 +844,8 @@ class B8182D0Target
 class B8182D0Object
 {
   public:
-    void FUN_00c9c1d0();
-    B8182D0Target* FUN_009d9f40();
+    void activate_00c9c1d0();
+    B8182D0Target* CombatGroup_GetLastSearchAreaUpdateTimer();
     void ApplyToTarget(void* pvArg);
 };
 
@@ -844,8 +853,8 @@ class B8182D0Object
 // @fnv 0x008182d0
 void B8182D0Object::ApplyToTarget(void* pvArg)
 {
-    FUN_00c9c1d0();
-    FUN_009d9f40()->Apply(pvArg);
+    activate_00c9c1d0();
+    CombatGroup_GetLastSearchAreaUpdateTimer()->Apply(pvArg);
 }
 
 // Update the owned effect; drop it once it has finished (unless this owner keeps finished effects).
@@ -927,7 +936,7 @@ struct Callee00815410
 
 struct Callee0084e3a0
 {
-    void* FUN_0084e3a0();
+    void* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 extern int DAT_01184638;
@@ -936,17 +945,18 @@ void* __cdecl FUN_00ec43fb(void* a0, int a1, int* a2, int* a3, int a4);
 
 struct FUN_00818be0_cls
 {
-    void* FUN_00818be0();
+    void* MagicCaster_GetMagicCasterFormID();
 };
 
 // @fnv 0x00818be0
-void* FUN_00818be0_cls::FUN_00818be0()
+// src: COMMUNITY 0x00818be0
+void* FUN_00818be0_cls::MagicCaster_GetMagicCasterFormID()
 {
     void* a = ((Callee00815410*)this)->FUN_00815410();
     OuterB* b = (OuterB*)FUN_00ec43fb(this, 0, &DAT_011a1224, &DAT_01184638, 0);
     if (a != 0)
     {
-        return ((Callee0084e3a0*)a)->FUN_0084e3a0();
+        return ((Callee0084e3a0*)a)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     }
     else
     {
@@ -954,7 +964,7 @@ void* FUN_00818be0_cls::FUN_00818be0()
         {
             if (b->emb.v11() != 0)
             {
-                return ((Callee0084e3a0*)b->emb.v11())->FUN_0084e3a0();
+                return ((Callee0084e3a0*)b->emb.v11())->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             }
         }
     }
@@ -1192,7 +1202,7 @@ struct IngredientData
 
 struct SoundFile
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 
 struct SpellFeedback : MagicItem
@@ -1202,13 +1212,13 @@ struct SpellFeedback : MagicItem
 };
 struct FUN_0081c470_shell
 {
-    void FUN_0081c470(bool, float);
+    void MagicLight_Fade(bool, float);
 };
 struct CastingCheck : MagicCaster
 {
     bool TryCast(TESBoundObject* source);
     FeedbackActor* FUN_00815410();
-    void FUN_00815d00(float, TESBoundObject*, bool, float, bool);
+    void MagicCaster_FindTargets(float, TESBoundObject*, bool, float, bool);
 };
 bool __cdecl QueueUIMessage(const char*, int, const char*, const char*, float, bool);
 
@@ -1228,9 +1238,9 @@ bool CastingCheck::TryCast(TESBoundObject* source)
         if (actor && effect)
         {
             TESSound* sound = 0;
-            if (sound && ((SoundFile*)((char*)sound + sizeof(TESBoundAnimObject)))->FUN_00408da0() && !pCastSpell)
+            if (sound && ((SoundFile*)((char*)sound + sizeof(TESBoundAnimObject)))->TESModel_GetModel() && !pCastSpell)
             {
-                const char* filename = sound->FUN_00511840();
+                const char* filename = sound->TESSound_GetFilename();
                 actor->PlaySoundAtOwner(filename, 0, 0x40000102);
             }
         }
@@ -1245,10 +1255,10 @@ bool CastingCheck::TryCast(TESBoundObject* source)
     }
     SetState(MagicCaster::RELEASE, "Release Cast");
     MagicItem* spell = GetSelectedMagicItem();
-    FUN_00815d00(cost, source, false, 1.0f, false);
+    MagicCaster_FindTargets(cost, source, false, 1.0f, false);
     SpellCast(spell, true);
     if (apTargetLight)
-        ((FUN_0081c470_shell*)apTargetLight)->FUN_0081c470(false, 0.75f);
+        ((FUN_0081c470_shell*)apTargetLight)->MagicLight_Fade(false, 0.75f);
     return true;
 }
 
@@ -1976,7 +1986,7 @@ struct P142Prefix
 struct P142EffectList : P142Prefix, P142Node
 {
     EffectItem* FindCostliestEffectItem(int, int);
-    int FUN_004065e0(int, float);
+    int EffectItemList_GetAssociatedSkill(int, float);
 };
 struct P142Spell : TESFullName, P142EffectList
 {
@@ -2277,7 +2287,7 @@ struct P142Ref
     virtual void slot287();
     virtual void NotifySpell(int);
     P142Caster* FUN_009185e0();
-    P142Ref* FUN_004fd400();
+    P142Ref* GetAVEffect();
     int FUN_004086a0();
 };
 struct P142Caster : MagicCaster
@@ -2287,7 +2297,7 @@ struct P142Caster : MagicCaster
     bool FUN_00817940(MagicTarget*, NiPoint3, P142Spell*, ActiveEffect*, bool);
     void ApplyAreaEffect(P142Spell*, ActiveEffect*, int, NiPoint3, MagicTarget*, P142Ref*, BSSimpleList<const char*>*,
                          bool*, float);
-    void FUN_00817b90(NiPoint3, int, P142Spell*, EffectItem*, BSSimpleList<const char*>*, float, float);
+    void MagicCaster_DoExplosion(NiPoint3, int, P142Spell*, EffectItem*, BSSimpleList<const char*>*, float, float);
     bool CheckHealthDamageKill(MagicTarget*, P142Spell*);
     void ApplyExplosion(Actor*, NiPoint3, EffectItem*, float);
     void ApplySpellEffects(P142Spell*, int, NiPoint3, P142Ref*, P142Ref*, int, float, float);
@@ -2329,7 +2339,7 @@ void P142Caster::ApplySpellEffects(P142Spell* spell, int flags, NiPoint3 positio
                     if ((ref && !modifier && spell->GetSpellType() == 0) || spell->GetSpellType() == 5)
                     {
                         modifier = true;
-                        ref->NotifySpell(spell->FUN_004065e0(1, 0.0f));
+                        ref->NotifySpell(spell->EffectItemList_GetAssociatedSkill(1, 0.0f));
                     }
                 }
             }
@@ -2339,13 +2349,13 @@ void P142Caster::ApplySpellEffects(P142Spell* spell, int flags, NiPoint3 positio
         }
         targets = static_cast<P142EffectList*>(targets->FUN_00726070());
     }
-    bool primary = source->FUN_004fd400()->FUN_004086a0() == 3;
+    bool primary = source->GetAVEffect()->FUN_004086a0() == 3;
     EffectItem* secondary = spell->FindCostliestEffectItem(2, 1);
     if (!primary)
     {
         if (secondary)
-            FUN_00817b90(position, flags, spell, secondary, &special, effectiveness, magnitude);
-        else if (target && target->IsActor() && notified && notified->GetEffectSetting()->FUN_00403e60(0x20000000))
+            MagicCaster_DoExplosion(position, flags, spell, secondary, &special, effectiveness, magnitude);
+        else if (target && target->IsActor() && notified && notified->GetEffectSetting()->IsFlagSet_00403e60(0x20000000))
         {
             Actor* actor = (Actor*)target;
             if (CheckHealthDamageKill(actor, spell))
@@ -2359,13 +2369,13 @@ namespace fnv_00817970 {
 struct HealthRef : TESObjectREFR
 {
     float GetHealth();
-    float FUN_008808a0(float amount, Actor* sourceActor);
+    float Actor_DifficultyLevelAdjustHealthModifier(float amount, Actor* sourceActor);
 };
 struct EffectSettingOps : EffectSetting
 {
     bool FUN_00403e80();
-    int FUN_00586150();
-    bool FUN_00403e60(unsigned int flag);
+    int CombatController_GetCombatState();
+    bool IsFlagSet_00403e60(unsigned int flag);
 };
 
 struct Recipient
@@ -2376,7 +2386,7 @@ struct Recipient
 };
 struct EffectDuration
 {
-    bool FUN_00405d80();
+    bool IsHostile_00405d80();
 };
 struct EffectSpec
 {
@@ -2385,8 +2395,8 @@ struct EffectSpec
     int duration;
     EffectDuration data;
 };
-float __cdecl FUN_00404010(float a, float b);
-float __cdecl FUN_0040ebd0(float a, float b);
+float __cdecl BSMAX_00404010(float a, float b);
+float __cdecl BSMIN(float a, float b);
 struct CasterOps : MagicCaster
 {
     Actor* FUN_00815410();
@@ -2398,7 +2408,7 @@ bool CasterOps::CheckHealthDamageKill(Recipient* pRecipient, EffectSpec* pEffect
     if (!pRecipient || !pEffectSpec || !pRecipient->GetActor() || !pRecipient->GetActor()->IsActor() ||
         !pRecipient->GetActor()->GetNiNode())
         return false;
-    if (pEffectSpec->data.FUN_00405d80())
+    if (pEffectSpec->data.IsHostile_00405d80())
     {
         Actor* sourceActor = FUN_00815410();
         HealthRef* actor = pRecipient->GetActor();
@@ -2413,15 +2423,15 @@ bool CasterOps::CheckHealthDamageKill(Recipient* pRecipient, EffectSpec* pEffect
                 EffectSettingOps* setting = (EffectSettingOps*)effect->FUN_007df1d0();
                 int value;
                 if (setting->FUN_00403e80())
-                    value = setting->FUN_00586150();
+                    value = setting->CombatController_GetCombatState();
                 else
-                    value = effect->FUN_0084e3a0()->GetAffectedActorValue();
-                if (value == 16 && setting->FUN_00403e60(4) && !setting->FUN_00403e60(2))
+                    value = effect->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->GetAffectedActorValue();
+                if (value == 16 && setting->IsFlagSet_00403e60(4) && !setting->IsFlagSet_00403e60(2))
                 {
                     float magnitude = effect->GetFloatAtOffset1C();
                     if (effect->FUN_007df1f0() > 0.0)
                     {
-                        float factor = FUN_0040ebd0(4.0f, FUN_00404010(0.0f, effect->FUN_007df1f0()));
+                        float factor = BSMIN(4.0f, BSMAX_00404010(0.0f, effect->FUN_007df1f0()));
                         magnitude *= factor;
                     }
                     total += magnitude;
@@ -2429,7 +2439,7 @@ bool CasterOps::CheckHealthDamageKill(Recipient* pRecipient, EffectSpec* pEffect
             }
             node = node->FUN_00726070();
         }
-        total = -actor->FUN_008808a0(-total, sourceActor);
+        total = -actor->Actor_DifficultyLevelAdjustHealthModifier(-total, sourceActor);
         if (total >= health)
             return true;
     }
@@ -2445,7 +2455,7 @@ struct ExplosionValues
 class ExplosionPoint : public NiPoint3
 {
   public:
-    NiPoint3 __thiscall FUN_00439ef0(const NiPoint3&) const;
+    NiPoint3 __thiscall SubtractIntoVector(const NiPoint3&) const;
     float __thiscall FUN_00457990() const;
 };
 
@@ -2455,7 +2465,7 @@ struct TransformNode
 };
 struct ExplosionNode
 {
-    TransformNode* FUN_00461130(NiTransform*);
+    TransformNode* NiAVObject_GetWorldRotate(NiTransform*);
 };
 class ExplosionActor;
 class ExplosionProcess
@@ -3058,7 +3068,7 @@ class ExplosionActor
     ExplosionValues values;
     float GetFatigueRatio();
     ExplosionProcess* FUN_008d8520();
-    const char* FUN_0055d520();
+    const char* TESObjectREFR_GetFullName();
 };
 struct ExplosionCaster
 {
@@ -3070,7 +3080,7 @@ extern Setting originalRuntimeFloatSetting1131;
 extern Setting g_011d180c;
 extern NiPoint3 DAT_011a9478;
 float __cdecl ComputeBlastPower(int, int, float, int, int, float);
-bool __cdecl FUN_005b6f70();
+bool __cdecl CombatController_GetShowVerboseMessages();
 void __cdecl DebugLog(const char*, ...);
 // Computes explosion magnitude from the target's height and distance to origin, clamps it, then staggers or impulses the target and logs the hit.
 // @fnv 0x00818310
@@ -3084,7 +3094,7 @@ void ExplosionCaster::ApplyExplosion(ExplosionActor* target, NiPoint3 origin, Ef
     NiPoint3 s = *target->GetPosition();
     s.z += a * 0.75;
     // Displacement used to calculate the distance.
-    NiPoint3 p = ((ExplosionPoint&)s).FUN_00439ef0(origin);
+    NiPoint3 p = ((ExplosionPoint&)s).SubtractIntoVector(origin);
     h = ((ExplosionPoint&)p).FUN_00457990();
     i = ComputeBlastPower((int)strength, (int)(effect->GetArea() * *originalRuntimeFloatSetting1112.Float()), h,
                           target->values.FUN_0066ef20(10), target->values.FUN_0066ef20(11), target->GetFatigueRatio());
@@ -3105,15 +3115,15 @@ void ExplosionCaster::ApplyExplosion(ExplosionActor* target, NiPoint3 origin, Ef
             if (node)
             {
                 NiTransform transform;
-                node->FUN_00461130(&transform)->FUN_004b4880();
-                localOrigin = *reinterpret_cast<NiPoint3*>(&transform.FUN_00524c40(reinterpret_cast<const NiPoint3&>(origin)));
-                localPosition = *reinterpret_cast<NiPoint3*>(&transform.FUN_00524c40(reinterpret_cast<const NiPoint3&>(s)));
+                node->NiAVObject_GetWorldRotate(&transform)->FUN_004b4880();
+                localOrigin = *reinterpret_cast<NiPoint3*>(&transform.ComputeValue_00524c40(reinterpret_cast<const NiPoint3&>(origin)));
+                localPosition = *reinterpret_cast<NiPoint3*>(&transform.ComputeValue_00524c40(reinterpret_cast<const NiPoint3&>(s)));
             }
             target->Impulse(caster, 2.0 * i, 0.0f, &localPosition, &localOrigin);
         }
     }
-    if (i > 0.0 && FUN_005b6f70())
-        DebugLog("An explosion of %.1f magnitude hits %.20s!", i, target->FUN_0055d520());
+    if (i > 0.0 && CombatController_GetShowVerboseMessages())
+        DebugLog("An explosion of %.1f magnitude hits %.20s!", i, target->TESObjectREFR_GetFullName());
 }
 }  // namespace fnv_00818310
 
@@ -3275,7 +3285,7 @@ struct SpellOps
 };
 struct NodeAim
 {
-    const AimPoint& FUN_0045bb80() const;
+    const AimPoint& NiAVObject_GetWorldTranslate() const;
 };
 struct ActorLooking
 {
@@ -3336,8 +3346,8 @@ struct LightDelete
 };
 extern Setting AimRangeSetting;
 AimPoint ComputeRelativeFiringAngle(TESObjectREFR*, TESObjectREFR*, float, float, int);
-AimPoint FUN_009a87f0(AimPoint, TESObjectREFR*, float, float, int);
-void FUN_0081e040(MagicCaster*, int, MagicEffectCollection*, MagicItem*, EffectItem*, EffectSetting*, AimPoint, AimPoint);
+AimPoint CombatUtilities_GetAngleToProjectedTarget(AimPoint, TESObjectREFR*, float, float, int);
+void MagicProjectile_Launch(MagicCaster*, int, MagicEffectCollection*, MagicItem*, EffectItem*, EffectSetting*, AimPoint, AimPoint);
 struct FUN_00818610_class : MagicCaster
 {
     void CastAimEffect();
@@ -3379,7 +3389,7 @@ void FUN_00818610_class::CastAimEffect()
         }
         NiNode* eb = GetMagicNode();
         if (eb)
-            b = ((NodeAim*)eb)->FUN_0045bb80();
+            b = ((NodeAim*)eb)->NiAVObject_GetWorldTranslate();
         if (this != static_cast<MagicCaster*>(_g_thePlayer) && h && p)
         {
             AimAux* hDistance;
@@ -3387,11 +3397,11 @@ void FUN_00818610_class::CastAimEffect()
             float iMode = 0;
             hDistance = ((ActorAim*)h)->Aux();
             int pElevation = hDistance ? hDistance->GetPackageRefCount() : 1;
-            cf = FUN_009a87f0(b, p, aAux, iMode, pElevation);
+            cf = CombatUtilities_GetAngleToProjectedTarget(b, p, aAux, iMode, pElevation);
         }
         if (i && f)
         {
-            FUN_0081e040(this, 0, apTargetLight, GetSelectedMagicItem(), i, a, b, cf);
+            MagicProjectile_Launch(this, 0, apTargetLight, GetSelectedMagicItem(), i, a, b, cf);
             apTargetLight = 0;
         }
         if (apTargetLight)
@@ -3899,12 +3909,13 @@ extern const double RayHeightScale;
 
 struct RayObj
 {
-    bool FUN_008190d0(NiPoint3 from, RayRef* ref);
+    bool MagicCaster_RunExplosionLOSPick(NiPoint3 from, RayRef* ref);
 };
 
 // Sets a ray from from to the reference position plus a height offset, then returns the negation of CastRay.
 // @fnv 0x008190d0
-bool RayObj::FUN_008190d0(NiPoint3 from, RayRef* ref)
+// src: XBOX_PDB 0x008190d0
+bool RayObj::MagicCaster_RunExplosionLOSPick(NiPoint3 from, RayRef* ref)
 {
     if (!ref)
         return false;
@@ -3945,7 +3956,7 @@ extern Object* DAT_011dea3c;
 extern NiPoint3 DAT_011f426c;
 struct EffectSettings
 {
-    bool FUN_00403e60(unsigned int);
+    bool IsFlagSet_00403e60(unsigned int);
     float FUN_00639b20();
 };
 
@@ -3962,11 +3973,11 @@ struct UnsignedIntegerValue
 };
 struct EffectList : UnsignedIntegerValue, EffectLink
 {
-    bool FUN_00405da0();
-    bool FUN_00405fe0();
+    bool CanBePoison();
+    bool HasTouchEffect();
     bool HasNonDetrimentalEffect();
     EffectItem* FindCostliestEffectItem(int, bool);
-    void* FUN_004065e0(bool);
+    void* EffectItemList_GetAssociatedSkill(bool);
 };
 struct NameView
 {
@@ -4011,17 +4022,17 @@ struct MagicAccessor
 };
 struct Node
 {
-    unsigned int FUN_00453470();
-    void FUN_00440490(float);
+    unsigned int NiNode_GetChildCount();
+    void NiAVObject_SetScale(float);
 };
 struct ModelInstance
 {
-    void FUN_00689920(const char*);
+    void PlaySequence(const char*);
     Node* FUN_00490e40();
 };
 struct PositionProvider
 {
-    NiPoint3* FUN_0045bb80();
+    NiPoint3* NiAVObject_GetWorldTranslate();
 };
 struct CasterPart
 {
@@ -4371,9 +4382,9 @@ struct Object
     unsigned int unk84;
     CasterPart caster;
     TargetPart target;
-    float FUN_00567400();
+    float TESObjectREFR_GetScale_00567400();
     float AttachSubObject();
-    float FUN_008bec80();
+    float Actor_GetSurvivalEffectivenessMultiplier();
     void* FUN_008d6f30();
     NiPoint3* FUN_00430830();
 };
@@ -4384,22 +4395,22 @@ struct Target
 };
 struct Loader
 {
-    void FUN_00445300(const char*, bool, int);
+    void ModelLoader_ReleaseModel(const char*, bool, int);
 };
 extern Loader* DAT_011c3b3c;
 extern const char DAT_0107acfc[];
 extern const char DAT_0102054c[];
-float FUN_00404010(float, float);
-float FUN_009a64d0(Object*, Object*, bool);
-bool FUN_00409720(Source*, int, EffectSettings*, bool);
+float BSMAX_00404010(float, float);
+float CombatUtilities_GetDistanceBetweenFacingActors(Object*, Object*, bool);
+bool EnchantmentItem_IsValidEffectForEnchantment(Source*, int, EffectSettings*, bool);
 void ComputeDerivedValues(float*, float*, float, float, int, int, float, float, float, int);
 void ComputeScaledResult(float*, float, float, int, int, float, float, float, int);
 void ComputeSettingAdjustedValue(float*, float, float, int, int, float, float, float, int);
 float FUN_004bd510(float, float);
 void FUN_005e58f0(int, Object*, float*);
-float FUN_005b9e80(float);
-float FUN_005c53d0(float);
-ModelInstance* FUN_006890b0(void*, float, const char*, NiPoint3, NiPoint3, float, int, int);
+float NiCos(float);
+float NiSin_005c53d0(float);
+ModelInstance* BSTempEffectParticle_Spawn(void*, float, const char*, NiPoint3, NiPoint3, float, int, int);
 struct Caster
 {
     virtual void slot00();
@@ -4427,15 +4438,16 @@ struct Caster
     void GatherTargetsInArea(MagicItem*, bool, NiPoint3, Context*);
     bool FUN_00817940(Target*, NiPoint3, MagicItem*, ActiveEffect*, bool);
     void ApplyAreaEffect(MagicItem*, ActiveEffect*, void*, NiPoint3, Target*, bool, Context*, bool*, float);
-    void FUN_00817b90(NiPoint3, void*, MagicItem*, EffectItem*, Context*, float, float);
+    void MagicCaster_DoExplosion(NiPoint3, void*, MagicItem*, EffectItem*, Context*, float, float);
     bool CheckHealthDamageKill(MagicTarget*, MagicItem*);
     void ApplyExplosion(Actor*, NiPoint3, EffectItem*, float);
     void CastAimEffect();
-    void FUN_00815d00(float, Source*, bool, float, bool);
+    void MagicCaster_FindTargets(float, Source*, bool, float, bool);
 };
 // Casts the current spell on a target, creating active effects, applying area effects, and updating the caster's state.
 // @fnv 0x00815d00
-void Caster::FUN_00815d00(float power, Source* source, bool immediate, float multiplier, bool abFlag4)
+// src: XBOX_PDB 0x00815d00
+void Caster::MagicCaster_FindTargets(float power, Source* source, bool immediate, float multiplier, bool abFlag4)
 {
     MagicItem* spellB = GetSpell();
     if (!spellB)
@@ -4445,9 +4457,9 @@ void Caster::FUN_00815d00(float power, Source* source, bool immediate, float mul
     Object* casterActorSlot25 = FUN_00815410();
     Target* target6 = 0;
     bool potion = spellB->GetSpellType() == 7;
-    bool touchPotionSlot30 = potion && reinterpret_cast<MagicView*>(spellB)->FUN_00405da0();
+    bool touchPotionSlot30 = potion && reinterpret_cast<MagicView*>(spellB)->CanBePoison();
     AlchemyItem* alchemy2 = potion ? dynamic_cast<AlchemyItem*>(spellB) : 0;
-    if (reinterpret_cast<MagicView*>(spellB)->FUN_00405fe0() || touchPotionSlot30)
+    if (reinterpret_cast<MagicView*>(spellB)->HasTouchEffect() || touchPotionSlot30)
     {
         bool noTouch = source ? source->FUN_00401170() == 0x29 : false;
         if (!noTouch && spellB->GetSpellType() == 6)
@@ -4463,20 +4475,20 @@ void Caster::FUN_00815d00(float power, Source* source, bool immediate, float mul
             target6 = GetCurrentMagicTarget();
             if (target6 && !source && !noTouch && target6->GetObject())
             {
-                float reach = *DAT_011d1a90.FUN_00403e20();
+                float reach = *DAT_011d1a90.Setting_Float_00403e20();
                 if (casterObjectSlot2->IsActor() &&
                     (casterObjectSlot2 == DAT_011dea3c || !target6->GetObject()->IsActor() ||
                      target6->GetObject()->GetActorType() != 9))
                     reach = casterObjectSlot2->GetReach();
-                reach *= FUN_00404010(1.0f, casterObjectSlot2->FUN_00567400());
-                if (reach < FUN_009a64d0(casterObjectSlot2, target6->GetObject(), false))
+                reach *= BSMAX_00404010(1.0f, casterObjectSlot2->TESObjectREFR_GetScale_00567400());
+                if (reach < CombatUtilities_GetDistanceBetweenFacingActors(casterObjectSlot2, target6->GetObject(), false))
                     target6 = 0;
             }
         }
     }
     bool releaseModel = false;
     Node* magicNode = GetMagicNode();
-    if (magicNode && magicNode->FUN_00453470() > 0 && !source)
+    if (magicNode && magicNode->NiNode_GetChildCount() > 0 && !source)
         releaseModel = true;
     Object* aTargetObject = target6 ? target6->GetObject() : 0;
     bool didTarget2 = false;
@@ -4495,12 +4507,12 @@ void Caster::FUN_00815d00(float power, Source* source, bool immediate, float mul
     while (cursorA)
     {
         EffectItem* effect = *cursorA->FUN_006815c0();
-        if (effect && spellB->GetSpellType() == 6 && source && !FUN_00409720(source, 0, reinterpret_cast<EffectSettings*>(effect->GetEffectSetting()), false))
+        if (effect && spellB->GetSpellType() == 6 && source && !EnchantmentItem_IsValidEffectForEnchantment(source, 0, reinterpret_cast<EffectSettings*>(effect->GetEffectSetting()), false))
             effect = 0;
         if (effect)
         {
             ActiveEffect* active = CreateActiveEffect(spellB, effect, source);
-            EffectItem* activeEffect = (EffectItem*)active->FUN_0084e3a0();
+            EffectItem* activeEffect = (EffectItem*)active->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             float _cost = reinterpret_cast<EffectSettings*>(activeEffect->GetEffectSetting())->FUN_00639b20();
             if (immediate)
             {
@@ -4511,44 +4523,44 @@ void Caster::FUN_00815d00(float power, Source* source, bool immediate, float mul
             {
             case 8: {
                 if (ingredientSlot11 && reinterpret_cast<IngredientFlags*>((char*)ingredientSlot11 + 0x3c)->HasFoodEffect())
-                    active->FUN_00693d50(1.0f);
+                    active->BaseProcess_SetLastTimeProcessed(1.0f);
                 else
                 {
                     EffectSettings* _settings = (EffectSettings*)active->FUN_007df1d0();
                     float magnitude = 0, _duration = 0;
-                    if (!_settings->FUN_00403e60(0x80) && !_settings->FUN_00403e60(0x100))
+                    if (!_settings->IsFlagSet_00403e60(0x80) && !_settings->IsFlagSet_00403e60(0x100))
                         ComputeDerivedValues(&magnitude, &_duration, _cost, power, 6, 0, 0, 0, 0, 0);
-                    else if (!_settings->FUN_00403e60(0x80) && _settings->FUN_00403e60(0x100))
+                    else if (!_settings->IsFlagSet_00403e60(0x80) && _settings->IsFlagSet_00403e60(0x100))
                         ComputeScaledResult(&_duration, _cost, power, 6, 0, 0, 0, 0, 0);
-                    else if (_settings->FUN_00403e60(0x80) && !_settings->FUN_00403e60(0x100))
+                    else if (_settings->IsFlagSet_00403e60(0x80) && !_settings->IsFlagSet_00403e60(0x100))
                         ComputeSettingAdjustedValue(&magnitude, _cost, power, 6, 0, 0, 0, 0, 0);
                     _duration = FUN_004bd510(_duration, 1.0f);
                     magnitude = FUN_004bd510(magnitude, 1.0f);
-                    active->FUN_00693d50(_duration);
-                    active->FUN_00804cb0(magnitude);
+                    active->BaseProcess_SetLastTimeProcessed(_duration);
+                    active->ActiveEffect_SetMagnitude(magnitude);
                 }
                 break;
             }
             case 0:
-                if (!abFlag4 || (abFlag4 && ((EffectItem*)active->FUN_0084e3a0())->IsHostile()))
+                if (!abFlag4 || (abFlag4 && ((EffectItem*)active->GetHavokWorldObjectCountInSceneGraph_0084e3a0())->IsHostile()))
                     active->FUN_00804bc0(Effectiveness(false, 0) * multiplier);
                 break;
             case 7: {
-                if (alchemy2 && alchemy2->FUN_004029d0(4))
+                if (alchemy2 && alchemy2->AlchemyItem_IsFlagSet(4))
                 {
                     float potency = casterActorSlot25->AttachSubObject() * multiplier;
-                    if (casterActorSlot25->IsCharacter() && ((EffectItem*)active->FUN_0084e3a0())->GetAffectedActorValue() == 16)
+                    if (casterActorSlot25->IsCharacter() && ((EffectItem*)active->GetHavokWorldObjectCountInSceneGraph_0084e3a0())->GetAffectedActorValue() == 16)
                         FUN_005e58f0(12, casterActorSlot25, &potency);
                     active->FUN_00804bc0(potency);
                 }
-                if (alchemy2 && alchemy2->FUN_004029d0(2) && ((EffectItem*)active->FUN_0084e3a0())->GetAffectedActorValue() != 54)
+                if (alchemy2 && alchemy2->AlchemyItem_IsFlagSet(2) && ((EffectItem*)active->GetHavokWorldObjectCountInSceneGraph_0084e3a0())->GetAffectedActorValue() != 54)
                 {
-                    float foodPower = casterActorSlot25->FUN_008bec80() * multiplier;
-                    if (casterActorSlot25->IsCharacter() && ((EffectItem*)active->FUN_0084e3a0())->GetAffectedActorValue() == 16)
+                    float foodPower = casterActorSlot25->Actor_GetSurvivalEffectivenessMultiplier() * multiplier;
+                    if (casterActorSlot25->IsCharacter() && ((EffectItem*)active->GetHavokWorldObjectCountInSceneGraph_0084e3a0())->GetAffectedActorValue() == 16)
                         FUN_005e58f0(12, casterActorSlot25, &foodPower);
                     active->FUN_00804bc0(foodPower);
                 }
-                else if (alchemy2 && alchemy2->FUN_004029d0(2) && ((EffectItem*)active->FUN_0084e3a0())->GetAffectedActorValue() == 54)
+                else if (alchemy2 && alchemy2->AlchemyItem_IsFlagSet(2) && ((EffectItem*)active->GetHavokWorldObjectCountInSceneGraph_0084e3a0())->GetAffectedActorValue() == 54)
                 {
                     float modifier = 1.0f;
                     FUN_005e58f0(44, casterActorSlot25, &modifier);
@@ -4619,30 +4631,30 @@ void Caster::FUN_00815d00(float power, Source* source, bool immediate, float mul
         NiPoint3 position;
         PositionProvider* provider3 =
             (casterActorSlot25 && !source) ? casterActorSlot25->caster.GetSourcePosition() : 0;
-        position = provider3 ? *provider3->FUN_0045bb80() : *areaTarget3->GetPosition();
+        position = provider3 ? *provider3->NiAVObject_GetWorldTranslate() : *areaTarget3->GetPosition();
         if (areaEffect7)
         {
-            FUN_00817b90(position, areaTarget3->FUN_008d6f30(), spellB, areaEffect7, &contextSlot12, 1.0f, 1.0f);
+            MagicCaster_DoExplosion(position, areaTarget3->FUN_008d6f30(), spellB, areaEffect7, &contextSlot12, 1.0f, 1.0f);
             if (artSlot15 && artSlot15->model.FUN_0048cee0())
             {
-                NiPoint3 direction(-FUN_005c53d0(-areaTarget3->FUN_00430830()->x),
-                                FUN_005b9e80(-areaTarget3->FUN_00430830()->x), 0);
+                NiPoint3 direction(-NiSin_005c53d0(-areaTarget3->FUN_00430830()->x),
+                                NiCos(-areaTarget3->FUN_00430830()->x), 0);
                 ModelInstance* instance2 =
-                    FUN_006890b0(areaTarget3->FUN_008d6f30(), 1.0f, artSlot15->model.GetModelFilePath(), direction,
+                    BSTempEffectParticle_Spawn(areaTarget3->FUN_008d6f30(), 1.0f, artSlot15->model.GetModelFilePath(), direction,
                                  position, 1.0f, 7, 0);
-                instance2->FUN_00689920(DAT_0102054c);
+                instance2->PlaySequence(DAT_0102054c);
                 if (instance2->FUN_00490e40())
                 {
-                    float areaScale = areaEffect7->GetArea() * *DAT_011d1bbc.FUN_00403e20();
-                    if (areaScale > *DAT_011d1acc.FUN_00403e20())
-                        areaScale = *DAT_011d1acc.FUN_00403e20();
-                    else if (areaScale < *DAT_011d15a4.FUN_00403e20())
-                        areaScale = *DAT_011d15a4.FUN_00403e20();
-                    instance2->FUN_00490e40()->FUN_00440490(areaScale);
+                    float areaScale = areaEffect7->GetArea() * *DAT_011d1bbc.Setting_Float_00403e20();
+                    if (areaScale > *DAT_011d1acc.Setting_Float_00403e20())
+                        areaScale = *DAT_011d1acc.Setting_Float_00403e20();
+                    else if (areaScale < *DAT_011d15a4.Setting_Float_00403e20())
+                        areaScale = *DAT_011d15a4.Setting_Float_00403e20();
+                    instance2->FUN_00490e40()->NiAVObject_SetScale(areaScale);
                 }
             }
         }
-        else if (areaTarget3->IsActor() && aTouchEffect && aTouchEffect->GetEffectSetting()->FUN_00403e60(0x20000000))
+        else if (areaTarget3->IsActor() && aTouchEffect && aTouchEffect->GetEffectSetting()->IsFlagSet_00403e60(0x20000000))
         {
             Actor* actor = reinterpret_cast<Actor*>(areaTarget3);
             if (CheckHealthDamageKill(static_cast<MagicTarget*>(actor), spellB))
@@ -4653,9 +4665,9 @@ void Caster::FUN_00815d00(float power, Source* source, bool immediate, float mul
     if (reinterpret_cast<MagicView*>(spellB)->HasNonDetrimentalEffect())
         CastAimEffect();
     else if (didTarget2 && casterActorSlot25 && (spellB->GetSpellType() == 0 || spellB->GetSpellType() == 5))
-        casterActorSlot25->UseSkill(reinterpret_cast<MagicView*>(spellB)->FUN_004065e0(true), 0);
+        casterActorSlot25->UseSkill(reinterpret_cast<MagicView*>(spellB)->EffectItemList_GetAssociatedSkill(true), 0);
     if (releaseModel && artSlot15 && artSlot15->model.FUN_0048cee0() > 0)
-        DAT_011c3b3c->FUN_00445300(artSlot15->model.GetModelFilePath(), false, 1);
+        DAT_011c3b3c->ModelLoader_ReleaseModel(artSlot15->model.GetModelFilePath(), false, 1);
     SetSpell(0);
     SetMagicTarget(0);
     FUN_00818af0(0, 0);
@@ -4675,7 +4687,7 @@ namespace fnv_00818150 {
 
 struct MassVec;
 
-hkVector4& FUN_004a3e00(hkVector4& out, const NiPoint3& in);
+hkVector4& NI2HK(hkVector4& out, const NiPoint3& in);
 struct RefNode;
 void GetRefPosition(NiPoint3* out, RefNode* node);
 
@@ -4703,12 +4715,13 @@ float CalcForce(int a, int b, float dist, int c, int d, float e);
 
 struct Pusher
 {
-    void FUN_00818150(PushRef* target, NiPoint3 origin, EffectItem* effect, float magnitude);
+    void MagicCaster_ExplodeRigidBody(PushRef* target, NiPoint3 origin, EffectItem* effect, float magnitude);
 };
 
 // Computes a force on target from origin and effect, clamps and scales it, then applies the resulting impulse to the target.
 // @fnv 0x00818150
-void Pusher::FUN_00818150(PushRef* target, NiPoint3 origin, EffectItem* effect, float magnitude)
+// src: XBOX_PDB 0x00818150
+void Pusher::MagicCaster_ExplodeRigidBody(PushRef* target, NiPoint3 origin, EffectItem* effect, float magnitude)
 {
     NiPoint3 pos;
     GetRefPosition(&pos, target->GetNode());
@@ -4724,7 +4737,7 @@ void Pusher::FUN_00818150(PushRef* target, NiPoint3 origin, EffectItem* effect, 
         vDirection[2u] += 0.5;
         NiPoint3 vImpulse = vDirection * force;
         hkVector4 v;
-        FUN_004a3e00(v, vImpulse);
+        NI2HK(v, vImpulse);
         MassVec m(target->GetMass());
         v.Mul(reinterpret_cast<const ::MassVec&>(m));
         target->Activate();

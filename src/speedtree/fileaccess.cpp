@@ -10,14 +10,15 @@ struct FUN_00b3ede0_shell
     void* prev;
     unsigned int used;
     unsigned int size;
-    void* FUN_00b3ede0();
+    void* AdvanceBlockAllocationCursor();
 };
 
 unsigned int __cdecl FUN_00ec7c56(void);
 
 // Checks the block has room for alloc bytes, calls FUN_00ec7c56 if not, advances p twice and returns the pointer at used+alloc.
 // @fnv 0x00b3ede0
-void* FUN_00b3ede0_shell::FUN_00b3ede0()
+// src: GUESS 0x00b3ede0 (confidence: medium)
+void* FUN_00b3ede0_shell::AdvanceBlockAllocationCursor()
 {
     unsigned int alloc = *(unsigned int*)this;
     FUN_00b3ede0_shell* block = (FUN_00b3ede0_shell*)((char*)this + 4);
@@ -33,7 +34,7 @@ struct FUN_00b3ef80_shell
 {
     int m_iValueAt00;
     void* m_pObjectAt04;
-    float FUN_00b3ed20();
+    float CTreeFileAccess_ParseFloat();
     CVec3 GetVector3();
 };
 
@@ -48,7 +49,7 @@ CVec3 FUN_00b3ef80_shell::GetVector3()
     vecResult[1] = 0.0f;
     vecResult[0] = 0.0f;
     for (iComponent = 0; iComponent < 3; iComponent++)
-        vecResult[iComponent] = FUN_00b3ed20();
+        vecResult[iComponent] = CTreeFileAccess_ParseFloat();
     return *reinterpret_cast<CVec3*>(vecResult);
 }
 
@@ -67,11 +68,12 @@ struct FUN_00b3ed20_cls
 {
     unsigned int m_nCursor;
     FUN_00b3ed20_range m_range;
-    float FUN_00b3ed20();
+    float CTreeFileAccess_ParseFloat();
 };
 
 // @fnv 0x00b3ed20
-float FUN_00b3ed20_cls::FUN_00b3ed20()
+// src: COMMUNITY 0x00b3ed20
+float FUN_00b3ed20_cls::CTreeFileAccess_ParseFloat()
 {
     unsigned int idx = m_nCursor;
     FUN_00b3ed20_range* p2 = &m_range;

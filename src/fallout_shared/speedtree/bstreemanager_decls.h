@@ -11,8 +11,8 @@
 #include "../../../include/NiPointer.h"
 extern BSTreeManager* DAT_011d5c48;
 extern TES* g_TES;
-void FUN_00664940();
-void* FUN_00664840(bool);
+void BSTreeManager_Destroy_();
+void* BSTreeManager_GetInstance(bool);
 void SetGlobalValue(bool);
 void SetGlobalFloatFromUInt(unsigned int);
 void ClampAndStoreValue(float);

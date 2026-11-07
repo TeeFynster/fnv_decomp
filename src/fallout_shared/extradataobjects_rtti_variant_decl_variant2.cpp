@@ -102,13 +102,14 @@ template <> bool BSStringT<char>::Set(const BSStringT<char>& source)
 }
 
 void ResolveFormID(unsigned int*, TESFile*);
-TESForm* FUN_004839c0(unsigned int);
-void FUN_005b5e40(const char*, ...);
+TESForm* TESForm_GetFormByNumericID(unsigned int);
+void Warning_005b5e40(const char*, ...);
 void __cdecl operator delete(void*);
 
 // Walks m_kDecalReferences, resolving each decal's m_pHitReference form ID against the given TESForm and removing entries that cannot be resolved.
 // @fnv 0x00433db0
-void ExtraDecalRefs::FUN_00433db0(TESForm* form)
+// src: XBOX_PDB 0x00433db0
+void ExtraDecalRefs::InitItem_00433db0(TESForm* form)
 {
     BSSimpleList<ReferenceIntersectionData*>* position = &m_kDecalReferences;
     BSSimpleList<ReferenceIntersectionData*>* previous = 0;
@@ -118,10 +119,10 @@ void ExtraDecalRefs::FUN_00433db0(TESForm* form)
         ReferenceIntersectionData* decal = position->GetItem();
         unsigned int formID = reinterpret_cast<unsigned int>(decal->m_pHitReference);
         ResolveFormID(&formID, form->FUN_00484e60(-1));
-        TESObjectREFR* resolvedB = dynamic_cast<TESObjectREFR*>(FUN_004839c0(formID));
+        TESObjectREFR* resolvedB = dynamic_cast<TESObjectREFR*>(TESForm_GetFormByNumericID(formID));
         if (!resolvedB)
         {
-            FUN_005b5e40("MASTERFILE: Unable to find decal reference %08X.", formID);
+            Warning_005b5e40("MASTERFILE: Unable to find decal reference %08X.", formID);
             if (previous)
             {
                 previous->Remove(decal);

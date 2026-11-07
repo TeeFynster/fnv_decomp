@@ -32,7 +32,7 @@ public:
     void* FUN_00500940();
     void FUN_004021a0();
     void* FUN_00402170(unsigned int flags);
-    bool FUN_00402310(TESForm* pkForm);
+    bool Compare_00402310(TESForm* pkForm);
 
     static void ClearStageData(BGSSleepDeprevationStage* stage);
 };

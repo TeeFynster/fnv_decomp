@@ -9,7 +9,7 @@ typedef ::__m128 LocalM128;
 #include "../../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../../include/hkReferencedObject.h"
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 typedef ::__m128 LocalM128;
 
@@ -40,7 +40,7 @@ struct CloneDataA : CloneDataBase
     Block5b unk94;
     Block5 unka8;
     CloneDataA* FUN_00d4f2a0();
-    void FUN_00d4f270(hkBool flag);
+    void hkpRagdollLimitsData_setConeLimitStabilization(hkBool flag);
 };
 
 struct CloneDataB : CloneDataBase
@@ -101,7 +101,7 @@ struct Instance : hkReferencedObject
 
 inline void* hkAlloc(int size)
 {
-    hkReferencedObject* p = (hkReferencedObject*)FUN_00c85750()->heap().blockAlloc(size);
+    hkReferencedObject* p = (hkReferencedObject*)hkMemoryRouter_getInstance()->heap().blockAlloc(size);
     p->m_usMemSizeAndFlags = (unsigned short)size;
     return p;
 }
@@ -127,7 +127,7 @@ Instance* __cdecl CloneInstanceFromSource(Instance* apSource)
         pCloneTyped->unka8 = s->unk124;
         pCloneTyped->unk94 = s->unk110;
         hkBool flag(s->unk110.unk06 != 0);
-        pCloneTyped->FUN_00d4f270(flag);
+        pCloneTyped->hkpRagdollLimitsData_setConeLimitStabilization(flag);
         break;
     }
     case 2: {
@@ -216,7 +216,8 @@ class FnvHolder
 
 // Reads the inner constraint's kind and copies two __m128 vectors into a1/a2, or logs an unsupported-type error and returns 1.
 // @fnv 0x00e5ad40
-int FUN_00e5ad40(FnvHolder* pHolder, LocalM128* pOutA, LocalM128* pOutB)
+// src: XBOX_PDB 0x00e5ad40
+int hkpConstraintUtils_getConstraintPivots(FnvHolder* pHolder, LocalM128* pOutA, LocalM128* pOutB)
 {
     FnvInner* inner = pHolder->m_0c;
 
@@ -257,7 +258,7 @@ struct S_00e5ae60_Stream
     int unk04;
     int unk08;
     S_00e5ae60_Stream(char* buf, int size) throw();
-    S_00e5ae60_Stream& FUN_00cc01c0(const char* s) throw();
+    S_00e5ae60_Stream& ProcessAndReturnValue_00cc01c0(const char* s) throw();
     ~S_00e5ae60_Stream() throw();
 };
 
@@ -325,9 +326,9 @@ struct S_00e5ae60_Constraint
     int unka8;
     int unkac;
     int m_b0;
-    int FUN_00cdea20() throw();
-    int FUN_00cdea80() throw();
-    int FUN_00cdeaa0() throw();
+    int hkpRagdollConstraintData_getTwistMotor() throw();
+    int hkpRagdollConstraintData_getConeMotor() throw();
+    int hkpRagdollConstraintData_getPlaneMotor() throw();
 };
 
 // Reads motor values from the constraint into a, b and d based on its type; for unsupported types logs an error and returns 1.
@@ -343,9 +344,9 @@ int __cdecl GetConstraintMotorValues(S_00e5ae60_Constraint* pConstraint, int* pi
         *piValueD = 0;
         return 0;
     case 7:
-        *piValueA = pConstraint->FUN_00cdea20();
-        *piValueB = pConstraint->FUN_00cdea80();
-        *piValueD = pConstraint->FUN_00cdeaa0();
+        *piValueA = pConstraint->hkpRagdollConstraintData_getTwistMotor();
+        *piValueB = pConstraint->hkpRagdollConstraintData_getConeMotor();
+        *piValueD = pConstraint->hkpRagdollConstraintData_getPlaneMotor();
         return 0;
     default:
         *piValueD = 0;
@@ -354,7 +355,7 @@ int __cdecl GetConstraintMotorValues(S_00e5ae60_Constraint* pConstraint, int* pi
         {
             unsigned int buf[128];  // 512-byte text buffer (int array avoids a GS cookie)
             S_00e5ae60_Stream s((char*)buf, 0x200);
-            s.FUN_00cc01c0("This type of constraint does not have motors");
+            s.ProcessAndReturnValue_00cc01c0("This type of constraint does not have motors");
             DAT_01268360->FUN_message(1, 0xabbae233, (const char*)buf,
                                       ".\\Constraint\\Bilateral\\hkpConstraintUtils.cpp", 0x104);
         }

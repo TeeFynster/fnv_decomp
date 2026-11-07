@@ -68,7 +68,7 @@ struct FUN_00d5a630_ctxB
     void InitB();
 };
 extern float DAT_0106ea1c;
-void __cdecl FUN_00d5a630(void* a1, int a2, int a3);
+void __cdecl hkGeometryUtility_createConvexGeometry(void* a1, int a2, int a3);
 struct S_00d5a6b0_Array
 {
     Vec4* m_data;
@@ -83,7 +83,7 @@ struct D5C110Allocator
     virtual void unk0C();
     virtual void ReturnMemory(void* p, int numBytes);
 };
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance();
 // hkArray<hkVector4> without a destructor (Havok was built without EH): explicit cleanup.
 struct D5C110VertexArray
 {
@@ -96,7 +96,7 @@ struct D5C110VertexArray
 
     void ClearAndRelease()
     {
-        D5C110Allocator& alloc = *reinterpret_cast<D5C110Allocator*>(FUN_00c85750().m_heap);
+        D5C110Allocator& alloc = *reinterpret_cast<D5C110Allocator*>(hkMemoryRouter_getInstance().m_heap);
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(Vec4));
@@ -121,19 +121,19 @@ void __cdecl InitAndSetB(const D5C110StridedVertices& vertices, D5C110Geometry& 
 void __cdecl BuildGeometryFromShape(const void* shape, D5C110Geometry& aGeometry);
 struct D5C110VertexArray;
 void __cdecl ProcessArg(const void* shape, D5C110VertexArray& vertices);
-void __cdecl FUN_00d5a6a0(const void* shape, D5C110VertexArray& vertices);
+void __cdecl hkGeometryUtility_createVerticesFromPlaneEquations(const void* shape, D5C110VertexArray& vertices);
 #include <math.h>
 struct S00d5ad60_cls
 {
     float m_f00;
     unsigned char S00d5ad60_call(float* other, float threshold);
 };
-static unsigned char FUN_00d5ad60(S00d5ad60_cls* self, float* other, float threshold);
+static unsigned char approxEquals(S00d5ad60_cls* self, float* other, float threshold);
 #ifndef _INCLUDED_MM2
 extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 #endif
 extern float DAT_01011d78;
-static int FUN_00d5ad90(const float* pVec, float fTol);
+static int Hkgeometryutility_IsMaximumAbsoluteComponentNearOne(const float* pVec, float fTol);
 int __cdecl S00d5ad90_Wrap(const float* pVec, float fTol);
 struct S00d5c060_Src
 {
@@ -156,9 +156,9 @@ struct __declspec(align(16)) S00d5c060_Result
     unsigned int unk0C;
 };
 char* __cdecl AllocateWithHeader(D5C110Allocator* alloc, int size);
-char* __cdecl FUN_00c856c0(D5C110Allocator* owner, char* data);
-void __cdecl FUN_00d5beb0(S00d5c060_Result* self, char* data, int count, int flags, float scale);
-S00d5c060_Result FUN_00d5c060(const S00d5c060_Src* src, float scale);
+char* __cdecl hkMemoryRouter_easyFree(D5C110Allocator* owner, char* data);
+void __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(S00d5c060_Result* self, char* data, int count, int flags, float scale);
+S00d5c060_Result hkGeometryUtility_createMinBoundingSphere(const S00d5c060_Src* src, float scale);
 extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
 extern "C" float _mm_cvtss_f32(LocalM128);
 extern "C" void _mm_store_ss(float*, LocalM128);
@@ -172,7 +172,8 @@ struct MyPoint
 {
     LocalM128 v;
 };
-static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t)
+// src: GUESS 0x00d5bb10 (confidence: low)
+static __declspec(noinline) Vec4* Hkgeometryutilityfull_UpdateState_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -180,7 +181,8 @@ static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, fl
     res->w = a.y;
     return res;
 }
-static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
+// src: GUESS 0x00d5bb80 (confidence: low)
+static __declspec(noinline) Vec4* Object_ProcessAndReturnValue_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -188,7 +190,8 @@ static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Ve
     res->w = a.y;
     return res;
 }
-static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
+// src: GUESS 0x00d5bce0 (confidence: low)
+static __declspec(noinline) Vec4* Object_ComputeValue_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -196,7 +199,7 @@ static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Ve
     res->w = a.y;
     return res;
 }
-LocalM128* __cdecl FUN_00d5beb0(LocalM128* out, MyPoint* pts, int count, int depth, float t);
+LocalM128* __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(LocalM128* out, MyPoint* pts, int count, int depth, float t);
 extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
 extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
 extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
@@ -295,7 +298,8 @@ struct ObbWord
     }
 };
 extern "C" int obbMix(int);
-static __declspec(noinline) void FUN_00d5ae60(const float* verts, int count, int stride, ObbWord ext,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const float* verts, int count, int stride, ObbWord ext,
                                               const ObbAxis* axes, ObbWord pos)
 {
     int triangles = count / 3;
@@ -311,7 +315,8 @@ static __declspec(noinline) void FUN_00d5ae60(const float* verts, int count, int
     ((ObbAxis*)ext.v)->operator()(0) = sum + axes[1](0) + (float)total;
     ((ObbAxis*)pos.v)->operator()(0) = (float)stride;
 }
-static __declspec(noinline) float FUN_00d5b0c0(const float* verts, int count, int stride, const ObbAxis* axes)
+// src: GUESS 0x00d5b0c0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00d5b0c0(const float* verts, int count, int stride, const ObbAxis* axes)
 {
     ObbAxis tmp[3];
     tmp[0] = axes[0];
@@ -323,10 +328,11 @@ static __declspec(noinline) float FUN_00d5b0c0(const float* verts, int count, in
     tmp[2].cross(axes[0], axes[1]);
     tmp[2].normalize();
     ObbAxis position, extents;
-    FUN_00d5ae60(verts, count, stride, ObbWord((int)&extents), tmp, ObbWord((int)&position));
+    Object_ProcessEntries_00d5ae60(verts, count, stride, ObbWord((int)&extents), tmp, ObbWord((int)&position));
     return extents(1) * extents(0) * extents(2);
 }
-static __declspec(noinline) void FUN_00d5b440(const ObbAxis* axes, ObbAxis* direction, float step, ObbAxis* out)
+// src: GUESS 0x00d5b440 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b440(const ObbAxis* axes, ObbAxis* direction, float step, ObbAxis* out)
 {
     for (int i = 0; i < 2; ++i)
     {
@@ -344,7 +350,7 @@ inline float obbRoot(float f)
 {
     return (float)sqrt((double)f);
 }
-static float FUN_00d5b640(const float* vertexArray, int numVertices, int striding, const ObbAxis* axes, float stepIn,
+static float Object_ProcessEntries_00d5b640(const float* vertexArray, int numVertices, int striding, const ObbAxis* axes, float stepIn,
                           ObbAxis* direction, int maxIter);
 const float* volatile obbVerts;
 const ObbAxis* volatile obbAxes;
@@ -484,7 +490,8 @@ __forceinline float axisInvSqrt(float f)
 {
     return 1.0f / axisSqrt(f);
 }
-static __declspec(noinline) void FUN_00d5ae60(const float* data, int count, int stride, Axis& size, const Axis* axes,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const float* data, int count, int stride, Axis& size, const Axis* axes,
                                               Axis& center)
 {
     Axis lower;
@@ -535,7 +542,8 @@ static __declspec(noinline) void FUN_00d5ae60(const float* data, int count, int 
     center.addMul4(midpoint(1), axes[1]);
     center.addMul4(midpoint(2), axes[2]);
 }
-static __declspec(noinline) float FUN_00d5b0c0(const float* data, int count, int stride, const Axis* axes)
+// src: GUESS 0x00d5b0c0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00d5b0c0(const float* data, int count, int stride, const Axis* axes)
 {
     Axis adjusted[3];
     adjusted[0] = axes[0];
@@ -548,23 +556,24 @@ static __declspec(noinline) float FUN_00d5b0c0(const float* data, int count, int
     adjusted[2].normalize3();
     Axis center;
     Axis size;
-    FUN_00d5ae60(data, count, stride, size, adjusted, center);
+    Object_ProcessEntries_00d5ae60(data, count, stride, size, adjusted, center);
     return size(0) * size(1) * size(2);
 }
-static __declspec(noinline) void FUN_00d5b2a0(const float* data, int count, int stride, const Axis* axes, float delta,
+// src: GUESS 0x00d5b2a0 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b2a0(const float* data, int count, int stride, const Axis* axes, float delta,
                                               Axis* direction)
 {
     Axis changed[3];
     changed[0] = axes[0];
     changed[1] = axes[1];
-    float base = FUN_00d5b0c0(data, count, stride, axes);
+    float base = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, axes);
     float invDelta = 1 / delta;
     for (int row = 0; row < 2; ++row)
     {
         for (int col = 0; col < 3; ++col)
         {
             changed[row](col) += delta;
-            float volume = FUN_00d5b0c0(data, count, stride, changed);
+            float volume = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             direction[row](col) = (volume - base) * invDelta;
             changed[row](col) = axes[row](col);
         }
@@ -578,7 +587,8 @@ static __declspec(noinline) void FUN_00d5b2a0(const float* data, int count, int 
         direction[1].mul4(invNorm);
     }
 }
-static __declspec(noinline) void FUN_00d5b440(const Axis* input, Axis* direction, float step, Axis* output)
+// src: GUESS 0x00d5b440 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b440(const Axis* input, Axis* direction, float step, Axis* output)
 {
     for (int axis = 0; axis < 2; ++axis)
     {
@@ -592,15 +602,16 @@ static __declspec(noinline) void FUN_00d5b440(const Axis* input, Axis* direction
     output[2].setCross(output[0], output[1]);
     output[2].normalize3();
 }
-static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int stride, const Axis* axes, float start,
+// src: GUESS 0x00d5b640 (confidence: low)
+static __declspec(noinline) float Object_ProcessEntries_00d5b640(const float* data, int count, int stride, const Axis* axes, float start,
                                                Axis* direction, int limit)
 {
     float fb = 0, fc = 0;
     float a = 0;
-    float fa = FUN_00d5b0c0(data, count, stride, axes);
+    float fa = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, axes);
     Axis changed[3];
-    FUN_00d5b440(axes, direction, start, changed);
-    float trial = FUN_00d5b0c0(data, count, stride, changed);
+    Object_ProcessEntries_00d5b440(axes, direction, start, changed);
+    float trial = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
     float b, c;
     if (fa > trial)
     {
@@ -610,8 +621,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         for (int iter = 0; iter < limit; ++iter)
         {
             c *= 1.2f;
-            FUN_00d5b440(axes, direction, c, changed);
-            fc = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, c, changed);
+            fc = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fc > fb)
                 break;
             else
@@ -631,8 +642,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         for (int iter = 0; iter < limit; ++iter)
         {
             b = (a + b) * 0.5;
-            FUN_00d5b440(axes, direction, b, changed);
-            fb = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, b, changed);
+            fb = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fa > fb && fc > fb)
                 break;
             if (iter == limit - 1)
@@ -650,8 +661,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         if (bc < ab)
         {
             x = b - golden * ab;
-            FUN_00d5b440(axes, direction, x, changed);
-            fx = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, x, changed);
+            fx = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fb > fx)
             {
                 c = b;
@@ -668,8 +679,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         else
         {
             x = b + golden * bc;
-            FUN_00d5b440(axes, direction, x, changed);
-            fx = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, x, changed);
+            fx = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fb > fx)
             {
                 a = b;
@@ -686,7 +697,7 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
     }
     return b;
 }
-static float FUN_00d5b990(const float* data, int count, int stride, const Axis* initial, Axis* result, int limit);
+static float Hkgeometryutility_UpdateState_00d5b990(const float* data, int count, int stride, const Axis* initial, Axis* result, int limit);
 const float* volatile probeData;
 int volatile probeCount, probeStride, probeLimit;
 Axis* volatile probeAxes;
@@ -740,9 +751,9 @@ struct ObbVec
         return q.m128_f32[2];
     }
 
-    void FUN_00c7f640(const void* transform, const ObbVec* v) throw();
+    void setTransformedPos_00c7f640(const void* transform, const ObbVec* v) throw();
 
-    void FUN_00c7f700(const void* transform, const ObbVec* v) throw();
+    void hkVector4_setRotatedDir(const void* transform, const ObbVec* v) throw();
 };
 
 struct ObbRot
@@ -750,7 +761,7 @@ struct ObbRot
 
     ObbVec c0, c1, c2;
 
-    void FUN_00cd4f10(float tolerance) throw();
+    void invert_00cd4f10(float tolerance) throw();
 };
 
 struct ObbXf
@@ -758,7 +769,7 @@ struct ObbXf
 
     ObbVec c0, c1, c2, c3;
 
-    void FUN_00cb21e0(const ObbXf* other) throw();
+    void hkTransform_setInverse(const ObbXf* other) throw();
 };
 
 struct ObbInput
@@ -766,7 +777,7 @@ struct ObbInput
     ObbVec* data;
     int size;
     int cap;
-    bool __cdecl FUN_00d5c6d0(ObbVec& halfExtents, ObbXf& output, float tolerance) const;
+    bool __cdecl getIsBoxGeometry(ObbVec& halfExtents, ObbXf& output, float tolerance) const;
 };
 
 struct ObbStride
@@ -792,7 +803,7 @@ struct ObbAllocator
 
 namespace FitMemory {
 
-hkMemoryRouter& FUN_00c85750() throw();
+hkMemoryRouter& hkMemoryRouter_getInstance() throw();
 
 inline ObbAllocator& GetHeap(hkMemoryRouter& router)
 {
@@ -818,7 +829,7 @@ struct ObbArray
     ~ObbArray() throw()
     {
 
-        ObbAllocator& a = FitMemory::GetHeap(FitMemory::FUN_00c85750());
+        ObbAllocator& a = FitMemory::GetHeap(FitMemory::hkMemoryRouter_getInstance());
 
         size = 0;
 
@@ -832,7 +843,7 @@ struct ObbArray
     void push(const ObbVec& v) throw()
     {
 
-        ObbAllocator& a = FitMemory::GetHeap(FitMemory::FUN_00c85750());
+        ObbAllocator& a = FitMemory::GetHeap(FitMemory::hkMemoryRouter_getInstance());
 
         if (size == (cap & 0x3fffffff))
             ResizeAudioStream(&a, this, 16);
@@ -852,11 +863,11 @@ struct ObbScratch
     ObbScratch(int count, int& capacityOut) throw() : cap(capacityOut)
     {
 
-        FitMemory::FUN_00c85750();
+        FitMemory::hkMemoryRouter_getInstance();
 
-        FitMemory::FUN_00c85750();
+        FitMemory::hkMemoryRouter_getInstance();
 
-        ObbAllocator& a = FitMemory::GetHeap(FitMemory::FUN_00c85750());
+        ObbAllocator& a = FitMemory::GetHeap(FitMemory::hkMemoryRouter_getInstance());
 
         if (count > 0)
         {
@@ -878,7 +889,7 @@ struct ObbScratch
     ~ObbScratch() throw()
     {
 
-        ObbAllocator& a = FitMemory::GetHeap(FitMemory::FUN_00c85750());
+        ObbAllocator& a = FitMemory::GetHeap(FitMemory::hkMemoryRouter_getInstance());
 
         if ((cap & 0x80000000) == 0)
             a.free(data, (cap & 0x3fffffff) * 16);
@@ -916,7 +927,8 @@ static LocalM128 normalizeScale(LocalM128 v)
     return _mm_andnot_ps(mask, _mm_mul_ss(_mm_mul_ss(half, r), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(s, r), r))));
 }
 
-static __declspec(noinline) unsigned char FUN_00d5ad60(S00d5ad60_cls* self, float* other, float threshold)
+// src: HAVOK_LIB 0x00d5ad60
+static __declspec(noinline) unsigned char approxEquals(S00d5ad60_cls* self, float* other, float threshold)
 {
 
     float d = *(float*)self - *other;
@@ -928,7 +940,7 @@ static __declspec(noinline) unsigned char FUN_00d5ad60(S00d5ad60_cls* self, floa
 
 static __forceinline unsigned char hlpA(const float* a, const float* b, float eps)
 {
-    return (FUN_00d5ad60)((S00d5ad60_cls*)a, (float*)b, eps);
+    return (approxEquals)((S00d5ad60_cls*)a, (float*)b, eps);
 }
 
 static __declspec(noinline) bool hlpB(const ObbVec* v, float eps) throw()
@@ -944,7 +956,8 @@ static __declspec(noinline) bool hlpB(const ObbVec* v, float eps) throw()
 }
 
 // @fnv 0x00d5c6d0
-bool __cdecl ObbInput::FUN_00d5c6d0(ObbVec& halfExtents, ObbXf& output, float tolerance) const
+// src: XBOX_PDB 0x00d5c6d0
+bool __cdecl ObbInput::getIsBoxGeometry(ObbVec& halfExtents, ObbXf& output, float tolerance) const
 {
 
     const ObbInput& input = *this;
@@ -1055,12 +1068,12 @@ bool __cdecl ObbInput::FUN_00d5c6d0(ObbVec& halfExtents, ObbXf& output, float to
 
     rotation.c2.q = _mm_mul_ps(_mm_shuffle_ps(nc, nc, 0), cross);
 
-    rotation.FUN_00cd4f10(DAT_01013ea4);
+    rotation.invert_00cd4f10(DAT_01013ea4);
 
     ObbVec* vertex = scratch.data;
 
     for (int i = 0; i < 8; ++i, ++vertex)
-        vertex->FUN_00c7f700(&rotation, vertex);
+        vertex->hkVector4_setRotatedDir(&rotation, vertex);
 
     float minX = scratch.data[0].x(), maxX = scratch.data[0].x();
 
@@ -1133,12 +1146,12 @@ bool __cdecl ObbInput::FUN_00d5c6d0(ObbVec& halfExtents, ObbXf& output, float to
 
     inverse.c3 = center;
 
-    output.FUN_00cb21e0(&inverse);
+    output.hkTransform_setInverse(&inverse);
 
     if (hlpB(&rotation.c0, tolerance) && hlpB(&rotation.c1, tolerance) && hlpB(&rotation.c2, tolerance))
     {
 
-        halfExtents.FUN_00c7f700(&output, &halfExtents);
+        halfExtents.hkVector4_setRotatedDir(&output, &halfExtents);
 
         halfExtents.q.m128_f32[3] = 0;
 
@@ -1160,14 +1173,14 @@ bool __cdecl ObbInput::FUN_00d5c6d0(ObbVec& halfExtents, ObbXf& output, float to
         output.c2.q = rotation.c2.q;
     }
 
-    inverse.FUN_00cb21e0(&output);
+    inverse.hkTransform_setInverse(&output);
 
     for (int i = 0; i < input.size; i++)
     {
 
         ObbVec transformed;
 
-        transformed.FUN_00c7f640(&inverse, &input.data[i]);
+        transformed.setTransformedPos_00c7f640(&inverse, &input.data[i]);
 
         for (int j = 0; j < 3; j++)
         {
@@ -1306,7 +1319,8 @@ static __forceinline void IncludeBoundsPoint(const BoundsVector* axes, const cha
     }
 }
 
-static __declspec(noinline) void FUN_00d5ae60(const BoundsVector* axes, const char* vertices, int count, int stride,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const BoundsVector* axes, const char* vertices, int count, int stride,
 
                                               BoundsVector* halfExtents, BoundsVector* center)
 {
@@ -1347,7 +1361,8 @@ static __declspec(noinline) void FUN_00d5ae60(const BoundsVector* axes, const ch
 }
 
 // @fnv 0x00d5b0c0
-static __declspec(noinline) float FUN_00d5b0c0(const BoundsVector* input, int stride, const char* vertices, int count)
+// src: GUESS 0x00d5b0c0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00d5b0c0(const BoundsVector* input, int stride, const char* vertices, int count)
 {
 
     // The zero comparison mask is dead when the bounds helper writes the extents.
@@ -1385,14 +1400,14 @@ static __declspec(noinline) float FUN_00d5b0c0(const BoundsVector* input, int st
 
     NormalizeThree<false>(axes[2], cross, halfExtents.packed, three, half);
 
-    FUN_00d5ae60(axes, vertices, count, stride, &halfExtents, &center);
+    Object_ProcessEntries_00d5ae60(axes, vertices, count, stride, &halfExtents, &center);
 
     return halfExtents.component[0] * halfExtents.component[1] * halfExtents.component[2];
 }
 
 float BoundsVolume(const BoundsVector* input, int stride, const char* vertices, int count)
 {
-    return FUN_00d5b0c0(input, stride, vertices, count);
+    return Object_ProcessAndReturnValue_00d5b0c0(input, stride, vertices, count);
 }
 
 class Lane
@@ -1481,7 +1496,8 @@ class StepAxis
 };
 
 // @fnv 0x00d5b440
-static __declspec(noinline) void FUN_00d5b440(const StepAxis* axesIn, StepAxis* direction, float stepLength,
+// src: GUESS 0x00d5b440 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b440(const StepAxis* axesIn, StepAxis* direction, float stepLength,
                                               StepAxis* axesOut)
 {
     for (int i = 0; i < 2; i++)
@@ -1504,7 +1520,7 @@ float g_d5b440Step;
 
 void d5b440_caller()
 {
-    FUN_00d5b440(&g_d5b440In0, &g_d5b440Dir0, g_d5b440Step, &g_d5b440Out0);
+    Object_ProcessEntries_00d5b440(&g_d5b440In0, &g_d5b440Dir0, g_d5b440Step, &g_d5b440Out0);
 }
 
 class Scalar
@@ -1617,8 +1633,9 @@ class Ball
 };
 
 // @fnv 0x00d5bce0
+// src: GUESS 0x00d5bce0 (confidence: low)
 static __declspec(noinline) Ball
-    FUN_00d5bce0(const GeomUtilVector4& pA, const GeomUtilVector4& pB, const GeomUtilVector4& pC, const GeomUtilVector4& pD, float slack)
+    Object_ComputeValue_00d5bce0(const GeomUtilVector4& pA, const GeomUtilVector4& pB, const GeomUtilVector4& pC, const GeomUtilVector4& pD, float slack)
 {
     GeomUtilVector4 b;
     b.setSub4(pB, pA);
@@ -1654,5 +1671,5 @@ Ball* g_d5bce0Out;
 
 void d5bce0_caller()
 {
-    *g_d5bce0Out = FUN_00d5bce0(g_d5bce0P0, g_d5bce0P1, g_d5bce0P2, g_d5bce0P3, g_d5bce0Slack);
+    *g_d5bce0Out = Object_ComputeValue_00d5bce0(g_d5bce0P0, g_d5bce0P1, g_d5bce0P2, g_d5bce0P3, g_d5bce0Slack);
 }

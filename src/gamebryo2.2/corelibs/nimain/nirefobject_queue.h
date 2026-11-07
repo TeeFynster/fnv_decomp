@@ -3,7 +3,7 @@
 
 class BGSLoadGameBuffer;
 
-int __cdecl FUN_0043b460(volatile long*, long, long);
+int __cdecl BSAtomicCompareExchange(volatile long*, long, long);
 class ScrapHeapTaskQueue
 {
   public:

@@ -26,7 +26,7 @@ struct DFD680MemoryRouter
     }
 };
 
-extern "C" DFD680MemoryRouter& __cdecl FUN_00c85750();
+extern "C" DFD680MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 template<class T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& sharedAlloc)
 {
@@ -57,16 +57,17 @@ struct DFD680MeshData
     hkArrayBase<unsigned short> m_kIndices16;
     hkArrayBase<unsigned char> m_flags;
 
-    void FUN_00dfd680();
+    void ReleaseMeshArrays_00dfd680();
 };
 
 // Clears and deallocates all five arrays of the mesh data in reverse order.
 // @fnv 0x00dfd680
-void DFD680MeshData::FUN_00dfd680()
+// src: GUESS 0x00dfd680 (confidence: medium)
+void DFD680MeshData::ReleaseMeshArrays_00dfd680()
 {
-    m_flags._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
-    m_kIndices16._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
-    m_kMaterials._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
-    m_kIndices32._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
-    m_kVertices._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
+    m_flags._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance().heap()));
+    m_kIndices16._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance().heap()));
+    m_kMaterials._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance().heap()));
+    m_kIndices32._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance().heap()));
+    m_kVertices._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(hkMemoryRouter_getInstance().heap()));
 }

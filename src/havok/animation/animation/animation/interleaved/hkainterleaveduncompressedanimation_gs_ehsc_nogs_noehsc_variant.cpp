@@ -19,7 +19,8 @@ __forceinline void hkQuaternion::operator=(const hkQuaternion& q)
     reinterpret_cast<hkVector4&>(*this) = reinterpret_cast<const hkVector4&>(q);
 }
 
-inline __declspec(noinline) void hkQuaternion::FUN_00c66320(const hkQuaternion& q0, const hkQuaternion& q1)
+// src: COMMUNITY 0x00c66320
+inline __declspec(noinline) void hkQuaternion::setMul(const hkQuaternion& q0, const hkQuaternion& q1)
 {
     __m128 a = reinterpret_cast<const hkVector4&>(q0).m_vComponents;
     __m128 b = reinterpret_cast<const hkVector4&>(q1).m_vComponents;
@@ -93,7 +94,7 @@ __forceinline void hkQsTransform::SetProduct(const hkQsTransform& t1, const hkQs
     temp.SetRotatedDirection(t1.m_rotation, t2.m_vTranslation);
     m_vTranslation.setAdd4(temp, t1.m_vTranslation);
     // The original call targets hkQuaternion's product implementation at 0x00c66320.
-    m_rotation.FUN_00c66320(t1.m_rotation, t2.m_rotation);
+    m_rotation.setMul(t1.m_rotation, t2.m_rotation);
     m_vScale.setMul4(t1.m_vScale, t2.m_vScale);
 }
 
@@ -113,11 +114,12 @@ class FUN_00e401d0Owner
     hkQsTransform* m_pkTransforms;
     int m_iNumTransforms;
 
-    void FUN_00e401d0(int iTrack, const hkQsTransform& kTransform);
+    void ProcessEntries_00e401d0(int iTrack, const hkQsTransform& kTransform);
 };
 
 // @fnv 0x00e401d0
-void FUN_00e401d0Owner::FUN_00e401d0(int iTrack, const hkQsTransform& kTransform)
+// src: GUESS 0x00e401d0 (confidence: low)
+void FUN_00e401d0Owner::ProcessEntries_00e401d0(int iTrack, const hkQsTransform& kTransform)
 {
     int iTransformCountPerTrack = m_iNumTransforms / m_iNumTracks;
     for (int i = 0; i < iTransformCountPerTrack; i++)

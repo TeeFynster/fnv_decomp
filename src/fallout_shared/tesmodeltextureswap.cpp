@@ -201,7 +201,7 @@ void TESModelTextureSwap::ReadTextureSwapChunk(TESModelTextureSwap* model, TESFi
     }
     break;
     default:
-        if (FUN_00489280(chunk))
+        if (TESModel_IsModelChunk(chunk))
             TESModel::LoadModelData(reinterpret_cast<TESModel*>(model), file);
         break;
     }
@@ -229,7 +229,7 @@ void TESModel::LoadModelData(TESModel* model, TESFile* file)
     case 0x44534f4d: {
         unsigned char flags;
         file->GetChunkData(&flags, 1);
-        model->FUN_004893c0(flags);
+        model->SetFlags_004893c0(flags);
     }
     break;
     }
@@ -292,7 +292,7 @@ DistantTreeTextureInfo::DistantTreeTextureInfo()
 // @fnv 0x0048af40
 NiFixedString::NiFixedString(const NiFixedString& other)
 {
-    FUN_0043ba60(other);
+    NiGlobalStringTable_IncRefCount(other);
     m_kHandle = other.m_kHandle;
 }
 
@@ -329,12 +329,13 @@ bool FUN_0048af90_shell::Equals(const char* apOther)
 
 struct FUN_00409aa0_shell
 {
-    void FUN_00409aa0(unsigned int flags, bool set);
+    void IngredientItem_SetFlag(unsigned int flags, bool set);
 };
 
 // Sets or clears the given flag bits in the byte at offset 0xa0 of this object.
 // @fnv 0x00409aa0
-void FUN_00409aa0_shell::FUN_00409aa0(unsigned int flags, bool set)
+// src: COMMUNITY 0x00409aa0
+void FUN_00409aa0_shell::IngredientItem_SetFlag(unsigned int flags, bool set)
 {
     set ? ((unsigned char*)this)[0xa0] |= flags : ((unsigned char*)this)[0xa0] &= ~flags;
 }
@@ -522,7 +523,7 @@ struct TextureSwapCount
 {
     int GetSize();
 };
-int FUN_00404dc0(const char*, const char*);
+int BSstricmp(const char*, const char*);
 
 // @fnv 0x0048ac40
 bool TESModelTextureSwap::CompareTextureSwaps(BaseFormComponent* other)
@@ -544,7 +545,7 @@ bool TESModelTextureSwap::CompareTextureSwaps(BaseFormComponent* other)
             return true;
         if (pMine->formID != pSwap->formID)
             return true;
-        if (pMine->objectName[0] && pSwap->objectName[0] && FUN_00404dc0(pMine->objectName, pSwap->objectName))
+        if (pMine->objectName[0] && pSwap->objectName[0] && BSstricmp(pMine->objectName, pSwap->objectName))
             return true;
         pNode = pNode->FUN_00726070();
     }
@@ -562,16 +563,16 @@ class TextureSwapSerializationNode
 class ObjectRef
 {
   public:
-    int FUN_0084e3a0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 char* __cdecl FormHeap_Allocate(unsigned int);
-unsigned int __cdecl FUN_0044a670(unsigned int);
-bool __cdecl FUN_00401500();
+unsigned int __cdecl BSstrlen(unsigned int);
+bool __cdecl TESForm_QEndianSwapOnSave();
 struct FUN_00401080_tag
 {
 };
-void __cdecl FUN_00401080(int*, FUN_00401080_tag);
+void __cdecl BSEndian_00401080(int*, FUN_00401080_tag);
 void __cdecl FUN_00401460(char*, unsigned int, unsigned int);
 
 // @fnv 0x0048a590
@@ -595,7 +596,7 @@ bool TESModelTextureSwap::SerializeList(char** apBuffer, unsigned int* auiSize)
         {
             v = *iT->FUN_006815c0();
             *auiSize += 4;
-            *auiSize += FUN_0044a670(v + 8);
+            *auiSize += BSstrlen(v + 8);
             *auiSize += 4;
             *auiSize += 4;
             count++;
@@ -604,9 +605,9 @@ bool TESModelTextureSwap::SerializeList(char** apBuffer, unsigned int* auiSize)
         *apBuffer = FormHeap_Allocate(*auiSize);
         _w = *apBuffer;
         loA2 = count;
-        if (FUN_00401500())
+        if (TESForm_QEndianSwapOnSave())
         {
-            FUN_00401080(&loA2, FUN_00401080_tag());
+            BSEndian_00401080(&loA2, FUN_00401080_tag());
         }
         *(int*)_w = loA2;
         _w += 4;
@@ -614,10 +615,10 @@ bool TESModelTextureSwap::SerializeList(char** apBuffer, unsigned int* auiSize)
         while (iT != 0 && !iT->FUN_008256d0())
         {
             P = *iT->FUN_006815c0();
-            r = FUN_0044a670(P + 8);
-            if (FUN_00401500())
+            r = BSstrlen(P + 8);
+            if (TESForm_QEndianSwapOnSave())
             {
-                FUN_00401080(&loA2, FUN_00401080_tag());
+                BSEndian_00401080(&loA2, FUN_00401080_tag());
             }
             *(unsigned int*)_w = r;
             _w += 4;
@@ -625,7 +626,7 @@ bool TESModelTextureSwap::SerializeList(char** apBuffer, unsigned int* auiSize)
             _w += r;
             t = 0;
             if (*(unsigned int*)P != 0)
-                t = ((ObjectRef*)*(unsigned int*)P)->FUN_0084e3a0();
+                t = ((ObjectRef*)*(unsigned int*)P)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             *(unsigned int*)_w = t;
             _w += 4;
             *(unsigned int*)_w = *((unsigned int*)P + 1);

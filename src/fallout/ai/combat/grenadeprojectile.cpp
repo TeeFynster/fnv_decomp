@@ -27,16 +27,18 @@ GrenadeProjectile::GrenadeProjectile(bool abFlag) : Projectile(abFlag)
 
 // Calls FUN_009c43e0 with the given arguments, then invokes HandleTracer, returning the result of the first call.
 // @fnv 0x009b4700
-bool GrenadeProjectile::FUN_009b4700(int aiArg, bool b)
+// src: COMMUNITY 0x009b4700
+bool GrenadeProjectile::TurnOff(int aiArg, bool b)
 {
-    bool r = FUN_009c43e0(aiArg, b);
+    bool r = Projectile_DisarmPlacedExplosives(aiArg, b);
     HandleTracer();
     return r;
 }
 
 extern double _gModifierZero;
 // @fnv 0x009b4c70
-void GrenadeProjectile::FUN_009b4c70()
+// src: COMMUNITY 0x009b4c70
+void GrenadeProjectile::ReportHavokDeactivation()
 {
     if (GetProjectileBase()->GetHasExplosionDetonates() ||
         (GetProjectileBase()->GetHasExplosionAltTrigger() &&
@@ -47,16 +49,17 @@ void GrenadeProjectile::FUN_009b4c70()
 }
 
 // @fnv 0x009b4d10
-void __thiscall GrenadeProjectile::FUN_009b4d10(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: COMMUNITY 0x009b4d10
+void __thiscall GrenadeProjectile::RevertBGS_009b4d10(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    Projectile::FUN_009c58e0(apLoadGameBuffer);
+    Projectile::RevertBGS_009c58e0(apLoadGameBuffer);
     bFlag150 = 0;
 }
 
 struct ObjHelper
 {
-    void* __thiscall FUN_00810660();
-    TESForm* __thiscall FUN_00621a90();
+    void* __thiscall bhkCharacterController_GetNiObject();
+    TESForm* __thiscall bhkCharacterProxy_GethkShapePhantom();
 };
 
 extern TESObjectREFR* __cdecl GetReferenceFromNiAVObject(NiAVObject*);
@@ -68,13 +71,13 @@ void GrenadeProjectile::DispatchReferenceSourceFiles(ObjHelper* pObjHelper, void
 {
     if (pObjHelper)
     {
-        if (pObjHelper->FUN_00810660())
+        if (pObjHelper->bhkCharacterController_GetNiObject())
         {
             TESObjectREFR* pRef8;
             BSSimpleList<TESFile*>* m_kSourceFiles;
             int nCount2;
-            pRef8 = GetReferenceFromNiAVObject((NiAVObject*)pObjHelper->FUN_00810660());
-            m_kSourceFiles = pObjHelper->FUN_00621a90()->GetSourceFiles();
+            pRef8 = GetReferenceFromNiAVObject((NiAVObject*)pObjHelper->bhkCharacterController_GetNiObject());
+            m_kSourceFiles = pObjHelper->bhkCharacterProxy_GethkShapePhantom()->GetSourceFiles();
             nCount2 = -1;
             ((void(__thiscall*)(void*, TESObjectREFR*, void**, void**, BSSimpleList<TESFile*>*, int, int))(
                 (*(void***)this)[203]))(this, pRef8, &a2, &a5, m_kSourceFiles, nCount2, 0x24);
@@ -86,7 +89,7 @@ void GrenadeProjectile::DispatchReferenceSourceFiles(ObjHelper* pObjHelper, void
 // @fnv 0x009b46c0
 void GrenadeProjectile::SetLightEnabled()
 {
-    FUN_005726e0(GetNiNode(), !FUN_00444d00(0x200));
+    TESObjectREFR_SetLight_005726e0(GetNiNode(), !Projectile_IsFlagSet(0x200));
 }
 
 // Constructs the base object, clears bFlag150, and sets the form type to 0x3e.
@@ -109,7 +112,7 @@ struct GPCdBody
 {
     void* _ref_006815c0();
 };
-void* __cdecl FUN_004b59f0(const void*);
+void* __cdecl hkpGetRigidBody(const void*);
 NiPoint3& __cdecl SetNiPoint3FromHkVector4(NiPoint3&, const hkVector4&);
 struct GPContact
 {
@@ -265,11 +268,11 @@ struct GPRefVt
 // @fnv 0x009b4950
 void GrenadeProjectile::HandleContactHit(GPContact* apContact)
 {
-    void* pCollA2 = FUN_004b59f0(apContact->pBodyA->GetLastNode());
+    void* pCollA2 = hkpGetRigidBody(apContact->pBodyA->GetLastNode());
     bhkCollisionObject* pbhkA8 = pCollA2 ? bhkCollisionObject::GetFromRigidBody((const hkpRigidBody*)pCollA2) : 0;
     NiAVObject* pNiA2 = pbhkA8 ? GetCollisionSceneObject(pbhkA8) : 0;
     TESObjectREFR* pRefA_ = pNiA2 ? GetReferenceFromNiAVObject(pNiA2) : 0;
-    void* pCollB3 = FUN_004b59f0(apContact->pBodyB->GetLastNode());
+    void* pCollB3 = hkpGetRigidBody(apContact->pBodyB->GetLastNode());
     bhkCollisionObject* pbhkB_ = pCollB3 ? bhkCollisionObject::GetFromRigidBody((const hkpRigidBody*)pCollB3) : 0;
     NiAVObject* pNiB = pbhkB_ ? GetCollisionSceneObject(pbhkB_) : 0;
     TESObjectREFR* pRefB = pNiB ? GetReferenceFromNiAVObject(pNiB) : 0;
@@ -317,7 +320,7 @@ void GrenadeProjectile::InitProjectileFlags()
     }
 
     SetProjFlag(0x2000,
-                (GetProjectileBase()->FUN_004fd360() && !GetProjectileBase()->FUN_00975300() && !GetProjectileBase()->FUN_005de080()) ? true : false);
+                (GetProjectileBase()->GetHasExplosion() && !GetProjectileBase()->FUN_00975300() && !GetProjectileBase()->GetHasExplosionDetonates_005de080()) ? true : false);
     SetProjFlag(0x8000, true);
     SetProjFlag(0x40000, true);
     FinishSetup();
@@ -760,9 +763,9 @@ struct Ref
 
     virtual bool IsValidTarget();
 
-    int FUN_0043fcd0();
+    int TESObjectREFR_Get3D();
 
-    bool FUN_00437b90();
+    bool TESForm_GetDisabledOrDeleted();
 
     bool FUN_00477ba0();
 
@@ -770,11 +773,11 @@ struct Ref
 
     unsigned short GetShortAtOffset1C0();
 
-    int FUN_00517630();
+    int bhkRigidBody_GetMotionType();
 
     int SetEffectValue(int, float, int);
 
-    void FUN_0089a760(void*, int);
+    void Actor_HitMe(void*, int);
 };
 
 struct Hit
@@ -819,7 +822,7 @@ struct ContactHelper
 
     ~ContactHelper();
 
-    Ref* FUN_00559450();
+    Ref* Modelloader_GetReferencedThis();
 };
 
 struct LoadedProjectile
@@ -858,19 +861,19 @@ struct LoadedProjectile
 struct Resource
 {
 
-    int FUN_0043fcd0();
+    int TESObjectREFR_Get3D();
 
-    int FUN_00517630();
+    int bhkRigidBody_GetMotionType();
 };
 
 struct EventStatus
 {
 
-    bool FUN_004fd360();
+    bool GetHasExplosion();
 
     bool FUN_00975300();
 
-    bool FUN_005de080();
+    bool GetHasExplosionDetonates_005de080();
 };
 
 extern Ref* DAT_011dea3c;
@@ -885,17 +888,17 @@ extern double DAT_01012060;
 
 struct TargetSettings
 {
-    bool FUN_00525430();
+    bool VATS_IsInVats();
 };
 extern TargetSettings DAT_011f2250;
 
 extern void __cdecl PlayMysteriousStrangerSound();
 
-extern Ref* __cdecl FUN_004b5a80(int);
+extern Ref* __cdecl bhkEntity_Getbhk(int);
 
 struct FormID
 {
-    Ref* FUN_00460140();
+    Ref* TESDataHandler_GetWorldSpaceList();
 };
 
 extern LoadedProjectile* __cdecl FUN_009b4d90();
@@ -979,9 +982,9 @@ struct ImpactProjectile : Ref
 
     float GetFieldDC();
 
-    Ref* FUN_00874480();
+    Ref* Projectile_GetShooter();
 
-    Ref* FUN_00476c90();
+    Ref* Sky_GetMode();
 
     EventStatus* FUN_004181e0();
 
@@ -989,9 +992,9 @@ struct ImpactProjectile : Ref
 
     void ApplyImpact(Ref*, const NiPoint3*, const NiPoint3*, Ref*, int);
 
-    NiPoint3 FUN_009b7010(Ref*);
+    NiPoint3 Projectile_GetMovementDirection(Ref*);
 
-    void FUN_009c2e80(NiPoint3, NiPoint3);
+    void Projectile_ApplyImpactForce(NiPoint3, NiPoint3);
 };
 
 // Iterates the hit list, applies impact effects to each hit's target, and marks the projectile as impacted.
@@ -1022,11 +1025,11 @@ bool ImpactProjectile::ProcessHits()
             if (aTarget && GetFieldDC() > DAT_01012060 && hit->valid29)
             {
 
-                int oldState = hit->reference->FUN_0043fcd0();
+                int oldState = hit->reference->TESObjectREFR_Get3D();
 
-                if (FUN_00874480() && FUN_00874480()->IsActor() &&
+                if (Projectile_GetShooter() && Projectile_GetShooter()->IsActor() &&
 
-                    aTarget->IsActor() && !FUN_00874480()->FUN_00437b90())
+                    aTarget->IsActor() && !Projectile_GetShooter()->TESForm_GetDisabledOrDeleted())
                 {
 
                     inverse = !aTarget->CheckFlag(0);
@@ -1036,19 +1039,19 @@ bool ImpactProjectile::ProcessHits()
                 else
                 {
 
-                    Ref* form = FUN_004b5a80(hit->itemID);
+                    Ref* form = bhkEntity_Getbhk(hit->itemID);
 
-                    if (form && form->FUN_00517630() < 4)
+                    if (form && form->bhkRigidBody_GetMotionType() < 4)
 
                         aTarget->ApplyValue(GetValue());
 
-                    Ref* attacker = (FUN_00874480() && FUN_00874480()->IsActor()) ? FUN_00874480() : 0;
+                    Ref* attacker = (Projectile_GetShooter() && Projectile_GetShooter()->IsActor()) ? Projectile_GetShooter() : 0;
 
                     float jump = 0.0f;
 
-                    if (attacker && attacker->IsValidTarget() && DAT_011f2250.FUN_00525430() && FUN_00476c90())
+                    if (attacker && attacker->IsValidTarget() && DAT_011f2250.VATS_IsInVats() && Sky_GetMode())
 
-                        jump = (float)FUN_00476c90()->GetShortAtOffset1C0();
+                        jump = (float)Sky_GetMode()->GetShortAtOffset1C0();
 
                     float delay = GetFieldDC() + jump;
 
@@ -1058,11 +1061,11 @@ bool ImpactProjectile::ProcessHits()
                         Ref* actor = aTarget;
                         ContactHelper helper(new LoadedProjectile());
 
-                        InitFromObjects(helper.FUN_00559450(), 0, actor, 0, this);
+                        InitFromObjects(helper.Modelloader_GetReferencedThis(), 0, actor, 0, this);
 
                         inverse = !actor->CheckFlag(0);
 
-                        actor->FUN_0089a760(helper.FUN_00559450(), 0);
+                        actor->Actor_HitMe(helper.Modelloader_GetReferencedThis(), 0);
                     }
                     else
                     {
@@ -1070,45 +1073,45 @@ bool ImpactProjectile::ProcessHits()
                         hit->reference->ApplyTime(delay, 0);
                     }
 
-                    if (aTarget->FUN_00477ba0() && FUN_00874480() == DAT_011dea3c)
+                    if (aTarget->FUN_00477ba0() && Projectile_GetShooter() == DAT_011dea3c)
 
                         DAT_011dea3c->SetEffectValue(10, DAT_0102918c, 0);
                 }
 
-                if (oldState != aTarget->FUN_0043fcd0())
+                if (oldState != aTarget->TESObjectREFR_Get3D())
                     aChanged = true;
             }
 
             if (!aTarget || !(aTarget->FUN_0044ddc0() & 0x20))
             {
 
-                if (!FUN_004181e0()->FUN_004fd360() || FUN_004181e0()->FUN_00975300() || FUN_004181e0()->FUN_005de080())
+                if (!FUN_004181e0()->GetHasExplosion() || FUN_004181e0()->FUN_00975300() || FUN_004181e0()->GetHasExplosionDetonates_005de080())
                 {
 
                     if (!aChanged)
                     {
 
-                        if (DAT_011f21e8 && DAT_011f21e8 == FUN_00874480() && aTarget && aTarget->IsActor())
+                        if (DAT_011f21e8 && DAT_011f21e8 == Projectile_GetShooter() && aTarget && aTarget->IsActor())
 
                             PlayMysteriousStrangerSound();
 
-                        if (DAT_011f21ec && DAT_011f21ec == FUN_00874480() && aTarget && aTarget->IsActor() &&
+                        if (DAT_011f21ec && DAT_011f21ec == Projectile_GetShooter() && aTarget && aTarget->IsActor() &&
                             aTarget->CheckFlag(0) && inverse)
 
                             PlayMysteriousStrangerSound();
 
-                        Ref* form = hit->itemID ? ((FormID*)hit->itemID)->FUN_00460140() : 0;
+                        Ref* form = hit->itemID ? ((FormID*)hit->itemID)->TESDataHandler_GetWorldSpaceList() : 0;
 
                         ApplyImpact(aTarget, &hit->position, &hit->normal, form, hit->unk20);
 
-                        FUN_009c2e80(hit->position, FUN_009b7010(form));
+                        Projectile_ApplyImpactForce(hit->position, Projectile_GetMovementDirection(form));
                     }
                 }
             }
 
             processed = true;
 
-            if (FUN_00437b90())
+            if (TESForm_GetDisabledOrDeleted())
 
                 break;
         }

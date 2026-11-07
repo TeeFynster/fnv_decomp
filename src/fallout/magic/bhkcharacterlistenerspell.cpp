@@ -15,31 +15,33 @@ const NiRTTI* bhkCharacterProxy::GetRTTI() const
 }
 
 // @fnv 0x00806f10
-unsigned int __fastcall FUN_00806f10(bhkCharacterProxy*)
+// src: COMMUNITY 0x00806f10
+unsigned int __fastcall bhkCharacterController_GetCinfoSize(bhkCharacterProxy*)
 {
     return 0xc0;
 }
 
-const char* __cdecl FUN_00458b20();
+const char* __cdecl hkVector4_getZero();
 int __fastcall GetReferenceFlags(void*);
 struct ProxyHolder
 {
-    const char* FUN_00cac950();
+    const char* hkpCharacterProxy_getLinearVelocity();
 };
 struct Holder00807080
 {
-    const char* FUN_00807080();
+    const char* bhkCharacterProxy_GethkLinearVelocity();
 };
 // Looks up a proxy holder via GetReferenceFlags; if found, returns its FUN_00cac950 result, otherwise returns FUN_00458b20's result.
 // @fnv 0x00807080
-const char* Holder00807080::FUN_00807080()
+// src: XBOX_PDB 0x00807080
+const char* Holder00807080::bhkCharacterProxy_GethkLinearVelocity()
 {
     ProxyHolder* pProxy = (ProxyHolder*)GetReferenceFlags(this);
-    const char* pResult = FUN_00458b20();
+    const char* pResult = hkVector4_getZero();
     if (pProxy)
     {
         ((NiObject*)this)->NiObject::GetStreamableRTTI();
-        pResult = pProxy->FUN_00cac950();
+        pResult = pProxy->hkpCharacterProxy_getLinearVelocity();
         ((NiObject*)this)->NiObject::GetStreamableRTTI();
     }
     return pResult;
@@ -57,7 +59,7 @@ struct Node2
     int unk04;
     int unk08;
     int unk0C;
-    void* __thiscall FUN_0043b540();
+    void* __thiscall hkpCollidable_getCollisionFilterInfo();
 };
 
 struct Node
@@ -88,13 +90,13 @@ struct Str20
 {
     int unk00;
     void __thiscall FUN_008c71b0(void* p);
-    int __thiscall FUN_0043b4d0();
+    int __thiscall CFilter_GetLayer();
 };
 
 struct __declspec(align(16)) Vec16
 {
     __m128 m_v;
-    int __thiscall FUN_005532a0(float a, float b, float c, float d);
+    int __thiscall hkVector4_hkVector4(float a, float b, float c, float d);
 };
 
 struct Item
@@ -115,12 +117,12 @@ struct Item
     int unk34;
     int unk38;
     int unk3C;
-    void __thiscall FUN_004a3f10(int p);
+    void __thiscall SetValue(int p);
 };
 
 struct ItemSub
 {
-    void __thiscall FUN_004a3f10(int p);
+    void __thiscall SetValue(int p);
 };
 
 struct Arg2
@@ -149,54 +151,55 @@ struct Arg2
 
 struct Owner1
 {
-    Node* __thiscall FUN_00807770(int i);
+    Node* __thiscall EvaluateValue_00807770(int i);
 };
 
 struct Global
 {
-    int __thiscall FUN_0089f4e0();
+    int __thiscall PlayerCharacter_GetGrabObject();
 };
 
 extern Global* g_pGlobalDea3c;
-int __cdecl FUN_004b59f0(void* p);
+int __cdecl hkpGetRigidBody(void* p);
 
 struct ProxyUpdate
 {
-    int __thiscall FUN_00807080();
-    int __thiscall FUN_00807730(void* p);
-    void __thiscall FUN_00806f20(Owner1* a1, Arg2* a2);
+    int __thiscall bhkCharacterProxy_GethkLinearVelocity();
+    int __thiscall bhkCharacterListenerSpell_GetObjectREFR(void* p);
+    void __thiscall bhkCharacterListenerSpell_processConstraintsCallback(Owner1* a1, Arg2* a2);
 };
 
 // For each item, checks its node's m_48 and calls FUN_004a3f10 on the item when branch conditions are met.
 // @fnv 0x00806f20
-void ProxyUpdate::FUN_00806f20(Owner1* apOwner, Arg2* apArgs)
+// src: COMMUNITY 0x00806f20
+void ProxyUpdate::bhkCharacterListenerSpell_processConstraintsCallback(Owner1* apOwner, Arg2* apArgs)
 {
     int count = apArgs->m_4C;
     for (int i = 0; i < count; i++)
     {
         Item* item = apArgs->m_48 + i;
-        Node* pNode = apOwner->FUN_00807770(i);
-        int iResult1 = FUN_004b59f0(pNode->m_48);
+        Node* pNode = apOwner->EvaluateValue_00807770(i);
+        int iResult1 = hkpGetRigidBody(pNode->m_48);
         Str20 s;
-        s.FUN_008c71b0(pNode->m_48->FUN_0043b540());
-        int iResult3 = s.FUN_0043b4d0();
+        s.FUN_008c71b0(pNode->m_48->hkpCollidable_getCollisionFilterInfo());
+        int iResult3 = s.CFilter_GetLayer();
         if (iResult1 == 0)
         {
             if (iResult3 != 0x1e)
             {
-                ((ItemSub*)&item->unk10)->FUN_004a3f10(this->FUN_00807080());
+                ((ItemSub*)&item->unk10)->SetValue(this->bhkCharacterProxy_GethkLinearVelocity());
                 Vec16 t;
-                item->FUN_004a3f10(t.FUN_005532a0(0.0f, 0.0f, 0.0f, 1.0f));
+                item->SetValue(t.hkVector4_hkVector4(0.0f, 0.0f, 0.0f, 1.0f));
             }
         }
         else
         {
-            int iResult4 = this->FUN_00807730(pNode->m_48);
-            if (iResult4 != 0 && iResult4 == g_pGlobalDea3c->FUN_0089f4e0())
+            int iResult4 = this->bhkCharacterListenerSpell_GetObjectREFR(pNode->m_48);
+            if (iResult4 != 0 && iResult4 == g_pGlobalDea3c->PlayerCharacter_GetGrabObject())
             {
-                ((ItemSub*)&item->unk10)->FUN_004a3f10(this->FUN_00807080());
+                ((ItemSub*)&item->unk10)->SetValue(this->bhkCharacterProxy_GethkLinearVelocity());
                 Vec16 t;
-                item->FUN_004a3f10(t.FUN_005532a0(0.0f, 0.0f, 0.0f, 1.0f));
+                item->SetValue(t.hkVector4_hkVector4(0.0f, 0.0f, 0.0f, 1.0f));
                 break;
             }
         }

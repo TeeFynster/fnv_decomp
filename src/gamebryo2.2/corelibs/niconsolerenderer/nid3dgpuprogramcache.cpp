@@ -53,7 +53,8 @@ extern char* EmptyFS;
 extern MemoryManager g_memoryManager;
 
 // @fnv 0x00a644a0
-void FUN_00a644a0(char** p)
+// src: GUESS 0x00a644a0 (confidence: low)
+void Object_ProcessEntries_00a644a0(char** p)
 {
     if (p)
     {
@@ -70,7 +71,8 @@ void FUN_00a644a0(char** p)
 }
 
 // @fnv 0x00e8dd60
-const char* __cdecl FUN_00e8dd60()
+// src: COMMUNITY 0x00e8dd60
+const char* __cdecl NiD3DGPUProgramCache_GetPlatformSpecificCodeID()
 {
     return "hlsl";
 }
@@ -78,7 +80,8 @@ const char* __cdecl FUN_00e8dd60()
 extern "C" void* g_01270920;
 
 // @fnv 0x00e8ea10
-void* __cdecl FUN_00e8ea10()
+// src: COMMUNITY 0x00e8ea10
+void* __cdecl NiGPUProgramCache_GetRTTI()
 {
     return &g_01270920;
 }
@@ -401,11 +404,11 @@ struct W20Profiles
 {
     NiFixedString* data;
     unsigned int capacity, count, unk0c, unk10;
-    __declspec(nothrow) void FUN_00e8e290(unsigned int);
+    __declspec(nothrow) void ResizeStringArray(unsigned int);
     __declspec(nothrow) void PushBack(const NiFixedString& value)
     {
         if (count == capacity)
-            FUN_00e8e290(capacity > 0 ? capacity * 2 : 1);
+            ResizeStringArray(capacity > 0 ? capacity * 2 : 1);
         data[count++] = value;
     }
 };
@@ -587,8 +590,8 @@ struct ShaderLibrary8e
     void __thiscall AddShader();
     void __thiscall RegisterShader();
 };
-ShaderLibrary8e* __stdcall FUN_00e92eb0(ShaderProgram8e* pkProgram);
-long __stdcall FUN_00ee6e3a(unsigned int uiNumBytes, ShaderBuffer8e** ppkBuffer);
+ShaderLibrary8e* __stdcall NiD3DShaderProgramFactory_GetInstance(ShaderProgram8e* pkProgram);
+long __stdcall D3DXCreateBuffer_0(unsigned int uiNumBytes, ShaderBuffer8e** ppkBuffer);
 extern const char* DAT_0126fa48;
 extern const char* DAT_0126fa40;
 extern ShaderFactory8e* DAT_0126fa3c;
@@ -618,7 +621,7 @@ struct ShaderLoader8e
     virtual void v20();
     virtual const NiFixedString& GetLoaderName();
 
-    void FUN_00ee92d0(ShaderStream8e* pkStream, char* pcBuffer, unsigned int uiMaxLen);
+    void NiGPUProgramCache_LoadStringA(ShaderStream8e* pkStream, char* pcBuffer, unsigned int uiMaxLen);
     bool LoadShaderProgram(ShaderStream8e* pkStream, const NiFixedString& kName, ShaderProgram8e** ppkProgram,
                            bool bSkip);
 };
@@ -630,7 +633,7 @@ bool ShaderLoader8e::LoadShaderProgram(ShaderStream8e* pkStream, const NiFixedSt
     *ppkProgram = 0;
     unsigned int uiCodeSize = 0;
     char acType[256];
-    FUN_00ee92d0(pkStream, acType, 0x100);
+    NiGPUProgramCache_LoadStringA(pkStream, acType, 0x100);
 
     bool bVertex;
     if (FUN_00aa1360(acType, DAT_0126fa48) == 0)
@@ -648,7 +651,7 @@ bool ShaderLoader8e::LoadShaderProgram(ShaderStream8e* pkStream, const NiFixedSt
     }
 
     ShaderBuffer8e* pkBuffer = 0;
-    if (FUN_00ee6e3a(uiCodeSize, &pkBuffer) < 0)
+    if (D3DXCreateBuffer_0(uiCodeSize, &pkBuffer) < 0)
         return false;
 
     LoadBinary8e(pkStream, (char*)pkBuffer->GetBufferPointer(), uiCodeSize);
@@ -659,23 +662,23 @@ bool ShaderLoader8e::LoadShaderProgram(ShaderStream8e* pkStream, const NiFixedSt
         *ppkProgram = pkFactory->CreateVertexShaderProgram(pkBuffer, uiCodeSize, kName, "Main", GetLoaderName(), 0, 0,
                                                            false, false);
         if (*ppkProgram)
-            FUN_00e92eb0(*ppkProgram)->AddShader();
+            NiD3DShaderProgramFactory_GetInstance(*ppkProgram)->AddShader();
     }
     else
     {
         *ppkProgram = pkFactory->CreatePixelShaderProgram(pkBuffer, uiCodeSize, kName, "Main", GetLoaderName(), false);
         if (*ppkProgram)
-            FUN_00e92eb0(*ppkProgram)->RegisterShader();
+            NiD3DShaderProgramFactory_GetInstance(*ppkProgram)->RegisterShader();
     }
     pkBuffer->Release();
     return true;
 }
 
 #include <string.h>
-bool __cdecl FUN_00ee8d20();
+bool __cdecl NiGPUProgramCache_ValidateDirectory();
 void __cdecl fnv_StandardizeFilePath(char* path);
-bool __cdecl FUN_00aa1ab0(const char* dir);
-bool __cdecl FUN_00aa1bb0(const char* dir);
+bool __cdecl NiFile_DirectoryExists(const char* dir);
+bool __cdecl NiFile_CreateDirectoryRecursive(const char* dir);
 
 inline unsigned int NiBinaryStream::Write(const void* pvBuffer, unsigned int uiBytes)
 {
@@ -690,7 +693,7 @@ inline unsigned int NiBinaryStream::Write(const void* pvBuffer, unsigned int uiB
 // @fnv 0x00e8dd70
 bool __stdcall WriteTextToFile(const char* pcFileName, const char* pcText)
 {
-    if (FUN_00ee8d20())
+    if (NiGPUProgramCache_ValidateDirectory())
     {
         char acDir[260];
         strcpy_s(acDir, 260, pcFileName);
@@ -699,7 +702,7 @@ bool __stdcall WriteTextToFile(const char* pcFileName, const char* pcText)
         if (pcSlash || (pcSlash = strrchr(acDir, '\\')) != 0)
             *pcSlash = 0;
 
-        if (FUN_00aa1ab0(acDir) || FUN_00aa1bb0(acDir))
+        if (NiFile_DirectoryExists(acDir) || NiFile_CreateDirectoryRecursive(acDir))
         {
             NiFile* pkFile = NiFile::GetFile(pcFileName, NiFile::WRITE_ONLY, 0x8000);
             if (pkFile)
@@ -713,14 +716,14 @@ bool __stdcall WriteTextToFile(const char* pcFileName, const char* pcText)
     return false;
 }
 
-void* __cdecl FUN_00aa1070(unsigned int size);
-void __cdecl FUN_00aa10f0(void* p);
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
+void __cdecl _NiFree_00aa10f0(void* p);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 __declspec(nothrow) void FUN_00a305b0(char*, unsigned int, const char*, ...);
 char* __cdecl FUN_00a5b690(const char* name);
-void* __cdecl FUN_00e93850(char* text, unsigned int len, char* path, char* path2, const char* entry, int target, int a,
+void* __cdecl NiD3DShaderProgramFactory_CreateVertexShaderFromBuffer(char* text, unsigned int len, char* path, char* path2, const char* entry, int target, int a,
                            int b, int c, int d);
-void* __cdecl FUN_00e938e0(char* text, unsigned int len, char* path, char* path2, const char* entry, int target, int d);
+void* __cdecl NiD3DShaderProgramFactory_CreatePixelShaderFromBuffer(char* text, unsigned int len, char* path, char* path2, const char* entry, int target, int d);
 
 struct RefCountedBase
 {
@@ -865,12 +868,13 @@ class S00e8eb80_Obj
     unsigned char unk43;
     const char* m_44;
 
-    RefCountedBase* FUN_00e8eb80(const char* name, const char* src, ArrayHolder* refs);
+    RefCountedBase* NiD3DGPUProgramCache_GenerateProgram(const char* name, const char* src, ArrayHolder* refs);
 };
 
 // Compiles shader source into a ShaderNode, adds refs, and inserts it into the ShaderMap keyed by name.
 // @fnv 0x00e8eb80
-RefCountedBase* S00e8eb80_Obj::FUN_00e8eb80(const char* name, const char* apSource, ArrayHolder* refs)
+// src: XBOX_PDB 0x00e8eb80
+RefCountedBase* S00e8eb80_Obj::NiD3DGPUProgramCache_GenerateProgram(const char* name, const char* apSource, ArrayHolder* refs)
 {
     if (!m_3a)
     {
@@ -879,7 +883,7 @@ RefCountedBase* S00e8eb80_Obj::FUN_00e8eb80(const char* name, const char* apSour
         pObj.m_p = 0;
 
         unsigned int srcLen = strlen(apSource);
-        char* text = (char*)FUN_00aa1070(srcLen + 0x208);
+        char* text = (char*)_NiMalloc_00aa1070(srcLen + 0x208);
 
         if (m_3c == 0)
         {
@@ -889,7 +893,7 @@ RefCountedBase* S00e8eb80_Obj::FUN_00e8eb80(const char* name, const char* apSour
             FUN_00a305b0(text, srcLen + 0x208, "#line 2 \"%s\"\n%s", path, apSource);
             unsigned int len = strlen(text);
             int tgt = m_24;
-            RefCountedBase* r = (RefCountedBase*)FUN_00e93850(text, len, path, path, "Main", tgt, 0, 0, 0, 1);
+            RefCountedBase* r = (RefCountedBase*)NiD3DShaderProgramFactory_CreateVertexShaderFromBuffer(text, len, path, path, "Main", tgt, 0, 0, 0, 1);
             pObj.FUN_00a5f860(r);
         }
         else if (m_3c == 2)
@@ -900,7 +904,7 @@ RefCountedBase* S00e8eb80_Obj::FUN_00e8eb80(const char* name, const char* apSour
             FUN_00a305b0(text, srcLen + 0x208, "#line 2 \"%s\"\n%s", path, apSource);
             unsigned int len = strlen(text);
             int tgt = m_24;
-            RefCountedBase* r = (RefCountedBase*)FUN_00e938e0(text, len, path, path, "Main", tgt, 1);
+            RefCountedBase* r = (RefCountedBase*)NiD3DShaderProgramFactory_CreatePixelShaderFromBuffer(text, len, path, path, "Main", tgt, 1);
             pObj.FUN_00a5f860(r);
         }
 
@@ -912,7 +916,7 @@ RefCountedBase* S00e8eb80_Obj::FUN_00e8eb80(const char* name, const char* apSour
         RefCountedBase* obj = pObj.m_p;
         if (obj != 0 && vfn7C(obj, refs))
         {
-            ShaderNode* blk = (ShaderNode*)FUN_00aa13e0(0x18);
+            ShaderNode* blk = (ShaderNode*)Object_DispatchCommandFour(0x18);
             ShaderNode* node = blk != 0 ? blk->FUN_00e8ead0() : 0;
 
             for (unsigned int i = 0; i < refs->m_uiItemCount; i++)
@@ -936,7 +940,7 @@ RefCountedBase* S00e8eb80_Obj::FUN_00e8eb80(const char* name, const char* apSour
             obj = pObj.m_p;
         }
 
-        FUN_00aa10f0(text);
+        _NiFree_00aa10f0(text);
 
         if (obj != 0)
         {

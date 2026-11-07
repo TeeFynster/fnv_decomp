@@ -12,13 +12,14 @@ typedef unsigned int hkUint32;
 
 
 // @fnv 0x00e2f270
-void __stdcall FUN_00e2f270(int)
+// src: COMMUNITY 0x00e2f270
+void __stdcall nullsub_85(int)
 {}
 
 struct FUN_00cb0c30_s
 {
     char* m_pcString;
-    void FUN_00cb0c30(const FUN_00cb0c30_s& kOther) throw();
+    void UpdateState_00cb0c30(const FUN_00cb0c30_s& kOther) throw();
 };
 class hkaAnnotationTrack
 {
@@ -31,7 +32,7 @@ class hkaAnnotationTrack
         Annotation& operator=(const Annotation& kOther)
         {
             m_uiCommandId = kOther.m_uiCommandId;
-            m_pText.FUN_00cb0c30(kOther.m_pText);
+            m_pText.UpdateState_00cb0c30(kOther.m_pText);
             return *this;
         }
     };
@@ -113,7 +114,7 @@ int LocalhkaAnimation::CountAnnotationsInRange(float from, float delta)
 // Retained locally because include/hkMemoryRouter.h is not available.
 #include "../../../../../include/hkMemoryRouter.h"
 
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 inline void* operator new(unsigned int, void* pvWhere)
 {
@@ -151,7 +152,7 @@ __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& kAlloc, 
 template <class T, class Allocator>
 __forceinline hkArray<T, Allocator>& hkArray<T, Allocator>::operator=(const hkArray& a)
 {
-    hkMemoryAllocator& kAlloc = FUN_00c85750().heap();
+    hkMemoryAllocator& kAlloc = hkMemoryRouter_getInstance().heap();
     const int iOldSize = m_iElementCount;
     const int iNewSize = a.m_iElementCount;
     int iCopiedSize = (iNewSize > iOldSize) ? iOldSize : iNewSize;

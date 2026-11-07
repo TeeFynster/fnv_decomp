@@ -14,5 +14,5 @@ public:
     unsigned char cFlags;
     unsigned char layoutPadding13[1];
 
-    void FUN_0067ff10();  // 0x0067ff10: the VATS endian swap TESObjectWEAP::LoadForm calls
+    void OBJ_WEAP_VATS_SPECIAL_Endian();  // 0x0067ff10: the VATS endian swap TESObjectWEAP::LoadForm calls
 };

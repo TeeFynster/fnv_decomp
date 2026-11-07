@@ -20,13 +20,13 @@ struct Updater
     virtual void v04();
     virtual int update(int x, int y);
 };
-static void FUN_00da4a50(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y, Out* out2, Out* out1);
+static void extractChildShapes_00da4a50(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y, Out* out2, Out* out1);
 void S00da4a50_Wrap(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y, Out* out2, Out* out1);
 
 #include <xmmintrin.h>
 struct S00da4920_Sub
 {
-    void FUN_00cb21e0(void* arg);
+    void hkTransform_setInverse(void* arg);
 };
 
 struct S00da4920_Blob
@@ -65,17 +65,18 @@ struct S00da4920_Blob
 extern char DAT_010c4c00;
 
 // @fnv 0x00da4920
-static __declspec(noinline) void FUN_00da4920(S00da4920_Blob* src, S00da4920_Blob* dst)
+// src: XBOX_PDB 0x00da4920
+static __declspec(noinline) void hkAgent1nMachine_flipInput(S00da4920_Blob* src, S00da4920_Blob* dst)
 {
     dst->unk00 = src->unk04;
     dst->unk04 = src->unk00;
     dst->unk0C = src->unk0C;
     dst->unk10 = src->unk10;
     dst->m_v70 = _mm_xor_ps(src->m_v70, *(const __m128*)&DAT_010c4c00);
-    ((S00da4920_Sub*)((char*)dst + 0x20))->FUN_00cb21e0((char*)src + 0x20);
+    ((S00da4920_Sub*)((char*)dst + 0x20))->hkTransform_setInverse((char*)src + 0x20);
 }
 
 void S00da4920_entry(S00da4920_Blob* src, S00da4920_Blob* dst)
 {
-    FUN_00da4920(src, dst);
+    hkAgent1nMachine_flipInput(src, dst);
 }

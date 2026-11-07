@@ -5,10 +5,10 @@
 
 // src/havok/physics/collide/agent/convexagent/boxbox/hkpboxboxagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/boxbox/hkpboxboxagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-extern "C" void* __cdecl FUN_00d401d0(void);
-extern "C" void* __cdecl FUN_00d406c0(void);
+extern "C" void* __cdecl hkpBoxBoxAgent_createBoxBoxAgent(void);
+extern "C" void* __cdecl hkpBoxBoxAgent_staticGetPenetrations(void);
 extern "C" void* __cdecl FUN_00dac450(void);
-extern "C" void* __cdecl FUN_00daf8e0(void);
+extern "C" void* __cdecl Object_ProcessEntries_00daf8e0(void);
 struct FUN_00d408e0_1 {
     void* p1;
     void* p2;
@@ -17,7 +17,7 @@ struct FUN_00d408e0_1 {
     unsigned char b1;
     unsigned char b2;
 };
-void __cdecl FUN_00d408e0(FUN_00d408e0_1* a);
+void __cdecl Object_InitializeAgentFunctionTable_00d408e0(FUN_00d408e0_1* a);
 struct S_00d40180_Target {
     virtual void vfn_00();
     virtual void vfn_04();
@@ -60,7 +60,7 @@ void __cdecl RegisterStaticCollisionAgent(D41FD0CollisionDispatcher* dispatcher)
 extern "C" const double DAT_010cf200;
 extern "C" char DAT_010cf1c4;
 extern "C" void* __cdecl FUN_00dacc00(void* a1, void* a2, void* a3, void* a4);
-extern "C" void* __cdecl FUN_00c85750(void);
+extern "C" void* __cdecl hkMemoryRouter_getInstance(void);
 class Allocator
 {
 public:
@@ -86,7 +86,7 @@ public:
 class SubStub
 {
 public:
-    void FUN_00db0920();
+    void InitializeEmptyEntries();
 };
 class SpawnedObject
 {
@@ -96,15 +96,16 @@ public:
     unsigned short m_06;
     void* m_08;
 };
-void* FUN_00d401d0(void* a1, void* a2, void* a3, void* a4);
-extern "C" void __cdecl FUN_00d40470(void* a, void* b, void* c, void* d);
+void* hkpBoxBoxAgent_createBoxBoxAgent(void* a1, void* a2, void* a3, void* a4);
+extern "C" void __cdecl hkpBoxBoxAgent_staticGetClosestPoints(void* a, void* b, void* c, void* d);
 // @fnv 0x00d406a0
-extern "C" void __stdcall FUN_00d406a0(void* a, void* b, void* c, void* d) {
-    FUN_00d40470(a, b, c, d);
+// src: HAVOK_SRC 0x00d406a0
+extern "C" void __stdcall hkpBoxBoxAgent_getClosestPoints(void* a, void* b, void* c, void* d) {
+    hkpBoxBoxAgent_staticGetClosestPoints(a, b, c, d);
 }
 typedef void (__cdecl *FUN_00d406c0_fn4)(void*, void*, void*, void*);
-extern "C" void* __cdecl FUN_00d406c0(void);
-void __stdcall FUN_00d408c0(void* a1, void* a2, void* a3, void* a4);
+extern "C" void* __cdecl hkpBoxBoxAgent_staticGetPenetrations(void);
+void __stdcall hkpBoxBoxAgent_getPenetrations(void* a1, void* a2, void* a3, void* a4);
 
 #include <xmmintrin.h>
 inline void* operator new(unsigned int, void* p) { return p; }
@@ -145,7 +146,7 @@ struct Transform70 {
         z = a.z;
         t = a.t;
     }
-    void FUN_00cb22f0(const Transform70*, const Transform70*);
+    void hkTransform_setMulInverseMul(const Transform70*, const Transform70*);
 };
 
 struct Shape70 {
@@ -209,7 +210,7 @@ struct Query70 {
         expandedB.quad=_mm_add_ps(toleranceVec.quad, hb.quad);
     }
 
-    hkBool70 FUN_00db2750(Contact70*);
+    hkBool70 UpdateState_00db2750(Contact70*);
 };
 
 struct CollisionWork70 {
@@ -219,7 +220,8 @@ struct CollisionWork70 {
 };
 
 // @fnv 0x00d40470
-extern "C" void __cdecl FUN_00d40470(void* first, void* second, void* rawInput, void* rawCollector)
+// src: XBOX_PDB 0x00d40470
+extern "C" void __cdecl hkpBoxBoxAgent_staticGetClosestPoints(void* first, void* second, void* rawInput, void* rawCollector)
 {
     {
         TimerStream70* stream = (TimerStream70*)TlsGetValue(DAT_0126835c);
@@ -251,14 +253,14 @@ extern "C" void __cdecl FUN_00d40470(void* first, void* second, void* rawInput, 
     hb; hb.quad=_mm_set1_ps(r_hb);
     hb.quad=_mm_add_ps(sb->half.quad, hb.quad);
 
-    relative.FUN_00cb22f0(a->transform, b->transform);
+    relative.hkTransform_setMulInverseMul(a->transform, b->transform);
 
     new (&query) Query70(a, b, relative, ha, hb, ((Input70*)rawInput)->GetTolerance());
 
     contact.a = a;
     contact.b = b;
 
-    hkBool70 hit = query.FUN_00db2750(&contact);
+    hkBool70 hit = query.UpdateState_00db2750(&contact);
 
     if (hit) {
         ((Collector70*)rawCollector)->Add(&contact);

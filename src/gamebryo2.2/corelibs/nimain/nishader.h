@@ -5,7 +5,7 @@
 // gamebryo2.2/corelibs/nimain/nishader.h
 
 #pragma optimize("", off)
-bool FUN_0043b300(const NiRTTI*, NiAVObject*);
+bool NiObject_IsKindOf(const NiRTTI*, NiAVObject*);
 class GarbageCollectorObjectPtr
 {
   public:
@@ -13,7 +13,7 @@ class GarbageCollectorObjectPtr
     NiAVObject* operator->() const;
 };
 extern NiRTTI DAT_01267b70;
-GarbageCollectorObjectPtr* FUN_00c85ef0(GarbageCollectorObjectPtr*, NiAVObject*, const NiRTTI*);
+GarbageCollectorObjectPtr* bhkWorldObject_GetProperty(GarbageCollectorObjectPtr*, NiAVObject*, const NiRTTI*);
 __forceinline bool NiShader::IsKindOfType(const NiRTTI* type) const
 {
     const NiRTTI* current = GetRTTI();
@@ -26,7 +26,8 @@ __forceinline bool NiShader::IsKindOfType(const NiRTTI* type) const
     return false;
 }
 // @fnv 0x0043b300
-bool FUN_0043b300(const NiRTTI* type, NiAVObject* object)
+// src: XBOX_PDB 0x0043b300
+bool NiObject_IsKindOf(const NiRTTI* type, NiAVObject* object)
 {
     if (!object)
         return false;
@@ -37,7 +38,7 @@ bool FUN_0043b300(const NiRTTI* type, NiAVObject* object)
 NiAVObject* NiShader::DynamicCast(NiAVObject* object)
 {
     GarbageCollectorObjectPtr result;
-    return FUN_00c85ef0(&result, object, &DAT_01267b70)->operator->();
+    return bhkWorldObject_GetProperty(&result, object, &DAT_01267b70)->operator->();
 }
 
 #pragma optimize("", on)

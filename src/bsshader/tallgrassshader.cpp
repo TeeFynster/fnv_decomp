@@ -57,8 +57,8 @@ struct Prop
 {
     char pad[0x20];
     unsigned int flags;
-    void FUN_00ba8d00(bool);
-    void FUN_00441130(int, int);
+    void BSShaderProperty_SetMotionBlurred(bool);
+    void BSShaderProperty_SetFlag(int, int);
 };
 struct PropHelper
 {
@@ -84,7 +84,8 @@ struct Node
     unsigned short count;
 };
 // @fnv 0x00ba90a0
-void FUN_00ba90a0(Obj* apObj)
+// src: COMMUNITY 0x00ba90a0
+void BSShaderProperty_ToggleMotionBlurRecurse(Obj* apObj)
 {
     if (!apObj)
         return;
@@ -92,7 +93,7 @@ void FUN_00ba90a0(Obj* apObj)
     {
         Prop* p = ((PropHelper*)apObj)->GetProperty(3);
         if (p)
-            p->FUN_00ba8d00((p->flags & 0x10) <= 0);
+            p->BSShaderProperty_SetMotionBlurred((p->flags & 0x10) <= 0);
         return;
     }
     Node* n = apObj->v3();
@@ -103,7 +104,7 @@ void FUN_00ba90a0(Obj* apObj)
         {
             Obj* c = n->kids[i];
             if (c)
-                FUN_00ba90a0(c);
+                BSShaderProperty_ToggleMotionBlurRecurse(c);
         }
     }
 }
@@ -113,8 +114,8 @@ struct Prop
 {
     char pad[0x20];
     unsigned char flags;
-    void FUN_00ba8d00(int);
-    void FUN_00441130(int, int);
+    void BSShaderProperty_SetMotionBlurred(int);
+    void BSShaderProperty_SetFlag(int, int);
 };
 struct PropHelper
 {
@@ -140,7 +141,8 @@ struct Node
     unsigned short count;
 };
 // @fnv 0x00ba9120
-void FUN_00ba9120(Obj* pObj, int a)
+// src: COMMUNITY 0x00ba9120
+void BSShaderProperty_SetMotionBlurRecurse(Obj* pObj, int a)
 {
     if (!pObj)
         return;
@@ -148,7 +150,7 @@ void FUN_00ba9120(Obj* pObj, int a)
     {
         Prop* p = ((PropHelper*)pObj)->GetProperty(3);
         if (p)
-            p->FUN_00ba8d00(a);
+            p->BSShaderProperty_SetMotionBlurred(a);
         return;
     }
     Node* n = pObj->v3();
@@ -159,7 +161,7 @@ void FUN_00ba9120(Obj* pObj, int a)
         {
             Obj* c = n->kids[i];
             if (c)
-                FUN_00ba9120(c, a);
+                BSShaderProperty_SetMotionBlurRecurse(c, a);
         }
     }
 }
@@ -170,8 +172,8 @@ struct Prop
 {
     char pad[0x20];
     unsigned char flags;
-    void FUN_00ba8d00(int);
-    void FUN_00441130(int, bool);
+    void BSShaderProperty_SetMotionBlurred(int);
+    void BSShaderProperty_SetFlag(int, bool);
 };
 struct PropHelper
 {
@@ -197,7 +199,8 @@ struct Node
     unsigned short count;
 };
 // @fnv 0x00ba91a0
-void FUN_00ba91a0(Obj* pObj, int a, bool b)
+// src: XBOX_PDB 0x00ba91a0
+void BSShaderProperty_SetFlagRecurse(Obj* pObj, int a, bool b)
 {
     if (!pObj)
         return;
@@ -205,7 +208,7 @@ void FUN_00ba91a0(Obj* pObj, int a, bool b)
     {
         Prop* p = ((PropHelper*)pObj)->GetProperty(3);
         if (p)
-            p->FUN_00441130(a, b);
+            p->BSShaderProperty_SetFlag(a, b);
         return;
     }
     Node* n = pObj->v3();
@@ -216,7 +219,7 @@ void FUN_00ba91a0(Obj* pObj, int a, bool b)
         {
             Obj* c = n->kids[i];
             if (c)
-                FUN_00ba91a0(c, a, b);
+                BSShaderProperty_SetFlagRecurse(c, a, b);
         }
     }
 }
@@ -224,7 +227,8 @@ void FUN_00ba91a0(Obj* pObj, int a, bool b)
 
 extern int DAT_010b8480;
 // @fnv 0x00ba9230
-void __fastcall FUN_00ba9230(void** self, int)
+// src: GUESS 0x00ba9230 (confidence: low)
+void __fastcall Tallgrassshader_ReleaseStorage_00ba9230(void** self, int)
 {
     void* p = self[1];
     self[0] = &DAT_010b8480;
@@ -242,7 +246,8 @@ struct FUN_00ba8e50
 };
 // Allocates and constructs a new property object, returning the pointer.
 // @fnv 0x00ba9250
-FUN_00ba8e50* FUN_00ba9250()
+// src: EXE 0x00ba9250
+FUN_00ba8e50* BSShaderProperty_CreateObject()
 {
     return new FUN_00ba8e50;
 }
@@ -252,7 +257,8 @@ struct FUN_00bac160_holder
     void ConfigureBeamPasses();
 };
 // @fnv 0x00bac8b0
-void __fastcall FUN_00bac8b0(FUN_00bac160_holder* self, int)
+// src: XBOX_PDB 0x00bac8b0
+void __fastcall TallGrassShader_ReloadShaders(FUN_00bac160_holder* self, int)
 {
     void** vt = *(void***)self;
     ((void(__thiscall*)(void*))vt[79])(self);
@@ -280,7 +286,8 @@ extern S* DAT_0126f74c;
 extern int DAT_011f95e4;
 extern int DAT_011f95e8;
 // @fnv 0x00bac8d0
-void __stdcall FUN_00bac8d0(unsigned int k)
+// src: XBOX_PDB 0x00bac8d0
+void __stdcall TallGrassShader_SetupPassTextures(unsigned int k)
 {
     S* g = DAT_0126f74c;
     if ((k >= 0x1c && k <= 0x25) || k - 0x262 <= 9)
@@ -298,7 +305,7 @@ void __stdcall FUN_00bac8d0(unsigned int k)
 namespace fnv_00bac950 {
 struct TextureReceiver
 {
-    void* FUN_004bc320(int);
+    void* BSRenderedTexture_GetTexture(int);
 };
 struct Poly
 {
@@ -450,11 +457,12 @@ struct Self
     virtual void s64();
     virtual void s65();
     virtual int s66();
-    int FUN_00bac950(Arg* arg);
+    int TallGrassShader_SetupGeometryTextures(Arg* arg);
 };
 // Stores the result of p->s45() into the first slot, and for k in 0x284..0x287 also stores a texture from DAT_011f91e0[3] into the second slot, then calls s66().
 // @fnv 0x00bac950
-int Self::FUN_00bac950(Arg* arg)
+// src: XBOX_PDB 0x00bac950
+int Self::TallGrassShader_SetupGeometryTextures(Arg* arg)
 {
     unsigned int k = DAT_011f91e4;
     Poly* p = arg->p;
@@ -463,7 +471,7 @@ int Self::FUN_00bac950(Arg* arg)
     if (k - 0x284 <= 3)
     {
         Slot* b = DAT_0126f74c->t->b;
-        b->f = DAT_011f91e0[3]->in->tr->FUN_004bc320(0);
+        b->f = DAT_011f91e0[3]->in->tr->BSRenderedTexture_GetTexture(0);
     }
     return s66();
 }
@@ -485,12 +493,13 @@ struct NiTexture;
 
 extern ImageSpaceTexture DAT_012005a4;
 // @fnv 0x00bad4a0
-void FUN_00bad4a0()
+// src: COMMUNITY 0x00bad4a0
+void ImageSpaceEffectHDR_ClearAdaptedLight()
 {
     if (DAT_012005a4.GetTexture())
     {
         DAT_012005a4.AddRenderedTexture();
-        DAT_012005a4.FUN_00ba38b0();
+        DAT_012005a4.ImageSpaceTexture_ClearTexture();
     }
 }
 
@@ -819,7 +828,7 @@ struct NiPropertyState_stub
     virtual void v67();
     virtual void v68();
     virtual void v69();
-    void FUN_00a81430(FUN_00ba8e50*, unsigned int);
+    void NiShadeProperty_CopyMembers(FUN_00ba8e50*, unsigned int);
 };
 struct FUN_00ba8ff0_shell : NiPropertyState_stub
 {
@@ -837,7 +846,7 @@ struct FUN_00ba8ff0_shell : NiPropertyState_stub
 FUN_00ba8e50* FUN_00ba8ff0_shell::CreatePropertyStateCopy(unsigned int uiPass)
 {
     FUN_00ba8e50* pResult = new FUN_00ba8e50;
-    FUN_00a81430(pResult, uiPass);
+    NiShadeProperty_CopyMembers(pResult, uiPass);
     *(int*)((char*)pResult + 0x20) = f20;
     *(int*)((char*)pResult + 0x24) = f24;
     *(float*)((char*)pResult + 0x28) = f28;
@@ -867,11 +876,12 @@ static __forceinline void S_BinRead(S_00ba9380_Bin* bin, void* v, unsigned int b
 struct FUN_00ba9380_cls
 {
     void SaveToStream(void* pOther);
-    void FUN_00ba9380(void* pOther);
+    void BSShaderProperty_SaveBinary(void* pOther);
 };
 // Calls SaveToStream, then reads four 4-byte values from the stream at pOther+0x250 into this+0x58, this+0x20, this+0x24 and this+0x30.
 // @fnv 0x00ba9380
-void FUN_00ba9380_cls::FUN_00ba9380(void* pOther)
+// src: XBOX_PDB 0x00ba9380
+void FUN_00ba9380_cls::BSShaderProperty_SaveBinary(void* pOther)
 {
     char* pObj = (char*)pOther;
     SaveToStream(pOther);
@@ -890,7 +900,7 @@ extern int DAT_00ffdead;
 
 struct S_00ba9520_Heap
 {
-    void FUN_00aa4060(void* p);
+    void MemoryManager_Deallocate(void* p);
 };
 extern S_00ba9520_Heap DAT_011f6238;
 
@@ -918,7 +928,7 @@ struct S_00ba9520_Base
     ~S_00ba9520_Base()
     {
         unk00 = (int)&DAT_010b8480;
-        DAT_011f6238.FUN_00aa4060(unk04);
+        DAT_011f6238.MemoryManager_Deallocate(unk04);
     }
 };
 
@@ -939,11 +949,11 @@ FUN_00ba9520::~FUN_00ba9520()
             pEntry->unk04 = 0;
             if (pEntry->unk0c != 0)
             {
-                DAT_011f6238.FUN_00aa4060(pEntry->unk0c);
+                DAT_011f6238.MemoryManager_Deallocate(pEntry->unk0c);
                 pEntry->unk0c = 0;
             }
             pEntry->unk0b = 0;
-            DAT_011f6238.FUN_00aa4060(pEntry);
+            DAT_011f6238.MemoryManager_Deallocate(pEntry);
         }
     }
     unk10 = &DAT_00ffdead;
@@ -956,11 +966,12 @@ struct Shader_bad060 : BSShader
 {
     NiPointer<NiD3DPass> m_aspPass[0x2c];
     void ConfigureBeamPasses();
-    bool FUN_00bad060();
+    bool TallGrassShader_LoadStagesAndPasses();
 };
 
 // @fnv 0x00bad060
-bool Shader_bad060::FUN_00bad060()
+// src: COMMUNITY 0x00bad060
+bool Shader_bad060::TallGrassShader_LoadStagesAndPasses()
 {
     AutoMemContext kContext(0x1c);
     for (int i = 0; i < 0x2c; ++i)
@@ -971,7 +982,7 @@ bool Shader_bad060::FUN_00bad060()
     return true;
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern "C" char DAT_010a1e50, DAT_010af648, DAT_01011584;
 extern "C" char DAT_010b8c54, DAT_010b8c48, DAT_010b8c34, DAT_010b8c24;
 extern "C" char DAT_010b8c10, DAT_010b8bfc, DAT_010b8bec;
@@ -981,7 +992,7 @@ struct ShaderVariableMap : RefObj_bacd00
     ShaderVariableMap(void* context, int mode);
     static void* operator new(unsigned int)
     {
-        return FUN_00aa13e0(0x44);
+        return Object_DispatchCommandFour(0x44);
     }
     virtual void Register(const void* name, unsigned int type, int a, int b, int c, const void* desc, int stride,
                           int count, const void* data, int optional);
@@ -1099,7 +1110,8 @@ extern Matrix215 DAT_01200470, DAT_012004b0;
 extern NiPoint3 DAT_012004f0;
 // If neither flag is set, copies the renderer's two matrices and the source's x/y/z point into globals and sets DAT_0120045e true and DAT_011adcdc false.
 // @fnv 0x00ba9420
-void FUN_00ba9420(const Source215* source)
+// src: COMMUNITY 0x00ba9420
+void BSShaderProperty_PreviousTransform_SaveCamera(const Source215* source)
 {
     if (!DAT_0120045c && !DAT_0120045d)
     {
@@ -1133,7 +1145,7 @@ struct S_00ba92c0_Stream;
 
 struct S_00ba92c0_Base
 {
-    void FUN_00a95190(S_00ba92c0_Stream& kStream);
+    void NiDitherProperty_LoadBinary(S_00ba92c0_Stream& kStream);
 };
 
 struct S_00ba92c0_Stream
@@ -1326,14 +1338,15 @@ struct S_00ba92c0_Prop : S_00ba92c0_Base
             unk38 = 0;
         uiFlags |= uiMask;
     }
-    void FUN_00ba92c0(S_00ba92c0_Stream& kStream);
+    void BSShaderProperty_LoadBinary(S_00ba92c0_Stream& kStream);
 };
 
 // Reads unk58, the two flag words, sets flag 0x8000 when bit 0x2000 is set, then reads unk30 from the stream's bin.
 // @fnv 0x00ba92c0
-void S_00ba92c0_Prop::FUN_00ba92c0(S_00ba92c0_Stream& kStream)
+// src: XBOX_PDB 0x00ba92c0
+void S_00ba92c0_Prop::BSShaderProperty_LoadBinary(S_00ba92c0_Stream& kStream)
 {
-    FUN_00a95190(kStream);
+    NiDitherProperty_LoadBinary(kStream);
     S_00ba92c0_BinRead(kStream.m_pkBin, &unk58, 4);
     for (int i = 0; i < 2; ++i)
         S_00ba92c0_BinRead(kStream.m_pkBin, &m_auiFlags[i], 4);
@@ -1596,7 +1609,7 @@ extern bool DAT_011f948b, DAT_011f94a4, DAT_011f948a, DAT_011f9421;
 const char* __cdecl FUN_00b4f380(int);
 int __cdecl FUN_004dc060(int);
 void __cdecl FUN_00be0c00(const char*, char*);
-int __cdecl FUN_00406d00(char*, unsigned int, const char*, ...);
+int __cdecl BSsprintf(char*, unsigned int, const char*, ...);
 struct TallGrassPrograms
 {
     int unk000;
@@ -1677,7 +1690,7 @@ struct TallGrassPrograms
     GrassShaderRef pixelPrograms[7];
     GrassShader* FUN_00be0fe0(const char*, GrassMacro*, const char*, const char*);
     GrassShader* FUN_00be1750(const char*, GrassMacro*, const char*, const char*);
-    void FUN_00baafc0();
+    void TallGrassShader_LoadShaders();
 };
 inline GrassMacro* FindGrassMacroEnd(GrassShaderDescriptor* desc)
 {
@@ -1694,7 +1707,8 @@ inline GrassMacro* FindGrassMacroEnd(GrassShaderDescriptor* desc)
 }
 // Builds vertex and pixel shader entries from descriptors, choosing profiles and binary names using global flags.
 // @fnv 0x00baafc0
-void TallGrassPrograms::FUN_00baafc0()
+// src: COMMUNITY 0x00baafc0
+void TallGrassPrograms::TallGrassShader_LoadShaders()
 {
     GrassMemoryScope grassMemoryScope;
     GrassShaderDescriptor vertex[24];
@@ -2001,11 +2015,11 @@ void TallGrassPrograms::FUN_00baafc0()
                 for (int index = 0; index < 24; index++)
                 {
                     FUN_00be0c00(vertex[index].source, sourcePath);
-                    FUN_00406d00(binaryShaderName, 260, "GRASS2%03i.vso", index);
+                    BSsprintf(binaryShaderName, 260, "GRASS2%03i.vso", index);
                     const char* vertexShaderProfile = "vs_2_0";
                     if (DAT_011f94a4 && DAT_011f948a)
                     {
-                        FUN_00406d00(binaryShaderName, 260, "GRASS23x%03i.vso", index);
+                        BSsprintf(binaryShaderName, 260, "GRASS23x%03i.vso", index);
                         vertexShaderProfile = "vs_3_0";
                     }
                     vertexPrograms[index] = FUN_00be0fe0(sourcePath, (GrassMacro*)vertex[index].macros,
@@ -2018,11 +2032,11 @@ void TallGrassPrograms::FUN_00baafc0()
             for (int index = 0; index < 24; index++)
             {
                 FUN_00be0c00(vertex[index].source, sourcePath);
-                FUN_00406d00(binaryShaderName, 260, "GRASS2%03i.vso", index);
+                BSsprintf(binaryShaderName, 260, "GRASS2%03i.vso", index);
                 const char* vertexShaderProfile = "vs_2_0";
                 if (DAT_011f94a4 && DAT_011f948a)
                 {
-                    FUN_00406d00(binaryShaderName, 260, "GRASS23x%03i.vso", index);
+                    BSsprintf(binaryShaderName, 260, "GRASS23x%03i.vso", index);
                     vertexShaderProfile = "vs_3_0";
                 }
                 vertexPrograms[index] =
@@ -2048,19 +2062,19 @@ void TallGrassPrograms::FUN_00baafc0()
                             reinterpret_cast<GrassShaderDescriptor*>(reinterpret_cast<char*>(pixel) + pixelOffset));
                         macro->name = "TRANSPARENCYMS";
                         macro->value = "";
-                        FUN_00406d00(binaryShaderName, 260, "GRASS2%03iTMS.pso", index);
+                        BSsprintf(binaryShaderName, 260, "GRASS2%03iTMS.pso", index);
                     }
                     else
-                        FUN_00406d00(binaryShaderName, 260, "GRASS2%03i.pso", index);
+                        BSsprintf(binaryShaderName, 260, "GRASS2%03i.pso", index);
                     FUN_00be0c00(
                         reinterpret_cast<GrassShaderDescriptor*>(reinterpret_cast<char*>(pixel) + pixelOffset)->source,
                         sourcePath);
                     if (DAT_011f94a4 && DAT_011f948a)
                     {
                         if (DAT_011f9421)
-                            FUN_00406d00(binaryShaderName, 260, "GRASS23x%03iTMS.pso", index);
+                            BSsprintf(binaryShaderName, 260, "GRASS23x%03iTMS.pso", index);
                         else
-                            FUN_00406d00(binaryShaderName, 260, "GRASS23x%03i.pso", index);
+                            BSsprintf(binaryShaderName, 260, "GRASS23x%03i.pso", index);
                         shaderProfile = "ps_3_0";
                     }
                     else
@@ -2082,16 +2096,16 @@ void TallGrassPrograms::FUN_00baafc0()
                     macro->name = "TRANSPARENCYMS";
                     macro->value = "";
                     if (DAT_011f94a4 && DAT_011f948a)
-                        FUN_00406d00(binaryShaderName, 260, "GRASS23x%03iTMS.pso", index);
+                        BSsprintf(binaryShaderName, 260, "GRASS23x%03iTMS.pso", index);
                     else
-                        FUN_00406d00(binaryShaderName, 260, "GRASS2%03iTMS.pso", index);
+                        BSsprintf(binaryShaderName, 260, "GRASS2%03iTMS.pso", index);
                 }
                 else
                 {
                     if (DAT_011f94a4 && DAT_011f948a)
-                        FUN_00406d00(binaryShaderName, 260, "GRASS23x%03i.pso", index);
+                        BSsprintf(binaryShaderName, 260, "GRASS23x%03i.pso", index);
                     else
-                        FUN_00406d00(binaryShaderName, 260, "GRASS2%03i.pso", index);
+                        BSsprintf(binaryShaderName, 260, "GRASS2%03i.pso", index);
                 }
                 if (DAT_011f94a4 && DAT_011f948a)
                     shaderProfile = "ps_3_0";
@@ -2185,12 +2199,12 @@ struct Stage_c160
     unsigned int unk58;
     unsigned int unk5c;
     unsigned int unk60;
-    void FUN_00e7ecd0();
+    void NiD3DTextureStage_ReturnStageToPool();
     void DecRefCount()
     {
         --unk60;
         if (unk60 == 0)
-            FUN_00e7ecd0();
+            NiD3DTextureStage_ReturnStageToPool();
     }
 };
 void AssignStageFromPool(Stage_c160**);
@@ -2232,7 +2246,7 @@ struct Pass_c160
     unsigned int unk54;
     unsigned int unk58;
     RefPtr_bacd00 vertex;
-    void FUN_00e802b0(unsigned int, Stage_c160*);
+    void NiD3DPass_SetStage(unsigned int, Stage_c160*);
     void Set(unsigned int key, unsigned int value)
     {
         if (!state)
@@ -2266,7 +2280,7 @@ void Shader_c160::ConfigureBeamPasses()
                 AssignStageFromPool(&stage.object);
                 Stage_c160* current = stage.object;
                 ConfigureBeamStage(current, 0, 3, 2, 0);
-                pass->FUN_00e802b0(pass->unk14, current);
+                pass->NiD3DPass_SetStage(pass->unk14, current);
             }
         }
         int pixelIndex;
@@ -2280,13 +2294,13 @@ void Shader_c160::ConfigureBeamPasses()
                         AssignStageFromPool(&stage.object);
                         Stage_c160* current = stage.object;
                         ConfigureBeamStage(current, 1, 1, 2, 0);
-                        pass->FUN_00e802b0(pass->unk14, current);
+                        pass->NiD3DPass_SetStage(pass->unk14, current);
                     }
                     {
                         AssignStageFromPool(&stage.object);
                         Stage_c160* current = stage.object;
                         ConfigureBeamStage(current, 2, 1, 2, 0);
-                        pass->FUN_00e802b0(pass->unk14, current);
+                        pass->NiD3DPass_SetStage(pass->unk14, current);
                     }
                 }
                 pixelIndex = 2;
@@ -2321,7 +2335,7 @@ void Shader_c160::ConfigureBeamPasses()
                 AssignStageFromPool(&stage.object);
                 Stage_c160* current = stage.object;
                 ConfigureBeamStage(current, 0, 3, 2, 0);
-                pass->FUN_00e802b0(pass->unk14, current);
+                pass->NiD3DPass_SetStage(pass->unk14, current);
             }
             {
                 AssignStageFromPool(&stage.object);
@@ -2329,7 +2343,7 @@ void Shader_c160::ConfigureBeamPasses()
                 ConfigureBeamStage(current, 1, 3, 2, 0);
                 current->unk08 = DAT_011f9534;
                 current->unk0c = 1;
-                pass->FUN_00e802b0(pass->unk14, current);
+                pass->NiD3DPass_SetStage(pass->unk14, current);
             }
         }
         int pixelIndex;
@@ -2343,13 +2357,13 @@ void Shader_c160::ConfigureBeamPasses()
                         AssignStageFromPool(&stage.object);
                         Stage_c160* current = stage.object;
                         ConfigureBeamStage(current, 2, 1, 2, 0);
-                        pass->FUN_00e802b0(pass->unk14, current);
+                        pass->NiD3DPass_SetStage(pass->unk14, current);
                     }
                     {
                         AssignStageFromPool(&stage.object);
                         Stage_c160* current = stage.object;
                         ConfigureBeamStage(current, 3, 1, 2, 0);
-                        pass->FUN_00e802b0(pass->unk14, current);
+                        pass->NiD3DPass_SetStage(pass->unk14, current);
                     }
                 }
                 pixelIndex = 3;
@@ -2385,13 +2399,13 @@ void Shader_c160::ConfigureBeamPasses()
                 AssignStageFromPool(&stage.object);
                 Stage_c160* current = stage.object;
                 ConfigureBeamStage(current, 0, 3, 2, 0);
-                pass->FUN_00e802b0(pass->unk14, current);
+                pass->NiD3DPass_SetStage(pass->unk14, current);
             }
             {
                 AssignStageFromPool(&stage.object);
                 Stage_c160* current = stage.object;
                 ConfigureBeamStage(current, 1, 3, 2, 0);
-                pass->FUN_00e802b0(pass->unk14, current);
+                pass->NiD3DPass_SetStage(pass->unk14, current);
             }
         }
         pass->Set(27, 1);
@@ -2666,11 +2680,11 @@ extern "C"
     extern V4_bacd00 DAT_01200590;
 }
 
-int __cdecl FUN_00b97f20(unsigned int a, unsigned int b, int c);
+int __cdecl BSRenderState_SetAlphaTestFuncRef(unsigned int a, unsigned int b, int c);
 
 struct BSParticleShader : FUN_00bacd00
 {
-    void FUN_00baaf40(GeomStub* geom, Param2* p2);
+    void TallGrassShader_SetupInstanceSize(GeomStub* geom, Param2* p2);
     void SetShaderParams(Param1* p1);
 };
 
@@ -2723,7 +2737,7 @@ void BSParticleShader::SetShaderParams(Param1* p1)
     }
     DAT_01200538 = 1.0f;
 
-    FUN_00baaf40(geom, p2);
+    TallGrassShader_SetupInstanceSize(geom, p2);
 
     if (DAT_011f941e)
     {
@@ -2753,7 +2767,7 @@ void BSParticleShader::SetShaderParams(Param1* p1)
 
     if (_fnv_particle_shader_renderer_level < 2 || !DAT_011f941e)
     {
-        FUN_00b97f20((p1->unk00->word18 >> 10) & 7, p1->unk00->byte1A, 0);
+        BSRenderState_SetAlphaTestFuncRef((p1->unk00->word18 >> 10) & 7, p1->unk00->byte1A, 0);
     }
 
     PassHandler* pass = reinterpret_cast<PassHandler*>(m_spPixelConstantMap.m_pObject);

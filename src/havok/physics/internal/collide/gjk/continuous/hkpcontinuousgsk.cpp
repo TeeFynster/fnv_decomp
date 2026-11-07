@@ -129,7 +129,7 @@ struct S_00db4b50_Out
     int unk12c;
 };
 
-void FUN_00cf1710(void* a, float b, float c, void* out);
+void hkSweptTransform_ComputeValues_00cf1710(void* a, float b, float c, void* out);
 __forceinline void S_rotInv(const __m128* r, const __m128* in, int n, __m128* out)
 {
     __m128 a0 = r[0], a1 = r[1], a2 = r[2];
@@ -150,21 +150,22 @@ __forceinline void S_rotInv(const __m128* r, const __m128* in, int n, __m128* ou
 
 // Calls FUN_00cf1710 twice using a's two pointers and b's values, fills out via sub-object calls and S_rotInv, and sets out->unkcc to -a->unk14.
 // @fnv 0x00db4b50
-void FUN_00db4b50(S_00db4b50_A* a, float f, S_00db4b50_Out* out)
+// src: GUESS 0x00db4b50 (confidence: low)
+void hkTransform_setMulInverseMul_UpdateState_00db4b50(S_00db4b50_A* a, float f, S_00db4b50_Out* out)
 {
     S_00db4b50_B* b = a->unk40;
     float t = b->unk08 * f;
-    FUN_00cf1710(a->unk00 + 0x40, b->unk00, t, out);
-    FUN_00cf1710(a->unk04 + 0x40, b->unk00, t, &out->unk40);
+    hkSweptTransform_ComputeValues_00cf1710(a->unk00 + 0x40, b->unk00, t, out);
+    hkSweptTransform_ComputeValues_00cf1710(a->unk04 + 0x40, b->unk00, t, &out->unk40);
     void* m = &out->unk80;
-    ((Transform*)m)->FUN_00cb22f0(out, &out->unk40);
-    ((Vec4*)&out->unkc0)->FUN_00c7f700(m, *(const Vec4*)&a->unk20);
-    ((Vec4*)&out->unkd0)->FUN_00c7f640((const Buf40*)m, &a->unk30);
+    ((Transform*)m)->hkTransform_setMulInverseMul(out, &out->unk40);
+    ((Vec4*)&out->unkc0)->hkVector4_setRotatedDir(m, *(const Vec4*)&a->unk20);
+    ((Vec4*)&out->unkd0)->setTransformedPos_00c7f640((const Buf40*)m, &a->unk30);
     out->unkcc = -a->unk14;
     *(__m128*)&out->unk110 = *(__m128*)(a->unk00 + 0x80);
     S_rotInv((const __m128*)&out->unk00, (const __m128*)&a->unk60, 2, (__m128*)&out->unkf0);
-    ((Vec4*)&out->unk120)->FUN_00c7f640((const Buf40*)m, a->unk04 + 0x80);
-    ((Vec4*)&out->unke0)->FUN_004b4ab0(*(const Rot*)out, *(const Vec4*)&a->unk50);
+    ((Vec4*)&out->unk120)->setTransformedPos_00c7f640((const Buf40*)m, a->unk04 + 0x80);
+    ((Vec4*)&out->unke0)->hkVector4_setRotatedInverseDir(*(const Rot*)out, *(const Vec4*)&a->unk50);
 }
 
 namespace fnv_00db52c0 {
@@ -258,7 +259,7 @@ struct Shape
     int unk128;
     int unk12c;
     Vec4::Aligned vector130;
-    void FUN_00daad40(void*, void*, Transform*, Vec4*);
+    void hkpGsk_getClosestFeature(void*, void*, Transform*, Vec4*);
 };
 // hkpConvexShape view: m_radius at +0x10 (hkReferencedObject 8 + userData + type); distance = d - radiusA - radiusB
 struct GskConvexShape
@@ -302,7 +303,8 @@ static __forceinline void calculate(Vec4& output, const Transform& frame, LocalM
     reinterpret_cast<LocalM128&>(output) = x2;
 }
 // @fnv 0x00db52c0
-static __declspec(noinline) void FUN_00db52c0(Shape* obj, const Transform* mat, const Transform* other, GskConvexShape* apPairA,
+// src: GUESS 0x00db52c0 (confidence: low)
+static __declspec(noinline) void Object_UpdateFields_00db52c0(Shape* obj, const Transform* mat, const Transform* other, GskConvexShape* apPairA,
                                               GskConvexShape* apPairB, OutArg a3, Vec4* apResult)
 {
     Vec4* out = a3.p;
@@ -310,8 +312,8 @@ static __declspec(noinline) void FUN_00db52c0(Shape* obj, const Transform* mat, 
     __declspec(align(16)) void* transformStorage[sizeof(Transform) / sizeof(void*)];
     Transform& localTransform = *reinterpret_cast<Transform*>(transformStorage);
     Vec4::Aligned shapeResult(Vec4::Uninitialized);
-    localTransform.FUN_00cb22f0(mat, other);
-    obj->FUN_00daad40(apPairA, apPairB, &localTransform, &shapeResult);
+    localTransform.hkTransform_setMulInverseMul(mat, other);
+    obj->hkpGsk_getClosestFeature(apPairA, apPairB, &localTransform, &shapeResult);
 
     LocalM128 v = reinterpret_cast<const LocalM128&>(shapeResult);
     LocalM128 p = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), reinterpret_cast<const LocalM128&>(mat->r[1]));
@@ -351,12 +353,12 @@ void emit_function()
 {
     PairArg p1 = {inputPair1}, p2 = {inputPair2};
     OutArg o1 = {inputOut1}, o2 = {inputOut2};
-    FUN_00db52c0(inputObj, inputMat, inputOther, p1.p, p2.p, o1, o2.p);
+    Object_UpdateFields_00db52c0(inputObj, inputMat, inputOther, p1.p, p2.p, o1, o2.p);
 }
 }  // namespace fnv_00db52c0
 
 extern const double DAT_010c9300;
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct Table
 {
     void* unk00;
@@ -539,7 +541,8 @@ struct Out
 };
 // Fills out from in: stores both p8 pointers and the f10 sum, reserves v*16 bytes (rounded to 128) from FUN_00c85750's cursor, and computes f18 and f1c.
 // @fnv 0x00db53f0
-static __declspec(noinline) void FUN_00db53f0(In* in, Out* out)
+// src: GUESS 0x00db53f0 (confidence: low)
+static __declspec(noinline) void hkMemoryRouter_getInstance_UpdateState_00db53f0(In* in, Out* out)
 {
     ObjA* a = in->a;
     ObjB* b = in->b;
@@ -555,7 +558,7 @@ static __declspec(noinline) void FUN_00db53f0(In* in, Out* out)
     int v = pCtrlA->tab->f2c(pCtrlA);
     out->f10 = v;
     out->f0c = v;
-    unsigned int* pBlockCursor = (unsigned int*)FUN_00c85750();
+    unsigned int* pBlockCursor = (unsigned int*)hkMemoryRouter_getInstance();
     unsigned int uiBlockStart = *pBlockCursor;
     int sz = v * 16;
     sz = sz + 0x7f;
@@ -574,5 +577,5 @@ extern In* volatile inputIn;
 extern Out* volatile inputOut;
 void emit_function()
 {
-    FUN_00db53f0(inputIn, inputOut);
+    hkMemoryRouter_getInstance_UpdateState_00db53f0(inputIn, inputOut);
 }

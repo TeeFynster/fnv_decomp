@@ -148,7 +148,7 @@ TESObjectIMOD::TESObjectIMOD()
 void TESObjectIMOD::LoadGameLegacy(unsigned int arg1, unsigned int arg2)
 {
     TESForm::LoadGameLegacy(arg1, arg2);
-    TESValueForm::FUN_0048ea10(arg1, arg2);
+    TESValueForm::LoadGame_0048ea10(arg1, arg2);
 }
 
 // @fnv 0x0051a630
@@ -174,7 +174,7 @@ unsigned short TESObjectIMOD::GetSaveSizeLegacy(unsigned int aiFlags)
 {
     unsigned short isize = 0;
     isize += reinterpret_cast<TESFormSerialization*>(this)->GetSaveSizeLegacy(aiFlags);
-    isize += TESValueForm::FUN_0048e9b0(aiFlags);
+    isize += TESValueForm::GetFlaggedDataSize(aiFlags);
     return isize;
 }
 
@@ -182,21 +182,21 @@ unsigned short TESObjectIMOD::GetSaveSizeLegacy(unsigned int aiFlags)
 void TESObjectIMOD::SaveGameLegacy(unsigned int aiFlags)
 {
     TESForm::SaveGameLegacy(aiFlags);
-    TESValueForm::FUN_0048e9e0(aiFlags);
+    TESValueForm::SaveGame_0048e9e0(aiFlags);
 }
 
 // @fnv 0x0051a600
 void TESObjectIMOD::SaveGame(BGSSaveFormBuffer* buffer)
 {
     TESForm::SaveGame(buffer);
-    TESValueForm::FUN_0048ea40(buffer);
+    TESValueForm::SaveGameBGS_0048ea40(buffer);
 }
 
 // @fnv 0x0051a420
 void TESObjectIMOD::SaveRecord()
 {
-    TESForm::FUN_004855a0();
-    TESFullName::FUN_00487010();
+    TESForm::BeginFormRecord();
+    TESFullName::Save_00487010();
     reinterpret_cast<TESModelRecordWriter*>(reinterpret_cast<char*>(this) + 0x3c)->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
     TESIcon::Save(0x4e4f4349);
     BGSMessageIcon::Save(0x4f43494d);
@@ -205,7 +205,7 @@ void TESObjectIMOD::SaveRecord()
     BGSDestructibleObjectForm::Save();
     reinterpret_cast<PickupPutdownSoundRecordWriter*>(reinterpret_cast<char*>(this) + 0xa4)->LogFormIDs();
     reinterpret_cast<TESFormSerialization*>(this)->SaveHeader();
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // @fnv 0x0051a4c0

@@ -28,8 +28,8 @@ public:
     void UpdateCamera(float time);
     NiPoint3 GetCameraPosition();
     bool IsNotFlag4Set();
-    bool FUN_0058d630();
-    float FUN_00639aa0();
+    bool IsInitialized();
+    float TESCombatStyle_GetTargetingFOV();
 
     BGSCameraShot__CAMERA_SHOT_DATA Data;
     NiPointer<NiAVObject> m_pLocationNode;

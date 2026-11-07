@@ -33,7 +33,8 @@ struct StackByte
 };
 
 // @fnv 0x0051d060
-void __fastcall FUN_0051d060(DummyClass* _this, StackByte aByteValue)
+// src: COMMUNITY 0x0051d060
+void __fastcall NiBillboardNode_SetUpdateControllers(DummyClass* _this, StackByte aByteValue)
 {
     _this->FUN_0051d080_mem(aByteValue.v, 8);
 }

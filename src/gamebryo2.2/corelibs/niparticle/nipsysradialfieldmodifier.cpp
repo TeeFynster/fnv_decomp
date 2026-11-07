@@ -15,7 +15,8 @@
 extern "C" void* g_012026b0;
 
 // @fnv 0x00c285c0
-void* __cdecl FUN_00c285c0()
+// src: COMMUNITY 0x00c285c0
+void* __cdecl NiPSysRadialFieldModifier_GetRTTI()
 {
     return &g_012026b0;
 }
@@ -32,7 +33,8 @@ inline NiBinaryStream& NiStream::Istr()
 }
 
 // @fnv 0x00c27770
-void NiPSysRadialFieldModifier::FUN_00c27770(NiStream& kStream)
+// src: XBOX_PDB 0x00c27770
+void NiPSysRadialFieldModifier::SaveBinary_00c27770(NiStream& kStream)
 {
     NiPSysFieldModifier::SaveBinary(kStream);
     NiBinaryStream* __restrict output = kStream.GetBinaryStream();
@@ -43,7 +45,8 @@ void NiPSysRadialFieldModifier::FUN_00c27770(NiStream& kStream)
 }
 
 // @fnv 0x00c28760
-void NiPSysRadialFieldModifier::FUN_00c28760(NiStream& stream)
+// src: XBOX_PDB 0x00c28760
+void NiPSysRadialFieldModifier::LoadBinary_00c28760(NiStream& stream)
 {
     NiPSysFieldModifier::LoadBinary(stream);
     NiBinaryStream* __restrict input = &stream.Istr();
@@ -73,7 +76,8 @@ NiPSysFieldModifier* __fastcall ConstructFieldModifier(NiPSysFieldModifier* modi
 extern "C" char __stdcall FUN_00c32060(void*);
 
 // @fnv 0x00c285a0
-unsigned char __stdcall FUN_00c285a0(void* p)
+// src: XBOX_PDB 0x00c285a0
+unsigned char __stdcall NiPSysRadialFieldModifier_IsEqual(void* p)
 {
     return FUN_00c32060(p) != 0;
 }
@@ -96,8 +100,8 @@ struct FieldModifierViewerStrings
     void GetViewerStrings(NiViewerStringsArray* strings);
 };
 extern const char* DAT_012026b0;
-char* __cdecl FUN_00a7d330(const char* s);
-char* __cdecl FUN_00a7d550(const char* name, float value);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* s);
+char* __cdecl NiGetViewerString_00a7d550(const char* name, float value);
 __forceinline void S_00c28a90_Add(S_00c28a90_Arr* a, char* s)
 {
     unsigned int i = a->esize;
@@ -110,8 +114,8 @@ void NiPSysRadialFieldModifier::GetViewerStrings(NiViewerStringsArray* strings)
 {
     reinterpret_cast<FieldModifierViewerStrings*>(this)->GetViewerStrings(strings);
     S_00c28a90_Arr* pArray = reinterpret_cast<S_00c28a90_Arr*>(strings);
-    S_00c28a90_Add(pArray, FUN_00a7d330(DAT_012026b0));
-    S_00c28a90_Add(pArray, FUN_00a7d550("RadialType", m_fBoundRadius));
+    S_00c28a90_Add(pArray, NiViewerStrings_NiGetViewerString_Title(DAT_012026b0));
+    S_00c28a90_Add(pArray, NiGetViewerString_00a7d550("RadialType", m_fBoundRadius));
 }
 
 inline NiPoint3::NiPoint3(float fX, float fY, float fZ)

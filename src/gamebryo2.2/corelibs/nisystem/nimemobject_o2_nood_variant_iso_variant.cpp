@@ -7,7 +7,8 @@
 #include "nimemobject_decls.h"
 
 // @fnv 0x00a5c230
-void* __cdecl FUN_00a5c230()
+// src: COMMUNITY 0x00a5c230
+void* __cdecl NiObjectNET_GetRTTI()
 {
     return static_cast<void*>(&DAT_011f4304[0]);
 }

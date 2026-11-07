@@ -37,7 +37,7 @@ public:
     unsigned int m_pRayCursor;
 
     void Realloc(unsigned int);
-    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    void ProcessEntries_00a56e60(unsigned int ItemUpdateArray);
     unsigned int Find(Item* item);
     int Find(unsigned int value);
     void Add(Item* item);
@@ -63,20 +63,22 @@ NiCollisionObject* NiCollisionObject::Construct()
 }
 
 extern unsigned char* DAT_011f5b04;
-void __cdecl FUN_00714960(int);
+void __cdecl NiParallelUpdateTaskManager_WaitRenderSema(int);
 
 // @fnv 0x00a81a20
-void __cdecl FUN_00a81a20()
+// src: COMMUNITY 0x00a81a20
+void __cdecl NiParallelUpdateTaskManager_BeginUpdate()
 {
     if (DAT_011f5b04)
     {
         DAT_011f5b04[0x1b0] = 1;
-        FUN_00714960(-1);
+        NiParallelUpdateTaskManager_WaitRenderSema(-1);
     }
 }
 
 // @fnv 0x00a81b80
-int __cdecl FUN_00a81b80(const unsigned short* ausLeft, const unsigned short* ausRight)
+// src: GAMEBRYO_LIB 0x00a81b80
+int __cdecl NiSkinData_BoneVertData_Compare(const unsigned short* ausLeft, const unsigned short* ausRight)
 {
     if (*ausLeft < *ausRight)
         return -1;
@@ -86,7 +88,8 @@ int __cdecl FUN_00a81b80(const unsigned short* ausLeft, const unsigned short* au
 extern const void* DAT_0109e984;
 // Allocates a 0xc4-byte BSFadeNode, runs Init on it, sets its vtbl to DAT_0109e984 and returns it, or returns 0 on allocation failure.
 // @fnv 0x00a877a0
-BSFadeNode* FUN_00a877a0()
+// src: EXE 0x00a877a0
+BSFadeNode* NiScreenElements_CreateObject()
 {
     BSFadeNode* node = static_cast<BSFadeNode*>(BSFadeNode::operator new(0xc4));
     if (node) {
@@ -98,11 +101,12 @@ BSFadeNode* FUN_00a877a0()
 }
 
 struct FUN_00a87900_class {
-    void FUN_00a87900();
+    void NiScreenElementsData_UpdateBound();
 };
 
 // @fnv 0x00a87900
-void FUN_00a87900_class::FUN_00a87900()
+// src: XBOX_PDB 0x00a87900
+void FUN_00a87900_class::NiScreenElementsData_UpdateBound()
 {
     *(unsigned char*)((char*)this + 0x6e) = 0;
     if (*(unsigned short*)((char*)this + 8) > 0) {
@@ -112,29 +116,31 @@ void FUN_00a87900_class::FUN_00a87900()
 
 extern int DAT_011f5b84;
 void __cdecl InitializeGameSystems();
-void __cdecl FUN_00a8a280();
-void __cdecl FUN_00aa2060(void*, void*);
+void __cdecl NiMainSDM_Shutdown();
+void __cdecl NiStaticDataManager_SetRootLibrary(void*, void*);
 struct FUN_00a8a5f0_class {
-    void* FUN_00a8a5f0();
+    void* UpdateState_00a8a5f0();
 };
 // @fnv 0x00a8a5f0
-void* FUN_00a8a5f0_class::FUN_00a8a5f0()
+// src: GUESS 0x00a8a5f0 (confidence: low)
+void* FUN_00a8a5f0_class::UpdateState_00a8a5f0()
 {
     void* old = (void*)DAT_011f5b84;
     ++DAT_011f5b84;
     if (!old)
-        FUN_00aa2060((void*)&InitializeGameSystems, (void*)&FUN_00a8a280);
+        NiStaticDataManager_SetRootLibrary((void*)&InitializeGameSystems, (void*)&NiMainSDM_Shutdown);
     return this;
 }
 
 struct FUN_00a8f060_class {
-    void FUN_00a8f060();
+    void NiPixelData_FreeData();
 };
 
 extern "C" void NiFreeAlias(void*);
 
 // @fnv 0x00a8f060
-void FUN_00a8f060_class::FUN_00a8f060()
+// src: GAMEBRYO_LIB 0x00a8f060
+void FUN_00a8f060_class::NiPixelData_FreeData()
 {
     NiFreeAlias(*(void**)((char*)this + 0x50));
     *(int*)((char*)this + 0x5C) = 0;
@@ -226,10 +232,11 @@ void NiFree(void*);
 struct FUN_00a96460_class {
     char pad[0x54];
     void* m_0x54;
-    void FUN_00a96460(void* p);
+    void NiParticlesData_ReplaceSizes(void* p);
 };
 // @fnv 0x00a96460
-void FUN_00a96460_class::FUN_00a96460(void* apPointer)
+// src: COMMUNITY 0x00a96460
+void FUN_00a96460_class::NiParticlesData_ReplaceSizes(void* apPointer)
 {
     NiFree(m_0x54);
     m_0x54 = apPointer;
@@ -239,11 +246,12 @@ void NiFreeAlias(void*);
 
 struct FUN_00a96480_Class {
     void* m_5c;
-    void FUN_00a96480(void* p);
+    void NiParticlesData_ReplaceRotationAngles(void* p);
 };
 
 // @fnv 0x00a96480
-void FUN_00a96480_Class::FUN_00a96480(void* p)
+// src: COMMUNITY 0x00a96480
+void FUN_00a96480_Class::NiParticlesData_ReplaceRotationAngles(void* p)
 {
     NiFreeAlias(*(void**)((char*)this + 0x5c));
     *(void**)((char*)this + 0x5c) = p;
@@ -253,18 +261,20 @@ extern "C" void __cdecl NiFreeAlias(void*);
 
 struct FUN_00a964a0_Class {
     void* m_p;
-    void FUN_00a964a0(void* p);
+    void NiParticlesData_ReplaceTextureIndices(void* p);
 };
 
 // @fnv 0x00a964a0
-void FUN_00a964a0_Class::FUN_00a964a0(void* apValue) {
+// src: COMMUNITY 0x00a964a0
+void FUN_00a964a0_Class::NiParticlesData_ReplaceTextureIndices(void* apValue) {
     NiFreeAlias(*(void**)((char*)this + 0x64));
     *(void**)((char*)this + 0x64) = apValue;
 }
 
 namespace fnv_00a982d0 {
 // @fnv 0x00a982d0
-void* FUN_00a982d0()
+// src: EXE 0x00a982d0
+void* NiPersistentSrcTextureRendererData_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x94);
     if (p)
@@ -277,19 +287,21 @@ struct CloningProcess;
 struct NiBinaryExtraData;
 struct NiFloatsExtraData;
 struct FUN_00a99c40_shell : public NiExtraData {
-    void FUN_00a99c40(NiBinaryExtraData* dst, CloningProcess* cp);
+    void NiIntegerExtraData_CopyMembers(NiBinaryExtraData* dst, CloningProcess* cp);
 };
 // @fnv 0x00a99c40
-void FUN_00a99c40_shell::FUN_00a99c40(NiBinaryExtraData* dst, CloningProcess* cp)
+// src: GAMEBRYO_LIB 0x00a99c40
+void FUN_00a99c40_shell::NiIntegerExtraData_CopyMembers(NiBinaryExtraData* dst, CloningProcess* cp)
 {
-    FUN_00a7b330(dst, cp);
+    CopyMembers_00a7b330(dst, cp);
     *(void**)((char*)dst + 0xc) = *(void**)((char*)this + 0xc);
 }
 
 
 extern const void* DAT_0109e47c;
 // @fnv 0x00a81fb0
-BSFadeNode* FUN_00a81fb0()
+// src: EXE 0x00a81fb0
+BSFadeNode* NiSkinPartition_CreateObject()
 {
     BSFadeNode* p = static_cast<BSFadeNode*>(BSFadeNode::operator new(0x10));
     if (p) {
@@ -302,7 +314,8 @@ BSFadeNode* FUN_00a81fb0()
 }
 
 // @fnv 0x00a88ac0
-unsigned int __cdecl FUN_00a88ac0(unsigned int auiValue)
+// src: GAMEBRYO_LIB 0x00a88ac0
+unsigned int __cdecl NiString_GetBestBufferSize(unsigned int auiValue)
 {
     if (auiValue < 32)
         return 32;
@@ -321,7 +334,8 @@ unsigned int __cdecl FUN_00a88ac0(unsigned int auiValue)
 
 extern int DAT_0109fb94;
 // @fnv 0x00a91fe0
-void* __cdecl FUN_00a91fe0()
+// src: EXE 0x00a91fe0
+void* __cdecl NiVectorExtraData_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x1c);
     if (p) {
@@ -339,7 +353,8 @@ void* __cdecl FUN_00a91fe0()
 extern int DAT_010a02e4;
 // Allocates a 0x1c-byte NiProperty, constructs it, sets m_18 to 0 and its vtbl to DAT_010a02e4, returning the object or null on allocation failure.
 // @fnv 0x00a95160
-NiProperty* __cdecl FUN_00a95160()
+// src: EXE 0x00a95160
+NiProperty* __cdecl NiSpecularProperty_CreateObject()
 {
     NiProperty* p = 0;
     if (void* mem = BSFadeNode::operator new(0x1c))
@@ -357,7 +372,8 @@ NiProperty* __cdecl FUN_00a95160()
 extern const void* DAT_010a0a6c;
 // Allocates a 0xcc-byte NiParticleMeshes, calls Init, sets its vtable and m_flag to 1, and returns it (or null on allocation failure).
 // @fnv 0x00a98e70
-NiParticleMeshes* __cdecl FUN_00a98e70() {
+// src: EXE 0x00a98e70
+NiParticleMeshes* __cdecl NiParticleMeshes_CreateObject() {
     NiParticleMeshes* p = (NiParticleMeshes*)BSFadeNode::operator new(0xcc);
     if (p) {
         p->Init();
@@ -398,7 +414,8 @@ extern const void* DAT_010a12cc;
 void __fastcall FUN_00a71f60(void*);
 
 // @fnv 0x00a9b330
-void* __cdecl FUN_00a9b330()
+// src: EXE 0x00a9b330
+void* __cdecl NiAmbientLight_CreateObject()
 {
     void* p = BSFadeNode::operator new(0xf0);
     if (p) {
@@ -491,7 +508,8 @@ extern int DAT_011f5ff8;
 extern unsigned char DAT_011f6000;
 
 // @fnv 0x00a9b8b0
-void __cdecl FUN_00a9b8b0()
+// src: COMMUNITY 0x00a9b8b0
+void __cdecl NiShaderConstantMapEntry_InitializeAttribTable()
 {
     int v = 1;
     int w = 12;
@@ -584,7 +602,8 @@ struct FUN_00a87140_class {
     void FUN_00a87140_ctor();
 };
 // @fnv 0x00a87140
-FUN_00a87140_class* FUN_00a87140() {
+// src: EXE 0x00a87140
+FUN_00a87140_class* BSSegmentedTriShape_CreateObject() {
     FUN_00a87140_class* p = (FUN_00a87140_class*)BSFadeNode::operator new(0xd0);
     if (p) {
         p->FUN_00a87140_ctor();
@@ -609,10 +628,11 @@ struct FUN_00a94c00_shell {
     float m_108;
     float m_10c;
     float m_110;
-    void FUN_00a94c00(NiDirectionalLight* dst, CloningProcess& cp);
+    void NiSpotLight_CopyMembers(NiDirectionalLight* dst, CloningProcess& cp);
 };
 // @fnv 0x00a94c00
-void FUN_00a94c00_shell::FUN_00a94c00(NiDirectionalLight* dst, CloningProcess& cp)
+// src: XBOX_PDB 0x00a94c00
+void FUN_00a94c00_shell::NiSpotLight_CopyMembers(NiDirectionalLight* dst, CloningProcess& cp)
 {
     reinterpret_cast<void (__thiscall*)(NiDirectionalLight*, NiDirectionalLight*, CloningProcess&)>(FUN_00a7d6a0)((NiDirectionalLight*)this, dst, cp);
     FUN_00a94c00_shell* d = (FUN_00a94c00_shell*)dst;
@@ -638,11 +658,12 @@ struct FUN_00a96800_shell {
     void* m_60;
     void* m_64;
     void* m_68;
-    void FUN_00a96800();
+    void ReleaseStorage_00a96800();
     void DestroyGeometryData();
 };
 // @fnv 0x00a96800
-void FUN_00a96800_shell::FUN_00a96800()
+// src: GUESS 0x00a96800 (confidence: medium)
+void FUN_00a96800_shell::ReleaseStorage_00a96800()
 {
     void* pOld = m_4c;
     *(void**)this = &DAT_010a05e4;
@@ -669,11 +690,12 @@ struct FUN_00a81bd0_class {
     void* m_10;
     void* m_14;
     void* m_18;
-    void FUN_00a81bd0();
+    void UpdateState_00a81bd0();
 };
 
 // @fnv 0x00a81bd0
-void FUN_00a81bd0_class::FUN_00a81bd0()
+// src: GUESS 0x00a81bd0 (confidence: low)
+void FUN_00a81bd0_class::UpdateState_00a81bd0()
 {
     m_iWordAt00 = &DAT_0109e470;
     NiFree(m_iWordAt04);
@@ -685,7 +707,7 @@ void FUN_00a81bd0_class::FUN_00a81bd0()
 }
 
 struct Stub {
-    void FUN_00aa0250(void* p);
+    void NiTStringPointerMap_NiAVObject_RemoveAt(void* p);
 };
 extern int DAT_0109f73c;
 extern void* _EmptyFS;
@@ -693,15 +715,16 @@ extern int (__stdcall* DAT_00fdf1c4)(void*);
 extern const void* vftable_NiRefObject;
 
 struct FUN_00a8f810_class {
-    void FUN_00a8f810();
+    void SetVtableAndProcessState_00a8f810();
 };
 
 // @fnv 0x00a8f810
-void FUN_00a8f810_class::FUN_00a8f810()
+// src: GUESS 0x00a8f810 (confidence: low)
+void FUN_00a8f810_class::SetVtableAndProcessState_00a8f810()
 {
     *(const void**)this = &DAT_0109f73c;
     Stub* s = (Stub*)DAT_011f5e34;
-    s->FUN_00aa0250((char*)this + 8);
+    s->NiTStringPointerMap_NiAVObject_RemoveAt((char*)this + 8);
     void* p = *(void**)((char*)this + 8);
     int (__stdcall* fn)(void*) = DAT_00fdf1c4;
     if (p != _EmptyFS)
@@ -712,9 +735,10 @@ void FUN_00a8f810_class::FUN_00a8f810()
 
 struct CloningProcess;
 // @fnv 0x00a81430
-void NiCullingProperty::FUN_00a81430(void* dst, CloningProcess& proc)
+// src: XBOX_PDB 0x00a81430
+void NiCullingProperty::NiShadeProperty_CopyMembers(void* dst, CloningProcess& proc)
 {
-    FUN_00a5d7a0(dst, proc);
+    NiProperty_CopyMembers(dst, proc);
     static_cast<NiCullingProperty*>(dst)->m_usFlags = m_usFlags;
 }
 
@@ -722,10 +746,11 @@ void __cdecl NiFree(void*);
 struct FUN_00a8a670_shell {
     void* m_iWordAt00;
     void* m_iWordAt04;
-    void FUN_00a8a670();
+    void ForwardCall_00a8a670();
 };
 // @fnv 0x00a8a670
-void FUN_00a8a670_shell::FUN_00a8a670()
+// src: GUESS 0x00a8a670 (confidence: low)
+void FUN_00a8a670_shell::ForwardCall_00a8a670()
 {
     NiFree(m_iWordAt04);
 }
@@ -804,24 +829,26 @@ struct NiCullingData {
 
 // Copies this NiCullingProperty's m_18, m_1c and m_20 into the destination after calling FUN_00a5d7a0.
 // @fnv 0x00a99e00
-void NiCullingProperty::FUN_00a99e00(
+// src: GAMEBRYO_LIB 0x00a99e00
+void NiCullingProperty::NiFogProperty_CopyMembers(
     void* destination, CloningProcess& cloningProcess)
 {
     NiCullingProperty* dest = static_cast<NiCullingProperty*>(destination);
 
-    FUN_00a5d7a0(destination, cloningProcess);
+    NiProperty_CopyMembers(destination, cloningProcess);
     dest->m_usFlags = m_usFlags;
     *(float*)((char*)dest + 0x1c) = *(float*)((char*)this + 0x1c);
     *(NiCullingData*)((char*)dest + 0x20) = *(NiCullingData*)((char*)this + 0x20);
 }
 
-void __cdecl FUN_00a9b8b0();
-void __cdecl FUN_00a9b9b0();
+void __cdecl NiShaderConstantMapEntry_InitializeAttribTable();
+void __cdecl NiShaderConstantMapEntry_SDMInit_NiShaderConstantMapEntry_InitializeObjectTable();
 // @fnv 0x00a9ba80
-void __cdecl FUN_00a9ba80()
+// src: COMMUNITY 0x00a9ba80
+void __cdecl NiShaderConstantMapEntry__SDMInit()
 {
-    FUN_00a9b8b0();
-    FUN_00a9b9b0();
+    NiShaderConstantMapEntry_InitializeAttribTable();
+    NiShaderConstantMapEntry_SDMInit_NiShaderConstantMapEntry_InitializeObjectTable();
 }
 
 extern int DAT_0109e04c;
@@ -849,12 +876,13 @@ struct FUN_00a80580_cls {
     NiRefObject* m_bc;
 
     void BaseTeardown();
-    void FUN_00a80580();
+    void UpdateFields_00a80580();
 };
 
 // Releases the two NiRefObject members via reference counting, cleans up m_sub9c, then calls BaseTeardown.
 // @fnv 0x00a80580
-void FUN_00a80580_cls::FUN_00a80580()
+// src: GUESS 0x00a80580 (confidence: low)
+void FUN_00a80580_cls::UpdateFields_00a80580()
 {
     *(void* volatile*)&m_vptr = (void*)&DAT_0109e04c;
     NiRefObject* first = *(NiRefObject* volatile*)&m_b8;
@@ -896,7 +924,8 @@ extern "C" double __cdecl fabs(double);
 
 // Computes the angle of the vector (x, y) using a polynomial approximation of atan, handling zero and quadrant cases.
 // @fnv 0x00a811f0
-float __cdecl FUN_00a811f0(float y, float x)
+// src: GAMEBRYO_LIB 0x00a811f0
+float __cdecl NiFastATan2(float y, float x)
 {
     if (x == 0.0f && y == 0.0f)
         return 0.0f;
@@ -937,7 +966,7 @@ float __cdecl FUN_00a811f0(float y, float x)
     return r;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern int DAT_0109e32c;
 
 struct FUN_00a81760_obj
@@ -951,9 +980,10 @@ struct FUN_00a81760_obj
 };
 
 // @fnv 0x00a81760
-FUN_00a81760_obj* __cdecl FUN_00a81760()
+// src: EXE 0x00a81760
+FUN_00a81760_obj* __cdecl NiTriShapeDynamicData_CreateObject()
 {
-    FUN_00a81760_obj* p = (FUN_00a81760_obj*)FUN_00aa13e0(0x5c);
+    FUN_00a81760_obj* p = (FUN_00a81760_obj*)Object_DispatchCommandFour(0x5c);
     if (p != 0)
     {
         p->FUN_00a7b690();
@@ -1011,7 +1041,8 @@ virtual void v38();
 virtual void v39();
 };
 // @fnv 0x00a819e0
-void FUN_00a819e0() {
+// src: COMMUNITY 0x00a819e0
+void NiParallelUpdateTaskManager_Shutdown() {
     if (DAT_011f5b04) {
         ((S_a819e0_O*)DAT_011f5b04)->v39();
         if (DAT_011f5b04) delete (S_a819e0_O*)DAT_011f5b04;
@@ -1060,11 +1091,12 @@ FUN_00a81ba0_cls::FUN_00a81ba0_cls()
 struct FUN_00a84c60_cls
 {
     unsigned short m_00;
-    FUN_00a84c60_cls* FUN_00a84c60();
+    FUN_00a84c60_cls* ClearField00_00a84c60();
 };
 
 // @fnv 0x00a84c60
-FUN_00a84c60_cls* FUN_00a84c60_cls::FUN_00a84c60()
+// src: GUESS 0x00a84c60 (confidence: low)
+FUN_00a84c60_cls* FUN_00a84c60_cls::ClearField00_00a84c60()
 {
     m_00 = 0;
     return this;
@@ -1175,7 +1207,7 @@ void CloneObject::CopyRefCountedPointers(CloneObject* destination, void* process
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size) throw();
+void* __cdecl Object_DispatchCommandFour(unsigned int size) throw();
 extern int DAT_01069b14;
 
 struct SpawnedObject
@@ -1199,9 +1231,10 @@ struct SpawnedObject
 
 // Allocates a 0x34-byte SpawnedObject, runs InitBase, installs the vtable, zeroes most fields, sets m18 to -1, and returns it (or null).
 // @fnv 0x00a866f0
-SpawnedObject* __cdecl FUN_00a866f0() throw()
+// src: EXE 0x00a866f0
+SpawnedObject* __cdecl NiSkinInstance_CreateObject() throw()
 {
-    SpawnedObject* p = (SpawnedObject*)FUN_00aa13e0(0x34);
+    SpawnedObject* p = (SpawnedObject*)Object_DispatchCommandFour(0x34);
     if (p != 0)
     {
         p->InitBase();
@@ -1283,11 +1316,12 @@ struct FUN_00a87790_cls
     virtual void vd4();
     virtual void vd8();
     virtual void Tail(int a);
-    void FUN_00a87790(int a);
+    void NiScreenElements_Draw(int a);
 };
 
 // @fnv 0x00a87790
-void FUN_00a87790_cls::FUN_00a87790(int a)
+// src: COMMUNITY 0x00a87790
+void FUN_00a87790_cls::NiScreenElements_Draw(int a)
 {
     this->Tail(a);
 }
@@ -1296,7 +1330,7 @@ struct FUN_00a88c60_Point2 {
     float unk00;
     float unk04;
 
-    bool __thiscall FUN_0051c330(const FUN_00a88c60_Point2* other);
+    bool __thiscall ForwardCall_0051c330(const FUN_00a88c60_Point2* other);
 };
 
 struct FUN_00a88c60_Class {
@@ -1317,14 +1351,15 @@ struct FUN_00a88c60_Class {
     int unk40;
     int unk44;
 
-    int __thiscall FUN_00a88c60(FUN_00a88c60_Class* other);
+    int __thiscall ProcessAndReturnValue_00a88c60(FUN_00a88c60_Class* other);
 };
 
 // @fnv 0x00a88c60
-int __thiscall FUN_00a88c60_Class::FUN_00a88c60(FUN_00a88c60_Class* other) {
+// src: GUESS 0x00a88c60 (confidence: low)
+int __thiscall FUN_00a88c60_Class::ProcessAndReturnValue_00a88c60(FUN_00a88c60_Class* other) {
     if (unk08 == other->unk08 && unk00 == other->unk00 && unk04 == other->unk04) {
-        if (!unk0C.FUN_0051c330(&other->unk0C) && unk44 == other->unk44) {
-            if (!unk14.FUN_0051c330(&other->unk14)) {
+        if (!unk0C.ForwardCall_0051c330(&other->unk0C) && unk44 == other->unk44) {
+            if (!unk14.ForwardCall_0051c330(&other->unk14)) {
                 return 0;
             }
         }
@@ -1334,7 +1369,8 @@ int __thiscall FUN_00a88c60_Class::FUN_00a88c60(FUN_00a88c60_Class* other) {
 }
 
 // @fnv 0x00a89650
-void FUN_00a89650(const short* psCompressed, unsigned int uiUnused, float afBase, float fHalfRange, float* pfValues,
+// src: GAMEBRYO_LIB 0x00a89650
+void NiCompUtility_DecompressFloatArray(const short* psCompressed, unsigned int uiUnused, float afBase, float fHalfRange, float* pfValues,
                   unsigned int ItemUpdateArray)
 {
     for (unsigned int i = 0; i < ItemUpdateArray; i++)
@@ -1358,7 +1394,7 @@ struct BaseCls {
     void __thiscall FUN_00a67b20(int, int, int, int, int, int, int);
 };
 
-extern "C" void* __cdecl FUN_00aa1070(int);
+extern "C" void* __cdecl _NiMalloc_00aa1070(int);
 
 extern int DAT_0109f23c;
 
@@ -1392,7 +1428,7 @@ void* FUN_00a8a680_cls::InitWithBuffer(int ausLength, int a1, int a2, int a3, in
         m_40 = (void*)apBuffer;
     } else {
         unsigned short usLength = (unsigned short)ausLength;
-        m_40 = FUN_00aa1070(usLength);
+        m_40 = _NiMalloc_00aa1070(usLength);
         for (unsigned short i = 0; i < usLength; i++) {
             ((unsigned char*)m_40)[i] = (unsigned char)((~i) & 1);
         }
@@ -1510,12 +1546,13 @@ struct FUN_00a8bdf0_cls {
     void (__thiscall* m_04)(FUN_00a8bdf0_cls* self, unsigned char* out);
     int m_08;
     int m_0c;
-    void FUN_00a8bdf0(unsigned char* dst, unsigned int a2, unsigned int count);
+    void CopyGeneratedRows(unsigned char* dst, unsigned int a2, unsigned int count);
 };
 
 // Fills a 0x40-byte buffer via m_00 and m_04, then copies a2*4 bytes from it into dst count times, advancing dst by m_0c and src by 0x10 each iteration.
 // @fnv 0x00a8bdf0
-void FUN_00a8bdf0_cls::FUN_00a8bdf0(unsigned char* dst, unsigned int a2, unsigned int count)
+// src: GUESS 0x00a8bdf0 (confidence: medium)
+void FUN_00a8bdf0_cls::CopyGeneratedRows(unsigned char* dst, unsigned int a2, unsigned int count)
 {
     
     unsigned char aucBuffer[0x40];
@@ -1603,30 +1640,30 @@ struct FUN_00a910f0_class {
     FUN_00a910f0_class* FUN_00a910f0(unsigned char flags);
 };
 struct FUN_00aa4060_class {
-    void FUN_00aa4060(void* object);
+    void MemoryManager_Deallocate(void* object);
 };
 extern FUN_00aa4060_class DAT_011f6238;
 // @fnv 0x00a910f0
 FUN_00a910f0_class* FUN_00a910f0_class::FUN_00a910f0(unsigned char flags) {
     vft = &DAT_0109f9bc;
     ReleaseObjectArray(buffer);
-    if (flags & 1) DAT_011f6238.FUN_00aa4060(this);
+    if (flags & 1) DAT_011f6238.MemoryManager_Deallocate(this);
     return this;
 }
 
 namespace fnv_00a91120 {
-struct S_a91120_Alloc { void* FUN_00aa3e40(unsigned int size); };
+struct S_a91120_Alloc { void* Game_DoHeapAlloc(unsigned int size); };
 extern S_a91120_Alloc DAT_011f6238;
-void* __cdecl FUN_00a90290(unsigned int count);
+void* __cdecl Runtime_GetIndexedValue_00a90290(unsigned int count);
 struct S_a91120_Blk {
     unsigned char* unk00;
     unsigned int unk04;
     S_a91120_Blk* unk08;
-    static void* operator new(unsigned int size) { return DAT_011f6238.FUN_00aa3e40(size); }
+    static void* operator new(unsigned int size) { return DAT_011f6238.Game_DoHeapAlloc(size); }
     S_a91120_Blk(unsigned int n) throw() {
         unk04 = n;
         unk08 = 0;
-        if (n > 0) unk00 = (unsigned char*)FUN_00a90290(n);
+        if (n > 0) unk00 = (unsigned char*)Runtime_GetIndexedValue_00a90290(n);
         else unk00 = 0;
     }
     unsigned char* GetAt(unsigned int i) {
@@ -1639,7 +1676,7 @@ struct S_a91120 {
     unsigned int unk04;
     unsigned int unk08;
     S_a91120_Blk* unk0c;
-    void FUN_00a311e0(unsigned int n);
+    void NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(unsigned int n);
     void AppendItems(unsigned int n);
 };
 // Allocates a block of n items, appends each item pointer to unk00, growing via FUN_00a311e0 when full, then links the block into unk0c.
@@ -1649,7 +1686,7 @@ void S_a91120::AppendItems(unsigned int n) {
     for (unsigned int i = 0; i < n; i++) {
         unsigned char* item = pBlock->GetAt(i);
         if (unk08 == unk04)
-            FUN_00a311e0(unk04 > 0 ? unk04 * 2 : 1);
+            NiTSet_NiScreenGeometryData_ScreenElement_NiTMallocInterface_NiScreenGeometryData_ScreenElement_Add(unk04 > 0 ? unk04 * 2 : 1);
         unk00[unk08] = item;
         unk08++;
     }
@@ -1702,10 +1739,11 @@ struct NiObjectShell {
     unsigned int unk8c;
     NiRefObject* volatile reference;
     void FUN_00a5d3d0();
-    void FUN_00a98240();
+    void UpdateFields_00a98240();
 };
 // @fnv 0x00a98240
-void NiObjectShell::FUN_00a98240() {
+// src: GUESS 0x00a98240 (confidence: low)
+void NiObjectShell::UpdateFields_00a98240() {
     vtable = (void*)&DAT_010a08ac;
     NiRefObject* oldReference = reference;
     if (oldReference) {
@@ -1793,12 +1831,12 @@ struct NiParticleObject : NiParticleBase {
     NiParticleSubobject firstMember;
     NiParticleSubobject secondMember;
 };
-extern void* __cdecl FUN_00aa13e0(unsigned int);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern const char DAT_010a1024;
 // @fnv 0x00a9aea0
 NiParticleObject* __cdecl CreateNiParticleObject() {
     NiParticleObject* object =
-        (NiParticleObject*)FUN_00aa13e0(0xcc);
+        (NiParticleObject*)Object_DispatchCommandFour(0xcc);
     if (object) {
         object->FUN_00a5ecb0(0);
         object->vtable = (void*)&DAT_010a1024;
@@ -1816,11 +1854,12 @@ extern int DAT_010a13ac;
 void __declspec(noreturn) FUN_00aa0dc0();
 
 struct FUN_00a9b4a0_Class {
-    void __thiscall FUN_00a9b4a0();
+    void __thiscall UpdateFields_00a9b4a0();
 };
 
 // @fnv 0x00a9b4a0
-void __thiscall FUN_00a9b4a0_Class::FUN_00a9b4a0() {
+// src: GUESS 0x00a9b4a0 (confidence: low)
+void __thiscall FUN_00a9b4a0_Class::UpdateFields_00a9b4a0() {
     *reinterpret_cast<void**>(this) = reinterpret_cast<void*>(&DAT_010a13ac);
     FUN_00aa0dc0();
 }
@@ -1846,7 +1885,8 @@ extern int DAT_011f5fb0;
 extern unsigned char DAT_011f6001;
 
 // @fnv 0x00a9b9b0
-void __cdecl FUN_00a9b9b0()
+// src: COMMUNITY 0x00a9b9b0
+void __cdecl NiShaderConstantMapEntry_SDMInit_NiShaderConstantMapEntry_InitializeObjectTable()
 {
     DAT_011f5f90 = 0;
     DAT_011f5f94 = 1;
@@ -1905,7 +1945,7 @@ RefCountedPair* RefCountedPair::Assign(const RefCountedPair* other)
 
 namespace fnv_00a9fda0 {
 struct FUN_00a9fda0_holder {
-    void FUN_00aa4060(void* p);
+    void MemoryManager_Deallocate(void* p);
 };
 
 struct FUN_00a9fda0_pair {
@@ -1935,7 +1975,7 @@ void DestroyPairArrays()
                 }
             } while (--i >= 0);
         }
-        DAT_011f6238.FUN_00aa4060((void*)((char*)arr - 4));
+        DAT_011f6238.MemoryManager_Deallocate((void*)((char*)arr - 4));
     }
     FUN_00a9fda0_pair* arr2 = DAT_011f6024;
     DAT_011f602c = 0;
@@ -1951,7 +1991,7 @@ void DestroyPairArrays()
                 }
             } while (--i >= 0);
         }
-        DAT_011f6238.FUN_00aa4060((void*)((char*)arr2 - 4));
+        DAT_011f6238.MemoryManager_Deallocate((void*)((char*)arr2 - 4));
     }
     DAT_011f6024 = 0;
 }
@@ -2019,7 +2059,7 @@ NiDepthStencilBuffer* __cdecl ProcessArgWithObj(Ni2DBuffer* a, FUN_00a9ff00_Obj*
 }
 
 extern unsigned char* DAT_011f5b04;
-int __cdecl FUN_00714900();
+int __cdecl NiParallelUpdateTaskManager_SignalRenderSema();
 
 struct FnvRing {
     unsigned int unk00;
@@ -2180,7 +2220,8 @@ struct FnvQueueState {
 };
 
 // @fnv 0x00a81a80
-void __cdecl FUN_00a81a80()
+// src: COMMUNITY 0x00a81a80
+void __cdecl NiParallelUpdateTaskManager_EndUpdate()
 {
     FnvQueueState* s = (FnvQueueState*)DAT_011f5b04;
     if (s == 0) {
@@ -2190,7 +2231,7 @@ void __cdecl FUN_00a81a80()
         s->Probe(2) != 0 || s->Probe(3) != 0) {
         s->va0(1, &s->m_19c, 0, 0);
     } else {
-        FUN_00714900();
+        NiParallelUpdateTaskManager_SignalRenderSema();
     }
     ((FnvQueueState*)DAT_011f5b04)->m_1b0 = 0;
 }
@@ -2417,7 +2458,8 @@ struct SdmBase {
 
 // Looks up pKey's value in the global hash table's bucket chain and returns the matching node's stored value, or 0 if not found.
 // @fnv 0x00a8fe20
-unsigned int __cdecl FUN_00a8fe20(unsigned int* pKey)
+// src: GUESS 0x00a8fe20 (confidence: medium)
+unsigned int __cdecl Object_FindGlobalHashValue(unsigned int* pKey)
 {
     unsigned int key = *pKey;
     if (key == (unsigned int)DAT_0109b220) goto zero;
@@ -2447,11 +2489,12 @@ struct FNVObj {
     const void* vft;
     unsigned int references;
     ReferenceHandle handle;
-    FNVObj* FUN_00a8fe70(const ReferenceHandle& src);
+    FNVObj* NiMaterialLibrary_NiMaterialLibrary(const ReferenceHandle& src);
 };
 // Initializes the object's vtable and reference count, copies src into handle, and appends this to the global object array, growing it if full.
 // @fnv 0x00a8fe70
-FNVObj* FNVObj::FUN_00a8fe70(const ReferenceHandle& src) {
+// src: EXE 0x00a8fe70
+FNVObj* FNVObj::NiMaterialLibrary_NiMaterialLibrary(const ReferenceHandle& src) {
     vft = &vftable_NiRefObject;
     references = 0;
     InterlockedIncrement(&DAT_011f4400);
@@ -2779,43 +2822,48 @@ void RleDecoder::Decode(NiBinaryStream& stream,unsigned char* dest,unsigned int 
 
 // 0x00a85510  ret 0x20
 // @fnv 0x00a85510
-void __stdcall FUN_00a85510(int, int, int, int, int, int, int, int) {
+// src: COMMUNITY 0x00a85510
+void __stdcall nullsub_2(int, int, int, int, int, int, int, int) {
 }
 
-extern void __cdecl FUN_00a98ea0();
+extern void __cdecl NiParticleMeshes_LoadBinary();
 // @fnv 0x00a877d0
-void __cdecl FUN_00a877d0() {
-    FUN_00a98ea0();
+// src: XBOX_PDB 0x00a877d0
+void __cdecl NiScreenElements_LoadBinary() {
+    NiParticleMeshes_LoadBinary();
 }
 
-extern "C" void __cdecl FUN_00a71d10();
+extern "C" void __cdecl NiParticleMeshes_SaveBinary();
 
 // @fnv 0x00a877e0
-void __cdecl FUN_00a877e0()
+// src: XBOX_PDB 0x00a877e0
+void __cdecl NiScreenElements_SaveBinary()
 {
-    FUN_00a71d10();
+    NiParticleMeshes_SaveBinary();
 }
 
 extern "C" void __cdecl ReadGroup();
 // @fnv 0x00a88a40
-void __cdecl FUN_00a88a40()
+// src: XBOX_PDB 0x00a88a40
+void __cdecl BSTextureSet_LoadBinary()
 {
     ReadGroup();
 }
 
 // 0x00a89af0  ret 4
 // @fnv 0x00a89af0
-void __stdcall FUN_00a89af0(int) {
+// src: COMMUNITY 0x00a89af0
+void __stdcall nullsub_3(int) {
 }
 
 struct S_00a8d8b0;
 void __cdecl AdvancePosition(S_00a8d8b0*, void*, unsigned int);
-struct FUN_00a5e3a0_Helper { void* FUN_00aa3e40(unsigned int); };
+struct FUN_00a5e3a0_Helper { void* Game_DoHeapAlloc(unsigned int); };
 struct PixelRow4 {
     unsigned char rgba[4];
     PixelRow4() {}
     static void* operator new[](unsigned int size) {
-        return ((FUN_00a5e3a0_Helper*)&DAT_011f6238)->FUN_00aa3e40(size);
+        return ((FUN_00a5e3a0_Helper*)&DAT_011f6238)->Game_DoHeapAlloc(size);
     }
 };
 struct ImageConverter {
@@ -2928,7 +2976,7 @@ void ImageConverter::ReadPixels(S_00a8d8b0* stream)
     if (inputCapacity < (unsigned int)pixelCount * 4) {
         inputCapacity = (unsigned int)pixelCount * 4;
         NiFree(inputBuffer);
-        inputBuffer = (unsigned char*)FUN_00aa1070(inputCapacity);
+        inputBuffer = (unsigned char*)_NiMalloc_00aa1070(inputCapacity);
     }
     unsigned char* out = (unsigned char*)outputBuffer;
     switch (bitsPerPixel) {
@@ -3005,11 +3053,12 @@ FUN_00a8f490::~FUN_00a8f490() {
 }
 
 struct FUN_00a923a0_class {
-    unsigned short __thiscall FUN_00a923a0();
+    unsigned short __thiscall NiParticlesData_GetActiveVertexCount();
 };
 
 // @fnv 0x00a923a0
-unsigned short __thiscall FUN_00a923a0_class::FUN_00a923a0()
+// src: XBOX_PDB 0x00a923a0
+unsigned short __thiscall FUN_00a923a0_class::NiParticlesData_GetActiveVertexCount()
 {
     return *reinterpret_cast<unsigned short*>(this + 0x50);
 }
@@ -3021,7 +3070,8 @@ extern "C" float epsilon;
 struct FUN_00a88970_q { float w, x, y, z; void Set(float fW, float fX, float fY, float fZ); };
 struct FUN_00a88970_v { void* m_pvVtbl; float x, y, z; };
 // @fnv 0x00a88970
-FUN_00a88970_q FUN_00a88970(const FUN_00a88970_v& v)
+// src: GAMEBRYO_LIB 0x00a88970
+FUN_00a88970_q NiQuaternion_Exp(const FUN_00a88970_v& v)
 {
     float fScaleMultiplier = v.x * v.x + v.y * v.y + v.z * v.z;
     fScaleMultiplier = sqrt(fScaleMultiplier);
@@ -3036,12 +3086,13 @@ FUN_00a88970_q FUN_00a88970(const FUN_00a88970_v& v)
 }
 
 struct FUN_00a81a40_shell {
-    int __thiscall FUN_00a81a40(int ai);
+    int __thiscall NiTaskManager_GetNumTasks(int ai);
 };
 
 // Reads the 16-byte slot at this+8+ai*16; returns 0 if its +8 value is -1, otherwise a difference built from its +4, +8 and +12 values.
 // @fnv 0x00a81a40
-int __thiscall FUN_00a81a40_shell::FUN_00a81a40(int ai)
+// src: GAMEBRYO_LIB 0x00a81a40
+int __thiscall FUN_00a81a40_shell::NiTaskManager_GetNumTasks(int ai)
 {
     char* pSlot = (char*)this + 8 + ai * 16;
     int value = *(int*)(pSlot + 8);
@@ -3163,7 +3214,8 @@ void ByteDecoder::DecodeBytes(unsigned char* src, unsigned char* dst)
 #include <string.h>
 // Returns 1 if a is null, -1 if b is null, otherwise returns the result of comparing the two strings pointed to by a and b.
 // @fnv 0x00a86280
-int __cdecl FUN_00a86280(const char** apStrA, const char** apStrB)
+// src: COMMUNITY 0x00a86280
+int __cdecl CompareBoneNames(const char** apStrA, const char** apStrB)
 {
     if (apStrA == 0)
         return 1;
@@ -3192,12 +3244,13 @@ public:
     unsigned short unk08;
     unsigned short m_0a;
     unsigned short m_0c;
-    void FUN_00a9ba90(unsigned int idx, NiRefObject** a2);
+    void SetReferenceSlotAndUpdateCounts(unsigned int idx, NiRefObject** a2);
 };
 
 // Sets the NiRefStub at idx, updating m_0a/m_0c and swapping the reference with ref-counted destroy/increment.
 // @fnv 0x00a9ba90
-void FUN_00a9ba90_cls::FUN_00a9ba90(unsigned int idx, NiRefObject** apRefStub) {
+// src: GUESS 0x00a9ba90 (confidence: medium)
+void FUN_00a9ba90_cls::SetReferenceSlotAndUpdateCounts(unsigned int idx, NiRefObject** apRefStub) {
     if (!(NiReferenceSlotKeyInitialized & 1)) {
         NiReferenceSlotKeyInitialized |= 1;
         NiReferenceSlotKey.m_00 = 0;
@@ -3539,7 +3592,7 @@ struct SkinInstance {
     void* partition;
     SkinObject* root;
     SkinObject** bones;
-    void FUN_00a855f0(const NiPoint3* positions, const NiPoint3* normals,
+    void NiSkinInstance_Deform(const NiPoint3* positions, const NiPoint3* normals,
         unsigned int count, NiPoint3* dstPos, NiPoint3* dstNorm,
         NiPoint3* dstTan, NiPoint3* dstBin, unsigned int stride) const;
 };
@@ -3548,7 +3601,8 @@ void* __cdecl _fnv_zlib_memset(void*, int, unsigned int);
 void __cdecl NormalizePoints(NiPoint3*, unsigned int, unsigned int);
 // Applies per-bone weighted transforms to positions, normals, tangents and binormals, accumulating results into the destination arrays.
 // @fnv 0x00a855f0
-void SkinInstance::FUN_00a855f0(const NiPoint3* positions, const NiPoint3* normals,
+// src: COMMUNITY 0x00a855f0
+void SkinInstance::NiSkinInstance_Deform(const NiPoint3* positions, const NiPoint3* normals,
     unsigned int count, NiPoint3* dstPos, NiPoint3* dstNorm,
     NiPoint3* dstTan, NiPoint3* dstBin, unsigned int stride) const
 {
@@ -3697,12 +3751,13 @@ struct MaterialLibraryView {
     void* vtbl;
     int m_iWordAt04;
     int m_8;
-    void FUN_00a8fdb0();
+    void ProcessEntries_00a8fdb0();
 };
 
 // Swap-removes this from the pointer array at DAT_011f5e44, releases m_8 via DAT_00fdf1c4 unless it is _EmptyFS, and sets the NiRefObject vtable.
 // @fnv 0x00a8fdb0
-void MaterialLibraryView::FUN_00a8fdb0()
+// src: GUESS 0x00a8fdb0 (confidence: low)
+void MaterialLibraryView::ProcessEntries_00a8fdb0()
 {
     vtbl = &DAT_0109f7f4;
     unsigned int count = DAT_011f5e4c;

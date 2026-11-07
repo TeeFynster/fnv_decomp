@@ -21,7 +21,7 @@
 // against, for verified matches whose own declarations clash with the unit's current types.
 // src/fallout/interface/menus/roulettemenu.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/interface/menus/roulettemenu.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-int __cdecl FUN_007bc820();
+int __cdecl RouletteMenu_GetMenuID_();
 extern unsigned int __cdecl GetRandomNumberInRange(int, int);
 struct B006815c0
 {
@@ -63,11 +63,11 @@ struct BSSimpleListTESRaceSize
 void __cdecl FUN_004d5c60(int);
 struct FUN_00559450_shell
 {
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
 };
 struct FUN_0073ac90_shell
 {
-    int* FUN_0073ac90();
+    int* NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead();
 };
 struct FUN_006317a0_shell
 {
@@ -90,11 +90,11 @@ struct S_007bf7a0_Val
 };
 struct S_007bf7a0_Inner
 {
-    void FUN_00a59c60(S_007bf7a0_Val* v);
+    void NiAVObject_Update(S_007bf7a0_Val* v);
 };
 struct S_007bf7a0_Holder
 {
-    S_007bf7a0_Inner* FUN_00559450();
+    S_007bf7a0_Inner* Modelloader_GetReferencedThis();
 };
 extern S_007bf7a0_Holder DAT_011da8a0;
 struct SettingString
@@ -124,30 +124,30 @@ struct RouletteBetStandIn
 extern RouletteBetStandIn* DAT_011da87c;
 extern RoulettePlayerStandIn* DAT_011da880;
 extern int DAT_011da870;
-int __cdecl FUN_00406d00(char* buffer, int size, const char* format, ...);
+int __cdecl BSsprintf(char* buffer, int size, const char* format, ...);
 static const char kNameFormat[] = "%s %s";
 namespace RouletteCleanup {
 struct Scene;
 struct MenuRef
 {
-    Setting* FUN_00504e00(int);
+    Setting* TESCasino_GetModel(int);
 };
 struct Cache
 {
-    void FUN_0045a5e0(const char*);
+    void ModelLoader_ReleaseFile(const char*);
 };
 struct Player
 {
-    void FUN_00969b20();
+    void SetLastAntiCheatTime();
 };
 struct Scene
 {
-    void FUN_00572160();
+    void DetachAllChildren_00572160();
 };
 struct Pointer
 {
     Scene* value;
-    Scene* FUN_00559450();
+    Scene* Modelloader_GetReferencedThis();
     void FUN_0066b0d0(Scene*);
     ~Pointer();
 };
@@ -212,7 +212,7 @@ struct Renderer
     virtual void slote0();
     virtual void slote4();
     virtual void Detach(Scene*);
-    void FUN_00b5d180();
+    void RemoveAllLights();
 };
 Renderer* FUN_00450b80(int);
 struct Animation
@@ -262,7 +262,7 @@ extern void* DAT_011da87c;
 extern void* DAT_011da878;
 extern const char DAT_01075ff8[], DAT_01075fc4[], DAT_01070944[];
 void FUN_00406d30(char*, unsigned int, const char*);
-unsigned int FUN_0044a670(const char*);
+unsigned int BSstrlen(const char*);
 // The shared BetSlot lacks the nontrivial destructor required by this cleanup
 // function, so retain its local layout until the shared header supports it.
 struct FUN_007b9020 : Base
@@ -345,15 +345,15 @@ struct FUN_007b9020 : Base
 // @fnv 0x007b9020
 FUN_007b9020::~FUN_007b9020()
 {
-    DAT_011dea3c->FUN_00969b20();
-    DAT_011c3b3c->FUN_0045a5e0(DAT_011da880->FUN_00504e00(9)->Name());
-    DAT_011c3b3c->FUN_0045a5e0(DAT_01075ff8);
-    DAT_011c3b3c->FUN_0045a5e0(DAT_01075fc4);
-    DAT_011c3b3c->FUN_0045a5e0(DAT_011da880->FUN_00504e00(6)->Name());
+    DAT_011dea3c->SetLastAntiCheatTime();
+    DAT_011c3b3c->ModelLoader_ReleaseFile(DAT_011da880->TESCasino_GetModel(9)->Name());
+    DAT_011c3b3c->ModelLoader_ReleaseFile(DAT_01075ff8);
+    DAT_011c3b3c->ModelLoader_ReleaseFile(DAT_01075fc4);
+    DAT_011c3b3c->ModelLoader_ReleaseFile(DAT_011da880->TESCasino_GetModel(6)->Name());
     char* extension = 0;
     char path[260];
-    FUN_00406d30(path, 260, DAT_011da880->FUN_00504e00(6)->Name());
-    for (unsigned int index = 0; index < FUN_0044a670(path); index++)
+    FUN_00406d30(path, 260, DAT_011da880->TESCasino_GetModel(6)->Name());
+    for (unsigned int index = 0; index < BSstrlen(path); index++)
     {
         if (path[index] == '.')
         {
@@ -364,12 +364,12 @@ FUN_007b9020::~FUN_007b9020()
     if (extension)
     {
         FUN_00406d30(extension, 15, DAT_01070944);
-        DAT_011c3b3c->FUN_0045a5e0(path);
+        DAT_011c3b3c->ModelLoader_ReleaseFile(path);
     }
     DAT_011da8d0.FUN_0066b0d0(0);
-    FUN_00450b80(1)->Detach(DAT_011da8a0.FUN_00559450());
-    FUN_00450b80(1)->FUN_00b5d180();
-    DAT_011da8a0.FUN_00559450()->FUN_00572160();
+    FUN_00450b80(1)->Detach(DAT_011da8a0.Modelloader_GetReferencedThis());
+    FUN_00450b80(1)->RemoveAllLights();
+    DAT_011da8a0.Modelloader_GetReferencedThis()->DetachAllChildren_00572160();
     DAT_011da8a0.FUN_0066b0d0(0);
     table = 0;
     wheel = 0;
@@ -409,7 +409,7 @@ struct ModelPath
 };
 struct PathOwner
 {
-    ModelPath* FUN_00504e00(int);
+    ModelPath* TESCasino_GetModel(int);
 };
 struct ModelLoader
 {
@@ -418,7 +418,7 @@ struct ModelLoader
 extern ModelLoader* g_modelLoader;
 struct Controller
 {
-    void* FUN_0047a520(const NiFixedString&);
+    void* NiControllerManager_GetSequenceByName(const NiFixedString&);
     void FUN_0048fef0(float);
 };
 struct NiRTTI;
@@ -426,12 +426,12 @@ extern NiRTTI DAT_011f36ac;
 struct SceneHolder
 {
     SceneHolder& operator=(NiNode*);
-    NiNode* FUN_00559450();
+    NiNode* Modelloader_GetReferencedThis();
 };
 extern SceneHolder g_011da8d0;
-NiNode* __cdecl FUN_004aae30(NiNode*, const char*);
+NiNode* __cdecl BSUtilities_GetObjectByName(NiNode*, const char*);
 NiNode* __cdecl FUN_00450b80(int);
-void __cdecl FUN_00a6d2d0(NiNode*);
+void __cdecl NiTimeController_StartAnimations(NiNode*);
 int __cdecl strcpy_s(char*, unsigned int, const char*);
 struct FUN_00733f50
 {
@@ -506,9 +506,9 @@ struct PlayerForRoulette
     int unk09c;
     int unk0a0;
     ActorValueOwner av;
-    BetList* FUN_005a6260();
-    bool FUN_00969b80();
-    int FUN_00969b40();
+    BetList* PlayerCharacter_GetCasinoDataList();
+    bool IsCasinoAntiCheat();
+    int GetAntiCheatTimeRemaining();
     int FUN_00575610(void*);
 };
 extern PlayerForRoulette* DAT_011dea3c;
@@ -528,9 +528,9 @@ struct CasinoData
 };
 struct CasinoForRoulette
 {
-    int FUN_0084e3a0();
-    CasinoData* FUN_00504e60();
-    void* FUN_007316d0();
+    int GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    CasinoData* TESCasino_GetData();
+    void* TESCasino_GetChipType();
 };
 struct PlayerVirtual
 {
@@ -615,19 +615,19 @@ struct PlayerVirtual
 
 struct InterfaceRoulette
 {
-    Tile* FUN_00586150(const char*);
+    Tile* CombatController_GetCombatState(const char*);
 };
 extern SettingString g_011d2274, g_011d2d24, g_011d3abc, g_011d2424, g_011d3594, g_011d3804, g_011d3168, g_011d3300,
     g_011d41e0, g_011d2c1c, g_011d2820, g_011d3354, g_011d487c, g_011d33fc;
 extern const char DAT_01076274[], DAT_01049638[], DAT_01025cc4[], DAT_01076254[], DAT_01076200[], DAT_010761e4[];
 extern float DAT_010162c0, DAT_0101e704;
 extern double DAT_010704f0, DAT_010704e8;
-Menu* __cdecl FUN_00a09030(int);
+Menu* __cdecl Tile_GetMenuByClass(int);
 bool __cdecl QueueUIMessage(const char*, int, const char*, const char*, float, bool);
-void __cdecl FUN_005b5e40(const char*);
+void __cdecl Warning_005b5e40(const char*);
 float __stdcall FUN_00a01530(int);
-Tile* __cdecl FUN_00a08b20(Tile*, const char*);
-Tile* __cdecl FUN_007bbe20(RoulettePlayerStandIn* casino, int bet, int arg3, int exchange);
+Tile* __cdecl Tile_GetTileByName(Tile*, const char*);
+Tile* __cdecl RouletteMenu_Create(RoulettePlayerStandIn* casino, int bet, int arg3, int exchange);
 struct RouletteEntry
 {
     int amount;
@@ -664,7 +664,7 @@ struct List08
     List08();
     ~List08();
 };
-int __cdecl FUN_00a00940(const char*, int);
+int __cdecl Tile_AddUserTrait(const char*, int);
 extern const char DAT_01071ba0[];
 extern const char DAT_01071b94[];
 extern const char DAT_01071b88[];
@@ -688,7 +688,7 @@ struct FUN_007e6780 : Menu
     FUN_007e6780();
     virtual ~FUN_007e6780();
 };
-int __fastcall FUN_0045bb80(int);
+int __fastcall NiAVObject_GetWorldTranslate(int);
 namespace bf {
 struct Slot
 {
@@ -697,12 +697,13 @@ struct Slot
 };
 }
 // @fnv 0x007bf390
-int RouletteMenu::FUN_007bf390()
+// src: XBOX_PDB 0x007bf390
+int RouletteMenu::GetBetIndex()
 {
     int i;
     for (i = 0; i < 0x90; i++)
     {
-        NiPoint3 v = ((const NiPoint3*)FUN_0045bb80(m_iNode))->operator-(reinterpret_cast<bf::Slot*>(&unk006c)[i].m_kPos);
+        NiPoint3 v = ((const NiPoint3*)NiAVObject_GetWorldTranslate(m_iNode))->operator-(reinterpret_cast<bf::Slot*>(&unk006c)[i].m_kPos);
         float f = v.Length();
         if (f <= m_afRadius[0])
             break;
@@ -711,7 +712,7 @@ int RouletteMenu::FUN_007bf390()
     {
         for (; i < 0x9f; i++)
         {
-            NiPoint3 v2 = ((const NiPoint3*)FUN_0045bb80(m_iNode))->operator-(reinterpret_cast<bf::Slot*>(&unk006c)[i].m_kPos);
+            NiPoint3 v2 = ((const NiPoint3*)NiAVObject_GetWorldTranslate(m_iNode))->operator-(reinterpret_cast<bf::Slot*>(&unk006c)[i].m_kPos);
             float f2 = v2.Length();
             if (f2 <= m_afRadius[i - 0x8f])
                 break;
@@ -737,7 +738,7 @@ struct BoundRes
 {
     NiPoint3* FUN_006815c0();
 };
-NiAVObject* __cdecl FUN_004aae30(NiAVObject*, char*);
+NiAVObject* __cdecl BSUtilities_GetObjectByName(NiAVObject*, char*);
 struct SubObj
 {
     int unk00;
@@ -758,7 +759,8 @@ void* __cdecl fnv_zlib_memset(void*, int, int);
 
 extern float DAT_0101e704;
 // @fnv 0x007bed70
-bool RouletteMenu::FUN_007bed70(int number)
+// src: XBOX_PDB 0x007bed70
+bool RouletteMenu::SetBet(int number)
 {
     if (unk3fe4 >= 10 || number >= 159 || number < 0 || !unk3fe8)
         return false;
@@ -783,11 +785,11 @@ bool RouletteMenu::FUN_007bed70(int number)
         reinterpret_cast<BetList*>(unk3e78)->FUN_00726c60(ba);
     else
         reinterpret_cast<BetList*>(unk3e78)->FUN_005ae3d0(ba);
-    FUN_007bf840();
+    SetBetChip();
     ++unk3fe4;
     ++unk3fe0;
     unk3fec += unk3fe8;
-    BSAudio::GetSingleton()->FUN_00ad7550("GAMERouletteIncreaseBet", 0x121).Play(false);
+    BSAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName("GAMERouletteIncreaseBet", 0x121).Play(false);
     if (unk3fe0 >= 13)
         unk3fe0 = 3;
     while (!IsEyesListBelowThreshold(unk3fe0) && unk3fe4 < 10)
@@ -799,14 +801,14 @@ bool RouletteMenu::FUN_007bed70(int number)
     float c[3];
     if (unk3fe4 < 10 && unk3fec < unk4000)
     {
-        *reinterpret_cast<NiPoint3*>(c) = reinterpret_cast<NiNode*>(static_cast<unsigned int>(g_011da8a0))->FUN_0043b4a0(2)->FUN_0043c490();
+        *reinterpret_cast<NiPoint3*>(c) = reinterpret_cast<NiNode*>(static_cast<unsigned int>(g_011da8a0))->FUN_0043b4a0(2)->GetTranslate_0043c490();
         reinterpret_cast<NiNode*>(static_cast<unsigned int>(g_011da8a0))
             ->FUN_0043b4a0(unk3fe0)
-            ->FUN_004bc1f0(c[0], c[1], 0.0f);
+            ->NiAVObject_SetTranslate_004bc1f0(c[0], c[1], 0.0f);
         reinterpret_cast<NiNode*>(static_cast<unsigned int>(g_011da8a0))
             ->FUN_0043b4a0(unk3fe0 + 10)
-            ->FUN_004bc1f0(c[0], c[1], 0.0f);
-        FUN_007bf840();
+            ->NiAVObject_SetTranslate_004bc1f0(c[0], c[1], 0.0f);
+        SetBetChip();
     }
     if (unk3fec + unk3fe8 > unk3ff0)
     {

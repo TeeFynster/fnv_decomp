@@ -10,9 +10,9 @@ struct FUN_00caba90_array
 };
 struct FUN_006212c0_shell
 {
-    void* FUN_006212c0(void* source);
+    void* InitializeFields_006212c0(void* source);
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* manager, void* array, int itemSize);
 struct FUN_00caba90_Class
 {
@@ -27,7 +27,7 @@ struct FUN_00caba90_Class
 void* FUN_00caba90_Class::AppendItem(void* source)
 {
     FUN_00caba90_array* items = &array;
-    void* manager = FUN_00c85750();
+    void* manager = hkMemoryRouter_getInstance();
     if (items->count == (items->capacity & 0x3fffffff))
     {
         void* allocator = *(void**)((char*)manager + 0x10);
@@ -36,7 +36,7 @@ void* FUN_00caba90_Class::AppendItem(void* source)
     unsigned int index = items->count;
     char* item = (char*)items->data + index * 0x70;
     items->count = index + 1;
-    return ((FUN_006212c0_shell*)item)->FUN_006212c0(source);
+    return ((FUN_006212c0_shell*)item)->InitializeFields_006212c0(source);
 }
 
 struct ByteTag
@@ -50,7 +50,7 @@ struct ByteTag
     {}
 };
 
-void __cdecl FUN_009b2ed0(void* apData, int aiFirst, int aiLast, ByteTag akTag);
+void __cdecl hkAlgorithm_quickSortRecursive_hkpRootCdPoint_hkAlgorithm_less_hkpRootCdPoint(void* apData, int aiFirst, int aiLast, ByteTag akTag);
 
 struct SortableArray
 {
@@ -61,15 +61,16 @@ struct SortableArray
     void* m_pData;
     int m_iArrayLength;
 
-    void FUN_00cabad0();
+    void hkpAllCdPointCollector_sortHits();
 };
 
 // @fnv 0x00cabad0
-void SortableArray::FUN_00cabad0()
+// src: XBOX_PDB 0x00cabad0
+void SortableArray::hkpAllCdPointCollector_sortHits()
 {
     ByteTag kTag;
     if (m_iArrayLength > 1)
-        FUN_009b2ed0(m_pData, 0, m_iArrayLength - 1, kTag);
+        hkAlgorithm_quickSortRecursive_hkpRootCdPoint_hkAlgorithm_less_hkpRootCdPoint(m_pData, 0, m_iArrayLength - 1, kTag);
 }
 
 #include <xmmintrin.h>
@@ -85,7 +86,7 @@ struct S_00cab970_Router
     int unk0c;
     S_00cab970_Heap* heap;
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct S_00cab970_Vec
 {
     __m128 q;
@@ -124,7 +125,7 @@ struct S_00cab970_Arr
     int m_cap;
     __forceinline S_00cab970_Entry& AllocatePair()
     {
-        S_00cab970_Router* r = (S_00cab970_Router*)FUN_00c85750();
+        S_00cab970_Router* r = (S_00cab970_Router*)hkMemoryRouter_getInstance();
         if (m_iElementCount == (m_cap & 0x3fffffff))
             ResizeAudioStream(r->heap, this, sizeof(S_00cab970_Entry));
         return m_data[m_iElementCount++];
@@ -167,11 +168,12 @@ struct S_00cab970_Cls
     int unk08;
     int unk0c;
     S_00cab970_Arr arr;
-    void FUN_00cab970(const S_00cab970_Src* src);
+    void hkpAllCdPointCollector_addCdPoint(const S_00cab970_Src* src);
 };
 // Allocates an entry in arr, copies the two vectors from src, and records the root, key, and key path for each body via S_00cab970_Path.
 // @fnv 0x00cab970
-void S_00cab970_Cls::FUN_00cab970(const S_00cab970_Src* src)
+// src: XBOX_PDB 0x00cab970
+void S_00cab970_Cls::hkpAllCdPointCollector_addCdPoint(const S_00cab970_Src* src)
 {
     S_00cab970_Entry& entry = arr.AllocatePair();
     entry.a.q = src->a.q;

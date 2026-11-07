@@ -6,12 +6,12 @@
 class BGSSaveLoadUI_startmenu_rtm_variant
 {
 public:
-    void FUN_007d0bb0();
-    void FUN_007d0bd0(bool);
-    bool FUN_007d3170();
-    bool FUN_00a26090(char*);
-    bool FUN_00a26020(char const*);
-    void FUN_00a26120(char*);
+    void XGamerProfile_ForcePresenceUpdate();
+    void XGamerProfile_SetPlayingFlag(bool);
+    bool XGamerProfile_GetRumbleDefault();
+    bool XGamerProfile_RedeemCode(char*);
+    bool XGamerProfile_IsCodeRedeemed(char const*);
+    void XGamerProfile_RevokeCode(char*);
 };
 #include "../../../../include/ListBoxBase.h"
 #include "../../../../include/OptionListBox.h"
@@ -20,24 +20,24 @@ public:
 #include "startmenu_packet.h"
 
 class OSGlobals;
-void FUN_007d1b30();
-float FUN_007d1d00(int type);
-void FUN_007d30d0();
+void Get_fGamma();
+float BSFadeNode_GetFadeOutMultiplier(int type);
+void GetIsControllerDisabled();
 
 #include <string.h>
 #include <stdio.h>
 struct MainMenuAudioAccess
 {
-    void FUN_00ad84e0(int, bool);
+    void BSAudio_KillAllOfType(int, bool);
 };
-BSAudio* __cdecl FUN_00453a70();
+BSAudio* __cdecl BSAudio_QInstance();
 struct MainMenuResetAccess
 {
-    void FUN_007d0b90();
+    void kMainMenuFromIngameMenuRetnAddr();
 };
 struct MainMenuWorldAccess
 {
-    void FUN_00457d70(int, int, int);
+    void TES_ShowLoadingMenu(int, int, int);
 };
 // This player accessor is not yet declared by the shared PlayerCharacter header.
 int __cdecl GetMediaLocationController();
@@ -45,11 +45,11 @@ typedef int (__thiscall* PlayerMediaAccessor)(PlayerCharacter*);
 class TES;
 void __cdecl PlayAudioMedia(int, const char*, unsigned int, bool, bool, float, unsigned int);
 void __cdecl FUN_008304c0();
-void __cdecl FUN_00703610();
-void __cdecl FUN_00706320(int);
-void __cdecl FUN_00761460(bool);
+void __cdecl Interface_HideMenus();
+void __cdecl Interface_CloseAllSupportMenus(int);
+void __cdecl FalloutAudio_SetMainMenuMusic(bool);
 void __cdecl ResetTaskQueueGlobals();
-BGSSaveLoadUI_startmenu_rtm_variant* __cdecl FUN_00a25920();
+BGSSaveLoadUI_startmenu_rtm_variant* __cdecl XGamerProfile_Instance();
 extern StartMenu* DAT_011daac0;
 extern bool DAT_011daacd;
 extern OSGlobals* g_osGlobals;
@@ -57,29 +57,30 @@ extern TES* g_TES;
 extern PlayerCharacter* g_thePlayer;
 
 // @fnv 0x007d0a70
-void FUN_007d0a70()
+// src: XBOX_PDB 0x007d0a70
+void StartMenu_ChooseMainMenu()
 {
     char acMusicPath[64];
     delete DAT_011daac0;
-    FUN_00703610();
-    FUN_00706320(0);
-    ((MainMenuAudioAccess*)FUN_00453a70())->FUN_00ad84e0(-1, false);
+    Interface_HideMenus();
+    Interface_CloseAllSupportMenus(0);
+    ((MainMenuAudioAccess*)BSAudio_QInstance())->BSAudio_KillAllOfType(-1, false);
     ResetTaskQueueGlobals();
     {
         int bIsChild = ((PlayerMediaAccessor)&GetMediaLocationController)(g_thePlayer);
         bIsChild = 0;
     }
-    if (FUN_00a25920())
+    if (XGamerProfile_Instance())
     {
-        FUN_00a25920()->FUN_007d0bd0(false);
-        FUN_00a25920()->FUN_007d0bb0();
+        XGamerProfile_Instance()->XGamerProfile_SetPlayingFlag(false);
+        XGamerProfile_Instance()->XGamerProfile_ForcePresenceUpdate();
     }
     DAT_011daacd = true;
-    ((MainMenuResetAccess*)g_osGlobals)->FUN_007d0b90();
-    ((MainMenuWorldAccess*)g_TES)->FUN_00457d70(1, 0, 0);
+    ((MainMenuResetAccess*)g_osGlobals)->kMainMenuFromIngameMenuRetnAddr();
+    ((MainMenuWorldAccess*)g_TES)->TES_ShowLoadingMenu(1, 0, 0);
     memset(acMusicPath, 0, 64);
     sprintf_s(acMusicPath, 64, "Data\\Music\\Special\\MainTitle.mp3");
-    FUN_00761460(true);
+    FalloutAudio_SetMainMenuMusic(true);
     PlayAudioMedia(8, acMusicPath, 5000, true, true, 0.0f, 0);
     FUN_008304c0();
 }

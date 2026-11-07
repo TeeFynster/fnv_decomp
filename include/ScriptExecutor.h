@@ -14,7 +14,7 @@ public:
     ScriptExecutor();
     ~ScriptExecutor();
     static ScriptExecutor* Instance();
-    bool FUN_005e2730(Script* script, TESObjectREFR* ref, ScriptLocals* locals); // returns bool (body in tesscriptrunmanager.cpp)
+    bool ScriptRunManager_InitActionList(Script* script, TESObjectREFR* ref, ScriptLocals* locals); // returns bool (body in tesscriptrunmanager.cpp)
     bool Run(Script* script, TESObjectREFR* reference, ScriptLocals* locals, TESObjectREFR* target,
              bool arg5, bool arg6, bool arg7, float arg8);
 };

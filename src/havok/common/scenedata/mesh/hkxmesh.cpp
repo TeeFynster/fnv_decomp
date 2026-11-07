@@ -51,11 +51,12 @@ struct FUN_00e4ad00_cls
 {
     int m_vptr;
 
-    FUN_00e4ad00_cls* FUN_00e4ad00(unsigned int unusedArg);
+    FUN_00e4ad00_cls* SetVirtualTable_00e4ad00(unsigned int unusedArg);
 };
 
 // @fnv 0x00e4ad00
-FUN_00e4ad00_cls* FUN_00e4ad00_cls::FUN_00e4ad00(unsigned int unusedArg)
+// src: GUESS 0x00e4ad00 (confidence: low)
+FUN_00e4ad00_cls* FUN_00e4ad00_cls::SetVirtualTable_00e4ad00(unsigned int unusedArg)
 {
     m_vptr = (int)&DAT_010ec1dc;
     return this;
@@ -69,7 +70,7 @@ struct MemoryAllocator_CCE530
     virtual void Unknown0C();
     virtual void Free(void* allocation, unsigned int bytes);
 };
-extern "C" FUN_00e4ae20_Router* FUN_00c85750();
+extern "C" FUN_00e4ae20_Router* hkMemoryRouter_getInstance();
 struct ArrayElement_CCE530
 {
     int unk00, unk04, unk08, unk0C;
@@ -81,7 +82,7 @@ struct Array_CCE530
     int capacityAndFlags;
     ~Array_CCE530()
     {
-        FUN_00e4ae20_Router* router = FUN_00c85750();
+        FUN_00e4ae20_Router* router = hkMemoryRouter_getInstance();
         MemoryAllocator_CCE530* heap = (MemoryAllocator_CCE530*)router->m_pMemoryManager;
         int capacity = capacityAndFlags;
         size = 0;
@@ -132,13 +133,13 @@ struct FNV_00e4ad10_Layout
     FNV_00e4ad10_Array first;
     FNV_00e4ad10_Array second;
 };
-extern "C" FUN_00e4ae20_Router* __cdecl FUN_00c85750();
+extern "C" FUN_00e4ae20_Router* __cdecl hkMemoryRouter_getInstance();
 // @fnv 0x00e4ad10
 void FUN_00e4ae20_Object::ClearArrays()
 {
     FNV_00e4ad10_Layout* object = reinterpret_cast<FNV_00e4ad10_Layout*>(this);
     object->vtable = &DAT_010ec1dc;
-    FNV_00e4ad10_Allocator* heap = reinterpret_cast<FNV_00e4ad10_Allocator*>(FUN_00c85750()->m_pMemoryManager);
+    FNV_00e4ad10_Allocator* heap = reinterpret_cast<FNV_00e4ad10_Allocator*>(hkMemoryRouter_getInstance()->m_pMemoryManager);
     int count = object->second.length;
     FNV_00e4ad10_Ref** ppItems = object->second.objects;
     for (int index = 0; index < count; index++)
@@ -154,7 +155,7 @@ void FUN_00e4ae20_Object::ClearArrays()
         heap->Free(object->second.objects, (size & 0x3fffffff) * 4);
     object->second.objects = 0;
     object->second.capacity = 0x80000000;
-    heap = reinterpret_cast<FNV_00e4ad10_Allocator*>(FUN_00c85750()->m_pMemoryManager);
+    heap = reinterpret_cast<FNV_00e4ad10_Allocator*>(hkMemoryRouter_getInstance()->m_pMemoryManager);
     count = object->first.length;
     ppItems = object->first.objects;
     for (int index = 0; index < count; index++)
@@ -177,11 +178,12 @@ class hkObjectE4AE
 {
   public:
     int InsertElements(int a, int b, int c, int d, int e);
-    int FUN_00e4ae00(int a, int b, int d, int e);
+    int InsertElements_Thunk(int a, int b, int d, int e);
 };
 
 // @fnv 0x00e4ae00
-int hkObjectE4AE::FUN_00e4ae00(int aiArg1, int aiArg2, int aiArg4, int aiArg5)
+// src: GUESS 0x00e4ae00 (confidence: medium)
+int hkObjectE4AE::InsertElements_Thunk(int aiArg1, int aiArg2, int aiArg4, int aiArg5)
 {
     return InsertElements(aiArg1, aiArg2, 0, aiArg4, aiArg5);
 }
@@ -190,7 +192,7 @@ struct GeoOutputE4AB80
 {
     hkArray<hkVector4> vertices;
     hkArray<ArrayElement_CCE530> triangles;
-    void FUN_00d5a4c0(void* allocator, int start, const void* values, int count);
+    void ProcessAndReturnValue_00d5a4c0(void* allocator, int start, const void* values, int count);
 };
 struct GeomArraysE4AB80
 {
@@ -207,14 +209,14 @@ struct GeomPairE4AB80
 class TriangleInsertE4AB80
 {
   public:
-    int FUN_00e4ae00(int allocator, int start, int values, int count);
+    int InsertElements_Thunk(int allocator, int start, int values, int count);
 };
 class MeshSectionE4AB80
 {
   public:
     int unk00, unk04, unk08, unk0C, unk10, unk14;
     void* material;
-    void FUN_00e61530(GeomPairE4AB80* geometry, int materialIndex);
+    void hkxMeshSection_appendGeometry(GeomPairE4AB80* geometry, int materialIndex);
 };
 void ResizeAudioStream(void* allocator, void* array, int elementSize);
 template <class T> __forceinline void constructWithCopyRange(T* p, int n, T v)
@@ -226,11 +228,12 @@ struct MeshE4AB80
 {
     int unk00, unk04;
     hkArray<hkxMeshSection*> m_sections;
-    void FUN_00e4ab80(GeoOutputE4AB80* output, hkArray<void*>* materials);
+    void CollectMeshSectionsWithRebasedIndices(GeoOutputE4AB80* output, hkArray<void*>* materials);
 };
 // Iterates mesh sections, resolves material indices, collects vertex and triangle arrays into output, and offsets triangle indices by the base vertex count.
 // @fnv 0x00e4ab80
-void MeshE4AB80::FUN_00e4ab80(GeoOutputE4AB80* output, hkArray<void*>* materials)
+// src: GUESS 0x00e4ab80 (confidence: medium)
+void MeshE4AB80::CollectMeshSectionsWithRebasedIndices(GeoOutputE4AB80* output, hkArray<void*>* materials)
 {
     int materialIndex = -1;
     for (int iSectionIndex = 0; iSectionIndex < m_sections.m_iElementCount; ++iSectionIndex)
@@ -252,7 +255,7 @@ void MeshE4AB80::FUN_00e4ab80(GeoOutputE4AB80* output, hkArray<void*>* materials
             if (materialIndex == -1)
             {
                 materialIndex = materials->m_iElementCount;
-                FUN_00e4ae20_Router* router = FUN_00c85750();
+                FUN_00e4ae20_Router* router = hkMemoryRouter_getInstance();
                 if (materials->m_iElementCount == (materials->m_iCapacityState & 0x3fffffff))
                 {
                     ResizeAudioStream(router->m_pMemoryManager, materials, 4);
@@ -268,7 +271,7 @@ void MeshE4AB80::FUN_00e4ab80(GeoOutputE4AB80* output, hkArray<void*>* materials
         data.first.size = 0;
         data.second.data = 0;
         data.second.size = 0;
-        ((MeshSectionE4AB80*)m_sections.m_data[iSectionIndex])->FUN_00e61530(&data, materialIndex);
+        ((MeshSectionE4AB80*)m_sections.m_data[iSectionIndex])->hkxMeshSection_appendGeometry(&data, materialIndex);
         for (int i = 0; i < data.second.size; ++i)
         {
             data.second.data[i].unk00 += baseVertex;
@@ -278,17 +281,17 @@ void MeshE4AB80::FUN_00e4ab80(GeoOutputE4AB80* output, hkArray<void*>* materials
         {
             int vn = data.first.size;
             ArrayElement_CCE530* pVertices = data.first.data;
-            FUN_00e4ae20_Router* pRouter = FUN_00c85750();
+            FUN_00e4ae20_Router* pRouter = hkMemoryRouter_getInstance();
             void* pAllocator = pRouter->m_pMemoryManager;
-            output->FUN_00d5a4c0(pAllocator, baseVertex, pVertices, vn);
+            output->ProcessAndReturnValue_00d5a4c0(pAllocator, baseVertex, pVertices, vn);
         }
         {
             int tn = data.second.size;
             int iTriangleStart = output->triangles.m_iElementCount;
             ArrayElement_CCE530* pTriangles = data.second.data;
-            FUN_00e4ae20_Router* r2 = FUN_00c85750();
+            FUN_00e4ae20_Router* r2 = hkMemoryRouter_getInstance();
             void* al2 = r2->m_pMemoryManager;
-            ((TriangleInsertE4AB80*)&output->triangles)->FUN_00e4ae00((int)al2, iTriangleStart, (int)pTriangles, tn);
+            ((TriangleInsertE4AB80*)&output->triangles)->InsertElements_Thunk((int)al2, iTriangleStart, (int)pTriangles, tn);
         }
         data.FUN_00cce530();
     }

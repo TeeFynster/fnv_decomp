@@ -12,7 +12,7 @@ void __cdecl _Deallocate(void*);
 // @fnv 0x004b0550
 void* IBSAnimNoteReceiver::FUN_004b0550(unsigned int flags)
 {
-    FUN_004b0530();
+    SetVtableAndProcessState_004b0530();
     if (flags & 1)
         _Deallocate(this);
     return this;

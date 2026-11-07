@@ -387,7 +387,7 @@ struct FUN_00a69400
     Plane planes[6];
     unsigned activePlanes;
     FUN_00a69400(void*);
-    void FUN_00a694a0(void*);
+    void NiCullingProcess_SetFrustum(void*);
 };
 extern "C" void* DAT_0101e2ec;
 struct CleanupRef
@@ -451,7 +451,7 @@ struct S00bd7bb0_Cull : FUN_00a69400
                 DAT_00fdf1c0(&ref->refs);
         }
     }
-    void FUN_004a0fd0(Scene*);
+    void BSCullingProcess_SetAccumulator(Scene*);
 };
 struct TextureArrayFields
 {
@@ -497,10 +497,10 @@ extern unsigned DAT_011f91b8;
 extern void* DAT_011f9520;
 extern ImageSpaceManager* DAT_011f91ac;
 extern int DAT_011ff9f0;
-void FUN_00b6b8d0(unsigned, void*);
-void FUN_00b6bee0(void*, void*, S00bd7bb0_Cull*);
+void BSRenderedTexture_StartOffscreen(unsigned, void*);
+void BSShaderUtil_AccumulateScene(void*, void*, S00bd7bb0_Cull*);
 void FUN_00b6c0d0(void*, Scene*, int);
-void FUN_00b71360(unsigned, Water*, float);
+void BSShaderLightingProperty_SetLight(unsigned, Water*, float);
 void FUN_00b97fa0(int, int);
 void FUN_00b97ff0(int, int, int);
 void FUN_00b6b790();
@@ -594,14 +594,15 @@ struct Camera
     Ptr<Water> water;
     void* sceneData;
     Ptr<Scene> scene;
-    void FUN_00bd7200(int);
-    void FUN_00a59c60(UpdateData&);
+    void BSCubeMapCamera_SetupTransformation(int);
+    void NiAVObject_Update(UpdateData&);
     void CullScene(Water*);
-    void FUN_00bd7bb0(int);
+    void BSCubeMapCamera_ClickCubeMapWithMask(int);
 };
 // For each selected face, selects the cube face, may update and cull the scene, then calls the image-space manager for supported faces.
 // @fnv 0x00bd7bb0
-void Camera::FUN_00bd7bb0(int aiFace)
+// src: COMMUNITY 0x00bd7bb0
+void Camera::BSCubeMapCamera_ClickCubeMapWithMask(int aiFace)
 {
     UpdateData updateData;
     Color savedColor;
@@ -621,10 +622,10 @@ void Camera::FUN_00bd7bb0(int aiFace)
     {
         if (aiFace != -1 && face != aiFace)
             continue;
-        FUN_00bd7200(face);
+        BSCubeMapCamera_SetupTransformation(face);
         Cube* cube = target ? target->cube : (const Ptr<Cube>&)Ptr<Cube>();
         cube->Select(face);
-        FUN_00b6b8d0(7, target->FUN_00b6b260());
+        BSRenderedTexture_StartOffscreen(7, target->FUN_00b6b260());
         unsigned bit = 0;
         switch (face)
         {
@@ -655,7 +656,7 @@ void Camera::FUN_00bd7bb0(int aiFace)
             updateData.flag2 = false;
             updateData.flag3 = false;
             updateData.flag4 = false;
-            FUN_00a59c60(updateData);
+            NiAVObject_Update(updateData);
             if (DAT_011f91b8 != 7)
             {
                 if (sceneData)
@@ -670,9 +671,9 @@ void Camera::FUN_00bd7bb0(int aiFace)
                     scene->flag = true;
                     S00bd7bb0_Cull cull(0);
                     cull.camera = this;
-                    cull.FUN_00a694a0(&unk0dc);
-                    cull.FUN_004a0fd0(scene);
-                    FUN_00b6bee0(this, sceneData, &cull);
+                    cull.NiCullingProcess_SetFrustum(&unk0dc);
+                    cull.BSCullingProcess_SetAccumulator(scene);
+                    BSShaderUtil_AccumulateScene(this, sceneData, &cull);
                     FUN_00b6c0d0(this, scene, 0);
                     cull.ClearRef();
                     if (held)
@@ -685,7 +686,7 @@ void Camera::FUN_00bd7bb0(int aiFace)
             }
             else if (water)
             {
-                FUN_00b71360(0, water, 1.0f);
+                BSShaderLightingProperty_SetLight(0, water, 1.0f);
                 target = water.value->texture;
                 CullScene(water);
             }
@@ -702,29 +703,29 @@ void Camera::FUN_00bd7bb0(int aiFace)
         case 1: {
             imageSpaceParams.FUN_00b8a760(0, Cos(1.5707963267948966), Sin(1.5707963267948966), 0.0f, 0.0f);
             imageSpaceParams.FUN_00b8a760(1, -Sin(1.5707963267948966), Cos(1.5707963267948966), 0.0f, 0.0f);
-            manager->FUN_00b975f0(47, renderer, destination, target, &imageSpaceParams, 0);
+            manager->ImageSpaceManager_RenderEffect_2(47, renderer, destination, target, &imageSpaceParams, 0);
             break;
         }
         case 0: {
             imageSpaceParams.FUN_00b8a760(0, Cos(4.7123889923095703), Sin(4.7123889923095703), 0.0f, 0.0f);
             imageSpaceParams.FUN_00b8a760(1, -Sin(4.7123889923095703), Cos(4.7123889923095703), 0.0f, 0.0f);
-            manager->FUN_00b975f0(47, renderer, destination, target, &imageSpaceParams, 0);
+            manager->ImageSpaceManager_RenderEffect_2(47, renderer, destination, target, &imageSpaceParams, 0);
             break;
         }
         case 3: {
             imageSpaceParams.FUN_00b8a760(0, Cos(3.1415927410125732), Sin(3.1415927410125732), 0.0f, 0.0f);
             imageSpaceParams.FUN_00b8a760(1, -Sin(3.1415927410125732), Cos(3.1415927410125732), 0.0f, 0.0f);
-            manager->FUN_00b975f0(47, renderer, destination, target, &imageSpaceParams, 0);
+            manager->ImageSpaceManager_RenderEffect_2(47, renderer, destination, target, &imageSpaceParams, 0);
             break;
         }
         case 2: {
             imageSpaceParams.FUN_00b8a760(0, Cos(0.0), Sin(0.0), 0.0f, 0.0f);
             imageSpaceParams.FUN_00b8a760(1, -Sin(0.0), Cos(0.0), 0.0f, 0.0f);
-            manager->FUN_00b975f0(47, renderer, destination, target, &imageSpaceParams, 0);
+            manager->ImageSpaceManager_RenderEffect_2(47, renderer, destination, target, &imageSpaceParams, 0);
             break;
         }
         case 4:
-            manager->FUN_00b975f0(47, renderer, destination, target, &imageSpaceParams, 0);
+            manager->ImageSpaceManager_RenderEffect_2(47, renderer, destination, target, &imageSpaceParams, 0);
             break;
         }
         --DAT_011ff9f0;

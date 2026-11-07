@@ -72,10 +72,11 @@ struct S_00cf5880
 {
     int unk0;
     void FindNextEnabledChild(int a);
-    void FUN_00cf5880();
+    void FindNextEnabledChild_Thunk();
 };
 // @fnv 0x00cf5880
-void S_00cf5880::FUN_00cf5880()
+// src: GUESS 0x00cf5880 (confidence: medium)
+void S_00cf5880::FindNextEnabledChild_Thunk()
 {
     FindNextEnabledChild(-1);
 }
@@ -94,25 +95,26 @@ struct __declspec(align(16)) BufAligned32
 
 struct FUN_00cf4fb0_Obj
 {
-    void FUN_00cf4fb0(void* a1);
+    void ProcessEntries_00cf4fb0(void* a1);
 };
 
 struct FUN_00cf5420_class
 {
-    void FUN_00cf5420();
+    void hkpListShape_recalcAabbExtents();
 };
 
 // @fnv 0x00cf5420
-void FUN_00cf5420_class::FUN_00cf5420()
+// src: HAVOK_LIB 0x00cf5420
+void FUN_00cf5420_class::hkpListShape_recalcAabbExtents()
 {
     BufAligned32 bufAligned;
     FUN_00cf4fb0_Obj* obj = (FUN_00cf4fb0_Obj*)this;
-    obj->FUN_00cf4fb0(&bufAligned);
+    obj->ProcessEntries_00cf4fb0(&bufAligned);
 }
 
 extern const hkClass DAT_01269198;
 
-int __cdecl FUN_00d06f80(const void* pvChunk, int iNumBytes) throw();
+int __cdecl hkStatisticsCollector_getAllocatedSize(const void* pvChunk, int iNumBytes) throw();
 
 template <class T, class Allocator>
 void hkStatisticsCollector::addArray(const char* pcName, const hkArray<T, Allocator>& kArray)
@@ -120,7 +122,7 @@ void hkStatisticsCollector::addArray(const char* pcName, const hkArray<T, Alloca
     if ((kArray.m_iCapacityState & 0x80000000) == 0 || m_reportInplaceAllocations)
     {
         const T* pData = kArray.m_data;
-        int iAllocated = FUN_00d06f80(pData, kArray.getCapacity() * sizeof(T));
+        int iAllocated = hkStatisticsCollector_getAllocatedSize(pData, kArray.getCapacity() * sizeof(T));
         AddMemoryChunk(3, pcName, kArray.m_data, kArray.GetLogicalSize() * sizeof(T), iAllocated);
     }
 }
@@ -232,7 +234,7 @@ int hkListShapeCF58::FindNextEnabledChild(int oldKey) const
     return -1;
 }
 
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 struct FnvCpu_FUN_00cf5890_CpuObject
 {
     unsigned int unk00;
@@ -247,18 +249,18 @@ FnvCpu_FUN_00cf5890_CpuObject* FnvCpu_FUN_00cf5890_CpuObject::Destroy(unsigned i
     FUN_00cf5750();
     if (flags & 1)
     {
-        hkMemoryRouter* pAllocatorHolder = FUN_00c85750();
+        hkMemoryRouter* pAllocatorHolder = hkMemoryRouter_getInstance();
         pAllocatorHolder->heap().blockFree(this, size);
     }
     return this;
 }
 
-void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
 
 
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return FUN_00c85750()->heap();
+    return hkMemoryRouter_getInstance()->heap();
 }
 
 template <class T>
@@ -269,7 +271,7 @@ __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& kAlloc, 
     {
         int iCap2 = 2 * iCap;
         int iNewCap = (n < iCap2) ? iCap2 : n;
-        FUN_00c908c0(kAlloc, this, iNewCap, sizeof(T));
+        hkArrayUtil__reserve(kAlloc, this, iNewCap, sizeof(T));
     }
 }
 
@@ -302,7 +304,7 @@ class FUN_00cf5640 : public ShapeCollectionConstruction
     int m_aiIds[8];
 
     FUN_00cf5640(int iA, int iB, int iC) throw();
-    void FUN_00cf54d0(int iA, int iB, int iZero, int iC) throw();
+    void hkpListShape_setShapes(int iA, int iB, int iZero, int iC) throw();
 };
 
 // Constructs a shape by reserving 4 points, calling FUN_00cf54d0 with iA, iB, 0, iC, and initializing m_aiIds to -1 and flags to 0.
@@ -310,7 +312,7 @@ class FUN_00cf5640 : public ShapeCollectionConstruction
 FUN_00cf5640::FUN_00cf5640(int iA, int iB, int iC) throw() : ShapeCollectionConstruction(9, 0)
 {
     m_kPoints.reserve(4);
-    FUN_00cf54d0(iA, iB, 0, iC);
+    hkpListShape_setShapes(iA, iB, 0, iC);
     for (int i = 0; i < 8; i++)
         m_aiIds[i] = -1;
     m_flags26 = 0;
@@ -326,10 +328,11 @@ struct ListShapeCF
     int unk10;
     int unk14;
     hkArray<hkpListShapeChildInfo> m_kChildInfoList;
-    int FUN_00cf50c0(const bool& input, int spuBufferSizeLeft);
+    int hkpListShape_calcSizeForSpu(const bool& input, int spuBufferSizeLeft);
 };
 // @fnv 0x00cf50c0
-int ListShapeCF::FUN_00cf50c0(const bool& input, int spuBufferSizeLeft)
+// src: HAVOK_LIB 0x00cf50c0
+int ListShapeCF::hkpListShape_calcSizeForSpu(const bool& input, int spuBufferSizeLeft)
 {
     if (input && m_kChildInfoList.GetLogicalSize() > 252)
         return -1;
@@ -345,28 +348,29 @@ int ListShapeCF::FUN_00cf50c0(const bool& input, int spuBufferSizeLeft)
     return 0x70;
 }
 
-void __cdecl FUN_00c908c0(void* allocator, void* array, int capacity, int elementSize);
-void __cdecl FUN_00c90670(void* data, int count, int elementSize);
+void __cdecl hkArrayUtil__reserve(void* allocator, void* array, int capacity, int elementSize);
+void __cdecl hkReferencedObject_addReferences(void* data, int count, int elementSize);
 
 struct ListShapeCF54 : public hkpListShape
 {
-    void FUN_00cf5420();
-    void FUN_00cf54d0(int* shapes, int count, int* shapeData, int flag);
+    void hkpListShape_recalcAabbExtents();
+    void hkpListShape_setShapes(int* shapes, int count, int* shapeData, int flag);
 };
 
 // Copies shape and filter data into m_kChildInfoList, growing capacity as needed, then calls FUN_00cf5420.
 // @fnv 0x00cf54d0
-void ListShapeCF54::FUN_00cf54d0(int* shapes, int count, int* shapeData, int flag)
+// src: HAVOK_LIB 0x00cf54d0
+void ListShapeCF54::hkpListShape_setShapes(int* shapes, int count, int* shapeData, int flag)
 {
     hkArray<hkpListShapeChildInfo>& children = m_kChildInfoList;
-    hkMemoryAllocator& heap = FUN_00c85750()->heap();
+    hkMemoryAllocator& heap = hkMemoryRouter_getInstance()->heap();
     int capacity = children.m_iCapacityState & 0x3fffffff;
     if (capacity < count)
     {
         int increasedCapacity = capacity * 2;
         if (count >= increasedCapacity)
             increasedCapacity = count;
-        FUN_00c908c0(&heap, &children, increasedCapacity, 16);
+        hkArrayUtil__reserve(&heap, &children, increasedCapacity, 16);
     }
     children.m_iElementCount = count;
     if (count > 0)
@@ -391,8 +395,8 @@ void ListShapeCF54::FUN_00cf54d0(int* shapes, int count, int* shapeData, int fla
         } while (--remaining);
     }
     if (flag == 1)
-        FUN_00c90670(children.m_data, this->m_kChildInfoList.m_iElementCount, 16);
-    FUN_00cf5420();
+        hkReferencedObject_addReferences(children.m_data, this->m_kChildInfoList.m_iElementCount, 16);
+    hkpListShape_recalcAabbExtents();
 }
 
 // Preserve uninitialized construction of the shared vector union member.
@@ -444,17 +448,18 @@ class hkpListShapeq
     hkVector4q m_kAabbHalfExtents;
     hkVector4q m_kAabbCenter;
 
-    void FUN_00cf5420();
-    void FUN_00cf5590(const hkTransform& localToWorld, float tolerance, hkAabbq& out);
+    void hkpListShape_recalcAabbExtents();
+    void hkpListShape_getAabb(const hkTransform& localToWorld, float tolerance, hkAabbq& out);
 };
 
 // Computes the combined AABB of all child shapes by querying each child's AABB and merging the min and max corners.
 // @fnv 0x00cf5590
-void hkpListShapeq::FUN_00cf5590(const hkTransform& localToWorld, float tolerance, hkAabbq& out)
+// src: XBOX_PDB 0x00cf5590
+void hkpListShapeq::hkpListShape_getAabb(const hkTransform& localToWorld, float tolerance, hkAabbq& out)
 {
     if (m_kAabbHalfExtents.compareLessThanEqual4(DAT_01267e30) == 15)
     {
-        FUN_00cf5420();
+        hkpListShape_recalcAabbExtents();
     }
 
     out.m_kMinimumCorner.m_vComponents = _mm_set_ps1(1.70141001e+38f);
@@ -565,12 +570,13 @@ struct S00cf5140_Obj : public hkpListShape
         return 1;
     }
 
-    hkBool FUN_00cf5140(const S00cf5140_Input& input, S00cf5140_Output& results) const;
+    hkBool hkpListShape_castRayImpl(const S00cf5140_Input& input, S00cf5140_Output& results) const;
 };
 
 // Performs a ray cast against all enabled child shapes of this list shape, recording the hit child index in the output and returning whether any child was hit.
 // @fnv 0x00cf5140
-hkBool S00cf5140_Obj::FUN_00cf5140(const S00cf5140_Input& input, S00cf5140_Output& results) const
+// src: HAVOK_LIB 0x00cf5140
+hkBool S00cf5140_Obj::hkpListShape_castRayImpl(const S00cf5140_Input& input, S00cf5140_Output& results) const
 {
     ((S00cf5140_Stream*)TlsGetValue(DAT_0126835c))->timerBegin(str_010cc398);
 
@@ -626,7 +632,7 @@ hkBool S00cf5140_Obj::FUN_00cf5140(const S00cf5140_Input& input, S00cf5140_Outpu
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (0x10).
 struct PrimaryBase
 {
-    virtual void FUN_00cf5820();
+    virtual void AdjustThisAndForward_00cf5820();
     int unk04;
     int unk08;
     int unk0C;
@@ -634,14 +640,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_00cf5820();
+    virtual void AdjustThisAndForward_00cf5820();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x00cf5820
-    virtual void FUN_00cf5820();
+// src: GUESS 0x00cf5820 (confidence: low)
+    virtual void AdjustThisAndForward_00cf5820();
 };
 
 Derived::Derived()
@@ -677,12 +684,13 @@ inline hkpCdBody::hkpCdBody() {}
 
 struct S00cf52c0_Obj : public S00cf5140_Obj
 {
-    void FUN_00cf52c0(const S00cf5140_Input& input, const hkpCdBody& cdBody, hkpRayHitCollector& collector) const;
+    void hkpListShape_castRayWithCollectorImpl(const S00cf5140_Input& input, const hkpCdBody& cdBody, hkpRayHitCollector& collector) const;
 };
 
 // Iterates enabled children, optionally filtering via m_pRayShapeCollectionFilter, and casts a ray on each child's collision shape into the collector.
 // @fnv 0x00cf52c0
-void S00cf52c0_Obj::FUN_00cf52c0(const S00cf5140_Input& input, const hkpCdBody& cdBody,
+// src: HAVOK_LIB 0x00cf52c0
+void S00cf52c0_Obj::hkpListShape_castRayWithCollectorImpl(const S00cf5140_Input& input, const hkpCdBody& cdBody,
                                  hkpRayHitCollector& collector) const
 {
     hkpCdBody child;

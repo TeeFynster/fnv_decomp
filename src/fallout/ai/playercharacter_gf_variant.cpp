@@ -20,7 +20,7 @@ extern float DAT_0108b0a0f;
 extern NiPoint3* DAT_011e07d0;
 struct SettingShell
 {
-    float* __thiscall FUN_00403e20();
+    float* __thiscall Setting_Float_00403e20();
 };
 extern SettingShell DAT_011ccfd8;
 extern SettingShell DAT_011cda94;
@@ -47,7 +47,7 @@ struct PtLen
 };
 struct StoreShell
 {
-    NiPoint3* __thiscall FUN_0063c8a0(void* p);
+    NiPoint3* __thiscall ComputeValue_0063c8a0(void* p);
 };
 struct __declspec(align(16)) BigObj
 {
@@ -57,7 +57,7 @@ struct __declspec(align(16)) BigObj
     unsigned int shapeKeysA[8];
     int unk48, unk4c;
     unsigned int shapeKeysB[8];
-    void __thiscall FUN_00621c40();
+    void __thiscall ProcessAndReturnValue_00621c40();
 };
 struct PointSubtract
 {
@@ -65,14 +65,14 @@ struct PointSubtract
 };
 struct Field21c
 {
-    int __thiscall FUN_00621440();
-    void __thiscall FUN_00621370(int x);
-    unsigned char __thiscall FUN_00620bc0(NiPoint3* a, NiPoint3* b, BigObj* c);
-    unsigned char __thiscall FUN_006214d0(void* o, NiPoint3* p, float a, float b);
+    int __thiscall CameraCaster_GetWorld();
+    void __thiscall CameraCaster_Add(int x);
+    unsigned char __thiscall CameraCaster_Pick(NiPoint3* a, NiPoint3* b, BigObj* c);
+    unsigned char __thiscall CameraCaster_KeepOutOfCharacter(void* o, NiPoint3* p, float a, float b);
 };
 struct Obj621ad0
 {
-    int __thiscall FUN_00621ad0();
+    int __thiscall bhkCharacterController_GetWorld();
 };
 struct ModeShell
 {
@@ -84,10 +84,10 @@ struct TObjShell
 };
 struct ListShell
 {
-    void* __thiscall FUN_0045bb80();
+    void* __thiscall NiAVObject_GetWorldTranslate();
 };
 extern ModeShell DAT_011f2250;
-bool __cdecl FUN_00702680(int a, unsigned int b);
+bool __cdecl Interface_IsMenuIDVisible(int a, unsigned int b);
 struct ThisShell
 {
     int f_000;
@@ -497,12 +497,13 @@ struct ThisShell
     unsigned char unk64b;
     bool bThirdPerson;
     unsigned char byte64d;
-    void __thiscall FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag);
+    void __thiscall PlayerCharacter_UpdateChaseCamera(NiPoint3* p1, NiPoint3* p2, unsigned char flag);
     void __thiscall FUN_008c4640();
     void* __thiscall FUN_009306d0();
 };
 // @fnv 0x0094a0c0
-void ThisShell::FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
+// src: XBOX_PDB 0x0094a0c0
+void ThisShell::PlayerCharacter_UpdateChaseCamera(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
 {
     NiPoint3 vec;
     signed char state = (signed char)((unsigned char)bThirdPerson - byte64a);
@@ -512,9 +513,9 @@ void ThisShell::FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
         if (flag || DAT_011e07c3)
             state = 0;
         else
-            f = *DAT_011ccfd8.FUN_00403e20() + ((DAT_011e0b5c - *DAT_011cda94.FUN_00403e20()) /
-                                                (*DAT_011cde14.FUN_00403e20() - *DAT_011cda94.FUN_00403e20())) *
-                                                   *DAT_011cdd60.FUN_00403e20();
+            f = *DAT_011ccfd8.Setting_Float_00403e20() + ((DAT_011e0b5c - *DAT_011cda94.Setting_Float_00403e20()) /
+                                                (*DAT_011cde14.Setting_Float_00403e20() - *DAT_011cda94.Setting_Float_00403e20())) *
+                                                   *DAT_011cdd60.Setting_Float_00403e20();
     }
     if (flag || DAT_011e07c3)
     {
@@ -527,7 +528,7 @@ void ThisShell::FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
         if (DAT_011e07b9)
         {
             ((StoreShell*)&DAT_011e0808)
-                ->FUN_0063c8a0(&((vec - DAT_011e0808) * *DAT_011cd3d8.FUN_00403e20() * DAT_011f6394.FUN_0084d030()));
+                ->ComputeValue_0063c8a0(&((vec - DAT_011e0808) * *DAT_011cd3d8.Setting_Float_00403e20() * DAT_011f6394.FUN_0084d030()));
             vec = DAT_011e0808;
         }
         else
@@ -541,24 +542,24 @@ void ThisShell::FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
         NiPoint3 a70 = *p2;
         NiPoint3 a7c = vec;
         BigObj big;
-        big.FUN_00621c40();
-        if (field21c->FUN_00621440() == 0)
+        big.ProcessAndReturnValue_00621c40();
+        if (field21c->CameraCaster_GetWorld() == 0)
         {
-            int handle = FUN_009306d0() ? ((Obj621ad0*)FUN_009306d0())->FUN_00621ad0() : 0;
-            field21c->FUN_00621370(handle);
+            int handle = FUN_009306d0() ? ((Obj621ad0*)FUN_009306d0())->bhkCharacterController_GetWorld() : 0;
+            field21c->CameraCaster_Add(handle);
         }
-        if (field21c->FUN_00620bc0(&a70, &a7c, &big))
+        if (field21c->CameraCaster_Pick(&a70, &a7c, &big))
         {
             ((PointSubtract*)&a7c)->Subtract(a70);
             if (len - a7c.Length() > 2.0)
                 DAT_011e07c2 = 1;
-            len = a7c.Length() - *DAT_011e0934.FUN_00403e20() * 0.5;
+            len = a7c.Length() - *DAT_011e0934.Setting_Float_00403e20() * 0.5;
         }
     }
-    float scaled = *DAT_011cd288.FUN_00403e20() * DAT_011f6394.FUN_0084d030() * f;
-    float lim = *DAT_011cd568.FUN_00403e20();
+    float scaled = *DAT_011cd288.Setting_Float_00403e20() * DAT_011f6394.FUN_0084d030() * f;
+    float lim = *DAT_011cd568.Setting_Float_00403e20();
     if (DAT_011e07b8)
-        lim = *DAT_011cde14.FUN_00403e20();
+        lim = *DAT_011cde14.Setting_Float_00403e20();
     if (state != 0)
     {
         if (state == 1 && len < DAT_011e0768 + state * scaled)
@@ -595,8 +596,8 @@ void ThisShell::FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
             DAT_011e0768 = len;
         else
             DAT_011e0768 += scaled;
-        if (!DAT_011e07c2 && DAT_011e0768 < *DAT_011cda94.FUN_00403e20())
-            DAT_011e0768 = *DAT_011cda94.FUN_00403e20();
+        if (!DAT_011e07c2 && DAT_011e0768 < *DAT_011cda94.Setting_Float_00403e20())
+            DAT_011e0768 = *DAT_011cda94.Setting_Float_00403e20();
         if (DAT_011e0768 > lim)
             DAT_011e0768 = lim;
     }
@@ -606,21 +607,21 @@ void ThisShell::FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
     {
         if (state < 0)
         {
-            if (DAT_011e0768 < *DAT_011e0a84.FUN_00403e20())
+            if (DAT_011e0768 < *DAT_011e0a84.Setting_Float_00403e20())
             {
                 DAT_011e0768 = 0.0f;
                 DAT_011e07dc = 0.0f;
                 state = 0;
             }
         }
-        else if (DAT_011e0768 < *DAT_011e0a84.FUN_00403e20())
-            DAT_011e0768 = *DAT_011e0a84.FUN_00403e20();
+        else if (DAT_011e0768 < *DAT_011e0a84.Setting_Float_00403e20())
+            DAT_011e0768 = *DAT_011e0a84.Setting_Float_00403e20();
     }
-    else if (!FUN_00702680(0x40c, 0) && DAT_011f2250.FUN_0044ddc0() != 4)
+    else if (!Interface_IsMenuIDVisible(0x40c, 0) && DAT_011f2250.FUN_0044ddc0() != 4)
     {
         void* o = FUN_009306d0();
         float ft = ((TObjShell*)this)->GetActorHeight() - 124.0;
-        if (field21c->FUN_006214d0(o, &v128, *DAT_011e09c8.FUN_00403e20(), ft))
+        if (field21c->CameraCaster_KeepOutOfCharacter(o, &v128, *DAT_011e09c8.Setting_Float_00403e20(), ft))
             ok = true;
     }
     if (ok && !byte64d)
@@ -651,7 +652,7 @@ void ThisShell::FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
         DAT_011e07dc = v158.Length() / DAT_011f6394.FUN_0084d030();
         if (state == -1)
         {
-            NiPoint3 v16c = *p1 - *(NiPoint3*)((ListShell*)DAT_011e07d0)->FUN_0045bb80();
+            NiPoint3 v16c = *p1 - *(NiPoint3*)((ListShell*)DAT_011e07d0)->NiAVObject_GetWorldTranslate();
             if (v158.Length() >= v16c.Length())
             {
                 DAT_011e07dc = 0.0f;

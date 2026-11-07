@@ -65,8 +65,8 @@ class PathManagerImpl
     bool Initialize();
     bool BuildPath(NiPointer<PathingRequest> m_pPathingRequest, NiPointer<ActorPathingMessageQueue> spQueue);
 
-    bool FUN_006eb790();
-    void FUN_006eb7b0();
+    bool PathManagerImpl_TaskTryLock();
+    void PathManagerImpl_TaskUnlock();
     bool GetByteAtOffsetC34();
     void DispatchPathingMessage(const Struct_004b0680& item);
 };
@@ -91,7 +91,7 @@ class PathManager
                    bool bAsync);
 
     static PathManager* GetRandomGenerator();
-    PathManagerImpl* FUN_00559450();
+    PathManagerImpl* Modelloader_GetReferencedThis();
     DummyTimer* FUN_00717e50();
 };
 

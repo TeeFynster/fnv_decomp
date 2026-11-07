@@ -35,7 +35,7 @@ struct S_00cee1c0_Router
     int unk0C;
     S_00cee1c0_Heap* heap;
 };
-S_00cee1c0_Router* FUN_00c85750();
+S_00cee1c0_Router* hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* heap, void* array, int elemSize);
 
 #include <math.h>
@@ -235,7 +235,7 @@ __forceinline void hkTransform::setTranslation(const hkVector4& t)
 }
 __forceinline void hkTransform::SetBodyOrientation(const hkQuaternion& q)
 {
-    reinterpret_cast<hkRotation*>(&m_row0)->FUN_00cb2d90(q);
+    reinterpret_cast<hkRotation*>(&m_row0)->hkRotation_set(q);
 }
 __forceinline void hkTransform::setIdentity()
 {
@@ -267,7 +267,7 @@ inline S_00cee1c0_Heap& GetRouterHeap(S_00cee1c0_Router* r)
 #include "../../../../../../include/hkArray.h"
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    return reinterpret_cast<hkMemoryAllocator&>(GetRouterHeap(FUN_00c85750()));
+    return reinterpret_cast<hkMemoryAllocator&>(GetRouterHeap(hkMemoryRouter_getInstance()));
 }
 template <typename T> __forceinline void hkArrayBase<T>::clear()
 {
@@ -297,7 +297,7 @@ template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
 
 extern const hkVector4 DAT_01268390;
 float __cdecl ClampedAcos(float);
-int __cdecl FUN_00ced090(const hkArray<MassPropertiesTransform>& elements, hkpMassProperties& result);
+int __cdecl hkpInertiaTensorComputer_combineMassProperties(const hkArray<MassPropertiesTransform>& elements, hkpMassProperties& result);
 namespace MathUtilities {
 __forceinline hkReal fabs(hkReal r)
 {
@@ -306,7 +306,8 @@ __forceinline hkReal fabs(hkReal r)
 }
 
 // @fnv 0x00cef6d0
-__declspec(noinline) int __cdecl FUN_00cef6d0(const hkVector4& startAxis, const hkVector4& endAxis, hkReal radius,
+// src: XBOX_PDB 0x00cef6d0
+__declspec(noinline) int __cdecl hkpInertiaTensorComputer_computeCylinderVolumeMassProperties(const hkVector4& startAxis, const hkVector4& endAxis, hkReal radius,
                                               hkReal mass, hkpMassProperties& result)
 {
     if (!(mass <= 0.0f))
@@ -327,7 +328,7 @@ __declspec(noinline) int __cdecl FUN_00cef6d0(const hkVector4& startAxis, const 
                 rotAxis.setCross(canonicalZ, axis);
                 rotAxis.normalize3();
                 hkQuaternion q;
-                q.FUN_00cb2450(rotAxis, ClampedAcos(axis.dot3(canonicalZ)));
+                q.hkQuaternion_setAxisAngle(rotAxis, ClampedAcos(axis.dot3(canonicalZ)));
                 cylinderBaseTransform.SetBodyOrientation(q);
             }
             else
@@ -353,7 +354,7 @@ __declspec(noinline) int __cdecl FUN_00cef6d0(const hkVector4& startAxis, const 
             el.m_kProperties.m_kCenterOfMass1.setZero4();
             el.m_kProperties.m_iBufferSize = volume;
             el.m_kProperties.m_fViscosityFriction = massCopy;
-            FUN_00ced090(elements, result);
+            hkpInertiaTensorComputer_combineMassProperties(elements, result);
             return 0;
         }
     }

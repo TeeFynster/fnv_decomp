@@ -89,20 +89,21 @@ bool PathingLOSMap::HasNavMeshEntry(unsigned int aiNavMeshID)
 
 struct ArrHelper
 {
-    bool FUN_0076b610() const;
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() const;
 };
 // Returns false if the helper at offset 0x1c reports true; otherwise scans text entries and returns true on the first non-positive char whose lookup succeeds.
 // @fnv 0x006e1770
-bool PathingLOSMap::FUN_006e1770(unsigned int a, unsigned int b)
+// src: COMMUNITY 0x006e1770
+bool PathingLOSMap::GetUnseenNavMeshAndTriangle(unsigned int a, unsigned int b)
 {
-    if (((const ArrHelper*)((char*)this + 0x1c))->FUN_0076b610())
+    if (((const ArrHelper*)((char*)this + 0x1c))->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
         return false;
     for (unsigned int i = 0; i < (unsigned int)((Script*)this)->FUN_0055b980(); ++i)
     {
         char cChar = ((Script*)this)->GetByteAt(i);
         if (cChar > 0)
             continue;
-        unsigned char d = FUN_006e1670(i, (SpawnedTarget*)a, (unsigned short*)b);
+        unsigned char d = GetNavMeshAndTriangleForIndex(i, (SpawnedTarget*)a, (unsigned short*)b);
         if (d)
             return true;
     }
@@ -187,8 +188,8 @@ bool PathingLOSMap::BuildNavMeshMap(NavMeshCollection* pNavMeshArray)
     m_uTotalCount = 0;
     for (i = 0; i < pNavMeshArray->FUN_0044ddc0(); i++)
     {
-        m_map.SetAt(pNavMeshArray->FUN_00877a30(i).FUN_00559450()->FUN_0084e3a0(), m_uTotalCount);
-        m_uTotalCount += pNavMeshArray->FUN_00877a30(i).FUN_00559450()->FUN_00558200();
+        m_map.SetAt(pNavMeshArray->FUN_00877a30(i).Modelloader_GetReferencedThis()->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), m_uTotalCount);
+        m_uTotalCount += pNavMeshArray->FUN_00877a30(i).Modelloader_GetReferencedThis()->NavMesh_GetTriangleCount();
         m_shell1c.AppendValue(pNavMeshArray->FUN_00877a30(i));
     }
     if (m_pData)
@@ -205,8 +206,8 @@ bool PathingLOSMap::BuildNavMeshMap(NavMeshCollection* pNavMeshArray)
 
 struct SeqEntry
 {
-    SeqEntry* FUN_00559450();
-    Script* FUN_0084e3a0();
+    SeqEntry* Modelloader_GetReferencedThis();
+    Script* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 
 struct SeqList
@@ -227,11 +228,12 @@ struct SpawnedTarget
 
 // Scans the sequence list, measuring each entry's script length; when a length exceeds limit, stores the remaining offset and passes the previous entry to target.
 // @fnv 0x006e1670
-char PathingLOSMap::FUN_006e1670(unsigned int limit, SpawnedTarget* target, unsigned short* outOffset)
+// src: COMMUNITY 0x006e1670
+char PathingLOSMap::GetNavMeshAndTriangleForIndex(unsigned int limit, SpawnedTarget* target, unsigned short* outOffset)
 {
     unsigned int i;
     unsigned int accum;
-    if (((ArrHelper*)((char*)this + 0x1c))->FUN_0076b610())
+    if (((ArrHelper*)((char*)this + 0x1c))->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
     {
         return 0;
     }
@@ -240,7 +242,7 @@ char PathingLOSMap::FUN_006e1670(unsigned int limit, SpawnedTarget* target, unsi
     for (accum = 0; accum < ((SeqList*)((char*)this + 0x1c))->FUN_0044ddc0(); accum++)
     {
         unsigned int len;
-        Script* script = ((SeqList*)((char*)this + 0x1c))->FUN_00877a30(accum)->FUN_00559450()->FUN_0084e3a0();
+        Script* script = ((SeqList*)((char*)this + 0x1c))->FUN_00877a30(accum)->Modelloader_GetReferencedThis()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         if (!((SubMatcher*)((char*)this + 8))->FUN_00853130(script, &len))
         {
             return 0;
@@ -264,8 +266,8 @@ char PathingLOSMap::FUN_006e1670(unsigned int limit, SpawnedTarget* target, unsi
 
 
 
-void* __cdecl FUN_00c58f00(float, int, void*);
-void* __cdecl FUN_00c58d30(float, float, float, int, int, void*);
+void* __cdecl BSTestObjects_CreateCircle(float, int, void*);
+void* __cdecl BSTestObjects_CreateCappedCylinder(float, float, float, int, int, void*);
 void __cdecl AttachLightingPropertyRecursive(void*);
 void __cdecl FUN_00b57e30(void*, int, int);
 // This external call passes three trivial 12-byte vertices by value.  The
@@ -274,17 +276,17 @@ struct DebugTriangleVertex
 {
     float components[3];
 };
-NiAVObject* __cdecl FUN_004b3570(DebugTriangleVertex, DebugTriangleVertex, DebugTriangleVertex, const NiColorA*, int);
+NiAVObject* __cdecl MakeTriangle(DebugTriangleVertex, DebugTriangleVertex, DebugTriangleVertex, const NiColorA*, int);
 
 // @fnv 0x006e1800
 NiSortAdjustNode* PathingLOSMap::CreateSortAdjustNode()
 {
     NiSortAdjustNode* rootNode = new NiSortAdjustNode(0);
     NiPointer<NiAlphaProperty> spA(new NiAlphaProperty());
-    spA->FUN_0049ed90(true);
+    spA->NiAlphaProperty_SetAlphaBlending(true);
     NiPointer<NiMaterialProperty> spB(new NiMaterialProperty());
-    spB->FUN_004bc450((const NiColor*)&NiPoint3(1.0f, 1.0f, 1.0f));
-    spB->FUN_0068c9f0(0.75f);
+    spB->NiMaterialProperty_SetEmittance((const NiColor*)&NiPoint3(1.0f, 1.0f, 1.0f));
+    spB->NiMaterialProperty_SetAlpha(0.75f);
     rootNode->NiAVObject::AttachProperty((NiObject*)(NiAlphaProperty*)spA);
     rootNode->NiAVObject::AttachProperty((NiObject*)(NiMaterialProperty*)spB);
 
@@ -305,7 +307,7 @@ NiSortAdjustNode* PathingLOSMap::CreateSortAdjustNode()
     {
         NavMeshPtr p2;
         unsigned short p0;
-        if (!(unsigned char)FUN_006e1670(j, (SpawnedTarget*)&p2, &p0))
+        if (!(unsigned char)GetNavMeshAndTriangleForIndex(j, (SpawnedTarget*)&p2, &p0))
             continue;
         char a = ((Script*)this)->GetByteAt(j);
         if (a == 0x7f)
@@ -319,10 +321,10 @@ NiSortAdjustNode* PathingLOSMap::CreateSortAdjustNode()
         {
             for (unsigned int k = 0; k < 3; ++k)
             {
-                cf[k] = p2->FUN_0068f0a0(h->FUN_005582d0(k));
+                cf[k] = p2->GetVertex_0068f0a0(h->GetVert_005582d0(k));
                 cf[k].z += 5.0;
             }
-            NiPointer<NiAVObject> spC(FUN_004b3570(*(DebugTriangleVertex*)&cf[0], *(DebugTriangleVertex*)&cf[1], *(DebugTriangleVertex*)&cf[2], &h0, 1));
+            NiPointer<NiAVObject> spC(MakeTriangle(*(DebugTriangleVertex*)&cf[0], *(DebugTriangleVertex*)&cf[1], *(DebugTriangleVertex*)&cf[2], &h0, 1));
             rootNode->AttachChildInAvailableSlot(spC, 1);
         }
     }
@@ -333,19 +335,19 @@ NiSortAdjustNode* PathingLOSMap::CreateSortAdjustNode()
         NiColorA vec(1.0f, 1.0f, 0.0f, 0.5f);
         for (unsigned int m = 0; m < 5; ++m)
         {
-            void* ac = FUN_00c58f00(this->f48, 0x24, &vec);
-            ((NiAVObject*)ac)->FUN_004bc1f0(this->f3c, this->f40, (float)((double)m * 25.0 + this->f44));
+            void* ac = BSTestObjects_CreateCircle(this->f48, 0x24, &vec);
+            ((NiAVObject*)ac)->NiAVObject_SetTranslate_004bc1f0(this->f3c, this->f40, (float)((double)m * 25.0 + this->f44));
             p4->AttachChildInAvailableSlot((NiAVObject*)ac, 1);
         }
-        void* ac1 = FUN_00c58d30(16.0f, 16.0f, 400.0f, 10, 10, &vec);
-        ((NiSortAdjustNode*)ac1)->FUN_00440460(*(const NiPoint3*)&this->f3c);
+        void* ac1 = BSTestObjects_CreateCappedCylinder(16.0f, 16.0f, 400.0f, 10, 10, &vec);
+        ((NiSortAdjustNode*)ac1)->NiAVObject_SetTranslate(*(const NiPoint3*)&this->f3c);
         p4->AttachChildInAvailableSlot((NiAVObject*)ac1, 1);
         AttachLightingPropertyRecursive(p4);
         FUN_00b57e30(p4, 0, 0);
         rootNode->AttachChildInAvailableSlot((NiAVObject*)p4, 1);
     }
 
-    rootNode->FUN_00a5a040();
+    rootNode->UpdateProperties();
     NiUpdateData updateData(0.0f, false, false);
     rootNode->Update((const NiUpdateData&)updateData);
     return rootNode;

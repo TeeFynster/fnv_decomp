@@ -164,7 +164,7 @@ void ScriptEffect::SaveGame(Actor* apActor)
         {
             count = m_pScriptLocals->GetSaveSize();
         }
-        g_TESSaveLoadGame->FUN_008579b0(&count, 2u);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&count, 2u);
     }
     if (g_TESSaveLoadGame->FUN_008df040() < 0x2a)
     {
@@ -183,7 +183,7 @@ void ScriptEffect::LoadGame(Actor* apActor)
     unsigned short flag = 0;
     if (g_TESSaveLoadGame->FUN_008df040() >= 42)
     {
-        g_TESSaveLoadGame->FUN_008579e0(&flag, 2);
+        g_TESSaveLoadGame->TESSaveLoadGame_LoadGameDataOLD(&flag, 2);
     }
     if (g_TESSaveLoadGame->FUN_008df040() < 42)
     {

@@ -16,8 +16,8 @@ struct S_00e647e0 {
     int unk20; int unk24; int unk28; int unk2C; int unk30; int unk34; int unk38; int unk3C;
     hkBool m_bHasHit; char unk41; char unk42; char unk43;
     S_00e647e0_Input* m_pRayCastInput;
-    void FUN_00e645b0(const void* a, const void* b, const void* c, S_00e647e0_Local* out);
-    void FUN_00e63f10(S_00e647e0_Local* l, S_00e647e0_Shape* shape);
+    void ComputeValues_00e645b0(const void* a, const void* b, const void* c, S_00e647e0_Local* out);
+    void queryOBBOnTree(S_00e647e0_Local* l, S_00e647e0_Shape* shape);
     hkBool SetupAndProcessShape(S_00e647e0_Input* input, const void* b, const void* c, const void* d);
 };
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
@@ -81,11 +81,12 @@ struct PointerArg { const void* p; };
 struct BoundsWorker {
  int unk00,unk04,unk08,unk0C,unk10,unk14,unk18,unk1C,unk20,unk24,unk28,unk2C,unk30,unk34,unk38,unk3C;
  hkBool m_bHasHit; char unk41,unk42,unk43; S_00e647e0_Input* m_pRayCastInput;
- void FUN_00e645b0(const void* a, PointerArg b, const void* c, S_00e647e0_Local* out);
+ void ComputeValues_00e645b0(const void* a, PointerArg b, const void* c, S_00e647e0_Local* out);
 };
 
 // @fnv 0x00e645b0
-void BoundsWorker::FUN_00e645b0(const void* a, PointerArg b, const void* c, S_00e647e0_Local* out) {
+// src: GUESS 0x00e645b0 (confidence: low)
+void BoundsWorker::ComputeValues_00e645b0(const void* a, PointerArg b, const void* c, S_00e647e0_Local* out) {
     const __m128* pExt = (const __m128*)a;
     const S_00e645b0_Transform* t = (const S_00e645b0_Transform*)b.p;
     const float* pRadius = (const float*)c;

@@ -12,10 +12,11 @@ struct SpeedTreeLodData
     unsigned short m_usValueAt28;
     char m_pAuxiliaryObject[2];
     LeafLod* m_pLeafLod;
-    void FUN_00b27820();
+    void CLeafGeometry_Invalidate();
 };
 // @fnv 0x00b27820
-void SpeedTreeLodData::FUN_00b27820()
+// src: COMMUNITY 0x00b27820
+void SpeedTreeLodData::CLeafGeometry_Invalidate()
 {
     if (m_pLeafLod)
     {
@@ -77,7 +78,7 @@ const float* FUN_00b27870_Class::CopyLodData(unsigned int& auiOffset)
     return m_pCopiedLodData;
 }
 
-extern "C" bool FUN_00b0d7a0();
+extern "C" bool CSpeedTreeRT_GetTextureFlip();
 extern const float DAT_01012054;
 
 struct FUN_00b28720_Class
@@ -98,7 +99,7 @@ void FUN_00b28720_Class::SetLeafTableEntry(int aiLeafIndex, const float* apSrcFl
 {
     if (m_pLeafTable && apSrcFloats)
     {
-        float fOddScale = FUN_00b0d7a0() ? DAT_01012054 : 1.0f;
+        float fOddScale = CSpeedTreeRT_GetTextureFlip() ? DAT_01012054 : 1.0f;
 
         float* pfDest = m_pLeafTable + (aiLeafIndex * 2) * 8;
         *pfDest++ = apSrcFloats[0];

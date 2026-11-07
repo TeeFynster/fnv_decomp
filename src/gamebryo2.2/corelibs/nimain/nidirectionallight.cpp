@@ -25,7 +25,8 @@ inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
 
 // Calls FUN_00a71f60, sets the vtable to &DAT_0109d7b4, stores NiPoint3(1,0,0) at pThis+0xf0 and byte 3 at pThis+0x9d, then returns pThis.
 // @fnv 0x00a75c20
-void* __fastcall FUN_00a75c20(char* pObject)
+// src: EXE 0x00a75c20
+void* __fastcall NiDirectionalLight_NiDirectionalLight(char* pObject)
 {
     FUN_00a71f60(pObject);
     *(int**)pObject = &DAT_0109d7b4;
@@ -43,7 +44,8 @@ struct GlobalObjectO2_00a7b610
 GlobalObjectO2_00a7b610 g_011f4a68;
 
 // @fnv 0x00a75c70
-void* __fastcall FUN_00a75c70(NiDirectionalLight*)
+// src: COMMUNITY 0x00a75c70
+void* __fastcall NiDirectionalLight_GetRTTI(NiDirectionalLight*)
 {
     return &g_011f4a68;
 }
@@ -63,7 +65,8 @@ NiDirectionalLight* __fastcall FUN_00a75c80(NiDirectionalLight* light, void*, in
 
 // Calls NiAVObject::UpdateWorldData, copies three floats from offsets 0x68/0x74/0x80 to 0xf0/0xf4/0xf8, and increments the int at 0xa8.
 // @fnv 0x00a75cb0
-void __fastcall FUN_00a75cb0(NiDirectionalLight* light, void*, NiUpdateData* UpdateData)
+// src: XBOX_PDB 0x00a75cb0
+void __fastcall NiDirectionalLight_UpdateWorldData(NiDirectionalLight* light, void*, NiUpdateData* UpdateData)
 {
     light->NiAVObject::UpdateWorldData(*UpdateData);
     char* p = reinterpret_cast<char*>(light);
@@ -87,7 +90,8 @@ struct GlobalObjectO2_00a7b610
 extern GlobalObjectO2_00a7b610 g_011f4a68;
 char* _FUN_00a7d330(const char*);
 // @fnv 0x00a75d70
-void __fastcall FUN_00a75d70(NiDirectionalLight* light, void*, NiTPrimitiveArray<char*>* apArray)
+// src: XBOX_PDB 0x00a75d70
+void __fastcall NiDirectionalLight_GetViewerStrings(NiDirectionalLight* light, void*, NiTPrimitiveArray<char*>* apArray)
 {
     reinterpret_cast<NiLightViewerOperations*>(light)->AppendEffectProperties(apArray);
     char* s = _FUN_00a7d330(g_011f4a68.p);
@@ -98,7 +102,7 @@ void __fastcall FUN_00a75d70(NiDirectionalLight* light, void*, NiTPrimitiveArray
 }
 }  // namespace fnv_00a75d70
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 inline void* operator new(unsigned int, void* memory) throw()
 {
     return memory;
@@ -106,17 +110,18 @@ inline void* operator new(unsigned int, void* memory) throw()
 // @fnv 0x00a75d50
 NiDirectionalLight* __cdecl CreateNiDirectionalLight()
 {
-    return ::new (FUN_00aa13e0(sizeof(NiDirectionalLight))) NiDirectionalLight;
+    return ::new (Object_DispatchCommandFour(sizeof(NiDirectionalLight))) NiDirectionalLight;
 }
 
 // Allocates a NiDirectionalLight, initializes it via FUN_00a75c20, copies member data and m_kWorldDir from the source, and returns the new object.
 // @fnv 0x00a75cf0
-NiObject* __fastcall FUN_00a75cf0(NiDirectionalLight* light, void*, CloningProcess* kCloning)
+// src: XBOX_PDB 0x00a75cf0
+NiObject* __fastcall NiDirectionalLight_CreateClone(NiDirectionalLight* light, void*, CloningProcess* kCloning)
 {
-    NiDirectionalLight* pkObject = (NiDirectionalLight*)FUN_00aa13e0(sizeof(NiDirectionalLight));
+    NiDirectionalLight* pkObject = (NiDirectionalLight*)Object_DispatchCommandFour(sizeof(NiDirectionalLight));
 
     if (pkObject)
-        pkObject = (NiDirectionalLight*)FUN_00a75c20((char*)pkObject);
+        pkObject = (NiDirectionalLight*)NiDirectionalLight_NiDirectionalLight((char*)pkObject);
     else
         pkObject = 0;
 

@@ -16,7 +16,7 @@ public:
     unsigned int m_pRayCursor;
 
     void Realloc(unsigned int);
-    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    void ProcessEntries_00a56e60(unsigned int ItemUpdateArray);
     unsigned int Find(Item* item);
     int Find(unsigned int value);
     void Add(Item* item);
@@ -68,7 +68,8 @@ bool __fastcall ProcessCollector(void*, int, NiGeometryGroup*, NiGeometryData*, 
 
 // Forwards the geometry group, data and skin instance to ProcessCollector along with the bool at pThis+0x18 and two zero arguments.
 // @fnv 0x00e88fa0
-bool __fastcall FUN_00e88fa0(NiD3DGeometryGroupManager* pThis, int, NiGeometryGroup* pkGroup, NiGeometryData* pkData,
+// src: XBOX_PDB 0x00e88fa0
+bool __fastcall NiD3DGeometryGroupManager_AddObjectToGroup(NiD3DGeometryGroupManager* pThis, int, NiGeometryGroup* pkGroup, NiGeometryData* pkData,
                              NiSkinInstance* pkSkinInstance)
 {
     typedef bool(__thiscall * Fn)(void*, NiGeometryGroup*, NiGeometryData*, NiSkinInstance*, bool, unsigned int,
@@ -113,7 +114,7 @@ bool __fastcall RemoveScreenTexture(NiD3DGeometryGroupManager*, int, NiScreenTex
 }
 
 void __fastcall DestroyGeometryGroupManagerBase(NiD3DGeometryGroupManager*, int);
-void __cdecl FUN_00e94290();
+void __cdecl NiVBSet_DeleteBlocks();
 void __cdecl _NiFreeAlias(void*);
 // @fnv 0x00e88d60
 void __fastcall DestroyGeometryGroupManager(NiD3DGeometryGroupManager* manager, int)
@@ -127,7 +128,7 @@ void __fastcall DestroyGeometryGroupManager(NiD3DGeometryGroupManager* manager, 
         if (e)
             delete e;
     }
-    FUN_00e94290();
+    NiVBSet_DeleteBlocks();
     if (manager->m_10)
         manager->m_10->Release();
     _NiFreeAlias(manager->m_04);
@@ -160,7 +161,8 @@ struct FUN_P
     FUN_Elem* m_0C;
 };
 // @fnv 0x00e88d00
-bool __stdcall FUN_00e88d00(FUN_P* p)
+// src: XBOX_PDB 0x00e88d00
+bool __stdcall NiD3DGeometryGroupManager_RemoveSkinPartitionFromGroup(FUN_P* p)
 {
     unsigned int cnt = p->m_08;
     FUN_Elem* e = p->m_0C;
@@ -234,7 +236,8 @@ struct GeomRef
 
 // Removes the referenced geometry buffers, then purges the owner group if it is empty.
 // @fnv 0x00e88e40
-bool __stdcall FUN_00e88e40(GeomOwner* pGeomOwner, GeomRef* pGeomRef)
+// src: XBOX_PDB 0x00e88e40
+bool __stdcall NiD3DGeometryGroupManager_RemoveObjectFromGroup(GeomOwner* pGeomOwner, GeomRef* pGeomRef)
 {
     if (pGeomRef == 0)
     {
@@ -244,7 +247,7 @@ bool __stdcall FUN_00e88e40(GeomOwner* pGeomOwner, GeomRef* pGeomRef)
     {
         goto owner;
     }
-    return FUN_00e88d00(reinterpret_cast<FUN_P*>(pGeomRef->m_0C));
+    return NiD3DGeometryGroupManager_RemoveSkinPartitionFromGroup(reinterpret_cast<FUN_P*>(pGeomRef->m_0C));
 owner:
     if (pGeomOwner->m_34 == 0)
     {

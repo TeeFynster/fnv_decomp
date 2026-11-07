@@ -50,11 +50,12 @@ struct CF6DE0HandlePair
 
 struct CF6DE0PhantomBroadPhaseListener
 {
-    void FUN_00cf6de0(CF6DE0HandlePair& pair);
+    void UpdateFields_00cf6de0(CF6DE0HandlePair& pair);
 };
 
 // @fnv 0x00cf6de0
-void CF6DE0PhantomBroadPhaseListener::FUN_00cf6de0(CF6DE0HandlePair& pair)
+// src: GUESS 0x00cf6de0 (confidence: low)
+void CF6DE0PhantomBroadPhaseListener::UpdateFields_00cf6de0(CF6DE0HandlePair& pair)
 {
     if (pair.m_kPointA->m_type == 2)
     {

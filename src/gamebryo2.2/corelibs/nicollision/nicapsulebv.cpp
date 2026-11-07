@@ -9,7 +9,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x00c1ba40
-int __cdecl FUN_00c1ba40()
+// src: GUESS 0x00c1ba40 (confidence: low)
+int __cdecl Object_ComputeValue_00c1ba40()
 {
     return 2;
 }
@@ -33,13 +34,13 @@ NiBoundingVolume* NiCapsuleBV::Clone()
 
 struct ComparableRecord
 {
-    bool FUN_00eae690(const ComparableRecord&) const;
+    bool IsEquivalentWithEqualFloat(const ComparableRecord&) const;
 };
 
 // @fnv 0x00e9f170
 int NiCapsuleBV::IsEqual(const NiBoundingVolume& kABV) const
 {
-    if (kABV.F3() == 2 && reinterpret_cast<const ComparableRecord*>(((const NiCapsuleBV&)kABV)._pad)->FUN_00eae690(*reinterpret_cast<const ComparableRecord*>(_pad)))
+    if (kABV.F3() == 2 && reinterpret_cast<const ComparableRecord*>(((const NiCapsuleBV&)kABV)._pad)->IsEquivalentWithEqualFloat(*reinterpret_cast<const ComparableRecord*>(_pad)))
         return 1;
     return 0;
 }
@@ -84,19 +85,20 @@ struct MatchList
     unsigned short unk12;
     unsigned int foundIndex;
 };
-bool __cdecl FUN_00e9ca50(float value, void* item, unsigned int arg3, unsigned int arg4, unsigned int arg5,
+bool __cdecl NiBoundingVolume_FindTriIntersect(float value, void* item, unsigned int arg3, unsigned int arg4, unsigned int arg5,
                           unsigned int arg6, unsigned int arg7, unsigned int arg8, unsigned int arg9,
                           unsigned int arg10, unsigned int arg11, unsigned int arg12);
 // Scans list->entries for the first item accepted by FUN_00e9ca50, stores its index in list->foundIndex and returns true, otherwise returns false.
 // @fnv 0x00e9ec10
-bool __cdecl FUN_00e9ec10(float value, MatchList* pMatchList, unsigned int arg3, unsigned int arg4, unsigned int arg5,
+// src: COMMUNITY 0x00e9ec10
+bool __cdecl NiUnionBV_UnionTriFindIntersect(float value, MatchList* pMatchList, unsigned int arg3, unsigned int arg4, unsigned int arg5,
                           unsigned int arg6, unsigned int arg7, unsigned int arg8, unsigned int arg9,
                           unsigned int arg10, unsigned int arg11, unsigned int arg12)
 {
     for (unsigned int i = 0; i < pMatchList->count; ++i)
     {
         void* item = pMatchList->entries[i];
-        if (FUN_00e9ca50(value, item, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12))
+        if (NiBoundingVolume_FindTriIntersect(value, item, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12))
         {
             pMatchList->foundIndex = i;
             return true;
@@ -173,37 +175,38 @@ struct S_00e9f400_Obj
     int unk44;
     void InitFromParams(int a, int b, float c, float d, float e, int f);
     void Solve(int a, int b);
-    float FUN_00eae6f0();
+    float NiIntersector_GetContactTime();
     int FUN_00be0aa0();
-    S_00e9f400_P3* FUN_00eae700();
-    S_00e9f400_P3* FUN_00eae710();
-    void FUN_00eae6d0();
+    S_00e9f400_P3* NiIntersector_GetContactPoint();
+    S_00e9f400_P3* NiIntersector_GetContactNormal();
+    void SetVtbl();
 };
 
 // @fnv 0x00e9f400
-bool __cdecl FUN_00e9f400(float p1, int p2, int p3, int p4, int p5, float* p6, S_00e9f400_P3* p7, bool abWantNormal,
+// src: XBOX_PDB 0x00e9f400
+bool __cdecl NiCapsuleBV_CapsuleSphereFindIntersect(float p1, int p2, int p3, int p4, int p5, float* p6, S_00e9f400_P3* p7, bool abWantNormal,
                           S_00e9f400_P3* p9, S_00e9f400_P3* p10)
 {
     S_00e9f400_Obj obj;
     obj.InitFromParams(p2, p4, p1, DAT_01017d00, DAT_010141cc, 0x20);
     obj.Solve(p3, p5);
-    *p6 = obj.FUN_00eae6f0();
+    *p6 = obj.NiIntersector_GetContactTime();
     if (obj.FUN_00be0aa0() != 3 && obj.FUN_00be0aa0() != 2)
     {
-        obj.FUN_00eae6d0();
+        obj.SetVtbl();
         return false;
     }
-    *p7 = *obj.FUN_00eae700();
+    *p7 = *obj.NiIntersector_GetContactPoint();
     if (abWantNormal)
     {
-        *p9 = *obj.FUN_00eae710();
+        *p9 = *obj.NiIntersector_GetContactNormal();
         S_00e9f400_P3 n;
         n.x = -p9->x;
         n.y = -p9->y;
         n.z = -p9->z;
         *p10 = n;
     }
-    obj.FUN_00eae6d0();
+    obj.SetVtbl();
     return true;
 }
 
@@ -229,7 +232,7 @@ extern float DAT_011f426c;
 extern float DAT_011f4270;
 extern float DAT_011f4274;
 
-float __cdecl FUN_00eaf310(const S_Seg* a, const S_Seg* b, float* s, float* t);
+float __cdecl NiSqrDistance_Compute(const S_Seg* a, const S_Seg* b, float* s, float* t);
 float __cdecl DistanceSquaredToSegment(const S_Vec3* p, const S_Seg* b, float* s);
 
 // @fnv 0x00e9f620
@@ -252,7 +255,7 @@ bool __cdecl SweepSphereAgainstCapsule(float t, NiCapsuleBV* apCapsule, const S_
         d.z *= t;
         sweepSeg.p = apSphere->pos;
         sweepSeg.d = d;
-        fDistSq = FUN_00eaf310(&sweepSeg, reinterpret_cast<const S_Seg*>(apCapsule->_pad), &s, &fSegParam2);
+        fDistSq = NiSqrDistance_Compute(&sweepSeg, reinterpret_cast<const S_Seg*>(apCapsule->_pad), &s, &fSegParam2);
     }
     else
     {
@@ -266,7 +269,7 @@ bool __cdecl SweepSphereAgainstCapsule(float t, NiCapsuleBV* apCapsule, const S_
 namespace fnv_00ea04b0 {
 struct S_00ea04b0_Alloc
 {
-    void* FUN_00aa3e40(unsigned int sz) throw();
+    void* Game_DoHeapAlloc(unsigned int sz) throw();
 };
 
 extern "C" S_00ea04b0_Alloc DAT_011f6238;
@@ -288,7 +291,7 @@ __forceinline void ConstructCapsule(NiCapsuleBV* p, NiPoint3 v1, NiPoint3 v2) th
 // @fnv 0x00ea04b0
 NiCapsuleBV* CreateObjWithArg(void* arg)
 {
-    void* mem = DAT_011f6238.FUN_00aa3e40(0x3c);
+    void* mem = DAT_011f6238.Game_DoHeapAlloc(0x3c);
     NiCapsuleBV* p;
     if (mem)
     {
@@ -409,7 +412,8 @@ extern int DAT_011a9474;
 
 // Allocates a 0x3c-byte object, initializes its vtable, center and axis vectors and two floats to 1.0, calls FUN_00e9f1b0, and returns it.
 // @fnv 0x00ea0690
-NiCapsuleBV* __cdecl FUN_00ea0690()
+// src: GAMEBRYO_SRC 0x00ea0690
+NiCapsuleBV* __cdecl NiCapsuleBV_Create()
 {
     NiCapsuleBV* p = (NiCapsuleBV*)g_memoryManager.Allocate(0x3c);
     if (p)
@@ -455,35 +459,36 @@ struct IsectObj
     int unk48;
     void Initialize(int a, int b, float c, float d, float e, int f);
     void Solve(int a, int b);
-    float FUN_00eae6f0();
+    float NiIntersector_GetContactTime();
     int FUN_00be0aa0();
-    Vec3e* FUN_00eae700();
-    Vec3e* FUN_00eae710();
-    void FUN_00eae6d0();
+    Vec3e* NiIntersector_GetContactPoint();
+    Vec3e* NiIntersector_GetContactNormal();
+    void SetVtbl();
 };
 extern float DAT_010141cc;
 extern float DAT_01017d00;
 // @fnv 0x00e9f510
-bool __cdecl FUN_00e9f510(float p1, int p2, int p3, int p4, int p5, float* p6, Vec3e* p7, bool abWantNormal, Vec3e* p9,
+// src: XBOX_PDB 0x00e9f510
+bool __cdecl NiCapsuleBV_CapsuleCapsuleFindIntersect(float p1, int p2, int p3, int p4, int p5, float* p6, Vec3e* p7, bool abWantNormal, Vec3e* p9,
                           Vec3e* p10)
 {
     IsectObj o;
     o.Initialize(p2, p4, p1, DAT_01017d00, DAT_010141cc, 0x20);
     o.Solve(p3, p5);
-    *p6 = o.FUN_00eae6f0();
+    *p6 = o.NiIntersector_GetContactTime();
     if (o.FUN_00be0aa0() != 3 && o.FUN_00be0aa0() != 2)
     {
-        o.FUN_00eae6d0();
+        o.SetVtbl();
         return false;
     }
-    *p7 = *o.FUN_00eae700();
+    *p7 = *o.NiIntersector_GetContactPoint();
     if (abWantNormal)
     {
-        *p9 = *o.FUN_00eae710();
+        *p9 = *o.NiIntersector_GetContactNormal();
         Vec3e n = {-p9->x, -p9->y, -p9->z};
         *p10 = n;
     }
-    o.FUN_00eae6d0();
+    o.SetVtbl();
     return true;
 }
 
@@ -496,7 +501,7 @@ struct TrianglePointSet
 
 extern const S_Vec3 NiPoint3_ZERO;
 
-float __cdecl FUN_00eaff20(const S_Seg* pkSeg, const TrianglePointSet* pkPgm, float* pfSegParam, float* pfPgmParam0,
+float __cdecl NiSqrDistance_Compute_00eaff20(const S_Seg* pkSeg, const TrianglePointSet* pkPgm, float* pfSegParam, float* pfPgmParam0,
                            float* pfPgmParam1);
 
 inline S_Vec3 operator-(const S_Vec3& kA, const S_Vec3& kB)
@@ -536,11 +541,11 @@ bool __cdecl IsCapsuleSweptHit(float fTime, NiCapsuleBV* pkCapsule0, const S_Vec
         kSwept.m_kStartPoint = reinterpret_cast<const S_Seg*>(pkCapsule1->_pad)->p;
         kSwept.m_kPoint1 = reinterpret_cast<const S_Seg*>(pkCapsule1->_pad)->d;
         kSwept.m_kPoint2 = kRelVelocity * fTime;
-        fSqrDist = FUN_00eaff20(reinterpret_cast<const S_Seg*>(pkCapsule0->_pad), &kSwept, &fSqrDist, &fParam0, &fParam1);
+        fSqrDist = NiSqrDistance_Compute_00eaff20(reinterpret_cast<const S_Seg*>(pkCapsule0->_pad), &kSwept, &fSqrDist, &fParam0, &fParam1);
     }
     else
     {
-        fSqrDist = FUN_00eaf310(reinterpret_cast<const S_Seg*>(pkCapsule0->_pad), reinterpret_cast<const S_Seg*>(pkCapsule1->_pad), &fSqrDist, &fParam1);
+        fSqrDist = NiSqrDistance_Compute(reinterpret_cast<const S_Seg*>(pkCapsule0->_pad), reinterpret_cast<const S_Seg*>(pkCapsule1->_pad), &fSqrDist, &fParam1);
     }
 
     float fRadiusSum = pkCapsule0->m_fBoundRadius + pkCapsule1->m_fBoundRadius;
@@ -680,7 +685,7 @@ struct BigStruct
     NiPoint3 c2c;
     NiPoint3 prod;
 };
-float __cdecl FUN_00eb1d20(NiPoint3* c20, Query* q, float* pf3c, float* p30, float* pftmp);
+float __cdecl NiSqrDistance_Compute_00eb1d20(NiPoint3* c20, Query* q, float* pf3c, float* p30, float* pftmp);
 float __cdecl TriangleTriangleDistance(Query* q, BigStruct* bs, float* p30, float* pftmp, float* pR, float* pf3c);
 // Tests capsule proximity to the triangle formed by pOrg, pA, and pB, then compares the computed squared distance with the squared radius.
 // @fnv 0x00e9f8c0
@@ -737,7 +742,7 @@ bool __cdecl CapsuleTriangleIntersect(float afScale, NiCapsuleBV* apCapsule, NiP
         goto ftmp;
     if (vDir.z != DAT_011f4274)
         goto ftmp;
-    fResult = FUN_00eb1d20(reinterpret_cast<NiPoint3*>(apCapsule->_pad), &s, &i, &fResult, &tr);
+    fResult = NiSqrDistance_Compute_00eb1d20(reinterpret_cast<NiPoint3*>(apCapsule->_pad), &s, &i, &fResult, &tr);
     goto done;
 ftmp: {
     BigStruct bigStruct;
@@ -774,7 +779,8 @@ inline S_Vec3 cross3(const S_Vec3& a, const S_Vec3& b)
 
 // Computes the squared distance between segments a and b and writes the closest-point parameters s and t.
 // @fnv 0x00eaf310
-float __cdecl FUN_00eaf310(const S_Seg& a, const S_Seg& b, float& s, float& t)
+// src: XBOX_PDB 0x00eaf310
+float __cdecl NiSqrDistance_Compute(const S_Seg& a, const S_Seg& b, float& s, float& t)
 {
     float edge;
     S_Vec3 vDelta = a.p - b.p;
@@ -1022,7 +1028,7 @@ float __cdecl FUN_00eaf310(const S_Seg& a, const S_Seg& b, float& s, float& t)
 }
 
 #include <string.h>
-void* __cdecl FUN_00aa1070(unsigned int);
+void* __cdecl _NiMalloc_00aa1070(unsigned int);
 int __cdecl FUN_00a305b0(char*, unsigned int, const char*, ...);
 struct S_00ea0730_Arr
 {
@@ -1040,7 +1046,7 @@ struct S_00ea0730_Arr
 void __stdcall AddCapsuleBV(const char* name, S_00ea0730_Arr* arr)
 {
     unsigned int n = strlen(name) + 14;
-    char* buf = (char*)FUN_00aa1070(n);
+    char* buf = (char*)_NiMalloc_00aa1070(n);
     FUN_00a305b0(buf, n, "%s = CAPSULE_BV", name);
     unsigned int i = arr->esize;
     if (i >= arr->size)
@@ -1069,7 +1075,7 @@ struct CenterPoint
         return r;
     }
     NiPoint3 FUN_00439e90(const NiPoint3& b) const;
-    NiPoint3 FUN_00439ef0(const NiPoint3& b) const;
+    NiPoint3 SubtractIntoVector(const NiPoint3& b) const;
 };
 struct PtOp
 {
@@ -1085,7 +1091,7 @@ struct CapsuleSegment
 struct CollisionTriangle
 {
     NiPoint3 p, u, v;
-    NiPoint3 FUN_00eb3830() const;
+    NiPoint3 NiTrigon_GetNormal() const;
 };
 struct CapsuleTriangleQuery
 {
@@ -1099,13 +1105,13 @@ struct CapsuleTriangleQuery
     float inverseRadiusSquared, segmentParameter, triangleParameter;
     void FUN_00eb3750(NiCapsuleBV*, const NiPoint3*, const NiPoint3*, const NiPoint3*, float, float, float, int);
     void Solve(int, int);
-    float FUN_00eae6f0();
+    float NiIntersector_GetContactTime();
     int FUN_00be0aa0();
-    const NiPoint3* FUN_00eae700();
-    const NiPoint3* FUN_00eae710();
-    void FUN_00eae6d0();
+    const NiPoint3* NiIntersector_GetContactPoint();
+    const NiPoint3* NiIntersector_GetContactNormal();
+    void SetVtbl();
 };
-__declspec(noalias) float __cdecl FUN_00eb1d20(const CapsuleSegment*, const CollisionTriangle*, float*, float*, float*);
+__declspec(noalias) float __cdecl NiSqrDistance_Compute_00eb1d20(const CapsuleSegment*, const CollisionTriangle*, float*, float*, float*);
 __declspec(noinline) NiPoint3 __cdecl FUN_004a3760(float s, const NiPoint3& v)
 {
     return NiPoint3(s * v.x, s * v.y, s * v.z);
@@ -1122,7 +1128,8 @@ struct DistanceData
 };
 // Tests a moving capsule against a triangle for static overlap and swept collision, returning contact time, point, and normal.
 // @fnv 0x00e9fdc0
-bool __cdecl FUN_00e9fdc0(float afTime, NiCapsuleBV* apCapsule, NiPoint3* a2, const NiPoint3* apTriA, NiPoint3* apTriB, NiPoint3* apTriC,
+// src: XBOX_PDB 0x00e9fdc0
+bool __cdecl NiCapsuleBV_CapsuleTriFindIntersect(float afTime, NiCapsuleBV* apCapsule, NiPoint3* a2, const NiPoint3* apTriA, NiPoint3* apTriB, NiPoint3* apTriC,
                           NiPoint3* a6, float* a7, NiPoint3* apPoint, bool abNormal, NiPoint3* apNormal, NiPoint3* apNormal2)
 {
     DistanceData collisionData;
@@ -1132,7 +1139,7 @@ bool __cdecl FUN_00e9fdc0(float afTime, NiCapsuleBV* apCapsule, NiPoint3* a2, co
     CopyVector(collisionData.triangle.p, *apTriA);
     CopyVector(collisionData.triangle.u, *apTriB - *apTriA);
     CopyVector(collisionData.triangle.v, *apTriC - *apTriA);
-    float separation = FUN_00eb1d20(&collisionData.segment, &collisionData.triangle, &collisionData.segmentParameter,
+    float separation = NiSqrDistance_Compute_00eb1d20(&collisionData.segment, &collisionData.triangle, &collisionData.segmentParameter,
                                     &collisionData.triangleU, &collisionData.triangleV) -
                        collisionData.radiusSquared;
     if (separation <= 0.0f)
@@ -1142,7 +1149,7 @@ bool __cdecl FUN_00e9fdc0(float afTime, NiCapsuleBV* apCapsule, NiPoint3* a2, co
                    collisionData.triangleV * collisionData.triangle.v);
         if (abNormal)
         {
-            CopyVector(*apNormal2, collisionData.triangle.FUN_00eb3830());
+            CopyVector(*apNormal2, collisionData.triangle.NiTrigon_GetNormal());
             CopyVector(*apNormal, -*apNormal2);
         }
         return true;
@@ -1167,7 +1174,7 @@ bool __cdecl FUN_00e9fdc0(float afTime, NiCapsuleBV* apCapsule, NiPoint3* a2, co
             float speed = motion.Dot(normal);
             if (speed >= DAT_01011d78)
                 return false;
-            CopyVector(support, reinterpret_cast<const NiPoint3&>(apCapsule->m_kCenter).FUN_00439ef0(FUN_004a3760(extent, normal)));
+            CopyVector(support, reinterpret_cast<const NiPoint3&>(apCapsule->m_kCenter).SubtractIntoVector(FUN_004a3760(extent, normal)));
         }
         else
         {
@@ -1189,21 +1196,21 @@ bool __cdecl FUN_00e9fdc0(float afTime, NiCapsuleBV* apCapsule, NiPoint3* a2, co
     CapsuleTriangleQuery query;
     query.FUN_00eb3750(apCapsule, apTriA, apTriB, apTriC, afTime, DAT_01017d00, DAT_010141cc, 0x20);
     query.Solve((int)a2, (int)a6);
-    *a7 = query.FUN_00eae6f0();
+    *a7 = query.NiIntersector_GetContactTime();
     if (query.FUN_00be0aa0() != 3 && query.FUN_00be0aa0() != 2)
     {
-        query.FUN_00eae6d0();
+        query.SetVtbl();
         return false;
     }
-    const NiPoint3* point = query.FUN_00eae700();
+    const NiPoint3* point = query.NiIntersector_GetContactPoint();
     CopyVector(*apPoint, *point);
     if (abNormal)
     {
-        const NiPoint3* pNormal = query.FUN_00eae710();
+        const NiPoint3* pNormal = query.NiIntersector_GetContactNormal();
         CopyVector(*apNormal, *pNormal);
         CopyVector(*apNormal2, -*apNormal);
     }
-    query.FUN_00eae6d0();
+    query.SetVtbl();
     return true;
 }
 }  // namespace fnv_00e9fdc0

@@ -47,5 +47,5 @@ public:
 
     void WaitForTasksDuringRendering();
     void QueryPerformanceCounter(int);
-    void FUN_00453860(bool);
+    void TES_LockHavokUpdateMT(bool);
 };

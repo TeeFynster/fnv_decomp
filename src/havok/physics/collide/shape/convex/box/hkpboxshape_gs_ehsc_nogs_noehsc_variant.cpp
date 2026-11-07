@@ -10,8 +10,8 @@ typedef ::__m128 LocalM128;
 #include "havok/hkpBoxShape.h"
 #include "../../../../../../../include/MemoryManager.h"
 #include "../../../../../../../include/hkMemoryRouter.h"
-int __cdecl FUN_00c9db70();
-float __cdecl FUN_00c9e0f0(float a, float b);
+int __cdecl hkpBoxShape_ReturnConstant_8();
+float __cdecl NiMin(float a, float b);
 extern "C" void* DAT_0102e388;
 struct FUN_00c9db80_class
 {
@@ -26,10 +26,10 @@ struct FUN_00c9e1b0_class
     void* FUN_00c9e1b0(unsigned char flags);
 };
 hkMemoryRouter* __cdecl _D1A0E0GetMemoryRouter();
-int __stdcall FUN_00c9e1a0(int a1, int a2);
+int __stdcall Object_Return0x30(int a1, int a2);
 extern "C" int DAT_01268940;
-void __cdecl FUN_00c90360(int a, int* b);
-void __cdecl FUN_00c9db60(int a, int* b);
+void __cdecl hkReferencedObject_calcContentStatistics(int a, int* b);
+void __cdecl hkpBoxShape_calcContentStatistics(int a, int* b);
 struct hkAabb;
 void __cdecl ComputeAabbFromTransform(const hkTransform& transform, const hkVector4& halfExtents, hkReal tolerance,
                                       hkAabb& out);
@@ -68,7 +68,7 @@ using ::_mm_movemask_ps;
 extern float DAT_010c44d0[4];
 struct S00c9dc40_Box : public hkpBoxShape
 {
-    void __thiscall FUN_00c9dc40(const float* src, float* dst);
+    void __thiscall getSupportingVertexImpl(const float* src, float* dst);
 };
 // @fnv 0x00c9dcb0
 extern "C" void __stdcall ZeroResult(LocalM128* result)
@@ -100,11 +100,12 @@ struct FUN_00c9dcd0_object
     unsigned char unknown00[0x20];
     LocalM128 halfExtents;
 
-    void __thiscall FUN_00c9dcd0(const unsigned short* ids, int count, FUN_00c9dcd0_vertex* output);
+    void __thiscall hkpBoxShape_convertVertexIdsToVerticesImpl(const unsigned short* ids, int count, FUN_00c9dcd0_vertex* output);
 };
 
 // @fnv 0x00c9dcd0
-void __thiscall FUN_00c9dcd0_object::FUN_00c9dcd0(const unsigned short* ids, int count, FUN_00c9dcd0_vertex* output)
+// src: HAVOK_SRC 0x00c9dcd0
+void __thiscall FUN_00c9dcd0_object::hkpBoxShape_convertVertexIdsToVerticesImpl(const unsigned short* ids, int count, FUN_00c9dcd0_vertex* output)
 {
     for (int i = count - 1; i >= 0; --i)
     {

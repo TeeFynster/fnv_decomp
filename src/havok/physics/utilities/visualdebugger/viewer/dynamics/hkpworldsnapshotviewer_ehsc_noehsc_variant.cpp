@@ -18,7 +18,7 @@ extern int DAT_010d1720;
 extern void __cdecl FUN_00ddcc60();
 struct FUN_00d62fe0_cls
 {
-    void __thiscall FUN_00d62fe0();
+    void __thiscall UpdateFields_00d62fe0();
 };
 extern int DAT_01268fc0;
 extern int DAT_01268fc4;
@@ -29,12 +29,12 @@ struct FUN_00d63210_class
 typedef void(__cdecl* SnapshotFn)();
 struct ProfileRegistry
 {
-    int FUN_00dd9380(const char* apName, SnapshotFn apfnHandler);
+    int hkProcessFactory_registerProcess(const char* apName, SnapshotFn apfnHandler);
 };
 extern ProfileRegistry* DAT_01269cd0;
 extern int DAT_01268fc4;
 extern int DAT_01268fc0;
-void __cdecl FUN_00d62f20();
+void __cdecl hkpWorldSnapshotViewer_createNative();
 void __cdecl AllocateRecordWithData();
 void __cdecl RegisterSnapshotCommands();
 struct FUN_00c7be20_cls;
@@ -51,7 +51,7 @@ struct FUN_00c7be20_arr
     int m_uiItemCount;
     unsigned int m_capFlags;
 };
-void* __cdecl FUN_00c85750() throw();
+void* __cdecl hkMemoryRouter_getInstance() throw();
 struct FUN_00c7be20_cls
 {
     int unk00;
@@ -111,17 +111,17 @@ struct FUN_00d63280_cls
     SubObject m_sub28;
 
     void Setup(int b);
-    FUN_00d63280_cls* FUN_00d63280(int a, int b);
+    FUN_00d63280_cls* hkpWorldMemoryViewer_hkpWorldMemoryViewer(int a, int b);
 };
 
 
-void* __cdecl FUN_00c85750() throw();
+void* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00c7be20_arr;
 
 inline hkMemoryAllocator& containerHeap()
 {
-    return ((hkMemoryRouter*)FUN_00c85750())->heap();
+    return ((hkMemoryRouter*)hkMemoryRouter_getInstance())->heap();
 }
 
 inline hkCharArray::~hkCharArray()
@@ -142,7 +142,7 @@ inline void hkCharArray::reserve(int n)
     {
         int cap2 = 2 * capacity;
         int newSize = (n < cap2) ? cap2 : n;
-        FUN_00c908c0(alloc, this, newSize, 1);
+        hkArrayUtil__reserve(alloc, this, newSize, 1);
     }
 }
 
@@ -166,15 +166,15 @@ extern StructureLayoutRules DAT_011b7b88;
 extern int DAT_01268fc0;
 extern int DAT_01268fc4;
 
-hkBool __cdecl FUN_00cc0d60(hkpWorld* world, hkArrayStreamWriter* writer, hkBool binary,
+hkBool __cdecl hkpHavokSnapshot_save_00cc0d60(hkpWorld* world, hkArrayStreamWriter* writer, hkBool binary,
                             const StructureLayoutRules* rules, int aiFlags);
 
 struct hkDisplaySerializeOStream
 {
-    void FUN_00d60960(int n);
-    void FUN_00d605d0(unsigned int b);
+    void hkOArchive_write32u(int n);
+    void hkOArchive_write8u(unsigned int b);
     void WriteInt(int n);
-    void FUN_00d607b0(const char* buf, int n);
+    void hkOArchive_writeRaw(const char* buf, int n);
 };
 
 inline int hkpPhysicsContext::getNumWorlds() const
@@ -199,11 +199,12 @@ struct FUN_00d63040_cls
     hkpPhysicsContext* m_iValueAtOffset0C;
     hkBool m_convertToPC;
 
-    void FUN_00d63040(float frameTimeInMs);
+    void hkpWorldSnapshotViewer_step(float frameTimeInMs);
 };
 
 // @fnv 0x00d63040
-void FUN_00d63040_cls::FUN_00d63040(float frameTimeInMs)
+// src: HAVOK_LIB 0x00d63040
+void FUN_00d63040_cls::hkpWorldSnapshotViewer_step(float frameTimeInMs)
 {
     if (m_pDisplayStream)
     {
@@ -215,18 +216,18 @@ void FUN_00d63040_cls::FUN_00d63040(float frameTimeInMs)
         for (int wi = 0; wi < m_iValueAtOffset0C->getNumWorlds(); ++wi)
         {
             storage.SetSizeAndGrow(0);
-            FUN_00cc0d60(m_iValueAtOffset0C->getWorld(wi), &sw, true, &rules, 0);
+            hkpHavokSnapshot_save_00cc0d60(m_iValueAtOffset0C->getWorld(wi), &sw, true, &rules, 0);
             int length = storage.GetLogicalSize();
             if (length >= 1)
             {
-                m_pDisplayStream->FUN_00d60960(length + 9);
-                m_pDisplayStream->FUN_00d605d0(0xd0);
-                m_pDisplayStream->FUN_00d605d0(rules.m_ucBytesInPointer);
-                m_pDisplayStream->FUN_00d605d0(rules.m_bLittleEndian);
-                m_pDisplayStream->FUN_00d605d0(rules.m_bReusePaddingOptimization);
-                m_pDisplayStream->FUN_00d605d0(rules.m_bEmptyBaseClassOptimization);
+                m_pDisplayStream->hkOArchive_write32u(length + 9);
+                m_pDisplayStream->hkOArchive_write8u(0xd0);
+                m_pDisplayStream->hkOArchive_write8u(rules.m_ucBytesInPointer);
+                m_pDisplayStream->hkOArchive_write8u(rules.m_bLittleEndian);
+                m_pDisplayStream->hkOArchive_write8u(rules.m_bReusePaddingOptimization);
+                m_pDisplayStream->hkOArchive_write8u(rules.m_bEmptyBaseClassOptimization);
                 m_pDisplayStream->WriteInt(length);
-                m_pDisplayStream->FUN_00d607b0(storage.begin(), length);
+                m_pDisplayStream->hkOArchive_writeRaw(storage.begin(), length);
             }
         }
     }

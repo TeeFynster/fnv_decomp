@@ -5,7 +5,8 @@
 #include <string.h>
 // Converts forward slashes to backslashes, removes repeated backslashes after the first two characters, and returns whether either change occurred.
 // @fnv 0x00aa2a00
-bool FUN_00aa2a00(char* path)
+// src: GAMEBRYO_LIB 0x00aa2a00
+bool NiPath_Standardize(char* path)
 {
     bool changed = false;
     if (!path)
@@ -55,18 +56,18 @@ void __cdecl RemoveDotSlash(char* pcPath)
 }
 
 namespace fnv_00aa2ac0 {
-void __cdecl FUN_00aa2a00(char*);
+void __cdecl NiPath_Standardize(char*);
 void __cdecl RemoveDotSlash(char*);
-char __cdecl FUN_00aa2cc0(char*);
+char __cdecl Path_IsRelative(char*);
 char* __cdecl SkipPathPrefix(char*);
 
 // Runs path helpers, then removes each `\..` occurrence and its preceding path component.
 // @fnv 0x00aa2ac0
 void __cdecl RemoveParentDirSegments(char* path)
 {
-    FUN_00aa2a00(path);
+    NiPath_Standardize(path);
     RemoveDotSlash(path);
-    if (FUN_00aa2cc0(path))
+    if (Path_IsRelative(path))
     {
         if (!path)
             return;

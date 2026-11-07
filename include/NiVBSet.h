@@ -26,8 +26,8 @@ public:
 
     void Create(unsigned int key, void* val);
     void Create(unsigned int key, unsigned int val);
-    VbNode* FUN_00e94650(unsigned int size, bool flag);
+    VbNode* NiVBSet_AllocateChip(unsigned int size, bool flag);
     void RemoveNode(NiVBBlock*);
-    void FUN_00e94330(NiVBBlock*);
-    void FUN_00e94490(unsigned int uiArrayIndex, unsigned int uiChipIndex);
+    void NiVBSet_FreeBlock(NiVBBlock*);
+    void FreeChip(unsigned int uiArrayIndex, unsigned int uiChipIndex);
 };

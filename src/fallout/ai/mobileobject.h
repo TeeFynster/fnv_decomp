@@ -7,7 +7,7 @@
 // @fnv 0x008ae4c0
 NiPoint3* MobileObject::GetPos() const
 {
-    if (!FUN_005a2030())
+    if (!IsSwimming_005a2030())
         return reinterpret_cast<NiPoint3*>(
             reinterpret_cast<TESTopicInfo*>(const_cast<MobileObject*>(this))->GetAddTopicList());
     if (GetRelevantWaterHeight() == DAT_010241b0)

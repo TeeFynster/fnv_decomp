@@ -30,17 +30,17 @@ class NiParticleSystem : public NiParticles
     virtual void UpdateRigidDownwardPass(NiUpdateData& data, unsigned int flags);
     virtual void UpdateWorldData(NiUpdateData& data);
     virtual void UpdateWorldBound();
-    virtual void FUN_00c1ae40(float time);
+    virtual void UpdateSystem(float time);
     virtual void Update(float time);
 
-    void FUN_00a74780(NiStream* stream);
-    void FUN_00c1aee0(unsigned short particle);
-    void FUN_00c1aee0(unsigned int particle);
-    void FUN_00c1b120();
-    void FUN_00c1b260(float time);
-    void FUN_00c1b060(CloningProcess& process);
-    void FUN_00c1b6f0(NiParticleSystem* destination, CloningProcess& process);
-    NiParticleSystem* FUN_00c1b5c0();
+    void NiLines_LinkObject(NiStream* stream);
+    void InitializeNewParticle(unsigned short particle);
+    void InitializeNewParticle(unsigned int particle);
+    void PerformSystemReset();
+    void Do_UpdateSystem(float time);
+    void ProcessClone_00c1b060(CloningProcess& process);
+    void CopyMembers_00c1b6f0(NiParticleSystem* destination, CloningProcess& process);
+    NiParticleSystem* NiParticleSystem_00c1b5c0();
     void CopyMemberData(NiParticleSystem* destination, CloningProcess& process);
     void InsertSorted(NiPSysModifier* modifier);
     void LoadModifiers(NiStream* stream);

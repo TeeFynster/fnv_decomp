@@ -62,14 +62,15 @@ NiInterpolator* NiMultiTargetTransformController::GetInterpolatorAtIndex(unsigne
 }
 
 // @fnv 0x00a2fd40
-char* __fastcall FUN_00a2fd40(NiMultiTargetTransformController* self, int, unsigned short usIndex)
+// src: XBOX_PDB 0x00a2fd40
+char* __fastcall NiMultiTargetTransformController_GetInterpolatorID(NiMultiTargetTransformController* self, int, unsigned short usIndex)
 {
     return self->m_ppTargetObjects[usIndex]->m_kName.m_kHandle;
 }
 
 void __fastcall DestroyInterpolatorArray(void* pThis);
 void __cdecl FUN_00aa1460(void* ptr, unsigned int size);
-void __cdecl FUN_00aa1490(void* ptr, unsigned int size);
+void __cdecl NiMemObject_ReleaseStorage_00aa1490(void* ptr, unsigned int size);
 
 // @fnv 0x00a2ff70
 void* __fastcall FUN_00a2ff70(char* pThis, int, unsigned int flags)
@@ -86,7 +87,7 @@ void* __fastcall FUN_00a2ff70(char* pThis, int, unsigned int flags)
         }
         if (flags & 1)
         {
-            FUN_00aa1490(base, 0x30);
+            NiMemObject_ReleaseStorage_00aa1490(base, 0x30);
         }
         return base;
     }
@@ -131,7 +132,8 @@ class ShaderBufferRecord;
 
 // Calls the base ProcessClone, then clones each target transform interpolator and remaps its target object through the cloning process's pointer map.
 // @fnv 0x00a300d0
-void __fastcall FUN_00a300d0(NiMultiTargetTransformController* self, int, CloningProcess* kCloning)
+// src: XBOX_PDB 0x00a300d0
+void __fastcall NiMultiTargetTransformController_ProcessClone(NiMultiTargetTransformController* self, int, CloningProcess* kCloning)
 {
     self->NiTimeController::ProcessClone(*kCloning);
 
@@ -168,19 +170,22 @@ void* __fastcall FUN_00a30280(void* pThis, int, unsigned int flags)
 }
 
 // @fnv 0x00a2fa30
-char* __fastcall FUN_00a2fa30(NiMultiTargetTransformController* self, int, unsigned short ausIndex)
+// src: XBOX_PDB 0x00a2fa30
+char* __fastcall NiMultiTargetTransformController_GetInterpolator(NiMultiTargetTransformController* self, int, unsigned short ausIndex)
 {
     return reinterpret_cast<char*>(&self->m_pkBlendInterpolators[ausIndex]);
 }
 
 // @fnv 0x00a2fa50
-char* __fastcall FUN_00a2fa50(NiMultiTargetTransformController* self, int, unsigned short ausIndex, bool a, bool b, float c, unsigned char d)
+// src: XBOX_PDB 0x00a2fa50
+char* __fastcall NiMultiTargetTransformController_CreateBlendInterpolator(NiMultiTargetTransformController* self, int, unsigned short ausIndex, bool a, bool b, float c, unsigned char d)
 {
     return reinterpret_cast<char*>(&self->m_pkBlendInterpolators[ausIndex]);
 }
 
 // @fnv 0x00a2fa70
-void __fastcall FUN_00a2fa70(NiMultiTargetTransformController* self, int, float afValueA, float afValueB)
+// src: XBOX_PDB 0x00a2fa70
+void __fastcall NiMultiTargetTransformController_GuaranteeTimeRange(NiMultiTargetTransformController* self, int, float afValueA, float afValueB)
 {
     for (unsigned short us = 0; us < self->m_usNumInterps; us++)
         self->m_pkBlendInterpolators[us].SetActiveTimeRange(afValueA, afValueB);
@@ -188,7 +193,8 @@ void __fastcall FUN_00a2fa70(NiMultiTargetTransformController* self, int, float 
 
 extern int DAT_011f36bc;
 // @fnv 0x00a2fbd0
-int* __cdecl FUN_00a2fbd0()
+// src: COMMUNITY 0x00a2fbd0
+int* __cdecl NiMultiTargetTransformController_GetRTTI()
 {
     return &DAT_011f36bc;
 }
@@ -255,7 +261,8 @@ NiMultiTargetTransformController* __cdecl CreateCtl()
 }
 
 // @fnv 0x00a30370
-void __cdecl FUN_00a30370(NiStream* stream, const void* data)
+// src: XBOX_PDB 0x00a30370
+void __cdecl NiStreamLoadBinary_unsigned_short(NiStream* stream, const void* data)
 {
     NiBinaryStream* binary = *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(stream) + 0x24c);
     NiBinaryStream::ReadFunction transfer = reinterpret_cast<NiBinaryStream::ReadFunction*>(binary)[2];
@@ -264,7 +271,8 @@ void __cdecl FUN_00a30370(NiStream* stream, const void* data)
 }
 
 // @fnv 0x00a303a0
-void __cdecl FUN_00a303a0(NiStream* stream, const void* data)
+// src: XBOX_PDB 0x00a303a0
+void __cdecl NiStreamSaveBinary_unsigned_short(NiStream* stream, const void* data)
 {
     NiBinaryStream* binary = *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(stream) + 0x250);
     NiBinaryStream::WriteFunction transfer = reinterpret_cast<NiBinaryStream::WriteFunction*>(binary)[3];
@@ -417,8 +425,8 @@ struct FUN_00a304b0_arr
     void FUN_0096ae90(unsigned int uiIndex, void** ppItem);
 };
 
-void* __cdecl FUN_00a7d330(int);
-void* __cdecl FUN_00a7d490(const char*, unsigned short);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(int);
+void* __cdecl NiGetViewerString_00a7d490(const char*, unsigned short);
 extern int DAT_011f36bc;
 
 void __fastcall WriteManagerControlledFlag(NiMultiTargetTransformController*, int, FUN_00a304b0_arr*);
@@ -427,7 +435,7 @@ void __fastcall WriteManagerControlledFlag(NiMultiTargetTransformController*, in
 void __fastcall GetMultiTargetViewerStrings(NiMultiTargetTransformController* self, int, FUN_00a304b0_arr* pArr)
 {
     reinterpret_cast<void (__thiscall*)(NiMultiTargetTransformController*, FUN_00a304b0_arr*)>(&WriteManagerControlledFlag)(self, pArr);
-    void* pItem = FUN_00a7d330(DAT_011f36bc);
+    void* pItem = NiViewerStrings_NiGetViewerString_Title(DAT_011f36bc);
     unsigned int usIndex = pArr->m_usElementCount;
     if (usIndex >= pArr->m_usCapacity)
     {
@@ -435,7 +443,7 @@ void __fastcall GetMultiTargetViewerStrings(NiMultiTargetTransformController* se
     }
     pArr->FUN_0096ae90(usIndex, &pItem);
 
-    pItem = FUN_00a7d490("m_usNumInterps", self->m_usNumInterps);
+    pItem = NiGetViewerString_00a7d490("m_usNumInterps", self->m_usNumInterps);
     usIndex = pArr->m_usElementCount;
     if (usIndex >= pArr->m_usCapacity)
     {

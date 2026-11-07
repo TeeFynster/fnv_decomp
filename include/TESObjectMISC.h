@@ -35,7 +35,7 @@ public:
     void SetFormType(int type);
     void SetLoopingSound(TESSound* sound);
     void FUN_009db930(unsigned int value);
-    void FUN_004f9570();
+    void InitializeData();
 
     TESSound* pLoopingSound;
 };

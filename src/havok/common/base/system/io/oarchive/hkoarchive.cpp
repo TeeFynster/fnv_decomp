@@ -30,25 +30,29 @@ void hkOArchive::WriteInt64(int n, int m)
 }
 
 // @fnv 0x00d60a20
-void __fastcall FUN_00d60a20(hkOArchive* self, void*, const void* data, unsigned int size)
+// src: GUESS 0x00d60a20 (confidence: medium)
+void __fastcall hkOArchive_WriteSwapped_Thunk(hkOArchive* self, void*, const void* data, unsigned int size)
 {
     self->WriteSwapped(data, 1, size);
 }
 
 // @fnv 0x00d60a60
-void __fastcall FUN_00d60a60(hkOArchive* self, void*, int aiFirst, int aiSecond)
+// src: GUESS 0x00d60a60 (confidence: medium)
+void __fastcall hkOArchive_WriteSwapped_Thunk_00d60a60(hkOArchive* self, void*, int aiFirst, int aiSecond)
 {
     self->WriteSwapped(reinterpret_cast<const void*>(aiFirst), 2, aiSecond);
 }
 
 // @fnv 0x00d60a80
-void __fastcall FUN_00d60a80(hkOArchive* self, void*, const void* apData, unsigned int count)
+// src: GUESS 0x00d60aa0 (confidence: medium)
+void __fastcall hkOArchive_WriteSwapped_Thunk_00d60aa0(hkOArchive* self, void*, const void* apData, unsigned int count)
 {
     self->WriteSwapped(apData, 4, count);
 }
 
 // @fnv 0x00d60aa0
-void __fastcall FUN_00d60aa0(hkOArchive* self, void*, const void* data, int count)
+// src: GUESS 0x00d60b00 (confidence: medium)
+void __fastcall hkOArchive_WriteSwapped_Thunk_00d60b00(hkOArchive* self, void*, const void* data, int count)
 {
     self->WriteSwapped(data, 4, count);
 }
@@ -60,7 +64,8 @@ void hkOArchive::WriteArray(const void* data, unsigned int elementCount)
 }
 
 // @fnv 0x00d60ae0
-void __fastcall FUN_00d60ae0(hkOArchive* self, void*, int a, int b)
+// src: GUESS 0x00d60ae0 (confidence: medium)
+void __fastcall hkOArchive_WriteSwapped_Thunk_00d60ae0(hkOArchive* self, void*, int a, int b)
 {
     self->WriteSwapped((void*)a, 8, b);
 }
@@ -72,19 +77,22 @@ void hkOArchive::WriteInt(unsigned int aiValue)
 }
 
 // @fnv 0x00d60960
-void __stdcall FUN_00d60960(const float* p)
+// src: XBOX_PDB 0x00d60960
+void __stdcall hkOArchive_write32u(const float* p)
 {
     WriteSwapped((void*)&p, 4, 1);
 }
 
 // @fnv 0x00d60980
-void __fastcall FUN_00d60980(hkOArchive* self, void*, int aiValue, int aiUnused)
+// src: GUESS 0x00d609a0 (confidence: medium)
+void __fastcall hkOArchive_WriteBinaryData_Thunk(hkOArchive* self, void*, int aiValue, int aiUnused)
 {
     self->WriteBinaryData(&aiValue, 8, 1);
 }
 
 // @fnv 0x00d609a0
-void __fastcall FUN_00d609a0(hkOArchive* self, void*, int value, int)
+// src: GUESS 0x00d609e0 (confidence: medium)
+void __fastcall hkOArchive_WriteBinaryData_Thunk_00d609e0(hkOArchive* self, void*, int value, int)
 {
     self->WriteBinaryData(&value, 8, 1);
 }
@@ -96,7 +104,8 @@ void hkOArchive::WriteUint8(unsigned char value)
 }
 
 // @fnv 0x00d605d0
-void __fastcall FUN_00d605d0(hkOArchive* self, void*, unsigned char value)
+// src: XBOX_PDB 0x00d605d0
+void __fastcall hkOArchive_write8u(hkOArchive* self, void*, unsigned char value)
 {
     self->writer->write(&value, 1);
 }
@@ -119,7 +128,8 @@ int __fastcall ForwardValueToObject(hkOArchive* self, void*, int value)
 extern int DAT_010d14f8;
 
 // @fnv 0x00d60830
-hkOArchive* __fastcall FUN_00d60830(hkOArchive* self, void*, hkReferencedObject* apObject, char b)
+// src: GUESS 0x00d60830 (confidence: high)
+hkOArchive* __fastcall hkOArchive_InitializeWriterWithByteSwap(hkOArchive* self, void*, hkReferencedObject* apObject, char b)
 {
     self->m_sReferenceCount = 1;
     *(int*)self = (int)&DAT_010d14f8;
@@ -136,7 +146,8 @@ void hkOArchive::WriteRaw(const void* data, int size)
 }
 
 // @fnv 0x00d60a40
-void __fastcall FUN_00d60a40(hkOArchive* self, void*, int apData, int b)
+// src: GUESS 0x00d60a40 (confidence: medium)
+void __fastcall hkOArchive_WriteBinaryData_Thunk_00d60a40(hkOArchive* self, void*, int apData, int b)
 {
     self->WriteBinaryData((void*)apData, 2, b);
 }
@@ -149,7 +160,8 @@ void __fastcall WriteFloatArray(hkOArchive* self, void*, const float* data, unsi
 
 // Swaps the two bytes stored at the given addresses.
 // @fnv 0x00d605f0
-static void FUN_00d605f0(unsigned char* pFirst, unsigned char* pSecond)
+// src: GUESS 0x00d605f0 (confidence: high)
+static void hkOArchive_SwapBytes(unsigned char* pFirst, unsigned char* pSecond)
 {
     unsigned char t = *pFirst;
     *pFirst = *pSecond;
@@ -159,7 +171,7 @@ static void FUN_00d605f0(unsigned char* pFirst, unsigned char* pSecond)
 // Keeps the helper referenced so the compiler emits its out-of-line body.
 void swapBytesCaller(unsigned char* pLeft, unsigned char* pRight)
 {
-    FUN_00d605f0(pLeft, pRight);
+    hkOArchive_SwapBytes(pLeft, pRight);
 }
 
 struct hkStub
@@ -171,18 +183,20 @@ struct hkStub
     virtual void vf10(int a);
 };
 // @fnv 0x00d607b0
-void __fastcall FUN_00d607b0(hkOArchive* self, void*, int a)
+// src: XBOX_PDB 0x00d607b0
+void __fastcall hkOArchive_writeRaw(hkOArchive* self, void*, int a)
 {
     reinterpret_cast<hkStub*>(self->writer)->vf10(a);
 }
 
 // @fnv 0x00d607c0
-void __fastcall FUN_00d607c0(hkOArchive* self, void*, char v)
+// src: GUESS 0x00d607c0 (confidence: low)
+void __fastcall hkOArchive_UpdateFields_00d607c0(hkOArchive* self, void*, char v)
 {
     self->byteSwap.m_cBooleanValue = v;
 }
 
-extern "C" void* __cdecl FUN_00cb1260(void* dest, const void* src, unsigned int count);
+extern "C" void* __cdecl hkString_memCpy(void* dest, const void* src, unsigned int count);
 
 inline void swapBytes(unsigned char& a, unsigned char& b)
 {
@@ -218,7 +232,7 @@ void hkOArchive::WriteSwapped(const void* data, unsigned int size, unsigned int 
             chunkSize = remBytes;
         }
 
-        FUN_00cb1260(aiBuffer, cur, chunkSize);
+        hkString_memCpy(aiBuffer, cur, chunkSize);
 
         switch (elementSize)
         {
@@ -262,14 +276,16 @@ void hkOArchive::WriteSwapped(const void* data, unsigned int size, unsigned int 
 }
 
 // @fnv 0x00d607d0
-unsigned char* __fastcall FUN_00d607d0(hkOArchive* self, void*, unsigned char* output)
+// src: GUESS 0x00d607d0 (confidence: high)
+unsigned char* __fastcall hkOArchive_GetByteSwapFlag(hkOArchive* self, void*, unsigned char* output)
 {
     *output = self->byteSwap.m_cBooleanValue;
     return output;
 }
 
 // @fnv 0x00d60800
-void* __fastcall FUN_00d60800(hkOArchive* self, void*)
+// src: XBOX_PDB 0x00d60800
+void* __fastcall hkOArchive_getStreamWriter(hkOArchive* self, void*)
 {
     return self->writer;
 }
@@ -281,7 +297,7 @@ class hkMap64DBA
     int m_iCapacityFlags;
     int m_iPairCount;
 
-    unsigned __int64 FUN_00cb1cb0(unsigned __int64 key, unsigned __int64 def) const;
+    unsigned __int64 hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_getWithDefault(unsigned __int64 key, unsigned __int64 def) const;
     void InsertKeyValue(hkMemoryAllocator& alloc, unsigned __int64 key, unsigned __int64 val);
 };
 
@@ -307,7 +323,7 @@ class ListMapDBA
 // @fnv 0x00dba360
 void ListMapDBA::Insert(unsigned __int64 key, const int& value)
 {
-    int next = (int)m_map.FUN_00cb1cb0(key, (unsigned __int64)-1);
+    int next = (int)m_map.hkMapBase_unsigned_int64_unsigned_int64_struct_hkMapOperations_unsigned_int64_getWithDefault(key, (unsigned __int64)-1);
     int iSlot = AllocateSlot();
     EntryDBA& e = m_entries[iSlot];
     e.m_uiFilterValue = value;

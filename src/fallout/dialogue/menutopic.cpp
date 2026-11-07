@@ -47,7 +47,7 @@ MenuTopic* TopicMenuController::GetSelectedTopic()
 // @fnv 0x0083e4f0
 MenuTopic* TopicMenuController::GetFirstTopic()
 {
-    return FUN_0083f260()->GetItem();
+    return MenuTopicManager_GetCurrentTopicList()->GetItem();
 }
 
 // Advances the stored iterator to its next entry and returns whether it exists and has an item.
@@ -63,7 +63,7 @@ bool TopicMenuController::AdvanceTopic()
 // @fnv 0x0083e370
 bool TopicMenuController::SelectTopic(bool advance)
 {
-    m_pCurrentTopicList = FUN_0083f260();
+    m_pCurrentTopicList = MenuTopicManager_GetCurrentTopicList();
     if (advance && m_pCurrentTopicList)
         m_pCurrentTopicList = m_pCurrentTopicList->GetNext();
     return m_pCurrentTopicList && m_pCurrentTopicList->GetItem();
@@ -89,7 +89,7 @@ bool TopicMenuController::Initialize(MobileObject* speaker, TESTopic* requestedT
         MenuTopic* menuTopic;
         TESTopic* topic;
     } locals;
-    FUN_0083e230();
+    MenuTopicManager_ClearData();
     locals.topicList = new BSSimpleList<MenuTopic*>;
     m_kTopicListStack.AddHead(locals.topicList);
     m_pDialogueSpeaker = (TESObjectREFR*)speaker;
@@ -108,9 +108,9 @@ bool TopicMenuController::Initialize(MobileObject* speaker, TESTopic* requestedT
             locals.quest = locals.topic->GetParentQuest(locals.info);
             locals.menuTopic =
                 new MenuTopic(locals.quest, locals.topic, locals.info, (MobileObject*)m_pDialogueSpeaker, false);
-            locals.menuTopic->FUN_0045cd60(2147483648.0f)->FUN_00965250();
+            locals.menuTopic->FUN_0045cd60(2147483648.0f)->ImageSpaceModifierInstanceDOF_SetMaskConst();
             locals.menuTopic->FillResponseList();
-            FUN_0083f260()->AddTail(locals.menuTopic);
+            MenuTopicManager_GetCurrentTopicList()->AddTail(locals.menuTopic);
         }
     }
     if (locals.menuTopic)
@@ -183,7 +183,7 @@ MenuTopic::MenuTopic(TESQuest* quest, TESTopic* topic, TESTopicInfo* info, Mobil
             m_kPrompt.Set(info->GetPrompt());
         else
             m_kPrompt.Set(topic->GetFullName());
-        m_kPrompt.Set(FUN_0083d8b0());
+        m_kPrompt.Set(BSStringT_char_RemoveCurlyContent());
         if (!m_bIsRemappedRumor)
             m_bFirstFlag = pInfo->GetConversationData() && !pInfo->GetConversationData()->GetLinkToList()->IsEmpty();
         if (topic->IsPersuasion())
@@ -191,9 +191,9 @@ MenuTopic::MenuTopic(TESQuest* quest, TESTopic* topic, TESTopicInfo* info, Mobil
         locals.ownerQuest = pInfo->GetParentQuest();
         locals.ownerTopic = TESTopic::GetTopicFromInfo(pInfo);
         if (locals.selectedQuest != locals.ownerQuest || locals.selectedTopic != locals.ownerTopic)
-            FUN_0083df80(locals.ownerQuest, locals.ownerTopic, pInfo, speaker);
+            MenuTopic_FillResponseList_0083df80(locals.ownerQuest, locals.ownerTopic, pInfo, speaker);
         else
-            FUN_0083df80(locals.selectedQuest, locals.selectedTopic, pInfo, speaker);
+            MenuTopic_FillResponseList_0083df80(locals.selectedQuest, locals.selectedTopic, pInfo, speaker);
     }
     pTopic = locals.selectedTopic;
     pQuest = locals.selectedQuest;
@@ -216,7 +216,8 @@ TopicMenuController* TopicMenuController::GetInstance()
 }
 
 // @fnv 0x0083ec10
-bool TESTopicInfo::FUN_0083ec10()
+// src: COMMUNITY 0x0083ec10
+bool TESTopicInfo::IsRunForRumors()
 {
     return m_Data.flags & 0x40;
 }
@@ -234,7 +235,7 @@ void TopicMenuController::RunTopicResultScript()
     locals.info = 0;
     if (locals.topic)
     {
-        if (!locals.topic->GetTopicInfo()->FUN_0083ec10())
+        if (!locals.topic->GetTopicInfo()->IsRunForRumors())
             locals.info = locals.topic->GetTopicInfo();
     }
     if (locals.info)
@@ -243,32 +244,34 @@ void TopicMenuController::RunTopicResultScript()
 
 struct FUN_0083de40_shell : public TESTopicInfo
 {
-    bool FUN_0083de40();
+    bool TESTopicInfo_HasPrompt();
 };
 
-unsigned int __fastcall FUN_004048e0(void*);
+unsigned int __fastcall BSStringT_char_Length(void*);
 
 // @fnv 0x0083de40
-bool FUN_0083de40_shell::FUN_0083de40()
+// src: XBOX_PDB 0x0083de40
+bool FUN_0083de40_shell::TESTopicInfo_HasPrompt()
 {
-    return FUN_004048e0(reinterpret_cast<char*>(this) + 0x28) > 0;
+    return BSStringT_char_Length(reinterpret_cast<char*>(this) + 0x28) > 0;
 }
 
 struct FUN_0083de60_shell : public TESTopic
 {
-    bool FUN_0083de60();
+    bool TESTopic_IsPersuasion();
 };
 
 // Returns true when the form ID is 0xFD or 0x118.
 // @fnv 0x0083de60
-bool FUN_0083de60_shell::FUN_0083de60()
+// src: COMMUNITY 0x0083de60
+bool FUN_0083de60_shell::TESTopic_IsPersuasion()
 {
     return GetFormID() == 0xFD || GetFormID() == 0x118;
 }
 
 struct FUN_0083e230_shell : public TopicMenuController
 {
-    void FUN_0083e230();
+    void MenuTopicManager_ClearData();
 };
 
 bool __fastcall _ref_008256d0(void* pThis);
@@ -277,11 +280,12 @@ void __fastcall _ref_0063f7b0(void* pThis);
 
 struct FUN_0083e2d0_helper
 {
-    void FUN_0083e2d0(void* pList, bool bDeleteGreeting);
+    void MenuTopicManager_ClearTopicList(void* pList, bool bDeleteGreeting);
 };
 
 // @fnv 0x0083e230
-void FUN_0083e230_shell::FUN_0083e230()
+// src: XBOX_PDB 0x0083e230
+void FUN_0083e230_shell::MenuTopicManager_ClearData()
 {
     bool bdeletegreeting;
     BSSimpleList<char const*>* pCurrentElementNext;
@@ -292,7 +296,7 @@ void FUN_0083e230_shell::FUN_0083e230()
         pCurrentElementNext = *_ref_006815c0((char*)this + 4);
         _ref_0063f7b0((char*)this + 4);
         bdeletegreeting = _ref_008256d0((char*)this + 4);
-        ((FUN_0083e2d0_helper*)this)->FUN_0083e2d0(pCurrentElementNext, bdeletegreeting);
+        ((FUN_0083e2d0_helper*)this)->MenuTopicManager_ClearTopicList(pCurrentElementNext, bdeletegreeting);
         ((BSSimpleList<int>*)pCurrentElementNext)->RemoveAll();
         delete pCurrentElementNext;
     }
@@ -300,14 +304,15 @@ void FUN_0083e230_shell::FUN_0083e230()
 
 struct FUN_0083e430_shell : public TopicMenuController
 {
-    bool FUN_0083e430(int);
+    bool DialogMenu_SetClickedMenuItem(int);
 };
 
 // @fnv 0x0083e430
-bool FUN_0083e430_shell::FUN_0083e430(int aiIndex)
+// src: COMMUNITY 0x0083e430
+bool FUN_0083e430_shell::DialogMenu_SetClickedMenuItem(int aiIndex)
 {
     int a = 0;
-    BSSimpleList<MenuTopic*>* pMenuTopicEntry = FUN_0083f260();
+    BSSimpleList<MenuTopic*>* pMenuTopicEntry = MenuTopicManager_GetCurrentTopicList();
     if (pMenuTopicEntry)
     {
         pMenuTopicEntry = pMenuTopicEntry->GetNext();
@@ -327,13 +332,14 @@ bool FUN_0083e430_shell::FUN_0083e430(int aiIndex)
 namespace fnv_0083f260 {
 struct FUN_0083f260_shell : public TopicMenuController
 {
-    void* FUN_0083f260();
+    void* MenuTopicManager_GetCurrentTopicList();
 };
 
 void** __fastcall _ref_006815c0(void* pThis);
 
 // @fnv 0x0083f260
-void* FUN_0083f260_shell::FUN_0083f260()
+// src: XBOX_PDB 0x0083f260
+void* FUN_0083f260_shell::MenuTopicManager_GetCurrentTopicList()
 {
     return *_ref_006815c0((char*)this + 4);
 }
@@ -341,11 +347,12 @@ void* FUN_0083f260_shell::FUN_0083f260()
 
 struct FUN_00965250_shell : public TESTopic
 {
-    void FUN_00965250(float);
+    void ImageSpaceModifierInstanceDOF_SetMaskConst(float);
 };
 
 // @fnv 0x00965250
-void FUN_00965250_shell::FUN_00965250(float afValue)
+// src: COMMUNITY 0x00965250
+void FUN_00965250_shell::ImageSpaceModifierInstanceDOF_SetMaskConst(float afValue)
 {
     *(float*)((char*)this + 0x28) = afValue;
 }
@@ -364,10 +371,11 @@ void* __fastcall _ref_00726070(void* pThis);
 struct TopicHolder
 {
     void* head;
-    void FUN_0083e2d0(void* list, bool flag);
+    void MenuTopicManager_ClearTopicList(void* list, bool flag);
 };
 // @fnv 0x0083e2d0
-void TopicHolder::FUN_0083e2d0(void* list, bool flag)
+// src: XBOX_PDB 0x0083e2d0
+void TopicHolder::MenuTopicManager_ClearTopicList(void* list, bool flag)
 {
     head = 0;
     void* node = list;
@@ -400,7 +408,7 @@ struct FUN_0083ec30_topic : MenuTopic
 struct FUN_0083ec30_mgr : TopicMenuController
 {
     void PopTopicList();
-    void FUN_0083e2d0(BSSimpleList<MenuTopic*>*, bool);
+    void MenuTopicManager_ClearTopicList(BSSimpleList<MenuTopic*>*, bool);
 };
 
 // @fnv 0x0083ec30
@@ -423,7 +431,7 @@ void FUN_0083ec30_shell::UpdateTopicList()
         TESTopic* pTopic = pMenuTopicEntry->GetAudioBackendData();
         if (pList)
         {
-            ((FUN_0083ec30_mgr*)this)->FUN_0083e2d0(FUN_0083f260(), false);
+            ((FUN_0083ec30_mgr*)this)->MenuTopicManager_ClearTopicList(MenuTopicManager_GetCurrentTopicList(), false);
             BuildTopicList(pList, false, bIsChoice, pTopic);
         }
         if (m_bControllerFlag)
@@ -431,7 +439,7 @@ void FUN_0083ec30_shell::UpdateTopicList()
     }
 }
 
-float __fastcall FUN_00526ae0(TESTopic*);
+float __fastcall TESTopic_GetPriority_GetUnk28(TESTopic*);
 struct FUN_0083f110_topic : MenuTopic
 {
     TESTopic* GetAudioBackendData();
@@ -439,17 +447,18 @@ struct FUN_0083f110_topic : MenuTopic
 
 // Compares two topics by the value returned from FUN_00526ae0, returning -1, 1 or 0 for descending order.
 // @fnv 0x0083f110
-int FUN_0083f110(FUN_0083f110_topic* apTopicA, FUN_0083f110_topic* apTopicB)
+// src: GUESS 0x0083f110 (confidence: high)
+int TESTopic_GetPriority_GetUnk28_CompareTopicPrioritiesDescending(FUN_0083f110_topic* apTopicA, FUN_0083f110_topic* apTopicB)
 {
-    return FUN_00526ae0(apTopicA->GetAudioBackendData()) > FUN_00526ae0(apTopicB->GetAudioBackendData())
+    return TESTopic_GetPriority_GetUnk28(apTopicA->GetAudioBackendData()) > TESTopic_GetPriority_GetUnk28(apTopicB->GetAudioBackendData())
                ? -1
-               : (FUN_00526ae0(apTopicA->GetAudioBackendData()) < FUN_00526ae0(apTopicB->GetAudioBackendData()) ? 1
+               : (TESTopic_GetPriority_GetUnk28(apTopicA->GetAudioBackendData()) < TESTopic_GetPriority_GetUnk28(apTopicB->GetAudioBackendData()) ? 1
                                                                                                                 : 0);
 }
 
 struct FUN_0083f1d0_t : TopicMenuController
 {
-    void FUN_0083e2d0(BSSimpleList<MenuTopic*>*, bool);
+    void MenuTopicManager_ClearTopicList(BSSimpleList<MenuTopic*>*, bool);
     BSSimpleList<MenuTopic*>* PopTopicList();
 };
 
@@ -462,7 +471,7 @@ BSSimpleList<MenuTopic*>* FUN_0083f1d0_t::PopTopicList()
         if (pCurrentElementNext)
         {
             m_kTopicListStack.RemoveHead();
-            FUN_0083e2d0(pCurrentElementNext, false);
+            MenuTopicManager_ClearTopicList(pCurrentElementNext, false);
             pCurrentElementNext->RemoveAll();
             delete pCurrentElementNext;
         }
@@ -494,17 +503,18 @@ unsigned int BSStringLength(const char*);
 TESForm* GetFormByID(unsigned int);
 struct FUN_0083f280_t : MenuTopic
 {
-    unsigned short FUN_0083f280();
+    unsigned short MenuTopic_GetSaveSize();
 };
 
 // Computes the save size of a MenuTopic by summing field sizes and optionally logs the size and form header details.
 // @fnv 0x0083f280
-unsigned short FUN_0083f280_t::FUN_0083f280()
+// src: COMMUNITY 0x0083f280
+unsigned short FUN_0083f280_t::MenuTopic_GetSaveSize()
 {
     unsigned short isize = 0;
     {
         unsigned short itempStartSize = isize;
-        if (g_TESSaveLoadGame->FUN_00862110())
+        if (g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
         {
             isize += 4;
             isize += 2;
@@ -553,12 +563,13 @@ struct FUN_0083e1d0
 // @fnv 0x0083e1d0
 FUN_0083e1d0::~FUN_0083e1d0()
 {
-    ((TopicMenuController*)this)->FUN_0083e230();
+    ((TopicMenuController*)this)->MenuTopicManager_ClearData();
 }
 
 // If the global pointer g_011ddde4 is non-null, deletes it and resets it to null.
 // @fnv 0x0083e510
-void FUN_0083e510()
+// src: XBOX_PDB 0x0083e510
+void MenuTopicManager_Destroy()
 {
     if (g_011ddde4)
     {
@@ -587,11 +598,12 @@ struct FUN_0083f0d0_shell
 {
     char _pad[0x25];
     char f25;
-    int FUN_0083f0d0();
+    int TESTopic_GetDummyNodeState();
 };
 // Returns 1 if bit 0x10 of f25 is set, otherwise 2 plus 1 when bit 0x20 is set.
 // @fnv 0x0083f0d0
-int FUN_0083f0d0_shell::FUN_0083f0d0()
+// src: COMMUNITY 0x0083f0d0
+int FUN_0083f0d0_shell::TESTopic_GetDummyNodeState()
 {
     return (f25 & 0x10) ? 1 : (((f25 & 0x20) != 0) + 2);
 }
@@ -620,7 +632,7 @@ bool __fastcall HasNoRumors(Actor* actor);
 
 struct FUN_00619df0_shell
 {
-    bool FUN_00619df0();
+    bool TESTopic_IsRemappedRumors();
     TESTopicInfo* FUN_0061a790(bool* apbFlag, TESObjectREFR* apSpeaker, PlayerCharacter* apPlayer, int a4,
                                TESTopic* apTopic, int a6);
     TESQuest* FindQuestForTopicInfo(TESTopicInfo* apInfo);
@@ -628,10 +640,10 @@ struct FUN_00619df0_shell
 
 struct FUN_0042df90_shell
 {
-    MenuTopic* FUN_0042df90(TESObjectREFR* apRef);
-    void FUN_0042dee0(MenuTopic* apTopic);
+    MenuTopic* ExtraDataList_GetInfoGeneralTopic(TESObjectREFR* apRef);
+    void ExtraDataList_SetInfoGeneralTopic(MenuTopic* apTopic);
 };
-FUN_0042df90_shell* __fastcall FUN_005d43c0(TESObjectREFR* apRef);
+FUN_0042df90_shell* __fastcall BSFile_GetDevice(TESObjectREFR* apRef);
 
 struct FUN_0083e0c0_shell
 {
@@ -640,17 +652,17 @@ struct FUN_0083e0c0_shell
 
 struct FUN_00619b20_shell
 {
-    bool FUN_00619b20();
+    bool TESTopicInfo_IsSayOnce();
 };
 
 struct FUN_009611e0_shell
 {
-    FUN_00619b20_shell* FUN_009611e0();
+    FUN_00619b20_shell* NiAVObject_GetParent();
 };
 
 struct FUN_005f65d0_list
 {
-    bool FUN_005f65d0(MenuTopic*& arpTopic);
+    bool BSSimpleList_TESLevSpell_IsInList(MenuTopic*& arpTopic);
     void SortItems(int (*apCompare)(FUN_0083f110_topic*, FUN_0083f110_topic*));
 };
 
@@ -697,12 +709,12 @@ void FUN_0083ed50_shell::BuildMenuTopics(BSSimpleList<TESTopic*>* apList, bool a
     {
         TESTopic* pTopic = apList->GetItem();
         apList = apList->GetNext();
-        if (abFlag && !((FUN_0083de60_shell*)pTopic)->FUN_0083de60())
+        if (abFlag && !((FUN_0083de60_shell*)pTopic)->TESTopic_IsPersuasion())
             continue;
-        if (!abFlag && ((FUN_0083de60_shell*)pTopic)->FUN_0083de60())
+        if (!abFlag && ((FUN_0083de60_shell*)pTopic)->TESTopic_IsPersuasion())
             continue;
 
-        int iTypeValue = ((FUN_0083f0d0_shell*)pTopic)->FUN_0083f0d0();
+        int iTypeValue = ((FUN_0083f0d0_shell*)pTopic)->TESTopic_GetDummyNodeState();
         if (((Actor*)g_thePlayer)->GetActorValue((ActorValue::Index)9) <= *g_011d0dc8.Int())
         {
             if (iTypeValue == 3)
@@ -714,15 +726,15 @@ void FUN_0083ed50_shell::BuildMenuTopics(BSSimpleList<TESTopic*>* apList, bool a
                 continue;
         }
 
-        if (((FUN_00619df0_shell*)pTopic)->FUN_00619df0() && !HasNoRumors(pActorCur))
+        if (((FUN_00619df0_shell*)pTopic)->TESTopic_IsRemappedRumors() && !HasNoRumors(pActorCur))
         {
             MenuTopic* pExisting = 0;
-            pExisting = FUN_005d43c0(m_pDialogueSpeaker)->FUN_0042df90(m_pDialogueSpeaker);
+            pExisting = BSFile_GetDevice(m_pDialogueSpeaker)->ExtraDataList_GetInfoGeneralTopic(m_pDialogueSpeaker);
             if (pExisting && !bStateChanged)
             {
                 if (((FUN_0083e0c0_shell*)pExisting)->HasCur() && !bStateChanged &&
-                    !((FUN_005f65d0_list*)FUN_0083f260())->FUN_005f65d0(pExisting))
-                    FUN_0083f260()->AddTail(pExisting);
+                    !((FUN_005f65d0_list*)MenuTopicManager_GetCurrentTopicList())->BSSimpleList_TESLevSpell_IsInList(pExisting))
+                    MenuTopicManager_GetCurrentTopicList()->AddTail(pExisting);
                 bStateChanged = true;
             }
         }
@@ -735,7 +747,7 @@ void FUN_0083ed50_shell::BuildMenuTopics(BSSimpleList<TESTopic*>* apList, bool a
             TESQuest* pQuest4 = ((FUN_00619df0_shell*)pTopic)->FindQuestForTopicInfo(pInfo);
             bool bSave = false;
             bool bCreate5 = true;
-            if (((FUN_00619df0_shell*)pTopic)->FUN_00619df0())
+            if (((FUN_00619df0_shell*)pTopic)->TESTopic_IsRemappedRumors())
             {
                 if (!bStateChanged && !HasNoRumors(pActorCur))
                     bSave = true;
@@ -746,24 +758,24 @@ void FUN_0083ed50_shell::BuildMenuTopics(BSSimpleList<TESTopic*>* apList, bool a
             if (bCreate5)
                 pMenuTopic = new MenuTopic(pQuest4, pTopic, pInfo, (MobileObject*)m_pDialogueSpeaker, bChoice);
             if (bCreate5 && ((FUN_0083e0c0_shell*)pMenuTopic)->HasCur() &&
-                !((FUN_005f65d0_list*)FUN_0083f260())->FUN_005f65d0(pMenuTopic))
+                !((FUN_005f65d0_list*)MenuTopicManager_GetCurrentTopicList())->BSSimpleList_TESLevSpell_IsInList(pMenuTopic))
             {
-                FUN_0083f260()->AddTail(pMenuTopic);
+                MenuTopicManager_GetCurrentTopicList()->AddTail(pMenuTopic);
             }
             else if (pMenuTopic)
             {
                 delete (FUN_00425ff0*)pMenuTopic;
                 pMenuTopic = 0;
             }
-            if (bSave && pMenuTopic && !((FUN_009611e0_shell*)pMenuTopic)->FUN_009611e0()->FUN_00619b20())
+            if (bSave && pMenuTopic && !((FUN_009611e0_shell*)pMenuTopic)->NiAVObject_GetParent()->TESTopicInfo_IsSayOnce())
             {
-                FUN_005d43c0(m_pDialogueSpeaker)->FUN_0042dee0(pMenuTopic);
+                BSFile_GetDevice(m_pDialogueSpeaker)->ExtraDataList_SetInfoGeneralTopic(pMenuTopic);
                 ((FUN_0083ed50_ref*)m_pDialogueSpeaker)->v12(0x80000000);
             }
         }
     }
     if (!abNoSort)
-        ((FUN_005f65d0_list*)FUN_0083f260())->SortItems(FUN_0083f110);
+        ((FUN_005f65d0_list*)MenuTopicManager_GetCurrentTopicList())->SortItems(TESTopic_GetPriority_GetUnk28_CompareTopicPrioritiesDescending);
 }
 
 struct TopicLoader
@@ -1165,7 +1177,7 @@ struct InfoShell
 {
     bool IsChallengeFlagSet();
     void MarkAsRefusal();
-    bool FUN_00619b20();
+    bool TESTopicInfo_IsSayOnce();
     bool IsSayOnceADay();
     int FUN_0061f2b0();
     int GetType();
@@ -1187,7 +1199,7 @@ struct ProcShell
 
 struct ListShell
 {
-    void FUN_00905330();
+    void RemoveMatchingItem();
 };
 
 class FloatSetting
@@ -1198,12 +1210,12 @@ class FloatSetting
 extern FloatSetting g_011d0a24;
 
 
-int FUN_006705b0(int a, int b);
+int ExperiencePoints_GetExperiencePoints(int a, int b);
 unsigned int DialogueRandom();
-int FUN_005b5e40(int a, const char* b);
+int Warning_005b5e40(int a, const char* b);
 int FUN_004d5c60(int a);
 TESTopic* GetTopicSubTypeName(int a, int b);
-float FUN_00648f60(int a);
+float GamePlayFormulas_GetSpeechFailPenalty(int a);
 int ComputeWeightedValue(float a, float b, int c);
 
 class Mgr
@@ -1218,7 +1230,7 @@ class Mgr
     MenuTopic* FUN_0083e4f0();
     void FUN_0083e370(int a);
     void AddHeadIfNotNull(void* p);
-    ListShell* FUN_0083f260(MenuTopic** p);
+    ListShell* MenuTopicManager_GetCurrentTopicList(MenuTopic** p);
     bool CheckTopicInfoChance(MenuTopic* pTopic);
 };
 
@@ -1243,7 +1255,7 @@ bool Mgr::CheckTopicInfoChance(MenuTopic* pTopic)
                                                      ((ProcShell*)pTopic)->GetProcessLevel(), 0);
             if (!pInfo)
             {
-                FUN_005b5e40(6, (const char*)&DAT_0107dd28);
+                Warning_005b5e40(6, (const char*)&DAT_0107dd28);
             }
             else
             {
@@ -1252,7 +1264,7 @@ bool Mgr::CheckTopicInfoChance(MenuTopic* pTopic)
                                                 (MobileObject*)m_pDialogueSpeaker, false);
                 pNew->FillResponseList();
                 ((InfoShell*)pTopic->GetTopicInfo())->MarkAsRefusal();
-                if (((InfoShell*)pTopic->GetTopicInfo())->FUN_00619b20() ||
+                if (((InfoShell*)pTopic->GetTopicInfo())->TESTopicInfo_IsSayOnce() ||
                     ((InfoShell*)pTopic->GetTopicInfo())->IsSayOnceADay())
                 {
                     if (((InfoShell*)pTopic->GetTopicInfo())->IsSayOnceADay() && m_pDialogueSpeaker->v63())
@@ -1260,7 +1272,7 @@ bool Mgr::CheckTopicInfoChance(MenuTopic* pTopic)
                         SpeakerVt* pSpk7 = m_pDialogueSpeaker;
                         pSpk7->LoadRecord(pTopic->GetTopicInfo());
                     }
-                    FUN_0083f260(&pTopic)->FUN_00905330();
+                    MenuTopicManager_GetCurrentTopicList(&pTopic)->RemoveMatchingItem();
                 }
                 ((BSSimpleList<MenuTopic*>*)pList)->AddTail(FUN_0083e4f0());
                 ((BSSimpleList<MenuTopic*>*)pList)->AddTail(pNew);
@@ -1268,11 +1280,11 @@ bool Mgr::CheckTopicInfoChance(MenuTopic* pTopic)
                 FUN_0083e370(1);
             }
             if (m_pDialogueSpeaker->v64())
-                m_pDialogueSpeaker->v280(g_thePlayer, FUN_00648f60(iChance2));
+                m_pDialogueSpeaker->v280(g_thePlayer, GamePlayFormulas_GetSpeechFailPenalty(iChance2));
         }
         else
         {
-            m_iTopicIndex = FUN_006705b0(4, ((InfoShell*)pTopic->GetTopicInfo())->GetType() - 1);
+            m_iTopicIndex = ExperiencePoints_GetExperiencePoints(4, ((InfoShell*)pTopic->GetTopicInfo())->GetType() - 1);
         }
     }
     return m_bControllerFlag;
@@ -1289,9 +1301,9 @@ struct GlobalObject_0045cf30
 };
 extern GlobalObject_0045cf30 g_011de4e8;
 
-TESForm* __cdecl FUN_004839c0(unsigned int auiFormId);
-void __cdecl FUN_0040fbe0(const char* pcFormat, ...);
-void __cdecl FUN_005b5e40(const char* pcFormat, ...);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int auiFormId);
+void __cdecl ProgramFlow(const char* pcFormat, ...);
+void __cdecl Warning_005b5e40(const char* pcFormat, ...);
 
 }  // namespace fnv_0083f3e0
 
@@ -1305,54 +1317,54 @@ void MenuTopic::SaveTopic()
     char* pcStart = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
     if (*fnv_0083f3e0::g_011de4e8.FUN_00408d60())
         pcStart = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
-    if (fnv_0083f3e0::g_TESSaveLoadGame->FUN_00862110())
+    if (fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
     {
         unsigned int uiTag = 'BLOK';
-        fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&uiTag, 4);
+        fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&uiTag, 4);
         pcSizeLoc = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
-        fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&usLen, 2);
+        fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&usLen, 2);
     }
     const char* pcTopic = m_kPrompt.String();
     unsigned char ucTextLen = fnv_0083f3e0::BSStringLength(pcTopic);
-    fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&ucTextLen, 1);
+    fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&ucTextLen, 1);
     if (ucTextLen)
-        fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0((void*)pcTopic, ucTextLen);
-    fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&m_bFirstFlag, 1);
-    fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&m_bIsRemappedRumor, 1);
-    fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&m_bInfoHasBeenRead, 1);
+        fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((void*)pcTopic, ucTextLen);
+    fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_bFirstFlag, 1);
+    fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_bIsRemappedRumor, 1);
+    fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD(&m_bInfoHasBeenRead, 1);
     unsigned int uiQuestID = 0;
     if (pQuest)
-        uiQuestID = pQuest->FUN_0084e3a0();
-    fnv_0083f3e0::g_TESSaveLoadGame->FUN_00857a10((void*)&uiQuestID, 4);
+        uiQuestID = pQuest->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID((void*)&uiQuestID, 4);
     unsigned int uiID2 = 0;
     if (pTopic)
-        uiID2 = pTopic->FUN_0084e3a0();
-    fnv_0083f3e0::g_TESSaveLoadGame->FUN_00857a10((void*)&uiID2, 4);
+        uiID2 = pTopic->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID((void*)&uiID2, 4);
     unsigned int uiResp = 0;
     if (pInfo)
-        uiResp = pInfo->FUN_0084e3a0();
-    fnv_0083f3e0::g_TESSaveLoadGame->FUN_00857a10((void*)&uiResp, 4);
+        uiResp = pInfo->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_SaveNumericID((void*)&uiResp, 4);
     if (*fnv_0083f3e0::g_011de4e8.FUN_00408d60())
     {
         char* pcEnd = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
         SaveFormHeader* pkHeader = (SaveFormHeader*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_004fd3e0();
         if (pkHeader)
         {
-            TESForm* pkForm = FUN_004839c0(pkHeader->formID);
-            FUN_0040fbe0("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
+            TESForm* pkForm = TESForm_GetFormByNumericID(pkHeader->formID);
+            ProgramFlow("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
                          pcEnd - pcStart, pkHeader->formID, pkForm->GetName(), *(unsigned int*)&pkHeader->flagsLow,
                          0x2ff, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Dialogue\\MenuTopic.cpp");
         }
         else
-            FUN_0040fbe0("SaveGame(): %-5i ending at line %i in file %s", pcEnd - pcStart, 0x2ff,
+            ProgramFlow("SaveGame(): %-5i ending at line %i in file %s", pcEnd - pcStart, 0x2ff,
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Dialogue\\MenuTopic.cpp");
     }
-    if (fnv_0083f3e0::g_TESSaveLoadGame->FUN_00862110())
+    if (fnv_0083f3e0::g_TESSaveLoadGame->TESSaveLoadGame_UseSaveGameBlocks())
     {
         char* pcNow = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
         char* pcMark = pcSizeLoc;
         if (pcNow > pcMark + 0xffff)
-            FUN_005b5e40("SAVELOAD: Save Game Block in file %s on line %i is greater than maximum short size",
+            Warning_005b5e40("SAVELOAD: Save Game Block in file %s on line %i is greater than maximum short size",
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Dialogue\\MenuTopic.cpp", 0x2ff);
         *(unsigned short*)pcSizeLoc = pcNow - pcMark;
     }
@@ -1362,7 +1374,7 @@ void MenuTopic::SaveTopic()
 typedef char _sizecheck_ResponseListWrapper[sizeof(TESResponseList) == 4 ? 1 : -1];
 struct FUN_0083df80_shell : public MenuTopic
 {
-    void FUN_0083df80(TESObjectREFR*);
+    void MenuTopic_FillResponseList_0083df80(TESObjectREFR*);
 };
 
 struct FUN_0061e760_shell
@@ -1386,12 +1398,13 @@ class DialogueResponse
 };
 struct ResponseFillOwner : MenuTopic
 {
-    void FUN_0083df80(TESQuest* apQuest, TESTopic* apTopic, TESTopicInfo* apInfo, TESObjectREFR* apSpeaker);
+    void MenuTopic_FillResponseList_0083df80(TESQuest* apQuest, TESTopic* apTopic, TESTopicInfo* apInfo, TESObjectREFR* apSpeaker);
 };
 
 // Iterates the response list obtained from pInfo and appends eligible DialogueResponse entries to m_kResponseList.
 // @fnv 0x0083df80
-void ResponseFillOwner::FUN_0083df80(TESQuest* apQuest, TESTopic* apTopic, TESTopicInfo* apInfo,
+// src: XBOX_PDB 0x0083df80
+void ResponseFillOwner::MenuTopic_FillResponseList_0083df80(TESQuest* apQuest, TESTopic* apTopic, TESTopicInfo* apInfo,
                                      TESObjectREFR* apSpeaker)
 {
     TESResponseList lResponseList;

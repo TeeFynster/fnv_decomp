@@ -3315,16 +3315,16 @@ __forceinline void Arg4::Commit(Arg6* cursor, unsigned int value)
     m_06 = value;
     *(char**)&cursor->m_00 += 0x30;
 }
-extern int FUN_00dabca0(void* a, void* b, void* c, void* d);
+extern int hkpGsk_getClosestPoint(void* a, void* b, void* c, void* d);
 extern void ReleaseAllEntries(void* a, void* b, void* c);
 extern unsigned char FindAndPromoteEntry(void* a, void* b);
-extern void FUN_00dae3a0(void* a, void* b, int c, void* d, void* e);
-extern int FUN_00daf1e0(void* a, void* b, void* c, void* d, void* e, void* f, void* g, void* h, void* i, int j);
-extern void FUN_00dae340(void* a, int b);
+extern void hkGskManifold_verifyAndGetPoints(void* a, void* b, int c, void* d, void* e);
+extern int hkGskManifold_addPoint(void* a, void* b, void* c, void* d, void* e, void* f, void* g, void* h, void* i, int j);
+extern void _hkGskManifold_removePoint(void* a, int b);
 static __forceinline int BuildContacts(void* a, void* b, void* c, void* d, void* e, void* f, void* g, void* h, void* i,
                                        int j)
 {
-    return FUN_00daf1e0(a, b, c, d, e, f, g, h, i, j);
+    return hkGskManifold_addPoint(a, b, c, d, e, f, g, h, i, j);
 }
 static __forceinline unsigned short AddContact(Node* shape, void* a, void* b, void* c, void* d, void* e, void* f)
 {
@@ -3385,7 +3385,7 @@ void ProcessCollision(In* in, void* p1, Arg2* p2, Arg3* p3, Arg4* p4, VecS* p5, 
     head.m_04 = in->m_00->m_08;
     head.m_10 = *(float*)&in->m_0c->m_08;
     p2->m_0b &= 0xef;
-    int kIter = FUN_00dabca0(&head, p3, p5c, &out);
+    int kIter = hkpGsk_getClosestPoint(&head, p3, p5c, &out);
     if (kIter == 1)
     {
         if (p4->m_02 == 0)
@@ -3452,7 +3452,7 @@ AfterV:
             QueryVertices((Node*)r, ids + p4->m_00 * 2, p4->m_01, val);
             XformReverse(val, (Mat*)bodyB->m_08, p4->m_01);
         }
-        FUN_00dae3a0(p4, x.points, iEntry, p6, in->m_10);
+        hkGskManifold_verifyAndGetPoints(p4, x.points, iEntry, p6, in->m_10);
         tailTest = iEntry;
         (void)res;
     }
@@ -3511,7 +3511,7 @@ AfterV:
             *(char**)&p6->m_00 += 0x30;
             goto a;
         Dae340:
-            FUN_00dae340(p4, 0);
+            _hkGskManifold_removePoint(p4, 0);
             goto RestoreA;
         }
         if (rr == 5)

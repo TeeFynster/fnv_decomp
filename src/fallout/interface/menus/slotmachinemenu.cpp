@@ -62,19 +62,22 @@ struct AudioPlaybackHandle
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 // @fnv 0x007c0800
-int SlotMachineMenu::FUN_007c0800()
+// src: COMMUNITY 0x007c0800
+int SlotMachineMenu::GetMenuID_007c0800()
 {
     return 0x438;
 }
 
 // @fnv 0x007c1440
-int __cdecl FUN_007c1440()
+// src: COMMUNITY 0x007c1440
+int __cdecl SlotMachineMenu_GetMenuID_0()
 {
     return 0x438;
 }
 
 // @fnv 0x007c1450
-char SlotMachineMenu::FUN_007c1450()
+// src: GUESS 0x007c1450 (confidence: high)
+char SlotMachineMenu::HasAllTenTiles()
 {
     for (int i = 0; i < 10; ++i)
     {
@@ -94,7 +97,8 @@ void SlotMachineMenu::SetTile(int aiIndex, Tile* tile)
 }
 
 // @fnv 0x007c5760
-int SlotMachineMenu::FUN_007c5760()
+// src: COMMUNITY 0x007c5760
+int SlotMachineMenu::InterpretSpin()
 {
     int wildcount = 0;
     for (int i = 0; i < 3; i++)
@@ -161,7 +165,7 @@ struct Accum_00733500;
 
 struct S148c0
 {
-    void FUN_007148c0(int, int);
+    void RendererClearBufferHook(int, int);
 };
 
 struct GlobalObject_00633c90 : GO
@@ -170,48 +174,49 @@ struct GlobalObject_00633c90 : GO
 
 struct Mgr_00733500
 {
-    AnimIdle* FUN_007fd640();
+    AnimIdle* RaceSexMenu_GetProjectorFile();
 };
 
 struct Accum_00733500
 {
-    void FUN_00c4f270(int);
-    void FUN_004a0fd0(AnimIdle*);
-    void FUN_00c4f2d0();
+    void BSCullingProcess_PushCullMode(int);
+    void BSCullingProcess_SetAccumulator(AnimIdle*);
+    void BSCullingProcess_PopCullMode();
 };
 
-S148c0* __cdecl FUN_0043c4b0();
-AnimIdle* __cdecl FUN_0045c670();
+S148c0* __cdecl NiXenonRenderer_GetRenderer();
+AnimIdle* __cdecl Main_GetWorldSceneGraph();
 void __cdecl UpdateCameraFrustum(AnimIdle*, float);
 Mgr_00733500* __cdecl _FUN_004b7210();
-void __cdecl FUN_00b6bee0(AnimIdle*, void*, Accum_00733500*);
+void __cdecl BSShaderUtil_AccumulateScene(AnimIdle*, void*, Accum_00733500*);
 
 extern GlobalObject_00633c90 g_011da9d0;
 extern const float g_011db5ec_arg1;
 
 // @fnv 0x007c19c0
-void FUN_007c19c0()
+// src: COMMUNITY 0x007c19c0
+void SlotMachineMenu_DrawScene()
 {
-    FUN_0043c4b0()->FUN_007148c0(0, 4);
+    NiXenonRenderer_GetRenderer()->RendererClearBufferHook(0, 4);
 
-    AnimIdle* go = FUN_0045c670();
+    AnimIdle* go = Main_GetWorldSceneGraph();
     Accum_00733500* accum = (Accum_00733500*)((MiddleLowProcess*)go)->MiddleLowProcess::GetProcessInteger();
-    accum->FUN_00c4f270(1);
+    accum->BSCullingProcess_PushCullMode(1);
 
     AnimIdle* anim2 = (AnimIdle*)(unsigned int)g_011da9d0;
     UpdateCameraFrustum(anim2, g_011db5ec_arg1);
 
-    GO selected((int)_FUN_004b7210()->FUN_007fd640());
-    accum->FUN_004a0fd0((AnimIdle*)(unsigned int)selected);
+    GO selected((int)_FUN_004b7210()->RaceSexMenu_GetProjectorFile());
+    accum->BSCullingProcess_SetAccumulator((AnimIdle*)(unsigned int)selected);
 
     AnimIdle* anim = anim2 ? anim2 : (AnimIdle*)((BSFaceGenNiNode*)go)->BSFaceGenNiNode::GetAnimationData();
 
-    FUN_00b6bee0(anim, NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1), accum);
+    BSShaderUtil_AccumulateScene(anim, NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1), accum);
     BSShaderRenderUtility_slotmachinemenu::SetRenderCamera(anim, (AnimIdle*)(unsigned int)selected, false);
 
-    accum->FUN_004a0fd0(0);
+    accum->BSCullingProcess_SetAccumulator(0);
     selected = 0;
-    accum->FUN_00c4f2d0();
+    accum->BSCullingProcess_PopCullMode();
 }
 
 struct NiBoundW7
@@ -220,13 +225,13 @@ struct NiBoundW7
 };
 struct CtrlObj
 {
-    CtrlObj* FUN_0047a520(const NiFixedString&);
+    CtrlObj* NiControllerManager_GetSequenceByName(const NiFixedString&);
     void FUN_0048fef0(float);
     void FUN_0047aab0(CtrlObj*, int, int, float, float, int);
 };
 struct AVObj
 {
-    CtrlObj* FUN_00a5c570(const void*);
+    CtrlObj* NiObjectNET_GetController(const void*);
 };
 struct NiNodeW7
 {
@@ -286,10 +291,10 @@ struct NiNodeW7
     virtual void Vf53();
     virtual void Vf54();
     virtual void Vf55(void*, int);
-    void FUN_0043fa80(const void*);
-    void FUN_004bc1f0(float, float, float);
-    void FUN_00a59c60(const NiUpdateData&);
-    NiBoundW7* FUN_0043d450();
+    void SetRotate_0043fa80(const void*);
+    void NiAVObject_SetTranslate_004bc1f0(float, float, float);
+    void NiAVObject_Update(const NiUpdateData&);
+    NiBoundW7* NiAVObject_GetWorldBound();
 };
 struct ShadowSceneNodeW7 : NiNodeW7
 {
@@ -298,7 +303,7 @@ struct ShadowSceneNodeW7 : NiNodeW7
 ShadowSceneNodeW7* __cdecl FUN_00450b80(int);
 struct GObjW7
 {
-    NiNodeW7* FUN_00559450();
+    NiNodeW7* Modelloader_GetReferencedThis();
 };
 struct GlobalObject_00633c90;
 extern GlobalObject_00633c90 g_011da9fc;
@@ -328,47 +333,47 @@ struct FUN_00a5ecb0 : NiMemObject
 extern int DAT_011f36ac;
 extern float DAT_0105478c;
 extern float DAT_0107678c;
-void __cdecl FUN_00a6d2d0(AVObj*);
+void __cdecl NiTimeController_StartAnimations(AVObj*);
 static const char kPayoutIn[] = "Payout_In";
 // @fnv 0x007c1af0
 void SlotMachineMenu::InitPayoutMenu()
 {
     ((GO&)g_011da9fc) = new FUN_00a5ecb0(0);
-    ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->Vf55(m_104, 1);
-    ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->Vf55(m_108[0], 1);
-    ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->Vf55(m_108[1], 1);
-    ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->Vf55(m_108[2], 1);
+    ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->Vf55(m_104, 1);
+    ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->Vf55(m_108[0], 1);
+    ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->Vf55(m_108[1], 1);
+    ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->Vf55(m_108[2], 1);
     MatW7 xObjB;
     MatW7 objC7;
     xObjB.FUN_006815c0();
     objC7.FUN_006815c0();
     xObjB.FUN_00524ac0(1.5707963705062866f);
     objC7.FUN_004a0c90(1.5707963705062866f);
-    ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->FUN_0043fa80((const void*)&xObjB.FUN_0043f8d0(&objC7));
-    ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->FUN_004bc1f0(DAT_0105478c, DAT_0107678c, 0.0f);
+    ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->SetRotate_0043fa80((const void*)&xObjB.FUN_0043f8d0(&objC7));
+    ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->NiAVObject_SetTranslate_004bc1f0(DAT_0105478c, DAT_0107678c, 0.0f);
     NiUpdateData upd1(0.0f, false, 0);
-    ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->FUN_00a59c60(upd1);
-    CtrlObj* xPCtrl = m_104->FUN_00a5c570(&DAT_011f36ac);
+    ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->NiAVObject_Update(upd1);
+    CtrlObj* xPCtrl = m_104->NiObjectNET_GetController(&DAT_011f36ac);
     if (xPCtrl != 0)
     {
         m_134 = xPCtrl;
-        m_138 = m_134->FUN_0047a520(NiFixedString("Forward"));
-        m_13c = m_134->FUN_0047a520(NiFixedString("Backward"));
-        m_140 = m_134->FUN_0047a520(NiFixedString(kPayoutIn));
-        m_144 = m_134->FUN_0047a520(NiFixedString("Payout_Out"));
+        m_138 = m_134->NiControllerManager_GetSequenceByName(NiFixedString("Forward"));
+        m_13c = m_134->NiControllerManager_GetSequenceByName(NiFixedString("Backward"));
+        m_140 = m_134->NiControllerManager_GetSequenceByName(NiFixedString(kPayoutIn));
+        m_144 = m_134->NiControllerManager_GetSequenceByName(NiFixedString("Payout_Out"));
         m_134->FUN_0048fef0(0.0f);
         if (m_138 != 0)
         {
             m_134->FUN_0047aab0(m_138, 0, 1, 1.0f, 0.0f, 0);
         }
-        FUN_00a6d2d0(m_104);
+        NiTimeController_StartAnimations(m_104);
     }
     CtrlObj* arr12[3];
     CtrlObj* aarr2[3];
     int oI;
     for (oI = 0; oI < 3; oI++)
     {
-        arr12[oI] = m_108[oI]->FUN_00a5c570(&DAT_011f36ac);
+        arr12[oI] = m_108[oI]->NiObjectNET_GetController(&DAT_011f36ac);
     }
     int jX;
     for (jX = 0; jX < 3; jX++)
@@ -376,29 +381,30 @@ void SlotMachineMenu::InitPayoutMenu()
         if (arr12[jX] != 0)
         {
             aarr2[jX] = arr12[jX];
-            m_148[jX] = aarr2[jX]->FUN_0047a520(NiFixedString("Forward"));
+            m_148[jX] = aarr2[jX]->NiControllerManager_GetSequenceByName(NiFixedString("Forward"));
             aarr2[jX]->FUN_0048fef0(0.0f);
             if (m_148[jX] != 0)
             {
                 aarr2[jX]->FUN_0047aab0(m_148[jX], 0, 1, 1.0f, 0.0f, 0);
             }
-            FUN_00a6d2d0(m_108[jX]);
+            NiTimeController_StartAnimations(m_108[jX]);
         }
     }
     NiUpdateData _upd2(0.0f, false, 0);
-    ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->FUN_00a59c60(_upd2);
-    ((GO&)g_011da9d0) = FUN_007c2180();
-    FUN_00450b80(1)->Vf55(((GObjW7*)(void*)&g_011da9fc)->FUN_00559450(), 1);
-    float fTemp0 = ((GObjW7*)(void*)&g_011da9fc)->FUN_00559450()->FUN_0043d450()->FUN_0084d030() * 3.0;
-    FUN_00450b80(1)->FUN_00b5ca70(((GObjW7*)(void*)&g_011da9fc)->FUN_00559450(), fTemp0);
-    FUN_007c4d70();
-    FUN_007c40b0();
+    ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->NiAVObject_Update(_upd2);
+    ((GO&)g_011da9d0) = BlackJackMenu_SetupCamera();
+    FUN_00450b80(1)->Vf55(((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis(), 1);
+    float fTemp0 = ((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis()->NiAVObject_GetWorldBound()->FUN_0084d030() * 3.0;
+    FUN_00450b80(1)->FUN_00b5ca70(((GObjW7*)(void*)&g_011da9fc)->Modelloader_GetReferencedThis(), fTemp0);
+    SwapFrontfacingTextures();
+    SwapBackfacingTextures();
 }
 
 int __cdecl FUN_00944460(int, int);
 
 // @fnv 0x007c56e0
-void SlotMachineMenu::FUN_007c56e0()
+// src: GUESS 0x007c56e0 (confidence: medium)
+void SlotMachineMenu::SelectSpinResults()
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -406,7 +412,7 @@ void SlotMachineMenu::FUN_007c56e0()
         currentResults[i] = sourceValues[FUN_00944460(0, valueCount * 2 - 1)];
     }
 
-    FUN_007c5760();
+    InterpretSpin();
 }
 
 extern PlayerCharacter* g_thePlayer;
@@ -422,12 +428,12 @@ struct SlotModelSource
 };
 struct SlotModelList
 {
-    SlotModelSource* FUN_00504e00(int index);
+    SlotModelSource* TESCasino_GetModel(int index);
 };
 
 struct ModelLoader
 {
-    void FUN_0045a5e0(const char* path);
+    void ModelLoader_ReleaseFile(const char* path);
 };
 extern ModelLoader* g_modelLoader;
 extern SlotMachineMenu* DAT_011da9a4;
@@ -497,7 +503,7 @@ struct SlotShadowNode
 
 struct SlotSceneNode
 {
-    void FUN_00b5d180();
+    void RemoveAllLights();
 };
 
 struct NiNodeRef
@@ -509,14 +515,14 @@ struct NiNodeRef
 // @fnv 0x007c0870
 SlotMachineMenu::~SlotMachineMenu()
 {
-    g_thePlayer->FUN_00969b20();
-    g_modelLoader->FUN_0045a5e0(((SlotModelList*)DAT_011da9ac)->FUN_00504e00(7)->GetModelPath());
-    g_modelLoader->FUN_0045a5e0("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel01.NIF");
-    g_modelLoader->FUN_0045a5e0("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel02.NIF");
-    g_modelLoader->FUN_0045a5e0("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel03.NIF");
-    ((SlotShadowNode*)FUN_00450b80(1))->AttachRoot(((GObjW7*)&g_011da9fc)->FUN_00559450());
-    ((SlotSceneNode*)FUN_00450b80(1))->FUN_00b5d180();
-    ((NiNodeRef*)((GObjW7*)&g_011da9fc)->FUN_00559450())->DetachAllChildren();
+    g_thePlayer->SetLastAntiCheatTime();
+    g_modelLoader->ModelLoader_ReleaseFile(((SlotModelList*)DAT_011da9ac)->TESCasino_GetModel(7)->GetModelPath());
+    g_modelLoader->ModelLoader_ReleaseFile("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel01.NIF");
+    g_modelLoader->ModelLoader_ReleaseFile("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel02.NIF");
+    g_modelLoader->ModelLoader_ReleaseFile("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel03.NIF");
+    ((SlotShadowNode*)FUN_00450b80(1))->AttachRoot(((GObjW7*)&g_011da9fc)->Modelloader_GetReferencedThis());
+    ((SlotSceneNode*)FUN_00450b80(1))->RemoveAllLights();
+    ((NiNodeRef*)((GObjW7*)&g_011da9fc)->Modelloader_GetReferencedThis())->DetachAllChildren();
     m_104 = 0;
     (GO&)g_011da9d0 = 0;
     (GO&)g_011da9fc = 0;
@@ -569,7 +575,7 @@ struct CasinoData
 };
 struct StringField
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct Casino
 {
@@ -656,9 +662,9 @@ struct Casino
     int unk10;
     int unk14;
     StringField name;
-    void* FUN_0084e3a0();
-    CasinoData* FUN_00504e60();
-    void* FUN_007316d0();
+    void* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+    CasinoData* TESCasino_GetData();
+    void* TESCasino_GetChipType();
 };
 struct Player
 {
@@ -707,18 +713,18 @@ struct Player
     {
         int FUN_0066ef20(int);
     } stats;
-    RecordList* FUN_005a6260();
-    bool FUN_00969b80();
-    int FUN_00969b40();
+    RecordList* PlayerCharacter_GetCasinoDataList();
+    bool IsCasinoAntiCheat();
+    int GetAntiCheatTimeRemaining();
     int FUN_00575610(void*);
 };
 struct GameTile
 {
-    GameTile* FUN_00a01b00();
-    SlotMachineMenu* FUN_00a03c90();
+    GameTile* Tile_ReadFile();
+    SlotMachineMenu* Tile_GetMenu();
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float);
-    void FUN_00a01350(int, const char*, bool);
+    void Tile_Set(int, float);
+    void Tile_Set_00a01350(int, const char*, bool);
     void SetTraitAndReset(int, float);
     void FUN_00700320(int, int);
 };
@@ -726,17 +732,17 @@ struct TileManager
 {
     struct Reader
     {
-        GameTile* FUN_00586150(const char*);
+        GameTile* CombatController_GetCombatState(const char*);
     };
 };
-void* __cdecl FUN_00a09030(int);
-int __cdecl FUN_004839c0(void*);
+void* __cdecl Tile_GetMenuByClass(int);
+int __cdecl TESForm_GetFormByNumericID(void*);
 void __cdecl DispatchMessageToSink(const char*, int, const char*, int, float, int);
-void __cdecl FUN_005b5e40(const char*);
-int __cdecl FUN_0044a670(const char*);
-GameTile* __cdecl FUN_00a08b20(GameTile*, const char*);
+void __cdecl Warning_005b5e40(const char*);
+int __cdecl BSstrlen(const char*);
+GameTile* __cdecl Tile_GetTileByName(GameTile*, const char*);
 float __stdcall FUN_00a01530(int);
-void __cdecl FUN_007c2420();
+void __cdecl SlotMachineMenu_SetShouldExit();
 extern Player* DAT_011dea3c;
 extern SlotMachineMenu* DAT_011da9a4;
 extern int DAT_011a0828;
@@ -768,23 +774,24 @@ extern const char DAT_010765d8[];
 
 // Validates casino wager/limit/threshold, finds or creates the casino record, opens the casino menu and fills its tiles, returning the menu tile or null.
 // @fnv 0x007c0a40
-GameTile* __cdecl FUN_007c0a40(char* casino, int wager, int mode, int threshold)
+// src: COMMUNITY 0x007c0a40
+GameTile* __cdecl SlotMachineMenu_Create(char* casino, int wager, int mode, int threshold)
 {
-    SlotMachineMenu* oldMenu = (SlotMachineMenu*)FUN_00a09030(0x438);
+    SlotMachineMenu* oldMenu = (SlotMachineMenu*)Tile_GetMenuByClass(0x438);
     TileManager::Reader* tile = (TileManager::Reader*)_FUN_004b7210();
     DAT_011a0828 = mode;
     DAT_011a082c = wager;
     DAT_011da9ac = casino;
     DAT_011da9a8 = 0;
-    RecordList* node = DAT_011dea3c->FUN_005a6260();
+    RecordList* node = DAT_011dea3c->PlayerCharacter_GetCasinoDataList();
     while (node && *node->FUN_006815c0())
     {
-        if (!(*node->FUN_006815c0())->owner || !FUN_004839c0((*node->FUN_006815c0())->owner))
+        if (!(*node->FUN_006815c0())->owner || !TESForm_GetFormByNumericID((*node->FUN_006815c0())->owner))
         {
             DispatchMessageToSink(DAT_01076694, 0, DAT_01049638, 0, DAT_010162c0, 0);
             return 0;
         }
-        if (((Casino*)DAT_011da9ac)->FUN_0084e3a0() == (*node->FUN_006815c0())->owner)
+        if (((Casino*)DAT_011da9ac)->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == (*node->FUN_006815c0())->owner)
         {
             DAT_011da9a8 = (int*)*node->FUN_006815c0();
             break;
@@ -796,24 +803,24 @@ GameTile* __cdecl FUN_007c0a40(char* casino, int wager, int mode, int threshold)
     if (!DAT_011da9a8)
     {
         Record* pNewRecord = new Record;
-        pNewRecord->owner = ((Casino*)DAT_011da9ac)->FUN_0084e3a0();
+        pNewRecord->owner = ((Casino*)DAT_011da9ac)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         pNewRecord->count = 0;
-        node = DAT_011dea3c->FUN_005a6260();
+        node = DAT_011dea3c->PlayerCharacter_GetCasinoDataList();
         if (!node || node->FUN_008256d0())
             node->FUN_00726c60(&pNewRecord);
         else
             node->FUN_005ae3d0(&pNewRecord);
         DAT_011da9a8 = (int*)pNewRecord;
     }
-    if (DAT_011dea3c->FUN_00969b80())
+    if (DAT_011dea3c->IsCasinoAntiCheat())
     {
         char message[260];
-        _sprintf_s(message, 260, DAT_01070c58, DAT_011d2ac0.FUN_00403df0(), DAT_011dea3c->FUN_00969b40());
+        _sprintf_s(message, 260, DAT_01070c58, DAT_011d2ac0.FUN_00403df0(), DAT_011dea3c->GetAntiCheatTimeRemaining());
         DispatchMessageToSink(message, 0, DAT_01049638, 0, DAT_010162c0, 0);
         BSAudio::GetSingleton()->GetSoundHandleByEditorID(DAT_01025cc4, 0x121).Play(false);
         return 0;
     }
-    if (((Record*)DAT_011da9a8)->count >= ((Casino*)DAT_011da9ac)->FUN_00504e60()->limit)
+    if (((Record*)DAT_011da9a8)->count >= ((Casino*)DAT_011da9ac)->TESCasino_GetData()->limit)
     {
         char message[260];
         _sprintf_s(message, 260, DAT_011d3abc.FUN_00403df0());
@@ -821,7 +828,7 @@ GameTile* __cdecl FUN_007c0a40(char* casino, int wager, int mode, int threshold)
         BSAudio::GetSingleton()->GetSoundHandleByEditorID(DAT_01025cc4, 0x121).Play(false);
         return 0;
     }
-    if (DAT_011dea3c->FUN_00575610(((Casino*)DAT_011da9ac)->FUN_007316d0()) < DAT_011a082c)
+    if (DAT_011dea3c->FUN_00575610(((Casino*)DAT_011da9ac)->TESCasino_GetChipType()) < DAT_011a082c)
     {
         char message[260];
         _sprintf_s(message, 260, DAT_011d2424.FUN_00403df0());
@@ -839,48 +846,48 @@ GameTile* __cdecl FUN_007c0a40(char* casino, int wager, int mode, int threshold)
     }
     if (oldMenu)
         delete oldMenu;
-    GameTile* manager = tile->FUN_00586150(DAT_01076670)->FUN_00a01b00();
-    DAT_011da9a4 = manager->FUN_00a03c90();
-    if (DAT_011da9a4 && DAT_011da9a4->GetClass() == FUN_007c1440() && DAT_011da9ac)
+    GameTile* manager = tile->CombatController_GetCombatState(DAT_01076670)->Tile_ReadFile();
+    DAT_011da9a4 = manager->Tile_GetMenu();
+    if (DAT_011da9a4 && DAT_011da9a4->GetClass() == SlotMachineMenu_GetMenuID_0() && DAT_011da9ac)
     {
         DAT_011da9a4->FUN_00a1dc70((TileMenu*)manager, false);
-        if (!(unsigned char)DAT_011da9a4->FUN_007c1450())
+        if (!(unsigned char)DAT_011da9a4->HasAllTenTiles())
         {
-            FUN_005b5e40(DAT_01076618);
+            Warning_005b5e40(DAT_01076618);
             return 0;
         }
         if (manager->FUN_00a011b0(0xfa7) == 6006.0 || manager->FUN_00a011b0(0xfa7) == 102.0)
-            manager->FUN_00a012d0(0xfad, FUN_00a01530(1));
+            manager->Tile_Set(0xfad, FUN_00a01530(1));
         BSAudio::GetSingleton()->GetSoundHandleByEditorID(DAT_01076600, 0x121).Play(false);
         DAT_011da9a4->stat = DAT_011dea3c->stats.FUN_0066ef20(11);
         DAT_011da9a4->wager = DAT_011a082c;
-        DAT_011da9a4->tilea0->FUN_00a01350(DAT_011da99c, DAT_011d3804.FUN_00403df0(), true);
+        DAT_011da9a4->tilea0->Tile_Set_00a01350(DAT_011da99c, DAT_011d3804.FUN_00403df0(), true);
         ((GameTile*)DAT_011da9a4->tilea0)->SetTraitAndReset(DAT_011da998, 1.0f);
         DAT_011da9a4->tilea0->FUN_00700320(DAT_011da998, DAT_011a082c);
-        DAT_011da9a4->tilea4->FUN_00a01350(DAT_011da99c, DAT_011d3300.FUN_00403df0(), true);
+        DAT_011da9a4->tilea4->Tile_Set_00a01350(DAT_011da99c, DAT_011d3300.FUN_00403df0(), true);
         ((GameTile*)DAT_011da9a4->tilea4)->SetTraitAndReset(DAT_011da998, 1.0f);
         DAT_011da9a4->tilea4->FUN_00700320(DAT_011da998,
-                                           DAT_011dea3c->FUN_00575610(((Casino*)DAT_011da9ac)->FUN_007316d0()));
+                                           DAT_011dea3c->FUN_00575610(((Casino*)DAT_011da9ac)->TESCasino_GetChipType()));
         char label[64];
-        if (FUN_0044a670(((Casino*)DAT_011da9ac)->name.FUN_00408da0()))
-            _sprintf_s(label, 64, DAT_01012058, ((Casino*)DAT_011da9ac)->name.FUN_00408da0(),
+        if (BSstrlen(((Casino*)DAT_011da9ac)->name.TESModel_GetModel()))
+            _sprintf_s(label, 64, DAT_01012058, ((Casino*)DAT_011da9ac)->name.TESModel_GetModel(),
                        g_011d3e08.GetMenuTitle());
         else
             _sprintf_s(label, 64, DAT_010765f0, ((Casino*)DAT_011da9ac)->GetName());
-        DAT_011da9a4->tilea8->FUN_00a01350(DAT_011da99c, label, true);
-        FUN_00a08b20((GameTile*)DAT_011da9a4->tilea8, DAT_010765d8)->FUN_00700320(0xfa3, 0);
+        DAT_011da9a4->tilea8->Tile_Set_00a01350(DAT_011da99c, label, true);
+        Tile_GetTileByName((GameTile*)DAT_011da9a4->tilea8, DAT_010765d8)->FUN_00700320(0xfa3, 0);
         DAT_011da9a4->UpdateTileText();
-        DAT_011da9a4->tileac->FUN_00a01350(0xfc4, DAT_011d2fd0.FUN_00403df0(), true);
-        DAT_011da9a4->tileb0->FUN_00a01350(0xfc4, DAT_011d3354.FUN_00403df0(), true);
-        DAT_011da9a4->tileb4->FUN_00a01350(0xfc4, DAT_011d487c.FUN_00403df0(), true);
-        DAT_011da9a4->tileb8->FUN_00a01350(0xfc4, DAT_011d4054.FUN_00403df0(), true);
-        DAT_011da9a4->tilebc->FUN_00a01350(0xfc4, DAT_011d37f8.FUN_00403df0(), true);
-        DAT_011da9a4->tilec4->FUN_00a01350(0xfc4, DAT_011d387c.FUN_00403df0(), true);
+        DAT_011da9a4->tileac->Tile_Set_00a01350(0xfc4, DAT_011d2fd0.FUN_00403df0(), true);
+        DAT_011da9a4->tileb0->Tile_Set_00a01350(0xfc4, DAT_011d3354.FUN_00403df0(), true);
+        DAT_011da9a4->tileb4->Tile_Set_00a01350(0xfc4, DAT_011d487c.FUN_00403df0(), true);
+        DAT_011da9a4->tileb8->Tile_Set_00a01350(0xfc4, DAT_011d4054.FUN_00403df0(), true);
+        DAT_011da9a4->tilebc->Tile_Set_00a01350(0xfc4, DAT_011d37f8.FUN_00403df0(), true);
+        DAT_011da9a4->tilec4->Tile_Set_00a01350(0xfc4, DAT_011d387c.FUN_00403df0(), true);
         if (DAT_011da9a4->tilec0)
-            DAT_011da9a4->tilec0->FUN_00a01350(0xfc4, DAT_011d33fc.FUN_00403df0(), true);
+            DAT_011da9a4->tilec0->Tile_Set_00a01350(0xfc4, DAT_011d33fc.FUN_00403df0(), true);
         if (!DAT_011da9a4->LoadAssets())
         {
-            FUN_007c2420();
+            SlotMachineMenu_SetShouldExit();
             return 0;
         }
         DAT_011da9a4->InitPayoutMenu();
@@ -1478,7 +1485,7 @@ void SlotMachineMenu::Update()
 struct ReelTexture
 {
     void* value;
-    void* FUN_00559450() const;
+    void* Modelloader_GetReferencedThis() const;
 };
 struct ReelProperty
 {
@@ -1549,11 +1556,12 @@ struct ReelNode
 {
     ReelProperty* FUN_00a59d30(unsigned int);
 };
-ReelNode* __cdecl FUN_004aae30(ReelNode*, const char*);
+ReelNode* __cdecl BSUtilities_GetObjectByName(ReelNode*, const char*);
 int _sprintf_s(char*, unsigned int, const char*, ...);
 // For each reel whose current result differs from the saved result, computes texture indices and sets the texture on the Cylinder nodes' property.
 // @fnv 0x007c40b0
-void SlotMachineMenu::FUN_007c40b0()
+// src: COMMUNITY 0x007c40b0
+void SlotMachineMenu::SwapBackfacingTextures()
 {
     int reel4, delta8, a6, b, c3, d_, e, f7, g2, _h;
     char name6[260];
@@ -1597,7 +1605,7 @@ void SlotMachineMenu::FUN_007c40b0()
             }
             _sprintf_s(name6, 260, "Cylinder0%i:%i", 6 - reel4,
                        2 * reel4 + 4 > 13 ? 2 * reel4 + 4 - 14 : 2 * reel4 + 4);
-            node9 = FUN_004aae30((ReelNode*)m_reels[reel4], name6);
+            node9 = BSUtilities_GetObjectByName((ReelNode*)m_reels[reel4], name6);
             propA =
                 (!node9->FUN_00a59d30(3)
                      ? 0
@@ -1607,10 +1615,10 @@ void SlotMachineMenu::FUN_007c40b0()
                     ? node9->FUN_00a59d30(3)
                     : 0;
             if (propA)
-                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[a6].FUN_00559450());
+                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[a6].Modelloader_GetReferencedThis());
             _sprintf_s(name6, 260, "Cylinder0%i:%i", 6 - reel4,
                        2 * reel4 + 5 > 13 ? 2 * reel4 + 5 - 14 : 2 * reel4 + 5);
-            node9 = FUN_004aae30((ReelNode*)m_reels[reel4], name6);
+            node9 = BSUtilities_GetObjectByName((ReelNode*)m_reels[reel4], name6);
             propA =
                 (!node9->FUN_00a59d30(3)
                      ? 0
@@ -1620,10 +1628,10 @@ void SlotMachineMenu::FUN_007c40b0()
                     ? node9->FUN_00a59d30(3)
                     : 0;
             if (propA)
-                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[b].FUN_00559450());
+                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[b].Modelloader_GetReferencedThis());
             _sprintf_s(name6, 260, "Cylinder0%i:%i", 6 - reel4,
                        2 * reel4 + 6 > 13 ? 2 * reel4 + 6 - 14 : 2 * reel4 + 6);
-            node9 = FUN_004aae30((ReelNode*)m_reels[reel4], name6);
+            node9 = BSUtilities_GetObjectByName((ReelNode*)m_reels[reel4], name6);
             propA =
                 (!node9->FUN_00a59d30(3)
                      ? 0
@@ -1633,10 +1641,10 @@ void SlotMachineMenu::FUN_007c40b0()
                     ? node9->FUN_00a59d30(3)
                     : 0;
             if (propA)
-                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[e].FUN_00559450());
+                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[e].Modelloader_GetReferencedThis());
             _sprintf_s(name6, 260, "Cylinder0%i:%i", 6 - reel4,
                        2 * reel4 + 7 > 13 ? 2 * reel4 + 7 - 14 : 2 * reel4 + 7);
-            node9 = FUN_004aae30((ReelNode*)m_reels[reel4], name6);
+            node9 = BSUtilities_GetObjectByName((ReelNode*)m_reels[reel4], name6);
             propA =
                 (!node9->FUN_00a59d30(3)
                      ? 0
@@ -1646,10 +1654,10 @@ void SlotMachineMenu::FUN_007c40b0()
                     ? node9->FUN_00a59d30(3)
                     : 0;
             if (propA)
-                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[d_].FUN_00559450());
+                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[d_].Modelloader_GetReferencedThis());
             _sprintf_s(name6, 260, "Cylinder0%i:%i", 6 - reel4,
                        2 * reel4 + 8 > 13 ? 2 * reel4 + 8 - 14 : 2 * reel4 + 8);
-            node9 = FUN_004aae30((ReelNode*)m_reels[reel4], name6);
+            node9 = BSUtilities_GetObjectByName((ReelNode*)m_reels[reel4], name6);
             propA =
                 (!node9->FUN_00a59d30(3)
                      ? 0
@@ -1659,10 +1667,10 @@ void SlotMachineMenu::FUN_007c40b0()
                     ? node9->FUN_00a59d30(3)
                     : 0;
             if (propA)
-                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[c3].FUN_00559450());
+                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[c3].Modelloader_GetReferencedThis());
             _sprintf_s(name6, 260, "Cylinder0%i:%i", 6 - reel4,
                        2 * reel4 + 9 > 13 ? 2 * reel4 + 9 - 14 : 2 * reel4 + 9);
-            node9 = FUN_004aae30((ReelNode*)m_reels[reel4], name6);
+            node9 = BSUtilities_GetObjectByName((ReelNode*)m_reels[reel4], name6);
             propA =
                 (!node9->FUN_00a59d30(3)
                      ? 0
@@ -1672,10 +1680,10 @@ void SlotMachineMenu::FUN_007c40b0()
                     ? node9->FUN_00a59d30(3)
                     : 0;
             if (propA)
-                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[f7].FUN_00559450());
+                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[f7].Modelloader_GetReferencedThis());
             _sprintf_s(name6, 260, "Cylinder0%i:%i", 6 - reel4,
                        2 * reel4 + 10 > 13 ? 2 * reel4 + 10 - 14 : 2 * reel4 + 10);
-            node9 = FUN_004aae30((ReelNode*)m_reels[reel4], name6);
+            node9 = BSUtilities_GetObjectByName((ReelNode*)m_reels[reel4], name6);
             propA =
                 (!node9->FUN_00a59d30(3)
                      ? 0
@@ -1685,10 +1693,10 @@ void SlotMachineMenu::FUN_007c40b0()
                     ? node9->FUN_00a59d30(3)
                     : 0;
             if (propA)
-                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[g2].FUN_00559450());
+                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[g2].Modelloader_GetReferencedThis());
             _sprintf_s(name6, 260, "Cylinder0%i:%i", 6 - reel4,
                        2 * reel4 + 11 > 13 ? 2 * reel4 + 11 - 14 : 2 * reel4 + 11);
-            node9 = FUN_004aae30((ReelNode*)m_reels[reel4], name6);
+            node9 = BSUtilities_GetObjectByName((ReelNode*)m_reels[reel4], name6);
             propA =
                 (!node9->FUN_00a59d30(3)
                      ? 0
@@ -1698,7 +1706,7 @@ void SlotMachineMenu::FUN_007c40b0()
                     ? node9->FUN_00a59d30(3)
                     : 0;
             if (propA)
-                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[_h].FUN_00559450());
+                propA->SetTexture(0, 0, ((ReelTexture*)m_reelNodes)[_h].Modelloader_GetReferencedThis());
         }
     }
 }
@@ -1784,7 +1792,8 @@ ReelNode* FindReelNode(void*, const char*);
 
 // For each of the 3 reels whose current value changed, computes cylinder indices and sets the texture on each matching reel node property.
 // @fnv 0x007c4d70
-void SlotMachineMenu::FUN_007c4d70()
+// src: COMMUNITY 0x007c4d70
+void SlotMachineMenu::SwapFrontfacingTextures()
 {
     using namespace fnv_007c4d70;
     int reel4;
@@ -1909,7 +1918,7 @@ struct Audio
     BSSoundHandle GetSoundByEditorID(const char*, unsigned int);
 };
 bool QueueUIMessage(const char*, int, const char*, const char*, float, bool);
-void FUN_007c2420();
+void SlotMachineMenu_SetShouldExit();
 int _sprintf_s(char*, unsigned int, const char*, ...);
 // @fnv 0x007c16b0
 bool SlotMachineMenu::InitReels()
@@ -1971,7 +1980,7 @@ bool SlotMachineMenu::InitReels()
             QueueUIMessage(message, 0, "Interface\\Icons\\Message Icons\\glow_message_vaultboy_surprised.dds", 0, 2.0f,
                            false);
             Audio::Get()->GetSoundByEditorID("UIPopUpMessageGeneral", 0x121).Play(false);
-            FUN_007c2420();
+            SlotMachineMenu_SetShouldExit();
             return false;
         }
     }
@@ -1988,7 +1997,7 @@ bool SlotMachineMenu::InitReels()
 
 struct SlotTextureName
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct SlotModelName
 {
@@ -2001,8 +2010,8 @@ struct SlotModelName
 };
 struct SlotAssets
 {
-    SlotTextureName* FUN_00504e20(int);
-    SlotModelName* FUN_00504e00(int);
+    SlotTextureName* TESCasino_GetNthSlotReel(int);
+    SlotModelName* TESCasino_GetModel(int);
 };
 struct SlotTextureLoader
 {
@@ -2011,10 +2020,10 @@ struct SlotTextureLoader
 extern SlotTextureLoader* DAT_011dea10;
 struct SlotModelLoader
 {
-    void* LoadModel(const char*, int, bool, bool, bool, bool);
+    void* ModelLoader_LoadFile(const char*, int, bool, bool, bool, bool);
 };
 extern SlotModelLoader* DAT_011c3b3c;
-void FUN_00406d00(char*, unsigned int, const char*, ...);
+void BSsprintf(char*, unsigned int, const char*, ...);
 void FUN_004b7240(const char*, char*, unsigned int);
 // @fnv 0x007c1490
 bool SlotMachineMenu::LoadAssets()
@@ -2027,22 +2036,22 @@ bool SlotMachineMenu::LoadAssets()
         {
             if (DAT_011da9ac)
             {
-                FUN_00406d00(path, 260, "%s%s", "Textures\\",
-                             reinterpret_cast<SlotAssets*>(DAT_011da9ac)->FUN_00504e20(i)->FUN_00408da0());
+                BSsprintf(path, 260, "%s%s", "Textures\\",
+                             reinterpret_cast<SlotAssets*>(DAT_011da9ac)->TESCasino_GetNthSlotReel(i)->TESModel_GetModel());
                 FUN_004b7240(path, normalized, 260);
                 DAT_011dea10->FUN_004568c0(normalized, &m_reelNodes[i].m_pObject, false, false);
             }
         }
-        FUN_00406d00(path, 260, "%sNV_SlotMachine-Symbol%s.dds", "Textures\\terminals\\NV_SlotMachine\\", "S");
+        BSsprintf(path, 260, "%sNV_SlotMachine-Symbol%s.dds", "Textures\\terminals\\NV_SlotMachine\\", "S");
         FUN_004b7240(path, normalized, 260);
         DAT_011dea10->FUN_004568c0(normalized, &m_reelNodes[7].m_pObject, false, false);
-        machine = DAT_011c3b3c->LoadModel(reinterpret_cast<SlotAssets*>(DAT_011da9ac)->FUN_00504e00(7)->GetPath(), 0,
+        machine = DAT_011c3b3c->ModelLoader_LoadFile(reinterpret_cast<SlotAssets*>(DAT_011da9ac)->TESCasino_GetModel(7)->GetPath(), 0,
                                              true, false, false, false);
-        reel1 = DAT_011c3b3c->LoadModel("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel01.NIF", 0, true,
+        reel1 = DAT_011c3b3c->ModelLoader_LoadFile("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel01.NIF", 0, true,
                                            false, false, false);
-        reel2 = DAT_011c3b3c->LoadModel("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel02.NIF", 0, true,
+        reel2 = DAT_011c3b3c->ModelLoader_LoadFile("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel02.NIF", 0, true,
                                            false, false, false);
-        reel3 = DAT_011c3b3c->LoadModel("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel03.NIF", 0, true,
+        reel3 = DAT_011c3b3c->ModelLoader_LoadFile("Meshes\\terminals\\NV_SlotMachine\\NV_SlotMachine-Reel03.NIF", 0, true,
                                            false, false, false);
         loading = false;
         return InitReels();
@@ -2073,7 +2082,7 @@ bool SlotMachineMenu::AdjustReels(int a)
                 while (RandomizeSlotReels(this) < a)
                 {
                 }
-                return AdjustReels(FUN_007c5760());
+                return AdjustReels(InterpretSpin());
                 break;
             case 2:
                 if (reels[0] == 12)
@@ -2091,7 +2100,7 @@ bool SlotMachineMenu::AdjustReels(int a)
                     reels[0] = symbols[FUN_00944460(0, iValueCount) * 2];
                     reels[1] = symbols[FUN_00944460(0, iValueCount) * 2];
                 }
-                if (FUN_007c5760() > a)
+                if (InterpretSpin() > a)
                 {
                     return true;
                 }
@@ -2213,19 +2222,20 @@ struct FUN_0041a250
 };
 struct SlotsAudio
 {
-    FUN_0041a250 FUN_00ad7550(const char*, int, int);
+    FUN_0041a250 BSAudio_GetSoundHandleByEditorName(const char*, int, int);
 };
 extern int DAT_011a0828, DAT_011a082c, DAT_011da998;
 extern SlotMachineMenu* DAT_011da9a4;
-void FUN_007c2420();
+void SlotMachineMenu_SetShouldExit();
 void FUN_004d5c60(int);
-int FUN_00406d00(char*, unsigned int, const char*, ...);
-SlotsAudio* FUN_00453a70();
+int BSsprintf(char*, unsigned int, const char*, ...);
+SlotsAudio* BSAudio_QInstance();
 // Processes input actions for the slots menu, adjusting the bet, starting a spin, or transitioning between states based on the current state.
 }  // namespace fnv_007c2460
 
 // @fnv 0x007c2460
-void SlotMachineMenu::FUN_007c2460(int action, void* target)
+// src: XBOX_PDB 0x007c2460
+void SlotMachineMenu::DoClick_007c2460(int action, void* target)
 {
     using namespace fnv_007c2460;
     if (state == 6)
@@ -2233,7 +2243,7 @@ void SlotMachineMenu::FUN_007c2460(int action, void* target)
         switch (action)
         {
         case 8:
-            fnv_007c2460::FUN_007c2420();
+            fnv_007c2460::SlotMachineMenu_SetShouldExit();
             break;
         case 3:
             if (funds < bet)
@@ -2241,7 +2251,7 @@ void SlotMachineMenu::FUN_007c2460(int action, void* target)
             soundIndex = 1;
             result = RandomizeSlotReels(this);
             won = AdjustReels(result);
-            result = FUN_007c5760();
+            result = InterpretSpin();
             state = 1;
             fnv_007c2460::FUN_004d5c60(42);
             break;
@@ -2266,8 +2276,8 @@ void SlotMachineMenu::FUN_007c2460(int action, void* target)
             if (iOldBet != bet)
             {
                 char sound[260];
-                fnv_007c2460::FUN_00406d00(sound, 260, "GAMESlotsIncreaseBet0%i", soundIndex);
-                fnv_007c2460::FUN_00453a70()->FUN_00ad7550(sound, 289, 0).FUN_00ad8830();
+                fnv_007c2460::BSsprintf(sound, 260, "GAMESlotsIncreaseBet0%i", soundIndex);
+                fnv_007c2460::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(sound, 289, 0).FUN_00ad8830();
                 soundIndex = soundIndex + 1 > 3 ? 1 : soundIndex + 1;
             }
             break;
@@ -2290,7 +2300,7 @@ void SlotMachineMenu::FUN_007c2460(int action, void* target)
             ((SlotsTile*)fnv_007c2460::DAT_011da9a4->tile)->FUN_00700320(fnv_007c2460::DAT_011da998, bet);
             if (iOldBet != bet)
             {
-                fnv_007c2460::FUN_00453a70()->FUN_00ad7550("GAMESlotsDecreaseBet", 289, 0).FUN_00ad8830();
+                fnv_007c2460::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName("GAMESlotsDecreaseBet", 289, 0).FUN_00ad8830();
                 soundIndex = 1;
             }
             break;
@@ -2307,8 +2317,8 @@ void SlotMachineMenu::FUN_007c2460(int action, void* target)
                 ((SlotsTile*)fnv_007c2460::DAT_011da9a4->tile)->SetTraitAndReset(fnv_007c2460::DAT_011da998, 1.0f);
                 ((SlotsTile*)fnv_007c2460::DAT_011da9a4->tile)->FUN_00700320(fnv_007c2460::DAT_011da998, bet);
                 char sound[260];
-                fnv_007c2460::FUN_00406d00(sound, 260, "GAMESlotsIncreaseBet0%i", soundIndex);
-                fnv_007c2460::FUN_00453a70()->FUN_00ad7550(sound, 289, 0).FUN_00ad8830();
+                fnv_007c2460::BSsprintf(sound, 260, "GAMESlotsIncreaseBet0%i", soundIndex);
+                fnv_007c2460::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(sound, 289, 0).FUN_00ad8830();
                 soundIndex = soundIndex + 1 > 3 ? 1 : soundIndex + 1;
             }
             break;

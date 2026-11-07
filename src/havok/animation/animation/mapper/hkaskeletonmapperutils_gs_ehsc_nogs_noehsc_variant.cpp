@@ -17,9 +17,9 @@ struct CE5F90QsTransform
     float m_rotation[4];
     float m_vScale[4];
 };
-void __cdecl FUN_00ce5a70(CE5F90QsTransform* out, const CE5F90QsTransform* a, const CE5F90QsTransform* b, int mode,
+void __cdecl hkaSkeletonMapperUtils_computeMappingTransform(CE5F90QsTransform* out, const CE5F90QsTransform* a, const CE5F90QsTransform* b, int mode,
                           float weightA, float weightB);
-void __cdecl FUN_00ce5f90(CE5F90QsTransform* out, const CE5F90QsTransform* poseA, short boneA,
+void __cdecl hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(CE5F90QsTransform* out, const CE5F90QsTransform* poseA, short boneA,
                           const CE5F90QsTransform* poseB, short boneB, int mode, float weightA, float weightB);
 
 extern "C" void _ReadBarrier();
@@ -41,7 +41,8 @@ struct hkaSkeletonMapperDataSimpleMapping
 };
 extern hkError* DAT_01268360;
 // @fnv 0x00ce5840
-int __cdecl FUN_00ce5840(hkaSkeletonMapperData* mapping)
+// src: HAVOK_LIB 0x00ce5840
+int __cdecl hkaSkeletonMapperUtils_lockTranslationsAutomatically(hkaSkeletonMapperData* mapping)
 {
     int i = 0;
     int count = mapping->m_kSimpleMappings.m_iElementCount;

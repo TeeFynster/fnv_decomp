@@ -61,16 +61,16 @@ public:
 
     static void __cdecl Close();
     void UpdateContainer(TESObjectREFR*, bool);
-    void FUN_0075c280(int);
-    void FUN_0075c280(MenuForm*);
-    bool FUN_0075b710();
-    void FUN_0075baf0(TESObjectREFR*, bool);
-    void FUN_0075bc80();
+    void ContainerMenu_UpdateLists(int);
+    void ContainerMenu_UpdateLists(MenuForm*);
+    bool HasTiles();
+    void PlayContainerSound(TESObjectREFR*, bool);
+    void InitContainerMode();
     void AttachAndDeliver(void*, void*, void*);
     void AttachAndDeliver(MenuForm*, void*, MenuList*);
-    bool FUN_0075d510(InventoryEntry*, ExpectedReference*, ActorView*);
+    bool IsPlacingMine(InventoryEntry*, ExpectedReference*, ActorView*);
     int GetContainerValue(ItemEntry*, int, bool);
-    bool FUN_0075e0b0(Actor*, int);
+    bool PickpocketCheck(Actor*, int);
     void SetLabelText(const char*);
     void UpdatePaneTitle(TileObj*);
     void PlaySelectedTopicInfo(PlaybackTopic*);

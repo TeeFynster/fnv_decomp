@@ -19,7 +19,7 @@ struct S_00dfee20_Router
     int unk8;
     int unkC;
     S_00dfee20_Allocator* unk10;
-    static S_00dfee20_Router& FUN_00c85750();
+    static S_00dfee20_Router& hkMemoryRouter_getInstance();
     S_00dfee20_Allocator& heap()
     {
         return *unk10;
@@ -37,7 +37,7 @@ static __forceinline void S_00dfee20_Array__clearAndDeallocate(hkArrayBase<unsig
 
 static __forceinline void S_00dfee20_Array_destroy(hkArrayBase<unsigned char>& self) throw()
 {
-        S_00dfee20_Array__clearAndDeallocate(self, S_00dfee20_Router::FUN_00c85750().heap());
+        S_00dfee20_Array__clearAndDeallocate(self, S_00dfee20_Router::hkMemoryRouter_getInstance().heap());
     }
 
 struct S_00dfee20_ArrayPolicy
@@ -56,7 +56,7 @@ struct S_00dfee20_Base
     static void operator delete(void* p)
     {
         S_00dfee20_Base* b = static_cast<S_00dfee20_Base*>(p);
-        S_00dfee20_Router::FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        S_00dfee20_Router::hkMemoryRouter_getInstance().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 

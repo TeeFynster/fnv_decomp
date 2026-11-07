@@ -21,12 +21,13 @@ extern int _DAT_0102e388;
 
 struct FUN_00cf4de0_class
 {
-    void FUN_00cf4de0(void);
+    void ReleaseReferencedObjectsAndLock(void);
 };
 
 // Resets the vtable, releases the two referenced objects at offsets 0x18 and 0x1c, then destroys the lock at 0x14 and resets the vtable again.
 // @fnv 0x00cf4de0
-void FUN_00cf4de0_class::FUN_00cf4de0(void)
+// src: GUESS 0x00cf4de0 (confidence: medium)
+void FUN_00cf4de0_class::ReleaseReferencedObjectsAndLock(void)
 {
     *(void**)this = &DAT_010cc320;
     if (*(void**)((char*)this + 0x18))
@@ -51,11 +52,12 @@ struct FUN_00c97510
 
 struct FUN_00cf4cc0_class
 {
-    void FUN_00cf4cc0(void* arg);
+    void hkpBinaryAction_entityRemovedCallback(void* arg);
 };
 
 // @fnv 0x00cf4cc0
-void FUN_00cf4cc0_class::FUN_00cf4cc0(void* arg)
+// src: HAVOK_SRC 0x00cf4cc0
+void FUN_00cf4cc0_class::hkpBinaryAction_entityRemovedCallback(void* arg)
 {
     void* p = *(void**)((char*)this + 8);
     if (p)
@@ -126,7 +128,7 @@ struct FUN_00cf4ce0_class
     int unk10;
     int unk14;
     void* unk18;
-    void FUN_00cf4ce0(void* newAction);
+    void hkpBinaryAction_setEntityA(void* newAction);
 };
 
 struct FUN_00c90510_class
@@ -146,11 +148,12 @@ struct FUN_00c976a0_class
 
 struct FUN_00c92bd0_class
 {
-    void FUN_00c92bd0(void*, void*);
+    void hkpWorld_attachActionToEntity(void*, void*);
 };
 
 // @fnv 0x00cf4ce0
-void FUN_00cf4ce0_class::FUN_00cf4ce0(void* newAction)
+// src: HAVOK_LIB 0x00cf4ce0
+void FUN_00cf4ce0_class::hkpBinaryAction_setEntityA(void* newAction)
 {
     ((FUN_00c90510_class*)newAction)->FUN_00c90510();
     if (unk18)
@@ -165,7 +168,7 @@ void FUN_00cf4ce0_class::FUN_00cf4ce0(void* newAction)
     unk18 = newAction;
     if (unk08)
     {
-        ((FUN_00c92bd0_class*)unk08)->FUN_00c92bd0(this, newAction);
+        ((FUN_00c92bd0_class*)unk08)->hkpWorld_attachActionToEntity(this, newAction);
     }
 }
 
@@ -228,14 +231,14 @@ struct hkMemoryRouterXcf4e30
 };
 
 namespace hkRouterXcf4e30 {
-extern "C" hkMemoryRouterXcf4e30& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouterXcf4e30& __cdecl hkMemoryRouter_getInstance() throw();
 }
 void __cdecl ResizeAudioStream(void* m_pPoolBase, void* pArray, int iSizeElem);
 
 template <class T>
 static __forceinline void hkArrayXcf4e30_AddBack(hkArrayBase<T>& self, const T& e)
 {
-        hkMemoryRouterXcf4e30& router = hkRouterXcf4e30::FUN_00c85750();
+        hkMemoryRouterXcf4e30& router = hkRouterXcf4e30::hkMemoryRouter_getInstance();
         if (self.m_iElementCount == self.getCapacity())
             ResizeAudioStream(router.m_pStreamAllocator, (&self), sizeof(T));
         memCpyOneAlignedXcf4e30<sizeof(T)>(self.m_data + self.m_iElementCount, &e);

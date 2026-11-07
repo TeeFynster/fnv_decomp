@@ -12,13 +12,13 @@ public:
     virtual void* Destroy(unsigned int auiFlags);           // 0x00 0x00aeabb0
     virtual void vfn_4() = 0;                               // 0x04
     virtual void vfn_8(NiPoint3* pos) = 0;                  // 0x08
-    virtual NiPoint3& FUN_00aeaad0();                       // 0x0C
+    virtual NiPoint3& GetPosition_00aeaad0();                       // 0x0C
     virtual void vfn_10();                                  // 0x10 0x00aa7830
     virtual void vfn_14(NiPoint3* front, NiPoint3* top) = 0; // 0x14
-    virtual NiPoint3* FUN_00aeaaf0();                       // 0x18
-    virtual NiPoint3& FUN_00aeab10();                       // 0x1C
+    virtual NiPoint3* GetFrontOrientation();                       // 0x18
+    virtual NiPoint3& GetTopOrientation();                       // 0x1C
     virtual void vfn_20(NiPoint3* velocity) = 0;            // 0x20
-    virtual void FUN_00aeab30(float afGain);                // 0x24
+    virtual void SetGain(float afGain);                // 0x24
     virtual void SetListenerID(unsigned int);               // 0x28 0x00aeab50
     virtual unsigned int GetListenerID();                   // 0x2C 0x00aeab70
     virtual void SetRolloffFactor(float afRolloffFactor);   // 0x30 0x00aeab90

@@ -31,7 +31,8 @@ unsigned int NiSkinPartition::Partition::GetStripIndexCount()
 const void* g_011f5b1c;
 
 // @fnv 0x00a820d0
-const void* __cdecl FUN_00a820d0()
+// src: COMMUNITY 0x00a820d0
+const void* __cdecl NiSkinPartition_GetRTTI()
 {
     return &g_011f5b1c;
 }
@@ -79,10 +80,11 @@ struct S : NiRefObject
 {
     int f8;
     void* fC;
-    void __thiscall FUN_00a824d0();
+    void __thiscall SetVtableAndProcessState_00a824d0();
 };
 // @fnv 0x00a824d0
-void __thiscall S::FUN_00a824d0()
+// src: GUESS 0x00a824d0 (confidence: low)
+void __thiscall S::SetVtableAndProcessState_00a824d0()
 {
     *(void**)this = (void*)&DAT_0109e47c;
     if (NiRenderer::ms_pRenderer)
@@ -148,11 +150,12 @@ struct FUN_00a82710_shell
     void* m_p;
     unsigned int m_iElementCount;
     unsigned int m_uiItemCount;
-    void FUN_00a82710(unsigned int n);
+    void NiTSet_UInt16_Add(unsigned int n);
 };
 
 // @fnv 0x00a82710
-void FUN_00a82710_shell::FUN_00a82710(unsigned int n)
+// src: COMMUNITY 0x00a82710
+void FUN_00a82710_shell::NiTSet_UInt16_Add(unsigned int n)
 {
     if (n != m_iElementCount)
     {
@@ -174,12 +177,13 @@ void FUN_00a82710_shell::FUN_00a82710(unsigned int n)
 struct FUN_00a82890_shell
 {
     char __thiscall ContainsAllValues(void*);
-    char __thiscall FUN_00a82890(const unsigned short* a, const void* b);
+    char __thiscall ContainsAllIndexedTriples(const unsigned short* a, const void* b);
 };
 
 // Calls ContainsAllValues on three offsets into b taken from a, returning 0 if any call fails and 1 otherwise.
 // @fnv 0x00a82890
-char __thiscall FUN_00a82890_shell::FUN_00a82890(const unsigned short* a, const void* apBase)
+// src: GUESS 0x00a82890 (confidence: medium)
+char __thiscall FUN_00a82890_shell::ContainsAllIndexedTriples(const unsigned short* a, const void* apBase)
 {
     for (unsigned int i = 0; i < 3; ++i)
         if (!ContainsAllValues((char*)apBase + a[i] * 12))
@@ -190,14 +194,14 @@ char __thiscall FUN_00a82890_shell::FUN_00a82890(const unsigned short* a, const 
 void __cdecl _delete(void*, unsigned int);
 struct FUN_00a82c70_holder
 {
-    void FUN_00a824d0();
+    void SetVtableAndProcessState_00a824d0();
     void* DestroyIfFlagged(unsigned int);
 };
 // Calls FUN_00a824d0, then deletes this with size 0x10 when bit 0 of a is set, and returns this.
 // @fnv 0x00a82c70
 void* FUN_00a82c70_holder::DestroyIfFlagged(unsigned int auiFlags)
 {
-    FUN_00a824d0();
+    SetVtableAndProcessState_00a824d0();
     if (auiFlags & 1)
         _delete(this, 0x10);
     return this;
@@ -208,7 +212,7 @@ struct C082d30
     unsigned short* f0;
     unsigned int f4;
     unsigned int f8;
-    void FUN_00a82710(unsigned int);
+    void NiTSet_UInt16_Add(unsigned int);
     void AppendMatchingIndices(int, int*, unsigned int);
 };
 // Scans the first c entries of b and appends the index of each entry equal to a to f0, growing the buffer via FUN_00a82710 when full.
@@ -226,7 +230,7 @@ void C082d30::AppendMatchingIndices(int aiValue, int* paiValues, unsigned int c)
                     n = f4 * 2;
                 else
                     n = 1;
-                FUN_00a82710(n);
+                NiTSet_UInt16_Add(n);
             }
             f0[f8++] = (unsigned short)i;
         }
@@ -246,11 +250,11 @@ struct MyCls
     int _40;
     int _44;
     void _Call_a5d3a0();
-    void FUN_00a853c0(int);
+    void NiSkinData_ComputeBoneBounds(int);
     MyCls* InitFromData(int, int, const Dummy13&, int);
 };
 extern int DAT_0109e574;
-int __cdecl FUN_00a853c0();
+int __cdecl NiSkinData_ComputeBoneBounds();
 // Initialises the object: sets the vtable, clears _08, copies a3 into _0c, stores a2 and a1, then calls FUN_00a853c0(a4) and returns this.
 // @fnv 0x00a854c0
 MyCls* MyCls::InitFromData(int a1, int a2, const Dummy13& aData, int a4)
@@ -261,7 +265,7 @@ MyCls* MyCls::InitFromData(int a1, int a2, const Dummy13& aData, int a4)
     _0c = aData;
     _40 = a2;
     _44 = a1;
-    FUN_00a853c0(a4);
+    NiSkinData_ComputeBoneBounds(a4);
     return this;
 }
 
@@ -273,11 +277,12 @@ struct FUN_00a826b0_shell
     void* m_p;
     unsigned int m_uiItemCount;
     unsigned int m_uiBufferCapacity;
-    void FUN_00a826b0(unsigned int n);
+    void ReleaseStorage_00a826b0(unsigned int n);
 };
 
 // @fnv 0x00a826b0
-void FUN_00a826b0_shell::FUN_00a826b0(unsigned int n)
+// src: GUESS 0x00a826b0 (confidence: low)
+void FUN_00a826b0_shell::ReleaseStorage_00a826b0(unsigned int n)
 {
     if (n == m_uiItemCount)
         return;
@@ -320,7 +325,7 @@ struct FUN_00a81ff0_elem
     int m_20;
     int m_24;
     int m_28;
-    bool FUN_00a81c90(const FUN_00a81ff0_elem* other);
+    bool NiSkinPartition_Partition_IsEqual(const FUN_00a81ff0_elem* other);
 };
 
 struct FUN_00a81ff0_cls
@@ -348,7 +353,7 @@ bool FUN_00a81ff0_cls::Equals(const FUN_00a81ff0_cls* other)
         int iOffset = (int)other->m_pElements - (int)m_pElements;
         do
         {
-            if (!a->FUN_00a81c90((FUN_00a81ff0_elem*)((int)a + iOffset)))
+            if (!a->NiSkinPartition_Partition_IsEqual((FUN_00a81ff0_elem*)((int)a + iOffset)))
                 return false;
             i++;
             a++;
@@ -617,7 +622,7 @@ int __cdecl FindMatchingItem(ItemSet* pItemSet, const unsigned short* a2, const 
         if (flags[i] == key)
         {
             void*& pItem = pItemSet->m_items[i];
-            if (((FUN_00a82890_shell*)pItem)->FUN_00a82890(a2, a3))
+            if (((FUN_00a82890_shell*)pItem)->ContainsAllIndexedTriples(a2, a3))
             {
                 flags[i] = 1;
                 return (int)i;
@@ -676,10 +681,11 @@ __forceinline bool EqualBuffers(const void* right, const void* left, unsigned in
 }
 struct PartitionCompare : NiSkinPartition::Partition
 {
-    bool FUN_00a81c90(const PartitionCompare* other);
+    bool NiSkinPartition_Partition_IsEqual(const PartitionCompare* other);
 };
 // @fnv 0x00a81c90
-bool PartitionCompare::FUN_00a81c90(const PartitionCompare* other)
+// src: GAMEBRYO_LIB 0x00a81c90
+bool PartitionCompare::NiSkinPartition_Partition_IsEqual(const PartitionCompare* other)
 {
     if (m_usVertices != other->m_usVertices)
         return false;
@@ -995,7 +1001,7 @@ struct SkinBuilder
     int unk04;
     unsigned int count;
     __declspec(nothrow) void BuildBoneLODControllerSets(SkinGeom*, void*, SkinItems*, int*) throw();
-    __declspec(nothrow) void FUN_00a839d0(unsigned int, SkinItems*) throw();
+    __declspec(nothrow) void NiSkinPartition_MergeBoneSets(unsigned int, SkinItems*) throw();
     bool BuildTriangleSetMapping(SkinGeom*, void*, unsigned int, void*, SkinItems*, int**, int*) throw();
 };
 // Builds a per-triangle set index mapping from group IDs or weights, compacts unused sets, and returns false if a triangle's vertices span three distinct groups.
@@ -1005,7 +1011,7 @@ bool SkinBuilder::BuildTriangleSetMapping(SkinGeom* geom, void* unused, unsigned
 {
     unsigned int triangles = geom->triangleCount;
     BuildBoneLODControllerSets(geom, weights, sets, groupIDs);
-    FUN_00a839d0(input, sets);
+    NiSkinPartition_MergeBoneSets(input, sets);
     *mapping = (int*)NiMalloc(triangles * sizeof(int));
     unsigned int setCount = sets->count;
     unsigned char* pUsedFlags = (unsigned char*)NiMalloc(setCount);
@@ -1146,12 +1152,13 @@ class SkinPartitionOwner : public SkinObjectBase
     NiSkinPartition::Partition* m_pPartitions;
 
     virtual ~SkinPartitionOwner();
-    void FUN_00a846e0(SkinViewerStrings* pkStrings);
+    void NiSkinPartition_GetViewerStrings(SkinViewerStrings* pkStrings);
 };
 
 // Appends the RTTI name and one line per partition listing its bone count to the viewer strings array.
 // @fnv 0x00a846e0
-void SkinPartitionOwner::FUN_00a846e0(SkinViewerStrings* pkStrings)
+// src: XBOX_PDB 0x00a846e0
+void SkinPartitionOwner::NiSkinPartition_GetViewerStrings(SkinViewerStrings* pkStrings)
 {
     SkinObjectBase::GetViewerStrings(pkStrings);
     pkStrings->Add(SkinGetViewerString(g_kSkinPartitionRTTI.GetName()));
@@ -1420,12 +1427,13 @@ template <class T> inline void ReadBinaryValue(NiStream& kStream, T* ptVal, unsi
 
 struct PartitionLoader : NiSkinPartition::Partition
 {
-    void FUN_00a82d90(NiStream& kStream);
+    void NiSkinPartition_Partition_LoadBinary(NiStream& kStream);
 };
 
 // Reads skin partition vertex, triangle, strip, weight and bone palette data from kStream, allocating buffers as needed.
 // @fnv 0x00a82d90
-void PartitionLoader::FUN_00a82d90(NiStream& kStream)
+// src: COMMUNITY 0x00a82d90
+void PartitionLoader::NiSkinPartition_Partition_LoadBinary(NiStream& kStream)
 {
     ReadBinaryValue(kStream, &m_usVertices);
     ReadBinaryValue(kStream, &m_usTriangles);
@@ -1506,7 +1514,7 @@ void PartitionLoader::FUN_00a82d90(NiStream& kStream)
 class FUN_00a89af0_helper
 {
   public:
-    void FUN_00a89af0(NiStream& kStream);
+    void nullsub_3(NiStream& kStream);
 };
 
 
@@ -1517,14 +1525,15 @@ class SaverA83C : public FUN_00a89af0_helper
     unsigned int m_uiCount;
     PartitionSave* m_pkElems;
 
-    void FUN_00a83ce0(NiStream& kStream);
+    void NiSkinPartition_SaveBinary(NiStream& kStream);
 };
 
 // Calls the base serialization method, writes m_uiCount, then serializes each partition.
 // @fnv 0x00a83ce0
-void SaverA83C::FUN_00a83ce0(NiStream& kStream)
+// src: XBOX_PDB 0x00a83ce0
+void SaverA83C::NiSkinPartition_SaveBinary(NiStream& kStream)
 {
-    FUN_00a89af0(kStream);
+    nullsub_3(kStream);
     SerializeValue(kStream, m_uiCount);
     for (unsigned int i = 0; i < m_uiCount; i++)
         m_pkElems[i].WriteToStream(kStream);
@@ -1622,7 +1631,7 @@ struct ScriptProgram
 __declspec(nothrow) void* __cdecl NiMalloc(unsigned int);
 __declspec(nothrow) void __cdecl NiFreeAlias(void*);
 extern MemoryManager _g_memoryManager;
-int __cdecl FUN_00a81b80(const unsigned short*, const unsigned short*);
+int __cdecl NiSkinData_BoneVertData_Compare(const unsigned short*, const unsigned short*);
 void __cdecl FUN_00ec6f20(void*, unsigned int, unsigned int,
                           int(__cdecl*)(const unsigned short*, const unsigned short*));
 template <class T> struct BoneArray
@@ -1707,7 +1716,7 @@ public:
     unsigned int m_pRayCursor;
 
     void Realloc(unsigned int);
-    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    void ProcessEntries_00a56e60(unsigned int ItemUpdateArray);
     unsigned int Find(Item* item);
     int Find(unsigned int value);
     void Add(Item* item);
@@ -1746,7 +1755,7 @@ void __stdcall BuildBoneLODControllerSets(ScriptProgram* mesh, BoneWeights* weig
                                     set->Add(bone);
                             }
                         }
-                        FUN_00ec6f20(set->data, set->count, 2, FUN_00a81b80);
+                        FUN_00ec6f20(set->data, set->count, 2, NiSkinData_BoneVertData_Compare);
                     }
                 }
                 if (!found)
@@ -1762,7 +1771,7 @@ void __stdcall BuildBoneLODControllerSets(ScriptProgram* mesh, BoneWeights* weig
                                 set->Add(bone);
                         }
                     }
-                    FUN_00ec6f20(set->data, set->count, 2, FUN_00a81b80);
+                    FUN_00ec6f20(set->data, set->count, 2, NiSkinData_BoneVertData_Compare);
                     sets->Add(set);
                 }
             }
@@ -1786,12 +1795,12 @@ void __stdcall BuildBoneLODControllerSets(ScriptProgram* mesh, BoneWeights* weig
                         if (set->Find(bone) == -1)
                         {
                             if (set->count == set->capacity)
-                                ((C082d30*)set)->FUN_00a82710(set->capacity > 0 ? 2 * set->capacity : 1);
+                                ((C082d30*)set)->NiTSet_UInt16_Add(set->capacity > 0 ? 2 * set->capacity : 1);
                             set->data[set->count++] = bone;
                         }
                     }
                 }
-                FUN_00ec6f20(set->data, set->count, 2, FUN_00a81b80);
+                FUN_00ec6f20(set->data, set->count, 2, NiSkinData_BoneVertData_Compare);
                 unsigned int index = 0;
                 while (index < sets->count)
                 {

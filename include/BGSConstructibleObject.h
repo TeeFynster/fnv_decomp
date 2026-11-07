@@ -8,7 +8,7 @@ public:
     BGSConstructibleObject();
     virtual ~BGSConstructibleObject();
 
-    void FUN_004f9570();
+    void InitializeData();
     void* __thiscall FUN_004f94b0();
     void* __thiscall Destroy(unsigned int flags);
 

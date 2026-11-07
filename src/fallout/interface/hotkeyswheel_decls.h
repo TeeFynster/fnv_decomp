@@ -17,10 +17,10 @@ class InputManager
     unsigned short flags;
     unsigned char keyboard[3][28];
     unsigned char controller[28];
-    int FUN_00a24660(int key, int state);
-    int FUN_00a24560(int, int, int);
+    int Controls_GetUserAction(int key, int state);
+    int Controls_GetButtonState(int, int, int);
     int HandleHotkeyInput(int, int);
-    int FUN_00a23e10(int, int);
+    int Controls_GetControllerButton(int, int);
 };
 int __cdecl GetTileValueID(const char*, int);
 int __cdecl Warning(const char*, ...);

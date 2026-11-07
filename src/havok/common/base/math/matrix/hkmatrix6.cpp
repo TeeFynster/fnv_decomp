@@ -34,7 +34,8 @@ struct FUN_00e29290_Block
 
 // Adds each matrix and vector of b into the corresponding member of a.
 // @fnv 0x00e29290
-extern "C" void __cdecl FUN_00e29290(FUN_00e29290_Block* pDst, const FUN_00e29290_Block* pSrc)
+// src: GUESS 0x00e29290 (confidence: medium)
+extern "C" void __cdecl hkMatrix6_AddMatricesAndVectorsInPlace(FUN_00e29290_Block* pDst, const FUN_00e29290_Block* pSrc)
 {
     pDst->f0.add(pSrc->f0);
     pDst->f1.add(pSrc->f1);
@@ -50,7 +51,8 @@ struct E29250Matrix6
 };
 
 // @fnv 0x00e29250
-void __cdecl FUN_00e29250(E29250Matrix6& out, const E29250Matrix6& in)
+// src: HAVOK_LIB 0x00e29250
+void __cdecl _hkMatrix6SetTranspose(E29250Matrix6& out, const E29250Matrix6& in)
 {
     out.m_iUnknownValue2[0][0]._setTranspose(in.m_iUnknownValue2[0][0]);
     out.m_iUnknownValue2[0][1]._setTranspose(in.m_iUnknownValue2[1][0]);
@@ -59,7 +61,8 @@ void __cdecl FUN_00e29250(E29250Matrix6& out, const E29250Matrix6& in)
 }
 
 // @fnv 0x00e29510
-void FUN_00e29510(__m128* out, const __m128* aMatrix, const __m128* aVectors)
+// src: GUESS 0x00e29510 (confidence: low)
+void hkVector4_ComputeValues_00e29510(__m128* out, const __m128* aMatrix, const __m128* aVectors)
 {
     __m128 v0 = aVectors[0];
     __m128 a = _mm_mul_ps(_mm_shuffle_ps(v0, v0, 0x55), aMatrix[1]);
@@ -109,13 +112,14 @@ struct WrappedPointer
     WrappedPointer(void* q) : p(q)
     {}
 };
-extern "C" void __cdecl FUN_00cd5530(void* out, const void* a,
+extern "C" void __cdecl hkMatrix3_MultiplyMatrixColumns(void* out, const void* a,
                                      const void*
 
                                          b);
 
 // @fnv 0x00e29470
-void __cdecl FUN_00e29470(void* apDest, WrappedPointer src, WrappedPointer rhs)
+// src: GUESS 0x00e29470 (confidence: low)
+void __cdecl hkMatrix3_ProcessEntries_00e29470(void* apDest, WrappedPointer src, WrappedPointer rhs)
 
 {
 
@@ -139,9 +143,9 @@ void __cdecl FUN_00e29470(void* apDest, WrappedPointer src, WrappedPointer rhs)
 
             hkMatrix3 tempMatrix;
 
-            FUN_00cd5530(&tempMatrix, source, right);
+            hkMatrix3_MultiplyMatrixColumns(&tempMatrix, source, right);
 
-            FUN_00cd5530(cur - 2, source + 0x30, right + 0x60);
+            hkMatrix3_MultiplyMatrixColumns(cur - 2, source + 0x30, right + 0x60);
 
             cur[-2] = _mm_add_ps(cur[-2], tempMatrix.m_kColumn0.m_vComponents);
             AddVector(cur[-1], tempMatrix.m_kColumn1.m_vComponents);
@@ -169,7 +173,8 @@ __forceinline void subtractGroup(__m128* d, const __m128* s)
 }
 // Subtracts 12 __m128 values from source into destination, using subtractGroup for the first two triplets and individual subtract calls for the remaining six.
 // @fnv 0x00e29380
-void __cdecl FUN_00e29380(__m128* destination, const __m128* source)
+// src: GUESS 0x00e29380 (confidence: medium)
+void __cdecl Object_SubtractVectorBundles(__m128* destination, const __m128* source)
 {
     subtractGroup(destination + 0, source + 0);
     subtractGroup(destination + 3, source + 3);

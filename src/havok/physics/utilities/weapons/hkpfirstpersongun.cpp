@@ -59,11 +59,12 @@ struct FUN_00e463b0_cls
     int unk08;
     unsigned int m_0C;
 
-    unsigned int FUN_00e463b0();
+    unsigned int hkpFirstPersonGun_getName();
 };
 
 // @fnv 0x00e463b0
-unsigned int FUN_00e463b0_cls::FUN_00e463b0()
+// src: HAVOK_SRC 0x00e463b0
+unsigned int FUN_00e463b0_cls::hkpFirstPersonGun_getName()
 {
     return m_0C & 0xfffffffeu;
 }
@@ -79,11 +80,12 @@ struct FUN_00e463c0_cls
     virtual void v18();
     virtual void v1c();
     virtual void Tail(int a);
-    void FUN_00e463c0(int a);
+    void hkpFirstPersonGun_quitGun(int a);
 };
 
 // @fnv 0x00e463c0
-void FUN_00e463c0_cls::FUN_00e463c0(int a)
+// src: HAVOK_SRC 0x00e463c0
+void FUN_00e463c0_cls::hkpFirstPersonGun_quitGun(int a)
 {
     this->Tail(a);
 }
@@ -148,10 +150,10 @@ class FUN_00cb0c00_class
   public:
     const char* m_pcText;
 
-    void FUN_00cb0c00() throw();
+    void Object_UpdateFields_00cb0c00() throw();
     ~FUN_00cb0c00_class()
     {
-        FUN_00cb0c00();
+        Object_UpdateFields_00cb0c00();
     }
 };
 
@@ -388,7 +390,7 @@ struct hkpClosestCdPointCollectorq
 
 struct hkpWorldq
 {
-    void FUN_00c92430(const hkpCollidableq* collA, const hkpLinearCastInputq& input,
+    void hkpWorld_linearCast(const hkpCollidableq* collA, const hkpLinearCastInputq& input,
                       hkpClosestCdPointCollectorq& castCollector, void* startCollector);
 };
 
@@ -403,7 +405,8 @@ struct LinearCastResult
 
 // Performs a sphere linear cast in the physics world and stores the hit point, normal, rigid body, and shape key in the result.
 // @fnv 0x00e464e0
-hkResult FUN_00e464e0(hkpWorldq* world, const hkVector4q& from, float radius, const hkVector4q& to,
+// src: GUESS 0x00e464e0 (confidence: medium)
+hkResult hkpWorldq_CastSphereAndStoreHit(hkpWorldq* world, const hkVector4q& from, float radius, const hkVector4q& to,
                       LinearCastResult* result)
 {
     hkpSphereShapeq* sphere = new hkpSphereShapeq(radius);
@@ -421,7 +424,7 @@ hkResult FUN_00e464e0(hkpWorldq* world, const hkVector4q& from, float radius, co
     input.m_fMaxExtraPenetration = DAT_0104da4c;
     input.m_fMaxExtraPenetrationAgainstFixed = DAT_0104da4c;
 
-    world->FUN_00c92430(&collidable, input, collector, 0);
+    world->hkpWorld_linearCast(&collidable, input, collector, 0);
 
     sphere->FUN_00c905b0();
 

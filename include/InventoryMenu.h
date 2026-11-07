@@ -47,11 +47,11 @@ public:
     int unk2C;
 
     void FUN_007312e0();
-    MenuEntry* FUN_0071a320(InventoryStackRecord*, const char*, int, int);
+    MenuEntry* ListBox_ItemChange_AddItem(InventoryStackRecord*, const char*, int, int);
     void PopulateInventoryList(MenuReference*, void (*)(), int, int, int, int);
-    void FUN_007314c0(void (*)(), int, int);
+    void ListBox_ItemChange_Traverse(void (*)(), int, int);
     void ApplyFilter(void (*)());
-    unsigned int FUN_0071ae60();
+    unsigned int ListBox_ItemChange_NumUnfiltered();
     void UpdateCurrentValueTile(int);
     void* CallVirtualZero(int);
 };
@@ -94,19 +94,19 @@ public:
 
     InventoryMenu();
     Tile* FUN_00726070();
-    void FUN_00781680();
+    void UpdateButtons();
     void ClearActionPointSource();
     void UpdateItemDisplay(int, Tile*);
     void Click(int, int);
     void Select(int, int);
     void AttachAndDeliver(MenuForm*, void*, MenuList*);
-    void FUN_0075c280(MenuForm*);
-    bool FUN_00782190(int input, int unused);
-    bool FUN_0077ff90();
-    void FUN_00867a20();
+    void ContainerMenu_UpdateLists(MenuForm*);
+    bool DoGamepad(int input, int unused);
+    bool IsWellFormedMenu_0077ff90();
+    void Menu_SetRenderedMenu();
 
     static Tile* Create();
-    static int FUN_0077ff80();
+    static int GetClassStatic();
     static void UpdateItemList();
     static int ms_iValueTileID;
     static int ms_iItemTypeTileID;

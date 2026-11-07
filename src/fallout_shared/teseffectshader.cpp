@@ -169,7 +169,8 @@ bool TESEffectShader::Load(TESFile* file)
 }
 
 // @fnv 0x00507040
-bool TESEffectShader::FUN_00507040(unsigned int mask)
+// src: XBOX_PDB 0x00507040
+bool TESEffectShader::IsFlagSet_00507040(unsigned int mask)
 {
     return *(unsigned char*)GetData() & mask;
 }
@@ -200,12 +201,13 @@ TESTexture* TESEffectShader::GetFieldAt164()
     return reinterpret_cast<TESTexture*>(&m_kHolesTexture);
 }
 
-extern "C" void __cdecl FUN_00ba6290(NiAVObject*, ParticleShaderProperty*);
+extern "C" void __cdecl ParticleShader_Stop(NiAVObject*, ParticleShaderProperty*);
 
 // @fnv 0x00507810
-void TESEffectShader::FUN_00507810(NiAVObject* aiArg1, ParticleShaderProperty* aiArg2)
+// src: COMMUNITY 0x00507810
+void TESEffectShader::StopParticleShader(NiAVObject* aiArg1, ParticleShaderProperty* aiArg2)
 {
-    FUN_00ba6290(aiArg1, aiArg2);
+    ParticleShader_Stop(aiArg1, aiArg2);
 }
 
 // @fnv 0x00507b00
@@ -225,37 +227,37 @@ class ParticleShaderProperty
 {
   public:
     void SetParticleTime(float);
-    void FUN_00507550(void*);
-    void FUN_00584150(float);
-    void FUN_00507570(float);
-    void FUN_0051b8c0(float);
-    void FUN_00810550(float);
+    void ParticleShaderProperty_SetTexture0x118(void*);
+    void SetWaterLODHeight(float);
+    void ParticleShaderProperty_SetLifetimeVar(float);
+    void SkyShaderProperty_SetBlendValue(float);
+    void bhkCharacterControllerCinfo_SetAcrobatics(float);
     void FUN_006e29d0(float);
     void SetData(NiPoint3);
-    void FUN_005075c0(NiPoint3);
-    void FUN_005075f0(float);
-    void FUN_009314d0(float);
-    void FUN_00507610(float);
-    void FUN_006e5ee0(float);
+    void ParticleShaderProperty_SetAcceleration(NiPoint3);
+    void LowProcess_SetDeathTime(float);
+    void bhkCharacterControllerCinfo_SetScale(float);
+    void PathingRequestClosePoint_SetMinDistance(float);
+    void SetMaxDistance_006e5ee0(float);
     void FUN_00507780(float);
     void SetBoltSmallWidth(float);
-    void FUN_005077a0(float);
+    void BoltShaderProperty_SetSegmentVariance(float);
     void SetPoint(Color);
-    void FUN_00507660(Color);
-    void FUN_00507690(Color);
-    void FUN_006e4ef0(float);
-    void FUN_006e4320(float);
-    void FUN_005076c0(float);
-    void FUN_005076e0(float);
-    void FUN_00733fd0(float);
-    void FUN_00507700(float);
-    void FUN_00507720(float);
-    void FUN_006d30e0(int);
+    void ParticleShaderProperty_SetColor2(Color);
+    void ParticleShaderProperty_SetColor3(Color);
+    void PathingRequestCoveredMove_SetAttackerHeight(float);
+    void PathingRequestCoveredMove_SetAttackerSneakHeight(float);
+    void PathingRequestCoveredMove_SetAttackerHealth(float);
+    void SetFieldAtOffsetF4_005076e0(float);
+    void NiCamera_SetMinNearPlaneDist(float);
+    void NiCamera_SetMaxFarNearRatio(float);
+    void SetFieldAtOffset100_00507720(float);
+    void PathingRequestCoveredMove_SetCombatCoverSearchInfo(int);
     void FUN_00505e50(int);
-    void FUN_00507740(int);
-    void FUN_00507760(int);
+    void ParticleShaderProperty_SetBlendOp(int);
+    void ParticleShaderProperty_SetZTestFunc(int);
 };
-ParticleShaderProperty* __cdecl FUN_00ba68d0(NiAVObject*, NiAVObject*);
+ParticleShaderProperty* __cdecl ParticleShader_Start(NiAVObject*, NiAVObject*);
 // @fnv 0x005077c0
 ParticleShaderProperty* TESEffectShader::CreateParticleShaderProperty(NiAVObject* apRootObject, NiAVObject* apTargetObject,
                                                         NiSourceTexture* apTex, float afTime)
@@ -263,7 +265,7 @@ ParticleShaderProperty* TESEffectShader::CreateParticleShaderProperty(NiAVObject
     ParticleShaderProperty* pProp;
     if (apTex)
     {
-        pProp = FUN_00ba68d0(apRootObject, apTargetObject);
+        pProp = ParticleShader_Start(apRootObject, apTargetObject);
         CopySettingsTo(pProp, apTex);
         pProp->SetParticleTime(afTime);
         return pProp;
@@ -314,46 +316,46 @@ bool TESEffectShader::Compare(TESForm* apCompare)
 
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
 
-void FUN_004856f0(unsigned int, void*, unsigned int);
+void TESForm_AddChunkArray(unsigned int, void*, unsigned int);
 
 bool _FUN_00401500();
 
 // @fnv 0x005060f0
 void TESEffectShader::SaveForm()
 {
-    TESForm::FUN_004855a0();
+    TESForm::BeginFormRecord();
 
     if (reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x14c)->GetModelLength() == 0)
     {
-        FUN_004856f0(0x4e4f4349, reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x14c)->GetFullName(),
+        TESForm_AddChunkArray(0x4e4f4349, reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x14c)->GetFullName(),
                      reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x14c)->GetModelLength() + 1);
     }
     else
     {
-        reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x14c)->FUN_0048e370(0x4e4f4349);
+        reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x14c)->TESTexture_Save(0x4e4f4349);
     }
 
     if (reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x158)->GetModelLength() == 0)
     {
-        FUN_004856f0(0x324f4349, reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x158)->GetFullName(),
+        TESForm_AddChunkArray(0x324f4349, reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x158)->GetFullName(),
                      reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x158)->GetModelLength() + 1);
     }
     else
     {
-        reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x158)->FUN_0048e370(0x324f4349);
+        reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x158)->TESTexture_Save(0x324f4349);
     }
 
     if (reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x164)->GetModelLength() == 0)
     {
-        FUN_004856f0(0x374d414e, reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x164)->GetFullName(),
+        TESForm_AddChunkArray(0x374d414e, reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x164)->GetFullName(),
                      reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x164)->GetModelLength() + 1);
     }
     else
     {
-        reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x164)->FUN_0048e370(0x374d414e);
+        reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x164)->TESTexture_Save(0x374d414e);
     }
 
     BGSDebris* psaveAddon = Data.pAddonModels;
@@ -368,7 +370,7 @@ void TESEffectShader::SaveForm()
         Data.Endian();
     }
 
-    TESForm::FUN_00485e20(&Data, sizeof(Data));
+    TESForm::TESForm___SaveData(&Data, sizeof(Data));
 
     if (_FUN_00401500())
     {
@@ -377,7 +379,7 @@ void TESEffectShader::SaveForm()
 
     Data.pAddonModels = psaveAddon;
 
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 // @fnv 0x005064d0
@@ -424,7 +426,7 @@ struct ShaderPropStub
     void ApplyTexEffect(void* apData);
 };
 
-int FUN_00408b20(const char*, const char*);
+int BSstrcmp(const char*, const char*);
 
 // @fnv 0x00507b40
 void TESEffectShader::ApplyShaderToTree(NiAVObject* apObject, BSShaderPPLightingProperty::TextureEffectData* apData)
@@ -440,10 +442,10 @@ void TESEffectShader::ApplyShaderToTree(NiAVObject* apObject, BSShaderPPLighting
                                : 0) != 0)
             {
                 bool bApply = true;
-                if (FUN_00507040(0x20))
+                if (IsFlagSet_00507040(0x20))
                 {
                     NiPropStub* pNameProp = reinterpret_cast<NiPropStub*>(apObject->GetProperty(2));
-                    if (!(const char*)pNameProp->GetName() || FUN_00408b20(pNameProp->GetName(), "skin"))
+                    if (!(const char*)pNameProp->GetName() || BSstrcmp(pNameProp->GetName(), "skin"))
                     {
                         bApply = false;
                     }
@@ -472,7 +474,7 @@ struct S_00507c90_Ptr;
 struct S_00507c90_Item
 {
     int FUN_00441110();
-    S_00507c90_Ptr* FUN_00507d80();
+    S_00507c90_Ptr* FOPipboyManager_Get3rdPersonPipboyRoot();
     void AssignRefObj(S_00507c90_Ptr* p);
 };
 struct S_00507c90_Cls
@@ -491,7 +493,7 @@ void S_00507c90_Cls::ClearItemRef(NiAVObject* obj, S_00507c90_Ptr* ref)
             S_00507c90_Item* s;
             if ((s = (!t_ ? 0 : (t_->FUN_00441110() >= 8 && t_->FUN_00441110() <= 12)) ? t_ : 0) != 0)
             {
-                if (s->FUN_00507d80() == ref)
+                if (s->FOPipboyManager_Get3rdPersonPipboyRoot() == ref)
                     s->AssignRefObj(0);
             }
         }
@@ -518,21 +520,21 @@ struct Color
 // @fnv 0x00507060
 void TESEffectShader::CopySettingsTo(ParticleShaderProperty* apDestination, NiSourceTexture* apTexture)
 {
-    apDestination->FUN_00507550(apTexture);
-    apDestination->FUN_00584150(Data.m_fShaderFloatParameter3);
-    apDestination->FUN_00507570(Data.m_fShaderFloatParameter4);
-    apDestination->FUN_0051b8c0(Data.m_fShaderFloatParameter5);
-    apDestination->FUN_00810550(Data.m_fShaderFloatParameter6);
+    apDestination->ParticleShaderProperty_SetTexture0x118(apTexture);
+    apDestination->SetWaterLODHeight(Data.m_fShaderFloatParameter3);
+    apDestination->ParticleShaderProperty_SetLifetimeVar(Data.m_fShaderFloatParameter4);
+    apDestination->SkyShaderProperty_SetBlendValue(Data.m_fShaderFloatParameter5);
+    apDestination->bhkCharacterControllerCinfo_SetAcrobatics(Data.m_fShaderFloatParameter6);
     apDestination->FUN_006e29d0(Data.m_fShaderFloatParameter17);
     apDestination->SetData(Data.VelocityState);
-    apDestination->FUN_005075c0(Data.m_kVectorState2);
-    apDestination->FUN_005075f0(Data.m_fShaderFloatParameter18);
-    apDestination->FUN_009314d0(Data.m_fShaderFloatParameter19);
-    apDestination->FUN_00507610(Data.m_fShaderFloatParameter20);
-    apDestination->FUN_006e5ee0(Data.m_fShaderFloatParameter21);
+    apDestination->ParticleShaderProperty_SetAcceleration(Data.m_kVectorState2);
+    apDestination->LowProcess_SetDeathTime(Data.m_fShaderFloatParameter18);
+    apDestination->bhkCharacterControllerCinfo_SetScale(Data.m_fShaderFloatParameter19);
+    apDestination->PathingRequestClosePoint_SetMinDistance(Data.m_fShaderFloatParameter20);
+    apDestination->SetMaxDistance_006e5ee0(Data.m_fShaderFloatParameter21);
     apDestination->FUN_00507780(Data.m_uiIntegerParameter1);
     apDestination->SetBoltSmallWidth(Data.m_uiIntegerParameter2);
-    apDestination->FUN_005077a0(Data.m_fFloatAfterDefaultColor);
+    apDestination->BoltShaderProperty_SetSegmentVariance(Data.m_fFloatAfterDefaultColor);
     Color color1 = Color((unsigned char)(Data.m_uiColorParameter1 & 255),
                          (unsigned char)(((unsigned short)Data.m_uiColorParameter1 >> 8) & 255),
                          (unsigned char)((Data.m_uiColorParameter1 >> 16) & 255), 0.0f) /
@@ -549,19 +551,19 @@ void TESEffectShader::CopySettingsTo(ParticleShaderProperty* apDestination, NiSo
     color2.a = Data.m_fShaderFloatParameter12;
     color3.a = Data.m_fShaderFloatParameter13;
     apDestination->SetPoint(color1);
-    apDestination->FUN_00507660(color2);
-    apDestination->FUN_00507690(color3);
-    apDestination->FUN_006e4ef0(Data.m_fShaderFloatParameter14);
-    apDestination->FUN_006e4320(Data.m_fShaderFloatParameter15);
-    apDestination->FUN_005076c0(Data.m_fShaderFloatParameter16);
-    apDestination->FUN_005076e0(Data.m_fShaderFloatParameter7);
-    apDestination->FUN_00733fd0(Data.m_fShaderFloatParameter8);
-    apDestination->FUN_00507700(Data.m_fShaderFloatParameter9);
-    apDestination->FUN_00507720(Data.m_fShaderFloatParameter10);
-    apDestination->FUN_006d30e0(Data.m_eAlphaSourceBlend);
+    apDestination->ParticleShaderProperty_SetColor2(color2);
+    apDestination->ParticleShaderProperty_SetColor3(color3);
+    apDestination->PathingRequestCoveredMove_SetAttackerHeight(Data.m_fShaderFloatParameter14);
+    apDestination->PathingRequestCoveredMove_SetAttackerSneakHeight(Data.m_fShaderFloatParameter15);
+    apDestination->PathingRequestCoveredMove_SetAttackerHealth(Data.m_fShaderFloatParameter16);
+    apDestination->SetFieldAtOffsetF4_005076e0(Data.m_fShaderFloatParameter7);
+    apDestination->NiCamera_SetMinNearPlaneDist(Data.m_fShaderFloatParameter8);
+    apDestination->NiCamera_SetMaxFarNearRatio(Data.m_fShaderFloatParameter9);
+    apDestination->SetFieldAtOffset100_00507720(Data.m_fShaderFloatParameter10);
+    apDestination->PathingRequestCoveredMove_SetCombatCoverSearchInfo(Data.m_eAlphaSourceBlend);
     apDestination->FUN_00505e50(Data.m_eAlphaDestinationBlend);
-    apDestination->FUN_00507740(Data.m_eAlphaBlendOperation);
-    apDestination->FUN_00507760(Data.m_eAlphaDepthCompareFunction);
+    apDestination->ParticleShaderProperty_SetBlendOp(Data.m_eAlphaBlendOperation);
+    apDestination->ParticleShaderProperty_SetZTestFunc(Data.m_eAlphaDepthCompareFunction);
 }
 
 struct ColorValue
@@ -625,7 +627,7 @@ BSShaderPPLightingProperty::TextureEffectData* TESEffectShader::CreateEffectData
     data2->root = root;
     data2->target = target;
     data2->unk70 = (unsigned int)GetEffectShaderCount(this);
-    if (FUN_00507040(16))
+    if (IsFlagSet_00507040(16))
     {
         data2->edge.x += -1.0;
         data2->edge.y += -1.0;
@@ -646,8 +648,8 @@ struct ShaderState
     int unk54, unk58, unk5c, unk60, unk64, unk68, unk6c;
     unsigned int alpha;
 };
-float __cdecl FUN_00404010(float, float);
-float __cdecl FUN_0040ebd0(float, float);
+float __cdecl BSMAX_00404010(float, float);
+float __cdecl BSMIN(float, float);
 float __cdecl LinearInterpolate(float, float, float, float, float);
 struct ShaderUpdate
 {
@@ -672,14 +674,14 @@ void ShaderUpdate::UpdateShaderState(ShaderState* state, float delta, float dura
         state->baseFill.w = UpdateFill(state->baseFill.w, delta, duration, mode);
         state->fill = state->baseFill;
         state->fill.w = FillPulse(time) * state->fill.w + state->fill.w;
-        state->fill.w = FUN_0040ebd0(1.0f, FUN_00404010(0.0f, state->fill.w));
+        state->fill.w = BSMIN(1.0f, BSMAX_00404010(0.0f, state->fill.w));
         state->baseEdge.w = UpdateEdge(state->baseEdge.w, delta, duration, mode);
         state->edge = state->baseEdge;
         state->edge.w = EdgePulse(time) * state->edge.w + state->edge.w;
-        state->edge.w = FUN_0040ebd0(1.0f, FUN_00404010(0.0f, state->edge.w));
+        state->edge.w = BSMIN(1.0f, BSMAX_00404010(0.0f, state->edge.w));
         state->u = USpeed() * delta + state->u;
         state->v = VSpeed() * delta + state->v;
-        float boundedTime = FUN_0040ebd0(StartTime(), FUN_00404010(EndTime(), time));
+        float boundedTime = BSMIN(StartTime(), BSMAX_00404010(EndTime(), time));
         state->alpha = (unsigned int)LinearInterpolate(StartAlpha(), EndAlpha(), EndTime(), StartTime(), boundedTime);
     }
 }
@@ -688,308 +690,308 @@ struct SwapFlag
 {
     bool value;
 };
-extern "C" void __cdecl FUN_00401080(void* field, bool reverseBytes);
+extern "C" void __cdecl BSEndian_00401080(void* field, bool reverseBytes);
 // @fnv 0x00506850
 void EffectShaderData::Endian()
 {
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_eDestinationBlend, needsEndianSwap.value);
+        BSEndian_00401080(&m_eDestinationBlend, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_eBlendOperation, needsEndianSwap.value);
+        BSEndian_00401080(&m_eBlendOperation, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_eDepthCompareFunction, needsEndianSwap.value);
+        BSEndian_00401080(&m_eDepthCompareFunction, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&BlendDepthState, needsEndianSwap.value);
+        BSEndian_00401080(&BlendDepthState, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&BlendDepthParameters, needsEndianSwap.value);
+        BSEndian_00401080(&BlendDepthParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&DepthCompareParameters, needsEndianSwap.value);
+        BSEndian_00401080(&DepthCompareParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&IndexedFloatParameters, needsEndianSwap.value);
+        BSEndian_00401080(&IndexedFloatParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&ShaderFloatParameterSet, needsEndianSwap.value);
+        BSEndian_00401080(&ShaderFloatParameterSet, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&ShaderParameterFormatSet, needsEndianSwap.value);
+        BSEndian_00401080(&ShaderParameterFormatSet, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&SevenFloatParameterRecord, needsEndianSwap.value);
+        BSEndian_00401080(&SevenFloatParameterRecord, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&SixFloatAndUnsignedIntegerRecord, needsEndianSwap.value);
+        BSEndian_00401080(&SixFloatAndUnsignedIntegerRecord, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&SixFloatUnsignedIntegerAndFloatRecord, needsEndianSwap.value);
+        BSEndian_00401080(&SixFloatUnsignedIntegerAndFloatRecord, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&ExtendedFloatFlagParameters, needsEndianSwap.value);
+        BSEndian_00401080(&ExtendedFloatFlagParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&ShaderFloatParameterBlock, needsEndianSwap.value);
+        BSEndian_00401080(&ShaderFloatParameterBlock, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&SixFloatRecordWithMiddleFlag, needsEndianSwap.value);
+        BSEndian_00401080(&SixFloatRecordWithMiddleFlag, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&FloatFlagParameters, needsEndianSwap.value);
+        BSEndian_00401080(&FloatFlagParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&SixFloatRecordWithLeadingFlag, needsEndianSwap.value);
+        BSEndian_00401080(&SixFloatRecordWithLeadingFlag, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&BlendFloatParameters, needsEndianSwap.value);
+        BSEndian_00401080(&BlendFloatParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&AlphaBlendParameters, needsEndianSwap.value);
+        BSEndian_00401080(&AlphaBlendParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&BlendStateParameters, needsEndianSwap.value);
+        BSEndian_00401080(&BlendStateParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&BlendFactorState, needsEndianSwap.value);
+        BSEndian_00401080(&BlendFactorState, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&BlendModeConfiguration, needsEndianSwap.value);
+        BSEndian_00401080(&BlendModeConfiguration, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_eSourceBlend, needsEndianSwap.value);
+        BSEndian_00401080(&m_eSourceBlend, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_eAlphaSourceBlend, needsEndianSwap.value);
+        BSEndian_00401080(&m_eAlphaSourceBlend, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_eAlphaBlendOperation, needsEndianSwap.value);
+        BSEndian_00401080(&m_eAlphaBlendOperation, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_eAlphaDepthCompareFunction, needsEndianSwap.value);
+        BSEndian_00401080(&m_eAlphaDepthCompareFunction, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_eAlphaDestinationBlend, needsEndianSwap.value);
+        BSEndian_00401080(&m_eAlphaDestinationBlend, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&AlphaBlendSettings, needsEndianSwap.value);
+        BSEndian_00401080(&AlphaBlendSettings, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fAlphaBlendParameter, needsEndianSwap.value);
+        BSEndian_00401080(&m_fAlphaBlendParameter, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&BlendFactorParameters, needsEndianSwap.value);
+        BSEndian_00401080(&BlendFactorParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter1, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter1, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter2, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter2, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter3, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter3, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter4, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter4, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter5, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter5, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter6, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter6, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&VelocityState.x, needsEndianSwap.value);
+        BSEndian_00401080(&VelocityState.x, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&VelocityState.y, needsEndianSwap.value);
+        BSEndian_00401080(&VelocityState.y, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&VelocityState.z, needsEndianSwap.value);
+        BSEndian_00401080(&VelocityState.z, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_kVectorState2.x, needsEndianSwap.value);
+        BSEndian_00401080(&m_kVectorState2.x, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_kVectorState2.y, needsEndianSwap.value);
+        BSEndian_00401080(&m_kVectorState2.y, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_kVectorState2.z, needsEndianSwap.value);
+        BSEndian_00401080(&m_kVectorState2.z, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter7, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter7, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter8, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter8, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter9, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter9, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter10, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter10, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_uiColorParameter1, needsEndianSwap.value);
+        BSEndian_00401080(&m_uiColorParameter1, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_uiColorParameter2, needsEndianSwap.value);
+        BSEndian_00401080(&m_uiColorParameter2, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_uiColorParameter3, needsEndianSwap.value);
+        BSEndian_00401080(&m_uiColorParameter3, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter11, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter11, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter12, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter12, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter13, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter13, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter14, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter14, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter15, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter15, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter16, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter16, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter17, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter17, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter18, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter18, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter19, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter19, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter20, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter20, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fShaderFloatParameter21, needsEndianSwap.value);
+        BSEndian_00401080(&m_fShaderFloatParameter21, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&DebrisModelSettings, needsEndianSwap.value);
+        BSEndian_00401080(&DebrisModelSettings, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&EffectShaderAddonData, needsEndianSwap.value);
+        BSEndian_00401080(&EffectShaderAddonData, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&DebrisColorSettings, needsEndianSwap.value);
+        BSEndian_00401080(&DebrisColorSettings, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&EffectShaderColorData, needsEndianSwap.value);
+        BSEndian_00401080(&EffectShaderColorData, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&EffectShaderParameters, needsEndianSwap.value);
+        BSEndian_00401080(&EffectShaderParameters, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_uiBaseColor, needsEndianSwap.value);
+        BSEndian_00401080(&m_uiBaseColor, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fFloatAfterDefaultColor, needsEndianSwap.value);
+        BSEndian_00401080(&m_fFloatAfterDefaultColor, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_uiIntegerParameter1, needsEndianSwap.value);
+        BSEndian_00401080(&m_uiIntegerParameter1, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_uiIntegerParameter2, needsEndianSwap.value);
+        BSEndian_00401080(&m_uiIntegerParameter2, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fFirstValueAfterIntegerFields, needsEndianSwap.value);
+        BSEndian_00401080(&m_fFirstValueAfterIntegerFields, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&m_fSecondValueAfterIntegerFields, needsEndianSwap.value);
+        BSEndian_00401080(&m_fSecondValueAfterIntegerFields, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&UnsignedIntAndSixFloatData, needsEndianSwap.value);
+        BSEndian_00401080(&UnsignedIntAndSixFloatData, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&SixFloatValueSet, needsEndianSwap.value);
+        BSEndian_00401080(&SixFloatValueSet, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&FiveFloatData, needsEndianSwap.value);
+        BSEndian_00401080(&FiveFloatData, needsEndianSwap.value);
     }
     {
         SwapFlag needsEndianSwap = {};
-        FUN_00401080(&FourFloatValueSet, needsEndianSwap.value);
+        BSEndian_00401080(&FourFloatValueSet, needsEndianSwap.value);
     }
 }

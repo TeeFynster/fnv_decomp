@@ -26,7 +26,7 @@ public:
 
     ExtraActivateRef();
     ActivateEntry334* Find(TESObjectREFR* reference);
-    bool FUN_00433a20(BSExtraData* pOther);
+    bool Compare_00433a20(BSExtraData* pOther);
     void Copy(BSExtraDataEx* apSource);
 
     ReferenceList references;

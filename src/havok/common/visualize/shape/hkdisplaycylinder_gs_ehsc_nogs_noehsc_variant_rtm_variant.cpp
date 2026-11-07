@@ -5,7 +5,7 @@
 // src/havok/common/visualize/shape/hkdisplaycylinder_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/common/visualize/shape/hkdisplaycylinder.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
-void __stdcall FUN_00d58500(int, int);
+void __stdcall nullsub_78(int, int);
 #include <xmmintrin.h>
 struct DE1F50Vector4
 {
@@ -90,8 +90,8 @@ struct Mgr
     int unk00, unk04, unk08, unk0c;
     AllocObj* m_10;
 };
-Mgr* FUN_00c85750();
-int FUN_00c908c0(void*, void*, int, int);
+Mgr* hkMemoryRouter_getInstance();
+int hkArrayUtil__reserve(void*, void*, int, int);
 struct Quaternion;
 class LaneScalar
 {
@@ -212,19 +212,21 @@ struct __declspec(align(16)) Quaternion
     {}
     Quaternion(const MathVector& axis, float theta)
     {
-        FUN_00cb2450(axis, theta);
+        hkQuaternion_setAxisAngle(axis, theta);
     }
-    __declspec(noinline) void FUN_00cb2450(const MathVector& axis, float theta);
-    __declspec(noinline) void FUN_00c66320(const Quaternion& a, const Quaternion& b);
+    __declspec(noinline) void hkQuaternion_setAxisAngle(const MathVector& axis, float theta);
+    __declspec(noinline) void setMul(const Quaternion& a, const Quaternion& b);
 };
-__declspec(noinline) void Quaternion::FUN_00cb2450(const MathVector& axis, float angle)
+// src: XBOX_PDB 0x00cb2450
+__declspec(noinline) void Quaternion::hkQuaternion_setAxisAngle(const MathVector& axis, float angle)
 {
     float h = (float)(angle * 0.5);
     float sn = (float)sin(h);
     *(MathVector*)this = _mm_mul_ps(_mm_set_ps1(sn), axis.raw());
     w = (float)cos(h);
 }
-__declspec(noinline) void Quaternion::FUN_00c66320(const Quaternion& av, const Quaternion& bv)
+// src: COMMUNITY 0x00c66320
+__declspec(noinline) void Quaternion::setMul(const Quaternion& av, const Quaternion& bv)
 {
     __m128 a = ((const MathVector*)&av)->raw();
     __m128 b = ((const MathVector*)&bv)->raw();
@@ -281,7 +283,7 @@ template <class T> struct List
     {}
     __forceinline T* expandBy(int amount)
     {
-        Mgr* mgr = FUN_00c85750();
+        Mgr* mgr = hkMemoryRouter_getInstance();
         void* allocator = mgr->m_10;
         int old = size;
         int need = old + amount;
@@ -290,7 +292,7 @@ template <class T> struct List
         {
             int twice = cap + cap;
             int next = need < twice ? twice : need;
-            FUN_00c908c0(allocator, this, next, sizeof(T));
+            hkArrayUtil__reserve(allocator, this, next, sizeof(T));
         }
         size += amount;
         return data + old;
@@ -336,7 +338,8 @@ struct CachePair
     Quaternion delta;
 };
 // @fnv 0x00d58590
-__declspec(noinline) void __fastcall FUN_00d58590(CylinderMeshBuilder* self)
+// src: HAVOK_SRC 0x00d58590
+__declspec(noinline) void __fastcall hkDisplayCylinder_buildGeometry(CylinderMeshBuilder* self)
 {
     const int& heights = self->m_88;
     const int& sectors = self->m_84;
@@ -370,9 +373,9 @@ __declspec(noinline) void __fastcall FUN_00d58590(CylinderMeshBuilder* self)
         MathVector& zxy = const_cast<MathVector&>(zxyStorage);
         MathVector& yzx = pair.yzx;
         Quaternion& delta = pair.delta;
-        delta.FUN_00cb2450(unit, float(double(6.28318548f) / sectors));
+        delta.hkQuaternion_setAxisAngle(unit, float(double(6.28318548f) / sectors));
         Quaternion rotation(unit, 0.0f);
-        Mgr* mgr = FUN_00c85750();
+        Mgr* mgr = hkMemoryRouter_getInstance();
         void* allocation = mgr->m_10->v04(24);
         self->m_08 = allocation ? new (allocation) Geometry : 0;
         *self->m_08->vertices.expandBy(1) = origin;
@@ -422,7 +425,7 @@ __declspec(noinline) void __fastcall FUN_00d58590(CylinderMeshBuilder* self)
                 _ReadWriteBarrier();
                 Quaternion& previous = axisWork.previous;
                 previous = rotation;
-                rotation.FUN_00c66320(previous, delta);
+                rotation.setMul(previous, delta);
                 ++a;
             } while (a < sectors);
         }

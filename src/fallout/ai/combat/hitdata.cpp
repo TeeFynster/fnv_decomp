@@ -46,7 +46,8 @@ void FUN_009b7840_shell::RaiseMaxValue(float afValue)
 
 // Returns true for the index values 0, 1, 2, 16, 17, 20 and 21, and false for any other value.
 // @fnv 0x0066de30
-bool FUN_0066de30(int a)
+// src: XBOX_PDB 0x0066de30
+bool ActionPoints_IsMeleeAttackAction(int a)
 {
     switch (a)
     {
@@ -93,12 +94,13 @@ class HitData
     unsigned int uiFlags;
     float m_fHitValueAtOffset5C;
     int BackgroundTask;
-    void FUN_009b4dc0();
-    void FUN_009b4ec0(const HitData& src);
+    void ClearData_009b4dc0();
+    void Copy_009b4ec0(const HitData& src);
 };
 
 // @fnv 0x009b4dc0
-void HitData::FUN_009b4dc0()
+// src: XBOX_PDB 0x009b4dc0
+void HitData::ClearData_009b4dc0()
 {
     m_pAggressor = 0;
     pTarget = 0;
@@ -144,11 +146,12 @@ void FUN_009b7970_shell::InitializeAndClear()
 
 struct FUN_009b7010_shell
 {
-    NiPoint3& FUN_009b7010(NiPoint3& akDest);
+    NiPoint3& Projectile_GetMovementDirection(NiPoint3& akDest);
 };
 // Copies the NiPoint3 stored at offset 0x104 of this object into akDest and returns it.
 // @fnv 0x009b7010
-NiPoint3& FUN_009b7010_shell::FUN_009b7010(NiPoint3& akDest)
+// src: COMMUNITY 0x009b7010
+NiPoint3& FUN_009b7010_shell::Projectile_GetMovementDirection(NiPoint3& akDest)
 {
     akDest = *reinterpret_cast<const NiPoint3*>(reinterpret_cast<const char*>(this) + 0x104);
     return akDest;
@@ -156,12 +159,12 @@ NiPoint3& FUN_009b7010_shell::FUN_009b7010(NiPoint3& akDest)
 
 struct AX
 {
-    void FUN_006b3eb0(unsigned int a, unsigned int b);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int a, unsigned int b);
 };
 struct FUN_009b7940_shell
 {
     int* vtable;
-    void FUN_006b3eb0(unsigned int a, unsigned int b);
+    void BSSimpleArray_float_1024_InitialSetup(unsigned int a, unsigned int b);
     FUN_009b7940_shell* Initialize();
 };
 // Sets the vtable to DAT_0108f9e8, calls FUN_006b3eb0 with 0, 0, and returns this.
@@ -169,7 +172,7 @@ struct FUN_009b7940_shell
 FUN_009b7940_shell* FUN_009b7940_shell::Initialize()
 {
     vtable = &DAT_0108f9e8;
-    FUN_006b3eb0(0, 0);
+    BSSimpleArray_float_1024_InitialSetup(0, 0);
     return this;
 }
 
@@ -179,10 +182,11 @@ struct WeightedResultList
     BSSimpleArray<void*, 1024> kResults;
     BSSimpleArray<void*, 1024> kWeights;
     int m_iTotalWeight;
-    void FUN_009b7990(BGSBodyPart* aResult, unsigned int aiWeight);
+    void BSWeightedRandom_BGSBodyPart_AddWeightedResult(BGSBodyPart* aResult, unsigned int aiWeight);
 };
 // @fnv 0x009b7990
-void WeightedResultList::FUN_009b7990(BGSBodyPart* aResult, unsigned int aiWeight)
+// src: XBOX_PDB 0x009b7990
+void WeightedResultList::BSWeightedRandom_BGSBodyPart_AddWeightedResult(BGSBodyPart* aResult, unsigned int aiWeight)
 {
     m_iTotalWeight += aiWeight;
     kWeights.Add((void*&)aiWeight);
@@ -222,11 +226,12 @@ struct FUN_009b4d90
 // @fnv 0x009b4d90
 FUN_009b4d90::FUN_009b4d90()
 {
-    ((HitData*)this)->FUN_009b4dc0();
+    ((HitData*)this)->ClearData_009b4dc0();
 }
 
 // @fnv 0x009b4ec0
-void HitData::FUN_009b4ec0(const HitData& src)
+// src: XBOX_PDB 0x009b4ec0
+void HitData::Copy_009b4ec0(const HitData& src)
 {
     m_pAggressor = src.m_pAggressor;
     pTarget = src.pTarget;
@@ -291,7 +296,8 @@ struct SpawnLocal
 void __cdecl SetContextInfo(SpawnLocal* ctx, SpawnObj* p);
 
 // @fnv 0x009b4fe0
-float __cdecl FUN_009b4fe0(SpawnObj* pSpawnObj)
+// src: COMMUNITY 0x009b4fe0
+float __cdecl HitData_PredictVATSCommandHealthDamage(SpawnObj* pSpawnObj)
 {
     if (pSpawnObj == 0)
     {
@@ -337,7 +343,7 @@ FUN_009b7870::FUN_009b7870()
 
 void __cdecl ApplyPerkModifiers(int aeEntry, Actor* apActor, ...);
 float __cdecl GetWeaponDPS(void* apOwner, void* apWeapon);
-float& __fastcall FUN_00403e20(float* apSetting);
+float& __fastcall Setting_Float_00403e20(float* apSetting);
 unsigned int __cdecl FUN_00487f50();
 extern unsigned int DAT_011ca278;
 extern int DAT_011ce46c;
@@ -356,7 +362,7 @@ struct FUN_009b7060_weapon
 // Keep only that external method declaration here until it is shared.
 struct ActorDetectionQuery
 {
-    bool FUN_0088b880(int, Actor*, int, int, int);
+    bool Actor_LineOfSight(int, Actor*, int, int, int);
 };
 
 struct FUN_009b7060_shell
@@ -370,7 +376,7 @@ struct FUN_009b7060_shell
     char kad[0x50 - 0x34];
     unsigned int uiValue;
     int iValue;
-    bool FUN_0058cba0(int aeFlag);
+    bool EffectSetting_IsFlagSetAny(int aeFlag);
     void FUN_00407e00(int aeFlag, bool abSet);
     void ApplyCriticalHit();
 };
@@ -380,7 +386,7 @@ void FUN_009b7060_shell::ApplyCriticalHit()
 {
     if (pTarget && reinterpret_cast<MagicTarget*>((char*)pTarget + 0x94)->CanReceiveMagicEffects())
         return;
-    if (FUN_0058cba0(0x800))
+    if (EffectSetting_IsFlagSetAny(0x800))
         return;
 
     float fLimbDamage4 = 0.0f;
@@ -389,18 +395,18 @@ void FUN_009b7060_shell::ApplyCriticalHit()
     ApplyPerkModifiers(1, pSource, pWeapon ? pWeapon : (FUN_009b7060_weapon*)DAT_011ca278, pTarget, &fCritChance);
     ApplyPerkModifiers(0x24, pTarget, pWeapon ? pWeapon : (FUN_009b7060_weapon*)DAT_011ca278, pSource, &fCritChance);
     if (iValue)
-        fCritChance += FUN_00403e20((float*)&DAT_011ce46c);
+        fCritChance += Setting_Float_00403e20((float*)&DAT_011ce46c);
     fCritChance *= 10.0;
 
     if (pSource && pSource->IsPlayerRef() && pTarget && pTarget->IsActor() &&
         !pTarget->HasHealth(false) && pSource->FUN_004997b0() &&
         !pTarget->IsCombatTargetHostile(pSource))
     {
-        bool cDetected = reinterpret_cast<ActorDetectionQuery*>(pTarget)->FUN_0088b880(0, pSource, 1, 0, 0);
+        bool cDetected = reinterpret_cast<ActorDetectionQuery*>(pTarget)->Actor_LineOfSight(0, pSource, 1, 0, 0);
         int iDetection = pTarget->CalculateDetectionLevel(0, pSource, &cDetected, false, 0, false, 0);
         if (iDetection <= 0)
         {
-            fCritChance *= FUN_00403e20((float*)&DAT_011ce858);
+            fCritChance *= Setting_Float_00403e20((float*)&DAT_011ce858);
             FUN_00407e00(0x400, true);
         }
     }
@@ -413,7 +419,7 @@ void FUN_009b7060_shell::ApplyCriticalHit()
         if (pCritWeapon)
         {
             fLimbDamage4 =
-                pWeapon ? (double)pWeapon->GetShortAtOffset1C0() : afDamageAmount * FUN_00403e20((float*)&DAT_011ce57c);
+                pWeapon ? (double)pWeapon->GetShortAtOffset1C0() : afDamageAmount * Setting_Float_00403e20((float*)&DAT_011ce57c);
             ApplyPerkModifiers(2, pSource, pCritWeapon, pTarget, &fLimbDamage4);
             if (fLimbDamage4 > DAT_01012060)
                 afDamageAmount += fLimbDamage4;
@@ -890,7 +896,7 @@ struct Ctx
 };
 }
 extern n9b::Mgr* DAT_011dea3c;
-bool __cdecl FUN_0066de30(int v);
+bool __cdecl ActionPoints_IsMeleeAttackAction(int v);
 void __cdecl InitHitData(n9b::Ctx* ctx, n9b::Mgr* mgr, n9b::Tgt* t, int v, bool flag);
 // @fnv 0x009b5050
 void __cdecl SetContextInfo(n9b::Ctx* ctx, n9b::Info* info)
@@ -898,6 +904,6 @@ void __cdecl SetContextInfo(n9b::Ctx* ctx, n9b::Info* info)
     if (!ctx || !info || !info->m_iThirdValue)
         return;
     ctx->m_54 = info;
-    bool flag = FUN_0066de30(info->m_iWordAt00) && info->m_iWordAt04;
+    bool flag = ActionPoints_IsMeleeAttackAction(info->m_iWordAt00) && info->m_iWordAt04;
     InitHitData(ctx, DAT_011dea3c, info->m_iThirdValue->v40() ? info->m_iThirdValue : 0, DAT_011dea3c->FUN_008d8520()->v52(), flag);
 }

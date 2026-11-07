@@ -89,7 +89,8 @@ template <class T> inline T hkMax2(T x, T y)
 
 // Stores the reciprocal of the largest diagonal inertia component into m_kInertiaAndMassInv for the sphere motion.
 // @fnv 0x00d1e290
-void hkpSphereMotion::FUN_00d1e290(const hkMatrix3& inertia)
+// src: HAVOK_SRC 0x00d1e290
+void hkpSphereMotion::setInertiaLocal(const hkMatrix3& inertia)
 {
     float a = hkMax2(hkMax2(inertia.m_kColumn0.x, inertia.m_kColumn1.y), inertia.m_kColumn2.z);
     float fInvMaxDiag;
@@ -182,7 +183,8 @@ extern float DAT_0104da4c;
 
 // Reads m_kInertiaAndMassInv.x (replaced by DAT_0104da4c if below DAT_010c9300) and writes a matrix at out with its reciprocal on the diagonal, zeros elsewhere.
 // @fnv 0x00d1e1d0
-void hkpSphereMotion::FUN_00d1e1d0(int out)
+// src: HAVOK_SRC 0x00d1e1d0
+void hkpSphereMotion::getInertiaLocal(int out)
 {
     hkReal x = m_kInertiaAndMassInv.x;
     hkReal y = (double)x < DAT_010c9300 ? DAT_0104da4c : x;
@@ -199,7 +201,8 @@ void hkpSphereMotion::FUN_00d1e1d0(int out)
 
 // Writes a diagonal hkMatrix3 with m_kInertiaAndMassInv.x on the diagonal and zeros elsewhere into out.
 // @fnv 0x00d1e3d0
-void hkpSphereMotion::FUN_00d1e3d0(hkMatrix3* out) const
+// src: GUESS 0x00d1e390 (confidence: medium)
+void hkpSphereMotion::GetDiagonalInverseInertia(hkMatrix3* out) const
 {
     float inverse = m_kInertiaAndMassInv.x;
     LocalM128 zero = _mm_setzero_ps();
@@ -215,7 +218,8 @@ void hkpSphereMotion::FUN_00d1e3d0(hkMatrix3* out) const
 
 // Zeroes the 3x3 matrix and sets its diagonal entries to the scalar m_kInertiaAndMassInv.x value.
 // @fnv 0x00d1e390
-void hkpSphereMotion::FUN_00d1e390(hkMatrix3& inertiaInvOut)
+// src: GUESS 0x00d1e3d0 (confidence: medium)
+void hkpSphereMotion::GetDiagonalInverseInertia_00d1e3d0(hkMatrix3& inertiaInvOut)
 {
     hkReal val = m_kInertiaAndMassInv.x;
     LocalM128 zero = _mm_setzero_ps();

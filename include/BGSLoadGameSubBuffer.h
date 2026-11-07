@@ -26,5 +26,5 @@ public:
     void LoadGame(BGSLoadGameBuffer* buffer);
     BGSLoadFormBuffer* CreateFormBuffer(TESForm* form);
     void RenderCopyData(BGSSaveFormBuffer* buffer);
-    void FUN_00435b20();
+    void DeleteBuffer();
 };

@@ -103,17 +103,17 @@ public:
     int maxAxis() const;
     float GetAngle();
 
-    void FUN_00416870(float x, float y, float z);
-    DisplayVectorCallLocal_00ddfd10 FUN_00439ef0(const DisplayVectorCallLocal_00ddfd10& vector);
+    void SetComponents(float x, float y, float z);
+    DisplayVectorCallLocal_00ddfd10 SubtractIntoVector(const DisplayVectorCallLocal_00ddfd10& vector);
     DisplayVectorCallLocal_00ddfd10 FUN_00439e90(const DisplayVectorCallLocal_00ddfd10& vector);
-    void FUN_00439180(float value);
-    void FUN_004a0c10();
-    void FUN_005611c0();
-    void FUN_00c66320(const DisplayVectorCallLocal_00ddfd10* a, const DisplayVectorCallLocal_00ddfd10* b);
-    void FUN_00c74ac0(const DisplayVectorCallLocal_00ddfd10* a, const DisplayVectorCallLocal_00ddfd10* b);
-    void FUN_00c74c90(DisplayVectorCallLocal_00ddfd10* vector);
-    void FUN_00c7f640(const Transform& transform, const DisplayVectorCallLocal_00ddfd10& point);
-    void FUN_00cb2450(const DisplayVectorCallLocal_00ddfd10* vector, float value);
+    void ScaleComponents(float value);
+    void Unitize_004a0c10();
+    void normalize_005611c0();
+    void setMul(const DisplayVectorCallLocal_00ddfd10* a, const DisplayVectorCallLocal_00ddfd10* b);
+    void setMulInverse(const DisplayVectorCallLocal_00ddfd10* a, const DisplayVectorCallLocal_00ddfd10* b);
+    void hkQuaternion_getAxis(DisplayVectorCallLocal_00ddfd10* vector);
+    void setTransformedPos_00c7f640(const Transform& transform, const DisplayVectorCallLocal_00ddfd10& point);
+    void hkQuaternion_setAxisAngle(const DisplayVectorCallLocal_00ddfd10* vector, float value);
     void FUN_00cb26e0(const hkRotation* rotation);
 
     template <int I> void splat(const DisplayVectorCallLocal_00ddfd10& vector);
@@ -144,7 +144,7 @@ struct S_00ddfcd0_Router
         return *m_pStreamAllocator;
     }
 };
-S_00ddfcd0_Router* FUN_00c85750();
+S_00ddfcd0_Router* hkMemoryRouter_getInstance();
 struct S_00ddfcd0_RefObj
 {
     unsigned short m_usMemSizeAndFlags;
@@ -157,7 +157,7 @@ struct S_00ddfcd0_RefObj
     {}
     void* operator new(unsigned int nbytes)
     {
-        S_00ddfcd0_RefObj* b = static_cast<S_00ddfcd0_RefObj*>(FUN_00c85750()->heap().AllocateMemoryBlock(nbytes));
+        S_00ddfcd0_RefObj* b = static_cast<S_00ddfcd0_RefObj*>(hkMemoryRouter_getInstance()->heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -179,7 +179,7 @@ struct S_00ddfcd0_Obj : S_00ddfcd0_RefObj
     {}
     virtual ~S_00ddfcd0_Obj() throw();
 };
-S_00ddfcd0_RefObj* FUN_00ddfcd0();
+S_00ddfcd0_RefObj* hkpUserShapeDisplayBuildercreate();
 
 #include <xmmintrin.h>
 class Scalar
@@ -260,7 +260,7 @@ __forceinline Scalar DisplayVectorCallLocal_00ddfd10::length3() const
 }
 __forceinline void DisplayVectorCallLocal_00ddfd10::SetTransformedPoint(const Transform& m, const DisplayVectorCallLocal_00ddfd10& p)
 {
-    FUN_00c7f640(m, p);
+    setTransformedPos_00c7f640(m, p);
 }
 extern DisplayVectorCallLocal_00ddfd10 DAT_01267e30, DAT_01017d10;
 __forceinline int DisplayVectorCallLocal_00ddfd10::getMajorAxis() const
@@ -309,7 +309,7 @@ __forceinline Transform& Transform::operator=(const Transform& m)
 }
 __forceinline void Transform::SetProduct(const Transform& a, const Transform& b)
 {
-    FUN_00cb2240(a, b);
+    hkTransform_setMul(a, b);
 }
 __forceinline void Transform::setIdentity()
 {
@@ -354,7 +354,7 @@ struct HeapView
     virtual void fc();
     virtual void ReleaseBlock(void*, int);
 };
-void FUN_00c908c0(S_00ddfcd0_Allocator*, void*, int, int);
+void hkArrayUtil__reserve(S_00ddfcd0_Allocator*, void*, int, int);
 void FUN_00c90940(S_00ddfcd0_Allocator*, void*, int);
 template <class T> __forceinline void copyRange(T* p, int n, const T& v)
 {
@@ -403,7 +403,7 @@ template <class T> class ArrayBase
         {
             int twice = 2 * cap;
             int next = n < twice ? twice : n;
-            FUN_00c908c0(&heap, this, next, sizeof(T));
+            hkArrayUtil__reserve(&heap, this, next, sizeof(T));
         }
     }
     __forceinline T* expandBy(S_00ddfcd0_Allocator& heap, int n)
@@ -448,19 +448,19 @@ template <class T> struct Array : ArrayBase<T>
     {}
     __forceinline ~Array()
     {
-        release(FUN_00c85750()->heap());
+        release(hkMemoryRouter_getInstance()->heap());
     }
     __forceinline T* expandBy(int n)
     {
-        return ArrayBase<T>::expandBy(FUN_00c85750()->heap(), n);
+        return ArrayBase<T>::expandBy(hkMemoryRouter_getInstance()->heap(), n);
     }
     __forceinline void SetSizeAndGrow(int n)
     {
-        ArrayBase<T>::SetSizeAndGrow(FUN_00c85750()->heap(), n);
+        ArrayBase<T>::SetSizeAndGrow(hkMemoryRouter_getInstance()->heap(), n);
     }
     __forceinline void AddBack(const T& v)
     {
-        ArrayBase<T>::AddBack(FUN_00c85750()->heap(), v);
+        ArrayBase<T>::AddBack(hkMemoryRouter_getInstance()->heap(), v);
     }
 };
 template <class T> struct LocalArray : Array<T>
@@ -468,7 +468,7 @@ template <class T> struct LocalArray : Array<T>
     T* saved;
     __forceinline LocalArray(int n)
     {
-        S_00ddfcd0_Router* r = FUN_00c85750();
+        S_00ddfcd0_Router* r = hkMemoryRouter_getInstance();
         T* p = (T*)r->unk0;
         r->unk0 = (int)p + ((n * sizeof(T) + 127) & ~127);
         data = p;
@@ -480,7 +480,7 @@ template <class T> struct LocalArray : Array<T>
         T* p = saved;
         if (p == data)
             clear();
-        FUN_00c85750()->unk0 = (int)p;
+        hkMemoryRouter_getInstance()->unk0 = (int)p;
     }
 };
 struct Mesh
@@ -500,7 +500,7 @@ struct Mesh
     Array<Triangle> m_uiTriangleCount;
     __forceinline void* operator new(unsigned int n)
     {
-        return FUN_00c85750()->heap().AllocateMemoryBlock(n);
+        return hkMemoryRouter_getInstance()->heap().AllocateMemoryBlock(n);
     }
 };
 struct FUN_00cce5e0 : Mesh
@@ -531,7 +531,7 @@ struct RefObject
     unsigned short GetAllocationSize, refs;
     __forceinline void* operator new(unsigned int n)
     {
-        RefObject* p = (RefObject*)FUN_00c85750()->heap().AllocateMemoryBlock(n);
+        RefObject* p = (RefObject*)hkMemoryRouter_getInstance()->heap().AllocateMemoryBlock(n);
         p->GetAllocationSize = (unsigned short)n;
         return p;
     }
@@ -814,12 +814,12 @@ struct Node
         int m_iFirstValue, m_iSecondValue;
     } m_kEnvironment;
     Display* current;
-    Display* FUN_00ddfc30(Array<Display*>&);
+    Display* hkpShapeDisplayBuilder_getCurrentRawGeometry(Array<Display*>&);
     __forceinline Display* GetCurrentDisplay(Array<Display*>& a)
     {
-        return FUN_00ddfc30(a);
+        return hkpShapeDisplayBuilder_getCurrentRawGeometry(a);
     }
-    void FUN_00ddfd10(const BaseShape*, const Transform&, Array<Display*>&);
+    void hkpShapeDisplayBuilder_buildShapeDisplay(const BaseShape*, const Transform&, Array<Display*>&);
 };
 struct UserBuilders
 {
@@ -839,7 +839,8 @@ __forceinline UserBuilders& UserBuilders::GetMonitorStream()
 }
 
 // @fnv 0x00ddfd10
-void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Display*>& out)
+// src: XBOX_PDB 0x00ddfd10
+void Node::hkpShapeDisplayBuilder_buildShapeDisplay(const BaseShape* shape, const Transform& mat, Array<Display*>& out)
 {
     switch (shape->getType())
     {
@@ -941,25 +942,25 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
         local.setTranslation(s->getTranslation());
         __declspec(align(16)) Transform result;
         result.SetProduct(mat, local);
-        FUN_00ddfd10(s->GetShapeForKey(), result, out);
+        hkpShapeDisplayBuilder_buildShapeDisplay(s->GetShapeForKey(), result, out);
         break;
     }
     case 12: {
         const ConvexTransformShape* s = static_cast<const ConvexTransformShape*>(shape);
         __declspec(align(16)) Transform result;
         result.SetProduct(mat, s->getTransform());
-        FUN_00ddfd10(s->GetShapeForKey(), result, out);
+        hkpShapeDisplayBuilder_buildShapeDisplay(s->GetShapeForKey(), result, out);
         break;
     }
     case 15: {
         const TransformShape* s = static_cast<const TransformShape*>(shape);
         __declspec(align(16)) Transform result;
         result.SetProduct(mat, s->getTransform());
-        FUN_00ddfd10(s->GetShapeForKey(), result, out);
+        hkpShapeDisplayBuilder_buildShapeDisplay(s->GetShapeForKey(), result, out);
         break;
     }
     case 27:
-        FUN_00ddfd10(static_cast<const BoundingShape*>(shape)->getBoundingVolumeShape(), mat, out);
+        hkpShapeDisplayBuilder_buildShapeDisplay(static_cast<const BoundingShape*>(shape)->getBoundingVolumeShape(), mat, out);
         break;
     case 8:
     case 10: {
@@ -968,7 +969,7 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
         for (unsigned int key = c->GetFirstKey(); key != 0xffffffff; key = c->GetNextShapeKey(key))
         {
             const BaseShape* child = c->GetShapeForKey(key, buffer);
-            FUN_00ddfd10(child, mat, out);
+            hkpShapeDisplayBuilder_buildShapeDisplay(child, mat, out);
         }
         break;
     }
@@ -977,7 +978,7 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
         for (unsigned int key = s->GetFirstKey(); key != 0xffffffff; key = s->GetNextShapeKey(key))
         {
             const BaseShape* child = s->getChildShapeInl(key);
-            FUN_00ddfd10(child, mat, out);
+            hkpShapeDisplayBuilder_buildShapeDisplay(child, mat, out);
         }
         break;
     }
@@ -991,7 +992,7 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
         for (unsigned int key = c->GetFirstKey(); key != 0xffffffff; key = c->GetNextShapeKey(key))
         {
             const BaseShape* child = c->GetShapeForKey(key, buffer);
-            FUN_00ddfd10(child, mat, out);
+            hkpShapeDisplayBuilder_buildShapeDisplay(child, mat, out);
         }
         break;
     }

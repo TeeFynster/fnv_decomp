@@ -19,7 +19,7 @@ public:
     void* DeleteThis(unsigned int flags);
     void ClearSourceFiles();
     void ResetData();
-    void FUN_00617e80();
+    void InitializeData_00617e80();
 
     unsigned char formData[0x34];
 };

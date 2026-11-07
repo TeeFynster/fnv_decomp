@@ -52,7 +52,7 @@ template <class BoundingVolumeNode, class TLink> class AStarNodeAllocator
   public:
     unsigned char m_ScrapHeap[16];
     AStarNode<BoundingVolumeNode, TLink>* CreateNode();
-    AStarNode<BoundingVolumeNode, TLink>* FUN_006b9420();
+    AStarNode<BoundingVolumeNode, TLink>* AStarNodeHeap_CombatPlanNode_CombatPlanLink_AllocateNode();
 };
 
 template <class BoundingVolumeNode, class TLink> class AStarNodeHashTable
@@ -60,7 +60,7 @@ template <class BoundingVolumeNode, class TLink> class AStarNodeHashTable
   public:
     AStarNode<BoundingVolumeNode, TLink>* m_ppNodes[2039];  // +0x0
     unsigned int iCount;                                    // +0x1FDC
-    unsigned int FUN_00996840(unsigned int uiKey);
+    unsigned int AStarNodeMap_GetBucketIndex(unsigned int uiKey);
 };
 
 template <class BoundingVolumeNode, class TLink> class AStarOpenList
@@ -123,5 +123,5 @@ FNV_STATIC_ASSERT(offsetof(NavMeshAStarSearch, m_bUseBestNode) == 0x2054);
 
 unsigned int gm_GetCurrentThreadId();
 
-void FUN_0040fca0(unsigned long);
+void BSSleep(unsigned long);
 #endif

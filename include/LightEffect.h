@@ -22,7 +22,7 @@ public:
     float GetFloatAtOffset1C();
     void AttachLightEffect();
     void FUN_0080f030(Actor* apActor);
-    void FUN_0080ed60();
+    void DetachLight();
 
     NiPointer<NiPointLight> m_spLight;
 };

@@ -55,11 +55,12 @@ extern "C" double __cdecl sqrt(double);
 
 // hkpVehicleInstance.h does not declare this unit's wheel-impulse helper.
 struct WheelImpulseVehicle : hkpVehicleInstance {
-    void FUN_00e371d0(float deltaTime, int wheelNum, float force);
+    void ComputeValues_00e371d0(float deltaTime, int wheelNum, float force);
 };
 
 // @fnv 0x00e371d0
-void WheelImpulseVehicle::FUN_00e371d0(float deltaTime, int wheelNum, float force) {
+// src: GUESS 0x00e371d0 (confidence: low)
+void WheelImpulseVehicle::ComputeValues_00e371d0(float deltaTime, int wheelNum, float force) {
     float impulseScalar = force * deltaTime;
     hkpVehicleInstanceWheelInfo& wheelInfo = this->m_kWheelInfoArray.m_data[wheelNum];
     VehicleVector4 impulse;
@@ -69,7 +70,7 @@ void WheelImpulseVehicle::FUN_00e371d0(float deltaTime, int wheelNum, float forc
 
     if (force > 0.0f) {
         hkpEntity* entity = this->m_pEntity;
-        entity->FUN_00c9c1d0();
+        entity->activate_00c9c1d0();
         entity->m_pMotionState.ApplyImpulseAtPoint(reinterpret_cast<const hkVector4&>(impulse), reinterpret_cast<const hkVector4&>(wheelInfo.unk50));
     }
 
@@ -183,11 +184,12 @@ static __forceinline LocalM128 fnv_normalize3(LocalM128 v)
 }
 
 struct FnvVehicle : hkpVehicleInstance {
-    void FUN_00e37350(int w_it, float linearForceAtWheel, float suspensionForceAtWheel, float estimatedCarSpeed, FnvAxleParams& axle_params);
+    void ComputeValues_00e37350(int w_it, float linearForceAtWheel, float suspensionForceAtWheel, float estimatedCarSpeed, FnvAxleParams& axle_params);
 };
 
 // @fnv 0x00e37350
-void FnvVehicle::FUN_00e37350(int w_it, float linearForceAtWheel, float suspensionForceAtWheel, float estimatedCarSpeed, FnvAxleParams& axle_params)
+// src: GUESS 0x00e37350 (confidence: low)
+void FnvVehicle::ComputeValues_00e37350(int w_it, float linearForceAtWheel, float suspensionForceAtWheel, float estimatedCarSpeed, FnvAxleParams& axle_params)
 {
     float threshold = DAT_0104da4c;
     float forwardLen2;
@@ -248,10 +250,11 @@ struct TorqueOutputRef {
     TorqueOutputRef(TorqueOutput* q) : p(q) {}
 };
 struct TorqueVehicle : hkpVehicleInstance {
-    void FUN_00e376e0(float dt, TorqueOutputRef output) const;
+    void UpdateFields_00e376e0(float dt, TorqueOutputRef output) const;
 };
 // @fnv 0x00e376e0
-void TorqueVehicle::FUN_00e376e0(float dt, TorqueOutputRef output) const
+// src: GUESS 0x00e376e0 (confidence: low)
+void TorqueVehicle::UpdateFields_00e376e0(float dt, TorqueOutputRef output) const
 {
     const hkpVehicleData* d = (const hkpVehicleData*)m_data;
     if (d->m_fTorqueFactor != 0.0f) {
@@ -274,7 +277,7 @@ inline void Vec4::mul4(float r) { float t = r; LocalM128 s = _mm_load_ss(&t); ge
 
 struct TimeInterval;
 
-struct Sub150 { void FUN_00d72030(void* p); };
+struct Sub150 { void InitializeFields_00d72030(void* p); };
 
 struct Out37
 {
@@ -370,20 +373,21 @@ struct Out37
     Vec4 m_sub170;
 };
 
-void FUN_00d29830(const TimeInterval& info, hkpMotion** motions, int n, int z, void* out);
+void hkRigidMotionUtilApplyForcesAndBuildAccumulators(const TimeInterval& info, hkpMotion** motions, int n, int z, void* out);
 
 // The shared vehicle has no declaration for this velocity-output helper.
 struct VehicleVelocityVehicle : hkpVehicleInstance
 {
-    void FUN_00e37740(const TimeInterval& info, Out37& out);
+    void UpdateFields_00e37740(const TimeInterval& info, Out37& out);
 };
 
 // @fnv 0x00e37740
-void VehicleVelocityVehicle::FUN_00e37740(const TimeInterval& info, Out37& out)
+// src: GUESS 0x00e37740 (confidence: low)
+void VehicleVelocityVehicle::UpdateFields_00e37740(const TimeInterval& info, Out37& out)
 {
     hkpMotion* motions[1];
     motions[0] = &m_pEntity->m_pMotionState;
-    FUN_00d29830(info, motions, 1, 0, &out.unkd0);
+    hkRigidMotionUtilApplyForcesAndBuildAccumulators(info, motions, 1, 0, &out.unkd0);
 
     hkMotionState* ms = &m_pEntity->m_pMotionState.m_kMotionState;
     __declspec(align(16)) Vec4 linVel(_mm_sub_ps(ms->m_kSweptTransform.m_vCenterOfMass1.m_vComponents, ms->m_kSweptTransform.m_vCenterOfMass0.m_vComponents));
@@ -394,8 +398,8 @@ void VehicleVelocityVehicle::FUN_00e37740(const TimeInterval& info, Out37& out)
     __declspec(align(16)) Vec4 angVel(_mm_mul_ps(angularFactor, ms->m_kDeltaAngle.m_vComponents));
 
     *(LocalM128*)&out.m_kGravity = m_data->m_vChassisUnitInertiaAndMassInv.m_vComponents;
-    out.m_sub150.FUN_00d72030(&out.unkd0);
-    out.m_sub170.FUN_00c7f700(&out.unk120, angVel);
+    out.m_sub150.InitializeFields_00d72030(&out.unkd0);
+    out.m_sub170.hkVector4_setRotatedDir(&out.unk120, angVel);
     *(LocalM128*)&out.m_kTranslationalVelocity = *(LocalM128*)&linVel;
 }
 
@@ -403,8 +407,8 @@ extern "C" LocalM128 _mm_load_ss(const float*);
 
 struct VUBCD_Vec {
     LocalM128 m_vComponents;
-    void FUN_00c7f700(const VUBCD_Vec& rot, const VUBCD_Vec& dir) throw();
-    void FUN_00c7f640(const VUBCD_Vec& trans, const VUBCD_Vec& pos) throw();
+    void hkVector4_setRotatedDir(const VUBCD_Vec& rot, const VUBCD_Vec& dir) throw();
+    void setTransformedPos_00c7f640(const VUBCD_Vec& trans, const VUBCD_Vec& pos) throw();
     void setAddMul4(const VUBCD_Vec& a, const VUBCD_Vec& b, const float& r)
     {
         LocalM128 s = _mm_load_ss(&r); m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(s, s, 0), b.m_vComponents));
@@ -428,12 +432,13 @@ struct VUBCD_WheelCollide {
     virtual void s00(); virtual void s04(); virtual void s08(); virtual void s0c(); virtual void s10(); virtual void s14();
     virtual void CollideInstance(VUBCD_Instance* inst);
 };
-struct VUBCD_Instance : hkpVehicleInstance { void FUN_00e37940(); };
+struct VUBCD_Instance : hkpVehicleInstance { void hkpVehicleInstance_updateBeforeCollisionDetection(); };
 
 void VUBCD_WheelCollide::CollideInstance(VUBCD_Instance* inst) {}
 
 // @fnv 0x00e37940
-void VUBCD_Instance::FUN_00e37940()
+// src: XBOX_PDB 0x00e37940
+void VUBCD_Instance::hkpVehicleInstance_updateBeforeCollisionDetection()
 {
     VUC_Mon* s = (VUC_Mon*)TlsGetValue(DAT_0126835c);
     VUC_Timer* h = (VUC_Timer*)s->m_kRayEnd;
@@ -450,8 +455,8 @@ void VUBCD_Instance::FUN_00e37940()
     const VUBCD_Vec& carTransform = reinterpret_cast<const VUBCD_Vec&>(m_pEntity->m_pMotionState.m_kMotionState.m_kMotionTransform);
     for (int w = 0; w < m_data->m_iWheelCount; w++) {
         hkpVehicleInstanceWheelInfo& wheelInfo = m_kWheelInfoArray.m_data[w];
-        reinterpret_cast<VUBCD_Vec&>(wheelInfo.unk80).FUN_00c7f700(carTransform, static_cast<VUBCD_Suspension*>(static_cast<void*>(m_pSuspension))->m_kWheelParams[w].m_vDirectionChassisSpace);
-        reinterpret_cast<VUBCD_Vec&>(wheelInfo.unk50).FUN_00c7f640(carTransform, static_cast<VUBCD_Suspension*>(static_cast<void*>(m_pSuspension))->m_kWheelParams[w].m_vHardpointChassisSpace);
+        reinterpret_cast<VUBCD_Vec&>(wheelInfo.unk80).hkVector4_setRotatedDir(carTransform, static_cast<VUBCD_Suspension*>(static_cast<void*>(m_pSuspension))->m_kWheelParams[w].m_vDirectionChassisSpace);
+        reinterpret_cast<VUBCD_Vec&>(wheelInfo.unk50).setTransformedPos_00c7f640(carTransform, static_cast<VUBCD_Suspension*>(static_cast<void*>(m_pSuspension))->m_kWheelParams[w].m_vHardpointChassisSpace);
         const float sum = static_cast<VUBCD_Suspension*>(static_cast<void*>(m_pSuspension))->m_kWheelParams[w].m_fRestLength + m_data->m_kWheelParams.m_data[w].m_fSphereRadius;
                 reinterpret_cast<VUBCD_Vec&>(wheelInfo.unk60).setAddMul4(reinterpret_cast<VUBCD_Vec&>(wheelInfo.unk50), reinterpret_cast<VUBCD_Vec&>(wheelInfo.unk80), sum);
     }

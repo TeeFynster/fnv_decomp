@@ -142,10 +142,11 @@ struct S_00cd7850_Features
     unsigned short m_auiVertexIds[3];
 };
 
-int FUN_00d230e0(const S_00cd7850_Vec& pos, const S_00cd7850_Vec& a, const S_00cd7850_Vec& b, S_00cd7850_Vec* out);
+int hkLineSegmentUtil_closestPointLineSeg(const S_00cd7850_Vec& pos, const S_00cd7850_Vec& a, const S_00cd7850_Vec& b, S_00cd7850_Vec* out);
 
 // @fnv 0x00cd7850
-int FUN_00cd7850(const S_00cd7850_Vec& position, const S_00cd7850_Vec* tri, const S_00cd7850_Cache& cache,
+// src: XBOX_PDB 0x00cd7850
+int hkpCollideTriangleUtil_closestPointTriangle(const S_00cd7850_Vec& position, const S_00cd7850_Vec* tri, const S_00cd7850_Cache& cache,
                  S_00cd7850_Result& result, S_00cd7850_Features* featuresOut)
 {
     if (featuresOut)
@@ -200,7 +201,7 @@ int FUN_00cd7850(const S_00cd7850_Vec& position, const S_00cd7850_Vec* tri, cons
     if (index < 0)
     {
         index += 8;
-        int code = FUN_00d230e0(position, tri[DAT_010cb440[index + 2]], tri[DAT_010cb440[index]], &uvw);
+        int code = hkLineSegmentUtil_closestPointLineSeg(position, tri[DAT_010cb440[index + 2]], tri[DAT_010cb440[index]], &uvw);
         if (featuresOut)
         {
             if (code == 4)
@@ -226,8 +227,8 @@ int FUN_00cd7850(const S_00cd7850_Vec& position, const S_00cd7850_Vec* tri, cons
     }
 
     S_00cd7850_Vec p1;
-    int code0 = FUN_00d230e0(position, tri[index], tri[DAT_010cb440[index + 2]], &uvw);
-    int code1 = FUN_00d230e0(position, tri[DAT_010cb440[index]], tri[index], &p1);
+    int code0 = hkLineSegmentUtil_closestPointLineSeg(position, tri[index], tri[DAT_010cb440[index + 2]], &uvw);
+    int code1 = hkLineSegmentUtil_closestPointLineSeg(position, tri[DAT_010cb440[index]], tri[index], &p1);
     S_00cd7850_Vec deltaA;
     deltaA.setSub4(position, uvw);
     S_00cd7850_Vec deltaB;

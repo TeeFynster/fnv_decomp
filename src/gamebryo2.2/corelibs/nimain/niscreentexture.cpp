@@ -46,7 +46,8 @@ extern int DAT_010a048c;
 void __cdecl _NiFreeAlias(void*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 // @fnv 0x00a95590
-void NiScreenTexture::FUN_00a95590()
+// src: GUESS 0x00a95590 (confidence: medium)
+void NiScreenTexture::ReleaseReference_00a95590()
 {
     *reinterpret_cast<void**>(this) = (void*)&DAT_010a048c;
     NiRenderer* r = NiRenderer::ms_pRenderer;
@@ -71,7 +72,7 @@ void __cdecl _delete(void*, unsigned int);
 // @fnv 0x00a95740
 void* __thiscall NiScreenTexture::FUN_00a95740(unsigned int flags)
 {
-    FUN_00a95590();
+    ReleaseReference_00a95590();
     if (flags & 1)
         _delete(this, sizeof(NiScreenTexture));
     return this;
@@ -137,8 +138,8 @@ void NiScreenTexture::SaveBinary(NiStream& kStream)
     kStream.SaveLinkID(reinterpret_cast<const NiObject*>(m_pTexturingProperty));
 }
 
-void* __cdecl FUN_00aa1070(unsigned int bytes);
-void __cdecl FUN_00aa10f0(void* memory);
+void* __cdecl _NiMalloc_00aa1070(unsigned int bytes);
+void __cdecl _NiFree_00aa10f0(void* memory);
 
 struct ScreenRectArray
 {
@@ -156,7 +157,7 @@ void ScreenRectArray::Resize(unsigned int uiNewCapacity)
         RendererDataRecord* pNew;
         if (uiNewCapacity > 0)
         {
-            pNew = static_cast<RendererDataRecord*>(FUN_00aa1070(uiNewCapacity * sizeof(RendererDataRecord)));
+            pNew = static_cast<RendererDataRecord*>(_NiMalloc_00aa1070(uiNewCapacity * sizeof(RendererDataRecord)));
             for (unsigned int i = 0; i < m_uiAllocatedCapacity; ++i)
             {
                 pNew[i] = m_pBase[i];
@@ -166,7 +167,7 @@ void ScreenRectArray::Resize(unsigned int uiNewCapacity)
         {
             pNew = 0;
         }
-        FUN_00aa10f0(m_pBase);
+        _NiFree_00aa10f0(m_pBase);
         m_pBase = pNew;
         m_uiElementCount = uiNewCapacity;
     }
@@ -223,7 +224,7 @@ void ScreenCopy::CopyTo(ScreenCopy* dest, void* cloning)
     dest->flags = flags;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 // Initialize the base explicitly; NiScreenTexture has no shared constructor declaration.
 static inline void InitScreenTextureBase(NiScreenTexture* p) throw()
@@ -233,9 +234,10 @@ static inline void InitScreenTextureBase(NiScreenTexture* p) throw()
 }
 
 // @fnv 0x00a958b0
-NiScreenTexture* __cdecl FUN_00a958b0()
+// src: EXE 0x00a958b0
+NiScreenTexture* __cdecl NiScreenTexture_CreateObject()
 {
-    NiScreenTexture* p = (NiScreenTexture*)FUN_00aa13e0(sizeof(NiScreenTexture));
+    NiScreenTexture* p = (NiScreenTexture*)Object_DispatchCommandFour(sizeof(NiScreenTexture));
     if (p != 0)
     {
         ::new (p) NiObject;
@@ -390,7 +392,7 @@ static inline unsigned int* InitTexProp(unsigned int* p) throw()
 // @fnv 0x00a95c10
 NiObject* NiScreenTexture::MakeClone(CloningProcess& cloning)
 {
-    NiScreenTexture* object = static_cast<NiScreenTexture*>(FUN_00aa13e0(sizeof(NiScreenTexture)));
+    NiScreenTexture* object = static_cast<NiScreenTexture*>(Object_DispatchCommandFour(sizeof(NiScreenTexture)));
     if (object)
     {
         InitScreenTextureBase(object);

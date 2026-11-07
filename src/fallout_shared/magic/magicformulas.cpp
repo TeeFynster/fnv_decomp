@@ -12,13 +12,13 @@ int FlaggedData::ContainsAnyFlag(unsigned int mask)
 // @fnv 0x00703350
 int FlaggedData::GetPlayerValue()
 {
-    if (FUN_004b7210() && reinterpret_cast<QuestStage*>(FUN_004b7210())->GetIndex())
-        return reinterpret_cast<int>(FUN_004b7210()->FUN_00874480());
+    if (InterfaceManager_GetSingleton() && reinterpret_cast<QuestStage*>(InterfaceManager_GetSingleton())->GetIndex())
+        return reinterpret_cast<int>(InterfaceManager_GetSingleton()->Projectile_GetShooter());
     return 0;
 }
 
-float __cdecl FUN_00404010(float, float);
-float __cdecl FUN_004dd130(float, float);
+float __cdecl BSMAX_00404010(float, float);
+float __cdecl pow_004dd130(float, float);
 extern Setting originalRuntimeFloatSetting1116;
 extern Setting originalRuntimeFloatSetting1114;
 extern Setting originalRuntimeFloatSetting1209;
@@ -32,25 +32,27 @@ float __cdecl CalcEffectCost(float afBaseEffectCost, int aiArea, int aiDuration,
     float fmagnitudeModifier;
     float fareaModifier;
     float fbaseCost;
-    fareaModifier = FUN_00404010(*originalRuntimeFloatSetting1114.Float() * (float)aiArea, 1.0f);
+    fareaModifier = BSMAX_00404010(*originalRuntimeFloatSetting1114.Float() * (float)aiArea, 1.0f);
     fdurationModifier =
         afBaseEffectCost * *originalRuntimeFloatSetting1115.Float() * (aiDuration == 0 ? 1.0f : (float)aiDuration);
     fmagnitudeModifier =
-        aiMagnitude == 0 ? 1.0f : FUN_004dd130((float)aiMagnitude, *originalRuntimeFloatSetting1209.Float());
+        aiMagnitude == 0 ? 1.0f : pow_004dd130((float)aiMagnitude, *originalRuntimeFloatSetting1209.Float());
     fbaseCost = fareaModifier * fdurationModifier * fmagnitudeModifier;
     return (abIsRangeTarget ? *originalRuntimeFloatSetting1116.Float() : 1.0f) * fbaseCost;
 }
 
 // @fnv 0x006494b0
-float FUN_006494b0(float afA, float afB)
+// src: XBOX_PDB 0x006494b0
+float NiPow_006494b0(float afA, float afB)
 {
-    return FUN_004dd130(afA, afB);
+    return pow_004dd130(afA, afB);
 }
 
 extern double g_d100;
 // Returns 0 if either input is at least g_d100, otherwise computes 1 - ((1 - a/g_d100) * (b/g_d100) + a/g_d100).
 // @fnv 0x006492a0
-float FUN_006492a0(float a, float b)
+// src: COMMUNITY 0x006492a0
+float MagicFormulas_GetMagicTargetResistance(float a, float b)
 {
     if (a >= g_d100 || b >= g_d100)
         return 0.0f;
@@ -67,7 +69,8 @@ extern Setting originalRuntimeFloatSetting1183;
 extern Setting g_011d1a14;
 // Scales afMagnitude by a runtime float setting and returns true if the result reaches the global int threshold or is at least aiTargetLevel.
 // @fnv 0x006494d0
-bool FUN_006494d0(int aiTargetLevel, float afMagnitude)
+// src: XBOX_PDB 0x006494d0
+bool MagicFormulas_CheckTargetLevelMagnitude(int aiTargetLevel, float afMagnitude)
 {
     float fScaledMagnitude;
     fScaledMagnitude = afMagnitude * *originalRuntimeFloatSetting1183.Float();
@@ -107,11 +110,12 @@ extern Setting g_011d1938;
 extern Setting originalRuntimeFloatSetting1161;
 extern Setting originalRuntimeFloatSetting1160;
 extern Setting originalRuntimeFloatSetting1159;
-float FUN_006494b0(float f, float g);
+float NiPow_006494b0(float f, float g);
 
 // Returns 0 outside [afStart, afEnd]; otherwise scales afBase by a curve from afTime, afSkill and settings, with flag-dependent multipliers.
 // @fnv 0x00649390
-float __cdecl FUN_00649390(float afBase, float afTime, float afStart, float afEnd, bool abFlag1, float afSkill,
+// src: XBOX_PDB 0x00649390
+float __cdecl MagicFormulas_CalcSunDamage(float afBase, float afTime, float afStart, float afEnd, bool abFlag1, float afSkill,
                            bool abFlag2)
 {
     if (afTime < afStart || afTime > afEnd)
@@ -127,7 +131,7 @@ float __cdecl FUN_00649390(float afBase, float afTime, float afStart, float afEn
             fRatio9 = (fMid - afTime) / (fMid - afEnd);
         else
             fRatio9 = (fMid - afTime) / (fMid - afStart);
-        fRatio9 = 1.0f - FUN_006494b0(fRatio9, 4.0f);
+        fRatio9 = 1.0f - NiPow_006494b0(fRatio9, 4.0f);
         fSkillMult = (1.0f - *g_011d1938.Float()) * afSkill + *g_011d1938.Float();
         fFlag1Mult4 = !abFlag1 ? *originalRuntimeFloatSetting1161.Float() : 1.0f;
         fFlag2Mult_ = abFlag2 ? *originalRuntimeFloatSetting1160.Float() : 1.0f;

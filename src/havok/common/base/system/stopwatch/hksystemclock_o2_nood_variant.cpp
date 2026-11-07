@@ -16,13 +16,14 @@ struct Obj
     virtual long long v1();
     virtual long long v2();
     virtual long long GetCounter();
-    unsigned __int64 FUN_00dd8e20();
+    unsigned __int64 hkWindowsSystemClock_getTicksPerSecond();
 };
 
 unsigned __int64 g_freq;
 
 // @fnv 0x00dd8e20
-unsigned __int64 Obj::FUN_00dd8e20()
+// src: HAVOK_LIB 0x00dd8e20
+unsigned __int64 Obj::hkWindowsSystemClock_getTicksPerSecond()
 {
     if (g_freq != 0)
         return g_freq;

@@ -9,7 +9,7 @@ class ContainerItemExtra
   public:
     unsigned int data[3];
     ContainerItemExtra();
-    void FUN_0040eb90(float);
+    void ContainerItemExtra_AdjustHealthPercent(float);
     void InitItem(TESForm*);
 };
 class LeveledObject;

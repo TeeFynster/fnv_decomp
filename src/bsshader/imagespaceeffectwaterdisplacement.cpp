@@ -178,7 +178,7 @@ struct GameObject
     float accumulated;
     float step;
 
-    void FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4);
+    void ImageSpaceEffectWaterDisplacement_Render(void* arg1, void* arg2, int arg3, int arg4);
 };
 
 extern float DAT_010313d4;
@@ -213,7 +213,8 @@ static HolderForAccum* GetNode(HolderForAccum* p)
 }
 
 // @fnv 0x00ba0900
-void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
+// src: XBOX_PDB 0x00ba0900
+void GameObject::ImageSpaceEffectWaterDisplacement_Render(void* arg1, void* arg2, int arg3, int arg4)
 {
     if (DAT_011fffed)
     {
@@ -234,10 +235,10 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
     ImageSpaceTexture tex64;
     ImageSpaceTexture tex34;
 
-    tex64.FUN_00ba3840(8);
+    tex64.ImageSpaceTexture_BorrowRenderedTexture(8);
 
-    tex34.FUN_00ba37a0((BSRenderedTexture*)new RenderedTextureWrapper(tex64.FUN_00ba3770()->FUN_004bc320(), 0, 1,
-                                         ((RenderTargetGroup*)GetAsset<1>()->FUN_00ba3770()->GetGroup())->GetView()));
+    tex34.ImageSpaceTexture_SetTexture((BSRenderedTexture*)new RenderedTextureWrapper(tex64.ImageSpaceTexture_GetRenderedTexture()->BSRenderedTexture_GetTexture(), 0, 1,
+                                         ((RenderTargetGroup*)GetAsset<1>()->ImageSpaceTexture_GetRenderedTexture()->GetGroup())->GetView()));
 
     ImageSpaceTexture tex44;
 
@@ -250,9 +251,9 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
         node->SetAccumulatorAt(1, assets[1], 1);
         node->Dispatch(arg1, arg2, pEmitter, 1);
 
-        tex44.FUN_00ba3940(assets[1]);
-        tex54.FUN_00ba3940(&tex34);
-        tex34.FUN_00ba3940(&tex44);
+        tex44.InitializeFields_00ba3940(assets[1]);
+        tex54.InitializeFields_00ba3940(&tex34);
+        tex34.InitializeFields_00ba3940(&tex44);
         DAT_011fffec = 0;
     }
 
@@ -290,10 +291,10 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
                     localData0->FUN_00a87ae0(4, 0, 0);
                     NiScreenElementsData* localData1 = (NiScreenElementsData*)widget->m_spModelData.m_pObject;
                     localData1->SetRectangle(0, 0.0f, DAT_01013ea4, 1.0f, DAT_010542a4);
-                    ((NiScreenElementsData*)widget->m_spModelData.m_pObject)->FUN_00a87900();
+                    ((NiScreenElementsData*)widget->m_spModelData.m_pObject)->NiScreenElementsData_UpdateBound();
                     NiScreenElementsData* localData2 = (NiScreenElementsData*)widget->m_spModelData.m_pObject;
                     localData2->FUN_00a88130(0, 0, 0.0f, 0.0f, 1.0f, 1.0f);
-                    widget->FUN_00a5a040();
+                    widget->UpdateProperties();
 
                     NiUpdateData kData(0.0f);
                     widget->Update(&kData);
@@ -341,9 +342,9 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
     }
 
     DAT_01200000 = 0;
-    tex44.FUN_00ba3940(assets[1]);
-    tex54.FUN_00ba3940(&tex34);
-    tex34.FUN_00ba3940(&tex44);
+    tex44.InitializeFields_00ba3940(assets[1]);
+    tex54.InitializeFields_00ba3940(&tex34);
+    tex34.InitializeFields_00ba3940(&tex44);
 
     int frames = 0;
     while (time - previous > step)
@@ -363,9 +364,9 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
             node->SetAccumulatorAt(1, &tex54, 1);
             node->Dispatch(arg1, arg2, pEmitter, 1);
             DAT_01200000 = 1;
-            tex44.FUN_00ba3940(&tex54);
-            tex54.FUN_00ba3940(&tex34);
-            tex34.FUN_00ba3940(&tex44);
+            tex44.InitializeFields_00ba3940(&tex54);
+            tex54.InitializeFields_00ba3940(&tex34);
+            tex34.InitializeFields_00ba3940(&tex44);
         }
     }
 
@@ -373,12 +374,12 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
     {
         void* renderer = DAT_011f9508;
         ImageSpaceManager* pManager = DAT_011f91ac;
-        pManager->FUN_00b97550(0x22, renderer, tex54.FUN_00ba3770(), tex34.FUN_00ba3770(), 0, 1);
+        pManager->ImageSpaceManager_RenderEffect(0x22, renderer, tex54.ImageSpaceTexture_GetRenderedTexture(), tex34.ImageSpaceTexture_GetRenderedTexture(), 0, 1);
     }
 
     if (tex64.GetTexture())
     {
-        tex64.FUN_00ba39a0();
+        tex64.ImageSpaceTexture_ReturnRenderedTexture();
     }
 }
 
@@ -664,7 +665,7 @@ class ImageSpaceShaderParam : public ImageSpaceEffectParam
     int m_84;
     ImageSpaceShaderParam();
     void FUN_00b8ab10(int a, int b);
-    void FUN_00b8a7c0();
+    void SetBlurClearMode();
 };
 struct Sub
 {
@@ -833,7 +834,7 @@ void ImageSpaceEffect::InitFromConfig(Src* config, int unused)
         param = new ImageSpaceShaderParam;
         param->FUN_00b8ab10(2, 6);
         param->m_55 = 0;
-        param->FUN_00b8a7c0();
+        param->SetBlurClearMode();
         m_18.FUN_00ba3aa0(0, param);
         int value = config->m_08->f1a4;
         FUN_00ba3c70(0, value, param, 0);
@@ -843,7 +844,7 @@ void ImageSpaceEffect::InitFromConfig(Src* config, int unused)
         param = new ImageSpaceShaderParam;
         param->FUN_00b8ab10(2, 6);
         param->m_55 = 0;
-        param->FUN_00b8a7c0();
+        param->SetBlurClearMode();
         m_18.FUN_00ba3aa0(1, param);
         int value = config->m_08->f1a8;
         FUN_00ba3c70(1, value, param, 0);
@@ -893,7 +894,7 @@ void ImageSpaceEffect::InitFromConfig(Src* config, int unused)
         param = new ImageSpaceShaderParam;
         param->FUN_00b8ab10(2, 6);
         param->m_55 = 0;
-        param->FUN_00b8a7c0();
+        param->SetBlurClearMode();
         m_18.FUN_00ba3aa0(6, param);
         int value = config->m_08->f1bc;
         FUN_00ba3c70(6, value, param, 0);
@@ -903,7 +904,7 @@ void ImageSpaceEffect::InitFromConfig(Src* config, int unused)
         param = new ImageSpaceShaderParam;
         param->FUN_00b8ab10(2, 6);
         param->m_55 = 0;
-        param->FUN_00b8a7c0();
+        param->SetBlurClearMode();
         m_18.FUN_00ba3aa0(7, param);
         int value = config->m_08->f1c0;
         FUN_00ba3c70(7, value, param, 0);
@@ -913,7 +914,7 @@ void ImageSpaceEffect::InitFromConfig(Src* config, int unused)
         param = new ImageSpaceShaderParam;
         param->FUN_00b8ab10(2, 6);
         param->m_55 = 0;
-        param->FUN_00b8a7c0();
+        param->SetBlurClearMode();
         m_18.FUN_00ba3aa0(8, param);
         int value = config->m_08->f1c4;
         FUN_00ba3c70(8, value, param, 0);

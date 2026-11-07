@@ -12,9 +12,9 @@ public:
 
     void* ScalarDeletingDestructor(unsigned int flags);
     void Destroy();
-    bool FUN_004210c0(BSExtraData* apCompare);
+    bool Compare_004210c0(BSExtraData* apCompare);
     void* FUN_00421130(unsigned int flags);
-    void FUN_00421160();
+    void ReleaseStorage();
 
     CollisionData* m_pCollisionData;
 };

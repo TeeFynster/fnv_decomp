@@ -35,7 +35,7 @@ using ::DAT_01011d78;
 struct __declspec(align(16)) WheelUpdateVector
 {
     float x, y, z, w;
-    void FUN_00c7f700(hkRotation* rot, WheelUpdateVector* dir) throw();
+    void hkVector4_setRotatedDir(hkRotation* rot, WheelUpdateVector* dir) throw();
 };
 
 class WheelUpdateEntity
@@ -182,7 +182,7 @@ void hkpVehicleInstance::UpdateVehicle(hkReal dt, const hkpVehicleWheelCollide::
             result = ::_mm_add_ps(result, result);
             WheelUpdateVector spin;
             *(WheelUpdateSimd*)&spin = result;
-            ((WheelUpdateVector*)&wheel->unka0)->FUN_00c7f700(chassisRot, &spin);
+            ((WheelUpdateVector*)&wheel->unka0)->hkVector4_setRotatedDir(chassisRot, &spin);
             ++ci;
             ++i;
         } while (i < ((VUC_Data*)self->m_data)->m_iWheelCount);
@@ -219,7 +219,7 @@ struct Accumulator
     hkVector4 m_vec40;
     hkRotation m_rotation;
 
-    void FUN_00d72030(const Accumulator& other);
+    void InitializeFields_00d72030(const Accumulator& other);
 };
 
 class AxleParams
@@ -422,7 +422,7 @@ class AxleDataView
     int m_iWheelCount;
 };
 
-extern "C" void __cdecl FUN_00d29830(void* arg1, GroundMotion** motions, int numMotions, int offset,
+extern "C" void __cdecl hkRigidMotionUtilApplyForcesAndBuildAccumulators(void* arg1, GroundMotion** motions, int numMotions, int offset,
                                      Accumulator* accumOut);
 
 class Vehicle : public hkpVehicleInstance
@@ -436,7 +436,7 @@ class Vehicle : public hkpVehicleInstance
         reinterpret_cast<Prepare>((*reinterpret_cast<void***>(this))[15])(this, body, contact);
     }
 
-    void FUN_00e37d60(void* arg1, GroundBody** arg2, Accumulator* arg3, Accumulator* arg4, AxleParams* arg5);
+    void ProcessEntries_00e37d60(void* arg1, GroundBody** arg2, Accumulator* arg3, Accumulator* arg4, AxleParams* arg5);
 };
 
 __forceinline void normalizeDirection(hkVector4& v)
@@ -475,7 +475,8 @@ __forceinline void rotateDirection(hkVector4& out, const hkRotation& a, const Ax
 }
 
 // @fnv 0x00e37d60
-void Vehicle::FUN_00e37d60(void* arg1, GroundBody** arg2, Accumulator* arg3, Accumulator* arg4, AxleParams* arg5)
+// src: GUESS 0x00e37d60 (confidence: low)
+void Vehicle::ProcessEntries_00e37d60(void* arg1, GroundBody** arg2, Accumulator* arg3, Accumulator* arg4, AxleParams* arg5)
 {
     int i = 0;
     if (reinterpret_cast<AxleDataView*>(m_data)->m_iWheelCount <= 0)
@@ -518,7 +519,7 @@ void Vehicle::FUN_00e37d60(void* arg1, GroundBody** arg2, Accumulator* arg3, Acc
         else
         {
             GroundMotion* motion = &body->m_pMotionState;
-            FUN_00d29830(arg1, &motion, 1, 0, out1);
+            hkRigidMotionUtilApplyForcesAndBuildAccumulators(arg1, &motion, 1, 0, out1);
 
             float invMass1 = inverseMass(reinterpret_cast<GroundBody*>(m_pEntity)->m_pMotionState.unkC0);
             float invMass2 = inverseMass(motion->unkC0);
@@ -537,7 +538,7 @@ void Vehicle::FUN_00e37d60(void* arg1, GroundBody** arg2, Accumulator* arg3, Acc
             VelocityVector angVel;
             angVel.setMul4(motion->getInvDeltaTime(), motion->unkA0);
 
-            out2->FUN_00d72030(*out1);
+            out2->InitializeFields_00d72030(*out1);
             wheelInfo->m_contactBody2 = out2;
 
             rotateDirection(out2->m_contactNormal, out1->m_rotation, angVel.q);

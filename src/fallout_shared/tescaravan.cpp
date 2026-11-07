@@ -354,7 +354,8 @@ bool TESCaravanCard::Load(TESFile* file)
 }
 
 // @fnv 0x00503650
-TESTexture* TESCaravanCard::FUN_00503650()
+// src: XBOX_PDB 0x00503650
+TESTexture* TESCaravanCard::GetBackTexture()
 {
     return &m_kBackTexture;
 }
@@ -399,7 +400,7 @@ void FUN_0059b9c0_shell::ClearListAndData()
 
 struct FUN_0048e370_shell
 {
-    void FUN_0048e370(int);
+    void TESTexture_Save(int);
 };
 struct FUN_0047b560_shell
 {
@@ -415,26 +416,26 @@ struct FUN_00485680
 };
 struct S_00487010
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 struct FUN_00485e00_shell
 {
-    void FUN_00485e00();
+    void TESForm_SaveData();
 };
 
 // @fnv 0x0059b1b0
 void TESCaravanMoney::SaveForm()
 {
-    TESForm::FUN_004855a0();
-    ((S_00487010*)((char*)this + 0x30))->FUN_00487010();
+    TESForm::BeginFormRecord();
+    ((S_00487010*)((char*)this + 0x30))->Save_00487010();
     reinterpret_cast<TESModelTextureSwap*>(reinterpret_cast<char*>(this) + sizeof(TESBoundObject) + sizeof(TESFullName))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    ((FUN_0048e370_shell*)((char*)this + 0x5c))->FUN_0048e370(0x4e4f4349);
+    ((FUN_0048e370_shell*)((char*)this + 0x5c))->TESTexture_Save(0x4e4f4349);
     BGSMessageIcon::Save(0x4f43494d);
     ((FUN_0047b560_shell*)((char*)this + 0x80))->LogFormIDs();
-    ((FUN_00485e00_shell*)this)->FUN_00485e00();
+    ((FUN_00485e00_shell*)this)->TESForm_SaveData();
     ((TESModelTextureSwap*)GetModelTextureSwap(0))->ProcessAndFreeData(0x32444f4d, 0x54444f4d, 0x53444f4d);
     ((TESModelTextureSwap*)GetModelTextureSwap(1))->ProcessAndFreeData(0x33444f4d, 0x54444f4d, 0x53444f4d);
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 void _Deallocate(void*);
@@ -454,11 +455,11 @@ void* CaravanCardRelease::Release(unsigned int flags)
 
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
 struct S_0048cca0
 {
-    void FUN_0048cca0();
+    void Save_0048cca0();
 };
 struct FUN_0047b560_holder
 {
@@ -474,19 +475,19 @@ struct CaravanCardWriter : TESCaravanCard
 // @fnv 0x0059a720
 void CaravanCardWriter::SaveForm()
 {
-    TESForm::FUN_004855a0();
-    ((S_00487010*)((char*)this + 0x30))->FUN_00487010();
+    TESForm::BeginFormRecord();
+    ((S_00487010*)((char*)this + 0x30))->Save_00487010();
     reinterpret_cast<TESModelTextureSwap*>(reinterpret_cast<char*>(this) + sizeof(TESBoundObject) + sizeof(TESFullName))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    ((FUN_0048e370_obj*)((char*)this + 0x5c))->FUN_0048e370(0x4e4f4349);
+    ((FUN_0048e370_obj*)((char*)this + 0x5c))->TESTexture_Save(0x4e4f4349);
     BGSMessageIcon::Save(0x4f43494d);
-    ((S_0048cca0*)((char*)this + 0x80))->FUN_0048cca0();
+    ((S_0048cca0*)((char*)this + 0x80))->Save_0048cca0();
     ((FUN_0047b560_holder*)((char*)this + 0x8c))->LogFormIDs();
-    ((FUN_0048e370_obj*)static_cast<CaravanCardAccess*>(static_cast<TESCaravanCard*>(this))->GetFrontTexture())->FUN_0048e370(0x30305854);
-    ((FUN_0048e370_obj*)FUN_00503650())->FUN_0048e370(0x31305854);
+    ((FUN_0048e370_obj*)static_cast<CaravanCardAccess*>(static_cast<TESCaravanCard*>(this))->GetFrontTexture())->TESTexture_Save(0x30305854);
+    ((FUN_0048e370_obj*)GetBackTexture())->TESTexture_Save(0x31305854);
     _FUN_00485910(0x56544e49, data.m_uiSecondValue);
     _FUN_00485910(0x56544e49, data.m_uiFirstValue);
-    ((FUN_00485e00_shell*)this)->FUN_00485e00();
-    TESForm::FUN_00485680();
+    ((FUN_00485e00_shell*)this)->TESForm_SaveData();
+    TESForm::FinishFormRecord();
 }
 
 struct CaravanCardSaveGame : TESCaravanCard
@@ -540,17 +541,17 @@ struct FUN_004855a0
 };
 struct S_00487010
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
-extern "C" void __cdecl FUN_00485910(int, unsigned int);
-extern "C" bool __cdecl FUN_00401500();
+extern "C" void __cdecl TESForm_AddChunk_00485910(int, unsigned int);
+extern "C" bool __cdecl TESForm_QEndianSwapOnSave();
 struct BipedModelForm
 {
     void Endian();
 };
 struct FUN_00485e00_shell
 {
-    void FUN_00485e20(int, int);
+    void TESForm___SaveData(int, int);
 };
 struct FUN_00485680
 {
@@ -561,26 +562,27 @@ struct FUN_0059ba80_shell : public FUN_004855a0
 {
     BSSimpleList<TESCaravanCard*>* m_pCardListHeadCur;
     BipedModelForm data;
-    void FUN_00485e20(int, int);
+    void TESForm___SaveData(int, int);
     void M();
-    void FUN_0059ba80();
+    void TESCaravanDeck_SaveAlt();
 };
 
 // @fnv 0x0059ba80
-void FUN_0059ba80_shell::FUN_0059ba80()
+// src: COMMUNITY 0x0059ba80
+void FUN_0059ba80_shell::TESCaravanDeck_SaveAlt()
 {
     M();
-    ((S_00487010*)((char*)this + 0x18))->FUN_00487010();
+    ((S_00487010*)((char*)this + 0x18))->Save_00487010();
     BSSimpleList<TESCaravanCard*>* current = (BSSimpleList<TESCaravanCard*>*)((BSThread*)this)->GetThreadID();
     while (current && current->GetItem())
     {
-        FUN_00485910(0x44524143, current->GetItem()->GetFormID());
+        TESForm_AddChunk_00485910(0x44524143, current->GetItem()->GetFormID());
         current = current->GetNext();
     }
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         ((BipedModelForm*)((char*)this + 0x28))->Endian();
-    FUN_00485e20((int)((char*)this + 0x28), 4);
-    if (FUN_00401500())
+    TESForm___SaveData((int)((char*)this + 0x28), 4);
+    if (TESForm_QEndianSwapOnSave())
         ((BipedModelForm*)((char*)this + 0x28))->Endian();
     ((FUN_00485680*)this)->M();
 }
@@ -622,7 +624,7 @@ struct FUN_00401170_shell
 
 struct CaravanMoneyCopy : TESCaravanMoney
 {
-    void FUN_004851b0(void* source);
+    void TESForm_CopyAllComponents(void* source);
     void FUN_004f15a0(void* type);
     void CopyFrom(int source);
 };
@@ -636,7 +638,7 @@ void CaravanMoneyCopy::CopyFrom(int a1)
     }
     else
     {
-        FUN_004851b0(p);
+        TESForm_CopyAllComponents(p);
         m_kModelTextureSwaps[0].SetModelFilePath(static_cast<TESCaravanMoney*>(p)->GetModelTextureSwap(0)->GetModelFilePath());
         m_kModelTextureSwaps[1].SetModelFilePath(static_cast<TESCaravanMoney*>(p)->GetModelTextureSwap(1)->GetModelFilePath());
         FUN_004f15a0(((FUN_00401170_shell*)a1)->FUN_00401170());
@@ -710,7 +712,7 @@ struct P24c
 
 struct FUN_0059bd50_cls
 {
-    void FUN_004851b0(L1c* rec);
+    void TESForm_CopyAllComponents(L1c* rec);
     void FUN_004f15a0(unsigned int v);
     unsigned int unk00;
     unsigned int unk04;
@@ -737,7 +739,7 @@ void FUN_0059bd50_cls::LoadDeckData(void* arg)
     }
     else
     {
-        FUN_004851b0(rec);
+        TESForm_CopyAllComponents(rec);
         while (p24 != 0 && !p24->FUN_008256d0())
             p24->FUN_0063f7b0();
         Itc* it = rec->FUN_0059bb30();
@@ -767,7 +769,7 @@ void* FUN_00ec43fb(void*, int, void*, void*, int);
 class StrB
 {
   public:
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 class StrSet
 {
@@ -781,7 +783,7 @@ class FormA
 };
 struct CaravanCardCopy : TESCaravanCard
 {
-    void FUN_004851b0(CaravanCardAccess* source);
+    void TESForm_CopyAllComponents(CaravanCardAccess* source);
     void FUN_004f15a0(int type);
     void CopyFrom(FormA* form);
 };
@@ -791,9 +793,9 @@ void CaravanCardCopy::CopyFrom(FormA* pForm)
     CaravanCardAccess* pSrc = (CaravanCardAccess*)FUN_00ec43fb(pForm, 0, &DAT_01183028, &DAT_0118c5c4, 0);
     if (!pSrc)
         return;
-    FUN_004851b0(pSrc);
-    reinterpret_cast<StrSet*>(&m_kFrontTexture)->FUN_00489100(reinterpret_cast<StrB*>(pSrc->GetFrontTexture())->FUN_00408da0());
-    reinterpret_cast<StrSet*>(&m_kBackTexture)->FUN_00489100(reinterpret_cast<StrB*>(pSrc->FUN_00503650())->FUN_00408da0());
+    TESForm_CopyAllComponents(pSrc);
+    reinterpret_cast<StrSet*>(&m_kFrontTexture)->FUN_00489100(reinterpret_cast<StrB*>(pSrc->GetFrontTexture())->TESModel_GetModel());
+    reinterpret_cast<StrSet*>(&m_kBackTexture)->FUN_00489100(reinterpret_cast<StrB*>(pSrc->GetBackTexture())->TESModel_GetModel());
     data = *pSrc->GetCardData();
     FUN_004f15a0(pForm->FUN_00401170());
 }
@@ -807,14 +809,14 @@ extern "C" void* DAT_01183028;
 
 struct StrHelper_00408da0
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 
-int FUN_00408b20(const char*, const char*);
+int BSstrcmp(const char*, const char*);
 
 struct CaravanCardCompare : TESCaravanCard
 {
-    bool FUN_00485270(CaravanCardAccess* card);
+    bool TESForm_CompareAllComponents(CaravanCardAccess* card);
     bool IsDifferentFromCard(void* card);
 };
 
@@ -825,11 +827,11 @@ bool CaravanCardCompare::IsDifferentFromCard(void* apCard)
     CaravanCardAccess* card = (CaravanCardAccess*)FNV_DynamicCast(apCard, 0, &DAT_01183028, &DAT_0118c5c4, 0);
     if (!card)
         return true;
-    if (this->FUN_00485270(card))
+    if (this->TESForm_CompareAllComponents(card))
         return true;
-    if (FUN_00408b20(reinterpret_cast<StrHelper_00408da0*>(&m_kFrontTexture)->FUN_00408da0(), reinterpret_cast<StrHelper_00408da0*>(card->GetFrontTexture())->FUN_00408da0()))
+    if (BSstrcmp(reinterpret_cast<StrHelper_00408da0*>(&m_kFrontTexture)->TESModel_GetModel(), reinterpret_cast<StrHelper_00408da0*>(card->GetFrontTexture())->TESModel_GetModel()))
         return true;
-    if (FUN_00408b20(reinterpret_cast<StrHelper_00408da0*>(&m_kBackTexture)->FUN_00408da0(), reinterpret_cast<StrHelper_00408da0*>(card->FUN_00503650())->FUN_00408da0()))
+    if (BSstrcmp(reinterpret_cast<StrHelper_00408da0*>(&m_kBackTexture)->TESModel_GetModel(), reinterpret_cast<StrHelper_00408da0*>(card->GetBackTexture())->TESModel_GetModel()))
         return true;
     if (memcmp(&data, card->GetCardData(), 8))
         return true;
@@ -862,7 +864,7 @@ bool TESCaravanDeck::Compare(TESForm* form)
     return false;
 }
 
-int __cdecl FUN_00408b20(const char*, const char*);
+int __cdecl BSstrcmp(const char*, const char*);
 
 // @fnv 0x0059b740
 bool TESCaravanMoney::Compare(TESForm* other)
@@ -875,11 +877,11 @@ bool TESCaravanMoney::Compare(TESForm* other)
     if (TESForm::Compare(compared))
         return true;
 
-    if (FUN_00408b20(m_kModelTextureSwaps[0].GetModelFilePath(),
+    if (BSstrcmp(m_kModelTextureSwaps[0].GetModelFilePath(),
                      compared->GetModelTextureSwap(0)->GetModelFilePath()))
         return true;
 
-    if (FUN_00408b20(m_kModelTextureSwaps[1].GetModelFilePath(),
+    if (BSstrcmp(m_kModelTextureSwaps[1].GetModelFilePath(),
                      compared->GetModelTextureSwap(1)->GetModelFilePath()))
         return true;
 

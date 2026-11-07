@@ -66,11 +66,12 @@ struct Owner
     int unk0ac;
     int m_iValue;
 
-    void FUN_005468d0(int iValue);
+    void BSMultiBoundNode_SetCullingMode(int iValue);
 };
 
 // @fnv 0x005468d0
-void Owner::FUN_005468d0(int iValue)
+// src: COMMUNITY 0x005468d0
+void Owner::BSMultiBoundNode_SetCullingMode(int iValue)
 {
     m_iValue = iValue;
 }

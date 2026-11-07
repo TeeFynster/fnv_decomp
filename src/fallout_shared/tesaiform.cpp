@@ -134,10 +134,10 @@ void TESAIForm::CopyAISettings(TESAIForm* source)
 {
     SetAggression(reinterpret_cast<PatrolActorPackageData*>(source)->IsPatrolling(), true);
     SetAssistance(source->GetAssistance());
-    SetConfidence(source->FUN_004f6de0(), true);
-    SetEnergy(reinterpret_cast<BSAudio*>(source)->FUN_005bb4d0(), true);
+    SetConfidence(source->_GetByte05(), true);
+    SetEnergy(reinterpret_cast<BSAudio*>(source)->TESRegionData_GetPriority(), true);
     SetResponsibility(source->GetResponsibility(), true);
-    SetAIMood(source->FUN_0062f2f0());
+    SetAIMood(source->MenuTopic_GetTopicIsChoice());
     SetHasAggroRadius(reinterpret_cast<ActiveEffect*>(source)->FUN_00705cf0());
     SetAggroRadius(reinterpret_cast<TimeGlobal*>(source)->GetTimeStamp());
     SetServiceFlags(reinterpret_cast<TESForm*>(source)->GetFormID(), true);
@@ -293,12 +293,13 @@ void TESAIForm::CopyAIDataFromAIDATA(PackedRecordData* source)
 struct FUN_0047ee00_class
 {
     void DispatchToOuter(int);
-    void FUN_0047ee00(unsigned char value, bool flag);
+    void TESAIForm_SetAggression(unsigned char value, bool flag);
 };
 
 // Stores value at offset 4 of this object and, when flag is set, calls DispatchToOuter with 8.
 // @fnv 0x0047ee00
-void FUN_0047ee00_class::FUN_0047ee00(unsigned char value, bool flag)
+// src: COMMUNITY 0x0047ee00
+void FUN_0047ee00_class::TESAIForm_SetAggression(unsigned char value, bool flag)
 {
     *(unsigned char*)((char*)this + 4) = value;
     if (flag)
@@ -307,12 +308,13 @@ void FUN_0047ee00_class::FUN_0047ee00(unsigned char value, bool flag)
 
 struct FUN_0047eed0_shell : public TESAIForm
 {
-    void FUN_0047eed0(unsigned char, bool);
+    void TESAIForm_SetConfidence(unsigned char, bool);
 };
 
 // Sets confidence to acConfidence and, when abAddChange is true, calls DispatchToOuter with 8.
 // @fnv 0x0047eed0
-void FUN_0047eed0_shell::FUN_0047eed0(unsigned char acConfidence, bool abAddChange)
+// src: COMMUNITY 0x0047eed0
+void FUN_0047eed0_shell::TESAIForm_SetConfidence(unsigned char acConfidence, bool abAddChange)
 {
     confidence = acConfidence;
     if (abAddChange)
@@ -321,12 +323,13 @@ void FUN_0047eed0_shell::FUN_0047eed0(unsigned char acConfidence, bool abAddChan
 
 struct FUN_0047ef00_shell : public TESAIForm
 {
-    void FUN_0047ef00(unsigned char, bool);
+    void TESAIForm_SetEnergy(unsigned char, bool);
 };
 
 // Sets the energy field to acEnergy and, when abAddChange is set, calls DispatchToOuter with 8.
 // @fnv 0x0047ef00
-void FUN_0047ef00_shell::FUN_0047ef00(unsigned char acEnergy, bool abAddChange)
+// src: COMMUNITY 0x0047ef00
+void FUN_0047ef00_shell::TESAIForm_SetEnergy(unsigned char acEnergy, bool abAddChange)
 {
     energy = acEnergy;
     if (abAddChange)
@@ -335,12 +338,13 @@ void FUN_0047ef00_shell::FUN_0047ef00(unsigned char acEnergy, bool abAddChange)
 
 struct FUN_0047ef50_shell : public TESAIForm
 {
-    void FUN_0047ef50(unsigned char, bool);
+    void TESAIForm_SetResponsibility(unsigned char, bool);
 };
 
 // Sets the responsibility field to acResponsibility and, when abAddChange is true, calls DispatchToOuter with 8.
 // @fnv 0x0047ef50
-void FUN_0047ef50_shell::FUN_0047ef50(unsigned char acResponsibility, bool abAddChange)
+// src: COMMUNITY 0x0047ef50
+void FUN_0047ef50_shell::TESAIForm_SetResponsibility(unsigned char acResponsibility, bool abAddChange)
 {
     responsibility = acResponsibility;
     if (abAddChange)
@@ -349,12 +353,13 @@ void FUN_0047ef50_shell::FUN_0047ef50(unsigned char acResponsibility, bool abAdd
 
 struct FUN_0047ef80_shell : public TESAIForm
 {
-    void FUN_0047ef80(unsigned char);
+    void TESAIForm_SetMood(unsigned char);
 };
 
 // If acMood is below 8, stores it in mood and calls DispatchToOuter with 8.
 // @fnv 0x0047ef80
-void FUN_0047ef80_shell::FUN_0047ef80(unsigned char acMood)
+// src: XBOX_PDB 0x0047ef80
+void FUN_0047ef80_shell::TESAIForm_SetMood(unsigned char acMood)
 {
     if (acMood < 8)
     {
@@ -395,14 +400,15 @@ void FUN_0047f020_shell::SetSkill(int aeSkill)
 
 // Returns true when index is between 0x20 and 0x2d inclusive.
 // @fnv 0x0047f060
-bool __cdecl FUN_0047f060(int index)
+// src: XBOX_PDB 0x0047f060
+bool __cdecl ActorValue_IsSkill(int index)
 {
     return index >= 0x20 && index < 0x2e;
 }
 
 struct FUN_0047f4c0_shell : public TESAIForm
 {
-    void FUN_0047f4c0(TESForm*);
+    void TESAIForm_InitItem(TESForm*);
 };
 
 
@@ -410,7 +416,8 @@ extern Setting g_011c5348;
 
 // If the Setting byte is zero, calls InitItem on the conditions object obtained from this, passing apOwner.
 // @fnv 0x0047f4c0
-void FUN_0047f4c0_shell::FUN_0047f4c0(TESForm* apOwner)
+// src: XBOX_PDB 0x0047f4c0
+void FUN_0047f4c0_shell::TESAIForm_InitItem(TESForm* apOwner)
 {
     if (!*g_011c5348.FUN_00408d60())
     {
@@ -421,12 +428,13 @@ void FUN_0047f4c0_shell::FUN_0047f4c0(TESForm* apOwner)
 namespace fnv_0047f500 {
 struct FUN_0047f500_shell : public TESAIForm
 {
-    void FUN_0047f500(TESPackage*);
+    void TESAIForm_AddPackage(TESPackage*);
 };
 
 // Adds the given package to the package list obtained from the form's conditions.
 // @fnv 0x0047f500
-void FUN_0047f500_shell::FUN_0047f500(TESPackage* apPack)
+// src: XBOX_PDB 0x0047f500
+void FUN_0047f500_shell::TESAIForm_AddPackage(TESPackage* apPack)
 {
     ((PackageList*)((BGSCameraPath*)this)->GetConditions())->AddPackage(apPack);
 }
@@ -434,11 +442,12 @@ void FUN_0047f500_shell::FUN_0047f500(TESPackage* apPack)
 
 struct FUN_0062f2f0_shell : public TESAIForm
 {
-    unsigned char FUN_0062f2f0();
+    unsigned char MenuTopic_GetTopicIsChoice();
 };
 
 // @fnv 0x0062f2f0
-unsigned char FUN_0062f2f0_shell::FUN_0062f2f0()
+// src: COMMUNITY 0x0062f2f0
+unsigned char FUN_0062f2f0_shell::MenuTopic_GetTopicIsChoice()
 {
     return *((unsigned char*)this + 8);
 }
@@ -499,7 +508,8 @@ FUN_0047ecb0::~FUN_0047ecb0()
 extern float DAT_011c52a8;
 
 // @fnv 0x0047eeb0
-float __cdecl FUN_0047eeb0(unsigned char a)
+// src: XBOX_PDB 0x0047eeb0
+float __cdecl TESAIForm_GetConfidenceLevel(unsigned char a)
 {
     if (a >= 5)
         return 0.0f;
@@ -508,11 +518,12 @@ float __cdecl FUN_0047eeb0(unsigned char a)
 
 struct FUN_0047f7e0_shell
 {
-    unsigned short __thiscall FUN_0047f7e0(unsigned int aiFlags);
+    unsigned short __thiscall TESAIForm_GetSaveSize(unsigned int aiFlags);
 };
 
 // @fnv 0x0047f7e0
-unsigned short __thiscall FUN_0047f7e0_shell::FUN_0047f7e0(unsigned int aiFlags)
+// src: XBOX_PDB 0x0047f7e0
+unsigned short __thiscall FUN_0047f7e0_shell::TESAIForm_GetSaveSize(unsigned int aiFlags)
 {
     unsigned short isize = 0;
     if (aiFlags & 8)
@@ -553,11 +564,12 @@ TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct FUN_0047f8c0_shell
 {
-    void __thiscall FUN_0047f8c0(unsigned int arg1, unsigned int arg2);
+    void __thiscall TESAIForm_LoadGame(unsigned int arg1, unsigned int arg2);
 };
 
 // @fnv 0x0047f8c0
-void __thiscall FUN_0047f8c0_shell::FUN_0047f8c0(unsigned int uiFlags, unsigned int arg2)
+// src: XBOX_PDB 0x0047f8c0
+void __thiscall FUN_0047f8c0_shell::TESAIForm_LoadGame(unsigned int uiFlags, unsigned int arg2)
 {
     if (uiFlags & 8)
     {
@@ -610,32 +622,34 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct FUN_0047f840_shell
 {
-    void FUN_0047f840(unsigned int aFlags);
+    void TESAIForm_SaveGame(unsigned int aFlags);
 };
 
 // When the flags include 8, passes five consecutive bytes starting at this+4 to TESSaveLoadGame's save routine.
 // @fnv 0x0047f840
-void FUN_0047f840_shell::FUN_0047f840(unsigned int aFlags)
+// src: XBOX_PDB 0x0047f840
+void FUN_0047f840_shell::TESAIForm_SaveGame(unsigned int aFlags)
 {
     if (aFlags & 8)
     {
-        g_TESSaveLoadGame->FUN_008579b0((char*)this + 4, 1);
-        g_TESSaveLoadGame->FUN_008579b0((char*)this + 5, 1);
-        g_TESSaveLoadGame->FUN_008579b0((char*)this + 6, 1);
-        g_TESSaveLoadGame->FUN_008579b0((char*)this + 7, 1);
-        g_TESSaveLoadGame->FUN_008579b0((char*)this + 8, 1);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((char*)this + 4, 1);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((char*)this + 5, 1);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((char*)this + 6, 1);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((char*)this + 7, 1);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((char*)this + 8, 1);
     }
 }
 }  // namespace fnv_0047f840
 
 struct FUN_0047f300_shell
 {
-    bool FUN_0047f300(BaseFormComponent* apCompareFC);
+    bool TESAIForm_CompareComponent(BaseFormComponent* apCompareFC);
 };
 
 // Compares this object with apCompareFC via a TESAIForm cast and many field getters, returning true if any differ or the cast fails.
 // @fnv 0x0047f300
-bool FUN_0047f300_shell::FUN_0047f300(BaseFormComponent* apCompareFC)
+// src: XBOX_PDB 0x0047f300
+bool FUN_0047f300_shell::TESAIForm_CompareComponent(BaseFormComponent* apCompareFC)
 {
     TESAIForm* pCompare = dynamic_cast<TESAIForm*>(apCompareFC);
     if (!pCompare)
@@ -648,16 +662,16 @@ bool FUN_0047f300_shell::FUN_0047f300(BaseFormComponent* apCompareFC)
     if (reinterpret_cast<TESAIForm*>(this)->GetAssistance() != pCompare->GetAssistance())
         return true;
 
-    if (reinterpret_cast<TESAIForm*>(this)->FUN_004f6de0() != pCompare->FUN_004f6de0())
+    if (reinterpret_cast<TESAIForm*>(this)->_GetByte05() != pCompare->_GetByte05())
         return true;
 
-    if (reinterpret_cast<BSAudio*>(this)->FUN_005bb4d0() != reinterpret_cast<BSAudio*>(pCompare)->FUN_005bb4d0())
+    if (reinterpret_cast<BSAudio*>(this)->TESRegionData_GetPriority() != reinterpret_cast<BSAudio*>(pCompare)->TESRegionData_GetPriority())
         return true;
 
     if (reinterpret_cast<TESAIForm*>(this)->GetResponsibility() != pCompare->GetResponsibility())
         return true;
 
-    if (reinterpret_cast<TESAIForm*>(this)->FUN_0062f2f0() != pCompare->FUN_0062f2f0())
+    if (reinterpret_cast<TESAIForm*>(this)->MenuTopic_GetTopicIsChoice() != pCompare->MenuTopic_GetTopicIsChoice())
         return true;
 
     if (reinterpret_cast<TimeGlobal*>(this)->GetTimeStamp() != reinterpret_cast<TimeGlobal*>(pCompare)->GetTimeStamp())
@@ -691,7 +705,7 @@ struct AIFormFlags
     int m_pAuxiliaryObject;
     int m_flags;
     bool HasFlags(int arg);
-    bool FUN_0047f600(TESForm* apForm);
+    bool TESAIForm_SellBuysItem(TESForm* apForm);
 };
 
 struct FormTypeStub
@@ -701,7 +715,8 @@ struct FormTypeStub
 
 // Maps the form's type (and equip type for type 0x2f) to a flag bit and returns the result of HasFlags for that bit.
 // @fnv 0x0047f600
-bool AIFormFlags::FUN_0047f600(TESForm* apForm)
+// src: COMMUNITY 0x0047f600
+bool AIFormFlags::TESAIForm_SellBuysItem(TESForm* apForm)
 {
     bool bResult2 = false;
     int iType8 = ((FormTypeStub*)apForm)->GetFormType();

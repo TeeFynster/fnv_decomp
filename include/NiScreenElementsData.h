@@ -19,7 +19,7 @@ class NiScreenElementsData : public NiTriShapeData
     virtual bool IsEqual(NiObject*) const;
     virtual void GetViewerStrings(NiViewerStringsArray*);
 
-    void FUN_00a87900();
+    void NiScreenElementsData_UpdateBound();
     bool FUN_00a87ae0(int, int, int);
     bool FUN_00a88130(int, int, float, float, float, float);
     void FUN_00a67050(int);

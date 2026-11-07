@@ -6,7 +6,7 @@ class ExtraSeed : public BSExtraData
 {
 public:
     virtual bool Compare(BSExtraData* apCompare);
-    bool FUN_004325e0(BSExtraData* apCompare);
+    bool Compare_004325e0(BSExtraData* apCompare);
 
     ExtraSeed(unsigned char seed);
 

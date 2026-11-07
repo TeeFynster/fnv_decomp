@@ -9,7 +9,7 @@
 
 struct FUN_00d97a10_Class
 {
-    void FUN_00d97a10(float* p) const;
+    void hkKdTreeCollidableRayBundleCaster_getHitFractions(float* p) const;
 };
 struct S_00d979e0_Inner
 {
@@ -26,7 +26,7 @@ struct S_00d979e0
     int unk8;
     int unkC;
     S_00d979e0_Inner* unk10;
-    float FUN_00d979e0() const;
+    float hkpKdTreeCollidableRaycaster_getHitFraction() const;
 };
 struct S_00d98300_Entry
 {
@@ -155,7 +155,7 @@ struct S00d97bf0_Pool
     S00d97bf0_Rec* end;
 };
 struct S00d97bf0_Obj;
-void __cdecl FUN_00d98ca0(int* p, int a, int b, int c, S00d97bf0_Obj* d);
+void __cdecl hkKdTreeUtils_castRayIterative(int* p, int a, int b, int c, S00d97bf0_Obj* d);
 struct S00d97bf0_Obj
 {
     virtual void v0();
@@ -167,7 +167,7 @@ struct S00d97bf0_Obj
     int m0C;
     int m10;
 
-    int __thiscall FUN_00d97bf0(int a0, int a1, int a2, int a3);
+    int __thiscall hkpKdTreeCollidableRaycaster_castRayIterative(int a0, int a1, int a2, int a3);
 };
 struct D98360Allocator
 {
@@ -188,7 +188,7 @@ struct D98360MemoryRouter
         return *m_pStreamAllocator;
     }
 };
-extern "C" D98360MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D98360MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 struct D98360Base
 {
     virtual ~D98360Base()
@@ -207,7 +207,7 @@ struct FUN_00d98360 : D98360Base
 
     static void operator delete(void* p, unsigned int nbytes)
     {
-        FUN_00c85750().heap().ReleaseBlock(p, nbytes);
+        hkMemoryRouter_getInstance().heap().ReleaseBlock(p, nbytes);
     }
 };
 FUN_00d98360::FUN_00d98360()
@@ -353,10 +353,11 @@ struct ThisCls
     SubObj* sub;
     int m_0c;
     DestEnt* dest;
-    void FUN_00d97c90(Arg0* a0, __m128* a1);
+    void hkKdTreeCollidableRayBundleCaster_addMidPhaseHit(Arg0* a0, __m128* a1);
 };
 // @fnv 0x00d97c90
-void ThisCls::FUN_00d97c90(Arg0* a0, __m128* a1)
+// src: HAVOK_SRC 0x00d97c90
+void ThisCls::hkKdTreeCollidableRayBundleCaster_addMidPhaseHit(Arg0* a0, __m128* a1)
 {
     HeadObj* head = a0->head;
     if (head == 0)

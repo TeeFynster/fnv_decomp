@@ -47,7 +47,8 @@ inline hkSimdReal hkVector4::length3() const
 extern int g_unk01269168;
 
 // @fnv 0x00cf4ef0
-int* __cdecl FUN_00cf4ef0()
+// src: COMMUNITY 0x00cf4ef0
+int* __cdecl hkpBinaryAction_getClassType()
 {
     return &g_unk01269168;
 }
@@ -206,8 +207,8 @@ void hkpStiffSpringWrapperD4D3::UpdatePivotsAndRestLength(const hkVector4& kPivo
 {
     hkpEntity* pkA = m_pEntityA;
     hkpEntity* pkB = m_pEntityB;
-    m_kPivotInA.FUN_00c7f690(pkA->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotAW);
-    m_kPivotInB.FUN_00c7f690(pkB->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotBW);
+    m_kPivotInA.hkVector4_setTransformedInversePos(pkA->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotAW);
+    m_kPivotInB.hkVector4_setTransformedInversePos(pkB->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotBW);
     hkVector4 kDiff;
     kDiff.setSub4(kPivotAW, kPivotBW);
     m_fSpringRestLength = kDiff.length3();
@@ -238,9 +239,9 @@ void hkpStiffSpringWrapperD4D41::SetPivots(const hkVector4& kPivotA, const hkVec
     m_kPivotInA = kPivotA;
     m_kPivotInB = kPivotB;
     hkVector4 kPivotAW;
-    kPivotAW.FUN_00c7f640(pkA->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotA);
+    kPivotAW.setTransformedPos_00c7f640(pkA->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotA);
     hkVector4 kPivotBW;
-    kPivotBW.FUN_00c7f640(pkB->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotB);
+    kPivotBW.setTransformedPos_00c7f640(pkB->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotB);
     hkVector4 kDiff;
     kDiff.setSub4(kPivotAW, kPivotBW);
     m_fSpringRestLength = kDiff.length3();
@@ -272,7 +273,7 @@ struct S00d4d4a0_Obj
 
     S00d4d4a0_Obj* FUN_00d4d340(void* entityA, void* entityB, void* data);
 
-    S00d4d4a0_Obj* FUN_00d4d4a0(const hkpCloneArgD4A0& argA, const hkpCloneArgD4A0& argB) const;
+    S00d4d4a0_Obj* hkpSpringAction_clone(const hkpCloneArgD4A0& argA, const hkpCloneArgD4A0& argB) const;
 
     unsigned int unk00;
     unsigned short m_usMemSizeAndFlags;
@@ -296,7 +297,8 @@ struct S00d4d4a0_Obj
 
 // Returns null unless argA.m_type is 2 and argB.m_type is 0; else builds a copy on argA's entity pair and copies pivots, rest length, spring, damping and flags.
 // @fnv 0x00d4d4a0
-S00d4d4a0_Obj* S00d4d4a0_Obj::FUN_00d4d4a0(const hkpCloneArgD4A0& argA, const hkpCloneArgD4A0& argB) const
+// src: HAVOK_SRC 0x00d4d4a0
+S00d4d4a0_Obj* S00d4d4a0_Obj::hkpSpringAction_clone(const hkpCloneArgD4A0& argA, const hkpCloneArgD4A0& argB) const
 {
     if (argA.m_type != 2)
         return 0;

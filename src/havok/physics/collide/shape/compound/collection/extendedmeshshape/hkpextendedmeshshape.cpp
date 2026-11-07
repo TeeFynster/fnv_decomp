@@ -96,46 +96,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 #include "../../../../../../../../include/hkReferencedObject.h"
@@ -203,7 +203,7 @@ __forceinline hkpShapeType hkpShape::getType() const
 struct FUN_00d554a0_class
 {
     int m_d0;
-    int __thiscall FUN_00d1f1e0();
+    int __thiscall hkpShapeContainer_getNumChildShapes();
     int __thiscall GetOrInitValue();
 };
 
@@ -211,30 +211,31 @@ struct FUN_00d554a0_class
 int __thiscall FUN_00d554a0_class::GetOrInitValue()
 {
     if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xd0) < 0)
-        *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xd0) = FUN_00d1f1e0();
+        *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xd0) = hkpShapeContainer_getNumChildShapes();
     return *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xd0);
 }
 
-void __cdecl FUN_00d26230(void* first, void* second, void* third, float value, int last);
+void __cdecl hkAabbUtil_calcAabb_00d26230(void* first, void* second, void* third, float value, int last);
 struct FUN_00d56040_shell
 {
-    void __thiscall FUN_00d56040(void* first, float value, int last);
+    void __thiscall hkpExtendedMeshShape_getAabbImpl(void* first, float value, int last);
 };
 // Calls FUN_00d26230 with first, the two buffers at offsets 0x90 and 0xa0 of this, value and last.
 // @fnv 0x00d56040
-void __thiscall FUN_00d56040_shell::FUN_00d56040(void* first, float value, int last)
+// src: HAVOK_LIB 0x00d56040
+void __thiscall FUN_00d56040_shell::hkpExtendedMeshShape_getAabbImpl(void* first, float value, int last)
 {
-    FUN_00d26230(first, (unsigned char*)this + 0x90, (unsigned char*)this + 0xa0, value, last);
+    hkAabbUtil_calcAabb_00d26230(first, (unsigned char*)this + 0x90, (unsigned char*)this + 0xa0, value, last);
 }
 
 
-__declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
+__declspec(nothrow) BSAudio* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* audio()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 
-__declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
+__declspec(nothrow) void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 
 // hkArray bodies this unit uses (the allocator is the memory router's heap; FUN_00c908c0 is hkArrayUtil::_reserve).
 __forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
@@ -260,7 +261,7 @@ template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMem
     if (getCapacity() < n)
     {
         int cap = 2 * getCapacity();
-        FUN_00c908c0(alloc, this, n < cap ? cap : n, sizeof(T));
+        hkArrayUtil__reserve(alloc, this, n < cap ? cap : n, sizeof(T));
     }
 }
 
@@ -269,7 +270,7 @@ inline void* operator new(unsigned int, void*);
 template <typename T> __forceinline void hkArrayBase<T>::_reserveExactly(hkMemoryAllocator& alloc, int n)
 {
     if (getCapacity() < n)
-        FUN_00c908c0(alloc, this, n, sizeof(T));
+        hkArrayUtil__reserve(alloc, this, n, sizeof(T));
 }
 template <typename T> __forceinline void hkArrayBase<T>::_setSize(hkMemoryAllocator& alloc, int n)
 {
@@ -453,7 +454,8 @@ struct FUN_00d55520_cls
 };
 
 // @fnv 0x00d55520
-int __stdcall FUN_00d55520(FUN_00d55520_cls* a1)
+// src: XBOX_PDB 0x00d55520
+int __stdcall hkpExtendedMeshShape__getNumChildShapesInShapesSubpart(FUN_00d55520_cls* a1)
 {
     return a1->m_18;
 }
@@ -517,7 +519,7 @@ struct SpawnedOwner
     int unkD8;
     int m_0xdc;
 
-    int FUN_00d55530(int aiIndex);
+    int hkpExtendedMeshShape_getMeshMaterial(int aiIndex);
 };
 
 struct FUN_00d555d0_cls
@@ -531,7 +533,7 @@ struct FUN_00d555d0_cls
 int FUN_00d555d0_cls::GetSpawnedValue(int aiKey)
 {
     SpawnedOwner* outer = (SpawnedOwner*)((char*)this - 0x10);
-    int* v = (int*)outer->FUN_00d55530(aiKey);
+    int* v = (int*)outer->hkpExtendedMeshShape_getMeshMaterial(aiKey);
     if (v != 0)
     {
         return *v;
@@ -623,11 +625,12 @@ struct FUN_00d55a90_cls
     Group* m_0c0;
     int m_0c4;
 
-    int __thiscall FUN_00d55a90(int a1, int a2);
+    int __thiscall hkpExtendedMeshShape_calcSizeForSpu(int a1, int a2);
 };
 
 // @fnv 0x00d55a90
-int FUN_00d55a90_cls::FUN_00d55a90(int a1, int a2)
+// src: HAVOK_LIB 0x00d55a90
+int FUN_00d55a90_cls::hkpExtendedMeshShape_calcSizeForSpu(int a1, int a2)
 {
     int i = 0;
     if (m_0c4 > 0)
@@ -976,7 +979,7 @@ struct FUN_00d56160_items
 
 struct FUN_00d56160_sub
 {
-    FUN_00d56160_out* FUN_00d55ce0(unsigned int value, FUN_00d56160_out* out);
+    FUN_00d56160_out* hkpExtendedMeshShape_getChildShape(unsigned int value, FUN_00d56160_out* out);
 };
 
 extern float DAT_011b2e90;
@@ -1044,7 +1047,7 @@ int FUN_00d56160_cls::Vec4(FUN_00d56160_items* items, unsigned int value)
     {
         FUN_00d56160_big tmp;
         unsigned char hit;
-        FUN_00d56160_out* r = m_sub.FUN_00d55ce0((value << (32 - m_b0)) | i, &tmp.m_out);
+        FUN_00d56160_out* r = m_sub.hkpExtendedMeshShape_getChildShape((value << (32 - m_b0)) | i, &tmp.m_out);
         if (*IsDegenerateTriangle(&hit, &r->m_20, &r->m_30, &r->m_40, DAT_011b2e90) == 0)
         {
             ++count;
@@ -1064,10 +1067,11 @@ struct Container
     hkReferencedObject** data;
     int count;
     unsigned capacityFlags;
-    void FUN_00d56800();
+    void ProcessEntries_00d56800();
 };
 // @fnv 0x00d56800
-void Container::FUN_00d56800()
+// src: GUESS 0x00d56800 (confidence: low)
+void Container::ProcessEntries_00d56800()
 {
     hkMemoryAllocator* allocator = audio()->m_heap;
     int savedCount = count;
@@ -1096,7 +1100,7 @@ struct Elem40
 {
     int v00, v04, v08, v0c, v10, v14, v18, v1c;
     int v20, v24, v28, v2c, v30, v34, v38, v3c;
-    void FUN_00d56800();
+    void ProcessEntries_00d56800();
 };
 
 struct Elem60
@@ -1114,7 +1118,7 @@ template <class T> static __forceinline void destroyAndDeallocate(::hkArray<T>& 
     T* p = a.m_data;
     for (int i = 0; i < n; i++)
     {
-        p[i].FUN_00d56800();
+        p[i].ProcessEntries_00d56800();
     }
     a.m_iElementCount = 0;
     if ((a.m_iCapacityState & 0x80000000) == 0)
@@ -1139,12 +1143,13 @@ struct Obj
     hkArray<Elem60> mb4;
     hkArray<Elem40> mc0;
     hkArray<short> mcc;
-    void FUN_00d56e00();
+    void ReleaseMeshArrays();
 };
 
 // Resets the object's two vtables and clears the mcc, mc0 and mb4 arrays, destroying mc0's elements and freeing their storage.
 // @fnv 0x00d56e00
-void Obj::FUN_00d56e00()
+// src: GUESS 0x00d56e00 (confidence: medium)
+void Obj::ReleaseMeshArrays()
 {
     m_vtbl = DAT_010d0ecc;
     m_vtbl10 = DAT_010d0ea8;
@@ -1264,11 +1269,13 @@ int bhkShapeOwner::GetShapeKey()
 }
 
 // @fnv 0x00d554e0
-void __stdcall FUN_00d554e0(int a)
+// src: GUESS 0x00d554e0 (confidence: high)
+void __stdcall Object_DoNothing_00d554e0(int a)
 {}
 
 // @fnv 0x00d554f0
-void __stdcall FUN_00d554f0(int a0)
+// src: GUESS 0x00d554f0 (confidence: high)
+void __stdcall hkpExtendedMeshShape_DoNothing(int a0)
 {}
 
 extern "C" LocalM128 _mm_setzero_ps();
@@ -1317,12 +1324,13 @@ struct OwnerD562
     int unkB0;
     hkArray<ElemD562> m_kArray;
 
-    ElemD562* FUN_00d562f0();
+    ElemD562* hkpExtendedMeshShape_expandOneTriangleSubparts();
 };
 
 // Returns a new triangle subpart, using the inline element for the first entry.
 // @fnv 0x00d562f0
-ElemD562* OwnerD562::FUN_00d562f0()
+// src: XBOX_PDB 0x00d562f0
+ElemD562* OwnerD562::hkpExtendedMeshShape_expandOneTriangleSubparts()
 {
     if (m_kArray.m_iElementCount == 0)
     {
@@ -1457,11 +1465,12 @@ struct FUN_00d554c0_Class
     int unk78;
     int unk7C;
     LocalM128 unk80;
-    void FUN_00d554c0(const LocalM128* value);
+    void hkpExtendedMeshShape_setScaling(const LocalM128* value);
 };
 
 // @fnv 0x00d554c0
-void FUN_00d554c0_Class::FUN_00d554c0(const LocalM128* value)
+// src: XBOX_PDB 0x00d554c0
+void FUN_00d554c0_Class::hkpExtendedMeshShape_setScaling(const LocalM128* value)
 {
     unk80 = *value;
 }
@@ -1492,14 +1501,15 @@ struct ShapeHolderS
 
 // Computes the combined axis-aligned bounding box of all shapes in src by transforming each shape's AABB and merging the min/max corners.
 // @fnv 0x00d558b0
-static __declspec(noinline) void FUN_00d558b0(const ShapeHolderS* apShapeHolder, hkAabb* out)
+// src: XBOX_PDB 0x00d558b0
+static __declspec(noinline) void calcAabbExtents_00d558b0(const ShapeHolderS* apShapeHolder, hkAabb* out)
 {
     LocalM128 v = _mm_load_ss(&DAT_0104da48);
     out->m_kMinimumCorner.m_vComponents = _mm_shuffle_ps(v, v, 0);
     out->m_kMaximumCorner.m_vComponents = _mm_xor_ps(out->m_kMinimumCorner.m_vComponents, DAT_010c44d0);
     hkTransform t;
     copyVectorLanes(&t.m_vTranslation, &apShapeHolder->m_vTranslation);
-    t.m_rotation.FUN_00cb2d90(apShapeHolder->m_rotation);
+    t.m_rotation.hkRotation_set(apShapeHolder->m_rotation);
     for (int i = 0; i < apShapeHolder->m_numShapes; i++)
     {
         hkAabb a;
@@ -1522,12 +1532,13 @@ void CallTarget_d558b0()
 {
     ShapeHolderS* s = g_src;
     hkAabb* o = g_out;
-    FUN_00d558b0(s, o);
+    calcAabbExtents_00d558b0(s, o);
     SomeOtherCall_d558(o);
 }
 
 // @fnv 0x00d55500
-void FUN_00d55500()
+// src: GUESS 0x00d55500 (confidence: high)
+void Object_DoNothing_00d55500()
 {}
 
 extern "C"
@@ -1570,7 +1581,8 @@ struct TrianglesSubpart
 
 // Computes the axis-aligned bounding box of all triangle vertices in a subpart, applying scale and a fixed transform, and stores the result in aabb.
 // @fnv 0x00d55680
-void __cdecl FUN_00d55680(const TrianglesSubpart& part, const hkVector4& scale, hkAabb& aabb)
+// src: XBOX_PDB 0x00d55680
+void __cdecl calcAabbExtents(const TrianglesSubpart& part, const hkVector4& scale, hkAabb& aabb)
 {
     aabb.m_kMinimumCorner.SetAllComponents(3.40282e+38f);
     aabb.m_kMaximumCorner.m_vComponents = _mm_xor_ps(aabb.m_kMinimumCorner.m_vComponents, DAT_010c44d0);
@@ -1607,7 +1619,7 @@ void __cdecl FUN_00d55680(const TrianglesSubpart& part, const hkVector4& scale, 
             hkVector4 vertex;
             vertex.set(v0[0] * scale(0), v0[1] * scale(1), v0[2] * scale(2));
             hkVector4 transformed;
-            transformed.FUN_00c7f640(DAT_01268370, vertex);
+            transformed.setTransformedPos_00c7f640(DAT_01268370, vertex);
             aabb.m_kMinimumCorner.setMin4(aabb.m_kMinimumCorner, transformed);
             aabb.m_kMaximumCorner.setMax4(aabb.m_kMaximumCorner, transformed);
         }
@@ -1615,7 +1627,7 @@ void __cdecl FUN_00d55680(const TrianglesSubpart& part, const hkVector4& scale, 
             hkVector4 vertex;
             vertex.set(*(const volatile float*)&v1[0] * scale(0), v1[1] * scale(1), v1[2] * scale(2));
             hkVector4 transformed;
-            transformed.FUN_00c7f640(DAT_01268370, vertex);
+            transformed.setTransformedPos_00c7f640(DAT_01268370, vertex);
             aabb.m_kMinimumCorner.setMin4(aabb.m_kMinimumCorner, transformed);
             aabb.m_kMaximumCorner.setMax4(aabb.m_kMaximumCorner, transformed);
         }
@@ -1623,7 +1635,7 @@ void __cdecl FUN_00d55680(const TrianglesSubpart& part, const hkVector4& scale, 
             hkVector4 vertex;
             vertex.set(v2[0] * scale(0), v2[1] * scale(1), v2[2] * scale(2));
             hkVector4 transformed;
-            transformed.FUN_00c7f640(DAT_01268370, vertex);
+            transformed.setTransformedPos_00c7f640(DAT_01268370, vertex);
             aabb.m_kMinimumCorner.setMin4(aabb.m_kMinimumCorner, transformed);
             aabb.m_kMaximumCorner.setMax4(aabb.m_kMaximumCorner, transformed);
         }
@@ -1660,7 +1672,7 @@ extern LocalM128 DAT_010c4c10;
 extern float DAT_011b153c;
 
 void __cdecl CopySixteenByteBlocks(void* dst, const void* src);
-void __cdecl FUN_00d570d0(void* dst, const void* src);
+void __cdecl hkString_memCpy16_64(void* dst, const void* src);
 
 struct HelperC9E340
 {
@@ -1668,7 +1680,7 @@ struct HelperC9E340
 };
 struct HelperD5D7A0
 {
-    const hkpShape* FUN_00d5d7a0(const hkpShape* child, const void* transform, int unk);
+    const hkpShape* hkpConvexTransformShape_hkpConvexTransformShape(const hkpShape* child, const void* transform, int unk);
 };
 
 struct MeshSubpartTriangle
@@ -1808,12 +1820,13 @@ struct ExtendedMeshShape : S_00d55bd0_MeshShape
     float m_fTriangleRadius;  // 0xd4
     int unkd8;
 
-    const hkpShape* FUN_00d55ce0(unsigned int key, void* buffer) const;
+    const hkpShape* hkpExtendedMeshShape_getChildShape(unsigned int key, void* buffer) const;
 };
 
 // Resolves a subpart key to a TriangleShape or child shape, applying scale, welding info, and optional transform into the caller buffer.
 // @fnv 0x00d55ce0
-const hkpShape* ExtendedMeshShape::FUN_00d55ce0(unsigned int key, void* buffer) const
+// src: XBOX_PDB 0x00d55ce0
+const hkpShape* ExtendedMeshShape::hkpExtendedMeshShape_getChildShape(unsigned int key, void* buffer) const
 {
     __declspec(align(16)) unsigned int subpartStorage[45];
     unsigned int numBits = m_iNumBitsForSubpartIndex;
@@ -1897,7 +1910,7 @@ const hkpShape* ExtendedMeshShape::FUN_00d55ce0(unsigned int key, void* buffer) 
     else
     {
         void* subpartBuffer = (void*)(((unsigned int)subpartStorage + 0x3f) & ~0x3f);
-        FUN_00d570d0(subpartBuffer, (const char*)m_kShapesSubparts + (uiSubpartIndex << 6));
+        hkString_memCpy16_64(subpartBuffer, (const char*)m_kShapesSubparts + (uiSubpartIndex << 6));
         const MeshSubpartShape* pSubpartShape = (const MeshSubpartShape*)subpartBuffer;
 
         int mvA = *reinterpret_cast<const int*>(&pSubpartShape->m_vTranslation.w) & 0xc0ffffff;
@@ -1923,11 +1936,11 @@ const hkpShape* ExtendedMeshShape::FUN_00d55ce0(unsigned int key, void* buffer) 
         {
             Transform transform;
             copyVectorLanes(&transform.translation, &pSubpartShape->m_vTranslation);
-            transform.FUN_00cb2d90((void*)&pSubpartShape->m_rotation);
+            transform.hkRotation_set((void*)&pSubpartShape->m_rotation);
 
             if (buffer)
             {
-                return ((HelperD5D7A0*)buffer)->FUN_00d5d7a0(childShape, &transform, 0);
+                return ((HelperD5D7A0*)buffer)->hkpConvexTransformShape_hkpConvexTransformShape(childShape, &transform, 0);
             }
         }
         return 0;
@@ -1941,7 +1954,7 @@ extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
 extern LocalM128 DAT_010c71d0;
 struct MeshEntry
 {
-    void FUN_00d4ad60(int);
+    void CopySubpartFields(int);
 };
 struct MeshOwner
 {
@@ -1989,24 +2002,25 @@ struct MeshOwner
     int unkC8, unkCC, unkD0, unkD4, unkD8, unkDC;
     int m_children;
     S_00d56880_Elem* AppendElement();
-    int FUN_00d55520(int);
-    int FUN_00d56900(volatile int);
+    int hkpExtendedMeshShape__getNumChildShapesInShapesSubpart(int);
+    int AppendShapeAndExpandBounds(volatile int);
 };
 // Appends a shape element, expands the owner AABB to include it, and returns the new element index.
 // @fnv 0x00d56900
-int MeshOwner::FUN_00d56900(volatile int key)
+// src: GUESS 0x00d56900 (confidence: medium)
+int MeshOwner::AppendShapeAndExpandBounds(volatile int key)
 {
     S_00d56880_Elem* elem = AppendElement();
-    ((MeshEntry*)elem)->FUN_00d4ad60(key);
+    ((MeshEntry*)elem)->CopySubpartFields(key);
     hkAabb bounds;
     LocalM128 lo = _mm_sub_ps(m_kCenterPosition, m_vHalfExtents);
     LocalM128 hi = _mm_add_ps(m_vHalfExtents, m_kCenterPosition);
-    FUN_00d558b0((ShapeHolderS*)elem, &bounds);
+    calcAabbExtents_00d558b0((ShapeHolderS*)elem, &bounds);
     LocalM128 mn = _mm_min_ps(lo, bounds.m_kMinimumCorner.m_vComponents);
     LocalM128 mx = _mm_max_ps(hi, bounds.m_kMaximumCorner.m_vComponents);
     _mm_store_ps((float*)&m_kCenterPosition, _mm_mul_ps(_mm_add_ps(mx, mn), DAT_010c71d0));
     m_vHalfExtents = _mm_mul_ps(_mm_sub_ps(mx, mn), DAT_010c71d0);
-    m_children += FUN_00d55520(key);
+    m_children += hkpExtendedMeshShape__getNumChildShapesInShapesSubpart(key);
     return m_uiItemCount - 1;
 }
 
@@ -2018,8 +2032,8 @@ struct SubBuf
     int m_08;
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(void* a, void* b, int c, int d);
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(void* a, void* b, int c, int d);
 
 struct FUN_00d56200_cls
 {
@@ -2076,12 +2090,13 @@ struct FUN_00d56200_cls
     int unkc8;
     SubBuf m_cc;
     unsigned char m_d8;
-    void FUN_00d56200(int a1);
+    void hkpExtendedMeshShape_initWeldingInfo(int a1);
 };
 
 // Stores a1 in m_d8; if a1 is 6 frees and resets m_cc, else writes running totals into the 0x60-byte records of m_b4 and grows m_cc to the total.
 // @fnv 0x00d56200
-void FUN_00d56200_cls::FUN_00d56200(int a1)
+// src: HAVOK_LIB 0x00d56200
+void FUN_00d56200_cls::hkpExtendedMeshShape_initWeldingInfo(int a1)
 {
     m_d8 = (unsigned char)a1;
     if (a1 != 6)
@@ -2102,10 +2117,10 @@ void FUN_00d56200_cls::FUN_00d56200(int a1)
             } while (i < m_b8);
         }
         SubBuf* sub = &m_cc;
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         if ((sub->m_08 & 0x3fffffff) < total)
-            FUN_00c908c0(pHolder->m_heap, sub, total, 2);
-        hkMemoryRouter* pHolder2 = FUN_00c85750();
+            hkArrayUtil__reserve(pHolder->m_heap, sub, total, 2);
+        hkMemoryRouter* pHolder2 = hkMemoryRouter_getInstance();
         void* alloc2 = pHolder2->m_heap;
         int size = sub->m_08 & 0x3fffffff;
         if (size < total)
@@ -2113,12 +2128,12 @@ void FUN_00d56200_cls::FUN_00d56200(int a1)
             int cap = size * 2;
             if (total >= cap)
                 cap = total;
-            FUN_00c908c0(alloc2, sub, cap, 2);
+            hkArrayUtil__reserve(alloc2, sub, cap, 2);
         }
         sub->m_04 = total;
         return;
     }
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* alloc = (hkMemoryAllocator*)pHolder->m_heap;
     int size = m_cc.m_08;
     int zero = 0;
@@ -2247,11 +2262,12 @@ struct SpawnedOwnerQ
     unsigned int numGroups;
     int unkBC;
     ChanGroupNeg* negGroups;
-    int FUN_00d55530(int aiIndex);
+    int hkpExtendedMeshShape_getMeshMaterial(int aiIndex);
 };
 // Splits aiIndex into a group number and offset, picks an entry from groups, negGroups (high bit set) or the inline entry, and returns its get(offset) or 0.
 // @fnv 0x00d55530
-int SpawnedOwnerQ::FUN_00d55530(int aiIndex)
+// src: XBOX_PDB 0x00d55530
+int SpawnedOwnerQ::hkpExtendedMeshShape_getMeshMaterial(int aiIndex)
 {
     unsigned int m_iGridX = ((unsigned int)aiIndex & 0x7fffffff) >> (32 - bits);
     unsigned int iOffset = (0xffffffffu >> bits) & aiIndex;
@@ -2283,7 +2299,8 @@ extern float DAT_01011d78;
 
 // Scales a LocalVec3 point, transforms it via a matrix, and expands the hkAabb min/max corners to include the result.
 // @fnv 0x00d55600
-static __declspec(noinline) void __cdecl FUN_00d55600(const LocalVec3* apPoint, const LocalVec3* scale, const void* transform,
+// src: GUESS 0x00d55600 (confidence: medium)
+static __declspec(noinline) void __cdecl Object_ExpandAABBWithTransformedPoint(const LocalVec3* apPoint, const LocalVec3* scale, const void* transform,
                                                       hkAabb* aabb)
 {
     float x = apPoint->x * scale->x;
@@ -2292,7 +2309,7 @@ static __declspec(noinline) void __cdecl FUN_00d55600(const LocalVec3* apPoint, 
     hkVector4 p;
     *(LocalM128*)&p = _mm_setr_ps(x, y, z, DAT_01011d78);
     hkVector4 out;
-    out.FUN_00c7f640(*static_cast<const hkTransform*>(transform), p);
+    out.setTransformedPos_00c7f640(*static_cast<const hkTransform*>(transform), p);
     LocalM128 o = *(LocalM128*)&out;
     *(LocalM128*)&aabb->m_kMinimumCorner = _mm_min_ps(*(LocalM128*)&aabb->m_kMinimumCorner, o);
     *(LocalM128*)&aabb->m_kMaximumCorner = _mm_max_ps(*(LocalM128*)&aabb->m_kMaximumCorner, o);
@@ -2300,14 +2317,14 @@ static __declspec(noinline) void __cdecl FUN_00d55600(const LocalVec3* apPoint, 
 
 void keep_alive_b11424(const LocalVec3* self, const LocalVec3* scale, const void* transform, hkAabb* aabb)
 {
-    FUN_00d55600(self, scale, transform, aabb);
+    Object_ExpandAABBWithTransformedPoint(self, scale, transform, aabb);
 }
 
 extern "C" LocalM128 _mm_load_ps1(const float* p);
 extern "C" LocalM128 _mm_min_ps(LocalM128, LocalM128);
 struct hkpD563Tree
 {
-    void FUN_00d4abf0(void* arg);
+    void UpdateState_00d4abf0(void* arg);
 };
 
 struct hkpD563Key
@@ -2315,17 +2332,17 @@ struct hkpD563Key
     unsigned int unk00, unk04, unk08, unk0c;
 };
 
-void __cdecl FUN_00d55680(hkpD563Tree* tree, const hkpD563Key* key, hkAabb* out);
+void __cdecl calcAabbExtents(hkpD563Tree* tree, const hkpD563Key* key, hkAabb* out);
 
 class hkpD563Shape
 {
 
   public:
-    hkpD563Tree* FUN_00d562f0();
+    hkpD563Tree* hkpExtendedMeshShape_expandOneTriangleSubparts();
 
     int Vec4(void* arg, int level);
 
-    void FUN_00d563a0(void* arg);
+    void hkpExtendedMeshShape_addTrianglesSubpart(void* arg);
 
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
 
@@ -2354,12 +2371,13 @@ class hkpD563Shape
 
 // Updates the shape's AABB by querying the tree, expanding by m_fScalar, and accumulating m_total from FUN_00d56160.
 // @fnv 0x00d563a0
-void hkpD563Shape::FUN_00d563a0(void* arg)
+// src: XBOX_PDB 0x00d563a0
+void hkpD563Shape::hkpExtendedMeshShape_addTrianglesSubpart(void* arg)
 {
 
-    hkpD563Tree* tree = FUN_00d562f0();
+    hkpD563Tree* tree = hkpExtendedMeshShape_expandOneTriangleSubparts();
 
-    tree->FUN_00d4abf0(arg);
+    tree->UpdateState_00d4abf0(arg);
 
     hkAabb existing;
 
@@ -2369,7 +2387,7 @@ void hkpD563Shape::FUN_00d563a0(void* arg)
 
     existing.m_kMaximumCorner.setAdd4(m_kAabbHalfExtents, m_kAabbCenter);
 
-    FUN_00d55680(tree, &m_key, &updated);
+    calcAabbExtents(tree, &m_key, &updated);
 
     hkVector4 tolerance;
 
@@ -2487,7 +2505,7 @@ struct ShapesSubpartT
         m_pVertexBase = 0;
         m_ulUserData = 0;
     }
-    ShapesSubpartT* FUN_00d56660(hkConvexShapeS* const* childShapes, int numChildShapes,
+    ShapesSubpartT* InitializeConvexSubpartTransform(hkConvexShapeS* const* childShapes, int numChildShapes,
                                  const hkTransform& transform);
 };
 
@@ -2502,7 +2520,8 @@ static __forceinline hkVector4CompS compareEquals3(const hkVector4& a, const Loc
 
 // Initializes a convex subpart with child shapes and a transform, storing translation flags in the w component of m_vTranslation.
 // @fnv 0x00d56660
-ShapesSubpartT* ShapesSubpartT::FUN_00d56660(hkConvexShapeS* const* childShapes, int numChildShapes,
+// src: GUESS 0x00d56660 (confidence: medium)
+ShapesSubpartT* ShapesSubpartT::InitializeConvexSubpartTransform(hkConvexShapeS* const* childShapes, int numChildShapes,
                                              const hkTransform& transform)
 {
     initSubpart(1);
@@ -2625,7 +2644,7 @@ struct FUN_00d56ab0 : public FUN_00d21410
     float m_ce4;
 
     FUN_00d56ab0(Src& input) throw();
-    void __thiscall FUN_00d55950();
+    void __thiscall hkpExtendedMeshShape_recalcAabbExtents();
 };
 
 // Constructs the object by copying fields from input, allocating and copying m_w, initializing m_aiIndexedValues from input.arr, and calling FUN_00d55950.
@@ -2695,6 +2714,6 @@ FUN_00d56ab0::FUN_00d56ab0(Src& input) throw() : FUN_00d21410(14, 1)
         arr.m_data[i].a30 = _mm_setzero_ps();
         arr.m_data[i].a49 = s->arr[i].f18;
     }
-    FUN_00d55950();
-    m_ce0 = reinterpret_cast<FUN_00d554a0_class*>(static_cast<Base2*>(this))->FUN_00d1f1e0();
+    hkpExtendedMeshShape_recalcAabbExtents();
+    m_ce0 = reinterpret_cast<FUN_00d554a0_class*>(static_cast<Base2*>(this))->hkpShapeContainer_getNumChildShapes();
 }

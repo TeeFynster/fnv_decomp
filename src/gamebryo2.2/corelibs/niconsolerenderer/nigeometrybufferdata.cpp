@@ -157,12 +157,13 @@ class NiSlotSetE8E
     unsigned int* m_puiFlags;
     void** m_ppvSlots;
 
-    void FUN_00e8ef10(unsigned int uiNewSize);
+    void NiGeometryBufferData_SetStreamCount(unsigned int uiNewSize);
 };
 
 // Resizes the slot and flag arrays to uiNewSize, copying existing entries, zeroing new ones, notifying the listener of removed slots, and freeing the old arrays.
 // @fnv 0x00e8ef10
-void NiSlotSetE8E::FUN_00e8ef10(unsigned int uiNewSize)
+// src: COMMUNITY 0x00e8ef10
+void NiSlotSetE8E::NiGeometryBufferData_SetStreamCount(unsigned int uiNewSize)
 {
     if (uiNewSize == m_uiSize)
         return;

@@ -19,12 +19,12 @@ void __thiscall hkpLimitedHingeConstraintData::SetConstraintFlag(int aiBitIndex)
     ((char*)this)[0xd6] = (char)(1 << aiBitIndex);
 }
 
-extern "C" void* __cdecl FUN_00d21a60(void* self, int a, int b);
+extern "C" void* __cdecl hkpConstraintData_getConstraintInfoUtil(void* self, int a, int b);
 
 // @fnv 0x00cb8af0
 void* __thiscall hkpLimitedHingeConstraintData::vf15(int arg)
 {
-    return FUN_00d21a60((char*)this + 0x10, 0xcc, arg);
+    return hkpConstraintData_getConstraintInfoUtil((char*)this + 0x10, 0xcc, arg);
 }
 
 // @fnv 0x00cb8b10
@@ -67,7 +67,8 @@ void __fastcall DestroyLimitedHingeMotor(hkpLimitedHingeConstraintData* self, vo
 
 // Stores b at self+0xa2 and its negation at self+0xb6; if a is non-null, zeroes four floats at a->0x30->0x1c.
 // @fnv 0x00cb8fe0
-void __fastcall FUN_00cb8fe0(char* self, int, int a, bool b)
+// src: HAVOK_LIB 0x00cb8fe0
+void __fastcall hkpLimitedHingeConstraintData_setMotorActive(char* self, int, int a, bool b)
 {
     self[0xa2] = b;
     self[0xb6] = !b;
@@ -130,7 +131,7 @@ struct FnvCpu_FUN_00cb9220_CpuAllocatorHolder
     unsigned int unk0c;
     FnvCpu_FUN_00cb9220_CpuAllocator* allocator;
 };
-FnvCpu_FUN_00cb9220_CpuAllocatorHolder* __cdecl FUN_00c85750();
+FnvCpu_FUN_00cb9220_CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 
 // Destroys the hinge and, when requested, frees its recorded allocation size through the Havok allocator.
 // @fnv 0x00cb9220
@@ -139,7 +140,7 @@ hkpLimitedHingeConstraintData* __fastcall DeleteLimitedHinge(hkpLimitedHingeCons
     reinterpret_cast<void (__thiscall*)(hkpLimitedHingeConstraintData*)>(DestroyLimitedHingeMotor)(self);
     if (flags & 1)
     {
-        FnvCpu_FUN_00cb9220_CpuAllocatorHolder* pAllocatorHolder = FUN_00c85750();
+        FnvCpu_FUN_00cb9220_CpuAllocatorHolder* pAllocatorHolder = hkMemoryRouter_getInstance();
         pAllocatorHolder->allocator->Invoke(self, self->m_usMemSizeAndFlags);
     }
     return self;
@@ -147,7 +148,7 @@ hkpLimitedHingeConstraintData* __fastcall DeleteLimitedHinge(hkpLimitedHingeCons
 
 struct FUN_00b5aea0_self
 {
-    void FUN_00cb9930(int* a, int* b, unsigned int c);
+    void BSSimpleArray_ShadowSceneLight_1024_MoveItems(int* a, int* b, unsigned int c);
 };
 
 struct FUN_00cb9ce0_cls
@@ -160,11 +161,12 @@ struct FUN_00cb9ce0_cls
     int m_004;
     int m_008;
     int m_00c;
-    void FUN_00cb9ce0(int a, int b);
+    void BSSimpleArray_Resize(int a, int b);
 };
 
 // @fnv 0x00cb9ce0
-void FUN_00cb9ce0_cls::FUN_00cb9ce0(int a, int b)
+// src: COMMUNITY 0x00cb9ce0
+void FUN_00cb9ce0_cls::BSSimpleArray_Resize(int a, int b)
 {
     if (m_004)
     {
@@ -175,7 +177,7 @@ void FUN_00cb9ce0_cls::FUN_00cb9ce0(int a, int b)
         else
         {
             int r = reinterpret_cast<int>(v1(a));
-            reinterpret_cast<FUN_00b5aea0_self*>(this)->FUN_00cb9930(reinterpret_cast<int*>(r),
+            reinterpret_cast<FUN_00b5aea0_self*>(this)->BSSimpleArray_ShadowSceneLight_1024_MoveItems(reinterpret_cast<int*>(r),
                                                                      reinterpret_cast<int*>(m_004), b);
             v2(m_004);
             m_004 = r;

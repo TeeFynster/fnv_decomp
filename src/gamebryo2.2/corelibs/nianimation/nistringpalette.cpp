@@ -10,7 +10,8 @@ extern "C" void* g_011f3f30;
 
 // Returns the address of the global g_011f3f30.
 // @fnv 0x00a47140
-void* __cdecl FUN_00a47140()
+// src: COMMUNITY 0x00a47140
+void* __cdecl NiStringPalette_GetRTTI()
 {
     return &g_011f3f30;
 }
@@ -53,7 +54,8 @@ inline NiBinaryStream& NiStream::Istr()
 }
 // Reads uiNumEls bytes into pValue through the stream's input reader and advances the input position by the bytes read.
 // @fnv 0x00a471d0
-void FUN_00a471d0(NiStream* kStream, unsigned char* pBuffer, unsigned int uiNumEls)
+// src: XBOX_PDB 0x00a471d0
+void NiStreamLoadBinary_char(NiStream* kStream, unsigned char* pBuffer, unsigned int uiNumEls)
 {
     NiBinaryStream* __restrict input = &kStream->Istr();
     unsigned int size = 1;
@@ -106,12 +108,13 @@ void S_00a47210::WriteToStream(NiStream& kStream)
 
 struct S_00a470c0 : S_00a47190
 {
-    bool FUN_00a470c0(S_00a470c0* other);
+    bool NiStringPalette_IsEqual(S_00a470c0* other);
 };
 
 // Compares this object with another: checks the base comparison, matching m_0C and m_10, then byte-compares m_0C bytes at m_08; returns true if all match.
 // @fnv 0x00a470c0
-bool S_00a470c0::FUN_00a470c0(S_00a470c0* other)
+// src: GAMEBRYO_LIB 0x00a470c0
+bool S_00a470c0::NiStringPalette_IsEqual(S_00a470c0* other)
 {
     if (IsSameAs(other) && other->m_0C == m_0C && other->m_10 == m_10)
     {
@@ -162,12 +165,13 @@ struct S_00a47150_Obj : NiObject
 };
 // Allocates and constructs a new S_00a47150_Obj via its operator new and returns the pointer.
 // @fnv 0x00a47150
-S_00a47150_Obj* __cdecl FUN_00a47150()
+// src: EXE 0x00a47150
+S_00a47150_Obj* __cdecl NiStringPalette_CreateObject()
 {
     return new S_00a47150_Obj;
 }
 
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 __forceinline void NiBinaryStream::ReadComp(void* data, unsigned int byteCount, unsigned int componentSize)
 {
     unsigned int elementSize = componentSize;
@@ -188,7 +192,7 @@ void FUN_00a472b0_cls::ReadFromStream(NiStream* stream)
     stream->Istr().ReadComp(&m_uiCount0C, 4, 4);
     if (m_uiCount0C > 0)
     {
-        m_pBuf08 = FUN_00aa1070(m_uiCount0C);
+        m_pBuf08 = _NiMalloc_00aa1070(m_uiCount0C);
         stream->Istr().ReadComp(m_pBuf08, m_uiCount0C, 1);
     }
     stream->Istr().ReadComp(&m_uiExtra10, 4, 4);

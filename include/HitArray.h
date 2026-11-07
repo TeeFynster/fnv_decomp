@@ -11,7 +11,7 @@ public:
     unsigned int capacity;
 
     void Append(const BooleanFloatQuery* src);
-    HitArray* FUN_00460140();
+    HitArray* TESDataHandler_GetWorldSpaceList();
     int FUN_00726070();
     HitInfo* GetEntryAt(int i);
 };

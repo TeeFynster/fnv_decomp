@@ -16,14 +16,14 @@ class TileShaderProperty : public BSShaderProperty
 
     void CopyTileShaderProperty(TileShaderProperty* dst, int flag);
     TileShaderProperty* CreateTilePropertyClone(int flag);
-    void FUN_00bb7b60(NiStream* stream);
-    void FUN_00bb7be0(NiStream* stream);
+    void LoadBinary_00bb7b60(NiStream* stream);
+    void SaveBinary_00bb7be0(NiStream* stream);
 
     void SetTextureImage(NiTexture* texture);      // 0x00bb7a10 replaces m_spTexture (+0x60)
-    void FUN_00bb7a10(NiTexture* texture);         // 0x00bb7a10 (same function)
+    void SetTileTexture(NiTexture* texture);         // 0x00bb7a10 (same function)
     void SetAlpha(float alpha);                    // 0x00821600 stores +0x78
-    void FUN_008cc6d0(int value);                  // 0x008cc6d0 stores +0x8C
-    NiTexture* FUN_009c8640();                     // 0x009c8640 returns m_spTexture
+    void EffectSetting_SetAreaSound(int value);                  // 0x008cc6d0 stores +0x8C
+    NiTexture* BGSCameraShot_GetLocationNode();                     // 0x009c8640 returns m_spTexture
     void FUN_007700d0(bool value);                 // 0x007700d0 stores +0x91
 
     NiPointer<NiTexture> m_spTexture;              // +0x60

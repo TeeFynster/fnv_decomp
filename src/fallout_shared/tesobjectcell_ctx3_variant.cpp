@@ -8,15 +8,15 @@
 #include "../../include/TESObjectLAND.h"
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
-unsigned int FUN_0054f4c0();
-NiAVObject* FUN_0054f4f0();
+unsigned int TESTerrainLODManager_GetGrassNode();
+NiAVObject* TESMain_GetWeatherRoot();
 
 #include "../../include/NavMeshCollection.h"
 int __fastcall GetReferenceFlags(void*);
 NavMeshPtr __cdecl MakeNavMeshPointer(NavMesh*);
 struct S004867a0
 {
-    TESForm* FUN_004867a0(bool, void*);
+    TESForm* TESForm_CreateDuplicateForm(bool, void*);
 };
 struct CellX
 {
@@ -54,11 +54,12 @@ struct LNode
 
 struct FUN_005436e0_shell : TESObjectCELL
 {
-    TESForm* FUN_005436e0(bool abCreateEditorID, void* apCopyMap);
+    TESForm* TESObjectCELL_CreateDuplicateForm(bool abCreateEditorID, void* apCopyMap);
 };
 
 // @fnv 0x005436e0
-TESForm* FUN_005436e0_shell::FUN_005436e0(bool abCreateEditorID, void* apCopyMap)
+// src: XBOX_PDB 0x005436e0
+TESForm* FUN_005436e0_shell::TESObjectCELL_CreateDuplicateForm(bool abCreateEditorID, void* apCopyMap)
 {
     TESObjectCELL* pdupcell = 0;
     if (IsCellInterior())
@@ -67,7 +68,7 @@ TESForm* FUN_005436e0_shell::FUN_005436e0(bool abCreateEditorID, void* apCopyMap
     else
     {
         BSSimpleList<TESObjectREFR*>* pCurrentElementNext;
-        pdupcell = dynamic_cast<TESObjectCELL*>(((S004867a0*)this)->FUN_004867a0(false, apCopyMap));
+        pdupcell = dynamic_cast<TESObjectCELL*>(((S004867a0*)this)->TESForm_CreateDuplicateForm(false, apCopyMap));
         TESObjectLAND* pland;
         pland = *(TESObjectLAND**)((char*)this + 0x4c);
         if (pland)
@@ -101,7 +102,7 @@ TESForm* FUN_005436e0_shell::FUN_005436e0(bool abCreateEditorID, void* apCopyMap
         }
         CellRefLockEnter();
         ListX templist;
-        pCurrentElementNext = (BSSimpleList<TESObjectREFR*>*)FUN_009604f0();
+        pCurrentElementNext = (BSSimpleList<TESObjectREFR*>*)GetRefList_009604f0();
         while (pCurrentElementNext && !((LNode*)pCurrentElementNext)->FUN_008256d0())
         {
             TESObjectREFR* pref = (TESObjectREFR*)*((LNode*)pCurrentElementNext)->FUN_006815c0();

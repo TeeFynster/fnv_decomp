@@ -41,32 +41,35 @@ void* BGSDecalNode::DestroyDecalNode(unsigned int flags)
 }
 
 // @fnv 0x004ee4d0
-void BGSDecalNode::FUN_004ee4d0(NiAVObject* apAVObj, bool abFirstAvailableSlot)
+// src: XBOX_PDB 0x004ee4d0
+void BGSDecalNode::AttachChild_004ee4d0(NiAVObject* apAVObj, bool abFirstAvailableSlot)
 {
     NiNode::AttachChildInAvailableSlot(apAVObj, abFirstAvailableSlot);
 }
 
 // @fnv 0x004ee560
-void BGSDecalNode::FUN_004ee560(int aiValue)
+// src: GUESS 0x004ee560 (confidence: low)
+void BGSDecalNode::ProcessState_004ee560(int aiValue)
 {
     GO g(0);
     InsertChild(reinterpret_cast<BSTempEffect*>(aiValue), &g);
 }
 
 // @fnv 0x004ee450
-void BGSDecalNode::FUN_004ee450(BSTempEffect* apAVObj, bool abFlag)
+// src: XBOX_PDB 0x004ee450
+void BGSDecalNode::AttachChild(BSTempEffect* apAVObj, bool abFlag)
 {
     void* prop = apAVObj->Get3D()->GetProperty(3);
     if (prop != 0)
     {
-        ((EffectSetting*)prop)->FUN_004ee4b0(1.0f);
+        ((EffectSetting*)prop)->BSShaderProperty_SetDepthBias(1.0f);
     }
     NiNode::AttachChildInAvailableSlot(apAVObj->Get3D(), abFlag);
 }
 
 struct S2
 {
-    void FUN_00a5e780(void*);
+    void NiNode_DetachChild_00a5e780(void*);
 };
 struct VirtParam
 {
@@ -115,7 +118,7 @@ struct VirtParam
 void BGSDecalNode::InsertChild(BSTempEffect* pEffect, void* b)
 {
     RemoveEffect(pEffect);
-    ((S2*)this)->FUN_00a5e780(reinterpret_cast<VirtParam*>(pEffect)->v38(b));
+    ((S2*)this)->NiNode_DetachChild_00a5e780(reinterpret_cast<VirtParam*>(pEffect)->v38(b));
 }
 
 // Removes the given effect from the list stored at offset 0xac of this node.
@@ -133,8 +136,8 @@ struct GlobalObject_004ee810
     GlobalObject_004ee810();
 };
 
-NiFixedString const& FUN_004a2c60();
-NiFixedString const& FUN_004ee440();
+NiFixedString const& FixedStrings_QSkinnedDecalNode();
+NiFixedString const& FixedStrings_QDecalNode();
 
 // Allocates a GlobalObject_004ee810 and sets the object's name from one of two fixed strings depending on flag.
 // @fnv 0x004ee390
@@ -143,9 +146,9 @@ void BGSDecalNode::InitNameAndData()
     pList = reinterpret_cast<BSSimpleList<GO>*>(new GlobalObject_004ee810);
 
     if (flag)
-        SetName(FUN_004a2c60());
+        SetName(FixedStrings_QSkinnedDecalNode());
     else
-        SetName(FUN_004ee440());
+        SetName(FixedStrings_QDecalNode());
 }
 
 
@@ -217,7 +220,7 @@ struct Callback
     virtual void v53();
     virtual void v54();
     virtual void v55(void* object, int enabled);
-    void FUN_00a59c60(NiPoint3* offset);
+    void NiAVObject_Update(NiPoint3* offset);
 };
 struct EffectsList
 {
@@ -233,37 +236,38 @@ BGSDecalNode::BGSDecalNode(NiNode* parent, unsigned char flag) : NiNode(0)
 
     float vecOffset[3];
     reinterpret_cast<NiPoint3*>(vecOffset)->FUN_0043d410(0.0f, 0, 0);
-    reinterpret_cast<Callback*>(parent)->FUN_00a59c60(reinterpret_cast<NiPoint3*>(vecOffset));
+    reinterpret_cast<Callback*>(parent)->NiAVObject_Update(reinterpret_cast<NiPoint3*>(vecOffset));
     BGSDecalNode* pSelf = this;
     g_011c7d20.FUN_005ae3d0(&pSelf);
 }
 
 struct FUN_004ee610_view
 {
-    BSTempEffect* FUN_00559450();
+    BSTempEffect* Modelloader_GetReferencedThis();
     void FUN_00a59e00(int aValue);
 };
 
 struct FUN_004ee610_node
 {
     FUN_004ee610_view* FUN_006815c0();
-    bool FUN_004a4460();
+    bool BSSimpleList_NiRefObjectPtr_IsEmpty();
     FUN_004ee610_node* FUN_00726070();
 };
 
 // @fnv 0x004ee610
-void BGSDecalNode::FUN_004ee610(int a1)
+// src: XBOX_PDB 0x004ee610
+void BGSDecalNode::OnVisible_004ee610(int a1)
 {
     if (IsVisualObject())
     {
         FUN_004ee610_node* node = reinterpret_cast<FUN_004ee610_node*>(pList);
-        while (node != 0 && !node->FUN_004a4460())
+        while (node != 0 && !node->BSSimpleList_NiRefObjectPtr_IsEmpty())
         {
             {
-                GO local((int)node->FUN_006815c0()->FUN_00559450()->Get3D());
-                if (reinterpret_cast<FUN_004ee610_view*>(&local)->FUN_00559450())
+                GO local((int)node->FUN_006815c0()->Modelloader_GetReferencedThis()->Get3D());
+                if (reinterpret_cast<FUN_004ee610_view*>(&local)->Modelloader_GetReferencedThis())
                 {
-                    reinterpret_cast<FUN_004ee610_view*>(reinterpret_cast<FUN_004ee610_view*>(&local)->FUN_00559450())
+                    reinterpret_cast<FUN_004ee610_view*>(reinterpret_cast<FUN_004ee610_view*>(&local)->Modelloader_GetReferencedThis())
                         ->FUN_00a59e00(a1);
                 }
                 node = node->FUN_00726070();

@@ -37,7 +37,7 @@ public:
     bool SetPatrolRefIndex(unsigned int aiRefIndex);
     void SelectClosestPatrolPoint(const NiPoint3& arPoint);
     void SelectClosestPatrolPoint(void* apPoint);
-    void FUN_009f2b30();
+    void PatrolActorPackageData_ClearReservedPatrolRef();
 
     PATROL_STATE eState; // 0x04
     float m_fElapsedWaitTime; // 0x08

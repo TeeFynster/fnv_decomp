@@ -16,12 +16,12 @@ bool ScrapHeapTaskQueue::QueueCall(void* command)
     bool result;
     while (true)
     {
-        if (FUN_0043b460(&lock, 0, 1) == 0)
+        if (BSAtomicCompareExchange(&lock, 0, 1) == 0)
         {
             reinterpret_cast<void(__cdecl*)()>(&Interface::PrintDebugMessage)();
             result = Enqueue(command);
             reinterpret_cast<void(__cdecl*)()>(&Interface::PrintDebugMessage)();
-            FUN_0043b460(&lock, 1, 0);
+            BSAtomicCompareExchange(&lock, 1, 0);
             break;
         }
     }

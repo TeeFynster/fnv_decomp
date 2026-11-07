@@ -41,7 +41,7 @@ extern "C"
     extern const unsigned char DAT_011FA290[];
     extern const unsigned char DAT_01200618[];
 
-    void FUN_00b79930();
+    void NiD3DPass_ReleasePassReference();
 }
 
 #endif

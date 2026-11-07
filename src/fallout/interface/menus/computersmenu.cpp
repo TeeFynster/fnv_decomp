@@ -25,12 +25,12 @@ public:
     Tile* container;
     Tile* selected;
 
-    void FUN_007244e0();
-    void FUN_00725080();
-    void FUN_007a5e70();
-    void FUN_007a73e0();
+    void ListBox_enum_ActorValue_Index_UpdateHighlightBoxPos();
+    void ListBox_enum_MiscStatManager_MiscStatID_UpdateHighlightBoxPos();
+    void ListBox_ItemChange_ScrollToHighlight();
+    void UpdateHighlightTraits_007a73e0();
     __declspec(dllexport) void UpdateHighlight();
-    void FUN_0072c2b0();
+    void UpdateState_0072c2b0();
 };
 // HighlightValue_computersmenu: local type (was include/HighlightValue.h, which had no evidence of one real class); its methods are 0x00a09130 Tile::Value::AddRefValueAction, 0x00a09410 Tile::Value::SetFloat
 #include "../../../../include/Tile.h"
@@ -39,9 +39,9 @@ public:
 class HighlightValue_computersmenu
 {
 public:
-    void FUN_00a09130(int trait, Tile* tile, int sourceTrait);
-    void FUN_00a09130(int trait, void* source, int sourceTrait);
-    void FUN_00a09410(int value);
+    void Tile_Value_AddRefValueAction(int trait, Tile* tile, int sourceTrait);
+    void Tile_Value_AddRefValueAction(int trait, void* source, int sourceTrait);
+    void Tile_Value_SetFloat(int value);
 };
 // InterfaceH_computersmenu: local type (was include/InterfaceH.h, which had no evidence of one real class); its methods are 0x00702360 Interface::IsInMenuMode, 0x00702450 Interface::IsTopMenuID, 0x00703860 HUDMainMenu::HandleHealthbarForCrosshairActor_, 0x00705e00 Interface::CreateLoadingMenu
 class TESForm;
@@ -64,7 +64,8 @@ public:
 
 // Stores apTile into the tile slot at index aiID when aiID is in [0, 0x10).
 // @fnv 0x00754c00
-void ComputersMenu::FUN_00754c00(int aiID, Tile* apTile)
+// src: COMMUNITY 0x00754c00
+void ComputersMenu::CompanionWheelMenu_AttachTileByID(int aiID, Tile* apTile)
 {
     if (aiID >= 0 && aiID < 0x10)
     {
@@ -80,7 +81,8 @@ int __thiscall ComputersMenu::GetMenuId()
 }
 
 // @fnv 0x00757e20
-int FUN_00757e20()
+// src: XBOX_PDB 0x00757e20
+int ComputersMenu_GetClassStatic()
 {
     return 0x421;
 }
@@ -99,11 +101,12 @@ unsigned char FUN_00757e80_shell::IsFlagBitSet()
 struct FUN_00758390_shell
 {
     signed char m_74;
-    bool __thiscall FUN_00758390();
+    bool __thiscall TERMINAL_MENU_ITEM_ForcesRedraw();
 };
 
 // @fnv 0x00758390
-bool __thiscall FUN_00758390_shell::FUN_00758390()
+// src: XBOX_PDB 0x00758390
+bool __thiscall FUN_00758390_shell::TERMINAL_MENU_ITEM_ForcesRedraw()
 {
     return (((signed char*)this)[0x74 / sizeof(signed char)] & 2) != 0;
 }
@@ -111,11 +114,12 @@ bool __thiscall FUN_00758390_shell::FUN_00758390()
 struct FUN_00758a60_shell
 {
     char m_74;
-    bool __thiscall FUN_00758a60();
+    bool __thiscall TERMINAL_MENU_ITEM_IsSelected();
 };
 
 // @fnv 0x00758a60
-bool __thiscall FUN_00758a60_shell::FUN_00758a60()
+// src: XBOX_PDB 0x00758a60
+bool __thiscall FUN_00758a60_shell::TERMINAL_MENU_ITEM_IsSelected()
 {
     return (((char*)this)[0x74] & 4) != 0;
 }
@@ -125,7 +129,8 @@ extern int __cdecl GetTileValueID(const char*, int);
 extern char $SG7172[];
 
 // @fnv 0x007596a0
-void __cdecl FUN_007596a0(Tile* apTile, void* apMenuItem)
+// src: COMMUNITY 0x007596a0
+void __cdecl ComputersMenu_PostDisplay(Tile* apTile, void* apMenuItem)
 {
     if (apTile)
         apTile->Set(GetTileValueID($SG7172, -1), 1);
@@ -149,11 +154,12 @@ bool __thiscall ComputersMenu::HasAllTiles(int* piIndex)
 struct FUN_00758350_shell
 {
     char m_6c[4];
-    bool __thiscall FUN_00758350();
+    bool __thiscall TERMINAL_MENU_ITEM_IsAutoAdd();
 };
 // Returns true when the int at offset 0x6c is nonzero and bit 0 of the byte at offset 0x74 is set.
 // @fnv 0x00758350
-bool __thiscall FUN_00758350_shell::FUN_00758350()
+// src: XBOX_PDB 0x00758350
+bool __thiscall FUN_00758350_shell::TERMINAL_MENU_ITEM_IsAutoAdd()
 {
     return *(int*)((char*)this + 0x6c) && ((*(signed char*)((char*)this + 0x74) & 1));
 }
@@ -165,12 +171,13 @@ struct Helper98
 };
 void __cdecl RefreshF57EA0TerminalMenu();
 // @fnv 0x00758a80
-void __thiscall ComputersMenu::FUN_00758a80()
+// src: XBOX_PDB 0x00758a80
+void __thiscall ComputersMenu::DisplayPreviousTerminal()
 {
     reinterpret_cast<Helper98*>(&notes)->_ref_0063f7b0();
     terminal = reinterpret_cast<BGSTerminal*>(*reinterpret_cast<Helper98*>(&notes)->_ref_006815c0());
     if (terminal != 0)
-        FUN_007586e0(0);
+        DisplayTerminal(0);
     else
         RefreshF57EA0TerminalMenu();
 }
@@ -180,10 +187,11 @@ struct Host
 {
     char _pad[0xA6];
     unsigned char mA6;
-    char const* __thiscall FUN_00758fe0();
+    char const* __thiscall BGSTerminal_GetServerText();
 };
 // @fnv 0x00758fe0
-char const* __thiscall Host::FUN_00758fe0()
+// src: XBOX_PDB 0x00758fe0
+char const* __thiscall Host::BGSTerminal_GetServerText()
 {
     return mA6 < 10 ? static_cast<const StartMenu*>(DAT_01189e94[mA6])->GetMenuTitle() : 0;
 }
@@ -209,7 +217,8 @@ struct S_7597c0
 extern S_7597c0* DAT_011d9338;
 // Calls FUN_007597c0(1) on DAT_011d9338 if non-null, then sets DAT_011d9338 to null.
 // @fnv 0x00759780
-void FUN_00759780()
+// src: XBOX_PDB 0x00759780
+void ComputersMenu_AnimatingTextManager_DeleteInstance()
 {
     S_7597c0* b = DAT_011d9338;
     S_7597c0* a = b;
@@ -240,7 +249,7 @@ struct GlobalObject_0048f200
 };
 struct FUN_00759850_owner
 {
-    void __thiscall FUN_00759850();
+    void __thiscall ComputersMenu_AnimatingTextManager_FlushList();
 };
 struct FUN_007597f0 : GlobalObject_0048f200
 {
@@ -250,13 +259,13 @@ struct FUN_007597f0 : GlobalObject_0048f200
 // @fnv 0x007597f0
 FUN_007597f0::~FUN_007597f0()
 {
-    ((FUN_00759850_owner*)this)->FUN_00759850();
+    ((FUN_00759850_owner*)this)->ComputersMenu_AnimatingTextManager_FlushList();
 }
 }  // namespace fnv_007597f0
 
 struct ArrHelper
 {
-    bool FUN_0076b610() const;
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() const;
 };
 struct ScriptObj
 {
@@ -268,12 +277,13 @@ struct ListBase
 };
 struct Holder
 {
-    void FUN_00759850();
+    void ComputersMenu_AnimatingTextManager_FlushList();
 };
 // @fnv 0x00759850
-void Holder::FUN_00759850()
+// src: XBOX_PDB 0x00759850
+void Holder::ComputersMenu_AnimatingTextManager_FlushList()
 {
-    while (!((ArrHelper*)this)->FUN_0076b610())
+    while (!((ArrHelper*)this)->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
     {
         ScriptObj* pB = ((ListBase*)this)->RemoveHead();
         ScriptObj* pA = pB;
@@ -307,7 +317,7 @@ struct TL
 };
 struct NoArgumentMethodObject
 {
-    void FUN_00700110();
+    void AnimatingText_ForceFinish();
 };
 struct TileProcessor
 {
@@ -319,7 +329,7 @@ void TileProcessor::ProcessAllTiles()
     void* piter = (void*)((Flt*)this)->operator unsigned int();
     while (piter)
     {
-        ((NoArgumentMethodObject*)((TL*)this)->GetNext(piter))->FUN_00700110();
+        ((NoArgumentMethodObject*)((TL*)this)->GetNext(piter))->AnimatingText_ForceFinish();
     }
 }
 
@@ -371,12 +381,13 @@ struct FUN_0075a5e0_shell
 {
     char _pad[4];
     TerminalNodeSortList m_kNode;
-    void __thiscall FUN_0075a5e0(int(__cdecl* f)(void*, void*));
+    void __thiscall SortAndResetEntries(int(__cdecl* f)(void*, void*));
 };
 
 // Sorts the list using the given comparison function, then calls ResetAndProcessNodes on this object.
 // @fnv 0x0075a5e0
-void __thiscall FUN_0075a5e0_shell::FUN_0075a5e0(int(__cdecl* f)(void*, void*))
+// src: GUESS 0x0075a5e0 (confidence: medium)
+void __thiscall FUN_0075a5e0_shell::SortAndResetEntries(int(__cdecl* f)(void*, void*))
 {
     m_kNode.Sort(f);
     reinterpret_cast<FUN_0075aa50_shell*>(this)->ResetAndProcessNodes();
@@ -397,7 +408,7 @@ bool ComputersMenu::HandleButtonInput(int aiButton, float afValue)
             }
             else
             {
-                FUN_00758a80();
+                DisplayPreviousTerminal();
             }
             return true;
         }
@@ -429,7 +440,7 @@ void* __cdecl operator new(unsigned int);
 
 struct M788
 {
-    void __thiscall FUN_004ed8c0(void*);
+    void __thiscall NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(void*);
 };
 
 struct AnimationPointerList
@@ -439,12 +450,12 @@ struct AnimationPointerList
 
 struct FUN_006ffe80_shell
 {
-    void __thiscall FUN_006ffe80(int, int);
+    void __thiscall AnimatingText_SetTraits(int, int);
 };
 
 struct FUN_00726db0_class
 {
-    bool __thiscall FUN_00726db0(bool);
+    bool __thiscall AnimatingText_SetVisibility(bool);
 };
 
 struct FUN_00759eb0
@@ -456,7 +467,7 @@ struct FUN_00759eb0
 
 struct FUN_007b5330_shell
 {
-    void __thiscall FUN_007b5330(void*, void*);
+    void __thiscall NiTPointerListBase_InsertBefore_0(void*, void*);
 };
 
 struct FUN_00759da0_shell : FUN_007b5330_shell
@@ -469,11 +480,11 @@ void FUN_00759da0_shell::InsertAtPosition(char const* aParam1, int aParam2, int 
 {
     FUN_00759eb0* pNewObject = new FUN_00759eb0(aParam1);
 
-    reinterpret_cast<FUN_006ffe80_shell*>(pNewObject)->FUN_006ffe80(aParam2, aParam3);
+    reinterpret_cast<FUN_006ffe80_shell*>(pNewObject)->AnimatingText_SetTraits(aParam2, aParam3);
 
     if (aParam4 == -1)
     {
-        reinterpret_cast<M788*>(this)->FUN_004ed8c0(reinterpret_cast<void*>(&pNewObject));
+        reinterpret_cast<M788*>(this)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(reinterpret_cast<void*>(&pNewObject));
     }
     else
     {
@@ -487,15 +498,15 @@ void FUN_00759da0_shell::InsertAtPosition(char const* aParam1, int aParam2, int 
 
         if (pNode != 0)
         {
-            this->FUN_007b5330(reinterpret_cast<void*>(pNode), reinterpret_cast<void*>(&pNewObject));
+            this->NiTPointerListBase_InsertBefore_0(reinterpret_cast<void*>(pNode), reinterpret_cast<void*>(&pNewObject));
         }
         else
         {
-            reinterpret_cast<M788*>(this)->FUN_004ed8c0(reinterpret_cast<void*>(&pNewObject));
+            reinterpret_cast<M788*>(this)->NiTPointerListBase_NiTPointerAllocator_unsigned_int_BSMultiBoundRoom_AddTail(reinterpret_cast<void*>(&pNewObject));
         }
     }
 
-    reinterpret_cast<FUN_00726db0_class*>(pNewObject)->FUN_00726db0(false);
+    reinterpret_cast<FUN_00726db0_class*>(pNewObject)->AnimatingText_SetVisibility(false);
 }
 
 struct SysColorMgr
@@ -505,13 +516,13 @@ struct SysColorMgr
 };
 extern int DAT_011d9334;
 extern int DAT_011d934c;
-void FUN_00759780();
+void ComputersMenu_AnimatingTextManager_DeleteInstance();
 // The compiler also emits the scalar deleting destructor at 0x00757a20.
 // @fnv 0x00757a50
 ComputersMenu::~ComputersMenu()
 {
     DAT_011d9334 = 0;
-    FUN_00759780();
+    ComputersMenu_AnimatingTextManager_DeleteInstance();
     notes.RemoveAll();
     for (int i = 0; i < 3; i++)
     {
@@ -524,7 +535,7 @@ ComputersMenu::~ComputersMenu()
 struct BlinkValue
 {
     float FUN_00488d50();
-    void FUN_00a0a270(float, bool);
+    void Tile_Value_SetFloat_00a0a270(float, bool);
 };
 // The shared Tile API has no non-creating trait lookup or clipping toggle yet.
 // These declarations provide only the missing calls, with no Tile layout copy.
@@ -543,7 +554,7 @@ __declspec(noinline) inline void ComputersMenu::UpdateBlink()
     static float interval = tile40->FUN_00a011b0(GetTileValueID("_blink_interval", -1));
     if (gm_GetTickCount() > nextTick && unka4)
     {
-        static_cast<BlinkValue*>(unka4)->FUN_00a0a270(static_cast<BlinkValue*>(unka4)->FUN_00488d50() == 1.0 ? 0.0f : 1.0f, true);
+        static_cast<BlinkValue*>(unka4)->Tile_Value_SetFloat_00a0a270(static_cast<BlinkValue*>(unka4)->FUN_00488d50() == 1.0 ? 0.0f : 1.0f, true);
         nextTick = gm_GetTickCount() + interval;
     }
     else if (!unka4)
@@ -688,7 +699,7 @@ struct Shell
     void __thiscall UpdateHighlight();
 };
 
-char const* __cdecl FUN_00a00940(char const* a1, int a2);
+char const* __cdecl Tile_AddUserTrait(char const* a1, int a2);
 
 class SetTileHelper
 {
@@ -696,15 +707,16 @@ class SetTileHelper
     char _pad[0x10];
     Tile* m_pTile10;
 
-    bool FUN_0075a610(Tile* apTile);
+    bool HasEnabledTrait(Tile* apTile);
 };
 
 // @fnv 0x0075a610
-bool SetTileHelper::FUN_0075a610(Tile* apTile)
+// src: GUESS 0x0075a610 (confidence: high)
+bool SetTileHelper::HasEnabledTrait(Tile* apTile)
 {
     if (((Shell*)this)->IsTileTraitEnabled() &&
         (apTile == 0 || (((Shell*)this)->ContainsKey(apTile) &&
-                         apTile->IsTraitNonZero((int)FUN_00a00940("_enabled", -1)))))
+                         apTile->IsTraitNonZero((int)Tile_AddUserTrait("_enabled", -1)))))
     {
         m_pTile10 = apTile;
         ((Shell*)this)->UpdateHighlight();
@@ -792,7 +804,7 @@ void RefreshF57EA0TerminalMenu()
         g_pF57EA0TerminalMenu->GetTile()->SetFloat(0xfc1, g_fF57EA0TileDefault, true);
         if (F57EA0GetRenderedMenu(F57EA0GetInterfaceManager()) &&
             F57EA0GetRenderedMenu(F57EA0GetInterfaceManager())->GetSceneNode() ==
-                g_pF57EA0TerminalMenu->GetTile()->FUN_0056c7f0())
+                g_pF57EA0TerminalMenu->GetTile()->GetModel_0056c7f0())
         {
             FORenderedTerminal* pkTerminal =
                 dynamic_cast<FORenderedTerminal*>(F57EA0GetRenderedMenu(F57EA0GetInterfaceManager()));
@@ -804,22 +816,23 @@ void RefreshF57EA0TerminalMenu()
 }
 
 namespace fnv_00758470 {
-InterfaceManager* FUN_004b7210();
+InterfaceManager* InterfaceManager_GetSingleton();
 struct HH84
 {
     unsigned int GetReferenceFlags();
     void ProcessQueue();
 };
-void FUN_007596a0(Tile*, TESObjectREFR*);
+void ComputersMenu_PostDisplay(Tile*, TESObjectREFR*);
 unsigned int __cdecl gm_GetTickCount();
 extern unsigned int DAT_011d93c4;
 }  // namespace fnv_00758470
 
 // @fnv 0x00758470
-void ComputersMenu::FUN_00758470()
+// src: XBOX_PDB 0x00758470
+void ComputersMenu::DoIdle_00758470()
 {
     using namespace fnv_00758470;
-    if ((unkc0 && !FUN_004b7210()->kTutorialManager.HasBeenShown(0x18)) || m_eFadeState == 2)
+    if ((unkc0 && !InterfaceManager_GetSingleton()->kTutorialManager.HasBeenShown(0x18)) || m_eFadeState == 2)
         return;
     reinterpret_cast<HH84*>(manager)->ProcessQueue();
     UpdateBlink();
@@ -840,7 +853,7 @@ void ComputersMenu::FUN_00758470()
         }
         else if (bRefreshed)
         {
-            entries.Traverse(FUN_007596a0, 0, 0x7fffffff);
+            entries.Traverse(ComputersMenu_PostDisplay, 0, 0x7fffffff);
             bRefreshed = 0;
         }
     }
@@ -990,7 +1003,8 @@ extern unsigned int g_uiChallengeUpdateMS;
 
 // Resets the display and list box, optionally adds the current challenge to the recent list, and rebuilds the challenge lines and tiles.
 // @fnv 0x007586e0
-void ComputersMenu::FUN_007586e0(bool abAddRecent)
+// src: XBOX_PDB 0x007586e0
+void ComputersMenu::DisplayTerminal(bool abAddRecent)
 {
     if (!reinterpret_cast<CHChallenge*>(terminal))
         return;
@@ -1035,7 +1049,7 @@ void ComputersMenu::FUN_007586e0(bool abAddRecent)
 
 struct FUN_00ad73b0_t
 {
-    BSSoundHandle FUN_00ad73b0(unsigned int auiFormID, unsigned int auiFlags);
+    BSSoundHandle GetSoundHandleByFormID_00ad73b0(unsigned int auiFormID, unsigned int auiFlags);
 };
 
 
@@ -1043,7 +1057,7 @@ struct FUN_00ad73b0_t
 void ComputersMenu::PlayNoteSound(BGSNote* apNote)
 {
     ((FUN_00ad73b0_t*)BSAudio::GetSingleton())
-        ->FUN_00ad73b0(apNote->FUN_005e9100()->GetFormID(), 0x101)
+        ->GetSoundHandleByFormID_00ad73b0(apNote->GetNoteSound()->GetFormID(), 0x101)
         .Play(false);
 }
 
@@ -1133,17 +1147,17 @@ namespace fnv_007598d0 {
 struct QueueText
 {
     ~QueueText();
-    bool FUN_00759d80();
-    const char* FUN_00458b50();
+    bool AnimatingText_IsDisplayFinished();
+    const char* AnimatingText_GetFullText();
     const char* FUN_0059bb30();
-    unsigned int FUN_0044edb0();
-    Tile* FUN_007001f0();
-    void FUN_006ffea0();
+    unsigned int TESMain_GetThread();
+    Tile* AnimatingText_GetParent();
+    void AnimatingText_Update();
 };
 struct TextQueue
 {
-    bool FUN_0076b610() const;
-    QueueText** FUN_0073ac90();
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() const;
+    QueueText** NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead();
     QueueText* PopFrontScript();
     void ProcessQueue();
 };
@@ -1151,26 +1165,26 @@ struct TextAudioManager
 {
     BSSoundHandle ResolveAudioHandle(const char*, unsigned int);
 };
-TextAudioManager* FUN_00ad9060();
-unsigned int FUN_0044a670(const char*);
+TextAudioManager* BSAudioManager_QInstance_00ad9060();
+unsigned int BSstrlen(const char*);
 extern unsigned int DAT_011d93d4;
 extern const char DAT_01072118[];
 // @fnv 0x007598d0
 void TextQueue::ProcessQueue()
 {
     bool hasTrait = false;
-    while (!FUN_0076b610() && gm_GetTickCount() > DAT_011d93d4)
+    while (!NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() && gm_GetTickCount() > DAT_011d93d4)
     {
-        if ((*FUN_0073ac90())->FUN_00759d80())
+        if ((*NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->AnimatingText_IsDisplayFinished())
         {
             QueueText* removed = PopFrontScript();
             if (!reinterpret_cast<ComputersMenu*>(DAT_011d9334)->unkb0)
             {
-                if (removed && *removed->FUN_00458b50() == *DAT_01072118)
+                if (removed && *removed->AnimatingText_GetFullText() == *DAT_01072118)
                     reinterpret_cast<BSSoundHandle&>(reinterpret_cast<ComputersMenu*>(DAT_011d9334)->sounds[2]).Play(false);
                 DAT_011d93d4 = gm_GetTickCount() + 500;
             }
-            else if (removed && removed->FUN_007001f0() == reinterpret_cast<ComputersMenu*>(DAT_011d9334)->tile44)
+            else if (removed && removed->AnimatingText_GetParent() == reinterpret_cast<ComputersMenu*>(DAT_011d9334)->tile44)
             {
                 reinterpret_cast<ComputersMenu*>(DAT_011d9334)->tile64->FUN_00700320(0xfa3, 1);
             }
@@ -1187,29 +1201,29 @@ void TextQueue::ProcessQueue()
                         unsigned int oldLength = 0;
                         unsigned int newLength = 0;
                         if (!reinterpret_cast<ComputersMenu*>(DAT_011d9334)->unkb0 &&
-                            *(*FUN_0073ac90())->FUN_00458b50() == *DAT_01072118)
+                            *(*NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->AnimatingText_GetFullText() == *DAT_01072118)
                         {
-                            oldLength = FUN_0044a670((*FUN_0073ac90())->FUN_0059bb30());
-                            (*FUN_0073ac90())->FUN_006ffea0();
-                            newLength = FUN_0044a670((*FUN_0073ac90())->FUN_0059bb30());
+                            oldLength = BSstrlen((*NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->FUN_0059bb30());
+                            (*NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->AnimatingText_Update();
+                            newLength = BSstrlen((*NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->FUN_0059bb30());
                             for (unsigned int index = 0; index < newLength - oldLength; index++)
                             {
                                 unsigned int offset =
-                                    (*FUN_0073ac90())->FUN_0044edb0() * index / (newLength - oldLength);
-                                FUN_00ad9060()
+                                    (*NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->TESMain_GetThread() * index / (newLength - oldLength);
+                                BSAudioManager_QInstance_00ad9060()
                                     ->ResolveAudioHandle("UIHackingCharSingle", 0x121)
                                     .PlayAfter(offset, 0);
                             }
                         }
                         else
                         {
-                            (*FUN_0073ac90())->FUN_006ffea0();
+                            (*NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->AnimatingText_Update();
                             reinterpret_cast<BSSoundHandle&>(reinterpret_cast<ComputersMenu*>(DAT_011d9334)->sounds[1]).Play(false);
                         }
                         x = 0;
                         y = 0;
-                        tile = (*FUN_0073ac90())->FUN_007001f0();
-                        hasTrait = tile->FUN_00a00f30(0xfba) != 0;
+                        tile = (*NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->AnimatingText_GetParent();
+                        hasTrait = tile->Tile_GetValue(0xfba) != 0;
                         for (Tile* parent = tile;
                              parent &&
                              parent != reinterpret_cast<ComputersMenu*>(DAT_011d9334)->tile40->FUN_0045cd60();
@@ -1218,25 +1232,25 @@ void TextQueue::ProcessQueue()
                             x += (int)parent->FUN_00a011b0(0xfa1);
                             y += (int)parent->FUN_00a011b0(0xfa2);
                         }
-                        tile->FUN_00a04640(false);
+                        tile->Tile_UpdateTile(false);
                         if (reinterpret_cast<ComputersMenu*>(DAT_011d9334)
                                 ->entries.ContainsKey(tile))
                         {
                             reinterpret_cast<TileCompatibility*>(tile)->FUN_00a04620(false);
                             reinterpret_cast<ComputersMenu*>(DAT_011d9334)
-                                ->tile40->FUN_00a012d0(
+                                ->tile40->Tile_Set(
                                     0xfa1,
-                                    x + tile->FUN_00a011b0(reinterpret_cast<int>(FUN_00a00940("_text_width", -1))),
+                                    x + tile->FUN_00a011b0(reinterpret_cast<int>(Tile_AddUserTrait("_text_width", -1))),
                                     true);
                             reinterpret_cast<ComputersMenu*>(DAT_011d9334)
-                                ->tile40->FUN_00a012d0(
-                                    0xfa2, y + tile->FUN_00a011b0(reinterpret_cast<int>(FUN_00a00940("_text_y", -1))),
+                                ->tile40->Tile_Set(
+                                    0xfa2, y + tile->FUN_00a011b0(reinterpret_cast<int>(Tile_AddUserTrait("_text_y", -1))),
                                     true);
                         }
                         else if (!hasTrait)
                         {
                             reinterpret_cast<ComputersMenu*>(DAT_011d9334)
-                                ->tile40->FUN_00a012d0(0xfa1, x + tile->FUN_00a011b0(0xfb1), true);
+                                ->tile40->Tile_Set(0xfa1, x + tile->FUN_00a011b0(0xfb1), true);
                             reinterpret_cast<ComputersMenu*>(DAT_011d9334)->tile40->FUN_00700320(0xfa2, y);
                         }
                         break;
@@ -1245,10 +1259,10 @@ void TextQueue::ProcessQueue()
             }
         }
     }
-    if (FUN_0076b610() || hasTrait)
+    if (NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty() || hasTrait)
     {
         reinterpret_cast<ComputersMenu*>(DAT_011d9334)
-            ->tile40->FUN_00a012d0(
+            ->tile40->Tile_Set(
                 0xfa1,
                 reinterpret_cast<ComputersMenu*>(DAT_011d9334)->tile3c->FUN_00a011b0(0xfa1) +
                     (reinterpret_cast<ComputersMenu*>(DAT_011d9334)->tile3c->IsAllChildrenFlag0()
@@ -1256,7 +1270,7 @@ void TextQueue::ProcessQueue()
                          : 0.0f),
                 true);
         reinterpret_cast<ComputersMenu*>(DAT_011d9334)
-            ->tile40->FUN_00a012d0(
+            ->tile40->Tile_Set(
                 0xfa2, reinterpret_cast<ComputersMenu*>(DAT_011d9334)->tile3c->FUN_00a011b0(0xfa2), true);
     }
 }
@@ -1267,9 +1281,9 @@ int __cdecl TraitNameToID(const char* apName, int aiDefault);
 struct LBTileValue
 {
     void RemoveFromReactions();
-    void FUN_00a09130(int aiOperator, Tile* apTile, int aiID);
+    void Tile_Value_AddRefValueAction(int aiOperator, Tile* apTile, int aiID);
     void AppendFloatAction(int aiOperator, float afValue);
-    void FUN_00a09410(int aiFlag);
+    void Tile_Value_SetFloat(int aiFlag);
 };
 
 struct LBTileMenu
@@ -1303,7 +1317,7 @@ struct LBListBox
     const char* pTemplateName;
     unsigned short usItemCount;
 
-    bool FUN_007242c0(int aiUnk);
+    bool ListBox_unsigned_int_GetFlag(int aiUnk);
     void ResetAndProcessNodes();
     void AccumulateTileHeight(Tile* apTile);
     void UpdateScrollItems();
@@ -1327,13 +1341,13 @@ Tile* LBListBox::AddItem(int aiObject, const char* apText, int(__cdecl* apSort)(
         if (apSort)
         {
             kList.InsertSorted(new LBItem(pTile, aiObject), apSort);
-            if (FUN_007242c0(0))
+            if (ListBox_unsigned_int_GetFlag(0))
                 ResetAndProcessNodes();
         }
         else
         {
             kList.Append(new LBItem(pTile, aiObject));
-            if (FUN_007242c0(0))
+            if (ListBox_unsigned_int_GetFlag(0))
             {
                 AccumulateTileHeight(pTile);
                 UpdateScrollItems();
@@ -1344,9 +1358,9 @@ Tile* LBListBox::AddItem(int aiObject, const char* apText, int(__cdecl* apSort)(
         {
             LBTileValue* pAction = static_cast<LBTileValue*>(reinterpret_cast<TileCompatibility*>(pParentTile)->FindTraitValue(0xfb0));
             pAction->RemoveFromReactions();
-            pAction->FUN_00a09130(0x7d0, pTile, 0xfb0);
+            pAction->Tile_Value_AddRefValueAction(0x7d0, pTile, 0xfb0);
             pAction->AppendFloatAction(0x7d3, pParentTile->GetFloat(TraitNameToID("_number_of_visible_items", -1)));
-            pAction->FUN_00a09410(0);
+            pAction->Tile_Value_SetFloat(0);
         }
         return pTile;
     }
@@ -1375,7 +1389,7 @@ struct AnimationNode
     ~AnimationNode();
 };
 extern bool s_bAllowDetach;
-int __cdecl FUN_00a01860(const char* name);
+int __cdecl Tile_TextToTrait(const char* name);
 struct AnimationList
 {
     int unk00;
@@ -1388,7 +1402,7 @@ struct AnimationList
     unsigned short count;
     unsigned short unk1e;
     float elapsed;
-    bool FUN_007242c0(unsigned int flag);
+    bool ListBox_unsigned_int_GetFlag(unsigned int flag);
     void UpdateScrollItems();
     void UpdateHighlight();
     void ClearEntries();
@@ -1402,7 +1416,7 @@ void AnimationList::ClearEntries()
         AnimationNode* next = node->FUN_00726070();
         if (!s_bAllowDetach)
             delete (*node->FUN_006815c0())->object;
-        if (FUN_007242c0(1))
+        if (ListBox_unsigned_int_GetFlag(1))
             delete (*node->FUN_006815c0())->text;
         delete *node->FUN_006815c0();
         node->FUN_006ecd40(0);
@@ -1413,7 +1427,7 @@ void AnimationList::ClearEntries()
     {
         if (!s_bAllowDetach)
             delete entry->object;
-        if (FUN_007242c0(1))
+        if (ListBox_unsigned_int_GetFlag(1))
             delete entry->text;
         delete entry;
     }
@@ -1421,14 +1435,14 @@ void AnimationList::ClearEntries()
     count = 0;
     elapsed = 0.0f;
     if (tile)
-        tile->Set(FUN_00a01860("_num_filtered"), 0.0f, true);
+        tile->Set(Tile_TextToTrait("_num_filtered"), 0.0f, true);
     UpdateScrollItems();
     currentTile = 0;
     UpdateHighlight();
 }
 
 float __cdecl FUN_004bd510(float, float);
-int __cdecl FUN_00a01860(const char*);
+int __cdecl Tile_TextToTrait(const char*);
 
 struct MyInner
 {
@@ -1486,13 +1500,13 @@ Tile* MyListBox::GetScrollTargetTile(int aiScrollCode)
     case 15:
         iTileIndex =
             m_tile0c ? (int)FUN_004bd510(
-                           -m_tile0c->FUN_00a011b0(0xfb0) / m_tile0c->FUN_00a011b0(FUN_00a01860("_scroll_delta")), 1.0f)
+                           -m_tile0c->FUN_00a011b0(0xfb0) / m_tile0c->FUN_00a011b0(Tile_TextToTrait("_scroll_delta")), 1.0f)
                      : 0;
         break;
     case 16:
         iTileIndex =
             m_tile0c ? (int)FUN_004bd510(
-                           m_tile0c->FUN_00a011b0(0xfb0) / m_tile0c->FUN_00a011b0(FUN_00a01860("_scroll_delta")), 1.0f)
+                           m_tile0c->FUN_00a011b0(0xfb0) / m_tile0c->FUN_00a011b0(Tile_TextToTrait("_scroll_delta")), 1.0f)
                      : 0;
         break;
     default:
@@ -1531,13 +1545,13 @@ Tile* MyListBox::GetScrollTargetTile(int aiScrollCode)
                 }
             }
 
-            if (pFound_ && !pFound_->IsTraitNonZero((int)FUN_00a00940("_enabled", -1)))
+            if (pFound_ && !pFound_->IsTraitNonZero((int)Tile_AddUserTrait("_enabled", -1)))
             {
                 pFound_ = 0;
                 if (iTileIndex > 0 && ++curIdx > maxIdxTmp)
                 {
                     curIdx = maxIdxTmp - 1;
-                    while ((!pFound_ || !pFound_->IsTraitNonZero((int)FUN_00a00940("_enabled", -1))) && curIdx >= 0)
+                    while ((!pFound_ || !pFound_->IsTraitNonZero((int)Tile_AddUserTrait("_enabled", -1))) && curIdx >= 0)
                     {
                         pFound_ = FUN_0075a955(curIdx--, 0);
                     }
@@ -1546,7 +1560,7 @@ Tile* MyListBox::GetScrollTargetTile(int aiScrollCode)
                 else if (iTileIndex < 0 && --curIdx < 0)
                 {
                     curIdx = 1;
-                    while ((!pFound_ || !pFound_->IsTraitNonZero((int)FUN_00a00940("_enabled", -1))) &&
+                    while ((!pFound_ || !pFound_->IsTraitNonZero((int)Tile_AddUserTrait("_enabled", -1))) &&
                            curIdx <= maxIdxTmp)
                     {
                         pFound_ = FUN_0075a955(curIdx++, 0);
@@ -1566,7 +1580,7 @@ Tile* MyListBox::GetScrollTargetTile(int aiScrollCode)
 
 struct FUN_0075b020_cls
 {
-    unsigned int __thiscall FUN_0075b020();
+    unsigned int __thiscall ListBox_TERMINAL_MENU_ITEM_NumUnfiltered();
 };
 
 struct ScrollData
@@ -1581,8 +1595,8 @@ struct ScrollData
 
 extern double DAT_01012060;
 float __cdecl FUN_004e4430(float afValue);
-int __cdecl FUN_00647b70(int aiMinimum, int aiValue);
-int __cdecl FUN_00a01860(const char* apText);
+int __cdecl BSMAX_00647b70(int aiMinimum, int aiValue);
+int __cdecl Tile_TextToTrait(const char* apText);
 
 // Computes the number of scroll items from the tile value and m_20, sets _scroll_delta on the tile and _number_of_items on the list.
 // @fnv 0x0075aef0
@@ -1600,8 +1614,8 @@ void FUN_0075aa50_cls::UpdateScrollItems()
             if (m_20 > fTimeOffset)
             {
                 iNumberOfItems =
-                    FUN_00647b70((int)FUN_004e4430(
-                                     ((float)((FUN_0075b020_cls*)this)->FUN_0075b020() * (m_20 - fTimeOffset)) / m_20) +
+                    BSMAX_00647b70((int)FUN_004e4430(
+                                     ((float)((FUN_0075b020_cls*)this)->ListBox_TERMINAL_MENU_ITEM_NumUnfiltered() * (m_20 - fTimeOffset)) / m_20) +
                                      1,
                                  2);
             }
@@ -1609,13 +1623,13 @@ void FUN_0075aa50_cls::UpdateScrollItems()
             if (iNumberOfItems > 1)
             {
                 ((ScrollData*)this)->pTile0c
-                    ->FUN_00a012d0(FUN_00a01860("_scroll_delta"), (m_20 - fTimeOffset) / (iNumberOfItems - 1), true);
+                    ->Tile_Set(Tile_TextToTrait("_scroll_delta"), (m_20 - fTimeOffset) / (iNumberOfItems - 1), true);
             }
         }
 
         if (((ScrollData*)this)->pTile14 != 0)
         {
-            ((ScrollData*)this)->pTile14->FUN_00700320(FUN_00a01860("_number_of_items"), iNumberOfItems);
+            ((ScrollData*)this)->pTile14->FUN_00700320(Tile_TextToTrait("_number_of_items"), iNumberOfItems);
         }
     }
 }
@@ -1966,14 +1980,14 @@ struct UI
     Tile* Root();
 };
 UI* GetUI();
-int FUN_00757e20();
+int ComputersMenu_GetClassStatic();
 ComputersMenu* FindMenu(int);
 float GetDefault();
 void Warn(const char*, ...);
 // @fnv 0x00757b70
 Tile* CreateComputerMenu(Ref* reference)
 {
-    ComputersMenu* oldMenu = FindMenu(FUN_00757e20());
+    ComputersMenu* oldMenu = FindMenu(ComputersMenu_GetClassStatic());
     if (oldMenu)
     {
         delete oldMenu;
@@ -1985,7 +1999,7 @@ Tile* CreateComputerMenu(Ref* reference)
     float defaultValue = GetDefault();
     Tile* aTile = GetUI()->Root()->ReadFile("Data\\Menus\\computers_menu.xml");
     ComputersMenu* menu = reinterpret_cast<ComputersMenu*>(aTile->GetMenu());
-    if (menu && menu->GetClass() == FUN_00757e20())
+    if (menu && menu->GetClass() == ComputersMenu_GetClassStatic())
     {
         menu->SetTileMenu(reinterpret_cast<TileMenu*>(aTile), false);
         gComputerMenu = menu;
@@ -2002,7 +2016,7 @@ Tile* CreateComputerMenu(Ref* reference)
         }
         if (aTile->FUN_00a011b0(0xfa7) == 6006.0 || aTile->FUN_00a011b0(0xfa7) == 102.0)
             aTile->Set(0xfad, defaultValue, true);
-        reinterpret_cast<unsigned char&>(gComputerMenu->unkc0) = GetUI()->keys.Check(0x18, FUN_00757e20(), 0x200);
+        reinterpret_cast<unsigned char&>(gComputerMenu->unkc0) = GetUI()->keys.Check(0x18, ComputersMenu_GetClassStatic(), 0x200);
         gComputerMenu->reference = reinterpret_cast<TESObjectREFR*>(reference);
         gComputerMenu->terminal = reinterpret_cast<BGSTerminal*>(terminal);
         gComputerMenu->entries.Initialize(gComputerMenu->tile2c, "computers_file_template");
@@ -2025,68 +2039,68 @@ Tile* CreateComputerMenu(Ref* reference)
 }
 }  // namespace fnv_00757b70
 
-Tile* __cdecl FUN_00a08b20(Tile* root, const char* path);
+Tile* __cdecl Tile_GetTileByName(Tile* root, const char* path);
 // @fnv 0x0075abd0
 __declspec(dllexport) __declspec(noinline) inline void HighlightList_computersmenu::UpdateHighlight()
 {
-    static const char* highlightY = FUN_00a00940("_highlight_y", -1);
-    static const char* selectedHeight = FUN_00a00940("_selected_height", -1);
+    static const char* highlightY = Tile_AddUserTrait("_highlight_y", -1);
+    static const char* selectedHeight = Tile_AddUserTrait("_selected_height", -1);
     if (container)
     {
         if (selected)
         {
-            HighlightValue_computersmenu* heightValue = static_cast<HighlightValue_computersmenu*>(container->FUN_00a00f30(reinterpret_cast<int>(highlightY)));
-            HighlightValue_computersmenu* yValue = static_cast<HighlightValue_computersmenu*>(container->FUN_00a00f30(reinterpret_cast<int>(selectedHeight)));
-            heightValue->FUN_00a09130(2000, selected, 4002);
-            heightValue->FUN_00a09410(0);
-            yValue->FUN_00a09130(2000, selected, 4016);
-            yValue->FUN_00a09410(0);
+            HighlightValue_computersmenu* heightValue = static_cast<HighlightValue_computersmenu*>(container->Tile_GetValue(reinterpret_cast<int>(highlightY)));
+            HighlightValue_computersmenu* yValue = static_cast<HighlightValue_computersmenu*>(container->Tile_GetValue(reinterpret_cast<int>(selectedHeight)));
+            heightValue->Tile_Value_AddRefValueAction(2000, selected, 4002);
+            heightValue->Tile_Value_SetFloat(0);
+            yValue->Tile_Value_AddRefValueAction(2000, selected, 4016);
+            yValue->Tile_Value_SetFloat(0);
             if (selected->GetSpeechChallengeFailure())
             {
-                Tile* box = FUN_00a08b20(container, "lb_highlight_box");
+                Tile* box = Tile_GetTileByName(container, "lb_highlight_box");
                 if (box)
                 {
                     Tile* edge = box->GetNamedChild("top");
                     if (edge)
                     {
-                        edge->FUN_0071aa60(true);
-                        edge->SetChangeFlag(8);
+                        edge->SetSpeechChallengeFailure_0071aa60(true);
+                        edge->Tile_SetChangeFlag(8);
                         edge = box->GetNamedChild("bottom");
-                        edge->FUN_0071aa60(true);
-                        edge->SetChangeFlag(8);
+                        edge->SetSpeechChallengeFailure_0071aa60(true);
+                        edge->Tile_SetChangeFlag(8);
                         edge = box->GetNamedChild("left");
-                        edge->FUN_0071aa60(true);
-                        edge->SetChangeFlag(8);
+                        edge->SetSpeechChallengeFailure_0071aa60(true);
+                        edge->Tile_SetChangeFlag(8);
                         edge = box->GetNamedChild("right");
-                        edge->FUN_0071aa60(true);
-                        edge->SetChangeFlag(8);
+                        edge->SetSpeechChallengeFailure_0071aa60(true);
+                        edge->Tile_SetChangeFlag(8);
                     }
-                    box->FUN_0071aa60(true);
-                    box->SetChangeFlag(8);
+                    box->SetSpeechChallengeFailure_0071aa60(true);
+                    box->Tile_SetChangeFlag(8);
                 }
             }
             else
             {
-                Tile* box = FUN_00a08b20(container, "lb_highlight_box");
+                Tile* box = Tile_GetTileByName(container, "lb_highlight_box");
                 if (box)
                 {
                     Tile* edge = box->GetNamedChild("top");
                     if (edge)
                     {
-                        edge->FUN_0071aa60(false);
-                        edge->SetChangeFlag(8);
+                        edge->SetSpeechChallengeFailure_0071aa60(false);
+                        edge->Tile_SetChangeFlag(8);
                         edge = box->GetNamedChild("bottom");
-                        edge->FUN_0071aa60(false);
-                        edge->SetChangeFlag(8);
+                        edge->SetSpeechChallengeFailure_0071aa60(false);
+                        edge->Tile_SetChangeFlag(8);
                         edge = box->GetNamedChild("left");
-                        edge->FUN_0071aa60(false);
-                        edge->SetChangeFlag(8);
+                        edge->SetSpeechChallengeFailure_0071aa60(false);
+                        edge->Tile_SetChangeFlag(8);
                         edge = box->GetNamedChild("right");
-                        edge->FUN_0071aa60(false);
-                        edge->SetChangeFlag(8);
+                        edge->SetSpeechChallengeFailure_0071aa60(false);
+                        edge->Tile_SetChangeFlag(8);
                     }
-                    box->FUN_0071aa60(false);
-                    box->SetChangeFlag(8);
+                    box->SetSpeechChallengeFailure_0071aa60(false);
+                    box->Tile_SetChangeFlag(8);
                 }
             }
         }
@@ -2119,29 +2133,29 @@ void ComputersMenu::RefreshDisplay()
     this->tile50->FUN_00700320(0xFA3, 0);
     this->tile54->FUN_00700320(0xFA3, 0);
     this->tile58->FUN_00700320(0xFA3, 0);
-    this->FUN_007586e0(1);
+    this->DisplayTerminal(1);
 
-    reinterpret_cast<MyDisplay*>(manager)->InsertAtPosition(g_011d3d78.FUN_004c69f0(), this->tile34->FUN_00a00f30(0xFC4),
+    reinterpret_cast<MyDisplay*>(manager)->InsertAtPosition(g_011d3d78.FUN_004c69f0(), this->tile34->Tile_GetValue(0xFC4),
                                      reinterpret_cast<TileCompatibility*>(this->tile34)->FindTraitValue(0xFA3), 0);
-    this->tile34->FUN_00a012d0(
+    this->tile34->Tile_Set(
         0xFA1,
         (this->tile34->FUN_0045cd60()->FUN_00a011b0(0xFB1) - BSStringLength(g_011d3d78.FUN_00403df0()) * 17) / 2.0, 1);
 
-    reinterpret_cast<MyDisplay*>(manager)->InsertAtPosition(g_011d4978.FUN_004c69f0(), this->tile38->FUN_00a00f30(0xFC4),
+    reinterpret_cast<MyDisplay*>(manager)->InsertAtPosition(g_011d4978.FUN_004c69f0(), this->tile38->Tile_GetValue(0xFC4),
                                      reinterpret_cast<TileCompatibility*>(this->tile38)->FindTraitValue(0xFA3), 1);
-    this->tile38->FUN_00a012d0(
+    this->tile38->Tile_Set(
         0xFA1,
         (this->tile38->FUN_0045cd60()->FUN_00a011b0(0xFB1) - BSStringLength(g_011d4978.FUN_00403df0()) * 17) / 2.0, 1);
 
-    reinterpret_cast<MyDisplay*>(manager)->InsertAtPosition(reinterpret_cast<Host*>(terminal)->FUN_00758fe0(), this->tile28->FUN_00a00f30(0xFC4),
+    reinterpret_cast<MyDisplay*>(manager)->InsertAtPosition(reinterpret_cast<Host*>(terminal)->BGSTerminal_GetServerText(), this->tile28->Tile_GetValue(0xFC4),
                                      reinterpret_cast<TileCompatibility*>(this->tile28)->FindTraitValue(0xFA3), 2);
-    this->tile28->FUN_00a012d0(
+    this->tile28->Tile_Set(
         0xFA1,
-        (this->tile28->FUN_0045cd60()->FUN_00a011b0(0xFB1) - BSStringLength(reinterpret_cast<Host*>(terminal)->FUN_00758fe0()) * 17) /
+        (this->tile28->FUN_0045cd60()->FUN_00a011b0(0xFB1) - BSStringLength(reinterpret_cast<Host*>(terminal)->BGSTerminal_GetServerText()) * 17) /
             2.0,
         1);
 
-    reinterpret_cast<MyDisplay*>(manager)->InsertAtPosition("> ", this->tile48->FUN_00a00f30(0xFC4), reinterpret_cast<TileCompatibility*>(this->tile48)->FindTraitValue(0xFA3),
+    reinterpret_cast<MyDisplay*>(manager)->InsertAtPosition("> ", this->tile48->Tile_GetValue(0xFC4), reinterpret_cast<TileCompatibility*>(this->tile48)->FindTraitValue(0xFA3),
                                      -1);
     this->unkb0 = 2;
 }
@@ -2151,7 +2165,7 @@ struct ConstructorAudio
 {
     BSSoundHandle ResolveAudioHandle(const char*, unsigned int);
 };
-ConstructorAudio* FUN_00ad9060();
+ConstructorAudio* BSAudioManager_QInstance_00ad9060();
 void PlayNoteSound();
 void SetTextSource();
 void UpdateNoteDisplay();
@@ -2167,7 +2181,7 @@ ComputersMenu::ComputersMenu()
     callbackf0 = ::SetTextSource;
     callbackf4 = UpdateNoteDisplay;
     unkf8 = 0;
-    ConstructorAudio* audio = FUN_00ad9060();
+    ConstructorAudio* audio = BSAudioManager_QInstance_00ad9060();
     reinterpret_cast<BSSoundHandle&>(sounds[0]) = audio->ResolveAudioHandle("UIHackingFanHumLP", 0x31);
     reinterpret_cast<BSSoundHandle&>(sounds[1]) = audio->ResolveAudioHandle("UIHackingCharScroll", 0x21);
     reinterpret_cast<BSSoundHandle&>(sounds[2]) = audio->ResolveAudioHandle("UIHackingCharEnter", 0x21);
@@ -2183,7 +2197,7 @@ ComputersMenu::ComputersMenu()
 namespace fnv_00757f70 {
 struct Value
 {
-    const char* FUN_0084e3a0();
+    const char* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
 };
 struct BStr
 {
@@ -2191,7 +2205,7 @@ struct BStr
     int m_len;
     BStr();
     ~BStr();
-    const char* FUN_00559450();
+    const char* Modelloader_GetReferencedThis();
 };
 struct Obj
 {
@@ -2202,9 +2216,9 @@ struct Obj
     BGSNote* m_note;
     void* m_70;
     void SetFlag4(bool);
-    void FUN_00501830(void*);
-    bool FUN_00758350();
-    bool FUN_00758390();
+    void TERMINAL_MENU_ITEM_RunResultScript(void*);
+    bool TERMINAL_MENU_ITEM_IsAutoAdd();
+    bool TERMINAL_MENU_ITEM_ForcesRedraw();
 };
 struct Mgr
 {
@@ -2214,21 +2228,22 @@ struct Mgr
 struct Player
 {
     bool FUN_00966c10(BGSNote*);
-    void FUN_00966a70(BGSNote*, int);
+    void PlayerCharacter_AddNote(BGSNote*, int);
 };
 extern Player* DAT_011dea3c;
 extern Setting DAT_011d3ca0;
 extern Setting DAT_011d3e50;
 extern unsigned char DAT_011d93c0;
-unsigned int __cdecl FUN_00457fe0();
-int __cdecl FUN_00406f60(BStr*, const char*, ...);
+unsigned int __cdecl Cmd_GetSessionTime_Execute();
+int __cdecl BSStringT_char_SPrintF(BStr*, const char*, ...);
 bool __cdecl DispatchMessageToSink(const char*, int, const char*, const char*, float, bool);
 void __cdecl UpdateNoteTile(Tile*, void*);
 }  // namespace fnv_00757f70
 
 // Processes a tile index and optional tile pointer, updates tile and note display state, and may dispatch a note message to the player.
 // @fnv 0x00757f70
-void __thiscall ComputersMenu::FUN_00757f70(int aiTileIndex, Tile* apTile)
+// src: XBOX_PDB 0x00757f70
+void __thiscall ComputersMenu::DoClick(int aiTileIndex, Tile* apTile)
 {
     using namespace fnv_00757f70;
     using fnv_00757f70::Obj;
@@ -2253,17 +2268,17 @@ void __thiscall ComputersMenu::FUN_00757f70(int aiTileIndex, Tile* apTile)
             m_pTiles[1]->FUN_00700320(0xfa3, 1);
             if (DAT_011d93c0)
             {
-                FUN_007586e0(0);
+                DisplayTerminal(0);
             }
             else
             {
                 if (!m_pTiles[7]->IsAllChildrenFlag0())
                 {
                     m_pTiles[15]->FUN_00700320(0xfa3, 0);
-                    val = static_cast<Value*>(m_pTiles[7]->FUN_00a00f30(0xfc4));
-                    reinterpret_cast<Mgr*>(manager)->InsertAtPosition(val->FUN_0084e3a0(), val, reinterpret_cast<TileCompatibility*>(m_pTiles[7])->FindTraitValue(0xfa3), -1);
+                    val = static_cast<Value*>(m_pTiles[7]->Tile_GetValue(0xfc4));
+                    reinterpret_cast<Mgr*>(manager)->InsertAtPosition(val->GetHavokWorldObjectCountInSceneGraph_0084e3a0(), val, reinterpret_cast<TileCompatibility*>(m_pTiles[7])->FindTraitValue(0xfa3), -1);
                 }
-                entries.FUN_007314c0(&UpdateNoteTile, 0, 0x7fffffff);
+                entries.ListBox_ItemChange_Traverse(&UpdateNoteTile, 0, 0x7fffffff);
                 bRefreshed = 1;
             }
         }
@@ -2281,47 +2296,47 @@ void __thiscall ComputersMenu::FUN_00757f70(int aiTileIndex, Tile* apTile)
             obj = reinterpret_cast<Obj*>(entries.FindItemData(apTile));
             if (!obj)
             {
-                FUN_00758a80();
+                DisplayPreviousTerminal();
             }
             else if (obj->m_70)
             {
                 obj->SetFlag4(true);
-                obj->FUN_00501830(reference);
+                obj->TERMINAL_MENU_ITEM_RunResultScript(reference);
                 terminal = reinterpret_cast<BGSTerminal*>(obj->m_70);
-                FUN_007586e0(1);
+                DisplayTerminal(1);
             }
             else
             {
                 obj->SetFlag4(true);
-                obj->FUN_00501830(reference);
-                if (obj->m_str.FUN_00559450())
+                obj->TERMINAL_MENU_ITEM_RunResultScript(reference);
+                if (obj->m_str.Modelloader_GetReferencedThis())
                 {
-                    reinterpret_cast<Mgr*>(manager)->InsertAtPosition(obj->m_str.FUN_00559450(), m_pTiles[5]->FUN_00a00f30(0xfc4),
+                    reinterpret_cast<Mgr*>(manager)->InsertAtPosition(obj->m_str.Modelloader_GetReferencedThis(), m_pTiles[5]->Tile_GetValue(0xfc4),
                                                  reinterpret_cast<TileCompatibility*>(m_pTiles[5])->FindTraitValue(0xfa3), 0);
-                    unka0 = FUN_00457fe0() + *DAT_011d3e50.FUN_0043d4d0() * 1000;
+                    unka0 = Cmd_GetSessionTime_Execute() + *DAT_011d3e50.Setting_Int() * 1000;
                 }
                 if (obj->m_note)
                 {
-                    if (obj->FUN_00758350() && !DAT_011dea3c->FUN_00966c10(obj->m_note))
+                    if (obj->TERMINAL_MENU_ITEM_IsAutoAdd() && !DAT_011dea3c->FUN_00966c10(obj->m_note))
                     {
-                        DAT_011dea3c->FUN_00966a70(obj->m_note, 0);
+                        DAT_011dea3c->PlayerCharacter_AddNote(obj->m_note, 0);
                         {
                             BStr str;
-                            FUN_00406f60(&str, DAT_011d3ca0.FUN_00403df0(), obj->m_note->TESFullName::GetFullName());
-                            DispatchMessageToSink(str.FUN_00559450(), 0,
+                            BSStringT_char_SPrintF(&str, DAT_011d3ca0.FUN_00403df0(), obj->m_note->TESFullName::GetFullName());
+                            DispatchMessageToSink(str.Modelloader_GetReferencedThis(), 0,
                                                   "Interface\\Icons\\Message Icons\\glow_message_giftbox.dds", 0, 2.0f,
                                                   false);
                         }
                     }
                     if (reinterpret_cast<NoteHandler*>(&callbackec)[obj->m_note->GetNoteType()])
                         (this->*reinterpret_cast<NoteHandler*>(&callbackec)[obj->m_note->GetNoteType()])(obj->m_note);
-                    DAT_011d93c0 = obj->FUN_00758390();
+                    DAT_011d93c0 = obj->TERMINAL_MENU_ITEM_ForcesRedraw();
                     flag4 = true;
                 }
                 else
                 {
-                    if (obj->FUN_00758390())
-                        FUN_007586e0(0);
+                    if (obj->TERMINAL_MENU_ITEM_ForcesRedraw())
+                        DisplayTerminal(0);
                 }
             }
         }
@@ -2340,10 +2355,10 @@ extern Setting g_011d430c;
 extern int DAT_0119f278;
 struct TerminalReference
 {
-    unsigned int FUN_00501270(void*);
+    unsigned int BGSTerminal_GetHackMiniGameValue(void*);
 };
-int __cdecl FUN_00406f60(StrMem*, const char*, ...);
-void __cdecl FUN_00403d30(void*, int, unsigned int);
+int __cdecl BSStringT_char_SPrintF(StrMem*, const char*, ...);
+void __cdecl ourMemset(void*, int, unsigned int);
 
 }  // namespace fnv_00758ad0
 
@@ -2355,24 +2370,24 @@ void ComputersMenu::BuildAnimation()
     unsigned int promptDelay;
     {
         StrMem text;
-        unsigned int introDelay = *reinterpret_cast<unsigned int*>(g_011d3de4.FUN_0043d4d0()) > 0 ? 1000 / *reinterpret_cast<unsigned int*>(g_011d3de4.FUN_0043d4d0()) : 1000;
-        promptDelay = *reinterpret_cast<unsigned int*>(g_011d4e4c.FUN_0043d4d0()) > 0 ? 1000 / *reinterpret_cast<unsigned int*>(g_011d4e4c.FUN_0043d4d0()) : 1000;
+        unsigned int introDelay = *reinterpret_cast<unsigned int*>(g_011d3de4.Setting_Int()) > 0 ? 1000 / *reinterpret_cast<unsigned int*>(g_011d3de4.Setting_Int()) : 1000;
+        promptDelay = *reinterpret_cast<unsigned int*>(g_011d4e4c.Setting_Int()) > 0 ? 1000 / *reinterpret_cast<unsigned int*>(g_011d4e4c.Setting_Int()) : 1000;
         fnv_00758ad0::DAT_0119f278 = introDelay;
-        reinterpret_cast<FUN_00759da0_shell*>(manager)->InsertAtPosition(g_011d3a38.FUN_004c69f0(), (int)tile4c->FUN_00a00f30(0xfc4),
+        reinterpret_cast<FUN_00759da0_shell*>(manager)->InsertAtPosition(g_011d3a38.FUN_004c69f0(), (int)tile4c->Tile_GetValue(0xfc4),
                                     (int)reinterpret_cast<TileCompatibility*>(tile4c)->FindTraitValue(0xfa3), -1);
         fnv_00758ad0::DAT_0119f278 = promptDelay;
-        FUN_00406f60(&text, "%s%s", "> ", g_011d2ee0.FUN_00403df0());
-        reinterpret_cast<FUN_00759da0_shell*>(manager)->InsertAtPosition(text.FUN_00559450(), (int)tile50->FUN_00a00f30(0xfc4),
+        BSStringT_char_SPrintF(&text, "%s%s", "> ", g_011d2ee0.FUN_00403df0());
+        reinterpret_cast<FUN_00759da0_shell*>(manager)->InsertAtPosition(text.Modelloader_GetReferencedThis(), (int)tile50->Tile_GetValue(0xfc4),
                                     (int)reinterpret_cast<TileCompatibility*>(tile50)->FindTraitValue(0xfa3), -1);
         fnv_00758ad0::DAT_0119f278 = introDelay;
-        reinterpret_cast<FUN_00759da0_shell*>(manager)->InsertAtPosition(g_011d430c.FUN_004c69f0(), (int)tile54->FUN_00a00f30(0xfc4),
+        reinterpret_cast<FUN_00759da0_shell*>(manager)->InsertAtPosition(g_011d430c.FUN_004c69f0(), (int)tile54->Tile_GetValue(0xfc4),
                                     (int)reinterpret_cast<TileCompatibility*>(tile54)->FindTraitValue(0xfa3), -1);
         fnv_00758ad0::DAT_0119f278 = promptDelay;
         char password[16];
-        FUN_00403d30(password, 0, 16);
-        FUN_00403d30(password, '*', reinterpret_cast<TerminalReference*>(terminal)->FUN_00501270(reference));
-        FUN_00406f60(&text, "%s%s", "> ", password);
-        reinterpret_cast<FUN_00759da0_shell*>(manager)->InsertAtPosition(text.FUN_00559450(), (int)tile58->FUN_00a00f30(0xfc4),
+        ourMemset(password, 0, 16);
+        ourMemset(password, '*', reinterpret_cast<TerminalReference*>(terminal)->BGSTerminal_GetHackMiniGameValue(reference));
+        BSStringT_char_SPrintF(&text, "%s%s", "> ", password);
+        reinterpret_cast<FUN_00759da0_shell*>(manager)->InsertAtPosition(text.Modelloader_GetReferencedThis(), (int)tile58->Tile_GetValue(0xfc4),
                                     (int)reinterpret_cast<TileCompatibility*>(tile58)->FindTraitValue(0xfa3), -1);
     }
 }

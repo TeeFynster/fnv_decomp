@@ -26,11 +26,12 @@ namespace fnv_00a1c050 {
 
 struct FUN_00a1c050_Class
 {
-    void* FUN_00a1c050(void* p, unsigned int n);
+    void* Reallocate_Thunk(void* p, unsigned int n);
 };
 
 // @fnv 0x00a1c050
-void* __thiscall FUN_00a1c050_Class::FUN_00a1c050(void* p, unsigned int n)
+// src: GUESS 0x00a1c050 (confidence: medium)
+void* __thiscall FUN_00a1c050_Class::Reallocate_Thunk(void* p, unsigned int n)
 {
     return g_memoryManager.Reallocate(p, n << 5);
 }
@@ -38,11 +39,12 @@ void* __thiscall FUN_00a1c050_Class::FUN_00a1c050(void* p, unsigned int n)
 
 struct FUN_00a1e720_class
 {
-    void __thiscall FUN_00a1e720(int a, int b, int c);
+    void __thiscall BSMapBase_unsigned_int_ScrapHeap_SetValue(int a, int b, int c);
 };
 
 // @fnv 0x00a1e720
-void __thiscall FUN_00a1e720_class::FUN_00a1e720(int pObject, int b, int c)
+// src: COMMUNITY 0x00a1e720
+void __thiscall FUN_00a1e720_class::BSMapBase_unsigned_int_ScrapHeap_SetValue(int pObject, int b, int c)
 {
     *(int*)((char*)pObject + 4) = b;
     *(int*)((char*)pObject + 8) = c;
@@ -55,12 +57,13 @@ struct FUN_00a1e1a0_class
 {
     int m_vtbl;
     int m_field;
-    void __thiscall FUN_00a1e1a0();
+    void __thiscall ReleaseStorage_00a1e1a0();
 };
 
 // Sets the vtable pointer to DAT_01095524 and frees the m_field pointer via NiFreeAlias.
 // @fnv 0x00a1e1a0
-void __thiscall FUN_00a1e1a0_class::FUN_00a1e1a0()
+// src: GUESS 0x00a1e1a0 (confidence: medium)
+void __thiscall FUN_00a1e1a0_class::ReleaseStorage_00a1e1a0()
 {
     m_vtbl = (int)&DAT_01095524;
     void* p = (void*)m_field;
@@ -144,15 +147,16 @@ struct StrA
     unsigned int _Myres;
     bool _Inside(const char*);
     bool _Grow(unsigned int, bool);
-    StrA& FUN_00a0c570(const StrA&, unsigned int, unsigned int);
-    StrA& FUN_00a0c430(const char* _Ptr, unsigned int _Count);
+    StrA& UpdateState_00a0c570(const StrA&, unsigned int, unsigned int);
+    StrA& std_string_append(const char* _Ptr, unsigned int _Count);
 };
 // Appends _Count characters from _Ptr to the string, growing the buffer if needed and handling self-referential input.
 // @fnv 0x00a0c430
-StrA& StrA::FUN_00a0c430(const char* apChars, unsigned int auiCount)
+// src: COMMUNITY 0x00a0c430
+StrA& StrA::std_string_append(const char* apChars, unsigned int auiCount)
 {
     if (_Inside(apChars))
-        return FUN_00a0c570(*this, apChars - (16 <= _Myres ? _Bx._Ptr : _Bx._Buf), auiCount);
+        return UpdateState_00a0c570(*this, apChars - (16 <= _Myres ? _Bx._Ptr : _Bx._Buf), auiCount);
     if (DAT_010173f0 - _Mysize <= auiCount || _Mysize + auiCount < _Mysize)
         FUN_00ec30b0();
     unsigned int uiNewSize;
@@ -186,11 +190,12 @@ struct FUN_00a0d5f0_class
     int m_iElementCount;
     void* m_data;
     int m_auiShapeKeys;
-    FUN_00a0d5f0_class* __thiscall FUN_00a0d5f0(unsigned int size);
+    FUN_00a0d5f0_class* __thiscall NiTMapBase_NiTPointerAllocator_unsigned_int_char_const_int_NiTMapBase_NiTPointerAllocator_unsigned_int_char_const_int(unsigned int size);
 };
 // Sets the vtable, stores size, allocates size*4 bytes, zeroes them and stores the pointer in m_data.
 // @fnv 0x00a0d5f0
-FUN_00a0d5f0_class* __thiscall FUN_00a0d5f0_class::FUN_00a0d5f0(unsigned int size)
+// src: COMMUNITY 0x00a0d5f0
+FUN_00a0d5f0_class* __thiscall FUN_00a0d5f0_class::NiTMapBase_NiTPointerAllocator_unsigned_int_char_const_int_NiTMapBase_NiTPointerAllocator_unsigned_int_char_const_int(unsigned int size)
 {
     unsigned int iAllocationSize;
     unsigned int memsetSize;
@@ -385,10 +390,11 @@ struct FUN_00a0d710_class
     int m_iElementCount;
     void* m_data;
     int m_auiShapeKeys;
-    FUN_00a0d710_class* __thiscall FUN_00a0d710(unsigned int size);
+    FUN_00a0d710_class* __thiscall NiTMapBase_NiTPointerAllocator_unsigned_int_int_int_Init(unsigned int size);
 };
 // @fnv 0x00a0d710
-FUN_00a0d710_class* FUN_00a0d710_class::FUN_00a0d710(unsigned int size)
+// src: COMMUNITY 0x00a0d710
+FUN_00a0d710_class* FUN_00a0d710_class::NiTMapBase_NiTPointerAllocator_unsigned_int_int_int_Init(unsigned int size)
 {
     unsigned int a;
     void* b;
@@ -433,11 +439,12 @@ struct S00a0d390
 struct FUN_00a0d960_class : S00a0d390
 {
     void* m_data;
-    void FUN_00a0d960();
+    void ReleaseStorage_00a0d960();
 };
 
 // @fnv 0x00a0d960
-void FUN_00a0d960_class::FUN_00a0d960()
+// src: GUESS 0x00a0d960 (confidence: medium)
+void FUN_00a0d960_class::ReleaseStorage_00a0d960()
 {
     int unused;
     int padding;
@@ -641,10 +648,11 @@ void NiFree(void*);
 struct FUN_00a1e880_class : S00a0d390
 {
     void* m_data;
-    void FUN_00a1e880();
+    void SetVirtualTable_00a1e880();
 };
 // @fnv 0x00a1e880
-void FUN_00a1e880_class::FUN_00a1e880()
+// src: GUESS 0x00a1e880 (confidence: low)
+void FUN_00a1e880_class::SetVirtualTable_00a1e880()
 {
     m_vtbl = (int*)&DAT_010955e4;
     void* pAssertA;
@@ -693,7 +701,7 @@ struct FUN_00a1ebf0_Class : S00a0d390
     void* __thiscall FUN_00a1ebf0(int flags);
 };
 
-void FUN_00aa10f0(void* arg);
+void _NiFree_00aa10f0(void* arg);
 
 // @fnv 0x00a1ebf0
 void* __thiscall FUN_00a1ebf0_Class::FUN_00a1ebf0(int flags)
@@ -702,7 +710,7 @@ void* __thiscall FUN_00a1ebf0_Class::FUN_00a1ebf0(int flags)
     int _temp2;
     m_vtbl = &DAT_01095664;
     ClearAll();
-    FUN_00aa10f0(m_data);
+    _NiFree_00aa10f0(m_data);
     if ((flags & 1) != 0)
     {
         g_memoryManager.Deallocate(this);
@@ -735,7 +743,7 @@ struct S_00a0c9f0_Node
 struct S_00a0c9f0_Pool
 {
     int m_uiCount;
-    S_00a0c9f0_Node* FUN_0043a010();
+    S_00a0c9f0_Node* NiGeometry_AddProperty();
 };
 
 class S_00a0c9f0
@@ -745,14 +753,15 @@ class S_00a0c9f0
     S_00a0c9f0_Pool m_kNodePool;
 
   public:
-    void __thiscall FUN_00a0c9f0(int* pValue);
+    void __thiscall _NiTListBase_AddHead(int* pValue);
 };
 
 // @fnv 0x00a0c9f0
-void __thiscall S_00a0c9f0::FUN_00a0c9f0(int* pValue)
+// src: COMMUNITY 0x00a0c9f0
+void __thiscall S_00a0c9f0::_NiTListBase_AddHead(int* pValue)
 {
     volatile int dummy_frame[7];
-    S_00a0c9f0_Node* pNode = m_kNodePool.FUN_0043a010();
+    S_00a0c9f0_Node* pNode = m_kNodePool.NiGeometry_AddProperty();
     pNode->m_val = *pValue;
     pNode->m_pkPrev = 0;
     pNode->m_pkNext = m_pkHead;
@@ -774,10 +783,11 @@ void __thiscall S_00a0c9f0::FUN_00a0c9f0(int* pValue)
 struct FUN_00a0d790_class : S00a0d390
 {
     void* m_data;
-    void FUN_00a0d790();
+    void UpdateState_00a0d790();
 };
 // @fnv 0x00a0d790
-void FUN_00a0d790_class::FUN_00a0d790()
+// src: GUESS 0x00a0d790 (confidence: low)
+void FUN_00a0d790_class::UpdateState_00a0d790()
 {
     int unusedA;
     int unusedB;
@@ -787,7 +797,7 @@ void FUN_00a0d790_class::FUN_00a0d790()
 }
 
 extern int DAT_01094e9c;
-extern void* __cdecl FUN_00aa10f0(void*);
+extern void* __cdecl _NiFree_00aa10f0(void*);
 
 struct FUN_00a0d990_cls : S00a0d390
 {
@@ -804,7 +814,7 @@ int __thiscall FUN_00a0d990_cls::FUN_00a0d990(int aiFlags)
     (void)b;
     this->m_vtbl = reinterpret_cast<int*>(&DAT_01094e9c);
     this->ClearAll();
-    FUN_00aa10f0(this->m_data);
+    _NiFree_00aa10f0(this->m_data);
     if ((aiFlags & 1) != 0)
     {
         g_memoryManager.Deallocate(this);
@@ -879,7 +889,7 @@ struct S00a0ca70_Node
 struct S00a0ca70_Pool
 {
     unsigned int m_uiCount;
-    S00a0ca70_Node* FUN_0043a010();
+    S00a0ca70_Node* NiGeometry_AddProperty();
 };
 struct S00a0ca70_Blk
 {
@@ -891,16 +901,17 @@ class S00a0ca70_List
     unsigned int m_unk00;
     S00a0ca70_Node* m_pkHead;
     S00a0ca70_Pool m_kNodePool;
-    S00a0ca70_Node* FUN_00a0ca70(S00a0ca70_Node** pos, const unsigned int* value);
+    S00a0ca70_Node* AllocateAndInsertListNode(S00a0ca70_Node** pos, const unsigned int* value);
 };
 // Allocates a node from m_kNodePool, sets its m_val, and splices it into the linked list at the position pointed to by pos.
 // @fnv 0x00a0ca70
-S00a0ca70_Node* S00a0ca70_List::FUN_00a0ca70(S00a0ca70_Node** pos, const unsigned int* value)
+// src: GUESS 0x00a0ca70 (confidence: high)
+S00a0ca70_Node* S00a0ca70_List::AllocateAndInsertListNode(S00a0ca70_Node** pos, const unsigned int* value)
 {
     S00a0ca70_Node** pForm;
     S00a0ca70_Blk blk;
     S00a0ca70_Node* node2;
-    node2 = m_kNodePool.FUN_0043a010();
+    node2 = m_kNodePool.NiGeometry_AddProperty();
     node2->m_val = *value;
     pForm = pos;
     node2->m_pkPrev = pForm;

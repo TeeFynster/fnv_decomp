@@ -48,11 +48,11 @@ struct FUN_004a3c20
     int unkA0, unkA4, unkA8;
     bool flag;
     FUN_004a3c20();
-    void FUN_004a3f70(unsigned int);
-    void FUN_004a3da0(const NiPoint3&);
-    void FUN_004a3eb0(const NiPoint3&);
-    void FUN_004a3fb0(void*);
-    HitArray* FUN_008cdd90();
+    void bhkPickData_SetFilter(unsigned int);
+    void bhkPickData_SetFrom(const NiPoint3&);
+    void bhkPickData_SetTo(const NiPoint3&);
+    void bhkPickData_SetAllCollector(void*);
+    HitArray* DialoguePackage_GetCurrentDialogItem();
 };
 struct FUN_004a3a70
 {
@@ -69,8 +69,8 @@ struct FUN_008c71b0
 {
     unsigned int value;
     FUN_008c71b0(unsigned int);
-    void FUN_004a39f0(int);
-    unsigned int FUN_004a3a20();
+    void CFilter_SetLayer(int);
+    unsigned int CFilter_GetGroup();
 };
 struct FUN_004a37b0
 {
@@ -97,7 +97,7 @@ struct World
 };
 struct Cell
 {
-    World* FUN_004543c0();
+    World* TESObjectCELL_GetbhkWorld();
 };
 struct Prompt
 {
@@ -105,49 +105,49 @@ struct Prompt
 };
 struct Scene
 {
-    Prompt* FUN_006a9540();
-    NiPoint3& FUN_0043c490();
+    Prompt* NiAVObject_GetRotate_006a9540();
+    NiPoint3& GetTranslate_0043c490();
 };
 struct Ref
 {
-    Cell* FUN_0084e3a0();
+    Cell* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     Scene* FUN_00490e40();
-    float FUN_00621b00();
+    float ActorPackage_GetPackageStartTime();
     float FUN_00488d50();
-    Ref* FUN_009611e0();
-    void FUN_004a3fe0(FUN_004a37b0*, int, char);
+    Ref* NiAVObject_GetParent();
+    void TESObjectCELL_AddDecal(FUN_004a37b0*, int, char);
 };
 struct RefHandle
 {
-    Ref* FUN_00559450();
+    Ref* Modelloader_GetReferencedThis();
 };
 struct HitBody
 {
     RefHandle shape;
-    unsigned int FUN_0043b540();
+    unsigned int hkpCollidable_getCollisionFilterInfo();
 };
 struct Shape
 {
-    unsigned int FUN_00c84f10(unsigned int);
+    unsigned int bhkShape_GetSubshapeMaterial(unsigned int);
 };
 struct ImpactData
 {
     float GetModifierValue();
-    float FUN_004a40a0();
+    float BGSImpactData_GetDecalMinWidth();
     void* FUN_006733e0();
-    bool FUN_004a4100();
+    bool BGSImpactData_GetIsParallax();
     float FUN_004a41c0();
-    bool FUN_004a41e0();
+    bool BGSImpactData_GetParallaxPasses();
     bool CallMemberAtOffset54();
-    bool FUN_004a4140();
+    bool BGSImpactData_GetIsAlphaBlend();
     float FUN_004a40e0();
-    float FUN_009a9350();
+    float TESCombatStyle_GetWeaponMinRangeMult();
     float FUN_00598040();
     unsigned int GetNextFromSubobject();
 };
 struct Gate
 {
-    bool FUN_004a4020();
+    bool MenuConsole_IsVisible();
 };
 Gate* __cdecl FUN_0071b160(int);
 bool __cdecl IsStartMenuFlag1Set();
@@ -155,37 +155,37 @@ float __cdecl FUN_00476b70(float, float);
 struct Splatter
 {
     void FUN_006233c0(int);
-    void FUN_004a1a10(int, unsigned char);
-    void FUN_006231a0(World*);
+    void DecalCaster_SetCollision(int, unsigned char);
+    void DecalCaster_Add(World*);
 };
 Splatter* __cdecl FUN_00622a70(float, bool);
 struct FloatSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 struct IntSetting
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 extern FloatSetting DAT_011c5818, DAT_011c584c;
 extern IntSetting DAT_011c5868;
 extern const float DAT_01017868, DAT_0101e578, DAT_01018f5c, DAT_0101e574, DAT_0101e570;
-void* __cdecl FUN_004b3890(const NiPoint3&, const NiColorA&, const NiPoint3&, const NiColorA&,
+void* __cdecl MakeLine(const NiPoint3&, const NiColorA&, const NiPoint3&, const NiColorA&,
                            bool);
 struct TESView
 {
     void FUN_00458e20(void*, float);
-    Ref* FUN_00457620(const NiPoint3&);
-    Ref* FUN_004519d0(NiPoint3);
+    Ref* TES_GetLandGeometry(const NiPoint3&);
+    Ref* TES_GetCellForPoint(NiPoint3);
 };
 extern TESView* g_TES;
-Shape* __cdecl FUN_004a3a40(Ref*);
+Shape* __cdecl bhkShape_Getbhk(Ref*);
 NiPoint3 __cdecl FUN_004a3760(float, const NiPoint3&);
-NiPoint3& __cdecl FUN_004a3970(NiPoint3&, const ImpactVector4&);
-Ref* __cdecl FUN_00c7fa90(HitBody*);
-void* __cdecl FUN_0056f930(Ref*);
+NiPoint3& __cdecl HK2NINS(NiPoint3&, const ImpactVector4&);
+Ref* __cdecl bhkUtilFunctions_GetNiAVObject(HitBody*);
+void* __cdecl TESObjectREFR_FindReferenceFor3D(Ref*);
 bool __cdecl IsAcousticSpaceFormTypeAllowed(void*, bool);
-float __cdecl FUN_004a4240();
+float __cdecl RandomFloatTwoPi();
 float __cdecl FUN_00406cc0(float);
 struct ImpactTask
 {
@@ -195,119 +195,120 @@ struct ImpactTask
     unsigned short unk06;
     ImpactData* impact;
     RefHandle reference;
-    void FUN_004a2d50();
+    void BGSDecalEmitter_Update();
 };
 // @fnv 0x004a2d50
-void ImpactTask::FUN_004a2d50()
+// src: XBOX_PDB 0x004a2d50
+void ImpactTask::BGSDecalEmitter_Update()
 {
-    if (FUN_0071b160(1)->FUN_004a4020() || IsStartMenuFlag1Set())
+    if (FUN_0071b160(1)->MenuConsole_IsVisible() || IsStartMenuFlag1Set())
         return;
-    if (!reference.FUN_00559450()->FUN_0084e3a0() || !reference.FUN_00559450()->FUN_00490e40())
+    if (!reference.Modelloader_GetReferencedThis()->GetHavokWorldObjectCountInSceneGraph_0084e3a0() || !reference.Modelloader_GetReferencedThis()->FUN_00490e40())
     {
         finished = true;
         return;
     }
-    if (remaining > 0 && impact && reference.FUN_00559450()->FUN_00621b00() <= reference.FUN_00559450()->FUN_00488d50())
+    if (remaining > 0 && impact && reference.Modelloader_GetReferencedThis()->ActorPackage_GetPackageStartTime() <= reference.Modelloader_GetReferencedThis()->FUN_00488d50())
     {
         NiPoint3 direction;
-        reference.FUN_00559450()->FUN_00490e40()->FUN_006a9540()->FUN_00476930(2, direction);
-        direction.FUN_004a0c10();
-        NiPoint3 origin = reference.FUN_00559450()->FUN_00490e40()->FUN_0043c490();
-        float radius = FUN_00476b70(impact->FUN_004a40a0(), impact->GetModifierValue());
+        reference.Modelloader_GetReferencedThis()->FUN_00490e40()->NiAVObject_GetRotate_006a9540()->FUN_00476930(2, direction);
+        direction.Unitize_004a0c10();
+        NiPoint3 origin = reference.Modelloader_GetReferencedThis()->FUN_00490e40()->GetTranslate_0043c490();
+        float radius = FUN_00476b70(impact->BGSImpactData_GetDecalMinWidth(), impact->GetModifierValue());
         Splatter* splatter = FUN_00622a70(radius, true);
         splatter->FUN_006233c0(0);
-        splatter->FUN_004a1a10(8, 0);
-        splatter->FUN_004a1a10(29, 0);
-        Cell* cell = reference.FUN_00559450()->FUN_0084e3a0();
-        World* world = cell ? cell->FUN_004543c0() : 0;
+        splatter->DecalCaster_SetCollision(8, 0);
+        splatter->DecalCaster_SetCollision(29, 0);
+        Cell* cell = reference.Modelloader_GetReferencedThis()->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+        World* world = cell ? cell->TESObjectCELL_GetbhkWorld() : 0;
         FUN_004a3c20 ray;
         if (world)
         {
-            splatter->FUN_006231a0(world);
-            float distance = *DAT_011c5818.FUN_00403e20();
+            splatter->DecalCaster_Add(world);
+            float distance = *DAT_011c5818.Setting_Float_00403e20();
             NiPoint3 end = static_cast<const NiPoint3&>(origin).FUN_00439e90(direction.ApplyScaled(distance));
             end.x += FUN_00476b70(DAT_0101e578, DAT_01017868);
             end.y += FUN_00476b70(DAT_0101e578, DAT_01017868);
             end.z += FUN_00476b70(DAT_0101e578, DAT_01017868);
-            float drop = -*DAT_011c584c.FUN_00403e20() *
-                         (reference.FUN_00559450()->FUN_00621b00() / reference.FUN_00559450()->FUN_00488d50());
+            float drop = -*DAT_011c584c.Setting_Float_00403e20() *
+                         (reference.Modelloader_GetReferencedThis()->ActorPackage_GetPackageStartTime() / reference.Modelloader_GetReferencedThis()->FUN_00488d50());
             end.z += drop;
-            if (*DAT_011c5868.FUN_0043d4d0() > 0)
+            if (*DAT_011c5868.Setting_Int() > 0)
             {
-                void* line = FUN_004b3890(origin, NiColorA(0, 1, 0, 1), end,
+                void* line = MakeLine(origin, NiColorA(0, 1, 0, 1), end,
                                           NiColorA(0, 1, 1, 1), true);
                 g_TES->FUN_00458e20(line, DAT_01018f5c);
             }
             FUN_008c71b0 filter(0);
-            filter.FUN_004a39f0(39);
-            ray.FUN_004a3f70(filter.value);
-            ray.FUN_004a3da0(origin);
-            ray.FUN_004a3eb0(end);
+            filter.CFilter_SetLayer(39);
+            ray.bhkPickData_SetFilter(filter.value);
+            ray.bhkPickData_SetFrom(origin);
+            ray.bhkPickData_SetTo(end);
             FUN_004a3a70 collector;
-            ray.FUN_004a3fb0(&collector);
+            ray.bhkPickData_SetAllCollector(&collector);
             bool rayHit = ((bool(__thiscall*)(World*, FUN_004a3c20*))world->vtable[50])(world, &ray);
-            int count = ray.FUN_008cdd90()->FUN_00460140()->FUN_00726070();
+            int count = ray.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->FUN_00726070();
             bool placed = false;
             for (int hit = 0; !placed && hit < count; ++hit)
             {
-                HitBody* body = ray.FUN_008cdd90()->FUN_00460140()->GetEntryAt(hit)->body;
+                HitBody* body = ray.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(hit)->body;
                 if (body)
                 {
                     unsigned int key = -1;
                     for (int keyIndex = 0;
-                         keyIndex < 8 && ray.FUN_008cdd90()->FUN_00460140()->GetEntryAt(hit)->keys[keyIndex] != -1;
+                         keyIndex < 8 && ray.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(hit)->keys[keyIndex] != -1;
                          ++keyIndex)
                     {
-                        key = ray.FUN_008cdd90()->FUN_00460140()->GetEntryAt(hit)->keys[keyIndex];
+                        key = ray.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(hit)->keys[keyIndex];
                     }
-                    Shape* shape = FUN_004a3a40(body->shape.FUN_00559450());
+                    Shape* shape = bhkShape_Getbhk(body->shape.Modelloader_GetReferencedThis());
                     if (!shape)
                         continue;
-                    unsigned int material = shape->FUN_00c84f10(key);
+                    unsigned int material = shape->bhkShape_GetSubshapeMaterial(key);
                     void* texture = impact ? impact->FUN_006733e0() : 0;
                     if (!texture)
                         continue;
                     NiPoint3 position = static_cast<const NiPoint3&>(origin).FUN_00439e90(FUN_004a3760(
-                        ray.FUN_008cdd90()->FUN_00460140()->GetEntryAt(hit)->fraction, static_cast<const NiPoint3&>(end).FUN_00439ef0(origin)));
+                        ray.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(hit)->fraction, static_cast<const NiPoint3&>(end).SubtractIntoVector(origin)));
                     NiPoint3 normal;
-                    FUN_004a3970(normal, ray.FUN_008cdd90()->FUN_00460140()->GetEntryAt(hit)->normal);
-                    bool landscape = FUN_008c71b0(body->FUN_0043b540()).FUN_004a3a20() == 1;
+                    HK2NINS(normal, ray.DialoguePackage_GetCurrentDialogItem()->TESDataHandler_GetWorldSpaceList()->GetEntryAt(hit)->normal);
+                    bool landscape = FUN_008c71b0(body->hkpCollidable_getCollisionFilterInfo()).CFilter_GetGroup() == 1;
                     Ref* target = 0;
                     if (landscape)
                     {
-                        target = g_TES->FUN_00457620(position);
-                        if (target && target->FUN_009611e0())
-                            target = target->FUN_009611e0();
+                        target = g_TES->TES_GetLandGeometry(position);
+                        if (target && target->NiAVObject_GetParent())
+                            target = target->NiAVObject_GetParent();
                     }
                     else
-                        target = FUN_00c7fa90(body);
-                    void* object = FUN_0056f930(target);
+                        target = bhkUtilFunctions_GetNiAVObject(body);
+                    void* object = TESObjectREFR_FindReferenceFor3D(target);
                     if (!landscape && (!object || !IsAcousticSpaceFormTypeAllowed(object, true)))
                         continue;
-                    Ref* owner = g_TES->FUN_004519d0(position);
+                    Ref* owner = g_TES->TES_GetCellForPoint(position);
                     FUN_004a37b0 decal;
                     decal.position = position;
                     decal.normal = normal;
                     decal.width = radius;
                     decal.height = radius;
                     decal.depth = DAT_0101e574;
-                    decal.lifetime = FUN_004a4240();
+                    decal.lifetime = RandomFloatTwoPi();
                     decal.rotation = (unsigned char)(int)FUN_00406cc0(FUN_00476b70(0, DAT_0101e570));
                     decal.reference = target;
                     decal.texture = texture;
-                    decal.flag73 = impact->FUN_004a4100();
+                    decal.flag73 = impact->BGSImpactData_GetIsParallax();
                     decal.radius = impact->FUN_004a41c0();
-                    decal.flag76 = impact->FUN_004a41e0();
+                    decal.flag76 = impact->BGSImpactData_GetParallaxPasses();
                     decal.flag74 = impact->CallMemberAtOffset54();
-                    decal.flag75 = impact->FUN_004a4140();
+                    decal.flag75 = impact->BGSImpactData_GetIsAlphaBlend();
                     decal.parallax = impact->FUN_004a40e0();
-                    decal.shininess = impact->FUN_009a9350();
+                    decal.shininess = impact->TESCombatStyle_GetWeaponMinRangeMult();
                     decal.scale = impact->FUN_00598040();
                     decal.color =
                         NiPoint3((unsigned char)(impact->GetNextFromSubobject() & 255) / 255.0,
                                  (unsigned char)(((unsigned short)impact->GetNextFromSubobject() >> 8) & 255) / 255.0,
                                  (unsigned char)((impact->GetNextFromSubobject() >> 16) & 255) / 255.0);
-                    owner->FUN_004a3fe0(&decal, 1, 0);
+                    owner->TESObjectCELL_AddDecal(&decal, 1, 0);
                     placed = true;
                 }
             }
@@ -328,11 +329,12 @@ struct FUN_004b4cf0_shell
 struct FUN_004b4ab0_Class
 {
     __m128 value;
-    void FUN_004b4ad0(FUN_004b4cf0_shell* matrix, __m128* vector);
+    void hkVector4__setRotatedInverseDir(FUN_004b4cf0_shell* matrix, __m128* vector);
 };
 
 // @fnv 0x004b4ad0
-void FUN_004b4ab0_Class::FUN_004b4ad0(FUN_004b4cf0_shell* matrix, __m128* vector)
+// src: COMMUNITY 0x004b4ad0
+void FUN_004b4ab0_Class::hkVector4__setRotatedInverseDir(FUN_004b4cf0_shell* matrix, __m128* vector)
 {
     __m128 row0 = *matrix->FUN_004b4cf0(0);
     __m128 row1 = *matrix->FUN_004b4cf0(1);

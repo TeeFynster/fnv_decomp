@@ -49,16 +49,16 @@ public:
     void SeekFrom(int iOffset, int iWhence);
     void Write(const char*, int);
 
-    int FUN_00473180(const char*, unsigned int);
-    void FUN_00473180(const void*, unsigned int);
-    bool FUN_008905f0();
+    int NiBinaryStream_Write(const char*, unsigned int);
+    void NiBinaryStream_Write(const void*, unsigned int);
+    bool TESAnimGroup_GetDecal();
     void FUN_00aff300(int, int);
     bool FUN_00aff300(bool, bool);
     void FUN_00aff7c0(BSStringT<char>*, int);
-    void FUN_00aff950(char*, unsigned int);
-    unsigned int FUN_00aff950(const char*, unsigned int);
-    unsigned int FUN_00aff950(const void*, unsigned int);
-    void FUN_00affbb0(void*, int);
+    void BSFile_WriteF(char*, unsigned int);
+    unsigned int BSFile_WriteF(const char*, unsigned int);
+    unsigned int BSFile_WriteF(const void*, unsigned int);
+    void BSFile_Write_00affbb0(void*, int);
     void FUN_00affd10();
 
     static void* operator new(size_t size);

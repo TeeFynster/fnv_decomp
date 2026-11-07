@@ -11,7 +11,7 @@ struct Base0
 struct Base2;
 struct Target
 {
-    void FUN_00c93920(Base2* p);
+    void hkpWorld_addWorldPostSimulationListener(Base2* p);
 };
 struct Base1
 {
@@ -31,7 +31,7 @@ struct Derived : Base0, Base1, Base2
 void Base1::PassSelfAsBase2ToTarget(Target* apTarget)
 {
     Derived* d = (Derived*)((char*)this - 0x20);
-    apTarget->FUN_00c93920(d ? (Base2*)((char*)this + 8) : 0);
+    apTarget->hkpWorld_addWorldPostSimulationListener(d ? (Base2*)((char*)this + 8) : 0);
 }
 
 struct S_00d65180_Allocator
@@ -53,7 +53,7 @@ struct S_00d65180_Router
     }
 };
 
-S_00d65180_Router* FUN_00c85750();
+S_00d65180_Router* hkMemoryRouter_getInstance();
 
 struct S_00d65180_RefObj
 {
@@ -63,7 +63,7 @@ struct S_00d65180_RefObj
     {}
     void* operator new(unsigned int nbytes)
     {
-        S_00d65180_RefObj* b = static_cast<S_00d65180_RefObj*>(FUN_00c85750()->heap().AllocateMemoryBlock(nbytes));
+        S_00d65180_RefObj* b = static_cast<S_00d65180_RefObj*>(hkMemoryRouter_getInstance()->heap().AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -98,7 +98,8 @@ struct S_00d65180_Obj : S_00d65180_RefObj, S_00d65180_Base2
 
 // Allocates and constructs an S_00d65180_Obj from arg, returning it as an S_00d65180_Base2 pointer.
 // @fnv 0x00d65180
-S_00d65180_Base2* FUN_00d65180(void* arg)
+// src: XBOX_PDB 0x00d65180
+S_00d65180_Base2* hkpSimulationIslandViewer_create(void* arg)
 {
     return new S_00d65180_Obj(arg);
 }
@@ -106,7 +107,8 @@ S_00d65180_Base2* FUN_00d65180(void* arg)
 extern int g_D651E0Value;
 
 // @fnv 0x00d651e0
-int __cdecl FUN_00d651e0()
+// src: GUESS 0x00d651e0 (confidence: low)
+int __cdecl Object_GetG_D651E0Value_00d651e0()
 {
     return g_D651E0Value;
 }
@@ -126,7 +128,7 @@ struct FUN_00d65220_Service
     int unk0c;
     FUN_00d65220_Interface* unk10;
 };
-FUN_00d65220_Service* __cdecl FUN_00c85750();
+FUN_00d65220_Service* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00d65220_Class
 {
     void* vtable;
@@ -141,7 +143,7 @@ FUN_00d65220_Class* FUN_00d65220_Class::FUN_00d65220(char flags)
     FUN_00d64ae0();
     if (flags & 1)
     {
-        FUN_00d65220_Service* service = FUN_00c85750();
+        FUN_00d65220_Service* service = hkMemoryRouter_getInstance();
         service->unk10->notify(this, unk04);
     }
     return this;
@@ -271,7 +273,7 @@ struct S_Arr
     int m_cap;
     __forceinline void clear() throw()
     {
-        S_Heap* heap = ((S_Holder*)FUN_00c85750())->m10;
+        S_Heap* heap = ((S_Holder*)hkMemoryRouter_getInstance())->m10;
         int n = m_iElementCount;
         S_Elem* d = m_data;
         for (int i = 0; i < n; i++)
@@ -315,7 +317,8 @@ extern const char str_010d19d0[];
 extern void RegisterCallback();
 
 // @fnv 0x00d651c0
-void FUN_00d651c0()
+// src: XBOX_PDB 0x00d651c0
+void hkpSimulationIslandViewer_registerViewer()
 {
     DAT_01268fdc = DAT_01269cd0->Register(str_010d19d0, RegisterCallback);
 }
@@ -328,7 +331,7 @@ class hkListenerD64A
 class hkEntityD64A
 {
   public:
-    void FUN_00c93920(hkListenerD64A* pkListener) throw();
+    void hkpWorld_addWorldPostSimulationListener(hkListenerD64A* pkListener) throw();
 };
 class hkWorldD64A
 {
@@ -386,7 +389,7 @@ FUN_00d64a50::FUN_00d64a50(void* pkInfo) throw() : FUN_00ddccb0(pkInfo)
     if (m_pOwningWorld)
     {
         for (int i = 0; i < m_pOwningWorld->m_iActorEntryCount; i++)
-            m_pOwningWorld->m_kActorEntries[i]->FUN_00c93920(this);
+            m_pOwningWorld->m_kActorEntries[i]->hkpWorld_addWorldPostSimulationListener(this);
     }
 }
 
@@ -419,20 +422,21 @@ static ThunkOwner g_thunk;
 // declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (8).
 struct PrimaryBase
 {
-    virtual void FUN_00d65200();
+    virtual void AdjustThisAndForward_00d65200();
     int unk04;
 };
 
 struct SecondaryBase
 {
-    virtual void FUN_00d65200();
+    virtual void AdjustThisAndForward_00d65200();
 };
 
 struct AdjustedDerived : PrimaryBase, SecondaryBase
 {
     AdjustedDerived();
 // @fnv 0x00d65200
-    virtual void FUN_00d65200();
+// src: GUESS 0x00d65200 (confidence: low)
+    virtual void AdjustThisAndForward_00d65200();
 };
 
 AdjustedDerived::AdjustedDerived()
@@ -469,7 +473,7 @@ Own_00d65210* make_00d65210()
 
 struct IslandRemovalCallback
 {
-    virtual void FUN_00d64a20(S_Elem2* world);
+    virtual void ClearValue_Thunk(S_Elem2* world);
 };
 
 struct IslandRemovalParent : hkBaseAD64A, hkBaseBD64A, IslandRemovalCallback
@@ -479,12 +483,13 @@ struct IslandRemovalParent : hkBaseAD64A, hkBaseBD64A, IslandRemovalCallback
 
 struct IslandWorldRemoval : IslandRemovalParent, hkListenerD64A
 {
-    virtual void FUN_00d64a20(S_Elem2* world);
+    virtual void ClearValue_Thunk(S_Elem2* world);
 };
 
 // Calls ClearValue on world with this object's listener base.
 // @fnv 0x00d64a20
-void IslandWorldRemoval::FUN_00d64a20(S_Elem2* world)
+// src: GUESS 0x00d64a20 (confidence: medium)
+void IslandWorldRemoval::ClearValue_Thunk(S_Elem2* world)
 {
     world->ClearValue(static_cast<hkListenerD64A*>(this));
 }

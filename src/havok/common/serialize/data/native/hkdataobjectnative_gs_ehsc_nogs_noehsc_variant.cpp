@@ -44,7 +44,7 @@ FUN_00dbc640_class* FUN_00dbc640_class::FUN_00dbc640(int flags)
 
     return this;
 }
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 
 inline Pair::Pair() throw()
 {}
@@ -53,7 +53,7 @@ inline Pair::Pair() throw()
 
 inline void* __cdecl hkReferencedObject::operator new(std::size_t nbytes)
 {
-    hkReferencedObject* b = static_cast<hkReferencedObject*>(GetRouterHeap<hkMemoryAllocator>(FUN_00c85750()).blockAlloc(nbytes));
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(GetRouterHeap<hkMemoryAllocator>(hkMemoryRouter_getInstance()).blockAlloc(nbytes));
     b->m_usMemSizeAndFlags = (unsigned short)nbytes;
     return b;
 }
@@ -97,7 +97,8 @@ struct S00dbb260_Result
 };
 
 // @fnv 0x00dbb260
-static __declspec(noinline) S00dbb260_Result* FUN_00dbb260(Pair* args, S00dbb260_World* world)
+// src: XBOX_PDB 0x00dbb260
+static __declspec(noinline) S00dbb260_Result* hkNativeDataObjectImplCreate(Pair* args, S00dbb260_World* world)
 {
     if (!!args->b)
     {
@@ -121,19 +122,19 @@ static __declspec(noinline) S00dbb260_Result* FUN_00dbb260(Pair* args, S00dbb260
         }
     }
     S00dbb260_Result* rec;
-    rec = (S00dbb260_Result*)GetRouterHeap<hkMemoryAllocator>(FUN_00c85750()).blockAlloc(0x18);
+    rec = (S00dbb260_Result*)GetRouterHeap<hkMemoryAllocator>(hkMemoryRouter_getInstance()).blockAlloc(0x18);
     rec->size = 0x18;
     rec->unk06 = 0;
     rec->unk08 = 0;
     rec->vt = (int)DAT_010d6334;
-    rec->sub.FUN_00d873d0(*args);
+    rec->sub.Imath_Vec2_int_Vec2_int(*args);
     rec->world = world;
     return rec;
 }
 
 S00dbb260_Result* S00dbb260_Entry(Pair* a, S00dbb260_World* w)
 {
-    return FUN_00dbb260(a, w);
+    return hkNativeDataObjectImplCreate(a, w);
 }
 
 struct ClassLookupDBC
@@ -173,7 +174,8 @@ struct ResultDBC
     void* object;
     hkClass* type;
 };
-static __declspec(noinline) ResultDBC FUN_00dbb140(hkClass* type, void* object, ClassLookupDBC* lookup, WorldDBC* world)
+// src: XBOX_PDB 0x00dbb140
+static __declspec(noinline) ResultDBC getVariantWithMostDerivedClass(hkClass* type, void* object, ClassLookupDBC* lookup, WorldDBC* world)
 {
     ResultDBC result = {0, 0};
     if (type && object)
@@ -208,10 +210,11 @@ class NativeDBC : public hkReferencedObject
     WorldDBC* world;
     NativeDBC(const Pair& p, WorldDBC* w) : zero(0), world(w)
     {
-        value.FUN_00d873d0(p);
+        value.Imath_Vec2_int_Vec2_int(p);
     }
 };
-static __declspec(noinline) NativeDBC* FUN_00dbb260(WorldDBC* world, Pair* value)
+// src: XBOX_PDB 0x00dbb260
+static __declspec(noinline) NativeDBC* hkNativeDataObjectImplCreate(WorldDBC* world, Pair* value)
 {
     if (value->b)
     {
@@ -241,7 +244,8 @@ struct DescriptorDBC
     ClassLookupDBC* lookup;
 };
 // @fnv 0x00dbc000
-NativeDBC* hkDataArrayNative::FUN_00dbc000(int index)
+// src: XBOX_PDB 0x00dbc000
+NativeDBC* hkDataArrayNative::asObject(int index)
 {
     Pair value;
     value.a = 0;
@@ -250,13 +254,13 @@ NativeDBC* hkDataArrayNative::FUN_00dbc000(int index)
     switch (m_18)
     {
     case 20: {
-        ResultDBC v = FUN_00dbb140((hkClass*)m_1c, *(void**)(((char*)m_0C) + m_14 * index), ((DescriptorDBC*)m_08)->lookup, ((DescriptorDBC*)m_08)->world);
+        ResultDBC v = getVariantWithMostDerivedClass((hkClass*)m_1c, *(void**)(((char*)m_0C) + m_14 * index), ((DescriptorDBC*)m_08)->lookup, ((DescriptorDBC*)m_08)->world);
         value.a = reinterpret_cast<int>(v.object);
         high = (unsigned)v.type;
         break;
     }
     case 25: {
-        ResultDBC v = FUN_00dbb140((hkClass*)m_1c, ((char*)m_0C) + m_14 * index, ((DescriptorDBC*)m_08)->lookup, ((DescriptorDBC*)m_08)->world);
+        ResultDBC v = getVariantWithMostDerivedClass((hkClass*)m_1c, ((char*)m_0C) + m_14 * index, ((DescriptorDBC*)m_08)->lookup, ((DescriptorDBC*)m_08)->world);
         value.a = reinterpret_cast<int>(v.object);
         high = (unsigned)v.type;
         break;
@@ -270,6 +274,6 @@ NativeDBC* hkDataArrayNative::FUN_00dbc000(int index)
     }
     value.b = (int)high;
     if (value.a && value.b)
-        return FUN_00dbb260((WorldDBC*)((DescriptorDBC*)m_08), &value);
+        return hkNativeDataObjectImplCreate((WorldDBC*)((DescriptorDBC*)m_08), &value);
     return 0;
 }

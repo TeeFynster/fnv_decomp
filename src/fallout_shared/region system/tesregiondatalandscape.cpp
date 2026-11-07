@@ -57,7 +57,8 @@ struct FUN_004f32b0_Arg
 
 // Calls SetMaskedBits with the argument's val, 0x3000 and 0xc.
 // @fnv 0x004f32b0
-void __fastcall FUN_004f32b0(FUN_004f32b0_This* this_ptr, FUN_004f32b0_Arg aValue)
+// src: XBOX_PDB 0x004f32b0
+void __fastcall NiTexturingProperty_Map_SetClampMode(FUN_004f32b0_This* this_ptr, FUN_004f32b0_Arg aValue)
 {
     this_ptr->SetMaskedBits(aValue.val, 0x3000, 0xc);
 }
@@ -171,7 +172,7 @@ NiTexturingProperty* GetDefaultFullMaskTextureProperty()
     if ((NiTexturingProperty*)g_011c7f0c)
         return g_011c7f0c;
     ppixeldata = new NiPixelData(64, 64, &gNiPoint3StartupSrc, 1, 1);
-    ppixels = ppixeldata->FUN_0064dac0(0, 0);
+    ppixels = ppixeldata->NiPixelData_GetPixels(0, 0);
     for (iy = 0; iy < 64; iy++)
     {
         for (ix = 0; ix < 64; ix++)
@@ -243,10 +244,10 @@ struct ThisT
     unsigned char m_04;
     unsigned char m_05;
     unsigned char m_06;
-    unsigned char FUN_004f1540();
+    unsigned char TESRegionData_GetOverride();
     void FUN_004f15a0(int v);
     bool FUN_004f15c0(unsigned char v);
-    unsigned char FUN_005bb4d0();
+    unsigned char TESRegionData_GetPriority();
     void __thiscall UpdateFromSource(ThisT* a1, int a2);
 };
 
@@ -260,8 +261,8 @@ void __thiscall ThisT::UpdateFromSource(ThisT* a1, int a2)
         return;
     if (m_05)
     {
-        FUN_004f15a0(a1p->FUN_004f1540());
-        FUN_004f15c0(a1p->FUN_005bb4d0());
+        FUN_004f15a0(a1p->TESRegionData_GetOverride());
+        FUN_004f15c0(a1p->TESRegionData_GetPriority());
         a1p->Slot10(&str3);
         Slot11(&str3);
     }
@@ -275,12 +276,12 @@ void __thiscall ThisT::UpdateFromSource(ThisT* a1, int a2)
         {
             if (m_04)
             {
-                if (a1p->FUN_004f1540())
+                if (a1p->TESRegionData_GetOverride())
                 {
-                    if (a1p->FUN_005bb4d0() > FUN_005bb4d0())
+                    if (a1p->TESRegionData_GetPriority() > TESRegionData_GetPriority())
                     {
-                        FUN_004f15a0(a1p->FUN_004f1540());
-                        FUN_004f15c0(a1p->FUN_005bb4d0());
+                        FUN_004f15a0(a1p->TESRegionData_GetOverride());
+                        FUN_004f15c0(a1p->TESRegionData_GetPriority());
                         a1p->Slot10(&str3);
                         Slot11(&str3);
                     }
@@ -289,23 +290,23 @@ void __thiscall ThisT::UpdateFromSource(ThisT* a1, int a2)
             }
             else
             {
-                if (a1p->FUN_004f1540())
+                if (a1p->TESRegionData_GetOverride())
                 {
-                    FUN_004f15a0(a1p->FUN_004f1540());
-                    FUN_004f15c0(a1p->FUN_005bb4d0());
+                    FUN_004f15a0(a1p->TESRegionData_GetOverride());
+                    FUN_004f15c0(a1p->TESRegionData_GetPriority());
                     a1p->Slot10(&str3);
                     Slot11(&str3);
                 }
                 else
                 {
-                    if (a1p->FUN_005bb4d0() > FUN_005bb4d0())
+                    if (a1p->TESRegionData_GetPriority() > TESRegionData_GetPriority())
                     {
                         a1p->Slot10(&str3);
                         Slot11(&str3);
                     }
-                    f = (float)(FUN_005bb4d0() * FUN_005bb4d0() + (100 - FUN_005bb4d0()) * a1p->FUN_005bb4d0());
-                    f += (float)((100 - a1p->FUN_005bb4d0()) * FUN_005bb4d0() +
-                                 a1p->FUN_005bb4d0() * a1p->FUN_005bb4d0());
+                    f = (float)(TESRegionData_GetPriority() * TESRegionData_GetPriority() + (100 - TESRegionData_GetPriority()) * a1p->TESRegionData_GetPriority());
+                    f += (float)((100 - a1p->TESRegionData_GetPriority()) * TESRegionData_GetPriority() +
+                                 a1p->TESRegionData_GetPriority() * a1p->TESRegionData_GetPriority());
                     f *= DAT_01023b88;
                     FUN_004f15c0((unsigned char)floor(f));
                 }

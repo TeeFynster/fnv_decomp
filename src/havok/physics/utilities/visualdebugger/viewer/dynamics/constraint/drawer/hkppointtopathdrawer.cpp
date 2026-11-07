@@ -26,7 +26,7 @@ inline void hkVector4::operator=(const hkVector4& v)
     m_vComponents = v.m_vComponents;
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 static __forceinline void hkVector4Array_ClearAndRelease(hkArrayBase<hkVector4>& self, hkMemoryAllocator& alloc);
 
@@ -84,7 +84,7 @@ struct BoneTransformData
     int unk68;
     int unk6c;
     hkTransform m_kMotionTransform;
-    void FUN_00dee820(const hkVector4* in, hkVector4* out);
+    void hkpPointToPathConstraintData_calcPivot(const hkVector4* in, hkVector4* out);
 };
 
 struct ExtraData
@@ -181,7 +181,7 @@ extern float DAT_0101622c;
 
 struct Processor
 {
-    void FUN_00e10a10(LineDrawer* drawer);
+    void hkpPrimitiveDrawer_setDisplayHandler(LineDrawer* drawer);
 };
 
 struct Viewer
@@ -230,15 +230,16 @@ struct Viewer
     int unkbc;
     Processor m_processor;
 
-    void FUN_00de47e0(Input* input, hkTransform* transform, hkTransform* extra);
-    void FUN_00de4530(int id, int tag);
-    void FUN_00de44c0(int id, int tag);
-    void FUN_00de7020(Input* input, LineDrawer* drawer, int id, int tag);
+    void hkpConstraintDrawer_updateCommonParameters(Input* input, hkTransform* transform, hkTransform* extra);
+    void hkpConstraintDrawer_drawBodyFrames(int id, int tag);
+    void hkpConstraintDrawer_drawPivots(int id, int tag);
+    void UpdateViewerAndDrawPointLines(Input* input, LineDrawer* drawer, int id, int tag);
 };
 
 // Runs several viewer update steps, then draws lines between consecutive points of the scene's point source, transformed to world space, using drawer.
 // @fnv 0x00de7020
-void Viewer::FUN_00de7020(Input* input, LineDrawer* drawer, int id, int tag)
+// src: GUESS 0x00de7020 (confidence: medium)
+void Viewer::UpdateViewerAndDrawPointLines(Input* input, LineDrawer* drawer, int id, int tag)
 {
     BoneTransformData* scene = input->m_scene;
     // Vector-backed storage preserves the original stack layout and /GS classification.
@@ -249,16 +250,16 @@ void Viewer::FUN_00de7020(Input* input, LineDrawer* drawer, int id, int tag)
     hkTransform& worldTransform = *reinterpret_cast<hkTransform*>(worldTransformStorage);
     hkTransform& extraTransform = *reinterpret_cast<hkTransform*>(extraTransformStorage);
 
-    m_processor.FUN_00e10a10(drawer);
-    FUN_00de47e0(input, &localTransform, &extraTransform);
+    m_processor.hkpPrimitiveDrawer_setDisplayHandler(drawer);
+    hkpConstraintDrawer_updateCommonParameters(input, &localTransform, &extraTransform);
     m_vContactPosition.m_vComponents = localTransform.m_vTranslation;
-    scene->FUN_00dee820(&input->m_extra->m_endPoint, &m_endPoint);
-    FUN_00de4530(id, tag);
-    FUN_00de44c0(id, tag);
+    scene->hkpPointToPathConstraintData_calcPivot(&input->m_extra->m_endPoint, &m_endPoint);
+    hkpConstraintDrawer_drawBodyFrames(id, tag);
+    hkpConstraintDrawer_drawPivots(id, tag);
 
     if (scene->m_kPoints)
     {
-        worldTransform.FUN_00cb2240(localTransform, scene->m_kMotionTransform);
+        worldTransform.hkTransform_setMul(localTransform, scene->m_kMotionTransform);
         PointSource* source = scene->m_kPoints;
         if (source)
         {
@@ -270,12 +271,12 @@ void Viewer::FUN_00de7020(Input* input, LineDrawer* drawer, int id, int tag)
                 hkVector4 a;
                 hkVector4 b;
                 hkVector4 p = points.m_data[i];
-                a.FUN_00c7f640(worldTransform, p);
+                a.setTransformedPos_00c7f640(worldTransform, p);
                 p = points.m_data[i - 1];
-                b.FUN_00c7f640(worldTransform, p);
+                b.setTransformedPos_00c7f640(worldTransform, p);
                 drawer->drawLine(a, b, PackColorBigEndian(0.0f, DAT_0101622c, 1.0f, 1.0f), id, tag);
             }
-            hkVector4Array_ClearAndRelease(points, PointToPathHeap(FUN_00c85750()));
+            hkVector4Array_ClearAndRelease(points, PointToPathHeap(hkMemoryRouter_getInstance()));
         }
     }
 }

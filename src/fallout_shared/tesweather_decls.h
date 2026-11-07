@@ -22,7 +22,7 @@ class TESWeather__WeatherSound
     unsigned int formID;
     unsigned int type;
     TESWeather__WeatherSound();
-    void FUN_00462230();
+    void TwoValues_Endian();
 };
 void* __cdecl operator new(unsigned int);
 extern "C" void* memset(void* dst, int val, unsigned int size);

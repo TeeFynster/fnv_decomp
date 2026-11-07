@@ -40,7 +40,8 @@ void NiBSplineFloatInterpolator::LoadBinary(NiStream& stream)
 }
 
 // @fnv 0x00a50a20
-int __stdcall FUN_00a50a20(unsigned short v)
+// src: XBOX_PDB 0x00a50a20
+int __stdcall NiBSplineFloatInterpolator_GetDimension(unsigned short v)
 {
     unsigned short z = 0;
     return z == v;
@@ -80,7 +81,8 @@ struct GlobalObjX
 };
 extern GlobalObjX g_011f401c_arg1;
 // @fnv 0x00a50b70
-GlobalObjX* FUN_00a50b70()
+// src: COMMUNITY 0x00a50b70
+GlobalObjX* NiBSplineFloatInterpolator_GetRTTI()
 {
     return &g_011f401c_arg1;
 }
@@ -124,8 +126,8 @@ NiBSplineFloatInterpolator* __fastcall CloneFloatInterpolator(NiBSplineFloatInte
 void __fastcall GetBSplineInterpolatorStrings(NiBSplineInterpolator* self, int, StrArr* strings);
 
 char* __cdecl _FUN_00a7d330(char const* value);
-char* __cdecl FUN_00a7d550(char const* name, float value);
-char* __cdecl FUN_00a7d510(char const* name, char const* value);
+char* __cdecl NiGetViewerString_00a7d550(char const* name, float value);
+char* __cdecl NiGetViewerString_00a7d510(char const* name, char const* value);
 
 // @fnv 0x00a50d30
 void __fastcall SerializeToStrings(NiBSplineFloatInterpolator* self, int, StrArr* strings)
@@ -140,7 +142,7 @@ void __fastcall SerializeToStrings(NiBSplineFloatInterpolator* self, int, StrArr
 
     strings->SetAt(index, value);
 
-    value = FUN_00a7d550("m_fFloatValue", self->m_fFloatValue);
+    value = NiGetViewerString_00a7d550("m_fFloatValue", self->m_fFloatValue);
 
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)
@@ -148,7 +150,7 @@ void __fastcall SerializeToStrings(NiBSplineFloatInterpolator* self, int, StrArr
 
     strings->SetAt(index, value);
 
-    value = FUN_00a7d510("m_kFloatCPHandle", reinterpret_cast<char const*>(self->m_kFloatCPHandle));
+    value = NiGetViewerString_00a7d510("m_kFloatCPHandle", reinterpret_cast<char const*>(self->m_kFloatCPHandle));
 
     index = strings->m_usSize;
     if (index >= strings->m_usMaxSize)

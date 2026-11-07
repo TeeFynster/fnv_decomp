@@ -28,11 +28,12 @@ struct FUN_00b404c0_cls
     int unk14;
     unsigned char unk18;
 
-    void FUN_00b404c0(const FUN_00b28440_Class* src, bool flag);
+    void CBillboardLeaf_SetColor(const FUN_00b28440_Class* src, bool flag);
 };
 
 // @fnv 0x00b404c0
-void FUN_00b404c0_cls::FUN_00b404c0(const FUN_00b28440_Class* src, bool flag)
+// src: COMMUNITY 0x00b404c0
+void FUN_00b404c0_cls::CBillboardLeaf_SetColor(const FUN_00b28440_Class* src, bool flag)
 {
     FUN_00b28440_Class v = *src;
     int i;
@@ -70,9 +71,9 @@ struct FUN_0044a4c0
     FUN_0044a4c0(const FUN_0044a4c0& r);
     ~FUN_0044a4c0()
     {
-        FUN_0044a730(true, 0);
+        fopen_0044a730(true, 0);
     }
-    void FUN_0044a730(unsigned char b, unsigned n);
+    void fopen_0044a730(unsigned char b, unsigned n);
 };
 struct FUN_00b096a0
 {
@@ -102,8 +103,8 @@ struct Parser
     unsigned uiPos;
     ByteVec kData;
     int GetNextElement();
-    float FUN_00b3ed20();
-    int FUN_00b3ede0();
+    float CTreeFileAccess_ParseFloat();
+    int AdvanceBlockAllocationCursor();
     unsigned char GetNextChar();
     V3 GetVector3();
 };
@@ -136,7 +137,8 @@ struct LeafQ
     }
 };
 // @fnv 0x00b405c0
-LeafQ* FUN_00b405c0(Parser* p)
+// src: XBOX_PDB 0x00b405c0
+LeafQ* CBillboardLeaf_Parse(Parser* p)
 {
     LeafQ* pLeaf = new LeafQ;
     int iToken = p->GetNextElement();
@@ -145,7 +147,7 @@ LeafQ* FUN_00b405c0(Parser* p)
         switch (iToken)
         {
         case 0x1b5e:
-            pLeaf->i14 = p->FUN_00b3ede0();
+            pLeaf->i14 = p->AdvanceBlockAllocationCursor();
             break;
         case 0x1b5f:
             pLeaf->b10 = p->GetNextChar();
@@ -169,7 +171,7 @@ LeafQ* FUN_00b405c0(Parser* p)
             pLeaf->SetA(p->GetVector3());
             break;
         case 0x1b68:
-            p->FUN_00b3ed20();
+            p->CTreeFileAccess_ParseFloat();
             break;
         default:
             throw FUN_00b09480("malformed billboard leaf", false);

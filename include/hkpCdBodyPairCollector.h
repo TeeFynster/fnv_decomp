@@ -9,10 +9,10 @@ public:
 
     virtual ~hkpCdBodyPairCollector();
     virtual void AddCdBodyPair(const hkpCdBody& bodyA, const hkpCdBody& bodyB);
-    virtual void FUN_0062d330();
+    virtual void hkpCdBodyPairCollector_reset();
 
     void dtor();
-    void* FUN_0062d3c0();
+    void* hkpCdBodyPairCollector_hkpCdBodyPairCollector();
     void* FUN_0062d3f0(unsigned int flags);
-    void FUN_0062d420();
+    void SetVirtualTable_0062d420();
 };

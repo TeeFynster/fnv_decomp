@@ -8,7 +8,7 @@ typedef ::__m128 LocalM128;
 // src/havok/physics/constraintsolver/solve/hkpsolver.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/constraintsolver/solve/hkpsolver.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern unsigned char DAT_011b9434[128];
-int __cdecl FUN_00d921d0(const signed char* index);
+int __cdecl Hkpsolver_GetIndexedValue_00d921d0(const signed char* index);
 typedef ::__m128 LocalM128;
 using ::_mm_add_ss;
 // Adds the lowest single-precision float of b to that of a and stores the result in out.
@@ -17,14 +17,14 @@ extern "C" void __cdecl AddScalarFloat(LocalM128* pResult, const LocalM128* pLef
 {
     *pResult = _mm_add_ss(*pLeft, *pRight);
 }
-char* __cdecl FUN_00d921c0(char* dst, const char* src);
+char* __cdecl Object_ComputeValue_00d921c0(char* dst, const char* src);
 using ::_mm_sub_ss;
 // @fnv 0x00c6ccc0
 extern "C" void __cdecl SubtractScalarFloat(LocalM128* pResult, const LocalM128* pLeft, const LocalM128* pRight)
 {
     *pResult = _mm_sub_ss(*pLeft, *pRight);
 }
-void FUN_00d892d0();
+void hkSolveUpload();
 
 extern "C" void _ReadWriteBarrier();
 using ::_mm_load_ss;
@@ -68,7 +68,8 @@ struct SpawnedElem {
 
 struct BeginArg { SpawnedElem* p; BeginArg(SpawnedElem* q):p(q){} };
 // @fnv 0x00d89ed0
-void __cdecl FUN_00d89ed0(SpawnedOwner* owner, BeginArg begin, SpawnedElem* limit)
+// src: GUESS 0x00d89ed0 (confidence: low)
+void __cdecl Hkpsolver_ProcessEntries_00d89ed0(SpawnedOwner* owner, BeginArg begin, SpawnedElem* limit)
 {
     SpawnedVec4 scale = owner->m_vec10;
     SpawnedElem* p = begin.p;
@@ -407,7 +408,8 @@ static void Step_debugPrintfAccumulators(int mode, const Step_SolverInfo& info, 
 struct Step_InArg { Step_Accumulator* value; Step_InArg() {} };
 struct Step_OutArg { Step_Bool* value; Step_OutArg() {} };
 // @fnv 0x00d89f80
-extern "C" __declspec(noinline) int __cdecl FUN_00d89f80(
+// src: GUESS 0x00d89f80 (confidence: low)
+extern "C" __declspec(noinline) int __cdecl Object_ProcessAndReturnValue_00d89f80(
     const Step_SolverInfo& info,
     int currentSolverStep,
     Step_InArg inputArg,

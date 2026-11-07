@@ -15,23 +15,25 @@ ChameleonEffect::ChameleonEffect(void* a, void* b, void* c) : ValueModifierEffec
 {
 }
 
-bool __cdecl FUN_005b9b00();
+bool __cdecl BSShaderManager_IsRefractionEnabled();
 // @fnv 0x0080b1b0
-void ChameleonEffect::FUN_0080b1b0(Actor* apActor)
+// src: XBOX_PDB 0x0080b1b0
+void ChameleonEffect::Revert_0080b1b0(Actor* apActor)
 {
     reinterpret_cast<TESForm*>(this)->TESForm::Revert((unsigned int)apActor);
-    if (FUN_005b9b00())
+    if (BSShaderManager_IsRefractionEnabled())
         apActor->Unk_E1(1, 0.0F);
     else
         apActor->UpdateActorPresentation();
 }
 
 // @fnv 0x0080b310
-void ChameleonEffect::FUN_0080b310(BGSLoadFormBuffer* apActor)
+// src: XBOX_PDB 0x0080b310
+void ChameleonEffect::Revert_0080b310(BGSLoadFormBuffer* apActor)
 {
     Actor* actor = apActor->GetActor();
     reinterpret_cast<TESForm*>(this)->TESForm::Revert((unsigned int)apActor);
-    if (FUN_005b9b00())
+    if (BSShaderManager_IsRefractionEnabled())
         actor->Unk_E1(1, 0.0f);
     else
         actor->UpdateActorPresentation();
@@ -39,30 +41,32 @@ void ChameleonEffect::FUN_0080b310(BGSLoadFormBuffer* apActor)
 
 // Allocates and constructs a ChameleonEffect from three arguments and returns it.
 // @fnv 0x0080b040
-ChameleonEffect* __cdecl FUN_0080b040(void* a, void* b, void* c)
+// src: COMMUNITY 0x0080b040
+ChameleonEffect* __cdecl ChameleonEffect_Create(void* a, void* b, void* c)
 {
     return new ChameleonEffect(a, b, c);
 }
 
 extern double DAT_01017a40;
 
-float __cdecl FUN_00404010(float a, float b);
-float __cdecl FUN_0040ebd0(float a, float b);
-float __cdecl FUN_0040df50();
+float __cdecl BSMAX_00404010(float a, float b);
+float __cdecl BSMIN(float a, float b);
+float __cdecl MagicSystem_GetChameleonMaxRefraction();
 float __cdecl GetOriginalRuntimeFloatSetting9();
 float __cdecl LinearInterpolate(float a, float b, float c, float d, float e);
 
 // @fnv 0x0080b0c0
-void ChameleonEffect::FUN_0080b0c0(Actor* a1)
+// src: XBOX_PDB 0x0080b0c0
+void ChameleonEffect::FinishInitLoadGame_0080b0c0(Actor* a1)
 {
     ValueModifierEffect::FinishLoadGameTES(a1);
-    if (FUN_005b9b00())
+    if (BSShaderManager_IsRefractionEnabled())
     {
         a1->SetAlpha(1.0f);
         float h;
         float s;
-        h = FUN_0040ebd0(1.0f, FUN_00404010(0.0f, (float)(a1->GetCurrentActorValue(static_cast<ActorValue::Index>(m_eActorValue)) / DAT_01017a40)));
-        s = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), FUN_0040df50(), 0.0f, 1.0f, 1.0f - h);
+        h = BSMIN(1.0f, BSMAX_00404010(0.0f, (float)(a1->GetCurrentActorValue(static_cast<ActorValue::Index>(m_eActorValue)) / DAT_01017a40)));
+        s = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), MagicSystem_GetChameleonMaxRefraction(), 0.0f, 1.0f, 1.0f - h);
         a1->Unk_E1(1, s);
     }
     else
@@ -72,18 +76,19 @@ void ChameleonEffect::FUN_0080b0c0(Actor* a1)
 }
 
 // @fnv 0x0080b200
-void ChameleonEffect::FUN_0080b200(BGSLoadFormBuffer* target)
+// src: XBOX_PDB 0x0080b200
+void ChameleonEffect::FinishLoadGame(BGSLoadFormBuffer* target)
 {
     Actor* actor = target->GetActor();
     ActiveEffect::ApplyLoadBuffer(target);
     if (bActive)
     {
-        if (FUN_005b9b00())
+        if (BSShaderManager_IsRefractionEnabled())
         {
             actor->SetAlpha(1.0f);
             float clamped =
-                FUN_0040ebd0(1.0f, FUN_00404010(0.0f, (float)(actor->GetCurrentActorValue(static_cast<ActorValue::Index>(m_eActorValue)) / 100.0)));
-            float alpha4 = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), FUN_0040df50(), 0.0f, 1.0f,
+                BSMIN(1.0f, BSMAX_00404010(0.0f, (float)(actor->GetCurrentActorValue(static_cast<ActorValue::Index>(m_eActorValue)) / 100.0)));
+            float alpha4 = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), MagicSystem_GetChameleonMaxRefraction(), 0.0f, 1.0f,
                                              (float)(1.0 - clamped));
             actor->Unk_E1(1, alpha4);
         }
@@ -97,7 +102,8 @@ void ChameleonEffect::FUN_0080b200(BGSLoadFormBuffer* target)
 extern double DAT_01012060;
 
 // @fnv 0x0080aef0
-void ChameleonEffect::FUN_0080aef0()
+// src: XBOX_PDB 0x0080aef0
+void ChameleonEffect::Finish_0080aef0()
 {
     Actor* actor;
     float ratio3;
@@ -107,12 +113,12 @@ void ChameleonEffect::FUN_0080aef0()
     actor = ActiveEffect::FUN_0059bb30() ? ActiveEffect::FUN_0059bb30()->FUN_00822b40() : (Actor*)0;
     if (actor != 0)
     {
-        if (FUN_005b9b00())
+        if (BSShaderManager_IsRefractionEnabled())
         {
-            ratio3 = FUN_0040ebd0(1.0f, FUN_00404010(0.0f, actor->GetCurrentActorValue(static_cast<ActorValue::Index>(m_eActorValue)) / DAT_01017a40));
+            ratio3 = BSMIN(1.0f, BSMAX_00404010(0.0f, actor->GetCurrentActorValue(static_cast<ActorValue::Index>(m_eActorValue)) / DAT_01017a40));
             if (ratio3 > DAT_01012060)
             {
-                interp2 = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), FUN_0040df50(), 0.0f, 1.0f,
+                interp2 = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), MagicSystem_GetChameleonMaxRefraction(), 0.0f, 1.0f,
                                             1.0f - ratio3 / DAT_01017a40);
                 actor->Unk_E1(1, interp2);
             }
@@ -136,11 +142,11 @@ void ChameleonEffect::UpdateChameleonEffect()
     ValueModifierEffect::Start();
     if (q != 0)
     {
-        if (FUN_005b9b00())
+        if (BSShaderManager_IsRefractionEnabled())
         {
             q->SetAlpha(1.0f);
-            float r2 = FUN_0040ebd0(1.0f, FUN_00404010(0.0f, q->GetCurrentActorValue(static_cast<ActorValue::Index>(m_eActorValue)) / DAT_01017a40));
-            float r3 = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), FUN_0040df50(), 0.0f, 1.0f, 1.0f - r2);
+            float r2 = BSMIN(1.0f, BSMAX_00404010(0.0f, q->GetCurrentActorValue(static_cast<ActorValue::Index>(m_eActorValue)) / DAT_01017a40));
+            float r3 = LinearInterpolate(GetOriginalRuntimeFloatSetting9(), MagicSystem_GetChameleonMaxRefraction(), 0.0f, 1.0f, 1.0f - r2);
             q->Unk_E1(1, r3);
         }
         else

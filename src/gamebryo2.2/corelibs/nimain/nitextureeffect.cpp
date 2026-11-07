@@ -55,7 +55,8 @@ void NiTextureEffect::InitializePoint3()
 extern int g_011f5e94;
 
 // @fnv 0x00a927d0
-int* __cdecl FUN_00a927d0()
+// src: COMMUNITY 0x00a927d0
+int* __cdecl NiTextureEffect_GetRTTI()
 {
     return &g_011f5e94;
 }
@@ -105,16 +106,17 @@ void FUN_00a928b0_shell::ClearFixedStrings()
 
 struct FUN_00a6ff10_holder
 {
-    bool FUN_00a6ff10(NiStream&);
+    bool NiDynamicEffect_RegisterStreamables(NiStream&);
 };
 struct FUN_00a92a30_shell : NiTextureEffect
 {
-    bool FUN_00a92a30(NiStream&);
+    bool NiTextureEffect_RegisterStreamables(NiStream&);
 };
 // @fnv 0x00a92a30
-bool FUN_00a92a30_shell::FUN_00a92a30(NiStream& kStream)
+// src: XBOX_PDB 0x00a92a30
+bool FUN_00a92a30_shell::NiTextureEffect_RegisterStreamables(NiStream& kStream)
 {
-    if (!((FUN_00a6ff10_holder*)this)->FUN_00a6ff10(kStream))
+    if (!((FUN_00a6ff10_holder*)this)->NiDynamicEffect_RegisterStreamables(kStream))
         return false;
     NiObject* pkObj = *(NiObject**)((char*)this + 0x124);
     if (pkObj)
@@ -129,7 +131,7 @@ struct FUN_00a929d0_Holder : NiDynamicEffect
 {
     char _pad[0x60];
     NiObject* m_pObject;
-    void FUN_00a929d0(NiStream&);
+    void NiTextureEffect_LinkObject(NiStream&);
 };
 }  // namespace fnv_00a929d0
 
@@ -259,10 +261,11 @@ struct CallTarget_00a92c40
 };
 struct SearchObject
 {
-    int FUN_00a92ef0(unsigned int arg0);
+    int NiTextureEffect_UpdateWorldData(unsigned int arg0);
 };
 // @fnv 0x00a92ef0
-int SearchObject::FUN_00a92ef0(unsigned int arg0)
+// src: XBOX_PDB 0x00a92ef0
+int SearchObject::NiTextureEffect_UpdateWorldData(unsigned int arg0)
 {
     unsigned int callResult0 = (unsigned int)((CallTarget_00a68c60*)this)->FUN_00a68c60((int)arg0);
     unsigned int callResult1 = (unsigned int)((CallTarget_00a92c40*)this)->UpdateWorldProjection();
@@ -288,7 +291,7 @@ class FUN_00a93040_cls
 {
   public:
     bool FUN_00a68d80(FUN_00a93040_cls* other);
-    bool FUN_00a93040(FUN_00a93040_cls* other);
+    bool NiTextureEffect_IsEqual(FUN_00a93040_cls* other);
     unsigned int unk_000;
     unsigned int unk_004;
     unsigned int unk_008;
@@ -374,7 +377,8 @@ class FUN_00a93040_cls
 };
 // Returns true when FUN_00a68d80 succeeds, the unk_0c4 subobjects match, the unk_0e8 and unk_13c subobjects differ, and m_128 through m_138 are equal.
 // @fnv 0x00a93040
-bool FUN_00a93040_cls::FUN_00a93040(FUN_00a93040_cls* other)
+// src: XBOX_PDB 0x00a93040
+bool FUN_00a93040_cls::NiTextureEffect_IsEqual(FUN_00a93040_cls* other)
 {
     if (FUN_00a68d80(other) != 0 && reinterpret_cast<SubCmpA*>(&other->unk_0c4)->Equal(&unk_0c4) != 0 &&
         reinterpret_cast<SubCmpB*>(&other->unk_0e8)->Equal(&unk_0e8) == 0 && other->m_128 == m_128 &&
@@ -415,7 +419,8 @@ inline WriteStream* NiStream::GetWriter()
 namespace fnv_00a929d0 {
 // Links the stream's object to m_pObject, releasing the previous object and incrementing the new one's reference count.
 // @fnv 0x00a929d0
-void FUN_00a929d0_Holder::FUN_00a929d0(NiStream& kStream)
+// src: XBOX_PDB 0x00a929d0
+void FUN_00a929d0_Holder::NiTextureEffect_LinkObject(NiStream& kStream)
 {
     NiDynamicEffect::LinkObject(kStream);
     NiObject* pkObj = kStream.GetLoadedObject();
@@ -451,12 +456,13 @@ struct TexEffectSaver : NiDynamicEffect
     int m_eCoordGenType;
     bool m_bClippingPlaneEnable;
     PlaneSaver m_kModelPlane;
-    void FUN_00a932f0(NiStream& kStream);
+    void NiTextureEffect_SaveBinary(NiStream& kStream);
 };
 
 // Saves the dynamic effect base, model projection matrix and translation, texture settings, source texture link, clipping flag and model plane to the stream.
 // @fnv 0x00a932f0
-void TexEffectSaver::FUN_00a932f0(NiStream& kStream)
+// src: XBOX_PDB 0x00a932f0
+void TexEffectSaver::NiTextureEffect_SaveBinary(NiStream& kStream)
 {
     NiDynamicEffect::SaveBinary(kStream);
     m_kModelProjMat.SaveBinary(kStream);
@@ -473,7 +479,8 @@ void TexEffectSaver::FUN_00a932f0(NiStream& kStream)
 
 #include "../../../../include/NiMemObject.h"
 // @fnv 0x00a929b0
-void* __cdecl FUN_00a929b0()
+// src: EXE 0x00a929b0
+void* __cdecl NiTextureEffect_CreateObject()
 {
     NiTextureEffect* obj = (NiTextureEffect*)NiMemObject::operator new(0x15c);
     if (obj)
@@ -608,12 +615,12 @@ struct PlaneViewer : PlaneSaver
 {
     char* FUN_00a69a60(const char* name);
 };
-char* __cdecl FUN_00a7d330(const char* name);
-char* __cdecl FUN_00a92a60(const char* name, int value);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* name);
+char* __cdecl NiTextureEffect_GetViewerString(const char* name, int value);
 char* __cdecl BuildFilterModeString(const char* name, int value);
 char* __cdecl BuildTextureAddressModeString(const char* name, int value);
 char* __cdecl BuildProjectionModeString(const char* name, int value);
-char* __cdecl FUN_00a7d370(const char* name, bool value);
+char* __cdecl NiGetViewerString(const char* name, bool value);
 struct TextureEffectViewer : DynamicEffectViewer
 {
     NiMatrix3 modelProjMat;
@@ -633,15 +640,15 @@ struct TextureEffectViewer : DynamicEffectViewer
 void TextureEffectViewer::AppendToStrings(StrArr& strings)
 {
     FUN_00a69140(strings);
-    strings.AppendInline(FUN_00a7d330(reinterpret_cast<const char*>(g_011f5e94)));
+    strings.AppendInline(NiViewerStrings_NiGetViewerString_Title(reinterpret_cast<const char*>(g_011f5e94)));
     strings.AppendInline(modelProjMat.GetViewerString("m_kModelProjMat"));
-    strings.AppendInline(modelProjTrans.FUN_00a59af0("m_kModelProjTrans"));
-    strings.AppendInline(FUN_00a92a60("m_eTextureMode", textureMode));
+    strings.AppendInline(modelProjTrans.GetViewerString_00a59af0("m_kModelProjTrans"));
+    strings.AppendInline(NiTextureEffect_GetViewerString("m_eTextureMode", textureMode));
     strings.AppendInline(BuildFilterModeString("m_eFilter", filter));
     strings.AppendInline(BuildTextureAddressModeString("m_eClamp", clamp));
-    strings.AppendInline(FUN_00a92a60("m_eTextureMode", textureMode));
+    strings.AppendInline(NiTextureEffect_GetViewerString("m_eTextureMode", textureMode));
     strings.AppendInline(BuildProjectionModeString("m_eCoordMode", coordMode));
-    strings.AppendInline(FUN_00a7d370("m_bPlaneEnable", planeEnable));
+    strings.AppendInline(NiGetViewerString("m_bPlaneEnable", planeEnable));
     strings.AppendInline(modelPlane.FUN_00a69a60("m_kModelPlane"));
 }
 
@@ -784,10 +791,11 @@ struct TexEffectLoader : NiDynamicEffect
     int m_eCoordGenType;
     bool m_bClippingPlaneEnable;
     NiPlane m_kModelPlane;
-    void FUN_00a93140(NiStream& kStream);
+    void NiTextureEffect_LoadBinary(NiStream& kStream);
 };
 // @fnv 0x00a93140
-void TexEffectLoader::FUN_00a93140(NiStream& kStream)
+// src: XBOX_PDB 0x00a93140
+void TexEffectLoader::NiTextureEffect_LoadBinary(NiStream& kStream)
 {
     NiDynamicEffect::LoadBinary(kStream);
     m_kModelProjMat.LoadBinary(kStream);
@@ -828,7 +836,8 @@ extern "C" void* __cdecl _NiMalloc(unsigned int);
 int __cdecl NiSprintf(char*, unsigned int, const char*, ...);
 
 // @fnv 0x00a92a60
-char* __cdecl FUN_00a92a60(const char* pPrefix, unsigned int eMode)
+// src: XBOX_PDB 0x00a92a60
+char* __cdecl NiTextureEffect_GetViewerString(const char* pPrefix, unsigned int eMode)
 {
     unsigned int uiLen = strlen(pPrefix) + 0x19;
     char* pString = static_cast<char*>(_NiMalloc(uiLen));

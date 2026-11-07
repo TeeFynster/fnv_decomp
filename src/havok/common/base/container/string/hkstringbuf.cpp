@@ -6,8 +6,8 @@
 #include "../../../../../../include/hkMemoryRouter.h"
 #include <stdarg.h>
 
-BSAudio* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00c908c0(void*, void*, int, int);
+BSAudio* __cdecl hkMemoryRouter_getInstance();
+extern "C" void __cdecl hkArrayUtil__reserve(void*, void*, int, int);
 
 class BufferOwner
 {
@@ -25,7 +25,7 @@ BufferOwner* BufferOwner::InitBuffer()
     m_pData = (char*)this + 0xc;
     m_iReferenceCount = 0;
     m_uiObjectFlags = 0x80000080;
-    hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance());
     void* pAllocator = pHolder->m_temp;
     int iCount = (int)(m_uiObjectFlags & 0x3fffffff);
     if (iCount < 1)
@@ -35,7 +35,7 @@ BufferOwner* BufferOwner::InitBuffer()
         {
             iCapacity = 1;
         }
-        FUN_00c908c0(pAllocator, this, iCapacity, 1);
+        hkArrayUtil__reserve(pAllocator, this, iCapacity, 1);
     }
     m_iReferenceCount = 1;
     *m_pData = 0;
@@ -43,7 +43,7 @@ BufferOwner* BufferOwner::InitBuffer()
     return this;
 }
 
-int __cdecl FUN_00cb0f50(char* buf, int size, const char* fmt, va_list args);
+int __cdecl hkString_vsnprintf(char* buf, int size, const char* fmt, va_list args);
 inline hkMemoryAllocator& GetStreamAllocator(hkMemoryRouter& router)
 {
     return *static_cast<hkMemoryAllocator*>(router.m_temp);
@@ -65,12 +65,12 @@ struct StringBuf : public BufferOwner
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, 1);
+            hkArrayUtil__reserve(&alloc, this, newSize, 1);
         }
     }
     void SetSize(int n)
     {
-        Reserve(GetStreamAllocator(*reinterpret_cast<hkMemoryRouter*>(FUN_00c85750())), n);
+        Reserve(GetStreamAllocator(*reinterpret_cast<hkMemoryRouter*>(hkMemoryRouter_getInstance())), n);
         m_iReferenceCount = n;
     }
     void SetLength(int n)
@@ -78,18 +78,19 @@ struct StringBuf : public BufferOwner
         SetSize(n + 1);
         m_pData[n] = 0;
     }
-    void FUN_00d61d00(const char* fmt, ...);
+    void hkStringBuf_printf(const char* fmt, ...);
 };
 // Formats fmt into the buffer with va_list args, growing capacity until the write fits, then null-terminates.
 // @fnv 0x00d61d00
-void StringBuf::FUN_00d61d00(const char* fmt, ...)
+// src: HAVOK_LIB 0x00d61d00
+void StringBuf::hkStringBuf_printf(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     while (1)
     {
         int size = GetCapacity();
-        int iChars = FUN_00cb0f50(Begin(), size, fmt, args);
+        int iChars = hkString_vsnprintf(Begin(), size, fmt, args);
         if (iChars >= 0 && iChars < size)
         {
             SetLength(iChars);

@@ -24,7 +24,7 @@ public:
     TESObjectCLOT();
     virtual ~TESObjectCLOT();
 
-    void FUN_005156b0();
-    void FUN_00515f40();
+    void InitializeData_005156b0();
+    void Save_00515f40();
     void* DestroyIfFlagged(unsigned int flags);
 };

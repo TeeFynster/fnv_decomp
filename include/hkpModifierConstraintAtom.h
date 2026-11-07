@@ -21,5 +21,5 @@ public:
     };
     hkpModifierConstraintAtom* m_pChildAtom;
 
-    int FUN_00d22090(GenericConstraintAtomScheme& infoOut, unsigned char& usedFlagsOut);
+    int addModifierDataToConstraintInfo(GenericConstraintAtomScheme& infoOut, unsigned char& usedFlagsOut);
 };

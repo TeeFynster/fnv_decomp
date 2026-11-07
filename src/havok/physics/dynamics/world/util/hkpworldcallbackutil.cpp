@@ -215,7 +215,7 @@ struct Reference
     Metadata* metadata;
     void FUN_00c905b0();
 };
-extern void FUN_00c95800();
+extern void hkpWorld_removePhantomBatch();
 
 __forceinline void RemoveWorldReferences(hkpWorld* world, Reference** references, unsigned count)
 {
@@ -224,7 +224,7 @@ __forceinline void RemoveWorldReferences(hkpWorld* world, Reference** references
         void (*address)();
         void (hkpWorld::*method)(Reference**, unsigned);
     } operation;
-    operation.address = FUN_00c95800;
+    operation.address = hkpWorld_removePhantomBatch;
     (world->*operation.method)(references, count);
 }
 void* FUN_00ec61c0(void*, int, unsigned);
@@ -327,7 +327,8 @@ static __forceinline void D00370Array_removeAtAndCopy(hkArrayBase<void*>& self, 
 
 // Iterates cleanupArray backwards and removes every null element via removeAtAndCopy.
 // @fnv 0x00d00370
-static __declspec(noinline) void FUN_00d00370(hkArrayBase<void*>& cleanupArray)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(hkArrayBase<void*>& cleanupArray)
 {
     for (int i = cleanupArray.m_iElementCount - 1; i >= 0; i--)
     {
@@ -339,8 +340,8 @@ static __declspec(noinline) void FUN_00d00370(hkArrayBase<void*>& cleanupArray)
 // Callers so the file-static helper is emitted with its register calling convention.
 void D00370CleanupBoth(hkArrayBase<void*>* a, hkArrayBase<void*>* b)
 {
-    FUN_00d00370(*a);
-    FUN_00d00370(*b);
+    worldCallbackUtil_cleanupNullPointers(*a);
+    worldCallbackUtil_cleanupNullPointers(*b);
 }
 
 // RemoveZeroEntries - removes the NULL entries of a small array.
@@ -386,7 +387,8 @@ struct Array833
     int capacity;
 };
 
-static __declspec(noinline) void FUN_00d00370(Array833& listeners)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
     {
@@ -435,7 +437,7 @@ void __cdecl NotifyActionAdded(hkpWorld* world, hkpAction* action)
             TimerEvent833("Et", endTicks);
         }
     }
-    FUN_00d00370(listeners);
+    worldCallbackUtil_cleanupNullPointers(listeners);
 }
 
 namespace fnv_00d00500 {
@@ -450,7 +452,8 @@ struct Array833
     int capacity;
 };
 
-static __declspec(noinline) void FUN_00d00370(Array833& listeners)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
     {
@@ -499,7 +502,7 @@ void __cdecl NotifyEntityAdded(hkpWorld* world, hkpEntity* entity)
             TimerEvent833("Et", endTicks);
         }
     }
-    FUN_00d00370(listeners);
+    worldCallbackUtil_cleanupNullPointers(listeners);
 }
 }  // namespace fnv_00d00500
 
@@ -515,7 +518,8 @@ struct Array833
     int capacity;
 };
 
-static __declspec(noinline) void FUN_00d00370(Array833& listeners)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
     {
@@ -564,7 +568,7 @@ void __cdecl NotifyEntitySetMotionType(hkpWorld* world, hkpEntity* entity)
             TimerEvent833("Et", endTicks);
         }
     }
-    FUN_00d00370(listeners);
+    worldCallbackUtil_cleanupNullPointers(listeners);
 }
 }  // namespace fnv_00d006e0
 
@@ -580,7 +584,8 @@ struct Array833
     int capacity;
 };
 
-static __declspec(noinline) void FUN_00d00370(Array833& listeners)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
     {
@@ -629,7 +634,7 @@ void __cdecl NotifyPhantomAdded(hkpWorld* world, hkpPhantom* phantom)
             TimerEvent833("Et", endTicks);
         }
     }
-    FUN_00d00370(listeners);
+    worldCallbackUtil_cleanupNullPointers(listeners);
 }
 }  // namespace fnv_00d00780
 
@@ -659,7 +664,8 @@ struct ListenerList
 
 // Iterates the listener list in apOwner in reverse, calling OnEvent on each non-null item with tracing, then calls FUN_00d00370 on the list.
 // @fnv 0x00d00bf0
-void __cdecl FUN_00d00bf0(hkpWorld* apOwner, void* apParam)
+// src: HAVOK_LIB 0x00d00bf0
+void __cdecl hkpWorldCallbackUtil_fireConstraintRepaired(hkpWorld* apOwner, void* apParam)
 {
     struct State
     {
@@ -701,7 +707,7 @@ void __cdecl FUN_00d00bf0(hkpWorld* apOwner, void* apParam)
             }
         } while (--i >= 0);
     }
-    FUN_00d00370(*state.list);
+    worldCallbackUtil_cleanupNullPointers(*state.list);
 }
 
 extern DWORD g_D00CA0TlsIndex;
@@ -754,7 +760,8 @@ extern const char g_D00CA0TimerEnd[];
 
 // Invokes entityCallback on each non-null listener in the world's entity listener array, then removes null entries.
 // @fnv 0x00d00ca0
-void __cdecl FUN_00d00ca0(hkpWorld* world, void* entity)
+// src: HAVOK_LIB 0x00d00ca0
+void __cdecl hkpWorldCallbackUtil_fireContactPointCallback(hkpWorld* world, void* entity)
 {
     hkArrayBase<D00CA0Listener*>& listeners = (hkArrayBase<D00CA0Listener*>&)world->m_kContactListeners;
     for (int i = listeners.m_iElementCount - 1; i >= 0; i--)
@@ -790,7 +797,8 @@ struct Array833
     int capacity;
 };
 
-static __declspec(noinline) void FUN_00d00370(Array833& listeners)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
     {
@@ -839,7 +847,7 @@ void __cdecl DispatchCollisionEvents(hkpWorld* world, CollisionEvent* simulation
             TimerEvent833("Et", endTicks);
         }
     }
-    FUN_00d00370(listeners);
+    worldCallbackUtil_cleanupNullPointers(listeners);
 }
 }  // namespace fnv_00d00d40
 
@@ -895,7 +903,8 @@ extern const char g_D00DE0TimerEnd[];
 
 // Invokes entityCallback on each non-null listener in the world's entity listener array, then removes null entries.
 // @fnv 0x00d00de0
-void __cdecl FUN_00d00de0(hkpWorld* world, void* entity)
+// src: HAVOK_LIB 0x00d00de0
+void __cdecl hkpWorldCallbackUtil_fireContactConstraintRemovedCallback(hkpWorld* world, void* entity)
 {
     hkArrayBase<D00DE0Listener*>& listeners = (hkArrayBase<D00DE0Listener*>&)world->m_kContactListeners;
     for (int i = listeners.m_iElementCount - 1; i >= 0; i--)
@@ -970,7 +979,8 @@ extern const char g_D00E80TimerEnd[];
 
 // Iterates the world's entity listener array in reverse, calling each non-null listener's actionCallback with the world, then compacts out null entries.
 // @fnv 0x00d00e80
-void __cdecl FUN_00d00e80(hkpWorld* world)
+// src: HAVOK_LIB 0x00d00e80
+void __cdecl hkpWorldCallbackUtil_fireWorldDeleted(hkpWorld* world)
 {
     D00E80TickPair kTicks;
     hkArrayBase<D00E80Listener*>& listeners = (hkArrayBase<D00E80Listener*>&)world->m_kWorldDeletionListeners;
@@ -1006,7 +1016,8 @@ struct Array833
     int capacity;
 };
 
-static __declspec(noinline) void FUN_00d00370(Array833& listeners)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
     {
@@ -1055,7 +1066,7 @@ void __cdecl NotifyWorldDeleted(hkpWorld* world)
             TimerEvent833("Et", endTicks);
         }
     }
-    FUN_00d00370(listeners);
+    worldCallbackUtil_cleanupNullPointers(listeners);
 }
 }  // namespace fnv_00d00f30
 
@@ -1078,7 +1089,8 @@ struct Array833
     int capacity;
 };
 
-static __declspec(noinline) void FUN_00d00370(Array833& listeners)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
     {
@@ -1112,7 +1124,8 @@ __forceinline void TimerEvent833(const char* name, volatile unsigned int& ticks)
 }
 // Iterates postSimulationListeners, calling postSimulationCallback on each non-null entry, then compacts the array via FUN_00d00370.
 // @fnv 0x00d01380
-void __cdecl FUN_00d01380(hkpWorld* world)
+// src: HAVOK_LIB 0x00d01380
+void __cdecl hkpWorldCallbackUtil_firePostSimulationCallback(hkpWorld* world)
 {
     volatile unsigned beginTicks;
     volatile unsigned endTicks;
@@ -1134,7 +1147,7 @@ void __cdecl FUN_00d01380(hkpWorld* world)
             TimerEvent833("Et", endTicks);
         }
     }
-    FUN_00d00370(listeners);
+    worldCallbackUtil_cleanupNullPointers(listeners);
 }
 }  // namespace fnv_00d01380
 
@@ -1157,7 +1170,8 @@ struct Array833
     int capacity;
 };
 
-static __declspec(noinline) void FUN_00d00370(Array833& listeners)
+// src: HAVOK_LIB 0x00d00370
+static __declspec(noinline) void worldCallbackUtil_cleanupNullPointers(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
     {
@@ -1192,7 +1206,8 @@ __forceinline void TimerEvent833(const char* name, volatile unsigned int& ticks)
 }
 // Iterates the world's postIntegrationListeners, calling each non-null listener's postIntegrationCallback with world and stepInfo, then compacts the array.
 // @fnv 0x00d01440
-void __cdecl FUN_00d01440(hkpWorld* world, void* stepInfo)
+// src: HAVOK_LIB 0x00d01440
+void __cdecl hkpWorldCallbackUtil_firePostIntegrateCallback(hkpWorld* world, void* stepInfo)
 {
     volatile unsigned beginTicks;
     volatile unsigned endTicks;
@@ -1207,7 +1222,7 @@ void __cdecl FUN_00d01440(hkpWorld* world, void* stepInfo)
             TimerEvent833("Et", endTicks);
         }
     }
-    FUN_00d00370(listeners);
+    worldCallbackUtil_cleanupNullPointers(listeners);
 }
 }  // namespace fnv_00d01440
 
@@ -1269,7 +1284,8 @@ extern const char g_D014F0TimerEnd[];
 
 // Iterates the world's entity listener array, invoking collisionAddedCallback on each non-null listener with timing markers, then removes null entries.
 // @fnv 0x00d014f0
-void __cdecl FUN_00d014f0(hkpWorld* world, void* pvEvent)
+// src: HAVOK_LIB 0x00d014f0
+void __cdecl hkpWorldCallbackUtil_firePostCollideCallback(hkpWorld* world, void* pvEvent)
 {
     D014F0TickPair kTicks;
     hkArrayBase<D014F0Listener*>& listeners = (hkArrayBase<D014F0Listener*>&)world->m_kWorldPostCollideListeners;
@@ -1336,7 +1352,8 @@ extern const char g_D015A0TimerEnd[];
 
 // Invokes contactCallback on each non-null listener in world->m_kIslandPostIntegrateListeners, then removes null entries from the array.
 // @fnv 0x00d015a0
-void __cdecl FUN_00d015a0(hkpWorld* world, void* apFirst, void* pkSecond)
+// src: HAVOK_LIB 0x00d015a0
+void __cdecl hkpWorldCallbackUtil_fireIslandPostIntegrateCallback(hkpWorld* world, void* apFirst, void* pkSecond)
 {
     hkArrayBase<D015A0Listener*>& listeners = (hkArrayBase<D015A0Listener*>&)world->m_kIslandPostIntegrateListeners;
     for (int i = listeners.m_iElementCount - 1; i >= 0; i--)
@@ -1404,7 +1421,8 @@ extern const char g_D01650TimerEnd[];
 
 // Invokes collisionAddedCallback on each non-null listener in the array, then removes null entries.
 // @fnv 0x00d01650
-void __cdecl FUN_00d01650(hkpWorld* world, void* pvEvent, void* pvContext)
+// src: HAVOK_LIB 0x00d01650
+void __cdecl hkpWorldCallbackUtil_fireIslandPostCollideCallback(hkpWorld* world, void* pvEvent, void* pvContext)
 {
     hkArrayBase<D01650Listener*>& listeners = (hkArrayBase<D01650Listener*>&)world->m_kIslandPostCollideListeners;
     for (int i = listeners.m_iElementCount - 1; i >= 0; i--)
@@ -1438,7 +1456,8 @@ struct ListenerArray
 };
 
 
-__declspec(noinline) static void FUN_00d00370(ListenerArray* arr)
+// src: HAVOK_LIB 0x00d00370
+__declspec(noinline) static void worldCallbackUtil_cleanupNullPointers(ListenerArray* arr)
 {
     for (int i = arr->m_iElementCount - 1; i >= 0; --i)
     {
@@ -1464,7 +1483,8 @@ static __forceinline void writeTimestamp(char* cur, const char* tag, volatile un
 
 // Iterates hkpWorld listener array, writes start/end timestamps to TLS buffer, invokes each listener, then compacts the array.
 // @fnv 0x00d01700
-void __cdecl FUN_00d01700(hkpWorld* world, void* a1, void* a2)
+// src: HAVOK_LIB 0x00d01700
+void __cdecl hkpWorldCallbackUtil_fireContactImpulseLimitBreached(hkpWorld* world, void* a1, void* a2)
 {
     volatile unsigned int uiStartTsc;
     volatile unsigned int t1;
@@ -1490,7 +1510,7 @@ void __cdecl FUN_00d01700(hkpWorld* world, void* a1, void* a2)
             }
         }
     }
-    FUN_00d00370(arr);
+    worldCallbackUtil_cleanupNullPointers(arr);
 }
 
 extern DWORD g_D017B0TlsIndex;
@@ -1684,7 +1704,7 @@ void __cdecl NotifyActionRemoved(hkpWorld* world, void* action)
             TimerWriteV(DAT_010c41f8, t2);
         }
     }
-    FUN_00d00370(listen);
+    worldCallbackUtil_cleanupNullPointers(listen);
 }
 
 extern DWORD g_D005A0TlsIndex;
@@ -1732,7 +1752,8 @@ extern const char g_D005A0TimerEnd[];
 
 // Iterates the world's entity listener array, calling EntityRemovedCallback on each non-null listener, then removes null entries.
 // @fnv 0x00d005a0
-void __cdecl FUN_00d005a0(hkpWorld* world, void* entity)
+// src: HAVOK_LIB 0x00d005a0
+void __cdecl hkpWorldCallbackUtil_fireEntityRemoved(hkpWorld* world, void* entity)
 {
     hkArrayBase<hkpEntityListener*>& listeners = (hkArrayBase<hkpEntityListener*>&)world->m_kEntityListenerArray;
     for (int i = listeners.m_iElementCount - 1; i >= 0; i--)
@@ -1856,7 +1877,8 @@ extern const char g_D00820TimerEnd[];
 
 // Iterates the world's entity listener array, calls entityCallback on each non-null listener with the entity, then removes null entries.
 // @fnv 0x00d00820
-void __cdecl FUN_00d00820(hkpWorld* world, void* entity)
+// src: HAVOK_LIB 0x00d00820
+void __cdecl hkpWorldCallbackUtil_firePhantomRemoved(hkpWorld* world, void* entity)
 {
     hkArrayBase<hkpPhantomListener*>& listeners = (hkArrayBase<hkpPhantomListener*>&)world->m_kPhantomListeners;
     for (int i = listeners.m_iElementCount - 1; i >= 0; i--)
@@ -1918,7 +1940,8 @@ extern const char g_D008C0TimerEnd[];
 
 // Iterates the world's entity listener array in reverse, invoking shapeSetCallback on each non-null listener, then compacts the array to remove null entries.
 // @fnv 0x00d008c0
-void __cdecl FUN_00d008c0(hkpWorld* world, void* entity)
+// src: HAVOK_LIB 0x00d008c0
+void __cdecl hkpWorldCallbackUtil_firePhantomShapeSet(hkpWorld* world, void* entity)
 {
     hkArrayBase<hkpPhantomListener*>& listeners = (hkArrayBase<hkpPhantomListener*>&)world->m_kPhantomListeners;
     for (int i = listeners.m_iElementCount - 1; i >= 0; i--)
@@ -1979,7 +2002,7 @@ void __cdecl NotifyTargets(hkpWorld* pOwner, DWORD a2)
             }
         } while (--i >= 0);
     }
-    FUN_00d00370(targets);
+    worldCallbackUtil_cleanupNullPointers(targets);
 }
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
@@ -1998,7 +2021,8 @@ struct Phantom
 };
 // Iterates owner's m_kListeners in reverse, calling v10 with a2 on each non-null listener between timer samples, then calls FUN_00d00370 on the array.
 // @fnv 0x00d00aa0
-void __cdecl FUN_00d00aa0(hkpWorld* owner, int a2)
+// src: HAVOK_LIB 0x00d00aa0
+void __cdecl hkpWorldCallbackUtil_fireConstraintViolated(hkpWorld* owner, int a2)
 {
     hkArrayBase<void*>& listen = (hkArrayBase<void*>&)owner->m_kConstraintListeners;
     for (int i = listen.m_iElementCount - 1; i >= 0; i--)
@@ -2012,7 +2036,7 @@ void __cdecl FUN_00d00aa0(hkpWorld* owner, int a2)
             TimerWriteV(DAT_010c41f8, t2);
         }
     }
-    FUN_00d00370(listen);
+    worldCallbackUtil_cleanupNullPointers(listen);
 }
 
 extern "C" void _ReadWriteBarrier(void);
@@ -2252,7 +2276,7 @@ void __cdecl ProcessSceneCallbacks(hkpWorld* game, Scene* scene)
             }
         }
     }
-    FUN_00d00370(*pSlots);
+    worldCallbackUtil_cleanupNullPointers(*pSlots);
     for (int i = 0; i < scene->field4c; ++i)
     {
         Entity* ent = scene->field48[i];
@@ -2298,7 +2322,7 @@ void __cdecl ProcessSceneCallbacks(hkpWorld* game, Scene* scene)
         if (game->m_iPendingOperationCount)
             game->FUN_00c91120();
         if (game->m_iPendingOperationQueueCount == 1 && game->m_iQueuedOperationCount)
-            game->FUN_00c91140();
+            game->UpdateFields_00c91140();
     }
 }
 
@@ -2324,7 +2348,8 @@ struct RemovedEvent
 };
 // Iterates world->m_kContactListeners in reverse, calling HandleContactEvent(&event) on each non-null listener between timer samples, then calls FUN_00d00370.
 // @fnv 0x00d01900
-void __cdecl FUN_00d01900(hkpWorld* world, RemovedEvent& event)
+// src: HAVOK_LIB 0x00d01900
+void __cdecl hkpWorldCallbackUtil_fireContactPointRemoved(hkpWorld* world, RemovedEvent& event)
 {
     hkArrayBase<void*>& listen = (hkArrayBase<void*>&)world->m_kContactListeners;
     event.m_iUnknownValue = 0;
@@ -2339,7 +2364,7 @@ void __cdecl FUN_00d01900(hkpWorld* world, RemovedEvent& event)
             TimerWriteV(DAT_010c41f8, t2);
         }
     }
-    FUN_00d00370(listen);
+    worldCallbackUtil_cleanupNullPointers(listen);
 }
 
 extern void*(__stdcall* DAT_00fdf044)(unsigned long);
@@ -2360,7 +2385,8 @@ struct ListenerArrayQ
 };
 // Iterates pOwner's listener array, profiling each call to v05(a2), then calls FUN_00d00370 on the array.
 // @fnv 0x00d00b40
-void __cdecl FUN_00d00b40(hkpWorld* pOwner, unsigned long a2)
+// src: HAVOK_LIB 0x00d00b40
+void __cdecl hkpWorldCallbackUtil_fireConstraintBroken(hkpWorld* pOwner, unsigned long a2)
 {
     volatile unsigned long tick1;
     struct ProfileState
@@ -2406,7 +2432,7 @@ void __cdecl FUN_00d00b40(hkpWorld* pOwner, unsigned long a2)
             i--;
         } while (i >= 0);
     }
-    FUN_00d00370(*(hkArrayBase<void*>*)state.arr);
+    worldCallbackUtil_cleanupNullPointers(*(hkArrayBase<void*>*)state.arr);
 }
 
 // Based on an unverified 2026-10-22 contribution.
@@ -2437,7 +2463,8 @@ struct S00d01850_ItemList
 };
 // Zeroes pOut->unk0C, calls vtbl10(pOut) on each non-null list item from the end with profiler records, then calls FUN_00d00370 on the list.
 // @fnv 0x00d01850
-void __cdecl FUN_00d01850(hkpWorld* pOwner, S00d01850_Out* pOut)
+// src: HAVOK_LIB 0x00d01850
+void __cdecl hkpWorldCallbackUtil_fireContactPointAdded(hkpWorld* pOwner, S00d01850_Out* pOut)
 {
     volatile DWORD t1;
     volatile DWORD t2;
@@ -2476,7 +2503,7 @@ void __cdecl FUN_00d01850(hkpWorld* pOwner, S00d01850_Out* pOut)
             }
         }
     }
-    FUN_00d00370(*pCallbacks);
+    worldCallbackUtil_cleanupNullPointers(*pCallbacks);
 }
 
 #include <windows.h>
@@ -2664,7 +2691,8 @@ struct S011b0_Island
 
 // Calls the world's and each entity's listeners for isl with profiler records, then may run FUN_00c91120/FUN_00c91140 when w->m_iCriticalOperationsLockCount returns to 0 and m_9c is clear.
 // @fnv 0x00d011b0
-void __cdecl FUN_00d011b0(hkpWorld* apWorld, S011b0_Island* apIsland)
+// src: HAVOK_LIB 0x00d011b0
+void __cdecl hkpWorldCallbackUtil_fireIslandDeactivated(hkpWorld* apWorld, S011b0_Island* apIsland)
 {
     struct
     {
@@ -2701,7 +2729,7 @@ void __cdecl FUN_00d011b0(hkpWorld* apWorld, S011b0_Island* apIsland)
                 }
             }
         }
-        ::FUN_00d00370(list);
+        ::worldCallbackUtil_cleanupNullPointers(list);
     }
     for (int iEntity = 0; iEntity < apIsland->m_nEnts; iEntity++)
     {
@@ -2744,7 +2772,7 @@ void __cdecl FUN_00d011b0(hkpWorld* apWorld, S011b0_Island* apIsland)
         if (apWorld->m_iPendingOperationCount)
             apWorld->FUN_00c91120();
         if (apWorld->m_iPendingOperationQueueCount == 1 && apWorld->m_iQueuedOperationCount)
-            apWorld->FUN_00c91140();
+            apWorld->UpdateFields_00c91140();
     }
 }
 
@@ -2756,7 +2784,8 @@ struct D00960Listener
 
 // Iterates owner->m_kTargets, records TtconAddCb/Et profiler ticks around each D00960Listener::method1 call, then calls FUN_00d00370 on the list.
 // @fnv 0x00d00960
-void __cdecl FUN_00d00960(::hkpWorld* owner, void* arg)
+// src: HAVOK_LIB 0x00d00960
+void __cdecl hkpWorldCallbackUtil_fireConstraintAdded(::hkpWorld* owner, void* arg)
 {
     volatile unsigned long uiEndTick;
     volatile unsigned long* pEndTick = &uiEndTick;
@@ -2792,5 +2821,5 @@ void __cdecl FUN_00d00960(::hkpWorld* owner, void* arg)
             }
         }
     }
-    ::FUN_00d00370(*list);
+    ::worldCallbackUtil_cleanupNullPointers(*list);
 }

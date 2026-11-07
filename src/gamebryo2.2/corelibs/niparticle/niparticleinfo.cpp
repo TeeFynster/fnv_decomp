@@ -257,12 +257,13 @@ struct C31F10ParticleInfo
     unsigned short m_usFirstValue;
     unsigned short m_usSecondValue;
 
-    void FUN_00c31f10(C31F10Stream& kStream);
+    void LoadParticleInfo(C31F10Stream& kStream);
 };
 
 // LoadBinary
 // @fnv 0x00c31f10
-void C31F10ParticleInfo::FUN_00c31f10(C31F10Stream& kStream)
+// src: GUESS 0x00c31f10 (confidence: medium)
+void C31F10ParticleInfo::LoadParticleInfo(C31F10Stream& kStream)
 {
     m_kValue.LoadBinary(kStream);
     if (kStream.GetFileVersion() < 0x0a030005)

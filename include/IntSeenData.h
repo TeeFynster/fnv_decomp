@@ -17,9 +17,9 @@ public:
     virtual ~IntSeenData();
     virtual void AddToNode(NiNode* pNode, NiPoint3& kPos, bool bFlag) override;
     virtual unsigned short GetSaveSize(bool abRecursing) override;
-    virtual void FUN_0087a060(bool abRecursing) override;
+    virtual void SaveGame_0087a060(bool abRecursing) override;
     virtual void LoadGame(BGSLoadFormBuffer* buffer) override;
-    virtual void FUN_0087a090(unsigned short count) override;
+    virtual void LoadGame_0087a090(unsigned short count) override;
 
     void SaveToBuffer(BGSSaveFormBuffer* buffer);
     void* FUN_0087a140(unsigned int flags);

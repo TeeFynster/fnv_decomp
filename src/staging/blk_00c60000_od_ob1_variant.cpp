@@ -114,46 +114,46 @@ public:
     float GetSquaredXYLength() const;
     Elem16& expand(Allocator& allocator);
 
-    void FUN_00416870(float x, float y, float z);
+    void SetComponents(float x, float y, float z);
     bool FUN_00439090(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other);
-    bool FUN_004390c0(const LocalVec3* other) const;
-    bool FUN_004390c0(const char* other);
-    void FUN_00439180(float scale);
+    bool HasEqualComponents(const LocalVec3* other);
+    bool HasEqualComponents(const LocalVec3* other) const;
+    bool HasEqualComponents(const char* other);
+    void ScaleComponents(float scale);
     LocalVec3 FUN_00439e90(const LocalVec3& other);
     LocalVec3 FUN_00439e90(const LocalVec3& other) const;
-    void FUN_00439ef0();
-    LocalVec3 FUN_00439ef0(const LocalVec3& other);
-    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
-    LocalVec3 FUN_00439ef0(LocalVec3* other);
-    LocalVec3 FUN_00439ef0(const LocalVec3* other);
-    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
-    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void SubtractIntoVector();
+    LocalVec3 SubtractIntoVector(const LocalVec3& other);
+    LocalVec3 SubtractIntoVector(const LocalVec3& other) const;
+    LocalVec3 SubtractIntoVector(LocalVec3* other);
+    LocalVec3 SubtractIntoVector(const LocalVec3* other);
+    void SubtractIntoVector(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* SubtractIntoVector(void* output, void* other);
     void FUN_0043d410(float x, int y, int z);
     void FUN_0043d410(float x, unsigned int y, unsigned int z);
     float FUN_00457910();
     float FUN_00457990();
     float FUN_00457990() const;
-    void FUN_004a0c10();
+    void Unitize_004a0c10();
     float FUN_004a7290();
     float FUN_004a7290() const;
     LocalVec3 FUN_004b3800(const LocalVec3& other) const;
-    LocalVec3 FUN_0053d280(float divisor);
-    float FUN_00589850();
-    float FUN_00589850() const;
-    void FUN_0063c8a0(const LocalVec3* other);
-    void FUN_0063c8a0(void* other);
+    LocalVec3 ProcessAndReturnValue_0053d280(float divisor);
+    float NiPoint3_XYLength();
+    float NiPoint3_XYLength() const;
+    void ComputeValue_0063c8a0(const LocalVec3* other);
+    void ComputeValue_0063c8a0(void* other);
     void FUN_006815c0();
-    float FUN_00b04d40(LocalVec3* other);
-    float FUN_00b04d40(const LocalVec3& other) const;
-    LocalVec3 FUN_00b05000(const Mat& matrix);
-    LocalVec3 FUN_00b05000(const Matrix4* matrix);
-    void FUN_00b12790();
-    LocalVec3 FUN_00b13040(void* other);
-    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float CVec3_Distance(LocalVec3* other);
+    float CVec3_Distance(const LocalVec3& other) const;
+    LocalVec3 TransformPointByMatrix4(const Mat& matrix);
+    LocalVec3 TransformPointByMatrix4(const Matrix4* matrix);
+    void Normalize_00b12790();
+    LocalVec3 Diff_00b13040(void* other);
+    LocalVec3 Diff_00b13040(const LocalVec3& other) const;
     float FUN_00b2a180(void* other);
-    LocalVec3& FUN_00b2a1c0(void* other);
-    void FUN_00ddc870();
+    LocalVec3& AddComponents(void* other);
+    void ProcessEntries_00ddc870();
     void FUN_00e0f6e0();
 };
 
@@ -224,35 +224,36 @@ template <class T> inline bool operator!=(const NiPointer<T>& lhs, const NiPoint
 extern "C" void* g_01204388;
 struct FUN_00c600f0_Class
 {
-    void* __thiscall FUN_00c600f0();
+    void* __thiscall BSPSysStripUpdateModifier_GetRTTI();
 };
 extern "C" void* g_01204390;
 struct FUN_00c60d40_Class
 {
-    void* __thiscall FUN_00c60d40();
+    void* __thiscall BSPSysSimpleColorModifier_GetRTTI();
 };
 struct FUN_00c61420_Class
 {
-    void* __thiscall FUN_00c61420(void* p);
+    void* __thiscall BSWArray_CreateClone(void* p);
 };
 struct FUN_00a99870_Class
 {
-    void __thiscall FUN_00a99870(int, int);
+    void __thiscall CopyMembers_00a99870(int, int);
 };
-void __thiscall FUN_00a99870_Class::FUN_00a99870(int, int)
+// src: XBOX_PDB 0x00a99870
+void __thiscall FUN_00a99870_Class::CopyMembers_00a99870(int, int)
 {}
 struct FUN_00c61430_Class
 {
-    void __thiscall FUN_00c61430(int, int);
+    void __thiscall ForwardCall_00c61430(int, int);
 };
 struct FUN_00c61450_Class
 {
     void FUN_00a99a90(int);
-    void FUN_00c61450(int a);
+    void BSWArray_LoadBinary(int a);
 };
 struct FUN_00a9af00_class
 {
-    void FUN_00a9af00(int a);
+    void NiBinaryExtraData_LinkObject(int a);
 };
 struct FUN_00c61470_class : FUN_00a9af00_class
 {
@@ -260,48 +261,48 @@ struct FUN_00c61470_class : FUN_00a9af00_class
 };
 struct FUN_00c61490_Class
 {
-    bool FUN_00a89ae0(const void* arg);
+    bool RegisterStreamables_00a89ae0(const void* arg);
     bool IsNot(const void* arg);
 };
 struct FUN_00c614c0_Class
 {
-    void __thiscall FUN_00a89210(void*);
-    void __thiscall FUN_00c614c0(void* ap);
+    void __thiscall SaveBinary_00a89210(void*);
+    void __thiscall BSWArray_SaveBinary(void* ap);
 };
 struct FUN_00c614e0_Class
 {
-    char FUN_00a998e0(int arg);
-    char FUN_00c614e0(int arg);
+    char IsEqual_00a998e0(int arg);
+    char BSWArray_IsEqual(int arg);
 };
 extern NiFixedString* DAT_012043a0;
 extern "C" void* g_012043a4;
 struct FUN_00c61810_class
 {
-    void* FUN_00c61810();
+    void* BSWArray_GetRTTI();
 };
 struct FUN_00c61820_class
 {
-    void* FUN_00c61820(int);
+    void* PArrayPoint_Copy(int);
 };
 struct FUN_00c61f60_class
 {
-    void __thiscall FUN_00c2f4f0(int);
-    void __thiscall FUN_00c61f60(int);
+    void __thiscall NiPSysAirFieldModifier_RegisterStreamables(int);
+    void __thiscall BSPSysArrayEmitter_RegisterStreamables(int);
 };
 struct FUN_00c61f80_cls
 {
     void FUN_00c31b60(void* apParam);
-    void FUN_00c61f80(void* apParam);
+    void BSPSysArrayEmitter_SaveBinary(void* apParam);
 };
 struct FUN_00c627e0_Class
 {
-    void __thiscall FUN_00c62140();
-    void __thiscall FUN_00c627e0(void* p);
+    void __thiscall BSPSysArrayEmitter_SetupArray();
+    void __thiscall BSPSysArrayEmitter_SetEmitterObj(void* p);
 };
 extern "C" void* g_012043b8;
 struct FUN_00c632e0_Class
 {
-    void* __thiscall FUN_00c632e0();
+    void* __thiscall PArrayPoint_GetRTTI();
 };
 struct FUN_00c31670_class
 {
@@ -313,12 +314,12 @@ struct FUN_00c63950_class
 };
 struct GlobalObject_00a7b610;
 extern GlobalObject_00a7b610 g_012043c8;
-void __cdecl FUN_00c63c30(int, int);
+void __cdecl NiFixedString_CopyMemory_00c63c30(int, int);
 void __cdecl CallWithSameArgumentTwice(int a);
 struct FUN_00c644d0_Class
 {
     unsigned char Equals(const char*);
-    unsigned char FUN_00c644d0(const char*);
+    unsigned char BSDecalPlacementVectorExtraData_IsEqual(const char*);
 };
 extern "C" void* g_012043d4;
 struct FUN_00c64600_Class
@@ -336,7 +337,7 @@ struct FUN_00c64fc0_class
 struct C00c541e0
 {
     bool FUN_00a7b3d0(int);
-    bool FUN_00c65290(int a);
+    bool BSAttachPoints_IsEqual(int a);
 };
 extern "C" void* DAT_012043f0;
 struct FUN_00c657e0_class
@@ -355,7 +356,7 @@ struct FUN_00c65680_Class
 };
 struct FUN_00c600c0_class
 {
-    void* __thiscall FUN_00c5fd50();
+    void* __thiscall UpdateState_00c5fd50();
     void* __thiscall FUN_00c600c0(unsigned int flags);
     static void __cdecl operator delete(void* p, unsigned int size);
 };
@@ -388,21 +389,21 @@ struct SObj;
 void __cdecl CallAnimCallback(SStream*, SObj*);
 struct FUN_00c63970_class : NiPSysModifier
 {
-    void __thiscall FUN_00c63970(void* stream);
+    void __thiscall BSParentVelocityModifier_SaveBinary(void* stream);
 };
 void __cdecl FUN_00c63b40(void* p);
 void __cdecl operator delete(void* p, unsigned int size);
 struct FUN_00c64930_Class
 {
-    void FUN_00c64930(int a);
+    void BSReference_LinkObject(int a);
 };
 struct FUN_00c64940_Class
 {
-    bool FUN_00c64940(int a);
+    bool BSReference_RegisterStreamables(int a);
 };
 struct FUN_00c64c30_Class
 {
-    bool __thiscall FUN_00c64c30(int a);
+    bool __thiscall BSNodeReferences_IsEqual(int a);
 };
 extern int DAT_010c3384;
 struct FUN_00c60240 : NiPSysPositionModifier
@@ -422,7 +423,7 @@ struct FUN_00c62090_Class
 extern GlobalObject_00a7b610 g_012043b0;
 struct FUN_00c63320_Class
 {
-    GlobalObject_00a7b610* __thiscall FUN_00c63320();
+    GlobalObject_00a7b610* __thiscall BSPSysArrayEmitter_GetRTTI();
 };
 struct FUN_00c65210_class
 {
@@ -433,9 +434,9 @@ struct FUN_00c65210_class
     void* m_10;
     void* m_14;
     unsigned short m_18;
-    void __thiscall FUN_00c65210(NiStream& stream);
+    void __thiscall BSAttachPoints_SaveBinary(NiStream& stream);
 };
-void __cdecl FUN_0044adf0(NiStream& stream, const unsigned int& count);
+void __cdecl NiStreamSaveBinary_unsigned_int(NiStream& stream, const unsigned int& count);
 extern "C" void* __cdecl NiMalloc(unsigned int size);
 struct FUN_00c65760_Class
 {
@@ -454,7 +455,7 @@ struct FUN_00c61b10
     ~FUN_00c61b10();
     static void* operator new(unsigned int size);
 };
-FUN_00c61b10* FUN_00c61e70();
+FUN_00c61b10* BSPSysArrayEmitter_CreateObject();
 extern "C" void* __cdecl NiMalloc(unsigned int);
 struct FUN_00c63260_class
 {
@@ -480,7 +481,7 @@ struct FUN_00c64780_Class
     void* m_iWordAt00;
     void* m_iWordAt04;
     void* m_8;
-    void FUN_00c64780(const char* apName);
+    void BSReference_SetName(const char* apName);
 };
 struct FUN_00c65710_Class
 {
@@ -507,12 +508,12 @@ struct FUN_00c60700_Data
 };
 struct FUN_00c60700_Class : NiPSysModifier
 {
-    void FUN_00c60700(NiPSysModifier* dst, CloningProcess& proc);
+    void BSPSysSimpleColorModifier_CopyMembers(NiPSysModifier* dst, CloningProcess& proc);
 };
 template <class T> void __cdecl ReadBinaryValue(NiStream& stream, T& value);
 struct FUN_00c60850_Class : public NiPSysModifier
 {
-    void FUN_00c60850(NiStream& stream);
+    void BSPSysSimpleColorModifier_LoadBinary(NiStream& stream);
 };
 struct FUN_00c60a10_Class
 {
@@ -524,7 +525,7 @@ struct FUN_00c60a10_Class
     float m_58;
     float m_5c;
 
-    bool __thiscall FUN_00c60a10(NiObject*);
+    bool __thiscall BSPSysSimpleColorModifier_IsEqual(NiObject*);
 };
 void __cdecl FUN_00c31750(void);
 void __cdecl operator delete(void* p, unsigned int size);
@@ -544,18 +545,18 @@ struct FUN_00c612b0_Class : NiAVObject, A51BF0Base
     FUN_00c612b0_Class();
 };
 extern NiFixedString DAT_011f49e0;
-NiAVObject* __cdecl FUN_00c61510();
+NiAVObject* __cdecl BSWArray_CreateObject();
 struct FUN_00a7b330_shell
 {
-    void FUN_00a7b330(void* a, void* b);
+    void CopyMembers_00a7b330(void* a, void* b);
 };
 struct FUN_00c61830_class
 {
-    void FUN_00c61830(void* a, void* b);
+    void ForwardCall_00c61830(void* a, void* b);
 };
 struct FUN_00c62390_class
 {
-    void FUN_00c62390(void*, void*);
+    void BSPSysArrayEmitter_GetAPoint(void*, void*);
 };
 struct FUN_00c61ba0_class : FUN_00c62390_class
 {
@@ -573,7 +574,7 @@ struct FUN_00c31750_Class
 };
 struct FUN_00c64500_Class : FUN_00c61490_Class
 {
-    bool FUN_00c64500(const void* arg);
+    bool BSDecalPlacementVectorExtraData_RegisterStreamables(const void* arg);
 };
 struct A46BB0Object
 {
@@ -582,11 +583,11 @@ struct A46BB0Object
 int __cdecl __stricmp(const char*, const char*);
 struct FUN_00c64980_Class : A46BB0Object
 {
-    bool FUN_00c64980(A46BB0Object* arg);
+    bool BSReference_IsEqual(A46BB0Object* arg);
 };
 struct FUN_0043ba10_shell
 {
-    FUN_0043ba10_shell* FUN_0043ba10(unsigned int);
+    FUN_0043ba10_shell* AssignInternedString(unsigned int);
 };
 struct FUN_00c64dc0_Class
 {
@@ -598,7 +599,7 @@ struct FUN_00c64dc0_Class
     int m_8;
     int m_iThirdValue;
     int m_10;
-    FUN_0043ba10_shell* FUN_00c64dc0(unsigned int a);
+    FUN_0043ba10_shell* BSAttachPointPair_SetChild(unsigned int a);
 };
 void __cdecl operator delete(void* p, unsigned int size);
 struct FUN_00c64e70_Class
@@ -606,17 +607,17 @@ struct FUN_00c64e70_Class
     void __thiscall FUN_00c64e70();
     void* __thiscall FUN_00c65650(unsigned int flags);
 };
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct SpawnedObject_b9118
 {
     char m00[0x60];
     SpawnedObject_b9118();
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
-SpawnedObject_b9118* FUN_00c607d0();
+SpawnedObject_b9118* BSPSysSimpleColorModifier_CreateObject();
 class C61330Base
 {
   public:
@@ -636,7 +637,7 @@ class FUN_00c61330 : public C61330Base
 struct FUN_00c61c50_sub
 {
     void SetSize(unsigned int n);
-    void FUN_00c62b90(unsigned int n, unsigned int* p);
+    void NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_SetAt(unsigned int n, unsigned int* p);
 };
 struct FUN_00c61c50_cls
 {
@@ -644,8 +645,8 @@ struct FUN_00c61c50_cls
     unsigned int* m_60;
     unsigned short pad1[1];
     unsigned short m_66;
-    void FUN_00c31b10(unsigned int a, unsigned int b);
-    void FUN_00c61c50(unsigned int x, unsigned int y);
+    void NiPSysVolumeEmitter_CopyMembers(unsigned int a, unsigned int b);
+    void BSPSysArrayEmitter_CopyMembers(unsigned int x, unsigned int y);
 };
 struct FUN_00c62140_Elem;
 struct FUN_00c62140_Item;
@@ -663,7 +664,7 @@ struct FUN_00c62140_Item
     virtual void v00();
     virtual void v01();
     virtual void v02();
-    void FUN_00a59c60(FUN_00c62140_Val* pVal);
+    void NiAVObject_Update(FUN_00c62140_Val* pVal);
     int unk04;
     int unk08;
     int unk0C;
@@ -731,7 +732,7 @@ struct FUN_00c62140_Pad5
 };
 struct FUN_00c62140_Sub
 {
-    void FUN_00c62f40();
+    void NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_RemoveAll();
 };
 struct FUN_00c62140_cls
 {
@@ -760,8 +761,8 @@ struct FUN_00c62140_cls
     int unk58;
     FUN_00c62140_Sub m_5c;
 
-    void FUN_00c62140();
-    void FUN_00c62200(FUN_00c62140_Elem* pElem);
+    void BSPSysArrayEmitter_SetupArray();
+    void BSPSysArrayEmitter_SetObjectPointers(FUN_00c62140_Elem* pElem);
 };
 struct S_00c62cc0_Class
 {
@@ -773,7 +774,7 @@ struct S_00c62cc0_Class
     unsigned short m_usTrailingValue;
 
     void SetSize(unsigned int arg);
-    void FUN_00c62b90(unsigned int arg1, unsigned int arg2);
+    void NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_SetAt(unsigned int arg1, unsigned int arg2);
     unsigned int FUN_00c62cc0(unsigned int arg);
 };
 struct S_00c62cc0_Locals
@@ -835,7 +836,7 @@ class FUN_00c634b0_cls
     unsigned int m_1c;
     unsigned int m_20, m_24, m_28, m_2c;
     XSub30 m_30;
-    void FUN_00c634b0(XObj70* a1, unsigned short idx);
+    void BSParentVelocityModifier_Initialize(XObj70* a1, unsigned short idx);
 };
 struct FUN_00c63780_c
 {
@@ -843,14 +844,14 @@ struct FUN_00c63780_c
     NiPoint3 v;
     void ResetVector();
 };
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct PositionModifierObject_b9439
 {
     char m00[0x3c];
     PositionModifierObject_b9439();
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
 PositionModifierObject_b9439* CreatePositionModifierObject();
@@ -865,10 +866,10 @@ struct ArgObj
 struct FUN_00c63a00_cls
 {
     void FUN_00c319e0(void* a);
-    void FUN_00c63a00(ArgObj* a1);
+    void BSParentVelocityModifier_GetViewerStrings(ArgObj* a1);
 };
-unsigned int __cdecl FUN_00a7d330(unsigned int v);
-unsigned int __cdecl FUN_00a7d550(const char* name, float f);
+unsigned int __cdecl NiViewerStrings_NiGetViewerString_Title(unsigned int v);
+unsigned int __cdecl NiGetViewerString_00a7d550(const char* name, float f);
 struct S_00c643d0_Foo
 {
     void* unk00;
@@ -879,10 +880,10 @@ struct S_00c643d0_Foo
     void* m_entries[16];
 
     void __thiscall FUN_00a9a4e0(int arg);
-    void __thiscall FUN_00c643d0(int arg);
+    void __thiscall BSDecalPlacementVectorExtraData_SaveBinary(int arg);
 };
-extern "C" void __cdecl FUN_00a303a0(int arg, void* object);
-extern "C" void __cdecl FUN_00a417b0(int arg, void* data, int count);
+extern "C" void __cdecl NiStreamSaveBinary_unsigned_short(int arg, void* object);
+extern "C" void __cdecl NiPoint3_SaveBinary(int arg, void* data, int count);
 class FUN_00c64b90_target;
 class FUN_00c64b90_item
 {
@@ -921,15 +922,15 @@ class FUN_00c64b90_cls
     FUN_00c64b90_item** m_0c;
     int unk10;
     unsigned short m_14;
-    void FUN_00c64b90(FUN_00c64b90_target* a1);
-    void FUN_00a89af0(FUN_00c64b90_target* a1);
+    void BSNodeReferences_SaveBinary(FUN_00c64b90_target* a1);
+    void nullsub_3(FUN_00c64b90_target* a1);
 };
-void __cdecl FUN_0044adf0(FUN_00c64b90_target* a1, unsigned int* p);
+void __cdecl NiStreamSaveBinary_unsigned_int(FUN_00c64b90_target* a1, unsigned int* p);
 struct FUN_00c64da0_cls
 {
     int unk00;
     void Callee0043ba10(int a);
-    void FUN_00c64da0(int a);
+    void BSAttachPointPair_SetParent(int a);
 };
 struct DispatchStub_c64
 {
@@ -944,7 +945,7 @@ struct DispatchStub_c64
 };
 struct ItemCallee_c64
 {
-    void FUN_00c65490(int a1, int a2);
+    void BSAttachPoints_AddPair(int a1, int a2);
 };
 struct FUN_00c65180_VTable
 {
@@ -1090,7 +1091,7 @@ inline const char* NiRTTI::GetName() const
 }
 extern const NiRTTI DAT_011f4428;
 
-char* __cdecl FUN_00a7d330(const char* pcText);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcText);
 void* NiMalloc645(unsigned int uiSize);
 void NiFree645(void* p);
 
@@ -1184,14 +1185,15 @@ struct Parent645
 
 struct Obj645 : Parent645
 {
-    void FUN_00c645c0(ViewerStrings645* pkStrings);
+    void BSDecalPlacementVectorExtraData_GetViewerStrings(ViewerStrings645* pkStrings);
 };
 
 // @fnv 0x00c645c0
-void Obj645::FUN_00c645c0(ViewerStrings645* pkStrings)
+// src: XBOX_PDB 0x00c645c0
+void Obj645::BSDecalPlacementVectorExtraData_GetViewerStrings(ViewerStrings645* pkStrings)
 {
     Parent645::FUN_00a99d70(pkStrings);
-    pkStrings->FUN_0096a610(FUN_00a7d330(DAT_011f4428.GetName()));
+    pkStrings->FUN_0096a610(NiViewerStrings_NiGetViewerString_Title(DAT_011f4428.GetName()));
 }
 
 extern const char* DAT_012043ec;
@@ -1283,25 +1285,27 @@ struct RTTI_Stub
     }
 };
 
-char* __cdecl FUN_00a7d330(const char* name);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* name);
 
 unsigned int __cdecl strlen(const char*);
-void* __cdecl FUN_00aa1070(unsigned int);
+void* __cdecl _NiMalloc_00aa1070(unsigned int);
 int __cdecl FUN_00a305b0(char*, unsigned int, const char*, ...);
 extern const char str_0109dcec[];
 extern const char str_0109c360[];
-inline unsigned int __cdecl FUN_00a7d550(const char* label, float value)
+// src: XBOX_PDB 0x00a7d550
+inline unsigned int __cdecl NiGetViewerString_00a7d550(const char* label, float value)
 {
     unsigned int length = strlen(label) + 20;
-    char* result = static_cast<char*>(FUN_00aa1070(length));
+    char* result = static_cast<char*>(_NiMalloc_00aa1070(length));
     FUN_00a305b0(result, length, str_0109dcec, value);
     return reinterpret_cast<unsigned int>(result);
 }
 
 extern const char str_0109dca0[];
-inline char* __cdecl FUN_00a7d330(const char* name)
+// src: COMMUNITY 0x00a7d330
+inline char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* name)
 {
-    char* result = static_cast<char*>(FUN_00aa1070(strlen(name) + 9));
+    char* result = static_cast<char*>(_NiMalloc_00aa1070(strlen(name) + 9));
     FUN_00a305b0(result, strlen(name) + 9, str_0109dca0, name);
     return result;
 }
@@ -1317,23 +1321,24 @@ inline char* NiColorA::GetViewerString(const char* label) const
 {
     using namespace fnv_00c60b20;
     unsigned int length = fnv_00c60b20::strlen(label) + 36;
-    char* result = static_cast<char*>(fnv_00c60b20::FUN_00aa1070(length));
+    char* result = static_cast<char*>(fnv_00c60b20::_NiMalloc_00aa1070(length));
     fnv_00c60b20::FUN_00a305b0(result, length, str_0109c360, r, g, b, a);
     return result;
 }
 
 // @fnv 0x00c60b20
-void BSPSysSimpleColorModifier::FUN_00c60b20(ViewerStrings* strings)
+// src: XBOX_PDB 0x00c60b20
+void BSPSysSimpleColorModifier::GetViewerStrings_00c60b20(ViewerStrings* strings)
 {
     using namespace fnv_00c60b20;
     reinterpret_cast<ModifierBase_Stub*>(this)->FUN_00c319e0(strings);
-    strings->FUN_0096a610((unsigned int)fnv_00c60b20::FUN_00a7d330(reinterpret_cast<RTTI_Stub*>(&g_01204390)->GetName()));
-    strings->FUN_0096a610((unsigned int)fnv_00c60b20::FUN_00a7d550(str_010c3494, color1End * 100.0));
-    strings->FUN_0096a610((unsigned int)fnv_00c60b20::FUN_00a7d550(str_010c3480, color2Start * 100.0));
-    strings->FUN_0096a610((unsigned int)fnv_00c60b20::FUN_00a7d550(str_010c3470, color2End * 100.0));
-    strings->FUN_0096a610((unsigned int)fnv_00c60b20::FUN_00a7d550(str_010c345c, color3Start * 100.0));
-    strings->FUN_0096a610((unsigned int)fnv_00c60b20::FUN_00a7d550(str_010c3450, fadeIn * 100.0));
-    strings->FUN_0096a610((unsigned int)fnv_00c60b20::FUN_00a7d550(str_010c3440, fadeOut * 100.0));
+    strings->FUN_0096a610((unsigned int)fnv_00c60b20::NiViewerStrings_NiGetViewerString_Title(reinterpret_cast<RTTI_Stub*>(&g_01204390)->GetName()));
+    strings->FUN_0096a610((unsigned int)fnv_00c60b20::NiGetViewerString_00a7d550(str_010c3494, color1End * 100.0));
+    strings->FUN_0096a610((unsigned int)fnv_00c60b20::NiGetViewerString_00a7d550(str_010c3480, color2Start * 100.0));
+    strings->FUN_0096a610((unsigned int)fnv_00c60b20::NiGetViewerString_00a7d550(str_010c3470, color2End * 100.0));
+    strings->FUN_0096a610((unsigned int)fnv_00c60b20::NiGetViewerString_00a7d550(str_010c345c, color3Start * 100.0));
+    strings->FUN_0096a610((unsigned int)fnv_00c60b20::NiGetViewerString_00a7d550(str_010c3450, fadeIn * 100.0));
+    strings->FUN_0096a610((unsigned int)fnv_00c60b20::NiGetViewerString_00a7d550(str_010c3440, fadeOut * 100.0));
     strings->FUN_0096a610((unsigned int)color1.GetViewerString(str_010c3438));
     strings->FUN_0096a610((unsigned int)color2.GetViewerString(str_010c3430));
     strings->FUN_0096a610((unsigned int)color3.GetViewerString(str_010c3428));
@@ -1593,10 +1598,11 @@ struct Modifier
     int unk14;
     float elapsed, lastTime, scale;
     NiPoint3 previous, offset;
-    void FUN_00c63520(float time, System* system);
+    void BSParentVelocityModifier_Update(float time, System* system);
 };
 // @fnv 0x00c63520
-void Modifier::FUN_00c63520(float time, System* system)
+// src: XBOX_PDB 0x00c63520
+void Modifier::BSParentVelocityModifier_Update(float time, System* system)
 {
     if (!system->GetCount())
         return;
@@ -1652,14 +1658,14 @@ struct FUN_00c64640
 };
 struct BaseX
 {
-    void FUN_00a99c40(BaseX* p, int a);
+    void NiIntegerExtraData_CopyMembers(BaseX* p, int a);
 };
 struct ObjX : BaseX
 {
     int pad[4];
     unsigned short m10;
     FUN_00c64640* m14[1];
-    void FUN_00c640f0(ObjX* p, int a);
+    void BSDecalPlacementVectorExtraData_CopyMembers(ObjX* p, int a);
 };
 inline void DbgX()
 {
@@ -1670,9 +1676,10 @@ inline void DbgX()
     const char* e;
 }
 // @fnv 0x00c640f0
-void ObjX::FUN_00c640f0(ObjX* p, int a)
+// src: XBOX_PDB 0x00c640f0
+void ObjX::BSDecalPlacementVectorExtraData_CopyMembers(ObjX* p, int a)
 {
-    FUN_00a99c40(p, a);
+    NiIntegerExtraData_CopyMembers(p, a);
     p->m10 = m10;
     for (int i = 0; i < m10; i++)
     {
@@ -1689,7 +1696,7 @@ void ObjX::FUN_00c640f0(ObjX* p, int a)
 
 namespace fnv_00c64270 {
 extern MemoryManager DAT_011f6238;
-void FUN_00a30370(NiStream& kStream, unsigned short* pusVal);
+void NiStreamLoadBinary_unsigned_short(NiStream& kStream, unsigned short* pusVal);
 void ReadElements(NiStream& kStream, float* pfVals, unsigned int ItemUpdateArray);
 inline void ReadPointsFromFile(NiStream& kStream, NiPoint3* pkPts, unsigned int uiElementCount)
 {
@@ -1717,17 +1724,18 @@ struct ObjY : BaseY
 {
     unsigned short m_usElementCount;
     FUN_00c64640* m_apRecs[1];
-    void FUN_00c64270(NiStream& kStream);
+    void BSDecalPlacementVectorExtraData_LoadBinary(NiStream& kStream);
 };
 // @fnv 0x00c64270
-void ObjY::FUN_00c64270(NiStream& kStream)
+// src: XBOX_PDB 0x00c64270
+void ObjY::BSDecalPlacementVectorExtraData_LoadBinary(NiStream& kStream)
 {
     FUN_00a99d30(kStream);
-    FUN_00a30370(kStream, &m_usElementCount);
+    NiStreamLoadBinary_unsigned_short(kStream, &m_usElementCount);
     for (int i = 0; i < m_usElementCount; i++)
     {
         m_apRecs[i] = new FUN_00c64640;
-        FUN_00a30370(kStream, &m_apRecs[i]->m_usNum);
+        NiStreamLoadBinary_unsigned_short(kStream, &m_apRecs[i]->m_usNum);
         ReadPointsFromFile(kStream, m_apRecs[i]->m_akA, m_apRecs[i]->m_usNum);
         ReadPointsFromFile(kStream, m_apRecs[i]->m_akB, m_apRecs[i]->m_usNum);
     }
@@ -1737,7 +1745,7 @@ void ObjY::FUN_00c64270(NiStream& kStream)
 namespace fnv_00c65040 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* pl);
 extern char* DAT_0109b220;
-void FUN_00a26df0(NiStream& kStream, unsigned int& uiVal);
+void NiStreamLoadBinary_float(NiStream& kStream, unsigned int& uiVal);
 struct MapX
 {
     void FUN_00c4c920(unsigned int uiSize);
@@ -1750,20 +1758,21 @@ struct ObjM : BaseX
 {
     int m_i0, m_i4, m_i8;
     MapX m_kFormatEntries;
-    void FUN_00c65490(NiFixedString& kKey, NiFixedString& kVal);
+    void BSAttachPoints_AddPair(NiFixedString& kKey, NiFixedString& kVal);
     void Insert(NiFixedString& kKey, NiFixedString& kVal)
     {
         int aiD[3];
-        FUN_00c65490(kKey, kVal);
+        BSAttachPoints_AddPair(kKey, kVal);
     }
-    void FUN_00c65040(NiStream& kStream);
+    void BSAttachPoints_LoadBinary(NiStream& kStream);
 };
 // @fnv 0x00c65040
-void ObjM::FUN_00c65040(NiStream& kStream)
+// src: XBOX_PDB 0x00c65040
+void ObjM::BSAttachPoints_LoadBinary(NiStream& kStream)
 {
     FUN_00a7b4a0(kStream);
     unsigned int ItemUpdateArray = 0;
-    FUN_00a26df0(kStream, ItemUpdateArray);
+    NiStreamLoadBinary_float(kStream, ItemUpdateArray);
     m_kFormatEntries.FUN_00c4c920(ItemUpdateArray);
     for (unsigned int i = 0; i < ItemUpdateArray; i++)
     {
@@ -1799,13 +1808,13 @@ struct IntegerExtraData244 : ExtraData244
 struct FUN_00c612b0 : IntegerExtraData244
 {
     virtual ~FUN_00c612b0();
-    void FUN_00c61610();
+    void BSWArray_SetName();
     FUN_00c612b0();
 };
 // @fnv 0x00c612b0
 FUN_00c612b0::FUN_00c612b0()
 {
-    FUN_00c61610();
+    BSWArray_SetName();
 }
 
 struct C616Node
@@ -1829,7 +1838,8 @@ inline bool C616Contains(C616Node* node)
 }
 
 // @fnv 0x00c61630
-void* FUN_00c61630(NiAVObject* host)
+// src: GUESS 0x00c61630 (confidence: low)
+void* NiAVObject_UpdateState_00c61630(NiAVObject* host)
 {
     void* result2 = 0;
     if (host != 0)
@@ -1864,7 +1874,8 @@ char* __cdecl FUN_00a5b690(const char* arg);
 extern "C" void* g_012043a0;
 
 // @fnv 0x00c616c0
-void __cdecl FUN_00c616c0()
+// src: COMMUNITY 0x00c616c0
+void __cdecl BSWArray_InitSDM()
 {
     g_012043a0 = new NiFixedString(static_cast<const char*>(str_010c3610));
 }
@@ -1913,7 +1924,7 @@ struct BaseObj
     int unk4C;
     int unk50;
     int unk54;
-    void FUN_00c62140();
+    void BSPSysArrayEmitter_SetupArray();
 };
 
 struct FUN_00c61a10 : BaseObj
@@ -1931,7 +1942,7 @@ FUN_00c61a10::FUN_00c61a10(int p1, int p2, int p3, float f0, float f1, float f2,
     : BaseObj(p1, p2, f0, f1, f2, f3, f4, f5, q, g0, g1, g2, g3), m_58(p3)
 {
     SubObj* sub;
-    FUN_00c62140();
+    BSPSysArrayEmitter_SetupArray();
 }
 
 inline void NiAVObject::IncRefCount()
@@ -2057,11 +2068,12 @@ struct Collector62
     {
         return unk58;
     }
-    void FUN_00c62200(NiAVObject* pkObj);
+    void BSPSysArrayEmitter_SetObjectPointers(NiAVObject* pkObj);
 };
 
 // @fnv 0x00c62200
-void Collector62::FUN_00c62200(NiAVObject* pkObj)
+// src: XBOX_PDB 0x00c62200
+void Collector62::BSPSysArrayEmitter_SetObjectPointers(NiAVObject* pkObj)
 {
     if (pkObj)
     {
@@ -2090,7 +2102,7 @@ void Collector62::FUN_00c62200(NiAVObject* pkObj)
         {
             unsigned int i2 = pkNode2->GetSize();
             while (i2--)
-                FUN_00c62200(pkNode2->GetAt(i2));
+                BSPSysArrayEmitter_SetObjectPointers(pkNode2->GetAt(i2));
         }
     }
 }
@@ -2143,13 +2155,14 @@ class FUN_00c62390_cls
         void*& r = m_60[i];
         return r;
     }
-    void FUN_00c625f0(void* a, void* b, void* c);
-    void FUN_00c62470(void* a, void* b, void* c);
-    void FUN_00c62390(void* a1, void* a2);
+    void BSPSysArrayEmitter_GetPointFromGeometry(void* a, void* b, void* c);
+    void BSPSysArrayEmitter_GetPointFromObject(void* a, void* b, void* c);
+    void BSPSysArrayEmitter_GetAPoint(void* a1, void* a2);
 };
 
 // @fnv 0x00c62390
-void FUN_00c62390_cls::FUN_00c62390(void* a1, void* a2)
+// src: XBOX_PDB 0x00c62390
+void FUN_00c62390_cls::BSPSysArrayEmitter_GetAPoint(void* a1, void* a2)
 {
     void* pick;
     unsigned int n = m_66;
@@ -2169,10 +2182,10 @@ void FUN_00c62390_cls::FUN_00c62390(void* a1, void* a2)
     switch (GetMode())
     {
     case 0:
-        FUN_00c625f0(pick, a1, a2);
+        BSPSysArrayEmitter_GetPointFromGeometry(pick, a1, a2);
         break;
     default:
-        FUN_00c62470(pick, a1, a2);
+        BSPSysArrayEmitter_GetPointFromObject(pick, a1, a2);
         break;
     }
 }
@@ -2181,11 +2194,11 @@ inline NiPoint3 NiPoint3::operator*(float scale) const
 {
     return NiPoint3(scale * x, scale * y, scale * z);
 }
-float FUN_004579e0(float);
+float NiSqrt_004579e0(float);
 inline float NiPoint3::Length() const
 {
     float squared = x * x + y * y + z * z;
-    return FUN_004579e0(squared);
+    return NiSqrt_004579e0(squared);
 }
 
 namespace fnv_00c625f0 {
@@ -2370,11 +2383,12 @@ typedef unsigned short(__thiscall* GetVertexCountFunction)(GeometryData*);
 
 struct EmitterSampler
 {
-    void FUN_00c625f0(EmitterObject* object, NiPoint3& position, NiPoint3& direction);
+    void BSPSysArrayEmitter_GetPointFromGeometry(EmitterObject* object, NiPoint3& position, NiPoint3& direction);
 };
 
 // @fnv 0x00c625f0
-void EmitterSampler::FUN_00c625f0(EmitterObject* object, NiPoint3& position, NiPoint3& direction)
+// src: COMMUNITY 0x00c625f0
+void EmitterSampler::BSPSysArrayEmitter_GetPointFromGeometry(EmitterObject* object, NiPoint3& position, NiPoint3& direction)
 {
     Geometry* geometry = object ? ((GetGeometryFunction)object->vtable[6])(object) : 0;
     if (geometry)
@@ -2399,7 +2413,7 @@ void EmitterSampler::FUN_00c625f0(EmitterObject* object, NiPoint3& position, NiP
 }
 }  // namespace fnv_00c625f0
 
-void __cdecl FUN_00aa10f0(void* p);
+void __cdecl _NiFree_00aa10f0(void* p);
 
 struct S00c62800_Arr
 {
@@ -2414,7 +2428,7 @@ __forceinline S00c62800_Arr::~S00c62800_Arr()
 {
     *(int*)this = (int)&DAT_010c377c;
     void* data = m_data;
-    FUN_00aa10f0(data);
+    _NiFree_00aa10f0(data);
 }
 
 struct S00c62800_Base
@@ -2589,7 +2603,7 @@ struct ArrayC62
     void* m_00;
     PtrC62* m_04;
     unsigned short m_08, m_0a, m_0c, m_0e;
-    PtrC62 FUN_00c62d10(unsigned int i);
+    PtrC62 UpdateState_00c62d10(unsigned int i);
 };
 inline void FrameC62()
 {
@@ -2600,7 +2614,8 @@ inline void FrameC62()
     (void)&slots;
 }
 // @fnv 0x00c62d10
-PtrC62 ArrayC62::FUN_00c62d10(unsigned int i)
+// src: GUESS 0x00c62d10 (confidence: low)
+PtrC62 ArrayC62::UpdateState_00c62d10(unsigned int i)
 {
     if (i >= m_0a)
         return PtrC62();
@@ -2632,14 +2647,14 @@ struct NiManager630
 };
 extern NiManager630* DAT_011f6080;
 extern const double DAT_01017cf8;
-float FUN_004579e0(float);
+float NiSqrt_004579e0(float);
 extern int DAT_012043d0;
 extern int DAT_0109b220;
 
 extern MemoryManager g_mm630;
 
 char* __cdecl FUN_00a5b690(const char* s);
-int __cdecl FUN_004b75a0(void* p, const char* name);
+int __cdecl BSstristr(void* p, const char* name);
 long __cdecl FUN_00eca6d3(const char* s);
 
 }  // namespace fnv_00c63c30
@@ -2657,10 +2672,11 @@ inline LocalVec3::LocalVec3()
 inline float LocalVec3::Length() const
 {
     float squared = x * x + y * y + z * z;
-    return fnv_00c63c30::FUN_004579e0(squared);
+    return fnv_00c63c30::NiSqrt_004579e0(squared);
 }
 
-inline void LocalVec3::FUN_004a0c10()
+// src: XBOX_PDB 0x004a0c10
+inline void LocalVec3::Unitize_004a0c10()
 {
     float length = Length();
     if (length > fnv_00c63c30::DAT_01017cf8)
@@ -2823,7 +2839,8 @@ struct ObjC63
 };
 
 // @fnv 0x00c63c30
-bool __cdecl FUN_00c63c30(ObjC63* obj, ObjC63* root)
+// src: GUESS 0x00c63c30 (confidence: low)
+bool __cdecl NiFixedString_CopyMemory_00c63c30(ObjC63* obj, ObjC63* root)
 {
     if (obj->v0c())
     {
@@ -2831,7 +2848,7 @@ bool __cdecl FUN_00c63c30(ObjC63* obj, ObjC63* root)
             DAT_012043d0 = (int)new NiFixedString("DVPG");
         BSDecalPlacementVectorExtraData* extra = root->GetExtraData(DAT_012043d0);
         ObjC63* p = obj;
-        if (p->GetMesh() && FUN_004b75a0(p->GetMesh(), "DecalPlacementVectorGroup"))
+        if (p->GetMesh() && BSstristr(p->GetMesh(), "DecalPlacementVectorGroup"))
         {
             if (!extra)
             {
@@ -2853,7 +2870,7 @@ bool __cdecl FUN_00c63c30(ObjC63* obj, ObjC63* root)
                         Mat3 m = child->m34;
                         LocalVec3 v5;
                         m.GetColumn(2, reinterpret_cast<::NiPoint3&>(v5));
-                        v5.FUN_004a0c10();
+                        v5.Unitize_004a0c10();
                         memcpy(&pv->m4[pv->m0], &child->m58, sizeof(LocalVec3));
                         memcpy(&pv->m64[pv->m0], &v5, sizeof(LocalVec3));
                         pv->m0++;
@@ -2872,7 +2889,7 @@ bool __cdecl FUN_00c63c30(ObjC63* obj, ObjC63* root)
                 Child* c = (Child*)p->children.GetAt(i);
                 if (c)
                 {
-                    if (FUN_00c63c30((ObjC63*)c, root))
+                    if (NiFixedString_CopyMemory_00c63c30((ObjC63*)c, root))
                         c = 0;
                 }
                 i++;
@@ -2899,7 +2916,8 @@ class FactoryObject : public NiObject
     int value;
 };
 // @fnv 0x00c64810
-FactoryObject* __cdecl FUN_00c64810()
+// src: EXE 0x00c64810
+FactoryObject* __cdecl BSReference_CreateObject()
 {
     return new FactoryObject;
 }
@@ -2910,7 +2928,7 @@ extern int DAT_01069d84;
 class C649F0_SubBase
 {
   public:
-    void FUN_0068ac40(unsigned int a, unsigned int b);
+    void NiTArray_NiAVObject_NiTMallocInterface_NiAVObject_NiTArray_NiAVObject_NiTMallocInterface_NiAVObject(unsigned int a, unsigned int b);
 };
 class C649F0_Sub : public C649F0_SubBase
 {
@@ -2923,7 +2941,7 @@ class C649F0_Sub : public C649F0_SubBase
     {
         int unused;
         (void)unused;
-        FUN_0068ac40(0, 1);
+        NiTArray_NiAVObject_NiTMallocInterface_NiAVObject_NiTArray_NiAVObject_NiTMallocInterface_NiAVObject(0, 1);
         m_00 = &DAT_01069d84;
     }
 };
@@ -2933,12 +2951,13 @@ class C649F0_Object : public NiObject
     C649F0_Sub m_08;
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     virtual ~C649F0_Object();
 };
 // @fnv 0x00c649f0
-C649F0_Object* __cdecl FUN_00c649f0()
+// src: EXE 0x00c649f0
+C649F0_Object* __cdecl BSNodeReferences_CreateObject()
 {
     return new C649F0_Object;
 }
@@ -2980,11 +2999,12 @@ inline bool InList(void*& p)
 class FUN_00c64c40_cls
 {
   public:
-    bool __thiscall FUN_00c64c40(void* a1, FNVListObj* a2);
+    bool __thiscall BSNodeReferences_AddParentRef(void* a1, FNVListObj* a2);
 };
 
 // @fnv 0x00c64c40
-bool FUN_00c64c40_cls::FUN_00c64c40(void* a1, FNVListObj* a2)
+// src: COMMUNITY 0x00c64c40
+bool FUN_00c64c40_cls::BSNodeReferences_AddParentRef(void* a1, FNVListObj* a2)
 {
     void* local2;
     void* m18;
@@ -3038,14 +3058,14 @@ struct FUN_00c64d10
     NiFixedString m_pHeadNode;
     NiFixedString m_iSecondInteger;
     FUN_00c64d10(int first, int second);
-    void FUN_00c64da0(int value);
-    void FUN_00c64dc0(int value);
+    void BSAttachPointPair_SetParent(int value);
+    void BSAttachPointPair_SetChild(int value);
 };
 // @fnv 0x00c64d10
 FUN_00c64d10::FUN_00c64d10(int first, int second) : m_pHeadNode(), m_iSecondInteger()
 {
-    FUN_00c64da0(first);
-    FUN_00c64dc0(second);
+    BSAttachPointPair_SetParent(first);
+    BSAttachPointPair_SetChild(second);
 }
 }  // namespace fnv_00c64d10
 
@@ -3125,10 +3145,11 @@ struct C65490_Owner
     int unk04;
     int unk08;
     C65490_List m_kNode;
-    void FUN_00c65490(int first, int second);
+    void BSAttachPoints_AddPair(int first, int second);
 };
 // @fnv 0x00c65490
-void C65490_Owner::FUN_00c65490(int first, int second)
+// src: COMMUNITY 0x00c65490
+void C65490_Owner::BSAttachPoints_AddPair(int first, int second)
 {
     FUN_00c64d10* item = new FUN_00c64d10(first, second);
     m_kNode.FUN_00c4c8d0(item);
@@ -3143,7 +3164,8 @@ int __cdecl FUN_00a5b690(const char* s);
 extern NiFixedString* DAT_012043ec;
 
 // @fnv 0x00c65530
-void __cdecl FUN_00c65530()
+// src: COMMUNITY 0x00c65530
+void __cdecl BSAttachPoints_InitSDM()
 {
     DAT_012043ec = new NiFixedString("ATP");
 }
@@ -3160,14 +3182,15 @@ inline void NiFixedString::operator delete(void* p)
 namespace fnv_00c655d0 {
 extern NiFixedString* DAT_012043ec;
 // @fnv 0x00c655d0
-void FUN_00c655d0()
+// src: GUESS 0x00c655d0 (confidence: low)
+void Runtime_ReleaseStorage_00c655d0()
 {
     delete DAT_012043ec;
     DAT_012043ec = 0;
 }
 }  // namespace fnv_00c655d0
 
-void __cdecl FUN_00aa10f0(void* p);
+void __cdecl _NiFree_00aa10f0(void* p);
 // NiExtraData's virtual destructor changes the original staged destructor at 0x00c613a0.
 struct FUN_00a7b300
 {
@@ -3182,7 +3205,7 @@ struct C613A0_StringsData : FUN_00a7b300
     void* m_pData;
     ~C613A0_StringsData()
     {
-        FUN_00aa10f0(m_pData);
+        _NiFree_00aa10f0(m_pData);
         m_pData = 0;
     }
 };
@@ -3220,11 +3243,12 @@ struct SetAtArray
     unsigned short m_usSize;
     unsigned short m_usESize;
     unsigned short m_usGrowBy;
-    void FUN_00c62b90(unsigned int uiIndex, const SetAtPointer& element);
+    void NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_SetAt(unsigned int uiIndex, const SetAtPointer& element);
 };
 
 // @fnv 0x00c62b90
-void SetAtArray::FUN_00c62b90(unsigned int uiIndex, const SetAtPointer& element)
+// src: XBOX_PDB 0x00c62b90
+void SetAtArray::NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_SetAt(unsigned int uiIndex, const SetAtPointer& element)
 {
     static SetAtPointer kNull(0);
     if (uiIndex >= m_usSize)
@@ -3319,11 +3343,12 @@ class S00c62f40_Array
     unsigned short m_usESize;
     unsigned short m_usGrowBy;
 
-    void FUN_00c62f40();
+    void NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_RemoveAll();
 };
 
 // @fnv 0x00c62f40
-void S00c62f40_Array::FUN_00c62f40()
+// src: COMMUNITY 0x00c62f40
+void S00c62f40_Array::NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_RemoveAll()
 {
     unsigned short index;
 
@@ -3363,11 +3388,11 @@ struct ListBaseB3
 struct ListB3 : ListBaseB3
 {
     int unk00, unk04, unk08;
-    void FUN_00c64710();
+    void ReleaseStorage_00c64710();
     __forceinline ~ListB3()
     {
         int a, b, c;
-        FUN_00c64710();
+        ReleaseStorage_00c64710();
     }
 };
 extern MemoryManager DAT_011f6238;
@@ -3398,7 +3423,7 @@ BSDecalPlacementVectorExtraData_DtorView::~BSDecalPlacementVectorExtraData_DtorV
 extern "C" int __cdecl rand();
 inline void ScalePoint(NiPoint3& point, float scale)
 {
-    point.FUN_00439180(scale);
+    point.ScaleComponents(scale);
 }
 struct M68Q
 {
@@ -3505,14 +3530,15 @@ inline float Rand01()
     return rand() / 32767.0;
 }
 // @fnv 0x00c62470
-void FUN_00c62390_cls::FUN_00c62470(void* a, void* b, void* c)
+// src: COMMUNITY 0x00c62470
+void FUN_00c62390_cls::BSPSysArrayEmitter_GetPointFromObject(void* a, void* b, void* c)
 {
     if (a)
     {
         NodeQ* pParent = *(NodeQ**)((char*)a + 0x18);
         if (GetMode() != 1 && pParent)
         {
-            *(NiPoint3*)b = ((NodeQ*)a)->kPos.FUN_00439ef0(pParent->kPos);
+            *(NiPoint3*)b = ((NodeQ*)a)->kPos.SubtractIntoVector(pParent->kPos);
             Dead3();
             *(NiPoint3*)b = pParent->kPos.FUN_00439e90(((NiPoint3*)b)->ApplyScaled(Rand01()));
             Dead6();
@@ -3545,7 +3571,8 @@ struct ExtraData850 : NiExtraData
     virtual ~ExtraData850();
 };
 // @fnv 0x00c61850
-ExtraData850* __cdecl FUN_00c61850()
+// src: COMMUNITY 0x00c61850
+ExtraData850* __cdecl PArrayPoint_PArrayPoint()
 {
     ExtraData850* pkData = new ExtraData850(*DAT_012043ac);
     pkData->SetName(DAT_011f49e0);
@@ -3569,12 +3596,13 @@ extern MemoryManager DAT_011f6238;
 extern char* DAT_0109b220;
 extern const char str_010c36b0[];
 char* __cdecl FUN_00a5b690(const char* text);
-void __cdecl FormHeap_Free(void* buffer);
+void __cdecl FormHeapFreeAndLog_00401030(void* buffer);
 
 extern NiFixedString* DAT_012043ac;
 
 // @fnv 0x00c618f0
-void FUN_00c618f0()
+// src: COMMUNITY 0x00c618f0
+void PArrayPoint_InitSDM()
 {
     DAT_012043ac = new NiFixedString(str_010c36b0);
 }
@@ -3664,8 +3692,8 @@ struct PtrArray61
     {
         return m_pBase[i];
     }
-    void FUN_00c62b90(unsigned int i, Ptr61& p);
-    Ptr61 FUN_00c62d10(unsigned int i);
+    void NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_SetAt(unsigned int i, Ptr61& p);
+    Ptr61 UpdateState_00c62d10(unsigned int i);
     void Compact();
 };
 struct Base61
@@ -3698,11 +3726,12 @@ struct Emitter61 : Base61
     int unk54;
     int unk58;
     PtrArray61 m_kArray;
-    void FUN_00c61cc0(Cloning61& kCloning);
+    void BSPSysArrayEmitter_ProcessClone(Cloning61& kCloning);
 };
 
 // @fnv 0x00c61cc0
-void Emitter61::FUN_00c61cc0(Cloning61& kCloning)
+// src: XBOX_PDB 0x00c61cc0
+void Emitter61::BSPSysArrayEmitter_ProcessClone(Cloning61& kCloning)
 {
     Base61::FUN_00c31c90(kCloning);
     void* pkClone4;
@@ -3724,11 +3753,11 @@ void Emitter61::FUN_00c61cc0(Cloning61& kCloning)
                 S61_Pad2();
                 Ptr61 spNew3 = (RefObjV61*)pkNew;
                 S61_Pad1();
-                pkDest9->m_kArray.FUN_00c62b90(uiCount4, spNew3);
+                pkDest9->m_kArray.NiTArray_NiPointer_NiAVObject_NiTMallocInterface_NiPointer_NiAVObject_SetAt(uiCount4, spNew3);
             }
             else
             {
-                pkDest9->m_kArray.FUN_00c62d10(uiCount4);
+                pkDest9->m_kArray.UpdateState_00c62d10(uiCount4);
             }
         }
         S61_Pad12();

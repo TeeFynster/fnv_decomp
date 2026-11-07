@@ -80,11 +80,12 @@ struct FUN_00e059d0_cls
     int m_0c;
     int unk10;
     int m_14;
-    unsigned char* FUN_00e059d0(unsigned char* supported);
+    unsigned char* hkMemoryStreamReader_setMark(unsigned char* supported);
 };
 
 // @fnv 0x00e059d0
-unsigned char* FUN_00e059d0_cls::FUN_00e059d0(unsigned char* supported)
+// src: HAVOK_LIB 0x00e059d0
+unsigned char* FUN_00e059d0_cls::hkMemoryStreamReader_setMark(unsigned char* supported)
 {
     m_14 = m_0c;
     return 0;
@@ -92,7 +93,8 @@ unsigned char* FUN_00e059d0_cls::FUN_00e059d0(unsigned char* supported)
 
 // FUN_00e05a00: sets the flag byte pointed to by the argument to 1 and returns the argument.
 // @fnv 0x00e05a00
-unsigned char* __stdcall FUN_00e05a00(unsigned char* supported)
+// src: HAVOK_SRC 0x00e05a00
+unsigned char* __stdcall hkMemoryStreamReader_seekTellSupported(unsigned char* supported)
 {
     *supported = 1;
     return supported;
@@ -119,11 +121,12 @@ hkBool MemoryStreamEndState::IsNotAtEnd() const
 
 struct FUN_00e05a10_cls : hkMemoryStreamReader
 {
-    int __thiscall FUN_00e05a10(int arg4, int mode);
+    int __thiscall hkMemoryStreamReader_seek(int arg4, int mode);
 };
 // Computes a new stream position from arg4 and mode, clamps it to [0, m_10], stores it in m_0c and returns whether clamping occurred.
 // @fnv 0x00e05a10
-int __thiscall FUN_00e05a10_cls::FUN_00e05a10(int aiOffset, int mode)
+// src: HAVOK_LIB 0x00e05a10
+int __thiscall FUN_00e05a10_cls::hkMemoryStreamReader_seek(int aiOffset, int mode)
 {
     int edx = -1;
     switch (mode)
@@ -163,10 +166,11 @@ struct FnvCpu_FUN_00e05a70_CpuObject
     unsigned int unk04;
     unsigned int unk08;
     int value;
-    int FUN_00e05a70();
+    int GetValue();
 };
 // @fnv 0x00e05a70
-int FnvCpu_FUN_00e05a70_CpuObject::FUN_00e05a70()
+// src: GUESS 0x00e05a70 (confidence: low)
+int FnvCpu_FUN_00e05a70_CpuObject::GetValue()
 {
     return value;
 }
@@ -185,7 +189,7 @@ struct FUN_00e05a80Class
 
     int __thiscall ReadFromBuffer(void* destination, int count);
 };
-extern "C" void __cdecl FUN_00cb1260(void* destination, const void* source, int count);
+extern "C" void __cdecl hkString_memCpy(void* destination, const void* source, int count);
 
 // @fnv 0x00e05a80
 int __thiscall FUN_00e05a80Class::ReadFromBuffer(void* destination, int count)
@@ -195,7 +199,7 @@ int __thiscall FUN_00e05a80Class::ReadFromBuffer(void* destination, int count)
     {
         int remaining = m_10 - m_0c;
         int copied = count < remaining ? count : remaining;
-        FUN_00cb1260(destination, m_08 + m_0c, copied);
+        hkString_memCpy(destination, m_08 + m_0c, copied);
         m_0c += copied;
         if (copied == 0 && count != 0)
             m_0c = m_10 + 1;
@@ -239,10 +243,10 @@ int __thiscall FUN_00e05af0_Obj::ReadBytes(int aiByteCount)
 }
 
 namespace hkRouterE05B {
-extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 void* __cdecl AllocateWithHeader(hkMemoryAllocator& kAlloc, int iNumBytes) throw();
-void __cdecl FUN_00cb1260(void* pvDst, const void* pvSrc, int iNumBytes) throw();
+void __cdecl hkString_memCpy(void* pvDst, const void* pvSrc, int iNumBytes) throw();
 
 class FUN_00e05b40 : public hkReferencedObject
 {
@@ -267,8 +271,8 @@ FUN_00e05b40::FUN_00e05b40(void* data, int size, int external) throw()
     m_external = external;
     if (!external)
     {
-        m_data = AllocateWithHeader(hkRouterE05B::FUN_00c85750().heap(), size);
-        FUN_00cb1260(m_data, data, size);
+        m_data = AllocateWithHeader(hkRouterE05B::hkMemoryRouter_getInstance().heap(), size);
+        hkString_memCpy(m_data, data, size);
     }
     else
     {
@@ -277,13 +281,13 @@ FUN_00e05b40::FUN_00e05b40(void* data, int size, int external) throw()
 }
 
 namespace fnv_00e05bb0 {
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750() throw();
-void __cdecl FUN_00c856c0(hkMemoryAllocator* pAllocator, void* p) throw();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
+void __cdecl hkMemoryRouter_easyFree(hkMemoryAllocator* pAllocator, void* p) throw();
 
 inline void hkDeallocateE05B(void* p)
 {
-    hkMemoryRouter* r = FUN_00c85750();
-    FUN_00c856c0(r->m_heap, p);
+    hkMemoryRouter* r = hkMemoryRouter_getInstance();
+    hkMemoryRouter_easyFree(r->m_heap, p);
 }
 
 // The data pointer at +0x08 and ownership flag at +0x18 belong to the memory stream.

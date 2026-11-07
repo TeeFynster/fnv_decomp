@@ -63,7 +63,7 @@ struct Node_cls
     void FUN_00b8a790(int a1, float f0, float f1, float f2, float f3);
     static void* operator new(unsigned int size) throw()
     {
-        return DAT_011f6238.FUN_00aa3e40(size);
+        return DAT_011f6238.Game_DoHeapAlloc(size);
     }
     static void operator delete(void* p) throw()
     {}

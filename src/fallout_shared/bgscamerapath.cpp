@@ -216,7 +216,7 @@ bool BGSCameraPath::Load(TESFile* file)
             memset(&parentInfo, 0, 8);
             file->GetChunkData(&parentInfo, 8);
             if (file->IsEndianConversionRequired())
-                parentInfo.FUN_00462230();
+                parentInfo.TwoValues_Endian();
             m_pFirstCameraPath = (BGSCameraPath*)parentInfo.parent;
             m_pSecondCameraPath = (BGSCameraPath*)parentInfo.previous;
             DAT_011ca700->AddCameraPath(this);
@@ -347,7 +347,8 @@ bool BGSCameraPath::IsFlag80Set()
 
 // Returns true when neither bit 0 nor bit 1 of cFlags is set, otherwise false.
 // @fnv 0x0058b4a0
-bool BGSCameraPath::FUN_0058b4a0()
+// src: COMMUNITY 0x0058b4a0
+bool BGSCameraPath::GetZoomDefault()
 {
     if (data.cFlags & 1 || data.cFlags & 2)
         return false;
@@ -355,7 +356,8 @@ bool BGSCameraPath::FUN_0058b4a0()
 }
 
 // @fnv 0x0058b4d0
-bool BGSCameraPath::FUN_0058b4d0()
+// src: COMMUNITY 0x0058b4d0
+bool BGSCameraPath::GetZoomDisable()
 {
     if (data.cFlags & 1)
         return true;
@@ -383,7 +385,7 @@ struct BSSimpleList_shell
 
 struct FUN_00485e00_shell
 {
-    void __thiscall FUN_00485e20(int, int);
+    void __thiscall TESForm___SaveData(int, int);
 };
 
 bool _FUN_00401500();
@@ -391,7 +393,8 @@ void _FUN_00485990(unsigned int, void*, unsigned int);
 void _FUN_00485910(unsigned int, unsigned int);
 
 // @fnv 0x0058ac10
-void BGSCameraPath::FUN_0058ac10()
+// src: XBOX_PDB 0x0058ac10
+void BGSCameraPath::Save_0058ac10()
 {
     BSSimpleList_shell* pShotList;
     IdentifierHistoryEntry ids;
@@ -401,7 +404,7 @@ void BGSCameraPath::FUN_0058ac10()
         BGSCameraShot* pshot;
         unsigned int shotFormID;
 
-        TESForm::FUN_004855a0();
+        TESForm::BeginFormRecord();
         reinterpret_cast<TESConditionSave_bgscamerapath*>(GetConditions())->ProcessItems();
 
         memset(&ids, 0, 8);
@@ -420,17 +423,17 @@ void BGSCameraPath::FUN_0058ac10()
         }
 
         if (_FUN_00401500())
-            reinterpret_cast<FUN_005a71d0*>(&ids)->FUN_00462230();
+            reinterpret_cast<FUN_005a71d0*>(&ids)->TwoValues_Endian();
 
         _FUN_00485990(0x4d414e41, &ids, 8);
 
         if (_FUN_00401500())
-            reinterpret_cast<FUN_005a71d0*>(&ids)->FUN_00462230();
+            reinterpret_cast<FUN_005a71d0*>(&ids)->TwoValues_Endian();
 
         if (_FUN_00401500())
             reinterpret_cast<TESForm*>(&data)->TESForm::ClearData();
 
-        reinterpret_cast<FUN_00485e00_shell*>(this)->FUN_00485e20(reinterpret_cast<int>(&data), 1);
+        reinterpret_cast<FUN_00485e00_shell*>(this)->TESForm___SaveData(reinterpret_cast<int>(&data), 1);
 
         if (_FUN_00401500())
             reinterpret_cast<TESForm*>(&data)->TESForm::ClearData();
@@ -446,7 +449,7 @@ void BGSCameraPath::FUN_0058ac10()
         }
     }
 
-    TESForm::FUN_00485680();
+    TESForm::FinishFormRecord();
 }
 
 void* __cdecl __memcpy(void*, const void*, unsigned int);
@@ -490,7 +493,8 @@ struct ConditionCompareStub
 
 // Compares this camera path against another form's camera path: base form, conditions, a data byte, and shot lists; returns true if any differ.
 // @fnv 0x0058a750
-bool BGSCameraPath::FUN_0058a750(TESForm* form)
+// src: XBOX_PDB 0x0058a750
+bool BGSCameraPath::Compare_0058a750(TESForm* form)
 {
     BGSCameraPath* pathForm = dynamic_cast<BGSCameraPath*>(form);
     if (!pathForm)
@@ -580,7 +584,8 @@ struct CameraPathArrayResize
 
 // Clones the base camera path, remaps its parent and previous paths through apMap, and copies the child form array when present.
 // @fnv 0x0058a870
-TESForm* BGSCameraPath::FUN_0058a870(bool abPersist, CameraPathMap* apMap)
+// src: XBOX_PDB 0x0058a870
+TESForm* BGSCameraPath::CreateDuplicateForm(bool abPersist, CameraPathMap* apMap)
 {
     BGSCameraPath* pClone_ =
         dynamic_cast<BGSCameraPath*>(CreateBaseClone(abPersist, apMap));
@@ -623,7 +628,8 @@ struct CameraFlag
 };
 
 // @fnv 0x0058b510
-BGSCameraPath* BGSCameraPath::FUN_0058b510(unsigned int context, unsigned int flags)
+// src: COMMUNITY 0x0058b510
+BGSCameraPath* BGSCameraPath::GetCameraPathToPlay(unsigned int context, unsigned int flags)
 {
     BGSCameraPath* result = 0;
     if (!FUN_00440d80())
@@ -642,7 +648,7 @@ BGSCameraPath* BGSCameraPath::FUN_0058b510(unsigned int context, unsigned int fl
                 {
                     BGSCameraPath* child = GetCameraPathAt(i);
                     if (child != 0)
-                        descendant = child->FUN_0058b510(context, flags);
+                        descendant = child->GetCameraPathToPlay(context, flags);
                     if (descendant != 0)
                         break;
                 }

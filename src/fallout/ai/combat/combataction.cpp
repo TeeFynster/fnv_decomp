@@ -115,7 +115,8 @@ char* CombatAction::GetCombatActionName()
 }
 
 // @fnv 0x00979e40
-float CombatAction::FUN_00979e40(CombatController* apCombatController, int aiActionValue)
+// src: XBOX_PDB 0x00979e40
+float CombatAction::GetCost_00979e40(CombatController* apCombatController, int aiActionValue)
 {
     return DAT_011a4280[reinterpret_cast<BSThread*>(this)->GetThreadID()].m_fPathingCostCur;
 }
@@ -126,7 +127,8 @@ struct TaskQueueInterface
 };
 
 // @fnv 0x00979e60
-void CombatAction::FUN_00979e60(char* apDebugText, unsigned int aiMaxLength, int aiActionValue)
+// src: XBOX_PDB 0x00979e60
+void CombatAction::GetDebugText(char* apDebugText, unsigned int aiMaxLength, int aiActionValue)
 {
     TaskQueueInterface::CopyStringToBuffer(apDebugText, aiMaxLength, GetCombatActionName());
 }
@@ -147,11 +149,12 @@ struct FUN_005e3fc0_shell
 };
 struct FUN_00979f70_shell
 {
-    void FUN_00979f70(unsigned int);
+    void CombatPlannerData_SetLinkLocation(unsigned int);
 };
 
 // @fnv 0x00979e90
-bool CombatAction::FUN_00979e90(CombatController* apCombatController, CombatWorldStateArray* apWorldStateArray,
+// src: XBOX_PDB 0x00979e90
+bool CombatAction::CanExecute(CombatController* apCombatController, CombatWorldStateArray* apWorldStateArray,
                                  int aiActionValue)
 {
     UnsignedIdHandle* pWorldState4;
@@ -166,15 +169,15 @@ bool CombatAction::FUN_00979e90(CombatController* apCombatController, CombatWorl
         if (pWorldState4)
         {
             iValue3 = pWorldState4->_ref_00726070() == -1 ? aiActionValue : pWorldState4->_ref_00726070();
-            if (!apWorldStateArray->FUN_009aadc0(*pWorldState4, iValue3))
+            if (!apWorldStateArray->CombatWorldStateArray_IsTrue(*pWorldState4, iValue3))
                 return false;
         }
         pList = pList->GetNext();
     }
     _iCombatLocation = -1;
-    if (FUN_00979f50(1, &_iCombatLocation))
+    if (HasRequirement(1, &_iCombatLocation))
         reinterpret_cast<FUN_00979f70_shell*>(reinterpret_cast<FUN_005e3fc0_shell*>(apCombatController)->Get())
-            ->FUN_00979f70(_iCombatLocation);
+            ->CombatPlannerData_SetLinkLocation(_iCombatLocation);
     return true;
 }
 
@@ -186,7 +189,8 @@ struct CombatActionStateListAccess : CombatWorldStateListNode
 
 // Calls FindStateByType on the object at offset 0xc of this, passing a and b through.
 // @fnv 0x00979f50
-void CombatAction::FUN_00979f50(int aiArg1, int aiArg2)
+// src: COMMUNITY 0x00979f50
+void CombatAction::HasRequirement(int aiArg1, int aiArg2)
 {
     reinterpret_cast<CombatActionStateListAccess*>(&m_kActionWorldStateNode)->FindStateByType(aiArg1, aiArg2);
 }
@@ -199,18 +203,19 @@ struct QuantityData
 
 struct FUN_00979f70_shell
 {
-    void FUN_00979f70(unsigned int aiQuantity);
+    void CombatPlannerData_SetLinkLocation(unsigned int aiQuantity);
 };
 
 // @fnv 0x00979f70
-void FUN_00979f70_shell::FUN_00979f70(unsigned int aiQuantity)
+// src: XBOX_PDB 0x00979f70
+void FUN_00979f70_shell::CombatPlannerData_SetLinkLocation(unsigned int aiQuantity)
 {
     (*reinterpret_cast<QuantityData**>(reinterpret_cast<char*>(this) + 4))->SetQuantity(aiQuantity);
 }
 }  // namespace fnv_00979f70
 
 namespace fnv_0097abd0 {
-int __cdecl FUN_00404dc0(const char*, const char*);
+int __cdecl BSstricmp(const char*, const char*);
 
 struct CombatActionEntry
 {
@@ -221,11 +226,12 @@ struct CombatActionEntry
 extern CombatActionEntry DAT_011a4280[];
 
 // @fnv 0x0097abd0
-bool FUN_0097abd0(char* apCombatActionName, float afCost)
+// src: COMMUNITY 0x0097abd0
+bool CombatAction_SetCombatActionCost(char* apCombatActionName, float afCost)
 {
     for (unsigned int i = 0; i < 0x1b; i++)
     {
-        if (!FUN_00404dc0(DAT_011a4280[i].pName, apCombatActionName))
+        if (!BSstricmp(DAT_011a4280[i].pName, apCombatActionName))
         {
             DAT_011a4280[i].m_fPathingCostCur = afCost;
             return true;
@@ -238,7 +244,7 @@ bool FUN_0097abd0(char* apCombatActionName, float afCost)
 struct CombatController;
 struct IMH
 {
-    CombatState* FUN_00586150();
+    CombatState* CombatController_GetCombatState();
 };
 extern double _gModifierZero;
 extern float DAT_0108ca80;
@@ -251,7 +257,7 @@ float GetWeaponDPSDeficit(CombatController* apCombatController, int aeWeaponType
     CombatState* pcombatState;
     float fmaxAttackDPS;
 
-    pcombatState = reinterpret_cast<IMH*>(apCombatController)->FUN_00586150();
+    pcombatState = reinterpret_cast<IMH*>(apCombatController)->CombatController_GetCombatState();
     fattackDPS = pcombatState->GetCombatWeaponDPS(aeWeaponType);
     if (fattackDPS == _gModifierZero)
         return DAT_0108ca80;
@@ -268,22 +274,23 @@ float CombatState::GetCombatWeaponDPS(int aiIndex)
 struct CombatController;
 struct CoordinateTriple
 {
-    double FUN_00527a40(CoordinateTriple*);
+    double BGSWorldLocation_GetDistanceSquared(CoordinateTriple*);
 };
-float __cdecl FUN_0040ebd0(float, float);
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMIN(float, float);
+float __cdecl BSMAX_00404010(float, float);
 extern float DAT_0108cb00;
 extern double DAT_0108cb08;
 
 // @fnv 0x0097acb0
-float FUN_0097acb0(CombatController* apCombatController, CoordinateTriple* arStartWorldLoc,
+// src: COMMUNITY 0x0097acb0
+float CombatAction_GetMovementCost(CombatController* apCombatController, CoordinateTriple* arStartWorldLoc,
                    CoordinateTriple* arEndWorldLoc)
 {
     float fmovementCost;
 
-    fmovementCost = arStartWorldLoc->FUN_00527a40(arEndWorldLoc) / DAT_0108cb08;
-    fmovementCost = FUN_0040ebd0(fmovementCost, DAT_0108cb00);
-    fmovementCost = FUN_00404010(fmovementCost, 0.01f);
+    fmovementCost = arStartWorldLoc->BGSWorldLocation_GetDistanceSquared(arEndWorldLoc) / DAT_0108cb08;
+    fmovementCost = BSMIN(fmovementCost, DAT_0108cb00);
+    fmovementCost = BSMAX_00404010(fmovementCost, 0.01f);
     return fmovementCost;
 }
 

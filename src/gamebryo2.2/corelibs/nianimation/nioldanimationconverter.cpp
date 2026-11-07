@@ -2,7 +2,7 @@
 // src/gamebryo2.2/corelibs/nianimation/nioldanimationconverter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/nioldanimationconverter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 extern char DAT_0109717c[];
 
 struct FUN_00a5d3a0_cls
@@ -40,17 +40,18 @@ struct FUN_00a42460_cls
     unsigned int unk14;
     void* m_18;
     unsigned int m_1c;
-    void FUN_00a42460(unsigned int a1, unsigned int a2, unsigned int a3);
+    void NiPoint3Interpolator_SetKeys(unsigned int a1, unsigned int a2, unsigned int a3);
 };
 
 // @fnv 0x00a42460
-void FUN_00a42460_cls::FUN_00a42460(unsigned int auiArg1, unsigned int auiArg2, unsigned int auiArg3)
+// src: COMMUNITY 0x00a42460
+void FUN_00a42460_cls::NiPoint3Interpolator_SetKeys(unsigned int auiArg1, unsigned int auiArg2, unsigned int auiArg3)
 {
     if (auiArg2 > 0)
     {
         if (m_18 == 0)
         {
-            SpawnedObject* o = (SpawnedObject*)FUN_00aa13e0(0x18);
+            SpawnedObject* o = (SpawnedObject*)Object_DispatchCommandFour(0x18);
             if (o != 0)
             {
                 ((FUN_00a5d3a0_cls*)o)->FUN_00a5d3a0();
@@ -81,7 +82,7 @@ void FUN_00a42460_cls::FUN_00a42460(unsigned int auiArg1, unsigned int auiArg2, 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-void* __cdecl FUN_00aa13e0(unsigned int uiSize);
+void* __cdecl Object_DispatchCommandFour(unsigned int uiSize);
 
 struct LcRTTI
 {
@@ -168,7 +169,7 @@ struct LcSourceInterp : LcObject
         return 0;
     }
     void* FUN_00a3f990(unsigned int& uiElementCount, int& eType, unsigned char& ucSize);
-    void* FUN_00a3f9e0(unsigned int& uiElementCount, int& eType, unsigned char& ucSize);
+    void* NiTransformInterpolator_GetScaleData(unsigned int& uiElementCount, int& eType, unsigned char& ucSize);
 };
 
 struct LcCtlr : LcObject
@@ -221,7 +222,7 @@ struct LcCtlr : LcObject
     virtual void v48();
     virtual LcSourceInterp* GetInterpolator(unsigned short usIndex) const;
     virtual void SetInterpolator(void* pkInterp, unsigned short usIndex);
-    void FUN_00a36560();
+    void NiTransformController_NiTransformController();
 };
 
 struct LcCtlrNew : LcCtlr
@@ -234,14 +235,14 @@ struct LcKeys
 {
     char pad[0x20];
     LcKeys(int i);
-    void FUN_00a42460(void* pkKeys, unsigned int uiElementCount, int eType);
+    void NiPoint3Interpolator_SetKeys(void* pkKeys, unsigned int uiElementCount, int eType);
 };
 
 struct LcKeys2
 {
     char pad[0x18];
     LcKeys2(int i);
-    void FUN_00a42290(void* pkKeys, unsigned int uiElementCount, int eType);
+    void NiFloatInterpolator_SetKeys(void* pkKeys, unsigned int uiElementCount, int eType);
 };
 
 struct LcInterp : LcCtlr
@@ -252,15 +253,15 @@ struct LcInterp : LcCtlr
     int m_i10;
     char pad14[0x44 - 0x14];
     LcInterp(int a, int b, int c);
-    void FUN_00eea6d0(const LcString& kName);
-    void FUN_00a42310(LcKeys* pkKeys);
-    void FUN_00a423f0(LcKeys2* pkKeys);
+    void SetLookAtName(const LcString& kName);
+    void NiLookAtInterpolator_SetTranslateInterpolator(LcKeys* pkKeys);
+    void NiLookAtInterpolator_SetScaleInterpolator(LcKeys2* pkKeys);
 };
 
 struct LcTarget
 {
-    LcCtlr* FUN_00a5c570(const LcRTTI* pkRTTI) const;
-    void FUN_00a5c480(void* pkCtlr);
+    LcCtlr* NiObjectNET_GetController(const LcRTTI* pkRTTI) const;
+    void NiObjectNET_RemoveController(void* pkCtlr);
 };
 
 struct LcOld
@@ -280,18 +281,18 @@ extern "C" void __cdecl CreateInterpolator(LcOld* pkOld)
 {
     LcTarget* pkTarget = pkOld->m_pkTarget;
     bool bControllerCreated = false;
-    LcCtlr* pkCtlr = pkTarget->FUN_00a5c570(&DAT_011f36ec);
+    LcCtlr* pkCtlr = pkTarget->NiObjectNET_GetController(&DAT_011f36ec);
     LcSourceInterp* pkSrc;
     if (!pkCtlr || !(pkSrc = pkCtlr->GetInterpolator(0)) || !pkSrc->IsKindOfType(&DAT_011f3e50))
     {
         bControllerCreated = true;
-        pkCtlr = new (FUN_00aa13e0(0x38), 0) LcCtlrNew;
+        pkCtlr = new (Object_DispatchCommandFour(0x38), 0) LcCtlrNew;
         CopyControllerSettings(pkOld, pkCtlr);
     }
 
-    LcInterp* pkInterp = new (FUN_00aa13e0(0x44), 0) LcInterp(0, 0, 0);
+    LcInterp* pkInterp = new (Object_DispatchCommandFour(0x44), 0) LcInterp(0, 0, 0);
     pkInterp->m_i10 = pkOld->m_i38;
-    pkInterp->FUN_00eea6d0(DAT_011f49e0);
+    pkInterp->SetLookAtName(DAT_011f49e0);
     if (pkOld->m_uiObjectFlags & 1)
         pkInterp->m_uiObjectFlags |= 1;
     else
@@ -306,25 +307,25 @@ extern "C" void __cdecl CreateInterpolator(LcOld* pkOld)
         {
             if (pkData->GetNumA())
             {
-                LcKeys* pkKeys = new (FUN_00aa13e0(0x20), 0) LcKeys(0);
+                LcKeys* pkKeys = new (Object_DispatchCommandFour(0x20), 0) LcKeys(0);
                 unsigned int uiElementCount;
                 int eType;
                 unsigned char ucSize;
                 void* pvKeyBuffer = pkData->FUN_00a3f990(uiElementCount, eType, ucSize);
-                pkKeys->FUN_00a42460(pvKeyBuffer, uiElementCount, eType);
+                pkKeys->NiPoint3Interpolator_SetKeys(pvKeyBuffer, uiElementCount, eType);
                 pkData->m_pUserData->FUN_00a4e0b0(0, 0, 0);
-                pkInterp->FUN_00a42310(pkKeys);
+                pkInterp->NiLookAtInterpolator_SetTranslateInterpolator(pkKeys);
             }
             if (pkData->GetNumB())
             {
-                LcKeys2* pkKeys = new (FUN_00aa13e0(0x18), 0) LcKeys2(0);
+                LcKeys2* pkKeys = new (Object_DispatchCommandFour(0x18), 0) LcKeys2(0);
                 unsigned int uiElementCount;
                 int eType;
                 unsigned char ucSize;
-                void* pvKeyBuffer = pkData->FUN_00a3f9e0(uiElementCount, eType, ucSize);
-                pkKeys->FUN_00a42290(pvKeyBuffer, uiElementCount, eType);
+                void* pvKeyBuffer = pkData->NiTransformInterpolator_GetScaleData(uiElementCount, eType, ucSize);
+                pkKeys->NiFloatInterpolator_SetKeys(pvKeyBuffer, uiElementCount, eType);
                 pkData->m_pUserData->InitFromParams(0, 0, 0);
-                pkInterp->FUN_00a423f0(pkKeys);
+                pkInterp->NiLookAtInterpolator_SetScaleInterpolator(pkKeys);
             }
         }
     }
@@ -334,7 +335,7 @@ extern "C" void __cdecl CreateInterpolator(LcOld* pkOld)
     if (bControllerCreated)
         pkCtlr->SetTarget(pkTarget);
     if (pkTarget)
-        pkTarget->FUN_00a5c480(pkOld);
+        pkTarget->NiObjectNET_RemoveController(pkOld);
     if (pkData)
         pkData->DecRefCount();
 }

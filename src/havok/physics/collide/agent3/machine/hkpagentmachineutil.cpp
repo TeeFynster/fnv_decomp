@@ -6,31 +6,32 @@
 struct FUN_00c91180_Class
 {
     void __thiscall IncrementCounter();
-    void __thiscall FUN_00c91190();
+    void __thiscall hkpWorld_unlock();
     int m_field;
     void* m_ptr;
 };
 
-void __cdecl FUN_00d01d20(void* p);
+void __cdecl hkpWorldMemoryUtil_watchHeapMemory(void* p);
 struct FUN_00d022b0_Class
 {
-    void __thiscall FUN_00d022b0(void* a, float c);
+    void __thiscall hkpMultiThreadedSimulation_stepBeginSt(void* a, float c);
 };
 
 // If the field at offset 0x50 is set, calls IncrementCounter, FUN_00d01d20 and FUN_00c91190 on self, then forwards a and c to the object at offset 8.
 // @fnv 0x00c92d70
-void __fastcall FUN_00c92d70(FUN_00c91180_Class* self, int, void* apArg, float afValue)
+// src: HAVOK_LIB 0x00c92d70
+void __fastcall hkpWorld_initMtStep(FUN_00c91180_Class* self, int, void* apArg, float afValue)
 {
     if (*(int*)((char*)self + 0x50))
     {
         self->IncrementCounter();
-        FUN_00d01d20(self);
-        self->FUN_00c91190();
+        hkpWorldMemoryUtil_watchHeapMemory(self);
+        self->hkpWorld_unlock();
     }
-    ((FUN_00d022b0_Class*)*(void**)((char*)self + 8))->FUN_00d022b0(apArg, afValue);
+    ((FUN_00d022b0_Class*)*(void**)((char*)self + 8))->hkpMultiThreadedSimulation_stepBeginSt(apArg, afValue);
 }
 
-int __cdecl FUN_00d06f80(void* p, int size);
+int __cdecl hkStatisticsCollector_getAllocatedSize(void* p, int size);
 
 struct S_00d97360_Collector
 {
@@ -85,7 +86,7 @@ void __cdecl CollectSectors(S_00d97360_Track& track, S_00d97360_Collector* colle
     if ((track.m_kSectors.m_iCapacityState & 0x80000000) == 0 || collector->unk10)
     {
         int iAllocatedBytes =
-            FUN_00d06f80(track.m_kSectors.m_data, track.m_kSectors.getCapacity() * sizeof(S_00d97360_Sector*));
+            hkStatisticsCollector_getAllocatedSize(track.m_kSectors.m_data, track.m_kSectors.getCapacity() * sizeof(S_00d97360_Sector*));
         collector->addArray(3, "Sectors", track.m_kSectors.m_data,
                             track.m_kSectors.GetLogicalSize() * sizeof(S_00d97360_Sector*), iAllocatedBytes);
     }
@@ -1646,7 +1647,8 @@ template <typename T> inline T* hkAddByteOffset(T* base, int offset)
 {
     return (T*)((char*)base + offset);
 }
-void __cdecl FUN_00d97130(S_00d97130_Track& track, const S_00d97130_Input* input, S_00d97130_Collector* collector)
+// src: HAVOK_LIB 0x00d97130
+void __cdecl hkpAgentMachineUtil_calcNnStatistics(S_00d97130_Track& track, const S_00d97130_Input* input, S_00d97130_Collector* collector)
 {
     for (int i = 0; i < track.m_kSectors.GetLogicalSize(); i++)
     {
@@ -1719,16 +1721,17 @@ struct Ent
     int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28;
     int unk2c, unk30, unk34, unk38, unk3c, unk40, unk44, unk48, unk4c;
 };
-unsigned int __cdecl FUN_00d06f80(void* p, unsigned int n);
+unsigned int __cdecl hkStatisticsCollector_getAllocatedSize(void* p, unsigned int n);
 // Logs sector pointer array and iterates sectors dispatching entry operations to registered functions via the logger.
 // @fnv 0x00d97250
-void __cdecl FUN_00d97250(Hdr* apSectorArray, char** st, Logger* apLogger)
+// src: HAVOK_LIB 0x00d97250
+void __cdecl hkpAgentMachineUtil_calc1nStatistics(Hdr* apSectorArray, char** st, Logger* apLogger)
 {
     if (!(apSectorArray->flags & 0x80000000) || apLogger->quiet)
     {
         unsigned int n = (apSectorArray->flags & 0x3fffffff) * 4;
         void* a = apSectorArray->arr;
-        unsigned int sz = FUN_00d06f80(a, n);
+        unsigned int sz = hkStatisticsCollector_getAllocatedSize(a, n);
         apLogger->Log(3, "SectorPtrs", apSectorArray->arr, apSectorArray->count * 4, sz);
     }
     int i = 0;

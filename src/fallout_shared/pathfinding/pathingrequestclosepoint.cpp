@@ -27,16 +27,18 @@ void* __thiscall PathingRequestClosePoint::FUN_006e3f70(unsigned int flags)
 
 // Calls the base save routine, then writes the two close-point fields to the save buffer.
 // @fnv 0x006e5f00
-void __thiscall PathingRequestClosePoint::FUN_006e5f00(BGSSaveFormBuffer* apSaveGameBuffer)
+// src: XBOX_PDB 0x006e5f00
+void __thiscall PathingRequestClosePoint::PathingRequestOptimalLocation_SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    PathingRequest::FUN_006e3230(apSaveGameBuffer);
+    PathingRequest::PathingRequest_SaveGame(apSaveGameBuffer);
     apSaveGameBuffer->SaveData(&fPointHeight, 4, 0);
     apSaveGameBuffer->SaveData(&m_fUnknownValue2, 4, 0);
 }
 
 // Calls the base load routine, then reads the two close-point fields from the buffer.
 // @fnv 0x006e5f50
-void PathingRequestClosePoint::FUN_006e5f50(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x006e5f50
+void PathingRequestClosePoint::PathingRequestOptimalLocation_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     PathingRequest::LoadGame(apLoadGameBuffer);
     apLoadGameBuffer->ReadTypedData(&fPointHeight, 4u);
@@ -48,8 +50,8 @@ void __thiscall PathingRequestClosePoint::CopyToWithClosePoint(PathingRequest* a
 {
     PathingRequestClosePoint* pdest = (PathingRequestClosePoint*)apDest;
     PathingRequest::CopyTo((PathingRequest*)pdest);
-    pdest->FUN_00507610(this->fPointHeight);
-    pdest->FUN_006e5ee0(this->m_fUnknownValue2);
+    pdest->PathingRequestClosePoint_SetMinDistance(this->fPointHeight);
+    pdest->SetMaxDistance_006e5ee0(this->m_fUnknownValue2);
 }
 
 // @fnv 0x006e3fb0

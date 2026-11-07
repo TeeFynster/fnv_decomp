@@ -13,10 +13,10 @@ struct FUN_00811930_shell : RefH
     bool IsNotDeleted() const;
 };
 extern int DAT_011ae61c;
-void FUN_00811e00(int value);
+void BoltShader_SetSubSegmentCount(int value);
 struct FUN_008133d0_shell
 {
-    void FUN_008133d0(int value);
+    void MagicBoltProjectile_SetState(int value);
 };
 
 // 0x00bc2360 indexes a 16-byte particle-position stream; NiPoint3 would change the stride to 12.
@@ -130,13 +130,14 @@ struct Emitter
     unsigned int unk16c;
     unsigned int unk170;
     unsigned char active, state, flags, centered;
-    int FUN_00bc0b40();
-    void FUN_00bc2360();
+    int BoltShader_GetMaxSegments();
+    void BoltShaderProperty_InitSegmentData();
 };
 // @fnv 0x00bc2360
-void Emitter::FUN_00bc2360()
+// src: XBOX_PDB 0x00bc2360
+void Emitter::BoltShaderProperty_InitSegmentData()
 {
-    int available = FUN_00bc0b40();
+    int available = BoltShader_GetMaxSegments();
     elapsed = 0.0f;
     active = false;
     if (available < count * stride)

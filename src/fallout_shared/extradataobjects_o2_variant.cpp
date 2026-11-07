@@ -9,11 +9,12 @@ class FUN_00ee8ac0_cls
     virtual void vSlot0();
     unsigned int m_uiCount;
     int** m_ppItems;
-    int* FUN_00ee8ac0();
+    int* NiTMapIterator_GetFirstPos();
 };
 
 // @fnv 0x00ee8ac0
-int* FUN_00ee8ac0_cls::FUN_00ee8ac0()
+// src: COMMUNITY 0x00ee8ac0
+int* FUN_00ee8ac0_cls::NiTMapIterator_GetFirstPos()
 {
     unsigned int count = m_uiCount;
     int i = 0;

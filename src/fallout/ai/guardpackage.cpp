@@ -9,7 +9,7 @@
 // @fnv 0x00408840
 double std::abs(float value)
 {
-    return FUN_00408860(value);
+    return fabsf_00408860(value);
 }
 // Reads eState, a second dword, iWarningCount and a trailing value from the load buffer.
 // @fnv 0x009f28b0

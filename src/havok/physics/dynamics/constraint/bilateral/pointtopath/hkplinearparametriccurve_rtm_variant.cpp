@@ -26,7 +26,7 @@ extern "C" void _mm_store_ss(float*, LocalM128);
 #include "../../../../../../../include/hkpLinearParametricCurve.h"
 #include <string.h>
 
-void* FUN_00c85750();
+void* hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* pvAllocator, void* apvArray, int iElemSize);
 
 // Only the thread allocator at +0x10 is used here; this is a view of the TLS allocation context.
@@ -42,7 +42,7 @@ struct CurveAllocationContext
 // The shared array's pushBack returns void; this helper also returns the appended element.
 template <class T> static __forceinline T* appendCurveElement(hkArray<T>& array, const T& value)
 {
-    CurveAllocationContext* context = (CurveAllocationContext*)FUN_00c85750();
+    CurveAllocationContext* context = (CurveAllocationContext*)hkMemoryRouter_getInstance();
     if (array.m_iElementCount == array.getCapacity())
         ResizeAudioStream(context->m_pStreamAllocator, &array, sizeof(T));
     T* element = &array.m_data[array.m_iElementCount];

@@ -77,7 +77,7 @@ class MobileObject : public TESObjectREFR
     virtual void Unk_C0(void);
     bool HasSaidTopicInfo(TESTopicInfo* info);
     virtual NiPoint3* GetPos() const;
-    bool FUN_005a2030() const;
+    bool IsSwimming_005a2030() const;
     float GetRelevantWaterHeight() const;
     float GetActorHeight() const;
 };

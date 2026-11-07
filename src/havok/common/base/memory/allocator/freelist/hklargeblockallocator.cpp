@@ -23,19 +23,21 @@ inline hkLargeBlockAllocator::Chunk* hkLargeBlockAllocator::Page::getFooter() { 
 
 struct FUN_00dd74b0_cls
 {
-    void FUN_00dd74b0(int a, int b, int c, int d);
-    void* FUN_00dd7650(int a, int b, int c, int d);
+    void _init(int a, int b, int c, int d);
+    void* hkFreeList_hkFreeList(int a, int b, int c, int d);
 };
 // Calls FUN_00dd74b0 with the four arguments and returns this.
 // @fnv 0x00dd7650
-void* __thiscall FUN_00dd74b0_cls::FUN_00dd7650(int a, int b, int c, int d)
+// src: HAVOK_LIB 0x00dd7650
+void* __thiscall FUN_00dd74b0_cls::hkFreeList_hkFreeList(int a, int b, int c, int d)
 {
-    FUN_00dd74b0(a, b, c, d);
+    _init(a, b, c, d);
     return this;
 }
 
 // @fnv 0x00dd8a80
-void* __stdcall FUN_00dd8a80(void* p, void* apUnused)
+// src: HAVOK_LIB 0x00dd8a80
+void* __stdcall hkLargeBlockAllocator_getAllocatedSize(void* p, void* apUnused)
 {
     return reinterpret_cast<char*>(reinterpret_cast<size_t*>(p)[-3] & 0xfffffffc) - 0x10;
 }
@@ -47,7 +49,8 @@ extern int DAT_010d7c80;
 // (RTTI 0x010d7c80, base hkReferencedObject), releases m_streamReader at +8 and
 // restores hkBaseObject's vftable (0x0102e388), i.e. the hkIArchive destructor body.
 // @fnv 0x00dd91f0
-void hkIArchive::FUN_00dd91f0()
+// src: GUESS 0x00dd91f0 (confidence: medium)
+void hkIArchive::ReleaseArchiveReader()
 {
     *(int**)this = (int*)&DAT_010d7c80;
     if (m_streamReader)
@@ -57,14 +60,16 @@ void hkIArchive::FUN_00dd91f0()
 
 // Returns the value at a[-3] with the low two bits cleared.
 // @fnv 0x00dd8a90
-int __stdcall FUN_00dd8a90(int* pValues, int iUnused)
+// src: HAVOK_LIB 0x00dd8a90
+int __stdcall hkLargeBlockAllocator_getAllocatedSizeWithOverhead(int* pValues, int iUnused)
 {
     return (pValues[-3] & 0xfffffffc);
 }
 
 // Clears the pool's counters, buckets, free list and sentinel node, then sets the block shift to 3.
 // @fnv 0x00dd7f10
-void hkLargeBlockAllocator::FUN_00dd7f10()
+// src: HAVOK_LIB 0x00dd7f10
+void hkLargeBlockAllocator::_init_00dd7f10()
 {
     m_peakBytes = 0;
     m_totalBytes = 0;
@@ -113,7 +118,7 @@ void hkLargeBlockAllocator::ProcessAllItems()
             current = next;
         } while (current != (WorkItem*)&m_kPage);
     }
-    FUN_00dd7f10();
+    _init_00dd7f10();
 }
 
 struct TreeChunk
@@ -137,13 +142,14 @@ unsigned int __stdcall GetMaxChunkSize(TreeChunk* apTreeChunk, unsigned int maxS
     return maxSize;
 }
 
-int __cdecl FUN_00dd7e00(unsigned int size);
+int __cdecl hkLargeBlockAllocator__computeTreeIndex(unsigned int size);
 
 // @fnv 0x00dd8350
-unsigned int hkLargeBlockAllocator::FUN_00dd8350()
+// src: HAVOK_LIB 0x00dd8350
+unsigned int hkLargeBlockAllocator::findLargestBlockSize()
 {
     unsigned int size = m_uiChunkSize;
-    int idx = FUN_00dd7e00(size);
+    int idx = hkLargeBlockAllocator__computeTreeIndex(size);
     for (int i = 31; i >= idx; i--)
     {
         void* tree = m_treeBins[i];
@@ -212,7 +218,8 @@ void hkLargeBlockAllocator::ForEachAllocatedBlock(S_00dd8aa0_Callback callback, 
 }
 
 // @fnv 0x00dd7e70
-int __cdecl FUN_00dd7e70(int aiValue)
+// src: HAVOK_LIB 0x00dd7e70
+int __cdecl hkLargeBlockAllocator__bitToIndex(int aiValue)
 {
     unsigned int r = (unsigned int)(aiValue - 1);
     unsigned int t = r >> 12 & 0x10;
@@ -257,7 +264,8 @@ struct ListTarget
 
 // Sets the vtable, walks the m_a4 list calling m_98->v10 on each node, then sets the second vtable.
 // @fnv 0x00dd7ec0
-void hkLargeBlockAllocator::FUN_00dd7ec0()
+// src: GUESS 0x00dd7ec0 (confidence: low)
+void hkLargeBlockAllocator::ProcessEntries_00dd7ec0()
 {
     *(int**)this = &DAT_010d7c34;
     ::HklargeblockallocatorListNodeView* sentinel = (::HklargeblockallocatorListNodeView*)&m_a4;
@@ -286,7 +294,7 @@ struct tchunk
     int index;
 };
 
-int __cdecl FUN_00dd7e00(int size);
+int __cdecl hkLargeBlockAllocator__computeTreeIndex(int size);
 
 // Computes a bin index from size, then inserts chunk x into that bin's list or tree, splitting by size bits until a matching chunk or empty slot is found.
 // @fnv 0x00dd8010
@@ -294,7 +302,7 @@ void hkLargeBlockAllocator::InsertChunk(tchunk* pChunk, int size)
 {
     tchunk** ppBin;
     int index;
-    index = FUN_00dd7e00(size);
+    index = hkLargeBlockAllocator__computeTreeIndex(size);
     ppBin = &m_apChunkLists[index];
     pChunk->index = index;
     pChunk->child[0] = pChunk->child[1] = 0;
@@ -433,7 +441,8 @@ void hkLargeBlockAllocator::RemoveNode(hkLargeBlockAllocator::TreeChunk* node)
 }
 
 // @fnv 0x00dd83a0
-__declspec(noinline) void hkLargeBlockAllocator::FUN_00dd83a0()
+// src: HAVOK_LIB 0x00dd83a0
+__declspec(noinline) void hkLargeBlockAllocator::_makeTopValid()
 {
     *(unsigned int*)(m_10 + 4) = m_14 | 1;
     *(unsigned int*)(m_10 + m_14) = m_14;
@@ -493,7 +502,8 @@ struct hkMemoryManager
 
 // Rounds size up to a 16-byte multiple, allocates it via this allocator or unk98, writes a tag at the start and returns the block offset by 0x10.
 // @fnv 0x00dd8700
-void* hkLargeBlockAllocator::FUN_00dd8700(unsigned int size)
+// src: HAVOK_LIB 0x00dd8700
+void* hkLargeBlockAllocator::criticalAlloc(unsigned int size)
 {
     unsigned int uiAlignedSize = (size + 0x1fu) & 0xfffffff0u;
     void* block = vf01(uiAlignedSize);
@@ -531,7 +541,8 @@ struct Heap
 };
 
 // @fnv 0x00dd8750
-void hkLargeBlockAllocator::FUN_00dd8750(void* apBlock, unsigned int auiSize)
+// src: HAVOK_LIB 0x00dd8750
+void hkLargeBlockAllocator::criticalFree(void* apBlock, unsigned int auiSize)
 {
     int iCount = *(int*)((char*)apBlock - 0x10);
     switch (iCount)
@@ -557,7 +568,7 @@ struct FUN_00dd8790_owner
 // @fnv 0x00dd8790
 void hkLargeBlockAllocator::PurgeAndSelectBlock()
 {
-    FUN_00dd83a0();
+    _makeTopValid();
     hkLargeBlockAllocator::Page* sentinel = &m_a4;
     hkLargeBlockAllocator::Page* n = m_a4.m_next;
     if (n != sentinel)
@@ -706,7 +717,8 @@ ok:
 }
 
 // @fnv 0x00dd8b20
-hkLargeBlockAllocator::PageRange hkLargeBlockAllocator::FUN_00dd8b20()
+// src: HAVOK_LIB 0x00dd8b20
+hkLargeBlockAllocator::PageRange hkLargeBlockAllocator::getIterator()
 {
     hkLargeBlockAllocator::PageRange r;
     m10->head = m14 | 1;
@@ -723,9 +735,10 @@ hkLargeBlockAllocator::PageRange hkLargeBlockAllocator::FUN_00dd8b20()
 }
 
 // @fnv 0x00dd8df0
-hkLargeBlockAllocator* hkLargeBlockAllocator::FUN_00dd8df0(int arg)
+// src: GUESS 0x00dd8df0 (confidence: low)
+hkLargeBlockAllocator* hkLargeBlockAllocator::EvaluateValue_00dd8df0(int arg)
 {
-    FUN_00dd7ec0();
+    ProcessEntries_00dd7ec0();
     return this;
 }
 
@@ -798,7 +811,8 @@ inline void alignEnd(char*& p)
 
 // Rounds the requested size, tries allocation, then may extend the segment or request a page before allocating.
 // @fnv 0x00dd84c0
-void* hkLargeBlockAllocator::FUN_00dd84c0(unsigned int size)
+// src: HAVOK_LIB 0x00dd84c0
+void* hkLargeBlockAllocator::alloc_00dd84c0(unsigned int size)
 {
     unsigned int uiAlignedSize;
     uiAlignedSize = (size + 31) & ~15;
@@ -898,13 +912,13 @@ void* hkLargeBlockAllocator::FUN_00dd84c0(unsigned int size)
 
     if (this->m_fMinimumV != (hkLargeBlockAllocator::Chunk*)&this->m_9c)
     {
-        this->FUN_00dd83a0();
+        this->_makeTopValid();
         this->InsertChunk(this->m_fMinimumV, this->m_fMinimumV->head & ~3);
     }
 
     this->m_uiChunkSize = (pNewPage->m_kRayEnd - pNewPage->m_kRayStart) - 0x10;
     this->m_fMinimumV = (hkLargeBlockAllocator::Chunk*)pNewPage->m_kRayStart;
-    this->FUN_00dd83a0();
+    this->_makeTopValid();
 
     hkLargeBlockAllocator::Chunk* endChunk;
     endChunk = (hkLargeBlockAllocator::Chunk*)(pNewPage->m_kRayEnd - 0x10);
@@ -926,18 +940,19 @@ void* hkLargeBlockAllocator::FUN_00dd84c0(unsigned int size)
     return this->AllocateBlock(uiAlignedSize);
 }
 
-int __cdecl FUN_00dd7e00(unsigned int size);
-int __cdecl FUN_00dd7e70(unsigned int bit);
+int __cdecl hkLargeBlockAllocator__computeTreeIndex(unsigned int size);
+int __cdecl hkLargeBlockAllocator__bitToIndex(unsigned int bit);
 
 // Finds the best-fit free chunk for nb bytes, splits it if the remainder is large enough, and returns a pointer to the allocated block.
 // @fnv 0x00dd8180
-void* hkLargeBlockAllocator::FUN_00dd8180(unsigned int uiSize)
+// src: HAVOK_LIB 0x00dd8180
+void* hkLargeBlockAllocator::_allocLarge(unsigned int uiSize)
 {
     hkLargeBlockAllocator::TreeChunk* t;
     hkLargeBlockAllocator::TreeChunk* pBest = 0;
     unsigned long uiRemainder = 0 - uiSize;
     int idx = 0;
-    idx = FUN_00dd7e00(uiSize);
+    idx = hkLargeBlockAllocator__computeTreeIndex(uiSize);
     t = bins[idx];
     if (t != 0)
     {
@@ -972,7 +987,7 @@ void* hkLargeBlockAllocator::FUN_00dd8180(unsigned int uiSize)
         if (leftbits != 0)
         {
             unsigned int leastbit = leftbits & (0 - leftbits);
-            t = bins[FUN_00dd7e70(leastbit)];
+            t = bins[hkLargeBlockAllocator__bitToIndex(leastbit)];
         }
     }
     while (t != 0)
@@ -1030,7 +1045,8 @@ namespace fnv_00dd7e00 {
 
 // Shifts and tests bits of x, returning 0, 0x1f, or a value computed from the shifted bits.
 // @fnv 0x00dd7e00
-unsigned int __cdecl FUN_00dd7e00(unsigned int x)
+// src: HAVOK_LIB 0x00dd7e00
+unsigned int __cdecl hkLargeBlockAllocator__computeTreeIndex(unsigned int x)
 {
     unsigned int hi = x >> 8;
     if (hi == 0)

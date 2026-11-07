@@ -18,12 +18,13 @@ struct NiTriStripsDynamicData : NiTriStripsData
 {
     unsigned short m_usActiveVertices;
     unsigned short m_usActiveTriangles;
-    void FUN_00a923c0(unsigned short& usStrips, const unsigned short*& pusStripLengths,
+    void GetStripData_00a923c0(unsigned short& usStrips, const unsigned short*& pusStripLengths,
                       const unsigned short*& pusTriList, unsigned int& uiStripLengthSum);
 };
 
 // @fnv 0x00a923c0
-void NiTriStripsDynamicData::FUN_00a923c0(unsigned short& usStrips, const unsigned short*& pusStripLengths,
+// src: XBOX_PDB 0x00a923c0
+void NiTriStripsDynamicData::GetStripData_00a923c0(unsigned short& usStrips, const unsigned short*& pusStripLengths,
                                           const unsigned short*& pusTriList, unsigned int& uiStripLengthSum)
 {
     usStrips = 1;
@@ -57,7 +58,8 @@ bool NiTriStripsDynamicData::IsEqualDynamic(NiObject* pkObject)
 extern "C" void* g_011f5e8c;
 
 // @fnv 0x00a92470
-void* __cdecl FUN_00a92470()
+// src: COMMUNITY 0x00a92470
+void* __cdecl NiTriStripsDynamicData_GetRTTI()
 {
     return &g_011f5e8c;
 }
@@ -66,11 +68,12 @@ struct FUN_00a92480_shell : NiTriStripsData
 {
     unsigned short m_usActiveVertices;
     unsigned short m_usActiveTriangles;
-    void __thiscall FUN_00a92480(short value);
+    void __thiscall NiTriStripsDynamicData_SetActiveVertexCount(short value);
 };
 
 // @fnv 0x00a92480
-void __thiscall FUN_00a92480_shell::FUN_00a92480(short value)
+// src: XBOX_PDB 0x00a92480
+void __thiscall FUN_00a92480_shell::NiTriStripsDynamicData_SetActiveVertexCount(short value)
 {
     m_usActiveVertices = value;
 }
@@ -79,7 +82,8 @@ extern int DAT_0109fc54;
 
 // Allocates the dynamic strips data, constructs its shared base, initializes the active counts and vtable, and returns it or null.
 // @fnv 0x00a923f0
-void* __cdecl FUN_00a923f0()
+// src: EXE 0x00a923f0
+void* __cdecl NiTriStripsDynamicData_CreateObject()
 {
     void* pNode = BSFadeNode::operator new(0x54);
     if (pNode)
@@ -167,12 +171,13 @@ struct DynStripsData : NiTriStripsData
 {
     unsigned short m_usActiveVertices;
     unsigned short m_usActiveTriangles;
-    void FUN_00a924d0(NiStream& stream);
+    void NiTriStripsDynamicData_LoadBinary(NiStream& stream);
 };
 
 // Loads the base NiTriStripsData from the stream, then reads the active vertex and triangle counts.
 // @fnv 0x00a924d0
-void DynStripsData::FUN_00a924d0(NiStream& stream)
+// src: XBOX_PDB 0x00a924d0
+void DynStripsData::NiTriStripsDynamicData_LoadBinary(NiStream& stream)
 {
     NiTriStripsData::LoadBinary(stream);
     ReadBinaryValue(stream, m_usActiveVertices);
@@ -198,8 +203,8 @@ template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(co
 
 typedef NiTArray<char*, NiTMallocInterface<char*> > A92590StringArray;
 
-extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
-char* __cdecl FUN_00a7d490(const char* pcPrefix, unsigned short usValue);
+extern "C" char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcText);
+char* __cdecl NiGetViewerString_00a7d490(const char* pcPrefix, unsigned short usValue);
 
 struct A92590TriShapeData : NiTriStripsData
 {
@@ -210,19 +215,20 @@ struct A92590TriShapeData : NiTriStripsData
 
     // The shared base has no viewer overload for this local string-array type.
     void GetBaseViewerStrings(A92590StringArray* pkStrings);
-    void FUN_00a92590(A92590StringArray* pkStrings);
+    void NiTriStripsDynamicData_GetViewerStrings(A92590StringArray* pkStrings);
 };
 
 // Appends the RTTI name and the active vertex and triangle counts to the viewer string array.
 // @fnv 0x00a92590
-void A92590TriShapeData::FUN_00a92590(A92590StringArray* pkStrings)
+// src: XBOX_PDB 0x00a92590
+void A92590TriShapeData::NiTriStripsDynamicData_GetViewerStrings(A92590StringArray* pkStrings)
 {
     GetBaseViewerStrings(pkStrings);
-    char* pcString = FUN_00a7d330(ms_kRTTI.GetName());
+    char* pcString = NiViewerStrings_NiGetViewerString_Title(ms_kRTTI.GetName());
     pkStrings->Add(pcString);
-    pcString = FUN_00a7d490("m_usActiveVertices", m_usActiveVertices);
+    pcString = NiGetViewerString_00a7d490("m_usActiveVertices", m_usActiveVertices);
     pkStrings->Add(pcString);
-    pcString = FUN_00a7d490("m_usActiveTriangles", m_usActiveTriangles);
+    pcString = NiGetViewerString_00a7d490("m_usActiveTriangles", m_usActiveTriangles);
     pkStrings->Add(pcString);
 }
 
@@ -240,11 +246,12 @@ struct DynamicStripCountWriter : NiTriStripsData
 {
     unsigned short m_usActiveVertices;
     unsigned short m_usActiveTriangles;
-    void __thiscall FUN_00a92530(void*);
+    void __thiscall NiTriStripsDynamicData_SaveBinary(void*);
 };
 
 // @fnv 0x00a92530
-void __thiscall DynamicStripCountWriter::FUN_00a92530(void* stream)
+// src: XBOX_PDB 0x00a92530
+void __thiscall DynamicStripCountWriter::NiTriStripsDynamicData_SaveBinary(void* stream)
 {
     NiTriStripsData::SaveBinary(*(NiStream*)stream);
     NiBinaryStream* pBuffer = *(NiBinaryStream**)((char*)stream + 0x250);
@@ -266,10 +273,11 @@ struct TriStrips_A923B0 : NiTriStripsData
 {
     unsigned short m_usActiveVertices;
     unsigned short m_usActiveTriangles;
-    unsigned short FUN_00a923b0() const;
+    unsigned short NiTriStripsDynamicData_GetActiveTriangleCount() const;
 };
 // @fnv 0x00a923b0
-unsigned short TriStrips_A923B0::FUN_00a923b0() const
+// src: XBOX_PDB 0x00a923b0
+unsigned short TriStrips_A923B0::NiTriStripsDynamicData_GetActiveTriangleCount() const
 {
     return m_usActiveTriangles;
 }

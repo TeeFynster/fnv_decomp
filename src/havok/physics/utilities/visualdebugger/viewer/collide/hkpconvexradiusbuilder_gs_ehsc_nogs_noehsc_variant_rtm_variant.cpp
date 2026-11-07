@@ -52,9 +52,9 @@ struct D31Tbl
     void* t;
 };
 __declspec(align(16)) D31Tbl tbl_0101b330;
-D31Tbl2* __cdecl FUN_00c85750();
+D31Tbl2* __cdecl hkMemoryRouter_getInstance();
 extern float DAT_0101b31c;
-static float FUN_00de3110(int dummy, D31Mgr* mgr);
+static float _getPlaneToSurfaceDistance(int dummy, D31Mgr* mgr);
 float __cdecl S00de3110_Entry();
 
 #include <xmmintrin.h>
@@ -146,9 +146,10 @@ struct Shape
 struct VectorResult
 {
     __m128 value;
-    __declspec(noalias) void FUN_00c7f640(const Transform*, const __m128*);
+    __declspec(noalias) void setTransformedPos_00c7f640(const Transform*, const __m128*);
 };
-__declspec(noinline) void VectorResult::FUN_00c7f640(const Transform* transform, const __m128* point)
+// src: XBOX_PDB 0x00c7f640
+__declspec(noinline) void VectorResult::setTransformedPos_00c7f640(const Transform* transform, const __m128* point)
 {
     __m128 p = *point;
     value =
@@ -165,7 +166,7 @@ struct Allocator
     virtual void freeChunk(void*, int);
 };
 extern void FUN_00c90940(void*, void*, int);
-extern void FUN_00c908c0(void*, void*, int, int);
+extern void hkArrayUtil__reserve(void*, void*, int, int);
 struct OutputShape
 {
     int field00;
@@ -182,7 +183,7 @@ struct OutputArray
     unsigned m_iCapacityState;
     __forceinline void append(OutputShape* shape)
     {
-        D31Tbl2* holder = FUN_00c85750();
+        D31Tbl2* holder = hkMemoryRouter_getInstance();
         if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
             FUN_00c90940(reinterpret_cast<Allocator*>(holder->sub), this, 4);
         OutputShape** slot = m_data + m_iElementCount;
@@ -224,7 +225,7 @@ static __forceinline void PlaneArray_release(hkArrayBase<PlaneVector>& self);
 
 static __forceinline void PlaneArray_reserve(hkArrayBase<PlaneVector>& self, int count)
 {
-        D31Tbl2* holder = FUN_00c85750();
+        D31Tbl2* holder = hkMemoryRouter_getInstance();
         Allocator* a = reinterpret_cast<Allocator*>(holder->sub);
         int old = self.m_iCapacityState & 0x3fffffff;
         if (old < count)
@@ -232,13 +233,13 @@ static __forceinline void PlaneArray_reserve(hkArrayBase<PlaneVector>& self, int
             int wanted = 2 * old;
             if (wanted <= count)
                 wanted = count;
-            FUN_00c908c0(a, (&self), wanted, 16);
+            hkArrayUtil__reserve(a, (&self), wanted, 16);
         }
     }
 
 static __forceinline void PlaneArray_release(hkArrayBase<PlaneVector>& self)
 {
-        D31Tbl2* holder = FUN_00c85750();
+        D31Tbl2* holder = hkMemoryRouter_getInstance();
         Allocator* a = reinterpret_cast<Allocator*>(holder->sub);
         self.m_iElementCount = 0;
         if (!(unsigned(self.m_iCapacityState) & 0x80000000))
@@ -347,7 +348,8 @@ static __forceinline void planeDistance(hkArrayBase<PlaneVector>& planes, int in
 }
 extern const Transform DAT_01268370;
 
-static __declspec(noinline) float FUN_00de3110(Shape* shape)
+// src: XBOX_PDB 0x00de3110
+static __declspec(noinline) float _getPlaneToSurfaceDistance(Shape* shape)
 {
     hkArrayBase<PlaneVector>* source = shape->FUN_00d58d50();
     hkArrayBase<PlaneVector> vertices(FinishingFlag(0));
@@ -370,7 +372,8 @@ static __declspec(noinline) float FUN_00de3110(Shape* shape)
     PlaneArray_release(vertices);
     return maximum;
 }
-static __declspec(noinline) void FUN_00de3200(Shape* shape, hkArrayBase<PlaneVector>* planes, float radius)
+// src: XBOX_PDB 0x00de3200
+static __declspec(noinline) void _addBoundingPlanes(Shape* shape, hkArrayBase<PlaneVector>* planes, float radius)
 {
     __m128 boundsStorage[sizeof(hkAabb) / sizeof(__m128)];
     hkAabb& bounds = *reinterpret_cast<hkAabb*>(boundsStorage);
@@ -395,7 +398,7 @@ struct Geometry
     hkArrayBase<PlaneVector> vertices, triangles;
     Geometry() : vertices(FinishingFlag(0)), triangles(FinishingFlag(0)) {}
 };
-extern void FUN_00d5a6a0(const hkArrayBase<PlaneVector>*, hkArrayBase<PlaneVector>*);
+extern void hkGeometryUtility_createVerticesFromPlaneEquations(const hkArrayBase<PlaneVector>*, hkArrayBase<PlaneVector>*);
 extern void FUN_00d5a5e0(const StridedVertices*, Geometry*);
 struct ConvexOutput
 {
@@ -403,13 +406,14 @@ struct ConvexOutput
     unsigned short memorySize, references;
     OutputShape* FUN_00de1d20(Geometry*);
 };
-static __declspec(noinline) OutputShape* FUN_00de3360(hkArrayBase<PlaneVector>* planes, const Transform* transform)
+// src: HAVOK_LIB 0x00de3360
+static __declspec(noinline) OutputShape* _createConvexDisplayFromPlanes(hkArrayBase<PlaneVector>* planes, const Transform* transform)
 {
     hkArrayBase<PlaneVector> vertices(FinishingFlag(0));
     vertices.m_data = 0;
     vertices.m_iElementCount = 0;
     vertices.m_iCapacityState = 0x80000000;
-    FUN_00d5a6a0(planes, &vertices);
+    hkGeometryUtility_createVerticesFromPlaneEquations(planes, &vertices);
     int count = vertices.m_iElementCount;
     if (count < 1)
     {
@@ -423,8 +427,8 @@ static __declspec(noinline) OutputShape* FUN_00de3360(hkArrayBase<PlaneVector>* 
     PlaneArray_reserve(transformed, count);
     transformed.m_iElementCount = count;
     for (int i = 0; i < count; ++i)
-        reinterpret_cast<VectorResult*>(&transformed.m_data[i])->FUN_00c7f640(transform, &vertices.m_data[i].quad);
-    Geometry* geometry = static_cast<Geometry*>(reinterpret_cast<Allocator*>(FUN_00c85750()->sub)->allocate(0x18));
+        reinterpret_cast<VectorResult*>(&transformed.m_data[i])->setTransformedPos_00c7f640(transform, &vertices.m_data[i].quad);
+    Geometry* geometry = static_cast<Geometry*>(reinterpret_cast<Allocator*>(hkMemoryRouter_getInstance()->sub)->allocate(0x18));
     if (geometry)
     {
         geometry->vertices.m_data = 0;
@@ -440,7 +444,7 @@ static __declspec(noinline) OutputShape* FUN_00de3360(hkArrayBase<PlaneVector>* 
     view.stride = 16;
     FUN_00d5a5e0(&view, geometry);
     ConvexOutput* allocation =
-        static_cast<ConvexOutput*>(reinterpret_cast<Allocator*>(FUN_00c85750()->sub)->allocate(0x60));
+        static_cast<ConvexOutput*>(reinterpret_cast<Allocator*>(hkMemoryRouter_getInstance()->sub)->allocate(0x60));
     allocation->memorySize = 0x60;
     OutputShape* result = allocation->FUN_00de1d20(geometry);
     PlaneArray_release(transformed);
@@ -451,10 +455,11 @@ struct Processor
 {
     int field00, field04;
     float threshold;
-    void FUN_00de3520(Shape*, const Transform*, OutputArray*);
+    void hkpConvexRadiusBuilder_buildShapeDisplay(Shape*, const Transform*, OutputArray*);
 };
 // @fnv 0x00de3520
-void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArray* output)
+// src: XBOX_PDB 0x00de3520
+void Processor::hkpConvexRadiusBuilder_buildShapeDisplay(Shape* shape, const Transform* transform, OutputArray* output)
 {
     Transform combined;
     ShapeBuffer buffer;
@@ -477,20 +482,20 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         local.r[2] = _mm_setzero_ps();
         local.r[2].m128_f32[2] = 1.0f;
         local.r[3] = shape->point20;
-        combined.FUN_00cb2240(transform, &local);
-        FUN_00de3520(shape->child18, &combined, output);
+        combined.hkTransform_setMul(transform, &local);
+        hkpConvexRadiusBuilder_buildShapeDisplay(shape->child18, &combined, output);
         return;
     }
     case 12:
-        combined.FUN_00cb2240(transform, reinterpret_cast<Transform*>(&shape->point20));
-        FUN_00de3520(shape->child18, &combined, output);
+        combined.hkTransform_setMul(transform, reinterpret_cast<Transform*>(&shape->point20));
+        hkpConvexRadiusBuilder_buildShapeDisplay(shape->child18, &combined, output);
         return;
     case 15:
-        combined.FUN_00cb2240(transform, reinterpret_cast<Transform*>(&shape->point30));
-        FUN_00de3520(shape->child14, &combined, output);
+        combined.hkTransform_setMul(transform, reinterpret_cast<Transform*>(&shape->point30));
+        hkpConvexRadiusBuilder_buildShapeDisplay(shape->child14, &combined, output);
         return;
     case 27:
-        FUN_00de3520(shape->child10, transform, output);
+        hkpConvexRadiusBuilder_buildShapeDisplay(shape->child10, transform, output);
         return;
     case 8:
     case 10: {
@@ -498,7 +503,7 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         for (int key = collection->first(); key != -1; key = collection->next(key))
         {
             Shape* child = collection->child(key, buffer);
-            FUN_00de3520(child, transform, output);
+            hkpConvexRadiusBuilder_buildShapeDisplay(child, transform, output);
         }
         return;
     }
@@ -512,7 +517,7 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         if (!collection || key == -1)
             goto commonExit;
         Shape* child = collection->child(key, buffer);
-        FUN_00de3520(child, transform, output);
+        hkpConvexRadiusBuilder_buildShapeDisplay(child, transform, output);
         key = collection->next(key);
         goto top;
     }
@@ -535,7 +540,7 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         for (int i = 0; i < selection->count; ++i)
         {
             Shape* child = selection->owner->collection.child(selection->keys[i], buffer);
-            FUN_00de3520(child, transform, output);
+            hkpConvexRadiusBuilder_buildShapeDisplay(child, transform, output);
         }
         return;
     }
@@ -546,8 +551,8 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
             return;
         VectorResult end;
         VectorResult start;
-        end.FUN_00c7f640(transform, &shape->point30);
-        start.FUN_00c7f640(transform, &shape->point20);
+        end.setTransformedPos_00c7f640(transform, &shape->point30);
+        start.setTransformedPos_00c7f640(transform, &shape->point20);
         __m128 ev = end.value;
         __m128 sv = start.value;
         __m128 dv = _mm_sub_ps(ev, sv);
@@ -556,7 +561,7 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         __m128 offset = _mm_mul_ps(nv, _mm_shuffle_ps(rv, rv, 0));
         end.value = _mm_add_ps(ev, offset);
         start.value = _mm_sub_ps(sv, offset);
-        D31Tbl2* holder = FUN_00c85750();
+        D31Tbl2* holder = hkMemoryRouter_getInstance();
         OutputShape* result = static_cast<OutputShape*>(reinterpret_cast<Allocator*>(holder->sub)->allocate(0x90));
         result->memorySize = 0x90;
         result = result->FUN_00d58510(&end.value, &start.value, radius + additional, 9, 1);
@@ -569,7 +574,7 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         if (!(radius > threshold))
             return;
         __m128 dimensions = _mm_add_ps(_mm_set1_ps(radius), shape->point20);
-        D31Tbl2* holder = FUN_00c85750();
+        D31Tbl2* holder = hkMemoryRouter_getInstance();
         OutputShape* result = static_cast<OutputShape*>(reinterpret_cast<Allocator*>(holder->sub)->allocate(0x70));
         result->memorySize = 0x70;
         result = result->FUN_00de1f50(&dimensions);
@@ -600,7 +605,7 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         planes.m_iElementCount = 0;
         planes.m_iCapacityState = 0x80000000;
         int count = 8;
-        D31Tbl2* holder = FUN_00c85750();
+        D31Tbl2* holder = hkMemoryRouter_getInstance();
         PlaneVector* allocation = count > 0 ? allocatePlaneItems(*reinterpret_cast<Allocator*>(holder->sub), count) : 0;
         int m_iCapacityState = count ? count : 0x80000000;
         planes.m_data = allocation;
@@ -627,7 +632,7 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         planes.m_data[7] = _mm_add_ps(planes.m_data[4], planes.m_data[2]);
         planes.m_data[7] = normalizedUsing(planes.m_data[7], normZero, normThree, normHalf);
         planeDistance(planes, 7, *a, radius);
-        OutputShape* result = FUN_00de3360(&planes, transform);
+        OutputShape* result = _createConvexDisplayFromPlanes(&planes, transform);
         if (result)
             output->append(result);
         PlaneArray_release(planes);
@@ -639,11 +644,11 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         if (!(radius > threshold))
             return;
         hkArrayBase<PlaneVector>* source = shape->FUN_00d58d50();
-        float limit = FUN_00de3110(shape);
+        float limit = _getPlaneToSurfaceDistance(shape);
         planes.m_data = 0;
         planes.m_iElementCount = 0;
         planes.m_iCapacityState = 0x80000000;
-        D31Tbl2* holder = FUN_00c85750();
+        D31Tbl2* holder = hkMemoryRouter_getInstance();
         Allocator* allocator = reinterpret_cast<Allocator*>(holder->sub);
         if ((planes.m_iCapacityState & 0x3fffffff) < source->m_iElementCount)
         {
@@ -671,8 +676,8 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
                 component -= radius;
             }
         }
-        FUN_00de3200(shape, &planes, radius);
-        OutputShape* result = FUN_00de3360(&planes, transform);
+        _addBoundingPlanes(shape, &planes, radius);
+        OutputShape* result = _createConvexDisplayFromPlanes(&planes, transform);
         if (result)
             output->append(result);
         PlaneArray_release(planes);

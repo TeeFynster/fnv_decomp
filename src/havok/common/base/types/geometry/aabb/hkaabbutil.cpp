@@ -82,7 +82,8 @@ __forceinline void setTransformedPos(hkVector4q& result, const hkTransform& t, c
 
 // Transforms a local-space AABB (center, halfExtents, extraRadius) into world space via localToWorld and writes the result to aabbOut.
 // @fnv 0x00d26230
-void __cdecl FUN_00d26230(const hkTransform& localToWorld, const hkVector4q& halfExtents,
+// src: XBOX_PDB 0x00d26230
+void __cdecl hkAabbUtil_calcAabb_00d26230(const hkTransform& localToWorld, const hkVector4q& halfExtents,
                           const hkVector4q& center, float extraRadius, hkAabb& aabbOut)
 {
     hkVector4q vHeX;
@@ -185,7 +186,7 @@ struct hkRotationq
     hkVector4q m_kColumn1;
     hkVector4q m_kColumn2;
 
-    void FUN_00cb2d90(const hkQuaternionq& q);
+    void hkRotation_set(const hkQuaternionq& q);
     __forceinline const hkVector4q& getColumn(int i) const
     {
         return (&m_kColumn0)[i];
@@ -237,7 +238,7 @@ class hkSweptTransformq
         hkQuaternionq q;
         q.m_vec.setInterpolate4(m_qRotation0.m_vec, m_qRotation1.m_vec, t4);
         q.normalize();
-        transformOut.m_rotation.FUN_00cb2d90(q);
+        transformOut.m_rotation.hkRotation_set(q);
 
         transformOut.m_vTranslation.setInterpolate4(m_vCenterOfMass0, m_vCenterOfMass1, t4);
         hkVector4q centerShift;
@@ -258,7 +259,7 @@ class hkSweptTransformq
         q.m_vec.m_vComponents = _mm_add_ps(left, right);
 
         q.normalizeLoop();
-        transformOut.m_rotation.FUN_00cb2d90(q);
+        transformOut.m_rotation.hkRotation_set(q);
 
         transformOut.m_vTranslation.setInterpolate4(m_vCenterOfMass0, m_vCenterOfMass1, t4);
         hkVector4q centerShift;
@@ -277,7 +278,7 @@ struct hkMotionStateq
 struct SweptSampleInfo
 {
     hkTransformq m_frame;
-    void FUN_00cb21e0(const hkMotionStateq* motionState);
+    void hkTransform_setInverse(const hkMotionStateq* motionState);
 };
 
 struct SweptTransformSamples
@@ -297,10 +298,11 @@ struct SweptTransformSamples
 
 // Stores motionState and sample info in out, then evaluates swept transforms at times based on delta angle, filling m_kTransforms and m_numQsTransforms.
 // @fnv 0x00cbec90
-void FUN_00cbec90(const hkMotionStateq* motionState, SweptTransformSamples* out)
+// src: GUESS 0x00cbec90 (confidence: medium)
+void hkMotionStateq_SampleSweptMotionTransforms(const hkMotionStateq* motionState, SweptTransformSamples* out)
 {
     out->m_kMotionState = motionState;
-    out->m_info.FUN_00cb21e0(motionState);
+    out->m_info.hkTransform_setInverse(motionState);
 
     const hkSweptTransformq& swept = motionState->m_kSweptTransform;
     swept.EvaluateTransformAtTime(swept.m_vCenterOfMass0(3), out->m_kMotionTransform);

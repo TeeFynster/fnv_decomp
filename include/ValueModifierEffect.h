@@ -35,6 +35,6 @@ public:
     unsigned short __thiscall FUN_00802d90(Actor* apActor);
     void FUN_00802db0(Actor* apActor);
     void FUN_00802dd0(Actor* apActor);
-    void FUN_0082ba30(Actor* apActor);
-    void __thiscall FUN_0082cd10(Actor* apActor);
+    void LimbConditionEffect_SaveGame(Actor* apActor);
+    void __thiscall ValueModifierEffect_FinishInitLoadGame(Actor* apActor);
 };

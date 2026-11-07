@@ -69,18 +69,18 @@ TESImageSpace::~TESImageSpace()
     ClearData();
 }
 
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int, char*, unsigned int);
 // @fnv 0x0052b630
 void TESImageSpace::Save()
 {
-    FUN_004855a0();
-    if (FUN_00401500())
+    BeginFormRecord();
+    if (TESForm_QEndianSwapOnSave())
         Data.Endian();
     AppendChunk(0x4d414e44, (char*)&Data, sizeof(Data));
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         Data.Endian();
-    FUN_00485680();
+    FinishFormRecord();
 }
 
 // @fnv 0x0052b700

@@ -10,8 +10,8 @@ public:
     virtual unsigned int slotA8();
     virtual MoppCodeHeader* slotB4(char* pAllocated);
 
-    void FUN_00c87710(NiStream& stream);
-    unsigned int FUN_00cc9f60(NiStream& stream);
+    void bhkSerializable_LoadCInfo(NiStream& stream);
+    unsigned int LoadCInfo(NiStream& stream);
 
     static NiObject* __cdecl CreateObject();
 };

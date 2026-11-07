@@ -95,8 +95,8 @@ template <> inline NiPointer<NiTransformData>& NiPointer<NiTransformData>::opera
 struct TransformInterpolatorKeys : NiTransformInterpolator
 {
     PositionKeyInterpolator* FUN_00a3f990(unsigned int&, NiAnimationKey::KeyType&, unsigned char&);
-    TimedRotationKey* FUN_0058cb00(unsigned int&, NiAnimationKey::KeyType&, unsigned char&);
-    TimedAnimationKey* FUN_00a3f9e0(unsigned int&, NiAnimationKey::KeyType&, unsigned char&);
+    TimedRotationKey* NiTransformInterpolator_GetRotData(unsigned int&, NiAnimationKey::KeyType&, unsigned char&);
+    TimedAnimationKey* NiTransformInterpolator_GetScaleData(unsigned int&, NiAnimationKey::KeyType&, unsigned char&);
 };
 
 // @fnv 0x00a3fae0
@@ -148,7 +148,7 @@ bool NiTransformInterpolator::Update(float time, NiObjectNET* target, NiQuatTran
             PositionKeyInterpolator::InterpolatePosition(time, pTranslateKeys, eKeyType, count, last, size));
         m_usLastRotationKeyIndex = (unsigned short)last;
     }
-    TimedRotationKey* pRotateKeys = ((TransformInterpolatorKeys*)this)->FUN_0058cb00(count, eKeyType, size);
+    TimedRotationKey* pRotateKeys = ((TransformInterpolatorKeys*)this)->NiTransformInterpolator_GetRotData(count, eKeyType, size);
     if (count > 0)
     {
         last = m_usLastPositionKeyIndex;
@@ -156,7 +156,7 @@ bool NiTransformInterpolator::Update(float time, NiObjectNET* target, NiQuatTran
             TimedRotationKey::InterpolatePosition(time, pRotateKeys, eKeyType, count, last, size));
         m_usLastPositionKeyIndex = (unsigned short)last;
     }
-    TimedAnimationKey* pScaleKeys = ((TransformInterpolatorKeys*)this)->FUN_00a3f9e0(count, eKeyType, size);
+    TimedAnimationKey* pScaleKeys = ((TransformInterpolatorKeys*)this)->NiTransformInterpolator_GetScaleData(count, eKeyType, size);
     if (count > 0)
     {
         last = m_usLastScaleKeyIndex;
@@ -171,7 +171,7 @@ bool NiTransformInterpolator::Update(float time, NiObjectNET* target, NiQuatTran
     return true;
 }
 
-void __fastcall FUN_00a3ca30(void* pThis);
+void __fastcall UpdateState_00a3ca30(void* pThis);
 void __cdecl FUN_00aa1460(void* p, unsigned int s);
 
 // @fnv 0x00a40410
@@ -180,7 +180,7 @@ void* __fastcall FUN_00a40410(NiTransformInterpolator* pThis, int, unsigned int 
     NiRefObject* pkData = *(NiRefObject**)((char*)pThis + 0x2c);
     if (pkData)
         pkData->DecRefCount();
-    FUN_00a3ca30(pThis);
+    UpdateState_00a3ca30(pThis);
     if (flags & 1)
         FUN_00aa1460(pThis, 0x48);
     return pThis;
@@ -199,7 +199,8 @@ enum KeyContent
 
 // Maps a channel index to a KeyContent: 0 quaternion, 1 position, 2 none, otherwise tangent.
 // @fnv 0x00a3f570
-KeyContent __stdcall FUN_00a3f570(unsigned short usChannel)
+// src: XBOX_PDB 0x00a3f570
+KeyContent __stdcall NiTransformInterpolator_GetKeyContent(unsigned short usChannel)
 {
     if (usChannel == 0)
         return KEY_CONTENT_QUATERNION;
@@ -391,7 +392,8 @@ void NiTransformInterpolator::SetActiveTimeRange(float afArg1, float afArg2)
 
 // Returns the scale key array from the interpolator's transform data, filling in key count, interpolation type and key size, or zeroes if no data exists.
 // @fnv 0x00a3f9e0
-TimedAnimationKey* TransformInterpolatorKeys::FUN_00a3f9e0(unsigned int& uiNumScaleKeys,
+// src: COMMUNITY 0x00a3f9e0
+TimedAnimationKey* TransformInterpolatorKeys::NiTransformInterpolator_GetScaleData(unsigned int& uiNumScaleKeys,
                                                          NiAnimationKey::KeyType& eScaleKeyType,
                                                          unsigned char& ucScaleKeySize)
 {
@@ -798,7 +800,7 @@ void NiTransformInterpolator::SaveBinary(NiStream& stream)
 
 #include <string.h>
 
-void __stdcall FUN_00aa0ab0(NiTransformInterpolator* pkDest, CloningProcess* kCloning);
+void __stdcall NiKeyBasedInterpolator_CopyMembers(NiTransformInterpolator* pkDest, CloningProcess* kCloning);
 
 template <> inline NiPointer<NiTransformData>& NiPointer<NiTransformData>::operator=(const NiPointer& rhs)
 {
@@ -817,7 +819,7 @@ template <> inline NiPointer<NiTransformData>& NiPointer<NiTransformData>::opera
 // @fnv 0x00a40360
 void NiTransformInterpolator::CopyMemberData(NiTransformInterpolator* pkDest, CloningProcess& kCloning)
 {
-    FUN_00aa0ab0(pkDest, &kCloning);
+    NiKeyBasedInterpolator_CopyMembers(pkDest, &kCloning);
 
     memcpy(&pkDest->m_kDefaultTransform, &m_kDefaultTransform, 32);
 
@@ -831,15 +833,16 @@ void NiTransformInterpolator::CopyMemberData(NiTransformInterpolator* pkDest, Cl
 }
 
 namespace fnv_00a403f0 {
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 inline void* __cdecl operator new(unsigned int, void* address)
 {
     return address;
 }
 // @fnv 0x00a403f0
-NiTransformInterpolator* __cdecl FUN_00a403f0()
+// src: EXE 0x00a403f0
+NiTransformInterpolator* __cdecl NiTransformInterpolator_CreateObject()
 {
-    void* storage = FUN_00aa13e0(sizeof(NiTransformInterpolator));
+    void* storage = Object_DispatchCommandFour(sizeof(NiTransformInterpolator));
     if (storage)
         return ::new (storage) NiTransformInterpolator(static_cast<NiTransformData*>(0));
     return 0;

@@ -12,9 +12,9 @@ struct SightFilter
     unsigned int bits;
 
     SightFilter(int bits);
-    void FUN_004a39f0(int layer);
-    unsigned int FUN_004a3a20();
-    void FUN_0059ce80(unsigned int);
+    void CFilter_SetLayer(int layer);
+    unsigned int CFilter_GetGroup();
+    void CFilter_SetGroup(unsigned int);
 };
 
 struct __declspec(align(16)) SightRayOutput

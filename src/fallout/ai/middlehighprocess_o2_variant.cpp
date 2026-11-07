@@ -23,7 +23,7 @@ struct C69FC0Packet
     unsigned int unk18;
 };
 C69FC0State* __cdecl GetExtraDataChecked(int object);
-void __cdecl FUN_00c68900(int object, C69FC0Packet* packet, unsigned int dispatcher);
+void __cdecl bhkWorld_DoObjectRec(int object, C69FC0Packet* packet, unsigned int dispatcher);
 extern unsigned int DAT_011afebc;
 
 static inline unsigned int C69FC0IsEnabled(int object)
@@ -33,7 +33,8 @@ static inline unsigned int C69FC0IsEnabled(int object)
 }
 
 // @fnv 0x00c69fc0
-bool __cdecl FUN_00c69fc0(int object, unsigned char bSelect, unsigned char mode, unsigned char overrideCheck)
+// src: COMMUNITY 0x00c69fc0
+bool __cdecl _bhkWorld_AdjustForceAddCount(int object, unsigned char bSelect, unsigned char mode, unsigned char overrideCheck)
 {
     bool bResult = false;
     if (object)
@@ -47,7 +48,7 @@ bool __cdecl FUN_00c69fc0(int object, unsigned char bSelect, unsigned char mode,
             kPacket.opcode = 0xd;
             kPacket.selection = bSelect != 0;
             if (DAT_011afebc)
-                FUN_00c68900(object, &kPacket, DAT_011afebc);
+                bhkWorld_DoObjectRec(object, &kPacket, DAT_011afebc);
         }
     }
     return bResult;

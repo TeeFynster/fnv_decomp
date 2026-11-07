@@ -49,7 +49,7 @@ struct S93ba0_Mem {
     __forceinline S93ba0_Alloc* getBlockAlloc() { return AllocateMemoryBlock; }
 };
 
-extern "C" S93ba0_Mem* __cdecl FUN_00c85750();
+extern "C" S93ba0_Mem* __cdecl hkMemoryRouter_getInstance();
 
 struct S93ba0_Stream {
     int unk00;
@@ -96,7 +96,7 @@ struct S93ba0_LocalArray {
 
     __forceinline S93ba0_LocalArray(int n) : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {
-        S93ba0_Mem* mem = FUN_00c85750();
+        S93ba0_Mem* mem = hkMemoryRouter_getInstance();
         char* p = mem->lifoCursor;
         mem->lifoCursor = p + ((n * 8 + 127) & ~127);
         m_data = (S93ba0_Pair*)p;
@@ -112,8 +112,8 @@ struct S93ba0_LocalArray {
     {
         S93ba0_Pair* local = m_pTrailingData;
         if (local == m_data) m_iElementCount = 0;
-        FUN_00c85750()->lifoCursor = (char*)local;
-        S93ba0_Alloc* a = FUN_00c85750()->getBlockAlloc();
+        hkMemoryRouter_getInstance()->lifoCursor = (char*)local;
+        S93ba0_Alloc* a = hkMemoryRouter_getInstance()->getBlockAlloc();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000u) == 0)
             a->ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * 8);
@@ -213,7 +213,7 @@ struct S93ba0_Conn {
 
 struct S93ba0_Stager {
     void FUN_00cf70f0(S93ba0_Pair* data, int size);
-    void FUN_00cf7080(S93ba0_Pair* data, int size, void* extra);
+    void hkpTypedBroadPhaseDispatcher_addPairs(S93ba0_Pair* data, int size, void* extra);
 };
 
 struct S93ba0_Device {
@@ -423,7 +423,7 @@ struct S93ba0_Device {
     int unk338;
     int pairCapacity;
     void FUN_00c911d0(int v);
-    void FUN_00c91210(int v);
+    void hkpWorld_unlockIslandForConstraintUpdate(int v);
 };
 
 struct S93ba0_Builder {
@@ -554,11 +554,11 @@ struct S93ba0_Owner {
 
 struct S93ba0_Output {
     void* ProcessCallback(void* a, void* b, int c);
-    void* FUN_00d05020(int a, int b, void* job, int c);
+    void* hkJobQueue_finishAddAndGetNextJob(int a, int b, void* job, int c);
 };
 
-extern "C" void __cdecl FUN_00cb5480(void* device, void* setup);
-extern "C" void __cdecl FUN_00d01700(void* device, void* data, int count);
+extern "C" void __cdecl hkpWorldOperationUtil_markIslandInactiveMt(void* device, void* setup);
+extern "C" void __cdecl hkpWorldCallbackUtil_fireContactImpulseLimitBreached(void* device, void* data, int count);
 extern "C" void* __cdecl FUN_00d96530(int count, int size);
 
 __forceinline void S93ba0_copy4(void* dst,const void* src,int n) { const u32* s=(const u32*)src; u32* d=(u32*)dst; for(int j=0;j<n;++j) { *d++=*s++; } }
@@ -588,7 +588,8 @@ _ReadWriteBarrier();
         job->pitch = (u16)pitch;
 }
 // @fnv 0x00d93ba0
-void* __cdecl FUN_00d93ba0(S93ba0_Owner* owner, S93ba0_Output* output, S93ba0_Job* nextJobOut) throw()
+// src: COMMUNITY 0x00d93ba0
+void* __cdecl hkpSingleThreadedJobsOnIsland_cpuBroadPhaseJob(S93ba0_Owner* owner, S93ba0_Output* output, S93ba0_Job* nextJobOut) throw()
 {
     S93ba0_Job* job = nextJobOut;
 
@@ -602,7 +603,7 @@ void* __cdecl FUN_00d93ba0(S93ba0_Owner* owner, S93ba0_Output* output, S93ba0_Jo
     S93ba0_timer( str_010d3e68);
     if (job->block->pending && owner->device->enabled &&
         (setup->newFlags & 12) && !(setup->oldFlags & 12))
-        FUN_00cb5480(owner->device, setup);
+        hkpWorldOperationUtil_markIslandInactiveMt(owner->device, setup);
 
     marker = &job->block->state;
     S93ba0_LocalArray first(owner->device->pairCapacity);
@@ -630,7 +631,7 @@ void* __cdecl FUN_00d93ba0(S93ba0_Owner* owner, S93ba0_Output* output, S93ba0_Jo
             total = 0;
             for (S93ba0_Chunk* c = block->chunks; c; c = c->next)
                 total += c->count;
-            S93ba0_Mem* mem = FUN_00c85750();
+            S93ba0_Mem* mem = hkMemoryRouter_getInstance();
             copy = mem->lifoCursor;
             mem->lifoCursor = copy + ((total * 16 + 127) & ~127);
             index = 0;
@@ -640,8 +641,8 @@ void* __cdecl FUN_00d93ba0(S93ba0_Owner* owner, S93ba0_Output* output, S93ba0_Jo
                 S93ba0_copy4(copy + index * 16, src, n);
                 index += c->count;
             }
-            FUN_00d01700(owner->device, copy, total);
-            FUN_00c85750()->lifoCursor = copy;
+            hkpWorldCallbackUtil_fireContactImpulseLimitBreached(owner->device, copy, total);
+            hkMemoryRouter_getInstance()->lifoCursor = copy;
         }
         *marker = 2;
     } else {
@@ -665,14 +666,14 @@ void* __cdecl FUN_00d93ba0(S93ba0_Owner* owner, S93ba0_Output* output, S93ba0_Jo
             device->FUN_00c911d0((*conn)->lockId);
             device->stager->FUN_00cf70f0(second.m_data, second.m_iElementCount);
             const int needed = first.m_iElementCount;
-            if (!FUN_00c85750()->getBlockAlloc()->hasSpace(needed << 10)) {
-                device->FUN_00c91210((*conn)->lockId);
+            if (!hkMemoryRouter_getInstance()->getBlockAlloc()->hasSpace(needed << 10)) {
+                device->hkpWorld_unlockIslandForConstraintUpdate((*conn)->lockId);
             } else {
                 S93ba0_timer( str_010cc5d8);
                 char* extra = device->extra;
-                device->stager->FUN_00cf7080(
+                device->stager->hkpTypedBroadPhaseDispatcher_addPairs(
                     first.m_data, first.m_iElementCount, extra ? extra + 8 : 0);
-                device->FUN_00c91210((*conn)->lockId);
+                device->hkpWorld_unlockIslandForConstraintUpdate((*conn)->lockId);
             }
         }
         S93ba0_timer( str_01076f38);
@@ -682,32 +683,32 @@ void* __cdecl FUN_00d93ba0(S93ba0_Owner* owner, S93ba0_Output* output, S93ba0_Jo
         while (block->bigNodes) {
             S93ba0_Node* n = block->bigNodes;
             block->bigNodes = n->next;
-            FUN_00c85750()->getBlockAlloc()->ReleaseBlock(n, 0x1000);
+            hkMemoryRouter_getInstance()->getBlockAlloc()->ReleaseBlock(n, 0x1000);
         }
         while (block->smallNodes) {
             S93ba0_Node* n = block->smallNodes;
             block->smallNodes = n->next;
-            FUN_00c85750()->getBlockAlloc()->ReleaseBlock(n, 0x30);
+            hkMemoryRouter_getInstance()->getBlockAlloc()->ReleaseBlock(n, 0x30);
         }
         void* buffer = block->buffer;
         if (buffer) {
             int bufferSize = block->bufferSize;
-            FUN_00c85750()->solver().ReturnMemory(buffer,bufferSize);
+            hkMemoryRouter_getInstance()->solver().ReturnMemory(buffer,bufferSize);
             block->buffer = 0;
         }
         if (block->numThreads > 1) {
             int tableCount = block->tableCount;
             void* table = block->table;
-            FUN_00c85750()->getBlockAlloc()->ReturnMemory(table, tableCount * 4);
+            hkMemoryRouter_getInstance()->getBlockAlloc()->ReturnMemory(table, tableCount * 4);
             block->table = 0;
         }
-        S93ba0_Alloc* a = FUN_00c85750()->getBlockAlloc();
+        S93ba0_Alloc* a = hkMemoryRouter_getInstance()->getBlockAlloc();
         block->arrSize = 0;
         if ((block->arrCapacityAndFlags & 0x80000000u) == 0)
             a->ReturnMemory(block->arrData, (block->arrCapacityAndFlags & 0x3fffffff) * 4);
         block->arrData = 0;
         block->arrCapacityAndFlags = 0x80000000;
-        FUN_00c85750()->getBlockAlloc()->ReleaseBlock(block, 0x80);
+        hkMemoryRouter_getInstance()->getBlockAlloc()->ReleaseBlock(block, 0x80);
     }
 
 
@@ -724,7 +725,7 @@ initNext(job,dev,param,count,cap,pitch);
             job->numBlocks = (u16)n;
         }
         S93ba0_timer( str_010c41f8);
-        return output->FUN_00d05020(0, 1, job, 0);
+        return output->hkJobQueue_finishAddAndGetNextJob(0, 1, job, 0);
     } else {
         S93ba0_timer( str_010c41f8);
         return output->ProcessCallback(job, job, 0);

@@ -109,14 +109,15 @@ struct FUN_0067f600_shell
 };
 
 void* FUN_00ec43fb(void* object, unsigned int flags, char* typeInfo1, char* typeInfo2, int reserved);
-float __cdecl FUN_00408860(float value);
+float __cdecl fabsf_00408860(float value);
 
 extern char DAT_0119bdec;
 extern char DAT_0119bf00;
 
 // Compares this use-weapon package data against apCompare field by field, returning true when any field differs or the cast fails.
 // @fnv 0x0067cfc0
-bool TESUseWeaponPackageData::FUN_0067cfc0(TESPackageData* apCompare)
+// src: XBOX_PDB 0x0067cfc0
+bool TESUseWeaponPackageData::Compare_0067cfc0(TESPackageData* apCompare)
 {
     TESUseWeaponPackageData* pOtherData =
         static_cast<TESUseWeaponPackageData*>(FUN_00ec43fb(apCompare, 0, &DAT_0119bdec, &DAT_0119bf00, 0));
@@ -175,17 +176,17 @@ bool TESUseWeaponPackageData::FUN_0067cfc0(TESPackageData* apCompare)
     if (this->m_usValue3 != pOtherData->m_usValue3)
         return true;
 
-    if (FUN_00408860(this->m_fValue1 - pOtherData->m_fValue1) > 0.01)
+    if (fabsf_00408860(this->m_fValue1 - pOtherData->m_fValue1) > 0.01)
         return true;
 
-    if (FUN_00408860(this->m_fValue2 - pOtherData->m_fValue2) > 0.01)
+    if (fabsf_00408860(this->m_fValue2 - pOtherData->m_fValue2) > 0.01)
         return true;
 
     return false;
 }
 
 void* memset(void*, int, unsigned int);
-bool __cdecl FUN_00401500();
+bool __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 
 struct PackageLocationSave
@@ -208,11 +209,12 @@ struct FlaggedValueData
     float m_fValue2;
     unsigned int m_uiIntegerValue;
 
-    void FUN_0067ca10();
+    void PACK_USE_WEAPON_DATA_PKW2_Endian();
 };
 
 // @fnv 0x0067d350
-void TESUseWeaponPackageData::FUN_0067d350()
+// src: XBOX_PDB 0x0067d350
+void TESUseWeaponPackageData::Save_0067d350()
 {
     FlaggedValueData saveData;
 
@@ -232,16 +234,16 @@ void TESUseWeaponPackageData::FUN_0067d350()
 
     saveData.m_uiIntegerValue = this->pWeapon ? this->pWeapon->GetFormID() : 0;
 
-    if (FUN_00401500())
-        saveData.FUN_0067ca10();
+    if (TESForm_QEndianSwapOnSave())
+        saveData.PACK_USE_WEAPON_DATA_PKW2_Endian();
 
     AppendChunk(0x33574b50, &saveData, 0x18);
 
-    if (FUN_00401500())
-        saveData.FUN_0067ca10();
+    if (TESForm_QEndianSwapOnSave())
+        saveData.PACK_USE_WEAPON_DATA_PKW2_Endian();
 
     if (this->m_pUseTarget)
-        this->m_pUseTarget->FUN_006802f0(0x32445450);
+        this->m_pUseTarget->PackageTarget_Save(0x32445450);
 
     if (this->m_pTargetLocation)
         reinterpret_cast<PackageLocationSave*>(this->m_pTargetLocation)->Save(0x32444c50);
@@ -279,7 +281,7 @@ void TESUseWeaponPackageData::Copy(TESPackageData* pkSource)
     {
         if (!m_pUseTarget)
             m_pUseTarget = new PackageTargetRecord;
-        m_pUseTarget->FUN_006801a0(reinterpret_cast<PackageTargetRecord*>(pkSource));
+        m_pUseTarget->PackageTarget_Copy(reinterpret_cast<PackageTargetRecord*>(pkSource));
     }
     else
     {
@@ -288,45 +290,45 @@ void TESUseWeaponPackageData::Copy(TESPackageData* pkSource)
     }
 }
 
-TESForm* __cdecl FUN_004839c0(unsigned int);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int);
 struct PackageLocationObj
 {
     unsigned int type;
     unsigned int location;
     unsigned int radius;
     PackageLocationObj();
-    void FUN_0067fbe0(BGSLoadFormBuffer*);
+    void PackageLocation_LoadGame_0067fbe0(BGSLoadFormBuffer*);
 };
 // Reads the use-weapon package data from the buffer: fixed-size fields, a weapon form, and optional target and location objects.
 // @fnv 0x0067d6b0
 void TESUseWeaponPackageData::LoadUseWeaponData(BGSLoadFormBuffer* buffer)
 {
-    buffer->FUN_00864980(&m_bFlag1, 1);
-    buffer->FUN_00864980(&m_bFlag2, 1);
-    buffer->FUN_00864980(&m_bFlag3, 1);
-    buffer->FUN_00864980(&m_bFlag4, 1);
-    buffer->FUN_00864980(&m_bFlag5, 1);
-    buffer->FUN_00864980(&m_bFlag6, 1);
-    buffer->FUN_00864980(&m_usValue1, 2);
-    buffer->FUN_00864980(&m_usValue2, 2);
-    buffer->FUN_00864980(&m_usValue3, 2);
-    buffer->FUN_00864980(&m_fValue1, 4);
-    buffer->FUN_00864980(&m_fValue2, 4);
-    pWeapon = dynamic_cast<TESObjectWEAP*>(FUN_004839c0(buffer->FUN_008648a0()));
+    buffer->LoadData(&m_bFlag1, 1);
+    buffer->LoadData(&m_bFlag2, 1);
+    buffer->LoadData(&m_bFlag3, 1);
+    buffer->LoadData(&m_bFlag4, 1);
+    buffer->LoadData(&m_bFlag5, 1);
+    buffer->LoadData(&m_bFlag6, 1);
+    buffer->LoadData(&m_usValue1, 2);
+    buffer->LoadData(&m_usValue2, 2);
+    buffer->LoadData(&m_usValue3, 2);
+    buffer->LoadData(&m_fValue1, 4);
+    buffer->LoadData(&m_fValue2, 4);
+    pWeapon = dynamic_cast<TESObjectWEAP*>(TESForm_GetFormByNumericID(buffer->FUN_008648a0()));
     bool hasTarget;
     bool hasLocation = false;
-    buffer->FUN_00864980(&hasLocation, 1);
+    buffer->LoadData(&hasLocation, 1);
     if (hasLocation)
     {
         m_pUseTarget = new PackageTargetRecord;
         m_pUseTarget->LoadGame(buffer);
     }
     hasTarget = false;
-    buffer->FUN_00864980(&hasTarget, 1);
+    buffer->LoadData(&hasTarget, 1);
     if (hasTarget)
     {
         m_pTargetLocation = reinterpret_cast<LocationDescriptor*>(new PackageLocationObj);
-        reinterpret_cast<PackageLocationObj*>(m_pTargetLocation)->FUN_0067fbe0(buffer);
+        reinterpret_cast<PackageLocationObj*>(m_pTargetLocation)->PackageLocation_LoadGame_0067fbe0(buffer);
     }
 }
 
@@ -351,7 +353,8 @@ struct TargetLocation_Stub
 
 // Copies a TESUseWeaponPackageData obtained from apSource into this, deep-copying its two sub-objects and copying the remaining fields.
 // @fnv 0x0067cd90
-void TESUseWeaponPackageData::FUN_0067cd90(TESPackageData* apSource)
+// src: XBOX_PDB 0x0067cd90
+void TESUseWeaponPackageData::Copy_0067cd90(TESPackageData* apSource)
 {
     TESUseWeaponPackageData* target =
         (TESUseWeaponPackageData*)FUN_00ec43fb(apSource, 0, &DAT_0119bdec, &DAT_0119bf00, 0);
@@ -366,7 +369,7 @@ void TESUseWeaponPackageData::FUN_0067cd90(TESPackageData* apSource)
     if (target->m_pUseTarget)
     {
         this->m_pUseTarget = new PackageTargetRecord();
-        this->m_pUseTarget->FUN_006801a0(target->m_pUseTarget);
+        this->m_pUseTarget->PackageTarget_Copy(target->m_pUseTarget);
     }
 
     this->pWeapon = target->pWeapon;
@@ -395,10 +398,11 @@ void TESUseWeaponPackageData::FUN_0067cd90(TESPackageData* apSource)
 
 struct LocationSave
 {
-    void FUN_0067fb60(BGSSaveFormBuffer*);
+    void PackageLocation_SaveGame(BGSSaveFormBuffer*);
 };
 // @fnv 0x0067d550
-void TESUseWeaponPackageData::FUN_0067d550(BGSSaveFormBuffer* buffer)
+// src: XBOX_PDB 0x0067d550
+void TESUseWeaponPackageData::SaveGame_0067d550(BGSSaveFormBuffer* buffer)
 {
     buffer->SaveData(&m_bFlag1, 1, 0);
     buffer->SaveData(&m_bFlag2, 1, 0);
@@ -419,7 +423,7 @@ void TESUseWeaponPackageData::FUN_0067d550(BGSSaveFormBuffer* buffer)
     bool bHasLocation = m_pTargetLocation;
     buffer->SaveData(&bHasLocation, 1, 0);
     if (bHasLocation)
-        ((LocationSave*)m_pTargetLocation)->FUN_0067fb60(buffer);
+        ((LocationSave*)m_pTargetLocation)->PackageLocation_SaveGame(buffer);
 }
 
 // Copies the raw parameter fields, clears target/location, and stores the weapon value.

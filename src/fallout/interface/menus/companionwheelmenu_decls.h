@@ -20,7 +20,7 @@ class FUN_0076bda0
     char storage[32];
 };
 
-InterfaceManager* FUN_004b7210();
+InterfaceManager* InterfaceManager_GetSingleton();
 // MessageMenu (menu class 1001): ctor 0x007a8a10 installs vftable 0x0107566c; GetMenuById allocates 0x94. Named apart from
 // include/MessageMenu.h, whose ListBox_int_ and GameTimerRecord declare none of the ctors/dtor this ctor calls.
 class MessageMenu_007a8a10 : public Menu

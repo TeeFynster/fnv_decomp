@@ -2,8 +2,9 @@
 
 struct FUN_00aaa0d0_s
 {
-    void FUN_00aaa0d0(int a);
+    void AbstractHeap_CheckBlockValidity(int a);
 };
 // @fnv 0x00aaa0d0
-void FUN_00aaa0d0_s::FUN_00aaa0d0(int a)
+// src: COMMUNITY 0x00aaa0d0
+void FUN_00aaa0d0_s::AbstractHeap_CheckBlockValidity(int a)
 {}

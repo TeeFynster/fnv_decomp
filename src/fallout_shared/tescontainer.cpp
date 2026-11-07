@@ -289,14 +289,15 @@ void* __fastcall _ref_00726070(void* pThis);
 
 struct ContainerItemExtra_helper
 {
-    void FUN_0040eb90(float);
+    void ContainerItemExtra_AdjustHealthPercent(float);
 };
 
 }  // namespace fnv_00482090
 
 // Walks the container's item list, creating each item's extra data if missing, applies afHealthPerc to it, and deletes extras that become default.
 // @fnv 0x00482090
-void TESContainer::FUN_00482090(float afHealthPerc)
+// src: COMMUNITY 0x00482090
+void TESContainer::ApplyHealthPercentToContainer(float afHealthPerc)
 {
     void* pCurrentElementNext = (void*)GetObjectList();
     while (pCurrentElementNext && !fnv_00482090::_ref_008256d0(pCurrentElementNext))
@@ -304,7 +305,7 @@ void TESContainer::FUN_00482090(float afHealthPerc)
         InventoryItemEntry* pcont = *fnv_00482090::_ref_006815c0(pCurrentElementNext);
         if (!pcont->extra)
             pcont->extra = new ContainerItemExtra;
-        ((fnv_00482090::ContainerItemExtra_helper*)pcont->extra)->FUN_0040eb90(afHealthPerc);
+        ((fnv_00482090::ContainerItemExtra_helper*)pcont->extra)->ContainerItemExtra_AdjustHealthPercent(afHealthPerc);
         if (pcont->extra->IsDefault())
         {
             delete pcont->extra;
@@ -360,7 +361,8 @@ struct TESLevFormStub : public TESLevPad, public TESLeveledList
 
 // Returns apForm cast to TESLeveledList when its form type is 0x34, 0x2C, 0x2D or 0x4C, otherwise null.
 // @fnv 0x00487be0
-TESLeveledList* __cdecl FUN_00487be0(TESForm* apForm)
+// src: COMMUNITY 0x00487be0
+TESLeveledList* __cdecl TESLeveledList_GetFormAsLeveledList(TESForm* apForm)
 {
     TESLeveledList* pLeveledList = 0;
     if (apForm)
@@ -486,9 +488,10 @@ bool FUN_00481470_shell::IsNotEqual(InventoryItemEntry* apCompare)
 }
 
 // @fnv 0x00481f10
-bool __cdecl FUN_00481f10(TESObject* pObj)
+// src: XBOX_PDB 0x00481f10
+bool __cdecl TESContainer_IsGold(TESObject* pObj)
 {
-    if (pObj && ((TESForm*)pObj)->FUN_0084e3a0() == 0xF)
+    if (pObj && ((TESForm*)pObj)->GetHavokWorldObjectCountInSceneGraph_0084e3a0() == 0xF)
         return true;
     return false;
 }
@@ -665,11 +668,11 @@ struct blob12
 typedef char _sizecheck_InventoryChanges[sizeof(InventoryChanges) == 20 ? 1 : -1];
 struct Fn40ea20
 {
-    void FUN_0040ea20(ExtraDataList*, TESHealthForm*);
+    void ContainerItemExtra_AddToExtraDataList(ExtraDataList*, TESHealthForm*);
 };
 struct FUN_004c29a0_t
 {
-    void FUN_004c29a0(void*, ExtraDataList*, int);
+    void InventoryChanges_AddItem(void*, ExtraDataList*, int);
 };
 struct ContList
 {
@@ -697,17 +700,17 @@ void TESContainer::AddInventoryChangesToContainer(int aiLevItemIndex, InventoryC
                 bhadChanges = true;
                 ExtraDataList* pextra = new ExtraDataList();
                 pextra->SetLeveledItemIndex(aiLevItemIndex);
-                pextra->FUN_00419ad0((unsigned short)pcont->count);
+                pextra->ExtraDataList_SetCount((unsigned short)pcont->count);
                 if (pcont->extra)
                     ((fnv_00482770::Fn40ea20*)pcont->extra)
-                        ->FUN_0040ea20(pextra, TESHealthForm::GetFormAsHealthForm((TESForm*)pcont->object));
-                ((fnv_00482770::FUN_004c29a0_t*)apChanges)->FUN_004c29a0(pcont->object, pextra, pcont->count);
+                        ->ContainerItemExtra_AddToExtraDataList(pextra, TESHealthForm::GetFormAsHealthForm((TESForm*)pcont->object));
+                ((fnv_00482770::FUN_004c29a0_t*)apChanges)->InventoryChanges_AddItem(pcont->object, pextra, pcont->count);
             }
             pCurrentElementNext = pCurrentElementNext->GetNext();
         }
         if (bhadChanges && ((GridArray*)apChanges)->GetCenterX() && fnv_00482770::g_osGlobals->IsPatrolling())
         {
-            if (!fnv_00482770::g_BGSSaveLoadGame->FUN_0042ce10() || fnv_00482770::g_BGSSaveLoadGame->IsFlag20Set())
+            if (!fnv_00482770::g_BGSSaveLoadGame->BGSSaveLoadGame_GetSaveGameLoading() || fnv_00482770::g_BGSSaveLoadGame->IsFlag20Set())
                 ((GridArray*)apChanges)->GetCenterX()->SetFormFlags(0x8000000);
         }
     }
@@ -776,7 +779,7 @@ float __thiscall TESContainer::GetContainerWeight(bool flag)
 class ScriptLocals;
 struct ItemExtra
 {
-    void FUN_0040ea20(ExtraDataList*, void*);
+    void ContainerItemExtra_AddToExtraDataList(ExtraDataList*, void*);
 };
 struct Item
 {
@@ -795,12 +798,13 @@ struct SettingString
 };
 extern SettingString DAT_011d4e7c, DAT_011d3114;
 extern Actor* DAT_011dea3c;
-Script* FUN_004826d0(TESForm*);
+Script* TESScriptableForm_GetFormScript(TESForm*);
 void* GetHealthForm(TESForm*);
-const char* FUN_00482720(TESForm*);
+const char* TESFullName_GetFullName(TESForm*);
 bool QueueUIMessage(const char*, int, const char*, const char*, float, bool);
 // @fnv 0x004821a0
-void TESContainer::FUN_004821a0(TESObjectREFR* target, bool silent)
+// src: COMMUNITY 0x004821a0
+void TESContainer::AddContainerToReference(TESObjectREFR* target, bool silent)
 {
     if (target)
     {
@@ -812,7 +816,7 @@ void TESContainer::FUN_004821a0(TESObjectREFR* target, bool silent)
             Item* item = *node->FUN_006815c0();
             if (item)
             {
-                Script* script = FUN_004826d0(item->form);
+                Script* script = TESScriptableForm_GetFormScript(item->form);
                 int count = item->count;
                 actor = item;
                 if (script)
@@ -821,22 +825,22 @@ void TESContainer::FUN_004821a0(TESObjectREFR* target, bool silent)
                     {
                         ExtraDataList* extra = 0;
                         extra = new ExtraDataList;
-                        extra->FUN_00419ad0(1);
-                        if (extra && !extra->FUN_00418800())
+                        extra->ExtraDataList_SetCount(1);
+                        if (extra && !extra->ExtraDataList_GetScript())
                         {
-                            extra->FUN_00419ed0(script);
-                            extra->FUN_00419f80(script->FUN_005abf60());
+                            extra->ExtraDataList_SetScript(script);
+                            extra->ExtraDataList_SetScriptLocals(script->FUN_005abf60());
                             TESObjectREFR* ref = new TESObjectREFR;
                             ref->FUN_00484490();
-                            script->FUN_005ac1e0(ref, extra->FUN_00418830(), 0, false);
+                            script->FUN_005ac1e0(ref, extra->ExtraDataList_GetScriptLocals(), 0, false);
                             delete ref;
                             if (item->extra)
-                                item->extra->FUN_0040ea20(extra, GetHealthForm(item->form));
+                                item->extra->ContainerItemExtra_AddToExtraDataList(extra, GetHealthForm(item->form));
                         }
                         if (last)
                             last->AddItem(item->form, extra, 1);
                         else
-                            target->FUN_00574fa0(item->form, extra, 1);
+                            target->TESObjectREFR_AddBoundObjectItem(item->form, extra, 1);
                     }
                 }
                 else
@@ -845,13 +849,13 @@ void TESContainer::FUN_004821a0(TESObjectREFR* target, bool silent)
                     if (item->extra)
                     {
                         data = new ExtraDataList;
-                        data->FUN_00419ad0((unsigned short)item->count);
-                        item->extra->FUN_0040ea20(data, GetHealthForm(item->form));
+                        data->ExtraDataList_SetCount((unsigned short)item->count);
+                        item->extra->ContainerItemExtra_AddToExtraDataList(data, GetHealthForm(item->form));
                     }
                     if (last)
                         last->AddItem(item->form, data, item->count);
                     else
-                        target->FUN_00574fa0(item->form, data, item->count);
+                        target->TESObjectREFR_AddBoundObjectItem(item->form, data, item->count);
                 }
             }
             node = node->FUN_00726070();
@@ -860,10 +864,10 @@ void TESContainer::FUN_004821a0(TESObjectREFR* target, bool silent)
         {
             BSStringT<char> text;
             if (actor->count > 1)
-                text.PrintfString("%i %s%s %s", actor->count, FUN_00482720(actor->form), DAT_011d3114.FUN_00403df0(),
+                text.PrintfString("%i %s%s %s", actor->count, TESFullName_GetFullName(actor->form), DAT_011d3114.FUN_00403df0(),
                              DAT_011d4e7c.FUN_00403df0());
             else
-                text.PrintfString("%s %s", FUN_00482720(actor->form), DAT_011d4e7c.FUN_00403df0());
+                text.PrintfString("%s %s", TESFullName_GetFullName(actor->form), DAT_011d4e7c.FUN_00403df0());
             switch (actor->form->FUN_00401170())
             {
             case 25:
@@ -879,11 +883,11 @@ void TESContainer::FUN_004821a0(TESObjectREFR* target, bool silent)
             case 115:
             case 116:
                 QueueUIMessage(text.String(), 0, "Interface\\Icons\\Message Icons\\glow_message_giftbox.dds",
-                               silent ? 0 : DAT_011dea3c->FUN_008adcf0(actor->form, 1, 0), 2.0f, false);
+                               silent ? 0 : DAT_011dea3c->Actor_GetPickUpSoundName(actor->form, 1, 0), 2.0f, false);
                 break;
             case 24:
                 QueueUIMessage(text.String(), 0, "Interface\\Icons\\Message Icons\\glow_message_giftbox.dds",
-                               silent ? 0 : DAT_011dea3c->FUN_008adcf0(actor->form, 1, 0), 2.0f, false);
+                               silent ? 0 : DAT_011dea3c->Actor_GetPickUpSoundName(actor->form, 1, 0), 2.0f, false);
                 break;
             }
         }
@@ -908,7 +912,7 @@ struct FUN_00482910_node
 
 struct FUN_00482910_obj
 {
-    float FUN_005f0d60(FUN_00482910_rec* r);
+    float GetDesirability(FUN_00482910_rec* r);
 };
 
 int __cdecl FUN_00ec43fb(int a, int b, void* c, void* d, int e);
@@ -928,7 +932,7 @@ TESObjectWEAP* TESContainer::GetBestWeapon(TESActorBase* pScorer)
             FUN_00482910_rec* r = (FUN_00482910_rec*)FUN_00ec43fb(t3->unk04, 0, &DAT_01183108, &DAT_01183998, 0);
             if (r != 0)
             {
-                float f7 = reinterpret_cast<FUN_00482910_obj*>(pScorer)->FUN_005f0d60(r);
+                float f7 = reinterpret_cast<FUN_00482910_obj*>(pScorer)->GetDesirability(r);
                 if (f7 > best)
                 {
                     best = f7;
@@ -1021,14 +1025,14 @@ BSSimpleList<InventoryStackRecord*>* __fastcall CopyUniqueContainerObjects(TESCo
 struct VATSCommand;
 struct VATS_CommandList
 {
-    void FUN_00905330(VATSCommand* const& apCommand);
+    void RemoveMatchingItem(VATSCommand* const& apCommand);
 };
 // @fnv 0x00481790
 void TESContainer::RemoveContainerObject(InventoryItemEntry* apEntry)
 {
     if (!apEntry)
         return;
-    ((VATS_CommandList*)GetObjectList())->FUN_00905330((VATSCommand* const&)apEntry);
+    ((VATS_CommandList*)GetObjectList())->RemoveMatchingItem((VATSCommand* const&)apEntry);
     BGSPerkEntry* pkEntry = reinterpret_cast<BGSPerkEntry*>(apEntry);
     BGSPerkEntry* pkDeleteCur = pkEntry;
     pkDeleteCur ? pkDeleteCur->Destroy(1) : 0;
@@ -1036,7 +1040,7 @@ void TESContainer::RemoveContainerObject(InventoryItemEntry* apEntry)
 
 struct ArmorRater
 {
-    float FUN_005f0d60(TESObjectARMO* armor);
+    float GetDesirability(TESObjectARMO* armor);
 };
 static const float kNegInfinity = -3.402823466e+38f;
 // Scans the container's object list for armor matching the given biped slot and returns the one with the highest rater score, or null.
@@ -1054,7 +1058,7 @@ TESObjectARMO* TESContainer::FindBestArmor(TESActorBase* rater, int slot)
             TESObjectARMO* armor = dynamic_cast<TESObjectARMO*>((TESBoundObject*)pkObject->object);
             if (armor && slot != -1 && armor->TESBipedModelForm::FUN_00480af0(slot, 0, 0))
             {
-                float fVal = reinterpret_cast<ArmorRater*>(rater)->FUN_005f0d60(armor);
+                float fVal = reinterpret_cast<ArmorRater*>(rater)->GetDesirability(armor);
                 if (fVal > best)
                 {
                     best = fVal;
@@ -1272,12 +1276,12 @@ struct RecipeActorForm
     virtual void RemoveItem(void* item, int extra, int count, int a4, int a5, int a6, int a7, int a8, int a9, int a10);
 
     int FUN_00401170();
-    void* FUN_008a1710();
+    void* Actor_GetCurrentWeapon();
     int FUN_00575610(void* item);
-    void FUN_0088d7d0(void* item, int count, void* extra, bool a4, bool a5, bool a6);
+    void Actor_UnEquipObject(void* item, int count, void* extra, bool a4, bool a5, bool a6);
     RecipeProcess* FUN_008d8520();
-    bool FUN_004c0bf0();
-    void FUN_00574fa0(void* item, int extra, int count);
+    bool TESObjectWEAP_IsThrownWeapon();
+    void TESObjectREFR_AddBoundObjectItem(void* item, int extra, int count);
 };
 
 struct RecipeListBox
@@ -1331,14 +1335,14 @@ struct RecipeMenuState
 
 struct ActiveRecipe
 {
-    void* FUN_005a8080();
-    void* FUN_005d43c0();
+    void* ComputeValue_005a8080();
+    void* BSFile_GetDevice();
 };
 
 struct RecipeComponentItem
 {
     void* FUN_00726070();
-    int FUN_00559450();
+    int Modelloader_GetReferencedThis();
 };
 
 struct RecipeComponentNode
@@ -1350,7 +1354,7 @@ struct RecipeComponentNode
 
 struct FUN_004f2770_Class
 {
-    const char* FUN_008adcf0(void* item, int a2, int a3);
+    const char* Actor_GetPickUpSoundName(void* item, int a2, int a3);
 };
 
 struct GameSettingStr
@@ -1360,7 +1364,7 @@ struct GameSettingStr
 
 struct WeaponFormOps
 {
-    void* FUN_00525980(void* actor);
+    void* TESObjectWEAP_GetCurrentAmmo(void* actor);
 };
 
 extern RecipeMenuState* DAT_011d8e90;
@@ -1374,10 +1378,10 @@ extern const char str_0101c140[];
 
 int __cdecl FUN_005f5950(int a1, int a2, void* a3, int a4, int a5, int a6, int a7);
 void __cdecl FUN_004d5e10(int statId, int delta);
-const char* __cdecl FUN_00482720(void* form);
+const char* __cdecl TESFullName_GetFullName(void* form);
 bool __cdecl QueueUIMessage(const char* msg, int emotion, const char* iconPath, const char* soundName, float duration,
                             bool instant);
-void __cdecl FUN_00727430();
+void __cdecl RecipeMenu_Close();
 
 // Removes recipe components from the crafter and adds the crafted item, queuing a UI message with the item name and quantity.
 // @fnv 0x007284f0
@@ -1395,7 +1399,7 @@ void CraftRecipe(int count)
                     RecipeActorForm* itemForm;
                     {
                         void* recipeTile = DAT_011d8e90->recipeList->FindItemData(&DAT_011d8e94);
-                        node = (RecipeComponentNode*)DAT_011d8e94->FUN_005a8080();
+                        node = (RecipeComponentNode*)DAT_011d8e94->ComputeValue_005a8080();
                         itemForm = 0;
                         compForm = 0;
                         compQty = 0;
@@ -1417,7 +1421,7 @@ void CraftRecipe(int count)
                                 }
                             }
                             playedSound = 1;
-                            compQty = (*node->FUN_006815c0())->FUN_00559450();
+                            compQty = (*node->FUN_006815c0())->Modelloader_GetReferencedThis();
                             if (compForm != 0 && ((RecipeActorForm*)compForm)->IsBoundObject())
                             {
                                 itemForm = (RecipeActorForm*)compForm;
@@ -1430,17 +1434,17 @@ void CraftRecipe(int count)
                                     actor = (DAT_011d8e90->crafterRef != 0 && DAT_011d8e90->crafterRef->IsActor())
                                                 ? DAT_011d8e90->crafterRef
                                                 : 0;
-                                    if (actor != 0 && actor->FUN_008a1710() != 0)
+                                    if (actor != 0 && actor->Actor_GetCurrentWeapon() != 0)
                                     {
                                         isCurrentAmmo =
-                                            (((WeaponFormOps*)actor->FUN_008a1710())->FUN_00525980(_g_thePlayer) ==
+                                            (((WeaponFormOps*)actor->Actor_GetCurrentWeapon())->TESObjectWEAP_GetCurrentAmmo(_g_thePlayer) ==
                                              (*node->FUN_006815c0())->FUN_00726070());
                                     }
                                     if (itemForm->FUN_00401170() == 0x28)
                                     {
-                                        if (actor->FUN_00575610(itemForm) == 1 && itemForm == actor->FUN_008a1710())
+                                        if (actor->FUN_00575610(itemForm) == 1 && itemForm == actor->Actor_GetCurrentWeapon())
                                         {
-                                            actor->FUN_0088d7d0(itemForm, 1, 0, 0, 0, 1);
+                                            actor->Actor_UnEquipObject(itemForm, 1, 0, 0, 0, 1);
                                         }
                                     }
                                     DAT_011d8e90->crafterRef->RemoveItem(itemForm, 0, compQty * count, 0, 0, 0, 0, 0, 1,
@@ -1457,14 +1461,14 @@ void CraftRecipe(int count)
                         {
                             FUN_004d5e10(0x20, count);
                         }
-                        node = (RecipeComponentNode*)DAT_011d8e94->FUN_005d43c0();
+                        node = (RecipeComponentNode*)DAT_011d8e94->BSFile_GetDevice();
                         itemForm = 0;
                         compForm = 0;
                         compQty = 0;
                         for (; node != 0 && !node->FUN_008256d0();)
                         {
                             compForm = (*node->FUN_006815c0())->FUN_00726070();
-                            compQty = (*node->FUN_006815c0())->FUN_00559450();
+                            compQty = (*node->FUN_006815c0())->Modelloader_GetReferencedThis();
                             if (compForm != 0 && ((RecipeActorForm*)compForm)->IsBoundObject())
                             {
                                 itemForm = (RecipeActorForm*)compForm;
@@ -1474,9 +1478,9 @@ void CraftRecipe(int count)
                                 if (itemForm->FUN_00401170() == 0x28)
                                 {
                                     RecipeActorForm* weapForm = itemForm;
-                                    if (weapForm->FUN_004c0bf0())
+                                    if (weapForm->TESObjectWEAP_IsThrownWeapon())
                                     {
-                                        DAT_011d8e90->crafterRef->FUN_00574fa0(itemForm, 0, compQty * count);
+                                        DAT_011d8e90->crafterRef->TESObjectREFR_AddBoundObjectItem(itemForm, 0, compQty * count);
                                     }
                                     else
                                     {
@@ -1485,8 +1489,8 @@ void CraftRecipe(int count)
                                         {
                                             tempCont1.FUN_004818e0((TESForm*)itemForm, compQty * count, 0);
                                         }
-                                        tempCont1.FUN_00482090(DAT_01030ff0);
-                                        tempCont1.FUN_004821a0(DAT_011d8e90->crafterRef, 0);
+                                        tempCont1.ApplyHealthPercentToContainer(DAT_01030ff0);
+                                        tempCont1.AddContainerToReference(DAT_011d8e90->crafterRef, 0);
                                     }
                                 }
                                 else if (itemForm->FUN_00401170() == 0x18 || itemForm->FUN_00401170() == 0x1a)
@@ -1496,30 +1500,30 @@ void CraftRecipe(int count)
                                     {
                                         tempCont2.FUN_004818e0((TESForm*)itemForm, compQty * count, 0);
                                     }
-                                    tempCont2.FUN_00482090(DAT_01030ff0);
-                                    tempCont2.FUN_004821a0(DAT_011d8e90->crafterRef, 0);
+                                    tempCont2.ApplyHealthPercentToContainer(DAT_01030ff0);
+                                    tempCont2.AddContainerToReference(DAT_011d8e90->crafterRef, 0);
                                 }
                                 else
                                 {
-                                    DAT_011d8e90->crafterRef->FUN_00574fa0(itemForm, 0, compQty * count);
+                                    DAT_011d8e90->crafterRef->TESObjectREFR_AddBoundObjectItem(itemForm, 0, compQty * count);
                                 }
                                 BSStringT<char> msgStr;
                                 if (compQty * count > 1)
                                 {
-                                    msgStr.PrintfString(str_0101c178, compQty * count, FUN_00482720(itemForm),
+                                    msgStr.PrintfString(str_0101c178, compQty * count, TESFullName_GetFullName(itemForm),
                                                  DAT_011d3114.FUN_00403df0(), DAT_011d4e7c.FUN_00403df0());
                                 }
                                 else
                                 {
-                                    msgStr.PrintfString(str_01012058, FUN_00482720(itemForm),
+                                    msgStr.PrintfString(str_01012058, TESFullName_GetFullName(itemForm),
                                                  DAT_011d4e7c.FUN_00403df0());
                                 }
                                 QueueUIMessage(msgStr.String(), 0, str_0101c140,
-                                               _g_thePlayer->FUN_008adcf0(itemForm, 1, 0), DAT_010162c0, 0);
+                                               _g_thePlayer->Actor_GetPickUpSoundName(itemForm, 1, 0), DAT_010162c0, 0);
                             }
                             node = node->FUN_00726070();
                         }
-                        FUN_00727430();
+                        RecipeMenu_Close();
                     }
                 }
             }
@@ -1548,7 +1552,8 @@ extern unsigned char DAT_01183254;
 extern "C" void* __cdecl FNV_DynamicCast(void*, long, void*, void*, int);
 // Dynamic-casts apForm to TESScriptableForm and returns its script, or null if the cast fails.
 // @fnv 0x004826d0
-Script* FUN_004826d0(TESForm* apForm)
+// src: XBOX_PDB 0x004826d0
+Script* TESScriptableForm_GetFormScript(TESForm* apForm)
 {
     TESScriptableForm* pSF =
         static_cast<TESScriptableForm*>(FNV_DynamicCast(apForm, 0, &DAT_01183028, &DAT_01183254, 0));

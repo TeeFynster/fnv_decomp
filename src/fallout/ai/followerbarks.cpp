@@ -45,7 +45,8 @@ extern TESForm* __cdecl FUN_00483a00(const char*);
 
 // Returns the TESTopic form mapped to kind, or null when no form is returned.
 // @fnv 0x008d5910
-TESTopic* __cdecl FUN_008d5910(unsigned int kind)
+// src: XBOX_PDB 0x008d5910
+TESTopic* __cdecl FollowerBarks_GetBarkTopicByType(unsigned int kind)
 {
     switch (kind)
     {

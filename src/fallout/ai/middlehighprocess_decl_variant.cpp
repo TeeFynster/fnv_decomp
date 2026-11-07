@@ -14,7 +14,8 @@ struct SettingFloat
 };
 extern SettingFloat originalRuntimeFloatSetting236;
 // @fnv 0x0091db40
-void MiddleHighProcess::FUN_0091db40(Actor* actor)
+// src: XBOX_PDB 0x0091db40
+void MiddleHighProcess::ProcessCombat_0091db40(Actor* actor)
 {
     int remaining = (int)*originalRuntimeFloatSetting236.Float();
     Actor* found = 0;
@@ -27,7 +28,7 @@ void MiddleHighProcess::FUN_0091db40(Actor* actor)
     }
     if (found &&
         ((actor->GetParentCell() && actor->GetParentCell() == found->GetParentCell()) ||
-         actor->TESObjectREFR::FUN_005723b0(found, 0, 0) < 300.0) &&
+         actor->TESObjectREFR::TESObjectREFR_GetDistanceFromReference(found, 0, 0) < 300.0) &&
         found->GetProcess() && found->GetProcess()->GetProcessLevel() == 1)
     {
         while (remaining)

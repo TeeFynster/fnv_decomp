@@ -15,17 +15,17 @@ inline hkTransform::hkTransform() {}
 
 // src/havok/physics/collide/agent/miscagent/multirayconvex/hkpmultirayconvexagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/miscagent/multirayconvex/hkpmultirayconvexagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-void FUN_00d374f0(int a, int b, int c, int d);
+void hkpMultiRayConvexAgent_staticGetPenetrations(int a, int b, int c, int d);
 struct FUN_00d37690_Class {
     void __thiscall ForwardToFunction(int a, int b, int c, int d);
 };
-void FUN_00d37740(int a, int b, int c, int d);
+void hkpMultiRayConvexAgent_createMultiRayConvexAgent(int a, int b, int c, int d);
 void FUN_00d37780(int a, int b, int c, int d);
-void FUN_00d37860(int a, int b, int c, int d);
-void FUN_00d378a0(int a, int b, int c, int d);
-void FUN_00d37280(int a, int b, int c, int d);
-void FUN_00daf8e0();
-void FUN_00d3ac80();
+void Object_ProcessState_00d37860(int a, int b, int c, int d);
+void Object_UpdateFields_00d378a0(int a, int b, int c, int d);
+void hkpMultiRayConvexAgent_staticGetClosestPoints(int a, int b, int c, int d);
+void Object_ProcessEntries_00daf8e0();
+void Object_UpdateFields_00d3ac80();
 struct FUN_00cfbbe0_Arg {
     void* f0;
     void* f1;
@@ -35,9 +35,9 @@ struct FUN_00cfbbe0_Arg {
     char f5;
 };
 struct FUN_00cfbbe0_Class {
-    void __thiscall FUN_00cfbbe0(FUN_00cfbbe0_Arg* a, int b, int c);
+    void __thiscall AppendRecordAndRegisterAgents(FUN_00cfbbe0_Arg* a, int b, int c);
 };
-void FUN_00d377d0(int a);
+void hkpMultiRayConvexAgent_registerAgent(int a);
 struct Handler {
     virtual void slot0();
     virtual void slot1();
@@ -66,13 +66,13 @@ struct S_00d37860_Collector : S_00d37860_Base {
     S_00d37860_Collector(int filter) : m_iFilter(filter) {}
     virtual void f1();
 };
-void FUN_00d374f0(void* b, void* a, void* c, S_00d37860_Collector* collector);
-void FUN_00d37860(void* a, void* b, void* c, int filter);
+void hkpMultiRayConvexAgent_staticGetPenetrations(void* b, void* a, void* c, S_00d37860_Collector* collector);
+void Object_ProcessState_00d37860(void* a, void* b, void* c, int filter);
 struct Payload { const char* name; float value; int id; };
 extern float DAT_0104da48;
 extern const char DAT_010ce7fc[];
-void FUN_00d37280(int, int, int, Payload*);
-void FUN_00d378a0(int a, int b, int c, int d);
+void hkpMultiRayConvexAgent_staticGetClosestPoints(int, int, int, Payload*);
+void Object_UpdateFields_00d378a0(int a, int b, int c, int d);
 struct D376B0Allocator;
 struct D376B0MemoryRouter {
     int unk00;
@@ -83,8 +83,8 @@ struct D376B0MemoryRouter {
 
     D376B0Allocator& heap() { return *m_pStreamAllocator; }
 };
-extern "C" D376B0MemoryRouter& __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(D376B0Allocator* alloc, void* array, int numElements, int sizeElem);
+extern "C" D376B0MemoryRouter& __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(D376B0Allocator* alloc, void* array, int numElements, int sizeElem);
 class D376B0ReferencedObject {
 public:
     D376B0ReferencedObject() : m_sReferenceCount(1) {}
@@ -106,12 +106,12 @@ struct D376B0IndexArray {
 
     void SetSizeAndGrow(int n)
     {
-        D376B0Allocator& alloc = FUN_00c85750().heap();
+        D376B0Allocator& alloc = hkMemoryRouter_getInstance().heap();
         const int cap = getCapacity();
         if (cap < n) {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(unsigned short));
+            hkArrayUtil__reserve(&alloc, this, newSize, sizeof(unsigned short));
         }
         m_iElementCount = n;
     }
@@ -248,7 +248,8 @@ struct S_00d374f0_Collector {
 };
 
 // @fnv 0x00d374f0
-void FUN_00d374f0(const S_00d374f0_CdBody& bodyA, const S_00d374f0_CdBody& bodyB, int input, S_00d374f0_Collector* collector)
+// src: XBOX_PDB 0x00d374f0
+void hkpMultiRayConvexAgent_staticGetPenetrations(const S_00d374f0_CdBody& bodyA, const S_00d374f0_CdBody& bodyB, int input, S_00d374f0_Collector* collector)
 {
     S_00d374f0_Timer("TtmultiRay-cnvx-getPen");
     const S_00d374f0_MultiRayShape* msA = (const S_00d374f0_MultiRayShape*)bodyA.m_pCollisionShape;
@@ -256,7 +257,7 @@ void FUN_00d374f0(const S_00d374f0_CdBody& bodyA, const S_00d374f0_CdBody& bodyB
 
     S_00d374f0_Collector* col = collector;
     hkTransform bTa;
-    bTa.FUN_00cb22f0(*bodyB.m_pMotionState, *bodyA.m_pMotionState);
+    bTa.hkTransform_setMulInverseMul(*bodyB.m_pMotionState, *bodyA.m_pMotionState);
 
     int nRays = msA->m_iElementCount;
     const hkpMultiRayShape::Ray* rayA = msA->m_data;
@@ -334,7 +335,7 @@ struct Agent378 {
     int unknown;
     ContactManager378* manager;
     unsigned short* indices;
-    void __thiscall FUN_00d378e0(Body378*, Body378*, void*, ContactBuffer378*);
+    void __thiscall hkpMultiRayConvexAgent_processCollision(Body378*, Body378*, void*, ContactBuffer378*);
 };
 inline __m128 transform378(const hkTransform& t, __m128 p) {
     return _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p,p,0x55),t.m_kColumn1),_mm_mul_ps(_mm_shuffle_ps(p,p,0),t.m_kColumn0)),
@@ -342,13 +343,14 @@ inline __m128 transform378(const hkTransform& t, __m128 p) {
 }
 struct Scratch378 { Ray378 ray; hkTransform relative; hkVector4 position; };
 // @fnv 0x00d378e0
-void Agent378::FUN_00d378e0(Body378* a, Body378* b, void* input, ContactBuffer378* buffer) {
+// src: HAVOK_SRC 0x00d378e0
+void Agent378::hkpMultiRayConvexAgent_processCollision(Body378* a, Body378* b, void* input, ContactBuffer378* buffer) {
     timer378(DAT_010ceda8);
     struct { int count; Shape378* target; Shape378* source; } shapes;
     shapes.source = a->shape;
     shapes.target = b->shape;
     Scratch378 scratch;
-    scratch.relative.FUN_00cb22f0(b->transform,a->transform);
+    scratch.relative.hkTransform_setMulInverseMul(b->transform,a->transform);
     shapes.count = shapes.source->count;
     scratch.ray.filter = 0;
     scratch.ray.userData = 0;
@@ -372,8 +374,8 @@ void Agent378::FUN_00d378e0(Body378* a, Body378* b, void* input, ContactBuffer37
             Contact378* contact = buffer->current;
             __m128 fraction = _mm_set1_ps(hit.fraction);
             scratch.position.v = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0,fraction),scratch.ray.from.v),_mm_mul_ps(fraction,scratch.ray.to.v));
-            contact->position.FUN_00c7f640(*b->transform, scratch.position);
-            contact->normal.FUN_00c7f700(reinterpret_cast<const hkRotation*>(b->transform), &hit.normal);
+            contact->position.setTransformedPos_00c7f640(*b->transform, scratch.position);
+            contact->normal.hkVector4_setRotatedDir(reinterpret_cast<const hkRotation*>(b->transform), &hit.normal);
             contact->normal.w = (hit.fraction-1.0)*current->m_kRayStart.w+shapes.source->radius;
             if (indices[i] == 0xffff) {
                 unsigned short iContactPointId = manager->add(a,b,input,buffer,0,contact); indices[i] = iContactPointId;

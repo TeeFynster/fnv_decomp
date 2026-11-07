@@ -47,14 +47,16 @@ FUN_00d04300::FUN_00d04300(bool del)
 }
 
 // @fnv 0x00d021e0
-int __fastcall FUN_00d021e0(int self, int, int* out)
+// src: HAVOK_LIB 0x00d021e0
+int __fastcall hkpMultiThreadedSimulation_getMultithreadConfig(int self, int, int* out)
 {
     *out = *(int*)(self + 0xb4);
     return *out;
 }
 
 // @fnv 0x00d021f0
-void __fastcall FUN_00d021f0(void* this_, int, int* arg, int)
+// src: HAVOK_LIB 0x00d021f0
+void __fastcall hkpMultiThreadedSimulation_setMultithreadConfig(void* this_, int, int* arg, int)
 {
     *(int*)((char*)this_ + 0xb4) = *arg;
 }
@@ -99,7 +101,8 @@ struct S_00d02020_Handle
 
 // For each handle in the pair whose m_type is 2, calls v24 on the owner's owner with the other handle's owner as argument.
 // @fnv 0x00d02020
-void __stdcall FUN_00d02020(Pair* pair)
+// src: XBOX_PDB 0x00d02020
+void __stdcall hkpMultiThreadedSimulation_MtPhantomBroadPhaseListener_removeCollisionPair(Pair* pair)
 {
     if (((S_00d02020_Handle*)pair->a)->m_type == 2)
     {
@@ -204,7 +207,7 @@ struct World
 };
 struct Reserve
 {
-    void FUN_00d97070(int);
+    void hkpBroadPhase_enableMultiThreading(int);
 };
 struct Owner
 {
@@ -347,7 +350,7 @@ FUN_00d02c80::FUN_00d02c80(World* world)
 
     active = 0;
     enabled = false;
-    owner->reserve->FUN_00d97070(10000);
+    owner->reserve->hkpBroadPhase_enableMultiThreading(10000);
     a.context = this;
     b.context = &workLock;
     world->registry->unk24 = &a;
@@ -419,7 +422,8 @@ struct SubNode
 
 // For each handle in the pair whose type is 2, resolves its node and calls v07 on the target with the other handle's adjusted pointer.
 // @fnv 0x00d01fc0
-void __stdcall FUN_00d01fc0(HandlePair* pHandlePair)
+// src: XBOX_PDB 0x00d01fc0
+void __stdcall hkpMultiThreadedSimulation_MtPhantomBroadPhaseListener_addCollisionPair(HandlePair* pHandlePair)
 {
     Handle* h = pHandlePair->first;
     if (h->type == 2)
@@ -445,7 +449,8 @@ void __stdcall FUN_00d01fc0(HandlePair* pHandlePair)
 }
 
 // @fnv 0x00d02160
-bool FUN_00d02160(int* apPairA, int* apPairB)
+// src: HAVOK_LIB 0x00d02160
+bool pairLessThan(int* apPairA, int* apPairB)
 {
     char* p1 = (char*)*apPairA;
     char* b1 = p1 + p1[5];
@@ -481,9 +486,9 @@ struct PairArray
     unsigned int m_pRayCursor;
 };
 
-char* __cdecl FUN_00c85750();
+char* __cdecl hkMemoryRouter_getInstance();
 void __cdecl ResizeAudioStream(void* alloc, PairArray* arr, int elemSize);
-void __cdecl FUN_00cc0f40(char* a, char* b, char* c);
+void __cdecl hkpWorldAgentUtil_addAgent(char* a, char* b, char* c);
 
 struct FUN_00d026e0_cls
 {
@@ -508,7 +513,7 @@ void FUN_00d026e0_cls::ProcessPair(int* aiPair)
         *(int*)(x2 + 0xcc) != *(int*)(y2 + 0xcc))
     {
         PairArray* arr = (PairArray*)(world + 0x6c);
-        char* h = FUN_00c85750();
+        char* h = hkMemoryRouter_getInstance();
         if (arr->m_iElementCount == (int)(arr->m_pRayCursor & 0x3fffffff))
         {
             void* alloc = *(void**)(h + 0x10);
@@ -534,7 +539,7 @@ void FUN_00d026e0_cls::ProcessPair(int* aiPair)
     {
         int v = *(int*)(base + ((int)t << 6) + 0x1c30);
         *(int*)(sub + 0x14) = v;
-        FUN_00cc0f40((char*)x, (char*)y, sub);
+        hkpWorldAgentUtil_addAgent((char*)x, (char*)y, sub);
     }
 }
 
@@ -552,10 +557,10 @@ struct PairList
     unsigned int m_capBits;
 };
 
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 void ResizeAudioStream(void* allocator, PairList* list, unsigned int elemSize);
 char* FindEntryValue(char* a, char* b);
-void FUN_00cc10b0(char* p);
+void hkpWorldAgentUtil_removeAgent(char* p);
 
 struct FUN_00d027c0_cls
 {
@@ -580,7 +585,7 @@ void FUN_00d027c0_cls::ProcessPairEntry(PairEntry* entry)
         if (na[0xe8] != 5 && nb[0xe8] != 5 && *(int*)(na + 0xcc) != *(int*)(nb + 0xcc))
         {
             PairList* list = (PairList*)(m_pSharedOwner + 0x90);
-            hkMemoryRouter* holder = FUN_00c85750();
+            hkMemoryRouter* holder = hkMemoryRouter_getInstance();
             if (list->m_uiItemCount == (int)(list->m_capBits & 0x3fffffffu))
             {
                 ResizeAudioStream(holder->m_heap, list, 8);
@@ -599,7 +604,7 @@ void FUN_00d027c0_cls::ProcessPairEntry(PairEntry* entry)
     char* r = FindEntryValue(pFirstRec, pSecondRec);
     if (r != 0)
     {
-        FUN_00cc10b0(r);
+        hkpWorldAgentUtil_removeAgent(r);
     }
 }
 }  // namespace fnv_00d027c0
@@ -623,11 +628,11 @@ struct HkMemHolder
     HkMemRouter* m10;
 };
 
-HkMemHolder* __cdecl FUN_00c85750(void);
+HkMemHolder* __cdecl hkMemoryRouter_getInstance(void);
 
 inline HkMemRouter& GetMemRouter()
 {
-    return *FUN_00c85750()->m10;
+    return *hkMemoryRouter_getInstance()->m10;
 }
 void* __cdecl AllocateBlockHeader(int count, int blockSize);
 
@@ -855,7 +860,7 @@ struct HkSub1
     HkVec4 unk50;
     HkVec4 unk60;
     HkVec4 unk70;
-    void FUN_00cfa6e0(void* a, void* b, int c);
+    void hkpConstraintQueryIn_set(void* a, void* b, int c);
 };
 
 struct HkSub2
@@ -897,7 +902,7 @@ void __cdecl AccumulateShapes(HkCollector* c, int flags, HkInput2* in);
 struct HkDispatcher
 {
     void AddObjectCopy(HkInput* in, int n);
-    void FUN_00d051b0();
+    void hkJobQueue_processAllJobs();
 };
 
 struct HkProcessor
@@ -952,16 +957,17 @@ struct HkProcessor
     int unkbc;
     HkDispatcher* dispatcher;
 
-    void FUN_00d0c9c0(int* data, int n, HkSource* src, HkParam* param, char flag);
-    void FUN_00d03030(int* data, int n, HkSource* src, HkParam* param, char flag);
+    void hkpContinuousSimulation_processAgentNnEntries(int* data, int n, HkSource* src, HkParam* param, char flag);
+    void hkpMultiThreadedSimulation_processAgentNnEntries(int* data, int n, HkSource* src, HkParam* param, char flag);
 };
 
 // @fnv 0x00d03030
-void HkProcessor::FUN_00d03030(int* paiData, int aiCount, HkSource* pSource, HkParam* param, char flag)
+// src: XBOX_PDB 0x00d03030
+void HkProcessor::hkpMultiThreadedSimulation_processAgentNnEntries(int* paiData, int aiCount, HkSource* pSource, HkParam* param, char flag)
 {
     if (dispatcher == 0 || aiCount <= world->unkec)
     {
-        FUN_00d0c9c0(paiData, aiCount, pSource, param, flag);
+        hkpContinuousSimulation_processAgentNnEntries(paiData, aiCount, pSource, param, flag);
         return;
     }
 
@@ -993,7 +999,7 @@ void HkProcessor::FUN_00d03030(int* paiData, int aiCount, HkSource* pSource, HkP
         in.unk02 = 2;
         dispatcher->AddObjectCopy(&in, 1);
     }
-    dispatcher->FUN_00d051b0();
+    dispatcher->hkJobQueue_processAllJobs();
 
     if (aiCount > 0)
     {
@@ -1014,7 +1020,7 @@ void HkProcessor::FUN_00d03030(int* paiData, int aiCount, HkSource* pSource, HkP
         collector.sub2.unk04 = 0;
         collector.unk114 = &world->unk1d0;
         collector.sub2.FUN_00cfa7d0(world->unk78);
-        collector.sub1.FUN_00cfa6e0(&world->unk1e0, &world->unk1d0, world->unk1b8);
+        collector.sub1.hkpConstraintQueryIn_set(&world->unk1e0, &world->unk1d0, world->unk1b8);
         collector.owner = this;
         collector.unk118 = world->unk78->unk8;
         collector.unk11c = &DAT_01269210;
@@ -1022,12 +1028,12 @@ void HkProcessor::FUN_00d03030(int* paiData, int aiCount, HkSource* pSource, HkP
         AccumulateShapes(&collector, 0, &input2);
         if (collector.sub2.unk64)
         {
-            HkMemHolder* h = FUN_00c85750();
+            HkMemHolder* h = hkMemoryRouter_getInstance();
             h->m10->free(collector.sub2.unk64, 0x200);
         }
     }
 
-    HkMemHolder* holder = FUN_00c85750();
+    HkMemHolder* holder = hkMemoryRouter_getInstance();
     HkMemRouter* pMemRouter = holder->m10;
     if ((capacity & 0x80000000) == 0)
     {
@@ -1111,7 +1117,7 @@ struct CpuAllocatorHolder
     unsigned int unk0c;
     CpuAllocator* allocator;
 };
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+CpuAllocatorHolder* __cdecl hkMemoryRouter_getInstance();
 struct CpuObject
 {
     unsigned int unk00;
@@ -1126,7 +1132,7 @@ CpuObject* CpuObject::FUN_00d04320(unsigned int flags)
     FUN_00d02da0();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
+        CpuAllocatorHolder* holder = hkMemoryRouter_getInstance();
         holder->allocator->Invoke(this, size);
     }
     return this;
@@ -1137,7 +1143,8 @@ CpuObject* CpuObject::FUN_00d04320(unsigned int flags)
 // are ignored; otherwise each phantom side is told about the other side's collidable.
 // For each pair member of type 3, calls v24 on the other member's owner's owner, passing the non-phantom member's owner.
 // @fnv 0x00d020f0
-void __stdcall FUN_00d020f0(Pair* pair)
+// src: XBOX_PDB 0x00d020f0
+void __stdcall hkpMultiThreadedSimulation_MtBroadPhaseBorderListener_removeCollisionPair(Pair* pair)
 {
     if (((S_00d02020_Handle*)pair->a)->m_type == 3 && ((S_00d02020_Handle*)pair->b)->m_type == 3)
         return;
@@ -1156,12 +1163,14 @@ void __stdcall FUN_00d020f0(Pair* pair)
 }
 
 // @fnv 0x00d02200
-void __stdcall FUN_00d02200(int)
+// src: COMMUNITY 0x00d02200
+void __stdcall hkpMultiThreadedSimulation_61(int)
 {}
 
 // Empty function that takes three int arguments and does nothing.
 // @fnv 0x00d02210
-void __stdcall FUN_00d02210(int, int, int)
+// src: COMMUNITY 0x00d02210
+void __stdcall hkpMultiThreadedSimulation_assertThereIsNoCollisionInformationForEntities(int, int, int)
 {}
 
 struct OwnerD020;
@@ -1249,7 +1258,7 @@ struct __declspec(align(16)) SolverContext
     int unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C;
     int unk40, unk44, unk48, unk4C, unk50, unk54, unk58, unk5C;
     int unk60, unk64, unk68, unk6C, unk70, unk74, unk78, unk7C;
-    void FUN_00cfa6e0(void*, void*, int);
+    void hkpConstraintQueryIn_set(void*, void*, int);
 };
 struct PhysicsOwner
 {
@@ -1363,7 +1372,7 @@ struct __declspec(align(16)) ResultJob : JobHeader
 struct JobQueue
 {
     void AddObjectCopy(BuildJob*, int);
-    void FUN_00d051b0();
+    void hkJobQueue_processAllJobs();
 };
 struct Allocator
 {
@@ -1409,7 +1418,7 @@ struct Processor
     JobQueue* active;
 
     void ProcessGroups(int**, int, struct Group*, int, TaskInput*, hkBool);
-    void FUN_00d0c9c0(int**, int, TaskInput*, GroupIdentity*, hkBool);
+    void hkpContinuousSimulation_processAgentNnEntries(int**, int, TaskInput*, GroupIdentity*, hkBool);
 };
 struct Group
 {
@@ -1426,7 +1435,7 @@ void Processor::ProcessGroups(int** items, int total, Group* groups, int count, 
     {
         int batch = owner->batchSize;
         Group* pSpecialGroup = 0;
-        ThreadState* pThreadState = (ThreadState*)FUN_00c85750();
+        ThreadState* pThreadState = (ThreadState*)hkMemoryRouter_getInstance();
         BuildJob* jobs = (BuildJob*)pThreadState->top;
         pThreadState->top += (count * sizeof(BuildJob) + 127) & ~127;
         for (int i = 0; i < count; ++i)
@@ -1450,7 +1459,7 @@ void Processor::ProcessGroups(int** items, int total, Group* groups, int count, 
                 group->job = job;
             }
         }
-        ((JobQueue*)active)->FUN_00d051b0();
+        ((JobQueue*)active)->hkJobQueue_processAllJobs();
         for (int i = 0; i < count; ++i)
         {
             Group* group = groups + i;
@@ -1465,7 +1474,7 @@ void Processor::ProcessGroups(int** items, int total, Group* groups, int count, 
                 context.input.unk04 = 0;
                 context.input.FUN_00cfa7d0(world->input);
                 world = (PhysicsOwner*)owner;
-                context.solver.FUN_00cfa6e0(&world->unk1E0, &world->unk1D0, world->unk1B8);
+                context.solver.hkpConstraintQueryIn_set(&world->unk1E0, &world->unk1D0, world->unk1B8);
                 world = (PhysicsOwner*)owner;
                 context.processor = this;
                 context.delta = *(float*)&world->input->unk08;
@@ -1473,26 +1482,26 @@ void Processor::ProcessGroups(int** items, int total, Group* groups, int count, 
                 context.shared = &DAT_01269210;
                 AccumulateShapes(&context, 0, &job);
                 if (context.input.scratch)
-                    ((ThreadState*)FUN_00c85750())->heap().freeBlock(context.input.scratch, 512);
+                    ((ThreadState*)hkMemoryRouter_getInstance())->heap().freeBlock(context.input.scratch, 512);
             }
         }
         if (pSpecialGroup)
-            FUN_00d0c9c0(items + pSpecialGroup->start, pSpecialGroup->count, input, pSpecialGroup->id, false);
-        ((ThreadState*)FUN_00c85750())->top = (char*)jobs;
+            hkpContinuousSimulation_processAgentNnEntries(items + pSpecialGroup->start, pSpecialGroup->count, input, pSpecialGroup->id, false);
+        ((ThreadState*)hkMemoryRouter_getInstance())->top = (char*)jobs;
     }
     else
     {
         for (int i = 0; i < count; ++i)
-            FUN_00d0c9c0(items + groups[i].start, groups[i].count, input, groups[i].id, flag);
+            hkpContinuousSimulation_processAgentNnEntries(items + groups[i].start, groups[i].count, input, groups[i].id, flag);
     }
 }
 
 void __cdecl ResizeAudioStream(void* alloc, void* arr, int elemSize);
-extern "C" void __cdecl FUN_00cb1280(void* p, int v, int n);
+extern "C" void __cdecl hkString_memSet(void* p, int v, int n);
 
 __forceinline hkMemoryRouterQ_hkpmultithreadedsimulation& getRouter()
 {
-    return *(hkMemoryRouterQ_hkpmultithreadedsimulation*)FUN_00c85750();
+    return *(hkMemoryRouterQ_hkpmultithreadedsimulation*)hkMemoryRouter_getInstance();
 }
 
 #include "../../../../../../../include/hkArray.h"
@@ -1646,7 +1655,7 @@ struct SimulationIslandQ
 struct InputQ
 {
     int LookupHashEntry(int key, int flag);
-    void FUN_00cb1870(hkMemoryAllocator* heap, int key, EntityQ* entity);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(hkMemoryAllocator* heap, int key, EntityQ* entity);
 };
 
 struct CollideSimQ
@@ -1659,8 +1668,8 @@ struct CollideSimQ
     int m_3c;
     int unk40[0x20];
     int m_c0;
-    void FUN_00d0db40(EntityQ** entities, int numEntities, void* input, int* out);
-    void FUN_00d03030(AgentEntryQ** entries, int numEntries, void* input, SimulationIslandQ* island, hkBool flag);
+    void hkpContinuousSimulation_collideEntitiesOfOneIslandNarrowPhaseContinuous_toiOnly(EntityQ** entities, int numEntities, void* input, int* out);
+    void hkpMultiThreadedSimulation_processAgentNnEntries(AgentEntryQ** entries, int numEntries, void* input, SimulationIslandQ* island, hkBool flag);
     void ProcessCollisionEntries(EntityQ** entities, int numEntities, void* input, InputQ* collInput) throw();
 };
 
@@ -1673,7 +1682,7 @@ void CollideSimQ::ProcessCollisionEntries(EntityQ** entities, int numEntities, v
         SimulationIslandQ* island = entities[0]->m_pSimulationIsland;
         int numIslandEntities = island->m_iActorEntryCount;
         hkLocalArrayQ<unsigned char> marked(numIslandEntities);
-        FUN_00cb1280(marked.m_data, 0, numIslandEntities);
+        hkString_memSet(marked.m_data, 0, numIslandEntities);
 
         hkLocalArrayQ<AgentEntryQ*> toProcess(1000);
         StreamHeapArrayQ<CollisionEntryQ> entries;
@@ -1705,14 +1714,14 @@ void CollideSimQ::ProcessCollisionEntries(EntityQ** entities, int numEntities, v
                     {
                         entity->FUN_00c90510();
                         key = entity->m_d4;
-                        collInput->FUN_00cb1870(getRouter().m_pStreamAllocator, key, entity);
+                        collInput->hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(getRouter().m_pStreamAllocator, key, entity);
                     }
                 }
             }
         }
 
         if (toProcess.m_iElementCount)
-            FUN_00d03030(toProcess.m_data, toProcess.m_iElementCount, input, island, false);
+            hkpMultiThreadedSimulation_processAgentNnEntries(toProcess.m_data, toProcess.m_iElementCount, input, island, false);
 
         entries.ClearAndRelease();
         toProcess.release();
@@ -1720,7 +1729,7 @@ void CollideSimQ::ProcessCollisionEntries(EntityQ** entities, int numEntities, v
     }
     else
     {
-        FUN_00d0db40(entities, numEntities, input, &m_3c);
+        hkpContinuousSimulation_collideEntitiesOfOneIslandNarrowPhaseContinuous_toiOnly(entities, numEntities, input, &m_3c);
     }
 }
 
@@ -1770,7 +1779,8 @@ struct S00d02880_Key
 };
 // Linearly searches m_data for a matching key, otherwise grows the array if full and appends a new element with that key.
 // @fnv 0x00d02880
-static __declspec(noinline) S00d02880_Elem* FUN_00d02880(S00d02880_Arr* apArray, S00d02880_Key aKey)
+// src: HAVOK_LIB 0x00d02880
+static __declspec(noinline) S00d02880_Elem* getIslandEntriesInfo(S00d02880_Arr* apArray, S00d02880_Key aKey)
 {
     int key = aKey.v;
     long i = 0;
@@ -1787,7 +1797,7 @@ static __declspec(noinline) S00d02880_Elem* FUN_00d02880(S00d02880_Arr* apArray,
             p++;
         } while (i < apArray->m_uiItemCount);
     }
-    S00d02880_Heap* h = reinterpret_cast<S00d02880_Heap*>(FUN_00c85750());
+    S00d02880_Heap* h = reinterpret_cast<S00d02880_Heap*>(hkMemoryRouter_getInstance());
     if (apArray->m_uiItemCount == (int)(0x3fffffffu & apArray->m_capFlags))
     {
         ResizeAudioStream(h->unk10, reinterpret_cast<PairArray*>(apArray), 0x18u);
@@ -1800,7 +1810,7 @@ static __declspec(noinline) S00d02880_Elem* FUN_00d02880(S00d02880_Arr* apArray,
 
 S00d02880_Elem* S00d02880_Call(S00d02880_Arr* a, S00d02880_Key key)
 {
-    return FUN_00d02880(a, key);
+    return getIslandEntriesInfo(a, key);
 }
 
 #include <windows.h>
@@ -1827,7 +1837,7 @@ struct AudioSink
     virtual void Release(void* data, int size);
 };
 
-extern BSAudio* __cdecl FUN_00c85750();
+extern BSAudio* __cdecl hkMemoryRouter_getInstance();
 
 // A streamed audio buffer: the size field counts the live items, the data
 // pointer is handed back to the audio sink when the buffer is released.
@@ -1930,7 +1940,7 @@ FUN_00d02da0::~FUN_00d02da0()
     DeleteCriticalSection(&m_critical100);
     DeleteCriticalSection(&m_critical9c);
     {
-        BSAudio* audio = FUN_00c85750();
+        BSAudio* audio = hkMemoryRouter_getInstance();
         AudioSink* sink = reinterpret_cast<AudioSink*>(audio->pListener);
         int items = m_audio90.m_iElementCount;
         m_audio90.m_uiItemCount = 0;
@@ -1940,7 +1950,7 @@ FUN_00d02da0::~FUN_00d02da0()
     }
     DeleteCriticalSection(&m_critical78);
     {
-        BSAudio* audio = FUN_00c85750();
+        BSAudio* audio = hkMemoryRouter_getInstance();
         AudioSink* sink = reinterpret_cast<AudioSink*>(audio->pListener);
         int items = m_audio6c.m_iElementCount;
         m_audio6c.m_uiItemCount = 0;
@@ -1999,7 +2009,7 @@ struct MessageBuilder
     unsigned int capacity;
     char* cursor;
     __declspec(nothrow) MessageBuilder(char* buffer, unsigned int capacity);
-    void FUN_00cc01c0(const char* text);
+    void ProcessAndReturnValue_00cc01c0(const char* text);
     void FUN_00cc00e0();
 };
 
@@ -2109,7 +2119,7 @@ void FUN_00d02e70_cls::AddToiEvent(char* input, EventMeta* meta, CRITICAL_SECTIO
     {
         __declspec(align(16)) int buffer[128];
         MessageBuilder message((char*)buffer, sizeof(buffer));
-        message.FUN_00cc01c0(
+        message.ProcessAndReturnValue_00cc01c0(
             "Toi event queue full, consider using HK_COLLIDABLE_QUALITY_DEBRIS for some objects or increase hkpWorldCinfo::m_sizeOfToiEventQueue");
         DAT_01268360->Log(1, 0xf0323454, (char*)buffer,
                           ".\\World\\Simulation\\Multithreaded\\hkpMultithreadedSimulation.cpp", 1015);
@@ -2236,7 +2246,8 @@ template <class T, class L> inline void sortPairs(T* data, int count, L less)
 
 // Swaps each pair's handles so the left key is not greater than the right key, then sorts the pair list using FUN_00d02160.
 // @fnv 0x00d02250
-void __cdecl FUN_00d02250(PairList<TypedPair>& list)
+// src: HAVOK_LIB 0x00d02250
+void __cdecl sortPairList(PairList<TypedPair>& list)
 {
     TypedPair* item = list.begin();
     TypedPair* end = item + list.size();
@@ -2250,7 +2261,7 @@ void __cdecl FUN_00d02250(PairList<TypedPair>& list)
         }
         ++item;
     }
-    sortPairs(list.begin(), list.size(), FUN_00d02160);
+    sortPairs(list.begin(), list.size(), pairLessThan);
 }
 
 extern int DAT_01269200;
@@ -2275,7 +2286,7 @@ struct RuntimeBase
 
 struct Job
 {
-    int FUN_00d04440();
+    int hkJobQueue_getMasterThreadFinishingFlags();
     void SetSimulationEnabled(int);
     void SetValue(int);
 };
@@ -3311,11 +3322,11 @@ struct StepWorld
     PendingConstraints* f1b8;
 
     void IncrementCounter();
-    void FUN_00c910b0();
+    void nullsub_6();
     void FUN_00c91120();
-    void FUN_00c91140();
-    void FUN_00c91190();
-    int FUN_00c93570();
+    void UpdateFields_00c91140();
+    void hkpWorld_unlock();
+    int hkpWorld_getMemoryWatchDog();
 };
 
 struct TimeInfo
@@ -3329,25 +3340,25 @@ struct StepPair
     Handle* second;
 };
 
-void __cdecl FUN_00dd7d00(Island**, int, int, void(__cdecl*)(bool*, CompareObject*, CompareObject*));
+void __cdecl hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(Island**, int, int, void(__cdecl*)(bool*, CompareObject*, CompareObject*));
 
-void __cdecl FUN_00cf7130(PairArray*, PairArray*);
+void __cdecl hkpTypedBroadPhaseDispatcher_removeDuplicates(PairArray*, PairArray*);
 
-void __cdecl FUN_00d02250(PairArray*);
+void __cdecl sortPairList(PairArray*);
 
-void __cdecl FUN_00cb4c60(StepWorld*, Island*, Island*);
+void __cdecl hkpWorldOperationUtil_internalMergeTwoIslands(StepWorld*, Island*, Island*);
 
-Agent* __cdecl FUN_00cc0f40(Body*, Body*, Dispatcher*);
+Agent* __cdecl hkpWorldAgentUtil_addAgent(Body*, Body*, Dispatcher*);
 
 Agent* __cdecl FindEntryValue(Body*, Body*);
 
-void __cdecl FUN_00cc1160(Agent*);
+void __cdecl hkpWorldAgentUtil_removeAgentAndItsToiEvents(Agent*);
 
-void __cdecl FUN_00cfedd0(Agent*, Dispatcher*, Output*, Manager*);
+void __cdecl hkAgentNnMachine_ProcessAgent(Agent*, Dispatcher*, Output*, Manager*);
 
-void __cdecl FUN_00d00aa0(StepWorld*, Constraint*);
+void __cdecl hkpWorldCallbackUtil_fireConstraintViolated(StepWorld*, Constraint*);
 
-void __cdecl FUN_00d014f0(StepWorld*, TimeInfo*);
+void __cdecl hkpWorldCallbackUtil_firePostCollideCallback(StepWorld*, TimeInfo*);
 
 void __cdecl ProcessChildLoop(StepWorld*);
 
@@ -3537,12 +3548,13 @@ struct Stepper
 
     void AddToiEvent(Output*, Agent*, void*);
 
-    int FUN_00d03290(Job*, Jobs*);
+    int hkpMultiThreadedSimulation_finishMtStep(Job*, Jobs*);
 };
 
 // Advances the physics world by one step, processing added/removed contact pairs, dispatching collision agents, and invoking post-collision callbacks.
 // @fnv 0x00d03290
-int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
+// src: HAVOK_LIB 0x00d03290
+int Stepper::hkpMultiThreadedSimulation_finishMtStep(Job* job, Jobs* jobs)
 {
 
     volatile unsigned pairStamp;
@@ -3587,7 +3599,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
 
     if (job && jobs)
     {
-        jobState.prior = job->FUN_00d04440();
+        jobState.prior = job->hkJobQueue_getMasterThreadFinishingFlags();
         job->SetSimulationEnabled(1);
         job->SetValue(2);
         jobs->start(job, 11);
@@ -3596,12 +3608,12 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
     const int size = f00c->f02c - f0b8;
 
     if (size > 1)
-        FUN_00dd7d00(f00c->f028 + f0b8, 0, size - 1, CompareObjectKeys);
+        hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(f00c->f028 + f0b8, 0, size - 1, CompareObjectKeys);
 
     for (int i = f0b8; i < f00c->f02c; ++i)
         f00c->f028[i]->storageIndex = (short)i;
 
-    f00c->FUN_00c910b0();
+    f00c->nullsub_6();
 
     if (removed.size() + added.size())
     {
@@ -3620,7 +3632,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
             }
         }
 
-        FUN_00cf7130((PairArray*)&added, (PairArray*)&removed);
+        hkpTypedBroadPhaseDispatcher_removeDuplicates((PairArray*)&added, (PairArray*)&removed);
 
         {
             TraceBuffer* p = (TraceBuffer*)TlsGetValue(DAT_0126835c);
@@ -3635,8 +3647,8 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
             }
         }
 
-        FUN_00d02250((PairArray*)&added);
-        FUN_00d02250((PairArray*)&removed);
+        sortPairList((PairArray*)&added);
+        sortPairList((PairArray*)&removed);
 
         {
             TraceBuffer* p = (TraceBuffer*)TlsGetValue(DAT_0126835c);
@@ -3673,7 +3685,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
 
             if (island != islandB)
             {
-                FUN_00cb4c60(f00c, island, islandB);
+                hkpWorldOperationUtil_internalMergeTwoIslands(f00c, island, islandB);
                 island = scratch.entity->f0cc;
             }
 
@@ -3688,7 +3700,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
 
                 scratch.input->f014 = scratch.input->f000->qualities[code].f10;
 
-                Agent* agent = FUN_00cc0f40(a, b, scratch.input);
+                Agent* agent = hkpWorldAgentUtil_addAgent(a, b, scratch.input);
 
                 if (agent)
                 {
@@ -3704,7 +3716,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
 
                     out.reset();
 
-                    FUN_00cfedd0(agent, d, &out, agent->manager);
+                    hkAgentNnMachine_ProcessAgent(agent, d, &out, agent->manager);
 
                     if (!out.empty())
                         agent->manager->process(*savedA, *scratch.db, *d, out);
@@ -3738,7 +3750,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
             Body* b = bodyOf(pair->second);
             Agent* agent = FindEntryValue(a, b);
             if (agent)
-                FUN_00cc1160(agent);
+                hkpWorldAgentUtil_removeAgentAndItsToiEvents(agent);
         }
         removed.clear();
         removed.clear();
@@ -3763,7 +3775,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
     const int n = count < 128 ? count : 128;
 
     for (int k = 0; k < n; ++k)
-        FUN_00d00aa0(f00c, f00c->f1b8->entries[k]);
+        hkpWorldCallbackUtil_fireConstraintViolated(f00c, f00c->f1b8->entries[k]);
 
     f018 += f01c;
 
@@ -3776,7 +3788,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
             world->FUN_00c91120();
 
         if (world->f0a4 == 1 && world->f090)
-            world->FUN_00c91140();
+            world->UpdateFields_00c91140();
     }
 
     result = 0;
@@ -3786,7 +3798,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
 
         result = 2;
         f018 -= f01c;
-        f00c->FUN_00c91190();
+        f00c->hkpWorld_unlock();
         {
             TraceBuffer* p = (TraceBuffer*)TlsGetValue(DAT_0126835c);
             TraceRecord* r = p->next;
@@ -3828,7 +3840,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
             t.delta = scratch.end - start;
             t.inverse = t.delta == 0 ? 0 : 1 / t.delta;
 
-            FUN_00d014f0(f00c, &t);
+            hkpWorldCallbackUtil_firePostCollideCallback(f00c, &t);
             {
                 TraceBuffer* p = (TraceBuffer*)TlsGetValue(DAT_0126835c);
                 TraceRecord* r = p->next;
@@ -3843,7 +3855,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
             }
         }
 
-        f00c->FUN_00c910b0();
+        f00c->nullsub_6();
         {
             TraceBuffer* p = (TraceBuffer*)TlsGetValue(DAT_0126835c);
             TraceRecord* r = p->next;
@@ -3860,7 +3872,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
         if (f00c->f0e4)
             f0c0 = (int)job;
 
-        f00c->FUN_00c91190();
+        f00c->hkpWorld_unlock();
         v18();
         f0c0 = 0;
 
@@ -3902,7 +3914,7 @@ int Stepper::FUN_00d03290(Job* job, Jobs* jobs)
 
     f028 = result;
 
-    if (result && f00c->FUN_00c93570())
+    if (result && f00c->hkpWorld_getMemoryWatchDog())
         ProcessChildLoop(f00c);
 
     return f028;
@@ -3930,7 +3942,7 @@ struct Singleton
 void __cdecl ResizeAudioStream(void*, PairArray*, int);
 static inline Singleton* GetSingleton()
 {
-    return (Singleton*)FUN_00c85750();
+    return (Singleton*)hkMemoryRouter_getInstance();
 }
 
 struct ArrPair
@@ -3999,9 +4011,9 @@ struct ObjA
     int m_08;
     void EnsureCapacity(DeallocCtx* ctx, int zero);
     int LookupHashEntry(void* elem, int zero);
-    void FUN_00cb1870(DeallocCtx* ctx, void* elem, int one);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(DeallocCtx* ctx, void* elem, int one);
     void ProcessArgument(DeallocCtx* ctx);
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 
 struct CollisionCell
@@ -5976,7 +5988,7 @@ struct SubObj
         return m_78;
     }
     void FUN_00c91120();
-    void FUN_00c91140();
+    void UpdateFields_00c91140();
 };
 
 struct ElemSub
@@ -6354,13 +6366,14 @@ struct ThisCls
     int m_04;
     int m_08;
     SubObj* m_0c;
-    void FUN_00d03c20(ParamObj* p0, ParamObj* p1);
+    void hkpMultiThreadedSimulation_collideEntitiesNeedingPsiCollisionDetectionNarrowPhase_toiOnly(ParamObj* p0, ParamObj* p1);
     void ProcessGroups(int* a, int b, Group* c, int d, void* e, CollisionFlag f);
 };
 
 // Collects contact pairs from p1 elements, groups them by identity, and calls ProcessGroups with the results.
 // @fnv 0x00d03c20
-void ThisCls::FUN_00d03c20(ParamObj* apUnused, ParamObj* p1)
+// src: HAVOK_LIB 0x00d03c20
+void ThisCls::hkpMultiThreadedSimulation_collideEntitiesNeedingPsiCollisionDetectionNarrowPhase_toiOnly(ParamObj* apUnused, ParamObj* p1)
 {
     TraceBuffer* pTraceBuf = (TraceBuffer*)TlsGetValue(DAT_0126835c);
     if (pTraceBuf->next < pTraceBuf->end)
@@ -6433,7 +6446,7 @@ void ThisCls::FUN_00d03c20(ParamObj* apUnused, ParamObj* p1)
                     key = (GroupIdentity*)((Elem*)h)->m_cc;
                 }
                 Singleton* pSingleton1 = GetSingleton();
-                L.seen.FUN_00cb1870(pSingleton1->m_10, e2, 1);
+                L.seen.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(pSingleton1->m_10, e2, 1);
                 Singleton* pSingleton2 = GetSingleton();
                 if (pairs.m_iArrayLength == (pairs.m_iCapacity & 0x3fffffff))
                     ResizeAudioStream(pSingleton2->m_10, (PairArray*)&pairs, 8);
@@ -6482,7 +6495,7 @@ void ThisCls::FUN_00d03c20(ParamObj* apUnused, ParamObj* p1)
         if (sub->m_8c != 0)
             sub->FUN_00c91120();
         if (sub->m_a4 == 1 && sub->m_90 != 0)
-            sub->FUN_00c91140();
+            sub->UpdateFields_00c91140();
     }
     TraceBuffer* pTraceBuf2 = (TraceBuffer*)TlsGetValue(DAT_0126835c);
     if (pTraceBuf2->next < pTraceBuf2->end)
@@ -6514,5 +6527,5 @@ void ThisCls::FUN_00d03c20(ParamObj* apUnused, ParamObj* p1)
     pairs.m_iCapacity = sentinel;
     Singleton* pSingleton10 = GetSingleton();
     L.seen.ProcessArgument(pSingleton10->m_10);
-    L.seen.FUN_00a29680();
+    L.seen.Object_DoNothing();
 }

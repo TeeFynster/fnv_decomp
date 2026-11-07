@@ -36,11 +36,12 @@ void EffectSerialization::SaveGame(Actor* apActor)
 struct FUN_00803a50_shell
 {
     unsigned char bFlag;  // +0x177
-    void FUN_00803a50(unsigned char flag);
+    void BoltShaderProperty_SetStartFromPoint(unsigned char flag);
 };
 
 // @fnv 0x00803a50
-void FUN_00803a50_shell::FUN_00803a50(unsigned char flag)
+// src: COMMUNITY 0x00803a50
+void FUN_00803a50_shell::BoltShaderProperty_SetStartFromPoint(unsigned char flag)
 {
     ((unsigned char*)this)[0x177] = flag;
 }
@@ -69,23 +70,26 @@ void FUN_00803b10_shell::SetByteAtOffset175(unsigned char value)
 
 struct FUN_00803b50_shell
 {
-    void FUN_00803b50(float value);
+    void BoltShaderProperty_SetSubSegmentVariance(float value);
 };
 // @fnv 0x00803b50
-void FUN_00803b50_shell::FUN_00803b50(float value)
+// src: XBOX_PDB 0x00803b50
+void FUN_00803b50_shell::BoltShaderProperty_SetSubSegmentVariance(float value)
 {
     *(float*)((char*)this + 0x150) = value;
 }
 
 // @fnv 0x00803d00
-void __thiscall AbsorbEffect::FUN_00803d00(Actor* apActor)
+// src: XBOX_PDB 0x00803d00
+void __thiscall AbsorbEffect::FinishInitLoadGame(Actor* apActor)
 {
     ValueModifierEffect::FinishLoadGameTES(apActor);
     InitBoltEffect();
 }
 
 // @fnv 0x0082a650
-void AbsorbEffect::FUN_0082a650(ActiveEffect* apDestination)
+// src: XBOX_PDB 0x0082a650
+void AbsorbEffect::CopyData_0082a650(ActiveEffect* apDestination)
 {
     ValueModifierEffect::CopyData(apDestination);
 }
@@ -110,22 +114,24 @@ void* __thiscall AbsorbEffect::Destroy(unsigned int flags)
 
 struct FUN_00803a70_shell
 {
-    void FUN_00803a70(unsigned int value);
+    void BoltShaderProperty_SetNumBolts(unsigned int value);
 };
 
 // @fnv 0x00803a70
-void FUN_00803a70_shell::FUN_00803a70(unsigned int value)
+// src: XBOX_PDB 0x00803a70
+void FUN_00803a70_shell::BoltShaderProperty_SetNumBolts(unsigned int value)
 {
     *(unsigned int*)((char*)this + 0x128) = value;
 }
 
 struct FUN_00803b30_shell
 {
-    void FUN_00803b30(float value);
+    void BoltShaderProperty_SetSegmentLength(float value);
 };
 
 // @fnv 0x00803b30
-void FUN_00803b30_shell::FUN_00803b30(float value)
+// src: XBOX_PDB 0x00803b30
+void FUN_00803b30_shell::BoltShaderProperty_SetSegmentLength(float value)
 {
     *(float*)((char*)this + 0x144) = value;
 }
@@ -158,11 +164,11 @@ void FUN_00803ae0_shell::SetData(NiColorA aVal)
     *reinterpret_cast<NiColorA*>((char*)this + 0x164) = aVal;
 }
 
-void __cdecl FUN_00bc1470(NiAVObject* apSource, NiAVObject* apTarget);
+void __cdecl BoltShader_Stop(NiAVObject* apSource, NiAVObject* apTarget);
 // @fnv 0x00802e20
 AbsorbEffect::~AbsorbEffect()
 {
-    FUN_00bc1470(spBolt, m_spTargetObject);
+    BoltShader_Stop(spBolt, m_spTargetObject);
     m_spTargetObject = 0;
     if (spBolt)
     {
@@ -377,7 +383,7 @@ struct BoltActorStandIn
     char pad04[0xa4 - 4];
     BoltAVOwner kAVOwner;
 
-    float FUN_005723b0(BoltActorStandIn* pkOther, bool b1, bool b2);
+    float TESObjectREFR_GetDistanceFromReference(BoltActorStandIn* pkOther, bool b1, bool b2);
     BoltProcessStandIn* FUN_008d8520();
 };
 
@@ -708,7 +714,7 @@ struct BoltProcessStandIn
 };
 
 extern Setting g_s_011d1aa8;
-float __cdecl FUN_006463e0(float f);
+float __cdecl CombatFormulas_CalcWeaponReach(float f);
 
 // @fnv 0x00803120
 void AbsorbEffect::Update(float fTimeOffset)
@@ -731,8 +737,8 @@ void AbsorbEffect::Update(float fTimeOffset)
     if (!FUN_00705cf0() && pkTarget && pkTarget->Get3D() && !pkTarget->IsDead(false) && pkCaster && pkCaster->Get3D() &&
         !pkCaster->IsDead(false))
     {
-        float fDist = pkCaster->FUN_005723b0(pkTarget, false, false);
-        if (fDist > FUN_006463e0(*g_s_011d1aa8.FUN_00403e20()))
+        float fDist = pkCaster->TESObjectREFR_GetDistanceFromReference(pkTarget, false, false);
+        if (fDist > CombatFormulas_CalcWeaponReach(*g_s_011d1aa8.Setting_Float_00403e20()))
             Dispel(false);
         else if (pkCaster->FUN_008d8520())
         {
@@ -746,7 +752,7 @@ void AbsorbEffect::Update(float fTimeOffset)
         Dispel(false);
     }
     if (!FUN_00705cf0())
-        FUN_00803b70(fTimeOffset);
+        Update3D_00803b70(fTimeOffset);
 }
 
 // @fnv 0x008033b0
@@ -759,7 +765,7 @@ void AbsorbEffect::Finish()
         float f = GetModifiedMagnitude(GetFloatAtOffset1C());
         ApplyActorValueModifier(t, f, ActorValue::ActorValue__Index_VALUE_NONE);
     }
-    FUN_00bc1470(spBolt, m_spTargetObject);
+    BoltShader_Stop(spBolt, m_spTargetObject);
     if (spBolt)
     {
         NiNode* n = ((const NiAVObject*)(NiAVObject*)spBolt)->GetParent();
@@ -770,7 +776,7 @@ void AbsorbEffect::Finish()
 }
 
 namespace fnv_008034c0 {
-void* __cdecl FUN_00aa13e0(unsigned int uiSize);
+void* __cdecl Object_DispatchCommandFour(unsigned int uiSize);
 void __cdecl BoltFree(void* pvMem);
 
 
@@ -780,30 +786,30 @@ struct BoltExtraData
     BoltExtraData();
     static void* operator new(unsigned int uiSize)
     {
-        return FUN_00aa13e0(uiSize);
+        return Object_DispatchCommandFour(uiSize);
     }
     static void operator delete(void* pvMem)
     {
         BoltFree(pvMem);
     }
-    void FUN_00519230(int a1, int a2);
+    void BSXFlags_SetFlags(int a1, int a2);
 };
 
 struct BoltGeometry
 {
-    void FUN_00821620(float f);
+    void BoltShaderProperty_SetBoltsRadius(float f);
     void FUN_00507780(float f);
-    void FUN_00803b30(float f);
-    void FUN_005077a0(float f);
-    void FUN_00803b50(float f);
+    void BoltShaderProperty_SetSegmentLength(float f);
+    void BoltShaderProperty_SetSegmentVariance(float f);
+    void BoltShaderProperty_SetSubSegmentVariance(float f);
     void SetBoltSmallWidth(float f);
     void SetBoltGrowWidth(float f);
-    void FUN_00803a70(unsigned int ui);
+    void BoltShaderProperty_SetNumBolts(unsigned int ui);
     void SetArg(NiColorA kColor);
     void SetData(NiColorA kColor);
     void SetByteAtOffset175(unsigned char uc);
-    void FUN_00803a50(unsigned char uc);
-    void FUN_00bc2360();
+    void BoltShaderProperty_SetStartFromPoint(unsigned char uc);
+    void BoltShaderProperty_InitSegmentData();
 };
 
 // The shared NiPointer interface does not declare this comparison helper.
@@ -812,8 +818,8 @@ template <class T> struct BoltPtr
     bool FUN_00822510(T* pObject) const;
 };
 
-const char* __cdecl FUN_00448a80();
-BoltGeometry* __cdecl FUN_00bc18d0(NiNode* pkNode, int iFlag);
+const char* __cdecl BSXFlags_Tag();
+BoltGeometry* __cdecl BoltShader_Start(NiNode* pkNode, int iFlag);
 
 extern Setting g_s_011d1710;
 extern Setting g_s_011d1c88;
@@ -877,7 +883,7 @@ struct BoltModelInfo
 };
 struct BoltRoot
 {
-    BoltModelInfo* FUN_00496940();
+    BoltModelInfo* GetControllerManager_00496940();
 };
 
 struct BoltAttachSource
@@ -1025,13 +1031,13 @@ using namespace fnv_008034c0;
 void AbsorbEffect::InitBoltEffect()
 {
     spBolt = new NiNode(0);
-    BoltExtraData* pkDataZ = reinterpret_cast<BoltExtraData*>(((NiAVObject*)spBolt)->FUN_00a5bdd0(*reinterpret_cast<const NiFixedString*>(FUN_00448a80())));
+    BoltExtraData* pkDataZ = reinterpret_cast<BoltExtraData*>(((NiAVObject*)spBolt)->FUN_00a5bdd0(*reinterpret_cast<const NiFixedString*>(BSXFlags_Tag())));
     if (!pkDataZ)
     {
         pkDataZ = new BoltExtraData;
-        ((NiAVObject*)spBolt)->AddExtraData(*reinterpret_cast<const NiFixedString*>(FUN_00448a80()), reinterpret_cast<NiExtraData*>(pkDataZ));
+        ((NiAVObject*)spBolt)->AddExtraData(*reinterpret_cast<const NiFixedString*>(BSXFlags_Tag()), reinterpret_cast<NiExtraData*>(pkDataZ));
     }
-    pkDataZ->FUN_00519230(1, 1);
+    pkDataZ->BSXFlags_SetFlags(1, 1);
 
     BoltActor* pkAY = ActiveEffect::FUN_0059bb30()
                           ? (BoltActor*)ActiveEffect::FUN_0059bb30()->GetMagicTargetReference()
@@ -1046,13 +1052,13 @@ void AbsorbEffect::InitBoltEffect()
         pkAttachTmp = pkAY->FUN_008d6f30()->FUN_005497a0();
         pkAttachTmp->AttachChildInAvailableSlot(static_cast<NiAVObject*>(spBolt), true);
         m_spTargetObject = 0;
-        m_spTargetObject = (NiAVObject*)FUN_00bc18d0((NiNode*)(NiAVObject*)spBolt, 1);
+        m_spTargetObject = (NiAVObject*)BoltShader_Start((NiNode*)(NiAVObject*)spBolt, 1);
 
         pkRootRes = pkBOut->GetRoot();
         if (pkRootRes)
         {
             spNode50 =
-                pkRootRes->FUN_00496940()->GetStringAtOffset()->GetObjectByName(NiFixedString(s_szSpine1));
+                pkRootRes->GetControllerManager_00496940()->GetStringAtOffset()->GetObjectByName(NiFixedString(s_szSpine1));
             if (reinterpret_cast<const BoltPtr<NiAVObject>&>(spNode50).FUN_00822510(0))
                 spNode50 = pkAY->Get3D();
         }
@@ -1060,28 +1066,28 @@ void AbsorbEffect::InitBoltEffect()
         if (pkRootRes)
         {
             spNode54 =
-                pkRootRes->FUN_00496940()->GetStringAtOffset()->GetObjectByName(NiFixedString(s_szSpine1));
+                pkRootRes->GetControllerManager_00496940()->GetStringAtOffset()->GetObjectByName(NiFixedString(s_szSpine1));
             if (reinterpret_cast<const BoltPtr<NiAVObject>&>(spNode54).FUN_00822510(0))
                 spNode54 = pkBOut->Get3D();
         }
 
         if ((BoltGeometry*)(NiAVObject*)m_spTargetObject)
         {
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_00821620(*g_s_011d1710.FUN_00403e20());
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_00507780(*g_s_011d1c88.FUN_00403e20());
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_00803b30(*g_s_011d1af0.FUN_00403e20());
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_005077a0(*g_s_011d1d3c.FUN_00403e20());
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_00803b50(*g_s_011d1ac0.FUN_00403e20());
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetBoltSmallWidth(*g_s_011d1ab4.FUN_00403e20());
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetBoltGrowWidth(*g_s_011d1680.FUN_00403e20());
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_00803a70(*g_s_011d1c64.FUN_0043d4d0());
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetArg(NiColorA(*g_s_011d1c94.FUN_00403e20(), *g_s_011d1570.FUN_00403e20(),
-                                                            *g_s_011d18b4.FUN_00403e20(), 1.0f));
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetData(NiColorA(*g_s_011d16a4.FUN_00403e20(), *g_s_011d1830.FUN_00403e20(),
-                                                             *g_s_011d1818.FUN_00403e20(), 1.0f));
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->BoltShaderProperty_SetBoltsRadius(*g_s_011d1710.Setting_Float_00403e20());
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_00507780(*g_s_011d1c88.Setting_Float_00403e20());
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->BoltShaderProperty_SetSegmentLength(*g_s_011d1af0.Setting_Float_00403e20());
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->BoltShaderProperty_SetSegmentVariance(*g_s_011d1d3c.Setting_Float_00403e20());
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->BoltShaderProperty_SetSubSegmentVariance(*g_s_011d1ac0.Setting_Float_00403e20());
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetBoltSmallWidth(*g_s_011d1ab4.Setting_Float_00403e20());
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetBoltGrowWidth(*g_s_011d1680.Setting_Float_00403e20());
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->BoltShaderProperty_SetNumBolts(*g_s_011d1c64.Setting_Int());
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetArg(NiColorA(*g_s_011d1c94.Setting_Float_00403e20(), *g_s_011d1570.Setting_Float_00403e20(),
+                                                            *g_s_011d18b4.Setting_Float_00403e20(), 1.0f));
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetData(NiColorA(*g_s_011d16a4.Setting_Float_00403e20(), *g_s_011d1830.Setting_Float_00403e20(),
+                                                             *g_s_011d1818.Setting_Float_00403e20(), 1.0f));
             ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->SetByteAtOffset175(0);
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_00803a50(1);
-            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->FUN_00bc2360();
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->BoltShaderProperty_SetStartFromPoint(1);
+            ((BoltGeometry*)(NiAVObject*)m_spTargetObject)->BoltShaderProperty_InitSegmentData();
         }
     }
 }
@@ -1109,24 +1115,25 @@ struct S_00803b70_O58
 extern Setting DAT_011d1c10;
 extern NiPoint3 DAT_011f426c;
 extern unsigned char DAT_011db9f4;
-float __cdecl FUN_004b5550(float a, float b);
+float __cdecl NiATan2(float a, float b);
 
 // @fnv 0x00803b70
-void AbsorbEffect::FUN_00803b70(float value)
+// src: XBOX_PDB 0x00803b70
+void AbsorbEffect::Update3D_00803b70(float value)
 {
     if (((NiAVObject*)spNode50) && ((NiAVObject*)spNode54) && ((NiAVObject*)spBolt) && ((NiAVObject*)m_spTargetObject) && !DAT_011db9f4)
     {
         NiPoint3 v7 = DAT_011f426c;
-        v7 = ((NiAVObject*)spNode50)->FUN_0045bb80();
-        ((NiAVObject*)spBolt)->FUN_00440460(&v7);
-        NiPoint3 r = ((NiAVObject*)spNode54)->FUN_0045bb80().FUN_00439ef0(v7);
+        v7 = ((NiAVObject*)spNode50)->NiAVObject_GetWorldTranslate();
+        ((NiAVObject*)spBolt)->NiAVObject_SetTranslate(&v7);
+        NiPoint3 r = ((NiAVObject*)spNode54)->NiAVObject_GetWorldTranslate().SubtractIntoVector(v7);
         FUN_006815c0 mat;
         float t = r.z;
         r.z = 0.0f;
         float fPlanarLen = r.FUN_00457990();
-        mat.FUN_00a59780(FUN_004b5550(r.x, r.y), 0.0f, -FUN_004b5550(t, fPlanarLen));
-        ((NiAVObject*)spBolt)->FUN_0043fa80(reinterpret_cast<const void*>(&mat));
+        mat.FUN_00a59780(NiATan2(r.x, r.y), 0.0f, -NiATan2(t, fPlanarLen));
+        ((NiAVObject*)spBolt)->SetRotate_0043fa80(reinterpret_cast<const void*>(&mat));
         // The original call to Setting's 0x00403e20 accessor passes an unused zero argument.
-        ((S_00803b70_O58*)(NiAVObject*)m_spTargetObject)->AddValue(value, r.FUN_00457990(), *(DAT_011d1c10.*reinterpret_cast<float* (Setting::*)(int)>(&Setting::FUN_00403e20))(0));
+        ((S_00803b70_O58*)(NiAVObject*)m_spTargetObject)->AddValue(value, r.FUN_00457990(), *(DAT_011d1c10.*reinterpret_cast<float* (Setting::*)(int)>(&Setting::Setting_Float_00403e20))(0));
     }
 }

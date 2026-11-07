@@ -106,13 +106,13 @@ class TimeGlobal
 class InputManager
 {
   public:
-    int FUN_00a23a50(int, int);
-    int FUN_00a24660(int, int);
+    int Controls_GetMouseButton(int, int);
+    int Controls_GetUserAction(int, int);
 };
 class OSGlobals
 {
   public:
-    InputManager* FUN_00877720();
+    InputManager* Main_GetControls();
 };
 class Interface
 {
@@ -180,7 +180,7 @@ class Tile : public TileListBoxCalls
     static Menu* FindMenuById(int);
     Tile* ReadFile(const char*);
     Menu* GetMenu();
-    NiNode* FUN_0056c7f0();
+    NiNode* GetModel_0056c7f0();
 };
 int GetTileValueID(const char*, int);
 int Warning(const char*, ...);
@@ -189,7 +189,7 @@ class NiProperty;
 class TileShaderProperty
 {
   public:
-    NiTexture* FUN_009c8640();
+    NiTexture* BGSCameraShot_GetLocationNode();
     void SetTextureImage(NiTexture*);
     void FUN_007700d0(bool);
 };
@@ -233,11 +233,11 @@ class NiAVObject
     virtual void vfn_88();
     NiProperty* GetProperty(unsigned int);
 };
-unsigned int FUN_00438220();
+unsigned int NiShadeProperty_GetType();
 class NiNode : public NiAVObject
 {
   public:
-    NiAVObject* FUN_0045bc00(unsigned int);
+    NiAVObject* NiNode_GetAtChecked(unsigned int);
     virtual void vfn_8c();
     virtual void vfn_90();
     virtual void vfn_94();
@@ -428,8 +428,8 @@ class PlayerCharacter : public TESObjectREFR
 {
   public:
     bool IsFastTravelAllowed();
-    TESObjectREFR* FUN_00798400();
-    void FUN_009529d0(TESQuest*);
+    TESObjectREFR* QPlayerMapMarker();
+    void SetActiveQuest(TESQuest*);
     void SetDateTimeText(BSStringT<char>&);
 };
 class TESQuest
@@ -445,7 +445,7 @@ class TESWorldSpace : public TESForm
 class TESObjectCELL : public TESForm
 {
   public:
-    void FUN_00555b10(NiPoint3&, NiPoint3&, bool);
+    void AdjustCoordForNorthRotation(NiPoint3&, NiPoint3&, bool);
 };
 class RegionObjectEntry
 {
@@ -457,9 +457,9 @@ class BGSNote
 {
   public:
     int GetNoteType();
-    TESForm* FUN_005e9100();
-    TESTopic* FUN_005e9240();
-    TESBoundObject* FUN_005e92a0();
+    TESForm* GetNoteSound();
+    TESTopic* GetNoteTopic();
+    TESBoundObject* GetNoteSpeaker();
     bool GetUnk7d();
     void SetSoundNotePlayed(bool);
 };
@@ -501,7 +501,7 @@ class BSAudio
     BSSoundHandle GetSoundHandleByEditorID(const char*, unsigned int);
     static void EnableAudio();
     // Instance audio entry at 0x00ad85a0 is distinct from the static dialogue flag helper.
-    void FUN_00ad85a0();
+    void EnterDialogue();
     float GetMusicVolume();
 };
 class FalloutRadio
@@ -526,7 +526,7 @@ template <class T> class ListBox
     void Initialize(Tile*, const char*);
     void SetSelectedTile(Tile*, bool);
     void ClearSelection(bool);
-    void FUN_007a1a70();
+    void BSSimpleArray_BSStringT_char_1024_BSSimpleArray();
     void FUN_007a1c90();
     void FUN_007a27f0();
     void FUN_007a36e0();
@@ -629,23 +629,23 @@ class MapMenu : public Menu
     void SelectNote(BGSNote*);
     void RefreshMapData();
     void SetMapDisplayMode(bool);
-    void FUN_0079c090();
-    static void FUN_0079c340(bool);
+    void ResetWaveform();
+    static void MapMenu_SetKnobPosition(bool);
     NiPoint3 WorldToMapPosition(NiPoint3, TESWorldSpace*);
     NiPoint3 MapToWorldPosition(NiPoint3, TESWorldSpace*);
     TESObjectREFR* GetTeleportDestination(TESObjectREFR*, PathingPath*);
-    TESWorldSpace* FUN_007984d0(NiPoint3);
+    TESWorldSpace* CalculatePlayerMarkerSpace(NiPoint3);
     void RefreshMapMarkers();
     void UpdateMapObjectives();
     void UpdateMapHighlight();
     void SetFlag8000();
     bool HasNoZeroEntries();
-    void FUN_00867a20();
+    void Menu_SetRenderedMenu();
     void SetTileMenu(TileMenu*, bool);
     void SetMenuVisibility(bool);
 };
 extern const double DAT_01074f68, DAT_010301a8;
-void FUN_0079ffb0(bool);
+void MapMenu_RenderLocalMapGrid(bool);
 class Calendar
 {
   public:
@@ -659,7 +659,7 @@ struct SystemLocaleState
 };
 extern SystemLocaleState gSystemLocaleState;
 extern Calendar g_calendar;
-int FUN_00408b20(const char*, const char*);
+int BSstrcmp(const char*, const char*);
 extern SettingT_GameSettingCollection_ DAT_011d1da8, DAT_011d3f64, DAT_011d45f4, DAT_011d3414, DAT_011d2f10,
     DAT_011d3180, DAT_011d4cfc, DAT_011d27a8, DAT_011d3798, DAT_011d3210, DAT_011d21e4;
 extern int DAT_011da354, DAT_011da358, DAT_011da350, DAT_011da34c, DAT_011da35c;
@@ -676,11 +676,11 @@ extern SettingT_GameSettingCollection_ DAT_011d47bc, DAT_011d4438, DAT_011d4960,
     DAT_011d3a2c, DAT_011d34f8, DAT_011d3684, DAT_011d4a38, DAT_011d48e8, DAT_011db458, DAT_011db37c;
 extern SettingT_GameSettingCollection_* DAT_011a03e4[3];
 extern SettingT_GameSettingCollection_ DAT_011d38ac, DAT_011d204c, DAT_011d5020, DAT_011d28a4, DAT_011d4aec;
-int FUN_00720df0();
-InterfaceManager* FUN_004b7210();
-bool FUN_004b71d0();
-bool FUN_00798440();
-bool FUN_00709d40();
+int MapMenu_GetClassStatic();
+InterfaceManager* InterfaceManager_GetSingleton();
+bool InterfaceManager_Has360Controller();
+bool FalloutRadio_IsPipboyRadioEnabled();
+bool Interface_Has360Controller();
 class InterfaceManager
 {
   public:
@@ -692,15 +692,15 @@ class InterfaceManager
     char fields[0x4d4];
     TutorialState tutorials;
     Tile* GetParent();
-    float FUN_007697f0();
+    float InterfaceManager_GetPipboyMouseX();
     float GetScaledValue();
-    Tile* FUN_00586150();
+    Tile* CombatController_GetCombatState();
 };
-void FUN_00798840();
-void FUN_00798710();
-void FUN_0079be80(Tile*, TESObjectREFR*);
-bool FUN_0079b390(BGSNote*);
-bool FUN_0079b720(TESChallenge*);
+void MapMenu_SetPlayerMarkerCallback();
+void OnPCFastTravel();
+void SetMapMenuTraitUnselected(Tile*, TESObjectREFR*);
+bool MapMenu_ShouldHideNote(BGSNote*);
+bool MapMenu_ChallengeFilterFunc(TESChallenge*);
 extern "C" int sprintf_s(char*, size_t, const char*, ...);
 extern "C" int _stricmp(const char*, const char*);
 template <class T> class NiPointer

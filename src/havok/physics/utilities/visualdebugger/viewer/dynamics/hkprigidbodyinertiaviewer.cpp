@@ -14,19 +14,19 @@ __forceinline hkMemoryAllocator& routerHeap(hkMemoryRouter& router)
     return *reinterpret_cast<hkMemoryAllocator*>(router.m_heap);
 }
 
-void __cdecl FUN_00d67880();
+void __cdecl Object_ConstructObject_00d67880();
 
 extern int DAT_01268ffc;
 extern int DAT_01269cd0;
 
 struct FUN_00dd9380_StandIn {
-    int __thiscall FUN_00dd9380(const char* name, void* factory);
+    int __thiscall hkProcessFactory_registerProcess(const char* name, void* factory);
 };
 
 // @fnv 0x00d678c0
 void __cdecl RegisterInertiaTensors()
 {
-    DAT_01268ffc = ((FUN_00dd9380_StandIn*)DAT_01269cd0)->FUN_00dd9380("Inertia Tensors", &FUN_00d67880);
+    DAT_01268ffc = ((FUN_00dd9380_StandIn*)DAT_01269cd0)->hkProcessFactory_registerProcess("Inertia Tensors", &Object_ConstructObject_00d67880);
 }
 
 struct SubObject {
@@ -44,8 +44,8 @@ struct Arg {
     SubObject** m_34;
     int m_38;
 
-    void FUN_00c93820(void* p);
-    void FUN_00c93920(void* p);
+    void hkpWorld_addEntityListener(void* p);
+    void hkpWorld_addWorldPostSimulationListener(void* p);
 };
 
 struct Field28 {
@@ -63,8 +63,8 @@ struct FUN_00d67020_class {
 
 // @fnv 0x00d67020
 void FUN_00d67020_class::VisitSubObjects(Arg* arg) {
-    arg->FUN_00c93820(this ? &field28 : 0);
-    arg->FUN_00c93920(this ? &field2c : 0);
+    arg->hkpWorld_addEntityListener(this ? &field28 : 0);
+    arg->hkpWorld_addWorldPostSimulationListener(this ? &field2c : 0);
 
     for (int i = 0; i < arg->m_2c; ++i) {
         hkArrayBase<void*>* arr = &arg->m_28[i]->arr;
@@ -123,14 +123,15 @@ struct Prefix32 {
     int unk10; int unk14; int unk18; int unk1C;
 };
 struct SecondaryBase {
-    void FUN_00d67160();
+    void UpdateFields_00d67160();
 };
 struct CompleteObject : Prefix32, SecondaryBase {
     void VisitSubObjects();
 };
 // Adjusts this to the enclosing CompleteObject and calls its VisitSubObjects method.
 // @fnv 0x00d67160
-void SecondaryBase::FUN_00d67160() {
+// src: GUESS 0x00d67160 (confidence: low)
+void SecondaryBase::UpdateFields_00d67160() {
     CompleteObject* pCompleteObject = reinterpret_cast<CompleteObject*>(reinterpret_cast<char*>(this) - sizeof(Prefix32));
     pCompleteObject->VisitSubObjects();
 }
@@ -161,7 +162,8 @@ void S_00d67170::RemoveItem(void* item)
 
 extern int DAT_01268ffc;
 // @fnv 0x00d678e0
-int __cdecl FUN_00d678e0()
+// src: GUESS 0x00d678e0 (confidence: low)
+int __cdecl Object_GetDAT_01268ffc_00d678e0()
 {
     return DAT_01268ffc;
 }
@@ -216,7 +218,7 @@ struct FUN_00d66f30_params {
     int unk48;
     int unk4c;
 
-    void FUN_00c917a0(void* apTarget);
+    void hkpWorld_removeEntityListener(void* apTarget);
     void ClearValue(void* apTarget);
 };
 
@@ -234,13 +236,14 @@ struct FUN_00d66f30_cls {
     FUN_00d66f30_inner m_kInner;
     int m_iN;
 
-    void FUN_00d66f30(FUN_00d66f30_params* apParams);
+    void ProcessEntries_00d66f30(FUN_00d66f30_params* apParams);
 };
 
 // @fnv 0x00d66f30
-void FUN_00d66f30_cls::FUN_00d66f30(FUN_00d66f30_params* apParams)
+// src: GUESS 0x00d66f30 (confidence: low)
+void FUN_00d66f30_cls::ProcessEntries_00d66f30(FUN_00d66f30_params* apParams)
 {
-    apParams->FUN_00c917a0(this != 0 ? &m_kInner : 0);
+    apParams->hkpWorld_removeEntityListener(this != 0 ? &m_kInner : 0);
     apParams->ClearValue(this != 0 ? &m_iN : 0);
 
     for (int i = 0; i < apParams->m_iItemCount; i++) {
@@ -266,16 +269,17 @@ void FUN_00d66f30_cls::FUN_00d66f30(FUN_00d66f30_params* apParams)
 }
 
 struct Outer {
-    void __thiscall FUN_00d66f30(void* arg);
+    void __thiscall ProcessEntries_00d66f30(void* arg);
 };
 
 struct TargetClass {
-    void __thiscall FUN_00d67150(void* arg);
+    void __thiscall ForwardCall_00d67150(void* arg);
 };
 
 // @fnv 0x00d67150
-void TargetClass::FUN_00d67150(void* arg) {
-    ((Outer*)((char*)this - 0x20))->FUN_00d66f30(arg);
+// src: GUESS 0x00d67150 (confidence: low)
+void TargetClass::ForwardCall_00d67150(void* arg) {
+    ((Outer*)((char*)this - 0x20))->ProcessEntries_00d66f30(arg);
 }
 
 class D671F0ListenerA {
@@ -413,7 +417,8 @@ public:
 
 // Allocates a D67880Object from info and returns it as a D67880Interface pointer.
 // @fnv 0x00d67880
-D67880Interface* __cdecl FUN_00d67880(const void* info)
+// src: GUESS 0x00d67880 (confidence: medium)
+D67880Interface* __cdecl Object_ConstructObject_00d67880(const void* info)
 {
     return new D67880Object(info);
 }
@@ -553,14 +558,15 @@ struct Viewer_d672 {
     int* m_vtbl2C;
     hkArray<int> m_ids;
     hkArray<DisplayGeometry_d672> m_geometries;
-    void FUN_00d66f30(Entity_d672* entity);
+    void ProcessEntries_00d66f30(Entity_d672* entity);
     void FUN_00ddcc60();
-    void FUN_00d67250();
+    void ProcessEntries_00d67250();
 };
 
 // Resets vtable pointers, calls FUN_00d66f30 on each actor entry of the owning world, clears the geometry and id arrays, then calls FUN_00ddcc60.
 // @fnv 0x00d67250
-void Viewer_d672::FUN_00d67250()
+// src: GUESS 0x00d67250 (confidence: low)
+void Viewer_d672::ProcessEntries_00d67250()
 {
     m_vtbl00 = &DAT_010d1d80;
     m_vtbl08 = &DAT_010d1d60;
@@ -570,7 +576,7 @@ void Viewer_d672::FUN_00d67250()
     if (m_pOwningWorld) {
         int n = m_pOwningWorld->m_iActorEntryCount;
         for (int i = 0; i < n; i++)
-            FUN_00d66f30(m_pOwningWorld->m_kActorEntries[i]);
+            ProcessEntries_00d66f30(m_pOwningWorld->m_kActorEntries[i]);
     }
     m_geometries.clearAndDeallocate();
     m_ids.clearAndDeallocate();
@@ -612,7 +618,7 @@ D678F0Object::D678F0Object()
 
 struct D67900Primary {
     virtual void vfunc00();
-    virtual void FUN_00d67900();
+    virtual void AdjustThisAndForward_00d67900();
 
     int unk04;
     int unk08;
@@ -624,14 +630,15 @@ struct D67900Primary {
 };
 
 struct D67900Secondary {
-    virtual void FUN_00d67900();
+    virtual void AdjustThisAndForward_00d67900();
 };
 
 struct D67900Object : D67900Primary, D67900Secondary {
     D67900Object();
 
 // @fnv 0x00d67900
-    virtual void FUN_00d67900();
+// src: GUESS 0x00d67900 (confidence: low)
+    virtual void AdjustThisAndForward_00d67900();
 };
 
 D67900Object::D67900Object()
@@ -655,20 +662,21 @@ D67900Object::D67900Object()
 // derived class makes the vftable that references the thunk be emitted here.
 struct AdjBase1 {
     AdjBase1();
-    virtual void FUN_00d67920();
+    virtual void AdjustThisAndForward_00d67920();
     char pad[0x24];
 };
 
 struct AdjBase2 {
     AdjBase2();
 // @fnv 0x00d67920
-    virtual void FUN_00d67920();
+// src: GUESS 0x00d67920 (confidence: low)
+    virtual void AdjustThisAndForward_00d67920();
 };
 
 struct AdjOwner : AdjBase1, AdjBase2 {
     AdjOwner();
     virtual void key_fn();    // key function - defined, so the vftable is emitted
-    void FUN_00d67920();              // the shared override - declared only
+    void AdjustThisAndForward_00d67920();              // the shared override - declared only
 };
 
 AdjOwner::AdjOwner() { }
@@ -736,7 +744,7 @@ struct __declspec(align(16)) Vec {
     __forceinline Vec(float a, float b, float c, float d) { set(_mm_setr_ps(a,b,c,d)); }
     __forceinline Vec(const Vec& other) { set(other.get()); }
     __forceinline Vec& operator=(const Vec& other) { set(other.get()); return *this; }
-    void FUN_00c7f700(const Transform* transform, const Vec* value);
+    void hkVector4_setRotatedDir(const Transform* transform, const Vec* value);
 };
 __forceinline Transform::Transform(const Transform& other) {
     __m128 a = _mm_load_ps(&other.m_f00), b = _mm_load_ps(&other.m_f10);
@@ -857,9 +865,9 @@ struct Shape {
     int unk54, unk58, unk5c;
     ShapeVec4 halfExtents;
     void FUN_00de1fc0();
-    void FUN_00de2010(const Vec* dimensions, const Transform* transform);
+    void InitializeFields_00de2010(const Vec* dimensions, const Transform* transform);
 };
-void __cdecl FUN_00c908c0(void* allocator, void* array, int capacity, int elementSize);
+void __cdecl hkArrayUtil__reserve(void* allocator, void* array, int capacity, int elementSize);
 template <typename T>
 __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& allocator, int n)
 {
@@ -867,7 +875,7 @@ __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& allocato
     if (capacity < n) {
         int twice = capacity * 2;
         int next = n < twice ? twice : n;
-        FUN_00c908c0(&allocator, this, next, sizeof(T));
+        hkArrayUtil__reserve(&allocator, this, next, sizeof(T));
     }
 }
 inline void destroyShapes(Shape* begin, int count) {
@@ -910,7 +918,7 @@ struct ViewerPart {
     int bodyCount;
     int bodyCapacity;
     hkArray<Shape> shapes;
-    void FUN_00d67340(float unused);
+    void ProcessEntries_00d67340(float unused);
 };
 struct ViewerPrefix {
     virtual void v00();
@@ -919,7 +927,8 @@ struct ViewerPrefix {
 };
 struct Viewer : ViewerPrefix, ViewerPart {};
 // @fnv 0x00d67340
-void ViewerPart::FUN_00d67340(float unused) {
+// src: GUESS 0x00d67340 (confidence: low)
+void ViewerPart::ProcessEntries_00d67340(float unused) {
     recordEvent("TthkpRigidBodyInertiaViewer");
     recordEvent("TtgetProps");
     shapes.setSize(bodyCount);
@@ -941,11 +950,11 @@ void ViewerPart::FUN_00d67340(float unused) {
             Vec rotated;
             {
                 Vec center = bodies[i]->motion.centerOfMass;
-                rotated.FUN_00c7f700(&transform, &center);
+                rotated.hkVector4_setRotatedDir(&transform, &center);
             }
             rotated.set(_mm_add_ps(reinterpret_cast<const Vec&>(transform.r[3]).get(), rotated.get()));
             reinterpret_cast<Vec&>(transform.r[3]) = rotated;
-            shapes.m_data[used++].FUN_00de2010(&dimensions, &transform);
+            shapes.m_data[used++].InitializeFields_00de2010(&dimensions, &transform);
         }
     }
     recordEvent(DAT_010c41f8);

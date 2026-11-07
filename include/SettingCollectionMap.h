@@ -26,5 +26,5 @@ public:
     TESFile* pFile;
 
     void __thiscall AddSetting(T* setting);
-    unsigned int FUN_00404fd0(NiTPrimitiveArray<char*>*);
+    unsigned int GetViewerStrings_00404fd0(NiTPrimitiveArray<char*>*);
 };

@@ -67,13 +67,14 @@ struct S_00df8d60
     int unkC;
     int unk10;
     float unk14;
-    hkBool FUN_00df8aa0(const void* data);
-    float FUN_00df8d60(const S_00df8d60_Data* data, int unused);
+    hkBool CastBody_Thunk(const void* data);
+    float hkCpuWorldRayCastCollector_addBroadPhaseHandle(const S_00df8d60_Data* data, int unused);
 };
 // @fnv 0x00df8d60
-float S_00df8d60::FUN_00df8d60(const S_00df8d60_Data* data, int unused)
+// src: HAVOK_LIB 0x00df8d60
+float S_00df8d60::hkCpuWorldRayCastCollector_addBroadPhaseHandle(const S_00df8d60_Data* data, int unused)
 {
-    FUN_00df8aa0((const char*)data + data->unk5);
+    CastBody_Thunk((const char*)data + data->unk5);
     return unk14;
 }
 
@@ -92,7 +93,7 @@ struct ParamBlock
 
 struct Container
 {
-    void FUN_00df8aa0(int* apOut, int aiValue);
+    void CastBody_Thunk(int* apOut, int aiValue);
 };
 
 struct FUN_00df8db0_cls
@@ -110,13 +111,13 @@ float FUN_00df8db0_cls::GetResult(ParamBlock* apParam)
 {
     int iOut;
     Container* pContainer = (Container*)((char*)this - 8);
-    pContainer->FUN_00df8aa0(&iOut, apParam->m_iValue);
+    pContainer->CastBody_Thunk(&iOut, apParam->m_iValue);
     return m_fResult;
 }
 
 extern int DAT_0101e594;
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct FUN_00df8960_cls
 {
@@ -132,7 +133,7 @@ FUN_00df8960_cls* FUN_00df8960_cls::FUN_00df8960(unsigned char acFlags)
     m_vptr = (int)&DAT_0101e594;
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, 0x1c);
     }
@@ -141,18 +142,19 @@ FUN_00df8960_cls* FUN_00df8960_cls::FUN_00df8960(unsigned char acFlags)
 
 struct AdjustedBase
 {
-    void FUN_00df8aa0(void* apFirst, int aiSecond);
+    void CastBody_Thunk(void* apFirst, int aiSecond);
 };
 
 struct AdjustOwner
 {
-    void* FUN_00df8d90(void* apFirst, int aiSecond);
+    void* hkCpuWorldRayCastCollector_addMidPhaseHit(void* apFirst, int aiSecond);
 };
 
 // @fnv 0x00df8d90
-void* AdjustOwner::FUN_00df8d90(void* apFirst, int aiSecond)
+// src: HAVOK_LIB 0x00df8d90
+void* AdjustOwner::hkCpuWorldRayCastCollector_addMidPhaseHit(void* apFirst, int aiSecond)
 {
-    ((AdjustedBase*)((char*)this - 4))->FUN_00df8aa0(apFirst, aiSecond);
+    ((AdjustedBase*)((char*)this - 4))->CastBody_Thunk(apFirst, aiSecond);
     return apFirst;
 }
 
@@ -166,7 +168,7 @@ struct FUN_00df8dd0_Param
 
 struct FUN_00df8dd0_helper
 {
-    void FUN_00df8aa0(FUN_00df8dd0_Param** pp, unsigned int value);
+    void CastBody_Thunk(FUN_00df8dd0_Param** pp, unsigned int value);
 };
 
 struct FUN_00df8dd0_cls
@@ -175,18 +177,19 @@ struct FUN_00df8dd0_cls
     int unk04;
     float m_f08;
 
-    float FUN_00df8dd0(FUN_00df8dd0_Param* p);
+    float hkCpuWorldRayCastCollector_addLeaf(FUN_00df8dd0_Param* p);
 };
 
 // @fnv 0x00df8dd0
-float FUN_00df8dd0_cls::FUN_00df8dd0(FUN_00df8dd0_Param* pParam)
+// src: HAVOK_LIB 0x00df8dd0
+float FUN_00df8dd0_cls::hkCpuWorldRayCastCollector_addLeaf(FUN_00df8dd0_Param* pParam)
 {
-    ((FUN_00df8dd0_helper*)((char*)this - 12))->FUN_00df8aa0(&pParam, pParam->m_i0c);
+    ((FUN_00df8dd0_helper*)((char*)this - 12))->CastBody_Thunk(&pParam, pParam->m_i0c);
     return m_f08;
 }
 
 namespace fnv_00df9470 {
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct BaseA
 {
@@ -225,7 +228,7 @@ MultiBaseOwner* MultiBaseOwner::FUN_00df9470(unsigned char acFlags)
     this->MultiBaseOwner::~MultiBaseOwner();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         pAllocator->blockFree(this, 0x80);
     }
@@ -305,7 +308,7 @@ Derived::Derived()
 extern char DAT_010dbb04[];
 extern void(__cdecl* DAT_0126ec04)(void* a, void* b, struct S_00df8990_Obj* obj);
 struct S_00df8990_Obj;
-void __cdecl FUN_00e2b9b0(void* a, void* b, S_00df8990_Obj* obj);
+void __cdecl Runtime_ProcessEntries_00e2b9b0(void* a, void* b, S_00df8990_Obj* obj);
 
 struct Source
 {
@@ -430,7 +433,8 @@ struct HkpcpuworldraycastjobInterfaceView
 
 // Fills out from src, builds a Local, constructs a Spawned in spawned if src->m_3c is set, writes fields of src->m_30's block, then calls iface->v5c.
 // @fnv 0x00df89b0
-void __cdecl FUN_00df89b0(HkpcpuworldraycastjobInterfaceView* apInterface, Source* apSource, Output* apOutput, Spawned* spawned)
+// src: XBOX_PDB 0x00df89b0
+void __cdecl castRayBroadPhase(HkpcpuworldraycastjobInterfaceView* apInterface, Source* apSource, Output* apOutput, Spawned* spawned)
 {
     Local local;
 
@@ -456,7 +460,7 @@ void __cdecl FUN_00df89b0(HkpcpuworldraycastjobInterfaceView* apInterface, Sourc
     if (apSource->m_3c != 0)
     {
         apOutput->m_60 = new (spawned) Spawned(apSource->m_30, apSource->m_34);
-        DAT_0126ec04 = FUN_00e2b9b0;
+        DAT_0126ec04 = Runtime_ProcessEntries_00e2b9b0;
     }
     else
         apOutput->m_60 = 0;
@@ -610,7 +614,7 @@ struct HitList
 __forceinline void memCpy16NonEmpty(void*, const void*, int);
 struct RayCaster_00df8aa0 : S_00df8d60
 {
-    hkBool FUN_00df8aa0(const void* data);
+    hkBool CastBody_Thunk(const void* data);
     hkBool m_bHit;
     char unk19;
     char unk1A;
@@ -744,7 +748,8 @@ __forceinline void memCpy16NonEmpty(void* dst, const void* src, int numQuads)
 
 // Delegates to castBody to test a collision body against the ray and record any hit in the output buffer.
 // @fnv 0x00df8aa0
-hkBool RayCaster_00df8aa0::FUN_00df8aa0(const void* apBody)
+// src: GUESS 0x00df8aa0 (confidence: medium)
+hkBool RayCaster_00df8aa0::CastBody_Thunk(const void* apBody)
 {
     return castBody(apBody);
 }

@@ -12,7 +12,7 @@ public:
     virtual void vf36();
     virtual bool vf37();
 
-    bool FUN_006824e0();
+    bool Clear_006824e0();
 
     int m_eStatus;
 };

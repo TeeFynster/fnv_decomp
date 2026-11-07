@@ -85,12 +85,13 @@ void NiBlendQuaternionInterpolator::SaveBinary(NiStream& kStream)
 extern int g_011f4064;
 
 // @fnv 0x00a55500
-int* __cdecl FUN_00a55500()
+// src: COMMUNITY 0x00a55500
+int* __cdecl NiBlendQuaternionInterpolator_GetRTTI()
 {
     return &g_011f4064;
 }
 
-void __fastcall FUN_00a36890(void*);
+void __fastcall NiBlendInterpolator_NiBlendInterpolator(void*);
 extern int DAT_011f4208;
 extern int DAT_011f420c;
 extern int DAT_011f4210;
@@ -98,12 +99,13 @@ extern int DAT_011f4214;
 extern int DAT_0109a3ac;
 
 // @fnv 0x00a55470
-void* __cdecl FUN_00a55470()
+// src: EXE 0x00a55470
+void* __cdecl NiBlendQuaternionInterpolator_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x40);
     if (p)
     {
-        FUN_00a36890(p);
+        NiBlendInterpolator_NiBlendInterpolator(p);
         *(int**)((char*)p + 0) = &DAT_0109a3ac;
         *(int*)((char*)p + 0x30) = DAT_011f4208;
         *(int*)((char*)p + 0x34) = DAT_011f420c;
@@ -116,7 +118,8 @@ void* __cdecl FUN_00a55470()
 
 // Returns whether the given NiInterpolator supports quaternion values.
 // @fnv 0x00a55450
-bool __stdcall FUN_00a55450(NiInterpolator* pkInterpolator)
+// src: XBOX_PDB 0x00a55450
+bool __stdcall NiBlendQuaternionInterpolator_InterpolatorIsCorrectType(NiInterpolator* pkInterpolator)
 {
     return pkInterpolator->IsQuaternionValueSupported();
 }
@@ -127,7 +130,7 @@ void* NiBlendQuaternionInterpolator::CloneInterpolator(void* kCloning)
     void* pkObject = BSFadeNode::operator new(0x40);
     if (pkObject)
     {
-        FUN_00a36890(pkObject);
+        NiBlendInterpolator_NiBlendInterpolator(pkObject);
         *(int*)pkObject = (int)&DAT_0109a3ac;
         *(NiQuadWords*)((char*)pkObject + 0x30) = *(NiQuadWords*)&DAT_011f4208;
     }
@@ -267,8 +270,8 @@ bool NiBlendQuaternionInterpolator::BlendValues(float fTime, void* pkTarget, NiQ
                     if (fCos < 0.0f)
                         kQuat = kQuat.Negate();
                 }
-                kQuat = kQuat.FUN_00a39120(m_pInterpArray[uc].m_fNormalizedWeight);
-                m_kQuaternionValue = m_kQuaternionValue.FUN_00a39120(fTotalWeight);
+                kQuat = kQuat.ScaleFourComponents(m_pInterpArray[uc].m_fNormalizedWeight);
+                m_kQuaternionValue = m_kQuaternionValue.ScaleFourComponents(fTotalWeight);
                 float fZ = m_kQuaternionValue.m_fScalarPart;
                 float fY = m_kQuaternionValue.m_fVectorZ;
                 float fX = m_kQuaternionValue.m_fVectorY;

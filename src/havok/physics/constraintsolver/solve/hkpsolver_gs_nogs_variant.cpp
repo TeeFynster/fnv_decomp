@@ -20,7 +20,7 @@ __forceinline const hkVector4& hkMatrix3::getColumn(int i) const { return (&m_kC
 // src/havok/physics/constraintsolver/solve/hkpsolver.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/constraintsolver/solve/hkpsolver.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern unsigned char DAT_011b9434[128];
-int __cdecl FUN_00d921d0(const signed char* index);
+int __cdecl Hkpsolver_GetIndexedValue_00d921d0(const signed char* index);
 using ::_mm_add_ss;
 // Adds the lowest single-precision float of b to that of a and stores the result in out.
 // @fnv 0x00c6cce0
@@ -28,14 +28,14 @@ extern "C" void __cdecl AddScalarFloat(LocalM128* pResult, const LocalM128* pLef
 {
     *pResult = _mm_add_ss(*pLeft, *pRight);
 }
-char* __cdecl FUN_00d921c0(char* dst, const char* src);
+char* __cdecl Object_ComputeValue_00d921c0(char* dst, const char* src);
 using ::_mm_sub_ss;
 // @fnv 0x00c6ccc0
 extern "C" void __cdecl SubtractScalarFloat(LocalM128* pResult, const LocalM128* pLeft, const LocalM128* pRight)
 {
     *pResult = _mm_sub_ss(*pLeft, *pRight);
 }
-void FUN_00d892d0();
+void hkSolveUpload();
 
 #include <math.h>
 using ::_mm_mul_ps;
@@ -81,7 +81,7 @@ __forceinline hkSimdReal operator-(hkSimdRealParameter r, hkSimdRealParameter s)
 __forceinline hkSimdReal operator+(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_add_ss(r.getQuad(), s.getQuad()); }
 __forceinline hkSimdReal operator-(hkSimdRealParameter r) { return _mm_sub_ss(DAT_010c7160, r.getQuad()); }
 hkSimdReal __cdecl SubtractScalarFloat(hkSimdRealParameter r, hkSimdRealParameter s);
-hkSimdReal __cdecl FUN_00891060(hkSimdRealParameter r, hkSimdRealParameter s);
+hkSimdReal __cdecl Object_ProcessAndReturnValue_00891060(hkSimdRealParameter r, hkSimdRealParameter s);
 __declspec(noinline) hkSimdReal __cdecl AddScalarFloat(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_add_ss(r.getQuad(),s.getQuad()); }
 // Solver adapter: getSimdAtE(2) supplies zero rather than the vector's third lane.
 class SolverVector4
@@ -136,8 +136,8 @@ public:
         else if (i == 3) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
     }
     __forceinline void setBroadcast3clobberW(const SolverVector4& v, int i) { setBroadcast(v, i); }
-    void FUN_00c7f750(const hkMatrix3& a, const SolverVector4& b);
-    __forceinline void SetRotatedVector(const hkMatrix3& a, const SolverVector4& b) { FUN_00c7f750(a, b); }
+    void hkVector4_setMul3(const hkMatrix3& a, const SolverVector4& b);
+    __forceinline void SetRotatedVector(const hkMatrix3& a, const SolverVector4& b) { hkVector4_setMul3(a, b); }
     hkQuadReal m_vComponents;
 };
 
@@ -228,8 +228,9 @@ __forceinline int getNumSolverElemTemps(const SolverSchemaHeader* s)
     const int numSolverElemTemps = DAT_011b9434[(SolverSchemaType)getType(s)];
     return numSolverElemTemps;
 }
-SchemaEnum __cdecl FUN_00d921c0(const SolverSchemaHeader* s);
-inline int __cdecl FUN_00d921d0(const SolverSchemaHeader* s) {return DAT_011b9434[(int)s->m_type];}
+SchemaEnum __cdecl Object_ComputeValue_00d921c0(const SolverSchemaHeader* s);
+// src: GUESS 0x00d921d0 (confidence: low)
+inline int __cdecl Hkpsolver_GetIndexedValue_00d921d0(const SolverSchemaHeader* s) {return DAT_011b9434[(int)s->m_type];}
 class __declspec(align(16)) ConstraintHeaderSchema : public SolverSchemaHeader
 {
 public:
@@ -304,9 +305,9 @@ void __cdecl ValidateHavokKeyCode(unsigned char*);
 class hkpStiffChainSchema : public SolverSchemaHeader { public: unsigned char unk01; unsigned short m_iConstraintCount; int m_sizeOfNext; };
 class hkpBallChainSchema : public SolverSchemaHeader { public: unsigned char unk01; unsigned short m_iConstraintCount; int m_sizeOfNext; };
 class hkpPoweredChainSchema : public SolverSchemaHeader { public: unsigned char flags; unsigned short m_numTemps, m_pBodyA, m_pBodyB; int unk08, unk0c, m_nextOffset; };
-void __cdecl FUN_00d893a0(const ConstraintSolverInfo*, const SolverStepInfo*, QuantizedBoundsData*, const hkpStiffChainSchema*, FloatRecord*);
-void __cdecl FUN_00d89690(const ConstraintSolverInfo*, const SolverStepInfo*, QuantizedBoundsData*, const hkpBallChainSchema*, FloatRecord*);
-void __cdecl FUN_00d8a3a0(const ConstraintSolverInfo*, const SolverStepInfo*, QuantizedBoundsData*, const hkpPoweredChainSchema*, FloatRecord*);
+void __cdecl Object_ProcessEntries_00d893a0(const ConstraintSolverInfo*, const SolverStepInfo*, QuantizedBoundsData*, const hkpStiffChainSchema*, FloatRecord*);
+void __cdecl hkpSolverInfo_ProcessEntries_00d89690(const ConstraintSolverInfo*, const SolverStepInfo*, QuantizedBoundsData*, const hkpBallChainSchema*, FloatRecord*);
+void __cdecl Object_ProcessEntries_00d8a3a0(const ConstraintSolverInfo*, const SolverStepInfo*, QuantizedBoundsData*, const hkpPoweredChainSchema*, FloatRecord*);
 __forceinline void loadFixedRegisters() {}
 struct FloatRecord;
 __forceinline void storeDelayedResult(FloatRecord*) {}
@@ -982,7 +983,7 @@ __forceinline void solvePulley(const ConstraintSolverInfo& info, const SingleJac
 {
     hkSimdReal dv = getDv2Lin2Ang(schema, mA, mB, info);
     {
-        hkSimdReal impulse = FUN_00891060(dv, schema.getInvJacDiagSr());
+        hkSimdReal impulse = Object_ProcessAndReturnValue_00891060(dv, schema.getInvJacDiagSr());
         applyImpulse2Lin2Ang(impulse, schema, mA, mB, sr[0]);
     }
 }
@@ -1092,7 +1093,7 @@ friction2d:
             {
                 const Friction2DSchema* schema = reinterpret_cast<const Friction2DSchema*>(com);
                 solve2dRollingFriction(info, *schema, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(schema + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(schema + 1);
                 if (comtype == SCHEMA_TYPE_3D_FRICTION) goto friction3d;
@@ -1104,7 +1105,7 @@ case_1D_ANGULAR_FRICTION:
             {
                 const FrictionImpulseLimitedJacobian* sc = reinterpret_cast<const FrictionImpulseLimitedJacobian*>(com);
                 solve1dAngFriction(info, temp, *sc, *mA, *mB, sr);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_ANGULAR_FRICTION) goto case_1D_ANGULAR_FRICTION;
@@ -1115,7 +1116,7 @@ case_1D_ANGULAR_LIMITS:
             {
                 const AngularLimitJacobian* sc = reinterpret_cast<const AngularLimitJacobian*>(com);
                 solve1dAngLimits(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_ANGULAR_LIMITS) goto case_1D_ANGULAR_LIMITS;
@@ -1126,7 +1127,7 @@ case_1D_ANGULAR_MOTOR:
             {
                 const MotorInfoRecord* sc = reinterpret_cast<const MotorInfoRecord*>(com);
                 solve1dAngularMotor(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_ANGULAR_MOTOR) goto case_1D_ANGULAR_MOTOR;
@@ -1137,7 +1138,7 @@ case_1D_ANGULAR:
             {
                 const JacobianHolder* sc = reinterpret_cast<const JacobianHolder*>(com);
                 solve1dAngular(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_ANGULAR) goto case_1D_ANGULAR;
@@ -1148,8 +1149,8 @@ case_1D_BILATERAL:
             {
                 const JacobianDataHolder* sc = reinterpret_cast<const JacobianDataHolder*>(com);
                 solve1dBilateral(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_BILATERAL) goto case_1D_BILATERAL;
                 break;
@@ -1159,8 +1160,8 @@ case_1D_BILATERAL_WITH_IMPULSE_LIMIT:
             {
                 const JacobianDataHolder* sc = reinterpret_cast<const JacobianDataHolder*>(com);
                 solve1dBilateralWithImpulseLimit(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_BILATERAL_WITH_IMPULSE_LIMIT) goto case_1D_BILATERAL_WITH_IMPULSE_LIMIT;
                 break;
@@ -1170,8 +1171,8 @@ case_1D_BILATERAL_USER_TAU:
             {
                 const LinearSoftConstraintAtom* sc = reinterpret_cast<const LinearSoftConstraintAtom*>(com);
                 solve1dBilateralUserTau(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_BILATERAL_USER_TAU) goto case_1D_BILATERAL_USER_TAU;
                 break;
@@ -1181,8 +1182,8 @@ case_1D_FRICTION:
             {
                 const FrictionImpulseLimitAtom* sc = reinterpret_cast<const FrictionImpulseLimitAtom*>(com);
                 solve1dFriction(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_FRICTION) goto case_1D_FRICTION;
                 break;
@@ -1192,8 +1193,8 @@ case_1D_LINEAR_LIMITS:
             {
                 const LinearDistanceLimitAtom* sc = reinterpret_cast<const LinearDistanceLimitAtom*>(com);
                 solve1dLinLimits(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_LINEAR_LIMITS) goto case_1D_LINEAR_LIMITS;
                 break;
@@ -1203,8 +1204,8 @@ case_1D_LINEAR_MOTOR:
             {
                 const MotorSolverSchema* sc = reinterpret_cast<const MotorSolverSchema*>(com);
                 solve1dLinearMotor(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_LINEAR_MOTOR) goto case_1D_LINEAR_MOTOR;
                 break;
@@ -1248,10 +1249,10 @@ case_1D_LINEAR_MOTOR:
             {
                 const hkpJacobianSetComSchema* sc = reinterpret_cast<const hkpJacobianSetComSchema*>(com);
                 storeVelocityAccumulators(*mA, *mB);
-                SolverVector4 deltaVelA; deltaVelA.FUN_00c7f750(sc->m_angularA, mA->m_vAngularVelocity);
-                SolverVector4 deltaVelB; deltaVelB.FUN_00c7f750(sc->m_angularB, mB->m_vAngularVelocity);
-                SolverVector4 deltaSumVelA; deltaSumVelA.FUN_00c7f750(sc->m_angularA, mA->getSumAngularVel());
-                SolverVector4 deltaSumVelB; deltaSumVelB.FUN_00c7f750(sc->m_angularB, mB->getSumAngularVel());
+                SolverVector4 deltaVelA; deltaVelA.hkVector4_setMul3(sc->m_angularA, mA->m_vAngularVelocity);
+                SolverVector4 deltaVelB; deltaVelB.hkVector4_setMul3(sc->m_angularB, mB->m_vAngularVelocity);
+                SolverVector4 deltaSumVelA; deltaSumVelA.hkVector4_setMul3(sc->m_angularA, mA->getSumAngularVel());
+                SolverVector4 deltaSumVelB; deltaSumVelB.hkVector4_setMul3(sc->m_angularB, mB->getSumAngularVel());
                 mA->m_vLinearVelocity.add4(deltaVelA);
                 mA->getSumLinearVel().add4(deltaSumVelA);
                 mB->m_vLinearVelocity.add4(deltaVelB);
@@ -1273,7 +1274,7 @@ case_1D_LINEAR_MOTOR:
         case SCHEMA_TYPE_STIFF_SPRING_CHAIN:
             {
                 const hkpStiffChainSchema* chain = reinterpret_cast<const hkpStiffChainSchema*>(com);
-                FUN_00d893a0(&info, &temp, accums, chain, sr);
+                Object_ProcessEntries_00d893a0(&info, &temp, accums, chain, sr);
                 sr += chain->m_iConstraintCount;
                 com = hkAddByteOffsetConst(com, chain->m_sizeOfNext);
                 break;
@@ -1281,7 +1282,7 @@ case_1D_LINEAR_MOTOR:
         case SCHEMA_TYPE_BALL_SOCKET_CHAIN:
             {
                 const hkpBallChainSchema* chain = reinterpret_cast<const hkpBallChainSchema*>(com);
-                FUN_00d89690(&info, &temp, accums, chain, sr);
+                hkpSolverInfo_ProcessEntries_00d89690(&info, &temp, accums, chain, sr);
                 sr += 3 * chain->m_iConstraintCount;
                 com = hkAddByteOffsetConst(com, chain->m_sizeOfNext);
                 break;
@@ -1289,7 +1290,7 @@ case_1D_LINEAR_MOTOR:
         case SCHEMA_TYPE_POWERED_CHAIN:
             {
                 const hkpPoweredChainSchema* chain = reinterpret_cast<const hkpPoweredChainSchema*>(com);
-                FUN_00d8a3a0(&info, &temp, accums, chain, sr);
+                Object_ProcessEntries_00d8a3a0(&info, &temp, accums, chain, sr);
                 sr += 6 * chain->m_pBodyA;
                 com = hkAddByteOffsetConst(com, chain->m_nextOffset);
                 break;
@@ -1301,7 +1302,8 @@ case_1D_LINEAR_MOTOR:
     }
 }
 // @fnv 0x00d8aac0
-extern "C" void __cdecl FUN_00d8aac0(const ConstraintSolverInfo& info, const SolverSchemaHeader* schemas, QuantizedBoundsData* accumulators, FloatRecord* elemTemp)
+// src: GUESS 0x00d8aac0 (confidence: low)
+extern "C" void __cdecl Object_UpdateFields_00d8aac0(const ConstraintSolverInfo& info, const SolverSchemaHeader* schemas, QuantizedBoundsData* accumulators, FloatRecord* elemTemp)
 {
     loadFixedRegisters();
     SolverStepInfo temp;
@@ -1417,7 +1419,8 @@ LocalM128 oldOutput=_mm_load_ss(output);
 _mm_store_ss(output,_mm_add_ss(oldOutput,scalar));
 }
 // @fnv 0x00d893a0
-void __cdecl FUN_00d893a0(unsigned int settingsAddress, void* unused, unsigned int bodies, ProbeHeader* header, float* output)
+// src: GUESS 0x00d893a0 (confidence: low)
+void __cdecl Object_ProcessEntries_00d893a0(unsigned int settingsAddress, void* unused, unsigned int bodies, ProbeHeader* header, float* output)
 {
     ProbeRow* rowData;
     long count;
@@ -1600,7 +1603,8 @@ static __forceinline void applyImpulse(hkSimdRealParameter imp, const hkp1Lin2An
 }
 
 // @fnv 0x00d89690
-void __cdecl FUN_00d89690(const hkpSolverInfo& info, const hkSolverQ::SolverStepInfo& temp, hkpVelocityAccumulator* accums, hkpJacobianBallSocketChainSchema* chain, hkpSolverElemTemp* sr)
+// src: GUESS 0x00d89690 (confidence: low)
+void __cdecl hkpSolverInfo_ProcessEntries_00d89690(const hkpSolverInfo& info, const hkSolverQ::SolverStepInfo& temp, hkpVelocityAccumulator* accums, hkpJacobianBallSocketChainSchema* chain, hkpSolverElemTemp* sr)
 {
     int numConstraints = chain->m_iConstraintCount;
     hkp1Lin2AngJacobian* j = hkpJacobianBallSocketChainSchema::getJacobians(chain);
@@ -1904,16 +1908,17 @@ struct PoweredChainContext {
     PoweredChainCell<PoweredChainVector8*> m_tempBuffer;
     PoweredChainCell<PoweredChainVector8*> m_velocities;
 };
-void __cdecl FUN_00df0d30(const PoweredChainContext& info, PoweredChainVector8* velocities);
-void __cdecl FUN_00df11a0(const PoweredChainContext& info, PoweredChainVector8* temp);
+void __cdecl hkpPoweredChain_ComputeLinkVelocityDeltas(const PoweredChainContext& info, PoweredChainVector8* velocities);
+void __cdecl hkAabb_ProcessEntries_00df11a0(const PoweredChainContext& info, PoweredChainVector8* temp);
 void __cdecl CopyChannelValue(int link, int axis, const PoweredChainMotor* motors, PoweredChainVector8* velocities);
-void __cdecl FUN_00df1430(const PoweredChainContext& info, int& link, int& axis, hkReal& impulse, PoweredChainMotor* motors);
-void __cdecl FUN_00df1260(const PoweredChainContext& info, int& link, int& axis, hkReal& impulse, PoweredChainMotor* motors);
-void __cdecl FUN_00df2040(int link, int count, PoweredChainMotor* motors, PoweredChainMatrixTriple* matrices);
-void __cdecl FUN_00df1060(int link, int axis, const PoweredChainContext& info, PoweredChainVector8* velocities);
+void __cdecl hkChainInfo_ProcessEntries_00df1430(const PoweredChainContext& info, int& link, int& axis, hkReal& impulse, PoweredChainMotor* motors);
+void __cdecl Object_ProcessEntries_00df1260(const PoweredChainContext& info, int& link, int& axis, hkReal& impulse, PoweredChainMotor* motors);
+void __cdecl Object_ProcessEntries_00df2040(int link, int count, PoweredChainMotor* motors, PoweredChainMatrixTriple* matrices);
+void __cdecl Object_UpdateFields_00df1060(int link, int axis, const PoweredChainContext& info, PoweredChainVector8* velocities);
 
 // @fnv 0x00d8a3a0
-void __cdecl FUN_00d8a3a0(const PoweredChainSettings& info, const PoweredChainSolver::PoweredChainStepTemp& temp, PoweredChainAccumulator* accums, PoweredChainSchema* schema, PoweredChainResult* sr)
+// src: GUESS 0x00d8a3a0 (confidence: low)
+void __cdecl Object_ProcessEntries_00d8a3a0(const PoweredChainSettings& info, const PoweredChainSolver::PoweredChainStepTemp& temp, PoweredChainAccumulator* accums, PoweredChainSchema* schema, PoweredChainResult* sr)
 {
     PoweredChainContext chainInfo(info);
     chainInfo.m_iConstraintCount = schema->m_iConstraintCount;
@@ -1942,7 +1947,7 @@ void __cdecl FUN_00d8a3a0(const PoweredChainSettings& info, const PoweredChainSo
         }
     }
 
-    FUN_00df0d30(chainInfo, chainInfo.m_velocities);
+    hkpPoweredChain_ComputeLinkVelocityDeltas(chainInfo, chainInfo.m_velocities);
 
     for (int i = 0; i < chainInfo.m_iConstraintCount; i++)
     {
@@ -1962,15 +1967,15 @@ void __cdecl FUN_00d8a3a0(const PoweredChainSettings& info, const PoweredChainSo
 
     while (true)
     {
-        FUN_00df11a0(chainInfo, chainInfo.m_tempBuffer);
+        hkAabb_ProcessEntries_00df11a0(chainInfo, chainInfo.m_tempBuffer);
         int link = -1;
         int axis = -1;
         hkReal impulse = 0.0f;
-        FUN_00df1430(chainInfo, link, axis, impulse, chainInfo.m_kAngularMotors);
+        hkChainInfo_ProcessEntries_00df1430(chainInfo, link, axis, impulse, chainInfo.m_kAngularMotors);
         if (link >= 0)
         {
-            FUN_00df2040(link, chainInfo.m_iConstraintCount, chainInfo.m_kAngularMotors, chainInfo.m_kMatrices);
-            FUN_00df1060(link, axis, chainInfo, chainInfo.m_velocities);
+            Object_ProcessEntries_00df2040(link, chainInfo.m_iConstraintCount, chainInfo.m_kAngularMotors, chainInfo.m_kMatrices);
+            Object_UpdateFields_00df1060(link, axis, chainInfo, chainInfo.m_velocities);
         }
         else
         {
@@ -1979,14 +1984,14 @@ void __cdecl FUN_00d8a3a0(const PoweredChainSettings& info, const PoweredChainSo
     }
     while (true)
     {
-        FUN_00df11a0(chainInfo, chainInfo.m_tempBuffer);
+        hkAabb_ProcessEntries_00df11a0(chainInfo, chainInfo.m_tempBuffer);
         int link = -1;
         int axis = -1;
         hkReal impulse = 0.0f;
-        FUN_00df1260(chainInfo, link, axis, impulse, chainInfo.m_kAngularMotors);
+        Object_ProcessEntries_00df1260(chainInfo, link, axis, impulse, chainInfo.m_kAngularMotors);
         if (link >= 0)
         {
-            FUN_00df2040(link, chainInfo.m_iConstraintCount, chainInfo.m_kAngularMotors, chainInfo.m_kMatrices);
+            Object_ProcessEntries_00df2040(link, chainInfo.m_iConstraintCount, chainInfo.m_kAngularMotors, chainInfo.m_kMatrices);
             CopyChannelValue(link, axis, chainInfo.m_kAngularMotors, chainInfo.m_velocities);
         }
         else
@@ -2073,7 +2078,7 @@ __forceinline ConstraintStepScalar operator-(ConstraintStepScalarParameter r, Co
 __forceinline ConstraintStepScalar operator+(ConstraintStepScalarParameter r, ConstraintStepScalarParameter s) { return _mm_add_ss(r.getQuad(), s.getQuad()); }
 __forceinline ConstraintStepScalar operator-(ConstraintStepScalarParameter r) { return _mm_sub_ss(DAT_010c7160, r.getQuad()); }
 ConstraintStepScalar __cdecl SubtractScalarFloat(ConstraintStepScalarParameter r, ConstraintStepScalarParameter s);
-ConstraintStepScalar __cdecl FUN_00891060(ConstraintStepScalarParameter r, ConstraintStepScalarParameter s);
+ConstraintStepScalar __cdecl Object_ProcessAndReturnValue_00891060(ConstraintStepScalarParameter r, ConstraintStepScalarParameter s);
 __declspec(noinline) ConstraintStepScalar __cdecl AddScalarFloat(ConstraintStepScalarParameter r, ConstraintStepScalarParameter s) { return _mm_add_ss(r.getQuad(),s.getQuad()); }
 class ConstraintStepVector
 {
@@ -2117,8 +2122,8 @@ public:
         else if (i == 3) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
     }
     __forceinline void setBroadcast3clobberW(const ConstraintStepVector& v, int i) { setBroadcast(v, i); }
-    void FUN_00c7f750(const hkMatrix3& a, const ConstraintStepVector& b);
-    __forceinline void SetRotatedVector(const hkMatrix3& a, const ConstraintStepVector& b) { FUN_00c7f750(a, b); }
+    void hkVector4_setMul3(const hkMatrix3& a, const ConstraintStepVector& b);
+    __forceinline void SetRotatedVector(const hkMatrix3& a, const ConstraintStepVector& b) { hkVector4_setMul3(a, b); }
     ConstraintStepQuad m_vComponents;
 };
 struct ConstraintSolverInfo
@@ -2205,8 +2210,9 @@ __forceinline int getNumSolverElemTemps(const SolverSchemaHeader* s)
     const int numSolverElemTemps = DAT_011b9434[(SolverSchemaType)getType(s)];
     return numSolverElemTemps;
 }
-SchemaEnum __cdecl FUN_00d921c0(const SolverSchemaHeader* s);
-inline int __cdecl FUN_00d921d0(const SolverSchemaHeader* s) { return DAT_011b9434[static_cast<SolverSchemaType>(s->m_type)]; }
+SchemaEnum __cdecl Object_ComputeValue_00d921c0(const SolverSchemaHeader* s);
+// src: GUESS 0x00d921d0 (confidence: low)
+inline int __cdecl Hkpsolver_GetIndexedValue_00d921d0(const SolverSchemaHeader* s) { return DAT_011b9434[static_cast<SolverSchemaType>(s->m_type)]; }
 class __declspec(align(16)) ConstraintHeaderSchema : public SolverSchemaHeader
 {
 public:
@@ -2280,9 +2286,9 @@ void __cdecl ValidateHavokKeyCode(unsigned char*);
 class hkpStiffChainSchema : public SolverSchemaHeader { public: unsigned char unk01; unsigned short m_iConstraintCount; int m_sizeOfNext; };
 class hkpBallChainSchema : public SolverSchemaHeader { public: unsigned char unk01; unsigned short m_iConstraintCount; int m_sizeOfNext; };
 class hkpPoweredChainSchema : public SolverSchemaHeader { public: unsigned char flags; unsigned short m_numTemps, m_pBodyA, m_pBodyB; int unk08, unk0c, m_nextOffset; };
-void __cdecl FUN_00d893a0(const ConstraintSolverInfo*, const SolverStepInfo*, ConstraintStepAccumulator*, const hkpStiffChainSchema*, FloatRecord*);
-void __cdecl FUN_00d89690(const ConstraintSolverInfo*, const SolverStepInfo*, ConstraintStepAccumulator*, const hkpBallChainSchema*, FloatRecord*);
-void __cdecl FUN_00d8a3a0(const ConstraintSolverInfo*, const SolverStepInfo*, ConstraintStepAccumulator*, const hkpPoweredChainSchema*, FloatRecord*);
+void __cdecl Object_ProcessEntries_00d893a0(const ConstraintSolverInfo*, const SolverStepInfo*, ConstraintStepAccumulator*, const hkpStiffChainSchema*, FloatRecord*);
+void __cdecl hkpSolverInfo_ProcessEntries_00d89690(const ConstraintSolverInfo*, const SolverStepInfo*, ConstraintStepAccumulator*, const hkpBallChainSchema*, FloatRecord*);
+void __cdecl Object_ProcessEntries_00d8a3a0(const ConstraintSolverInfo*, const SolverStepInfo*, ConstraintStepAccumulator*, const hkpPoweredChainSchema*, FloatRecord*);
 __forceinline void loadFixedRegisters() {}
 struct FloatRecord;
 __forceinline void storeDelayedResult(FloatRecord*) {}
@@ -2882,7 +2888,7 @@ __forceinline void solvePulley(const ConstraintSolverInfo& info, const SingleJac
 {
     ConstraintStepScalar dv = getDv2Lin2Ang(schema, mA, mB, info);
     {
-        ConstraintStepScalar impulse = FUN_00891060(dv, schema.getInvJacDiagSr());
+        ConstraintStepScalar impulse = Object_ProcessAndReturnValue_00891060(dv, schema.getInvJacDiagSr());
         applyImpulse2Lin2Ang(impulse, schema, mA, mB, sr[0]);
     }
 }
@@ -2992,7 +2998,7 @@ friction2d:
             {
                 const Friction2DSchema* schema = reinterpret_cast<const Friction2DSchema*>(com);
                 solve2dRollingFriction( *schema, *mA, *mB, sr);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(schema + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(schema + 1);
                 if (comtype == SCHEMA_TYPE_3D_FRICTION) goto friction3d;
@@ -3004,7 +3010,7 @@ case_1D_ANGULAR_FRICTION:
             {
                 const FrictionImpulseLimitedJacobian* sc = reinterpret_cast<const FrictionImpulseLimitedJacobian*>(com);
                 solve1dAngFriction(info, temp, *sc, *mA, *mB, sr);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_ANGULAR_FRICTION) goto case_1D_ANGULAR_FRICTION;
@@ -3015,7 +3021,7 @@ case_1D_ANGULAR_LIMITS:
             {
                 const AngularLimitJacobian* sc = reinterpret_cast<const AngularLimitJacobian*>(com);
                 solve1dAngLimits(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_ANGULAR_LIMITS) goto case_1D_ANGULAR_LIMITS;
@@ -3026,7 +3032,7 @@ case_1D_ANGULAR_MOTOR:
             {
                 const MotorInfoRecord* sc = reinterpret_cast<const MotorInfoRecord*>(com);
                 solve1dAngularMotor(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_ANGULAR_MOTOR) goto case_1D_ANGULAR_MOTOR;
@@ -3037,7 +3043,7 @@ case_1D_ANGULAR:
             {
                 const JacobianHolder* sc = reinterpret_cast<const JacobianHolder*>(com);
                 solve1dAngular(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
                 const SolverSchemaType comtype = getType(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_ANGULAR) goto case_1D_ANGULAR;
@@ -3048,8 +3054,8 @@ case_1D_BILATERAL:
             {
                 const JacobianDataHolder* sc = reinterpret_cast<const JacobianDataHolder*>(com);
                 solve1dBilateral(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_BILATERAL) goto case_1D_BILATERAL;
                 break;
@@ -3059,8 +3065,8 @@ case_1D_BILATERAL_WITH_IMPULSE_LIMIT:
             {
                 const JacobianDataHolder* sc = reinterpret_cast<const JacobianDataHolder*>(com);
                 solve1dBilateralWithImpulseLimit(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_BILATERAL_WITH_IMPULSE_LIMIT) goto case_1D_BILATERAL_WITH_IMPULSE_LIMIT;
                 break;
@@ -3070,8 +3076,8 @@ case_1D_BILATERAL_USER_TAU:
             {
                 const LinearSoftConstraintAtom* sc = reinterpret_cast<const LinearSoftConstraintAtom*>(com);
                 solve1dBilateralUserTau(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_BILATERAL_USER_TAU) goto case_1D_BILATERAL_USER_TAU;
                 break;
@@ -3081,8 +3087,8 @@ case_1D_FRICTION:
             {
                 const FrictionImpulseLimitAtom* sc = reinterpret_cast<const FrictionImpulseLimitAtom*>(com);
                 solve1dFriction(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_FRICTION) goto case_1D_FRICTION;
                 break;
@@ -3092,8 +3098,8 @@ case_1D_LINEAR_LIMITS:
             {
                 const LinearDistanceLimitAtom* sc = reinterpret_cast<const LinearDistanceLimitAtom*>(com);
                 solve1dLinLimits(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_LINEAR_LIMITS) goto case_1D_LINEAR_LIMITS;
                 break;
@@ -3103,8 +3109,8 @@ case_1D_LINEAR_MOTOR:
             {
                 const MotorSolverSchema* sc = reinterpret_cast<const MotorSolverSchema*>(com);
                 solve1dLinearMotor(info, temp, *sc, *mA, *mB, sr, delayedResult);
-                sr += FUN_00d921d0(com);
-                const SolverSchemaType comtype = FUN_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
+                sr += Hkpsolver_GetIndexedValue_00d921d0(com);
+                const SolverSchemaType comtype = Object_ComputeValue_00d921c0(reinterpret_cast<const SolverSchemaHeader*>(sc + 1));
                 com = reinterpret_cast<const SolverSchemaHeader*>(sc + 1);
                 if (comtype == SCHEMA_TYPE_1D_LINEAR_MOTOR) goto case_1D_LINEAR_MOTOR;
                 break;
@@ -3148,10 +3154,10 @@ case_1D_LINEAR_MOTOR:
             {
                 const hkpJacobianSetComSchema* sc = reinterpret_cast<const hkpJacobianSetComSchema*>(com);
                 storeVelocityAccumulators(*mA, *mB);
-                ConstraintStepVector deltaVelA; deltaVelA.FUN_00c7f750(sc->m_angularA, mA->m_vAngularVelocity);
-                ConstraintStepVector deltaVelB; deltaVelB.FUN_00c7f750(sc->m_angularB, mB->m_vAngularVelocity);
-                ConstraintStepVector deltaSumVelA; deltaSumVelA.FUN_00c7f750(sc->m_angularA, mA->getSumAngularVel());
-                ConstraintStepVector deltaSumVelB; deltaSumVelB.FUN_00c7f750(sc->m_angularB, mB->getSumAngularVel());
+                ConstraintStepVector deltaVelA; deltaVelA.hkVector4_setMul3(sc->m_angularA, mA->m_vAngularVelocity);
+                ConstraintStepVector deltaVelB; deltaVelB.hkVector4_setMul3(sc->m_angularB, mB->m_vAngularVelocity);
+                ConstraintStepVector deltaSumVelA; deltaSumVelA.hkVector4_setMul3(sc->m_angularA, mA->getSumAngularVel());
+                ConstraintStepVector deltaSumVelB; deltaSumVelB.hkVector4_setMul3(sc->m_angularB, mB->getSumAngularVel());
                 mA->m_vLinearVelocity.add4(deltaVelA);
                 mA->getSumLinearVel().add4(deltaSumVelA);
                 mB->m_vLinearVelocity.add4(deltaVelB);
@@ -3173,7 +3179,7 @@ case_1D_LINEAR_MOTOR:
         case SCHEMA_TYPE_STIFF_SPRING_CHAIN:
             {
                 const hkpStiffChainSchema* chain = reinterpret_cast<const hkpStiffChainSchema*>(com);
-                FUN_00d893a0(&info, &temp, accums, chain, sr);
+                Object_ProcessEntries_00d893a0(&info, &temp, accums, chain, sr);
                 sr += chain->m_iConstraintCount;
                 com = hkAddByteOffsetConst(com, chain->m_sizeOfNext);
                 break;
@@ -3181,7 +3187,7 @@ case_1D_LINEAR_MOTOR:
         case SCHEMA_TYPE_BALL_SOCKET_CHAIN:
             {
                 const hkpBallChainSchema* chain = reinterpret_cast<const hkpBallChainSchema*>(com);
-                FUN_00d89690(&info, &temp, accums, chain, sr);
+                hkpSolverInfo_ProcessEntries_00d89690(&info, &temp, accums, chain, sr);
                 sr += 3 * chain->m_iConstraintCount;
                 com = hkAddByteOffsetConst(com, chain->m_sizeOfNext);
                 break;
@@ -3189,7 +3195,7 @@ case_1D_LINEAR_MOTOR:
         case SCHEMA_TYPE_POWERED_CHAIN:
             {
                 const hkpPoweredChainSchema* chain = reinterpret_cast<const hkpPoweredChainSchema*>(com);
-                FUN_00d8a3a0(&info, &temp, accums, chain, sr);
+                Object_ProcessEntries_00d8a3a0(&info, &temp, accums, chain, sr);
                 sr += 6 * chain->m_pBodyA;
                 com = hkAddByteOffsetConst(com, chain->m_nextOffset);
                 break;
@@ -3201,7 +3207,8 @@ case_1D_LINEAR_MOTOR:
     }
 }
 // @fnv 0x00d8fb70
-int __cdecl FUN_00d8fb70(const ConstraintSolverInfo& info, int currentSolverStep, int currentSolverMicroStep, const SolverSchemaHeader* schemas, ConstraintStepAccumulator* accumulators, FloatRecord* elemTemp)
+// src: GUESS 0x00d8fb70 (confidence: low)
+int __cdecl HkpsolverGsNogs_UpdateState_00d8fb70(const ConstraintSolverInfo& info, int currentSolverStep, int currentSolverMicroStep, const SolverSchemaHeader* schemas, ConstraintStepAccumulator* accumulators, FloatRecord* elemTemp)
 {
     if (!DAT_01269204)
     {

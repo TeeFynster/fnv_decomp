@@ -9,7 +9,8 @@
 extern "C" int _stricmp(const char* s1, const char* s2);
 
 // @fnv 0x00404dc0
-int FUN_00404dc0(const char* pcString1, const char* pcString2)
+// src: COMMUNITY 0x00404dc0
+int BSstricmp(const char* pcString1, const char* pcString2)
 {
     return _stricmp(pcString1, pcString2);
 }

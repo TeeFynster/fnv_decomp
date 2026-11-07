@@ -28,7 +28,8 @@ __forceinline const float& hkVector4::operator()(int i) const { return reinterpr
 
 // Writes 6 and 0x30 into a2[1] and a2[0] when a1 is nonzero, otherwise writes zeros to both.
 // @fnv 0x00d4e580
-void __stdcall FUN_00d4e580(char a1, int* a2)
+// src: HAVOK_LIB 0x00d4e580
+void __stdcall hkpWheelConstraintData_getRuntimeInfo(char a1, int* a2)
 {
     if (a1)
     {
@@ -43,15 +44,16 @@ void __stdcall FUN_00d4e580(char a1, int* a2)
 }
 
 // The shared wheel header lacks these methods; free fastcall functions reserve EDX and preserve ECX=this.
-void* __cdecl FUN_00d21a60(void* a, int b, int c);
+void* __cdecl hkpConstraintData_getConstraintInfoUtil(void* a, int b, int c);
 // @fnv 0x00d4e560
 void* __fastcall PopulateWheelInfo(hkpWheelConstraintData* self, void*, int aiIndex)
 {
-    return FUN_00d21a60(&self->m_kBridgeAtoms, 0x124, aiIndex);
+    return hkpConstraintData_getConstraintInfoUtil(&self->m_kBridgeAtoms, 0x124, aiIndex);
 }
 
 // @fnv 0x00d4e5b0
-int __cdecl FUN_00d4e5b0()
+// src: GUESS 0x00d4e5b0 (confidence: high)
+int __cdecl hkpWheelConstraintData_ReturnConstant_9()
 {
     return 9;
 }

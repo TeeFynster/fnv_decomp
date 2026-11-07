@@ -25,7 +25,8 @@ void Stars::Initialize(NiNode* node)
 
 
 // @fnv 0x0043fa80
-void NiAVObject::FUN_0043fa80(const NiMatrix3& kRot)
+// src: XBOX_PDB 0x0043fa80
+void NiAVObject::SetRotate_0043fa80(const NiMatrix3& kRot)
 {
     m_kLocal.m_Rotate = kRot;
 }
@@ -37,7 +38,8 @@ struct blob16
 typedef char _sizecheck_NiQuaternion[sizeof(NiQuaternion) == 16 ? 1 : -1];
 
 // @fnv 0x004f0160
-void NiAVObject::FUN_004f0160(const NiQuaternion& rotation)
+// src: COMMUNITY 0x004f0160
+void NiAVObject::NiNode_SetRotate(const NiQuaternion& rotation)
 {
     const_cast<NiQuaternion&>(rotation).ToRotationMatrix(&m_kLocal.m_Rotate);
 }
@@ -68,7 +70,7 @@ class Calendar
     unsigned int GetGameDaysPassed();
 };
 extern Calendar g_calendar;
-float __cdecl FUN_004b1520(float, float);
+float __cdecl fmodf(float, float);
 
 }  // namespace fnv_00640020
 
@@ -83,17 +85,17 @@ void Stars::Update(Sky* apSky, float afSecondsPassed)
     fAlpha = 0.0f;
     static NiPoint3 lastColor(0.0f, 0.0f, 0.0f);
     SkyObject::Update(apSky, afSecondsPassed);
-    if (apSky->FUN_00476c90() == 3 || apSky->FUN_00476c90() == 2)
+    if (apSky->Sky_GetMode() == 3 || apSky->Sky_GetMode() == 2)
     {
-        if (!((NiAVObject*)(NiNode*)m_pRootNode)->FUN_006366b0())
+        if (!((NiAVObject*)(NiNode*)m_pRootNode)->GetDisplayObject())
         {
             ((NiAVObject*)(NiNode*)m_pRootNode)->SetAppCulled(true);
             return;
         }
-        float fSunsetBegin = apSky->FUN_00595fc0();
-        float fSunsetEnd = apSky->FUN_0063ba30();
-        float fSunriseEnd = apSky->FUN_00595f50();
-        float fSunriseBegin = apSky->FUN_0063b9b0();
+        float fSunsetBegin = apSky->Sky_GetSunsetBegin();
+        float fSunsetEnd = apSky->GetEndSunsetColors();
+        float fSunriseEnd = apSky->Sky_GetSunriseEnd();
+        float fSunriseBegin = apSky->GetBeginSunriseColors();
         float fBeginFadeIn = fSunsetEnd - (fSunsetEnd - fSunsetBegin) * 0.5f;
         float fEndFadeOut = fSunriseEnd - (fSunriseEnd - fSunriseBegin) * 0.5f;
         if (fSunriseBegin < fhour && fhour < fEndFadeOut)
@@ -107,10 +109,10 @@ void Stars::Update(Sky* apSky, float afSecondsPassed)
         if (fAlpha > 0.0)
         {
             ((NiAVObject*)(NiNode*)m_pRootNode)->SetAppCulled(false);
-            NiPoint3 colorThisFrame = *(NiPoint3*)((TESWaterForm*)apSky)->FUN_0057eef0();
+            NiPoint3 colorThisFrame = *(NiPoint3*)((TESWaterForm*)apSky)->Sky_GetStarsColor();
             NiGeometry* pstarsgeo = 0;
             NiAVObject* pchild = 0;
-            unsigned int icount = (NiNode*)m_pStarsNode ? ((NiNode*)m_pStarsNode)->FUN_00453470() : 0;
+            unsigned int icount = (NiNode*)m_pStarsNode ? ((NiNode*)m_pStarsNode)->NiNode_GetChildCount() : 0;
             for (unsigned int i = 0; i < icount; i++)
             {
                 pchild = ((NiNode*)m_pStarsNode)->GetAt(i);
@@ -140,7 +142,7 @@ void Stars::Update(Sky* apSky, float afSecondsPassed)
             }
             lastColor = colorThisFrame;
             float felapsed = g_calendar.GetGameDaysPassed() + apSky->GetFieldEC() / 24.0;
-            float fangle = FUN_004b1520(felapsed, originalRuntimeFloatSetting79.Float()[0]) * 6.2831854820251465 /
+            float fangle = fmodf(felapsed, originalRuntimeFloatSetting79.Float()[0]) * 6.2831854820251465 /
                            originalRuntimeFloatSetting79.Float()[0];
             NiPoint3 axis(g_011ccdc4.Float()[0], g_011cce30.Float()[0], g_011ccddc.Float()[0]);
             axis.ComputeMagnitude();
@@ -170,33 +172,34 @@ class Model
     NiNode* GetObject3D();
 };
 extern const char* const DAT_011f4428;
-bool __cdecl FUN_0043b300(const void*, NiNode*);
+bool __cdecl NiObject_IsKindOf(const void*, NiNode*);
 void __cdecl FNV_Warning(const char*);
 // @fnv 0x0063fdb0
-void Stars::FUN_0063fdb0(const char* path)
+// src: XBOX_PDB 0x0063fdb0
+void Stars::LoadGeometry(const char* path)
 {
     if (!path || !*path)
     {
-        m_pRootNode->FUN_00635fe0(false);
+        m_pRootNode->NiAVObject_SetDisplayObject(false);
         return;
     }
     BSStringT<char> fileName;
     fileName.PrintfString("%s%s%s", "Meshes", "\\", path);
     {
         BSStream stream;
-        if (!stream.FUN_00c3a8a0(fileName, false) || stream.GetRefAt21C() != 1 ||
-            !FUN_0043b300(&DAT_011f4428, stream.GetStringAt(0)))
+        if (!stream.BSStream_Load(fileName, false) || stream.GetRefAt21C() != 1 ||
+            !NiObject_IsKindOf(&DAT_011f4428, stream.GetStringAt(0)))
         {
             FNV_Warning("DEFAULT: Cannot load the stars.");
-            m_pRootNode->FUN_00635fe0(false);
+            m_pRootNode->NiAVObject_SetDisplayObject(false);
             return;
         }
         Model model(fileName, &stream, true, false);
-        m_pRootNode->FUN_00635fe0(true);
+        m_pRootNode->NiAVObject_SetDisplayObject(true);
         m_pRootNode->RemoveObject(m_pStarsNode);
         m_pStarsNode = model.GetObject3D();
-        m_pStarsNode->FUN_004902f0(true);
+        m_pStarsNode->NiAVObject_SetSelectiveUpdate(true);
         m_pRootNode->AttachChildInAvailableSlot((NiAVObject*)(NiNode*)m_pStarsNode, true);
-        m_pStarsNode->FUN_00a5a040();
+        m_pStarsNode->UpdateProperties();
     }
 }

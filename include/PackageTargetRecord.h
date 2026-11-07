@@ -42,9 +42,9 @@ class PackageTargetRecord
     void SetTargetObjectReference(TESObjectREFR* reference); // 0x00680110
     void SetTargObject(TESForm* form);                      // 0x00680140
     void SetTargObjectType(int type);                       // 0x00680170
-    void FUN_00680170(void* reference);
-    void FUN_006801a0(PackageTargetRecord* other);           // 0x006801a0
-    void FUN_006802f0(int chunk);                           // 0x006802f0
+    void UpdateState_00680170(void* reference);
+    void PackageTarget_Copy(PackageTargetRecord* other);           // 0x006801a0
+    void PackageTarget_Save(int chunk);                           // 0x006802f0
     void InitItem(TESForm* owner);                          // 0x006803b0
     float GetTargAcquireRadius();                           // 0x0084d030
     float FUN_0084d030();

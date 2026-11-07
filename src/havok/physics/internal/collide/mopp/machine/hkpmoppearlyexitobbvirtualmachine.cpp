@@ -13,8 +13,8 @@ struct S_00e647e0 {
     int unk20; int unk24; int unk28; int unk2C; int unk30; int unk34; int unk38; int unk3C;
     hkBool m_bHasHit; char unk41; char unk42; char unk43;
     S_00e647e0_Input* m_pRayCastInput;
-    void FUN_00e645b0(const void* a, const void* b, const void* c, S_00e647e0_Local* out);
-    void FUN_00e63f10(S_00e647e0_Local* l, S_00e647e0_Shape* shape);
+    void ComputeValues_00e645b0(const void* a, const void* b, const void* c, S_00e647e0_Local* out);
+    void queryOBBOnTree(S_00e647e0_Local* l, S_00e647e0_Shape* shape);
     hkBool SetupAndProcessShape(S_00e647e0_Input* input, const void* b, const void* c, const void* d);
 };
 // @fnv 0x00e647e0
@@ -26,10 +26,10 @@ hkBool S_00e647e0::SetupAndProcessShape(S_00e647e0_Input* input, const void* b, 
     m_pRayCastInput = input;
     S_00e647e0_Shape* shape = input->m_pCollisionShape;
     __declspec(align(16)) S_00e647e0_Local localData;
-    FUN_00e645b0(c, b, d, &localData);
+    ComputeValues_00e645b0(c, b, d, &localData);
     localData.unk44 = 0;
     m_bHasHit = false;
-    FUN_00e63f10(&localData, shape);
+    queryOBBOnTree(&localData, shape);
     return m_bHasHit;
 }
 

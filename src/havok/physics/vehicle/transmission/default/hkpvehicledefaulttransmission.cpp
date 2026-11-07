@@ -28,12 +28,13 @@ struct FUN_00e43d00_class
     virtual void v7() = 0;
     virtual float v8(FUN_00e43d00_arg1*, FUN_00e43d00_arg2*) = 0;
 
-    float FUN_00e43d00(FUN_00e43d00_arg1*, FUN_00e43d00_arg2*);
+    float hkpVehicleDefaultTransmission_calcMainTransmittedTorque(FUN_00e43d00_arg1*, FUN_00e43d00_arg2*);
 };
 
 // Returns zero when the flag is set, otherwise multiplies the value from arg1 by the result of v8.
 // @fnv 0x00e43d00
-float FUN_00e43d00_class::FUN_00e43d00(FUN_00e43d00_arg1* pInput, FUN_00e43d00_arg2* arg2)
+// src: HAVOK_LIB 0x00e43d00
+float FUN_00e43d00_class::hkpVehicleDefaultTransmission_calcMainTransmittedTorque(FUN_00e43d00_arg1* pInput, FUN_00e43d00_arg2* arg2)
 {
     if (arg2->flag)
         return 0.0f;
@@ -146,11 +147,12 @@ struct FUN_00e43ea0_Class
     int unk18;
     int unk1C;
     int unk20;
-    void FUN_00e43ea0(float a, int b, FUN_00e43ea0_State* st);
+    void hkpVehicleDefaultTransmission_updateCurrentGear(float a, int b, FUN_00e43ea0_State* st);
 };
 
 // @fnv 0x00e43ea0
-void FUN_00e43ea0_Class::FUN_00e43ea0(float afDelta, int aiUnused, FUN_00e43ea0_State* pState)
+// src: HAVOK_LIB 0x00e43ea0
+void FUN_00e43ea0_Class::hkpVehicleDefaultTransmission_updateCurrentGear(float afDelta, int aiUnused, FUN_00e43ea0_State* pState)
 {
     float fRemaining = pState->unk10 - afDelta;
     pState->unk10 = fRemaining;
@@ -203,7 +205,8 @@ struct ObjBE43C
 
 // Returns true if pkA is enabled and pkB's level is not positive, otherwise false.
 // @fnv 0x00e43c00
-hkBool __stdcall FUN_00e43c00(ObjAE43C* pkA, ObjBE43C* pkB)
+// src: HAVOK_LIB 0x00e43c00
+hkBool __stdcall hkpVehicleDefaultTransmission_calcIsReversing(ObjAE43C* pkA, ObjBE43C* pkB)
 {
     if (!pkA->m_bEnableState)
         return false;

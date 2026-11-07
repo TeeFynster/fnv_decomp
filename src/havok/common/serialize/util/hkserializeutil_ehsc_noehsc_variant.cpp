@@ -9,10 +9,10 @@
 #include "../../../../../include/hkStringPtr.h"
 #include "../../../../../include/Pair.h"
 
-void __cdecl FUN_00d48620(int a, int b, int c);
-void __cdecl FUN_00d48640(int a, int b);
-extern "C" void __cdecl FUN_00d485a0(int, int, int, int, int);
-void __cdecl FUN_00d48660(int a, int b, int c);
+void __cdecl Object_ForwardCall_00d48620(int a, int b, int c);
+void __cdecl Object_ForwardCall_00d48640(int a, int b);
+extern "C" void __cdecl Object_ProcessAndReturnValue_00d485a0(int, int, int, int, int);
+void __cdecl Object_ForwardCall_00d48660(int a, int b, int c);
 extern int DAT_0102e388;
 extern int DAT_010d7540;
 struct FUN_00dcc160_cls
@@ -20,7 +20,7 @@ struct FUN_00dcc160_cls
     void* vtbl;
     int a;
     hkReferencedObject* b;
-    void FUN_00dcc160();
+    void SetVirtualTable_00dcc160();
 };
 struct FUN_00dbc670_storage
 {
@@ -81,9 +81,9 @@ struct FUN_00dbc670_storage
 struct FUN_00dbc670_shell
 {
     void FUN_00dbc670();
-    void FUN_00dbda50(int, int, int);
+    void hkPackfileWriter_setContents(int, int, int);
     int ProcessPoly(int, int);
-    void FUN_00dbc6e0();
+    void SetVirtualTableAndProcessState_00dbc6e0();
 };
 struct GlobalDispatch
 {
@@ -93,18 +93,18 @@ struct GlobalDispatch
     virtual int Dispatch(int, int, int, int, int);
 };
 extern GlobalDispatch* DAT_01269b74;
-int __cdecl FUN_00d484a0(int a1, int a2, int a3, int a4, int useLocal, int a6);
-extern void* FUN_00d48d30(void* obj_b, int a2, int a3);
+int __cdecl hkSerializeUtil_savePackfile(int a1, int a2, int a3, int a4, int useLocal, int a6);
+extern void* hkSerializeUtil_load(void* obj_b, int a2, int a3);
 struct CtorBox
 {
     CtorBox* InitFromValue(void* arg);
-    void FUN_00dcc160();
+    void SetVirtualTable_00dcc160();
 
     void* f0;
     int f4;
     void* b;
 };
-void* __cdecl FUN_00d48ec0(void* a1, int a2, int a3);
+void* __cdecl hkSerializeUtil_load_00d48ec0(void* a1, int a2, int a3);
 struct S_00d49310_Lock
 {
     int unk0;
@@ -118,15 +118,15 @@ struct S_00d49310_Result
     S_00d49310_Result(int v) : m_uiFilterValue(v)
     {}
 };
-void FUN_00d48af0(void* stream, int* out) throw();
-S_00d49310_Result FUN_00d49310(void* stream);
-int FUN_00cb0fa0(const char* a, const char* b);
+void hkSerializeUtil_detectFormat(void* stream, int* out) throw();
+S_00d49310_Result hkSerializeUtil_detectFormat_00d49310(void* stream);
+int hkString_strCmp(const char* a, const char* b);
 static inline int S_00d49350_Compare(const char* a, const char* b)
 {
     if (a)
     {
         if (b)
-            return FUN_00cb0fa0(a, b);
+            return hkString_strCmp(a, b);
         return 1;
     }
     return b ? -1 : 0;
@@ -177,14 +177,14 @@ struct GlobalObj
 };
 struct Obj5
 {
-    void* FUN_00dba680();
-    void FUN_00dba660();
+    void* hkDataClass_getName();
+    void Object_DoNothing_00dba660();
 };
 struct Obj2
 {
     void GetObjectValue(Obj5* apOut);
-    int FUN_00dba980();
-    void FUN_00dba660();
+    int hkDataObject_isNull();
+    void Object_DoNothing_00dba660();
     void GetSourcePair(Pair* apOut);
 };
 struct Obj1
@@ -209,7 +209,8 @@ struct FUN_00d49420_cls
     void unk20(Obj1* apA, void* apB, void* apC);
 };
 extern volatile int DAT_01269b70;
-static __declspec(noinline) int FUN_00d48950(int d, int a, int b, int c)
+// src: GUESS 0x00d48950 (confidence: low)
+static __declspec(noinline) int Hkserializeutil_UpdateState_00d48950(int d, int a, int b, int c)
 {
     int* pb = &b;
     if (d)
@@ -221,20 +222,20 @@ static __declspec(noinline) int FUN_00d48950(int d, int a, int b, int c)
 struct Holder_cls
 {
     int unk00;
-    void FUN_00dba7f0();
+    void ReleaseStorage_00dba7f0();
 };
 struct Pending_cls
 {
     int unk00;
     int unk04;
     void FUN_00dc5d30();
-    void FUN_00dc5d50(Holder_cls* h, int a, int b);
+    void hkBinaryTagfileReader_load(Holder_cls* h, int a, int b);
 };
 struct Owner_cls
 {
-    int FUN_00dba0d0(int a, int b);
+    int hkVersionPatchManager_applyPatches(int a, int b);
 };
-static int FUN_00d48a90(int a1, int esi_in, int edi_in, int ebx_in);
+static int hkBinaryTagfileReader_load_EvaluateValue_00d48a90(int a1, int esi_in, int edi_in, int ebx_in);
 int __cdecl S00d48a90_Entry(int a1);
 struct S00d48d30_Bool
 {
@@ -296,9 +297,10 @@ extern const char str_010cfacc[];
 extern const char str_010cfab8[];
 extern const char str_010cfa94[];
 int S00d48d30_Finish(int opts);
-void FUN_00d48af0(void* stream, int* out) throw();
-int __cdecl FUN_00dc3300(const S00d48d30_Ref& r, int opts);
-static __declspec(noinline) int FUN_00d48a90(S00d48d30_Stream* s, S00d48d30_Reader* reader, S00d48d30_Result* out)
+void hkSerializeUtil_detectFormat(void* stream, int* out) throw();
+int __cdecl hkDataObjectUtil_toResourceWithRegistry(const S00d48d30_Ref& r, int opts);
+// src: GUESS 0x00d48a90 (confidence: low)
+static __declspec(noinline) int hkBinaryTagfileReader_load_EvaluateValue_00d48a90(S00d48d30_Stream* s, S00d48d30_Reader* reader, S00d48d30_Result* out)
 {
     reader->prepare();
     if (reader->open(s) == 0)
@@ -313,7 +315,8 @@ static __declspec(noinline) int FUN_00d48a90(S00d48d30_Stream* s, S00d48d30_Read
     }
     return 0;
 }
-static __declspec(noinline) int FUN_00d48760(S00d48d30_Stream* s, S00d48d30_Format* format, S00d48d30_Result* out,
+// src: GUESS 0x00d48760 (confidence: low)
+static __declspec(noinline) int Object_ProcessAndReturnValue_00d48760(S00d48d30_Stream* s, S00d48d30_Format* format, S00d48d30_Result* out,
                                              int opts)
 {
     if (format->m_type < 2)
@@ -334,7 +337,7 @@ static __declspec(noinline) int FUN_00d48760(S00d48d30_Stream* s, S00d48d30_Form
     }
     return S00d48d30_Finish(opts);
 }
-int __cdecl FUN_00d48d30(S00d48d30_Stream* s, S00d48d30_Result* out, int opts) throw();
+int __cdecl hkSerializeUtil_load(S00d48d30_Stream* s, S00d48d30_Result* out, int opts) throw();
 struct S00d48680_Arr
 {
     char* m_data;
@@ -356,8 +359,8 @@ struct S00d48680_Sys
         return *heap;
     }
 };
-extern "C" S00d48680_Sys* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00c908c0(S00d48680_Alloc* h, S00d48680_Arr* a, int cap, int flag);
+extern "C" S00d48680_Sys* __cdecl hkMemoryRouter_getInstance();
+extern "C" void __cdecl hkArrayUtil__reserve(S00d48680_Alloc* h, S00d48680_Arr* a, int cap, int flag);
 struct S00d48680_Obj
 {
     virtual void v0();
@@ -373,12 +376,12 @@ struct S00d48680_Obj
     virtual void v10(int a, int b);
     virtual int v11();
 };
-static void FUN_00d48680(S00d48680_Obj* obj, S00d48680_Arr* arr);
+static void Object_ReadIntoGrowingBuffer(S00d48680_Obj* obj, S00d48680_Arr* arr);
 void __cdecl S00d48680_Entry(S00d48680_Obj* obj, S00d48680_Arr* arr);
 
 extern int DAT_011b7b88;
-extern "C" int __cdecl FUN_00cb1290(const void*, const void*, int);
-extern "C" const char* __cdecl FUN_00dc0fb0();
+extern "C" int __cdecl hkString_memCmp(const void*, const void*, int);
+extern "C" const char* __cdecl hkVersionUtil_getCurrentVersion();
 extern "C" void* __cdecl CreateResourceFromArray(const void*, int, const void*);
 
 struct ByteBool
@@ -440,7 +443,7 @@ struct TemporaryAllocator
 {
     __forceinline BufferAllocator& get(void*)
     {
-        return *(BufferAllocator*)FUN_00c85750()->heap;
+        return *(BufferAllocator*)hkMemoryRouter_getInstance()->heap;
     }
 };
 struct BufferBase : S00d48680_Arr
@@ -482,7 +485,7 @@ struct BufferBase : S00d48680_Arr
         if (required > capacity())
         {
             int grown = 2 * capacity();
-            FUN_00c908c0((S00d48680_Alloc*)&allocator, this, required > grown ? required : grown, 1);
+            hkArrayUtil__reserve((S00d48680_Alloc*)&allocator, this, required > grown ? required : grown, 1);
         }
     }
     __forceinline void resize(BufferAllocator& allocator, int count)
@@ -528,7 +531,8 @@ struct OldLoader
     }
 };
 
-static __declspec(noinline) void FUN_00d48680(S00d48680_Obj* obj, S00d48680_Arr* arr)
+// src: GUESS 0x00d48680 (confidence: medium)
+static __declspec(noinline) void Object_ReadIntoGrowingBuffer(S00d48680_Obj* obj, S00d48680_Arr* arr)
 {
     VersionedDataBlock& input = *(VersionedDataBlock*)obj;
     Buffer& bytes = *(Buffer*)arr;
@@ -554,21 +558,22 @@ static __declspec(noinline) void FUN_00d48680(S00d48680_Obj* obj, S00d48680_Arr*
 
 void __cdecl S00d48680_Entry(S00d48680_Obj* obj, S00d48680_Arr* arr)
 {
-    FUN_00d48680(obj, arr);
+    Object_ReadIntoGrowingBuffer(obj, arr);
 }
 
 // @fnv 0x00d48760
-static __declspec(noinline) void* FUN_00d48760(VersionedDataBlock& input, const LoadFormat& format, LoadError* error,
+// src: GUESS 0x00d48760 (confidence: low)
+static __declspec(noinline) void* Object_ProcessAndReturnValue_00d48760(VersionedDataBlock& input, const LoadFormat& format, LoadError* error,
                                                const void* registry)
 {
     if (format.kind == 2)
     {
-        if (FUN_00cb1290(&format.pointerSize, &DAT_011b7b88, 4) == 0)
+        if (hkString_memCmp(&format.pointerSize, &DAT_011b7b88, 4) == 0)
         {
-            if (format.version.Equals(FUN_00dc0fb0()))
+            if (format.version.Equals(hkVersionUtil_getCurrentVersion()))
             {
                 Buffer bytes;
-                FUN_00d48680((S00d48680_Obj*)&input, &bytes);
+                Object_ReadIntoGrowingBuffer((S00d48680_Obj*)&input, &bytes);
                 return CreateResourceFromArray(bytes.begin(), bytes.size(), registry);
             }
         }
@@ -584,5 +589,5 @@ static __declspec(noinline) void* FUN_00d48760(VersionedDataBlock& input, const 
 
 void* FiveIntegerLoadRecord(VersionedDataBlock& input, const LoadFormat& format, LoadError* error, const void* registry)
 {
-    return FUN_00d48760(input, format, error, registry);
+    return Object_ProcessAndReturnValue_00d48760(input, format, error, registry);
 }

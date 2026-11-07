@@ -17,29 +17,29 @@ class WorldCBFD
     void FUN_00cfb1e0(FlagCBFD kFlag);
 };
 
-void __cdecl FUN_00d46410(WorldCBFD* pkWorld);
+void __cdecl hkpCollisionDispatcher_ProcessState_00d46410(WorldCBFD* pkWorld);
 void __cdecl ConfigureVtblHandlers(WorldCBFD* pkWorld);
 void __cdecl RegisterTwoTables(WorldCBFD* pkWorld);
 void __cdecl RegisterAll(WorldCBFD* pkWorld);
-void __cdecl FUN_00d44310(WorldCBFD* pkWorld);
-void __cdecl FUN_00cbfc60(WorldCBFD* pkWorld);
+void __cdecl hkpShapeCollectionAgent_registerAgent(WorldCBFD* pkWorld);
+void __cdecl hkpAgentRegisterUtil__registerListAgents(WorldCBFD* pkWorld);
 void __cdecl RegisterCallbacks(WorldCBFD* pkWorld);
-void __cdecl FUN_00d42960(WorldCBFD* pkWorld);
-void __cdecl FUN_00cbfcb0(WorldCBFD* pkWorld);
+void __cdecl Object_UpdateFields_00d42960(WorldCBFD* pkWorld);
+void __cdecl hkpAgentRegisterUtil__registerTerminalAgents(WorldCBFD* pkWorld);
 
 // Calls a sequence of registration and configuration functions on pkWorld, toggling a flag between two of them.
 // @fnv 0x00cbfd20
 void __cdecl InitializeWorld(WorldCBFD* pkWorld)
 {
-    FUN_00d46410(pkWorld);
+    hkpCollisionDispatcher_ProcessState_00d46410(pkWorld);
     ConfigureVtblHandlers(pkWorld);
     RegisterTwoTables(pkWorld);
     RegisterAll(pkWorld);
     pkWorld->FUN_00cfb1e0(FlagCBFD(false));
-    FUN_00d44310(pkWorld);
+    hkpShapeCollectionAgent_registerAgent(pkWorld);
     pkWorld->FUN_00cfb1e0(FlagCBFD(true));
-    FUN_00cbfc60(pkWorld);
+    hkpAgentRegisterUtil__registerListAgents(pkWorld);
     RegisterCallbacks(pkWorld);
-    FUN_00d42960(pkWorld);
-    FUN_00cbfcb0(pkWorld);
+    Object_UpdateFields_00d42960(pkWorld);
+    hkpAgentRegisterUtil__registerTerminalAgents(pkWorld);
 }

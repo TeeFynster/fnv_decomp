@@ -6,13 +6,13 @@
 #include "../../../../../../include/BSAudio.h"
 
 void EnterTlsGuard();
-void FUN_00c904e0();
+void hkReferencedObject_unlockAll();
 
 struct S_00cf7540_Alloc
 {
 };
 
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 void ResizeAudioStream(S_00cf7540_Alloc* alloc, void* arr, int elemSize);
 
 struct S_00cf7540_Ref
@@ -33,7 +33,7 @@ struct S_00cf7540_Entry
 template <class T>
 static __forceinline T& S_00cf7540_Array_AllocatePair(hkArrayBase<T>& self)
 {
-        BSAudio* router = FUN_00c85750();
+        BSAudio* router = hkMemoryRouter_getInstance();
         if (self.m_iElementCount == (self.m_iCapacityState & 0x3fffffff))
             ResizeAudioStream(reinterpret_cast<S_00cf7540_Alloc*>(router->pListener), (&self), sizeof(T));
         return self.m_data[self.m_iElementCount++];
@@ -107,7 +107,7 @@ void S_00cf7540::AddEntry(S_00cf7540_Ref* pRefA, S_00cf7540_Ref* pRefB, int c, i
     e.m_iFourthElementInteger = d;
     pRefA->FUN_00c90510();
     pRefB->FUN_00c90510();
-    FUN_00c904e0();
+    hkReferencedObject_unlockAll();
 }
 
 struct Node
@@ -210,17 +210,18 @@ struct FUN_00c93580_Class
     Node* m_110;
     int m_114;
 
-    void FUN_00c93580();
-    void __thiscall FUN_00c92c70(int v);
+    void hkpWorld_removeAll();
+    void __thiscall hkpWorld_removePhantom(int v);
     void __thiscall ProcessTarget(char* buf, int v);
-    void __thiscall FUN_00c914d0(void* p, int flag);
+    void __thiscall hkpWorld_addEntity(void* p, int flag);
 };
 
 // @fnv 0x00c93580
-void FUN_00c93580_Class::FUN_00c93580()
+// src: HAVOK_LIB 0x00c93580
+void FUN_00c93580_Class::hkpWorld_removeAll()
 {
     while (this->m_114 > 0)
-        this->FUN_00c92c70(*(int*)this->m_110);
+        this->hkpWorld_removePhantom(*(int*)this->m_110);
 
     while (this->m_2c > 0)
     {
@@ -252,7 +253,7 @@ void FUN_00c93580_Class::FUN_00c93580()
         node = this->m_20;
     }
 
-    this->FUN_00c914d0(this->m_24, 1);
+    this->hkpWorld_addEntity(this->m_24, 1);
     FUN_00c905b0(this->m_24);
 
     if (this->m_c8 == 0)
@@ -415,14 +416,14 @@ struct Body
     int unkd8;
     int unkdc;
     Motion motion;
-    void FUN_00ca8420(int, int, int);
-    void FUN_00d07ec0(void*);
-    void FUN_00ca8860(const hkVector4&, const hkVector4&);
+    void hkpRigidBody_setMotionType(int, int, int);
+    void hkpPhantom_updateBroadPhase(void*);
+    void hkpRigidBody_setPositionAndRotation(const hkVector4&, const hkVector4&);
     void OnTrigger(const hkVector4&);
-    void FUN_00561800(const hkVector4&);
-    void FUN_00c9c1d0();
+    void hkpRigidBody_setAngularVelocity(const hkVector4&);
+    void activate_00c9c1d0();
     void FUN_00c9c240();
-    void FUN_00d87c20(Body*, int);
+    void hkpConstraintCollisionFilter__constraintBreakingCallbackImmediate(Body*, int);
 };
 struct WorldDispatcher
 {
@@ -484,23 +485,23 @@ struct World
     int unk9c;
     int unka0;
     int criticalOperations;
-    void FUN_00c914d0(Body*, int);
+    void hkpWorld_addEntity(Body*, int);
     void ProcessTarget(char*, Body*);
-    void FUN_00c94bd0(Body**, int, int);
+    void hkpWorld_addEntityBatch(Body**, int, int);
     void RemoveEntities(Body**, int);
-    void FUN_00c97d30(Body*);
-    void FUN_00c97e80(char*, Body*);
-    void FUN_00c97370(Body*);
+    void hkpWorld_addConstraint(Body*);
+    void hkpWorld_removeConstraint(char*, Body*);
+    void hkpWorld_addAction(Body*);
     void DispatchOrQueue(Body*);
-    void FUN_00c936a0(Body*);
-    void FUN_00c92c70(Body*);
-    void FUN_00c954e0(Body**, int);
-    void FUN_00c95800(Body**, int);
-    void FUN_00c946e0(void*, int, int);
+    void hkpWorld_addPhantom(Body*);
+    void hkpWorld_removePhantom(Body*);
+    void hkpWorld_addPhantomBatch(Body**, int);
+    void hkpWorld_removePhantomBatch(Body**, int);
+    void hkpWorld_updateCollisionFilterOnEntity(void*, int, int);
     void ProcessPair(Body*, Body*);
     void UpdatePhantom(void*, int);
-    void FUN_00c96ff0(int, int);
-    void FUN_00c93c30(void*);
+    void hkpWorld_updateCollisionFilterOnWorld(int, int);
+    void hkpWorld_activateRegion(void*);
 };
 // queued island merge (priority, entity A, entity B, 2 more dwords): sorted by priority, then FUN_00cb5570(world, a, b) merges
 struct IslandMergeRequest
@@ -566,14 +567,14 @@ struct Pending
     int pairCount;
     int pairCapacity;
     void EnterTlsGuard();
-    void FUN_00cf7c10();
+    void DrainPendingPhysicsOperations();
 };
 extern "C" void __cdecl LessThanPairPriority(IslandMergeRequest*, IslandMergeRequest*);
-extern "C" void __cdecl FUN_00cf8510(IslandMergeRequest*, int, int, void(__cdecl*)(IslandMergeRequest*, IslandMergeRequest*));
-extern "C" void __cdecl FUN_00cb5570(World*, Body*, Body*);
+extern "C" void __cdecl hkAlgorithm_quickSortRecursive(IslandMergeRequest*, int, int, void(__cdecl*)(IslandMergeRequest*, IslandMergeRequest*));
+extern "C" void __cdecl hkpWorldOperationUtil_mergeIslands(World*, Body*, Body*);
 extern "C" void __cdecl AddCollisionShape(World*, Body*);
-extern "C" void __cdecl FUN_00c90740(Body**, int, int);
-extern "C" void __cdecl FUN_00ca8700(Body*);
+extern "C" void __cdecl hkReferencedObject_removeReferences(Body**, int, int);
+extern "C" void __cdecl hkpRigidBody_updateBroadphaseAndResetCollisionInformationOfWarpedBody(Body*);
 
 static __forceinline void release(Body* p)
 {
@@ -581,7 +582,7 @@ static __forceinline void release(Body* p)
 }
 static __forceinline Heap* heap()
 {
-    BSAudio* router = FUN_00c85750();
+    BSAudio* router = hkMemoryRouter_getInstance();
     return reinterpret_cast<Heap*>(router->pListener);
 }
 static __forceinline void freeBlock(void* p, int n)
@@ -603,7 +604,8 @@ static __forceinline void freeEntities(EntityArray& a)
 }
 // Drains pending physics pairs and queued operations, dispatching each to the world and releasing the associated bodies and memory.
 // @fnv 0x00cf7c10
-void Pending::FUN_00cf7c10()
+// src: GUESS 0x00cf7c10 (confidence: medium)
+void Pending::DrainPendingPhysicsOperations()
 {
     EnterTlsGuard();
     OpArray todo;
@@ -615,7 +617,7 @@ void Pending::FUN_00cf7c10()
     if (pairCount)
     {
         if (pairCount > 1)
-            FUN_00cf8510(pairs, 0, pairCount - 1, LessThanPairPriority);
+            hkAlgorithm_quickSortRecursive(pairs, 0, pairCount - 1, LessThanPairPriority);
         while (pairCount)
         {
             IslandMergeRequest p = pairs[pairCount - 1];
@@ -624,7 +626,7 @@ void Pending::FUN_00cf7c10()
                 p.a->island != p.b->island)
             {
                 _ReadWriteBarrier();
-                FUN_00cb5570(p.a->world, p.a, p.b);
+                hkpWorldOperationUtil_mergeIslands(p.a->world, p.a, p.b);
             }
             release(p.a);
             release(p.b);
@@ -639,7 +641,7 @@ void Pending::FUN_00cf7c10()
         {
         case 1:
             if (!p->object->world)
-                world->FUN_00c914d0(p->object, p->arg);
+                world->hkpWorld_addEntity(p->object, p->arg);
             release(p->object);
             break;
         case 2: {
@@ -652,7 +654,7 @@ void Pending::FUN_00cf7c10()
             break;
         }
         case 4:
-            p->object->FUN_00ca8420(p->flags.a, p->flags.b, p->flags.c);
+            p->object->hkpRigidBody_setMotionType(p->flags.a, p->flags.b, p->flags.c);
             release(p->object);
             break;
         case 5:
@@ -661,25 +663,25 @@ void Pending::FUN_00cf7c10()
             release(p->other);
             break;
         case 6:
-            world->FUN_00c94bd0(p->objects, p->batch.count, p->batch.mode);
-            FUN_00c90740(p->objects, p->batch.count, 4);
+            world->hkpWorld_addEntityBatch(p->objects, p->batch.count, p->batch.mode);
+            hkReferencedObject_removeReferences(p->objects, p->batch.count, 4);
             freeBatch(p->objects, p->batch.count);
             break;
         case 7:
             world->RemoveEntities(p->objects, p->batch.count);
-            FUN_00c90740(p->objects, p->batch.count, 4);
+            hkReferencedObject_removeReferences(p->objects, p->batch.count, 4);
             freeBatch(p->objects, p->batch.count);
             break;
         case 8:
             if (!p->object->world && p->object->bodyA->world == world && p->object->bodyB->world == world)
-                world->FUN_00c97d30(p->object);
+                world->hkpWorld_addConstraint(p->object);
             release(p->object);
             break;
         case 9: {
             if (p->object->world)
             {
                 char result;
-                world->FUN_00c97e80(&result, p->object);
+                world->hkpWorld_removeConstraint(&result, p->object);
             }
             release(p->object);
             break;
@@ -696,7 +698,7 @@ void Pending::FUN_00cf7c10()
                 for (; i < a.size; ++i)
                     if (a.data[i]->world != world)
                         goto skipAction;
-                world->FUN_00c97370(p->object);
+                world->hkpWorld_addAction(p->object);
             skipAction:;
                 freeEntities(a);
             }
@@ -709,22 +711,22 @@ void Pending::FUN_00cf7c10()
             break;
         case 13:
             if (!p->object->world)
-                world->FUN_00c936a0(p->object);
+                world->hkpWorld_addPhantom(p->object);
             release(p->object);
             break;
         case 14:
             if (p->object->world == world)
-                world->FUN_00c92c70(p->object);
+                world->hkpWorld_removePhantom(p->object);
             release(p->object);
             break;
         case 15:
-            world->FUN_00c954e0(p->objects, p->batch.count);
-            FUN_00c90740(p->objects, p->batch.count, 4);
+            world->hkpWorld_addPhantomBatch(p->objects, p->batch.count);
+            hkReferencedObject_removeReferences(p->objects, p->batch.count, 4);
             freeBatch(p->objects, p->batch.count);
             break;
         case 16:
-            world->FUN_00c95800(p->objects, p->batch.count);
-            FUN_00c90740(p->objects, p->batch.count, 4);
+            world->hkpWorld_removePhantomBatch(p->objects, p->batch.count);
+            hkReferencedObject_removeReferences(p->objects, p->batch.count, 4);
             freeBatch(p->objects, p->batch.count);
             break;
         case 3:
@@ -734,14 +736,14 @@ void Pending::FUN_00cf7c10()
             break;
         case 17:
             if (p->object->world == world)
-                p->object->FUN_00d07ec0(p->point);
+                p->object->hkpPhantom_updateBroadPhase(p->point);
             release(p->object);
             if (p->point)
                 freeBlock(p->point, 32);
             break;
         case 18:
             if (p->object->world == world)
-                world->FUN_00c946e0(p->object, p->flags.a, p->flags.b);
+                world->hkpWorld_updateCollisionFilterOnEntity(p->object, p->flags.a, p->flags.b);
             release(p->object);
             break;
         case 19:
@@ -756,14 +758,14 @@ void Pending::FUN_00cf7c10()
             release(p->object);
             break;
         case 21:
-            world->FUN_00c96ff0(p->flag1, p->flag2);
+            world->hkpWorld_updateCollisionFilterOnWorld(p->flag1, p->flag2);
             break;
         case 22:
-            FUN_00ca8700(p->object);
+            hkpRigidBody_updateBroadphaseAndResetCollisionInformationOfWarpedBody(p->object);
             release(p->object);
             break;
         case 24:
-            p->object->FUN_00ca8860(p->point[0], p->point[1]);
+            p->object->hkpRigidBody_setPositionAndRotation(p->point[0], p->point[1]);
             freeBlock(p->point, 32);
             release(p->object);
             break;
@@ -777,7 +779,7 @@ void Pending::FUN_00cf7c10()
         case 26: {
             hkVector4 v;
             v.quad = _mm_setr_ps(p->x, p->y, p->z, 0.0f);
-            p->object->FUN_00561800(v);
+            p->object->hkpRigidBody_setAngularVelocity(v);
             release(p->object);
             break;
         }
@@ -785,7 +787,7 @@ void Pending::FUN_00cf7c10()
             hkVector4 v;
             v.quad = _mm_setr_ps(p->x, p->y, p->z, 0.0f);
             Body* b = p->object;
-            b->FUN_00c9c1d0();
+            b->activate_00c9c1d0();
             b->motion.impulse(v);
             release(p->object);
             break;
@@ -794,7 +796,7 @@ void Pending::FUN_00cf7c10()
             const hkVector4& a = p->point[1];
             const hkVector4& b = p->point[0];
             Body* body = p->object;
-            body->FUN_00c9c1d0();
+            body->activate_00c9c1d0();
             body->motion.pointImpulse(a, b);
             freeBlock(p->point, 32);
             release(p->object);
@@ -804,17 +806,17 @@ void Pending::FUN_00cf7c10()
             hkVector4 v;
             v.quad = _mm_setr_ps(p->x, p->y, p->z, 0.0f);
             Body* b = p->object;
-            b->FUN_00c9c1d0();
+            b->activate_00c9c1d0();
             b->motion.angularImpulse(v);
             release(p->object);
             break;
         }
         case 32:
-            world->FUN_00c93c30(p->vector);
+            world->hkpWorld_activateRegion(p->vector);
             freeBlock(p->vector, 32);
             break;
         case 33:
-            p->object->FUN_00c9c1d0();
+            p->object->activate_00c9c1d0();
             release(p->object);
             break;
         case 34:
@@ -823,7 +825,7 @@ void Pending::FUN_00cf7c10()
             release(p->object);
             break;
         case 35:
-            p->object->FUN_00d87c20(p->other, p->enabled);
+            p->object->hkpConstraintCollisionFilter__constraintBreakingCallbackImmediate(p->other, p->enabled);
             release(p->object);
             release(p->other);
             break;
@@ -858,12 +860,12 @@ void Pending::FUN_00cf7c10()
             break;
         }
         if (operations.size)
-            FUN_00cf7c10();
+            DrainPendingPhysicsOperations();
     }
     todo.SwapThreeInts(this);
     operations.size = 0;
     --world->criticalOperations;
-    ::FUN_00c904e0();
+    ::hkReferencedObject_unlockAll();
     Heap* h = heap();
     if ((todo.capacity & 0x80000000) == 0)
         h->ReturnMemory(todo.data, (todo.capacity & 0x3fffffff) * sizeof(Op));
@@ -879,7 +881,7 @@ struct Allocator
     virtual void Release(void* data, unsigned int size) = 0;
 };
 
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 
 struct Elem20
 {
@@ -911,7 +913,7 @@ template <typename T> void Buffer<T>::clear()
 {
     const unsigned int stride = sizeof(T);
 
-    BSAudio* audio = FUN_00c85750();
+    BSAudio* audio = hkMemoryRouter_getInstance();
     Allocator* alloc = reinterpret_cast<Allocator*>(audio->pListener);
 
     const unsigned int f = flags;
@@ -933,12 +935,13 @@ struct Owner
     Buffer<Elem20> second;
     Buffer<Elem16> third;
 
-    void FUN_00cf75f0();
+    void ClearThreeBuffers();
 };
 
 // Clears the third, second, and first buffer members of the Owner object in that order.
 // @fnv 0x00cf75f0
-void Owner::FUN_00cf75f0()
+// src: GUESS 0x00cf75f0 (confidence: high)
+void Owner::ClearThreeBuffers()
 {
     third.clear();
     second.clear();
@@ -961,10 +964,10 @@ struct FUN_00d1df70
     void removeReference();
 };
 void EnterTlsGuard();
-void FUN_00c904e0();
-BSAudio* FUN_00c85750();
+void hkReferencedObject_unlockAll();
+BSAudio* hkMemoryRouter_getInstance();
 void ResizeAudioStream(void* alloc, void* vec, int elemsz);
-void FUN_00cb1260(void* dst, void* src, int n);
+void hkString_memCpy(void* dst, void* src, int n);
 
 struct Elem
 {
@@ -1012,7 +1015,7 @@ struct hkpWorldOperationQueue
 void hkpWorldOperationQueue::queueOperation(Elem* arg)
 {
     EnterTlsGuard();
-    BSAudio* bsa = FUN_00c85750();
+    BSAudio* bsa = hkMemoryRouter_getInstance();
     if (cnt == (cap & 0x3fffffff))
     {
         ResizeAudioStream(reinterpret_cast<Alloc*>(bsa->pListener), this, 0x14);
@@ -1047,15 +1050,15 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
     case 5:
         ((Obj*)dst->f04)->FUN_00c90510();
         ((Obj*)dst->f08)->FUN_00c90510();
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 6: {
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
-        BSAudio* b = FUN_00c85750();
+        BSAudio* b = hkMemoryRouter_getInstance();
         void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
-        FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
+        hkString_memCpy(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
         int* end = p + (unsigned short)dst->f08;
         while (p < end)
@@ -1063,15 +1066,15 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
             ((Obj*)*p++)->FUN_00c90510();
         }
     }
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 7: {
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
-        BSAudio* b = FUN_00c85750();
+        BSAudio* b = hkMemoryRouter_getInstance();
         void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
-        FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
+        hkString_memCpy(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
         int* end = p + (unsigned short)dst->f08;
         while (p < end)
@@ -1079,7 +1082,7 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
             ((Obj*)*p++)->FUN_00c90510();
         }
     }
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 8:
         ((Obj*)dst->f04)->FUN_00c90510();
@@ -1098,7 +1101,7 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
         ((Obj*)dst->f08)->FUN_00c90510();
         {
             VecBase* s = &sub;
-            BSAudio* b = FUN_00c85750();
+            BSAudio* b = hkMemoryRouter_getInstance();
             if (s->cnt == (s->cap & 0x3fffffff))
             {
                 ResizeAudioStream(reinterpret_cast<Alloc*>(b->pListener), s, 0x14);
@@ -1111,7 +1114,7 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
             s->cnt++;
             cnt--;
         }
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 13:
         ((Obj*)dst->f04)->FUN_00c90510();
@@ -1122,10 +1125,10 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
     case 15: {
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
-        BSAudio* b = FUN_00c85750();
+        BSAudio* b = hkMemoryRouter_getInstance();
         void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
-        FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
+        hkString_memCpy(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
         int* end = p + (unsigned short)dst->f08;
         while (p < end)
@@ -1133,15 +1136,15 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
             ((Obj*)*p++)->FUN_00c90510();
         }
     }
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 16: {
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
-        BSAudio* b = FUN_00c85750();
+        BSAudio* b = hkMemoryRouter_getInstance();
         void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
-        FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
+        hkString_memCpy(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
         int* end = p + (unsigned short)dst->f08;
         while (p < end)
@@ -1149,11 +1152,11 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
             ((Obj*)*p++)->FUN_00c90510();
         }
     }
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 17: {
         ((Obj*)dst->f04)->FUN_00c90510();
-        BSAudio* b = FUN_00c85750();
+        BSAudio* b = hkMemoryRouter_getInstance();
         void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(0x20);
         int nf08;
         if (mem)
@@ -1175,7 +1178,7 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
             nf08 = 0;
         }
         dst->f08 = nf08;
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     }
     case 18:
@@ -1184,7 +1187,7 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
     case 19:
         ((Obj*)dst->f04)->FUN_00c90510();
         ((Obj*)dst->f08)->FUN_00c90510();
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 20:
         ((Obj*)dst->f04)->FUN_00c90510();
@@ -1195,10 +1198,10 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
     case 23: {
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
-        BSAudio* b = FUN_00c85750();
+        BSAudio* b = hkMemoryRouter_getInstance();
         void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
-        FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
+        hkString_memCpy(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
         int* end = p + (unsigned short)dst->f08;
         while (p < end)
@@ -1206,7 +1209,7 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
             ((Obj*)*p++)->FUN_00c90510();
         }
     }
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 24:
         ((Obj*)dst->f04)->FUN_00c90510();
@@ -1230,13 +1233,13 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
         ((Obj*)dst->f04)->FUN_00c90510();
         cnt--;
         *(int*)(owner + 0x8c) -= 1;
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 31:
         ((FUN_00d1df70*)dst->f04)->removeReference();
         cnt--;
         *(int*)(owner + 0x8c) -= 1;
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 33:
         ((Obj*)dst->f04)->FUN_00c90510();
@@ -1247,13 +1250,13 @@ void hkpWorldOperationQueue::queueOperation(Elem* arg)
     case 35:
         ((Obj*)dst->f04)->FUN_00c90510();
         ((Obj*)dst->f08)->FUN_00c90510();
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         return;
     case 36:
         ((Obj*)dst->f04)->FUN_00c90510();
         break;
     }
-    FUN_00c904e0();
+    hkReferencedObject_unlockAll();
 }
 }  // namespace fnv_00cf7690
 
@@ -1266,18 +1269,18 @@ struct S_00cf7ae0_Heap
     virtual void vc();
     virtual void ReleaseBlock(void* p, int n);
 };
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 inline BSAudio& GetMonitorStream()
 {
-    return *FUN_00c85750();
+    return *hkMemoryRouter_getInstance();
 }
 inline S_00cf7ae0_Heap& __fastcall GetStreamHeap(BSAudio& audio)
 {
     return *reinterpret_cast<S_00cf7ae0_Heap*>(audio.pListener);
 }
-void __cdecl FUN_00c908c0(S_00cf7ae0_Heap*, void* arr, int n, int elemSize);
+void __cdecl hkArrayUtil__reserve(S_00cf7ae0_Heap*, void* arr, int n, int elemSize);
 void __cdecl EnterTlsGuard();
-void __cdecl FUN_00c904e0();
+void __cdecl hkReferencedObject_unlockAll();
 
 struct S_00cf7ae0_Obj
 {
@@ -1294,8 +1297,8 @@ struct S_00cf7ae0_Entry
     int unk8;
     int unkc;
 };
-bool __cdecl FUN_00cf74b0(const S_00cf7ae0_Entry&, const S_00cf7ae0_Entry&);
-void __cdecl FUN_00cf83c0(S_00cf7ae0_Entry* data, int lo, int hi,
+bool __cdecl hkpWorldBodyOperationQueueSortCmp(const S_00cf7ae0_Entry&, const S_00cf7ae0_Entry&);
+void __cdecl hkAlgorithm_quickSortRecursive_struct_hkpBodyOperationEntry_bool(S_00cf7ae0_Entry* data, int lo, int hi,
                           bool(__cdecl* cmp)(const S_00cf7ae0_Entry&, const S_00cf7ae0_Entry&));
 
 struct S_00cf7ae0_Array
@@ -1310,7 +1313,7 @@ struct S_00cf7ae0_Array
         if (cap < n)
         {
             int c2 = cap * 2;
-            FUN_00c908c0(&a, this, (n < c2) ? c2 : n, 16);
+            hkArrayUtil__reserve(&a, this, (n < c2) ? c2 : n, 16);
         }
     }
     __forceinline void ClearAndRelease(S_00cf7ae0_Heap& a)
@@ -1368,12 +1371,13 @@ struct S_00cf7ae0
     S_00cf7ae0_Owner* owner;
     int unk10, unk14, unk18;
     S_00cf7ae0_Array pending;
-    void FUN_00cf7ae0();
+    void hkpWorldOperationQueue_executeAllPendingBodyOperations();
 };
 
 // Drains pending by moving it to a local array, sorting, calling each listener's vfnc on its data, then FUN_00c903b0 on both objects and clearing the local copy.
 // @fnv 0x00cf7ae0
-void S_00cf7ae0::FUN_00cf7ae0()
+// src: HAVOK_LIB 0x00cf7ae0
+void S_00cf7ae0::hkpWorldOperationQueue_executeAllPendingBodyOperations()
 {
     while (pending.m_iElementCount != 0)
     {
@@ -1388,7 +1392,7 @@ void S_00cf7ae0::FUN_00cf7ae0()
         if (n > 1)
         {
             int last = n - 1;
-            FUN_00cf83c0(localArray.m_data, 0, last, FUN_00cf74b0);
+            hkAlgorithm_quickSortRecursive_struct_hkpBodyOperationEntry_bool(localArray.m_data, 0, last, hkpWorldBodyOperationQueueSortCmp);
         }
         if (n > 0)
         {
@@ -1417,7 +1421,7 @@ void S_00cf7ae0::FUN_00cf7ae0()
                 p++;
             } while (--n != 0);
         }
-        FUN_00c904e0();
+        hkReferencedObject_unlockAll();
         localArray.ClearAndRelease(GetStreamHeap(GetMonitorStream()));
     }
 }
@@ -1548,7 +1552,7 @@ struct S_Motion
     int unk1ac;
     LocalM128 m_1b0;
     LocalM128 m_1c0;
-    void FUN_00c9c1d0();
+    void activate_00c9c1d0();
 };
 struct S_Body
 {
@@ -1655,8 +1659,8 @@ struct S_Item
 };
 struct S_Mgr : FUN_00c93580_Class
 {
-    void FUN_00c94bd0(S_Item** items, unsigned int count, int flag);
-    void FUN_00c92a80(int a, int b);
+    void hkpWorld_addEntityBatch(S_Item** items, unsigned int count, int flag);
+    void hkpWorld_findInitialContactPoints(int a, int b);
 };
 void __cdecl PropagateStateToChildren(S_Mgr* mgr, S_Shape* shape);
 
@@ -1745,17 +1749,18 @@ struct S_Owner
     virtual void v35();
     virtual void v36();
     virtual S_Mgr* GetMgr();
-    void FUN_00c674d0(S_Item** items, unsigned int count);
+    void bhkWorld_AddEntities(S_Item** items, unsigned int count);
 };
 // For each item clears flag 0x10 on its body (or calls ProcessTarget), updates the first valid shape once, calls FUN_00c905b0, then zeroes the items array.
 // @fnv 0x00c674d0
-void S_Owner::FUN_00c674d0(S_Item** items, unsigned int count)
+// src: XBOX_PDB 0x00c674d0
+void S_Owner::bhkWorld_AddEntities(S_Item** items, unsigned int count)
 {
     S_ModeGuard guard;
     S_Mgr* mgr = GetMgr();
     if (mgr)
     {
-        mgr->FUN_00c94bd0(items, count, 0);
+        mgr->hkpWorld_addEntityBatch(items, count, 0);
         bool bShapeUpdated = false;
         for (unsigned int i = 0; i < count; i++)
         {
@@ -1780,7 +1785,7 @@ void S_Owner::FUN_00c674d0(S_Item** items, unsigned int count)
                 if (s && s->m_20 != 0xffff)
                 {
                     if (DAT_01267b44)
-                        mgr->FUN_00c92a80(s->m_48, s->m_4c);
+                        mgr->hkpWorld_findInitialContactPoints(s->m_48, s->m_4c);
                     PropagateStateToChildren(mgr, s);
                     bShapeUpdated = true;
                 }
@@ -1788,7 +1793,7 @@ void S_Owner::FUN_00c674d0(S_Item** items, unsigned int count)
             if (!AllNear3(GetLinVel(body), DAT_01267e30, eps.v) || !AllNear3(GetAngVel(body), DAT_01267e30, eps.v))
             {
                 if (body && body->m_8)
-                    body->m_8->FUN_00c9c1d0();
+                    body->m_8->activate_00c9c1d0();
             }
             FUN_00c905b0(items[i]);
         }

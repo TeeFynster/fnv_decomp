@@ -113,11 +113,12 @@ struct CbfOwner
     int unk3C;
     int unk40;
     int m_44;
-    void FUN_00cbf860(CbfTarget* obj, CbfSrc* src, int* p3, int p4, int p5);
+    void hkpWorldRayCaster_castRay(CbfTarget* obj, CbfSrc* src, int* p3, int p4, int p5);
 };
 
 // @fnv 0x00cbf860
-void CbfOwner::FUN_00cbf860(CbfTarget* obj, CbfSrc* src, int* p3, int p4, int p5)
+// src: COMMUNITY 0x00cbf860
+void CbfOwner::hkpWorldRayCaster_castRay(CbfTarget* obj, CbfSrc* src, int* p3, int p4, int p5)
 {
     cbfTimer(DAT_010c9268);
     m_04 = src;

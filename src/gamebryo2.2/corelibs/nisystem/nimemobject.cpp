@@ -5,7 +5,7 @@
 // @fnv 0x004393c0
 void Flag512Receiver::SetFlag512(bool enabled)
 {
-    FUN_00633ba0(enabled, 0x200);
+    NiAlphaProperty_SetBit(enabled, 0x200);
 }
 
 // Initializes the point's x and y components from the two float arguments.
@@ -28,7 +28,8 @@ struct _NiAllocatorDummy
 
 __pragma(optimize("gsty", on))
 // @fnv 0x00aa1490
-    void __cdecl FUN_00aa1490(void* apMemory, unsigned int stElementSize)
+// src: GUESS 0x00aa1490 (confidence: low)
+    void __cdecl NiMemObject_ReleaseStorage_00aa1490(void* apMemory, unsigned int stElementSize)
 {
     if (apMemory != 0)
     {

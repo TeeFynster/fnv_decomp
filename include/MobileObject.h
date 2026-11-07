@@ -144,15 +144,15 @@ public:
 
     bool FUN_00440d80();
     bool FUN_00440da0();
-    bool FUN_00574900();
-    bool FUN_005a2030() const;
-    bool FUN_008b2f90(const NiPoint3& targetPos, float radius, bool addCharRadius, bool check3D);
+    bool MobileObject_IsTalkingActivator();
+    bool IsSwimming_005a2030() const;
+    bool Actor_IsAtPoint(const NiPoint3& targetPos, float radius, bool addCharRadius, bool check3D);
     BaseProcess* FUN_008d8520();
     BaseProcess* FUN_008d8520() const;
-    void FUN_008cf2c0(unsigned int, unsigned int);
+    void ArrowProjectile_InitLoadGame(unsigned int, unsigned int);
     int FUN_00931850();
     bool FUN_009336c0();
-    void FUN_00934250();
+    void MobileObject_StopCurrentDialogue();
 
     TESObjectREFR* GetCurrentTarget();
     void Unk_B3(void);

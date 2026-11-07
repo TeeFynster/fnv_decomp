@@ -53,7 +53,7 @@ template <class T> static __forceinline void AddBack(hkArray<T>* a, const T& t)
     a->m_iElementCount++;
 }
 
-extern int __cdecl FUN_00dd6380(hkArray<hkVector4>* planes, int skip1, int skip2, int plane, hkContactPoint* contact);
+extern int __cdecl Object_ProcessAndReturnValue_00dd6380(hkArray<hkVector4>* planes, int skip1, int skip2, int plane, hkContactPoint* contact);
 
 extern float DAT_0104da48;
 extern float DAT_0109afc4;
@@ -61,7 +61,8 @@ extern double DAT_01032980;
 extern __m128 DAT_010c7160;
 
 // @fnv 0x00dd66d0
-hkBool __cdecl FUN_00dd66d0(const hkVector4* direction, hkArray<hkVector4>* planes, int skip1, int skip2,
+// src: GUESS 0x00dd66d0 (confidence: low)
+hkBool __cdecl hkBool_ProcessEntries_00dd66d0(const hkVector4* direction, hkArray<hkVector4>* planes, int skip1, int skip2,
                             hkVector4* position, hkArray<hkContactPoint>* contacts)
 {
     float best = DAT_0104da48;
@@ -86,7 +87,7 @@ hkBool __cdecl FUN_00dd66d0(const hkVector4* direction, hkArray<hkVector4>* plan
             if (dist < best + DAT_01032980)
             {
                 hkContactPoint contact;
-                if (FUN_00dd6380(planes, skip1, skip2, i, &contact) == 0)
+                if (Object_ProcessAndReturnValue_00dd6380(planes, skip1, skip2, i, &contact) == 0)
                 {
                     found = true;
                     float diff = dist - best;
@@ -119,7 +120,8 @@ static inline float Dot3(__m128 a, __m128 b)
 }
 
 // @fnv 0x00ddd5a0
-void __cdecl FUN_00ddd5a0(const float* a, const float* b, const float* c)
+// src: COMMUNITY 0x00ddd5a0
+void __cdecl hkpMeshWeldingUtility_calcAngleForEdge(const float* a, const float* b, const float* c)
 {
     __m128 scale = _mm_load_ps(c);
     float fB = Dot3(_mm_load_ps(b), scale);
@@ -130,7 +132,8 @@ void __cdecl FUN_00ddd5a0(const float* a, const float* b, const float* c)
 extern __m128 DAT_010c44d0;
 
 // @fnv 0x00dd2fd0
-static __declspec(noinline) void FUN_00dd2fd0(hkSimdReal* self, __m128* out, __m128* a1, __m128* a2)
+// src: GUESS 0x00dd2fd0 (confidence: low)
+static __declspec(noinline) void hkSimdReal_ComputeValues_00dd2fd0(hkSimdReal* self, __m128* out, __m128* a1, __m128* a2)
 {
     __m128 d = _mm_sub_ps(*a1, self->m_vValue);
     __m128 r = _mm_rcp_ps(d);
@@ -143,5 +146,5 @@ static __declspec(noinline) void FUN_00dd2fd0(hkSimdReal* self, __m128* out, __m
 
 void S00dd2fd0_wrap(hkSimdReal* self, __m128* out, __m128* a1, __m128* a2)
 {
-    FUN_00dd2fd0(self, out, a1, a2);
+    hkSimdReal_ComputeValues_00dd2fd0(self, out, a1, a2);
 }

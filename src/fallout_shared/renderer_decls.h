@@ -15,8 +15,8 @@ class Renderer
     static bool CanRender();
 };
 
-NiDX9Renderer* FUN_004bc3f0();
-bool FUN_005d4a40();
+NiDX9Renderer* Renderer_GetNIRenderer();
+bool Cmd_Default_Execute();
 extern NiColor DAT_011c74b8;
 extern bool DAT_011c70e9;
 

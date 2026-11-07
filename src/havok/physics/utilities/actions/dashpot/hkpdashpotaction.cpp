@@ -21,7 +21,8 @@ extern float DAT_01013ea4;
 extern int DAT_010d0994;
 // Calls FUN_00cf4d80, sets m_fSpringStrength and m_fMotorDamping from globals, sets the vtable pointer, zeroes both m_kPoint entries and returns this.
 // @fnv 0x00d4d980
-hkpDashpotAction* hkpDashpotAction::FUN_00d4d980(int entityA, int entityB, int userData)
+// src: GUESS 0x00d4d980 (confidence: medium)
+hkpDashpotAction* hkpDashpotAction::InitializeSpringMotorFields(int entityA, int entityB, int userData)
 {
     FUN_00cf4d80(entityA, entityB, userData);
     m_fSpringStrength = DAT_0101e2bc;
@@ -38,7 +39,8 @@ __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 
 unsigned long g_tlsIdx = 0;
 
-__declspec(noinline) void* FUN_00c85750()
+// src: XBOX_PDB 0x00c85750
+__declspec(noinline) void* hkMemoryRouter_getInstance()
 {
     unsigned long idx = g_tlsIdx;
     return TlsGetValue(idx);
@@ -46,7 +48,8 @@ __declspec(noinline) void* FUN_00c85750()
 
 // Clones the dashpot action when exactly two entities are added and none removed, copying points, spring strength, damping, and contact impulse.
 // @fnv 0x00d4d9d0
-hkpAction* hkpDashpotAction::FUN_00d4d9d0(const hkArray<hkpEntity*>& newEntities,
+// src: HAVOK_SRC 0x00d4d9d0
+hkpAction* hkpDashpotAction::clone_00d4d9d0(const hkArray<hkpEntity*>& newEntities,
                                            const hkArray<hkpEntity*>& removedEntities)
 {
     if (newEntities.m_iElementCount != 2)
@@ -54,10 +57,10 @@ hkpAction* hkpDashpotAction::FUN_00d4d9d0(const hkArray<hkpEntity*>& newEntities
     if (removedEntities.m_iElementCount != 0)
         return 0;
 
-    hkMemoryRouter* router = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* router = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkpDashpotAction* pDashpot = (hkpDashpotAction*)router->m_heap->blockAlloc(0x60);
     pDashpot->m_usMemSizeAndFlags = 0x60;
-    pDashpot = pDashpot->FUN_00d4d980(reinterpret_cast<int>(newEntities.m_data[0]),
+    pDashpot = pDashpot->InitializeSpringMotorFields(reinterpret_cast<int>(newEntities.m_data[0]),
                                     reinterpret_cast<int>(newEntities.m_data[1]), m_ulUserData);
 
     *(__m128*)&pDashpot->m_kPoint[0] = *(__m128*)&m_kPoint[0];

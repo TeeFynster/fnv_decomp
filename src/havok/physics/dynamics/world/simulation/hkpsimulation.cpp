@@ -41,7 +41,7 @@ inline void hkVector4::operator=(const hkVector4& value) {
     dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = src[3];
 }
 
-extern "C" void __cdecl FUN_00cfdbe0(int, int);
+extern "C" void __cdecl hkAgentNnMachine_InvalidateTimInAgent(int, int);
 
 struct FUN_00cf87a0_Class {
     void __thiscall ForwardToGlobal(int a, int b, int c);
@@ -50,18 +50,19 @@ struct FUN_00cf87a0_Class {
 // @fnv 0x00cf87a0
 void __thiscall FUN_00cf87a0_Class::ForwardToGlobal(int aiArg1, int aiArg2, int aiUnused)
 {
-    FUN_00cfdbe0(aiArg1, aiArg2);
+    hkAgentNnMachine_InvalidateTimInAgent(aiArg1, aiArg2);
 }
 
 extern "C" void __cdecl ProcessChildLoop(hkpWorld*);
 
 class SimulationDerived : public hkpSimulation {
 public:
-    hkUint32 __thiscall FUN_00cf8730(hkReal dt);
+    hkUint32 __thiscall hkpSimulation_stepDeltaTime(hkReal dt);
 };
 
 // @fnv 0x00cf8730
-hkUint32 SimulationDerived::FUN_00cf8730(hkReal afDeltaTime) {
+// src: HAVOK_LIB 0x00cf8730
+hkUint32 SimulationDerived::hkpSimulation_stepDeltaTime(hkReal afDeltaTime) {
     if (!m_uiSimulationType || m_uiSimulationType == 1) {
         reinterpret_cast<void (__thiscall **)(hkpSimulation*, hkReal)>(*reinterpret_cast<void***>(this))[4](this, afDeltaTime);
     }
@@ -72,7 +73,7 @@ hkUint32 SimulationDerived::FUN_00cf8730(hkReal afDeltaTime) {
         vf06();
     }
     if (m_uiSimulationType != 0) {
-        if (m_pOwningWorld->FUN_00c93570()) {
+        if (m_pOwningWorld->hkpWorld_getMemoryWatchDog()) {
             ProcessChildLoop(m_pOwningWorld);
         }
     }
@@ -87,7 +88,7 @@ extern "C" {
     extern unsigned long DAT_0126835c;
     extern const char str_010c41f8[];
     extern const char str_010cc530[];
-    void __cdecl FUN_00d014f0(void*, void*);
+    void __cdecl hkpWorldCallbackUtil_firePostCollideCallback(void*, void*);
 }
 
 // The original's timer helpers (expansions of Havok's timer macros), kept as members of a unit-local view so the
@@ -119,14 +120,15 @@ public:
         reinterpret_cast<void (__thiscall **)(hkpSimulation*, hkStepInfo*)>(*reinterpret_cast<void***>(this))[13](this, info);
     }
 
-    hkUint32 FUN_00cf8820();
+    hkUint32 hkpSimulation_reCollideAfterStepFailure();
 };
 
 // @fnv 0x00cf8820
-hkUint32 hkpSimulation_Derived::FUN_00cf8820()
+// src: HAVOK_LIB 0x00cf8820
+hkUint32 hkpSimulation_Derived::hkpSimulation_reCollideAfterStepFailure()
 {
     volatile hkUint32 t;
-    m_pOwningWorld->FUN_00c96ff0(0, 1);
+    m_pOwningWorld->hkpWorld_updateCollisionFilterOnWorld(0, 1);
 
     hkStepInfo stepInfo;
     if (m_uiSimulationType == 3) {
@@ -146,7 +148,7 @@ hkUint32 hkpSimulation_Derived::FUN_00cf8820()
         m_fSimulationTime += m_fStepDeltaTime;
         if (m_pOwningWorld->m_kWorldPostCollideListeners.m_iElementCount != 0) {
             recordTimer(str_010cc530, t);
-            FUN_00d014f0(m_pOwningWorld, &stepInfo);
+            hkpWorldCallbackUtil_firePostCollideCallback(m_pOwningWorld, &stepInfo);
             recordTimer(str_010c41f8, t);
         }
         m_bHasStepped = 1;
@@ -159,14 +161,15 @@ hkUint32 hkpSimulation_Derived::FUN_00cf8820()
 extern "C" void CollectLinearCast();
 
 struct FUN_00cfa400_Obj {
-    void __thiscall FUN_00cf9480(int a1, int a2, int a3, void (*callback)(), int a5);
-    void __thiscall FUN_00cfa400(int a1, int a2, int a3, int a4);
+    void __thiscall hkpSimulation_processAgentsOfEntities(int a1, int a2, int a3, void (*callback)(), int a5);
+    void __thiscall hkpSimulation_collideEntitiesNarrowPhaseDiscrete(int a1, int a2, int a3, int a4);
 };
 
 // Forwards the four arguments to FUN_00cf9480, passing CollectLinearCast as the callback.
 // @fnv 0x00cfa400
-void __thiscall FUN_00cfa400_Obj::FUN_00cfa400(int a1, int a2, int a3, int a4) {
-    FUN_00cf9480(a1, a2, a3, CollectLinearCast, a4);
+// src: HAVOK_LIB 0x00cfa400
+void __thiscall FUN_00cfa400_Obj::hkpSimulation_collideEntitiesNarrowPhaseDiscrete(int a1, int a2, int a3, int a4) {
+    hkpSimulation_processAgentsOfEntities(a1, a2, a3, CollectLinearCast, a4);
 }
 
 namespace fnv_00cfa470 {
@@ -195,10 +198,10 @@ struct CollisionStepContext {
     hkStepInfo m_pStepInfo;
 };
 
-void __cdecl FUN_00cf1b10(float time, hkMotionState* ms);
-void __cdecl FUN_00d28680(const hkStepInfo* stepInfo, hkpEntity** entities, int numEntities, int offset);
-void __cdecl FUN_00d1a330(CollisionStepContext* input, hkpEntity** entities, int numEntities);
-void __cdecl FUN_00cf9c60(hkpEntity** entities, int numEntities, hkpWorld* world);
+void __cdecl hkSweptTransformUtil_backStepMotionState(float time, hkMotionState* ms);
+void __cdecl hkRigidMotionUtilStep(const hkStepInfo* stepInfo, hkpEntity** entities, int numEntities, int offset);
+void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(CollisionStepContext* input, hkpEntity** entities, int numEntities);
+void __cdecl hkpSimulation_collideEntitiesBroadPhaseDiscrete(hkpEntity** entities, int numEntities, hkpWorld* world);
 
 class hkpSimulationV : public hkpSimulation {
 public:
@@ -206,7 +209,7 @@ public:
         reinterpret_cast<void (__thiscall **)(hkpSimulation*, hkpEntity**, int, hkpWorld*, int)>(*reinterpret_cast<void***>(this))[8](this, entities, numEntities, world, findExtraContacts);
     }
 
-    void FUN_00cfa400(hkpEntity** entities, int numEntities, CollisionStepContext* input, int flag);
+    void hkpSimulation_collideEntitiesNarrowPhaseDiscrete(hkpEntity** entities, int numEntities, CollisionStepContext* input, int flag);
     void ResetSimulationState(hkpEntity** entities, int numEntities, hkpWorld* world, int resetInfo);
 };
 
@@ -216,8 +219,8 @@ void hkpSimulationV::ResetSimulationState(hkpEntity** entities, int numEntities,
     world->m_iCriticalOperationsLockCount++;
 
     hkStepInfo stepInfo;
-    float startTime = world->FUN_00c91020();
-    float endTime = world->FUN_00c91030();
+    float startTime = world->hkpWorld_getCurrentTime();
+    float endTime = world->hkpWorld_getCurrentPsiTime();
     stepInfo.m_uiStartTime = startTime;
     stepInfo.m_fEndTime = endTime;
     stepInfo.m_fTimeStep = endTime - startTime;
@@ -231,21 +234,21 @@ void hkpSimulationV::ResetSimulationState(hkpEntity** entities, int numEntities,
             hkpEntity* entity = entities[i];
             if (*reinterpret_cast<const hkUint8*>(&entity->m_pMotionState.m_type) != 5)
             {
-                FUN_00cf1b10(world->FUN_00c91020(), &entity->m_pMotionState.m_kMotionState);
+                hkSweptTransformUtil_backStepMotionState(world->hkpWorld_getCurrentTime(), &entity->m_pMotionState.m_kMotionState);
             }
         }
-        FUN_00d28680(&stepInfo, entities, numEntities, 0xe0);
-        FUN_00d1a330(((CollisionStepContext*)world->m_pCollisionInput), entities, numEntities);
+        hkRigidMotionUtilStep(&stepInfo, entities, numEntities, 0xe0);
+        hkpEntityAabbUtil_entityBatchRecalcAabb(((CollisionStepContext*)world->m_pCollisionInput), entities, numEntities);
     }
 
     if (auiResetFlags & RESET_TIM)
     {
-        FUN_00cf9c60(entities, numEntities, world);
+        hkpSimulation_collideEntitiesBroadPhaseDiscrete(entities, numEntities, world);
     }
 
     if (auiResetFlags & RESET_AABB)
     {
-        FUN_00cfa400(entities, numEntities, ((CollisionStepContext*)world->m_pCollisionInput), 0);
+        hkpSimulation_collideEntitiesNarrowPhaseDiscrete(entities, numEntities, ((CollisionStepContext*)world->m_pCollisionInput), 0);
     }
     else if (auiResetFlags & RESET_TOI)
     {
@@ -260,7 +263,7 @@ void hkpSimulationV::ResetSimulationState(hkpEntity** entities, int numEntities,
         }
         if (world->m_iPendingOperationQueueCount == 1 && world->m_iQueuedOperationCount)
         {
-            world->FUN_00c91140();
+            world->UpdateFields_00c91140();
         }
     }
 }
@@ -272,25 +275,25 @@ struct FnvCpu_FUN_00cfa7a0_CpuAllocator {
     virtual void Invoke(void* block, unsigned int size);
 };
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct FnvCpu_FUN_00cfa7a0_CpuObject {
     unsigned int unk00;
     unsigned short size;
-    void FUN_00cf86d0();
+    void SetVtableAndProcessState_00cf86d0();
     FnvCpu_FUN_00cfa7a0_CpuObject* FUN_00cfa7a0(unsigned int flags);
 };
 // @fnv 0x00cfa7a0
 FnvCpu_FUN_00cfa7a0_CpuObject* FnvCpu_FUN_00cfa7a0_CpuObject::FUN_00cfa7a0(unsigned int flags)
 {
-    FUN_00cf86d0();
+    SetVtableAndProcessState_00cf86d0();
     if (flags & 1) {
-        hkMemoryRouter* holder = FUN_00c85750();
+        hkMemoryRouter* holder = hkMemoryRouter_getInstance();
         ((FnvCpu_FUN_00cfa7a0_CpuAllocator*)holder->m_heap)->Invoke(this, size);
     }
     return this;
 }
 
-extern "C" void __cdecl FUN_00d01380(int);
+extern "C" void __cdecl hkpWorldCallbackUtil_firePostSimulationCallback(int);
 extern unsigned long DAT_0126835c;
 extern void* DAT_00fdf044;
 extern const char str_010cc540[];
@@ -323,18 +326,19 @@ struct S00cf8a40_Obj {
     int m_uiContentCount;
 
     float GetClampedSimulationTime();
-    int FUN_00cf8a40();
+    int hkpSimulation_advanceTime();
 };
 
 // @fnv 0x00cf8a40
-int S00cf8a40_Obj::FUN_00cf8a40()
+// src: HAVOK_LIB 0x00cf8a40
+int S00cf8a40_Obj::hkpSimulation_advanceTime()
 {
     m_uiCommandId = GetClampedSimulationTime();
     if (m_uiCommandId >= m_pFreeList && m_node->m_kWorldPostSimulationListeners.m_iElementCount) {
         S00cf8a40_TlsFn pTlsFn = (S00cf8a40_TlsFn)DAT_00fdf044;
         hkMonitorStream* s = (hkMonitorStream*)pTlsFn(DAT_0126835c);
         timer(s, str_010cc540);
-        FUN_00d01380((int)m_node);
+        hkpWorldCallbackUtil_firePostSimulationCallback((int)m_node);
         s = (hkMonitorStream*)pTlsFn(DAT_0126835c);
         timer(s, str_010c41f8);
     }
@@ -554,7 +558,7 @@ struct CollisionPairEntry {
 extern float DAT_0104da48;
 extern int DAT_01269200;
 
-void __cdecl FUN_00cfedd0(CollisionPairEntry* in, ContactProcessingContext* input, ContactBufferState* collector, ContactManagerDispatch* agent);
+void __cdecl hkAgentNnMachine_ProcessAgent(CollisionPairEntry* in, ContactProcessingContext* input, ContactBufferState* collector, ContactManagerDispatch* agent);
 
 // @fnv 0x00cf92c0
 void __stdcall CollectLinearCast(CollisionPairEntry* apLinearCastInput, ContactProcessingContext* input, ContactBufferState* collector)
@@ -565,7 +569,7 @@ void __stdcall CollectLinearCast(CollisionPairEntry* apLinearCastInput, ContactP
     CollisionDispatchRegistry* dispatcher = input->m_pCollisionDispatcher;
     input->m_aiContactPointIds = dispatcher->m_pAgents[0].m_aiContactPointIds;
     input->m_pCreateFunc = dispatcher->m_pAgents[apLinearCastInput->m_iType].m_pCreateFunc;
-    FUN_00cfedd0(apLinearCastInput, input, collector, apLinearCastInput->m_pCollisionAgent);
+    hkAgentNnMachine_ProcessAgent(apLinearCastInput, input, collector, apLinearCastInput->m_pCollisionAgent);
     if (DAT_01269200 != 1 && collector->m_data != collector->m_kStorage) {
         apLinearCastInput->m_pCollisionAgent->getPenetrations(apLinearCastInput->m_pBodyA, apLinearCastInput->m_pBodyB, input, collector);
     }
@@ -596,12 +600,13 @@ static inline hkMonitorStream& GetMonStream() {
 }
 
 struct SimLocal : hkpSimulation {
-    int FUN_00cf8da0(const hkStepInfo& stepInfo);
-    int FUN_00cf9340(float physicsDeltaTime);
+    int hkpSimulation_integrateInternal(const hkStepInfo& stepInfo);
+    int hkpSimulation_integrate(float physicsDeltaTime);
 };
 
 // @fnv 0x00cf9340
-int SimLocal::FUN_00cf9340(float physicsDeltaTime)
+// src: HAVOK_LIB 0x00cf9340
+int SimLocal::hkpSimulation_integrate(float physicsDeltaTime)
 {
     volatile unsigned int t;
     hkMonitorStream& monStream = GetMonStream();
@@ -621,7 +626,7 @@ int SimLocal::FUN_00cf9340(float physicsDeltaTime)
     ((SimCollisionInput*)m_pOwningWorld->m_pCollisionInput)->m_pStepInfo = physicsStepInfo;
     ((SimMaintenanceMgr*)m_pOwningWorld->m_pMaintenanceManager)->PerformMaintenance(m_pOwningWorld, physicsStepInfo);
 
-    int result = FUN_00cf8da0(physicsStepInfo);
+    int result = hkpSimulation_integrateInternal(physicsStepInfo);
     m_uiSimulationType = result;
     if (result == 0) {
         m_bHasStepped = (hkUint8)result;
@@ -644,14 +649,15 @@ extern "C" void ForwardToGlobal();
 extern "C" void __cdecl InitArrayEntries(void* a, void* b);
 
 struct MyObj : FUN_00cfa400_Obj {
-    void FUN_00cfa430(void* first, void* second, hkpWorld* data, unsigned char flags);
+    void hkpSimulation_resetCollisionInformationForEntities(void* first, void* second, hkpWorld* data, unsigned char flags);
 };
 
 // If flags & 2, forwards the world collision input; if flags & 4, calls InitArrayEntries(first, second).
 // @fnv 0x00cfa430
-void MyObj::FUN_00cfa430(void* first, void* second, hkpWorld* data, unsigned char flags) {
+// src: HAVOK_LIB 0x00cfa430
+void MyObj::hkpSimulation_resetCollisionInformationForEntities(void* first, void* second, hkpWorld* data, unsigned char flags) {
     if (flags & 2) {
-        FUN_00cf9480((int)first, (int)second, (int)data->m_pCollisionInput, ForwardToGlobal, 0);
+        hkpSimulation_processAgentsOfEntities((int)first, (int)second, (int)data->m_pCollisionInput, ForwardToGlobal, 0);
     }
     if (flags & 4) {
         InitArrayEntries(first, second);
@@ -773,12 +779,13 @@ struct S00cfa6e0_Dst {
     int u64;
     int i68;
     int u6c;
-    void FUN_00cfa6e0(S00cfa6e0_Src* s, S00cfa6e0_Pair* p, int v);
+    void hkpConstraintQueryIn_set(S00cfa6e0_Src* s, S00cfa6e0_Pair* p, int v);
 };
 
 // Copies float and int fields from s and p into this object, computing several products of source floats.
 // @fnv 0x00cfa6e0
-void S00cfa6e0_Dst::FUN_00cfa6e0(S00cfa6e0_Src* apSource, S00cfa6e0_Pair* apPair, int aiValue)
+// src: XBOX_PDB 0x00cfa6e0
+void S00cfa6e0_Dst::hkpConstraintQueryIn_set(S00cfa6e0_Src* apSource, S00cfa6e0_Pair* apPair, int aiValue)
 {
     f00 = apSource->f10c;
     f04 = apSource->f11c * apSource->f10c;
@@ -931,15 +938,16 @@ static __forceinline void S00cf8bc0_timer(const char* tag, hkReal& slot) {
     }
 }
 struct S00cf8bc0_Sim : hkpSimulation_Derived {
-    int FUN_00cf8bc0();
+    int hkpSimulation_collide();
 };
 // If m_uiSimulationType is non-zero, returns FUN_00cf8820(); else calls step by m_fStepDeltaTime, returning 2 if DAT_01269200 is 1, otherwise 0.
 // @fnv 0x00cf8bc0
-int S00cf8bc0_Sim::FUN_00cf8bc0() {
+// src: HAVOK_LIB 0x00cf8bc0
+int S00cf8bc0_Sim::hkpSimulation_collide() {
     hkReal startTime;
     S00cf8bc0_timer(str_010cc568, startTime);
     if (m_uiSimulationType != 0) {
-        int r = FUN_00cf8820();
+        int r = hkpSimulation_reCollideAfterStepFailure();
         S00cf8bc0_timer(str_010c41f8, startTime);
         return r;
     }
@@ -955,7 +963,7 @@ int S00cf8bc0_Sim::FUN_00cf8bc0() {
     m_fSimulationTime += m_fStepDeltaTime;
     if (m_pOwningWorld->m_kWorldPostCollideListeners.m_iElementCount != 0) {
         S00cf8bc0_timer(str_010cc530, startTime);
-        FUN_00d014f0(m_pOwningWorld, &si);
+        hkpWorldCallbackUtil_firePostCollideCallback(m_pOwningWorld, &si);
         S00cf8bc0_timer(str_010c41f8, startTime);
     }
     m_bHasStepped = 1;
@@ -969,11 +977,11 @@ extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 extern const char str_010cc624[], str_010cc618[], str_010cc60c[], str_010cc5fc[];
 extern const char str_010cc5f0[], str_010cc5e4[], str_010cc5d8[], str_01076f38[];
-extern "C" void __cdecl FUN_00d88040(int);
+extern "C" void __cdecl hkSetOutOfMemoryState(int);
 
-extern "C" void __cdecl FUN_00cf7130(hkArrayBase<__int64>*, hkArrayBase<__int64>*);
-extern "C" void __cdecl FUN_00d1a330(void*, void*, int);
-struct Ctx64 { void __thiscall DispatchPairs(u32, int); void __thiscall FUN_00cf7080(u32, int, void*); };
+extern "C" void __cdecl hkpTypedBroadPhaseDispatcher_removeDuplicates(hkArrayBase<__int64>*, hkArrayBase<__int64>*);
+extern "C" void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(void*, void*, int);
+struct Ctx64 { void __thiscall DispatchPairs(u32, int); void __thiscall hkpTypedBroadPhaseDispatcher_addPairs(u32, int, void*); };
 struct MainObj {
  virtual void s00(); virtual void s04(); virtual void s08(); virtual void s0c();
  virtual void s10(); virtual void s14(); virtual void s18(); virtual void s1c();
@@ -1001,10 +1009,10 @@ static __forceinline void recordInto(const char* tag, volatile u32& t, TlsFn get
 }
 
 static __forceinline u32 stackAlloc(int size){
- hkMemoryRouter* h=FUN_00c85750();
+ hkMemoryRouter* h=hkMemoryRouter_getInstance();
  u32 base= (int)(h->m_stack.m_next.m_storage); h->m_stack.m_next.m_storage=(void*)(base+((size+127)&~127)); return base;
 }
-static __forceinline void stackFree(u32 base){ FUN_00c85750()->m_stack.m_next.m_storage=(void*)(base); }
+static __forceinline void stackFree(u32 base){ hkMemoryRouter_getInstance()->m_stack.m_next.m_storage=(void*)(base); }
 static __forceinline void clear(hkArrayBase<__int64>* a, AllocX* allocator){
  a->m_iElementCount=0;
  if(!(a->m_iCapacityState&0x80000000)) allocator->Free((void*)a->m_data,(a->m_iCapacityState&0x3fffffff)*8);
@@ -1020,7 +1028,7 @@ struct LocalArr {
  __forceinline void release(){
   if(saved==(u32)arr.m_data) {arr.m_iElementCount=0;}
   stackFree(saved);
-  hkMemoryRouter* holder=FUN_00c85750();
+  hkMemoryRouter* holder=hkMemoryRouter_getInstance();
   clear(&arr,(AllocX*)holder->m_heap);
  }
 };
@@ -1034,7 +1042,8 @@ struct Entity { u32 unk00; u32 unk04; u32 unk08; u32 unk0c; EntityData data; };
 struct Optional { u32 unk00; u32 unk04; u32 payload; };
 // Copies entity bounds to a stack buffer, runs a2->main->Proc to fill two arrays, then dispatches pairs through a2->ctx64 if the allocator check passes.
 // @fnv 0x00cf9c60
-void __cdecl FUN_00cf9c60(Entity** apEntities, int aiCount, hkpWorld* apContext){
+// src: HAVOK_LIB 0x00cf9c60
+void __cdecl hkpSimulation_collideEntitiesBroadPhaseDiscrete(Entity** apEntities, int aiCount, hkpWorld* apContext){
  TlsFn get=TlsGetValue;
  int rem;
  record16(get,reinterpret_cast<volatile u32&>(rem));
@@ -1053,7 +1062,7 @@ void __cdecl FUN_00cf9c60(Entity** apEntities, int aiCount, hkpWorld* apContext)
   EntityData* data=&e->data;
   *(u32**)((char*)elems+pointerDifference)=&data->unk14;
   Block16* src=data->bounds;
-  if(src[0].f[0] > src[1].f[0]) FUN_00d1a330(apContext->m_pCollisionInput, &e, 1);
+  if(src[0].f[0] > src[1].f[0]) hkpEntityAabbUtil_entityBatchRecalcAabb(apContext->m_pCollisionInput, &e, 1);
   copyBounds((void*)destination,data->bounds,2);
   destination=(Block16*)((Block16*)destination+2);
   ++elems;
@@ -1066,19 +1075,19 @@ void __cdecl FUN_00cf9c60(Entity** apEntities, int aiCount, hkpWorld* apContext)
  stackFree(pBoundsBuffer);
  if(arrA.arr.m_iElementCount+arrB.arr.m_iElementCount>0){
   record12(str_010cc5f0);
-  FUN_00cf7130(&arrA.arr,&arrB.arr);
+  hkpTypedBroadPhaseDispatcher_removeDuplicates(&arrA.arr,&arrB.arr);
   record12(str_010cc5e4);
   ((Ctx64*)apContext->m_pBroadPhaseDispatcher)->DispatchPairs((u32)arrB.arr.m_data,arrB.arr.m_iElementCount);
   int size=arrA.arr.m_iElementCount;
-  hkMemoryRouter* holder=FUN_00c85750();
+  hkMemoryRouter* holder=hkMemoryRouter_getInstance();
   AllocX* pAllocator=(AllocX*)holder->m_heap;
   if(!pAllocator->Test((u32)(size*5)<<7)){
-   FUN_00d88040(1);
+   hkSetOutOfMemoryState(1);
    record12(str_01076f38);
    arrB.release(); arrA.release(); return;
   }
   record12(str_010cc5d8);
-  ((Ctx64*)apContext->m_pBroadPhaseDispatcher)->FUN_00cf7080((u32)arrA.arr.m_data,arrA.arr.m_iElementCount,((Optional*)apContext->m_pCollisionFilter) ? &((Optional*)apContext->m_pCollisionFilter)->payload : 0);
+  ((Ctx64*)apContext->m_pBroadPhaseDispatcher)->hkpTypedBroadPhaseDispatcher_addPairs((u32)arrA.arr.m_data,arrA.arr.m_iElementCount,((Optional*)apContext->m_pCollisionFilter) ? &((Optional*)apContext->m_pCollisionFilter)->payload : 0);
  }
  record12(str_01076f38);
 finish:
@@ -1235,7 +1244,7 @@ struct MemoryRequirements { int max, sum; Island* biggest; };
 static __forceinline void unlockWorldOperations(hkpWorld* world) {
     if (--world->m_iCriticalOperationsLockCount == 0 && !world->m_bBlockExecutingPendingOperations) {
         if (world->m_iPendingOperationCount) world->FUN_00c91120();
-        if (world->m_iPendingOperationQueueCount == 1 && world->m_iQueuedOperationCount) world->FUN_00c91140();
+        if (world->m_iPendingOperationQueueCount == 1 && world->m_iQueuedOperationCount) world->UpdateFields_00c91140();
     }
 }
 
@@ -1259,9 +1268,9 @@ __declspec(noinline) void hkpWorldMemoryUsage::ComputeMemoryUsage(MemoryRequirem
 }
 struct Holder { unsigned int unk00, unk04, unk08, unk0c, unk10, unk14; MemoryManager* memory; };
 
-extern "C" void __cdecl FUN_00d892d0();
-extern "C" void __cdecl FUN_00cb55d0(hkpWorld*);
-extern "C" void __cdecl FUN_00d01bc0(hkpWorld*);
+extern "C" void __cdecl hkSolveUpload();
+extern "C" void __cdecl hkpWorldOperationUtil_cleanupDirtyIslands(hkpWorld*);
+extern "C" void __cdecl hkpWorldMemoryUtil_checkMemoryForIntegration(hkpWorld*);
 struct __declspec(align(16)) IntegrationContext {
     unsigned int unk000;
     unsigned int unk004;
@@ -1292,25 +1301,26 @@ struct __declspec(align(16)) IntegrationContext {
     unsigned int unk074;
     void* collisionInput78;
     unsigned int unk07c;
-    void FUN_00cfa6e0(SolverInfo*, const TimeInterval*, void*);
+    void hkpConstraintQueryIn_set(SolverInfo*, const TimeInterval*, void*);
 };
-extern "C" int __cdecl FUN_00d28a30(SolverInfo*, TimeInterval*, void*, void*, int, int);
-extern "C" void __cdecl FUN_00d1a330(void*, void*, int);
-extern "C" int __cdecl FUN_00d88b50(TimeInterval*, SolverInfo*, IntegrationContext*, Island*, int, int, void*, int);
+extern "C" int __cdecl hkRigidMotionUtilApplyForcesAndStep(SolverInfo*, TimeInterval*, void*, void*, int, int);
+extern "C" void __cdecl hkpEntityAabbUtil_entityBatchRecalcAabb(void*, void*, int);
+extern "C" int __cdecl hkpConstraintSolverSetup_solve(TimeInterval*, SolverInfo*, IntegrationContext*, Island*, int, int, void*, int);
 extern "C" void __cdecl AddItemToContainer(hkpWorld*, Island*);
-extern "C" void __cdecl FUN_00d015a0(hkpWorld*, Island*, const TimeInterval*);
-extern "C" void __cdecl FUN_00d01440(hkpWorld*, const TimeInterval*);
+extern "C" void __cdecl hkpWorldCallbackUtil_fireIslandPostIntegrateCallback(hkpWorld*, Island*, const TimeInterval*);
+extern "C" void __cdecl hkpWorldCallbackUtil_firePostIntegrateCallback(hkpWorld*, const TimeInterval*);
 struct Simulation {
     unsigned int unk00, unk04, unk08;
     hkpWorld* m_pOwningWorld;
     unsigned int unk10, unk14, unk18, unk1c, unk20, unk24;
     unsigned int m_uiSimulationType;
-    void FUN_00cf8b00();
-    int FUN_00cf8da0(const TimeInterval* step);
+    void hkpSimulation_applyActions();
+    int hkpSimulation_integrateInternal(const TimeInterval* step);
 };
 // Advances the simulation by one time step, integrating island entities and invoking world and island callbacks.
 // @fnv 0x00cf8da0
-int Simulation::FUN_00cf8da0(const TimeInterval* step) {
+// src: XBOX_PDB 0x00cf8da0
+int Simulation::hkpSimulation_integrateInternal(const TimeInterval* step) {
     struct IslandResources {
         MemoryRequirements memory;
         unsigned int singleEnd;
@@ -1331,19 +1341,19 @@ int Simulation::FUN_00cf8da0(const TimeInterval* step) {
     scale = _mm_load_ss(&scalar.dt);
     frame = _mm_shuffle_ps(scale, scale, 0);
     allocator->gravityPerFrame = _mm_mul_ps(frame, m_pOwningWorld->m_kGravity.m_vComponents);
-    FUN_00d892d0();
-    FUN_00cb55d0(m_pOwningWorld);
+    hkSolveUpload();
+    hkpWorldOperationUtil_cleanupDirtyIslands(m_pOwningWorld);
 
     ((hkpWorldMemoryUsage*)m_pOwningWorld)->ComputeMemoryUsage(&resources.memory);
     Holder* holder;
     MemoryManager* solver;
-    holder = (Holder*)FUN_00c85750();
+    holder = (Holder*)hkMemoryRouter_getInstance();
     solver = holder->memory;
     // The solver allocator calls slot 8; the shared available declaration is nonvirtual.
     if (!reinterpret_cast<bool (__thiscall **)(MemoryManager*, int)>(*reinterpret_cast<void***>(solver))[8](solver, resources.memory.max)) {
-        if (m_pOwningWorld->FUN_00c93570()) {
+        if (m_pOwningWorld->hkpWorld_getMemoryWatchDog()) {
             unlockWorldOperations(m_pOwningWorld);
-            FUN_00d01bc0(m_pOwningWorld);
+            hkpWorldMemoryUtil_checkMemoryForIntegration(m_pOwningWorld);
             ++m_pOwningWorld->m_iCriticalOperationsLockCount;
         } else {
             m_uiSimulationType = 1;
@@ -1353,7 +1363,7 @@ int Simulation::FUN_00cf8da0(const TimeInterval* step) {
     m_pOwningWorld->m_iCriticalOperationsLockCount++;
     --m_pOwningWorld->m_iCriticalOperationsLockCountForPhantoms;
     static_cast<MonitorStream_hkpsimulation*>(hkMonitorStream::getInstancePtr())->timer(str_010cc5b0, (unsigned int&)scalar.i);
-    FUN_00cf8b00();
+    hkpSimulation_applyActions();
     ++m_pOwningWorld->m_iCriticalOperationsLockCountForPhantoms;
     unlockWorldOperations(m_pOwningWorld);
     ++m_pOwningWorld->m_iCriticalOperationsLockCount;
@@ -1366,7 +1376,7 @@ int Simulation::FUN_00cf8da0(const TimeInterval* step) {
         allocator->frameCounter = 0;
     }
     IntegrationContext context;
-    context.FUN_00cfa6e0(&(*(SolverInfo*)(m_pOwningWorld->pad1C8 + 0x18)), step, m_pOwningWorld->m_pViolatedConstraintArray);
+    context.hkpConstraintQueryIn_set(&(*(SolverInfo*)(m_pOwningWorld->pad1C8 + 0x18)), step, m_pOwningWorld->m_pViolatedConstraintArray);
     static_cast<MonitorStream_hkpsimulation*>(hkMonitorStream::getInstancePtr())->timer(str_010cc5a4, (unsigned int&)scalar.i);
     resources.islands = (hkArray<Island*>*)&m_pOwningWorld->m_kActiveSimulationIslands;
     for (scalar.i = resources.islands->m_iElementCount - 1; scalar.i >= 0; --scalar.i) {
@@ -1379,26 +1389,26 @@ int Simulation::FUN_00cf8da0(const TimeInterval* step) {
             void*& pEntityData = island->entities;
             int iEntityCount = (volatile int&)island->numEntities;
             void* firstData = (void*volatile&)island->entities;
-            result = FUN_00d28a30((SolverInfo*)(info + 1), info, &((SolverInfo*)(info + 1))->gravityPerFrame, firstData, iEntityCount, 0xe0);
-            FUN_00d1a330((island->world)->m_pCollisionInput, pEntityData, island->numEntities);
+            result = hkRigidMotionUtilApplyForcesAndStep((SolverInfo*)(info + 1), info, &((SolverInfo*)(info + 1))->gravityPerFrame, firstData, iEntityCount, 0xe0);
+            hkpEntityAabbUtil_entityBatchRecalcAabb((island->world)->m_pCollisionInput, pEntityData, island->numEntities);
             static_cast<MonitorStream_hkpsimulation*>(hkMonitorStream::getInstancePtr())->timer(DAT_010c41f8, resources.singleEnd);
         } else {
             int count = island->numEntities;
             void* batch = island->entities;
-            result = FUN_00d88b50(info, (SolverInfo*)(info + 1), &context, island, 0, 0, batch, count);
+            result = hkpConstraintSolverSetup_solve(info, (SolverInfo*)(info + 1), &context, island, 0, 0, batch, count);
         }
         if (result > 5 && (island->flags & 12) && island->world->m_bWantDeactivation) {
             AddItemToContainer(island->world, island);
         }
         if (m_pOwningWorld->m_kIslandPostIntegrateListeners.m_iElementCount) {
             static_cast<MonitorStream_hkpsimulation*>(hkMonitorStream::getInstancePtr())->timer(str_010cc58c, (unsigned int&)scalar.dt);
-            FUN_00d015a0(m_pOwningWorld, island, step);
+            hkpWorldCallbackUtil_fireIslandPostIntegrateCallback(m_pOwningWorld, island, step);
         }
     }
     unlockWorldOperations(m_pOwningWorld);
     if (m_pOwningWorld->m_kWorldPostIntegrateListeners.m_iElementCount) {
         static_cast<MonitorStream_hkpsimulation*>(hkMonitorStream::getInstancePtr())->timer(str_010cc574, (unsigned int&)scalar.dt);
-        FUN_00d01440(m_pOwningWorld, step);
+        hkpWorldCallbackUtil_firePostIntegrateCallback(m_pOwningWorld, step);
         static_cast<MonitorStream_hkpsimulation*>(hkMonitorStream::getInstancePtr())->timer(DAT_010c41f8, (unsigned int&)scalar.dt);
     }
     static_cast<MonitorStream_hkpsimulation*>(hkMonitorStream::getInstancePtr())->timer(str_01076f38, (unsigned int&)scalar.dt);
@@ -1536,11 +1546,11 @@ unsigned int unk05c;
 unsigned int unk060; };
 struct S00cfa080_Obj {
  unsigned int unk00, unk04, unk08; hkpWorld* m_pOwningWorld;
- void __thiscall FUN_00cfa080(hkVector4* p);
+ void __thiscall hkpSimulation_collideInternal(hkVector4* p);
 };
-extern "C" void __cdecl FUN_00cf9c60(unsigned int, unsigned int, hkpWorld*);
-extern "C" void __cdecl FUN_00cff3c0(O*, void*, O*);
-extern "C" void __cdecl FUN_00d01650(hkpWorld*,O*,hkVector4*);
+extern "C" void __cdecl hkpSimulation_collideEntitiesBroadPhaseDiscrete(unsigned int, unsigned int, hkpWorld*);
+extern "C" void __cdecl hkpConstraintOwner_ProcessEntries_00cff3c0(O*, void*, O*);
+extern "C" void __cdecl hkpWorldCallbackUtil_fireIslandPostCollideCallback(hkpWorld*,O*,hkVector4*);
 __forceinline void stampN(const char* name) {
  hkMonitorStream* t = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
  hkMonitorStream::TimerCommand* e = reinterpret_cast<hkMonitorStream::TimerCommand*>(t->m_end.m_storage);
@@ -1572,11 +1582,12 @@ __forceinline void stampEnd() {
 __forceinline void done(hkpWorld* w) {
  if (--w->m_iCriticalOperationsLockCount == 0 && w->m_bBlockExecutingPendingOperations.m_cBooleanValue == 0) {
   if(w->m_iPendingOperationCount != 0) w->FUN_00c91120();
-  if(w->m_iPendingOperationQueueCount == 1 && w->m_iQueuedOperationCount != 0) w->FUN_00c91140();
+  if(w->m_iPendingOperationQueueCount == 1 && w->m_iQueuedOperationCount != 0) w->UpdateFields_00c91140();
  }
 }
 // @fnv 0x00cfa080
-void S00cfa080_Obj::FUN_00cfa080(hkVector4* p) {
+// src: HAVOK_LIB 0x00cfa080
+void S00cfa080_Obj::hkpSimulation_collideInternal(hkVector4* p) {
  volatile unsigned int tb, t1, t2, t3;
  stamp(&str_010cc64c, tb);
  memcpy(m_pOwningWorld->pad1C8 + 0x8, p, sizeof(hkVector4));
@@ -1588,7 +1599,7 @@ void S00cfa080_Obj::FUN_00cfa080(hkVector4* p) {
  hkArray<O*>* a = (hkArray<O*>*)&m_pOwningWorld->m_kActiveSimulationIslands;
  for (int i = 0; i < a->m_iElementCount; ++i) {
   O* e = a->m_data[i];
-  FUN_00cf9c60(e->unk048,e->unk04c,m_pOwningWorld);
+  hkpSimulation_collideEntitiesBroadPhaseDiscrete(e->unk048,e->unk04c,m_pOwningWorld);
   if (DAT_01269200 == 1) {
    done(m_pOwningWorld);
    stampEnd();
@@ -1604,12 +1615,12 @@ void S00cfa080_Obj::FUN_00cfa080(hkVector4* p) {
   stamp(&str_010cc54c, tb);
   obj->unk060 = obj->unk000 + 0x1c60;
   obj->unk014 = 0;
-  FUN_00cff3c0(entry, &entry->unk058, obj);
+  hkpConstraintOwner_ProcessEntries_00cff3c0(entry, &entry->unk058, obj);
   stamp(str_010c41f8, t1);
   if(DAT_01269200 == 1) break;
   if(m_pOwningWorld->m_kIslandPostCollideListeners.m_iElementCount != 0) {
    stamp(&str_010cc634, t2);
-   FUN_00d01650(m_pOwningWorld,entry,p);
+   hkpWorldCallbackUtil_fireIslandPostCollideCallback(m_pOwningWorld,entry,p);
    stamp(str_010c41f8, t3);
   }
  }
@@ -1646,12 +1657,13 @@ struct Sim {
     int unk04;
     int unk08;
     hkpWorld* m_pOwningWorld;
-    void FUN_00cf8b00();
+    void hkpSimulation_applyActions();
 };
 
 // Iterates the active islands and passes the world step info to each actor entry.
 // @fnv 0x00cf8b00
-void Sim::FUN_00cf8b00()
+// src: HAVOK_LIB 0x00cf8b00
+void Sim::hkpSimulation_applyActions()
 {
     IslandArray& islands = *(IslandArray*)&m_pOwningWorld->m_kActiveSimulationIslands;
     for (int i = 0; i < islands.m_iElementCount; i++) {
@@ -1695,10 +1707,10 @@ struct PairArray { PairEntry* data; int size, capacity; };
 struct PairMap {
     int* data; int size, mask;
     void __thiscall EnsureCapacity(Allocator*, int);
-    void __thiscall FUN_00cb1870(Allocator*, void*, int);
+    void __thiscall hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(Allocator*, void*, int);
     int __thiscall FindSlot(int);
     void __thiscall ProcessArgument(Allocator*);
-    void __thiscall FUN_00a29680();
+    void __thiscall Object_DoNothing();
 };
 struct RootBody {
     int unk00;
@@ -1774,9 +1786,9 @@ struct AgentNnEntry {
 };
 struct Quaternion {
     LocalM128 value;
-    void __thiscall FUN_00cb2450(const LocalM128*, float);
-    void __thiscall FUN_00c66320(const Quaternion*, const Quaternion*);
-    void __thiscall FUN_00c74b70(const Quaternion*, const Quaternion*);
+    void __thiscall hkQuaternion_setAxisAngle(const LocalM128*, float);
+    void __thiscall setMul(const Quaternion*, const Quaternion*);
+    void __thiscall hkQuaternion_setInverseMul(const Quaternion*, const Quaternion*);
 };
 
 struct MotionHeader {
@@ -1917,25 +1929,26 @@ struct SavedTransform {
 struct Vec4f { int x, y, z, w; };
 __forceinline void copySnapshot(Vec4f& dest,const void* value) { const Vec4f& src=*reinterpret_cast<const Vec4f*>(value); dest.x=src.x; dest.y=src.y; dest.z=src.z; dest.w=src.w; }
 inline void releaseAll(PairArray& pairs, PairMap& visited) {
-    hkMemoryRouter* router=(hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* router=(hkMemoryRouter*)hkMemoryRouter_getInstance();
     Allocator* heap=reinterpret_cast<Allocator*>(router->m_heap);
     pairs.size=0;
     if((pairs.capacity&0x80000000)==0) heap->freeBlock(pairs.data,(pairs.capacity&0x3fffffff)*8);
     pairs.data=0; pairs.capacity=0x80000000;
-    Allocator* finalHeap=reinterpret_cast<Allocator*>(((hkMemoryRouter*)FUN_00c85750())->m_heap);
+    Allocator* finalHeap=reinterpret_cast<Allocator*>(((hkMemoryRouter*)hkMemoryRouter_getInstance())->m_heap);
     visited.ProcessArgument(finalHeap);
-    visited.FUN_00a29680();
+    visited.Object_DoNothing();
 }
 inline float hkMaxF(float a,float b){return a>b?a:b;}
 struct SimulationContext {
-    void __thiscall FUN_00cf9480(Body**, int, CollisionInput*, ProcessCallback, int);
+    void __thiscall hkpSimulation_processAgentsOfEntities(Body**, int, CollisionInput*, ProcessCallback, int);
 };
 // Iterates over bodies, collects collision pairs, invokes callback for each, and applies corrective rotations when mode is 1 and a contact is found.
 // @fnv 0x00cf9480
-void __thiscall SimulationContext::FUN_00cf9480(Body** bodies, int count, CollisionInput* input, ProcessCallback callback, int mode) {
+// src: XBOX_PDB 0x00cf9480
+void __thiscall SimulationContext::hkpSimulation_processAgentsOfEntities(Body** bodies, int count, CollisionInput* input, ProcessCallback callback, int mode) {
     PairMap visited;
     visited.data=0; visited.size=0; visited.mask=-1;
-    hkMemoryRouter* router=(hkMemoryRouter*)FUN_00c85750(); Allocator* initialHeap=reinterpret_cast<Allocator*>(router->m_heap);
+    hkMemoryRouter* router=(hkMemoryRouter*)hkMemoryRouter_getInstance(); Allocator* initialHeap=reinterpret_cast<Allocator*>(router->m_heap);
     visited.EnsureCapacity(initialHeap,count);
     __declspec(align(16)) CollisionOutput collisionOutput;
     collisionOutput.toiTime=3.402820018375656e38f;
@@ -1946,8 +1959,8 @@ void __thiscall SimulationContext::FUN_00cf9480(Body** bodies, int count, Collis
     for(int i=0;i<count;++i) {
         Body* body=bodies[i];
         Collidable* root=&body->collidable;
-        router=(hkMemoryRouter*)FUN_00c85750(); Allocator* currentHeap=reinterpret_cast<Allocator*>(router->m_heap);
-        visited.FUN_00cb1870(currentHeap,root,0);
+        router=(hkMemoryRouter*)hkMemoryRouter_getInstance(); Allocator* currentHeap=reinterpret_cast<Allocator*>(router->m_heap);
+        visited.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_insert(currentHeap,root,0);
         root->CopyAndSortGeometryList(&pairs);
         for(int j=0;j<pairs.size;++j) {
             PairEntry* finalHeap=&pairs.data[j]; int key=finalHeap->key;
@@ -1958,7 +1971,7 @@ void __thiscall SimulationContext::FUN_00cf9480(Body** bodies, int count, Collis
                 int owner;
                 if(collidable->type==5) owner=otherBody->root()->owner; else owner=collidable->owner;
                 collisionOutput.owner=owner;
-                FUN_00cfdbe0((int)pair,(int)input);
+                hkAgentNnMachine_InvalidateTimInAgent((int)pair,(int)input);
                 callback(this,pair,input,&collisionOutput);
                 if(mode==1 && collisionOutput.firstFree!=collisionOutput.contacts) {
                     Vec4f angle; copySnapshot(angle,&body->motion.rotation1);
@@ -2003,11 +2016,11 @@ void __thiscall SimulationContext::FUN_00cf9480(Body** bodies, int count, Collis
                         LocalM128 inverseScalar=_mm_load_ss(&inverseLength);
                         axis=_mm_mul_ps(_mm_shuffle_ps(inverseScalar,inverseScalar,0),axis);
                         Quaternion turn, rotated;
-                        turn.FUN_00cb2450(&axis,savedRotation);
-                        rotated.FUN_00c66320(&turn,&body->motion.rotation1);
-                        transform.FUN_00cb2d90(&rotated);
+                        turn.hkQuaternion_setAxisAngle(&axis,savedRotation);
+                        rotated.setMul(&turn,&body->motion.rotation1);
+                        transform.hkRotation_set(&rotated);
                         updateTranslation(body);
-                        FUN_00cfdbe0((int)pair,(int)input);
+                        hkAgentNnMachine_InvalidateTimInAgent((int)pair,(int)input);
                         callback(this,pair,input,&collisionOutput);
                         LocalM128 perpendicular=_mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(axis,axis,0xc9),normalZXY),
                                                        _mm_mul_ps(_mm_shuffle_ps(axis,axis,0xd2),normalYZX));
@@ -2018,22 +2031,22 @@ void __thiscall SimulationContext::FUN_00cf9480(Body** bodies, int count, Collis
                         refined=_mm_andnot_ps(_mm_cmpeq_ss(length,_mm_set_ss(0.0f)),refined);
                         perpendicular=_mm_mul_ps(_mm_shuffle_ps(refined,refined,0),perpendicular);
                         Quaternion sideways, oriented;
-                        sideways.FUN_00cb2450(&perpendicular,savedRotation);
-                        oriented.FUN_00c66320(&sideways,(Quaternion*)&angle);
-                        transform.FUN_00cb2d90(&oriented);
+                        sideways.hkQuaternion_setAxisAngle(&perpendicular,savedRotation);
+                        oriented.setMul(&sideways,(Quaternion*)&angle);
+                        transform.hkRotation_set(&oriented);
                         updateTranslation(body);
-                        FUN_00cfdbe0((int)pair,(int)input);
+                        hkAgentNnMachine_InvalidateTimInAgent((int)pair,(int)input);
                         callback(this,pair,input,&collisionOutput);
-                        oriented.FUN_00c74b70(&sideways,(Quaternion*)&angle);
-                        transform.FUN_00cb2d90(&oriented);
+                        oriented.hkQuaternion_setInverseMul(&sideways,(Quaternion*)&angle);
+                        transform.hkRotation_set(&oriented);
                         updateTranslation(body);
-                        FUN_00cfdbe0((int)pair,(int)input);
+                        hkAgentNnMachine_InvalidateTimInAgent((int)pair,(int)input);
                         callback(this,pair,input,&collisionOutput);
                         input->tolerance=savedTolerance;
                         input->step->m_fEndTime=savedStart;
                         input->step->m_fTimeStep=savedEnd;
                         body->motion.restore((const hkTransform*)&savedTransform);
-                        FUN_00cfdbe0((int)pair,(int)input);
+                        hkAgentNnMachine_InvalidateTimInAgent((int)pair,(int)input);
                         callback(this,pair,input,&collisionOutput);
                     }
                 }
@@ -2089,14 +2102,15 @@ struct FNVAudioHolder_CFA5F0 {
     int unk00, unk04, unk08, unk0c;
     FNVAudio_CFA5F0* audio10;
 };
-extern "C" void __cdecl FUN_00cf9c60(int arg1,int arg2,hkpWorld* simulation);
-FNVAudioHolder_CFA5F0* __cdecl FUN_00c85750();
+extern "C" void __cdecl hkpSimulation_collideEntitiesBroadPhaseDiscrete(int arg1,int arg2,hkpWorld* simulation);
+FNVAudioHolder_CFA5F0* __cdecl hkMemoryRouter_getInstance();
 struct FNVOwner_CFA5F0 {
-    void __thiscall FUN_00cfa400(int arg1, int arg2, FNVState_CFA5F0* state, int arg5);
-    void __thiscall FUN_00cfa5f0(int arg1,int arg2,hkpWorld* sim, const int* values,int arg5);
+    void __thiscall hkpSimulation_collideEntitiesNarrowPhaseDiscrete(int arg1, int arg2, FNVState_CFA5F0* state, int arg5);
+    void __thiscall hkpSimulation_collideEntitiesDiscrete(int arg1,int arg2,hkpWorld* sim, const int* values,int arg5);
 };
 // @fnv 0x00cfa5f0
-void __thiscall FNVOwner_CFA5F0::FUN_00cfa5f0(int arg1,int arg2,hkpWorld* sim,const int* values,int arg5) {
+// src: HAVOK_SRC 0x00cfa5f0
+void __thiscall FNVOwner_CFA5F0::hkpSimulation_collideEntitiesDiscrete(int arg1,int arg2,hkpWorld* sim,const int* values,int arg5) {
     FNVState_CFA5F0 state;
     int* source = (int*)sim->m_pCollisionInput;
     memcpy(&state, source, 0x50);
@@ -2107,14 +2121,14 @@ void __thiscall FNVOwner_CFA5F0::FUN_00cfa5f0(int arg1,int arg2,hkpWorld* sim,co
     state.input58 = values[2];
     state.input5c = values[3];
     ++sim->m_iCriticalOperationsLockCount;
-    FUN_00cf9c60(arg1,arg2,sim);
-    FUN_00cfa400(arg1,arg2,&state,arg5);
+    hkpSimulation_collideEntitiesBroadPhaseDiscrete(arg1,arg2,sim);
+    hkpSimulation_collideEntitiesNarrowPhaseDiscrete(arg1,arg2,&state,arg5);
     if (--sim->m_iCriticalOperationsLockCount == 0 && !sim->m_bBlockExecutingPendingOperations.m_cBooleanValue) {
         if (sim->m_iPendingOperationCount) sim->FUN_00c91120();
-        if (sim->m_iPendingOperationQueueCount == 1 && sim->m_iQueuedOperationCount) sim->FUN_00c91140();
+        if (sim->m_iPendingOperationQueueCount == 1 && sim->m_iQueuedOperationCount) sim->UpdateFields_00c91140();
     }
     if (state.result64) {
-        FNVAudioHolder_CFA5F0* holder = FUN_00c85750();
+        FNVAudioHolder_CFA5F0* holder = hkMemoryRouter_getInstance();
         holder->audio10->v2(state.result64, 0x200);
     }
 }

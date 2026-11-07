@@ -14,14 +14,15 @@ struct __declspec(align(16)) V_0062b8d0
     V_0062b8d0();
 };
 
-extern "C" void __cdecl FUN_004a3e00(V_0062b8d0* out, const void* in);
-extern "C" void __cdecl FUN_0062b930(void* object, V_0062b8d0* v, unsigned char flag);
+extern "C" void __cdecl NI2HK(V_0062b8d0* out, const void* in);
+extern "C" void __cdecl TESHavokUtilities_AddVelocity_0(void* object, V_0062b8d0* v, unsigned char flag);
 
 // @fnv 0x0062b8d0
-void __cdecl FUN_0062b8d0(void* object, const void* in, unsigned char flag)
+// src: XBOX_PDB 0x0062b8d0
+void __cdecl TESHavokUtilities_AddVelocity(void* object, const void* in, unsigned char flag)
 {
     V_0062b8d0 v;
 
-    FUN_004a3e00(&v, in);
-    FUN_0062b930(object, &v, flag);
+    NI2HK(&v, in);
+    TESHavokUtilities_AddVelocity_0(object, &v, flag);
 }

@@ -28,7 +28,7 @@ struct FUN_0096aca0_shell : Arr
 
 extern __declspec(thread) int g_tlsMemContext;
 extern void* DAT_012685c8;
-void* __cdecl FUN_00a7d330(void*);
+void* __cdecl NiViewerStrings_NiGetViewerString_Title(void*);
 
 struct PrimitiveStringArray
 {
@@ -66,20 +66,21 @@ struct OperationParameters
 };
 struct HavokOperation
 {
-    void FUN_00c8ad40(PrimitiveStringArray*);
-    void FUN_00cc3a50(const OperationParameters*);
-    void FUN_00cc4070(PrimitiveStringArray*);
+    void bhkBinaryAction_GetViewerStrings(PrimitiveStringArray*);
+    void bhkDashpotAction_CopyCinfo(const OperationParameters*);
+    void bhkDashpotAction_GetViewerStrings(PrimitiveStringArray*);
 };
 // @fnv 0x00cc4070
-void HavokOperation::FUN_00cc4070(PrimitiveStringArray* array)
+// src: XBOX_PDB 0x00cc4070
+void HavokOperation::bhkDashpotAction_GetViewerStrings(PrimitiveStringArray* array)
 {
     MemoryContextScope context;
-    FUN_00c8ad40(array);
-    void* entry = FUN_00a7d330(DAT_012685c8);
+    bhkBinaryAction_GetViewerStrings(array);
+    void* entry = NiViewerStrings_NiGetViewerString_Title(DAT_012685c8);
     unsigned int index = array->size_at_0a;
     if (index >= array->capacity_at_08)
         array->FUN_0096ad30(index + array->growth_at_0e);
     array->FUN_0096ae90(index, entry);
     OperationParameters parameters = {0, 0, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 0.1f, 0.01f};
-    FUN_00cc3a50(&parameters);
+    bhkDashpotAction_CopyCinfo(&parameters);
 }

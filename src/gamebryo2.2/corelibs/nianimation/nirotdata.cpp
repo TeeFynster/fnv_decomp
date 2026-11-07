@@ -12,7 +12,8 @@
 extern const NiRTTI g_011f3f50;
 
 // @fnv 0x00a48150
-const NiRTTI* __cdecl FUN_00a48150()
+// src: COMMUNITY 0x00a48150
+const NiRTTI* __cdecl NiRotData_GetRTTI()
 {
     return &g_011f3f50;
 }
@@ -161,14 +162,15 @@ struct SelfStub
     virtual void v50();
     virtual void v51();
     virtual void v52(char*);
-    void FUN_00b702b0(char*, void*);
-    void FUN_00b665d0(char*, void*);
+    void BSShaderLightingProperty_CopyMembers(char*, void*);
+    void Lighting30ShaderProperty_CopyMembers(char*, void*);
 };
 // Calls FUN_00b702b0 with the given arguments, then invokes v52 on the same char pointer.
 // @fnv 0x00b665d0
-void SelfStub::FUN_00b665d0(char* a, void* b)
+// src: COMMUNITY 0x00b665d0
+void SelfStub::Lighting30ShaderProperty_CopyMembers(char* a, void* b)
 {
-    FUN_00b702b0(a, b);
+    BSShaderLightingProperty_CopyMembers(a, b);
     v52(a);
 }
 
@@ -228,12 +230,13 @@ struct S00b66600
     virtual void v51();
     virtual void v52(int);
 };
-void __fastcall FUN_00b70290(S00b66600*, int, int);
+void __fastcall BSShaderLightingProperty_CopyTo(S00b66600*, int, int);
 // Calls FUN_00b70290 with the two int arguments, then invokes the virtual method v52 on the object with the second argument.
 // @fnv 0x00b66600
-void __fastcall FUN_00b66600(S00b66600* p, int aiFirst, int aiSecond)
+// src: XBOX_PDB 0x00b66600
+void __fastcall BSShaderPPLightingProperty_CopyTo(S00b66600* p, int aiFirst, int aiSecond)
 {
-    FUN_00b70290(p, aiFirst, aiSecond);
+    BSShaderLightingProperty_CopyTo(p, aiFirst, aiSecond);
     p->v52(aiSecond);
 }
 
@@ -269,7 +272,7 @@ struct NiRTTIAccess
 };
 
 void* __cdecl _FUN_00a7d330(void* pObject);
-char* __cdecl FUN_00a7d510(char const* pName, unsigned int uiValue);
+char* __cdecl NiGetViewerString_00a7d510(char const* pName, unsigned int uiValue);
 void __stdcall AppendCameraPathEntries(StrArr* apViewerStrings);
 
 // @fnv 0x00a484c0
@@ -285,7 +288,7 @@ void __fastcall AppendNumKeysToStringArray(NiRotData* self, int, StrArr* apViewe
         apViewerStrings->SetSize(uiSize + apViewerStrings->m_usGrowBy);
     apViewerStrings->SetAt(uiSize, pString);
 
-    pString = FUN_00a7d510("self->m_uiNumKeys", self->m_uiNumKeys);
+    pString = NiGetViewerString_00a7d510("self->m_uiNumKeys", self->m_uiNumKeys);
 
     uiSize = apViewerStrings->m_usSize;
     if (uiSize >= apViewerStrings->m_usMaxSize)
@@ -350,12 +353,13 @@ struct FUN_00b66620_cls
     int unkD0;
     int unkD4;
     int m_d8;
-    void FUN_00b66620(int value);
+    void BSShaderPPLightingProperty_SetClampD3D(int value);
 };
 
 // Stores 3 when the incoming value differs from 3, otherwise 0.
 // @fnv 0x00b66620
-void FUN_00b66620_cls::FUN_00b66620(int value)
+// src: XBOX_PDB 0x00b66620
+void FUN_00b66620_cls::BSShaderPPLightingProperty_SetClampD3D(int value)
 {
     m_d8 = (value != 3) ? 3 : 0;
 }
@@ -470,7 +474,7 @@ void __fastcall LinkRotData(NiRotData* self, int, NiStream& kStream)
 extern int(__stdcall* DAT_00fdf1c0)(void*);
 extern int(__stdcall* DAT_00fdf1c4)(void*);
 
-void __cdecl FUN_00a3d630(int a1, int a2, void* a3, unsigned int a4, float a5, float a6, TimedRotationKey** a7,
+void __cdecl NiAnimationKey_CopySequence(int a1, int a2, void* a3, unsigned int a4, float a5, float a6, TimedRotationKey** a7,
                           unsigned int* a8);
 
 // Obtains an object, fills its keys using the current key data and time arguments, then assigns it to ppRival with reference counting.
@@ -489,7 +493,7 @@ void __fastcall CopyRotData(NiRotData* self, int, float fTime, float fDuration, 
     {
         TimedRotationKey* pKeys = 0;
         unsigned int uiNumKeys = 0;
-        FUN_00a3d630(2, self->m_eRequestType, self->m_pKeyArray, self->m_uiNumKeys, fTime, fDuration, &pKeys, &uiNumKeys);
+        NiAnimationKey_CopySequence(2, self->m_eRequestType, self->m_pKeyArray, self->m_uiNumKeys, fTime, fDuration, &pKeys, &uiNumKeys);
         pCopy->SetKeys(pKeys, uiNumKeys, (NiAnimationKey::KeyType)self->m_eRequestType);
     }
 

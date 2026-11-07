@@ -12,7 +12,8 @@ extern void* g_011f3f28;
 
 // Returns the address of the global pointer g_011f3f28.
 // @fnv 0x00a46b60
-void* __cdecl FUN_00a46b60()
+// src: COMMUNITY 0x00a46b60
+void* __cdecl NiTextKeyExtraData_GetRTTI()
 {
     return &g_011f3f28;
 }
@@ -20,7 +21,8 @@ void* __cdecl FUN_00a46b60()
 extern void* DAT_0109827c;
 
 // @fnv 0x00a46b70
-void* __cdecl FUN_00a46b70()
+// src: EXE 0x00a46b70
+void* __cdecl NiTextKeyExtraData_CreateObject()
 {
     NiTextKeyExtraData* p = static_cast<NiTextKeyExtraData*>(BSFadeNode::operator new(sizeof(NiTextKeyExtraData)));
     if (p)
@@ -119,7 +121,7 @@ void __fastcall DestroyTextKeyList(NiTextKeyExtraData* self, void*)
         }
         g_memoryManager.Deallocate((char*)keys - 4);
     }
-    self->NiExtraData::FUN_00a7b300();
+    self->NiExtraData::DestroyFields_00a7b300();
 }
 
 extern int DAT_0109b220;
@@ -179,10 +181,10 @@ struct StrArray
     }
 };
 
-char* FUN_00a7d330(const char* s);
-char* FUN_00a7d510(const char* s, unsigned int v);
-char* FUN_00a7d550(const char* s, float v);
-char* FUN_00a7d5e0(const char* s, const char* v);
+char* NiViewerStrings_NiGetViewerString_Title(const char* s);
+char* NiGetViewerString_00a7d510(const char* s, unsigned int v);
+char* NiGetViewerString_00a7d550(const char* s, float v);
+char* NiGetViewerString_00a7d5e0(const char* s, const char* v);
 void* NiMalloc(unsigned int size);
 void NiFree(void* p);
 int NiSprintf(char* buf, unsigned int size, const char* fmt, ...);
@@ -194,17 +196,17 @@ void __cdecl GetExtraDataViewerStrings();
 void __fastcall WriteTextKeyStrings(NiTextKeyExtraData* self, void*, StrArray* pkStrings)
 {
     reinterpret_cast<void (__thiscall*)(NiExtraData*, StrArray*)>(&GetExtraDataViewerStrings)(self, pkStrings);
-    pkStrings->Add(FUN_00a7d330((const char*)g_011f3f28));
-    pkStrings->Add(FUN_00a7d510("m_uiNumKeys", self->m_uiNumKeys));
+    pkStrings->Add(NiViewerStrings_NiGetViewerString_Title((const char*)g_011f3f28));
+    pkStrings->Add(NiGetViewerString_00a7d510("m_uiNumKeys", self->m_uiNumKeys));
 
     for (unsigned int i = 0; i < self->m_uiNumKeys; i++)
     {
-        char* pcTimeString = FUN_00a7d550("Time", self->m_pKeys[i].GetTime());
-        char* pcTextString = FUN_00a7d5e0("Text", self->m_pKeys[i].GetText());
+        char* pcTimeString = NiGetViewerString_00a7d550("Time", self->m_pKeys[i].GetTime());
+        char* pcTextString = NiGetViewerString_00a7d5e0("Text", self->m_pKeys[i].GetText());
         unsigned int uiBufferSize = strlen(pcTimeString) + strlen(pcTextString) + 4;
         char* pcString = (char*)NiMalloc(uiBufferSize);
         NiSprintf(pcString, uiBufferSize, "%s : %s", pcTimeString, pcTextString);
-        char* pcEntryString = FUN_00a7d5e0("TextKey", pcString);
+        char* pcEntryString = NiGetViewerString_00a7d5e0("TextKey", pcString);
         pkStrings->AddInline(pcEntryString);
         NiFree(pcTimeString);
         NiFree(pcTextString);

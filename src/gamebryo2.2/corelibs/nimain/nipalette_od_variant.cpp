@@ -5,7 +5,7 @@
 // src/gamebryo2.2/corelibs/nimain/nipalette.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nipalette.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern "C" void* g_011f5c08;
-void* __cdecl FUN_00a8b070();
+void* __cdecl NiPalette_GetRTTI();
 
 // MemoryManager::FUN_00aa4060 - release a block that was handed out by one
 // of the manager's heaps.
@@ -133,11 +133,12 @@ struct FNV_MemoryManager
     void FNV_releaseAlias(void* block, int flag);
     FNV_Heap* FNV_heapForPointer(void* block);
 
-    void FUN_00aa4060(void* block);
+    void MemoryManager_Deallocate(void* block);
 };
 
 // @fnv 0x00aa4060
-void FNV_MemoryManager::FUN_00aa4060(void* block)
+// src: XBOX_PDB 0x00aa4060
+void FNV_MemoryManager::MemoryManager_Deallocate(void* block)
 {
     if (!block)
         return;

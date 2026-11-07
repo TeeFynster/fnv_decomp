@@ -27,7 +27,7 @@ void NavMeshObstacleManager::ProcessActivatedObstacles()
     for (unsigned int uiIndex = 0; uiIndex < count; ++uiIndex)
     {
         bhkRigidBody* body;
-        m_kActivatedRigidBodies.FUN_006c6030(body);
+        m_kActivatedRigidBodies.LockFreeQueue_bhkRigidBody_Pop(body);
         NiPointer<ObstacleData> obstacle(0);
         if (RigidBodyObstacleLookup.GetAt(body, obstacle))
         {
@@ -56,7 +56,8 @@ struct Dummy0042f800
 };
 
 // @fnv 0x0049f1c0
-void* __fastcall FUN_0049f1c0(int** pThis)
+// src: GUESS 0x0049f1c0 (confidence: low)
+void* __fastcall Object_InitializeFields_0049f1c0(int** pThis)
 {
     *pThis = &DAT_010159d4;
     reinterpret_cast<Dummy0042f800*>(pThis)->FUN_0042fcb0(0, 0);
@@ -66,11 +67,12 @@ void* __fastcall FUN_0049f1c0(int** pThis)
 typedef char _sizecheck_NavMeshTriangle[sizeof(NavMeshTriangle) == 16 ? 1 : -1];
 struct FUN_006a5ec0_shell : public NavMeshTriangle
 {
-    bool FUN_006a5ec0();
+    bool NavMeshTriangle_IsWater();
 };
 
 // @fnv 0x006a5ec0
-bool FUN_006a5ec0_shell::FUN_006a5ec0()
+// src: XBOX_PDB 0x006a5ec0
+bool FUN_006a5ec0_shell::NavMeshTriangle_IsWater()
 {
     return GetFlag(0x200);
 }
@@ -100,12 +102,13 @@ struct FUN_006a5b70_shell
     short m_06;
     short m_08;
     short m_0A;
-    void FUN_006a5b70(short* a, short* b, short* c);
+    void NavMeshTriangle_GetSides(short* a, short* b, short* c);
 };
 
 // Copies the shell's m_06, m_08 and m_0A shorts into the three output pointers.
 // @fnv 0x006a5b70
-void FUN_006a5b70_shell::FUN_006a5b70(short* a, short* b, short* c)
+// src: COMMUNITY 0x006a5b70
+void FUN_006a5b70_shell::NavMeshTriangle_GetSides(short* a, short* b, short* c)
 {
     *a = m_06;
     *b = m_08;
@@ -131,11 +134,12 @@ struct PaddedBooleanState
     unsigned char padding[0x210];
     bool m_bState;
 
-    void FUN_006a36e0(bool);
+    void NavMeshRender_SetDraw(bool);
 };
 
 // @fnv 0x006a36e0
-void PaddedBooleanState::FUN_006a36e0(bool abDraw)
+// src: COMMUNITY 0x006a36e0
+void PaddedBooleanState::NavMeshRender_SetDraw(bool abDraw)
 {
     if (abDraw)
     {
@@ -146,7 +150,7 @@ void PaddedBooleanState::FUN_006a36e0(bool abDraw)
     }
     else
     {
-        reinterpret_cast<NiNode*>(static_cast<const GO&>(g_011d6e5c).operator unsigned int())->FUN_004def90();
+        reinterpret_cast<NiNode*>(static_cast<const GO&>(g_011d6e5c).operator unsigned int())->NiNode_RemoveAllChildren();
         reinterpret_cast<NiAVObject*>(static_cast<const GO&>(g_011d6e5c).operator unsigned int())->UpdateSceneObject();
 
         NiUpdateData UpdateData(0.0f, false, false);
@@ -177,19 +181,20 @@ struct GlobalObject_0045cfe0
 
 struct PaddedBooleanState
 {
-    void FUN_006a36e0(bool value);
-    void FUN_006a37a0(TESObjectCELL* cell, bool value);
-    void FUN_006a5ca0();
+    void NavMeshRender_SetDraw(bool value);
+    void NavMeshRender_AddDrawOnlyNavMeshes(TESObjectCELL* cell, bool value);
+    void NavMeshRender_UpdateRenderOnlyNavMeshes();
 };
 
 bool __fastcall FUN_00425fd0(TESObjectCELL* cell);
-int __cdecl FUN_00552ba0(void);
+int __cdecl NavMeshRender_GetSingleton(void);
 
 GlobalObject_0045cfe0 g_011c63cc;
 int g_TES;
 
 // @fnv 0x006a5ca0
-void PaddedBooleanState::FUN_006a5ca0()
+// src: COMMUNITY 0x006a5ca0
+void PaddedBooleanState::NavMeshRender_UpdateRenderOnlyNavMeshes()
 {
     TESObjectCELL* pcellVal;
     int d8;
@@ -197,7 +202,7 @@ void PaddedBooleanState::FUN_006a5ca0()
     int y3;
     TESObjectCELL* pgridCell4;
 
-    FUN_006a36e0(false);
+    NavMeshRender_SetDraw(false);
     pcellVal = reinterpret_cast<TES*>(g_TES)->GetDetailedActorPathHandler();
     if (pcellVal)
     {
@@ -212,16 +217,16 @@ void PaddedBooleanState::FUN_006a5ca0()
                 {
                     pgridCell4 = reinterpret_cast<TESWorldSpace*>(reinterpret_cast<DoorH*>(pcellVal)->GetParentWorldSpace())
                                      ->GetCellAtGridPosition(x9, y3);
-                    FUN_006a37a0(pgridCell4, false);
+                    NavMeshRender_AddDrawOnlyNavMeshes(pgridCell4, false);
                 }
             }
         }
         else
         {
-            reinterpret_cast<PaddedBooleanState*>(FUN_00552ba0())->FUN_006a37a0(pcellVal, false);
+            reinterpret_cast<PaddedBooleanState*>(NavMeshRender_GetSingleton())->NavMeshRender_AddDrawOnlyNavMeshes(pcellVal, false);
         }
     }
-    FUN_006a36e0(true);
+    NavMeshRender_SetDraw(true);
 }
 }  // namespace fnv_006a5ca0
 
@@ -458,7 +463,7 @@ struct NavRenderX
     unsigned int unk1fc;
     CellMapX kMap;
     int GetTriColor(NavTriX* apTri);
-    void FUN_006a37a0(CellX* apCell, bool abUpdate);
+    void NavMeshRender_AddDrawOnlyNavMeshes(CellX* apCell, bool abUpdate);
 };
 unsigned int __fastcall xGetNavMeshCount(NavArrX* apArray);
 void* __cdecl xNiMalloc(unsigned int auiSize);
@@ -475,7 +480,8 @@ extern bool xbShowCover;
 extern float xfCoverWidth, xfCoverScale, xfCoverOffset, xfCoverWidth2;
 // Builds and attaches a navmesh debug render node for the cell: lines, cover lines, triangles and spheres, then updates the nav root if requested.
 // @fnv 0x006a37a0
-void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
+// src: XBOX_PDB 0x006a37a0
+void NavRenderX::NavMeshRender_AddDrawOnlyNavMeshes(CellX* apCell, bool abUpdate)
 {
     NavArrX* qfTOqo;
     unsigned int qQMZREG;
@@ -514,7 +520,7 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
         Pt3X* qbXcw;
         unsigned int qBCzzXA;
         qsSDDgz = qfTOqo->GetAt(qbfQdhM);
-        qMBds = static_cast<NavMesh*>(qsSDDgz)->FUN_00558200();
+        qMBds = static_cast<NavMesh*>(qsSDDgz)->NavMesh_GetTriangleCount();
         qBCzzXA = NavMeshGetArrayFlags(static_cast<NavMesh*>(qsSDDgz));
         if (!qMBds)
             continue;
@@ -775,7 +781,7 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
         ((NiAVObject*)qrzAir)->AttachProperty(qdqWL);
         ((NiAVObject*)qrzAir)->AttachProperty(spWireframe);
         ((NiAVObject*)qrzAir)->AttachProperty(spZBuffer);
-        ((NiAVObject*)qrzAir)->FUN_00440460(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 1.0f)));
+        ((NiAVObject*)qrzAir)->NiAVObject_SetTranslate(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 1.0f)));
         NiPointer<NiAVObject> qvyWyw(0);
         if (qArxcFu > 0)
         {
@@ -790,7 +796,7 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
             ((BSShaderNoLightingProperty*)qdqWL)->SetFlag(0x20, false);
             ((NiAVObject*)qvyWyw)->AttachProperty(qdqWL);
             ((NiAVObject*)qvyWyw)->AttachProperty(spZBuffer);
-            ((NiAVObject*)qvyWyw)->FUN_00440460(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 3.0f)));
+            ((NiAVObject*)qvyWyw)->NiAVObject_SetTranslate(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 3.0f)));
         }
         qFffvLe = new Pt3X[qXMUYT];
         qZAdkzg = new ColorX[qXMUYT];
@@ -803,16 +809,16 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
         ((NiAVObject*)qpTd)->AttachProperty(spVertexColor);
         ((NiAVObject*)qpTd)->AttachProperty(spZBuffer);
         ((NiAVObject*)qpTd)->AttachProperty(qSVM);
-        ((NiAVObject*)qpTd)->FUN_00440460(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 1.0f)));
-        for (unsigned int qMFd = 0; qMFd < static_cast<NavMesh*>(qsSDDgz)->FUN_00691620(); qMFd++)
+        ((NiAVObject*)qpTd)->NiAVObject_SetTranslate(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 1.0f)));
+        for (unsigned int qMFd = 0; qMFd < static_cast<NavMesh*>(qsSDDgz)->GetAvoidNodeCount(); qMFd++)
         {
-            AvoidSphere* qsCroYH = &static_cast<NavMesh*>(qsSDDgz)->FUN_00691640(qMFd);
+            AvoidSphere* qsCroYH = &static_cast<NavMesh*>(qsSDDgz)->NavMesh_GetAvoidNode(qMFd);
             ColorX qODE(0.25f, 0.0f, 0.0f, 0.5f);
             NiPointer<NiAVObject> qFwpo(xMakeSphere(qsCroYH->GetRadius(), 10, 10, &qODE));
             NiPointer<AlphaX> qmgeiw(new AlphaX());
             ((AlphaX*)qmgeiw)->SetAlphaBlending(true);
             ((NiAVObject*)qFwpo)->AttachProperty(qmgeiw);
-            ((NiAVObject*)qFwpo)->FUN_00440460(const_cast<NiPoint3*>(&qsCroYH->FUN_006815c0()));
+            ((NiAVObject*)qFwpo)->NiAVObject_SetTranslate(const_cast<NiPoint3*>(&qsCroYH->FUN_006815c0()));
             reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qFwpo, true);
         }
         reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qrzAir, true);
@@ -837,7 +843,7 @@ struct WorldPointer : public GO
 };
 struct QueryQueue
 {
-    bool FUN_006c62d0(int key, WorldPointer* result);
+    bool NiTMapBase_DFALL_NiTMapItem_bhkRigidBody_NiPointer_ObstacleData_bhkRigidBody_NiPointer_ObstacleData_GetAt(int key, WorldPointer* result);
     void RemoveKey(int key);
 };
 struct RenderTask
@@ -848,7 +854,7 @@ struct RenderTask
 void RenderTask::UpdateChildByKey(int key)
 {
     WorldPointer child(0);
-    if (reinterpret_cast<QueryQueue*>(reinterpret_cast<char*>(this) + 0x200)->FUN_006c62d0(key, &child))
+    if (reinterpret_cast<QueryQueue*>(reinterpret_cast<char*>(this) + 0x200)->NiTMapBase_DFALL_NiTMapItem_bhkRigidBody_NiPointer_ObstacleData_bhkRigidBody_NiPointer_ObstacleData_GetAt(key, &child))
     {
         reinterpret_cast<NiNode*>(static_cast<unsigned int>(static_cast<const GO&>(g_011d6e5c)))
             ->RemoveObject(reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(static_cast<const GO&>(child))));

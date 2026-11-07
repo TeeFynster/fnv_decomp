@@ -3,5 +3,6 @@
 
 // 0x00d05db0  bare ret
 // @fnv 0x00d05db0
-void FUN_00d05db0()
+// src: COMMUNITY 0x00d05db0
+void nullsub_8()
 {}

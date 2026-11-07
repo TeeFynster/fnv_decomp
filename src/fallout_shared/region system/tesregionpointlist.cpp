@@ -127,7 +127,7 @@ TESRegionList* TESObjectCELL::GetRegionList(bool create)
     TESRegionList* result = 0;
     if (IsCellInterior())
         return 0;
-    result = reinterpret_cast<TESRegionPointList_CellExtraList*>(formData + 4)->FUN_0041bce0();
+    result = reinterpret_cast<TESRegionPointList_CellExtraList*>(formData + 4)->ExtraDataList_GetRegionList();
     if (!result && create)
     {
         result = new TESRegionList(0);
@@ -138,7 +138,7 @@ TESRegionList* TESObjectCELL::GetRegionList(bool create)
 
 struct FUN_004f7dd0_shell : public RegionPointList
 {
-    void FUN_004f7dd0();
+    void TESRegionPointList_Clear();
 };
 
 RegionPoint*& __fastcall _ref_006815c0(void* pThis);
@@ -146,7 +146,8 @@ void __fastcall _ref_0063f7b0(void* pThis);
 extern float const DAT_01015f5c;
 
 // @fnv 0x004f7dd0
-void FUN_004f7dd0_shell::FUN_004f7dd0()
+// src: COMMUNITY 0x004f7dd0
+void FUN_004f7dd0_shell::TESRegionPointList_Clear()
 {
     RegionPoint* pdelete = 0;
     while (reinterpret_cast<BSThread*>(this)->GetThreadID() > 0)
@@ -169,18 +170,19 @@ void FUN_004f7dd0_shell::FUN_004f7dd0()
 namespace fnv_004f81e0 {
 struct FUN_004f81e0_shell : public RegionPointList
 {
-    bool FUN_004f81e0(bool);
+    bool TESRegionPointList_Validate(bool);
 };
 
 struct FUN_004f8220_stub
 {
-    bool FUN_004f8220(bool);
+    bool TESRegionPointList_SelfIntersects(bool);
 };
 // Returns false if abMinPointsTest is set and GetThreadID() is below 3, or if FUN_004f8220(true) returns true; otherwise returns true.
 // @fnv 0x004f81e0
-bool FUN_004f81e0_shell::FUN_004f81e0(bool abMinPointsTest)
+// src: COMMUNITY 0x004f81e0
+bool FUN_004f81e0_shell::TESRegionPointList_Validate(bool abMinPointsTest)
 {
-    if ((abMinPointsTest && ((BSThread*)this)->GetThreadID() < 3) || ((FUN_004f8220_stub*)this)->FUN_004f8220(true))
+    if ((abMinPointsTest && ((BSThread*)this)->GetThreadID() < 3) || ((FUN_004f8220_stub*)this)->TESRegionPointList_SelfIntersects(true))
         return false;
     return true;
 }
@@ -248,15 +250,16 @@ extern float const DAT_01016970;
 
 struct FUN_004f7e80_shell : public RegionPointList
 {
-    float FUN_004f7e80();
+    float TESRegionPointList_GetMinX();
 };
 
 RegionPoint*& __fastcall _ref_006815c0(void* pThis);
-float __fastcall FUN_006a7f50(RegionPoint* pPoint);
+float __fastcall AStarSearch_EvaluateValue_006a7f50(RegionPoint* pPoint);
 void* __fastcall FUN_00726070(void* pNode);
 
 // @fnv 0x004f7e80
-float FUN_004f7e80_shell::FUN_004f7e80()
+// src: COMMUNITY 0x004f7e80
+float FUN_004f7e80_shell::TESRegionPointList_GetMinX()
 {
     float fMinValue = DAT_01016970;
     void* node2 = this;
@@ -266,9 +269,9 @@ float FUN_004f7e80_shell::FUN_004f7e80()
     }
     while (node2 != 0 && _ref_006815c0(node2) != 0)
     {
-        if (fMinValue > FUN_006a7f50(_ref_006815c0(node2)))
+        if (fMinValue > AStarSearch_EvaluateValue_006a7f50(_ref_006815c0(node2)))
         {
-            fMinValue = FUN_006a7f50(_ref_006815c0(node2));
+            fMinValue = AStarSearch_EvaluateValue_006a7f50(_ref_006815c0(node2));
         }
         node2 = FUN_00726070(node2);
     }
@@ -343,7 +346,7 @@ struct TESRegionPointList_ref : RegionPointList
 };
 struct TESRegionPoint_ref : RegionPoint
 {
-    RegionPoint* FUN_004f7130(int option);
+    RegionPoint* TESRegionPoint_Copy(int option);
 };
 struct FUN_004f80c0_shell : RegionPointList
 {
@@ -360,7 +363,7 @@ RegionPointList* FUN_004f80c0_shell::CloneRegionPointList(RegionPointList* apOut
     {
         if (result->m_bOwnsPointMemory)
         {
-            clonedPoint = reinterpret_cast<TESRegionPoint_ref*>(_ref_006815c0(current))->FUN_004f7130(0);
+            clonedPoint = reinterpret_cast<TESRegionPoint_ref*>(_ref_006815c0(current))->TESRegionPoint_Copy(0);
             if (!reinterpret_cast<TESRegionPointList_ref*>(result)->AddPoint(clonedPoint, 0.0f))
             {
                 delete clonedPoint;
@@ -381,15 +384,16 @@ struct PointNode
     PointNode* FUN_00726070();
     RegionPoint** FUN_006815c0();
 };
-bool FUN_004f7310(RegionPoint*, RegionPoint*, RegionPoint*, RegionPoint*);
+bool TESRegionPoint_LineSegmentsIntersect(RegionPoint*, RegionPoint*, RegionPoint*, RegionPoint*);
 struct PointList : PointNode
 {
     unsigned int FUN_0059bb30();
-    bool FUN_004f8220(bool);
+    bool TESRegionPointList_SelfIntersects(bool);
 };
 // Walks the point list and returns true if any four consecutive points pass the FUN_004f7310 test, wrapping to the head when closed.
 // @fnv 0x004f8220
-bool PointList::FUN_004f8220(bool closed)
+// src: COMMUNITY 0x004f8220
+bool PointList::TESRegionPointList_SelfIntersects(bool closed)
 {
     bool p = false;
     if (FUN_0059bb30() < 4)
@@ -419,7 +423,7 @@ bool PointList::FUN_004f8220(bool closed)
                     p = true;
             }
             if (c && j && e && l &&
-                FUN_004f7310(*c->FUN_006815c0(), *j->FUN_006815c0(), *e->FUN_006815c0(), *l->FUN_006815c0()))
+                TESRegionPoint_LineSegmentsIntersect(*c->FUN_006815c0(), *j->FUN_006815c0(), *e->FUN_006815c0(), *l->FUN_006815c0()))
                 return true;
             e = l;
             if (l)
@@ -432,8 +436,8 @@ bool PointList::FUN_004f8220(bool closed)
 }
 
 #include <string.h>
-void FUN_00485910(unsigned int chunk, unsigned int value);
-void FUN_00485710(unsigned int chunk, void* data, unsigned int points);
+void TESForm_AddChunk_00485910(unsigned int chunk, unsigned int value);
+void TESForm_AddChunkArray_00485710(unsigned int chunk, void* data, unsigned int points);
 struct RegionPointAccess : RegionPoint
 {
     NiPoint2& FUN_006815c0();
@@ -445,13 +449,14 @@ struct RegionNode : PointNode
 };
 struct FUN_004f77c0_shell : RegionPointList
 {
-    void FUN_004f77c0();
+    void TESRegionPointList_Save();
 };
 // Calls FUN_00485910 with the distance value, then conditionally calls FUN_00485710 with the collected points.
 // @fnv 0x004f77c0
-void FUN_004f77c0_shell::FUN_004f77c0()
+// src: COMMUNITY 0x004f77c0
+void FUN_004f77c0_shell::TESRegionPointList_Save()
 {
-    FUN_00485910(0x494c5052, m_uiDistanceInsideAtMax);
+    TESForm_AddChunk_00485910(0x494c5052, m_uiDistanceInsideAtMax);
     RegionNode* node = reinterpret_cast<RegionNode*>(this);
     if (!node->FUN_008256d0())
     {
@@ -475,7 +480,7 @@ void FUN_004f77c0_shell::FUN_004f77c0()
             node = node->FUN_00726070();
         }
         if (points)
-            FUN_00485710(0x444c5052, blocks, points * 2);
+            TESForm_AddChunkArray_00485710(0x444c5052, blocks, points * 2);
         delete[] blocks;
     }
 }
@@ -483,16 +488,17 @@ void FUN_004f77c0_shell::FUN_004f77c0()
 typedef BSSimpleList<RegionPoint*> RegionPointNode;
 
 RegionPoint*& __fastcall _ref_006815c0(void* pThis);
-float __fastcall FUN_006a7f50(void* pThis);
+float __fastcall AStarSearch_EvaluateValue_006a7f50(void* pThis);
 extern double const DAT_010241b0;
 
 struct FUN_004f7f10_cls : public RegionPointList
 {
-    float FUN_004f7f10();
+    float TESRegionPointList_GetMaxX();
 };
 
 // @fnv 0x004f7f10
-float FUN_004f7f10_cls::FUN_004f7f10()
+// src: COMMUNITY 0x004f7f10
+float FUN_004f7f10_cls::TESRegionPointList_GetMaxX()
 {
     float best3 = DAT_01015f5c;
     RegionPointNode* pNode = (RegionPointNode*)this;
@@ -502,9 +508,9 @@ float FUN_004f7f10_cls::FUN_004f7f10()
     }
     while (pNode != 0 && _ref_006815c0(pNode) != 0)
     {
-        if (best3 < FUN_006a7f50(_ref_006815c0(pNode)))
+        if (best3 < AStarSearch_EvaluateValue_006a7f50(_ref_006815c0(pNode)))
         {
-            best3 = FUN_006a7f50(_ref_006815c0(pNode));
+            best3 = AStarSearch_EvaluateValue_006a7f50(_ref_006815c0(pNode));
         }
         pNode = FUN_00726070(pNode);
     }

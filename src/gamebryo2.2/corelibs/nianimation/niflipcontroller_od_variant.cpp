@@ -7,7 +7,7 @@
 #include "../../../../include/BSFadeNode.h"
 
 extern "C" const void* g_011f3fd4;
-const void* __cdecl FUN_00a4f5d0();
+const void* __cdecl NiFlipController_GetRTTI();
 void* __cdecl CreateNiFlipController();
 
 struct StaticKey
@@ -21,7 +21,7 @@ struct SlotTarget
 {
     unsigned int m_00;
     bool IsNotEqual(StaticKey* k);
-    bool FUN_004b0460(StaticKey* k);
+    bool LightRefData_IsEqual(StaticKey* k);
     void FUN_006e5cc0(SlotTarget* a);
 };
 
@@ -33,11 +33,12 @@ class FUN_0060c120_cls
     unsigned short unk08;
     unsigned short m_0a;
     unsigned short m_0c;
-    void FUN_0060c120(unsigned int idx, SlotTarget* a2);
+    void NiTObjectArray_NiPointer_NiTexture_SetAt(unsigned int idx, SlotTarget* a2);
 };
 
 // @fnv 0x0060c120
-void FUN_0060c120_cls::FUN_0060c120(unsigned int idx, SlotTarget* a2)
+// src: COMMUNITY 0x0060c120
+void FUN_0060c120_cls::NiTObjectArray_NiPointer_NiTexture_SetAt(unsigned int idx, SlotTarget* a2)
 {
     static StaticKey key(0);
     if (idx >= m_0a)
@@ -52,7 +53,7 @@ void FUN_0060c120_cls::FUN_0060c120(unsigned int idx, SlotTarget* a2)
     {
         if (a2->IsNotEqual(&key))
         {
-            if ((m_04 + idx)->FUN_004b0460(&key))
+            if ((m_04 + idx)->LightRefData_IsEqual(&key))
             {
                 m_0c++;
             }

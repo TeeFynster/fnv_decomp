@@ -50,7 +50,7 @@ void __fastcall StepInspectionProcess(hkProcess* process, void*, float unused)
     for (int i = 0; i < GetInspectionPairCount(process); i++)
     {
         SetInspectionArraySize(written, 0);
-        reinterpret_cast<hkInspectProcess*>(reinterpret_cast<char*>(process) - 8)->FUN_00ddb770(
+        reinterpret_cast<hkInspectProcess*>(reinterpret_cast<char*>(process) - 8)->writeObject(
             reinterpret_cast<hkWrittenObjectQ*>(reinterpret_cast<hkInspectProcess*>(reinterpret_cast<char*>(process) - 8)->unk20)[i].m_object,
             reinterpret_cast<hkWrittenObjectQ*>(reinterpret_cast<hkInspectProcess*>(reinterpret_cast<char*>(process) - 8)->unk20)[i].m_class,
             false, reinterpret_cast<hkArrQLocalForm<hkWrittenObjectQ>*>(&written));

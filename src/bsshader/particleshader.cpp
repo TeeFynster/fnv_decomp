@@ -83,18 +83,20 @@ void* __fastcall AssignNiD3DPass(void* pThis, int, void* param)
 extern "C" void* g_012003f8;
 
 // @fnv 0x00ba5730
-void* __cdecl FUN_00ba5730()
+// src: XBOX_PDB 0x00ba5730
+void* __cdecl ParticleShader_GetRTTI()
 {
     return &g_012003f8;
 }
 
 struct FUN_00ba6ce0_shell
 {
-    char __thiscall FUN_00ba6ce0(int value);
+    char __thiscall ParticleShaderProperty_SetupGeometry(int value);
 };
 
 // @fnv 0x00ba6ce0
-char __thiscall FUN_00ba6ce0_shell::FUN_00ba6ce0(int value)
+// src: XBOX_PDB 0x00ba6ce0
+char __thiscall FUN_00ba6ce0_shell::ParticleShaderProperty_SetupGeometry(int value)
 {
     *(int*)((char*)this + 0x12c) = value;
     return 1;
@@ -105,11 +107,12 @@ struct FUN_00ba52f0_shell
     char _pad[0x74];
     void* _a;
     void* _b;
-    void __thiscall FUN_00ba52f0();
+    void __thiscall ParticleShader_ClearPassStages();
 };
 // Calls the virtual function at vtable slot 74 twice, passing _a and then _b.
 // @fnv 0x00ba52f0
-void __thiscall FUN_00ba52f0_shell::FUN_00ba52f0()
+// src: XBOX_PDB 0x00ba52f0
+void __thiscall FUN_00ba52f0_shell::ParticleShader_ClearPassStages()
 {
     typedef void(__thiscall * Fn)(FUN_00ba52f0_shell*, void*);
     (*(Fn**)this)[74](this, _a);
@@ -530,7 +533,8 @@ extern float DAT_011adcd4;
 extern float DAT_011adcd8;
 
 // @fnv 0x00ba5320
-void __cdecl FUN_00ba5320()
+// src: COMMUNITY 0x00ba5320
+void __cdecl ParticleShader_UpdateFov()
 {
     S_00ba5320_Inner* pRenderTarget = DAT_011f4748->GetRenderTarget();
     unsigned int uiWidth = pRenderTarget->GetWidth(0);
@@ -574,18 +578,19 @@ struct ArgObj
     NiBound* bound;
 };
 
-NiObject* __cdecl FUN_00ba64e0();
+NiObject* __cdecl ParticleShader_GetParticleGeometry();
 void __cdecl FUN_00b57e30(NiObject*, int, int);
 
 // @fnv 0x00ba68d0
-NiProperty* __cdecl FUN_00ba68d0(NiAVObject* apObject, ArgObj* apArg)
+// src: XBOX_PDB 0x00ba68d0
+NiProperty* __cdecl ParticleShader_Start(NiAVObject* apObject, ArgObj* apArg)
 {
     if (apObject)
     {
         NiNode* obj = apObject->IsSceneNode();
         if (obj)
         {
-            NiObject* pPrototype = FUN_00ba64e0();
+            NiObject* pPrototype = ParticleShader_GetParticleGeometry();
             NiAVObject* clone = (NiAVObject*)pPrototype->Clone();
             // The clone is geometry; its data pointer follows the NiAVObject base.
             BoundHolder* holder = *(BoundHolder**)((char*)clone + 0xb8);
@@ -617,7 +622,7 @@ NiProperty* __cdecl FUN_00ba68d0(NiAVObject* apObject, ArgObj* apArg)
             {
                 typedef void (__thiscall *SetGeometry)(NiProperty*, NiObject*);
                 (*(SetGeometry**)pKeptProperty)[0x9c / 4](pKeptProperty, clone);
-                FUN_00ba64e0();
+                ParticleShader_GetParticleGeometry();
                 ++DAT_012003f0;
             }
             return pKeptProperty;
@@ -629,7 +634,7 @@ NiProperty* __cdecl FUN_00ba68d0(NiAVObject* apObject, ArgObj* apArg)
 struct Q64_Pool
 {
     int unk00;
-    void* __thiscall FUN_00aa3e40(unsigned int size);
+    void* __thiscall Game_DoHeapAlloc(unsigned int size);
 };
 struct Q64_Pt2
 {
@@ -641,12 +646,12 @@ extern int DAT_011f91c0;
 extern unsigned int DAT_012003ec;
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 unsigned int __cdecl GetFloatQuadTable();
 
 inline void* operator new[](unsigned int n, Q64_Pool& p)
 {
-    return p.FUN_00aa3e40(n);
+    return p.Game_DoHeapAlloc(n);
 }
 
 inline unsigned short* Q64_allocIdx(unsigned short t)
@@ -666,7 +671,7 @@ struct Q64_Obj
 {
     static void* operator new(unsigned int n)
     {
-        return FUN_00aa13e0(n);
+        return Object_DispatchCommandFour(n);
     }
     static void operator delete(void* p);
 };
@@ -697,9 +702,9 @@ struct Q64_Buf : Q64_Obj
     int unk20;
     int unk24;
     int unk28;
-    void __thiscall FUN_00a72ca0(int a);
-    void __thiscall FUN_00a72bb0(int a, unsigned int b, unsigned int c, int d);
-    void __thiscall FUN_00a726a0(int a, int b, int c, int d, unsigned short e, int f, int g);
+    void __thiscall SetSize_Thunk(int a);
+    void __thiscall NiAdditionalGeometryData_SetDataBlock(int a, unsigned int b, unsigned int c, int d);
+    void __thiscall NiAdditionalGeometryData_SetDataStream(int a, int b, int c, int d, unsigned short e, int f, int g);
     Q64_Buf(unsigned short nv, int a);
 };
 struct Q64_Geo : Q64_Obj
@@ -868,7 +873,7 @@ struct Q64_Top : Q64_Obj
     Q64_Sub* sub;
     int unkbc;
     int unkc0;
-    void __thiscall FUN_00439410(Q64_Ren* a);
+    void __thiscall NiAVObject_AttachProperty(Q64_Ren* a);
     Q64_Top(Q64_Geo* geo);
 };
 
@@ -887,7 +892,8 @@ struct RefObj : ComTarget
 using ::NiPointer;
 // Builds and caches a Q64_Top containing repeated quad geometry with vertices, UVs, and a renderer.
 // @fnv 0x00ba64e0
-NiObject* __cdecl FUN_00ba64e0()
+// src: XBOX_PDB 0x00ba64e0
+NiObject* __cdecl ParticleShader_GetParticleGeometry()
 {
     if (!DAT_011f91c0)
         return 0;
@@ -938,9 +944,9 @@ NiObject* __cdecl FUN_00ba64e0()
 
     Q64_Geo* geo = new Q64_Geo(nv, verts, 0, 0, uv, 1, 0, tris, idx);
     Q64_Buf* buf = new Q64_Buf(nv, 1);
-    buf->FUN_00a72ca0(1);
-    buf->FUN_00a72bb0(0, GetFloatQuadTable(), nv * 4, 1);
-    buf->FUN_00a726a0(0, 0, 0, 1, nv, 4, 4);
+    buf->SetSize_Thunk(1);
+    buf->NiAdditionalGeometryData_SetDataBlock(0, GetFloatQuadTable(), nv * 4, 1);
+    buf->NiAdditionalGeometryData_SetDataStream(0, 0, 0, 1, nv, 4, 4);
     geo->FUN_00a67260(buf);
 
     Q64_Top* top = new Q64_Top(geo);
@@ -950,7 +956,7 @@ NiObject* __cdecl FUN_00ba64e0()
     sub->bound.m_kCenter = kBound.m_kCenter;
 
     Q64_Ren* ren = new Q64_Ren;
-    top->FUN_00439410(ren);
+    top->NiAVObject_AttachProperty(ren);
 
     if (DAT_012003f4 != (ComTarget*)top)
     {
@@ -966,7 +972,7 @@ extern void* __cdecl FUN_00ec61c0(void*, int, unsigned int);
 
 struct ParticleMemoryManager
 {
-    void* __thiscall FUN_00aa3e40(unsigned int);
+    void* __thiscall Game_DoHeapAlloc(unsigned int);
 };
 extern ParticleMemoryManager particleMemoryManager;
 
@@ -1026,7 +1032,7 @@ struct Particle
     float x, y, z, w, a, b, c, d, e, f, g, h;
     static void* operator new[](unsigned int size)
     {
-        return particleMemoryManager.FUN_00aa3e40(size);
+        return particleMemoryManager.Game_DoHeapAlloc(size);
     }
 };
 class FUN_00ba53f0 : public BSShader

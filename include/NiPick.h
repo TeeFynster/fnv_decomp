@@ -31,7 +31,7 @@ public:
         NiPoint3 m_vHitNormal;
         float m_kDiffuseColor[4];
 
-        NiAVObject* FUN_00458b50();
+        NiAVObject* AnimatingText_GetFullText();
         const NiPoint2* FUN_00891170();
     };
 
@@ -64,7 +64,7 @@ public:
             }
             m_pBase[index] = record;
         }
-        Record* FUN_00968670(unsigned int);
+        Record* ProcessArray_GetItem(unsigned int);
         void InvokeCallbacks();
         void FindHighestPriorityCallback();
         void Clear() throw();
@@ -97,9 +97,9 @@ public:
     {
         return static_cast<NiAVObject*>(root);
     }
-    void FUN_00705fc0(NiAVObject*);
-    void FUN_00705fc0(void*);
-    void FUN_00705fc0(PickNode*);
+    void SetTarget_00705fc0(NiAVObject*);
+    void SetTarget_00705fc0(void*);
+    void SetTarget_00705fc0(PickNode*);
     void SetByteAtOffset17(bool);
     void SetByteAtOffset17(int);
     bool FUN_00e98e20(const NiPoint3&, const NiPoint3&, bool);
@@ -113,11 +113,11 @@ public:
     void SetByteAtOffset30(bool);
     void SetByteAtOffset30(int);
     bool PerformPick(const NiPoint3&, const NiPoint3&, bool);
-    NiAVObject* FUN_00458b50();
+    NiAVObject* AnimatingText_GetFullText();
     const NiPoint2* FUN_00891170();
-    Record* FUN_00968670(unsigned int);
+    Record* ProcessArray_GetItem(unsigned int);
     NiPickResults* GetResults();
-    void FUN_00632d20(bool bValue);
+    void RadioEntry_Data_SetLastSignalStrength(bool bValue);
     void* ScalarDeletingDestructor(unsigned int flags);
     void InvokeCallbacks();
     void FindHighestPriorityCallback();

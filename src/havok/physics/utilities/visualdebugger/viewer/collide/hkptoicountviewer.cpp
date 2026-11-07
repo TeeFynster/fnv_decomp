@@ -21,7 +21,8 @@ void __stdcall ClearTwoInts(int* piFirst, int* piSecond)
 extern int g_D67960Value;
 
 // @fnv 0x00d67960
-int __cdecl FUN_00d67960()
+// src: GUESS 0x00d67960 (confidence: low)
+int __cdecl Object_GetG_D67960Value_00d67960()
 {
     return g_D67960Value;
 }
@@ -29,17 +30,17 @@ int __cdecl FUN_00d67960()
 struct Item;
 struct Sink
 {
-    void FUN_00c9c670(Item*);
+    void removeEntityListener_00c9c670(Item*);
 };
 struct Link
 {
-    void FUN_00cb1fb0(Sink*);
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(Sink*);
 };
 struct Item
 {
     int value;
     Link link;
-    void FUN_00d67bc0(Sink*);
+    void ProcessState_00d67bc0(Sink*);
 };
 struct Prefix
 {
@@ -51,10 +52,11 @@ struct Derived : Prefix, Item
 {
 };
 // @fnv 0x00d67bc0
-void Item::FUN_00d67bc0(Sink* sink)
+// src: GUESS 0x00d67bc0 (confidence: low)
+void Item::ProcessState_00d67bc0(Sink* sink)
 {
-    sink->FUN_00c9c670(static_cast<Item*>(reinterpret_cast<Derived*>(reinterpret_cast<char*>(this) - sizeof(Prefix))));
-    link.FUN_00cb1fb0(sink);
+    sink->removeEntityListener_00c9c670(static_cast<Item*>(reinterpret_cast<Derived*>(reinterpret_cast<char*>(this) - sizeof(Prefix))));
+    link.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(sink);
 }
 
 class PrimaryBase
@@ -97,7 +99,7 @@ struct CountArray
     {}
     __declspec(nothrow) void EnsureCapacity(void*, int);
 };
-__declspec(nothrow) hkMemoryRouter* FUN_00c85750();
+__declspec(nothrow) hkMemoryRouter* hkMemoryRouter_getInstance();
 class FUN_00d67ce0 : public FUN_00ddccb0,
                      public hkpContactListener,
                      public hkpWorldPostSimulationListener,
@@ -136,12 +138,12 @@ class FUN_00d67ce0 : public FUN_00ddccb0,
 // @fnv 0x00d67ce0
 FUN_00d67ce0::FUN_00d67ce0(int context) : FUN_00ddccb0(context)
 {
-    hkMemoryRouter* audio = FUN_00c85750();
+    hkMemoryRouter* audio = hkMemoryRouter_getInstance();
     counts.EnsureCapacity(audio->m_heap, 0);
 }
 
 namespace fnv_00d67d60 {
-extern void* FUN_00c85750();
+extern void* hkMemoryRouter_getInstance();
 struct hkpToiCountViewer
 {
     void* vtable;
@@ -153,7 +155,7 @@ struct hkpToiCountViewer
 // @fnv 0x00d67d60
 void* __cdecl AllocateToiCountViewer(unsigned int arg)
 {
-    hkMemoryRouter* global = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryRouter* global = (hkMemoryRouter*)hkMemoryRouter_getInstance();
     hkpToiCountViewer* pViewer = (hkpToiCountViewer*)reinterpret_cast<hkMemoryAllocator*>(global->m_heap)->blockAlloc(0x40);
     pViewer->size = 0x40;
     pViewer = pViewer->FUN_00d67ce0(arg);
@@ -179,7 +181,7 @@ void RegisterToiCounter()
     g_00d67e10_toiCounterId = g_00d67e10_registry->Register("TOI counter", AllocateToiCountViewer);
 }
 
-__declspec(nothrow) hkMemoryRouter* FUN_00c85750();
+__declspec(nothrow) hkMemoryRouter* hkMemoryRouter_getInstance();
 
 
 struct ItemList
@@ -240,7 +242,7 @@ struct Member : MemberBase
     __declspec(nothrow) void Release(void* heap);
     ~Member()
     {
-        Release(FUN_00c85750()->m_heap);
+        Release(hkMemoryRouter_getInstance()->m_heap);
     }
 };
 
@@ -301,9 +303,9 @@ struct Query
 };
 struct BaseHelper
 {
-    void FUN_00d68030(void* entry, int mode);
+    void hkpToiCountViewer_displayCountForBody(void* entry, int mode);
 };
-int __cdecl FUN_00d679c0(float* direction);
+int __cdecl Object_GetSignedLargestComponentIndex(float* direction);
 struct Context
 {
     void ProcessQuery(Query* query);
@@ -312,16 +314,16 @@ struct Context
 // @fnv 0x00d68130
 void Context::ProcessQuery(Query* query)
 {
-    int mode = FUN_00d679c0(&query->direction.x);
+    int mode = Object_GetSignedLargestComponentIndex(&query->direction.x);
     for (int groupIndex = 0; groupIndex < query->groupCount; ++groupIndex)
     {
         EntryListNode* list = &query->groups[groupIndex]->entries;
         for (int entryIndex = 0; entryIndex < list->count; ++entryIndex)
-            ((BaseHelper*)((char*)this - 0x2c))->FUN_00d68030(list->entries[entryIndex], mode);
+            ((BaseHelper*)((char*)this - 0x2c))->hkpToiCountViewer_displayCountForBody(list->entries[entryIndex], mode);
     }
     EntryListNode* list = &query->direct->entries;
     for (int entryIndex = 0; entryIndex < list->count; ++entryIndex)
-        ((BaseHelper*)((char*)this - 0x2c))->FUN_00d68030(list->entries[entryIndex], mode);
+        ((BaseHelper*)((char*)this - 0x2c))->hkpToiCountViewer_displayCountForBody(list->entries[entryIndex], mode);
 }
 
 struct FUN_00d67970_helper
@@ -337,12 +339,13 @@ struct FUN_00d67970_class
     void* unk08;
     void* unk0c;
 
-    void __thiscall FUN_00d67970(FUN_00d67970_helper* helper);
+    void __thiscall hkpToiCountViewer_worldAddedCallback(FUN_00d67970_helper* helper);
 };
 
 // Passes pointers to this object's unk0c and unk08 fields to the helper's c93920 and c93a20 methods, or null if the base pointer is null.
 // @fnv 0x00d67970
-void __thiscall FUN_00d67970_class::FUN_00d67970(FUN_00d67970_helper* helper)
+// src: HAVOK_LIB 0x00d67970
+void __thiscall FUN_00d67970_class::hkpToiCountViewer_worldAddedCallback(FUN_00d67970_helper* helper)
 {
     void* base = reinterpret_cast<char*>(this) - 0x20;
     void* value;
@@ -457,13 +460,13 @@ struct SpawnedObject
     unsigned int unk00;
     unsigned int unk04;
     SpawnedObject* m_08;
-    void FUN_00c9c670(void* listener) throw();
-    void FUN_00c91a20(void* listener) throw();
+    void removeEntityListener_00c9c670(void* listener) throw();
+    void hkpWorld_removeContactListener(void* listener) throw();
     void ClearValue(void* listener) throw();
 };
 
 
-hkMemoryRouter* FUN_00c85750() throw();
+hkMemoryRouter* hkMemoryRouter_getInstance() throw();
 
 void __cdecl ResizeAudioStream(void* a, void* arr, unsigned int size) throw();
 
@@ -501,7 +504,7 @@ struct HkptoicountviewerMapView
         return it <= m_hashModMask;
     }
 
-    void FUN_00cb1fb0(SpawnedObject* o) throw();
+    void hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(SpawnedObject* o) throw();
 };
 
 struct Array
@@ -512,7 +515,7 @@ struct Array
 
     void clear()
     {
-        hkMemoryRouter* h = FUN_00c85750();
+        hkMemoryRouter* h = hkMemoryRouter_getInstance();
         hkMemoryAllocator* al = reinterpret_cast<hkMemoryAllocator*>(h->m_heap);
         int cap = m_iCapacityState;
         m_iElementCount = 0;
@@ -549,7 +552,7 @@ void FUN_00d67e30_cls::RemoveEntriesForObject(SpawnedObject* a1)
         SpawnedObject* obj = m_14.m_kPrimitiveElement[it].obj;
         if (obj->m_08 == a1)
         {
-            hkMemoryRouter* h = FUN_00c85750();
+            hkMemoryRouter* h = hkMemoryRouter_getInstance();
             if (out.m_iElementCount == (int)(out.m_iCapacityState & 0x3fffffffu))
             {
                 ResizeAudioStream(h->m_heap, &out, 4);
@@ -563,13 +566,13 @@ void FUN_00d67e30_cls::RemoveEntriesForObject(SpawnedObject* a1)
     for (int iMatch = 0; iMatch < size; iMatch++)
     {
         SpawnedObject** it = &out.m_data[iMatch];
-        (*it)->FUN_00c9c670((char*)this - 0x20 != 0 ? (void*)((char*)this + 0x10) : 0);
-        m_14.FUN_00cb1fb0(*it);
+        (*it)->removeEntityListener_00c9c670((char*)this - 0x20 != 0 ? (void*)((char*)this + 0x10) : 0);
+        m_14.hkMapBase_unsigned_long_unsigned_long_hkMapOperations_unsigned_long_remove(*it);
     }
 
     out.clear();
 
-    a1->FUN_00c91a20((char*)this - 0x20 != 0 ? (void*)((char*)this + 8) : 0);
+    a1->hkpWorld_removeContactListener((char*)this - 0x20 != 0 ? (void*)((char*)this + 8) : 0);
     a1->ClearValue((char*)this - 0x20 != 0 ? (void*)((char*)this + 0xc) : 0);
 }
 
@@ -586,7 +589,8 @@ __declspec(align(16)) struct SquaredLanes
 
 // Finds the index of the largest squared component of a vector and returns it offset by 3 if the original component is positive.
 // @fnv 0x00d679c0
-int __cdecl FUN_00d679c0(const __m128* apVector)
+// src: GUESS 0x00d679c0 (confidence: medium)
+int __cdecl Object_GetSignedLargestComponentIndex(const __m128* apVector)
 {
     __m128 vSquared = _mm_and_ps(_mm_mul_ps(*apVector, *apVector), DAT_01017d10);
     SquaredLanes lanes;
@@ -608,7 +612,7 @@ int __cdecl FUN_00d679c0(const __m128* apVector)
 
 struct PtrMapEntryObj
 {
-    void FUN_00c9c670(void* arg);
+    void removeEntityListener_00c9c670(void* arg);
 };
 
 struct PtrMapEntry
@@ -643,12 +647,13 @@ struct FUN_00d67da0_cls
     int m_i30;
     PtrMapStorage m_kStorage;
 
-    void FUN_00d67da0();
+    void hkpToiCountViewer_reset();
 };
 
 // Walks m_kStorage entries with a key other than -1, calls FUN_00c9c670 on each key with the address of m_i30, then calls m_kStorage.clear().
 // @fnv 0x00d67da0
-void FUN_00d67da0_cls::FUN_00d67da0()
+// src: HAVOK_LIB 0x00d67da0
+void FUN_00d67da0_cls::hkpToiCountViewer_reset()
 {
     PtrMapStorage* st = &m_kStorage;
     int i = 0;
@@ -670,7 +675,7 @@ void FUN_00d67da0_cls::FUN_00d67da0()
     {
         do
         {
-            st->m_pEntries[i].m_pKey->FUN_00c9c670(&m_i30);
+            st->m_pEntries[i].m_pKey->removeEntityListener_00c9c670(&m_i30);
             int j = i + 1;
             int n = st->m_iArrayLength;
             if (j <= n)
@@ -713,7 +718,7 @@ struct BSAudioString
 
     void Release()
     {
-        hkMemoryAllocator* allocator = (hkMemoryAllocator*)FUN_00c85750()->m_temp;
+        hkMemoryAllocator* allocator = (hkMemoryAllocator*)hkMemoryRouter_getInstance()->m_temp;
         m_fRestLength = 0;
         if ((m_pRayCursor & 0x80000000) == 0)
             allocator->bufFree(m_data, m_pRayCursor & 0x3fffffff);
@@ -766,14 +771,15 @@ struct ContactViewer
     int unk30;
     ContactTable m_table;
 
-    void FUN_00d68030(void* entry, int mode);
+    void hkpToiCountViewer_displayCountForBody(void* entry, int mode);
 };
 
-extern void __cdecl FUN_00d67a50(int owner, int id, void* entry, int mode, const char* name, unsigned int info,
+extern void __cdecl HkptoicountviewerGsEhscNogsNoehsc_UpdateState_00d67a50(int owner, int id, void* entry, int mode, const char* name, unsigned int info,
                                  float value, BSAudioValue flags);
 
 // @fnv 0x00d68030
-void ContactViewer::FUN_00d68030(void* entry, int mode)
+// src: HAVOK_LIB 0x00d68030
+void ContactViewer::hkpToiCountViewer_displayCountForBody(void* entry, int mode)
 {
     unsigned int index = m_table.Find(entry);
     if ((int)index > m_table.m_pRayCursor)
@@ -785,7 +791,7 @@ void ContactViewer::FUN_00d68030(void* entry, int mode)
         name.Format("%d(%d)", flags & 0xffffff, tag);
     else
         name.Format("%d", flags & 0xffffff);
-    FUN_00d67a50(m_18, m_notifier.v1(), entry, mode, name.m_data, 0xff800000u, 0.1f, BSAudioValue());
+    HkptoicountviewerGsEhscNogsNoehsc_UpdateState_00d67a50(m_18, m_notifier.v1(), entry, mode, name.m_data, 0xff800000u, 0.1f, BSAudioValue());
     m_table.m_entries[index].m_flags = flags & 0xffffff;
     name.Release();
 }
@@ -793,7 +799,7 @@ void ContactViewer::FUN_00d68030(void* entry, int mode)
 struct D681E0Primary
 {
     virtual void vfunc00();
-    virtual void FUN_00d681e0();
+    virtual void AdjustThisAndForward_00d681e0();
 
     int unk04;
     int unk08;
@@ -806,7 +812,7 @@ struct D681E0Primary
 
 struct D681E0Secondary
 {
-    virtual void FUN_00d681e0();
+    virtual void AdjustThisAndForward_00d681e0();
 };
 
 struct D681E0Object : D681E0Primary, D681E0Secondary
@@ -814,7 +820,8 @@ struct D681E0Object : D681E0Primary, D681E0Secondary
     D681E0Object();
 
 // @fnv 0x00d681e0
-    virtual void FUN_00d681e0();
+// src: GUESS 0x00d681e0 (confidence: low)
+    virtual void AdjustThisAndForward_00d681e0();
 };
 
 D681E0Object::D681E0Object()
@@ -825,7 +832,7 @@ D681E0Object::D681E0Object()
 // so the secondary base sits at +0x28 and MSVC emits the this-adjusting thunk.
 struct AdjPrimaryBase
 {
-    virtual void FUN_00d68200();
+    virtual void AdjustThisAndForward_00d68200();
     int unk04;
     int unk08;
     int unk0C;
@@ -839,14 +846,15 @@ struct AdjPrimaryBase
 
 struct AdjSecondaryBase
 {
-    virtual void FUN_00d68200();
+    virtual void AdjustThisAndForward_00d68200();
 };
 
 struct AdjDerived : AdjPrimaryBase, AdjSecondaryBase
 {
     AdjDerived();
 // @fnv 0x00d68200
-    virtual void FUN_00d68200();
+// src: GUESS 0x00d68200 (confidence: low)
+    virtual void AdjustThisAndForward_00d68200();
 };
 
 AdjDerived::AdjDerived()
@@ -855,7 +863,7 @@ AdjDerived::AdjDerived()
 namespace fnv_00d68230 {
 
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00d68230
 {
@@ -865,7 +873,7 @@ struct FUN_00d68230
     virtual ~FUN_00d68230();
     static void operator delete(void* apMemory)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         unsigned int uiSize = ((FUN_00d68230*)apMemory)->m_u04;
         hkMemoryAllocator* pAllocator = (hkMemoryAllocator*)pHolder->m_heap;
         pAllocator->blockFree(apMemory, uiSize);
@@ -882,7 +890,7 @@ FUN_00d68230::FUN_00d68230()
 }  // namespace fnv_00d68230
 
 namespace fnv_00d67c30 {
-extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 extern "C" char DAT_01000001;
 extern "C" char DAT_00ffffff;
 
@@ -923,12 +931,13 @@ struct FUN_00d67c30_cls
     Table m_0c;
     int m_14;
 
-    void FUN_00d67c30(ArgBlock* a1);
+    void hkpToiCountViewer_contactPointCallback(ArgBlock* a1);
 };
 
 // For each of two items in a1->m_items, increments the high/low counters in the table entry or attaches a new entry and applies the item.
 // @fnv 0x00d67c30
-void FUN_00d67c30_cls::FUN_00d67c30(ArgBlock* apBlock)
+// src: HAVOK_LIB 0x00d67c30
+void FUN_00d67c30_cls::hkpToiCountViewer_contactPointCallback(ArgBlock* apBlock)
 {
     if (apBlock->unk10 > 0)
     {
@@ -959,7 +968,7 @@ void FUN_00d67c30_cls::FUN_00d67c30(ArgBlock* apBlock)
         }
         else
         {
-            hkMemoryRouter* h = FUN_00c85750();
+            hkMemoryRouter* h = hkMemoryRouter_getInstance();
             t->Attach((int)h->m_heap, (int)item, (int)&DAT_01000001);
             char* owner = ((char*)this - 0x28) != 0 ? (char*)this + 8 : 0;
             item->Apply((int)owner);

@@ -12,7 +12,7 @@ public:
 
     ExtraOriginalReference(TESObjectREFR* apReference);
 
-    bool FUN_004319d0(BSExtraData* apCompare);
+    bool Compare_004319d0(BSExtraData* apCompare);
 
     TESObjectREFR* m_pWorldReferenceInfo;
 };

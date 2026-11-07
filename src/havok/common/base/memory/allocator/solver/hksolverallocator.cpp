@@ -84,10 +84,11 @@ struct FUN_00c66560_class
 {
     void* m_pVftable;
 
-    __declspec(noinline) void FUN_00cbf1a0();
+    __declspec(noinline) void UpdateFields_00cbf1a0();
 };
 
-void FUN_00c66560_class::FUN_00cbf1a0()
+// src: GUESS 0x00cbf1a0 (confidence: low)
+void FUN_00c66560_class::UpdateFields_00cbf1a0()
 {
     volatile int* p = &DAT_010d1110;
     *p = *p;
@@ -107,11 +108,12 @@ void FUN_00cd06a0_class::ResetVftableAndDeleteCriticalSection()
     void* criticalSection = &m_CriticalSection;
     m_pVftable = &DAT_010d1110;
     DeleteCriticalSection(criticalSection);
-    FUN_00cbf1a0();
+    UpdateFields_00cbf1a0();
 }
 
 // @fnv 0x00c661c0
-int __stdcall FUN_00c661c0(unsigned int arg0, unsigned int arg1)
+// src: COMMUNITY 0x00c661c0
+int __stdcall hkMemoryAllocator_getAllocatedSize(unsigned int arg0, unsigned int arg1)
 {
     return (int)arg1;
 }
@@ -124,22 +126,25 @@ struct S_00d5e8f0
     int unkC;
     int unk10;
     int unk14;
-    void FUN_00d5e8f0();
+    void hkSolverAllocator_resetPeakMemoryStatistics();
 };
 // @fnv 0x00d5e8f0
-void S_00d5e8f0::FUN_00d5e8f0()
+// src: HAVOK_LIB 0x00d5e8f0
+void S_00d5e8f0::hkSolverAllocator_resetPeakMemoryStatistics()
 {
     unk14 = unkC - unk4;
 }
 
 // @fnv 0x00d5e880
-int __stdcall FUN_00d5e880(int arg0)
+// src: COMMUNITY 0x00d5e880
+int __stdcall hkSolverAllocator_blockAlloc(int arg0)
 {
     return 0;
 }
 
 // @fnv 0x00d5e890
-void __stdcall FUN_00d5e890(void* context, unsigned int flags)
+// src: COMMUNITY 0x00d5e890
+void __stdcall nullsub_79(void* context, unsigned int flags)
 {}
 
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs);
@@ -398,7 +403,7 @@ inline void* operator new(unsigned int, void* ptr)
     return ptr;
 }
 
-void __cdecl FUN_00d2cc70(void* dst, const void* src, unsigned int numBytes);
+void __cdecl hkMemUtil_memMove(void* dst, const void* src, unsigned int numBytes);
 
 struct Element
 {
@@ -423,7 +428,7 @@ void hkArrayBase<Element>::_spliceInto(hkMemoryAllocator& allocator, int index, 
         hkArrayUtil::_reserve(allocator, this, iCapacity, 8);
     }
 
-    FUN_00d2cc70(&m_data[index + numToInsert], &m_data[index + numToRemove], numToMove * 8);
+    hkMemUtil_memMove(&m_data[index + numToInsert], &m_data[index + numToRemove], numToMove * 8);
 
     Element* dst = &m_data[index];
     for (int i = 0; i < numToInsert; ++i)
@@ -504,12 +509,13 @@ struct S00d5eb10_Alloc : public FUN_00c66560_class
     hkInplaceArray<S00d5eb10_Block, 32> m_kBlocks;
     S00d5eb10_CS m_pWorldLock;
 
-    void FUN_00d5eb10(void* p, int size);
+    void hkSolverAllocator_bufFree(void* p, int size);
 };
 
 // Updates allocation bookkeeping; moves m_pTileTemplate backward for an adjacent block, otherwise merges with or inserts into m_kBlocks.
 // @fnv 0x00d5eb10
-void S00d5eb10_Alloc::FUN_00d5eb10(void* apBlock, int size)
+// src: HAVOK_LIB 0x00d5eb10
+void S00d5eb10_Alloc::hkSolverAllocator_bufFree(void* apBlock, int size)
 {
     void* cs = &m_pWorldLock;
     EnterCriticalSection(cs);
@@ -585,11 +591,12 @@ exit:
 
 struct SolverDeletingView : FUN_00cd06a0_class
 {
-    SolverDeletingView* FUN_00d5ed70(unsigned int flags);
+    SolverDeletingView* UpdateState_00d5ed70(unsigned int flags);
 };
 
 // @fnv 0x00d5ed70
-SolverDeletingView* SolverDeletingView::FUN_00d5ed70(unsigned int)
+// src: GUESS 0x00d5ed70 (confidence: low)
+SolverDeletingView* SolverDeletingView::UpdateState_00d5ed70(unsigned int)
 {
     void (FUN_00cd06a0_class::*destroy)() = &FUN_00cd06a0_class::ResetVftableAndDeleteCriticalSection;
     (this->*destroy)();

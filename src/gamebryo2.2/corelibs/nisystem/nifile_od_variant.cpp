@@ -18,10 +18,10 @@ struct Dummy_0086bce0;
 extern Dummy_0086bce0* _g_fileFinder;
 extern bool DAT_011f81e0;
 
-void FUN_00afdf00(const char* apPath, int aiArg, unsigned int auiArg);
-void FUN_00afde50();
-void __cdecl FUN_00aa1b90(void (*apfnCallback)(const char*, int, unsigned int));
-void __cdecl FUN_00aa1a70(void (*apfnCallback)());
+void FileFinder_GetFile_(const char* apPath, int aiArg, unsigned int auiArg);
+void FileFinder_AccessFile();
+void __cdecl NiFile_SetFileCreateFunc(void (*apfnCallback)(const char*, int, unsigned int));
+void __cdecl NiFile_SetFileAccessFunc(void (*apfnCallback)());
 
 class FUN_00afdc60 : public FUN_00afe9f0
 {
@@ -36,7 +36,7 @@ FUN_00afdc60::FUN_00afdc60(int aiArg1, int aiArg2, bool abFlag) : FUN_00afe9f0(0
     (void)aiUnused;
     if (!_g_fileFinder)
         _g_fileFinder = (Dummy_0086bce0*)this;
-    FUN_00aa1b90(FUN_00afdf00);
-    FUN_00aa1a70(FUN_00afde50);
+    NiFile_SetFileCreateFunc(FileFinder_GetFile_);
+    NiFile_SetFileAccessFunc(FileFinder_AccessFile);
     DAT_011f81e0 = abFlag;
 }

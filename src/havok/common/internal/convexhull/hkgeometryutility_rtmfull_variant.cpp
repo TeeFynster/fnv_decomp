@@ -97,7 +97,8 @@ extern float DAT_0106ea1c;
 
 // Initialises two context objects, sets a flag, looks up a1 in the first context and, if found, applies a2 and a3 and a float constant before finishing.
 // @fnv 0x00d5a630
-void __cdecl FUN_00d5a630(void* a1, int a2, int a3)
+// src: HAVOK_LIB 0x00d5a630
+void __cdecl hkGeometryUtility_createConvexGeometry(void* a1, int a2, int a3)
 {
     FUN_00d5a630_ctxB b;
     FUN_00d5a630_ctxA a;
@@ -151,7 +152,7 @@ struct D5C110MemoryRouter
     }
 };
 
-extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
+extern "C" D5C110MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 // hkArray<hkVector4> without a destructor (Havok was built without EH): explicit cleanup.
 struct D5C110VertexArray
@@ -165,7 +166,7 @@ struct D5C110VertexArray
 
     void ClearAndRelease()
     {
-        D5C110Allocator& alloc = FUN_00c85750().heap();
+        D5C110Allocator& alloc = hkMemoryRouter_getInstance().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(Vec4));
@@ -216,7 +217,8 @@ struct D5C110VertexArray;
 void __cdecl ProcessArg(const void* shape, D5C110VertexArray& vertices);
 
 // @fnv 0x00d5a6a0
-void __cdecl FUN_00d5a6a0(const void* shape, D5C110VertexArray& vertices)
+// src: XBOX_PDB 0x00d5a6a0
+void __cdecl hkGeometryUtility_createVerticesFromPlaneEquations(const void* shape, D5C110VertexArray& vertices)
 {
     ProcessArg(shape, vertices);
 }
@@ -229,7 +231,8 @@ struct S00d5ad60_cls
 };
 
 // @fnv 0x00d5ad60
-static __declspec(noinline) unsigned char FUN_00d5ad60(S00d5ad60_cls* self, float* other, float threshold)
+// src: HAVOK_LIB 0x00d5ad60
+static __declspec(noinline) unsigned char approxEquals(S00d5ad60_cls* self, float* other, float threshold)
 {
     float d = *other - self->m_f00;
     d = fabs(d);
@@ -238,7 +241,7 @@ static __declspec(noinline) unsigned char FUN_00d5ad60(S00d5ad60_cls* self, floa
 
 unsigned char S00d5ad60_cls::S00d5ad60_call(float* other, float threshold)
 {
-    return FUN_00d5ad60(this, other, threshold);
+    return approxEquals(this, other, threshold);
 }
 
 
@@ -248,7 +251,8 @@ extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 extern float DAT_01011d78;
 
 // @fnv 0x00d5ad90
-static __declspec(noinline) int FUN_00d5ad90(const float* pVec, float fTol)
+// src: GUESS 0x00d5ad90 (confidence: high)
+static __declspec(noinline) int Hkgeometryutility_IsMaximumAbsoluteComponentNearOne(const float* pVec, float fTol)
 {
     float a2 = fabs(pVec[2]);
     float a1 = fabs(pVec[1]);
@@ -265,7 +269,7 @@ static __declspec(noinline) int FUN_00d5ad90(const float* pVec, float fTol)
 
 int __cdecl S00d5ad90_Wrap(const float* pVec, float fTol)
 {
-    return FUN_00d5ad90(pVec, fTol);
+    return Hkgeometryutility_IsMaximumAbsoluteComponentNearOne(pVec, fTol);
 }
 
 struct S00d5c060_Src
@@ -276,15 +280,16 @@ struct S00d5c060_Src
 };
 
 char* __cdecl AllocateWithHeader(D5C110Allocator* alloc, int size);
-char* __cdecl FUN_00c856c0(D5C110Allocator* owner, char* data);
-void __cdecl FUN_00d5beb0(Vec4* self, char* data, int count, int flags, float scale);
+char* __cdecl hkMemoryRouter_easyFree(D5C110Allocator* owner, char* data);
+void __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(Vec4* self, char* data, int count, int flags, float scale);
 
 // @fnv 0x00d5c060
-Vec4 FUN_00d5c060(const S00d5c060_Src* src, float scale)
+// src: HAVOK_LIB 0x00d5c060
+Vec4 hkGeometryUtility_createMinBoundingSphere(const S00d5c060_Src* src, float scale)
 {
     Vec4 result;
     int count = src->m_uiItemCount;
-    char* data = AllocateWithHeader(&FUN_00c85750().heap(), count * 16);
+    char* data = AllocateWithHeader(&hkMemoryRouter_getInstance().heap(), count * 16);
     int quad = src->m_iElementIndex / 4;
     Vec4* d = (Vec4*)data;
     for (int i = 0; i < src->m_uiItemCount; ++i)
@@ -293,8 +298,8 @@ Vec4 FUN_00d5c060(const S00d5c060_Src* src, float scale)
         d[i].y = ((const float*)src->m_pData)[i * quad + 1];
         d[i].z = ((const float*)src->m_pData)[i * quad + 2];
     }
-    FUN_00d5beb0(&result, data, src->m_uiItemCount, 0, scale);
-    FUN_00c856c0(&FUN_00c85750().heap(), data);
+    Hkgeometryutility_ProcessEntries_00d5beb0(&result, data, src->m_uiItemCount, 0, scale);
+    hkMemoryRouter_easyFree(&hkMemoryRouter_getInstance().heap(), data);
     return result;
 }
 
@@ -398,12 +403,13 @@ struct ObbFlag
     char c;
 };
 
-void __cdecl FUN_00c908c0(void*, void*, int, int);
-bool __cdecl FUN_00d5c6d0(void* geom, void* halfExtents, void* transform, float tolerance);
-void __cdecl FUN_00d5c1a0(void*, int, int, void*, void*, ObbFlag);
-void __cdecl FUN_00d5ac50(void*, void*, void*, void*, void*);
+void __cdecl hkArrayUtil__reserve(void*, void*, int, int);
+bool __cdecl getIsBoxGeometry(void* geom, void* halfExtents, void* transform, float tolerance);
+void __cdecl getMeanAndCovariance(void*, int, int, void*, void*, ObbFlag);
+void __cdecl HkgeometryutilityGsEhscNogsNoehsc_ComputeValues_00d5ac50(void*, void*, void*, void*, void*);
 
-static __declspec(noinline) void FUN_00d5ae60(const char* verts, const char* mat, int count, int stride, S4 extents,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const char* verts, const char* mat, int count, int stride, S4 extents,
                                               S4 center)
 {
     int n = count / 3;
@@ -420,7 +426,8 @@ static __declspec(noinline) void FUN_00d5ae60(const char* verts, const char* mat
     *(int*)center.v = stride;
 }
 
-static __declspec(noinline) float FUN_00d5b990(S4 verts, S4 count, S4 src, int steps, int stride, char* dest)
+// src: GUESS 0x00d5b990 (confidence: low)
+static __declspec(noinline) float Hkgeometryutility_UpdateState_00d5b990(S4 verts, S4 count, S4 src, int steps, int stride, char* dest)
 {
     *(int*)dest = stride + steps;
     int acc = verts.v + count.v + src.v + steps + stride + (int)dest;
@@ -428,14 +435,15 @@ static __declspec(noinline) float FUN_00d5b990(S4 verts, S4 count, S4 src, int s
 }
 
 // @fnv 0x00d5d270
-void FUN_00d5d270(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
+// src: XBOX_PDB 0x00d5d270
+void hkGeometryUtility_calcObb(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
 {
     ObbGeom geom;
     InitAndSetB(*(const D5C110StridedVertices*)shape, *(D5C110Geometry*)&geom);
 
     int nStack = geom.numTris * 3;
     ObbArr arr;
-    D5C110MemoryRouter& router = FUN_00c85750();
+    D5C110MemoryRouter& router = hkMemoryRouter_getInstance();
     char* start = (char*)router.unk00;
     router.unk00 = (int)(start + ((nStack * 16 + 0x7f) & ~0x7f));
     arr.m_cap = nStack | 0x80000000;
@@ -443,13 +451,13 @@ void FUN_00d5d270(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
     arr.m_pTrailingData = start;
 
     int total = geom.numTris * 3;
-    D5C110Allocator& heap = FUN_00c85750().heap();
+    D5C110Allocator& heap = hkMemoryRouter_getInstance().heap();
     if ((arr.m_cap & 0x3fffffff) < total)
     {
         int cap = (arr.m_cap & 0x3fffffff) * 2;
         if (total >= cap)
             cap = total;
-        FUN_00c908c0(&heap, &arr.m_data, cap, 16);
+        hkArrayUtil__reserve(&heap, &arr.m_data, cap, 16);
     }
     arr.m_iElementCount = total;
 
@@ -460,13 +468,13 @@ void FUN_00d5d270(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
         arr.m_data[i * 3 + 2].q = geom.verts[geom.tris[i].i2].q;
     }
 
-    if (FUN_00d5c6d0(&geom, outExt, outXf, DAT_01013ea4))
+    if (getIsBoxGeometry(&geom, outExt, outXf, DAT_01013ea4))
     {
         char* saved = arr.m_pTrailingData;
         if (saved == (char*)arr.m_data)
             arr.m_iElementCount = 0;
-        FUN_00c85750().unk00 = (int)saved;
-        D5C110Allocator& alloc = FUN_00c85750().heap();
+        hkMemoryRouter_getInstance().unk00 = (int)saved;
+        D5C110Allocator& alloc = hkMemoryRouter_getInstance().heap();
         arr.m_iElementCount = 0;
         if ((arr.m_cap & 0x80000000) == 0)
             alloc.ReturnMemory(arr.m_data, (arr.m_cap & 0x3fffffff) * 16);
@@ -484,22 +492,22 @@ void FUN_00d5d270(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
     f.rot0.c1.q = _mm_setr_ps(DAT_01011d78, DAT_01012068, DAT_01011d78, DAT_01011d78);
     f.rot0.c2.q = _mm_setr_ps(DAT_01011d78, DAT_01011d78, DAT_01012068, DAT_01011d78);
 
-    FUN_00d5ae60(data, (const char*)&f.rot0, count, 16, S4((int)&f.ext0), S4((int)&f.ctr0));
+    Object_ProcessEntries_00d5ae60(data, (const char*)&f.rot0, count, 16, S4((int)&f.ext0), S4((int)&f.ctr0));
     float vol0 = f.ext0.y() * f.ext0.x() * f.ext0.z();
     ObbFlag flag;
     flag.c = 0;
-    FUN_00d5c1a0((void*)data, count, 16, &f.cov, &f.ctr1, flag);
+    getMeanAndCovariance((void*)data, count, 16, &f.cov, &f.ctr1, flag);
     char ok;
-    FUN_00d5ac50(&ok, &f.cov, &f.rot1.c0, &f.rot1.c1, &f.rot1.c2);
-    FUN_00d5ae60(data, (const char*)&f.rot1, count, 16, S4((int)&f.ext1), S4((int)&f.ctr1));
+    HkgeometryutilityGsEhscNogsNoehsc_ComputeValues_00d5ac50(&ok, &f.cov, &f.rot1.c0, &f.rot1.c1, &f.rot1.c2);
+    Object_ProcessEntries_00d5ae60(data, (const char*)&f.rot1, count, 16, S4((int)&f.ext1), S4((int)&f.ctr1));
     float vol1 = f.ext1.y() * f.ext1.x() * f.ext1.z();
 
     if (mode == 2)
     {
-        vol0 = FUN_00d5b990(S4((int)data), S4(count), S4((int)&f.rot0), 20, 16, (char*)&f.rot0);
-        FUN_00d5ae60(data, (const char*)&f.rot0, count, 16, S4((int)&f.ext0), S4((int)&f.ctr0));
-        vol1 = FUN_00d5b990(S4((int)data), S4(count), S4((int)&f.rot1), 20, 16, (char*)&f.rot1);
-        FUN_00d5ae60(data, (const char*)&f.rot1, count, 16, S4((int)&f.ext1), S4((int)&f.ctr1));
+        vol0 = Hkgeometryutility_UpdateState_00d5b990(S4((int)data), S4(count), S4((int)&f.rot0), 20, 16, (char*)&f.rot0);
+        Object_ProcessEntries_00d5ae60(data, (const char*)&f.rot0, count, 16, S4((int)&f.ext0), S4((int)&f.ctr0));
+        vol1 = Hkgeometryutility_UpdateState_00d5b990(S4((int)data), S4(count), S4((int)&f.rot1), 20, 16, (char*)&f.rot1);
+        Object_ProcessEntries_00d5ae60(data, (const char*)&f.rot1, count, 16, S4((int)&f.ext1), S4((int)&f.ctr1));
     }
 
     LocalM128 pickedCtr;
@@ -528,8 +536,8 @@ void FUN_00d5d270(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
     char* saved = arr.m_pTrailingData;
     if (saved == (char*)arr.m_data)
         arr.m_iElementCount = 0;
-    FUN_00c85750().unk00 = (int)saved;
-    D5C110Allocator& alloc2 = FUN_00c85750().heap();
+    hkMemoryRouter_getInstance().unk00 = (int)saved;
+    D5C110Allocator& alloc2 = hkMemoryRouter_getInstance().heap();
     arr.m_iElementCount = 0;
     if ((arr.m_cap & 0x80000000) == 0)
         alloc2.ReturnMemory(arr.m_data, (arr.m_cap & 0x3fffffff) * 16);
@@ -550,9 +558,10 @@ extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
 
 extern const float DAT_01012054;
 
-static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t);
+static __declspec(noinline) Vec4* Hkgeometryutilityfull_UpdateState_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t);
 
-static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
+// src: GUESS 0x00d5bb80 (confidence: low)
+static __declspec(noinline) Vec4* Object_ProcessAndReturnValue_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -561,7 +570,8 @@ static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Ve
     return res;
 }
 
-static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
+// src: GUESS 0x00d5bce0 (confidence: low)
+static __declspec(noinline) Vec4* Object_ComputeValue_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
 {
     res->x = 0.0f;
     Vec4 a = *p0;
@@ -571,7 +581,8 @@ static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Ve
 }
 
 // @fnv 0x00d5beb0
-LocalM128* __cdecl FUN_00d5beb0(LocalM128* out, Vec4* pts, int count, int depth, float t)
+// src: GUESS 0x00d5beb0 (confidence: low)
+LocalM128* __cdecl Hkgeometryutility_ProcessEntries_00d5beb0(LocalM128* out, Vec4* pts, int count, int depth, float t)
 {
     Vec4 rA;
     Vec4 rB;
@@ -590,13 +601,13 @@ LocalM128* __cdecl FUN_00d5beb0(LocalM128* out, Vec4* pts, int count, int depth,
         *out = *(LocalM128*)&rA;
         break;
     case 2:
-        *out = *(LocalM128*)FUN_00d5bb10(&rA, (Vec4*)&pts[-1], (Vec4*)&pts[-2], t);
+        *out = *(LocalM128*)Hkgeometryutilityfull_UpdateState_00d5bb10(&rA, (Vec4*)&pts[-1], (Vec4*)&pts[-2], t);
         break;
     case 3:
-        *out = *(LocalM128*)FUN_00d5bb80(&rB, (Vec4*)&pts[-1], (Vec4*)&pts[-2], (Vec4*)&pts[-3], t);
+        *out = *(LocalM128*)Object_ProcessAndReturnValue_00d5bb80(&rB, (Vec4*)&pts[-1], (Vec4*)&pts[-2], (Vec4*)&pts[-3], t);
         break;
     default:
-        *out = *(LocalM128*)FUN_00d5bce0(&rC, (Vec4*)&pts[-1], (Vec4*)&pts[-2], (Vec4*)&pts[-3], (Vec4*)&pts[-4], t);
+        *out = *(LocalM128*)Object_ComputeValue_00d5bce0(&rC, (Vec4*)&pts[-1], (Vec4*)&pts[-2], (Vec4*)&pts[-3], (Vec4*)&pts[-4], t);
         return out;
     }
 
@@ -620,7 +631,7 @@ LocalM128* __cdecl FUN_00d5beb0(LocalM128* out, Vec4* pts, int count, int depth,
                 pts[k - 1].v = *(LocalM128*)&rA;
             }
 
-            *out = *FUN_00d5beb0((LocalM128*)&rB, pts + 1, i, depth + 1, t);
+            *out = *Hkgeometryutility_ProcessEntries_00d5beb0((LocalM128*)&rB, pts + 1, i, depth + 1, t);
         }
     }
 
@@ -726,7 +737,8 @@ struct ObbWord
 };
 
 extern "C" int obbMix(int);
-static __declspec(noinline) void FUN_00d5ae60(const float* verts, int count, int stride, ObbWord ext,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const float* verts, int count, int stride, ObbWord ext,
                                               const ObbAxis* axes, ObbWord pos)
 {
     int triangles = count / 3;
@@ -743,7 +755,8 @@ static __declspec(noinline) void FUN_00d5ae60(const float* verts, int count, int
     ((ObbAxis*)pos.v)->operator()(0) = (float)stride;
 }
 
-static __declspec(noinline) float FUN_00d5b0c0(const float* verts, int count, int stride, const ObbAxis* axes)
+// src: GUESS 0x00d5b0c0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00d5b0c0(const float* verts, int count, int stride, const ObbAxis* axes)
 {
     ObbAxis tmp[3];
     tmp[0] = axes[0];
@@ -755,10 +768,11 @@ static __declspec(noinline) float FUN_00d5b0c0(const float* verts, int count, in
     tmp[2].cross(axes[0], axes[1]);
     tmp[2].normalize();
     ObbAxis position, extents;
-    FUN_00d5ae60(verts, count, stride, ObbWord((int)&extents), tmp, ObbWord((int)&position));
+    Object_ProcessEntries_00d5ae60(verts, count, stride, ObbWord((int)&extents), tmp, ObbWord((int)&position));
     return extents(1) * extents(0) * extents(2);
 }
-static __declspec(noinline) void FUN_00d5b440(const ObbAxis* axes, ObbAxis* direction, float step, ObbAxis* out)
+// src: GUESS 0x00d5b440 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b440(const ObbAxis* axes, ObbAxis* direction, float step, ObbAxis* out)
 {
     for (int i = 0; i < 2; ++i)
     {
@@ -777,16 +791,17 @@ inline float obbRoot(float f)
     return (float)sqrt((double)f);
 }
 // @fnv 0x00d5b640
-static __declspec(noinline) float FUN_00d5b640(const float* vertexArray, int numVertices, int striding,
+// src: GUESS 0x00d5b640 (confidence: low)
+static __declspec(noinline) float Object_ProcessEntries_00d5b640(const float* vertexArray, int numVertices, int striding,
                                                const ObbAxis* axes, float stepIn, ObbAxis* direction, int maxIter)
 {
     float fb = 0;
     float fc = 0;
     float a = 0;
-    float fa = FUN_00d5b0c0(vertexArray, numVertices, striding, axes);
+    float fa = Object_ProcessAndReturnValue_00d5b0c0(vertexArray, numVertices, striding, axes);
     ObbAxis tempAxes[3];
-    FUN_00d5b440(axes, direction, stepIn, tempAxes);
-    float fTemp = FUN_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
+    Object_ProcessEntries_00d5b440(axes, direction, stepIn, tempAxes);
+    float fTemp = Object_ProcessAndReturnValue_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
     float b, c;
     if (fTemp < fa)
     {
@@ -796,8 +811,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* vertexArray, int num
         for (int i = 0; i < maxIter; i++)
         {
             c *= double(1.2f);
-            FUN_00d5b440(axes, direction, c, tempAxes);
-            fc = FUN_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
+            Object_ProcessEntries_00d5b440(axes, direction, c, tempAxes);
+            fc = Object_ProcessAndReturnValue_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
             if (fb < fc)
                 break;
             else
@@ -817,8 +832,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* vertexArray, int num
         for (int i = 0; i < maxIter; i++)
         {
             b = (a + b) * 0.5;
-            FUN_00d5b440(axes, direction, b, tempAxes);
-            fb = FUN_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
+            Object_ProcessEntries_00d5b440(axes, direction, b, tempAxes);
+            fb = Object_ProcessAndReturnValue_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
             if (fb < fa && fb < fc)
                 break;
             if (i == maxIter - 1)
@@ -836,8 +851,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* vertexArray, int num
         if (lengthAb > lengthBc)
         {
             x = b - GoldenRatio * lengthAb;
-            FUN_00d5b440(axes, direction, x, tempAxes);
-            fx = FUN_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
+            Object_ProcessEntries_00d5b440(axes, direction, x, tempAxes);
+            fx = Object_ProcessAndReturnValue_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
             if (fx < fb)
             {
                 c = b;
@@ -854,8 +869,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* vertexArray, int num
         else
         {
             x = b + GoldenRatio * lengthBc;
-            FUN_00d5b440(axes, direction, x, tempAxes);
-            fx = FUN_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
+            Object_ProcessEntries_00d5b440(axes, direction, x, tempAxes);
+            fx = Object_ProcessAndReturnValue_00d5b0c0(vertexArray, numVertices, striding, tempAxes);
             if (fx < fb)
             {
                 a = b;
@@ -879,7 +894,7 @@ volatile int obbCount, obbStride, obbIter;
 volatile float obbStep, obbAnswer;
 void obbCaller()
 {
-    obbAnswer = FUN_00d5b640(obbVerts, obbCount, obbStride, obbAxes, obbStep, obbDir, obbIter);
+    obbAnswer = Object_ProcessEntries_00d5b640(obbVerts, obbCount, obbStride, obbAxes, obbStep, obbDir, obbIter);
 }
 
 extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
@@ -1019,7 +1034,8 @@ __forceinline float axisInvSqrt(float f)
     return 1.0f / axisSqrt(f);
 }
 
-static __declspec(noinline) void FUN_00d5ae60(const float* data, int count, int stride, Axis& size, const Axis* axes,
+// src: GUESS 0x00d5ae60 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5ae60(const float* data, int count, int stride, Axis& size, const Axis* axes,
                                               Axis& center)
 {
     Axis lower;
@@ -1071,7 +1087,8 @@ static __declspec(noinline) void FUN_00d5ae60(const float* data, int count, int 
     center.addMul4(midpoint(2), axes[2]);
 }
 
-static __declspec(noinline) float FUN_00d5b0c0(const float* data, int count, int stride, const Axis* axes)
+// src: GUESS 0x00d5b0c0 (confidence: low)
+static __declspec(noinline) float Object_ProcessAndReturnValue_00d5b0c0(const float* data, int count, int stride, const Axis* axes)
 {
     Axis adjusted[3];
     adjusted[0] = axes[0];
@@ -1084,24 +1101,25 @@ static __declspec(noinline) float FUN_00d5b0c0(const float* data, int count, int
     adjusted[2].normalize3();
     Axis center;
     Axis size;
-    FUN_00d5ae60(data, count, stride, size, adjusted, center);
+    Object_ProcessEntries_00d5ae60(data, count, stride, size, adjusted, center);
     return size(0) * size(1) * size(2);
 }
 
-static __declspec(noinline) void FUN_00d5b2a0(const float* data, int count, int stride, const Axis* axes, float delta,
+// src: GUESS 0x00d5b2a0 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b2a0(const float* data, int count, int stride, const Axis* axes, float delta,
                                               Axis* direction)
 {
     Axis changed[3];
     changed[0] = axes[0];
     changed[1] = axes[1];
-    float base = FUN_00d5b0c0(data, count, stride, axes);
+    float base = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, axes);
     float invDelta = 1 / delta;
     for (int row = 0; row < 2; ++row)
     {
         for (int col = 0; col < 3; ++col)
         {
             changed[row](col) += delta;
-            float volume = FUN_00d5b0c0(data, count, stride, changed);
+            float volume = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             direction[row](col) = (volume - base) * invDelta;
             changed[row](col) = axes[row](col);
         }
@@ -1116,7 +1134,8 @@ static __declspec(noinline) void FUN_00d5b2a0(const float* data, int count, int 
     }
 }
 
-static __declspec(noinline) void FUN_00d5b440(const Axis* input, Axis* direction, float step, Axis* output)
+// src: GUESS 0x00d5b440 (confidence: low)
+static __declspec(noinline) void Object_ProcessEntries_00d5b440(const Axis* input, Axis* direction, float step, Axis* output)
 {
     for (int axis = 0; axis < 2; ++axis)
     {
@@ -1131,15 +1150,16 @@ static __declspec(noinline) void FUN_00d5b440(const Axis* input, Axis* direction
     output[2].normalize3();
 }
 
-static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int stride, const Axis* axes, float start,
+// src: GUESS 0x00d5b640 (confidence: low)
+static __declspec(noinline) float Object_ProcessEntries_00d5b640(const float* data, int count, int stride, const Axis* axes, float start,
                                                Axis* direction, int limit)
 {
     float fb = 0, fc = 0;
     float a = 0;
-    float fa = FUN_00d5b0c0(data, count, stride, axes);
+    float fa = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, axes);
     Axis changed[3];
-    FUN_00d5b440(axes, direction, start, changed);
-    float trial = FUN_00d5b0c0(data, count, stride, changed);
+    Object_ProcessEntries_00d5b440(axes, direction, start, changed);
+    float trial = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
     float b, c;
     if (fa > trial)
     {
@@ -1149,8 +1169,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         for (int iter = 0; iter < limit; ++iter)
         {
             c *= 1.2f;
-            FUN_00d5b440(axes, direction, c, changed);
-            fc = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, c, changed);
+            fc = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fc > fb)
                 break;
             else
@@ -1170,8 +1190,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         for (int iter = 0; iter < limit; ++iter)
         {
             b = (a + b) * 0.5;
-            FUN_00d5b440(axes, direction, b, changed);
-            fb = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, b, changed);
+            fb = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fa > fb && fc > fb)
                 break;
             if (iter == limit - 1)
@@ -1189,8 +1209,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         if (bc < ab)
         {
             x = b - golden * ab;
-            FUN_00d5b440(axes, direction, x, changed);
-            fx = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, x, changed);
+            fx = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fb > fx)
             {
                 c = b;
@@ -1207,8 +1227,8 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
         else
         {
             x = b + golden * bc;
-            FUN_00d5b440(axes, direction, x, changed);
-            fx = FUN_00d5b0c0(data, count, stride, changed);
+            Object_ProcessEntries_00d5b440(axes, direction, x, changed);
+            fx = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, changed);
             if (fb > fx)
             {
                 a = b;
@@ -1227,12 +1247,13 @@ static __declspec(noinline) float FUN_00d5b640(const float* data, int count, int
 }
 
 // @fnv 0x00d5b990
-static __declspec(noinline) float FUN_00d5b990(const float* data, int count, int stride, const Axis* initial,
+// src: GUESS 0x00d5b990 (confidence: low)
+static __declspec(noinline) float Hkgeometryutility_UpdateState_00d5b990(const float* data, int count, int stride, const Axis* initial,
                                                Axis* result, int limit)
 {
     float delta = 0.0001f;
     float step = 0.001f;
-    float volume = FUN_00d5b0c0(data, count, stride, initial);
+    float volume = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, initial);
     result[0] = initial[0];
     result[1] = initial[1];
     result[2] = initial[2];
@@ -1243,13 +1264,13 @@ static __declspec(noinline) float FUN_00d5b990(const float* data, int count, int
         previous[0] = result[0];
         previous[1] = result[1];
         previous[2] = result[2];
-        FUN_00d5b2a0(data, count, stride, result, delta, direction);
-        step = FUN_00d5b640(data, count, stride, result, step, direction, limit);
+        Object_ProcessEntries_00d5b2a0(data, count, stride, result, delta, direction);
+        step = Object_ProcessEntries_00d5b640(data, count, stride, result, step, direction, limit);
         if (step < 0.0)
             break;
-        FUN_00d5b440(result, direction, step, result);
+        Object_ProcessEntries_00d5b440(result, direction, step, result);
         float lastVolume = volume;
-        volume = FUN_00d5b0c0(data, count, stride, result);
+        volume = Object_ProcessAndReturnValue_00d5b0c0(data, count, stride, result);
         if (lastVolume < volume)
         {
             volume = lastVolume;
@@ -1271,7 +1292,7 @@ Axis* volatile probeOutput;
 volatile float probeSink;
 void runProbe()
 {
-    probeSink = FUN_00d5b990(probeData, probeCount, probeStride, probeAxes, probeOutput, probeLimit);
+    probeSink = Hkgeometryutility_UpdateState_00d5b990(probeData, probeCount, probeStride, probeAxes, probeOutput, probeLimit);
 }
 #pragma optimize("", on)
 
@@ -1330,7 +1351,8 @@ inline void setAdd(Vec4& vector, const Vec4& a, const Vec4& b)
 }
 
 // @fnv 0x00d5bb10
-__declspec(noinline) Vec4* FUN_00d5bb10(Vec4* result, Vec4* first, Vec4* second, float radius)
+// src: GUESS 0x00d5bb10 (confidence: low)
+__declspec(noinline) Vec4* Hkgeometryutilityfull_UpdateState_00d5bb10(Vec4* result, Vec4* first, Vec4* second, float radius)
 {
     using namespace sphere_pair_build;
     const Vec4* a = reinterpret_cast<const Vec4*>(first);

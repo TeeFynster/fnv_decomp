@@ -6,13 +6,13 @@
 #include "../../../../../include/hkMemoryAllocator.h"
 #include "../../../../../include/hkReferencedObject.h"
 
-hkMemoryRouter* FUN_00c85750();
+hkMemoryRouter* hkMemoryRouter_getInstance();
 
 
 inline void hkReferencedObject::operator delete(void* p)
 {
     hkReferencedObject* b = static_cast<hkReferencedObject*>(p);
-    FUN_00c85750()->heap().blockFree(p, b->m_usMemSizeAndFlags);
+    hkMemoryRouter_getInstance()->heap().blockFree(p, b->m_usMemSizeAndFlags);
 }
 
 struct FUN_00e01ac0 : hkReferencedObject

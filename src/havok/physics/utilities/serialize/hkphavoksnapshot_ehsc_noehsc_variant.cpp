@@ -16,10 +16,10 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 // The TLS getter is 0x00c85750 and the heap is at +0x10; hkMemoryRouter.h is not available yet.
 #include "../../../../../include/hkMemoryRouter.h"
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* getRouter()
 {
-    return FUN_00c85750();
+    return hkMemoryRouter_getInstance();
 }
 
 void __cdecl ResizeAudioStream(void* alloc, void* arr, int elemSize);
@@ -46,7 +46,7 @@ public:
     {
         m_name = name;
         m_pReferencedResource.FUN_00d47770(object, pClassInfo);
-        m_pClassName = m_pReferencedResource.FUN_00d477a0() ? m_pReferencedResource.FUN_00d477a0()->getName() : 0;
+        m_pClassName = m_pReferencedResource.hkRefVariant_getClass() ? m_pReferencedResource.hkRefVariant_getClass()->getName() : 0;
     }
 };
 inline void* operator new(unsigned int, void* p)
@@ -85,13 +85,14 @@ __forceinline T& hkArrayBase<T>::_expandOne(hkMemoryAllocator& a)
 }
 extern int DAT_01268b54;
 // The game ABI passes aggregate result storage as the first stack argument.
-void __cdecl FUN_00cc0b50(hkResult* result, const void* object, const void* pClassInfo, int a3, int a4, int a5, int a6);
+void __cdecl hkpHavokSnapshot_save(hkResult* result, const void* object, const void* pClassInfo, int a3, int a4, int a5, int a6);
 
 // @fnv 0x00cc0bc0
-hkResult* __cdecl FUN_00cc0bc0(hkResult* result, const void* object, const hkClass& pClassInfo, int a3, int a4, int a5)
+// src: HAVOK_LIB 0x00cc0bc0
+hkResult* __cdecl hkpHavokSnapshot_saveUnderRootLevel(hkResult* result, const void* object, const hkClass& pClassInfo, int a3, int a4, int a5)
 {
     hkRootLevelContainer container;
     container.m_kNamedVariants.expandOne().set(pClassInfo.getName(), object, &pClassInfo);
-    FUN_00cc0b50(result, &container, &DAT_01268b54, a3, a4, a5, 0);
+    hkpHavokSnapshot_save(result, &container, &DAT_01268b54, a3, a4, a5, 0);
     return result;
 }

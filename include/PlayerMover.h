@@ -10,11 +10,11 @@ class PlayerMover : public ActorMover
 public:
     ~PlayerMover();
 
-    void FUN_009e9dc0(unsigned int auMode);
-    void FUN_009e9de0(unsigned int auMode);
+    void SetMoveModePreference(unsigned int auMode);
+    void ClearMoveModePreference(unsigned int auMode);
     void* FUN_009e9e00(unsigned int auFlags);
-    void FUN_009e9e30();
-    void FUN_009ea5a0(BGSSaveFormBuffer* apBuffer);
+    void ResetVtableAndDestroyActorMover();
+    void SaveGame_009ea5a0(BGSSaveFormBuffer* apBuffer);
 
     void Revert(BGSLoadFormBuffer* apBuffer);
     void LoadGame(BGSLoadFormBuffer* apBuffer);

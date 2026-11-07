@@ -33,17 +33,18 @@ class FUN_00472840_impl
 class FUN_005e6c60_shell
 {
   public:
-    void FUN_005e6c60(void* data);
+    void SetLabel(void* data);
 };
 
 class ActivateChoice : public BGSEntryPointFunctionDataActivateChoice
 {
   public:
-    bool FUN_005e6ee0(TESFile* file);
+    bool BGSEntryPointFunctionDataActivateChoice_Load(TESFile* file);
 };
 
 // @fnv 0x005e6ee0
-bool ActivateChoice::FUN_005e6ee0(TESFile* file)
+// src: XBOX_PDB 0x005e6ee0
+bool ActivateChoice::BGSEntryPointFunctionDataActivateChoice_Load(TESFile* file)
 {
     void* scvrBuf3;
     unsigned int scdaSize4;
@@ -107,7 +108,7 @@ bool ActivateChoice::FUN_005e6ee0(TESFile* file)
     case 0x32465045:  // 'EPF2'
         epf2BufTmp = _alloca(file->GetChunkSize());
         file->GetChunkData(epf2BufTmp, 0);
-        reinterpret_cast<FUN_005e6c60_shell*>(this)->FUN_005e6c60(epf2BufTmp);
+        reinterpret_cast<FUN_005e6c60_shell*>(this)->SetLabel(epf2BufTmp);
         break;
 
     case 0x33465045:  // 'EPF3'

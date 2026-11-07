@@ -151,14 +151,14 @@ hkUint32 MeshTriangleKeyCursor::GetNextNonDegenerateTriangleKey(hkUint32 auiKey)
 
 extern const hkClass DAT_01269198;
 
-int __cdecl FUN_00d06f80(const void* pvChunk, int iNumBytes) throw();
+int __cdecl hkStatisticsCollector_getAllocatedSize(const void* pvChunk, int iNumBytes) throw();
 
 template <class T> __forceinline void addArray(hkStatisticsCollector* collector, const char* name, const hkArray<T>& array)
 {
     if ((array.m_iCapacityState & 0x80000000) == 0 || collector->m_reportInplaceAllocations)
     {
         const T* data = array.m_data;
-        int allocated = FUN_00d06f80(data, array.getCapacity() * sizeof(T));
+        int allocated = hkStatisticsCollector_getAllocatedSize(data, array.getCapacity() * sizeof(T));
         collector->AddMemoryChunk(3, name, array.m_data, array.GetLogicalSize() * sizeof(T), allocated);
     }
 }
@@ -342,7 +342,7 @@ static __declspec(noinline) void ExpandAabbWithVertex(hkAabb& aabb, const hkTran
     hkVector4 scaled;
     scaled.set(vertex[0] * scaling.x, vertex[1] * scaling.y, vertex[2] * scaling.z);
     hkVector4 v;
-    v.FUN_00c7f640(localToWorld, scaled);
+    v.setTransformedPos_00c7f640(localToWorld, scaled);
     aabb.m_kMinimumCorner.m_vComponents = _mm_min_ps(aabb.m_kMinimumCorner.m_vComponents, v.m_vComponents);
     aabb.m_kMaximumCorner.m_vComponents = _mm_max_ps(aabb.m_kMaximumCorner.m_vComponents, v.m_vComponents);
 }
@@ -453,7 +453,7 @@ __forceinline void add(const hkVector4& b, hkVector4& a)
 class MeshShapeHelper : public hkpMeshShape
 {
   public:
-    void FUN_00dccdd0(const hkTransform& transform, hkReal tolerance, hkAabb& out) const;
+    void hkpMeshShape_getAabb(const hkTransform& transform, hkReal tolerance, hkAabb& out) const;
 };
 template <class T> __forceinline const T* hkAddByteOffsetConst(const T* p, long n)
 {
@@ -461,7 +461,8 @@ template <class T> __forceinline const T* hkAddByteOffsetConst(const T* p, long 
 }
 // Computes the world-space AABB of all subpart triangles, then expands it by margin plus m_fSphereRadius.
 // @fnv 0x00dccdd0
-void MeshShapeHelper::FUN_00dccdd0(const hkTransform& placement, hkReal margin, hkAabb& bounds) const
+// src: XBOX_PDB 0x00dccdd0
+void MeshShapeHelper::hkpMeshShape_getAabb(const hkTransform& placement, hkReal margin, hkAabb& bounds) const
 {
     bounds.m_kMinimumCorner.set(3.402820018375656e+38f, 3.402820018375656e+38f, 3.402820018375656e+38f);
     bounds.m_kMaximumCorner.set(-3.402820018375656e+38f, -3.402820018375656e+38f, -3.402820018375656e+38f);
@@ -501,11 +502,12 @@ void MeshShapeHelper::FUN_00dccdd0(const hkTransform& placement, hkReal margin, 
 class MeshScalingSetter : public hkpMeshShape
 {
   public:
-    void FUN_00dccf40(const hkVector4& value);
+    void UpdateFields_00dccf40(const hkVector4& value);
 };
 
 // @fnv 0x00dccf40
-void MeshScalingSetter::FUN_00dccf40(const hkVector4& value)
+// src: GUESS 0x00dccf40 (confidence: low)
+void MeshScalingSetter::UpdateFields_00dccf40(const hkVector4& value)
 {
     LocalM128 data = _mm_load_ps(&value.x);
     _mm_store_ps(&m_kScaling.x, data);

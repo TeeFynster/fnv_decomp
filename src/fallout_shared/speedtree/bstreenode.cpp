@@ -17,11 +17,12 @@
 
 struct FUN_00622430_shell
 {
-    unsigned int __thiscall FUN_00622430();
+    unsigned int __thiscall bhkTransformShape_GetCInfoSize();
 };
 
 // @fnv 0x00622430
-unsigned int __thiscall FUN_00622430_shell::FUN_00622430()
+// src: COMMUNITY 0x00622430
+unsigned int __thiscall FUN_00622430_shell::bhkTransformShape_GetCInfoSize()
 {
     return 0x50;
 }
@@ -84,19 +85,19 @@ bool BSTreeNode::SetLeafTextureVariant(unsigned char acTest)
                 ->GetProperty(0));
         if (pprop)
         {
-            pprop->FUN_0094db80(acTest);
+            pprop->NiAlphaProperty_SetTestRef(acTest);
         }
     }
     return true;
 }
 
 struct NiCullingProcess;
-extern "C" unsigned char __cdecl FUN_0054ee20();
+extern "C" unsigned char __cdecl BSTreeManager_GetTreesEnabled();
 // If FUN_0054ee20() returns nonzero, forwards the culling call to FUN_00a5dbe0 with arCuller.
 // @fnv 0x0066bf50
 void __thiscall BSTreeNode::OnVisible(NiCullingProcess& arCuller)
 {
-    if (FUN_0054ee20())
+    if (BSTreeManager_GetTreesEnabled())
     {
         reinterpret_cast<NiNode*>(this)->NiNode::OnVisible(arCuller);
     }
@@ -109,11 +110,12 @@ struct FUN_00c6c290_holder
 
 struct FUN_0066d410_shell : public FUN_00c6c290_holder
 {
-    void FUN_0066d410();
+    void ForwardCall_0066d410();
 };
 
 // @fnv 0x0066d410
-void FUN_0066d410_shell::FUN_0066d410()
+// src: GUESS 0x0066d410 (confidence: low)
+void FUN_0066d410_shell::ForwardCall_0066d410()
 {
     FUN_00c6c290();
 }
@@ -135,14 +137,14 @@ void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 
 struct FUN_0066d440_shell
 {
-    void FUN_0066d470();
+    void ForwardCall_0066d470();
     void* FUN_0066d440(unsigned int flags);
 };
 
 // @fnv 0x0066d440
 void* FUN_0066d440_shell::FUN_0066d440(unsigned int flags)
 {
-    this->FUN_0066d470();
+    this->ForwardCall_0066d470();
     if (flags & 1)
         __Dummy_00b6fef0(this, 20);
     return this;
@@ -150,25 +152,27 @@ void* FUN_0066d440_shell::FUN_0066d440(unsigned int flags)
 
 struct FUN_0066d470_shell
 {
-    void FUN_0066d410();
-    void FUN_0066d470();
+    void ForwardCall_0066d410();
+    void ForwardCall_0066d470();
 };
 
 // @fnv 0x0066d470
-void FUN_0066d470_shell::FUN_0066d470()
+// src: GUESS 0x0066d470 (confidence: low)
+void FUN_0066d470_shell::ForwardCall_0066d470()
 {
-    this->FUN_0066d410();
+    this->ForwardCall_0066d410();
 }
 
 struct FUN_0066d510_shell
 {
-    const void* FUN_0066d510();
+    const void* bhkMultiSphereShape_GetRTTI();
 };
 
 extern const void* g_012683e0;
 
 // @fnv 0x0066d510
-const void* FUN_0066d510_shell::FUN_0066d510()
+// src: COMMUNITY 0x0066d510
+const void* FUN_0066d510_shell::bhkMultiSphereShape_GetRTTI()
 {
     return &g_012683e0;
 }
@@ -207,7 +211,8 @@ GlobalObjectO2_00a7b610* FUN_0066d610_shell::GetGlobalObject()
 }
 
 // @fnv 0x0066d730
-unsigned int __thiscall bhkCapsuleShape::FUN_0066d730() const
+// src: COMMUNITY 0x0066d730
+unsigned int __thiscall bhkCapsuleShape::retn_48() const
 {
     return 0x30;
 }
@@ -273,17 +278,18 @@ bool __thiscall BSTreeNode::SetFrondVisible(bool abVisible)
 
 struct FUN_0066d3d0_shell
 {
-    void __thiscall FUN_0066d3d0(void*);
+    void __thiscall bhkPCollisionObject_bhkPCollisionObject(void*);
 };
 extern int DAT_01066acc;
 struct FUN_0066d3a0_shell
 {
-    void* __thiscall FUN_0066d3a0(void*);
+    void* __thiscall bhkSPCollisionObject_bhkSPCollisionObject(void*);
 };
 // @fnv 0x0066d3a0
-void* __thiscall FUN_0066d3a0_shell::FUN_0066d3a0(void* arg)
+// src: EXE 0x0066d3a0
+void* __thiscall FUN_0066d3a0_shell::bhkSPCollisionObject_bhkSPCollisionObject(void* arg)
 {
-    reinterpret_cast<FUN_0066d3d0_shell*>(this)->FUN_0066d3d0(arg);
+    reinterpret_cast<FUN_0066d3d0_shell*>(this)->bhkPCollisionObject_bhkPCollisionObject(arg);
     *reinterpret_cast<void**>(this) = &DAT_01066acc;
     return this;
 }
@@ -298,12 +304,13 @@ extern void* DAT_01066b94;
 struct FUN_0066d3d0_shell
 {
     void* m0;
-    void* __thiscall FUN_0066d3d0(unsigned int a);
+    void* __thiscall bhkPCollisionObject_bhkPCollisionObject(unsigned int a);
 };
 
 // Calls FUN_00c6b950 with a, then sets m0 to point at DAT_01066b94 and returns this.
 // @fnv 0x0066d3d0
-void* __thiscall FUN_0066d3d0_shell::FUN_0066d3d0(unsigned int a)
+// src: EXE 0x0066d3d0
+void* __thiscall FUN_0066d3d0_shell::bhkPCollisionObject_bhkPCollisionObject(unsigned int a)
 {
     ((FUN_00c6b950_shell*)this)->FUN_00c6b950(a);
     m0 = &DAT_01066b94;
@@ -311,11 +318,11 @@ void* __thiscall FUN_0066d3d0_shell::FUN_0066d3d0(unsigned int a)
 }
 }  // namespace fnv_0066d3d0
 
-extern "C" void __cdecl FUN_004b5020();
+extern "C" void __cdecl hkActionCinfo_hkActionCinfo();
 extern "C" void __cdecl FUN_0056e270();
 struct FUN_0056e120_shell
 {
-    void __thiscall FUN_0056e120();
+    void __thiscall bhkTransform_setIdentity();
 };
 struct FUN_0066d550_shell
 {
@@ -324,10 +331,10 @@ struct FUN_0066d550_shell
 // @fnv 0x0066d550
 void* FUN_0066d550_shell::Initialize()
 {
-    ((void(__thiscall*)(void*))FUN_004b5020)(this);
+    ((void(__thiscall*)(void*))hkActionCinfo_hkActionCinfo)(this);
     ((unsigned int*)this)[1] = 0;
     ((void(__thiscall*)(void*))FUN_0056e270)((char*)this + 0x10);
-    ((FUN_0056e120_shell*)((char*)this + 0x10))->FUN_0056e120();
+    ((FUN_0056e120_shell*)((char*)this + 0x10))->bhkTransform_setIdentity();
     return this;
 }
 
@@ -368,18 +375,19 @@ struct FUN_0056e900_shell
 };
 struct FUN_006299a0_shell
 {
-    void __thiscall FUN_006299a0();
+    void __thiscall ProcessAndReturnValue_006299a0();
 };
 struct FUN_0066d770_shell
 {
-    void* __thiscall FUN_0066d770();
+    void* __thiscall hkMultiSphereShapeCinfo_hkMultiSphereShapeCinfo();
 };
 // Calls StepAndReturnThis on this and FUN_006299a0 on the object at this+4, then returns this.
 // @fnv 0x0066d770
-void* __thiscall FUN_0066d770_shell::FUN_0066d770()
+// src: XBOX_PDB 0x0066d770
+void* __thiscall FUN_0066d770_shell::hkMultiSphereShapeCinfo_hkMultiSphereShapeCinfo()
 {
     ((FUN_0056e900_shell*)this)->StepAndReturnThis();
-    ((FUN_006299a0_shell*)((char*)this + 4))->FUN_006299a0();
+    ((FUN_006299a0_shell*)((char*)this + 4))->ProcessAndReturnValue_006299a0();
     return this;
 }
 
@@ -415,7 +423,7 @@ bool BSTreeNode::SetTexturingProperty(NiTexturingProperty* apProp)
 
 struct FUN_0094db80_shell
 {
-    void FUN_0094db80(unsigned char);
+    void NiAlphaProperty_SetTestRef(unsigned char);
 };
 // Looks up the node for a type; if mode is 0xff it culls the node, otherwise it unculls it and passes mode to the node's property 0.
 // @fnv 0x0066bdb0
@@ -433,26 +441,26 @@ bool BSTreeNode::SetFrondTextureVariant(unsigned short type, unsigned char mode)
         node->SetAppCulled(false);
         NiObject* property = (NiObject*)((NiAVObject*)node)->GetProperty(0);
         if (property != 0)
-            ((FUN_0094db80_shell*)property)->FUN_0094db80(mode);
+            ((FUN_0094db80_shell*)property)->NiAlphaProperty_SetTestRef(mode);
     }
     return true;
 }
 
 struct NiCamera;
 extern double gModifierZero;
-extern "C" unsigned int __cdecl FUN_00552380();
-extern bool __cdecl FUN_004b5fc0(NiAVObject*, NiCamera*);
+extern "C" unsigned int __cdecl BSTreeManager_GetCamera();
+extern bool __cdecl NodeInFrustum(NiAVObject*, NiCamera*);
 #include "../../../include/MEM_CONTEXT.h"
 // @fnv 0x0066bf80
 void BSTreeNode::UpdateDownwardPass(NiUpdateData& data, unsigned int flags)
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TREEART, true,
                            "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\SpeedTree\\BSTreeNode.cpp", 0x20d);
-    if (!FUN_0054ee20())
+    if (!BSTreeManager_GetTreesEnabled())
         return;
     if (data.fTime > gModifierZero)
     {
-        if (!FUN_004b5fc0((NiAVObject*)this, (NiCamera*)FUN_00552380()))
+        if (!NodeInFrustum((NiAVObject*)this, (NiCamera*)BSTreeManager_GetCamera()))
             return;
     }
     SetWindAmplitude(data.fTime);
@@ -465,7 +473,7 @@ class NiTexture;
 struct bhkWorldObject;
 
 extern char g_01268444_arg1;
-NiObject* __cdecl FUN_00653270(const NiRTTI* apRTTI, NiObject* apObject);
+NiObject* __cdecl NiObject_DynamicCast(const NiRTTI* apRTTI, NiObject* apObject);
 
 // @fnv 0x0066d7c0
 bhkSimpleShapePhantom* BSTreeNode::GetLeafObject()
@@ -477,8 +485,8 @@ bhkSimpleShapePhantom* BSTreeNode::GetLeafObject()
         NiPointer<NiTexture> spRetainedObject((NiTexture*)pPart8->GetPartName());
         if (spRetainedObject)
         {
-            bhkWorldObject* pWorld5 = ((bhkCollisionObject*)(NiTexture*)spRetainedObject)->FUN_006fa820();
-            pResult4 = FUN_00653270((const NiRTTI*)&g_01268444_arg1, (NiObject*)pWorld5);
+            bhkWorldObject* pWorld5 = ((bhkCollisionObject*)(NiTexture*)spRetainedObject)->bhkNiCollisionObject_GetWorldObject();
+            pResult4 = NiObject_DynamicCast((const NiRTTI*)&g_01268444_arg1, (NiObject*)pWorld5);
         }
     }
     return reinterpret_cast<bhkSimpleShapePhantom*>(pResult4);
@@ -569,11 +577,11 @@ void BSTreeNode::UpdateSelectedDownwardPass(NiUpdateData& kUpdate, unsigned int 
     AutoMemContext kMemContext(MEM_CONTEXT_MEM_CONTEXT_TREEART, true,
                                "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\SpeedTree\\BSTreeNode.cpp",
                                0x223);
-    if (!FUN_0054ee20())
+    if (!BSTreeManager_GetTreesEnabled())
         return;
     if (kUpdate.fTime > gModifierZero)
     {
-        if (!FUN_004b5fc0((NiAVObject*)this, (NiCamera*)FUN_00552380()))
+        if (!NodeInFrustum((NiAVObject*)this, (NiCamera*)BSTreeManager_GetCamera()))
             return;
     }
     SetWindAmplitude(kUpdate.fTime);
@@ -593,7 +601,7 @@ struct FUN_0066d490_base
 struct FUN_0066d490_cls : FUN_0066d490_base
 {
     void* m_vptr;
-    void FUN_00cb7b80(unsigned int a1);
+    void bhkMultiSphereShape_Init(unsigned int a1);
     FUN_0066d490_cls(unsigned int a1);
 };
 
@@ -602,7 +610,7 @@ struct FUN_0066d490_cls : FUN_0066d490_base
 FUN_0066d490_cls::FUN_0066d490_cls(unsigned int a1)
 {
     *(void* volatile*)&m_vptr = &DAT_01066c5c;
-    this->FUN_00cb7b80(a1);
+    this->bhkMultiSphereShape_Init(a1);
     DAT_012683dc = DAT_012683dc + 1;
 }
 
@@ -618,7 +626,7 @@ struct FUN_0066d590_base
 struct FUN_0066d590_cls : FUN_0066d590_base
 {
     void* m_vptr;
-    void FUN_00c8c5b0(unsigned int a1);
+    void bhkTransformShape_Init(unsigned int a1);
     FUN_0066d590_cls(unsigned int a1);
 };
 
@@ -627,12 +635,12 @@ struct FUN_0066d590_cls : FUN_0066d590_base
 FUN_0066d590_cls::FUN_0066d590_cls(unsigned int a1)
 {
     *(void* volatile*)&m_vptr = &DAT_01066d44;
-    this->FUN_00c8c5b0(a1);
+    this->bhkTransformShape_Init(a1);
     DAT_012681b0 = DAT_012681b0 + 1;
 }
 
-extern "C" int __cdecl FUN_00406d00(char* text, unsigned size, const char* fmt, ...);
-extern "C" char* __cdecl FUN_00a7d330(const char* s);
+extern "C" int __cdecl BSsprintf(char* text, unsigned size, const char* fmt, ...);
+extern "C" char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* s);
 
 struct S_0066d880_List
 {
@@ -640,40 +648,40 @@ struct S_0066d880_List
 };
 struct S_0066d880_Obj
 {
-    unsigned char FUN_00666f00();
+    unsigned char CombatProcedure_GetFinished();
     int FUN_008d6f30();
 };
-extern "C" void __cdecl FUN_00a5ea70();
+extern "C" void __cdecl NiNode_GetViewerStrings();
 
 // The shared NiNode header does not declare its viewer-string override.
 // @fnv 0x0066d880
 void BSTreeNode::GetViewerStrings(NiViewerStringsArray* list)
 {
-    reinterpret_cast<void (__thiscall*)(NiNode*, void*)>(FUN_00a5ea70)(this, list);
-    char* name = FUN_00a7d330("BSTreeNode");
+    reinterpret_cast<void (__thiscall*)(NiNode*, void*)>(NiNode_GetViewerStrings)(this, list);
+    char* name = NiViewerStrings_NiGetViewerString_Title("BSTreeNode");
     reinterpret_cast<S_0066d880_List*>(list)->FUN_0096a610(&name);
     char* text;
     if (m_spModel.operator->())
     {
         text = new char[0x20];
-        if (m_spModel.operator->()->FUN_00666f00())
-            FUN_00406d00(text, 0x20, "Type = Instance");
+        if (m_spModel.operator->()->CombatProcedure_GetFinished())
+            BSsprintf(text, 0x20, "Type = Instance");
         else
-            FUN_00406d00(text, 0x20, "Type = Base");
+            BSsprintf(text, 0x20, "Type = Base");
         reinterpret_cast<S_0066d880_List*>(list)->FUN_0096a610(&text);
         text = new char[0x20];
-        FUN_00406d00(text, 0x20, "Seed = %d", reinterpret_cast<S_0066d880_Obj*>(m_spModel.operator->())->FUN_008d6f30());
+        BSsprintf(text, 0x20, "Seed = %d", reinterpret_cast<S_0066d880_Obj*>(m_spModel.operator->())->FUN_008d6f30());
         reinterpret_cast<S_0066d880_List*>(list)->FUN_0096a610(&text);
     }
     else
     {
         text = new char[0x20];
-        FUN_00406d00(text, 0x20, "-No Model-");
+        BSsprintf(text, 0x20, "-No Model-");
         reinterpret_cast<S_0066d880_List*>(list)->FUN_0096a610(&text);
     }
 }
 
-extern void* __cdecl FUN_00aa13e0(unsigned int size);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern void* __cdecl FormHeap_Allocate(unsigned int size);
 extern float DAT_01016b78;
 extern void* __cdecl GetFltValueAtOffset16();
@@ -728,7 +736,7 @@ struct FUN_00a5ecb0
     FUN_00a5ecb0(int initial);
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     static void operator delete(void*, unsigned int);
 };
@@ -781,11 +789,11 @@ struct FUN_0051cf00
     unsigned int unkac;
     unsigned int unkb0;
     FUN_0051cf00();
-    void FUN_0051d000(int enabled);
+    void SetMode_0051d000(int enabled);
     void FUN_006404b0(float size, float a, float b, float c);
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     static void operator delete(void*, unsigned int);
 };
@@ -829,10 +837,10 @@ struct FUN_0066b640
     virtual void v8c(void*);
     unsigned int unk04, unk08, unk0c, unk10;
     FUN_0066b640();
-    void FUN_00c6b980(void* p);
+    void bhkNiCollisionObject_SetWorldObject(void* p);
     static void* operator new(unsigned int size)
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
     static void operator delete(void*, unsigned int);
 };
@@ -840,21 +848,21 @@ struct FUN_0066b640
 // @fnv 0x0066b120
 BSTreeNode::BSTreeNode(void* initial, void* external) : m_spModel(0), m_spLeafMesh(0)
 {
-    FUN_00b4dec0(6);
+    BSFadeNode_SetLODMultType(6);
     m_spModel = reinterpret_cast<BSTreeModel*>(initial);
-    FUN_004902f0(1);
+    NiAVObject_SetSelectiveUpdate(1);
     FUN_00a5ecb0* pkCurrentObject = new FUN_00a5ecb0(0);
     NiNode::AddObjectAt(0, reinterpret_cast<NiAVObject*>(pkCurrentObject));
     pkCurrentObject = new FUN_00a5ecb0(0);
     NiNode::AddObjectAt(1, reinterpret_cast<NiAVObject*>(pkCurrentObject));
     FUN_0066b640* pController;
     FUN_0051cf00* controller = new FUN_0051cf00();
-    controller->FUN_0051d000(1);
+    controller->SetMode_0051d000(1);
     controller->FUN_006404b0(DAT_01016b78, 1.0f, 0.0f, 0.0f);
     NiNode::AddObjectAt(2, reinterpret_cast<NiAVObject*>(controller));
 
     unsigned short count;
-    unsigned short i = m_spModel.operator->()->FUN_00669990();
+    unsigned short i = m_spModel.operator->()->GetNumBranchLODLevels();
     if (i != 0)
     {
         m_pBranchMeshes = new NiPointer<NiTriBasedGeom>[i];
@@ -882,7 +890,7 @@ BSTreeNode::BSTreeNode(void* initial, void* external) : m_spModel(0), m_spLeafMe
     if (chosen)
     {
         pController = new FUN_0066b640();
-        pController->FUN_00c6b980(external ? external : m_spModel.operator->()->ConvertFloatToUInt());
+        pController->bhkNiCollisionObject_SetWorldObject(external ? external : m_spModel.operator->()->ConvertFloatToUInt());
         pController->v8c(this);
     }
     m_fWindTime = 0.0f;
@@ -892,7 +900,7 @@ BSTreeNode::BSTreeNode(void* initial, void* external) : m_spModel(0), m_spLeafMe
 // @fnv 0x0066b7d0
 NiTriBasedGeom* BSTreeNode::GetBranchMesh(unsigned short usIndex)
 {
-    if (!static_cast<BSTreeModel*>(m_spModel) || !m_pBranchMeshes || usIndex >= m_spModel->FUN_00669990())
+    if (!static_cast<BSTreeModel*>(m_spModel) || !m_pBranchMeshes || usIndex >= m_spModel->GetNumBranchLODLevels())
         return 0;
     return static_cast<NiTriBasedGeom*>(m_pBranchMeshes[usIndex]);
 }
@@ -928,7 +936,7 @@ bool BSTreeNode::SetBranchGeometry(unsigned short index, NiTriBasedGeom* type)
     FnvScopedContext guard;
     if (!static_cast<BSTreeModel*>(m_spModel) || !m_pBranchMeshes || !type)
         return false;
-    unsigned short maxIndex = m_spModel->FUN_00669990();
+    unsigned short maxIndex = m_spModel->GetNumBranchLODLevels();
     if (index >= maxIndex)
         return false;
     NiNode* actor = GetBranchesNode();

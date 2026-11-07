@@ -4,7 +4,7 @@
 
 struct Sub
 {
-    void FUN_0044a730(int a, int b);
+    void fopen_0044a730(int a, int b);
 };
 struct V3
 {
@@ -48,7 +48,7 @@ FUN_00b3e6c0_cls* FUN_00b3e6c0_cls::ClearVectors()
     {
         Sub* t = &s;
         r = &flag;
-        t->FUN_0044a730(0, 0);
+        t->fopen_0044a730(0, 0);
     }
     return this;
 }

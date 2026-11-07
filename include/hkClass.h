@@ -35,10 +35,10 @@ public:
     const hkClassMember& GetDeclaredMember(int i) const;
     void touch() const;
     hkBool GetLastNodeFlag() const;
-    hkBool FUN_00d46d80(const hkClass& kOther) const;
+    hkBool hkClass_isSuperClass(const hkClass& kOther) const;
     const char* getName() const;
     unsigned int CalculateDatabaseSignature(int iFlags) const throw();
-    const hkClassMember& __thiscall FUN_00d46f20(int i) const;
+    const hkClassMember& __thiscall getMember(int i) const;
     const char* FUN_00d46d40() const;
     const hkClass* FUN_00d46d50() const;
     int FUN_00d47120() const;

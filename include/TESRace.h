@@ -44,8 +44,8 @@ public:
     bool GetBipedObjectModelPath(TESNPC* npc, BIPED_OBJECT part, char* path);
     TESModel* GetBipedObjectModel(SEX sex, BIPED_OBJECT part);
     TESModel* GetBodyPartModel(SEX sex, int part);
-    TESModel* FUN_00613970(int sex, int part);
-    TESModel* FUN_00613a20(int sex, int part);
+    TESModel* GetHeadPartModel_00613970(int sex, int part);
+    TESModel* GetBodyPartModel_00613a20(int sex, int part);
     TESTexture* GetBodyPartTexture(int sex, int part);
     TESTexture* GetBodyPartTexture(unsigned int sex, unsigned int part);
     TESTexture* GetBodyPartTexture(int sex, unsigned int part);
@@ -60,10 +60,10 @@ public:
     float GetWeight(SEX sex);
     bool BuildFaceGenHead(BSFaceGenNiNode*& head, BSFaceGenNiNode*& hair, TESNPC* npc, bool arg3, bool arg4, SEX sex);
     TESEyes* GetReferencedValue();
-    TESHair* FUN_00613870(SEX sex);
-    TESHair* FUN_00613870(int sex);
-    unsigned short FUN_00607350();
-    TESForm* __thiscall FUN_00969910();
+    TESHair* TESRace_GetDefaultHair(SEX sex);
+    TESHair* TESRace_GetDefaultHair(int sex);
+    unsigned short GetFaceCoordNum_00607350();
+    TESForm* __thiscall AudioMarker_GetMediaLocationController();
 
     RaceDefinitionData Data;
     TESAttributes m_kMaleAttributes;

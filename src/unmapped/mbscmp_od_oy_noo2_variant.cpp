@@ -7,7 +7,8 @@
 int __cdecl FUN_00ec8244(void* pvA, void* pvB);
 
 // @fnv 0x00469880
-int FUN_00469880(void* pvA, void* pvB)
+// src: COMMUNITY 0x00469880
+int _tcscmp(void* pvA, void* pvB)
 {
     return FUN_00ec8244(pvA, pvB);
 }

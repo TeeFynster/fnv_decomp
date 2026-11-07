@@ -45,8 +45,8 @@ public:
     void SetFactionFightReaction(TESFaction* faction, _FightReaction::Type reaction);
     bool IsHiddenFlagSet();
     unsigned int GetFormID();
-    bool FUN_0047d7c0();
-    void FUN_0047eb90(bool value);
+    bool GetEvil();
+    void ForwardCall_0047eb90(bool value);
 
     FactionSaveData data;
     TESReputation* pReputationData;

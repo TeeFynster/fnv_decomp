@@ -27,16 +27,17 @@ struct QHeadPtr
 };
 struct C_00449210
 {
-    void FUN_00449210(int, QHeadPtr*);
+    void LockFreePriorityQueue_NiPointer_IOTask_Push(int, QHeadPtr*);
 };
 struct FUN_0043d6b0_shell
 {
-    void __thiscall FUN_0043d6b0(IOTask* aHead);
+    void __thiscall IOManager_AddPostProcessTask(IOTask* aHead);
 };
 // Wraps aHead in a QHeadPtr and passes its priority and the wrapper to the object at this+0x64 via FUN_00449210.
 // @fnv 0x0043d6b0
-void FUN_0043d6b0_shell::FUN_0043d6b0(IOTask* aHead)
+// src: XBOX_PDB 0x0043d6b0
+void FUN_0043d6b0_shell::IOManager_AddPostProcessTask(IOTask* aHead)
 {
     QHeadPtr head(aHead);
-    (*(C_00449210**)((char*)this + 0x64))->FUN_00449210(aHead->GetPriority(), &head);
+    (*(C_00449210**)((char*)this + 0x64))->LockFreePriorityQueue_NiPointer_IOTask_Push(aHead->GetPriority(), &head);
 }

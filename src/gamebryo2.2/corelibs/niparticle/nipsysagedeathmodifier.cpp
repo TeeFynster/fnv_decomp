@@ -12,7 +12,8 @@
 extern NiRTTI g_01202798;
 
 // @fnv 0x00c2efe0
-const NiRTTI* __cdecl FUN_00c2efe0()
+// src: COMMUNITY 0x00c2efe0
+const NiRTTI* __cdecl NiPSysAgeDeathModifier_GetRTTI()
 {
     return &g_01202798;
 }
@@ -20,7 +21,8 @@ const NiRTTI* __cdecl FUN_00c2efe0()
 extern "C" const void* g_012027a0;
 
 // @fnv 0x00c2f3d0
-const void* __cdecl FUN_00c2f3d0()
+// src: COMMUNITY 0x00c2f3d0
+const void* __cdecl NiPSysAirFieldSpreadCtlr_GetRTTI()
 {
     return &g_012027a0;
 }
@@ -35,12 +37,13 @@ struct NiPSysAirFieldSpreadCtlr
 {
     char _pad[0x3c];
     FUN_00c2f3f0Target* unk3c;
-    void __thiscall FUN_00c2f3e0(float& fValue);
-    void __thiscall FUN_00c2f3f0(float fValue);
+    void __thiscall GetTargetFloatValue_00c2f3e0(float& fValue);
+    void __thiscall SetTargetFloatValue_00c2f3f0(float fValue);
 };
 
 // @fnv 0x00c2f3e0
-void __thiscall NiPSysAirFieldSpreadCtlr::FUN_00c2f3e0(float& fValue)
+// src: XBOX_PDB 0x00c2f3e0
+void __thiscall NiPSysAirFieldSpreadCtlr::GetTargetFloatValue_00c2f3e0(float& fValue)
 {
     unsigned char* base = reinterpret_cast<unsigned char*>(this);
     int* ptr = reinterpret_cast<int*>(*(reinterpret_cast<int*>(base + 0x3c)));
@@ -54,23 +57,24 @@ struct NiPSysAgeDeathModifier : NiPSysModifier
 {
     bool m_bSpawnOnDeath;
     NiPSysSpawnModifier* m_pSpawnModifier;
-    void FUN_00c2ef60(NiStream&);
-    void __thiscall FUN_00c2f1a0(CloningProcess&);
+    void LinkObject_00c2ef60(NiStream&);
+    void __thiscall ProcessClone_00c2f1a0(CloningProcess&);
     void* __thiscall Destroy(unsigned int);
-    void FUN_00c2f2c0(StrArr*);
-    NiPSysAgeDeathModifier* FUN_00c2f150(CloningProcess&);
-    bool FUN_00c2ef80(NiObject*);
+    void GetViewerStrings_00c2f2c0(StrArr*);
+    NiPSysAgeDeathModifier* CreateClone_00c2f150(CloningProcess&);
+    bool IsEqual_00c2ef80(NiObject*);
     void UpdateAges(float, ParticleSystem*);
-    void FUN_00c2f200(NiStream&);
+    void LoadBinary_00c2f200(NiStream&);
     void SaveAgeDeathModifier(NiStream*);
 };
 
 // NiStream is opaque here; the unit only needs its existing load/link entry points.
 NiObject* __cdecl FUN_00a63430();
-void __cdecl FUN_00a645b0();
+void __cdecl ReadLinkID();
 
 // @fnv 0x00c2ef60
-void NiPSysAgeDeathModifier::FUN_00c2ef60(NiStream& kStream)
+// src: XBOX_PDB 0x00c2ef60
+void NiPSysAgeDeathModifier::LinkObject_00c2ef60(NiStream& kStream)
 {
     NiPSysModifier::LinkObject(kStream);
     typedef NiObject*(__thiscall * GetLoadedObjectProc)(NiStream*);
@@ -109,7 +113,8 @@ typedef char _sizecheck_NiCloningProcess[sizeof(CloningProcess) == 16 ? 1 : -1];
 // shared NiTPointerMap specialization by nitimecontroller.cpp and niblendinterpolator.cpp.
 // Calls the base ProcessClone, looks up the clone in the cloning map, and remaps the spawn modifier pointer to its cloned counterpart.
 // @fnv 0x00c2f1a0
-void __thiscall NiPSysAgeDeathModifier::FUN_00c2f1a0(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00c2f1a0
+void __thiscall NiPSysAgeDeathModifier::ProcessClone_00c2f1a0(CloningProcess& kCloning)
 {
     bool bFound;
     NiObject* pkClone;
@@ -140,7 +145,8 @@ inline void* __cdecl operator new(unsigned int, void* p)
     return p;
 }
 // @fnv 0x00c2f3a0
-FUN_00c32d80* __cdecl FUN_00c2f3a0()
+// src: EXE 0x00c2f3a0
+FUN_00c32d80* __cdecl NiPSysAirFieldSpreadCtlr_CreateObject()
 {
     FUN_00c32d80* p = (FUN_00c32d80*)BSFadeNode::operator new(0x40);
     if (p)
@@ -153,28 +159,29 @@ FUN_00c32d80* __cdecl FUN_00c2f3a0()
 }
 
 void __cdecl FUN_00c319e0();
-char* __cdecl FUN_00a7d330(char*);
-char* __cdecl FUN_00a7d370(char const*, bool);
-char* __cdecl FUN_00a7d5e0(char const*, char const*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(char*);
+char* __cdecl NiGetViewerString(char const*, bool);
+char* __cdecl NiGetViewerString_00a7d5e0(char const*, char const*);
 extern char const* const g_011d1f8c_arg1;
 // @fnv 0x00c2f2c0
-void NiPSysAgeDeathModifier::FUN_00c2f2c0(StrArr* pkStrings)
+// src: XBOX_PDB 0x00c2f2c0
+void NiPSysAgeDeathModifier::GetViewerStrings_00c2f2c0(StrArr* pkStrings)
 {
     typedef void(__thiscall * ViewerStringsProc)(NiPSysModifier*, StrArr*);
     reinterpret_cast<ViewerStringsProc>(&FUN_00c319e0)(this, pkStrings);
-    char* pcString = FUN_00a7d330(*(char**)&g_01202798);
+    char* pcString = NiViewerStrings_NiGetViewerString_Title(*(char**)&g_01202798);
     unsigned int uiIndex = ((unsigned short*)pkStrings)[5];
     if (uiIndex >= ((unsigned short*)pkStrings)[4])
         pkStrings->SetSize(((unsigned short*)pkStrings)[7] + uiIndex);
     pkStrings->SetAt(uiIndex, pcString);
-    pcString = FUN_00a7d370("Spawn on Death", m_bSpawnOnDeath);
+    pcString = NiGetViewerString("Spawn on Death", m_bSpawnOnDeath);
     uiIndex = ((unsigned short*)pkStrings)[5];
     if (uiIndex >= ((unsigned short*)pkStrings)[4])
         pkStrings->SetSize(((unsigned short*)pkStrings)[7] + uiIndex);
     pkStrings->SetAt(uiIndex, pcString);
     char const* pcModifierName =
         m_pSpawnModifier ? m_pSpawnModifier->m_kName.m_kHandle : (char const*)&g_011d1f8c_arg1;
-    pcString = FUN_00a7d5e0("Spawn Modifier", pcModifierName);
+    pcString = NiGetViewerString_00a7d5e0("Spawn Modifier", pcModifierName);
     uiIndex = ((unsigned short*)pkStrings)[5];
     if (uiIndex >= ((unsigned short*)pkStrings)[4])
         pkStrings->SetSize(((unsigned short*)pkStrings)[7] + uiIndex);
@@ -183,7 +190,8 @@ void NiPSysAgeDeathModifier::FUN_00c2f2c0(StrArr* pkStrings)
 
 extern int DAT_010c0304;
 // @fnv 0x00c2f150
-NiPSysAgeDeathModifier* NiPSysAgeDeathModifier::FUN_00c2f150(CloningProcess& kCloning)
+// src: XBOX_PDB 0x00c2f150
+NiPSysAgeDeathModifier* NiPSysAgeDeathModifier::CreateClone_00c2f150(CloningProcess& kCloning)
 {
     NiPSysAgeDeathModifier* pkObject = (NiPSysAgeDeathModifier*)BSFadeNode::operator new(0x20);
     if (pkObject)
@@ -203,7 +211,8 @@ NiPSysAgeDeathModifier* NiPSysAgeDeathModifier::FUN_00c2f150(CloningProcess& kCl
 }
 
 // @fnv 0x00c2ef80
-bool NiPSysAgeDeathModifier::FUN_00c2ef80(NiObject* pkObject)
+// src: XBOX_PDB 0x00c2ef80
+bool NiPSysAgeDeathModifier::IsEqual_00c2ef80(NiObject* pkObject)
 {
     if (!NiPSysModifier::IsEqual(pkObject))
         return false;
@@ -355,14 +364,15 @@ inline void NiBinaryStream::ReadScalar(void* pvValue, unsigned int uiSize)
 }
 
 // @fnv 0x00c2f200
-void NiPSysAgeDeathModifier::FUN_00c2f200(NiStream& kStream)
+// src: XBOX_PDB 0x00c2f200
+void NiPSysAgeDeathModifier::LoadBinary_00c2f200(NiStream& kStream)
 {
     NiPSysModifier::LoadBinary(kStream);
     unsigned char ucFlag;
     (*reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(&kStream) + 0x24c))->ReadScalar(&ucFlag, 1);
     m_bSpawnOnDeath = ucFlag != 0;
     typedef void(__thiscall * ResetStreamProc)(NiStream*);
-    reinterpret_cast<ResetStreamProc>(&FUN_00a645b0)(&kStream);
+    reinterpret_cast<ResetStreamProc>(&ReadLinkID)(&kStream);
 }
 
 inline void NiBinaryStream::WriteSpawnFlag(const bool& onDeath)
@@ -391,7 +401,8 @@ double g_01012070 = 1.0;
 
 // Clamps fValue to [0,1] and stores it into the target's unk64 field.
 // @fnv 0x00c2f3f0
-void __thiscall NiPSysAirFieldSpreadCtlr::FUN_00c2f3f0(float fValue)
+// src: XBOX_PDB 0x00c2f3f0
+void __thiscall NiPSysAirFieldSpreadCtlr::SetTargetFloatValue_00c2f3f0(float fValue)
 {
     FUN_00c2f3f0Target* target = this->unk3c;
     float fClamped = fValue;
@@ -408,7 +419,7 @@ void __thiscall NiPSysAirFieldSpreadCtlr::FUN_00c2f3f0(float fValue)
     target->unk64 = fClamped;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 struct Host2f440
 {
     void FUN_00c32de0(FUN_00c32d80* obj, int arg);
@@ -418,7 +429,7 @@ struct Host2f440
 // @fnv 0x00c2f440
 FUN_00c32d80* Host2f440::CreateAndInit(int arg)
 {
-    FUN_00c32d80* p = (FUN_00c32d80*)FUN_00aa13e0(0x40);
+    FUN_00c32d80* p = (FUN_00c32d80*)Object_DispatchCommandFour(0x40);
     if (p)
     {
         new (p) FUN_00c32d80;
@@ -435,7 +446,8 @@ FUN_00c32d80* Host2f440::CreateAndInit(int arg)
 void __cdecl FUN_00c31670();
 
 // @fnv 0x00c28b60
-void __cdecl FUN_00c28b60()
+// src: XBOX_PDB 0x00c28b60
+void __cdecl NiPSysAgeDeathModifier_RegisterStreamables()
 {
     FUN_00c31670();
 }

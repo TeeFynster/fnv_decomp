@@ -59,7 +59,7 @@ unsigned int SaveLoadFile::Read(void* buffer, unsigned int size)
 // @fnv 0x00846400
 unsigned int SaveLoadFile::GetFilePosition()
 {
-    if (DAT_011de134->FUN_00424940())
+    if (DAT_011de134->InterfaceManager_GetMenuMode())
         return m_uiFilePosition;
     return pFile->GetFilePosition();
 }
@@ -67,7 +67,7 @@ unsigned int SaveLoadFile::GetFilePosition()
 // @fnv 0x00846440
 void SaveLoadFile::SetFilePosition(int position)
 {
-    if (DAT_011de134->FUN_00424940())
+    if (DAT_011de134->InterfaceManager_GetMenuMode())
         m_uiFilePosition = position;
     else
         pFile->Seek(position, DAT_010a2480);
@@ -92,7 +92,7 @@ NiTexture* BGSSaveLoadFileEntry::ReadScreenshotFromFile()
     if (m_uiHeaderRecordValue && m_uiFileSize)
         screenshot =
             LoadTextureFromFile((SaveLoadHeader*)header, SaveFileMetadata, m_uiHeaderRecordValue, m_uiFileSize);
-    DAT_011de134->FUN_00850100((SaveLoadHeader*)header, 0);
+    DAT_011de134->CloseSaveFile((SaveLoadHeader*)header, 0);
     return screenshot;
 }
 
@@ -103,7 +103,7 @@ SaveLoadFile::SaveLoadFile(const char* fileName, bool flag, unsigned int size)
     m_uiBufferSize = 0;
     m_uiFilePosition = 0;
     m_cFileName[0] = 0;
-    if (!DAT_011de134->FUN_00424940())
+    if (!DAT_011de134->InterfaceManager_GetMenuMode())
         pFile = new BSFile(fileName, flag ? 1 : 0, size, false);
 }
 
@@ -132,13 +132,14 @@ void BGSSaveLoadFileEntry::ReadTypedData()
         pLocation = pAllocatedPath;
         TaskQueueInterface::CopyStringToBuffer(pLocation, length, pFileName);
     }
-    DAT_011de134->FUN_00850100((SaveLoadHeader*)header, 0);
+    DAT_011de134->CloseSaveFile((SaveLoadHeader*)header, 0);
     m_bHeaderParsed = true;
 }
 
 // Deletes the BSFile object stored at offset 0x104 of pThis.
 // @fnv 0x008462c0
-void __fastcall FUN_008462c0(char* pThis)
+// src: GUESS 0x008462c0 (confidence: low)
+void __fastcall Object_ProcessState_008462c0(char* pThis)
 {
     delete *reinterpret_cast<BSFile**>(pThis + 0x104);
 }
@@ -150,9 +151,10 @@ struct UnknownOwner008463c0
 };
 
 // @fnv 0x008463c0
-bool __fastcall FUN_008463c0(UnknownOwner008463c0* _this)
+// src: COMMUNITY 0x008463c0
+bool __fastcall BGSSaveLoadFile_Open(UnknownOwner008463c0* _this)
 {
-    if (DAT_011de134->FUN_00424940())
+    if (DAT_011de134->InterfaceManager_GetMenuMode())
         return true;
     return _this->unk104->Open(false, false);
 }
@@ -172,7 +174,7 @@ struct FUN_00846490_t
 // @fnv 0x00846490
 void FUN_00846490_t::AdvancePosition(int offset)
 {
-    if (DAT_011de134->FUN_00424940())
+    if (DAT_011de134->InterfaceManager_GetMenuMode())
     {
         pos_10c += offset;
     }
@@ -188,21 +190,24 @@ struct FUN_008464f0_arg
 };
 
 // @fnv 0x008464f0
-void __fastcall FUN_008464f0(char* pThis, FUN_008464f0_arg aStringArg)
+// src: COMMUNITY 0x008464f0
+void __fastcall BGSSaveLoadFile_SetSaveFileName(char* pThis, FUN_008464f0_arg aStringArg)
 {
     TaskQueueInterface::CopyStringToBuffer(pThis, 0x104, aStringArg.str);
 }
 
 // Allocates and constructs a new object from a name string, a bool flag and an unsigned int value, returning the new instance.
 // @fnv 0x00846520
-SaveLoadFile* __cdecl FUN_00846520(const char* apName, bool abFlag, unsigned int auiValue)
+// src: COMMUNITY 0x00846520
+SaveLoadFile* __cdecl BGSSaveLoadFile_Create(const char* apName, bool abFlag, unsigned int auiValue)
 {
     return new SaveLoadFile(apName, abFlag, auiValue);
 }
 
 // Deletes the objects stored at indices 0, 6, 5, 3 and 4 of the array pointed to by pThis.
 // @fnv 0x00846690
-void __fastcall FUN_00846690(void** pThis)
+// src: GUESS 0x00846690 (confidence: low)
+void __fastcall Bgssaveloadfile_ReleaseStorage_00846690(void** pThis)
 {
     delete pThis[0];
     delete pThis[6];
@@ -266,7 +271,8 @@ void __fastcall UpdateFileWriteTime(char* pThis)
 
 namespace fnv_00846ad0 {
 // @fnv 0x00846ad0
-bool __fastcall FUN_00846ad0(const char** pThis)
+// src: XBOX_PDB 0x00846ad0
+bool __fastcall BGSSaveLoadFileEntry_IsQuicksave(const char** pThis)
 {
     return DAT_011de134->IsQuickSaveFileName(*pThis);
 }
@@ -327,7 +333,7 @@ struct FUN_00846330_shell
 // @fnv 0x00846330
 unsigned int FUN_00846330_shell::WriteToFile(const void* apBuffer, unsigned int aiBytes)
 {
-    if (DAT_011de134->FUN_00424940())
+    if (DAT_011de134->InterfaceManager_GetMenuMode())
     {
         unsigned int ifileSizePositionDiff =
             *(unsigned int*)((char*)this + 0x108) - *(unsigned int*)((char*)this + 0x10c);
@@ -336,22 +342,23 @@ unsigned int FUN_00846330_shell::WriteToFile(const void* apBuffer, unsigned int 
         *(unsigned int*)((char*)this + 0x10c) += aiBytes;
         return aiBytes;
     }
-    return (*reinterpret_cast<BSFile**>((char*)this + 0x104))->FUN_00473180((const char*)apBuffer, aiBytes);
+    return (*reinterpret_cast<BSFile**>((char*)this + 0x104))->NiBinaryStream_Write((const char*)apBuffer, aiBytes);
 }
 
 struct FUN_00846710_cls : public BGSSaveLoadFileEntry
 {
     void DispatchEvent();
-    bool FUN_00846710();
+    bool BGSSaveLoadFileEntry_DeleteSave();
 };
 
 // @fnv 0x00846710
-bool FUN_00846710_cls::FUN_00846710()
+// src: COMMUNITY 0x00846710
+bool FUN_00846710_cls::BGSSaveLoadFileEntry_DeleteSave()
 {
     if (DAT_011de134->IsSaveFileNameDefault(pFileName) ||
         DAT_011de134->IsSaveFileNameLegacyAutosave(pFileName))
     {
-        if (DAT_011de134->FUN_008503b0(0, m_iScreenshotOffset, 0))
+        if (DAT_011de134->SaveGame_008503b0(0, m_iScreenshotOffset, 0))
         {
             DispatchEvent();
             return true;
@@ -359,7 +366,7 @@ bool FUN_00846710_cls::FUN_00846710()
     }
     else
     {
-        if (DAT_011de134->FUN_008503b0(pFileName, m_iScreenshotOffset, 0))
+        if (DAT_011de134->SaveGame_008503b0(pFileName, m_iScreenshotOffset, 0))
         {
             static_cast<SaveLoadManagerFileOperations*>(DAT_011de134)->RemoveAndDelete(this);
             return true;
@@ -416,7 +423,8 @@ struct FUN_006815c0_Class
 
 // Builds successive .bak paths, deletes an existing destination, and calls FUN_00ec862c with source and destination paths.
 // @fnv 0x00850100
-void BGSSaveLoadManager::FUN_00850100(SaveLoadHeader* header, int abRotate)
+// src: COMMUNITY 0x00850100
+void BGSSaveLoadManager::CloseSaveFile(SaveLoadHeader* header, int abRotate)
 {
     FUN_00850330_class* p2;
     FUN_00850330_class* p1;

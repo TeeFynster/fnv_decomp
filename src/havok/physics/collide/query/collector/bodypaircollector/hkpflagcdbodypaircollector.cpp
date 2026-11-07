@@ -8,15 +8,16 @@ struct DAFc80
 {
     int unk00;
     unsigned char unk04;
-    void FUN_00dafc80(int a, int b);
+    void hkpFlagCdBodyPairCollector_addCdBodyPair(int a, int b);
 };
 // @fnv 0x00dafc80
-void DAFc80::FUN_00dafc80(int a, int b)
+// src: XBOX_PDB 0x00dafc80
+void DAFc80::hkpFlagCdBodyPairCollector_addCdBodyPair(int a, int b)
 {
     unk04 = 1;
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00d34900
 {
@@ -30,7 +31,7 @@ struct FUN_00d34900
 
     static void operator delete(void* apMemory)
     {
-        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
         FreeFunction pFree = reinterpret_cast<FreeFunction>((*reinterpret_cast<void***>(pAllocator))[2]);

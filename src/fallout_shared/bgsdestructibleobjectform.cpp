@@ -99,7 +99,7 @@ void BGSDestructibleObjectForm::UpdateDestructionMap()
 // @fnv 0x00571630
 TESModel* TESObjectREFR::GetTESModel()
 {
-    TESModel* model = GetExtraData()->FUN_0042e250();
+    TESModel* model = GetExtraData()->ExtraDataList_GetModelSwap();
     if (!model && GetObjectReference())
     {
         if (static_cast<const TESForm*>(GetObjectReference())->GetFormType() == 40)
@@ -176,7 +176,7 @@ int ActorValueOwner::GetActorValue(ActorValue::Index value)
         result = ((TESAttributes*)((char*)this - 0x48))->GetLuck();
         break;
     case 16:
-        result = ((TESActorBase*)((char*)this - 0x100))->FUN_005f0b00();
+        result = ((TESActorBase*)((char*)this - 0x100))->GetHealth_005f0b00();
         break;
     case 22:
         result = ((const TESActorBaseData*)((char*)this - 0xd0))->GetFatigue();
@@ -188,16 +188,16 @@ int ActorValueOwner::GetActorValue(ActorValue::Index value)
         result = ((TESAIForm*)((char*)this - 0x70))->GetAssistance();
         break;
     case 1:
-        result = ((TESAIForm*)((char*)this - 0x70))->FUN_004f6de0();
+        result = ((TESAIForm*)((char*)this - 0x70))->_GetByte05();
         break;
     case 2:
-        result = ((BSAudio*)((char*)this - 0x70))->FUN_005bb4d0();
+        result = ((BSAudio*)((char*)this - 0x70))->TESRegionData_GetPriority();
         break;
     case 3:
         result = ((TESAIForm*)((char*)this - 0x70))->GetResponsibility();
         break;
     case 4:
-        result = ((TESAIForm*)((char*)this - 0x70))->FUN_0062f2f0();
+        result = ((TESAIForm*)((char*)this - 0x70))->MenuTopic_GetTopicIsChoice();
         break;
     case 21:
         result = ((TESActorBaseData*)((char*)this - 0xd0))->GetShortAtOffset12();
@@ -265,7 +265,7 @@ void BGSDestructibleObjectForm::InitItem(TESForm* owner)
         case 42:
         case 43: {
             TESActorBase* actor = (TESActorBase*)owner;
-            reinterpret_cast<DestructibleData*>(pData)->health = actor->FUN_005f0b00();
+            reinterpret_cast<DestructibleData*>(pData)->health = actor->GetHealth_005f0b00();
             break;
         }
         }
@@ -273,13 +273,15 @@ void BGSDestructibleObjectForm::InitItem(TESForm* owner)
 }
 
 // @fnv 0x0045bb80
-int __fastcall FUN_0045bb80(int param_1)
+// src: XBOX_PDB 0x0045bb80
+int __fastcall NiAVObject_GetWorldTranslate(int param_1)
 {
     return param_1 + 0x8C;
 }
 
 // @fnv 0x00461130
-int __fastcall FUN_00461130(int pThis)
+// src: XBOX_PDB 0x00461130
+int __fastcall NiAVObject_GetWorldRotate(int pThis)
 {
     return pThis + 0x68;
 }
@@ -289,7 +291,8 @@ void __fastcall FUN_008c6060(void* pThis);
 
 // Initialises the BaseFormComponent at pThis, sets its vtable to DAT_0101a4c4, calls FUN_008c6060, and returns pThis.
 // @fnv 0x00475350
-void* __fastcall FUN_00475350(void* pThis)
+// src: GUESS 0x00475350 (confidence: medium)
+void* __fastcall BGSDestructibleObjectForm_InitializeFormComponent(void* pThis)
 {
     ((BaseFormComponent*)pThis)->BaseFormComponent::BaseFormComponent();
     *(int**)pThis = &DAT_0101a4c4;
@@ -300,7 +303,7 @@ void* __fastcall FUN_00475350(void* pThis)
 // @fnv 0x00475380
 BGSDestructibleObjectForm::~BGSDestructibleObjectForm()
 {
-    FUN_00478690();
+    BGSDestructibleObjectForm_RemoveData();
 }
 
 struct DestructionStageData
@@ -363,10 +366,11 @@ bool BGSDestructibleObjectForm::HasValidStages()
 struct FUN_00476980_S
 {
     void FUN_004769c0(int, int);
-    FUN_00476980_S* FUN_00476980(int a, int b, int c);
+    FUN_00476980_S* NiMatrix3_NiMatrix3(int a, int b, int c);
 };
 // @fnv 0x00476980
-FUN_00476980_S* FUN_00476980_S::FUN_00476980(int aiValue0, int aiValue1, int aiValue2)
+// src: COMMUNITY 0x00476980
+FUN_00476980_S* FUN_00476980_S::NiMatrix3_NiMatrix3(int aiValue0, int aiValue1, int aiValue2)
 {
     FUN_004769c0(0, aiValue0);
     FUN_004769c0(1, aiValue1);
@@ -379,11 +383,12 @@ void __fastcall _ref_006815c0(void*);
 struct _dummy_476a80
 {
     char pad[0x24];
-    _dummy_476a80* FUN_00476a80();
+    _dummy_476a80* NiTransform_NiTransform();
 };
 
 // @fnv 0x00476a80
-_dummy_476a80* _dummy_476a80::FUN_00476a80()
+// src: XBOX_PDB 0x00476a80
+_dummy_476a80* _dummy_476a80::NiTransform_NiTransform()
 {
     _ref_006815c0(this);
     _ref_006815c0((char*)this + 0x24);
@@ -397,16 +402,17 @@ struct BSFadeNode_Dummy
     float f2;
 };
 
-void __cdecl FUN_00476ae0();
+void __cdecl BSFadeNode_SetFadingFlag();
 
 // Sets the fade node's two float fields to 1.0 and calls FUN_00476ae0 with true.
 // @fnv 0x00476ab0
-void __fastcall FUN_00476ab0(BSFadeNode_Dummy* pThis)
+// src: XBOX_PDB 0x00476ab0
+void __fastcall BSFadeNode_TurnFadeNodeOn(BSFadeNode_Dummy* pThis)
 {
     pThis->f2 = 1.0f;
     pThis->f1 = 1.0f;
     typedef void(__thiscall * Fn)(BSFadeNode_Dummy*, bool);
-    ((Fn)&FUN_00476ae0)(pThis, true);
+    ((Fn)&BSFadeNode_SetFadingFlag)(pThis, true);
 }
 
 struct MersenneTwister
@@ -434,11 +440,12 @@ struct MersenneTwister
 typedef char _sizecheck_BSRandom[sizeof(MersenneTwister) == 2508 ? 1 : -1];
 struct FUN_00476b90_shell : public MersenneTwister
 {
-    float FUN_00476b90(float, float);
+    float BSRandom_Float(float, float);
 };
 
 // @fnv 0x00476b90
-float FUN_00476b90_shell::FUN_00476b90(float afMin, float afMax)
+// src: XBOX_PDB 0x00476b90
+float FUN_00476b90_shell::BSRandom_Float(float afMin, float afMax)
 {
     unsigned int r = GetRandomUInt();
     return (float)(r * (afMax - afMin) / 4294967296.0 + afMin);
@@ -464,13 +471,14 @@ void FUN_005df560_S::GetRowFloats(unsigned int row, float* pfOut0, float* pfOut1
 }
 
 namespace fnv_004753d0 {
-extern "C" void* __cdecl FUN_00475400(void*);
+extern "C" void* __cdecl BGSDestructibleObjectForm_GetDestructionForm(void*);
 
 // Looks up the destructible wrapper for apForm via FUN_00475400 and returns its FUN_00475a00 result, or false if no wrapper exists.
 // @fnv 0x004753d0
-bool FUN_004753d0(void* apForm)
+// src: XBOX_PDB 0x004753d0
+bool BGSDestructibleObjectForm_IsDestructible(void* apForm)
 {
-    BGSDestructibleObjectForm* pWrapper = (BGSDestructibleObjectForm*)FUN_00475400(apForm);
+    BGSDestructibleObjectForm* pWrapper = (BGSDestructibleObjectForm*)BGSDestructibleObjectForm_GetDestructionForm(apForm);
     if (!pWrapper)
     {
         return false;
@@ -480,7 +488,8 @@ bool FUN_004753d0(void* apForm)
 }  // namespace fnv_004753d0
 
 // @fnv 0x00477410
-void FUN_00477410(unsigned int index)
+// src: COMMUNITY 0x00477410
+void BGSDestructibleObjectForm_RemoveDestructibleObject(unsigned int index)
 {
     g_011c4104.RemoveAt(reinterpret_cast<TESFile*>(index));
 }
@@ -514,11 +523,11 @@ struct FUN_004759a0_Mid
     FUN_004759a0_Elem** arr;
 };
 
-BGSDestructibleObjectForm* __cdecl FUN_00475400(void*);
+BGSDestructibleObjectForm* __cdecl BGSDestructibleObjectForm_GetDestructionForm(void*);
 // @fnv 0x004759a0
 int __cdecl GetElementValue(void* a, int aiIndex)
 {
-    BGSDestructibleObjectForm* pFirst = FUN_00475400(a);
+    BGSDestructibleObjectForm* pFirst = BGSDestructibleObjectForm_GetDestructionForm(a);
     if (!pFirst || aiIndex == -1)
         return 0;
     {
@@ -580,17 +589,18 @@ struct bhkWorldObject;
 struct H0043b4d0
 {
     int value;
-    int FUN_0043b4d0();
+    int CFilter_GetLayer();
 };
 
 struct W_0043b4f0
 {
-    H0043b4d0 FUN_0043b4f0();
+    H0043b4d0 bhkWorldObject_GetCollisionFilter();
 };
 
 // If object has a collision object whose world object type is 19, sets it app-culled and returns true; otherwise recurses into child nodes.
 // @fnv 0x00477560
-bool __cdecl FUN_00477560(NiAVObject* object)
+// src: COMMUNITY 0x00477560
+bool __cdecl BGSDestructibleObjectForm_HideSmallDebris(NiAVObject* object)
 {
     bool result = false;
 
@@ -601,11 +611,11 @@ bool __cdecl FUN_00477560(NiAVObject* object)
 
         if (collisionObject)
         {
-            bhkWorldObject* worldObject = collisionObject->FUN_006fa820();
+            bhkWorldObject* worldObject = collisionObject->bhkNiCollisionObject_GetWorldObject();
 
             if (worldObject)
             {
-                if (reinterpret_cast<W_0043b4f0*>(worldObject)->FUN_0043b4f0().FUN_0043b4d0() == 19)
+                if (reinterpret_cast<W_0043b4f0*>(worldObject)->bhkWorldObject_GetCollisionFilter().CFilter_GetLayer() == 19)
                     bIsLodObject = true;
             }
         }
@@ -625,7 +635,7 @@ bool __cdecl FUN_00477560(NiAVObject* object)
 
                 for (unsigned int index = 0; index < count; ++index)
                 {
-                    if (FUN_00477560(node->GetAt(index)))
+                    if (BGSDestructibleObjectForm_HideSmallDebris(node->GetAt(index)))
                         result = true;
                 }
             }
@@ -1272,7 +1282,8 @@ struct Form33 : Fields_58, BGSDestructibleObjectForm
 
 // Returns the form cast to BGSDestructibleObjectForm for supported form types, or null if the form is null or unsupported.
 // @fnv 0x00475400
-BGSDestructibleObjectForm* __cdecl FUN_00475400(void* form)
+// src: XBOX_PDB 0x00475400
+BGSDestructibleObjectForm* __cdecl BGSDestructibleObjectForm_GetDestructionForm(void* form)
 {
     BGSDestructibleObjectForm* result = 0;
     if (form)
@@ -1396,7 +1407,7 @@ BGSDestructibleObjectForm* __cdecl FUN_00475400(void* form)
 // @fnv 0x00475920
 int FindIndexByValue(void* a1, unsigned int aiValue)
 {
-    BGSDestructibleObjectForm* pOwner = FUN_00475400(a1);
+    BGSDestructibleObjectForm* pOwner = BGSDestructibleObjectForm_GetDestructionForm(a1);
     if (pOwner == 0)
     {
         return -1;
@@ -1419,12 +1430,13 @@ int FindIndexByValue(void* a1, unsigned int aiValue)
 float __cdecl FUN_00476b20(float);
 
 // @fnv 0x00477430
-int __cdecl FUN_00477430(TESObjectREFR* ref)
+// src: GUESS 0x00477430 (confidence: low)
+int __cdecl TESObjectREFR_ProcessEntries_00477430(TESObjectREFR* ref)
 {
     int iStage = -1;
     if (ref)
     {
-        BGSDestructibleObjectForm* pForm = FUN_00475400(ref->GetObjectReference());
+        BGSDestructibleObjectForm* pForm = BGSDestructibleObjectForm_GetDestructionForm(ref->GetObjectReference());
         FUN_004759a0_Mid* pData = pForm ? reinterpret_cast<FUN_004759a0_Mid*>(pForm->FUN_00726070()) : 0;
         if (pData)
         {
@@ -1470,7 +1482,7 @@ struct SaveLoadView
 };
 struct WorldView
 {
-    void FUN_00451ef0(TESObjectREFR*, void*, int, int);
+    void TES_AttachModel(TESObjectREFR*, void*, int, int);
 };
 struct FinalView
 {
@@ -1483,44 +1495,45 @@ struct ManagerView
 extern SaveLoadView* DAT_011ddf38;
 extern WorldView* DAT_011dea10;
 extern ManagerView* DAT_011f1958;
-void __cdecl FUN_00c6a270(SceneObjectView*, bool, bool, int);
-void __cdecl FUN_00476ec0(NiAVObject*, int);
+void __cdecl bhkWorld_Activate(SceneObjectView*, bool, bool, int);
+void __cdecl BGSDestructibleObjectForm_UpdateDamageStageNodes(NiAVObject*, int);
 
 // @fnv 0x00477d10
-void __cdecl FUN_00477d10(TESObjectREFR* reference)
+// src: XBOX_PDB 0x00477d10
+void __cdecl BGSDestructibleObjectForm_ClearDestruction(TESObjectREFR* reference)
 {
     if (!reinterpret_cast<bool (__thiscall*)(const TESObjectREFR*)>(&HasReferenceDestruction)(reference))
         return;
-    BGSDestructibleObjectForm* destructible = FUN_00475400(reinterpret_cast<TESObjectREFR*>(reference)->GetObjectReference());
-    float health = reinterpret_cast<float (__thiscall*)(ExtraDataList*)>(&ReadExtraHealth)(reference->FUN_005d43c0());
+    BGSDestructibleObjectForm* destructible = BGSDestructibleObjectForm_GetDestructionForm(reinterpret_cast<TESObjectREFR*>(reference)->GetObjectReference());
+    float health = reinterpret_cast<float (__thiscall*)(ExtraDataList*)>(&ReadExtraHealth)(reference->BSFile_GetDevice());
     if (health == -1.0)
         return;
-    reinterpret_cast<void (__thiscall*)(ExtraDataList*)>(&RemoveExtraHealth)(reference->FUN_005d43c0());
+    reinterpret_cast<void (__thiscall*)(ExtraDataList*)>(&RemoveExtraHealth)(reference->BSFile_GetDevice());
     if (IsDestroyed(reference))
         reference->SetDestroyed(false);
-    if (reference->FUN_005d43c0()->FUN_0042e250())
+    if (reference->BSFile_GetDevice()->ExtraDataList_GetModelSwap())
     {
-        reinterpret_cast<void (__thiscall*)(ExtraDataList*)>(&RemoveExtraModel)(reference->FUN_005d43c0());
+        reinterpret_cast<void (__thiscall*)(ExtraDataList*)>(&RemoveExtraModel)(reference->BSFile_GetDevice());
         if (reinterpret_cast<SceneObjectView*>(reference->GetNiNode()))
         {
             bool allowChanges = DAT_011ddf38->FUN_004623f0(false);
             reference->Set3D(0, true);
             DAT_011ddf38->FUN_004623f0(allowChanges);
-            DAT_011dea10->FUN_00451ef0(reference, reference->GetParentCell(), 0, 0);
+            DAT_011dea10->TES_AttachModel(reference, reference->GetParentCell(), 0, 0);
             if (reinterpret_cast<SceneObjectView*>(reference->GetNiNode()))
             {
                 SceneObjectView* object = reinterpret_cast<SceneObjectView*>(reference->GetNiNode());
                 FadeNodeView* fade = object ? object->AsNode() : 0;
                 BSFadeNode_Dummy* node = fade ? fade->AsFadeNode() : 0;
                 if (node)
-                    FUN_00476ab0(node);
-                FUN_00c6a270(object, true, true, 0);
+                    BSFadeNode_TurnFadeNodeOn(node);
+                bhkWorld_Activate(object, true, true, 0);
             }
         }
     }
     else if (reinterpret_cast<SceneObjectView*>(reference->GetNiNode()))
     {
-        FUN_00476ec0(reference->Get3DSimple(), 0);
+        BGSDestructibleObjectForm_UpdateDamageStageNodes(reference->Get3DSimple(), 0);
     }
     if (reinterpret_cast<TESForm*>(reference)->GetDisabled())
         reinterpret_cast<void (__thiscall*)(TESObjectREFR*)>(&RestoreReferenceEnabledState)(reference);
@@ -1528,10 +1541,10 @@ void __cdecl FUN_00477d10(TESObjectREFR* reference)
     DAT_011f1958->FUN_00825c00(reference)->RemoveEntryForRef();
 }
 
-unsigned char __cdecl FUN_00401500();
+unsigned char __cdecl TESForm_QEndianSwapOnSave();
 void __cdecl AppendChunk(unsigned int auiType, char* apData, unsigned int auiSize);
-void __cdecl FUN_00403d30(void* apDst, int aiValue, unsigned int auiSize);
-void __cdecl FUN_004856d0(int aiType);
+void __cdecl ourMemset(void* apDst, int aiValue, unsigned int auiSize);
+void __cdecl TESForm_AddChunk(int aiType);
 
 extern "C" void __cdecl WriteReplacementModel();
 
@@ -1562,7 +1575,7 @@ struct FUN_004781b0
     unsigned char ucCount;
     unsigned char ucFlag;
     FUN_004781b0();
-    void FUN_00503210();
+    void QuestPerkEntryData_Endian();
 };
 
 struct FUN_00478130_entry
@@ -1575,7 +1588,7 @@ struct FUN_00478130_entry
     unsigned int uiSound8;
     unsigned int uiSoundC;
     unsigned int uiValue10;
-    void FUN_00478130();
+    void SAVE_DESTRUCTIBLE_OBJECT_STAGE_Endian();
 };
 
 // @fnv 0x00477f20
@@ -1587,16 +1600,16 @@ void BGSDestructibleObjectForm::Save()
         kHeader.uiValue = reinterpret_cast<FUN_00477f20_data*>(pData)->uiValue;
         kHeader.ucCount = reinterpret_cast<FUN_00477f20_data*>(pData)->ucCount;
         kHeader.ucFlag = reinterpret_cast<FUN_00477f20_data*>(pData)->ucFlag;
-        if (FUN_00401500())
-            kHeader.FUN_00503210();
+        if (TESForm_QEndianSwapOnSave())
+            kHeader.QuestPerkEntryData_Endian();
         AppendChunk(0x54534544, (char*)&kHeader, 8);
-        if (FUN_00401500())
-            kHeader.FUN_00503210();
+        if (TESForm_QEndianSwapOnSave())
+            kHeader.QuestPerkEntryData_Endian();
 
         for (unsigned int i = 0; i < reinterpret_cast<FUN_00477f20_data*>(pData)->ucCount; i++)
         {
             FUN_00478130_entry kEntry;
-            FUN_00403d30(&kEntry, 0, 0x14);
+            ourMemset(&kEntry, 0, 0x14);
             kEntry.m_ucClipIdentifier = i;
             kEntry.ucByte0 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->ucByte1;
             kEntry.uiValue4 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->uiValue4;
@@ -1604,18 +1617,18 @@ void BGSDestructibleObjectForm::Save()
             kEntry.ucByte3 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->ucByte2;
             kEntry.uiValue10 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->uiValue10;
             if (reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSound8)
-                kEntry.uiSound8 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSound8->FUN_0084e3a0();
+                kEntry.uiSound8 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSound8->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
             if (reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSoundC)
-                kEntry.uiSoundC = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSoundC->FUN_0084e3a0();
-            if (FUN_00401500())
-                kEntry.FUN_00478130();
+                kEntry.uiSoundC = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSoundC->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
+            if (TESForm_QEndianSwapOnSave())
+                kEntry.SAVE_DESTRUCTIBLE_OBJECT_STAGE_Endian();
             AppendChunk(0x44545344, (char*)&kEntry, 0x14);
-            if (FUN_00401500())
-                kEntry.FUN_00478130();
+            if (TESForm_QEndianSwapOnSave())
+                kEntry.SAVE_DESTRUCTIBLE_OBJECT_STAGE_Endian();
             if (reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pObj14)
                 reinterpret_cast<void (__thiscall*)(TESModelTextureSwap*, unsigned int, unsigned int, unsigned int)>(&WriteReplacementModel)(
                     reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pObj14, 0x4c444d44, 0x54444d44, 0x53444d44);
-            FUN_004856d0(0x46545344);
+            TESForm_AddChunk(0x46545344);
         }
     }
 }
@@ -1645,7 +1658,7 @@ struct MyDestructibleData
     MyDestructionStage** stages;
 };
 
-extern "C" BGSDestructibleObjectForm* __cdecl FUN_00475400(TESBoundObject*);
+extern "C" BGSDestructibleObjectForm* __cdecl BGSDestructibleObjectForm_GetDestructionForm(TESBoundObject*);
 float __cdecl FUN_00476b20(float);
 
 // @fnv 0x00477bc0
@@ -1654,7 +1667,7 @@ unsigned int __cdecl GetDestructionStageSelfDamage(TESObjectREFR* refr, float da
     if (refr == 0 || damage == DAT_01012060)
         return 0;
 
-    BGSDestructibleObjectForm* aActorData = FUN_00475400(refr->GetObjectReference());
+    BGSDestructibleObjectForm* aActorData = BGSDestructibleObjectForm_GetDestructionForm(refr->GetObjectReference());
     if (aActorData == 0)
         return 0;
 

@@ -9,19 +9,21 @@
 // src/gamebryo2.2/corelibs/nianimation/nibsplinecompcolorinterpolator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/nibsplinecompcolorinterpolator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-char __stdcall FUN_00a50b10(char);
+char __stdcall NiBSplineColorInterpolator_RegisterStreamables(char);
 
 // @fnv 0x00a51210
-char __stdcall FUN_00a51210(char acValue)
+// src: XBOX_PDB 0x00a51210
+char __stdcall NiBSplineCompColorInterpolator_RegisterStreamables(char acValue)
 {
-    char r = FUN_00a50b10(acValue);
+    char r = NiBSplineColorInterpolator_RegisterStreamables(acValue);
     return r != 0;
 }
 
 extern "C" void* g_011f4024;
 
 // @fnv 0x00a51770
-void* __cdecl FUN_00a51770()
+// src: COMMUNITY 0x00a51770
+void* __cdecl NiBSplineCompColorInterpolator_GetRTTI()
 {
     return &g_011f4024;
 }
@@ -63,27 +65,27 @@ inline void NiBinaryStream::Write(void* buffer, unsigned int bytes)
 
 struct BaseCall
 {
-    void FUN_00a51ca0(NiStream&);
+    void NiBSplineColorInterpolator_SaveBinary(NiStream&);
 };
 // Calls the base save routine, then writes the two interpolator values (8 bytes) to the stream.
 // @fnv 0x00a51970
 void NiBSplineCompColorInterpolator::SaveToStream(NiStream& aStream)
 {
-    ((BaseCall*)this)->FUN_00a51ca0(aStream);
+    ((BaseCall*)this)->NiBSplineColorInterpolator_SaveBinary(aStream);
     NiBinaryStream* output = *(NiBinaryStream**)((char*)&aStream + 0x250);
     output->Write(m_iFourthElementInteger, 8);
 }
 
 struct FUN_00a51cf0_obj
 {
-    bool FUN_00a51cf0(NiObject*);
+    bool NiBSplineColorInterpolator_IsEqual(NiObject*);
 };
 // @fnv 0x00a51730
 bool NiBSplineCompColorInterpolator::IsEqual(NiObject* pkObject) const
 {
     NiBSplineCompColorInterpolator* pkDest;
     unsigned int uiIndex;
-    if (!((FUN_00a51cf0_obj*)this)->FUN_00a51cf0(pkObject))
+    if (!((FUN_00a51cf0_obj*)this)->NiBSplineColorInterpolator_IsEqual(pkObject))
         return false;
     pkDest = (NiBSplineCompColorInterpolator*)pkObject;
     for (uiIndex = 0; uiIndex < 2; uiIndex++)
@@ -96,13 +98,13 @@ bool NiBSplineCompColorInterpolator::IsEqual(NiObject* pkObject) const
 
 struct BaseHolder
 {
-    void FUN_00a51d30(NiStream&);
+    void NiBSplineColorInterpolator_LoadBinary(NiStream&);
 };
 // Calls the base holder's stream loader, then reads 8 bytes into m_data through the stream's binary reader.
 // @fnv 0x00a51930
 void NiBSplineCompColorInterpolator::LoadFromStream(NiStream& stream)
 {
-    ((BaseHolder*)this)->FUN_00a51d30(stream);
+    ((BaseHolder*)this)->NiBSplineColorInterpolator_LoadBinary(stream);
     NiBinaryStream* __restrict input = *(NiBinaryStream**)((char*)&stream + 0x24c);
     unsigned int size = 4;
     *(unsigned int*)((char*)input + 4) +=
@@ -125,7 +127,8 @@ struct BaseDummy
     void AppendColorACPHandleStrings(NiTPrimitiveArray<char*>*);
 };
 // @fnv 0x00a519b0
-void NiBSplineCompColorInterpolator::FUN_00a519b0(NiTPrimitiveArray<char*>* pkStrings)
+// src: XBOX_PDB 0x00a519b0
+void NiBSplineCompColorInterpolator::GetViewerStrings_00a519b0(NiTPrimitiveArray<char*>* pkStrings)
 {
     ((BaseDummy*)this)->AppendColorACPHandleStrings(pkStrings);
     char* pcString = _FUN_00a7d330((const char*)g_011f4024);
@@ -183,12 +186,13 @@ char __fastcall EvaluateColor(NiBSplineCompColorInterpolator* self, void*, float
     return 1;
 }
 
-extern void* __cdecl FUN_00aa13e0(unsigned int);
+extern void* __cdecl Object_DispatchCommandFour(unsigned int);
 // Allocates and initializes a clone, then copies the base and compressed scalar values.
 // @fnv 0x00a51890
-NiBSplineCompColorInterpolator* NiBSplineCompColorInterpolator::FUN_00a51890(CloningProcess& process)
+// src: XBOX_PDB 0x00a51890
+NiBSplineCompColorInterpolator* NiBSplineCompColorInterpolator::CreateClone_00a51890(CloningProcess& process)
 {
-    NiBSplineCompColorInterpolator* __restrict result = (NiBSplineCompColorInterpolator*)FUN_00aa13e0(0x3c);
+    NiBSplineCompColorInterpolator* __restrict result = (NiBSplineCompColorInterpolator*)Object_DispatchCommandFour(0x3c);
     if (result)
     {
         ((ColorInterpolatorBaseConstruction*)result)->Construct(0, 0xffff, 0);

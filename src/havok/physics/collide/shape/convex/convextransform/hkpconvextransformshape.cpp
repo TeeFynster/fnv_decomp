@@ -72,29 +72,31 @@ struct FUN_00d5d730_class
     virtual void v7();
     virtual void v8();
     virtual void v9();
-    void FUN_00d5d730(FUN_00d5d730_class* pChild, const char* name);
+    void hkpConvexTransformShape_calcContentStatistics(FUN_00d5d730_class* pChild, const char* name);
 };
 
 struct FUN_00c90360_helper
 {
-    void FUN_00c90360(FUN_00d5d730_class* pChild, const char* const* name);
+    void hkReferencedObject_calcContentStatistics(FUN_00d5d730_class* pChild, const char* const* name);
 };
 
 // Calls pChild->v3 with "Child" and this+0x18, then FUN_00c90360 with pChild and g_01268970_arg1.
 // @fnv 0x00d5d730
-void FUN_00d5d730_class::FUN_00d5d730(FUN_00d5d730_class* pChild, const char* name)
+// src: HAVOK_SRC 0x00d5d730
+void FUN_00d5d730_class::hkpConvexTransformShape_calcContentStatistics(FUN_00d5d730_class* pChild, const char* name)
 {
     pChild->v3("Child", *(const char**)((char*)this + 0x18), 0);
-    ((FUN_00c90360_helper*)this)->FUN_00c90360(pChild, &g_01268970_arg1);
+    ((FUN_00c90360_helper*)this)->hkReferencedObject_calcContentStatistics(pChild, &g_01268970_arg1);
 }
 
 struct FUN_00d5e020_standin
 {
-    int FUN_00d5e020(int a, int b);
+    int hkpConvexTransformShape_calcSizeForSpu(int a, int b);
 };
 
 // @fnv 0x00d5e020
-int FUN_00d5e020_standin::FUN_00d5e020(int a, int aiLimit)
+// src: HAVOK_LIB 0x00d5e020
+int FUN_00d5e020_standin::hkpConvexTransformShape_calcSizeForSpu(int a, int aiLimit)
 {
     char* p = (char*)this;
     int iLimit = aiLimit - 0x60;
@@ -138,22 +140,24 @@ struct FUN_00d5d720_cls
     int unk10;
     int unk14;
     Inner* m_pInner;
-    void FUN_00d5d720();
+    void hkpConvexTransformShape_getNumCollisionSpheresImpl();
 };
 
 // @fnv 0x00d5d720
-void FUN_00d5d720_cls::FUN_00d5d720()
+// src: HAVOK_SRC 0x00d5d720
+void FUN_00d5d720_cls::hkpConvexTransformShape_getNumCollisionSpheresImpl()
 {
     m_pInner->Tail();
 }
 
 struct GetChildShapeHost : hkpConvexTransformShapeBase
 {
-    hkpSingleShapeContainer* FUN_00d5d760();
+    hkpSingleShapeContainer* hkpConvexTransformShape_getContainer();
 };
 
 // @fnv 0x00d5d760
-hkpSingleShapeContainer* GetChildShapeHost::FUN_00d5d760()
+// src: HAVOK_SRC 0x00d5d760
+hkpSingleShapeContainer* GetChildShapeHost::hkpConvexTransformShape_getContainer()
 {
     return &m_pContainedShape;
 }
@@ -192,7 +196,7 @@ void Cls_00d5d800::GetAabb(const hkTransform& t, float tol, Aabb_00d5d800& out)
 {
     __declspec(align(16)) ShapeQuad storage[4];
     hkTransform& tmp = reinterpret_cast<hkTransform&>(storage);
-    tmp.FUN_00cb2240(t, m_kMotionTransform);
+    tmp.hkTransform_setMul(t, m_kMotionTransform);
     reinterpret_cast<Shape_00d5d800*>(m_pContainedShape)->getAabb(tmp, tol, out);
 }
 
@@ -277,7 +281,7 @@ static __forceinline ShapeQuad rt_inv(const hkTransformq& tr, const hkVector4q& 
 
 struct RtStandin : public hkpConvexTransformShape
 {
-    hkBool FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
+    hkBool hkpConvexTransformShape_castRayImpl(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
 };
 
 static __forceinline void timer_begin(const char* name)
@@ -297,7 +301,8 @@ static __forceinline void timer_begin(const char* name)
 
 // Transforms the ray endpoints into local space, delegates to the contained child shape, and rotates the hit direction back to world space.
 // @fnv 0x00d5d940
-hkBool RtStandin::FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const
+// src: HAVOK_SRC 0x00d5d940
+hkBool RtStandin::hkpConvexTransformShape_castRayImpl(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const
 {
     timer_begin(str_010d1074);
 
@@ -379,12 +384,13 @@ static __forceinline ShapeQuad rotateInverse(const hkTransform& a, const hkVecto
 class hkpConvexTransformShapeWrapper : public hkpConvexTransformShape
 {
   public:
-    void FUN_00d5dae0(const ShapeRayCastQuery& input, const hkpCdBody& cdBody, hkpRayHitCollector& collector) const;
+    void hkpConvexTransformShape_castRayWithCollectorImpl(const ShapeRayCastQuery& input, const hkpCdBody& cdBody, hkpRayHitCollector& collector) const;
 };
 
 // Transforms the ray endpoints into the contained shape's local space and delegates the ray cast to the contained shape with a derived motion state.
 // @fnv 0x00d5dae0
-void hkpConvexTransformShapeWrapper::FUN_00d5dae0(const ShapeRayCastQuery& input, const hkpCdBody& cdBody,
+// src: HAVOK_SRC 0x00d5dae0
+void hkpConvexTransformShapeWrapper::hkpConvexTransformShape_castRayWithCollectorImpl(const ShapeRayCastQuery& input, const hkpCdBody& cdBody,
                                                   hkpRayHitCollector& collector) const
 {
     hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -409,7 +415,7 @@ void hkpConvexTransformShapeWrapper::FUN_00d5dae0(const ShapeRayCastQuery& input
 
     __declspec(align(16)) ShapeQuad storage[4];
     hkTransform& transform = reinterpret_cast<hkTransform&>(storage);
-    transform.FUN_00cb2240(*static_cast<const hkTransform*>(cdBody.m_pMotionState), m_kMotionTransform);
+    transform.hkTransform_setMul(*static_cast<const hkTransform*>(cdBody.m_pMotionState), m_kMotionTransform);
 
     hkpCdBody childCdBody(&cdBody, (const void*)&transform);
     childCdBody.SetCollisionShapeAndKey(m_pContainedShape.m_pContainedShape, 0);
@@ -470,11 +476,12 @@ struct FUN_00d5de40_Obj
     hkVector4 unk40;
     hkVector4 unk50;
 
-    void FUN_00d5de40(hkVector4* value);
+    void hkpConvexTransformShape_getCentreImpl(hkVector4* value);
 };
 
 // @fnv 0x00d5de40
-void FUN_00d5de40_Obj::FUN_00d5de40(hkVector4* value)
+// src: HAVOK_SRC 0x00d5de40
+void FUN_00d5de40_Obj::hkpConvexTransformShape_getCentreImpl(hkVector4* value)
 {
     unk18->vf44(value);
 
@@ -547,12 +554,13 @@ struct Standin
     int unk1c;
     hkTransform m_kMotionTransform;
 
-    Standin* FUN_00d5d7a0(const hkpConvexShape* childShape, const hkTransform& transform, int refPolicy);
+    Standin* hkpConvexTransformShape_hkpConvexTransformShape(const hkpConvexShape* childShape, const hkTransform& transform, int refPolicy);
 };
 
 // Calls FUN_00c9e340 with childShape and its m_fSphereRadius, sets the vtable, copies the four rows of transform into m_kMotionTransform, and returns this.
 // @fnv 0x00d5d7a0
-Standin* Standin::FUN_00d5d7a0(const hkpConvexShape* childShape, const hkTransform& transform, int refPolicy)
+// src: EXE 0x00d5d7a0
+Standin* Standin::hkpConvexTransformShape_hkpConvexTransformShape(const hkpConvexShape* childShape, const hkTransform& transform, int refPolicy)
 {
     ((BaseHelper*)this)->FUN_00c9e340(0xc, childShape->m_fSphereRadius, childShape, refPolicy);
     this->vtable = &DAT_010d102c;
@@ -599,12 +607,13 @@ struct TransformHost
     hkVector4 unk40;
     hkVector4 unk50;
 
-    void __thiscall FUN_00d5dd40(int a, int b, float* c);
+    void __thiscall hkpConvexTransformShape_convertVertexIdsToVerticesImpl(int a, int b, float* c);
 };
 
 // Calls unk18->vf3c(a, b, c), then transforms the b vectors in c in place by the matrix made from unk20, unk30, unk40 and unk50.
 // @fnv 0x00d5dd40
-void __thiscall TransformHost::FUN_00d5dd40(int a, int aiCount, float* apPoints)
+// src: HAVOK_SRC 0x00d5dd40
+void __thiscall TransformHost::hkpConvexTransformShape_convertVertexIdsToVerticesImpl(int a, int aiCount, float* apPoints)
 {
     unk18->vf3c(a, aiCount, (int)apPoints);
     __declspec(align(16)) ShapeQuad storage[4];
@@ -665,7 +674,7 @@ class hkpConvexTransformShapeSpheres : public hkpConvexTransformShape
     {
         return (const hkpConvexShapeSpheres*)m_pContainedShape.m_pContainedShape;
     }
-    const hkSphereq* FUN_00d5df10(hkSphereq* sphereBuffer) const;
+    const hkSphereq* hkpConvexTransformShape_getCollisionSpheresImpl(hkSphereq* sphereBuffer) const;
 };
 
 static __forceinline void hkTransformPoints(const hkTransform& t, const hkVector4q* vectorsIn, int numVectors,
@@ -696,7 +705,8 @@ static __forceinline void hkTransformPoints(const hkTransform& t, const hkVector
 
 // Transforms the contained shape's collision spheres by the motion transform and writes them into the provided buffer.
 // @fnv 0x00d5df10
-const hkSphereq* hkpConvexTransformShapeSpheres::FUN_00d5df10(hkSphereq* sphereBuffer) const
+// src: HAVOK_SRC 0x00d5df10
+const hkSphereq* hkpConvexTransformShapeSpheres::hkpConvexTransformShape_getCollisionSpheresImpl(hkSphereq* sphereBuffer) const
 {
     const hkSphereq* spheres = GetShapeForKey()->getCollisionSpheres(sphereBuffer);
     int numSpheres = GetShapeForKey()->getNumCollisionSpheres();
@@ -730,11 +740,12 @@ class TransformShape_d5d8
     ShapeQuad m_kColumn2;
     ShapeQuad m_vTranslation;
 
-    float FUN_00d5d840(const ShapeQuad& direction);
+    float hkpConvexTransformShape_getMaximumProjection(const ShapeQuad& direction);
 };
 
 // @fnv 0x00d5d840
-float TransformShape_d5d8::FUN_00d5d840(const ShapeQuad& direction)
+// src: HAVOK_SRC 0x00d5d840
+float TransformShape_d5d8::hkpConvexTransformShape_getMaximumProjection(const ShapeQuad& direction)
 {
     ShapeQuad c0 = m_kColumn0;
     ShapeQuad c1 = m_kColumn1;

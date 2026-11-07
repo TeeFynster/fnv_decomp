@@ -15,8 +15,8 @@
 #include "../../../../../../../include/hkVector4.h"
 #include "../../../../../../../include/hkpShape.h"
 
-hkMemoryRouter* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* array, int newCapacity, int elemSize);
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* alloc, void* array, int newCapacity, int elemSize);
 
 
 template <class T>
@@ -40,13 +40,13 @@ static __forceinline void VertexArray_destroy(hkArrayBase<T>& self)
 template <class T>
 static __forceinline void VertexArray_reserve(hkArrayBase<T>& self, int n)
 {
-        hkMemoryAllocator& alloc = FUN_00c85750()->heap();
+        hkMemoryAllocator& alloc = hkMemoryRouter_getInstance()->heap();
         const int capacity = self.getCapacity();
         if (capacity < n)
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, (&self), newSize, sizeof(T));
+            hkArrayUtil__reserve(&alloc, (&self), newSize, sizeof(T));
         }
     }
 
@@ -60,7 +60,7 @@ static __forceinline void VertexArray_SetSizeAndGrow(hkArrayBase<T>& self, int n
 template <class T>
 static __forceinline void VertexArray_ClearAndRelease(hkArrayBase<T>& self)
 {
-        hkMemoryAllocator& alloc = FUN_00c85750()->heap();
+        hkMemoryAllocator& alloc = hkMemoryRouter_getInstance()->heap();
         self.m_iElementCount = 0;
         if ((self.m_iCapacityState & 0x80000000) == 0)
         {
@@ -91,7 +91,7 @@ inline hkGeometry::hkGeometry()
 
 inline void* hkGeometry::operator new(size_t nbytes) throw()
 {
-    return FUN_00c85750()->heap().blockAlloc(nbytes);
+    return hkMemoryRouter_getInstance()->heap().blockAlloc(nbytes);
 }
 
 struct FloatArrayDescriptor
@@ -103,7 +103,7 @@ struct FloatArrayDescriptor
 
 inline void* hkReferencedObject::operator new(std::size_t nbytes)
 {
-    hkReferencedObject* b = static_cast<hkReferencedObject*>(FUN_00c85750()->heap().blockAlloc(nbytes));
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkMemoryRouter_getInstance()->heap().blockAlloc(nbytes));
     b->m_usMemSizeAndFlags = static_cast<unsigned short>(nbytes);
     return b;
 }
@@ -115,14 +115,15 @@ inline void* hkDisplayGeometry::operator new(std::size_t nbytes)
 
 struct VertexSource;
 
-void __cdecl FUN_00d5a6a0(const VertexSource* src, hkArray<hkVector4>* verticesOut);
+void __cdecl hkGeometryUtility_createVerticesFromPlaneEquations(const VertexSource* src, hkArray<hkVector4>* verticesOut);
 void __cdecl InitAndSetB(const FloatArrayDescriptor& vertices, hkGeometry& geometryOut);
 
 // @fnv 0x00de3360
-static __declspec(noinline) hkpShape* FUN_00de3360(const VertexSource* src, const hkTransform& transform)
+// src: HAVOK_LIB 0x00de3360
+static __declspec(noinline) hkpShape* _createConvexDisplayFromPlanes(const VertexSource* src, const hkTransform& transform)
 {
     hkArray<hkVector4, VertexArrayPolicy> localVertices;
-    FUN_00d5a6a0(src, reinterpret_cast<hkArray<hkVector4>*>(&localVertices));
+    hkGeometryUtility_createVerticesFromPlaneEquations(src, reinterpret_cast<hkArray<hkVector4>*>(&localVertices));
     const int numVertices = localVertices.GetLogicalSize();
     if (numVertices < 1)
     {
@@ -133,7 +134,7 @@ static __declspec(noinline) hkpShape* FUN_00de3360(const VertexSource* src, cons
     VertexArray_SetSizeAndGrow(vertices, numVertices);
     for (int i = 0; i < numVertices; i++)
     {
-        vertices[i].FUN_00c7f640(transform, localVertices[i]);
+        vertices[i].setTransformedPos_00c7f640(transform, localVertices[i]);
     }
 
     hkGeometry* geom = new hkGeometry;
@@ -150,7 +151,7 @@ static __declspec(noinline) hkpShape* FUN_00de3360(const VertexSource* src, cons
 
 hkpShape* BuildConvexShapeEntry(const VertexSource* src, const hkTransform& transform)
 {
-    return FUN_00de3360(src, transform);
+    return _createConvexDisplayFromPlanes(src, transform);
 }
 
 

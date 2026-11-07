@@ -10,17 +10,17 @@
 void BSSystemUtility::Destroy()
 {
     DownloadableContentManager::GetRandomGenerator();
-    FUN_00af2760();
+    Object_ClearGlobalObject();
     NetworkSystemUtility::GetRandomGenerator();
-    FUN_00af2d30();
+    Runtime_DoNothing();
     IdleSystem::GetRandomGenerator();
     FUN_00af2370();
 
-    FUN_00af3850()->vfn_08();
+    BSSysInfoSystemUtility_GetSingleton()->vfn_08();
     GetStaticSlot()->vfn_08();
-    FUN_00af2e50()->vfn_08();
+    BSSaveDataSystemUtility_GetSingleton()->vfn_08();
     GetVTableSlot8()->vfn_08();
-    FUN_00af34f0()->vfn_08();
+    BSGameDataSystemUtility_GetSingleton()->vfn_08();
     GetInitObj()->vfn_08();
 
     fnv_zlib_memset((char*)this + 4, 0, 0x80);
@@ -48,11 +48,11 @@ void BSSystemUtility::Initialize(const char* pcFilePath, const char* pcArg, unsi
         fnv_CopyFilePath((char*)this + 4, length + 1, pcFilePath, length);
     }
 
-    FUN_00af3850()->vfn_04();
+    BSSysInfoSystemUtility_GetSingleton()->vfn_04();
     GetStaticSlot()->vfn_04(pcArg, arg2);
-    FUN_00af2e50()->vfn_04();
+    BSSaveDataSystemUtility_GetSingleton()->vfn_04();
     GetVTableSlot8()->vfn_04();
-    FUN_00af34f0()->vfn_04();
+    BSGameDataSystemUtility_GetSingleton()->vfn_04();
     GetInitObj()->vfn_04();
 
     IdleSystem::GetRandomGenerator();
@@ -60,7 +60,7 @@ void BSSystemUtility::Initialize(const char* pcFilePath, const char* pcArg, unsi
     NetworkSystemUtility::GetRandomGenerator();
     IdleSystem::Initialize();
     DownloadableContentManager::GetRandomGenerator();
-    FUN_00af2750();
+    Runtime_EvaluateValue_00af2750();
 }
 
 // If the byte at offset 0x49 is set, clears the byte at 0x48 and signals the object at offset 0x30.
@@ -76,11 +76,12 @@ void BSSystemUtility::Update()
 
 // Calls Idle, UpdateSteamRunningFlag and FUN_00af2c80 on the three system utility singletons.
 // @fnv 0x00af3340
-void BSSystemUtility::FUN_00af3340()
+// src: COMMUNITY 0x00af3340
+void BSSystemUtility::Update_00af3340()
 {
     IdleSystem::GetRandomGenerator().Idle();
     NetworkSystemUtility::GetRandomGenerator().UpdateSteamRunningFlag();
-    DownloadableContentManager::GetRandomGenerator().FUN_00af2c80();
+    DownloadableContentManager::GetRandomGenerator().DoNothing_00af2c80();
 }
 
 // If the new byte differs from the stored one, calls the callback at _f88 with it, then stores the byte in _f94.
@@ -103,7 +104,7 @@ extern MemoryManager g_memoryManager;
 // @fnv 0x00af33c0
 void* BSSystemUtility::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_00af3120();
+    SetVirtualTable_00af3120();
     if (flags & 1)
         g_memoryManager._DeallocateAlias(this);
     return this;
@@ -115,7 +116,8 @@ struct FUN_00af2ed0_T : FNVVTableSlot8
     ~FUN_00af2ed0_T();
 };
 // @fnv 0x00af2e50
-FNVVTableSlot8* FUN_00af2e50()
+// src: COMMUNITY 0x00af2e50
+FNVVTableSlot8* BSSaveDataSystemUtility_GetSingleton()
 {
     static FUN_00af2ed0_T s_instance;
     return &s_instance;
@@ -143,7 +145,8 @@ struct FUN_00af3980 : FNVVTableSlot8
 
 // Returns the address of a function-local static object.
 // @fnv 0x00af34f0
-FNVVTableSlot8* FUN_00af34f0()
+// src: COMMUNITY 0x00af34f0
+FNVVTableSlot8* BSGameDataSystemUtility_GetSingleton()
 {
     static FUN_00af3980 instance;
     return &instance;
@@ -187,7 +190,8 @@ struct FUN_00af3850_Stat
 
 // Returns a pointer to a function-local static object cast to FNVVTableSlot8.
 // @fnv 0x00af3850
-FNVVTableSlot8* FUN_00af3850(void)
+// src: COMMUNITY 0x00af3850
+FNVVTableSlot8* BSSysInfoSystemUtility_GetSingleton(void)
 {
     static FUN_00af3850_Stat s_obj;
     return reinterpret_cast<FNVVTableSlot8*>(&s_obj);

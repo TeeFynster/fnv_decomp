@@ -61,7 +61,7 @@ struct Updater
     virtual void v04();
     virtual int update(int x, int y);
 };
-static void FUN_00da4a50(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y, Out* out2, Out* out1);
+static void extractChildShapes_00da4a50(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y, Out* out2, Out* out1);
 void S00da4a50_Wrap(Updater* self, int flag, Pair* dest, Pair* src, Updater* other, int y, Out* out2, Out* out1);
 
 
@@ -115,7 +115,7 @@ __forceinline hkTransform::hkTransform() {}
 __forceinline hkQuaternion::hkQuaternion() {}
 struct S00da4920_Sub
 {
-    void FUN_00cb21e0(void* arg);
+    void hkTransform_setInverse(void* arg);
 };
 struct S00da4920_Blob
 {
@@ -150,7 +150,7 @@ struct S00da4920_Blob
     __m128 m_v70;
 };
 extern char DAT_010c4c00;
-static void FUN_00da4920(S00da4920_Blob* src, S00da4920_Blob* dst);
+static void hkAgent1nMachine_flipInput(S00da4920_Blob* src, S00da4920_Blob* dst);
 void S00da4920_entry(S00da4920_Blob* src, S00da4920_Blob* dst);
 
 // Keep the unit's scalar conversion path distinct from the shared monitor wrapper.
@@ -1090,7 +1090,8 @@ static __forceinline void extractChildShapes(const WrappedShapeKeys& shapeKeyPai
     }
 }
 // @fnv 0x00da5b80
-void __cdecl FUN_00da5b80(AgentSectorPointerArray& agentTrack, const AgentSubtypeMarker& inputIn,
+// src: GUESS 0x00da5b80 (confidence: low)
+void __cdecl ProcessAgentSectorsAndChildren_00da5b80(AgentSectorPointerArray& agentTrack, const AgentSubtypeMarker& inputIn,
                           const hkpShapeContainer* shapeContainerA, const hkpShapeContainer* shapeContainerB,
                           const ShapeKeyCombination* newKeys, WorldOperationEntry& output)
 {
@@ -2672,7 +2673,8 @@ static __forceinline void fixupPotentialContactPointers(const Q150* bufferIn, vo
     }
 }
 // @fnv 0x00da4aa0
-void __cdecl FUN_00da4aa0(AgentSectorPointerArray& agentTrack, const Q14& inputIn, const hkpShapeContainer* shapeContainerB, const Q26* newKeys,
+// src: XBOX_PDB 0x00da4aa0
+void __cdecl hkAgent1nMachine_Process(AgentSectorPointerArray& agentTrack, const Q14& inputIn, const hkpShapeContainer* shapeContainerB, const Q26* newKeys,
                           Q6& output)
 {
     MathUtilities::prefetch128(reinterpret_cast<Q155<hkpAgent1nSector*>&>(agentTrack.m_kSectors).begin());

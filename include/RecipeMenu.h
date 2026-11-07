@@ -19,16 +19,16 @@ public:
 
     unsigned char layoutExtension[0xDC];
 
-    int FUN_00726f00();
+    int GetMenuID_00726f00();
     void* FUN_00726f20(unsigned int flags);
     void FUN_00726f50();
     int GetID();
     void OnAction(int action, Tile* tile);
     void PopulateChallengeList(int unused, int type);
-    void FUN_00727b10(int id, Tile* tile);
+    void RecipeMenu_DoEnter(int id, Tile* tile);
     bool HandleMenuButton(int button, float value);
-    void FUN_00728a70();
-    void FUN_00728da0(TESForm*, Tile*);
-    void FUN_00728da0(TESForm*, MenuTileList*);
+    void RecipeMenu_DoIdle();
+    void RecipeMenu_PopulateItemStatsDisplay(TESForm*, Tile*);
+    void RecipeMenu_PopulateItemStatsDisplay(TESForm*, MenuTileList*);
     void FUN_00a1d910();
 };

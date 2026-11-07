@@ -9,10 +9,10 @@
 __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern char* EmptyFS;
 extern MemoryManager g_memoryManager;
-void FUN_00a644a0(char** p);
-const char* __cdecl FUN_00e8dd60();
+void Object_ProcessEntries_00a644a0(char** p);
+const char* __cdecl NiD3DGPUProgramCache_GetPlatformSpecificCodeID();
 extern "C" void* g_01270920;
-void* __cdecl FUN_00e8ea10();
+void* __cdecl NiGPUProgramCache_GetRTTI();
 struct RefCounted
 {
     virtual void f0();
@@ -157,11 +157,11 @@ struct W20Profiles
 {
     NiFixedString* data;
     unsigned int capacity, count, unk0c, unk10;
-    __declspec(nothrow) void FUN_00e8e290(unsigned int);
+    __declspec(nothrow) void ResizeStringArray(unsigned int);
     __declspec(nothrow) void PushBack(const NiFixedString& value)
     {
         if (count == capacity)
-            FUN_00e8e290(capacity > 0 ? capacity * 2 : 1);
+            ResizeStringArray(capacity > 0 ? capacity * 2 : 1);
         data[count++] = value;
     }
 };
@@ -241,8 +241,8 @@ struct ShaderLibrary8e
     void __thiscall AddShader();
     void __thiscall RegisterShader();
 };
-ShaderLibrary8e* __stdcall FUN_00e92eb0(ShaderProgram8e* pkProgram);
-long __stdcall FUN_00ee6e3a(unsigned int uiNumBytes, ShaderBuffer8e** ppkBuffer);
+ShaderLibrary8e* __stdcall NiD3DShaderProgramFactory_GetInstance(ShaderProgram8e* pkProgram);
+long __stdcall D3DXCreateBuffer_0(unsigned int uiNumBytes, ShaderBuffer8e** ppkBuffer);
 extern const char* DAT_0126fa48;
 extern const char* DAT_0126fa40;
 extern ShaderFactory8e* DAT_0126fa3c;
@@ -271,7 +271,7 @@ struct ShaderLoader8e
     virtual void v20();
     virtual const NiFixedString& GetLoaderName();
 
-    void FUN_00ee92d0(ShaderStream8e* pkStream, char* pcBuffer, unsigned int uiMaxLen);
+    void NiGPUProgramCache_LoadStringA(ShaderStream8e* pkStream, char* pcBuffer, unsigned int uiMaxLen);
     bool LoadShaderProgram(ShaderStream8e* pkStream, const NiFixedString& kName, ShaderProgram8e** ppkProgram,
                            bool bSkip);
 };
@@ -286,13 +286,14 @@ extern MemoryManager DAT_011f6238;
 
 inline void* operator new[](unsigned int uiSize, MemoryManager& allocator)
 {
-    return allocator.FUN_00aa3e40(uiSize);
+    return allocator.Game_DoHeapAlloc(uiSize);
 }
 
 namespace sc1d790 {
 
 // @fnv 0x00c1d790
-NiPointer<NiD3DPass>* FUN_00c1d790(unsigned int ItemUpdateArray)
+// src: XBOX_PDB 0x00c1d790
+NiPointer<NiD3DPass>* NiTObjectArray_NiPointer_NiScreenTexture_NiTObjectArray_NiPointer_NiScreenTexture(unsigned int ItemUpdateArray)
 {
     return new (DAT_011f6238) NiPointer<NiD3DPass>[ItemUpdateArray];
 }

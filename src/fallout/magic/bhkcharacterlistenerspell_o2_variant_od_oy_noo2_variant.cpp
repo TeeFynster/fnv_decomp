@@ -258,19 +258,19 @@ class Debug807
 };
 extern Debug807* g_pkDebug807;
 
-DebugNode807* __cdecl FUN_004a3a40(void* pvOwner);
-void __cdecl FUN_00624b10(Matrix807& kOut, const hkRotation& kIn);
+DebugNode807* __cdecl bhkShape_Getbhk(void* pvOwner);
+void __cdecl HK2NI_00624b10(Matrix807& kOut, const hkRotation& kIn);
 void __cdecl FUN_00458620(NiPoint3& kOut, const hkVector4& kIn);
-void* __cdecl FUN_004b5950(void* pvCollidable);
-void* __cdecl FUN_004b59f0(void* pvCollidable);
-void* __cdecl FUN_004b5a80(void* pvEntry);
+void* __cdecl hkpGetPhantom(void* pvCollidable);
+void* __cdecl hkpGetRigidBody(void* pvCollidable);
+void* __cdecl bhkEntity_Getbhk(void* pvEntry);
 Line807* __cdecl CreateOctahedron(float fSize, const ColorA807& kColor, int iType);
 
 class Listener807
 {
   public:
     TESObjectREFR* GetRef(void* pvCollidable);
-    void FUN_008070d0(Event807* pkEvent);
+    void bhkCharacterListenerSpell_contactPointAddedCallback(Event807* pkEvent);
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -681,7 +681,8 @@ class Listener807
 // Preserve the original stack protection for the address-taken collision/debug temporaries.
 #pragma strict_gs_check(push, on)
 // @fnv 0x008070d0
-void Listener807::FUN_008070d0(Event807* pkEvent)
+// src: XBOX_PDB 0x008070d0
+void Listener807::bhkCharacterListenerSpell_contactPointAddedCallback(Event807* pkEvent)
 {
     MagicProjectile* pkProjectile = dynamic_cast<MagicProjectile*>(GetRef(pkEvent->m_pvCollidableA));
     if (!pkProjectile)
@@ -690,7 +691,7 @@ void Listener807::FUN_008070d0(Event807* pkEvent)
         return;
     TESObjectREFR* pkHit = GetRef(pkEvent->m_pvCollidableB);
     Actor* pkActor = pkHit && pkHit->IsActor() ? (Actor*)pkHit : 0;
-    void* pvEntry = FUN_004b5950(pkEvent->m_pvCollidableB);
+    void* pvEntry = hkpGetPhantom(pkEvent->m_pvCollidableB);
     if (pvEntry)
     {
         if (!pkActor)
@@ -710,27 +711,27 @@ void Listener807::FUN_008070d0(Event807* pkEvent)
     {
         NiPoint3 kUnused;
         EventCopy807 kCopy(pkEvent);
-        DebugNode807* pkNodeA = FUN_004a3a40(kCopy.m_pkBodyA->GetOwner());
+        DebugNode807* pkNodeA = bhkShape_Getbhk(kCopy.m_pkBodyA->GetOwner());
         if (pkNodeA)
         {
             Line807* pkLineA = new Line807(0);
             Color807 kColorA(1.0f, 1.0f, 1.0f);
             pkNodeA->AttachLine(pkLineA, kColorA);
             Matrix807 kRotA;
-            FUN_00624b10(kRotA, kCopy.m_pkBodyA->GetTransform()->getRotation());
+            HK2NI_00624b10(kRotA, kCopy.m_pkBodyA->GetTransform()->getRotation());
             pkLineA->SetLocalRotation(kRotA);
             NiPoint3 kPosA;
             FUN_00458620(kPosA, kCopy.m_pkBodyA->GetTransform()->getTranslation());
             pkLineA->GetTransformScale(kPosA);
         }
-        DebugNode807* pkNodeB = FUN_004a3a40(kCopy.m_pkBodyB->GetOwner());
+        DebugNode807* pkNodeB = bhkShape_Getbhk(kCopy.m_pkBodyB->GetOwner());
         if (pkNodeB)
         {
             Line807* pkLineB = new Line807(0);
             Color807 kColorB(1.0f, 1.0f, 1.0f);
             pkNodeB->AttachLine(pkLineB, kColorB);
             Matrix807 kRotB;
-            FUN_00624b10(kRotB, kCopy.m_pkBodyB->GetTransform()->getRotation());
+            HK2NI_00624b10(kRotB, kCopy.m_pkBodyB->GetTransform()->getRotation());
             pkLineB->SetLocalRotation(kRotB);
             NiPoint3 kPosB;
             FUN_00458620(kPosB, kCopy.m_pkBodyB->GetTransform()->getTranslation());
@@ -754,8 +755,8 @@ void Listener807::FUN_008070d0(Event807* pkEvent)
         pkHitActor = pkHit;
     }
     Unk815* pkEffect = pkCaster ? pkCaster->GetEffect() : 0;
-    void* pvHitEntry = FUN_004b59f0(pkEvent->m_pvCollidableB);
-    void* pvTarget = pvHitEntry ? FUN_004b5a80(pvHitEntry) : 0;
+    void* pvHitEntry = hkpGetRigidBody(pkEvent->m_pvCollidableB);
+    void* pvTarget = pvHitEntry ? bhkEntity_Getbhk(pvHitEntry) : 0;
     pkProjectile->OnHit(kPos, pvTarget, pkHit, 0);
 }
 

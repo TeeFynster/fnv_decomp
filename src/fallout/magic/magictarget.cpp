@@ -19,7 +19,7 @@ public:
     signed char GetByteAtOffset8C();
     bool HasCombatFlag(int);
     signed char FUN_0073cb80();
-    signed char FUN_00505c00();
+    signed char TESCombatStyle_GetPowerAttackF();
     signed char GetByteAtOffset9A();
     signed char GetByteAtOffset9B();
     signed char FUN_009e8670();
@@ -76,10 +76,10 @@ extern PlayerCharacter* g_thePlayer;
 void DebugLog(const char*, ...);
 void ApplyPerkModifiers(int, Actor*, ...);
 int GetStatusResult();
-bool FUN_0040dfa0(EffectItem*, EffectItem*);
+bool MagicSystem_CheckBoundItemEffects(EffectItem*, EffectItem*);
 // Getter bodies are folded in the original executable. These expressions use
 // their existing canonical bindings while retaining each receiver's layout.
-#define EFFECT_ITEM(e) ((e)->FUN_0084e3a0())
+#define EFFECT_ITEM(e) ((e)->GetHavokWorldObjectCountInSceneGraph_0084e3a0())
 #define EFFECT_SPELL(e) ((e)->FUN_0044ddc0())
 class BSFileEntry;
 class LocationDescriptor
@@ -246,7 +246,7 @@ bool MagicTarget::AddActiveEffect(MagicCaster* caster, MagicItem* spell, ActiveE
     TESObjectREFR* i = GetMagicTargetReference();  // target reference
     if (i)
         Script::GetLocalData((TESForm*)EFFECT_ITEM(effect)->GetEffectSetting(), i->GetExtraData(), 0x2000);
-    bool permanent = EFFECT_ITEM(effect)->FUN_008231f0() ? spell->IgnoreResistance() : false;
+    bool permanent = EFFECT_ITEM(effect)->IsScriptEffect_008231f0() ? spell->IgnoreResistance() : false;
     // Resistance scales the cloned effect unless it came from an ingredient.
     float a = spell->GetSpellType() != 4 && !permanent ? GetEffectiveness(caster, spell, effect) : 1.0f;
     if (a <= 0.0)
@@ -283,7 +283,7 @@ bool MagicTarget::AddActiveEffect(MagicCaster* caster, MagicItem* spell, ActiveE
                 ActiveEffect* current = (ActiveEffect*)((BSSimpleList<BGSPerkEntry*>*)node)->GetItem();
                 if (current && EFFECT_ITEM(current) == usageMonitor)
                 {
-                    current->FUN_00804cb0(current->GetFloatAtOffset1C() + effect->GetFloatAtOffset1C());
+                    current->ActiveEffect_SetMagnitude(current->GetFloatAtOffset1C() + effect->GetFloatAtOffset1C());
                     SetEffectMagnitude(current, 0.0f);
                     found = true;
                 }
@@ -302,7 +302,7 @@ bool MagicTarget::AddActiveEffect(MagicCaster* caster, MagicItem* spell, ActiveE
         {
             float duration = effect->FUN_007df1f0();
             ApplyPerkModifiers(24, actor, &duration);
-            effect->FUN_00693d50(duration);
+            effect->BaseProcess_SetLastTimeProcessed(duration);
         }
     }
     else if (spell->GetSpellType() == 7)
@@ -315,7 +315,7 @@ bool MagicTarget::AddActiveEffect(MagicCaster* caster, MagicItem* spell, ActiveE
             {
                 float duration = effect->FUN_007df1f0();
                 ApplyPerkModifiers(25, actor, &duration);
-                effect->FUN_00693d50(duration);
+                effect->BaseProcess_SetLastTimeProcessed(duration);
             }
         }
     }
@@ -343,7 +343,7 @@ bool MagicTarget::AddActiveEffect(MagicCaster* caster, MagicItem* spell, ActiveE
             while (node && !((BSSimpleList<PerkButtonEntry*>*)node)->IsEmpty())
             {
                 ActiveEffect* current = (ActiveEffect*)((BSSimpleList<BGSPerkEntry*>*)node)->GetItem();
-                if (current && FUN_0040dfa0(EFFECT_ITEM(effect), EFFECT_ITEM(current)))
+                if (current && MagicSystem_CheckBoundItemEffects(EFFECT_ITEM(effect), EFFECT_ITEM(current)))
                 {
                     Dispel(EFFECT_SPELL(current), 0, current);
                     e = false;
@@ -366,7 +366,7 @@ bool MagicTarget::AddActiveEffect(MagicCaster* caster, MagicItem* spell, ActiveE
             break;
         case 6: {
             SpellItem* source = spell ? (SpellItem*)((char*)spell - 0x18) : 0;
-            if (source->FUN_00823c20())
+            if (source->ActiveEffect_IsExtendDuration())
             {
                 e = false;
                 d = true;
@@ -442,9 +442,9 @@ void MagicTarget::UpdateActiveEffects(float delta)
             bool done = IsEffectFlaggedForRemoval(pEffect);
             bool bShouldUpdate = !done;
             if (bShouldUpdate && TESSpellList::RemoveSpell(((LocationDescriptor*)pEffect)->SetLocRef()) &&
-                pEffect->GetEffectSetting()->FUN_00403e60(2) && pEffect->GetByteAtOffset17())
+                pEffect->GetEffectSetting()->IsFlagSet_00403e60(2) && pEffect->GetByteAtOffset17())
             {
-                bShouldUpdate = pEffect->FUN_007df210() || ((LowProcess*)pEffect)->LowProcess::GetActiveCombatTarget();
+                bShouldUpdate = pEffect->HasConditions() || ((LowProcess*)pEffect)->LowProcess::GetActiveCombatTarget();
             }
             if (bShouldUpdate)
                 pEffect->UpdateEffect(delta);
@@ -453,9 +453,9 @@ void MagicTarget::UpdateActiveEffects(float delta)
                 MagicItem* spell = EFFECT_SPELL(pEffect);
                 MagicTarget* target = (MagicTarget*)((ActorMover*)pEffect)->GetCurrentMoveModeType();
                 pEffect->SetFlag(true);
-                if (pEffect->FUN_00833c20() && !pEffect->IsFlag200Set() &&
+                if (pEffect->ActiveEffect_IsActive() && !pEffect->IsFlag200Set() &&
                     target == (g_thePlayer ? (MagicTarget*)((char*)g_thePlayer + 0x94) : 0) && spell->GetSpellType() == 7 &&
-                    target->FUN_00822c30(spell, pEffect))
+                    target->IsLastEffect(spell, pEffect))
                 {
                     bool show = true;
                     char message[260];
@@ -476,7 +476,7 @@ void MagicTarget::UpdateActiveEffects(float delta)
                     {
                         MagicTargetMessages::ShowMessage(message, 0, 0, "UIHealthChemsWearOff", 2.0f, false);
                         AlchemyItem* potion = dynamic_cast<AlchemyItem*>(spell);
-                        if (potion && potion->FUN_004030b0())
+                        if (potion && potion->CombatController_GetTarget())
                         {
                             TESImageSpaceModifier* modifier = dynamic_cast<TESImageSpaceModifier*>(
                                 BGSDefaultObjectManager::GetDefaultObjectByIndex(20));
@@ -506,12 +506,12 @@ int MagicTarget::CompareActiveEffects(ActiveEffect* first, ActiveEffect* second)
     char buffer2[256];
     EffectItem* pEffect = EFFECT_ITEM(first);
     sprintf(buffer1, "%c%.30s%.1f%.1f", 'A', pEffect->GetEffectName().String(),
-            pEffect->GetEffectSetting()->FUN_00403e60(0x100) ? 1000.0f : first->GetFloatAtOffset1C(),
-            pEffect->GetEffectSetting()->FUN_00403e60(0x80) ? 1000.0f : first->FUN_007df1f0());
+            pEffect->GetEffectSetting()->IsFlagSet_00403e60(0x100) ? 1000.0f : first->GetFloatAtOffset1C(),
+            pEffect->GetEffectSetting()->IsFlagSet_00403e60(0x80) ? 1000.0f : first->FUN_007df1f0());
     pEffect = EFFECT_ITEM(second);
     sprintf(buffer2, "%c%.30s%.1f%.1f", 'A', pEffect->GetEffectName().String(),
-            pEffect->GetEffectSetting()->FUN_00403e60(0x100) ? 1000.0f : second->GetFloatAtOffset1C(),
-            pEffect->GetEffectSetting()->FUN_00403e60(0x80) ? 1000.0f : second->FUN_007df1f0());
+            pEffect->GetEffectSetting()->IsFlagSet_00403e60(0x100) ? 1000.0f : second->GetFloatAtOffset1C(),
+            pEffect->GetEffectSetting()->IsFlagSet_00403e60(0x80) ? 1000.0f : second->FUN_007df1f0());
     return _mbsicmp((const unsigned char*)buffer1, (const unsigned char*)buffer2);
 }
 
@@ -556,7 +556,7 @@ bool MagicTarget::AddEffectToTarget(MagicCaster* caster, MagicItem* spell, Activ
 {
     if (((TESForm*)EFFECT_ITEM(effect))->GetFormID())
     {
-        bool permanent = EFFECT_ITEM(effect)->FUN_008231f0() ? spell->IgnoreResistance() : false;
+        bool permanent = EFFECT_ITEM(effect)->IsScriptEffect_008231f0() ? spell->IgnoreResistance() : false;
         if (!permanent && !spell->GetNoAbsorbOrReflect())
         {
             if (ExecuteEffect(caster, spell, effect))
@@ -622,7 +622,8 @@ SpellItem* MagicSystem::GetPipBoyLightSpell()
 }
 
 // @fnv 0x00822f70
-bool MagicTarget::FUN_00822f70(ActorValue::Index aeActorValue)
+// src: COMMUNITY 0x00822f70
+bool MagicTarget::HasRecoverableActorValueEffect(ActorValue::Index aeActorValue)
 {
     // Short local names retain the original MSVC9 stack layout.
     bool b = false;  // found a hostile effect
@@ -635,13 +636,13 @@ bool MagicTarget::FUN_00822f70(ActorValue::Index aeActorValue)
         ActiveEffect* effect = (ActiveEffect*)((BSSimpleList<BGSPerkEntry*>*)node)->GetItem();
         if (effect && EFFECT_ITEM(effect)->GetAffectedActorValue() == aeActorValue)
         {
-            bool permanent = (int)((LocationDescriptor*)effect)->SetLocRef() == 4 && !effect->FUN_007df210() ? 1 : 0;
+            bool permanent = (int)((LocationDescriptor*)effect)->SetLocRef() == 4 && !effect->HasConditions() ? 1 : 0;
             if (a->IsPlayerRef() && permanent &&
-                effect->GetEffectSetting()->FUN_00403e60(2))
+                effect->GetEffectSetting()->IsFlagSet_00403e60(2))
             {
                 // Permanent player effects do not count here.
             }
-            else if (effect->GetEffectSetting()->FUN_00403e60(2))
+            else if (effect->GetEffectSetting()->IsFlagSet_00403e60(2))
                 b = true;
         }
         node = (BSSimpleList<ActiveEffect*>*)((BSSimpleList<BGSPerkEntry*>*)node)->GetNext();
@@ -656,7 +657,7 @@ bool MagicTarget::HasSpell(MagicItem* spell, bool includeInactive)
     while (node && !found)
     {
         ActiveEffect* effect = (ActiveEffect*)((BSSimpleList<BGSPerkEntry*>*)node)->GetItem();
-        if (effect && EFFECT_SPELL(effect) == spell && (includeInactive || effect->FUN_00833c20()) &&
+        if (effect && EFFECT_SPELL(effect) == spell && (includeInactive || effect->ActiveEffect_IsActive()) &&
             !EFFECT_ITEM(effect)->IsScriptBasedEffect())
             found = true;
         node = (BSSimpleList<ActiveEffect*>*)((BSSimpleList<BGSPerkEntry*>*)node)->GetNext();
@@ -677,7 +678,8 @@ void MagicTarget::DispelAllEffects()
     }
 }
 // @fnv 0x008231f0
-bool EffectItem::FUN_008231f0()
+// src: XBOX_PDB 0x008231f0
+bool EffectItem::IsScriptEffect_008231f0()
 {
     return m_pEffectSetting->FUN_007df1b0();
 }
@@ -707,11 +709,12 @@ struct FlaggedData
 
 struct FUN_00823c20_shell : FlaggedData
 {
-    int FUN_00823c20();
+    int ActiveEffect_IsExtendDuration();
 };
 
 // @fnv 0x00823c20
-int FUN_00823c20_shell::FUN_00823c20()
+// src: COMMUNITY 0x00823c20
+int FUN_00823c20_shell::ActiveEffect_IsExtendDuration()
 {
     return ContainsAnyFlag(2);
 }
@@ -739,7 +742,7 @@ bool FUN_00822cf0_shell::HasActiveEffectOfArchetype(int archetype, bool include)
     while (list && !found)
     {
         ActiveEffect* effect = list->GetItem();
-        if (effect && effect->GetEffectSetting()->GetArchetype() == archetype && (include || effect->FUN_00833c20()))
+        if (effect && effect->GetEffectSetting()->GetArchetype() == archetype && (include || effect->ActiveEffect_IsActive()))
             found = true;
         list = list->GetNext();
     }
@@ -809,11 +812,12 @@ void FUN_00824570_shell::DispelMatchingActiveEffects(unsigned int formID, unsign
 
 struct FUN_008248e0_shell : public MagicTarget
 {
-    void FUN_008248e0(MagicItem* apItem, bool abImmediate);
+    void MagicTarget_Dispel_008248e0(MagicItem* apItem, bool abImmediate);
 };
 
 // @fnv 0x008248e0
-void FUN_008248e0_shell::FUN_008248e0(MagicItem* apItem, bool abImmediate)
+// src: XBOX_PDB 0x008248e0
+void FUN_008248e0_shell::MagicTarget_Dispel_008248e0(MagicItem* apItem, bool abImmediate)
 {
     if (!apItem)
         return;
@@ -834,17 +838,18 @@ void FUN_008248e0_shell::FUN_008248e0(MagicItem* apItem, bool abImmediate)
 
 struct EvalShell : MagicTarget
 {
-    void FUN_008255a0();
+    void MagicTarget_EvaluateSpellConditions();
 };
 // @fnv 0x008255a0
-void EvalShell::FUN_008255a0()
+// src: XBOX_PDB 0x008255a0
+void EvalShell::MagicTarget_EvaluateSpellConditions()
 {
     BSSimpleList<ActiveEffect*>* current = GetActiveEffectList();
     while (current)
     {
         ActiveEffect* effect = (ActiveEffect*)current->GetItem();
         current = (BSSimpleList<ActiveEffect*>*)current->GetNext();
-        if (effect && (effect->FUN_007df210() || ((LowProcess*)effect)->LowProcess::GetActiveCombatTarget()))
+        if (effect && (effect->HasConditions() || ((LowProcess*)effect)->LowProcess::GetActiveCombatTarget()))
             effect->AdvanceEffect(0.0f, true);
     }
 }
@@ -860,10 +865,11 @@ struct EffectListNode
 };
 struct FUN_00822eb0_shell : MagicTarget
 {
-    float FUN_00822eb0(MagicItem* apSpell);
+    float MagicTarget_GetUsageMonitorEffectMagnitude(MagicItem* apSpell);
 };
 // @fnv 0x00822eb0
-float FUN_00822eb0_shell::FUN_00822eb0(MagicItem* apSpell)
+// src: XBOX_PDB 0x00822eb0
+float FUN_00822eb0_shell::MagicTarget_GetUsageMonitorEffectMagnitude(MagicItem* apSpell)
 {
     float fresult = 0.0f;
     EffectItem* pmonitorEffect = apSpell ? ((EffectItemList*)((char*)apSpell + 0xc))->GetScriptEffect() : 0;
@@ -889,11 +895,12 @@ class S3c60
 
 struct FUN_00822e00_shell : public MagicTarget
 {
-    bool FUN_00822e00();
+    bool MagicTarget_HasDamageHealthEffect();
 };
 
 // @fnv 0x00822e00
-bool FUN_00822e00_shell::FUN_00822e00()
+// src: COMMUNITY 0x00822e00
+bool FUN_00822e00_shell::MagicTarget_HasDamageHealthEffect()
 {
     BSSimpleList<ActiveEffect*>* list = GetActiveEffectList();
     bool found = false;
@@ -905,7 +912,7 @@ bool FUN_00822e00_shell::FUN_00822e00()
         if (effect != 0 && reinterpret_cast<S3c60*>(effect->GetEffectSetting())->HasFlag2() &&
             reinterpret_cast<EffectItem*>(reinterpret_cast<TESForm*>(effect)->GetFormID())->GetAffectedActorValue() ==
                 0x10 &&
-            effect->GetEffectSetting()->FUN_00403e60(4))
+            effect->GetEffectSetting()->IsFlagSet_00403e60(4))
         {
             found = true;
         }
@@ -918,9 +925,10 @@ bool FUN_00822e00_shell::FUN_00822e00()
 
 // Returns false if pkForm is deleted, otherwise counts enabled, non-deleted forms of iType in the list excluding pkForm and returns whether that count is zero.
 // @fnv 0x00822c30
-bool MagicTarget::FUN_00822c30(MagicItem* iType, ActiveEffect* pkForm)
+// src: COMMUNITY 0x00822c30
+bool MagicTarget::IsLastEffect(MagicItem* iType, ActiveEffect* pkForm)
 {
-    if (pkForm->FUN_0084e3a0()->IsScriptBasedEffect())
+    if (pkForm->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->IsScriptBasedEffect())
         return false;
 
     BSSimpleList<ActiveEffect*>* pkNode = GetActiveEffectList();
@@ -929,7 +937,7 @@ bool MagicTarget::FUN_00822c30(MagicItem* iType, ActiveEffect* pkForm)
     while (pkNode)
     {
         ActiveEffect* pkItem6 = pkNode->GetItem();
-        if (pkItem6 && pkItem6->FUN_0044ddc0() == iType && pkItem6->FUN_00833c20() && !pkItem6->FUN_0084e3a0()->IsScriptBasedEffect() &&
+        if (pkItem6 && pkItem6->FUN_0044ddc0() == iType && pkItem6->ActiveEffect_IsActive() && !pkItem6->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->IsScriptBasedEffect() &&
             pkItem6 != pkForm)
             iCount6++;
         pkNode = pkNode->GetNext();
@@ -945,7 +953,7 @@ class NiNode;
 class CellS
 {
   public:
-    NiNode* FUN_00545cb0();
+    NiNode* Get3D_00545cb0();
 };
 
 class RefS
@@ -1084,7 +1092,7 @@ void MagicTargetUpd::UpdateEffectsByFlags(unsigned int auiFlags)
         Actor* pActor = (Actor*)(MagicTarget*)this;
         if ((pActor && !((const Actor*)pActor)->GetCurrentProcess()) || !((RefS*)GetMagicTargetReference())->Get3D() ||
             !((RefS*)GetMagicTargetReference())->GetParentCell() ||
-            !((RefS*)GetMagicTargetReference())->GetParentCell()->FUN_00545cb0())
+            !((RefS*)GetMagicTargetReference())->GetParentCell()->Get3D_00545cb0())
             return;
     }
     while (pIter && !pIter->IsEmpty())
@@ -1148,12 +1156,13 @@ void B824800MagicTarget::RemoveEffectsByArchetype(int aiArchetype, int iProcessL
 
 struct MagicTargetDispel : MagicTarget
 {
-    void FUN_008249d0(bool immediate);
+    void MagicTarget_DispelAllSpells(bool immediate);
 };
 
 // Iterates the active effect list and dispels each effect whose spell type is 0, 2, 3, 7 or 8, or is an enchantment of type 0.
 // @fnv 0x008249d0
-void MagicTargetDispel::FUN_008249d0(bool immediate)
+// src: XBOX_PDB 0x008249d0
+void MagicTargetDispel::MagicTarget_DispelAllSpells(bool immediate)
 {
     BSSimpleList<ActiveEffect*>* node = GetActiveEffectList();
     while (node && !node->IsEmpty())
@@ -1190,7 +1199,7 @@ bool MagicTarget::CanAddEffect(MagicItem* auiFormID, MagicCaster* apCaster, Acti
         BSSimpleList<ActiveEffect*>* pNext3 = pNode2->GetNext();
         if (pEff && !pEff->FUN_00705cf0() && pEff->FUN_0044ddc0() == auiFormID &&
             (apCaster ? GetEffectCaster(pEff) == apCaster : true) &&
-            (apEffect ? !pEff->FUN_0084e3a0()->Compare(apEffect->FUN_0084e3a0()) : true))
+            (apEffect ? !pEff->GetHavokWorldObjectCountInSceneGraph_0084e3a0()->Compare(apEffect->GetHavokWorldObjectCountInSceneGraph_0084e3a0()) : true))
         {
             SetEffectMagnitude(pEff, 0.0f);
             bFound4 = true;
@@ -1230,12 +1239,13 @@ class FUN_00824df0_cls
     virtual void vfn_4();
     virtual ListNodeCls* GetFirst();
 
-    void FUN_00824df0(void* a1, int a2);
+    void MagicTarget_SetDisplacementSpell(void* a1, int a2);
 };
 
 // Walks the list nodes and, for each item whose object has kind a2, sets its owner to a1 and its value to 0.0f with flag 1.
 // @fnv 0x00824df0
-void FUN_00824df0_cls::FUN_00824df0(void* pOwner, int iKind)
+// src: COMMUNITY 0x00824df0
+void FUN_00824df0_cls::MagicTarget_SetDisplacementSpell(void* pOwner, int iKind)
 {
     ListNodeCls* node = GetFirst();
     while (node != 0 && !node->IsDone())
@@ -1255,10 +1265,10 @@ struct FUN_008251c0_obj
     virtual void* Release(bool);
 };
 extern int DAT_011c3ea4;
-int* __fastcall FUN_0043d4d0(int*);
-bool FUN_00713d90();
+int* __fastcall Setting_Int(int*);
+bool AILinearTaskThreadManager_QRunningThreads();
 void* __stdcall FUN_004537b0(ActiveEffect*);
-void __fastcall FUN_00905330(void*);
+void __fastcall RemoveMatchingItem(void*);
 void __fastcall QueueTaskWithValue(void*);
 
 class FUN_008251c0_cls
@@ -1271,20 +1281,21 @@ class FUN_008251c0_cls
     virtual void vfn_10();
     virtual void vfn_14();
     virtual void vfn_18(ActiveEffect* a);
-    void FUN_008251c0(ActiveEffect* a, bool b);
+    void MagicTarget_RemoveEffect(ActiveEffect* a, bool b);
 };
 
 // @fnv 0x008251c0
-void FUN_008251c0_cls::FUN_008251c0(ActiveEffect* pEffect, bool b)
+// src: COMMUNITY 0x008251c0
+void FUN_008251c0_cls::MagicTarget_RemoveEffect(ActiveEffect* pEffect, bool b)
 {
     if (!b)
     {
         pEffect->SetFlag(true);
         return;
     }
-    FUN_00905330(vfn_8(&pEffect));
+    RemoveMatchingItem(vfn_8(&pEffect));
     vfn_18(pEffect);
-    if (*FUN_0043d4d0(&DAT_011c3ea4) > 1 && FUN_00713d90())
+    if (*Setting_Int(&DAT_011c3ea4) > 1 && AILinearTaskThreadManager_QRunningThreads())
     {
         QueueTaskWithValue(FUN_004537b0(pEffect));
         return;
@@ -1344,14 +1355,14 @@ float __fastcall GetAlchemyAddictionChance(AlchemyItem*);
 
 struct MT : public MagicTarget
 {
-    void FUN_008255a0();
+    void MagicTarget_EvaluateSpellConditions();
 };
 
 struct FUN_00824e70_shell : public MagicTarget
 {
-    float FUN_00822eb0(MagicItem*);
+    float MagicTarget_GetUsageMonitorEffectMagnitude(MagicItem*);
     void DispelMatchingActiveEffects(EffectItem*, MagicItem*, void*);
-    void FUN_00824df0(MagicItem*, MagicItem*);
+    void MagicTarget_SetDisplacementSpell(MagicItem*, MagicItem*);
     bool ApplyAddiction(AlchemyItem* apItem);
 };
 
@@ -1359,7 +1370,7 @@ struct FUN_00824e70_shell : public MagicTarget
 bool FUN_00824e70_shell::ApplyAddiction(AlchemyItem* apItem)
 {
     float fAddictionChance2 = apItem ? GetAlchemyAddictionChance(apItem) : 0.0f;
-    if (!apItem || !apItem->FUN_004030b0() || fAddictionChance2 == 0.0)
+    if (!apItem || !apItem->CombatController_GetTarget() || fAddictionChance2 == 0.0)
     {
         return false;
     }
@@ -1371,7 +1382,7 @@ bool FUN_00824e70_shell::ApplyAddiction(AlchemyItem* apItem)
     EffectItem* pEffectItem = apItem->GetScriptEffect();
     if (pEffectItem)
     {
-        float fResistance = FUN_00822eb0(apItem);
+        float fResistance = MagicTarget_GetUsageMonitorEffectMagnitude(apItem);
         if (fResistance <= *setting_011d1878.Float())
         {
             return false;
@@ -1385,7 +1396,7 @@ bool FUN_00824e70_shell::ApplyAddiction(AlchemyItem* apItem)
     int roll2 = DialogueRandom() % 100;
     if (fAddictionChance2 * 100.0 <= roll2)
     {
-        ((MT*)this)->FUN_008255a0();
+        ((MT*)this)->MagicTarget_EvaluateSpellConditions();
         return false;
     }
     bool bShowMsg = pActor2->IsPlayerRef() && !pActor2->ContainsSpell(apItem, true);
@@ -1393,8 +1404,8 @@ bool FUN_00824e70_shell::ApplyAddiction(AlchemyItem* apItem)
     {
         DispelMatchingActiveEffects(pEffectItem, apItem, NULL);
     }
-    pActor2->CastSpellOnSelf((SpellItem*)apItem->FUN_004030b0(), false);
-    FUN_00824df0(apItem, (SpellItem*)apItem->FUN_004030b0());
+    pActor2->CastSpellOnSelf((SpellItem*)apItem->CombatController_GetTarget(), false);
+    MagicTarget_SetDisplacementSpell(apItem, (SpellItem*)apItem->CombatController_GetTarget());
     if (bShowMsg)
     {
         FUN_004d5c60(10);
@@ -1430,7 +1441,7 @@ bool AddictionEffectQuery::HasMatchingSource(int iType, bool bAny)
         ActiveEffect* pkSet = pkNode->GetItem();
         MagicItem* pkForm = pkSet ? pkSet->FUN_0044ddc0() : 0;
         if (pkForm && pkForm->GetSpellType() == 0xa && (!iType || (int)GetEffectSource(pkSet) == iType) &&
-            (bAny || pkSet->FUN_00833c20()))
+            (bAny || pkSet->ActiveEffect_IsActive()))
             bFound = true;
         pkNode = pkNode->GetNext();
     }
@@ -1468,7 +1479,7 @@ bool MagicTarget::CanAcceptEffect(MagicItem* apItem, MagicCaster* apCaster, Acti
             (apCaster ? GetEffectCaster(pActive_2) == apCaster : true) &&
             (apEffect ? !EFFECT_ITEM(pActive_2)->Compare(EFFECT_ITEM(apEffect)) : true))
         {
-            pActive_2->FUN_00693d50(pActive_2->FUN_007df1f0() + apEffect->FUN_007df1f0());
+            pActive_2->BaseProcess_SetLastTimeProcessed(pActive_2->FUN_007df1f0() + apEffect->FUN_007df1f0());
             bStackedValue = true;
         }
         pNode = pTmpNext;
@@ -1536,12 +1547,13 @@ struct ActorSpellList
 
 struct MagicTargetTypedDispel : MagicTarget
 {
-    void FUN_00824630(int aiType);
+    void MagicTarget_Dispel(int aiType);
 };
 
 // For aiType 1, removes type-1 spells; otherwise, dispels matching active effects or flagged alchemy effects when aiType is 5.
 // @fnv 0x00824630
-void MagicTargetTypedDispel::FUN_00824630(int aiType)
+// src: XBOX_PDB 0x00824630
+void MagicTargetTypedDispel::MagicTarget_Dispel(int aiType)
 {
     BSSimpleList<ActiveEffect*>* pIter;
     if (aiType == 1)
@@ -1581,7 +1593,7 @@ void MagicTargetTypedDispel::FUN_00824630(int aiType)
             if (pEffect && !pEffect->FUN_00705cf0())
             {
                 AlchemyItem* pAlch = dynamic_cast<AlchemyItem*>(pEffect->FUN_0044ddc0());
-                bool bFlag = pAlch ? pAlch->FUN_00405da0() : false;
+                bool bFlag = pAlch ? pAlch->CanBePoison() : false;
                 if (pEffect->FUN_0044ddc0()->GetSpellType() == aiType || (bFlag && aiType == 5))
                 {
                     pEffect->Dispel(false);

@@ -88,7 +88,8 @@ struct NodeArg
     NiNode* n;
 };
 // @fnv 0x007700b0
-void __fastcall FUN_007700b0(char* self, NodeArg aNodeArg)
+// src: COMMUNITY 0x007700b0
+void __fastcall TileShaderProperty_SetAlphaTexture(char* self, NodeArg aNodeArg)
 {
     ((NiPointer<NiNode>*)(self + 0x64))->operator=(aNodeArg.n);
 }
@@ -114,8 +115,8 @@ struct FUN_00771540_shell : public HUDMainMenu
 extern PlayerCharacter* pPlayer;
 extern double _gModifierZero;
 
-float __cdecl FUN_00404010(float, float);
-float __cdecl FUN_0040ebd0(float, float);
+float __cdecl BSMAX_00404010(float, float);
+float __cdecl BSMIN(float, float);
 void __cdecl UpdateMeterTile(Tile*, float, int, int, int);
 
 // @fnv 0x00771540
@@ -127,7 +128,7 @@ void FUN_00771540_shell::UpdateActorValueMeter(int aeActorValue)
         float fbase = ((ActorValueOwner*)((char*)pPlayer + 0xa4))->GetPermanentActorValueAdjustment((ActorValue::Index)16);
         if (fbase != _gModifierZero)
         {
-            fbase = FUN_00404010(0.0f, ((ActorValueOwner*)((char*)pPlayer + 0xa4))->GetCurrentActorValue((ActorValue::Index)16)) / fbase;
+            fbase = BSMAX_00404010(0.0f, ((ActorValueOwner*)((char*)pPlayer + 0xa4))->GetCurrentActorValue((ActorValue::Index)16)) / fbase;
         }
         if (fbase > 1.0)
         {
@@ -144,12 +145,12 @@ void FUN_00771540_shell::UpdateActorValueMeter(int aeActorValue)
         break;
     }
     case 12: {
-        float fbase = FUN_00404010(0.0f, ((ActorValueOwner*)((char*)pPlayer + 0xa4))->GetPermanentActorValueAdjustment((ActorValue::Index)12));
+        float fbase = BSMAX_00404010(0.0f, ((ActorValueOwner*)((char*)pPlayer + 0xa4))->GetPermanentActorValueAdjustment((ActorValue::Index)12));
         if (fbase != _gModifierZero)
         {
-            fbase = FUN_00404010(0.0f, ((ActorValueOwner*)((char*)pPlayer + 0xa4))->GetCurrentActorValue((ActorValue::Index)12)) / fbase;
+            fbase = BSMAX_00404010(0.0f, ((ActorValueOwner*)((char*)pPlayer + 0xa4))->GetCurrentActorValue((ActorValue::Index)12)) / fbase;
         }
-        UpdateMeterTile(m_pTiles[7], FUN_0040ebd0(fbase, 1.0f), 1, 0, 0);
+        UpdateMeterTile(m_pTiles[7], BSMIN(fbase, 1.0f), 1, 0, 0);
         break;
     }
     }
@@ -313,7 +314,8 @@ struct blob48
 };
 
 // @fnv 0x007721a0
-NiAVObject* __fastcall FUN_007721a0(char* thisPtr)
+// src: COMMUNITY 0x007721a0
+NiAVObject* __fastcall PlayerCharacter_GetWeaponSightingNode(char* thisPtr)
 {
     return *(NiAVObject**)(thisPtr + 0xe34);
 }
@@ -329,7 +331,8 @@ struct Lst
 };
 extern HUDMainMenu* g_pHudMainMenuInstance;
 // @fnv 0x007735d0
-bool __fastcall FUN_007735d0(unsigned char* self)
+// src: COMMUNITY 0x007735d0
+bool __fastcall HUDMainMenu_IsQuestNameShowing(unsigned char* self)
 {
     if (!self[0x260])
         return false;
@@ -357,7 +360,8 @@ struct Lst
 };
 extern HUDMainMenu* g_pHudMainMenuInstance;
 // @fnv 0x00773650
-bool __fastcall FUN_00773650(unsigned char* self)
+// src: XBOX_PDB 0x00773650
+bool __fastcall HUDMainMenu_AreObjectivesShowing(unsigned char* self)
 {
     if (!self[0x261])
         return false;
@@ -384,22 +388,23 @@ struct Node
 
 struct PM
 {
-    bool FUN_00773650();
+    bool HUDMainMenu_AreObjectivesShowing();
 };
 extern HUDMainMenu* g_pHudMainMenuInstance;
-void __cdecl FUN_0077a5b0(const char*, int, int);
+void __cdecl HUDMainMenu_ShowQuestObjective(const char*, int, int);
 // @fnv 0x007736d0
-void __cdecl FUN_007736d0(Script* script)
+// src: XBOX_PDB 0x007736d0
+void __cdecl HUDMainMenu_DisplayQuestReminder(Script* script)
 {
     if (!g_pHudMainMenuInstance)
         return;
-    if (script && !((PM*)g_pHudMainMenuInstance)->FUN_00773650() && ((Node*)((char*)g_pHudMainMenuInstance + 0x258))->_ref_008256d0())
+    if (script && !((PM*)g_pHudMainMenuInstance)->HUDMainMenu_AreObjectivesShowing() && ((Node*)((char*)g_pHudMainMenuInstance + 0x258))->_ref_008256d0())
     {
         Node* pNode = (Node*)script->GetVariableList();
         while (pNode && !pNode->_ref_008256d0())
         {
             if ((*pNode->_ref_006815c0(1))->HasFlag() && !(*pNode->_ref_006815c0(2))->HasFlag())
-                FUN_0077a5b0((*pNode->_ref_006815c0())->GetDisplayText(), 0, 1);
+                HUDMainMenu_ShowQuestObjective((*pNode->_ref_006815c0())->GetDisplayText(), 0, 1);
             pNode = pNode->_ref_00726070();
         }
     }
@@ -409,7 +414,8 @@ namespace fnv_00774800 {
 
 // Calls Tile::Set with a fixed first argument and a second argument chosen by the brightness value.
 // @fnv 0x00774800
-void __cdecl FUN_00774800(Tile* apTile, int aeBrightness)
+// src: XBOX_PDB 0x00774800
+void __cdecl HUDMainMenu_SetBrightness(Tile* apTile, int aeBrightness)
 {
     switch (aeBrightness)
     {
@@ -485,7 +491,7 @@ void __cdecl UpdateMeterTile(Tile* apTile, float afMeterPercent, int aeJustify, 
 
 struct FUN_00775670_shell : public HUDMainMenu
 {
-    void FUN_00775670();
+    void HUDMainMenu_HideSubtitle();
 };
 
 
@@ -503,7 +509,8 @@ extern char const g_011d31e0_arg1[];
 extern HUDMainMenu* HUDMainMenu_pme;
 
 // @fnv 0x00775670
-void FUN_00775670_shell::FUN_00775670()
+// src: XBOX_PDB 0x00775670
+void FUN_00775670_shell::HUDMainMenu_HideSubtitle()
 {
     if (!HUDInterfaceAccess::IsMenuActive((HUDInterfaceAccess::enumMenus)0x3f5, 0))
     {
@@ -513,12 +520,12 @@ void FUN_00775670_shell::FUN_00775670()
     m_pCurrentSubtitle = 0;
 }
 
-short __fastcall FUN_00418770(const ExtraDataList* pExtra);
+short __fastcall ExtraDataList_GetCount(const ExtraDataList* pExtra);
 
 // @fnv 0x00778930
 int __fastcall GetExtraDataShort(const TESObjectREFR* pThis)
 {
-    return FUN_00418770(pThis->GetExtra());
+    return ExtraDataList_GetCount(pThis->GetExtra());
 }
 
 struct NiStream;
@@ -582,7 +589,8 @@ struct QuestObjective_local
 };
 
 // @fnv 0x0077a5b0
-void __cdecl FUN_0077a5b0(const char* apObjectiveName, bool abCompleted, bool abReminder)
+// src: COMMUNITY 0x0077a5b0
+void __cdecl HUDMainMenu_ShowQuestObjective(const char* apObjectiveName, bool abCompleted, bool abReminder)
 {
     if (HUDMainMenu_pme_access::g_pHudMainMenuInstance && apObjectiveName)
     {
@@ -641,14 +649,15 @@ struct QuestUpdateManager
 typedef char _sizecheck_QuestUpdateManager[sizeof(QuestUpdateManager) == 1 ? 1 : -1];
 struct FUN_0077b2c0_shell : public QuestUpdateManager
 {
-    bool FUN_0077b2c0();
+    bool QuestUpdateManager_IsQuestNamesEmpty();
 };
 
 extern int g_011d970c;
 bool __fastcall _ref_008256d0(void* pThis);
 
 // @fnv 0x0077b2c0
-bool FUN_0077b2c0_shell::FUN_0077b2c0()
+// src: COMMUNITY 0x0077b2c0
+bool FUN_0077b2c0_shell::QuestUpdateManager_IsQuestNamesEmpty()
 {
     return _ref_008256d0(&g_011d970c);
 }
@@ -668,7 +677,7 @@ void __cdecl SetHudVisible(bool visible)
 {
     if (g_pHudMainMenuInstance && (const char*)g_011d9770)
     {
-        if (((NiNode*)(const char*)g_011d9770)->FUN_0045bc00(0))
+        if (((NiNode*)(const char*)g_011d9770)->NiNode_GetAtChecked(0))
         {
             g_pHudMainMenuInstance->m_bHudModeActive = visible;
             ((NiAVObject*)(const char*)g_011d9770)->SetAppCulled(!visible);
@@ -694,7 +703,7 @@ struct Lst
 struct Q
 {
     void* GetQuestNamesHead();
-    void FUN_0077b2e0();
+    void QuestUpdateManager_RemoveQuestNamesHead();
     void ClearGlobalList();
 };
 extern HUDMainMenu* g_pHudMainMenuInstance;
@@ -722,7 +731,7 @@ void __fastcall ResetHudTiles(void* self)
                 void* pItemCopy = item;
                 Deallocate(pItemCopy);
             }
-            DAT_011d96bc->FUN_0077b2e0();
+            DAT_011d96bc->QuestUpdateManager_RemoveQuestNamesHead();
         }
         DAT_011d96bc->ClearGlobalList();
     }
@@ -731,7 +740,7 @@ void __fastcall ResetHudTiles(void* self)
 
 namespace fnv_00773050 {
 
-unsigned int __cdecl FUN_00706f20(void);
+unsigned int __cdecl HudMainMenu_GetMenuID(void);
 Menu* __cdecl FindMenuById(int);
 extern int DAT_011a010c;
 extern HUDMainMenu* DAT_011d96c0;
@@ -742,7 +751,7 @@ void __cdecl ResetHUDMainMenu()
     Tile* ptile;
     HUDMainMenu* pmenu;
 
-    ptile = reinterpret_cast<Tile*>(FindMenuById(FUN_00706f20()));
+    ptile = reinterpret_cast<Tile*>(FindMenuById(HudMainMenu_GetMenuID()));
     if (!ptile || !ptile->GetMenu())
         return;
 
@@ -770,11 +779,12 @@ struct FUN_00525430_Class
     int mField0;
     int mField4;
     int mMode;
-    bool FUN_00525430();
+    bool VATS_IsInVats();
 };
 
 // @fnv 0x00525430
-bool FUN_00525430_Class::FUN_00525430()
+// src: XBOX_PDB 0x00525430
+bool FUN_00525430_Class::VATS_IsInVats()
 {
     return mMode != 0;
 }
@@ -830,7 +840,7 @@ void __cdecl SetHoldText(const char* pText)
 {
     static int iHoldTrait = Tile::GetTraitID("_Hold");
     if (pText && (*(Tile**)((char*)g_pHudMainMenuInstance + 0x68))->GetFloat(4009) == _gModifierZero &&
-        (*(Tile**)((char*)g_pHudMainMenuInstance + 0x68))->FUN_00a07fc0(4009))
+        (*(Tile**)((char*)g_pHudMainMenuInstance + 0x68))->Tile_GetFadeFinished(4009))
     {
         (*(Tile**)((char*)g_pHudMainMenuInstance + 0x64))->Set(4036, pText, true);
         (*(Tile**)((char*)g_pHudMainMenuInstance + 0x64))->Set(Tile::GetTraitID("_Hold"), 1);
@@ -902,7 +912,7 @@ namespace fnv_00773e90 {
 struct MenuValueDescriptor;
 struct FUN_00773e90_shell : public HUDMainMenu
 {
-    void FUN_00773e90(Tile*, float, bool);
+    void HUDMainMenu_StatusModeTileEffects(Tile*, float, bool);
 };
 
 extern Setting originalRuntimeFloatSetting808;
@@ -913,11 +923,12 @@ extern AnimIdle g_timeGlobal;
 extern bool DAT_011d9afc;
 extern unsigned int DAT_011d9b00;
 extern float DAT_011d9b04;
-void __cdecl FUN_005330e0(float& value, float fMin, float fScaledValue);
+void __cdecl BSClamp_float(float& value, float fMin, float fScaledValue);
 
 // Sets the tile's trait 4084 and alpha 4009 from afCurrValue thresholds, and when bResetValues advances DAT_011d9b04 by a fade step clamped to 128..255.
 // @fnv 0x00773e90
-void FUN_00773e90_shell::FUN_00773e90(Tile* apTile, float afCurrValue, bool bResetValues)
+// src: XBOX_PDB 0x00773e90
+void FUN_00773e90_shell::HUDMainMenu_StatusModeTileEffects(Tile* apTile, float afCurrValue, bool bResetValues)
 {
     float fAlphaFadeSpeed = 0.5f;
     if (afCurrValue >= *originalRuntimeFloatSetting808.Float())
@@ -958,7 +969,7 @@ void FUN_00773e90_shell::FUN_00773e90(Tile* apTile, float afCurrValue, bool bRes
             DAT_011d9afc = true;
         if (DAT_011d9b04 <= 128.0)
             DAT_011d9afc = false;
-        FUN_005330e0(DAT_011d9b04, 128.0f, 255.0f);
+        BSClamp_float(DAT_011d9b04, 128.0f, 255.0f);
     }
 }
 }  // namespace fnv_00773e90
@@ -967,11 +978,12 @@ void** __fastcall _ref_006815c0(void*);
 
 struct FUN_00775210_cls
 {
-    FUN_00775210_cls* FUN_00775210();
+    FUN_00775210_cls* HUDMainMenu_SubtitleData_SubtitleData();
 };
 
 // @fnv 0x00775210
-FUN_00775210_cls* FUN_00775210_cls::FUN_00775210()
+// src: XBOX_PDB 0x00775210
+FUN_00775210_cls* FUN_00775210_cls::HUDMainMenu_SubtitleData_SubtitleData()
 {
     _ref_006815c0((void*)((char*)this + 0x10c));
     return this;
@@ -993,7 +1005,7 @@ void __cdecl UpdateRadiationInfo(int aiRadiationAmount, int aiInfoLabel, int aiI
 {
     char str[260];
     float fmodifiedMagnitude;
-    float fresistance = g_thePlayer->FUN_008c4330();
+    float fresistance = g_thePlayer->Actor_GetRadiationResistanceMult();
     float feffectivenessMult = 1.0f;
     ApplyPerkModifiers(0x1a, g_thePlayer, &feffectivenessMult);
     fresistance *= feffectivenessMult;
@@ -1045,7 +1057,8 @@ static HUDMainMenu* g_pHudMainMenuInstance;
 extern int DAT_011a010c;
 
 // @fnv 0x0077da30
-void __cdecl FUN_0077da30()
+// src: XBOX_PDB 0x0077da30
+void __cdecl HUDMainMenu_ClearXPMeterFinishedMoving()
 {
     if (g_pHudMainMenuInstance)
         g_pHudMainMenuInstance->m_bSequenceActive = 0;
@@ -1061,7 +1074,8 @@ struct DataHandler
 extern DataHandler* g_dataHandler;
 
 // @fnv 0x0077eac0
-bool TESSound::FUN_0077eac0()
+// src: COMMUNITY 0x0077eac0
+bool TESSound::Projectile_IsEditorCreated()
 {
     return !g_dataHandler->FormIDExists(Deallocate());
 }
@@ -1141,7 +1155,7 @@ void HUDTileShiftAccess::ShiftTileValues(int aishift)
 typedef char _sizecheck_BSTimer[sizeof(GameTimerRecord) == 32 ? 1 : -1];
 struct FUN_00aa4ee0_shell : public GameTimerRecord
 {
-    void FUN_00aa4ee0();
+    void BSTimer_Update();
 };
 
 extern "C" __declspec(dllimport) void __stdcall Sleep(unsigned long dwMilliseconds);
@@ -1149,11 +1163,12 @@ extern double _gModifierZero;
 extern float DAT_011ac3a0;
 struct FUN_00aa4ee0_t : public GameTimerRecord
 {
-    void FUN_00aa4ee0(unsigned int aiTime);
+    void BSTimer_Update(unsigned int aiTime);
 };
 
 // @fnv 0x00aa4ee0
-void FUN_00aa4ee0_t::FUN_00aa4ee0(unsigned int aiTime)
+// src: XBOX_PDB 0x00aa4ee0
+void FUN_00aa4ee0_t::BSTimer_Update(unsigned int aiTime)
 {
     unsigned int iscaleTime = aiTime - m_uiSecondTimerValue;
     if ((bool)(m_ucFirstTimerByte ? 0 : 1))
@@ -1245,11 +1260,12 @@ struct FUN_009ca410_shell_base
 
 struct FUN_0077b2e0_shell : public FUN_009ca410_shell_base
 {
-    void FUN_0077b2e0();
+    void QuestUpdateManager_RemoveQuestNamesHead();
 };
 
 // @fnv 0x0077b2e0
-void FUN_0077b2e0_shell::FUN_0077b2e0()
+// src: COMMUNITY 0x0077b2e0
+void FUN_0077b2e0_shell::QuestUpdateManager_RemoveQuestNamesHead()
 {
     reinterpret_cast<FUN_009ca410_shell_base*>(&g_011d970c)->FUN_0063f7b0();
 }
@@ -1302,7 +1318,7 @@ extern unsigned int DAT_011d9aec;
 extern AnimIdle g_timeGlobal;
 extern HUDMainMenu* g_pHudMainMenuInstance;
 extern double _gModifierZero;
-int __cdecl FUN_00408b20(const char* a, const char* b);
+int __cdecl BSstrcmp(const char* a, const char* b);
 
 // @fnv 0x007728f0
 void __cdecl ShowRegionData(const RegionDisplayInfo* aRegionData)
@@ -1315,11 +1331,11 @@ void __cdecl ShowRegionData(const RegionDisplayInfo* aRegionData)
             DAT_011d9aec = aRegionData->uiRegionID;
         bool bshowRegion =
             g_pHudMainMenuInstance->m_pTiles[15]->GetFloat(4009) == _gModifierZero ||
-            !FUN_00408b20(aRegionData->m_kName,
+            !BSstrcmp(aRegionData->m_kName,
                           g_pHudMainMenuInstance->m_pTiles[15]->GetString(4036));
         if (aRegionData->m_kName[0] &&
             g_pHudMainMenuInstance->m_pTiles[16]->GetFloat(4009) == _gModifierZero &&
-            g_pHudMainMenuInstance->m_pTiles[16]->FUN_00a07fc0(4009))
+            g_pHudMainMenuInstance->m_pTiles[16]->Tile_GetFadeFinished(4009))
         {
             g_pHudMainMenuInstance->m_pTiles[15]->Set(Tile::GetTraitID("_Hold"), 0);
             g_pHudMainMenuInstance->m_pTiles[15]->Set(4036, aRegionData->m_kName, true);
@@ -1361,7 +1377,8 @@ extern Tile* _pme;
 
 // Stores the global time at offset 0x24c and, if the flag at 0x1bc is set, calls Set(0xfa3, 1) on the tile at 0x170 or 0x154 depending on bFlag.
 // @fnv 0x0077f420
-void __cdecl FUN_0077f420(bool bFlag)
+// src: XBOX_PDB 0x0077f420
+void __cdecl HUDMainMenu_ShowDDTIcon(bool bFlag)
 {
     *(unsigned int*)((char*)_pme + 0x24c) = g_timeGlobal.GetTime();
     if (*(unsigned int*)((char*)_pme + 0x1bc) & 1)
@@ -1394,7 +1411,8 @@ void __cdecl UpdateTileOnFlag(bool abUseFirstTile)
 }  // namespace fnv_0077f490
 
 // @fnv 0x00709430
-float TESObjectWEAP::FUN_00709430(bool bModValue)
+// src: XBOX_PDB 0x00709430
+float TESObjectWEAP::GetAmmoRegenRate(bool bModValue)
 {
     if (bModValue)
     {
@@ -2574,7 +2592,7 @@ bool UpdateActivatePrompt(RefX* apRef, int aiUnused, bool abForce)
         xpHUD->m_pTiles[38]->Set(0xff4, 1);
         xpHUD->m_pTiles[39]->Set(0xff4, 1);
     }
-    s_pButtonText->SetChangeFlag(8);
+    s_pButtonText->Tile_SetChangeFlag(8);
     qbfQdhM = xpHUD->m_pTiles[32]->GetFloat(0x100c);
     NiPoint3 qrEZrs =
         FontManager::Instance()->GetStringDimensions(xpHUD->m_pTiles[32]->GetString(0xfc4), (int)xpHUD->m_pTiles[32]->GetFloat(0xfb9),
@@ -2781,10 +2799,10 @@ struct FloatSetting
 {
     float* Float();
 };
-FovSource* FUN_0045c670();
-int FUN_004dc200();
-int FUN_004dc1f0();
-float FUN_0057dd70(float);
+FovSource* Main_GetWorldSceneGraph();
+int Renderer_GetScreenHeight();
+int Renderer_GetScreenWidth();
+float tan_0057dd70(float);
 extern bool g_011f9426;
 extern int g_011f9434;
 extern CamRect g_011ad840;
@@ -2793,12 +2811,13 @@ extern FloatSetting g_01203150;
 
 struct CamBuilder
 {
-    CamObj* FUN_0077ee50();
+    CamObj* HUDMainMenu_Create3DCamera();
 };
 
 // Allocates a CamObj, sets its viewport, FOV-derived frustum, LOD adjust, look-at, scale and updates it, then returns it.
 // @fnv 0x0077ee50
-CamObj* CamBuilder::FUN_0077ee50()
+// src: COMMUNITY 0x0077ee50
+CamObj* CamBuilder::HUDMainMenu_Create3DCamera()
 {
     CamObj* pCamera = new CamObj;
     CamRect port2(0.0f, 1.0f, 1.0f, 0.0f);
@@ -2808,16 +2827,16 @@ CamObj* CamBuilder::FUN_0077ee50()
     }
     pCamera->SetViewPort(port2);
     CamFrustum _frustum(false);
-    _frustum.f = FUN_0045c670()->GetFov();
+    _frustum.f = Main_GetWorldSceneGraph()->GetFov();
     _frustum.n = *g_01203144.Float();
     pCamera->SetLODAdjust(_frustum.f / _frustum.n);
-    float fAspect2 = (double)(g_011f9426 ? g_011f9434 : FUN_004dc200()) / (double)FUN_004dc1f0();
+    float fAspect2 = (double)(g_011f9426 ? g_011f9434 : Renderer_GetScreenHeight()) / (double)Renderer_GetScreenWidth();
     float fScale = 0.75f;
     float fAngle2 = *g_01203150.Float() * 0.01745329238474369 * 0.15000000596046448;
-    _frustum.l = -FUN_0057dd70(fAngle2) * fScale;
-    _frustum.r = FUN_0057dd70(fAngle2) * fScale;
-    _frustum.b = -FUN_0057dd70(fAngle2) * fAspect2 * fScale;
-    _frustum.t = FUN_0057dd70(fAngle2) * fAspect2 * fScale;
+    _frustum.l = -tan_0057dd70(fAngle2) * fScale;
+    _frustum.r = tan_0057dd70(fAngle2) * fScale;
+    _frustum.b = -tan_0057dd70(fAngle2) * fAspect2 * fScale;
+    _frustum.t = tan_0057dd70(fAngle2) * fAspect2 * fScale;
     _frustum.ortho = false;
     pCamera->UpdateViewFrustum(_frustum);
     pCamera->LookAt(CamPoint3(0.0f, 0.0f, 1.0f), CamPoint3(0.0f, 0.0f, 1.0f));
@@ -2859,10 +2878,11 @@ extern int DAT_011d96c0;
 extern char DAT_011d9770;
 extern void* DAT_011c3b3c;
 
-void FUN_0077f270();
+void HUDMainMenu_ClearGunScope();
 
 // @fnv 0x0077f2f0
-void FUN_0077f2f0(FUN_0077f2f0_obj* pObject)
+// src: XBOX_PDB 0x0077f2f0
+void HUDMainMenu_InitGunScope(FUN_0077f2f0_obj* pObject)
 {
     NiNode* vt;
     FUN_0077f2f0_loc loc;
@@ -2870,7 +2890,7 @@ void FUN_0077f2f0(FUN_0077f2f0_obj* pObject)
     {
         if (((NiPointer<NiNode>*)&DAT_011d9770)->operator NiNode*() != 0)
         {
-            FUN_0077f270();
+            HUDMainMenu_ClearGunScope();
             if (pObject != 0)
             {
                 if (pObject->F48cee0() > 0)
@@ -2879,7 +2899,7 @@ void FUN_0077f2f0(FUN_0077f2f0_obj* pObject)
                     ((HUDSceneAttach*)*(void**)vt)[55](vt, ((HUDSceneRenderer*)DAT_011c3b3c)->GetB(), pObject->v5(), 0, 1, 0, 0, 0, 1);
                     ((NiPointer<NiNode>*)&DAT_011d9770)->operator NiNode*()->FUN_00450f90(true);
                     loc.Init(0.0f, 0, 0);
-                    ((NiPointer<NiNode>*)&DAT_011d9770)->operator NiNode*()->FUN_00a59c60((NiUpdateData&)loc);
+                    ((NiPointer<NiNode>*)&DAT_011d9770)->operator NiNode*()->NiAVObject_Update((NiUpdateData&)loc);
                 }
             }
         }
@@ -3109,7 +3129,7 @@ struct TESObjectREFR_GetFlags_Helper
 };
 
 extern unsigned int DAT_011ca278;
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMAX_00404010(float, float);
 void __cdecl ApplyPerkModifiers(int, Actor*, ...);
 // Returns the actor's value 76 clamped to at least zero, adjusted by perk modifiers 58 and 56, or 0.0 if either argument is null.
 // @fnv 0x007700f0
@@ -3119,7 +3139,7 @@ float __cdecl GetActorValueWithPerkModifiers(MobileObject* pMobileObject, Actor*
     {
         return 0.0f;
     }
-    float baseValue = FUN_00404010(((ActorValueOwner*)((char*)pActor + 0xa4))->GetCurrentActorValue((ActorValue::Index)76), 0.0f);
+    float baseValue = BSMAX_00404010(((ActorValueOwner*)((char*)pActor + 0xa4))->GetCurrentActorValue((ActorValue::Index)76), 0.0f);
     BaseProcess* proc = pMobileObject->GetCurrentAIProcess();
     TESObjectREFR_GetFlags_Helper* target = (TESObjectREFR_GetFlags_Helper*)proc->GetActiveWeapon();
     unsigned int result;
@@ -3137,7 +3157,7 @@ float __cdecl GetActorValueWithPerkModifiers(MobileObject* pMobileObject, Actor*
     float fAdd = 0.0f;
     ApplyPerkModifiers(56, pActor, (Actor*)pMobileObject, modFlags, &fAdd);
     baseValue = baseValue - fPenalty + fAdd;
-    baseValue = FUN_00404010(0.0f, baseValue);
+    baseValue = BSMAX_00404010(0.0f, baseValue);
     return baseValue;
 }
 
@@ -3152,7 +3172,7 @@ extern GlobalObject_0040c150 g_011d50b0;
 struct HMTarget
 {
     bool FUN_00477ba0();
-    const char* FUN_0055d520();
+    const char* TESObjectREFR_GetFullName();
 };
 
 struct HMTimer
@@ -3208,13 +3228,13 @@ void FUN_007701e0_shell::UpdateTargetInfo(HMTarget* apTarget)
         ApplyPerkModifiers(0x2f, pPlayer, &fShowInfo);
         if (fShowInfo > 0.0)
         {
-            sprintf(acBuffer, "%s\n %s:%d %s:%.2f", apTarget->FUN_0055d520(), g_011d50b0.FUN_00403df0(), (int)fCurrentAmountNext,
+            sprintf(acBuffer, "%s\n %s:%d %s:%.2f", apTarget->TESObjectREFR_GetFullName(), g_011d50b0.FUN_00403df0(), (int)fCurrentAmountNext,
                     g_011d396c.FUN_00403df0(), fPlayerDist);
             HUDMainMenu_pme->m_pTiles[23]->Set(0xfc4, acBuffer, true);
         }
         else
         {
-            HUDMainMenu_pme->m_pTiles[23]->Set(0xfc4, apTarget->FUN_0055d520(), true);
+            HUDMainMenu_pme->m_pTiles[23]->Set(0xfc4, apTarget->TESObjectREFR_GetFullName(), true);
         }
     }
 }
@@ -3227,11 +3247,11 @@ struct HUDTime
 extern HUDTime DAT_011f6394;
 struct HUDFloatSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 struct HUDIntSetting
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 extern HUDFloatSetting DAT_011d9774, DAT_011cf87c;
 extern HUDIntSetting DAT_011d2220;
@@ -3256,18 +3276,18 @@ struct HUDActor : RefX
 {
     int FUN_008d6f30();
     bool FUN_004997b0();
-    bool FUN_004d1360();
-    HUDDetectionList* FUN_00595d10();
+    bool PlayerCharacter_IsHardcore();
+    HUDDetectionList* PlayerCharacter_GetCompassTargets();
     bool FUN_00477ba0();
-    HUDDetection* FUN_00967090(void*);
-    bool FUN_008bc700(void*);
-    bool FUN_00493bb0();
-    bool FUN_00579690();
-    Script* FUN_005cbb50();
+    HUDDetection* PlayerCharacter_IsActorPerceived(void*);
+    bool Actor_IsInCombatWithActor(void*);
+    bool Actor_IsInCombat();
+    bool TESObjectREFR_IsCrimeToActivate();
+    Script* PlayerCharacter_GetActiveQuest();
 };
 struct HUDTile : Tile
 {
-    bool FUN_00a07fc0(int);
+    bool Tile_GetFadeFinished(int);
     bool IsTraitNonZero(int);
     void StartFade(int, float, float, float, int);
     void FUN_00715c60(int, unsigned);
@@ -3543,25 +3563,25 @@ struct HUDMessage
 };
 struct HUDSubtitleList
 {
-    bool FUN_0076b610();
+    bool NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty();
     unsigned FUN_0044ddc0();
     HUDSubtitle** FUN_00877a30(unsigned);
-    void FUN_006bf8f0(unsigned, bool);
+    void BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(unsigned, bool);
 };
 struct HUDMessageList
 {
     int FUN_005ae380();
     HUDMessage** FUN_006815c0();
 };
-void __cdecl FUN_00779070(Tile*, Tile*, Tile*, Tile*);
-float __cdecl FUN_00715da0();
+void __cdecl HUDMainMenu_UpdateCompass(Tile*, Tile*, Tile*, Tile*);
+float __cdecl InterfaceManager_GetScreenHeight();
 float __cdecl FUN_00715d40();
-float __cdecl FUN_007177c0();
-float __cdecl FUN_00717820();
+float __cdecl InterfaceManager_GetScreenSafeX();
+float __cdecl InterfaceManager_GetScreenSafeY();
 float __cdecl FUN_00408840(float);
-void __cdecl FUN_00773190(RefX*);
-void __cdecl FormHeap_Free(void*);
-int __cdecl FUN_00458030();
+void __cdecl HUDMainMenu_SetEnemyActor(RefX*);
+void __cdecl FormHeapFreeAndLog_00401030(void*);
+int __cdecl HUDMainMenu_GetMenuMode();
 extern bool DAT_011d96c5, DAT_011d97c0;
 extern float DAT_011d979c;
 extern const char DAT_01073474[];
@@ -3570,33 +3590,34 @@ extern const double DAT_0101db88, DAT_01073480, DAT_0101e568, DAT_01017b70, DAT_
 extern const float DAT_010162c0, DAT_01016248, DAT_01021f44;
 struct HUDUpdate : HUDMainMenu
 {
-    void FUN_00770430();
-    void FUN_0077da60();
+    void HUDMainMenu_DoIdle();
+    void ClearHUDOrphanedTiles();
     void UpdateAmmoHUD();
     void UpdateCompassMarkers();
     void FUN_0077f700();
     void UpdateActorValueMeter(int);
-    void FUN_0077e4f0();
-    void FUN_007732d0();
+    void HUDMainMenu_UpdateBreathMeter();
+    void HUDMainMenu_UpdateSneak();
     void UpdateQuestNotification();
-    void FUN_0077c4e0();
+    void HUDMainMenu_UpdateXPMeter();
     void UpdateRadMeter();
     void UpdateCrippleMeters(bool);
     void UpdateTargetInfo(void*);
     void ResetHudTiles();
     void ResetWaitTiles();
-    void FUN_00775670();
+    void HUDMainMenu_HideSubtitle();
     HUDSubtitle* FindTargetMarker();
-    void FUN_007756e0();
+    void HUDMainMenu_HideMessage();
 };
 // @fnv 0x00770430
-void HUDUpdate::FUN_00770430()
+// src: XBOX_PDB 0x00770430
+void HUDUpdate::HUDMainMenu_DoIdle()
 {
     if (!DAT_011dea3c || !((HUDActor*)DAT_011dea3c)->FUN_008d6f30())
         return;
     ((HUDTime*)&m_cBuffer)->FUN_00771520();
-    FUN_00779070(m_pTiles[6], m_pTiles[3], m_pTiles[4], m_pTiles[5]);
-    FUN_0077da60();
+    HUDMainMenu_UpdateCompass(m_pTiles[6], m_pTiles[3], m_pTiles[4], m_pTiles[5]);
+    ClearHUDOrphanedTiles();
     UpdateAmmoHUD();
     UpdateCompassMarkers();
     FUN_0077f700();
@@ -3618,8 +3639,8 @@ void HUDUpdate::FUN_00770430()
         ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[83])->Set(4003, 0);
     }
     lastUpdate = ((HUDTime*)&m_cBuffer)->GetTimeStamp();
-    int f = (int)FUN_00715da0(), h = (int)FUN_00715d40();
-    int cf = (int)FUN_007177c0(), p = (int)FUN_00717820();
+    int f = (int)InterfaceManager_GetScreenHeight(), h = (int)FUN_00715d40();
+    int cf = (int)InterfaceManager_GetScreenSafeX(), p = (int)InterfaceManager_GetScreenSafeY();
     ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[60])->Set(4001, 2 * cf + 10);
     ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[60])
         ->Set(4002, f - 2 * p - ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[60])->GetFloat(4016), true);
@@ -3627,11 +3648,11 @@ void HUDUpdate::FUN_00770430()
         ->Set(4001, h - 2 * cf - ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[59])->GetFloat(4017) + DAT_0101db88, true);
     ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[59])
         ->Set(4002, f - 2 * p - ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[59])->GetFloat(4016), true);
-    ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[60])->SetChangeFlag(1);
-    ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[59])->SetChangeFlag(1);
+    ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[60])->Tile_SetChangeFlag(1);
+    ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[59])->Tile_SetChangeFlag(1);
     UpdateActorValueMeter(16);
     UpdateActorValueMeter(12);
-    FUN_0077e4f0();
+    HUDMainMenu_UpdateBreathMeter();
     ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[86])->Set(4009, DAT_011d979c, true);
     ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[78])->Set(4009, DAT_011d979c, true);
     ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[75])->Set(4009, DAT_011d979c, true);
@@ -3640,40 +3661,40 @@ void HUDUpdate::FUN_00770430()
     ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[76])->Set(4009, DAT_011d979c, true);
     ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[77])->Set(4009, DAT_011d979c, true);
     if (((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])->GetFloat(4009) > 0.0 &&
-        ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])->FUN_00a07fc0(4009) &&
+        ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])->Tile_GetFadeFinished(4009) &&
         DAT_011f6394.GetTimeStamp() - ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])->GetFloat(4100) > DAT_01073480)
         ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])
             ->StartFade(4009, ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])->GetFloat(4009), 0.0f, DAT_010162c0, 0);
     if (((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[16])->GetFloat(4009) > 0.0 &&
-        ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[16])->FUN_00a07fc0(4009) &&
+        ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[16])->Tile_GetFadeFinished(4009) &&
         DAT_011f6394.GetTimeStamp() - ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[16])->GetFloat(4100) > DAT_01073480)
         ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[16])
-            ->StartFade(4009, *DAT_011d9774.FUN_00403e20() * DAT_0101e568, 0.0f, DAT_010162c0, 0);
+            ->StartFade(4009, *DAT_011d9774.Setting_Float_00403e20() * DAT_0101e568, 0.0f, DAT_010162c0, 0);
     if (((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])->IsTraitNonZero(xTraitID(DAT_01073474)) &&
         ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[64])->GetFloat(4003) != 0.0 &&
         ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[16])->GetFloat(4009) == 0.0 &&
-        ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[16])->FUN_00a07fc0(4009))
+        ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[16])->Tile_GetFadeFinished(4009))
     {
         ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])
-            ->StartFade(4009, 0.0f, *DAT_011d9774.FUN_00403e20() * DAT_0101e568, DAT_010162c0, 0);
+            ->StartFade(4009, 0.0f, *DAT_011d9774.Setting_Float_00403e20() * DAT_0101e568, DAT_010162c0, 0);
         ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])->FUN_00715c60(4100, DAT_011f6394.GetTimeStamp());
         ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[15])->Set(xTraitID(DAT_01073474), 0);
     }
     if (((HUDActor*)DAT_011dea3c)->FUN_004997b0())
-        FUN_007732d0();
+        HUDMainMenu_UpdateSneak();
     else if (((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[24])->GetFloat(4009) > 0.0 &&
-             ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[24])->FUN_00a07fc0(4009))
+             ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[24])->Tile_GetFadeFinished(4009))
         ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[24])
             ->StartFade(4009, ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[24])->GetFloat(4009), 0.0f, DAT_01016248, 0);
     if (HUDMainMenu::g_pHudMainMenuInstance->m_eHudMenuMode != 18 && HUDMainMenu::g_pHudMainMenuInstance->m_eHudMenuMode != 19)
         UpdateQuestNotification();
-    FUN_0077c4e0();
+    HUDMainMenu_UpdateXPMeter();
     UpdateRadMeter();
-    UpdateCrippleMeters(((HUDActor*)DAT_011dea3c)->FUN_004d1360());
+    UpdateCrippleMeters(((HUDActor*)DAT_011dea3c)->PlayerCharacter_IsHardcore());
     DAT_011d96c5 = false;
     if (m_pTargetActor)
     {
-        HUDDetectionList* list = ((HUDActor*)DAT_011dea3c)->FUN_00595d10();
+        HUDDetectionList* list = ((HUDActor*)DAT_011dea3c)->PlayerCharacter_GetCompassTargets();
         while (list && !list->FUN_008256d0())
         {
             HUDDetection* detection = *list->FUN_006815c0();
@@ -3692,7 +3713,7 @@ void HUDUpdate::FUN_00770430()
         s = GetAngleBetweenPoints(*(NiPoint3*)((const TESObjectREFR*)((HUDActor*)DAT_011dea3c))->GetPos(),
                                   *(NiPoint3*)((const TESObjectREFR*)((HUDActor*)m_pTargetActor))->GetPos());
     bool i = (((HUDTime*)&m_cBuffer)->GetTimeStamp() - m_uiHudValueFirstAfterActor >
-                  (unsigned)(*DAT_011cf87c.FUN_00403e20() * DAT_01017b70) &&
+                  (unsigned)(*DAT_011cf87c.Setting_Float_00403e20() * DAT_01017b70) &&
               !(FUN_00408840(eb - s) < DAT_010357e8))
                  ? 0
                  : 1;
@@ -3701,7 +3722,7 @@ void HUDUpdate::FUN_00770430()
         if (DAT_011f21cc && DAT_011f21cc->IsActor() && !DAT_011f21cc->HasHealth(false))
         {
             a = true;
-            FUN_00773190((RefX*)DAT_011f21cc);
+            HUDMainMenu_SetEnemyActor((RefX*)DAT_011f21cc);
         }
     }
     else if (m_pTargetActor && !((HUDActor*)m_pTargetActor)->HasHealth(false) &&
@@ -3722,37 +3743,37 @@ void HUDUpdate::FUN_00770430()
     if (a)
     {
         bool hostile = false;
-        if (m_pTargetActor && ((((HUDActor*)DAT_011dea3c)->FUN_00967090(m_pTargetActor) &&
-                                ((HUDActor*)DAT_011dea3c)->FUN_00967090(m_pTargetActor)->detected) ||
-                               ((HUDActor*)m_pTargetActor)->FUN_008bc700(DAT_011dea3c)))
+        if (m_pTargetActor && ((((HUDActor*)DAT_011dea3c)->PlayerCharacter_IsActorPerceived(m_pTargetActor) &&
+                                ((HUDActor*)DAT_011dea3c)->PlayerCharacter_IsActorPerceived(m_pTargetActor)->detected) ||
+                               ((HUDActor*)m_pTargetActor)->Actor_IsInCombatWithActor(DAT_011dea3c)))
             hostile = true;
         ((Tile*)m_pTiles[21])->Set(4003, 1);
         ((Tile*)m_pTiles[22])->Set(4003, 1);
         ((Tile*)m_pTiles[23])->Set(4003, 1);
         ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[62])->Set(4084, hostile ? 2 : 1);
-        ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[21])->SetChangeFlag(8);
-        ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[22])->SetChangeFlag(8);
-        ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[23])->SetChangeFlag(8);
-        ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[23])->SetChangeFlag(8);
+        ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[21])->Tile_SetChangeFlag(8);
+        ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[22])->Tile_SetChangeFlag(8);
+        ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[23])->Tile_SetChangeFlag(8);
+        ((Tile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[23])->Tile_SetChangeFlag(8);
     }
-    if (m_pTargetActor && (((HUDActor*)m_pTargetActor)->FUN_00493bb0() || DAT_011f2250.FUN_0044ddc0() == 4))
+    if (m_pTargetActor && (((HUDActor*)m_pTargetActor)->Actor_IsInCombat() || DAT_011f2250.FUN_0044ddc0() == 4))
         UpdateTargetInfo(m_pTargetActor);
-    if (m_pCrosshairReference && DAT_011d97c0 != ((HUDActor*)m_pCrosshairReference)->FUN_00579690())
+    if (m_pCrosshairReference && DAT_011d97c0 != ((HUDActor*)m_pCrosshairReference)->TESObjectREFR_IsCrimeToActivate())
     {
-        DAT_011d97c0 = ((HUDActor*)m_pCrosshairReference)->FUN_00579690();
+        DAT_011d97c0 = ((HUDActor*)m_pCrosshairReference)->TESObjectREFR_IsCrimeToActivate();
         UpdateActivatePrompt((RefX*)m_pCrosshairReference, 0, true);
     }
     if (m_bHudAnimationActive &&
-        DAT_011f6394.GetTimeStamp() - m_uiHudValueSecondAfterActor > (unsigned)(*DAT_011d2220.FUN_0043d4d0() * 1000) &&
+        DAT_011f6394.GetTimeStamp() - m_uiHudValueSecondAfterActor > (unsigned)(*DAT_011d2220.Setting_Int() * 1000) &&
         HUDMainMenu::g_pHudMainMenuInstance->m_eHudMenuMode != 18 && HUDMainMenu::g_pHudMainMenuInstance->m_eHudMenuMode != 19)
     {
         m_uiHudValueSecondAfterActor = DAT_011f6394.GetTimeStamp();
-        FUN_007736d0(((HUDActor*)DAT_011dea3c)->FUN_005cbb50());
+        HUDMainMenu_DisplayQuestReminder(((HUDActor*)DAT_011dea3c)->PlayerCharacter_GetActiveQuest());
     }
-    else if (m_uiHudValueSecondAfterActor == 0 && FUN_00458030() == 2)
+    else if (m_uiHudValueSecondAfterActor == 0 && HUDMainMenu_GetMenuMode() == 2)
     {
         m_uiHudValueSecondAfterActor = DAT_011f6394.GetTimeStamp();
-        FUN_007736d0(((HUDActor*)DAT_011dea3c)->FUN_005cbb50());
+        HUDMainMenu_DisplayQuestReminder(((HUDActor*)DAT_011dea3c)->PlayerCharacter_GetActiveQuest());
         m_bQuestObjectiveUpdatesEnabled = false;
     }
     {
@@ -3764,7 +3785,7 @@ void HUDUpdate::FUN_00770430()
             ResetWaitTiles();
             m_bQuestObjectiveUpdatesEnabled = false;
         }
-        else if (!((HUDSubtitleList*)&m_kSubtitleArray)->FUN_0076b610())
+        else if (!((HUDSubtitleList*)&m_kSubtitleArray)->NiTListBase_DFALL_NiTListItem_BSAnimGroupSequence_const_BSAnimGroupSequence_const_IsEmpty())
         {
             for (k = 0; k < ((HUDSubtitleList*)&m_kSubtitleArray)->FUN_0044ddc0(); ++k)
             {
@@ -3773,10 +3794,10 @@ void HUDUpdate::FUN_00770430()
                     (*((HUDSubtitleList*)&m_kSubtitleArray)->FUN_00877a30(k))->duration * DAT_01017b70)
                 {
                     if (*((HUDSubtitleList*)&m_kSubtitleArray)->FUN_00877a30(k) == (HUDSubtitle*)m_pCurrentSubtitle)
-                        FUN_00775670();
+                        HUDMainMenu_HideSubtitle();
                     HUDSubtitle* j = *((HUDSubtitleList*)&m_kSubtitleArray)->FUN_00877a30(k);
-                    FormHeap_Free(j);
-                    ((HUDSubtitleList*)&m_kSubtitleArray)->FUN_006bf8f0(k, true);
+                    FormHeapFreeAndLog_00401030(j);
+                    ((HUDSubtitleList*)&m_kSubtitleArray)->BSSimpleArray_HUDMainMenu_SubtitleData_1024_Remove(k, true);
                     --k;
                 }
             }
@@ -3802,22 +3823,22 @@ void HUDUpdate::FUN_00770430()
                 ((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[26])
                     ->StartFade(4009, 0.0f, DAT_011d979c, DAT_01021f44, 0);
             }
-            if (((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[27])->FUN_00a07fc0(4009))
+            if (((HUDTile*)HUDMainMenu::g_pHudMainMenuInstance->m_pTiles[27])->Tile_GetFadeFinished(4009))
             {
                 l = *((HUDMessageList*)&m_kMessageList)->FUN_006815c0();
                 if (!m_uiMessageCount)
                     m_uiMessageCount = ((HUDTime*)&m_cBuffer)->GetTimeStamp();
                 if (((HUDTime*)&m_cBuffer)->GetTimeStamp() - m_uiMessageCount >= l->duration * DAT_01017b70)
-                    FUN_007756e0();
+                    HUDMainMenu_HideMessage();
             }
         }
     }
-    DAT_011d979c = *DAT_011d9774.FUN_00403e20() * DAT_0101e568;
+    DAT_011d979c = *DAT_011d9774.Setting_Float_00403e20() * DAT_0101e568;
 }
 
 struct MarkerData772
 {
-    const char* FUN_00438eb0();
+    const char* MapMarkerData_GetLocationName();
 };
 struct MarkerRef772
 {
@@ -3841,17 +3862,17 @@ void __cdecl UpdateMapMarkerHUD(MarkerEvent772* event)
         DAT_011d9af0 = event->reference;
         if (event->reference && event->reference->GetMapMarkerData())
         {
-            if (((Tile*)HUDMainMenu_pme->m_pTiles[16])->FUN_00a07fc0(0xfa9) &&
+            if (((Tile*)HUDMainMenu_pme->m_pTiles[16])->Tile_GetFadeFinished(0xfa9) &&
                 ((Tile*)HUDMainMenu_pme->m_pTiles[16])->FUN_00a011b0(0xfa9) == 0.0)
             {
                 ((Tile*)HUDMainMenu_pme->m_pTiles[16])
-                    ->FUN_00a01350(0xfc4, event->reference->GetMapMarkerData()->FUN_00438eb0(), true);
+                    ->Tile_Set_00a01350(0xfc4, event->reference->GetMapMarkerData()->MapMarkerData_GetLocationName(), true);
                 ((Tile*)HUDMainMenu_pme->m_pTiles[16])
-                    ->StartFade(0xfa9, 0.0f, (float)(*g_011d9774.FUN_00403e20() * 255.0), 2.0f, 0);
+                    ->StartFade(0xfa9, 0.0f, (float)(*g_011d9774.Setting_Float_00403e20() * 255.0), 2.0f, 0);
                 ((Tile*)HUDMainMenu_pme->m_pTiles[16])->Set(0x1004, (unsigned int)g_timeGlobal.GetSection());
             }
             ((Tile*)HUDMainMenu_pme->m_pTiles[15])->Stop(0xfa9);
-            ((Tile*)HUDMainMenu_pme->m_pTiles[15])->FUN_00a012d0(0xfa9, 0.0f, true);
+            ((Tile*)HUDMainMenu_pme->m_pTiles[15])->Tile_Set(0xfa9, 0.0f, true);
         }
     }
     else if (!event->active && event->reference == DAT_011d9af0)
@@ -3917,10 +3938,10 @@ struct HealthActor : RefX
     int unk09C;
     int unk0A0;
     ActorValueOwner actorValues;
-    TESBoundObject* FUN_00579280();
-    bool FUN_008bc700(Actor* other);
-    DetectX* FUN_00967090(HealthActor* other);
-    bool FUN_008bbc10();
+    TESBoundObject* TESObjectREFR_GetTargetType();
+    bool Actor_IsInCombatWithActor(Actor* other);
+    DetectX* PlayerCharacter_IsActorPerceived(HealthActor* other);
+    bool Actor_GetIronSights();
 };
 struct FUN_00a01230_shell : Tile
 {
@@ -3928,7 +3949,7 @@ struct FUN_00a01230_shell : Tile
 };
 struct FUN_00a07530_shell : Tile
 {
-    void SetChangeFlag(int flags);
+    void Tile_SetChangeFlag(int flags);
 };
 struct TargetHealthTile : Tile
 {
@@ -3938,7 +3959,7 @@ struct TargetHealthHUD : HUDMainMenu
 {
     void UpdateTargetInfo(HealthActor* actor);
 };
-void __cdecl FUN_00773190(HealthActor* actor);
+void __cdecl HUDMainMenu_SetEnemyActor(HealthActor* actor);
 extern bool DAT_011d96ba;
 extern bool DAT_011d96b9;
 
@@ -3949,16 +3970,16 @@ void __cdecl UpdateTargetHealthHUD(HealthActor* target, unsigned char enabled)
     {
         bool isDead = true;
         if (target && HUDMainMenu_pme && !*g_011d8a0c.Bool() && enabled &&
-            (!*g_011d898c.Bool() || !((HealthActor*)pPlayer)->FUN_008bbc10()))
+            (!*g_011d898c.Bool() || !((HealthActor*)pPlayer)->Actor_GetIronSights()))
         {
             HealthActor* actor;
             {
-                TESBoundObject* baseObject = target->FUN_00579280();
+                TESBoundObject* baseObject = target->TESObjectREFR_GetTargetType();
                 actor = target->IsActor() ? target : 0;
                 isDead = actor && actor->HasHealth(false);
-                if (actor && ((((HealthActor*)pPlayer)->FUN_00967090(actor) &&
-                               ((HealthActor*)pPlayer)->FUN_00967090(actor)->bDetected) ||
-                              actor->FUN_008bc700((Actor*)pPlayer)))
+                if (actor && ((((HealthActor*)pPlayer)->PlayerCharacter_IsActorPerceived(actor) &&
+                               ((HealthActor*)pPlayer)->PlayerCharacter_IsActorPerceived(actor)->bDetected) ||
+                              actor->Actor_IsInCombatWithActor((Actor*)pPlayer)))
                 {
                     isHostile = true;
                 }
@@ -3967,16 +3988,16 @@ void __cdecl UpdateTargetHealthHUD(HealthActor* target, unsigned char enabled)
                             !((FUN_00a01230_shell*)HUDMainMenu_pme->m_pTiles[32])->IsTraitNonZero(4003);
                 if (show)
                 {
-                    FUN_00773190(actor);
+                    HUDMainMenu_SetEnemyActor(actor);
                     HUDMainMenu_pme->m_pTiles[21]->Set(4003, 1);
                     HUDMainMenu_pme->m_pTiles[22]->Set(4003, 1);
                     HUDMainMenu_pme->m_pTiles[23]->Set(4003, 1);
                     HUDMainMenu_pme->m_pTiles[23]->Set(4003, 1);
                     HUDMainMenu_pme->m_pTiles[62]->Set(4084, isHostile ? 2 : 1);
-                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[21])->SetChangeFlag(8);
-                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[22])->SetChangeFlag(8);
-                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[23])->SetChangeFlag(8);
-                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[23])->SetChangeFlag(8);
+                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[21])->Tile_SetChangeFlag(8);
+                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[22])->Tile_SetChangeFlag(8);
+                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[23])->Tile_SetChangeFlag(8);
+                    ((FUN_00a07530_shell*)HUDMainMenu_pme->m_pTiles[23])->Tile_SetChangeFlag(8);
                     ((TargetHealthHUD*)HUDMainMenu_pme)->UpdateTargetInfo(actor);
                 }
             }
@@ -4216,7 +4237,7 @@ struct EnemyRefV
     virtual void v137();
     virtual void v138();
     virtual bool IsUnseen(int iArg);
-    char* FUN_0055d520();
+    char* TESObjectREFR_GetFullName();
 };
 struct EnemyTimer
 {
@@ -4225,7 +4246,8 @@ struct EnemyTimer
 };
 // Selects the enemy reference to show in the HUD, sets its name text, and refreshes the timer and its value.
 // @fnv 0x00773190
-void FUN_00773190(EnemyRefV* pkRef)
+// src: XBOX_PDB 0x00773190
+void HUDMainMenu_SetEnemyActor(EnemyRefV* pkRef)
 {
     if (*g_011e0988.Bool())
         return;
@@ -4240,7 +4262,7 @@ void FUN_00773190(EnemyRefV* pkRef)
         HUDMainMenu_pme->m_pTargetActor = (Actor*)pkRef;
     if (HUDMainMenu_pme->m_pTargetActor)
     {
-        HUDMainMenu_pme->m_pTiles[23]->Set(0xfc4, ((EnemyRefV*)HUDMainMenu_pme->m_pTargetActor)->FUN_0055d520(), true);
+        HUDMainMenu_pme->m_pTiles[23]->Set(0xfc4, ((EnemyRefV*)HUDMainMenu_pme->m_pTargetActor)->TESObjectREFR_GetFullName(), true);
         ((EnemyTimer*)&HUDMainMenu_pme->m_cBuffer)->FUN_00771520();
         HUDMainMenu_pme->m_uiHudValueFirstAfterActor = ((EnemyTimer*)&HUDMainMenu_pme->m_cBuffer)->FUN_00825c00();
     }
@@ -4250,7 +4272,7 @@ void FUN_00773190(EnemyRefV* pkRef)
 struct RadiationTile
 {
     double FUN_00a011b0(int trait);
-    void FUN_00a012d0(int trait, float value, int propagate);
+    void Tile_Set(int trait, float value, int propagate);
     void FUN_00700320(int trait, int enabled);
 };
 struct RandomGenerator
@@ -4266,8 +4288,8 @@ void __fastcall UpdateHUDRadiation(HUDMainMenu* menu, float afDrinkinRads, float
     if (afDrinkinRads > _gModifierZero)
     {
         reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])
-            ->FUN_00a012d0(0x100a, (float)((double)g_011f6394.FUN_00825c00() + DAT_01073490), 1);
-        reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->FUN_00a012d0(0x1009, totalRads, 1);
+            ->Tile_Set(0x100a, (float)((double)g_011f6394.FUN_00825c00() + DAT_01073490), 1);
+        reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->Tile_Set(0x1009, totalRads, 1);
         reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->FUN_00700320(0x100b, 1);
     }
     else if (afStandinRads > _gModifierZero)
@@ -4275,7 +4297,7 @@ void __fastcall UpdateHUDRadiation(HUDMainMenu* menu, float afDrinkinRads, float
         if (reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->FUN_00a011b0(0x100a) <=
             (double)g_011f6394.FUN_00825c00())
         {
-            reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->FUN_00a012d0(0x1009, totalRads, 1);
+            reinterpret_cast<RadiationTile*>(g_pHudMainMenuInstance->m_pTiles[19])->Tile_Set(0x1009, totalRads, 1);
         }
     }
 }
@@ -4372,10 +4394,10 @@ namespace fnv_00774090 {
 struct RadTile
 {
     float FUN_00a011b0(int);
-    bool FUN_00a07fc0(int);
+    bool Tile_GetFadeFinished(int);
     bool IsTraitNonZero(int);
     void StartFade(int, float, float, float, int);
-    void FUN_00a012d0(int, float, bool);
+    void Tile_Set(int, float, bool);
     void Set(int, int);
     void Set(int, const char*, bool);
 };
@@ -4394,7 +4416,7 @@ extern float DAT_011d979c;
 extern char DAT_011d9b08[260];
 
 float __cdecl LinearInterpolate(float, float, float, float, float);
-int __cdecl FUN_00647b70(int, int);
+int __cdecl BSMAX_00647b70(int, int);
 struct RadHUD : HUDMainMenu
 {
     void UpdateRadMeter();
@@ -4412,13 +4434,13 @@ void RadHUD::UpdateRadMeter()
     if (!low && !recent && DAT_011a0120 == 4)
         return;
     bool previousAngle = false;
-    if (((RadTile*)HUDMainMenu_pme->m_pTiles[17])->FUN_00a07fc0(0xfa9) &&
+    if (((RadTile*)HUDMainMenu_pme->m_pTiles[17])->Tile_GetFadeFinished(0xfa9) &&
         ((RadTile*)HUDMainMenu_pme->m_pTiles[17])->FUN_00a011b0(0xfa9) == 0.0 &&
-        ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a07fc0(0xfa9) &&
+        ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->Tile_GetFadeFinished(0xfa9) &&
         ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a011b0(0xfa9) == 0.0 &&
-        ((RadTile*)HUDMainMenu_pme->m_pTiles[19])->FUN_00a07fc0(0xfa9) &&
+        ((RadTile*)HUDMainMenu_pme->m_pTiles[19])->Tile_GetFadeFinished(0xfa9) &&
         ((RadTile*)HUDMainMenu_pme->m_pTiles[19])->FUN_00a011b0(0xfa9) == 0.0 &&
-        ((RadTile*)HUDMainMenu_pme->m_pTiles[20])->FUN_00a07fc0(0xfa9) &&
+        ((RadTile*)HUDMainMenu_pme->m_pTiles[20])->Tile_GetFadeFinished(0xfa9) &&
         ((RadTile*)HUDMainMenu_pme->m_pTiles[20])->FUN_00a011b0(0xfa9) == 0.0)
         DAT_011a0120 = 4;
     if ((DAT_011a0120 == 4 || DAT_011a0120 == 2) && (low || recent))
@@ -4444,17 +4466,17 @@ void RadHUD::UpdateRadMeter()
                 updateText = true;
                 change = ((RadTile*)HUDMainMenu_pme->m_pTiles[19])->FUN_00a011b0(0x1009);
                 active = LinearInterpolate(high, unused, 0.0f, 1000.0f,
-                                           FUN_00404010(FUN_0040ebd0(value - change, 1000.0f), 0.0f));
+                                           BSMAX_00404010(BSMIN(value - change, 1000.0f), 0.0f));
             }
             if ((recent && previousAngle) || showing || low)
             {
                 updateText = true;
                 currentAngle =
-                    LinearInterpolate(high, unused, 0.0f, 1000.0f, FUN_00404010(FUN_0040ebd0(value, 1000.0f), 0.0f));
+                    LinearInterpolate(high, unused, 0.0f, 1000.0f, BSMAX_00404010(BSMIN(value, 1000.0f), 0.0f));
             }
             if (updateText)
             {
-                xsprintf_s(DAT_011d9b08, 260, "+%i", FUN_00647b70(1, (int)change));
+                xsprintf_s(DAT_011d9b08, 260, "+%i", BSMAX_00647b70(1, (int)change));
                 ((RadTile*)HUDMainMenu_pme->m_pTiles[19])->Set(0xfc4, DAT_011d9b08, true);
             }
         }
@@ -4462,7 +4484,7 @@ void RadHUD::UpdateRadMeter()
         {
             DAT_011a0120 = 8;
             ((RadTile*)HUDMainMenu_pme->m_pTiles[18])
-                ->FUN_00a012d0(0xfa1, FUN_0040ebd0(low ? currentAngle : active, unused), true);
+                ->Tile_Set(0xfa1, BSMIN(low ? currentAngle : active, unused), true);
             HUDMainMenu_pme->m_pTiles[61]->Set(0xfa3, 1);
             ((RadTile*)HUDMainMenu_pme->m_pTiles[17])
                 ->StartFade(0xfa9, ((RadTile*)HUDMainMenu_pme->m_pTiles[17])->FUN_00a011b0(0xfa9), DAT_011d979c, 0.25f,
@@ -4479,15 +4501,15 @@ void RadHUD::UpdateRadMeter()
         }
         else if (low)
         {
-            ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a012d0(0xfa1, FUN_0040ebd0(currentAngle, unused), true);
+            ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->Tile_Set(0xfa1, BSMIN(currentAngle, unused), true);
         }
         if (showing)
         {
             HUDMainMenu_pme->m_pTiles[19]->Set(0x100b, 0);
-            ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a012d0(0x1004, FUN_0040ebd0(currentAngle, unused), true);
-            float duration = LinearInterpolate(1.5f, 3.0f, 0.0f, 50.0f, FUN_0040ebd0(50.0f, change));
+            ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->Tile_Set(0x1004, BSMIN(currentAngle, unused), true);
+            float duration = LinearInterpolate(1.5f, 3.0f, 0.0f, 50.0f, BSMIN(50.0f, change));
             float start = ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a011b0(0xfa1);
-            float finish = FUN_00404010(((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a011b0(0x1004), high);
+            float finish = BSMAX_00404010(((RadTile*)HUDMainMenu_pme->m_pTiles[18])->FUN_00a011b0(0x1004), high);
             if (!low)
                 ((RadTile*)HUDMainMenu_pme->m_pTiles[18])->StartFade(0xfa1, start, finish, duration, 0);
         }
@@ -4849,7 +4871,7 @@ struct HUDTimerStub
     unsigned int GetTime();
 };
 
-int FUN_00408b20(const char* a, const char* b);
+int BSstrcmp(const char* a, const char* b);
 extern HUDMainMenu* HUDMainMenu_pme;
 extern PlayerCharacter* _g_thePlayer;
 extern float g_fHUDMessageFadeTime;
@@ -4857,13 +4879,14 @@ extern const float g_fHUDMessageFadeEnd;
 
 struct HUDMainMenuMessages : public HUDMainMenu
 {
-    void FUN_007756e0();
+    void HUDMainMenu_HideMessage();
 };
 
 typedef BSSimpleList<HUDMainMenu__MessageData*> MessageList;
 
 // @fnv 0x007756e0
-void HUDMainMenuMessages::FUN_007756e0()
+// src: XBOX_PDB 0x007756e0
+void HUDMainMenuMessages::HUDMainMenu_HideMessage()
 {
     if (((MessageList*)&m_kMessageList)->IsEmpty())
         return;
@@ -4871,7 +4894,7 @@ void HUDMainMenuMessages::FUN_007756e0()
     while (pIter)
     {
         HUDMainMenu__MessageData* pMsg = pIter->GetItem();
-        if (pMsg && !FUN_00408b20(pMsg->cMessage, ((Tile*)HUDMainMenu_pme->m_pTiles[26])->GetString(0xfc4)))
+        if (pMsg && !BSstrcmp(pMsg->cMessage, ((Tile*)HUDMainMenu_pme->m_pTiles[26])->GetString(0xfc4)))
         {
             HUDMainMenu__MessageData* pOld = pMsg;
             ((MessageList*)&m_kMessageList)->Remove(pMsg);
@@ -4909,7 +4932,7 @@ namespace fnv_00778c20 {
 extern const char str_01073500[];
 struct IntSetting179
 {
-    int* FUN_0043d4d0();
+    int* Setting_Int();
 };
 extern IntSetting179 g_011d1d54, g_011d30d8, g_011d4d44;
 extern IntSetting179 g_011d30f0, g_011d3c94, g_011d2bd4;
@@ -4921,16 +4944,17 @@ struct TimeGlobal
 };
 extern TimeGlobal DAT_011f6394;
 extern float DAT_011d979c;
-int FUN_00a00940(const char*, int);
-int FUN_0077f9c0(int);
+int Tile_AddUserTrait(const char*, int);
+int sqr_int(int);
 float LinearInterpolate(float, float, float, float, float);
 // @fnv 0x00778c20
-void FUN_00778c20(Tile* tile, float value, float limit)
+// src: COMMUNITY 0x00778c20
+void BlinkTile(Tile* tile, float value, float limit)
 {
-    static int trait = FUN_00a00940(str_01073500, -1);
-    int actual = FUN_0077f9c0(*g_011d1d54.FUN_0043d4d0());
-    int lower = FUN_0077f9c0(*g_011d30d8.FUN_0043d4d0());
-    int low = FUN_0077f9c0(*g_011d4d44.FUN_0043d4d0());
+    static int trait = Tile_AddUserTrait(str_01073500, -1);
+    int actual = sqr_int(*g_011d1d54.Setting_Int());
+    int lower = sqr_int(*g_011d30d8.Setting_Int());
+    int low = sqr_int(*g_011d4d44.Setting_Int());
     if (value > actual)
         value = (float)actual;
     else if (value < lower)
@@ -4941,10 +4965,10 @@ void FUN_00778c20(Tile* tile, float value, float limit)
     float alpha = tile->FUN_00a011b0(trait);
     state = 0.0f;
     if (rate)
-        state = LinearInterpolate((float)*g_011d3c94.FUN_0043d4d0(), (float)*g_011d30f0.FUN_0043d4d0(), (float)low,
+        state = LinearInterpolate((float)*g_011d3c94.Setting_Int(), (float)*g_011d30f0.Setting_Int(), (float)low,
                                   (float)lower, value);
     else
-        state = LinearInterpolate((float)*g_011d2bd4.FUN_0043d4d0(), (float)*g_011d3c94.FUN_0043d4d0(), (float)actual,
+        state = LinearInterpolate((float)*g_011d2bd4.Setting_Int(), (float)*g_011d3c94.Setting_Int(), (float)actual,
                                   (float)low, value);
     float middle = 0.0f;
     if (alpha == 0.0)
@@ -4957,25 +4981,25 @@ void FUN_00778c20(Tile* tile, float value, float limit)
                      : 0.0;
     else if (alpha == 3.0)
         middle = DAT_011d979c;
-    tile->FUN_00a012d0(4009, middle, true);
+    tile->Tile_Set(4009, middle, true);
     high = tile->FUN_00a011b0(4009);
     if (high > limit)
     {
-        tile->FUN_00a012d0(4009, limit, true);
+        tile->Tile_Set(4009, limit, true);
         tile->FUN_00700320(trait, 3);
     }
     else if (high < 0.0)
     {
         float delay = 0.0f;
         if (rate)
-            delay = LinearInterpolate((float)*g_011d46cc.FUN_0043d4d0(), (float)*g_011d3924.FUN_0043d4d0(), (float)low,
+            delay = LinearInterpolate((float)*g_011d46cc.Setting_Int(), (float)*g_011d3924.Setting_Int(), (float)low,
                                       (float)lower, value);
         else
-            delay = LinearInterpolate((float)*g_011d24f0.FUN_0043d4d0(), (float)*g_011d46cc.FUN_0043d4d0(),
+            delay = LinearInterpolate((float)*g_011d24f0.Setting_Int(), (float)*g_011d46cc.Setting_Int(),
                                       (float)actual, (float)low, value);
-        tile->FUN_00a012d0(4009, 0.0f, true);
+        tile->Tile_Set(4009, 0.0f, true);
         tile->FUN_00700320(trait, 0);
-        tile->FUN_00a012d0(4110, DAT_011f6394.GetTimeStamp() + delay, true);
+        tile->Tile_Set(4110, DAT_011f6394.GetTimeStamp() + delay, true);
     }
     else if (tile->FUN_00a011b0(4110) < DAT_011f6394.GetTimeStamp() && alpha == 3.0)
     {
@@ -4989,13 +5013,13 @@ namespace fnv_0077a650 {
 
 struct QAudio
 {
-    BSSoundHandle FUN_00ad7550(const char*, unsigned int);
+    BSSoundHandle BSAudio_GetSoundHandleByEditorName(const char*, unsigned int);
 };
-QAudio* FUN_00453a70();
+QAudio* BSAudio_QInstance();
 struct QSetting
 {
     const char* FUN_00403df0();
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern QSetting DAT_011d282c, DAT_011d27c0, DAT_011d237c, DAT_011d4d14, DAT_011d2688;
 struct QTile
@@ -5003,21 +5027,21 @@ struct QTile
     int value;
     struct List
     {
-        QTile** FUN_0073ac90();
-        QTile** FUN_0073ac90(int);
-        void* FUN_00559450();
-        QTile*& FUN_0057cbe0(void*&);
+        QTile** NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead();
+        QTile** NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead(int);
+        void* Modelloader_GetReferencedThis();
+        QTile*& NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(void*&);
     } children;
     void Set(int, int);
     void Set(int, float, bool);
     void Set(int, const char*, bool);
     void FUN_00715c60(int, unsigned int);
     float FUN_00a011b0(int);
-    const char* FUN_00a011f0(int);
+    const char* Tile_GetString(int);
 };
 struct QName
 {
-    const char* FUN_00408da0();
+    const char* TESModel_GetModel();
 };
 struct QQuest
 {
@@ -5036,18 +5060,18 @@ struct QEntry
 struct QManager
 {
     QEntry* GetQuestNamesHead();
-    bool FUN_0077b2c0();
-    void FUN_0077b2e0();
+    bool QuestUpdateManager_IsQuestNamesEmpty();
+    void QuestUpdateManager_RemoveQuestNamesHead();
 };
 extern QManager* DAT_011d96bc;
 struct QInterface
 {
-    bool FUN_007023a0();
+    bool IsInMenuMode();
 };
-QInterface* FUN_004b7210();
-bool FUN_00702680(int, unsigned int);
-bool FUN_00703d50();
-bool FUN_00702450(int);
+QInterface* InterfaceManager_GetSingleton();
+bool Interface_IsMenuIDVisible(int, unsigned int);
+bool Interface_IsConsoleVisible();
+bool Interface_IsTopMenuID(int);
 struct QFlags
 {
     unsigned int FUN_0044ddc0();
@@ -5058,19 +5082,19 @@ struct QTime
     unsigned int FUN_00825c00();
 };
 extern QTime DAT_011f6394;
-bool FUN_007178a0();
+bool InterfaceManager_IsInPipboyMenu();
 float FUN_00715d40();
-float FUN_007177c0();
+float InterfaceManager_GetScreenSafeX();
 struct QFont
 {
     static QFont* FUN_005bd5b0();
     void FUN_00a1b020(NiPoint3*, const char*, int, float, int = 0);
 };
-void FUN_005b5e40(int, const char*, ...);
+void Warning_005b5e40(int, const char*, ...);
 int FUN_00406d30(char*, unsigned int, const char*);
-int FUN_0044a670(const char*);
-void FUN_0040fbe0(const char*, ...);
-void FUN_00774800(QTile*, int);
+int BSstrlen(const char*);
+void ProgramFlow(const char*, ...);
+void HUDMainMenu_SetBrightness(QTile*, int);
 extern const char DAT_0106f370[], DAT_01073700[], DAT_010736b0[], DAT_01073640[], DAT_01073624[];
 struct QObjectives
 {
@@ -5079,8 +5103,8 @@ struct QObjectives
 struct QHud : HUDMainMenu
 {
     void UpdateQuestNotification();
-    bool FUN_007735d0();
-    bool FUN_00773650();
+    bool HUDMainMenu_IsQuestNameShowing();
+    bool HUDMainMenu_AreObjectivesShowing();
     void UpdateTileAnimations(Tile*);
     void UpdateQuestMenu(Tile*);
     void ResetWaitTiles();
@@ -5107,25 +5131,25 @@ void QHud::UpdateQuestNotification()
     if (!DAT_011d96c0 || m_eHudMenuMode == 7 || m_eHudMenuMode == 9 || m_eHudMenuMode == 8 ||
         DAT_011f6394.FUN_00825c00() - (unsigned int)DAT_011d96ac < 2000)
         return;
-    _y = FUN_007178a0();
-    if (!FUN_007735d0() && !DAT_011d96bc->FUN_0077b2c0() &&
-        !(FUN_00773650() &&
-          ((QTile*)HUDMainMenu_pme->m_pTiles[13])->children.FUN_0073ac90()[0]->FUN_00a011b0(4009) != 0.0) &&
-        (!FUN_004b7210()->FUN_007023a0() || FUN_00702680(1009, 0) || FUN_00703d50()) && !DAT_011f2250.FUN_0044ddc0())
+    _y = InterfaceManager_IsInPipboyMenu();
+    if (!HUDMainMenu_IsQuestNameShowing() && !DAT_011d96bc->QuestUpdateManager_IsQuestNamesEmpty() &&
+        !(HUDMainMenu_AreObjectivesShowing() &&
+          ((QTile*)HUDMainMenu_pme->m_pTiles[13])->children.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead()[0]->FUN_00a011b0(4009) != 0.0) &&
+        (!InterfaceManager_GetSingleton()->IsInMenuMode() || Interface_IsMenuIDVisible(1009, 0) || Interface_IsConsoleVisible()) && !DAT_011f2250.FUN_0044ddc0())
     {
         m_bQuestObjectiveUpdatePending = true;
         QEntry* aShared;
         BSSoundHandle aRepair;
         if (DAT_011d96bc->GetQuestNamesHead()->kind == 0)
-            aRepair = FUN_00453a70()->FUN_00ad7550(DAT_0106f370, 289);
+            aRepair = BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(DAT_0106f370, 289);
         else if (DAT_011d96bc->GetQuestNamesHead()->kind == 3)
-            aRepair = FUN_00453a70()->FUN_00ad7550(DAT_011d96bc->GetQuestNamesHead()->sound, 289);
+            aRepair = BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(DAT_011d96bc->GetQuestNamesHead()->sound, 289);
         else
-            aRepair = FUN_00453a70()->FUN_00ad7550(DAT_01073700, 289);
+            aRepair = BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(DAT_01073700, 289);
         aRepair.Play(false);
         aBy = 0;
         aAlternate = DAT_011f6394.FUN_00825c00();
-        aLocation = ((QTile*)HUDMainMenu_pme->m_pTiles[14])->children.FUN_0073ac90()[0];
+        aLocation = ((QTile*)HUDMainMenu_pme->m_pTiles[14])->children.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead()[0];
         if (DAT_011d96bc->GetQuestNamesHead()->kind == 0)
             aLocation->Set(4036, DAT_011d282c.FUN_00403df0(), true);
         else if (DAT_011d96bc->GetQuestNamesHead()->kind == 2)
@@ -5135,7 +5159,7 @@ void QHud::UpdateQuestNotification()
         else if (DAT_011d96bc->GetQuestNamesHead()->kind == 3)
             aLocation->Set(4036, DAT_011d96bc->GetQuestNamesHead()->title, true);
         else
-            FUN_005b5e40(7, DAT_010736b0, DAT_011d96bc->GetQuestNamesHead()->kind);
+            Warning_005b5e40(7, DAT_010736b0, DAT_011d96bc->GetQuestNamesHead()->kind);
         aLocation->Set(4003, 1);
         aLocation->Set(4009, 0);
         aActor = 7;
@@ -5144,14 +5168,14 @@ void QHud::UpdateQuestNotification()
         aLocation->Set(4025, aActor);
         {
             float aImpact[3];
-            QFont::FUN_005bd5b0()->FUN_00a1b020(reinterpret_cast<NiPoint3*>(aImpact), aLocation->FUN_00a011f0(4036),
+            QFont::FUN_005bd5b0()->FUN_00a1b020(reinterpret_cast<NiPoint3*>(aImpact), aLocation->Tile_GetString(4036),
                                                 (int)aLocation->FUN_00a011b0(4025), aLocation->FUN_00a011b0(4026), 0);
             aBy = (int)aImpact[0];
             aLocation->Set(4002, (float)-(aImpact[1] + 15.0), true);
             a6 = 1;
             aOverrideFlag3 = 0.0f;
             aProcess = (int)FUN_00715d40();
-            aCount1 = (int)FUN_007177c0();
+            aCount1 = (int)InterfaceManager_GetScreenSafeX();
             _unused = aProcess - 2 * aCount1;
             if (DAT_011d96bc->GetQuestNamesHead()->kind == 3)
             {
@@ -5170,7 +5194,7 @@ void QHud::UpdateQuestNotification()
                     aOverrideFlag3 = 1.0f;
                     break;
                 default:
-                    FUN_005b5e40(7, DAT_01073640, DAT_011d96bc->GetQuestNamesHead()->alignment, 0);
+                    Warning_005b5e40(7, DAT_01073640, DAT_011d96bc->GetQuestNamesHead()->alignment, 0);
                     a6 = 1;
                     aOverrideFlag3 = 0.0f;
                     break;
@@ -5179,8 +5203,8 @@ void QHud::UpdateQuestNotification()
                 aLocation->Set(4023, a6);
             }
             aLocation->FUN_00715c60(4100, aAlternate);
-            aLocation->Set(4101, (float)(aAlternate + *DAT_011d4d14.FUN_00403e20() * 1000.0), true);
-            FUN_00774800(aLocation, 0);
+            aLocation->Set(4101, (float)(aAlternate + *DAT_011d4d14.Setting_Float_00403e20() * 1000.0), true);
+            HUDMainMenu_SetBrightness(aLocation, 0);
             if (DAT_011d96bc->GetQuestNamesHead()->kind == 1)
                 ResetWaitTiles();
 
@@ -5190,11 +5214,11 @@ void QHud::UpdateQuestNotification()
                 if (DAT_011d96bc->GetQuestNamesHead()->kind == 3)
                     FUN_00406d30(aPoint4, 260, DAT_011d96bc->GetQuestNamesHead()->text);
                 else
-                    FUN_00406d30(aPoint4, 260, DAT_011d96bc->GetQuestNamesHead()->quest->name.FUN_00408da0());
+                    FUN_00406d30(aPoint4, 260, DAT_011d96bc->GetQuestNamesHead()->quest->name.TESModel_GetModel());
                 for (unsigned int i = 0; i < 260; i++)
                     aPoint4[i] = (char)toupper(aPoint4[i]);
                 aGy = 32;
-                aOwnList = FUN_0044a670(aPoint4);
+                aOwnList = BSstrlen(aPoint4);
                 if (aOwnList >= 32)
                     for (int i = 32; i >= 0; i--)
                         if (aPoint4[i] == ' ')
@@ -5207,17 +5231,17 @@ void QHud::UpdateQuestNotification()
                     aActor = DAT_011d96bc->GetQuestNamesHead()->textFont;
                 QFont::FUN_005bd5b0()->FUN_00a1b020(reinterpret_cast<NiPoint3*>(aData7), aPoint4, aActor, DAT_01016970, 0);
                 aOverrideFlagA = (int)((_unused - (1.0f + aOverrideFlag3) * aData7[0]) * aOverrideFlag3);
-                aInv = ((QTile*)HUDMainMenu_pme->m_pTiles[14])->children.FUN_00559450();
+                aInv = ((QTile*)HUDMainMenu_pme->m_pTiles[14])->children.Modelloader_GetReferencedThis();
                 {
                     QTile* aEffect;
                     if (aInv)
-                        aEffect = ((QTile*)HUDMainMenu_pme->m_pTiles[14])->children.FUN_0057cbe0(aInv);
+                        aEffect = ((QTile*)HUDMainMenu_pme->m_pTiles[14])->children.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(aInv);
                     for (int index = 0; aPoint4[index]; index++)
                     {
                         QTile* tile = 0;
                         {
                             if (aInv)
-                                tile = ((QTile*)HUDMainMenu_pme->m_pTiles[14])->children.FUN_0057cbe0(aInv);
+                                tile = ((QTile*)HUDMainMenu_pme->m_pTiles[14])->children.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(aInv);
                             else
                                 continue;
                             char character[2];
@@ -5239,12 +5263,12 @@ void QHud::UpdateQuestNotification()
                                     tile->Set(4002, 0);
                                 else
                                     tile->Set(4002, (float)(size[1] + 5.0), true);
-                                aAlternate += (unsigned int)(*DAT_011d2688.FUN_00403e20() * 1000.0);
+                                aAlternate += (unsigned int)(*DAT_011d2688.Setting_Float_00403e20() * 1000.0);
                                 tile->FUN_00715c60(4100, aAlternate);
-                                tile->Set(4101, (float)(aAlternate + *DAT_011d4d14.FUN_00403e20() * 1000.0), true);
-                                FUN_0040fbe0(DAT_01073624, tile->FUN_00a011f0(4036),
-                                             aAlternate + *DAT_011d4d14.FUN_00403e20() * 1000.0);
-                                FUN_00774800(tile, 0);
+                                tile->Set(4101, (float)(aAlternate + *DAT_011d4d14.Setting_Float_00403e20() * 1000.0), true);
+                                ProgramFlow(DAT_01073624, tile->Tile_GetString(4036),
+                                             aAlternate + *DAT_011d4d14.Setting_Float_00403e20() * 1000.0);
+                                HUDMainMenu_SetBrightness(tile, 0);
                                 aOverrideFlagA += (int)size[0];
                                 if (tile->FUN_00a011b0(4001) + size[0] > aBy)
                                     aBy = (int)(tile->FUN_00a011b0(4001) + size[0]);
@@ -5256,14 +5280,14 @@ void QHud::UpdateQuestNotification()
         }
         aShared = DAT_011d96bc->GetQuestNamesHead();
         delete aShared;
-        DAT_011d96bc->FUN_0077b2e0();
+        DAT_011d96bc->QuestUpdateManager_RemoveQuestNamesHead();
         UpdateTileAnimations(HUDMainMenu_pme->m_pTiles[14]);
     }
-    if (FUN_007735d0())
+    if (HUDMainMenu_IsQuestNameShowing())
         UpdateTileAnimations(HUDMainMenu_pme->m_pTiles[14]);
-    else if (!FUN_00702450(1048))
+    else if (!Interface_IsTopMenuID(1048))
     {
-        if ((FUN_00773650() || !((QObjectives*)&m_kQuestObjectives)->FUN_008256d0()) && !FUN_007735d0())
+        if ((HUDMainMenu_AreObjectivesShowing() || !((QObjectives*)&m_kQuestObjectives)->FUN_008256d0()) && !HUDMainMenu_IsQuestNameShowing())
             UpdateQuestMenu(HUDMainMenu_pme->m_pTiles[13]);
     }
 }
@@ -5405,7 +5429,8 @@ struct RefX
 
 // Compares the distances from the player to the positions of two RefX objects, returning 1, -1 or 0.
 // @fnv 0x0077b300
-int __cdecl FUN_0077b300(RefX** apRefA, RefX** apRefB)
+// src: COMMUNITY 0x0077b300
+int __cdecl CompassTarget_CompareForSorting(RefX** apRefA, RefX** apRefB)
 {
     if (apRefA && *apRefA && apRefB && *apRefB)
     {
@@ -5435,8 +5460,8 @@ struct AnimatedTile
     int tileType;
     TileList children;
     float FUN_00a011b0(int id);
-    const char* FUN_00a011f0(int id);
-    void FUN_00a012d0(int id, float value, bool propagate);
+    const char* Tile_GetString(int id);
+    void Tile_Set(int id, float value, bool propagate);
     void FUN_00700320(int id, int value);
     void FUN_00707e10(const char* name);
     void StartFade(int id, float start, float end, float duration, int mode);
@@ -5446,7 +5471,7 @@ extern Setting DAT_011d2238;
 extern Setting DAT_011d9774;
 extern Setting DAT_011d4f30;
 extern const char str_01073724[];
-int __cdecl FUN_00a01860(const char* name);
+int __cdecl Tile_TextToTrait(const char* name);
 struct TileAnimationUpdater
 {
     void UpdateTileAnimations(AnimatedTile* root);
@@ -5463,8 +5488,8 @@ void TileAnimationUpdater::UpdateTileAnimations(AnimatedTile* pRootTile)
             pChild = ((AnimatedTile*)HUDMainMenu_pme->m_pTiles[13])->children.GetNext(tile);
             if (pChild)
             {
-                pChild->FUN_00a012d0(0xfa9, 0.0f, true);
-                pChild->FUN_00700320(FUN_00a01860(str_01073724), 0);
+                pChild->Tile_Set(0xfa9, 0.0f, true);
+                pChild->FUN_00700320(Tile_TextToTrait(str_01073724), 0);
             }
         }
         tile = pRootTile->children.GetHeadPos();
@@ -5475,7 +5500,7 @@ void TileAnimationUpdater::UpdateTileAnimations(AnimatedTile* pRootTile)
             if (pChild && pChild->FUN_00a011b0(0x1004) > 0.0 &&
                 (unsigned int)g_timeGlobal.GetSection() > pChild->FUN_00a011b0(0x1004))
             {
-                pChild->FUN_00707e10(pChild->FUN_00a011f0(0xfc4));
+                pChild->FUN_00707e10(pChild->Tile_GetString(0xfc4));
                 pChild->StartFade(0xfa9, 0.0f, (float)(255.0 * *DAT_011d9774.Float()), *DAT_011d2238.Float(), 0);
                 pChild->FUN_00700320(0x1004, 0);
             }
@@ -5993,10 +6018,11 @@ struct BreathHUD
     int unk1f8;
     int unk1fc;
     BreathSequence* sequence;
-    void FUN_0077e4f0();
+    void HUDMainMenu_UpdateBreathMeter();
 };
 // @fnv 0x0077e4f0
-void BreathHUD::FUN_0077e4f0()
+// src: COMMUNITY 0x0077e4f0
+void BreathHUD::HUDMainMenu_UpdateBreathMeter()
 {
     float aWater = breathPlayer->Calculate(breathPlayer->GetPosition()->z, breathPlayer->GetContainingCell());
     bool submergedA = aWater >= 0.009999999776482582;
@@ -6024,22 +6050,22 @@ void BreathHUD::FUN_0077e4f0()
 namespace fnv_0077e750 {
 struct CompassBase
 {
-    void* FUN_004fd3c0();
+    void* BGSProjectile_GetExplosion();
     float FUN_0045cd80();
 };
 struct CompassReference : TESObjectREFR
 {
-    bool FUN_00576d30();
+    bool TESForm_IsStillLoading();
     bool FUN_00440d80();
     bool FUN_00440da0();
-    bool FUN_0077eac0();
+    bool Projectile_IsEditorCreated();
     CompassBase* FUN_004181e0();
 };
 struct CompassArray
 {
-    unsigned int FUN_005de0f0();
-    unsigned int FUN_005be5c0();
-    CompassReference* FUN_00968670();
+    unsigned int ProcessArray_GetProcessLevelHead();
+    unsigned int ProcessArray_GetProcessLevelTail();
+    CompassReference* ProcessArray_GetItem();
 };
 struct CompassArrayOwner
 {
@@ -6049,7 +6075,7 @@ extern CompassArrayOwner g_011e0e80;
 extern CompassReference* g_011dea3c;
 struct CompassSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern CompassSetting g_011d45dc;
 extern CompassSetting g_011d9774;
@@ -6064,19 +6090,19 @@ struct CompassUpdate
 struct CompassNode
 {
     void FUN_006404b0(float, float, float, float);
-    void FUN_00a59c60(CompassUpdate&);
+    void NiAVObject_Update(CompassUpdate&);
 };
 struct CompassTile
 {
-    bool FUN_00a07fc0(int);
+    bool Tile_GetFadeFinished(int);
     float FUN_00a011b0(int);
     void StartFade(int, float, float, float, bool);
-    CompassNode* FUN_0056c7f0();
+    CompassNode* GetModel_0056c7f0();
 };
 struct CompassTileList
 {
-    void* FUN_00559450();
-    CompassTile*& FUN_0057cbe0(void*&);
+    void* Modelloader_GetReferencedThis();
+    CompassTile*& NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(void*&);
 };
 struct CompassTileOwner
 {
@@ -6107,24 +6133,24 @@ void CompassHUD::UpdateCompassMarkers()
 {
     CompassReference* reference_2 = 0;
     CompassTile* h;
-    void* position = ((CompassTileOwner*)m_pTiles[73])->tiles.FUN_00559450();
-    for (unsigned int index = g_011e0e80.FUN_00717e50(0)->FUN_005de0f0();
-         index < g_011e0e80.FUN_00717e50(0)->FUN_005be5c0(); ++index)
+    void* position = ((CompassTileOwner*)m_pTiles[73])->tiles.Modelloader_GetReferencedThis();
+    for (unsigned int index = g_011e0e80.FUN_00717e50(0)->ProcessArray_GetProcessLevelHead();
+         index < g_011e0e80.FUN_00717e50(0)->ProcessArray_GetProcessLevelTail(); ++index)
     {
-        reference_2 = g_011e0e80.FUN_00717e50(index)->FUN_00968670();
-        if (reference_2 && !reference_2->FUN_00576d30() && !reference_2->FUN_00440d80() &&
+        reference_2 = g_011e0e80.FUN_00717e50(index)->ProcessArray_GetItem();
+        if (reference_2 && !reference_2->TESForm_IsStillLoading() && !reference_2->FUN_00440d80() &&
             !reference_2->FUN_00440da0() && reference_2->GetFormType() == 62 && reference_2->IsProjectile())
         {
-            if (reference_2 && !reference_2->FUN_0077eac0() && reference_2->FUN_004181e0()->FUN_004fd3c0() &&
+            if (reference_2 && !reference_2->Projectile_IsEditorCreated() && reference_2->FUN_004181e0()->BGSProjectile_GetExplosion() &&
                 reference_2->FUN_004181e0()->FUN_0045cd80() == 0.0 &&
                 (*(CompassPoint*)((const TESObjectREFR*)reference_2)->GetPos() - *(CompassPoint*)((const TESObjectREFR*)g_011dea3c)->GetPos()).FUN_00457990() <
-                    *g_011d45dc.FUN_00403e20())
+                    *g_011d45dc.Setting_Float_00403e20())
             {
                 if (position)
                 {
-                    h = ((CompassTileOwner*)m_pTiles[73])->tiles.FUN_0057cbe0(position);
-                    if (h->FUN_00a07fc0(4009) && h->FUN_00a011b0(4009) == 0.0)
-                        h->StartFade(4009, 0.0f, (float)(*g_011d9774.FUN_00403e20() * 255.0), 0.5f, false);
+                    h = ((CompassTileOwner*)m_pTiles[73])->tiles.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(position);
+                    if (h->Tile_GetFadeFinished(4009) && h->FUN_00a011b0(4009) == 0.0)
+                        h->StartFade(4009, 0.0f, (float)(*g_011d9774.Setting_Float_00403e20() * 255.0), 0.5f, false);
                 }
                 else
                 {
@@ -6132,18 +6158,18 @@ void CompassHUD::UpdateCompassMarkers()
                 }
                 float angle2 =
                     GetDirectionAngle(*(CompassPoint*)((const TESObjectREFR*)reference_2)->GetPos() - *(CompassPoint*)((const TESObjectREFR*)g_011dea3c)->GetPos());
-                float angle5 = GetDirectionAngle(((CompassCamera*)FUN_0045c670())->FUN_006629f0()->FUN_0045bba0());
-                h->FUN_0056c7f0()->FUN_006404b0(angle5 - angle2, 0.0f, 1.0f, 0.0f);
+                float angle5 = GetDirectionAngle(((CompassCamera*)Main_GetWorldSceneGraph())->FUN_006629f0()->FUN_0045bba0());
+                h->GetModel_0056c7f0()->FUN_006404b0(angle5 - angle2, 0.0f, 1.0f, 0.0f);
                 CompassUpdate updated5;
                 updated5.FUN_0043d410(0.0f, true, false);
-                h->FUN_0056c7f0()->FUN_00a59c60(updated5);
+                h->GetModel_0056c7f0()->NiAVObject_Update(updated5);
             }
         }
     }
     while (position)
     {
-        CompassTile* remaining = ((CompassTileOwner*)m_pTiles[73])->tiles.FUN_0057cbe0(position);
-        if (remaining->FUN_00a07fc0(4009) && remaining->FUN_00a011b0(4009) > 0.0)
+        CompassTile* remaining = ((CompassTileOwner*)m_pTiles[73])->tiles.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(position);
+        if (remaining->Tile_GetFadeFinished(4009) && remaining->FUN_00a011b0(4009) > 0.0)
             remaining->StartFade(4009, remaining->FUN_00a011b0(4009), 0.0f, 0.5f, false);
     }
 }
@@ -6160,14 +6186,14 @@ struct ScriptObj
     int FUN_0055b980();
 };
 void** __fastcall _ref_006815c0(void*);
-int __cdecl FUN_00406d00(char*, unsigned int, const char*, ...);
+int __cdecl BSsprintf(char*, unsigned int, const char*, ...);
 extern double _gModifierZero;
 extern float DAT_011d979c;
 extern const char* DAT_011a00c4[];
 extern const char str_01073868[];
 struct Tile77
 {
-    void FUN_00a01350(int, const char*, bool);
+    void Tile_Set_00a01350(int, const char*, bool);
     void FUN_00700320(int, int);
     void StartFade(int, float, float, float, int);
 };
@@ -6207,17 +6233,17 @@ void MenuC::UpdateStatsMenu()
             if (result > 4)
                 result = 4;
         }
-        FUN_00406d00(buf, 0x104, str_01073868, result);
-        m_face->FUN_00a01350(0xfcc, buf, true);
+        BSsprintf(buf, 0x104, str_01073868, result);
+        m_face->Tile_Set_00a01350(0xfcc, buf, true);
         m_face->StartFade(0xfa9, 0.0f, DAT_011d979c, 5.0f, 4);
         val = 0x35;
         for (t = 0x19; t < 0x1f; ++t, ++val)
         {
             state = ((ActorValueOwner*)((char*)DAT_011dea3c + 0xa4))->GetCurrentActorValue((ActorValue::Index)t) / 100.0;
-            FUN_00406d00(buf, 0x104,
+            BSsprintf(buf, 0x104,
                          state > _gModifierZero ? "Interface\\Stats\\%s.dds" : "Interface\\Stats\\%s_broken.dds",
                          DAT_011a00c4[t]);
-            m_tiles[val]->FUN_00a01350(0xfcc, buf, true);
+            m_tiles[val]->Tile_Set_00a01350(0xfcc, buf, true);
             if (state == _gModifierZero)
             {
                 m_tiles[val]->FUN_00700320(0xff4, 2);
@@ -6319,9 +6345,10 @@ extern NiPointer<NiNode> g_011d9770;
 
 // If HUDMainMenu_pme and g_011d9770 exist and the node has a child at index 0, detaches that child and clears b1fc on the HUD menu.
 // @fnv 0x0077f270
-void __cdecl FUN_0077f270()
+// src: XBOX_PDB 0x0077f270
+void __cdecl HUDMainMenu_ClearGunScope()
 {
-    if (HUDMainMenu_pme && (NiNode*)g_011d9770 && ((NiNode*)g_011d9770)->FUN_0045bc00(0))
+    if (HUDMainMenu_pme && (NiNode*)g_011d9770 && ((NiNode*)g_011d9770)->NiNode_GetAtChecked(0))
     {
         ((NiNode*)g_011d9770)->RemoveObject(((NiNode*)g_011d9770)->GetChildAt(0));
         ((HUD_77f270*)HUDMainMenu_pme)->b1fc = false;
@@ -6336,22 +6363,22 @@ struct xSize
 struct xTile
 {
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
-    void FUN_00a01350(int, const char*, bool);
+    void Tile_Set(int, float, bool);
+    void Tile_Set_00a01350(int, const char*, bool);
     void FUN_00700320(int, int);
     bool IsTraitNonZero(int);
     void FUN_00707e10(const char*);
-    const char* FUN_00a011f0(int);
+    const char* Tile_GetString(int);
     void StartFade(int, float, float, float, int);
-    bool FUN_00a07fc0(int);
+    bool Tile_GetFadeFinished(int);
 };
 struct xTileList
 {
-    void* FUN_00559450();
-    xTile*& FUN_0057cbe0(void*&);
+    void* Modelloader_GetReferencedThis();
+    xTile*& NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(void*&);
     void* FUN_00726070();
     xTile*& FUN_00683520(void*&);
-    xTile*& FUN_0073ac90();
+    xTile*& NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead();
 };
 struct xHolder
 {
@@ -6375,7 +6402,7 @@ struct xQNode
     bool FUN_008256d0();
     xQObj** FUN_006815c0();
     xQNode* FUN_00726070();
-    void FUN_00905330(xQObj**);
+    void RemoveMatchingItem(xQObj**);
     void* m_iWordAt00;
     void* m_iWordAt04;
 };
@@ -6386,8 +6413,8 @@ struct xFontMgr
 };
 struct xAudio
 {
-    static xAudio* FUN_00453a70();
-    BSSoundHandle FUN_00ad7550(const char*, unsigned int);
+    static xAudio* BSAudio_QInstance();
+    BSSoundHandle BSAudio_GetSoundHandleByEditorName(const char*, unsigned int);
 };
 struct xStrSetting
 {
@@ -6395,7 +6422,7 @@ struct xStrSetting
 };
 struct xFltSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern xStrSetting xg_s_11d1d60;
 extern xFltSetting xg_f_11d4cc0, xg_f_11d3b68, xg_f_11d2b5c, xg_f_11d2724, xg_f_11d2c94;
@@ -6423,7 +6450,7 @@ struct xQuestMenu
     xQNode m_258;
     char m_260;
     bool m_261;
-    bool FUN_00773650();
+    bool HUDMainMenu_AreObjectivesShowing();
     void UpdateQuestMenu(xHolder*);
 };
 
@@ -6433,19 +6460,19 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
 {
     int qrEZrs = (int)xF715d40();
     bool qfTOqo = false;
-    if (!FUN_00773650())
+    if (!HUDMainMenu_AreObjectivesShowing())
     {
         xQNode* qArxcFu = &m_258;
-        void* qAhbO = xg_pme_11d96c0->m_5c->m_iWordAt04.FUN_00559450();
+        void* qAhbO = xg_pme_11d96c0->m_5c->m_iWordAt04.Modelloader_GetReferencedThis();
         for (int SKIPA = 0; SKIPA < 0x1f; SKIPA++)
-            xg_pme_11d96c0->m_5c->m_iWordAt04.FUN_0057cbe0(qAhbO);
+            xg_pme_11d96c0->m_5c->m_iWordAt04.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(qAhbO);
         void* qxQHW = xg_pme_11d96c0->m_5c->m_iWordAt04.FUN_00726070();
         while (qArxcFu && !qArxcFu->FUN_008256d0() && qAhbO)
         {
-            bool qHVMR = !FUN_00773650();
+            bool qHVMR = !HUDMainMenu_AreObjectivesShowing();
             bool qxWmVch =
                 qHVMR ? false
-                      : xg_pme_11d96c0->m_5c->m_iWordAt04.FUN_0073ac90()->IsTraitNonZero(xFa01860(s_szIsReminder));
+                      : xg_pme_11d96c0->m_5c->m_iWordAt04.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead()->IsTraitNonZero(xFa01860(s_szIsReminder));
             bool qJDuOZ = (*qArxcFu->FUN_006815c0())->m_105;
             if (!qHVMR && qxWmVch && !qJDuOZ)
             {
@@ -6466,19 +6493,19 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
                 char LINE[0x104];
                 xStrcpy(LINE, 0x104, xg_s_11d1d60.FUN_00403df0());
                 xStrcat(LINE, 0x104, (*qArxcFu->FUN_006815c0())->m_pText);
-                qQMZREG->FUN_00a01350(0xfc4, LINE, true);
+                qQMZREG->Tile_Set_00a01350(0xfc4, LINE, true);
                 qQMZREG->FUN_00700320(xFa01860(s_szIsReminder), qJDuOZ);
                 qQMZREG->FUN_00700320(0x1007, 1);
-                qDdzMIp->FUN_00a01350(0xfcc, s_szFilled, true);
+                qDdzMIp->Tile_Set_00a01350(0xfcc, s_szFilled, true);
             }
             else
             {
-                qQMZREG->FUN_00a01350(0xfc4, (*qArxcFu->FUN_006815c0())->m_pText, true);
+                qQMZREG->Tile_Set_00a01350(0xfc4, (*qArxcFu->FUN_006815c0())->m_pText, true);
                 qQMZREG->FUN_00700320(0x1007, 0);
                 qQMZREG->FUN_00700320(xFa01860(s_szIsReminder), qJDuOZ);
-                qDdzMIp->FUN_00a01350(0xfcc, s_szSquare, true);
+                qDdzMIp->Tile_Set_00a01350(0xfcc, s_szSquare, true);
             }
-            qDdzMIp->FUN_00a012d0(0xfa1, qQMZREG->FUN_00a011b0(0xfa1) - 20.0, true);
+            qDdzMIp->Tile_Set(0xfa1, qQMZREG->FUN_00a011b0(0xfa1) - 20.0, true);
             qDdzMIp->FUN_00700320(0xfa3, 1);
             qQMZREG->FUN_00700320(0xfb9, 7);
             qQMZREG->FUN_00700320(0xfa3, 1);
@@ -6489,13 +6516,13 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
             xSprintf(NAME, 0x104, s_szObjFmt, qaGEwZ++);
             qQMZREG->FUN_00707e10(NAME);
             xF774800(qQMZREG, 0);
-            xAudio::FUN_00453a70()->FUN_00ad7550(s_szQuestUpdate, 0x121).Play(false);
-            qArxcFu->FUN_00905330(qArxcFu->FUN_006815c0());
+            xAudio::BSAudio_QInstance()->BSAudio_GetSoundHandleByEditorName(s_szQuestUpdate, 0x121).Play(false);
+            qArxcFu->RemoveMatchingItem(qArxcFu->FUN_006815c0());
         }
     }
     if (qfTOqo)
     {
-        void* qQGWBE = xg_pme_11d96c0->m_5c->m_iWordAt04.FUN_00559450();
+        void* qQGWBE = xg_pme_11d96c0->m_5c->m_iWordAt04.Modelloader_GetReferencedThis();
         void* qZWI = xg_pme_11d96c0->m_5c->m_iWordAt04.FUN_00726070();
         for (int SKIPB = 0; SKIPB < 0x1f; SKIPB++)
             xg_pme_11d96c0->m_5c->m_iWordAt04.FUN_00683520(qZWI);
@@ -6504,20 +6531,20 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
         while (qQGWBE && qpia < 0x20)
         {
             qpia++;
-            xTile* qXMUYT = HOLDER->m_iWordAt04.FUN_0057cbe0(qQGWBE);
-            xTile* qIpA = HOLDER->m_iWordAt04.FUN_0057cbe0(qZWI);
+            xTile* qXMUYT = HOLDER->m_iWordAt04.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(qQGWBE);
+            xTile* qIpA = HOLDER->m_iWordAt04.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(qZWI);
             if (qXMUYT && qXMUYT->IsTraitNonZero(0xfa3))
             {
                 qXMUYT->FUN_00700320(0xfa2, qkJsUdT);
                 qIpA->FUN_00700320(0xfa2, qkJsUdT + 3);
                 xSize SZ = xFontMgr::FUN_005bd5b0()->FUN_00a1b020(
-                    qXMUYT->FUN_00a011f0(0xfc4), (int)qXMUYT->FUN_00a011b0(0xfb9), qXMUYT->FUN_00a011b0(0xfba), 0);
+                    qXMUYT->Tile_GetString(0xfc4), (int)qXMUYT->FUN_00a011b0(0xfb9), qXMUYT->FUN_00a011b0(0xfba), 0);
                 qkJsUdT += (int)SZ.y;
             }
         }
     }
     static int s_iWait = xFa00940(s_szWaitComplete, -1);
-    void* qSVM = HOLDER->m_iWordAt04.FUN_00559450();
+    void* qSVM = HOLDER->m_iWordAt04.Modelloader_GetReferencedThis();
     void* qdqWL = HOLDER->m_iWordAt04.FUN_00726070();
     for (int SKIPC = 0; SKIPC < 0x1f; SKIPC++)
         xg_pme_11d96c0->m_5c->m_iWordAt04.FUN_00683520(qdqWL);
@@ -6536,8 +6563,8 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
     while (qSVM && qpTd < 4 && qvyWyw < 0x20)
     {
         qvyWyw++;
-        xTile* qbfQdhM = HOLDER->m_iWordAt04.FUN_0057cbe0(qSVM);
-        xTile* qidnYUK = HOLDER->m_iWordAt04.FUN_0057cbe0(qdqWL);
+        xTile* qbfQdhM = HOLDER->m_iWordAt04.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(qSVM);
+        xTile* qidnYUK = HOLDER->m_iWordAt04.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(qdqWL);
         if (qbfQdhM->IsTraitNonZero(0xfa3))
         {
             if (qpTd > 0 && qpqRa[qpTd] == qsSDDgz[qpTd - 1])
@@ -6553,13 +6580,13 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
         {
             qpqRa[0]->FUN_00700320(s_iWait, 0);
             qpqRa[0]->StartFade(0xfa9, 0.0f, xg_f_11d979c, 0.5f, 0);
-            qpqRa[0]->StartFade(s_iWait, 0.0f, 1.0f, *xg_f_11d4cc0.FUN_00403e20() * 3.0, 0);
+            qpqRa[0]->StartFade(s_iWait, 0.0f, 1.0f, *xg_f_11d4cc0.Setting_Float_00403e20() * 3.0, 0);
             qsSDDgz[0]->StartFade(0xfa9, 0.0f, xg_f_11d979c, 0.5f, 0);
             if (qpqRa[1])
             {
-                qpqRa[1]->StartFade(s_iWait, 0.0f, 1.0f, 1.0 * *xg_f_11d4cc0.FUN_00403e20(), 0);
+                qpqRa[1]->StartFade(s_iWait, 0.0f, 1.0f, 1.0 * *xg_f_11d4cc0.Setting_Float_00403e20(), 0);
                 if (qpqRa[2])
-                    qpqRa[2]->StartFade(s_iWait, 0.0f, 1.0f, 2.0 * *xg_f_11d4cc0.FUN_00403e20(), 0);
+                    qpqRa[2]->StartFade(s_iWait, 0.0f, 1.0f, 2.0 * *xg_f_11d4cc0.Setting_Float_00403e20(), 0);
             }
         }
         else if (qpqRa[0]->FUN_00a011b0(s_iWait) == 1.0)
@@ -6568,29 +6595,29 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
             if (qpqRa[0]->FUN_00a011b0(s_iHold) == 0.0)
             {
                 qpqRa[0]->FUN_00700320(s_iHold, 0);
-                qpqRa[0]->StartFade(s_iHold, 0.0f, 1.0f, *xg_f_11d3b68.FUN_00403e20(), 0);
+                qpqRa[0]->StartFade(s_iHold, 0.0f, 1.0f, *xg_f_11d3b68.Setting_Float_00403e20(), 0);
             }
             else if (qpqRa[0]->FUN_00a011b0(s_iHold) == 1.0)
             {
-                qpqRa[0]->StartFade(0xfa9, xg_f_11d979c, 0.0f, *xg_f_11d2b5c.FUN_00403e20(), 0);
+                qpqRa[0]->StartFade(0xfa9, xg_f_11d979c, 0.0f, *xg_f_11d2b5c.Setting_Float_00403e20(), 0);
                 qpqRa[0]->FUN_00700320(s_iWait, 2);
-                qsSDDgz[0]->StartFade(0xfa9, xg_f_11d979c, 0.0f, *xg_f_11d2b5c.FUN_00403e20(), 0);
+                qsSDDgz[0]->StartFade(0xfa9, xg_f_11d979c, 0.0f, *xg_f_11d2b5c.Setting_Float_00403e20(), 0);
             }
         }
-        else if (qpqRa[0]->FUN_00a07fc0(0xfa9) && qpqRa[0]->FUN_00a011b0(0xfa9) == 0.0)
+        else if (qpqRa[0]->Tile_GetFadeFinished(0xfa9) && qpqRa[0]->FUN_00a011b0(0xfa9) == 0.0)
         {
             if (qpqRa[1])
             {
                 int qxDeKK = (int)(qpqRa[1]->FUN_00a011b0(0xfa2) - qpqRa[0]->FUN_00a011b0(0xfa2));
-                qSVM = HOLDER->m_iWordAt04.FUN_00559450();
+                qSVM = HOLDER->m_iWordAt04.Modelloader_GetReferencedThis();
                 xTile* qAXSCg = 0;
                 if (qSVM)
-                    qAXSCg = HOLDER->m_iWordAt04.FUN_0057cbe0(qSVM);
+                    qAXSCg = HOLDER->m_iWordAt04.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(qSVM);
                 while (qSVM)
                 {
-                    qAXSCg = HOLDER->m_iWordAt04.FUN_0057cbe0(qSVM);
+                    qAXSCg = HOLDER->m_iWordAt04.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(qSVM);
                     qAXSCg->StartFade(0xfa2, qAXSCg->FUN_00a011b0(0xfa2), qAXSCg->FUN_00a011b0(0xfa2) - qxDeKK,
-                                      *xg_f_11d2724.FUN_00403e20(), 0);
+                                      *xg_f_11d2724.Setting_Float_00403e20(), 0);
                 }
             }
             if (qpqRa[3])
@@ -6602,13 +6629,13 @@ void xQuestMenu::UpdateQuestMenu(xHolder* HOLDER)
         }
         if (qpqRa[1] && qpqRa[1]->FUN_00a011b0(s_iWait) == 1.0 && qpqRa[1]->FUN_00a011b0(0xfa9) == 0.0)
         {
-            qpqRa[1]->StartFade(0xfa9, 0.0f, xg_f_11d979c, *xg_f_11d2c94.FUN_00403e20(), 0);
-            qsSDDgz[1]->StartFade(0xfa9, 0.0f, xg_f_11d979c, *xg_f_11d2c94.FUN_00403e20(), 0);
+            qpqRa[1]->StartFade(0xfa9, 0.0f, xg_f_11d979c, *xg_f_11d2c94.Setting_Float_00403e20(), 0);
+            qsSDDgz[1]->StartFade(0xfa9, 0.0f, xg_f_11d979c, *xg_f_11d2c94.Setting_Float_00403e20(), 0);
         }
         if (qpqRa[2] && qpqRa[2]->FUN_00a011b0(s_iWait) == 1.0 && qpqRa[2]->FUN_00a011b0(0xfa9) == 0.0)
         {
-            qpqRa[2]->StartFade(0xfa9, 0.0f, xg_f_11d979c, *xg_f_11d2c94.FUN_00403e20(), 0);
-            qsSDDgz[2]->StartFade(0xfa9, 0.0f, xg_f_11d979c, *xg_f_11d2c94.FUN_00403e20(), 0);
+            qpqRa[2]->StartFade(0xfa9, 0.0f, xg_f_11d979c, *xg_f_11d2c94.Setting_Float_00403e20(), 0);
+            qsSDDgz[2]->StartFade(0xfa9, 0.0f, xg_f_11d979c, *xg_f_11d2c94.Setting_Float_00403e20(), 0);
         }
     }
 }
@@ -6672,17 +6699,17 @@ struct AmmoWeapon
     AmmoFlags flags;
     int FUN_00446390();
     unsigned char GetByteAt102();
-    float FUN_00709430(bool);
+    float GetAmmoRegenRate(bool);
     int GetFlaggedValue(bool);
-    TESBoundObject* FUN_00525980(AmmoPlayer*);
-    bool FUN_006450c0();
+    TESBoundObject* TESObjectWEAP_GetCurrentAmmo(AmmoPlayer*);
+    bool TESObjectWEAP_IsMeleeWeapon();
     int GetModdedValue(bool);
 };
 struct AmmoExtra
 {
     AmmoWeapon* FUN_0044ddc0();
     bool HasEffect(int);
-    float FUN_004bcdb0(int);
+    float ItemChange_GetItemHealth(int);
 };
 struct AmmoData
 {
@@ -6779,19 +6806,19 @@ struct AmmoProvider
 struct AmmoPlayer
 {
     AmmoProvider* FUN_008d8520();
-    int FUN_00969040();
+    int PlayerCharacter_GetNumRockItAmmo();
 };
 struct AmmoSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern AmmoSetting ammoSetting;
 extern AmmoPlayer* ammoPlayer;
 struct AmmoTile
 {
-    void FUN_00a01350(int, const char*, bool);
+    void Tile_Set_00a01350(int, const char*, bool);
     void FUN_00700320(int, int);
-    void FUN_00a012d0(int, float, bool);
+    void Tile_Set(int, float, bool);
 };
 struct AmmoHUD
 {
@@ -6826,11 +6853,11 @@ void AmmoHUD::UpdateAmmoHUD()
 {
     if (ammoPlayer && ammoPlayer->FUN_008d8520())
     {
-        float flashTime_ = *ammoSetting.FUN_00403e20() * 255.0;
+        float flashTime_ = *ammoSetting.Setting_Float_00403e20() * 255.0;
         AmmoExtra* extra9 = ammoPlayer->FUN_008d8520()->GetLoadedForm();
         static float timer = flashTime_;
         AmmoFormat(ammoName, 260, ammoStringFormat, ammoEmptyString);
-        tiles[77]->FUN_00a01350(4036, ammoName, true);
+        tiles[77]->Tile_Set_00a01350(4036, ammoName, true);
         if (extra9)
         {
             AmmoWeapon* weapon5 = extra9->FUN_0044ddc0();
@@ -6855,7 +6882,7 @@ void AmmoHUD::UpdateAmmoHUD()
                 {
                     const char* name = ammo_->FUN_00772820();
                     AmmoFormat(ammoSpecialName, 260, ammoStringFormat, name ? name : ammoEmptyString);
-                    tiles[77]->FUN_00a01350(4036, ammoSpecialName, true);
+                    tiles[77]->Tile_Set_00a01350(4036, ammoSpecialName, true);
                     if (name)
                     {
                         if (!ammoNameShowing)
@@ -6871,32 +6898,32 @@ void AmmoHUD::UpdateAmmoHUD()
                     }
                 }
                 bool useInventory5 = true;
-                if (weapon5->FUN_00709430(extra9->HasEffect(6)) > 0.0)
+                if (weapon5->GetAmmoRegenRate(extra9->HasEffect(6)) > 0.0)
                 {
                     total2 = weapon5->GetFlaggedValue(extra9->HasEffect(2));
                     useInventory5 = false;
                 }
-                if (weapon5->FUN_00525980(ammoPlayer) && data3)
+                if (weapon5->TESObjectWEAP_GetCurrentAmmo(ammoPlayer) && data3)
                 {
                     current4 = data3->FUN_00726070();
                     if (useInventory5)
                         total2 =
-                            AmmoGetInventory(ammoPlayer)->FUN_004c8f30(weapon5->FUN_00525980(ammoPlayer)) - current4;
+                            AmmoGetInventory(ammoPlayer)->FUN_004c8f30(weapon5->TESObjectWEAP_GetCurrentAmmo(ammoPlayer)) - current4;
                 }
                 else if (weapon5->flags.FUN_00474a80())
                 {
-                    current4 = ammoPlayer->FUN_00969040();
+                    current4 = ammoPlayer->PlayerCharacter_GetNumRockItAmmo();
                     total2 = current4;
                 }
             }
             break;
             }
-            if (weapon5->FUN_006450c0())
+            if (weapon5->TESObjectWEAP_IsMeleeWeapon())
                 tiles[12]->FUN_00700320(4003, 0);
             else if (ammoLastCurrent != current4 || ammoLastTotal != total2 || ammoLastWeapon != weapon5)
             {
                 AmmoFormat(ammoCountText, 260, ammoCountFormat, (int)current4, (int)total2);
-                tiles[12]->FUN_00a01350(4036, ammoCountText, true);
+                tiles[12]->Tile_Set_00a01350(4036, ammoCountText, true);
                 tiles[12]->FUN_00700320(4003, 1);
                 ammoLastCurrent = current4;
                 ammoLastTotal = total2;
@@ -6912,8 +6939,8 @@ void AmmoHUD::UpdateAmmoHUD()
                     ShiftTileValues(50);
                 ammoNameShowing = false;
             }
-            float ammoValue2 = extra9->FUN_004bcdb0(0);
-            float conditionA = extra9->FUN_004bcdb0(1);
+            float ammoValue2 = extra9->ItemChange_GetItemHealth(0);
+            float conditionA = extra9->ItemChange_GetItemHealth(1);
             if (conditionA < 25.0)
             {
                 AmmoClamp(&timer, 0.0f, flashTime_);
@@ -6926,10 +6953,10 @@ void AmmoHUD::UpdateAmmoHUD()
             }
             else
                 timer = flashTime_;
-            tiles[10]->FUN_00a012d0(4009, timer, true);
+            tiles[10]->Tile_Set(4009, timer, true);
             if (ammoLastCondition != conditionA)
             {
-                float value5 = extra9->FUN_004bcdb0(0);
+                float value5 = extra9->ItemChange_GetItemHealth(0);
                 float base2 = weapon5->GetModdedValue(extra9->HasEffect(10));
                 AmmoAnimate(tiles[10], AmmoMin(1.0f, AmmoMax(0.0f, value5 / base2)), 0, 0, ammoNameShowing ? -50 : 0);
                 ammoLastCondition = conditionA;
@@ -7403,26 +7430,27 @@ extern CompassSetting DAT_011d9774, DAT_011d12cc, DAT_011d2208, DAT_011d0364, DA
     DAT_011cdcbc, DAT_011d32d0;
 extern float DAT_011d979c;
 extern bool DAT_011d96c4;
-int __cdecl FUN_00a00940(const char* apName, int aiUnk);
+int __cdecl Tile_AddUserTrait(const char* apName, int aiUnk);
 float __cdecl LinearInterpolate(float afMin, float afMax, float afFrom, float afTo, float afVal);
 double __cdecl CompassMin(float afA, float afB);
 float __cdecl ComputeObjectAngleDelta(CompassPoint aPos, CompassPoint aOrigin);
-void __cdecl FUN_00778c20(Tile* apTile, float afDistance, float afAlpha);
+void __cdecl BlinkTile(Tile* apTile, float afDistance, float afAlpha);
 void __cdecl UpdateMapMarkerHUD(CompassEvent* apEvent);
-void __cdecl FUN_0076b960(const char*, const char*, int, int, int, int, const char*);
+void __cdecl QuestUpdateManager_SetCustomQuestText(const char*, const char*, int, int, int, int, const char*);
 void __cdecl FUN_005f5950(int, int, CompassRef*, CompassRef*, int, int, int);
 void __cdecl FUN_004d5c60(bool abVal);
-int __cdecl FUN_0077b300(void*, void*);
+int __cdecl CompassTarget_CompareForSorting(void*, void*);
 void __cdecl FUN_005e58f0(int aiPerk, CompassRef* apRef, float* apValue);
 
 // Updates compass tile positions, visibility, and fade for map markers, quest targets, the player marker, and nearby actors.
 // @fnv 0x00779070
-void __cdecl FUN_00779070(CompassMovie* apMovie, CompassTileList* apMapTiles, CompassTileList* apQuestTiles,
+// src: XBOX_PDB 0x00779070
+void __cdecl HUDMainMenu_UpdateCompass(CompassMovie* apMovie, CompassTileList* apMapTiles, CompassTileList* apQuestTiles,
                           CompassTileList* apActorTiles)
 {
-    static int iDistanceID = FUN_00a00940("_Distance", -1);
-    static int iHeadingID = FUN_00a00940("_Heading", -1);
-    static int iAlphaDownID = FUN_00a00940("_AlphaDown", -1);
+    static int iDistanceID = Tile_AddUserTrait("_Distance", -1);
+    static int iHeadingID = Tile_AddUserTrait("_Heading", -1);
+    static int iAlphaDownID = Tile_AddUserTrait("_AlphaDown", -1);
     float fAngleDeg =
         (((CompassRef*)DAT_011dea3c)->GetAngleZ(0) + ((CompassRef*)DAT_011dea3c)->GetProcess()->GetAngleOffset()) *
         57.2957763671875;
@@ -7479,7 +7507,7 @@ void __cdecl FUN_00779070(CompassMovie* apMovie, CompassTileList* apMapTiles, Co
             kEvent.bSkip = false;
             if (bDiscovered)
             {
-                FUN_0076b960(DAT_011d2208.String(), pCompassMarker->pInfo->GetName(), 1, 0, -1, -1, "UIPopUpQuestNew");
+                QuestUpdateManager_SetCustomQuestText(DAT_011d2208.String(), pCompassMarker->pInfo->GetName(), 1, 0, -1, -1, "UIPopUpQuestNew");
                 FUN_005f5950(4, 1, pCompassMarker->pRef, pCompassMarker->pRef, 0, 0, 0);
                 FUN_004d5c60(true);
                 ((CompassRef*)DAT_011dea3c)->RewardXP(*DAT_011d0364.Int());
@@ -7523,7 +7551,7 @@ void __cdecl FUN_00779070(CompassMovie* apMovie, CompassTileList* apMapTiles, Co
                 if (fMapX > fFadeStart)
                     pTileElem->Set(4009, LinearInterpolate(1, 0, fFadeStart, m_fGlyphWidthInPixels, fMapX) * fAlpha, true);
                 else if (fLen < 10000.0)
-                    FUN_00778c20(pTileElem, fLen, DAT_011d979c);
+                    BlinkTile(pTileElem, fLen, DAT_011d979c);
                 else
                     pTileElem->Set(4009, fAlpha, true);
             }
@@ -7582,7 +7610,7 @@ void __cdecl FUN_00779070(CompassMovie* apMovie, CompassTileList* apMapTiles, Co
                 if (apMovie->GetModeObj()->GetMode() == 1)
                 {
                     if (!bSpecial)
-                        FUN_00778c20(pTileElem, fTgtDst, DAT_011d979c);
+                        BlinkTile(pTileElem, fTgtDst, DAT_011d979c);
                     else
                         pTileElem->Set(4009, fAlpha, true);
                 }
@@ -7609,10 +7637,10 @@ void __cdecl FUN_00779070(CompassMovie* apMovie, CompassTileList* apMapTiles, Co
                 if (fPCX > fFadeStart)
                 {
                     float fPCOpacity = LinearInterpolate(fAlpha, 0, fFadeStart, m_fGlyphWidthInPixels, fPCX);
-                    FUN_00778c20(pTileElem, fPCDist, fPCOpacity);
+                    BlinkTile(pTileElem, fPCDist, fPCOpacity);
                 }
                 else
-                    FUN_00778c20(pTileElem, fPCDist, DAT_011d979c);
+                    BlinkTile(pTileElem, fPCDist, DAT_011d979c);
             }
             else
                 pTileElem->Set(4003, 0);
@@ -7634,7 +7662,7 @@ void __cdecl FUN_00779070(CompassMovie* apMovie, CompassTileList* apMapTiles, Co
     unsigned int uiShown = pActors->Count();
     if (pActors->Count() > (unsigned int)*DAT_011d32d0.Int())
     {
-        pActors->Sort(FUN_0077b300);
+        pActors->Sort(CompassTarget_CompareForSorting);
         uiShown = *DAT_011d32d0.Int();
     }
     while (pActors && !pActors->IsEmpty() && uiShown)
@@ -7714,7 +7742,7 @@ class VisibilityTile
 {
   public:
     void FUN_00700320(int trait, int value);
-    void FUN_00a012d0(int trait, float value, bool propagate);
+    void Tile_Set(int trait, float value, bool propagate);
     float FUN_00a011b0(int trait);
 };
 
@@ -7856,10 +7884,10 @@ class VisibilityPlayer
     virtual void vf210();
     virtual int GetMode();
     bool FUN_005a03f0(unsigned int);
-    bool FUN_008bbc10();
-    bool FUN_008a16d0();
-    NiNode* FUN_007721a0();
-    bool FUN_00524d10();
+    bool Actor_GetIronSights();
+    bool IsWeaponDrawn();
+    NiNode* PlayerCharacter_GetWeaponSightingNode();
+    bool PlayerCharacter_IsActually3rdPerson();
 };
 
 class VisibilityHUD : public HUDMainMenu
@@ -7867,7 +7895,7 @@ class VisibilityHUD : public HUDMainMenu
   public:
     int FUN_0059bb30();
     void FUN_00a1db20();
-    void FUN_00775670();
+    void HUDMainMenu_HideSubtitle();
 };
 struct VisibilityMode
 {
@@ -7877,7 +7905,7 @@ struct VisibilityMode
 class InterfaceManager_00771700
 {
   public:
-    bool FUN_00719ae0();
+    bool InterfaceManager_GetLockpickControlsDisable();
 };
 extern HUDMainMenu* HUDMainMenu_pme;
 extern VisibilityPlayer* _g_thePlayer;
@@ -7885,14 +7913,15 @@ extern VisibilityMode DAT_011f2250;
 extern NiPointer<NiNode> DAT_011d9770;
 extern bool DAT_011d96bb;
 extern const double DAT_01073488;
-int __cdecl FUN_007023c0();
-InterfaceManager_00771700* __cdecl FUN_004b7210();
+int __cdecl Interface_GetTopMenuID();
+InterfaceManager_00771700* __cdecl InterfaceManager_GetSingleton();
 void __cdecl FUN_00778b10();
 void __cdecl SetHudVisible(bool);
 
 // Selects a HUD mode from the requested value and player state, then updates HUD flags, tile traits, and a sound handle.
 // @fnv 0x00771700
-void __cdecl FUN_00771700(int aiMenuMode)
+// src: COMMUNITY 0x00771700
+void __cdecl HUDMainMenu_UpdateVisibilityState(int aiMenuMode)
 {
     if (!HUDMainMenu_pme)
         return;
@@ -7901,7 +7930,7 @@ void __cdecl FUN_00771700(int aiMenuMode)
         ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00a1db20();
     if (state == 1)
     {
-        int iMenuId = FUN_007023c0();
+        int iMenuId = Interface_GetTopMenuID();
         switch (iMenuId)
         {
         case 1002:
@@ -7927,8 +7956,8 @@ void __cdecl FUN_00771700(int aiMenuMode)
             else if (DAT_011f2250.FUN_0044ddc0() == 4)
                 state = 8;
             else if (_g_thePlayer->FUN_005a03f0(1))
-                FUN_00771700(12);
-            else if (_g_thePlayer->FUN_008bbc10())
+                HUDMainMenu_UpdateVisibilityState(12);
+            else if (_g_thePlayer->Actor_GetIronSights())
                 state = 22;
             else
                 state = 2;
@@ -7951,11 +7980,11 @@ void __cdecl FUN_00771700(int aiMenuMode)
             state = 16;
         }
     }
-    if (state == 22 && DAT_011d9770 && DAT_011d9770->FUN_0045bc00(0) && _g_thePlayer->FUN_008a16d0())
+    if (state == 22 && DAT_011d9770 && DAT_011d9770->NiNode_GetAtChecked(0) && _g_thePlayer->IsWeaponDrawn())
         state = 23;
     if (state != 24 && state != 4 && state != 5 && _g_thePlayer->FUN_005a03f0(1))
     {
-        if (FUN_004b7210()->FUN_00719ae0())
+        if (InterfaceManager_GetSingleton()->InterfaceManager_GetLockpickControlsDisable())
             state = 2;
         else if (state == 6)
             state = 6;
@@ -7975,7 +8004,7 @@ void __cdecl FUN_00771700(int aiMenuMode)
         FUN_00778b10();
         break;
     case 3:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0x100;
         break;
     case 4:
@@ -7985,38 +8014,38 @@ void __cdecl FUN_00771700(int aiMenuMode)
     case 18:
     case 21:
     case 24:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0;
         break;
     case 19:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0;
         break;
     case 25:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0;
         break;
     case 9:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0x1000;
         break;
     case 12:
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0x1514;
         break;
     case 6:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0x1110;
         break;
     case 7:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0x100;
         break;
     case 8:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0x108;
         break;
     case 23:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 8;
         break;
     case 11:
@@ -8027,23 +8056,23 @@ void __cdecl FUN_00771700(int aiMenuMode)
         break;
     case 15:
     case 16:
-        ((VisibilityHUD*)HUDMainMenu_pme)->FUN_00775670();
+        ((VisibilityHUD*)HUDMainMenu_pme)->HUDMainMenu_HideSubtitle();
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode = 0x1010;
     }
     HUDMainMenu_pme->m_iHudValueFirstBeforeMode &= HUDMainMenu_pme->m_iHudValueSecondBeforeMode;
     if (DAT_011d96bb)
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode &= ~8;
-    if (_g_thePlayer && _g_thePlayer->FUN_007721a0() && !_g_thePlayer->FUN_00524d10())
+    if (_g_thePlayer && _g_thePlayer->PlayerCharacter_GetWeaponSightingNode() && !_g_thePlayer->PlayerCharacter_IsActually3rdPerson())
         HUDMainMenu_pme->m_iHudValueFirstBeforeMode &= ~64;
     if (state == 6)
     {
         float scopeY = ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->FUN_00a011b0(4103);
-        ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->FUN_00a012d0(4002, scopeY - DAT_01073488, true);
+        ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->Tile_Set(4002, scopeY - DAT_01073488, true);
     }
     else
     {
         float normalY = ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->FUN_00a011b0(4103);
-        ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->FUN_00a012d0(4002, normalY, true);
+        ((VisibilityTile*)HUDMainMenu_pme->m_pTiles[71])->Tile_Set(4002, normalY, true);
     }
     if (HUDMainMenu_pme->m_eHudMenuMode != 23 && state == 23)
         SetHudVisible(true);
@@ -8122,17 +8151,17 @@ class HotkeyTile
 {
   public:
     void FUN_00700320(int aiID, int aiValue);
-    void FUN_00a01350(int aiID, const char* apText, bool abPropagate);
+    void Tile_Set_00a01350(int aiID, const char* apText, bool abPropagate);
 };
 
 struct HotkeyWheel
 {
-    int FUN_00701bd0(int aiIndex);
-    void FUN_007017b0();
+    int HotKeysWheel_MoveHighlight(int aiIndex);
+    void HotKeysWheel_UpdateHotkeyList();
     bool FUN_00701740();
     void FUN_00701760(bool abVisible);
-    void FUN_00701e80();
-    int FUN_006e4ba0();
+    void HotKeysWheel_UseHotkeyItem();
+    int Return8();
     void FUN_0061cc40(int aiIndex);
 };
 
@@ -8297,17 +8326,17 @@ extern HUDPlayer* DAT_011dea3c;
 
 struct HUDInterface
 {
-    bool FUN_007023a0();
+    bool IsInMenuMode();
 };
 
 struct HUDInput
 {
-    int FUN_00a24660(int aiControl, int aiState);
+    int Controls_GetUserAction(int aiControl, int aiState);
 };
 
 struct HUDGlobals
 {
-    HUDInput* FUN_00877720();
+    HUDInput* Main_GetControls();
 };
 extern HUDGlobals* DAT_011dea0c;
 
@@ -8319,7 +8348,7 @@ extern HUDTimer DAT_011f6394;
 
 struct HUDSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern HUDSetting DAT_011d2d84;
 extern HUDSetting DAT_011d279c;
@@ -8328,11 +8357,11 @@ extern bool DAT_011d9e90;
 extern int DAT_011d9e8c;
 extern int DAT_011a0124;
 
-InterfaceManager* FUN_004b7210();
-bool FUN_004b71d0();
+InterfaceManager* InterfaceManager_GetSingleton();
+bool InterfaceManager_Has360Controller();
 HotkeyList* __cdecl FUN_004bf220(HUDPlayer* apPlayer);
-int __cdecl FUN_00a01860(const char* apTrait);
-int __cdecl FUN_00406d00(char* apDest, unsigned int auiSize, const char* apFormat, ...);
+int __cdecl Tile_TextToTrait(const char* apTrait);
+int __cdecl BSsprintf(char* apDest, unsigned int auiSize, const char* apFormat, ...);
 int __cdecl FUN_00406d30(char* apDest, unsigned int auiSize, const char* apSrc);
 
 static const char s_szNameCount[] = "%s (%d)";
@@ -8342,22 +8371,23 @@ static const char s_szBlank[] = " ";
 
 struct HUDHotkeys : HUDMainMenu
 {
-    void FUN_0077da60();
+    void ClearHUDOrphanedTiles();
 };
 
 // Updates hotkey wheel selection, tile labels, and icon visibility based on input state and timer thresholds.
 // @fnv 0x0077da60
-void HUDHotkeys::FUN_0077da60()
+// src: COMMUNITY 0x0077da60
+void HUDHotkeys::ClearHUDOrphanedTiles()
 {
-    if (!((HUDInterface*)FUN_004b7210())->FUN_007023a0() && !DAT_011dea3c->FUN_vt22c(0) &&
+    if (!((HUDInterface*)InterfaceManager_GetSingleton())->IsInMenuMode() && !DAT_011dea3c->FUN_vt22c(0) &&
         !DAT_011dea3c->FUN_005a03f0(4))
     {
-        if (FUN_004b71d0())
+        if (InterfaceManager_Has360Controller())
         {
-            int iSelected = ((HotkeyWheel*)&m_kMenuData)->FUN_00701bd0(-1);
+            int iSelected = ((HotkeyWheel*)&m_kMenuData)->HotKeysWheel_MoveHighlight(-1);
             if (!DAT_011d9e90 && iSelected >= 0)
             {
-                ((HotkeyWheel*)&m_kMenuData)->FUN_007017b0();
+                ((HotkeyWheel*)&m_kMenuData)->HotKeysWheel_UpdateHotkeyList();
                 DAT_011d9e90 = true;
                 DAT_011d9e8c = DAT_011f6394.FUN_00825c00();
             }
@@ -8366,7 +8396,7 @@ void HUDHotkeys::FUN_0077da60()
                 if (iSelected >= 0)
                 {
                     if (DAT_011d9e8c > 0 &&
-                        DAT_011f6394.FUN_00825c00() - DAT_011d9e8c > *DAT_011d2d84.FUN_00403e20() * 1000.0 &&
+                        DAT_011f6394.FUN_00825c00() - DAT_011d9e8c > *DAT_011d2d84.Setting_Float_00403e20() * 1000.0 &&
                         !((HotkeyWheel*)&m_kMenuData)->FUN_00701740())
                     {
                         ((HotkeyWheel*)&m_kMenuData)->FUN_00701760(true);
@@ -8390,11 +8420,11 @@ void HUDHotkeys::FUN_0077da60()
                             if (pIcon)
                                 bHasIcon = true;
                             if (pFinalItem->FUN_00726070() > 1)
-                                FUN_00406d00(acNameVal, 260, s_szNameCount, pFinalItem->GetTargetFullName(),
+                                BSsprintf(acNameVal, 260, s_szNameCount, pFinalItem->GetTargetFullName(),
                                              pFinalItem->FUN_00726070());
                             else
                                 FUN_00406d30(acNameVal, 260, pFinalItem->GetTargetFullName());
-                            ((HotkeyTile*)m_pTiles[41])->FUN_00a01350(0xfc4, acNameVal, true);
+                            ((HotkeyTile*)m_pTiles[41])->Tile_Set_00a01350(0xfc4, acNameVal, true);
                             ((HotkeyTile*)m_pTiles[41])->FUN_00700320(0xfa3, 1);
                         }
                         else
@@ -8403,12 +8433,12 @@ void HUDHotkeys::FUN_0077da60()
                         }
                         if (!bHasIcon)
                         {
-                            ((HotkeyTile*)m_pTiles[40])->FUN_00700320(FUN_00a01860(s_szIconVisible), 0);
+                            ((HotkeyTile*)m_pTiles[40])->FUN_00700320(Tile_TextToTrait(s_szIconVisible), 0);
                         }
                         else
                         {
-                            ((HotkeyTile*)m_pTiles[40])->FUN_00a01350(FUN_00a01860(s_szIconFilename), pIcon, true);
-                            ((HotkeyTile*)m_pTiles[40])->FUN_00700320(FUN_00a01860(s_szIconVisible), 1);
+                            ((HotkeyTile*)m_pTiles[40])->Tile_Set_00a01350(Tile_TextToTrait(s_szIconFilename), pIcon, true);
+                            ((HotkeyTile*)m_pTiles[40])->FUN_00700320(Tile_TextToTrait(s_szIconVisible), 1);
                         }
                         DAT_011a0124 = iSelected;
                         delete pFinalItem;
@@ -8416,7 +8446,7 @@ void HUDHotkeys::FUN_0077da60()
                 }
                 else
                 {
-                    ((HotkeyWheel*)&m_kMenuData)->FUN_00701e80();
+                    ((HotkeyWheel*)&m_kMenuData)->HotKeysWheel_UseHotkeyItem();
                     ((HotkeyWheel*)&m_kMenuData)->FUN_00701760(false);
                     ((HotkeyTile*)m_pTiles[41])->FUN_00700320(0xfa3, 0);
                     DAT_011d9e8c = 0;
@@ -8427,9 +8457,9 @@ void HUDHotkeys::FUN_0077da60()
         }
         else
         {
-            for (int i = 0; i < ((HotkeyWheel*)&m_kMenuData)->FUN_006e4ba0(); i++)
+            for (int i = 0; i < ((HotkeyWheel*)&m_kMenuData)->Return8(); i++)
             {
-                if (DAT_011dea0c->FUN_00877720()->FUN_00a24660(i + 0x11, 1))
+                if (DAT_011dea0c->Main_GetControls()->Controls_GetUserAction(i + 0x11, 1))
                 {
                     if (i == 1)
                     {
@@ -8440,7 +8470,7 @@ void HUDHotkeys::FUN_0077da60()
                     HotkeyItem* pEntry = 0;
                     bool bIconTmp = false;
                     DAT_011d9e8c = DAT_011f6394.FUN_00825c00();
-                    ((HotkeyWheel*)&m_kMenuData)->FUN_00701bd0(i);
+                    ((HotkeyWheel*)&m_kMenuData)->HotKeysWheel_MoveHighlight(i);
                     pEntry = pHotkeys ? pHotkeys->FindEntryWithExtraListType(i) : 0;
                     const char* pIconPathOld = 0;
                     char acLabel[260];
@@ -8450,30 +8480,30 @@ void HUDHotkeys::FUN_0077da60()
                         if (pIconPathOld)
                             bIconTmp = true;
                         if (pEntry->FUN_00726070() > 1)
-                            FUN_00406d00(acLabel, 260, s_szNameCount, pEntry->GetTargetFullName(), pEntry->FUN_00726070());
+                            BSsprintf(acLabel, 260, s_szNameCount, pEntry->GetTargetFullName(), pEntry->FUN_00726070());
                         else
                             FUN_00406d30(acLabel, 260, pEntry->GetTargetFullName());
-                        ((HotkeyTile*)m_pTiles[41])->FUN_00a01350(0xfc4, acLabel, true);
+                        ((HotkeyTile*)m_pTiles[41])->Tile_Set_00a01350(0xfc4, acLabel, true);
                     }
                     else
                     {
-                        ((HotkeyTile*)m_pTiles[41])->FUN_00a01350(0xfc4, s_szBlank, true);
+                        ((HotkeyTile*)m_pTiles[41])->Tile_Set_00a01350(0xfc4, s_szBlank, true);
                     }
                     if (!bIconTmp)
                     {
-                        ((HotkeyTile*)m_pTiles[40])->FUN_00700320(FUN_00a01860(s_szIconVisible), 0);
+                        ((HotkeyTile*)m_pTiles[40])->FUN_00700320(Tile_TextToTrait(s_szIconVisible), 0);
                     }
                     else
                     {
-                        ((HotkeyTile*)m_pTiles[40])->FUN_00a01350(FUN_00a01860(s_szIconFilename), pIconPathOld, true);
-                        ((HotkeyTile*)m_pTiles[40])->FUN_00700320(FUN_00a01860(s_szIconVisible), 1);
+                        ((HotkeyTile*)m_pTiles[40])->Tile_Set_00a01350(Tile_TextToTrait(s_szIconFilename), pIconPathOld, true);
+                        ((HotkeyTile*)m_pTiles[40])->FUN_00700320(Tile_TextToTrait(s_szIconVisible), 1);
                     }
                     delete pEntry;
                 }
-                else if (DAT_011dea0c->FUN_00877720()->FUN_00a24660(i + 0x11, 0))
+                else if (DAT_011dea0c->Main_GetControls()->Controls_GetUserAction(i + 0x11, 0))
                 {
                     if (!((HotkeyWheel*)&m_kMenuData)->FUN_00701740() && DAT_011d9e8c > 0 &&
-                        DAT_011f6394.FUN_00825c00() - DAT_011d9e8c > *DAT_011d2d84.FUN_00403e20() * 1000.0 && i != 1)
+                        DAT_011f6394.FUN_00825c00() - DAT_011d9e8c > *DAT_011d2d84.Setting_Float_00403e20() * 1000.0 && i != 1)
                     {
                         ((HotkeyWheel*)&m_kMenuData)->FUN_00701760(true);
                         ((HotkeyTile*)m_pTiles[41])->FUN_00700320(0xfa3, 1);
@@ -8487,15 +8517,15 @@ void HUDHotkeys::FUN_0077da60()
                     if (((HotkeyWheel*)&m_kMenuData)->FUN_00701740())
                         DAT_011d9e8c = DAT_011f6394.FUN_00825c00();
                 }
-                else if (DAT_011dea0c->FUN_00877720()->FUN_00a24660(i + 0x11, 2))
+                else if (DAT_011dea0c->Main_GetControls()->Controls_GetUserAction(i + 0x11, 2))
                 {
-                    ((HotkeyWheel*)&m_kMenuData)->FUN_00701e80();
+                    ((HotkeyWheel*)&m_kMenuData)->HotKeysWheel_UseHotkeyItem();
                     if (!((HotkeyWheel*)&m_kMenuData)->FUN_00701740())
                         DAT_011d9e8c = 0;
                 }
             }
             if (((HotkeyWheel*)&m_kMenuData)->FUN_00701740() && DAT_011d9e8c > 0 &&
-                DAT_011f6394.FUN_00825c00() - DAT_011d9e8c > *DAT_011d279c.FUN_00403e20() * 1000.0)
+                DAT_011f6394.FUN_00825c00() - DAT_011d9e8c > *DAT_011d279c.Setting_Float_00403e20() * 1000.0)
             {
                 ((HotkeyTile*)m_pTiles[41])->FUN_00700320(0xfa3, 0);
                 ((HotkeyWheel*)&m_kMenuData)->FUN_00701760(false);
@@ -8515,7 +8545,7 @@ void HUDHotkeys::FUN_0077da60()
 class Tile_traitSetter
 {
   public:
-    void FUN_00a012d0(int aiTrait, float afValue, bool abPropagate);
+    void Tile_Set(int aiTrait, float afValue, bool abPropagate);
 };
 
 // The shared HUDMainMenu lacks this operation; its receiver is the only register argument.
@@ -8525,7 +8555,8 @@ extern HUDMainMenu* HUDMainMenu_pSingleton;
 
 // Sets trait 4009 to afScale * 255.0 on HUD main menu tiles with indices outside the listed exclusions.
 // @fnv 0x0077e430
-void __cdecl FUN_0077e430(float afScale)
+// src: XBOX_PDB 0x0077e430
+void __cdecl HUDMainMenu_ResetHUDOpacity(float afScale)
 {
     if (HUDMainMenu_pSingleton)
     {
@@ -8555,7 +8586,7 @@ void __cdecl FUN_0077e430(float afScale)
             case 58:
                 break;
             default:
-                ((Tile_traitSetter*)HUDMainMenu_pSingleton->m_pTiles[i])->FUN_00a012d0(4009, afScale * 255.0, true);
+                ((Tile_traitSetter*)HUDMainMenu_pSingleton->m_pTiles[i])->Tile_Set(4009, afScale * 255.0, true);
                 break;
             }
         }
@@ -8592,7 +8623,7 @@ struct VATSCreateTileX
     void SetInt(int aeID, int aiValue);
     void Set(int aeID, const char* apValue, bool abPropagate);
     float GetFloat(int aeID);
-    VATSCreateTileX* FUN_00a03da0(const char* apName);
+    VATSCreateTileX* Tile_GetChildByName(const char* apName);
 };
 struct VATSCreateTileMenuX : public VATSCreateTileX
 {
@@ -8645,7 +8676,7 @@ template <class T> struct VATSCreateListX
     bool IsEmpty();
     T& GetItem();
     VATSCreateListX* GetNext();
-    void FUN_00905330(T const& arItem);
+    void RemoveMatchingItem(T const& arItem);
     void Sort(int (*apCompare)(void*, void*));
     void RemoveAll();
 };
@@ -8744,7 +8775,7 @@ struct VATSCreateFormListX
 };
 struct VATSCreateNodeArgX
 {
-    void FUN_007700b0(VATSCreateTexX* apTexture);
+    void TileShaderProperty_SetAlphaTexture(VATSCreateTexX* apTexture);
     void FUN_007700d0(bool abArg);
 };
 struct VATSCreateNode3DX
@@ -8862,7 +8893,7 @@ struct VATSCreateProcX
     virtual void v1a4();
     virtual void v1a8();
     virtual bool IsInDialogue();
-    void FUN_008ff030(VATSCreateRefX* apRef);
+    void HighProcess_SkipFadeIn(VATSCreateRefX* apRef);
 };
 struct VATSCreateAVOwnerX
 {
@@ -9115,9 +9146,9 @@ struct VATSCreateRefX
     VATSCreateAVOwnerX kAVOwner;
     VATSCreateFormX* GetObjectReference();
     VATSCreateProcX* GetProcess();
-    bool FUN_005a2030() const;
-    void FUN_00950110(int aiArg);
-    void FUN_008a6840(int aiArg);
+    bool IsSwimming_005a2030() const;
+    void PlayerCharacter_SetFirstPerson(int aiArg);
+    void Actor_SetWantWeaponDrawn(int aiArg);
     void SetProcessValue(float afArg);
     void SetActiveState(int a1, int a2, int a3);
 };
@@ -9203,7 +9234,7 @@ struct VATSCreateSettingX
 };
 struct VATSCreateHUDManagerX
 {
-    void FUN_00718630(int a1, int a2, int a3);
+    void InterfaceManager_TutorialManager_ShowMessage(int a1, int a2, int a3);
 };
 struct VATSCreateInterfaceMgrX
 {
@@ -9517,12 +9548,12 @@ struct VATSCreateInterfaceMgrX
     unsigned int unk4cc;
     unsigned int unk4d0;
     VATSCreateHUDManagerX kHUD;
-    VATSCreateLoaderX* FUN_00586150();
+    VATSCreateLoaderX* CombatController_GetCombatState();
 };
 struct VATSCreateAudioX
 {
     static VATSCreateAudioX* GetSingleton();
-    void FUN_007eb8a0();
+    void BSAudio_PauseWorldSounds();
 };
 struct VATSCreateCalendarX
 {
@@ -9639,7 +9670,8 @@ extern char xRTTI_Tile[], xRTTI_TileMenu[], xRTTI_Menu[], xRTTI_VATSMenu[];
 
 // Validates VATS targets, loads the VATS menu XML, builds HUD tiles, and initializes the VATS menu state.
 // @fnv 0x007e9200
-bool FUN_007e9200()
+// src: COMMUNITY 0x007e9200
+bool VATSMenu_Create()
 {
     float qfTOqo;
     VATSCreateFormListX* qsSDDgz;
@@ -9681,14 +9713,14 @@ bool FUN_007e9200()
                 }
             }
             if ((qxQHW->GetItem()->pRef->IsActor() && qxQHW->GetItem()->pRef->IsDead(0)) ||
-                (qsSDDgz && qArxcFu && qsSDDgz->GetHeader()->IsInList(qArxcFu)) || (qGfbX && qGfbX->FUN_005a2030()) ||
+                (qsSDDgz && qArxcFu && qsSDDgz->GetHeader()->IsInList(qArxcFu)) || (qGfbX && qGfbX->IsSwimming_005a2030()) ||
                 qAhbO)
             {
                 if (VATSCreateDAT_011f21cc == qxQHW->GetItem()->pRef)
                 {
                     VATSCreateDAT_011f21cc = 0;
                 }
-                qxQHW->FUN_00905330(qxQHW->GetItem());
+                qxQHW->RemoveMatchingItem(qxQHW->GetItem());
             }
             qxQHW = qxQHW->GetNext();
         }
@@ -9697,7 +9729,7 @@ bool FUN_007e9200()
     {
         if (VATSCreateDAT_011f21d1)
         {
-            VATSCreateDAT_011dea3c->FUN_00950110(1);
+            VATSCreateDAT_011dea3c->PlayerCharacter_SetFirstPerson(1);
         }
         return false;
     }
@@ -9723,7 +9755,7 @@ bool FUN_007e9200()
     }
     qpTd = VATSCreateFUN_004b7210();
     qfTOqo = VATSCreateFUN_00a01530();
-    qrEZrs = qpTd->FUN_00586150()->ReadFile("Data\\Menus\\VATS_menu.xml");
+    qrEZrs = qpTd->CombatController_GetCombatState()->ReadFile("Data\\Menus\\VATS_menu.xml");
     qSVM = qrEZrs->GetMenu();
     if (qSVM && qSVM->GetID() == VATSCreateFUN_007eb8c0())
     {
@@ -9791,8 +9823,8 @@ bool FUN_007e9200()
                 VATSCreateDAT_011f21e8 = VATSCreateDAT_011c3f2c->PlaceObjectReference(
                     VATSCreateDAT_011db0ac, qCTa, VATSCreateDAT_011f426c, VATSCreateDAT_011dea10->FUN_005f36f0(),
                     VATSCreateDAT_011dea10->FUN_004fd3e0(), 0, 0, 0);
-                VATSCreateDAT_011f21e8->FUN_008a6840(1);
-                VATSCreateDAT_011f21e8->GetProcess()->FUN_008ff030(VATSCreateDAT_011f21e8);
+                VATSCreateDAT_011f21e8->Actor_SetWantWeaponDrawn(1);
+                VATSCreateDAT_011f21e8->GetProcess()->HighProcess_SkipFadeIn(VATSCreateDAT_011f21e8);
                 VATSCreateDAT_011f21e8->SetProcessValue(0.0f);
             }
         }
@@ -9820,8 +9852,8 @@ bool FUN_007e9200()
                 VATSCreateDAT_011f21ec = VATSCreateDAT_011c3f2c->PlaceObjectReference(
                     VATSCreateDAT_011db0b4, qXUDve, VATSCreateDAT_011f426c, VATSCreateDAT_011dea10->FUN_005f36f0(),
                     VATSCreateDAT_011dea10->FUN_004fd3e0(), 0, 0, 0);
-                VATSCreateDAT_011f21ec->FUN_008a6840(1);
-                VATSCreateDAT_011f21ec->GetProcess()->FUN_008ff030(VATSCreateDAT_011f21ec);
+                VATSCreateDAT_011f21ec->Actor_SetWantWeaponDrawn(1);
+                VATSCreateDAT_011f21ec->GetProcess()->HighProcess_SkipFadeIn(VATSCreateDAT_011f21ec);
                 VATSCreateDAT_011f21ec->SetProcessValue(0.0f);
             }
         }
@@ -9854,7 +9886,7 @@ bool FUN_007e9200()
             if (!qOHwfb->GetItem()->pRef || !qOHwfb->GetItem()->pRef->Get3D())
             {
                 VATSCreateListX<VATSCreateVATSTargetX*>* qOFvKuu = qOHwfb->GetNext();
-                VATSCreateDAT_011db150.FUN_00905330(qOHwfb->GetItem());
+                VATSCreateDAT_011db150.RemoveMatchingItem(qOHwfb->GetItem());
                 qOHwfb = qOFvKuu;
                 continue;
             }
@@ -9912,7 +9944,7 @@ bool FUN_007e9200()
         qOPw = VATSCreateFUN_00a00940("_OriginalX", -1);
         qkJsUdT = VATSCreateFUN_00a00940("_TotalWidth", -1);
         qrBzVM = VATSCreateFUN_00a00940("_ImageWidth", -1);
-        VATSCreateAudioX::GetSingleton()->FUN_007eb8a0();
+        VATSCreateAudioX::GetSingleton()->BSAudio_PauseWorldSounds();
         qnEqwa = VATSCreateFUN_007f4890(VATSCreateFUN_00a09030(0x420), "ActionPoints");
         if (!qnEqwa)
         {
@@ -10149,7 +10181,7 @@ bool FUN_007e9200()
         VATSCreatePtrX<VATSCreateTexX> qxWmVch(0);
         qxWmVch = VATSCreateSourceTextureX::Create(
             VATSCreateFixedStringX("Textures\\Interface\\HUD\\hud_compass_alphamap.dds"), VATSCreateDAT_011a9598, 1, 0);
-        VATSCreateDAT_011db0d4->m_pTiles[22]->GetNode()->FUN_007700b0(qxWmVch);
+        VATSCreateDAT_011db0d4->m_pTiles[22]->GetNode()->TileShaderProperty_SetAlphaTexture(qxWmVch);
         VATSCreateDAT_011db0d4->m_pTiles[22]->GetNode()->FUN_007700d0(1);
         if (!VATSCreateDAT_011db0d4->HasAllSlotsSet(&qidnYUK))
         {
@@ -10191,7 +10223,7 @@ bool FUN_007e9200()
         {
             VATSCreateDAT_011db0d4->m_pTiles[5]->SetInt(0xfa3, 0);
         }
-        VATSCreateFUN_004b7210()->kHUD.FUN_00718630(VATSCreateFUN_00709d40() ? 0x1b : 0x15, VATSCreateFUN_007eb8c0(),
+        VATSCreateFUN_004b7210()->kHUD.InterfaceManager_TutorialManager_ShowMessage(VATSCreateFUN_00709d40() ? 0x1b : 0x15, VATSCreateFUN_007eb8c0(),
                                                     0x200);
         qYvToq = VATSCreateFUN_0066dce0(qYvz, 1, 0);
         if (VATSCreateDAT_011db0d4->m_fOverrideActionPoints < qYvToq)
@@ -10205,16 +10237,16 @@ bool FUN_007e9200()
             VATSCreateDAT_011db0d4->m_pTiles[4]->Set(0xfc4, VATSCreateDAT_011d21c0.String(), 1);
             VATSCreateDAT_011db0d4->m_pTiles[5]->Set(0xfc4, VATSCreateDAT_011d2b74.String(), 1);
             VATSCreateDAT_011db0d4->FUN_00726070()
-                ->FUN_00a03da0("Target_button")
+                ->Tile_GetChildByName("Target_button")
                 ->Set(0xfc4, VATSCreateDAT_011d4d38.String(), 1);
         }
-        qIpA = VATSCreateDAT_011db0d4->FUN_00726070()->FUN_00a03da0("BodyPart_button");
+        qIpA = VATSCreateDAT_011db0d4->FUN_00726070()->Tile_GetChildByName("BodyPart_button");
         if (qIpA)
         {
             qIpA->Set(VATSCreateFUN_00a01860("_xbox_button"), "&xbuttonls;", 1);
             qIpA->SetInt(VATSCreateFUN_00a01860("_xbox_button"), 0x11);
         }
-        qIpA = VATSCreateDAT_011db0d4->FUN_00726070()->FUN_00a03da0("Target_button");
+        qIpA = VATSCreateDAT_011db0d4->FUN_00726070()->Tile_GetChildByName("Target_button");
         if (qIpA)
         {
             qIpA->Set(VATSCreateFUN_00a01860("_xbox_button"), "&xbuttonrs;", 1);
@@ -10237,7 +10269,7 @@ struct SneakStringSetting
 };
 struct SneakFloatSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 __if_not_exists(GlobalObject_0040c150::GlobalObject_0040c150)
 {
@@ -10252,7 +10284,7 @@ __if_not_exists(GlobalObject_004de370::GlobalObject_004de370)
     class GlobalObject_004de370
     {
       public:
-        float* FUN_00403e20();
+        float* Setting_Float_00403e20();
     };
 }
 __if_not_exists(g_011d4804)
@@ -10298,44 +10330,45 @@ __if_not_exists(DAT_011e0e80)
 struct InteractionTile
 {
     void FUN_00700320(int, int);
-    void FUN_00a01350(int, const char*, bool);
+    void Tile_Set_00a01350(int, const char*, bool);
     bool IsTraitNonZero(int);
     void StartFade(int, float, float, float, int);
     int FindValueByKey(int);
-    bool FUN_00a07fc0(int);
+    bool Tile_GetFadeFinished(int);
     float FUN_00a011b0(int);
 };
 struct HUDInteraction : HUDMainMenu
 {
-    void FUN_007732d0();
+    void HUDMainMenu_UpdateSneak();
 };
 // Updates HUD tile 24 using player state, a process count, and string and float settings.
 // @fnv 0x007732d0
-void HUDInteraction::FUN_007732d0()
+// src: XBOX_PDB 0x007732d0
+void HUDInteraction::HUDMainMenu_UpdateSneak()
 {
     bool blocked = false;
     {
         bool active = false;
-        if (_g_thePlayer->FUN_00953c50(&blocked) || blocked)
+        if (_g_thePlayer->PlayerCharacter_IsPlayerCharacterInCombat(&blocked) || blocked)
         {
             ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->FUN_00700320(0xff4, 2);
             if (blocked)
             {
                 ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])
-                    ->FUN_00a01350(0xfc4, ((SneakStringSetting*)&g_011d4804)->FUN_00403df0(), true);
+                    ->Tile_Set_00a01350(0xfc4, ((SneakStringSetting*)&g_011d4804)->FUN_00403df0(), true);
             }
             else
             {
                 active = true;
                 ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])
-                    ->FUN_00a01350(0xfc4, ((SneakStringSetting*)&g_011d4eb8)->FUN_00403df0(), true);
+                    ->Tile_Set_00a01350(0xfc4, ((SneakStringSetting*)&g_011d4eb8)->FUN_00403df0(), true);
             }
         }
         else if (((HUDPlayerQueries*)_g_thePlayer)->GetByteAt5F8())
         {
             ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->FUN_00700320(0xff4, 2);
             ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])
-                ->FUN_00a01350(0xfc4, ((SneakStringSetting*)&g_011d4804)->FUN_00403df0(), true);
+                ->Tile_Set_00a01350(0xfc4, ((SneakStringSetting*)&g_011d4804)->FUN_00403df0(), true);
         }
         else
         {
@@ -10346,27 +10379,27 @@ void HUDInteraction::FUN_007732d0()
             {
                 if (!((HUDPlayerQueries*)_g_thePlayer)->GetByteAt5F8())
                     ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])
-                        ->FUN_00a01350(0xfc4, ((SneakStringSetting*)&g_011d2490)->FUN_00403df0(), true);
+                        ->Tile_Set_00a01350(0xfc4, ((SneakStringSetting*)&g_011d2490)->FUN_00403df0(), true);
             }
             else
             {
                 ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])
-                    ->FUN_00a01350(0xfc4, ((SneakStringSetting*)&g_011d27b4)->FUN_00403df0(), true);
+                    ->Tile_Set_00a01350(0xfc4, ((SneakStringSetting*)&g_011d27b4)->FUN_00403df0(), true);
             }
         }
         if (active && !((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->IsTraitNonZero(0x1004))
         {
             ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])
-                ->StartFade(0xfa9, 0.0f, *((SneakFloatSetting*)&g_011d9774)->FUN_00403e20() * 255.0, 0.5f, 2);
+                ->StartFade(0xfa9, 0.0f, *((SneakFloatSetting*)&g_011d9774)->Setting_Float_00403e20() * 255.0, 0.5f, 2);
         }
         else if ((!active && ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->FindValueByKey(0xfa9) == 2) ||
-                 (((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->FUN_00a07fc0(0xfa9) &&
+                 (((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->Tile_GetFadeFinished(0xfa9) &&
                   ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->FUN_00a011b0(0xfa9) !=
-                      *((SneakFloatSetting*)&g_011d9774)->FUN_00403e20() * 255.0))
+                      *((SneakFloatSetting*)&g_011d9774)->Setting_Float_00403e20() * 255.0))
         {
             ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])
                 ->StartFade(0xfa9, ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->FUN_00a011b0(0xfa9),
-                               *((SneakFloatSetting*)&g_011d9774)->FUN_00403e20() * 255.0, 0.5f, 0);
+                               *((SneakFloatSetting*)&g_011d9774)->Setting_Float_00403e20() * 255.0, 0.5f, 0);
         }
         ((InteractionTile*)HUDMainMenu_pme->m_pTiles[24])->FUN_00700320(0x1004, active);
     }
@@ -10375,8 +10408,8 @@ void HUDInteraction::FUN_007732d0()
 class ClearMessagesTile
 {
   public:
-    void FUN_00a012d0(int trait, float value, bool propagate);
-    void FUN_00a01350(int trait, const char* text, bool propagate);
+    void Tile_Set(int trait, float value, bool propagate);
+    void Tile_Set_00a01350(int trait, const char* text, bool propagate);
 };
 struct ClearMessagesList
 {
@@ -10385,7 +10418,7 @@ struct ClearMessagesList
     ClearMessagesList* FUN_00726070();
     void FUN_00470470();
 };
-void __cdecl FormHeap_Free(void*);
+void __cdecl FormHeapFreeAndLog_00401030(void*);
 extern HUDMainMenu* HUDMainMenu_pme;
 
 // @fnv 0x00775920
@@ -10395,53 +10428,54 @@ void __fastcall ClearHUDMessages(HUDMainMenu* menu)
     while (list && !list->FUN_008256d0())
     {
         void* message = *list->FUN_006815c0();
-        FormHeap_Free(message);
+        FormHeapFreeAndLog_00401030(message);
         list = list->FUN_00726070();
     }
     ((ClearMessagesList*)&menu->m_kMessageList)->FUN_00470470();
-    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[27])->FUN_00a012d0(4009, 0.0f, true);
-    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[26])->FUN_00a01350(4036, g_011d31e0_arg1, true);
-    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[26])->FUN_00a012d0(4009, 0.0f, true);
-    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[25])->FUN_00a012d0(4009, 0.0f, true);
-    ((FUN_00775670_shell*)menu)->FUN_00775670();
+    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[27])->Tile_Set(4009, 0.0f, true);
+    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[26])->Tile_Set_00a01350(4036, g_011d31e0_arg1, true);
+    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[26])->Tile_Set(4009, 0.0f, true);
+    ((ClearMessagesTile*)HUDMainMenu_pme->m_pTiles[25])->Tile_Set(4009, 0.0f, true);
+    ((FUN_00775670_shell*)menu)->HUDMainMenu_HideSubtitle();
 }
 
-int __cdecl FUN_00408b20(const char* a, const char* b);
+int __cdecl BSstrcmp(const char* a, const char* b);
 struct VisibilityController
 {
-    static bool __cdecl FUN_004b71d0();
+    static bool __cdecl InterfaceManager_Has360Controller();
 };
-VisibilityController* __cdecl FUN_004b7210();
-int __cdecl FUN_00a01860(const char* text);
+VisibilityController* __cdecl InterfaceManager_GetSingleton();
+int __cdecl Tile_TextToTrait(const char* text);
 struct VisibilityTile;
 struct VisibilityChildren
 {
-    void* FUN_00559450() const;
-    VisibilityTile*& FUN_0057cbe0(void*& pos);
+    void* Modelloader_GetReferencedThis() const;
+    VisibilityTile*& NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(void*& pos);
 };
 struct VisibilityTile
 {
     void* vtable;
     VisibilityChildren children;
-    const char* FUN_00700300();
+    const char* GetName_00700300();
     void FUN_00700320(int trait, int value);
-    void FUN_00a074d0(int flags);
+    void Tile_SetNeedsUpdate(int flags);
 };
 
 // Recursively visits child tiles, then conditionally sets a trait derived from `_360Controller` and applies flag value 4.
 // @fnv 0x00719580
-void __cdecl FUN_00719580(VisibilityTile* pTile)
+// src: COMMUNITY 0x00719580
+void __cdecl Tile_Update360ControllerTraitRecurse(VisibilityTile* pTile)
 {
     VisibilityTile* pChild = 0;
-    void* pos = pTile->children.FUN_00559450();
+    void* pos = pTile->children.Modelloader_GetReferencedThis();
     while (pos)
     {
-        pChild = pTile->children.FUN_0057cbe0(pos);
-        FUN_00719580(pChild);
+        pChild = pTile->children.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetNext(pos);
+        Tile_Update360ControllerTraitRecurse(pChild);
     }
-    if (!FUN_00408b20(pTile->FUN_00700300(), "xbox_button") || !FUN_00408b20(pTile->FUN_00700300(), "PCShortcutLabel"))
+    if (!BSstrcmp(pTile->GetName_00700300(), "xbox_button") || !BSstrcmp(pTile->GetName_00700300(), "PCShortcutLabel"))
     {
-        pTile->FUN_00700320(FUN_00a01860("_360Controller"), FUN_004b7210()->FUN_004b71d0());
-        pTile->FUN_00a074d0(4);
+        pTile->FUN_00700320(Tile_TextToTrait("_360Controller"), InterfaceManager_GetSingleton()->InterfaceManager_Has360Controller());
+        pTile->Tile_SetNeedsUpdate(4);
     }
 }

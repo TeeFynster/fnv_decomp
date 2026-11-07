@@ -315,7 +315,8 @@ void NiMatrix3::SaveBinary(NiStream& kStream)
 
 // Transforms each of count source points by a 3x3 matrix plus translation, writing the results to destination.
 // @fnv 0x00a582f0
-extern "C" void FUN_00a582f0(const float* matrix,const float* translation,unsigned int count,const NiPoint3* source,NiPoint3* destination) {
+// src: GAMEBRYO_LIB 0x00a582f0
+extern "C" void NiMatrix3_TransformVertices(const float* matrix,const float* translation,unsigned int count,const NiPoint3* source,NiPoint3* destination) {
  for(unsigned int i=0;i<count;++i) {
   destination[i].x=matrix[0]*source[i].x+translation[0]+matrix[1]*source[i].y+source[i].z*matrix[2];
   destination[i].y=matrix[3]*source[i].x+translation[1]+matrix[4]*source[i].y+matrix[5]*source[i].z;
@@ -519,7 +520,7 @@ bool NiMatrix3::Tridiagonal(float* diag, float* subd)
     return false;
 }
 
-float FUN_00a811f0(float fY, float fX);
+float NiFastATan2(float fY, float fX);
 
 static float DAT_011a9444 = 1.5707964f;
 
@@ -547,13 +548,13 @@ bool NiMatrix3::ToEulerAnglesXYZ(float& rfXAngle, float& rfYAngle, float& rfZAng
     {
         if (rfYAngle > -DAT_011a9444)
         {
-            rfXAngle = -FUN_00a811f0(-m_pEntry[1][2], m_pEntry[2][2]);
-            rfZAngle = -FUN_00a811f0(-m_pEntry[0][1], m_pEntry[0][0]);
+            rfXAngle = -NiFastATan2(-m_pEntry[1][2], m_pEntry[2][2]);
+            rfZAngle = -NiFastATan2(-m_pEntry[0][1], m_pEntry[0][0]);
             return true;
         }
         else
         {
-            float fRmY = FUN_00a811f0(m_pEntry[1][0], m_pEntry[1][1]);
+            float fRmY = NiFastATan2(m_pEntry[1][0], m_pEntry[1][1]);
             rfZAngle = 0.0f;
             rfXAngle = fRmY - rfZAngle;
             return false;
@@ -561,7 +562,7 @@ bool NiMatrix3::ToEulerAnglesXYZ(float& rfXAngle, float& rfYAngle, float& rfZAng
     }
     else
     {
-        float fRpY = FUN_00a811f0(m_pEntry[1][0], m_pEntry[1][1]);
+        float fRpY = NiFastATan2(m_pEntry[1][0], m_pEntry[1][1]);
         rfZAngle = 0.0f;
         rfXAngle = rfZAngle - fRpY;
         return false;

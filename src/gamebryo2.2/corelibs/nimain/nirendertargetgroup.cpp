@@ -10,7 +10,8 @@
 extern NiRTTI g_012708ec;
 
 // @fnv 0x00ee8530
-NiRTTI* __cdecl FUN_00ee8530()
+// src: COMMUNITY 0x00ee8530
+NiRTTI* __cdecl NiRenderTargetGroup_GetRTTI()
 {
     return &g_012708ec;
 }
@@ -31,7 +32,8 @@ const NiPixelFormat* __thiscall NiRenderTargetGroup::GetPixelFormat() const
 
 
 // @fnv 0x00ee8460
-void NiRenderTargetGroup::FUN_00ee8460(RendererData* pkRendererData)
+// src: XBOX_PDB 0x00ee8460
+void NiRenderTargetGroup::SetRendererData_00ee8460(RendererData* pkRendererData)
 {
     RendererData*& m_pTextureRendererData = reinterpret_cast<RendererData*&>(RenderTargetBufferInfo);
     if (m_pTextureRendererData)
@@ -46,7 +48,8 @@ void NiRenderTargetGroup::FUN_00ee8460(RendererData* pkRendererData)
 }
 
 // @fnv 0x00ee84d0
-int NiRenderTargetGroup::FUN_00ee84d0() const
+// src: XBOX_PDB 0x00ee84d0
+int NiRenderTargetGroup::GetDepthStencilWidth() const
 {
     const NiMemObject* p =
         *reinterpret_cast<const NiMemObject* const*>(reinterpret_cast<const unsigned char*>(this) + 0x20);
@@ -56,7 +59,8 @@ int NiRenderTargetGroup::FUN_00ee84d0() const
 }
 
 // @fnv 0x00ee84e0
-int NiRenderTargetGroup::FUN_00ee84e0() const
+// src: XBOX_PDB 0x00ee84e0
+int NiRenderTargetGroup::GetDepthStencilHeight() const
 {
     void* p =
         *reinterpret_cast<void**>(const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(this)) + 0x20);
@@ -66,19 +70,22 @@ int NiRenderTargetGroup::FUN_00ee84e0() const
 }
 
 // @fnv 0x00ee84f0
-NiMemObject* __thiscall NiRenderTargetGroup::FUN_00ee84f0(unsigned int uiIndex) const
+// src: XBOX_PDB 0x00ee84f0
+NiMemObject* __thiscall NiRenderTargetGroup::GetBuffer_00ee84f0(unsigned int uiIndex) const
 {
     return GetBuffers()[uiIndex];
 }
 
 // @fnv 0x00ee8550
-void __thiscall NiRenderTargetGroup::FUN_00ee8550(bool abResolve)
+// src: XBOX_PDB 0x00ee8550
+void __thiscall NiRenderTargetGroup::SetResolveDepthBufferMode(bool abResolve)
 {
     m_bNeedsResolve = abResolve;
 }
 
 // @fnv 0x00ee86e0
-void* NiRenderTargetGroup::FUN_00ee86e0(unsigned int uiIndex) const
+// src: XBOX_PDB 0x00ee86e0
+void* NiRenderTargetGroup::GetBufferRendererData(unsigned int uiIndex) const
 {
     void* p = GetBuffers()[uiIndex];
     if (p)
@@ -101,12 +108,13 @@ void* __thiscall NiRenderTargetGroup::FUN_00ee87e0(unsigned int flags)
 }
 
 void __stdcall AppendCameraPathEntries(StrArr*);
-char* __cdecl FUN_00a7d330(const char*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
 // @fnv 0x00ee8800
-void __stdcall FUN_00ee8800(StrArr* pkStrings)
+// src: XBOX_PDB 0x00ee8800
+void __stdcall NiRenderTargetGroup_GetViewerStrings(StrArr* pkStrings)
 {
     AppendCameraPathEntries(pkStrings);
-    char* pString = FUN_00a7d330(*(const char**)&g_012708ec);
+    char* pString = NiViewerStrings_NiGetViewerString_Title(*(const char**)&g_012708ec);
     unsigned int size = pkStrings->m_usSize;
     unsigned int max = pkStrings->m_usMaxSize;
     if (size >= max)
@@ -261,10 +269,11 @@ struct SpawnedObject
     int m_1c;
 };
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 // @fnv 0x00ee8760
-SpawnedObject* __cdecl FUN_00ee8760(void* a1, NiRenderer* apSource, void* a3)
+// src: COMMUNITY 0x00ee8760
+SpawnedObject* __cdecl NiRenderTargetGroup_Create_(void* a1, NiRenderer* apSource, void* a3)
 {
     if (apSource == 0)
     {
@@ -279,7 +288,7 @@ SpawnedObject* __cdecl FUN_00ee8760(void* a1, NiRenderer* apSource, void* a3)
         return 0;
     }
     SpawnedObject* pSpawned;
-    void* mem = FUN_00aa13e0(0x28);
+    void* mem = Object_DispatchCommandFour(0x28);
     if (mem != 0)
     {
         pSpawned = reinterpret_cast<SpawnedObject*>(FUN_00ee8500(mem));
@@ -355,11 +364,12 @@ class AA1AC0Class
     int unk1C;
     unsigned int unk20;
 
-    virtual unsigned int FUN_00aa1ac0();
+    virtual unsigned int NiFile_GetBuffer();
 };
 
 // @fnv 0x00aa1ac0
-unsigned int AA1AC0Class::FUN_00aa1ac0()
+// src: COMMUNITY 0x00aa1ac0
+unsigned int AA1AC0Class::NiFile_GetBuffer()
 {
     return unk20;
 }
@@ -383,7 +393,7 @@ struct RefCountedObj
 // @fnv 0x00ee8620
 bool __fastcall SetRenderTargetGroupItem(NiRenderTargetGroup* pkGroup, void*, RefCountedObj* apItem, unsigned int uiIndex)
 {
-    pkGroup->FUN_00ee8460(0);
+    pkGroup->SetRendererData_00ee8460(0);
     RefCountedObj** m_apItems = reinterpret_cast<RefCountedObj**>(pkGroup->GetBuffers());
     if (uiIndex < reinterpret_cast<unsigned int&>(pkGroup->m_aspRenderTargetBuffers[2].m_pObject))
     {

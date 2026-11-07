@@ -28,9 +28,9 @@ public:
     void vfunc0C();
     void* vfunc10();
     void vf0C();
-    void FUN_00d07b90();
-    void FUN_00d07de0(hkpPhantomOverlapListener* listener);
-    void FUN_00d07c80(hkpPhantomOverlapListener* listener) throw();
+    void firePhantomAdded();
+    void addPhantomOverlapListener_00d07de0(hkpPhantomOverlapListener* listener);
+    void removePhantomOverlapListener_00d07c80(hkpPhantomOverlapListener* listener) throw();
 
     void addPhantomOverlapListener(hkpPhantomOverlapListener* listener);
     void removePhantomOverlapListener(hkpPhantomOverlapListener* listener) throw();

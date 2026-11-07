@@ -44,45 +44,49 @@ extern "C"
 // all curve storage and construction use include/hkpLinearParametricCurve.h.
 struct CurveEndParameter : public hkpLinearParametricCurve
 {
-    double FUN_00e47c20() const;
+    double hkpLinearParametricCurve_getEnd() const;
 };
 
 // @fnv 0x00e47c20
-double CurveEndParameter::FUN_00e47c20() const
+// src: HAVOK_LIB 0x00e47c20
+double CurveEndParameter::hkpLinearParametricCurve_getEnd() const
 {
     return static_cast<double>(m_kPoints.m_iElementCount - 1);
 }
 
 struct CurvePointTransformer : public hkpLinearParametricCurve
 {
-    void FUN_00e47e50(void const*);
+    void hkpLinearParametricCurve_transformPoints(void const*);
 };
 
 // Transforms every curve point in place with the supplied hkTransform.
 // @fnv 0x00e47e50
-void CurvePointTransformer::FUN_00e47e50(void const* data)
+// src: HAVOK_LIB 0x00e47e50
+void CurvePointTransformer::hkpLinearParametricCurve_transformPoints(void const* data)
 {
     int pointCount = m_kPoints.m_iElementCount;
     for (int i = 0; i < pointCount; ++i)
-        m_kPoints.m_data[i].FUN_00c7f640(*static_cast<const hkTransform*>(data), m_kPoints.m_data[i]);
+        m_kPoints.m_data[i].setTransformedPos_00c7f640(*static_cast<const hkTransform*>(data), m_kPoints.m_data[i]);
 }
 
 struct CurveSmoothingSetter : public hkpLinearParametricCurve
 {
-    void FUN_00e47430(float input);
+    void hkpLinearParametricCurve_setSmoothingFactor(float input);
 };
 // @fnv 0x00e47430
-void CurveSmoothingSetter::FUN_00e47430(float input)
+// src: XBOX_PDB 0x00e47430
+void CurveSmoothingSetter::hkpLinearParametricCurve_setSmoothingFactor(float input)
 {
     m_fSmoothingValue = input;
 }
 
 struct CurveLoopGetter : public hkpLinearParametricCurve
 {
-    unsigned char* FUN_00e47400(unsigned char* output);
+    unsigned char* hkpLinearParametricCurve_isClosedLoop(unsigned char* output);
 };
 // @fnv 0x00e47400
-unsigned char* CurveLoopGetter::FUN_00e47400(unsigned char* output)
+// src: HAVOK_SRC 0x00e47400
+unsigned char* CurveLoopGetter::hkpLinearParametricCurve_isClosedLoop(unsigned char* output)
 {
     *output = m_bClosedLoop.m_cBooleanValue;
     return output;
@@ -98,11 +102,12 @@ float __cdecl GetZeroFloat()
 class CurveSmoothingGetter : public hkpLinearParametricCurve
 {
   public:
-    float FUN_00e47420() const;
+    float hkpLinearParametricCurve_getSmoothingFactor() const;
 };
 
 // @fnv 0x00e47420
-float CurveSmoothingGetter::FUN_00e47420() const
+// src: XBOX_PDB 0x00e47420
+float CurveSmoothingGetter::hkpLinearParametricCurve_getSmoothingFactor() const
 {
     return m_fSmoothingValue;
 }
@@ -110,7 +115,7 @@ float CurveSmoothingGetter::FUN_00e47420() const
 
 extern const LocalM128 DAT_010ec7f0;
 
-int __cdecl FUN_00cbfef0(float f);
+int __cdecl hkMath_hkFloatToInt(float f);
 
 // hkSimdReal is the shared hkSimdReal representation (hkSimdRealParameter).
 __forceinline hkSimdReal::hkSimdReal(float f)
@@ -129,14 +134,15 @@ __forceinline void hkVector4::setInterpolate4(const hkVector4& a, const hkVector
 class CurvePointSampler : public hkpLinearParametricCurve
 {
   public:
-    void FUN_00e47440(float t, hkVector4& kPointOut) const;
+    void hkpLinearParametricCurve_getPoint(float t, hkVector4& kPointOut) const;
 };
 
 // Selects a point from m_kPoints using t, interpolates with the next point when available, and writes the result to kPointOut.
 // @fnv 0x00e47440
-void CurvePointSampler::FUN_00e47440(float afParam, hkVector4& kPointOut) const
+// src: HAVOK_SRC 0x00e47440
+void CurvePointSampler::hkpLinearParametricCurve_getPoint(float afParam, hkVector4& kPointOut) const
 {
-    const int i = (afParam < 0.0f) ? 0 : FUN_00cbfef0(afParam);
+    const int i = (afParam < 0.0f) ? 0 : hkMath_hkFloatToInt(afParam);
     const float fFrac = afParam - i;
     const int iNextIndex = i + 1;
     if (iNextIndex < m_kPoints.GetLogicalSize())
@@ -150,7 +156,7 @@ void CurvePointSampler::FUN_00e47440(float afParam, hkVector4& kPointOut) const
 }
 
 namespace fnv_00e474e0 {
-extern int __cdecl FUN_00cbfef0(float f);
+extern int __cdecl hkMath_hkFloatToInt(float f);
 
 extern const LocalM128 DAT_010ec7f0;
 
@@ -197,7 +203,7 @@ float CurveNearestPoint::FindNearestPoint(float t, const VectorQ& nearPointValue
     {
         t = 0.0f;
     }
-    int ia = FUN_00cbfef0(t);
+    int ia = hkMath_hkFloatToInt(t);
     int ib = ia + 1;
     if (ib >= m_kPoints.GetLogicalSize())
     {
@@ -277,7 +283,7 @@ namespace fnv_00e478d0 {
 
 extern LocalM128 DAT_010ec7f0;
 
-int __cdecl FUN_00cbfef0(hkReal r);
+int __cdecl hkMath_hkFloatToInt(hkReal r);
 
 static __forceinline void hkSetSub4(hkVector4& out, const hkVector4& a, const hkVector4& b)
 {
@@ -319,7 +325,7 @@ void LinearCurveT::GetTangent(hkReal t, hkVector4& tangentOut) const
     hkReal smooth = m_fSmoothingValue;
     hkReal invSmooth = 1.0f / smooth;
 
-    int ia = FUN_00cbfef0(t);
+    int ia = hkMath_hkFloatToInt(t);
     int ib = ia + 1;
     if (ib >= m_kPoints.m_iElementCount)
     {
@@ -363,7 +369,7 @@ void LinearCurveT::GetTangent(hkReal t, hkVector4& tangentOut) const
 }
 }  // namespace fnv_00e478d0
 
-int __cdecl FUN_00cbfef0(float f);
+int __cdecl hkMath_hkFloatToInt(float f);
 
 class CurveDistanceInterpolator : public hkpLinearParametricCurve
 {
@@ -375,7 +381,7 @@ class CurveDistanceInterpolator : public hkpLinearParametricCurve
 // @fnv 0x00e47c30
 float CurveDistanceInterpolator::GetInterpolatedValue(float t) const
 {
-    int i = FUN_00cbfef0(t);
+    int i = hkMath_hkFloatToInt(t);
     float fInterval;
     if (i >= m_kPoints.m_iElementCount - 1)
     {
@@ -409,7 +415,7 @@ struct ThreadMemory
     Allocator* m_pMemoryAllocator;
 };
 
-void* FUN_00c85750();
+void* hkMemoryRouter_getInstance();
 
 struct CurveHelper : public hkpLinearParametricCurve
 {
@@ -420,7 +426,7 @@ struct CurveHelper : public hkpLinearParametricCurve
 // @fnv 0x00e47fa0
 void CurveHelper::CopyPoints(hkArray<hkVector4>& out) const
 {
-    Allocator* mgr = ((ThreadMemory*)FUN_00c85750())->m_pMemoryAllocator;
+    Allocator* mgr = ((ThreadMemory*)hkMemoryRouter_getInstance())->m_pMemoryAllocator;
     int cap = out.m_iCapacityState & 0x3fffffff;
     if (cap < this->m_kPoints.m_iElementCount)
     {
@@ -496,12 +502,12 @@ static __forceinline hkSimdReal curveLane(const hkVector4& vector, int i)
 // The shared curve does not yet declare clone/add-point; no layout is repeated.
 struct LinearCurveClone : public hkpLinearParametricCurve
 {
-    LinearCurveClone* FUN_00e48090();
+    LinearCurveClone* hkpLinearParametricCurve_clone();
     void FUN_00e47e80(const hkVector4*);
 };
 static __forceinline LinearCurveClone* createCurve()
 {
-    CurveThreadMemory* memory = (CurveThreadMemory*)FUN_00c85750();
+    CurveThreadMemory* memory = (CurveThreadMemory*)hkMemoryRouter_getInstance();
     void* chunk = memory->m_pThreadAllocator->allocateChunk(0x40);
     ((hkReferencedObject*)chunk)->m_usMemSizeAndFlags = 0x40;
     return static_cast<LinearCurveClone*>(::new (chunk) hkpLinearParametricCurve);
@@ -530,7 +536,8 @@ static __forceinline void copyFromArray_e48090(hkArray<T>& self, Allocator* allo
     arrCopy_e48090(self.m_data, 0, a.m_data, self.m_iElementCount);
 }
 // @fnv 0x00e48090
-LinearCurveClone* LinearCurveClone::FUN_00e48090()
+// src: HAVOK_SRC 0x00e48090
+LinearCurveClone* LinearCurveClone::hkpLinearParametricCurve_clone()
 {
     LinearCurveClone* clone = createCurve();
     int numPoints = this->m_kPoints.m_iElementCount;
@@ -546,7 +553,7 @@ LinearCurveClone* LinearCurveClone::FUN_00e48090()
                          curveLane(m_kVector4, 1),
                          curveLane(m_kVector4, 2), 0.0f);
     copyFromArray_e48090(clone->m_fClosestPointDistanceSquared,
-                         ((CurveThreadMemory*)FUN_00c85750())->m_pThreadAllocator,
+                         ((CurveThreadMemory*)hkMemoryRouter_getInstance())->m_pThreadAllocator,
                          this->m_fClosestPointDistanceSquared);
     clone->m_fSmoothingValue = this->m_fSmoothingValue;
     return clone;
@@ -633,12 +640,13 @@ static __forceinline void hkSetCross(hkVector4& out, const hkVector4& v0, const 
 
 struct LinearCurve : public hkpLinearParametricCurve
 {
-    void FUN_00e47cb0(hkReal t, hkVector4& up) const;
+    void hkpLinearParametricCurve_getBinormal(hkReal t, hkVector4& up) const;
 };
 
 // Computes a normalized up vector for the curve at t by crossing or perpendicularizing the tangent against m_kVector4.
 // @fnv 0x00e47cb0
-void LinearCurve::FUN_00e47cb0(hkReal t, hkVector4& up) const
+// src: HAVOK_SRC 0x00e47cb0
+void LinearCurve::hkpLinearParametricCurve_getBinormal(hkReal t, hkVector4& up) const
 {
     hkVector4 tangent;
     const_cast<LinearCurve*>(this)->GetTangentAt(t, reinterpret_cast<VectorQ&>(tangent));

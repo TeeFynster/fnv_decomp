@@ -9,6 +9,6 @@ class NiIntegerStreamEntry
 {
   public:
     unsigned int fields[3];
-    void FUN_00c545d0(NiStream&);
+    void FurnitureMark_LoadBinary(NiStream&);
 };
 #endif

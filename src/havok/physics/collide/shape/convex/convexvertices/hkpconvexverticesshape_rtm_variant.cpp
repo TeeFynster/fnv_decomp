@@ -40,7 +40,7 @@ extern "C" {
     LocalM128 _mm_sub_ps(LocalM128, LocalM128);
     void _mm_store_ss(float*, LocalM128);
     double __cdecl sqrt(double) throw();
-    ThreadMemory& __cdecl FUN_00c85750() throw();
+    ThreadMemory& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 struct Allocator {
@@ -81,7 +81,7 @@ struct ThreadMemory {
 
 struct FUN_00d5a4c0_Helper {
 
-    void FUN_00d5a4c0(void* mem, int index, const void* src, int num) throw();
+    void ProcessAndReturnValue_00d5a4c0(void* mem, int index, const void* src, int num) throw();
 
 };
 
@@ -126,7 +126,7 @@ static __forceinline void PlaneArray_initialize(hkArrayBase<hkVector4>& self, hk
 
         const hkArray<hkVector4>& other = shape->m_kVertexPositions;
 
-        Allocator& alloc = ((ThreadMemory*)&FUN_00c85750())->heap();
+        Allocator& alloc = ((ThreadMemory*)&hkMemoryRouter_getInstance())->heap();
 
         if (other.m_iElementCount > 0) {
 
@@ -182,7 +182,7 @@ static __forceinline void PlaneArray_ClearAndRelease(hkArrayBase<hkVector4>& sel
 static __forceinline void PlaneArray_destroy(hkArrayBase<hkVector4>& self) throw()
 {
 
-        PlaneArray_ClearAndRelease(self, ((ThreadMemory*)&FUN_00c85750())->heap());
+        PlaneArray_ClearAndRelease(self, ((ThreadMemory*)&hkMemoryRouter_getInstance())->heap());
 
     }
 
@@ -213,7 +213,7 @@ struct LocalArray {
 
         m_iCapacityState = 0x80000000;
 
-        ThreadMemory* mem = (ThreadMemory*)&FUN_00c85750();
+        ThreadMemory* mem = (ThreadMemory*)&hkMemoryRouter_getInstance();
 
         void* p = mem->m_stackCurrent;
 
@@ -241,9 +241,9 @@ struct LocalArray {
 
         }
 
-        ((ThreadMemory*)&FUN_00c85750())->m_stackCurrent = initial;
+        ((ThreadMemory*)&hkMemoryRouter_getInstance())->m_stackCurrent = initial;
 
-        ClearAndRelease(((ThreadMemory*)&FUN_00c85750())->heap());
+        ClearAndRelease(((ThreadMemory*)&hkMemoryRouter_getInstance())->heap());
 
     }
 
@@ -378,7 +378,8 @@ __forceinline void GetShapeVertices(const hkpConvexVerticesShape* shape, hkArray
 }
 
 // @fnv 0x00d59f40
-void hkpConvexVerticesShape::FUN_00d59f40()
+// src: GUESS 0x00d59f40 (confidence: low)
+void hkpConvexVerticesShape::ProcessEntries_00d59f40()
 
 {
 
@@ -503,9 +504,9 @@ if (reinterpret_cast<PlaneVector&>(normal).normalize()==PlaneSuccess) {
 
         int index = shape->m_kVertexPositions.m_iElementCount;
 
-        ThreadMemory* mem = (ThreadMemory*)&FUN_00c85750();
+        ThreadMemory* mem = (ThreadMemory*)&hkMemoryRouter_getInstance();
 
-        reinterpret_cast<FUN_00d5a4c0_Helper*>(&planeEquations)->FUN_00d5a4c0(
+        reinterpret_cast<FUN_00d5a4c0_Helper*>(&planeEquations)->ProcessAndReturnValue_00d5a4c0(
 
             mem->m_pMemoryAllocator, index, planes.begin(), planes.GetLogicalSize());
 

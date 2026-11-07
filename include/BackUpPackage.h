@@ -27,9 +27,9 @@ public:
     void ExecuteBackupPackage(Actor* actor);
 
     void ForwardToBase(void* buffer);
-    void __thiscall FUN_009edb60(BGSSaveFormBuffer* buffer);
+    void __thiscall SaveGame_009edb60(BGSSaveFormBuffer* buffer);
     void __thiscall LoadGameWithBackup(BGSLoadFormBuffer* buffer);
-    unsigned short __thiscall FUN_009ed5f0();
+    unsigned short __thiscall GetSaveSize_009ed5f0();
     void SaveBackupPackage();
     void LoadPackageBlock();
 

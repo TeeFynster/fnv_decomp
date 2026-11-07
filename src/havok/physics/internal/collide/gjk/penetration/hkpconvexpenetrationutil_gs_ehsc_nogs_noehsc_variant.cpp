@@ -26,7 +26,7 @@ struct Obj
     int m_iThirdValue;
     int m_auiShapeKeys[4];
     Entry m_usTrailingValue[4];
-    void FUN_00e2d440();
+    void ProcessEntries_00e2d440();
     void SetEntries(const hkVector4* a, const hkVector4* b, const hkVector4* c);
 };
 struct FUN_00df9c40_Obj
@@ -130,7 +130,7 @@ struct hkpCdVertexPairDF9B
 class hkpMinkowskiDF9B
 {
   public:
-    void FUN_00df9b50(const hkVector4& kDirection, hkpCdVertexPairDF9B& kOut) const;
+    void UpdateState_00df9b50(const hkVector4& kDirection, hkpCdVertexPairDF9B& kOut) const;
 
     hkTransform m_kTransform;
     unsigned int unk40, unk44, unk48, unk4C, unk50;
@@ -139,7 +139,8 @@ class hkpMinkowskiDF9B
 };
 
 // @fnv 0x00df9b50
-void hkpMinkowskiDF9B::FUN_00df9b50(const hkVector4& kDirection, hkpCdVertexPairDF9B& kOut) const
+// src: GUESS 0x00df9b50 (confidence: low)
+void hkpMinkowskiDF9B::UpdateState_00df9b50(const hkVector4& kDirection, hkpCdVertexPairDF9B& kOut) const
 {
     m_pShapeA->GetSupportVertex(kDirection, reinterpret_cast<Vector4WithInt24W&>(kOut.m_kVertexA));
     hkVector4 kNegDir;
@@ -186,9 +187,9 @@ struct S00df9ef0_Hit
 
 struct S00df9ef0_Obj
 {
-    void FUN_00df9b50(const hkVector4* in, hkVector4* out);
+    void UpdateState_00df9b50(const hkVector4* in, hkVector4* out);
 
-    void FUN_00df9ef0(hkVector4* p, S00df9ef0_Pad<hkVector4> r, S00df9ef0_Hit* q, S00df9ef0_Pad<float> outF);
+    void ComputeValues_00df9ef0(hkVector4* p, S00df9ef0_Pad<hkVector4> r, S00df9ef0_Hit* q, S00df9ef0_Pad<float> outF);
 };
 
 static float S00df9ef0_Dot3(__m128 v)
@@ -201,15 +202,16 @@ static float S00df9ef0_Dot3(__m128 v)
 }
 
 // @fnv 0x00df9ef0
-void S00df9ef0_Obj::FUN_00df9ef0(hkVector4* p, S00df9ef0_Pad<hkVector4> r, S00df9ef0_Hit* q,
+// src: GUESS 0x00df9ef0 (confidence: low)
+void S00df9ef0_Obj::ComputeValues_00df9ef0(hkVector4* p, S00df9ef0_Pad<hkVector4> r, S00df9ef0_Hit* q,
                                  S00df9ef0_Pad<float> outF)
 {
     S00df9ef0_Hit h;
     hkVector4 neg;
     _mm_store_ps(&neg.x, _mm_xor_ps(_mm_load_ps(&p->x), DAT_010c44d0));
-    this->FUN_00df9b50(p, &h.a);
+    this->UpdateState_00df9b50(p, &h.a);
     S00df9ef0_Hit* qq = q;
-    this->FUN_00df9b50(&neg, &qq->a);
+    this->UpdateState_00df9b50(&neg, &qq->a);
 
     float f1 = S00df9ef0_Dot3(_mm_mul_ps(_mm_sub_ps(_mm_load_ps(&h.a.x), _mm_load_ps(&r->x)), _mm_load_ps(&p->x)));
     float f2 = S00df9ef0_Dot3(_mm_mul_ps(_mm_sub_ps(_mm_load_ps(&qq->a.x), _mm_load_ps(&r->x)), _mm_load_ps(&neg.x)));
@@ -259,7 +261,7 @@ struct Edges
 
 struct Result4 : hkVector4
 {
-    __declspec(noalias) void FUN_004b4ab0(const Edges* edges, const Tri* tri);
+    __declspec(noalias) void hkVector4_setRotatedInverseDir(const Edges* edges, const Tri* tri);
 };
 
 struct Shape
@@ -269,8 +271,8 @@ struct Shape
     int unk08;
     int m_iThirdValue;
     int m_10;
-    int FUN_00dfb040(const Tri* tri, const hkVector4* pos, int* outA, int* outB);
-    int FUN_00e2d1b0(int a, int b, const hkVector4* pos);
+    int hkWingedEdge_findVisibilityBoundaryEdges(const Tri* tri, const hkVector4* pos, int* outA, int* outB);
+    int AllocateTriangleFan(int a, int b, const hkVector4* pos);
 };
 
 struct Tester
@@ -292,11 +294,12 @@ struct Tester
     int unk38;
     int unk3C;
     hkVector4 m_40;
-    int FUN_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int* result);
+    int ComputeValues_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int* result);
 };
 
 // @fnv 0x00df9c90
-int Tester::FUN_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int* result)
+// src: GUESS 0x00df9c90 (confidence: low)
+int Tester::ComputeValues_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int* result)
 {
     Edges edges;
     __m128 p = *(const __m128*)pos;
@@ -304,7 +307,7 @@ int Tester::FUN_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int
     *(__m128*)&edges.e1 = _mm_sub_ps(p, *(const __m128*)tri->m_p1);
     *(__m128*)&edges.e2 = _mm_sub_ps(p, *(const __m128*)tri->m_p2);
     Result4 bary;
-    bary.FUN_004b4ab0(&edges, tri);
+    bary.hkVector4_setRotatedInverseDir(&edges, tri);
     if (_mm_movemask_ps(_mm_cmplt_ps(*(__m128*)&bary, *(__m128*)&m_40)) & 7)
     {
         *result = 0;
@@ -312,7 +315,7 @@ int Tester::FUN_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int
     }
     int a = 0;
     int b;
-    if (shape->FUN_00dfb040(tri, pos, &a, &b))
+    if (shape->hkWingedEdge_findVisibilityBoundaryEdges(tri, pos, &a, &b))
     {
         *result = 3;
         return 1;
@@ -322,7 +325,7 @@ int Tester::FUN_00df9c90(Shape* shape, const Tri* tri, const hkVector4* pos, int
         *result = 2;
         return 1;
     }
-    if (shape->FUN_00e2d1b0(a, b, pos))
+    if (shape->AllocateTriangleFan(a, b, pos))
     {
         *result = 3;
         return 1;

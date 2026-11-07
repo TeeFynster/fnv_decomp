@@ -15,7 +15,8 @@ struct StateD72090
 };
 
 // @fnv 0x00d72090
-void FUN_00d72090(StateD72090* out)
+// src: HAVOK_LIB 0x00d72090
+void _hkSimpleContactConstraintDataAddALittleSurfaceViscosity(StateD72090* out)
 {
     out->unk0C = 0.0f;
     out->unk14 = 0.0f;
@@ -71,14 +72,15 @@ struct __declspec(align(16)) Buffer
     int unk7c;
 };
 
-extern "C" void __cdecl FUN_00d72090(void*);
-extern "C" void __cdecl FUN_00d72190(Node*, Buffer*, int, int*);
-extern "C" void __cdecl FUN_00d6f460(Node*, unsigned short, Buffer*, int*);
+extern "C" void __cdecl _hkSimpleContactConstraintDataAddALittleSurfaceViscosity(void*);
+extern "C" void __cdecl hkSimpleContactConstraintDataBuildJacobian(Node*, Buffer*, int, int*);
+extern "C" void __cdecl hkSolverBuildJacobianFromAtomsNotContact(Node*, unsigned short, Buffer*, int*);
 extern "C" Buffer* __cdecl GetSharedBuffer();
 
 // Copies source to a local buffer, follows unk14 links while unk00 >= 0x17, then calls FUN_00d72190 if that node's unk00 is 0x16, else FUN_00d6f460.
 // @fnv 0x00d6c5a0
-static void __cdecl FUN_00d6c5a0(Node* self, int* counter, Buffer* source)
+// src: GUESS 0x00d6c5a0 (confidence: low)
+static void __cdecl Object_CopyData_00d6c5a0(Node* self, int* counter, Buffer* source)
 {
     Buffer buffer;
     union Flag
@@ -98,21 +100,21 @@ static void __cdecl FUN_00d6c5a0(Node* self, int* counter, Buffer* source)
         node = node->unk14;
     } while (node->unk00 >= 0x17);
 
-    FUN_00d72090(&node->unk10);
+    _hkSimpleContactConstraintDataAddALittleSurfaceViscosity(&node->unk10);
 
     node = self->unk14;
     if (node->unk00 == 0x16)
     {
         flag.byte = 1;
-        FUN_00d72190(node, &buffer, flag.value, counter);
+        hkSimpleContactConstraintDataBuildJacobian(node, &buffer, flag.value, counter);
     }
     else
     {
-        FUN_00d6f460(node, (unsigned short)value, &buffer, counter);
+        hkSolverBuildJacobianFromAtomsNotContact(node, (unsigned short)value, &buffer, counter);
     }
 }
 
 void __cdecl Caller(Node* self, int* counter)
 {
-    FUN_00d6c5a0(self, counter, GetSharedBuffer());
+    Object_CopyData_00d6c5a0(self, counter, GetSharedBuffer());
 }

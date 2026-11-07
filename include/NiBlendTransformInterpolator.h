@@ -13,6 +13,6 @@ class NiBlendTransformInterpolator : public NiBlendInterpolator
     bool Update(float fTime, NiObjectNET* pkObject, NiQuatTransform& kTransform);
     bool UpdateAccumulatedTransform(float fTime, NiObjectNET* pkObject, NiQuatTransform& kTransform);
     bool UpdateSingleInterpolator(float fTime, NiObjectNET* pkObject, NiQuatTransform& kTransform);
-    bool FUN_00a40b30(float time, NiObjectNET* object, NiQuatTransform& value);
+    bool StoreSingleValue(float time, NiObjectNET* object, NiQuatTransform& value);
 
 };

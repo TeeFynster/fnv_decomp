@@ -13,7 +13,8 @@
 extern "C" void* g_011f5b88;
 
 // @fnv 0x00a8a7b0
-void* __cdecl FUN_00a8a7b0()
+// src: COMMUNITY 0x00a8a7b0
+void* __cdecl NiLinesData_GetRTTI()
 {
     return &g_011f5b88;
 }
@@ -89,15 +90,15 @@ inline unsigned int NiTArray<T, TAlloc>::Add(const T& s)
 }
 
 extern int DAT_011f5b88;
-const char* FUN_00a7d330(int g);
-const char* FUN_00a7d5a0(const char* fmt, int v);
+const char* NiViewerStrings_NiGetViewerString_Title(int g);
+const char* NiGetViewerString_00a7d5a0(const char* fmt, int v);
 
 // @fnv 0x00a8a890
 void NiLinesData::GetViewerStrings(NiViewerStringsArray* arr)
 {
     RegisterGeometryFields(arr);
-    arr->Add(FUN_00a7d330(DAT_011f5b88));
-    arr->Add(FUN_00a7d5a0("m_pkFlags", reinterpret_cast<int>(m_pkFlags)));
+    arr->Add(NiViewerStrings_NiGetViewerString_Title(DAT_011f5b88));
+    arr->Add(NiGetViewerString_00a7d5a0("m_pkFlags", reinterpret_cast<int>(m_pkFlags)));
 }
 
 inline unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,

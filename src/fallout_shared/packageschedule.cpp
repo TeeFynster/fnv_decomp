@@ -81,12 +81,13 @@ struct DurationData
 typedef char _sizecheck_PackageSchedule[sizeof(DurationData) == 8 ? 1 : -1];
 struct FUN_0067fd40_shell : public DurationData
 {
-    void FUN_0067fd40(DurationData*);
+    void PackageSchedule_Copy(DurationData*);
 };
 
 // Copies the start month, day of week, date, time and duration from apCopy into this schedule when apCopy is non-null.
 // @fnv 0x0067fd40
-void FUN_0067fd40_shell::FUN_0067fd40(DurationData* apCopy)
+// src: COMMUNITY 0x0067fd40
+void FUN_0067fd40_shell::PackageSchedule_Copy(DurationData* apCopy)
 {
     if (apCopy)
     {
@@ -157,16 +158,17 @@ public:
 typedef char _sizecheck_CombatCoverLocation[sizeof(CombatCoverPointData_packageschedule) == 120 ? 1 : -1];
 struct FUN_0067fdb0_shell : public CombatCoverPointData_packageschedule
 {
-    void FUN_0067fdb0(bool);
+    void PackageSchedule_SetStartDayOfWeek(bool);
 };
 
 // @fnv 0x0067fdb0
-void FUN_0067fdb0_shell::FUN_0067fdb0(bool abValue)
+// src: COMMUNITY 0x0067fdb0
+void FUN_0067fdb0_shell::PackageSchedule_SetStartDayOfWeek(bool abValue)
 {
     *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 1) = abValue;  // bReserved (+0x1); the shared CombatCoverPointData_packageschedule names no fields
 }
 
-extern "C" unsigned char __cdecl FUN_00401500();
+extern "C" unsigned char __cdecl TESForm_QEndianSwapOnSave();
 extern "C" void __cdecl AppendChunk(int, void*, int);
 
 struct FUN_0067fec0_shell
@@ -177,10 +179,10 @@ struct FUN_0067fec0_shell
 // @fnv 0x0067fec0
 void FUN_0067fec0_shell::Save()
 {
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         reinterpret_cast<QuestData*>(this)->Endian();
     AppendChunk(0x54445350, this, 8);
-    if (FUN_00401500())
+    if (TESForm_QEndianSwapOnSave())
         reinterpret_cast<QuestData*>(this)->Endian();
 }
 
@@ -230,14 +232,15 @@ struct BoundHolder
 struct DurationData : BoundHolder
 {
     int GetSecondByte();
-    char FUN_00678ce0();
+    char Main_GameReset();
     char FUN_0086a460();
     int _ref_00726070();
-    char FUN_0067fe10(DurationData* other);
+    char EvaluateValue_0067fe10(DurationData* other);
 };
 // Returns 1 if other is null or any of five compared values differ, otherwise returns 0.
 // @fnv 0x0067fe10
-char DurationData::FUN_0067fe10(DurationData* other)
+// src: GUESS 0x0067fe10 (confidence: low)
+char DurationData::EvaluateValue_0067fe10(DurationData* other)
 {
     if (!other)
         return 1;
@@ -245,7 +248,7 @@ char DurationData::FUN_0067fe10(DurationData* other)
         return 1;
     if (GetBoundingRadius() != other->GetBoundingRadius())
         return 1;
-    if (FUN_00678ce0() != other->FUN_00678ce0())
+    if (Main_GameReset() != other->Main_GameReset())
         return 1;
     if (FUN_0086a460() != other->FUN_0086a460())
         return 1;

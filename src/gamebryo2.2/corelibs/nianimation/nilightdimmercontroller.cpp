@@ -10,7 +10,8 @@
 extern "C" char __stdcall FUN_00a57c10(void* a);
 
 // @fnv 0x00a4cf50
-char __stdcall FUN_00a4cf50(void* pThis)
+// src: XBOX_PDB 0x00a4cf50
+char __stdcall NiLightDimmerController_IsEqual(void* pThis)
 {
     return FUN_00a57c10(pThis) != 0;
 }
@@ -30,7 +31,8 @@ struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f3fa0;
 
 // @fnv 0x00a4cf90
-GlobalObjectO2_00a7b610* __cdecl FUN_00a4cf90()
+// src: COMMUNITY 0x00a4cf90
+GlobalObjectO2_00a7b610* __cdecl NiLightDimmerController_GetRTTI()
 {
     return &g_011f3fa0;
 }
@@ -41,7 +43,8 @@ inline void* __cdecl operator new(unsigned int, void* p)
     return p;
 }
 // @fnv 0x00a4d0d0
-void* FUN_00a4d0d0()
+// src: EXE 0x00a4d0d0
+void* NiLightDimmerController_CreateObject()
 {
     void* p = BSFadeNode::operator new(0x38);
     if (p)
@@ -54,20 +57,21 @@ void* FUN_00a4d0d0()
 }
 
 #include "../../../../include/NiTPrimitiveArray.h"
-void __stdcall FUN_00a576c0(NiTPrimitiveArray<char*>*);
-char* __cdecl FUN_00a7d330(const char*);
+void __stdcall NiFloatInterpController_GetViewerStrings(NiTPrimitiveArray<char*>*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
 // @fnv 0x00a4d100
-void __stdcall FUN_00a4d100(NiTPrimitiveArray<char*>* pkStrings)
+// src: XBOX_PDB 0x00a4d100
+void __stdcall NiLightDimmerController_GetViewerStrings(NiTPrimitiveArray<char*>* pkStrings)
 {
-    FUN_00a576c0(pkStrings);
-    char* pszStr = FUN_00a7d330(*(const char**)&g_011f3fa0);
+    NiFloatInterpController_GetViewerStrings(pkStrings);
+    char* pszStr = NiViewerStrings_NiGetViewerString_Title(*(const char**)&g_011f3fa0);
     unsigned int uIdx = pkStrings->m_usSize;
     if (uIdx >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(uIdx + pkStrings->m_usGrowBy);
     pkStrings->SetAt(uIdx, pszStr);
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 struct FloatInterpOwner
 {
@@ -78,7 +82,7 @@ struct FloatInterpOwner
 // @fnv 0x00a4d080
 void* FloatInterpOwner::CreateFloatInterpController(int arg)
 {
-    NiFloatInterpController* obj = (NiFloatInterpController*)FUN_00aa13e0(0x38);
+    NiFloatInterpController* obj = (NiFloatInterpController*)Object_DispatchCommandFour(0x38);
     if (obj != 0)
     {
         obj->NiFloatInterpController::NiFloatInterpController();
@@ -107,7 +111,7 @@ void __fastcall UpdateDimmer(NiLightDimmerController* controller, void*, const f
     {
         controller->m_fControllerTime = DAT_01096324;
     }
-    else if (controller->FUN_00a36250(fTime) && (!controller->m_spControllerInterpolator.m_pObject || !controller->m_spControllerInterpolator.m_pObject->AlwaysUpdate()))
+    else if (controller->DontDoUpdate(fTime) && (!controller->m_spControllerInterpolator.m_pObject || !controller->m_spControllerInterpolator.m_pObject->AlwaysUpdate()))
     {
         return;
     }
@@ -130,7 +134,8 @@ void __fastcall UpdateDimmer(NiLightDimmerController* controller, void*, const f
 extern void FUN_00a57c70();
 
 // @fnv 0x00a4cf40
-void FUN_00a4cf40()
+// src: XBOX_PDB 0x00a4cf40
+void NiLightDimmerController_LoadBinary()
 {
     FUN_00a57c70();
 }

@@ -29,7 +29,7 @@ void ImageSpaceEffectMultiTexture::Setup(ImageSpaceManager* manager, VatsScanEff
     ImageSpaceTexture* pTexture = new ImageSpaceTexture;
     pTextures.SetAt(3, pTexture);
     pTextures.m_pBase[3]->SetTexture(pScanTexture);
-    pTextures.m_pBase[3]->FUN_00ba3760(3);
+    pTextures.m_pBase[3]->NiShader_SetImplementation(3);
     pTexture = new ImageSpaceTexture;
     pTextures.SetAt(4, pTexture);
     pTextures.m_pBase[4]->SetTexture(pDistortTexture);

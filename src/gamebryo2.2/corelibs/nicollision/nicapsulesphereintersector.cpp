@@ -65,11 +65,12 @@ struct S_00eaea50
     float m_fValue;
     float m_fParam;
 
-    float FUN_00eaea50(const NiPoint3& kV0, const NiPoint3& kV1, float fTime);
+    float NiCapsuleSphereIntersector_Pseudodistance(const NiPoint3& kV0, const NiPoint3& kV1, float fTime);
 };
 
 // @fnv 0x00eaea50
-float S_00eaea50::FUN_00eaea50(const NiPoint3& kV0, const NiPoint3& kV1, float fTime)
+// src: GAMEBRYO_LIB 0x00eaea50
+float S_00eaea50::NiCapsuleSphereIntersector_Pseudodistance(const NiPoint3& kV0, const NiPoint3& kV1, float fTime)
 {
     OriginDirectionPair kSeg = m_pkCapsule->m_kOriginDirectionPair;
     kSeg.m_kStartPoint += kV0 * fTime;
@@ -80,7 +81,7 @@ float S_00eaea50::FUN_00eaea50(const NiPoint3& kV0, const NiPoint3& kV1, float f
 
 struct SegmentMethods : OriginDirectionPair
 {
-    NiPoint3 FUN_00eb6090(float parameter) const;
+    NiPoint3 NiSegment_GetPoint(float parameter) const;
 };
 struct CapsuleGeometry : S_00eaea50_Capsule
 {
@@ -108,7 +109,7 @@ struct ContactGeometry
 void ContactGeometry::ComputeContactPoint(const NiPoint3& velocity0, const NiPoint3& velocity1)
 {
     NiPoint3 kCapsulePoint =
-        static_cast<const SegmentMethods&>(m_pkCapsule->m_kOriginDirectionPair).FUN_00eb6090(m_fParam);
+        static_cast<const SegmentMethods&>(m_pkCapsule->m_kOriginDirectionPair).NiSegment_GetPoint(m_fParam);
     const NiPoint3* __restrict pkSphereCenter = &m_pkSphere->m_kCenter;
     NiPoint3 kSpherePoint = *pkSphereCenter;
     if (m_eRequestType == 2)
@@ -116,7 +117,7 @@ void ContactGeometry::ComputeContactPoint(const NiPoint3& velocity0, const NiPoi
         kCapsulePoint += velocity0 * m_fTime;
         kSpherePoint += velocity1 * m_fTime;
         m_kPlaneNormal = Difference(kSpherePoint, kCapsulePoint);
-        m_kPlaneNormal.FUN_004a0c10();
+        m_kPlaneNormal.Unitize_004a0c10();
         m_kPoint = kCapsulePoint + m_kPlaneNormal * m_pkCapsule->m_fBoundRadius;
     }
     else
@@ -125,7 +126,7 @@ void ContactGeometry::ComputeContactPoint(const NiPoint3& velocity0, const NiPoi
         if (kCapsulePoint != kSpherePoint)
         {
             m_kPlaneNormal = Difference(kSpherePoint, kCapsulePoint);
-            m_kPlaneNormal.FUN_004a0c10();
+            m_kPlaneNormal.Unitize_004a0c10();
         }
         else
             m_kPlaneNormal = DAT_011a9484;

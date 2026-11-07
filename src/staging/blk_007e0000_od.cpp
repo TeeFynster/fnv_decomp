@@ -22,44 +22,47 @@
 #include "../../include/BSSoundHandle.h"
 #include "../../include/Tile.h"
 
-const char* __cdecl FUN_007ab810();
+const char* __cdecl XVirtualKeyboard_IsActive();
 
 struct FUN_007e6760_cls
 {
-    bool __thiscall FUN_007e6760();
+    bool __thiscall TextEntryMenu_IsDone();
 };
 
 // @fnv 0x007e6760
-bool __thiscall FUN_007e6760_cls::FUN_007e6760()
+// src: XBOX_PDB 0x007e6760
+bool __thiscall FUN_007e6760_cls::TextEntryMenu_IsDone()
 {
-    return FUN_007ab810() != 0;
+    return XVirtualKeyboard_IsActive() != 0;
 }
 
 // The approved BSAudio header lacks FUN_00ad8510(int, int).
 struct BSAudio_
 {
-    void FUN_00ad8510(int, int);
-    void FUN_007eb8a0();
+    void BSAudio_PauseAllOfType(int, int);
+    void BSAudio_PauseWorldSounds();
 };
 
 // @fnv 0x007eb8a0
-void BSAudio_::FUN_007eb8a0()
+// src: COMMUNITY 0x007eb8a0
+void BSAudio_::BSAudio_PauseWorldSounds()
 {
-    FUN_00ad8510(0x3002, 0);
+    BSAudio_PauseAllOfType(0x3002, 0);
 }
 
-extern "C" void __cdecl FUN_007004e0();
+extern "C" void __cdecl ForwardCall_007004e0();
 
 struct FUN_007f7770_Class
 {
-    void __thiscall FUN_007004e0();
-    void __thiscall FUN_007f7770();
+    void __thiscall ForwardCall_007004e0();
+    void __thiscall ForwardCall_007f7770();
 };
 
 // @fnv 0x007f7770
-void __thiscall FUN_007f7770_Class::FUN_007f7770()
+// src: GUESS 0x007f7770 (confidence: low)
+void __thiscall FUN_007f7770_Class::ForwardCall_007f7770()
 {
-    FUN_007004e0();
+    ForwardCall_007004e0();
 }
 
 extern float DAT_012007d0;
@@ -67,7 +70,8 @@ extern float DAT_012007d4;
 extern char DAT_011ae5d4;
 
 // @fnv 0x007f7a50
-void __cdecl FUN_007f7a50(float afValue1, float afValue2)
+// src: COMMUNITY 0x007f7a50
+void __cdecl ImageSpaceShaderMenuUnpack_SetOffset(float afValue1, float afValue2)
 {
     DAT_012007d0 = afValue1;
     DAT_012007d4 = afValue2;
@@ -75,7 +79,8 @@ void __cdecl FUN_007f7a50(float afValue1, float afValue2)
 }
 
 // @fnv 0x007fa200
-void FOPipboyManager::FUN_007fa200()
+// src: XBOX_PDB 0x007fa200
+void FOPipboyManager::ReInitialize()
 {
     InitializeMenuLight();
 }
@@ -87,7 +92,8 @@ struct Flt
 
 // The shared manager has no declaration for this object accessor.
 // @fnv 0x007fa970
-NiAVObject* __fastcall FUN_007fa970(FOPipboyManager* manager)
+// src: XBOX_PDB 0x007fa970
+NiAVObject* __fastcall FOPipboyManager_Get3rdPersonScreen(FOPipboyManager* manager)
 {
     return manager->m_pPipBoyObject2;
 }
@@ -112,11 +118,12 @@ struct Flt
 
 struct FUN_007fd640Class
 {
-    unsigned int FUN_007fd640();
+    unsigned int RaceSexMenu_GetProjectorFile();
 };
 
 // @fnv 0x007fd640
-unsigned int FUN_007fd640Class::FUN_007fd640()
+// src: XBOX_PDB 0x007fd640
+unsigned int FUN_007fd640Class::RaceSexMenu_GetProjectorFile()
 {
     return ((Flt*)((char*)this + 0x90))->operator unsigned int();
 }
@@ -124,30 +131,32 @@ unsigned int FUN_007fd640Class::FUN_007fd640()
 
 
 // @fnv 0x007fe910
-void RaceSexMenu::FUN_007fe910(void* apList)
+// src: GUESS 0x007fe910 (confidence: medium)
+void RaceSexMenu::OnRaceSelected_Thunk(void* apList)
 {
     OnRaceSelected(apList);
 }
 
 
 extern ::BSStringT<char> g_011daed8;
-void __cdecl FUN_007e65b0();
+void __cdecl TextInputCloseHook();
 struct FUN_007e66a0_cls
 {
     char _0[0x28];
-    void __thiscall FUN_007e66a0(int a, int b);
+    void __thiscall TextEditMenu_HandleClick(int a, int b);
 };
 // If b is zero and a is in [0,3), reads b from this[a+10]; for a==1, sets g_011daed8 from the navmesh pointer at this+0x34 and calls FUN_007e65b0.
 // @fnv 0x007e66a0
-void __thiscall FUN_007e66a0_cls::FUN_007e66a0(int aiIndex, int aiValue)
+// src: COMMUNITY 0x007e66a0
+void __thiscall FUN_007e66a0_cls::TextEditMenu_HandleClick(int aiIndex, int aiValue)
 {
     if (aiValue == 0 && aiIndex >= 0 && aiIndex < 3)
         aiValue = ((int*)this)[aiIndex + 10];
     switch (aiIndex)
     {
     case 1:
-        g_011daed8.Set((const char*)((NavMeshPtr*)((char*)this + 0x34))->FUN_00458b50(), 0);
-        FUN_007e65b0();
+        g_011daed8.Set((const char*)((NavMeshPtr*)((char*)this + 0x34))->AnimatingText_GetFullText(), 0);
+        TextInputCloseHook();
         break;
     }
 }
@@ -181,10 +190,11 @@ struct FUN_007f7880_Class
     float f8;
     float f9;
     float f10;
-    void __thiscall FUN_007f7880(float a, float b, float c);
+    void __thiscall FOHUDEffectManager_TriggerShudder(float a, float b, float c);
 };
 // @fnv 0x007f7880
-void __thiscall FUN_007f7880_Class::FUN_007f7880(float a, float b, float c)
+// src: XBOX_PDB 0x007f7880
+void __thiscall FUN_007f7880_Class::FOHUDEffectManager_TriggerShudder(float a, float b, float c)
 {
     bActive = 1;
     f2 = a;
@@ -210,6 +220,7 @@ extern int DAT_011a0bb0;
 extern Flt g_011db63c;
 // If g_011db63c is nonzero, calls the model loader with DAT_011a0bb0, true, true, then sets g_011db63c to 0.
 // @fnv 0x007ffe00
+// src: COMMUNITY 0x007ffe00
 void PurgeTerminalModel()
 {
     if ((unsigned int)g_011db63c)
@@ -221,15 +232,16 @@ struct FUN_007e0e30_Class
 {
     void* m_p;
     void* m_sub;
-    void FUN_007e0e30(bool(__cdecl* fn)(void*, unsigned int), unsigned int v);
+    void BSSimpleList_Tile_Traverse(bool(__cdecl* fn)(void*, unsigned int), unsigned int v);
 };
 
 // Calls fn on m_p with v and, if that returns true and m_sub is set, recurses into m_sub with the same arguments.
 // @fnv 0x007e0e30
-void FUN_007e0e30_Class::FUN_007e0e30(bool(__cdecl* fn)(void*, unsigned int), unsigned int uiValue)
+// src: XBOX_PDB 0x007e0e30
+void FUN_007e0e30_Class::BSSimpleList_Tile_Traverse(bool(__cdecl* fn)(void*, unsigned int), unsigned int uiValue)
 {
     if (fn(m_p, uiValue) && m_sub)
-        ((FUN_007e0e30_Class*)m_sub)->FUN_007e0e30(fn, uiValue);
+        ((FUN_007e0e30_Class*)m_sub)->BSSimpleList_Tile_Traverse(fn, uiValue);
 }
 
 struct FUN_007f7830_Class
@@ -255,12 +267,13 @@ struct FUN_007fecc0_Class
     unsigned char _1[3];
     float fTime;
     float fValue;
-    void __thiscall FUN_007fecc0();
+    void __thiscall ActivateAndResetTimer();
 };
 
 // Sets bActive to 1, stores the current global time in fTime and resets fValue to 0.0f.
 // @fnv 0x007fecc0
-void __thiscall FUN_007fecc0_Class::FUN_007fecc0()
+// src: GUESS 0x007fecc0 (confidence: medium)
+void __thiscall FUN_007fecc0_Class::ActivateAndResetTimer()
 {
     bActive = 1;
     fTime = (float)g_timeGlobal.GetTime();
@@ -292,7 +305,8 @@ struct SimpleList
 };
 extern SimpleList* DAT_011daec4;
 // @fnv 0x007e65b0
-void FUN_007e65b0()
+// src: COMMUNITY 0x007e65b0
+void TextInputCloseHook()
 {
     if (DAT_011daec4)
     {
@@ -351,7 +365,7 @@ void __thiscall FUN_007f78f0_Class::InitFromPoints(const NiPoint2* apPoint1, con
 struct FUN_007e0d80_shell : Flt
 {
     char* m_buffer;
-    unsigned int FUN_004048e0();
+    unsigned int BSStringT_char_Length();
     unsigned int FUN_004039a0();
     void FUN_004037f0(char* oldBuffer, unsigned int requiredLength);
     void FUN_004039c0(unsigned int newLength);
@@ -368,12 +382,12 @@ FUN_007e0d80_shell* FUN_007e0d80_shell::AppendString(FUN_007e0d80_shell* other)
     {
         if ((unsigned int)*this)
         {
-            unsigned int newLength = FUN_004048e0() + other->FUN_004048e0();
+            unsigned int newLength = BSStringT_char_Length() + other->BSStringT_char_Length();
             if (newLength > FUN_004039a0())
             {
                 FUN_004037f0((char*)(unsigned int)*this, newLength);
             }
-            memcpy(m_buffer + FUN_004048e0(), (char*)(unsigned int)*other, other->GetLengthPlusOne());
+            memcpy(m_buffer + BSStringT_char_Length(), (char*)(unsigned int)*other, other->GetLengthPlusOne());
             FUN_004039c0(newLength);
         }
         else
@@ -385,13 +399,15 @@ FUN_007e0d80_shell* FUN_007e0d80_shell::AppendString(FUN_007e0d80_shell* other)
 }
 
 // @fnv 0x007e1970
-int FUN_007e1970()
+// src: XBOX_PDB 0x007e1970
+int SurgeryMenu_GetClassStatic()
 {
     return 0x41e;
 }
 
 // @fnv 0x007e65a0
-int __cdecl FUN_007e65a0()
+// src: COMMUNITY 0x007e65a0
+int __cdecl TextEdit_GetMenuID()
 {
     return 0x41b;
 }
@@ -544,7 +560,8 @@ float __cdecl FastSqrt(const float* v)
 }
 
 // @fnv 0x007eb8c0
-int __cdecl FUN_007eb8c0()
+// src: XBOX_PDB 0x007eb8c0
+int __cdecl VATSMenu_GetClassStatic()
 {
     return (int)1056u;
 }
@@ -615,23 +632,25 @@ struct SystemColorManager
     bool GetColor(int id, NiColor& out);
 };
 
-Dummy_00718c90* __cdecl FUN_00718b60();
+Dummy_00718c90* __cdecl SystemColorManager_GetInstance();
 
 // The shared manager has no declaration for this initialization helper.
 // @fnv 0x007f7f40
-void __fastcall FUN_007f7f40(FOPipboyManager* manager)
+// src: XBOX_PDB 0x007f7f40
+void __fastcall FOPipboyManager_ResetColors(FOPipboyManager* manager)
 {
     NiColorA color(0.0f, 0.0f, 0.0f, 0.0f);
-    if (reinterpret_cast<SystemColorManager*>(FUN_00718b60())->GetColor(4, *(NiColor*)&color))
+    if (reinterpret_cast<SystemColorManager*>(SystemColorManager_GetInstance())->GetColor(4, *(NiColor*)&color))
     {
         manager->SetQuad(color);
-        manager->FUN_007f7fb0(color);
+        manager->FORenderedMenu_SetTintColor(color);
         manager->InitializeMenuLight();
     }
 }
 
 // @fnv 0x007f7fb0
-void FOPipboyManager::FUN_007f7fb0(const NiColorA& color)
+// src: XBOX_PDB 0x007f7fb0
+void FOPipboyManager::FORenderedMenu_SetTintColor(const NiColorA& color)
 {
     m_kMenuLightColor = color;
 }
@@ -661,7 +680,7 @@ void FOPipboyManager::SetValue(int index, bool play)
         if (g_burstSoundEnabled && play)
         {
             BSSoundHandle handle;
-            handle = BSAudio::GetSingleton()->FUN_00ad7550("UIPipBoyTab", 0x121);
+            handle = BSAudio::GetSingleton()->BSAudio_GetSoundHandleByEditorName("UIPipBoyTab", 0x121);
             handle.Play(false);
         }
     }
@@ -695,7 +714,7 @@ ShadowSceneNode* __cdecl FUN_00450b80(unsigned int uiIndex);
 class Light7FD
 {
   public:
-    void FUN_007fd660(float fScale);
+    void FORenderedMenuRaceSex_SetupLights(float fScale);
 
     int unk000, unk004, unk008, unk00C, unk010, unk014, unk018, unk01C;
     int unk020, unk024, unk028, unk02C, unk030, unk034, unk038, unk03C;
@@ -710,7 +729,8 @@ class Light7FD
 };
 
 // @fnv 0x007fd660
-void Light7FD::FUN_007fd660(float fScale)
+// src: COMMUNITY 0x007fd660
+void Light7FD::FORenderedMenuRaceSex_SetupLights(float fScale)
 {
     float fRadius = ((const NiAVObject*)m_spNode)->GetBoundingVolume().GetRadius() * 3.0 * fScale;
     FUN_00450b80(3)->FUN_00b5ca70((NiNode*)(NiAVObject*)m_spLight, fRadius);
@@ -857,10 +877,11 @@ struct ListOwner
     void Select(Tile*);
     void Update();
     int Mode();
-    Tile* FUN_007e0e70(int data, const char* text, void* compare, const char* name);
+    Tile* StatsMenu_PerksList_Append(int data, const char* text, void* compare, const char* name);
 };
 // @fnv 0x007e0e70
-Tile* ListOwner::FUN_007e0e70(int data, const char* text, void* compare, const char* name)
+// src: COMMUNITY 0x007e0e70
+Tile* ListOwner::StatsMenu_PerksList_Append(int data, const char* text, void* compare, const char* name)
 {
     if (parent && (templateName || name))
     {
@@ -1371,7 +1392,7 @@ struct RemoveTile
 {
     virtual void* Destroy(unsigned int);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void Tile_Set(int, float, bool);
 };
 struct RemoveOwned
 {
@@ -1394,11 +1415,11 @@ struct RemoveNode
 };
 struct RemoveInterface
 {
-    void FUN_00715860(RemoveTile*, int, bool);
+    void InterfaceManager_SetCurrentFocusTarget(RemoveTile*, int, bool);
 };
-RemoveInterface* FUN_004b7210();
-int FUN_00a01860(const char*);
-void FormHeap_Free(void*);
+RemoveInterface* InterfaceManager_GetSingleton();
+int Tile_TextToTrait(const char*);
+void FormHeapFreeAndLog_00401030(void*);
 struct RemoveBase
 {
     int unk00;
@@ -1407,8 +1428,8 @@ struct RemoveView : RemoveBase, RemoveNode
 {
     RemoveTile* container;
     RemoveTile* selected;
-    bool FUN_007242c0(bool);
-    void FUN_00726090();
+    bool ListBox_unsigned_int_GetFlag(bool);
+    void ListBox_unsigned_int_Synchronize();
     bool RemoveNodeFromList(RemoveNode*, RemoveNode*);
 };
 // @fnv 0x007f7380
@@ -1421,17 +1442,17 @@ bool RemoveView::RemoveNodeFromList(RemoveNode* node, RemoveNode* previous)
             selected = node->FUN_00726070() ? (*node->FUN_00726070()->FUN_006815c0())->tile
                                             : (previous && previous != node ? (*previous->FUN_006815c0())->tile : 0);
             if (selected)
-                FUN_004b7210()->FUN_00715860(selected, 0xfc3, true);
+                InterfaceManager_GetSingleton()->InterfaceManager_SetCurrentFocusTarget(selected, 0xfc3, true);
         }
         if (container && (*node->FUN_006815c0())->filtered)
         {
-            container->FUN_00a012d0(FUN_00a01860("_num_filtered"),
-                                    (float)(container->FUN_00a011b0(FUN_00a01860("_num_filtered")) - 1.0), true);
+            container->Tile_Set(Tile_TextToTrait("_num_filtered"),
+                                    (float)(container->FUN_00a011b0(Tile_TextToTrait("_num_filtered")) - 1.0), true);
         }
         RemoveTile* tile_2 = (*node->FUN_006815c0())->tile;
         RemoveTile* tileCopyA = tile_2;
         tileCopyA ? tileCopyA->Destroy(1) : 0;
-        if (FUN_007242c0(true))
+        if (ListBox_unsigned_int_GetFlag(true))
         {
             RemoveOwned* owned3 = (*node->FUN_006815c0())->owned;
             RemoveOwned* ownedCopyB = owned3;
@@ -1439,7 +1460,7 @@ bool RemoveView::RemoveNodeFromList(RemoveNode* node, RemoveNode* previous)
         }
         {
             RemoveData* record7 = *node->FUN_006815c0();
-            FormHeap_Free(record7);
+            FormHeapFreeAndLog_00401030(record7);
         }
         if (node == static_cast<RemoveNode*>(this))
         {
@@ -1466,8 +1487,8 @@ bool RemoveView::RemoveNodeFromList(RemoveNode* node, RemoveNode* previous)
             RemoveNode* oldCopyB4 = oldB;
             oldCopyB4 ? oldCopyB4->FUN_004702f0(1) : 0;
         }
-        if (FUN_007242c0(false))
-            FUN_00726090();
+        if (ListBox_unsigned_int_GetFlag(false))
+            ListBox_unsigned_int_Synchronize();
         return true;
     }
     return false;

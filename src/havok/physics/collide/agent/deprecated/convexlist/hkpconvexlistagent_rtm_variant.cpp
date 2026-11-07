@@ -44,25 +44,25 @@ typedef union __declspec(intrin_type) __declspec(align(16)) {
 #include "../../../../../../../include/hkpConvexListShape.h"
 #include "../../../../../../../include/hkpGskfAgent.h"
 
-extern "C" void __cdecl FUN_00da3510(void*, void*);
-extern "C" void __cdecl FUN_00d339d0(int, int, int, int);
+extern "C" void __cdecl hkpAgent1nSector_ProcessEntries_00da3510(void*, void*);
+extern "C" void __cdecl hkpConvexListAgent_QueryClosestPointsAfterHullTest(int, int, int, int);
 extern "C"
 {
-    void __cdecl FUN_00d33b90(void* a, void* b, void* c, void* d);
+    void __cdecl hkpConvexListAgent_staticGetPenetrations(void* a, void* b, void* c, void* d);
 }
 extern void* __cdecl CreateConvexListAgent();
 extern void* __cdecl InitSpawnedBuffer();
-extern void* __cdecl FUN_00d34970();
-extern void* __cdecl FUN_00d349b0();
-extern void* __cdecl FUN_00d343f0();
+extern void* __cdecl Runtime_UpdateState_00d34970();
+extern void* __cdecl hkpConvexListAgent_staticLinearCast_UpdateState_00d349b0();
+extern void* __cdecl hkpConvexListAgent_createConvexConvexListAgent();
 extern void* __cdecl _FUN_00d33b90();
 extern void* __cdecl _FUN_00d339d0();
-extern void* __cdecl FUN_00d33ca0();
-extern void* __cdecl FUN_00d34510();
+extern void* __cdecl hkpConvexListAgent_staticLinearCast();
+extern void* __cdecl hkpConvexListAgent_createConvexListConvexListAgent();
 void __cdecl RegisterConvexListAgentCollisionFuncs(hkpConvexListAgent* self);
-extern void __cdecl FUN_00d97250(void*, void*, void*);
-void __cdecl FUN_00da42b0(void*, int, int, int);
-void* __stdcall FUN_00d33da0(void* a, void* b, void* c, void* d, void* e);
+extern void __cdecl hkpAgentMachineUtil_calc1nStatistics(void*, void*, void*);
+void __cdecl hkAgent1nMachine_Destroy(void*, int, int, int);
+void* __stdcall hkpConvexListAgent_linearCast(void* a, void* b, void* c, void* d, void* e);
 struct D338e0Agent
 {
     virtual void vf00();
@@ -94,11 +94,11 @@ struct D338e0Local
     int field18;
     int field1C;
 };
-extern "C" void __cdecl FUN_00da48e0(int*, D338e0Local*);
+extern "C" void __cdecl hkAgent1nMachine_UpdateShapeCollectionFilter(int*, D338e0Local*);
 inline void D338e0Dispatch(D338e0Local* local, int* ownerField, int result)
 {
     local->field0C = result;
-    FUN_00da48e0(ownerField, local);
+    hkAgent1nMachine_UpdateShapeCollectionFilter(ownerField, local);
 }
 void __cdecl ReleaseAllEntries(void* out, void* src, void* arg);
 void InitBlockPool(void* p);
@@ -120,19 +120,20 @@ class hkCollectorD347 : public hkCollectorBaseD347
 
     int m_iFilter;
 };
-extern "C" void __cdecl FUN_00d43dc0(void* a, void* b, void* c, hkCollectorBaseD347& collector);
-void __cdecl FUN_00d34790(void* b, void* a, void* c, int filter);
-extern "C" void __cdecl FUN_00d34810();
+extern "C" void __cdecl hkpShapeCollectionAgent_staticGetPenetrations(void* a, void* b, void* c, hkCollectorBaseD347& collector);
+void __cdecl hkCollectorD347_ProcessState_00d34790(void* b, void* a, void* c, int filter);
+extern "C" void __cdecl hkpShapeCollectionAgent_staticLinearCast_UpdateState_00d34810();
 // @fnv 0x00d36930
-extern "C" void __cdecl FUN_00d36930()
+// src: GUESS 0x00d36930 (confidence: low)
+extern "C" void __cdecl hkpConvexListAgent_ForwardCall_00d36930()
 {
-    FUN_00d34810();
+    hkpShapeCollectionAgent_staticLinearCast_UpdateState_00d34810();
 }
 struct hkMemberD337
 {
     int unk00;
 };
-void __cdecl FUN_00da35f0(hkMemberD337* member, float a, float b, int c);
+void __cdecl _hkAgent1nMachine_WarpTime(hkMemberD337* member, float a, float b, int c);
 // @fnv 0x00d33890
 extern void __cdecl ReleaseAllEntries(void*, int, void*);
 struct ContactAgent
@@ -170,9 +171,10 @@ struct ContactAgent
     int unk7c;
     int state80;
     unsigned char flag84;
-    void FUN_00d33890(void*);
+    void hkpConvexListAgent_cleanup(void*);
 };
-void ContactAgent::FUN_00d33890(void* input)
+// src: HAVOK_LIB 0x00d33890
+void ContactAgent::hkpConvexListAgent_cleanup(void* input)
 {
     if (flag84)
     {
@@ -180,7 +182,7 @@ void ContactAgent::FUN_00d33890(void* input)
     }
     else
     {
-        FUN_00da42b0(&contact30, state80, collidable08, (int)input);
+        hkAgent1nMachine_Destroy(&contact30, state80, collidable08, (int)input);
     }
     Invalidate(1);
 }
@@ -204,11 +206,11 @@ struct __declspec(align(16)) S00d33940_Out
     float y3;
     float z3;
     float w3;
-    void FUN_00cb22f0(int a, int b);
+    void hkTransform_setMulInverseMul(int a, int b);
 };
 struct S00d33940_Sub
 {
-    void FUN_00dafcd0(int a, int b, S00d33940_Out* c);
+    void hkpGskCache_init(int a, int b, S00d33940_Out* c);
 };
 extern "C" unsigned __int64 __rdtsc(void);
 extern "C" void _ReadWriteBarrier(void);
@@ -220,9 +222,10 @@ struct HitCollector
     bool m_bHit;
 };
 void __cdecl TestGsk(void* a, void* b, void* c, HitCollector* col);
-void __cdecl FUN_00d34790(void* a, void* b, void* c, void* d);
+void __cdecl hkCollectorD347_ProcessState_00d34790(void* a, void* b, void* c, void* d);
 // @fnv 0x00d33b90
-extern "C" void __cdecl FUN_00d33b90(void* a, void* b, void* c, void* d)
+// src: HAVOK_LIB 0x00d33b90
+extern "C" void __cdecl hkpConvexListAgent_staticGetPenetrations(void* a, void* b, void* c, void* d)
 {
     volatile DWORD tick;
     hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -253,7 +256,7 @@ extern "C" void __cdecl FUN_00d33b90(void* a, void* b, void* c, void* d)
             pRec->m_time0 = tick;
             pBuf->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)((char*)pRec + 0xc));
         }
-        FUN_00d34790(a, b, c, d);
+        hkCollectorD347_ProcessState_00d34790(a, b, c, d);
     }
 
     pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -285,7 +288,8 @@ struct ContactPointPair
     const void* m_pBodyB;
 };
 // @fnv 0x00d339d0
-extern "C" void __cdecl FUN_00d339d0(int a1, int a2, int a3, int a4)
+// src: GUESS 0x00d339d0 (confidence: medium)
+extern "C" void __cdecl hkpConvexListAgent_QueryClosestPointsAfterHullTest(int a1, int a2, int a3, int a4)
 {
     {
         hkMonitorStream* pForm = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
@@ -431,7 +435,7 @@ struct Workspace
     L4096 contacts;
     L128 state;
     void __thiscall FUN_00d33670(Arg4&);
-    void __thiscall FUN_00d33600(const Shape&, const Shape&, Arg4&, void*);
+    void __thiscall hkpProcessCollisionOutputBackup_rollbackOutput(const Shape&, const Shape&, Arg4&, void*);
 };
 
 struct Obj
@@ -551,7 +555,7 @@ struct Arg4
 struct CollObj
 {
     Vec4 a, b, c, d;
-    void __thiscall FUN_00cb22f0(Obj*, Obj*);
+    void __thiscall hkTransform_setMulInverseMul(Obj*, Obj*);
 };
 struct SStruct
 {
@@ -586,11 +590,11 @@ struct Big
 };
 
 void FUN_00d33670(void* a);
-void FUN_00d33600(void* a, void* b, void* c, void* d);
-void* FUN_00cb22f0(void* a, void* b);
-int FUN_00dabca0(SStruct* a, void* b, void* c, void* d);
-void FUN_00d33850(void* a);
-void FUN_00d33ef0(void* a);
+void hkpProcessCollisionOutputBackup_rollbackOutput(void* a, void* b, void* c, void* d);
+void* hkTransform_setMulInverseMul(void* a, void* b);
+int hkpGsk_getClosestPoint(SStruct* a, void* b, void* c, void* d);
+void hkpConvexListAgent_switchToGskMode(void* a);
+void hkpConvexListAgent_switchToStreamMode(void* a);
 void FUN_00d42020(void* a, void* b, void* c, void* d);
 struct AddressValue
 {
@@ -598,7 +602,7 @@ struct AddressValue
     __forceinline AddressValue(void* p) : value(p)
     {}
 };
-void FUN_00da4aa0(void* a, const void* b, AddressValue wrapped, void* d, void* e);
+void hkAgent1nMachine_Process(void* a, const void* b, AddressValue wrapped, void* d, void* e);
 void ReleaseAllEntries(void* a, void* b, void* c);
 
 typedef void(__thiscall* Ws70Fn)(void*, const void*);
@@ -657,13 +661,13 @@ struct Agent
     char m_84;
     char m_85;
     short m_86;
-    void __thiscall FUN_00d33850(void*);
-    void __thiscall FUN_00d33ef0(void*);
+    void __thiscall hkpConvexListAgent_switchToGskMode(void*);
+    void __thiscall hkpConvexListAgent_switchToStreamMode(void*);
     void __thiscall FUN_00d42020(const Shape&, const Shape&, const Arg3&, Arg4&);
     __forceinline void processCached(const Shape&, const Shape&, const Arg3&, Arg4&, const Vec4&, Workspace&, StackObj&,
                                      ScalarScratch&, bool&);
     void streamCollision(const Shape&, const Shape&, const Arg3&, Arg4&, const Vec4&, ShapeHead*);
-    void __thiscall FUN_00d33f40(const Shape& a, const Shape& b, const Arg3& c, Arg4& d);
+    void __thiscall hkpConvexListAgent_processCollision(const Shape& a, const Shape& b, const Arg3& c, Arg4& d);
 };
 
 __forceinline void projectDistance(Vec4& normal, const Vec4& vec)
@@ -733,7 +737,7 @@ __forceinline void Agent::streamCollision(const Shape& a, const Shape& b, const 
     LocalM128 motion = vec.m_vComponents;
     big.c = &c;
     big.vec.m_vComponents = motion;
-    big.co.FUN_00cb22f0(a.m_08, b.m_08);
+    big.co.hkTransform_setMulInverseMul(a.m_08, b.m_08);
     int count = bHead->count;
     // The shared router accessor is bound to 0x00c85750; its first slot holds the scratch cursor.
     hkMemoryRouter* pool = (&hkMemoryRouter::getInstance());
@@ -742,7 +746,7 @@ __forceinline void Agent::streamCollision(const Shape& a, const Shape& b, const 
     for (int i = 0; i < count; i++)
         arr[i] = i;
     arr[count] = -1;
-    FUN_00da4aa0(&streaming(), &big, AddressValue(&bHead->unk14), arr, &d);
+    hkAgent1nMachine_Process(&streaming(), &big, AddressValue(&bHead->unk14), arr, &d);
     hkMemoryRouter* pool2 = (&hkMemoryRouter::getInstance());
     pool2->m_stack.m_next.m_storage = arr;
 }
@@ -809,14 +813,15 @@ __forceinline void Agent::processCached(const Shape& a, const Shape& b, const Ar
             if (!(cachedDistance < -scratch.radius))
                 return;
         }
-        ws.FUN_00d33600(a, b, d, m_08);
-        FUN_00d33ef0(d.m_04);
+        ws.hkpProcessCollisionOutputBackup_rollbackOutput(a, b, d, m_08);
+        hkpConvexListAgent_switchToStreamMode(d.m_04);
         retry = true;
         return;
     }
 }
 // @fnv 0x00d33f40
-void __thiscall Agent::FUN_00d33f40(const Shape& a, const Shape& b, const Arg3& c, Arg4& d)
+// src: HAVOK_SRC 0x00d33f40
+void __thiscall Agent::hkpConvexListAgent_processCollision(const Shape& a, const Shape& b, const Arg3& c, Arg4& d)
 {
     Workspace ws;
     Vec4 vec;
@@ -867,7 +872,7 @@ stream: {
         goto sqrtpath;
     m_86 = 0x19;
     {
-        co.FUN_00cb22f0(a.m_08, b.m_08);
+        co.hkTransform_setMulInverseMul(a.m_08, b.m_08);
         SStruct& s = temp.query;
         Vec4 objD;
         s.a0 = a.m_00;
@@ -875,14 +880,14 @@ stream: {
         s.pCo = &co;
         s.pObjA = a.m_08;
         s.f = c.m_08;
-        int res = FUN_00dabca0(&s, &m_0c, &m_20w, &objD);
+        int res = hkpGsk_getClosestPoint(&s, &m_0c, &m_20w, &objD);
         if (res == 0)
         {
             streaming().distance = -m_20w.w;
             goto sqrtpath;
         }
-        FUN_00d33850(d.m_04);
-        ws.FUN_00d33600(a, b, d, m_08);
+        hkpConvexListAgent_switchToGskMode(d.m_04);
+        ws.hkpProcessCollisionOutputBackup_rollbackOutput(a, b, d, m_08);
     }
 }
 // Update cached separation before choosing GSK or cached-contact export.

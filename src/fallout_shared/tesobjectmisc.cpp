@@ -137,30 +137,32 @@ bool TESObjectMISC::Load(TESFile* file)
 
 struct FUN_0051b070_shell
 {
-    void FUN_0051b070(unsigned int aiFlags);
+    void TESObjectMISC_SaveGame(unsigned int aiFlags);
 };
 
 // Calls FUN_00484c20 with aiFlags, then calls FUN_0048e9e0 with aiFlags on the object at this+0x74.
 // @fnv 0x0051b070
-void FUN_0051b070_shell::FUN_0051b070(unsigned int aiFlags)
+// src: XBOX_PDB 0x0051b070
+void FUN_0051b070_shell::TESObjectMISC_SaveGame(unsigned int aiFlags)
 {
     reinterpret_cast<LegacyFormRecordIO*>(this)->SaveRecordFlags(aiFlags);
-    reinterpret_cast<TESValueForm*>(reinterpret_cast<char*>(this) + 0x74)->FUN_0048e9e0(aiFlags);
+    reinterpret_cast<TESValueForm*>(reinterpret_cast<char*>(this) + 0x74)->SaveGame_0048e9e0(aiFlags);
 }
 
 
 struct FUN_0051b020_shell
 {
-    unsigned short __thiscall FUN_0051b020(unsigned int aiFlags);
+    unsigned short __thiscall TESObjectMISC_GetSaveSize(unsigned int aiFlags);
 };
 
 // Returns the sum of GetSaveSize(aiFlags) for this object and the sub-object at offset 0x74.
 // @fnv 0x0051b020
-unsigned short __thiscall FUN_0051b020_shell::FUN_0051b020(unsigned int aiFlags)
+// src: XBOX_PDB 0x0051b020
+unsigned short __thiscall FUN_0051b020_shell::TESObjectMISC_GetSaveSize(unsigned int aiFlags)
 {
     unsigned short isize = 0;
     isize += (unsigned short)((TESForm*)this)->TESForm::GetSaveSize(aiFlags);
-    isize += ((TESValueForm*)((char*)this + 0x74))->FUN_0048e9b0(aiFlags);
+    isize += ((TESValueForm*)((char*)this + 0x74))->GetFlaggedDataSize(aiFlags);
     return isize;
 }
 
@@ -175,7 +177,7 @@ void FUN_0051b0a0_shell::LoadForm(unsigned int aiFlags, BGSLoadFormBuffer* apLoa
     reinterpret_cast<LegacyFormRecordIO*>(this)->LoadRecordArguments(
         aiFlags, reinterpret_cast<unsigned int>(apLoadGameBuffer));
     reinterpret_cast<TESValueForm*>(reinterpret_cast<char*>(this) + 0x74)
-        ->FUN_0048ea10(aiFlags, reinterpret_cast<unsigned int>(apLoadGameBuffer));
+        ->LoadGame_0048ea10(aiFlags, reinterpret_cast<unsigned int>(apLoadGameBuffer));
 }
 
 void _Deallocate(void*);
@@ -202,7 +204,7 @@ struct S_00477f20
 };
 struct S_00487010
 {
-    void FUN_00487010();
+    void Save_00487010();
 };
 struct S_0048a520
 {
@@ -210,7 +212,7 @@ struct S_0048a520
 };
 struct S_0048cca0
 {
-    void FUN_0048cca0();
+    void Save_0048cca0();
 };
 struct FUN_0047a240_shell
 {
@@ -222,48 +224,50 @@ struct FUN_0047b560_holder
 };
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
-void FUN_00485910(unsigned int, unsigned int);
+void TESForm_AddChunk_00485910(unsigned int, unsigned int);
 struct FUN_0051ae80_shell
 {
-    void FUN_0051ae80();
+    void TESObjectMISC_Save();
 };
 // @fnv 0x0051ae80
-void FUN_0051ae80_shell::FUN_0051ae80()
+// src: XBOX_PDB 0x0051ae80
+void FUN_0051ae80_shell::TESObjectMISC_Save()
 {
-    ((TESForm*)this)->FUN_004855a0();
-    ((S_00487010*)((char*)this + 0x30))->FUN_00487010();
+    ((TESForm*)this)->BeginFormRecord();
+    ((S_00487010*)((char*)this + 0x30))->Save_00487010();
     ((S_0048a520*)((char*)this + 0x3c))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    ((FUN_0048e370_obj*)((char*)this + 0x5c))->FUN_0048e370(0x4e4f4349);
+    ((FUN_0048e370_obj*)((char*)this + 0x5c))->TESTexture_Save(0x4e4f4349);
     ((FUN_0047a240_shell*)((char*)this + 0x8c))->FUN_0047a240(0x4f43494d);
-    ((S_0048cca0*)((char*)this + 0x68))->FUN_0048cca0();
+    ((S_0048cca0*)((char*)this + 0x68))->Save_0048cca0();
     ((S_00477f20*)((char*)this + 0x84))->FUN_00477f20();
     ((FUN_0047b560_holder*)((char*)this + 0x9c))->LogFormIDs();
     ((LegacyFormRecordIO*)this)->FinishRecord();
     if (*(unsigned int*)((char*)this + 0xa8))
     {
         unsigned int formID = ((TESForm**)((char*)this + 0xa8))[0]->GetFormID();
-        FUN_00485910(0x4d414e52, formID);
+        TESForm_AddChunk_00485910(0x4d414e52, formID);
     }
-    ((TESForm*)this)->FUN_00485680();
+    ((TESForm*)this)->FinishFormRecord();
 }
 
 struct FUN_008cdd90_shell
 {
-    unsigned int __thiscall FUN_008cdd90();
+    unsigned int __thiscall DialoguePackage_GetCurrentDialogItem();
 };
 struct FUN_0051af50_shell
 {
-    void __thiscall FUN_0051af50(TESForm* apCopy);
+    void __thiscall TESObjectMISC_Copy(TESForm* apCopy);
 };
 // @fnv 0x0051af50
-void __thiscall FUN_0051af50_shell::FUN_0051af50(TESForm* apCopy)
+// src: XBOX_PDB 0x0051af50
+void __thiscall FUN_0051af50_shell::TESObjectMISC_Copy(TESForm* apCopy)
 {
     TESObjectMISC* pmisc = dynamic_cast<TESObjectMISC*>(apCopy);
     if (!pmisc)
         return;
-    ((TESObjectMISC*)this)->FUN_009db930(((FUN_008cdd90_shell*)pmisc)->FUN_008cdd90());
+    ((TESObjectMISC*)this)->FUN_009db930(((FUN_008cdd90_shell*)pmisc)->DialoguePackage_GetCurrentDialogItem());
     ((TESForm*)this)->TESForm::CopyFrom(apCopy);
 }
 
@@ -276,16 +280,17 @@ struct FUN_0051b0d0_holder
 void FUN_0051b0d0_holder::SaveToBuffer(BGSSaveFormBuffer* buffer)
 {
     reinterpret_cast<TESForm*>(this)->TESForm::SaveGame(buffer);
-    reinterpret_cast<TESValueForm*>(reinterpret_cast<char*>(this) + 0x74)->FUN_0048ea40(buffer);
+    reinterpret_cast<TESValueForm*>(reinterpret_cast<char*>(this) + 0x74)->SaveGameBGS_0048ea40(buffer);
 }
 
 struct FUN_0051b100_owner
 {
-    void __thiscall FUN_0051b100(BGSLoadFormBuffer* apLoadGameBuffer);
+    void __thiscall TESObjectMISC_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer);
 };
 // Loads the form from the buffer, then loads the value form at offset 0x74 from the same buffer.
 // @fnv 0x0051b100
-void __thiscall FUN_0051b100_owner::FUN_0051b100(BGSLoadFormBuffer* apLoadGameBuffer)
+// src: XBOX_PDB 0x0051b100
+void __thiscall FUN_0051b100_owner::TESObjectMISC_LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     reinterpret_cast<TESForm*>(this)->TESForm::LoadGame(apLoadGameBuffer);
     reinterpret_cast<TESValueForm*>((char*)this + 0x74)->LoadGame(apLoadGameBuffer);
@@ -293,15 +298,16 @@ void __thiscall FUN_0051b100_owner::FUN_0051b100(BGSLoadFormBuffer* apLoadGameBu
 
 struct FUN_0051afb0_shell : public FUN_008cdd90_shell
 {
-    bool FUN_0051afb0(TESForm* apCompare);
+    bool TESObjectMISC_Compare(TESForm* apCompare);
 };
 // @fnv 0x0051afb0
-bool FUN_0051afb0_shell::FUN_0051afb0(TESForm* apCompare)
+// src: XBOX_PDB 0x0051afb0
+bool FUN_0051afb0_shell::TESObjectMISC_Compare(TESForm* apCompare)
 {
     TESObjectMISC* pcomp = dynamic_cast<TESObjectMISC*>(apCompare);
     if (!pcomp)
         return true;
-    if (FUN_008cdd90() != ((FUN_008cdd90_shell*)pcomp)->FUN_008cdd90())
+    if (DialoguePackage_GetCurrentDialogItem() != ((FUN_008cdd90_shell*)pcomp)->DialoguePackage_GetCurrentDialogItem())
         return true;
     if (((TESForm*)this)->TESForm::Compare((TESForm*)pcomp))
         return true;

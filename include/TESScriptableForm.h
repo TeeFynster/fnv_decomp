@@ -22,7 +22,7 @@ public:
     void Save();
     void Initialize(unsigned int);
     void FUN_006ecd40(unsigned int);
-    void FUN_0048cca0();
+    void Save_0048cca0();
     void* FUN_00726070();
     void InitItem(TESForm* form);
     static Script* GetScriptForForm(TESForm* form);

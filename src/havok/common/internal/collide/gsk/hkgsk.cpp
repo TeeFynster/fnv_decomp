@@ -166,12 +166,13 @@ struct TriangleSolver
     hkVector4 m_unk90;
     hkVector4 m_kSmartReference;
 
-    int FUN_00e4da90(const hkVector4& p, TriangleVerts& tri, hkVector4& normalOut);
+    int ComputeTriangleBarycentricTerms(const hkVector4& p, TriangleVerts& tri, hkVector4& normalOut);
 };
 
 // Computes three dot products into m_barycentric, stores the normal, and may flip the winding and swap values when mask is 7.
 // @fnv 0x00e4da90
-int TriangleSolver::FUN_00e4da90(const hkVector4& p, TriangleVerts& tri, hkVector4& normalOut)
+// src: GUESS 0x00e4da90 (confidence: medium)
+int TriangleSolver::ComputeTriangleBarycentricTerms(const hkVector4& p, TriangleVerts& tri, hkVector4& normalOut)
 {
     hkVector4 e0;
     e0.setSub4(tri.m_kVertices[2], tri.m_kVertices[1]);
@@ -239,7 +240,8 @@ static inline void dot3_3vs3Direct(const hkVector4& a0, const hkVector4& b0, con
 
 // Computes three dot products of cross products with the normal, stores them, and returns a bitmask of negative first three components.
 // @fnv 0x00e4dc70
-int hkVector4::FUN_00e4dc70(const hkVector4& point, const hkVector4* apTriangle, void*)
+// src: GUESS 0x00e4dc70 (confidence: medium)
+int hkVector4::GetTriangleEdgeSignMask(const hkVector4& point, const hkVector4* apTriangle, void*)
 {
     const hkVector4& v0 = apTriangle[0];
     const hkVector4& v1 = apTriangle[1];
@@ -367,7 +369,7 @@ struct Both
     Clip first;
     Clip second;
 };
-extern "C" int FUN_00d22e40(Shape*, const hkVector4*, const hkVector4*, const hkVector4*, Clip*);
+extern "C" int hkLineSegmentUtil_closestLineSegLineSeg(Shape*, const hkVector4*, const hkVector4*, const hkVector4*, Clip*);
 
 static __forceinline void ThreeDots(const hkVector4& first, const hkVector4& firstWeight, const hkVector4& second, const hkVector4& secondWeight,
                                     const hkVector4& third, const hkVector4& thirdWeight, hkVector4& out)
@@ -420,13 +422,14 @@ struct State
     int m10, m14, m18, m1c;
     hkVector4 m20, m30, m40, m50, m60, m70, m80, m90, ma0, mb0, mc0, md0, me0, mf0, m100, m110;
     hkVector4 direction;
-    int FUN_00e4da90(Shape*, Shape*, hkVector4*);
-    int FUN_00e4dc70(hkVector4*, Shape*, hkVector4*);
-    int FUN_00e4bbe0(Shape*, Shape*, int*, int*, unsigned char, int);
+    int ComputeTriangleBarycentricTerms(Shape*, Shape*, hkVector4*);
+    int GetTriangleEdgeSignMask(hkVector4*, Shape*, hkVector4*);
+    int ProcessAndReturnValue_00e4bbe0(Shape*, Shape*, int*, int*, unsigned char, int);
 };
 // Branches on flag, updates shape points and anchors, writes through out1 or out2 on selected paths, and returns status values.
 // @fnv 0x00e4bbe0
-int State::FUN_00e4bbe0(Shape* apShapeA, Shape* apShapeB, int* __restrict apOutCount1, int* __restrict apOutCount2,
+// src: GUESS 0x00e4bbe0 (confidence: low)
+int State::ProcessAndReturnValue_00e4bbe0(Shape* apShapeA, Shape* apShapeB, int* __restrict apOutCount1, int* __restrict apOutCount2,
                         unsigned char flag, int val)
 {
     if (flag)
@@ -455,7 +458,7 @@ int State::FUN_00e4bbe0(Shape* apShapeA, Shape* apShapeB, int* __restrict apOutC
                 Swap(apShapeA->points[0], apShapeA->points[1]);
                 Swap(apShapeA->anchors[0], apShapeA->anchors[1]);
             }
-            if (FUN_00e4da90(apShapeA, apShapeB, &direction) == 7)
+            if (ComputeTriangleBarycentricTerms(apShapeA, apShapeB, &direction) == 7)
             {
                 *apOutCount1 = 1;
                 return 0;
@@ -465,8 +468,8 @@ int State::FUN_00e4bbe0(Shape* apShapeA, Shape* apShapeB, int* __restrict apOutC
         diff.setSub4(apShapeA->points[1], apShapeA->points[0]);
         Clip clip0, clip1;
         Clip* later = &clip1;
-        FUN_00d22e40(apShapeA, &diff, &apShapeB->points[2], &edge0, &clip0);
-        FUN_00d22e40(apShapeA, &diff, &apShapeB->points[2], &edge1, later);
+        hkLineSegmentUtil_closestLineSegLineSeg(apShapeA, &diff, &apShapeB->points[2], &edge0, &clip0);
+        hkLineSegmentUtil_closestLineSegLineSeg(apShapeA, &diff, &apShapeB->points[2], &edge1, later);
         int index = clip0.distance > clip1.distance ? 1 : 0;
         ReplaceSelected(apShapeB->points[index], apShapeB->anchors[index], apShapeB->points[2], apShapeB->anchors[2],
                         apOutCount2);
@@ -489,7 +492,7 @@ int State::FUN_00e4bbe0(Shape* apShapeA, Shape* apShapeB, int* __restrict apOutC
             if (mask(p, apShapeB) == 7)
                 return 1;
         }
-        int r = FUN_00e4dc70(end, apShapeB, &direction);
+        int r = GetTriangleEdgeSignMask(end, apShapeB, &direction);
         if (r == 7)
         {
             CollapseFirst(apShapeA, *end, apOutCount1);

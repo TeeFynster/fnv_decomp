@@ -5,27 +5,28 @@
 #include "../../../../../include/hkpCollisionDispatcher.h"
 
 // @fnv 0x00d46410
-void FUN_00d46410(hkpCollisionDispatcher* dispatcher)
+// src: GUESS 0x00d46410 (confidence: low)
+void hkpCollisionDispatcher_ProcessState_00d46410(hkpCollisionDispatcher* dispatcher)
 {
-    dispatcher->FUN_00cfbf60(1, 0x12);
-    dispatcher->FUN_00cfbf60(3, 0x12);
-    dispatcher->FUN_00cfbf60(4, 0x12);
-    dispatcher->FUN_00cfbf60(5, 0x12);
-    dispatcher->FUN_00cfbf60(2, 0x12);
-    dispatcher->FUN_00cfbf60(6, 0x12);
-    dispatcher->FUN_00cfbf60(0xb, 0x12);
-    dispatcher->FUN_00cfbf60(0xc, 0x12);
-    dispatcher->FUN_00cfbf60(0x14, 0x12);
-    dispatcher->FUN_00cfbf60(0x17, 7);
-    dispatcher->FUN_00cfbf60(9, 7);
-    dispatcher->FUN_00cfbf60(0xe, 7);
-    dispatcher->FUN_00cfbf60(0x10, 7);
-    dispatcher->FUN_00cfbf60(0x1e, 7);
-    dispatcher->FUN_00cfbf60(0x1f, 7);
-    dispatcher->FUN_00cfbf60(0xa, 8);
-    dispatcher->FUN_00cfbf60(0x12, 0x1a);
-    dispatcher->FUN_00cfbf60(0x1c, 0x19);
-    dispatcher->FUN_00cfbf60(0xd, 0x19);
+    dispatcher->registerAlternateShapeType(1, 0x12);
+    dispatcher->registerAlternateShapeType(3, 0x12);
+    dispatcher->registerAlternateShapeType(4, 0x12);
+    dispatcher->registerAlternateShapeType(5, 0x12);
+    dispatcher->registerAlternateShapeType(2, 0x12);
+    dispatcher->registerAlternateShapeType(6, 0x12);
+    dispatcher->registerAlternateShapeType(0xb, 0x12);
+    dispatcher->registerAlternateShapeType(0xc, 0x12);
+    dispatcher->registerAlternateShapeType(0x14, 0x12);
+    dispatcher->registerAlternateShapeType(0x17, 7);
+    dispatcher->registerAlternateShapeType(9, 7);
+    dispatcher->registerAlternateShapeType(0xe, 7);
+    dispatcher->registerAlternateShapeType(0x10, 7);
+    dispatcher->registerAlternateShapeType(0x1e, 7);
+    dispatcher->registerAlternateShapeType(0x1f, 7);
+    dispatcher->registerAlternateShapeType(0xa, 8);
+    dispatcher->registerAlternateShapeType(0x12, 0x1a);
+    dispatcher->registerAlternateShapeType(0x1c, 0x19);
+    dispatcher->registerAlternateShapeType(0xd, 0x19);
 }
 
 // Returns the HK_SHAPE_* name string for a Havok shape type id, or null when the id is unknown.

@@ -133,7 +133,7 @@ namespace ActorValue
 {
     bool IsSkill(Index);
 }
-bool FUN_0066eba0(ActorValue__Index);
+bool ActorValue_IsResistance(ActorValue__Index);
 int Warning(const char*, ...);
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 extern "C" void* __cdecl _alloca(unsigned int);

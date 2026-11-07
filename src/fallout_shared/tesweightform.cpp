@@ -92,7 +92,8 @@ void __fastcall FUN_008c6060(void* pThis);
 
 // Runs the BaseFormComponent constructor, installs the vtable pointer from DAT_0101a4c4, calls FUN_008c6060, and returns pThis.
 // @fnv 0x0048eac0
-void* __fastcall FUN_0048eac0(void* pThis)
+// src: GUESS 0x0048eac0 (confidence: low)
+void* __fastcall Object_InitializeFields_0048eac0(void* pThis)
 {
     ((BaseFormComponent*)pThis)->BaseFormComponent::BaseFormComponent();
     *(int**)pThis = &DAT_0101a4c4;
@@ -105,7 +106,8 @@ extern int DAT_0101a4c4;
 void __fastcall DestroyBaseFormComponent(void* component);
 
 // @fnv 0x0048eaf0
-void __fastcall FUN_0048eaf0(void* pThis)
+// src: GUESS 0x0048eaf0 (confidence: low)
+void __fastcall TESWeightForm_UpdateState_0048eaf0(void* pThis)
 {
     *reinterpret_cast<int*>(pThis) = reinterpret_cast<int>(&DAT_0101a4c4);
     DestroyBaseFormComponent(pThis);
@@ -113,20 +115,21 @@ void __fastcall FUN_0048eaf0(void* pThis)
 
 class PC7d;
 extern PC7d* g_thePlayer;
-void __cdecl FUN_00709470(int, int, int, int, int, int);
-void __cdecl FUN_0047a560(int, PC7d*, int);
+void __cdecl Interface_QueueMenuCreate(int, int, int, int, int, int);
+void __cdecl BGSOpenCloseForm_HandleActivate(int, PC7d*, int);
 struct S00517380
 {
-    void FUN_00517380(int, PC7d*);
+    void TESObjectCONT_HandleOpenFinish(int, PC7d*);
 };
 // If a1 is non-zero and a2 is the player, calls FUN_00709470 with (1, a1, 0, 0, 1, 0) then FUN_0047a560(a1, a2, 0).
 // @fnv 0x00517380
-void S00517380::FUN_00517380(int a1, PC7d* a2)
+// src: COMMUNITY 0x00517380
+void S00517380::TESObjectCONT_HandleOpenFinish(int a1, PC7d* a2)
 {
     if (a1 != 0 && a2 == g_thePlayer)
     {
-        FUN_00709470(1, a1, 0, 0, 1, 0);
-        FUN_0047a560(a1, a2, 0);
+        Interface_QueueMenuCreate(1, a1, 0, 0, 1, 0);
+        BGSOpenCloseForm_HandleActivate(a1, a2, 0);
     }
 }
 
@@ -142,11 +145,12 @@ void Modifier::SetWeight(BaseFormComponent* component)
 
 struct WeightComparison : TESWeightForm
 {
-    bool FUN_0048eb60(BaseFormComponent* component);
+    bool TESWeightForm_CompareComponent(BaseFormComponent* component);
 };
 // Returns true if the other form is not a TESWeightForm or its weight differs from this form's weight.
 // @fnv 0x0048eb60
-bool WeightComparison::FUN_0048eb60(BaseFormComponent* component)
+// src: XBOX_PDB 0x0048eb60
+bool WeightComparison::TESWeightForm_CompareComponent(BaseFormComponent* component)
 {
     TESWeightForm* other = dynamic_cast<TESWeightForm*>(component);
     if (!other)

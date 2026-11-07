@@ -4,11 +4,12 @@
 struct S_0082f1f0_Lock
 {
     CRITICAL_SECTION m_cs;
-    void FUN_0082f1f0();
+    void BSCriticalSection_Unlock();
 };
 
 // @fnv 0x0082f1f0
-void S_0082f1f0_Lock::FUN_0082f1f0()
+// src: XBOX_PDB 0x0082f1f0
+void S_0082f1f0_Lock::BSCriticalSection_Unlock()
 {
     LeaveCriticalSection(&m_cs);
 }

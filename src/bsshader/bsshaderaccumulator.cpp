@@ -142,7 +142,7 @@ void FUN_00b63500_shell::RenderBound(void* aBound, bool abZPrePass)
         batchRenderer, aBound, abZPrePass, *(void**)((char*)this + 8), *(bool*)((char*)this + 0x31));
 }
 
-void __cdecl FUN_00b97e30(unsigned int, unsigned int);
+void __cdecl BSRenderState_SetZWriteEnable(unsigned int, unsigned int);
 void __cdecl SendFloatAdd(float, unsigned int);
 extern bool DAT_011ad80f;
 extern int DAT_011ff9dc;
@@ -150,7 +150,8 @@ extern int DAT_011ff9e4;
 extern float DAT_01200458;
 
 // @fnv 0x00b64e30
-void __fastcall FUN_00b64e30(AccumWIP* pAccumWIP)
+// src: COMMUNITY 0x00b64e30
+void __fastcall BSShaderAccumulator_RenderBlendedDecals(AccumWIP* pAccumWIP)
 {
     if (*reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(pAccumWIP) + 0x16C) &&
         *reinterpret_cast<int*>(reinterpret_cast<char*>(pAccumWIP) + 0x19C) != 8)
@@ -160,12 +161,12 @@ void __fastcall FUN_00b64e30(AccumWIP* pAccumWIP)
         {
             fVal = 0.0f;
         }
-        FUN_00b97e30(0, 1);
+        BSRenderState_SetZWriteEnable(0, 1);
         SendFloatAdd(fVal, 1);
         pAccumWIP->SetShaderPassEnabled(2, true);
         pAccumWIP->SetShaderPassEnabled(3, true);
         --DAT_011ff9dc;
-        FUN_00b97e30(1, 0);
+        BSRenderState_SetZWriteEnable(1, 0);
         --DAT_011ff9e4;
         SendFloatAdd(0.0f, 0);
     }
@@ -188,7 +189,8 @@ static inline BSBatchRenderer__GeometryGroup*& GetNextAlphaGroup(
 }
 
 // @fnv 0x00b64f20
-void __fastcall FUN_00b64f20(BSBatchRenderer* pThis, int, unsigned int uiIndex)
+// src: COMMUNITY 0x00b64f20
+void __fastcall BSBatchRenderer_ClearAlphaLists(BSBatchRenderer* pThis, int, unsigned int uiIndex)
 {
     pThis->pAlphaGroupA[uiIndex]->ClearPassTextureSlots();
 
@@ -210,7 +212,7 @@ void __fastcall FUN_00b64f20(BSBatchRenderer* pThis, int, unsigned int uiIndex)
 }
 
 
-void __fastcall FUN_00c4ed40(void*);
+void __fastcall ProcessState_00c4ed40(void*);
 extern RecursiveSpinLock g_011c5f80;
 extern unsigned int DAT_011c5f84;
 
@@ -230,7 +232,8 @@ struct Self_00b655b0
 
 // Pops every node from the list, frees each node's element and payload, and returns the nodes to a free pool.
 // @fnv 0x00b655b0
-void __fastcall FUN_00b655b0(Self_00b655b0* self)
+// src: XBOX_PDB 0x00b655b0
+void __fastcall BSShaderAccumulator_ClearAllBoundVolumes(Self_00b655b0* self)
 {
     while (self->count != 0)
     {
@@ -240,7 +243,7 @@ void __fastcall FUN_00b655b0(Self_00b655b0* self)
             void* sub = item->ptr;
             if (sub)
             {
-                FUN_00c4ed40(sub);
+                ProcessState_00c4ed40(sub);
                 g_memoryManager.Deallocate(sub);
                 item->ptr = 0;
             }
@@ -278,7 +281,8 @@ struct BSBatchRenderer__PassList
 extern const void* const* vftable_BSBatchRenderer__PassList;
 
 // @fnv 0x00b656b0
-void __fastcall FUN_00b656b0(BSBatchRenderer__PassList* pThis, int)
+// src: GUESS 0x00b656b0 (confidence: medium)
+void __fastcall BSBatchRenderer__PassList_ResetPassListAndStorage(BSBatchRenderer__PassList* pThis, int)
 {
     *(volatile unsigned int*)pThis = (unsigned int)&vftable_BSBatchRenderer__PassList;
     pThis->ResetPassList();
@@ -409,7 +413,7 @@ struct V42
     {}
 };
 
-extern void __fastcall FUN_00b64f90(void*);
+extern void __fastcall BSShaderAccumulator_RenderTiles(void*);
 
 // BSRenderStateManager_bsshaderaccumulator: local type (was include/BSRenderStateManager.h, which had no evidence of one real class); its methods are 0x00b97fa0 BSRenderState::SetAlphaBlendEnable, 0x00b98380 BSRenderState::SetColorWriteEnable
 #include "../../include/BSRENDERSTATE_LOCK.h"
@@ -424,13 +428,14 @@ public:
 };
 
 // @fnv 0x00b65e80
-void __cdecl FUN_00b65e80(void* pObject)
+// src: COMMUNITY 0x00b65e80
+void __cdecl BSShaderAccumulator_FinishAccumulating_Interface(void* pObject)
 {
     if (*(int*)((unsigned char*)pObject + 8))
     {
         *(int*)((unsigned char*)pObject + 0x18) = 0;
         reinterpret_cast<V42*>(pObject)->f40();
-        FUN_00b64f90(pObject);
+        BSShaderAccumulator_RenderTiles(pObject);
         BSRenderStateManager_bsshaderaccumulator::SetDepthBufferEnabled(0, 0);
     }
 }
@@ -466,7 +471,8 @@ extern NiRenderer* DAT_011f9508;
 extern AccumulatorPointer<NiGPUProgram> DAT_011f956c;
 // If a renderer exists, creates the shader when missing and then calls DrawSlots(0) on it.
 // @fnv 0x00b55a10
-void FUN_00b55a10()
+// src: COMMUNITY 0x00b55a10
+void BSShaderManager_RenderDebugTexture()
 {
     if (DAT_011f9508)
     {
@@ -500,10 +506,10 @@ void FUN_00b63090_shell::DispatchBatchRenderer()
 }
 
 namespace fnv_00b63620 {
-void __fastcall FUN_00c4ed40(void*);
+void __fastcall ProcessState_00c4ed40(void*);
 struct QueryStub
 {
-    unsigned char FUN_00c4edf0(unsigned int*, int);
+    unsigned char BSOcclusionQuery_GetResult(unsigned int*, int);
 };
 struct QEntry
 {
@@ -520,18 +526,19 @@ struct AccumStub
 };
 // For each of the three entries, queries the stub, releases and deallocates it, clears the pointer and flag, then clears m_b40.
 // @fnv 0x00b63620
-void __fastcall FUN_00b63620(AccumStub* self)
+// src: COMMUNITY 0x00b63620
+void __fastcall BSShaderAccumulator_ClearSunQueries(AccumStub* self)
 {
     for (int i = 0; i < 3; ++i)
     {
         unsigned int uiData = 0;
         if (self->m_aEntries[i].query)
         {
-            self->m_aEntries[i].query->FUN_00c4edf0(&uiData, 1);
+            self->m_aEntries[i].query->BSOcclusionQuery_GetResult(&uiData, 1);
             QueryStub* q = self->m_aEntries[i].query;
             if (q)
             {
-                FUN_00c4ed40(q);
+                ProcessState_00c4ed40(q);
                 g_memoryManager.Deallocate(q);
             }
             self->m_aEntries[i].query = 0;
@@ -565,7 +572,7 @@ extern bool DAT_011f9fc3;
 extern bool DAT_011f9fc4;
 struct QueryStub
 {
-    unsigned char FUN_00c4edf0(unsigned int*, int);
+    unsigned char BSOcclusionQuery_GetResult(unsigned int*, int);
 };
 struct VolNode
 {
@@ -581,7 +588,7 @@ struct AccumView
     unsigned int cachedId;
     bool cachedResult;
 };
-void __fastcall FUN_00c4ed40(void*);
+void __fastcall ProcessState_00c4ed40(void*);
 
 // Looks up a volume by id in the accumulator's list, optionally runs its query, and returns/caches the volume's boolean state.
 // @fnv 0x00b63680
@@ -613,7 +620,7 @@ bool FUN_00b63680_shell::CheckVolumeState(unsigned int uiVolumeId, bool abRunQue
                 do
                 {
                     r = reinterpret_cast<QueryStub*>(vol->m_pRenderQuery)
-                            ->FUN_00c4edf0(reinterpret_cast<unsigned int*>(&abRunQuery), 1);
+                            ->BSOcclusionQuery_GetResult(reinterpret_cast<unsigned int*>(&abRunQuery), 1);
                 } while (r == 1);
                 if (r == 0)
                 {
@@ -626,7 +633,7 @@ bool FUN_00b63680_shell::CheckVolumeState(unsigned int uiVolumeId, bool abRunQue
                     RenderQuery* q = vol->m_pRenderQuery;
                     if (q)
                     {
-                        FUN_00c4ed40(q);
+                        ProcessState_00c4ed40(q);
                         g_memoryManager.Deallocate(q);
                     }
                     vol->m_pRenderQuery = 0;
@@ -652,7 +659,7 @@ bool FUN_00b63680_shell::CheckVolumeState(unsigned int uiVolumeId, bool abRunQue
 namespace fnv_00b63a50 {
 struct BatchStub
 {
-    void FUN_00b99a10(int, char);
+    void BSBatchRenderer_SortAlphaPasses(int, char);
 };
 struct AccumStub
 {
@@ -666,16 +673,18 @@ struct AccumStub
 };
 // Calls FUN_00b99a10 on each of the m_uiCount batch renderers, passing m_i8 and m_c31.
 // @fnv 0x00b63a50
-void __fastcall FUN_00b63a50(AccumStub* pAccum)
+// src: COMMUNITY 0x00b63a50
+void __fastcall BSShaderAccumulator_SortAlphaPasses(AccumStub* pAccum)
 {
     for (unsigned int i = 0; i < pAccum->m_uiCount; ++i)
-        pAccum->m_pBatchRenderer[i]->FUN_00b99a10(pAccum->m_i8, pAccum->m_c31);
+        pAccum->m_pBatchRenderer[i]->BSBatchRenderer_SortAlphaPasses(pAccum->m_i8, pAccum->m_c31);
 }
 }  // namespace fnv_00b63a50
 
 namespace fnv_00b65570 {
 // @fnv 0x00b65570
-void __fastcall FUN_00b65570(char* self, int unused)
+// src: GUESS 0x00b65570 (confidence: medium)
+void __fastcall BSShaderLightingProperty_ClearLights_Thunk(char* self, int unused)
 {
     reinterpret_cast<BSShaderLightingProperty*>(self + 0xc)->ClearLights();
 }
@@ -684,23 +693,25 @@ void __fastcall FUN_00b65570(char* self, int unused)
 struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011fa000;
 // @fnv 0x00b65a80
-GlobalObjectO2_00a7b610* __cdecl FUN_00b65a80()
+// src: XBOX_PDB 0x00b65a80
+GlobalObjectO2_00a7b610* __cdecl BSShaderAccumulator_GetRTTI()
 {
     return &g_011fa000;
 }
 
-void __cdecl FUN_00b65ae0(void*);
-void __cdecl FUN_00b65c60(void*);
+void __cdecl BSShaderAccumulator_FinishAccumulating_Standard_PreResolveDepth(void*);
+void __cdecl BSShaderAccumulator_FinishAccumulating_Standard_PostResolveDepth(void*);
 // @fnv 0x00b665a0
-void __cdecl FUN_00b665a0(void* p)
+// src: COMMUNITY 0x00b665a0
+void __cdecl BSShaderAccumulator_FinishAccumulating_Standard(void* p)
 {
-    FUN_00b65ae0(p);
-    FUN_00b65c60(p);
+    BSShaderAccumulator_FinishAccumulating_Standard_PreResolveDepth(p);
+    BSShaderAccumulator_FinishAccumulating_Standard_PostResolveDepth(p);
 }
 
 namespace fnv_00b64f90 {
-void __cdecl FUN_00b988e0();
-void __cdecl FUN_00b994f0(void*, unsigned short, int, int, int);
+void __cdecl BSBatchRenderer_EndPass();
+void __cdecl BSBatchRenderer_RenderPassImmediately(void*, unsigned short, int, int, int);
 extern RecursiveSpinLock g_011c5f80;
 typedef PoolAllocatorBase<unsigned int> PoolAlloc;
 // Exe 0x00b64f90: unit-local ListNode view; declarations and layout are preserved.
@@ -763,18 +774,19 @@ struct AccumS
             return ppArray[--uiIter];
         return 0;
     }
-    void FUN_00b64f90();
+    void BSShaderAccumulator_RenderTiles();
 };
 
 // Calls FUN_00b988e0, applies FUN_00b994f0 to each pass from First/Next, then drains pList or kList and calls FUN_00b988e0 again.
 // @fnv 0x00b64f90
-void AccumS::FUN_00b64f90()
+// src: COMMUNITY 0x00b64f90
+void AccumS::BSShaderAccumulator_RenderTiles()
 {
-    FUN_00b988e0();
+    BSBatchRenderer_EndPass();
     for (void* p = First(); p; p = Next())
     {
         kPass.pPass = p;
-        FUN_00b994f0(&kPass, kPass.usIndex, 1, 1, 1);
+        BSBatchRenderer_RenderPassImmediately(&kPass, kPass.usIndex, 1, 1, 1);
     }
     if (pList)
     {
@@ -786,7 +798,7 @@ void AccumS::FUN_00b64f90()
         while (kList.m_uiCount)
             kList.RemoveHead();
     }
-    FUN_00b988e0();
+    BSBatchRenderer_EndPass();
 }
 }  // namespace fnv_00b64f90
 
@@ -809,9 +821,9 @@ inline NiTPointerMap<NiAVObject*, bool>::~NiTPointerMap()
 }
 
 namespace fnv_00b656e0 {
-void __fastcall FUN_00c4ed40(void*);
-void __fastcall FUN_00bd9150(void*);
-void __fastcall FUN_00ba8cd0(char*);
+void __fastcall ProcessState_00c4ed40(void*);
+void __fastcall Runtime_ReleaseStorage_00bd9150(void*);
+void __fastcall BSShaderProperty_ReleaseStorage_00ba8cd0(char*);
 extern RecursiveSpinLock g_011c5f80;
 extern unsigned int DAT_011c5f84;
 struct OMNode
@@ -904,7 +916,7 @@ struct OMMember1a4
     char pad[0x10];
     ~OMMember1a4()
     {
-        FUN_00ba8cd0((char*)this);
+        BSShaderProperty_ReleaseStorage_00ba8cd0((char*)this);
     }
 };
 struct OMPolyObj
@@ -915,7 +927,7 @@ struct OMObjC4
 {
     ~OMObjC4()
     {
-        FUN_00c4ed40(this);
+        ProcessState_00c4ed40(this);
     }
     static void operator delete(void* p)
     {
@@ -926,7 +938,7 @@ struct OMObjD9
 {
     ~OMObjD9()
     {
-        FUN_00bd9150(this);
+        Runtime_ReleaseStorage_00bd9150(this);
     }
     static void operator delete(void* p)
     {
@@ -1050,10 +1062,10 @@ namespace fnv_00b65c60 {
 using ::BSTextureManager;
 struct AccumStub
 {
-    bool FUN_00b63120(int, int);
+    bool GetWaterRefractionPassWithinRange(int, int);
     void UpdatePasses(bool);
 };
-void FUN_00b6b8d0(unsigned int, NiRenderTargetGroup*);
+void BSRenderedTexture_StartOffscreen(unsigned int, NiRenderTargetGroup*);
 extern BSTextureManager* DAT_011f91a8;
 extern ImageSpaceManager* DAT_011f91ac;
 extern BSRenderedTexture* DAT_011f9438;
@@ -1061,17 +1073,18 @@ extern BSRenderedTexture* DAT_011f943c;
 extern NiRenderer* DAT_011f9508;
 
 // @fnv 0x00b65c60
-void FUN_00b65c60(AccumWIP* apAccum)
+// src: COMMUNITY 0x00b65c60
+void BSShaderAccumulator_FinishAccumulating_Standard_PostResolveDepth(AccumWIP* apAccum)
 {
-    if (*((unsigned char*)apAccum + 0x38) && ((AccumStub*)apAccum)->FUN_00b63120(0x288, 0x2ce))
+    if (*((unsigned char*)apAccum + 0x38) && ((AccumStub*)apAccum)->GetWaterRefractionPassWithinRange(0x288, 0x2ce))
     {
         if (DAT_011f9438)
         {
             BSRenderedTexture::EndAllAndResetRendererState();
             if (!DAT_011f943c)
                 DAT_011f943c = DAT_011f91a8->CreateRenderTargetTexture(DAT_011f9508, 5, 0, 0, 0);
-            DAT_011f91ac->FUN_00b97550(0x22, DAT_011f9508, DAT_011f9438, DAT_011f943c, 0, true);
-            FUN_00b6b8d0(0, DAT_011f9438->GetGroup());
+            DAT_011f91ac->ImageSpaceManager_RenderEffect(0x22, DAT_011f9508, DAT_011f9438, DAT_011f943c, 0, true);
+            BSRenderedTexture_StartOffscreen(0, DAT_011f9438->GetGroup());
         }
         DAT_011f9508->SetCurrentCamera(*(NiCamera**)((char*)apAccum + 8));
     }
@@ -1103,13 +1116,14 @@ void __cdecl _FUN_00b98280(int, int, int, int, int, int, int);
 struct AccumView
 {
     void* CreateRenderPassesNode();
-    void FUN_00b63a50();
+    void BSShaderAccumulator_SortAlphaPasses();
     void UpdatePasses(bool);
-    void FUN_00b64e30();
+    void BSShaderAccumulator_RenderBlendedDecals();
 };
 
 // @fnv 0x00b65ae0
-void __cdecl FUN_00b65ae0(AccumWIP* pAccum)
+// src: XBOX_PDB 0x00b65ae0
+void __cdecl BSShaderAccumulator_FinishAccumulating_Standard_PreResolveDepth(AccumWIP* pAccum)
 {
     if (pAccum->m_pkCamera)
     {
@@ -1150,9 +1164,9 @@ void __cdecl FUN_00b65ae0(AccumWIP* pAccum)
         DAT_011a9608 = 1;
         pAccum->SetShaderPassEnabled(0, false);
         DAT_011a9608 = saved;
-        ((AccumView*)pAccum)->FUN_00b64e30();
+        ((AccumView*)pAccum)->BSShaderAccumulator_RenderBlendedDecals();
         pAccum->RenderPassGroup(0x25c, 0x287, false, -1);
-        ((AccumView*)pAccum)->FUN_00b63a50();
+        ((AccumView*)pAccum)->BSShaderAccumulator_SortAlphaPasses();
         if (*(bool*)(raw + 0x167))
             ((AccumView*)pAccum)->UpdatePasses(false);
         else
@@ -1208,8 +1222,8 @@ struct QueryLocal
     {
         g_memoryManager.Deallocate(p);
     }
-    void FUN_00c4ed70();
-    void FUN_00c4edb0();
+    void BSOcclusionQuery_Begin();
+    void BSOcclusionQuery_End();
 };
 struct FUN_00c4ecf0 : QueryLocal
 {
@@ -1235,15 +1249,15 @@ struct ShaderLocal
     ShaderStageLocal* stage30;
     ShaderStageLocal* stage34;
 };
-ShaderLocal* __cdecl FUN_00b55560(int);
-void __cdecl FUN_00b7a870(int, int);
+ShaderLocal* __cdecl BSShaderManager_GetShader(int);
+void __cdecl ShadowLightShader_EnableConstantsForPass(int, int);
 struct ManagerLocal
 {
     void SetFromCamera(void*);
 };
 extern ManagerLocal* DAT_011f4748;
 void __cdecl FUN_00ba8ec0(void*, void*, unsigned short, unsigned char, bool, bool);
-void __cdecl FUN_00b994f0(void*, unsigned short, int, int, int);
+void __cdecl BSBatchRenderer_RenderPassImmediately(void*, unsigned short, int, int, int);
 struct FUN_00ba8cd0 : BSShaderAccumulator::BSShaderProperty__RenderPass
 {
     FUN_00ba8cd0(void* geometry, unsigned short pass, unsigned char hint, bool first, bool last)
@@ -1267,15 +1281,15 @@ void Candidate::RenderGeometryPass(void* geometry, unsigned int index, void* cam
     }
     if (pSunTests[index].m_pRenderQuery)
     {
-        ShaderLocal* shader = FUN_00b55560(1);
-        FUN_00b7a870(9, 0);
+        ShaderLocal* shader = BSShaderManager_GetShader(1);
+        ShadowLightShader_EnableConstantsForPass(9, 0);
         shader->stage34->Reset();
         shader->stage30->Reset();
-        reinterpret_cast<QueryLocal*>(pSunTests[index].m_pRenderQuery)->FUN_00c4ed70();
+        reinterpret_cast<QueryLocal*>(pSunTests[index].m_pRenderQuery)->BSOcclusionQuery_Begin();
         DAT_011f4748->SetFromCamera(camera);
         FUN_00ba8cd0 pass(geometry, 9, 1, false, false);
-        FUN_00b994f0(&pass, 9, 0, 0, 0);
-        reinterpret_cast<QueryLocal*>(pSunTests[index].m_pRenderQuery)->FUN_00c4edb0();
+        BSBatchRenderer_RenderPassImmediately(&pass, 9, 0, 0, 0);
+        reinterpret_cast<QueryLocal*>(pSunTests[index].m_pRenderQuery)->BSOcclusionQuery_End();
         pSunTests[index].m_bQueryPending = true;
         pSunTests[index].m_uiQueryResult = 0;
     }
@@ -1307,12 +1321,13 @@ class FUN_00b65ec0_cls
     unsigned int m_uiItemCount;
 
     void Reset(unsigned int a, unsigned int b, int c, int d);
-    void FUN_00b65ec0();
+    void BSShaderAccumulator_RenderScreenSplatter();
 };
 
 // Calls Begin on each item's sub with 0x2f0 and 0x2f1, then Reset, then End on each item's sub.
 // @fnv 0x00b65ec0
-void FUN_00b65ec0_cls::FUN_00b65ec0()
+// src: COMMUNITY 0x00b65ec0
+void FUN_00b65ec0_cls::BSShaderAccumulator_RenderScreenSplatter()
 {
     unsigned int a;
     unsigned int b;
@@ -1337,12 +1352,12 @@ void FUN_00b65ec0_cls::FUN_00b65ec0()
 
 extern bool DAT_011f94a6;
 void __cdecl FUN_00bbb840();
-void __cdecl FUN_00b988e0();
+void __cdecl BSBatchRenderer_EndPass();
 struct RenderBatch : BSBatchRenderer
 {
     bool FUN_00b9a090(unsigned int*, int*, bool*);
-    bool FUN_00b9a120(unsigned int*, int*, bool*, bool);
-    bool FUN_00b9a3c0(unsigned int*, int*, bool*, bool);
+    bool BSBatchRenderer_RenderNextRenderPass(unsigned int*, int*, bool*, bool);
+    bool BSBatchRenderer_SkipNextRenderPass(unsigned int*, int*, bool*, bool);
 };
 struct RenderGroup
 {
@@ -1353,11 +1368,12 @@ struct RenderGroup
 };
 struct RenderAccumulator : BSShaderAccumulator
 {
-    void FUN_00b63770(unsigned int first, unsigned int last, bool flag, int group);
+    void BSShaderAccumulator_RenderBatches(unsigned int first, unsigned int last, bool flag, int group);
 };
 // Runs each renderer's passes in priority order, choosing the next pass by pass id, sub-index and flag, then finalizes the groups.
 // @fnv 0x00b63770
-void RenderAccumulator::FUN_00b63770(unsigned int uiFirstPass, unsigned int last, bool flag, int group)
+// src: COMMUNITY 0x00b63770
+void RenderAccumulator::BSShaderAccumulator_RenderBatches(unsigned int uiFirstPass, unsigned int last, bool flag, int group)
 {
     RenderBatch* renderers[2];
     RenderGroup* groups[2];
@@ -1421,12 +1437,12 @@ void RenderAccumulator::FUN_00b63770(unsigned int uiFirstPass, unsigned int last
              (pass >= 0x284 && pass <= 0x287)) &&
             (bWaterReflection || bWaterRefraction))
         {
-            pbcurrentActiveA[selected] = renderers[selected]->FUN_00b9a3c0(
+            pbcurrentActiveA[selected] = renderers[selected]->BSBatchRenderer_SkipNextRenderPass(
                 &puicurrentPassA[selected], &picurrentBucketA[selected], &pbcurrentFirstPassA[selected], false);
         }
         else
         {
-            pbcurrentActiveA[selected] = renderers[selected]->FUN_00b9a120(
+            pbcurrentActiveA[selected] = renderers[selected]->BSBatchRenderer_RenderNextRenderPass(
                 &puicurrentPassA[selected], &picurrentBucketA[selected], &pbcurrentFirstPassA[selected], flag);
         }
     }
@@ -1435,21 +1451,22 @@ void RenderAccumulator::FUN_00b63770(unsigned int uiFirstPass, unsigned int last
         if (groups[i])
             groups[i]->FUN_00b9a490();
     }
-    FUN_00b988e0();
+    BSBatchRenderer_EndPass();
 }
 
 class BSShaderAccumulatorPassIndexList_W : public BSSimpleList<unsigned short>
 {
   public:
-    void FUN_00b64f10();
+    void RemoveAll_Thunk();
 };
 // @fnv 0x00b64f10
-void BSShaderAccumulatorPassIndexList_W::FUN_00b64f10()
+// src: GUESS 0x00b64f10 (confidence: medium)
+void BSShaderAccumulatorPassIndexList_W::RemoveAll_Thunk()
 {
     RemoveAll();
 }
 
-void FUN_00b988e0();
+void BSBatchRenderer_EndPass();
 extern float DAT_01015f5c;
 struct FlagB
 {
@@ -1461,7 +1478,7 @@ struct PassX
 {
     float ComputeAlphaDepth(void* p, void* m, FlagB f);
     void UpdateVisibility(void* p, void* m, bool b, float f);
-    void FUN_00b64f20(void* p);
+    void BSBatchRenderer_ClearAlphaLists(void* p);
 };
 struct ViewX
 {
@@ -1480,7 +1497,7 @@ struct ViewX
 // @fnv 0x00b650c0
 void ViewX::UpdatePasses(void* p)
 {
-    FUN_00b988e0();
+    BSBatchRenderer_EndPass();
     float afValues[2];
     afValues[0] = m_apPass[0]->ComputeAlphaDepth(p, m8, FlagB(m31));
     if (m18c == 2)
@@ -1493,10 +1510,10 @@ void ViewX::UpdatePasses(void* p)
         m_apPass[i]->UpdateVisibility(p, m8, m31, afValues[1 - i]);
         afValues[i] = m_apPass[i]->ComputeAlphaDepth(p, m8, FlagB(m31));
     }
-    m_apPass[0]->FUN_00b64f20(p);
+    m_apPass[0]->BSBatchRenderer_ClearAlphaLists(p);
     if (m18c == 2)
-        m_apPass[1]->FUN_00b64f20(p);
-    FUN_00b988e0();
+        m_apPass[1]->BSBatchRenderer_ClearAlphaLists(p);
+    BSBatchRenderer_EndPass();
 }
 
 struct RefVolSrc
@@ -1922,7 +1939,7 @@ struct ShRenderer
 };
 BSRenderedTexture* __cdecl FUN_00b4f530();
 void __cdecl FUN_00b6b790();
-void __cdecl FUN_00b6b8d0(int aiType, NiRenderTargetGroup* aiValue);
+void __cdecl BSRenderedTexture_StartOffscreen(int aiType, NiRenderTargetGroup* aiValue);
 extern ShRenderer* g_pShRenderer;
 
 struct FUN_00b64a00_Pass
@@ -1931,12 +1948,13 @@ struct FUN_00b64a00_Pass
     int unk04;
     ShCamera* m_pkAccumulationCamera;
     void FUN_00b639e0(int aiPass, int aiFlags);
-    void FUN_00b64a00(ShCamera* pkCamera, ShCamera* pkOther);
+    void BSShaderAccumulator_RenderDepth(ShCamera* pkCamera, ShCamera* pkOther);
 };
 
 // Sets a white background, configures the accumulation camera, and issues pass commands, optionally using pkOther's frustum.
 // @fnv 0x00b64a00
-void FUN_00b64a00_Pass::FUN_00b64a00(ShCamera* pkCamera, ShCamera* pkOther)
+// src: XBOX_PDB 0x00b64a00
+void FUN_00b64a00_Pass::BSShaderAccumulator_RenderDepth(ShCamera* pkCamera, ShCamera* pkOther)
 {
     ShRenderer* pkRenderer = g_pShRenderer;
     NiColorA kSaved;
@@ -1946,7 +1964,7 @@ void FUN_00b64a00_Pass::FUN_00b64a00(ShCamera* pkCamera, ShCamera* pkOther)
     BSRenderedTexture* pkManager = FUN_00b4f530();
     if (g_pShRenderer->m_iRendererState)
         FUN_00b6b790();
-    FUN_00b6b8d0(7, pkManager->GetGroup());
+    BSRenderedTexture_StartOffscreen(7, pkManager->GetGroup());
 
     m_pkAccumulationCamera = pkCamera;
     pkRenderer->SetCurrentCamera(m_pkAccumulationCamera->m_kWorldTranslate, m_pkAccumulationCamera->m_kWorldRotate,
@@ -2281,7 +2299,7 @@ struct ShRenderer
     }
 };
 void __cdecl FUN_00b6b790();
-void __cdecl FUN_00b6b8d0(int aiType, NiRenderTargetGroup* aiValue);
+void __cdecl BSRenderedTexture_StartOffscreen(int aiType, NiRenderTargetGroup* aiValue);
 extern ShRenderer* g_pShRenderer;
 
 struct Sh651_BaseA
@@ -2320,8 +2338,8 @@ struct Sh651_BaseB
 };
 struct Sh651_Accum : Sh651_BaseA, Sh651_BaseB
 {
-    BSRenderedTexture* FUN_00b63c60();
-    void FUN_00b63d10();
+    BSRenderedTexture* ImageSpaceShaderVolumetricFog_GetVolumetricFogTexture();
+    void ImageSpaceShaderVolumetricFog_ReturnVolumetricFogTexture();
 };
 struct Sh651_Cam
 {
@@ -2402,7 +2420,7 @@ struct Sh651_Holder
     int unk00;
     int unk04;
     Sh651_Scene* m_pkScene;
-    void FUN_00b97550(int aiPass, ShRenderer* pkRenderer, BSRenderedTexture* pkA, BSRenderedTexture* pkB, int aiC, int aiD);
+    void ImageSpaceManager_RenderEffect(int aiPass, ShRenderer* pkRenderer, BSRenderedTexture* pkA, BSRenderedTexture* pkB, int aiC, int aiD);
 };
 extern Sh651_Holder* g_pSh651Holder;
 extern bool g_bSh651Flag;
@@ -2683,12 +2701,13 @@ struct Sh651_Batch
     int unk88;
     int unk8C;
     Sh651_List m_kList;
-    bool FUN_00b651e0(ShCamera* pkCamera, BSRenderedTexture* pkManager);
+    bool BSShaderAccumulator_RenderVolumetricFog(ShCamera* pkCamera, BSRenderedTexture* pkManager);
 };
 
 // Renders items whose geometry passes the type check, issuing selected passes and updating fog state.
 // @fnv 0x00b651e0
-bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, BSRenderedTexture* pkManager)
+// src: COMMUNITY 0x00b651e0
+bool Sh651_Batch::BSShaderAccumulator_RenderVolumetricFog(ShCamera* pkCamera, BSRenderedTexture* pkManager)
 {
     unsigned int ItemUpdateArray = m_kList.m_uiCount;
     if (ItemUpdateArray > 0)
@@ -2697,7 +2716,7 @@ bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, BSRenderedTexture* pkManager)
             FUN_00b6b790();
         ShRenderer* pkRenderer = g_pShRenderer;
         NiColorA kSaved;
-        BSRenderedTexture* pkAccumMgr = static_cast<Sh651_Accum*>(g_pSh651Holder->m_pkScene->m_pkAccum)->FUN_00b63c60();
+        BSRenderedTexture* pkAccumMgr = static_cast<Sh651_Accum*>(g_pSh651Holder->m_pkScene->m_pkAccum)->ImageSpaceShaderVolumetricFog_GetVolumetricFogTexture();
         Sh651_Pass kPass;
         bool bFlag = g_bSh651Flag;
         ShCamera* pkSavedCamera = m_pkAccumulationCamera;
@@ -2717,7 +2736,7 @@ bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, BSRenderedTexture* pkManager)
                 pkGeom = pkItem->m_pkGeom;
                 if (pkGeom)
                 {
-                    fnv_00b651e0::FUN_00b6b8d0(3, pkAccumMgr->GetGroup());
+                    fnv_00b651e0::BSRenderedTexture_StartOffscreen(3, pkAccumMgr->GetGroup());
                     pkRenderer->SetCurrentCamera(
                         m_pkAccumulationCamera->m_kWorldTranslate, m_pkAccumulationCamera->m_kWorldRotate,
                         m_pkAccumulationCamera->m_kViewFrustum, m_pkAccumulationCamera->m_kPort);
@@ -2736,19 +2755,19 @@ bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, BSRenderedTexture* pkManager)
                         pkItem->Render(g_pShRenderer);
                     }
                     FUN_00b6b790();
-                    fnv_00b651e0::FUN_00b6b8d0(0, pkManager->GetGroup());
+                    fnv_00b651e0::BSRenderedTexture_StartOffscreen(0, pkManager->GetGroup());
                     NiColorA kColor = pkGeom->m_kFogTint;
                     Sh651_Cam* pkCam = g_pSh651Holder->m_pkScene->m_pkCam;
                     pkCam->m_bValueAt0C = true;
                     pkCam->m_kFogTint = kColor;
-                    g_pSh651Holder->FUN_00b97550(0xd, pkRenderer, pkManager, pkManager, 0, 1);
+                    g_pSh651Holder->ImageSpaceManager_RenderEffect(0xd, pkRenderer, pkManager, pkManager, 0, 1);
                 }
             }
         }
         m_kList.FUN_00b71300();
         pkRenderer->SetBackgroundColor(kSaved);
         m_pkAccumulationCamera = pkSavedCamera;
-        static_cast<Sh651_Accum*>(g_pSh651Holder->m_pkScene->m_pkAccum)->FUN_00b63d10();
+        static_cast<Sh651_Accum*>(g_pSh651Holder->m_pkScene->m_pkAccum)->ImageSpaceShaderVolumetricFog_ReturnVolumetricFogTexture();
     }
     return ItemUpdateArray > 0;
 }
@@ -2824,13 +2843,13 @@ void QueryOwner_b64d::UpdateQueries()
 extern NP DAT_011fa008;
 extern bool DAT_011f9fc1;
 
-void __fastcall FUN_00b64e30(AccumWIP*);
+void __fastcall BSShaderAccumulator_RenderBlendedDecals(AccumWIP*);
 
 class AccumWIP2 : public AccumWIP
 {
   public:
     void* CreateRenderPassesNode();
-    void FUN_00b63a50();
+    void BSShaderAccumulator_SortAlphaPasses();
     void UpdatePasses(int);
 };
 
@@ -2897,8 +2916,8 @@ void __cdecl RenderAccumulationPasses(AccumWIP2* apAccumWIP)
     ((VtblSlot41*)apAccumWIP)->slot41();
 
     apAccumWIP->RenderPassGroup(1, 0x287, false, -1);
-    FUN_00b64e30(apAccumWIP);
-    apAccumWIP->FUN_00b63a50();
+    BSShaderAccumulator_RenderBlendedDecals(apAccumWIP);
+    apAccumWIP->BSShaderAccumulator_SortAlphaPasses();
 
     if (*(char*)((char*)apAccumWIP + 0x167))
         apAccumWIP->UpdatePasses(0);
@@ -2923,7 +2942,7 @@ struct S00b66050_heap
 
 struct S00b66050_obj
 {
-    void FUN_00c4ed40();
+    void ProcessState_00c4ed40();
 };
 
 struct S00b66050_entry
@@ -3063,7 +3082,7 @@ void S00b66050_cls::RemoveEntry(unsigned int key)
                 S00b66050_obj* p = entry->m_ptr;
                 if (p != 0)
                 {
-                    p->FUN_00c4ed40();
+                    p->ProcessState_00c4ed40();
                     DAT_011f6238.Free(p);
                 }
                 entry->m_ptr = 0;
@@ -3078,8 +3097,8 @@ void S00b66050_cls::RemoveEntry(unsigned int key)
 class RenderQuery
 {
   public:
-    unsigned char FUN_00c4ee40(unsigned int* result, int wait);
-    void FUN_00c4ed40();
+    unsigned char BSOcclusionQuery_GetResultNoWait(unsigned int* result, int wait);
+    void ProcessState_00c4ed40();
 };
 extern double DAT_010737c8;
 class SunQueryAccum : public BSShaderAccumulator
@@ -3098,7 +3117,7 @@ void SunQueryAccum::PollQuery(unsigned int uiSlot)
     if (!pSunTests[uiSlot].m_pRenderQuery)
         return;
     unsigned int count;
-    unsigned char status = pSunTests[uiSlot].m_pRenderQuery->FUN_00c4ee40(&count, 1);
+    unsigned char status = pSunTests[uiSlot].m_pRenderQuery->BSOcclusionQuery_GetResultNoWait(&count, 1);
     if (status == 1)
     {
         if (count == 0)
@@ -3119,7 +3138,7 @@ void SunQueryAccum::PollQuery(unsigned int uiSlot)
         RenderQuery* query = pSunTests[uiSlot].m_pRenderQuery;
         if (query)
         {
-            query->FUN_00c4ed40();
+            query->ProcessState_00c4ed40();
             g_memoryManager.Deallocate(query);
         }
         pSunTests[uiSlot].m_pRenderQuery = 0;
@@ -3550,22 +3569,23 @@ struct CountView
 };
 void __cdecl FUN_00b98380(int, int);
 void __cdecl FUN_00b6b790();
-void __cdecl FUN_00b6b8d0(int, NiRenderTargetGroup*);
+void __cdecl BSRenderedTexture_StartOffscreen(int, NiRenderTargetGroup*);
 extern bool DAT_011f9fc2;
 struct LightingShaderView
 {
     void AddTexture(NiRefObject*);
 };
 extern RenderManagerView* DAT_011f4748;
-LightingShaderView* __cdecl FUN_00b55560(int);
+LightingShaderView* __cdecl BSShaderManager_GetShader(int);
 struct DepthAccumulator : BSShaderAccumulator
 {
     void FUN_00b639e0(int, bool);
-    bool FUN_00b64570(NiCamera* camera, BSRenderedTexture* target);
+    bool BSShaderAccumulator_RenderNormals(NiCamera* camera, BSRenderedTexture* target);
 };
 // Processes geometry groups using a depth surface and may update a lighting shader texture; restores the saved rectangle and camera.
 // @fnv 0x00b64570
-bool DepthAccumulator::FUN_00b64570(NiCamera* camera, BSRenderedTexture* target)
+// src: XBOX_PDB 0x00b64570
+bool DepthAccumulator::BSShaderAccumulator_RenderNormals(NiCamera* camera, BSRenderedTexture* target)
 {
     if (!target)
         return false;
@@ -3590,7 +3610,7 @@ bool DepthAccumulator::FUN_00b64570(NiCamera* camera, BSRenderedTexture* target)
         changedRect = true;
         if (((RenderManagerView*)DAT_011f4748)->mode)
             FUN_00b6b790();
-        fnv_00b64570::FUN_00b6b8d0(0, depth->GetGroup());
+        fnv_00b64570::BSRenderedTexture_StartOffscreen(0, depth->GetGroup());
         renderer->SetupCamera(
             ((CameraView*)m_pkCamera)->position, ((CameraView*)m_pkCamera)->GetDirection(),
             ((CameraView*)m_pkCamera)->GetRight(), ((CameraView*)m_pkCamera)->GetUp(),
@@ -3620,7 +3640,7 @@ bool DepthAccumulator::FUN_00b64570(NiCamera* camera, BSRenderedTexture* target)
             renderer->SetRect(RenderRect(0.5f, 0.5f, 0, 0));
             changedRect = true;
             FUN_00b6b790();
-            fnv_00b64570::FUN_00b6b8d0(fallback ? 1 : 0, depth->GetGroup());
+            fnv_00b64570::BSRenderedTexture_StartOffscreen(fallback ? 1 : 0, depth->GetGroup());
             const NiCamera*& activeCamera = m_pkCamera;
             renderer->SetupCamera(((CameraView*)m_pkCamera)->position,
                                   ((CameraView*)activeCamera)->GetDirection(), ((CameraView*)activeCamera)->GetRight(),
@@ -3632,7 +3652,7 @@ bool DepthAccumulator::FUN_00b64570(NiCamera* camera, BSRenderedTexture* target)
         {
             NiRefObject* texture =
                 (depth ? reinterpret_cast<const AccumulatorPointer<NiRefObject>&>(depth->spTexture[0]) : (const AccumulatorPointer<NiRefObject>&)AccumulatorPointer<NiRefObject>()).m_pObject;
-            LightingShaderView* shader = FUN_00b55560(9);
+            LightingShaderView* shader = BSShaderManager_GetShader(9);
             shader->AddTexture(texture);
         }
     }
@@ -3748,16 +3768,16 @@ struct FUN_00bd9120
     }
     FUN_00bd9120();
 };
-void* __cdecl FUN_00aa13e0(unsigned);
-void* __cdecl FUN_00aa1070(unsigned);
-void* __cdecl FUN_00aa13e0(unsigned);
+void* __cdecl Object_DispatchCommandFour(unsigned);
+void* __cdecl _NiMalloc_00aa1070(unsigned);
+void* __cdecl Object_DispatchCommandFour(unsigned);
 void* __cdecl FUN_00ec61c0(void*, int, unsigned);
 template <>
 inline NiTMapBase<NiTPointerAllocator<unsigned int>, NiAVObject*, bool>::NiTMapBase(unsigned int hashSize)
 {
     m_uiHashSize = hashSize;
     m_kItemCount.m_uiCount = 0;
-    m_ppkHashTable = static_cast<NiTMapItem<NiAVObject*, bool>**>(FUN_00aa1070(hashSize * 4));
+    m_ppkHashTable = static_cast<NiTMapItem<NiAVObject*, bool>**>(_NiMalloc_00aa1070(hashSize * 4));
     unsigned bytes = m_uiHashSize * 4;
     FUN_00ec61c0(m_ppkHashTable, 0, bytes);
 }

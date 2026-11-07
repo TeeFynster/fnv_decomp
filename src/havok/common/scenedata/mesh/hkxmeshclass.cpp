@@ -5,7 +5,7 @@
 struct FUN_00cb0c00_class
 {
     int unk00;
-    void FUN_00cb0c00();
+    void Object_UpdateFields_00cb0c00();
 };
 struct Allocator
 {
@@ -18,7 +18,7 @@ struct Manager
     int unk00, unk04, unk08, unk0C;
     Allocator* unk10;
 };
-extern Manager* __cdecl FUN_00c85750();
+extern Manager* __cdecl hkMemoryRouter_getInstance();
 struct Owner
 {
     virtual void V();
@@ -32,12 +32,12 @@ struct Owner
 // @fnv 0x00e01ef0
 void* Owner::Destroy(unsigned int flags)
 {
-    unk18.FUN_00cb0c00();
-    unk14.FUN_00cb0c00();
+    unk18.Object_UpdateFields_00cb0c00();
+    unk14.Object_UpdateFields_00cb0c00();
     FUN_00e3eaa0();
     if (flags & 1)
     {
-        Manager* manager = FUN_00c85750();
+        Manager* manager = hkMemoryRouter_getInstance();
         Allocator* allocator = manager->unk10;
         unsigned short size = unk04;
         allocator->Free(this, size);

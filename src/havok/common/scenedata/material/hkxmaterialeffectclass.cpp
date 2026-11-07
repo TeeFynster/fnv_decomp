@@ -18,7 +18,7 @@ static __forceinline void FreeAudioArray(hkMemoryAllocator* pAllocator, void* pM
     reinterpret_cast<FreeFunction>((*reinterpret_cast<void***>(pAllocator))[4])(pAllocator, pMemory, iSize);
 }
 
-hkMemoryRouter* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance() throw();
 
 struct SpawnedMember
 {
@@ -50,7 +50,7 @@ struct FUN_00e022d0_cls : SpawnedBase
 // @fnv 0x00e022d0
 FUN_00e022d0_cls* FUN_00e022d0_cls::FUN_00e022d0(unsigned char acFlags)
 {
-    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryRouter* pHolder = hkMemoryRouter_getInstance();
     hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uDataFlags = m_uiObjectFlags;
     m_i14 = 0;
@@ -64,7 +64,7 @@ FUN_00e022d0_cls* FUN_00e022d0_cls::FUN_00e022d0(unsigned char acFlags)
     this->SpawnedBase::~SpawnedBase();
     if (acFlags & 1)
     {
-        hkMemoryRouter* pHolder2 = FUN_00c85750();
+        hkMemoryRouter* pHolder2 = hkMemoryRouter_getInstance();
         hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
         FreeAudioBlock(pAllocator2, this, m_uSize);
     }

@@ -26,7 +26,7 @@ class S004b4db0_Vector4
 class S004b4db0_Quaternion
 {
   public:
-    S004b4db0_Quaternion& FUN_004b4db0(const S004b4db0_Vector4& v);
+    S004b4db0_Quaternion& SetQuaternionComponentsFromVector(const S004b4db0_Vector4& v);
     float m_fVectorY;
     float m_fVectorZ;
     float m_fScalarPart;
@@ -34,7 +34,8 @@ class S004b4db0_Quaternion
 };
 
 // @fnv 0x004b4db0
-S004b4db0_Quaternion& S004b4db0_Quaternion::FUN_004b4db0(const S004b4db0_Vector4& v)
+// src: GUESS 0x004b4db0 (confidence: high)
+S004b4db0_Quaternion& S004b4db0_Quaternion::SetQuaternionComponentsFromVector(const S004b4db0_Vector4& v)
 {
     m_fVectorY = v.getComponent(0);
     m_fVectorZ = v.getComponent(1);

@@ -23,7 +23,7 @@ public:
     virtual void getMemoryStatistics(MemoryStatistics& kU);
     virtual int getAllocatedSize(const void* pObj, int iNbytes);
     virtual void resetPeakMemoryStatistics();
-    virtual void FUN_00d2c7a0();
+    virtual void hkThreadMemory_releaseCachedMemory();
 
     // The inherited vfptr occupies offset 0.
     int unk04;

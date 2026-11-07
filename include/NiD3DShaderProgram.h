@@ -65,8 +65,8 @@ public:
                                         unsigned int, unsigned short*);
 
     unsigned int GetCodeSize() const;
-    void FUN_00e89840();
-    void FUN_00eea540(NiD3DShaderProgramCreator* pkCreator);
+    void UpdateFields_00e89840();
+    void SetCreator_00eea540(NiD3DShaderProgramCreator* pkCreator);
     void* DestroyIfFlagged(unsigned int flags);
     void SetShaderCode(unsigned int uiSize, void* pvCode);
     void SetD3DDevice(Direct3DDeviceInterface*);

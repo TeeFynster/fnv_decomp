@@ -132,15 +132,15 @@ void QuestStage::MarkDone(bool done)
     }
     if (done || reinterpret_cast<PlayerQuestData*>(this)->GetConditions()->ContainsTrait(g_thePlayer, 0))
     {
-        m_pCompletionDate = new Date(g_calendar.GetGameHour(), g_calendar.GetCurrentMonth(), g_calendar.FUN_00867c60());
+        m_pCompletionDate = new Date(g_calendar.GetGameHour(), g_calendar.GetCurrentMonth(), g_calendar.Calendar_GetYear());
 
-        if (FUN_0060fd70())
+        if (TESQuestStageItem_GetEndQuest())
         {
             if (m_pSharedOwner)
             {
                 m_pSharedOwner->MarkCompleted(true);
-                if (m_pSharedOwner == g_thePlayer->FUN_005cbb50())
-                    g_thePlayer->FUN_009529d0(0);
+                if (m_pSharedOwner == g_thePlayer->PlayerCharacter_GetActiveQuest())
+                    g_thePlayer->SetActiveQuest(0);
             }
         }
         if (IsFlag2Set())
@@ -148,8 +148,8 @@ void QuestStage::MarkDone(bool done)
             if (m_pSharedOwner)
             {
                 m_pSharedOwner->SetQuestCompleted(true);
-                if (m_pSharedOwner == g_thePlayer->FUN_005cbb50())
-                    g_thePlayer->FUN_009529d0(0);
+                if (m_pSharedOwner == g_thePlayer->PlayerCharacter_GetActiveQuest())
+                    g_thePlayer->SetActiveQuest(0);
             }
         }
         if (m_bCompleteObjective)
@@ -159,7 +159,7 @@ void QuestStage::MarkDone(bool done)
         if (FUN_005ac740() && script && script->GetHeader()->dataSize)
         {
             script->GetHeader()->m_bQuest = false;
-            script->Run(g_thePlayer, g_thePlayer->FUN_005d43c0(false, true)->FUN_00418830());
+            script->Run(g_thePlayer, g_thePlayer->BSFile_GetDevice(false, true)->ExtraDataList_GetScriptLocals());
         }
     }
 }
@@ -218,7 +218,8 @@ class QuestStageItemList
 };
 
 // @fnv 0x0060f210
-void* __fastcall FUN_0060f210(char* pThis)
+// src: COMMUNITY 0x0060f210
+void* __fastcall TESQuestStage_TESQuestStage(char* pThis)
 {
     ResetFlags(pThis);
     ((QuestStageItemList*)(pThis + 4))->QuestStageItemList::QuestStageItemList();
@@ -233,18 +234,18 @@ struct FUN_0060f260
 {
     char pad[4];
     IntList list;
-    void FUN_0060f3a0();
+    void ProcessEntries_0060f3a0();
     ~FUN_0060f260();
 };
 // @fnv 0x0060f260
 FUN_0060f260::~FUN_0060f260()
 {
-    FUN_0060f3a0();
+    ProcessEntries_0060f3a0();
 }
 
 struct FUN_0060f320_shell : public QuestStage
 {
-    void FUN_0060f320(TESForm*);
+    void TESQuestStage_InitItem(TESForm*);
 };
 
 struct StageItemNode;
@@ -254,7 +255,8 @@ StageItemNode* __fastcall _ref_00726070(StageItemNode* node);
 
 // Walks the stage item list, calls InitItem on each non-null item, clears a header byte, and counts the items.
 // @fnv 0x0060f320
-void FUN_0060f320_shell::FUN_0060f320(TESForm* apOwner)
+// src: COMMUNITY 0x0060f320
+void FUN_0060f320_shell::TESQuestStage_InitItem(TESForm* apOwner)
 {
     StageItemNode* pNode = FUN_00717e50(this);
     int iCount = 0;
@@ -275,10 +277,11 @@ struct StageHolder
 {
     bool GetDone();
     BSSimpleList<QuestStage*>* GetConditions();
-    void FUN_0060f4a0(TESQuest* quest, bool done);
+    void TESQuestStage_SetDone(TESQuest* quest, bool done);
 };
 // @fnv 0x0060f4a0
-void StageHolder::FUN_0060f4a0(TESQuest* quest, bool done)
+// src: XBOX_PDB 0x0060f4a0
+void StageHolder::TESQuestStage_SetDone(TESQuest* quest, bool done)
 {
     QuestStage* stage;
     BSSimpleList<QuestStage*>* list;
@@ -327,11 +330,12 @@ FUN_0060f520::FUN_0060f520()
 
 struct FUN_0060fd70_shell : public PlayerQuestData
 {
-    bool FUN_0060fd70();
+    bool TESQuestStageItem_GetEndQuest();
 };
 
 // @fnv 0x0060fd70
-bool FUN_0060fd70_shell::FUN_0060fd70()
+// src: XBOX_PDB 0x0060fd70
+bool FUN_0060fd70_shell::TESQuestStageItem_GetEndQuest()
 {
     return (*(unsigned char*)this & 1) != 0;
 }
@@ -341,7 +345,7 @@ struct StageItemNode;
 StageItemNode* __fastcall FUN_00717e50(void*);
 const char** __fastcall _ref_006815c0(void*);
 StageItemNode* __fastcall _ref_00726070(void*);
-char __fastcall FUN_005dc980(char const*);
+char __fastcall BGSBodyPart_GetToHitChance(char const*);
 struct FUN_0060f2c0_shell
 {
     const char* FindItemByDoneFlag(unsigned char);
@@ -354,7 +358,7 @@ const char* FUN_0060f2c0_shell::FindItemByDoneFlag(unsigned char done)
     while (pNode)
     {
         const char* item = *_ref_006815c0(pNode);
-        if (item && (unsigned char)FUN_005dc980(item) == done)
+        if (item && (unsigned char)BGSBodyPart_GetToHitChance(item) == done)
             return item;
         pNode = _ref_00726070(pNode);
     }

@@ -10,10 +10,11 @@ struct BSBatchRenderer__PassList
 };
 struct FUN_00b65660_StandIn
 {
-    void FUN_00b65660();
+    void BSShaderAccumulator_ClearRenderedGeometryCache();
 };
 // @fnv 0x00b65660
-void FUN_00b65660_StandIn::FUN_00b65660()
+// src: COMMUNITY 0x00b65660
+void FUN_00b65660_StandIn::BSShaderAccumulator_ClearRenderedGeometryCache()
 {
     BSBatchRenderer__PassList* p = (BSBatchRenderer__PassList*)((char*)this + 0xa0);
     for (int i = 0; i < 4; ++i, p = (BSBatchRenderer__PassList*)((char*)p + 0x14))

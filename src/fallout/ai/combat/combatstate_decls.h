@@ -9,8 +9,8 @@ class CombatLocations
 class CombatLOS
 {
   public:
-    bool FUN_00884920();
-    void FUN_008be220(CombatLocations*);
+    bool BaseProcess_HasCachedValues();
+    void BaseProcess_GetCachedRadius(CombatLocations*);
 };
 class GlobalObject_0044f440
 {

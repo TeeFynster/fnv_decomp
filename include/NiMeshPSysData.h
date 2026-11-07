@@ -30,18 +30,18 @@ public:
     void FillPools(bool bFill);
     void WriteToStream(NiStream& kStream);
 
-    void __thiscall FUN_00c308d0(unsigned short usStartIndex);
-    void __thiscall FUN_00c30920(CloningProcess& kCloning);
-    bool __thiscall FUN_00c30940(NiStream& kStream);
-    char __thiscall FUN_00c30970(NiMeshPSysData* pkOther);
+    void __thiscall SetActiveVertexCount_00c308d0(unsigned short usStartIndex);
+    void __thiscall ProcessClone_00c30920(CloningProcess& kCloning);
+    bool __thiscall RegisterStreamables_00c30940(NiStream& kStream);
+    char __thiscall IsEqual_00c30970(NiMeshPSysData* pkOther);
     void __thiscall FUN_00c309d0();
-    void __thiscall FUN_00c30a90();
-    void __thiscall FUN_00c30b70(NiStream& kStream);
+    void __thiscall ResolveAddedParticles_00c30a90();
+    void __thiscall LinkObject_00c30b70(NiStream& kStream);
     void* __thiscall FUN_00c30bd0(unsigned int);
     NiMeshPSysData* __thiscall FUN_00c30c00();
-    NiObject* __thiscall FUN_00c30c50(CloningProcess& kCloning);
-    void __thiscall FUN_00c30e80(unsigned short usParticleIndex);
-    void __thiscall FUN_00c31090(NiStream& kStream);
+    NiObject* __thiscall CreateClone_00c30c50(CloningProcess& kCloning);
+    void __thiscall RemoveParticle(unsigned short usParticleIndex);
+    void __thiscall LoadBinary_00c31090(NiStream& kStream);
 
     NiPointer<NiNode> m_pMeshNode;
     bool m_bUseDefaultPools;

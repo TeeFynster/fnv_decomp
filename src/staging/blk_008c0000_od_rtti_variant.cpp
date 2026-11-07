@@ -35,7 +35,7 @@
 #include "../../include/PathingRequest.h"
 struct FUN_008c1be0_Class
 {
-    unsigned int __thiscall FUN_008c1be0(unsigned int mask);
+    unsigned int __thiscall bhkTTNode_TESObjectREFR_GetFlags(unsigned int mask);
 };
 struct BooleanFloatQuery
 {
@@ -43,12 +43,12 @@ struct BooleanFloatQuery
 };
 struct S_008c1c60
 {
-    void __thiscall FUN_008c1c60();
+    void __thiscall ReleaseReferencedObject_008c1c60();
 };
 struct FlaggedData
 {
     int ContainsAnyFlag(unsigned int);
-    int FUN_008c2e30();
+    int ContainsAnyFlag_Thunk();
 };
 int FlaggedData::ContainsAnyFlag(unsigned int)
 {
@@ -56,7 +56,7 @@ int FlaggedData::ContainsAnyFlag(unsigned int)
 }
 struct FUN_008c5000_shell
 {
-    int FUN_008c5000(int);
+    int Actor_GetCastPowerItem(int);
     int IsNonZero(int arg);
 };
 void ActorPackageContext::Clear()
@@ -69,7 +69,7 @@ extern int DAT_01085864;
 struct FUN_008ca740_class
 {
     void __thiscall InitializeVtbl();
-    FUN_008ca740_class* __thiscall FUN_008ca740();
+    FUN_008ca740_class* __thiscall InitializeFields_008ca740();
 };
 extern int DAT_01085884;
 struct FUN_008ca7a0_cls
@@ -79,7 +79,7 @@ struct FUN_008ca7a0_cls
 };
 struct GlobalObject_0044fae0
 {
-    void* FUN_0044fae0();
+    void* Object_InitializeCriticalSection_Thunk();
 };
 struct FUN_008caab0 : GlobalObject_0044fae0
 {
@@ -89,19 +89,19 @@ struct FUN_008caab0 : GlobalObject_0044fae0
 };
 struct FUN_008cc6d0_class
 {
-    void FUN_008cc6d0(int value);
+    void EffectSetting_SetAreaSound(int value);
 };
 struct T_
 {
-    void FUN_004a3f10(void*);
+    void SetValue(void*);
 };
 struct FUN_008cd6a0_Class
 {
-    void FUN_00cb2d90(void*);
-    void FUN_008cd6a0(void* a, void* b);
+    void hkRotation_set(void*);
+    void hkTransform_set(void* a, void* b);
 };
 extern int DAT_011dfc9c;
-unsigned int __cdecl FUN_005dbe10();
+unsigned int __cdecl bhkCollisionFilter_GetNewSystemGroup();
 unsigned int __cdecl GetCachedValue();
 struct FUN_008ce370_cls
 {
@@ -109,18 +109,18 @@ struct FUN_008ce370_cls
 };
 struct CalleeObj
 {
-    void FUN_00622570(bool);
+    void UpdateState_00622570(bool);
 };
 struct FUN_008cfff0_Class
 {
     int m_iWordAt00;
     int m_cByteAtOffset1;
     int m_cByteAtOffset2;
-    CalleeObj* FUN_008cfff0(CalleeObj* arg);
+    CalleeObj* hkpWorldObject_isAddedToWorld(CalleeObj* arg);
 };
 struct FUN_008d01e0_Class
 {
-    float FUN_008d01e0() const;
+    float NiAVObject_GetWorldScale() const;
 };
 struct FUN_008d0200_Class
 {
@@ -132,11 +132,11 @@ struct FUN_008d0220_class
 };
 struct FUN_008d0240_Class
 {
-    void FUN_008d0240();
+    void ArrowProjectile_ClearAttachedRef();
 };
 struct FUN_008d1160_Class
 {
-    void __thiscall FUN_008d1160();
+    void __thiscall ForwardCall_008d1160();
     void __thiscall FUN_00c705c0();
 };
 struct GlobalObject2_0096a2d0
@@ -144,34 +144,35 @@ struct GlobalObject2_0096a2d0
     void __thiscall _ref_00905330(const void**);
 };
 extern GlobalObject2_0096a2d0 g_011dfe14;
-void __cdecl FUN_008d15b0(const void* p);
+void __cdecl BSDoorHavokController_ReleaseDoor(const void* p);
 extern float DAT_011dfed4;
 extern float DAT_011dfed8;
-void __cdecl FUN_008d1d10(float a, float b);
+void __cdecl SetCameraShakeData(float a, float b);
 struct FUN_008d5020_class
 {
-    void __thiscall FUN_008d5020();
+    void __thiscall CharacterProgression_AllocateData();
 };
-void __thiscall FUN_008d5020_class::FUN_008d5020()
+// src: COMMUNITY 0x008d5020
+void __thiscall FUN_008d5020_class::CharacterProgression_AllocateData()
 {}
 struct FUN_008d4360_class
 {
-    FUN_008d4360_class* __thiscall FUN_008d4360();
+    FUN_008d4360_class* __thiscall CharacterProgression_CharacterProgression();
 };
 extern "C" void __cdecl FreeAndClear();
 struct FUN_008d4380_class
 {
     void __thiscall FreeAndClear();
-    void __thiscall FUN_008d4380();
+    void __thiscall FreeAndClear_Thunk();
 };
 struct FUN_008d5590_shell
 {
-    void FUN_008d55b0();
+    void CharacterProgressionData_InitializeData();
 };
 struct FUN_008d50e0_shell
 {
     FUN_008d5590_shell* m_p;
-    void FUN_008d50e0();
+    void CharacterProgression_InitializeData();
 };
 struct FUN_008d5660_class
 {
@@ -203,12 +204,12 @@ struct FUN_008ca800_Class
     int a;
     int b;
     int c;
-    FUN_008ca800_Class* __thiscall FUN_008ca800();
+    FUN_008ca800_Class* __thiscall BSTFreeList_MobileObjectMessage_BSTFreeList_MobileObjectMessage();
 };
 extern "C" void __cdecl _Deallocate(void*);
 struct FUN_008c4f90_Class
 {
-    void __thiscall FUN_008c4f90(int arg);
+    void __thiscall Actor_RemoveCastPower(int arg);
 };
 void __cdecl _Deallocate(void*);
 // Sibling blk_008c0000_od binds this accessor to 0x004ae750 (nullable GetReferenceFlags), not ScriptLocals::GetLocalData at 0x00541c80.
@@ -218,7 +219,7 @@ struct NullableReferenceFlagsAccessor
 };
 struct FUN_008c5df0_Class
 {
-    void FUN_008c5df0(void* arg);
+    void bhkMouseSpringAction_SetMousePosition_hk(void* arg);
 };
 struct FUN_008c5e20_Class
 {
@@ -228,7 +229,7 @@ struct FUN_008c5e20_Class
     int d;
     float e;
     int f;
-    void* __thiscall FUN_008c5e20();
+    void* __thiscall InitializeFields_008c5e20();
 };
 struct FUN_008c7790_Class
 {
@@ -252,25 +253,25 @@ struct FUN_008c77c0_Class : FUN_00aa63c0_base
     GlobalObject_0078d3b0 m_008c77e4;
 };
 extern unsigned char DAT_011dfa19;
-void __fastcall FUN_008c7490(void*);
+void __fastcall AITaskThread_WaitForCompletion(void*);
 struct FUN_008c7990_Class
 {
     void* m_iWordAt00;
     void* m_iWordAt04;
-    void __fastcall FUN_008c7990();
+    void __fastcall AILinearTaskThreadManager_WaitForThreads();
 };
 struct FUN_008ca7c0_shell
 {
     bool __thiscall PopNode(int a);
     void __thiscall Reinitialize(int b);
-    bool __thiscall FUN_008ca7c0(int a, int b);
+    bool __thiscall BSTFreeList_Allocate(int a, int b);
 };
 struct FUN_008_Struct
 {
     void* m_iWordAt00;
     void* m_iWordAt04;
     void* m_8;
-    void* __thiscall FUN_008caa70(FUN_008_Struct* source);
+    void* __thiscall InitializeFields_008caa70(FUN_008_Struct* source);
 };
 struct BMobile_S
 {
@@ -290,7 +291,7 @@ struct FUN_008cab20 : BMobile_S
     FUN_008cab20();
 };
 extern int DAT_01085e2c;
-void __cdecl FUN_008c5e20();
+void __cdecl InitializeFields_008c5e20();
 struct FUN_008d0270_Class
 {
     void* vtbl;
@@ -305,7 +306,7 @@ struct FUN_008d0270_Class
     int m_24;
     int m_28;
     int m_2c;
-    FUN_008d0270_Class* __thiscall FUN_008d0270();
+    FUN_008d0270_Class* __thiscall BaseProcess_BaseProcess();
 };
 void __cdecl CallWithParam(int);
 struct FUN_008d1130_Class : FUN_008d1160_Class
@@ -316,7 +317,7 @@ extern "C" void __fastcall FUN_00a6d220(void*);
 extern int DAT_010867fc;
 struct FUN_008d15d0_Class
 {
-    void* __thiscall FUN_008d15d0();
+    void* __thiscall BSPlayerDistanceCheckController_BSPlayerDistanceCheckController();
 };
 struct FUN_0087d4a0
 {
@@ -344,10 +345,10 @@ struct FUN_008d56c0_class
 };
 struct FUN_008d56f0_Class
 {
-    void __thiscall FUN_008d56f0(BGSLoadFormBuffer* buffer);
+    void __thiscall CharacterProgressionData_LoadGameBGS(BGSLoadFormBuffer* buffer);
 };
 unsigned int __cdecl gm_GetTickCount();
-unsigned int __cdecl FUN_008d5830(unsigned int a);
+unsigned int __cdecl FollowerBarks_GetBarkNoRepeatDuration(unsigned int a);
 struct FUN_008d6000_Class
 {
     unsigned int m_iWordAt00;
@@ -358,7 +359,7 @@ struct FUN_008d6000_Class
 };
 struct S694a0
 {
-    void FUN_00a694a0(void*);
+    void NiCullingProcess_SetFrustum(void*);
 };
 struct FUN_008d6bb0_shell
 {
@@ -368,7 +369,7 @@ struct FUN_008d6bb0_shell
 extern ProcessLists DAT_011e0e80;
 struct FUN_008d6f50_Class
 {
-    void FUN_008d6f50(int arg);
+    void HighActorCuller_Run(int arg);
 };
 extern "C" void __cdecl _delete(void* p, unsigned int size);
 struct FUN_008df980_Class
@@ -386,7 +387,7 @@ struct SeqObj
 };
 struct ModelLoader
 {
-    void FUN_0045a5e0(const char* name);
+    void ModelLoader_ReleaseFile(const char* name);
 };
 struct Loader_S
 {
@@ -395,20 +396,20 @@ struct Loader_S
 extern Loader_S g_modelLoader;
 extern int DAT_011e00e0[12];
 extern int DAT_011e0110[12];
-void __cdecl FUN_008d68d0();
+void __cdecl FreeWobbleAnimations();
 struct Model
 {
     NiTimeController* GetObject3D();
 };
 struct GlobalObject_00a7b610
 {
-    bool __cdecl FUN_0045bad0(NiTimeController*);
+    bool __cdecl NiObject_IsExactKindOf(NiTimeController*);
 };
 extern GlobalObject_00a7b610 g_012031b8;
-int __cdecl FUN_00571550();
+int __cdecl get_g_bip01();
 struct FUN_008da1a0_Class
 {
-    void FUN_008da1a0(Actor* actor);
+    void HighProcess_InitBoneLOD(Actor* actor);
 };
 struct FUN_0052d240_obj
 {
@@ -429,11 +430,11 @@ extern int DAT_01086674;
 extern int DAT_01086684;
 struct FUN_008d10e0_Class : Call741e0
 {
-    void* FUN_008d10e0(int a, int b);
+    void* bhkCharacterListenerArrow_bhkCharacterListenerArrow(int a, int b);
 };
 struct FUN_00929240_Class
 {
-    void FUN_00929240(float);
+    void MagicShaderHitEffect_SetLifeTime(float);
 };
 struct CloneableObj
 {
@@ -441,7 +442,7 @@ struct CloneableObj
 };
 struct FUN_008d17d0_Class
 {
-    void FUN_008d17d0(BGSAcousticSpace* dst, void* arg);
+    void BSPlayerDistanceCheckController_CopyMembers(BGSAcousticSpace* dst, void* arg);
 };
 struct FUN_0087adf0_shell
 {
@@ -450,7 +451,7 @@ struct FUN_0087adf0_shell
 struct FUN_008c1c30_Class
 {
     FUN_0087adf0_shell* m_iWordAt00;
-    FUN_008c1c30_Class* FUN_008c1c30(FUN_0087adf0_shell* a);
+    FUN_008c1c30_Class* UpdateState_008c1c30(FUN_0087adf0_shell* a);
 };
 struct FUN_008c45a0_Result
 {
@@ -701,7 +702,7 @@ struct FUN_008c45a0_Result
     virtual void v244();
     virtual void v245();
     virtual void v246();
-    virtual void FUN_008c45a0(unsigned char arg);
+    virtual void Actor_SetShouldCheckMagicNode(unsigned char arg);
 };
 struct FUN_008c7250_Class
 {
@@ -717,7 +718,7 @@ struct FUN_008c7270_Class
 };
 struct FUN_008c8110_Class
 {
-    void __thiscall FUN_008c8110();
+    void __thiscall ForwardCall_008c8110();
     unsigned char m_00[0x18];
     FUN_008c7270_Class m_18;
 };
@@ -729,10 +730,10 @@ struct Date
 };
 struct FUN_008ca770_Class
 {
-    void FUN_008ca8d0(Date**);
-    void FUN_008ca770(Date**);
+    void ProcessEntries_008ca8d0(Date**);
+    void ProcessState_008ca770(Date**);
 };
-int __cdecl FUN_0043b460(long volatile*, long, long);
+int __cdecl BSAtomicCompareExchange(long volatile*, long, long);
 // Exe 0x008d12e0: unit-local Interface view; declarations and layout are preserved.
 struct BlkInterfaceView
 {
@@ -743,7 +744,7 @@ struct FUN_008ca8d0_Class
     int m_iWordAt00;
     long volatile m_iWordAt04;
     int m_8;
-    void __thiscall FUN_008ca8d0(int* arg);
+    void __thiscall ProcessEntries_008ca8d0(int* arg);
 };
 struct FUN_008caae0_Class
 {
@@ -751,11 +752,11 @@ struct FUN_008caae0_Class
     int m_iWordAt04;
     int m_8;
     int m_iThirdValue;
-    void* __thiscall FUN_008caae0();
+    void* __thiscall BSTFreeListElem_MobileObjectMessage_BSTFreeListElem_MobileObjectMessage();
 };
 struct FUN_008cc6f0_Class
 {
-    void* FUN_008cc6f0();
+    void* EvaluateValue_008cc6f0();
 };
 struct FUN_008d3f40_Class
 {
@@ -766,7 +767,7 @@ struct FUN_008d3f10_Class
     unsigned char pad[0x38];
     GO m_38;
 
-    void __thiscall FUN_008d3f10(int arg);
+    void __thiscall NiGeomMorpherController_GetTarget(int arg);
 };
 struct FUN_008d50a0_Class
 {
@@ -776,14 +777,14 @@ struct FUN_008d50a0_Class
 struct FUN_008d5680_Class
 {
     FUN_008d56f0_Class* m_p;
-    void FUN_008d5680(BGSLoadFormBuffer* arg);
+    void CharacterProgression_LoadGameBGS(BGSLoadFormBuffer* arg);
 };
 struct FUN_008d56a0_Class
 {
-    void __thiscall FUN_008d56a0(int value);
+    void __thiscall ProcessAndTransformResult_008d56a0(int value);
 };
 extern int DAT_011c3580;
-int __cdecl FUN_008c4f00();
+int __cdecl MagicSystem_GetAbsorbShaderEffect();
 struct S_8c4f10_Item
 {
     virtual void v00();
@@ -854,7 +855,7 @@ struct S_8c4f10_Cls
     int unk8c;
     int unk90;
     S_8c4f10_List list;
-    void FUN_008c4f10(int a);
+    void Actor_CheckDeletedCaster(int a);
 };
 struct SpawnedElemB
 {
@@ -877,7 +878,7 @@ struct FUN_008c71d0_cls
     unsigned int m_6c[8];
     unsigned int* m_8c;
     unsigned int* m_90;
-    FUN_008c71d0_cls* FUN_008c71d0();
+    FUN_008c71d0_cls* AILinearTaskThreadManager_AILinearTaskThreadManager();
 };
 // Stand-in for the game's class (the pack's own unit file does not declare it):
 //   +0x00  two element pointers          +0x0c  two ints
@@ -894,13 +895,13 @@ struct FUN_008c78c0_Class
     int unk14[10];
     int unk3c[12];
     int unk6c[8];
-    void FUN_008c78c0();
+    void AILinearTaskThreadManager_StartThreads();
 };
 // Callback slot in the game's global handler table: one int argument, and the
 // callee pops it (stdcall), so the call site has no stack cleanup.
 extern void(__stdcall* g_FNV_008c78c0_hook)(int);
-void __cdecl FUN_0040fbe0();
-int __cdecl FUN_0043b460(long volatile*, long, long);
+void __cdecl ProgramFlow();
+int __cdecl BSAtomicCompareExchange(long volatile*, long, long);
 struct FreeNode16
 {
     int unk00;
@@ -923,7 +924,7 @@ struct FUN_008ca940_node
     int m_08;
     FUN_008ca940_node* m_0c;
 };
-void __cdecl FUN_0040fbe0();
+void __cdecl ProgramFlow();
 class FUN_008ca940_cls
 {
   public:
@@ -936,23 +937,23 @@ class FUN_008ca940_cls
 class FUN_008cab00_cls
 {
   public:
-    void FUN_0044fb00();
-    void FUN_008cab00();
+    void DeleteCriticalSection_Thunk();
+    void ForwardCall_008cab00();
 };
 extern int DAT_01085c90;
 struct Renderer
 {
-    void FUN_00440460(void*);
-    void FUN_0043fa80(void*);
+    void NiAVObject_SetTranslate(void*);
+    void SetRotate_0043fa80(void*);
     double GetFloatAt64();
-    void FUN_00440490(float);
+    void NiAVObject_SetScale(float);
 };
-void __cdecl FUN_00c69ee0(Renderer*, int, int);
-void __cdecl FUN_0062bc10(Renderer*);
-void __cdecl FUN_005b5e40(const void*);
+void __cdecl bhkWorld_RemoveObjects(Renderer*, int, int);
+void __cdecl TESHavokUtilities_RemoveHavokFromSceneGraph(Renderer*);
+void __cdecl Warning_005b5e40(const void*);
 struct GameContext
 {
-    void FUN_00b5b1c0(Renderer*);
+    void RemoveObject_00b5b1c0(Renderer*);
     void FUN_00b5eeb0(Renderer*);
 };
 GameContext* __cdecl FUN_00450b80(int);
@@ -1513,7 +1514,7 @@ struct Action
     virtual void v53() = 0;
     virtual void v54() = 0;
     virtual void apply(Renderer*, int) = 0;
-    float FUN_008d01e0() const;
+    float NiAVObject_GetWorldScale() const;
 };
 struct State
 {
@@ -1741,17 +1742,17 @@ struct Player
 struct EventTarget;
 struct ResourceInfo
 {
-    EventTarget* FUN_006fa820();
+    EventTarget* bhkNiCollisionObject_GetWorldObject();
 };
 struct EventProperty
 {
-    unsigned char FUN_006205a0();
+    unsigned char bhkShape_QMaterial();
 };
 struct EventTarget
 {
-    EventProperty* FUN_004ae6a0();
+    EventProperty* bhkWorldObject_GetShape();
 };
-ResourceInfo* __cdecl FUN_004b5260(int source);
+ResourceInfo* __cdecl FindFirstCollisionObject(int source);
 extern float DAT_01016248;
 struct EventRecord
 {
@@ -1766,9 +1767,9 @@ struct EventRecord
     void* eventPointer;
     EventTarget* target;
     int cursorOffset;
-    void FUN_006240d0();
+    void BGSPrimitive_EvaluateValue_006240d0();
 };
-void __cdecl FUN_00837550(EventRecord*);
+void __cdecl ImpactMixer_PlayCollisionSound(EventRecord*);
 struct Object
 {
     virtual void v0();
@@ -1888,7 +1889,7 @@ struct Object
     virtual void v114();
     virtual void v115();
     virtual int GetSource();
-    void FUN_008cfad0(float weight, int a, int b, int c, int offset, unsigned char enabled);
+    void ArrowProjectile_PlayArrowCollisionSound(float weight, int a, int b, int c, int offset, unsigned char enabled);
 };
 struct FUN_00620b80_shell
 {
@@ -1900,11 +1901,11 @@ struct FUN_005609f0_shell
 };
 struct FUN_00a29680_Obj
 {
-    void FUN_00a29680();
+    void Object_DoNothing();
 };
 struct Holder_cffa0
 {
-    bool FUN_008cffa0();
+    bool bhkWorldObject_IsAddedToWorld();
 };
 struct Target_cls
 {
@@ -1932,10 +1933,10 @@ struct Arg_cls
     int unk0040;
     int unk0044;
     int unk0048;
-    int FUN_00460140();
+    int TESDataHandler_GetWorldSpaceList();
     int FUN_006815c0();
 };
-void FUN_008d12e0(Target_cls* p, int a, int b, int c);
+void bhkCharacterListenerArrow_ProcessCollision(Target_cls* p, int a, int b, int c);
 struct FUN_008d14e0_cls
 {
     int unk0000;
@@ -2343,12 +2344,12 @@ struct FUN_008d14e0_cls
     int unk0648;
     int unk064C;
     Target_cls* m_650;
-    void FUN_008d14e0(Arg_cls* a1);
+    void bhkCharacterListenerArrow_contactPointAddedCallback(Arg_cls* a1);
 };
 extern float DAT_011dfed4;
-float __cdecl FUN_008d1cf0();
+float __cdecl GetCameraShakeMult();
 extern float DAT_011dfed8;
-float __cdecl FUN_008d1d00();
+float __cdecl GetCameraShakeCurrentTime();
 struct AnimTimeSource
 {
     float GetSourceTimeStub();
@@ -2458,9 +2459,9 @@ class C1CD0Handler
 void FNV_Warning(const char* fmt, ...);
 struct ArrowCollision
 {
-    ArrowWorldObj* FUN_006fa820();
+    ArrowWorldObj* bhkNiCollisionObject_GetWorldObject();
 };
-ArrowCollision* __cdecl FUN_004b5260(ArrowRenderer* source);
+ArrowCollision* __cdecl FindFirstCollisionObject(ArrowRenderer* source);
 struct ArrowImpact
 {
     int type;
@@ -2474,9 +2475,9 @@ struct RotationMatrix
 };
 struct SceneNode
 {
-    void FUN_00440460(const NiPoint3&);
-    void FUN_00a59c60(NiUpdateData&);
-    RotationMatrix& FUN_00461130();
+    void NiAVObject_SetTranslate(const NiPoint3&);
+    void NiAVObject_Update(NiUpdateData&);
+    RotationMatrix& NiAVObject_GetWorldRotate();
 };
 struct LoadingState
 {
@@ -2490,9 +2491,9 @@ struct FloatSetting
 extern FloatSetting DAT_011ce1dc, DAT_011cedac;
 struct AnimationOutput
 {
-    void FUN_00626cb0(unsigned int);
-    void FUN_005615d0(const NiPoint3&);
-    void FUN_00561630(const NiPoint3&);
+    void bhkWorldObject_SetCollisionFilter(unsigned int);
+    void bhkRigidBody_SetLinearVelocity(const NiPoint3&);
+    void bhkRigidBody_SetAngularVelocity(const NiPoint3&);
 };
 struct UpdateToken
 {
@@ -2501,13 +2502,13 @@ struct UpdateToken
 };
 struct ResourceUpdate
 {
-    void FUN_00573ed0(bool);
+    void bhkNiCollisionObject_SetNotify(bool);
 };
-ResourceUpdate* FUN_004b5260(SceneNode*);
-void FUN_00c6a350(SceneNode*, int, bool, bool, bool);
+ResourceUpdate* FindFirstCollisionObject(SceneNode*);
+void bhkWorld_SetMotion(SceneNode*, int, bool, bool, bool);
 NiPoint3 FUN_004a3760(float, const NiPoint3&);
-void FUN_00525340(NiPoint3&);
-double FUN_00408820(float);
+void NiPoint3_UnitizeVector(NiPoint3&);
+double NiAbs_00408820(float);
 float SignOfFloat(float);
 struct MovementState
 {
@@ -3052,17 +3053,17 @@ struct LiveCallback
     virtual void v258() = 0;
     virtual int v259() = 0;
     LiveCallback* __thiscall FUN_008d8520();
-    unsigned char __thiscall FUN_008ace90();
+    unsigned char __thiscall GetGhost_008ace90();
 };
 struct SourceData
 {
-    int __thiscall FUN_0043b540();
+    int __thiscall hkpCollidable_getCollisionFilterInfo();
 };
 struct StateHandle
 {
     int value;
     void __thiscall FUN_008c71b0(int);
-    int __thiscall FUN_004a3a20();
+    int __thiscall CFilter_GetGroup();
 };
 struct ArgumentData
 {
@@ -3073,13 +3074,13 @@ struct ArgumentData
 };
 struct TargetOwner
 {
-    void __thiscall FUN_008cc740(ArgumentData*, ArgumentData*);
-    void __thiscall FUN_008cba30(ArgumentData*, ArgumentData*, LiveCallback*);
+    void __thiscall ArrowProjectile_CollideTerrain(ArgumentData*, ArgumentData*);
+    void __thiscall ArrowProjectile_CollideActor(ArgumentData*, ArgumentData*, LiveCallback*);
     void __thiscall FUN_008cc730(ArgumentData*, ArgumentData*, void*, int);
 };
 struct CurrentState
 {
-    void* __thiscall FUN_0089f4e0();
+    void* __thiscall PlayerCharacter_GetGrabObject();
 };
 extern CurrentState* DAT_011dea3c;
 extern int DAT_011841cc;
@@ -3087,19 +3088,20 @@ extern int DAT_011846d4;
 extern LiveCallback* __fastcall FUN_008d8520(LiveCallback*);
 extern void* __cdecl GetReferenceFromObject(SourceData*);
 extern LiveCallback* __cdecl FUN_00ec43fb(void*, int, const void*, const void*, int);
-extern int __cdecl FUN_004b5950(SourceData*);
-extern int __cdecl FUN_004b59f0(SourceData*);
-extern int __cdecl FUN_004b5a80(int);
+extern int __cdecl hkpGetPhantom(SourceData*);
+extern int __cdecl hkpGetRigidBody(SourceData*);
+extern int __cdecl bhkEntity_Getbhk(int);
 extern unsigned int __cdecl GetCachedValue();
 extern void __cdecl FUN_00458620(ArgumentData*, int);
-extern void __cdecl FUN_004a3970(ArgumentData*, int);
+extern void __cdecl HK2NINS(ArgumentData*, int);
 
 // @fnv 0x008d12e0
-void __cdecl FUN_008d12e0(TargetOwner* target, SourceData* source, int arg0, int arg1)
+// src: COMMUNITY 0x008d12e0
+void __cdecl bhkCharacterListenerArrow_ProcessCollision(TargetOwner* target, SourceData* source, int arg0, int arg1)
 {
     void* owner = GetReferenceFromObject(source);
     LiveCallback* active = FUN_00ec43fb(owner, 0, &DAT_011841cc, &DAT_011846d4, 0);
-    int action = FUN_004b5950(source);
+    int action = hkpGetPhantom(source);
     if (action)
     {
         if (!active)
@@ -3127,32 +3129,32 @@ void __cdecl FUN_008d12e0(TargetOwner* target, SourceData* source, int arg0, int
         }
     }
     StateHandle state;
-    state.FUN_008c71b0(source->FUN_0043b540());
-    if (state.FUN_004a3a20() == GetCachedValue())
+    state.FUN_008c71b0(source->hkpCollidable_getCollisionFilterInfo());
+    if (state.CFilter_GetGroup() == GetCachedValue())
         return;
-    if (owner && owner == DAT_011dea3c->FUN_0089f4e0())
+    if (owner && owner == DAT_011dea3c->PlayerCharacter_GetGrabObject())
         return;
     ArgumentData first;
     first.FUN_006815c0();
     FUN_00458620(&first, arg0);
     ArgumentData argumentBundle;
     argumentBundle.FUN_006815c0();
-    FUN_004a3970(&argumentBundle, arg1);
-    if (state.FUN_004a3a20() == 1)
+    HK2NINS(&argumentBundle, arg1);
+    if (state.CFilter_GetGroup() == 1)
     {
-        target->FUN_008cc740(&first, &argumentBundle);
+        target->ArrowProjectile_CollideTerrain(&first, &argumentBundle);
         return;
     }
     if (owner)
     {
-        if (active && !active->FUN_008ace90())
+        if (active && !active->GetGhost_008ace90())
         {
-            target->FUN_008cba30(&first, &argumentBundle, active);
+            target->ArrowProjectile_CollideActor(&first, &argumentBundle, active);
             return;
         }
         if (!active)
         {
-            int identifier = FUN_004b5a80(FUN_004b59f0(source));
+            int identifier = bhkEntity_Getbhk(hkpGetRigidBody(source));
             target->FUN_008cc730(&first, &argumentBundle, owner, identifier);
         }
     }
@@ -3160,7 +3162,7 @@ void __cdecl FUN_008d12e0(TargetOwner* target, SourceData* source, int arg0, int
 
 struct Obj
 {
-    unsigned int FUN_00819250();
+    unsigned int bhkCharacterController_GetCollisionGroup();
 };
 struct ActorImpact
 {
@@ -3380,26 +3382,27 @@ struct SceneProjectile
     int unk84;
     ActorImpact* unk88;
 
-    bool FUN_008cdaf0(SceneOutput* owner);
+    bool ArrowProjectile_ProcessSimulate(SceneOutput* owner);
 };
 
 // @fnv 0x008cdaf0
-bool SceneProjectile::FUN_008cdaf0(SceneOutput* owner)
+// src: XBOX_PDB 0x008cdaf0
+bool SceneProjectile::ArrowProjectile_ProcessSimulate(SceneOutput* owner)
 {
     v2a0();
-    FUN_00c6a350(v1d0(), 1, true, false, true);
+    bhkWorld_SetMotion(v1d0(), 1, true, false, true);
     Actor* actor = dynamic_cast<Actor*>(unk88->object);
     if (actor && actor->FUN_009306d0())
     {
-        owner->FUN_00626cb0(UpdateToken(4, actor->FUN_009306d0()->FUN_00819250(), 0).value);
+        owner->bhkWorldObject_SetCollisionFilter(UpdateToken(4, actor->FUN_009306d0()->bhkCharacterController_GetCollisionGroup(), 0).value);
     }
     else
     {
-        owner->FUN_00626cb0(UpdateToken(4, GetCachedValue(), 0).value);
+        owner->bhkWorldObject_SetCollisionFilter(UpdateToken(4, GetCachedValue(), 0).value);
     }
-    owner->FUN_005615d0(unk88->position);
+    owner->bhkRigidBody_SetLinearVelocity(unk88->position);
     ResourceUpdate* resource = FUN_004b5a20(owner->GetReferenceFlags());
     if (resource)
-        resource->FUN_00573ed0(true);
+        resource->bhkNiCollisionObject_SetNotify(true);
     return true;
 }

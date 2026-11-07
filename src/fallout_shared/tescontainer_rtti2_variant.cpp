@@ -49,13 +49,13 @@ class B81390Extra
 };
 
 void __cdecl ResolveFormID(unsigned int* puiFormID, TESFile* file);
-TESForm* __cdecl FUN_004839c0(unsigned int auiFormId);
-void __cdecl FUN_005b5e40(const char* pcFormat, ...);
+TESForm* __cdecl TESForm_GetFormByNumericID(unsigned int auiFormId);
+void __cdecl Warning_005b5e40(const char* pcFormat, ...);
 
 class B81390ContainerObject
 {
   public:
-    void FUN_00481390(TESForm* pkOwner);
+    void ContainerObject_InitItem(TESForm* pkOwner);
 
     int m_iArrayLength;
     TESBoundObject* m_pPointer;
@@ -63,25 +63,26 @@ class B81390ContainerObject
 };
 
 // @fnv 0x00481390
-void B81390ContainerObject::FUN_00481390(TESForm* pkOwner)
+// src: XBOX_PDB 0x00481390
+void B81390ContainerObject::ContainerObject_InitItem(TESForm* pkOwner)
 {
     unsigned int auiFormId = (unsigned int)m_pPointer;
     ResolveFormID(&auiFormId, pkOwner->FUN_00484e60(-1));
-    m_pPointer = dynamic_cast<TESBoundObject*>(FUN_004839c0(auiFormId));
+    m_pPointer = dynamic_cast<TESBoundObject*>(TESForm_GetFormByNumericID(auiFormId));
     if (!m_pPointer)
     {
         if (pkOwner)
         {
-            if (pkOwner->FUN_00474cb0())
-                FUN_005b5e40("MASTERFILE: Unable to find container object (%08X) on owner object \"%s\".", auiFormId,
+            if (pkOwner->GetFormEditorIDLength())
+                Warning_005b5e40("MASTERFILE: Unable to find container object (%08X) on owner object \"%s\".", auiFormId,
                              pkOwner->GetName());
             else
-                FUN_005b5e40("MASTERFILE: Unable to find container object (%08X) on owner object (%08X).", auiFormId,
-                             pkOwner->FUN_0084e3a0());
+                Warning_005b5e40("MASTERFILE: Unable to find container object (%08X) on owner object (%08X).", auiFormId,
+                             pkOwner->GetHavokWorldObjectCountInSceneGraph_0084e3a0());
         }
         else
         {
-            FUN_005b5e40("MASTERFILE: Unable to find container object (%08X) on unknown owner.", auiFormId);
+            Warning_005b5e40("MASTERFILE: Unable to find container object (%08X) on unknown owner.", auiFormId);
         }
     }
     if (m_pkExtra)

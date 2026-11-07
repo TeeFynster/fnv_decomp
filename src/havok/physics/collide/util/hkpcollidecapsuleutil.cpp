@@ -140,7 +140,7 @@ struct VectorPairResult
     float unk2c;
 };
 
-int FUN_00d22e40(const hkVector4& A, const hkVector4& dA, const hkVector4& B, const hkVector4& dB,
+int hkLineSegmentUtil_closestLineSegLineSeg(const hkVector4& A, const hkVector4& dA, const hkVector4& B, const hkVector4& dB,
                  VectorPairResult& result);
 
 static __forceinline void calcPerpendicular(const hkVector4& vectorIn, hkVector4& biVectorOut)
@@ -173,7 +173,8 @@ static __forceinline void calcPerpendicular(const hkVector4& vectorIn, hkVector4
 
 // Tests two capsules for collision using FUN_00d22e40, then fills cpOut with the separating normal and contact point.
 // @fnv 0x00cd6260
-int FUN_00cd6260(const hkVector4* capsA, float capsARadius, const hkVector4* capsB, float capsBRadius,
+// src: XBOX_PDB 0x00cd6260
+int hkCollideCapsuleUtilClostestPointCapsVsCaps(const hkVector4* capsA, float capsARadius, const hkVector4* capsB, float capsBRadius,
                  float collisionTolerance, hkContactPoint* cpOut)
 {
     hkVector4 dA;
@@ -182,7 +183,7 @@ int FUN_00cd6260(const hkVector4* capsA, float capsARadius, const hkVector4* cap
     dB.setSub4(capsB[1], capsB[0]);
 
     VectorPairResult result;
-    int res = FUN_00d22e40(capsA[0], dA, capsB[0], dB, result);
+    int res = hkLineSegmentUtil_closestLineSegLineSeg(capsA[0], dA, capsB[0], dB, result);
 
     float radiusSum = capsARadius + capsBRadius;
     float refDist = radiusSum + collisionTolerance;
@@ -240,7 +241,8 @@ static __forceinline LocalM128 broadcastFloat(float f)
 
 // Computes the triangle normal scaled by p[3], builds m from the edges scaled by p[0..2] crossed with the normal (transposed), and sets m's last column from p.
 // @fnv 0x00cd6120
-static __declspec(noinline) void FUN_00cd6120(const float* apParams, const hkVector4* apVertices, hkVector4& normal,
+// src: GUESS 0x00cd6120 (confidence: low)
+static __declspec(noinline) void hkVector4_UpdateFields_00cd6120(const float* apParams, const hkVector4* apVertices, hkVector4& normal,
                                               hkMatrix4& m)
 {
     hkVector4 e1;
@@ -291,7 +293,7 @@ volatile void* g_m;
 
 void dummy_caller()
 {
-    FUN_00cd6120((const float*)g_p, (const hkVector4*)g_v, *(hkVector4*)g_n, *(hkMatrix4*)g_m);
+    hkVector4_UpdateFields_00cd6120((const float*)g_p, (const hkVector4*)g_v, *(hkVector4*)g_n, *(hkMatrix4*)g_m);
 }
 
 extern const double DAT_010c9300;
@@ -462,7 +464,8 @@ inline float addRadii(const float& a, const float& b)
 }
 // Computes the closest points between two capsules defined by endpoints and radii, writing contact normals and positions into points.
 // @fnv 0x00cd58b0
-int __cdecl FUN_00cd58b0(const ManifoldVector* apFirstSegment, RadiusInput firstRadius,
+// src: XBOX_PDB 0x00cd58b0
+int __cdecl hkCollideCapsuleUtilManifoldCapsVsCaps(const ManifoldVector* apFirstSegment, RadiusInput firstRadius,
                          const ManifoldVector* apSecondSegment, RadiusInput secondRadius,
                          ManifoldContact* apContactPoints)
 {
@@ -1102,9 +1105,9 @@ struct Feature
     unsigned char count;
     unsigned short first, second, third;
 };
-int FUN_00d22e40(const ContactVector&, const ContactVector&, const ContactVector&, const ContactVector&,
+int hkLineSegmentUtil_closestLineSegLineSeg(const ContactVector&, const ContactVector&, const ContactVector&, const ContactVector&,
                  ContactClosest&);
-unsigned int FUN_00cd58b0(const ContactVector*, float, const ContactVector*, float, ContactRecord*);
+unsigned int hkCollideCapsuleUtilManifoldCapsVsCaps(const ContactVector*, float, const ContactVector*, float, ContactRecord*);
 __forceinline float localAbs(float f)
 {
     return fabs(f);
@@ -1158,7 +1161,8 @@ static __forceinline void makePlanes(const ContactVector* v, const float* cache,
 }
 // Tests a capsule (two positions, radius, thickness) against a triangle, filling up to three ContactRecords and optional Feature data.
 // @fnv 0x00cd6520
-void __cdecl FUN_00cd6520(const ContactVector* positions, float radius, const ContactVector* triangle, float thickness,
+// src: XBOX_PDB 0x00cd6520
+void __cdecl hkCollideCapsuleUtilCapsVsTri(const ContactVector* positions, float radius, const ContactVector* triangle, float thickness,
                           const float* orientation, float margin, int useFaces, ContactRecord* contacts,
                           Feature* feature)
 {
@@ -1293,7 +1297,7 @@ void __cdecl FUN_00cd6520(const ContactVector* positions, float radius, const Co
                 int left = DAT_010cb442[j], right = DAT_010cb440[j];
                 pair[0] = triangle[left];
                 pair[1] = triangle[right];
-                int kind = FUN_00cd58b0(positions, radius, pair, thickness, contacts);
+                int kind = hkCollideCapsuleUtilManifoldCapsVsCaps(positions, radius, pair, thickness, contacts);
                 if (feature)
                     for (int k = 0; k < 3; ++k)
                     {
@@ -1365,7 +1369,7 @@ void __cdecl FUN_00cd6520(const ContactVector* positions, float radius, const Co
                 ContactVector edge;
                 edge.setSub4(triangle[left], trianglePoint);
                 ContactClosest closest;
-                int kind = FUN_00d22e40(positions[0], worldDirection, trianglePoint, edge, closest);
+                int kind = hkLineSegmentUtil_closestLineSegLineSeg(positions[0], worldDirection, trianglePoint, edge, closest);
                 if (feature)
                 {
                     feature[endpoint].first = (unsigned short)right;

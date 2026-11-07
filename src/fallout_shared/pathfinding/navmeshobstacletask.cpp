@@ -95,7 +95,7 @@ void ObstacleTaskData::Process()
     {
         m_spWorkingNavMesh = reinterpret_cast<NavMeshPtr(__cdecl*)(NavMesh*)>(&MakeNavMeshPointer)(new NavMesh);
         NAVMESH_FROM(m_spSourceNavMesh)->CopyNavMeshDataTo(m_spWorkingNavMesh);
-        FUN_006c8150();
+        SortOperations();
         for (unsigned int i = 0; i < Operations.GetSize(); ++i)
         {
             switch (OPERATION_AT(Operations, i).eType)
@@ -166,13 +166,14 @@ void __cdecl CompareObstacleEntries();
 
 struct Helper_006c8980
 {
-    void FUN_006c8980(void(__cdecl*)());
+    void BSSimpleArray_Sort_0(void(__cdecl*)());
 };
 
 // @fnv 0x006c8150
-void ObstacleTaskData::FUN_006c8150()
+// src: COMMUNITY 0x006c8150
+void ObstacleTaskData::SortOperations()
 {
-    ((Helper_006c8980*)((char*)this + 0x24))->FUN_006c8980(CompareObstacleEntries);
+    ((Helper_006c8980*)((char*)this + 0x24))->BSSimpleArray_Sort_0(CompareObstacleEntries);
 }
 
 struct Elem16
@@ -184,7 +185,7 @@ struct Arr16
 {
     int pad;
     Elem16* data;
-    unsigned int FUN_006f31f0();
+    unsigned int BSSimpleArray_TeleportLink_1024_AddUninitialized();
     void InitializeArray(Elem16* e, int f);
     unsigned int AppendValue(int value);
 };
@@ -192,7 +193,7 @@ struct Arr16
 // @fnv 0x006c8810
 unsigned int Arr16::AppendValue(int value)
 {
-    unsigned int index = FUN_006f31f0();
+    unsigned int index = BSSimpleArray_TeleportLink_1024_AddUninitialized();
     InitializeArray(&data[index], 1);
     data[index].AssignFrom(value);
     return index;
@@ -244,15 +245,16 @@ char* FUN_006c85c0_shell::GetCharPtrAtOffset()
 extern int DAT_0106c8d4;
 struct S_006c87c0
 {
-    int FUN_006c8c70(int, int);
-    S_006c87c0* FUN_006c87c0();
+    int BSSimpleArray_ObstacleTaskNavMeshOperation_1024_InitialSetup(int, int);
+    S_006c87c0* InitializeFields_006c87c0();
 };
 // Sets the object's vtable pointer to DAT_0106c8d4, calls FUN_006c8c70(0, 0), and returns this.
 // @fnv 0x006c87c0
-S_006c87c0* S_006c87c0::FUN_006c87c0()
+// src: GUESS 0x006c87c0 (confidence: low)
+S_006c87c0* S_006c87c0::InitializeFields_006c87c0()
 {
     *(int*)this = (int)&DAT_0106c8d4;
-    FUN_006c8c70(0, 0);
+    BSSimpleArray_ObstacleTaskNavMeshOperation_1024_InitialSetup(0, 0);
     return this;
 }
 
@@ -260,14 +262,15 @@ extern int DAT_0106c8d4;
 struct FUN_006c87f0_shell
 {
     void* vftable;
-    void __thiscall FUN_006c8a30(int a);
-    void __thiscall FUN_006c87f0();
+    void __thiscall BSSimpleArray_ObstacleTaskNavMeshOperation_1024_Clear(int a);
+    void __thiscall SetVtableAndProcessState_006c87f0();
 };
 // @fnv 0x006c87f0
-void __thiscall FUN_006c87f0_shell::FUN_006c87f0()
+// src: GUESS 0x006c87f0 (confidence: low)
+void __thiscall FUN_006c87f0_shell::SetVtableAndProcessState_006c87f0()
 {
     vftable = &DAT_0106c8d4;
-    FUN_006c8a30(1);
+    BSSimpleArray_ObstacleTaskNavMeshOperation_1024_Clear(1);
 }
 
 // @fnv 0x006c7e60
@@ -326,7 +329,7 @@ int __cdecl CompareObstacleEntries(const void* apEntryA, const void* apEntryB)
         case OBSTACLE_TASK_TYPE_OBSTACLE_TASK_TYPE_REMOVE_OBSTACLE:
         case OBSTACLE_TASK_TYPE_OBSTACLE_TASK_TYPE_REMOVE_OBSTACLE_FOR_UPDATE: {
             NavMeshPtr mesh(a->apSearchNavMesh);
-            if (mesh.FUN_00458b50())
+            if (mesh.AnimatingText_GetFullText())
             {
                 int ia = static_cast<const NavMeshPtr&>(mesh)->FindEntryIndex((void*)a);
                 int ib = static_cast<const NavMeshPtr&>(mesh)->FindEntryIndex((void*)b);
@@ -358,10 +361,10 @@ class FUN_006c8860_Class
     Element16* data;
     unsigned int size;
     unsigned int capacity;
-    bool FUN_006f3170();
-    unsigned int FUN_00869600();
-    void FUN_006c8bd0(Element16*, const Element16*, unsigned int);
-    void FUN_006c8b90(Element16*, unsigned int);
+    bool BSSimpleArray_HasSufficientCapacity();
+    unsigned int BSSimpleArray_GetOptimalCapacity();
+    void BSSimpleArray_NiColorA_1024_CopyItems(Element16*, const Element16*, unsigned int);
+    void BSSimpleArray_ObstacleTaskNavMeshOperation_1024_DestructItems(Element16*, unsigned int);
     void FUN_006a8500();
     void RemoveAt(unsigned int index, bool shrink);
 };
@@ -369,33 +372,33 @@ class FUN_006c8860_Class
 // @fnv 0x006c8860
 void FUN_006c8860_Class::RemoveAt(unsigned int index, bool shrink)
 {
-    if (shrink && FUN_006f3170())
+    if (shrink && BSSimpleArray_HasSufficientCapacity())
     {
-        unsigned int uiNewCapacity = FUN_00869600();
+        unsigned int uiNewCapacity = BSSimpleArray_GetOptimalCapacity();
         Element16* pNewData = Allocate(uiNewCapacity);
-        FUN_006c8bd0(pNewData, data, index);
-        FUN_006c8b90(data + index, 1);
-        FUN_006c8bd0(pNewData + index, data + index + 1, size - 1);
+        BSSimpleArray_NiColorA_1024_CopyItems(pNewData, data, index);
+        BSSimpleArray_ObstacleTaskNavMeshOperation_1024_DestructItems(data + index, 1);
+        BSSimpleArray_NiColorA_1024_CopyItems(pNewData + index, data + index + 1, size - 1);
         FUN_006a8500();
         data = pNewData;
         capacity = uiNewCapacity;
     }
     else
     {
-        FUN_006c8b90(data + index, 1);
-        FUN_006c8bd0(data + index, data + index + 1, size - index - 1);
+        BSSimpleArray_ObstacleTaskNavMeshOperation_1024_DestructItems(data + index, 1);
+        BSSimpleArray_NiColorA_1024_CopyItems(data + index, data + index + 1, size - index - 1);
     }
     size = size - 1;
 }
 
 struct ObstacleCellChild
 {
-    void FUN_00469500(NavMeshPtr);
-    void FUN_0069bb00(NavMeshPtr);
+    void NavMeshArray_AddNavMesh(NavMeshPtr);
+    void NavMeshArray_RemoveNavMesh(NavMeshPtr);
 };
 struct ObstacleCell
 {
-    ObstacleCellChild* FUN_0070ec90();
+    ObstacleCellChild* DetailedActorPathHandler_GetCurrentNodeIndex();
 };
 struct ObstacleInfo
 {
@@ -428,18 +431,18 @@ bool __fastcall CommitObstacleTask(ObstacleTaskData* task)
     }
     if (bFound)
     {
-        unsigned int formID = ((NavMesh*)task->m_spSourceNavMesh)->FUN_0084e3a0();
+        unsigned int formID = ((NavMesh*)task->m_spSourceNavMesh)->GetHavokWorldObjectCountInSceneGraph_0084e3a0();
         ObstacleCell* pCell = reinterpret_cast<ObstacleCell*>(((NavMesh*)task->m_spSourceNavMesh)->GetParentCell());
         if (pCell)
         {
-            pCell->FUN_0070ec90()->FUN_00469500(task->m_spWorkingNavMesh);
-            pCell->FUN_0070ec90()->FUN_0069bb00(task->m_spSourceNavMesh);
+            pCell->DetailedActorPathHandler_GetCurrentNodeIndex()->NavMeshArray_AddNavMesh(task->m_spWorkingNavMesh);
+            pCell->DetailedActorPathHandler_GetCurrentNodeIndex()->NavMeshArray_RemoveNavMesh(task->m_spSourceNavMesh);
         }
         ((NavMesh*)task->m_spSourceNavMesh)->ForceSetFormID(0);
-        ((NavMesh*)task->m_spSourceNavMesh)->FUN_006d3100((NavMeshInfo*)0);
+        ((NavMesh*)task->m_spSourceNavMesh)->PathingRequestCoveredMove_SetCombatCoverLocation((NavMeshInfo*)0);
         ((NavMesh*)task->m_spWorkingNavMesh)->ForceSetFormID(formID);
-        ((NavMesh*)task->m_spWorkingNavMesh)->FUN_006d3100((NavMeshInfo*)task->pInfo);
-        reinterpret_cast<ObstacleInfo*>(task->pInfo)->SetField54(task->m_spWorkingNavMesh.FUN_00458b50());
+        ((NavMesh*)task->m_spWorkingNavMesh)->PathingRequestCoveredMove_SetCombatCoverLocation((NavMeshInfo*)task->pInfo);
+        reinterpret_cast<ObstacleInfo*>(task->pInfo)->SetField54(task->m_spWorkingNavMesh.AnimatingText_GetFullText());
         return true;
     }
     else

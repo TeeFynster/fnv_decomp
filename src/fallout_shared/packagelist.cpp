@@ -56,7 +56,7 @@ TESPackage* PackageList::GetPackageForActor(Actor* actor)
                 (selection.package->IsMustReachLocation() &&
                  !actor->GetExtraData()->CanReachPackageLocation(selection.package)))
             {
-                selection.schedule = selection.package->FUN_0041d8a0();
+                selection.schedule = selection.package->TESPackage_GetPackageSchedule();
                 if (selection.schedule)
                 {
                     bool bCalendarMonth;
@@ -71,18 +71,18 @@ TESPackage* PackageList::GetPackageForActor(Actor* actor)
                         int yesterday = g_calendar.GetGameHour() - 1;
                         if (yesterday < 0)
                             yesterday = 30;
-                        if (selection.schedule->FUN_00678ce0() == yesterday)
+                        if (selection.schedule->Main_GameReset() == yesterday)
                             bDayOfMonth = true;
                         int lastMonth = g_calendar.GetCurrentMonth() - 1;
                         if (lastMonth < 0)
                             lastMonth = 12;
-                        if (selection.schedule->FUN_00678ca0() == lastMonth)
+                        if (selection.schedule->PackageLocation_GetLocType() == lastMonth)
                             bCalendarMonth = true;
                     }
-                    if ((selection.schedule->FUN_00678ca0() == -1 ||
-                         selection.schedule->FUN_00678ca0() == g_calendar.GetCurrentMonth() || bCalendarMonth) &&
-                        (selection.schedule->FUN_00678ce0() == 0 ||
-                         selection.schedule->FUN_00678ce0() == g_calendar.GetGameHour() || bDayOfMonth) &&
+                    if ((selection.schedule->PackageLocation_GetLocType() == -1 ||
+                         selection.schedule->PackageLocation_GetLocType() == g_calendar.GetCurrentMonth() || bCalendarMonth) &&
+                        (selection.schedule->Main_GameReset() == 0 ||
+                         selection.schedule->Main_GameReset() == g_calendar.GetGameHour() || bDayOfMonth) &&
                         (selection.schedule->GetSecondByte() == -1 || selection.package->IsScheduledForDay(false) ||
                          bDayOfWeek) &&
                         (selection.schedule->FUN_0086a460() == -1 ||
@@ -100,7 +100,7 @@ TESPackage* PackageList::GetPackageForActor(Actor* actor)
                             targetState.reference = targetState.packageTarget->GetReferenceTarget();
                         if (selection.package->GetConditions()->ContainsTrait(actor, targetState.reference))
                         {
-                            if (FUN_00703180() == actor)
+                            if (Interface_GetTargetREFR() == actor)
                             {
                                 sprintf(
                                     message, "%s Picked Package %s (%s)", actor->TESObjectREFR::GetFullName(),
@@ -173,11 +173,11 @@ void PackageList::CollectEligiblePackages(Actor* actor, BSSimpleList<TESPackage*
             DurationData* pSchedule = 0;
             while (pList && (pPackage = pList->GetItem()))
             {
-                if (pPackage->FUN_0067efd0() && pPackage->FUN_00677760(actor))
+                if (pPackage->GetMustComplete() && pPackage->HasActorCompletedPackage(actor))
                 {
-                    pSchedule = pPackage->FUN_0041d8a0();
-                    if (pSchedule && (pSchedule->FUN_00678ca0() == -1 || pSchedule->FUN_00678ca0() <= scan.month) &&
-                        (pSchedule->FUN_00678ce0() == 0 || pSchedule->FUN_00678ce0() <= scan.day) &&
+                    pSchedule = pPackage->TESPackage_GetPackageSchedule();
+                    if (pSchedule && (pSchedule->PackageLocation_GetLocType() == -1 || pSchedule->PackageLocation_GetLocType() <= scan.month) &&
+                        (pSchedule->Main_GameReset() == 0 || pSchedule->Main_GameReset() <= scan.day) &&
                         (pSchedule->GetSecondByte() == -1 ||
                          pSchedule->GetSecondByte() <= g_calendar.GetGameDayOfWeek()) &&
                         (pSchedule->FUN_0086a460() == -1 || pSchedule->FUN_0086a460() < scan.hour) &&
@@ -228,7 +228,7 @@ void PackageList::CollectEligiblePackages(Actor* actor, BSSimpleList<TESPackage*
             {
                 TESPackage* pPackage1 = sortCtx.cursor->GetItem();
                 TESPackage* pPackage2 = pNext->GetItem();
-                if (pPackage1->CompareTo(pPackage2->FUN_0041d8a0()) == 1)
+                if (pPackage1->CompareTo(pPackage2->TESPackage_GetPackageSchedule()) == 1)
                 {
                     sortCtx.cursor->SetItem(pPackage2);
                     pNext->SetItem(pPackage1);
@@ -347,7 +347,8 @@ void PackageList::AddPackage(TESPackage* package)
 }
 
 // @fnv 0x0067efd0
-bool TESPackage::FUN_0067efd0()
+// src: XBOX_PDB 0x0067efd0
+bool TESPackage::GetMustComplete()
 {
     return (packageFlags & 4) ? true : false;
 }

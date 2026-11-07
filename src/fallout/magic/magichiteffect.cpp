@@ -49,7 +49,8 @@ void ActiveEffectHitEffectAccess::RemoveHitEffect(BSTempEffect* apHitEffect)
 struct FUN_0081b6c0_shell;
 
 // @fnv 0x0081b6c0
-int __fastcall FUN_0081b6c0(int)
+// src: COMMUNITY 0x0081b6c0
+int __fastcall retn4(int)
 {
     return 4;
 }
@@ -130,16 +131,17 @@ extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct FUN_0081bd80_s
 {
-    void FUN_0081bd80(ActiveEffect* apEffect, TESObjectREFR* apTarget);
+    void MagicHitEffect_SaveGame(ActiveEffect* apEffect, TESObjectREFR* apTarget);
 };
 
 // @fnv 0x0081bd80
-void FUN_0081bd80_s::FUN_0081bd80(ActiveEffect* apEffect, TESObjectREFR* apTarget)
+// src: COMMUNITY 0x0081bd80
+void FUN_0081bd80_s::MagicHitEffect_SaveGame(ActiveEffect* apEffect, TESObjectREFR* apTarget)
 {
-    g_TESSaveLoadGame->FUN_008579b0((char*)this + 0x20, 4);
-    g_TESSaveLoadGame->FUN_008579b0((char*)this + 0x24, 1);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((char*)this + 0x20, 4);
+    g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((char*)this + 0x24, 1);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x72)
-        g_TESSaveLoadGame->FUN_008579b0((char*)this + 8, 4);
+        g_TESSaveLoadGame->TESSaveLoadGame_SaveGameDataOLD((char*)this + 8, 4);
 }
 }  // namespace fnv_0081bd80
 
@@ -165,12 +167,13 @@ struct FUN_00682a30_base
 
 struct FUN_0081be80_s : FUN_00682a30_base
 {
-    void FUN_0081be80(BGSSaveFormBuffer* apSaveGameBuffer);
+    void MagicHitEffect_SaveGameBGS(BGSSaveFormBuffer* apSaveGameBuffer);
 };
 
 // Calls the base save, writes the 4-byte field at 0x20 and the byte at 0x24, then saves the TESObjectREFR pointer at 0x1c.
 // @fnv 0x0081be80
-void FUN_0081be80_s::FUN_0081be80(BGSSaveFormBuffer* apSaveGameBuffer)
+// src: COMMUNITY 0x0081be80
+void FUN_0081be80_s::MagicHitEffect_SaveGameBGS(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     FUN_00682a30(apSaveGameBuffer);
     apSaveGameBuffer->SaveData((char*)this + 0x20, 4, 0);
@@ -440,32 +443,33 @@ struct VObj
 struct Node
 {
     void* FUN_008d6f30();
-    Node* FUN_009611e0();
-    Node* FUN_00545cb0();
+    Node* NiAVObject_GetParent();
+    Node* Get3D_00545cb0();
     VObj* FUN_005497a0();
 };
 
 struct FUN_0081bc70_s
 {
     Node* FUN_00441110();
-    Node* FUN_0084e3a0();
+    Node* GetHavokWorldObjectCountInSceneGraph_0084e3a0();
     void FUN_0041fd00(void* apNode);
-    void FUN_0081bc70(Node* apArg);
+    void MagicHitEffect_UpdateParentCell(Node* apArg);
 };
 
 // @fnv 0x0081bc70
-void FUN_0081bc70_s::FUN_0081bc70(Node* apArg)
+// src: COMMUNITY 0x0081bc70
+void FUN_0081bc70_s::MagicHitEffect_UpdateParentCell(Node* apArg)
 {
     if (FUN_00441110())
     {
         FUN_0041fd00(FUN_00441110()->FUN_008d6f30());
         if (apArg)
         {
-            if (FUN_0084e3a0() && FUN_0084e3a0()->FUN_00545cb0())
+            if (GetHavokWorldObjectCountInSceneGraph_0084e3a0() && GetHavokWorldObjectCountInSceneGraph_0084e3a0()->Get3D_00545cb0())
             {
-                if (!apArg->FUN_009611e0() || FUN_0084e3a0()->FUN_00545cb0() != apArg->FUN_009611e0()->FUN_009611e0())
+                if (!apArg->NiAVObject_GetParent() || GetHavokWorldObjectCountInSceneGraph_0084e3a0()->Get3D_00545cb0() != apArg->NiAVObject_GetParent()->NiAVObject_GetParent())
                 {
-                    VObj* m = FUN_0084e3a0()->FUN_005497a0();
+                    VObj* m = GetHavokWorldObjectCountInSceneGraph_0084e3a0()->FUN_005497a0();
                     m->v55(apArg, 1);
                 }
             }
@@ -497,12 +501,13 @@ class BF20RefFormCall : public BF20FormCall
   public:
     TESObjectREFR* m_pkTarget;
 
-    void FUN_0081bf20(unsigned int uiFlags);
+    void MagicHitEffect_SetTarget(unsigned int uiFlags);
 };
 
 // Reverts the base form call with uiFlags, then re-resolves m_pkTarget through BF20ResolveForm or clears it if null.
 // @fnv 0x0081bf20
-void BF20RefFormCall::FUN_0081bf20(unsigned int uiFlags)
+// src: COMMUNITY 0x0081bf20
+void BF20RefFormCall::MagicHitEffect_SetTarget(unsigned int uiFlags)
 {
     BF20FormCall::Revert(uiFlags);
     m_pkTarget = m_pkTarget ? dynamic_cast<TESObjectREFR*>(BF20ResolveForm(m_pkTarget)) : 0;
@@ -515,7 +520,7 @@ class CasterX
     virtual TESObjectREFR* V04(ActiveEffect* pEffect);
     Actor* FUN_00822b40();
 };
-unsigned char FUN_00525420();
+unsigned char Main_GetSceneIsComplex();
 class EffBase
 {
   public:
@@ -554,7 +559,7 @@ extern Setting DAT_011df7f8;
 class MgrX
 {
   public:
-    void FUN_00973fd0(EffBase* p);
+    void ProcessLists_AddTempEffect(EffBase* p);
 };
 extern MgrX DAT_011e0e80;
 
@@ -566,7 +571,7 @@ FUN_00470440* __cdecl CreateEffectEntries(ActiveEffect* pEffect)
     {
         TESCreature* pCreature = dynamic_cast<TESCreature*>(pEffect->FUN_0059bb30()->FUN_00822b40()->GetActorBase());
         Character* pCharacter = dynamic_cast<Character*>(pEffect->FUN_0059bb30()->FUN_00822b40());
-        if ((!pCreature || !pCreature->FUN_005fbf20()) && pCharacter)
+        if ((!pCreature || !pCreature->IsHumanoidCreature()) && pCharacter)
             pCharacter->IsCharacter();
     }
     FUN_00470440* c = 0;
@@ -577,12 +582,12 @@ FUN_00470440* __cdecl CreateEffectEntries(ActiveEffect* pEffect)
     bool bSkip = pEffect->GetEffectSetting()->IsFlagSet(0x1000) && *DAT_011df7f8.Bool();
     if (bSkip)
         return c;
-    if (!pEffect->HasFlag(4) && !FUN_00525420())
+    if (!pEffect->HasFlag(4) && !Main_GetSceneIsComplex())
     {
         a = new FUN_0081c630(reinterpret_cast<CasterX*>(pEffect->FUN_0059bb30())->V04(pEffect));
         if (a->VC4())
         {
-            DAT_011e0e80.FUN_00973fd0(a);
+            DAT_011e0e80.ProcessLists_AddTempEffect(a);
             c = new FUN_00470440(a);
         }
         else
@@ -595,7 +600,7 @@ FUN_00470440* __cdecl CreateEffectEntries(ActiveEffect* pEffect)
         a = new FUN_0081f350(reinterpret_cast<CasterX*>(pEffect->FUN_0059bb30())->V04(pEffect));
         if (a->VC4())
         {
-            DAT_011e0e80.FUN_00973fd0(a);
+            DAT_011e0e80.ProcessLists_AddTempEffect(a);
             if (c)
                 c->FUN_005ae3d0(a);
             else

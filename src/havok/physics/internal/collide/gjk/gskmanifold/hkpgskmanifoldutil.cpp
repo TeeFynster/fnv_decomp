@@ -161,10 +161,11 @@ bool FindAndPromoteEntry(S_00dad4d0_Set* set, S_00dad4d0_Key* key)
     return false;
 }
 
-void __fastcall FUN_00dae220(int unused, S_00dad640_Set* set);
+void __fastcall hkGskManifold_garbageCollect(int unused, S_00dad640_Set* set);
 
 // @fnv 0x00dae340
-void __cdecl FUN_00dae340(S_00dad640_Set* set, unsigned int index)
+// src: HAVOK_LIB 0x00dae340
+void __cdecl _hkGskManifold_removePoint(S_00dad640_Set* set, unsigned int index)
 {
     unsigned int n = set->count;
     unsigned int last = n - 1;
@@ -179,7 +180,7 @@ void __cdecl FUN_00dae340(S_00dad640_Set* set, unsigned int index)
         *puiDst = *(unsigned int*)((char*)puiSrc + ((char*)puiDst - (char*)puiBaseDst));
         ++puiDst;
     }
-    FUN_00dae220(iShift, set);
+    hkGskManifold_garbageCollect(iShift, set);
 }
 
 extern float DAT_01011d78, DAT_01017718, DAT_01016248;
@@ -574,7 +575,8 @@ struct EntryParameter
 };
 // Switches on 4 * f.numA + f.numB to call pointPoint, pointEdge, pointFace, edgePoint, edgeEdge or facePoint; returns 1 for other combinations.
 // @fnv 0x00dad990
-static __declspec(noinline) int FUN_00dad990(const ContactWork& w, ContactResult& r, EntryParameter entry)
+// src: GUESS 0x00dad990 (confidence: medium)
+static __declspec(noinline) int Hkpgskmanifoldutil_DispatchFeaturePairQuery(const ContactWork& w, ContactResult& r, EntryParameter entry)
 {
     const S_00dad4d0_Entry& f = *entry.p;
     switch (4 * f.numA + f.numB)
@@ -600,5 +602,5 @@ static __declspec(noinline) int FUN_00dad990(const ContactWork& w, ContactResult
 int probeCaller(const ContactWork& w, ContactResult& r, const S_00dad4d0_Entry* f)
 {
     EntryParameter e = {f};
-    return FUN_00dad990(w, r, e);
+    return Hkpgskmanifoldutil_DispatchFeaturePairQuery(w, r, e);
 }

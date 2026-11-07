@@ -54,21 +54,22 @@ struct ShapeData
     int m_kPointB;
     int m_iThirdValue;
     int m_iFourthElementInteger;
-    void FUN_00d738f0(int);
-    void FUN_00d74a20();
-    ShapeData* FUN_00d74b20(ShapeRefArray* refs);
+    void _SharedShapeData_recursivelyParseShapeReferences(int);
+    void _SharedShapeData_removeSingleReferencedShapeData();
+    ShapeData* _SharedShapeData__SharedShapeData(ShapeRefArray* refs);
 };
 
 // Resets the three fields, forwards each ref's value at offset 0x10 to FUN_00d738f0, then calls FUN_00d74a20 and returns this.
 // @fnv 0x00d74b20
-ShapeData* ShapeData::FUN_00d74b20(ShapeRefArray* refs)
+// src: HAVOK_LIB 0x00d74b20
+ShapeData* ShapeData::_SharedShapeData__SharedShapeData(ShapeRefArray* refs)
 {
     m_kPointA = 0;
     m_kPointB = 0;
     m_iThirdValue = 0x80000000;
     for (int i = 0; i < refs->count; ++i)
-        FUN_00d738f0(*(int*)(refs->refs[i] + 0x10));
-    FUN_00d74a20();
+        _SharedShapeData_recursivelyParseShapeReferences(*(int*)(refs->refs[i] + 0x10));
+    _SharedShapeData_removeSingleReferencedShapeData();
     return this;
 }
 
@@ -104,12 +105,12 @@ struct FUN_00d74420_Context
     int m_kPointA;  // +0x00
     int m_kPointB;  // +0x04
     int m_iThirdValue;  // +0x08, initialized to 0x80000000
-    void FUN_00d738f0(int value);
-    void FUN_00d74a20();
-    void FUN_00d74aa0();
+    void _SharedShapeData_recursivelyParseShapeReferences(int value);
+    void _SharedShapeData_removeSingleReferencedShapeData();
+    void ProcessEntries_00d74aa0();
 };
 
-int FUN_00d739f0(int a1, int a2, FUN_00d74420_Context* ctx, int a3);
+int hkpShape_ProcessEntries_00d739f0(int a1, int a2, FUN_00d74420_Context* ctx, int a3);
 
 // @fnv 0x00d74420
 int RunContextOperation(int aiArg1, int aiArg2, int aiArg3, int* piOut)
@@ -118,10 +119,10 @@ int RunContextOperation(int aiArg1, int aiArg2, int aiArg3, int* piOut)
     ctx.m_kPointA = 0;
     ctx.m_kPointB = 0;
     ctx.m_iThirdValue = 0x80000000;
-    ctx.FUN_00d738f0(aiArg1);
-    ctx.FUN_00d74a20();
-    *piOut = FUN_00d739f0(aiArg1, aiArg2, &ctx, aiArg3);
-    ctx.FUN_00d74aa0();
+    ctx._SharedShapeData_recursivelyParseShapeReferences(aiArg1);
+    ctx._SharedShapeData_removeSingleReferencedShapeData();
+    *piOut = hkpShape_ProcessEntries_00d739f0(aiArg1, aiArg2, &ctx, aiArg3);
+    ctx.ProcessEntries_00d74aa0();
     return 0;
 }
 
@@ -167,7 +168,8 @@ int __cdecl RemapCollisionShapes(hkArray<hkpEntity*>& kEntities, int iA, int iB)
 
 // Appends pkEntity to a local hkArray and forwards it with iA and iB to RemapCollisionShapes, returning its result.
 // @fnv 0x00d748d0
-int __cdecl FUN_00d748d0(hkpEntity* pkEntity, int iA, int iB) throw()
+// src: GUESS 0x00d748d0 (confidence: high)
+int __cdecl hkpEntity_RemapSingleEntityCollisionShapes(hkpEntity* pkEntity, int iA, int iB) throw()
 {
     hkArray<hkpEntity*> kEntities;
     kEntities.pushBack(pkEntity);
@@ -250,7 +252,7 @@ __forceinline const hkpConvexShape* hkpConvexTranslateShape::GetShapeForKey() co
 // Typed adapters for the original pointer-returning constructor entry points.
 // These allow construction without duplicating the shared abstract classes.
 extern "C" void FUN_00cf5990();
-extern "C" void FUN_00d5d7a0();
+extern "C" void hkpConvexTransformShape_hkpConvexTransformShape();
 extern "C" void FUN_00c9e340();
 __forceinline void* hkReferencedObject::operator new(std::size_t nbytes)
 {
@@ -287,7 +289,7 @@ struct Arr_d74480
     int size;
     int capacity;
 };
-hkpShape* __cdecl FUN_00d739f0(hkpShape*, void*, Cache_d74480*, void*);
+hkpShape* __cdecl hkpShape_ProcessEntries_00d739f0(hkpShape*, void*, Cache_d74480*, void*);
 
 // Recursively processes a shape tree, replacing nodes with cached or newly allocated equivalents and storing results in the cache.
 // @fnv 0x00d74480
@@ -372,7 +374,7 @@ hkpShape* __cdecl ProcessShape(hkpShape* shape, void* context, Cache_d74480* cac
             n->removeReference();
             cache->SetEntryValue(shape, v);
         }
-        result = FUN_00d739f0(v, context, cache, settings);
+        result = hkpShape_ProcessEntries_00d739f0(v, context, cache, settings);
         v->removeReference();
         break;
     }
@@ -391,11 +393,11 @@ hkpShape* __cdecl ProcessShape(hkpShape* shape, void* context, Cache_d74480* cac
         {
             hkpShape* mem = (hkpShape*)hkMemoryRouter::getInstance().heap().blockAlloc(0x60);
             mem->m_usMemSizeAndFlags = 0x60;
-            v = reinterpret_cast<hkpConvexTransformShape*(__thiscall*)(hkpConvexTransformShape*, const hkpConvexShape*, const hkTransform&, int)>(FUN_00d5d7a0)(static_cast<hkpConvexTransformShape*>(mem), static_cast<hkpConvexShape*>(n), static_cast<hkpConvexTransformShape*>(cv)->m_kMotionTransform, 1);
+            v = reinterpret_cast<hkpConvexTransformShape*(__thiscall*)(hkpConvexTransformShape*, const hkpConvexShape*, const hkTransform&, int)>(hkpConvexTransformShape_hkpConvexTransformShape)(static_cast<hkpConvexTransformShape*>(mem), static_cast<hkpConvexShape*>(n), static_cast<hkpConvexTransformShape*>(cv)->m_kMotionTransform, 1);
             n->removeReference();
             cache->SetEntryValue(shape, v);
         }
-        result = FUN_00d739f0(v, context, cache, settings);
+        result = hkpShape_ProcessEntries_00d739f0(v, context, cache, settings);
         v->removeReference();
         break;
     }
@@ -422,7 +424,7 @@ hkpShape* __cdecl ProcessShape(hkpShape* shape, void* context, Cache_d74480* cac
             n->removeReference();
             cache->SetEntryValue(shape, v);
         }
-        result = FUN_00d739f0(v, context, cache, settings);
+        result = hkpShape_ProcessEntries_00d739f0(v, context, cache, settings);
         v->removeReference();
         break;
     }
@@ -455,7 +457,7 @@ struct hkShapeOutputD748
     int unk04;
     int unk08;
     int unk0C;
-    void FUN_00d73400() throw();
+    void UpdateFields_00d73400() throw();
 };
 
 struct hkShapeMapD748
@@ -463,8 +465,8 @@ struct hkShapeMapD748
     void* m_data;
     int m_iElementCount;
     int m_iCapacityState;
-    hkShapeMapD748* FUN_00d74b20(hkShapeEntryArrayD748* refs) throw();
-    void FUN_00d74aa0() throw();
+    hkShapeMapD748* _SharedShapeData__SharedShapeData(hkShapeEntryArrayD748* refs) throw();
+    void ProcessEntries_00d74aa0() throw();
 };
 
 hkReferencedObject* __cdecl ProcessShape(hkReferencedObject* shape, void* context, hkShapeMapD748* map,
@@ -474,9 +476,9 @@ hkReferencedObject* __cdecl ProcessShape(hkReferencedObject* shape, void* contex
 // @fnv 0x00d74850
 int __cdecl RemapCollisionShapes(hkShapeEntryArrayD748* refs, void* context, hkShapeOutputD748* out)
 {
-    out->FUN_00d73400();
+    out->UpdateFields_00d73400();
     hkShapeMapD748 map;
-    map.FUN_00d74b20(refs);
+    map._SharedShapeData__SharedShapeData(refs);
     for (int i = 0; i < refs->m_iElementCount; i++)
     {
         hkShapeEntryD748* entry = refs->m_data[i];
@@ -485,7 +487,7 @@ int __cdecl RemapCollisionShapes(hkShapeEntryArrayD748* refs, void* context, hkS
         shape->removeReference();
         entry->m_pCollisionShape = pRemappedShape;
     }
-    map.FUN_00d74aa0();
+    map.ProcessEntries_00d74aa0();
     return 0;
 }
 
@@ -500,7 +502,8 @@ template <class T> static __forceinline void PushBackD737(hkArray<T>* a, const T
 
 // Appends the child shapes of a shape to out: every list child for type 9, or the single child pointer for types 15, 12 and 11.
 // @fnv 0x00d737d0
-static __declspec(noinline) void FUN_00d737d0(const hkpShape* shape, hkArray<const hkpShape*>* out)
+// src: GUESS 0x00d737d0 (confidence: high)
+static __declspec(noinline) void hkpShape_AppendChildShapesByType(const hkpShape* shape, hkArray<const hkpShape*>* out)
 {
     switch (shape->getType())
     {
@@ -539,7 +542,7 @@ static __declspec(noinline) void FUN_00d737d0(const hkpShape* shape, hkArray<con
 
 void zz_probe_d737d0(const hkpShape* shape, hkArray<const hkpShape*>* out)
 {
-    FUN_00d737d0(shape, out);
+    hkpShape_AppendChildShapesByType(shape, out);
 }
 
 struct D74A20Entry
@@ -556,7 +559,8 @@ struct D74A20Array
 };
 
 // @fnv 0x00d74a20
-void ShapeData::FUN_00d74a20()
+// src: HAVOK_LIB 0x00d74a20
+void ShapeData::_SharedShapeData_removeSingleReferencedShapeData()
 {
     D74A20Array* array = reinterpret_cast<D74A20Array*>(this);
 
@@ -601,7 +605,8 @@ void ShapeData::FUN_00d74a20()
 
 // Applies a transform to a shape, collapsing identity results to the child shape or creating a new transform/convex shape wrapper.
 // @fnv 0x00d73590
-const hkpShape* __cdecl FUN_00d73590(const hkpShape* shape, const hkTransform& transform) throw()
+// src: GUESS 0x00d73590 (confidence: medium)
+const hkpShape* __cdecl hkpShape_CreateTransformedShape(const hkpShape* shape, const hkTransform& transform) throw()
 {
     bool identity = transform.IsEqualWithinTolerance(hkTransform::GetIdentityTransform(), 0.001f);
     const hkpShape* retainedShape = shape;
@@ -637,7 +642,7 @@ retainShape:
             return child;
         }
         hkpConvexTransformShape* p = static_cast<hkpConvexTransformShape*>(hkReferencedObject::operator new(sizeof(hkpConvexTransformShape)));
-        return reinterpret_cast<hkpConvexTransformShape*(__thiscall*)(hkpConvexTransformShape*, const hkpConvexShape*, const hkTransform&, int)>(FUN_00d5d7a0)(p, cts->GetShapeForKey(), combined, 1);
+        return reinterpret_cast<hkpConvexTransformShape*(__thiscall*)(hkpConvexTransformShape*, const hkpConvexShape*, const hkTransform&, int)>(hkpConvexTransformShape_hkpConvexTransformShape)(p, cts->GetShapeForKey(), combined, 1);
     }
     case HK_SHAPE_CONVEX_TRANSLATE: {
         if (transform.getRotation().IsEqualWithinTolerance(hkTransform::GetIdentityTransform().getRotation(), 0.001f))
@@ -675,11 +680,12 @@ class RefPairListD74
 {
   public:
     hkArray<RefPairD74> m_pairs;
-    void FUN_00d74aa0();
+    void ProcessEntries_00d74aa0();
 };
 // Removes references from all pairs in m_pairs and then clears and releases the underlying array storage.
 // @fnv 0x00d74aa0
-void RefPairListD74::FUN_00d74aa0()
+// src: GUESS 0x00d74aa0 (confidence: low)
+void RefPairListD74::ProcessEntries_00d74aa0()
 {
     for (int i = 0; i < m_pairs.m_iElementCount; i++)
     {

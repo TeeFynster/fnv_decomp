@@ -13,7 +13,7 @@ class TaskThreadManager
 extern TaskThreadManager DAT_01200088;
 extern bool DAT_011f94b4;
 extern unsigned int DAT_01200080;
-void __cdecl FUN_00ba3190();
+void __cdecl MTRenderingSystem_TaskThreadCallback();
 #include "../../include/AILinearTaskThread.h"
 
 #include "../../include/NiRenderer.h"

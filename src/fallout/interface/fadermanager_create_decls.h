@@ -6,8 +6,8 @@
 // Private type and helper declarations used by the two creation routines.
 void* operator new[](size_t);
 void* _NiMalloc(unsigned int);
-int FUN_004dc1f0();
-int FUN_004dc200();
+int Renderer_GetScreenWidth();
+int Renderer_GetScreenHeight();
 
 // Shader inputs used while constructing the fader surface.
 struct FaderSurfaceParameters
@@ -16,7 +16,7 @@ struct FaderSurfaceParameters
     NiPoint2* pTexCoords;
 };
 
-bool FUN_004de070();
+bool is_bEyeFinity();
 
 extern NiTexture::TextureFormatPreferences DAT_011a9598;
 

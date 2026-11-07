@@ -14,15 +14,16 @@
 
 struct CoordinateTriple
 {
-    bool FUN_00527a00();
-    TESObjectCELL* FUN_00527900();
+    bool BGSWorldLocation_IsLocationLoaded();
+    TESObjectCELL* BGSWorldLocation_GetCell();
 };
 extern TES* g_TES;
 
 // @fnv 0x00527a00
-bool CoordinateTriple::FUN_00527a00()
+// src: XBOX_PDB 0x00527a00
+bool CoordinateTriple::BGSWorldLocation_IsLocationLoaded()
 {
-    TESObjectCELL* pcell = FUN_00527900();
+    TESObjectCELL* pcell = BGSWorldLocation_GetCell();
     if (!pcell)
         return false;
     return g_TES->IsCellBuffered(pcell, false);
@@ -35,11 +36,12 @@ struct CoordinateTriple
     NiPoint3 pos;
     // +0x0c
     void* m_pPathingCell;
-    float FUN_00527a40(const CoordinateTriple& arWorldLocation);
+    float BGSWorldLocation_GetDistanceSquared(const CoordinateTriple& arWorldLocation);
 };
 
 // @fnv 0x00527a40
-float CoordinateTriple::FUN_00527a40(const CoordinateTriple& arWorldLocation)
+// src: XBOX_PDB 0x00527a40
+float CoordinateTriple::BGSWorldLocation_GetDistanceSquared(const CoordinateTriple& arWorldLocation)
 {
     if (this->m_pPathingCell != arWorldLocation.m_pPathingCell)
     {
@@ -73,29 +75,31 @@ struct FUN_00527b70_shell
 {
     char _pad[12];
     void* m_pPathingCell;
-    void FUN_00527b70(BGSSaveGameBuffer*);
+    void BGSWorldLocation_SaveGame(BGSSaveGameBuffer*);
 };
 // @fnv 0x00527b70
-void FUN_00527b70_shell::FUN_00527b70(BGSSaveGameBuffer* apSaveGameBuffer)
+// src: COMMUNITY 0x00527b70
+void FUN_00527b70_shell::BGSWorldLocation_SaveGame(BGSSaveGameBuffer* apSaveGameBuffer)
 {
     apSaveGameBuffer->SaveData(this, 0xC, 0);
     apSaveGameBuffer->SerializeFormData(m_pPathingCell, 0);
 }
 
 void* __cdecl _ref_004839c0(unsigned int);
-bool __cdecl FUN_00527b20(void*);
+bool __cdecl TESForm_ProcessAndReturnValue_00527b20(void*);
 struct FUN_00527ba0_This
 {
     char _pad[12];
     void* m_pPathingCell;
-    void FUN_00527ba0(BGSLoadGameBuffer* apLoadGameBuffer);
+    void BGSLoadGameBuffer_LoadBGSWorldLocation(BGSLoadGameBuffer* apLoadGameBuffer);
 };
 // @fnv 0x00527ba0
-void FUN_00527ba0_This::FUN_00527ba0(BGSLoadGameBuffer* apLoadGameBuffer)
+// src: COMMUNITY 0x00527ba0
+void FUN_00527ba0_This::BGSLoadGameBuffer_LoadBGSWorldLocation(BGSLoadGameBuffer* apLoadGameBuffer)
 {
     apLoadGameBuffer->ReadTypedData(this, 12);
     m_pPathingCell = _ref_004839c0(apLoadGameBuffer->ReadFormIdentifier());
-    if (!FUN_00527b20(m_pPathingCell))
+    if (!TESForm_ProcessAndReturnValue_00527b20(m_pPathingCell))
         m_pPathingCell = 0;
 }
 
@@ -103,10 +107,11 @@ struct FUN_00527990_shell
 {
     char _pad[12];
     TESForm* pForm;
-    bool FUN_00527990(int* apID, int* apType);
+    bool BGSWorldLocation_GetCellOrWorld(int* apID, int* apType);
 };
 // @fnv 0x00527990
-bool FUN_00527990_shell::FUN_00527990(int* apID, int* apType)
+// src: XBOX_PDB 0x00527990
+bool FUN_00527990_shell::BGSWorldLocation_GetCellOrWorld(int* apID, int* apType)
 {
     if (!pForm)
         return false;
@@ -152,7 +157,8 @@ struct FUN_00425fd0_shell
 
 // Returns true if form is null, has form type 0x41, or is a cell whose FUN_00425fd0 check succeeds; otherwise false.
 // @fnv 0x00527b20
-bool __cdecl FUN_00527b20(TESForm* form)
+// src: GUESS 0x00527b20 (confidence: low)
+bool __cdecl TESForm_ProcessAndReturnValue_00527b20(TESForm* form)
 {
     if (form == 0)
         return true;
@@ -185,12 +191,13 @@ struct FUN_00527900_shell
     int unk8;
     TESForm* pForm;
 
-    TESObjectCELL* FUN_00527900();
+    TESObjectCELL* BGSWorldLocation_GetCell();
 };
 
 // Returns pForm for type 0x39, resolves type 0x41 using m_f0 and m_f4, and otherwise returns null.
 // @fnv 0x00527900
-TESObjectCELL* FUN_00527900_shell::FUN_00527900()
+// src: XBOX_PDB 0x00527900
+TESObjectCELL* FUN_00527900_shell::BGSWorldLocation_GetCell()
 {
     if (pForm == 0)
         return 0;

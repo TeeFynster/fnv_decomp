@@ -5,11 +5,12 @@
 struct FUN_00cf6da0_cls
 {
     CRITICAL_SECTION m_00;
-    FUN_00cf6da0_cls* FUN_00cf6da0(DWORD spinCount);
+    FUN_00cf6da0_cls* ProcessAndReturnValue_00cf6da0(DWORD spinCount);
 };
 
 // @fnv 0x00cf6da0
-FUN_00cf6da0_cls* FUN_00cf6da0_cls::FUN_00cf6da0(DWORD spinCount)
+// src: GUESS 0x00cf6da0 (confidence: low)
+FUN_00cf6da0_cls* FUN_00cf6da0_cls::ProcessAndReturnValue_00cf6da0(DWORD spinCount)
 {
     InitializeCriticalSectionAndSpinCount((LPCRITICAL_SECTION)this, spinCount);
     return this;

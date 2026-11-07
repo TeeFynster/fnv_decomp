@@ -30,8 +30,8 @@ public:
     hkpAllCdBodyPairCollector();
     virtual ~hkpAllCdBodyPairCollector();
     virtual void AddCdBodyPair(const hkpCdBody& bodyA, const hkpCdBody& bodyB);
-    virtual void FUN_0062d330();
+    virtual void hkpCdBodyPairCollector_reset();
 
     void* FUN_0062d440(unsigned int flags);
-    void FUN_0062d310();
+    void reset_0062d310();
 };

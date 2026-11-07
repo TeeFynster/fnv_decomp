@@ -23,7 +23,7 @@ struct FUN_00e008e0_MemoryRouter
     }
 };
 
-extern "C" FUN_00e008e0_MemoryRouter& __cdecl FUN_00c85750();
+extern "C" FUN_00e008e0_MemoryRouter& __cdecl hkMemoryRouter_getInstance();
 
 struct FUN_00e008e0
 {
@@ -36,7 +36,7 @@ struct FUN_00e008e0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00e008e0* b = static_cast<FUN_00e008e0*>(p);
-        FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        hkMemoryRouter_getInstance().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 

@@ -25,7 +25,7 @@ bool BGSSaveLoadChangesMap::ContainsChangeFlags(unsigned int formID, FormChangeM
 {
     FormChangeRecord* changes = FUN_009a4250(formID);
     if (changes)
-        return ((FormChangeMask*)changes)->ContainsAnyFlags(flags.FUN_00559450());
+        return ((FormChangeMask*)changes)->ContainsAnyFlags(flags.Modelloader_GetReferencedThis());
     return false;
 }
 
@@ -38,12 +38,12 @@ void BGSSaveLoadChangesMap::AddFormChangeFlags(unsigned int formID, FormChangeMa
         changes = new FormChangeRecord();
         SetAt(formID, changes);
     }
-    else if (((FormChangeMask*)((char*)changes + 4))->FUN_00559450())
+    else if (((FormChangeMask*)((char*)changes + 4))->Modelloader_GetReferencedThis())
     {
         return;
     }
 
-    changes->FUN_00841100((char*)flags.FUN_00559450());
+    changes->FUN_00841100((char*)flags.Modelloader_GetReferencedThis());
 }
 
 // @fnv 0x00845880
@@ -60,7 +60,7 @@ void BGSSaveLoadChangesMap::ApplyFormQuantityChange(unsigned int formID, FormCha
         changes = new FormChangeRecord();
         SetAt(formID, changes);
     }
-    ((QuantityData*)changes)->SetQuantity(flags.FUN_00559450());
+    ((QuantityData*)changes)->SetQuantity(flags.Modelloader_GetReferencedThis());
 }
 
 // Looks up the change record for formID; if found, deletes it, removes it from the map, and returns true, otherwise returns false.
@@ -81,10 +81,10 @@ bool BGSSaveLoadChangesMap::HasFormChanges(unsigned int formID)
 bool BGSSaveLoadChangesMap::ClearChangeFlags(unsigned int formID, FormChangeMask flags)
 {
     FormChangeRecord* changes = FUN_009a4250(formID);
-    if (changes && !changes->flags.FUN_00559450())
+    if (changes && !changes->flags.Modelloader_GetReferencedThis())
     {
-        changes->FUN_00562210(flags.FUN_00559450());
-        if (((FormChangeMask*)changes)->FUN_00559450())
+        changes->FUN_00562210(flags.Modelloader_GetReferencedThis());
+        if (((FormChangeMask*)changes)->Modelloader_GetReferencedThis())
             return false;
         if (((TESDataHandlerAccess*)g_dataHandler)->FormIDExists(formID))
             return false;
@@ -128,7 +128,8 @@ void __fastcall FUN_005890c0(int* self, FUN_00845b30_arg a);
 
 // Calls FUN_005890c0 on self, then stores the address of DAT_01031fac into *self and returns self.
 // @fnv 0x00845b30
-int* __fastcall FUN_00845b30(int* self, FUN_00845b30_arg aArg)
+// src: EXE 0x00845b30
+int* __fastcall NiTPointerMap_unsigned_int_BGSFormChanges_NiTPointerMap(int* self, FUN_00845b30_arg aArg)
 {
     FUN_005890c0(self, aArg);
     *self = (int)&DAT_01031fac;
@@ -221,10 +222,11 @@ struct Fake845
 };
 struct S845
 {
-    CF845 FUN_00845760(unsigned int aiFormID);
+    CF845 BGSSaveLoadChangesMap_GetChangeBuffer(unsigned int aiFormID);
 };
 // @fnv 0x00845760
-CF845 S845::FUN_00845760(unsigned int aiFormID)
+// src: COMMUNITY 0x00845760
+CF845 S845::BGSSaveLoadChangesMap_GetChangeBuffer(unsigned int aiFormID)
 {
     FormChangeRecord* pEntry;
     pEntry = (FormChangeRecord*)((CombatTargetMap*)this)->GetTargetsForActor((Actor*)aiFormID);
@@ -234,7 +236,7 @@ CF845 S845::FUN_00845760(unsigned int aiFormID)
 }
 }  // namespace fnv_00845760
 
-int __fastcall FUN_00559450(int*);
+int __fastcall Modelloader_GetReferencedThis(int*);
 
 // Looks up or creates a per-form entry in the map, sets its quantity from FUN_00559450(quantity) and stores extra at offset 4.
 // @fnv 0x00845960
@@ -246,7 +248,7 @@ void BGSSaveLoadChangesMap::SetCombatTargetQuantity(unsigned int formID, unsigne
         array = (BSSimpleArray<Actor*, 1024>*)new FormChangeRecord;
         ((BGSSaveLoadChangesMap*)this)->SetAt(formID, (FormChangeRecord*)array);
     }
-    ((QuantityData*)array)->SetQuantity(FUN_00559450((int*)&quantity));
+    ((QuantityData*)array)->SetQuantity(Modelloader_GetReferencedThis((int*)&quantity));
     ((unsigned int*)((char*)array + 4))[0] = extra;
 }
 

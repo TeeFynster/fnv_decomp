@@ -2,10 +2,10 @@
 #ifndef FNV_NIPARALLELUPDATETASKMANAGER_INL_DECLS_H
 #define FNV_NIPARALLELUPDATETASKMANAGER_INL_DECLS_H
 
-int FUN_00683a60();
-bool FUN_00714a00();
-void FUN_00a81a80();
-void FUN_00714960(int);
+int NiParallelUpdateTaskManager_Get();
+bool NiParallelUpdateTaskManager_IsActive();
+void NiParallelUpdateTaskManager_EndUpdate();
+void NiParallelUpdateTaskManager_WaitRenderSema(int);
 class NiParallelUpdateTaskManager
 {
   public:

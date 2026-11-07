@@ -15,7 +15,7 @@ public:
 
     BGSSaveLoadChangesMap();
     void Initialize(unsigned int hashSize);
-    void FUN_00845b30(unsigned int hashSize);
+    void NiTPointerMap_unsigned_int_BGSFormChanges_NiTPointerMap(unsigned int hashSize);
     FormChangeRecord* GetChanges(unsigned int formID);
     FormChangeRecord* FUN_009a4250(unsigned int formID);
     bool ContainsChangeFlags(unsigned int formID, FormChangeMask flags);

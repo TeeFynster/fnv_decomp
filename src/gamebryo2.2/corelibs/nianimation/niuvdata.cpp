@@ -12,7 +12,8 @@
 extern const void* g_011f3f10;
 
 // @fnv 0x00a45010
-const void* __cdecl FUN_00a45010()
+// src: COMMUNITY 0x00a45010
+const void* __cdecl NiUVData_GetRTTI()
 {
     return &g_011f3f10;
 }
@@ -31,7 +32,8 @@ void* NiUVData::FUN_00a45200(unsigned int flags)
 extern void(__cdecl* DAT_011f38a0[])(void*);
 extern unsigned char DAT_011f3758[];
 // @fnv 0x00a45280
-void NiUVData::FUN_00a45280(void* keys, unsigned int count, int type)
+// src: XBOX_PDB 0x00a45280
+void NiUVData::ReplaceVOffsetAnim(void* keys, unsigned int count, int type)
 {
     void* oldKeys = m_pVOffsetKeys;
     if (oldKeys)
@@ -55,7 +57,8 @@ void NiUVData::FUN_00a45280(void* keys, unsigned int count, int type)
 
 // Releases the previous key data, then stores the new keys, count and type (or clears them when keys or count is null/zero).
 // @fnv 0x00a45340
-void NiUVData::FUN_00a45340(void* keys, unsigned int count, unsigned int type)
+// src: XBOX_PDB 0x00a45340
+void NiUVData::ReplaceVTilingAnim(void* keys, unsigned int count, unsigned int type)
 {
     if (m_pVTilingKeys)
         DAT_011f38a0[m_uiVTilingKeyStride](m_pVTilingKeys);
@@ -78,7 +81,8 @@ void NiUVData::FUN_00a45340(void* keys, unsigned int count, unsigned int type)
 
 // Releases the current key array, then stores the new keys, count and type (or clears them when keys or numKeys is null/zero).
 // @fnv 0x00a45220
-void NiUVData::FUN_00a45220(TimedAnimationKey* keys, unsigned int numKeys, unsigned int type)
+// src: XBOX_PDB 0x00a45220
+void NiUVData::ReplaceUOffsetAnim(TimedAnimationKey* keys, unsigned int numKeys, unsigned int type)
 {
     if (m_pUOffsetKeys)
         DAT_011f38a0[m_uiUOffsetKeyStride](m_pUOffsetKeys);
@@ -100,7 +104,8 @@ void NiUVData::FUN_00a45220(TimedAnimationKey* keys, unsigned int numKeys, unsig
 
 // Releases the previous key array, then stores the new keys, count and type (or clears them when keys or count is null/zero).
 // @fnv 0x00a452e0
-void NiUVData::FUN_00a452e0(void* keys, unsigned int count, unsigned int type)
+// src: XBOX_PDB 0x00a452e0
+void NiUVData::ReplaceUTilingAnim(void* keys, unsigned int count, unsigned int type)
 {
     if (m_pUTilingKeys)
         DAT_011f38a0[m_uiUTilingKeyStride](m_pUTilingKeys);
@@ -147,7 +152,7 @@ void NiUVData::Destructor()
 
 void __stdcall AppendCameraPathEntries(StrArr*);
 char* __cdecl _FUN_00a7d330(char*);
-char* __cdecl FUN_00a7d510(char const*, unsigned int);
+char* __cdecl NiGetViewerString_00a7d510(char const*, unsigned int);
 
 
 // @fnv 0x00a457d0
@@ -164,25 +169,25 @@ void NiUVData::AppendKeyNames(StrArr* apViewerStrings)
         apViewerStrings->SetSize(apViewerStrings->m_usGrowBy + nIndex);
     apViewerStrings->SetAt(nIndex, pString);
 
-    pString = FUN_00a7d510("m_uiNumUOffsetKeys", m_uiNumUOffsetKeys);
+    pString = NiGetViewerString_00a7d510("m_uiNumUOffsetKeys", m_uiNumUOffsetKeys);
     nIndex = apViewerStrings->m_usSize;
     if (nIndex >= apViewerStrings->m_usMaxSize)
         apViewerStrings->SetSize(apViewerStrings->m_usGrowBy + nIndex);
     apViewerStrings->SetAt(nIndex, pString);
 
-    pString = FUN_00a7d510("m_uiNumUTilingKeys", m_uiNumUTilingKeys);
+    pString = NiGetViewerString_00a7d510("m_uiNumUTilingKeys", m_uiNumUTilingKeys);
     nIndex = apViewerStrings->m_usSize;
     if (nIndex >= apViewerStrings->m_usMaxSize)
         apViewerStrings->SetSize(apViewerStrings->m_usGrowBy + nIndex);
     apViewerStrings->SetAt(nIndex, pString);
 
-    pString = FUN_00a7d510("m_uiNumVOffsetKeys", m_uiNumVOffsetKeys);
+    pString = NiGetViewerString_00a7d510("m_uiNumVOffsetKeys", m_uiNumVOffsetKeys);
     nIndex = apViewerStrings->m_usSize;
     if (nIndex >= apViewerStrings->m_usMaxSize)
         apViewerStrings->SetSize(apViewerStrings->m_usGrowBy + nIndex);
     apViewerStrings->SetAt(nIndex, pString);
 
-    pString = FUN_00a7d510("m_uiNumVTilingKeys", m_uiNumVTilingKeys);
+    pString = NiGetViewerString_00a7d510("m_uiNumVTilingKeys", m_uiNumVTilingKeys);
     nIndex = apViewerStrings->m_usSize;
     if (nIndex >= apViewerStrings->m_usMaxSize)
         apViewerStrings->SetSize(apViewerStrings->m_usGrowBy + nIndex);
@@ -198,7 +203,8 @@ inline unsigned char* NiUVData::GetKeyPointerByIndex(unsigned char* pk, unsigned
 }
 
 // @fnv 0x00a45090
-bool NiUVData::FUN_00a45090(NiUVData* pkOther)
+// src: XBOX_PDB 0x00a45090
+bool NiUVData::IsEqual_00a45090(NiUVData* pkOther)
 {
     if (!NiObject::IsEqual(pkOther))
         return false;

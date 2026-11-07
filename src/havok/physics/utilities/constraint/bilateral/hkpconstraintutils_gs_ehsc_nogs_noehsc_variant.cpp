@@ -14,10 +14,10 @@ typedef ::__m128 LocalM128;
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 typedef ::__m128 LocalM128;
 struct BSAudio;
-BSAudio* __cdecl FUN_00c85750();
+BSAudio* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* audio()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
 struct Block5
 {
@@ -43,7 +43,7 @@ struct CloneDataA : CloneDataBase
     Block5b unk94;
     Block5 unka8;
     CloneDataA* FUN_00d4f2a0();
-    void FUN_00d4f270(hkBool flag);
+    void hkpRagdollLimitsData_setConeLimitStabilization(hkBool flag);
 };
 struct CloneDataB : CloneDataBase
 {
@@ -147,7 +147,7 @@ class FnvHolder
     char unk00[0x0c];
     FnvInner* m_0c;
 };
-int FUN_00e5ad40(FnvHolder* a0, LocalM128* a1, LocalM128* a2);
+int hkpConstraintUtils_getConstraintPivots(FnvHolder* a0, LocalM128* a1, LocalM128* a2);
 
 struct Ent
 {
@@ -168,9 +168,9 @@ struct Ent
     int unk190, unk194, unk198, unk19c, unk1a0, unk1a4, unk1a8, unk1ac;
     LocalM128 unk1b0;
     LocalM128 unk1c0;
-    void FUN_00ca8800(LocalM128* v);
+    void hkpRigidBody_setPosition(LocalM128* v);
     void OnTrigger(int arg);
-    void FUN_00561800(void* p);
+    void hkpRigidBody_setAngularVelocity(void* p);
 };
 
 struct FnvHolder2 : FnvHolder
@@ -183,7 +183,7 @@ struct FnvHolder2 : FnvHolder
 struct Conv
 {
     LocalM128 m;
-    void FUN_00c7f640(LocalM128* src, LocalM128* arg);
+    void setTransformedPos_00c7f640(LocalM128* src, LocalM128* arg);
 };
 
 // Constraint pivots followed by their transformed positions.
@@ -214,14 +214,15 @@ extern "C"
 }
 
 // @fnv 0x00e5af80
-bool* FUN_00e5af80(bool* out, FnvHolder2* h, float t, float t2)
+// src: XBOX_PDB 0x00e5af80
+bool* hkpConstraintUtils_checkAndFixConstraint(bool* out, FnvHolder2* h, float t, float t2)
 {
     float d;
     WorkVectors v;
     Ent* a;
     Ent* b;
 
-    if (FUN_00e5ad40(h, &v.va, &v.vb) == 0)
+    if (hkpConstraintUtils_getConstraintPivots(h, &v.va, &v.vb) == 0)
     {
         {
             LocalM128 sq = _mm_mul_ps(v.va, v.va);
@@ -240,8 +241,8 @@ bool* FUN_00e5af80(bool* out, FnvHolder2* h, float t, float t2)
         }
         b = h->unk18;
         a = h->unk14;
-        v.cb.FUN_00c7f640(&b->unkf0, &v.vb);
-        v.ca.FUN_00c7f640(&a->unkf0, &v.va);
+        v.cb.setTransformedPos_00c7f640(&b->unkf0, &v.vb);
+        v.ca.setTransformedPos_00c7f640(&a->unkf0, &v.va);
         {
             LocalM128 cbv = v.cb.m;
             LocalM128 cav = v.ca.m;
@@ -257,10 +258,10 @@ bool* FUN_00e5af80(bool* out, FnvHolder2* h, float t, float t2)
                 LocalM128 t2v = _mm_set_ps1(t2);
                 LocalM128 r = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, t2v), v.cb.m),
                                       _mm_mul_ps(_mm_load_ps(b->unk120.m128_f32), t2v));
-                a->FUN_00ca8800(&r);
+                a->hkpRigidBody_setPosition(&r);
             }
             a->OnTrigger((int)&b->unk1b0);
-            a->FUN_00561800(&b->unk1c0);
+            a->hkpRigidBody_setAngularVelocity(&b->unk1c0);
             *out = true;
             return out;
         }

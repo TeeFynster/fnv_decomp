@@ -8,7 +8,7 @@
 // PrimaryBase = vptr + 30 named int fields = 0x7c bytes; Derived redeclares the claimed virtual and defines only its ctor.
 struct PrimaryBase
 {
-    virtual void FUN_005fbf80();
+    virtual void AdjustThisAndForward_005fbf80();
     int unk04;
     int unk08;
     int unk0C;
@@ -43,14 +43,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_005fbf80();
+    virtual void AdjustThisAndForward_005fbf80();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x005fbf80
-    virtual void FUN_005fbf80();
+// src: GUESS 0x005fbf80 (confidence: low)
+    virtual void AdjustThisAndForward_005fbf80();
 };
 
 Derived::Derived()
@@ -371,7 +372,7 @@ namespace fnv_005fc040 {
 // Primary base = vptr + 35 int fields (0x90 bytes).
 struct PrimaryBase
 {
-    virtual void FUN_005fc040();
+    virtual void AdjustThisAndForward_005fc040();
     int unk04;
     int unk08;
     int unk0C;
@@ -411,14 +412,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_005fc040();
+    virtual void AdjustThisAndForward_005fc040();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x005fc040
-    virtual void FUN_005fc040();
+// src: GUESS 0x005fc040 (confidence: low)
+    virtual void AdjustThisAndForward_005fc040();
 };
 
 Derived::Derived()

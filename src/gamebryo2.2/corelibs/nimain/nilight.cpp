@@ -49,7 +49,7 @@ void NiLight::LoadBinary(NiStream& stream)
 // @fnv 0x00a68d40
 void NiLight::CopyMemberData(NiLight* clone, CloningProcess& process)
 {
-    NiAVObject::FUN_00a5ac90(clone, process);
+    NiAVObject::CopyMembers_00a5ac90(clone, process);
     clone->pushCount = pushCount;
     clone->revID = revID;
     clone->switchState = switchState;
@@ -91,7 +91,7 @@ bool NiLight::IsEqual(NiObject* pObject) const
 }
 
 char* __cdecl _FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d550(const char*, float);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
 
 // Appends formatted strings for the dimmer, ambient, diffuse and specular properties to pArray, growing it when full.
 // @fnv 0x00a721e0
@@ -113,7 +113,7 @@ void NiLight::AppendEffectProperties(StrArr* pArray)
         pArray->SetAt(nIndex, pString);
     }
 
-    pString = FUN_00a7d550("m_fDimmer", m_fDimmer);
+    pString = NiGetViewerString_00a7d550("m_fDimmer", m_fDimmer);
     {
         unsigned int nIndex = pArray->m_usSize;
         unsigned int nCapacity = pArray->m_usMaxSize;
@@ -204,12 +204,13 @@ void NiLight::LinkObject(NiStream& stream)
     NiDynamicEffect::LinkObject(stream);
 }
 
-void __cdecl FUN_00a6ff10();
+void __cdecl NiDynamicEffect_RegisterStreamables();
 
 // @fnv 0x00a90010
-void __cdecl FUN_00a90010()
+// src: XBOX_PDB 0x00a90010
+void __cdecl NiLight_RegisterStreamables()
 {
-    FUN_00a6ff10();
+    NiDynamicEffect_RegisterStreamables();
 }
 
 void __fastcall DestroyDynamicEffect(NiDynamicEffect*);

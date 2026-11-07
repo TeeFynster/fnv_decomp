@@ -53,7 +53,7 @@ extern SettingT_GameSettingCollection_ DAT_011db44c;
 extern SettingT_GameSettingCollection_ DAT_011db470;
 extern SettingT_GameSettingCollection_ DAT_011db3d8;
 
-unsigned int FUN_00438220();
-unsigned int FUN_004af350();
+unsigned int NiShadeProperty_GetType();
+unsigned int NiMaterialProperty_GetType();
 extern NiColor DAT_011f4998;
 #endif

@@ -6,5 +6,5 @@ class NiPSysAirFieldAirFrictionCtlr : public NiPSysModifierFloatCtlr
 {
 public:
     void CopyMemberData(NiPSysAirFieldAirFrictionCtlr*, CloningProcess&);
-    void FUN_00c307d0(float& rfValue);
+    void GetTargetFloatValue_00c307d0(float& rfValue);
 };

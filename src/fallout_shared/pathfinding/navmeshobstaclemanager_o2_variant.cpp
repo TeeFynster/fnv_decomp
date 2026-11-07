@@ -3,7 +3,7 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 
-void* __cdecl FUN_00aa1070(unsigned int size);
+void* __cdecl _NiMalloc_00aa1070(unsigned int size);
 void __cdecl FUN_00ec61c0(void* p, int fill, unsigned int size);
 int __cdecl FUN_00ec658f(void(__cdecl* fn)());
 
@@ -18,7 +18,7 @@ struct ArrayHolderBase
     {
         m_04 = 0x25;
         m_0C = 0;
-        m_08 = FUN_00aa1070(m_04 * 4);
+        m_08 = _NiMalloc_00aa1070(m_04 * 4);
         FUN_00ec61c0(m_08, 0, m_04 * 4);
         m_10 = true;
     }
@@ -33,7 +33,8 @@ struct ArrayHolder : ArrayHolderBase
 };
 
 // @fnv 0x00b61890
-ArrayHolder* __cdecl FUN_00b61890()
+// src: COMMUNITY 0x00b61890
+ArrayHolder* __cdecl TallGrassShaderProperty_GetCachedGeometryMap()
 {
     static ArrayHolder obj;
     return &obj;

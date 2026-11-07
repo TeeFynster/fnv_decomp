@@ -138,17 +138,17 @@ public:
     int maxAxis() const;
     float GetAngle();
 
-    void FUN_00416870(float x, float y, float z);
-    GskVectorCallLocal_00da8500 FUN_00439ef0(const GskVectorCallLocal_00da8500& vector);
+    void SetComponents(float x, float y, float z);
+    GskVectorCallLocal_00da8500 SubtractIntoVector(const GskVectorCallLocal_00da8500& vector);
     GskVectorCallLocal_00da8500 FUN_00439e90(const GskVectorCallLocal_00da8500& vector);
-    void FUN_00439180(float value);
-    void FUN_004a0c10();
-    void FUN_005611c0();
-    void FUN_00c66320(const GskVectorCallLocal_00da8500* a, const GskVectorCallLocal_00da8500* b);
-    void FUN_00c74ac0(const GskVectorCallLocal_00da8500* a, const GskVectorCallLocal_00da8500* b);
-    void FUN_00c74c90(GskVectorCallLocal_00da8500* vector);
-    void FUN_00c7f640(const Transform& transform, const GskVectorCallLocal_00da8500& point);
-    void FUN_00cb2450(const GskVectorCallLocal_00da8500* vector, float value);
+    void ScaleComponents(float value);
+    void Unitize_004a0c10();
+    void normalize_005611c0();
+    void setMul(const GskVectorCallLocal_00da8500* a, const GskVectorCallLocal_00da8500* b);
+    void setMulInverse(const GskVectorCallLocal_00da8500* a, const GskVectorCallLocal_00da8500* b);
+    void hkQuaternion_getAxis(GskVectorCallLocal_00da8500* vector);
+    void setTransformedPos_00c7f640(const Transform& transform, const GskVectorCallLocal_00da8500& point);
+    void hkQuaternion_setAxisAngle(const GskVectorCallLocal_00da8500* vector, float value);
     void FUN_00cb26e0(const hkRotation* rotation);
 
     template <int I> void splat(const GskVectorCallLocal_00da8500& vector);
@@ -287,11 +287,12 @@ struct ThisClass
     char pad2[0x90];
     Entry entries2[3];
 
-    void FUN_00da9790(Dest* out);
+    void hkpGsk_exitAndExportCacheImpl(Dest* out);
 };
 
 // @fnv 0x00da9790
-void ThisClass::FUN_00da9790(Dest* pDest)
+// src: HAVOK_LIB 0x00da9790
+void ThisClass::hkpGsk_exitAndExportCacheImpl(Dest* pDest)
 {
     pDest->count1 = (unsigned char)this->count1;
     pDest->count2 = (unsigned char)this->count2;
@@ -380,7 +381,7 @@ struct Simplex
     GskVectorCallLocal_00da8500 unk60, unk70, unk80, unk90;
     GskVectorCallLocal_00da8500 verticesB[8];
     GskVectorCallLocal_00da8500 result, axis, unk140, unk150, weights;
-    int FUN_00da8500(const GskVectorCallLocal_00da8500* point, GskVectorCallLocal_00da8500* vertices, int orient);
+    int TestTriangleOrientationAndSwapVertices(const GskVectorCallLocal_00da8500* point, GskVectorCallLocal_00da8500* vertices, int orient);
 };
 
 static __forceinline __m128 cross(__m128 a, __m128 b)
@@ -424,7 +425,8 @@ static __forceinline __m128 triangleSideTests(const GskVectorCallLocal_00da8500*
 
 // Computes barycentric side tests for point against a triangle, optionally flips orientation and swaps vertices if the point is behind the face.
 // @fnv 0x00da8500
-int Simplex::FUN_00da8500(const GskVectorCallLocal_00da8500* point, GskVectorCallLocal_00da8500* vertices, int orient)
+// src: GUESS 0x00da8500 (confidence: medium)
+int Simplex::TestTriangleOrientationAndSwapVertices(const GskVectorCallLocal_00da8500* point, GskVectorCallLocal_00da8500* vertices, int orient)
 {
     GskVectorCallLocal_00da8500 normalVector;
     __m128& normal = normalVector.q;
@@ -468,8 +470,9 @@ struct Tri
 
 // Computes the signed distance from point to the plane of the triangle defined by tri, using ref to orient the normal.
 // @fnv 0x00da8700
+// src: GUESS 0x00da8700 (confidence: medium)
 static __declspec(noinline) hkSimdReal
-    FUN_00da8700(const Tri* tri, hkVector4* normal, const hkVector4* ref, const hkVector4* point)
+    hkVector4_ComputeSignedTrianglePlaneDistance(const Tri* tri, hkVector4* normal, const hkVector4* ref, const hkVector4* point)
 {
     hkVector4 e0;
     e0.setSub4(tri->m_v2, tri->m_v1);
@@ -487,7 +490,7 @@ static __declspec(noinline) hkSimdReal
 void Caller00da(const Tri* tri, hkVector4* normal, const hkVector4* ref, hkSimdReal* dist,
                 const hkVector4* point)
 {
-    *dist = FUN_00da8700(tri, normal, ref, point);
+    *dist = hkVector4_ComputeSignedTrianglePlaneDistance(tri, normal, ref, point);
 }
 }  // namespace fnv_00da8700
 
@@ -577,12 +580,13 @@ struct __declspec(align(16)) FUN_00da9880_cls
     int unk12C;
     __m128 m_v130;
 
-    void FUN_00da9880(const SpawnedSrc* apSrc, SpawnedDst* apDst);
+    void hkpGsk_convertFeatureToClosestDistance(const SpawnedSrc* apSrc, SpawnedDst* apDst);
 };
 
 // Copies apSrc's vector and float into apDst, then sets m_v10 to m_v20 if m_i00 is 1, to a w-scaled blend with m_va0 if m_i04 is 1, else to m_v130.
 // @fnv 0x00da9880
-void FUN_00da9880_cls::FUN_00da9880(const SpawnedSrc* apSrc, SpawnedDst* apDst)
+// src: XBOX_PDB 0x00da9880
+void FUN_00da9880_cls::hkpGsk_convertFeatureToClosestDistance(const SpawnedSrc* apSrc, SpawnedDst* apDst)
 {
     apDst->m_f20 = *(const volatile float*)((const char*)apSrc + 0xc);
     apDst->m_v00 = apSrc->m_v;
@@ -614,7 +618,8 @@ extern const signed char DAT_010cb440[];
 
 // For each i, when dist[a] and dist[b] are both non-negative, sets one to -1 from a dot-product test with p and v[3]; returns first index with dist > 0, else -1.
 // @fnv 0x00da8390
-static __declspec(noinline) int __cdecl FUN_00da8390(const hkVector4* apVertices, const hkVector4* apPoint,
+// src: GUESS 0x00da8390 (confidence: low)
+static __declspec(noinline) int __cdecl hkVector4_ProcessEntries_00da8390(const hkVector4* apVertices, const hkVector4* apPoint,
                                                      float* apDistances)
 {
     for (int i = 0; i < 3; ++i)
@@ -662,7 +667,7 @@ static __declspec(noinline) int __cdecl FUN_00da8390(const hkVector4* apVertices
 
 int S00da8390_Call(const hkVector4* p, float* dist, const hkVector4* v)
 {
-    return FUN_00da8390(v, p, dist);
+    return hkVector4_ProcessEntries_00da8390(v, p, dist);
 }
 
 extern "C"
@@ -684,12 +689,13 @@ struct S00da8820_Result
     float m_fValue;
 };
 
-int __cdecl FUN_00d22e40(const hkVector4& A, const hkVector4& dA, const hkVector4& B,
+int __cdecl hkLineSegmentUtil_closestLineSegLineSeg(const hkVector4& A, const hkVector4& dA, const hkVector4& B,
                          const hkVector4& dB, S00da8820_Result& result);
 
 // Finds the closest points of two edges, builds a plane from their cross product (using oldNormal if near-parallel), and stores the point and plane.
 // @fnv 0x00da8820
-static __declspec(noinline) void __cdecl FUN_00da8820(hkVector4* edgeA, hkVector4* edgeB,
+// src: GUESS 0x00da8820 (confidence: medium)
+static __declspec(noinline) void __cdecl hkVector4_ComputeEdgeContactPlane(hkVector4* edgeA, hkVector4* edgeB,
                                                       const hkVector4& oldNormal, hkVector4& pointOut,
                                                       hkVector4& planeOut)
 {
@@ -699,7 +705,7 @@ static __declspec(noinline) void __cdecl FUN_00da8820(hkVector4* edgeA, hkVector
     dB.setSub4(edgeB[1], edgeB[0]);
 
     S00da8820_Result result;
-    FUN_00d22e40(edgeA[0], dA, edgeB[0], dB, result);
+    hkLineSegmentUtil_closestLineSegLineSeg(edgeA[0], dA, edgeB[0], dB, result);
 
     planeOut.setCross(dA, dB);
 
@@ -733,7 +739,7 @@ static __declspec(noinline) void __cdecl FUN_00da8820(hkVector4* edgeA, hkVector
 void __cdecl S00da8820_RecalcContact(hkVector4* vA, hkVector4* vB, const hkVector4& n, hkVector4& p,
                                      hkVector4& plane)
 {
-    FUN_00da8820(vA, vB, n, p, plane);
+    hkVector4_ComputeEdgeContactPlane(vA, vB, n, p, plane);
 }
 
 #include <math.h>
@@ -828,9 +834,9 @@ extern const __m128 DAT_010c44d0;
 extern const signed char DAT_010cb438[], DAT_010cb440[], DAT_010cb442[];
 struct Transform_result : Collision_vector
 {
-    void FUN_00c7f700(Collision_mat*, Collision_vector*);
+    void hkVector4_setRotatedDir(Collision_mat*, Collision_vector*);
 };
-extern int FUN_00d22e40(Collision_vector*, Collision_vector*, Collision_vector*, Collision_vector*, Collision_vector*);
+extern int hkLineSegmentUtil_closestLineSegLineSeg(Collision_vector*, Collision_vector*, Collision_vector*, Collision_vector*, Collision_vector*);
 struct SmallBool
 {
     char value;
@@ -856,10 +862,10 @@ struct Collision_workspace
     Collision_vector axis;
     Collision_vector witnesses[4];
     int oldCountB, unk174, unk178, unk17c;
-    int FUN_00da8500(Collision_vector*, Collision_vector*, int);
-    int FUN_00da9340(Collision_vector*, Collision_vector*, int*, int*, SmallBool, int);
+    int TestTriangleOrientationAndSwapVertices(Collision_vector*, Collision_vector*, int);
+    int ClipPolygonAgainstSegment(Collision_vector*, Collision_vector*, int*, int*, SmallBool, int);
     __forceinline int updateSimplex(Collision_vector& edgeB);
-    SmallBool FUN_00da9b30(Collision_vcls*, Collision_vcls*, Collision_mat*, Collision_vector*, Collision_hit*);
+    SmallBool ProcessEntries_00da9b30(Collision_vcls*, Collision_vcls*, Collision_mat*, Collision_vector*, Collision_hit*);
 };
 static __forceinline __m128 broadcast(const float* value)
 {
@@ -898,8 +904,9 @@ static __forceinline int sign(__m128 v)
 extern const __m128 DAT_01017d10;
 extern const float DAT_0104da48, DAT_010c6090;
 extern const double DAT_010290f8;
-extern int __cdecl FUN_00da8390(const Collision_vector*, const Collision_vector*);
-static int FUN_00da8fb0(const Collision_vector* vertices, const Collision_vector* point, float orientation)
+extern int __cdecl hkVector4_ProcessEntries_00da8390(const Collision_vector*, const Collision_vector*);
+// src: GUESS 0x00da8fb0 (confidence: low)
+static int Hkpgsk_ProcessEntries_00da8fb0(const Collision_vector* vertices, const Collision_vector* point, float orientation)
 {
     __m128 v0 = vertices[0].simd(), v1 = vertices[1].simd(), v2 = vertices[2].simd(), v3 = vertices[3].simd();
     Collision_vector normals[3];
@@ -954,7 +961,7 @@ static int FUN_00da8fb0(const Collision_vector* vertices, const Collision_vector
     if (dist[1] * DAT_010290f8 < dist[2])
         return index;
     Collision_vector projected = dots;
-    return FUN_00da8390(point, &projected);
+    return hkVector4_ProcessEntries_00da8390(point, &projected);
 }
 __forceinline void Collision_vector::normalize3(const __m128& zero, const __m128& three, const __m128& half)
 {
@@ -975,7 +982,7 @@ redispatch:
     {
     case 19: {
         int old = oldCountB;
-        int result = FUN_00da9340(a, b, &countA, &countB, SmallBool(old == 2), 1);
+        int result = ClipPolygonAgainstSegment(a, b, &countA, &countB, SmallBool(old == 2), 1);
         switch (result)
         {
         case 1:
@@ -988,7 +995,7 @@ redispatch:
     }
     case 26: {
         int old = oldCountB;
-        int result = FUN_00da9340(b, a, &countB, &countA, SmallBool(old == 2), -1);
+        int result = ClipPolygonAgainstSegment(b, a, &countB, &countA, SmallBool(old == 2), -1);
         switch (result)
         {
         case 1:
@@ -1006,7 +1013,7 @@ redispatch:
         Collision_vector& eb = edgeB;
         eb.simd() = b[1].simd();
         eb.simd() = _mm_sub_ps(eb.simd(), b[0].simd());
-        int result = FUN_00d22e40(a, &edgeA, b, &edgeB, witnesses);
+        int result = hkLineSegmentUtil_closestLineSegLineSeg(a, &edgeA, b, &edgeB, witnesses);
         if (!result)
         {
             axis.simd() = cross(edgeA.simd(), edgeB.simd());
@@ -1032,7 +1039,7 @@ redispatch:
         goto redispatch;
     }
     case 12: {
-        int index = FUN_00da8fb0(b, a, 1.0f);
+        int index = Hkpgsk_ProcessEntries_00da8fb0(b, a, 1.0f);
         if (index < 0)
             goto finish;
         countB--;
@@ -1040,7 +1047,7 @@ redispatch:
         sourceB[index].simd() = sourceB[3].simd();
     }
     case 11: {
-        int result = FUN_00da8500(a, b, 1);
+        int result = TestTriangleOrientationAndSwapVertices(a, b, 1);
         if (result == 7)
             goto nextAxis;
         int index = DAT_010cb438[result];
@@ -1114,14 +1121,14 @@ redispatch:
         return 0;
     }
     case 33: {
-        int index = FUN_00da8fb0(a, b, DAT_01012054);
+        int index = Hkpgsk_ProcessEntries_00da8fb0(a, b, DAT_01012054);
         if (index < 0)
             goto finish;
         countA--;
         a[index].simd() = a[3].simd();
     }
     case 25: {
-        int result = FUN_00da8500(b, a, -1);
+        int result = TestTriangleOrientationAndSwapVertices(b, a, -1);
         if (result == 7)
             goto nextAxis;
         int index = DAT_010cb438[result];
@@ -1202,7 +1209,8 @@ finish:
 
 // GJK-style cast of path against shapeA (or shapeA minus transformed shapeB); returns true and updates hit's fraction and normal when it hits sooner.
 // @fnv 0x00da9b30
-SmallBool Collision_workspace::FUN_00da9b30(Collision_vcls* shapeA, Collision_vcls* shapeB, Collision_mat* transform,
+// src: GUESS 0x00da9b30 (confidence: low)
+SmallBool Collision_workspace::ProcessEntries_00da9b30(Collision_vcls* shapeA, Collision_vcls* shapeB, Collision_mat* transform,
                                             Collision_vector* path, Collision_hit* hit)
 {
     Collision_vector displacement;
@@ -1262,7 +1270,7 @@ SmallBool Collision_workspace::FUN_00da9b30(Collision_vcls* shapeA, Collision_vc
             localDirection.simd() = _mm_add_ps(_mm_add_ps(zero, t), u);
             shapeB->support(&localDirection, &supportB);
             Transform_result transformed;
-            transformed.FUN_00c7f700(transform, &supportB);
+            transformed.hkVector4_setRotatedDir(transform, &supportB);
             support.simd() = _mm_sub_ps(support.simd(), transformed.simd());
         }
         int z = countA;
@@ -1492,7 +1500,7 @@ struct ContactClosest
     ContactVector delta;
     StoredDistance distanceSquared;
 };
-int FUN_00d22e40(const ContactVector&, const ContactVector&, const ContactVector&, const ContactVector&,
+int hkLineSegmentUtil_closestLineSegLineSeg(const ContactVector&, const ContactVector&, const ContactVector&, const ContactVector&,
                  ContactClosest&);
 
 static __forceinline void orient(ContactVector& out, const ContactVector& axis)
@@ -1530,7 +1538,7 @@ static __forceinline void edgeToEdge(ContactVector* first, ContactVector* second
     edgeA.setSub4(first[1], first[0]);
     edgeB.setSub4(second[1], second[0]);
     ContactClosest closest;
-    FUN_00d22e40(first[0], edgeA, second[0], edgeB, closest);
+    hkLineSegmentUtil_closestLineSegLineSeg(first[0], edgeA, second[0], edgeB, closest);
     out.setCross(edgeA, edgeB);
     float combinedLength;
     {
@@ -1560,7 +1568,8 @@ static __forceinline void edgeToEdge(ContactVector* first, ContactVector* second
 }
 // Dispatches on contact shape pair to compute the contact normal and closest point via point-to-point, point-to-edge, point-to-triangle, or edge-to-edge routines.
 // @fnv 0x00da8a00
-void FUN_00da8a00(ContactVector* first, ContactVector* second, int countA, int countB, const ContactVector& axis,
+// src: GUESS 0x00da8a00 (confidence: medium)
+void Object_ComputeContactPointAndNormal(ContactVector* first, ContactVector* second, int countA, int countB, const ContactVector& axis,
                   ContactVector& point, ContactVector& out)
 {
     int pair = (countA << 3) | countB;
@@ -1634,7 +1643,8 @@ struct Int4
 
 // Weights the point against three face normals of a 4-vertex shape; returns -1, a face index, or the FUN_00da8390 result when two best distances are close.
 // @fnv 0x00da8fb0
-static __declspec(noinline) int FUN_00da8fb0(const hkVector4* vertices, const hkVector4* point, float orient)
+// src: GUESS 0x00da8fb0 (confidence: low)
+static __declspec(noinline) int Hkpgsk_ProcessEntries_00da8fb0(const hkVector4* vertices, const hkVector4* point, float orient)
 {
     __m128 e21 = _mm_sub_ps(vertices[2].m_vComponents, vertices[1].m_vComponents);
     __m128 e02 = _mm_sub_ps(vertices[0].m_vComponents, vertices[2].m_vComponents);
@@ -1719,7 +1729,7 @@ static __declspec(noinline) int FUN_00da8fb0(const hkVector4* vertices, const hk
         return bestIdx;
     }
     *(Int4*)dist = *(const Int4*)&weights;
-    return FUN_00da8390((const hkVector4*)vertices, (const hkVector4*)point, dist);
+    return hkVector4_ProcessEntries_00da8390((const hkVector4*)vertices, (const hkVector4*)point, dist);
 }
 
 hkVector4* g_v;
@@ -1729,7 +1739,7 @@ int g_out;
 
 void dummy()
 {
-    g_out = FUN_00da8fb0(g_v, g_p, g_f);
+    g_out = Hkpgsk_ProcessEntries_00da8fb0(g_v, g_p, g_f);
 }
 
 extern "C" __m128 _mm_load_ss(const float*);
@@ -1966,7 +1976,7 @@ struct GapLineResult
     GapVector point, difference;
     GapValue<float> distance;
 };
-int __cdecl FUN_00d22e40(const GapVector&, const GapVector&, const GapVector&, const GapVector&, GapLineResult&);
+int __cdecl hkLineSegmentUtil_closestLineSegLineSeg(const GapVector&, const GapVector&, const GapVector&, const GapVector&, GapLineResult&);
 namespace GapMath {
 inline int negative(const GapScalar& v)
 {
@@ -2058,13 +2068,14 @@ class GapSolver
     {
         changed = f;
     }
-    void FUN_00daa7e0(const GapShape*, const GapShape*, const GapTransform&);
-    int FUN_00da8500(const GapVector&, GapVector*, SupportTypes);
-    NextCase FUN_00da9340(GapVector*, GapVector*, GapValue<int>&, GapValue<int>&, GapBool, SupportTypes);
-    GapStatus FUN_00daad40(const GapShape*, const GapShape*, const GapTransform&, GapVector&);
+    void hkpGsk_processEdgeTriangle(const GapShape*, const GapShape*, const GapTransform&);
+    int TestTriangleOrientationAndSwapVertices(const GapVector&, GapVector*, SupportTypes);
+    NextCase ClipPolygonAgainstSegment(GapVector*, GapVector*, GapValue<int>&, GapValue<int>&, GapBool, SupportTypes);
+    GapStatus hkpGsk_getClosestFeature(const GapShape*, const GapShape*, const GapTransform&, GapVector&);
 };
 
-static __declspec(noinline) int FUN_00da8390(const GapVector& point, const GapVector* tetra, GapVector& weights)
+// src: GUESS 0x00da8390 (confidence: low)
+static __declspec(noinline) int hkVector4_ProcessEntries_00da8390(const GapVector& point, const GapVector* tetra, GapVector& weights)
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -2091,7 +2102,8 @@ static __declspec(noinline) int FUN_00da8390(const GapVector& point, const GapVe
         return 2;
     return -1;
 }
-static __declspec(noinline) int FUN_00da8fb0(const GapVector& point, const GapVector* tetra, float sign)
+// src: GUESS 0x00da8fb0 (confidence: low)
+static __declspec(noinline) int Hkpgsk_ProcessEntries_00da8fb0(const GapVector& point, const GapVector* tetra, float sign)
 {
     GapRotation normals;
     GapVector e0, e1, e2;
@@ -2144,7 +2156,7 @@ static __declspec(noinline) int FUN_00da8fb0(const GapVector& point, const GapVe
     if (scores[1] * DAT_010290f8 >= scores[0])
         return selected;
     GapVector fallback = distances;
-    return FUN_00da8390(point, tetra, fallback);
+    return hkVector4_ProcessEntries_00da8390(point, tetra, fallback);
 }
 static __forceinline void process_point_edge(GapVector* __restrict vertexA, GapVector* __restrict vertexB,
                                              GapValue<int>& dimB, GapVector& support, GapSolver::SupportTypes stype)
@@ -2255,7 +2267,7 @@ __forceinline GapSolver::ReduceDimensionResult GapSolver::reduce()
         }
         case GSK_POINT_TRIANGLE:
         case_point_triangle: {
-            int mask = FUN_00da8500(verticesA[0], verticesB, BUILD_POS_SUPPORT);
+            int mask = TestTriangleOrientationAndSwapVertices(verticesA[0], verticesB, BUILD_POS_SUPPORT);
             if (mask == 7)
             {
                 break;
@@ -2309,7 +2321,7 @@ __forceinline GapSolver::ReduceDimensionResult GapSolver::reduce()
         }
         case GSK_TRIANGLE_POINT:
         case_triangle_point: {
-            int mask = FUN_00da8500(verticesB[0], verticesA, BUILD_NEG_SUPPORT);
+            int mask = TestTriangleOrientationAndSwapVertices(verticesB[0], verticesA, BUILD_NEG_SUPPORT);
             if (mask == 7)
             {
                 break;
@@ -2359,7 +2371,7 @@ __forceinline GapSolver::ReduceDimensionResult GapSolver::reduce()
             continue;
         }
         case GSK_EDGE_TRIANGLE: {
-            NextCase nextcase = FUN_00da9340(verticesA, verticesB, countA, countB, previousB == 2, BUILD_POS_SUPPORT);
+            NextCase nextcase = ClipPolygonAgainstSegment(verticesA, verticesB, countA, countB, previousB == 2, BUILD_POS_SUPPORT);
             switch (nextcase)
             {
             case NEXT_IS_EDGE_EDGE:
@@ -2372,7 +2384,7 @@ __forceinline GapSolver::ReduceDimensionResult GapSolver::reduce()
             break;
         }
         case GSK_TRIANGLE_EDGE: {
-            NextCase nextcase = FUN_00da9340(verticesB, verticesA, countB, countA, previousB == 2, BUILD_NEG_SUPPORT);
+            NextCase nextcase = ClipPolygonAgainstSegment(verticesB, verticesA, countB, countA, previousB == 2, BUILD_NEG_SUPPORT);
             switch (nextcase)
             {
             case NEXT_IS_EDGE_EDGE:
@@ -2390,7 +2402,7 @@ __forceinline GapSolver::ReduceDimensionResult GapSolver::reduce()
             edgeA.subtract(verticesA[1], verticesA[0]);
             GapVector edgeB;
             edgeB.edgeSubtract(verticesB[1], verticesB[0]);
-            int result = FUN_00d22e40(verticesA[0], edgeA, verticesB[0], edgeB, closest);
+            int result = hkLineSegmentUtil_closestLineSegLineSeg(verticesA[0], edgeA, verticesB[0], edgeB, closest);
             if (result == 0)
             {
                 axis.cross(edgeA, edgeB);
@@ -2423,7 +2435,7 @@ __forceinline GapSolver::ReduceDimensionResult GapSolver::reduce()
             continue;
         }
         case GSK_POINT_TETRA: {
-            int maxIndex = FUN_00da8fb0(verticesA[0], verticesB, 1.0f);
+            int maxIndex = Hkpgsk_ProcessEntries_00da8fb0(verticesA[0], verticesB, 1.0f);
             if (maxIndex >= 0)
             {
                 ;
@@ -2435,7 +2447,7 @@ __forceinline GapSolver::ReduceDimensionResult GapSolver::reduce()
             goto penetration;
         }
         case GSK_TETRA_POINT: {
-            int maxIndex = FUN_00da8fb0(verticesB[0], verticesA, -1.0f);
+            int maxIndex = Hkpgsk_ProcessEntries_00da8fb0(verticesB[0], verticesA, -1.0f);
             if (maxIndex >= 0)
             {
                 ;
@@ -2468,7 +2480,8 @@ __forceinline float hkGskCalcSupportDistSquared(const GapVector& support, const 
     return GapMath::absolute(dot0) * dot0;
 }
 // @fnv 0x00daad40
-GapStatus GapSolver::FUN_00daad40(const GapShape* shapeA, const GapShape* shapeB, const GapTransform& aTb,
+// src: XBOX_PDB 0x00daad40
+GapStatus GapSolver::hkpGsk_getClosestFeature(const GapShape* shapeA, const GapShape* shapeB, const GapTransform& aTb,
                                   GapVector& separatingNormalOut)
 {
     GapUtil::points(aTb, &sourceB[0], countB, &verticesB[0]);
@@ -2492,7 +2505,7 @@ GapStatus GapSolver::FUN_00daad40(const GapShape* shapeA, const GapShape* shapeB
             {
                 if (!skipPenetration.val())
                 {
-                    FUN_00daa7e0(shapeA, shapeB, aTb);
+                    hkpGsk_processEdgeTriangle(shapeA, shapeB, aTb);
                     break;
                 }
                 else
@@ -2644,7 +2657,8 @@ static __forceinline GskVectorCallLocal_00da8500 subV(const GskVectorCallLocal_0
     return r;
 }
 // @fnv 0x00da9210
-static void FUN_00da9210(SimplexDA* apSimplex, int* apCount, int flag, GskVectorCallLocal_00da8500* out, const GskVectorCallLocal_00da8500* apPoint)
+// src: GUESS 0x00da9210 (confidence: low)
+static void Hkpgsk_ComputeValues_00da9210(SimplexDA* apSimplex, int* apCount, int flag, GskVectorCallLocal_00da8500* out, const GskVectorCallLocal_00da8500* apPoint)
 {
     GskVectorCallLocal_00da8500 vPoint;
     vPoint.q = apPoint->q;
@@ -2685,7 +2699,7 @@ static GskVectorCallLocal_00da8500 g_outDA;
 static GskVectorCallLocal_00da8500 g_ppDA;
 void CallerDA()
 {
-    FUN_00da9210(&g_sxDA, &g_numDA, 1, &g_outDA, &g_ppDA);
+    Hkpgsk_ComputeValues_00da9210(&g_sxDA, &g_numDA, 1, &g_outDA, &g_ppDA);
 }
 
 extern "C"
@@ -2744,7 +2758,7 @@ struct SolverOutput
     AlignedPoint normal, point;
     float distance;
 };
-extern void __cdecl FUN_00d22e40(const AlignedPoint* polygon, const AlignedPoint* direction, const AlignedPoint* vertex,
+extern void __cdecl hkLineSegmentUtil_closestLineSegLineSeg(const AlignedPoint* polygon, const AlignedPoint* direction, const AlignedPoint* vertex,
                                  const AlignedPoint* edge, SolverOutput* result);
 static __forceinline __m128 dotThree(__m128 vector, __m128 normal)
 {
@@ -2768,8 +2782,8 @@ struct CollisionPlanes
     __m128 reference160;
     int unk170;
     int lastSegment174;
-    __declspec(noinline) int FUN_00da8500(const AlignedPoint* point, AlignedPoint* triangle, int mode);
-    int __thiscall FUN_00da9340(AlignedPoint* segment, AlignedPoint* polygon, int* volatile segmentCount,
+    __declspec(noinline) int TestTriangleOrientationAndSwapVertices(const AlignedPoint* point, AlignedPoint* triangle, int mode);
+    int __thiscall ClipPolygonAgainstSegment(AlignedPoint* segment, AlignedPoint* polygon, int* volatile segmentCount,
                                 int* polygonCount, char recomputeNormal, int segmentIndex);
 };
 
@@ -2778,7 +2792,8 @@ static __forceinline __m128 crossThree(__m128 a, __m128 b)
     return _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2)),
                       _mm_mul_ps(_mm_shuffle_ps(a, a, 0xd2), _mm_shuffle_ps(b, b, 0xc9)));
 }
-int CollisionPlanes::FUN_00da8500(const AlignedPoint* point, AlignedPoint* triangle, int mode)
+// src: GUESS 0x00da8500 (confidence: medium)
+int CollisionPlanes::TestTriangleOrientationAndSwapVertices(const AlignedPoint* point, AlignedPoint* triangle, int mode)
 {
     __m128 bc = _mm_sub_ps(triangle[2].quad, triangle[1].quad);
     __m128 ca = _mm_sub_ps(triangle[0].quad, triangle[2].quad);
@@ -2815,7 +2830,8 @@ int CollisionPlanes::FUN_00da8500(const AlignedPoint* point, AlignedPoint* trian
 }
 // Tests a segment against a polygon plane, clipping or collapsing the polygon and updating counts based on the intersection mask.
 // @fnv 0x00da9340
-int __thiscall CollisionPlanes::FUN_00da9340(AlignedPoint* segment, AlignedPoint* polygon, int* volatile segmentCount,
+// src: GUESS 0x00da9340 (confidence: medium)
+int __thiscall CollisionPlanes::ClipPolygonAgainstSegment(AlignedPoint* segment, AlignedPoint* polygon, int* volatile segmentCount,
                                              int* polygonCount, char recomputeNormal, int segmentIndex)
 {
     AlignedPoint edgeA;
@@ -2840,7 +2856,7 @@ int __thiscall CollisionPlanes::FUN_00da9340(AlignedPoint* segment, AlignedPoint
         {
             __m128 proportion = _mm_div_ss(firstDistance, _mm_sub_ss(firstDistance, secondDistance));
             scratch.quad = (blendPoints(segment[0].quad, segment[1].quad, proportion));
-            if (FUN_00da8500(&scratch, polygon, 0) == 7)
+            if (TestTriangleOrientationAndSwapVertices(&scratch, polygon, 0) == 7)
                 return 1;
         }
         else
@@ -2853,7 +2869,7 @@ int __thiscall CollisionPlanes::FUN_00da9340(AlignedPoint* segment, AlignedPoint
                 swapPoints(segment[0], segment[1]);
                 swapPoints(segment[4], segment[5]);
             }
-            if (FUN_00da8500(segment, polygon, 1) == 7)
+            if (TestTriangleOrientationAndSwapVertices(segment, polygon, 1) == 7)
             {
                 --*segmentCount;
                 return 0;
@@ -2861,8 +2877,8 @@ int __thiscall CollisionPlanes::FUN_00da9340(AlignedPoint* segment, AlignedPoint
         }
         scratch.quad = (_mm_sub_ps(segment[1].quad, segment[0].quad));
         SolverOutput sampleB, sampleA;
-        FUN_00d22e40(segment, &scratch, polygon + 2, &edgeB, &sampleA);
-        FUN_00d22e40(segment, &scratch, polygon + 2, &edgeA, &sampleB);
+        hkLineSegmentUtil_closestLineSegLineSeg(segment, &scratch, polygon + 2, &edgeB, &sampleA);
+        hkLineSegmentUtil_closestLineSegLineSeg(segment, &scratch, polygon + 2, &edgeA, &sampleB);
         int selection = sampleA.distance > sampleB.distance ? 1 : 0;
         polygon[selection] = polygon[2];
         polygon[selection + 4] = polygon[6];
@@ -2878,10 +2894,10 @@ int __thiscall CollisionPlanes::FUN_00da9340(AlignedPoint* segment, AlignedPoint
     {
         __m128 proportion = _mm_div_ss(secondDistance, _mm_sub_ss(secondDistance, firstDistance));
         edgeA.quad = (blendPoints(segment[0].quad, segment[1].quad, proportion));
-        if (FUN_00da8500(&edgeA, polygon, 0) == 7)
+        if (TestTriangleOrientationAndSwapVertices(&edgeA, polygon, 0) == 7)
             return 1;
     }
-    int result = FUN_00da8500(segment + 1, polygon, 0);
+    int result = TestTriangleOrientationAndSwapVertices(segment + 1, polygon, 0);
     if (result == 7)
     {
         assignCounted(segment[0], segment[1].quad, segmentCount);
@@ -2997,20 +3013,21 @@ struct S00daac40_RayParams
 class S00daac40_RayCastTarget
 {
   public:
-    void FUN_009c1aa0(S00daac40_RayParams* p);
+    void ProcessEntries_009c1aa0(S00daac40_RayParams* p);
 };
 
 class S00daac40_FUN_00daac40_cls
 {
   public:
-    bool* FUN_00daac40(S00daac40_RayArgument<bool*> out, int p2, int p3,
+    bool* ProcessAndReturnValue_00daac40(S00daac40_RayArgument<bool*> out, int p2, int p3,
                        S00daac40_RayArgument<S00daac40_RayParams*> p4);
-    void FUN_00da9b30(bool* hit, int p2, int zero, S00daac40_Mat3* m, int p3, S00daac40_RayParams* p);
+    void ProcessEntries_00da9b30(bool* hit, int p2, int zero, S00daac40_Mat3* m, int p3, S00daac40_RayParams* p);
 };
 
 // Records a GJK ray-cast profile tick, runs FUN_00da9b30 with an identity matrix, and sets out true when hit and local.m_z10 is non-zero.
 // @fnv 0x00daac40
-bool* S00daac40_FUN_00daac40_cls::FUN_00daac40(S00daac40_RayArgument<bool*> out, int p2, int p3,
+// src: GUESS 0x00daac40 (confidence: low)
+bool* S00daac40_FUN_00daac40_cls::ProcessAndReturnValue_00daac40(S00daac40_RayArgument<bool*> out, int p2, int p3,
                                                S00daac40_RayArgument<S00daac40_RayParams*> apRayParams)
 {
     volatile unsigned long ticks;
@@ -3038,7 +3055,7 @@ bool* S00daac40_FUN_00daac40_cls::FUN_00daac40(S00daac40_RayArgument<bool*> out,
     _mm_store_ps((float*)&m.r2, _mm_setzero_ps());
     m.r2.z = one;
 
-    this->FUN_00da9b30(&hit, p2, 0, &m, p3, &rayParams);
+    this->ProcessEntries_00da9b30(&hit, p2, 0, &m, p3, &rayParams);
 
     pProfBuf = (S00daac40_ProfBuf*)TlsGetValue(DAT_0126835c);
     if (pProfBuf->m_pCur < pProfBuf->m_pRecordEnd)
@@ -3053,7 +3070,7 @@ bool* S00daac40_FUN_00daac40_cls::FUN_00daac40(S00daac40_RayArgument<bool*> out,
 
     if (hit && rayParams.m_z10 != 0.0f)
     {
-        reinterpret_cast<S00daac40_RayCastTarget*>((S00daac40_RayParams*)apRayParams)->FUN_009c1aa0(&rayParams);
+        reinterpret_cast<S00daac40_RayCastTarget*>((S00daac40_RayParams*)apRayParams)->ProcessEntries_009c1aa0(&rayParams);
         bool* destination = out;
         *destination = true;
         return destination;

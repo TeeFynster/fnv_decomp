@@ -25,7 +25,8 @@ typedef union __declspec(intrin_type) __declspec(align(16)) {
 void __cdecl EnableConstraintsAndZeroArrays(void* a, void* b);
 
 // @fnv 0x00cf3d90
-__declspec(noinline) void __fastcall FUN_00cf3d90(hkpConstraintInstance* self)
+// src: COMMUNITY 0x00cf3d90
+__declspec(noinline) void __fastcall hkpConstraintInstance_enable(hkpConstraintInstance* self)
 {
     EnableConstraintsAndZeroArrays(self, self->m_pOwnerObject);
 }
@@ -39,21 +40,22 @@ void __fastcall SetActive(hkpConstraintInstance* self, int, bool active)
         *(char*)((char*)p + 0x13) = active;
 }
 
-void __cdecl FUN_00cb3dd0(void* a, void* b, int c);
+void __cdecl hkpWorldOperationUtil_removeConstraintImmediately(void* a, void* b, int c);
 
 // If the owner is set, calls FUN_00cb3dd0 with the pointer at arg+8, this, and 1.
 // @fnv 0x00cf3090
 void hkpConstraintInstance::vf04(void* arg)
 {
     if (m_pOwnerObject)
-        FUN_00cb3dd0(*(void**)((char*)arg + 8), this, 1);
+        hkpWorldOperationUtil_removeConstraintImmediately(*(void**)((char*)arg + 8), this, 1);
 }
 
-void __cdecl FUN_00cdff60(void*, void*);
+void __cdecl hkpResponseModifier_disableConstraint(void*, void*);
 // @fnv 0x00cf3da0
-__declspec(noinline) void __fastcall FUN_00cf3da0(hkpConstraintInstance* self)
+// src: COMMUNITY 0x00cf3da0
+__declspec(noinline) void __fastcall hkpConstraintInstance_disable(hkpConstraintInstance* self)
 {
-    FUN_00cdff60(self, self->m_pOwnerObject);
+    hkpResponseModifier_disableConstraint(self, self->m_pOwnerObject);
 }
 
 // @fnv 0x00cf3000
@@ -87,7 +89,8 @@ void __fastcall RemoveReferenceFromSlots(hkpConstraintInstance* self, int, void*
 namespace fnv_00cf3e60 {
 
 // @fnv 0x00cf3e60
-void __fastcall FUN_00cf3e60(hkpConstraintInstance* self)
+// src: HAVOK_LIB 0x00cf3e60
+void __fastcall hkpConstraintInstance_pointNullsToFixedRigidBody(hkpConstraintInstance* self)
 {
     for (int i = 0; i < 2; ++i)
     {
@@ -115,15 +118,18 @@ void __fastcall FUN_00cf3e60(hkpConstraintInstance* self)
 }  // namespace fnv_00cf3e60
 
 // @fnv 0x00cf2f90
-void __stdcall FUN_00cf2f90(int)
+// src: COMMUNITY 0x00cf2f90
+void __stdcall nullsub_55(int)
 {}
 
 // @fnv 0x00cf2fa0
-void __stdcall FUN_00cf2fa0(int)
+// src: COMMUNITY 0x00cf2fa0
+void __stdcall nullsub_56(int)
 {}
 
 // @fnv 0x00cf2fb0
-__declspec(noinline) hkBool hkpConstraintInstance::FUN_00cf2fb0() const throw()
+// src: HAVOK_LIB 0x00cf2fb0
+__declspec(noinline) hkBool hkpConstraintInstance::isConstrainedToWorld() const throw()
 {
     return m_kActorEntries[1] == 0 ||
            (m_kActorEntries[0]->m_pOwningWorld &&
@@ -135,7 +141,8 @@ namespace fnv_00cf2fe0 {
 int __cdecl FindModifierConstraintAtom(const void* pvObject, int iType);
 
 // @fnv 0x00cf2fe0
-hkBool* __fastcall FUN_00cf2fe0(const hkpConstraintInstance* self, int, hkBool* result)
+// src: HAVOK_LIB 0x00cf2fe0
+hkBool* __fastcall hkpConstraintInstance_isEnabled(const hkpConstraintInstance* self, int, hkBool* result)
 {
     result->m_cBooleanValue = FindModifierConstraintAtom(self, 0x1b) == 0;
     return result;
@@ -154,13 +161,15 @@ static inline int FindListenerIndex(const hkpConstraintInstance* self, void* ite
 
 // Clears the matching listener slot.
 // @fnv 0x00cf30b0
-void __fastcall FUN_00cf30b0(hkpConstraintInstance* self, int, void* apItem)
+// src: HAVOK_LIB 0x00cf30b0
+void __fastcall hkpConstraintInstance_removeConstraintListener(hkpConstraintInstance* self, int, void* apItem)
 {
     static_cast<void**>(self->m_kListeners.m_data)[FindListenerIndex(self, apItem)] = 0;
 }
 
 // @fnv 0x00cf3dd0
-int __fastcall FUN_00cf3dd0(const hkpConstraintInstance* self)
+// src: HAVOK_LIB 0x00cf3dd0
+int __fastcall hkpConstraintInstance_getSimulationIsland(const hkpConstraintInstance* self)
 {
     const hkpEntity* pkEntity = self->m_kActorEntries[0];
     if (*reinterpret_cast<const unsigned char*>(&pkEntity->m_pMotionState.m_type) != 5)
@@ -170,8 +179,8 @@ int __fastcall FUN_00cf3dd0(const hkpConstraintInstance* self)
 
 // The per-thread router at 0x00c85750 is shared as hkMemoryRouter; its heap is at +0x10.
 
-hkpConstraintData* __cdecl FUN_00d85700(const hkpConstraintData* pkData) throw();
-hkpConstraintData* __cdecl FUN_00d858f0(const hkpConstraintData* pkData) throw();
+hkpConstraintData* __cdecl hkpConstraintDataCloningUtil_deepClone(const hkpConstraintData* pkData) throw();
+hkpConstraintData* __cdecl hkpConstraintDataCloningUtil_cloneIfCanHaveMotors(const hkpConstraintData* pkData) throw();
 
 class FUN_00cf3ea0 : public hkpConstraintInstance
 {
@@ -195,15 +204,16 @@ static inline hkpConstraintData* getCloneData(const hkpConstraintInstance* insta
 
 // Creates a new constraint instance from this one according to eMode, copying the name and returning the new instance.
 // @fnv 0x00cf3fa0
-hkpConstraintInstance* hkpConstraintInstance::FUN_00cf3fa0(hkpEntity* pkEntityA, hkpEntity* pkEntityB,
+// src: HAVOK_LIB 0x00cf3fa0
+hkpConstraintInstance* hkpConstraintInstance::clone_00cf3fa0(hkpEntity* pkEntityA, hkpEntity* pkEntityB,
                                                                int eCloneMode) const throw()
 {
     hkpConstraintInstance* pkInstance;
     if (eCloneMode == CLONE_INSTANCES_ONLY)
     {
-        if (FUN_00cf2fb0().m_cBooleanValue)
+        if (isConstrainedToWorld().m_cBooleanValue)
         {
-            hkpConstraintData* pkData = FUN_00d85700(getCloneData(this));
+            hkpConstraintData* pkData = hkpConstraintDataCloningUtil_deepClone(getCloneData(this));
             pkInstance = new FUN_00cf3ea0(pkEntityA, 0, pkData, getPriority());
             pkData->removeReference();
         }
@@ -212,7 +222,7 @@ hkpConstraintInstance* hkpConstraintInstance::FUN_00cf3fa0(hkpEntity* pkEntityA,
     }
     else if (eCloneMode == CLONE_DATAS_WITH_MOTORS)
     {
-        hkpConstraintData* pkData = FUN_00d858f0(getCloneData(this));
+        hkpConstraintData* pkData = hkpConstraintDataCloningUtil_cloneIfCanHaveMotors(getCloneData(this));
         if (!pkData)
         {
             pkData = getCloneData(this);
@@ -231,17 +241,18 @@ namespace fnv_00cf40b0 {
 extern void* DAT_010cc040;
 extern void* DAT_0102e388;
 
-void __cdecl FUN_00d85ef0(void*) throw();
+void __cdecl hkpConstraintCallbackUtil_fireConstraintDeleted(void*) throw();
 static inline void hkDeallocate(void* p, int size) throw()
 {
     hkMemoryRouter::getInstance().heap().blockFree(p, size);
 }
 
 // @fnv 0x00cf40b0
-__declspec(noinline) void __fastcall FUN_00cf40b0(hkpConstraintInstance* self)
+// src: GUESS 0x00cf40b0 (confidence: low)
+__declspec(noinline) void __fastcall hkpConstraintInstance_ProcessEntries_00cf40b0(hkpConstraintInstance* self)
 {
     *(void**)self = &DAT_010cc040;
-    FUN_00d85ef0(self);
+    hkpConstraintCallbackUtil_fireConstraintDeleted(self);
     if (self->m_kActorEntries[0])
         reinterpret_cast<hkReferencedObject*>(self->m_kActorEntries[0])->removeReference();
     if (self->m_kActorEntries[1])
@@ -274,7 +285,7 @@ namespace fnv_00cf4160 {
 // @fnv 0x00cf4160
 hkpConstraintInstance* __fastcall FUN_00cf4160(hkpConstraintInstance* self, int, unsigned int uiFlags) throw()
 {
-    fnv_00cf40b0::FUN_00cf40b0(self);
+    fnv_00cf40b0::hkpConstraintInstance_ProcessEntries_00cf40b0(self);
     if (uiFlags & 1)
         hkMemoryRouter::getInstance().heap().blockFree(self, self->m_usMemSizeAndFlags);
     return self;
@@ -299,7 +310,7 @@ hkpModifierConstraintAtom* __cdecl FindModifierConstraintAtom(hkpConstraintInsta
     return atom;
 }
 
-extern "C" void __cdecl FUN_00d06cb0(void* apvArray, int iSizeElem);
+extern "C" void __cdecl hkSmallArrayUtil__reserveMore(void* apvArray, int iSizeElem);
 extern "C" void _ReadWriteBarrier();
 
 static __forceinline void PutListener(hkpConstraintInstanceSmallArraySerializeOverrideType* array, void* a)
@@ -328,7 +339,7 @@ static __forceinline void PutListener(hkpConstraintInstanceSmallArraySerializeOv
             } while (i < array->m_iElementCount);
         }
         if (n == (array->m_iCapacityState & 0x3fff))
-            FUN_00d06cb0(array, 4);
+            hkSmallArrayUtil__reserveMore(array, 4);
         static_cast<void**>(array->m_data)[array->m_iElementCount++] = a;
     }
 
@@ -345,8 +356,8 @@ struct Matrix4f;
 struct CVector
 {
     LocalM128 m;
-    void FUN_00c7f640(Matrix4f*, CVector*);
-    void FUN_00c7f700(Matrix4f*, CVector*);
+    void setTransformedPos_00c7f640(Matrix4f*, CVector*);
+    void hkVector4_setRotatedDir(Matrix4f*, CVector*);
 };
 struct __declspec(align(16)) Matrix4f
 {
@@ -373,9 +384,9 @@ struct ConstraintReference : ConstraintReferencedBase
     unsigned unk1c;
     Matrix4f a, b, c, d;
     unsigned unk120;
-    ConstraintReference* FUN_00cdf6c0();
-    void FUN_00d541b0(CVector*, CVector*);
-    void FUN_00cbe400(CVector*, CVector*, CVector*, CVector*);
+    ConstraintReference* hkpMalleableConstraintData_getWrappedConstraintData();
+    void InitializeFields_00d541b0(CVector*, CVector*);
+    void SetConstraintPivotFrames(CVector*, CVector*, CVector*, CVector*);
     void FUN_00cb8da0(CVector*, CVector*, CVector*, CVector*, CVector*, CVector*);
     void SetBasis(CVector*, CVector*, CVector*);
     void FUN_00d4fba0(CVector*, CVector*, CVector*, CVector*, CVector*, CVector*);
@@ -402,16 +413,16 @@ struct CInstance
 {
     unsigned unk00, unk04, unk08;
     ConstraintReference* data;
-    hkBool FUN_00cf2fb0();
-    void FUN_00cf30f0(Matrix4f*);
+    hkBool isConstrainedToWorld();
+    void ApplyTransformToWorldConstraint(Matrix4f*);
 };
 static __forceinline void point(CVector& v, Matrix4f* t)
 {
-    v.FUN_00c7f640(t, &v);
+    v.setTransformedPos_00c7f640(t, &v);
 }
 static __forceinline void rotate(CVector& v, Matrix4f* t)
 {
-    v.FUN_00c7f700(t, &v);
+    v.hkVector4_setRotatedDir(t, &v);
 }
 static __forceinline CVector getVector(const CVector& s)
 {
@@ -428,9 +439,10 @@ static __forceinline void copyTransform(Matrix4f& d, const Matrix4f& s)
 
 // Applies the given Matrix4f transform to the constraint data referenced by this instance, dispatching on the constraint type.
 // @fnv 0x00cf30f0
-void CInstance::FUN_00cf30f0(Matrix4f* apTransform)
+// src: GUESS 0x00cf30f0 (confidence: medium)
+void CInstance::ApplyTransformToWorldConstraint(Matrix4f* apTransform)
 {
-    if (!FUN_00cf2fb0())
+    if (!isConstrainedToWorld())
         return;
     ConstraintReference* p = data;
     for (;;)
@@ -440,11 +452,11 @@ void CInstance::FUN_00cf30f0(Matrix4f* apTransform)
             p = p->child18;
             break;
         case 13:
-            p = p->FUN_00cdf6c0();
+            p = p->hkpMalleableConstraintData_getWrappedConstraintData();
             break;
         case 0:
             point(p->a.c1, apTransform);
-            p->FUN_00d541b0(&p->a.c0, &p->a.c1);
+            p->InitializeFields_00d541b0(&p->a.c0, &p->a.c1);
             return;
         case 1: {
             Matrix4f a, b;
@@ -453,7 +465,7 @@ void CInstance::FUN_00cf30f0(Matrix4f* apTransform)
             CVector ax = a.c0, bx = b.c0;
             point(b.c3, apTransform);
             rotate(bx, apTransform);
-            p->FUN_00cbe400(&a.c3, &b.c3, &ax, &bx);
+            p->SetConstraintPivotFrames(&a.c3, &b.c3, &ax, &bx);
             return;
         }
         case 2: {
@@ -538,7 +550,7 @@ struct TargetObj
 
 struct ReceiverObj
 {
-    void FUN_00c7f640(void* pTarget, hkVector4* pVec);
+    void setTransformedPos_00c7f640(void* pTarget, hkVector4* pVec);
 };
 
 class FUN_00cf3c90_cls
@@ -550,19 +562,20 @@ class FUN_00cf3c90_cls
     TargetObj* m_target14;
     TargetObj* m_target18;
 
-    void FUN_00cf3c90(ReceiverObj* first, ReceiverObj* second);
+    void hkpConstraintInstance_getPivotsInWorld(ReceiverObj* first, ReceiverObj* second);
 };
 
 // Copies two vectors obtained from m_obj0C, then calls FUN_00c7f640 on first and second with m_target14->unk18 and m_target18->unk18 and the matching vector.
 // @fnv 0x00cf3c90
-void FUN_00cf3c90_cls::FUN_00cf3c90(ReceiverObj* apFirstReceiver, ReceiverObj* apSecondReceiver)
+// src: XBOX_PDB 0x00cf3c90
+void FUN_00cf3c90_cls::hkpConstraintInstance_getPivotsInWorld(ReceiverObj* apFirstReceiver, ReceiverObj* apSecondReceiver)
 {
     LocalM128 vFirstVec = *(LocalM128*)GetDispatchTarget(m_obj0C);
     LocalM128 vSecondVec = *(LocalM128*)GetShapeData(m_obj0C);
 
     void* pSecondTargetPtr = m_target18->unk18;
-    apFirstReceiver->FUN_00c7f640(m_target14->unk18, reinterpret_cast<hkVector4*>(&vFirstVec));
-    apSecondReceiver->FUN_00c7f640(pSecondTargetPtr, reinterpret_cast<hkVector4*>(&vSecondVec));
+    apFirstReceiver->setTransformedPos_00c7f640(m_target14->unk18, reinterpret_cast<hkVector4*>(&vFirstVec));
+    apSecondReceiver->setTransformedPos_00c7f640(pSecondTargetPtr, reinterpret_cast<hkVector4*>(&vSecondVec));
 }
 
 union FUN_00cf3d00_Vec4
@@ -607,7 +620,7 @@ struct FUN_00cf3d00_Buf
 };
 
 void* __cdecl FindModifierConstraintAtom(void* self, int size);
-void __cdecl FUN_00d27960(void* a, void* b, void* c);
+void __cdecl hkpWorldConstraintUtil_addModifier(void* a, void* b, void* c);
 
 // Stores a and b in unk20 and unk30 of the atom found by FindModifierConstraintAtom(static_cast<void*>(self), 0x18), or of a new 0x40-byte buffer passed to FUN_00d27960.
 // @fnv 0x00cf3d00
@@ -638,14 +651,15 @@ void __fastcall SetVec4Pair(hkpConstraintInstance* self, int, FUN_00cf3d00_Vec4*
     buf->unk20.m = a->m;
     buf->unk30.m = b->m;
 
-    FUN_00d27960(self, self->m_pOwnerObject, buf);
+    hkpWorldConstraintUtil_addModifier(self, self->m_pOwnerObject, buf);
 }
 
 extern char DAT_010cc040;
 
 // Sets the vtable pointer, zeroes most fields, sets m_6 to 1, m_1c to flag, m_1d to 1, m_26 to 0x8000, m_34 to -16, and calls m_28.Init().
 // @fnv 0x00cf3f40
-hkpConstraintInstance* __fastcall FUN_00cf3f40(hkpConstraintInstance* self, int, bool flag)
+// src: HAVOK_LIB 0x00cf3f40
+hkpConstraintInstance* __fastcall hkpConstraintInstance_hkpConstraintInstance(hkpConstraintInstance* self, int, bool flag)
 {
     int z = 0;
     *(void* volatile*)&*reinterpret_cast<void**>(self) = (void*)&DAT_010cc040;
@@ -667,14 +681,15 @@ hkpConstraintInstance* __fastcall FUN_00cf3f40(hkpConstraintInstance* self, int,
 }
 
 // @fnv 0x00cf3db0
-void __fastcall FUN_00cf3db0(hkpConstraintInstance* self, int, hkBool enabled)
+// src: HAVOK_LIB 0x00cf3db0
+void __fastcall hkpConstraintInstance_setEnabled(hkpConstraintInstance* self, int, hkBool enabled)
 {
     if (enabled)
     {
-        FUN_00cf3d90(self);
+        hkpConstraintInstance_enable(self);
     }
     else
     {
-        FUN_00cf3da0(self);
+        hkpConstraintInstance_disable(self);
     }
 }

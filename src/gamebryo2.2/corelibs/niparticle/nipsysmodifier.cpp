@@ -64,7 +64,8 @@ void NiPSysModifier::SetTargetSystem(NiParticleSystem* pkTarget)
 extern const char* const g_01202528_arg1;
 
 // @fnv 0x00c31710
-const char* const* __cdecl FUN_00c31710()
+// src: COMMUNITY 0x00c31710
+const char* const* __cdecl NiPSysModifier_GetRTTI()
 {
     return &g_01202528_arg1;
 }
@@ -152,10 +153,10 @@ __forceinline void StrArr::AppendInline(char* pElement)
     SetAt(uiIndex, pElement);
 }
 void __stdcall AppendCameraPathEntries(StrArr* apViewerStrings);
-char* __cdecl FUN_00a7d330(const char* pcText);
-char* __cdecl FUN_00a7d5e0(const char* pcPrefix, const char* pcValue);
-char* __cdecl FUN_00a7d510(const char* pcPrefix, unsigned int uiValue);
-char* __cdecl FUN_00a7d370(const char* pcPrefix, bool bValue);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* pcText);
+char* __cdecl NiGetViewerString_00a7d5e0(const char* pcPrefix, const char* pcValue);
+char* __cdecl NiGetViewerString_00a7d510(const char* pcPrefix, unsigned int uiValue);
+char* __cdecl NiGetViewerString(const char* pcPrefix, bool bValue);
 extern const char g_011d4e34_arg1[];
 
 // Appends the modifier's name, order and active flag as formatted strings to the given string array.
@@ -164,11 +165,11 @@ extern const char g_011d4e34_arg1[];
 void __fastcall GetNiPSysModifierViewerStrings(NiPSysModifier* modifier, void*, StrArr* apViewerStrings)
 {
     AppendCameraPathEntries(apViewerStrings);
-    apViewerStrings->AppendInline(FUN_00a7d330(g_01202528_arg1));
+    apViewerStrings->AppendInline(NiViewerStrings_NiGetViewerString_Title(g_01202528_arg1));
     const char* pcName = modifier->m_kName.m_kHandle;
-    apViewerStrings->AppendInline(FUN_00a7d5e0(g_011d4e34_arg1, pcName));
-    apViewerStrings->AppendInline(FUN_00a7d510("Order", modifier->m_uiUpdateOrder));
-    apViewerStrings->AppendInline(FUN_00a7d370("Active", modifier->m_bModifierActive));
+    apViewerStrings->AppendInline(NiGetViewerString_00a7d5e0(g_011d4e34_arg1, pcName));
+    apViewerStrings->AppendInline(NiGetViewerString_00a7d510("Order", modifier->m_uiUpdateOrder));
+    apViewerStrings->AppendInline(NiGetViewerString("Active", modifier->m_bModifierActive));
 }
 
 // The scalar deleting destructor keeps the modifier vtable installed while releasing its name.

@@ -8,7 +8,7 @@ public:
     ExtraTimeLeft(float time);
 
     bool Compare(BSExtraData* extra) override;
-    bool FUN_00431ef0(BSExtraData* extra);
+    bool Compare_00431ef0(BSExtraData* extra);
 
     float fTime;
 };

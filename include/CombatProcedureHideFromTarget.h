@@ -19,7 +19,7 @@ public:
         bool expired();
         float elapsed();
         float FUN_00435e00();
-        float FUN_006b9130();
+        float CombatTimer_GetTargetTime();
         void FUN_009a5eb0(BGSSaveFormBuffer* buffer);
         void FUN_009a5f20(BGSLoadFormBuffer* buffer);
     };
@@ -34,12 +34,12 @@ public:
     virtual void LoadGame(BGSLoadFormBuffer* apBuffer);
     virtual void vf16();
 
-    COMBAT_PROCEDURES FUN_009d60e0();
+    COMBAT_PROCEDURES GetType_009d60e0();
     void Update();
     void PrintState(Output* out, int x, int y);
-    void FUN_00996e20(int mode);
+    void SetMoveMode_00996e20(int mode);
     void SetLookAtPoint(const NiPoint3& point, unsigned char mode);
-    void FUN_009caac0(const char* message);
+    void CombatProcedure_SetFailed(const char* message);
     void SetState();
 
     union

@@ -35,7 +35,7 @@ public:
     void BaseFormRecord(BaseFormComponent* component);
     bool IsEqualToBase(BaseFormComponent* component);
     void SetChanceNone(unsigned char chance);
-    void FUN_0042e680(unsigned char chance);
+    void ExtraWeaponModFlags_SetWeaponModFlags(unsigned char chance);
     bool GetCalcAllBelow();
     bool GetAllBelow();
     bool FUN_004877e0();

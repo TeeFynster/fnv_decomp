@@ -8,19 +8,19 @@
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpbroadphaseviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkpbroadphaseviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct Container { int ClearValue(void* value); };
-struct Owner { int FUN_00d6a910(Container* container); };
+struct Owner { int ClearAdjustedValue(Container* container); };
 struct FUN_00dd9380_StandIn {
-    int FUN_00dd9380(const char* name, void* constructor);
+    int hkProcessFactory_registerProcess(const char* name, void* constructor);
 };
 extern FUN_00dd9380_StandIn* DAT_01269cd0;
 extern int DAT_01269028;
 extern char DAT_010c65b0;
-void FUN_00d6ad00();
-void __cdecl FUN_00d6ad40();
+void hkpBroadphaseViewer_Create();
+void __cdecl Object_UpdateFields_00d6ad40();
 extern int DAT_01269028;
-int FUN_00d6ad60();
+int Object_GetDAT_01269028_00d6ad60();
 struct Target {
-    void FUN_00c93920(void* apArg);
+    void hkpWorld_addWorldPostSimulationListener(void* apArg);
 };
 struct FUN_00d6a8e0_cls {
     int unk00;
@@ -84,7 +84,7 @@ struct PostSimListener {
 };
 // one shape of the world; 0xc93920 appends a listener to its list at +0x164
 struct BroadElem {
-    void FUN_00c93920(PostSimListener* p);
+    void hkpWorld_addWorldPostSimulationListener(PostSimListener* p);
 };
 // the primary base at 0x00 (its vptr is the one at 0x00)
 struct PrimBase {
@@ -129,7 +129,7 @@ private:
     ~FUN_00d6a940();               // never defined: keeps a second tagged
                                    // symbol out of the object file
 };
-hkMemoryRouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl hkMemoryRouter_getInstance();
 struct SpawnedItem {
     virtual void v00(int aiFlags);
     int unk04;
@@ -224,18 +224,19 @@ struct FUN_00d6ac40_cls : PrimaryBase, MidBase, TailBase, SubObject {
 };
 struct D6AD80Primary {
     virtual void vfunc00();
-    virtual void FUN_00d6ad80();
+    virtual void AdjustThisAndForward_00d6ad80();
 
     int unk04;
 };
 struct D6AD80Secondary {
-    virtual void FUN_00d6ad80();
+    virtual void AdjustThisAndForward_00d6ad80();
 };
 struct D6AD80Object : D6AD80Primary, D6AD80Secondary {
     D6AD80Object();
 
 // @fnv 0x00d6ad80
-    virtual void FUN_00d6ad80();
+// src: GUESS 0x00d6ad80 (confidence: low)
+    virtual void AdjustThisAndForward_00d6ad80();
 };
 D6AD80Object::D6AD80Object()
 {
@@ -310,9 +311,9 @@ static inline hkMemoryAllocator& __fastcall GetAudioAllocator(hkMemoryRouter* ho
 
 static inline hkMemoryAllocator& S00d6a9b0_heap()
 {
-    return GetAudioAllocator(FUN_00c85750());
+    return GetAudioAllocator(hkMemoryRouter_getInstance());
 }
-void __cdecl FUN_00c908c0(hkMemoryAllocator* a, void* arr, int cap, int elemSize);
+void __cdecl hkArrayUtil__reserve(hkMemoryAllocator* a, void* arr, int cap, int elemSize);
 
 template <typename T>
 struct S00d6a9b0_Arr
@@ -345,7 +346,7 @@ struct S00d6a9b0_Arr
         {
             int cap2 = 2 * cap;
             int nc = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&a, this, nc, sizeof(T));
+            hkArrayUtil__reserve(&a, this, nc, sizeof(T));
         }
     }
 };
@@ -425,7 +426,7 @@ struct S00d6a9b0_Item
     int unk40; int unk44; int unk48; int unk4c; int unk50; int unk54; int unk58; int unk5c;
     int unk60; int unk64; int unk68; int unk6c; int unk70; int unk74; int unk78; int unk7c;
     void FUN_00de1210();
-    void FUN_00de1170(void* a, void* b);
+    void hkDisplayAABB_setExtents(void* a, void* b);
 };
 
 struct S00d6a9b0_Sub
@@ -461,14 +462,15 @@ struct S00d6a9b0_Obj
     int unk00;
     S00d6a9b0_Arr<S00d6a9b0_Item> m_aiIndexedValues;
 
-    void FUN_00d6a9b0(S00d6a9b0_Ctx* a1);
+    void hkpBroadphaseViewer_postSimulationCallback(S00d6a9b0_Ctx* a1);
 };
 
 struct ViewerPrefix { S00d6a9b0_Owner* m_pOwnerObject; int unk04; int unk08; int unk0c; };
 struct WholeViewer : ViewerPrefix, S00d6a9b0_Obj {};
 
 // @fnv 0x00d6a9b0
-void S00d6a9b0_Obj::FUN_00d6a9b0(S00d6a9b0_Ctx* a1)
+// src: HAVOK_LIB 0x00d6a9b0
+void S00d6a9b0_Obj::hkpBroadphaseViewer_postSimulationCallback(S00d6a9b0_Ctx* a1)
 {
     S00d6a9b0_Mark("TthkpBroadphaseViewer");
 
@@ -484,7 +486,7 @@ void S00d6a9b0_Obj::FUN_00d6a9b0(S00d6a9b0_Ctx* a1)
     for (int k = req.m_iElementCount - 1; k >= 0; k--)
     {
         S00d6a9b0_Blk* b = req.m_data + k;
-        m_aiIndexedValues.m_data[k].FUN_00de1170(&b->m_kMinimumCorner, &b->m_kMaximumCorner);
+        m_aiIndexedValues.m_data[k].hkDisplayAABB_setExtents(&b->m_kMinimumCorner, &b->m_kMaximumCorner);
         ptrs.m_data[k] = m_aiIndexedValues.m_data + k;
     }
 

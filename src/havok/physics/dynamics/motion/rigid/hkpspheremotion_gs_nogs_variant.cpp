@@ -18,10 +18,11 @@ extern float DAT_0104da4c;
 // hkpSphereMotion lacks this accessor declaration; this member-only adapter uses its shared layout.
 struct SphereWorldInertiaAccess : public hkpSphereMotion
 {
-    void FUN_00d1e230(float* out);
+    void hkpSphereMotion_getInertiaWorld(float* out);
 };
 // @fnv 0x00d1e230
-void SphereWorldInertiaAccess::FUN_00d1e230(float* out)
+// src: HAVOK_SRC 0x00d1e230
+void SphereWorldInertiaAccess::hkpSphereMotion_getInertiaWorld(float* out)
 {
     float t = m_kInertiaAndMassInv.x;
     float s;

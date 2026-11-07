@@ -28,7 +28,8 @@ inline void* __cdecl operator new(unsigned int, void* p)
     return p;
 }
 // @fnv 0x00a6c8a0
-BSDismemberSkinInstance* FUN_00a6c8a0()
+// src: EXE 0x00a6c8a0
+BSDismemberSkinInstance* BSDismemberSkinInstance_CreateObject()
 {
     BSDismemberSkinInstance* p = (BSDismemberSkinInstance*)BSFadeNode::operator new(sizeof(BSDismemberSkinInstance));
     if (p)

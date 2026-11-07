@@ -10,7 +10,7 @@ public:
 
     ExtraRadiation();
     ExtraRadiation(float afRadiation);
-    bool FUN_00436c40(BSExtraData* apCompare);
+    bool Compare_00436c40(BSExtraData* apCompare);
 
     float m_fRadiation;
 };

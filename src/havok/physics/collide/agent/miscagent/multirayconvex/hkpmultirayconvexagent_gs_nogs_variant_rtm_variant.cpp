@@ -31,17 +31,17 @@
 
 // src/havok/physics/collide/agent/miscagent/multirayconvex/hkpmultirayconvexagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/miscagent/multirayconvex/hkpmultirayconvexagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-void FUN_00d374f0(int a, int b, int c, int d);
+void hkpMultiRayConvexAgent_staticGetPenetrations(int a, int b, int c, int d);
 struct FUN_00d37690_Class {
     void __thiscall ForwardToFunction(int a, int b, int c, int d);
 };
-void FUN_00d37740(int a, int b, int c, int d);
+void hkpMultiRayConvexAgent_createMultiRayConvexAgent(int a, int b, int c, int d);
 void FUN_00d37780(int a, int b, int c, int d);
-void FUN_00d37860(int a, int b, int c, int d);
-void FUN_00d378a0(int a, int b, int c, int d);
-void FUN_00d37280(int a, int b, int c, int d);
-void FUN_00daf8e0();
-void FUN_00d3ac80();
+void Object_ProcessState_00d37860(int a, int b, int c, int d);
+void Object_UpdateFields_00d378a0(int a, int b, int c, int d);
+void hkpMultiRayConvexAgent_staticGetClosestPoints(int a, int b, int c, int d);
+void Object_ProcessEntries_00daf8e0();
+void Object_UpdateFields_00d3ac80();
 struct FUN_00cfbbe0_Arg {
     void* f0;
     void* f1;
@@ -51,9 +51,9 @@ struct FUN_00cfbbe0_Arg {
     char f5;
 };
 struct FUN_00cfbbe0_Class {
-    void __thiscall FUN_00cfbbe0(FUN_00cfbbe0_Arg* a, int b, int c);
+    void __thiscall AppendRecordAndRegisterAgents(FUN_00cfbbe0_Arg* a, int b, int c);
 };
-void FUN_00d377d0(int pClass);
+void hkpMultiRayConvexAgent_registerAgent(int pClass);
 struct Handler {
     virtual void slot0();
     virtual void slot1();
@@ -82,13 +82,13 @@ struct S_00d37860_Collector : S_00d37860_Base {
     S_00d37860_Collector(int filter) : m_iFilter(filter) {}
     virtual void f1();
 };
-void FUN_00d374f0(void* b, void* a, void* c, S_00d37860_Collector* collector);
-void FUN_00d37860(void* a, void* b, void* c, int filter);
+void hkpMultiRayConvexAgent_staticGetPenetrations(void* b, void* a, void* c, S_00d37860_Collector* collector);
+void Object_ProcessState_00d37860(void* a, void* b, void* c, int filter);
 struct Payload { const char* name; float value; int id; };
 extern float DAT_0104da48;
 extern const char DAT_010ce7fc[];
-void FUN_00d37280(int, int, int, Payload*);
-void FUN_00d378a0(int aiArg1, int aiArg2, int aiArg3, int aiId);
+void hkpMultiRayConvexAgent_staticGetClosestPoints(int, int, int, Payload*);
+void Object_UpdateFields_00d378a0(int aiArg1, int aiArg2, int aiArg3, int aiId);
 struct D376B0Allocator;
 struct D376B0MemoryRouter {
     int unk00;
@@ -99,8 +99,8 @@ struct D376B0MemoryRouter {
 
     D376B0Allocator& heap() { return *m_pStreamAllocator; }
 };
-extern "C" D376B0MemoryRouter& __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(D376B0Allocator* alloc, void* array, int numElements, int sizeElem);
+extern "C" D376B0MemoryRouter& __cdecl hkMemoryRouter_getInstance();
+void __cdecl hkArrayUtil__reserve(D376B0Allocator* alloc, void* array, int numElements, int sizeElem);
 class D376B0ReferencedObject {
 public:
     D376B0ReferencedObject() : m_sReferenceCount(1) {}
@@ -122,12 +122,12 @@ struct D376B0IndexArray {
 
     void SetSizeAndGrow(int n)
     {
-        D376B0Allocator& alloc = FUN_00c85750().heap();
+        D376B0Allocator& alloc = hkMemoryRouter_getInstance().heap();
         const int cap = getCapacity();
         if (cap < n) {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(unsigned short));
+            hkArrayUtil__reserve(&alloc, this, newSize, sizeof(unsigned short));
         }
         m_iElementCount = n;
     }
@@ -364,7 +364,8 @@ extern const char DAT_010ceda8[];
 extern const char DAT_010c41f8[];
 
 // @fnv 0x00d37280
-void __cdecl FUN_00d37280(const hkpCdBody&bodyA,const hkpCdBody&bodyB,const CollisionAgentContext&input,class hkpCdPointCollector&collector)
+// src: XBOX_PDB 0x00d37280
+void __cdecl hkpMultiRayConvexAgent_staticGetClosestPoints(const hkpCdBody&bodyA,const hkpCdBody&bodyB,const CollisionAgentContext&input,class hkpCdPointCollector&collector)
 {
 {hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor=DAT_010ceda8;h->setTime();mStream.setEnd((char*)(h+1));}};
 const hkpMultiRayShape*msA=static_cast<const hkpMultiRayShape*>(bodyA.getShape());

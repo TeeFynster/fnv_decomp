@@ -21,25 +21,26 @@ struct __declspec(align(16)) Matrix43
     float m10, m11, m12, m13;
     float m20, m21, m22, m23;
     float m30, m31, m32, m33;
-    void FUN_00cb2240(Matrix43* a, Matrix43* b);
-    void FUN_00cb22c0(Transform* a, Matrix43* b);
+    void hkTransform_setMul(Matrix43* a, Matrix43* b);
+    void hkTransform_setMul_00cb22c0(Transform* a, Matrix43* b);
 };
 // @fnv 0x00cb22c0
-void Matrix43::FUN_00cb22c0(Transform* apTransform, Matrix43* apMatrix)
+// src: HAVOK_LIB 0x00cb22c0
+void Matrix43::hkTransform_setMul_00cb22c0(Transform* apTransform, Matrix43* apMatrix)
 {
     Matrix43 temp;
-    apTransform->FUN_00ce5300(&temp);
-    this->FUN_00cb2240(&temp, apMatrix);
+    apTransform->Object_ForwardCall_00ce5300(&temp);
+    this->hkTransform_setMul(&temp, apMatrix);
 }
 
 struct Matrix44;
 struct FUN_00cb21e0_shell
 {
-    void __thiscall FUN_00cb21e0(const Matrix44* source);
+    void __thiscall hkTransform_setInverse(const Matrix44* source);
 };
 struct FUN_00cb2240_shell
 {
-    void __thiscall FUN_00cb2240(const Matrix44* left, const Matrix44* right);
+    void __thiscall hkTransform_setMul(const Matrix44* left, const Matrix44* right);
 };
 __declspec(align(16)) struct Matrix44
 {
@@ -47,15 +48,16 @@ __declspec(align(16)) struct Matrix44
     hkVector4 row1;
     hkVector4 row2;
     hkVector4 row3;
-    void FUN_00cb2420(const Matrix44* left, const Matrix44* right);
+    void hkTransform_setMulMulInverse(const Matrix44* left, const Matrix44* right);
 };
 // @fnv 0x00cb2420
-void Matrix44::FUN_00cb2420(const Matrix44* left, const Matrix44* right)
+// src: HAVOK_LIB 0x00cb2420
+void Matrix44::hkTransform_setMulMulInverse(const Matrix44* left, const Matrix44* right)
 {
     __m128 tempStorage[4];
     Matrix44& tempMatrix = *reinterpret_cast<Matrix44*>(tempStorage);
-    ((FUN_00cb21e0_shell*)&tempMatrix)->FUN_00cb21e0(right);
-    ((FUN_00cb2240_shell*)this)->FUN_00cb2240(left, &tempMatrix);
+    ((FUN_00cb21e0_shell*)&tempMatrix)->hkTransform_setInverse(right);
+    ((FUN_00cb2240_shell*)this)->hkTransform_setMul(left, &tempMatrix);
 }
 
 // The shared vector does not yet declare this method; retain only its call interface.
@@ -81,18 +83,19 @@ struct S_cb2110_Foo
 
     hkVector4 unk30;
 
-    bool* __thiscall FUN_00cb2d70(bool* value);
-    bool* __thiscall FUN_00cb2110(bool* result);
+    bool* __thiscall hkRotation_isOk(bool* value);
+    bool* __thiscall hkTransform_isOk(bool* result);
 };
 
 // @fnv 0x00cb2110
-bool* __thiscall S_cb2110_Foo::FUN_00cb2110(bool* result)
+// src: HAVOK_LIB 0x00cb2110
+bool* __thiscall S_cb2110_Foo::hkTransform_isOk(bool* result)
 {
     bool value1;
     bool value2;
     bool value;
 
-    if (*reinterpret_cast<VectorFiniteCheck*>(&unk30)->CheckFloatsFinite(&value1) && *FUN_00cb2d70(&value2))
+    if (*reinterpret_cast<VectorFiniteCheck*>(&unk30)->CheckFloatsFinite(&value1) && *hkRotation_isOk(&value2))
     {
         value = true;
     }
@@ -178,7 +181,7 @@ __forceinline void SetRotatedInverseDir(hkVector4& out, const hkMatrix3& r, cons
 class __declspec(align(16)) hkTransformCB22
 {
   public:
-    void FUN_00cb22f0(const hkTransformCB22& kA, const hkTransformCB22& kB);
+    void hkTransform_setMulInverseMul(const hkTransformCB22& kA, const hkTransformCB22& kB);
 
     hkMatrix3 m_rotation;
     hkVector4 m_vTranslation;
@@ -186,7 +189,8 @@ class __declspec(align(16)) hkTransformCB22
 
 // Sets the transform to the inverse of kA multiplied by kB, combining rotation via SetMulInverse and translation via a rotated difference.
 // @fnv 0x00cb22f0
-void hkTransformCB22::FUN_00cb22f0(const hkTransformCB22& kA, const hkTransformCB22& kB)
+// src: XBOX_PDB 0x00cb22f0
+void hkTransformCB22::hkTransform_setMulInverseMul(const hkTransformCB22& kA, const hkTransformCB22& kB)
 {
     MatrixMulInverse(m_rotation, kA.m_rotation, kB.m_rotation);
     __m128 kDiff = _mm_sub_ps(kB.m_vTranslation.m_vComponents, kA.m_vTranslation.m_vComponents);
@@ -212,20 +216,21 @@ struct Matrix
 
 struct Obj : Matrix
 {
-    void __thiscall FUN_00cb2240(Matrix* m, int a);
-    void __thiscall FUN_00cb23e0(int a);
+    void __thiscall hkTransform_setMul(Matrix* m, int a);
+    void __thiscall ProcessTransformedMatrixCopy_00cb23e0(int a);
 };
 
 // Copies the matrix into a local, applies FUN_00cb2240 to that copy with a, leaving the original matrix unchanged.
 // @fnv 0x00cb23e0
-void __thiscall Obj::FUN_00cb23e0(int a)
+// src: GUESS 0x00cb23e0 (confidence: low)
+void __thiscall Obj::ProcessTransformedMatrixCopy_00cb23e0(int a)
 {
     Matrix localMatrix;
     localMatrix.r0.v = r0.v;
     localMatrix.r1.v = r1.v;
     localMatrix.r2.v = r2.v;
     localMatrix.r3.v = r3.v;
-    FUN_00cb2240(&localMatrix, a);
+    hkTransform_setMul(&localMatrix, a);
 }
 
 extern "C" __m128 _mm_and_ps(__m128 a, __m128 b);
@@ -240,12 +245,13 @@ struct FUN_00cb2050_cls
     __m128 m_kRow2;
     __m128 m_kRow3;
 
-    void FUN_00cb2050(FUN_00cb2050_cls* apOut);
+    void CopyMaskedMatrixRows(FUN_00cb2050_cls* apOut);
 };
 
 // Copies the four m_kRow vectors into apOut, masking the first three with DAT_010c4c10 and shuffling the fourth with DAT_010c7170.
 // @fnv 0x00cb2050
-void FUN_00cb2050_cls::FUN_00cb2050(FUN_00cb2050_cls* apOut)
+// src: GUESS 0x00cb2050 (confidence: medium)
+void FUN_00cb2050_cls::CopyMaskedMatrixRows(FUN_00cb2050_cls* apOut)
 {
     apOut->m_kRow0 = _mm_and_ps(m_kRow0, DAT_010c4c10);
     apOut->m_kRow1 = _mm_and_ps(m_kRow1, DAT_010c4c10);
@@ -269,12 +275,13 @@ struct FUN_00cb20b0_shell
     hkVector4 row2;
     hkVector4 row3;
 
-    const Matrix44* __thiscall FUN_00cb20b0(const Matrix44* source);
+    const Matrix44* __thiscall hkTransform_set4x4ColumnMajor(const Matrix44* source);
 };
 
 // Applies g_absMask to the first three source rows, shuffles source row3 with g_rowMask, stores the results, and returns source.
 // @fnv 0x00cb20b0
-const Matrix44* FUN_00cb20b0_shell::FUN_00cb20b0(const Matrix44* source)
+// src: XBOX_PDB 0x00cb20b0
+const Matrix44* FUN_00cb20b0_shell::hkTransform_set4x4ColumnMajor(const Matrix44* source)
 {
     _mm_store_ps(&row0.x, _mm_and_ps(_mm_load_ps(&source->row0.x), _mm_load_ps(g_absMask)));
     _mm_store_ps(&row1.x, _mm_and_ps(_mm_load_ps(&source->row1.x), _mm_load_ps(g_absMask)));
@@ -318,7 +325,8 @@ __forceinline void S_00cb21e0_Transform::Body(const S_00cb21e0_Transform& t)
 }
 
 // @fnv 0x00cb21e0
-void FUN_00cb21e0_shell::FUN_00cb21e0(const Matrix44* source)
+// src: XBOX_PDB 0x00cb21e0
+void FUN_00cb21e0_shell::hkTransform_setInverse(const Matrix44* source)
 {
     ((S_00cb21e0_Transform*)this)->Body(*(const S_00cb21e0_Transform*)source);
 }
@@ -333,11 +341,12 @@ extern __m128 DAT_01017d10;
 struct FUN_00cb2160_cls : hkTransformCB22
 {
     unsigned char* Probe(unsigned char* out, const FUN_00cb2160_cls* other, float eps);
-    unsigned char* FUN_00cb2160(unsigned char* out, const FUN_00cb2160_cls* other, float eps);
+    unsigned char* hkTransform_isApproximatelyEqual(unsigned char* out, const FUN_00cb2160_cls* other, float eps);
 };
 // Writes 1 when Probe succeeds and the masked first three translation differences are at most eps; otherwise writes 0.
 // @fnv 0x00cb2160
-unsigned char* FUN_00cb2160_cls::FUN_00cb2160(unsigned char* out, const FUN_00cb2160_cls* other, float eps)
+// src: COMMUNITY 0x00cb2160
+unsigned char* FUN_00cb2160_cls::hkTransform_isApproximatelyEqual(unsigned char* out, const FUN_00cb2160_cls* other, float eps)
 {
     unsigned char flag;
     unsigned char* p = Probe(&flag, other, eps);

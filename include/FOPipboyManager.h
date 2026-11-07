@@ -36,16 +36,16 @@ public:
     void SetDataGlowEnabled(bool);
     void UpdatePipboyLight(int);
     void SetValue(int page, bool abPlaySounds);
-    bool FUN_007f8720(bool press, bool release, float& x, float& y, int& button);
-    NiAVObject* FUN_007fa950();
-    void FUN_00705fc0(NiNode*);
-    void FUN_004dc540(NiNode*);
-    void FUN_007fc2d0(NiAVObject*);
-    void FUN_007f7fb0(const NiColorA&);
-    void FUN_00444020(float);
-    void FUN_00810530(bool);
+    bool CheckOrangeButtonsClicked(bool press, bool release, float& x, float& y, int& button);
+    NiAVObject* SkyObject_GetNiNode();
+    void SetTarget_00705fc0(NiNode*);
+    void NiTexturingProperty_Map_SetTexture(NiNode*);
+    void FORenderedMenu_SetupScreen(NiAVObject*);
+    void FORenderedMenu_SetTintColor(const NiColorA&);
+    void TESQuest_SetScriptProcessingDelay(float);
+    void bhkCharacterControllerCinfo_SetAvoidBox(bool);
     FORenderedMenu* FUN_00704370();
-    void FUN_007fa200();
+    void ReInitialize();
 
     NiPointer<NiNode> m_pPipBoyObject0;
     NiPointer<NiNode> m_pPipBoyObject1;

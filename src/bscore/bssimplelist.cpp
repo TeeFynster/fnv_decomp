@@ -170,11 +170,12 @@ struct ObsList
 {
     void* m_item;
     ObsList* m_pkNext;
-    bool FUN_004a4460();
+    bool BSSimpleList_NiRefObjectPtr_IsEmpty();
 };
 // Returns true when m_pkNext is null and this object compares equal to a null NiNode pointer.
 // @fnv 0x004a4460
-bool ObsList::FUN_004a4460()
+// src: COMMUNITY 0x004a4460
+bool ObsList::BSSimpleList_NiRefObjectPtr_IsEmpty()
 {
     return (m_pkNext == 0 && *reinterpret_cast<NiPointer<NiNode>*>(this) == 0) ? 1 : 0;
 }
@@ -206,12 +207,13 @@ struct FUN_004bc550_t
     void* m_04;
     int m_08;
 
-    FUN_004bc550_t* FUN_004bc550(int a1, void* a2);
+    FUN_004bc550_t* InitializeFields_004bc550(int a1, void* a2);
 };
 
 // Initialises the object by storing a1 in m_08, allocating a new SL into m_00, and storing a2 in m_04.
 // @fnv 0x004bc550
-FUN_004bc550_t* FUN_004bc550_t::FUN_004bc550(int aiValue, void* a2)
+// src: GUESS 0x004bc550 (confidence: low)
+FUN_004bc550_t* FUN_004bc550_t::InitializeFields_004bc550(int aiValue, void* a2)
 {
     m_08 = aiValue;
     m_00 = new SL();
@@ -249,11 +251,12 @@ struct GNode
 };
 struct GList
 {
-    GObj* FUN_004f35b0(int key);
+    GObj* TESRegionDataList_Find(int key);
 };
 // Walks nodes from this pointer and returns the first object whose vtable slot 4 returns key, or null if none match.
 // @fnv 0x004f35b0
-GObj* GList::FUN_004f35b0(int key)
+// src: COMMUNITY 0x004f35b0
+GObj* GList::TESRegionDataList_Find(int key)
 {
     GNode* node = reinterpret_cast<GNode*>(this);
     GObj* pObj = 0;
@@ -356,12 +359,13 @@ struct TargetClass
     NodePointerWithRawComparison m_item;
     TargetClass* m_pkNext;
 
-    void FUN_0052a9b0(const NiPointer<NiNode>& item);
+    void BSSimpleList_NiRefObjectPtr_AddTail(const NiPointer<NiNode>& item);
 };
 
 // Appends a NiNode reference to the end of the linked list, reusing an empty slot or allocating a new node.
 // @fnv 0x0052a9b0
-void TargetClass::FUN_0052a9b0(const NiPointer<NiNode>& item)
+// src: COMMUNITY 0x0052a9b0
+void TargetClass::BSSimpleList_NiRefObjectPtr_AddTail(const NiPointer<NiNode>& item)
 {
     if (item == 0)
         return;
@@ -408,11 +412,12 @@ struct ActList
     void* pad0;
     void* pad1;
     ActNode* head;
-    FormFlagRecord* FUN_005a90b0(TESForm* form, bool create);
+    FormFlagRecord* ScriptLocals_GetActionObject(TESForm* form, bool create);
 };
 // Returns a matching entry, or the last visited entry with a null form when create is true.
 // @fnv 0x005a90b0
-FormFlagRecord* ActList::FUN_005a90b0(TESForm* form, bool create)
+// src: XBOX_PDB 0x005a90b0
+FormFlagRecord* ActList::ScriptLocals_GetActionObject(TESForm* form, bool create)
 {
     if (!head)
         return 0;
@@ -438,11 +443,12 @@ struct RefList
 {
     void* m_item;
     RefList* m_pkNext;
-    bool FUN_005f65d0(void** item);
+    bool BSSimpleList_TESLevSpell_IsInList(void** item);
 };
 // Walks the linked list and returns true when a node's m_item matches the value pointed to by item.
 // @fnv 0x005f65d0
-bool RefList::FUN_005f65d0(void** item)
+// src: XBOX_PDB 0x005f65d0
+bool RefList::BSSimpleList_TESLevSpell_IsInList(void** item)
 {
     const RefList* pNode = this;
     while (pNode && pNode->m_item != *item)
@@ -499,11 +505,12 @@ struct TargetClass
     NodePointerWithRawComparison m_item;
     TargetClass* m_pkNext;
 
-    void FUN_00631540(const NiPointer<NiNode>& item);
+    void BSSimpleList_NiPointer_bhkAction_AddHead(const NiPointer<NiNode>& item);
 };
 
 // @fnv 0x00631540
-void TargetClass::FUN_00631540(const NiPointer<NiNode>& item)
+// src: XBOX_PDB 0x00631540
+void TargetClass::BSSimpleList_NiPointer_bhkAction_AddHead(const NiPointer<NiNode>& item)
 {
     if (item == 0)
         return;
@@ -528,11 +535,12 @@ struct ListReader
     ListReader* next;
     ~ListReader();
     bool IsEmpty();
-    void FUN_00631620(const NiPointer<NiNode>& value);
+    void BSSimpleList_NiPointer_bhkAction_Remove(const NiPointer<NiNode>& value);
 };
 // Removes the node whose item equals value; if it is the only node, clears item.
 // @fnv 0x00631620
-void ListReader::FUN_00631620(const NiPointer<NiNode>& value)
+// src: XBOX_PDB 0x00631620
+void ListReader::BSSimpleList_NiPointer_bhkAction_Remove(const NiPointer<NiNode>& value)
 {
     if (value == 0 || IsEmpty())
         return;
@@ -590,7 +598,7 @@ struct B006815c0
 
 
 
-CombatTargetTimestamp* __fastcall FUN_004300a0(CombatTargetTimestamp*);
+CombatTargetTimestamp* __fastcall CombatTargetTimestamp_ClearTimeStamp(CombatTargetTimestamp*);
 extern float DAT_010673a0;
 
 struct FUN_0066e590
@@ -613,7 +621,7 @@ struct FUN_0066e590
 // @fnv 0x0066e590
 FUN_0066e590::FUN_0066e590()
 {
-    FUN_004300a0((CombatTargetTimestamp*)m_abyActorState);
+    CombatTargetTimestamp_ClearTimeStamp((CombatTargetTimestamp*)m_abyActorState);
     pActor = 0;
     m_eDetectionLevel = 0;
     m_bHasLineOfSight = false;
@@ -630,12 +638,13 @@ FUN_0066e590::FUN_0066e590()
 
 struct FUN_007653f0_class
 {
-    void FUN_007653f0(void** apArray, int(__cdecl* apCompareFn)(const void*, const void*), int aiCount);
+    void BSSimpleList_ShellSort(void** apArray, int(__cdecl* apCompareFn)(const void*, const void*), int aiCount);
 };
 
 // Sorts apArray in place using a shell sort algorithm with a compare function apCompareFn over aiCount elements.
 // @fnv 0x007653f0
-void FUN_007653f0_class::FUN_007653f0(void** apArray, int(__cdecl* apCompareFn)(const void*, const void*), int aiCount)
+// src: COMMUNITY 0x007653f0
+void FUN_007653f0_class::BSSimpleList_ShellSort(void** apArray, int(__cdecl* apCompareFn)(const void*, const void*), int aiCount)
 {
     int igap = 0;
     int ileft = 0;
@@ -665,11 +674,12 @@ struct FlagS
 {
     char pad[0x2c];
     unsigned short flags;
-    void FUN_007a1950(unsigned int bit, bool on);
+    void ListBox_ItemChange_SetFlag(unsigned int bit, bool on);
 };
 // Sets or clears the bit at position bit in the flags field depending on the on parameter.
 // @fnv 0x007a1950
-void FlagS::FUN_007a1950(unsigned int bit, bool on)
+// src: XBOX_PDB 0x007a1950
+void FlagS::ListBox_ItemChange_SetFlag(unsigned int bit, bool on)
 {
     if (on)
         flags |= (1 << bit);
@@ -718,9 +728,9 @@ struct ItemChangeList : BSSimpleList<InventoryStackRecord*>
 
     int ItemsInList();
 
-    void FUN_007653f0(InventoryStackRecord**, int(__cdecl*)(InventoryStackRecord*, InventoryStackRecord*), int);
+    void BSSimpleList_ShellSort(InventoryStackRecord**, int(__cdecl*)(InventoryStackRecord*, InventoryStackRecord*), int);
 
-    void FUN_007a8790(int(__cdecl*)(InventoryStackRecord*, InventoryStackRecord*));
+    void BSSimpleList_BubbleSort(int(__cdecl*)(InventoryStackRecord*, InventoryStackRecord*));
 
     void SortItems(int(__cdecl* compare)(InventoryStackRecord*, InventoryStackRecord*));
 };
@@ -737,7 +747,7 @@ void ItemChangeList::SortItems(int(__cdecl* compare)(InventoryStackRecord*, Inve
     if (!puStack_10)
     {
 
-        FUN_007a8790(compare);
+        BSSimpleList_BubbleSort(compare);
 
         return;
     }
@@ -752,7 +762,7 @@ void ItemChangeList::SortItems(int(__cdecl* compare)(InventoryStackRecord*, Inve
         puStack_10[iStack_20] = _puStack_18->m_item;
     }
 
-    FUN_007653f0(puStack_10, compare, iStack6);
+    BSSimpleList_ShellSort(puStack_10, compare, iStack6);
 
     RemoveAll();
 
@@ -792,12 +802,13 @@ struct ItemChangeListNode
     ItemChangeListNode* m_pkNext;
     ~ItemChangeListNode();
     bool IsEmpty();
-    void FUN_00905330(InventoryStackRecord* const& item);
+    void RemoveMatchingItem(InventoryStackRecord* const& item);
 };
 
 // Removes a matching node; when it is the head, copies its successor into the head or clears the head, and otherwise unlinks and deletes it.
 // @fnv 0x00905330
-void ItemChangeListNode::FUN_00905330(InventoryStackRecord* const& item)
+// src: GUESS 0x00905330 (confidence: medium)
+void ItemChangeListNode::RemoveMatchingItem(InventoryStackRecord* const& item)
 {
     if (!item || IsEmpty())
         return;
@@ -848,11 +859,12 @@ struct FUN_00967290_struct
     char pad[0xd48];
     List_009e03e0* m_kNode;
 
-    void FUN_00967290();
+    void PlayerCharacter_FreeCompassTargets();
 };
 
 // @fnv 0x00967290
-void FUN_00967290_struct::FUN_00967290()
+// src: COMMUNITY 0x00967290
+void FUN_00967290_struct::PlayerCharacter_FreeCompassTargets()
 {
     if (m_kNode)
     {
@@ -871,7 +883,7 @@ void FUN_00967290_struct::FUN_00967290()
 
 struct S_00aa3e40
 {
-    void* FUN_00aa3e40(unsigned int n);
+    void* Game_DoHeapAlloc(unsigned int n);
 };
 
 extern S_00aa3e40 DAT_011f6238;
@@ -898,7 +910,7 @@ void S_00a0c7c0_List::AddToHead(void** apItem)
         return;
     if (m_item)
     {
-        S_00a0c7c0_Node* p2 = (S_00a0c7c0_Node*)DAT_011f6238.FUN_00aa3e40(8);
+        S_00a0c7c0_Node* p2 = (S_00a0c7c0_Node*)DAT_011f6238.Game_DoHeapAlloc(8);
         S_00a0c7c0_Node* a = p2 ? (p2->m_item = m_item, p2->m_pkNext = 0, p2) : 0;
         S_00a0c7c0_Node* b5 = a;
         b5->m_pkNext = m_pkNext;
@@ -913,7 +925,7 @@ void S_00a0c7c0_List::AddToHead(void** apItem)
 
 struct ModifierEntryView
 {
-    char FUN_009373f0();
+    char TESTextureList_GetTextureCount();
 };
 
 struct ModifierFormView
@@ -957,7 +969,7 @@ struct ModifierActorValueView
 struct ModifierRoutingList : BSSimpleList<ModifierEntryView*>
 {
     void FUN_00937280(char, ModifierEntryView*);
-    void FUN_00937380(ModifierEntryView* mod);
+    void ModifierList_AddModifier(ModifierEntryView* mod);
 };
 
 namespace ActorValue {
@@ -966,11 +978,12 @@ ActorValueInfo* __cdecl GetActorValueInfo(Index);
 
 // Looks up the modifier key; calls the other routing method when info has bit 0 set, otherwise adds the entry at the head.
 // @fnv 0x00937380
-void ModifierRoutingList::FUN_00937380(ModifierEntryView* apEntry)
+// src: XBOX_PDB 0x00937380
+void ModifierRoutingList::ModifierList_AddModifier(ModifierEntryView* apEntry)
 {
     if (!apEntry)
         return;
-    char key = apEntry->FUN_009373f0();
+    char key = apEntry->TESTextureList_GetTextureCount();
     ActorValueInfo* info = ActorValue::GetActorValueInfo(static_cast<ActorValue::Index>(key));
     if (info && (reinterpret_cast<ModifierActorValueView*>(info)->flags & 1))
         FUN_00937280(key, apEntry);

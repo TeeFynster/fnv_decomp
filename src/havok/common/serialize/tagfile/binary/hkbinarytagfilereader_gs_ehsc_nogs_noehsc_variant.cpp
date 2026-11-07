@@ -17,7 +17,8 @@ struct DataObjectImplReference
 };
 
 // @fnv 0x00dc6e50
-DataObjectImplReference hkBinaryTagfileReader::FUN_00dc6e50()
+// src: GUESS 0x00dc6e50 (confidence: low)
+DataObjectImplReference hkBinaryTagfileReader::ProcessEntries_00dc6e50()
 {
     char buf[512];
     int magic0;

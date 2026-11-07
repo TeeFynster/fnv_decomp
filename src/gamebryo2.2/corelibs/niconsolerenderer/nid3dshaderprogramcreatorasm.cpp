@@ -82,7 +82,7 @@ bool PixelShaderCreator::CreateShaderProgram(PixelShaderInterface* shader)
 
 extern void* DAT_0126fa2c;
 
-int FUN_00aa0020(int, int, const char*, long);
+int NiShaderFactory_ReportError(int, int, const char*, long);
 
 inline NiD3DVertexShader::NiD3DVertexShader(void* pkRenderer) : NiD3DShaderProgram(pkRenderer, 0)
 {
@@ -108,12 +108,13 @@ struct VertexShaderCreatorAsm
 
     void* CreateVertexShaderChecked(void* pvCode, void** phDecl, unsigned int uiUsage, void* pvConstants,
                                     void* pvConstantsExtra, bool bSoftwareVP);
-    NiD3DVertexShader* FUN_00e97980(const char* pcFileName, const char* pcShaderName, const char* pcEntryPoint,
+    NiD3DVertexShader* NiD3DShaderProgramCreatorAsm_CreateVertexShaderFromFile(const char* pcFileName, const char* pcShaderName, const char* pcEntryPoint,
                                     int iArg, void* hDecl, unsigned int uiUsage, bool bSoftwareVP, int bRecoverable);
 };
 
 // @fnv 0x00e97980
-NiD3DVertexShader* VertexShaderCreatorAsm::FUN_00e97980(const char* pcFileName, const char* pcShaderName,
+// src: XBOX_PDB 0x00e97980
+NiD3DVertexShader* VertexShaderCreatorAsm::NiD3DShaderProgramCreatorAsm_CreateVertexShaderFromFile(const char* pcFileName, const char* pcShaderName,
                                                         const char* pcEntryPoint, int iArg, void* hDecl,
                                                         unsigned int uiUsage, bool bSoftwareVP, int bRecoverable)
 {
@@ -134,7 +135,7 @@ NiD3DVertexShader* VertexShaderCreatorAsm::FUN_00e97980(const char* pcFileName, 
     void* hShader = CreateVertexShaderChecked(pvCode, &hDecl, uiUsage, pvConstants, pvConstantsExtra, bSoftwareVP);
     if (!hShader)
     {
-        FUN_00aa0020(1, bRecoverable, "Failed CreateVertexShader call on %s\n", (long)pcShaderName);
+        NiShaderFactory_ReportError(1, bRecoverable, "Failed CreateVertexShader call on %s\n", (long)pcShaderName);
         delete pkVertexShader;
         return 0;
     }
@@ -156,7 +157,7 @@ inline NiD3DPixelShader::NiD3DPixelShader(NiD3DRenderer* pkRenderer)
 
 namespace fnv_00e97c60 {
 extern void* DAT_0126fa2c;
-int FUN_00aa0020(int, int, const char*, long);
+int NiShaderFactory_ReportError(int, int, const char*, long);
 
 struct ShaderCreatorAsmStub
 {
@@ -173,13 +174,14 @@ struct ShaderCreatorAsmStub
                                 int iFlags);
 
     GeometryRelatedType* CreateHandle(void* pvCode);
-    NiD3DPixelShader* FUN_00e97c60(const char* pcFileName, const char* pcShaderName, const char* pcEntryPoint,
+    NiD3DPixelShader* NiD3DShaderProgramCreatorAsm_CreatePixelShaderFromFile(const char* pcFileName, const char* pcShaderName, const char* pcEntryPoint,
                                        const char* pcShaderTarget, int iFlags);
 };
 
 // Creates a NiD3DPixelShader, loads its shader code, creates the handle, sets name/file/code/creator/handle, and returns it or 0 on failure.
 // @fnv 0x00e97c60
-NiD3DPixelShader* ShaderCreatorAsmStub::FUN_00e97c60(const char* pcFileName, const char* pcShaderName,
+// src: XBOX_PDB 0x00e97c60
+NiD3DPixelShader* ShaderCreatorAsmStub::NiD3DShaderProgramCreatorAsm_CreatePixelShaderFromFile(const char* pcFileName, const char* pcShaderName,
                                                          const char* pcEntryPoint, const char* pcShaderTarget,
                                                          int iFlags)
 {
@@ -200,7 +202,7 @@ NiD3DPixelShader* ShaderCreatorAsmStub::FUN_00e97c60(const char* pcFileName, con
     GeometryRelatedType* hShader = CreateHandle(pvCode);
     if (!hShader)
     {
-        FUN_00aa0020(1, iFlags, "Failed CreatePixelShader call on %s\n", (long)pcShaderName);
+        NiShaderFactory_ReportError(1, iFlags, "Failed CreatePixelShader call on %s\n", (long)pcShaderName);
         delete pkShader;
         return 0;
     }
@@ -215,7 +217,7 @@ NiD3DPixelShader* ShaderCreatorAsmStub::FUN_00e97c60(const char* pcFileName, con
 }  // namespace fnv_00e97c60
 
 extern void* DAT_0126fa2c;
-int FUN_00aa0020(int, int, const char*, long);
+int NiShaderFactory_ReportError(int, int, const char*, long);
 struct Creator
 {
     virtual void f00();
@@ -229,10 +231,11 @@ struct Creator
     virtual void f08();
     virtual void f09();
     virtual bool compile(void*, void*, GeometryRelatedType**, void**, void**, void**, int);
-    NiD3DPixelShader* FUN_00e97d80(void*, void*, void*, int, int, int);
+    NiD3DPixelShader* NiD3DShaderProgramCreatorAsm_CreatePixelShaderFromBuffer(void*, void*, void*, int, int, int);
 };
 // @fnv 0x00e97d80
-NiD3DPixelShader* Creator::FUN_00e97d80(void* a, void* b, void* apShaderName, int d, int e, int f)
+// src: XBOX_PDB 0x00e97d80
+NiD3DPixelShader* Creator::NiD3DShaderProgramCreatorAsm_CreatePixelShaderFromBuffer(void* a, void* b, void* apShaderName, int d, int e, int f)
 {
     NiD3DPixelShader* shader = new NiD3DPixelShader(static_cast<NiD3DRenderer*>(DAT_0126fa2c));
     if (!shader)
@@ -250,7 +253,7 @@ NiD3DPixelShader* Creator::FUN_00e97d80(void* a, void* b, void* apShaderName, in
     void* pShaderHandle = reinterpret_cast<NiD3DShaderProgramCreatorAsm*>(this)->CreateHandle(first);
     if (!pShaderHandle)
     {
-        FUN_00aa0020(1, f, "Failed CreatePixelShader call on %s\n", (long)apShaderName);
+        NiShaderFactory_ReportError(1, f, "Failed CreatePixelShader call on %s\n", (long)apShaderName);
         delete shader;
         return 0;
     }
@@ -262,7 +265,7 @@ NiD3DPixelShader* Creator::FUN_00e97d80(void* a, void* b, void* apShaderName, in
     return shader;
 }
 
-int __cdecl FUN_00aa0020(int eError, int bRecoverable, const char* pcFormat, ...);
+int __cdecl NiShaderFactory_ReportError(int eError, int bRecoverable, const char* pcFormat, ...);
 
 struct VertexShaderCreatorHLSL
 {
@@ -282,14 +285,15 @@ struct VertexShaderCreatorHLSL
 
     void* CreateVertexShaderChecked(void* pvCode, void** phDecl, unsigned int uiUsage, void* pvConstants,
                                     void* pvConstantsExtra, bool bSoftwareVP);
-    NiD3DVertexShader* FUN_00e97af0(const char* pcFileName, const char* pcEntryPoint, const char* pcShaderName,
+    NiD3DVertexShader* NiD3DShaderProgramCreatorAsm_CreateVertexShaderFromBuffer(const char* pcFileName, const char* pcEntryPoint, const char* pcShaderName,
                                     const char* pcShaderTarget, const char* pcDefines, void* hDecl,
                                     unsigned int uiUsage, bool bSoftwareVP, int bRecoverable);
 };
 
 // Creates a NiD3DVertexShader, loads its shader code, builds the shader handle, and sets its name, code, creator, usage and declaration.
 // @fnv 0x00e97af0
-NiD3DVertexShader* VertexShaderCreatorHLSL::FUN_00e97af0(const char* pcFileName, const char* pcEntryPoint,
+// src: XBOX_PDB 0x00e97af0
+NiD3DVertexShader* VertexShaderCreatorHLSL::NiD3DShaderProgramCreatorAsm_CreateVertexShaderFromBuffer(const char* pcFileName, const char* pcEntryPoint,
                                                          const char* pcShaderName, const char* pcShaderTarget,
                                                          const char* pcDefines, void* hDecl, unsigned int uiUsage,
                                                          bool bSoftwareVP, int bRecoverable)
@@ -311,7 +315,7 @@ NiD3DVertexShader* VertexShaderCreatorHLSL::FUN_00e97af0(const char* pcFileName,
     void* hShader = CreateVertexShaderChecked(pvCode, &hDecl, uiUsage, pvConstants, pvConstantsExtra, bSoftwareVP);
     if (!hShader)
     {
-        FUN_00aa0020(1, bRecoverable, "Failed CreateVertexShader call on %s\n", pcShaderName);
+        NiShaderFactory_ReportError(1, bRecoverable, "Failed CreateVertexShader call on %s\n", pcShaderName);
         delete pkVertexShader;
         return 0;
     }

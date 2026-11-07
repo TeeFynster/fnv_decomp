@@ -166,11 +166,11 @@ public:
     void RemoveExtraFromObject(TESObject*, ExtraDataList*);
     void DeleteExtraData(TESBoundObject*, ExtraDataList*);
     ExtraDataList* FUN_004bfda0(TESForm*, int);
-    InventoryStackRecord* FUN_004d0650(TESForm*, int);
-    int FUN_004c8fd0(int);
-    int FUN_004c8fd0(bool);
-    ItemChangeShell* FUN_004c94f0(int);
-    ArrSI* FUN_004c8c10(unsigned int, int);
-    void FUN_004d1960();
-    bool FUN_0042cde0();
+    InventoryStackRecord* InventoryChanges_GetInventoryItem(TESForm*, int);
+    int GetCount_004c8fd0(int);
+    int GetCount_004c8fd0(bool);
+    ItemChangeShell* InventoryChanges_GetItembyIndex(int);
+    ArrSI* InventoryChanges_GetWornItem(unsigned int, int);
+    void InventoryChanges_InitScripts();
+    bool InventoryChanges_IsEmpty();
 };

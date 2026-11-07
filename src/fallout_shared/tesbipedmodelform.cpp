@@ -76,9 +76,9 @@ void TESBipedModelForm::SetBipedModel(BipedAnim* anim, SEX sex, BIPED_OBJECT slo
 
     if (modelRDT.GetModelLength())
     {
-        BSFaceGenModel* model = FUN_00480ce0();
+        BSFaceGenModel* model = GetBipedConstraint();
         NiPointer<BSFaceGenModelExtraData> extra(0);
-        g_modelLoader->FUN_004472a0(model, &extra);
+        g_modelLoader->ModelLoader_FindModel(model, &extra);
         if (extra.operator->())
             anim->FUN_0043f010(extra.operator->()->GetModelFilePath())->ApplyRDTNodeScales();
     }
@@ -86,7 +86,8 @@ void TESBipedModelForm::SetBipedModel(BipedAnim* anim, SEX sex, BIPED_OBJECT slo
 
 // Returns the face gen model obtained through the member TESModelRDT's vtable slot 5.
 // @fnv 0x00480ce0
-BSFaceGenModel* TESBipedModelForm::FUN_00480ce0()
+// src: XBOX_PDB 0x00480ce0
+BSFaceGenModel* TESBipedModelForm::GetBipedConstraint()
 {
     return (BSFaceGenModel*)modelRDT.GetModelFilePath();
 }
@@ -97,11 +98,12 @@ TESModelRDT::TESModelRDT()
 
 struct FUN_00480d30_shell : public TESBipedModelForm
 {
-    bool FUN_00480d30();
+    bool TESBipedModelForm_HasBackpack();
 };
 
 // @fnv 0x00480d30
-bool FUN_00480d30_shell::FUN_00480d30()
+// src: COMMUNITY 0x00480d30
+bool FUN_00480d30_shell::TESBipedModelForm_HasBackpack()
 {
     if (*((unsigned char*)this + 8) & 4)
         return true;
@@ -111,12 +113,13 @@ bool FUN_00480d30_shell::FUN_00480d30()
 
 struct FUN_00480d50_shell : public TESBipedModelForm
 {
-    void FUN_00480d50(bool);
+    void TESBipedModelForm_SetAddOnModel(bool);
 };
 
 // Sets or clears bit 0x10 in the byte at offset 8 of this TESBipedModelForm according to abVal.
 // @fnv 0x00480d50
-void FUN_00480d50_shell::FUN_00480d50(bool abVal)
+// src: XBOX_PDB 0x00480d50
+void FUN_00480d50_shell::TESBipedModelForm_SetAddOnModel(bool abVal)
 {
     if (abVal)
         *((unsigned char*)this + 8) |= 0x10;
@@ -126,11 +129,12 @@ void FUN_00480d50_shell::FUN_00480d50(bool abVal)
 
 struct FUN_00480d90_shell : public TESBipedModelForm
 {
-    bool FUN_00480d90();
+    bool TESBipedModelForm_GetPlayable();
 };
 
 // @fnv 0x00480d90
-bool FUN_00480d90_shell::FUN_00480d90()
+// src: XBOX_PDB 0x00480d90
+bool FUN_00480d90_shell::TESBipedModelForm_GetPlayable()
 {
     if (*((unsigned char*)this + 8) & 0x40)
         return false;
@@ -188,11 +192,12 @@ struct FUN_00481190_standin
 {
     unsigned char _pad[0x4C];
     TESModelTextureSwap models[2];
-    BSFaceGenModel* FUN_00481190(int idx);
+    BSFaceGenModel* _TESBipedModelForm_GetWorldModel(int idx);
 };
 // Returns the model from models[idx], falling back to index 0 when index 1 has no model length.
 // @fnv 0x00481190
-BSFaceGenModel* FUN_00481190_standin::FUN_00481190(int aiIndex)
+// src: COMMUNITY 0x00481190
+BSFaceGenModel* FUN_00481190_standin::_TESBipedModelForm_GetWorldModel(int aiIndex)
 {
     if (!models[aiIndex].GetModelLength() && aiIndex == 1)
         aiIndex = 0;
@@ -203,10 +208,11 @@ struct FUN_004811e0_shell
 {
     char _pad[12];
     TESModelTextureSwap bipedModel[2];
-    const char* FUN_004811e0(int aeSex);
+    const char* TESBipedModelForm_GetBipedModel(int aeSex);
 };
 // @fnv 0x004811e0
-const char* FUN_004811e0_shell::FUN_004811e0(int aeSex)
+// src: XBOX_PDB 0x004811e0
+const char* FUN_004811e0_shell::TESBipedModelForm_GetBipedModel(int aeSex)
 {
     if (bipedModel[aeSex].GetModelLength() == 0 && aeSex == 1)
         aeSex = 0;
@@ -230,12 +236,12 @@ struct FUN_004891d0_obj
 
 struct FUN_00489240_Class
 {
-    void FUN_00489240(unsigned int);
+    void TESModel_SaveFlags(unsigned int);
 };
 
 struct FUN_0048e370_obj
 {
-    void FUN_0048e370(unsigned int);
+    void TESTexture_Save(unsigned int);
 };
 
 struct BIPED_MODEL_ENDIAN : BipedModelForm
@@ -273,22 +279,22 @@ void FUN_00480610_shell::InitBipedModel()
 
     reinterpret_cast<DoorPart3c*>(reinterpret_cast<char*>(this) + 0x0c)
         ->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    reinterpret_cast<FUN_00489240_Class*>(reinterpret_cast<char*>(this) + 0x0c)->FUN_00489240(0x44444f4d);
+    reinterpret_cast<FUN_00489240_Class*>(reinterpret_cast<char*>(this) + 0x0c)->TESModel_SaveFlags(0x44444f4d);
 
     reinterpret_cast<DoorPart3c*>(reinterpret_cast<char*>(this) + 0x4c)
         ->ProcessAndFreeData(0x32444f4d, 0x54324f4d, 0x53324f4d);
 
-    reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x8c)->FUN_0048e370(0x4e4f4349);
+    reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x8c)->TESTexture_Save(0x4e4f4349);
     reinterpret_cast<FUN_0047a240_shell*>(reinterpret_cast<char*>(this) + 0xa4)->FUN_0047a240(0x4f43494d);
 
     reinterpret_cast<DoorPart3c*>(reinterpret_cast<char*>(this) + 0x2c)
         ->ProcessAndFreeData(0x33444f4d, 0x54334f4d, 0x53334f4d);
-    reinterpret_cast<FUN_00489240_Class*>(reinterpret_cast<char*>(this) + 0x2c)->FUN_00489240(0x44534f4d);
+    reinterpret_cast<FUN_00489240_Class*>(reinterpret_cast<char*>(this) + 0x2c)->TESModel_SaveFlags(0x44534f4d);
 
     reinterpret_cast<DoorPart3c*>(reinterpret_cast<char*>(this) + 0x6c)
         ->ProcessAndFreeData(0x34444f4d, 0x54344f4d, 0x53344f4d);
 
-    reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x98)->FUN_0048e370(0x324f4349);
+    reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x98)->TESTexture_Save(0x324f4349);
     reinterpret_cast<FUN_0047a240_shell*>(reinterpret_cast<char*>(this) + 0xb4)->FUN_0047a240(0x3243494d);
 
     reinterpret_cast<FUN_004891d0_obj*>(reinterpret_cast<char*>(this) + 0xc4)->WriteToBuffer(0x54434d42, 0);
@@ -504,12 +510,13 @@ struct FUN_004804d0_shell
 
     FUN_004804d0_standin unkC4;
 
-    void FUN_004804d0();
+    void TESBipedModelForm_InitializeDataComponent();
 };
 
 // Clears unk04 and unk08, then calls Call on the seven embedded objects at unk0c, unk4c, unk8c, unk2c, unk6c, unk98 and unkC4.
 // @fnv 0x004804d0
-void FUN_004804d0_shell::FUN_004804d0()
+// src: XBOX_PDB 0x004804d0
+void FUN_004804d0_shell::TESBipedModelForm_InitializeDataComponent()
 {
     unk04 = 0;
     unk08 = 0;
@@ -527,12 +534,13 @@ void FUN_004804d0_shell::FUN_004804d0()
 class BipedComparison : public TESBipedModelForm
 {
   public:
-    bool FUN_004808f0(BaseFormComponent* other);
+    bool TESBipedModelForm_CompareComponent(BaseFormComponent* other);
 };
 
 // Compares this BipedComparison against another BaseFormComponent, returning true if the cast fails or any biped model, icon, or facegen field differs.
 // @fnv 0x004808f0
-bool BipedComparison::FUN_004808f0(BaseFormComponent* other)
+// src: XBOX_PDB 0x004808f0
+bool BipedComparison::TESBipedModelForm_CompareComponent(BaseFormComponent* other)
 {
     TESBipedModelForm* compared = dynamic_cast<TESBipedModelForm*>(other);
     if (!compared)
@@ -563,12 +571,13 @@ bool BipedComparison::FUN_004808f0(BaseFormComponent* other)
 class BipedModelCopy : public TESBipedModelForm
 {
   public:
-    void FUN_004807a0(BaseFormComponent* component);
+    void TESBipedModelForm_CopyComponent(BaseFormComponent* component);
 };
 
 // Copies all biped model fields from a source TESBipedModelForm into this BipedModelCopy after casting the component.
 // @fnv 0x004807a0
-void BipedModelCopy::FUN_004807a0(BaseFormComponent* component)
+// src: XBOX_PDB 0x004807a0
+void BipedModelCopy::TESBipedModelForm_CopyComponent(BaseFormComponent* component)
 {
     TESBipedModelForm* source;
     source = dynamic_cast<TESBipedModelForm*>(component);

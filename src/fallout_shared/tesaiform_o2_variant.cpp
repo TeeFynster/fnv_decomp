@@ -62,7 +62,7 @@ Derived::Derived()
 namespace fnv_005fbfc0 {
 struct PrimaryBase
 {
-    virtual void FUN_005fbfc0();
+    virtual void AdjustThisAndForward_005fbfc0();
     int unk04;
     int unk08;
     int unk0C;
@@ -102,14 +102,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_005fbfc0();
+    virtual void AdjustThisAndForward_005fbfc0();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x005fbfc0
-    virtual void FUN_005fbfc0();
+// src: GUESS 0x005fbfc0 (confidence: low)
+    virtual void AdjustThisAndForward_005fbfc0();
 };
 
 Derived::Derived()
@@ -119,7 +120,7 @@ Derived::Derived()
 namespace fnv_005fc000 {
 struct PrimaryBase
 {
-    virtual void FUN_005fc000();
+    virtual void AdjustThisAndForward_005fc000();
     int unk04;
     int unk08;
     int unk0C;
@@ -159,14 +160,15 @@ struct PrimaryBase
 
 struct SecondaryBase
 {
-    virtual void FUN_005fc000();
+    virtual void AdjustThisAndForward_005fc000();
 };
 
 struct Derived : PrimaryBase, SecondaryBase
 {
     Derived();
 // @fnv 0x005fc000
-    virtual void FUN_005fc000();
+// src: GUESS 0x005fc000 (confidence: low)
+    virtual void AdjustThisAndForward_005fc000();
 };
 
 Derived::Derived()

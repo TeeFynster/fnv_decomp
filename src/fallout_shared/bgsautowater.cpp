@@ -24,25 +24,27 @@ void* NiStencilProperty::DestroyAndFree(unsigned int flags)
 
 struct Flag512Receiver
 {
-    void FUN_00633ba0(bool, unsigned int);
+    void NiAlphaProperty_SetBit(bool, unsigned int);
 };
 
 struct FUN_0049ed90_shell : Flag512Receiver
 {
-    void FUN_0049ed90(bool bAlpha);
+    void NiAlphaProperty_SetAlphaBlending(bool bAlpha);
 };
 
 // @fnv 0x0049ed90
-void __thiscall FUN_0049ed90_shell::FUN_0049ed90(bool bAlpha)
+// src: XBOX_PDB 0x0049ed90
+void __thiscall FUN_0049ed90_shell::NiAlphaProperty_SetAlphaBlending(bool bAlpha)
 {
-    this->FUN_00633ba0(bAlpha, 1);
+    this->NiAlphaProperty_SetBit(bAlpha, 1);
 }
 
 // Forwards the given texture slot to FUN_00439360 with flags 0xf000 and value 0xc.
 // @fnv 0x0049edb0
-void NiObjectNET::FUN_0049edb0(unsigned short argument0)
+// src: COMMUNITY 0x0049edb0
+void NiObjectNET::NiStencilProperty_SetStencilFunction(unsigned short argument0)
 {
-    FUN_00439360(argument0, 0xf000, 0xc);
+    SetField_00439360(argument0, 0xf000, 0xc);
 }
 
 // Calls FUN_00439360 with argument0, 0x380 and 7.
@@ -54,20 +56,22 @@ struct AutoWaterStencilFlags : NiObjectNET
 // @fnv 0x0049ede0
 void AutoWaterStencilFlags::SetStencilFunction(unsigned short argument0)
 {
-    FUN_00439360(argument0, 0x380, 7);
+    SetField_00439360(argument0, 0x380, 7);
 }
 
 // @fnv 0x0049ee10
-void NiObjectNET::FUN_0049ee10(unsigned short ausValue)
+// src: COMMUNITY 0x0049ee10
+void NiObjectNET::NiStencilProperty_SetStencilPassZFailAction(unsigned short ausValue)
 {
-    FUN_00439360(ausValue, 0x70, 4);
+    SetField_00439360(ausValue, 0x70, 4);
 }
 
 // Calls FUN_00439360 with the given unsigned short and the constants 0xc00 and 0xa.
 // @fnv 0x0049ee30
-void NiObjectNET::FUN_0049ee30(unsigned short a)
+// src: COMMUNITY 0x0049ee30
+void NiObjectNET::NiStencilProperty_SetDrawMode(unsigned short a)
 {
-    FUN_00439360(a, 0xc00, 0xa);
+    SetField_00439360(a, 0xc00, 0xa);
 }
 
 struct TaskQueueInterface
@@ -96,14 +100,16 @@ void NiStencilProperty::Destroy()
 
 // Clears the bits in flags at offset 0x18 and inserts value shifted by shift into them.
 // @fnv 0x00439360
-void NiObjectNET::FUN_00439360(unsigned short value, unsigned int uiMask, unsigned int shift)
+// src: COMMUNITY 0x00439360
+void NiObjectNET::SetField_00439360(unsigned short value, unsigned int uiMask, unsigned int shift)
 {
     *(unsigned short*)((char*)this + 0x18) =
         (*(unsigned short*)((char*)this + 0x18) & ~(unsigned short)uiMask) | (value << (unsigned short)shift);
 }
 
 // @fnv 0x0049ee60
-void BSFadeNode::FUN_0049ee60(bool enabled)
+// src: COMMUNITY 0x0049ee60
+void BSFadeNode::SetIgnoreFade(bool enabled)
 {
     reinterpret_cast<TaskQueueInterface*>(this)->SetEnabledFlag(enabled);
 }
@@ -112,11 +118,12 @@ struct FUN_0049eea0_shell
 {
     char pad[0x30];
     NiPoint3 m_kPoint;
-    void FUN_0049eea0(const NiPoint3& arPoint);
+    void TESObjectREFR_SetLocationOnReferenceSimple(const NiPoint3& arPoint);
 };
 
 // @fnv 0x0049eea0
-void FUN_0049eea0_shell::FUN_0049eea0(const NiPoint3& arPoint)
+// src: XBOX_PDB 0x0049eea0
+void FUN_0049eea0_shell::TESObjectREFR_SetLocationOnReferenceSimple(const NiPoint3& arPoint)
 {
     m_kPoint = arPoint;
 }
@@ -136,13 +143,13 @@ template <> struct UninitializedStorage<sizeof(unsigned int)>
 
 struct FUN_0049eed0_item
 {
-    NiPoint3* FUN_006a7af0();
+    NiPoint3* BSSimpleArray_NiPoint3_1024_GetAt();
 };
 
 struct FUN_0049eed0_list
 {
     int FUN_0059bb30();
-    FUN_0049eed0_item* FUN_00559450(int index);
+    FUN_0049eed0_item* Modelloader_GetReferencedThis(int index);
 };
 
 struct FUN_0049eed0_target
@@ -157,7 +164,7 @@ bool AnyPointInListMatches(FUN_0049eed0_list* apList, FUN_0049eed0_target* apTar
     for (int i8 = 0; i8 < apList->FUN_0059bb30(); i8++)
     {
         UninitializedStorage<sizeof(NiPoint3)> p2Storage;
-        (*reinterpret_cast<NiPoint3*>(&p2Storage)) = *apList->FUN_00559450(i8)->FUN_006a7af0();
+        (*reinterpret_cast<NiPoint3*>(&p2Storage)) = *apList->Modelloader_GetReferencedThis(i8)->BSSimpleArray_NiPoint3_1024_GetAt();
         NiPoint2 v((*reinterpret_cast<NiPoint3*>(&p2Storage)).x, (*reinterpret_cast<NiPoint3*>(&p2Storage)).y);
         if (apTarget->ContainsMatchingTriple(v))
         {
@@ -171,8 +178,8 @@ struct MeshPoint
 {
     float x, y, z;
     bool FUN_00439090(const MeshPoint&);
-    bool FUN_004390c0(const MeshPoint&);
-    MeshPoint* FUN_00416870(float, float, float);
+    bool HasEqualComponents(const MeshPoint&);
+    MeshPoint* SetComponents(float, float, float);
     void FUN_006815c0();
 };
 struct FUN_00a69990
@@ -195,7 +202,7 @@ struct FUN_0049f1c0
     void FUN_0049f510();
     void CallWithTwelve(bool(__cdecl*)(const MeshPoint&, const MeshPoint&));
     int FUN_0044ddc0();
-    MeshPoint& FUN_006a1440(int);
+    MeshPoint& Object_GetIndexedValue_006a1440(int);
 };
 struct FUN_0049f640
 {
@@ -205,15 +212,15 @@ struct FUN_0049f640
     int allocator;
     FUN_0049f640();
     ~FUN_0049f640();
-    void FUN_0049f690(int, const FUN_0049f1c0&);
-    FUN_0049f1c0& FUN_00558dd0(int) const;
+    void InsertPlaneWithGrowth(int, const FUN_0049f1c0&);
+    FUN_0049f1c0& GetElementAddress16(int) const;
 };
 struct ScriptProgram
 {
-    bool FUN_0045cb90();
-    void FUN_00535b90(int);
-    void FUN_00536d80();
-    float FUN_0049db00();
+    bool TESObjectLAND_HasVertices();
+    void TESObjectLAND_LoadVertices(int);
+    void TESObjectLAND_UnLoadVertices();
+    float TESObjectLAND_GetBaseHeight();
     MeshPoint** GetSecondPointer();
 };
 struct MeshMode
@@ -222,8 +229,8 @@ struct MeshMode
 };
 struct MeshInput
 {
-    ScriptProgram* FUN_00546fb0();
-    float FUN_005471e0();
+    ScriptProgram* TESObjectCELL_GetLand();
+    float TESObjectCELL_GetWaterHeight();
     MeshMode* FUN_0054ddd0();
 };
 extern FUN_0049f1c0* DAT_011c57ac;
@@ -231,35 +238,35 @@ extern unsigned short DAT_0118ae90[];
 extern unsigned short DAT_0118ae92[];
 extern unsigned short DAT_0118ae94[];
 extern int __cdecl GetCellCornerFlags(MeshInput*, MeshPoint);
-extern int __cdecl FUN_006b9a10(const MeshPoint&, const MeshPoint&, const MeshPoint&, const MeshPoint&, MeshPoint&);
-extern bool __cdecl FUN_0049c800(const MeshPoint&, const MeshPoint&);
-extern bool __cdecl FUN_0049c7b0(const MeshPoint&, const MeshPoint&);
+extern int __cdecl NavMeshMath_SegmentPlaneIntersection(const MeshPoint&, const MeshPoint&, const MeshPoint&, const MeshPoint&, MeshPoint&);
+extern bool __cdecl FloatKeyedRecord_CompareKeys(const MeshPoint&, const MeshPoint&);
+extern bool __cdecl Runtime_CompareFirstFloats(const MeshPoint&, const MeshPoint&);
 // Builds triangle geometry from the mesh's vertex data, clipping against a plane and collecting boundary edges into DAT_011c57ac.
 // @fnv 0x0049c930
 void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
 {
-    ScriptProgram* mesh = pMeshInput->FUN_00546fb0();
-    float height = pMeshInput->FUN_005471e0();
+    ScriptProgram* mesh = pMeshInput->TESObjectCELL_GetLand();
+    float height = pMeshInput->TESObjectCELL_GetWaterHeight();
     if (!DAT_011c57ac)
         DAT_011c57ac = new FUN_0049f1c0;
     else
         DAT_011c57ac->FUN_008454f0(true);
     if (mesh)
     {
-        bool active8 = mesh->FUN_0045cb90();
+        bool active8 = mesh->TESObjectLAND_HasVertices();
         if (!active8)
-            mesh->FUN_00535b90(0);
+            mesh->TESObjectLAND_LoadVertices(0);
         FUN_0049f640 _list1;
         for (int i = 0; i < 4; i++)
         {
             FUN_0049f1c0 temporary;
-            _list1.FUN_0049f690(i, temporary);
+            _list1.InsertPlaneWithGrowth(i, temporary);
         }
         bool offset6 = false;
         float _saved = 0.0f;
         if (pMeshInput->FUN_0054ddd0() && pMeshInput->FUN_0054ddd0()->IsFlag80Set())
         {
-            _saved = mesh->FUN_0049db00();
+            _saved = mesh->TESObjectLAND_GetBaseHeight();
             offset6 = true;
         }
         MeshPoint** _readObject = mesh->GetSecondPointer();
@@ -282,9 +289,9 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                 if (_cross.FUN_00439090(_delta) && _cross.FUN_00439090(_point) && _delta.FUN_00439090(_point))
                 {
                     MeshPoint origin6;
-                    origin6.FUN_00416870(0.0f, 0.0f, height);
+                    origin6.SetComponents(0.0f, 0.0f, height);
                     MeshPoint normalVal;
-                    normalVal.FUN_00416870(0.0f, 0.0f, 1.0f);
+                    normalVal.SetComponents(0.0f, 0.0f, 1.0f);
                     FUN_00a69990 _created(normalVal, origin6);
                     unsigned short count8 = 0;
                     bool _done = false;
@@ -294,21 +301,21 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                     int _current = GetCellCornerFlags(pMeshInput, _point);
                     MeshPoint _orient;
                     _orient.FUN_006815c0();
-                    int result3 = FUN_006b9a10(_cross, _delta, origin6, normalVal, _orient);
+                    int result3 = NavMeshMath_SegmentPlaneIntersection(_cross, _delta, origin6, normalVal, _orient);
                     if (result3 == 1)
                     {
-                        if (_cross.FUN_004390c0(_orient) || _delta.FUN_004390c0(_orient))
+                        if (_cross.HasEqualComponents(_orient) || _delta.HasEqualComponents(_orient))
                             _done = true;
                         DAT_011c57ac->AddItem(_orient);
                         ++count8;
                         if ((_bound & 1) && (aCount2 & 1))
-                            _list1.FUN_00558dd0(0).AddItem(_orient);
+                            _list1.GetElementAddress16(0).AddItem(_orient);
                         else if ((_bound & 2) && (aCount2 & 2))
-                            _list1.FUN_00558dd0(1).AddItem(_orient);
+                            _list1.GetElementAddress16(1).AddItem(_orient);
                         else if ((_bound & 4) && (aCount2 & 4))
-                            _list1.FUN_00558dd0(2).AddItem(_orient);
+                            _list1.GetElementAddress16(2).AddItem(_orient);
                         else if ((_bound & 8) && (aCount2 & 8))
-                            _list1.FUN_00558dd0(3).AddItem(_orient);
+                            _list1.GetElementAddress16(3).AddItem(_orient);
                     }
                     else if (result3 == -1)
                     {
@@ -317,11 +324,11 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         DAT_011c57ac->AddItem(_delta);
                         count8 += 2;
                     }
-                    result3 = FUN_006b9a10(_cross, _point, origin6, normalVal, _orient);
+                    result3 = NavMeshMath_SegmentPlaneIntersection(_cross, _point, origin6, normalVal, _orient);
                     if (result3 == 1)
                     {
                         bool add = true;
-                        if (_cross.FUN_004390c0(_orient) || _point.FUN_004390c0(_orient))
+                        if (_cross.HasEqualComponents(_orient) || _point.HasEqualComponents(_orient))
                         {
                             if (_done || _active)
                                 add = false;
@@ -333,13 +340,13 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                             DAT_011c57ac->AddItem(_orient);
                             ++count8;
                             if ((_bound & 1) && (_current & 1))
-                                _list1.FUN_00558dd0(0).AddItem(_orient);
+                                _list1.GetElementAddress16(0).AddItem(_orient);
                             else if ((_bound & 2) && (_current & 2))
-                                _list1.FUN_00558dd0(1).AddItem(_orient);
+                                _list1.GetElementAddress16(1).AddItem(_orient);
                             else if ((_bound & 4) && (_current & 4))
-                                _list1.FUN_00558dd0(2).AddItem(_orient);
+                                _list1.GetElementAddress16(2).AddItem(_orient);
                             else if ((_bound & 8) && (_current & 8))
-                                _list1.FUN_00558dd0(3).AddItem(_orient);
+                                _list1.GetElementAddress16(3).AddItem(_orient);
                         }
                     }
                     else if (result3 == -1)
@@ -351,24 +358,24 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         DAT_011c57ac->AddItem(_point);
                         count8 = 2;
                     }
-                    result3 = FUN_006b9a10(_delta, _point, origin6, normalVal, _orient);
+                    result3 = NavMeshMath_SegmentPlaneIntersection(_delta, _point, origin6, normalVal, _orient);
                     if (result3 == 1)
                     {
                         bool addThird = true;
-                        if (_delta.FUN_004390c0(_orient) || (_point.FUN_004390c0(_orient) && (_done || _active)))
+                        if (_delta.HasEqualComponents(_orient) || (_point.HasEqualComponents(_orient) && (_done || _active)))
                             addThird = false;
                         if (addThird)
                         {
                             DAT_011c57ac->AddItem(_orient);
                             ++count8;
                             if ((aCount2 & 1) && (_current & 1))
-                                _list1.FUN_00558dd0(0).AddItem(_orient);
+                                _list1.GetElementAddress16(0).AddItem(_orient);
                             else if ((aCount2 & 2) && (_current & 2))
-                                _list1.FUN_00558dd0(1).AddItem(_orient);
+                                _list1.GetElementAddress16(1).AddItem(_orient);
                             else if ((aCount2 & 4) && (_current & 4))
-                                _list1.FUN_00558dd0(2).AddItem(_orient);
+                                _list1.GetElementAddress16(2).AddItem(_orient);
                             else if ((aCount2 & 8) && (_current & 8))
-                                _list1.FUN_00558dd0(3).AddItem(_orient);
+                                _list1.GetElementAddress16(3).AddItem(_orient);
                         }
                     }
                     else if (result3 == -1)
@@ -390,10 +397,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_cross) == 2)
                         {
                             _cross.z = height;
-                            if (!_list1.FUN_00558dd0(0).ContainsPlane(_cross))
-                                _list1.FUN_00558dd0(0).AddItem(_cross);
-                            if (!_list1.FUN_00558dd0(3).ContainsPlane(_cross))
-                                _list1.FUN_00558dd0(3).AddItem(_cross);
+                            if (!_list1.GetElementAddress16(0).ContainsPlane(_cross))
+                                _list1.GetElementAddress16(0).AddItem(_cross);
+                            if (!_list1.GetElementAddress16(3).ContainsPlane(_cross))
+                                _list1.GetElementAddress16(3).AddItem(_cross);
                         }
                     }
                     else if (_bound == 10)
@@ -401,10 +408,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_cross) == 2)
                         {
                             _cross.z = height;
-                            if (!_list1.FUN_00558dd0(1).ContainsPlane(_cross))
-                                _list1.FUN_00558dd0(1).AddItem(_cross);
-                            if (!_list1.FUN_00558dd0(3).ContainsPlane(_cross))
-                                _list1.FUN_00558dd0(3).AddItem(_cross);
+                            if (!_list1.GetElementAddress16(1).ContainsPlane(_cross))
+                                _list1.GetElementAddress16(1).AddItem(_cross);
+                            if (!_list1.GetElementAddress16(3).ContainsPlane(_cross))
+                                _list1.GetElementAddress16(3).AddItem(_cross);
                         }
                     }
                     else if (_bound == 5)
@@ -412,10 +419,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_cross) == 2)
                         {
                             _cross.z = height;
-                            if (!_list1.FUN_00558dd0(0).ContainsPlane(_cross))
-                                _list1.FUN_00558dd0(0).AddItem(_cross);
-                            if (!_list1.FUN_00558dd0(2).ContainsPlane(_cross))
-                                _list1.FUN_00558dd0(2).AddItem(_cross);
+                            if (!_list1.GetElementAddress16(0).ContainsPlane(_cross))
+                                _list1.GetElementAddress16(0).AddItem(_cross);
+                            if (!_list1.GetElementAddress16(2).ContainsPlane(_cross))
+                                _list1.GetElementAddress16(2).AddItem(_cross);
                         }
                     }
                     else if (_bound == 6)
@@ -423,10 +430,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_cross) == 2)
                         {
                             _cross.z = height;
-                            if (!_list1.FUN_00558dd0(1).ContainsPlane(_cross))
-                                _list1.FUN_00558dd0(1).AddItem(_cross);
-                            if (!_list1.FUN_00558dd0(2).ContainsPlane(_cross))
-                                _list1.FUN_00558dd0(2).AddItem(_cross);
+                            if (!_list1.GetElementAddress16(1).ContainsPlane(_cross))
+                                _list1.GetElementAddress16(1).AddItem(_cross);
+                            if (!_list1.GetElementAddress16(2).ContainsPlane(_cross))
+                                _list1.GetElementAddress16(2).AddItem(_cross);
                         }
                     }
                     if (aCount2 == 9)
@@ -434,10 +441,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_delta) == 2)
                         {
                             _delta.z = height;
-                            if (!_list1.FUN_00558dd0(0).ContainsPlane(_delta))
-                                _list1.FUN_00558dd0(0).AddItem(_delta);
-                            if (!_list1.FUN_00558dd0(3).ContainsPlane(_delta))
-                                _list1.FUN_00558dd0(3).AddItem(_delta);
+                            if (!_list1.GetElementAddress16(0).ContainsPlane(_delta))
+                                _list1.GetElementAddress16(0).AddItem(_delta);
+                            if (!_list1.GetElementAddress16(3).ContainsPlane(_delta))
+                                _list1.GetElementAddress16(3).AddItem(_delta);
                         }
                     }
                     else if (aCount2 == 10)
@@ -445,10 +452,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_delta) == 2)
                         {
                             _delta.z = height;
-                            if (!_list1.FUN_00558dd0(1).ContainsPlane(_delta))
-                                _list1.FUN_00558dd0(1).AddItem(_delta);
-                            if (!_list1.FUN_00558dd0(3).ContainsPlane(_delta))
-                                _list1.FUN_00558dd0(3).AddItem(_delta);
+                            if (!_list1.GetElementAddress16(1).ContainsPlane(_delta))
+                                _list1.GetElementAddress16(1).AddItem(_delta);
+                            if (!_list1.GetElementAddress16(3).ContainsPlane(_delta))
+                                _list1.GetElementAddress16(3).AddItem(_delta);
                         }
                     }
                     else if (aCount2 == 5)
@@ -456,10 +463,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_delta) == 2)
                         {
                             _delta.z = height;
-                            if (!_list1.FUN_00558dd0(0).ContainsPlane(_delta))
-                                _list1.FUN_00558dd0(0).AddItem(_delta);
-                            if (!_list1.FUN_00558dd0(2).ContainsPlane(_delta))
-                                _list1.FUN_00558dd0(2).AddItem(_delta);
+                            if (!_list1.GetElementAddress16(0).ContainsPlane(_delta))
+                                _list1.GetElementAddress16(0).AddItem(_delta);
+                            if (!_list1.GetElementAddress16(2).ContainsPlane(_delta))
+                                _list1.GetElementAddress16(2).AddItem(_delta);
                         }
                     }
                     else if (aCount2 == 6)
@@ -467,10 +474,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_delta) == 2)
                         {
                             _delta.z = height;
-                            if (!_list1.FUN_00558dd0(1).ContainsPlane(_delta))
-                                _list1.FUN_00558dd0(1).AddItem(_delta);
-                            if (!_list1.FUN_00558dd0(2).ContainsPlane(_delta))
-                                _list1.FUN_00558dd0(2).AddItem(_delta);
+                            if (!_list1.GetElementAddress16(1).ContainsPlane(_delta))
+                                _list1.GetElementAddress16(1).AddItem(_delta);
+                            if (!_list1.GetElementAddress16(2).ContainsPlane(_delta))
+                                _list1.GetElementAddress16(2).AddItem(_delta);
                         }
                     }
                     if (_current == 9)
@@ -478,10 +485,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_point) == 2)
                         {
                             _point.z = height;
-                            if (!_list1.FUN_00558dd0(0).ContainsPlane(_point))
-                                _list1.FUN_00558dd0(0).AddItem(_point);
-                            if (!_list1.FUN_00558dd0(3).ContainsPlane(_point))
-                                _list1.FUN_00558dd0(3).AddItem(_point);
+                            if (!_list1.GetElementAddress16(0).ContainsPlane(_point))
+                                _list1.GetElementAddress16(0).AddItem(_point);
+                            if (!_list1.GetElementAddress16(3).ContainsPlane(_point))
+                                _list1.GetElementAddress16(3).AddItem(_point);
                         }
                     }
                     else if (_current == 10)
@@ -489,10 +496,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_point) == 2)
                         {
                             _point.z = height;
-                            if (!_list1.FUN_00558dd0(1).ContainsPlane(_point))
-                                _list1.FUN_00558dd0(1).AddItem(_point);
-                            if (!_list1.FUN_00558dd0(3).ContainsPlane(_point))
-                                _list1.FUN_00558dd0(3).AddItem(_point);
+                            if (!_list1.GetElementAddress16(1).ContainsPlane(_point))
+                                _list1.GetElementAddress16(1).AddItem(_point);
+                            if (!_list1.GetElementAddress16(3).ContainsPlane(_point))
+                                _list1.GetElementAddress16(3).AddItem(_point);
                         }
                     }
                     else if (_current == 5)
@@ -500,10 +507,10 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_point) == 2)
                         {
                             _point.z = height;
-                            if (!_list1.FUN_00558dd0(0).ContainsPlane(_point))
-                                _list1.FUN_00558dd0(0).AddItem(_point);
-                            if (!_list1.FUN_00558dd0(2).ContainsPlane(_point))
-                                _list1.FUN_00558dd0(2).AddItem(_point);
+                            if (!_list1.GetElementAddress16(0).ContainsPlane(_point))
+                                _list1.GetElementAddress16(0).AddItem(_point);
+                            if (!_list1.GetElementAddress16(2).ContainsPlane(_point))
+                                _list1.GetElementAddress16(2).AddItem(_point);
                         }
                     }
                     else if (_current == 6)
@@ -511,29 +518,29 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
                         if (_created.ClassifyPoint(&_point) == 2)
                         {
                             _point.z = height;
-                            if (!_list1.FUN_00558dd0(1).ContainsPlane(_point))
-                                _list1.FUN_00558dd0(1).AddItem(_point);
-                            if (!_list1.FUN_00558dd0(2).ContainsPlane(_point))
-                                _list1.FUN_00558dd0(2).AddItem(_point);
+                            if (!_list1.GetElementAddress16(1).ContainsPlane(_point))
+                                _list1.GetElementAddress16(1).AddItem(_point);
+                            if (!_list1.GetElementAddress16(2).ContainsPlane(_point))
+                                _list1.GetElementAddress16(2).AddItem(_point);
                         }
                     }
                 }
             }
         }
         if (!active8)
-            mesh->FUN_00536d80();
+            mesh->TESObjectLAND_UnLoadVertices();
         for (int boundary = 0; boundary < 4; boundary++)
         {
             if (boundary == 0 || boundary == 1)
-                _list1.FUN_00558dd0(boundary).CallWithTwelve(FUN_0049c800);
+                _list1.GetElementAddress16(boundary).CallWithTwelve(FloatKeyedRecord_CompareKeys);
             else
-                _list1.FUN_00558dd0(boundary).CallWithTwelve(FUN_0049c7b0);
-            for (int pair = 0; pair < _list1.FUN_00558dd0(boundary).FUN_0044ddc0(); pair += 2)
+                _list1.GetElementAddress16(boundary).CallWithTwelve(Runtime_CompareFirstFloats);
+            for (int pair = 0; pair < _list1.GetElementAddress16(boundary).FUN_0044ddc0(); pair += 2)
             {
-                if (_list1.FUN_00558dd0(boundary).FUN_0044ddc0() > pair + 1)
+                if (_list1.GetElementAddress16(boundary).FUN_0044ddc0() > pair + 1)
                 {
-                    DAT_011c57ac->AddItem(_list1.FUN_00558dd0(boundary).FUN_006a1440(pair));
-                    DAT_011c57ac->AddItem(_list1.FUN_00558dd0(boundary).FUN_006a1440(pair + 1));
+                    DAT_011c57ac->AddItem(_list1.GetElementAddress16(boundary).Object_GetIndexedValue_006a1440(pair));
+                    DAT_011c57ac->AddItem(_list1.GetElementAddress16(boundary).Object_GetIndexedValue_006a1440(pair + 1));
                 }
             }
         }
@@ -547,11 +554,11 @@ struct Pt
 };
 struct CellOrigin
 {
-    NiPoint3 FUN_00535b30(bool interior);
+    NiPoint3 TESObjectLAND_GetWorldOffsetForBlock(bool interior);
 };
 struct Cell
 {
-    CellOrigin* FUN_00546fb0();
+    CellOrigin* TESObjectCELL_GetLand();
     int FUN_00544c30();
     int FUN_00544c60();
 };
@@ -561,7 +568,7 @@ unsigned int __cdecl GetCellCornerFlags(Cell* cell, Pt point)
 {
     unsigned int f = 0;  // Edge mask: west=1, east=2, north=4, south=8.
     // Translate the point into the cell's coordinate system.
-    NiPoint3 i = cell->FUN_00546fb0()->FUN_00535b30(false);
+    NiPoint3 i = cell->TESObjectCELL_GetLand()->TESObjectLAND_GetWorldOffsetForBlock(false);
     point += i;
     // Cell corners: p=southwest, a=southeast, s=northwest, h=northeast.
     NiPoint2 p(float(cell->FUN_00544c30() << 12), float(cell->FUN_00544c60() << 12));
@@ -599,15 +606,15 @@ struct UpdData
 struct AVObj
 {
     void AssignFixedString(const NiFixedString&);
-    void FUN_00439410(void*);
+    void NiAVObject_AttachProperty(void*);
     int FUN_0049ec60();
-    unsigned short FUN_00456650() const;
+    unsigned short NiGeometry_GetVertexCount() const;
 };
 struct NodeObj
 {
     ~NodeObj();
-    AVObj* FUN_0056c7f0();
-    AVObj* FUN_004a8a90();
+    AVObj* GetModel_0056c7f0();
+    AVObj* NiTimeController_GetNext();
     int FUN_0049e3e0(unsigned int);
 };
 struct BufObj
@@ -615,22 +622,22 @@ struct BufObj
     float x;
     float y;
     float z;
-    NiPoint3* FUN_00535b30();
+    NiPoint3* TESObjectLAND_GetWorldOffsetForBlock();
 };
 struct WaterForm
 {
-    void* FUN_00580130();
+    void* GetPlaceableAutoWater();
 };
 struct ParamObj
 {
-    float FUN_005471e0();
-    BufObj FUN_00546fb0(int);
-    WaterForm* FUN_00547770();
+    float TESObjectCELL_GetWaterHeight();
+    BufObj TESObjectCELL_GetLand(int);
+    WaterForm* Actor_GetRadiationLevel();
     void FUN_00548230(void*, bool);
 };
 struct Mgr
 {
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
     void* DereferenceIfNotNull(void*);
     void* AddEight(void*);
     void* FUN_0049f590(void**);
@@ -641,8 +648,8 @@ struct SettingObj
     unsigned char* FUN_00408d60();
 };
 extern SettingObj DAT_011cc5a8;
-float __cdecl FUN_0040ebd0(float, float);
-float __cdecl FUN_00404010(float, float);
+float __cdecl BSMIN(float, float);
+float __cdecl BSMAX_00404010(float, float);
 namespace std {
 float abs(float);
 }
@@ -790,9 +797,9 @@ struct FUN_0055a2f0
     int m_5c;
     int m_60;
     int m_64;
-    void FUN_00575690(void*);
+    void TESObjectREFR_SetObjectReference(void*);
     void FUN_00484490();
-    void FUN_0056c8f0();
+    void TESObjectREFR_InitHavokForPlaceableWater();
 };
 struct FUN_00b6abb0 : NiMemObject
 {
@@ -948,7 +955,7 @@ struct FUN_00c37ec0 : NiMemObject
     int m_18;
     int m_1c;
     int m_20;
-    void FUN_00439680(const NiPoint3&);
+    void BSMultiBound_SetHalfExtents(const NiPoint3&);
 };
 struct FUN_00c46970 : NiMemObject
 {
@@ -1075,10 +1082,10 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
             NodeObj* nodeX;
             if (0 != DAT_011c57b0)
             {
-                (*reinterpret_cast<NiPoint3*>(&origin.position)).Set(a0->FUN_00546fb0(0).FUN_00535b30()->x, a0->FUN_00546fb0(0).FUN_00535b30()->y,
-                                 a0->FUN_005471e0());
+                (*reinterpret_cast<NiPoint3*>(&origin.position)).Set(a0->TESObjectCELL_GetLand(0).TESObjectLAND_GetWorldOffsetForBlock()->x, a0->TESObjectCELL_GetLand(0).TESObjectLAND_GetWorldOffsetForBlock()->y,
+                                 a0->TESObjectCELL_GetWaterHeight());
                 origin.hasWaterForm = false;
-                s = DAT_011c57b0->FUN_00559450();
+                s = DAT_011c57b0->Modelloader_GetReferencedThis();
                 i = 0;
                 while (0 != s)
                 {
@@ -1086,7 +1093,7 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                     if (!!s)
                     {
                         nodeX = *(NodeObj**)DAT_011c57b0->AddEight(s);
-                        if (nodeX->FUN_0056c7f0() != 0 && nodeX->FUN_004a8a90() != 0)
+                        if (nodeX->GetModel_0056c7f0() != 0 && nodeX->NiTimeController_GetNext() != 0)
                         {
                             {
                                 UninitializedStorage<sizeof(NiPoint3)> nStorage;
@@ -1129,12 +1136,12 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                         {
                                                                                                             UninitializedStorage<sizeof(NiPoint3)> oldNodeStorage;
                                                                                                             nodeX
-                                                                                                                ->FUN_0056c7f0()
+                                                                                                                ->GetModel_0056c7f0()
                                                                                                                 ->AssignFixedString(
                                                                                                                     NiFixedString(
                                                                                                                         "AutoWaterNode"));
                                                                                                             nodeX
-                                                                                                                ->FUN_004a8a90()
+                                                                                                                ->NiTimeController_GetNext()
                                                                                                                 ->AssignFixedString(
                                                                                                                     NiFixedString(
                                                                                                                         "AutoWater"));
@@ -1143,36 +1150,36 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                             geom =
                                                                                                                 new FUN_00b6abb0;
                                                                                                             nodeX
-                                                                                                                ->FUN_004a8a90()
-                                                                                                                ->FUN_00439410(
+                                                                                                                ->NiTimeController_GetNext()
+                                                                                                                ->NiAVObject_AttachProperty(
                                                                                                                     geom);
                                                                                                             FUN_00b57e30(
                                                                                                                 nodeX
-                                                                                                                    ->FUN_0056c7f0(),
+                                                                                                                    ->GetModel_0056c7f0(),
                                                                                                                 0, 0);
                                                                                                             minY =
                                                                                                                 new NiStencilProperty;
-                                                                                                            minY->FUN_0049ee30(
+                                                                                                            minY->NiStencilProperty_SetDrawMode(
                                                                                                                 3);
                                                                                                             nodeX
-                                                                                                                ->FUN_004a8a90()
-                                                                                                                ->FUN_00439410(
+                                                                                                                ->NiTimeController_GetNext()
+                                                                                                                ->NiAVObject_AttachProperty(
                                                                                                                     minY);
-                                                                                                            p84->FUN_00575690(
-                                                                                                                a0->FUN_00547770()
-                                                                                                                    ->FUN_00580130());
+                                                                                                            p84->TESObjectREFR_SetObjectReference(
+                                                                                                                a0->Actor_GetRadiationLevel()
+                                                                                                                    ->GetPlaceableAutoWater());
                                                                                                             p80 =
                                                                                                                 new AutoWaterFadeNode;
-                                                                                                            p80->FUN_0049ee60(
+                                                                                                            p80->SetIgnoreFade(
                                                                                                                 true);
                                                                                                             p84->FUN_vt1cc(
                                                                                                                 p80,
                                                                                                                 true);
-                                                                                                            p80->FUN_00440460(
+                                                                                                            p80->NiAVObject_SetTranslate(
                                                                                                                 (*reinterpret_cast<NiPoint3*>(&origin.position)));
                                                                                                             ((FUN_0049eea0_shell*)
                                                                                                                  p84)
-                                                                                                                ->FUN_0049eea0(
+                                                                                                                ->TESObjectREFR_SetLocationOnReferenceSimple(
                                                                                                                     (*reinterpret_cast<NiPoint3*>(&origin.position)));
                                                                                                             p7c =
                                                                                                                 new FUN_00c37ec0;
@@ -1184,7 +1191,7 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                             minZ = 0.0f;
                                                                                                             bufA =
                                                                                                                 nodeX
-                                                                                                                    ->FUN_004a8a90();
+                                                                                                                    ->NiTimeController_GetNext();
                                                                                                             verts =
                                                                                                                 (NiPoint3*)bufA
                                                                                                                     ->FUN_0049ec60();
@@ -1192,7 +1199,7 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                 b = 0;
                                                                                                                 b <
                                                                                                                 (int)bufA
-                                                                                                                    ->FUN_00456650();
+                                                                                                                    ->NiGeometry_GetVertexCount();
                                                                                                                 b++)
                                                                                                             {
                                                                                                                 (*reinterpret_cast<NiPoint3*>(&oldNodeStorage)) = verts
@@ -1200,27 +1207,27 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                 if (0 <
                                                                                                                     b)
                                                                                                                 {
-                                                                                                                    val = FUN_0040ebd0(
+                                                                                                                    val = BSMIN(
                                                                                                                         val,
                                                                                                                         (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .x);
-                                                                                                                    maxY = FUN_0040ebd0(
+                                                                                                                    maxY = BSMIN(
                                                                                                                         maxY,
                                                                                                                         (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .y);
-                                                                                                                    n7c = FUN_0040ebd0(
+                                                                                                                    n7c = BSMIN(
                                                                                                                         n7c,
                                                                                                                         (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .z);
-                                                                                                                    minX = FUN_00404010(
+                                                                                                                    minX = BSMAX_00404010(
                                                                                                                         minX,
                                                                                                                         (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .x);
-                                                                                                                    p50 = FUN_00404010(
+                                                                                                                    p50 = BSMAX_00404010(
                                                                                                                         p50,
                                                                                                                         (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .y);
-                                                                                                                    minZ = FUN_00404010(
+                                                                                                                    minZ = BSMAX_00404010(
                                                                                                                         minZ,
                                                                                                                         (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .z);
@@ -1264,15 +1271,15 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                     (*reinterpret_cast<NiPoint3*>(&pt44Storage)).y,
                                                                                                                 minZ -
                                                                                                                     (*reinterpret_cast<NiPoint3*>(&pt44Storage)).z);
-                                                                                                            (*reinterpret_cast<NiPoint3*>(&nStorage)).FUN_0063c8a0(
+                                                                                                            (*reinterpret_cast<NiPoint3*>(&nStorage)).ComputeValue_0063c8a0(
                                                                                                                 (*reinterpret_cast<NiPoint3*>(&origin.position)));
                                                                                                             p7c->FUN_vtb8(
                                                                                                                 &(*reinterpret_cast<NiPoint3*>(&nStorage)));
-                                                                                                            p7c->FUN_00439680(
+                                                                                                            p7c->BSMultiBound_SetHalfExtents(
                                                                                                                 (*reinterpret_cast<NiPoint3*>(&pt44Storage)));
                                                                                                             p6c =
                                                                                                                 new BSMultiBound;
-                                                                                                            p6c->FUN_004addc0(
+                                                                                                            p6c->BSMultiBound_SetShape(
                                                                                                                 p7c);
                                                                                                             oldNode2 =
                                                                                                                 new FUN_00c46970;
@@ -1284,13 +1291,13 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                 true);
                                                                                                             oldNode2->FUN_vtdc(
                                                                                                                 nodeX
-                                                                                                                    ->FUN_0056c7f0(),
+                                                                                                                    ->GetModel_0056c7f0(),
                                                                                                                 true);
                                                                                                             res.NiUpdateData(
                                                                                                                 0.0f,
                                                                                                                 false,
                                                                                                                 false);
-                                                                                                            p80->FUN_00a59c60(
+                                                                                                            p80->NiAVObject_Update(
                                                                                                                 &res);
                                                                                                             a0->FUN_00548230(
                                                                                                                 p84,
@@ -1301,7 +1308,7 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                     0 &&
                                                                                                                 !origin.hasWaterForm)
                                                                                                             {
-                                                                                                                p84->FUN_0056c8f0();
+                                                                                                                p84->TESObjectREFR_InitHavokForPlaceableWater();
                                                                                                                 origin.hasWaterForm =
                                                                                                                     true;
                                                                                                             }
@@ -1348,7 +1355,8 @@ NiPoint3 __cdecl FUN_004a3760(float t, const NiPoint3& point);
 
 // Computes the intersection of the line through p0 and p1 with the plane defined by (*reinterpret_cast<NiPoint3*>(&p2Storage)) and p3, writing the result to out.
 // @fnv 0x006b9a10
-int __cdecl FUN_006b9a10(const NiPoint3& apStart, const NiPoint3& apEnd, const NiPoint3& apPlanePoint,
+// src: COMMUNITY 0x006b9a10
+int __cdecl NavMeshMath_SegmentPlaneIntersection(const NiPoint3& apStart, const NiPoint3& apEnd, const NiPoint3& apPlanePoint,
                          const NiPoint3& apPlaneNormal, NiPoint3& out)
 {
     float f3 = DAT_0106c288;
@@ -1356,8 +1364,8 @@ int __cdecl FUN_006b9a10(const NiPoint3& apStart, const NiPoint3& apEnd, const N
     float f28;
     float f6;
 
-    NiPoint3 v1 = apEnd.FUN_00439ef0(apStart);
-    NiPoint3 v6 = apStart.FUN_00439ef0(apPlanePoint);
+    NiPoint3 v1 = apEnd.SubtractIntoVector(apStart);
+    NiPoint3 v6 = apStart.SubtractIntoVector(apPlanePoint);
     f28 = apPlaneNormal.DotProduct(v1);
     f2 = -apPlaneNormal.DotProduct(v6);
     if (f3 > FUN_00408840(f28))
@@ -1388,7 +1396,8 @@ void BuildWaterSurfaces(MeshInput*);
 
 // Builds auto-water boundary geometry and creates the auto-water node for the given mesh input.
 // @fnv 0x0049c860
-void FUN_0049c860(MeshInput* apMeshInput)
+// src: XBOX_PDB 0x0049c860
+void BGSAutoWater_GeneratePlaceableWaterForCell(MeshInput* apMeshInput)
 {
     AutoMemHelper context(29, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\BGSAutoWater.cpp", 83);
     if (!apMeshInput || !reinterpret_cast<TESObjectCELL*>(apMeshInput)->HasWater())

@@ -8,11 +8,12 @@ int __cdecl NiStricmp(const char*, const char*);
 
 struct FUN_00a1e740_Class
 {
-    bool __thiscall FUN_00a1e740(const char*, const char*);
+    bool __thiscall ProcessAndTransformResult_00a1e740(const char*, const char*);
 };
 
 // @fnv 0x00a1e740
-bool __thiscall FUN_00a1e740_Class::FUN_00a1e740(const char* pcKey1, const char* pcKey2)
+// src: GUESS 0x00a1e740 (confidence: low)
+bool __thiscall FUN_00a1e740_Class::ProcessAndTransformResult_00a1e740(const char* pcKey1, const char* pcKey2)
 {
     return NiStricmp(pcKey1, pcKey2) == 0;
 }

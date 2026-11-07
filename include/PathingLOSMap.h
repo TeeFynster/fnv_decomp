@@ -41,8 +41,8 @@ public:
     char* GetTriangleScore(unsigned int aNavMeshID);
     void GetMapValue(unsigned int uiKey, unsigned int& ruiValue);
     char GetLOSValue(unsigned int aiOffset, unsigned short aOffset);
-    char FUN_006e1670(unsigned int limit, SpawnedTarget* target, unsigned short* outOffset);
-    bool FUN_006e1770(unsigned int a, unsigned int b);
+    char GetNavMeshAndTriangleForIndex(unsigned int limit, SpawnedTarget* target, unsigned short* outOffset);
+    bool GetUnseenNavMeshAndTriangle(unsigned int a, unsigned int b);
     NiSortAdjustNode* CreateSortAdjustNode();
     void ClampNonPositiveTextChars();
     bool HasNavMeshEntry(unsigned int aiNavMeshID);

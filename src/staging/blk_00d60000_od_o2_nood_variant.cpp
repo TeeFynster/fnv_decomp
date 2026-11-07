@@ -50,7 +50,8 @@ struct __declspec(align(16)) LoadedObject
 };
 
 // @fnv 0x00d6ae50
-const char* FUN_00d6ae50()
+// src: HAVOK_LIB 0x00d6ae50
+const char* getVtablehkpConstraintInstance()
 {
     FinishLoadedObjectFlag kFlag;
     kFlag.m_iFinishing = 0;
@@ -132,7 +133,8 @@ __declspec(align(16)) class FUN_00d6aec0_obj
 };
 
 // @fnv 0x00d6aec0
-int FUN_00d6aec0() throw()
+// src: GUESS 0x00d6aec0 (confidence: low)
+int Object_ProcessAndReturnValue_00d6aec0() throw()
 {
     FUN_00d6aec0_obj obj((FUN_00d6aec0_seed()));
     return obj.unk00;
@@ -203,7 +205,8 @@ static __forceinline void buildBasis(const MotionInput* input, __m128 normal, Ba
 }
 
 // @fnv 0x00d6aef0
-void __cdecl FUN_00d6aef0(const MotionInput* input, float outputBits)
+// src: COMMUNITY 0x00d6aef0
+void __cdecl hkpCharacterMovementUtil_calculateMovement(const MotionInput* input, float outputBits)
 {
     __m128 a = input->directionA, b = input->directionB;
     __m128 t = _mm_mul_ps(_mm_shuffle_ps(b, b, 0xc9), _mm_shuffle_ps(a, a, 0xd2));
@@ -223,7 +226,7 @@ void __cdecl FUN_00d6aef0(const MotionInput* input, float outputBits)
         } workspace;
         buildBasis(input, normal, workspace.basis);
         (*reinterpret_cast<__m128*>(&workspace.position)) = _mm_sub_ps(input->position, input->translation);
-        workspace.position.FUN_004b4ab0(reinterpret_cast<const Rot&>(workspace.basis), workspace.position);
+        workspace.position.hkVector4_setRotatedInverseDir(reinterpret_cast<const Rot&>(workspace.basis), workspace.position);
         workspace.delta = _mm_sub_ps(input->target, (*reinterpret_cast<__m128*>(&workspace.position)));
         float distanceSquared;
         _mm_store_ss(&distanceSquared, dot3(workspace.delta));
@@ -241,7 +244,7 @@ void __cdecl FUN_00d6aef0(const MotionInput* input, float outputBits)
         }
         (*reinterpret_cast<__m128*>(&workspace.position)) = _mm_add_ps(movement, (*reinterpret_cast<__m128*>(&workspace.position)));
         Vec4* output = *reinterpret_cast<Vec4* const*>(&outputBits);
-        output->FUN_00c7f700(static_cast<const void*>(&workspace.basis), workspace.position);
+        output->hkVector4_setRotatedDir(static_cast<const void*>(&workspace.basis), workspace.position);
         __m128 translation = _mm_load_ps(reinterpret_cast<const float*>(&input->translation));
         __m128 transformed = _mm_load_ps(reinterpret_cast<const float*>(&output->x));
         _mm_store_ps(reinterpret_cast<float*>(&output->x), _mm_add_ps(translation, transformed));
@@ -279,7 +282,8 @@ struct BodyOut
 };
 
 // @fnv 0x00d6b4b0
-void FUN_00d6b4b0(BodyList* list, BodyOut* out)
+// src: COMMUNITY 0x00d6b4b0
+void hkaKeyFrameHierarchyUtility_initialize(BodyList* list, BodyOut* out)
 {
     for (int i = 0; i < list->m_iElementCount; i++)
     {
@@ -322,17 +326,18 @@ struct D6Idx
     unsigned char idx02;
 };
 
-extern "C" void __cdecl FUN_00dcf280(D6Vec3* s, void* d, void* e);
+extern "C" void __cdecl hk1dLinearBilateralConstraintBuildJacobian(D6Vec3* s, void* d, void* e);
 extern "C" Vec4* __cdecl D6GetArray(void);
 
 // @fnv 0x00d6c030
-static __declspec(noinline) void FUN_00d6c030(D6Owner* a, Vec4* b, D6Idx* c, void* d, void* e)
+// src: GUESS 0x00d6c030 (confidence: low)
+static __declspec(noinline) void Runtime_UpdateState_00d6c030(D6Owner* a, Vec4* b, D6Idx* c, void* d, void* e)
 {
     D6Vec3 s;
     *(__m128*)&s.ax = *(__m128*)&a->f30;
     *(__m128*)&s.bx = *(__m128*)&b[3];
     *(__m128*)&s.cx = *(__m128*)&b[c->idx02];
-    FUN_00dcf280(&s, d, e);
+    hk1dLinearBilateralConstraintBuildJacobian(&s, d, e);
 }
 
 volatile D6Owner* g_d6Owner;
@@ -342,5 +347,5 @@ volatile void* g_d6E;
 
 extern "C" __declspec(noinline) void d6c030_dummy_caller(void)
 {
-    FUN_00d6c030((D6Owner*)g_d6Owner, D6GetArray(), (D6Idx*)g_d6Idx, (void*)g_d6D, (void*)g_d6E);
+    Runtime_UpdateState_00d6c030((D6Owner*)g_d6Owner, D6GetArray(), (D6Idx*)g_d6Idx, (void*)g_d6D, (void*)g_d6E);
 }

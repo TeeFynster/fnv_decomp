@@ -7,7 +7,8 @@
 extern "C" void* g_011f3f48;
 
 // @fnv 0x00a47a10
-void* __cdecl FUN_00a47a10()
+// src: COMMUNITY 0x00a47a10
+void* __cdecl NiSequence_GetRTTI()
 {
     return &g_011f3f48;
 }
@@ -78,7 +79,7 @@ struct S_00a47ae0_Arr
 };
 struct S_00a47ae0_Base
 {
-    void FUN_00a89af0(S_00a47ae0_Src* s) throw();
+    void nullsub_3(S_00a47ae0_Src* s) throw();
 };
 struct S_00a47ae0_Obj : S_00a47ae0_Base
 {
@@ -97,7 +98,7 @@ struct S_00a47ae0_Obj : S_00a47ae0_Base
 // @fnv 0x00a47ae0
 void S_00a47ae0_Obj::CopyFromSource(S_00a47ae0_Src* pSource) throw()
 {
-    FUN_00a89af0(pSource);
+    nullsub_3(pSource);
     ptr = pSource->FUN_00a63430();
     unsigned int n = count;
     arr.FUN_00a47770(n);
@@ -194,7 +195,7 @@ void FUN_00a47470_cls::SetItem(unsigned int aiIndex, RefObject** appValue)
     }
 }
 
-void* __cdecl FUN_00aa1070(unsigned int);
+void* __cdecl _NiMalloc_00aa1070(unsigned int);
 extern "C" int __cdecl strcpy_s(char*, unsigned int, const char*);
 
 struct AHNameArray
@@ -273,7 +274,7 @@ unsigned int AHSeqOwner::AddSeq(const char* pcName, S_00a47ae0_Rc* pkSeq)
 {
     unsigned int uiIndex = m_kNames.GetSize();
     unsigned int uiLen = strlen(pcName) + 1;
-    char* pcCopy = (char*)FUN_00aa1070(uiLen);
+    char* pcCopy = (char*)_NiMalloc_00aa1070(uiLen);
     strcpy_s(pcCopy, uiLen, pcName);
     m_kNames.SetAtGrow(uiIndex, (char*)pcCopy);
     m_kSeqs.SetAtGrow(uiIndex, pkSeq);

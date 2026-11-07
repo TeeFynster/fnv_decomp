@@ -32,7 +32,7 @@ class NiObject
     NiObject* Clone();
     void ResolveObjectPointer(NiPointer<NiObject>&);
     void CopyMemberData(NiObject*, CloningProcess&);
-    void FUN_00528ce0(NiObject*);
+    void LockFreeMap_TESObjectREFR_NiPointer_QueuedReference_LockFreeMapInterface_RemoveAt_00528ce0(NiObject*);
 };
 extern "C" void NiObjectCopyInfoCtorAlias();
 extern "C" void NiTMapSetAtAlias();
@@ -54,7 +54,7 @@ class NiAVObject : public NiObject
   public:
     virtual void ProcessClone(CloningProcess&);
     virtual void LoadBinary(NiStream&);
-    void FUN_00c87c50(NiObject*);
+    void bhkRefObject_SethkObject(NiObject*);
 };
 class bhkRefObject : public NiObject
 {

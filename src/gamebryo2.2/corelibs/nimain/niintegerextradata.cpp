@@ -24,7 +24,8 @@ void NiIntegerExtraData::LoadBinary(NiStream& stream)
 extern char const* const g_01202de0_arg1;
 
 // @fnv 0x00a99c60
-char const* const* __cdecl FUN_00a99c60()
+// src: COMMUNITY 0x00a99c60
+char const* const* __cdecl NiIntegerExtraData_GetRTTI()
 {
     return &g_01202de0_arg1;
 }
@@ -37,11 +38,12 @@ extern int DAT_010a0d24;
 void __fastcall DestroyIntegerExtraData(NiIntegerExtraData* data)
 {
     *reinterpret_cast<int**>(data) = &DAT_010a0d24;
-    data->NiExtraData::FUN_00a7b300();
+    data->NiExtraData::DestroyFields_00a7b300();
 }
 
 // @fnv 0x00a99cd0
-NiExtraData* FUN_00a99cd0()
+// src: EXE 0x00a99cd0
+NiExtraData* NiIntegerExtraData_CreateObject()
 {
     NiExtraData* pExtraData = static_cast<NiExtraData*>(BSFadeNode::operator new(0x10));
     if (pExtraData)
@@ -59,7 +61,7 @@ void __cdecl operator delete(void*, unsigned int);
 void* __fastcall DeleteIntegerExtraData(NiIntegerExtraData* data, void*, unsigned int auiFlags)
 {
     *reinterpret_cast<int**>(data) = &DAT_010a0d24;
-    data->NiExtraData::FUN_00a7b300();
+    data->NiExtraData::DestroyFields_00a7b300();
     if (auiFlags & 1)
         ::operator delete(data, 0x10);
     return data;
@@ -69,7 +71,7 @@ void* __fastcall DeleteIntegerExtraData(NiIntegerExtraData* data, void*, unsigne
 extern "C" void __cdecl FUN_00a7b580();
 
 void* __cdecl _FUN_00a7d330(void*);
-char* __cdecl FUN_00a7d4d0(char const*, int);
+char* __cdecl NiGetViewerString_00a7d4d0(char const*, int);
 
 // Appends the base viewer strings plus a formatted "m_iValue" entry to the string array, growing it as needed.
 // @fnv 0x00a99d70
@@ -85,7 +87,7 @@ void __fastcall GetIntegerExtraDataViewerStrings(NiIntegerExtraData* data, void*
         apViewerStrings->SetSize(index + apViewerStrings->m_usGrowBy);
     apViewerStrings->SetAt(index, pString);
 
-    pString = FUN_00a7d4d0("m_iValue", data->m_iValue);
+    pString = NiGetViewerString_00a7d4d0("m_iValue", data->m_iValue);
 
     index = apViewerStrings->m_usSize;
     if (index >= apViewerStrings->m_usMaxSize)
@@ -93,12 +95,12 @@ void __fastcall GetIntegerExtraDataViewerStrings(NiIntegerExtraData* data, void*
     apViewerStrings->SetAt(index, pString);
 }
 
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
 // @fnv 0x00a99c80
 NiIntegerExtraData* __fastcall CreateIntegerExtraData(NiIntegerExtraData* data, void*, unsigned int argument)
 {
     NiIntegerExtraData* result;
-    NiIntegerExtraData* allocated = (NiIntegerExtraData*)FUN_00aa13e0(16);
+    NiIntegerExtraData* allocated = (NiIntegerExtraData*)Object_DispatchCommandFour(16);
     if (allocated != 0)
     {
         allocated->FUN_00a7b2e0();
@@ -110,7 +112,7 @@ NiIntegerExtraData* __fastcall CreateIntegerExtraData(NiIntegerExtraData* data, 
     {
         result = 0;
     }
-    data->FUN_00a7b330(result, reinterpret_cast<void*>(argument));
+    data->CopyMembers_00a7b330(result, reinterpret_cast<void*>(argument));
     result->m_iValue = data->m_iValue;
     return result;
 }

@@ -6938,34 +6938,35 @@ extern void* DAT_011f3950;
 extern void* DAT_011f39e0;
 extern void* DAT_011f3a70;
 extern void* DAT_011f3dd0;
-void __cdecl FUN_00a2a600();
-void __cdecl FUN_00a27b60();
+void __cdecl NiStepPosKey_DeleteArray();
+void __cdecl NiBezPosKey_Copy();
 void __cdecl AllocateElem64Array();
 void __cdecl LoadBezPosKeys();
 void __cdecl SaveKeyArray();
-void __cdecl FUN_00a28620(int, int);
+void __cdecl Object_UpdateFields_00a28620(int, int);
 // @fnv 0x00a28680
-int __cdecl FUN_00a28680()
+// src: GAMEBRYO_LIB 0x00a28680
+int __cdecl NiBezPosKey_RegisterLoader()
 {
     if (DAT_011f3668)
         return 0;
     DAT_011f3668 = 1;
     DAT_011f3dd0 = (void*)LoadBezPosKeys;
     DAT_011f3a70 = (void*)SaveKeyArray;
-    DAT_011f39e0 = (void*)FUN_00a27b60;
+    DAT_011f39e0 = (void*)NiBezPosKey_Copy;
     DAT_011f3950 = (void*)AllocateElem64Array;
-    DAT_011f38c0 = (void*)FUN_00a2a600;
+    DAT_011f38c0 = (void*)NiStepPosKey_DeleteArray;
     DAT_011f3760 = 0x40;
-    FUN_00a28620(1, 2);
+    Object_UpdateFields_00a28620(1, 2);
     return 1;
 }
 
 void __cdecl AllocateTempArray();
-void __cdecl FUN_00a2a600();
-void __cdecl FUN_00a2a7b0();
+void __cdecl NiStepPosKey_DeleteArray();
+void __cdecl Runtime_UpdateState_00a2a7b0();
 void __cdecl CreateVertexRecords();
-void __cdecl FUN_00a2d470();
-void __cdecl FUN_00a2aa50(int, int);
+void __cdecl Runtime_ApplyAnimationsToTarget();
+void __cdecl NiLinPosKey_Interpolate_RegisterKeyTableHandlers(int, int);
 extern unsigned char DAT_011f3693;
 extern unsigned char DAT_011f375f;
 extern int DAT_011f38bc;
@@ -6975,28 +6976,29 @@ extern int DAT_011f3a6c;
 extern int DAT_011f3dcc;
 
 // @fnv 0x00a2aab0
-int __cdecl FUN_00a2aab0()
+// src: GAMEBRYO_LIB 0x00a2aab0
+int __cdecl NiLinPosKey_RegisterLoader()
 {
     if (DAT_011f3693)
         return 0;
     DAT_011f3693 = 1;
     DAT_011f3dcc = (int)CreateVertexRecords;
-    DAT_011f3a6c = (int)FUN_00a2d470;
-    DAT_011f39dc = (int)FUN_00a2a7b0;
+    DAT_011f3a6c = (int)Runtime_ApplyAnimationsToTarget;
+    DAT_011f39dc = (int)Runtime_UpdateState_00a2a7b0;
     DAT_011f394c = (int)AllocateTempArray;
-    DAT_011f38bc = (int)FUN_00a2a600;
+    DAT_011f38bc = (int)NiStepPosKey_DeleteArray;
     DAT_011f375f = 0x10;
-    FUN_00a2aa50(1, 1);
+    NiLinPosKey_Interpolate_RegisterKeyTableHandlers(1, 1);
     return 1;
 }
 
 namespace fnv_00a2bb90 {
-extern "C" void __cdecl FUN_00a2a600();
+extern "C" void __cdecl NiStepPosKey_DeleteArray();
 extern "C" void __cdecl CopyFloatBlock();
 extern "C" void __cdecl AllocateBezierKeys();
-extern "C" void __cdecl FUN_00a2baa0(int, int);
+extern "C" void __cdecl Object_SetKeyFunctionTables(int, int);
 extern "C" void __cdecl AllocateElement76Array();
-extern "C" void __cdecl FUN_00a2bb60();
+extern "C" void __cdecl NiTCBPosKey_SaveToStream();
 extern unsigned char DAT_011f3695;
 extern unsigned char DAT_011f3761;
 extern int DAT_011f38c4;
@@ -7006,18 +7008,19 @@ extern int DAT_011f3a74;
 extern int DAT_011f3dd4;
 
 // @fnv 0x00a2bb90
-int __cdecl FUN_00a2bb90()
+// src: GAMEBRYO_LIB 0x00a2bb90
+int __cdecl NiTCBPosKey_RegisterLoader()
 {
     if (DAT_011f3695)
         return 0;
     DAT_011f3695 = 1;
     DAT_011f3dd4 = (int)&AllocateElement76Array;
-    DAT_011f3a74 = (int)&FUN_00a2bb60;
+    DAT_011f3a74 = (int)&NiTCBPosKey_SaveToStream;
     DAT_011f39e4 = (int)&CopyFloatBlock;
     DAT_011f3954 = (int)&AllocateBezierKeys;
-    DAT_011f38c4 = (int)&FUN_00a2a600;
+    DAT_011f38c4 = (int)&NiStepPosKey_DeleteArray;
     DAT_011f3761 = 0x4c;
-    FUN_00a2baa0(1, 3);
+    Object_SetKeyFunctionTables(1, 3);
     return 1;
 }
 }  // namespace fnv_00a2bb90
@@ -7049,7 +7052,8 @@ void __cdecl FUN_00a28cb0_Fn6();
 void __cdecl FUN_00a28cb0_Fn0();
 
 // @fnv 0x00a28cb0
-int __cdecl FUN_00a28cb0()
+// src: GUESS 0x00a28cb0 (confidence: low)
+int __cdecl CrtCallbackStatus_UpdateState_00a28cb0()
 {
     if (FUN_00a28cb0_bRegistered)
         return 0;
@@ -7078,25 +7082,26 @@ extern int DAT_011f3d58;
 extern int DAT_011f3c38;
 extern int DAT_011f3ba8;
 extern S_00a29110_Fn DAT_011f3de8;
-void __cdecl FUN_00a290a0();
+void __cdecl NiBezRotKey_CreateFromStream();
 extern S_00a29110_Fn DAT_011f3a88;
-void __cdecl FUN_00a28ed0();
+void __cdecl NiBezRotKey_SaveToStream();
 extern S_00a29110_Fn DAT_011f39f8;
 void __cdecl CopyBlk36();
 extern S_00a29110_Fn DAT_011f3968;
-void __cdecl FUN_00a28f00();
+void __cdecl NiBezRotKey_CreateArray();
 extern S_00a29110_Fn DAT_011f38d8;
 extern S_00a29110_Fn DAT_011f3cc8;
 void __cdecl CallSpawnTarget();
 extern S_00a29110_Fn DAT_011f3b18;
 void __cdecl CompareBounds();
 extern S_00a29110_Fn DAT_011f37b8;
-void __cdecl FUN_00a28dc0();
+void __cdecl NiBezRotKey_FillDerivedVals();
 extern S_00a29110_Fn DAT_011f3848;
-void __cdecl FUN_00a28f50();
-void __cdecl FUN_00a2a600();
+void __cdecl NiBezRotKey_Insert();
+void __cdecl NiStepPosKey_DeleteArray();
 // @fnv 0x00a29110
-int FUN_00a29110()
+// src: COMMUNITY 0x00a29110
+int NiBezRotKey_RegisterLoader()
 {
     if (DAT_011f367c)
         return 0;
@@ -7104,16 +7109,16 @@ int FUN_00a29110()
     DAT_011f3d58 = 0;
     DAT_011f3c38 = 0;
     DAT_011f3ba8 = 0;
-    DAT_011f3de8 = FUN_00a290a0;
-    DAT_011f3a88 = FUN_00a28ed0;
+    DAT_011f3de8 = NiBezRotKey_CreateFromStream;
+    DAT_011f3a88 = NiBezRotKey_SaveToStream;
     DAT_011f39f8 = CopyBlk36;
-    DAT_011f3968 = FUN_00a28f00;
-    DAT_011f38d8 = FUN_00a2a600;
+    DAT_011f3968 = NiBezRotKey_CreateArray;
+    DAT_011f38d8 = NiStepPosKey_DeleteArray;
     DAT_011f3766 = 0x24;
     DAT_011f3cc8 = CallSpawnTarget;
     DAT_011f3b18 = CompareBounds;
-    DAT_011f37b8 = FUN_00a28dc0;
-    DAT_011f3848 = FUN_00a28f50;
+    DAT_011f37b8 = NiBezRotKey_FillDerivedVals;
+    DAT_011f3848 = NiBezRotKey_Insert;
     return 1;
 }
 
@@ -7134,16 +7139,17 @@ extern void* DAT_011f3818;
 
 void LoadFloatKeys();
 void SaveKeys();
-void FUN_00a26f80();
+void NiBezFloatKey_Copy();
 void AllocateTempArray();
-void FUN_00a2a600();
-void FUN_00a26fe0();
-void FUN_00a26f30();
-void FUN_00a29680();
-void FUN_00a27080();
+void NiStepPosKey_DeleteArray();
+void NiBezFloatKey_Interpolate();
+void NiBezFloatKey_Equal();
+void Object_DoNothing();
+void Object_InsertBezierFloatKey();
 
 // @fnv 0x00a273a0
-int __cdecl FUN_00a273a0()
+// src: GUESS 0x00a273a0 (confidence: low)
+int __cdecl Object_ComputeValue_00a273a0()
 {
     if (DAT_011f3655 != 0)
     {
@@ -7155,14 +7161,14 @@ int __cdecl FUN_00a273a0()
     DAT_011f3b78 = 0;
     DAT_011f3db8 = (void*)LoadFloatKeys;
     DAT_011f3a58 = (void*)SaveKeys;
-    DAT_011f39c8 = (void*)FUN_00a26f80;
+    DAT_011f39c8 = (void*)NiBezFloatKey_Copy;
     DAT_011f3938 = (void*)AllocateTempArray;
-    DAT_011f38a8 = (void*)FUN_00a2a600;
+    DAT_011f38a8 = (void*)NiStepPosKey_DeleteArray;
     DAT_011f375a = 0x10;
-    DAT_011f3c98 = (void*)FUN_00a26fe0;
-    DAT_011f3ae8 = (void*)FUN_00a26f30;
-    DAT_011f3788 = (void*)FUN_00a29680;
-    DAT_011f3818 = (void*)FUN_00a27080;
+    DAT_011f3c98 = (void*)NiBezFloatKey_Interpolate;
+    DAT_011f3ae8 = (void*)NiBezFloatKey_Equal;
+    DAT_011f3788 = (void*)Object_DoNothing;
+    DAT_011f3818 = (void*)Object_InsertBezierFloatKey;
     return 1;
 }
 
@@ -7180,10 +7186,11 @@ void Callback3();
 void Callback4();
 void Callback5();
 
-void __cdecl FUN_00a27aa0(int, int);
+void __cdecl Object_SetKeyFunctionTable(int, int);
 
 // @fnv 0x00a27b00
-int FUN_00a27b00()
+// src: GAMEBRYO_LIB 0x00a27b00
+int NiPosKey_RegisterLoader()
 {
     if (DAT_011f3656)
         return 0;
@@ -7194,7 +7201,7 @@ int FUN_00a27b00()
     DAT_011f3948 = (void*)Callback4;
     DAT_011f38b8 = (void*)Callback5;
     DAT_011f375e = 0x10;
-    FUN_00a27aa0(1, 0);
+    Object_SetKeyFunctionTable(1, 0);
     return 1;
 }
 
@@ -7211,21 +7218,22 @@ extern S_00a294f0_Fn DAT_011f3e28;
 // The original installs one handler address into several slots, and the
 // compiler duplicated that constant at every slot, so each slot below
 // takes its own alias of the handler it stores.
-void __cdecl FUN_00a29680();
+void __cdecl Object_DoNothing();
 void __cdecl FUN_00a29680_b();
 void __cdecl FUN_00a29680_c();
-void __cdecl FUN_00e7cd40();
+void __cdecl Ret0();
 void __cdecl FUN_00e7cd40_b();
 void __cdecl RegisterCurveOps(int, int);
 
 // @fnv 0x00a294f0
-int FUN_00a294f0()
+// src: GAMEBRYO_LIB 0x00a294f0
+int NiBoolKey_RegisterLoader()
 {
     if (DAT_011f367e)
         return 0;
     DAT_011f367e = 1;
-    DAT_011f3e28 = &FUN_00e7cd40;
-    DAT_011f3ac8 = &FUN_00a29680;
+    DAT_011f3e28 = &Ret0;
+    DAT_011f3ac8 = &Object_DoNothing;
     DAT_011f3a38 = &FUN_00a29680_b;
     DAT_011f39a8 = &FUN_00e7cd40_b;
     DAT_011f3918 = &FUN_00a29680_c;
@@ -7234,15 +7242,15 @@ int FUN_00a294f0()
     return 1;
 }
 
-void __cdecl FUN_00a2abc0();
-void __cdecl FUN_00a2d690();
-void __cdecl FUN_00a2ab10();
-void __cdecl FUN_00a2ab40();
-void __cdecl FUN_00a2a600();
-void __cdecl FUN_00a2ab90();
-void __cdecl FUN_00a2d680();
-void __cdecl FUN_00a2d670();
-void __cdecl FUN_00a2ac30();
+void __cdecl Object_ProcessEntries_00a2abc0();
+void __cdecl Runtime_ProcessEntries_00a2d690();
+void __cdecl Runtime_CopyFloatAndTail();
+void __cdecl Object_GetIndexedValue_00a2ab40();
+void __cdecl NiStepPosKey_DeleteArray();
+void __cdecl Runtime_ForwardCall_00a2ab90();
+void __cdecl Object_ForwardCall_00a2d680();
+void __cdecl NiRotKey_FillDerivedVals_Thunk();
+void __cdecl NiRotKey_FillDerivedVals_AllocateStorage_00a2ac30();
 
 typedef void(__cdecl* A2AD80Callback)();
 
@@ -7262,7 +7270,8 @@ extern A2AD80Callback g_A2AD80Callback11;
 extern unsigned char g_A2AD80Flags;
 
 // @fnv 0x00a2ad80
-int __cdecl FUN_00a2ad80()
+// src: GUESS 0x00a2ad80 (confidence: low)
+int __cdecl Object_ComputeValue_00a2ad80()
 {
     if (g_A2AD80Initialized)
         return 0;
@@ -7270,16 +7279,16 @@ int __cdecl FUN_00a2ad80()
     g_A2AD80Callback0 = 0;
     g_A2AD80Callback1 = 0;
     g_A2AD80Callback2 = 0;
-    g_A2AD80Callback3 = FUN_00a2abc0;
-    g_A2AD80Callback4 = FUN_00a2d690;
-    g_A2AD80Callback5 = FUN_00a2ab10;
-    g_A2AD80Callback6 = FUN_00a2ab40;
-    g_A2AD80Callback7 = FUN_00a2a600;
+    g_A2AD80Callback3 = Object_ProcessEntries_00a2abc0;
+    g_A2AD80Callback4 = Runtime_ProcessEntries_00a2d690;
+    g_A2AD80Callback5 = Runtime_CopyFloatAndTail;
+    g_A2AD80Callback6 = Object_GetIndexedValue_00a2ab40;
+    g_A2AD80Callback7 = NiStepPosKey_DeleteArray;
     g_A2AD80Flags = 0x14;
-    g_A2AD80Callback8 = FUN_00a2ab90;
-    g_A2AD80Callback9 = FUN_00a2d680;
-    g_A2AD80Callback10 = FUN_00a2d670;
-    g_A2AD80Callback11 = FUN_00a2ac30;
+    g_A2AD80Callback8 = Runtime_ForwardCall_00a2ab90;
+    g_A2AD80Callback9 = Object_ForwardCall_00a2d680;
+    g_A2AD80Callback10 = NiRotKey_FillDerivedVals_Thunk;
+    g_A2AD80Callback11 = NiRotKey_FillDerivedVals_AllocateStorage_00a2ac30;
     return 1;
 }
 
@@ -7300,18 +7309,19 @@ extern RuntimeCallback DAT_011f3b1c;
 extern RuntimeCallback DAT_011f37bc;
 extern RuntimeCallback DAT_011f384c;
 
-void __cdecl FUN_00a2c420();
-void __cdecl FUN_00a2c490();
-void __cdecl FUN_00a2bbf0();
-void __cdecl FUN_00a2be60();
-void __cdecl FUN_00a2a600();
+void __cdecl Object_ProcessEntries_00a2c420();
+void __cdecl NiTCBRotKey_SaveToStream();
+void __cdecl NiTCBRotKey_Copy();
+void __cdecl Object_GetIndexedValue_00a2be60();
+void __cdecl NiStepPosKey_DeleteArray();
 void __cdecl InvokeSpawnTarget();
 void __cdecl BezRotKeyEqual();
-void __cdecl FUN_00a2c130();
-void __cdecl FUN_00a2c1b0();
+void __cdecl NiTCBRotKey_FillDerivedVals();
+void __cdecl NiTCBRotKey_FillDerivedVals_AllocateStorage_00a2c1b0();
 
 // @fnv 0x00a2c4c0
-int __cdecl FUN_00a2c4c0()
+// src: GUESS 0x00a2c4c0 (confidence: low)
+int __cdecl Object_ComputeValue_00a2c4c0()
 {
     if (DAT_011f3696 != 0)
         return 0;
@@ -7320,16 +7330,16 @@ int __cdecl FUN_00a2c4c0()
     DAT_011f3d5c = 0;
     DAT_011f3c3c = 0;
     DAT_011f3bac = 0;
-    DAT_011f3dec = FUN_00a2c420;
-    DAT_011f3a8c = FUN_00a2c490;
-    DAT_011f39fc = FUN_00a2bbf0;
-    DAT_011f396c = FUN_00a2be60;
-    DAT_011f38dc = FUN_00a2a600;
+    DAT_011f3dec = Object_ProcessEntries_00a2c420;
+    DAT_011f3a8c = NiTCBRotKey_SaveToStream;
+    DAT_011f39fc = NiTCBRotKey_Copy;
+    DAT_011f396c = Object_GetIndexedValue_00a2be60;
+    DAT_011f38dc = NiStepPosKey_DeleteArray;
     DAT_011f3767 = 0x40;
     DAT_011f3ccc = InvokeSpawnTarget;
     DAT_011f3b1c = BezRotKeyEqual;
-    DAT_011f37bc = FUN_00a2c130;
-    DAT_011f384c = FUN_00a2c1b0;
+    DAT_011f37bc = NiTCBRotKey_FillDerivedVals;
+    DAT_011f384c = NiTCBRotKey_FillDerivedVals_AllocateStorage_00a2c1b0;
     return 1;
 }
 
@@ -7348,17 +7358,18 @@ extern void* DAT_011f3aec;
 extern void* DAT_011f378c;
 extern void* DAT_011f381c;
 void __cdecl AllocateKeyframeElements();
-void __cdecl FUN_00a2cb50();
+void __cdecl NiTCBFloatKey_SaveToStream();
 void __cdecl CopyFloat7();
 void __cdecl AllocateElem28Array();
-void __cdecl FUN_00a2a600();
-void __cdecl FUN_00a2c610();
-void __cdecl FUN_00a2c550();
-void __cdecl FUN_00a2c7a0();
-void __cdecl FUN_00a2c890();
+void __cdecl NiStepPosKey_DeleteArray();
+void __cdecl NiTCBFloatKey_Interpolate();
+void __cdecl Runtime_AreRecordsAndFloatFieldsEqual();
+void __cdecl NiTCBFloatKey_FillDerivedVals();
+void __cdecl NiTCBFloatKey_FillDerivedVals_AllocateStorage_00a2c890();
 
 // @fnv 0x00a2cb80
-int __cdecl FUN_00a2cb80()
+// src: GUESS 0x00a2cb80 (confidence: low)
+int __cdecl Object_ComputeValue_00a2cb80()
 {
     if (DAT_011f3697 != 0)
     {
@@ -7369,15 +7380,15 @@ int __cdecl FUN_00a2cb80()
     DAT_011f3c0c = 0;
     DAT_011f3b7c = 0;
     DAT_011f3dbc = (void*)AllocateKeyframeElements;
-    DAT_011f3a5c = (void*)FUN_00a2cb50;
+    DAT_011f3a5c = (void*)NiTCBFloatKey_SaveToStream;
     DAT_011f39cc = (void*)CopyFloat7;
     DAT_011f393c = (void*)AllocateElem28Array;
-    DAT_011f38ac = (void*)FUN_00a2a600;
+    DAT_011f38ac = (void*)NiStepPosKey_DeleteArray;
     DAT_011f375b = 0x1c;
-    DAT_011f3c9c = (void*)FUN_00a2c610;
-    DAT_011f3aec = (void*)FUN_00a2c550;
-    DAT_011f378c = (void*)FUN_00a2c7a0;
-    DAT_011f381c = (void*)FUN_00a2c890;
+    DAT_011f3c9c = (void*)NiTCBFloatKey_Interpolate;
+    DAT_011f3aec = (void*)Runtime_AreRecordsAndFloatFieldsEqual;
+    DAT_011f378c = (void*)NiTCBFloatKey_FillDerivedVals;
+    DAT_011f381c = (void*)NiTCBFloatKey_FillDerivedVals_AllocateStorage_00a2c890;
     return 1;
 }
 
@@ -7395,18 +7406,19 @@ extern void* DAT_011f3d1c;
 extern void* DAT_011f3b6c;
 extern void* DAT_011f380c;
 extern void* DAT_011f389c;
-void __cdecl FUN_00a2cdc0();
-void __cdecl FUN_00a2cc60();
-void __cdecl FUN_00a2cc10();
+void __cdecl NiStream_ProcessEntries_00a2cdc0();
+void __cdecl Object_WriteEnabledFlags();
+void __cdecl NiStepBoolKey_Copy();
 void __cdecl AllocateArr8Array();
-void __cdecl FUN_00a2a600();
+void __cdecl NiStepPosKey_DeleteArray();
 void __cdecl SelectByteByThreshold();
-void __cdecl FUN_00a2cc30();
-void __cdecl FUN_00a29680();
-void __cdecl FUN_00a2ccd0();
+void __cdecl NiBoolKey_Equal_ForwardCall_00a2cc30();
+void __cdecl Object_DoNothing();
+void __cdecl Runtime_AllocateStorage_00a2ccd0();
 
 // @fnv 0x00a2ce20
-int __cdecl FUN_00a2ce20()
+// src: GUESS 0x00a2ce20 (confidence: low)
+int __cdecl Object_ComputeValue_00a2ce20()
 {
     if (DAT_011f3698 != 0)
     {
@@ -7416,16 +7428,16 @@ int __cdecl FUN_00a2ce20()
     DAT_011f3dac = 0;
     DAT_011f3c8c = 0;
     DAT_011f3bfc = 0;
-    DAT_011f3e3c = (void*)FUN_00a2cdc0;
-    DAT_011f3adc = (void*)FUN_00a2cc60;
-    DAT_011f3a4c = (void*)FUN_00a2cc10;
+    DAT_011f3e3c = (void*)NiStream_ProcessEntries_00a2cdc0;
+    DAT_011f3adc = (void*)Object_WriteEnabledFlags;
+    DAT_011f3a4c = (void*)NiStepBoolKey_Copy;
     DAT_011f39bc = (void*)AllocateArr8Array;
-    DAT_011f392c = (void*)FUN_00a2a600;
+    DAT_011f392c = (void*)NiStepPosKey_DeleteArray;
     DAT_011f377b = 8;
     DAT_011f3d1c = (void*)SelectByteByThreshold;
-    DAT_011f3b6c = (void*)FUN_00a2cc30;
-    DAT_011f380c = (void*)FUN_00a29680;
-    DAT_011f389c = (void*)FUN_00a2ccd0;
+    DAT_011f3b6c = (void*)NiBoolKey_Equal_ForwardCall_00a2cc30;
+    DAT_011f380c = (void*)Object_DoNothing;
+    DAT_011f389c = (void*)Runtime_AllocateStorage_00a2ccd0;
     return 1;
 }
 
@@ -7446,17 +7458,18 @@ extern RuntimeCallbackFn DAT_011f3cec;
 extern RuntimeCallbackFn DAT_011f3b3c;
 extern RuntimeCallbackFn DAT_011f386c;
 
-void __cdecl FUN_00a2cf60();
-void __cdecl FUN_00a2cfd0();
-void __cdecl FUN_00a2ab10();
-void __cdecl FUN_00a2ced0();
-void __cdecl FUN_00a2a600();
+void __cdecl Object_ProcessEntries_00a2cf60();
+void __cdecl Runtime_ProcessEntries_00a2cfd0();
+void __cdecl Runtime_CopyFloatAndTail();
+void __cdecl Runtime_AllocateStorage_00a2ced0();
+void __cdecl NiStepPosKey_DeleteArray();
 void __cdecl SelectPayloadByThreshold();
-void __cdecl FUN_00a2a1a0();
-void __cdecl FUN_00a2d000();
+void __cdecl Object_CompareHelpers_Thunk();
+void __cdecl Object_ProcessAndReturnValue_00a2d000();
 
 // @fnv 0x00a2d140
-int FUN_00a2d140()
+// src: GUESS 0x00a2d140 (confidence: low)
+int Object_ComputeValue_00a2d140()
 {
     if (DAT_011f3699 != 0)
         return 0;
@@ -7465,15 +7478,15 @@ int FUN_00a2d140()
     DAT_011f3c5c = 0;
     DAT_011f3bcc = 0;
     DAT_011f37dc = 0;
-    *(RuntimeCallbackFn volatile*)&DAT_011f3e0c = FUN_00a2cf60;
-    DAT_011f3aac = FUN_00a2cfd0;
-    DAT_011f3a1c = FUN_00a2ab10;
-    DAT_011f398c = FUN_00a2ced0;
-    DAT_011f38fc = FUN_00a2a600;
+    *(RuntimeCallbackFn volatile*)&DAT_011f3e0c = Object_ProcessEntries_00a2cf60;
+    DAT_011f3aac = Runtime_ProcessEntries_00a2cfd0;
+    DAT_011f3a1c = Runtime_CopyFloatAndTail;
+    DAT_011f398c = Runtime_AllocateStorage_00a2ced0;
+    DAT_011f38fc = NiStepPosKey_DeleteArray;
     DAT_011f376f = 0x14;
     DAT_011f3cec = SelectPayloadByThreshold;
-    DAT_011f3b3c = FUN_00a2a1a0;
-    DAT_011f386c = FUN_00a2d000;
+    DAT_011f3b3c = Object_CompareHelpers_Thunk;
+    DAT_011f386c = Object_ProcessAndReturnValue_00a2d000;
     return 1;
 }
 
@@ -7492,17 +7505,18 @@ extern void* DAT_011f3b24;
 extern void* DAT_011f37c4;
 extern void* DAT_011f3854;
 
-void __cdecl FUN_00a2abc0();
-void __cdecl FUN_00a2d690();
-void __cdecl FUN_00a2ab10();
-void __cdecl FUN_00a2ab40();
+void __cdecl Object_ProcessEntries_00a2abc0();
+void __cdecl Runtime_ProcessEntries_00a2d690();
+void __cdecl Runtime_CopyFloatAndTail();
+void __cdecl Object_GetIndexedValue_00a2ab40();
 void __cdecl SelectPayloadByThreshold();
-void __cdecl FUN_00a2d680();
-void __cdecl FUN_00a2d670();
-void __cdecl FUN_00a2d6c0();
+void __cdecl Object_ForwardCall_00a2d680();
+void __cdecl NiRotKey_FillDerivedVals_Thunk();
+void __cdecl Object_ProcessAndReturnValue_00a2d6c0();
 
 // @fnv 0x00a2d810
-int __cdecl FUN_00a2d810()
+// src: GUESS 0x00a2d810 (confidence: low)
+int __cdecl NiStepPosKey_DeleteArray_UpdateState_00a2d810()
 {
     if (DAT_011f369c != 0)
     {
@@ -7512,16 +7526,16 @@ int __cdecl FUN_00a2d810()
     DAT_011f3d64 = 0;
     DAT_011f3c44 = 0;
     DAT_011f3bb4 = 0;
-    DAT_011f3df4 = (void*)FUN_00a2abc0;
-    DAT_011f3a94 = (void*)FUN_00a2d690;
-    DAT_011f3a04 = (void*)FUN_00a2ab10;
-    DAT_011f3974 = (void*)FUN_00a2ab40;
-    DAT_011f38e4 = (void*)FUN_00a2a600;
+    DAT_011f3df4 = (void*)Object_ProcessEntries_00a2abc0;
+    DAT_011f3a94 = (void*)Runtime_ProcessEntries_00a2d690;
+    DAT_011f3a04 = (void*)Runtime_CopyFloatAndTail;
+    DAT_011f3974 = (void*)Object_GetIndexedValue_00a2ab40;
+    DAT_011f38e4 = (void*)NiStepPosKey_DeleteArray;
     DAT_011f3769 = 0x14;
     DAT_011f3cd4 = (void*)SelectPayloadByThreshold;
-    DAT_011f3b24 = (void*)FUN_00a2d680;
-    DAT_011f37c4 = (void*)FUN_00a2d670;
-    DAT_011f3854 = (void*)FUN_00a2d6c0;
+    DAT_011f3b24 = (void*)Object_ForwardCall_00a2d680;
+    DAT_011f37c4 = (void*)NiRotKey_FillDerivedVals_Thunk;
+    DAT_011f3854 = (void*)Object_ProcessAndReturnValue_00a2d6c0;
     return 1;
 }
 
@@ -7543,17 +7557,18 @@ extern S_00a2d360_Fn DAT_011f3794;
 extern S_00a2d360_Fn DAT_011f3824;
 
 void __cdecl CreateInitializedElems();
-void __cdecl FUN_00a2d230();
+void __cdecl NiAnimationKey_SaveToStream();
 void __cdecl CopyFloat2();
 void __cdecl AllocateArr8Array();
-void __cdecl FUN_00a2a600();
-void __cdecl FUN_00a2d200();
-void __cdecl FUN_00a2d1d0();
-void __cdecl FUN_00a29680();
+void __cdecl NiStepPosKey_DeleteArray();
+void __cdecl NiStepFloatKey_Interpolate();
+void __cdecl Runtime_AreRecordsEqual_Thunk();
+void __cdecl Object_DoNothing();
 void __cdecl InsertKeyPair();
 
 // @fnv 0x00a2d360
-int __cdecl FUN_00a2d360()
+// src: GUESS 0x00a2d360 (confidence: low)
+int __cdecl Object_ComputeValue_00a2d360()
 {
     if (DAT_011f369a)
         return 0;
@@ -7563,14 +7578,14 @@ int __cdecl FUN_00a2d360()
     DAT_011f369a = 1;
     DAT_011f3b84 = 0;
     DAT_011f3dc4 = CreateInitializedElems;
-    DAT_011f3a64 = FUN_00a2d230;
+    DAT_011f3a64 = NiAnimationKey_SaveToStream;
     DAT_011f39d4 = CopyFloat2;
     DAT_011f3944 = AllocateArr8Array;
-    DAT_011f38b4 = FUN_00a2a600;
+    DAT_011f38b4 = NiStepPosKey_DeleteArray;
     DAT_011f375d = 8;
-    DAT_011f3ca4 = FUN_00a2d200;
-    DAT_011f3af4 = FUN_00a2d1d0;
-    DAT_011f3794 = FUN_00a29680;
+    DAT_011f3ca4 = NiStepFloatKey_Interpolate;
+    DAT_011f3af4 = Runtime_AreRecordsEqual_Thunk;
+    DAT_011f3794 = Object_DoNothing;
     DAT_011f3824 = InsertKeyPair;
     return 1;
 }
@@ -7597,16 +7612,17 @@ extern void (*volatile DAT_011f38e8)(ColorAnimationKey*);
 extern unsigned char DAT_011f376a;
 extern int* (*volatile DAT_011f3cd8)(int, int, int, int*);
 extern bool (*volatile DAT_011f3b28)(const Helper*, const Helper*);
-extern void FUN_00e7cd40(CallbackTypeA*);
-extern void FUN_00e7cd40(CallbackTypeB*);
-extern void FUN_00a29680(CallbackTypeA*);
-extern void FUN_00a29680(CallbackTypeB*);
-extern void FUN_00a29680(ColorAnimationKey*);
+extern void Ret0(CallbackTypeA*);
+extern void Ret0(CallbackTypeB*);
+extern void Object_DoNothing(CallbackTypeA*);
+extern void Object_DoNothing(CallbackTypeB*);
+extern void Object_DoNothing(ColorAnimationKey*);
 extern int* CopyGlobalsToBuffer(int, int, int, int*);
 extern bool CompareHelpers(const Helper*, const Helper*);
 
 // @fnv 0x00a299f0
-int FUN_00a299f0()
+// src: GUESS 0x00a299f0 (confidence: low)
+int CrtCallbackStatus_FillMemory_00a299f0()
 {
     if (DAT_011f367f != 0)
         return 0;
@@ -7616,11 +7632,11 @@ int FUN_00a299f0()
     DAT_011f37c8 = 0;
     DAT_011f3858 = 0;
     memset(&DAT_011f367f, 1, 1);
-    DAT_011f3df8 = &FUN_00e7cd40;
-    DAT_011f3a98 = &FUN_00a29680;
-    DAT_011f3a08 = &FUN_00a29680;
-    DAT_011f3978 = &FUN_00e7cd40;
-    DAT_011f38e8 = &FUN_00a29680;
+    DAT_011f3df8 = &Ret0;
+    DAT_011f3a98 = &Object_DoNothing;
+    DAT_011f3a08 = &Object_DoNothing;
+    DAT_011f3978 = &Ret0;
+    DAT_011f38e8 = &Object_DoNothing;
     DAT_011f376a = 0x14;
     DAT_011f3cd8 = &CopyGlobalsToBuffer;
     DAT_011f3b28 = &CompareHelpers;
@@ -7630,13 +7646,13 @@ int FUN_00a299f0()
 extern unsigned char DAT_011f3690;
 extern unsigned char DAT_011f3768;
 extern unsigned int DAT_011f3d60, DAT_011f3c40, DAT_011f3bb0;
-extern void FUN_00a2a070();
-extern void FUN_00a2a0e0();
+extern void Runtime_AllocateStorage_00a2a070();
+extern void NiEulerRotKey_SaveToStream();
 extern void CopyKeyData();
-extern void FUN_00a29db0();
-extern void FUN_00a2a600();
-extern void FUN_00a29b10();
-extern void FUN_00a29c20();
+extern void Runtime_GetIndexedValue_00a29db0();
+extern void NiStepPosKey_DeleteArray();
+extern void Runtime_ProcessEntries_00a29b10();
+extern void NiEulerRotKey_Equal();
 extern void DispatchEntryCallbacks();
 extern void UpdateArrayElements();
 extern void (*DAT_011f3df0)();
@@ -7649,7 +7665,8 @@ extern void (*DAT_011f3b20)();
 extern void (*DAT_011f37c0)();
 extern void (*DAT_011f3850)();
 // @fnv 0x00a2a110
-int __cdecl FUN_00a2a110()
+// src: GUESS 0x00a2a110 (confidence: low)
+int __cdecl NiEulerRotKey_SaveToStream_FillMemory_00a2a110()
 {
     if (DAT_011f3690)
         return 0;
@@ -7657,14 +7674,14 @@ int __cdecl FUN_00a2a110()
     DAT_011f3c40 = 0;
     DAT_011f3bb0 = 0;
     memset(&DAT_011f3690, 1, 1);
-    DAT_011f3df0 = &FUN_00a2a070;
-    DAT_011f3a90 = &FUN_00a2a0e0;
+    DAT_011f3df0 = &Runtime_AllocateStorage_00a2a070;
+    DAT_011f3a90 = &NiEulerRotKey_SaveToStream;
     DAT_011f3a00 = &CopyKeyData;
-    DAT_011f3970 = &FUN_00a29db0;
-    DAT_011f38e0 = &FUN_00a2a600;
+    DAT_011f3970 = &Runtime_GetIndexedValue_00a29db0;
+    DAT_011f38e0 = &NiStepPosKey_DeleteArray;
     DAT_011f3768 = 0x48;
-    DAT_011f3cd0 = &FUN_00a29b10;
-    DAT_011f3b20 = &FUN_00a29c20;
+    DAT_011f3cd0 = &Runtime_ProcessEntries_00a29b10;
+    DAT_011f3b20 = &NiEulerRotKey_Equal;
     DAT_011f37c0 = &DispatchEntryCallbacks;
     DAT_011f3850 = &UpdateArrayElements;
     return 1;
@@ -7681,16 +7698,17 @@ extern void (*volatile DAT_011f38ec)();
 extern void (*volatile DAT_011f3cdc)();
 extern void (*volatile DAT_011f3b2c)();
 extern void (*volatile DAT_011f385c)();
-void FUN_00a2a320();
-void FUN_00a2cfd0();
-void FUN_00a2ab10();
-void FUN_00a2a1b0();
-void FUN_00a2a600();
+void Object_ProcessEntries_00a2a320();
+void Runtime_ProcessEntries_00a2cfd0();
+void Runtime_CopyFloatAndTail();
+void NiColorKey_K_AllocateStorage_00a2a1b0();
+void NiStepPosKey_DeleteArray();
 void InterpolateQuaternion();
-void FUN_00a2a1a0();
-void FUN_00a2a390();
+void Object_CompareHelpers_Thunk();
+void Runtime_AllocateStorage_00a2a390();
 // @fnv 0x00a2a4d0
-int __cdecl FUN_00a2a4d0()
+// src: GUESS 0x00a2a4d0 (confidence: low)
+int __cdecl NiStepPosKey_DeleteArray_FillMemory_00a2a4d0()
 {
     if (DAT_011f3691 != 0)
         return 0;
@@ -7699,15 +7717,15 @@ int __cdecl FUN_00a2a4d0()
     DAT_011f3bbc = 0;
     DAT_011f37cc = 0;
     memset(&DAT_011f3691, 1, 1);
-    DAT_011f3dfc = &FUN_00a2a320;
-    DAT_011f3a9c = &FUN_00a2cfd0;
-    DAT_011f3a0c = &FUN_00a2ab10;
-    DAT_011f397c = &FUN_00a2a1b0;
-    DAT_011f38ec = &FUN_00a2a600;
+    DAT_011f3dfc = &Object_ProcessEntries_00a2a320;
+    DAT_011f3a9c = &Runtime_ProcessEntries_00a2cfd0;
+    DAT_011f3a0c = &Runtime_CopyFloatAndTail;
+    DAT_011f397c = &NiColorKey_K_AllocateStorage_00a2a1b0;
+    DAT_011f38ec = &NiStepPosKey_DeleteArray;
     DAT_011f376b = 0x14;
     DAT_011f3cdc = &InterpolateQuaternion;
-    DAT_011f3b2c = &FUN_00a2a1a0;
-    DAT_011f385c = &FUN_00a2a390;
+    DAT_011f3b2c = &Object_CompareHelpers_Thunk;
+    DAT_011f385c = &Runtime_AllocateStorage_00a2a390;
     return 1;
 }
 
@@ -7715,13 +7733,13 @@ extern unsigned char DAT_011f3692;
 extern unsigned char DAT_011f3759;
 extern int DAT_011f3d24, DAT_011f3c04, DAT_011f3b74;
 void CreateInitializedElems();
-void FUN_00a2d230();
+void NiAnimationKey_SaveToStream();
 void CopyFloat2();
 void AllocateArr8Array();
-void FUN_00a2a560();
-void FUN_00a2d1d0();
-void FUN_00a29680();
-void FUN_00a2a620();
+void NiLinFloatKey_Interpolate();
+void Runtime_AreRecordsEqual_Thunk();
+void Object_DoNothing();
+void Object_ConstructObject_00a2a620();
 extern void (*DAT_011f3db4)();
 extern void (*DAT_011f3a54)();
 extern void (*DAT_011f39c4)();
@@ -7732,7 +7750,8 @@ extern void (*DAT_011f3ae4)();
 extern void (*DAT_011f3784)();
 extern void (*DAT_011f3814)();
 // @fnv 0x00a2a720
-int FUN_00a2a720()
+// src: GUESS 0x00a2a720 (confidence: low)
+int Object_ProcessAndReturnValue_00a2a720()
 {
     if (DAT_011f3692)
         return 0;
@@ -7741,14 +7760,14 @@ int FUN_00a2a720()
     DAT_011f3b74 = 0;
     memset(&DAT_011f3692, 1, 1);
     DAT_011f3db4 = CreateInitializedElems;
-    DAT_011f3a54 = FUN_00a2d230;
+    DAT_011f3a54 = NiAnimationKey_SaveToStream;
     DAT_011f39c4 = CopyFloat2;
     DAT_011f3934 = AllocateArr8Array;
-    DAT_011f38a4 = FUN_00a2a600;
+    DAT_011f38a4 = NiStepPosKey_DeleteArray;
     DAT_011f3759 = 8;
-    DAT_011f3c94 = FUN_00a2a560;
-    DAT_011f3ae4 = FUN_00a2d1d0;
-    DAT_011f3784 = FUN_00a29680;
-    DAT_011f3814 = FUN_00a2a620;
+    DAT_011f3c94 = NiLinFloatKey_Interpolate;
+    DAT_011f3ae4 = Runtime_AreRecordsEqual_Thunk;
+    DAT_011f3784 = Object_DoNothing;
+    DAT_011f3814 = Object_ConstructObject_00a2a620;
     return 1;
 }

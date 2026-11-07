@@ -6,7 +6,8 @@
 #include "../../include/CVec3.h"
 
 // @fnv 0x00b3f0c0
-CIdvCamera& CIdvCamera::FUN_00b3f0c0(const CIdvCamera& other)
+// src: GUESS 0x00b3f0c0 (confidence: low)
+CIdvCamera& CIdvCamera::AssignFields_00b3f0c0(const CIdvCamera& other)
 {
     if (&other != this)
     {

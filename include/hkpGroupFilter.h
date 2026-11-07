@@ -32,7 +32,7 @@ public:
     hkBool ShouldCollide(unsigned int uInfoA, unsigned int uInfoB) const throw();
     void ClearMaskedBits(unsigned int uMaskA, unsigned int uMaskB);
     void DisableCollisionPair(int iLayerA, int iLayerB);
-    void FUN_00e488e0(unsigned int uInfoA, unsigned int uInfoB);
+    void hkpGroupFilter_enableCollisionsUsingBitfield(unsigned int uInfoA, unsigned int uInfoB);
 
     __declspec(align(16)) int m_iNextFreeSystemGroup;
     unsigned int m_uiCollisionGroupMasks[32];

@@ -10,7 +10,8 @@
 extern char const* const g_011f5f14_arg1;
 
 // @fnv 0x00a9b1b0
-char const* const* __cdecl FUN_00a9b1b0()
+// src: COMMUNITY 0x00a9b1b0
+char const* const* __cdecl NiParticles_GetRTTI()
 {
     return &g_011f5f14_arg1;
 }
@@ -50,7 +51,8 @@ void __stdcall FUN_00a80e70(StrArr*);
 char* _FUN_00a7d330(const char*);
 // Grows the StrArr if it is full, then appends the string returned by _FUN_00a7d330(g_011f5f14_arg1) at the current size.
 // @fnv 0x00a9b2e0
-void __stdcall FUN_00a9b2e0(StrArr* apStrArr)
+// src: XBOX_PDB 0x00a9b2e0
+void __stdcall NiParticles_GetViewerStrings(StrArr* apStrArr)
 {
     FUN_00a80e70(apStrArr);
     char* psz = _FUN_00a7d330(g_011f5f14_arg1);
@@ -61,7 +63,7 @@ void __stdcall FUN_00a9b2e0(StrArr* apStrArr)
     apStrArr->SetAt(uiSize, psz);
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 extern int DAT_010a11d4;
 
 inline void* operator new(unsigned int, void* memory) { return memory; }
@@ -69,7 +71,7 @@ inline void* operator new(unsigned int, void* memory) { return memory; }
 // @fnv 0x00a9b250
 NiParticles* __fastcall CreateAndInitObject(NiParticles* self, void*, unsigned int arg)
 {
-    NiParticles* p = (NiParticles*)FUN_00aa13e0(0xc4);
+    NiParticles* p = (NiParticles*)Object_DispatchCommandFour(0xc4);
     if (p != 0)
     {
         ::new (p) NiGeometry;
@@ -100,7 +102,7 @@ struct ObjHdr
 
 struct HolderB8
 {
-    void FUN_00a96910(unsigned int);
+    void NiParticlesData_SortParticles(unsigned int);
 };
 
 struct ArgRec
@@ -118,7 +120,7 @@ void __fastcall ProcessArgIfFlagged(NiParticles* self, void*, ArgRec* pArg)
     ObjHdr* pObjHdr = (ObjHdr*)self->m_PropertyState.m_aspProps[0];
     if (pObjHdr != 0 && (pObjHdr->m_18b & 1) != 0 && (pObjHdr->m_18w & 0x1E0) != 0)
     {
-        ((HolderB8*)self->m_spModelData.m_pObject)->FUN_00a96910(pArg->m_0C);
+        ((HolderB8*)self->m_spModelData.m_pObject)->NiParticlesData_SortParticles(pArg->m_0C);
     }
     self->NiGeometry::OnVisible(*reinterpret_cast<NiCullingProcess*>(pArg));
 }

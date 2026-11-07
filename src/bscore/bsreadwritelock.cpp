@@ -28,14 +28,15 @@ struct ReadWriteLock
 typedef char _sizecheck_BSReadWriteLock[sizeof(ReadWriteLock) == 8 ? 1 : -1];
 struct FUN_00aa62e0_shell : public ReadWriteLock
 {
-    void FUN_00aa62e0();
+    void BSReadWriteLock_UnlockWrite();
 };
 
 __declspec(dllimport) long __stdcall InterlockedCompareExchange(long volatile* Destination, long Exchange,
                                                                 long Comperand);
 
 // @fnv 0x00aa62e0
-void FUN_00aa62e0_shell::FUN_00aa62e0()
+// src: XBOX_PDB 0x00aa62e0
+void FUN_00aa62e0_shell::BSReadWriteLock_UnlockWrite()
 {
     m_uiLockState -= 1;
     if (m_uiLockState == 0x80000000)
@@ -87,10 +88,11 @@ struct Lock00aa6120
 {
     unsigned int state;
     unsigned long owner;
-    bool FUN_00aa6120();
+    bool BSReadWriteLock_TryLockForRead();
 };
 // @fnv 0x00aa6120
-bool Lock00aa6120::FUN_00aa6120()
+// src: COMMUNITY 0x00aa6120
+bool Lock00aa6120::BSReadWriteLock_TryLockForRead()
 {
     bool bLocked = false;
     unsigned long dwThreadId = GetCurrentThreadId();
@@ -126,11 +128,12 @@ struct Lock00aa61b0
 {
     unsigned int state;
     unsigned long owner;
-    bool FUN_00aa61b0();
+    bool BSReadWriteLock_TryLockForWrite();
 };
 // Tries to acquire the lock: re-enters if already owned by this thread, otherwise atomically sets state and records the owner thread id.
 // @fnv 0x00aa61b0
-bool Lock00aa61b0::FUN_00aa61b0()
+// src: COMMUNITY 0x00aa61b0
+bool Lock00aa61b0::BSReadWriteLock_TryLockForWrite()
 {
     bool bLocked = false;
     unsigned long dwThreadId = GetCurrentThreadId();
@@ -162,11 +165,12 @@ struct Lock00aa6220
 {
     unsigned int state;
     unsigned long owner;
-    bool FUN_00aa6220();
+    bool BSReadWriteLock_TryLockForWriteAndReserve();
 };
 // Tries to acquire the lock: re-enters if already owned by this thread, otherwise claims the state word via InterlockedCompareExchange and records the owner.
 // @fnv 0x00aa6220
-bool Lock00aa6220::FUN_00aa6220()
+// src: COMMUNITY 0x00aa6220
+bool Lock00aa6220::BSReadWriteLock_TryLockForWriteAndReserve()
 {
     bool bLocked = false;
     unsigned long dwThreadId = GetCurrentThreadId();
@@ -203,10 +207,11 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile lo
 struct Lock00aa62c0
 {
     long count;
-    void FUN_00aa62c0();
+    void BSReadWriteLock_UnlockRead();
 };
 // @fnv 0x00aa62c0
-void Lock00aa62c0::FUN_00aa62c0()
+// src: XBOX_PDB 0x00aa62c0
+void Lock00aa62c0::BSReadWriteLock_UnlockRead()
 {
     InterlockedDecrement(&count);
 }

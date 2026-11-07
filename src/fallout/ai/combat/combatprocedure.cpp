@@ -38,7 +38,7 @@ void FUN_0097f450_shell::SetAttacker(unsigned char bAttacker)
 // @fnv 0x009ca6e0
 void* __thiscall CombatProcedure::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_009ca6c0();
+    SetVirtualTable_009ca6c0();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -70,7 +70,8 @@ void FUN_009d4f30_shell::SetByteAtOffset188ToFF()
 
 
 // @fnv 0x00980070
-CombatOptions* CombatController::FUN_00980070()
+// src: XBOX_PDB 0x00980070
+CombatOptions* CombatController::GetCurrentCombatStyle()
 {
     return reinterpret_cast<CombatOptions*>(unkF4);
 }
@@ -87,22 +88,24 @@ void __thiscall CombatProcedure::SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffe
 // @fnv 0x00996e60
 void CombatProcedure::SetLookAtPoint(const NiPoint3& arLookAtPoint, unsigned char acPriority)
 {
-    m_pCombatController->FUN_009816d0(
-        m_pCombatController->FUN_00981690(
+    m_pCombatController->SetLookAtTarget(
+        m_pCombatController->GetLookAtTargetIndex(
             this, arLookAtPoint, acPriority));
 }
 
 // Passes this procedure to the controller, then applies the returned look-at index.
 // @fnv 0x00996ea0
-void __thiscall CombatProcedure::FUN_00996ea0()
+// src: XBOX_PDB 0x00996ea0
+void __thiscall CombatProcedure::ClearLookAtTarget_00996ea0()
 {
-    m_pCombatController->FUN_00981720(
-        m_pCombatController->FUN_00981690(
+    m_pCombatController->ClearLookAtTarget_00981720(
+        m_pCombatController->GetLookAtTargetIndex(
             static_cast<void*>(this)));
 }
 
 // @fnv 0x00996ef0
-void __thiscall CombatProcedure::FUN_00996ef0(BGSLoadFormBuffer* buffer)
+// src: XBOX_PDB 0x00996ef0
+void __thiscall CombatProcedure::LoadGame_00996ef0(BGSLoadFormBuffer* buffer)
 {
     buffer->ReadTypedData(&eStatus, 4u);
 }
@@ -117,25 +120,28 @@ void __fastcall ResetActorMovement(Actor* actor)
 
 
 // @fnv 0x00996e00
-void* __thiscall CombatProcedure::FUN_00996e00()
+// src: XBOX_PDB 0x00996e00
+void* __thiscall CombatProcedure::GetTarget_00996e00()
 {
-    return m_pCombatController->FUN_004030b0();
+    return m_pCombatController->CombatController_GetTarget();
 }
 
 // @fnv 0x00996e20
-void __thiscall CombatProcedure::FUN_00996e20(int aiCombatMoveMode)
+// src: XBOX_PDB 0x00996e20
+void __thiscall CombatProcedure::SetMoveMode_00996e20(int aiCombatMoveMode)
 {
-    m_pCombatController->FUN_00981570(aiCombatMoveMode);
+    m_pCombatController->SetMoveMode(aiCombatMoveMode);
 }
 
 // @fnv 0x00996e40
-void __thiscall CombatProcedure::FUN_00996e40()
+// src: XBOX_PDB 0x00996e40
+void __thiscall CombatProcedure::ClearMoveMode()
 {
     m_pCombatController->ResetCombatState();
 }
 
 void* operator new(unsigned int);
-void __cdecl FUN_005b5e40(int, const char*, int);
+void __cdecl Warning_005b5e40(int, const char*, int);
 extern char DAT_0108ddac;
 // Returns a new CombatProcedure subclass for kind values 0 through 12; otherwise calls FUN_005b5e40 and returns null.
 // @fnv 0x00996f10
@@ -170,7 +176,7 @@ CombatProcedure* __cdecl CreateCombatProcedure(int kind)
     case 12:
         return new CombatProcedureEngageTarget();
     default:
-        FUN_005b5e40(1, &DAT_0108ddac, kind);
+        Warning_005b5e40(1, &DAT_0108ddac, kind);
         return 0;
     }
 }

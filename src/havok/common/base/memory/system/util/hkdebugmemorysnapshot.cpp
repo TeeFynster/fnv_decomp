@@ -69,10 +69,11 @@ public:
 
     void FreeBuffers();
     void Sort();
-    void FUN_00dd7090(hkDebugMemorySnapshot& other);
+    void subtract_00dd7090(hkDebugMemorySnapshot& other);
 };
 // @fnv 0x00dd7090
-void hkDebugMemorySnapshot::FUN_00dd7090(hkDebugMemorySnapshot& other)
+// src: HAVOK_LIB 0x00dd7090
+void hkDebugMemorySnapshot::subtract_00dd7090(hkDebugMemorySnapshot& other)
 {
     Sort();
     other.Sort();
@@ -96,12 +97,12 @@ void hkDebugMemorySnapshot::FUN_00dd7090(hkDebugMemorySnapshot& other)
 }
 
 namespace hkRouterDD6E {
-extern "C" DebugAllocatorRouter& __cdecl FUN_00c85750() throw();
+extern "C" DebugAllocatorRouter& __cdecl hkMemoryRouter_getInstance() throw();
 }
 
 template <typename T> inline void hkDeallocateChunkDD6E(T* p, int n)
 {
-    hkRouterDD6E::FUN_00c85750().debug().blockFree(p, n * sizeof(T));
+    hkRouterDD6E::hkMemoryRouter_getInstance().debug().blockFree(p, n * sizeof(T));
 }
 
 // Deallocates the two arrays when the first pointer is set, then nulls both pointers and the count.
@@ -118,20 +119,20 @@ void hkDebugMemorySnapshot::FreeBuffers()
     m_iElementCount = 0;
 }
 
-DebugAllocatorRouter* __cdecl FUN_00c85750();
+DebugAllocatorRouter* __cdecl hkMemoryRouter_getInstance();
 
 template <typename T> inline T* hkAllocateDebug(int n)
 {
-    return (T*)FUN_00c85750()->debug().blockAlloc(n * sizeof(T));
+    return (T*)hkMemoryRouter_getInstance()->debug().blockAlloc(n * sizeof(T));
 }
 
 template <typename T> inline void hkDeallocateDebug(T* p, int n)
 {
-    FUN_00c85750()->debug().blockFree(p, n * sizeof(T));
+    hkMemoryRouter_getInstance()->debug().blockFree(p, n * sizeof(T));
 }
 
 bool __cdecl LessThan(const hkSnapshotAddress* a, const hkSnapshotAddress* b);
-void __cdecl FUN_00dd7d00(const hkSnapshotAddress** p, int lo, int hi,
+void __cdecl hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(const hkSnapshotAddress** p, int lo, int hi,
                           bool(__cdecl* cmp)(const hkSnapshotAddress*, const hkSnapshotAddress*));
 
 inline void hkQuickSortQ(const hkSnapshotAddress** p, int size,
@@ -139,7 +140,7 @@ inline void hkQuickSortQ(const hkSnapshotAddress** p, int size,
 {
     if (size > 1)
     {
-        FUN_00dd7d00(p, 0, size - 1, cmp);
+        hkAlgorithm_quickSortRecursive_hkFreeList_Block_hkBool_cdecl_hkFreeList_Block_const_hkFreeList_Block_const(p, 0, size - 1, cmp);
     }
 }
 

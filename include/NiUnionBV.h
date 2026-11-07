@@ -26,7 +26,7 @@ public:
     virtual bool IsDifferent(NiBoundingVolume* pkOther);
     virtual void AddViewerStrings(char* pcPrefix, NiTPrimitiveArray<char*>* pkStrings);
 
-    NiUnionBV* FUN_00e9ee60(void* pkOtherRaw);
-    void FUN_00e9e860();
-    void FUN_00e9f0b0(char* pcPrefix, NiTPrimitiveArray<char*>* pkStrings);
+    NiUnionBV* NiUnionBV_NiUnionBV(void* pkOtherRaw);
+    void NiUnionBV_RemoveAllBoundingVolumes();
+    void AddViewerStrings_00e9f0b0(char* pcPrefix, NiTPrimitiveArray<char*>* pkStrings);
 };

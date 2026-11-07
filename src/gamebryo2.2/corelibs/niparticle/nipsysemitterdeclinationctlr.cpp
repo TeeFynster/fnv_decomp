@@ -4,11 +4,12 @@
 
 struct NiPSysEmitterDeclinationCtlr
 {
-    void FUN_00c2a1b0(float& fValue);
+    void GetTargetValueAtOffset20(float& fValue);
 };
 
 // @fnv 0x00c2a1b0
-void __thiscall NiPSysEmitterDeclinationCtlr::FUN_00c2a1b0(float& fValue)
+// src: GUESS 0x00c2a1b0 (confidence: medium)
+void __thiscall NiPSysEmitterDeclinationCtlr::GetTargetValueAtOffset20(float& fValue)
 {
     void* p = *(void**)((char*)this + 0x3C);
     fValue = *(float*)((char*)p + 0x20);
@@ -17,7 +18,8 @@ void __thiscall NiPSysEmitterDeclinationCtlr::FUN_00c2a1b0(float& fValue)
 extern "C" void* g_01202758;
 
 // @fnv 0x00c2b9a0
-void* __cdecl FUN_00c2b9a0()
+// src: COMMUNITY 0x00c2b9a0
+void* __cdecl NiPSysEmitterDeclinationCtlr_GetRTTI()
 {
     return &g_01202758;
 }
@@ -25,11 +27,12 @@ void* __cdecl FUN_00c2b9a0()
 namespace fnv_00c2b9b0 {
 struct NiPSysEmitterDeclinationCtlr
 {
-    void FUN_00c2b9b0(float fValue);
+    void SetTargetValueAtOffset20(float fValue);
 };
 
 // @fnv 0x00c2b9b0
-void NiPSysEmitterDeclinationCtlr::FUN_00c2b9b0(float fValue)
+// src: GUESS 0x00c2b9b0 (confidence: medium)
+void NiPSysEmitterDeclinationCtlr::SetTargetValueAtOffset20(float fValue)
 {
     void* pMember = *(void**)((char*)this + 0x3c);
     *(float*)((char*)pMember + 0x20) = fValue;
@@ -38,7 +41,7 @@ void NiPSysEmitterDeclinationCtlr::FUN_00c2b9b0(float fValue)
 
 struct NiObject;
 
-__declspec(nothrow) NiObject* __cdecl FUN_00a7d330(void* p);
+__declspec(nothrow) NiObject* __cdecl NiViewerStrings_NiGetViewerString_Title(void* p);
 
 struct ObjArray
 {
@@ -61,15 +64,16 @@ struct ObjArray
 
 struct FUN_00c2ba10_class
 {
-    __declspec(nothrow) void FUN_00c32f60(ObjArray* arr);
-    void FUN_00c2ba10(ObjArray* arr);
+    __declspec(nothrow) void NiPSysModifierFloatCtlr_GetViewerStrings(ObjArray* arr);
+    void NiPSysEmitterDeclinationCtlr_GetViewerStrings(ObjArray* arr);
 };
 
 // @fnv 0x00c2ba10
-void FUN_00c2ba10_class::FUN_00c2ba10(ObjArray* pArray)
+// src: XBOX_PDB 0x00c2ba10
+void FUN_00c2ba10_class::NiPSysEmitterDeclinationCtlr_GetViewerStrings(ObjArray* pArray)
 {
-    FUN_00c32f60(pArray);
-    NiObject* obj = FUN_00a7d330(g_01202758);
+    NiPSysModifierFloatCtlr_GetViewerStrings(pArray);
+    NiObject* obj = NiViewerStrings_NiGetViewerString_Title(g_01202758);
     pArray->Add(obj);
 }
 

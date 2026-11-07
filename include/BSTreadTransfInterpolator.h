@@ -28,11 +28,11 @@ class BSTreadTransfInterpolator : public NiKeyBasedInterpolator
     virtual void vf61(unsigned short usChannel);
 
     void CopyMembers(BSTreadTransfInterpolator* destination, void* context);
-    BSTreadTransfInterpolator* FUN_00a439e0(void* kCloning);
+    BSTreadTransfInterpolator* CreateClone_00a439e0(void* kCloning);
     void FUN_00a43690(BSTreadTransfInterpolator* pkDest, void* kCloning);
     bool UpdateSampleValue(float time, int, int);
-    void* FUN_00a43580(unsigned short flag);
-    bool FUN_00a435e0(int arg);
+    void* GetKeyType(unsigned short flag);
+    bool GetChannelPosed(int arg);
     void* FUN_00a43a50(unsigned int flags);
 
     TreadTransformEntry* entries;

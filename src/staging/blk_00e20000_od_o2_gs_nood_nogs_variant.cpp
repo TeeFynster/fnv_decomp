@@ -40,7 +40,8 @@ struct SupportResult
 static const __m128 kNegMask = {-0.0f, -0.0f, -0.0f, -0.0f};
 
 // @fnv 0x00e2da40
-static void FUN_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportResult* result, const __m128* dir,
+// src: GUESS 0x00e2da40 (confidence: low)
+static void hkTransform_UpdateFields_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportResult* result, const __m128* dir,
                          const hkTransform* xf)
 {
     __m128 negDir = _mm_xor_ps(*dir, kNegMask);
@@ -80,13 +81,14 @@ static void FUN_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportR
 
 void CallerOfIt(ConvexShapeStub* s, ConvexShapeStub* o, SupportResult* r, const __m128* d, const hkTransform* x)
 {
-    FUN_00e2da40(s, o, r, d, x);
-    FUN_00e2da40(o, s, r, d + 1, x);
-    FUN_00e2da40(s, s, r, d + 2, x);
+    hkTransform_UpdateFields_00e2da40(s, o, r, d, x);
+    hkTransform_UpdateFields_00e2da40(o, s, r, d + 1, x);
+    hkTransform_UpdateFields_00e2da40(s, s, r, d + 2, x);
 }
 
 // @fnv 0x00e31180
-void FUN_00e31180(const float* base, int stride, int count, int mul, int offset, __m128** dst)
+// src: GUESS 0x00e31180 (confidence: low)
+void Object_ProcessEntries_00e31180(const float* base, int stride, int count, int mul, int offset, __m128** dst)
 {
     for (int i = 0; i < count; i++)
         (*dst)[i] = _mm_setr_ps(base[(stride * mul + offset) + i * stride], 0.0f, 0.0f, 0.0f);
@@ -115,7 +117,7 @@ inline void hkRotation::setIdentity()
 class FrameE3B
 {
   public:
-    void FUN_00e3b630(const void* pSource);
+    void ProcessState_00e3b630(const void* pSource);
 
     int m_unk[8];
     hkRotation m_rotation;
@@ -124,8 +126,9 @@ class FrameE3B
 };
 
 // @fnv 0x00e3b630
-void FrameE3B::FUN_00e3b630(const void* pSource)
+// src: GUESS 0x00e3b630 (confidence: low)
+void FrameE3B::ProcessState_00e3b630(const void* pSource)
 {
     m_rotation.setIdentity();
-    m_pChildAtom.FUN_00cb2d90(*static_cast<const hkQuaternion*>(pSource));
+    m_pChildAtom.hkRotation_set(*static_cast<const hkQuaternion*>(pSource));
 }

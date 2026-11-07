@@ -70,7 +70,7 @@ struct FUN_006ac220_shell : NavMeshSearch
 bool FUN_006ac220_shell::SearchPath(PathingRequest* request, NavMeshTriangleReference const& start,
                                     NavMeshTriangleReference const& end)
 {
-    pLocation = *request->FUN_006a9540();
+    pLocation = *request->NiAVObject_GetRotate_006a9540();
     m_fCenterRadius = request->GetCenterRadius();
     fLowerBound = request->GetFieldB4Float() + request->GetCenterRadius();
     fUpperBound = request->GetFloatAtOffsetB0() + request->GetCenterRadius();
@@ -106,7 +106,7 @@ struct Node
     int unk00, unk04;
     Ref ref;
 };
-float FUN_004e4450(float);
+float ceilf(float);
 struct Search : NavMeshSearch
 {
     Loc location;
@@ -169,7 +169,7 @@ bool Search::TestNode(Node* node)
             segment -= start2;
             float length4 = segment.FUN_00457910();  // 0x00457910: normalizes and returns the length
             float countFloat = length4 / step;
-            float countRounded9 = FUN_004e4450(countFloat);
+            float countRounded9 = ceilf(countFloat);
             int count0 = (int)countRounded9;
             float spacing2 = length4 / countRounded9;
             float offset8 = spacing2 * 0.5;

@@ -34,7 +34,8 @@ unsigned int BSSimpleArray<Tile::Value*, 8>::Add(Tile::Value*& value)
 }
 
 // @fnv 0x006E6DA0
-void* __cdecl FUN_006e6da0(unsigned int size, void* place)
+// src: GUESS 0x006e6da0 (confidence: high)
+void* __cdecl Memory_ReturnPlacementAddress(unsigned int size, void* place)
 {
     return place;
 }
@@ -48,7 +49,7 @@ template <class A, class B> class AStarNode;
 template <> BSSimpleArray<AStarNode<const NavMeshInfo*, TESObjectREFR*>*, 1024>::BSSimpleArray()
 {
 
-    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(this)->FUN_006b3eb0(0, false);
+    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(this)->BSSimpleArray_float_1024_InitialSetup(0, false);
 }
 
 class GlobalObject_00719b80
@@ -62,7 +63,7 @@ class GlobalObject_00719b80
 GlobalObject_00719b80::GlobalObject_00719b80()
 {
     vtable = &DAT_0106f798;
-    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(this)->FUN_006b3eb0(0, false);
+    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(this)->BSSimpleArray_float_1024_InitialSetup(0, false);
 }
 
 class GlobalObject_00788300
@@ -120,7 +121,7 @@ void BSSimpleArray<NavMeshInfo*, 1024>::InitializeItems(NavMeshInfo** items, uns
 {
     for (unsigned int i = 0; i < count; i = i + 1)
     {
-        void* destination = FUN_006e6da0(sizeof(NavMeshInfo*), items + i);
+        void* destination = Memory_ReturnPlacementAddress(sizeof(NavMeshInfo*), items + i);
     }
 }
 

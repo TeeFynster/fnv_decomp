@@ -27,7 +27,7 @@ struct FUN_004bc5f0
 };
 struct EquipmentList536
 {
-    FUN_004bc5f0* FUN_004c8c10(int, bool);
+    FUN_004bc5f0* InventoryChanges_GetWornItem(int, bool);
 };
 struct ExtraList536
 {
@@ -37,10 +37,11 @@ struct ExtraList536
 // all object layout and base-class conversions come from Character.
 struct CharacterEquipmentWeight : Character
 {
-    float FUN_008d2110();
+    float Character_GetArmorDamageThreshold();
 };
 // @fnv 0x008d2110
-float CharacterEquipmentWeight::FUN_008d2110()
+// src: COMMUNITY 0x008d2110
+float CharacterEquipmentWeight::Character_GetArmorDamageThreshold()
 {
     int count = 0;
     ::TESObjectARMO* forms3[20];
@@ -48,13 +49,13 @@ float CharacterEquipmentWeight::FUN_008d2110()
     if (m_fSecondValue < _gModifierZero)
     {
         m_fSecondValue = 0.0f;
-        EquipmentList536* list6 = static_cast<ExtraList536*>(Actor::FUN_005d43c0())->FUN_00418520();
+        EquipmentList536* list6 = static_cast<ExtraList536*>(Actor::BSFile_GetDevice())->FUN_00418520();
         FUN_004bc5f0* item7 = 0;
         if (list6)
         {
             for (int index = 0; index < 20; ++index)
             {
-                item7 = list6->FUN_004c8c10(index, false);
+                item7 = list6->InventoryChanges_GetWornItem(index, false);
                 if (item7)
                 {
                     ::TESObjectARMO* armor = dynamic_cast<::TESObjectARMO*>(item7->FUN_0044ddc0());
@@ -82,7 +83,7 @@ float CharacterEquipmentWeight::FUN_008d2110()
     return m_fSecondValue;
 }
 
-float __cdecl FUN_0040ebd0(float a, float b);
+float __cdecl BSMIN(float a, float b);
 
 // Adapted from an unverified 2026-10-23 contribution by another contributor.
 
@@ -105,11 +106,12 @@ extern ::Setting originalRuntimeFloatSetting1016;
 
 struct CharacterArmorWeight : public Character
 {
-    float FUN_008d22b0();
+    float Character_GetArmorDamageResistance();
 };
 
 // @fnv 0x008d22b0
-float CharacterArmorWeight::FUN_008d22b0()
+// src: COMMUNITY 0x008d22b0
+float CharacterArmorWeight::Character_GetArmorDamageResistance()
 {
     int iCount = 0;
     ::TESObjectARMO* armors[20];
@@ -117,7 +119,7 @@ float CharacterArmorWeight::FUN_008d22b0()
     if (m_fFirstResetValue < 0.0)
     {
         m_fFirstResetValue = 0.0f;
-        InventoryData_8d22b0* items = static_cast<ContainerChanges_8d22b0*>(Actor::FUN_005d43c0())->GetData();
+        InventoryData_8d22b0* items = static_cast<ContainerChanges_8d22b0*>(Actor::BSFile_GetDevice())->GetData();
         InventoryEntry_8d22b0* entry = 0;
         if (items)
         {
@@ -150,7 +152,7 @@ float CharacterArmorWeight::FUN_008d22b0()
         }
     }
     return *originalRuntimeFloatSetting1016.GetFloat() > 0.0
-               ? FUN_0040ebd0(m_fFirstResetValue, *originalRuntimeFloatSetting1016.GetFloat())
+               ? BSMIN(m_fFirstResetValue, *originalRuntimeFloatSetting1016.GetFloat())
                : m_fFirstResetValue;
 }
 
@@ -160,7 +162,7 @@ struct InventoryEntryWeight534
 };
 struct EquipmentList534
 {
-    FUN_004bc5f0* FUN_004c8c10(int, bool);
+    FUN_004bc5f0* InventoryChanges_GetWornItem(int, bool);
 };
 struct ExtraList534
 {
@@ -169,13 +171,14 @@ struct ExtraList534
 extern ::Setting DAT_011d0ca8, DAT_011d1104, DAT_011d0d14, DAT_011d043c;
 struct CharacterClothingWeight : Character
 {
-    float FUN_008d3110();
+    float Character_GetClothingValue();
 };
 // @fnv 0x008d3110
-float CharacterClothingWeight::FUN_008d3110()
+// src: XBOX_PDB 0x008d3110
+float CharacterClothingWeight::Character_GetClothingValue()
 {
     float weight = 0.0f;
-    EquipmentList534* list = static_cast<ExtraList534*>(Actor::FUN_005d43c0())->FUN_00418520();
+    EquipmentList534* list = static_cast<ExtraList534*>(Actor::BSFile_GetDevice())->FUN_00418520();
     FUN_004bc5f0* item9 = 0;
     int index2;
     ::TESObjectARMO* armor7;
@@ -184,7 +187,7 @@ float CharacterClothingWeight::FUN_008d3110()
     {
         for (index2 = 0; index2 < 20; ++index2)
         {
-            item9 = list->FUN_004c8c10(index2, false);
+            item9 = list->InventoryChanges_GetWornItem(index2, false);
             if (item9)
             {
                 armor7 = dynamic_cast<::TESObjectARMO*>(item9->FUN_0044ddc0());

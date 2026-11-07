@@ -27,7 +27,8 @@ void BSShaderPPLightingProperty::EnsureNormalMap()
 }
 
 // @fnv 0x00b67260
-int __fastcall FUN_00b67260(char* pThis, int, int idx1, int idx2)
+// src: XBOX_PDB 0x00b67260
+int __fastcall BSShaderPPLightingProperty_GetTexture(char* pThis, int, int idx1, int idx2)
 {
     return ((int**)(pThis + 0xAC))[idx1][idx2];
 }
@@ -43,44 +44,50 @@ struct NewObj
 };
 struct SelfStub
 {
-    void FUN_00b702b0(NewObj*, int);
+    void BSShaderLightingProperty_CopyMembers(NewObj*, int);
 };
 // @fnv 0x00b67610
-NewObj* __fastcall FUN_00b67610(SelfStub* self, int edx, int arg)
+// src: XBOX_PDB 0x00b67610
+NewObj* __fastcall BSShaderPPLightingProperty_CreateClone(SelfStub* self, int edx, int arg)
 {
     NewObj* pObj = new NewObj();
-    self->FUN_00b702b0(pObj, arg);
+    self->BSShaderLightingProperty_CopyMembers(pObj, arg);
     (*(void(__thiscall***)(SelfStub*, NewObj*))self)[0x34](self, pObj);
     return pObj;
 }
 
 extern char const* const g_0120043c_arg1;
 // @fnv 0x00b671b0
-char const* const* __cdecl FUN_00b671b0()
+// src: XBOX_PDB 0x00b671b0
+char const* const* __cdecl BSShaderPPLightingProperty_GetRTTI()
 {
     return &g_0120043c_arg1;
 }
 
 // @fnv 0x00b671c0
-int __fastcall FUN_00b671c0(char* self, int)
+// src: XBOX_PDB 0x00b671c0
+int __fastcall BSShaderPPLightingProperty_GetClampNI(char* self, int)
 {
     return *reinterpret_cast<int*>(self + 0xd8);
 }
 
 // @fnv 0x00b671d0
-void __fastcall FUN_00b671d0(char* self, int, int v)
+// src: XBOX_PDB 0x00b671d0
+void __fastcall BSShaderPPLightingProperty_SetClampNI(char* self, int, int v)
 {
     *reinterpret_cast<int*>(self + 0xd8) = v;
 }
 
 // @fnv 0x00b671e0
-unsigned short __fastcall FUN_00b671e0(char* self, int)
+// src: XBOX_PDB 0x00b671e0
+unsigned short __fastcall BSShaderPPLightingProperty_GetTextureCount(char* self, int)
 {
     return *reinterpret_cast<unsigned short*>(self + 0xa8);
 }
 
 // @fnv 0x00b671f0
-unsigned short __fastcall FUN_00b671f0(char* self, int)
+// src: XBOX_PDB 0x00b671f0
+unsigned short __fastcall BSShaderPPLightingProperty_QLandscapeTextureCount(char* self, int)
 {
     return *reinterpret_cast<unsigned short*>(self + 0xc8);
 }
@@ -135,7 +142,8 @@ void __fastcall SetArrayElement(Container_00b67200* this_ptr, int unused_edx, un
 }
 
 // @fnv 0x00b67280
-int __fastcall FUN_00b67280(char* self, int)
+// src: XBOX_PDB 0x00b67280
+int __fastcall BSShaderPPLightingProperty_GetBaseTexture(char* self, int)
 {
     return **reinterpret_cast<int**>(self + 0xac);
 }
@@ -223,12 +231,12 @@ void __fastcall SetRefAt(void* self, int, int idx, NiRefObject* pValue)
 }  // namespace fnv_00b67330
 
 void __cdecl __Dummy_00b6fef0(void*, unsigned int);
-void __fastcall FUN_00b66850(void*);
+void __fastcall ReleaseStorage_00b66850(void*);
 // Calls FUN_00b66850 on self, then if bit 0 of flags is set calls __Dummy_00b6fef0 with self and 0x14, and returns self.
 // @fnv 0x00b67580
 void* __fastcall FUN_00b67580(void* self, int, unsigned char flags)
 {
-    FUN_00b66850(self);
+    ReleaseStorage_00b66850(self);
     if (flags & 1)
         __Dummy_00b6fef0(self, 0x14);
     return self;
@@ -252,7 +260,7 @@ extern int _fnv_particle_shader_renderer_level;
 extern unsigned char DAT_011f91d8;
 extern bool DAT_011f9427;
 extern int DAT_011f95e4;
-extern int __cdecl FUN_00b4f5c0();
+extern int __cdecl BSShaderManager_GetAccumulator();
 
 struct TargetClass_00b683e0
 {
@@ -301,7 +309,8 @@ struct TargetClass_00b683e0
 
 // Selects a renderer pointer based on particle shader settings, calls V40 with it, and returns the low 16 bits of the resulting local value.
 // @fnv 0x00b683e0
-unsigned short __fastcall FUN_00b683e0(TargetClass_00b683e0* this_ptr, int unused_edx, void* arg1)
+// src: XBOX_PDB 0x00b683e0
+unsigned short __fastcall BSShaderPPLightingProperty_GetNumberofPasses(TargetClass_00b683e0* this_ptr, int unused_edx, void* arg1)
 {
     unsigned int uiResult = 0;
     void* ebx;
@@ -310,7 +319,7 @@ unsigned short __fastcall FUN_00b683e0(TargetClass_00b683e0* this_ptr, int unuse
     else
         ebx = DAT_010a91d4;
 
-    this_ptr->V40(arg1, ebx, &uiResult, 0, FUN_00b4f5c0(), 0);
+    this_ptr->V40(arg1, ebx, &uiResult, 0, BSShaderManager_GetAccumulator(), 0);
     return (unsigned short)uiResult;
 }
 
@@ -502,7 +511,7 @@ BSShaderProperty__RenderPassArray* FUN_00b68c10_t::GetRenderPassArray(NiGeometry
 
 struct Helper
 {
-    void FUN_00b70260(NiStream& stream);
+    void BSShaderLightingProperty_LoadBinary(NiStream& stream);
 };
 
 template <class T> inline void NiBinaryStreamLoad(NiBinaryStream& stream, T& value)
@@ -529,7 +538,7 @@ struct FUN_00b68dc0_class
 // @fnv 0x00b68dc0
 void FUN_00b68dc0_class::LoadFromStream(NiStream& stream)
 {
-    reinterpret_cast<Helper*>(this)->FUN_00b70260(stream);
+    reinterpret_cast<Helper*>(this)->BSShaderLightingProperty_LoadBinary(stream);
 
     NiBinaryStreamLoad(*stream.GetBinaryStream(), m_uiValueD8);
 
@@ -615,13 +624,13 @@ struct S_00b68ed0_Obj
     int unke4;
     int unke8;
     int unkec;
-    void FUN_00bb7160(NiStream*);
+    void BSShaderLightingProperty_SaveBinary(NiStream*);
     void ReadFromStream(NiStream* s);
 };
 // @fnv 0x00b68ed0
 void S_00b68ed0_Obj::ReadFromStream(NiStream* apStream)
 {
-    FUN_00bb7160(apStream);
+    BSShaderLightingProperty_SaveBinary(apStream);
     S_BinRead(*reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(apStream) + 0x250), &unkd8, 4);
     apStream->SaveLinkID(reinterpret_cast<const NiObject*>(unka4));
     S_BinRead(*reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(apStream) + 0x250), &unke0, 4);
@@ -825,11 +834,12 @@ struct TexSet_b68660
     bool* m_pbCC;
 
     void Grow();
-    void FUN_00b68660(unsigned int uiIndex, BSShaderTextureSet* pSource);
+    void BSShaderPPLightingProperty_SetLandscapeTextureSet(unsigned int uiIndex, BSShaderTextureSet* pSource);
 };
 
 // @fnv 0x00b68660
-void TexSet_b68660::FUN_00b68660(unsigned int uiIndex, BSShaderTextureSet* pSource)
+// src: COMMUNITY 0x00b68660
+void TexSet_b68660::BSShaderPPLightingProperty_SetLandscapeTextureSet(unsigned int uiIndex, BSShaderTextureSet* pSource)
 {
     if (m_usCapacity < 10)
         Grow();
@@ -933,7 +943,8 @@ struct ShaderProp_b68770
 
 // Recursively applies shader flags 15, 16 and 36 and a float value to geometry objects whose shader type is 8-12, optionally setting iValueE4.
 // @fnv 0x00b68770
-void __cdecl FUN_00b68770(NiAVObject* obj, bool abFlag15, float afFloatValue, bool abFlag16, float afValueE4,
+// src: XBOX_PDB 0x00b68770
+void __cdecl BSShaderPPLightingProperty_SetRefractionRecurse(NiAVObject* obj, bool abFlag15, float afFloatValue, bool abFlag16, float afValueE4,
                           bool abFlag36)
 {
     if (!obj)
@@ -962,7 +973,7 @@ void __cdecl FUN_00b68770(NiAVObject* obj, bool abFlag15, float afFloatValue, bo
             {
                 NiAVObject* child = node->m_kChildren.m_pBase[i].m_pObject;
                 if (child)
-                    FUN_00b68770(child, abFlag15, afFloatValue, abFlag16, afValueE4, abFlag36);
+                    BSShaderPPLightingProperty_SetRefractionRecurse(child, abFlag15, afFloatValue, abFlag16, afValueE4, abFlag36);
             }
         }
     }
@@ -1040,7 +1051,7 @@ struct PropObj
     int m98;
     NiAlphaProperty* m9c_arr[1];
     NiAlphaProperty* FUN_00a59d30(unsigned int);
-    void FUN_00a5a040();
+    void UpdateProperties();
 };
 #include "../../include/NiMemObject.h"
 struct FUN_00bb4540 : NiMemObject
@@ -1118,14 +1129,14 @@ extern unsigned char DAT_011f94a6;
 extern char DAT_011f9422;
 extern int DAT_012007b0;
 extern int DAT_011f3728;
-bool __cdecl FUN_0045bad0(void*, void*);
+bool __cdecl NiObject_IsExactKindOf(void*, void*);
 __pragma(comment(
     linker,
     "/alternatename:?FUN_004a2020@BSPPL_b68880@@QAE_NH@Z=?FUN_004a2020@BSShaderPPLightingProperty@@QAE_NH@Z")) struct
     BSPPL_b68880
 {
     bool FUN_004a2020(int);
-    FUN_00bb4540* FUN_00b68880(PropObj*, int, int);
+    FUN_00bb4540* BSShaderPPLightingProperty_ClarifyShader(PropObj*, int, int);
     int m00;
     int m04;
     int m08;
@@ -1159,13 +1170,14 @@ __pragma(comment(
 };
 // Checks the PropObj's flags and alpha property and returns a new FUN_00bb4540 built from this, or null after updating m58/m38/m20.
 // @fnv 0x00b68880
-FUN_00bb4540* BSPPL_b68880::FUN_00b68880(PropObj* pProp, int aiArg2, int aiArg3)
+// src: XBOX_PDB 0x00b68880
+FUN_00bb4540* BSPPL_b68880::BSShaderPPLightingProperty_ClarifyShader(PropObj* pProp, int aiArg2, int aiArg3)
 {
     if (pProp && !pProp->vfn_30())
     {
         NiAlphaProperty** sub9c = pProp->m9c_arr;
         if (sub9c == 0)
-            pProp->FUN_00a5a040();
+            pProp->UpdateProperties();
         if ((unsigned)(m24 & 2) > 0 || (unsigned)(m20 & 0x4000) > 0)
         {
             m58 = 1;
@@ -1174,7 +1186,7 @@ FUN_00bb4540* BSPPL_b68880::FUN_00b68880(PropObj* pProp, int aiArg2, int aiArg3)
         {
             if (DAT_011f94a6)
             {
-                if (FUN_004a2020(0x1c) || FUN_0045bad0(&DAT_012007b0, this) || DAT_011f9422)
+                if (FUN_004a2020(0x1c) || NiObject_IsExactKindOf(&DAT_012007b0, this) || DAT_011f9422)
                     return new FUN_00bb4540(this);
             }
             m58 = 0xf;
@@ -1223,7 +1235,7 @@ FUN_00bb4540* BSPPL_b68880::FUN_00b68880(PropObj* pProp, int aiArg2, int aiArg3)
                 {
                     do
                     {
-                        FUN_0045bad0(&DAT_011f3728, node);
+                        NiObject_IsExactKindOf(&DAT_011f3728, node);
                         node = node->m30;
                     } while (node);
                 }
@@ -1318,9 +1330,9 @@ class ShaderProp_b68
     int unkDC;
     float m_fAlpha;
 
-    void FUN_00ba8be0(ShaderProp_b68* apOther);
-    void FUN_00b66ad0(float* apAlpha, int aiFlag);
-    void FUN_00b68fe0(ShaderProp_b68* apOther);
+    void BSShaderProperty_PostLinkObject(ShaderProp_b68* apOther);
+    void BSShaderPPLightingProperty_LoadTextureSet(float* apAlpha, int aiFlag);
+    void BSShaderPPLightingProperty_PostLinkObject(ShaderProp_b68* apOther);
 };
 
 template <class T> inline T Min_b68(T a, T b)
@@ -1341,28 +1353,29 @@ inline float NiClamp_b68(float fValue, float fMin, float fScaledValue)
 }
 
 // @fnv 0x00b68fe0
-void ShaderProp_b68::FUN_00b68fe0(ShaderProp_b68* apOther)
+// src: XBOX_PDB 0x00b68fe0
+void ShaderProp_b68::BSShaderPPLightingProperty_PostLinkObject(ShaderProp_b68* apOther)
 {
-    FUN_00ba8be0(apOther);
+    BSShaderProperty_PostLinkObject(apOther);
     if (!((m_uiValue1 & (unsigned int)&DAT_01000000) > 0))
     {
         if (!m_spTextureSet)
             m_spTextureSet = new BSShaderTextureSet;
-        FUN_00b66ad0(&apOther->m_fAlpha, 0);
+        BSShaderPPLightingProperty_LoadTextureSet(&apOther->m_fAlpha, 0);
     }
     float fCurrentAlpha = m_fAlpha;
     float fTemp = fCurrentAlpha < DAT_01012060 ? 0.0f : fCurrentAlpha;
     m_fAlpha = Min_b68(fTemp, 1.0f);
 }
 
-char* __cdecl FUN_00a7d330(const char*);
-char* __cdecl FUN_00a7d370(const char*, bool);
-char* __cdecl FUN_00a7d490(const char*, unsigned short);
-char* __cdecl FUN_00a7d4d0(const char*, int);
-char* __cdecl FUN_00a7d550(const char*, float);
-char* __cdecl FUN_00a7d5a0(const char*, void*);
-char* __cdecl FUN_00a7d5e0(const char*, const char*);
-const char* __cdecl FUN_00c4bb40(void*);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char*);
+char* __cdecl NiGetViewerString(const char*, bool);
+char* __cdecl NiGetViewerString_00a7d490(const char*, unsigned short);
+char* __cdecl NiGetViewerString_00a7d4d0(const char*, int);
+char* __cdecl NiGetViewerString_00a7d550(const char*, float);
+char* __cdecl NiGetViewerString_00a7d5a0(const char*, void*);
+char* __cdecl NiGetViewerString_00a7d5e0(const char*, const char*);
+const char* __cdecl BSUtilities_GetTextureName(void*);
 struct Extra
 {
     int unk00;
@@ -1533,72 +1546,73 @@ struct Target
     ExtraPtr unkdc;
     float unke0;
     int unke4;
-    void FUN_00b71450(StrArr*);
-    void FUN_00b690d0(StrArr* a);
+    void BSShaderLightingProperty_GetViewerStrings(StrArr*);
+    void BSShaderPPLightingProperty_GetViewerStrings(StrArr* a);
 };
 // @fnv 0x00b690d0
-void Target::FUN_00b690d0(StrArr* apStrings)
+// src: XBOX_PDB 0x00b690d0
+void Target::BSShaderPPLightingProperty_GetViewerStrings(StrArr* apStrings)
 {
     char* value;
     const char* name;
-    FUN_00b71450(apStrings);
+    BSShaderLightingProperty_GetViewerStrings(apStrings);
     {
-        value = FUN_00a7d330(g_0120043c_arg1);
+        value = NiViewerStrings_NiGetViewerString_Title(g_0120043c_arg1);
         apStrings->AppendReference(value);
     }
     if (!((unk20 & 0x4000) > 0))
     {
-        if (name = FUN_00c4bb40(unkac[0]))
+        if (name = BSUtilities_GetTextureName(unkac[0]))
         {
             {
-                value = FUN_00a7d5e0("base diff", name);
+                value = NiGetViewerString_00a7d5e0("base diff", name);
                 apStrings->AppendReference(value);
             }
         }
         else
         {
             {
-                value = FUN_00a7d5a0("base diff", unkac[0]);
+                value = NiGetViewerString_00a7d5a0("base diff", unkac[0]);
                 apStrings->AppendReference(value);
             }
         }
-        if (name = FUN_00c4bb40(unkb0[0]))
+        if (name = BSUtilities_GetTextureName(unkb0[0]))
         {
             {
-                value = FUN_00a7d5e0("base normal", name);
+                value = NiGetViewerString_00a7d5e0("base normal", name);
                 apStrings->AppendReference(value);
             }
         }
         else
         {
             {
-                value = FUN_00a7d5a0("base normal", unkb0[0]);
+                value = NiGetViewerString_00a7d5a0("base normal", unkb0[0]);
                 apStrings->AppendReference(value);
             }
         }
         if (unkac[1])
         {
-            if (name = FUN_00c4bb40(unkac[1]))
+            if (name = BSUtilities_GetTextureName(unkac[1]))
             {
-                value = FUN_00a7d5e0("multi diff", name);
+                value = NiGetViewerString_00a7d5e0("multi diff", name);
                 apStrings->AddFirstEmpty(value);
             }
             else
             {
-                value = FUN_00a7d5a0("multi diff", unkac[1]);
+                value = NiGetViewerString_00a7d5a0("multi diff", unkac[1]);
                 apStrings->AddFirstEmpty(value);
             }
         }
         if (unkb0[1])
         {
-            if (name = FUN_00c4bb40(unkb0[1]))
+            if (name = BSUtilities_GetTextureName(unkb0[1]))
             {
-                value = FUN_00a7d5e0("multi normal", name);
+                value = NiGetViewerString_00a7d5e0("multi normal", name);
                 apStrings->AddFirstEmpty(value);
             }
             else
             {
-                value = FUN_00a7d5a0("multi normal", unkb0[1]);
+                value = NiGetViewerString_00a7d5a0("multi normal", unkb0[1]);
                 apStrings->AddFirstEmpty(value);
             }
         }
@@ -1606,59 +1620,59 @@ void Target::FUN_00b690d0(StrArr* apStrings)
     else
     {
         {
-            value = FUN_00a7d370("landscape texturing", true);
+            value = NiGetViewerString("landscape texturing", true);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d490("landscape textures", unkA8);
+            value = NiGetViewerString_00a7d490("landscape textures", unkA8);
             apStrings->AppendReference(value);
         }
         for (int i = 0; i < 9; ++i)
         {
             if (unkac[i].object != 0)
             {
-                if (name = FUN_00c4bb40(unkac[i]))
+                if (name = BSUtilities_GetTextureName(unkac[i]))
                 {
                     {
-                        value = FUN_00a7d5e0("base tex", name);
+                        value = NiGetViewerString_00a7d5e0("base tex", name);
                         apStrings->AppendReference(value);
                     }
                 }
                 else
                 {
                     {
-                        value = FUN_00a7d5a0("base tex", unkac[i]);
+                        value = NiGetViewerString_00a7d5a0("base tex", unkac[i]);
                         apStrings->AppendReference(value);
                     }
                 }
                 if (unkb0[i])
                 {
-                    if (name = FUN_00c4bb40(unkb0[i]))
+                    if (name = BSUtilities_GetTextureName(unkb0[i]))
                     {
-                        value = FUN_00a7d5e0(" normal map", name);
+                        value = NiGetViewerString_00a7d5e0(" normal map", name);
                         apStrings->AddFirstEmpty(value);
                     }
                     else
                     {
-                        value = FUN_00a7d5a0(" normal map", unkb0[i]);
+                        value = NiGetViewerString_00a7d5a0(" normal map", unkb0[i]);
                         apStrings->AddFirstEmpty(value);
                     }
                 }
                 if (unkcc[i])
                 {
-                    value = FUN_00a7d370(" specular", true);
+                    value = NiGetViewerString(" specular", true);
                     apStrings->AppendReference(value);
                 }
                 if (unkb4[i])
                 {
-                    if (name = FUN_00c4bb40(unkb4[i]))
+                    if (name = BSUtilities_GetTextureName(unkb4[i]))
                     {
-                        value = FUN_00a7d5e0(" glow map", name);
+                        value = NiGetViewerString_00a7d5e0(" glow map", name);
                         apStrings->AddFirstEmpty(value);
                     }
                     else
                     {
-                        value = FUN_00a7d5a0(" glow map", unkb4[i]);
+                        value = NiGetViewerString_00a7d5a0(" glow map", unkb4[i]);
                         apStrings->AddFirstEmpty(value);
                     }
                 }
@@ -1667,143 +1681,143 @@ void Target::FUN_00b690d0(StrArr* apStrings)
     }
     if (unkb8[0].object != 0)
     {
-        if (name = FUN_00c4bb40(unkb8[0]))
+        if (name = BSUtilities_GetTextureName(unkb8[0]))
         {
             {
-                value = FUN_00a7d5e0("heightmap texture", name);
+                value = NiGetViewerString_00a7d5e0("heightmap texture", name);
                 apStrings->AppendReference(value);
             }
         }
         else
         {
             {
-                value = FUN_00a7d5a0("heightmap texture", unkb8[0]);
+                value = NiGetViewerString_00a7d5a0("heightmap texture", unkb8[0]);
                 apStrings->AppendReference(value);
             }
         }
     }
     if (unkb4[0].object != 0)
     {
-        if (name = FUN_00c4bb40(unkb4[0]))
+        if (name = BSUtilities_GetTextureName(unkb4[0]))
         {
             {
-                value = FUN_00a7d5e0("glow/skin sst/hair layer texture", name);
+                value = NiGetViewerString_00a7d5e0("glow/skin sst/hair layer texture", name);
                 apStrings->AppendReference(value);
             }
         }
         else
         {
             {
-                value = FUN_00a7d5a0("glow/skin sst/hair layer texture", unkb4[0]);
+                value = NiGetViewerString_00a7d5a0("glow/skin sst/hair layer texture", unkb4[0]);
                 apStrings->AppendReference(value);
             }
         }
     }
     if (unkbc[0].object != 0)
     {
-        if (name = FUN_00c4bb40(unkbc[0]))
+        if (name = BSUtilities_GetTextureName(unkbc[0]))
         {
             {
-                value = FUN_00a7d5e0("envmap texture", name);
+                value = NiGetViewerString_00a7d5e0("envmap texture", name);
                 apStrings->AppendReference(value);
             }
         }
         else
         {
             {
-                value = FUN_00a7d5a0("envmap texture", unkbc[0]);
+                value = NiGetViewerString_00a7d5a0("envmap texture", unkbc[0]);
                 apStrings->AppendReference(value);
             }
         }
     }
     if (unkc0[0].object != 0)
     {
-        if (name = FUN_00c4bb40(unkc0[0]))
+        if (name = BSUtilities_GetTextureName(unkc0[0]))
         {
             {
-                value = FUN_00a7d5e0("envmap mask texture", name);
+                value = NiGetViewerString_00a7d5e0("envmap mask texture", name);
                 apStrings->AppendReference(value);
             }
         }
         else
         {
             {
-                value = FUN_00a7d5a0("envmap mask texture", unkc0[0]);
+                value = NiGetViewerString_00a7d5a0("envmap mask texture", unkc0[0]);
                 apStrings->AppendReference(value);
             }
         }
     }
     if (!ve0())
     {
-        value = FUN_00a7d370("clamp", true);
+        value = NiGetViewerString("clamp", true);
         apStrings->AppendReference(value);
     }
     if ((unk20 & 0x8000) > 0)
     {
-        value = FUN_00a7d550("refraction power", unke0);
+        value = NiGetViewerString_00a7d550("refraction power", unke0);
         apStrings->AppendReference(value);
     }
     else if ((unk20 & 0x10000) > 0)
     {
         {
-            value = FUN_00a7d550("refraction power", unke0);
+            value = NiGetViewerString_00a7d550("refraction power", unke0);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d4d0("refraction period", unke4);
+            value = NiGetViewerString_00a7d4d0("refraction period", unke4);
             apStrings->AppendReference(value);
         }
     }
     if ((unk20 & 1) > 0)
     {
-        value = FUN_00a7d550("specular lod", v10c());
+        value = NiGetViewerString_00a7d550("specular lod", v10c());
         apStrings->AppendReference(value);
     }
     if ((unk20 & 128) > 0)
     {
-        value = FUN_00a7d550("envmap lod", v110());
+        value = NiGetViewerString_00a7d550("envmap lod", v110());
         apStrings->AppendReference(value);
     }
     if (unkdc)
     {
         {
-            value = FUN_00a7d5a0("spTexEffectData", unkdc.object);
+            value = NiGetViewerString_00a7d5a0("spTexEffectData", unkdc.object);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Fill Color R", unkdc->unk0c);
+            value = NiGetViewerString_00a7d550("Fill Color R", unkdc->unk0c);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Fill Color G", unkdc->unk10);
+            value = NiGetViewerString_00a7d550("Fill Color G", unkdc->unk10);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Fill Color R", unkdc->unk14);
+            value = NiGetViewerString_00a7d550("Fill Color R", unkdc->unk14);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Fill Color A", unkdc->unk18);
+            value = NiGetViewerString_00a7d550("Fill Color A", unkdc->unk18);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Edge Color R", unkdc->unk1c);
+            value = NiGetViewerString_00a7d550("Edge Color R", unkdc->unk1c);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Edge Color G", unkdc->unk20);
+            value = NiGetViewerString_00a7d550("Edge Color G", unkdc->unk20);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Edge Color R", unkdc->unk24);
+            value = NiGetViewerString_00a7d550("Edge Color R", unkdc->unk24);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Edge Color A", unkdc->unk28);
+            value = NiGetViewerString_00a7d550("Edge Color A", unkdc->unk28);
             apStrings->AppendReference(value);
         }
         {
-            value = FUN_00a7d550("Edge Falloff", unkdc->unk54);
+            value = NiGetViewerString_00a7d550("Edge Falloff", unkdc->unk54);
             apStrings->AppendReference(value);
         }
     }
@@ -1959,8 +1973,8 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volati
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* p);
 struct Pool
 {
-    void* FUN_00aa3e40(unsigned int uiSize);
-    void FUN_00aa4060(void* p);
+    void* Game_DoHeapAlloc(unsigned int uiSize);
+    void MemoryManager_Deallocate(void* p);
 };
 extern Pool DAT_011f6238;
 
@@ -1995,11 +2009,11 @@ struct NiPtrX
     }
     static void* operator new[](unsigned int s)
     {
-        return DAT_011f6238.FUN_00aa3e40(s);
+        return DAT_011f6238.Game_DoHeapAlloc(s);
     }
     static void operator delete[](void* p)
     {
-        DAT_011f6238.FUN_00aa4060(p);
+        DAT_011f6238.MemoryManager_Deallocate(p);
     }
 };
 struct OwnerX
@@ -2033,10 +2047,10 @@ void OwnerX::GrowArrays()
         delete[] m_apArrays[i];
         m_apArrays[i] = apNew[i];
     }
-    DAT_011f6238.FUN_00aa4060(m_pcc);
-    m_pcc = DAT_011f6238.FUN_00aa3e40(10);
-    DAT_011f6238.FUN_00aa4060(m_pc4);
-    m_pc4 = DAT_011f6238.FUN_00aa3e40(10);
+    DAT_011f6238.MemoryManager_Deallocate(m_pcc);
+    m_pcc = DAT_011f6238.Game_DoHeapAlloc(10);
+    DAT_011f6238.MemoryManager_Deallocate(m_pc4);
+    m_pc4 = DAT_011f6238.Game_DoHeapAlloc(10);
     m_usSize = 10;
 }
 
@@ -2140,7 +2154,7 @@ struct CallerArg
     unsigned int unkb0;
     unsigned int unkb4;
     Geometry* geometry;
-    void FUN_00a5a040();
+    void UpdateProperties();
     NiAlphaProperty* FUN_00a59d30(int);
 };
 extern NiRefObject* DAT_011f9528;
@@ -2148,8 +2162,8 @@ extern char DAT_011f4aac;
 extern int DAT_011f91c0;
 extern char DAT_010ae238;
 extern char DAT_010ae1f0;
-extern void* __cdecl FUN_00b54b60(CallerArg*);
-extern void __cdecl FUN_005b5e40(void*, void*);
+extern void* __cdecl BSShaderManager_CreateTangentSpaceSimple(CallerArg*);
+extern void __cdecl Warning_005b5e40(void*, void*);
 struct RefHandle
 {
     void* ptr;
@@ -2296,14 +2310,15 @@ struct SelfObj
     {
         return (secondaryFlags & mask) > 0;
     }
-    bool FUN_00b67a40(CallerArg* arg);
+    bool BSShaderPPLightingProperty_SetupGeometry(CallerArg* arg);
 };
 // Checks and may create the argument's bounding volume, updates secondary flag 0x20, conditionally stores a handle, applies flag-gated updates, then refreshes.
 // @fnv 0x00b67a40
-bool SelfObj::FUN_00b67a40(CallerArg* arg)
+// src: XBOX_PDB 0x00b67a40
+bool SelfObj::BSShaderPPLightingProperty_SetupGeometry(CallerArg* arg)
 {
     if (arg->GetBoundingVolume() == 0)
-        arg->FUN_00a5a040();
+        arg->UpdateProperties();
     bool b = arg->geometry->enabled || GetSecondaryFlag(0x20);
     if (b)
         SetSecondaryFlag(0x20, true);
@@ -2315,7 +2330,7 @@ bool SelfObj::FUN_00b67a40(CallerArg* arg)
         bool bSameKind = geom->property ? geom->property->IsSameKind(&DAT_011f4aac) : false;
         if (!bSameKind && !(geom->typeFlags & 0xf000))
         {
-            activeHandle.FUN_0066b0d0(FUN_00b54b60(arg));
+            activeHandle.FUN_0066b0d0(BSShaderManager_CreateTangentSpaceSimple(arg));
         }
     }
     if ((primaryFlags & 0x100000) > 0)
@@ -2338,14 +2353,14 @@ bool SelfObj::FUN_00b67a40(CallerArg* arg)
     {
         if ((flags & 0x10000000) <= 0 && geometry->opaqueTag)
         {
-            FUN_005b5e40(&DAT_010ae238, arg->debugName);
+            Warning_005b5e40(&DAT_010ae238, arg->debugName);
             return true;
         }
     }
     if ((flags & 0x10000000) > 0 || (flags & 0x800) > 0)
     {
         if (!geometry->opaqueTag)
-            FUN_005b5e40(&DAT_010ae1f0, arg->debugName);
+            Warning_005b5e40(&DAT_010ae1f0, arg->debugName);
     }
     return true;
 }
@@ -2430,7 +2445,7 @@ struct Geom
 };
 struct Camera
 {
-    NiPoint3& FUN_005bb9b0(NiPoint3&);
+    NiPoint3& ShadowSceneNode_GetCameraPos(NiPoint3&);
 };
 struct Context
 {
@@ -2763,10 +2778,10 @@ struct ScaleContext
     unsigned int unk004;
     DistanceScale* object;
 };
-int FUN_00b4f5c0();
+int BSShaderManager_GetAccumulator();
 float LinearInterpolate(float, float, float, float, float);
-bool FUN_005bf7b0();
-bool FUN_00b66760(unsigned int);
+bool BSShaderManager_GetShadows();
+bool Object_ComputeValue_00b66760(unsigned int);
 struct Fake_FUN_004a2020
 {
     bool GetFlag(unsigned int) const;
@@ -2878,15 +2893,15 @@ struct Shader
     void EnsureAllocated(int);
     void CreateSpawnedObjectIfMissing(int);
     void FUN_00ba95e0(int);
-    void FUN_00bdf650(Geom*, bool, bool, Context*);
-    void FUN_00bda060(Geom*, bool, bool);
+    void BSShaderPPLightingProperty_AddDepthMapPass_2x(Geom*, bool, bool, Context*);
+    void BSShaderProperty_AddConstAlphaPass(Geom*, bool, bool);
     void SetPassEnabled(Geom*, bool, bool);
     void AddPasses(Geom*, bool);
     bool GetFlag(int n)
     {
         return ((Fake_FUN_004a2020*)this)->GetFlag(n);
     }
-    void FUN_00ba8ab0(float);
+    void BSShaderProperty_SetAlpha(float);
     void SortShadowSceneLights(Bound*);
     Passes* GetPasses(Geom*, unsigned int, unsigned short*, unsigned int, Context*, unsigned char);
 };
@@ -2915,7 +2930,7 @@ Passes* Shader::GetPasses(Geom* geom, unsigned int pass, unsigned short* output,
             if (prop == 0)
                 prop = properties->alpha;
             bool alphaTest = prop && (bool)(int)((unsigned short)(prop->m_usAlphaArg >> 9) & 1);
-            FUN_00bdf650(geom, geom->skin != 0, alphaTest, context);
+            BSShaderPPLightingProperty_AddDepthMapPass_2x(geom, geom->skin != 0, alphaTest, context);
         }
         return special7;
     }
@@ -2936,7 +2951,7 @@ Passes* Shader::GetPasses(Geom* geom, unsigned int pass, unsigned short* output,
             if (prop == 0)
                 prop = properties->alpha;
             bool alphaTest = prop && (bool)(int)((unsigned short)(prop->m_usAlphaArg >> 9) & 1);
-            FUN_00bda060(geom, geom->skin != 0, alphaTest);
+            BSShaderProperty_AddConstAlphaPass(geom, geom->skin != 0, alphaTest);
         }
         return special8;
     }
@@ -2970,15 +2985,15 @@ Passes* Shader::GetPasses(Geom* geom, unsigned int pass, unsigned short* output,
         // These legacy vector operations use three scalar components.
         float posStorage[3];
         NiPoint3& pos = *reinterpret_cast<NiPoint3*>(posStorage);
-        context->camera->FUN_005bb9b0(pos);
+        context->camera->ShadowSceneNode_GetCameraPos(pos);
         float deltaStorage[3];
         NiPoint3& delta = *reinterpret_cast<NiPoint3*>(deltaStorage);
         delta.x = bound.x - pos.x;
         delta.y = bound.y - pos.y;
         delta.z = bound.z - pos.z;
         distance = delta.FUN_00457990() - bound.radius;
-        if (((ScaleContext*)FUN_00b4f5c0())->object)
-            distance *= ((ScaleContext*)FUN_00b4f5c0())->object->scale;
+        if (((ScaleContext*)BSShaderManager_GetAccumulator())->object)
+            distance *= ((ScaleContext*)BSShaderManager_GetAccumulator())->object->scale;
         if (distance != previousDistance)
         {
             if (fade20000)
@@ -3025,7 +3040,7 @@ Passes* Shader::GetPasses(Geom* geom, unsigned int pass, unsigned short* output,
         }
         else
             materialAlpha = alpha;
-        FUN_00ba8ab0(materialAlpha);
+        BSShaderProperty_SetAlpha(materialAlpha);
     }
     unsigned char updatePasses = update;
     if (key != renderKey || !updatePasses || dirty)
@@ -3050,7 +3065,7 @@ Passes* Shader::GetPasses(Geom* geom, unsigned int pass, unsigned short* output,
             Build1(geom, pass, output, context->renderer, context, updatePasses);
         else if (_fnv_particle_shader_renderer_level >= 2)
             Build2(geom, pass, output, context->renderer, context, updatePasses);
-        if (FUN_005bf7b0())
+        if (BSShaderManager_GetShadows())
         {
             if (updatePasses)
             {
@@ -3066,7 +3081,7 @@ Passes* Shader::GetPasses(Geom* geom, unsigned int pass, unsigned short* output,
                     skin = geom->skin;
                     EnsureNewObj(1);
                     special7->count = 0;
-                    FUN_00bdf650(geom, skin != 0, alphaTest, context);
+                    BSShaderPPLightingProperty_AddDepthMapPass_2x(geom, skin != 0, alphaTest, context);
                 }
             }
             else
@@ -3084,7 +3099,7 @@ Passes* Shader::GetPasses(Geom* geom, unsigned int pass, unsigned short* output,
         if (passCount > 1)
         {
             Pass* firstPass = passList->data[0];
-            if (FUN_00b66760(firstPass->id))
+            if (Object_ComputeValue_00b66760(firstPass->id))
             {
                 --firstPass->id;
                 return mainPasses;

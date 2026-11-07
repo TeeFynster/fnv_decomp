@@ -27,8 +27,8 @@ public:
     void ApplyQueuedModels();
     void FUN_0043f080();
     void* FUN_0043f030(unsigned int flags);
-    void FUN_0043eff0();
-    void FUN_0043f2b0();
+    void PostProcess();
+    void Finish_0043f2b0();
 
     BipedAnim* pExistingBipedAnim;
     unsigned char unused2[0x50];

@@ -30,12 +30,13 @@ RequestReceiver* RequestReceiver::InvokeFromRequest(void* request)
 static unsigned char* volatile g_out_slot;
 static unsigned int volatile g_val_slot;
 // @fnv 0x00da2eb0
-static __declspec(noinline) unsigned char* FUN_00da2eb0(unsigned char* out, unsigned int c)
+// src: HAVOK_LIB 0x00da2eb0
+static __declspec(noinline) unsigned char* hkIsDigit(unsigned char* out, unsigned int c)
 {
     *out = c >= 0x30u && c <= 0x39u;
     return out;
 }
 void da2eb0_probe_caller()
 {
-    FUN_00da2eb0(g_out_slot, g_val_slot);
+    hkIsDigit(g_out_slot, g_val_slot);
 }

@@ -67,8 +67,8 @@ struct This
     virtual void v43();
     virtual void v44();
     virtual Result* GetResult(char* output);
-    void FUN_00ca4e50(int first, int second);
-    void FUN_00c84df0(int first, int second);
+    void bhkBvTreeShape_CopyMembers(int first, int second);
+    void bhkShape_CopyMembers(int first, int second);
 };
 struct Resolved
 {
@@ -134,7 +134,7 @@ struct Child
 };
 struct S_00ca4ec0_Stream
 {
-    void FUN_00a645b0();
+    void ReadLinkID();
 };
 struct S_00ca4ec0_Out
 {
@@ -189,11 +189,11 @@ struct S_00ca4ec0_Base
     virtual void vac();
     virtual void vb0();
     virtual S_00ca4ec0_Out* vb4(int* out);
-    void FUN_00c84d00(S_00ca4ec0_Stream& kStream);
+    void bhkShape_LoadBinary(S_00ca4ec0_Stream& kStream);
 };
 struct S_00ca4ec0 : S_00ca4ec0_Base
 {
-    void FUN_00ca4ec0(S_00ca4ec0_Stream& kStream);
+    void bhkBvTreeShape_LoadBinary(S_00ca4ec0_Stream& kStream);
 };
 struct NiStream;
 struct FirstInterface
@@ -244,8 +244,8 @@ struct HC1Base
     int unk10;
     int unk14;
     int unk18;
-    bool __thiscall FUN_00aa0ad0(NiStream* stream);
-    void __thiscall FUN_00ca4f40(NiStream* stream);
+    bool __thiscall BSPackedAdditionalGeometryData_RegisterStreamables(NiStream* stream);
+    void __thiscall bhkBvTreeShape_RegisterStreamables(NiStream* stream);
 };
 struct Link
 {
@@ -287,8 +287,8 @@ struct Owner
     int state;
     int flags;
     Node* node;
-    void FUN_00c84d50(Sink*);
-    void FUN_00ca4f80(Sink*);
+    void bhkShape_SaveBinary(Sink*);
+    void bhkBvTreeShape_SaveBinary(Sink*);
     void* getValue()
     {
         if (this)
@@ -336,14 +336,14 @@ struct FUN_00cb0780_Manager
     int unk0c;
     FUN_00cb0780_Allocator* allocator;
 };
-void* __cdecl FUN_00c85750();
+void* __cdecl hkMemoryRouter_getInstance();
 struct FUN_00cb0780_class
 {
     int unk00;
     int unk04;
     int unk08;
     void* memory;
-    void FUN_00cb0780(bool release);
+    void bhkTriSampledHeightFieldBvTreeShape_KillCinfo(bool release);
 };
 struct ThreadState
 {
@@ -539,11 +539,11 @@ struct GlobalString
     const char* value;
 };
 extern GlobalString g_01268350;
-char* __cdecl FUN_00a7d330(const char* text);
+char* __cdecl NiViewerStrings_NiGetViewerString_Title(const char* text);
 struct StringBuilder
 {
-    void FUN_00ca5190(NiStringArray* array);
-    void FUN_00cb09b0(NiStringArray* array);
+    void bhkBvTreeShape_GetViewerStrings(NiStringArray* array);
+    void bhkTriSampledHeightFieldBvTreeShape_GetViewerStrings(NiStringArray* array);
 };
 struct ThreadStateGuard
 {
@@ -661,8 +661,8 @@ struct QTF
     virtual void f43();
     virtual void f44();
     virtual int M45(void* p);
-    void __thiscall FUN_00c84cc0(EP* p);
-    void FUN_00ca4f00(EP* a1);
+    void __thiscall bhkShape_LinkObject(EP* p);
+    void bhkBvTreeShape_LinkObject(EP* a1);
 };
 struct FUN_00ca4fd0_Value
 {
@@ -728,10 +728,10 @@ class FUN_00ca4fd0_cls
     int unk04;
     Node* m_pReferencedNode;
 
-    void FUN_00ca4fd0(int first, int second);
+    void bhkBvTreeShape_BuildDisplayGeometry(int first, int second);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* lpAddend);
-void FUN_00ca5080();
+void bhkBvTreeShape_RembhkShapeRef();
 struct RefCounted
 {
     int unk00;
@@ -739,12 +739,12 @@ struct RefCounted
 };
 struct Owner_Ext : public Owner
 {
-    void FUN_00c84e50(bool flag);
-    void FUN_00ca5130(bool flag);
+    void bhkShape_Link(bool flag);
+    void bhkBvTreeShape_Link(bool flag);
 };
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
-extern "C" void __cdecl FUN_00c876f0();
-extern "C" void __cdecl FUN_00c87700();
+extern "C" void* __cdecl Object_DispatchCommandFour(unsigned int);
+extern "C" void __cdecl bhkSerializable_CloneCritLock();
+extern "C" void __cdecl bhkSerializable_CloneCritUnlock();
 extern "C" char DAT_01030bf4[];
 extern "C" char DAT_0104dbac[];
 extern "C" int DAT_012680f8;
@@ -772,7 +772,7 @@ struct SpawnedObject
     }
     void* operator new(unsigned int size) throw()
     {
-        return FUN_00aa13e0(size);
+        return Object_DispatchCommandFour(size);
     }
 };
 struct FUN_00cb05d0_cls
@@ -827,7 +827,7 @@ struct FUN_00cb05d0_cls
     virtual void v47();
     virtual void v48();
     virtual void v49(SpawnedObject* obj, int a1);
-    SpawnedObject* FUN_00cb05d0(int a1);
+    SpawnedObject* bhkTriSampledHeightFieldBvTreeShape_CreateClone(int a1);
 };
 struct FUN_00cb06c0_Alloc
 {
@@ -852,8 +852,8 @@ struct FUN_00cb06c0_cls
     int unk04;
     void* unk08;
     void* unk0c;
-    void FUN_00cb0030(void* value);
-    void* FUN_00cb06c0(bool* out);
+    void UpdateState_00cb0030(void* value);
+    void* bhkTriSampledHeightFieldBvTreeShape_CreateCinfo(bool* out);
 };
 struct S00cb0820_Alloc
 {
@@ -880,7 +880,7 @@ struct S00cb0820_Ref
     short m_iObjectReferenceCount;
     void* operator new(unsigned int size)
     {
-        S00cb0820_Ref* b = (S00cb0820_Ref*)((S00cb0820_Mem*)FUN_00c85750())->heap().Alloc(size);
+        S00cb0820_Ref* b = (S00cb0820_Ref*)((S00cb0820_Mem*)hkMemoryRouter_getInstance())->heap().Alloc(size);
         b->m_usAllocationSize = (unsigned short)size;
         return b;
     }
@@ -921,7 +921,7 @@ struct S00cb0820_Shape : S00cb0820_Ref
     int unk0c;
     int unk10;
     int unk14;
-    void FUN_00d248a0(S00cb0820_Src* src, int n);
+    void ProcessAndReturnValue_00d248a0(S00cb0820_Src* src, int n);
 };
 struct S00cb0820_Shape70 : S00cb0820_Shape
 {
@@ -949,7 +949,7 @@ struct S00cb0820_Shape70 : S00cb0820_Shape
     int unk6c;
     S00cb0820_Shape70(S00cb0820_Src* src)
     {
-        FUN_00d248a0(src, 2);
+        ProcessAndReturnValue_00d248a0(src, 2);
         m_vtbl = &DAT_010c853c;
         double d = unk14 - DAT_01012070;
         unk60 = src->unk30;
@@ -1047,7 +1047,7 @@ struct S00cb0820_World
     virtual void v45();
     virtual void v46();
     virtual void v47(S00cb0820_Outer* a1);
-    void FUN_00cb0820(S00cb0820_Outer* a1);
+    void bhkTriSampledHeightFieldBvTreeShape_Init(S00cb0820_Outer* a1);
 };
 
 union __declspec(align(16)) xM128
@@ -1064,24 +1064,24 @@ struct __declspec(align(16)) xVec4
 float xFUN_004a3e90(float);
 struct xFltSetting
 {
-    float* FUN_00403e20();
+    float* Setting_Float_00403e20();
 };
 extern xFltSetting xg_11cc1d8;
 struct xFilter
 {
     xFilter(int, int, int);
-    unsigned int FUN_00559450();
+    unsigned int Modelloader_GetReferencedThis();
     unsigned int m_uiFilterValue;
 };
 struct __declspec(align(16)) xPhantomCinfo
 {
     xPhantomCinfo();
     ~xPhantomCinfo();
-    void FUN_00507610(float);
-    void FUN_0056d360(int);
-    void FUN_005076c0(float);
-    void FUN_0056f0f0(unsigned int);
-    void FUN_006222f0(int);
+    void PathingRequestClosePoint_SetMinDistance(float);
+    void bhkRigidBodyCinfo_SetMotionType(int);
+    void PathingRequestCoveredMove_SetAttackerHealth(float);
+    void bhkRigidBodyCinfo_SetCollisionFilter(unsigned int);
+    void bhkRigidBodyCinfo_SetShape_0(int);
     int m_q[0x38];
 };
 struct xRef
@@ -1118,20 +1118,20 @@ extern xThing xg_11f4a20;
 struct xPhantom : xNiAlloc
 {
     xPhantom(xPhantomCinfo*);
-    void FUN_00c85c10(xRef*, xThing*);
+    void bhkWorldObject_SetAVObject(xRef*, xThing*);
     int m_auiShapeKeys[7];
 };
 struct xPtr
 {
     xPtr(void*);
     ~xPtr();
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
     void* m_p;
 };
 int __fastcall xFUN_00620b80(void*);
 struct xList
 {
-    unsigned int FUN_006227b0(const xPtr&);
+    unsigned int NiTObjectArray_NiPointer_bhkRigidBody_Add(const xPtr&);
     int m_q[4];
 };
 struct xMgr
@@ -1139,10 +1139,11 @@ struct xMgr
     int m_iWordAt00, m_iWordAt04;
     xList m_8;
     bool FUN_00622470();
-    bool FUN_00621f60(xRef** apList, unsigned int auiCount, float afVal);
+    bool CellMopp_Create(xRef** apList, unsigned int auiCount, float afVal);
 };
 // @fnv 0x00621f60
-bool xMgr::FUN_00621f60(xRef** apList, unsigned int auiCount, float afVal)
+// src: XBOX_PDB 0x00621f60
+bool xMgr::CellMopp_Create(xRef** apList, unsigned int auiCount, float afVal)
 {
     bool RESULT = false;
     if (!FUN_00622470())
@@ -1150,11 +1151,11 @@ bool xMgr::FUN_00621f60(xRef** apList, unsigned int auiCount, float afVal)
         if (apList)
         {
             xPhantomCinfo CI;
-            CI.FUN_00507610(0.0f);
-            CI.FUN_0056d360(5);
-            CI.FUN_005076c0(*xg_11cc1d8.FUN_00403e20());
+            CI.PathingRequestClosePoint_SetMinDistance(0.0f);
+            CI.bhkRigidBodyCinfo_SetMotionType(5);
+            CI.PathingRequestCoveredMove_SetAttackerHealth(*xg_11cc1d8.Setting_Float_00403e20());
             xFilter FILTER(0x11, 1, 0);
-            CI.FUN_0056f0f0(FILTER.FUN_00559450());
+            CI.bhkRigidBodyCinfo_SetCollisionFilter(FILTER.Modelloader_GetReferencedThis());
             for (unsigned int I = 0; I < auiCount; I++)
             {
                 xRef* REF = apList[I];
@@ -1167,10 +1168,10 @@ bool xMgr::FUN_00621f60(xRef** apList, unsigned int auiCount, float afVal)
                     SC.m_44 = afVal;
                     SC.m_10.UpdateBoundsFromElements();
                     xPtr SHAPE(new xShape(&SC));
-                    CI.FUN_006222f0(xFUN_00620b80(SHAPE.FUN_00559450()));
+                    CI.bhkRigidBodyCinfo_SetShape_0(xFUN_00620b80(SHAPE.Modelloader_GetReferencedThis()));
                     xPhantom* PHANTOM = new xPhantom(&CI);
-                    PHANTOM->FUN_00c85c10(REF, &xg_11f4a20);
-                    m_8.FUN_006227b0(PHANTOM);
+                    PHANTOM->bhkWorldObject_SetAVObject(REF, &xg_11f4a20);
+                    m_8.NiTObjectArray_NiPointer_bhkRigidBody_Add(PHANTOM);
                 }
             }
         }

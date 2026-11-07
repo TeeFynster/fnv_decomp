@@ -12,6 +12,6 @@ public:
                                const char* apcText, const char* apcCaption,
                                unsigned int aStyle);
 
-    void FUN_00aa4c80();
+    void UpdateFields_00aa4c80();
     void* FUN_00aa4d00(unsigned int flags);
 };

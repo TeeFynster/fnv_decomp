@@ -66,7 +66,8 @@ NiObject* NiTriShape::CreateObject()
 
 extern const char g_011f5b34_arg1[];
 // @fnv 0x00a74520
-const char* __cdecl FUN_00a74520()
+// src: COMMUNITY 0x00a74520
+const char* __cdecl NiTriShape_GetRTTI()
 {
     return g_011f5b34_arg1;
 }
@@ -110,7 +111,7 @@ void NiTriShape::RenderImmediate(NiRenderer* apkRenderer)
 }
 
 namespace fnv_00a74690 {
-char* FUN_00a7d330(const char*);
+char* NiViewerStrings_NiGetViewerString_Title(const char*);
 extern const char* const g_011f5b34_arg1;
 }  // namespace fnv_00a74690
 
@@ -120,7 +121,7 @@ void NiTriShape::GetViewerStrings(NiViewerStringsArray* strings)
 {
     StrArr* pkStrings = reinterpret_cast<StrArr*>(strings);
     NiTriBasedGeom::GetViewerStrings(strings);
-    char* pStr = fnv_00a74690::FUN_00a7d330(fnv_00a74690::g_011f5b34_arg1);
+    char* pStr = fnv_00a74690::NiViewerStrings_NiGetViewerString_Title(fnv_00a74690::g_011f5b34_arg1);
     unsigned int uiIndex = *(unsigned short*)((char*)pkStrings + 0xa);
     if (uiIndex >= *(unsigned short*)((char*)pkStrings + 8))
         pkStrings->SetSize(uiIndex + *(unsigned short*)((char*)pkStrings + 0xe));
@@ -136,40 +137,45 @@ NiTriShape* __fastcall InitTriShapeWithData(NiTriShape* self, void*, NiTriBasedG
     return self;
 }
 
-extern void __cdecl FUN_00a9b140();
+extern void __cdecl NiParticleMeshes_CopyMembers();
 
 // @fnv 0x00a744c0
-void __cdecl FUN_00a744c0()
+// src: XBOX_PDB 0x00a744c0
+void __cdecl NiTriShape_CopyMembers()
 {
-    FUN_00a9b140();
+    NiParticleMeshes_CopyMembers();
 }
 
-void FUN_00a9b190();
+void NiLines_RegisterStreamables();
 // @fnv 0x00a74500
-void FUN_00a74500()
+// src: XBOX_PDB 0x00a74500
+void NiParticleMeshes_RegisterStreamables()
 {
-    FUN_00a9b190();
+    NiLines_RegisterStreamables();
 }
 
-void FUN_00a89770();
+void NiLines_IsEqual();
 // @fnv 0x00a74510
-void FUN_00a74510()
+// src: XBOX_PDB 0x00a74510
+void NiParticleMeshes_IsEqual()
 {
-    FUN_00a89770();
+    NiLines_IsEqual();
 }
 
-void FUN_00a74780(NiStream& stream);
+void NiLines_LinkObject(NiStream& stream);
 
 // @fnv 0x00a98eb0
-void FUN_00a98eb0(NiStream& stream)
+// src: XBOX_PDB 0x00a98eb0
+void NiParticleMeshes_LinkObject(NiStream& stream)
 {
-    FUN_00a74780(stream);
+    NiLines_LinkObject(stream);
 }
 
-void __cdecl FUN_00a9b1a0();
+void __cdecl NiLines_SaveBinary();
 
 // @fnv 0x00a71d10
-void __cdecl FUN_00a71d10()
+// src: XBOX_PDB 0x00a71d10
+void __cdecl NiParticleMeshes_SaveBinary()
 {
-    FUN_00a9b1a0();
+    NiLines_SaveBinary();
 }

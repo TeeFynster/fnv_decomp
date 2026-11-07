@@ -43,7 +43,8 @@ void* __thiscall BackUpPackage::DestroyOrFree(unsigned int flags)
 }
 
 // @fnv 0x009edb60
-void __thiscall BackUpPackage::FUN_009edb60(BGSSaveFormBuffer* apBuffer)
+// src: XBOX_PDB 0x009edb60
+void __thiscall BackUpPackage::SaveGame_009edb60(BGSSaveFormBuffer* apBuffer)
 {
     ((TESPackageUnitSupport*)this)->SaveToBuffer(apBuffer);
     apBuffer->SaveData((char*)this + 0x80, 0xc, 0);
@@ -80,7 +81,8 @@ GlobalObject_0045cf30 g_011de4e8;
 TESForm* __cdecl _ref_004839c0(unsigned int formID);
 
 // @fnv 0x009ed5f0
-unsigned short __thiscall BackUpPackage::FUN_009ed5f0()
+// src: XBOX_PDB 0x009ed5f0
+unsigned short __thiscall BackUpPackage::GetSaveSize_009ed5f0()
 {
     unsigned short usSaveSize = 0;
     unsigned short usOldSize;
@@ -88,7 +90,7 @@ unsigned short __thiscall BackUpPackage::FUN_009ed5f0()
     usSaveSize += TESPackage::GetSaveSize();
     usOldSize = usSaveSize;
 
-    if (DAT_011de45c->FUN_00862110())
+    if (DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
     {
         usSaveSize += 4;
         usSaveSize += 2;
@@ -126,8 +128,8 @@ BackUpPackage::BackUpPackage()
     reinterpret_cast<NiPoint3*>(&unk80)->FUN_006815c0();
 }
 
-void FUN_0040fbe0(const char*, ...);
-void FUN_005b5e40(const char*, ...);
+void ProgramFlow(const char*, ...);
+void Warning_005b5e40(const char*, ...);
 // @fnv 0x009ed700
 void BackUpPackage::SaveBackupPackage()
 {
@@ -137,16 +139,16 @@ void BackUpPackage::SaveBackupPackage()
     char* i = (char*)DAT_011de45c->FUN_00825c00();
     if (*g_011de4e8.Bool())
         i = (char*)DAT_011de45c->FUN_00825c00();
-    if (DAT_011de45c->FUN_00862110())
+    if (DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
     {
         unsigned int tag = 0x424c4f4b;
-        DAT_011de45c->FUN_008579b0(&tag, 4u);
+        DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&tag, 4u);
         p = (unsigned short*)DAT_011de45c->FUN_00825c00();
-        DAT_011de45c->FUN_008579b0(&a, 2u);
+        DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&a, 2u);
     }
     unsigned short s = 0;
     char* h = (char*)DAT_011de45c->FUN_00825c00();
-    DAT_011de45c->FUN_008579b0(&s, 2u);
+    DAT_011de45c->TESSaveLoadGame_SaveGameDataOLD(&s, 2u);
     ((TESPackageUnitSupport*)this)->WriteTypedData(&unk80, 12);
     if (*g_011de4e8.Bool())
     {
@@ -155,22 +157,22 @@ void BackUpPackage::SaveBackupPackage()
         if (end)
         {
             TESForm* form = _ref_004839c0(end->id);
-            FUN_0040fbe0("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s", header - i,
+            ProgramFlow("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s", header - i,
                          end->id, form->GetName(), *(unsigned int*)&end->unk05, 262,
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp");
         }
         else
         {
-            FUN_0040fbe0("SaveGame(): %-5i ending at line %i in file %s", header - i, 262,
+            ProgramFlow("SaveGame(): %-5i ending at line %i in file %s", header - i, 262,
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp");
         }
     }
-    if (DAT_011de45c->FUN_00862110())
+    if (DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
     {
         char* finalend = (char*)DAT_011de45c->FUN_00825c00();
         char* saved = (char*)p;
         if (finalend > saved + 65535)
-            FUN_005b5e40("SAVELOAD: Save Game Block in file %s on line %i is greater than maximum short size",
+            Warning_005b5e40("SAVELOAD: Save Game Block in file %s on line %i is greater than maximum short size",
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp", 262);
         *p = (unsigned short)(finalend - saved);
     }
@@ -185,7 +187,7 @@ public:
     TESObjectREFR* reference;
     LocationDescriptor();
     ~LocationDescriptor();
-    void FUN_0067f3c0(TESObjectREFR*);
+    void PackageLocation_SetLocReference(TESObjectREFR*);
 };
 
 // Actor.h does not yet declare this nonvirtual backup-package entry point.
@@ -202,17 +204,17 @@ void BackupPackageActorSupport::InstallBackupPackage(void* unused)
     value->SetMustReachLocation(false);
     value->SetMustComplete(false);
     LocationDescriptor* location = new LocationDescriptor;
-    location->FUN_0067f3c0(this);
-    value->FUN_00671d30(location);
+    location->PackageLocation_SetLocReference(this);
+    value->SetPackageLocation(location);
     delete location;
     PackageTargetRecord* target = new PackageTargetRecord;
-    value->FUN_00672fc0((PackageTargetRecord*)target);
+    value->SetPackageTarget((PackageTargetRecord*)target);
     value->SetProcedureType(41);
     ((TESPackageUnitSupport*)value)->GetData()->SetTargetKind(0);
     ((TESPackageUnitSupport*)value)->GetData()->SetTargetObjectReference((TESObjectREFR*)this);
     void* contextTmp = GetProcess()->GetCurrentPackage();
     if (contextTmp)
-        value->FUN_0067a1b0(contextTmp);
+        value->CopyAllFlags(contextTmp);
     ((TESPackageUnitSupport*)value)->GetData()->SetTargValue(GetActorBase()->GetAggroRadius());
     delete target;
     GetProcess()->ResetPackageState();
@@ -235,43 +237,43 @@ void BackUpPackage::LoadPackageBlock()
     TESPackage::LoadGameTESAlt();
     unsigned short usBlockSize = 0;
     char* pBlockStart = 0;
-    if (DAT_011de45c->FUN_00862110())
+    if (DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
     {
         unsigned int uiBlockMarker;
-        DAT_011de45c->FUN_008579e0(&uiBlockMarker, 4);
+        DAT_011de45c->TESSaveLoadGame_LoadGameDataOLD(&uiBlockMarker, 4);
         if (uiBlockMarker != 0x424c4f4b)
         {
-            LoadHeader* header = (LoadHeader*)DAT_011de45c->FUN_004fd3c0();
+            LoadHeader* header = (LoadHeader*)DAT_011de45c->BGSProjectile_GetExplosion();
             if (header)
             {
                 TESForm* form = _ref_004839c0(header->formID);
-                FUN_005b5e40(
+                Warning_005b5e40(
                     "SAVELOAD: (LoadGame Buffer error) Block Header is incorrect in file %s on line %i.  Currently loading form is %08X %s with version %i and flags %08X",
                     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp", 270, header->formID,
                     form->GetName(), header->type, *(unsigned int*)&header->flags0);
             }
             else
             {
-                FUN_005b5e40(
+                Warning_005b5e40(
                     "SAVELOAD: (LoadGame Buffer error) Block Header is incorrect in file %s on line %i.  Current version is %i",
                     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp", 270,
                     DAT_011de45c->FUN_008df040());
             }
         }
         pBlockStart = (char*)DAT_011de45c->FUN_00825c00();
-        DAT_011de45c->FUN_008579e0(&usBlockSize, 2);
+        DAT_011de45c->TESSaveLoadGame_LoadGameDataOLD(&usBlockSize, 2);
     }
     ((TESPackageUnitSupport*)this)->ReadTypedData(&unk80, 12);
-    if (DAT_011de45c->FUN_00862110())
+    if (DAT_011de45c->TESSaveLoadGame_UseSaveGameBlocks())
     {
         char* header = (char*)DAT_011de45c->FUN_00825c00();
-        LoadHeader* pBlockHeader = (LoadHeader*)DAT_011de45c->FUN_004fd3c0();
+        LoadHeader* pBlockHeader = (LoadHeader*)DAT_011de45c->BGSProjectile_GetExplosion();
         if (pBlockHeader)
         {
             TESForm* form = _ref_004839c0(pBlockHeader->formID);
             if (header > pBlockStart + usBlockSize)
             {
-                FUN_005b5e40(
+                Warning_005b5e40(
                     "SAVELOAD: LoadGame Buffer overrun of %i bytes in file %s on line %i.  Currently loading form is %08X %s with version %i and flags %08X",
                     header - (pBlockStart + usBlockSize),
                     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp", 310, pBlockHeader->formID,
@@ -279,7 +281,7 @@ void BackUpPackage::LoadPackageBlock()
             }
             else if (header < pBlockStart + usBlockSize)
             {
-                FUN_005b5e40(
+                Warning_005b5e40(
                     "SAVELOAD: LoadGame Buffer underrun of %i bytes in file %s on line %i.  Currently loading form is %08X %s with version %i and flags %08X",
                     (pBlockStart + usBlockSize) - header,
                     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp", 310, pBlockHeader->formID,
@@ -290,7 +292,7 @@ void BackUpPackage::LoadPackageBlock()
         {
             if (header > pBlockStart + usBlockSize)
             {
-                FUN_005b5e40(
+                Warning_005b5e40(
                     "SAVELOAD: LoadGame Buffer overrun of %i bytes in file %s on line %i.  Current version is %i",
                     header - (pBlockStart + usBlockSize),
                     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp", 310,
@@ -298,7 +300,7 @@ void BackUpPackage::LoadPackageBlock()
             }
             else if (header < pBlockStart + usBlockSize)
             {
-                FUN_005b5e40(
+                Warning_005b5e40(
                     "SAVELOAD: LoadGame Buffer underrun of %i bytes in file %s on line %i.  Current version is %i",
                     (pBlockStart + usBlockSize) - header,
                     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\AI\\BackUpPackage.cpp", 310,

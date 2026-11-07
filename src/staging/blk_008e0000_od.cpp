@@ -212,10 +212,11 @@ class SlotHost
 class FUN_008f3550_cls : public SlotHost
 {
   public:
-    bool FUN_008f3550(SlotHost* a1, int a2);
+    bool HighProcess_ProcessSleepOneHour(SlotHost* a1, int a2);
 };
 // @fnv 0x008f3550
-bool FUN_008f3550_cls::FUN_008f3550(SlotHost* a1, int a2)
+// src: COMMUNITY 0x008f3550
+bool FUN_008f3550_cls::HighProcess_ProcessSleepOneHour(SlotHost* a1, int a2)
 {
     SlotHost* p = this->vf27c();
     if (p == 0)
@@ -521,12 +522,13 @@ class FUN_008e26a0_C
     char unk00[0xe0];
     float m_fValue;
 
-    float FUN_008e26a0();
+    float CombatController_GetCombatPosition();
 };
 
 // Returns m_fValue clamped to a minimum of 0.0f.
 // @fnv 0x008e26a0
-float FUN_008e26a0_C::FUN_008e26a0()
+// src: XBOX_PDB 0x008e26a0
+float FUN_008e26a0_C::CombatController_GetCombatPosition()
 {
     return m_fValue < 0.0 ? 0.0f : m_fValue;
 }

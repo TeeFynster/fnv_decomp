@@ -83,7 +83,8 @@ static inline int IsLighting(S_00b6fa40_Prop* p)
 }
 
 // @fnv 0x00b6fa40
-void __cdecl FUN_00b6fa40(S_00b6fa40_Obj* obj, const float* pf)
+// src: XBOX_PDB 0x00b6fa40
+void __cdecl BSShaderNoLightingProperty_SetFalloffRecurse(S_00b6fa40_Obj* obj, const float* pf)
 {
     if (!obj)
         return;
@@ -124,7 +125,7 @@ void __cdecl FUN_00b6fa40(S_00b6fa40_Obj* obj, const float* pf)
             S_00b6fa40_Obj* c = n->unka0[i];
             if (c)
             {
-                FUN_00b6fa40(c, pf);
+                BSShaderNoLightingProperty_SetFalloffRecurse(c, pf);
             }
         }
     }

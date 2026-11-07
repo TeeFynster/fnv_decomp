@@ -30,7 +30,7 @@ inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer& other)
     return *this;
 }
 
-void* __cdecl FUN_00c1d790(unsigned int count);
+void* __cdecl NiTObjectArray_NiPointer_NiScreenTexture_NiTObjectArray_NiPointer_NiScreenTexture(unsigned int count);
 void __cdecl ReleaseObjectArray(void* memory);
 
 typedef NiTSet<NiPointer<NiMaterialResource>,
@@ -64,7 +64,7 @@ void NiMaterialResourceSet::Realloc(unsigned int uiAlloced)
         if (uiAlloced > 0)
         {
             pNew = static_cast<NiPointer<NiMaterialResource>*>(
-                FUN_00c1d790(uiAlloced));
+                NiTObjectArray_NiPointer_NiScreenTexture_NiTObjectArray_NiPointer_NiScreenTexture(uiAlloced));
             for (unsigned int i = 0; i < m_uiUsed; ++i)
                 pNew[i] = m_pBase[i];
         }

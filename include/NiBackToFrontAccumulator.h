@@ -14,7 +14,7 @@ class NiBackToFrontAccumulator : public NiAccumulator
 
     virtual void Sort();
 
-    void FUN_00aa1000(NiBackToFrontAccumulator* pkClone, CloningProcess& kCloning);
+    void NiCollisionObject_CopyMembers(NiBackToFrontAccumulator* pkClone, CloningProcess& kCloning);
     void QuickSort(int, int);
     float GetPivotValue(int, int);
     NiBackToFrontAccumulator& operator=(const NiBackToFrontAccumulator&);

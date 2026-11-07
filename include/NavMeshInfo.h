@@ -40,7 +40,7 @@ public:
     bool AcquireNavMesh(NavMeshPtr&);
     void Delete();                                                 // 0x006b6390: `delete this` (the deleting destructor)
     void CopyTo(NavMeshInfo*);
-    bool FUN_0068f320() const;
+    bool NavMeshInfo_GetDisabled() const;
     void FUN_0069ad00(NiPointer<NavMesh>&);
     float FUN_007df1f0() const;
     NavMeshBounds* GetBounds();
@@ -52,7 +52,7 @@ public:
     void ReleaseNavMesh();
     bool ResolveNavMesh(NavMeshPtr&);
     void SetNavMesh(NavMesh*);
-    TESObjectCELL* FUN_006b7770(); // exe 0x006b7770
+    TESObjectCELL* GetCell(); // exe 0x006b7770
     int GetInfoChunkSize();       // exe 0x006b4880
     void WriteInfoChunk(char*);   // exe 0x006b48f0
     int GetIndexChunkSize();      // exe 0x006b4e10

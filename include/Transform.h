@@ -28,7 +28,7 @@ public:
         float entries[3][3];
 
         void DecomposeToEulerAngles(float& x, float& y, float& z);
-        void FUN_00439f50(unsigned int axis, NiPoint3& out);
+        void NiMatrix3_GetCol(unsigned int axis, NiPoint3& out);
         void FUN_004769c0(int axis, const NiPoint3& value);
         Mat FUN_004768c0();
         Mat FUN_0043f8d0(const Mat& other);
@@ -49,7 +49,7 @@ public:
         int unk08;
         int unk0c;
 
-        void FUN_004b4db0(const void* source);
+        void SetQuaternionComponentsFromVector(const void* source);
     };
 
 #if defined(FNV_TRANSFORM_NO_SSE)
@@ -139,30 +139,30 @@ public:
     void setTranslation(const DisplayVectorCallLocal_00ddfd10& p);
     ValidationResult IsTransformValid(float tolerance);
 
-    Transform* FUN_00476a80();
+    Transform* NiTransform_NiTransform();
     void FUN_004b4880(Transform* out);
     void FUN_004b4880(Transform& out);
     Transform* FUN_004b4880(Transform* out) const;
-    NiPoint3* FUN_00524c40(NiPoint3* out, const NiPoint3* point);
-    NiPoint3* FUN_00524c40(NiPoint3* out, const NiPoint3* point) const;
-    void FUN_0056e120();
+    NiPoint3* ComputeValue_00524c40(NiPoint3* out, const NiPoint3* point);
+    NiPoint3* ComputeValue_00524c40(NiPoint3* out, const NiPoint3* point) const;
+    void bhkTransform_setIdentity();
     Transform* FUN_0062c250(Transform* out, const Transform* other) const;
     Transform FUN_0062c250(const Transform& rhs) const;
     void FUN_008b42e0(Transform& out) const;
     void FUN_00c6cd60(const Transform& other);
     void FUN_00c6cd60(const Transform* other);
-    void FUN_00cb2240(const Transform& a, const Transform& b);
-    void FUN_00cb2240(const Transform* a, const Transform* b);
-    void FUN_00cb22f0(Transform* a, Transform* b);
-    void FUN_00cb22f0(const Transform& a, const Transform& b);
-    void FUN_00cb22f0(const Transform* a, const Transform* b);
-    void FUN_00cb22f0(void* a, void* b);
-    void FUN_00cb2d90(const Quaternion* rotation);
-    void FUN_00cb2d90(void* rotation);
-    void FUN_00cb2fc0();
-    void FUN_00ce5070(const Transform* other) throw();
-    void FUN_00ce51f0(int value);
-    void FUN_00ce5300(Matrix43* out);
+    void hkTransform_setMul(const Transform& a, const Transform& b);
+    void hkTransform_setMul(const Transform* a, const Transform* b);
+    void hkTransform_setMulInverseMul(Transform* a, Transform* b);
+    void hkTransform_setMulInverseMul(const Transform& a, const Transform& b);
+    void hkTransform_setMulInverseMul(const Transform* a, const Transform* b);
+    void hkTransform_setMulInverseMul(void* a, void* b);
+    void hkRotation_set(const Quaternion* rotation);
+    void hkRotation_set(void* rotation);
+    void hkRotation_renormalize();
+    void setFromTransformNoScale(const Transform* other) throw();
+    void BuildMatrixFromRotationScaleAndPosition(int value);
+    void Object_ForwardCall_00ce5300(Matrix43* out);
 
     static const Transform& GetIdentityTransform();
 };

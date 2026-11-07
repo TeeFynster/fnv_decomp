@@ -19,7 +19,7 @@ class ImageSpaceModifierInstance : public NiObject
 
     static float GetTime();
     bool IsFlagSet();
-    void __thiscall FUN_009655e0();
+    void __thiscall PlayerCharacter_StopVatsImageSpace();
 
     bool m_bHasBeenApplied;
     unsigned char layoutPadding9[3];

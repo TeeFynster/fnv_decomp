@@ -199,12 +199,13 @@ unsigned int ReadEncodedInteger(char* buffer, unsigned int& value)
 }
 
 
-MemoryManager* __cdecl FUN_00401020(void);
+MemoryManager* __cdecl MemoryManager_Instance(void);
 
 // @fnv 0x00401030
-void __cdecl FormHeap_Free(void* ptr)
+// src: COMMUNITY 0x00401030
+void __cdecl FormHeapFreeAndLog_00401030(void* ptr)
 {
-    FUN_00401020()->Deallocate(ptr);
+    MemoryManager_Instance()->Deallocate(ptr);
 }
 
 // @fnv 0x00845d20
@@ -216,7 +217,8 @@ void ReadFileIntoBuffer(SaveLoadFile* file, unsigned int* apuiBuffer, unsigned i
 extern unsigned int DAT_011a2040[];
 
 // @fnv 0x00845d70
-unsigned int FUN_00845d70(unsigned int index)
+// src: XBOX_PDB 0x00845d70
+unsigned int GetSizeTypeSize(unsigned int index)
 {
     return DAT_011a2040[index];
 }
@@ -258,17 +260,19 @@ void ForwardToShell(FUN_00846330_shell* apShell, int aiArg1, int aiArg2)
 
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 // @fnv 0x00845cc0
-void __cdecl FUN_00845cc0(const char* apMessage, ...)
+// src: XBOX_PDB 0x00845cc0
+void __cdecl SaveGameWarning(const char* apMessage, ...)
 {
     char* varArgs;
     varArgs = (char*)&apMessage + 4;
     if (g_BGSSaveLoadGame)
-        g_BGSSaveLoadGame->FUN_0084ab00(apMessage, varArgs);
+        g_BGSSaveLoadGame->SaveGameWarningFunction(apMessage, varArgs);
     varArgs = 0;
 }
 
 // @fnv 0x00845d40
-unsigned int FUN_00845d40(unsigned int value)
+// src: COMMUNITY 0x00845d40
+unsigned int GetSizeTypeForSize(unsigned int value)
 {
     if (value <= 0xff)
         return 0;

@@ -36,8 +36,8 @@ class MemoryLevelManager
     bool active;
     void ResetActorReferences();
 };
-void FUN_00878250(bool);
-void FUN_00878200(ActorReferenceArray::ActorReferenceSetupData&);
+void MemoryLevelManager_FreeReleasedObjects(bool);
+void MemoryLevelManager_EndMemoryFree(ActorReferenceArray::ActorReferenceSetupData&);
 extern PlayerCharacter* g_thePlayer;
 
 class TESReputation;
@@ -57,11 +57,11 @@ void MemoryLevelManager::SetupActorReferences()
 {
     ActorReferenceSetupData data;
     TESObjectCELL::InitializeTESResources(data, true, true, true);
-    FUN_00878250(data.c);
-    if (g_thePlayer->FUN_00878340() && BSFaceGenManager::GetModelMap() &&
+    MemoryLevelManager_FreeReleasedObjects(data.c);
+    if (g_thePlayer->GetAllowEGMCacheClear() && BSFaceGenManager::GetModelMap() &&
         BSFaceGenManager::GetModelMap()->HasModels() && !Tile::FindMenuById(0x40c))
         BSFaceGenManager::GetModelMap()->PurgeUnusedModels(false);
-    FUN_00878200(data);
+    MemoryLevelManager_EndMemoryFree(data);
 }
 // @fnv 0x009777a0
 void MemoryLevelManager::ResetActorReferences()
@@ -126,9 +126,9 @@ void MemoryLevelManager::ResetActorReferences()
                 local.ref = 0;
                 local.actor = 0;
                 local.process = 0;
-                for (local.i = 0; local.i < reinterpret_cast<TopicInfoArray*>(actorArray)->FUN_005be5c0(0); local.i++)
+                for (local.i = 0; local.i < reinterpret_cast<TopicInfoArray*>(actorArray)->ProcessArray_GetProcessLevelTail(0); local.i++)
                 {
-                    local.ref = reinterpret_cast<TopicInfoArray*>(actorArray)->FUN_00968670(local.i);
+                    local.ref = reinterpret_cast<TopicInfoArray*>(actorArray)->ProcessArray_GetItem(local.i);
                     local.actor = 0;
                     if (local.ref && local.ref->IsActor())
                         local.actor = local.ref;
@@ -142,7 +142,7 @@ void MemoryLevelManager::ResetActorReferences()
                         {
                             local.distance = local.actor->GetDistanceToReference(local.source, false, true);
                             local.value = ScaleByInverseRatio(local.amount, local.radius, local.distance);
-                            local.scale = local.actor->FUN_008c4330();
+                            local.scale = local.actor->Actor_GetRadiationResistanceMult();
                             local.value *= local.scale;
                             if (local.actor &&
                                 local.value >
@@ -161,7 +161,7 @@ void MemoryLevelManager::ResetActorReferences()
                                     else
                                         local.actor->UpdateActorEquipmentState(local.source, 0.0f);
                                 }
-                                local.process->FUN_00977c90(local.value);
+                                local.process->HighProcess_SetRadiationLevel(local.value);
                             }
                             local.process->SetWaterLevel(local.process->GetField440());
                         }
@@ -172,11 +172,11 @@ void MemoryLevelManager::ResetActorReferences()
                 local.playerValue = ScaleByInverseRatio(local.amount, local.radius, local.playerDistance);
                 if (local.playerValue > 0.0)
                 {
-                    local.playerScale = g_thePlayer->FUN_008c4330();
+                    local.playerScale = g_thePlayer->Actor_GetRadiationResistanceMult();
                     local.playerValue *= local.playerScale;
                 }
                 if (g_thePlayer && local.playerValue > 0.0 && local.playerValue > local.process->GetField440())
-                    local.process->FUN_00977c90(local.playerValue);
+                    local.process->HighProcess_SetRadiationLevel(local.playerValue);
                 if (local.maximum < local.playerValue)
                     local.maximum = local.playerValue;
                 local.process->SetWaterLevel(local.process->GetField440());
@@ -186,10 +186,10 @@ void MemoryLevelManager::ResetActorReferences()
     active = local.maximum > 0.0 ? 1 : 0;
     if (local.reset)
     {
-        for (local.resetIndex = 0; local.resetIndex < reinterpret_cast<TopicInfoArray*>(actorArray)->FUN_005be5c0(0);
+        for (local.resetIndex = 0; local.resetIndex < reinterpret_cast<TopicInfoArray*>(actorArray)->ProcessArray_GetProcessLevelTail(0);
              local.resetIndex++)
         {
-            local.resetRef = reinterpret_cast<TopicInfoArray*>(actorArray)->FUN_00968670(local.resetIndex);
+            local.resetRef = reinterpret_cast<TopicInfoArray*>(actorArray)->ProcessArray_GetItem(local.resetIndex);
             local.resetActor = local.resetRef && local.resetRef->IsActor() ? local.resetRef : 0;
             if (local.resetActor)
             {
@@ -206,63 +206,66 @@ void MemoryLevelManager::ResetActorReferences()
 
 class IOManager;
 
-NiRenderer* __cdecl FUN_0043c4b0(void);
-void __cdecl FUN_00652190(void);
-void __cdecl FUN_008781e0(int);
-void __cdecl FUN_00a5b460(void);
-void __cdecl FUN_00aa7030(void);
-void __fastcall FUN_00c3e340(IOManager*);
+NiRenderer* __cdecl NiXenonRenderer_GetRenderer(void);
+void __cdecl BSFaceGenManager_UnlockFaceGenAccess(void);
+void __cdecl BSTexturePalette_SetMaxTexturesToPurge(int);
+void __cdecl NiGlobalStringTable_FreeUnusedStrings(void);
+void __cdecl MemoryPool_FreeUnusedPagesForAllPools_00aa7030(void);
+void __fastcall IOManager_Resume(IOManager*);
 extern IOManager* DAT_01202d98;
 
 // @fnv 0x00878200
-void __cdecl FUN_00878200(unsigned char* aFreeData)
+// src: XBOX_PDB 0x00878200
+void __cdecl MemoryLevelManager_EndMemoryFree(unsigned char* aFreeData)
 {
-    FUN_00a5b460();
-    FUN_00aa7030();
+    NiGlobalStringTable_FreeUnusedStrings();
+    MemoryPool_FreeUnusedPagesForAllPools_00aa7030();
     if (aFreeData[5])
     {
-        FUN_00652190();
+        BSFaceGenManager_UnlockFaceGenAccess();
     }
-    FUN_008781e0(*(int*)(aFreeData + 8));
+    BSTexturePalette_SetMaxTexturesToPurge(*(int*)(aFreeData + 8));
     if (aFreeData[3])
     {
-        FUN_0043c4b0()->FinishScene();
+        NiXenonRenderer_GetRenderer()->FinishScene();
     }
-    FUN_00c3e340(DAT_01202d98);
+    IOManager_Resume(DAT_01202d98);
 }
 
 class ModelLoader
 {
   public:
-    void FUN_00448620(bool);
+    void ModelLoader_ClearUnusedModels(bool);
 };
 
 extern ModelLoader* g_modelLoader;
 extern TES* g_TES;
 
-void __cdecl FUN_00868d70(int);
-void __fastcall FUN_00b5fd60(ShadowSceneNode*);
-void __cdecl FUN_00c459d0(int);
-void __cdecl FUN_00651e30();
-void __cdecl FUN_00651f40();
+void __cdecl GarbageCollector_ClearAll(int);
+void __fastcall ShadowSceneNode_ProcessQueuedLights(ShadowSceneNode*);
+void __cdecl NiObjectGarbage_ClearAll(int);
+void __cdecl BSFaceGenManager_ClearModelCache();
+void __cdecl BSFaceGenManager_ClearEGTCache();
 
 // @fnv 0x00878250
-void __cdecl FUN_00878250(bool abRunExtraSteps)
+// src: XBOX_PDB 0x00878250
+void __cdecl MemoryLevelManager_FreeReleasedObjects(bool abRunExtraSteps)
 {
-    FUN_00868d70(1);
-    FUN_00b5fd60(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(0));
-    FUN_00c459d0(0);
+    GarbageCollector_ClearAll(1);
+    ShadowSceneNode_ProcessQueuedLights(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(0));
+    NiObjectGarbage_ClearAll(0);
     if (abRunExtraSteps)
     {
-        FUN_00651e30();
-        FUN_00651f40();
+        BSFaceGenManager_ClearModelCache();
+        BSFaceGenManager_ClearEGTCache();
     }
-    g_modelLoader->FUN_00448620(true);
+    g_modelLoader->ModelLoader_ClearUnusedModels(true);
     g_TES->SetTESActive(false);
 }
 
 // @fnv 0x00878340
-bool PlayerCharacter::FUN_00878340()
+// src: XBOX_PDB 0x00878340
+bool PlayerCharacter::GetAllowEGMCacheClear()
 {
     return *((bool*)((char*)this + 0x75d));
 }

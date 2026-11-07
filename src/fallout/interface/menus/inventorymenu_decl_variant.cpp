@@ -48,8 +48,8 @@ enum ENUM_FORM_ID;
 class InputManager
 {
   public:
-    int FUN_00a24660(int, int);
-    int FUN_00a23a50(int, int);
+    int Controls_GetUserAction(int, int);
+    int Controls_GetMouseButton(int, int);
 };
 extern OSGlobals* g_osGlobals;
 extern PlayerCharacter* g_thePlayer;
@@ -58,8 +58,8 @@ extern PlayerCharacter* g_thePlayer;
 extern Setting DAT_011d3810;
 extern Setting DAT_011d1e18;
 extern bool DAT_011d9f38;
-bool FUN_004b71d0();
-InterfaceManager* FUN_004b7210();
+bool InterfaceManager_Has360Controller();
+InterfaceManager* InterfaceManager_GetSingleton();
 int Warning(const char*, ...);
 extern Setting DAT_011d3258;
 extern Setting DAT_011d2acc;
@@ -77,7 +77,7 @@ static const int kGetClassValue = 1002;
 // m_pTiles holds kNumTiles (23) entries, so out-of-range tile ids are ignored.
 static const int kNumTiles = 23;
 
-void __cdecl FUN_00704390();
+void __cdecl StatsMenu_ResetHealingMode();
 struct FUN_00780be0_shell
 {
     unsigned char m_0x00;  // +0x00
@@ -104,9 +104,9 @@ struct FUN_00780be0_shell
 };
 
 extern double _gModifierZero;
-void __cdecl FUN_00780c00(Tile* pTile);
+void __cdecl InventoryMenu_SetVisibleFunc(Tile* pTile);
 bool __cdecl _FUN_004b71d0();
-int __cdecl FUN_007023c0();
+int __cdecl Interface_GetTopMenuID();
 
 struct ProxyPipboy
 {
@@ -116,19 +116,19 @@ struct ProxyMgr
 {
     ProxyPipboy* __thiscall GetPipboyManager();
 };
-void FUN_00782470(bool a1);
-unsigned char FUN_007824b0();
+void InventoryMenu_SetKnobPosition(bool a1);
+unsigned char InventoryMenu_GetCurrentInventoryPage();
 unsigned int __fastcall FUN_0044ddc0(void*);
 unsigned char __cdecl IsNotFormType2E(void* a1);
 struct FUN_007832e0_class
 {
-    void FUN_007832e0(float, float);
+    void ListBox_ItemChange_SetListState(float, float);
 };
 
-void __cdecl FUN_007800c0();
+void __cdecl InventoryMenu_LoadPageState();
 struct FUN_004bddd0_t
 {
-    bool __thiscall FUN_004bddd0(bool);
+    bool __thiscall ItemChange_GetWorn(bool);
 };
 
 
@@ -394,7 +394,7 @@ struct PlayerCharacterShell
     virtual void v241() = 0;
     virtual void v242() = 0;
     virtual void DropInventoryObject(TESBoundObject*, ExtraDataList*, int, NiPoint3*, bool) = 0;
-    void __thiscall FUN_009614b0(TESBoundObject*, NiPoint3*, int, int);
+    void __thiscall PlayerCharacter_GetDropPoint(TESBoundObject*, NiPoint3*, int, int);
 };
 extern PlayerCharacterShell* _g_thePlayer;
 extern int _NiPoint3_ZERO;
@@ -420,7 +420,7 @@ class FUN_0077ffd0_lbx
     virtual void vfn_00();
     virtual Tile* vfn_04(int);
 };
-void* __cdecl FUN_00a01860(const char* s);
+void* __cdecl Tile_TextToTrait(const char* s);
 int __cdecl FUN_00ec62c0();
 void __cdecl UpdateCurrentValue();
 struct InputInterface
@@ -435,13 +435,13 @@ struct InputInterface
     virtual int GetSecondValue(int index);
 };
 extern char* DAT_011dea3c;
-bool __cdecl FUN_00780f70();
+bool __cdecl IsDrBagUsable();
 namespace InventorySelection {
 struct Item;
 struct Form;
 struct TileRef
 {
-    Tile** FUN_0073ac90();
+    Tile** NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead();
 };
 struct TileHolder
 {
@@ -467,24 +467,24 @@ struct Form
 struct Item
 {
     Form* FUN_0044ddc0();
-    float FUN_004bcdb0(int);
+    float ItemChange_GetItemHealth(int);
     const char* GetIconFilename(int);
 };
 struct Player
 {
-    bool FUN_00967b70(Item*);
+    bool PlayerCharacter_CanEquipOrUseObject(Item*);
 };
 
 struct Camera
 {
-    void FUN_007f8610(int, float, float, bool);
+    void FOPipboyManager_MoveKnob(int, float, float, bool);
 };
 // Exe 0x00780ff0: unit-local InventorymenuInterfaceView view used by this matched implementation.
 struct InventorymenuInterfaceView
 {
     Camera* FUN_00704370();
 };
-InventorymenuInterfaceView* FUN_004b7210();
+InventorymenuInterfaceView* InterfaceManager_GetSingleton();
 extern Setting DAT_011db2f0, DAT_011db358, DAT_011d3dcc, DAT_011d1f2c, DAT_011d33f0;
 extern Setting* DAT_011d5168;
 extern int DAT_011d9f34, DAT_011d9ebc;
@@ -493,12 +493,12 @@ extern Player* DAT_011dea3c;
 extern float DAT_0102f0f8, DAT_0101b268, DAT_01050280, DAT_01072e3c, DAT_01073af0, DAT_0104f754;
 extern double DAT_01073ae8, DAT_01073ae0;
 extern const char DAT_01020764[], DAT_0106eb24[], DAT_01073aac[];
-void FUN_00707e30(Item*, Tile*);
+void Interface_PopulateItemStatsDisplay(Item*, Tile*);
 const char* GetWeaponSkillIconPath(void*);
-int FUN_00406d00(char*, unsigned int, const char*, ...);
-int FUN_00408b20(const char*, const char*);
+int BSsprintf(char*, unsigned int, const char*, ...);
+int BSstrcmp(const char*, const char*);
 void FUN_00406d30(char*, unsigned int, const char*);
-unsigned int FUN_0044a670(const char*);
+unsigned int BSstrlen(const char*);
 void* FUN_00479430(Form*);
 const char* GetMenuIconName(void*);
 void FUN_00406d50(char*, unsigned int, const char*);
@@ -515,76 +515,76 @@ void InventoryMenu::UpdateItemDisplay(int action, Tile* changed)
             int selectedSlot11 = (int)reinterpret_cast<InventorySelection::List&>(m_kItemList).Value(0xfac)->FUN_00a011b0();
             if (InventorySelection::DAT_011d9f34 != selectedSlot11)
             {
-                InventorySelection::FUN_004b7210()->FUN_00704370()->FUN_007f8610(
-                    0, InventorySelection::DAT_011d9f34 < selectedSlot11 ? *InventorySelection::DAT_011db2f0.FUN_00403e20() : -*InventorySelection::DAT_011db2f0.FUN_00403e20(),
-                    *InventorySelection::DAT_011db358.FUN_00403e20(), 1);
+                InventorySelection::InterfaceManager_GetSingleton()->FUN_00704370()->FOPipboyManager_MoveKnob(
+                    0, InventorySelection::DAT_011d9f34 < selectedSlot11 ? *InventorySelection::DAT_011db2f0.Setting_Float_00403e20() : -*InventorySelection::DAT_011db2f0.Setting_Float_00403e20(),
+                    *InventorySelection::DAT_011db358.Setting_Float_00403e20(), 1);
                 InventorySelection::DAT_011d9f34 = selectedSlot11;
             }
             float threshold = InventorySelection::DAT_0102f0f8;
             if (InventorySelection::DAT_011d9ea8->FUN_0044ddc0()->FUN_00401170() == 24)
                 threshold = InventorySelection::DAT_0101b268;
-            if (InventorySelection::DAT_011d9ea8->FUN_004bcdb0(1) >= threshold)
-                m_pTiles[8]->FUN_00a01350(0xfc4, InventorySelection::DAT_011d3dcc.FUN_00403df0(), 1);
+            if (InventorySelection::DAT_011d9ea8->ItemChange_GetItemHealth(1) >= threshold)
+                m_pTiles[8]->Tile_Set_00a01350(0xfc4, InventorySelection::DAT_011d3dcc.FUN_00403df0(), 1);
             else
-                m_pTiles[8]->FUN_00a01350(0xfc4, InventorySelection::DAT_011d1f2c.FUN_00403df0(), 1);
-            InventorySelection::FUN_00707e30(InventorySelection::DAT_011d9ea8, m_pTiles[12]);
+                m_pTiles[8]->Tile_Set_00a01350(0xfc4, InventorySelection::DAT_011d1f2c.FUN_00403df0(), 1);
+            InventorySelection::Interface_PopulateItemStatsDisplay(InventorySelection::DAT_011d9ea8, m_pTiles[12]);
             m_pTiles[12]->FUN_00700320(0xfa3, true);
-            FUN_00726070()->FUN_00700320(InventorySelection::DAT_011d9ebc, InventorySelection::DAT_011dea3c->FUN_00967b70(InventorySelection::DAT_011d9ea8));
-            m_pTiles[11]->FUN_00a01350(0xfcc, InventorySelection::DAT_011d9ea8->GetIconFilename(0), 1);
+            FUN_00726070()->FUN_00700320(InventorySelection::DAT_011d9ebc, InventorySelection::DAT_011dea3c->PlayerCharacter_CanEquipOrUseObject(InventorySelection::DAT_011d9ea8));
+            m_pTiles[11]->Tile_Set_00a01350(0xfcc, InventorySelection::DAT_011d9ea8->GetIconFilename(0), 1);
             InventorySelection::Form* ammo = 0;
             if (InventorySelection::DAT_011d9ea8->FUN_0044ddc0()->FUN_00401170() == 40)
             {
                 ammo = InventorySelection::DAT_011d9ea8->FUN_0044ddc0();
-                m_pTiles[20]->FUN_00a01350(0xfcc, InventorySelection::GetWeaponSkillIconPath(ammo->GetUnk15C()), 1);
+                m_pTiles[20]->Tile_Set_00a01350(0xfcc, InventorySelection::GetWeaponSkillIconPath(ammo->GetUnk15C()), 1);
                 char countText[128];
-                InventorySelection::FUN_00406d00(countText, 128, InventorySelection::DAT_01020764, ammo->GetField1BC());
+                InventorySelection::BSsprintf(countText, 128, InventorySelection::DAT_01020764, ammo->GetField1BC());
                 if (m_pTiles[22])
-                    m_pTiles[22]->FUN_00a01350(0xfc4, countText, 1);
+                    m_pTiles[22]->Tile_Set_00a01350(0xfc4, countText, 1);
             }
-            if (!InventorySelection::FUN_00408b20(m_pTiles[11]->FUN_00a011f0(0xfcc), InventorySelection::DAT_011d33f0.FUN_00403df0()))
+            if (!InventorySelection::BSstrcmp(m_pTiles[11]->Tile_GetString(0xfcc), InventorySelection::DAT_011d33f0.FUN_00403df0()))
             {
-                m_pTiles[11]->FUN_00a012d0(0xfa1, InventorySelection::DAT_01050280, 1);
-                m_pTiles[11]->FUN_00a012d0(0xfb1, InventorySelection::DAT_01072e3c, 1);
-                m_pTiles[11]->FUN_00a012d0(0xfb0, InventorySelection::DAT_01072e3c, 1);
+                m_pTiles[11]->Tile_Set(0xfa1, InventorySelection::DAT_01050280, 1);
+                m_pTiles[11]->Tile_Set(0xfb1, InventorySelection::DAT_01072e3c, 1);
+                m_pTiles[11]->Tile_Set(0xfb0, InventorySelection::DAT_01072e3c, 1);
             }
             else if (InventorySelection::DAT_011d9ea8->FUN_0044ddc0()->FUN_00401170() == 41)
             {
                 float heightSlot1 = InventorySelection::DAT_01073af0;
                 float width = InventorySelection::DAT_0104f754;
-                m_pTiles[11]->FUN_00a012d0(0xfa1, heightSlot1 + InventorySelection::DAT_01073ae8, 1);
-                m_pTiles[11]->FUN_00a012d0(0xfb1, width + InventorySelection::DAT_01073ae0, 1);
-                m_pTiles[11]->FUN_00a012d0(0xfb0, width + InventorySelection::DAT_01073ae0, 1);
+                m_pTiles[11]->Tile_Set(0xfa1, heightSlot1 + InventorySelection::DAT_01073ae8, 1);
+                m_pTiles[11]->Tile_Set(0xfb1, width + InventorySelection::DAT_01073ae0, 1);
+                m_pTiles[11]->Tile_Set(0xfb0, width + InventorySelection::DAT_01073ae0, 1);
             }
             else
             {
-                m_pTiles[11]->FUN_00a012d0(0xfa1, InventorySelection::DAT_01050280, 1);
-                m_pTiles[11]->FUN_00a012d0(0xfb1, InventorySelection::DAT_01072e3c, 1);
-                m_pTiles[11]->FUN_00a012d0(0xfb0, InventorySelection::DAT_01072e3c, 1);
+                m_pTiles[11]->Tile_Set(0xfa1, InventorySelection::DAT_01050280, 1);
+                m_pTiles[11]->Tile_Set(0xfb1, InventorySelection::DAT_01072e3c, 1);
+                m_pTiles[11]->Tile_Set(0xfb0, InventorySelection::DAT_01072e3c, 1);
             }
-            m_pTiles[11]->SetChangeFlag(17);
+            m_pTiles[11]->Tile_SetChangeFlag(17);
             char path[260];
             InventorySelection::FUN_00406d30(path, 260, InventorySelection::DAT_0106eb24);
-            unsigned int prefixLengthSlot0 = InventorySelection::FUN_0044a670(path);
+            unsigned int prefixLengthSlot0 = InventorySelection::BSstrlen(path);
             InventorySelection::FUN_00406d50(path, 260, InventorySelection::GetMenuIconName(InventorySelection::FUN_00479430(InventorySelection::DAT_011d9ea8->FUN_0044ddc0())));
-            if (InventorySelection::FUN_0044a670(path) > prefixLengthSlot0)
+            if (InventorySelection::BSstrlen(path) > prefixLengthSlot0)
             {
-                (*reinterpret_cast<InventorySelection::TileHolder*>(m_pTiles[5])->tile.FUN_0073ac90())->FUN_00a01350(0xfcc, path, 1);
-                (*reinterpret_cast<InventorySelection::TileHolder*>(m_pTiles[5])->tile.FUN_0073ac90())->FUN_00700320(0xfa3, true);
+                (*reinterpret_cast<InventorySelection::TileHolder*>(m_pTiles[5])->tile.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->Tile_Set_00a01350(0xfcc, path, 1);
+                (*reinterpret_cast<InventorySelection::TileHolder*>(m_pTiles[5])->tile.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->FUN_00700320(0xfa3, true);
             }
             else
-                (*reinterpret_cast<InventorySelection::TileHolder*>(m_pTiles[5])->tile.FUN_0073ac90())->FUN_00700320(0xfa3, false);
+                (*reinterpret_cast<InventorySelection::TileHolder*>(m_pTiles[5])->tile.NiTPointerListBase_NiTPointerAllocator_unsigned_int_Tile_GetHead())->FUN_00700320(0xfa3, false);
             if (!reinterpret_cast<InventorySelection::Entry&>(m_kMenuData).FUN_00701740())
                 m_pTiles[11]->FUN_00700320(0xfa3, true);
-            FUN_00781680();
+            UpdateButtons();
         }
     }
     else if (action == 30)
     {
         ClearActionPointSource();
-        m_pTiles[11]->FUN_00a01350(0xfcc, InventorySelection::DAT_01073aac, 1);
+        m_pTiles[11]->Tile_Set_00a01350(0xfcc, InventorySelection::DAT_01073aac, 1);
         if (!reinterpret_cast<InventorySelection::Entry&>(m_kMenuData).FUN_00701740())
             m_pTiles[11]->FUN_00700320(0xfa3, true);
-        m_pTiles[6]->FUN_00a01350(0xfc4, InventorySelection::DAT_011d5168->FUN_00403df0(), 1);
+        m_pTiles[6]->Tile_Set_00a01350(0xfc4, InventorySelection::DAT_011d5168->FUN_00403df0(), 1);
         m_pTiles[6]->FUN_00700320(0xfaf, true);
     }
 }
@@ -595,7 +595,7 @@ struct Form
 };
 struct Extra
 {
-    bool FUN_00418ba0();
+    bool ExtraDataList_HasWeaponMods();
 };
 struct ExtraNode
 {
@@ -605,10 +605,10 @@ struct Entry
 {
     ~Entry();
     Form* FUN_0044ddc0();
-    float FUN_004bcdb0(bool);
+    float ItemChange_GetItemHealth(bool);
     int FUN_00726070();
-    ExtraNode* FUN_00559450();
-    bool FUN_004bddd0(bool);
+    ExtraNode* Modelloader_GetReferencedThis();
+    bool ItemChange_GetWorn(bool);
     void* FUN_004459e0(int);
 };
 struct EntryListNode
@@ -630,25 +630,25 @@ extern void* player;
 float __cdecl FUN_00476b20(float);
 struct InventoryCheck
 {
-    bool FUN_00781860(Entry* entry);
+    bool InventoryMenu_IsItemRepairable(Entry* entry);
 };
 struct ItemLabelSource : InventoryStackRecord
 {
     int FUN_00726070();
     unsigned char FUN_004bd820();
     const char* GetTargetFullName();
-    bool FUN_004bddd0(bool);
+    bool ItemChange_GetWorn(bool);
 };
 
 struct ItemLabelPlayer
 {
-    bool FUN_00967b70(InventoryStackRecord*);
-    TESObjectWEAP* FUN_008a1710();
+    bool PlayerCharacter_CanEquipOrUseObject(InventoryStackRecord*);
+    TESObjectWEAP* Actor_GetCurrentWeapon();
 };
 struct ItemLabelChildren
 {
     Tile** FUN_007b5370();
-    void* FUN_00559450();
+    void* Modelloader_GetReferencedThis();
     Tile** AddEight(void*);
 };
 int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
@@ -657,9 +657,9 @@ void __cdecl UpdateItemLabel(Tile* tile, ItemLabelSource* item);
 // thiscall, no stack args (ret): menu refresh/close path.
 extern "C" void* DAT_011d9ea8;
 extern "C" int DAT_011d9ebc;
-void* __fastcall FUN_00559450(void* obj);
-void __cdecl FUN_00782a90();
-void __cdecl FUN_007832a0(void* tile, int index);
+void* __fastcall Modelloader_GetReferencedThis(void* obj);
+void __cdecl InventoryMenu_UpdateInventoryMenu();
+void __cdecl InventoryMenu_AddToChangedItemsListIfWorn(void* tile, int index);
 struct Sh006815c0
 {
     void** FUN_006815c0();
@@ -671,7 +671,7 @@ struct Sh00726070
 struct Sh007314c0
 {
     char pad[0x64];
-    void FUN_007314c0(void (*fn)(void*, int), int a, int b);
+    void ListBox_ItemChange_Traverse(void (*fn)(void*, int), int a, int b);
 };
 struct Sh005ae3d0
 {
@@ -679,18 +679,18 @@ struct Sh005ae3d0
 };
 struct Sh004bddd0
 {
-    bool FUN_004bddd0(bool arg);
+    bool ItemChange_GetWorn(bool arg);
 };
 struct Sh0088c650
 {
-    void EquipItem(void* a, int b, void* c, bool d, bool e, bool f);
+    void Actor_QueueEquipObject(void* a, int b, void* c, bool d, bool e, bool f);
 };
 struct Sh0088c790
 {
-    void UnequipItem(void* a, int b, void* c, bool d, bool e, bool f);
+    void QueueUnEquipObject(void* a, int b, void* c, bool d, bool e, bool f);
 };
 unsigned __cdecl FUN_0058db10(int arg);
-unsigned __cdecl FUN_004839c0(int arg);
+unsigned __cdecl TESForm_GetFormByNumericID(int arg);
 
 extern "C" Setting DAT_011d2af0;
 struct GpEmb75
@@ -711,21 +711,22 @@ struct Gp75
 };
 
 
-bool FUN_00702450(int);
-FOPipboyManager* FUN_00705990();
-bool FUN_00709d40();
-bool FUN_00702140();
-void FUN_00717280(int);
+bool Interface_IsTopMenuID(int);
+FOPipboyManager* Interface_GetPipboy();
+bool Interface_Has360Controller();
+bool HotKeysWheel_IsDPadPressed();
+void InterfaceManager_PlayMenuSound(int);
 void ShowStatsMenu(int, int);
 void UpdatePipboyMapVisibility(int, int);
 
 // @fnv 0x00782190
-bool InventoryMenu::FUN_00782190(int input, int unused)
+// src: XBOX_PDB 0x00782190
+bool InventoryMenu::DoGamepad(int input, int unused)
 {
-    if (!FUN_00702450(1002) || !FUN_00705990()->IsUnk28Set())
+    if (!Interface_IsTopMenuID(1002) || !Interface_GetPipboy()->IsUnk28Set())
         return false;
     bool consumed = false;
-    if (FUN_00709d40() && m_kMenuData.GetVisible())
+    if (Interface_Has360Controller() && m_kMenuData.GetVisible())
     {
         switch (input)
         {
@@ -733,22 +734,22 @@ bool InventoryMenu::FUN_00782190(int input, int unused)
         case 2:
         case 3:
         case 4:
-            if (FUN_00702140())
+            if (HotKeysWheel_IsDPadPressed())
                 consumed = true;
             break;
         }
     }
-    if (!consumed && FUN_00702450(1002))
+    if (!consumed && Interface_IsTopMenuID(1002))
     {
         switch (input)
         {
         case 13:
-            FUN_00717280(36);
+            InterfaceManager_PlayMenuSound(36);
             ShowStatsMenu(1, 0);
             consumed = true;
             break;
         case 14:
-            FUN_00717280(36);
+            InterfaceManager_PlayMenuSound(36);
             UpdatePipboyMapVisibility(1, 0);
             consumed = true;
             break;

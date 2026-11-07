@@ -24,7 +24,7 @@ struct FUN_008df040_shell
     unsigned char __thiscall FUN_008df040();
 };
 extern FUN_008df040_shell* g_TESSaveLoadGame;
-void* __cdecl FUN_00703390();
+void* __cdecl Interface_GetTelekinesisREFR();
 struct Flt
 {
     operator unsigned int();
@@ -33,11 +33,11 @@ struct FUN_0082aa90_shell
 {
     unsigned int GetFloatAsUInt();
 };
-void* __cdecl FUN_004b5a80(void const*);
+void* __cdecl bhkEntity_Getbhk(void const*);
 struct FUN_0082aeb0_shell
 {
-    void* __thiscall FUN_0082aee0();
-    void* __thiscall FUN_0082aeb0();
+    void* __thiscall bhkUnaryAction_GethkRigidBody();
+    void* __thiscall bhkUnaryAction_GetRigidBody();
 };
 
 #include <xmmintrin.h>
@@ -74,7 +74,7 @@ class hkSimdRealT
     hkSimdRealT(float fValue);
 };
 
-void __cdecl FUN_004a3e00(hkVector4T* pkOut, const NiPoint3T* pkIn);
+void __cdecl NI2HK(hkVector4T* pkOut, const NiPoint3T* pkIn);
 
 class TelekinesisTargetController
 {
@@ -107,15 +107,16 @@ class GameSettingTableT
 extern GameSettingTableT g_kTelekinesisDistanceT;
 
 // @fnv 0x0082afa0
-void TelekinesisEffect::FUN_0082afa0()
+// src: XBOX_PDB 0x0082afa0
+void TelekinesisEffect::RemoveSpring()
 {
     if (g_pkPlayerCameraT->GetGrab())
     {
-        void* pvGrabbed = g_pkPlayerCameraT->GetGrab()->FUN_0082aee0();
+        void* pvGrabbed = g_pkPlayerCameraT->GetGrab()->bhkUnaryAction_GethkRigidBody();
         g_pkPlayerCameraT->ReleaseGrab();
         if (pvGrabbed)
         {
-            TelekinesisTarget* pkTarget = (TelekinesisTarget*)FUN_004b5a80(pvGrabbed);
+            TelekinesisTarget* pkTarget = (TelekinesisTarget*)bhkEntity_Getbhk(pvGrabbed);
             if (m_bHolding)
             {
                 NiPoint3T kForward;
@@ -125,7 +126,7 @@ void TelekinesisEffect::FUN_0082afa0()
                 kRotationBasis.GetCol(1, kForward);
                 NiPoint3T kIntersectionOffset = kForward * (g_kTelekinesisDistanceT.GetValue() + m_fHitDistance);
                 hkVector4T kMotionVelocity;
-                FUN_004a3e00(&kMotionVelocity, &kIntersectionOffset);
+                NI2HK(&kMotionVelocity, &kIntersectionOffset);
                 hkSimdRealT kMass(pkTarget->GetMass());
                 kMotionVelocity.mul4(kMass);
                 pkTarget->SetLinearVelocity(kMotionVelocity)->Update();

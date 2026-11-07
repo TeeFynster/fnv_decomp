@@ -44,7 +44,8 @@ void* FUN_0062e750_shell::FUN_0062e750(unsigned int flags)
 extern int DAT_011c7a3c;
 
 // @fnv 0x0062f310
-void FUN_0062f310(int value)
+// src: COMMUNITY 0x0062f310
+void TESWaterSystem_SetCurrentWaterType(int value)
 {
     DAT_011c7a3c = value;
 }
@@ -52,7 +53,8 @@ void FUN_0062f310(int value)
 extern unsigned char DAT_011c7a5a;
 
 // @fnv 0x0062f8e0
-void FUN_0062f8e0(unsigned char value)
+// src: COMMUNITY 0x0062f8e0
+void TESWaterSystem_SetCameraInPlaceableWater(unsigned char value)
 {
     DAT_011c7a5a = value;
 }
@@ -60,7 +62,8 @@ void FUN_0062f8e0(unsigned char value)
 extern float _DAT_011c7a5c;
 
 // @fnv 0x0062f8f0
-void FUN_0062f8f0(float value)
+// src: COMMUNITY 0x0062f8f0
+void TESWaterSystem_SetCameraRelevantWaterHeight(float value)
 {
     _DAT_011c7a5c = value;
 }
@@ -88,7 +91,8 @@ unsigned int __cdecl GetOcclusionPlaneThreadID(BSOcclusionPlane* pPlane)
 extern "C" float __cdecl ExpFloat(float);
 
 // @fnv 0x00630aa0
-float FUN_00630aa0(float value)
+// src: COMMUNITY 0x00630aa0
+float exp_00630aa0(float value)
 {
     return ExpFloat(value);
 }
@@ -134,7 +138,7 @@ bool __thiscall FUN_005631e0_shell::IsNonZero(int aiValue)
     return MaskWithField(aiValue) != 0;
 }
 
-float __cdecl FUN_004a3e90(float);
+float __cdecl NI2HK_004a3e90(float);
 
 struct FUN_0062e710_shell
 {
@@ -145,28 +149,29 @@ struct FUN_0062e710_shell
 void __thiscall FUN_0062e710_shell::SetValueAt(float afValue, int a, int b)
 {
     int index = a + b * (*(int*)((char*)this + 0x28));
-    *(float*)((*(int*)((char*)this + 0x20)) + index * 4) = FUN_004a3e90(afValue);
+    *(float*)((*(int*)((char*)this + 0x20)) + index * 4) = NI2HK_004a3e90(afValue);
 }
 
 struct BSSimpleList_Ragdoll
 {
-    void* __thiscall FUN_006310e0();
+    void* __thiscall hkpMotion_getCenterOfMassInWorld();
 };
 struct FUN_006310c0_shell
 {
-    void __thiscall FUN_006310c0();
+    void __thiscall hkpRigidBody_getCenterOfMassInWorld();
 };
 
 // @fnv 0x006310c0
-void FUN_006310c0_shell::FUN_006310c0()
+// src: XBOX_PDB 0x006310c0
+void FUN_006310c0_shell::hkpRigidBody_getCenterOfMassInWorld()
 {
-    ((BSSimpleList_Ragdoll*)((TESDataHandler*)this)->GetBGSRagdollList())->FUN_006310e0();
+    ((BSSimpleList_Ragdoll*)((TESDataHandler*)this)->GetBGSRagdollList())->hkpMotion_getCenterOfMassInWorld();
 }
 
-void* __cdecl FUN_004b5a80(const void* p);
+void* __cdecl bhkEntity_Getbhk(const void* p);
 struct FUN_00c9a520_shell
 {
-    void __thiscall FUN_00c9a520(void* q);
+    void __thiscall bhkEntityListener_RemoveEntity(void* q);
 };
 struct FUN_0062e940_shell
 {
@@ -175,23 +180,24 @@ struct FUN_0062e940_shell
 // @fnv 0x0062e940
 void __thiscall FUN_0062e940_shell::ProcessAndForward(const void* p)
 {
-    void* q = FUN_004b5a80(p);
-    ((FUN_00c9a520_shell*)this)->FUN_00c9a520(q);
+    void* q = bhkEntity_Getbhk(p);
+    ((FUN_00c9a520_shell*)this)->bhkEntityListener_RemoveEntity(q);
 }
 
 struct FUN_00576830_shell
 {
-    void* __thiscall FUN_00576830(BSOcclusionPlane* pPlane);
+    void* __thiscall BGSZoneTargetListener_GetZoneEntry(BSOcclusionPlane* pPlane);
 };
 
 // Calls GetOcclusionPlaneThreadID on pPlane; if it returns non-null, calls FUN_00576830 on the object at offset 0x14 and returns its result, otherwise returns null.
 // @fnv 0x0062fe80
-void* FUN_0062fe80(BSOcclusionPlane* pPlane)
+// src: COMMUNITY 0x0062fe80
+void* TESWaterListener_FindWater(BSOcclusionPlane* pPlane)
 {
     void* result = 0;
     unsigned int cull = GetOcclusionPlaneThreadID(pPlane);
     if (cull)
-        result = reinterpret_cast<FUN_00576830_shell*>(reinterpret_cast<char*>(cull) + 0x14)->FUN_00576830(pPlane);
+        result = reinterpret_cast<FUN_00576830_shell*>(reinterpret_cast<char*>(cull) + 0x14)->BGSZoneTargetListener_GetZoneEntry(pPlane);
     return result;
 }
 
@@ -201,11 +207,12 @@ struct FUN_0062b0a0_shell
 };
 struct FUN_00630100_shell
 {
-    void* __thiscall FUN_00630100(void* arg);
+    void* __thiscall hkVector4_lengthSquared3(void* arg);
 };
 // Calls FUN_0062b0a0 with arg and this, then returns arg.
 // @fnv 0x00630100
-void* __thiscall FUN_00630100_shell::FUN_00630100(void* arg)
+// src: COMMUNITY 0x00630100
+void* __thiscall FUN_00630100_shell::hkVector4_lengthSquared3(void* arg)
 {
     ((FUN_0062b0a0_shell*)this)->FUN_0062b0a0(arg, this);
     return arg;
@@ -216,14 +223,15 @@ struct PackedByteIntRecord
     char* __thiscall Endian();
 };
 // @fnv 0x006310e0
-void* BSSimpleList_Ragdoll::FUN_006310e0()
+// src: XBOX_PDB 0x006310e0
+void* BSSimpleList_Ragdoll::hkpMotion_getCenterOfMassInWorld()
 {
     return (char*)((PackedByteIntRecord*)((char*)this + 0x10))->Endian() + 0x10;
 }
 
 struct UnkCall
 {
-    void __thiscall FUN_00c9c1d0();
+    void __thiscall activate_00c9c1d0();
 };
 struct VList
 {
@@ -254,19 +262,20 @@ struct VList
 };
 struct FUN_00631100_shell
 {
-    void __thiscall FUN_00631100(float a, int b);
+    void __thiscall hkpRigidBody_applyForce(float a, int b);
 };
 // Calls FUN_00c9c1d0 on this, then forwards a and b to Target on the BGSRagdollList from TESDataHandler.
 // @fnv 0x00631100
-void __thiscall FUN_00631100_shell::FUN_00631100(float afValue, int aiValue)
+// src: XBOX_PDB 0x00631100
+void __thiscall FUN_00631100_shell::hkpRigidBody_applyForce(float afValue, int aiValue)
 {
-    ((UnkCall*)this)->FUN_00c9c1d0();
+    ((UnkCall*)this)->activate_00c9c1d0();
     ((VList*)((TESDataHandler*)this)->GetBGSRagdollList())->Target(afValue, aiValue);
 }
 
 struct FUN_00c9c1d0_shell
 {
-    void __thiscall FUN_00c9c1d0();
+    void __thiscall activate_00c9c1d0();
 };
 struct ListCall00631140
 {
@@ -296,33 +305,35 @@ struct ListCall00631140
 };
 struct FUN_00631140_shell
 {
-    void __thiscall FUN_00631140(float, int, int);
+    void __thiscall hkpRigidBody_applyForce_00631140(float, int, int);
 };
 // Calls FUN_00c9c1d0 on this, then forwards a, b and c to Target on the BGSRagdollList from the data handler.
 // @fnv 0x00631140
-void __thiscall FUN_00631140_shell::FUN_00631140(float afValue, int aiArg1, int aiArg2)
+// src: COMMUNITY 0x00631140
+void __thiscall FUN_00631140_shell::hkpRigidBody_applyForce_00631140(float afValue, int aiArg1, int aiArg2)
 {
-    ((FUN_00c9c1d0_shell*)this)->FUN_00c9c1d0();
+    ((FUN_00c9c1d0_shell*)this)->activate_00c9c1d0();
     ((ListCall00631140*)((TESDataHandler*)this)->GetBGSRagdollList())->Target(afValue, aiArg1, aiArg2);
 }
 
 struct AX
 {
-    void __thiscall FUN_006b3eb0(unsigned int, unsigned int);
+    void __thiscall BSSimpleArray_float_1024_InitialSetup(unsigned int, unsigned int);
 };
 extern int DAT_0104e4bc;
 
 struct FUN_00631750_shell
 {
-    void* __thiscall FUN_00631750();
+    void* __thiscall BSSimpleArray_hkpCollidable_const_1024_BSSimpleArray_hkpCollidable_const_1024();
 };
 
 // Sets the object's vtable pointer to DAT_0104e4bc, calls FUN_006b3eb0 with 0, 0, and returns this.
 // @fnv 0x00631750
-void* __thiscall FUN_00631750_shell::FUN_00631750()
+// src: XBOX_PDB 0x00631750
+void* __thiscall FUN_00631750_shell::BSSimpleArray_hkpCollidable_const_1024_BSSimpleArray_hkpCollidable_const_1024()
 {
     *(void**)this = &DAT_0104e4bc;
-    reinterpret_cast<AX*>(this)->FUN_006b3eb0(0, 0);
+    reinterpret_cast<AX*>(this)->BSSimpleArray_float_1024_InitialSetup(0, 0);
     return this;
 }
 
@@ -334,7 +345,7 @@ struct FUN_00628f30_shell
     int m12;
     int m16;
     int m20;
-    void __thiscall FUN_00628f70(int arg);
+    void __thiscall bhkWorldObject_ClearFlags(int arg);
     void __thiscall SetFlag(int a, bool b);
 };
 // @fnv 0x00628f30
@@ -343,7 +354,7 @@ void __thiscall FUN_00628f30_shell::SetFlag(int aiFlag, bool abSet)
     if (abSet)
         m16 |= aiFlag;
     else
-        FUN_00628f70(aiFlag);
+        bhkWorldObject_ClearFlags(aiFlag);
 }
 
 // Exe 0x0062e500: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
@@ -358,28 +369,28 @@ struct LS3de0
 };
 struct FUN_0057b700_class
 {
-    int FUN_0057b730(int);
-    void FUN_0061ff30(int);
+    int ZoneEntry_GetTargetEntry(int);
+    void ZoneEntry_RemoveTargetEntry(int);
 };
-bool __cdecl FUN_009a3830(int const*, int const*);
+bool __cdecl Actor_AreReferencedValuesEqual(int const*, int const*);
 // @fnv 0x0062e500
 void EffectItem::Process(TESObjectREFR* aiKey, int auiValue)
 {
-    int ptarget2 = m_pEffectSetting ? ((FUN_0057b700_class*)this)->FUN_0057b730((int)aiKey) : 0;
+    int ptarget2 = m_pEffectSetting ? ((FUN_0057b700_class*)this)->ZoneEntry_GetTargetEntry((int)aiKey) : 0;
     unsigned int uindex;
     if (ptarget2)
     {
-        uindex = ((LS3de0*)((char*)ptarget2 + 0x50))->Find(*(unsigned int*)&auiValue, 0, FUN_009a3830);
+        uindex = ((LS3de0*)((char*)ptarget2 + 0x50))->Find(*(unsigned int*)&auiValue, 0, Actor_AreReferencedValuesEqual);
         if (uindex != (unsigned int)-1)
             ((LS3de0*)((char*)ptarget2 + 0x50))->UpdateEntryValue(uindex, 1);
         if (!((TeswaterlistenerOffset08View*)((char*)ptarget2 + 0x50))->GetFlags())
-            ((FUN_0057b700_class*)this)->FUN_0061ff30(ptarget2);
+            ((FUN_0057b700_class*)this)->ZoneEntry_RemoveTargetEntry(ptarget2);
     }
 }
 
 struct FUN_0061fef0_Node
 {
-    void* FUN_0061fef0();
+    void* TargetEntry_QNextEntry();
 };
 struct WaterEntry;
 
@@ -387,10 +398,10 @@ struct WaterEntry;
 struct WaterExtraDataAccess : ExtraDataList
 {
     bool SetWaterZone(void*);
-    void FUN_0042f030(void*, int);
+    void ExtraDataList_SetInWaterZone(void*, int);
     WaterEntry* Find();
-    int FUN_0042f180();
-    NiTMap<unsigned int, void*>* FUN_0042f1d0();
+    int ExtraDataList_GetFirstWaterZone();
+    NiTMap<unsigned int, void*>* ExtraDataList_GetWaterZoneMap();
 };
 struct FUN_006205e0_shell
 {
@@ -402,12 +413,13 @@ struct ref_0084e3a0_shell
 };
 struct FUN_006312d0_shell
 {
-    void FUN_006312d0(void* apWaterRef);
+    void TESWaterListener_RemoveWaterZoneForReference(void* apWaterRef);
 };
 // @fnv 0x006312d0
-void FUN_006312d0_shell::FUN_006312d0(void* apWaterRef)
+// src: COMMUNITY 0x006312d0
+void FUN_006312d0_shell::TESWaterListener_RemoveWaterZoneForReference(void* apWaterRef)
 {
-    void* pzone = FUN_0062fe80((BSOcclusionPlane*)apWaterRef);
+    void* pzone = TESWaterListener_FindWater((BSOcclusionPlane*)apWaterRef);
     if (pzone)
     {
         GameTimerRecord* pentry = (GameTimerRecord*)((GameTimerRecord*)pzone)->GetTime();
@@ -417,9 +429,9 @@ void FUN_006312d0_shell::FUN_006312d0(void* apWaterRef)
             if (pActor)
             {
                 while (((WaterExtraDataAccess*)pActor->GetExtra())->SetWaterZone(pzone))
-                    ((WaterExtraDataAccess*)pActor->GetExtra())->FUN_0042f030(pzone, 0);
+                    ((WaterExtraDataAccess*)pActor->GetExtra())->ExtraDataList_SetInWaterZone(pzone, 0);
             }
-            pentry = (GameTimerRecord*)((FUN_0061fef0_Node*)pentry)->FUN_0061fef0();
+            pentry = (GameTimerRecord*)((FUN_0061fef0_Node*)pentry)->TargetEntry_QNextEntry();
         }
         ((FUN_006205e0_shell*)((char*)this + 0x14))->RemoveNode(pzone);
     }
@@ -434,11 +446,12 @@ struct FUN_00631230_shell
 };
 struct FUN_00631180_shell
 {
-    FUN_00631230_shell* FUN_00631180(TESObjectREFR*, void*);
+    FUN_00631230_shell* TESWaterListener_CreateZoneEntry(TESObjectREFR*, void*);
 };
 // Allocates a FUN_00631230_shell for apRef and apCol, stores the result of a call on the effect setting's object into pGroup, and returns it.
 // @fnv 0x00631180
-FUN_00631230_shell* FUN_00631180_shell::FUN_00631180(TESObjectREFR* apRef, void* apCol)
+// src: XBOX_PDB 0x00631180
+FUN_00631230_shell* FUN_00631180_shell::TESWaterListener_CreateZoneEntry(TESObjectREFR* apRef, void* apCol)
 {
     FUN_00631230_shell* apWZone = new FUN_00631230_shell(apRef, apCol);
     apWZone->pGroup = ((TESWaterSystem*)(void*)((EffectSetting*)g_TES)->GetEffectID())
@@ -446,7 +459,7 @@ FUN_00631230_shell* FUN_00631180_shell::FUN_00631180(TESObjectREFR* apRef, void*
     return apWZone;
 }
 
-bool __cdecl FUN_009a3830(int const*, int const*);
+bool __cdecl Actor_AreReferencedValuesEqual(int const*, int const*);
 
 struct RefList : LS3de0
 {
@@ -510,10 +523,10 @@ struct NodeOwner : FUN_0057b700_class
 // @fnv 0x0062e3d0
 LinkedNode* NodeOwner::FindOrCreateNode(int key, unsigned int ref, int arg)
 {
-    LinkedNode* pNode = pHead ? (LinkedNode*)FUN_0057b730(key) : 0;
+    LinkedNode* pNode = pHead ? (LinkedNode*)ZoneEntry_GetTargetEntry(key) : 0;
     if (pNode)
     {
-        if (pNode->refs.Find(ref, 0, FUN_009a3830) == -1)
+        if (pNode->refs.Find(ref, 0, Actor_AreReferencedValuesEqual) == -1)
             pNode->refs.Add(ref);
     }
     else
@@ -569,7 +582,7 @@ struct FUN_0062e590 : SpawnedBase
 // @fnv 0x0062e590
 FUN_0062e590::FUN_0062e590(int a1, int aiValue) : SpawnedBase(a1, 0), m_50()
 {
-    if (m_50.FUN_00719b20(&aiValue, 0, FUN_009a3830) == -1)
+    if (m_50.FUN_00719b20(&aiValue, 0, Actor_AreReferencedValuesEqual) == -1)
     {
         m_50.FUN_007cb2e0(&aiValue);
     }
@@ -625,34 +638,35 @@ struct S_0062f320_Tmp
 };
 struct S_0062f320_Type
 {
-    int FUN_0043b4d0();
+    int CFilter_GetLayer();
 };
 struct S_0062f320_Form
 {
-    int FUN_00517630();
-    S_0062f320_Type* FUN_0043b4f0(S_0062f320_Tmp* t);
+    int bhkRigidBody_GetMotionType();
+    S_0062f320_Type* bhkWorldObject_GetCollisionFilter(S_0062f320_Tmp* t);
 };
 extern int DAT_012681c0;
-const char* __cdecl FUN_004b5a80(const char* p);
-S_0062f320_Form* __cdecl FUN_00653270(int* table, const char* name);
+const char* __cdecl bhkEntity_Getbhk(const char* p);
+S_0062f320_Form* __cdecl NiObject_DynamicCast(int* table, const char* name);
 struct S_0062f320_This
 {
-    S_0062f320_Form* FUN_0062f320(const char* name);
+    S_0062f320_Form* TESWaterListener_GetRB(const char* name);
 };
 // Looks up a form by name in DAT_012681c0, rejects it if FUN_00517630 returns 5, and returns it only when FUN_0043b4d0 yields one of the listed values.
 // @fnv 0x0062f320
-S_0062f320_Form* S_0062f320_This::FUN_0062f320(const char* name)
+// src: XBOX_PDB 0x0062f320
+S_0062f320_Form* S_0062f320_This::TESWaterListener_GetRB(const char* name)
 {
-    const char* akey = FUN_004b5a80(name);
-    S_0062f320_Form* bform = FUN_00653270(&DAT_012681c0, akey);
-    if (bform->FUN_00517630() == 5)
+    const char* akey = bhkEntity_Getbhk(name);
+    S_0062f320_Form* bform = NiObject_DynamicCast(&DAT_012681c0, akey);
+    if (bform->bhkRigidBody_GetMotionType() == 5)
     {
         return 0;
     }
     if (bform)
     {
         S_0062f320_Tmp tmp;
-        switch (bform->FUN_0043b4f0(&tmp)->FUN_0043b4d0())
+        switch (bform->bhkWorldObject_GetCollisionFilter(&tmp)->CFilter_GetLayer())
         {
         case 4:
         case 5:
@@ -680,10 +694,10 @@ struct S_0062f5b0_Ptr
 
 struct S_0062f5b0_Sub
 {
-    void FUN_00631540(const S_0062f5b0_Ptr& p);
+    void BSSimpleList_NiPointer_bhkAction_AddHead(const S_0062f5b0_Ptr& p);
 };
 
-S_0062f5b0_Obj* __cdecl FUN_004b59f0(void* a);
+S_0062f5b0_Obj* __cdecl hkpGetRigidBody(void* a);
 
 struct S_0062f5b0_Cls
 {
@@ -691,22 +705,23 @@ struct S_0062f5b0_Cls
     int unk04;
     int unk08;
     S_0062f5b0_Sub unk0c;
-    bool __thiscall FUN_0062f5b0(void* a, int b);
+    bool __thiscall TESWaterListener_collidableEnterCallback(void* a, int b);
 };
 
 // Wraps the object returned by FUN_004b59f0 in a scoped pointer, passes it to unk0c.FUN_00631540, and returns false.
 // @fnv 0x0062f5b0
-bool S_0062f5b0_Cls::FUN_0062f5b0(void* a, int b)
+// src: COMMUNITY 0x0062f5b0
+bool S_0062f5b0_Cls::TESWaterListener_collidableEnterCallback(void* a, int b)
 {
     bool result = false;
     {
-        S_0062f5b0_Ptr p(FUN_004b59f0(a));
-        unk0c.FUN_00631540(p);
+        S_0062f5b0_Ptr p(hkpGetRigidBody(a));
+        unk0c.BSSimpleList_NiPointer_bhkAction_AddHead(p);
     }
     return result;
 }
 
-void* __cdecl FUN_004b59f0(int a);
+void* __cdecl hkpGetRigidBody(int a);
 
 struct LocalObj
 {
@@ -718,7 +733,7 @@ struct LocalObj
 struct MemberObj
 {
     unsigned int unk00;
-    void __thiscall FUN_00631620(LocalObj* p);
+    void __thiscall BSSimpleList_NiPointer_bhkAction_Remove(LocalObj* p);
 };
 
 struct FUN_0062f630_cls
@@ -737,8 +752,8 @@ bool FUN_0062f630_cls::ApplyToMember(int a, int unused)
 {
     bool done = false;
     {
-        LocalObj tmp(FUN_004b59f0(a));
-        m_0c.FUN_00631620(&tmp);
+        LocalObj tmp(hkpGetRigidBody(a));
+        m_0c.BSSimpleList_NiPointer_bhkAction_Remove(&tmp);
     }
     done = true;
     return done;
@@ -778,16 +793,16 @@ struct FilterTmp_62e970
 };
 struct Filter_62e970
 {
-    int FUN_0043b4d0();
+    int CFilter_GetLayer();
 };
 struct Body_62e970
 {
-    Filter_62e970* FUN_0043b4f0(FilterTmp_62e970* t);
-    void FUN_00560d50(NiPoint3& v);
-    void FUN_00560bc0(NiPoint3& v);
+    Filter_62e970* bhkWorldObject_GetCollisionFilter(FilterTmp_62e970* t);
+    void bhkRigidBody_GetLinearVelocity(NiPoint3& v);
+    void bhkRigidBody_GetPosition(NiPoint3& v);
 };
-float __fastcall FUN_004b5400(void* p);
-float FUN_00408820(float f);
+float __fastcall bhkRigidBody_GetMass(void* p);
+float NiAbs_00408820(float f);
 struct FloatSetting_62e970
 {
     float* Float();
@@ -811,8 +826,8 @@ struct TaskQueue_62e970
     void QueueSplash(float scale, NiPoint3* pos);
     void QueueSplashFx(float scale, NiPoint3* pos);
 };
-bool FUN_008c7aa0();
-void __cdecl FUN_0062eb50(float scale, NiPoint3 pos);
+bool AILinearTaskThreadManager_ShouldQueue3DTask();
+void __cdecl TESWaterListener_PlaySplashEffects(float scale, NiPoint3 pos);
 extern const float kSplashScale_62e970;
 
 struct WaterSplash_62e970
@@ -839,29 +854,29 @@ void WaterSplash_62e970::SpawnWaterSplash(Body_62e970* apBody, float afWaterZ)
 
     if (!apBody || fCooldown > 0.0)
         return;
-    if (apBody->FUN_0043b4f0(&tmp4)->FUN_0043b4d0() == 8)
+    if (apBody->bhkWorldObject_GetCollisionFilter(&tmp4)->CFilter_GetLayer() == 8)
         return;
-    fMass = FUN_004b5400(apBody);
+    fMass = bhkRigidBody_GetMass(apBody);
     NiPoint3 vel;
-    apBody->FUN_00560d50(vel);
-    fSpeed = FUN_00408820(vel.z);
+    apBody->bhkRigidBody_GetLinearVelocity(vel);
+    fSpeed = NiAbs_00408820(vel.z);
     if (fSpeed < 0.001)
         return;
     fScale = *originalRuntimeFloatSetting985.Float() * fSpeed + fMass;
     if (vel.z > 0.0)
         fScale = fScale * *originalRuntimeFloatSetting986.Float();
     NiPoint3 _pos;
-    apBody->FUN_00560bc0(_pos);
+    apBody->bhkRigidBody_GetPosition(_pos);
     fHeight4 = afWaterZ;
     if (!((TES_62e970*)g_TES)->GetInteriorCell() && ((TES_62e970*)g_TES)->UpdateTESState(_pos, fHeight4) &&
         fHeight4 > afWaterZ)
         return;
     _pos.z = afWaterZ;
-    if (!FUN_008c7aa0())
-        FUN_0062eb50(fScale, _pos);
+    if (!AILinearTaskThreadManager_ShouldQueue3DTask())
+        TESWaterListener_PlaySplashEffects(fScale, _pos);
     else
         TaskQueue_62e970::GetInstance()->QueueSplash(fScale, &_pos);
-    if (!FUN_008c7aa0())
+    if (!AILinearTaskThreadManager_ShouldQueue3DTask())
         ((TES_62e970*)g_TES)->GetSplash()->Play(_pos, kSplashScale_62e970);
     else
         TaskQueue_62e970::GetInstance()->QueueSplashFx(kSplashScale_62e970, &_pos);
@@ -893,7 +908,7 @@ extern GlobalObject_0040c150 g_011d12c0;
 
 extern PlayerCharacter* _g_thePlayer;
 
-float __cdecl FUN_004a4240();
+float __cdecl RandomFloatTwoPi();
 // These external entries take trivial by-value data. Keep their ABI argument
 // storage separate from the shared types' nontrivial copy constructors; live
 // matrices and points continue to use the shared definitions.
@@ -901,10 +916,10 @@ template <class T> struct TrivialValueArgument
 {
     unsigned int words[sizeof(T) / sizeof(unsigned int)];
 };
-void* __cdecl FUN_00689210(TESObjectCELL* cell, float f1, const char* str,
+void* __cdecl BSTempEffectParticle_Spawn_00689210(TESObjectCELL* cell, float f1, const char* str,
                            TrivialValueArgument<NiMatrix3> mat, TrivialValueArgument<NiPoint3> pos, float f2,
                            int b1, void* p0);
-bool __cdecl FUN_008c7aa0();
+bool __cdecl AILinearTaskThreadManager_ShouldQueue3DTask();
 
 class TES_Ext
 {
@@ -922,45 +937,46 @@ class TaskQueueInterface
 // The shared audio header still declares this factory with the old handle type.
 struct WaterSoundAudio : BSAudio
 {
-    BSSoundHandle FUN_00ad7550(const char* editorID, unsigned int flags);
+    BSSoundHandle BSAudio_GetSoundHandleByEditorName(const char* editorID, unsigned int flags);
 };
 
 // @fnv 0x0062eb50
-void __cdecl FUN_0062eb50(float a1, NiPoint3 aPosition)
+// src: XBOX_PDB 0x0062eb50
+void __cdecl TESWaterListener_PlaySplashEffects(float a1, NiPoint3 aPosition)
 {
     float fMult = 1.0f;
     BSSoundHandle kSound;
 
     if (a1 > originalRuntimeFloatSetting981.Float()[0])
     {
-        kSound = static_cast<WaterSoundAudio*>(BSAudio::GetSingleton())->FUN_00ad7550("CWaterLarge", 0x102);
+        kSound = static_cast<WaterSoundAudio*>(BSAudio::GetSingleton())->BSAudio_GetSoundHandleByEditorName("CWaterLarge", 0x102);
         fMult = *g_011d1458.Float();
     }
     if (!kSound.IsValid() && a1 > originalRuntimeFloatSetting982.Float()[0])
     {
-        kSound = static_cast<WaterSoundAudio*>(BSAudio::GetSingleton())->FUN_00ad7550("CWaterMedium", 0x102);
+        kSound = static_cast<WaterSoundAudio*>(BSAudio::GetSingleton())->BSAudio_GetSoundHandleByEditorName("CWaterMedium", 0x102);
         fMult = originalRuntimeFloatSetting987.Float()[0];
     }
     if (!kSound.IsValid() && a1 > originalRuntimeFloatSetting983.Float()[0])
     {
-        kSound = static_cast<WaterSoundAudio*>(BSAudio::GetSingleton())->FUN_00ad7550("CWaterSmall", 0x102);
+        kSound = static_cast<WaterSoundAudio*>(BSAudio::GetSingleton())->BSAudio_GetSoundHandleByEditorName("CWaterSmall", 0x102);
         fMult = originalRuntimeFloatSetting988.Float()[0];
     }
     if (kSound.IsValid())
     {
         kSound.SetPosition(aPosition.x, aPosition.y, aPosition.z);
         kSound.Play(false);
-        if (fMult > 0.0 && _g_thePlayer->GetParentCell() && _g_thePlayer->GetParentCell()->FUN_00547770() &&
-            !_g_thePlayer->GetParentCell()->FUN_00547770()->FUN_00580060())
+        if (fMult > 0.0 && _g_thePlayer->GetParentCell() && _g_thePlayer->GetParentCell()->Actor_GetRadiationLevel() &&
+            !_g_thePlayer->GetParentCell()->Actor_GetRadiationLevel()->IsDangerous())
         {
             NiMatrix3 kMat;
-            kMat.MakeZRotation(FUN_004a4240());
-            FUN_00689210(_g_thePlayer->GetParentCell(), 1.0f, g_011d12c0.String(),
+            kMat.MakeZRotation(RandomFloatTwoPi());
+            BSTempEffectParticle_Spawn_00689210(_g_thePlayer->GetParentCell(), 1.0f, g_011d12c0.String(),
                          reinterpret_cast<const TrivialValueArgument<NiMatrix3>&>(kMat),
                          reinterpret_cast<const TrivialValueArgument<NiPoint3>&>(aPosition), fMult, 1, 0);
         }
     }
-    if (!FUN_008c7aa0())
+    if (!AILinearTaskThreadManager_ShouldQueue3DTask())
     {
         ((TES_Ext*)g_TES)->GetWaterMgr()->AddWaterRipple(aPosition, 0.01f);
     }
@@ -974,11 +990,12 @@ void __cdecl FUN_0062eb50(float a1, NiPoint3 aPosition)
 struct FUN_00630d30_cls
 {
     __m128 m_vec;
-    void FUN_00630d30(const __m128* a, const __m128* b);
+    void AddComponentProductInPlace(const __m128* a, const __m128* b);
 };
 // Adds the element-wise product of two vectors to m_vec using SSE intrinsics.
 // @fnv 0x00630d30
-void FUN_00630d30_cls::FUN_00630d30(const __m128* apFirst, const __m128* apSecond)
+// src: GUESS 0x00630d30 (confidence: high)
+void FUN_00630d30_cls::AddComponentProductInPlace(const __m128* apFirst, const __m128* apSecond)
 {
     m_vec = _mm_add_ps(m_vec, _mm_mul_ps(*apFirst, *apSecond));
 }
@@ -1059,7 +1076,7 @@ struct SceneHolder
 {
     Scene* GetScene();
 };
-TESObjectREFR* __cdecl FUN_0062b4e0(void*);
+TESObjectREFR* __cdecl TESHavokUtilities_FindCollidableRef(void*);
 // The shared cell header does not yet declare the water-height accessor.
 struct CellWaterAccess : TESObjectCELL
 {
@@ -1084,9 +1101,9 @@ struct SettingWater
 };
 extern SettingWater g_011cc5a8;
 void __cdecl ResetWater(int);
-void FUN_0062f8f0(float);
-void FUN_0062f8e0(unsigned char);
-void FUN_0062f310(int);
+void TESWaterSystem_SetCameraRelevantWaterHeight(float);
+void TESWaterSystem_SetCameraInPlaceableWater(unsigned char);
+void TESWaterSystem_SetCurrentWaterType(int);
 struct WaterRecord
 {
     TESObjectREFR* reference;
@@ -1158,15 +1175,16 @@ struct WaterManager
     int unk30;
     RecordList records;
     void Process(WaterRecord*);
-    bool FUN_0062f900(EventWater* event);
+    bool TESWaterListener_contactPointRemovedCallback(EventWater* event);
 };
 // Resolves the event's water and reference, checks restrictions, then handles the player case or records or processes the reference.
 // @fnv 0x0062f900
-bool WaterManager::FUN_0062f900(EventWater* event)
+// src: COMMUNITY 0x0062f900
+bool WaterManager::TESWaterListener_contactPointRemovedCallback(EventWater* event)
 {
     bool f = false;
-    TESObjectREFR* s = FUN_0062b4e0(event->reference);
-    TESObjectREFR* eb = FUN_0062b4e0(event->water);
+    TESObjectREFR* s = TESHavokUtilities_FindCollidableRef(event->reference);
+    TESObjectREFR* eb = TESHavokUtilities_FindCollidableRef(event->water);
     if (!eb)
         return false;
     BGSPlaceableWater* i = dynamic_cast<BGSPlaceableWater*>(eb->GetBase());
@@ -1177,20 +1195,20 @@ bool WaterManager::FUN_0062f900(EventWater* event)
     void* cf = q ? q->data : 0;
     if (!s && _g_thePlayer->GetParentCell())
     {
-        if (event->reference == ((PlayerHandle*)_g_thePlayer->FUN_0061f6c0())->Get())
+        if (event->reference == ((PlayerHandle*)_g_thePlayer->QCameraRigidBody())->Get())
         {
             ResetWater(0);
-            FUN_0062f8f0(((CellWaterAccess*)_g_thePlayer->GetParentCell())->Height());
-            FUN_0062f8e0(0);
-            WaterEntry* entry = ((WaterExtraDataAccess*)_g_thePlayer->TESObjectREFR::FUN_005d43c0())->Find();
+            TESWaterSystem_SetCameraRelevantWaterHeight(((CellWaterAccess*)_g_thePlayer->GetParentCell())->Height());
+            TESWaterSystem_SetCameraInPlaceableWater(0);
+            WaterEntry* entry = ((WaterExtraDataAccess*)_g_thePlayer->TESObjectREFR::BSFile_GetDevice())->Find();
             if (entry)
             {
                 TESBoundObject* ref = entry->sub.Ref()->GetBase();
-                FUN_0062f310((int)static_cast<const TESObject*>(ref)->GetAssociatedWaterForm());
+                TESWaterSystem_SetCurrentWaterType((int)static_cast<const TESObject*>(ref)->GetAssociatedWaterForm());
             }
             else
             {
-                FUN_0062f310((int)_g_thePlayer->GetParentCell()->FUN_00547770());
+                TESWaterSystem_SetCurrentWaterType((int)_g_thePlayer->GetParentCell()->Actor_GetRadiationLevel());
             }
             return true;
         }
@@ -1267,7 +1285,7 @@ bool WaterManager::FUN_0062f900(EventWater* event)
     return true;
 }
 
-TESObjectREFR* __cdecl FUN_0062b4e0(void* handle);
+TESObjectREFR* __cdecl TESHavokUtilities_FindCollidableRef(void* handle);
 struct PlayerWaterReference
 {
     void* GetSourceFilesFromObject();
@@ -1275,10 +1293,10 @@ struct PlayerWaterReference
 // Water-contact methods not yet declared by the shared reference header.
 struct WaterContactReference : TESObjectREFR
 {
-    void FUN_0057b0d0(void* update, int enabled);
-    void FUN_0057b240(int enabled);
+    void TESObjectREFR_SetInZone(void* update, int enabled);
+    void TESObjectREFR_SetUnderwater(int enabled);
 };
-void __cdecl FUN_00575c90(int enabled);
+void __cdecl TESWaterSystem_SetPlayerForceUnderwater(int enabled);
 struct WaterRequest
 {
     unsigned int unk00;
@@ -1303,17 +1321,17 @@ struct WaterRequest
 };
 struct WaterUpdates
 {
-    void* FUN_00620340(WaterRequest*, TESObjectREFR*, TESObjectREFR*, int, int);
+    void* BGSZoneTargetListener_AddZoneTargetPair(WaterRequest*, TESObjectREFR*, TESObjectREFR*, int, int);
 };
 struct WaterTaskQueue
 {
-    void FUN_0087b4a0(TESObjectREFR*, TESObjectREFR*, float);
+    void TaskQueueInterface_QueueWaterObjectForAdd(TESObjectREFR*, TESObjectREFR*, float);
 };
 WaterTaskQueue* __cdecl FUN_004537b0();
-bool __cdecl FUN_008c7aa0();
+bool __cdecl AILinearTaskThreadManager_ShouldQueue3DTask();
 struct TESWaterAccess
 {
-    TESWaterSystem* FUN_0070ec90();
+    TESWaterSystem* DetailedActorPathHandler_GetCurrentNodeIndex();
 };
 struct WaterOwner
 {
@@ -1323,64 +1341,65 @@ struct WaterOwner
     unsigned int unk0c;
     unsigned int unk10;
     WaterUpdates updates;
-    void FUN_00631370(TESObjectREFR*, int, int);
-    bool FUN_0062f6b0(WaterRequest* request);
+    void TESWaterListener_HandleQueuedRemovals(TESObjectREFR*, int, int);
+    bool TESWaterListener_contactPointAddedCallback(WaterRequest* request);
 };
 // Processes a water request by resolving source and destination references, checking restrictions, and dispatching water contact updates.
 // @fnv 0x0062f6b0
-bool WaterOwner::FUN_0062f6b0(WaterRequest* request)
+// src: XBOX_PDB 0x0062f6b0
+bool WaterOwner::TESWaterListener_contactPointAddedCallback(WaterRequest* request)
 {
     bool e = false;
-    TESObjectREFR* d = FUN_0062b4e0(request->destination);
+    TESObjectREFR* d = TESHavokUtilities_FindCollidableRef(request->destination);
     if (!d)
     {
-        if (request->destination == ((PlayerWaterReference*)_g_thePlayer->FUN_0061f6c0())->GetSourceFilesFromObject())
+        if (request->destination == ((PlayerWaterReference*)_g_thePlayer->QCameraRigidBody())->GetSourceFilesFromObject())
         {
-            TESObjectREFR* f = FUN_0062b4e0(request->source);
+            TESObjectREFR* f = TESHavokUtilities_FindCollidableRef(request->source);
             if (!f)
                 return false;
             BGSPlaceableWater* g = dynamic_cast<BGSPlaceableWater*>(f->GetBase());
             if (!*g_011cc5a8.Bool() && g->IsRestricted())
                 return false;
-            FUN_0062f8f0(static_cast<const TESObjectREFR*>(f)->GetPos()->z);
-            FUN_00575c90(1);
-            FUN_0062f8e0(1);
-            FUN_0062f310((int)static_cast<const TESObject*>(g)->GetAssociatedWaterForm());
+            TESWaterSystem_SetCameraRelevantWaterHeight(static_cast<const TESObjectREFR*>(f)->GetPos()->z);
+            TESWaterSystem_SetPlayerForceUnderwater(1);
+            TESWaterSystem_SetCameraInPlaceableWater(1);
+            TESWaterSystem_SetCurrentWaterType((int)static_cast<const TESObject*>(g)->GetAssociatedWaterForm());
             return true;
         }
         return false;
     }
-    TESObjectREFR* b = FUN_0062b4e0(request->source);
+    TESObjectREFR* b = TESHavokUtilities_FindCollidableRef(request->source);
     if (!b)
         return false;
     BGSPlaceableWater* c = dynamic_cast<BGSPlaceableWater*>(b->GetBase());
     if (!*g_011cc5a8.Bool() && c->IsRestricted())
         return false;
     if (d == (TESObjectREFR*)_g_thePlayer)
-        FUN_0062f310((int)static_cast<const TESObject*>(c)->GetAssociatedWaterForm());
-    void* a = updates.FUN_00620340(request, b, d, 0, 0);
-    ((WaterContactReference*)d)->FUN_0057b0d0(a, 1);
-    if (FUN_008c7aa0() && FUN_004537b0())
+        TESWaterSystem_SetCurrentWaterType((int)static_cast<const TESObject*>(c)->GetAssociatedWaterForm());
+    void* a = updates.BGSZoneTargetListener_AddZoneTargetPair(request, b, d, 0, 0);
+    ((WaterContactReference*)d)->TESObjectREFR_SetInZone(a, 1);
+    if (AILinearTaskThreadManager_ShouldQueue3DTask() && FUN_004537b0())
     {
-        FUN_004537b0()->FUN_0087b4a0(b, d, 0.0f);
+        FUN_004537b0()->TaskQueueInterface_QueueWaterObjectForAdd(b, d, 0.0f);
     }
     else
     {
-        TESWaterSystem* h = ((TESWaterAccess*)g_TES)->FUN_0070ec90();
+        TESWaterSystem* h = ((TESWaterAccess*)g_TES)->DetailedActorPathHandler_GetCurrentNodeIndex();
         h->SetWaterHeight(b, d, 0.0f);
     }
-    FUN_00631370(d, 0, 1);
+    TESWaterListener_HandleQueuedRemovals(d, 0, 1);
     return true;
 }
 
 struct Holder0087b4f0
 {
-    void FUN_0087b4f0(int a, int b, float c);
+    void TaskQueueInterface_QueueWaterObjectForRemove(int a, int b, float c);
 };
 
-bool FUN_008c7aa0();
+bool AILinearTaskThreadManager_ShouldQueue3DTask();
 
-unsigned int __fastcall FUN_0070ec90(char* p);
+unsigned int __fastcall DetailedActorPathHandler_GetCurrentNodeIndex(char* p);
 
 struct ParamStruct
 {
@@ -1393,11 +1412,12 @@ struct ParamStruct
 
 struct WaterZoneRemoval : WaterSplash_62e970
 {
-    void FUN_0062fc70(ParamStruct* param);
+    void TESWaterListener_RemoveReferenceFromZone(ParamStruct* param);
 };
 
 // @fnv 0x0062fc70
-void WaterZoneRemoval::FUN_0062fc70(ParamStruct* apParams)
+// src: XBOX_PDB 0x0062fc70
+void WaterZoneRemoval::TESWaterListener_RemoveReferenceFromZone(ParamStruct* apParams)
 {
     bool b5;
     bool b8 = false;
@@ -1408,7 +1428,7 @@ void WaterZoneRemoval::FUN_0062fc70(ParamStruct* apParams)
     {
         if (_g_thePlayer->GetParentCell())
         {
-            FUN_0062f310((int)_g_thePlayer->GetParentCell()->FUN_00547770());
+            TESWaterSystem_SetCurrentWaterType((int)_g_thePlayer->GetParentCell()->Actor_GetRadiationLevel());
         }
     }
 
@@ -1430,14 +1450,14 @@ void WaterZoneRemoval::FUN_0062fc70(ParamStruct* apParams)
 
     if (apParams->unk0c)
     {
-        ((WaterContactReference*)apParams->unk00)->FUN_0057b0d0(apParams->unk0c, 0);
+        ((WaterContactReference*)apParams->unk00)->TESObjectREFR_SetInZone(apParams->unk0c, 0);
     }
-    ((WaterContactReference*)apParams->unk00)->FUN_0057b240(0);
+    ((WaterContactReference*)apParams->unk00)->TESObjectREFR_SetUnderwater(0);
 
     b5 = true;
-    if (!((WaterExtraDataAccess*)apParams->unk00->GetExtraData())->FUN_0042f180())
+    if (!((WaterExtraDataAccess*)apParams->unk00->GetExtraData())->ExtraDataList_GetFirstWaterZone())
     {
-        NiTMap<unsigned int, void*>* map4 = ((WaterExtraDataAccess*)apParams->unk00->GetExtraData())->FUN_0042f1d0();
+        NiTMap<unsigned int, void*>* map4 = ((WaterExtraDataAccess*)apParams->unk00->GetExtraData())->ExtraDataList_GetWaterZoneMap();
         if (map4)
         {
             void* pos4 = map4->GetFirstPos();
@@ -1457,14 +1477,14 @@ void WaterZoneRemoval::FUN_0062fc70(ParamStruct* apParams)
 
     if (b5)
     {
-        if (FUN_008c7aa0() && TaskQueueInterface::GetSingleton())
+        if (AILinearTaskThreadManager_ShouldQueue3DTask() && TaskQueueInterface::GetSingleton())
         {
             ((Holder0087b4f0*)TaskQueueInterface::GetSingleton())
-                ->FUN_0087b4f0((int)apParams->unk08, (int)apParams->unk00, 0.0f);
+                ->TaskQueueInterface_QueueWaterObjectForRemove((int)apParams->unk08, (int)apParams->unk00, 0.0f);
         }
         else
         {
-            TESWaterSystem* pWaterSystem7 = (TESWaterSystem*)FUN_0070ec90((char*)g_TES);
+            TESWaterSystem* pWaterSystem7 = (TESWaterSystem*)DetailedActorPathHandler_GetCurrentNodeIndex((char*)g_TES);
             pWaterSystem7->UpdateWaterZone((TESObjectREFR*)apParams->unk08, (TESObjectREFR*)apParams->unk00, 0.0f);
         }
     }

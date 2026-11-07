@@ -8,30 +8,30 @@
 // src/staging/blk_007e0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-const char* __cdecl FUN_007ab810();
+const char* __cdecl XVirtualKeyboard_IsActive();
 struct FUN_007e6760_cls
 {
-    bool __thiscall FUN_007e6760();
+    bool __thiscall TextEntryMenu_IsDone();
 };
 struct BSAudio_
 {
-    void FUN_00ad8510(int, int);
-    void FUN_007eb8a0();
+    void BSAudio_PauseAllOfType(int, int);
+    void BSAudio_PauseWorldSounds();
 };
-extern "C" void __cdecl FUN_007004e0();
+extern "C" void __cdecl ForwardCall_007004e0();
 struct FUN_007f7770_Class
 {
-    void __thiscall FUN_007004e0();
-    void __thiscall FUN_007f7770();
+    void __thiscall ForwardCall_007004e0();
+    void __thiscall ForwardCall_007f7770();
 };
 extern float DAT_012007d0;
 extern float DAT_012007d4;
 extern char DAT_011ae5d4;
-void __cdecl FUN_007f7a50(float a, float b);
+void __cdecl ImageSpaceShaderMenuUnpack_SetOffset(float a, float b);
 struct FOPipboyManager
 {
     void InitializeMenuLight();
-    void FUN_007fa200();
+    void ReInitialize();
 };
 struct Flt
 {
@@ -39,7 +39,7 @@ struct Flt
 };
 struct FUN_007fa970_Class
 {
-    unsigned int FUN_007fa970();
+    unsigned int FOPipboyManager_Get3rdPersonScreen();
 };
 struct GO
 {
@@ -54,19 +54,19 @@ struct FUN_007fd620_Class
 struct RaceSexMenu
 {
     void OnRaceSelected(void*);
-    void FUN_007fe910(void* apList);
+    void OnRaceSelected_Thunk(void* apList);
 };
 struct NavMeshPtr
 {
-    void* FUN_00458b50();
+    void* AnimatingText_GetFullText();
 };
 
 extern ::BSStringT<char> g_011daed8;
-void __cdecl FUN_007e65b0();
+void __cdecl TextInputCloseHook();
 struct FUN_007e66a0_cls
 {
     char _0[0x28];
-    void __thiscall FUN_007e66a0(int a, int b);
+    void __thiscall TextEditMenu_HandleClick(int a, int b);
 };
 void __cdecl DestroyList(void*);
 struct FUN_007f69d0_Class
@@ -92,7 +92,7 @@ struct FUN_007f7880_Class
     float f8;
     float f9;
     float f10;
-    void __thiscall FUN_007f7880(float a, float b, float c);
+    void __thiscall FOHUDEffectManager_TriggerShudder(float a, float b, float c);
 };
 struct ModelLoader
 {
@@ -111,7 +111,7 @@ struct FUN_007e0e30_Class
 {
     void* m_p;
     void* m_sub;
-    void FUN_007e0e30(bool(__cdecl* fn)(void*, unsigned int), unsigned int v);
+    void BSSimpleList_Tile_Traverse(bool(__cdecl* fn)(void*, unsigned int), unsigned int v);
 };
 struct FUN_007f7830_Class
 {
@@ -127,7 +127,7 @@ struct FUN_007fecc0_Class
     unsigned char _1[3];
     float fTime;
     float fValue;
-    void __thiscall FUN_007fecc0();
+    void __thiscall ActivateAndResetTimer();
 };
 struct FUN_007eb8d0_Class
 {
@@ -149,7 +149,7 @@ struct SimpleList
     SimpleList* __thiscall GetNext();
 };
 extern SimpleList* DAT_011daec4;
-void FUN_007e65b0();
+void TextInputCloseHook();
 struct ListX
 {
     ~ListX();
@@ -182,7 +182,7 @@ struct FUN_007f78f0_Class
 struct FUN_007e0d80_shell : Flt
 {
     char* m_buffer;
-    unsigned int FUN_004048e0();
+    unsigned int BSStringT_char_Length();
     unsigned int FUN_004039a0();
     void FUN_004037f0(char* oldBuffer, unsigned int requiredLength);
     void FUN_004039c0(unsigned int newLength);
@@ -191,8 +191,8 @@ struct FUN_007e0d80_shell : Flt
     FUN_007e0d80_shell* AppendString(FUN_007e0d80_shell* other);
 };
 extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
-int FUN_007e1970();
-int __cdecl FUN_007e65a0();
+int SurgeryMenu_GetClassStatic();
+int __cdecl TextEdit_GetMenuID();
 struct SysMgr
 {
     void Init(int a, int b);
@@ -301,7 +301,7 @@ class FUN_007e9130_cls : public Base
 };
 extern unsigned int* DAT_011f4aa8;
 float __cdecl FastSqrt(const float* v);
-int __cdecl FUN_007eb8c0();
+int __cdecl VATSMenu_GetClassStatic();
 class B7F7790Ref
 {
   public:
@@ -355,12 +355,12 @@ struct SystemColorManager
 {
     bool GetColor(int id, NiColor& out);
 };
-Dummy_00718c90* __cdecl FUN_00718b60();
+Dummy_00718c90* __cdecl SystemColorManager_GetInstance();
 struct PipboyStub : FOPipboyManager
 {
     void SetQuad(NiColorA* p);
-    void FUN_007f7fb0(NiColorA* p);
-    void FUN_007f7f40();
+    void FORenderedMenu_SetTintColor(NiColorA* p);
+    void FOPipboyManager_ResetColors();
 };
 struct FUN_007f7fb0_Value
 {
@@ -374,7 +374,7 @@ struct FUN_007f7fb0_Class
     unsigned char unk00[0xC0];
     FUN_007f7fb0_Value unkC0;
 
-    void __thiscall FUN_007f7fb0(const FUN_007f7fb0_Value* value);
+    void __thiscall FORenderedMenu_SetTintColor(const FUN_007f7fb0_Value* value);
 };
 struct Quad4
 {
@@ -594,7 +594,7 @@ ShadowSceneNode7FD* __cdecl FUN_00450b80(unsigned int uiIndex);
 class Light7FD
 {
   public:
-    void FUN_007fd660(float fScale);
+    void FORenderedMenuRaceSex_SetupLights(float fScale);
 
     int unk000, unk004, unk008, unk00C, unk010, unk014, unk018, unk01C;
     int unk020, unk024, unk028, unk02C, unk030, unk034, unk038, unk03C;
@@ -736,7 +736,7 @@ struct ListOwner
     void Select(TileX*);
     void Update();
     int Mode();
-    TileX* FUN_007e0e70(int data, const char* text, void* compare, const char* name);
+    TileX* StatsMenu_PerksList_Append(int data, const char* text, void* compare, const char* name);
 };
 struct WXObject;
 template <class T> struct WXPointer
@@ -1131,7 +1131,7 @@ struct RemoveTile
 {
     virtual void* Destroy(unsigned int);
     float FUN_00a011b0(int);
-    void FUN_00a012d0(int, float, bool);
+    void Tile_Set(int, float, bool);
 };
 struct RemoveOwned
 {
@@ -1154,11 +1154,11 @@ struct RemoveNode
 };
 struct RemoveInterface
 {
-    void FUN_00715860(RemoveTile*, int, bool);
+    void InterfaceManager_SetCurrentFocusTarget(RemoveTile*, int, bool);
 };
-RemoveInterface* FUN_004b7210();
-int FUN_00a01860(const char*);
-void FormHeap_Free(void*);
+RemoveInterface* InterfaceManager_GetSingleton();
+int Tile_TextToTrait(const char*);
+void FormHeapFreeAndLog_00401030(void*);
 struct RemoveBase
 {
     int unk00;
@@ -1167,7 +1167,7 @@ struct RemoveView : RemoveBase, RemoveNode
 {
     RemoveTile* container;
     RemoveTile* selected;
-    bool FUN_007242c0(bool);
-    void FUN_00726090();
+    bool ListBox_unsigned_int_GetFlag(bool);
+    void ListBox_unsigned_int_Synchronize();
     bool RemoveNodeFromList(RemoveNode*, RemoveNode*);
 };

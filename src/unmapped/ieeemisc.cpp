@@ -8,7 +8,8 @@ void ReportAssertionViolation(const char* file, int line);
 extern float DAT_01016970;
 extern float DAT_01015f5c;
 // @fnv 0x00ac79e0
-float FUN_00ac79e0(float a, float b)
+// src: GUESS 0x00ac79e0 (confidence: low)
+float Object_ProcessAndReturnValue_00ac79e0(float a, float b)
 {
     float fSum;
     if (!FUN_00ec75b1(a))

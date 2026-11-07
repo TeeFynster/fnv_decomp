@@ -9,7 +9,7 @@ struct MersenneTwister
     int _4;
     char _8[0x9C0];
     int _9C8;
-    void FUN_00aa5170(unsigned int);
+    void BSRandom_Init(unsigned int);
     void Seed(unsigned int);
 };
 
@@ -40,7 +40,8 @@ class FileStream
 };
 
 // @fnv 0x00afde50
-bool FUN_00afde50(const char* name, int mode)
+// src: COMMUNITY 0x00afde50
+bool FileFinder_AccessFile(const char* name, int mode)
 {
     if (mode == 0)
     {

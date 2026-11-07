@@ -21,7 +21,7 @@
 extern char DAT_010ceaa8[];
 
 
-BSAudio* FUN_00c85750();
+BSAudio* hkMemoryRouter_getInstance();
 struct SizeSource {
     virtual void v00(); virtual void v01(); virtual void v02(); virtual void v03();
     virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07();
@@ -40,17 +40,17 @@ struct FUN_00d32060_Class {
 
     FUN_00d32060_Class* Init(const SourceRef& src, int b, int c, int flag);
 };
-extern void __cdecl FUN_00d319e0(void*, void*, void*, void*);
-void __stdcall FUN_00d32170(void* apArg1, void* apArg2, void* apArg3, void* apArg4);
+extern void __cdecl hkpHeightFieldAgent_staticGetClosestPoints(void*, void*, void*, void*);
+void __stdcall hkpHeightFieldAgent_getClosestPoints(void* apArg1, void* apArg2, void* apArg3, void* apArg4);
 typedef void (*S_00d321e0_Func)();
-void FUN_00d32190();
-void FUN_00d32370();
-void FUN_00d323b0();
-void FUN_00d323f0();
+void hkpHeightFieldAgent_createHeightFieldAAgent();
+void hkpHeightFieldAgent_staticGetPenetrations_UpdateState_00d32370();
+void hkpHeightFieldAgent_staticGetClosestPoints_ProcessState_00d323b0();
+void Hkpheightfieldagent_UpdateState_00d323f0();
 void AllocateTargetObj();
-void FUN_00d317d0();
-void FUN_00d319e0();
-void FUN_00d31d30();
+void hkpHeightFieldAgent_staticGetPenetrations();
+void hkpHeightFieldAgent_staticGetClosestPoints();
+void hkpHeightFieldAgent_ProcessSphereQueries();
 struct S_00d321e0_AgentFuncs {
     S_00d321e0_Func m_pCreateFunc;
     S_00d321e0_Func m_pQueryPenetrationsFunc;
@@ -60,9 +60,9 @@ struct S_00d321e0_AgentFuncs {
     bool m_bIsPredictive;
 };
 struct S_00d321e0_Dispatcher {
-    void FUN_00cfbbe0(S_00d321e0_AgentFuncs& f, int typeA, int typeB);
+    void AppendRecordAndRegisterAgents(S_00d321e0_AgentFuncs& f, int typeA, int typeB);
 };
-void FUN_00d321e0(S_00d321e0_Dispatcher* dispatcher);
+void hkpHeightFieldAgent_registerAgent(S_00d321e0_Dispatcher* dispatcher);
 extern float g_D323B0MaxDistance;
 struct D323B0CollectorBase {
     virtual void unk00();
@@ -81,8 +81,8 @@ struct D323B0Collector : D323B0CollectorBase {
     virtual void unk00();
     virtual void unk04();
 };
-void __cdecl FUN_00d319e0(int a, int b, int c, D323B0CollectorBase* collector);
-void __cdecl FUN_00d323b0(int aiArg1, int aiArg2, int aiArg3, int aiData);
+void __cdecl hkpHeightFieldAgent_staticGetClosestPoints(int a, int b, int c, D323B0CollectorBase* collector);
+void __cdecl hkpHeightFieldAgent_staticGetClosestPoints_ProcessState_00d323b0(int aiArg1, int aiArg2, int aiArg3, int aiData);
 struct Handler {
     virtual void v0();
     virtual void v1();
@@ -99,27 +99,29 @@ struct Owner {
     int count;
     void NotifyAndClear(int value);
 };
-extern "C" void __cdecl FUN_00d31d30(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);
+extern "C" void __cdecl hkpHeightFieldAgent_ProcessSphereQueries(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);
 // Forwards all five arguments unchanged to FUN_00d31d30.
 // @fnv 0x00d32030
-extern "C" void __stdcall FUN_00d32030(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4)
+// src: HAVOK_SRC 0x00d32030
+extern "C" void __stdcall hkpHeightFieldAgent_linearCast(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4)
 {
-    FUN_00d31d30(arg0, arg1, arg2, arg3, arg4);
+    hkpHeightFieldAgent_ProcessSphereQueries(arg0, arg1, arg2, arg3, arg4);
 }
-extern "C" void __cdecl FUN_00d317d0(void* arg0, void* arg1, void* arg2, void* arg3);
+extern "C" void __cdecl hkpHeightFieldAgent_staticGetPenetrations(void* arg0, void* arg1, void* arg2, void* arg3);
 // @fnv 0x00d32150
-extern "C" void __stdcall FUN_00d32150(void* arg0, void* arg1, void* arg2, void* arg3)
+// src: HAVOK_SRC 0x00d32150
+extern "C" void __stdcall hkpHeightFieldAgent_getPenetrations(void* arg0, void* arg1, void* arg2, void* arg3)
 {
-    FUN_00d317d0(arg0, arg1, arg2, arg3);
+    hkpHeightFieldAgent_staticGetPenetrations(arg0, arg1, arg2, arg3);
 }
 extern char DAT_010ce81c;
-void __cdecl FUN_00d317d0(int a1, int a2, int a3, void* a4);
+void __cdecl hkpHeightFieldAgent_staticGetPenetrations(int a1, int a2, int a3, void* a4);
 struct FUN_00d32370_cls {
     void* vt;
     unsigned char flag;
     int d;
 };
-void __cdecl FUN_00d32370(int aiArg1, int aiArg2, int aiArg3, int a4);
+void __cdecl hkpHeightFieldAgent_staticGetPenetrations_UpdateState_00d32370(int aiArg1, int aiArg2, int aiArg3, int a4);
 #include <xmmintrin.h>
 #include "../../../../../../include/hkpCdPointCollector.h"
 namespace N {
@@ -251,10 +253,11 @@ struct ContactPointPair {
 };
 struct CollisionScratch { hkTransform transform; ContactPointPair contact; };
 
-void __cdecl FUN_00d317d0(int a1, int a2, int a3, void* a4);
+void __cdecl hkpHeightFieldAgent_staticGetPenetrations(int a1, int a2, int a3, void* a4);
 
 // @fnv 0x00d319e0
-void __cdecl FUN_00d319e0(int a, int b, int c, D323B0CollectorBase* collector)
+// src: XBOX_PDB 0x00d319e0
+void __cdecl hkpHeightFieldAgent_staticGetClosestPoints(int a, int b, int c, D323B0CollectorBase* collector)
 {
     const hkpCdBody* bodyA = (const hkpCdBody*)a;
     const hkpCdBody* bodyB = (const hkpCdBody*)b;
@@ -268,12 +271,12 @@ void __cdecl FUN_00d319e0(int a, int b, int c, D323B0CollectorBase* collector)
     // contains the SDK __m128 byte lanes and would introduce a VC9 /GS cookie.
     N::LocalM128 scratchStorage[sizeof(CollisionScratch) / sizeof(N::LocalM128)];
     CollisionScratch& scratch = *(CollisionScratch*)scratchStorage;
-    scratch.transform.FUN_00cb22f0(bodyB->m_pMotionState, bodyA->m_pMotionState);
+    scratch.transform.hkTransform_setMulInverseMul(bodyB->m_pMotionState, bodyA->m_pMotionState);
 
     // These sphere-representation virtual slots are absent from shared hkpShape.
     int count = ((int (__thiscall*)(const hkpShape*))(*(void***)shapeA)[11])(shapeA);
 
-    BSAudio* q = FUN_00c85750();
+    BSAudio* q = hkMemoryRouter_getInstance();
     char* cur1 = (char*)*(int*)q;
     hkSphere* sphereBuffer = (hkSphere*)cur1;
     *(int*)q = (int)(cur1 + ((count * 16 + 127) & ~127));
@@ -289,7 +292,7 @@ void __cdecl FUN_00d319e0(int a, int b, int c, D323B0CollectorBase* collector)
     static_cast<StringCursor_hkpheightfieldagent_rtm_variant&>(hkMonitorStream::getInstance()).timerSplit(DAT_010cea54);
 
     const CollisionAgentContext* __restrict in = input;
-    BSAudio* bs2 = FUN_00c85750();
+    BSAudio* bs2 = hkMemoryRouter_getInstance();
     char* cur2 = (char*)*(int*)bs2;
     hkSphere* hitResults = (hkSphere*)cur2;
     {
@@ -327,8 +330,8 @@ void __cdecl FUN_00d319e0(int a, int b, int c, D323B0CollectorBase* collector)
         }
     }
 
-    *(int*)FUN_00c85750() = (int)hitResults;
-    *(int*)FUN_00c85750() = (int)sphereBuffer;
+    *(int*)hkMemoryRouter_getInstance() = (int)hitResults;
+    *(int*)hkMemoryRouter_getInstance() = (int)sphereBuffer;
 
     static_cast<StringCursor_hkpheightfieldagent_rtm_variant&>(hkMonitorStream::getInstance()).timerEnd(DAT_01076f38);
 }
@@ -386,7 +389,7 @@ struct S_00d32270_cls
     hkVector4 m_30;
     int m_40;
     S_00d32270_Target* m_44;
-    void FUN_00d32270(S_00d32270_Q* q, S_00d32270_P* p);
+    void hkHeightFieldRayForwardingCollector_addRayHit(S_00d32270_Q* q, S_00d32270_P* p);
 };
 
 struct S_00d32270_In
@@ -401,7 +404,8 @@ struct S_00d32270_In
 static __forceinline float S_min(float a, float b) { return (b < a) ? b : a; }
 
 // @fnv 0x00d32270
-void S_00d32270_cls::FUN_00d32270(S_00d32270_Q* q, S_00d32270_P* p)
+// src: XBOX_PDB 0x00d32270
+void S_00d32270_cls::hkHeightFieldRayForwardingCollector_addRayHit(S_00d32270_Q* q, S_00d32270_P* p)
 {
     __declspec(align(16)) S_00d32270_In in(m_40, q);
     float s = -m_20;

@@ -18,11 +18,12 @@ struct ImageSpaceTextureSet
     ImageSpaceTexture m_kTextureSlot4;
     char _5[0x10];
     bool m_bHeaderParsed;
-    void FUN_00ba1250();
+    void ImageSpaceEffectWaterFFT_FreeUpTextureMemory();
 };
 
 // @fnv 0x00ba1250
-void ImageSpaceTextureSet::FUN_00ba1250()
+// src: COMMUNITY 0x00ba1250
+void ImageSpaceTextureSet::ImageSpaceEffectWaterFFT_FreeUpTextureMemory()
 {
     if (m_kTextureSlot2.GetTexture())
         m_kTextureSlot2.AddRenderedTexture();

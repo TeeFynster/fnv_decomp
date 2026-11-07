@@ -14,25 +14,25 @@
 struct FUN_00d554a0_class
 {
     int m_d0;
-    int __thiscall FUN_00d1f1e0();
+    int __thiscall hkpShapeContainer_getNumChildShapes();
     int __thiscall GetOrInitValue();
 };
-void __cdecl FUN_00d26230(void* first, void* second, void* third, float value, int last);
+void __cdecl hkAabbUtil_calcAabb_00d26230(void* first, void* second, void* third, float value, int last);
 struct FUN_00d56040_shell
 {
-    void __thiscall FUN_00d56040(void* first, float value, int last);
+    void __thiscall hkpExtendedMeshShape_getAabbImpl(void* first, float value, int last);
 };
-__declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
+__declspec(nothrow) BSAudio* __cdecl hkMemoryRouter_getInstance();
 inline hkMemoryRouter* audio()
 {
-    return (hkMemoryRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)hkMemoryRouter_getInstance();
 }
-__declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
+__declspec(nothrow) void __cdecl hkArrayUtil__reserve(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 static __forceinline void hkShortArray_reserveExactly(hkArrayBase<short>& self, int n)
 {
         hkMemoryRouter* m = audio();
         if (self.getCapacity() < n)
-            FUN_00c908c0(m->heap(), (&self), n, sizeof(short));
+            hkArrayUtil__reserve(m->heap(), (&self), n, sizeof(short));
     }
 
 static __forceinline void hkShortArray_reserve(hkArrayBase<short>& self, int n)
@@ -41,7 +41,7 @@ static __forceinline void hkShortArray_reserve(hkArrayBase<short>& self, int n)
         if (self.getCapacity() < n)
         {
             int cap = 2 * self.getCapacity();
-            FUN_00c908c0(alloc, (&self), n < cap ? cap : n, sizeof(short));
+            hkArrayUtil__reserve(alloc, (&self), n < cap ? cap : n, sizeof(short));
         }
     }
 
@@ -123,7 +123,7 @@ struct S_00d56880_Array
         {
             int cap2 = 2 * getCapacity();
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(a, this, newSize, sizeof(S_00d56880_Elem));
+            hkArrayUtil__reserve(a, this, newSize, sizeof(S_00d56880_Elem));
         }
     }
     __forceinline S_00d56880_Elem* expandBy(int n)
@@ -201,7 +201,7 @@ struct FUN_00d55520_cls
     int unk14;
     int m_18;
 };
-int __stdcall FUN_00d55520(FUN_00d55520_cls* a1);
+int __stdcall hkpExtendedMeshShape__getNumChildShapesInShapesSubpart(FUN_00d55520_cls* a1);
 struct SpawnedOwner
 {
     int unk00;
@@ -261,7 +261,7 @@ struct SpawnedOwner
     int unkD8;
     int m_0xdc;
 
-    int FUN_00d55530(int aiIndex);
+    int hkpExtendedMeshShape_getMeshMaterial(int aiIndex);
 };
 struct FUN_00d555d0_cls
 {
@@ -350,7 +350,7 @@ struct FUN_00d55a90_cls
     Group* m_0c0;
     int m_0c4;
 
-    int __thiscall FUN_00d55a90(int a1, int a2);
+    int __thiscall hkpExtendedMeshShape_calcSizeForSpu(int a1, int a2);
 };
 struct S_00d55bd0_Bool
 {
@@ -502,7 +502,7 @@ struct Container
     hkReferencedObject** data;
     int count;
     unsigned capacityFlags;
-    void FUN_00d56800();
+    void ProcessEntries_00d56800();
 };
 struct FUN_00d55b40_Shape
 {
@@ -581,8 +581,8 @@ struct bhkShapeOwner
     int unk_b4;
     int GetShapeKey();
 };
-void __stdcall FUN_00d554e0(int a);
-void __stdcall FUN_00d554f0(int a0);
+void __stdcall Object_DoNothing_00d554e0(int a);
+void __stdcall hkpExtendedMeshShape_DoNothing(int a0);
 struct ElemD562
 {
     unsigned char m_b0;
@@ -623,7 +623,7 @@ static __forceinline void ArrayD562_reserve(hkArrayBase<ElemD562>& self, hkMemor
         if (self.getCapacity() < n)
         {
             int cap = 2 * self.getCapacity();
-            FUN_00c908c0(alloc, (&self), n < cap ? cap : n, sizeof(ElemD562));
+            hkArrayUtil__reserve(alloc, (&self), n < cap ? cap : n, sizeof(ElemD562));
         }
     }
 
@@ -644,7 +644,7 @@ struct OwnerD562
     int unkB0;
     hkArrayBase<ElemD562> m_kArray;
 
-    ElemD562* FUN_00d562f0();
+    ElemD562* hkpExtendedMeshShape_expandOneTriangleSubparts();
 };
 
 extern "C" __m128 _mm_add_ps(__m128 _A, __m128 _B);
@@ -662,7 +662,7 @@ struct S00d55950_hkAabb
     __m128 m_kMaximumCorner;
 };
 
-void __cdecl FUN_00d55680(void* elem, void* unk80, S00d55950_hkAabb* aabb);
+void __cdecl calcAabbExtents(void* elem, void* unk80, S00d55950_hkAabb* aabb);
 
 extern __m128 DAT_010c44d0;
 extern __m128 DAT_010c71d0;
@@ -673,7 +673,7 @@ struct S00d55950_MeshTransform
     {
         int x, y, z, w;
     } translation;
-    void FUN_00cb2d90(const void* quaternion);
+    void hkRotation_set(const void* quaternion);
 };
 struct S00d55950_MeshChild
 {
@@ -686,7 +686,8 @@ struct S00d55950_MeshChild
     virtual void vf18();
     virtual void getAabb(const S00d55950_MeshTransform& transform, float tolerance, S00d55950_hkAabb& out);
 };
-static __declspec(noinline) void FUN_00d558b0(const S_00d56880_Elem* elem, S00d55950_hkAabb* out)
+// src: XBOX_PDB 0x00d558b0
+static __declspec(noinline) void calcAabbExtents_00d558b0(const S_00d56880_Elem* elem, S00d55950_hkAabb* out)
 {
     out->m_kMinimumCorner = _mm_load_ps1(&DAT_0104da48);
     out->m_kMaximumCorner = _mm_xor_ps(out->m_kMinimumCorner, DAT_010c44d0);
@@ -695,7 +696,7 @@ static __declspec(noinline) void FUN_00d558b0(const S_00d56880_Elem* elem, S00d5
     transform.translation.y = elem->unk34;
     transform.translation.z = elem->unk38;
     transform.translation.w = elem->unk3c;
-    transform.FUN_00cb2d90(&elem->unk20);
+    transform.hkRotation_set(&elem->unk20);
     for (int i = 0; i < elem->m_iElementCount; ++i)
     {
         S00d55950_hkAabb aabb;
@@ -760,11 +761,12 @@ struct S_00d55950
     int unkE0;
     float m_ucUnknownByte;
 
-    void FUN_00d55950();
+    void hkpExtendedMeshShape_recalcAabbExtents();
 };
 
 // @fnv 0x00d55950
-void S_00d55950::FUN_00d55950()
+// src: XBOX_PDB 0x00d55950
+void S_00d55950::hkpExtendedMeshShape_recalcAabbExtents()
 {
     S00d55950_hkAabb bounds;
     bounds.m_kMinimumCorner = _mm_load_ps1(&DAT_0104da48);
@@ -774,7 +776,7 @@ void S_00d55950::FUN_00d55950()
     for (int i = 0; i < this->m_iCapacityFlags; ++i)
     {
         S00d55950_hkAabb tempAabb;
-        FUN_00d55680(&this->m_pElements[i], &this->unk80, &tempAabb);
+        calcAabbExtents(&this->m_pElements[i], &this->unk80, &tempAabb);
         tempAabb.m_kMinimumCorner = _mm_sub_ps(tempAabb.m_kMinimumCorner, padVec);
         tempAabb.m_kMaximumCorner = _mm_add_ps(tempAabb.m_kMaximumCorner, padVec);
         bounds.m_kMinimumCorner = _mm_min_ps(bounds.m_kMinimumCorner, tempAabb.m_kMinimumCorner);
@@ -784,7 +786,7 @@ void S_00d55950::FUN_00d55950()
     for (int j = 0; j < this->m_numElems2; ++j)
     {
         S00d55950_hkAabb tempAabb;
-        FUN_00d558b0(&this->m_elems2[j], &tempAabb);
+        calcAabbExtents_00d558b0(&this->m_elems2[j], &tempAabb);
         bounds.m_kMinimumCorner = _mm_min_ps(bounds.m_kMinimumCorner, tempAabb.m_kMinimumCorner);
         bounds.m_kMaximumCorner = _mm_max_ps(bounds.m_kMaximumCorner, tempAabb.m_kMaximumCorner);
     }

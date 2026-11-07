@@ -29,9 +29,9 @@ struct CE5F90QsTransform
     float m_rotation[4];
     float m_vScale[4];
 };
-void __cdecl FUN_00ce5a70(CE5F90QsTransform* out, const CE5F90QsTransform* a, const CE5F90QsTransform* b, int mode,
+void __cdecl hkaSkeletonMapperUtils_computeMappingTransform(CE5F90QsTransform* out, const CE5F90QsTransform* a, const CE5F90QsTransform* b, int mode,
                           float weightA, float weightB);
-void __cdecl FUN_00ce5f90(CE5F90QsTransform* out, const CE5F90QsTransform* poseA, short boneA,
+void __cdecl hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(CE5F90QsTransform* out, const CE5F90QsTransform* poseA, short boneA,
                           const CE5F90QsTransform* poseB, short boneB, int mode, float weightA, float weightB);
 extern "C" void _ReadBarrier();
 #include <xmmintrin.h>
@@ -275,7 +275,8 @@ struct HkQuat
     {
         m_vec.setNeg3(q.getImag());
     }
-    inline void FUN_00c66320(const HkQuat& q0, const HkQuat& q1)
+// src: COMMUNITY 0x00c66320
+    inline void setMul(const HkQuat& q0, const HkQuat& q1)
     {
         HkVec4 vec;
         vec.setCross(q0.getImag(), q1.getImag());
@@ -366,7 +367,7 @@ struct HkQs
         HkVec4 extraTrans;
         extraTrans.SetRotatedDirection(aTb.m_rotation, bTc.m_vTranslation);
         m_vTranslation.setAdd4(aTb.m_vTranslation, extraTrans);
-        m_rotation.FUN_00c66320(aTb.m_rotation, bTc.m_rotation);
+        m_rotation.setMul(aTb.m_rotation, bTc.m_rotation);
         m_vScale.setMul4(aTb.m_vScale, bTc.m_vScale);
     }
     __forceinline void SetMulInverse(const HkQs& a, const HkQs& b)
@@ -492,7 +493,7 @@ void HkStack::deallocateStack(void* p)
 class HkRouter
 {
   public:
-    __declspec(nothrow) static HkRouter& __cdecl FUN_00c85750() throw();
+    __declspec(nothrow) static HkRouter& __cdecl hkMemoryRouter_getInstance() throw();
     inline HkStack& stack()
     {
         return m_aiEntries;
@@ -514,21 +515,21 @@ class HkRouter
 
 template <typename TYPE> __forceinline TYPE* __cdecl hkAllocStack(int n, const char* what = 0)
 {
-    HkRouter& mem = HkRouter::FUN_00c85750();
+    HkRouter& mem = HkRouter::hkMemoryRouter_getInstance();
     return static_cast<TYPE*>(
         mem.stack().allocateStack((((n * HkSizeOf<TYPE>::val) + ((128) - 1)) & (~((128) - 1))), what));
 }
 
 template <typename TYPE> __forceinline void __cdecl hkFreeStack(TYPE* ptr)
 {
-    HkRouter::FUN_00c85750().stack().deallocateStack(static_cast<void*>(ptr));
+    HkRouter::hkMemoryRouter_getInstance().stack().deallocateStack(static_cast<void*>(ptr));
 }
 
 struct HkHeapAllocator
 {
     HkHeap& get(const void*)
     {
-        return HkRouter::FUN_00c85750().heap();
+        return HkRouter::hkMemoryRouter_getInstance().heap();
     }
 };
 
@@ -578,7 +579,7 @@ class HkArrUtil
     template <typename T> static __forceinline void destruct(T* t, int n, HkClassTag);
     template <typename T> static __forceinline void constructWithArray(T* t, int n, const T* tcopy, HkPodTag);
     template <typename T> static __forceinline void constructWithArray(T* t, int n, const T* tcopy, HkClassTag);
-    __declspec(nothrow) static void __cdecl FUN_00c908c0(HkHeap& a, void* array, int reqElem, int sizeElem) throw();
+    __declspec(nothrow) static void __cdecl hkArrayUtil__reserve(HkHeap& a, void* array, int reqElem, int sizeElem) throw();
     __declspec(nothrow) static void __cdecl FUN_00c90940(HkHeap& a, void* array, int sizeElem) throw();
 };
 
@@ -689,7 +690,7 @@ template <typename T> class HkArrBaseLocalForm
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            HkArrUtil::FUN_00c908c0(alloc, this, newSize, sizeof(T));
+            HkArrUtil::hkArrayUtil__reserve(alloc, this, newSize, sizeof(T));
         }
     }
     __forceinline void _setSize(HkHeap& alloc, int n, const T& fill)
@@ -886,7 +887,7 @@ class FUN_00cc00e0 : public hkReferencedObject
 {
   public:
     __declspec(nothrow) ~FUN_00cc00e0() throw();
-    __declspec(nothrow) FUN_00cc00e0& FUN_00cc01c0(const char* s) throw();
+    __declspec(nothrow) FUN_00cc00e0& ProcessAndReturnValue_00cc01c0(const char* s) throw();
     __declspec(nothrow) FUN_00cc00e0& WriteName(const hkStringPtr& s) throw();
 
   protected:
@@ -955,7 +956,7 @@ struct HkChainMapping
 
 struct HkMotionParams
 {
-    __declspec(nothrow) void __cdecl FUN_00ce55d0(HkMappingType type, const HkQs* poseAMS, int numBonesA,
+    __declspec(nothrow) void __cdecl hkQsTransform_ComputePoseScaleFactors(HkMappingType type, const HkQs* poseAMS, int numBonesA,
                                                   const HkQs* poseBMS, int numBonesB, HkQs& aMotionOut,
                                                   HkQs& bMotionOut) throw();
     int m_iValueAfterFlags;
@@ -1007,10 +1008,10 @@ __declspec(nothrow) hkBool
 __declspec(nothrow) void __cdecl FUN_00cddcf0(int numTransforms, const short* parentIndices, const HkQs* poseLocal,
                                               HkQs* poseModelOut) throw();
 __declspec(nothrow) int __cdecl FUN_00cb0fe0(const char* s1, const char* s2) throw();
-__declspec(nothrow) void __cdecl FUN_00ce5f90(HkMappingType type, const HkQs* poseA, short boneA, const HkQs* poseB,
+__declspec(nothrow) void __cdecl hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(HkMappingType type, const HkQs* poseA, short boneA, const HkQs* poseB,
                                               short boneB, HkQs& mapOut, float tolerance = 1.0e-5f,
                                               float defaultScale = 1.0f) throw();
-__declspec(nothrow) void __cdecl FUN_00ce5fe0(HkMappingType type, const HkSkeleton* skeletonA, const HkQs* poseA,
+__declspec(nothrow) void __cdecl Object_BuildBonePairMapping(HkMappingType type, const HkSkeleton* skeletonA, const HkQs* poseA,
                                               short startA, short endA, const HkSkeleton* skeletonB, const HkQs* poseB,
                                               short startB, short endB, HkChainMapping& mapAFromBOut) throw();
 
@@ -1021,7 +1022,8 @@ __forceinline bool __cdecl checkRotation(const HkMapperParams& params, short bon
 }
 
 // @fnv 0x00ce61c0
-__declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalParams, hkaSkeletonMapperData& originalAToB,
+// src: COMMUNITY 0x00ce61c0
+__declspec(nothrow) void __cdecl hkaSkeletonMapperUtils_createMapping(const HkMapperParams& originalParams, hkaSkeletonMapperData& originalAToB,
                                               hkaSkeletonMapperData& originalBToA) throw()
 {
     hkErrorInstance().beginSection(0x54e4323e, "hkaSkeletonMapperUtils::createMapping");
@@ -1094,7 +1096,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 simpleMapping.m_sBoneA = boneIn;
                 simpleMapping.m_sBoneB = boneOut;
 
-                FUN_00ce5f90(params.m_eMappingType, poseA, boneIn, poseB, boneOut, simpleMapping.m_kAFromBTransform,
+                hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(params.m_eMappingType, poseA, boneIn, poseB, boneOut, simpleMapping.m_kAFromBTransform,
                              params.m_fFirstMappingTolerance, params.m_fSecondMappingTolerance);
 
                 reinterpret_cast<HkArr<HkSimpleMapping>&>(aToB.m_kSimpleMappings).AddBack(simpleMapping);
@@ -1107,11 +1109,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't find bones for mapping (")
-                        .FUN_00cc01c0(mapping.m_pBoneNameA)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(mapping.m_pBoneNameB)
-                        .FUN_00cc01c0(")");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't find bones for mapping (")
+                        .ProcessAndReturnValue_00cc01c0(mapping.m_pBoneNameA)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(mapping.m_pBoneNameB)
+                        .ProcessAndReturnValue_00cc01c0(")");
                     hkErrorInstance().message(1, 0xabba1c64, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 127);
                 }
                 else
@@ -1135,7 +1137,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 simpleMapping.m_sBoneA = boneIn;
                 simpleMapping.m_sBoneB = boneOut;
 
-                FUN_00ce5f90(params.m_eMappingType, poseB, boneIn, poseA, boneOut, simpleMapping.m_kAFromBTransform);
+                hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(params.m_eMappingType, poseB, boneIn, poseA, boneOut, simpleMapping.m_kAFromBTransform);
 
                 reinterpret_cast<HkArr<HkSimpleMapping>&>(bToA.m_kSimpleMappings).AddBack(simpleMapping);
 
@@ -1147,11 +1149,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't find bones for mapping (")
-                        .FUN_00cc01c0(mapping.m_pBoneNameA)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(mapping.m_pBoneNameB)
-                        .FUN_00cc01c0(")");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't find bones for mapping (")
+                        .ProcessAndReturnValue_00cc01c0(mapping.m_pBoneNameA)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(mapping.m_pBoneNameB)
+                        .ProcessAndReturnValue_00cc01c0(")");
                     hkErrorInstance().message(1, 0xabba1c64, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 158);
                 }
                 else
@@ -1179,11 +1181,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chain.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chain.m_kRayEnd)
-                        .FUN_00cc01c0("). Start bone not found in either skeleton.");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chain.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chain.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0("). Start bone not found in either skeleton.");
                     hkErrorInstance().message(1, 0x38521c64, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 185);
                 }
                 else
@@ -1197,11 +1199,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chain.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chain.m_kRayEnd)
-                        .FUN_00cc01c0("). End bone not found in either skeleton.");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chain.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chain.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0("). End bone not found in either skeleton.");
                     hkErrorInstance().message(1, 0x38521c64, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 191);
                 }
                 else
@@ -1229,11 +1231,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chain.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chain.m_kRayEnd)
-                        .FUN_00cc01c0(")");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chain.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chain.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0(")");
                     hkErrorInstance().message(1, 0xabba1c63, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 210);
                 }
                 else
@@ -1250,11 +1252,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chain.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chain.m_kRayEnd)
-                        .FUN_00cc01c0(")");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chain.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chain.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0(")");
                     hkErrorInstance().message(1, 0xabba1c64, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 220);
                 }
                 else
@@ -1270,11 +1272,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                     {
                         char assertBuf[512];
                         FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                        ostr.FUN_00cc01c0("Couldn't make a chain (")
-                            .FUN_00cc01c0(chain.m_kRayStart)
-                            .FUN_00cc01c0(" - ")
-                            .FUN_00cc01c0(chain.m_kRayEnd)
-                            .FUN_00cc01c0(")");
+                        ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                            .ProcessAndReturnValue_00cc01c0(chain.m_kRayStart)
+                            .ProcessAndReturnValue_00cc01c0(" - ")
+                            .ProcessAndReturnValue_00cc01c0(chain.m_kRayEnd)
+                            .ProcessAndReturnValue_00cc01c0(")");
                         hkErrorInstance().message(1, 0xabba1c65, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp",
                                                   230);
                     }
@@ -1292,11 +1294,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                     {
                         char assertBuf[512];
                         FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                        ostr.FUN_00cc01c0("Couldn't make a chain (")
-                            .FUN_00cc01c0(chain.m_kRayStart)
-                            .FUN_00cc01c0(" - ")
-                            .FUN_00cc01c0(chain.m_kRayEnd)
-                            .FUN_00cc01c0(")");
+                        ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                            .ProcessAndReturnValue_00cc01c0(chain.m_kRayStart)
+                            .ProcessAndReturnValue_00cc01c0(" - ")
+                            .ProcessAndReturnValue_00cc01c0(chain.m_kRayEnd)
+                            .ProcessAndReturnValue_00cc01c0(")");
                         hkErrorInstance().message(1, 0xabba1c66, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp",
                                                   239);
                     }
@@ -1311,9 +1313,9 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char reportBuf[512];
                     FUN_00cb1600 ostr(reportBuf, sizeof(reportBuf));
-                    ostr.FUN_00cc01c0("Creating chain ")
+                    ostr.ProcessAndReturnValue_00cc01c0("Creating chain ")
                         .WriteName(params.m_pSkeletonA->m_kBones[startChainA].m_name)
-                        .FUN_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(" - ")
                         .WriteName(params.m_pSkeletonA->m_kBones[endChainA].m_name);
                     hkErrorInstance().message(0, -1, reportBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 249);
                 }
@@ -1383,11 +1385,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chainA.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chainA.m_kRayEnd)
-                        .FUN_00cc01c0("). Start or end bone not found.");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chainA.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chainA.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0("). Start or end bone not found.");
                     hkErrorInstance().message(1, 0xabbaa938, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 325);
                 }
                 else
@@ -1401,11 +1403,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chainB.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chainB.m_kRayEnd)
-                        .FUN_00cc01c0("). Start or end bone not found.");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chainB.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chainB.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0("). Start or end bone not found.");
                     hkErrorInstance().message(1, 0xabbaa938, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 331);
                 }
                 else
@@ -1424,11 +1426,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chainA.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chainA.m_kRayEnd)
-                        .FUN_00cc01c0(")");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chainA.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chainA.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0(")");
                     hkErrorInstance().message(1, 0xabba1c63, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 343);
                 }
                 else
@@ -1442,11 +1444,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chainB.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chainB.m_kRayEnd)
-                        .FUN_00cc01c0(")");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chainB.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chainB.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0(")");
                     hkErrorInstance().message(1, 0xabba1c63, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 349);
                 }
                 else
@@ -1463,11 +1465,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chainA.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chainA.m_kRayEnd)
-                        .FUN_00cc01c0(")");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chainA.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chainA.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0(")");
                     hkErrorInstance().message(1, 0xabba1d64, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 359);
                 }
                 else
@@ -1481,11 +1483,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char assertBuf[512];
                     FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                    ostr.FUN_00cc01c0("Couldn't make a chain (")
-                        .FUN_00cc01c0(chainB.m_kRayStart)
-                        .FUN_00cc01c0(" - ")
-                        .FUN_00cc01c0(chainB.m_kRayEnd)
-                        .FUN_00cc01c0(")");
+                    ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                        .ProcessAndReturnValue_00cc01c0(chainB.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(chainB.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0(")");
                     hkErrorInstance().message(1, 0xabba1d64, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 366);
                 }
                 else
@@ -1501,11 +1503,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                     {
                         char assertBuf[512];
                         FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                        ostr.FUN_00cc01c0("Couldn't make a chain (")
-                            .FUN_00cc01c0(chainA.m_kRayStart)
-                            .FUN_00cc01c0(" - ")
-                            .FUN_00cc01c0(chainA.m_kRayEnd)
-                            .FUN_00cc01c0(")  Perhaps a bone is mapped twice?");
+                        ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                            .ProcessAndReturnValue_00cc01c0(chainA.m_kRayStart)
+                            .ProcessAndReturnValue_00cc01c0(" - ")
+                            .ProcessAndReturnValue_00cc01c0(chainA.m_kRayEnd)
+                            .ProcessAndReturnValue_00cc01c0(")  Perhaps a bone is mapped twice?");
                         hkErrorInstance().message(1, 0xabba1d65, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp",
                                                   376);
                     }
@@ -1523,11 +1525,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                     {
                         char assertBuf[512];
                         FUN_00cb1600 ostr(assertBuf, sizeof(assertBuf));
-                        ostr.FUN_00cc01c0("Couldn't make a chain (")
-                            .FUN_00cc01c0(chainB.m_kRayStart)
-                            .FUN_00cc01c0(" - ")
-                            .FUN_00cc01c0(chainB.m_kRayEnd)
-                            .FUN_00cc01c0(")  Perhaps a bone is mapped twice?");
+                        ostr.ProcessAndReturnValue_00cc01c0("Couldn't make a chain (")
+                            .ProcessAndReturnValue_00cc01c0(chainB.m_kRayStart)
+                            .ProcessAndReturnValue_00cc01c0(" - ")
+                            .ProcessAndReturnValue_00cc01c0(chainB.m_kRayEnd)
+                            .ProcessAndReturnValue_00cc01c0(")  Perhaps a bone is mapped twice?");
                         hkErrorInstance().message(1, 0xabba1d66, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp",
                                                   385);
                     }
@@ -1542,16 +1544,16 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char reportBuf[512];
                     FUN_00cb1600 ostr(reportBuf, sizeof(reportBuf));
-                    ostr.FUN_00cc01c0("Creating chains: ")
-                        .FUN_00cc01c0("( ")
-                        .FUN_00cc01c0(chainA.m_kRayStart)
-                        .FUN_00cc01c0(", ")
-                        .FUN_00cc01c0(chainA.m_kRayEnd)
-                        .FUN_00cc01c0(" )   ( ")
-                        .FUN_00cc01c0(chainB.m_kRayStart)
-                        .FUN_00cc01c0(", ")
-                        .FUN_00cc01c0(chainB.m_kRayEnd)
-                        .FUN_00cc01c0(" )");
+                    ostr.ProcessAndReturnValue_00cc01c0("Creating chains: ")
+                        .ProcessAndReturnValue_00cc01c0("( ")
+                        .ProcessAndReturnValue_00cc01c0(chainA.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(", ")
+                        .ProcessAndReturnValue_00cc01c0(chainA.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0(" )   ( ")
+                        .ProcessAndReturnValue_00cc01c0(chainB.m_kRayStart)
+                        .ProcessAndReturnValue_00cc01c0(", ")
+                        .ProcessAndReturnValue_00cc01c0(chainB.m_kRayEnd)
+                        .ProcessAndReturnValue_00cc01c0(" )");
                     hkErrorInstance().message(0, -1, reportBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 397);
                 }
                 else
@@ -1560,10 +1562,10 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 HkChainMapping chainMappingAFromB;
                 HkChainMapping chainMappingBFromA;
 
-                FUN_00ce5fe0(params.m_eMappingType, params.m_pSkeletonA, poseA, startChainA, endChainA,
+                Object_BuildBonePairMapping(params.m_eMappingType, params.m_pSkeletonA, poseA, startChainA, endChainA,
                              params.m_pSkeletonB, poseB, startChainB, endChainB, chainMappingAFromB);
 
-                FUN_00ce5fe0(params.m_eMappingType, params.m_pSkeletonB, poseB, startChainB, endChainB,
+                Object_BuildBonePairMapping(params.m_eMappingType, params.m_pSkeletonB, poseB, startChainB, endChainB,
                              params.m_pSkeletonA, poseA, startChainA, endChainA, chainMappingBFromA);
 
                 reinterpret_cast<HkArr<HkChainMapping>&>(bToA.m_kChainMappings).AddBack(chainMappingBFromA);
@@ -1668,7 +1670,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 const char* boneAName = params.m_pSkeletonA->m_kBones[boneA].m_name.cString();
                 const char* boneBName = params.m_pSkeletonB->m_kBones[boneB].m_name.cString();
 
-                FUN_00ce5f90(params.m_eMappingType, poseA, boneA, poseB, boneB, simpleMappingAtoB.m_kAFromBTransform,
+                hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(params.m_eMappingType, poseA, boneA, poseB, boneB, simpleMappingAtoB.m_kAFromBTransform,
                              params.m_fFirstMappingTolerance, 1.0f);
 
                 reinterpret_cast<HkArr<HkSimpleMapping>&>(aToB.m_kSimpleMappings).AddBack(simpleMappingAtoB);
@@ -1682,7 +1684,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 const char* boneAName = params.m_pSkeletonA->m_kBones[boneA].m_name.cString();
                 const char* boneBName = params.m_pSkeletonB->m_kBones[boneB].m_name.cString();
 
-                FUN_00ce5f90(params.m_eMappingType, poseB, boneB, poseA, boneA, simpleMappingBtoA.m_kAFromBTransform,
+                hkaSkeletonMapperUtils_computeMappingTransform_00ce5f90(params.m_eMappingType, poseB, boneB, poseA, boneA, simpleMappingBtoA.m_kAFromBTransform,
                              params.m_fFirstMappingTolerance, 1.0f);
 
                 reinterpret_cast<HkArr<HkSimpleMapping>&>(bToA.m_kSimpleMappings).AddBack(simpleMappingBtoA);
@@ -1698,7 +1700,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
             {
                 char reportBuf[512];
                 FUN_00cb1600 ostr(reportBuf, sizeof(reportBuf));
-                ostr.FUN_00cc01c0("Matching ").WriteName(params.m_pSkeletonA->m_kBones[boneA].m_name);
+                ostr.ProcessAndReturnValue_00cc01c0("Matching ").WriteName(params.m_pSkeletonA->m_kBones[boneA].m_name);
                 hkErrorInstance().message(0, -1, reportBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 561);
             }
             else
@@ -1771,9 +1773,9 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 {
                     char reportBuf[512];
                     FUN_00cb1600 ostr(reportBuf, sizeof(reportBuf));
-                    ostr.FUN_00cc01c0("Creating chain ")
+                    ostr.ProcessAndReturnValue_00cc01c0("Creating chain ")
                         .WriteName(params.m_pSkeletonA->m_kBones[startChainA].m_name)
-                        .FUN_00cc01c0(" - ")
+                        .ProcessAndReturnValue_00cc01c0(" - ")
                         .WriteName(params.m_pSkeletonA->m_kBones[endChainA].m_name);
                     hkErrorInstance().message(0, -1, reportBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", 637);
                 }
@@ -1847,7 +1849,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
 
     if (params.m_eMappingType == HK_RETARGETING_MAPPING)
     {
-        params.m_kMotionParams.FUN_00ce55d0(params.m_eMappingType, modelPoseA.begin(), numBonesA, modelPoseB.begin(),
+        params.m_kMotionParams.hkQsTransform_ComputePoseScaleFactors(params.m_eMappingType, modelPoseA.begin(), numBonesA, modelPoseB.begin(),
                                            numBonesB, reinterpret_cast<HkQs&>(originalAToB.m_kExtractedMotionMapping),
                                            reinterpret_cast<HkQs&>(originalBToA.m_kExtractedMotionMapping));
     }
@@ -1894,8 +1896,8 @@ struct HkVec
 struct HkQuat
 {
     HkVec v;
-    void FUN_00c66320(const HkQuat& a, const HkQuat& b) throw();
-    void FUN_00c74ac0(const HkQuat& a, const HkQuat& b) throw();
+    void setMul(const HkQuat& a, const HkQuat& b) throw();
+    void setMulInverse(const HkQuat& a, const HkQuat& b) throw();
 };
 // local form of hkQsTransform: 0x00ce5a70 needs inline SetConjugate/SetProduct and original scalar aliases; shared form gives 667 bytes vs exe 999.
 struct HkQs
@@ -1915,7 +1917,7 @@ struct HkQs
     {
         m_vTranslation.SetRotatedDirection(a.m_rotation, b.m_vTranslation);
         m_vTranslation.m = _mm_add_ps(m_vTranslation.m, a.m_vTranslation.m);
-        m_rotation.FUN_00c66320(a.m_rotation, b.m_rotation);
+        m_rotation.setMul(a.m_rotation, b.m_rotation);
         m_vScale.m = _mm_mul_ps(b.m_vScale.m, a.m_vScale.m);
     }
 };
@@ -2006,7 +2008,8 @@ __forceinline float HkVec::length3() const
     return out;
 }
 
-__declspec(noinline) void HkQuat::FUN_00c66320(const HkQuat& a, const HkQuat& b) throw()
+// src: COMMUNITY 0x00c66320
+__declspec(noinline) void HkQuat::setMul(const HkQuat& a, const HkQuat& b) throw()
 {
     LocalM128 av = a.v.m, bv = b.v.m;
     LocalM128 ax = _mm_shuffle_ps(av, av, 0), ay = _mm_shuffle_ps(av, av, 0x55);
@@ -2034,7 +2037,8 @@ static __forceinline void warnAlways(int id, const char* text, int line)
 }
 
 // @fnv 0x00ce5a70
-void __cdecl FUN_00ce5a70(CE5F90QsTransform* mappingType, const CE5F90QsTransform* poseA,
+// src: COMMUNITY 0x00ce5a70
+void __cdecl hkaSkeletonMapperUtils_computeMappingTransform(CE5F90QsTransform* mappingType, const CE5F90QsTransform* poseA,
                           const CE5F90QsTransform* poseB, int outputAddress, float tolerance, float defaultScale)
 {
     int type = reinterpret_cast<int>(mappingType);
@@ -2079,7 +2083,7 @@ void __cdecl FUN_00ce5a70(CE5F90QsTransform* mappingType, const CE5F90QsTransfor
         LocalM128 sv = _mm_load_ss(&scale);
         sv = _mm_shuffle_ps(sv, sv, 0);
         out->m_vScale.m = sv;
-        out->m_rotation.FUN_00c74ac0(b->m_rotation, a->m_rotation);
+        out->m_rotation.setMulInverse(b->m_rotation, a->m_rotation);
         float neg = -scale;
         LocalM128 ns = _mm_load_ss(&neg);
         ns = _mm_shuffle_ps(ns, ns, 0);

@@ -18,7 +18,8 @@
 extern NiRTTI g_011f3ee0;
 
 // @fnv 0x00a43ab0
-NiRTTI* __cdecl FUN_00a43ab0()
+// src: COMMUNITY 0x00a43ab0
+NiRTTI* __cdecl BSRotAccumTransfInterpolator_GetRTTI()
 {
     return &g_011f3ee0;
 }
@@ -48,12 +49,12 @@ BSRotAccumTransfInterpolator* CreateRotAccumTransfInterpolator()
 
 extern int DAT_011a9ea4;
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
+void* __cdecl Object_DispatchCommandFour(unsigned int size);
 
 // @fnv 0x00a43e90
 BSRotAccumTransfInterpolator* BSRotAccumTransfInterpolator::CreateInterpolator(int a)
 {
-    BSRotAccumTransfInterpolator* obj = (BSRotAccumTransfInterpolator*)FUN_00aa13e0(0x58);
+    BSRotAccumTransfInterpolator* obj = (BSRotAccumTransfInterpolator*)Object_DispatchCommandFour(0x58);
     if (obj != 0)
     {
         obj->NiTransformInterpolator::CopyMemberData(0);
@@ -98,7 +99,7 @@ inline TimedRotationKey* BSRotAccumTransfInterpolator::GetRotData(unsigned int& 
 // @fnv 0x00a43ac0
 void BSRotAccumTransfInterpolator::UpdateRotValue(int a)
 {
-    FUN_00a43330(a);
+    j_j_j_nullsub_3(a);
     unsigned int uiNumKeys;
     int eType;
     unsigned char ucSize;
@@ -111,7 +112,8 @@ void BSRotAccumTransfInterpolator::UpdateRotValue(int a)
 
 void __cdecl FUN_00a3f7b0();
 // @fnv 0x00a43a70
-void __cdecl FUN_00a43a70()
+// src: XBOX_PDB 0x00a43a70
+void __cdecl BSRotAccumTransfInterpolator_LoadBinary()
 {
     FUN_00a3f7b0();
 }
@@ -119,14 +121,16 @@ void __cdecl FUN_00a43a70()
 extern void __cdecl FUN_00a3f870();
 
 // @fnv 0x00a43a80
-void __cdecl FUN_00a43a80()
+// src: XBOX_PDB 0x00a43a80
+void __cdecl BSRotAccumTransfInterpolator_RegisterStreamables()
 {
     FUN_00a3f870();
 }
 
 void __cdecl FUN_00a3f8a0();
 // @fnv 0x00a43a90
-void __cdecl FUN_00a43a90()
+// src: XBOX_PDB 0x00a43a90
+void __cdecl BSRotAccumTransfInterpolator_SaveBinary()
 {
     FUN_00a3f8a0();
 }
@@ -134,7 +138,8 @@ void __cdecl FUN_00a43a90()
 extern void FUN_00a3f8d0();
 
 // @fnv 0x00a43aa0
-void FUN_00a43aa0()
+// src: XBOX_PDB 0x00a43aa0
+void BSRotAccumTransfInterpolator_IsEqual()
 {
     FUN_00a3f8d0();
 }
@@ -150,7 +155,8 @@ inline NiPoint3& AssignPosition(NiPoint3& target, const NiPoint3& source)
 struct QuaternionValue
 {
     float x, y, z, w;
-    __declspec(noinline) QuaternionValue FUN_00a2bcf0(const QuaternionValue& q) const
+// src: GUESS 0x00a2bcf0 (confidence: medium)
+    __declspec(noinline) QuaternionValue MultiplyQuaternion(const QuaternionValue& q) const
     {
         QuaternionValue r;
         r.w = w * q.w - x * q.x - y * q.y - z * q.z;
@@ -197,8 +203,8 @@ NiPoint3 __cdecl FUN_00a27490(float, void*, int, unsigned int, unsigned int&, un
 QuaternionValue __cdecl FUN_00a28740(float, void*, int, unsigned int, unsigned int&, unsigned char);
 float __cdecl InterpolateKey(float, void*, int, unsigned int, unsigned int&, unsigned char);
 void* FUN_00a3f990(unsigned int*, int*, unsigned char*);
-void* FUN_0058cb00(unsigned int*, int*, unsigned char*);
-void* FUN_00a3f9e0(unsigned int*, int*, unsigned char*);
+void* NiTransformInterpolator_GetRotData(unsigned int*, int*, unsigned char*);
+void* NiTransformInterpolator_GetScaleData(unsigned int*, int*, unsigned char*);
 typedef void* (__thiscall *GetTransformKeys)(NiTransformInterpolator*, unsigned int*, int*, unsigned char*);
 // Evaluates position, rotation and scale keys at time, applies rotation delta to object matrix, and stores the result in result.
 // @fnv 0x00a43b00
@@ -228,17 +234,17 @@ bool BSRotAccumTransfInterpolator::UpdateTransform(float time, NiObjectNET* targ
         AssignPosition(*(NiPoint3*)&m_kDefaultTransform.x, FUN_00a27490(time, keys, type, count, index, stride));
         m_usLastRotationKeyIndex = (unsigned short)index;
     }
-    keys = ((GetTransformKeys)FUN_0058cb00)(this, &count, &type, &stride);
+    keys = ((GetTransformKeys)NiTransformInterpolator_GetRotData)(this, &count, &type, &stride);
     if (count > 0)
     {
         index = m_usLastPositionKeyIndex;
         QuaternionValue rotation = FUN_00a28740(time, keys, type, count, index, stride);
         if (object)
         {
-            QQuatOps delta = rotation.FUN_00a2bcf0(FUN_00a6dc00((QuaternionValue&)m_kAccumulatedRotation));
+            QQuatOps delta = rotation.MultiplyQuaternion(FUN_00a6dc00((QuaternionValue&)m_kAccumulatedRotation));
             QQuatOps objectRotation;
             objectRotation.FUN_00a6df40(&object->m_kLocal.m_Rotate);
-            (QuaternionValue&)objectRotation = objectRotation.FUN_00a2bcf0(delta);
+            (QuaternionValue&)objectRotation = objectRotation.MultiplyQuaternion(delta);
             objectRotation.FUN_00a38560();
             *(QuaternionValue*)&m_kDefaultTransform.qx = objectRotation;
         }
@@ -251,7 +257,7 @@ bool BSRotAccumTransfInterpolator::UpdateTransform(float time, NiObjectNET* targ
     }
     {
         int scaleType;
-        keys = ((GetTransformKeys)FUN_00a3f9e0)(this, &count, &scaleType, &stride);
+        keys = ((GetTransformKeys)NiTransformInterpolator_GetScaleData)(this, &count, &scaleType, &stride);
         if (count > 0)
         {
             index = m_usLastScaleKeyIndex;
